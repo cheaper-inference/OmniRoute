@@ -820,47 +820,40 @@ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಬ್ಯಾಚ್ ಪ್ರಕ್ರಿ�
 
 ---
 
-## ಹುಡುಕಾಟ API
+## API ಹುಡುಕಿ
 
-ವೆಬ್/ಹುಡುಕಾಟ ಪೂರೈಕೆದಾರ ಅಮೂರ್ತೀಕರಣ (Tavily, Brave, Exa, Serper, ಇತ್ಯಾದಿ).
+Web/search ಪೂರೈಕೆದಾರರ ಅಮೂರ್ತತೆ (ಟವಿಲಿ, ಬ್ರೇವ್, ಎಕ್ಸಾ, ಸರ್ಪರ್, ಇತ್ಯಾದಿ).
 
-| ವಿಧಾನ | ಪಥ                     | ವಿವರಣೆ                                                                                                                            |
-| ----- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | ಸಂರಚಿಸಲಾದ ಹುಡುಕಾಟ ಪೂರೈಕೆದಾರರು + ಸಾಮರ್ಥ್ಯಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡುತ್ತದೆ                                                                    |
-| POST  | `/v1/search`           | ಹುಡುಕಾಟ ಪ್ರಶ್ನೆಯನ್ನು ಚಲಾಯಿಸುತ್ತದೆ — ವಿನಂತಿಯ ಮುಖ್ಯಾಂಶವನ್ನು `v1SearchSchema` ಮೌಲ್ಯೀಕರಿಸುತ್ತದೆ, ಕ್ಯಾಶಿಂಗ್/ಸಂಯೋಜನೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ |
-| GET   | `/v1/search/analytics` | ಪ್ರತಿ ಪೂರೈಕೆದಾರನ ಹಿಟ್/ವಿಳಂಬ/ಕ್ಯಾಶ್ ಅಂಕಿಅಂಶಗಳು                                                                                     |
+| ವಿಧಾನ | ಮಾರ್ಗ                  | ವಿವರಣೆ                                                                                                    |
+| ----- | ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ ಹುಡುಕಾಟ ಪೂರೈಕೆದಾರರ + ಸಾಮರ್ಥ್ಯಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡಿ                                           |
+| POST  | `/v1/search`           | `v1SearchSchema` ನಿಂದ ಮೌಲ್ಯೀಕರಿಸಲಾದ ಹುಡುಕಾಟ ಪ್ರಶ್ನೆ — ದೇಹವನ್ನು ರನ್ ಮಾಡಿ, caching/coalescing ಬೆಂಬಲಿಸುತ್ತದೆ |
+| GET   | `/v1/search/analytics` | ಪ್ರತಿ-ಒದಗಿಸುವವರ hit/latency/cache ಅಂಕಿಅಂಶಗಳು                                                              |
 
-**ದೃಢೀಕರಣ:** Bearer API ಕೀ (`extractApiKey` + `isValidApiKey`). ಹುಡುಕಾಟ ನೀತಿಯನ್ನು `enforceApiKeyPolicy` ಮೂಲಕ ಜಾರಿಗೊಳಿಸಲಾಗುತ್ತದೆ.
+**ದೃಢೀಕರಣ:** ಬೇರರ್ API ಕೀ (`extractApiKey` + `isValidApiKey`). ಹುಡುಕಾಟ ನೀತಿಯನ್ನು `enforceApiKeyPolicy` ಮೂಲಕ ಜಾರಿಗೊಳಿಸಲಾಗಿದೆ.
 
 ### Exa ಮತ್ತು Tavily `provider_options`
 
-Exa ಮತ್ತು Tavily ಪೂರೈಕೆದಾರ-ನಿರ್ದಿಷ್ಟ ಕ್ಷೇತ್ರಗಳನ್ನು ನೇಮ್ಸ್ಪೇಸ್ ಮಾಡಲಾದ ಸಂಚಯದಿಂದ ಓದುತ್ತವೆ:
-`provider_options.exa` (ಅಥವಾ `provider_options["exa-search"]`) ಮತ್ತು `provider_options.tavily`
-(ಅಥವಾ `provider_options["tavily-search"]`). ಕೆಳಗಿನ ಕೀಗಳನ್ನು ಮಾತ್ರ ಮುಂದಕ್ಕೆ ಕಳುಹಿಸಲಾಗುತ್ತದೆ. ಪ್ರತಿಯೊಂದನ್ನೂ
-`open-sse/handlers/search/providerOptionsPassthrough.ts` ನಲ್ಲಿರುವ ಅದರದೇ Zod ಸ್ಕೀಮಾ ವಿರುದ್ಧ
-ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ತಪ್ಪಾದ ಪ್ರಕಾರವನ್ನು ಹೊಂದಿರುವ ಕೀಯನ್ನು ಕೈಬಿಡಲಾಗುತ್ತದೆ. ದೃಢೀಕರಣ, ಮೂಲ URL,
-`stream` ಮತ್ತು `outputSchema` ಸೇರಿದಂತೆ ಬೇರೆ ಯಾವುದೇ ಕೀಯನ್ನು ನಿರ್ಲಕ್ಷಿಸಲಾಗುತ್ತದೆ. ಇತರ ಪೂರೈಕೆದಾರರು ಬಳಸುವ ಸಮತಟ್ಟಾದ ಕೀಗಳು (`cx`, `depth`, ...)
-ಮೊದಲಿನಂತೆಯೇ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ.
+ಎಕ್ಸಾ ಮತ್ತು ಟವಿಲಿ ನೇಮ್ಸ್ಪೇಸ್ಡ್ ಬ್ಯಾಗ್ನಿಂದ ಪೂರೈಕೆದಾರ-ನಿರ್ದಿಷ್ಟ ಕ್ಷೇತ್ರಗಳನ್ನು ಓದಿರಿ: `provider_options.exa` (ಅಥವಾ `provider_options["exa-search"]`) ಮತ್ತು `provider_options.tavily` (ಅಥವಾ `provider_options["tavily-search"]`). ಕೆಳಗಿನ ಕೀಗಳನ್ನು ಮಾತ್ರ ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗಿದೆ. ಪ್ರತಿಯೊಂದನ್ನು `open-sse/handlers/search/providerOptionsPassthrough.ts` ನಲ್ಲಿ ತನ್ನದೇ ಆದ Zod ಸ್ಕೀಮಾದ ವಿರುದ್ಧ ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ತಪ್ಪಾದ ಪ್ರಕಾರದ ಕೀಲಿಯನ್ನು ಕೈಬಿಡಲಾಗುತ್ತದೆ. ದೃಢೀಕರಣ, ಮೂಲ URL, `stream` ಮತ್ತು `outputSchema` ಸೇರಿದಂತೆ ಯಾವುದೇ ಇತರ ಕೀಲಿಯನ್ನು ನಿರ್ಲಕ್ಷಿಸಲಾಗುತ್ತದೆ. ಇತರ ಪೂರೈಕೆದಾರರು (`cx`, `depth`, ...) ಬಳಸುವ ಫ್ಲಾಟ್ ಕೀಗಳು ಮೊದಲಿನಂತೆಯೇ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ.
 
-| ಪೂರೈಕೆದಾರ | ಉನ್ನತ-ಮಟ್ಟದ ಕ್ಷೇತ್ರಗಳು                                                                                                                                                                                                                                                                                                                                                    | ನೆಸ್ಟೆಡ್                                                                                                                                                                          |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ಸಮತಟ್ಟಾದ ಮೂಲ ಪ್ರಕಾರಗಳು), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                       | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ಅನ್ನು ಡೀಫಾಲ್ಟ್ `{ text: true, highlights: true }` ಮೇಲೆ ವಿಲೀನಗೊಳಿಸಲಾಗುತ್ತದೆ |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                                 |
+| ಒದಗಿಸುವವರು | ಉನ್ನತ ಮಟ್ಟದ ಕ್ಷೇತ್ರಗಳು                                                                                                                                                                                                                                                                                                                                                    | ನೆಸ್ಟೆಡ್                                                                                                                                    |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| ಪರೀಕ್ಷೆ    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ಫ್ಲಾಟ್ ಪ್ರಿಮಿಟಿವ್ಸ್), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ಡೀಫಾಲ್ಟ್ `{ text: true, highlights: true }` ಮೇಲೆ ವಿಲೀನಗೊಂಡಿದೆ |
+| ತಾವಿಲಿ     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                           |
 
-ಸಾಮಾನ್ಯ ಕ್ಷೇತ್ರಗಳು ಯಾವಾಗಲೂ ಆದ್ಯತೆ ಪಡೆಯುತ್ತವೆ: `query`, `max_results`, `filters` (ಡೊಮೇನ್ಗಳು), `country` ಮತ್ತು
-`search_type` ನಿಂದ ಪಡೆದ ವಿಷಯ. Exa ಯಲ್ಲಿ, `search_type: "news"` ಎಂಬುದು `category: "news"` ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ.
-Tavily ಸಹ `search_type: "finance"` (`topic: "finance"`) ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ.
+ಜೆನೆರಿಕ್ ಕ್ಷೇತ್ರಗಳು ಯಾವಾಗಲೂ ಗೆಲ್ಲುತ್ತವೆ: `query`, `max_results`, `filters` (ಡೊಮೇನ್ಗಳು), `country` ಮತ್ತು `search_type` ನಿಂದ ಪಡೆದ ವಿಷಯ. Exa ನಲ್ಲಿ, `search_type: "news"` `category: "news"` ಇರಿಸುತ್ತದೆ. Tavily ಸಹ `search_type: "finance"` (`topic: "finance"`) ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ.
 
-ಸಾಮಾನ್ಯ `time_range` ಈಗ ಎರಡೂ ಪೂರೈಕೆದಾರರನ್ನು ತಲುಪುತ್ತದೆ: Exa `startPublishedDate` (ISO
-ಟೈಮ್ಸ್ಟ್ಯಾಂಪ್) ಅನ್ನು ಮತ್ತು Tavily `start_date` (`YYYY-MM-DD`) ಅನ್ನು ಪಡೆಯುತ್ತದೆ. `provider_options`
-ನಲ್ಲಿರುವ ಸ್ಪಷ್ಟ ದಿನಾಂಕವು ಮ್ಯಾಪ್ ಮಾಡಲಾದ ದಿನಾಂಕವನ್ನು ಅತಿಕ್ರಮಿಸುತ್ತದೆ.
+$0.002 (2 ಕ್ರೆಡಿಟ್ಗಳು) ಒಂದು ಬ್ಲಾಕ್ ಮತ್ತು ಪ್ರತಿ ಕರೆಗೆ ಕನಿಷ್ಠ ಒಂದು ಬ್ಲಾಕ್ ( [ಫೈರ್ಕ್ರಾಲ್ ಬಿಲ್ಲಿಂಗ್](https://docs.firecrawl.dev/billing) ): 10 ಫಲಿತಾಂಶಗಳ ಪ್ರಾರಂಭದ ಬ್ಲಾಕ್ಗೆ ಫೈರ್ಕ್ರಾಲ್ ಹುಡುಕಾಟದ ವೆಚ್ಚವನ್ನು ದಾಖಲಿಸಲಾಗುತ್ತದೆ: 11 ಫಲಿತಾಂಶಗಳ ಬೆಲೆ $0.004.
 
-Exa ಫಲಿತಾಂಶಗಳು `id`, `highlight_scores`, `summary`, `subpages`, `entities` ಮತ್ತು `extras` ಅನ್ನು
-`provider_raw` ನಲ್ಲಿ ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ. Tavily ಫಲಿತಾಂಶಗಳು `images` ಮತ್ತು `favicon` ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ.
+ಜೆನೆರಿಕ್ `time_range` ಈಗ ಎರಡೂ ಪೂರೈಕೆದಾರರನ್ನು ತಲುಪುತ್ತದೆ: Exa `startPublishedDate` (ISO ಟೈಮ್ಸ್ಟ್ಯಾಂಪ್) ಅನ್ನು ಪಡೆಯುತ್ತದೆ ಮತ್ತು Tavily `start_date` (`YYYY-MM-DD`) ಅನ್ನು ಪಡೆಯುತ್ತದೆ. `provider_options` ನಲ್ಲಿನ ಸ್ಪಷ್ಟ ದಿನಾಂಕವು ಮ್ಯಾಪ್ ಮಾಡಲಾದ ಒಂದನ್ನು ಅತಿಕ್ರಮಿಸುತ್ತದೆ.
 
-ವೆಚ್ಚ ಲೆಕ್ಕಾಚಾರವು ಇನ್ನೂ ಸಮತಟ್ಟಾದ ರಿಜಿಸ್ಟ್ರಿ `costPerQuery` ಆಗಿದೆ. Tavily
-`search_depth: "advanced"` ಗಾಗಿ ಪ್ರತಿ ಕರೆಗೆ ಹೆಚ್ಚಿನ ಕ್ರೆಡಿಟ್ಗಳನ್ನು ವಿಧಿಸುತ್ತದೆ ಮತ್ತು ಆ ವ್ಯತ್ಯಾಸವು
-`usage.search_cost_usd` ನಲ್ಲಿ ಪ್ರತಿಬಿಂಬಿಸುವುದಿಲ್ಲ.
+Exa ಫಲಿತಾಂಶಗಳು `id`, `highlight_scores`, `summary`, `subpages`, `entities` ಮತ್ತು `extras` ಅನ್ನು `provider_raw` ನಲ್ಲಿ ಇರಿಸುತ್ತವೆ. Tavily ಫಲಿತಾಂಶಗಳು `images` ಮತ್ತು `favicon` ಇರಿಸುತ್ತವೆ.
+
+ಲಿಂಕ್ಅಪ್ ಹುಡುಕಾಟದ ವೆಚ್ಚವನ್ನು `depth` `fast` ಮತ್ತು `standard` ಗಾಗಿ $0.005 ಮತ್ತು `deep` ಗೆ $0.05 ( [ಲಿಂಕಪ್ ಬೆಲೆ](https://docs.linkup.so/pages/documentation/development/pricing) ) ದಾಖಲಿಸಲಾಗಿದೆ, `depth` `provider_options` ಅಥವಾ ಸಂಪರ್ಕದ ಸೆಟ್ಟಿಂಗ್ಗಳಿಂದ ಬಂದಿರಲಿ.
+
+Exa `type: "lite"` (Exa 3.0) ಒಂದು ಸಣ್ಣ ಕ್ಷೇತ್ರಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ ಮತ್ತು ಯಾವುದೇ ಇತರ ಕ್ಷೇತ್ರವನ್ನು ಹೊಂದಿಸಿದಾಗ ಸಂಪೂರ್ಣ ವಿನಂತಿಯನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ. ಲೈಟ್ಗಾಗಿ, `additionalQueries`, `systemPrompt` ಮತ್ತು `text` ಮತ್ತು `highlights` ಹೊರತುಪಡಿಸಿ ಪ್ರತಿಯೊಂದು `contents` ಕೀಲಿಯನ್ನು ಕರೆಯ ಮೊದಲು ಕೈಬಿಡಲಾಗುತ್ತದೆ. ಅಸಮ್ಮತಿಸಿದ `subpages`, `subpageTarget`, `highlights.numSentences` ಮತ್ತು `highlights.highlightsPerUrl` ಅನ್ನು ಇನ್ನು ಮುಂದೆ ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗುವುದಿಲ್ಲ.
+
+ವೆಚ್ಚ ಲೆಕ್ಕಪರಿಶೋಧನೆಯು ಫ್ಲಾಟ್ ರಿಜಿಸ್ಟ್ರಿ `costPerQuery` ಆಗಿದೆ, ಇದು Exa ನ ಸ್ವಂತ ಬೆಲೆಯನ್ನು ಅನುಸರಿಸುವ Exa ಹೊರತುಪಡಿಸಿ: `auto` (ಮತ್ತು ಪರಂಪರೆ `fast`) ಗೆ ಪ್ರತಿ ಕರೆಗೆ $0.007 ಅಥವಾ `lite` ಗೆ $0.004 (ಮತ್ತು ಲೆಗಸಿ `instant`), 10 ಫಲಿತಾಂಶಗಳನ್ನು ಒಳಗೊಂಡಿದೆ; ಪ್ರತಿ ಮುಂದಿನ ಫಲಿತಾಂಶಕ್ಕೆ $0.001; ಮತ್ತು `contents.summary` ಅನ್ನು ಹೊಂದಿಸಿದಾಗ ಹಿಂದಿರುಗಿದ ಫಲಿತಾಂಶಕ್ಕೆ $0.001. Tavily ಅನ್ನು `search_depth` `basic`, `fast` ಮತ್ತು `ultra-fast` ಗಾಗಿ 1 ಕ್ರೆಡಿಟ್ ($0.008) ನಲ್ಲಿ ದಾಖಲಿಸಲಾಗಿದೆ ಮತ್ತು `advanced` ಗಾಗಿ 2 ಕ್ರೆಡಿಟ್ಗಳು ($0.016) ( [Tavily API ಕ್ರೆಡಿಟ್ಗಳು](https://docs.tavily.com/documentation/api-credits) ). Tavily ಸುಧಾರಿತ ಗೆ ಅಪ್ಗ್ರೇಡ್ ಮಾಡುವ `auto_parameters: true` ನೊಂದಿಗೆ ಕರೆಯನ್ನು ಇನ್ನೂ 1 ಕ್ರೆಡಿಟ್ನಲ್ಲಿ ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗಿದೆ.
 
 ---
 

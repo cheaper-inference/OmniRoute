@@ -111,150 +111,150 @@ OmniRoute/
 
 ---
 
-## `src/` — Next.js-sovellus
+## `src/` - Next.js sovellus
 
 ```
 src/
-├── app/                 # App Router (sivut + API-reitit + tilasivut + aloitussivu)
-├── lib/                 # Ydinkirjastot / toimialuemoduulit (80 alihakemistoa + noin 70 juuritason tiedostoa)
-├── domain/              # Puhdas toimialuelogiikka (käytäntömoottori, varamenettely, kustannukset, lukitus, comboResolver, arviointi)
-├── server/              # Vain palvelimella käytettävät moduulit (käyttöoikeusputki, cors, todennuksen väliohjelmisto) — niitä ei voi tuoda asiakaspuolelta
-├── shared/              # Jaettu palvelimen ja asiakasohjelman välillä, kun se on turvallista (vakiot, tyypit, validointi, sopimukset, apuohjelmat)
-├── i18n/                # next-intl-määritykset + kielikohtaiset viesti-JSON-tiedostot (67 kielialuetta)
-├── middleware/          # Next.js-väliohjelmisto (pyyntöjen rikastus, kielialueen tunnistus)
-├── mitm/                # MITM-välityspalvelimen ydin: varmenteiden luonti/asennus, käsittelijät, kohteet, tarkastin, peitteet, läpivienti
-│   ├── handlers/        # 9 IDE-agentin käsittelijäluokkaa, jotka perivät MitmHandlerBase-luokan (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Liikenteen tallennuskerros: puskuri (muistissa oleva rengaspuskuri), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Mallisovittimien yhdyskerros (vanha yhteensopivuussovitin)
-├── scripts/             # Lähdepuun sisäiset ylläpitoskriptit (esim. backfillAggregation)
-├── sse/                 # Vanhat SSE-käsittelijät/-palvelut (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Vanha muistinsisäinen tietovarasto (poistetaan asteittain src/lib/db:n hyväksi)
-├── types/               # Jaetut TS-tyyppitiedostot
-├── instrumentation.ts   # Next.js-telemetriakoukku (selain + edge)
-├── instrumentation-node.ts  # Vain Node-ympäristössä käytettävä instrumentointi
-└── proxy.ts             # HTTP-välityspalvelimen aloituspisteen yhteensopivuussovitin
+├── app/                 # App Router (pages + API routes + status pages + landing)
+├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
+├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
+├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
+├── middleware/          # Next.js middleware (request enrichment, locale detection)
+├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter glue (legacy shim)
+├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
+├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Legacy in-memory store (being phased out for src/lib/db)
+├── types/               # Shared TS type files
+├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
+├── instrumentation-node.ts  # Node-only instrumentation
+└── proxy.ts             # HTTP-proxy entry shim
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| Polku                                                                        | Tarkoitus                                                                                                                                                                                                                                                                                                                        |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | Julkinen OpenAI-yhteensopiva API (~25 alireittiä: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers jne.)                                                                                                                                |
-| `app/api/v1beta/`                                                            | Gemini-tyyliset API-päätepisteet                                                                                                                                                                                                                                                                                                 |
-| `app/api/playground/`                                                        | Playground Studion reitit: `improve-prompt/` (POST — LLM-kehotteen uudelleenkirjoitus), `presets/` (GET-luettelo / POST-luonti), `presets/[id]/` (GET / PUT / DELETE) — katso `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                             |
-| `app/api/` (muu kuin v1)                                                     | Hallinta-/ylläpitäjäreitit (~60 hakemistoa: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools jne.)                                                                                                                                                 |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 reittiä (palvelimen hallinta, agentin tila/DNS/määritykset, ohitus, varmenne, ylävirran CA). LOCAL_ONLY + SPAWN_CAPABLE. Katso `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                    |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspectorin REST- ja WS-API — yli 16 reittiä (pyynnöt, istunnot, isännät, kaappaustilat, vienti, ws). LOCAL_ONLY + SPAWN_CAPABLE. Katso `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                       |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 -aloituspiste (`POST /a2a`)                                                                                                                                                                                                                                                                                     |
-| `app/.well-known/agent.json/`                                                | A2A Agent Card (etsintä)                                                                                                                                                                                                                                                                                                         |
-| `app/(dashboard)/dashboard/`                                                 | Hallintapaneelin käyttöliittymäsivut (yli 50 osiota, ~118 page.tsx-tiedostoa: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity jne.)                                                                                                                           |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studion käyttöliittymä (3 välilehteä: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — katso `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                 |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (suunnitelma 21): `page.tsx` (3 välilehden runko), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge-hallintapaneelisivu — palvelinkortti, 9 agenttikorttia, ohjattu määritys, mallimääritykset, ohitusluettelo. i18n PT-BR + EN. Katso `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                 |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector -hallintapaneelisivu — DevTools-jaettu näkymä, 7 tietovälilehteä, 4 kaappaustilan valitsinta, istuntotallennin, kontekstin värikoodaus. i18n PT-BR + EN. Katso `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                         |
-| `app/(dashboard)/dashboard/activity/`                                        | Toimintasyötesivu (ryhmä B): `page.tsx` (palvelin) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — katso `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                        |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kiintiöiden jakamissivu (ryhmä B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                   |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Palveluntarjoajan palvelupakettien määrityssivu (ryhmä B): `page.tsx` + `ProviderPlanConfigClient.tsx` — yhteyskohtaiset kiintiöulottuvuuksien ohitukset                                                                                                                                                                         |
-| `app/docs/`                                                                  | Upotettu dokumentaation katseluohjelma (hahmontaa tiedostot `docs/*.md`)                                                                                                                                                                                                                                                         |
-| `app/landing/`                                                               | Markkinoinnin aloitussivu                                                                                                                                                                                                                                                                                                        |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Todennukseen liittyvät sivut                                                                                                                                                                                                                                                                                                     |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP-virhesivut                                                                                                                                                                                                                                                                                                                  |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Staattiset sivut ja tilasivut                                                                                                                                                                                                                                                                                                    |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Juuriasettelu, etusivu, PWA-manifesti, yleinen CSS                                                                                                                                                                                                                                                                               |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Virherajat                                                                                                                                                                                                                                                                                                                       |
+| Polku                                                                        | Tarkoitus                                                                                                                                                                                                                                                                                                           |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | Julkinen OpenAI-compat API (~ 25 alireitit: chat, täydennykset, upotukset, tiedostot, erät, ääni, kuvat, videot, musiikki, uudelleensijoitus, valvonta, haku, ws, agentit, tilit, palveluntarjoajat jne.)                                                                                                           |
+| `app/api/v1beta/`                                                            | Kaksosetyyliset API -päätepisteet                                                                                                                                                                                                                                                                                   |
+| `app/api/playground/`                                                        | Playground Studio -reitit: `improve-prompt/` (POST — LLM kehotteen uudelleenkirjoitin), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — katso `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                    |
+| `app/api/` (ei v1)                                                           | Management/admin reitit (~ 60 -hakemistot: palveluntarjoajat, yhdistelmät, asetukset, mcp, a2a, evals, muisti, taidot, webhookit, vaatimustenmukaisuus, joustavuus, valvonta, tunnelit, cli-työkalut jne.)                                                                                                          |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 reittiä (palvelimen ohjaus, agentti state/DNS/mappings, ohitus, varmenne, ylävirran CA). LOCAL_ONLY + SPAWN_CAPABLE. Katso `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                           |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 + reittiä (pyynnöt, istunnot, isännät, sieppaustilat, vienti, ws). LOCAL_ONLY + SPAWN_CAPABLE. Katso `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 -sisääntulopiste (`POST /a2a`)                                                                                                                                                                                                                                                                     |
+| `app/.well-known/agent.json/`                                                | A2A Agent Card (löytö)                                                                                                                                                                                                                                                                                              |
+| `app/(dashboard)/dashboard/`                                                 | Hallintapaneelin UI -sivut (50 + osiota, ~ 118 page.tsx -tiedostoa: palveluntarjoajat, yhdistelmät, asetukset, muisti, taidot, webhookit, evals, tarkastus, erä, välimuisti, kustannukset, kunto, järjestelmä, toiminta jne.)                                                                                       |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Hakutyökalut Studio UI (3 välilehteä: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — katso `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                 |
+| `app/(dashboard)/dashboard/memory/`                                          | Muististudio (suunnitelma 21): `page.tsx` (3-välilehtinen komentotulkki), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (usessa,sgine) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge dashboard -sivu — palvelinkortti, 9 agenttikorttia, ohjattu asennustoiminto, mallikartoitus, ohituslista. i18n PT-BR + EN. Katso `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                      |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Liikennetarkastajan kojelautasivu – DevTools -jako, 7 yksityiskohtavälilehteä, 4 kaappaustilan kytkintä, istunnon tallennin, kontekstin väritys. i18n PT-BR + EN. Katso `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                     |
+| `app/(dashboard)/dashboard/activity/`                                        | Aktiviteettisyötesivu (ryhmä B): `page.tsx` (palvelin) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — katso `docs/architecture/MONITORING_SECTIONS.md`                                                                                                       |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kiintiön jakamissivu (ryhmä B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                         |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Palveluntarjoajan suunnitelman määrityssivu (ryhmä B): `page.tsx` + `ProviderPlanConfigClient.tsx` — kiintiön mitat yhteys ohituskohtaisesti                                                                                                                                                                        |
+| `app/docs/`                                                                  | Upotettu dokumentaation katseluohjelma (muokkaa `docs/*.md`)                                                                                                                                                                                                                                                        |
+| `app/landing/`                                                               | Markkinoinnin aloitussivu                                                                                                                                                                                                                                                                                           |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | Auth-aiheiset sivut                                                                                                                                                                                                                                                                                                 |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP -virhesivut                                                                                                                                                                                                                                                                                                    |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status sivut                                                                                                                                                                                                                                                                                                 |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Juuriasettelu, koti, PWA -luettelo, globaali CSS                                                                                                                                                                                                                                                                    |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Virheen rajat                                                                                                                                                                                                                                                                                                       |
 
-### `src/lib/` — Ydinkirjastot (noin 50 moduulia)
+### `src/lib/` — ydinkirjastot (~ 50 moduulia)
 
-| Moduuli                                  | Tarkoitus                                                                                                                                                                                                                                                                                                                    |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A-protokollan tehtävienhallinta, taidot (5), suoratoisto                                                                                                                                                                                                                                                                   |
-| `acp/`                                   | CLI-agenttirekisteri (paikallisten CLI-työkalujen etsintä — katso `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                |
-| `api/`                                   | Jaetut API-apufunktiot (`requireManagementAuth`, validointi)                                                                                                                                                                                                                                                                 |
-| `auth/`                                  | Istunto, salasanojen hajautus, tunnusten validointi                                                                                                                                                                                                                                                                          |
-| `batches/`                               | OpenAI Batches API:n käsittelijät                                                                                                                                                                                                                                                                                            |
-| `catalog/`                               | Palveluntarjoajaluettelon Zod-validointi + ominaisuuksien selvitys                                                                                                                                                                                                                                                           |
-| `cloudAgent/`                            | Pilviagentit (Codex Cloud, Devin, Jules) — katso `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                            |
-| `combos/`                                | Yhdistelmien selvitys + uudelleenjärjestelyn apufunktiot                                                                                                                                                                                                                                                                     |
-| `audit/`                                 | Toimintasyötteen apufunktiot: `highLevelActions.ts` (sallittujen luettelo + `isHighLevelAction()`), `activityIcons.ts` (toiminto → kuvake-/verbikartta), `timeline.ts` (groupByDay/relativeTime) — katso `docs/architecture/MONITORING_SECTIONS.md`                                                                          |
-| `compliance/`                            | Tarkastusloki + palveluntarjoajan tarkastus — katso `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                            |
-| `compression/`                           | Pakkausmoottorin yhdistävä koodi (moottorit sijaitsevat hakemistossa `open-sse/services/compression/`)                                                                                                                                                                                                                       |
-| `config/`                                | Ajonaikaisen määrityksen apufunktiot                                                                                                                                                                                                                                                                                         |
-| `db/`                                    | Yli 120 toimialuekohtaista DB-moduulia + 168 migraatiota (käytä SQLite-toiminnoissa aina tätä)                                                                                                                                                                                                                               |
-| `quota/`                                 | Kiintiönjakomoottori: `dimensions.ts` (tyypit/Zod), `types.ts` (`QuotaStore`-rajapinta), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — katso `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Radarin ilmaismalliluettelon asiakasohjelma: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — katso `docs/frameworks/RADAR.md`                                                                                                                                   |
-| `display/`                               | Käyttöliittymän muotoiluaputoiminnot (kustannukset, viive jne.)                                                                                                                                                                                                                                                              |
-| `embeddings/`                            | Upotuspalvelun aputoiminnot                                                                                                                                                                                                                                                                                                  |
-| `env/`                                   | Ympäristömuuttujien jäsennys ja validointi                                                                                                                                                                                                                                                                                   |
-| `evals/`                                 | Arviointikehys (testikokonaisuudet, suorittaja, suoritusympäristö) — katso `docs/frameworks/EVALS.md`                                                                                                                                                                                                                        |
-| `guardrails/`                            | Henkilötietojen peittäjä, kehotesyötteiden torjunta, konenäkörajapinta — katso `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                 |
-| `jobs/`                                  | Taustatyöt (cron-tyyppiset)                                                                                                                                                                                                                                                                                                  |
-| `memory/`                                | Keskustelumuisti (SQLite FTS5 + sqlite-vec-hybridi-RRF + Qdrant-taso 2) — katso `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                  |
-| `memory/embedding/`                      | Monilähteinen upotuskerros: `index.ts` (selvittäjä), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (suunnitelma 21)                                                                                                                                                                         |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 -kääre — KNN-raakahaku + hybridi-RRF (FTS5 + vektori, k=60). Alustetaan laiskasti ja toiminnallisuus heikkenee hallitusti, kun sqlite-vec ei ole käytettävissä. (suunnitelma 21)                                                                                                                           |
-| `memory/reindex.ts`                      | `runReindexBatch()` — käsittelee taustalla muistit, joiden `needs_reindex=1`; sitä kutsuvat `POST /api/memory/reindex` ja laiskan jälkitäytön polku. (suunnitelma 21)                                                                                                                                                        |
-| `monitoring/`                            | Kuntotarkistukset, mittareiden lähetys                                                                                                                                                                                                                                                                                       |
-| `oauth/`                                 | OAuth-/tuontiprosessit 22 palveluntarjoajamoduulille (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                             |
-| `plugins/`                               | Liitännäisrekisteri                                                                                                                                                                                                                                                                                                          |
-| `promptCache/`                           | Anthropic-tyyliset kehotteen välimuistin katkaisukohdat                                                                                                                                                                                                                                                                      |
-| `skills/`                                | Taitokehys (sisäänrakennetut + markkinapaikka + SkillsSH) — katso `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                |
-| `playground/`                            | Playground Studion jaetut apufunktiot: `codeExport.ts` (curl-/Python-/TS-generaattori), `promptImprover.ts` (metakehotteen muodostaja), `streamMetrics.ts` (puhdas TTFT/TPS), `types.ts` (hinnoittelutaulukko) — katso `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                |
-| `webhookDispatcher.ts`                   | HMAC-webhookien toimitus — katso `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                               |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnelien hallinta — katso `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                       |
-| `cloudSync.ts`, `initCloudSync.ts`       | Tilan valinnainen pilvisynkronointi                                                                                                                                                                                                                                                                                          |
-| `localDb.ts`                             | Tietokantamoduulien jälleenvientikoonti (ei logiikkaa — vain jälleenviennit)                                                                                                                                                                                                                                                 |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | Pyyntöjen välimuistitus + idempotenssi                                                                                                                                                                                                                                                                                       |
-| (~30 muuta ylätason tiedostoa)           | Erikoistuneet apufunktiot (logEnv, modelsDevSync, piiSanitizer jne.)                                                                                                                                                                                                                                                         |
+| Moduuli                                  | Tarkoitus                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A -protokollan tehtävänhallinta, taidot (5), suoratoisto                                                                                                                                                                                                                                                                |
+| `acp/`                                   | CLI agenttirekisteri (paikallinen CLI -etsintä - katso `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                        |
+| `api/`                                   | Jaetut API avustajat (`requireManagementAuth`, validointi)                                                                                                                                                                                                                                                                |
+| `auth/`                                  | Istunto, salasanan hajautus, tunnuksen vahvistus                                                                                                                                                                                                                                                                          |
+| `batches/`                               | OpenAI Erät API käsittelijät                                                                                                                                                                                                                                                                                              |
+| `catalog/`                               | Palveluntarjoajan luettelo Zod validointi + -kyvyn resoluutio                                                                                                                                                                                                                                                             |
+| `cloudAgent/`                            | Pilviagentit (Codex Cloud, Devin, Jules) – katso `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                         |
+| `combos/`                                | Yhdistelmäresoluutio + uudelleenjärjestysapulaiset                                                                                                                                                                                                                                                                        |
+| `audit/`                                 | Toimintasyötteen apuohjelmat: `highLevelActions.ts` (allowlist + `isHighLevelAction()`), `activityIcons.ts` (toiminto → icon/verb kartta), `timeline.ts` (groupByDay/relativeTime) — katso `docs/architecture/MONITORING_SECTIONS.md`                                                                                     |
+| `compliance/`                            | Tarkastusloki + palveluntarjoajan tarkastus – katso `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                         |
+| `compression/`                           | Kompressiomoottorin liima (moottorit elävät `open-sse/services/compression/`)                                                                                                                                                                                                                                             |
+| `config/`                                | Ajonaikaiset konfigurointiapulaiset                                                                                                                                                                                                                                                                                       |
+| `db/`                                    | 120 + -verkkotunnuksen DB moduulia + 168 siirtoa (suori aina tästä SQLite)                                                                                                                                                                                                                                                |
+| `quota/`                                 | Kiintiönjakomoottori: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore -liitäntä), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` – katso `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | Tutkan vapaamalliluetteloasiakas: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) – katso `docs/frameworks/RADAR.md`                                                                                                                                           |
+| `display/`                               | UI -muotoiluapuohjelmat (hinta, latenssi jne.)                                                                                                                                                                                                                                                                            |
+| `embeddings/`                            | Upotuspalveluapulaiset                                                                                                                                                                                                                                                                                                    |
+| `env/`                                   | Env-muuttujan jäsennyksen + validointi                                                                                                                                                                                                                                                                                    |
+| `evals/`                                 | Eval-kehys (sviitit, runner, runtime) – katso `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                  |
+| `guardrails/`                            | PII masker, pikainjektio, näkösilta – katso `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                 |
+| `jobs/`                                  | Taustatyöt (cron-tyyppiset)                                                                                                                                                                                                                                                                                               |
+| `memory/`                                | Keskustelumuisti (SQLite FTS5 + sqlite-vec hybridi RRF + Qdrant taso 2) — katso `docs/frameworks/MEMORY.md`                                                                                                                                                                                                               |
+| `memory/embedding/`                      | Usean lähteen upotuskerros: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (suunnitelma 21)                                                                                                                                                                        |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 -kääre – KNN brute-force + -hybridi RRF (FTS5 + vektori, k = 60). Lazy-init, hajoaa sulavasti, kun sqlite-vec ei ole käytettävissä. (suunnitelma 21)                                                                                                                                                    |
+| `memory/reindex.ts`                      | `runReindexBatch()` — käsittelee muistoja `needs_reindex=1` taustalla; kutsutaan `POST /api/memory/reindex` llä ja lazy-backfill polulla. (suunnitelma 21)                                                                                                                                                                |
+| `monitoring/`                            | Terveystarkastukset, mittauspäästöt                                                                                                                                                                                                                                                                                       |
+| `oauth/`                                 | OAuth/import virtaa 22 toimittajamoduulille (agy, antigravity, claude, cline, codebuddy-cn, codex, kohdistin, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-koodaus, traqo, xaue- oference, kiro, xaioference zed-isännöity, zed)                                              |
+| `plugins/`                               | Lisäosien rekisteri                                                                                                                                                                                                                                                                                                       |
+| `promptCache/`                           | Antrooppiset välimuistin keskeytyskohdat                                                                                                                                                                                                                                                                                  |
+| `skills/`                                | Taitokehys (sisäänrakennettu + -markkinapaikka + SkillsSH) – katso `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                            |
+| `playground/`                            | Playground Studion jaetut apulaiset: `codeExport.ts` (curl/Python/TS -generaattori), `promptImprover.ts` (meta-prompt builder), `streamMetrics.ts` (puhdas TTFT/TPS), `types.ts` (hinnoittelutaulukko) - katso `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                     |
+| `webhookDispatcher.ts`                   | HMAC webhook -toimitus – katso `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                              |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnelinhoitajat – katso `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                      |
+| `cloudSync.ts`, `initCloudSync.ts`       | Valinnainen tilan pilvisynkronointi                                                                                                                                                                                                                                                                                       |
+| `localDb.ts`                             | Uudelleenvientitynnyri db-moduuleille (ei logiikkaa – vain jälleenvienti)                                                                                                                                                                                                                                                 |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | Pyydä + idempotencyn välimuistia                                                                                                                                                                                                                                                                                          |
+| (~ 30 muuta huipputason tiedostoa)       | Erikoisapulaiset (logEnv, modelsDevSync, piiSanitizer jne.)                                                                                                                                                                                                                                                               |
 
-### `src/lib/db/` — Tietokanta (147 moduulia + 208 migraatiota)
+### `src/lib/db/` — Tietokanta (147 moduulia + 208 migraatiot)
 
-| Alihakemisto              | Tarkoitus                                                                                                                                                                            |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `db/core.ts`              | `getDbInstance()`-singleton WAL-lokituksella                                                                                                                                         |
-| `db/migrations/`          | Versioidut SQL-tiedostot (idempotentteja, transaktionaalisia). `073_memory_vec.sql` lisää `memory_vec_meta`-taulun + `needs_reindex`-sarakkeen (suunnitelma 21).                     |
-| `db/playgroundPresets.ts` | CRUD-moduuli Playground Studion esiasetuksille (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)        |
-| `db/memoryVec.ts`         | CRUD kohteelle `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` jne. (suunnitelma 21)              |
-| `db/<domain>.ts`          | Yksi moduuli toimialuetta kohden: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache jne. |
+| Subdir                    | Tarkoitus                                                                                                                                                                                                               |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | `getDbInstance()` singleton WAL -päiväkirjauksella                                                                                                                                                                      |
+| `db/migrations/`          | Versioidut SQL -tiedostot (idempotent, transaktional). `073_memory_vec.sql` lisää `memory_vec_meta` + `needs_reindex` -sarakkeen (suunnitelma 21).                                                                      |
+| `db/playgroundPresets.ts` | CRUD moduuli Playground Studion esiasetuksiin (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                                            |
+| `db/memoryVec.ts`         | CRUD for `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` jne. (suunnitelma 21)                                                       |
+| `db/<domain>.ts`          | Yksi moduuli verkkotunnusta kohden: palveluntarjoajat, yhdistelmät, apiKeys, käyttäjät, istunnot, käyttö, tarkastusloki, webhookit, taidot, memory_entries, cloud_agent_tasks, evals* \* , argumentointivälimuisti jne. |
 
 ### `src/domain/`
 
-| Moduuli                | Tarkoitus                                           |
-| ---------------------- | --------------------------------------------------- |
-| `policy.ts`            | Käytäntömoottori                                    |
-| `fallbackPolicy.ts`    | Varajärjestelyn päätöspuu                           |
-| `costRules.ts`         | Kustannusten laskentasäännöt                        |
-| `lockoutPolicy.ts`     | Mallin/yhteyden lukituskäytäntö                     |
-| `tagRouter.ts`         | Tunnistepohjainen reititys                          |
-| `comboResolver.ts`     | Yhdistelmän ratkaisu (yhdistelmämoottorin käyttämä) |
-| `modelAvailability.ts` | Mallikohtainen saatavuustarkistus                   |
-| `assessment/`          | Mallin arviointi (RFC-AUTO-ASSESSMENTin vaihe 1)    |
+| Moduuli                | Tarkoitus                                        |
+| ---------------------- | ------------------------------------------------ |
+| `policy.ts`            | Politiikkamoottori                               |
+| `fallbackPolicy.ts`    | Varapäätöspuu                                    |
+| `costRules.ts`         | Kustannuslaskentasäännöt                         |
+| `lockoutPolicy.ts`     | Model/connection työsulkupolitiikka              |
+| `tagRouter.ts`         | Tag-pohjainen reititys                           |
+| `comboResolver.ts`     | Yhdistelmäresoluutio (kombomoottorin käyttämä)   |
+| `modelAvailability.ts` | Mallikohtainen saatavuuden tarkistus             |
+| `assessment/`          | Mallin arviointi (RFC-AUTO-ASSESSMENTin vaihe 1) |
 
 ### `src/server/`
 
 | Moduuli  | Tarkoitus                                                                                      |
 | -------- | ---------------------------------------------------------------------------------------------- |
-| `authz/` | Valtuutusputki: `classify` → `policies` → `enforce` — katso `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | CORS-määritykset                                                                               |
+| `authz/` | Valtuutusputki: `classify` → `policies` → `enforce` – katso `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | CORS -kokoonpano                                                                               |
 | `auth/`  | Istunnon väliohjelmisto                                                                        |
 
 ### `src/shared/`
 
-| Moduuli                          | Tarkoitus                                                                                                                       |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `components/`                    | Hallintapaneelin komponenttirajapinta: sovittimet `packages/ui-kit`-paketin päälle — katso `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: näkymissä käytettävät kuvakkeiden nimet → Lucide-komponentit (`<Icon>`)                                             |
-| `constants/providers.ts`         | **375 palveluntarjoajaa** Zod-validoinnilla (ensisijainen totuuden lähde)                                                       |
-| `constants/cliTools.ts`          | Ulkoisten CLI-työkalujen rekisteri                                                                                              |
-| `constants/routingStrategies.ts` | **20 reititysstrategiaa** prioriteetteineen                                                                                     |
-| `constants/publicApiRoutes.ts`   | Reitit, jotka edellyttävät Bearer-todennusta (hallintatodennuksen sijaan)                                                       |
-| `constants/upstreamHeaders.ts`   | Ylävirran pyyntöjen otsakkeiden estoluettelo                                                                                    |
-| `validation/schemas.ts`          | Noin 80 Zod-skeemaa (API-sopimusten ensisijainen totuuden lähde)                                                                |
-| `validation/helpers.ts`          | Zod-validoinnin apufunktiot (`validateBody` jne.)                                                                               |
-| `types/`                         | Jaetut TS-tyypit                                                                                                                |
-| `contracts/`                     | Julkisen API:n sopimukset (`package.json` käyttää niitä `files:`-kentässä)                                                      |
-| `utils/circuitBreaker.ts`        | Palveluntarjoajan katkaisija (katso `docs/architecture/RESILIENCE_GUIDE.md`)                                                    |
-| `utils/apiAuth.ts`               | API-avaimen validointi ja käyttöoikeusalueiden tarkistus                                                                        |
-| `utils/fetchTimeout.ts`          | Aikakatkaisu- ja keskeytyskääreet ylävirran fetch-pyynnöille                                                                    |
-| `utils/releaseNotes.ts`          | Suljettu v2-/vanhojen ilmoitusten jäsennin, lokalisointi ja ID-pohjainen kuittaus                                               |
+| Moduuli                          | Tarkoitus                                                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `components/`                    | Kojelaudan komponentti API: sovittimet `packages/ui-kit` :n yli – katso `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: näyttöjen käyttämät kuvakkeiden nimet → Lucide - komponentit (`<Icon>`)                          |
+| `constants/providers.ts`         | **377 palveluntarjoajaa** Zod -validaatiolla (totuuden lähde)                                                |
+| `constants/cliTools.ts`          | Ulkoinen CLI -työkalurekisteri                                                                               |
+| `constants/routingStrategies.ts` | **20 reititysstrategiaa** prioriteettien kanssa                                                              |
+| `constants/publicApiRoutes.ts`   | Reitit, jotka vaativat siirtotietodennuksen (vs. hallinta).                                                  |
+| `constants/upstreamHeaders.ts`   | Ylävirran pyyntöjen otsikon estoluettelo                                                                     |
+| `validation/schemas.ts`          | ~ 80 Zod -skeemaa (yksi totuuden lähde API -sopimuksille)                                                    |
+| `validation/helpers.ts`          | Zod -validointiapuohjelmat (`validateBody` jne.)                                                             |
+| `types/`                         | Jaetut TS tyypit                                                                                             |
+| `contracts/`                     | Julkiset API -sopimukset ( `files:` kuluttaa `package.json`:ssä)                                             |
+| `utils/circuitBreaker.ts`        | Palveluntarjoajan katkaisija (katso `docs/architecture/RESILIENCE_GUIDE.md`)                                 |
+| `utils/apiAuth.ts`               | API -avaimen validointi, laajuuden tarkistus                                                                 |
+| `utils/fetchTimeout.ts`          | Timeout/abort -kääreet noutoa varten                                                                         |
+| `utils/releaseNotes.ts`          | Suljettu v2/legacy -ilmoitusten jäsennys, lokalisointi ja ID poistaminen                                     |
 
 ---
 
@@ -393,78 +393,78 @@ open-sse/
 
 ## `docs/` — Julkinen dokumentaatio (7 juuritiedostoa + 17 alihakemistoa)
 
-### Ylätason oppaat
+### Huipputason oppaat
 
-| Dokumentti                  | Tarkoitus                                                                                          |
+| Doc                         | Tarkoitus                                                                                          |
 | --------------------------- | -------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Korkean tason arkkitehtuuri, alijärjestelmäkartta ja hallintapaneelin pinta                        |
-| `CODEBASE_DOCUMENTATION.md` | Kehityksen viitemateriaali: hakemistot, moduulit ja käytännöt                                      |
-| `FEATURES.md`               | Ominaisuusmatriisi ja v3.8:n kohokohdat                                                            |
-| `USER_GUIDE.md`             | Loppukäyttäjän opas (määritys, mallit, yhdistelmät, CLI:t, ääni jne.)                              |
-| `API_REFERENCE.md`          | API-päätepisteiden viitemateriaali ja todennusmalli                                                |
-| `openapi.yaml`              | OpenAPI 3.0 -määritys (121 polkua)                                                                 |
-| `SETUP_GUIDE.md`            | Asennustavat (npm, npx, Docker, Electron, Termux, lähdekoodi)                                      |
-| `ENVIRONMENT.md`            | Kaikki ympäristömuuttujat (~800 dokumentoitua, ~3 050 riviä `.env.example`-tiedostossa)            |
-| `TROUBLESHOOTING.md`        | Yleiset virheet ja v3.8.0:n tunnetut ongelmat                                                      |
-| `RELEASE_CHECKLIST.md`      | Koko julkaisuprosessi (taidot, husky, conventional commits, käyttöönotto)                          |
-| `COVERAGE_PLAN.md`          | Kattavuustavoitteet ja nykytila                                                                    |
-| `FREE_TIERS.md`             | Kuratoidut ilmaistasojen tarjoajat (48+ ilmaista + 11 OAuth-palvelua)                              |
-| `CLI-TOOLS.md`              | Ulkoiset CLI-integraatiot ja sisäinen OmniRoute CLI                                                |
-| `I18N.md`                   | i18n-arkkitehtuuri, kielen lisääminen ja 67 kielialuetta                                           |
-| `UNINSTALL.md`              | Puhtaan asennuksen poiston vaiheet                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Automaattisesti luotu** 375 tarjoajan luettelo (luo uudelleen: `npm run gen:provider-reference`) |
+| `ARCHITECTURE.md`           | Korkeatasoinen arkkitehtuuri, alijärjestelmäkartta, kojelaudan pinta                               |
+| `CODEBASE_DOCUMENTATION.md` | Tekniset tiedot: hakemistot, moduulit, sopimukset                                                  |
+| `FEATURES.md`               | Ominaisuusmatriisi v3.8:n kohokohdista                                                             |
+| `USER_GUIDE.md`             | Loppukäyttäjän opas (asennus, mallit, yhdistelmät, CLIs, ääni jne.)                                |
+| `API_REFERENCE.md`          | API päätepisteviittaus todennusmallilla                                                            |
+| `openapi.yaml`              | OpenAPI 3.0 -spesifikaatio (121 polkua)                                                            |
+| `SETUP_GUIDE.md`            | Asennustavat (npm, npx, Docker, Electron, Termux, lähde)                                           |
+| `ENVIRONMENT.md`            | Kaikki env vars (~ 800 dokumentoitu, ~ 3 050 riviä `.env.example`)                                 |
+| `TROUBLESHOOTING.md`        | Yleisiä virheitä + v3.8.0 tunnetut ongelmat                                                        |
+| `RELEASE_CHECKLIST.md`      | Täysi julkaisukulku (taidot, husky, perinteiset sitoumukset, käyttöönotto)                         |
+| `COVERAGE_PLAN.md`          | Peittotavoitteet ja nykytila                                                                       |
+| `FREE_TIERS.md`             | Kuroidut vapaan tason palveluntarjoajat (48 + ilmainen + 11 OAuth)                                 |
+| `CLI-TOOLS.md`              | Ulkoiset CLI -integraatiot + Sisäiset OmniRoute CLI                                                |
+| `I18N.md`                   | i18n-arkkitehtuuri, kielen lisääminen, 67 aluetta                                                  |
+| `UNINSTALL.md`              | Puhdista asennuksen poistovaiheet                                                                  |
+| `PROVIDER_REFERENCE.md`     | **Luotu automaattisesti** 377 palveluntarjoajan luettelo (regen: `npm run gen:provider-reference`) |
 
-### Alijärjestelmien syväluotaukset
+### Alajärjestelmän syväsukellukset
 
-| Dokumentti                                      | Tarkoitus                                                                                  |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `MCP-SERVER.md`                                 | MCP-palvelin: 110 työkalua, 3 siirtotapaa, 33 käyttöaluetta ja REST-päätepisteet           |
-| `A2A-SERVER.md`                                 | A2A v0.3: JSON-RPC, 6 taitoa, REST-aputoiminnot ja agenttikortti                           |
-| `AGENT_PROTOCOLS_GUIDE.md`                      | Yhtenäinen opas: A2A vs. ACP vs. pilviagentit                                              |
-| `CLOUD_AGENT.md`                                | Codex Cloudin / Devinin / Julesin orkestrointi                                             |
-| `SKILLS.md`                                     | Taitokehys (sisäänrakennetut + markkinapaikka + SkillsSH + hiekkalaatikko)                 |
-| `RADAR.md`                                      | Radarin ilmaisten mallien luettelon peittokuva (`RADAR_ENABLED`, oletuksena pois käytöstä) |
-| `MEMORY.md`                                     | Muistijärjestelmä (SQLite FTS5 + Qdrant)                                                   |
-| `EVALS.md`                                      | Arviointikehys (testikokonaisuudet, ajot ja arviointikriteerit)                            |
-| `GUARDRAILS.md`                                 | Henkilötietojen peittäjä, kehotesyötteet ja konenäköyhdyskäytävä                           |
-| `COMPLIANCE.md`                                 | Tarkastusloki, säilytys ja noLog-kieltäytymisvalinta                                       |
-| `WEBHOOKS.md`                                   | HMAC-allekirjoitettu webhook-toimitus                                                      |
-| `REASONING_REPLAY.md`                           | Hybridi muisti-/SQLite-välimuisti kohteelle `reasoning_content`                            |
-| `AUTHZ_GUIDE.md`                                | Valtuutusputki (`classify` → `policies` → `enforce`)                                       |
-| `RESILIENCE_GUIDE.md`                           | Katkaisija + jäähdytysjakso + mallin lukitus                                               |
-| `docs/security/STEALTH_GUIDE.md` (vain gitissä) | TLS-sormenjälkitunnistus (JA3/JA4), Claude Code CCH ja MITM-varmenne                       |
-| `AUTO-COMBO.md`                                 | Auto Combo -moottori (16 tekijän pisteytys, 6 tilapakettia ja virtuaalinen tehdas)         |
+| Doc                                         | Tarkoitus                                                                            |
+| ------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `MCP-SERVER.md`                             | MCP palvelin: 110 työkalua, 3 siirtoa, 33 laajuutta, REST -päätepisteet              |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 taitoa, REST auttajat, agenttikortti                           |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | Yhtenäinen opas: A2A vs ACP vs Cloud Agents                                          |
+| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules -orkesteri                                               |
+| `SKILLS.md`                                 | Skills-kehys (sisäänrakennettu + Marketplace + SkillsSH + sandbox)                   |
+| `RADAR.md`                                  | Tutka ilmaisen mallin luettelon peittokuva (`RADAR_ENABLED`, oletuksena pois päältä) |
+| `MEMORY.md`                                 | Muistijärjestelmä (SQLite FTS5 + Qdrant)                                             |
+| `EVALS.md`                                  | Eval-kehys (sviitit, runot, rubriikit)                                               |
+| `GUARDRAILS.md`                             | PII masker, nopea ruiskutus, näkösilta                                               |
+| `COMPLIANCE.md`                             | Tarkastusloki, säilytys, noLog-opt-out                                               |
+| `WEBHOOKS.md`                               | HMAC-allekirjoitettu webhook-toimitus                                                |
+| `REASONING_REPLAY.md`                       | Hybridi memory/SQLite -välimuisti zqb: `reasoning_content`                           |
+| `AUTHZ_GUIDE.md`                            | Valtuutusputki (`classify` → `policies` → `enforce`)                                 |
+| `RESILIENCE_GUIDE.md`                       | Katkaisija + cooldown + mallin lukitus                                               |
+| `docs/security/STEALTH_GUIDE.md` (vain git) | TLS sormenjäljet (JA3/JA4), Claude koodi CCH, MITM cert                              |
+| `AUTO-COMBO.md`                             | Auto Combo -moottori (16-faktorinen pisteytys, 6 tilapakettia, virtuaalinen tehdas)  |
 
-### Pakkaus
+### Puristus
 
-| Dokumentti                      | Tarkoitus                                            |
-| ------------------------------- | ---------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Pakkaustilojen yleiskatsaus ja etenemissuunnitelma   |
-| `COMPRESSION_ENGINES.md`        | Caveman- ja RTK-moottorit sekä rekisterisopimus      |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman-sääntöpaketin JSON-skeema                    |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Kielikohtaisten sääntöpakettien luettelo             |
-| `RTK_COMPRESSION.md`            | RTK:n deklaratiivinen käsittelyputki (49 suodatinta) |
+| Doc                             | Tarkoitus                                  |
+| ------------------------------- | ------------------------------------------ |
+| `COMPRESSION_GUIDE.md`          | Yleiskatsaus pakkaustiloihin + tiekartta   |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK -moottorit, rekisterisopimus |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman-sääntöpaketin JSON -skeema         |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Kielikohtainen sääntöpaketin mainosjakauma |
+| `RTK_COMPRESSION.md`            | RTK deklaratiivinen putki (56 suodatinta)  |
 
 ### Käyttöönotto
 
-| Dokumentti                   | Tarkoitus                                                              |
-| ---------------------------- | ---------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker-koonti, profiilit (base/cli/host/cliproxyapi), Redis-sivukontti |
-| `VM_DEPLOYMENT_GUIDE.md`     | Yleinen VM/VPS-käyttöönotto (Ubuntu/Debian + nginx + systemd)          |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-käyttöönotto (tällä hetkellä saatavilla vain kiinaksi)          |
-| `TERMUX_GUIDE.md`            | Android ilman graafista käyttöliittymää Termuxin kautta                |
-| `PWA_GUIDE.md`               | Progressiivisen verkkosovelluksen asennus + service worker             |
-| `ELECTRON_GUIDE.md`          | Työpöytäsovelluksen koonti + allekirjoitus + jakelu                    |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                 |
-| `PROXY_GUIDE.md`             | 4-tasoinen lähtevän liikenteen välityspalvelin + 1proxy-markkinapaikka |
+| Doc                          | Tarkoitus                                                               |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker -rakenne, profiilit (base/cli/host/cliproxyapi), Redis sivuvaunu |
+| `VM_DEPLOYMENT_GUIDE.md`     | Yleinen VM/VPS -käyttöönotto (Ubuntu/Debian + nginx + systemd)          |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-käyttöönotto (tällä hetkellä vain Kiinassa)                      |
+| `TERMUX_GUIDE.md`            | Android headless Termuxin kautta                                        |
+| `PWA_GUIDE.md`               | Progressiivinen Web App -asennus + palvelutyöntekijä                    |
+| `ELECTRON_GUIDE.md`          | Työpöytäsovellus rakentaa + sign + jakaa                                |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale                                         |
+| `PROXY_GUIDE.md`             | 4-tasoinen lähtevä välityspalvelin + 1proxy Marketplace                 |
 
 ### Alihakemistot
 
-| Alihakemisto          | Tarkoitus                                                                                                                                                                                                                      |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | Lokalisoidut dokumentaatiokäännökset (41 kielialuetta)                                                                                                                                                                         |
-| `docs/screenshots/`   | Oppaiden kuvaresurssit                                                                                                                                                                                                         |
-| `_tasks/superpowers/` | Superpowersin suunnitelmat/määritykset (`writing-plans`/`brainstorming`) + tutkimusaineisto — eristetty, erikseen versioitu tietovarasto, jonka pääpuu ohittaa Gitissä. Katso CLAUDE.md → "Suunnittelu- ja tutkimusaineistot". |
+| Subdir                | Tarkoitus                                                                                                                                                                                       |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokalisoidut asiakirjakäännökset (41 kieltä)                                                                                                                                                    |
+| `docs/screenshots/`   | Oppaiden kuvamateriaalit                                                                                                                                                                        |
+| `_tasks/superpowers/` | Plans/specs supervoimista (`writing-plans`/`brainstorming`) + -tutkimus — eristetty, erikseen versioitu repo, jonka pääpuu jättää huomiotta. Katso CLAUDE.md → "Planning & Research Artefacts". |
 
 ---
 

@@ -1,0 +1,1 @@
+- **feat(search):** Exa search cost now follows Exa's billing: 10 results included, $0.001 per extra result, and $0.001 per result when `contents.summary` is set ([#17396](https://github.com/diegosouzapw/OmniRoute/pull/17396)) — thanks @yourspraveen

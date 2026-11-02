@@ -849,47 +849,40 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## API ស្វែងរក
+## ស្វែងរក API
 
-ស្រទាប់អរូបីសម្រាប់អ្នកផ្តល់សេវាគេហទំព័រ/ការស្វែងរក (Tavily, Brave, Exa, Serper ជាដើម)។
+អរូបីអ្នកផ្តល់សេវាWeb/search (Tavily, Brave, Exa, Serper ។ល។)
 
-| វិធីសាស្ត្រ | ផ្លូវ                  | ការពិពណ៌នា                                                                                                                      |
-| ----------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| GET         | `/v1/search`           | រាយបញ្ជីអ្នកផ្តល់សេវាស្វែងរកដែលបានកំណត់រចនាសម្ព័ន្ធ + សមត្ថភាព                                                                  |
-| POST        | `/v1/search`           | ដំណើរការសំណួរស្វែងរក — body ត្រូវបានផ្ទៀងផ្ទាត់ដោយ `v1SearchSchema` និងគាំទ្រការរក្សាទុកក្នុងឃ្លាំងសម្ងាត់/ការបញ្ចូលសំណើរួមគ្នា |
-| GET         | `/v1/search/analytics` | ស្ថិតិចំនួន hit/រយៈពេលឆ្លើយតប/ឃ្លាំងសម្ងាត់ សម្រាប់អ្នកផ្តល់សេវានីមួយៗ                                                          |
+| វិធីសាស្រ្ត | ផ្លូវ                  | ការពិពណ៌នា                                                                           |
+| ----------- | ---------------------- | ------------------------------------------------------------------------------------ |
+| GET         | `/v1/search`           | រាយបញ្ជីអ្នកផ្តល់សេវាស្វែងរកដែលបានកំណត់រចនាសម្ព័ន្ធ +                                |
+| POST        | `/v1/search`           | ដំណើរការសំណួរស្វែងរក — តួដែលមានសុពលភាពដោយ `v1SearchSchema` គាំទ្រ caching/coalescing |
+| GET         | `/v1/search/analytics` | ស្ថិតិ hit/latency/cache របស់អ្នកផ្តល់សេវា                                           |
 
-**ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ៖** សោ API ប្រភេទ Bearer (`extractApiKey` + `isValidApiKey`)។ គោលការណ៍ស្វែងរកត្រូវបានអនុវត្តតាមរយៈ `enforceApiKeyPolicy`។
+**សិទ្ធិ៖** អ្នកកាន់ API key (`extractApiKey` + `isValidApiKey`) ។ គោលការណ៍ស្វែងរកបានអនុវត្តតាមរយៈ `enforceApiKeyPolicy`។
 
-### `provider_options` របស់ Exa និង Tavily
+### Exa និង Tavily `provider_options`
 
-Exa និង Tavily អានវាលជាក់លាក់សម្រាប់អ្នកផ្តល់សេវាពីថង់ទិន្នន័យដែលមាន namespace៖
-`provider_options.exa` (ឬ `provider_options["exa-search"]`) និង `provider_options.tavily`
-(ឬ `provider_options["tavily-search"]`)។ មានតែ key ខាងក្រោមប៉ុណ្ណោះដែលត្រូវបានបញ្ជូនបន្ត។ Key នីមួយៗត្រូវបាន
-ផ្ទៀងផ្ទាត់តាម Zod schema របស់វានៅក្នុង `open-sse/handlers/search/providerOptionsPassthrough.ts`
-ហើយ key ដែលមានប្រភេទមិនត្រឹមត្រូវនឹងត្រូវបានទម្លាក់ចោល។ Key ផ្សេងទៀតទាំងអស់ត្រូវបានមិនអើពើ រួមទាំងព័ត៌មានផ្ទៀងផ្ទាត់អត្តសញ្ញាណ, URL មូលដ្ឋាន,
-`stream` និង `outputSchema`។ Key រាបស្មើដែលប្រើដោយអ្នកផ្តល់សេវាផ្សេងទៀត (`cx`, `depth`, ...) បន្តដំណើរការ
-ដូចមុន។
+Exa និង Tavily អានវាលជាក់លាក់របស់អ្នកផ្តល់សេវាពីកាបូបដាក់ឈ្មោះ៖ `provider_options.exa` (ឬ `provider_options["exa-search"]`) និង `provider_options.tavily` (ឬ `provider_options["tavily-search"]`). មានតែសោខាងក្រោមប៉ុណ្ណោះដែលត្រូវបានបញ្ជូនបន្ត។ នីមួយៗត្រូវបានពិនិត្យទល់នឹងគ្រោងការណ៍ Zod ផ្ទាល់ខ្លួនក្នុង `open-sse/handlers/search/providerOptionsPassthrough.ts` ហើយសោដែលមានប្រភេទខុសត្រូវបានទម្លាក់។ សោណាមួយផ្សេងទៀតមិនត្រូវបានអើពើ រួមទាំង auth, base URL, `stream` និង `outputSchema`។ សោសំប៉ែតដែលប្រើដោយអ្នកផ្តល់សេវាផ្សេងទៀត (`cx`, `depth`, ... ) ដំណើរការដូចពីមុន។
 
-| អ្នកផ្តល់សេវា | វាលកម្រិតកំពូល                                                                                                                                                                                                                                                                                                                                                            | វាលជាន់ក្នុង                                                                                                                                                              |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa           | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (តម្លៃ primitive រាបស្មើ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ត្រូវបានបញ្ចូលពីលើតម្លៃលំនាំដើម `{ text: true, highlights: true }` |
-| Tavily        | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                         |
+| អ្នកផ្តល់សេវា | វាលកម្រិតកំពូល                                                                                                                                                                                                                                                                                                                                                            | សំបុក                                                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa           | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (បុព្វកាលផ្ទះល្វែង), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` បញ្ចូលគ្នាលើ `{ text: true, highlights: true }` លំនាំដើម |
+| តាវីលី        | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                      |
 
-វាលទូទៅតែងតែមានអាទិភាព៖ `query`, `max_results`, `filters` (ដែន), `country` និង
-ប្រធានបទដែលបានទាញចេញពី `search_type`។ នៅលើ Exa, `search_type: "news"` រក្សា `category: "news"`។
-Tavily ក៏ទទួលយក `search_type: "finance"` (`topic: "finance"`) ផងដែរ។
+វាលទូទៅតែងតែឈ្នះ៖ `query`, `max_results`, `filters` (ដែន), `country` និងប្រធានបទដែលបានមកពី `search_type`។ នៅលើ Exa, `search_type: "news"` រក្សា `category: "news"`។ Tavily ក៏ទទួលយក `search_type: "finance"` (`topic: "finance"`) ផងដែរ។
 
-ឥឡូវនេះ `time_range` ទូទៅត្រូវបានបញ្ជូនទៅអ្នកផ្តល់សេវាទាំងពីរ៖ Exa ទទួលបាន `startPublishedDate` (ត្រាពេលវេលា ISO)
-ហើយ Tavily ទទួលបាន `start_date` (`YYYY-MM-DD`)។ កាលបរិច្ឆេទដែលបានបញ្ជាក់ជាក់លាក់នៅក្នុង `provider_options`
-នឹងជំនួសតម្លៃដែលបានផ្គូផ្គង។
+ការចំណាយលើការស្វែងរក Firecrawl ត្រូវបានកត់ត្រាក្នុងមួយប្លុកដែលបានចាប់ផ្តើមនៃលទ្ធផល 10 ដែលត្រឡប់មកវិញនៅ $0.002 (2 ក្រេឌីត) ក្នុងមួយប្លុក និងយ៉ាងហោចណាស់មួយប្លុកក្នុងមួយការហៅ ( [ការចេញវិក្កយបត្រ Firecrawl](https://docs.firecrawl.dev/billing) ): 11 លទ្ធផលមានតម្លៃ $0.004 ។
 
-លទ្ធផល Exa រក្សាទុក `id`, `highlight_scores`, `summary`, `subpages`, `entities` និង `extras` នៅក្នុង
-`provider_raw`។ លទ្ធផល Tavily រក្សាទុក `images` និង `favicon`។
+`time_range` ទូទៅឥឡូវនេះទៅដល់អ្នកផ្តល់សេវាទាំងពីរ៖ Exa ទទួលបាន `startPublishedDate` (ISO timestamp) និង Tavily ទទួលបាន `start_date` (`YYYY-MM-DD`)។ កាលបរិច្ឆេទច្បាស់លាស់នៅក្នុង `provider_options` បដិសេធការគូសផែនទី។
 
-ការគណនាថ្លៃចំណាយនៅតែប្រើ registry រាបស្មើ `costPerQuery`។ Tavily គិតថ្លៃ
-`search_depth: "advanced"` ជា credits ច្រើនជាងក្នុងការហៅមួយដង ហើយភាពខុសគ្នានោះមិនត្រូវបានបង្ហាញនៅក្នុង
-`usage.search_cost_usd` ទេ។
+លទ្ធផល Exa រក្សា `id`, `highlight_scores`, `summary`, `subpages`, `entities` និង `extras` ក្នុង `provider_raw`។ លទ្ធផល Tavily រក្សា `images` និង `favicon`។
+
+តម្លៃនៃការស្វែងរកតំណភ្ជាប់ត្រូវបានកត់ត្រានៅ $0.005 សម្រាប់ `depth` `fast` និង `standard` និង $0.05 សម្រាប់ `deep` ( [តម្លៃភ្ជាប់](https://docs.linkup.so/pages/documentation/development/pricing) ) ថាតើ `depth` មកពី `provider_options` ឬការកំណត់នៃការតភ្ជាប់។
+
+Exa `type: "lite"` (Exa 3.0) ទទួលយកសំណុំវាលតូចជាង ហើយបដិសេធសំណើទាំងមូលនៅពេលដែលវាលផ្សេងទៀតត្រូវបានកំណត់។ សម្រាប់ lite, `additionalQueries`, `systemPrompt` និងរាល់ `contents` key លើកលែងតែ `text` និង `highlights` ត្រូវបានទម្លាក់មុនពេលហៅ។ `subpages`, `subpageTarget`, `highlights.numSentences` និង `highlights.highlightsPerUrl` ដែលបានបដិសេធមិនត្រូវបានបញ្ជូនបន្តទៀតទេ។
+
+គណនេយ្យតម្លៃគឺជា `costPerQuery` ឈ្មោះផ្ទះល្វែង លើកលែងតែ Exa ដែលធ្វើតាមតម្លៃផ្ទាល់ខ្លួនរបស់ Exa៖ 0.007 ដុល្លារក្នុងមួយការហៅសម្រាប់ `auto` (និង `fast` កេរ្តិ៍ដំណែល) ឬ 0.004 ដុល្លារសម្រាប់ `lite` (និង `instant` កេរ្តិ៍ដំណែល) គ្របដណ្តប់លទ្ធផល 10 ។ $0.001 សម្រាប់លទ្ធផលបន្ថែមនីមួយៗ; និង $0.001 ក្នុងមួយលទ្ធផលត្រឡប់មកវិញនៅពេលដែល `contents.summary` ត្រូវបានកំណត់។ Tavily ត្រូវបានកត់ត្រាក្នុង 1 ក្រេឌីត ($0.008) សម្រាប់ `search_depth` `basic`, `fast` និង `ultra-fast`, និង 2 credits ($0.016) សម្រាប់ `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) )។ ការហៅទូរសព្ទជាមួយ `auto_parameters: true` ដែល Tavily ដំឡើងកំណែទៅកម្រិតខ្ពស់នៅតែត្រូវបានកត់ត្រាក្នុង 1 ក្រេឌីត។
 
 ---
 

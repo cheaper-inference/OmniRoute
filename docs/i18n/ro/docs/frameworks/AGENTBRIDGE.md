@@ -16,34 +16,34 @@ AgentBridge este proxy-ul MITM (Man-in-the-Middle) al OmniRoute, care intercepte
 
 ### Ce este AgentBridge?
 
-Atunci când un agent IDE (de ex., GitHub Copilot, Cursor, Claude Code) efectuează un apel API, acesta se conectează direct la furnizorul AI upstream (OpenAI, Anthropic etc.). AgentBridge interceptează transparent acea conexiune la nivel TLS — fără a necesita vreo modificare a configurației agentului — și rescrie cererea prin OmniRoute.
+Când un agent IDE (de exemplu, GitHub Copilot, Cursor, Claude Code) efectuează un apel API, se conectează direct la furnizorul AI din amonte (OpenAI, Anthropic, etc.). AgentBridge interceptează acea conexiune în mod transparent la nivel TLS - fără a necesita nicio modificare a configurației agentului - și rescrie cererea prin OmniRoute.
 
-Acest lucru înseamnă că poți:
+Aceasta înseamnă că puteți:
 
-- **Redirecționa orice agent către orice furnizor**: Copilot comunică cu OpenAI? Redirecționează-l către Anthropic Claude, Gemini sau oricare dintre cei 375 de furnizori ai OmniRoute.
-- **Aplica mapări de modele**: `gemini-3-flash` → `claude-sonnet-4.7` transparent, la nivelul handlerului.
-- **Observa tot traficul agenților**: fiecare cerere interceptată este publicată în [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Aplica reziliența OmniRoute**: rutarea combinată, întrerupătoarele de circuit, mecanismele de fallback și urmărirea costurilor funcționează și pentru traficul agenților IDE.
+- **Redirecționați orice agent către orice furnizor** : Copilot vorbesc cu OpenAI? Redirecționați-l către Anthropic Claude, Gemini sau către oricare dintre cei 377 de furnizori ai OmniRoute.
+- **Aplicați mapările modelului** : `gemini-3-flash` → `claude-sonnet-4.7` transparent la nivelul handlerului.
+- **Observați tot traficul de agenți** : fiecare cerere interceptată este publicată la [Inspectorul de Trafic](./TRAFFIC_INSPECTOR.md).
+- **Aplicați rezistența OmniRoute** : rutarea combinată, întreruptoarele de circuit, alternativele și urmărirea costurilor funcționează și pentru traficul agentului IDE.
 
 ### Poziționare față de piață
 
-| Funcționalitate                    | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ---------------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                        |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                     |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                         |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                       |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                         |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                     |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                        |    —    |    —     |        ✓        |             ✓             |
-| Open Code                          |    —    |    —     |        ✓        |             ✓             |
-| Trae                               |    —    |    —     |        —        | 🔍 În curs de investigare |
-| Interfață de panou de control      |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector                  |    ✗    |    ✗     |        ✓        |             ✓             |
-| Rutare OmniRoute                   |    ✗    |    ✗     |        ✗        |             ✓             |
-| Interfață pentru maparea modelelor |    ✗    |    ✗     |        ✗        |             ✓             |
-| Listă de ocolire                   |    ✗    |    ✗     |        ✓        |             ✓             |
-| Certificat CA upstream             |    ✗    |    ✗     |        ✓        |             ✓             |
+| Caracteristică              | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| --------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity                 |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot              |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)                  |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex                |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE                  |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries              |    —    |    ✓     |        —        |             ✓             |
+| Codul Claude                |    —    |    —     |        ✓        |             ✓             |
+| Deschide codul              |    —    |    —     |        ✓        |             ✓             |
+| Trae                        |    —    |    —     |        —        |      🔍 Investigarea      |
+| Tabloul de bord UI          |    ✓    |    ✗     |        ✗        |             ✓             |
+| Inspector de trafic         |    ✗    |    ✗     |        ✓        |             ✓             |
+| rutare OmniRoute            |    ✗    |    ✗     |        ✗        |             ✓             |
+| Cartografierea modelului UI |    ✗    |    ✗     |        ✗        |             ✓             |
+| Lista de ocolire            |    ✗    |    ✗     |        ✓        |             ✓             |
+| Upstream CA cert            |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

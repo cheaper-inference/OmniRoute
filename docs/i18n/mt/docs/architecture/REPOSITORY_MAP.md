@@ -111,150 +111,150 @@ OmniRoute/
 
 ---
 
-## `src/` — Applikazzjoni Next.js
+## `src/` — applikazzjoni Next.js
 
 ```
 src/
-├── app/                 # App Router (paġni + rotot tal-API + paġni tal-istatus + paġna ewlenija)
-├── lib/                 # Libreriji ewlenin / moduli tad-dominju (80 sottodirettorju + madwar 70 fajl fl-ogħla livell)
-├── domain/              # Loġika pura tad-dominju (magna tal-politiki, alternattiva, spiża, imblukkar, comboResolver, valutazzjoni)
-├── server/              # Moduli għas-server biss (pipeline tal-awtorizzazzjoni, cors, middleware tal-awtentikazzjoni) — ma jistgħux jiġu importati mill-klijent
-├── shared/              # Kondiviż bejn is-server u l-klijent fejn ikun sikur (kostanti, tipi, validazzjoni, kuntratti, utilitajiet)
-├── i18n/                # Konfigurazzjoni ta’ next-intl + JSON tal-messaġġi għal kull locale (67 locale)
-├── middleware/          # Middleware ta’ Next.js (arrikkiment tat-talbiet, detezzjoni tal-locale)
-├── mitm/                # Qalba tal-proxy MITM: ġenerazzjoni/installazzjoni taċ-ċertifikati, handlers, miri, spettur, maskri, passthrough
-│   ├── handlers/        # 9 klassijiet ta’ handler għall-aġenti tal-IDE li jestendu MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Saff tal-qbid tat-traffiku: buffer (ċirku fil-memorja), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Kodiċi ta’ konnessjoni għall-adapters tal-mudelli (shim legat)
-├── scripts/             # Skripts ta’ manutenzjoni inklużi fis-siġra (eż., backfillAggregation)
-├── sse/                 # Handlers/servizzi SSE legati (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Ħażna legata fil-memorja (qed titneħħa gradwalment favur src/lib/db)
-├── types/               # Fajls kondiviżi tat-tipi TS
-├── instrumentation.ts   # Hook tat-telemetrija ta’ Next.js (browser + edge)
-├── instrumentation-node.ts  # Strumentazzjoni għal Node biss
-└── proxy.ts             # Shim tad-dħul għall-proxy HTTP
+├── app/                 # App Router (pages + API routes + status pages + landing)
+├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
+├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
+├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
+├── middleware/          # Next.js middleware (request enrichment, locale detection)
+├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter glue (legacy shim)
+├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
+├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Legacy in-memory store (being phased out for src/lib/db)
+├── types/               # Shared TS type files
+├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
+├── instrumentation-node.ts  # Node-only instrumentation
+└── proxy.ts             # HTTP-proxy entry shim
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| Mogħdija                                                                     | Skop                                                                                                                                                                                                                                                                                                                   |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | API pubblika kompatibbli ma’ OpenAI (~25 sottorotta: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers, eċċ.)                                                                                                                  |
-| `app/api/v1beta/`                                                            | Punti finali tal-API bi stil Gemini                                                                                                                                                                                                                                                                                    |
-| `app/api/playground/`                                                        | Rotot ta’ Playground Studio: `improve-prompt/` (POST — għodda li tikteb mill-ġdid il-prompt tal-LLM), `presets/` (GET biex turi l-lista / POST biex toħloq), `presets/[id]/` (GET / PUT / DELETE) — ara `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                         |
-| `app/api/` (mhux v1)                                                         | Rotot ta’ ġestjoni/amministrazzjoni (~60 direttorju: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools, eċċ.)                                                                                                                             |
-| `app/api/tools/agent-bridge/`                                                | API REST ta’ AgentBridge — 12-il rotta (kontroll tas-server, stat/DNS/immappjar tal-aġent, bypass, ċertifikat, CA upstream). LOCAL_ONLY + SPAWN_CAPABLE. Ara `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                      |
-| `app/api/tools/traffic-inspector/`                                           | API REST + WS ta’ Traffic Inspector — 16-il rotta jew aktar (talbiet, sessjonijiet, hosts, modi ta’ qbid, esportazzjoni, ws). LOCAL_ONLY + SPAWN_CAPABLE. Ara `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                               |
-| `app/a2a/`                                                                   | Punt tad-dħul A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                           |
-| `app/.well-known/agent.json/`                                                | Kard tal-Aġent A2A (skoperta)                                                                                                                                                                                                                                                                                          |
-| `app/(dashboard)/dashboard/`                                                 | Paġni tal-UI tad-dashboard (aktar minn 50 sezzjoni, madwar 118-il fajl page.tsx: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity, eċċ.)                                                                                                             |
-| `app/(dashboard)/dashboard/search-tools/`                                    | UI ta’ Search Tools Studio (3 tabs: Tiftix/Estrazzjoni/Tqabbil + SearchConceptCard + ProviderCatalog) — ara `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                   |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (pjan 21): `page.tsx` (qafas bi 3 tabs), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Paġna tad-dashboard ta’ AgentBridge — kard tas-server, 9 kards tal-aġenti, assistent tas-setup, immappjar tal-mudelli, lista tal-bypass. i18n PT-BR + EN. Ara `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                        |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Paġna tad-dashboard ta’ Traffic Inspector — tqassim maqsum bħal DevTools, 7 tabs tad-dettalji, 4 swiċċijiet tal-modi ta’ qbid, reġistratur tas-sessjonijiet, kulurizzazzjoni tal-kuntest. i18n PT-BR + EN. Ara `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                 |
-| `app/(dashboard)/dashboard/activity/`                                        | Paġna tal-fluss tal-attività (Grupp B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — ara `docs/architecture/MONITORING_SECTIONS.md`                                                                                                       |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Paġna tal-kondiviżjoni tal-kwota (Grupp B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Paġna tal-konfigurazzjoni tal-pjan tal-fornitur (Grupp B): `page.tsx` + `ProviderPlanConfigClient.tsx` — id-dimensjonijiet tal-kwota għal kull override tal-konnessjoni                                                                                                                                                |
-| `app/docs/`                                                                  | Viżwalizzatur tad-dokumentazzjoni inkorporat (jirrendi `docs/*.md`)                                                                                                                                                                                                                                                    |
-| `app/landing/`                                                               | Paġna ewlenija tal-marketing                                                                                                                                                                                                                                                                                           |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Paġni relatati mal-awtentikazzjoni                                                                                                                                                                                                                                                                                     |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | Paġni tal-iżbalji HTTP                                                                                                                                                                                                                                                                                                 |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Paġni statiċi/tal-istatus                                                                                                                                                                                                                                                                                              |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Tqassim ewlieni, paġna ewlenija, manifest PWA, CSS globali                                                                                                                                                                                                                                                             |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Konfini tal-iżbalji                                                                                                                                                                                                                                                                                                    |
+| Mogħdija                                                                     | Għan                                                                                                                                                                                                                                                                                             |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `app/api/v1/`                                                                | Pubbliku OpenAI-compat API (~ 25 sub-rotta: chat, kompleti, inkorporazzjonijiet, fajls, lottijiet, awdjo, stampi, vidjows, mużika, klassifikazzjoni mill-ġdid, moderazzjonijiet, tfittxija, ws, aġenti, kontijiet, fornituri, eċċ.)                                                              |
+| `app/api/v1beta/`                                                            | Gemini-style API endpoints                                                                                                                                                                                                                                                                       |
+| `app/api/playground/`                                                        | Playground Studio rotot: `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — ara `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                  |
+| `app/api/` (mhux v1)                                                         | rotot Management/admin (direttorji ~ 60: fornituri, combos, settings, mcp, a2a, evals, memorja, ħiliet, webhooks, konformità, reżiljenza, monitoraġġ, mini, cli-tools, eċċ.)                                                                                                                     |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12-il rotta (kontroll tas-server, aġent state/DNS/mappings, bypass, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Ara `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                              |
+| `app/api/tools/traffic-inspector/`                                           | Spettur tat-Traffiku REST + WS API — 16-il rotta + (talbiet, sessjonijiet, hosts, capture-modes, esportazzjoni, ws). LOCAL_ONLY + SPAWN_CAPABLE. Ara `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                  |
+| `app/a2a/`                                                                   | Punt tad-dħul A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                     |
+| `app/.well-known/agent.json/`                                                | A2A Agent Card (skoperta)                                                                                                                                                                                                                                                                        |
+| `app/(dashboard)/dashboard/`                                                 | Dashboard UI paġni (50 taqsima +, ~ 118 fajl page.tsx : fornituri, combos, settings, memorja, ħiliet, webhooks, evals, verifika, lott, cache, spejjeż, saħħa, sistema, attività, eċċ.)                                                                                                           |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 tabs: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — ara `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                      |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (pjan 21): `page.tsx` (3-tab shell), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (use)MemorySetting |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | paġna tad-dashboard AgentBridge — karta tas-server, 9 karti tal-aġent, wizard tas-setup, mapping tal-mudelli, lista tal-bypass. i18n PT-BR + EN. Ara `docs/frameworks/AGENTBRIDGE.md`.                                                                                                           |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Paġna tad-daxxbord tal-Ispettur tat-Traffiku — DevTools split, 7 tabs tad-dettall, 4 toggles tal-modalità tal-qbid, rekorder tas-sessjoni, kolorazzjoni tal-kuntest. i18n PT-BR + EN. Ara `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                |
+| `app/(dashboard)/dashboard/activity/`                                        | Paġna tal-għalf tal-attività (Grupp B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — ara `docs/architecture/MONITORING_SECTIONS.md`                                                                                 |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Il-paġna tal-Qsim tal-Kwoti (Grupp B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                               |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Paġna tal-konfigurazzjoni tal-pjan tal-fornitur (Grupp B): `page.tsx` + `ProviderPlanConfigClient.tsx` — dimensjonijiet tal-kwota għal kull konnessjoni override                                                                                                                                 |
+| `app/docs/`                                                                  | Telespettatur tad-dokumentazzjoni inkorporat (renders `docs/*.md`)                                                                                                                                                                                                                               |
+| `app/landing/`                                                               | Paġna ta 'destinazzjoni tal-marketing                                                                                                                                                                                                                                                            |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | Paġni relatati mal-awth                                                                                                                                                                                                                                                                          |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP error pages                                                                                                                                                                                                                                                                                 |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status pagni                                                                                                                                                                                                                                                                              |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | It-tqassim tal-għerq, id-dar, PWA manifest, CSS globali                                                                                                                                                                                                                                          |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Konfini ta' żball                                                                                                                                                                                                                                                                                |
 
-### `src/lib/` — Libreriji ewlenin (~50 modulu)
+### `src/lib/` — Libreriji ewlenin (~ 50 modulu)
 
-| Modulu                                   | Għan                                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | Maniġer tal-kompiti tal-protokoll A2A, ħiliet (5), streaming                                                                                                                                                                                                                                                                          |
-| `acp/`                                   | Reġistru tal-Aġenti CLI (sejbien lokali tas-CLI — ara `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                     |
-| `api/`                                   | Għodod awżiljarji kondiviżi tal-API (`requireManagementAuth`, validazzjoni)                                                                                                                                                                                                                                                           |
-| `auth/`                                  | Sessjoni, hashing tal-password, validazzjoni tat-token                                                                                                                                                                                                                                                                                |
-| `batches/`                               | Handlers tal-API tal-Batches ta’ OpenAI                                                                                                                                                                                                                                                                                               |
-| `catalog/`                               | Validazzjoni Zod tal-katalgu tal-fornituri + riżoluzzjoni tal-kapaċitajiet                                                                                                                                                                                                                                                            |
-| `cloudAgent/`                            | Aġenti tal-Cloud (Codex Cloud, Devin, Jules) — ara `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                                   |
-| `combos/`                                | Riżoluzzjoni tal-combo + għodod awżiljarji għar-riordni                                                                                                                                                                                                                                                                               |
-| `audit/`                                 | Għodod awżiljarji għall-feed tal-attività: `highLevelActions.ts` (lista ta’ permessi + `isHighLevelAction()`), `activityIcons.ts` (immappjar ta’ azzjoni → ikona/verb), `timeline.ts` (groupByDay/relativeTime) — ara `docs/architecture/MONITORING_SECTIONS.md`                                                                      |
-| `compliance/`                            | Reġistru tal-awditjar + awditjar tal-fornitur — ara `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                     |
-| `compression/`                           | Kodiċi ta’ integrazzjoni tal-magna tal-kompressjoni (il-magni jinsabu f’`open-sse/services/compression/`)                                                                                                                                                                                                                             |
-| `config/`                                | Għodod awżiljarji għall-konfigurazzjoni waqt it-tħaddim                                                                                                                                                                                                                                                                               |
-| `db/`                                    | 120+ modulu DB tad-dominju + 168 migrazzjoni (dejjem għaddi minn hawn għal SQLite)                                                                                                                                                                                                                                                    |
-| `quota/`                                 | Magna għall-Kondiviżjoni tal-Kwota: `dimensions.ts` (tipi/Zod), `types.ts` (interfaċċa QuotaStore), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — ara `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Klijent tal-katalgu ta’ mudelli bla ħlas ta’ Radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — ara `docs/frameworks/RADAR.md`                                                                                                                                       |
-| `display/`                               | Għodod ta’ għajnuna għall-ifformattjar tal-UI (spiża, latenza, eċċ.)                                                                                                                                                                                                                                                                  |
-| `embeddings/`                            | Għodod ta’ għajnuna għas-servizz tal-embeddings                                                                                                                                                                                                                                                                                       |
-| `env/`                                   | Analiżi sintattika u validazzjoni tal-varjabbli tal-ambjent                                                                                                                                                                                                                                                                           |
-| `evals/`                                 | Qafas tal-evalwazzjoni (suites, runner, runtime) — ara `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                     |
-| `guardrails/`                            | Maskra għall-PII, injezzjoni tal-prompt, pont tal-viżjoni — ara `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                         |
-| `jobs/`                                  | Kompiti fl-isfond (simili għal cron)                                                                                                                                                                                                                                                                                                  |
-| `memory/`                                | Memorja konversazzjonali (RRF ibridu ta’ SQLite FTS5 + sqlite-vec + Qdrant tal-livell 2) — ara `docs/frameworks/MEMORY.md`                                                                                                                                                                                                            |
-| `memory/embedding/`                      | Saff ta’ embeddings minn diversi sorsi: `index.ts` (riżolvitur), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (pjan 21)                                                                                                                                                                             |
-| `memory/vectorStore.ts`                  | Wrapper għal sqlite-vec v0.1.9 — KNN brute-force + RRF ibridu (FTS5 + vettur, k=60). Inizjalizzazzjoni għażżiena, u jiddegrada b’mod gradwali meta sqlite-vec ma jkunx disponibbli. (pjan 21)                                                                                                                                         |
-| `memory/reindex.ts`                      | `runReindexBatch()` — jipproċessa memorji b’`needs_reindex=1` fl-isfond; jissejjaħ minn `POST /api/memory/reindex` u mill-perkors ta’ backfill għażżien. (pjan 21)                                                                                                                                                                    |
-| `monitoring/`                            | Verifiki tas-saħħa, emissjoni ta’ metriċi                                                                                                                                                                                                                                                                                             |
-| `oauth/`                                 | Flussi OAuth/importazzjoni għal 22 modulu ta’ fornituri (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                   |
-| `plugins/`                               | Reġistru tal-plugins                                                                                                                                                                                                                                                                                                                  |
-| `promptCache/`                           | Punti ta’ waqfien tal-cache tal-prompt fl-istil ta’ Anthropic                                                                                                                                                                                                                                                                         |
-| `skills/`                                | Qafas tal-ħiliet (inkorporati + suq + SkillsSH) — ara `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                                     |
-| `playground/`                            | Funzjonijiet awżiljarji kondiviżi ta’ Playground Studio: `codeExport.ts` (ġeneratur ta’ curl/Python/TS), `promptImprover.ts` (bennej ta’ meta-prompt), `streamMetrics.ts` (TTFT/TPS puri), `types.ts` (tabella tal-prezzijiet) — ara `docs/frameworks/PLAYGROUND_STUDIO.md`                                                           |
-| `webhookDispatcher.ts`                   | Konsenja ta’ webhooks b’HMAC — ara `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                      |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Maniġers tat-tunnels — ara `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                                |
-| `cloudSync.ts`, `initCloudSync.ts`       | Sinkronizzazzjoni fakultattiva tal-istat mal-cloud                                                                                                                                                                                                                                                                                    |
-| `localDb.ts`                             | Modulu ċentrali ta’ esportazzjoni mill-ġdid għall-moduli tad-db (mingħajr loġika — esportazzjonijiet mill-ġdid biss)                                                                                                                                                                                                                  |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | Caching tat-talbiet + idempotenza                                                                                                                                                                                                                                                                                                     |
-| (~30 fajl ieħor fl-ogħla livell)         | Funzjonijiet awżiljarji speċjalizzati (logEnv, modelsDevSync, piiSanitizer, eċċ.)                                                                                                                                                                                                                                                     |
+| Modulu                                   | Għan                                                                                                                                                                                                                                                                                                                         |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A protocol task manager, ħiliet (5), streaming                                                                                                                                                                                                                                                                             |
+| `acp/`                                   | Reġistru tal-Aġent CLI (skoperta CLI lokali — ara `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                |
+| `api/`                                   | Helpers API kondiviżi (`requireManagementAuth`, validazzjoni)                                                                                                                                                                                                                                                                |
+| `auth/`                                  | Sessjoni, hashing tal-password, validazzjoni tat-tokens                                                                                                                                                                                                                                                                      |
+| `batches/`                               | OpenAI Lottijiet API handlers                                                                                                                                                                                                                                                                                                |
+| `catalog/`                               | Katalgu tal-fornitur Zod validation + kapaċità riżoluzzjoni                                                                                                                                                                                                                                                                  |
+| `cloudAgent/`                            | Cloud Agents (Codex Cloud, Devin, Jules) — ara `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                              |
+| `combos/`                                | Combo resolution + reorder helpers                                                                                                                                                                                                                                                                                           |
+| `audit/`                                 | Helpers tal-għalf tal-attivitajiet: `highLevelActions.ts` (lista permessa + `isHighLevelAction()`), `activityIcons.ts` (mappa tal-azzjoni → icon/verb ), `timeline.ts` (groupByDay/relativeTime) — ara `docs/architecture/MONITORING_SECTIONS.md`                                                                            |
+| `compliance/`                            | Ġurnal tal-verifika + verifika tal-fornitur — ara `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                              |
+| `compression/`                           | Kolla tal-magna tal-kompressjoni (magni jgħixu `open-sse/services/compression/`)                                                                                                                                                                                                                                             |
+| `config/`                                | Helpers tal-konfigurazzjoni tar-runtime                                                                                                                                                                                                                                                                                      |
+| `db/`                                    | 120 + domain DB modules + 168 migrazzjonijiet (dejjem mur hawn għal SQLite)                                                                                                                                                                                                                                                  |
+| `quota/`                                 | Magna tal-Qsim tal-Kwoti: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore interface ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — ara `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | Klijent tal-katalgu tal-mudell b'xejn tar-radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — ara `docs/frameworks/RADAR.md`                                                                                                                                 |
+| `display/`                               | UI ifformattjar helpers (kost, latency, eċċ.)                                                                                                                                                                                                                                                                                |
+| `embeddings/`                            | Helpers tas-servizz tal-embeddings                                                                                                                                                                                                                                                                                           |
+| `env/`                                   | Env varjabbli parsing + validazzjoni                                                                                                                                                                                                                                                                                         |
+| `evals/`                                 | Qafas ta’ evalwazzjoni (suites, runner, runtime) — ara `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                            |
+| `guardrails/`                            | PII masker, injezzjoni fil-pront, pont tal-vista — ara `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                         |
+| `jobs/`                                  | Impjiegi fl-isfond (bħal cron)                                                                                                                                                                                                                                                                                               |
+| `memory/`                                | Memorja konversazzjonali (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant saff 2) — ara `docs/frameworks/MEMORY.md`                                                                                                                                                                                                             |
+| `memory/embedding/`                      | Saff ta' inkorporazzjoni b'ħafna sorsi: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (pjan 21)                                                                                                                                                                      |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF (FTS5 + vector, k = 60). Lazy-init, tiddegrada bil-grazzja meta sqlite-vec mhux disponibbli. (pjanta 21)                                                                                                                                                            |
+| `memory/reindex.ts`                      | `runReindexBatch()` — tipproċessa memorji `needs_reindex=1` fl-isfond; imsejħa minn `POST /api/memory/reindex` u lazy-backfill mogħdija. (pjanta 21)                                                                                                                                                                         |
+| `monitoring/`                            | Kontrolli tas-saħħa, emissjoni metrika                                                                                                                                                                                                                                                                                       |
+| `oauth/`                                 | OAuth/import flows għal 22 modulu tal-fornitur (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qi-ooth zed)                                                                               |
+| `plugins/`                               | Plugin reġistru                                                                                                                                                                                                                                                                                                              |
+| `promptCache/`                           | Breakpoints tal-cache fil-pront ta' stil antropiku                                                                                                                                                                                                                                                                           |
+| `skills/`                                | Qafas tal-ħiliet (suq + inkorporat + SkillsSH) — ara `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                             |
+| `playground/`                            | Playground Studio shared helpers: `codeExport.ts` (ġeneratur curl/Python/TS ), `promptImprover.ts` (bennej meta-prompt), `streamMetrics.ts` ( TTFT/TPS pur), `types.ts` (tabella tal-prezzijiet) — ara `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                |
+| `webhookDispatcher.ts`                   | HMAC webhook delivery — ara `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                    |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnel managers — ara `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                            |
+| `cloudSync.ts`, `initCloudSync.ts`       | Sinkronizzazzjoni tas-sħab mhux obbligatorja tal-istat                                                                                                                                                                                                                                                                       |
+| `localDb.ts`                             | Baril ta' esportazzjoni mill-ġdid għal moduli db (l-ebda loġika — esportazzjonijiet mill-ġdid biss)                                                                                                                                                                                                                          |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | Talba caching + idempotenza                                                                                                                                                                                                                                                                                                  |
+| (~ 30 fajl ieħor tal-ogħla livell)       | Helpers speċjalizzati (logEnv, modelsDevSync, piiSanitizer, eċċ.)                                                                                                                                                                                                                                                            |
 
-### `src/lib/db/` — Bażi tad-data (147 modulu + 208 migrazzjoni)
+### `src/lib/db/` — Database (147 modulu + 208 migrazzjonijiet)
 
-| Sottodirettorju           | Għan                                                                                                                                                                                 |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `db/core.ts`              | Singleton `getDbInstance()` b’ġurnalar WAL                                                                                                                                           |
-| `db/migrations/`          | Fajls SQL b’verżjonijiet (idempotenti u tranżazzjonali). `073_memory_vec.sql` iżid `memory_vec_meta` + il-kolonna `needs_reindex` (pjan 21).                                         |
-| `db/playgroundPresets.ts` | Modulu CRUD għall-presets ta’ Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)       |
-| `db/memoryVec.ts`         | CRUD għal `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, eċċ. (pjan 21)                         |
-| `db/<domain>.ts`          | Modulu wieħed għal kull dominju: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, eċċ. |
+| Subdir                    | Għan                                                                                                                                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `db/core.ts`              | `getDbInstance()` singleton ma WAL journaling                                                                                                                                                    |
+| `db/migrations/`          | Fajls SQL b'verżjoni (idempotenti, transazzjonali). `073_memory_vec.sql` iżid `memory_vec_meta` + `needs_reindex` kolonna (pjanta 21).                                                           |
+| `db/playgroundPresets.ts` | Modulu CRUD għal presets tal-Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                    |
+| `db/memoryVec.ts`         | CRUD għal `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, eċċ. (pjan 21)                                     |
+| `db/<domain>.ts`          | Modulu wieħed għal kull dominju: fornituri, combos, apiKeys, utenti, sessjonijiet, użu, log tal-awditjar, webhooks, ħiliet, memory_entries, cloud_agent_tasks, evals* \* , reasoning_cache, eċċ. |
 
 ### `src/domain/`
 
-| Modulu                 | Għan                                                       |
-| ---------------------- | ---------------------------------------------------------- |
-| `policy.ts`            | Magna tal-politiki                                         |
-| `fallbackPolicy.ts`    | Siġra tad-deċiżjonijiet ta’ fallback                       |
-| `costRules.ts`         | Regoli għall-kalkolu tal-ispejjeż                          |
-| `lockoutPolicy.ts`     | Politika ta’ lockout tal-mudelli/konnessjonijiet           |
-| `tagRouter.ts`         | Routing ibbażat fuq tags                                   |
-| `comboResolver.ts`     | Riżoluzzjoni tal-combos (użata mill-magna tal-combos)      |
-| `modelAvailability.ts` | Kontroll tad-disponibbiltà għal kull mudell                |
-| `assessment/`          | Valutazzjoni tal-mudelli (Fażi 1 ta’ RFC-AUTO-ASSESSMENT ) |
+| Modulu                 | Għan                                                      |
+| ---------------------- | --------------------------------------------------------- |
+| `policy.ts`            | Magna tal-politika                                        |
+| `fallbackPolicy.ts`    | Siġra tad-deċiżjonijiet fallback                          |
+| `costRules.ts`         | Regoli tal-kalkolu tal-ispejjeż                           |
+| `lockoutPolicy.ts`     | Model/connection lockout policy                           |
+| `tagRouter.ts`         | Rotot ibbażat fuq tag                                     |
+| `comboResolver.ts`     | Riżoluzzjoni Combo (użata minn magna Combo)               |
+| `modelAvailability.ts` | Kontroll tad-disponibbiltà għal kull mudell               |
+| `assessment/`          | Valutazzjoni tal-mudell (Fażi 1 ta' RFC-AUTO-ASSESSMENT ) |
 
 ### `src/server/`
 
 | Modulu   | Għan                                                                                                       |
 | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `authz/` | Pipeline tal-awtorizzazzjoni: `classify` → `policies` → `enforce` — ara `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | Konfigurazzjoni ta’ CORS                                                                                   |
-| `auth/`  | Middleware tas-sessjoni                                                                                    |
+| `authz/` | Pipeline ta' awtorizzazzjoni: `classify` → `policies` → `enforce` — ara `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | CORS konfigurazzjoni                                                                                       |
+| `auth/`  | Sessjoni middleware                                                                                        |
 
 ### `src/shared/`
 
-| Modulu                           | Skop                                                                                                        |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `components/`                    | API tal-komponenti tad-dashboard: adapters fuq `packages/ui-kit` — ara `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: ismijiet tal-ikoni użati mill-iskrins → komponenti Lucide (`<Icon>`)                            |
-| `constants/providers.ts`         | **375 fornitur** b'validazzjoni Zod (is-sors awtorevoli)                                                    |
-| `constants/cliTools.ts`          | Reġistru ta' għodod CLI esterni                                                                             |
-| `constants/routingStrategies.ts` | **20 strateġija tar-routing** bi prijoritajiet                                                              |
-| `constants/publicApiRoutes.ts`   | Rotot li jeħtieġu awtentikazzjoni Bearer (minflok dik tal-ġestjoni)                                         |
-| `constants/upstreamHeaders.ts`   | Lista ta' headers ipprojbiti għal talbiet upstream                                                          |
-| `validation/schemas.ts`          | Madwar 80 skema Zod (sors awtorevoli uniku għall-kuntratti tal-API)                                         |
-| `validation/helpers.ts`          | Għodod awżiljarji għall-validazzjoni Zod (`validateBody`, eċċ.)                                             |
-| `types/`                         | Tipi TS kondiviżi                                                                                           |
-| `contracts/`                     | Kuntratti tal-API pubblika (użati minn `files:` f'`package.json`)                                           |
-| `utils/circuitBreaker.ts`        | Circuit breaker tal-fornitur (ara `docs/architecture/RESILIENCE_GUIDE.md`)                                  |
-| `utils/apiAuth.ts`               | Validazzjoni taċ-ċavetta tal-API u verifika tal-ambiti                                                      |
-| `utils/fetchTimeout.ts`          | Wrappers għal timeout/abort għal fetch upstream                                                             |
-| `utils/releaseNotes.ts`          | Parser magħluq għal avviżi v2/legacy, lokalizzazzjoni u twarrib skont l-ID                                  |
+| Modulu                           | Għan                                                                                                   |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `components/`                    | Komponent tad-dashboard API: adapters fuq `packages/ui-kit` — ara `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: ismijiet tal-ikoni użati mill-iskrins → komponenti Lucide (`<Icon>`)                       |
+| `constants/providers.ts`         | **377 fornitur** bil-validazzjoni Zod (sors tal-verità)                                                |
+| `constants/cliTools.ts`          | Reġistru estern tal-għodda CLI                                                                         |
+| `constants/routingStrategies.ts` | **20 strateġija ta' rotta** bi prijoritajiet                                                           |
+| `constants/publicApiRoutes.ts`   | Rotot li jeħtieġu awtifikazzjoni Bearer (vs management).                                               |
+| `constants/upstreamHeaders.ts`   | Lista taċ-ċaħda tal-header għal talbiet upstream                                                       |
+| `validation/schemas.ts`          | ~ 80 skemi Zod (sors uniku tal-verità għal kuntratti API )                                             |
+| `validation/helpers.ts`          | Zod validation helpers (`validateBody`, eċċ.)                                                          |
+| `types/`                         | Shared TS types                                                                                        |
+| `contracts/`                     | Kuntratti pubbliċi API (ikkonsmati minn `files:` fi `package.json`)                                    |
+| `utils/circuitBreaker.ts`        | Fornitur circuit breaker (ara `docs/architecture/RESILIENCE_GUIDE.md`)                                 |
+| `utils/apiAuth.ts`               | validazzjoni taċ-ċavetta API, verifika tal-ambitu                                                      |
+| `utils/fetchTimeout.ts`          | Timeout/abort wrappers għal upstream fetch                                                             |
+| `utils/releaseNotes.ts`          | Parser tal-avviż v2/legacy magħluq, lokalizzazzjoni u tkeċċija ID                                      |
 
 ---
 
@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Dokumentazzjoni Pubblika (7 fajls fl-għerq + 17-il sottodirettorju)
+## `docs/` — Dokumentazzjoni Pubblika (7 root files + 17 subdirs)
 
-### Gwidi ewlenin
+### Gwidi tal-ogħla livell
 
-| Dokument                    | Għan                                                                                                     |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Arkitettura ta’ livell għoli, mappa tas-sottosistemi, superfiċje tad-dashboard                           |
-| `CODEBASE_DOCUMENTATION.md` | Referenza tal-inġinerija: direttorji, moduli, konvenzjonijiet                                            |
-| `FEATURES.md`               | Matriċi tal-karatteristiċi bil-punti ewlenin ta’ v3.8                                                    |
-| `USER_GUIDE.md`             | Manwal għall-utent aħħari (konfigurazzjoni, mudelli, kombinazzjonijiet, CLIs, awdjo, eċċ.)               |
-| `API_REFERENCE.md`          | Referenza tal-endpoints tal-API bil-mudell tal-awtentikazzjoni                                           |
-| `openapi.yaml`              | Speċifikazzjoni OpenAPI 3.0 (121 mogħdija)                                                               |
-| `SETUP_GUIDE.md`            | Metodi ta’ installazzjoni (npm, npx, Docker, Electron, Termux, kodiċi sors)                              |
-| `ENVIRONMENT.md`            | Il-varjabbli ambjentali kollha (~800 dokumentati, ~3,050 linja f’`.env.example`)                         |
-| `TROUBLESHOOTING.md`        | Żbalji komuni + problemi magħrufa ta’ v3.8.0                                                             |
-| `RELEASE_CHECKLIST.md`      | Fluss sħiħ tar-rilaxx (ħiliet, husky, commits konvenzjonali, skjerament)                                 |
-| `COVERAGE_PLAN.md`          | Għanijiet tal-kopertura u l-istat attwali                                                                |
-| `FREE_TIERS.md`             | Fornituri magħżula b’livell bla ħlas (48+ bla ħlas + 11 OAuth)                                           |
-| `CLI-TOOLS.md`              | Integrazzjonijiet esterni tas-CLI + CLI intern ta’ OmniRoute                                             |
-| `I18N.md`                   | Arkitettura tal-i18n, żieda ta’ lingwa, 67 lokalità                                                      |
-| `UNINSTALL.md`              | Passi għal diżinstallazzjoni nadifa                                                                      |
-| `PROVIDER_REFERENCE.md`     | Katalgu ta’ 375 fornitur **iġġenerat awtomatikament** (riġenerazzjoni: `npm run gen:provider-reference`) |
+| Dok                         | Għan                                                                                          |
+| --------------------------- | --------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Arkitettura ta 'livell għoli, mappa tas-sottosistema, wiċċ tad-dashboard                      |
+| `CODEBASE_DOCUMENTATION.md` | Referenza tal-inġinerija: direttorji, moduli, konvenzjonijiet                                 |
+| `FEATURES.md`               | Matriċi tal-karatteristiċi b'punti ewlenin v3.8                                               |
+| `USER_GUIDE.md`             | Manwal għall-utent aħħari (setup, mudelli, combos, CLIs, awdjo, eċċ.)                         |
+| `API_REFERENCE.md`          | API endpoint referenza bil-mudell awth                                                        |
+| `openapi.yaml`              | OpenAPI 3.0 spec (121 mogħdija)                                                               |
+| `SETUP_GUIDE.md`            | Installa metodi (npm, npx, Docker, Electron, Termux, sors)                                    |
+| `ENVIRONMENT.md`            | Kollha env vars (~ 800 dokumentati, ~ 3,050 linji `.env.example`)                             |
+| `TROUBLESHOOTING.md`        | Żbalji komuni + v3.8.0 kwistjonijiet magħrufa                                                 |
+| `RELEASE_CHECKLIST.md`      | Fluss ta' rilaxx sħiħ (ħiliet, husky, impenji konvenzjonali, skjerament)                      |
+| `COVERAGE_PLAN.md`          | Għanijiet ta' kopertura u stat attwali                                                        |
+| `FREE_TIERS.md`             | Fornituri ta' saff b'xejn (48 + b'xejn + 11 OAuth)                                            |
+| `CLI-TOOLS.md`              | Integrazzjonijiet esterni CLI + Intern OmniRoute CLI                                          |
+| `I18N.md`                   | arkitettura i18n, li żżid lingwa, 67 lokali                                                   |
+| `UNINSTALL.md`              | Naddaf passi tad-diżinstalla                                                                  |
+| `PROVIDER_REFERENCE.md`     | **Ġenerat awtomatikament** katalgu ta' 377 fornitur (regen: `npm run gen:provider-reference`) |
 
-### Analiżijiet dettaljati tas-sottosistemi
+### Ads fil-fond tas-sottosistema
 
-| Dokument                                    | Għan                                                                                                    |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | Server MCP: 110 għodod, 3 trasporti, 33 ambitu, endpoints REST                                          |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 ħiliet, għodod awżiljarji REST, karta tal-aġent                                   |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | Gwida unifikata: A2A kontra ACP kontra Cloud Agents                                                     |
-| `CLOUD_AGENT.md`                            | Orkestrazzjoni ta’ Codex Cloud / Devin / Jules                                                          |
-| `SKILLS.md`                                 | Qafas tal-ħiliet (inkorporati + marketplace + SkillsSH + sandbox)                                       |
-| `RADAR.md`                                  | Sovrappożizzjoni tal-katalgu Radar ta’ mudelli bla ħlas (`RADAR_ENABLED`, diżattivata b’mod predefinit) |
-| `MEMORY.md`                                 | Sistema tal-memorja (SQLite FTS5 + Qdrant)                                                              |
-| `EVALS.md`                                  | Qafas tal-evalwazzjoni (ġabriet, eżekuzzjonijiet, rubriki)                                              |
-| `GUARDRAILS.md`                             | Maskra tal-PII, injezzjoni fil-prompt, pont tal-viżjoni                                                 |
-| `COMPLIANCE.md`                             | Reġistru tal-awditjar, żamma, għażla ta’ esklużjoni noLog                                               |
-| `WEBHOOKS.md`                               | Twassil ta’ webhooks iffirmat b’HMAC                                                                    |
-| `REASONING_REPLAY.md`                       | Cache ibridu tal-memorja/SQLite għal `reasoning_content`                                                |
-| `AUTHZ_GUIDE.md`                            | Pipeline tal-awtorizzazzjoni (`classify` → `policies` → `enforce`)                                      |
-| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + imblukkar tal-mudell                                                       |
-| `docs/security/STEALTH_GUIDE.md` (git biss) | Marki tas-swaba’ TLS (JA3/JA4), Claude Code CCH, ċertifikat MITM                                        |
-| `AUTO-COMBO.md`                             | Magna Auto Combo (punteġġar b’16-il fattur, 6 pakketti ta’ modi, fabbrika virtwali)                     |
+| Dok                                         | Għan                                                                                      |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | MCP server: 110 għodda, 3 trasporti, 33 ambiti, endpoints REST                            |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 ħiliet, REST helpers, karta tal-aġent                               |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | Gwida unifikata: A2A vs ACP vs Cloud Agents                                               |
+| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules orkestrazzjoni                                                |
+| `SKILLS.md`                                 | Qafas tal-ħiliet (built-in + marketplace + SkillsSH + sandbox)                            |
+| `RADAR.md`                                  | Overlay tal-katalgu tal-mudell b'xejn tar-radar (`RADAR_ENABLED`, mitfi b'mod awtomatiku) |
+| `MEMORY.md`                                 | Sistema tal-memorja (SQLite FTS5 + Qdrant)                                                |
+| `EVALS.md`                                  | Qafas ta’ evalwazzjoni (suites, runs, rubrics)                                            |
+| `GUARDRAILS.md`                             | PII masker, injezzjoni fil-pront, pont tal-vista                                          |
+| `COMPLIANCE.md`                             | Log tal-verifika, żamma, noLog opt-out                                                    |
+| `WEBHOOKS.md`                               | Konsenja ta' webhook iffirmata mill-HMAC                                                  |
+| `REASONING_REPLAY.md`                       | Hybrid memory/SQLite cache għal `reasoning_content`                                       |
+| `AUTHZ_GUIDE.md`                            | Pipeline ta' awtorizzazzjoni (`classify` → `policies` → `enforce`)                        |
+| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + model lockout                                                |
+| `docs/security/STEALTH_GUIDE.md` (git biss) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM cert                                  |
+| `AUTO-COMBO.md`                             | Magna Auto Combo (punteġġ ta '16-il fattur, pakketti ta' 6 modalità, fabbrika virtwali)   |
 
 ### Kompressjoni
 
-| Dokument                        | Għan                                                             |
-| ------------------------------- | ---------------------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Ħarsa ġenerali lejn il-modi ta’ kompressjoni + pjan direzzjonali |
-| `COMPRESSION_ENGINES.md`        | Magni Caveman + RTK, kuntratt tar-reġistru                       |
-| `COMPRESSION_RULES_FORMAT.md`   | Skema JSON tal-pakkett ta’ regoli Caveman                        |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Inventarju tal-pakketti ta’ regoli għal kull lingwa              |
-| `RTK_COMPRESSION.md`            | Pipeline dikjarattiv RTK (49 filtru)                             |
+| Dok                             | Għan                                                   |
+| ------------------------------- | ------------------------------------------------------ |
+| `COMPRESSION_GUIDE.md`          | Ħarsa ġenerali lejn il-modi ta' kompressjoni + roadmap |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK engines, kuntratt tar-registru           |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON schema                          |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Inventarju tal-pakkett tar-regoli għal kull lingwa     |
+| `RTK_COMPRESSION.md`            | RTK pipeline dikjarattiv (56 filtru)                   |
 
 ### Skjerament
 
-| Dokument                     | Għan                                                                  |
-| ---------------------------- | --------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Bini b’Docker, profili (base/cli/host/cliproxyapi), sidecar ta’ Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | Skjerament ġeneriku fuq VM/VPS (Ubuntu/Debian + nginx + systemd)      |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Skjerament fuq Fly.io (bħalissa disponibbli biċ-Ċiniż biss)           |
-| `TERMUX_GUIDE.md`            | Android mingħajr interfaċċa grafika permezz ta’ Termux                |
-| `PWA_GUIDE.md`               | Installazzjoni ta’ Progressive Web App + service worker               |
-| `ELECTRON_GUIDE.md`          | Bini + iffirmar + distribuzzjoni tal-applikazzjoni tad-desktop        |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                |
-| `PROXY_GUIDE.md`             | Proxy ’l barra b’4 livelli + suq 1proxy                               |
+| Dok                          | Għan                                                              |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker build, profiles (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Skjerament ġeneriku ta VM/VPS (Ubuntu/Debian + nginx + systemd)   |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Skjerament Fly.io (bħalissa ċ-Ċiniż biss)                         |
+| `TERMUX_GUIDE.md`            | Android bla ras permezz ta' Termux                                |
+| `PWA_GUIDE.md`               | Progressive Web App install + service worker                      |
+| `ELECTRON_GUIDE.md`          | Desktop app build + sign + distribute                             |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Lembut                            |
+| `PROXY_GUIDE.md`             | 4-level outbound proxy + 1proxy marketplace                       |
 
-### Sottodirettorji
+### Subdirettorji
 
-| Sottodirettorju       | Għan                                                                                                                                                                                                                           |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | Traduzzjonijiet lokalizzati tad-dokumentazzjoni (41 lingwa)                                                                                                                                                                    |
-| `docs/screenshots/`   | Assi tal-immaġnijiet għall-gwidi                                                                                                                                                                                               |
-| `_tasks/superpowers/` | Pjanijiet/speċifikazzjonijiet minn superpowers (`writing-plans`/`brainstorming`) + riċerka — repo iżolat u b’verżjonijiet separati, injorat minn git fis-siġra ewlenija. Ara CLAUDE.md → "Artifatti tal-Ippjanar u r-Riċerka". |
+| Subdir                | Għan                                                                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | Traduzzjonijiet ta' dok lokalizzati (41 lokalità)                                                                                                                                                |
+| `docs/screenshots/`   | Assi tal-immaġni għall-gwidi                                                                                                                                                                     |
+| `_tasks/superpowers/` | Plans/specs minn superpotenzi (`writing-plans`/`brainstorming`) + research — repo iżolat, b'verżjoni separata, gitignored mis-siġra prinċipali. Ara CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

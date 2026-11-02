@@ -1,0 +1,1 @@
+- **fix(combo):** a combo with set retries enabled now skips the providers and connections whose quota is durably exhausted instead of replaying them on every set; transient failures are still retried. ([#18133](https://github.com/cheaper-inference/OmniRoute/pull/18133)) — thanks @maxmad64bis

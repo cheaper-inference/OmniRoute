@@ -444,146 +444,104 @@ server/
 
 ---
 
-## 4. `open-sse/` — Streaming engine workspace
+## 4. `open-sse/` — လွှင့်အင်ဂျင်အလုပ်ခွင်
 
-`@omniroute/open-sse` အဖြစ် ထုတ်ဝေထားသော သီးခြား npm workspace ဖြစ်သည်။ Request processing၊ executors၊ translators၊ services၊ transformer နှင့် MCP server တို့ကို စီမံပိုင်ဆိုင်သည်။
+သီးခြား npm အလုပ်ခွင်ကို `@omniroute/open-sse` အဖြစ်ထုတ်ဝေသည်။ တောင်းဆိုမှုလုပ်ဆောင်ခြင်း၊ စီမံဆောင်ရွက်ပေးသူ၊ ဘာသာပြန်သူများ၊ ဝန်ဆောင်မှုများ၊ ထရန်စဖော်မာနှင့် MCP ဆာဗာတို့ကို ပိုင်ဆိုင်သည်။
 
 ```
 open-sse/
-├── index.ts                အများသုံး exports
+├── index.ts                Public exports
 ├── package.json            Workspace manifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Provider registries၊ header profiles၊ identity၊ …
-├── handlers/               Request handlers (chat၊ embeddings၊ audio၊ image၊ …)
-├── executors/              Provider executor module 156 ခု (executor classes + provider တစ်ခုချင်းစီအတွက် helpers)
-├── translator/             Format ပြောင်းလဲမှု (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── config/                 Provider registries, header profiles, identity, …
+├── handlers/               Request handlers (chat, embeddings, audio, image, …)
+├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
-├── services/               Service module 80+ ခု (combos၊ fallback၊ quotas၊ identity၊ …)
-├── utils/                  Streaming helpers၊ TLS client၊ AWS SigV4၊ proxy fetch၊ …
-└── mcp-server/             MCP server (transports 3 ခု၊ scopes 33 ခု၊ tools 110 ခု)
+├── services/               80+ service modules (combos, fallback, quotas, identity, …)
+├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
+└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | ရည်ရွယ်ချက်                                                              |
-| ----------------------- | ------------------------------------------------------------------------ |
-| `chatCore.ts`           | အဓိက chat pipeline (cache၊ rate limit၊ combo routing၊ executor dispatch) |
-| `responsesHandler.ts`   | OpenAI Responses API ဝင်ပေါက်                                            |
-| `embeddings.ts`         | Embeddings                                                               |
-| `imageGeneration.ts`    | ပုံဖန်တီးခြင်း                                                           |
-| `audioSpeech.ts`        | စာသားမှအသံသို့                                                           |
-| `audioTranscription.ts` | အသံမှစာသားသို့                                                           |
-| `videoGeneration.ts`    | ဗီဒီယိုဖန်တီးခြင်း                                                       |
-| `musicGeneration.ts`    | တေးဂီတဖန်တီးခြင်း                                                        |
-| `rerank.ts`             | ပြန်လည်အဆင့်သတ်မှတ်ခြင်း                                                 |
-| `moderations.ts`        | အကြောင်းအရာ စိစစ်ထိန်းချုပ်ခြင်း                                         |
-| `search.ts`             | ဝဘ်ရှာဖွေမှု                                                             |
-| `sseParser.ts`          | SSE event parser                                                         |
-| `usageExtractor.ts`     | Upstream streams များမှ token အရေအတွက်များကို ထုတ်ယူခြင်း                |
-| `responseSanitizer.ts`  | Provider သီးသန့် မလိုအပ်သော အချက်အလက်များကို ဖယ်ရှားခြင်း                |
-| `responseTranslator.ts` | Provider response နှင့် translator layer ကြား ချိတ်ဆက်ပေးခြင်း           |
+| ကိုင်တွယ်သူ             | ရည်ရွယ်ချက်                                                                                              |
+| ----------------------- | -------------------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | ပင်မချတ်ပိုက်လိုင်း (ကက်ရှ်၊ နှုန်းကန့်သတ်ချက်၊ ပေါင်းစပ်လမ်းကြောင်းပြခြင်း၊ စီမံအုပ်ချုပ်သူ ဖြန့်ဝေမှု) |
+| `responsesHandler.ts`   | OpenAI တုံ့ပြန်မှု API ဝင်ခွင့်အမှတ်                                                                     |
+| `embeddings.ts`         | တသားတည်း                                                                                                 |
+| `imageGeneration.ts`    | ပုံရိပ်မျိုးဆက်                                                                                          |
+| `audioSpeech.ts`        | စာသားမှစကားပြော                                                                                          |
+| `audioTranscription.ts` | စကားမှ စာသား                                                                                             |
+| `videoGeneration.ts`    | ဗီဒီယိုမျိုးဆက်                                                                                          |
+| `musicGeneration.ts`    | ဂီတမျိုးဆက်                                                                                              |
+| `rerank.ts`             | အဆင့်သတ်မှတ်ခြင်း                                                                                        |
+| `moderations.ts`        | ထိန်းညှိပေးသည်။                                                                                          |
+| `search.ts`             | ဝဘ်ရှာဖွေမှု                                                                                             |
+| `sseParser.ts`          | SSE event parser                                                                                         |
+| `usageExtractor.ts`     | အထက်စီးကြောင်းများမှ တိုကင်နံပါတ်များကို ဆွဲထုတ်ပါ။                                                      |
+| `responseSanitizer.ts`  | ချွတ်ပေးသူ- တိကျသော ဆူညံသံ                                                                               |
+| `responseTranslator.ts` | ဝန်ဆောင်မှုပေးသူတုံ့ပြန်မှုနှင့် ဘာသာပြန်အလွှာကြားတွင် ကော်ထားပါ။                                        |
 
 ### 4.2 `open-sse/executors/`
 
-ထိပ်တန်းအဆင့် executor module 156 ခု (`*.ts` မှ `base.ts`၊ `index.ts` နှင့် tests များကို နုတ်ထားခြင်း — ဤအရေအတွက်ကို
-`npm run check:docs-counts` က တိုင်းတာသည်)။ Executor class တိုင်းသည် `BaseExecutor` (`base.ts`) ကို
-တိုက်ရိုက်ဖြစ်စေ၊ `DefaultExecutor` သို့မဟုတ် အခြား executor မှတစ်ဆင့်ဖြစ်စေ ဆက်ခံထားသည်။ ကျန် module များသည် provider တစ်ခုချင်းစီအတွက်
-helpers (tool schemas၊ fetch/TTS adapters၊ ထူးခြားချက်ကို ကိုင်တွယ်သည့် handlers) ဖြစ်သည်။ Executors များတွင် အောက်ပါတို့ ပါဝင်သည်-
+156 ထိပ်တန်းအဆင့် executor modules (`*.ts` အနှုတ် `base.ts`၊ `index.ts` နှင့် စမ်းသပ်မှုများ — `npm run check:docs-counts` အစီအမံများ)။ executor အတန်းတိုင်းသည် `BaseExecutor` (`base.ts`) ကို တိုက်ရိုက် သို့မဟုတ် `DefaultExecutor` သို့မဟုတ် အခြားသော executor မှတဆင့် တိုးချဲ့သည်။ ကျန်ရှိသော module များသည် per-provider helpers (tool schemas၊ fetch/TTS adapters၊ quirk handlers) များဖြစ်သည်။ စီမံဆောင်ရွက်သူများ ပါဝင်သည်-
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`၊ ထို့အပြင် `claudeIdentity.ts`
-(မျှဝေသုံး identity helper) နှင့် `index.ts` (registry) တို့လည်း ပါဝင်သည်။
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, `claudeIdentity.ts` (အကူအညီ) နှင့် `index.ts`
 
-> မှတ်ချက်- ဤနေရာတွင် စာရင်းမပြုထားသော providers များကို ယေဘုယျ
-> OpenAI-compatible executor အသုံးပြုသည့် `default.ts` က ဆောင်ရွက်ပေးသည်။ Provider catalog အပြည့်အစုံ (providers 375 ခု) သည်
-> `src/shared/constants/providers.ts` တွင် ရှိသည်။
+> မှတ်ချက်- ဤနေရာတွင် စာရင်းမသွင်းထားသော ဝန်ဆောင်မှုပေးသူများကို ယေဘူယျ OpenAI-သဟဇာတဖြစ်သော executor ကို အသုံးပြု၍ `default.ts` မှ ဆောင်ရွက်ပေးပါသည်။ ဝန်ဆောင်မှုပေးသူ ကတ်တလောက် အပြည့်အစုံ (377 ဝန်ဆောင်မှုပေးသူ) သည် `src/shared/constants/providers.ts` တွင် နေထိုင်သည်။
 
 ### 4.3 `open-sse/translator/`
 
-Hub-and-spoke ဘာသာပြန်ပြောင်းလဲမှု (OpenAI သည် hub ဖြစ်သည်)။
+Hub-and-spoke ဘာသာပြန်ဆိုချက် (OpenAI သည် အချက်အချာကျသည်)။
 
-- **Request translators 9 ခု** (`translator/request/`):
-  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
-  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
-  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **Response translators 9 ခု** (`translator/response/`):
-  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
-  `openai-to-claude`.
-- **Helpers 9 ခု** (`translator/helpers/`):
-  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`၊ ထို့အပြင်
-  helper tests များ။
-- **Image helpers** (`translator/image/sizeMapper.ts`)။
-- ထိပ်တန်းအဆင့်- `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`။
+- **9 ဘာသာပြန်များတောင်းဆိုခြင်း။** (`translator/request/`) : `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **တုံ့ပြန်ဘာသာပြန်များ ၉** (`translator/response/`) : `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
+- **ကူညီသူ ၉** (`translator/helpers/`) : `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, plus helper tests။
+- **ရုပ်ပုံကူညီသူများ** (`translator/image/sizeMapper.ts`) ။
+- ထိပ်တန်းအဆင့်- `bootstrap.ts`၊ `formats.ts`၊ `registry.ts`၊ `index.ts`။
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` အခြေပြု Responses API ↔ Chat
-  Completions converter (`responses/` route catch-all က အသုံးပြုသည်)။
+- `responsesTransformer.ts` — `TransformStream` -based တုံ့ပြန်မှုများ API ↔ Chat Completions converter ( `responses/` လမ်းကြောင်းဖမ်း-အားလုံးသုံးသည်)။
 
 ### 4.5 `open-sse/services/`
 
-အဓိကအချက်များ (စာရင်းအပြည့်အစုံကို `open-sse/services/` အောက်တွင် ကြည့်ပါ)။
+ပေါ်လွင်ချက်များ ( `open-sse/services/` အောက်တွင် စာရင်းအပြည့်အစုံ ):
 
-| အကြောင်းအရာ                          | ဖိုင်များ                                                                                                                                                                                                                                                |
-| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Combo လမ်းကြောင်းသတ်မှတ်ခြင်း        | `combo.ts` (မဟာဗျူဟာ 20 ခု), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                   |
-| Auto Combo အင်ဂျင်                   | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| ခံနိုင်ရည်ရှိမှု                     | `accountFallback.ts` (စောင့်ဆိုင်းကာလ + လော့ခ်ချခြင်း), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                            |
-| ကန့်သတ်ပမာဏများ                      | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| ကက်ရှ်သိမ်းခြင်း                     | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| အသိဉာဏ်မြင့် လမ်းကြောင်းသတ်မှတ်ခြင်း | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| မော်ဒယ် ကိုင်တွယ်ခြင်း               | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| ချုံ့ခြင်း                           | `compression/` — ချုံ့ခြင်းအင်ဂျင်တစ်ခုလုံး၏ ချိတ်ဆက်တပ်ဆင်မှု                                                                                                                                                                                           |
-| Token + session                      | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| အဆင့် / manifest                     | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / ကွန်ရက်                         | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| အစုလိုက်လုပ်ဆောင်မှုများ             | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| အသုံးပြုမှု                          | `usage.ts`                                                                                                                                                                                                                                               |
+| စိုးရိမ်စရာ              | ဖို                                                                                                                                                                                                                                                      |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ပေါင်းစပ်လမ်းကြောင်း     | `combo.ts` (ဗျူဟာ 20), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                         |
+| Auto Combo အင်ဂျင်       | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| ခံနိုင်ရည်ရှိခြင်း။      | `accountFallback.ts` (အအေးခံ + လော့ခ်ချခြင်း), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                     |
+| ခွဲတမ်းများ              | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| သိမ်းဆည်းခြင်း။          | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| ထောက်လှမ်းရေးလမ်းကြောင်း | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| မော်ဒယ်ကိုင်တွယ်         | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| နှိမ်တယ်။                | `compression/` — အပြည့်ချုံ့အင်ဂျင်ဝိုင်ယာကြိုး                                                                                                                                                                                                          |
+| တိုကင် + စက်ရှင်         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| အဆင့် / ထင်ရှား          | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / ကွန်ရက်             | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| အသုတ်                    | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| အသုံးပြုမှု              | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts` တွင် ချိတ်ဆက်ထားသော **မတူညီသည့် tool 110 ခု** (`schemas/tools.ts` ထဲမှ စံသတ်မှတ်ထားသည့် 45 ခု +
-  memory၊ skills၊ GitHub-skills၊ pool၊ gamification၊ plugin၊ Notion၊ Obsidian၊
-  local-corpus နှင့် compression module များ — ပေါင်းစည်းထားသည့်စုစုပေါင်းကို `countUniqueMcpTools` ဖြင့် ရေတွက်ထားသည်)။
-- **သယ်ယူပို့ဆောင်မှုနည်းလမ်း 3 ခု**: stdio၊ HTTP Streamable၊ SSE။
-- Runtime တွင် အတည်ပြုထိန်းချုပ်ထားသော **scope 33 ခု** — အခြေခံစာရင်းသည် `src/shared/constants/mcpScopes.ts` တွင်ရှိပြီး၊ အပြည့်အစုံသည် tool module တစ်ခုချင်းစီက ကြေညာထားသော scope များကို ပေါင်းစည်းထားသည့်စုဖြစ်သည်။
-- စစ်ဆေးမှတ်တမ်းဇယား: `mcp_tool_audit` (`audit.ts` က ဖြည့်သွင်းသည်)။
-- ဖိုင်များ: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
-  `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
-  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  ထို့အပြင် `__tests__/` အောက်ရှိ စမ်းသပ်မှုများ။
-- tool catalog အပြည့်အစုံအတွက် [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ကို ကြည့်ပါ။
+- **ထူးခြားသောကိရိယာ ၁၁၀** `server.ts` တွင် ကြိုးတပ်ထားသည် ( `schemas/tools.ts` + memory တွင် 45 canonical၊ ကျွမ်းကျင်မှု၊ GitHub-skills၊ pool၊ gamification၊ plugin၊ Notion၊ Obsidian၊ local-corpus နှင့် compression modules — union ကို `countUniqueMcpTools` ဖြင့် ရေတွက်သည်)။
+- **သယ်ယူပို့ဆောင်ရေး ၃** : stdio၊ HTTP ထုတ်လွှင့်နိုင်သော၊ SSE။
+- **နယ်ပယ် ၃၃** runtime တွင်ပြဌာန်းထားသည် — `src/shared/constants/mcpScopes.ts` တွင်အခြေခံစာရင်း၊ အစုံသည် tool module တစ်ခုစီမှကြေငြာထားသောနယ်ပယ်များစုစည်းမှုဖြစ်သည်။
+- စာရင်းစစ်ဇယား- `mcp_tool_audit` ( `audit.ts` ဖြင့် ပြည့်နေသည်)။
+- ဖိုင်များ- `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, အပေါင်း `__tests__/` အောက်တွင် စမ်းသပ်မှုများ။
+- ကိရိယာအစုံအလင်အတွက် [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ကြည့်ပါ။
 
 ### 4.7 `open-sse/config/`
 
-Provider registry များ (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`)၊ format တစ်ခုချင်းစီအလိုက် model registry များ (`audioRegistry.ts`,
-`embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
-`musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`)၊
-identity အထောက်အကူပြုများ (`codexIdentity.ts`, `codexInstructions.ts`,
-`anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
-`cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`)၊
-အထောက်အထားဆိုင်ရာ အထောက်အကူပြုများ (`credentialLoader.ts`, `codexClient.ts`) နှင့် cloud
-adapter များ (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
-`maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
-`ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`)။
+ဝန်ဆောင်မှုပေးသော မှတ်ပုံတင်မှုများ (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`) ၊ ဖော်မက်တစ်ခုစီ မော်ဒယ် မှတ်ပုံတင်ခြင်း (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), အထောက်အထား အထောက်အကူများ (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts` `defaultThinkingSignature.ts` `toolCloaking.ts`, အထောက်အထားအကူအညီများ (`credentialLoader.ts`, `codexClient.ts`) နှင့် cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`)။
 
 ### 4.8 `open-sse/utils/`
 
-စီးဆင်းမှု အခြေခံအစိတ်အပိုင်းများနှင့် ဝန်ဆောင်မှုပေးသူ အကူလုပ်ဆောင်ချက်များ- `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+ထုတ်လွှ `awsSigV4.ts` `thinkTagParser.ts` `tlsClient.ts` `stream.ts` `streamHandler.ts` `streamHelpers.ts` `streamPayloadCollector.ts` `streamReadiness.ts` `sseHeartbeat.ts` `proxyFetch.ts` `proxyDispatcher.ts` `networkProxy.ts` `cacheControlPolicy.ts` `cursorChecksum.ts` `cursorAgentProtobuf.ts` `cursorVersionDetector.ts` `comfyuiClient.ts` `kieTask.ts` `bypassHandler.ts` `aiSdkCompat.ts` `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
 
 ---
 
