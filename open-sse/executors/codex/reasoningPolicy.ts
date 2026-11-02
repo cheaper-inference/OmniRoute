@@ -123,7 +123,8 @@ function requestedEffort(
   restoreOriginal: boolean
 ): string | undefined {
   if (restoreOriginal && Object.hasOwn(metadata, "requestedThinkingEffort")) {
-    return effort(metadata.requestedThinkingEffort);
+    const originalEffort = effort(metadata.requestedThinkingEffort);
+    if (originalEffort !== undefined) return originalEffort;
   }
   return effort(reasoning.effort) || effort(body.reasoning_effort);
 }
