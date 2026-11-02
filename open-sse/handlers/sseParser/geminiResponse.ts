@@ -205,6 +205,8 @@ function resolveCompletionTokens(
       ? nonNegativeOr(previousUsage.completion_tokens, undefined)
       : candidateTokens + (reasoningTokens ?? 0);
   return { completionTokens, reasoningTokens };
+}
+
 /** Resolve total tokens while preserving Gemini's first-zero and later-zero semantics. */
 function resolveTotalTokens(
   reportedTotalTokens: number | undefined,
