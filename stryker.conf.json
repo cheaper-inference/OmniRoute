@@ -97,6 +97,7 @@
       "tests/unit/provider-breaker-unreached-provider-15588.test.ts",
       "tests/unit/stream-stall-no-account-cooldown.test.ts",
       "tests/unit/claude-passthrough-unsigned-thinking-12917.test.ts",
+      "tests/unit/claude-passthrough-manual-thinking-no-final-block.test.ts",
       "tests/unit/combo-error-code-terminal.test.ts",
       "tests/unit/opencode-free-tier-diagnostics.test.ts",
       "tests/unit/opencode-free-tier-combo-diagnostics.test.ts",

@@ -9,7 +9,6 @@ import {
   applyKimiCodingThinking,
   createDefaultClaudeCacheControl,
 } from "../helpers/claudeHelper.ts";
-import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
 import { restoreClaudeThinkingBlocks } from "../../services/claudeThinkingStore.ts";
 import {
   getDefaultThinkingBudget,
@@ -766,10 +765,9 @@ function getContentBlocksFromMessage(
           if (part.type === "redacted_thinking" && part.data === "") {
             continue; // drop — same: empty data from non-Anthropic provider
           }
-          blocks.push({
-            ...part,
-            signature: part.signature || DEFAULT_THINKING_CLAUDE_SIGNATURE,
-          });
+          // Never fabricate a signature: the DEFAULT blob is a real encrypted thought from an
+          // unrelated session and Claude decrypts it as its own reasoning.
+          blocks.push({ ...part });
         } else if (part.type === "tool_use") {
           // Tool name already has prefix from tool declarations, keep as-is
           // CRITICAL: Skip tool_use blocks with empty name (causes Claude 400 error)
@@ -838,13 +836,13 @@ function getContentBlocksFromMessage(
     // keyed by the tool_use ids. Restore them verbatim before the owning tool_use —
     // only for MANUAL extended thinking (`type:"enabled"`), for the same provider +
     // model + connection, only when the client sent no thinking block of its own,
-    // never for a video-derived request. A miss keeps the #5312 placeholder.
+    // never for a video-derived request. A miss injects nothing.
     // #17324 recurrence (2026-10-27): adaptive-only models (Opus 4.7+/5.x, Fable 5)
     // accept a tool_use turn with NO thinking block at all, but replaying stored
     // signed blocks there breaks Anthropic's warm-cache block-equality whenever the
     // restore hits/misses differently than the turn that warmed the cache (TTL,
     // eviction, completed-turn rewrite) → 400 "latest assistant message cannot be
-    // modified". Same gate as the fabricated placeholder below.
+    // modified".
     if (
       !isKimiCoding &&
       !thinkingBinding.disabled &&
@@ -866,28 +864,10 @@ function getContentBlocksFromMessage(
     }
     if (isKimiCoding && typeof msg.reasoning_content === "string" && !hasThinkingBlock) {
       blocks.unshift({ type: "thinking", thinking: msg.reasoning_content });
-    } else if (
-      msg.reasoning_content &&
-      thinkingEnabledForRequest &&
-      hasToolUseBlock &&
-      !hasThinkingBlock
-    ) {
-      // #17324/#17344: only inject the #5312 `redacted_thinking` placeholder when the
-      // outbound request uses MANUAL extended thinking (`type:"enabled"`, budget_tokens)
-      // — the mode #5312 was VPS-validated on. For ADAPTIVE thinking (Opus 4.7+/Sonnet-5/
-      // Opus 5.x, reached via `reasoning_effort`), Anthropic accepts a tool_use turn with
-      // NO thinking block at all (verified live: assistant[tool_use] + thinking:adaptive
-      // → 200), while injecting the fabricated DEFAULT_THINKING_CLAUDE_SIGNATURE blob
-      // breaks prompt-cache block-equality for tool_use ids whose genuine signed blocks
-      // are still warm in Anthropic's cache → 400 "latest assistant message cannot be
-      // modified" (#17324).
-      if (thinkingTypeForRequest === "enabled") {
-        blocks.unshift({
-          type: "redacted_thinking",
-          data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-        });
-      }
     }
+    // A store miss injects nothing: adaptive thinking has no precursor requirement, and
+    // prepareClaudeRequest disables manual thinking when the final tool turn has no
+    // genuine block.
   }
 
   return blocks;
