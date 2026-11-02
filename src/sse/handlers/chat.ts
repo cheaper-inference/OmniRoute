@@ -31,6 +31,7 @@ import {
 import {
   applyAvalancheSuppressionHeaders,
   evaluateAvalancheRisk,
+  resolveAvalancheSettings,
 } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { estimateTokens } from "@omniroute/open-sse/services/contextManager.ts";
 import { getCombo, getComboForModel, getModelInfo } from "../services/model";
@@ -2732,16 +2733,15 @@ async function handleSingleModelChat(
       const skipConnectionDisable =
         isRefusalReplay || shouldSkipConnDisable(result, is401, hasExtraKeys, provider);
 
-      // Anti-Avalanche Guard: detect payload-induced rate limits / TPM rejections to suppress domino failover
+      // Anti-Avalanche Guard (opt-in): detect TPM / context-overflow rejections to suppress domino failover
       const avalancheRisk =
-        result.status === 429 || result.status === 400
+        (result.status === 429 || result.status === 400) && resolveAvalancheSettings().enabled
           ? evaluateAvalancheRisk({
               status: result.status,
               errorText: errorStr,
               provider,
               model: effectiveModel,
               promptTokens: estimateTokens(requestBody?.messages ?? requestBody),
-              fallbackAttemptCount: excludedConnectionIds.size,
             })
           : null;
 

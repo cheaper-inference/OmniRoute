@@ -52,7 +52,8 @@ async function seedThreeOpenAIKeys() {
 test.beforeEach(async () => {
   BaseExecutor.RETRY_CONFIG.maxAttempts = 1;
   BaseExecutor.RETRY_CONFIG.delayMs = 0;
-  delete process.env.OMNIROUTE_AVALANCHE_PROTECTION_ENABLED;
+  // Opt-in guard: these tests exercise it enabled unless they say otherwise.
+  process.env.OMNIROUTE_AVALANCHE_PROTECTION_ENABLED = "true";
   await resetStorage();
   clearAllModelLockouts();
 });
@@ -86,6 +87,27 @@ test("an explicit TPM 429 stops at the first key and tags the response as suppre
   assert.equal(response.headers.get("x-omniroute-avalanche-reason"), "explicit_tpm_limit");
 });
 
+test("a suppressed TPM 429 keeps the key out for the whole upstream Retry-After", async () => {
+  await seedThreeOpenAIKeys();
+  const keysUsed: string[] = [];
+  globalThis.fetch = async (_url, init) => {
+    keysUsed.push(bearerOf(init));
+    if (keysUsed.length > 1) return buildOpenAIResponse("served by a sibling key");
+    return new Response(JSON.stringify({ error: { message: TPM_BODY } }), {
+      status: 429,
+      headers: { "Content-Type": "application/json", "Retry-After": "3600" },
+    });
+  };
+
+  const first = await handleChat(buildRequest({ body: chatBody("a very large agent history") }));
+  assert.equal(first.status, 429);
+  assert.equal(keysUsed.length, 1);
+
+  const second = await handleChat(buildRequest({ body: chatBody("the next request") }));
+  assert.equal(second.status, 200);
+  assert.notEqual(keysUsed[1], keysUsed[0], "the first key must still be cooling down");
+});
+
 test("an ordinary small 429 still fails over to the next key", async () => {
   await seedThreeOpenAIKeys();
   const keysUsed = new Set<string>();
@@ -96,6 +118,22 @@ test("an ordinary small 429 still fails over to the next key", async () => {
   };
 
   const response = await handleChat(buildRequest({ body: chatBody("hello") }));
+
+  assert.equal(response.status, 200);
+  assert.equal(keysUsed.size, 2);
+  assert.equal(response.headers.get("x-omniroute-anti-avalanche"), null);
+});
+
+test("a quota-exhausted 429 on a massive prompt still fails over to a sibling key", async () => {
+  await seedThreeOpenAIKeys();
+  const keysUsed = new Set<string>();
+  globalThis.fetch = async (_url, init) => {
+    keysUsed.add(bearerOf(init));
+    if (keysUsed.size === 1) return upstreamError(429, "You exceeded your current quota");
+    return buildOpenAIResponse("served by a sibling key");
+  };
+
+  const response = await handleChat(buildRequest({ body: chatBody("large ".repeat(73_500)) }));
 
   assert.equal(response.status, 200);
   assert.equal(keysUsed.size, 2);
@@ -115,6 +153,23 @@ test("HTTP 413 keeps the #13350 fallback to another key", async () => {
 
   assert.equal(response.status, 200);
   assert.equal(keysUsed.size, 2);
+  assert.equal(response.headers.get("x-omniroute-anti-avalanche"), null);
+});
+
+test("the guard is off by default: an unset env keeps the normal failover over a TPM 429", async () => {
+  delete process.env.OMNIROUTE_AVALANCHE_PROTECTION_ENABLED;
+  await seedThreeOpenAIKeys();
+  const keysUsed = new Set<string>();
+  globalThis.fetch = async (_url, init) => {
+    keysUsed.add(bearerOf(init));
+    if (keysUsed.size < 3) return upstreamError(429, TPM_BODY);
+    return buildOpenAIResponse("served by the third key");
+  };
+
+  const response = await handleChat(buildRequest({ body: chatBody("a very large agent history") }));
+
+  assert.equal(response.status, 200);
+  assert.equal(keysUsed.size, 3);
   assert.equal(response.headers.get("x-omniroute-anti-avalanche"), null);
 });
 

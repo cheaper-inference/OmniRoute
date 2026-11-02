@@ -16,6 +16,43 @@ import {
   resolveAvalancheSettings,
   DEFAULT_AVALANCHE_BURST_COOLDOWN_MS,
 } from "../../open-sse/services/accountFallback/antiAvalanche.ts";
+import {
+  incrementTokenUsage,
+  resetCounters,
+} from "../../open-sse/services/geminiRateLimitTracker.ts";
+
+// The guard is opt-in: every test below exercises the enabled guard unless it says otherwise.
+const ENABLE_ENV = "OMNIROUTE_AVALANCHE_PROTECTION_ENABLED";
+const previousEnabled = process.env[ENABLE_ENV];
+
+test.beforeEach(() => {
+  process.env[ENABLE_ENV] = "true";
+});
+
+const OPENAI_TPM_ERROR =
+  "Rate limit reached for model gpt-4o on tokens per minute (TPM): Limit 30000, Requested 45000.";
+
+test("Anti-Avalanche: the guard is OFF unless the env var is exactly true", () => {
+  for (const value of [undefined, "", "false", "0", "1", "yes", "TRUE"]) {
+    if (value === undefined) delete process.env[ENABLE_ENV];
+    else process.env[ENABLE_ENV] = value;
+
+    assert.equal(resolveAvalancheSettings().enabled, false, String(value));
+    const result = evaluateAvalancheRisk({
+      status: 429,
+      errorText: OPENAI_TPM_ERROR,
+      provider: "openai",
+      model: "gpt-4o",
+      promptTokens: 150000,
+    });
+    assert.equal(result.isAvalancheRisk, false, String(value));
+    assert.equal(result.shouldSuppressFallback, false, String(value));
+    assert.equal(result.suggestedCooldownMs, 0, String(value));
+  }
+
+  process.env[ENABLE_ENV] = "true";
+  assert.equal(resolveAvalancheSettings().enabled, true);
+});
 
 test("Anti-Avalanche: small payload without explicit token metric does not suppress fallback", () => {
   const result = evaluateAvalancheRisk({
@@ -24,7 +61,6 @@ test("Anti-Avalanche: small payload without explicit token metric does not suppr
     provider: "gemini",
     model: "gemini-3.8-flash",
     promptTokens: 1200,
-    fallbackAttemptCount: 0,
   });
 
   assert.equal(result.isAvalancheRisk, false);
@@ -41,7 +77,6 @@ test("Anti-Avalanche: explicit Gemini TPM metric in error text triggers immediat
     provider: "gemini",
     model: "gemini-3.8-flash",
     promptTokens: 25000,
-    fallbackAttemptCount: 0,
   });
 
   assert.equal(result.isAvalancheRisk, true);
@@ -60,7 +95,6 @@ test("Anti-Avalanche: OpenAI-style tokens per minute 429 triggers immediate supp
     provider: "openai",
     model: "gpt-4o",
     promptTokens: 45000,
-    fallbackAttemptCount: 0,
   });
 
   assert.equal(result.isAvalancheRisk, true);
@@ -68,53 +102,80 @@ test("Anti-Avalanche: OpenAI-style tokens per minute 429 triggers immediate supp
   assert.equal(result.shouldSuppressFallback, true);
 });
 
-test("Anti-Avalanche: massive payload (>= 100k tokens, incident repro) immediately suppresses failover", () => {
-  // Incident condition: 115,618 tokens hitting 429
-  const result = evaluateAvalancheRisk({
-    status: 429,
-    errorText: "Resource has been exhausted (e.g. check quota).",
-    provider: "gemini",
-    model: "gemini-3.8-flash",
-    promptTokens: 115618,
-    fallbackAttemptCount: 0,
-  });
-
-  assert.equal(result.isAvalancheRisk, true);
-  assert.equal(result.reason, "oversized_payload_rate_limit");
-  assert.equal(result.shouldSuppressFallback, true);
-  assert.equal(result.suggestedCooldownMs, 60000);
-  assert.match(result.explanation || "", /Massive payload/);
+test("Anti-Avalanche: a quota-exhausted 429 keeps failing over however large the prompt is", () => {
+  // The incident prompt size (115,618 tokens) and the former 50k-100k band: payload size alone
+  // says nothing about the sibling accounts, whose quota may be intact.
+  for (const errorText of [
+    "Resource has been exhausted (e.g. check quota).",
+    "You exceeded your current quota, please check your plan and billing details.",
+    "Too Many Requests",
+  ]) {
+    for (const promptTokens of [115618, 60000]) {
+      const result = evaluateAvalancheRisk({
+        status: 429,
+        errorText,
+        provider: "gemini",
+        model: "gemini-3.8-flash",
+        promptTokens,
+      });
+      assert.equal(result.isAvalancheRisk, false, errorText);
+      assert.equal(result.shouldSuppressFallback, false, errorText);
+      assert.equal(result.suggestedCooldownMs, 0, errorText);
+    }
+  }
 });
 
-test("Anti-Avalanche: oversized payload (50k-100k tokens) allows 1 retry then suppresses consecutive failure", () => {
-  // Attempt 0: first key fails on 60k tokens -> allow 1 failover to test if key was just busy
-  const attempt0 = evaluateAvalancheRisk({
-    status: 429,
-    errorText: "Too Many Requests",
-    provider: "gemini",
-    model: "gemini-3.8-flash",
-    promptTokens: 60000,
-    fallbackAttemptCount: 0,
-  });
+test("Anti-Avalanche: token wording on a daily/plan quota is not a TPM marker", () => {
+  const cases: Array<[string | null, string]> = [
+    [
+      "openai",
+      '{"error":{"code":"rate_limit_exceeded","message":"Rate limit reached for gpt-4o on tokens per day (TPD): Limit 200000, Used 199000, Requested 45000."}}',
+    ],
+    ["openai", "Monthly token limit reached"],
+    ["openai", "Token limit reached for your plan"],
+    ["openai", "Your input tokens exceeded the monthly allowance"],
+    ["openai", "Usage limit exceeded: token rate limit for your plan"],
+    [
+      "gemini",
+      "Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, quotaId: GenerateContentInputTokensPerModelPerDay-FreeTier",
+    ],
+    [
+      "gemini",
+      "Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 15",
+    ],
+  ];
 
-  assert.equal(attempt0.isAvalancheRisk, true);
-  assert.equal(attempt0.reason, "oversized_payload_rate_limit");
-  assert.equal(attempt0.shouldSuppressFallback, false);
+  for (const [provider, errorText] of cases) {
+    const result = evaluateAvalancheRisk({
+      status: 429,
+      errorText,
+      provider,
+      model: "some-model",
+      promptTokens: 115618,
+    });
+    assert.equal(result.isAvalancheRisk, false, errorText);
+    assert.equal(result.shouldSuppressFallback, false, errorText);
+  }
+});
 
-  // Attempt 1: second key ALSO fails on 60k tokens -> suppress failover to protect keys 3..8
-  const attempt1 = evaluateAvalancheRisk({
-    status: 429,
-    errorText: "Too Many Requests",
-    provider: "gemini",
-    model: "gemini-3.8-flash",
-    promptTokens: 60000,
-    fallbackAttemptCount: 1,
-  });
-
-  assert.equal(attempt1.isAvalancheRisk, true);
-  assert.equal(attempt1.reason, "oversized_payload_rate_limit");
-  assert.equal(attempt1.shouldSuppressFallback, true);
-  assert.match(attempt1.explanation || "", /Cascading fallback suppressed/);
+test("Anti-Avalanche: the local Gemini token counter is not a marker on the 429 itself", () => {
+  // The counter is per model across every key, so it cannot tell this key's quota 429 apart
+  // from a pool-wide TPM limit.
+  resetCounters();
+  incrementTokenUsage("gemini-2.5-flash", 250001);
+  try {
+    const result = evaluateAvalancheRisk({
+      status: 429,
+      errorText: "Resource has been exhausted (e.g. check quota).",
+      provider: "gemini",
+      model: "gemini-2.5-flash",
+      promptTokens: 115618,
+    });
+    assert.equal(result.isAvalancheRisk, false);
+    assert.equal(result.shouldSuppressFallback, false);
+  } finally {
+    resetCounters();
+  }
 });
 
 test("Anti-Avalanche: HTTP 413 Payload Too Large keeps the #13350 fallback contract (not suppressed)", () => {
@@ -126,7 +187,6 @@ test("Anti-Avalanche: HTTP 413 Payload Too Large keeps the #13350 fallback contr
     provider: "anthropic",
     model: "claude-3-5-sonnet",
     promptTokens: 180000,
-    fallbackAttemptCount: 0,
   });
 
   assert.equal(result.isAvalancheRisk, false);
@@ -145,7 +205,6 @@ test("Anti-Avalanche: generic token_count / token-quota wording on a 429 is not 
       provider: "openai",
       model: "gpt-4o",
       promptTokens: 1200,
-      fallbackAttemptCount: 0,
     });
     assert.equal(result.isAvalancheRisk, false, errorText);
     assert.equal(result.shouldSuppressFallback, false, errorText);
@@ -160,7 +219,6 @@ test("Anti-Avalanche: HTTP 400 context length overflow suppresses failover immed
     provider: "openai",
     model: "gpt-4",
     promptTokens: 35000,
-    fallbackAttemptCount: 0,
   });
 
   assert.equal(result.isAvalancheRisk, true);
@@ -169,24 +227,17 @@ test("Anti-Avalanche: HTTP 400 context length overflow suppresses failover immed
 });
 
 test("Anti-Avalanche: disabled via OMNIROUTE_AVALANCHE_PROTECTION_ENABLED bypasses protection", () => {
-  const previous = process.env.OMNIROUTE_AVALANCHE_PROTECTION_ENABLED;
-  process.env.OMNIROUTE_AVALANCHE_PROTECTION_ENABLED = "false";
-  try {
-    const result = evaluateAvalancheRisk({
-      status: 429,
-      errorText: "generate_content_free_tier_input_token_count",
-      provider: "gemini",
-      model: "gemini-3.8-flash",
-      promptTokens: 115618,
-      fallbackAttemptCount: 5,
-    });
+  process.env[ENABLE_ENV] = "false";
+  const result = evaluateAvalancheRisk({
+    status: 429,
+    errorText: "generate_content_free_tier_input_token_count",
+    provider: "gemini",
+    model: "gemini-3.8-flash",
+    promptTokens: 115618,
+  });
 
-    assert.equal(result.isAvalancheRisk, false);
-    assert.equal(result.shouldSuppressFallback, false);
-  } finally {
-    if (previous === undefined) delete process.env.OMNIROUTE_AVALANCHE_PROTECTION_ENABLED;
-    else process.env.OMNIROUTE_AVALANCHE_PROTECTION_ENABLED = previous;
-  }
+  assert.equal(result.isAvalancheRisk, false);
+  assert.equal(result.shouldSuppressFallback, false);
 });
 
 test("Anti-Avalanche: formatAntiAvalancheMessage provides actionable guidance", () => {
@@ -194,7 +245,7 @@ test("Anti-Avalanche: formatAntiAvalancheMessage provides actionable guidance", 
     "gemini",
     "gemini-3.8-flash",
     115618,
-    "oversized_payload_rate_limit",
+    "explicit_tpm_limit",
     "RESOURCE_EXHAUSTED"
   );
 
@@ -204,28 +255,16 @@ test("Anti-Avalanche: formatAntiAvalancheMessage provides actionable guidance", 
   assert.match(msg, /RESOURCE_EXHAUSTED/);
 });
 
-test("Anti-Avalanche: resolveAvalancheSettings respects env thresholds", () => {
-  const keys = [
-    "OMNIROUTE_AVALANCHE_TOKEN_THRESHOLD",
-    "OMNIROUTE_AVALANCHE_MAX_RETRIES",
-    "OMNIROUTE_AVALANCHE_BURST_COOLDOWN_MS",
-  ] as const;
-  const previous = keys.map((key) => process.env[key]);
-  process.env.OMNIROUTE_AVALANCHE_TOKEN_THRESHOLD = "30000";
-  process.env.OMNIROUTE_AVALANCHE_MAX_RETRIES = "2";
+test("Anti-Avalanche: resolveAvalancheSettings respects the cooldown env", () => {
+  const previous = process.env.OMNIROUTE_AVALANCHE_BURST_COOLDOWN_MS;
   process.env.OMNIROUTE_AVALANCHE_BURST_COOLDOWN_MS = "45000";
   try {
     const custom = resolveAvalancheSettings();
     assert.equal(custom.enabled, true);
-    assert.equal(custom.tokenThreshold, 30000);
-    assert.equal(custom.maxRetries, 2);
     assert.equal(custom.burstCooldownMs, 45000);
   } finally {
-    keys.forEach((key, index) => {
-      const value = previous[index];
-      if (value === undefined) delete process.env[key];
-      else process.env[key] = value;
-    });
+    if (previous === undefined) delete process.env.OMNIROUTE_AVALANCHE_BURST_COOLDOWN_MS;
+    else process.env.OMNIROUTE_AVALANCHE_BURST_COOLDOWN_MS = previous;
   }
 });
 
@@ -275,6 +314,109 @@ test("Anti-Avalanche: markAccountUnavailable honors suppressFallback and bounds 
   );
 });
 
+const GEMINI_TPM_ERROR =
+  "Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_input_token_count, limit: 16000";
+const AVALANCHE_OPTIONS = {
+  isAvalancheRisk: true,
+  avalancheCooldownMs: 60000,
+  suppressFallback: true,
+};
+const ONE_HOUR_MS = 3600 * 1000;
+// Retry-After is parsed against the wall clock, so the hint can read slightly under the hour.
+const CLOCK_TOLERANCE_MS = 5000;
+
+async function createKey(provider: string, name: string) {
+  const providersDb = await import("../../src/lib/db/providers.ts");
+  const conn = await providersDb.createProviderConnection({
+    provider,
+    authType: "apikey",
+    name,
+    apiKey: `test-${name}`,
+  });
+  return (conn as { id: string }).id;
+}
+
+test("Anti-Avalanche: a longer upstream reset beats the burst cooldown on the model lockout", async () => {
+  const { markAccountUnavailable } = await import("../../src/sse/services/auth.ts");
+  const { getModelLockoutInfo } = await import("../../open-sse/services/accountFallback.ts");
+  const connId = await createKey("gemini", "avalanche-long-reset");
+
+  const result = await markAccountUnavailable(
+    connId,
+    429,
+    GEMINI_TPM_ERROR,
+    "gemini",
+    "gemini-3.8-flash",
+    null,
+    { ...AVALANCHE_OPTIONS, headers: new Headers({ "retry-after": "3600" }) }
+  );
+
+  assert.equal(result.shouldFallback, false);
+  assert.ok(result.cooldownMs > ONE_HOUR_MS - CLOCK_TOLERANCE_MS, String(result.cooldownMs));
+  const lock = getModelLockoutInfo("gemini", connId, "gemini-3.8-flash");
+  assert.ok(lock && lock.remainingMs > ONE_HOUR_MS - CLOCK_TOLERANCE_MS, JSON.stringify(lock));
+});
+
+test("Anti-Avalanche: a shorter upstream reset keeps the burst cooldown", async () => {
+  const { markAccountUnavailable } = await import("../../src/sse/services/auth.ts");
+  const connId = await createKey("gemini", "avalanche-short-reset");
+
+  const result = await markAccountUnavailable(
+    connId,
+    429,
+    GEMINI_TPM_ERROR,
+    "gemini",
+    "gemini-3.8-flash",
+    null,
+    { ...AVALANCHE_OPTIONS, headers: new Headers({ "retry-after": "10" }) }
+  );
+
+  assert.equal(result.shouldFallback, false);
+  assert.equal(result.cooldownMs, 60000);
+});
+
+test("Anti-Avalanche: a connection-scoped 429 still records the longer upstream reset", async () => {
+  const { markAccountUnavailable } = await import("../../src/sse/services/auth.ts");
+  const { getModelLockoutInfo } = await import("../../open-sse/services/accountFallback.ts");
+  const connId = await createKey("openai", "avalanche-connection-reset");
+
+  const result = await markAccountUnavailable(
+    connId,
+    429,
+    OPENAI_TPM_ERROR,
+    "openai",
+    "gpt-4o",
+    null,
+    { ...AVALANCHE_OPTIONS, headers: new Headers({ "retry-after": "3600" }) }
+  );
+
+  assert.equal(result.shouldFallback, false);
+  assert.ok(result.cooldownMs > ONE_HOUR_MS - CLOCK_TOLERANCE_MS, String(result.cooldownMs));
+  const lock = getModelLockoutInfo("openai", connId, "gpt-4o");
+  assert.ok(lock && lock.remainingMs > ONE_HOUR_MS - CLOCK_TOLERANCE_MS, JSON.stringify(lock));
+});
+
+test("Anti-Avalanche: a connection-scoped 429 without a hint applies the burst cooldown", async () => {
+  const { markAccountUnavailable } = await import("../../src/sse/services/auth.ts");
+  const { getModelLockoutInfo } = await import("../../open-sse/services/accountFallback.ts");
+  const connId = await createKey("openai", "avalanche-connection-no-hint");
+
+  const result = await markAccountUnavailable(
+    connId,
+    429,
+    OPENAI_TPM_ERROR,
+    "openai",
+    "gpt-4o",
+    null,
+    AVALANCHE_OPTIONS
+  );
+
+  assert.equal(result.shouldFallback, false);
+  assert.equal(result.cooldownMs, 60000);
+  const lock = getModelLockoutInfo("openai", connId, "gpt-4o");
+  assert.ok(lock && lock.remainingMs > 0 && lock.remainingMs <= 60000, JSON.stringify(lock));
+});
+
 test("Anti-Avalanche: normal 429 without suppressFallback still allows fallback", async () => {
   const { markAccountUnavailable } = await import("../../src/sse/services/auth.ts");
   const providersDb = await import("../../src/lib/db/providers.ts");
@@ -299,6 +441,8 @@ test("Anti-Avalanche: normal 429 without suppressFallback still allows fallback"
 });
 
 test.after(async () => {
+  if (previousEnabled === undefined) delete process.env[ENABLE_ENV];
+  else process.env[ENABLE_ENV] = previousEnabled;
   const core = await import("../../src/lib/db/core.ts");
   core.resetDbInstance();
   if (previousDataDir === undefined) delete process.env.DATA_DIR;
