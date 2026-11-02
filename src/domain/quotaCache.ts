@@ -762,6 +762,204 @@ export function isQuotaExhaustedForRequest(
 /**
  * Store quota data for a connection (called by usage endpoint and background refresh).
  */
+
+/** A persisted snapshot already records this exact fresh Codex observation. */
+function savedCodexSnapshotMatches(
+  snapshots: ReturnType<typeof getLatestQuotaSnapshotsForConnection> | undefined,
+  windowKey: string,
+  remainingPercentage: number,
+  windowExhausted: boolean,
+  resetAt: string | null
+): boolean {
+  const snapshot = snapshots?.find((row) => {
+    const saved = row as unknown as Record<string, unknown>;
+    return (saved.windowKey ?? row.window_key) === windowKey;
+  });
+  if (!snapshot || isUnreportedQuotaSnapshot(snapshot)) return false;
+  const saved = snapshot as unknown as Record<string, unknown>;
+  const savedAt = parseDate(String(saved.createdAt ?? saved.created_at ?? ""));
+  if (savedAt === null || savedAt > Date.now() || Date.now() - savedAt >= ACTIVE_TTL_MS)
+    return false;
+  return (
+    Number(saved.remainingPercentage ?? saved.remaining_percentage) === remainingPercentage &&
+    Number(saved.isExhausted ?? saved.is_exhausted) === Number(windowExhausted) &&
+    (saved.nextResetAt ?? saved.next_reset_at ?? null) === resetAt
+  );
+}
+
+/**
+ * #4438 stays unchanged for other providers. Codex also needs a fresh durable fact:
+ * a warm cache timestamp does not prove its deduplicated snapshot survived restart.
+ */
+function quotaWindowSnapshotIsCurrent(
+  connectionId: string,
+  provider: string,
+  windowKey: string,
+  remainingPercentage: number,
+  windowExhausted: boolean,
+  fractionReported: boolean,
+  reportedFlag: boolean | undefined,
+  resetAt: string | null,
+  prior: QuotaCacheEntry | null,
+  codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> }
+): boolean {
+  const priorWindow = prior?.quotas?.[windowKey];
+  if (
+    quotaSnapshotChanged(prior, windowKey, remainingPercentage, windowExhausted) ||
+    (priorWindow !== undefined && priorWindow.fractionReported !== reportedFlag)
+  )
+    return false;
+  if (provider !== "codex" || !fractionReported) return true;
+  codexSnapshots.current ??= getLatestQuotaSnapshotsForConnection(connectionId);
+  return savedCodexSnapshotMatches(
+    codexSnapshots.current,
+    windowKey,
+    remainingPercentage,
+    windowExhausted,
+    resetAt
+  );
+}
+
+function persistOneQuotaWindow(
+  connectionId: string,
+  provider: string,
+  entry: QuotaCacheEntry,
+  windowKey: string,
+  quotaInfo: unknown,
+  quotas: Record<string, QuotaInfo>,
+  prior: QuotaCacheEntry | null,
+  retainedCodexWindows: Set<string>,
+  codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> }
+): void {
+  if (!quotaInfo || typeof quotaInfo !== "object") return;
+  const normalized = quotas[windowKey];
+  // Retaining an old fact is not a new observation, including in restart snapshots.
+  if (!normalized || retainedCodexWindows.has(windowKey)) return;
+  const { remainingPercentage } = normalized;
+  const fractionReported = normalized.fractionReported !== false;
+  if (fractionReported) {
+    recordProviderQuotaResetEventIfChanged({
+      provider,
+      connectionId,
+      windowKey,
+      currentResetAt: normalized.resetAt,
+      currentRemainingPercentage: remainingPercentage,
+      previousObservation: prior?.quotas?.[windowKey]
+        ? {
+            resetAt: prior.quotas[windowKey].resetAt,
+            remainingPercentage: prior.quotas[windowKey].remainingPercentage,
+          }
+        : null,
+    });
+  }
+  // #5923 (Finding #5) — is_exhausted must reflect THIS window's own remaining
+  // percentage, not the connection-wide AND-across-all-windows aggregate
+  // (`entry.exhausted`). A connection with one 0% window and other non-zero
+  // windows previously never flagged that window's row as exhausted.
+  const windowExhausted = fractionReported && remainingPercentage <= 0;
+  if (
+    quotaWindowSnapshotIsCurrent(
+      connectionId,
+      provider,
+      windowKey,
+      remainingPercentage,
+      windowExhausted,
+      fractionReported,
+      normalized.fractionReported,
+      normalized.resetAt,
+      prior,
+      codexSnapshots
+    )
+  )
+    return;
+  try {
+    saveQuotaSnapshot({
+      provider,
+      connection_id: connectionId,
+      window_key: windowKey,
+      remaining_percentage: remainingPercentage,
+      is_exhausted: windowExhausted ? 1 : 0,
+      next_reset_at: normalized.resetAt,
+      window_duration_ms: entry.windowDurationMs ?? null,
+      // Persist only the interpretation, never the raw provider payload.
+      raw_data: fractionReported ? null : JSON.stringify({ fractionReported: false }),
+    });
+  } catch (error) {
+    console.error("[quotaCache] Failed to save snapshot:", error);
+  }
+}
+
+function persistQuotaWindowSnapshots(
+  connectionId: string,
+  provider: string,
+  entry: QuotaCacheEntry,
+  rawQuotas: Record<string, unknown>,
+  quotas: Record<string, QuotaInfo>,
+  prior: QuotaCacheEntry | null,
+  retainedCodexWindows: Set<string>
+): void {
+  const codexSnapshots: { current?: ReturnType<typeof getLatestQuotaSnapshotsForConnection> } = {};
+  for (const [windowKey, quotaInfo] of Object.entries(rawQuotas)) {
+    persistOneQuotaWindow(
+      connectionId,
+      provider,
+      entry,
+      windowKey,
+      quotaInfo,
+      quotas,
+      prior,
+      retainedCodexWindows,
+      codexSnapshots
+    );
+  }
+}
+
+/**
+ * Unknown Codex telemetry must not erase or redate a still-fresh reported fact.
+ * Returns the windows whose previous observation was kept.
+ */
+function retainFreshCodexObservations(
+  connectionId: string,
+  quotas: Record<string, QuotaInfo>,
+  prior: QuotaCacheEntry | null
+): Set<string> {
+  const retained = new Set<string>();
+  for (const [windowKey, quota] of Object.entries(quotas)) {
+    const previous = prior?.quotas[windowKey];
+    if (
+      quota.fractionReported === false &&
+      prior &&
+      previous &&
+      getQuotaWindowObservation(connectionId, windowKey) !== null
+    ) {
+      // Unknown telemetry cannot clear a reported fact or renew its observation clock.
+      quotas[windowKey] = { ...previous, observedAt: previous.observedAt ?? prior.fetchedAt };
+      retained.add(windowKey);
+    } else {
+      quota.observedAt = Date.now();
+    }
+  }
+  return retained;
+}
+
+/**
+ * A telemetry-only refresh is not evidence that a real upstream 429 has recovered.
+ * Keep its original timestamp so it can still expire normally.
+ */
+function isTelemetryOnlyRefresh(
+  prior: QuotaCacheEntry | null,
+  quotas: Record<string, QuotaInfo>,
+  modelQuotas: Record<string, QuotaInfo>
+): boolean {
+  return (
+    !!prior?.exhausted &&
+    Object.keys(prior.quotas).length === 0 &&
+    isStandardQuotaExhausted(prior, Date.now()) &&
+    Object.keys(modelQuotas).length === 0 &&
+    Object.values(quotas).every((q) => q.fractionReported === false)
+  );
+}
+
 export function setQuotaCache(
   connectionId: string,
   provider: string,
@@ -778,36 +976,12 @@ export function setQuotaCache(
   const prior =
     getState().cache.get(connectionId) ||
     (provider === "codex" ? hydrateQuotaCacheFromSnapshots(connectionId) : null);
-  const retainedCodexWindows = new Set<string>();
-  if (provider === "codex") {
-    for (const [windowKey, quota] of Object.entries(quotas)) {
-      const previous = prior?.quotas[windowKey];
-      if (
-        quota.fractionReported === false &&
-        prior &&
-        previous &&
-        getQuotaWindowObservation(connectionId, windowKey) !== null
-      ) {
-        // Unknown telemetry cannot clear a reported fact or renew its observation clock.
-        quotas[windowKey] = { ...previous, observedAt: previous.observedAt ?? prior.fetchedAt };
-        retainedCodexWindows.add(windowKey);
-      } else {
-        quota.observedAt = Date.now();
-      }
-    }
-  }
+  const retainedCodexWindows =
+    provider === "codex"
+      ? retainFreshCodexObservations(connectionId, quotas, prior)
+      : new Set<string>();
   const exhausted = isExhausted(quotas);
-  // A telemetry-only refresh is not evidence that a real upstream 429 has
-  // recovered. Keep its original timestamp so it can still expire normally.
-  if (
-    prior?.exhausted &&
-    Object.keys(prior.quotas).length === 0 &&
-    isStandardQuotaExhausted(prior, Date.now()) &&
-    Object.keys(modelQuotas).length === 0 &&
-    Object.values(quotas).every((q) => q.fractionReported === false)
-  ) {
-    return;
-  }
+  if (isTelemetryOnlyRefresh(prior, quotas, modelQuotas)) return;
   const entry: QuotaCacheEntry = {
     connectionId,
     provider,
@@ -828,83 +1002,17 @@ export function setQuotaCache(
   getState().cache.set(connectionId, entry);
 
   if (entry && rawQuotas) {
-    let codexSnapshots: ReturnType<typeof getLatestQuotaSnapshotsForConnection> | undefined;
-    for (const [windowKey, quotaInfo] of Object.entries(rawQuotas)) {
-      if (!quotaInfo || typeof quotaInfo !== "object") continue;
-      const normalized = quotas[windowKey];
-      // Retaining an old fact is not a new observation, including in restart snapshots.
-      if (!normalized || retainedCodexWindows.has(windowKey)) continue;
-      const { remainingPercentage } = normalized;
-      const fractionReported = normalized.fractionReported !== false;
-      if (fractionReported) {
-        recordProviderQuotaResetEventIfChanged({
-          provider,
-          connectionId,
-          windowKey,
-          currentResetAt: normalized.resetAt,
-          currentRemainingPercentage: remainingPercentage,
-          previousObservation: prior?.quotas?.[windowKey]
-            ? {
-                resetAt: prior.quotas[windowKey].resetAt,
-                remainingPercentage: prior.quotas[windowKey].remainingPercentage,
-              }
-            : null,
-        });
-      }
-      // #5923 (Finding #5) — is_exhausted must reflect THIS window's own remaining
-      // percentage, not the connection-wide AND-across-all-windows aggregate
-      // (`entry.exhausted`). A connection with one 0% window and other non-zero
-      // windows previously never flagged that window's row as exhausted.
-      const windowExhausted = fractionReported && remainingPercentage <= 0;
-      try {
-        // #4438 stays unchanged for other providers. Codex also needs a fresh durable fact:
-        // a warm cache timestamp does not prove its deduplicated snapshot survived restart.
-        if (
-          !quotaSnapshotChanged(prior, windowKey, remainingPercentage, windowExhausted) &&
-          prior?.quotas?.[windowKey]?.fractionReported === normalized.fractionReported
-        ) {
-          if (provider !== "codex" || !fractionReported) continue;
-          codexSnapshots ??= getLatestQuotaSnapshotsForConnection(connectionId);
-          const snapshot = codexSnapshots.find((row) => {
-            const saved = row as unknown as Record<string, unknown>;
-            return (saved.windowKey ?? row.window_key) === windowKey;
-          });
-          const saved = snapshot as unknown as Record<string, unknown> | undefined;
-          const savedAt = saved
-            ? parseDate(String(saved.createdAt ?? saved.created_at ?? ""))
-            : null;
-          if (
-            snapshot &&
-            saved &&
-            savedAt !== null &&
-            savedAt <= Date.now() &&
-            Date.now() - savedAt < ACTIVE_TTL_MS &&
-            !isUnreportedQuotaSnapshot(snapshot) &&
-            Number(saved.remainingPercentage ?? saved.remaining_percentage) ===
-              remainingPercentage &&
-            Number(saved.isExhausted ?? saved.is_exhausted) === Number(windowExhausted) &&
-            (saved.nextResetAt ?? saved.next_reset_at ?? null) === normalized.resetAt
-          )
-            continue;
-        }
-        saveQuotaSnapshot({
-          provider,
-          connection_id: connectionId,
-          window_key: windowKey,
-          remaining_percentage: remainingPercentage,
-          is_exhausted: windowExhausted ? 1 : 0,
-          next_reset_at: normalized.resetAt,
-          window_duration_ms: entry.windowDurationMs ?? null,
-          // Persist only the interpretation, never the raw provider payload.
-          raw_data: fractionReported ? null : JSON.stringify({ fractionReported: false }),
-        });
-      } catch (error) {
-        console.error("[quotaCache] Failed to save snapshot:", error);
-      }
-    }
+    persistQuotaWindowSnapshots(
+      connectionId,
+      provider,
+      entry,
+      rawQuotas,
+      quotas,
+      prior,
+      retainedCodexWindows
+    );
   }
 }
-
 /**
  * Get cached quota entry (returns null if not cached).
  */
