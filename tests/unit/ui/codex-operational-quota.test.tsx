@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { codexOperationalQuota } from "@/app/(dashboard)/dashboard/providers/[id]/components/codexOperationalQuota";
+import {
+  codexOperationalQuota,
+  codexOperationalWindows,
+} from "@/app/(dashboard)/dashboard/providers/[id]/components/codexOperationalQuota";
 
 describe("Codex operational quota values", () => {
   it("preserves a monthly window instead of presenting it as five-hour usage", () => {
@@ -55,5 +58,42 @@ describe("Codex operational quota values", () => {
         "5h"
       )
     ).toEqual({ usedPercent: 100, resetAt: null });
+  });
+});
+
+describe("Codex reported quota windows", () => {
+  it("shows only the weekly primary window for weekly-only accounts", () => {
+    const cache = {
+      quotas: { session: { used: 50, total: 100, windowSeconds: 604800, displayName: "Weekly" } },
+    };
+    expect(codexOperationalWindows(cache)).toEqual(["5h"]);
+    expect(codexOperationalQuota({}, cache, "5h")).toEqual({
+      usedPercent: 50,
+      resetAt: null,
+      period: "weekly",
+    });
+  });
+  it("recognizes a weekly display name in older cached payloads", () => {
+    expect(
+      codexOperationalQuota(
+        {},
+        { quotas: { session: { used: 10, total: 100, displayName: "Weekly" } } },
+        "5h"
+      ).period
+    ).toBe("weekly");
+  });
+  it("retains both reported windows, including observed zero usage", () => {
+    expect(
+      codexOperationalWindows({
+        quotas: { session: { used: 0, total: 100 }, weekly: { used: 0, total: 100 } },
+      })
+    ).toEqual(["5h", "7d"]);
+    expect(codexOperationalWindows({ quotas: { weekly: { used: 25, total: 100 } } })).toEqual([
+      "7d",
+    ]);
+  });
+  it("does not infer absent limits while quota data is unavailable", () => {
+    expect(codexOperationalWindows(undefined)).toEqual(["5h", "7d"]);
+    expect(codexOperationalWindows({ quotas: {} })).toEqual(["5h", "7d"]);
   });
 });

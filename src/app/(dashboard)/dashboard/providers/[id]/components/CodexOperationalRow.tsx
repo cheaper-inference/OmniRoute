@@ -10,7 +10,11 @@ import { getCodexPlanLabel } from "../codexPlanLabel";
 import { providerText } from "../providerPageHelpers";
 import { getStatusPresentation } from "./connectionRowStatus";
 import { shouldShowConnectionLastError } from "./connectionRowHelpers";
-import { codexOperationalQuota, type OperationalQuota } from "./codexOperationalQuota";
+import {
+  codexOperationalQuota,
+  codexOperationalWindows,
+  type OperationalQuota,
+} from "./codexOperationalQuota";
 import type { ConnectionRowProps } from "./connectionRowTypes";
 
 function QuotaCell({
@@ -157,14 +161,20 @@ export default function CodexOperationalRow({
       )}
     </div>
   );
-  const quotaCells = (["5h", "7d"] as const).map((window) => {
+  const quotaCells = codexOperationalWindows(quotaCache).map((window) => {
     const quota: OperationalQuota = visible
       ? codexOperationalQuota(connection, quotaCache, window)
       : { usedPercent: null, resetAt: null };
     return (
       <QuotaCell
         key={window}
-        label={quota.period === "monthly" ? t("quotaWindowMonthly") : window}
+        label={
+          quota.period === "monthly"
+            ? t("quotaWindowMonthly")
+            : quota.period === "weekly"
+              ? "7d"
+              : window
+        }
         usedLabel={t("codexPoolUsed")}
         resetLabel={providerText(t, "quotaResetsAtShort", "Resets")}
         locale={locale}
@@ -208,7 +218,12 @@ export default function CodexOperationalRow({
       )}
     </div>
   );
-  const cells = [identity, statusCell, ...quotaCells, actions];
+  const quotaSummary = (
+    <div className={`grid gap-5 ${quotaCells.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
+      {quotaCells}
+    </div>
+  );
+  const cells = [identity, statusCell, quotaSummary, actions];
   if (props.codexViewMode === "table")
     return (
       <>
@@ -221,7 +236,7 @@ export default function CodexOperationalRow({
         </tr>
         {(expanded || shouldShowConnectionLastError(connection) || quotaCache?.message) && (
           <tr>
-            <td colSpan={5}>
+            <td colSpan={4}>
               {notices}
               {details}
             </td>
@@ -238,12 +253,12 @@ export default function CodexOperationalRow({
         </div>
       )}
       <div
-        className={`grid grid-cols-2 items-center gap-x-5 gap-y-3 px-4 py-3 ${cards ? "" : "xl:grid-cols-[minmax(180px,1.6fr)_minmax(110px,.8fr)_minmax(150px,1fr)_minmax(150px,1fr)_auto]"}`}
+        className={`grid grid-cols-2 items-center gap-x-5 gap-y-3 px-4 py-3 ${cards ? "" : "xl:grid-cols-[minmax(180px,1.6fr)_minmax(110px,.8fr)_minmax(300px,2fr)_auto]"}`}
       >
         {cells.map((cell, index) => (
           <div
             key={index}
-            className={`min-w-0 ${index === 4 ? (cards ? "col-span-2" : "col-span-2 xl:col-span-1") : cards && index === 0 ? "col-span-2 pr-10" : cards && index === 1 ? "col-span-2" : ""}`}
+            className={`min-w-0 ${index === 3 ? (cards ? "col-span-2" : "col-span-2 xl:col-span-1") : cards && index === 0 ? "col-span-2 pr-10" : index === 2 ? (cards ? "col-span-2" : "col-span-2 xl:col-span-1") : cards && index === 1 ? "col-span-2" : ""}`}
           >
             {cell}
           </div>

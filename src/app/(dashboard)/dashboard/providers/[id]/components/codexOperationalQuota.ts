@@ -4,11 +4,21 @@ import type { ProviderQuotaCacheEntry } from "../hooks/useProviderQuota";
 export interface OperationalQuota {
   usedPercent: number | null;
   resetAt: string | null;
-  period?: "monthly";
+  period?: "monthly" | "weekly";
 }
 
 const finite = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
+
+/** A primary window may be weekly; the API's keys describe position, not duration. */
+export function codexOperationalWindows(
+  cache: ProviderQuotaCacheEntry | null | undefined
+): ("5h" | "7d")[] {
+  const windows = (["5h", "7d"] as const).filter(
+    (window) => cache?.quotas?.[window === "5h" ? "session" : "weekly"] != null
+  );
+  return windows.length ? windows : ["5h", "7d"];
+}
 
 /** Only observed numeric values count as usage. Missing usage must never become zero. */
 export function codexOperationalQuota(
@@ -43,6 +53,10 @@ export function codexOperationalQuota(
     ((finite(cached.windowSeconds) && cached.windowSeconds >= 27 * 86400) ||
       (typeof cached.displayName === "string" && /month|mensal/i.test(cached.displayName)))
       ? { period: "monthly" as const }
-      : {}),
+      : cached &&
+          ((finite(cached.windowSeconds) && cached.windowSeconds >= 6 * 86400) ||
+            (typeof cached.displayName === "string" && /weekly|semanal/i.test(cached.displayName)))
+        ? { period: "weekly" as const }
+        : {}),
   };
 }

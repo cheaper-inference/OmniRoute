@@ -211,8 +211,7 @@ export default function ConnectionsListPanel({
     headers: [
       providerText(t, "accountColumn", "Account"),
       providerText(t, "statusColumn", "Status"),
-      "5h",
-      "7d",
+      providerText(t, "quota", "Quota"),
       providerText(t, "itemActions", "Actions"),
     ],
   };

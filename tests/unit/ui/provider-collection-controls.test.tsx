@@ -92,17 +92,54 @@ describe("Provider collection views and pagination", () => {
       <CollectionLayout
         view="table"
         columns={3}
-        headers={["Account", "Status", "5h", "7d", "Actions"]}
+        headers={["Account", "Status", "Quota", "Actions"]}
       >
         <ConnectionRow {...props} />
       </CollectionLayout>
     );
-    expect(screen.getAllByRole("columnheader")).toHaveLength(5);
-    expect(screen.getAllByRole("cell")).toHaveLength(5);
+    expect(screen.getAllByRole("columnheader")).toHaveLength(4);
+    expect(screen.getAllByRole("cell")).toHaveLength(4);
     fireEvent.click(screen.getByRole("button", { name: "Details" }));
-    expect(screen.getAllByRole("cell")).toHaveLength(6);
+    expect(screen.getAllByRole("cell")).toHaveLength(5);
     fireEvent.click(screen.getByRole("button", { name: "Actions" }));
     fireEvent.click(screen.getByRole("button", { name: "Edit" }));
     expect(onEdit).toHaveBeenCalledOnce();
   });
+  for (const view of ["list", "cards", "table"] as const) {
+    it(`renders one weekly bar for a weekly-only account in ${view} view`, () => {
+      const props = {
+        connection: {
+          id: "weekly",
+          provider: "codex",
+          name: "Weekly account",
+          isActive: true,
+          testStatus: "active",
+        },
+        isCodex: true,
+        isOAuth: false,
+        codexViewMode: view,
+        quotaCache: {
+          quotas: {
+            session: { used: 50, total: 100, windowSeconds: 604800, displayName: "Weekly" },
+          },
+        },
+        onRetest: noop,
+        onToggleActive: noop,
+        onEdit: noop,
+        onDelete: noop,
+      } as ConnectionRowProps;
+      render(
+        <CollectionLayout
+          view={view}
+          columns={3}
+          headers={["Account", "Status", "Quota", "Actions"]}
+        >
+          <ConnectionRow {...props} />
+        </CollectionLayout>
+      );
+      expect(screen.getAllByRole("meter")).toHaveLength(1);
+      expect(screen.getByRole("meter", { name: "7d" }).getAttribute("aria-valuenow")).toBe("50");
+      expect(screen.queryByText("5h")).toBeNull();
+    });
+  }
 });
