@@ -106,15 +106,6 @@ export function phaseComboSetup(ctx: ComboContext): ComboSetup {
   );
   ctx.body = agentBody;
 
-  // Per-combo tier is a bucket policy, not a routing option: forward it in the
-  // request shared by every strategy/attempt. Unconfigured combos keep the
-  // client's tier (or its absence), and the caller's body is never mutated.
-  const rawServiceTier = combo.config?.service_tier ?? combo.config?.serviceTier;
-  const serviceTier =
-    typeof rawServiceTier === "string" ? rawServiceTier.trim().toLowerCase() : null;
-  if (serviceTier && ["auto", "default", "flex", "priority", "scale"].includes(serviceTier)) {
-    ctx.body = { ...ctx.body, service_tier: serviceTier };
-  }
   const clientRequestedStream = ctx.body?.stream === true;
 
   // Use config cascade before dispatch so all strategies, pinned context routes,

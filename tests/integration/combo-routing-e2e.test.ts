@@ -466,3 +466,38 @@ for (const tier of [undefined, "flex"]) {
     assert.equal(Object.hasOwn(body, "service_tier"), false);
   });
 }
+
+test("a mixed combo sends its tier to the OpenAI target and not to a strict gateway", async () => {
+  await seedConnection("groq", { apiKey: "gsk-groq-tier-test" });
+  await seedConnection("openai", { apiKey: "sk-openai-tier-test" });
+  await combosDb.createCombo({
+    name: "tier-mixed",
+    strategy: "priority",
+    config: { maxRetries: 0, retryDelayMs: 0, service_tier: "flex" },
+    models: ["groq/llama-3.3-70b-versatile", "openai/gpt-4o-mini"],
+  });
+  const attempts: Array<Record<string, unknown>> = [];
+  globalThis.fetch = async (_url, init = {}) => {
+    const payload = JSON.parse(String(init.body)) as Record<string, unknown>;
+    attempts.push(payload);
+    if (attempts.length === 1) {
+      return new Response(
+        JSON.stringify({ error: { code: "model_not_found", message: "model not found" } }),
+        { status: 404, headers: { "content-type": "application/json" } }
+      );
+    }
+    return buildOpenAIResponse("Tier mixed answered");
+  };
+
+  const response = await handleChat(buildRequest({ body: buildOpenAIChatBody("tier-mixed") }));
+
+  assert.equal(response.status, 200);
+  await response.body?.cancel();
+  assert.deepEqual(
+    attempts.map((payload) => [payload.model, payload.service_tier]),
+    [
+      ["llama-3.3-70b-versatile", undefined],
+      ["gpt-4o-mini", "flex"],
+    ]
+  );
+});

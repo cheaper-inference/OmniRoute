@@ -13,6 +13,7 @@ import {
   isForbiddenCustomHeaderName,
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
+import { OPENAI_SERVICE_TIER_VALUES } from "@omniroute/open-sse/config/serviceTier.ts";
 
 // ──── Combo Schemas ────
 
@@ -167,6 +168,12 @@ export const responseValidationSchema = z
   })
   .strict();
 
+const comboServiceTierSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.enum(OPENAI_SERVICE_TIER_VALUES));
+
 export const comboRuntimeConfigSchema = z
   .object({
     responseValidation: responseValidationSchema.optional(),
@@ -302,6 +309,10 @@ export const comboRuntimeConfigSchema = z
       })
       .strict()
       .optional(),
+    // Per-combo OpenAI tier, forwarded only to targets that accept service_tier. Read from the
+    // combo's own config: comboDefaults and providerOverrides share this schema but do not apply it.
+    service_tier: comboServiceTierSchema.optional(),
+    serviceTier: comboServiceTierSchema.optional(),
     // Optional client-side sort hint for combo models.
     // Honored in the dashboard builder; reserved for future server-side use. Inert on execution.
     modelSort: z
