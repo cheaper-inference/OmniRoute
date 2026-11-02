@@ -65,10 +65,12 @@ const mentionsVazirmatn = (d: Declaration) => /vazirmatn/i.test(d.text);
 test("globals.css self-hosts Vazirmatn through @fontsource (no Google Fonts / next/font)", () => {
   const imports = VAZIRMATN_WEIGHTS.map((w) => `@import "@fontsource/vazirmatn/${w}.css";`);
   for (const line of imports) assert.ok(css.includes(line), `globals.css has ${line}`);
-  const kitImport = css.indexOf('@import "../../packages/ui-kit/src/ci-ui.css";');
+  const interImport = css.indexOf('@import "@fontsource/inter/700.css";');
+  const firstRule = css.indexOf(":root,");
+  assert.ok(interImport > -1 && firstRule > -1);
   assert.ok(
-    imports.every((line) => css.indexOf(line) < kitImport),
-    "Vazirmatn is imported with the other fonts, before the kit"
+    imports.every((line) => css.indexOf(line) > interImport && css.indexOf(line) < firstRule),
+    "Vazirmatn is imported after the Inter script fallback, ahead of the first style rule"
   );
   assert.doesNotMatch(css, /fonts\.googleapis\.com/);
   assert.doesNotMatch(css, /next\/font/);
@@ -98,7 +100,7 @@ test("every reference to Vazirmatn in globals.css is scoped to html[dir=rtl]", (
   }
 });
 
-test("the RTL rule overrides the kit font token with Inter first, then Vazirmatn, at 0 tracking", () => {
+test("the RTL rule overrides the kit font token with Switzer, Inter, then Vazirmatn, at 0 tracking", () => {
   const rtl = declarations(css).filter((d) => {
     const selectors = splitSelectors(d.scopes[d.scopes.length - 1] ?? "");
     return selectors.includes(RTL_SCOPE) && selectors.includes(`${RTL_SCOPE} .ci-theme`);
@@ -112,12 +114,28 @@ test("the RTL rule overrides the kit font token with Inter first, then Vazirmatn
   assert.ok(stack, "--ci-font-ui is redefined for html[dir=rtl] (the kit sets it on .ci-theme)");
   assert.match(
     stack,
-    /^"Inter",\s*"Vazirmatn",/,
-    "Latin stays Inter; Arabic script falls to Vazirmatn"
+    /^"Switzer",\s*"Inter",\s*"Vazirmatn",/,
+    "Latin stays Switzer; Inter keeps its scripts; Arabic script falls to Vazirmatn"
   );
   assert.match(stack, /sans-serif$/);
   assert.equal(value("--font-sans"), "var(--ci-font-ui)");
   assert.equal(value("letter-spacing"), "0", "tracking breaks Arabic-script joining");
+  // Inheriting 0 is not enough: kit controls and headings and Tailwind `tracking-*` utilities set
+  // their own letter-spacing through these tokens, so each one that is not already 0 is reset.
+  const kitTracking = [
+    ...read("packages/ui-kit/src/ci-tokens.css").matchAll(
+      /(--ci-[a-z-]*(?:tracking|letter-spacing)[a-z-]*):\s*([^;]+);/g
+    ),
+  ]
+    .filter(([, , raw]) => !/^0(em)?$/.test(raw.trim()))
+    .map(([, name]) => name);
+  assert.ok(kitTracking.includes("--ci-type-control-tracking"), "the kit token scan found tokens");
+  const tailwindTracking = ["tighter", "tight", "wide", "wider", "widest"].map(
+    (step) => `--tracking-${step}`
+  );
+  for (const token of [...new Set(kitTracking), ...tailwindTracking]) {
+    assert.equal(value(token), "0", `${token} is reset under html[dir=rtl]`);
+  }
 });
 
 test("no other stylesheet or source file can pull Vazirmatn into an LTR page", () => {

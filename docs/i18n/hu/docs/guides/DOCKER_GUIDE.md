@@ -653,27 +653,29 @@ sudo systemctl enable --now omniroute-update.path
 A szolgáltatás a lekérés előtt eltávolítja a kérésfájlt, így egy sikertelen futás nem kerül végtelen ciklusba. A
 `DOCKER_UPDATE_TRIGGER_FILE` nélkül az irányítópult továbbra is a kézi parancsos folyamatot használja.
 
-## Rendelkezésre állás: az alapértelmezett SQLite egyetlen replikát támogat
+## Elérhetőség: az alapértelmezett SQLite egyetlen replika
 
-Az alapértelmezett Docker-/Kubernetes-alapú OmniRoute **egy Node-folyamatból és egy SQLite-íróból** áll. A magas rendelkezésre állás ezen a topológián **nem támogatott**.
+Stock Docker / Kubernetes OmniRoute is** one Node process + one SQLite író** . A magas rendelkezésre állás** nem támogatott** azon a topológián.
 
-| Korlátozás                                                      | Következmény                                                                                                                                                                                                                                                                                                                                                                                                         |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Egyetlen író                                                    | **Ne** futtasson több replikát ugyanazzal az SQLite-fájllal. Ez sérülést okoz az adatbázisban.                                                                                                                                                                                                                                                                                                                       |
-| Újbóli létrehozás / újraindítás / leállítás a HEALTHCHECK által | A folyamatban lévő SSE-kapcsolatok, irányítópult-munkamenetek és memóriában tárolt állapot **teljes kiesése**. Minden csatlakoztatott kliens kapcsolata megszakad. Az üres végponttal rendelkező időszakban érkező új kérések OmniRoute JSON helyett fordított proxytól származó **`502 Bad Gateway: Unknown error`** választ kapnak — a kliensek ezt nem tudják megkülönböztetni egy szolgáltatói hibától (#11015). |
-| Azonos eseményhurok, mint a `/healthz` esetén                   | Egy leterhelt katalógus- vagy tömörítési ciklus késleltetheti a vizsgálatokat; rövid időtúllépés esetén ezután újraindul az **egyetlen** replika.                                                                                                                                                                                                                                                                    |
+| Kényszer                                      | Következmény                                                                                                                                                                                                                                                                                                                                |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Egyedülálló író                               | Tedd** nem** futtasson több replikát ugyanazon SQLite fájlon. Ez elrontja a DB.                                                                                                                                                                                                                                                             |
+| Újrakészítés / újraindítás / HEALTHCHECK kill | **Teljes leállás** a repülés közbeni SSE, a műszerfali munkamenetek és a memória állapota. Minden csatlakoztatott kliens leesik. Az üres végpont ablakban érkező új kérések fordított proxyt kapnak**`502 Bad Gateway: Unknown error`** , nem OmniRoute JSON — az ügyfelek nem tudják megkülönböztetni ezt a szolgáltatói hibától (#11015). |
+| Ugyanaz az eseményhurok, mint `/healthz`      | Egy elfoglalt katalógus vagy tömörítés késleltetheti a szondákat; egy rövid időtúllépés, majd újraindítja a** csak** másolat.                                                                                                                                                                                                               |
 
-**Vizsgálati mátrix** (lásd még: [Kubernetes-vizsgálati javaslatok](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Szonda mátrix** (lásd még [a Kubernetes szonda ajánlásait](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Vizsgálat           | Cél                                                                                   | Ne használja ehhez                                                                |
-| ------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Életképesség        | TCP a `PORT` porton (alapértelmezés szerint `20128`), vagy engedékeny HTTP `/healthz` | `/api/monitoring/health`                                                          |
-| Készenlét           | HTTP `GET /healthz`                                                                   | Szigorú időtúllépések, amelyek az eseményhurok leterheltségét leállásként kezelik |
-| Mélyreható / emberi | `/api/monitoring/health`                                                              | Automatizált kubelet-életképességi vizsgálat                                      |
+| Szonda         | Cél                                                             | Ne használja                                                                |
+| -------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Életesség      | TCP `PORT` (alapértelmezett `20128`), vagy lágy HTTP `/healthz` | `/api/monitoring/health`                                                    |
+| Készenlét      | HTTP `GET /healthz`                                             | Szűk időtúllépések, amelyek az eseményhurok foglaltságát halottként kezelik |
+| Mély / emberek | `/api/monitoring/health`                                        | Automatizált kubelet életerő                                                |
 
-**Frissítések:** számítson minden munkamenet megszakadására. Ha lehetséges, ürítse ki a klienseket; az alapértelmezett SQLite használatakor nincs gördülő frissítés. A Compose `restart: unless-stopped` beállítása és a Docker `HEALTHCHECK` szintén lecseréli az egyetlen folyamatot, amikor a konténer Unhealthy állapotba kerül — ugyanazzal a hatókörű kieséssel.
+**Frissítések:** számítson arra, hogy minden munkamenet leesik. Drain ügyfeleket, ha lehet; az alapértelmezett SQLite n nincs folyamatos frissítés. `restart: unless-stopped` plusz Docker összeállítása `HEALTHCHECK` az egyetlen folyamatot is lecseréli, ha a tároló egészségtelen – ugyanaz a robbanási sugár.
 
-Kubernetes-részlet **egyetlen replikához** (a Recreate kötelező; ne növelje a `replicas` értékét egyetlen SQLite-fájl használata mellett):
+A kész jegyzékek és a Helm-diagram élőben `deploy/kubernetes/` és `deploy/helm/omniroute/` nyelven – lásd a [Kubernetes telepítési útmutatóját](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes kódrészlet a** egyetlen replika** (Újra létrehozás szükséges; ne emeljen `replicas` t egyetlen SQLite fájlra):
 
 ```yaml
 spec:
@@ -700,9 +702,9 @@ spec:
             periodSeconds: 20
 ```
 
-A `preStop` alatti várakozás lehetővé teszi, hogy a kube eltávolítsa a Service-végpontokat a SIGTERM előtt, így az **új** forgalom már nem jut el a leálló folyamathoz. A folyamatban lévő `/v1/responses` SSE-kapcsolatok leürítésére legfeljebb a `SHUTDOWN_TIMEOUT_MS` által meghatározott ideig (alapértelmezés szerint 30 másodpercig) kerül sor a nehézsúlyú beléptetési lease-ek segítségével (#11015). A folyamathoz mégis eljutó új kérések `503` + `Retry-After: 5` választ kapnak. A Recreate stratégia miatt a cserepéldány Ready állapotba kerüléséig fennálló, végpont nélküli időszak továbbra is teljes szolgáltatáskiesést jelent — ez az SQLite-topológiából ered, nem a probe-ok hibás konfigurációjából.
+`preStop` sleep lehetővé teszi, hogy a kube eldobja a szolgáltatás végpontjait SIGTERM előtt, így** új** a forgalom leáll, sújtja a haldokló folyamatot. Repülés közbeni `/v1/responses` SSE `SHUTDOWN_TIMEOUT_MS` (alapértelmezett 30 mp) lemerül nehézsúlyú belépőbérleti szerződések révén (#11015). Azok az új kérések, amelyek még mindig elérik a folyamatot `503` + `Retry-After: 5` fájlt kapják. Az Üres végpont-rés újra létrehozása, amíg a csere kész állapotba nem kerül, továbbra is súlyos kimaradást jelent – ez a SQLite topológia, nem pedig egy próba hiba.
 
-A külső Postgres / több írópéldányos HA **nem** dokumentált, alapértelmezetten támogatott megoldás. Ha HA-ra van szüksége, tartson fenn egyetlen replikát, vagy használjon olyan topológiát, amelyet a projekt külön tesztelt és dokumentált. A Postgres/MySQL fejlesztése a [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) alatt követhető. Amíg ez nem jelenik meg, a **nagy** `/v1/responses` kapacitás növelésének egyetlen támogatott módja N független folyamat futtatása (lásd a következő szakaszt), nem pedig a `replicas > 1` használata egyetlen köteten.
+Külső Postgres / több író HA is** nem** dokumentált készletút. Ha HA van szüksége, tartson meg egyetlen replikát, vagy futtasson egy topológiát, amelyet a projekt külön tesztelt és dokumentált. A Postgres/MySQL mű a [#8075-](https://github.com/diegosouzapw/OmniRoute/issues/8075) ben lakik. Amíg ez kiszáll, az egyetlen támogatott módja a szaporításnak** nagy** `/v1/responses` kapacitás N független folyamat (következő rész), nem `replicas > 1` egy köteten.
 
 ## Horizontális skálázás: N független folyamat
 
