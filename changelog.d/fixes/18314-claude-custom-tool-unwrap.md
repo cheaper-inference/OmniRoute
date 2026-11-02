@@ -1,0 +1,1 @@
+- **fix(translator):** keep Chat Completions custom tools (`type: "custom"`) when routing to Claude instead of silently dropping them ([#18314](https://github.com/cheaper-inference/OmniRoute/pull/18314)) — thanks @gebclogic

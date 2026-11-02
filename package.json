@@ -532,15 +532,13 @@
     "keytar": true,
     "protobufjs": true,
     "unrs-resolver": true,
-    "@playwright/browser-chromium@1.61.1": true,
-    "bun@1.4.2": true,
-    "libxmljs2@0.37.0": true,
-    "opencode-ai@1.18.30": true,
-    "better-sqlite3@13.0.3": true,
-    "@huggingface/transformers@4.2.0": true,
-    "keytar@7.9.0": true,
-    "sharp@0.35.4": true,
-    "onnxruntime-node@1.24.3": true
+    "@playwright/browser-chromium": true,
+    "bun": true,
+    "libxmljs2": true,
+    "opencode-ai": true,
+    "@huggingface/transformers": true,
+    "sharp": true,
+    "onnxruntime-node": false
   },
   "overrides": {
     "browserslist": "^4.28.8",
@@ -559,7 +557,7 @@
     "protobufjs": "^7.6.5",
     "@babel/core": "^7.29.6",
     "hono": "^4.13.13",
-    "@hono/node-server": "^2.0.5",
+    "@hono/node-server": "^2.1.3",
     "fast-uri": "^3.1.9",
     "body-parser": "^2.4.0",
     "@yarnpkg/parsers": {

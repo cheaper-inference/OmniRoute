@@ -370,3 +370,9 @@ export { SuccessTransition, type SuccessTransitionProps } from "./success-transi
 export { SecretValue, type SecretValueProps } from "./secret-value";
 
 export { SetupSelectionSummary, type SetupSelectionSummaryProps } from "./onboarding-patterns";
+
+export { cheapestCloudPlan, CloudConfigurator, CloudInstancePanel, CloudBillingDetails, CloudTopology, type CloudConfiguratorProps, type CloudInstancePanelProps, type CloudBillingDetailsProps, type CloudConfiguration, type CloudMachineOption, type CloudRegionOption } from "./cloud-patterns";
+export { CloudRoutingExplorer, type CloudRoutingExplorerProps } from "./cloud-routing-explorer";
+export { CloudAuthHandoff, type CloudAuthHandoffProps } from "./cloud-auth-handoff";
+
+export { CloudFieldHelp, CloudHostingConsent, type CloudHostingConsentValue } from "./cloud-patterns";

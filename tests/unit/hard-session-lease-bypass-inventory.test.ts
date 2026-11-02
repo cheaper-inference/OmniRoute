@@ -174,6 +174,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/(dashboard)/dashboard/tools/agent-bridge/page.tsx": 1,
     "src/app/api/cloud/auth/route.ts": 1,
     "src/app/api/cloud/credentials/update/route.ts": 1,
+    // #16747: combo import reads the connection rows only for their provider names, to warn
+    // about combos whose provider has no connection; no selection or dispatch (class C).
+    "src/app/api/combos/import/route.ts": 1,
     "src/app/api/models/route.ts": 1,
     // #13487 (61198da9e): Test-all reads the provider's rows once only to reject
     // with 409 when every connection is disabled — a state read behind the
