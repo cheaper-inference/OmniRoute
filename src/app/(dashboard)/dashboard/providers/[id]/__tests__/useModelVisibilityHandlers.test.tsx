@@ -142,4 +142,49 @@ describe("useModelVisibilityHandlers", () => {
     expect(notify.error).not.toHaveBeenCalled();
     expect(hook.get().modelTestStatus["agnes-image-2.5-flash"]).toBeUndefined();
   });
+
+  it("clears models for both storage alias and canonical providerId when they differ", async () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true)
+    );
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ cleared: true }),
+    } as Response);
+
+    let latestResult: HookResult | null = null;
+    function CustomWrapper() {
+      const result = useModelVisibilityHandlers({
+        ...baseProps,
+        providerId: "antigravity",
+        providerStorageAlias: "ag",
+      });
+      React.useEffect(() => {
+        latestResult = result;
+      });
+      return null;
+    }
+
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const root = createRoot(el);
+    act(() => {
+      root.render(<CustomWrapper />);
+    });
+    roots.push({ root, el });
+
+    await act(async () => {
+      await latestResult!.handleClearAllModels();
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/provider-models?provider=ag&all=true", {
+      method: "DELETE",
+    });
+    expect(fetchMock).toHaveBeenCalledWith("/api/provider-models?provider=antigravity&all=true", {
+      method: "DELETE",
+    });
+    expect(notify.success).toHaveBeenCalledWith("clearAllModelsSuccess");
+  });
 });
