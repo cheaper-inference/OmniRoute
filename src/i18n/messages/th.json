@@ -14094,6 +14094,10 @@
         "label": "ลำดับโพล egress ทั่วไป",
         "description": "สำหรับผู้ให้บริการที่ปริมาณการใช้งานถูกแบ่งตามที่อยู่ egress ให้จัดอันดับสมาชิกโพลที่แบ่งปันที่อยู่ egress ที่สังเกตได้ของสมาชิกที่ถูกปฏิเสธเมื่อไม่นานมาอยู่ใต้สมาชิกที่มีสุขภาพดีเท่านั้น เป็นการจัดลำดับเท่านั้น ไม่มีการตัดออก จำเป็นต้องใช้ PROXY_SKIP_RECENTLY_FAILED ซึ่งสร้างสัญญาณการปฏิเสธให้มันอ่าน ปิดใช้งานโดยค่าเริ่มต้น: ลำดับการเลือกเป็นการวนเวียนธรรมดาเท่านั้น"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "บันทึกการระบุที่มาของลำดับการวนเวียน",
         "description": "การวนเวียนของ Opencode จะบันทึกว่าบัญชีใดให้บริการหรือถูกข้าม (เฉพาะ ID ที่ถูกบดบังเท่านั้น ไม่มีการแสดง ID บัญชีเต็มรูปแบบ) และเชื่อมโยงบันทึกเหตุการณ์โพรกซีกับคำขอ เพื่อให้ผู้ดำเนินการแยกบัญชีที่ถูกข้ามออกจากบัญชีที่ไม่ได้ใช้งานออกได้ ปิดใช้งานโดยค่าเริ่มต้น: ไม่มีบรรทัดบันทึกเพิ่มเติม และไม่มีคอลัมน์ที่เขียนเพิ่ม"

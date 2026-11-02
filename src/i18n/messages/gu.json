@@ -14094,6 +14094,10 @@
         "label": "શેર્ડ એગ્રેસ પૂલ ક્રમ",
         "description": "જે પ્રોવાઇડર્સ માટે ક્વોટા એગ્રેસ એડ્રેસ દ્વારા બકેટ થયેલ છે, તેમના માટે તાજેતરમાં નકારાયેલ સભ્યનું ઓબ્ઝર્વ્ડ એગ્રેસ એડ્રેસ શેર કરતા પૂલ સભ્યને હેલ્ધી સભ્યોની તરત નીચે ક્રમાંકિત કરો. માત્ર ક્રમ, ક્યારેય બાકાત નહીં. PROXY_SKIP_RECENTLY_FAILED જરૂરી છે, જે તે વાંચે છે તે રિફ્યુઝલ સિગ્નલ ઉત્પન્ન કરે છે. ડિફૉલ્ટ રૂપે બંધ: પસંદગી ક્રમ બરાબર સામાન્ય રોટેશન જેવો જ છે."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "રોટેશન એટ્રિબ્યુશન લૉગિંગ",
         "description": "Opencode રોટેશન રેકોર્ડ કરે છે કે કયા એકાઉન્ટે સેવા આપી અથવા કયું અવગણવામાં આવ્યું (માત્ર માસ્ક કરેલ ids, ક્યારેય પૂર્ણ એકાઉન્ટ ids નહીં) અને પ્રોક્સી લૉગ એન્ટ્રીઓને તેમની વિનંતી સાથે લિંક કરે છે, જેથી ઑપરેટર અવગણવામાં આવેલા એકાઉન્ટ્સને વણવપરાયેલા એકાઉન્ટ્સથી અલગ ઓળખી શકે. ડિફૉલ્ટ રૂપે બંધ: કોઈ વધારાની લૉગ લાઇન્સ નહીં, કોઈ વધારાના કૉલમ લખાતા નથી."

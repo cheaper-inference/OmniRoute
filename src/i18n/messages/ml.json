@@ -14171,6 +14171,10 @@
         "label": "പങ്കിട്ട ഇഗ്രെസ് പൂൾ ക്രമം",
         "description": "ഇഗ്രെസ് വിലാസം അടിസ്ഥാനമാക്കി ക്വാട്ട നിശ്ചയിച്ചിട്ടുള്ള പ്രൊവൈഡർമാർക്കായി, അടുത്തിടെ നിരസിക്കപ്പെട്ട ഒരു അംഗത്തിന്റെ നിരീക്ഷിത ഇഗ്രെസ് വിലാസം പങ്കിടുന്ന പൂൾ അംഗത്തെ പ്രവർത്തനക്ഷമമായ അംഗങ്ങൾക്ക് തൊട്ടുതാഴെയായി റാങ്ക് ചെയ്യുക. ക്രമത്തിൽ മാറ്റം വരുത്താൻ മാത്രം, ഒരിക്കലും ഒഴിവാക്കില്ല. ഇതിന് PROXY_SKIP_RECENTLY_FAILED ആവശ്യമാണ്, ഇത് വായിക്കുന്ന നിരസിക്കൽ സിഗ്നൽ നൽകുന്നത് അതാണ്. ഡിഫോൾട്ടായി ഓഫ് ആണ്: തിരഞ്ഞെടുക്കൽ ക്രമം കൃത്യമായി സാധാരണ റൊട്ടേഷൻ മാത്രമായിരിക്കും."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "റൊട്ടേഷൻ ആട്രിബ്യൂഷൻ ലോഗിംഗ്",
         "description": "ഏത് അക്കൗണ്ടാണ് സേവനം നൽകിയതെന്നോ ഒഴിവാക്കപ്പെട്ടതെന്നോ opencode റൊട്ടേഷൻ രേഖപ്പെടുത്തുന്നു (മാസ്ക് ചെയ്ത id-കൾ മാത്രം, ഒരിക്കലും പൂർണ്ണമായ അക്കൗണ്ട് id-കൾ അല്ല), കൂടാതെ പ്രോക്സി ലോഗ് എൻട്രികളെ അവയുടെ അഭ്യർത്ഥനയുമായി ബന്ധിപ്പിക്കുന്നു, അതിനാൽ ഓപ്പറേറ്റർക്ക് ഒഴിവാക്കിയ അക്കൗണ്ടുകളെ ഉപയോഗിക്കാത്തവയിൽ നിന്ന് തിരിച്ചറിയാൻ കഴിയും. ഡിഫോൾട്ടായി ഓഫ് ആണ്: അധിക ലോഗ് വരികളോ അധിക കോളങ്ങളോ രേഖപ്പെടുത്തില്ല."

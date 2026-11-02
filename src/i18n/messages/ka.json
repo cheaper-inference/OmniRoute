@@ -14171,6 +14171,10 @@
         "label": "საერთო გამავალი პულის თანმიმდევრობა",
         "description": "იმ პროვაიდერებისთვის, რომელთა კვოტაც დაჯგუფებულია გამავალი მისამართის მიხედვით, პულის იმ წევრს, რომელიც იზიარებს ახლახან უარყოფილი წევრის დაფიქსირებულ გამავალ მისამართს, ანიჭებს რიგითობას უშუალოდ გამართული წევრების ქვემოთ. იცვლება მხოლოდ თანმიმდევრობა, არასოდეს გამოირიცხება. საჭიროებს PROXY_SKIP_RECENTLY_FAILED-ს, რომელიც აგენერირებს უარყოფის სიგნალს, რომელსაც ის კითხულობს. გამორთულია ნაგულისხმევად: შერჩევის თანმიმდევრობა ჩვეულებრივი როტაციის იდენტურია."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "როტაციის ატრიბუციის ლოგირება",
         "description": "Opencode-ის როტაცია იწერს, თუ რომელმა ანგარიშმა მოემსახურა მოთხოვნას ან რომელი გამოიტოვა (მხოლოდ მასკირებული ID-ები, არასდროს ანგარიშის სრული ID-ები) და აკავშირებს პროქსის ლოგის ჩანაწერებს მათ შესაბამის მოთხოვნასთან, რათა ოპერატორმა შეძლოს გამოტოვებული ანგარიშების გამოუყენებლებისგან გარჩევა. გამორთულია ნაგულისხმევად: არ იწერება დამატებითი ლოგის სტრიქონები და დამატებითი სვეტები."

@@ -14094,6 +14094,10 @@
         "label": "Jagatud väljundiaadressiga kogumi järjekord",
         "description": "Teenusepakkujate puhul, kelle kvooti arvestatakse väljundiaadressi põhiselt, paigutatakse hiljuti tagasilükatud liikme täheldatud väljundiaadressi jagav kogumiliige vahetult tervete liikmete järele. Mõjutab ainult järjekorda, ei välistata kunagi. Vajab parameetrit PROXY_SKIP_RECENTLY_FAILED, mis tekitab loetava tagasilükkamissignaali. Vaikimisi väljas: valikujärjekord on täpselt tavapärane rotatsioon."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotatsiooni omistamise logimine",
         "description": "Opencode'i rotatsioon salvestab, milline konto päringut teenindas või vahele jäeti (ainult maskeeritud ID-d, mitte kunagi täielikud konto ID-d) ning seob proksilogi kirjed vastava päringuga, võimaldades operaatoril eristada vahelejäänud kontosid kasutamata kontodest. Vaikimisi väljas: täiendavaid logiridu ega lisaveergusid ei kirjutata."

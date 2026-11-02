@@ -14094,6 +14094,10 @@
         "label": "Umumiy chiqish havuzi tartibi",
         "description": "Kvota chiqish manzili bo'yicha to'plamga ajratilgan provayderlar uchun, so'nggi rad etilgan a'zo tomon kuzatilgan chiqish manzili bilan umumlashuvchi havuz a'zolarini sog'lom a'zolar darajada kamroq qatnashish uchun tartiblang. Faqat tartib, hech qachon rad etilmaydi. Rad etish signalini o'qiydigan PROXY_SKIP_RECENTLY_FAILED talab qiladi. Standart holatda o'chiq: tanlov tartibi faqat oddiy rotatsiya bilan o'zgarmaydi."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotatsiya atib etib loglash",
         "description": "Opencode rotatsiyasi qaysi hisob xizmat ko'rsatgan yoki o'tkazib yuborilganini yozadi (faqat maskalangan identifikatorlar, hech qachon to'liq hisob identifikatorlari yozilmaydi) va proksi log yozuvlarini so'rovga bog'laydi, shunda operator o'tkazib yuborilgan hisoblarni ishlatilmaganlarni farqlash uchun. Standart holatda o'chiq: qo'shimcha log qatorlari yoki ustunlar yozilmaydi."

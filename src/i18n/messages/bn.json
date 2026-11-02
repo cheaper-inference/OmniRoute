@@ -14171,6 +14171,10 @@
         "label": "শেয়ার্ড ইগ্রেস পুলের ক্রম",
         "description": "যেসব প্রোভাইডারের কোটা ইগ্রেস অ্যাড্রেস অনুযায়ী ভাগ করা হয়, তাদের ক্ষেত্রে সম্প্রতি প্রত্যাখ্যাত কোনো মেম্বারের পর্যবেক্ষিত ইগ্রেস অ্যাড্রেস শেয়ার করা পুল মেম্বারকে সুস্থ মেম্বারদের ঠিক নিচে স্থান দেওয়া হয়। এটি কেবল ক্রম নির্ধারণ করে, কখনোই বাদ দেয় না। এর জন্য PROXY_SKIP_RECENTLY_FAILED প্রয়োজন, যা প্রত্যাখ্যানের সিগন্যাল তৈরি করে। ডিফল্টভাবে বন্ধ: নির্বাচনের ক্রম পুরোপুরি সাধারণ রোটেশনের মতো থাকে।"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "রোটেশন অ্যাট্রিবিউশন লগিং",
         "description": "Opencode রোটেশন রেকর্ড করে কোন অ্যাকাউন্ট সেবা দিয়েছে বা এড়িয়ে যাওয়া হয়েছে (শুধুমাত্র মাস্ক করা আইডি, কখনোই সম্পূর্ণ অ্যাকাউন্ট আইডি নয়) এবং প্রক্সি লগ এন্ট্রিগুলোকে সেগুলোর অনুরোধের সাথে লিঙ্ক করে, যাতে অপারেটর এড়িয়ে যাওয়া অ্যাকাউন্টগুলোকে অব্যবহৃত অ্যাকাউন্ট থেকে আলাদা করতে পারেন। ডিফল্টভাবে বন্ধ: কোনো অতিরিক্ত লগ লাইন বা অতিরিক্ত কলাম লেখা হয় না।"

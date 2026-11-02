@@ -14094,6 +14094,10 @@
         "label": "Համատեղ ելքային փուլի հերթականություն",
         "description": "Այն մատակարարների համար, որոնց քվոտան բաշխվում է ըստ ելքային հասցեների, փուլի այն անդամին, որը կիսում է վերջերս մերժված անդամի նկատված ելքային հասցեն, դասակարգել անմիջապես առողջ անդամներից ցածր: Միայն դասակարգում, երբեք չի բացառվում: Պահանջում է PROXY_SKIP_RECENTLY_FAILED, որը գեներացնում է վերջինիս կողմից ընթերցվող մերժման ազդանշանը: Լռելյայն անջատված է. ընտրության կարգը ճշգրիտ սովորական ռոտացիան է:"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Ռոտացիայի վերագրման մատյանագրում",
         "description": "Opencode-ի ռոտացիան գրանցում է, թե որ հաշիվն է սպասարկել կամ բաց թողնվել (միայն քողարկված id-ներ, երբեք ոչ հաշվի ամբողջական id-ներ) և կապում է պրոքսիի մատյանի գրառումներն իրենց հարցման հետ, որպեսզի օպերատորը կարողանա տարբերակել բաց թողնված հաշիվները չօգտագործվածներից: Լռելյայն անջատված է. մատյանի հավելյալ տողեր և հավելյալ սյունակներ չեն գրվում:"

@@ -14094,6 +14094,10 @@
         "label": "Ordre du pool par adresse d'egress partagée",
         "description": "Pour les fournisseurs dont le quota est compartimenté par adresse d'egress, classe un membre du pool partageant l'adresse d'egress observée d'un membre récemment refusé juste en dessous des membres sains. Ordre uniquement, jamais exclu. Nécessite PROXY_SKIP_RECENTLY_FAILED, qui produit le signal de refus qu'il lit. Désactivé par défaut : l'ordre de sélection correspond exactement à la rotation standard."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Journalisation de l'attribution de rotation",
         "description": "La rotation d'opencode enregistre quel compte a été utilisé ou ignoré (identifiants masqués uniquement, jamais d'identifiants de compte complets) et associe les entrées du journal de proxy à leur requête, afin que l'opérateur puisse distinguer les comptes ignorés de ceux non utilisés. Désactivé par défaut : aucune ligne de journal supplémentaire, aucune colonne supplémentaire écrite."

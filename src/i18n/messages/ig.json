@@ -14094,6 +14094,10 @@
         "label": "Usoro Òtù Egress E Kekọrịtara",
         "description": "Maka ndị na-eweta ọrụ ndị e ji adreesị egress kee quota ha, dozie onye òtù na-ekekọrịta adreesị egress a hụrụ nke onye a jụrụ n'oge na-adịbeghị anya n'okpuru ndị òtù ahụ dị mma. Naanị n'usoro, ọ dịghị mgbe a na-ewepụ ya. Chọrọ PROXY_SKIP_RECENTLY_FAILED, nke na-ewepụta akara ọjụjụ ọ na-agụ. Agbanyụrụ na ndabara: usoro nhọrọ bụ kpọmkwem ntụgharị nkịtị."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Ndekọ Njirimara Ntụgharị",
         "description": "Ntụgharị opencode na-edekọ akaụntụ jere ozi ma ọ bụ nke a mafere (naanị ID ndị e kpuchiri ekpuchi, ọ dịghị mgbe a na-ede ID akaụntụ zuru ezu) ma na-ejikọ ndekọ proxy log na arịrịọ ha, ka onye nlekọta wee nwee ike ịmata ọdịiche dị n'etiti akaụntụ ndị a mafere na ndị a na-ejighị mee ihe. Agbanyụrụ na ndabara: ọ dịghị ahịrị ndekọ ọzọ ma ọ bụ kọlụm ọzọ a na-ede."

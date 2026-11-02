@@ -14094,6 +14094,10 @@
         "label": "මාර්ග ඉවත් වීමේ පිළිවෙල",
         "description": "මාර්ග ඉවත් වීම් අනුව ඉක්මන් කළ සැපයුම්කරු සඳහා, ඉක්මන් කළ සාමාන්‍යයක් සමඟ නිරීක්ෂණය කරන ලද මාර්ග ඉවත් වීම් ලක්ෂ්‍යය හෙළි කරන සාමාන්‍යයක් උරමක් කිරීම ඉක්මන් කිරීම. අනුපිළිවෙල පමණි, ඉවත් කිරීමක් නොවේ. PROXY_SKIP_RECENTLY_FAILED අවශ්‍ය වේ, එය අනුපිළිවෙල පාලනය කරයි. පෙරනිමියෙන් අක්‍රියයි: තේරීමේ අනුපිළිවෙල වඩාත් ප්‍රබලයි."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "පිළිවෙල මාලිමා ලිපිනය",
         "description": "ප්‍රායෝගික එකකෝඩ් එකේ පිළිවෙල තේරීමේ ගිනුම ලිපිනය කරයි (අඳුනුම් ලකුණු පමණි, සම්පූර්ණ ගිනුම් අඳුනුම් ලකුණු නොවේ) සහ ක්‍රමීකරණ ලිපිගතීන් ඉල්ලීම් වලට සම්බන්ධ කරයි, මෙමගින් මාලිම්පාලකයා වැලඳුණු ගිනුම් අසමාල ගිනුම්වලින් වෙනස් කළ හැකිය. පෙරනිමියෙන් අක්‍රියයි: අතිරේක ලිපිගතීන් නොමැත, අතිරේක තීරු ලිපිනය නොමැත."

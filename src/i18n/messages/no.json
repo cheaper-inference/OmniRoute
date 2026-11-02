@@ -14094,6 +14094,10 @@
         "label": "Rekkefølge for delt egress-pulje",
         "description": "For leverandører der kvoten er inndelt etter egress-adresse, ranger et puljemedlem som deler et nylig avvist medlems observerte egress-adresse like under friske medlemmer. Kun rekkefølge, aldri ekskludert. Krever PROXY_SKIP_RECENTLY_FAILED, som produserer avvisningssignalet den leser. Av som standard: utvalgsrekkefølgen er nøyaktig den vanlige rotasjonen."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logging av rotasjonsattribusjon",
         "description": "Opencode-rotasjon registrerer hvilken konto som betjente eller ble hoppet over (kun maskerte ID-er, aldri fullstendige konto-ID-er) og kobler proxyloggoppføringer til forespørselen deres, slik at operatøren kan skille overhoppede kontoer fra ubrukte. Av som standard: ingen ekstra logglinjer, ingen ekstra kolonner skrives."

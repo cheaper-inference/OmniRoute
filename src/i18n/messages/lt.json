@@ -14094,6 +14094,10 @@
         "label": "Bendro išvesties telkinio tvarka",
         "description": "Teikėjams, kurių kvota skirstoma pagal išvesties adresą, telkinio narį, turintį tą patį stebėtą išvesties adresą kaip ir neseniai atmestas narys, rikiuoti iškart po veikiančių narių. Tik rikiavimas, niekada neatmetama. Reikalingas PROXY_SKIP_RECENTLY_FAILED, kuris pateikia nuskaitomą atmetimo signalą. Pagal numatytuosius nustatymus išjungta: pasirinkimo tvarka yra visiškai tokia pati, kaip įprastos rotacijos."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotacijos priskyrimo žurnalizavimas",
         "description": "„opencode“ rotacija fiksuoja, kuri paskyra aptarnavo užklausą arba buvo praleista (tik užmaskuoti ID, niekada ne pilni paskyrų ID), ir susieja proxy žurnalo įrašus su jų užklausa, kad operatorius galėtų atskirti praleistas paskyras nuo nenaudotų. Pagal numatytuosius nustatymus išjungta: papildomų žurnalo eilučių ar stulpelių nerašoma."

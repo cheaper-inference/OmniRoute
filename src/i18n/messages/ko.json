@@ -14094,6 +14094,10 @@
         "label": "공유 이그레스 풀 순서",
         "description": "이그레스 주소별로 쿼터가 할당되는 제공자의 경우, 최근 거부된 멤버와 관측된 이그레스 주소를 공유하는 풀 멤버의 우선순위를 정상 멤버 바로 아래로 낮춥니다. 순서만 조정될 뿐 제외되지는 않습니다. 거부 신호를 읽기 위해 PROXY_SKIP_RECENTLY_FAILED가 필요합니다. 기본값은 꺼짐(Off)이며, 선택 순서는 일반 로테이션과 정확히 동일합니다."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "로테이션 귀속 로깅",
         "description": "opencode 로테이션은 어떤 계정이 요청을 처리했거나 건너뛰어졌는지 기록하고(전체 계정 ID가 아닌 마스킹된 ID만 기록) 프록시 로그 항목을 해당 요청과 연결하여, 운영자가 건너뛴 계정과 미사용 계정을 구분할 수 있게 합니다. 기본값은 꺼짐(Off)이며, 추가 로그 라인이나 컬럼이 기록되지 않습니다."

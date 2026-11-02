@@ -14094,6 +14094,10 @@
         "label": "Порядок спільного пулу виходу в мережу",
         "description": "Для провайдерів, квота яких розподіляється за IP-адресами виходу в мережу, розміщуйте члена пулу, який спільно з нещодавно відхиленим членом має спостережуваний IP виходу в мережу, трохи нижче за здоровими членами. Лише порядок, ніколи не виключається. Потребує PROXY_SKIP_RECENTLY_FAILED, який генерує сигнал відхилень, з якого здійснюється читання. Вимкнено за замовчуванням: порядок вибору є точною звичайною ротацією."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Журналювання призначення ротації",
         "description": "Ротація opencode фіксує, який акаунт обслугував або був пропущений (лише маскувані ідентифікатори, ніколи повні ідентифікатори акаунтів), та пов'язує журнали проксі з їхнім запитом, щоб оператор міг відрізнити пропущені акаунти від невикористаних. Вимкнено за замовчуванням: додаткові рядки журналу не пишуться, додаткові стовпці не додаються."

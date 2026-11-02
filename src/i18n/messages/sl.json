@@ -14094,6 +14094,10 @@
         "label": "Vrstni red skupnega izhodnega seznama",
         "description": "Za ponudnike, za katere se kvota obsega po izhodni naslovu, vrsti člane seznama, ki delijo opažen izhodni naslov nedavno zavrnjenega člena, neposredno pod zdravimi člani. Samo vrstni red, nikoli izključitev. Potrebuje PROXY_SKIP_RECENTLY_FAILED, ki ustvari signal zavrnitve, ki ga bere. Privzeto je izklopljeno: vrstni red izbiranja je prav rotacija."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Evidenje pripisovanja rotacije",
         "description": "Opencode rotacija zabeleži, kateri račun je služil ali bil preskočen (le maskirani id-ji, nikoli polni id-ji uporabniških računov) in poveže vnose dnevniških posrednikov z njihovo zahtevo, da operater lahko razlikuje preskočene račune od neneuporabljenih. Privzeto je izklopljeno: nobeni dodatni vrstice dnevnička, nobene dodatne pisane vrstice."

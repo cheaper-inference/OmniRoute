@@ -14171,6 +14171,10 @@
         "label": "共享出口池排序",
         "description": "对按出口地址配额的提供者，把与近期被拒成员观测到相同出口地址的池成员排在健康成员之后。只调顺序，绝不排除。依赖 PROXY_SKIP_RECENTLY_FAILED 提供它读取的拒绝信号。默认关闭：选择顺序与纯轮换完全一致。"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "轮换归因日志",
         "description": "opencode 轮换记录由哪个账户服务或被跳过（仅脱敏 id，绝不记录完整账户 id），并把代理日志条目关联到其请求，便于运维区分被跳过的账户和未使用的账户。默认关闭：不写额外日志行，不写额外列。"

@@ -14094,6 +14094,10 @@
         "label": "Ord Linne d'Aschur Comhroinnte",
         "description": "I gcás soláthraithe a ndéantar a gcuóta a bhuicéadú de réir seoladh aschuir, rangaigh ball linne a roinneann seoladh aschuir breathnaithe de chuid ball ar diúltaíodh dó le déanaí díreach faoi bhun ball folláin. Ord amháin, ní eisiatar riamh é. Teastaíonn PROXY_SKIP_RECENTLY_FAILED uaidh, rud a tháirgeann an comhartha diúltaithe a léann sé. Múchta de réir réamhshocraithe: is ionann ord an roghnaithe agus an ghnáthuainíocht go díreach."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logáil Sannacháin Uainíochta",
         "description": "Taifeadann uainíocht opencode cén cuntas a d'fhreastail nó a scipeáladh (aitheantais mhascaithe amháin, gan aitheantais iomlána cuntais riamh) agus nascann sí iontrálacha loga seachfhreastalaí lena n-iarratas, ionas gur féidir leis an oibreoir cuntais a scipeáladh a idirdhealú ó chuntais nár úsáideadh. Múchta de réir réamhshocraithe: ní scríobhtar aon línte loga breise ná colúin bhreise."

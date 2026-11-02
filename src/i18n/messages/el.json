@@ -14094,6 +14094,10 @@
         "label": "Σειρά κοινόχρηστου pool εξόδου (egress)",
         "description": "Για παρόχους των οποίων το quota κατανέμεται ανά διεύθυνση εξόδου (egress), κατατάσσει ένα μέλος του pool που μοιράζεται την παρατηρηθείσα διεύθυνση εξόδου ενός μέλους που απορρίφθηκε πρόσφατα, ακριβώς κάτω από τα υγιή μέλη. Μόνο σειρά, ποτέ αποκλεισμός. Απαιτεί το PROXY_SKIP_RECENTLY_FAILED, το οποίο παράγει το σήμα απόρριψης που διαβάζει. Ανενεργό από προεπιλογή: η σειρά επιλογής είναι ακριβώς η απλή εναλλαγή."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Καταγραφή απόδοσης εναλλαγής",
         "description": "Η εναλλαγή του opencode καταγράφει ποιος λογαριασμός εξυπηρέτησε ή παραλείφθηκε (μόνο καλυμμένα αναγνωριστικά, ποτέ πλήρη αναγνωριστικά λογαριασμού) και συνδέει τις εγγραφές καταγραφής proxy με το αίτημά τους, ώστε ο διαχειριστής να μπορεί να διακρίνει τους παραλειφθέντες λογαριασμούς από τους αχρησιμοποίητους. Ανενεργό από προεπιλογή: δεν εγγράφονται επιπλέον γραμμές καταγραφής ούτε επιπλέον στήλες."

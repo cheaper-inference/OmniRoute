@@ -14171,6 +14171,10 @@
         "label": "Подредба на пул със споделен egress адрес",
         "description": "За доставчици, чиято квота се разпределя по egress адрес, член на пула, споделящ наблюдавания egress адрес на наскоро отказал член, се класира непосредствено под изправните членове. Засяга само подредбата, никога не се изключва. Изисква PROXY_SKIP_RECENTLY_FAILED, която генерира четения сигнал за отказ. Изключено по подразбиране: редът на избор съответства точно на стандартната ротация."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Логване на атрибуцията на ротацията",
         "description": "Ротацията на opencode записва кой акаунт е обслужил заявка или е бил пропуснат (само маскирани идентификатори, никога пълни идентификатори на акаунти) и свързва записите в дневника на проксито със съответната им заявка, така че операторът да може да различи пропуснатите акаунти от неизползваните. Изключено по подразбиране: не се записват допълнителни редове или допълнителни колони в дневника."

@@ -14171,6 +14171,10 @@
         "label": "Řazení poolu se sdíleným egresem",
         "description": "U poskytovatelů, jejichž kvóta je rozdělena podle odchozí adresy (egress), zařadí člena poolu sdílejícího zjištěnou odchozí adresu nedávno odmítnutého člena těsně za zdravé členy. Pouze mění pořadí, nikdy nevylučuje. Vyžaduje PROXY_SKIP_RECENTLY_FAILED, která generuje čtený signál odmítnutí. Ve výchozím stavu vypnuto: pořadí výběru přesně odpovídá běžné rotaci."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Protokolování atribuce rotace",
         "description": "Rotace opencode zaznamenává, který účet obsloužil požadavek nebo byl přeskočen (pouze maskovaná ID, nikdy celá ID účtů), a propojuje záznamy v protokolu proxy s jejich požadavkem, takže operátor může odlišit přeskočené účty od nepoužitých. Ve výchozím stavu vypnuto: nezapisují se žádné další řádky protokolu ani sloupce."

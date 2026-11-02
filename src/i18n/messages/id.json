@@ -14094,6 +14094,10 @@
         "label": "Urutan Pool Egress Bersama",
         "description": "Untuk penyedia yang kuotanya dikelompokkan berdasarkan alamat egress, urutkan anggota pool yang berbagi alamat egress teramati dari anggota yang baru saja ditolak tepat di bawah anggota yang sehat. Hanya urutan, tidak pernah dikecualikan. Memerlukan PROXY_SKIP_RECENTLY_FAILED, yang menghasilkan sinyal penolakan yang dibacanya. Nonaktif secara default: urutan pemilihan sama persis dengan rotasi biasa."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Pencatatan Log Atribusi Rotasi",
         "description": "Rotasi opencode mencatat akun mana yang melayani atau dilewati (hanya ID tersamar, tidak pernah ID akun lengkap) dan menautkan entri log proksi ke permintaannya, sehingga operator dapat membedakan akun yang dilewati dari yang tidak digunakan. Nonaktif secara default: tidak ada baris log tambahan, tidak ada kolom tambahan yang ditulis."

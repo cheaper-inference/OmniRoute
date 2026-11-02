@@ -14094,6 +14094,10 @@
         "label": "ترتیب استخر بر اساس خروجی مشترک",
         "description": "برای ارائه‌دهندگانی که سهمیه آن‌ها بر اساس نشانی خروجی (egress) سهمیه‌بندی می‌شود، اولویت عضو استخری که دارای نشانی خروجی مشاهده‌شده مشترک با یک عضو اخیراً رد شده است، درست در زیر اعضای سالم قرار می‌گیرد. صرفاً تغییر ترتیب است و هرگز کنار گذاشته نمی‌شود. به PROXY_SKIP_RECENTLY_FAILED نیاز دارد که سیگنال رد را برای خواندن تولید می‌کند. به‌طور پیش‌فرض غیرفعال است: ترتیب انتخاب دقیقاً همان چرخش ساده است."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ثبت لاگ انتساب چرخش",
         "description": "چرخش opencode ثبت می‌کند که کدام حساب سرویس‌دهی کرده یا رد شده است (فقط شناسه‌های ماسک‌شده، هرگز شناسه‌های کامل حساب‌ها ثبت نمی‌شوند) و ورودی‌های لاگ پروکسی را به درخواست مربوطه‌شان پیوند می‌دهد تا اپراتور بتواند حساب‌های رد شده را از موارد استفاده‌نشده تشخیص دهد. به‌طور پیش‌فرض غیرفعال است: هیچ خط لاگ اضافی یا ستون جدیدی نوشته نمی‌شود."

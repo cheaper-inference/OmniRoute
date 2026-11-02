@@ -14094,6 +14094,10 @@
         "label": "साझा Egress पुल क्रम",
         "description": "egress ठेगानाका आधारमा कोटा निर्धारण गरिएका प्रदायकहरूका लागि, हालै अस्वीकृत सदस्यको देखिएको egress ठेगाना साझा गर्ने पुल सदस्यलाई स्वस्थ सदस्यहरूको ठ्याक्कै तल श्रेणीबद्ध गर्नुहोस्। क्रम निर्धारण मात्र गरिन्छ, कहिल्यै बहिष्कृत गरिँदैन। PROXY_SKIP_RECENTLY_FAILED आवश्यक पर्दछ, जसले यसले पढ्ने अस्वीकृति संकेत उत्पन्न गर्दछ। पूर्वनिर्धारित रूपमा निष्क्रिय: चयन क्रम ठ्याक्कै सामान्य रोटेसन जस्तै हुन्छ।"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "रोटेसन एट्रिब्युसन लगिङ",
         "description": "Opencode रोटेसनले कुन खाताले सेवा दियो वा कुन छोडियो (मास्क गरिएका id हरू मात्र, कहिल्यै पनि पूरा खाता id हरू होइन) रेकर्ड गर्दछ र प्रोक्सी लग प्रविष्टिहरूलाई तिनको अनुरोधसँग लिङ्क गर्दछ, जसले गर्दा अपरेटरले छोडिएका खाताहरूलाई प्रयोग नगरिएकाहरूबाट छुट्याउन सक्छन्। पूर्वनिर्धारित रूपमा निष्क्रिय: कुनै अतिरिक्त लग लाइनहरू छैनन्, कुनै अतिरिक्त स्तम्भहरू लेखिएका छैनन्।"

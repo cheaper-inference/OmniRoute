@@ -14094,6 +14094,10 @@
         "label": "共有イグレスプールの順序",
         "description": "イグレスアドレスごとにクォータが割り当てられているプロバイダーにおいて、最近拒否されたメンバーと観測されたイグレスアドレスを共有するプールメンバーの順位を、正常なメンバーの直下に配置します。並び替えのみで、除外されることはありません。読み取り対象となる拒否シグナルを生成する PROXY_SKIP_RECENTLY_FAILED が必要です。デフォルトで無効: 選択順序は通常のローテーションとまったく同じになります。"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ローテーション帰属のログ記録",
         "description": "Opencodeのローテーションにおいて、どのアカウントが処理したか、またはスキップされたかを記録し（完全なアカウントIDではなくマスクされたIDのみ）、プロキシログのエントリをリクエストに関連付けることで、オペレーターがスキップされたアカウントと未使用のアカウントを識別できるようにします。デフォルトで無効: 追加のログ行やカラムは書き込まれません。"

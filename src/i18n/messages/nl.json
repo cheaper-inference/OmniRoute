@@ -14094,6 +14094,10 @@
         "label": "Volgorde voor gedeelde egress-pools",
         "description": "Voor providers waarvan het quotum is gegroepeerd op egress-adres: rangschik een pool-lid dat het waargenomen egress-adres deelt met een recent geweigerd lid net onder gezonde leden. Alleen volgorde, nooit uitgesloten. Vereist PROXY_SKIP_RECENTLY_FAILED, dat het weigeringssignaal genereert dat het uitleest. Standaard uitgeschakeld: selectievolgorde is exact de standaardrotatie."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotatie-attributielogging",
         "description": "Opencode-rotatie registreert welk account heeft gediend of is overgeslagen (alleen gemaskeerde id's, nooit volledige account-id's) en koppelt proxylogregels aan hun verzoek, zodat de beheerder overgeslagen accounts kan onderscheiden van ongebruikte accounts. Standaard uitgeschakeld: er worden geen extra logregels of kolommen weggeschreven."

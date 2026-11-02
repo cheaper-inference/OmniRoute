@@ -14171,6 +14171,10 @@
         "label": "Ordni tal-Pool b'Egress Kondiviż",
         "description": "Għal fornituri li l-kwota tagħhom hija raggruppata skont l-indirizz tal-egress, ikklassifika membru tal-pool li jikkondividi l-indirizz tal-egress osservat ta' membru miċħud riċentement eżatt taħt membri f'saħħithom. Ordni biss, qatt ma jiġi eskluż. Jeħtieġ PROXY_SKIP_RECENTLY_FAILED, li jipproduċi s-sinjal ta' rifjut li jaqra. Mitfi b'mod awtomatiku: l-ordni tal-għażla tkun eżattament ir-rotazzjoni ordinarja."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logging tal-Attribuzzjoni tar-Rotazzjoni",
         "description": "Ir-rotazzjoni ta' Opencode tirreġistra liema kont serva jew ġie maqbuż (IDs moħbija biss, qatt IDs sħaħ tal-kont) u tgħaqqad l-entrati tal-log tal-proxy mat-talba tagħhom, sabiex l-operatur ikun jista' jiddistingwi bejn kontijiet maqbuża u dawk mhux użati. Mitfi b'mod awtomatiku: l-ebda linji żejda fil-log, l-ebda kolonni żejda miktuba."

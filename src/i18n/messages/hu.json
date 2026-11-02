@@ -14094,6 +14094,10 @@
         "label": "Megosztott egress pool-sorrend",
         "description": "Azon szolgáltatók esetén, amelyeknél a kvóta egress-címek szerint van csoportosítva, a nemrég elutasított tag megfigyelt egress-címén osztozó pool-tagot közvetlenül az egészséges tagok mögé rangsorolja. Csak sorrendezés, soha nem kizárás. A PROXY_SKIP_RECENTLY_FAILED beállítást igényli, amely létrehozza az általa beolvasott elutasítási jelet. Alapértelmezés szerint kikapcsolva: a kiválasztási sorrend pontosan megegyezik a sima rotációval."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotációs hozzárendelés naplózása",
         "description": "Az opencode rotáció rögzíti, hogy melyik fiók szolgált ki kérést vagy lett kihagyva (csak maszkolt azonosítók, soha nem teljes fiókazonosítók), és összekapcsolja a proxynapló-bejegyzéseket a kérésükkel, így az üzemeltető meg tudja különböztetni a kihagyott fiókokat a nem használtaktól. Alapértelmezés szerint kikapcsolva: nem íródnak extra naplósorok és extra oszlopok."

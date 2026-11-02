@@ -14094,6 +14094,10 @@
         "label": "Susunan Kolam Egress Terkongsi",
         "description": "Bagi penyedia yang kuotanya dikumpulkan mengikut alamat egress, letakkan kedudukan ahli kolam yang berkongsi alamat egress tercerap bagi ahli yang baru sahaja ditolak tepat di bawah ahli yang sihat. Susunan sahaja, tidak pernah dikecualikan. Memerlukan PROXY_SKIP_RECENTLY_FAILED, yang menghasilkan isyarat penolakan yang dibacanya. Dimatikan secara lalai: susunan pemilihan adalah sama tepat seperti putaran biasa."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Pengelogan Atribusi Putaran",
         "description": "Putaran Opencode merekodkan akaun mana yang berkhidmat atau dilangkau (ID bertopeng sahaja, tidak sekali-kali ID akaun penuh) dan memautkan entri log proksi kepada permintaannya, supaya pengendali dapat membezakan akaun yang dilangkau daripada yang tidak digunakan. Dimatikan secara lalai: tiada baris log tambahan, tiada lajur tambahan ditulis."

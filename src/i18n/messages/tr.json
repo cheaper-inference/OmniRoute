@@ -14094,6 +14094,10 @@
         "label": "Paylaşılan Egress Havuzu Sıralaması",
         "description": "Kotası çıkış adresine göre bölünmüş sağlayıcılar için, son zamanlarda reddedilen bir üyenin gözlemlenen çıkış adresini paylaşan havuz üyesini, sağlıklı üyelerin hemen altına sıralayın. Yalnızca sıralama, asla hariç tutulma gerekçesi. Bunu okuyan reddetme sinyalini üreten PROXY_SKIP_RECENTLY_FAILED gerektirir. Varsayılan olarak kapalıdır: seçim sırası tamamen düz rotasyonla aynıdır."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotasyon Nispetlendirme Kaydına (Log) Yazma",
         "description": "Opencode rotasyonu, hangi hesabın hizmet verdiğini veya atlandığını (yalnızca maskeli kimlikler, asla tam hesap kimlikleri değil) kaydeder ve vekil log kayıtlarını istekle ilişkilendirir; böylece operatör atlanan hesapları kullanılmayanlardan ayırt edebilir. Varsayılan olarak kapalıdır: ek log satırı yok, yazılan ek sütun yok."

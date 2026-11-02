@@ -14094,6 +14094,10 @@
         "label": "Pagkakasunud-sunod ng Shared Egress Pool",
         "description": "Para sa mga provider na ang quota ay naka-bucket ayon sa egress address, iranggo ang miyembro ng pool na may parehong naobserbahang egress address ng isang kamakailang tinanggihang miyembro sa ilalim lamang ng maayos na mga miyembro. Pagkakasunud-sunod lamang, hindi kailanman ibinubukod. Nangangailangan ng PROXY_SKIP_RECENTLY_FAILED, na siyang gumagawa ng refusal signal na binabasa nito. Naka-off bilang default: ang pagkakasunud-sunod ng pagpili ay eksaktong karaniwang rotation."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Pag-log ng Attribution ng Rotation",
         "description": "Itinatala ng rotation ng opencode kung aling account ang nag-serve o nilaktawan (mga naka-mask na ID lamang, hindi kailanman buong account ID) at iniuugnay ang mga entry sa log ng proxy sa kanilang kahilingan, upang maipagkaiba ng operator ang mga nilaktawang account mula sa mga hindi nagamit. Naka-off bilang default: walang karagdagang linya ng log, walang karagdagang column na isinusulat."

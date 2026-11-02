@@ -14171,6 +14171,10 @@
         "label": "លំដាប់អាង Egress រួមគ្នា",
         "description": "សម្រាប់ក្រុមហ៊ុនផ្ដល់សេវាដែលកូតារបស់ពួកគេត្រូវបានបែងចែកតាមអាសយដ្ឋាន egress ចាត់ថ្នាក់សមាជិកអាងដែលចែករំលែកអាសយដ្ឋាន egress ដែលបានសង្កេតឃើញរបស់សមាជិកដែលទើបតែត្រូវបានបដិសេធ ឱ្យស្ថិតនៅខាងក្រោមកម្រិតសមាជិកដែលមានសុខភាពល្អ។ ប្តូរតែលំដាប់ប៉ុណ្ណោះ មិនដែលដកចេញឡើយ។ ត្រូវការ PROXY_SKIP_RECENTLY_FAILED ដែលបង្កើតសញ្ញាបដិសេធដែលវាអាន។ បិទតាមលំនាំដើម៖ លំដាប់នៃការជ្រើសរើសគឺដូចគ្នាបេះបិទទៅនឹងការបង្វិលធម្មតា។"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ការកត់ត្រាកំណត់ហេតុបញ្ជាក់ការបង្វិល",
         "description": "ការបង្វិលរបស់ Opencode កត់ត្រាថាគណនីណាបានបម្រើការ ឬត្រូវបានរំលង (លេខសម្គាល់ដែលបានបិទបាំងប៉ុណ្ណោះ មិនដែលមានលេខសម្គាល់គណនីពេញលេញឡើយ) និងភ្ជាប់ធាតុចូលកំណត់ហេតុប្រូកស៊ីទៅនឹងសំណើរបស់ពួកគេ ដូច្នេះប្រតិបត្តិករអាចបែងចែកគណនីដែលត្រូវបានរំលងចេញពីគណនីដែលមិនបានប្រើប្រាស់។ បិទតាមលំនាំដើម៖ គ្មានបន្ទាត់កំណត់ហេតុបន្ថែម និងគ្មានជួរឈរបន្ថែមត្រូវបានកត់ត្រាឡើយ។"

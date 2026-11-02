@@ -14094,6 +14094,10 @@
         "label": "Mpangilio wa Kitanda cha Sogoro Shirikishi",
         "description": "Kwa waangalizi ambao kiwango chao kinapatikana kwa maelezo ya anwani ya sogoro, weka alama kwa mtu anayeshiriki alama ya anwani ya sogoro aliyotajwa mara ndogo zilizokataliwa tu ndani ya mwanasayansi. Mpangilio tu, usikutolii. Inahitaji PROXY_SKIP_RECENTLY_FAILED, ambayo hutoa ishara ya ukatili wanayoelekeza kuisoma. Imezimwa kwa chaguo-msingi: mpangilio wa uteuzo ni sawaswa na mzunguko safi."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Kurekodi ya Marefu ya Mzunguko",
         "description": "Mzunguko wa opencode unrekodi akaunti ambayo ilitumwa au ilirukaa (alama za masiki tu, kamwe alama kamili za akaunti) na linakiangusisha rekodi za proxy na ombi la ombi, ili msimamizi anaweze kutofautisha akaunti zilizorukaa na zile zisizotumwa. Imezimwa kwa chaguo-msingi: hakuna mistari ya ziada ya ukandisi, hakuna mizunguko ya ziada ya mwandiko."

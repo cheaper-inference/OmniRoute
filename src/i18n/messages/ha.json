@@ -14094,6 +14094,10 @@
         "label": "Tsarin Rukunin Egress da Aka Raba",
         "description": "Ga masu ba da sabis waɗanda aka raba ƙuotarsu bisa adireshin egress, sanya memba na rukuni da ke raba adireshin egress da aka lura na wani memba da aka ƙi kwanan nan a ƙasan membobi masu lafiya. Tsari kawai, ba a taɓa cirewa ba. Yana buƙatar PROXY_SKIP_RECENTLY_FAILED, wanda ke samar da siginar ƙin karɓa da yake karantawa. A kashe ta tsohuwa: tsarin zaɓi yana zama ainihin juyawa na yau da kullun."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Yin Rijistar Danganta Juyawa",
         "description": "Juyawar opencode tana yin rikodin asusun da ya yi aiki ko aka tsallake (masked ids kawai, ba cikakkun id na asusu ba) kuma tana haɗa bayanan rajistar proxy zuwa buƙatarsu, domin mai gudanarwa ya iya bambanta asusun da aka tsallake da waɗanda ba a yi amfani da su ba. A kashe ta tsohuwa: babu ƙarin layukan rajista, babu ƙarin ginshiƙan da aka rubuta."

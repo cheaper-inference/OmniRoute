@@ -14094,6 +14094,10 @@
         "label": "Delad utgängspools ordning",
         "description": "För leverantörer vars kvot bucketas efter utgångsadress, rangordna en poolmedlem som delar en nyligen avvisad medlems observerade utgångsadress direkt under friska medlemmar. Endast ordning, aldrig utesluten. Kräver PROXY_SKIP_RECENTLY_FAILED, som producerar avvisningssignalen den läser. Inaktiverad som standard: urvalsordningen är exakt den vanliga rotationen."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Loggning av rotationsattribuerings",
         "description": "Opencodes rotation registrerar vilket konto som serverade eller hoppades över (endast maskerade id:n, aldrig kompletta kontoid:n) och länkar proxyloggposter till deras begäran, så att operatören kan skilja hoppade konton från oanvända. Inaktiverad som standard: inga extra loggrader, inga extra kolumner skrivna."

@@ -14094,6 +14094,10 @@
         "label": "Jaetun egress-poolin järjestys",
         "description": "Palveluntarjoajille, joiden kiintiöt on ryhmitelty egress-osoitteen mukaan, sijoita poolin jäsen, jolla on sama havaittu egress-osoite kuin äskettäin hylätyllä jäsenellä, heti terveiden jäsenten alapuolelle. Vaikuttaa vain järjestykseen, ei koskaan sulje pois. Vaatii asetuksen PROXY_SKIP_RECENTLY_FAILED, joka tuottaa sen lukeman hylkäyssignaalin. Oletuksena poissa käytöstä: valintajärjestys vastaa täysin tavallista rotaatiota."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotaation kohdistuslokitus",
         "description": "Opencoden rotaatio tallentaa, mikä tili palveli tai ohitettiin (vain maskatut tunnisteet, ei koskaan täysiä tilitunnisteita) ja linkittää välityspalvelinlokin merkinnät pyyntöönsä, jotta operaattori voi erottaa ohitetut tilit käyttämättömistä. Oletuksena poissa käytöstä: ylimääräisiä lokirivejä tai sarakkeita ei kirjoiteta."

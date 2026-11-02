@@ -14094,6 +14094,10 @@
         "label": "Poradie zdieľaného odchozího poolu",
         "description": "Pre poskytovateľov, ktorých kvóta je rozdelená podľa odchozej adresy, zoradte člena poolu, ktorý zdieľa pozorovanú odchozú adresu nedávno odmietnutého člena, tesne pod zdravými členmi. Iba poradie, nikdy sa nevylučuje. Vyžaduje PROXY_SKIP_RECENTLY_FAILED, ktorý produkuje signál odmietnutia, ktorý sa číta. V predvolenom nastavení vypnuté: poradie výberu je presne rotácia v čistom tvare."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logovanie atribúcie rotácie",
         "description": "Rotácia opencode zaznamenáva, ktorý účet slúžil alebo bol preskočený (iba maskované ID, nikdy celé ID účtu) a spája položky proxy denníka so svojou žiadosťou, takže operátor vie rozlíšiť preskočené účty od nepoužitých. V predvolenom nastavení vypnuté: žiadne dodatočné riadky v logu, žiadne dodatočné stĺpce nie sú zapisované."

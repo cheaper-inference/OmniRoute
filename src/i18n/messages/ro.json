@@ -14094,6 +14094,10 @@
         "label": "Ordine în pool pentru egress partajat",
         "description": "Pentru furnizorii a căror cotă este grupată după adresa de egress, plasează un membru al pool-ului care partajează adresa de egress observată a unui membru refuzat recent imediat sub membrii sănătoși. Doar ordonare, nu este exclus niciodată. Necesită PROXY_SKIP_RECENTLY_FAILED, care generează semnalul de refuz pe care îl citește. Dezactivat implicit: ordinea de selecție este exact rotația simplă."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Jurnalizare atribuire rotație",
         "description": "Rotația opencode înregistrează ce cont a servit cererea sau a fost omis (doar ID-uri mascate, niciodată ID-uri complete de cont) și asociază intrările din jurnalul proxy-ului cu cererea lor, astfel încât operatorul să poată distinge conturile omise de cele neutilizate. Dezactivat implicit: nu sunt scrise linii suplimentare în jurnal și nici coloane suplimentare."

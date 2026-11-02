@@ -14094,6 +14094,10 @@
         "label": "Poredak dijeljenog egress skupa",
         "description": "Za pružatelje usluga čija je kvota grupirana prema egress adresi, rangira člana skupa koji dijeli zabilježenu egress adresu nedavno odbijenog člana neposredno ispod zdravih članova. Samo redoslijed, nikada se ne isključuje. Zahtijeva PROXY_SKIP_RECENTLY_FAILED, koji proizvodi signal odbijanja koji ova opcija čita. Isključeno prema zadanim postavkama: redoslijed odabira točno odgovara običnoj rotaciji."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Bilježenje atribucije rotacije",
         "description": "Rotacija alata opencode bilježi koji je račun poslužio zahtjev ili bio preskočen (samo maskirani ID-jevi, nikada puni ID-jevi računa) i povezuje unose proxy dnevnika s njihovim zahtjevom, kako bi operater mogao razlikovati preskočene račune od nekorištenih. Isključeno prema zadanim postavkama: nema dodatnih redaka u dnevniku, nema dodatnih zapisanih stupaca."

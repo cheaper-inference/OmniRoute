@@ -14094,6 +14094,10 @@
         "label": "Thứ tự Pool Egress Chung",
         "description": "Đối với các nhà cung cấp có hạn mức được chia theo địa chỉ egress, xếp hạng thành viên pool chia sẻ địa chỉ egress quan sát được của thành viên vừa bị từ chối ngay dưới các thành viên đang khỏe mạnh. Chỉ thay đổi thứ tự, không bao giờ loại trừ. Cần PROXY_SKIP_RECENTLY_FAILED, vì tính năng này tạo ra tín hiệu từ chối để đọc. Tắt theo mặc định: thứ tự chọn chỉ đơn thuần là xoay vòng thường."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "Từ chối hạn mức theo từng model",
+        "description": "Giới hạn lỗi 429 hết hạn mức của opencode cho đúng model gặp lỗi, để cùng egress đó vẫn phục vụ các model khác, và chỉ xóa khi chính model đó thành công. Các nơi đọc không chỉ định model (xoay vòng pool, tạm dừng và phát lại, trang quản trị, trình kích hoạt selector, quét sức khỏe) vẫn thấy lỗi này. Cần PROXY_SKIP_RECENTLY_FAILED, nơi tạo ra tín hiệu từ chối. Tắt theo mặc định: lỗi 429 hạn mức của một model đặt egress sang một bên cho mọi model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Ghi Log Truy Xuất Nguồn Xoay Vòng",
         "description": "Xoay vòng opencode ghi nhận tài khoản nào đã phục vụ hoặc bị bỏ qua (chỉ ID che, không bao giờ là ID tài khoản đầy đủ) và liên kết các mục nhật ký proxy với yêu cầu tương ứng, giúp người vận hành phân biệt được các tài khoản bị bỏ qua với các tài khoản chưa được sử dụng. Tắt theo mặc định: không có dòng nhật ký bổ sung, không có cột dữ liệu bổ sung được ghi."

@@ -14094,6 +14094,10 @@
         "label": "साझा इग्रेस पूल क्रम",
         "description": "उन प्रदाताओं के लिए जिनका कोटा इग्रेस पते के अनुसार विभाजित है, हाल ही में अस्वीकृत सदस्य के देखे गए इग्रेस पते को साझा करने वाले पूल सदस्य को स्वस्थ सदस्यों के ठीक नीचे रैंक करें। केवल क्रमबद्ध किया जाता है, कभी बाहर नहीं किया जाता। PROXY_SKIP_RECENTLY_FAILED की आवश्यकता होती है, जो इसके द्वारा पढ़े जाने वाले अस्वीकृति सिग्नल को उत्पन्न करता है। डिफ़ॉल्ट रूप से बंद: चयन क्रम बिल्कुल सामान्य रोटेशन जैसा होता है।"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "रोटेशन एट्रिब्यूशन लॉगिंग",
         "description": "Opencode रोटेशन यह रिकॉर्ड करता है कि किस खाते ने सर्व किया या किसे छोड़ दिया गया (केवल मास्क्ड आईडी, कभी भी पूर्ण खाता आईडी नहीं) और प्रॉक्सी लॉग प्रविष्टियों को उनके अनुरोध से लिंक करता है, ताकि ऑपरेटर छोड़े गए खातों और अप्रयुक्त खातों में अंतर कर सके। डिफ़ॉल्ट रूप से बंद: कोई अतिरिक्त लॉग पंक्तियाँ नहीं, कोई अतिरिक्त कॉलम नहीं लिखे जाते।"

@@ -14171,6 +14171,10 @@
         "label": "ترتيب مجمّع الخروج المشترك",
         "description": "بالنسبة للمزودين الذين تُقسّم حصتهم حسب عنوان الخروج، يتم تصنيف عضو المجمّع الذي يتشارك عنوان خروج مرصود لعضو تم رفضه مؤخرًا أسفل الأعضاء السليمين مباشرة. ترتيب فقط، دون استبعاد أبدًا. يتطلب تفعيل PROXY_SKIP_RECENTLY_FAILED الذي ينتج إشارة الرفض التي يعتمد عليها. معطّل افتراضيًا: ترتيب التحديد مطابق تمامًا للتدوير العادي."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "تسجيل إسناد التدوير",
         "description": "يسجل تدوير Opencode الحساب الذي تمت خدمته أو تخطيه (معرّفات مقنّعة فقط، دون معرّفات الحسابات الكاملة مطلقًا) ويربط إدخالات سجل البروكسي بطلبها، ليتمكن المشغّل من تمييز الحسابات التي تم تخطيها عن الحسابات غير المستخدمة. معطّل افتراضيًا: لا تتم كتابة أسطر سجلات إضافية، ولا أعمدة إضافية."

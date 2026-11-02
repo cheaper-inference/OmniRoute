@@ -14094,6 +14094,10 @@
         "label": "ಹಂಚಿಕೆಯಾದ ಎಗ್ರೆಸ್ ಪೂಲ್ ಕ್ರಮ",
         "description": "ಎಗ್ರೆಸ್ ವಿಳಾಸದ ಆಧಾರದಲ್ಲಿ ಕೋಟಾವನ್ನು ವಿಂಗಡಿಸಲಾದ ಪ್ರೊವೈಡರ್‌ಗಳಿಗಾಗಿ, ಇತ್ತೀಚೆಗೆ ನಿರಾಕರಿಸಲಾದ ಸದಸ್ಯರ ವೀಕ್ಷಿಸಲಾದ ಎಗ್ರೆಸ್ ವಿಳಾಸವನ್ನು ಹಂಚಿಕೊಳ್ಳುವ ಪೂಲ್ ಸದಸ್ಯರಿಗೆ ಆರೋಗ್ಯಕರ ಸದಸ್ಯರ ನೇರವಾಗಿ ಕೆಳಗೆ ಶ್ರೇಯಾಂಕ ನೀಡಿ. ಕೇವಲ ಕ್ರಮ ಮಾತ್ರ, ಎಂದಿಗೂ ಹೊರಗಿಡಲಾಗುವುದಿಲ್ಲ. ಇದಕ್ಕೆ PROXY_SKIP_RECENTLY_FAILED ಅಗತ್ಯವಿದೆ, ಇದು ತಾನು ಓದುವ ನಿರಾಕರಣೆ ಸಿಗ್ನಲ್ ಅನ್ನು ಉತ್ಪಾದಿಸುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಆಯ್ಕೆಯ ಕ್ರಮವು ನಿಖರವಾಗಿ ಸಾಮಾನ್ಯ ರೊಟೇಶನ್ ಆಗಿದೆ."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ರೊಟೇಶನ್ ಅಟ್ರಿಬ್ಯೂಷನ್ ಲಾಗಿಂಗ್",
         "description": "Opencode ರೊಟೇಶನ್ ಯಾವ ಖಾತೆಯು ಸೇವೆ ಸಲ್ಲಿಸಿದೆ ಅಥವಾ ಸ್ಕಿಪ್ ಮಾಡಲಾಗಿದೆ ಎಂಬುದನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತದೆ (ಮರೆಮಾಡಲಾದ id ಗಳು ಮಾತ್ರ, ಎಂದಿಗೂ ಪೂರ್ಣ ಖಾತೆ id ಗಳಲ್ಲ) ಮತ್ತು ಪ್ರಾಕ್ಸಿ ಲಾಗ್ ನಮೂದುಗಳನ್ನು ಅವುಗಳ ವಿನಂತಿಗೆ ಲಿಂಕ್ ಮಾಡುತ್ತದೆ, ಇದರಿಂದ ಆಪರೇಟರ್ ಸ್ಕಿಪ್ ಮಾಡಲಾದ ಖಾತೆಗಳನ್ನು ಬಳಸದ ಖಾತೆಗಳಿಂದ ಪ್ರತ್ಯೇಕಿಸಿ ತಿಳಿಯಬಹುದು. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಯಾವುದೇ ಹೆಚ್ಚುವರಿ ಲಾಗ್ ಸಾಲುಗಳಿಲ್ಲ, ಯಾವುದೇ ಹೆಚ್ಚುವರಿ ಕಾಲಮ್‌ಗಳನ್ನು ಬರೆಯಲಾಗುವುದಿಲ್ಲ."

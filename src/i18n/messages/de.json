@@ -14094,6 +14094,10 @@
         "label": "Pool-Reihenfolge bei geteiltem Egress",
         "description": "Ordnet bei Anbietern, deren Kontingente nach Egress-Adresse aufgeteilt sind, ein Pool-Mitglied mit derselben beobachteten Egress-Adresse wie ein kürzlich abgewiesenes Mitglied direkt hinter intakten Mitgliedern ein. Nur Sortierung, niemals Ausschluss. Erfordert PROXY_SKIP_RECENTLY_FAILED, welches das gelesene Ablehnungssignal erzeugt. Standardmäßig deaktiviert: Die Auswahlreihenfolge entspricht exakt der einfachen Rotation."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Protokollierung der Rotationszuordnung",
         "description": "Die opencode-Rotation zeichnet auf, welcher Account Anfragen bedient hat oder übersprungen wurde (nur maskierte IDs, niemals vollständige Account-IDs), und verknüpft Proxy-Log-Einträge mit ihrer Anfrage, sodass Betreiber übersprungene von ungenutzten Accounts unterscheiden können. Standardmäßig deaktiviert: Es werden keine zusätzlichen Log-Zeilen oder Spalten geschrieben."

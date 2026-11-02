@@ -14094,6 +14094,10 @@
         "label": "סדר מאגר לפי כתובת יציאה משותפת",
         "description": "עבור ספקים שהמכסה שלהם מחולקת לפי כתובת יציאה, דרג חבר מאגר שחולק את כתובת היציאה הנצפית של חבר שנדחה לאחרונה מיד מתחת לחברים תקינים. שינוי סדר בלבד, לעולם לא מוחרג. דורש את PROXY_SKIP_RECENTLY_FAILED, המפיק את אות הדחייה שהוא קורא. מושבת כברירת מחדל: סדר הבחירה זהה בדיוק לרוטציה הרגילה."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "תיעוד שיוך ברוטציה",
         "description": "רוטציית opencode מתעדת איזה חשבון שירת או דולג (מזהים מוסווים בלבד, לעולם לא מזהי חשבון מלאים) ומקשרת רשומות יומן פרוקסי לבקשה שלהן, כך שהמפעיל יכול להבדיל בין חשבונות שדולגו לחשבונות שלא היו בשימוש. מושבת כברירת מחדל: לא נכתבות שורות יומן נוספות, ולא נכתבות עמודות נוספות."

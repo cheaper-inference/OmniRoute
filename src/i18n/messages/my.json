@@ -14171,6 +14171,10 @@
         "label": "Shared Egress Pool အစီအစဉ်",
         "description": "Quota ကို egress လိပ်စာအလိုက် ခွဲဝေသတ်မှတ်ထားသည့် provider များအတွက် မကြာသေးမီက ငြင်းပယ်ခံခဲ့ရသောအဖွဲ့ဝင်နှင့် တူညီသော egress လိပ်စာကို မျှဝေသုံးစွဲနေသည့် pool အဖွဲ့ဝင်အား ကောင်းမွန်သောအဖွဲ့ဝင်များ၏ အောက်တွင် အဆင့်သတ်မှတ်ပေးသည်။ အစီအစဉ်သတ်မှတ်ရုံသာဖြစ်ပြီး မည်သည့်အခါမျှ ဖယ်ထုတ်မည် မဟုတ်ပါ။ ၎င်းဖတ်ရှုမည့် ငြင်းပယ်မှုအချက်ပြသင်္ကေတကို ထုတ်ပေးသော PROXY_SKIP_RECENTLY_FAILED လိုအပ်ပါသည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- ရွေးချယ်မှုအစီအစဉ်သည် သာမန် အလှည့်ကျစနစ်အတိုင်း အတိအကျ ဖြစ်သည်။"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotation Attribution မှတ်တမ်းတင်ခြင်း",
         "description": "Opencode အလှည့်ကျစနစ်သည် မည်သည့်အကောင့်က ဝန်ဆောင်မှုပေးခဲ့သည် သို့မဟုတ် ကျော်သွားခဲ့သည်ကို မှတ်တမ်းတင်ပြီး (ဖုံးကွယ်ထားသော ID များကိုသာဖြစ်ပြီး အကောင့် ID အပြည့်အစုံ မဟုတ်ပါ) proxy log မှတ်တမ်းများကို သက်ဆိုင်ရာ request နှင့် ချိတ်ဆက်ပေးသောကြောင့် operator အနေဖြင့် ကျော်သွားသောအကောင့်များနှင့် အသုံးမပြုသောအကောင့်များကို ခွဲခြားသိရှိနိုင်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- log လိုင်းအပိုများနှင့် ကော်လံအပိုများ ရေးသားမည်မဟုတ်ပါ။"

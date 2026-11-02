@@ -14094,6 +14094,10 @@
         "label": "Koplietotās izejošās plūsmas pūla secība",
         "description": "Pakalpojumu sniedzējiem, kuru kvota tiek grupēta pēc izejošās adreses, ierindot pūla dalībnieku, kuram ir kopīga novērotā izejošā adrese ar nesen noraidītu dalībnieku, tieši aiz veselajiem dalībniekiem. Tikai secība, nekad netiek izslēgts. Nepieciešams PROXY_SKIP_RECENTLY_FAILED, kas nodrošina noraidījuma signālu tā nolasīšanai. Pēc noklusējuma izslēgts: atlases secība precīzi atbilst parastajai rotācijai."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotācijas atribūcijas reģistrēšana",
         "description": "Opencode rotācija reģistrē, kurš konts apkalpoja pieprasījumu vai tika izlaists (tikai maskēti ID, nekad pilni kontu ID), un sasaista starpniekservera žurnāla ierakstus ar to pieprasījumu, lai operators varētu atšķirt izlaistos kontus no neizmantotajiem. Pēc noklusējuma izslēgts: netiek rakstītas papildu žurnāla rindas vai kolonnas."

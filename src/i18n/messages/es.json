@@ -14094,6 +14094,10 @@
         "label": "Orden del pool por salida compartida",
         "description": "Para proveedores cuya cuota se agrupa por dirección de salida, clasifica a un miembro del pool que comparta la dirección de salida observada de un miembro rechazado recientemente justo por debajo de los miembros en buen estado. Solo afecta al orden, nunca se excluye. Requiere PROXY_SKIP_RECENTLY_FAILED, que genera la señal de rechazo que este lee. Desactivado por defecto: el orden de selección es exactamente la rotación simple."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Registro de atribución de rotación",
         "description": "La rotación de opencode registra qué cuenta sirvió o se omitió (solo identificadores enmascarados, nunca identificadores de cuenta completos) y vincula las entradas del registro de proxy con su solicitud, de modo que el operador pueda distinguir las cuentas omitidas de las no utilizadas. Desactivado por defecto: no se escriben líneas de registro ni columnas adicionales."

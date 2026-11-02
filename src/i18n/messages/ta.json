@@ -14094,6 +14094,10 @@
         "label": "பங்கு எகசஸ் பூல் வரிசை",
         "description": "egress முகவரி அடிப்படையில் ஒதுக்கீடு பிரிக்கப்படும் வழங்குநர்களுக்கு, சமீபத்தில் மறுக்கப்பட்ட உறுப்பினரின் கவனிக்கப்பட்ட egress முகவரியைப் பகிரும் pool உறுப்பினரை ஆரோக்கியமான உறுப்பினர்களுக்குச் சற்றுக் கீழே வரிசைப்படுத்தவும். வரிசை மட்டுமே; ஒருபோதும் விலக்கப்படாது. இது படிக்கும் மறுப்பு சமிக்ஞையை உருவாக்கும் PROXY_SKIP_RECENTLY_FAILED தேவை. இயல்பாக முடக்கப்பட்டது: தேர்வு வரிசை சாதாரண சுழற்சியே."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "சுழற்சி குறிப்பு ஆவணப்படுத்தல்",
         "description": "opencode சுழற்சி எந்தக் கணக்கு பரிமாற்றம் செய்யப்பட்டது அல்லது தவிர்க்கப்பட்டது என்பதைப் பதிவு செய்கிறது (மறைமுகமான id-கள் மட்டுமே, முழு கணக்கு id-கள் எப்போதும் இல்லை), மேலும் பேராக்ஸ் நாட்குறிப்புகளை அவற்றின் கோரிக்கைகளுடன் இணைக்கிறது, மேலும் நடப்பு நபர் தவறப்பட்ட கணக்குகளைப் பயன்படுத்தப்படாத கணக்குகளில் இருந்து வேறுபடுத்தி அறிய முடியும். இயல்புநிலையில் இயக்கமில்லை: கூடுதல் ஆவண வரிகள் எதுவும் இல்லை, கூடுதல் நெடுவரிசைகள் எழுதப்படாது."

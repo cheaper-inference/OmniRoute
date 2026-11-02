@@ -14094,6 +14094,10 @@
         "label": "مشترکہ ایگریس پول آرڈر",
         "description": "ان فراہم کنندوں کے لیے جن کی کوٹا ایگریس ایڈریس کے لحاظ سے ڈھلان میں تقسیم کی گئی ہے، ایک پول ممبر کو جو حال ہی میں مسترد شدہ ممبر کی مشاہدہ شدہ ایگریس ایڈریس شیئر کرتا ہے، صحت مند ممبروں کے بالکل نیچے رینک کریں۔ صرف ترتیب، کبھی استثناء نہیں۔ اسے PROXY_SKIP_RECENTLY_FAILED درکار ہے، جو اس مستردگی سیگنل کو پیدا کرتی ہے جسے یہ پڑھتا ہے۔ بطورِ ڈیفالٹ آف ہے: انتخاب کا ترتیب بالکل عام روٹیشن جیسا ہی ہے۔"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "روٹیشن ایٹری بیوشن لاگنگ",
         "description": "Opencode روٹیشن یہ ریکارڈ کرتی ہے کہ کون سا اکاؤنٹ فراہم ہوا یا نظرانداز کیا گیا (صرف ماسکڈ آئی ڈیز، کبھی پورا اکاؤنٹ آئی ڈی نہیں) اور پراکسی لاگ اندراجات کو اپنے درخواست سے جوڑتی ہے، تاکہ آپریٹر نظرانداز کردہ اکاؤنٹس کو غیر استعمال شدہ اکاؤنٹس سے پہچان سکتا ہے۔ بطورِ ڈیفالٹ آف ہے: کوئی اضافی لاگ لائنز نہیں، کوئی اضافی کالمز لکھے نہیں جاتے۔"

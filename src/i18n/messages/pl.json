@@ -14094,6 +14094,10 @@
         "label": "Kolejność w puli współdzielonego egressu",
         "description": "W przypadku dostawców, których limit jest dzielony według adresu wyjściowego (egress), umieszcza członka puli współdzielącego zaobserwowany adres wyjściowy niedawno odrzuconego członka tuż za sprawnymi członkami. Wpływa tylko na kolejność, nigdy nie wyklucza. Wymaga PROXY_SKIP_RECENTLY_FAILED, który generuje odczytywany sygnał odmowy. Domyślnie wyłączone: kolejność wyboru jest dokładnie taka sama jak w zwykłej rotacji."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rejestrowanie atrybucji rotacji",
         "description": "Rotacja opencode rejestruje, które konto obsłużyło żądanie lub zostało pominięte (wyłącznie zamaskowane identyfikatory, nigdy pełne identyfikatory kont) i łączy wpisy w dzienniku proxy z ich żądaniem, dzięki czemu operator może odróżnić pominięte konta od nieużywanych. Domyślnie wyłączone: brak dodatkowych wierszy dziennika i brak zapisywanych dodatkowych kolumn."

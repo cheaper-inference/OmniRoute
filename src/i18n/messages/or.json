@@ -14094,6 +14094,10 @@
         "label": "ଅଂଶୀଦାରିତ ଇଗ୍ରେସ୍ ପୁଲ୍ କ୍ରମ",
         "description": "ଯେଉଁ ପ୍ରଦାନକାରୀଙ୍କ କୋଟା ଇଗ୍ରେସ୍ ଠିକଣା ଦ୍ୱାରା ବଣ୍ଟନ କରାଯାଇଥାଏ, ସେମାନଙ୍କ ପାଇଁ ନିକଟରେ ପ୍ରତ୍ୟାଖ୍ୟାତ ସଦସ୍ୟଙ୍କ ନିରୀକ୍ଷିତ ଇଗ୍ରେସ୍ ଠିକଣା ଅଂଶୀଦାର କରୁଥିବା ଏକ ପୁଲ୍ ସଦସ୍ୟଙ୍କୁ ସୁସ୍ଥ ସଦସ୍ୟଙ୍କ ଠିକ୍ ତଳେ ସ୍ଥାନିତ କରନ୍ତୁ। କେବଳ କ୍ରମ, କଦାପି ବାଦ୍ ଦିଆଯାଏ ନାହିଁ। PROXY_SKIP_RECENTLY_FAILED ଆବଶ୍ୟକ, ଯାହା ଏହା ପଢ଼ୁଥିବା ପ୍ରତ୍ୟାଖ୍ୟାନ ସଙ୍କେତ ଉତ୍ପନ୍ନ କରେ। ଡିଫଲ୍ଟ ଭାବରେ ଅଫ୍ ଅଛି: ଚୟନ କ୍ରମ ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ ସାଧାରଣ ରୋଟେସନ୍ ଅଟେ।"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ରୋଟେସନ୍ ଆଟ୍ରିବ୍ୟୁସନ୍ ଲଗିଂ",
         "description": "Opencode ରୋଟେସନ୍ ରେକର୍ଡ କରେ ଯେ କେଉଁ ଆକାଉଣ୍ଟ ସର୍ଭ କରିଥିଲା କିମ୍ବା ଏଡ଼ାଇ ଦିଆଯାଇଥିଲା (କେବଳ ମାସ୍କ୍ ହୋଇଥିବା id, କଦାପି ସମ୍ପୂର୍ଣ୍ଣ ଆକାଉଣ୍ଟ id ନୁହେଁ) ଏବଂ ପ୍ରକ୍ସି ଲଗ୍ ଏଣ୍ଟ୍ରିଗୁଡ଼ିକୁ ସେମାନଙ୍କ ଅନୁରୋଧ ସହିତ ଲିଙ୍କ୍ କରେ, ଯାହାଦ୍ୱାରା ଅପରେଟର୍ ବାଦ୍ ଦିଆଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଅବ୍ୟବହୃତ ଆକାଉଣ୍ଟଗୁଡ଼ିକଠାରୁ ପୃଥକ ଭାବରେ ଚିହ୍ନିପାରିବେ। ଡିଫଲ୍ଟ ଭାବରେ ଅଫ୍ ଅଛି: କୌଣସି ଅତିରିକ୍ତ ଲଗ୍ ଧାଡ଼ି କିମ୍ବା ଅତିରିକ୍ତ କଲମ୍ ଲେଖାଯାଏ ନାହିଁ।"

@@ -14171,6 +14171,10 @@
         "label": "ਸਾਂਝਾ ਐਗਰੈੱਸ ਪੂਲ ਕ੍ਰਮ",
         "description": "ਉਨ੍ਹਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ ਜਿਨ੍ਹਾਂ ਦਾ ਕੋਟਾ ਐਗਰੈੱਸ ਪਤੇ ਅਨੁਸਾਰ ਨਿਰਧਾਰਤ ਕੀਤਾ ਗਿਆ ਹੈ, ਹਾਲ ਹੀ ਵਿੱਚ ਅਸਵੀਕਾਰ ਕੀਤੇ ਗਏ ਮੈਂਬਰ ਦੇ ਦੇਖੇ ਗਏ ਐਗਰੈੱਸ ਪਤੇ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਵਾਲੇ ਪੂਲ ਮੈਂਬਰ ਨੂੰ ਤੰਦਰੁਸਤ ਮੈਂਬਰਾਂ ਤੋਂ ਤੁਰੰਤ ਹੇਠਾਂ ਦਰਜਾ ਦਿਓ। ਸਿਰਫ਼ ਕ੍ਰਮਬੱਧ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਕਦੇ ਬਾਹਰ ਨਹੀਂ ਕੱਢਿਆ ਜਾਂਦਾ। PROXY_SKIP_RECENTLY_FAILED ਦੀ ਲੋੜ ਹੈ, ਜੋ ਅਸਵੀਕਾਰਤਾ ਸਿਗਨਲ ਤਿਆਰ ਕਰਦਾ ਹੈ ਜਿਸਨੂੰ ਇਹ ਪੜ੍ਹਦਾ ਹੈ। ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ: ਚੋਣ ਕ੍ਰਮ ਬਿਲਕੁਲ ਸਧਾਰਨ ਰੋਟੇਸ਼ਨ ਹੁੰਦਾ ਹੈ।"
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ਰੋਟੇਸ਼ਨ ਐਟਰੀਬਿਊਸ਼ਨ ਲੌਗਿੰਗ",
         "description": "Opencode ਰੋਟੇਸ਼ਨ ਰਿਕਾਰਡ ਕਰਦੀ ਹੈ ਕਿ ਕਿਸ ਖਾਤੇ ਨੇ ਸੇਵਾ ਦਿੱਤੀ ਜਾਂ ਕਿਸਨੂੰ ਛੱਡਿਆ ਗਿਆ ਸੀ (ਸਿਰਫ਼ ਮਾਸਕ ਕੀਤੀਆਂ ID, ਕਦੇ ਵੀ ਪੂਰੀਆਂ ਖਾਤਾ ID ਨਹੀਂ) ਅਤੇ ਪ੍ਰੌਕਸੀ ਲੌਗ ਐਂਟਰੀਆਂ ਨੂੰ ਉਨ੍ਹਾਂ ਦੀ ਬੇਨਤੀ ਨਾਲ ਜੋੜਦੀ ਹੈ, ਤਾਂ ਜੋ ਓਪਰੇਟਰ ਛੱਡੇ ਗਏ ਖਾਤਿਆਂ ਨੂੰ ਨਾ-ਵਰਤੇ ਖਾਤਿਆਂ ਤੋਂ ਵੱਖਰਾ ਪਛਾਣ ਸਕੇ। ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ: ਕੋਈ ਵਾਧੂ ਲੌਗ ਲਾਈਨਾਂ ਨਹੀਂ, ਕੋਈ ਵਾਧੂ ਕਾਲਮ ਨਹੀਂ ਲਿਖੇ ਜਾਂਦੇ।"

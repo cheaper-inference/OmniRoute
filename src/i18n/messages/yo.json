@@ -14094,6 +14094,10 @@
         "label": "Àyà ìṣàwísí Pool Egress Tí Wọ́n Kọ́pa Rárá",
         "description": "Fún àwọn ìṣàyàn tí oṣùwọ̀n wọn jẹ́ àyà tí a túmọ̀ pẹ̀lú àdírẹ́sì egress, sọ ìṣàwísí olóòrì pool tí ó gbé àdírẹ́sì egress tí a rí jọwọ́ tí olóòrì tí ó dàbá ìyọ̀ jọ. Àyà ìṣàwísí nìkan, kì í ṣe àyà tí a fí iṣàwísí. Ó nílò PROXY_SKIP_RECENTLY_FAILED, èyí tí ó ṣe àkọsílẹ̀ ìṣàwísí rẹ̀. Kò ṣiṣẹ́ ní ìbẹ̀rẹ̀: àyà ìṣàwísí jẹ́ àyà ìṣàwísí tó pẹ́ tó àwọn ẹlẹ́ṣẹ́́."
       },
+      "PROXY_REFUSAL_MODEL_SCOPE": {
+        "label": "__MISSING__:Model-Scoped Quota Refusals",
+        "description": "__MISSING__:Scope an opencode quota 429 to the model that hit it, so the same egress keeps serving other models, and clear it only when that model succeeds. Readers with no model (pool rotation, park and replay, admin visibility, selector trigger, health sweep) still see it. Needs PROXY_SKIP_RECENTLY_FAILED, which produces the refusal. Off by default: one model's quota 429 sets the egress aside for every model."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Àkọsílẹ̀ Ìṣẹ̀lẹ̀ Ìṣàwísí",
         "description": "Ìṣàwísí Opencode kọ àwọn akọsilẹ tí ó fìdí rẹ̀ múlẹ̀ pé akọsilẹ kan ni ó kó ìṣàwísí tàbí tí a fí ìṣàwísí (àwọn akọsilẹ tí a fí àwoṣe nìkan, kì í ṣe àwọn akọsilẹ̀ tó ní gbogbo àwọn akọsilẹ̀) àti ó gbe àwọn àkọsilẹ̀ ẹlẹ́ṣẹ́́ mọ́ àwọn ìbéèrè wọn, nígbà tí a lè sọ àwọn akọsilẹ̀ tí a fí ìṣàwísí àti àwọn tí a kò ṣàkójọpadà. Kò ṣiṣẹ́ ní ìbẹ̀rẹ̀: kò sí àwọn àkọsílẹ̀ àdárà, kò sí àwọn àdákọ àdárà tí a kọ."
