@@ -22,6 +22,11 @@ test("Every CLI_TOOLS entry passes CliCatalogEntrySchema.parse() without error",
   }
 });
 
+test("Pi manual configuration title survives catalog parsing", () => {
+  const parsed = CliCatalogEntrySchema.parse(CLI_TOOLS.pi);
+  assert.equal(parsed.codeBlock?.title, "~/.pi/agent/models.json");
+});
+
 test("CliCatalogSchema.parse() accepts the full CLI_TOOLS record", () => {
   const result = CliCatalogSchema.safeParse(CLI_TOOLS);
   assert.equal(
