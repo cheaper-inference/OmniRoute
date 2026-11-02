@@ -758,7 +758,7 @@ export function normalizeDiscoveredModels(
       ...(record.alwaysThinking === true ? { alwaysThinking: true } : {}),
       ...(typeof record.supportsTools === "boolean"
         ? { supportsTools: record.supportsTools }
-        : caps.function_calling === true
+        : providerId === "mistral" && caps.function_calling === true
           ? { supportsTools: true }
           : {}),
       ...(typeof record.supportsVideo === "boolean" ? { supportsVideo: record.supportsVideo } : {}),

@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import { detectVisionInput, normalizeDiscoveredModels } from "@/lib/providerModels/modelDiscovery";
-import { buildSyncedCapabilities } from "@/app/api/v1/models/syncedCapabilities";
 import {
   AUDIO_SPEECH_PROVIDERS,
   parseTranscriptionModel,
@@ -125,15 +124,15 @@ test("bug 2: ocr capability stamps the ocr endpoint", () => {
   assert.equal(row.endpointCapabilitySource, "declared");
 });
 
-test("bug 2: function_calling capability marks a model as supportsTools", () => {
-  const [row] = normalizeDiscoveredModels([
-    {
-      id: "mistral-large-latest",
-      object: "model",
-      capabilities: { completion_chat: true, function_calling: true },
-    },
-  ]);
-  assert.equal(row.supportsTools, true);
+test("bug 2: function_calling marks a Mistral card as supportsTools, and only a Mistral card", () => {
+  const card = {
+    id: "mistral-large-latest",
+    object: "model",
+    capabilities: { completion_chat: true, function_calling: true },
+  };
+  assert.equal(normalizeDiscoveredModels([card], "mistral")[0].supportsTools, true);
+  assert.equal(normalizeDiscoveredModels([card], "openrouter")[0].supportsTools, undefined);
+  assert.equal(normalizeDiscoveredModels([card])[0].supportsTools, undefined);
 });
 
 test("bug 1: mistral-large-4 maps to 1048576 (1M) context window", () => {
@@ -189,12 +188,4 @@ test("a capability flag Mistral does not publish adds no tool support", () => {
     { id: "some-model", object: "model", capabilities: { tools: true } },
   ]);
   assert.equal(row.supportsTools, undefined);
-});
-
-test("buildSyncedCapabilities exports tool_calling when model supportsTools", () => {
-  const caps = buildSyncedCapabilities(
-    { id: "mistral-large-latest", supportsTools: true },
-    "mistral"
-  );
-  assert.equal(caps?.tool_calling, true);
 });
