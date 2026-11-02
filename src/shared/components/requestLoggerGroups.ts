@@ -10,6 +10,44 @@ type GroupRow = {
   error?: unknown;
   upstreamHttp?: unknown;
 };
+function countGroupRows(
+  group: GroupRow[],
+  summaries: Map<string, ReturnType<typeof parseUpstreamHttp>>
+): number {
+  let groupSize = 0;
+  const represented = new Set<string>();
+  for (const row of group) {
+    const summary = parseUpstreamHttp(row.upstreamHttp);
+    if (summary && summaries.has(summary.groupId)) {
+      if (!represented.has(summary.groupId)) {
+        const logicalSummary = summaries.get(summary.groupId);
+        groupSize += logicalSummary?.role === "logical" ? logicalSummary.total : 0;
+        represented.add(summary.groupId);
+      }
+    } else groupSize++;
+  }
+  return groupSize;
+}
+
+function getGroupStatus(
+  logicalRows: GroupRow[],
+  logical: GroupRow[],
+  summaries: Map<string, ReturnType<typeof parseUpstreamHttp>>
+): "healed" | "failed" | null {
+  const final = logical[0];
+  const priorFailure =
+    logical.slice(1).some(isHttpLogError) ||
+    [...summaries.values()].some((summary) => summary?.role === "logical" && summary.failed > 0);
+  const succeeded = final && !isHttpLogError(final) && final.status >= 200 && final.status < 400;
+  return logicalRows[0]?.active
+    ? null
+    : final && isHttpLogError(final)
+      ? "failed"
+      : succeeded && priorFailure
+        ? "healed"
+        : null;
+}
+
 export function requestGroupMetadata(rows: GroupRow[]) {
   const groups = new Map<string, GroupRow[]>();
   for (const row of rows) {
@@ -33,32 +71,11 @@ export function requestGroupMetadata(rows: GroupRow[]) {
       const summary = parseUpstreamHttp(row.upstreamHttp);
       if (summary?.role === "logical") summaries.set(summary.groupId, summary);
     }
-    let groupSize = 0;
-    const represented = new Set<string>();
-    for (const row of group) {
-      const summary = parseUpstreamHttp(row.upstreamHttp);
-      if (summary && summaries.has(summary.groupId)) {
-        if (!represented.has(summary.groupId)) {
-          const logicalSummary = summaries.get(summary.groupId);
-          groupSize += logicalSummary?.role === "logical" ? logicalSummary.total : 0;
-          represented.add(summary.groupId);
-        }
-      } else groupSize++;
-    }
-    const final = logical[0];
-    const priorFailure =
-      logical.slice(1).some(isHttpLogError) ||
-      [...summaries.values()].some((summary) => summary?.role === "logical" && summary.failed > 0);
-    const succeeded = final && !isHttpLogError(final) && final.status >= 200 && final.status < 400;
+    const groupSize = countGroupRows(group, summaries);
+    const groupStatus = getGroupStatus(logicalRows, logical, summaries);
     result.set(cid, {
       groupSize: Math.max(1, groupSize),
-      groupStatus: logicalRows[0]?.active
-        ? null
-        : final && isHttpLogError(final)
-          ? "failed"
-          : succeeded && priorFailure
-            ? "healed"
-            : null,
+      groupStatus,
     });
   }
   return result;

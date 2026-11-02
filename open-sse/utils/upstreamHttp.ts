@@ -55,25 +55,28 @@ const upstreamHttpSchema = z.discriminatedUnion("role", [
 ]);
 export type UpstreamHttpSummary = z.infer<typeof upstreamHttpSchema>;
 
+function isValidHttpAttempt(send: HttpAttemptRecord): boolean {
+  if (new TextEncoder().encode(JSON.stringify(send)).length > 1024) return false;
+  if (
+    send.outcome === "response"
+      ? send.status === null || send.endedAt === null
+      : send.status !== null || send.durationMs !== null
+  )
+    return false;
+  if (send.outcome === "no_response_observed") {
+    if (send.endedAt !== null || send.cutoffAt === null) return false;
+  } else if (send.endedAt === null || send.cutoffAt !== null) return false;
+  if (send.outcome === "response" && send.durationMs === null) return false;
+  return true;
+}
+
 /** One projection for persistence, API DTOs and browser display; never returns unknown members. */
 export function parseUpstreamHttp(value: unknown): UpstreamHttpSummary | null {
   const result = upstreamHttpSchema.safeParse(value);
   if (!result.success) return null;
   const summary = result.data;
   const send = summary.send;
-  if (send) {
-    if (new TextEncoder().encode(JSON.stringify(send)).length > 1024) return null;
-    if (
-      send.outcome === "response"
-        ? send.status === null || send.endedAt === null
-        : send.status !== null || send.durationMs !== null
-    )
-      return null;
-    if (send.outcome === "no_response_observed") {
-      if (send.endedAt !== null || send.cutoffAt === null) return null;
-    } else if (send.endedAt === null || send.cutoffAt !== null) return null;
-    if (send.outcome === "response" && send.durationMs === null) return null;
-  }
+  if (send && !isValidHttpAttempt(send)) return null;
   if (
     summary.role === "logical" &&
     (summary.failed > summary.total ||

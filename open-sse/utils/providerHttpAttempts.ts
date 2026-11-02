@@ -105,6 +105,7 @@ export class HttpAttemptCollector {
       )
       .sort((a, b) => a.ordinal - b.ordinal);
     const send = records.find((record) => record.id === associated?.record.id) ?? null;
+    const logicalStatus = status ?? 0;
     const summary: UpstreamHttpSummary = {
       version: 1,
       groupId: this.groupId,
@@ -114,7 +115,11 @@ export class HttpAttemptCollector {
       failed: this.failed,
       omitted: this.total - records.length,
       logicalOutcome:
-        status >= 400 || error ? "failure" : status >= 200 && status < 400 ? "success" : "unknown",
+        logicalStatus >= 400 || error
+          ? "failure"
+          : logicalStatus >= 200 && logicalStatus < 400
+            ? "success"
+            : "unknown",
     };
     this.first = [];
     this.latest = null;

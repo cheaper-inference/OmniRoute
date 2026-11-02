@@ -1,4 +1,8 @@
-import { TRANSPORT_ERROR_LABEL, NO_RESPONSE_LABEL } from "../../utils/upstreamHttp.ts";
+import {
+  TRANSPORT_ERROR_LABEL,
+  NO_RESPONSE_LABEL,
+  type HttpAttemptRecord,
+} from "../../utils/upstreamHttp.ts";
 import type {
   HttpAttemptCollector,
   HttpAttemptSelection,
@@ -412,6 +416,35 @@ type HttpAttemptLogContext = Pick<
   "httpAttempts" | "correlationId" | "traceId" | "noLogEnabled" | "apiKeyInfo" | "comboName"
 >;
 
+function toUpstreamHttpAttemptLog(
+  send: HttpAttemptRecord,
+  groupId: string,
+  ctx: HttpAttemptLogContext
+): Parameters<typeof saveUpstreamHttpAttempt>[0] {
+  return {
+    timestamp: new Date(send.endedAt ?? send.cutoffAt ?? send.startedAt).toISOString(),
+    method: send.method,
+    path: send.endpoint,
+    status: send.status ?? 0,
+    model: send.model,
+    provider: send.provider,
+    connectionId: send.connectionId,
+    duration: send.durationMs ?? 0,
+    error:
+      send.outcome === "transport_error"
+        ? TRANSPORT_ERROR_LABEL
+        : send.outcome === "no_response_observed"
+          ? NO_RESPONSE_LABEL
+          : null,
+    correlationId: ctx.correlationId || ctx.traceId,
+    noLog: Boolean(ctx.noLogEnabled),
+    apiKeyId: ctx.apiKeyInfo?.id,
+    apiKeyName: ctx.apiKeyInfo?.name,
+    comboName: ctx.comboName,
+    upstreamHttp: { version: 1, groupId, role: "attempt", send },
+  };
+}
+
 /** One synchronous seal shared by terminal logging and exits before stream handoff. */
 export function drainUpstreamHttpAttempts(
   ctx: HttpAttemptLogContext,
@@ -427,28 +460,9 @@ export function drainUpstreamHttpAttempts(
       for (const send of observed.records) {
         if (send.id === observed.summary.send?.id) continue;
         try {
-          saveUpstreamHttpAttempt({
-            timestamp: new Date(send.endedAt ?? send.cutoffAt ?? send.startedAt).toISOString(),
-            method: send.method,
-            path: send.endpoint,
-            status: send.status ?? 0,
-            model: send.model,
-            provider: send.provider,
-            connectionId: send.connectionId,
-            duration: send.durationMs ?? 0,
-            error:
-              send.outcome === "transport_error"
-                ? TRANSPORT_ERROR_LABEL
-                : send.outcome === "no_response_observed"
-                  ? NO_RESPONSE_LABEL
-                  : null,
-            correlationId: ctx.correlationId || ctx.traceId,
-            noLog: Boolean(ctx.noLogEnabled),
-            apiKeyId: ctx.apiKeyInfo?.id,
-            apiKeyName: ctx.apiKeyInfo?.name,
-            comboName: ctx.comboName,
-            upstreamHttp: { version: 1, groupId: observed.summary.groupId, role: "attempt", send },
-          }).catch(() => {});
+          saveUpstreamHttpAttempt(
+            toUpstreamHttpAttemptLog(send, observed.summary.groupId, ctx)
+          ).catch(() => {});
         } catch {}
       }
     }

@@ -499,6 +499,10 @@ export async function sendAntigravityRequest(
   return { response, finalHeaders, upstreamHttpSelection: selectHttpResponse(response) };
 }
 
+function isCreditsRetryAborted(signal: AbortSignal | null | undefined, error: unknown): boolean {
+  return Boolean(signal?.aborted || isAbortError(error));
+}
+
 /**
  * Retry the SAME url with `enabledCreditTypes: ["GOOGLE_ONE_AI"]` injected, for a
  * quota_exhausted 429 that hasn't already tried credits. Returns the result to hand
@@ -589,7 +593,7 @@ export async function tryCreditsRetry(
     markCreditsExhausted(accountId);
     return null;
   } catch (creditsErr) {
-    if (signal?.aborted || isAbortError(creditsErr)) {
+    if (isCreditsRetryAborted(signal, creditsErr)) {
       throw signal?.reason ?? creditsErr;
     }
     handleCreditsFailure(credentials?.accessToken || "");
