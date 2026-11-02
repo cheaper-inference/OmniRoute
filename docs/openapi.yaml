@@ -2329,9 +2329,64 @@ paths:
     get:
       tags: [Models]
       summary: List models (management)
+      parameters:
+        - name: all
+          in: query
+          description: "`true` lists every model, not only those with an active provider connection."
+          schema:
+            type: string
+        - name: withLimits
+          in: query
+          description: >-
+            Opt-in. `1`/`true` adds `contextWindow`, `maxInputTokens`, `maxOutputTokens` and
+            `capsSource` (per-limit provenance) to each model row. Omitted or `0`/`false`
+            keeps the default payload unchanged.
+          schema:
+            type: string
+            enum: ["1", "true", "0", "false"]
       responses:
         "200":
           description: Internal model list with aliases
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  models:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        provider:
+                          type: string
+                        model:
+                          type: string
+                        name:
+                          type: string
+                        fullModel:
+                          type: string
+                        alias:
+                          type: string
+                        available:
+                          type: boolean
+                        supportsVision:
+                          type: boolean
+                        contextWindow:
+                          type: integer
+                          nullable: true
+                          description: Only with `withLimits=1`.
+                        maxInputTokens:
+                          type: integer
+                          nullable: true
+                          description: Only with `withLimits=1`.
+                        maxOutputTokens:
+                          type: integer
+                          nullable: true
+                          description: Only with `withLimits=1`.
+                        capsSource:
+                          $ref: "#/components/schemas/ModelLimitSources"
+        "400":
+          description: Invalid `withLimits` value
 
   /api/models/alias:
     post:
@@ -17630,6 +17685,23 @@ components:
         updatedAt:
           type: string
           format: date-time
+
+    ModelLimitSources:
+      type: object
+      description: >-
+        Which rule supplied each resolved token limit (`GET /api/models?withLimits=1`).
+        Values: `override:context`, `override:max_input`, `override:max_output`,
+        `static-authoritative:<provider>/<model>`, `synced:<provider>/<model>` (models.dev),
+        `registry:<provider>/<model>`, `spec:<model>`, optionally prefixed with `effort-base:`
+        when borrowed from an effort variant's base model, or `none`.
+      properties:
+        contextWindow:
+          type: string
+        maxInputTokens:
+          type: string
+        maxOutputTokens:
+          type: string
+      required: [contextWindow, maxInputTokens, maxOutputTokens]
 
     ProviderConnection:
       type: object
