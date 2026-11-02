@@ -31,22 +31,11 @@ osv와 Trivy는 **지속적으로 증가하는** CVE 데이터베이스와 종�
 
 두 게이트 모두 도구가 없거나 측정에 실패할 경우 (PATH에 osv-scanner 없음, osv.dev/네트워크 연결 불가, 유효하지 않은 JSON) **정상적으로 건너뜠니다** (exit 0). — **측정** 실패는 절대 차단하지 않으며, **측정된** 회귀만 차단합니다.
 
-## 알려진 허용된 위험
+## 폐기된 종속성 위험
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+고정된 promptfoo 개발 도구를 업그레이드한 후 루트 잠금 파일에는 더 이상 `extract-zip` 또는 이를 가리키는 종속성 연결이 포함되지 않습니다. 이로써 #14482에서 추적된, 이전에 허용되었던 `promptfoo` → `@openai/codex-security` → `extract-zip` 체인이 폐기되었습니다. `tests/unit/extract-zip-14482-exposure.test.ts`의 회귀 검사는 이 체인의 재도입을 거부하며 프로덕션 코드에서의 가져오기 금지를 계속 유지합니다.
 
-`extract-zip@2.0.1`에는 패치되지 않은 두 가지 심각도 높은 심볼릭 링크 트래버설 권고 사항이 있습니다.
-위의 CVE Variance 해결책 중 "업스트림 수정 없음" 분기에 따라, 이는
-**허용된 위험**이며, 버전 업그레이드가 아닙니다:
-
-- **체인:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  `package-lock.json`을 통해 확인되었습니다 — 전체 의존성 트리에서 정확히 하나의 패키지(`@openai/codex-security`)가 `extract-zip`을 선언하고, 정확히 하나의 패키지(`promptfoo`)가 `@openai/codex-security`를 선언합니다.
-- **체인 내 어디에도 수정된 릴리스가 존재하지 않습니다.** `extract-zip@2.0.1` (2020년 발행)은 해당 패키지의 최종 릴리스이며, 더 이상 유지보수되지 않습니다. `@openai/codex-security`의 현재 npm-latest (`0.1.29`)는 여전히 `extract-zip@2.0.1`을 사용합니다.
-- **프로덕션에서 접근 불가능.** `promptfoo`는 devDependency 전용이며 (`dependencies`에 절대 나열되지 않음), `src/`, `open-sse/`, `bin/` 아래의 어떤 파일도 `extract-zip` npm 패키지를 임포트하지 않습니다 — OmniRoute 자체의 `extractZip()` 헬퍼 (`src/lib/versionManager/binaryManager.ts:93`)는 네이티브 `unzip`/`tar`를 호출하며 관련이 없습니다. `@openai/codex-security` 또한 extract-zip의 `onEntry` 콜백 위에 자체 심볼릭 링크 트래버설 가드를 제공합니다.
-- `package.json` `overrides`를 통해 `extract-zip`을 별칭으로 지정**하지 마십시오** — 유일하게 실행 가능한 드롭인 대체품은 Electron-org-internal이며 `@openai/codex-security` 자체의 `onEntry`/`defaultDirMode`/`defaultFileMode` 검사와 API 호환되지 않습니다. 이를 오버라이드하면 해당 패키지의 보안 검사가 조용히 중단될 것입니다.
-- **기준선:** 측정된 osv `vulnCount` (3)는 이미 고정된 `config/quality/quality-baseline.json` 기준선 (27)보다 훨씬 낮습니다 — 래칫 변경이 필요하지 않습니다.
-- **회귀 방지:** `tests/unit/extract-zip-14482-exposure.test.ts`는 위에서 언급한 체인과 프로덕션 임포트 불가 불변성을 단언합니다. 만약 둘 중 하나라도 깨지면 (예: 향후 PR이 `extract-zip`을 프로덕션에서 접근 가능하게 만들면) CI가 실패합니다.
-- **추적:** 이슈 #14482.
+현재 종속성 수정에서는 호환성 재정의 범위도 Azure identity의 MSAL 클라이언트, get-uri의 FTP 클라이언트 및 OpenCode v1 SDK의 Zod 종속성으로 한정합니다. Azure 토큰 획득과 FTP 검색은 제어된 전송 계층으로 테스트되며, 두 OpenCode 패키지는 각각 자체 빌드 및 테스트 스위트를 실행합니다. 레지스트리 보안 권고 수는 특정 시점의 측정값이며 잠금 파일이 커밋된 후 변경될 수 있습니다.
 
 ## 백로그: Scorecard 권고 → 차단
 

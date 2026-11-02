@@ -31,36 +31,19 @@ Når osv eller Trivy blir røde på grunn av en nylig avslørt CVE, er løsninge
 
 Begge portene **hopper elegant over** (exit 0) når verktøyet mangler eller målingen feiler (osv-scanner ikke i PATH, osv.dev/nettverk utilgjengelig, ugyldig JSON) — en **målingsfeil** blokkerer aldri, kun en **målt** regresjon blokkerer.
 
-## Kjente aksepterte risikoer
+## Risiko ved utfaset avhengighet
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Rotlåsfilen inkluderer ikke lenger `extract-zip` eller en avhengighetskant til den etter
+oppgraderingen av det fastlåste utviklingsverktøyet promptfoo. Dette utfaser den tidligere godtatte
+`promptfoo` → `@openai/codex-security` → `extract-zip`-kjeden som spores i #14482.
+Regresjonskontrollene i `tests/unit/extract-zip-14482-exposure.test.ts` avviser at den
+gjeninnføres, og opprettholder forbudet mot importer fra produksjonskode.
 
-`extract-zip@2.0.1` inneholder to ufiksete symlink-traversal-rådgivninger med høy alvorlighetsgrad.
-I henhold til "ingen oppstrømsfiks"-grenen av CVE Variance-løsningen ovenfor, er dette en
-**akseptert risiko**, ikke en bump:
-
-- **Kjede:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Bekreftet via `package-lock.json` — nøyaktig én pakke i hele avhengighetstreet
-  (`@openai/codex-security`) deklarerer `extract-zip`, og nøyaktig én pakke
-  (`promptfoo`) deklarerer `@openai/codex-security`.
-- **Ingen fikset utgivelse eksisterer noe sted i kjeden.** `extract-zip@2.0.1` (publisert 2020) er pakkens siste utgivelse – den vedlikeholdes ikke. `@openai/codex-security`s
-  nåværende npm-latest (`0.1.29`) trekker fortsatt `extract-zip@2.0.1`.
-- **Uoppnåelig fra produksjon.** `promptfoo` er kun devDependency (aldri oppført
-  under `dependencies`), og ingen fil under `src/`, `open-sse/`, eller `bin/` importerer
-  `extract-zip` npm-pakken — OmniRoutes egen `extractZip()`-hjelper
-  (`src/lib/versionManager/binaryManager.ts:93`) kaller ut til native `unzip`/`tar`
-  og er urelatert. `@openai/codex-security` leverer også sin egen symlink-traversal-
-  beskyttelse på toppen av extract-zips onEntry-callback.
-- **Ikke** alias `extract-zip` via `package.json` `overrides` — den eneste levedyktige
-  drop-in-erstatningen er Electron-org-intern og API-inkompatibel med
-  `@openai/codex-security`s egne onEntry/defaultDirMode/defaultFileMode-kontroller;
-  å overstyre den ville i stillhet bryte pakkens sikkerhetskontroller.
-- **Grunnlinje:** målt osv `vulnCount` (3) er allerede godt under den frosne
-  `config/quality/quality-baseline.json`-grunnlinjen (27) — ingen ratchet-endring nødvendig.
-- **Regresjonsbeskyttelse:** `tests/unit/extract-zip-14482-exposure.test.ts` bekrefter
-  kjeden og den ingen-produksjonsimport-invarianten ovenfor; den feiler CI hvis en av dem
-  noen gang brytes (f.eks. en fremtidig PR gjør `extract-zip` tilgjengelig fra produksjon).
-- **Sporing:** sak #14482.
+Den gjeldende reparasjonen av avhengigheter avgrenser også kompatibilitetsoverstyringer til Azure identity sin
+MSAL-klient, get-uri sin FTP-klient og Zod-avhengigheten til OpenCode v1 SDK. Innhenting av Azure-token
+og FTP-henting testes med kontrollerte transporter. Begge OpenCode-
+pakkene kjører sine egne bygg- og testsuiter. Antallet registervarsler er øyeblikksmålinger
+og kan endres etter at låsfilen er innsendt.
 
 ## Restanse: Scorecard-rådgivning → blokkering
 

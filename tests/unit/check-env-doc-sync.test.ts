@@ -208,6 +208,18 @@ test("runEnvDocSync: shipped allowlist ignores ad-hoc BOT_TOKEN and BOT_URL", ()
   assert.deepEqual(shipped.problems.codeMissingEnv, []);
 });
 
+test("desktop release context is not app configuration, while undocumented app vars still fail", () => {
+  const result = runEnvDocSync({
+    envExampleText: "",
+    envDocText: "",
+    codeVars: new Set(["GITHUB_REPOSITORY", "VERSION", "OMNIROUTE_UNDOCUMENTED_APP_OPTION"]),
+    docOnlyAllowlist: new Set(),
+    envOnlyAllowlist: new Set(),
+  });
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.problems.codeMissingEnv, ["OMNIROUTE_UNDOCUMENTED_APP_OPTION"]);
+});
+
 test("repository contract is in sync (live data)", () => {
   // Uses the real .env.example, docs/ENVIRONMENT.md, and the bundled
   // allowlists. This is the same check that runs in pre-commit / CI.

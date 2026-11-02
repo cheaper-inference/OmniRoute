@@ -31,23 +31,18 @@ osv သို့မဟုတ် Trivy သည် အသစ်ထုတ်ဖေ�
 
 gates နှစ်ခုလုံးသည် tool မရှိခြင်း သို့မဟုတ် တိုင်းတာမှု မအောင်မြင်ခြင်း (osv-scanner သည် PATH တွင်မရှိခြင်း၊ osv.dev/network မရောက်နိုင်ခြင်း၊ invalid JSON) တို့တွင် **ချောမွေ့စွာ ကျော်သွားသည်** (exit 0) — **တိုင်းတာမှု** မအောင်မြင်ခြင်းသည် မည်သည့်အခါမျှ ပိတ်ဆို့ခြင်းမရှိဘဲ၊ **တိုင်းတာထားသော** နောက်ပြန်ဆုတ်မှုကသာ ပိတ်ဆို့သည်။
 
-## လက်ခံထားပြီးသော အန္တရာယ်များ
+## ရပ်ဆိုင်းထားသော dependency ၏ အန္တရာယ်
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+ပင်မ lockfile တွင် pinned လုပ်ထားသော promptfoo development tool ကို အဆင့်မြှင့်တင်ပြီးနောက် `extract-zip` သို့မဟုတ် ၎င်းထံသို့ ဆက်သွယ်ထားသော dependency edge မပါဝင်တော့ပါ။ ထို့ကြောင့် #14482 တွင် ခြေရာခံထားပြီး ယခင်က လက်ခံထားခဲ့သော
+`promptfoo` → `@openai/codex-security` → `extract-zip` ကွင်းဆက်ကို ရပ်ဆိုင်းလိုက်ပါသည်။
+`tests/unit/extract-zip-14482-exposure.test.ts` ရှိ regression စစ်ဆေးမှုများသည် ၎င်းကို
+ပြန်လည်ထည့်သွင်းခြင်းအား ပယ်ချပြီး production code မှ import ပြုလုပ်ခြင်းကို တားမြစ်ထားမှုအား ဆက်လက်ထိန်းသိမ်းထားပါသည်။
 
-`extract-zip@2.0.1` တွင် ပြင်ဆင်မထားသော မြင့်မားသည့် ပြင်းထန်မှုရှိသော symlink-traversal အကြံပြုချက်နှစ်ခု ပါရှိသည်။
-အထက်ပါ CVE Variance ကုစားမှု၏ "upstream fix မရှိ" အကိုင်းအခက်အရ၊ ၎င်းသည် **လက်ခံထားသော အန္တရာယ်** ဖြစ်ပြီး၊ အဆင့်မြှင့်တင်ခြင်း မဟုတ်ပါ-
-
-- **ကွင်းဆက်:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`။
-  `package-lock.json` မှတစ်ဆင့် အတည်ပြုပြီးဖြစ်သည် — dependency tree တစ်ခုလုံးတွင် `extract-zip` ကို ကြေညာထားသည့် package တစ်ခုတည်းသာ (`@openai/codex-security`) ရှိပြီး၊ `@openai/codex-security` ကို ကြေညာထားသည့် package တစ်ခုတည်းသာ (`promptfoo`) ရှိသည်။
-- **ကွင်းဆက်တစ်ခုလုံးတွင် ပြင်ဆင်ပြီးသား ထုတ်ဝေမှု မရှိပါ။** `extract-zip@2.0.1` (2020 တွင် ထုတ်ဝေခဲ့သည်) သည် package ၏ နောက်ဆုံးထုတ်ဝေမှုဖြစ်သည် — ၎င်းကို ထိန်းသိမ်းထားခြင်း မရှိပါ။ `@openai/codex-security` ၏
-  လက်ရှိ npm-latest (`0.1.29`) သည် `extract-zip@2.0.1` ကို ဆက်လက်အသုံးပြုနေဆဲဖြစ်သည်။
-- **ထုတ်လုပ်မှုမှ လက်လှမ်းမမီနိုင်ပါ။** `promptfoo` သည် devDependency-only ဖြစ်သည် (`dependencies` အောက်တွင် ဘယ်တော့မှ စာရင်းမသွင်းပါ)၊ `src/`၊ `open-sse/` သို့မဟုတ် `bin/` အောက်ရှိ မည်သည့်ဖိုင်မှ `extract-zip` npm package ကို import မလုပ်ပါ။ OmniRoute ၏ ကိုယ်ပိုင် `extractZip()` helper
-  (`src/lib/versionManager/binaryManager.ts:93`) သည် native `unzip`/`tar` ကို အသုံးပြုပြီး ဆက်စပ်မှုမရှိပါ။ `@openai/codex-security` သည်လည်း extract-zip ၏ onEntry callback အပေါ်တွင် ၎င်း၏ကိုယ်ပိုင် symlink-traversal guard ကို ထည့်သွင်းထားသည်။
-- `package.json` `overrides` မှတစ်ဆင့် `extract-zip` ကို alias **မလုပ်ပါနှင့်** — တစ်ခုတည်းသော အသုံးပြုနိုင်သည့် drop-in အစားထိုးသည် Electron-org-internal ဖြစ်ပြီး `@openai/codex-security` ၏ ကိုယ်ပိုင် onEntry/defaultDirMode/defaultFileMode စစ်ဆေးမှုများနှင့် API-မကိုက်ညီပါ။ ၎င်းကို override လုပ်ပါက ထို package ၏ လုံခြုံရေးစစ်ဆေးမှုများကို တိတ်တဆိတ် ပျက်စီးစေမည်ဖြစ်သည်။
-- **အခြေခံ:** တိုင်းတာထားသော osv `vulnCount` (3) သည် အေးခဲထားသော `config/quality/quality-baseline.json` အခြေခံ (27) အောက်တွင် ကောင်းစွာရှိနေပြီးဖြစ်သည် — ratchet ပြောင်းလဲမှု မလိုအပ်ပါ။
-- **Regression guard:** `tests/unit/extract-zip-14482-exposure.test.ts` သည် အထက်ပါ ကွင်းဆက်နှင့် ထုတ်လုပ်မှု-import မရှိခြင်း invariant ကို အတည်ပြုသည်။ ၎င်းသည် မည်သည့်အရာမဆို ပျက်စီးသွားပါက (ဥပမာ- အနာဂတ် PR တစ်ခုက `extract-zip` ကို ထုတ်လုပ်မှုမှ လက်လှမ်းမီစေပါက) CI ကို ကျရှုံးစေမည်ဖြစ်သည်။
-- **ခြေရာခံခြင်း:** issue #14482။
+လက်ရှိ dependency ပြင်ဆင်မှုသည် compatibility override များကို Azure identity ၏
+MSAL client၊ get-uri ၏ FTP client နှင့် OpenCode v1 SDK ၏ Zod dependency တို့အတွက်သာ ကန့်သတ်ထားပါသည်။ Azure token
+ရယူခြင်းနှင့် FTP retrieval တို့ကို ထိန်းချုပ်ထားသော transport များဖြင့် စမ်းသပ်ထားပြီး OpenCode
+package နှစ်ခုစလုံးသည် ၎င်းတို့၏ကိုယ်ပိုင် build နှင့် test suite များကို လုပ်ဆောင်ပါသည်။ Registry advisory အရေအတွက်များသည်
+သတ်မှတ်အချိန်တစ်ခုရှိ တိုင်းတာချက်များဖြစ်ပြီး lockfile ကို commit လုပ်ပြီးနောက် ပြောင်းလဲနိုင်ပါသည်။
 
 ## Backlog: Scorecard အကြံပြုချက် → ပိတ်ဆို့ခြင်း
 

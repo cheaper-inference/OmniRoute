@@ -31,20 +31,19 @@ osv සහ Trivy මඟින් deps, **නිරන්තරයෙන් ව�
 
 මෙවලම නොමැති විට හෝ මිනුම් අසාර්ථක වූ විට (PATH හි osv-scanner නොමැති වීම, osv.dev/network වෙත ළඟා විය නොහැකි වීම, වලංගු නොවන JSON) ගේට්ටු දෙකම **සුමටව මඟ හරියි** (exit 0) — **මිනුම්** අසාර්ථක වීමක් කිසි විටෙක අවහිර නොකරයි, **මනින ලද** පසුබෑමක් පමණක් අවහිර කරයි.
 
-## දැනට පිළිගත් අවදානම්
+## ඉවත් කළ පරායත්තතා අවදානම
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+ස්ථාවර කළ promptfoo සංවර්ධන මෙවලම උත්ශ්රේණි කිරීමෙන් පසු, මූල lockfile එකෙහි තවදුරටත් `extract-zip` හෝ එයට යොමු වන පරායත්තතා සම්බන්ධතාවක් ඇතුළත් නොවේ.
+මෙමඟින් #14482 හි නිරීක්ෂණය කළ, මීට පෙර පිළිගත්
+`promptfoo` → `@openai/codex-security` → `extract-zip` දාමය ඉවත් කෙරේ.
+`tests/unit/extract-zip-14482-exposure.test.ts` හි ඇති ප්රතිගමන පරීක්ෂණ එය
+නැවත හඳුන්වා දීම ප්රතික්ෂේප කරන අතර නිෂ්පාදන කේතයෙන් ආයාත කිරීමේ තහනමද පවත්වාගෙන යයි.
 
-`extract-zip@2.0.1` හි පැච් නොකළ ඉහළ-තීව්රතාවයකින් යුත් symlink-traversal උපදෙස් දෙකක් අඩංගු වේ.
-ඉහත සඳහන් CVE Variance පිළියමේ "no upstream fix" ශාඛාවට අනුව, මෙය **පිළිගත් අවදානමක්** මිස වැඩිදියුණු කිරීමක් නොවේ:
-
-- **දාමය:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`. `package-lock.json` හරහා තහවුරු කර ඇත — සමස්ත dependency tree එකේ (`@openai/codex-security`) `extract-zip` ප්රකාශ කරන එක් පැකේජයක් පමණක් ඇති අතර, `promptfoo` ප්රකාශ කරන එක් පැකේජයක් පමණක් `@openai/codex-security` ප්රකාශ කරයි.
-- **දාමයේ කිසිදු තැනක ස්ථාවර නිකුතුවක් නොමැත.** `extract-zip@2.0.1` (2020 දී ප්රකාශයට පත් කරන ලදී) යනු පැකේජයේ අවසාන නිකුතුවයි — එය නඩත්තු නොකෙරේ. `@openai/codex-security` හි වත්මන් npm-latest (`0.1.29`) තවමත් `extract-zip@2.0.1` භාවිතා කරයි.
-- **නිෂ්පාදනයෙන් ළඟා විය නොහැක.** `promptfoo` යනු devDependency-only (කිසි විටෙක `dependencies` යටතේ ලැයිස්තුගත කර නැත), සහ `src/`, `open-sse/`, හෝ `bin/` යටතේ ඇති කිසිදු ගොනුවක් `extract-zip` npm පැකේජය ආයාත නොකරයි — OmniRoute හිම `extractZip()` helper (`src/lib/versionManager/binaryManager.ts:93`) දේශීය `unzip`/`tar` වෙත යොමු වන අතර එය අදාළ නොවේ. `@openai/codex-security` ද extract-zip හි onEntry callback මත තමන්ගේම symlink-traversal ආරක්ෂාවක් සපයයි.
-- **`package.json` `overrides` හරහා `extract-zip` අන්වර්ථ නාම නොකරන්න** — එකම ශක්ය ආදේශකය වන්නේ Electron-org-internal වන අතර `@openai/codex-security` හිම onEntry/defaultDirMode/defaultFileMode පරීක්ෂාවන් සමඟ API-අනුකූල නොවේ; එය අභිබවා යාමෙන් එම පැකේජයේ ආරක්ෂක පරීක්ෂාවන් නිහඬව බිඳ වැටෙනු ඇත.
-- **මූලික මට්ටම:** මනින ලද osv `vulnCount` (3) දැනටමත් ශීත කළ `config/quality/quality-baseline.json` මූලික මට්ටමට (27) වඩා බෙහෙවින් අඩුය — ratchet වෙනසක් අවශ්ය නොවේ.
-- **ප්රතිගාමී ආරක්ෂාව:** `tests/unit/extract-zip-14482-exposure.test.ts` ඉහත දාමය සහ නිෂ්පාදන-ආයාත නොවන invariant තහවුරු කරයි; එය කිසියම් අවස්ථාවක බිඳ වැටුණහොත් (උදා: අනාගත PR එකක් `extract-zip` නිෂ්පාදනයෙන් ළඟා විය හැකි නම්) CI අසාර්ථක වේ.
-- **හඹා යාම:** ගැටලුව #14482.
+වත්මන් පරායත්තතා අලුත්වැඩියාව, ගැළපුම් අතික්රමණ Azure identity හි
+MSAL සේවාලාභියාට, get-uri හි FTP සේවාලාභියාට සහ OpenCode v1 SDK හි Zod පරායත්තතාවට පමණක් සීමා කරයි. Azure token
+ලබාගැනීම සහ FTP ලබාගැනීම පාලිත ප්රවාහන සමඟ පරීක්ෂා කර ඇත; OpenCode
+පැකේජ දෙකම තමන්ගේම ගොඩනැගීම් සහ පරීක්ෂණ කට්ටල ධාවනය කරයි. Registry උපදේශන ගණන් යනු
+නිශ්චිත මොහොතක සිදු කළ මිනුම් වන අතර lockfile එක commit කිරීමෙන් පසු වෙනස් විය හැක.
 
 ## Backlog: Scorecard උපදේශනය → අවහිර කිරීම
 

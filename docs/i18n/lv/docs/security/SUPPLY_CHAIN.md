@@ -49,36 +49,11 @@ Abi vārti **eleganti IZLAIŽ** (exit 0), ja rīks nav pieejams vai mērījums
 neizdodas (osv-scanner nav PATH, osv.dev/network nav sasniedzams, nederīgs JSON) —
 **mērījuma** kļūme nekad nebloķē, bloķē tikai **izmērīta** regresija.
 
-## Zināmi Akceptēti Riski
+## Izņemtas atkarības risks
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Pēc piesaistītā promptfoo izstrādes rīka jaunināšanas saknes bloķēšanas failā vairs nav iekļauts `extract-zip` vai atkarības saite uz to. Tādējādi tiek izņemta iepriekš akceptētā `promptfoo` → `@openai/codex-security` → `extract-zip` ķēde, kas izsekota #14482. Regresijas pārbaudes failā `tests/unit/extract-zip-14482-exposure.test.ts` nepieļauj tās atkārtotu ieviešanu un saglabā aizliegumu to importēt produkcijas kodā.
 
-`extract-zip@2.0.1` satur divus nelāpītus augstas smaguma pakāpes symlink-traversal brīdinājumus.
-Saskaņā ar iepriekš minēto CVE novirzes risinājuma "nav augšupējā labojuma" atzaru, tas ir
-**akceptēts risks**, nevis paaugstinājums:
-
-- **Ķēde:** `promptfoo` (izstrādes atkarība) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Apstiprināts, izmantojot `package-lock.json` — tieši viena pakotne visā atkarību kokā
-  (`@openai/codex-security`) deklarē `extract-zip`, un tieši viena pakotne
-  (`promptfoo`) deklarē `@openai/codex-security`.
-- **Ķēdē neeksistē neviena labota versija.** `extract-zip@2.0.1` (publicēta 2020. gadā) ir pakotnes pēdējā versija — tā netiek uzturēta. `@openai/codex-security`
-  pašreizējā npm-latest (`0.1.29`) joprojām izmanto `extract-zip@2.0.1`.
-- **Nav sasniedzams no ražošanas.** `promptfoo` ir tikai izstrādes atkarība (nekad nav norādīta
-  sadaļā `dependencies`), un neviens fails `src/`, `open-sse/` vai `bin/` neimportē
-  `extract-zip` npm pakotni — OmniRoute paša `extractZip()` palīgfunkcija
-  (`src/lib/versionManager/binaryManager.ts:93`) izmanto vietējos `unzip`/`tar`
-  un nav saistīta. `@openai/codex-security` arī nodrošina savu symlink-traversal
-  aizsardzību papildus `extract-zip` onEntry atzvanam.
-- **Ne** aizstāt `extract-zip` ar `package.json` `overrides` — vienīgais dzīvotspējīgais
-  aizstājējs ir Electron-org-internal un API-nesaderīgs ar
-  `@openai/codex-security` paša onEntry/defaultDirMode/defaultFileMode pārbaudēm;
-  tā aizstāšana klusi sabojātu šīs pakotnes drošības pārbaudes.
-- **Bāzes līnija:** izmērītais osv `vulnCount` (3) jau ir krietni zem iesaldētās
-  `config/quality/quality-baseline.json` bāzes līnijas (27) — nav nepieciešamas izmaiņas.
-- **Regresijas aizsardzība:** `tests/unit/extract-zip-14482-exposure.test.ts` apstiprina
-  ķēdi un iepriekš minēto bez-ražošanas-importa invariantu; tas izgāž CI, ja kāds no tiem jebkad
-  sabojājas (piemēram, nākotnes PR padara `extract-zip` sasniedzamu no ražošanas).
-- **Izsekošana:** problēma #14482.
+Pašreizējais atkarību labojums arī ierobežo saderības pārrakstīšanu līdz Azure identitātes MSAL klientam, get-uri FTP klientam un OpenCode v1 SDK Zod atkarībai. Azure pilnvaru iegūšana un FTP izguve tiek testēta ar kontrolētiem transportiem; abas OpenCode pakotnes izpilda savus būvēšanas un testēšanas komplektus. Reģistra drošības ieteikumu skaits ir konkrētā brīža mērījums un var mainīties pēc bloķēšanas faila komitēšanas.
 
 ## Atpalicība: Scorecard brīdinājums → bloķēšana
 

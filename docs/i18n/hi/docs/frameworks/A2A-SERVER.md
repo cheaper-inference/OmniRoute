@@ -146,33 +146,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## उपलब्ध कौशल
+## उपलब्ध स्किल्स
 
-OmniRoute, `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` में जुड़े 6 A2A कौशल उपलब्ध कराता है। प्रत्येक कौशल मॉड्यूल `src/lib/a2a/skills/` में स्थित है।
+OmniRoute 6 A2A स्किल्स प्रदान करता है, जो `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` में वायर्ड हैं। प्रत्येक स्किल मॉड्यूल `src/lib/a2a/skills/` में स्थित है।
 
-| कौशल                   | ID                   | विवरण                                                                                                                                                                     | टैग                 | उदाहरण                                                   |
-| :--------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------ | :------------------------------------------------------- |
-| स्मार्ट रूटिंग         | `smart-routing`      | OmniRoute के कॉम्बो इंजन + स्कोरिंग का उपयोग करके किसी प्रॉम्प्ट को इष्टतम प्रदाता/कॉम्बो के माध्यम से रूट करता है                                                        | रूटिंग, प्रदाता     | "इस प्रॉम्प्ट को सर्वश्रेष्ठ मॉडल के माध्यम से रूट करें" |
-| कोटा प्रबंधन           | `quota-management`   | प्रत्येक प्रदाता की कोटा स्थिति की रिपोर्ट करता है और कॉलर को यह तय करने में सहायता करता है कि कब थ्रॉटल/स्विच करना है                                                    | कोटा, प्रदाता       | "anthropic के लिए कोटा जाँचें"                           |
-| प्रदाता खोज            | `provider-discovery` | इंस्टॉल किए गए प्रदाताओं को उनकी क्षमताओं, निःशुल्क-टियर फ़्लैग और OAuth स्थिति के साथ सूचीबद्ध करता है                                                                   | प्रदाता, खोज        | "कौन-से प्रदाता उपलब्ध हैं?"                             |
-| लागत विश्लेषण          | `cost-analysis`      | कैटलॉग + हालिया उपयोग के आधार पर किसी अनुरोध/वार्तालाप की लागत का अनुमान लगाता है                                                                                         | लागत, उपयोग         | "इस वार्तालाप की लागत का अनुमान लगाएँ"                   |
-| स्वास्थ्य रिपोर्ट      | `health-report`      | प्रत्येक प्रदाता के लिए सर्किट ब्रेकर, कूलडाउन और लॉकआउट स्थिति को एकत्रित करता है                                                                                        | स्वास्थ्य, सुदृढ़ता | "सभी प्रदाताओं की स्वास्थ्य स्थिति दिखाएँ"               |
-| क्षमताएँ सूचीबद्ध करें | `list-capabilities`  | संदर्भ इंजेक्शन के लिए कच्चे SKILL.md URLs सहित संपूर्ण 45-प्रविष्टि वाला Agent Skills कैटलॉग (23 API + 21 CLI + 1 कॉन्फ़िगरेशन) एक मार्कडाउन तालिका के रूप में लौटाता है | कैटलॉग, खोज, कौशल   | "OmniRoute की सभी क्षमताएँ सूचीबद्ध करें"                |
+| स्किल              | ID                   | विवरण                                                                                                                                                       | टैग                        | उदाहरण                                               |
+| :----------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------- |
+| Smart Routing      | `smart-routing`      | OmniRoute के combo engine + scoring का उपयोग करके किसी prompt को इष्टतम provider/combo के माध्यम से रूट करता है                                             | routing, providers         | "इस prompt को सर्वोत्तम model के माध्यम से रूट करें" |
+| Quota Management   | `quota-management`   | प्रति-provider quota स्थिति की रिपोर्ट करता है, callers को throttle/switch कब करना है यह तय करने में मदद करता है                                            | quota, providers           | "anthropic के लिए quota जांचें"                      |
+| Provider Discovery | `provider-discovery` | capabilities, free-tier flags, OAuth status के साथ इंस्टॉल किए गए providers की सूची बनाता है                                                                | providers, discovery       | "कौन से providers उपलब्ध हैं?"                       |
+| Cost Analysis      | `cost-analysis`      | catalog + recent usage के आधार पर किसी request/conversation की लागत का अनुमान लगाता है                                                                      | cost, usage                | "इस conversation की लागत का अनुमान लगाएं"            |
+| Health Report      | `health-report`      | प्रति provider circuit breaker, cooldown, lockout स्थिति को एकत्रित करता है                                                                                 | health, resilience         | "सभी providers की health स्थिति दिखाएं"              |
+| List Capabilities  | `list-capabilities`  | context injection के लिए raw SKILL.md URLs के साथ संपूर्ण 45-entry Agent Skills catalog (23 API + 21 CLI + 1 config) को markdown table के रूप में लौटाता है | catalog, discovery, skills | "सभी OmniRoute capabilities की सूची बनाएं"           |
 
-> Agent Card को लाइव 374-प्रदाता कैटलॉग के अनुरूप रखा जाना चाहिए; प्रदाता संख्या और निःशुल्क/बिना-प्रमाणीकरण वाला मेटाडेटा रनटाइम रजिस्ट्री से प्राप्त किया जाता है।
+> Agent Card को live 375-provider catalog के साथ संरेखित रखा जाना चाहिए; provider संख्याएँ और free/no-auth metadata runtime registry से प्राप्त किए जाते हैं।
 
-### `list-capabilities` कौशल का विवरण
+### `list-capabilities` स्किल विवरण
 
-`list-capabilities` कौशल उन बाहरी एजेंटों के लिए विशेष रूप से उपयोगी है, जिन्हें API कॉल भेजने से पहले यह पता लगाना होता है कि OmniRoute क्या-क्या उपलब्ध कराता है। यह एक संरचित मार्कडाउन तालिका आर्टिफ़ैक्ट लौटाता है:
+`list-capabilities` स्किल उन बाहरी agents के लिए विशेष रूप से उपयोगी है जिन्हें API calls भेजने से पहले यह जानने की आवश्यकता होती है कि OmniRoute क्या प्रदान करता है। यह एक संरचित markdown table artifact लौटाता है:
 
 ```
-| ID | नाम | श्रेणी | क्षेत्र | एंडपॉइंट/कमांड | कच्चा URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | प्रमाणीकरण और सत्र | api | प्रमाणीकरण | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-प्रत्येक पंक्ति में `rawUrl` कॉलम शामिल होता है, ताकि एजेंट तुरंत संपूर्ण SKILL.md प्राप्त कर सकें। `metadata.totalSkills` फ़ील्ड कैटलॉग के आकार (वर्तमान में 45) को दर्शाता है। कार्यान्वयन: `src/lib/a2a/skills/listCapabilities.ts`। [AGENT-SKILLS.md](./AGENT-SKILLS.md) भी देखें।
+प्रत्येक पंक्ति में `rawUrl` कॉलम शामिल होता है ताकि agents तुरंत पूरा SKILL.md fetch कर सकें। `metadata.totalSkills` फ़ील्ड catalog के आकार (वर्तमान में 45) को दर्शाता है। कार्यान्वयन: `src/lib/a2a/skills/listCapabilities.ts`। यह भी देखें [AGENT-SKILLS.md](./AGENT-SKILLS.md)।
 
 ---
 
@@ -262,7 +262,7 @@ JSON-RPC एंडपॉइंट `/a2a` प्रामाणिक A2A प्�
 
 ---
 
-## एकीकरण के उदाहरण
+## एकीकरण उदाहरण
 
 ### Python (requests)
 

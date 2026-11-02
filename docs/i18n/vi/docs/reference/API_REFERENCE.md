@@ -823,8 +823,7 @@ phải là điểm vào đang hoạt động (theo mặc định là như vậy 
 
 **Codex CLI** của OpenAI xác thực tên model ở phía máy khách khi
 `supports_websockets = true` và **từ chối các ID có tiền tố nhà cung cấp** như
-`codex/gpt-5.5` (`Model 'codex/gpt-5.5' không được hỗ trợ khi sử dụng Codex với
-tài khoản ChatGPT`). Hãy gửi ID **thuần túy** (ví dụ: `gpt-5.5`). Cầu nối của OmniRoute
+`codex/gpt-5.5` (`The 'codex/gpt-5.5' model is not supported when using Codex with a ChatGPT account`). Hãy gửi ID **thuần túy** (ví dụ: `gpt-5.5`). Cầu nối của OmniRoute
 chỉ dành cho codex, vì vậy nó phân giải lại một ID thuần túy thành model codex
 (`resolveCodexWsModelInfo`) trước khi tạo đường hầm đến thượng nguồn — mặc dù một ID thuần túy
 `gpt-5.5` nếu không sẽ được định tuyến đến một nhà cung cấp khác qua HTTP.
@@ -931,13 +930,13 @@ bề mặt quản trị (`/api/keys/…`), vốn vẫn được bảo vệ bởi
 Khi sử dụng `/api/usage/om-usage`, bên gọi nên lưu ý sự khác biệt giữa các
 tỷ lệ phần trăm được trình bày trong **đầu ra văn bản thuần túy** và **đầu ra JSON** có cấu trúc:
 
-| Khía cạnh                       | Định dạng văn bản thuần túy (`/api/usage/om-usage` / `@@om-usage`)                                     | Định dạng JSON (`?format=json`)                                                                   |
-| :------------------------------ | :----------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ |
-| **Trường đầu ra**               | `NN% còn lại` (ví dụ: `20% còn lại`)                                                                   | `provider.quotas` / `providers[].quotas`                                                          |
-| **Phép đo**                     | **Mức khả dụng đã điều chỉnh theo ngưỡng ngắt**: dung lượng còn lại trên ngưỡng ngắt                   | **Hạn ngạch thô từ upstream**: phép đo chưa điều chỉnh của nhà cung cấp                           |
-| **Điều chỉnh theo ngưỡng ngắt** | Được điều chỉnh bằng `effectiveRemainingPercent()` để phần dự trữ được bảo vệ hiển thị là `0% còn lại` | Không có (các giá trị ảnh chụp thô do nhà cung cấp báo cáo)                                       |
-| **Dữ liệu ngưỡng**              | Được tính vào tỷ lệ phần trăm hiển thị                                                                 | Được lưu trong `quotaWindowThresholds` theo từng kết nối (hoặc dùng giá trị mặc định của máy chủ) |
-| **Đối tượng sử dụng chính**     | CLI tương tác, lời nhắc terminal, người vận hành                                                       | Tích hợp lập trình, bảng điều khiển, phân tích, trình theo dõi thanh toán                         |
+| Khía cạnh                       | Định dạng văn bản thuần túy (`/api/usage/om-usage` / `@@om-usage`)                                  | Định dạng JSON (`?format=json`)                                                                   |
+| :------------------------------ | :-------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ |
+| **Trường đầu ra**               | `NN% left` (ví dụ: `20% left`)                                                                      | `provider.quotas` / `providers[].quotas`                                                          |
+| **Phép đo**                     | **Mức khả dụng đã điều chỉnh theo ngưỡng ngắt**: dung lượng còn lại trên ngưỡng ngắt                | **Hạn ngạch thô từ upstream**: phép đo chưa điều chỉnh của nhà cung cấp                           |
+| **Điều chỉnh theo ngưỡng ngắt** | Được điều chỉnh bằng `effectiveRemainingPercent()` để phần dự trữ được bảo vệ hiển thị là `0% left` | Không có (các giá trị ảnh chụp thô do nhà cung cấp báo cáo)                                       |
+| **Dữ liệu ngưỡng**              | Được tính vào tỷ lệ phần trăm hiển thị                                                              | Được lưu trong `quotaWindowThresholds` theo từng kết nối (hoặc dùng giá trị mặc định của máy chủ) |
+| **Đối tượng sử dụng chính**     | CLI tương tác, lời nhắc terminal, người vận hành                                                    | Tích hợp lập trình, bảng điều khiển, phân tích, trình theo dõi thanh toán                         |
 
 #### Công thức điều chỉnh theo ngưỡng ngắt
 
@@ -955,14 +954,14 @@ OmniRoute hỗ trợ các ngưỡng ngắt hạn ngạch chủ động để ng�
 Hãy xét một cửa sổ của nhà cung cấp có **60% mức sử dụng thô** (do đó **40% hạn ngạch thô còn lại**) và một ngưỡng
 **ngắt khi hạn ngạch còn lại ở mức 25%** đã được cấu hình:
 
-| Cách biểu diễn                        | Phép tính                                          | Còn lại |          Mức đã dùng suy ra          |
-| :------------------------------------ | :------------------------------------------------- | :-----: | :----------------------------------: |
-| **JSON thô (`?format=json`)**         | Ảnh chụp upstream (`quotas[window]`)               | **40%** |               **60%**                |
-| **Định dạng văn bản (`NN% còn lại`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (nếu tính `100 - remaining`) |
+| Cách biểu diễn                     | Phép tính                                          | Còn lại |          Mức đã dùng suy ra          |
+| :--------------------------------- | :------------------------------------------------- | :-----: | :----------------------------------: |
+| **JSON thô (`?format=json`)**      | Ảnh chụp upstream (`quotas[window]`)               | **40%** |               **60%**                |
+| **Định dạng văn bản (`NN% left`)** | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (nếu tính `100 - remaining`) |
 
 - **Tại sao văn bản hiển thị còn lại 20%:** Trong số 40% hạn ngạch vật lý còn lại trên tài khoản, 25% được dành riêng theo
   chính sách ngưỡng ngắt. Bên gọi chỉ còn 15% trong tổng 75% dư địa khả dụng trước khi bộ định tuyến ngừng
-  định tuyến đến kết nối này. Việc điều chỉnh bảo đảm kết nối báo hiệu cạn kiệt (`0% còn lại`) chính xác khi
+  định tuyến đến kết nối này. Việc điều chỉnh bảo đảm kết nối báo hiệu cạn kiệt (`0% left`) chính xác khi
   quá trình định tuyến dừng lại.
 - **Tại sao JSON giữ nguyên các giá trị thô:** Payload JSON trả về ảnh chụp chính xác của nhà cung cấp (`UsageSnapshot`)
   để các công cụ bên ngoài có quyền truy cập vào mức sử dụng upstream thực tế và
@@ -971,7 +970,7 @@ Hãy xét một cửa sổ của nhà cung cấp có **60% mức sử dụng th�
 #### Hướng dẫn chuyển đổi cho bên sử dụng
 
 Nếu một tích hợp bên ngoài (chẳng hạn như plugin trình soạn thảo hoặc tiện ích mở rộng agent) trước đây đã thu thập dữ liệu từ endpoint văn bản
-(`NN% còn lại`) và tính tỷ lệ phần trăm đã dùng là `100 - NN`, thì việc chuyển sang `?format=json` có nghĩa là:
+(`NN% left`) và tính tỷ lệ phần trăm đã dùng là `100 - NN`, thì việc chuyển sang `?format=json` có nghĩa là:
 
 - Việc đọc các giá trị JSON thô sẽ phản ánh **mức tiêu thụ upstream thực tế** (đã dùng 60% trong ví dụ trên).
 - Nếu tích hợp muốn giữ nguyên ngữ nghĩa về mức khả dụng của endpoint văn bản, nó có thể đánh giá
@@ -1046,50 +1045,50 @@ X-OmniRoute-No-Cache: true
 
 ## Bảng điều khiển & Quản lý
 
-Các route quản lý (`/api/*` ngoại trừ xác thực/đăng nhập công khai) **không** được cấp quyền bằng
+Các route quản lý (`/api/*` ngoại trừ auth/login công khai) **không** được ủy quyền bởi
 các khóa API suy luận thông thường. Các nhóm thông tin xác thực, phạm vi và ví dụ curl:
 [Xác thực quản lý](../guides/MANAGEMENT-AUTH.md).
 
 ### Xác thực
 
-| Endpoint                      | Phương thức | Mô tả                                                                                                                                                                                                                                                                                                         |
-| ----------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST        | Đăng nhập                                                                                                                                                                                                                                                                                                     |
-| `/api/auth/logout`            | POST        | Đăng xuất                                                                                                                                                                                                                                                                                                     |
-| `/api/settings/require-login` | GET/POST    | Trạng thái đăng nhập (GET, công khai). POST đặt mật khẩu / bật tắt yêu cầu đăng nhập: chỉ dành cho người vận hành sau khi đã có mật khẩu (phiên bảng điều khiển, CLI cục bộ hoặc đăng nhập bị tắt — khóa API và token `oma_` nhận mã `403`); phiên bảng điều khiển gửi `currentPassword` để thay thế mật khẩu |
+| Endpoint                      | Method   | Mô tả                                                                                                                                                                                                                                                                                                              |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/auth/login`             | POST     | Đăng nhập                                                                                                                                                                                                                                                                                                          |
+| `/api/auth/logout`            | POST     | Đăng xuất                                                                                                                                                                                                                                                                                                          |
+| `/api/settings/require-login` | GET/POST | Trạng thái đăng nhập (GET, công khai). POST đặt mật khẩu / bật tắt đăng nhập: chỉ dành cho operator sau khi mật khẩu đã tồn tại (phiên bảng điều khiển, CLI cục bộ, hoặc đăng nhập bị vô hiệu hóa — các khóa API và token `oma_` nhận `403`); một phiên bảng điều khiển gửi `currentPassword` để thay thế mật khẩu |
 
-### Quản lý nhà cung cấp
+### Quản lý Provider
 
-| Endpoint                                | Phương thức               | Mô tả                                                                                                                                                                 |
-| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Liệt kê / tạo nhà cung cấp                                                                                                                                            |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Quản lý một nhà cung cấp                                                                                                                                              |
-| `/api/providers/[id]/test`              | POST                      | Kiểm tra kết nối nhà cung cấp                                                                                                                                         |
-| `/api/providers/[id]/models`            | GET                       | Liệt kê các mô hình của nhà cung cấp                                                                                                                                  |
-| `/api/providers/validate`               | POST                      | Xác thực cấu hình nhà cung cấp                                                                                                                                        |
-| `/api/providers/bulk`                   | POST                      | Thêm hàng loạt khóa API cho MỘT nhà cung cấp                                                                                                                          |
-| `/api/providers/import`                 | POST                      | Nhập DANH SÁCH nhà cung cấp không đồng nhất từ tệp CSV/JSON đã được phân tích cú pháp (#6836); trả về kết quả lỗi một phần theo từng hàng                             |
-| `/api/provider-nodes*`                  | Nhiều phương thức         | Quản lý node nhà cung cấp                                                                                                                                             |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Các mô hình tùy chỉnh và giá trị ghi đè theo từng mô hình (thêm, cập nhật, ẩn/hiện, xóa)                                                                              |
-| `/api/provider-models/validate-and-add` | POST                      | Xác thực kết nối nghiêm ngặt theo lựa chọn, có xác thực quản lý, cùng việc đăng ký mô hình tùy chỉnh nguyên tử; xem [Xác thực mô hình](../guides/MODEL-VALIDATION.md) |
+| Endpoint                                | Method                    | Mô tả                                                                                                                                                                       |
+| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | Liệt kê / tạo provider                                                                                                                                                      |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Quản lý một provider                                                                                                                                                        |
+| `/api/providers/[id]/test`              | POST                      | Kiểm tra kết nối provider                                                                                                                                                   |
+| `/api/providers/[id]/models`            | GET                       | Liệt kê các model của provider                                                                                                                                              |
+| `/api/providers/validate`               | POST                      | Xác thực cấu hình provider                                                                                                                                                  |
+| `/api/providers/bulk`                   | POST                      | Thêm hàng loạt khóa API cho MỘT provider                                                                                                                                    |
+| `/api/providers/import`                 | POST                      | Nhập một DANH SÁCH provider không đồng nhất từ tệp CSV/JSON đã phân tích (#6836); kết quả lỗi một phần theo từng hàng                                                       |
+| `/api/provider-nodes*`                  | Various                   | Quản lý node provider                                                                                                                                                       |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Model tùy chỉnh và ghi đè theo từng model (thêm, cập nhật, ẩn/hiện, xóa)                                                                                                    |
+| `/api/provider-models/validate-and-add` | POST                      | Được xác thực qua quản lý, xác thực kết nối nghiêm ngặt theo chế độ chọn tham gia và đăng ký model tùy chỉnh nguyên tử; xem [Xác thực model](../guides/MODEL-VALIDATION.md) |
 
-Đối với các mô hình đã đồng bộ/nhập, `PUT /api/provider-models` chấp nhận `provider`, `modelId` và
-`maxOutputTokenOverride`: một số nguyên dương đặt giới hạn token đầu ra thủ công, còn `null`
-xóa giới hạn đó để khôi phục giá trị mặc định. `GET /api/provider-models?provider=<provider>` trả về các
-giá trị này trong `modelOutputOverrides`, bao gồm cả các mô hình không có hàng mô hình tùy chỉnh. Giá trị ghi đè
-sử dụng khả năng `max_output_tokens` khi chạy và vẫn được giữ lại sau khi đồng bộ lại mô hình. Trang nhà cung cấp
-tương thích với OpenAI cung cấp các điều khiển chỉnh sửa/xóa tương tự và đánh dấu các mô hình hỗ trợ thị giác một cách tường minh.
+Đối với các model đã đồng bộ/đã nhập, `PUT /api/provider-models` chấp nhận `provider`, `modelId` và
+`maxOutputTokenOverride`: một số nguyên dương đặt giới hạn token đầu ra thủ công, và `null`
+xóa nó để khôi phục giá trị mặc định. `GET /api/provider-models?provider=<provider>` trả về các
+giá trị này trong `modelOutputOverrides`, bao gồm cả các model không có hàng model tùy chỉnh. Ghi đè
+này sử dụng khả năng `max_output_tokens` tại runtime và vẫn tồn tại sau khi đồng bộ lại model. Trang
+provider tương thích OpenAI cung cấp các điều khiển chỉnh sửa/xóa tương tự và đánh dấu các model có hỗ trợ vision rõ ràng.
 
-Các node Chat Completions tùy chỉnh chuyển đổi yêu cầu tắt suy luận tường minh cho phù hợp với backend thượng nguồn. Một
-lần kiểm tra kết nối thành công sẽ tự động chọn các điều khiển mẫu trò chuyện cho từng ID mô hình chính xác
-mà mục `/models` chứng minh có giá trị `owned_by` được nhận diện: `vllm`, `sglang` hoặc `llamacpp`.
-Các trình bao bọc tương thích với OpenAI và có tính trong suốt có thể giữ lại mục mô hình gốc bên trong một đối tượng
-`openai` lồng nhau; quá trình phát hiện sẽ theo dõi tối đa ba lớp bao như vậy. Các mô hình có thông tin sở hữu bị thiếu,
-không xác định hoặc xung đột vẫn giữ hành vi OpenAI thông thường. Quá trình phát hiện tái sử dụng yêu cầu danh mục hiện có,
-không tạo token hoàn thành nào và bị vô hiệu hóa khi endpoint kết nối thay đổi.
+Các node Chat Completions tùy chỉnh điều chỉnh việc từ chối reasoning rõ ràng cho phù hợp với backend
+thượng nguồn. Một lần kiểm tra kết nối thành công sẽ tự động chọn các điều khiển chat-template cho từng
+ID model chính xác có mục `/models` chứng minh giá trị `owned_by` được nhận dạng: `vllm`, `sglang`, hoặc
+`llamacpp`. Các wrapper tương thích OpenAI trong suốt có thể giữ nguyên mục model gốc bên trong một đối
+tượng `openai` lồng nhau; việc phát hiện lần theo tối đa ba lớp bao bọc như vậy. Các model có quyền sở hữu
+bị thiếu, không xác định hoặc xung đột sẽ giữ hành vi OpenAI thông thường. Việc phát hiện tái sử dụng yêu
+cầu catalog hiện có, không tạo token hoàn thành nào, và bị vô hiệu khi endpoint kết nối thay đổi.
 
-Để cố định hành vi cho một backend không cung cấp siêu dữ liệu đó, hãy sử dụng API cập nhật một phần
-nhà cung cấp hiện có:
+Để cố định hành vi cho một backend không cung cấp metadata đó, hãy sử dụng API cập nhật một phần
+provider hiện có:
 
 ```json
 {
@@ -1099,72 +1098,72 @@ nhà cung cấp hiện có:
 }
 ```
 
-Gửi phần thân đó bằng `PUT /api/providers/<connection-id>`. Trên kết nối đó, mức độ suy luận được chỉ định rõ là `none` sẽ được gửi dưới dạng `chat_template_kwargs.thinking=false` và `chat_template_kwargs.enable_thinking=false`. Các giá trị mẫu gốc được chỉ định rõ vẫn có hiệu lực cao nhất, trừ khi một quy tắc suy luận phía máy chủ buộc áp dụng một mức độ suy luận. Thiết lập này chỉ áp dụng khi một kết nối tùy chỉnh tương thích với OpenAI gửi phần thân Chat Completions; các yêu cầu Responses và nhà cung cấp thông thường vẫn giữ nguyên cấu trúc yêu cầu gốc. Đặt `reasoningControl` thành `openai` để buộc chuyển tiếp `reasoning_effort` thông thường của OpenAI, hoặc bỏ qua trường này/đặt thành `null` để sử dụng cơ chế tự động phát hiện.
+Gửi body đó bằng `PUT /api/providers/<connection-id>`. Trên kết nối đó, một reasoning effort tường minh là `none` sẽ được gửi dưới dạng `chat_template_kwargs.thinking=false` và `chat_template_kwargs.enable_thinking=false`. Các giá trị template gốc tường minh vẫn được ưu tiên cao nhất trừ khi một quy tắc reasoning phía máy chủ ép buộc một effort. Cài đặt này chỉ áp dụng khi một kết nối tùy chỉnh tương thích OpenAI gửi đi body Chat Completions; các yêu cầu Responses và các provider thông thường vẫn giữ nguyên dạng yêu cầu gốc của chúng. Đặt `reasoningControl` thành `openai` để ép truyền thẳng `reasoning_effort` của OpenAI thông thường, hoặc bỏ qua/đặt nó thành `null` để dùng chế độ tự động phát hiện.
 
-Các yêu cầu của bộ phân loại ở chế độ tự động của Claude Code mặc định tắt tính năng suy luận gốc khi không chứa bất kỳ cơ chế kiểm soát suy luận rõ ràng nào. Quá trình phát hiện sử dụng dấu hiệu hệ thống của bộ phân loại trong các yêu cầu theo định dạng Claude, chứ không dựa vào tên mô hình hoặc giới hạn hoàn thành. Các cơ chế kiểm soát rõ ràng trong phần thân, tiêu đề effort/thinking được hỗ trợ, quy tắc định tuyến và mức độ suy luận của mô hình đã được phân giải vẫn giữ nguyên thứ tự ưu tiên hiện có. Cả hai giai đoạn của bộ phân loại đều giữ nguyên prompt, giới hạn hoàn thành, chuỗi dừng và kết quả phân quyền thực tế từ thượng nguồn; giai đoạn thứ hai vẫn có thể tạo phần suy luận hiển thị được yêu cầu dưới dạng văn bản thông thường.
+Các yêu cầu classifier auto-mode của Claude Code mặc định tắt native thinking khi chúng không chứa bất kỳ điều khiển reasoning tường minh nào. Việc phát hiện dựa vào system marker của classifier trong các yêu cầu định dạng Claude, không dựa vào tên model hay giới hạn completion. Các điều khiển body tường minh, các header effort/thinking được hỗ trợ, các quy tắc routing và effort của model đã phân giải vẫn giữ nguyên thứ tự ưu tiên hiện có. Cả hai giai đoạn của classifier đều giữ nguyên prompt, giới hạn completion, stop sequence và các phán quyết quyền thực từ upstream; giai đoạn thứ hai vẫn có thể tạo phần reasoning hiển thị được yêu cầu dưới dạng văn bản thông thường.
 
-### Luồng OAuth
+### Các luồng OAuth
 
-| Điểm cuối                        | Phương thức | Mô tả                             |
-| -------------------------------- | ----------- | --------------------------------- |
-| `/api/oauth/[provider]/[action]` | Nhiều loại  | OAuth dành riêng cho nhà cung cấp |
+| Endpoint                         | Phương thức | Mô tả                    |
+| -------------------------------- | ----------- | ------------------------ |
+| `/api/oauth/[provider]/[action]` | Nhiều       | OAuth theo từng provider |
 
-### Định tuyến & cấu hình
+### Routing & Cấu hình
 
-| Điểm cuối             | Phương thức | Mô tả                                   |
-| --------------------- | ----------- | --------------------------------------- |
-| `/api/models/alias`   | GET/POST    | Bí danh mô hình                         |
-| `/api/models/catalog` | GET         | Tất cả mô hình theo nhà cung cấp + loại |
-| `/api/combos*`        | Nhiều loại  | Quản lý tổ hợp                          |
-| `/api/keys*`          | Nhiều loại  | Quản lý khóa API                        |
-| `/api/pricing`        | GET         | Giá mô hình                             |
+| Endpoint              | Phương thức | Mô tả                             |
+| --------------------- | ----------- | --------------------------------- |
+| `/api/models/alias`   | GET/POST    | Bí danh model                     |
+| `/api/models/catalog` | GET         | Tất cả model theo provider + loại |
+| `/api/combos*`        | Nhiều       | Quản lý combo                     |
+| `/api/keys*`          | Nhiều       | Quản lý API key                   |
+| `/api/pricing`        | GET         | Giá model                         |
 
-### Mức sử dụng & phân tích
+### Mức sử dụng & Phân tích
 
-| Điểm cuối                        | Phương thức     | Mô tả                                                                                                                                                                                                                                                                                                                               |
-| -------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Lịch sử sử dụng                                                                                                                                                                                                                                                                                                                     |
-| `/api/usage/logs`                | GET             | Nhật ký sử dụng                                                                                                                                                                                                                                                                                                                     |
-| `/api/usage/request-logs`        | GET             | Nhật ký cấp yêu cầu                                                                                                                                                                                                                                                                                                                 |
-| `/api/usage/[connectionId]`      | GET             | Mức sử dụng theo từng kết nối                                                                                                                                                                                                                                                                                                       |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Ngân sách giới hạn token theo từng khóa API                                                                                                                                                                                                                                                                                         |
-| `/api/usage/model-latency-stats` | GET             | Số liệu tổng hợp độ trễ luân phiên theo nhà cung cấp/mô hình (trung bình/p50/p95/p99, tỷ lệ thành công); bộ lọc: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                    |
-| `/api/usage/cache-health`        | GET             | Bản tóm tắt tình trạng bộ nhớ đệm prompt trên `call_logs` — tỷ lệ ghi/đọc, phân phối kích thước ghi p50/p90/p99, mức độ tập trung của các lượt ghi lớn, phân chia theo mô hình và kết luận `healthy`/`degraded`/`thrash`/`no-data`; tham số truy vấn `range` (`1h`\|`24h`\|`7d`\|`30d`, mặc định `24h`) và `model` tùy chọn (#8827) |
+| Endpoint                         | Phương thức     | Mô tả                                                                                                                                                                                                                                                                                                        |
+| -------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/usage/history`             | GET             | Lịch sử sử dụng                                                                                                                                                                                                                                                                                              |
+| `/api/usage/logs`                | GET             | Nhật ký sử dụng                                                                                                                                                                                                                                                                                              |
+| `/api/usage/request-logs`        | GET             | Nhật ký cấp yêu cầu                                                                                                                                                                                                                                                                                          |
+| `/api/usage/[connectionId]`      | GET             | Mức sử dụng theo kết nối                                                                                                                                                                                                                                                                                     |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Ngân sách giới hạn token theo API key                                                                                                                                                                                                                                                                        |
+| `/api/usage/model-latency-stats` | GET             | Tổng hợp độ trễ cuốn chiếu theo provider/model (avg/p50/p95/p99, tỷ lệ thành công); bộ lọc: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                  |
+| `/api/usage/cache-health`        | GET             | Tóm tắt tình trạng prompt-cache trên `call_logs` — tỷ lệ ghi/đọc, phân phối kích thước ghi p50/p90/p99, mức độ tập trung ghi nặng, phân tách theo model, và phán quyết `healthy`/`degraded`/`thrash`/`no-data`; tham số query `range` (`1h`\|`24h`\|`7d`\|`30d`, mặc định `24h`) và `model` tùy chọn (#8827) |
 
-### Quyền của khóa API
+### Quyền của API key
 
-`PATCH /api/keys/{id}` cập nhật quyền của một khóa hiện có. Giống như mọi tuyến `/api/keys*`, tuyến này cần quyền quản lý (xem [Xác thực quản lý](../guides/MANAGEMENT-AUTH.md)), không phải khóa suy luận. Chỉ gửi các trường bạn muốn thay đổi; yêu cầu không chứa trường nào trong số đó sẽ bị từ chối với thông báo `No valid fields to update`. Các trường được chấp nhận được định nghĩa bởi `updateKeyPermissionsSchema` trong `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` cập nhật quyền của một key hiện có. Giống như mọi route `/api/keys*`, nó yêu cầu ủy quyền quản lý (xem [Xác thực Quản lý](../guides/MANAGEMENT-AUTH.md)), chứ không phải inference key. Chỉ gửi các trường bạn muốn thay đổi; một yêu cầu không có trường nào trong số đó sẽ bị từ chối với `No valid fields to update`. Các trường được chấp nhận được định nghĩa bởi `updateKeyPermissionsSchema` trong `src/shared/validation/schemas/keys.ts`.
 
-| Trường                                      | Kiểu                                                                      | Ghi chú                                                                                                                                  |
-| ------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | chuỗi, 1-200 ký tự                                                        |                                                                                                                                          |
-| `isActive`                                  | boolean                                                                   |                                                                                                                                          |
-| `isBanned`                                  | boolean                                                                   |                                                                                                                                          |
-| `expiresAt`                                 | ngày giờ ISO 8601 hoặc `null`                                             | `null` xóa thời hạn hết hiệu lực                                                                                                         |
-| `modelAccessMode`                           | `all` \| `restricted`                                                     | `allowedModels` phải trống khi chế độ là `all`                                                                                           |
-| `allowedModels`, `blockedModels`            | mảng chuỗi, tối đa 1000 phần tử                                           |                                                                                                                                          |
-| `allowedCombos`                             | mảng chuỗi, tối đa 500 phần tử                                            | Kiểm soát các combo mà khóa có thể gọi; các mô hình trực tiếp chịu sự quản lý của `modelAccessMode` / `allowedModels`                    |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                     | `allowedConnections` phải không trống khi là `restricted` và phải trống khi là `all`                                                     |
-| `allowedConnections`                        | mảng UUID, tối đa 100 phần tử                                             |                                                                                                                                          |
-| `allowAutoCombos`                           | boolean                                                                   | `false` từ chối các yêu cầu dành cho mô hình `auto/*` bằng khóa này; các khóa chưa từng thiết lập trường này được phép                   |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                             | Nội dung mà `GET /v1/models` liệt kê cho khóa này (chỉ combo, chỉ mô hình hoặc cả hai); không thay đổi nội dung mà khóa có thể gọi       |
-| `forcedModel`                               | chuỗi tối đa 300 ký tự hoặc `null`                                        | Định tuyến yêu cầu trò chuyện đến mô hình/combo này, ưu tiên hơn `X-Route-Model` và `body.model`; các giới hạn của khóa vẫn được áp dụng |
-| `noLog`, `autoResolve`                      | boolean                                                                   |                                                                                                                                          |
-| `throttleDelayMs`                           | số nguyên, 0-300000                                                       |                                                                                                                                          |
-| `maxSessions`                               | số nguyên, 0-10000                                                        |                                                                                                                                          |
-| `rateLimits`                                | mảng `{ limit, window }` (số nguyên dương, tối đa 50 phần tử) hoặc `null` | `null` xóa các giới hạn                                                                                                                  |
-| `accessSchedule`                            | đối tượng lịch biểu hoặc `null`                                           | `null` xóa lịch biểu                                                                                                                     |
-| `scopes`                                    | mảng chuỗi, tối đa 32 phần tử                                             |                                                                                                                                          |
-| `allowedEndpoints`                          | mảng chuỗi, tối đa 20 phần tử                                             |                                                                                                                                          |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                        |                                                                                                                                          |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                      | Xem [Bỏ qua bộ nhớ đệm theo từng khóa](#per-key-cache-bypass)                                                                            |
-| `compressionEnabled`                        | boolean                                                                   |                                                                                                                                          |
-| `codexServiceMode`                          | một trong các chế độ dịch vụ Codex                                        |                                                                                                                                          |
-| `disableNonPublicModels`                    | boolean                                                                   |                                                                                                                                          |
-| `allowUsageCommand`                         | boolean                                                                   |                                                                                                                                          |
-| `usageLimitEnabled`                         | boolean                                                                   |                                                                                                                                          |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 hoặc `null`                                                   |                                                                                                                                          |
-| `chaosModeEnabled`                          | boolean                                                                   |                                                                                                                                          |
+| Trường                                      | Kiểu                                                                  | Ghi chú                                                                                                                           |
+| ------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | chuỗi, 1-200 ký tự                                                    |                                                                                                                                   |
+| `isActive`                                  | boolean                                                               |                                                                                                                                   |
+| `isBanned`                                  | boolean                                                               |                                                                                                                                   |
+| `expiresAt`                                 | ngày giờ ISO 8601 hoặc `null`                                         | `null` sẽ xóa thời điểm hết hạn                                                                                                   |
+| `modelAccessMode`                           | `all` \| `restricted`                                                 | `allowedModels` phải rỗng khi chế độ là `all`                                                                                     |
+| `allowedModels`, `blockedModels`            | mảng các chuỗi, tối đa 1000                                           |                                                                                                                                   |
+| `allowedCombos`                             | mảng các chuỗi, tối đa 500                                            | Kiểm soát các combo mà khóa được phép gọi; các model trực tiếp được quản lý bởi `modelAccessMode` / `allowedModels`               |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                 | `allowedConnections` phải không rỗng khi ở chế độ `restricted` và rỗng khi ở chế độ `all`                                         |
+| `allowedConnections`                        | mảng các UUID, tối đa 100                                             |                                                                                                                                   |
+| `allowAutoCombos`                           | boolean                                                               | `false` từ chối các yêu cầu đối với model `auto/*` bằng khóa này; các khóa chưa bao giờ thiết lập giá trị này thì được phép       |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                         | Những gì `GET /v1/models` liệt kê cho khóa này (chỉ combo, chỉ model, hoặc cả hai); nó không thay đổi những gì khóa được phép gọi |
+| `forcedModel`                               | chuỗi tối đa 300 ký tự, hoặc `null`                                   | Định tuyến các yêu cầu chat đến model/combo này, ghi đè `X-Route-Model` và `body.model`; các giới hạn của khóa vẫn được áp dụng   |
+| `noLog`, `autoResolve`                      | boolean                                                               |                                                                                                                                   |
+| `throttleDelayMs`                           | số nguyên, 0-300000                                                   |                                                                                                                                   |
+| `maxSessions`                               | số nguyên, 0-10000                                                    |                                                                                                                                   |
+| `rateLimits`                                | mảng các `{ limit, window }` (số nguyên dương, tối đa 50) hoặc `null` | `null` sẽ xóa các giới hạn                                                                                                        |
+| `accessSchedule`                            | đối tượng lịch trình hoặc `null`                                      | `null` sẽ xóa lịch trình                                                                                                          |
+| `scopes`                                    | mảng các chuỗi, tối đa 32                                             |                                                                                                                                   |
+| `allowedEndpoints`                          | mảng các chuỗi, tối đa 20                                             |                                                                                                                                   |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                    |                                                                                                                                   |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                  | Xem [Bỏ qua cache theo khóa](#per-key-cache-bypass)                                                                               |
+| `compressionEnabled`                        | boolean                                                               |                                                                                                                                   |
+| `codexServiceMode`                          | một trong các chế độ dịch vụ Codex                                    |                                                                                                                                   |
+| `disableNonPublicModels`                    | boolean                                                               |                                                                                                                                   |
+| `allowUsageCommand`                         | boolean                                                               |                                                                                                                                   |
+| `usageLimitEnabled`                         | boolean                                                               |                                                                                                                                   |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 hoặc `null`                                               |                                                                                                                                   |
+| `chaosModeEnabled`                          | boolean                                                               |                                                                                                                                   |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1175,69 +1174,69 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Cài đặt
 
-| Điểm cuối                             | Phương thức   | Mô tả                                                                                                                                                                                                                                                                                        |
-| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Cài đặt chung. Các khóa chính sách bảo mật (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) yêu cầu `currentPassword` và thông tin xác thực của người vận hành — API key và token `oma_` sẽ nhận `403`; mọi thay đổi đều yêu cầu phạm vi access-token `admin` |
-| `/api/settings/proxy`                 | GET/PUT       | Cấu hình proxy mạng                                                                                                                                                                                                                                                                          |
-| `/api/settings/proxy/test`            | POST          | Kiểm tra kết nối proxy                                                                                                                                                                                                                                                                       |
-| `/api/settings/ip-filter`             | GET/PUT       | Danh sách cho phép/chặn IP                                                                                                                                                                                                                                                                   |
-| `/api/settings/thinking-budget`       | GET/PUT       | Chế độ ghi lại **yêu cầu** suy nghĩ/lập luận (passthrough / auto-strip / custom / adaptive). Độc lập với tính năng nén. Xem [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                              |
-| `/api/settings/system-prompt`         | GET/PUT       | System prompt toàn cục                                                                                                                                                                                                                                                                       |
-| `/api/settings/compression`           | GET/PUT       | Cấu hình nén toàn cục                                                                                                                                                                                                                                                                        |
-| `/api/settings/purge-request-history` | POST          | Xóa các hàng nhật ký yêu cầu và các tệp nhật ký cuộc gọi cục bộ                                                                                                                                                                                                                              |
+| Endpoint                              | Phương thức   | Mô tả                                                                                                                                                                                                                                                                                       |
+| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Cài đặt chung. Các khóa chính sách bảo mật (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) cần `currentPassword` và thông tin xác thực của operator — API key và token `oma_` sẽ nhận `403`; mọi thao tác thay đổi đều cần scope `admin` trong access token |
+| `/api/settings/proxy`                 | GET/PUT       | Cấu hình proxy mạng                                                                                                                                                                                                                                                                         |
+| `/api/settings/proxy/test`            | POST          | Kiểm tra kết nối proxy                                                                                                                                                                                                                                                                      |
+| `/api/settings/ip-filter`             | GET/PUT       | Danh sách cho phép/chặn IP                                                                                                                                                                                                                                                                  |
+| `/api/settings/thinking-budget`       | GET/PUT       | Chế độ ghi đè **request** thinking/reasoning (passthrough / auto-strip / custom / adaptive). Độc lập với tính năng nén. Xem [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                             |
+| `/api/settings/system-prompt`         | GET/PUT       | System prompt toàn cục                                                                                                                                                                                                                                                                      |
+| `/api/settings/compression`           | GET/PUT       | Cấu hình nén toàn cục                                                                                                                                                                                                                                                                       |
+| `/api/settings/purge-request-history` | POST          | Xóa các bản ghi log request và artifact log cuộc gọi cục bộ                                                                                                                                                                                                                                 |
 
 ### Ngữ cảnh & Nén
 
-| Điểm cuối                              | Phương thức    | Mô tả                                                                                   |
-| -------------------------------------- | -------------- | --------------------------------------------------------------------------------------- |
-| `/api/compression/preview`             | POST           | Xem trước chế độ nén off/lite/standard/aggressive/ultra/RTK/stacked                     |
-| `/api/compression/language-packs`      | GET            | Liệt kê các gói ngôn ngữ Caveman có sẵn                                                 |
-| `/api/compression/rules`               | GET            | Liệt kê siêu dữ liệu quy tắc Caveman                                                    |
-| `/api/context/caveman/config`          | GET/PUT        | Bí danh cho các cài đặt dành riêng cho Caveman                                          |
-| `/api/context/rtk/config`              | GET/PUT        | Các cài đặt dành riêng cho RTK, bao gồm bộ lọc tùy chỉnh và khả năng lưu giữ đầu ra thô |
-| `/api/context/rtk/filters`             | GET            | Danh mục bộ lọc RTK và thông tin chẩn đoán bộ lọc tùy chỉnh                             |
-| `/api/context/rtk/test`                | POST           | Chạy bản xem trước/kiểm thử RTK với một tải trọng văn bản                               |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Đọc đầu ra thô đã biên tập và được lưu giữ theo id con trỏ                              |
-| `/api/context/combos`                  | GET/POST       | Liệt kê/tạo tổ hợp nén                                                                  |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Xem chi tiết/cập nhật/xóa tổ hợp nén                                                    |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Gán các tổ hợp nén cho các tổ hợp định tuyến                                            |
-| `/api/context/analytics`               | GET            | Bí danh cho dữ liệu phân tích nén                                                       |
+| Endpoint                               | Method         | Description                                                                |
+| -------------------------------------- | -------------- | -------------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | Xem trước nén off/lite/standard/aggressive/ultra/RTK/stacked               |
+| `/api/compression/language-packs`      | GET            | Liệt kê các gói ngôn ngữ Caveman có sẵn                                    |
+| `/api/compression/rules`               | GET            | Liệt kê metadata quy tắc Caveman                                           |
+| `/api/context/caveman/config`          | GET/PUT        | Bí danh cài đặt dành riêng cho Caveman                                     |
+| `/api/context/rtk/config`              | GET/PUT        | Cài đặt dành riêng cho RTK, bao gồm bộ lọc tùy chỉnh và lưu giữ raw-output |
+| `/api/context/rtk/filters`             | GET            | Danh mục bộ lọc RTK và chẩn đoán bộ lọc tùy chỉnh                          |
+| `/api/context/rtk/test`                | POST           | Chạy xem trước/kiểm thử RTK trên payload văn bản                           |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Đọc raw output đã che giấu được lưu giữ theo pointer id                    |
+| `/api/context/combos`                  | GET/POST       | Liệt kê/tạo combo nén                                                      |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Chi tiết/cập nhật/xóa combo nén                                            |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Gán combo nén cho combo định tuyến                                         |
+| `/api/context/analytics`               | GET            | Bí danh phân tích nén                                                      |
 
 ### Giám sát
 
-| Điểm cuối                            | Phương thức | Mô tả                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET         | Theo dõi các phiên đang hoạt động                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `/api/rate-limits`                   | GET         | Giới hạn tốc độ theo từng tài khoản                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `/api/monitoring/health`             | GET         | Kiểm tra tình trạng + tóm tắt nhà cung cấp (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Chế độ xem quản lý bao gồm `credentialHealth`: các giá trị vô hướng của bộ nhớ đệm thăm dò, `failedConnections` khi `failed>0`, và `staleDbNonOkCount` (`test_status` cố định của SQLite, không phải đồng hồ đo). Xem [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE  | Thống kê bộ nhớ đệm / xóa                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `/api/modality-bridge/stats`         | GET         | `attempts` trong bộ nhớ, số lần thành công/`bridged`, số lần thất bại, số lần trúng bộ nhớ đệm, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` tính theo số mẫu và thời gian sử dụng gần nhất (đặt lại khi khởi động lại; yêu cầu xác thực quản lý)                                                                                                                                                                                  |
-| `/api/modality-bridge/video/runtime` | GET         | Kiểm tra nghiêm ngặt vòng lặp cục bộ đáng tin cậy trước khi xác thực/thăm dò quản lý; trạng thái khả dụng và phiên bản FFmpeg/ffprobe đã được làm sạch (không lưu trữ)                                                                                                                                                                                                                                                                       |
-| `/api/modality-bridge/video/extract` | POST        | Trình môi giới byte nội bộ được xác thực qua vòng lặp cục bộ đáng tin cậy; đầu vào 50 MiB, hàng đợi bị giới hạn/đầu ra 32 MiB, `503` khi hết dung lượng, `499` khi ngắt kết nối, `504` khi quá hạn; không phải API tải lên công khai                                                                                                                                                                                                         |
+| Endpoint                             | Method     | Description                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Theo dõi phiên hoạt động                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/api/rate-limits`                   | GET        | Giới hạn tốc độ theo tài khoản                                                                                                                                                                                                                                                                                                                                                                                                |
+| `/api/monitoring/health`             | GET        | Kiểm tra sức khỏe + tóm tắt provider (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Chế độ xem quản trị bao gồm `credentialHealth`: các giá trị vô hướng của probe-cache, `failedConnections` khi `failed>0`, và `staleDbNonOkCount` (`test_status` bị dính trong SQLite, không phải gauge). Xem [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Thống kê cache / xóa                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `/api/modality-bridge/stats`         | GET        | `attempts` trong bộ nhớ, số lần thành công/`bridged`, số lần thất bại, cache hit, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` tính theo số mẫu, và thời điểm sử dụng cuối cùng (đặt lại khi khởi động lại; xác thực quản trị)                                                                                                                                                                                      |
+| `/api/modality-bridge/video/runtime` | GET        | Kiểm tra trusted-loopback nghiêm ngặt trước khi xác thực/thăm dò quản trị; tình trạng khả dụng và phiên bản FFmpeg/ffprobe đã được làm sạch (no-store)                                                                                                                                                                                                                                                                        |
+| `/api/modality-bridge/video/extract` | POST       | Trình trung chuyển byte trusted-loopback nội bộ có xác thực; đầu vào 50 MiB, hàng đợi giới hạn/đầu ra 32 MiB, `503` hết dung lượng, `499` ngắt kết nối, `504` hết hạn; không phải API tải lên công khai                                                                                                                                                                                                                       |
 
 ### Sao lưu & Xuất/Nhập
 
-| Endpoint                    | Phương thức | Mô tả                                                                           |
-| --------------------------- | ----------- | ------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET         | Liệt kê các bản sao lưu khả dụng                                                |
-| `/api/db-backups`           | PUT         | Tạo bản sao lưu thủ công                                                        |
-| `/api/db-backups`           | POST        | Khôi phục từ một bản sao lưu cụ thể                                             |
-| `/api/db-backups`           | PATCH       | Lưu cài đặt lưu giữ bản sao lưu (chỉ dành cho operator)                         |
-| `/api/db-backups`           | DELETE      | Dọn dẹp các bản sao lưu đã lưu trữ theo cài đặt lưu giữ (chỉ dành cho operator) |
-| `/api/db-backups/export`    | GET         | Tải cơ sở dữ liệu xuống dưới dạng tệp .sqlite                                   |
-| `/api/db-backups/import`    | POST        | Tải tệp .sqlite lên để thay thế cơ sở dữ liệu (`?dryRun=true` chỉ xác thực)     |
-| `/api/db-backups/exportAll` | GET         | Tải bản sao lưu đầy đủ xuống dưới dạng tệp lưu trữ .tar.gz                      |
+| Endpoint                    | Phương thức | Mô tả                                                                              |
+| --------------------------- | ----------- | ---------------------------------------------------------------------------------- |
+| `/api/db-backups`           | GET         | Liệt kê các bản sao lưu khả dụng                                                   |
+| `/api/db-backups`           | PUT         | Tạo bản sao lưu thủ công                                                           |
+| `/api/db-backups`           | POST        | Khôi phục từ một bản sao lưu cụ thể                                                |
+| `/api/db-backups`           | PATCH       | Lưu cài đặt lưu giữ bản sao lưu (chỉ dành cho operator)                            |
+| `/api/db-backups`           | DELETE      | Dọn dẹp các bản sao lưu đã lưu theo cài đặt lưu giữ (chỉ dành cho operator)        |
+| `/api/db-backups/export`    | GET         | Tải xuống cơ sở dữ liệu dưới dạng tệp .sqlite                                      |
+| `/api/db-backups/import`    | POST        | Tải lên tệp .sqlite để thay thế cơ sở dữ liệu (`?dryRun=true` chỉ kiểm tra hợp lệ) |
+| `/api/db-backups/exportAll` | GET         | Tải xuống bản sao lưu đầy đủ dưới dạng tệp nén .tar.gz                             |
 
 `/api/db-backups/export`, `/api/db-backups/exportAll` và `/api/settings/export-json` cung cấp
-mọi thông tin xác thực đã lưu trữ, vì vậy chúng yêu cầu phiên dashboard hoặc CLI cục bộ (hoặc đã
-tắt đăng nhập). Các khóa API thuộc bất kỳ phạm vi nào và access token `oma_` đều nhận `403`. Các
-thao tác khôi phục cũng có cùng ranh giới bảo mật: `POST /api/db-backups/import` (bao gồm
+mọi thông tin xác thực đã lưu, vì vậy chúng yêu cầu phiên dashboard hoặc CLI cục bộ (hoặc khi
+đăng nhập bị vô hiệu hóa). API key ở bất kỳ phạm vi nào và access token `oma_` đều nhận `403`.
+Các thao tác khôi phục cũng giữ ranh giới tương tự: `POST /api/db-backups/import` (bao gồm cả
 `dryRun=true`), `POST /api/db-backups` (khôi phục theo id) và `POST /api/settings/import-json`
-thay thế cơ sở dữ liệu hoặc cài đặt đang hoạt động, vì vậy thông tin xác thực của máy cũng nhận
-`403` tại đó; `omniroute sync import` gửi thông tin xác thực CLI cục bộ. Điều tương tự cũng áp dụng
-cho `DELETE /api/db-backups` (dọn dẹp các bản sao lưu đã lưu trữ) và `PATCH /api/db-backups`
-(cài đặt lưu giữ: các giá trị đã lưu chi phối việc dọn dẹp tự động sau mỗi lần sao lưu). Việc liệt kê
-(`GET`) và tạo bản sao lưu thủ công (`PUT`) tiếp tục sử dụng xác thực quản lý thông thường.
+thay thế cơ sở dữ liệu hoặc cài đặt đang hoạt động, nên thông tin xác thực máy cũng nhận `403`
+ở đó; `omniroute sync import` gửi thông tin xác thực CLI cục bộ. Tương tự với
+`DELETE /api/db-backups` (dọn dẹp các bản sao lưu đã lưu) và `PATCH /api/db-backups` (cài đặt
+lưu giữ: các giá trị được lưu trữ điều khiển việc dọn dẹp tự động sau mỗi lần sao lưu). Việc
+liệt kê (`GET`) và tạo bản sao lưu thủ công (`PUT`) vẫn giữ xác thực quản lý thông thường.
 
 ### Đồng bộ đám mây
 
@@ -1247,92 +1246,92 @@ cho `DELETE /api/db-backups` (dọn dẹp các bản sao lưu đã lưu trữ) v
 | `/api/sync/initialize` | POST        | Khởi tạo đồng bộ             |
 | `/api/cloud/*`         | Nhiều       | Quản lý đám mây              |
 
-### Đường hầm
+### Tunnel
 
-| Endpoint                   | Phương thức | Mô tả                                                                           |
-| -------------------------- | ----------- | ------------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET         | Đọc trạng thái cài đặt/thời gian chạy của Cloudflare Quick Tunnel cho dashboard |
-| `/api/tunnels/cloudflared` | POST        | Bật hoặc tắt Cloudflare Quick Tunnel (`action=enable/disable`)                  |
-| `/api/tunnels/ngrok`       | GET         | Đọc trạng thái thời gian chạy của ngrok Tunnel cho dashboard                    |
-| `/api/tunnels/ngrok`       | POST        | Bật hoặc tắt ngrok Tunnel (`action=enable/disable`)                             |
+| Endpoint                   | Phương thức | Mô tả                                                                    |
+| -------------------------- | ----------- | ------------------------------------------------------------------------ |
+| `/api/tunnels/cloudflared` | GET         | Đọc trạng thái cài đặt/runtime của Cloudflare Quick Tunnel cho dashboard |
+| `/api/tunnels/cloudflared` | POST        | Bật hoặc tắt Cloudflare Quick Tunnel (`action=enable/disable`)           |
+| `/api/tunnels/ngrok`       | GET         | Đọc trạng thái runtime của ngrok Tunnel cho dashboard                    |
+| `/api/tunnels/ngrok`       | POST        | Bật hoặc tắt ngrok Tunnel (`action=enable/disable`)                      |
 
 ### Công cụ CLI
 
-| Endpoint                           | Phương thức | Mô tả                     |
-| ---------------------------------- | ----------- | ------------------------- |
-| `/api/cli-tools/claude-settings`   | GET         | Trạng thái Claude CLI     |
-| `/api/cli-tools/codex-settings`    | GET         | Trạng thái Codex CLI      |
-| `/api/cli-tools/droid-settings`    | GET         | Trạng thái Droid CLI      |
-| `/api/cli-tools/openclaw-settings` | GET         | Trạng thái OpenClaw CLI   |
-| `/api/cli-tools/runtime/[toolId]`  | GET         | Môi trường chạy CLI chung |
+| Endpoint                           | Phương thức | Mô tả                   |
+| ---------------------------------- | ----------- | ----------------------- |
+| `/api/cli-tools/claude-settings`   | GET         | Trạng thái Claude CLI   |
+| `/api/cli-tools/codex-settings`    | GET         | Trạng thái Codex CLI    |
+| `/api/cli-tools/droid-settings`    | GET         | Trạng thái Droid CLI    |
+| `/api/cli-tools/openclaw-settings` | GET         | Trạng thái OpenClaw CLI |
+| `/api/cli-tools/runtime/[toolId]`  | GET         | Runtime CLI chung       |
 
 Phản hồi CLI bao gồm: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
-### Tác tử ACP
+### Agent ACP
 
-| Endpoint          | Phương thức | Mô tả                                                                          |
-| ----------------- | ----------- | ------------------------------------------------------------------------------ |
-| `/api/acp/agents` | GET         | Liệt kê tất cả tác tử được phát hiện (tích hợp sẵn + tùy chỉnh) kèm trạng thái |
-| `/api/acp/agents` | POST        | Thêm tác tử tùy chỉnh hoặc làm mới bộ nhớ đệm phát hiện                        |
-| `/api/acp/agents` | DELETE      | Xóa tác tử tùy chỉnh theo tham số truy vấn `id`                                |
+| Endpoint          | Phương thức | Mô tả                                                                             |
+| ----------------- | ----------- | --------------------------------------------------------------------------------- |
+| `/api/acp/agents` | GET         | Liệt kê tất cả các agent được phát hiện (tích hợp sẵn + tùy chỉnh) kèm trạng thái |
+| `/api/acp/agents` | POST        | Thêm agent tùy chỉnh hoặc làm mới bộ nhớ đệm phát hiện                            |
+| `/api/acp/agents` | DELETE      | Xóa một agent tùy chỉnh theo tham số query `id`                                   |
 
 Phản hồi GET bao gồm `agents[]` (id, name, binary, version, installed, protocol, isCustom) và `summary` (total, installed, notFound, builtIn, custom).
 
-### Khả năng phục hồi & giới hạn tốc độ
+### Khả năng phục hồi & Giới hạn tốc độ
 
-| Endpoint                          | Phương thức | Mô tả                                                                                                   |
-| --------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH   | Lấy/cập nhật hàng đợi yêu cầu, thời gian chờ kết nối, bộ ngắt provider và cài đặt chờ                   |
-| `/api/resilience/reset`           | POST        | Đặt lại các bộ ngắt mạch provider                                                                       |
-| `/api/resilience/model-cooldowns` | GET         | Liệt kê các khóa đang hoạt động theo từng (provider, connection, model), sắp xếp theo thời gian còn lại |
-| `/api/resilience/model-cooldowns` | DELETE      | Xóa khóa model — phần thân `{provider, model}` hoặc `{all: true}` để xóa tất cả                         |
-| `/api/rate-limits`                | GET         | Trạng thái giới hạn tốc độ theo từng tài khoản                                                          |
-| `/api/rate-limit`                 | GET         | Cấu hình giới hạn tốc độ toàn cục                                                                       |
+| Endpoint                          | Method    | Description                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | Lấy/cập nhật hàng đợi yêu cầu, cooldown kết nối, breaker của provider, và các cài đặt chờ                                                                                                                                                                                                                                                                                                                                                |
+| `/api/resilience/reset`           | POST      | Đặt lại các circuit breaker của provider                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `/api/resilience/model-cooldowns` | GET       | Liệt kê các khóa đang hoạt động theo từng (provider, connection, model), sắp xếp theo thời gian còn lại                                                                                                                                                                                                                                                                                                                                  |
+| `/api/resilience/model-cooldowns` | DELETE    | Xóa một khóa model — body `{provider, model}` hoặc `{all: true}` để xóa toàn bộ                                                                                                                                                                                                                                                                                                                                                          |
+| `/api/rate-limits`                | GET/POST  | Trạng thái giới hạn tốc độ theo từng tài khoản (GET) hoặc bật/tắt bảo vệ giới hạn tốc độ cho một kết nối (POST `{connectionId, enabled}`). Đường ghi được hỗ trợ cho `rateLimitProtection` (không bao giờ được sửa đổi qua `PUT /api/providers/[id]`). Lưu ý: `enabled: false` tắt chế độ bảo vệ tường minh nhưng không loại một kết nối API-key đang hoạt động ra khỏi lưới an toàn tự động bật toàn cục (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Cấu hình giới hạn tốc độ toàn cục (đã ngừng dùng; alias tới `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                          |
 
-> Cả bốn route `/api/resilience/*` đều yêu cầu **xác thực quản lý** (`requireManagementAuth`). Xem [Khả năng phục hồi (mở rộng)](#resilience-extended) để biết thông tin phân tích đầy đủ về bộ ngắt provider, thời gian chờ kết nối và khóa model.
+> Cả bốn route `/api/resilience/*` đều yêu cầu **xác thực quản trị** (`requireManagementAuth`). Xem [Resilience (mở rộng)](#resilience-extended) để biết phân tích đầy đủ về provider breaker so với connection cooldown so với model lockout.
 
-### Đánh giá
+### Evals
 
-| Endpoint     | Phương thức | Mô tả                                   |
-| ------------ | ----------- | --------------------------------------- |
-| `/api/evals` | GET/POST    | Liệt kê các bộ đánh giá / chạy đánh giá |
+| Endpoint     | Method   | Description                         |
+| ------------ | -------- | ----------------------------------- |
+| `/api/evals` | GET/POST | Liệt kê các bộ eval / chạy đánh giá |
 
 ### Chính sách
 
-| Endpoint        | Phương thức     | Mô tả                             |
+| Endpoint        | Method          | Description                       |
 | --------------- | --------------- | --------------------------------- |
 | `/api/policies` | GET/POST/DELETE | Quản lý các chính sách định tuyến |
 
 ### Tuân thủ
 
-| Điểm cuối                   | Phương thức | Mô tả                                   |
-| --------------------------- | ----------- | --------------------------------------- |
-| `/api/compliance/audit-log` | GET         | Nhật ký kiểm toán tuân thủ (N mục cuối) |
+| Endpoint                    | Method | Description                                 |
+| --------------------------- | ------ | ------------------------------------------- |
+| `/api/compliance/audit-log` | GET    | Nhật ký kiểm toán tuân thủ (N mục gần nhất) |
 
-### v1beta (Tương thích với Gemini)
+### v1beta (Tương thích Gemini)
 
-| Điểm cuối                  | Phương thức | Mô tả                                     |
-| -------------------------- | ----------- | ----------------------------------------- |
-| `/v1beta/models`           | GET         | Liệt kê các mô hình theo định dạng Gemini |
-| `/v1beta/models/{...path}` | POST        | Điểm cuối `generateContent` của Gemini    |
+| Endpoint                   | Method | Description                             |
+| -------------------------- | ------ | --------------------------------------- |
+| `/v1beta/models`           | GET    | Liệt kê các model theo định dạng Gemini |
+| `/v1beta/models/{...path}` | POST   | Endpoint `generateContent` của Gemini   |
 
-Các điểm cuối này mô phỏng định dạng API của Gemini dành cho những ứng dụng khách yêu cầu khả năng tương thích với Gemini SDK gốc.
+Các endpoint này mô phỏng định dạng API của Gemini cho những client yêu cầu tương thích với Gemini SDK gốc.
 
 ### API Nội bộ / Hệ thống
 
-| Điểm cuối                | Phương thức | Mô tả                                                                     |
-| ------------------------ | ----------- | ------------------------------------------------------------------------- |
-| `/api/init`              | GET         | Kiểm tra khởi tạo ứng dụng (được dùng trong lần chạy đầu tiên)            |
-| `/api/tags`              | GET         | Các thẻ mô hình tương thích với Ollama (dành cho ứng dụng khách Ollama)   |
-| `/api/restart`           | POST        | Kích hoạt khởi động lại máy chủ một cách an toàn                          |
-| `/api/shutdown`          | POST        | Kích hoạt tắt máy chủ một cách an toàn                                    |
-| `/api/system/env/repair` | POST        | Sửa chữa các biến môi trường của nhà cung cấp OAuth                       |
-| `/api/system/version`    | GET         | Phiên bản hiện tại/mới nhất, trạng thái cập nhật, kênh phát hành          |
-| `/api/system/version`    | POST        | Bắt đầu cập nhật lên phiên bản mới nhất có tính đến môi trường triển khai |
+| Endpoint                 | Method | Description                                                      |
+| ------------------------ | ------ | ---------------------------------------------------------------- |
+| `/api/init`              | GET    | Kiểm tra khởi tạo ứng dụng (dùng khi chạy lần đầu)               |
+| `/api/tags`              | GET    | Tag model tương thích Ollama (cho các client Ollama)             |
+| `/api/restart`           | POST   | Kích hoạt khởi động lại server êm (graceful)                     |
+| `/api/shutdown`          | POST   | Kích hoạt tắt server êm (graceful)                               |
+| `/api/system/env/repair` | POST   | Sửa chữa biến môi trường của provider OAuth                      |
+| `/api/system/version`    | GET    | Phiên bản hiện tại/mới nhất, trạng thái cập nhật, kênh phát hành |
+| `/api/system/version`    | POST   | Bắt đầu cập nhật có nhận thức deployment lên phiên bản mới nhất  |
 
-> **Lưu ý:** Các điểm cuối này được hệ thống sử dụng nội bộ hoặc để tương thích với ứng dụng khách Ollama. Người dùng cuối thường không gọi chúng.
+> **Lưu ý:** Các endpoint này được hệ thống sử dụng nội bộ hoặc để tương thích với client Ollama. Người dùng cuối thường không gọi trực tiếp chúng.
 
-### Sửa chữa Môi trường OAuth _(v3.6.1+)_
+### Sửa chữa biến môi trường OAuth _(v3.6.1+)_
 
 ```bash
 POST /api/system/env/repair
@@ -1343,7 +1342,7 @@ Content-Type: application/json
 }
 ```
 
-Sửa chữa các biến môi trường OAuth bị thiếu hoặc hỏng cho một nhà cung cấp cụ thể. Trả về:
+Sửa chữa các biến môi trường OAuth bị thiếu hoặc bị hỏng cho một nhà cung cấp cụ thể. Trả về:
 
 ```json
 {
@@ -1353,16 +1352,16 @@ Sửa chữa các biến môi trường OAuth bị thiếu hoặc hỏng cho m�
 }
 ```
 
-### Phiên bản và Kênh Phát hành
+### Phiên bản và Kênh phát hành
 
 ```bash
 GET /api/system/version
 ```
 
-Tuyến quản lý chỉ dành cho loopback (xác thực quản trị viên). Trả về phiên bản đang chạy, phiên bản
-được phát hành mới nhất và trạng thái tự động cập nhật. `releaseChannel` và `channels` là các trường
-được bổ sung (rail 3.8.54); `channel` giữ nguyên ý nghĩa — chế độ triển khai mà trình cập nhật trên bảng điều khiển
-sử dụng (`npm`, `source` hoặc `docker-compose`).
+Route quản lý chỉ dành cho loopback (xác thực admin). Trả về phiên bản đang chạy, phiên bản
+mới nhất đã phát hành và trạng thái tự động cập nhật. `releaseChannel` và `channels` là các
+trường bổ sung (rail 3.8.54); `channel` giữ nguyên ý nghĩa của nó — chế độ triển khai mà
+trình cập nhật dashboard sử dụng (`npm`, `source` hoặc `docker-compose`).
 
 ```json
 {
@@ -1378,17 +1377,18 @@ sử dụng (`npm`, `source` hoặc `docker-compose`).
 }
 ```
 
-- `releaseChannel` — kênh npm của bản dựng đang chạy: `nightly` cho các phiên bản `-nightly.*`,
-  `next` cho các bản phát hành trước khác (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` cho phiên bản ổn định thuộc
-  phiên bản chính cũ hơn `channels.latest`, nếu không thì là `latest`. Áp dụng cùng quy tắc như
-  `scripts/release/dist-tag.mjs`, tệp chọn npm dist-tag tại thời điểm phát hành.
-- `channels` — phiên bản mới nhất đã phát hành của mỗi dist-tag, từ `npm view omniroute dist-tags` (có phương án
-  dự phòng qua HTTP của registry), được lưu vào bộ nhớ đệm với TTL 10 phút giống như `latest`. `latest` luôn hiện diện
-  (dự phòng về trường `latest`, sau đó là `"unavailable"`); `next`, `nightly` và `lts` chỉ xuất hiện
-  khi dist-tag đó tồn tại. Yêu cầu `Cache-Control: no-cache` sẽ làm mới cả hai lượt tra cứu.
+- `releaseChannel` — kênh npm của bản build đang chạy: `nightly` cho các phiên bản `-nightly.*`,
+  `next` cho các bản pre-release khác (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` cho phiên bản ổn định
+  thuộc một major cũ hơn `channels.latest`, nếu không thì là `latest`. Cùng quy tắc với
+  `scripts/release/dist-tag.mjs`, script chọn npm dist-tag tại thời điểm phát hành.
+- `channels` — đầu (head) đã phát hành của mỗi dist-tag, lấy từ `npm view omniroute dist-tags`
+  (dự phòng bằng HTTP registry), được cache với cùng TTL 10 phút như `latest`. `latest` luôn
+  có mặt (dự phòng về trường `latest`, rồi đến `"unavailable"`); `next`, `nightly` và `lts` chỉ
+  xuất hiện khi dist-tag đó tồn tại. Một request `Cache-Control: no-cache` sẽ làm mới cả hai
+  lượt tra cứu.
 
-Mô hình kênh (`latest` = v3 cho đến khi 4.0 GA, `next` = rc, `nightly` = các bản dựng `develop`,
-`lts` = các bản vá v3 sau khi 4.0 GA) được mô tả trong `docs/ops/RELEASE_STRATEGY.md`.
+Mô hình kênh (`latest` = v3 cho đến bản 4.0 GA, `next` = rc, `nightly` = các bản build
+`develop`, `lts` = các bản vá v3 sau bản 4.0 GA) được mô tả trong `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 
@@ -1664,30 +1664,36 @@ Các proxy HTTP(S)/SOCKS gửi đi có thể được gán cho nhà cung cấp, 
 
 ## Khả năng phục hồi (mở rộng)
 
-OmniRoute cung cấp ba cơ chế xử lý lỗi tạm thời độc lập; các endpoint quản lý dưới đây cho phép người vận hành đọc và ghi đè chúng:
+OmniRoute cung cấp ba cơ chế xử lý lỗi tạm thời độc lập; các endpoint quản lý bên dưới cho phép người vận hành đọc và ghi đè chúng:
 
-| Phạm vi                   | Nơi lưu trữ trạng thái                                  | Đọc                                       | Đặt lại / xóa                                        |
-| ------------------------- | ------------------------------------------------------- | ----------------------------------------- | ---------------------------------------------------- |
-| Bộ ngắt mạch nhà cung cấp | `domain_circuit_breakers` + trong bộ nhớ                | `/api/monitoring/health`                  | `POST /api/resilience/reset`                         |
-| Thời gian chờ kết nối     | `rateLimitedUntil` trên các kết nối nhà cung cấp        | `/api/rate-limits`, `/api/providers/[id]` | (được bật lại khi cần; xóa qua PUT của nhà cung cấp) |
-| Khóa mô hình              | Sổ đăng ký trạng thái khả dụng của mô hình trong bộ nhớ | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`             |
+| Phạm vi                      | Lưu trữ trạng thái                            | Đọc                                       | Đặt lại / xóa                                          |
+| ---------------------------- | --------------------------------------------- | ----------------------------------------- | ------------------------------------------------------ |
+| Circuit breaker của provider | `domain_circuit_breakers` + trong bộ nhớ      | `/api/monitoring/health`                  | `POST /api/resilience/reset`                           |
+| Cooldown của kết nối         | `rateLimitedUntil` trên các kết nối provider  | `/api/rate-limits`, `/api/providers/[id]` | (tự kích hoạt lại khi cần; xóa thông qua PUT provider) |
+| Khóa model                   | Registry tính khả dụng của model trong bộ nhớ | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`               |
 
-`PATCH /api/resilience` chấp nhận các giá trị ghi đè cho bộ ngắt mạch nhà cung cấp tại `providerBreaker.oauth` và `providerBreaker.apikey`. Mỗi cấu hình hỗ trợ `degradationThreshold`, `failureThreshold` và `resetTimeoutMs`; các trường tương tự cũng được hiển thị trong Bảng điều khiển → Cài đặt → Khả năng phục hồi.
+`PATCH /api/resilience` chấp nhận các ghi đè circuit breaker của provider dưới `providerBreaker.oauth` và `providerBreaker.apikey`. Mỗi profile hỗ trợ `degradationThreshold`, `failureThreshold` và `resetTimeoutMs`; các trường tương tự cũng được hiển thị trong Dashboard → Settings → Resilience.
 
 ```bash
-# Xóa trạng thái khóa của một mô hình
+# Xóa khóa của một model cụ thể
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"provider":"openai","model":"gpt-4o-mini"}'
 
-# Xóa toàn bộ trạng thái khóa
+# Xóa toàn bộ các khóa
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -d '{"all":true}'
 ```
 
-Để xem tài liệu tham khảo đầy đủ về khái niệm và các giá trị mặc định của bộ ngắt mạch: xem [`CLAUDE.md`](../../CLAUDE.md) → "Trạng thái thời gian chạy của khả năng phục hồi".
+Tài liệu tham khảo khái niệm đầy đủ và giá trị mặc định của circuit breaker: xem [`CLAUDE.md`](../../CLAUDE.md) → "Resilience Runtime State" và [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md).
+
+### Hàng đợi Rate-Limit & Cơ chế an toàn tự động kích hoạt lại
+
+- **Đường dẫn ghi được hỗ trợ**: `POST /api/rate-limits` với body `{"connectionId": "<id>", "enabled": true|false}` là endpoint quản lý được hỗ trợ để bật/tắt bảo vệ rate-limit cho một kết nối. `PUT /api/providers/[id]` cố ý không sửa đổi hoặc đảo giá trị `rateLimitProtection` (#11278).
+- **Ngữ nghĩa của `enabled: false`**: Việc đặt `enabled: false` sẽ gỡ bỏ bảo vệ tường minh cho kết nối, nhưng **không** loại một kết nối API-key đang hoạt động ra khỏi cơ chế an toàn tự động kích hoạt toàn cục (`autoEnableApiKeyProviders = true`). Trong `reconcileEnabledConnections` (`open-sse/services/rateLimitManager.ts`), `false` và `undefined` là tương đương nhau; các kết nối API-key đang hoạt động mà không có bảo vệ tường minh vẫn được bảo vệ theo cơ chế an toàn tự động kích hoạt.
+- **Tắt toàn cục**: Để chạy các kết nối API-key mà không có hàng đợi rate-limit, hãy tắt cơ chế an toàn trên toàn cục thông qua `RATE_LIMIT_AUTO_ENABLE=false` (biến môi trường) hoặc `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false` (Settings → Resilience / `PATCH /api/resilience`).
 
 ---
 

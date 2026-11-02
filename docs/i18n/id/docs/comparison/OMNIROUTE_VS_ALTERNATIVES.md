@@ -4,46 +4,46 @@
 
 ---
 
-Perbandingan fitur objektif dengan router AI sumber terbuka populer.
+Perbandingan fitur objektif dengan router AI open-source populer.
 
-> **Metodologi**: Repositori publik diaudit pada 2026-Q2. Versi sebagaimana tercantum.
-> Kirim koreksi melalui PR — kami ingin informasi ini akurat.
+> **Metodologi**: Repositori publik diaudit pada 2026-Q2. Versi sesuai yang tercantum.
+> Kirimkan koreksi melalui PR — kami ingin ini akurat.
 
-| Fitur                                               |                 OmniRoute 3.8                 |    LiteLLM 1.x     | OpenRouter (SaaS) |   Portkey   |
-| --------------------------------------------------- | :-------------------------------------------: | :----------------: | :---------------: | :---------: |
-| **Penyedia**                                        |                    **329**                    |        ~100        |        ~50        |     ~30     |
-| **Entri katalog gratis/tanpa autentikasi**          |                    **155**                    |        n/a         |    passthrough    |     n/a     |
-| **Dapat dihosting sendiri**                         |                      ✅                       |         ✅         |        ❌         | ⚠ berbayar  |
-| **Entri katalog OAuth**                             |                    **23**                     |      sebagian      |        ❌         |     ❌      |
-| **Kombinasi fallback otomatis**                     |                **19 strategi**                | berbasis prioritas | berbasis tingkat  |  berbobot   |
-| **Fusi (panel paralel + sintesis penilai)**         |                      ✅                       |         ❌         |        ❌         |     ❌      |
-| **Fallback Tingkat 1/2/3 (langganan→murah→gratis)** |                    ✅ + UI                    |       manual       |        n/a        |   manual    |
-| **Kompresi token**                                  | Tumpukan 12 mesin (RTK + Caveman + LLMLingua) |     tidak ada      |     tidak ada     |  tidak ada  |
-| **Pembuatan multimodal (ucapan/musik/video)**       |                      ✅                       |         ❌         |    passthrough    |     ❌      |
-| **Server MCP bawaan**                               |            ✅ 110 alat, 33 cakupan            |         ❌         |        ❌         |     ❌      |
-| **Protokol A2A**                                    |               ✅ 6 keterampilan               |         ❌         |        ❌         |     ❌      |
-| **Memori (FTS5 + vektor)**                          |                      ✅                       |         ❌         |        ❌         |     ❌      |
-| **Guardrail (PII, injeksi, visi)**                  |                      ✅                       |      sebagian      |        ❌         | ✅ berbayar |
-| **Integrasi agen cloud**                            |          Codex, Cursor, Devin, Jules          |         ❌         |        ❌         |     ❌      |
-| **Pemutus sirkuit per penyedia**                    |    ✅ 3 status, pemulihan sesuai kebutuhan    |       dasar        |        ❌         |     ✅      |
-| **Penyamaran sidik jari TLS (JA3/JA4)**             |                  ✅ wreq-js                   |         ❌         |        ❌         |     ❌      |
-| **Kerangka kerja evaluasi**                         |                   ✅ bawaan                   |         ❌         |        ❌         | ⚠ berbayar  |
-| **Proksi MITM (mencegat Cursor/Antigravity)**       |              ✅ lintas platform               |         ❌         |        ❌         |     ❌      |
-| **CLI dengan baki sistem (tanpa Electron)**         |                      ✅                       |         ❌         |        n/a        |     n/a     |
-| **Autentikasi otomatis berbasis ID mesin pada CLI** |                      ✅                       |         ❌         |        n/a        |     n/a     |
-| **Dasbor**                                          |                  Next.js 16                   |       dasar        |    proprieter     | proprieter  |
-| **i18n**                                            |                 **42 lokal**                  |         ❌         |        ❌         |      ⚠      |
-| **Keterampilan agen publik (SKILL.md)**             |                     ✅ 45                     |         ❌         |        ❌         |     ❌      |
-| **Dukungan tunnel (Cloudflared, Tailscale, Ngrok)** |                      ✅                       |         ❌         |        n/a        |     n/a     |
-| **Lisensi**                                         |                      MIT                      |        MIT         |    proprieter     | proprieter  |
+| Fitur                                               |               OmniRoute 3.8                |    LiteLLM 1.x     | OpenRouter (SaaS) |   Portkey   |
+| --------------------------------------------------- | :----------------------------------------: | :----------------: | :---------------: | :---------: |
+| **Penyedia**                                        |                  **329**                   |        ~100        |        ~50        |     ~30     |
+| **Entri katalog gratis/tanpa autentikasi**          |                  **155**                   |        n/a         |    passthrough    |     n/a     |
+| **Dapat di-hosting sendiri**                        |                     ✅                     |         ✅         |        ❌         | ⚠ berbayar  |
+| **Entri katalog OAuth**                             |                   **23**                   |      sebagian      |        ❌         |     ❌      |
+| **Kombinasi auto-fallback**                         |              **20 strategi**               | berbasis prioritas |   berbasis tier   |  berbobot   |
+| **Fusi (panel paralel + sintesis juri)**            |                     ✅                     |         ❌         |        ❌         |     ❌      |
+| **Fallback tier 1/2/3 (langganan→murah→gratis)**    |                  ✅ + UI                   |       manual       |        n/a        |   manual    |
+| **Kompresi token**                                  | stack 12 mesin (RTK + Caveman + LLMLingua) |     tidak ada      |     tidak ada     |  tidak ada  |
+| **Generasi multimodal (ucapan/musik/video)**        |                     ✅                     |         ❌         |    passthrough    |     ❌      |
+| **Server MCP bawaan**                               |          ✅ 110 tools, 33 scopes           |         ❌         |        ❌         |     ❌      |
+| **Protokol A2A**                                    |                ✅ 6 skills                 |         ❌         |        ❌         |     ❌      |
+| **Memori (FTS5 + vektor)**                          |                     ✅                     |         ❌         |        ❌         |     ❌      |
+| **Guardrails (PII, injeksi, visi)**                 |                     ✅                     |      sebagian      |        ❌         | ✅ berbayar |
+| **Integrasi agen cloud**                            |        Codex, Cursor, Devin, Jules         |         ❌         |        ❌         |     ❌      |
+| **Circuit breaker per penyedia**                    |         ✅ 3-state, pemulihan lazy         |       dasar        |        ❌         |     ✅      |
+| **Penyamaran fingerprint TLS (JA3/JA4)**            |                 ✅ wreq-js                 |         ❌         |        ❌         |     ❌      |
+| **Framework evaluasi**                              |                 ✅ bawaan                  |         ❌         |        ❌         | ⚠ berbayar  |
+| **Proxy MITM (mencegat Cursor/Antigravity)**        |             ✅ lintas platform             |         ❌         |        ❌         |     ❌      |
+| **CLI dengan system tray (tanpa Electron)**         |                     ✅                     |         ❌         |        n/a        |     n/a     |
+| **Auto-auth machine-ID CLI**                        |                     ✅                     |         ❌         |        n/a        |     n/a     |
+| **Dasbor**                                          |                 Next.js 16                 |       dasar        |    proprietary    | proprietary |
+| **i18n**                                            |               **67 locales**               |         ❌         |        ❌         |      ⚠      |
+| **Skill agen publik (SKILL.md)**                    |                   ✅ 45                    |         ❌         |        ❌         |     ❌      |
+| **Dukungan tunnel (Cloudflared, Tailscale, Ngrok)** |                     ✅                     |         ❌         |        n/a        |     n/a     |
+| **Lisensi**                                         |                    MIT                     |        MIT         |    proprietary    | proprietary |
 
 ## Kapan memilih OmniRoute
 
-- Anda melakukan self-hosting dan menginginkan **cakupan penyedia maksimum** (374 penyedia, 155 entri katalog gratis/tanpa autentikasi)
-- Anda memerlukan **server MCP bawaan** (alat LLM, memori, dan keterampilan yang diekspos sebagai alat)
+- Anda menghosting sendiri dan menginginkan **cakupan provider maksimal** (375 provider, 155 entri katalog gratis/tanpa autentikasi)
+- Anda memerlukan **server MCP bawaan** (tool LLM, memori, skill yang diekspos sebagai tool)
 - Anda memerlukan **protokol A2A** untuk alur kerja antaragen
-- Anda menginginkan **penyamaran sidik jari** (JA3/JA4) agar tidak terdeteksi oleh CAPTCHA upstream
-- Anda memerlukan **fitur perusahaan** (guardrail, evaluasi, jejak audit) tanpa tagihan SaaS
+- Anda menginginkan **fingerprint stealth** (JA3/JA4) untuk menghindari deteksi oleh CAPTCHA upstream
+- Anda memerlukan **fitur enterprise** (guardrails, evals, audit trail) tanpa tagihan SaaS
 
 ## Kapan memilih LiteLLM
 

@@ -48,15 +48,15 @@ langsung berfungsi), memeriksa kesehatan server, dan menjalankan `claude` melalu
 
 ---
 
-## Alias penemuan — tampilkan model non-Claude di pemilih `/model`
+## Alias discovery — menampilkan model non-Claude di pemilih `/model`
 
-Penemuan model gateway Claude Code hanya mencantumkan id yang diawali dengan `claude`
-atau `anthropic`, sehingga dengan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, pemilih
-bawaan `/model` biasanya **hanya** menampilkan model Claude/Anthropic milik OmniRoute —
-`kimi/kimi-k2.6` atau `glm/glm-5.2` tidak pernah muncul, meskipun peruteannya berfungsi dengan baik.
+Discovery model gateway Claude Code hanya mencantumkan id yang diawali dengan `claude`
+atau `anthropic`, sehingga dengan `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` pemilih
+`/model` bawaan biasanya menampilkan **hanya** model Claude/Anthropic milik OmniRoute —
+`kimi/kimi-k2.6` atau `glm/glm-5.2` tidak pernah muncul, meskipun routing-nya berfungsi dengan baik.
 
-OmniRoute dapat mencerminkan model apa pun yang diaktifkan (dan kombinasi) di bawah id `claude/…`
-agar lolos dari filter tersebut dan muncul di pemilih:
+OmniRoute dapat mencerminkan (mirror) model apa pun yang diaktifkan (beserta combo) di bawah id `claude/…`
+sehingga lolos filter tersebut dan muncul di pemilih:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,32 +64,40 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Saat Anda memilih salah satunya di Claude Code, OmniRoute menghapus pembungkus `claude/`
-dan mengembalikannya ke id asli sebelum melakukan perutean — id `claude/<real-claude-model>`
-asli (penyedia OAuth Claude yang sebenarnya) selalu dibiarkan tanpa perubahan.
+Saat Anda memilih salah satu dari ini di Claude Code, OmniRoute melepaskan bungkus `claude/`
+kembali ke id aslinya sebelum routing — id `claude/<real-claude-model>` yang asli
+(provider Claude OAuth sebenarnya) selalu dibiarkan utuh.
 
-**Fitur ini dinonaktifkan secara default** dan dikendalikan oleh pengaturan tiga tingkat (yang paling spesifik
-diprioritaskan), sehingga OmniRoute biasa tidak pernah menggandakan katalognya untuk klien yang tidak menggunakan
-Claude Code:
+Secara default hanya id dasar yang dicerminkan. Dengan feature flag opt-in
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` yang aktif, varian reasoning-effort yang
+sudah tercantum di katalog (mis. `codex/gpt-6-sol-high`) dicerminkan seperti id
+lainnya, sehingga Claude Code dapat memilih level effort secara eksplisit, dan id `auto/*`
+bawaan yang tidak dapat diwujudkan oleh jalur request tidak dicerminkan. Apakah varian effort
+dicantumkan sama sekali tetap diatur oleh `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` —
+cermin tidak pernah menambahkan varian yang tidak dimiliki katalog dasar.
 
-| Tingkat  | Lokasi                                                                        |
-| -------- | ----------------------------------------------------------------------------- |
-| Model    | Halaman detail penyedia → pengalih "Expose in Claude Code" per model          |
-| Penyedia | Halaman detail penyedia → pengalih tingkat penyedia (mencakup semua modelnya) |
-| Global   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (default nonaktif)   |
+**Fitur ini nonaktif secara default** dan dikendalikan oleh gerbang tiga tingkat (yang paling
+spesifik menang), sehingga OmniRoute biasa tidak pernah menggandakan katalognya untuk klien yang tidak
+menggunakan Claude Code:
 
-Variabel lingkungan `EXPOSE_CC_DISCOVERY_ALIASES` memaksa tingkat global agar aktif
-dan lebih diprioritaskan daripada penggantian melalui dasbor (layar Feature Flags menampilkan
-catatan "active via environment variable" saat ini terjadi). Pengalih per penyedia dan
-per model menyempurnakan pengaturan tersebut — misalnya, global nonaktif + penyedia Kimi aktif akan menampilkan
-hanya model Kimi.
+| Tingkat  | Di mana                                                                     |
+| -------- | --------------------------------------------------------------------------- |
+| Model    | Halaman detail provider → toggle "Expose in Claude Code" per model          |
+| Provider | Halaman detail provider → toggle tingkat provider (mencakup semua modelnya) |
+| Global   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (default nonaktif) |
 
-> ⚠️ **Ketidakcocokan jendela pada model non-Claude.** Claude Code mengasumsikan jendela konteks
-> 200K untuk setiap id yang tidak dikenali (Claude Code tidak dapat membaca jendela sebenarnya dari
-> `/v1/models`). Untuk model dengan jendela yang lebih besar (misalnya 256K milik Kimi K2), atur
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ke nilai di bawah jendela sebenarnya milik model agar
-> pemadatan otomatis tidak dijalankan terlalu dini. Profil yang dibuat di atas telah
-> melakukan pengaturan ini untuk setiap model.
+Variabel lingkungan `EXPOSE_CC_DISCOVERY_ALIASES` memaksa tingkat global aktif
+dan lebih diutamakan daripada override dashboard (layar Feature Flags menampilkan
+catatan "active via environment variable" saat itu terjadi). Toggle per-provider dan
+per-model menyempurnakan dari sana — mis. global nonaktif + provider Kimi aktif hanya menampilkan
+model milik Kimi.
+
+> ⚠️ **Ketidakcocokan window pada model non-Claude.** Claude Code mengasumsikan context
+> window 200K untuk id apa pun yang tidak dikenalinya (ia tidak dapat membaca window asli dari
+> `/v1/models`). Untuk model dengan window lebih besar (mis. 256K milik Kimi K2), atur
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ke nilai di bawah window asli model tersebut agar
+> auto-compaction tidak terpicu sebelum waktunya. Profil yang dihasilkan di atas sudah
+> melakukan ini per model.
 
 ---
 

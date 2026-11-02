@@ -223,3 +223,47 @@ test("planSectionReuse retranslates a section that is still mostly English even 
     false
   );
 });
+
+test("section reuse revalidates cached code literals and table rows despite matching hashes", () => {
+  const sections = [
+    "Introduction.",
+    "## Settings\n\n| Variable | Meaning |\n| --- | --- |\n| `QODER_CLI_MAX_CONCURRENCY` | Queue limit |\n| `KIRO_REQUIRE_CREDITS` | Credit policy |",
+    "## Next\n\nContinue with setup.",
+  ];
+  const complete =
+    "## Configuração\n\n| Variável | Significado |\n| --- | --- |\n| `QODER_CLI_MAX_CONCURRENCY` | Limite da fila |\n| `KIRO_REQUIRE_CREDITS` | Política de créditos |";
+  for (const broken of [
+    complete
+      .split("\n")
+      .filter((line) => !line.includes("KIRO_REQUIRE_CREDITS"))
+      .join("\n"),
+    complete.replace("KIRO_REQUIRE_CREDITS", "KIRO_EXIGE_CREDITOS"),
+  ]) {
+    const plan = planSectionReuse({
+      previousHashes: sectionHashes(sections),
+      sections,
+      mirrorSections: ["Introdução.", broken, "## Próximo\n\nContinue a configuração."],
+    });
+    assert.deepEqual(plan.translate, [1]);
+    assert.deepEqual([...plan.reuse.keys()], [0, 2]);
+  }
+  const valid = planSectionReuse({
+    previousHashes: sectionHashes(sections),
+    sections,
+    mirrorSections: ["Introdução.", complete, "## Próximo\n\nContinue a configuração."],
+  });
+  assert.deepEqual(valid.translate, []);
+});
+
+test("a mirror with missing source literals is rebuilt even when its prose is translated", () => {
+  const source = "# Configuration\n\nSet `QODER_CLI_MAX_CONCURRENCY` and `KIRO_REQUIRE_CREDITS`.";
+  const mirror = "# Configuração\n\n🌐 Languages\n\n---\n\nConfigure `QODER_CLI_MAX_CONCURRENCY`.";
+  assert.equal(mirrorNeedsRebuild(mirror, source), true);
+  assert.equal(
+    mirrorNeedsRebuild(
+      mirror.replace("CONCURRENCY`.", "CONCURRENCY` e `KIRO_REQUIRE_CREDITS`."),
+      source
+    ),
+    false
+  );
+});

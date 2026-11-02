@@ -31,19 +31,11 @@ Nuair a éiríonn osv nó Trivy dearg mar gheall ar CVE nua-nochta, is é an lei
 
 Déanann an dá gheata SCIORADH go galánta (exit 0) nuair a bhíonn an uirlis in easnamh nó nuair a theipeann ar an tomhas (osv-scanner nach bhfuil i PATH, osv.dev/network do-rochtain, JSON neamhbhailí) — ní chuireann teip **tomhais** bac riamh, ní chuireann ach cúlchéimniú **tomhaiste** bac.
 
-## Rioscaí Glactha Aitheanta
+## Riosca spleáchais scortha
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Ní áirítear `extract-zip` ná imeall spleáchais chuige sa bhunchomhad glasála a thuilleadh tar éis uasghrádú a dhéanamh ar an uirlis forbartha promptfoo a bhfuil a leagan pionnáilte. Cuireann sé seo deireadh leis an slabhra `promptfoo` → `@openai/codex-security` → `extract-zip`, ar glacadh leis roimhe seo agus a rianaítear in #14482. Diúltaíonn na seiceálacha aischéimnithe in `tests/unit/extract-zip-14482-exposure.test.ts` dá thabhairt isteach arís agus coimeádann siad an toirmeasc ar iompórtálacha ó chód táirgthe.
 
-`extract-zip@2.0.1` tá dhá chomhairle neamhphaisteáilte ard-déine maidir le trasnú siombalach aige. De réir an ghéag "gan réiteach in aghaidh an tsrutha" den leigheas Éagsúlachta CVE thuas, is **riosca glactha** é seo, ní ardú:
-
-- **Slabhra:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`. Deimhnithe trí `package-lock.json` — ní dhearbhaíonn ach pacáiste amháin sa chrann spleáchais iomlán (`@openai/codex-security`) `extract-zip`, agus ní dhearbhaíonn ach pacáiste amháin (`promptfoo`) `@openai/codex-security`.
-- **Níl aon scaoileadh seasta ann in áit ar bith sa slabhra.** Is é `extract-zip@2.0.1` (foilsithe 2020) an scaoileadh deiridh den phacáiste — níl sé á chothabháil. Tarraingíonn an npm-latest reatha de `@openai/codex-security` (`0.1.29`) `extract-zip@2.0.1` fós.
-- **Neamh-inrochtana ó tháirgeadh.** Níl `promptfoo` ach mar devDependency (ní liostaítear é faoi `dependencies` riamh), agus ní allmhairíonn aon chomhad faoi `src/`, `open-sse/`, nó `bin/` an pacáiste npm `extract-zip` — déanann cúntóir `extractZip()` OmniRoute féin (`src/lib/versionManager/binaryManager.ts:93`) feidhmeanna `unzip`/`tar` dúchasacha a ghlaoch agus níl baint aige leis. Seolann `@openai/codex-security` a gharda trasnaithe siombalach féin freisin ar bharr an ghlao ar ais onEntry de extract-zip.
-- **Ná** déan ailiasú ar `extract-zip` trí `overrides` i `package.json` — is é an t-aon ionadach inmharthana atá ar fáil ná Electron-org-internal agus tá sé neamh-chomhoiriúnach le API le seiceálacha onEntry/defaultDirMode/defaultFileMode `@openai/codex-security` féin; bhrisfeadh sé go ciúin seiceálacha slándála an phacáiste sin dá ndéanfaí é a shárú.
-- **Bunlíne:** tá an `vulnCount` (3) osv tomhaiste i bhfad faoi bhun an bhunlíne reoite `config/quality/quality-baseline.json` (27) cheana féin — níl aon athrú ratchet ag teastáil.
-- **Cosaint ar aisghabháil:** dearbhaíonn `tests/unit/extract-zip-14482-exposure.test.ts` an slabhra agus an t-athraitheach gan allmhairiú táirgeachta thuas; teipeann ar CI má bhriseann ceachtar acu riamh (m.sh. má dhéanann PR sa todhchaí `extract-zip` inrochtana ó tháirgeadh).
-- **Rianú:** eisiúint #14482.
+Cuireann an deisiú spleáchais reatha teorainn freisin le sáruithe comhoiriúnachta, á gcur i bhfeidhm ar chliant MSAL aitheantais Azure, ar chliant FTP get-uri, agus ar spleáchas Zod SDK v1 OpenCode. Déantar éadáil chomharthaí Azure agus aisghabháil FTP a thástáil le hiompróirí rialaithe; ritheann an dá phacáiste OpenCode a bhfoirgnimh agus a sraitheanna tástála féin. Is tomhais ag pointe áirithe ama iad comhairimh chomhairleacha na clárlainne agus féadfaidh siad athrú tar éis an comhad glasála a chur i ngeall.
 
 ## Cúlra: Comhairle Scorecard → blocáil
 

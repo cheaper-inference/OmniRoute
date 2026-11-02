@@ -444,7 +444,7 @@ Visi trīs pakalpojumu sniedzēji atbild vienā Mistral formātā:
 
 ### Azure Document Intelligence izjautāšanas plūsma
 
-Azure Document Intelligence `analyze` API ir asinhrone: sākotnējais pieprasījums atgriež `Operation-Location` galveni tā vietā, lai atgrieztu saturu, un rezultāts ir jāizjautā. Apstrādātājs (`open-sse/handlers/ocr.ts`) izjautā šo URL katru sekundi līdz 30 mēģinājumiem, ātri neizdodas (nepatur izjautāšanu) nepareizas izjautāšanas atbildes vai `"failed"` statusa gadījumā, un atgriež `504`, ja operācija joprojām tiek izpildīta pēc mēģinājumu budžeta izsīkuma. Galīgā Azure atbilde tiek normalizēta tajā pašā `pages`/`markdown` formātā, ko izmanto Mistral, pirms tā tiek atgriezta izsaucējam, tāpēc klienta kodam nav jāparedz īpašs apstrāde pakalpojumu sniedzējam.
+Azure Document Intelligence `analyze` API ir asinhrone: sākotnējais pieprasījums atgriež `Operation-Location` galveni tā vietā, lai atgrieztu saturu, un rezultāts ir jāizjautā. Apstrādātājs (`open-sse/handlers/ocr.ts`) izjautā šo URL katru sekundi līdz 30 mēģinājumiem, ātri neizdodas (nepatur izjautāšanu) izjautāšanas atbildes, kuras `ok` ir nepatiess, vai `"failed"` statusa gadījumā, un atgriež `504`, ja operācija joprojām tiek izpildīta pēc mēģinājumu budžeta izsīkuma. Galīgā Azure atbilde tiek normalizēta tajā pašā `pages`/`markdown` formātā, ko izmanto Mistral, pirms tā tiek atgriezta izsaucējam, tāpēc klienta kodam nav jāparedz īpašs apstrāde pakalpojumu sniedzējam.
 
 ### Vertex AI DeepSeek OCR autentifikācija un galapunkta noskaidrošana
 
@@ -818,7 +818,7 @@ Kvotas koplietošanas maršrutēšanai izmantojiet `model: "qtSd/<group>/codex/<
 `app/server-ws.mjs` + `scripts/dev/responses-ws-proxy.mjs` + `src/app/api/internal/codex-responses-ws/route.ts`.
 
 **Autentifikācija:** Bearer API atslēga rokasspiediena laikā. Iekļautais HTTP serveris (`server-ws.mjs`)
-jābūt aktīvajam ievadam (tas ir pēc noklusējuma, kad `app/server-ws.mms` pastāv).
+jābūt aktīvajam ievadam (tas ir pēc noklusējuma, kad `app/server-ws.mjs` pastāv).
 
 #### Modeļa id: izmantojiet tīru ChatGPT id (bez `codex/` prefiksa)
 
@@ -1040,52 +1040,51 @@ X-OmniRoute-No-Cache: true
 
 ---
 
-## Informācijas panelis un pārvaldība
+## Vadības panelis un pārvaldība
 
-Pārvaldības maršruti (`/api/*`, izņemot publisko autentifikāciju/pieteikšanos) **netiek** autorizēti ar
-parastajām inferenču API atslēgām. Akreditācijas datu saimes, tvērumi un curl piemēri:
+Pārvaldības maršrutus (`/api/*`, izņemot publisko autentifikāciju/pieteikšanos) **nevar** autorizēt ar parastajām secinājumu API atslēgām. Akreditācijas datu saimes, tvērumi un curl piemēri:
 [Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md).
 
 ### Autentifikācija
 
-| Galapunkts                    | Metode   | Apraksts                                                                                                                                                                                                                                                                                                                      |
-| ----------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | Pieteikšanās                                                                                                                                                                                                                                                                                                                  |
-| `/api/auth/logout`            | POST     | Atteikšanās                                                                                                                                                                                                                                                                                                                   |
-| `/api/settings/require-login` | GET/POST | Pieteikšanās statuss (GET, publisks). POST iestata paroli / pārslēdz pieteikšanos: pēc paroles izveides pieejams tikai operatoram (informācijas paneļa sesija, lokālā CLI vai atspējota pieteikšanās — API atslēgas un `oma_` marķieri saņem `403`); informācijas paneļa sesija nosūta `currentPassword`, lai aizstātu paroli |
+| Endpoint                      | Method   | Description                                                                                                                                                                                                                                                                                      |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/auth/login`             | POST     | Pieteikšanās                                                                                                                                                                                                                                                                                     |
+| `/api/auth/logout`            | POST     | Atteikšanās                                                                                                                                                                                                                                                                                      |
+| `/api/settings/require-login` | GET/POST | Pieteikšanās statuss (GET, publisks). POST iestata paroli / pārslēdz pieteikšanos: tikai operators, kad parole jau ir iestatīta (paneļa sesija, lokālā CLI vai atspējota pieteikšanās — API atslēgas un `oma_` tokeni saņem `403`); paneļa sesija nosūta `currentPassword`, lai nomainītu paroli |
 
-### Pakalpojumu sniedzēju pārvaldība
+### Nodrošinātāju pārvaldība
 
-| Galapunkts                              | Metode                    | Apraksts                                                                                                                                                                                      |
-| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Uzskaitīt / izveidot pakalpojumu sniedzējus                                                                                                                                                   |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Pārvaldīt pakalpojumu sniedzēju                                                                                                                                                               |
-| `/api/providers/[id]/test`              | POST                      | Pārbaudīt savienojumu ar pakalpojumu sniedzēju                                                                                                                                                |
-| `/api/providers/[id]/models`            | GET                       | Uzskaitīt pakalpojumu sniedzēja modeļus                                                                                                                                                       |
-| `/api/providers/validate`               | POST                      | Validēt pakalpojumu sniedzēja konfigurāciju                                                                                                                                                   |
-| `/api/providers/bulk`                   | POST                      | Lielapjomā pievienot API atslēgas VIENAM pakalpojumu sniedzējam                                                                                                                               |
-| `/api/providers/import`                 | POST                      | Importēt neviendabīgu pakalpojumu sniedzēju SARAKSTU no parsēta CSV/JSON faila (#6836); daļējas kļūmes rezultāti katrai rindai                                                                |
-| `/api/provider-nodes*`                  | Dažādas                   | Pakalpojumu sniedzēja mezglu pārvaldība                                                                                                                                                       |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Pielāgoti modeļi un katram modelim noteiktas pārrakstīšanas vērtības (pievienošana, atjaunināšana, paslēpšana/parādīšana, dzēšana)                                                            |
-| `/api/provider-models/validate-and-add` | POST                      | Ar pārvaldības autentifikāciju aizsargāta, izvēles stingrā savienojuma validācija un atomāra pielāgotā modeļa reģistrācija; skatiet sadaļu [Modeļa validācija](../guides/MODEL-VALIDATION.md) |
+| Endpoint                                | Method                    | Description                                                                                                                                                                        |
+| --------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | Nodrošinātāju saraksts / izveide                                                                                                                                                   |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Nodrošinātāja pārvaldība                                                                                                                                                           |
+| `/api/providers/[id]/test`              | POST                      | Nodrošinātāja savienojuma pārbaude                                                                                                                                                 |
+| `/api/providers/[id]/models`            | GET                       | Nodrošinātāja modeļu saraksts                                                                                                                                                      |
+| `/api/providers/validate`               | POST                      | Nodrošinātāja konfigurācijas validācija                                                                                                                                            |
+| `/api/providers/bulk`                   | POST                      | Vairāku API atslēgu pievienošana VIENAM nodrošinātājam                                                                                                                             |
+| `/api/providers/import`                 | POST                      | Nehomogēna nodrošinātāju SARAKSTA importēšana no parsēta CSV/JSON faila (#6836); rezultāti pa rindām ar daļējām kļūmēm                                                             |
+| `/api/provider-nodes*`                  | Various                   | Nodrošinātāju mezglu pārvaldība                                                                                                                                                    |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Pielāgoti modeļi un pārrakstījumi pa modelim (pievienot, atjaunināt, paslēpt/parādīt, dzēst)                                                                                       |
+| `/api/provider-models/validate-and-add` | POST                      | Ar pārvaldības autentifikāciju veikta, brīvprātīga stingra savienojuma validācija un atomāra pielāgotā modeļa reģistrācija; sk. [Modeļa validācija](../guides/MODEL-VALIDATION.md) |
 
-Sinhronizētiem/importētiem modeļiem `PUT /api/provider-models` pieņem `provider`, `modelId` un
-`maxOutputTokenOverride`: pozitīvs vesels skaitlis iestata manuālo izvades marķieru ierobežojumu, bet `null`
-to notīra, atjaunojot noklusējuma vērtību. `GET /api/provider-models?provider=<provider>` atgriež šīs
-vērtības laukā `modelOutputOverrides`, tostarp modeļiem bez pielāgota modeļa rindas. Pārrakstīšana
+Sinhronizētajiem/importētajiem modeļiem `PUT /api/provider-models` pieņem `provider`, `modelId` un
+`maxOutputTokenOverride`: pozitīvs vesels skaitlis iestata manuālo izvades tokenu griestu vērtību, bet `null`
+to notīra, atjaunojot noklusējumu. `GET /api/provider-models?provider=<provider>` atgriež šīs
+vērtības laukā `modelOutputOverrides`, ieskaitot modeļus bez pielāgotā modeļa rindas. Pārrakstījums
 izmanto izpildlaika `max_output_tokens` iespēju un saglabājas pēc modeļa atkārtotas sinhronizācijas. Ar OpenAI saderīgā
-pakalpojumu sniedzēja lapa piedāvā tās pašas rediģēšanas/notīrīšanas vadīklas un atzīmē modeļus ar tieši norādītu attēlu atbalstu.
+nodrošinātāja lapa piedāvā tās pašas rediģēšanas/notīrīšanas vadīklas un atzīmē modeļus ar skaidri norādītu redzes atbalstu.
 
-Pielāgotie Chat Completions mezgli pielāgo tiešu spriešanas atteikumu augšupstraumes aizmugursistēmai.
-Veiksmīgs savienojuma tests automātiski atlasa tērzēšanas veidnes vadīklas katram precīzam modeļa ID,
+Pielāgotie Chat Completions mezgli pielāgo skaidri norādītās spriešanas režīma atteikšanās atbilstoši augšupvērstajai aizmugursistēmai.
+Veiksmīga savienojuma pārbaude automātiski izvēlas tērzēšanas veidnes vadīklas katram precīzam modeļa ID,
 kura `/models` ieraksts apliecina atpazītu `owned_by` vērtību: `vllm`, `sglang` vai `llamacpp`.
-Caurspīdīgi ar OpenAI saderīgi ietinēji var saglabāt sākotnējo modeļa ierakstu ligzdotā
-`openai` objektā; noteikšana pārbauda līdz trim šādiem aplokšņu līmeņiem. Modeļiem ar trūkstošu, nezināmu vai
-pretrunīgu īpašnieka informāciju tiek saglabāta parastā OpenAI darbība. Noteikšana atkārtoti izmanto esošo kataloga pieprasījumu,
-neģenerē pabeigšanas marķierus un tiek anulēta, mainoties savienojuma galapunktam.
+Caurspīdīgi ar OpenAI saderīgi apvalki var saglabāt sākotnējo modeļa ierakstu ligzdotā
+`openai` objektā; noteikšana seko līdz pat trim šādiem apvalkiem. Modeļi ar trūkstošu, nezināmu vai
+pretrunīgu īpašumtiesību informāciju saglabā parasto OpenAI uzvedību. Noteikšana atkārtoti izmanto esošo kataloga pieprasījumu,
+neģenerē pabeigšanas tokenus un tiek anulēta, kad mainās savienojuma galapunkts.
 
-Lai fiksētu šo darbību aizmugursistēmai, kas neatklāj šos metadatus, izmantojiet esošo daļējās
-pakalpojumu sniedzēja atjaunināšanas API:
+Lai fiksētu uzvedību aizmugursistēmai, kas neatklāj šos metadatus, izmantojiet esošo daļējā nodrošinātāja
+atjaunināšanas API:
 
 ```json
 {
@@ -1095,72 +1094,85 @@ pakalpojumu sniedzēja atjaunināšanas API:
 }
 ```
 
-Nosūtiet šo pamattekstu ar `PUT /api/providers/<connection-id>`. Šajā savienojumā skaidri norādīta spriešanas intensitāte `none` tiek nosūtīta kā `chat_template_kwargs.thinking=false` un `chat_template_kwargs.enable_thinking=false`. Skaidri norādītās vietējās veidnes vērtības saglabā prioritāti, ja vien servera puses spriešanas kārtula nepiespiež noteiktu intensitāti. Šis iestatījums ir spēkā tikai tad, ja pielāgots ar OpenAI saderīgs savienojums nosūta Chat Completions pamattekstu; Responses pieprasījumi un parastie nodrošinātāji saglabā savu vietējo pieprasījuma struktūru. Iestatiet `reasoningControl` uz `openai`, lai piespiestu parasto OpenAI `reasoning_effort` tiešo pārsūtīšanu, vai izlaidiet to/iestatiet to uz `null`, lai izmantotu automātisko noteikšanu.
+Nosūtiet šo saturu ar `PUT /api/providers/<connection-id>`. Šajā savienojumā skaidri norādītais
+spriešanas līmenis `none` tiek nosūtīts kā `chat_template_kwargs.thinking=false` un
+`chat_template_kwargs.enable_thinking=false`. Skaidri iestatītās vietējās veidnes vērtības paliek
+noteicošās, ja vien servera puses spriešanas noteikums neuzspiež kādu līmeni. Šis iestatījums
+darbojas tikai tad, kad pielāgots OpenAI saderīgs savienojums nosūta Chat Completions saturu;
+Responses pieprasījumi un parastie nodrošinātāji saglabā savu vietējo pieprasījuma formu. Iestatiet
+`reasoningControl` uz `openai`, lai piespiestu parasto OpenAI `reasoning_effort` tālāknodošanu, vai
+izlaidiet to / iestatiet uz `null`, lai izmantotu automātisko noteikšanu.
 
-Claude Code automātiskā režīma klasifikatora pieprasījumiem pēc noklusējuma vietējā domāšana ir atspējota, ja tajos nav skaidri norādītu spriešanas vadīklu. Noteikšana izmanto klasifikatora sistēmas marķieri Claude formāta pieprasījumos, nevis modeļu nosaukumus vai pabeigšanas ierobežojumus. Skaidri pamattekstā norādītās vadīklas, atbalstītās intensitātes/domāšanas galvenes, maršrutēšanas kārtulas un noteiktā modeļa intensitāte saglabā savu pašreizējo prioritāti. Abos klasifikatora posmos tiek saglabātas to uzvednes, pabeigšanas ierobežojumi, apturēšanas secības un reālie augšupstraumes atļauju spriedumi; otrais posms joprojām var ģenerēt pieprasīto redzamo spriešanu kā parastu tekstu.
+Claude Code automātiskā režīma klasifikatora pieprasījumi, ja tajos nav skaidru spriešanas vadības
+elementu, pēc noklusējuma atspējo vietējo domāšanu. Noteikšanā tiek izmantots klasifikatora sistēmas
+marķieris Claude formāta pieprasījumos, nevis modeļu nosaukumi vai pabeigšanas limiti. Skaidrie
+satura vadības elementi, atbalstītās effort/thinking galvenes, maršrutēšanas noteikumi un noteiktais
+modeļa spriešanas līmenis saglabā savu esošo prioritāti. Abi klasifikatora posmi saglabā savas
+uzvednes, pabeigšanas limitus, apstāšanās secības un reālos augšupvirzuma atļauju vērtējumus;
+otrais posms joprojām var izdot savu pieprasīto redzamo spriešanu kā parastu tekstu.
 
 ### OAuth plūsmas
 
 | Galapunkts                       | Metode  | Apraksts                        |
 | -------------------------------- | ------- | ------------------------------- |
-| `/api/oauth/[provider]/[action]` | Dažādas | Nodrošinātājam specifisks OAuth |
+| `/api/oauth/[provider]/[action]` | Dažādas | Nodrošinātājam specifiska OAuth |
 
 ### Maršrutēšana un konfigurācija
 
 | Galapunkts            | Metode   | Apraksts                              |
 | --------------------- | -------- | ------------------------------------- |
 | `/api/models/alias`   | GET/POST | Modeļu aizstājvārdi                   |
-| `/api/models/catalog` | GET      | Visi modeļi pēc nodrošinātāja un tipa |
+| `/api/models/catalog` | GET      | Visi modeļi pēc nodrošinātāja + veida |
 | `/api/combos*`        | Dažādas  | Kombināciju pārvaldība                |
 | `/api/keys*`          | Dažādas  | API atslēgu pārvaldība                |
 | `/api/pricing`        | GET      | Modeļu cenas                          |
 
 ### Lietojums un analītika
 
-| Galapunkts                       | Metode          | Apraksts                                                                                                                                                                                                                                                                                                                                                             |
-| -------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Lietojuma vēsture                                                                                                                                                                                                                                                                                                                                                    |
-| `/api/usage/logs`                | GET             | Lietojuma žurnāli                                                                                                                                                                                                                                                                                                                                                    |
-| `/api/usage/request-logs`        | GET             | Pieprasījumu līmeņa žurnāli                                                                                                                                                                                                                                                                                                                                          |
-| `/api/usage/[connectionId]`      | GET             | Lietojums katram savienojumam                                                                                                                                                                                                                                                                                                                                        |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Tokenu ierobežojumu budžeti katrai API atslēgai                                                                                                                                                                                                                                                                                                                      |
-| `/api/usage/model-latency-stats` | GET             | Slīdošais latentuma apkopojums katram nodrošinātājam/modelim (vidējais/p50/p95/p99, sekmīgo pieprasījumu īpatsvars); filtri: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                         |
-| `/api/usage/cache-health`        | GET             | Uzvedņu kešatmiņas stāvokļa kopsavilkums no `call_logs` — rakstīšanas/lasīšanas attiecība, rakstīšanas apjoma p50/p90/p99 sadalījums, intensīvas rakstīšanas koncentrācija, sadalījums pa modeļiem un spriedums `healthy`/`degraded`/`thrash`/`no-data`; vaicājuma parametri `range` (`1h`\|`24h`\|`7d`\|`30d`, pēc noklusējuma `24h`) un neobligāts `model` (#8827) |
+| Galapunkts                       | Metode          | Apraksts                                                                                                                                                                                                                                                                                                                                                              |
+| -------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Lietojuma vēsture                                                                                                                                                                                                                                                                                                                                                     |
+| `/api/usage/logs`                | GET             | Lietojuma žurnāli                                                                                                                                                                                                                                                                                                                                                     |
+| `/api/usage/request-logs`        | GET             | Pieprasījumu līmeņa žurnāli                                                                                                                                                                                                                                                                                                                                           |
+| `/api/usage/[connectionId]`      | GET             | Lietojums pa savienojumiem                                                                                                                                                                                                                                                                                                                                            |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Token limitu budžeti katrai API atslēgai                                                                                                                                                                                                                                                                                                                              |
+| `/api/usage/model-latency-stats` | GET             | Slidošs latentuma agregāts pa nodrošinātājiem/modeļiem (avg/p50/p95/p99, veiksmes rādītājs); filtri: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                                                                  |
+| `/api/usage/cache-health`        | GET             | Prompt kešatmiņas veselības kopsavilkums virs `call_logs` — rakstīšanas/lasīšanas attiecība, p50/p90/p99 rakstījumu apjoma sadalījums, intensīvo rakstījumu koncentrācija, sadalījums pa modeļiem un `healthy`/`degraded`/`thrash`/`no-data` vērtējums; vaicājuma parametri `range` (`1h`\|`24h`\|`7d`\|`30d`, pēc noklusējuma `24h`) un neobligātais `model` (#8827) |
 
-### API atslēgu atļaujas
+### API atslēgas atļaujas
 
-`PATCH /api/keys/{id}` atjaunina esošas atslēgas atļaujas. Tāpat kā katram `/api/keys*` maršrutam, tam ir nepieciešama pārvaldības autorizācija (skatiet [Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md)), nevis inferenču atslēga. Nosūtiet tikai tos laukus, kurus vēlaties mainīt; pieprasījums bez neviena no tiem tiek noraidīts ar `No valid fields to update`. Pieņemtos laukus definē `updateKeyPermissionsSchema` failā `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` atjaunina esošas atslēgas atļaujas. Tāpat kā katram `/api/keys*` maršrutam, tam nepieciešama pārvaldības autorizācija (skatiet [Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md)), nevis secinājumu atslēga. Nosūtiet tikai tos laukus, kurus vēlaties mainīt; pieprasījums bez neviena no tiem tiek noraidīts ar `No valid fields to update`. Pieņemamos laukus definē `updateKeyPermissionsSchema` failā `src/shared/validation/schemas/keys.ts`.
 
-| Lauks                                       | Tips                                                                             | Piezīmes                                                                                                                                       |
-| ------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | virkne, 1–200 rakstzīmes                                                         |                                                                                                                                                |
-| `isActive`                                  | Būla vērtība                                                                     |                                                                                                                                                |
-| `isBanned`                                  | Būla vērtība                                                                     |                                                                                                                                                |
-| `expiresAt`                                 | ISO 8601 datums un laiks vai `null`                                              | `null` notīra derīguma termiņu                                                                                                                 |
-| `modelAccessMode`                           | `all` \| `restricted`                                                            | `allowedModels` jābūt tukšam, ja režīms ir `all`                                                                                               |
-| `allowedModels`, `blockedModels`            | virkņu masīvs, ne vairāk kā 1000                                                 |                                                                                                                                                |
-| `allowedCombos`                             | virkņu masīvs, ne vairāk kā 500                                                  | Nosaka, kuras kombinācijas atslēga drīkst izsaukt; tiešos modeļus pārvalda `modelAccessMode` / `allowedModels`                                 |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                            | `allowedConnections` nedrīkst būt tukšs, ja režīms ir `restricted`, un tam jābūt tukšam, ja režīms ir `all`                                    |
-| `allowedConnections`                        | UUID masīvs, ne vairāk kā 100                                                    |                                                                                                                                                |
-| `allowAutoCombos`                           | Būla vērtība                                                                     | `false` noraida pieprasījumus `auto/*` modeļiem ar šo atslēgu; atslēgām, kurām tas nekad nav iestatīts, pieprasījumi ir atļauti                |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                                    | Nosaka, ko `GET /v1/models` uzskaita šai atslēgai (tikai kombinācijas, tikai modeļus vai abus); tas nemaina, ko atslēga drīkst izsaukt         |
-| `forcedModel`                               | virkne līdz 300 rakstzīmēm vai `null`                                            | Maršrutē tērzēšanas pieprasījumus uz šo modeli/kombināciju, ignorējot `X-Route-Model` un `body.model`; atslēgas ierobežojumi joprojām ir spēkā |
-| `noLog`, `autoResolve`                      | Būla vērtība                                                                     |                                                                                                                                                |
-| `throttleDelayMs`                           | vesels skaitlis, 0–300000                                                        |                                                                                                                                                |
-| `maxSessions`                               | vesels skaitlis, 0–10000                                                         |                                                                                                                                                |
-| `rateLimits`                                | `{ limit, window }` masīvs (pozitīvi veseli skaitļi, ne vairāk kā 50) vai `null` | `null` notīra ierobežojumus                                                                                                                    |
-| `accessSchedule`                            | grafika objekts vai `null`                                                       | `null` notīra grafiku                                                                                                                          |
-| `scopes`                                    | virkņu masīvs, ne vairāk kā 32                                                   |                                                                                                                                                |
-| `allowedEndpoints`                          | virkņu masīvs, ne vairāk kā 20                                                   |                                                                                                                                                |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                               |                                                                                                                                                |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                             | Skatiet [Kešatmiņas apiešana katrai atslēgai](#per-key-cache-bypass)                                                                           |
-| `compressionEnabled`                        | Būla vērtība                                                                     |                                                                                                                                                |
-| `codexServiceMode`                          | viens no Codex pakalpojuma režīmiem                                              |                                                                                                                                                |
-| `disableNonPublicModels`                    | boolean                                                                          |                                                                                                                                                |
-| `allowUsageCommand`                         | boolean                                                                          |                                                                                                                                                |
-| `usageLimitEnabled`                         | boolean                                                                          |                                                                                                                                                |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 vai `null`                                                           |                                                                                                                                                |
-| `chaosModeEnabled`                          | boolean                                                                          |                                                                                                                                                |
+| Lauks                                       | Tips                                                                        | Piezīmes                                                                                                                        |
+| ------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | string, 1-200 rakstzīmes                                                    |                                                                                                                                 |
+| `isActive`                                  | boolean                                                                     |                                                                                                                                 |
+| `isBanned`                                  | boolean                                                                     |                                                                                                                                 |
+| `expiresAt`                                 | ISO 8601 datetime vai `null`                                                | `null` notīra derīguma termiņu                                                                                                  |
+| `modelAccessMode`                           | `all` \| `restricted`                                                       | `allowedModels` ir jābūt tukšam, kad režīms ir `all`                                                                            |
+| `allowedModels`, `blockedModels`            | string masīvs, līdz 1000                                                    |                                                                                                                                 |
+| `allowedCombos`                             | string masīvs, līdz 500                                                     | Nosaka, kuras combos atslēga drīkst izsaukt; tiešos modeļus regulē `modelAccessMode` / `allowedModels`                          |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                       | `allowedConnections` nedrīkst būt tukšs, kad ir `restricted`, un jābūt tukšam, kad ir `all`                                     |
+| `allowedConnections`                        | UUID masīvs, līdz 100                                                       |                                                                                                                                 |
+| `allowAutoCombos`                           | boolean                                                                     | `false` noraida pieprasījumus `auto/*` modeļiem ar šo atslēgu; atslēgām, kas to nekad neiestata, tas ir atļauts                 |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                               | Ko `GET /v1/models` uzskaita šai atslēgai (tikai combos, tikai modeļus vai abus); tas nemaina to, ko atslēga drīkst izsaukt     |
+| `forcedModel`                               | string līdz 300 rakstzīmēm vai `null`                                       | Novirza čata pieprasījumus uz šo modeli/combo, apdodot `X-Route-Model` un `body.model`; atslēgas ierobežojumi joprojām ir spēkā |
+| `noLog`, `autoResolve`                      | boolean                                                                     |                                                                                                                                 |
+| `throttleDelayMs`                           | integer, 0-300000                                                           |                                                                                                                                 |
+| `maxSessions`                               | integer, 0-10000                                                            |                                                                                                                                 |
+| `rateLimits`                                | masīvs no `{ limit, window }` (pozitīvi veseli skaitļi, līdz 50) vai `null` | `null` notīra ierobežojumus                                                                                                     |
+| `accessSchedule`                            | plānojuma objekts vai `null`                                                | `null` notīra plānojumu                                                                                                         |
+| `scopes`                                    | string masīvs, līdz 32                                                      |                                                                                                                                 |
+| `allowedEndpoints`                          | string masīvs, līdz 20                                                      |                                                                                                                                 |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                          |                                                                                                                                 |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                        | Skatiet [Kešatmiņas apiešana atslēgas līmenī](#per-key-cache-bypass)                                                            |
+| `compressionEnabled`                        | boolean                                                                     |                                                                                                                                 |
+| `codexServiceMode`                          | viens no Codex pakalpojuma režīmiem                                         |                                                                                                                                 |
+| `disableNonPublicModels`                    | boolean                                                                     |                                                                                                                                 |
+| `allowUsageCommand`                         | boolean                                                                     |                                                                                                                                 |
+| `usageLimitEnabled`                         | boolean                                                                     |                                                                                                                                 |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 vai `null`                                                      |                                                                                                                                 |
+| `chaosModeEnabled`                          | boolean                                                                     |                                                                                                                                 |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1171,163 +1183,155 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Iestatījumi
 
-| Galapunkts                            | Metode        | Apraksts                                                                                                                                                                                                                                                                                                                          |
-| ------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Vispārīgie iestatījumi. Drošības politikas atslēgām (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) ir nepieciešama `currentPassword` vērtība un operatora akreditācijas dati — API atslēgas un `oma_` pilnvaras saņem `403`; katrai izmaiņai ir nepieciešams piekļuves pilnvaras tvērums `admin` |
-| `/api/settings/proxy`                 | GET/PUT       | Tīkla starpniekservera konfigurācija                                                                                                                                                                                                                                                                                              |
-| `/api/settings/proxy/test`            | POST          | Starpniekservera savienojuma pārbaude                                                                                                                                                                                                                                                                                             |
-| `/api/settings/ip-filter`             | GET/PUT       | Atļauto/bloķēto IP adrešu saraksts                                                                                                                                                                                                                                                                                                |
-| `/api/settings/thinking-budget`       | GET/PUT       | Domāšanas/spriešanas **pieprasījumu** pārrakstīšanas režīms (nemainīta pārsūtīšana / automātiska noņemšana / pielāgots / adaptīvs). Neatkarīgs no saspiešanas. Skatiet [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                        |
-| `/api/settings/system-prompt`         | GET/PUT       | Globālā sistēmas uzvedne                                                                                                                                                                                                                                                                                                          |
-| `/api/settings/compression`           | GET/PUT       | Globālā saspiešanas konfigurācija                                                                                                                                                                                                                                                                                                 |
-| `/api/settings/purge-request-history` | POST          | Notīrīt pieprasījumu žurnāla rindas un lokālos izsaukumu žurnāla artefaktus                                                                                                                                                                                                                                                       |
+| Galapunkts                            | Metode        | Apraksts                                                                                                                                                                                                                                                                                                      |
+| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Vispārīgie iestatījumi. Drošības politikas atslēgām (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) nepieciešams `currentPassword` un operatora akreditācijas dati — API atslēgas un `oma_` tokeni saņem `403`; katrai izmaiņai nepieciešams `admin` piekļuves tokena tvērums |
+| `/api/settings/proxy`                 | GET/PUT       | Tīkla starpniekservera konfigurācija                                                                                                                                                                                                                                                                          |
+| `/api/settings/proxy/test`            | POST          | Pārbaudīt starpniekservera savienojumu                                                                                                                                                                                                                                                                        |
+| `/api/settings/ip-filter`             | GET/PUT       | IP atļauto/bloķēto saraksts                                                                                                                                                                                                                                                                                   |
+| `/api/settings/thinking-budget`       | GET/PUT       | Thinking/reasoning **pieprasījuma** pārrakstīšanas režīms (passthrough / auto-strip / custom / adaptive). Neatkarīgs no saspiešanas. Skatiet [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                                              |
+| `/api/settings/system-prompt`         | GET/PUT       | Globālā sistēmas uzvedne                                                                                                                                                                                                                                                                                      |
+| `/api/settings/compression`           | GET/PUT       | Globālā saspiešanas konfigurācija                                                                                                                                                                                                                                                                             |
+| `/api/settings/purge-request-history` | POST          | Notīrīt pieprasījumu žurnāla rindas un lokālos izsaukumu žurnāla artefaktus                                                                                                                                                                                                                                   |
 
 ### Konteksts un saspiešana
 
-| Galapunkts                             | Metode         | Apraksts                                                                                   |
-| -------------------------------------- | -------------- | ------------------------------------------------------------------------------------------ |
-| `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked saspiešanas priekšskatījums                 |
-| `/api/compression/language-packs`      | GET            | Pieejamo Caveman valodu pakotņu saraksts                                                   |
-| `/api/compression/rules`               | GET            | Caveman kārtulu metadatu saraksts                                                          |
-| `/api/context/caveman/config`          | GET/PUT        | Caveman specifisko iestatījumu aizstājvārds                                                |
-| `/api/context/rtk/config`              | GET/PUT        | RTK specifiskie iestatījumi, tostarp pielāgoti filtri un neapstrādātās izvades saglabāšana |
-| `/api/context/rtk/filters`             | GET            | RTK filtru katalogs un pielāgoto filtru diagnostika                                        |
-| `/api/context/rtk/test`                | POST           | RTK priekšskatījuma/testa izpilde teksta datos                                             |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Saglabātās rediģētās neapstrādātās izvades nolasīšana pēc rādītāja id                      |
-| `/api/context/combos`                  | GET/POST       | Saspiešanas kombināciju saraksts/izveide                                                   |
-| `/api/context/combos/[id]`             | GET/PUT/DELETE | Saspiešanas kombinācijas informācija/atjaunināšana/dzēšana                                 |
-| `/api/context/combos/[id]/assignments` | GET/PUT        | Saspiešanas kombināciju piešķiršana maršrutēšanas kombinācijām                             |
-| `/api/context/analytics`               | GET            | Saspiešanas analītikas aizstājvārds                                                        |
+| Galapunkts                             | Metode         | Apraksts                                                                                    |
+| -------------------------------------- | -------------- | ------------------------------------------------------------------------------------------- |
+| `/api/compression/preview`             | POST           | off/lite/standard/aggressive/ultra/RTK/stacked saspiešanas priekšskatījums                  |
+| `/api/compression/language-packs`      | GET            | Pieejamo Caveman valodu pakotņu saraksts                                                    |
+| `/api/compression/rules`               | GET            | Caveman noteikumu metadatu saraksts                                                         |
+| `/api/context/caveman/config`          | GET/PUT        | Caveman specifisko iestatījumu aizstājvārds                                                 |
+| `/api/context/rtk/config`              | GET/PUT        | RTK specifiskie iestatījumi, tostarp pielāgotie filtri un neapstrādātās izvades saglabāšana |
+| `/api/context/rtk/filters`             | GET            | RTK filtru katalogs un pielāgoto filtru diagnostika                                         |
+| `/api/context/rtk/test`                | POST           | Izpildīt RTK priekšskatījumu/testu ar teksta slodzi                                         |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Nolasīt saglabāto rediģēto neapstrādāto izvadi pēc norādes id                               |
+| `/api/context/combos`                  | GET/POST       | Saspiešanas kombināciju saraksts/izveide                                                    |
+| `/api/context/combos/[id]`             | GET/PUT/DELETE | Saspiešanas kombinācijas detaļas/atjaunināšana/dzēšana                                      |
+| `/api/context/combos/[id]/assignments` | GET/PUT        | Piešķirt saspiešanas kombinācijas maršrutēšanas kombinācijām                                |
+| `/api/context/analytics`               | GET            | Saspiešanas analītikas aizstājvārds                                                         |
 
 ### Uzraudzība
 
-| Galapunkts                           | Metode     | Apraksts                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | Aktīvo sesiju izsekošana                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `/api/rate-limits`                   | GET        | Katra konta ātruma ierobežojumi                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `/api/monitoring/health`             | GET        | Darbspējas pārbaude un pakalpojumu sniedzēju kopsavilkums (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Pārvaldības skatā ir ietverts `credentialHealth`: pārbaužu kešatmiņas skalārās vērtības, `failedConnections`, ja `failed>0`, un `staleDbNonOkCount` (SQLite fiksētais `test_status`, nevis mērinstruments). Skatiet [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Kešatmiņas statistika/notīrīšana                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `/api/modality-bridge/stats`         | GET        | Atmiņā glabātie `attempts`, veiksmīgie mēģinājumi/`bridged`, kļūmes, kešatmiņas trāpījumi, `totalLatencyMs`, `latencySamples`, pēc paraugu skaita aprēķinātais `averageLatencyMs` un pēdējās lietošanas laiks (tiek atiestatīts restartējot; nepieciešama pārvaldības autentifikācija)                                                                                                                                                                    |
-| `/api/modality-bridge/video/runtime` | GET        | Stingra uzticamas lokālās atgriezeniskās saskarnes pārbaude pirms pārvaldības autentifikācijas/pārbaudes; sanitizēta FFmpeg/ffprobe pieejamības un versiju informācija (bez saglabāšanas)                                                                                                                                                                                                                                                                 |
-| `/api/modality-bridge/video/extract` | POST       | Iekšējs autentificēts uzticamas lokālās atgriezeniskās saskarnes baitu starpnieks; 50 MiB ievade, ierobežota rinda/32 MiB izvade, `503` — kapacitāte, `499` — atvienošanās, `504` — termiņš; tā nav publiska augšupielādes API                                                                                                                                                                                                                            |
+| Galapunkts                           | Metode     | Apraksts                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Aktīvo sesiju izsekošana                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `/api/rate-limits`                   | GET        | Pieprasījumu ātruma ierobežojumi pa kontiem                                                                                                                                                                                                                                                                                                                                                                                       |
+| `/api/monitoring/health`             | GET        | Veselības pārbaude + pakalpojumu sniedzēju kopsavilkums (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Pārvaldības skats ietver `credentialHealth`: zondes kešatmiņas skalārus, `failedConnections`, kad `failed>0`, un `staleDbNonOkCount` (SQLite lipīgais `test_status`, nevis rādītājs). Skatiet [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Kešatmiņas statistika / notīrīšana                                                                                                                                                                                                                                                                                                                                                                                                |
+| `/api/modality-bridge/stats`         | GET        | Operatīvajā atmiņā esošie `attempts`, veiksmes/`bridged`, kļūmes, kešatmiņas trāpījumi, `totalLatencyMs`, `latencySamples`, ar paraugu skaitu denominētais `averageLatencyMs` un pēdējās lietošanas laiks (atiestatās restartējot; pārvaldības autentifikācija)                                                                                                                                                                   |
+| `/api/modality-bridge/video/runtime` | GET        | Stingra uzticamā loopback pārbaude pirms pārvaldības autentifikācijas/zondes; attīrīta FFmpeg/ffprobe pieejamība un versijas (no-store)                                                                                                                                                                                                                                                                                           |
+| `/api/modality-bridge/video/extract` | POST       | Iekšējs autentificēts uzticamā loopback baitu starpnieks; 50 MiB ieeja, ierobežota rinda/32 MiB izeja, `503` kapacitāte, `499` atvienošanās, `504` termiņš; nav publiska augšupielādes API                                                                                                                                                                                                                                        |
 
-### Dublēšana un eksportēšana/importēšana
+### Dublēšana un eksports/imports
 
 | Galapunkts                  | Metode | Apraksts                                                                                  |
 | --------------------------- | ------ | ----------------------------------------------------------------------------------------- |
-| `/api/db-backups`           | GET    | Pieejamo dublējumkopiju saraksts                                                          |
-| `/api/db-backups`           | PUT    | Manuālas dublējumkopijas izveide                                                          |
-| `/api/db-backups`           | POST   | Atjaunošana no konkrētas dublējumkopijas                                                  |
-| `/api/db-backups`           | PATCH  | Dublējumkopiju glabāšanas iestatījumu saglabāšana (tikai operatoriem)                     |
-| `/api/db-backups`           | DELETE | Saglabāto dublējumkopiju tīrīšana atbilstoši glabāšanas iestatījumiem (tikai operatoriem) |
-| `/api/db-backups/export`    | GET    | Datubāzes lejupielāde .sqlite faila formātā                                               |
-| `/api/db-backups/import`    | POST   | .sqlite faila augšupielāde datubāzes aizstāšanai (`?dryRun=true` tikai validē)            |
-| `/api/db-backups/exportAll` | GET    | Pilnas dublējumkopijas lejupielāde .tar.gz arhīva formātā                                 |
+| `/api/db-backups`           | GET    | Uzskaitīt pieejamās dublējumkopijas                                                       |
+| `/api/db-backups`           | PUT    | Izveidot manuālo dublējumkopiju                                                           |
+| `/api/db-backups`           | POST   | Atjaunot no noteiktas dublējumkopijas                                                     |
+| `/api/db-backups`           | PATCH  | Saglabāt dublējumkopiju glabāšanas iestatījumus (tikai operators)                         |
+| `/api/db-backups`           | DELETE | Izsviest saglabātās dublējumkopijas atbilstoši glabāšanas iestatījumiem (tikai operators) |
+| `/api/db-backups/export`    | GET    | Lejupielādēt datubāzi kā .sqlite failu                                                    |
+| `/api/db-backups/import`    | POST   | Augšupielādēt .sqlite failu, lai aizstātu datubāzi (`?dryRun=true` tikai validē)          |
+| `/api/db-backups/exportAll` | GET    | Lejupielādēt pilnu dublējumkopiju kā .tar.gz arhīvu                                       |
 
-`/api/db-backups/export`, `/api/db-backups/exportAll` un `/api/settings/export-json` izsniedz
-visus saglabātos akreditācijas datus, tāpēc tiem ir nepieciešama informācijas paneļa sesija vai lokālais CLI (vai arī
-atspējota pieteikšanās). Jebkura tvēruma API atslēgas un `oma_` piekļuves pilnvaras saņem `403`. Uz atjaunošanu attiecas tā pati
-robeža: `POST /api/db-backups/import` (tostarp `dryRun=true`), `POST /api/db-backups` (atjaunošana
-pēc id) un `POST /api/settings/import-json` aizstāj aktīvo datubāzi vai iestatījumus, tāpēc mašīnas
-akreditācijas dati arī tur saņem `403`; `omniroute sync import` nosūta lokālā CLI akreditācijas datus. Tas pats attiecas uz
-`DELETE /api/db-backups` (saglabāto dublējumkopiju tīrīšana) un `PATCH /api/db-backups` (glabāšanas iestatījumi:
-saglabātās vērtības nosaka automātisko tīrīšanu pēc katras dublēšanas). Saraksta iegūšanai (`GET`) un manuālas
-dublējumkopijas izveidei (`PUT`) joprojām tiek izmantota parastā pārvaldības autentifikācija.
+`/api/db-backups/export`, `/api/db-backups/exportAll` un `/api/settings/export-json` izsniedz visus saglabātos akreditācijas datus, tāpēc tie pieprasa informācijas paneļa sesiju vai lokālo CLI (vai atspējotu pieteikšanos). Jebkura tvēruma API atslēgas un `oma_` piekļuves tokeni saņem `403`. Atjaunošanas darbības ievēro to pašu robežu: `POST /api/db-backups/import` (ieskaitot `dryRun=true`), `POST /api/db-backups` (atjaunošana pēc id) un `POST /api/settings/import-json` aizstāj aktīvo datubāzi vai iestatījumus, tāpēc arī tur mašīnas akreditācijas dati saņem `403`; `omniroute sync import` nosūta lokālā CLI akreditācijas datus. Tāpat arī `DELETE /api/db-backups` (saglabāto dublējumkopiju izsviešana) un `PATCH /api/db-backups` (glabāšanas iestatījumi: saglabātās vērtības vada automātisko izsviešanu pēc katras dublējumkopijas izveides). Uzskaitīšana (`GET`) un manuālas dublējumkopijas izveide (`PUT`) saglabā parasto pārvaldības autentifikāciju.
 
 ### Mākoņa sinhronizācija
 
 | Galapunkts             | Metode  | Apraksts                        |
 | ---------------------- | ------- | ------------------------------- |
 | `/api/sync/cloud`      | Dažādas | Mākoņa sinhronizācijas darbības |
-| `/api/sync/initialize` | POST    | Sinhronizācijas inicializēšana  |
+| `/api/sync/initialize` | POST    | Inicializēt sinhronizāciju      |
 | `/api/cloud/*`         | Dažādas | Mākoņa pārvaldība               |
 
 ### Tuneļi
 
-| Galapunkts                 | Metode | Apraksts                                                                                 |
-| -------------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET    | Cloudflare Quick Tunnel instalācijas/izpildlaika statusa nolasīšana informācijas panelim |
-| `/api/tunnels/cloudflared` | POST   | Cloudflare Quick Tunnel iespējošana vai atspējošana (`action=enable/disable`)            |
-| `/api/tunnels/ngrok`       | GET    | ngrok Tunnel izpildlaika statusa nolasīšana informācijas panelim                         |
-| `/api/tunnels/ngrok`       | POST   | ngrok Tunnel iespējošana vai atspējošana (`action=enable/disable`)                       |
+| Galapunkts                 | Metode | Apraksts                                                                           |
+| -------------------------- | ------ | ---------------------------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET    | Nolasīt Cloudflare Quick Tunnel instalēšanas/darbības statusu informācijas panelim |
+| `/api/tunnels/cloudflared` | POST   | Iespējot vai atspējot Cloudflare Quick Tunnel (`action=enable/disable`)            |
+| `/api/tunnels/ngrok`       | GET    | Nolasīt ngrok tuneļa darbības statusu informācijas panelim                         |
+| `/api/tunnels/ngrok`       | POST   | Iespējot vai atspējot ngrok tuneli (`action=enable/disable`)                       |
 
 ### CLI rīki
 
-| Galapunkts                         | Metode | Apraksts                  |
-| ---------------------------------- | ------ | ------------------------- |
-| `/api/cli-tools/claude-settings`   | GET    | Claude CLI statuss        |
-| `/api/cli-tools/codex-settings`    | GET    | Codex CLI statuss         |
-| `/api/cli-tools/droid-settings`    | GET    | Droid CLI statuss         |
-| `/api/cli-tools/openclaw-settings` | GET    | OpenClaw CLI statuss      |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | Vispārīgs CLI izpildlaiks |
+| Galapunkts                         | Metode | Apraksts                    |
+| ---------------------------------- | ------ | --------------------------- |
+| `/api/cli-tools/claude-settings`   | GET    | Claude CLI statuss          |
+| `/api/cli-tools/codex-settings`    | GET    | Codex CLI statuss           |
+| `/api/cli-tools/droid-settings`    | GET    | Droid CLI statuss           |
+| `/api/cli-tools/openclaw-settings` | GET    | OpenClaw CLI statuss        |
+| `/api/cli-tools/runtime/[toolId]`  | GET    | Vispārīga CLI izpildes vide |
 
-CLI atbildēs ir iekļauti: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
+CLI atbildes ietver: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
 ### ACP aģenti
 
-| Galapunkts        | Metode | Apraksts                                                                 |
-| ----------------- | ------ | ------------------------------------------------------------------------ |
-| `/api/acp/agents` | GET    | Visu noteikto aģentu (iebūvēto un pielāgoto) saraksts ar statusu         |
-| `/api/acp/agents` | POST   | Pielāgota aģenta pievienošana vai noteikšanas kešatmiņas atsvaidzināšana |
-| `/api/acp/agents` | DELETE | Pielāgota aģenta noņemšana pēc vaicājuma parametra `id`                  |
+| Galapunkts        | Metode | Apraksts                                                              |
+| ----------------- | ------ | --------------------------------------------------------------------- |
+| `/api/acp/agents` | GET    | Uzskaitīt visus noteiktos aģentus (iebūvētos + pielāgotos) ar statusu |
+| `/api/acp/agents` | POST   | Pievienot pielāgotu aģentu vai atsvaidzināt noteikšanas kešu          |
+| `/api/acp/agents` | DELETE | Noņemt pielāgotu aģentu pēc `id` vaicājuma parametra                  |
 
-GET atbildē ir iekļauti `agents[]` (id, name, binary, version, installed, protocol, isCustom) un `summary` (total, installed, notFound, builtIn, custom).
+GET atbilde ietver `agents[]` (id, name, binary, version, installed, protocol, isCustom) un `summary` (total, installed, notFound, builtIn, custom).
 
-### Noturība un ātruma ierobežojumi
+### Noturība un pieprasījumu ierobežojumi
 
-| Galapunkts                        | Metode    | Apraksts                                                                                                                   |
-| --------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | Pieprasījumu rindas, savienojuma atdzišanas perioda, nodrošinātāja slēdža un gaidīšanas iestatījumu iegūšana/atjaunināšana |
-| `/api/resilience/reset`           | POST      | Nodrošinātāju ķēdes pārtraucēju atiestatīšana                                                                              |
-| `/api/resilience/model-cooldowns` | GET       | Aktīvo bloķējumu saraksts katrai (nodrošinātāja, savienojuma, modeļa) kombinācijai, sakārtots pēc atlikušā laika           |
-| `/api/resilience/model-cooldowns` | DELETE    | Modeļa bloķējuma noņemšana — pamatteksts `{provider, model}` vai `{all: true}`, lai notīrītu visu                          |
-| `/api/rate-limits`                | GET       | Ātruma ierobežojumu statuss katram kontam                                                                                  |
-| `/api/rate-limit`                 | GET       | Globālā ātruma ierobežojuma konfigurācija                                                                                  |
+| Endpoint                          | Method    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/resilience`                 | GET/PATCH | Iegūt/atjaunināt pieprasījumu rindu, savienojuma atdzesēšanu, nodrošinātāja pārtraucēju un gaidīšanas iestatījumus                                                                                                                                                                                                                                                                                                                                                                   |
+| `/api/resilience/reset`           | POST      | Atiestatīt nodrošinātāja ķēdes pārtraucējus                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `/api/resilience/model-cooldowns` | GET       | Uzskaitīt aktīvās bloķēšanas pēc (nodrošinātāja, savienojuma, modeļa), sakārtotas pēc atlikušā laika                                                                                                                                                                                                                                                                                                                                                                                 |
+| `/api/resilience/model-cooldowns` | DELETE    | Notīrīt modeļa bloķēšanu — pamatteksts `{provider, model}` vai `{all: true}`, lai notīrītu visu                                                                                                                                                                                                                                                                                                                                                                                      |
+| `/api/rate-limits`                | GET/POST  | Konta līmeņa pieprasījumu ierobežojuma statuss (GET) vai pieprasījumu ierobežojuma aizsardzības pārslēgšana savienojumam (POST `{connectionId, enabled}`). Atbalstītais rakstīšanas ceļš priekš `rateLimitProtection` (nekad netiek modificēts caur `PUT /api/providers/[id]`). Piezīme: `enabled: false` atspējo skaidri noteiktu aizsardzību, bet neizslēdz aktīvu API atslēgas savienojumu no globālā automātiskās iespējošanas drošības mehānisma (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Globālā pieprasījumu ierobežojuma konfigurācija (novecojusi; aizstājējvārds priekš `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                                               |
 
-> Visiem četriem `/api/resilience/*` maršrutiem ir nepieciešama **pārvaldības autentifikācija** (`requireManagementAuth`). Pilnu skaidrojumu par nodrošinātāja slēdzi, savienojuma atdzišanas periodu un modeļa bloķējumu skatiet sadaļā [Noturība (paplašināti)](#resilience-extended).
+> Visiem četriem `/api/resilience/*` maršrutiem nepieciešama **pārvaldības autentifikācija** (`requireManagementAuth`). Pilnu nodrošinātāja pārtraucēja, savienojuma atdzesēšanas un modeļa bloķēšanas salīdzinājumu skatiet sadaļā [Noturība (paplašināta)](#resilience-extended).
 
 ### Novērtējumi
 
-| Galapunkts   | Metode   | Apraksts                                              |
-| ------------ | -------- | ----------------------------------------------------- |
-| `/api/evals` | GET/POST | Novērtējumu komplektu saraksts / novērtēšanas izpilde |
+| Endpoint     | Method   | Description                                            |
+| ------------ | -------- | ------------------------------------------------------ |
+| `/api/evals` | GET/POST | Uzskaitīt novērtējumu komplektus / palaist novērtēšanu |
 
 ### Politikas
 
-| Galapunkts      | Metode          | Apraksts                          |
+| Endpoint        | Method          | Description                       |
 | --------------- | --------------- | --------------------------------- |
-| `/api/policies` | GET/POST/DELETE | Maršrutēšanas politiku pārvaldība |
+| `/api/policies` | GET/POST/DELETE | Pārvaldīt maršrutēšanas politikas |
 
 ### Atbilstība
 
-| Galapunkts                  | Metode | Apraksts                               |
+| Endpoint                    | Method | Description                            |
 | --------------------------- | ------ | -------------------------------------- |
 | `/api/compliance/audit-log` | GET    | Atbilstības audita žurnāls (pēdējie N) |
 
-### v1beta (saderīgs ar Gemini)
+### v1beta (saderīga ar Gemini)
 
-| Galapunkts                 | Metode | Apraksts                            |
+| Endpoint                   | Method | Description                         |
 | -------------------------- | ------ | ----------------------------------- |
-| `/v1beta/models`           | GET    | Modeļu saraksts Gemini formātā      |
+| `/v1beta/models`           | GET    | Uzskaitīt modeļus Gemini formātā    |
 | `/v1beta/models/{...path}` | POST   | Gemini `generateContent` galapunkts |
 
-Šie galapunkti atspoguļo Gemini API formātu klientiem, kuriem nepieciešama saderība ar vietējo Gemini SDK.
+Šie galapunkti atspoguļo Gemini API formātu klientiem, kuri sagaida pilnu Gemini SDK saderību.
 
-### Iekšējās/sistēmas API
+### Iekšējās / sistēmas API
 
-| Galapunkts               | Metode | Apraksts                                                           |
-| ------------------------ | ------ | ------------------------------------------------------------------ |
-| `/api/init`              | GET    | Lietotnes inicializācijas pārbaude (izmanto pirmajā palaišanā)     |
-| `/api/tags`              | GET    | Ar Ollama saderīgi modeļu tagi (Ollama klientiem)                  |
-| `/api/restart`           | POST   | Aktivizē saudzīgu servera restartēšanu                             |
-| `/api/shutdown`          | POST   | Aktivizē saudzīgu servera izslēgšanu                               |
-| `/api/system/env/repair` | POST   | Izlabo OAuth nodrošinātāja vides mainīgos                          |
-| `/api/system/version`    | GET    | Pašreizējā/jaunākā versija, atjauninājuma statuss, laidiena kanāls |
-| `/api/system/version`    | POST   | Sāk izvietošanas veidam pielāgotu atjaunināšanu uz jaunāko versiju |
+| Endpoint                 | Method | Description                                                                    |
+| ------------------------ | ------ | ------------------------------------------------------------------------------ |
+| `/api/init`              | GET    | Lietojumprogrammas inicializācijas pārbaude (izmanto pirmajā palaišanas reizē) |
+| `/api/tags`              | GET    | Ar Ollama saderīgas modeļu birkas (Ollama klientiem)                           |
+| `/api/restart`           | POST   | Izsaukt kontrolētu servera restartēšanu                                        |
+| `/api/shutdown`          | POST   | Izsaukt kontrolētu servera izslēgšanu                                          |
+| `/api/system/env/repair` | POST   | Salabot OAuth nodrošinātāja vides mainīgos                                     |
+| `/api/system/version`    | GET    | Pašreizējā/jaunākā versija, atjauninājuma statuss, izlaiduma kanāls            |
+| `/api/system/version`    | POST   | Sākt atjauninājumu uz jaunāko versiju, ņemot vērā izvietojumu                  |
 
-> **Piezīme:** Šos galapunktus sistēma izmanto iekšēji vai Ollama klientu saderībai. Galalietotāji parasti tos neizsauc.
+> **Piezīme:** Šos galapunktus sistēma izmanto iekšēji vai Ollama klienta saderībai. Tos parasti neizsauc gala lietotāji.
 
-### OAuth vides labošana _(v3.6.1+)_
+### OAuth vides salabošana _(v3.6.1+)_
 
 ```bash
 POST /api/system/env/repair
@@ -1338,7 +1342,7 @@ Content-Type: application/json
 }
 ```
 
-Izlabo trūkstošus vai bojātus OAuth vides mainīgos konkrētam nodrošinātājam. Atgriež:
+Salabo trūkstošos vai bojātos OAuth vides mainīgos konkrētam pakalpojumu sniedzējam. Atgriež:
 
 ```json
 {
@@ -1348,16 +1352,16 @@ Izlabo trūkstošus vai bojātus OAuth vides mainīgos konkrētam nodrošinātā
 }
 ```
 
-### Versija un laidiena kanāls
+### Versija un izlaiduma kanāls
 
 ```bash
 GET /api/system/version
 ```
 
-Tikai atgriezeniskās cilpas saskarnē pieejams pārvaldības maršruts (administratora autentifikācija). Atgriež darbojošos versiju, jaunāko
-publicēto versiju un automātiskās atjaunināšanas statusu. `releaseChannel` un `channels` ir papildinoši
-lauki (rail 3.8.54); `channel` saglabā savu nozīmi — izvietošanas režīmu, ko izmanto informācijas paneļa
-atjauninātājs (`npm`, `source` vai `docker-compose`).
+Tikai loopback pārvaldības maršruts (administratora autentifikācija). Atgriež pašreiz izpildāmo
+versiju, jaunāko publicēto versiju un automātiskās atjaunināšanas statusu. `releaseChannel` un
+`channels` ir papildu lauki (rail 3.8.54); `channel` saglabā savu nozīmi — izvietošanas režīmu,
+ko izmanto informācijas paneļa atjauninātājs (`npm`, `source` vai `docker-compose`).
 
 ```json
 {
@@ -1373,17 +1377,18 @@ atjauninātājs (`npm`, `source` vai `docker-compose`).
 }
 ```
 
-- `releaseChannel` — darbojošā būvējuma npm kanāls: `nightly` versijām ar `-nightly.*`,
-  `next` citiem priekšlaidieniem (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` stabilai versijai, kuras
-  galvenā versija ir vecāka par `channels.latest`, bet citos gadījumos — `latest`. Tie paši noteikumi, kas
-  `scripts/release/dist-tag.mjs`, kurš publicēšanas laikā izvēlas npm dist-tag.
-- `channels` — katra dist-tag jaunākā publicētā versija no `npm view omniroute dist-tags` (rezerves variants —
-  reģistra HTTP pieprasījums), kas kešota ar tādu pašu 10 minūšu TTL kā `latest`. `latest` ir pieejams vienmēr
-  (rezerves gadījumā izmanto lauku `latest`, pēc tam `"unavailable"`); `next`, `nightly` un `lts` tiek parādīti
-  tikai tad, ja attiecīgais dist-tag pastāv. Pieprasījums ar `Cache-Control: no-cache` atsvaidzina abus vaicājumus.
+- `releaseChannel` — izpildāmā būvējuma npm kanāls: `nightly` versijām `-nightly.*`,
+  `next` citām priekšizlaidēm (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` stabilai versijai, kuras
+  galvenais versijas numurs ir vecāks nekā `channels.latest`, pretējā gadījumā `latest`. Tādi paši
+  noteikumi kā `scripts/release/dist-tag.mjs`, kas publicēšanas brīdī izvēlas npm dist-tag.
+- `channels` — katra dist-tag publicētā galotne, no `npm view omniroute dist-tags` (reģistra HTTP
+  rezerves variants), kešota ar tādu pašu 10 minūšu TTL kā `latest`. `latest` vienmēr ir klātesošs
+  (atkāpjas uz `latest` lauku, pēc tam uz `"unavailable"`); `next`, `nightly` un `lts` parādās
+  tikai tad, ja attiecīgais dist-tag pastāv. `Cache-Control: no-cache` pieprasījums atsvaidzina
+  abus vaicājumus.
 
-Kanālu modelis (`latest` = v3 līdz 4.0 vispārējai pieejamībai, `next` = rc, `nightly` = `develop` būvējumi,
-`lts` = v3 labojumi pēc 4.0 vispārējās pieejamības) ir aprakstīts failā `docs/ops/RELEASE_STRATEGY.md`.
+Kanālu modelis (`latest` = v3 līdz 4.0 GA, `next` = rc, `nightly` = `develop` būvējumi,
+`lts` = v3 labojumi pēc 4.0 GA) ir aprakstīts `docs/ops/RELEASE_STRATEGY.md`.
 
 ---
 
@@ -1651,32 +1656,38 @@ Izejošie HTTP(S)/SOCKS starpnieki, kurus var piešķirt pakalpojumu sniedzējie
 
 ---
 
-## Izturība (paplašināta)
+## Noturība (paplašināta)
 
-OmniRoute piedāvā tr neatkarīgas īslaicīgas kļūdas mehānismus; zemāk esošās pārvaldības gala punkti ļauj operatoriem tos lasīt un pārrakstīt:
+OmniRoute nodrošina trīs neatkarīgus pagaidu kļūmju apstrādes mehānismus; tālāk norādītie pārvaldības galapunkti ļauj operatoriem tos nolasīt un pārdefinēt:
 
-| Apjoms                        | Stāvokļa glabātuve                                | Lasīt                                     | Atiestatīt / notīrīt                           |
-| ----------------------------- | ------------------------------------------------- | ----------------------------------------- | ---------------------------------------------- |
-| Pakalpojuma avota pārtraucējs | `domain_circuit_breakers` + atmiņā                | `/api/monitoring/health`                  | `POST /api/resilience/reset`                   |
-| Savienojuma atdzesēšana       | `rateLimitedUntil` pakalpojuma avota savienojumos | `/api/rate-limits`, `/api/providers/[id]` | (atsāknējas slinki; notīrīt caur provider PUT) |
-| Modeļa bloķēšana              | Atmiņā reģistrētā modeļa pieejamība               | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`       |
+| Darbības joma                     | Stāvokļa glabāšana                                     | Lasīšana                                  | Atiestatīšana / notīrīšana                                          |
+| --------------------------------- | ------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------------- |
+| Pakalpojumu sniedzēja pārtraucējs | `domain_circuit_breakers` + operatīvajā atmiņā         | `/api/monitoring/health`                  | `POST /api/resilience/reset`                                        |
+| Savienojuma dzesēšana             | `rateLimitedUntil` pakalpojumu sniedzēja savienojumiem | `/api/rate-limits`, `/api/providers/[id]` | (atkārtoti ieslēdzas slinki; notīrāms ar pakalpojumu sniedzēja PUT) |
+| Modeļa bloķēšana                  | Modeļu pieejamības reģistrs operatīvajā atmiņā         | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`                            |
 
-`PATCH /api/resilience` pieņem pakalpojuma avota pārtraucēja pārrakstījumus sadaļās `providerBreaker.oauth` un `providerBreaker.apikey`. Katrs profils atbalsta `degradationThreshold`, `failureThreshold` un `resetTimeoutMs`; tie paši lauki ir redzami Dashboard → Settings → Resilience.
+`PATCH /api/resilience` pieņem pakalpojumu sniedzēja pārtraucēja pārdefinējumus zem `providerBreaker.oauth` un `providerBreaker.apikey`. Katrs profils atbalsta `degradationThreshold`, `failureThreshold` un `resetTimeoutMs`; tie paši lauki ir pieejami sadaļā Informācijas panelis → Iestatījumi → Noturība.
 
 ```bash
-# Notīrīt vienu modeļa bloķēšanu
+# Notīri viena modeļa bloķēšanu
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"provider":"openai","model":"gpt-4o-mini"}'
 
-# Notīrīt visas bloķēšanas
+# Izdzēs visas bloķēšanas
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -d '{"all":true}'
 ```
 
-Pilna konceptuālā atsauce un pārtraucēja noklusējuma vērtības: skatīt [`CLAUDE.md`](../../CLAUDE.md) → "Resilience Runtime State".
+Pilna konceptuālā atsauce un pārtraucēju noklusējuma vērtības: skatiet [`CLAUDE.md`](../../CLAUDE.md) → "Resilience Runtime State" un [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md).
+
+### Pieprasījumu ātruma ierobežojumu rinda un automātiskās ieslēgšanas drošības tīkls
+
+- **Atbalstītais rakstīšanas ceļš**: `POST /api/rate-limits` ar ķermeņa saturu `{"connectionId": "<id>", "enabled": true|false}` ir atbalstītais pārvaldības galapunkts, lai pārslēgtu pieprasījumu ātruma ierobežojumu aizsardzību savienojumam. `PUT /api/providers/[id]` apzināti nemodificē un nepārslēdz `rateLimitProtection` (#11278).
+- **`enabled: false` semantika**: `enabled: false` iestatīšana noņem skaidri definēto aizsardzību savienojumam, bet **neizslēdz** aktīvu API atslēgas savienojumu no globālā automātiskās ieslēgšanas drošības tīkla (`autoEnableApiKeyProviders = true`). Funkcijā `reconcileEnabledConnections` (`open-sse/services/rateLimitManager.ts`) `false` un `undefined` ir līdzvērtīgas; aktīvi API atslēgas savienojumi bez skaidri definētas aizsardzības paliek aizsargāti automātiskās ieslēgšanas drošības tīkla ietvaros.
+- **Globāla atslēgšana**: lai API atslēgas savienojumi darbotos bez pieprasījumu ātruma ierobežojumu rindām, globāli atslēdziet drošības tīklu ar `RATE_LIMIT_AUTO_ENABLE=false` (vides mainīgais) vai `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false` (Iestatījumi → Noturība / `PATCH /api/resilience`).
 
 ---
 
@@ -1730,7 +1741,7 @@ OmniRoute piegādā iebūvētu Model Context Protocol serveri ar 3 transportiem 
 | GET | `/api/mcp/stream` | Atvērt Streamable HTTP transporta SSE pusi (servera uzsāktas ziņas) |
 | POST | `/api/mcp/stream` | Sūtīt JSON-RPC kadru Streamable HTTP transportā |
 | DELETE | `/api/mcp/stream` | Beigt Streamable HTTP sesiju |
-| GET | `/api/mcp/audit` | Vaicāt auditā žurnālu — `?limit=`, `?offset=`, `?tool=`, `?success=true|false`, `?apiKeyId=` |
+| GET | `/api/mcp/audit` | Vaicāt auditā žurnālu — `?limit=`, `?offset=`, `?tool=`, `?success=true | false`, `?apiKeyId=` |
 | GET | `/api/mcp/audit/stats` | Agregēti audita statistika (kopsummas, panākumu līmenis, vidējais ilgums, labākie rīki) |
 
 **Autentifikācija:** `sse`/`stream` transporti ievēro MCP specifisko autentifikācijas virsmu (Bearer API atslēga ar `mcp` apjomu); `status`/`tools`/`audit*` maršrutus var nolasīt no informācijas paneļa (nav nepieciešama papildu autentifikācija, izņemot piekļušanu informācijas paneļa resursdatoram).

@@ -1,0 +1,494 @@
+{
+  "schemaVersion": 1,
+  "scope": "Explicit local full-observer static commands. Workflow shell is not an argv source. Runtime suites, coverage artifacts, external checks, publication and deployment require separate evidence.",
+  "sourceJobs": [
+    "lint",
+    "quality-gate",
+    "quality-extended",
+    "docs-sync-strict",
+    "pr-test-policy",
+    "i18n-ui-coverage",
+    "i18n-glossary-zhcn"
+  ],
+  "exclusions": [
+    {
+      "alias": "check:pr-evidence",
+      "reason": "Requires the pull request body; evaluated by hosted admission."
+    },
+    {
+      "alias": "check:ai-attribution",
+      "reason": "PR event metadata is evaluated by hosted admission; commit-message hooks remain active."
+    },
+    {
+      "alias": "check:codeql-ratchet",
+      "reason": "Reads remote CodeQL state and requires hosted security permissions."
+    }
+  ],
+  "gates": [
+    {
+      "id": "check:test-tla-order",
+      "job": "lint",
+      "args": ["run", "check:test-tla-order"],
+      "kind": "hard",
+      "command": "node scripts/check/check-test-tla-order.mjs"
+    },
+    {
+      "id": "check:node-runtime",
+      "job": "lint",
+      "args": ["run", "check:node-runtime"],
+      "kind": "hard",
+      "command": "node --import tsx scripts/check/check-supported-node-runtime.ts"
+    },
+    {
+      "id": "check:cycles:ratchet",
+      "job": "lint",
+      "args": ["run", "check:cycles:ratchet"],
+      "kind": "hard",
+      "command": "node scripts/check/check-cycles.mjs --ratchet"
+    },
+    {
+      "id": "check:boundary:ratchet",
+      "job": "lint",
+      "args": ["run", "check:boundary:ratchet"],
+      "kind": "hard",
+      "command": "node scripts/quality/measure-boundary.mjs --ratchet"
+    },
+    {
+      "id": "check:route-validation:t06",
+      "job": "lint",
+      "args": ["run", "check:route-validation:t06"],
+      "kind": "hard",
+      "command": "node scripts/check/check-route-validation.mjs"
+    },
+    {
+      "id": "check:any-budget:t11",
+      "job": "lint",
+      "args": ["run", "check:any-budget:t11"],
+      "kind": "hard",
+      "command": "node scripts/check/check-t11-any-budget.mjs"
+    },
+    {
+      "id": "check:provider-consistency",
+      "job": "lint",
+      "args": ["run", "check:provider-consistency"],
+      "kind": "hard",
+      "command": "bun scripts/check/check-provider-consistency.ts"
+    },
+    {
+      "id": "check:model-lifecycle",
+      "job": "lint",
+      "args": ["run", "check:model-lifecycle"],
+      "kind": "hard",
+      "command": "node --import tsx/esm scripts/check/check-model-lifecycle.mjs"
+    },
+    {
+      "id": "check:provider-asset-provenance",
+      "job": "lint",
+      "args": ["run", "check:provider-asset-provenance"],
+      "kind": "hard",
+      "command": "node scripts/check/check-provider-asset-provenance.mjs"
+    },
+    {
+      "id": "check:fetch-targets",
+      "job": "lint",
+      "args": ["run", "check:fetch-targets"],
+      "kind": "hard",
+      "command": "node scripts/check/check-fetch-targets.mjs"
+    },
+    {
+      "id": "check:deps",
+      "job": "lint",
+      "args": ["run", "check:deps"],
+      "kind": "hard",
+      "command": "node scripts/check/check-deps.mjs"
+    },
+    {
+      "id": "check:file-size",
+      "job": "lint",
+      "args": ["run", "check:file-size"],
+      "kind": "hard",
+      "command": "node scripts/check/check-file-size.mjs"
+    },
+    {
+      "id": "check:error-helper",
+      "job": "lint",
+      "args": ["run", "check:error-helper"],
+      "kind": "hard",
+      "command": "node scripts/check/check-error-helper.mjs"
+    },
+    {
+      "id": "check:migration-numbering",
+      "job": "lint",
+      "args": ["run", "check:migration-numbering"],
+      "kind": "hard",
+      "command": "node scripts/check/check-migration-numbering.mjs"
+    },
+    {
+      "id": "check:public-creds",
+      "job": "lint",
+      "args": ["run", "check:public-creds"],
+      "kind": "hard",
+      "command": "node scripts/check/check-public-creds.mjs"
+    },
+    {
+      "id": "check:db-rules",
+      "job": "lint",
+      "args": ["run", "check:db-rules"],
+      "kind": "hard",
+      "command": "node scripts/check/check-db-rules.mjs"
+    },
+    {
+      "id": "check:known-symbols",
+      "job": "lint",
+      "args": ["run", "check:known-symbols"],
+      "kind": "hard",
+      "command": "bun scripts/check/check-known-symbols.ts"
+    },
+    {
+      "id": "check:route-guard-membership",
+      "job": "lint",
+      "args": ["run", "check:route-guard-membership"],
+      "kind": "hard",
+      "command": "node --import tsx scripts/check/check-route-guard-membership.ts"
+    },
+    {
+      "id": "check:test-discovery",
+      "job": "lint",
+      "args": ["run", "check:test-discovery"],
+      "kind": "hard",
+      "command": "node scripts/check/check-test-discovery.mjs"
+    },
+    {
+      "id": "check:radar-sentinels",
+      "job": "lint",
+      "args": ["run", "check:radar-sentinels"],
+      "kind": "hard",
+      "command": "node scripts/check/check-radar-sentinels.mjs"
+    },
+    {
+      "id": "check:tracked-artifacts",
+      "job": "lint",
+      "args": ["run", "check:tracked-artifacts"],
+      "kind": "hard",
+      "command": "node scripts/check/check-tracked-artifacts.mjs"
+    },
+    {
+      "id": "check:vitest-exclusions",
+      "job": "lint",
+      "args": ["run", "check:vitest-exclusions"],
+      "kind": "hard",
+      "command": "node scripts/check/check-vitest-exclusions.mjs"
+    },
+    {
+      "id": "check:agent-skills-sync",
+      "job": "lint",
+      "args": ["run", "check:agent-skills-sync"],
+      "kind": "hard",
+      "command": "node --import tsx/esm scripts/skills/generate-agent-skills.mjs"
+    },
+    {
+      "id": "check:lockfile",
+      "job": "lint",
+      "args": ["run", "check:lockfile"],
+      "kind": "hard",
+      "command": "node scripts/check/check-lockfile.mjs"
+    },
+    {
+      "id": "check:licenses",
+      "job": "lint",
+      "args": ["run", "check:licenses"],
+      "kind": "hard",
+      "command": "node scripts/check/check-licenses.mjs"
+    },
+    {
+      "id": "check:dashboard-typecheck",
+      "job": "lint",
+      "args": ["run", "check:dashboard-typecheck"],
+      "kind": "hard",
+      "command": "node scripts/check/check-dashboard-typecheck.mjs"
+    },
+    {
+      "id": "check:duplication",
+      "job": "quality-gate",
+      "args": ["run", "check:duplication"],
+      "kind": "hard",
+      "command": "node scripts/check/check-duplication.mjs"
+    },
+    {
+      "id": "check:complexity-ratchets",
+      "job": "quality-gate",
+      "args": ["run", "check:complexity-ratchets"],
+      "kind": "hard",
+      "command": "node scripts/check/check-complexity-ratchets.mjs"
+    },
+    {
+      "id": "check:dead-code",
+      "job": "quality-gate",
+      "args": ["run", "check:dead-code"],
+      "kind": "hard",
+      "command": "node scripts/check/check-dead-code.mjs"
+    },
+    {
+      "id": "check:type-coverage",
+      "job": "quality-gate",
+      "args": ["run", "check:type-coverage"],
+      "kind": "hard",
+      "command": "node scripts/check/check-type-coverage.mjs"
+    },
+    {
+      "id": "check:compression-budget",
+      "job": "quality-gate",
+      "args": ["run", "check:compression-budget"],
+      "kind": "hard",
+      "command": "bun scripts/check/check-compression-budget.ts"
+    },
+    {
+      "id": "check:circular-deps",
+      "job": "quality-extended",
+      "args": ["run", "check:circular-deps"],
+      "kind": "drift",
+      "command": "node scripts/check/check-circular-deps.mjs"
+    },
+    {
+      "id": "check:bundle-size",
+      "job": "quality-extended",
+      "args": ["run", "check:bundle-size", "--", "--ratchet"],
+      "kind": "hard",
+      "command": "node scripts/check/check-bundle-size.mjs"
+    },
+    {
+      "id": "check:secrets",
+      "job": "quality-extended",
+      "args": ["run", "check:secrets", "--", "--ratchet"],
+      "kind": "hard",
+      "command": "node scripts/check/check-secrets.mjs"
+    },
+    {
+      "id": "check:vuln-ratchet",
+      "job": "quality-extended",
+      "args": ["run", "check:vuln-ratchet", "--", "--ratchet"],
+      "kind": "hard",
+      "command": "node scripts/check/check-vuln-ratchet.mjs"
+    },
+    {
+      "id": "check:workflows",
+      "job": "quality-extended",
+      "args": ["run", "check:workflows", "--", "--ratchet"],
+      "kind": "hard",
+      "command": "node scripts/check/check-workflows.mjs"
+    },
+    {
+      "id": "check:openapi-breaking",
+      "job": "quality-extended",
+      "args": ["run", "check:openapi-breaking", "--", "--ratchet"],
+      "kind": "hard",
+      "command": "node scripts/check/check-openapi-breaking.mjs"
+    },
+    {
+      "id": "check:docs-all",
+      "job": "docs-sync-strict",
+      "args": ["run", "check:docs-all"],
+      "kind": "hard",
+      "command": "npm run check:docs-sync && npm run check:docs-frontmatter && npm run check:docs-counts && npm run check:env-doc-sync && npm run check:deprecated-versions && npm run check:doc-links && npm run check:fabricated-docs"
+    },
+    {
+      "id": "check:cli-i18n",
+      "job": "docs-sync-strict",
+      "args": ["run", "check:cli-i18n"],
+      "kind": "hard",
+      "command": "node scripts/check/check-cli-i18n.mjs"
+    },
+    {
+      "id": "check:openapi-coverage",
+      "job": "docs-sync-strict",
+      "args": ["run", "check:openapi-coverage"],
+      "kind": "hard",
+      "command": "node scripts/check/check-openapi-coverage.mjs"
+    },
+    {
+      "id": "check:openapi-security-tiers",
+      "job": "docs-sync-strict",
+      "args": ["run", "check:openapi-security-tiers"],
+      "kind": "hard",
+      "command": "node scripts/check/check-openapi-security-tiers.mjs"
+    },
+    {
+      "id": "check:api-docs-refs",
+      "job": "docs-sync-strict",
+      "args": ["run", "check:api-docs-refs"],
+      "kind": "hard",
+      "command": "node scripts/check/check-api-docs-refs.mjs"
+    },
+    {
+      "id": "check:test-masking",
+      "job": "pr-test-policy",
+      "args": ["run", "check:test-masking"],
+      "env": {
+        "GITHUB_BASE_REF": "main"
+      },
+      "kind": "hard",
+      "command": "node scripts/check/check-test-masking.mjs"
+    },
+    {
+      "id": "check:mutation-test-coverage",
+      "job": "quality.yml:fast-gates",
+      "args": ["run", "check:mutation-test-coverage"],
+      "kind": "hard",
+      "command": "node scripts/check/check-mutation-test-coverage.mjs --strict"
+    },
+    {
+      "id": "i18n:check",
+      "job": "docs-sync-strict",
+      "args": ["run", "i18n:check"],
+      "kind": "hard",
+      "command": "node scripts/i18n/check-translation-drift.mjs"
+    },
+    {
+      "id": "i18n:check-ui-coverage",
+      "job": "i18n-ui-coverage",
+      "args": ["run", "i18n:check-ui-coverage", "--", "--threshold=65"],
+      "kind": "hard",
+      "command": "node scripts/i18n/check-ui-keys-coverage.mjs"
+    },
+    {
+      "id": "check:ui-icu",
+      "job": "i18n-ui-coverage",
+      "args": ["run", "check:ui-icu"],
+      "kind": "hard",
+      "command": "node scripts/i18n/check-ui-icu.mjs"
+    },
+    {
+      "id": "i18n:check-ratio",
+      "job": "i18n-ui-coverage",
+      "args": ["run", "i18n:check-ratio"],
+      "kind": "hard",
+      "command": "node scripts/i18n/check-translation-ratio.mjs"
+    },
+    {
+      "id": "i18n:check-value-drift",
+      "job": "i18n-ui-coverage",
+      "args": ["run", "i18n:check-value-drift"],
+      "kind": "hard",
+      "command": "node scripts/i18n/check-ui-value-drift.mjs"
+    },
+    {
+      "id": "i18n:check-new-keys",
+      "job": "i18n-ui-coverage",
+      "args": ["run", "i18n:check-new-keys"],
+      "kind": "hard",
+      "command": "node scripts/i18n/check-new-key-coverage.mjs"
+    },
+    {
+      "id": "i18n:check-keys",
+      "job": "i18n-ui-coverage",
+      "args": ["run", "i18n:check-keys"],
+      "kind": "hard",
+      "command": "node scripts/i18n/check-key-completeness.mjs"
+    },
+    {
+      "id": "i18n:check-keys:cli",
+      "job": "i18n-ui-coverage",
+      "args": ["run", "i18n:check-keys:cli"],
+      "kind": "hard",
+      "command": "node scripts/i18n/check-key-completeness.mjs --catalog=cli"
+    },
+    {
+      "id": "i18n:check-glossary:zh-CN",
+      "job": "i18n-glossary-zhcn",
+      "args": ["run", "i18n:check-glossary", "--", "--locale=zh-CN"],
+      "kind": "hard",
+      "command": "node scripts/i18n/check-glossary-consistency.mjs"
+    },
+    {
+      "id": "i18n:check-glossary:zh-TW",
+      "job": "i18n-glossary-zhcn",
+      "args": ["run", "i18n:check-glossary", "--", "--locale=zh-TW"],
+      "kind": "hard",
+      "command": "node scripts/i18n/check-glossary-consistency.mjs"
+    },
+    {
+      "id": "audit:deps",
+      "job": "lint",
+      "args": ["run", "audit:deps"],
+      "kind": "hard",
+      "command": "node scripts/quality/audit-dependencies.mjs"
+    },
+    {
+      "id": "lint:json",
+      "job": "lint",
+      "args": ["run", "lint:json"],
+      "kind": "hard",
+      "command": "node scripts/quality/run-eslint-json.mjs"
+    },
+    {
+      "id": "quality:collect",
+      "job": "quality-gate",
+      "args": ["run", "quality:collect"],
+      "kind": "hard",
+      "command": "node scripts/quality/collect-metrics.mjs"
+    },
+    {
+      "id": "quality:ratchet",
+      "job": "quality-gate",
+      "args": ["run", "quality:ratchet", "--", "--allow-missing"],
+      "kind": "hard",
+      "command": "node scripts/quality/check-quality-ratchet.mjs"
+    },
+    {
+      "id": "quality:ratchet:tighten",
+      "job": "quality-gate",
+      "args": ["run", "quality:ratchet", "--", "--allow-missing", "--require-tighten"],
+      "kind": "hard",
+      "command": "node scripts/quality/check-quality-ratchet.mjs"
+    },
+    {
+      "id": "typecheck:core",
+      "job": "lint",
+      "args": ["run", "typecheck:core"],
+      "kind": "hard",
+      "command": "tsc --pretty false -p tsconfig.typecheck-core.json"
+    },
+    {
+      "id": "check:test-runner-api",
+      "job": "quality.yml:fast-gates",
+      "args": ["run", "check:test-runner-api"],
+      "kind": "hard",
+      "command": "node scripts/check/check-test-runner-api.mjs"
+    },
+    {
+      "id": "check:build-scope",
+      "job": "quality.yml:fast-gates",
+      "args": ["run", "check:build-scope"],
+      "kind": "hard",
+      "command": "node scripts/check/check-build-scope.mjs"
+    },
+    {
+      "id": "check:pack-policy",
+      "job": "quality.yml:fast-gates",
+      "args": ["run", "check:pack-policy"],
+      "kind": "hard",
+      "command": "node --import tsx scripts/build/validate-pack-artifact.ts --policy-only"
+    },
+    {
+      "id": "check:open-sse-typecheck",
+      "job": "quality.yml:fast-gates",
+      "args": ["run", "check:open-sse-typecheck"],
+      "kind": "hard",
+      "command": "node scripts/check/check-open-sse-typecheck.mjs"
+    },
+    {
+      "id": "check:cycles",
+      "job": "quality.yml:fast-gates",
+      "args": ["run", "check:cycles", "--", "--ratchet"],
+      "kind": "hard",
+      "command": "node scripts/check/check-cycles.mjs"
+    },
+    {
+      "id": "check:boundary",
+      "job": "quality.yml:fast-gates",
+      "args": ["run", "check:boundary", "--", "--ratchet"],
+      "kind": "hard",
+      "command": "node scripts/quality/measure-boundary.mjs"
+    }
+  ]
+}

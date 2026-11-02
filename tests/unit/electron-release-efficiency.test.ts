@@ -6,9 +6,10 @@ import test from "node:test";
 const ROOT = join(import.meta.dirname, "..", "..");
 const workflow = readFileSync(join(ROOT, ".github", "workflows", "electron-release.yml"), "utf8");
 
-test("Electron release relies on setup-node's npm cache instead of caching node_modules", () => {
+test("Electron release installs without restoring a dependency cache", () => {
   assert.doesNotMatch(workflow, /path:\s*node_modules/);
-  assert.match(workflow, /uses:\s*actions\/setup-node@[^\n]+[\s\S]*?cache:\s*npm/);
+  assert.doesNotMatch(workflow, /cache:\s*npm/);
+  assert.match(workflow, /package-manager-cache:\s*false/);
 });
 
 test("Electron release installs both dependency trees deterministically", () => {

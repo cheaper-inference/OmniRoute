@@ -31,6 +31,8 @@ test("the hosted suite matrix has exactly ci.yml's unit and integration shards p
   const include = workflow.jobs.suites.strategy?.matrix?.include ?? [];
   const units = shardCountFromCi(ci, "test-unit");
   const integrations = shardCountFromCi(ci, "test-integration");
+  const vitest = shardCountFromCi(ci, "test-vitest");
+  assert.equal(vitest, 4, "UI files must be split across four hosted runners");
   const expected = [
     ...Array.from({ length: units }, (_, i) => ({
       name: `unit-${i + 1}`,
@@ -42,7 +44,11 @@ test("the hosted suite matrix has exactly ci.yml's unit and integration shards p
       script: "test:integration:ci",
       shard: `${i + 1}/${integrations}`,
     })),
-    { name: "vitest", script: "test:vitest", shard: "" },
+    ...Array.from({ length: vitest }, (_, i) => ({
+      name: `vitest-${i + 1}`,
+      script: "test:vitest:ui",
+      shard: `${i + 1}/${vitest}`,
+    })),
   ];
   assert.deepEqual(include, expected);
   const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
@@ -116,4 +122,5 @@ test("a suite job reports its name, exit code and first failure line", () => {
   });
   assert.throws(() => suiteResult("unit-x; rm -rf /", "0", ""), /unknown suite name/);
   assert.throws(() => suiteResult("vitest", "abc", ""), /invalid exit code/);
+  assert.equal(suiteResult("vitest-4", "0", "Tests passed").code, 0);
 });

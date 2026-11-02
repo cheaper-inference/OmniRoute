@@ -36,7 +36,7 @@ jobs:
       version: ${{ steps.validate.outputs.version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -82,12 +82,13 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
+          package-manager-cache: false
           node-version: 24
 
       - name: Install dependencies
@@ -112,7 +113,7 @@ jobs:
         run: node scripts/build/standaloneBundle.mjs pack --out web-bundle.tar.gz
 
       - name: Upload shared web bundle
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: web-standalone-bundle
           # compression-level 0: the payload is already a deterministic tar.gz;
@@ -168,14 +169,14 @@ jobs:
             arch: x64,arm64
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
       - name: Setup Node
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
+          package-manager-cache: false
           node-version: 24
-          cache: npm
 
       - name: Install dependencies
         run: npm ci
@@ -235,7 +236,7 @@ jobs:
         # Stage 8: inverse of the fallback step above — runs exactly when the
         # shared `web-build` job produced the bundle.
         if: needs.web-build.result == 'success'
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: web-standalone-bundle
 
@@ -347,7 +348,7 @@ jobs:
           done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: electron-${{ matrix.platform }}
           path: release-assets/
@@ -367,10 +368,10 @@ jobs:
     if: ${{ !cancelled() && needs.validate.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
-      contents: write # softprops/action-gh-release creates the GitHub Release
+      contents: write # publish desktop assets through the GitHub release API
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           fetch-depth: 0
@@ -384,7 +385,7 @@ jobs:
       # ARM dmg. Downloading into per-artifact subdirectories keeps both, so they can be
       # merged on purpose instead of by luck.
       - name: Download all artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           path: artifacts
 
@@ -426,31 +427,12 @@ jobs:
         run: ls -la release-assets/
 
       - name: Create Release
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ needs.validate.outputs.version }}
-          draft: false
-          prerelease: false
-          # NEVER. Phase 3 of the release flow creates the GitHub Release with the curated
-          # notes seconds after pushing the tag, so by the time this step runs (1-2 h of
-          # builds later) the body already exists — and `true` APPENDS GitHub's
-          # auto-generated "What's Changed" block to it (v3.8.48 shipped that way; the
-          # v3.8.50 re-attach dispatch added +1,416 chars to a 121 KB body, run
-          # 33238093090). A curated body sits ~3 KB under the 125,000-char cap, so the
-          # append can also turn this step RED and leave the release with no assets.
-          generate_release_notes: false
-          fail_on_unmatched_files: false
-          files: |
-            release-assets/*.dmg
-            release-assets/*.exe
-            release-assets/*.AppImage
-            release-assets/*.deb
-            release-assets/*.blockmap
-            release-assets/*.yml
-            release-assets/*.source.tar.gz
-            release-assets/*.source.zip
+        # Use the runner's gh CLI. Existing curated notes are preserved on retries;
+        # only a confirmed 404 can create a release, and upload failures stay red.
+        run: node scripts/release/upload-desktop-assets.mjs
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.validate.outputs.version }}
 
   verify-desktop-assets:
     name: Verify desktop assets landed
@@ -476,7 +458,9 @@ jobs:
           names=$(gh release view "$VERSION" --repo "$GITHUB_REPOSITORY" \
                     --json assets --jq '.assets[].name')
           echo "Assets on $VERSION:"
-          echo "$names" | sed 's/^/  /'
+          while IFS= read -r asset_name; do
+            printf '  %s\n' "$asset_name"
+          done <<< "$names"
 
           missing=""
           # `[ ... ] && missing=...` as the last command in a branch returns 1 and

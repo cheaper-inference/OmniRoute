@@ -34,19 +34,19 @@ Nígbà tí osv tàbí Trivy bá di pupa nítorí CVE tuntun tí a ṣí sílẹ
 
 Àwọn ẹnu-ọ̀nà méjèèjì **n fàyè gbà láti fò** (jáde 0) nígbà tí ohun èlò kò bá sí tàbí tí ìwọ̀n bá kùnà (osv-scanner kò sí nínú PATH, osv.dev/network kò ṣeé dé, JSON tí kò tọ́) — ìkùnà **ìwọ̀n** kì í dènà láé, kìkì ìpadàsẹ́yìn **tí a wọ̀n** ni ó n dènà.
 
-## Àwọn Ewu Tí A Gbà Wọlé Tí A Mọ̀
+## Ewu ìgbẹ́kẹ̀lé tí a ti fẹ̀yìntì
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Fáìlì ìdènà gbòǹgbò kò ní `extract-zip` mọ́ tàbí ìsopọ̀ ìgbẹ́kẹ̀lé sí i lẹ́yìn
+ìgbésókè irinṣẹ́ ìdàgbàsókè promptfoo tí a ti so mọ́ ẹ̀yà pàtó. Èyí fẹ̀yìntì ọ̀wọ̀
+`promptfoo` → `@openai/codex-security` → `extract-zip` tí a ti tẹ́wọ́ gbà tẹ́lẹ̀, tí a sì tọ́pa rẹ̀ nínú #14482.
+Àwọn àyẹ̀wò ìpadàsẹ́yìn nínú `tests/unit/extract-zip-14482-exposure.test.ts` kọ
+àtúnmú rẹ̀ wọlé, wọ́n sì pa ìfòfindè lórí àwọn ìgbéwọlé láti inú kóòdù ìṣelọpọ mọ́.
 
-`extract-zip@2.0.1` ní àwọn ìkìlọ̀ méjì tí kò tíì túnṣe, tí ó léwu púpọ̀ nípa symlink-traversal. Gẹ́gẹ́ bí ẹ̀ka "kò sí àtúnṣe láti orísun" ti ìtọ́jú CVE Variance lókè, èyí jẹ́ **ewu tí a gbà wọlé**, kì í ṣe ìgbéga:
-
-- **Ẹ̀wọ̀n:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`. Ìmúdájú nípasẹ̀ `package-lock.json` — gẹ́lẹ́gẹ́ àpò kan ṣoṣo nínú gbogbo igi ìgbẹ́kẹ̀lé (`@openai/codex-security`) ló kéde `extract-zip`, àti gẹ́lẹ́gẹ́ àpò kan ṣoṣo (`promptfoo`) ló kéde `@openai/codex-security`.
-- **Kò sí ìtúsílẹ̀ tí a ti túnṣe níbikíbi nínú ẹ̀wọ̀n náà.** `extract-zip@2.0.1` (tí a tẹ̀ jáde ní 2020) ni ìtúsílẹ̀ ìkẹyìn ti àpò náà — kò sí ẹni tó ń tọ́jú rẹ̀ mọ́. npm-latest lọ́wọ́lọ́wọ́ ti `@openai/codex-security` (`0.1.29`) ṣì ń fa `extract-zip@2.0.1` wọlé.
-- **Kò ṣeé dé ọ̀dọ̀ láti ìṣelọ́pọ̀.** `promptfoo` jẹ́ devDependency-nìkan (kò sí ní àtòjọ lábẹ́ `dependencies` rárá), kò sì sí faili kankan lábẹ́ `src/`, `open-sse/`, tàbí `bin/` tí ó kó àpò npm `extract-zip` wọlé — olùrànlọ́wọ́ `extractZip()` ti OmniRoute fúnra rẹ̀ (`src/lib/versionManager/binaryManager.ts:93`) ń lo `unzip`/`tar` abínibí, kò sì ní í ṣe pẹ̀lú rẹ̀. `@openai/codex-security` tún ní olùṣọ́ symlink-traversal tirẹ̀ lórí ìpèpadà onEntry ti extract-zip.
-- **Má ṣe** fi orúkọ mìíràn fún `extract-zip` nípasẹ̀ `overrides` ti `package.json` — àdánidúró kan ṣoṣo tí ó ṣeé lò ni Electron-org-internal, kò sì bá API mu pẹ̀lú àwọn àyẹ̀wò onEntry/defaultDirMode/defaultFileMode ti `@openai/codex-security` fúnra rẹ̀; fífi orúkọ mìíràn fún un yóò fọ́ àwọn àyẹ̀wò ààbò àpò náà láìsọ fún ẹnikẹ́ni.
-- **Ìpìlẹ̀:** `vulnCount` osv tí a wọ̀n (3) ti wà ní ìsàlẹ̀ ìpìlẹ̀ `config/quality/quality-baseline.json` tí a ti dì (27) — kò sí àtúnṣe ratchet tí ó pọn dandan.
-- **Olùṣọ́ ìpadàsẹ́yìn:** `tests/unit/extract-zip-14482-exposure.test.ts` ń fìdí ẹ̀wọ̀n àti àìyípadà kò-sí-ìkó-wọlé-ìṣelọ́pọ̀ lókè múlẹ̀; yóò kùnà CI bí ó bá yẹ́ nígbàkúùgbà (fún àpẹẹrẹ, PR ọjọ́ iwájú mú `extract-zip` ṣeé dé ọ̀dọ̀ láti ìṣelọ́pọ̀).
-- **Ìtọ́pinpin:** ọ̀rọ̀ #14482.
+Àtúnṣe ìgbẹ́kẹ̀lé lọ́wọ́lọ́wọ́ tún fi àwọn àtúnkọ ìbámu mọ́ oníbàárà MSAL ti Azure identity,
+oníbàárà FTP ti get-uri, àti ìgbẹ́kẹ̀lé Zod ti OpenCode v1 SDK. Ìgba token Azure
+àti gbígba ohun èlò nípasẹ̀ FTP ni a dánwò pẹ̀lú àwọn ọ̀nà ìgbéjàde tí a ṣàkóso; àwọn package OpenCode
+méjèèjì ń ṣiṣẹ́ àwọn àkójọpọ̀ àti àkójọpọ̀ ìdánwò tiwọn. Àwọn iye ìkìlọ̀ registry jẹ́ àwọn ìwọ̀n
+ní àkókò kan pàtó, wọ́n sì lè yí padà lẹ́yìn tí a bá commit fáìlì ìdènà náà.
 
 ## Àtòjọ Iṣẹ́ Tó Kù: Ìkìlọ̀ Scorecard → dídènà
 

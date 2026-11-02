@@ -48,49 +48,59 @@ zistí základnú URL a token (takže po `omniroute connect <vps>` stačí použ
 
 ---
 
-## Aliasy na vyhľadávanie — zobrazenie modelov mimo Claude vo výbere `/model`
+## Aliasy objavovania — zviditeľnenie modelov mimo Claude vo výbere `/model`
 
-Vyhľadávanie modelov brány v Claude Code zobrazuje iba ID, ktoré sa začínajú na
-`claude` alebo `anthropic`, takže pri nastavení `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
-natívny výber `/model` bežne zobrazuje **iba** modely Claude/Anthropic z OmniRoute —
-`kimi/kimi-k2.6` ani `glm/glm-5.2` sa nikdy nezobrazia, hoci ich smerovanie funguje správne.
+Objavovanie modelov brány v Claude Code vypisuje iba ID začínajúce na `claude`
+alebo `anthropic`, takže pri `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
+natívny výber `/model` bežne zobrazuje **iba** modely Claude/Anthropic
+z OmniRoute — `kimi/kimi-k2.6` alebo `glm/glm-5.2` sa nikdy nezobrazí, hoci
+smerovanie funguje bez problémov.
 
-OmniRoute môže zrkadliť ľubovoľný povolený model (aj kombináciu) pod ID `claude/…`,
-aby prešiel týmto filtrom a zobrazil sa vo výbere:
+OmniRoute môže zrkadliť ľubovoľný povolený model (a kombináciu) pod ID
+`claude/…`, aby prešiel týmto filtrom a zobrazil sa vo výbere:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<kombinácia "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Keď v Claude Code vyberiete jeden z týchto modelov, OmniRoute pred smerovaním
-odstráni obal `claude/` a obnoví skutočné ID — pravé ID `claude/<real-claude-model>`
-(skutočný poskytovateľ Claude OAuth) sa vždy ponechá bez zmeny.
+Keď v Claude Code vyberiete niektorý z týchto aliasov, OmniRoute pred
+smerovaním odstráni obal `claude/` a obnoví skutočné ID — pravé ID
+`claude/<real-claude-model>` (skutočný poskytovateľ Claude OAuth) zostáva vždy
+nedotknuté.
 
-**Táto funkcia je predvolene vypnutá** a riadi ju trojúrovňový mechanizmus
-(najkonkrétnejšie nastavenie má prednosť), takže bežná inštancia OmniRoute nikdy
-nezdvojnásobí svoj katalóg pre klientov, ktorí Claude Code nepoužívajú:
+Predvolene sa zrkadlia iba základné ID. So zapnutým voliteľným prepínačom
+funkcií `CATALOG_MIRROR_REFINEMENTS_ENABLED` sa ako každé iné ID zrkadlia aj
+varianty úrovne úsilia uvažovania, ktoré katalóg už obsahuje (napr.
+`codex/gpt-6-sol-high`), takže Claude Code si môže vybrať explicitnú úroveň
+úsilia; vstavané ID `auto/*`, ktoré cesta spracovania požiadavky nedokáže
+materializovať, sa nezrkadlia. To, či sa varianty úrovne úsilia vôbec
+vypisujú, naďalej riadi `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — zrkadlo
+nikdy nepridá variant, ktorý základný katalóg nemá.
 
-| Úroveň       | Kde                                                                                              |
-| ------------ | ------------------------------------------------------------------------------------------------ |
-| Model        | Stránka podrobností poskytovateľa → prepínač „Zobraziť v Claude Code“ pre model                  |
-| Poskytovateľ | Stránka podrobností poskytovateľa → prepínač na úrovni poskytovateľa (zahŕňa všetky jeho modely) |
-| Globálna     | Nastavenia → Príznaky funkcií → `EXPOSE_CC_DISCOVERY_ALIASES` (predvolene vypnuté)               |
+**Táto funkcia je predvolene vypnutá** a riadi ju trojúrovňová brána (vyhráva
+najšpecifickejšia úroveň), takže obyčajný OmniRoute nikdy nezdvojnásobí svoj
+katalóg pre klientov, ktorí nepoužívajú Claude Code:
+
+| Úroveň       | Kde                                                                                           |
+| ------------ | --------------------------------------------------------------------------------------------- |
+| Model        | Stránka detailu poskytovateľa → prepínač "Expose in Claude Code" pre jednotlivé modely        |
+| Poskytovateľ | Stránka detailu poskytovateľa → prepínač na úrovni poskytovateľa (pokrýva všetky jeho modely) |
+| Globálna     | Nastavenia → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (predvolene vypnuté)               |
 
 Premenná prostredia `EXPOSE_CC_DISCOVERY_ALIASES` vynúti zapnutie globálnej
-úrovne a má prednosť pred nastavením v ovládacom paneli (obrazovka Príznaky
-funkcií zobrazí poznámku „aktívne prostredníctvom premennej prostredia“).
-Prepínače pre jednotlivých poskytovateľov a modely toto nastavenie ďalej
-spresňujú — napr. globálne vypnutie + zapnutie poskytovateľa Kimi sprístupní
-iba modely Kimi.
+úrovne a má prednosť pred prepisom v dashboarde (obrazovka Feature Flags v
+takom prípade zobrazuje poznámku „active via environment variable"). Prepínače
+na úrovni poskytovateľa a modelu to ďalej spresňujú — napr. globálne vypnuté +
+poskytovateľ Kimi zapnutý odhalí iba modely Kimi.
 
-> ⚠️ **Nesúlad kontextového okna pri modeloch mimo Claude.** Claude Code predpokladá
-> kontextové okno 200K pre každé ID, ktoré nerozpozná (skutočnú veľkosť okna
-> nedokáže načítať z `/v1/models`). Pre model s väčším oknom (napr. 256K pri Kimi K2)
-> nastavte `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na hodnotu nižšiu než skutočná veľkosť
-> okna modelu, aby sa automatická kompakcia nespustila predčasne. Vyššie uvedené
-> vygenerované profily to už nastavujú osobitne pre každý model.
+> ⚠️ **Nesúlad okna pri modeloch, ktoré nie sú Claude.** Claude Code
+> predpokladá kontextové okno 200K pre každé ID, ktoré nerozpozná (skutočné
+> okno nedokáže prečítať z `/v1/models`). Pri modeli s väčším oknom (napr.
+> 256K Kimi K2) nastavte `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na hodnotu pod
+> skutočným oknom modelu, aby sa automatická kompaktizácia nespustila
+> predčasne. Vyššie uvedené vygenerované profily to už robia pre každý model.
 
 ---
 

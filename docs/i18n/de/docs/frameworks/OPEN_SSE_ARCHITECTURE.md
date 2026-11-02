@@ -165,20 +165,20 @@ Aufrufprotokoll-Artefakte werden (sofern aktiviert) unter `${DATA_DIR}/call_logs
 
 ---
 
-## Detaillierte Betrachtung der wichtigsten Dateien
+## Schlüsseldateien im Detail
 
 ### chatCore.ts (5977 Zeilen)
 
-Der **zentrale Request-Handler**. Trotz seines Umfangs weist er eine klare Struktur auf:
+Der **zentrale Request-Handler**. Trotz seiner Größe hat er eine klare Struktur:
 
 ```ts
-// Pseudostruktur von chatCore.ts
+// Pseudo-Struktur von chatCore.ts
 export async function handleChat(request: NextRequest) {
   // 1. Authentifizierung + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
-  // 2. Validierung des Bodys
+  // 2. Body-Validierung
   const body = await parseRequestBody(request);
 
   // 3. Formaterkennung + Übersetzung
@@ -196,7 +196,7 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // Mit dem nächsten Ziel fortfahren
+      // Weiter zum nächsten Ziel
     }
   }
 
@@ -205,11 +205,11 @@ export async function handleChat(request: NextRequest) {
 }
 ```
 
-Obwohl es sich um eine einzige riesige Funktion handelt, ist sie in **kommentierte Abschnitte** gegliedert, die der 5-stufigen Pipeline entsprechen.
+Obwohl es eine einzige riesige Funktion ist, ist sie in **kommentierte Abschnitte** gegliedert, die der 5-Stufen-Pipeline entsprechen.
 
 ### combo.ts (4456 LOC)
 
-Die **Routing-Engine**, die eine Combo in geordnete Ziele auflöst.
+Die **Routing-Engine**, die ein Combo in geordnete Ziele auflöst.
 
 ```ts
 // services/combo.ts
@@ -219,110 +219,113 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
     try {
       return await handleSingleModel(target, body);
     } catch (err) {
-      log.warn("Ziel fehlgeschlagen, nächstes wird versucht", { target, err });
+      log.warn("target failed, trying next", { target, err });
     }
   }
-  throw new ComboExhaustedError("Alle Ziele sind fehlgeschlagen");
+  throw new ComboExhaustedError("All targets failed");
 }
 ```
 
-Unterstützt **19 Routing-Strategien** (siehe `src/shared/constants/routingStrategies.ts`):
+Unterstützt **20 Routing-Strategien** (siehe `src/shared/constants/routingStrategies.ts`):
 
-| Strategie           | Verhalten                                                                                |
-| ------------------- | ---------------------------------------------------------------------------------------- |
-| `priority`          | Geordnete Liste, beginnend mit dem ersten Ziel                                           |
-| `weighted`          | Probabilistisch nach Gewichtung pro Ziel                                                 |
-| `round-robin`       | Ziele der Reihe nach zyklisch durchlaufen                                                |
-| `context-relay`     | Kontext zielübergreifend weiterreichen                                                   |
-| `fill-first`        | Kontingent ausschöpfen, bevor zum nächsten Ziel gewechselt wird                          |
-| `p2c`               | „Power of Two Choices“                                                                   |
-| `random`            | Gleichverteilte Zufallsauswahl                                                           |
-| `least-used`        | Ziel mit den wenigsten kürzlichen Verwendungen auswählen                                 |
-| `cost-optimized`    | Günstigstes fehlerfreies Ziel zuerst                                                     |
-| `reset-aware`       | Berücksichtigt die Reset-Zeitfenster des Providers                                       |
-| `reset-window`      | Routing basierend auf Reset-Zeitfenstern                                                 |
-| `headroom`          | Ziel mit dem größten verbleibenden Kontingent zuerst                                     |
-| `strict-random`     | Echte Gleichverteilung (ohne Qualitätsgewichtung)                                        |
-| `auto`              | Bewertung anhand von 16 Faktoren verwenden (`autoCombo/`)                                |
-| `lkgp`              | Zuletzt als funktionsfähig bekannter Provider zuerst                                     |
-| `context-optimized` | Am besten für Requests mit langem Kontext geeignet                                       |
-| `fusion`            | Parallele Verteilung an ein Panel, anschließend Synthese durch einen Judge (`fusion.ts`) |
+| Strategie           | Verhalten                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------- |
+| `priority`          | Geordnete Liste, erstes Ziel zuerst                                                   |
+| `weighted`          | Probabilistisch nach Gewicht pro Ziel                                                 |
+| `round-robin`       | Ziele der Reihe nach durchlaufen                                                      |
+| `context-relay`     | Kontext über Ziele hinweg weiterreichen                                               |
+| `fill-first`        | Kontingent ausschöpfen, bevor zum nächsten gewechselt wird                            |
+| `p2c`               | Power of Two Choices                                                                  |
+| `random`            | Gleichverteilt zufällig                                                               |
+| `least-used`        | Das Ziel mit den wenigsten kürzlichen Nutzungen wählen                                |
+| `cost-optimized`    | Günstigstes gesundes Ziel zuerst                                                      |
+| `reset-aware`       | Berücksichtigt Reset-Fenster der Provider                                             |
+| `reset-window`      | Routing basierend auf Reset-Fenstern                                                  |
+| `headroom`          | Größter verbleibender Kontingent-Spielraum zuerst                                     |
+| `quota-weighted`    | Erschöpfte Konten überspringen, dann nach Restkontingent ÷ laufender Last ziehen      |
+| `strict-random`     | Wirklich gleichverteilt (keine Qualitätsgewichtung)                                   |
+| `auto`              | 16-Faktoren-Scoring verwenden (`autoCombo/`)                                          |
+| `lkgp`              | Zuletzt bekannter funktionierender Provider zuerst                                    |
+| `context-optimized` | Optimal für Anfragen mit langem Kontext                                               |
+| `cache-optimized`   | Jedes wiederverwendbare Prompt-Präfix an dasselbe Konto pinnen (Prompt-Cache-Treffer) |
+| `fusion`            | Parallel an ein Panel auffächern, dann über einen Judge synthetisieren (`fusion.ts`)  |
+| `pipeline`          | Schritte verketten — die Ausgabe jedes Ziels speist das nächste                       |
 
 ### base.ts (1170 LOC)
 
-Der **abstrakte Executor**, von dem jede Executor-Klasse erbt (direkt oder über `DefaultExecutor` und andere Unterklassen). Er enthält:
+Der **abstrakte Executor**, den jede Executor-Klasse erweitert (direkt oder über `DefaultExecutor` und andere Unterklassen). Er enthält:
 
-- `buildUrl()` — standardmäßige URL-Konstruktion (Unterklassen überschreiben sie für benutzerdefiniertes Verhalten)
-- `buildHeaders()` — Standard-Header (Authentifizierung, Content-Type)
-- `transformRequest()` — standardmäßig unveränderte Weitergabe
-- `execute()` — die zentrale HTTP-Schleife mit Wiederholungsversuchen, Backoff und Circuit Breaker
+- `buildUrl()` — Standard-URL-Konstruktion (Unterklassen überschreiben sie bei Bedarf)
+- `buildHeaders()` — Standard-Header (Auth, Content-Type)
+- `transformRequest()` — standardmäßig Pass-Through
+- `execute()` — die zentrale HTTP-Schleife mit Retry/Backoff/Breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
   // Verarbeitet alle OpenAI-/Anthropic-kompatiblen Provider
-  // Provider registrieren Konfigurationen (URL, Authentifizierung, Header), verwenden jedoch dieselbe Executor-Logik
+  // Provider registrieren Konfigurationen (URL, Auth, Header), teilen aber die Executor-Logik
 }
 ```
 
-Provider-spezifisches Verhalten (Authentifizierungs-Header, Basis-URL, Versions-Header) wird über die Provider-Registry konfiguriert und nicht über separate Executor-Klassen.
+Provider-spezifisches Verhalten (Auth-Header, Basis-URL, Versions-Header) wird über die Provider-Registry konfiguriert, nicht über separate Executor-Klassen.
 
 ````
 
 ---
 
-## Dienste (117 Module)
+## Services (117 Module)
 
-Dienste sind **fokussierte Module mit jeweils einem einzigen Zweck**, die von Handlern kombiniert werden. Die Hauptkategorien:
+Services sind **fokussierte Module mit einem einzigen Zweck**, die Handler zusammensetzen. Die großen Kategorien:
 
-### Routing & Kombinationen
+### Routing & Combo
 
-- `combo.ts` — Einstiegspunkt für über Kombinationen geroutete Anfragen
-- `services/autoCombo/` — Bewertung anhand von 16 Faktoren, 8 automatische Routing-Strategien
-- `wildcardRouter.ts` — gleicht Wildcard-Routen (`gpt-*`) ab
-- `modelFamilyFallback.ts` — T5-Fallback innerhalb derselben Modellfamilie
+- `combo.ts` — Einstiegspunkt für Combo-geroutete Anfragen
+- `services/autoCombo/` — 16-Faktoren-Scoring, 8 Auto-Routing-Strategien
+- `wildcardRouter.ts` — ordnet Wildcard-Routen zu (`gpt-*`)
+- `modelFamilyFallback.ts` — T5-Fallback innerhalb der Modellfamilie
 
-### Ratenbegrenzung & Kontingente
+### Rate Limiting & Quota
 
-- `rateLimitManager.ts` — Token-Bucket pro Schlüssel und Anbieter
-- `usage.ts` — Erfassung der Nutzung
-- `quotaCache.ts` — Kontingent-Snapshots im Arbeitsspeicher
+- `rateLimitManager.ts` — Token Bucket pro Schlüssel+Provider
+- `usage.ts` — Nutzungserfassung
+- `quotaCache.ts` — In-Memory-Quota-Snapshots
 
-### Konten & Token
+### Konto & Token
 
-- `tokenRefresh.ts` — OAuth-Aktualisierung bei 401
+- `tokenRefresh.ts` — OAuth-Refresh bei 401
 - `accountFallback.ts` — Wechsel zu einem alternativen Konto
-- `sessionManager.ts` — Sitzungsstatus für Interaktionen über mehrere Runden
+- `sessionManager.ts` — Multi-Turn-Sitzungsstatus
 
 ### Intelligenz
 
-- `intentClassifier.ts` — klassifiziert die Absicht einer Anfrage
-- `taskAwareRouter.ts` — routet nach Aufgabentyp
-- `thinkingBudget.ts` — weist Token für Denkprozesse zu
-- `contextManager.ts` — fügt Routing-Kontext ein
+- `intentClassifier.ts` — klassifiziert die Absicht der Anfrage
+- `taskAwareRouter.ts` — Routing nach Aufgabentyp
+- `thinkingBudget.ts` — weist Thinking Tokens zu
+- `contextManager.ts` — injiziert Routing-Kontext
 
-### Ausfallsicherheit
+### Resilienz
 
-- `resilience.ts` — Orchestrierung von Wiederholungsversuchen, Backoff und Schutzschaltern
-- `emergencyFallback.ts` — Fallback als letzter Ausweg
+- `resilience.ts` — Orchestrierung von Retry, Backoff und Breaker
+- `emergencyFallback.ts` — Fallback letzter Instanz
 - `modelDeprecation.ts` — automatisches Routing zu Nachfolgemodellen
 
 ### Zustand
 
-- `signatureCache.ts` — Deduplizierung anhand der Anfragesignatur
-- `volumeDetector.ts` — Lastabwurf
+- `signatureCache.ts` — Deduplizierung anhand der Anfrage-Signatur
+- `volumeDetector.ts` — Load Shedding
 - `contextHandoff.ts` — Sitzungsserialisierung
 
 ### Komprimierung
 
-- `compression/` (Unterverzeichnis) — vollständige Komprimierungspipeline
+- `compression/` (Unterverzeichnis) — vollständige Komprimierungs-Pipeline
 - 39 Dateien für Engines, Regelpakete und Adapter
 
 ### Skills
 
 - (behandelt in [SKILLS.md](./SKILLS.md))
 
-### Speicher
+### Memory
 
 - (behandelt in [MEMORY.md](./MEMORY.md))
 
@@ -330,29 +333,29 @@ Dienste sind **fokussierte Module mit jeweils einem einzigen Zweck**, die von Ha
 
 ## Executors (150 Module)
 
-Überwiegend eine Datei pro Anbieter. Die Executor-Klassen erweitern alle `BaseExecutor` und überschreiben die abweichenden Teile; die übrigen Module sind anbieterspezifische Hilfsmodule (Werkzeugschemata, Fetch-/TTS-Adapter und Handler für Besonderheiten).
+Meist eine Datei pro Provider. Die Executor-Klassen erweitern alle `BaseExecutor` und überschreiben, was abweicht; die übrigen Module sind provider-spezifische Helfer (Tool-Schemata, Fetch/TTS-Adapter, Quirk-Handler).
 
-### Gängige Muster
+### Gemeinsame Muster
 
-Anbieter werden über `getExecutor(providerId)` aufgelöst, das den konfigurierten Executor zurückgibt. OpenAI-/Anthropic-kompatible Anbieter verwenden `DefaultExecutor` (`executors/default.ts`). Anbieterspezifisches Verhalten (Basis-URL, Authentifizierungs-Header, API-Version) wird in `open-sse/config/providers/` konfiguriert, während Transformationen des Anfragekörpers in `open-sse/translator/` verarbeitet werden.
+Provider werden über `getExecutor(providerId)` aufgelöst, das den konfigurierten Executor zurückgibt. OpenAI-/Anthropic-kompatible Provider verwenden `DefaultExecutor` (`executors/default.ts`). Provider-spezifisches Verhalten (Basis-URL, Auth-Header, API-Version) wird in `open-sse/config/providers/` konfiguriert, während Transformationen des Request-Bodys in `open-sse/translator/` behandelt werden.
 
-Eine **benutzerdefinierte URL** wird über die Anbieterkonfiguration festgelegt:
+**Eigene URL** wird über die Provider-Konfiguration gesetzt:
 
 ```ts
-// Anbieterkonfiguration in open-sse/config/providers/
+// Provider-Konfiguration in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-Eine **benutzerdefinierte Authentifizierung** wird über die Authentifizierungskonfiguration der Anbieterregistrierung gehandhabt (API-Schlüssel, OAuth, Header-Profile).
+**Eigene Authentifizierung** wird über die Auth-Konfiguration der Provider-Registry gehandhabt (API-Schlüssel, OAuth, Header-Profile).
 
-Transformationen für einen **benutzerdefinierten Anfragekörper** (z. B. die Trennung von `system` und `messages` bei Anthropic) werden pro Anbieter in `open-sse/translator/` registriert.
+Transformationen des **eigenen Request-Bodys** (z. B. trennt Anthropic `system` von `messages`) werden pro Provider in `open-sse/translator/` registriert.
 
 ````
 
-### Die Executor-Factory
+### Die Executor Factory
 
 `executors/index.ts` exportiert `getExecutor(providerId)`:
 
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-Die Auflösung erfolgt über die `ExecutorRegistry` (`executors/registry.ts`): Jeder spezialisierte Executor wird in der integrierten Tabelle von `executors/index.ts` deklariert und beim Laden des Moduls über `registerExecutor(alias, instance)` registriert; `getExecutor()` fragt die Registrierung ab und greift bei Anbietern ohne spezialisierten Eintrag auf einen memoisierten `DefaultExecutor` zurück. Die vollständige Zuordnung von Alias → Executor wird durch den Golden-Test `tests/unit/executor-map-golden.test.ts` beschrieben.
+Die Auflösung läuft über die `ExecutorRegistry` (`executors/registry.ts`): Jeder spezialisierte Executor wird in der eingebauten Tabelle von `executors/index.ts` deklariert und beim Laden des Moduls über `registerExecutor(alias, instance)` registriert; `getExecutor()` konsultiert die Registry und fällt für jeden Provider ohne spezialisierten Eintrag auf einen memoisierten `DefaultExecutor` zurück. Das vollständige Alias-→-Executor-Mapping wird durch den Golden Test `tests/unit/executor-map-golden.test.ts` charakterisiert.
 
 ---
 
@@ -483,15 +486,15 @@ Dabei werden folgende Elemente verarbeitet:
 
 `open-sse/config/` enthält die Konfigurationsschicht:
 
-| Datei                         | Zweck                                                 |
-| ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Chatmodell-Registry für den Katalog mit 374 Anbietern |
-| `providerModels.ts`           | Modellaliase, Formatzuordnung                         |
-| `constants.ts`                | Zeitüberschreitungen, Grenzwerte, Statuscodes         |
-| `defaultThinkingSignature.ts` | Standardmäßige Claude-Denksignatur                    |
-| `modelStrip.ts` (in Diensten) | Anbieterspezifisches Entfernen von Feldern            |
+| Datei                         | Zweck                                                   |
+| ----------------------------- | ------------------------------------------------------- |
+| `providerRegistry.ts`         | Chat-Modell-Registry über den Katalog mit 375 Providern |
+| `providerModels.ts`           | Modell-Aliase, Format-Mapping                           |
+| `constants.ts`                | Timeouts, Limits, Statuscodes                           |
+| `defaultThinkingSignature.ts` | Standard-Thinking-Signatur für Claude                   |
+| `modelStrip.ts` (in services) | Provider-spezifisches Entfernen von Feldern             |
 
-### Schema der Anbieter-Registry
+### Provider-Registry-Schema
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Die Zod-Validierung beim Laden des Moduls stellt sicher, dass alle Anbieterkonfigurationen gültig sind.
+Die Zod-Validierung beim Laden des Moduls stellt sicher, dass alle Provider-Konfigurationen gültig sind.
 
 ---
 

@@ -1,0 +1,1 @@
+- Full Release-Green sweeps prepare all required pinned security scanners from the immutable workflow revision before validation. Push checks retain their smaller workflow-only toolset, and missing installer or scanner evidence keeps the final verdict incomplete.

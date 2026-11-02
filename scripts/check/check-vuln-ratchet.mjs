@@ -6,12 +6,9 @@
 //   vulnCount=N         — total de vulnerabilidades encontradas (todos os severities)
 //   vulnCount=SKIP reason=binary-absent   — osv-scanner não está no PATH
 //
-// Por default é ADVISORY (sai 0 sempre). Passe --ratchet para tornar BLOQUEANTE:
-// lê metrics.vulnCount.value de config/quality/quality-baseline.json, compara a
-// contagem MEDIDA e SAI 1 SE — E SOMENTE SE — a medida for MAIOR que o baseline
-// (regressão real, direction:down). Qualquer SKIP gracioso (binário ausente,
-// osv.dev/rede inacessível, erro de parse) SAI 0 mesmo com --ratchet — uma falha
-// de MEDIÇÃO nunca bloqueia, só uma regressão medida bloqueia.
+// Advisory mode reports findings without blocking. With --ratchet, exit 1 means
+// a measured regression and exit 2 means INCOMPLETE (tool/report/baseline missing).
+// An unavailable measurement never establishes zero vulnerabilities.
 //
 // NB (variância de CVE): osv mede contra um banco de CVEs que cresce de forma
 // contínua. Um PR que NÃO toca dependências pode subitamente medir vulnCount >
@@ -85,9 +82,10 @@ export function parseOsvJson(osvJson) {
       if (!Array.isArray(pkg.vulnerabilities)) continue;
 
       // Use groups for deduplication when available (same vuln in multiple paths)
-      const pkgCount = Array.isArray(pkg.groups) && pkg.groups.length > 0
-        ? pkg.groups.length
-        : pkg.vulnerabilities.length;
+      const pkgCount =
+        Array.isArray(pkg.groups) && pkg.groups.length > 0
+          ? pkg.groups.length
+          : pkg.vulnerabilities.length;
 
       vulnCount += pkgCount;
 
@@ -151,7 +149,7 @@ export function evaluateVulnRatchet(current, baseline) {
 /**
  * Lê metrics.vulnCount.value do quality-baseline.json.
  * Retorna null se o arquivo ou a métrica estiverem ausentes (sem baseline não há
- * ratchet possível — o caller trata como SKIP gracioso, exit 0).
+ * ratchet possível — o caller trata como INCOMPLETE no modo obrigatório).
  *
  * @param {string} baselinePath
  * @returns {number|null}
@@ -165,7 +163,7 @@ export function readBaselineVulnValue(baselinePath = BASELINE_PATH) {
     return null;
   }
   const metric = baselineJson?.metrics?.vulnCount;
-  if (!metric || typeof metric.value !== "number") return null;
+  if (!metric || !Number.isSafeInteger(metric.value) || metric.value < 0) return null;
   return metric.value;
 }
 
@@ -215,19 +213,15 @@ export function findOsvScanner() {
  * Executa o osv-scanner sobre o lockfile/diretório.
  * Usa execFileSync sem shell interpolation (Hard Rule #13).
  *
- * Em uma falha de MEDIÇÃO (osv-scanner não produziu JSON — rede/osv.dev
- * inacessível, timeout, JSON inválido) retorna { skip: true, reason } em vez de
- * abortar o processo: o caller traduz isso num SKIP gracioso (exit 0 mesmo com
- * --ratchet). Uma falha de medição NUNCA bloqueia; só uma regressão MEDIDA bloqueia.
+ * Falhas de execução ou formato retornam { skip: true, reason }; o modo obrigatório
+ * as reporta como INCOMPLETE. Exit 1 do scanner é um resultado com findings;
+ * 127/128 e sinais não são medições. Ver https://google.github.io/osv-scanner/output/.
  *
  * @param {string} osvBin - Caminho para o binário osv-scanner
  * @returns {{ json: object } | { skip: true, reason: string }}
  */
 function runOsvScanner(osvBin) {
-  const args = [
-    "--format", "json",
-    "--lockfile", path.join(ROOT, "package-lock.json"),
-  ];
+  const args = ["--format", "json", "--lockfile", path.join(ROOT, "package-lock.json")];
 
   if (!QUIET) {
     process.stderr.write("[vuln-ratchet] Rodando osv-scanner --format json ...\n");
@@ -245,16 +239,33 @@ function runOsvScanner(osvBin) {
     // osv-scanner sai com código != 0 quando encontra vulnerabilidades;
     // o JSON ainda vai no stdout.
     stdout = err.stdout ? String(err.stdout) : "";
-    if (!stdout.trim()) {
+    if (err.status !== 1 || err.signal || err.killed || !stdout.trim()) {
       process.stderr.write(`[vuln-ratchet] ERRO ao executar osv-scanner: ${err.message}\n`);
       return { skip: true, reason: "osv-error" };
     }
   }
 
   try {
-    return { json: JSON.parse(stdout) };
+    const json = JSON.parse(stdout);
+    if (
+      !Array.isArray(json?.results) ||
+      json.results.some(
+        (result) =>
+          !Array.isArray(result?.packages) ||
+          result.packages.some(
+            (pkg) =>
+              !Array.isArray(pkg?.vulnerabilities) ||
+              pkg.vulnerabilities.some((vuln) => !vuln || typeof vuln.id !== "string" || !vuln.id)
+          )
+      )
+    ) {
+      return { skip: true, reason: "invalid-report" };
+    }
+    return { json };
   } catch (parseErr) {
-    process.stderr.write(`[vuln-ratchet] ERRO ao parsear JSON do osv-scanner: ${parseErr.message}\n`);
+    process.stderr.write(
+      `[vuln-ratchet] ERRO ao parsear JSON do osv-scanner: ${parseErr.message}\n`
+    );
     process.stderr.write(`[vuln-ratchet] stdout (primeiros 500 chars): ${stdout.slice(0, 500)}\n`);
     return { skip: true, reason: "parse-error" };
   }
@@ -264,37 +275,24 @@ function runOsvScanner(osvBin) {
 // Main
 // ---------------------------------------------------------------------------
 
+function incomplete(reason) {
+  console.log(`vulnCount=${RATCHET ? "INCOMPLETE" : "SKIP"} reason=${reason}`);
+  process.exitCode = RATCHET ? 2 : 0;
+}
+
 function main() {
   const osvBin = findOsvScanner();
 
   if (!osvBin) {
-    // Skip gracioso: binário ausente — esperado em ambientes sem osv-scanner instalado.
-    // SKIP sai 0 MESMO com --ratchet (binário ausente nunca bloqueia).
-    console.log("vulnCount=SKIP reason=binary-absent");
-    if (!QUIET) {
-      process.stderr.write(
-        "[vuln-ratchet] SKIP — osv-scanner não encontrado no PATH.\n" +
-        "[vuln-ratchet] Instale via: https://google.github.io/osv-scanner/\n" +
-        "[vuln-ratchet] SKIP gracioso — sai 0 mesmo com --ratchet (binário ausente nunca bloqueia).\n"
-      );
-    }
-    process.exitCode = 0;
+    incomplete("binary-absent");
+    if (!QUIET)
+      process.stderr.write("[vuln-ratchet] Install osv-scanner to complete this measurement.\n");
     return;
   }
 
   const osvResult = runOsvScanner(osvBin);
-
-  // Falha de MEDIÇÃO (rede/osv.dev inacessível, timeout, JSON inválido) → SKIP
-  // gracioso, sai 0 mesmo com --ratchet (uma falha de medição nunca bloqueia).
   if (osvResult.skip) {
-    console.log(`vulnCount=SKIP reason=${osvResult.reason}`);
-    if (!QUIET) {
-      process.stderr.write(
-        `[vuln-ratchet] SKIP — osv-scanner não produziu uma medição (${osvResult.reason}).\n` +
-        "[vuln-ratchet] SKIP gracioso — sai 0 mesmo com --ratchet (falha de medição nunca bloqueia).\n"
-      );
-    }
-    process.exitCode = 0;
+    incomplete(osvResult.reason);
     return;
   }
 
@@ -302,6 +300,7 @@ function main() {
 
   if (PRINT_JSON) {
     process.stdout.write(JSON.stringify(osvJson, null, 2) + "\n");
+    applyRatchet(parseOsvJson(osvJson).vulnCount);
     return;
   }
 
@@ -311,9 +310,10 @@ function main() {
   console.log(`vulnCount=${vulnCount}`);
 
   if (!QUIET) {
-    const severitySummary = Object.entries(bySeverity)
-      .map(([k, v]) => `${k}=${v}`)
-      .join(", ") || "nenhuma";
+    const severitySummary =
+      Object.entries(bySeverity)
+        .map(([k, v]) => `${k}=${v}`)
+        .join(", ") || "nenhuma";
     process.stderr.write(
       `[vuln-ratchet] Total de vulnerabilidades: ${vulnCount} (${severitySummary})\n`
     );
@@ -326,7 +326,7 @@ function main() {
 /**
  * Aplica o ratchet (direction:down) sobre a contagem medida vs o baseline.
  * Sem --ratchet: advisory (exit 0). Com --ratchet: exit 1 numa regressão real
- * (medida > baseline). Baseline ausente → SKIP gracioso (exit 0).
+ * (medida > baseline). Baseline ausente → INCOMPLETE (exit 2).
  *
  * @param {number} vulnCount - Contagem MEDIDA (medição bem-sucedida).
  */
@@ -343,12 +343,7 @@ function applyRatchet(vulnCount) {
 
   const baselineValue = readBaselineVulnValue(BASELINE_PATH);
   if (baselineValue === null) {
-    if (!QUIET) {
-      process.stderr.write(
-        "[vuln-ratchet] baseline ausente (metrics.vulnCount) — SKIP gracioso, sai 0.\n"
-      );
-    }
-    process.exitCode = 0;
+    incomplete("baseline-unresolved");
     return;
   }
 

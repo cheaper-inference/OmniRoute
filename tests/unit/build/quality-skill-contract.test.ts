@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -14,6 +14,7 @@ test("versioned admission consumers and shared merge rules are covered by the dr
     "sweep-reds/SKILL.md",
     "merge-prs/SKILL.md",
     "merge-batch/SKILL.md",
+    "i18n-waves/SKILL.md",
     "_shared/merge-gates.md",
     "_shared/validation-gate.md",
     "_shared/protected-surfaces.md",
@@ -21,6 +22,32 @@ test("versioned admission consumers and shared merge rules are covered by the dr
   ];
   const result = inspectSkillContracts("config/quality/skill-templates");
   assert.deepEqual(result.files.map((file) => file.path).sort(), expected.sort());
+});
+
+test("the translation-wave admission consumer cannot bypass the instruction contract", () => {
+  const dir = mkdtempSync(join(tmpdir(), "omniroute-i18n-contract-"));
+  const root = join(dir, "skills");
+  try {
+    cpSync("config/quality/skill-templates", root, { recursive: true });
+    mkdirSync(join(root, "i18n-waves"), { recursive: true });
+    const file = join(root, "i18n-waves/SKILL.md");
+    writeFileSync(file, "Unreviewed translation-wave admission exception.\n");
+    const drifted = inspectSkillContracts(root);
+    assert.equal(drifted.ok, false, "an unreviewed merge consumer must not be reported MATCH");
+    assert.equal(
+      drifted.files.find((entry) => entry.path === "i18n-waves/SKILL.md")?.status,
+      "DRIFT"
+    );
+    rmSync(file);
+    const missing = inspectSkillContracts(root);
+    assert.equal(missing.ok, false);
+    assert.equal(
+      missing.files.find((entry) => entry.path === "i18n-waves/SKILL.md")?.status,
+      "MISSING"
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("the skill contract distinguishes installed, drifted and missing instructions", () => {
