@@ -40,7 +40,10 @@
  *   - Set CLOUDFLARE_PLAYGROUND_CHROME_PATH to point at a full desktop Chrome
  *     binary when Playwright's bundled Chromium gets fingerprint-blocked.
  */
-import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
+import type {
+  ChatCompletionMessageParam,
+  ChatCompletionTool,
+} from "openai/resources/chat/completions";
 import { randomUUID } from "crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { isMissingBrowserExecutable } from "./browserExecutableCheck.ts";
@@ -828,14 +831,7 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
         messages: toCfMessages(
           buildCfToolConversationPrompt(
             messages as ChatCompletionMessageParam[],
-            tools as Array<{
-              type: string;
-              function: {
-                name: string;
-                description?: string;
-                parameters: Record<string, unknown>;
-              };
-            }>
+            tools as ChatCompletionTool[]
           )
         ),
         temperature,
