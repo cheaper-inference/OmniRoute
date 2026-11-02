@@ -1,3 +1,5 @@
+@import "./cloud-patterns.css";
+@import "./cloud-auth-handoff.css";
 @layer theme, base, components, utilities;
 
 @import "./ci-tokens.css";
@@ -3639,3 +3641,11 @@
 @media (hover:hover) { .ci-multi-choice-card--feature:hover { border-color:var(--ci-color-accent); box-shadow:var(--ci-shadow-sm); } }
 @media (max-width:760px) { .ci-multi-choice-card--feature { min-height:236px; padding:20px; } .ci-choice-visual { height:100px; } }
 @media (prefers-reduced-motion:reduce) { .ci-choice-visual__block { animation:none !important; } .ci-multi-choice-card--feature { transition:none; } }
+
+/* Optional Select option icons stay decorative and do not enter the selected label. */
+.ci-select__item-icon { display:grid;place-items:center;flex:none;width:18px;height:18px;margin-inline-end:10px;color:var(--ci-color-text-muted); }
+.ci-select__item-icon svg { width:16px;height:16px; }
+
+.ci-field__label-row { display:flex;align-items:center;gap:6px; }
+
+.ci-dialog[data-size="wide"] { max-width:36rem; }
