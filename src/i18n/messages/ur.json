@@ -14345,8 +14345,8 @@
         "description": "جب کوڈبو ٹارگٹ جواب میں بالکل کنٹینٹ-پولیسی رجحان (کوڈ یا ٹائپ cyber_policy / content_policy_violation) دیتا ہے، تو کوڈبو کو روک کر اس رجحان کو واپس کریں، چاہے باقی ٹارگٹس مختلف ماڈلز ہوں، اگلے ٹارگٹ پر آگے بڑھنے کے بجائے۔ بطورِ ڈیفالٹ بند: اس رجحان سے اکاؤنٹ کول یا پرووائیڈر بریکر ٹرائپ کبھی نہیں ہوتا، اور کوڈبو بالکل پہلے کی طرح اپنے اگلے ٹارگٹ پر آگے بڑھتا ہے۔"
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "کومبو: کریش سٹارم بریکر",
+        "description": "ڈسپیچ سے پہلے فراہم کنندہ کے کومبو اہداف کو چھوڑ دیں (وجہ کریش_سٹارم) ایک بار جب وہی خود ساختہ ناکامی (مقامی ایگزیکیوشن ایرر یا ایگزیکیوٹر کنٹریکٹ کی خلاف ورزی، 5xx) اس پر سلائیڈنگ ونڈو کے اندر دہرائی جاتی ہے: OMNIROUTE_CRASH_STORM_THRESHOLD (10) اور OMNIROUTE_CRASH_STORM_WINDOW_MS (5 منٹ)۔ یہ کبھی بھی کولڈاؤن یا لاک نہیں لکھتا، اور ایک حقیقی upstream 5xx اسے کبھی نہیں کھلاتا ہے۔ بطور ڈیفالٹ آف: کچھ بھی ریکارڈ نہیں کیا جاتا ہے اور کوئی ہدف چھوڑا نہیں جاتا ہے۔"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "کول ڈاؤن ری ٹرائی: 403/410 کی نافرمانی پر نظر انداز کریں",

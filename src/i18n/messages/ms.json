@@ -14345,8 +14345,8 @@
         "description": "Apabila sasaran kombo membalas dengan penolakan dasar kandungan yang tepat (kod atau jenis cyber_policy / content_policy_violation), hentikan kombo dan kembalikan penolakan tersebut walaupun sasaran yang selebihnya adalah model yang berbeza, bukannya mara ke sasaran seterusnya. Dimatikan secara lalai: penolakan tidak sekali-kali menyejukkan akaun atau mencetuskan pemutus litar penyedia, dan kombo mara ke sasaran seterusnya sama seperti sebelum ini."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Kombo: Pemecah Ribut",
+        "description": "Langkau sasaran kombo penyedia sebelum penghantaran (sebab crash_storm) apabila kegagalan yang dilakukan sendiri (ralat pelaksanaan tempatan atau pelanggaran kontrak pelaksana, 5xx) berulang padanya di dalam tetingkap gelongsor: OMNIROUTE_CRASH_STORM_THRESHOLD (10) dan OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Ia tidak pernah menulis cooldown atau kunci, dan 5xx huluan tulen tidak pernah menyuapnya. Mati secara lalai: tiada apa-apa direkodkan dan tiada sasaran dilangkau."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Percubaan Semula Tempoh Bertenang: Langkau Penolakan 403/410",

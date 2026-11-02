@@ -14345,8 +14345,8 @@
         "description": "Kad combo mērķis atbild ar precīzu satura politikas atteikumu (kods vai tips cyber_policy / content_policy_violation), apturēt combo un atgriezt šo atteikumu pat tad, ja atlikušie mērķi ir citi modeļi, nevis pāriet pie nākamā mērķa. Pēc noklusējuma izslēgts: atteikums nekad neatvēsina kontu un neiedarbina pakalpojumu sniedzēja slēdzi, un combo pāriet pie nākamā mērķa tieši tāpat kā iepriekš."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Kombinācija: Crash-Storm Breaker",
+        "description": "Izlaidiet nodrošinātāja kombinētos mērķus pirms nosūtīšanas (avārijas_vētra iemesls), ja bīdāmā logā atkārtojas tā pati pašradīta kļūme (lokāla izpildes kļūda vai izpildītāja līguma pārkāpums, 5xx): OMNIROUTE_CRASH_STORM_THRESHOLD (10) un OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Tas nekad neieraksta atdzišanu vai bloķēšanu, un īsts augšējais 5xx nekad to nebaro. Pēc noklusējuma izslēgts: nekas netiek ierakstīts un neviens mērķis netiek izlaists."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atdzišanas atkārtošana: izlaist 403/410 atteikumus",

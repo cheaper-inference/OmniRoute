@@ -14422,8 +14422,8 @@
         "description": "አንድ የ Combo ዒላማ በትክክለኛ የይዘት ፖሊሲ እምቢታ (ኮድ ወይም ዓይነት cyber_policy / content_policy_violation) ምላሽ ሲሰጥ፣ ወደ ቀጣዩ ዒላማ ከማለፍ ይልቅ የቀሩት ዒላማዎች የተለያዩ ሞዴሎች ቢሆኑም እንኳ Comboውን ያቁሙ እና ያንን እምቢታ ይመልሱ። በነባሪነት ጠፍቷል፦ እምቢታው መለያውን በፍጹም cooldown ውስጥ አያስገባም ወይም provider breakerን አያስነሳም፣ እንዲሁም Comboው ልክ እንደቀድሞው ወደ ቀጣዩ ዒላማው ያልፋል።"
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "ጥምር፡ የብልሽት-አውሎ ነፋስ ሰባሪ",
+        "description": "ከመላኩ በፊት የአቅራቢውን ጥምር ኢላማዎች ዝለል (ምክንያት የብልሽት_አውሎ ነፋስ) አንድ ጊዜ ተመሳሳይ እራስን ያደረሰ ውድቀት (አካባቢያዊ የማስፈጸሚያ ስህተት ወይም የአስፈፃሚ ውል ጥሰት፣ 5xx) በተንሸራታች መስኮት ውስጥ ይደገማል OMNIROUTE_CRASH_STORM_THRESHOLD (10) እና OMNIROUTE_CRASH_STORM_WINDOW_MS (5 ደቂቃ)። ቀዝቀዝ ወይም መቆለፊያን ፈጽሞ አይጽፍም፣ እና እውነተኛ የላይ ዥረት 5xx በጭራሽ አይመገብም። በነባሪ ጠፍቷል፡ ምንም አልተመዘገበም እና ምንም ዒላማ አልተዘለለም።"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "የ Cooldown ዳግም ሙከራ፦ የ 403/410 እምቢታዎችን ዝለል",

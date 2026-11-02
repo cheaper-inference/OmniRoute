@@ -14345,8 +14345,8 @@
         "description": "Երբ combo-ի թիրախը պատասխանում է բովանդակության քաղաքականության հստակ մերժմամբ (cyber_policy / content_policy_violation կոդով կամ տեսակով), կանգնեցնել combo-ն և վերադարձնել այդ մերժումը նույնիսկ այն դեպքում, երբ մնացած թիրախները տարբեր մոդելներ են՝ հաջորդ թիրախին անցնելու փոխարեն։ Լռելյայն անջատված է. մերժումը երբեք չի սառեցնում հաշիվը կամ չի ակտիվացնում provider breaker-ը, իսկ combo-ն առաջ է շարժվում դեպի իր հաջորդ թիրախը՝ ճիշտ ինչպես նախկինում։"
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Կոմբո՝ վթար-փոթորիկ կոտրիչ",
+        "description": "Բաց թողեք մատակարարի համակցված թիրախները նախքան ուղարկումը (պատճառը crash_storm), երբ նույն ինքն իրեն պատճառված ձախողումը (տեղական կատարման սխալ կամ կատարողի պայմանագրի խախտում, 5xx) կրկնվում է դրա վրա սահող պատուհանի ներսում՝ OMNIROUTE_CRASH_STORM_THRESHOLD (10) և OMNIROUTE_CRASH_STORM_WINDOW_MS (5 րոպե): Այն երբեք չի գրում սառեցում կամ կողպեք, իսկ իրական 5xx-ը երբեք չի սնուցում այն: Լռելյայն անջատված է. ոչինչ չի գրանցվում և ոչ մի թիրախ չի բաց թողնվում:"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Սառեցման կրկնափորձ. բաց թողնել 403/410 մերժումները",

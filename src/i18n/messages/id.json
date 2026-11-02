@@ -14345,8 +14345,8 @@
         "description": "Ketika target combo merespons dengan penolakan kebijakan konten yang persis (kode atau jenis cyber_policy / content_policy_violation), hentikan combo dan kembalikan penolakan tersebut meskipun target yang tersisa adalah model yang berbeda, alih-alih beralih ke target berikutnya. Nonaktif secara default: penolakan tersebut tidak pernah menerapkan cooldown pada akun atau memicu breaker penyedia, dan combo beralih ke target berikutnya persis seperti sebelumnya."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Kombo: Pemecah Badai",
+        "description": "Lewati target kombo penyedia sebelum pengiriman (alasan crash_storm) setelah kegagalan yang disebabkan oleh diri sendiri (kesalahan eksekusi lokal atau pelanggaran kontrak pelaksana, 5xx) terulang di dalam jendela geser: OMNIROUTE_CRASH_STORM_THRESHOLD (10) dan OMNIROUTE_CRASH_STORM_WINDOW_MS (5 menit). Itu tidak pernah menulis cooldown atau kunci, dan 5xx upstream asli tidak pernah memasukkannya. Nonaktif secara default: tidak ada yang direkam dan tidak ada target yang dilewati."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Coba Ulang Cooldown: Lewati Penolakan 403/410",

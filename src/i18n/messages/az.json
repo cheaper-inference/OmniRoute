@@ -14422,8 +14422,8 @@
         "description": "Kombo hədəfi dəqiq məzmun siyasəti imtinası ilə cavab verdikdə (kod və ya növü cyber_policy / content_policy_violation), növbəti hədəfə keçmək əvəzinə, komboyu dayandırın və qalan hədəflər fərqli modellər olsa belə, həmin imtina cavabını qaytarın. Defolt olaraq qeyri-aktivdir: rədd cavabı heç vaxt hesabı soyutmur və ya provayder kəsicisini işə salmır və kombo əvvəlki kimi növbəti hədəfinə keçir."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Kombo: Qəza-Fırtına Qırıcı",
+        "description": "Sürüşmə pəncərəsində eyni öz-özünə yaranan nasazlıq (yerli icra xətası və ya icraçı müqaviləsinin pozulması, 5xx) təkrarlanandan sonra göndərilməzdən əvvəl provayderin kombinə edilmiş hədəflərini keçin (səbəb crash_storm): OMNIROUTE_CRASH_STORM_THRESHOLD (10) və OMNIROUTE_CRASH_STORM_WINDOW_MS (5 dəq). O, heç vaxt soyuma müddətini və ya kilidi yazmır və orijinal yuxarı axın 5xx heç vaxt onu qidalandırmır. Defolt olaraq söndürülür: heç nə qeydə alınmır və heç bir hədəf atılmır."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Soyuma Təkrar Cəhdi: 403/410 İmtinalarını Keç",

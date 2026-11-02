@@ -14345,8 +14345,8 @@
         "description": "เมื่อเป้าหมายคอมโตอบสนองด้วยการปฏิเสธนโยบายเนื้อหาคงที่ (โค้ดหรือประเภท cyber_policy / content_policy_violation) ให้หยุดคอมโบและส่งการปฏิเสธนั้นกลับแม้ว่าเป้าหมายที่เหลือจะเป็นโมเดลอื่น แทนที่จะดำเนินการต่อเป้าหมายถัดไป ปิดไว้เป็นค่าเริ่มต้น: การปฏิเสธจะไม่ทำให้บัญชีเย็นลงหรือทำให่เบรกก์เกอร์ผู้ให้บริการทำงาน และคอมโบจะดำเนินการต่อเป้าหมายถัดไปตามเดิม"
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "คอมโบ: Crash-Storm Breaker",
+        "description": "ข้ามเป้าหมายคอมโบของผู้ให้บริการก่อนจัดส่ง (เหตุผล Crash_storm) เมื่อความล้มเหลวที่เกิดขึ้นในตัวเองแบบเดียวกัน (ข้อผิดพลาดในการดำเนินการในท้องถิ่นหรือการละเมิดสัญญาของผู้ดำเนินการ 5xx) เกิดขึ้นซ้ำภายในหน้าต่างเลื่อน: OMNIROUTE_CRASH_STORM_THRESHOLD (10) และ OMNIROUTE_CRASH_STORM_WINDOW_MS (5 นาที) มันไม่เคยเขียนคูลดาวน์หรือการล็อค และอัปสตรีม 5xx ของแท้จะไม่ป้อนมัน ปิดตามค่าเริ่มต้น: ไม่มีการบันทึกใดๆ และไม่มีการข้ามเป้าหมาย"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: ข้ามการปฏิเสธสถานะ 403/410",

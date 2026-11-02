@@ -14345,8 +14345,8 @@
         "description": "जेव्हा एखादे कॉम्बो टार्गेट नेमक्या कंटेंट-पॉलिसी रिफ्युझलसह (कोड किंवा प्रकार cyber_policy / content_policy_violation) प्रतिसाद देते, तेव्हा पुढील टार्गेटकडे जाण्याऐवजी, उर्वरित टार्गेट्स वेगवेगळे मॉडेल्स असले तरीही कॉम्बो थांबवा आणि ते रिफ्युझल परत करा. बाय डीफॉल्ट बंद: हे रिफ्युझल कधीही खात्याला कूल करत नाही किंवा प्रोव्हायडर ब्रेकर ट्रिप करत नाही, आणि कॉम्बो अगदी पूर्वीप्रमाणेच त्याच्या पुढील टार्गेटकडे पुढे जातो."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "कॉम्बो: क्रॅश-स्टॉर्म ब्रेकर",
+        "description": "डिस्पॅच करण्यापूर्वी प्रदात्याचे कॉम्बो टार्गेट वगळा (कारण क्रॅश_स्टॉर्म) एकदा तेच स्वत: ची बिघाड (स्थानिक अंमलबजावणी त्रुटी किंवा एक्झिक्युटर कॉन्ट्रॅक्टचे उल्लंघन, 5xx) स्लाइडिंग विंडोमध्ये पुनरावृत्ती झाल्यानंतर: OMNIROUTE_CRASH_STORM_THRESHOLD (10) आणि OMNIROUTE_CRASH_STORM_WINDOW_MS (5 मि). ते कधीही कूलडाउन किंवा लॉक लिहित नाही आणि अस्सल अपस्ट्रीम 5xx कधीही त्याला फीड करत नाही. डीफॉल्टनुसार बंद: काहीही रेकॉर्ड केलेले नाही आणि कोणतेही लक्ष्य वगळलेले नाही."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "कूलडाउन रिट्राय: 403/410 नकार वगळा",

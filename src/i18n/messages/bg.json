@@ -14422,8 +14422,8 @@
         "description": "Когато цел от комбинацията отговори с точен отказ поради политика за съдържанието (код или тип cyber_policy / content_policy_violation), спира комбинацията и връща този отказ, дори когато останалите цели са различни модели, вместо да преминава към следващата цел. Изключено по подразбиране: отказът никога не поставя акаунта в режим на охлаждане и не задейства прекъсвача на доставчика, а комбинацията преминава към следващата си цел точно както преди."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Комбо: Crash-Storm Breaker",
+        "description": "Пропуснете комбинираните цели на доставчик преди изпращане (причина crash_storm), след като същата самопричинена повреда (локална грешка при изпълнение или нарушение на договора на изпълнителя, 5xx) се повтори върху него в плъзгащ се прозорец: OMNIROUTE_CRASH_STORM_THRESHOLD (10) и OMNIROUTE_CRASH_STORM_WINDOW_MS (5 минути). Той никога не записва охлаждане или заключване, а истинският upstream 5xx никога не го захранва. Изключено по подразбиране: нищо не се записва и нито една цел не се пропуска."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Повторен опит при период на изчакване: Пропускане на откази 403/410",

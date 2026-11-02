@@ -14345,8 +14345,8 @@
         "description": "ಕಾಂಬೋ ಗುರಿಯು ನಿಖರವಾದ ಕಂಟೆಂಟ್-ಪಾಲಿಸಿ ತಿರಸ್ಕಾರದೊಂದಿಗೆ (ಕೋಡ್ ಅಥವಾ ಪ್ರಕಾರ cyber_policy / content_policy_violation) ಉತ್ತರಿಸಿದಾಗ, ಮುಂದಿನ ಗುರಿಗೆ ಮುನ್ನಡೆಯುವ ಬದಲು, ಉಳಿದ ಗುರಿಗಳು ವಿಭಿನ್ನ ಮಾಡೆಲ್‌ಗಳಾಗಿದ್ದರೂ ಸಹ ಕಾಂಬೋವನ್ನು ನಿಲ್ಲಿಸಿ ಮತ್ತು ಆ ತಿರಸ್ಕಾರವನ್ನು ಹಿಂತಿರುಗಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ತಿರಸ್ಕಾರವು ಎಂದಿಗೂ ಖಾತೆಯನ್ನು ಕೂಲ್ ಮಾಡುವುದಿಲ್ಲ ಅಥವಾ ಪ್ರೊವೈಡರ್ ಬ್ರೇಕರ್ ಅನ್ನು ಟ್ರಿಪ್ ಮಾಡುವುದಿಲ್ಲ, ಮತ್ತು ಕಾಂಬೋ ಮೊದಲಿನಂತೆಯೇ ತನ್ನ ಮುಂದಿನ ಗುರಿಗೆ ಮುನ್ನಡೆಯುತ್ತದೆ."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "ಕಾಂಬೊ: ಕ್ರ್ಯಾಶ್-ಸ್ಟಾರ್ಮ್ ಬ್ರೇಕರ್",
+        "description": "ಸ್ಲೈಡಿಂಗ್ ವಿಂಡೋದಲ್ಲಿ ಅದೇ ಸ್ವಯಂ-ಉಂಟುಮಾಡುವ ವೈಫಲ್ಯ (ಸ್ಥಳೀಯ ಮರಣದಂಡನೆ ದೋಷ ಅಥವಾ ಕಾರ್ಯನಿರ್ವಾಹಕ ಒಪ್ಪಂದದ ಉಲ್ಲಂಘನೆ, 5xx) ಪುನರಾವರ್ತನೆಯಾದಾಗ (ಕಾರಣ ಕುಸಿತ_ಸ್ಟಾರ್ಮ್) ರವಾನೆ ಮಾಡುವ ಮೊದಲು ಒದಗಿಸುವವರ ಕಾಂಬೊ ಗುರಿಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಿ: OMNIROUTE_CRASH_STORM_THRESHOLD (10) ಮತ್ತು OMNIROUTE_CRASH_STORM_WINDOW_MS (5 ನಿಮಿಷ). ಇದು ಕೂಲ್ಡೌನ್ ಅಥವಾ ಲಾಕ್ ಅನ್ನು ಎಂದಿಗೂ ಬರೆಯುವುದಿಲ್ಲ ಮತ್ತು ನಿಜವಾದ ಅಪ್ಸ್ಟ್ರೀಮ್ 5xx ಅದನ್ನು ಎಂದಿಗೂ ಫೀಡ್ ಮಾಡುವುದಿಲ್ಲ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್: ಯಾವುದನ್ನೂ ದಾಖಲಿಸಲಾಗಿಲ್ಲ ಮತ್ತು ಯಾವುದೇ ಗುರಿಯನ್ನು ಬಿಟ್ಟುಬಿಡುವುದಿಲ್ಲ."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "ಕೂಲ್‌ಡೌನ್ ಮರುಪ್ರಯತ್ನ: 403/410 ನಿರಾಕರಣೆಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಿ",

@@ -14422,8 +14422,8 @@
         "description": "ഒരു കോംബോ ടാർഗെറ്റ് കൃത്യമായ കണ്ടന്റ്-പോളിസി നിരസിക്കൽ (കോഡ് അല്ലെങ്കിൽ തരം cyber_policy / content_policy_violation) നൽകി മറുപടി നൽകുമ്പോൾ, അടുത്ത ടാർഗെറ്റിലേക്ക് പോകുന്നതിന് പകരം, ബാക്കിയുള്ള ടാർഗെറ്റുകൾ വ്യത്യസ്‌ത മോഡലുകൾ ആണെങ്കിൽപ്പോലും കോംബോ അവസാനിപ്പിക്കുകയും ആ നിരസിക്കൽ തിരികെ നൽകുകയും ചെയ്യുക. സ്വതവേ ഓഫാണ്: ഈ നിരസിക്കൽ ഒരിക്കലും അക്കൗണ്ടിനെ കൂൾ ഡൗൺ ചെയ്യുകയോ പ്രൊവൈഡർ ബ്രേക്കർ ട്രിപ്പ് ചെയ്യുകയോ ഇല്ല, കൂടാതെ കോംബോ മുൻപത്തെപ്പോലെ തന്നെ അതിന്റെ അടുത്ത ടാർഗെറ്റിലേക്ക് നീങ്ങുകയും ചെയ്യും."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "കോംബോ: ക്രാഷ്-സ്റ്റോം ബ്രേക്കർ",
+        "description": "ഒരു സ്ലൈഡിംഗ് വിൻഡോയ്ക്കുള്ളിൽ അതേ സ്വയം വരുത്തിയ പരാജയം (പ്രാദേശിക നിർവ്വഹണ പിശക് അല്ലെങ്കിൽ എക്സിക്യൂട്ടർ കരാർ ലംഘനം, 5xx) ആവർത്തിക്കുമ്പോൾ, ഡിസ്പാച്ച് ചെയ്യുന്നതിന് മുമ്പ് (കാരണം ക്രാഷ്_സ്റ്റോം) ഒരു ദാതാവിൻ്റെ കോംബോ ടാർഗെറ്റുകൾ ഒഴിവാക്കുക: OMNIROUTE_CRASH_STORM_THRESHOLD (10), OMNIROUTE_CRASH_STORM_WINDOW_MS (5 മിനിറ്റ്). ഇത് ഒരിക്കലും ഒരു കൂൾഡൗൺ അല്ലെങ്കിൽ ലോക്ക് എഴുതുന്നില്ല, ഒരു യഥാർത്ഥ അപ്സ്ട്രീം 5xx അത് ഒരിക്കലും ഫീഡ് ചെയ്യുന്നില്ല. ഡിഫോൾട്ടായി ഓഫ്: ഒന്നും റെക്കോർഡ് ചെയ്തിട്ടില്ല, ലക്ഷ്യമൊന്നും ഒഴിവാക്കിയിട്ടില്ല."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "കൂൾഡൗൺ റീട്രൈ: 403/410 നിരസിക്കലുകൾ ഒഴിവാക്കുക",

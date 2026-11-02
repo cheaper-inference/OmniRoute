@@ -14345,8 +14345,8 @@
         "description": "Όταν ένας στόχος combo απαντά με ρητή άρνηση πολιτικής περιεχομένου (κωδικός ή τύπος cyber_policy / content_policy_violation), διακόψτε το combo και επιστρέψτε αυτήν την άρνηση ακόμη και όταν οι υπόλοιποι στόχοι είναι διαφορετικά μοντέλα, αντί να προχωρήσετε στον επόμενο στόχο. Απενεργοποιημένο από προεπιλογή: η άρνηση δεν θέτει ποτέ τον λογαριασμό σε περίοδο αναμονής ούτε ενεργοποιεί το provider breaker, και το combo προχωρά στον επόμενο στόχο του ακριβώς όπως πριν."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Παραλείψτε τους συνδυαστικούς στόχους ενός παρόχου πριν από την αποστολή (λόγος crash_storm) μόλις επαναληφθεί η ίδια αυτοπροκαλούμενη αποτυχία (τοπικό σφάλμα εκτέλεσης ή παραβίαση σύμβασης εκτελεστή, 5xx) μέσα σε ένα συρόμενο παράθυρο: OMNIROUTE_CRASH_STORM_THRESHOLD (10) και OMNIROUTE_CRASH_STORM_WINDOW_MS (5 λεπτά). Δεν γράφει ποτέ cooldown ή κλείδωμα και ένα γνήσιο upstream 5xx δεν το τροφοδοτεί ποτέ. Απενεργοποίηση από προεπιλογή: τίποτα δεν καταγράφεται και κανένας στόχος δεν παραλείπεται."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Επανάληψη περιόδου αναμονής: Παράκαμψη αρνήσεων 403/410",

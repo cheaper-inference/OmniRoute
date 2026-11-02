@@ -14345,8 +14345,8 @@
         "description": "כאשר יעד combo משיב עם סירוב מדויק של מדיניות תוכן (קוד או סוג cyber_policy / content_policy_violation), עצור את ה-combo והחזר סירוב זה גם כאשר היעדים הנותרים הם מודלים שונים, במקום להתקדם ליעד הבא. מושבת כברירת מחדל: הסירוב לעולם אינו מכניס את החשבון לתקופת צינון ואינו מפעיל את ה-breaker של הספק, וה-combo ממשיך ליעד הבא שלו בדיוק כמו בעבר."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "משולבת: Crash-Storm Breaker",
+        "description": "דלג על יעדים משולבים של ספק לפני שיגור (reason crash_storm) ברגע שאותו כישלון עצמי (שגיאת ביצוע מקומית או הפרת חוזה מבצע, 5xx) חוזר עליו בתוך חלון הזזה: OMNIROUTE_CRASH_STORM_THRESHOLD (10) ו- OMNIROUTE_CRASH_STORM_WINDOW_MS (5 דקות). הוא אף פעם לא כותב התקררות או נעילה, ו-5xx אמיתי במעלה הזרם אף פעם לא מזין אותו. כבוי כברירת מחדל: שום דבר לא מתועד ולא מדלג על יעד."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "ניסיון חוזר בתקופת צינון: דילוג על סירובי 403/410",

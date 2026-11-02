@@ -14422,8 +14422,8 @@
         "description": "Når et combo-mål svarer med en præcis afvisning på grund af indholdspolitik (kode eller type cyber_policy / content_policy_violation), skal comboen stoppe og returnere denne afvisning, selv når de resterende mål er andre modeller, i stedet for at gå videre til næste mål. Deaktiveret som standard: afvisningen afkøler aldrig kontoen eller udløser udbyderafbryderen, og comboen går videre til sit næste mål præcis som før."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Spring over en udbyders kombinationsmål før afsendelse (årsag til crash_storm), når den samme selvforskyldte fejl (lokal udførelsesfejl eller brud på eksekveringskontrakten, 5xx) gentages på den inden for et glidende vindue: OMNIROUTE_CRASH_STORM_THRESHOLD (10) og OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Den skriver aldrig en cooldown eller lås, og en ægte upstream 5xx fodrer den aldrig. Fra som standard: intet registreres, og intet mål springes over."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Genforsøg ved nedkøling: Spring 403/410-afvisninger over",

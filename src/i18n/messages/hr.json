@@ -14345,8 +14345,8 @@
         "description": "Kada combo cilj odgovori točnim odbijanjem zbog pravila o sadržaju (kod ili tip cyber_policy / content_policy_violation), zaustavite combo i vratite to odbijanje čak i kada su preostali ciljevi različiti modeli, umjesto prelaska na sljedeći cilj. Zadano isključeno: odbijanje nikada ne stavlja račun na hlađenje niti aktivira prekidač pružatelja, a combo prelazi na svoj sljedeći cilj točno kao i prije."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Preskočite kombinirane ciljeve pružatelja prije slanja (razlog crash_storm) nakon što se isti samoprouzročeni kvar (pogreška lokalnog izvršenja ili kršenje ugovora izvršitelja, 5xx) ponovi na njemu unutar kliznog prozora: OMNIROUTE_CRASH_STORM_THRESHOLD (10) i OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nikada ne piše hlađenje ili zaključavanje, a pravi uzvodni 5xx ga nikada ne hrani. Isključeno prema zadanim postavkama: ništa se ne snima i nijedan cilj se ne preskače."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovni pokušaj pri hlađenju: Preskoči odbijanja 403/410",

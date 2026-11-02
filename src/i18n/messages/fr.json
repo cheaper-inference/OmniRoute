@@ -14345,8 +14345,8 @@
         "description": "Lorsqu'une cible de combo répond par un refus exact lié à la politique de contenu (code ou type cyber_policy / content_policy_violation), arrêter le combo et renvoyer ce refus même lorsque les cibles restantes sont des modèles différents, au lieu de passer à la cible suivante. Désactivé par défaut : le refus ne met jamais le compte en période de refroidissement et ne déclenche pas le disjoncteur du fournisseur, et le combo passe à sa cible suivante exactement comme avant."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Combo : Brise-tempête-crash",
+        "description": "Ignorez les cibles combinées d'un fournisseur avant l'envoi (raison crash_storm) une fois que le même échec auto-infligé (erreur d'exécution locale ou violation du contrat de l'exécuteur, 5xx) se répète dans une fenêtre glissante : OMNIROUTE_CRASH_STORM_THRESHOLD (10) et OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Il n'écrit jamais de temps de recharge ou de verrouillage, et un véritable 5xx en amont ne l'alimente jamais. Désactivé par défaut : rien n'est enregistré et aucune cible n'est ignorée."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Réessai lors du cooldown : ignorer les refus 403/410",

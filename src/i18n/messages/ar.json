@@ -14422,8 +14422,8 @@
         "description": "عندما يستجيب هدف كومبو برفض صريح لسياسة المحتوى (الرمز أو النوع cyber_policy / content_policy_violation)، يتم إيقاف الكومبو وإرجاع هذا الرفض حتى إذا كانت الأهداف المتبقية نماذج مختلفة، بدلاً من الانتقال إلى الهدف التالي. معطّل افتراضيًا: لا يؤدي الرفض مطلقًا إلى تهدئة الحساب أو تفعيل قاطع دائرة المزود، وينتقل الكومبو إلى هدفه التالي تمامًا كما كان في السابق."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "التحرير والسرد: تحطم العاصفة الكسارة",
+        "description": "تخطي أهداف التحرير والسرد الخاصة بالموفر قبل الإرسال (سبب تحطم_عاصفة) بمجرد تكرار نفس الفشل الذاتي (خطأ تنفيذ محلي أو انتهاك عقد المنفذ، 5xx) داخل نافذة منزلقة: OMNIROUTE_CRASH_STORM_THRESHOLD (10) و OMNIROUTE_CRASH_STORM_WINDOW_MS (5 دقائق). لا يكتب أبدًا فترة تهدئة أو قفل، ولا يغذيها المنبع الأصلي 5xx أبدًا. متوقف بشكل افتراضي: لا يتم تسجيل أي شيء ولا يتم تخطي أي هدف."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "إعادة المحاولة أثناء التهدئة: تخطي حالات رفض 403/410",

@@ -14345,8 +14345,8 @@
         "description": "Kai „combo“ taikinys atsako tiksliu turinio politikos atmetimu (kodas arba tipas cyber_policy / content_policy_violation), sustabdyti „combo“ ir grąžinti tą atmetimą net tada, kai likę taikiniai yra kitokie modeliai, užuot pereinant prie kito taikinio. Pagal numatytuosius nustatymus išjungta: atmetimas niekada neatvėsina paskyros ir nesuaktyvina teikėjo grandinės pertraukiklio, o „combo“ pereina prie kito taikinio lygiai taip pat, kaip anksčiau."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Derinys: „Crash-Storm Breaker“.",
+        "description": "Prieš išsiuntimą praleiskite tiekėjo kombinuotus tikslus (priežastis „crash_storm“), kai slankiojančiame lange pasikartoja tokia pati savaime sukelta klaida (vietinė vykdymo klaida arba vykdytojo sutarties pažeidimas, 5xx): OMNIROUTE_CRASH_STORM_THRESHOLD (10) ir OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min.). Jis niekada neįrašo atšalimo ar užrakto, o tikras prieš srovę esantis 5xx niekada jo nepadeda. Išjungta pagal numatytuosius nustatymus: niekas neįrašoma ir joks tikslas nepraleidžiamas."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atvėsimo pakartotinis bandymas: praleisti 403/410 atmetimus",

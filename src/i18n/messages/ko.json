@@ -14345,8 +14345,8 @@
         "description": "콤보 대상이 정확한 콘텐츠 정책 거부(코드 또는 타입 cyber_policy / content_policy_violation)로 응답할 때, 다음 대상으로 넘어가는 대신 남아 있는 대상이 다른 모델이더라도 콤보를 중단하고 해당 거부를 반환합니다. 기본값은 꺼짐: 해당 거부는 계정을 쿨다운시키거나 프로바이더 차단기를 작동시키지 않으며, 콤보는 이전과 동일하게 다음 대상으로 진행합니다."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "콤보: 크래시 스톰 브레이커",
+        "description": "동일한 자체 오류(로컬 실행 오류 또는 실행기 계약 위반, 5xx)가 슬라이딩 창 내에서 반복되면 디스패치(이유 crash_storm) 전에 공급자의 콤보 대상을 건너뜁니다: OMNIROUTE_CRASH_STORM_THRESHOLD (10) 및 OMNIROUTE_CRASH_STORM_WINDOW_MS (5분). 쿨다운이나 잠금을 기록하지 않으며 정품 업스트림 5xx는 이를 피드하지 않습니다. 기본적으로 꺼짐: 아무것도 기록되지 않으며 대상을 건너뛰지 않습니다."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "쿨다운 재시도: 403/410 거부 건너뛰기",

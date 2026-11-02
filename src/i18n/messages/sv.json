@@ -14345,8 +14345,8 @@
         "description": "När en combo-måltavla svarar med ett exakt innehållspolitiskt avslag (kod eller typ cyber_policy / content_policy_violation), stoppa combo:n och returnera det avslaget även när återstående måltavlor är olika modeller, istället för att avancera till nästa måltavla. Avstängt som standard: avslaget svalkar aldrig kontot eller triggar leverantörens brytare, och combo:n avancera till sin nästa måltavla exakt som tidigare."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Hoppa över en leverantörs kombinationsmål före utskick (orsak till crash_storm) när samma självförvållade misslyckande (lokalt exekveringsfel eller brott mot exekutorkontraktet, 5xx) upprepas på det i ett glidande fönster: OMNIROUTE_CRASH_STORM_THRESHOLD (10) och OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Den skriver aldrig en nedkylning eller lås, och en äkta uppströms 5xx matar den aldrig. Av som standard: ingenting spelas in och inget mål hoppas över."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Avsiktning vid återförsök: Hoppa över 403/410-avvisanden",

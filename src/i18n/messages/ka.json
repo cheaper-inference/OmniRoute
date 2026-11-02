@@ -14422,8 +14422,8 @@
         "description": "როდესაც combo სამიზნე პასუხობს ზუსტი content-policy უარით (კოდი ან ტიპი cyber_policy / content_policy_violation), შეაჩერეთ combo და დააბრუნეთ ეს უარი მაშინაც კი, როდესაც დარჩენილი სამიზნეები სხვა მოდელებია, შემდეგ სამიზნეზე გადასვლის ნაცვლად. ნაგულისხმევად გამორთულია: უარი არასოდეს გადაიყვანს ანგარიშს cooldown-ში და არ ააქტიურებს provider breaker-ს, ხოლო combo გადადის მის შემდეგ სამიზნეზე ზუსტად ისე, როგორც ადრე."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "კომბინირებული: Crash-Storm Breaker",
+        "description": "გამოტოვეთ პროვაიდერის კომბინირებული სამიზნეები გაგზავნამდე (მიზეზი crash_storm) ერთხელაც იგივე თვითმიყენებული მარცხი (ლოკალური შესრულების შეცდომა ან შემსრულებლის ხელშეკრულების დარღვევა, 5xx) მასზე განმეორდება მოცურების ფანჯარაში: OMNIROUTE_CRASH_STORM_THRESHOLD (10) და OMNIROUTE_CRASH_STORM_WINDOW_MS (5 წთ). ის არასოდეს წერს გაგრილებას ან დაბლოკვას და ნამდვილი 5xx არასოდეს კვებავს მას. ნაგულისხმევად გამორთულია: არაფერი არ არის ჩაწერილი და არც ერთი სამიზნე არ არის გამოტოვებული."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown-ის განმეორებითი ცდა: 403/410 უარყოფების გამოტოვება",

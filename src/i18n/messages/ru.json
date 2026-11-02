@@ -14345,8 +14345,8 @@
         "description": "Если цель комбинированного шлюза отвечает точным отказом по политике контента (код или тип cyber_policy / content_policy_violation), остановите комбинированный шлюз и верните этот отказ, даже если оставшиеся цели — это другие модели, а не переходите к следующей цели. По умолчанию отключено: отказ никогда не охлаждает учётную запись и не срабатывает предохранитель провайдера, а комбинированный шлюз переходит к следующей цели именно так, как прежде."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Комбо: Громовой штормовой разрушитель",
+        "description": "Пропускать комбинированные цели провайдера перед отправкой (причина сбоя_шторма), как только на нем повторяется тот же сбой, вызванный самим собой (локальная ошибка выполнения или нарушение контракта исполнителя, 5xx) внутри скользящего окна: OMNIROUTE_CRASH_STORM_THRESHOLD (10) и OMNIROUTE_CRASH_STORM_WINDOW_MS (5 минут). Он никогда не записывает время восстановления или блокировку, а настоящий восходящий 5xx никогда его не передает. По умолчанию выключено: ничего не записывается и ни одна цель не пропускается."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Повторная попытка во время ожидания: пропуск отказов 403/410",

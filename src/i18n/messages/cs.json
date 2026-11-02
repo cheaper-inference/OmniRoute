@@ -14422,8 +14422,8 @@
         "description": "Pokud cíl komba odpoví přesným odmítnutím z důvodu zásad obsahu (kód nebo typ cyber_policy / content_policy_violation), zastavit kombo a vrátit toto odmítnutí i v případě, že zbývající cíle jsou jiné modely, namísto přechodu na další cíl. Ve výchozím stavu vypnuto: odmítnutí nikdy neochladí účet ani nespustí jistič poskytovatele a kombo přejde na svůj další cíl přesně jako dříve."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Kombinace: Crash-Storm Breaker",
+        "description": "Přeskočte kombinované cíle poskytovatele před odesláním (reason crash_storm), jakmile se stejné selhání, které si sami způsobili (chyba místního provádění nebo porušení smlouvy exekutora, 5xx), zopakuje v posuvném okně: OMNIROUTE_CRASH_STORM_THRESHOLD (10) a OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nikdy nezapíše cooldown nebo zámek a originální upstream 5xx ho nikdy nenapáje. Ve výchozím nastavení vypnuto: nic se nezaznamená a žádný cíl se nepřeskočí."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Opakování při cooldownu: Přeskočit odmítnutí 403/410",

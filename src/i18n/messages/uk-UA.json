@@ -14345,8 +14345,8 @@
         "description": "Якщо ціль комбо відповідає точною відмовою щодо політики контенту (код або тип cyber_policy / content_policy_violation), зупиніть комбо та поверніть цю відмову, навіть якщо решта цілей — інші моделі, замість переходу до наступної цілі. Вимкнено за замовчуванням: відмова ніколи не охолоджує акаунт і не спрацьовує запобіжний розривник провайдера, а комбо переходить до наступної цілі точно так, як раніше."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Пропустити комбіновані цілі постачальника перед відправленням (причина crash_storm), коли та сама спричинена помилка (локальна помилка виконання або порушення контракту виконавця, 5xx) повторюється на ньому в ковзному вікні: OMNIROUTE_CRASH_STORM_THRESHOLD (10) і OMNIROUTE_CRASH_STORM_WINDOW_MS (5 хв). Він ніколи не записує кулдаун або блокування, а справжній висхідний 5xx ніколи не подає його. За замовчуванням вимкнено: нічого не записується і жодна мета не пропускається."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Повторна спроба після паузи: пропуск відхилень 403/410",

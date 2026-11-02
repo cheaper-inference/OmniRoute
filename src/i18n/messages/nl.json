@@ -14345,8 +14345,8 @@
         "description": "Wanneer een combo-doel antwoordt met een exacte content-policy-weigering (code of type cyber_policy / content_policy_violation), stop dan de combo en retourneer die weigering zelfs wanneer de resterende doelen andere modellen zijn, in plaats van door te gaan naar het volgende doel. Standaard uitgeschakeld: de weigering plaatst het account nooit in een cooldown en activeert de provider-breaker niet, en de combo gaat precies zoals voorheen door naar het volgende doel."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Combinatie: Crash-Storm Breaker",
+        "description": "Sla de combodoelen van een provider over voordat deze wordt verzonden (reden crash_storm) zodra dezelfde zelf veroorzaakte fout (lokale uitvoeringsfout of contractovertreding van de uitvoerder, 5xx) zich binnen een glijdend venster herhaalt: OMNIROUTE_CRASH_STORM_THRESHOLD (10) en OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Het schrijft nooit een cooldown of lock, en een echte upstream 5xx voedt het nooit. Standaard uitgeschakeld: er wordt niets opgenomen en er wordt geen doel overgeslagen."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown-retry: 403/410-weigeringen overslaan",

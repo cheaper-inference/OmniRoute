@@ -14345,8 +14345,8 @@
         "description": "Gdy cel combo odpowie dokładną odmową z powodu zasad dotyczących treści (kod lub typ cyber_policy / content_policy_violation), zatrzymaj combo i zwróć tę odmowę, nawet jeśli pozostałe cele to inne modele, zamiast przechodzić do następnego celu. Domyślnie wyłączone: odmowa nigdy nie nakłada na konto okresu karencji ani nie aktywuje wyłącznika awaryjnego dostawcy, a combo przechodzi do kolejnego celu dokładnie tak jak dotychczas."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Kombinacja: Łamacz katastrofy i burzy",
+        "description": "Pomiń cele combo dostawcy przed wysyłką (przyczyna awarii_burzy), gdy ta sama awaria z własnej winy (błąd wykonania lokalnego lub naruszenie umowy wykonawcy, 5xx) powtórzy się w przesuwanym oknie: OMNIROUTE_CRASH_STORM_THRESHOLD (10) i OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nigdy nie zapisuje czasu odnowienia ani blokady, a prawdziwy upstream 5xx nigdy go nie zasila. Domyślnie wyłączone: nic nie jest rejestrowane i żaden cel nie jest pomijany."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponawianie w okresie schładzania: pomijaj odmowy 403/410",

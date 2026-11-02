@@ -14345,8 +14345,8 @@
         "description": "Kapag sumagot ang isang target ng combo ng isang eksaktong pagtanggi sa content-policy (code o uri na cyber_policy / content_policy_violation), ihinto ang combo at ibalik ang pagtangging iyon kahit na magkakaibang modelo ang mga natitirang target, sa halip na magpatuloy sa susunod na target. Naka-off bilang default: hindi kailanman pinapalamig ng pagtanggi ang account o pinapagana ang provider breaker, at uusad ang combo sa susunod nitong target eksakto tulad ng dati."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Laktawan ang mga combo na target ng provider bago ipadala (dahilan ng crash_storm) kapag naulit dito ang parehong self-inflicted failure (local execution error o executor contract violation, 5xx) sa loob ng sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) at OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Hindi ito kailanman nagsusulat ng cooldown o lock, at hindi ito pinapakain ng isang tunay na upstream 5xx. Naka-off bilang default: walang naitala at walang target na nilaktawan."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Laktawan ang mga Pagtangging 403/410",

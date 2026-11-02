@@ -14345,8 +14345,8 @@
         "description": "Cuando un destino del combo responda con un rechazo exacto por política de contenido (código o tipo cyber_policy / content_policy_violation), detén el combo y devuelve ese rechazo incluso cuando los destinos restantes sean modelos diferentes, en lugar de avanzar al siguiente destino. Desactivado de forma predeterminada: el rechazo nunca enfría la cuenta ni dispara el disyuntor del proveedor, y el combo avanza a su siguiente destino exactamente como antes."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Combo: Rompetormentas",
+        "description": "Omita los objetivos combinados de un proveedor antes del envío (motivo crash_storm) una vez que la misma falla autoinfligida (error de ejecución local o violación del contrato del ejecutor, 5xx) se repita dentro de una ventana deslizante: OMNIROUTE_CRASH_STORM_THRESHOLD (10) y OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nunca escribe un tiempo de reutilización o bloqueo, y un 5xx ascendente genuino nunca lo alimenta. Desactivado de forma predeterminada: no se registra nada y no se omite ningún objetivo."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Reintento de enfriamiento: omitir rechazos 403/410",

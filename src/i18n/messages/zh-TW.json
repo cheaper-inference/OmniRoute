@@ -14345,8 +14345,8 @@
         "description": "當組合目標返回精確的內容策略拒絕（code 或 type 為 cyber_policy / content_policy_violation）時，停止組合並返回該拒絕，即使剩餘目標是不同模型，不再前進到下一目標。預設關閉：該拒絕不冷卻帳戶也不觸發提供者斷路器，組合與之前一樣前進到下一目標。"
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "組合：風暴破壞者",
+        "description": "一旦相同的自造成故障（本地執行錯誤或執行者合約違規，5xx）在滑動視窗內重複出現，則在分派之前跳過提供者的組合目標（原因 crash_storm）： OMNIROUTE_CRASH_STORM_THRESHOLD （10）和OMNIROUTE_CRASH_STORM_WINDOW_MS （5 分鐘）。它從不寫入冷卻時間或鎖定，真正的上游 5xx 也從不提供它。預設為關閉：不記錄任何內容，也不跳過任何目標。"
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "冷卻重試：跳過 403/410 拒絕",

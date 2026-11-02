@@ -14345,8 +14345,8 @@
         "description": "ஒரு கொம்போ குறிப்பு ஒரு உரிய உள்ளடக்க-முறேக் நிராகரிப்பால் (குறியீடு அல்லது வகை cyber_policy / content_policy_violation) பதிலளிக்கிறபோது, அடுத்த குறிப்புக்கு செல்லாமல், மீதமுள்ள குறிப்புகள் வேறுபட்ட மாதிரிகள் என்றாலும், கொம்போவை நிறுத்தி அந்த நிராகரிப்பை திருப்பி அனுப்பவும். இயல்புநிலையில் அணைக்கப்பட்டது: நிராகரிப்பு ஒரு கணக்கை குளிர்விக்கவோ அல்லது பிராவிடர் பிரேக்கரை (provider breaker) அடிக்கவோ செய்யாது, மேலும் கொம்போ முன்பு இருந்தபடி அதன் அடுத்த குறிப்புக்கு செல்கிறது."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "சேர்க்கை: விபத்து-புயல் பிரேக்கர்",
+        "description": "ஒரு ஸ்லைடிங் விண்டோவில் மீண்டும் அதே தோல்வி (உள்ளூர் செயலாக்கப் பிழை அல்லது நிறைவேற்றுபவரின் ஒப்பந்த மீறல், 5xx) மீண்டும் நிகழும்போது (காரணம் விபத்து_புயல்) அனுப்புவதற்கு முன் வழங்குநரின் சேர்க்கை இலக்குகளைத் தவிர்க்கவும்: OMNIROUTE_CRASH_STORM_THRESHOLD (10) மற்றும் OMNIROUTE_CRASH_STORM_WINDOW_MS (5 நிமிடம்). இது ஒருபோதும் கூல்டவுன் அல்லது பூட்டை எழுதாது, மேலும் உண்மையான அப்ஸ்ட்ரீம் 5xx அதை ஒருபோதும் ஊட்டுவதில்லை. முன்னிருப்பாக ஆஃப்: எதுவும் பதிவு செய்யப்படவில்லை மற்றும் எந்த இலக்கும் தவிர்க்கப்படவில்லை."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "குளோடோவேன் மீண்டும் முயற்சி: 403/410 நிராகரிப்புகளை தவிர்",

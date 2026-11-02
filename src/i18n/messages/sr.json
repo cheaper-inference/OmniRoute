@@ -14345,8 +14345,8 @@
         "description": "Када combo циљ одговори тачним одбијањем политике садржаја (код или тип cyber_policy / content_policy_violation), заустави combo и врати то одбијање чак и када су преостали циљеви различити модели, уместо да напредује ка следећем циљу. Подразумевано искључено: одбијање никада не хлади налог ни не окида осигурач пружалаца, а combo напредује ка свом следећем циљу тачно као и пре."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Комбинација: Црасх-Сторм Бреакер",
+        "description": "Прескочите комбиноване циљеве провајдера пре слања (разлог црасх_сторм) када се иста грешка коју је сам изазвао (локална грешка у извршењу или кршење уговора извршиоца, 5кк) понови на њој унутар клизног прозора: OMNIROUTE_CRASH_STORM_THRESHOLD (10) и OMNIROUTE_CRASH_STORM_WINDOW_MS (5 мин). Никада не уписује хлађење или закључавање, а прави узводни 5кк га никада не храни. Подразумевано искључено: ништа се не снима и ниједан циљ није прескочен."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Поновно покретање након паузе: Прескачи одбијене захтеве 403/410",

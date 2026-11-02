@@ -14345,8 +14345,8 @@
         "description": "Kui kombo sihtmärk vastab täpse sisupoliitika keeldumisega (kood või tüüp cyber_policy / content_policy_violation), peata kombo ja tagasta see keeldumine isegi siis, kui ülejäänud sihtmärgid on erinevad mudelid, selle asemel et liikuda järgmise sihtmärgi juurde. Vaikimisi väljas: keeldumine ei vii kunagi kontot jahtumisperioodile ega rakenda teenusepakkuja kaitselülitit ning kombo liigub oma järgmise sihtmärgi juurde täpselt nagu varem."
       },
       "CRASH_STORM_BREAKER_ENABLED": {
-        "label": "__MISSING__:Combo: Crash-Storm Breaker",
-        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+        "label": "Kombinatsioon: Crash-Storm Breaker",
+        "description": "Jätke teenusepakkuja kombineeritud sihtmärgid enne saatmist vahele (põhjus crash_storm), kui sellel kordub sama tõrge (kohalik täitmise viga või täitja lepingu rikkumine, 5xx): OMNIROUTE_CRASH_STORM_THRESHOLD (10) ja OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). See ei kirjuta kunagi jahtumist ega lukustumist ning tõeline ülesvoolu 5xx ei toida seda kunagi. Vaikimisi väljas: midagi ei salvestata ja ühtegi sihtmärki ei jäeta vahele."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jahtumisaja korduskatse: jäta 403/410 keeldumised vahele",
