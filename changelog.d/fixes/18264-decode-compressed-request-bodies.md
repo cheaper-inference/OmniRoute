@@ -1,0 +1,1 @@
+- **fix(api):** decode zstd/gzip/br/deflate-compressed JSON request bodies once at chat admission (Codex request compression), with the expanded size held to the hard body limit ([#18264](https://github.com/diegosouzapw/OmniRoute/pull/18264)) — thanks @DaDecky

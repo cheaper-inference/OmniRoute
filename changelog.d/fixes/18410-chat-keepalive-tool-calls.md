@@ -1,0 +1,1 @@
+- **fix(sse):** emit Chat Completions startup and periodic heartbeats without application choices, preserving LangChain tool-call aggregation and the upstream message identity while keeping JSON-compatible keepalives ([#18410](https://github.com/cheaper-inference/OmniRoute/issues/18410)).
