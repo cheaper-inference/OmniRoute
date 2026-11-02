@@ -14,9 +14,9 @@ OmniRoute 는 Next.js 기반으로 구축된 로컬 AI 라우팅 게이트웨이
 
 핵심 기능:
 
-- CLI/tools 용 OpenAI 호환 API 표면(공급자 377개, 실행기 모듈 156개)
+- CLI/tools 용 OpenAI 호환 API 표면(공급자 380개, 실행기 모듈 156개)
 - 공급자 형식에 따른 Request/response 번역
-- 모델 콤보 폴백(다중 모델 시퀀스)
+- 모델 콤보 대체(다중 모델 시퀀스)
 - `compositeTiers` 를 기준으로 런타임 순서를 지정하는 구조화된 콤보 단계(`provider + model + connection`)
 - 계정 수준 대체(공급업체당 다중 계정)
 - 기본 채팅 경로에서 할당량 프리플라이트 및 할당량 인식 P2C 계정 선택
@@ -30,7 +30,7 @@ OmniRoute 는 Next.js 기반으로 구축된 로컬 AI 라우팅 게이트웨이
 - `/v1/search` 통한 웹 검색(공급자 20개)
 - `/v1/moderations` 통한 중재
 - `/v1/rerank` 통해 순위 재지정
-- 추론 모델을 위한 태그 구문 분석(`<think>...</think>`)을 생각해 보세요.
+- 추론 모델을 위한 태그 구문 분석(`<think>...</think>`) 생각하기
 - 엄격한 OpenAI SDK 호환성을 위한 응답 삭제
 - 공급자 간 호환성을 위한 역할 정규화(개발자 → 시스템, 시스템 → 사용자)
 - 구조화된 출력 변환(json_schema → Gemini responseSchema)
@@ -61,7 +61,7 @@ OmniRoute 는 Next.js 기반으로 구축된 로컬 AI 라우팅 게이트웨이
 - 스킬 시스템(레지스트리, 실행자, 샌드박스, 내장 스킬)
 - 인증서 관리 및 DNS 처리 기능을 갖춘 MITM 프록시
 - 프롬프트 주입 가드 미들웨어
-- Caveman, RTK, 스택 파이프라인, 압축 콤보, 언어 팩 및 분석을 포함한 신속한 압축 파이프라인
+- Caveman, RTK, 스택 파이프라인, 압축 콤보, 언어 팩 및 분석을 포함하는 신속한 압축 파이프라인
 - ACP (에이전트 통신 프로토콜) 레지스트리
 - 모듈 OAuth 공급자( `src/lib/oauth/providers/` 아래의 개별 모듈 22개)
 - Uninstall/full-uninstall 스크립트

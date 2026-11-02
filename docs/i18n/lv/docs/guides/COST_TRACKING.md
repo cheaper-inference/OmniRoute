@@ -36,65 +36,61 @@ Tā kā šis skaitlis ir aptuvens novērtējums:
 
 ---
 
-## Kā tiek novērtētas izmaksas
+## Kā tiek aprēķinātas izmaksas
 
-### Cenu avots
+### Cenu noteikšanas avots
 
-Izmaksas tiek iegūtas no cenu tabulas, kas tiek noteikta šādā prioritātes secībā
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Izmaksas nāk no apvienotās cenu tabulas [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), šajā prioritātes secībā (** augstākais pirmais** ):
 
-1. **Lietotāja pārrakstītās vērtības** — cenas, kuras iestatāt informācijas panelī / izmantojot `PATCH /api/pricing`.
-2. **Sinhronizētās ārējās cenas** — tiek iegūtas no LiteLLM publiskā
-   `model_prices_and_context_window.json`, ja ir iespējota sinhronizācija (tās tiek glabātas atsevišķā
-   `pricing_synced` nosaukumvietā, tāpēc tās nekad nepārraksta jūsu iestatītās vērtības).
-3. **Kodā iekļautās noklusējuma vērtības** — tiek piegādātas kopā ar OmniRoute.
+1. **Lietotājs ignorē** — cenas, kas iestatītas informācijas panelī vai izmantojot `PATCH /api/pricing` ( `pricing` nosaukumvieta).
+2. **model.dev sinhronizācija** — cenas, kas iegūtas no `https://models.dev/api.json` ( `models_dev_pricing` nosaukumvietas).
+3. **LiteLLM sinhronizācija** — cenas, kas iegūtas no LiteLLM publiskās `model_prices_and_context_window.json` ( `pricing_synced` nosaukumvietas).
+4. **Cietkodētie noklusējuma iestatījumi** — likmes nosūtītas [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Ārējo cenu sinhronizācija ir **jāiespējo manuāli**, un pēc noklusējuma tā ir atspējota. Attiecīgie vides mainīgie
-(skatiet [`.env.example`](../../.env.example)):
+Tam pašam provider/model vērtības no augstākas prioritātes slāņiem pārraksta atbilstošos laukus zemākajos slāņos; lauki, kas nav augšējā slānī, joprojām var nākt no apakšējā slāņa. Pasūtījums ir fiksēts pat tad, ja vienlaikus tiek izpildīti abi neatkarīgie sinhronizācijas darbi. `GET /api/pricing?includeSources=1` atgriež `pricing` un `sourceMap`, kuru katra modeļa etiķetes (`user`, `modelsDev`, `litellm`, `default`) identificē augstākās prioritātes slāni, kas satur šo modeli.
 
-| Vides mainīgais         | Noklusējums | Nolūks                                                                         |
-| ----------------------- | ----------- | ------------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`     | Iespējot LiteLLM cenu sinhronizāciju fonā palaišanas laikā.                    |
-| `PRICING_SYNC_INTERVAL` | `86400`     | Sinhronizācijas intervāls **sekundēs** (pēc noklusējuma reizi dienā).          |
-| `PRICING_SYNC_SOURCES`  | `litellm`   | Ar komatiem atdalīts avotu saraksts (pašlaik tiek atbalstīts tikai `litellm`). |
+**LiteLLM sinhronizācija** ir izvēlēta, pēc noklusējuma atspējota. Tās vides mainīgie (skatiet [`.env.example`](../../.env.example) ) ir:
+
+| Env var                 | Noklusējums | Mērķis                                                                           |
+| ----------------------- | ----------- | -------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`     | Iespējot fona LiteLLM cenu sinhronizāciju.                                       |
+| `PRICING_SYNC_INTERVAL` | `86400`     | Sinhronizācijas intervāls sekundēs (katru dienu).                                |
+| `PRICING_SYNC_SOURCES`  | `litellm`   | Avota atlase tikai šai sinhronizācijai; pašlaik tiek atbalstīts tikai `litellm`. |
+
+**model.dev sinhronizācija** ir atsevišķi no LiteLLM sinhronizācijas un arī pēc noklusējuma ir atspējota. Iespējojiet to sadaļā Iestatījumi (models.dev sync) vai izmantojiet šos mainīgos:
+
+| Env var                    | Noklusējums     | Mērķis                                                                                                                                       |
+| -------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(atiestatīts)_ | Atiestatīts seko slēdzim Iestatījumi; `1/true/on/yes` tiek piespiests ieslēgts un `0/false/off/no` izslēgts (pat ja iestatījumi to iespējo). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Noklusējuma model.dev sinhronizācijas intervāls sekundēs (katru dienu).                                                                      |
+
+`PRICING_SYNC_SOURCES` dara** nē** iespējot modeļus.dev; tas kontrolē tikai LiteLLM sinhronizāciju. Dzēšot lietotāja ignorēšanu, netiek notīrīta neviena sinhronizētā nosaukumvieta; stājas spēkā nākamais pieejamais cenu līmenis. Ja modelis ir bez maksas, pirms manuālas ignorēšanas pievienošanas pārbaudiet gan sinhronizācijas iestatījumus, gan `sourceMap`.
 
 ### Izmaksu formula
 
-Izmaksas katram pieprasījumam tiek aprēķinātas no tokenu skaita un likmēm par vienu miljonu tokenu failā
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Maksa tiek aprēķināta katram pieprasījumam no marķieru skaita un miljonu marķieru likmēm [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Ievades tokeni** (atskaitot kešatmiņas lasījumus un kešatmiņas izveides tokenus) × `input` likme.
-- **Kešatmiņas lasīšanas tokeni** × `cached` likme (ja tās nav, tiek izmantota ievades likme).
-- **Kešatmiņas izveides tokeni** × `cache_creation` likme (ja tās nav, tiek izmantota ievades likme).
-- **Izvades tokeni** × `output` likme.
-- **Spriešanas tokeni** × `reasoning` likme (ja tās nav, tiek izmantota izvades likme).
+- **Ievades marķieri** (atskaitot kešatmiņas lasīšanas un kešatmiņas izveides pilnvaras) × `input` likme.
+- **Kešatmiņas lasīšanas marķieri** × `cached` ātrums (atkāpjas līdz ievades ātrumam).
+- **Kešatmiņas izveides marķieri** × `cache_creation` ātrums (atkāpjas līdz ievades ātrumam).
+- **Izvades marķieri** × `output` likme.
+- **Spriešanas zīmes** × `reasoning` ātrums (atkāpjas līdz izvades ātrumam).
 
-Visas likmes tiek interpretētas kā USD par 1 000 000 tokenu. Codex „fast”/„priority” vai
-„flex” pakalpojuma līmenim tiek piemērots izmaksu reizinātājs (`getCodexFastCostMultiplier`) — piemēram, flex
-tiek aprēķināts ar 50% tokenu atlaidi, kas informācijas panelī tiek parādīta kā **flex ietaupījums**.
+Visas likmes tiek interpretētas kā USD uz 1 000 000 žetonu. Codex "ātri"/"prioritāri" vai "elastīgi" pakalpojuma līmenim tiek piemērots izmaksu reizinātājs (`getCodexFastCostMultiplier`) — piemēram, flex tiek iekasēta ar 50% marķiera atlaidi, kas tiek rādīta kā** elastīgi ietaupījumi** informācijas panelī.
 
-Modeļu nosaukumi vispirms tiek normalizēti (tiek noņemti pakalpojumu sniedzēju ceļu prefiksi, piemēram, `openai/` vai
-`accounts/fireworks/models/`), lai arī vēsturiskās rindas joprojām atbilstu cenai.
+Modeļu nosaukumi vispirms tiek normalizēti (tiek noņemti pakalpojumu sniedzēja ceļa prefiksi, piemēram `openai/` vai `accounts/fireworks/models/` ), tāpēc vēsturiskās rindas joprojām atbilst cenai.
 
-### Kā tiek reģistrēti izdevumi
+### Kā tiek reģistrēti tēriņi
 
-- Katra pieprasījuma izmaksas tiek aprēķinātas pēc atbildes saņemšanas un reģistrētas asinhroni, negaidot rezultātu, lai tas
-  nekad neradītu klientam papildu aizkavi. Koplietojamās kvotas patēriņa reģistrēšana tiek ieplānota nākamajā
-  notikumu cikla iterācijā, izmantojot [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- API atslēgu izdevumi tiek buferēti un ierakstīti paketēs, izmantojot
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (noklusējuma ierakstīšanas intervāls ir 60 s,
-  bufera lielums — 1 000 ierakstu). To var pielāgot, izmantojot:
+- Maksa par pieprasījumu tiek aprēķināta pēc atbildes saņemšanas un reģistrēta, lai aizmirstu, lai klients nekad nepalielinātu latentumu. Koplietotās kvotas patēriņš ir ieplānots nākamajā notikumu cilpas atzīmēšanā, izmantojot [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- API atslēgas tēriņi tiek buferizēti un pa daļām tiek izskaloti, izmantojot [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (noklusējuma skalošanas intervāls 60 s, 1000 ierakstu buferis). Noskaņojams, izmantojot:
 
-  | Vides mainīgais                     | Noklusējums | Nolūks                                                    |
-  | ----------------------------------- | ----------- | --------------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Ierakstīšanas intervāls milisekundēs.                     |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Maksimālais buferēto ierakstu skaits pirms ierakstīšanas. |
+  | Env var                             | Noklusējums | Mērķis                                                   |
+  | ----------------------------------- | ----------- | -------------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Skalošanas intervāls milisekundēs.                       |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Maksimālais buferizēto ierakstu skaits pirms skalošanas. |
 
-Informācijas paneļa izmaksu skaitļi **netiek** nolasīti no katrai rindai saglabātas summas dolāros — tie
-tiek aprēķināti no jauna izpildes laikā, izmantojot tokenu skaitu un pašreizējo cenu tabulu, ikreiz, kad tiek
-izsaukts analītikas galapunkts. Tas nozīmē, ka nepareizas cenas izlabošana (un atkārtota sinhronizācija) ar atpakaļejošu
-spēku atjaunina vēsturiskos izmaksu novērtējumus.
+Informācijas paneļa izmaksu skaitļi ir šādi** nē** nolasa no rindiņā saglabātās summas dolāros — tie tiek pārrēķināti lidojuma laikā no pilnvaru skaita un pašreizējās cenu tabulas katru reizi, kad tiek izpildīts analītikas galapunkts. Tas nozīmē, ka nepareizas cenas labošana (un atkārtota sinhronizācija) ar atpakaļejošu datumu atjaunina vēsturisko izmaksu aprēķinus.
 
 ---
 
@@ -142,51 +138,48 @@ Izmaksu sadaļā ir pieejamas arī šādas lapas (visas zem `/dashboard/costs/`)
 
 ## API galapunkti
 
-Visiem šiem galapunktiem ir nepieciešama pārvaldības autentifikācija (loopback/JWT, izmantojot `requireManagementAuth`), ja vien
-nav norādīts citādi.
+Visām šīm darbībām ir nepieciešama pārvaldības autentifikācija (loopback/JWT, izmantojot `requireManagementAuth`), ja vien tas nav norādīts.
 
-### Lietojuma un izmaksu analītika
+### Lietojuma un izmaksu analīze
 
-| Metode | Galapunkts               | Mērķis                                                                                                                                                                                               |
-| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Pilna izmaksu/lietojuma analītika: kopsavilkums, dienas tendence, sadalījums pēc nodrošinātāja/modeļa/API atslēgas/konta/līmeņa. Vaicājums: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Katra nodrošinātāja kvotas izmantojums laika gaitā. Vaicājums: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                                          |
-| `GET`  | `/api/usage/history`     | Neapstrādātas lietojuma vēstures rindas.                                                                                                                                                             |
-| `GET`  | `/api/usage/call-logs`   | Katra pieprasījuma izsaukumu žurnāli (modelis, tokeni, izmaksas, latentums, statuss).                                                                                                                |
-| `GET`  | `/api/usage/quota`       | Nodrošinātāja kvotas statuss.                                                                                                                                                                        |
-| `GET`  | `/api/usage/proxy-logs`  | Starpniekservera pieprasījumu žurnāli.                                                                                                                                                               |
+| Metode | Galapunkts               | Mērķis                                                                                                                                                                  |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Pilna cost/usage analītika: kopsavilkums, dienas tendence, pēc provider/model/API key/account/tier. Vaicājums: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | Katra nodrošinātāja kvotas izlietojums laika gaitā. Vaicājums: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                             |
+| `GET`  | `/api/usage/history`     | Neapstrādātas lietošanas vēstures rindas.                                                                                                                               |
+| `GET`  | `/api/usage/call-logs`   | Zvanu žurnāli pēc pieprasījuma (modelis, marķieri, izmaksas, latentums, statuss).                                                                                       |
+| `GET`  | `/api/usage/quota`       | Pakalpojumu sniedzēja kvotas statuss.                                                                                                                                   |
+| `GET`  | `/api/usage/proxy-logs`  | Starpniekservera pieprasījumu žurnāli.                                                                                                                                  |
 
 ### Budžeti
 
-| Metode | Galapunkts               | Mērķis                                                                                                      |
-| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Izmaksu kopsavilkums un budžeta pārbaude vienai API atslēgai (nepieciešams vaicājuma parametrs `apiKeyId`). |
-| `POST` | `/api/usage/budget`      | Iestata dienas/nedēļas/mēneša ierobežojumus USD un brīdinājuma slieksni API atslēgai.                       |
-| `GET`  | `/api/usage/budget/bulk` | Vairāku API atslēgu budžetu kopsavilkumi.                                                                   |
+| Metode | Galapunkts               | Mērķis                                                                                                     |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Izmaksu kopsavilkums + budžeta pārbaude vienai API atslēgai (nepieciešams `apiKeyId` vaicājuma parametrs). |
+| `POST` | `/api/usage/budget`      | Iestatiet daily/weekly/monthly USD ierobežojumus + brīdinājuma slieksni API taustiņam.                     |
+| `GET`  | `/api/usage/budget/bulk` | Lielapjoma budžeta kopsavilkumi pa API taustiņiem.                                                         |
 
-> Budžeta API tvērums ir katrai **API atslēgai** (`apiKeyId`). Ierobežojumi, ko atgriež
-> `GET /api/usage/budget`, ietver `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> `warningThreshold` un pašreizējās kopsummas (`totalCostToday`, `totalCostMonth`, …).
+> Budžeta API apjoms ir noteikts**API atslēga** (`apiKeyId`). Ierobežojumi, ko atgriež `GET /api/usage/budget` ietver `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` un tekošās kopsummas (`totalCostToday`, `totalCostMonth`, …).
 
 ### Cenu noteikšana
 
-| Metode   | Galapunkts              | Mērķis                                                                                                                                     |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET`    | `/api/pricing`          | Pašreizējās apvienotās cenas (lietotāja + sinhronizētās + noklusējuma). Izmantojiet `?includeSources=1`, lai redzētu katra ieraksta avotu. |
-| `PATCH`  | `/api/pricing`          | Pārraksta cenas struktūrai `{ provider: { model: { input, output, cached, … } } }`.                                                        |
-| `DELETE` | `/api/pricing`          | Atiestata cenas uz noklusējuma vērtībām (tvērumu pēc izvēles var ierobežot ar `?provider=&model=`).                                        |
-| `GET`    | `/api/pricing/defaults` | Parāda noklusējuma rezerves likmes uz 1 miljonu.                                                                                           |
-| `GET`    | `/api/pricing/models`   | Cenas, kas indeksētas pēc modeļa.                                                                                                          |
-| `POST`   | `/api/pricing/sync`     | Aktivizē manuālu sinhronizāciju no ārējiem avotiem (LiteLLM).                                                                              |
-| `GET`    | `/api/pricing/sync`     | Pašreizējais sinhronizācijas statuss.                                                                                                      |
-| `DELETE` | `/api/pricing/sync`     | Notīra visus sinhronizētos cenu datus.                                                                                                     |
+| Metode   | Galapunkts              | Mērķis                                                                                                                                                                 |
+| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Apvienotā četru slāņu cenu noteikšana (lietotājs, modeļi.dev, LiteLLM, noklusējuma iestatījumi). `?includeSources=1` atgriež `pricing` + `sourceMap`.                  |
+| `PATCH`  | `/api/pricing`          | Ignorēt `{ provider: { model: { input, output, cached, … } } }` cenas.                                                                                                 |
+| `DELETE` | `/api/pricing`          | Noņemt lietotāja cenu ignorēšanu (pēc izvēles, izmantojot `?provider=&model=` tvērumu); sinhronizētie tarifi vai iebūvētie noklusējuma iestatījumi paliek kā rezerves. |
+| `GET`    | `/api/pricing/defaults` | Rādīt noklusējuma per-1M atkāpšanās rādītājus.                                                                                                                         |
+| `GET`    | `/api/pricing/models`   | Cenas noteiktas pēc modeļa.                                                                                                                                            |
+| `POST`   | `/api/pricing/sync`     | Aktivizējiet manuālu sinhronizāciju no ārējiem avotiem (LiteLLM).                                                                                                      |
+| `GET`    | `/api/pricing/sync`     | Pašreizējais sinhronizācijas statuss.                                                                                                                                  |
+| `DELETE` | `/api/pricing/sync`     | Notīrīt tikai LiteLLM sinhronizētās cenas (`pricing_synced`); modeļi.dev dati ir atsevišķi.                                                                            |
 
 ### Citi ar izmaksām saistīti galapunkti
 
-| Metode | Galapunkts                    | Mērķis                                                                                    |
-| ------ | ----------------------------- | ----------------------------------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | Bezmaksas modeļa žetonu kopsumma, šomēnes izmantotais apjoms un atlikusī bezmaksas kvota. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Koplietotas kvotas kopas lietojums.                                                       |
+| Metode | Galapunkts                    | Mērķis                                                                                     |
+| ------ | ----------------------------- | ------------------------------------------------------------------------------------------ |
+| `GET`  | `/api/free-tier/summary`      | Bezmaksas modeļa marķiera kopsummas, izmantotas šajā mēnesī un atlikušās bezmaksas kvotas. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Izmantošana dalītai kvotu kopai.                                                           |
 
 ---
 

@@ -100,39 +100,40 @@ OmniRoute 컨테이너 내부에서 실행되는 `setup-*` 명령은 컨테이�
 
 ---
 
-## 1. CLI Code 카탈로그(27개 도구)
+## 1. CLI Code 카탈로그(28개 도구)
 
 `/dashboard/cli-code` 에 나타나는 모든 도구. `baseUrlSupport: none` 사용하는 것은 사용자 정의 기본 URL 대신 MITM 또는 수동 가이드를 통해 연결됩니다.
 
-| ID             | 이름                   | 공급업체            | baseUrl지원 | 구성 유형       | acp생성 가능 |
-| -------------- | ---------------------- | ------------------- | ----------- | --------------- | ------------ |
-| 클로드         | Claude 코드            | Anthropic           | 가득한      | 환경            | 진실         |
-| 사본           | OpenAI Codex CLI       | OpenAI              | 가득한      | 관습            | 진실         |
-| z코드          | ZCode(GLM 코딩 계획)   | Z.ai                | 없음        | 관습            | 거짓         |
-| 클라인         | Cline                  | OSS (전 Claude Dev) | 가득한      | 관습            | 진실         |
-| 킬로           | 킬로 코드              | 킬로 조직           | 가득한      | 관습            | 거짓         |
-| 루             | 루코드                 | 루(OSS)             | 가득한      | 가이드          | 거짓         |
-| 계속하다       | 계속하다               | 계속.dev            | 가득한      | 가이드          | 거짓         |
-| 보조원         | 에이더                 | OSS (P. Gauthier)   | 가득한      | 가이드          | 진실         |
-| 노             | ForgeCode              | 안티노미 HQ         | 가득한      | 관습            | 진실         |
-| 제이코드       | 제이코드               | 1제황(OSS)          | 가득한      | 관습            | 거짓         |
-| deepseek-tui   | DeepSeek TUI           | 헌터 보운(OSS)      | 가득한      | 관습            | 거짓         |
-| 코드 고래      | CodeWhale              | 흠보운(OSS)         | 가득한      | 관습            | 거짓         |
-| 오픈코드       | OpenCode               | 이상 현상(SST 이전) | 가득한      | 가이드          | 진실         |
-| 드로이드       | 팩토리 드로이드        | 팩토리 AI           | 부분적인    | 가이드          | 거짓         |
-| 부조종사       | GitHub Copilot CLI     | GitHub/MS           | 가득한      | 관습            | 거짓         |
-| 커서-cli       | Cursor CLI             | 모든 구             | 부분적인    | 가이드          | 진실         |
-| 빙어           | 빙어                   | 레오나르드서(OSS)   | 가득한      | 관습            | 거짓         |
-| 파이           | Pi(파이 코딩 에이전트) | M. 제크너(OSS)      | 가득한      | 관습            | 거짓         |
-| 그로크 빌드    | Grok 빌드              | xAI                 | 가득한      | 관습            | 거짓         |
-| 으깨다         | 으깨다                 | OSS (매력)          | 가득한      | 관습            | 거짓         |
-| 퀀             | Qwen 코드              | Alibaba             | 가득한      | 가이드          | 진실         |
-| 제드 자의 명칭 | Zed                    | Zed 산업            | 가득한      | 가이드          | 거짓         |
-| 커서           | Cursor                 | 모든 구             | 없음        | 가이드          | 거짓         |
-| 반중력         | Antigravity            | Google              | 없음        | 미트            | 거짓         |
-| 헤르메스       | 헤르메스               | 누스 연구           | 없음        | 가이드          | 거짓         |
-| 키로           | Kiro AI                | Amazon              | 없음        | 미트            | 거짓         |
-| 관습           | 맞춤 CLI               | —                   | 가득한      | 맞춤형 제작업체 | 거짓         |
+| ID             | 이름                   | 공급업체            | baseUrlSupport | configType      | acpSpawnable |
+| -------------- | ---------------------- | ------------------- | -------------- | --------------- | ------------ |
+| 클로드         | Claude 코드            | Anthropic           | 가득한         | 환경            | 진실         |
+| 사본           | OpenAI Codex CLI       | OpenAI              | 가득한         | 관습            | 진실         |
+| z코드          | ZCode (GLM 코딩 계획)  | Z.ai                | 없음           | 관습            | 거짓         |
+| 클라인         | Cline                  | OSS (전 Claude Dev) | 가득한         | 관습            | 진실         |
+| 킬로           | 킬로 코드              | 킬로 조직           | 가득한         | 관습            | 거짓         |
+| 루             | 루코드                 | 루(OSS)             | 가득한         | 가이드          | 거짓         |
+| 계속하다       | 계속하다               | 계속.dev            | 가득한         | 가이드          | 거짓         |
+| 보조원         | 에이더                 | OSS (P. Gauthier)   | 가득한         | 가이드          | 진실         |
+| 노             | ForgeCode              | 안티노미 HQ         | 가득한         | 관습            | 진실         |
+| 제이코드       | 제이코드               | 1제황(OSS)          | 가득한         | 관습            | 거짓         |
+| deepseek-tui   | DeepSeek TUI           | 헌터 보운(OSS)      | 가득한         | 관습            | 거짓         |
+| 코드 고래      | CodeWhale              | 흠보운(OSS)         | 가득한         | 관습            | 거짓         |
+| 오픈코드       | OpenCode               | 이상 현상(SST 이전) | 가득한         | 가이드          | 진실         |
+| 드로이드       | 팩토리 드로이드        | 팩토리 AI           | 부분적인       | 가이드          | 거짓         |
+| 부조종사       | GitHub Copilot CLI     | GitHub/MS           | 가득한         | 관습            | 거짓         |
+| 커서-cli       | Cursor CLI             | 모든 구             | 부분적인       | 가이드          | 진실         |
+| 빙어           | 빙어                   | 레오나르드서(OSS)   | 가득한         | 관습            | 거짓         |
+| 파이           | Pi(파이 코딩 에이전트) | M. 제크너(OSS)      | 가득한         | 관습            | 거짓         |
+| 그로크 빌드    | Grok 빌드              | xAI                 | 가득한         | 관습            | 거짓         |
+| 으깨다         | 으깨다                 | OSS (매력)          | 가득한         | 관습            | 거짓         |
+| 퀀             | Qwen 코드              | Alibaba             | 가득한         | 가이드          | 진실         |
+| 개방형         | OpenClaude             | Gitlawb(OSS)        | 가득한         | 가이드          | 거짓         |
+| 제드 자의 명칭 | Zed                    | Zed 산업            | 가득한         | 가이드          | 거짓         |
+| 커서           | Cursor                 | 모든 구             | 없음           | 가이드          | 거짓         |
+| 반중력         | Antigravity            | Google              | 없음           | 미트            | 거짓         |
+| 헤르메스       | 헤르메스               | 누스 연구           | 없음           | 가이드          | 거짓         |
+| 키로           | Kiro AI                | Amazon              | 없음           | 미트            | 거짓         |
+| 관습           | 맞춤 CLI               | —                   | 가득한         | 맞춤형 제작업체 | 거짓         |
 
 `baseUrlSupport: "partial"` 포함된 도구는 대시보드 카드에 "⚠ Base URL parcial" 배지를 표시합니다.
 ---
@@ -212,22 +213,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. 신규 도구용 설정 핸들러
+## 6. 새로운 도구에 대한 설정 핸들러
 
-`configType: "custom"`인 신규 도구에는 전용 설정 API 라우트가 있습니다:
+`configType: "custom"` 의 새로운 도구에는 API 경로 전용 설정이 있습니다.
 
-| 라우트                                      | 도구                                                            |
-| ------------------------------------------- | --------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                         |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url 플래그)                                       |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, 레거시)                          |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, 기본 + 레거시 `~/.deepseek` 동기화) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                           |
-| `POST /api/cli-tools/pi-settings`           | Pi 코딩 에이전트                                                |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)           |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + 전용 `.env` 키)            |
+| 노선                                        | 도구                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                            |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url 플래그)                                          |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, 레거시)                             |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, 기본 + 레거시 `~/.deepseek` 동기화)    |
+| `POST /api/cli-tools/smelt-settings`        | 빙어                                                               |
+| `POST /api/cli-tools/pi-settings`           | Pi 코딩 에이전트(`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)              |
+| `POST /api/cli-tools/qwen-settings`         | Qwen 코드(`~/.qwen/settings.json` + 전용 `.env` 키)                |
 
-모든 라우트는 오류 응답에 `sanitizeErrorMessage()`를 사용합니다(필수 규칙 #12).
+모든 경로는 오류 응답에 `sanitizeErrorMessage()` 사용합니다(엄격한 규칙 #12).
 
 ---
 
@@ -286,19 +287,19 @@ interface ToolBatchStatus {
 
 ## 9. 빠른 시작
 
-### 1단계 — OmniRoute API 키 발급
+### 1단계 — OmniRoute API 키 받기
 
-1. `/dashboard/api-manager`를 열고 → **API 키 생성**
-2. 이름을 지정하고(예: `cli-tools`) 모든 권한을 선택합니다
-3. 키를 복사합니다 — 아래의 모든 CLI에서 필요합니다
+1. `/dashboard/api-manager` → 열기** API 키 생성**
+2. 이름(예: `cli-tools`)을 지정하고 모든 권한을 선택하세요.
+3. 아래의 모든 CLI 에 필요한 — 키를 복사하세요.
 
-> 키는 다음과 같은 형식입니다: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> 키는 다음과 같습니다: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
 ### 2단계 — CLI 도구 설치
 
-모든 npm 기반 도구에는 Node.js 22.22.2+ 또는 24.x가 필요합니다:
+모든 npm 기반 도구에는 Node.js 22.22.2 + 또는 24.x가 필요합니다.
 
 ```bash
 # Claude Code (Anthropic)
@@ -319,58 +320,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (`omniroute run gemini`을 통해 실행 가능 → /v1beta 인터페이스)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust 기반
+cargo install smelt  # Rust-based
 
-# Pi 코딩 에이전트
-# 설치 방법은 https://github.com/zechnerj/pi-coding-agent 참조
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# 설치 방법은 https://github.com/1jehuang/jcode 참조
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### 3단계 — 대시보드를 통해 구성
+### 3단계 — 대시보드를 통한 구성
 
-1. `http://localhost:20128/dashboard/cli-code`로 이동합니다
-2. 그리드에서 사용할 도구를 찾습니다
-3. 카드를 클릭하여 도구 상세 페이지를 엽니다
-4. API 키와 기본 URL을 선택합니다
-5. **구성 적용**을 클릭하거나 수동 구성 스니펫을 복사합니다
+1. `http://localhost:20128/dashboard/cli-code` 로 이동
+2. 그리드에서 도구를 찾으세요
+3. 카드를 클릭하면 도구 세부정보 페이지가 열립니다.
+4. API 키와 기본 URL 선택하세요.
+5. 딸깍 하는 소리** 구성 적용** 또는 수동 구성 스니펫을 복사하세요.
 
 ---
 
 ### 4단계 — 전역 환경 변수 설정
 
 ```bash
-# OmniRoute 범용 엔드포인트
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI는 루트의 GOOGLE_GEMINI_BASE_URL을 읽습니다(SDK가 /v1beta/...를 자체적으로 추가함)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **원격 서버**의 경우 `localhost:20128`을 서버 IP 또는 도메인으로 바꾸세요.
-> 예: `http://<your-server-ip>:20128`.
+> 에 대한** 원격 서버** `localhost:20128` 서버 IP 또는 도메인으로 바꾸십시오(예: `http://<your-server-ip>:20128`).
 
 ---
 
 ### 4단계 — 각 도구 구성
 
-#### Claude Code
+#### Claude 코드
 
 ```bash
-# ~/.claude/settings.json 생성:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -381,18 +381,15 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Claude Code에는 통합 Anthropic 게이트웨이 루트를 사용하세요. 여기에 `/v1`을 추가하지 마세요.
+Claude 코드에는 통합 Anthropic 게이트웨이 루트를 사용하십시오. 여기에 `/v1` 추가하지 마세요.
 
-**테스트:** `claude "say hello"`
+**시험:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-최신 Codex(v0.137+)는 `~/.codex/config.toml`만 읽습니다 — 이전
-`config.yaml`은 레거시 npm CLI용이며 아무런 알림 없이 무시됩니다. API
-키는 파일 내부가 아니라 항상 `OMNIROUTE_API_KEY` 환경 변수(`env_key`)에
-보관됩니다:
+최신 Codex (v0.137 +)는 `~/.codex/config.toml` 만 — 읽습니다. 이전 `config.yaml` 는 레거시 npm CLI 에 속하며 자동으로 무시됩니다. API 키는 파일 내부가 아닌 `OMNIROUTE_API_KEY` 환경 변수(`env_key`)에 유지됩니다.
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -407,9 +404,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-전체 참조(프로필, `wire_api`, 컨텍스트 윈도우): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+전체 참조(프로필, `wire_api`, 컨텍스트 창): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**테스트:** `codex "what is 2+2?"`
+**시험:** `codex "what is 2+2?"`
 
 ---
 
@@ -438,14 +435,44 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**테스트:** `opencode`
+**시험:** `opencode`
 
-> 사고 변형을 전송하려면 `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`을
-> 사용하세요.
+> `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` 사용하여 사고 변형을 보내세요.
 
 ---
 
-#### Cline (CLI 또는 VS Code)
+#### Pi 코딩 에이전트
+
+`npm install -g --ignore-scripts @earendil-works/pi-coding-agent` 사용하여 공식 Pi Coding Agent 패키지를 설치합니다. Pi는 `~/.pi/agent/models.json` 에서 사용자 정의 공급자를 읽습니다. 전체 에이전트 디렉토리를 이동하려면 `PI_CODING_AGENT_DIR` 설정하십시오. 대시보드는 해당 재정의를 따릅니다. Pi는 사용자 정의 엔드포인트에서 모델을 검색하지 않으므로 OmniRoute Pi의 `openai-completions` API 및 OmniRoute OpenAI 호환 `/v1` 엔드포인트를 사용하여 `models[]` 에 선택한 모델을 작성합니다.
+
+~ 안에**CLI 도구 → 파이** , 엔드포인트, API 키 및 모델을 선택하고 공급자 미리 보기를 검토한 다음 적용하세요. 미리보기는 공급자 조각입니다. Pi를 수동으로 구성할 때 `providers.omniroute` 기존 `models.json` 에 병합하여 다른 공급자와 설정이 그대로 유지되도록 합니다.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi는 `/model` 열 때 `models.json` 다시 로드합니다. 선택한 공급자 ID와 모델 ID로 구성된 경로를 테스트합니다.
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+참고 자료: [Pi 모델 및 사용자 정의 공급자](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi 환경 변수](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi 설치 지침](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (CLI 또는 VS 코드)
 
 **CLI 모드:**
 
@@ -459,14 +486,13 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code 모드:**
-Cline 확장 프로그램 설정 → API 제공자: `OpenAI Compatible` → 기본 URL: `http://localhost:20128/v1`
+**VS 코드 모드:** Cline 확장 설정 → API 공급자: `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
 
-또는 OmniRoute 대시보드 → **CLI 도구 → Cline → 구성 적용**을 사용하세요.
+또는 OmniRoute 대시보드 → 사용하세요.**CLI 도구 → Cline → 구성 적용** .
 
 ---
 
-#### KiloCode (CLI 또는 VS Code)
+#### KiloCode (CLI 또는 VS 코드)
 
 **CLI 모드:**
 
@@ -474,7 +500,7 @@ Cline 확장 프로그램 설정 → API 제공자: `OpenAI Compatible` → 기�
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code 설정:**
+**VS 코드 설정:**
 
 ```json
 {
@@ -483,13 +509,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-또는 OmniRoute 대시보드 → **CLI 도구 → KiloCode → 구성 적용**을 사용하세요.
+또는 OmniRoute 대시보드 → 사용하세요.**CLI 도구 → KiloCode → 구성 적용** .
 
 ---
 
-#### Continue (VS Code 확장 프로그램)
+#### 계속(VS 코드 확장)
 
-`~/.continue/config.yaml`을 편집합니다:
+`~/.continue/config.yaml` 편집:
 
 ```yaml
 models:
@@ -501,20 +527,20 @@ models:
     default: true
 ```
 
-편집 후 VS Code를 다시 시작합니다.
+편집 후 VS 코드를 다시 시작하십시오.
 
 ---
 
-#### VS Code Insiders (`chatLanguageModels.json`)
+#### VS 코드 내부자(`chatLanguageModels.json`)
 
-VS Code Insiders가 사용자 지정 엔드포인트 모델을 사용하도록 구성되어 있고, 사용자 지정 헤더 필드 없이 OmniRoute를 사용하려는 경우 이 설정을 사용하세요.
+VS Code Insiders가 사용자 정의 엔드포인트 모델에 대해 구성되어 있고 OmniRoute 사용자 정의 헤더 필드 없이 작동하도록 하려는 경우 이것을 사용하십시오.
 
 **권장 위치:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**토큰화된 OmniRoute 별칭 사용 예시:**
+**토큰화된 OmniRoute 별칭을 사용하는 예:**
 
 ```json
 [
@@ -538,27 +564,26 @@ VS Code Insiders가 사용자 지정 엔드포인트 모델을 사용하도록 �
 
 **참고:**
 
-- `sk-your-omniroute-key`를 OmniRoute에서 생성한 API 키로 바꾸세요.
-- `url` 필드는 `/api/v1/vscode/{token}/chat/completions`를 가리켜야 합니다.
-- `modelsUrl` 필드는 `/api/v1/vscode/{token}/models`를 가리켜야 합니다.
-- 클라이언트가 사용자 지정 헤더를 지원하는 경우 일반적인 `/v1` + Bearer 헤더 방식을 사용하는 것이 좋습니다.
-- URL에 포함된 토큰은 호환성을 위한 대체 수단이며 편집기 로그나 프록시 기록에 나타날 수 있습니다.
+- `sk-your-omniroute-key` OmniRoute 에서 생성된 API 키로 바꿉니다.
+- `url` 필드는 `/api/v1/vscode/{token}/chat/completions` 를 가리켜야 합니다.
+- `modelsUrl` 필드는 `/api/v1/vscode/{token}/models` 를 가리켜야 합니다.
+- 클라이언트가 사용자 정의 헤더를 지원할 때 일반적인 `/v1` + Bearer 헤더 흐름을 선호합니다.
+- URL 포함 토큰은 호환성 대체이며 편집기 로그 또는 프록시 기록에 나타날 수 있습니다.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# AWS/Kiro 계정에 로그인:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI는 자체 인증을 사용하므로 Kiro CLI 자체의 백엔드로 OmniRoute가 필요하지 않습니다.
-# 다른 도구에는 OmniRoute를 사용하면서 kiro-cli를 함께 사용하세요.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-**Kiro IDE** 데스크톱 앱의 경우 OmniRoute가 노출하는 MITM 엔드포인트를
-`/dashboard/cli-tools → Kiro`에서 사용하세요.
+에 대한**Kiro IDE** 데스크톱 앱의 경우 `/dashboard/cli-tools → Kiro` 아래의 OmniRoute 에 의해 노출된 MITM 엔드포인트를 사용하세요.
 
 ---
 
