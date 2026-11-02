@@ -1961,3 +1961,9 @@ Used by `open-sse/services/combo.ts` and `src/lib/quota/quotaScheduler.ts` for p
 | `OMNIROUTE_QUOTA_AWARE_ROUTING`    | `0`     | `open-sse/services/combo.ts`                | When `1`, skip connections whose per-window token budget (`rateLimitOverrides.tpm`, table `provider_quota_state`) cannot afford the estimated request cost before dispatch. Fail-open when no budget configured.                                 |
 | `OMNIROUTE_ESTIMATOR_CALIBRATION`  | _(on)_  | `open-sse/services/estimatorCalibration.ts` | Feedback calibration of the context-guard token estimator (#14931): per (provider, model, tools present) EMA of `usage.prompt_tokens` / estimate, clamped to 0.15–2.0, in memory only. `off`, `0` or `false` disables recording and application. |
 | `GROK_SUBSCRIPTION_IMAGES_ENABLED` | `false` | `open-sse/config/imageRegistry.ts`          | Registers the `xai-oauth` (`xao`) and `grok-cli` image routes. Dashboard feature flag of the same name; a DB override wins over this value.                                                                                                      |
+
+## Model synchronization diagnostics
+
+| Variable | Default | Source File | Description |
+| --- | --- | --- | --- |
+| `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0` | `src/lib/providerModels/modelSyncTimings.ts` | Set to `1` to log phase timing, a generated request ID and phase success/error outcomes during model synchronization. Disabled for all other values. Logs omit request, account, catalog and error payloads. |
