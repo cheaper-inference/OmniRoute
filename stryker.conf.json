@@ -665,6 +665,7 @@
       "tests/unit/chat-empty-stream-recovery.test.ts",
       "tests/unit/provider-error-rules-opt-in-flags-16797.test.ts",
       "tests/unit/17132-quota-share-block-per-key.test.ts",
+      "tests/unit/18633-credit-exhaustion-parks-connection.test.ts",
       "tests/unit/quota-share-public-code-17132.test.ts",
       "tests/unit/request-scoped-400.test.ts",
       "tests/unit/semantic-cache-request-controls.test.ts",
