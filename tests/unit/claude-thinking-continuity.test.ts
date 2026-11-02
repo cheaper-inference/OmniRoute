@@ -338,7 +338,7 @@ test("Responses client: end-to-end claude→responses stream then responses→cl
   assert.equal(toolUse?.id, "toolu_02RESP");
 });
 
-test("different model: nothing is restored (falls back to the #5312 placeholder)", () => {
+test("different model: nothing is restored and nothing is injected", () => {
   streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
 
   const turn = assistantTurn(
@@ -348,10 +348,12 @@ test("different model: nothing is restored (falls back to the #5312 placeholder)
     turn.content.some((block) => block.type === "thinking"),
     false
   );
-  assert.deepEqual(stripCacheControl(turn.content[0]), {
-    type: "redacted_thinking",
-    data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-  });
+  assert.equal(turn.content[0].type, "tool_use");
+  assert.equal(
+    JSON.stringify(turn).includes(DEFAULT_THINKING_CLAUDE_SIGNATURE),
+    false,
+    "the foreign placeholder blob is never injected"
+  );
 });
 
 test("dated response model vs undated request alias still binds to the same model", () => {
@@ -484,7 +486,7 @@ test("signature recovery drops a server-restored block in the active cycle and f
     "recovered turn keeps the tool_use and nothing fabricated before it"
   );
   assert.equal(
-    turn.content.some((block) => block.type === "thinking"),
+    turn.content.some((block) => block.type === "thinking" || block.type === "redacted_thinking"),
     false
   );
   assert.equal(
@@ -503,7 +505,7 @@ test("signature recovery drops a server-restored block in the active cycle and f
   );
 });
 
-test("signature recovery under manual extended thinking keeps the #5312 placeholder", () => {
+test("signature recovery under manual extended thinking injects nothing and disables thinking", () => {
   streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
   const translated = translateChatTurn(chatHistory(), { connectionId: CONN });
   assert.equal(assistantTurn(translated).content[0].type, "thinking");
@@ -511,16 +513,15 @@ test("signature recovery under manual extended thinking keeps the #5312 placehol
 
   const recovered = stripHistoricalThinkingForSignatureRecovery(body) as {
     messages: ClaudeMessage[];
+    thinking?: unknown;
   };
   assert.notEqual(recovered, body, "recovery produces a new body");
   const turn = assistantTurn(recovered);
-  // thinking.type "enabled" requires the tool_use turn to open with a thinking block, so the
-  // rejected restored signature is swapped for the placeholder instead of being dropped.
-  assert.deepEqual(turn.content[0], {
-    type: "redacted_thinking",
-    data: DEFAULT_THINKING_CLAUDE_SIGNATURE,
-  });
-  assert.equal(stripCacheControl(turn.content[1]).type, "tool_use");
+  // #18036 replaced the #5312 placeholder here: the blob is a foreign encrypted thought. The
+  // final tool turn is left bare, so manual thinking is turned off for this request instead.
+  assert.equal(stripCacheControl(turn.content[0]).type, "tool_use");
+  assert.equal(JSON.stringify(recovered).includes(DEFAULT_THINKING_CLAUDE_SIGNATURE), false);
+  assert.equal(recovered.thinking, undefined, "manual thinking is disabled for the retry");
   assert.equal(
     store.restoreClaudeThinkingBlocks({
       toolUseIds: ["toolu_01ABC"],
