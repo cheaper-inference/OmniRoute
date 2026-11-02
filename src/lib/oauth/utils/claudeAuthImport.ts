@@ -37,6 +37,7 @@ export interface EnrichedClaudeAuth extends ParsedClaudeAuth {
   organizationName: string | null;
   organizationType: string | null;
   rateLimitTier: string | null;
+  seatTier: string | null;
 }
 
 export interface CreateConnectionOptions {
@@ -109,6 +110,7 @@ export async function enrichWithBootstrap(
     organizationName: null,
     organizationType: null,
     rateLimitTier: parsed.rateLimitTier,
+    seatTier: null,
   };
 
   const controller = new AbortController();
@@ -131,13 +133,22 @@ export async function enrichWithBootstrap(
       return base;
     }
 
-    const body = toRecord(await res.json());
+    const raw = toRecord(await res.json());
+    // The live bootstrap nests the account under `oauth_account` (the shape
+    // fetchClaudeBootstrap reads); a flat body is still accepted.
+    const body = raw.oauth_account ? toRecord(raw.oauth_account) : raw;
 
     const accountUUID = toNonEmptyString(body.account_uuid);
     const organizationUUID = toNonEmptyString(body.organization_uuid);
     const organizationName = toNonEmptyString(body.organization_name);
     const organizationType = toNonEmptyString(body.organization_type);
-    const rateLimitTier = toNonEmptyString(body.rate_limit_tier) || parsed.rateLimitTier;
+    // The account's own (seat) tier first: the org's base tier and the CLI file's
+    // copy both differ from it once a Team admin moves seats.
+    const rateLimitTier =
+      toNonEmptyString(body.user_rate_limit_tier) ||
+      toNonEmptyString(body.rate_limit_tier) ||
+      parsed.rateLimitTier;
+    const seatTier = toNonEmptyString(body.seat_tier);
     const bootstrapEmail = toNonEmptyString(body.account_email);
 
     return {
@@ -147,6 +158,7 @@ export async function enrichWithBootstrap(
       organizationName,
       organizationType,
       rateLimitTier,
+      seatTier,
       email: parsed.email || bootstrapEmail,
     };
   } catch {
@@ -160,15 +172,22 @@ export async function enrichWithBootstrap(
 // ──── Lookup ──────────────────────────────────────────────────────────────────
 
 export async function findExistingClaudeConnection(
-  accountUUID: string
+  accountUUID: string,
+  organizationUUID: string | null = null
 ): Promise<JsonRecord | null> {
   const connections = await getProviderConnections({ provider: "claude" });
   const lower = accountUUID.toLowerCase();
+  const org = organizationUUID?.toLowerCase() ?? null;
   return (
     (connections.find((c) => {
       const psd = toRecord((c as JsonRecord).providerSpecificData);
       const stored = toNonEmptyString(psd.accountUUID);
-      return stored !== null && stored.toLowerCase() === lower;
+      if (stored === null || stored.toLowerCase() !== lower) return false;
+      // One accountUUID reaches its personal workspace and every Team org it
+      // belongs to; the org separates them. Like isMatchingOauthIdentity, the
+      // org decides only when both sides carry it.
+      const storedOrg = toNonEmptyString(psd.organizationUUID)?.toLowerCase() ?? null;
+      return !(org && storedOrg && org !== storedOrg);
     }) as JsonRecord | undefined) ?? null
   );
 }
@@ -181,7 +200,10 @@ export async function createConnectionFromAuthFile(
 ): Promise<{ connection: JsonRecord; created: boolean }> {
   // Duplicate detection by accountUUID (skipped when bootstrap failed)
   if (enriched.accountUUID) {
-    const existing = await findExistingClaudeConnection(enriched.accountUUID);
+    const existing = await findExistingClaudeConnection(
+      enriched.accountUUID,
+      enriched.organizationUUID
+    );
 
     if (existing) {
       if (!options.overwriteExisting) {
@@ -212,6 +234,7 @@ export async function createConnectionFromAuthFile(
           organizationName: enriched.organizationName,
           organizationType: enriched.organizationType,
           rateLimitTier: enriched.rateLimitTier,
+          ...(enriched.seatTier ? { seatTier: enriched.seatTier } : {}),
           scopes: enriched.scopes,
           subscriptionType: enriched.subscriptionType,
           bootstrapEmail: enriched.email,
@@ -258,6 +281,7 @@ export async function createConnectionFromAuthFile(
       organizationName: enriched.organizationName,
       organizationType: enriched.organizationType,
       rateLimitTier: enriched.rateLimitTier,
+      ...(enriched.seatTier ? { seatTier: enriched.seatTier } : {}),
       scopes: enriched.scopes,
       subscriptionType: enriched.subscriptionType,
       bootstrapEmail: enriched.email,
