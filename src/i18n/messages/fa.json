@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "این ارائه‌دهندگان/مدل‌های متصل فعلی که با این قالب مطابقت دارند را در یک ترکیب قابل ویرایش ذخیره می‌کند.",
     "duplicateAutoComboFailedPrefix": "تکرار ترکیب خودکار ناموفق بود:",
     "duplicateAutoComboUnknownError": "خطای ناشناخته",
-    "duplicateAutoComboTitle": "ایجاد یک ترکیب ثابت از {name}"
+    "duplicateAutoComboTitle": "ایجاد یک ترکیب ثابت از {name}",
+    "exportCombos": "خروجی گرفتن",
+    "exportCombosFailed": "خروجی گرفتن از ترکیب‌ها ناموفق بود",
+    "importCombos": "وارد کردن",
+    "importCombosTitle": "وارد کردن ترکیب‌ها",
+    "importCombosInvalidFile": "این فایل یک خروجی معتبر ترکیب‌ها نیست.",
+    "importCombosSummary": "ترکیب‌های موجود در فایل: {total} ({fresh} جدید، {conflicting} با نامی که از قبل وجود دارد).",
+    "importCombosMergeHint": "ادغام همه ترکیب‌های موجود را نگه می‌دارد و ترکیب‌هایی را که نامشان از قبل وجود دارد رد می‌کند. اتصال‌ها و اعتبارنامه‌ها هرگز وارد نمی‌شوند.",
+    "importCombosReplaceHint": "جایگزینی همه، ترکیب‌های موجود شما ({current}) را حذف می‌کند و به‌جای آن‌ها فایل را وارد می‌کند. این کار قابل بازگشت نیست.",
+    "importCombosMerge": "ادغام",
+    "importCombosReplace": "جایگزینی همه",
+    "importCombosDone": "ترکیب‌های واردشده: {created}. ردشده: {skipped}.",
+    "importCombosFailed": "وارد کردن ترکیب‌ها ناموفق بود",
+    "importCombosWarnings": "با هشدار وارد شد"
   },
   "costs": {
     "title": "هزینهها",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "کانکتور سفارشی ChatGPT",
     "doctorChecking": "در حال بررسی وضعیت…",
     "doctorCheck": "بررسی وضعیت داکتور",
-    "fallbackRetryBackendTitle": "بک‌اند تلاش مجدد جایگزین"
+    "fallbackRetryBackendTitle": "بک‌اند تلاش مجدد جایگزین",
+    "retryDelayTitle": "تأخیر تلاش مجدد",
+    "retryDelayDesc": "مدت زمانی که یک اتصال پس از خطای محدودیت نرخ استراحت می‌کند، وقتی ارائه‌دهنده زمان تلاش مجدد را اعلام نمی‌کند. حالت خودکار از عقب‌نشینی داخلی استفاده می‌کند؛ زمان بازنشانی ارسال‌شده توسط ارائه‌دهنده همیشه اولویت دارد.",
+    "retryDelayAuto": "خودکار",
+    "retryDelaySaved": "تأخیر تلاش مجدد ذخیره شد",
+    "retryDelayUpdateFailed": "به‌روزرسانی تأخیر تلاش مجدد ناموفق بود"
   },
   "settings": {
     "title": "تنظیمات",

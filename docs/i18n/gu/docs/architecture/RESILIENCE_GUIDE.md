@@ -10,6 +10,8 @@ OmniRoute પાસે ત્રણ અલગ પરંતુ એકબીજા
 
 > સ્રોત: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **સ્થિતિસ્થાપકતાના ટૉગલ માટે પર્યાવરણ અને ડૅશબોર્ડની અગ્રતા.** પર્યાવરણમાંથી પ્રારંભિક મૂલ્ય મેળવતા અને સ્પષ્ટપણે સક્રિય કરવા પડતા સ્થિતિસ્થાપકતાના ટૉગલ — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — ફક્ત _ડિફૉલ્ટ_ આપે છે (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). `resilienceSettings` માં કાયમી રીતે સાચવેલા બૂલિયનને (ડૅશબોર્ડ → **સેટિંગ્સ → સ્થિતિસ્થાપકતા** / `PATCH /api/resilience`, `key_value` માં સંગ્રહિત) પર્યાવરણના મૂલ્ય કરતાં અગ્રતા મળે છે: સામાન્યીકરણ (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) સાચવેલું બૂલિયન હાજર હોય ત્યારે તેને જાળવે છે. તેથી જે સ્થાપનમાં ડૅશબોર્ડે પહેલેથી `false` સાચવ્યું હોય ત્યાં એવો પર્યાવરણ ચલ `true` કરવાથી કંઈ બદલાતું નથી. **સેટિંગ્સ → સ્થિતિસ્થાપકતા** માં ટૉગલ બદલો અથવા સાચવેલું ફીલ્ડ સાફ કરો.
+
 ## 1. પ્રોવાઈડર સર્કિટ બ્રેકર
 
 **અવકાશ:** સમગ્ર પ્રોવાઈડર (દા.ત., `glm`, `openai`, `anthropic`).
@@ -94,6 +96,8 @@ OmniRoute પાસે ત્રણ અલગ પરંતુ એકબીજા
 - API-key બેઝ: 3s
 - API-key 429: અપસ્ટ્રીમ `Retry-After`/રીસેટ હેડર્સ/પાર્સ કરી શકાય એવા રીસેટ ટેક્સ્ટને પ્રાથમિકતા આપે છે
 - બેકઑફ: `baseCooldownMs * 2 ** failureIndex`
+
+**પ્રદાતા દીઠ ફરી પ્રયાસનો વિલંબ.** પ્રદાતાની વિગતોના પૃષ્ઠમાં **ફરી પ્રયાસનો વિલંબ** પસંદગી છે (આપમેળે, 15s થી 1h સુધી). તે `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` સાચવે છે (1–21600, `PATCH /api/resilience` દ્વારા). જ્યારે દર-મર્યાદાની ભૂલમાં ઉપરવર્તી સેવાનો ફરી પ્રયાસનો સંકેત ન હોય, ત્યારે આ મૂલ્ય પ્રદાતાની માપસર વધતી રાહને બદલે છે અને `backoffLevel` ને 0 પર ફરી સેટ કરે છે (`open-sse/services/rotationConfig.ts::overrideFor`). દર-મર્યાદાની ભૂલ માટે ઊંચાથી નીચી અગ્રતા આ છે: ઉપરવર્તી સેવાનો ફરી પ્રયાસ સંકેત, જોડાણનું `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, પ્રદાતાનો ફરી પ્રયાસ વિલંબ, પર્યાવરણ ચલ `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` અને માપસર વધતી રાહ. આપમેળે વિકલ્પ ફીલ્ડ કાઢી નાખે છે. તે ફક્ત દર-મર્યાદાના કારણને અસર કરે છે, અંતિમ સ્થિતિઓને ક્યારેય નહીં.
 
 **એન્ટી-થન્ડરિંગ-હર્ડ ગાર્ડ:** એકસાથે થતી નિષ્ફળતાઓને કૂલડાઉન વધુ પડતી લંબાવવાથી અથવા `backoffLevel` બમણું વધારવાથી રોકે છે.
 
@@ -523,7 +527,7 @@ quota_exhausted / auth_error / not_found / not_found_local:
 
 વૈકલ્પિક `resilienceSettings.streamRecovery.throughputWatchdog` ગાર્ડ એવા અપસ્ટ્રીમને શોધે છે જે હજી પણ ચંક્સ મોકલી રહ્યું છે, પરંતુ ગોઠવેલા ઉપયોગી-આઉટપુટ દર કરતાં ઓછું assistant આઉટપુટ ઉત્પન્ન કરી રહ્યું છે. તે idle timeoutથી ઇરાદાપૂર્વક અલગ છે: heartbeats અને metadata કોઈપણ ટાઈમરને રીસેટ કરતા નથી અને તેમને પ્રગતિ તરીકે ગણવામાં આવતા નથી. તે hard attempt deadline (#9153)થી પણ અલગ છે, જે આઉટપુટની ગુણવત્તાને ધ્યાનમાં લીધા વિના સંપૂર્ણ સલામતી મર્યાદા તરીકે યથાવત્ રહે છે.
 
-વોચડૉગને abort કરી શકાય તે પહેલાં warm-up અવધિ અને ત્યારબાદ સંપૂર્ણ rolling window જરૂરી છે. તે Chat Completions અને Responses APIના આઉટપુટ ઇવેન્ટ્સમાંથી text deltas ગણે છે (સાવચેત UTF-8 byte proxy), usage-only અને ખાલી ઇવેન્ટ્સને અવગણે છે અને tool-call અથવા reasoning ઇવેન્ટ્સ ચાલુ હોય ત્યારે નિર્ણય સ્થગિત રાખે છે. તે ડિફૉલ્ટ રૂપે અક્ષમ છે અને `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` વડે સક્ષમ કરી શકાય છે; window, warm-up, minimum rate અને minimum measurable output સામાન્ય resilience-settings normalization layer દ્વારા મર્યાદિત કરવામાં આવે છે.
+વોચડૉગને abort કરી શકાય તે પહેલાં warm-up અવધિ અને ત્યારબાદ સંપૂર્ણ rolling window જરૂરી છે. તે Chat Completions અને Responses APIના આઉટપુટ ઇવેન્ટ્સમાંથી text deltas ગણે છે (સાવચેત UTF-8 byte proxy), usage-only અને ખાલી ઇવેન્ટ્સને અવગણે છે અને tool-call અથવા reasoning ઇવેન્ટ્સ ચાલુ હોય ત્યારે નિર્ણય સ્થગિત રાખે છે. તે ડિફૉલ્ટ રૂપે અક્ષમ છે અને `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (પર્યાવરણનું આ મૂલ્ય ફક્ત ડિફૉલ્ટ આપે છે — સાચવેલા `resilienceSettings.streamRecovery.throughputWatchdog.enabled` બૂલિયનને અગ્રતા મળે છે; આ માર્ગદર્શિકાની શરૂઆતમાં પર્યાવરણ અને ડૅશબોર્ડની અગ્રતા વિશેની નોંધ જુઓ) વડે સક્ષમ કરી શકાય છે; window, warm-up, minimum rate અને minimum measurable output સામાન્ય resilience-settings normalization layer દ્વારા મર્યાદિત કરવામાં આવે છે.
 
 સક્ષમ હોય ત્યારે, વોચડૉગ abort માત્ર સક્રિય અપસ્ટ્રીમ પ્રયાસ પર લાગુ થાય છે. કોઈપણ client-visible bytes પહેલાં, હાલનો same-account early-recovery path પ્રયાસને ફરી ખોલી શકે છે. Commit પછી, સ્ટ્રીમને ક્યારેય અંધાધૂંધ રીતે replay કરવામાં આવતી નથી; માત્ર હાલનો safe mid-stream continuation contract જ suffix જોડાવી શકે છે. Finalization એક જ વાર થાય છે, તેથી usage accounting અને semaphore release ફરીથી થતા નથી.
 

@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Điều này sẽ chụp lại các nhà cung cấp/mô hình đang kết nối hiện tại phù hợp với mẫu này vào một tổ hợp có thể chỉnh sửa.",
     "duplicateAutoComboFailedPrefix": "Không thể sao chép tổ hợp tự động:",
     "duplicateAutoComboUnknownError": "Lỗi không xác định",
-    "duplicateAutoComboTitle": "Tạo tổ hợp tĩnh từ {name}"
+    "duplicateAutoComboTitle": "Tạo tổ hợp tĩnh từ {name}",
+    "exportCombos": "Xuất",
+    "exportCombosFailed": "Không thể xuất combo",
+    "importCombos": "Nhập",
+    "importCombosTitle": "Nhập combo",
+    "importCombosInvalidFile": "Tệp này không phải là tệp xuất combo hợp lệ.",
+    "importCombosSummary": "Combo trong tệp: {total} ({fresh} mới, {conflicting} trùng tên đã tồn tại).",
+    "importCombosMergeHint": "Hợp nhất giữ lại tất cả combo hiện có và bỏ qua những combo có tên đã tồn tại. Kết nối và thông tin xác thực không bao giờ được nhập.",
+    "importCombosReplaceHint": "Thay thế tất cả sẽ xóa các combo hiện có của bạn ({current}) và nhập tệp thay thế. Không thể hoàn tác thao tác này.",
+    "importCombosMerge": "Hợp nhất",
+    "importCombosReplace": "Thay thế tất cả",
+    "importCombosDone": "Combo đã nhập: {created}. Đã bỏ qua: {skipped}.",
+    "importCombosFailed": "Không thể nhập combo",
+    "importCombosWarnings": "Đã nhập kèm cảnh báo"
   },
   "costs": {
     "title": "Chi phí",
@@ -6973,7 +6986,12 @@
     "allowCodexPaidCreditsLabel": "Cho phép tín dụng trả phí của Codex",
     "allowCodexPaidCreditsDescription": "Cho phép tài khoản này sử dụng tín dụng trả phí sau khi hạn mức gói đăng ký đạt đến ngưỡng cắt. Yêu cầu có tín dụng khả dụng do OpenAI báo cáo; có thể phát sinh phí. Giới hạn Spark và thời gian chờ (cooldown) từ upstream vẫn được áp dụng. Tính khả dụng của tín dụng được kiểm tra ngay cả khi tính năng preflight hạn mức bị tắt.",
     "usedInComboTooltip": "Được dùng trong {count} combo: {combos}",
-    "openComboTooltip": "Mở Combo — được dùng bởi {combo}"
+    "openComboTooltip": "Mở Combo — được dùng bởi {combo}",
+    "retryDelayTitle": "Độ trễ thử lại",
+    "retryDelayDesc": "Thời gian một kết nối tạm nghỉ sau lỗi giới hạn tốc độ khi nhà cung cấp không cho biết khi nào thử lại. Tự động dùng cơ chế lùi tích hợp; thời điểm đặt lại do nhà cung cấp gửi luôn được ưu tiên.",
+    "retryDelayAuto": "Tự động",
+    "retryDelaySaved": "Đã lưu độ trễ thử lại",
+    "retryDelayUpdateFailed": "Không thể cập nhật độ trễ thử lại"
   },
   "settings": {
     "title": "Cài đặt",

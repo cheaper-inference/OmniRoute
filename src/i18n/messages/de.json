@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Dadurch werden die aktuell verbundenen Anbieter/Modelle, die dieser Vorlage entsprechen, in einer bearbeitbaren Kombination gespeichert.",
     "duplicateAutoComboFailedPrefix": "Automatische Kombination konnte nicht dupliziert werden:",
     "duplicateAutoComboUnknownError": "Unbekannter Fehler",
-    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}"
+    "duplicateAutoComboTitle": "Erstelle eine statische Kombination aus {name}",
+    "exportCombos": "Exportieren",
+    "exportCombosFailed": "Combos konnten nicht exportiert werden",
+    "importCombos": "Importieren",
+    "importCombosTitle": "Combos importieren",
+    "importCombosInvalidFile": "Diese Datei ist kein gültiger Combo-Export.",
+    "importCombosSummary": "Combos in der Datei: {total} ({fresh} neu, {conflicting} mit bereits vorhandenem Namen).",
+    "importCombosMergeHint": "Zusammenführen behält alle vorhandenen Combos und überspringt die, deren Name bereits existiert. Verbindungen und Zugangsdaten werden nie importiert.",
+    "importCombosReplaceHint": "„Alle ersetzen“ löscht Ihre vorhandenen Combos ({current}) und importiert stattdessen die Datei. Dies kann nicht rückgängig gemacht werden.",
+    "importCombosMerge": "Zusammenführen",
+    "importCombosReplace": "Alle ersetzen",
+    "importCombosDone": "Importierte Combos: {created}. Übersprungen: {skipped}.",
+    "importCombosFailed": "Combos konnten nicht importiert werden",
+    "importCombosWarnings": "Mit Warnungen importiert"
   },
   "costs": {
     "title": "Kosten",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ChatGPT Custom Connector",
     "doctorChecking": "Status wird geprüft…",
     "doctorCheck": "Doctor-Status prüfen",
-    "fallbackRetryBackendTitle": "Fallback-Backend für Wiederholungen"
+    "fallbackRetryBackendTitle": "Fallback-Backend für Wiederholungen",
+    "retryDelayTitle": "Wiederholungsverzögerung",
+    "retryDelayDesc": "Wie lange eine Verbindung nach einem Rate-Limit-Fehler pausiert, wenn der Anbieter nicht angibt, wann erneut versucht werden soll. Automatisch nutzt das eingebaute Backoff; eine vom Anbieter gesendete Reset-Zeit hat immer Vorrang.",
+    "retryDelayAuto": "Automatisch",
+    "retryDelaySaved": "Wiederholungsverzögerung gespeichert",
+    "retryDelayUpdateFailed": "Wiederholungsverzögerung konnte nicht aktualisiert werden"
   },
   "settings": {
     "title": "Einstellungen",

@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "ఈ టెంప్లేట్‌తో సరిపోయే ప్రస్తుత కనెక్ట్ చేసిన ప్రొవైడర్లు/మోడల్‌లను ఎడిటబుల్ కంబోలో స్నాప్‌షాట్ తీసుకుంటుంది.",
     "duplicateAutoComboFailedPrefix": "ఆటోకంబో డూప్లికేట్ చేయడంలో విఫలమైంది:",
     "duplicateAutoComboUnknownError": "తెలియని దోషం",
-    "duplicateAutoComboTitle": "{name} నుండి స్థిర కంబో సృష్టించండి"
+    "duplicateAutoComboTitle": "{name} నుండి స్థిర కంబో సృష్టించండి",
+    "exportCombos": "ఎగుమతి చేయండి",
+    "exportCombosFailed": "కాంబోలను ఎగుమతి చేయడం విఫలమైంది",
+    "importCombos": "దిగుమతి చేయండి",
+    "importCombosTitle": "కాంబోలను దిగుమతి చేయండి",
+    "importCombosInvalidFile": "ఈ ఫైల్ చెల్లుబాటు అయ్యే కాంబో ఎగుమతి కాదు.",
+    "importCombosSummary": "ఫైల్‌లోని కాంబోలు: {total} ({fresh} కొత్తవి, {conflicting} ఇప్పటికే ఉన్న పేరుతో).",
+    "importCombosMergeHint": "విలీనం ఇప్పటికే ఉన్న అన్ని కాంబోలను ఉంచుతుంది మరియు పేరు ఇప్పటికే ఉన్నవాటిని దాటవేస్తుంది. కనెక్షన్‌లు మరియు ఆధారాలు ఎప్పటికీ దిగుమతి చేయబడవు.",
+    "importCombosReplaceHint": "అన్నింటినీ భర్తీ చేయి మీ ప్రస్తుత కాంబోలను ({current}) తొలగించి వాటి స్థానంలో ఫైల్‌ను దిగుమతి చేస్తుంది. దీన్ని రద్దు చేయలేరు.",
+    "importCombosMerge": "విలీనం చేయండి",
+    "importCombosReplace": "అన్నింటినీ భర్తీ చేయండి",
+    "importCombosDone": "దిగుమతి చేసిన కాంబోలు: {created}. దాటవేసినవి: {skipped}.",
+    "importCombosFailed": "కాంబోలను దిగుమతి చేయడం విఫలమైంది",
+    "importCombosWarnings": "హెచ్చరికలతో దిగుమతి చేయబడింది"
   },
   "costs": {
     "title": "ఖర్చులు",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ChatGPT కస్టమ్ కనెక్టర్",
     "doctorChecking": "స్థితిని సరిచూస్తున్నాము…",
     "doctorCheck": "డాక్టర్ స్థితిని సరిచూడండి",
-    "fallbackRetryBackendTitle": "ఫాల్బ్యాక్ రీట్రై బ్యాక్‌ఎండ్"
+    "fallbackRetryBackendTitle": "ఫాల్బ్యాక్ రీట్రై బ్యాక్‌ఎండ్",
+    "retryDelayTitle": "మళ్లీ ప్రయత్నించే ఆలస్యం",
+    "retryDelayDesc": "మళ్లీ ఎప్పుడు ప్రయత్నించాలో ప్రొవైడర్ చెప్పనప్పుడు రేట్-లిమిట్ లోపం తర్వాత కనెక్షన్ ఎంతసేపు విశ్రాంతి తీసుకుంటుంది. ఆటోమేటిక్ మోడ్ అంతర్నిర్మిత బ్యాక్‌ఆఫ్‌ను ఉపయోగిస్తుంది; ప్రొవైడర్ పంపిన రీసెట్ సమయానికి ఎల్లప్పుడూ ప్రాధాన్యత ఉంటుంది.",
+    "retryDelayAuto": "ఆటోమేటిక్",
+    "retryDelaySaved": "మళ్లీ ప్రయత్నించే ఆలస్యం సేవ్ చేయబడింది",
+    "retryDelayUpdateFailed": "మళ్లీ ప్రయత్నించే ఆలస్యాన్ని నవీకరించడం విఫలమైంది"
   },
   "settings": {
     "title": "సెట్టింగ్లు",

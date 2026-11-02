@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "ଏହା ଏହି ଟେମ୍ପ୍ଲେଟ୍ ସହ ମେଳ ଖାଉଥିବା ବର୍ତ୍ତମାନ ସଂଯୁକ୍ତ ପ୍ରଦାନକାରୀ/ମଡେଲ୍ଗୁଡ଼ିକର ଏକ ସ୍ନାପ୍ସଟ୍ ନେଇ ତାହାକୁ ଏକ ସମ୍ପାଦନଯୋଗ୍ୟ କମ୍ବୋରେ ପରିଣତ କରିବ।",
     "duplicateAutoComboFailedPrefix": "ସ୍ୱୟଂଚାଳିତ କମ୍ବୋର ନକଲ କରିବାରେ ବିଫଳ:",
     "duplicateAutoComboUnknownError": "ଅଜଣା ତ୍ରୁଟି",
-    "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ"
+    "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ",
+    "exportCombos": "ରପ୍ତାନି କରନ୍ତୁ",
+    "exportCombosFailed": "କମ୍ବୋ ରପ୍ତାନି କରିବାରେ ବିଫଳ",
+    "importCombos": "ଆମଦାନି କରନ୍ତୁ",
+    "importCombosTitle": "କମ୍ବୋ ଆମଦାନି କରନ୍ତୁ",
+    "importCombosInvalidFile": "ଏହି ଫାଇଲ୍ ଏକ ବୈଧ କମ୍ବୋ ରପ୍ତାନି ନୁହେଁ।",
+    "importCombosSummary": "ଫାଇଲରେ ଥିବା କମ୍ବୋ: {total} ({fresh} ନୂଆ, {conflicting} ପୂର୍ବରୁ ଥିବା ନାମ ସହିତ)।",
+    "importCombosMergeHint": "ମିଶାଇବା ସମସ୍ତ ବିଦ୍ୟମାନ କମ୍ବୋ ରଖେ ଏବଂ ଯାହାର ନାମ ପୂର୍ବରୁ ଅଛି ସେଗୁଡ଼ିକୁ ଛାଡ଼ିଦିଏ। ସଂଯୋଗ ଏବଂ କ୍ରେଡେନସିଆଲ୍ କେବେ ବି ଆମଦାନି ହୁଏ ନାହିଁ।",
+    "importCombosReplaceHint": "ସବୁ ବଦଳାନ୍ତୁ ଆପଣଙ୍କ ବିଦ୍ୟମାନ କମ୍ବୋ ({current}) ଡିଲିଟ୍ କରେ ଏବଂ ସେଗୁଡ଼ିକ ବଦଳରେ ଫାଇଲ୍ ଆମଦାନି କରେ। ଏହାକୁ ପୂର୍ବାବସ୍ଥାକୁ ଫେରାଇ ହେବ ନାହିଁ।",
+    "importCombosMerge": "ମିଶାନ୍ତୁ",
+    "importCombosReplace": "ସବୁ ବଦଳାନ୍ତୁ",
+    "importCombosDone": "ଆମଦାନି ହୋଇଥିବା କମ୍ବୋ: {created}। ଛାଡ଼ାଯାଇଥିବା: {skipped}।",
+    "importCombosFailed": "କମ୍ବୋ ଆମଦାନି କରିବାରେ ବିଫଳ",
+    "importCombosWarnings": "ଚେତାବନୀ ସହିତ ଆମଦାନି ହେଲା"
   },
   "costs": {
     "title": "ଖର୍ଚ୍ଚ",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ଚାଟ୍ ଜି ପି ଟି କଷ୍ଟମ୍ କୋନେକ୍ଟର",
     "doctorChecking": "ଷ୍ଟାଟସ୍ ଯାଞ୍ଚ କରାଯାଉଛି…",
     "doctorCheck": "ଡକ୍ଟର ଷ୍ଟାଟସ୍ ଯାଞ୍ଚ କରନ୍ତୁ",
-    "fallbackRetryBackendTitle": "ଫଲବ୍ୟାକ୍ ପୁନଃଚେଷ୍ଟା backend"
+    "fallbackRetryBackendTitle": "ଫଲବ୍ୟାକ୍ ପୁନଃଚେଷ୍ଟା backend",
+    "retryDelayTitle": "ପୁନଃଚେଷ୍ଟା ବିଳମ୍ବ",
+    "retryDelayDesc": "ପ୍ରଦାତା ପୁଣି କେବେ ଚେଷ୍ଟା କରିବେ ତାହା ନ କହିଲେ ରେଟ୍-ଲିମିଟ୍ ତ୍ରୁଟି ପରେ ସଂଯୋଗ କେତେ ସମୟ ବିଶ୍ରାମ ନିଏ। ସ୍ୱୟଂଚାଳିତ ମୋଡ୍ ଅନ୍ତର୍ନିର୍ମିତ ବ୍ୟାକଅଫ୍ ବ୍ୟବହାର କରେ; ପ୍ରଦାତା ପଠାଇଥିବା ରିସେଟ୍ ସମୟ ସର୍ବଦା ପ୍ରାଧାନ୍ୟ ପାଏ।",
+    "retryDelayAuto": "ସ୍ୱୟଂଚାଳିତ",
+    "retryDelaySaved": "ପୁନଃଚେଷ୍ଟା ବିଳମ୍ବ ସଞ୍ଚୟ ହେଲା",
+    "retryDelayUpdateFailed": "ପୁନଃଚେଷ୍ଟା ବିଳମ୍ବ ଅପଡେଟ୍ କରିବାରେ ବିଫଳ"
   },
   "settings": {
     "title": "ସେଟିଂସ୍",

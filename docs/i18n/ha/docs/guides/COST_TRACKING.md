@@ -40,23 +40,31 @@ Saboda lambar ƙiyasi ce:
 
 ### Tushen farashi
 
-Kuɗaɗe suna fitowa ne daga teburin farashi da ake tantancewa bisa wannan jerin fifiko
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Ana samun kuɗaɗe daga teburin farashi da aka haɗa a [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), bisa wannan jerin fifiko (**mafi girma da farko**):
 
-1. **Sauye-sauyen mai amfani** — farashin da kuka saita a dashboard / ta hanyar `PATCH /api/pricing`.
-2. **Farashin waje da aka daidaita** — wanda aka ɗauko daga
-   `model_prices_and_context_window.json` na jama'a na LiteLLM lokacin da aka kunna daidaitawa (ana adana shi a wani
-   namespace na `pricing_synced` na daban don kada ya taɓa goge sauye-sauyenku).
-3. **Tsoffin ƙimomin da aka dasa a lamba** — waɗanda aka haɗa da OmniRoute.
+1. **Sauye-sauyen mai amfani** — farashin da aka saita a allon sarrafawa ko ta `PATCH /api/pricing` (sararin suna `pricing`).
+2. **Daidaitawar models.dev** — farashin da aka ɗauko daga `https://models.dev/api.json` (sararin suna `models_dev_pricing`).
+3. **Daidaitawar LiteLLM** — farashin da aka ɗauko daga fayil ɗin jama’a `model_prices_and_context_window.json` na LiteLLM (sararin suna `pricing_synced`).
+4. **Ƙimomin tsoho da ke cikin lamba** — farashin da ake kawowa a [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Daidaita farashin waje na buƙatar **bayyanannen amincewa**, kuma a kashe yake ta tsohuwa. Muhimman env vars
-(duba [`.env.example`](../../.env.example)):
+Ga mai samarwa/samfuri iri ɗaya, matakan da ke da fifiko mafi girma suna maye gurbin filayen da suka dace a matakan ƙasa; filayen da ba su cikin matakin sama suna iya fitowa daga ƙasa. Tsarin bai canza ba ko da ayyukan daidaitawa biyu masu zaman kansu suna gudana lokaci guda. `GET /api/pricing?includeSources=1` yana dawo da `pricing` da `sourceMap`; alamominsa ga kowane samfuri (`user`, `modelsDev`, `litellm`, `default`) suna nuna matakin fifiko mafi girma da ke ɗauke da samfurin.
 
-| Env var                 | Tsohon ƙima | Manufa                                                               |
-| ----------------------- | ----------- | -------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`     | Kunna daidaita farashin LiteLLM a bango lokacin farawa.              |
-| `PRICING_SYNC_INTERVAL` | `86400`     | Tazarar daidaitawa cikin **daƙiƙoƙi** (ta tsohuwa kullum).           |
-| `PRICING_SYNC_SOURCES`  | `litellm`   | Jerin tushe da waƙafi ya raba (a yau `litellm` kaɗai ake tallafawa). |
+Dole ne a zaɓi kunna **daidaitawar LiteLLM**; a tsoho tana kashe. Waɗannan su ne canje-canjen muhallinta (duba [`.env.example`](../../.env.example)):
+
+| Env var                 | Tsohon ƙima | Manufa                                                                          |
+| ----------------------- | ----------- | ------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`     | Yana kunna daidaitawar farashin LiteLLM a bayan fage.                           |
+| `PRICING_SYNC_INTERVAL` | `86400`     | Tazarar daidaitawa cikin **daƙiƙoƙi** (ta tsohuwa kullum).                      |
+| `PRICING_SYNC_SOURCES`  | `litellm`   | Zaɓin tushe na wannan daidaitawar kaɗai; a yanzu `litellm` kaɗai ake tallafawa. |
+
+**Daidaitawar models.dev** tana zaman kanta daga ta LiteLLM kuma ita ma a tsoho tana kashe. Kunna ta a Saituna (daidaitawar models.dev) ko amfani da waɗannan canje-canje:
+
+| Canjin muhalli             | Tsoho             | Manufa                                                                                                                                                      |
+| -------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(ba a saita ba)_ | Idan ba a saita ba, tana bin maɓallin Saituna; `1/true/on/yes` yana tilasta kunnawa, `0/false/off/no` kuma yana tilasta kashewa ko da Saituna sun kunna ta. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Tazarar tsoho ta daidaitawar models.dev a sakanni (kowace rana).                                                                                            |
+
+`PRICING_SYNC_SOURCES` **ba** ya kunna models.dev; yana sarrafa daidaitawar LiteLLM kawai. Share sauyin mai amfani ba ya share ko ɗaya daga sararin sunayen da aka daidaita; matakin farashi na gaba da yake samuwa yana aiki. Ga samfurin da ba shi da farashi, bincika saitunan daidaitawa duka biyu da `sourceMap` kafin ƙara sauyi da hannu.
 
 ### Tsarin lissafin kuɗi
 
@@ -170,16 +178,16 @@ an bayyana akasin haka.
 
 ### Farashi
 
-| Hanya    | Wurin ƙarshe            | Manufa                                                                                                                                                 |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET`    | `/api/pricing`          | Farashi da aka haɗa a halin yanzu (na mai amfani + daidaitacce + tsoffin ƙimomi). Yi amfani da `?includeSources=1` don ganin tushe ga kowace shigarwa. |
-| `PATCH`  | `/api/pricing`          | Sauya farashi don `{ provider: { model: { input, output, cached, … } } }`.                                                                             |
-| `DELETE` | `/api/pricing`          | Mayar da farashi zuwa tsoffin ƙimomi (za a iya iyakancewa ta `?provider=&model=`).                                                                     |
-| `GET`    | `/api/pricing/defaults` | Nuna tsoffin ƙimar madadin ga kowane miliyan 1.                                                                                                        |
-| `GET`    | `/api/pricing/models`   | Farashin da aka tsara bisa samfuri.                                                                                                                    |
-| `POST`   | `/api/pricing/sync`     | Fara daidaitawa da hannu daga tushe na waje (LiteLLM).                                                                                                 |
-| `GET`    | `/api/pricing/sync`     | Matsayin daidaitawa na yanzu.                                                                                                                          |
-| `DELETE` | `/api/pricing/sync`     | Share duk bayanan farashin da aka daidaita.                                                                                                            |
+| Hanya    | Wurin ƙarshe            | Manufa                                                                                                                                                                        |
+| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Farashin da aka haɗa daga matakai huɗu (mai amfani, models.dev, LiteLLM, tsoho). `?includeSources=1` yana dawo da `pricing` + `sourceMap`.                                    |
+| `PATCH`  | `/api/pricing`          | Sauya farashi don `{ provider: { model: { input, output, cached, … } } }`.                                                                                                    |
+| `DELETE` | `/api/pricing`          | Yana cire sauye-sauyen farashi na mai amfani (ana iya iyakancewa da `?provider=&model=`); farashin da aka daidaita ko tsohon farashin cikin lamba suna nan a matsayin madadi. |
+| `GET`    | `/api/pricing/defaults` | Nuna tsoffin ƙimar madadin ga kowane miliyan 1.                                                                                                                               |
+| `GET`    | `/api/pricing/models`   | Farashin da aka tsara bisa samfuri.                                                                                                                                           |
+| `POST`   | `/api/pricing/sync`     | Fara daidaitawa da hannu daga tushe na waje (LiteLLM).                                                                                                                        |
+| `GET`    | `/api/pricing/sync`     | Matsayin daidaitawa na yanzu.                                                                                                                                                 |
+| `DELETE` | `/api/pricing/sync`     | Yana share farashin da aka daidaita daga LiteLLM kawai (`pricing_synced`); bayanan models.dev suna daban.                                                                     |
 
 ### Sauran wuraren ƙarshe masu alaƙa da kuɗi
 

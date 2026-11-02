@@ -887,7 +887,7 @@ Firecrawli otsingu maksumus registreeritakse 10 tagastatud tulemuse alustatud pl
 ajatempel) ja Tavily saab `start_date` (`YYYY-MM-DD`). Võtmes `provider_options` otseselt määratud kuupäev
 alistab vastendatud kuupäeva.
 
-Exa tulemused säilitavad väljad `id`, `highlight_scores`, `summary`, `subpages`, `entities` ja `extras`
+Exa tulemused säilitavad väljad `id`, `highlights` (kõik esiletõstetud väljavõtted, mitte ainult esimene, mida kasutatakse väljal `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ja `extras`
 väljas `provider_raw`. Tavily tulemused säilitavad väljad `images` ja `favicon`.
 
 Linkup-otsingu maksumus registreeritakse `depth` `fast` ja `standard` puhul 0,005 dollarit ning `deep` ( [linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) puhul 0,05 dollarit, olenemata sellest, kas `depth` pärineb `provider_options` või ühenduse seadetest.
@@ -1296,11 +1296,29 @@ otsused; teine etapp saab endiselt väljastada nõutud nähtava arutluse tavatek
 
 | Lõpp-punkt            | Meetod   | Kirjeldus                           |
 | --------------------- | -------- | ----------------------------------- |
+| `/api/models`         | GET/PUT  | Mudelite loend / aliase uuendamine  |
 | `/api/models/alias`   | GET/POST | Mudelite aliased                    |
 | `/api/models/catalog` | GET      | Kõik mudelid pakkuja ja tüübi järgi |
 | `/api/combos*`        | Erinevad | Kombinatsioonide haldus             |
 | `/api/keys*`          | Erinevad | API-võtmete haldus                  |
 | `/api/pricing`        | GET      | Mudelite hinnakiri                  |
+
+#### Mudeli piirangute päritolu
+
+`GET /api/models?withLimits=1` (sobib ka `true`; `0`/`false` või parameetri ärajätmine jätab vaikevastuse muutmata) lisab igale mudelireale väljad `contextWindow`, `maxInputTokens`, `maxOutputTokens` ja objekti `capsSource`. `capsSource` nimetab iga piirangu määranud reegli, et näiteks 1M mudeli ootamatu 128k piirangu päritolu oleks jälgitav. Leitud väärtused on samad, mida kasutab marsruutimine; lipp ainult lisab välju ega muuda kunagi väärtust. Kõik muud `withLimits` väärtused lükatakse tagasi koodiga `400`.
+
+| `capsSource` väärtus                         | Päritolu                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `override:context`                           | Püsivalt salvestatud kontekstiakna ülekirjutus (`model_context_overrides`)           |
+| `override:max_input` / `override:max_output` | Püsivalt salvestatud võimekuste `max_input_tokens` / `max_output_tokens` ülekirjutus |
+| `static-authoritative:<provider>/<model>`    | Staatiline autoriteetne kontekstiakende tabel                                        |
+| `synced:<provider>/<model>`                  | models.dev teenusest sünkroonitud võimekuste rida                                    |
+| `registry:<provider>/<model>`                | Pakkujate registri kirje                                                             |
+| `spec:<model>`                               | Staatiline mudelispetsifikatsioon                                                    |
+| `effort-base:` eesliide                      | Pingutuse taseme järelliitega variandi baasmudelilt laenatud rida                    |
+| `none`                                       | Ükski allikas ei määra piirangut (väärtus on `null`)                                 |
+
+Teostus: `getResolvedModelCapabilitiesWithLimitSources()` failis `src/lib/modelCapabilities.ts` ning prioriteediahelad failis `src/lib/modelCapabilityLimits.ts`.
 
 ### Kasutus ja analüütika
 

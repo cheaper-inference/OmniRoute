@@ -10,6 +10,8 @@ OmniRoute dispose de trois mécanismes de résilience distincts mais liés. Chac
 
 > Source : [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Priorité entre environnement et tableau de bord pour les options de résilience.** Les options de résilience à activation volontaire initialisées depuis l’environnement — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — fournissent uniquement la _valeur par défaut_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Un booléen persisté dans `resilienceSettings` (Tableau de bord → **Paramètres → Résilience** / `PATCH /api/resilience`, stocké dans `key_value`) prévaut sur l’environnement : la normalisation (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) conserve le booléen enregistré dès qu’il existe. Définir une telle variable d’environnement sur `true` alors que le tableau de bord a déjà enregistré `false` ne change donc rien : modifiez l’option dans **Paramètres → Résilience**, ou effacez le champ enregistré.
+
 ## 1. Disjoncteur fournisseur
 
 **Portée :** l'ensemble du fournisseur (par ex. `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ En dessous du seuil, le fournisseur n'est **pas** considéré comme en refroidis
 - Base clé API : 3 s
 - Clé API 429 : privilégie les en-têtes amont `Retry-After`/de réinitialisation/le texte de réinitialisation analysable
 - Backoff : `baseCooldownMs * 2 ** failureIndex`
+
+**Délai de nouvelle tentative par fournisseur.** La page détaillée du fournisseur comporte un sélecteur **Délai de nouvelle tentative** (Automatique, de 15s à 1h). Il enregistre `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, via `PATCH /api/resilience`). Lorsqu’une erreur de limitation du débit ne comporte aucune indication de délai provenant du service amont, cette valeur remplace le délai progressif ajusté du fournisseur et remet `backoffLevel` à 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Pour une erreur de limitation du débit, la priorité décroissante est : indication de délai amont, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` propre à la connexion, délai du fournisseur, variable d’environnement `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, puis délai progressif ajusté. Automatique supprime le champ. Cela concerne uniquement le motif de limitation du débit, jamais les états terminaux.
 
 **Protection anti-thundering-herd :** empêche des échecs simultanés de prolonger excessivement le cooldown ou d'incrémenter deux fois `backoffLevel`.
 
@@ -565,7 +569,7 @@ complète avant de pouvoir abandonner. Il compte les deltas de texte des
 conservative en octets UTF-8), ignore les événements vides ou ne contenant que
 des données d'usage, et suspend son jugement tant que des événements d'appel
 d'outil ou de raisonnement sont en cours. Il est désactivé par défaut et peut
-être activé avec `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` ; la fenêtre, le
+être activé avec `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (cette valeur d’environnement définit seulement la valeur par défaut : le booléen enregistré dans `resilienceSettings.streamRecovery.throughputWatchdog.enabled` prévaut ; voir la note sur la priorité entre environnement et tableau de bord au début de ce guide) ; la fenêtre, le
 préchauffage, le débit minimum et la sortie mesurable minimale sont bornés par
 la couche normale de normalisation des paramètres de résilience.
 

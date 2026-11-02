@@ -10,6 +10,8 @@ OmniRoutessa on kolme erillistä mutta toisiinsa liittyvää resilienttisyysmeka
 
 > Lähde: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Ympäristön ja hallintapaneelin etusija häiriönsiedon valitsimissa.** Ympäristöstä alustetut, erikseen käyttöön otettavat häiriönsiedon valitsimet — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — antavat vain _oletusarvon_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Pysyvästi `resilienceSettings`-asetuksiin tallennettu totuusarvo (Hallintapaneeli → **Asetukset → Häiriönsieto** / `PATCH /api/resilience`, tallennuspaikka `key_value`) ohittaa ympäristön arvon: normalisointi (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) säilyttää tallennetun totuusarvon aina, kun sellainen on olemassa. Jos hallintapaneeli on jo tallentanut arvon `false`, vastaavan ympäristömuuttujan asettaminen arvoon `true` käyttöönotossa ei siis muuta mitään. Muuta valitsinta kohdassa **Asetukset → Häiriönsieto** tai poista tallennettu kenttä.
+
 ## 1. Palveluntarjoajan circuit breaker
 
 **Laajuus:** koko palveluntarjoaja (esim. `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ Kynnyksen alapuolella palveluntarjoajaa **ei** pidetä jäähdytyksessä; onnist
 - API-avaimen perustaso: 3 s
 - API-avain 429: suosii alkuperäispalvelun `Retry-After`-/reset-otsikoita/jäsennettävää reset-tekstiä
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Palveluntarjoajakohtainen uudelleenyritysviive.** Palveluntarjoajan tietosivulla on **Uudelleenyritysviive**-valitsin (Automaattinen, 15s–1h). Se tallentaa arvon `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 rajapinnan `PATCH /api/resilience` kautta). Jos nopeusrajoitusvirhe ei sisällä ylemmän palvelun uudelleenyritysohjetta, tämä arvo korvaa palveluntarjoajan skaalatun kasvavan odotusajan ja palauttaa kentän `backoffLevel` arvoon 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Nopeusrajoitusvirheen etusijajärjestys korkeimmasta alkaen: ylemmän palvelun uudelleenyritysohje, yhteyskohtainen `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, palveluntarjoajan uudelleenyritysviive, ympäristömuuttuja `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` ja skaalattu kasvava odotusaika. Automaattinen poistaa kentän. Tämä vaikuttaa vain nopeusrajoituksesta johtuvaan syyhyn, ei koskaan päättäviin tiloihin.
 
 **Thundering herd -suojaus:** estää samanaikaisia virheitä pidentämästä jäähdytysjaksoa liikaa tai kasvattamasta `backoffLevel`-arvoa kahteen kertaan.
 
@@ -618,7 +622,7 @@ voi keskeyttää. Se laskee tekstideltat Chat Completions- ja Responses API
 -tulostetapahtumista (konservatiivinen UTF-8-tavukorvike), ohittaa vain käyttötietoja
 sisältävät ja tyhjät tapahtumat ja keskeyttää arvioinnin, kun työkalukutsu- tai
 päättelytapahtumia on käynnissä. Se on oletuksena pois käytöstä, ja sen voi ottaa
-käyttöön asetuksella `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; ikkunan, lämmittelyn,
+käyttöön asetuksella `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ympäristön arvo antaa vain oletusarvon — tallennettu `resilienceSettings.streamRecovery.throughputWatchdog.enabled`-totuusarvo on ensisijainen; katso tämän oppaan alun huomautus ympäristön ja hallintapaneelin etusijasta); ikkunan, lämmittelyn,
 vähimmäisnopeuden ja vähimmäismittattavan tulosteen rajat määräytyvät normaalin
 resilience-asetusten normalisointikerroksen mukaan.
 

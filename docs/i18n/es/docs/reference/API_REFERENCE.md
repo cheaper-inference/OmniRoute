@@ -863,7 +863,7 @@ El campo genérico `time_range` ahora llega a ambos proveedores: Exa recibe `sta
 ISO) y Tavily recibe `start_date` (`YYYY-MM-DD`). Una fecha explícita en `provider_options`
 anula la fecha asignada.
 
-Los resultados de Exa conservan `id`, `highlight_scores`, `summary`, `subpages`, `entities` y `extras` en
+Los resultados de Exa conservan `id`, `highlights` (todos los fragmentos destacados, no solo el primero usado como `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` y `extras` en
 `provider_raw`. Los resultados de Tavily conservan `images` y `favicon`.
 
 Linkup: El costo de búsqueda de enlace se registra en $0,005 para `depth` `fast` y `standard` y $0,05 para `deep` ( [precio de enlace](https://docs.linkup.so/pages/documentation/development/pricing) ), ya sea que `depth` provenga de `provider_options` o de la configuración de la conexión.
@@ -1272,13 +1272,31 @@ de permisos del servicio ascendente; la segunda etapa aún puede generar el razo
 
 ### Enrutamiento y configuración
 
-| Endpoint              | Método   | Descripción                            |
-| --------------------- | -------- | -------------------------------------- |
-| `/api/models/alias`   | GET/POST | Alias de modelos                       |
-| `/api/models/catalog` | GET      | Todos los modelos por proveedor + tipo |
-| `/api/combos*`        | Varios   | Gestión de combos                      |
-| `/api/keys*`          | Varios   | Gestión de claves de API               |
-| `/api/pricing`        | GET      | Precios de los modelos                 |
+| Endpoint              | Método   | Descripción                               |
+| --------------------- | -------- | ----------------------------------------- |
+| `/api/models`         | GET/PUT  | Lista de modelos / actualización de alias |
+| `/api/models/alias`   | GET/POST | Alias de modelos                          |
+| `/api/models/catalog` | GET      | Todos los modelos por proveedor + tipo    |
+| `/api/combos*`        | Varios   | Gestión de combos                         |
+| `/api/keys*`          | Varios   | Gestión de claves de API                  |
+| `/api/pricing`        | GET      | Precios de los modelos                    |
+
+#### Procedencia de los límites del modelo
+
+`GET /api/models?withLimits=1` (también `true`; `0`/`false` u omitir el parámetro conserva la respuesta predeterminada) añade `contextWindow`, `maxInputTokens`, `maxOutputTokens` y un objeto `capsSource` a cada fila de modelo. `capsSource` identifica la regla que proporcionó cada límite, para rastrear valores inesperados, como 128k en un modelo de 1M. Los valores resueltos son los mismos que utiliza el enrutamiento; la opción solo añade campos y nunca cambia un valor. Cualquier otro valor de `withLimits` se rechaza con `400`.
+
+| `capsSource` valor                           | Origen                                                                           |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| `override:context`                           | Anulación persistida de la ventana de contexto (`model_context_overrides`)       |
+| `override:max_input` / `override:max_output` | Anulación persistida de las capacidades `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Tabla estática autoritativa de ventanas de contexto                              |
+| `synced:<provider>/<model>`                  | Fila de capacidades sincronizada desde models.dev                                |
+| `registry:<provider>/<model>`                | Entrada del registro de proveedores                                              |
+| `spec:<model>`                               | Especificación estática del modelo                                               |
+| `effort-base:` prefijo                       | Fila tomada del modelo base de una variante con sufijo de esfuerzo               |
+| `none`                                       | Ninguna fuente declara el límite (el valor es `null`)                            |
+
+Implementación: `getResolvedModelCapabilitiesWithLimitSources()` en `src/lib/modelCapabilities.ts` y las cadenas de precedencia de `src/lib/modelCapabilityLimits.ts`.
 
 ### Uso y análisis
 

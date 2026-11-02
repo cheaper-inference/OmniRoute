@@ -10,6 +10,8 @@ OmniRoute ima tri različita, ali povezana mehanizma otpornosti. Svaki ima druga
 
 > Izvor: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Предност окружења и контролне табле за прекидаче отпорности.** Опциони прекидачи иницијализовани из окружења — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — дају само _подразумевану вредност_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Логичка вредност трајно сачувана у `resilienceSettings` (Контролна табла → **Подешавања → Отпорност** / `PATCH /api/resilience`, смештена у `key_value`) има предност над окружењем: нормализација (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) задржава постојећу сачувану логичку вредност. Зато подешавање променљиве окружења на `true`, када је табла већ сачувала `false`, не мења ништа — промените прекидач у **Подешавања → Отпорност** или обришите сачувано поље.
+
 ## 1. Prekidač kola provajdera (circuit breaker)
 
 **Opseg:** ceo provajder (npr. `glm`, `openai`, `anthropic`).
@@ -91,6 +93,8 @@ Zaštita od regresije: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API-ključ osnovni: 3s
 - API-ključ 429: daje prednost upstream `Retry-After`/reset zaglavljima/tekstu o resetovanju koji se može parsirati
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Одлагање поновног покушаја по провајдеру.** Страница провајдера има избор **Одлагање поновног покушаја** (Auto, од 15s до 1h). Чува `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 преко `PATCH /api/resilience`). Када грешка ограничења учесталости нема узводни наговештај поновног покушаја, вредност замењује растуће одлагање провајдера и поставља `backoffLevel` на 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Приоритет од највишег: узводни наговештај, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` везе, одлагање провајдера, променљива `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, растуће одлагање. Auto уклања поље. Утиче само на разлог ограничења учесталости, никада на крајња стања.
 
 **Zaštita od thundering-herd efekta:** sprečava da istovremeni neuspesi prekomerno produže cooldown ili dvostruko uvećaju `backoffLevel`.
 
@@ -511,7 +515,7 @@ Zaštita od ograničenja brzine po konekciji prati se putem bulovskog polja `rat
 него што може да прекине. Броји делта текста из догађаја излаза Chat Completions и Responses API
 (конзервативни прокси у бајтовима UTF-8), игнорише догађаје само са употребом и празне догађаје и
 обуставља просуђивање док су догађаји позива алата или резоновања у току. Подразумевано је онемогућен и може се
-омогућити помоћу `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; прозор, загревање, минимална стопа и минимални мерљиви излаз
+омогућити помоћу `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (та вредност окружења задаје само подразумевану вредност — сачувана логичка вредност `resilienceSettings.streamRecovery.throughputWatchdog.enabled` има предност; погледајте напомену о предности окружења и табле на почетку водича); прозор, загревање, минимална стопа и минимални мерљиви излаз
 ограничени су нормалним слојем нормализације подешавања отпорности.
 
 Када је омогућен, прекид од стране надзорника примењује се само на активни покушај узводног сервера. Пре

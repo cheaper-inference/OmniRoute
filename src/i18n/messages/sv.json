@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Detta kommer att ta en ögonblicksbild av de för närvarande anslutna leverantörerna/modellerna som matchar denna mall i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering av automatisk kombination misslyckades:",
     "duplicateAutoComboUnknownError": "Okänt fel",
-    "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}"
+    "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}",
+    "exportCombos": "Exportera",
+    "exportCombosFailed": "Det gick inte att exportera combos",
+    "importCombos": "Importera",
+    "importCombosTitle": "Importera combos",
+    "importCombosInvalidFile": "Den här filen är inte en giltig combo-export.",
+    "importCombosSummary": "Combos i filen: {total} ({fresh} nya, {conflicting} med ett namn som redan finns).",
+    "importCombosMergeHint": "Sammanfoga behåller alla befintliga combos och hoppar över de vars namn redan finns. Anslutningar och inloggningsuppgifter importeras aldrig.",
+    "importCombosReplaceHint": "Ersätt alla tar bort dina befintliga combos ({current}) och importerar filen i stället. Detta kan inte ångras.",
+    "importCombosMerge": "Sammanfoga",
+    "importCombosReplace": "Ersätt alla",
+    "importCombosDone": "Importerade combos: {created}. Överhoppade: {skipped}.",
+    "importCombosFailed": "Det gick inte att importera combos",
+    "importCombosWarnings": "Importerat med varningar"
   },
   "costs": {
     "title": "Kostnader",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ChatGPT anpassad koppling",
     "doctorChecking": "Kontrollerar status…",
     "doctorCheck": "Kontrollera läkarestatus",
-    "fallbackRetryBackendTitle": "Reserverad återförsöksbackend"
+    "fallbackRetryBackendTitle": "Reserverad återförsöksbackend",
+    "retryDelayTitle": "Fördröjning före nytt försök",
+    "retryDelayDesc": "Hur länge en anslutning vilar efter ett hastighetsbegränsningsfel när leverantören inte anger när det ska försökas igen. Automatiskt använder den inbyggda backoffen; en återställningstid som leverantören skickar har alltid företräde.",
+    "retryDelayAuto": "Automatiskt",
+    "retryDelaySaved": "Fördröjning före nytt försök sparad",
+    "retryDelayUpdateFailed": "Det gick inte att uppdatera fördröjningen före nytt försök"
   },
   "settings": {
     "title": "Inställningar",

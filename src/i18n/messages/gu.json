@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "આ ટેમપ્લેટ સાથે મેચ થતા વર્તમાન જોડાયેલા પ્રદાતાઓ/મોડેલને સંપાદનીય કોમ્બોમાં સ્નેપશોટ લેશે.",
     "duplicateAutoComboFailedPrefix": "ઓટોકોમ્બો ડુપ્લિકેટ કરવામાં નિષ્ફળ:",
     "duplicateAutoComboUnknownError": "અજ્ઞાત ભૂલ",
-    "duplicateAutoComboTitle": "{name} માંથી સ્ટેટિક કોમ્બો બનાવો"
+    "duplicateAutoComboTitle": "{name} માંથી સ્ટેટિક કોમ્બો બનાવો",
+    "exportCombos": "નિકાસ કરો",
+    "exportCombosFailed": "કોમ્બો નિકાસ કરવામાં નિષ્ફળ",
+    "importCombos": "આયાત કરો",
+    "importCombosTitle": "કોમ્બો આયાત કરો",
+    "importCombosInvalidFile": "આ ફાઇલ માન્ય કોમ્બો નિકાસ નથી.",
+    "importCombosSummary": "ફાઇલમાં કોમ્બો: {total} ({fresh} નવા, {conflicting} એવા નામ સાથે જે પહેલેથી અસ્તિત્વમાં છે).",
+    "importCombosMergeHint": "મર્જ બધા હાલના કોમ્બો રાખે છે અને જેનું નામ પહેલેથી અસ્તિત્વમાં છે તેને છોડી દે છે. કનેક્શન અને ઓળખપત્રો ક્યારેય આયાત થતા નથી.",
+    "importCombosReplaceHint": "બધું બદલો તમારા હાલના કોમ્બો ({current}) કાઢી નાખે છે અને તેના બદલે ફાઇલ આયાત કરે છે. આ પૂર્વવત્ કરી શકાતું નથી.",
+    "importCombosMerge": "મર્જ કરો",
+    "importCombosReplace": "બધું બદલો",
+    "importCombosDone": "આયાત થયેલા કોમ્બો: {created}. છોડેલા: {skipped}.",
+    "importCombosFailed": "કોમ્બો આયાત કરવામાં નિષ્ફળ",
+    "importCombosWarnings": "ચેતવણીઓ સાથે આયાત થયું"
   },
   "costs": {
     "title": "ખર્ચ",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ChatGPT કસ્ટમ કનેક્ટર",
     "doctorChecking": "સ્થિતિ તપાસવામાં…",
     "doctorCheck": "ડૉક્ટર સ્થિતિ તપાસો",
-    "fallbackRetryBackendTitle": "ફોલબેક રીટ્રી બેકએન્ડ"
+    "fallbackRetryBackendTitle": "ફોલબેક રીટ્રી બેકએન્ડ",
+    "retryDelayTitle": "ફરી પ્રયાસમાં વિલંબ",
+    "retryDelayDesc": "પ્રદાતા ફરી ક્યારે પ્રયાસ કરવો તે ન જણાવે ત્યારે રેટ-લિમિટ ભૂલ પછી કનેક્શન કેટલો સમય આરામ કરે છે. સ્વચાલિત મોડ બિલ્ટ-ઇન બેકઓફનો ઉપયોગ કરે છે; પ્રદાતાએ મોકલેલો રીસેટ સમય હંમેશા અગ્રતા ધરાવે છે.",
+    "retryDelayAuto": "સ્વચાલિત",
+    "retryDelaySaved": "ફરી પ્રયાસનો વિલંબ સાચવ્યો",
+    "retryDelayUpdateFailed": "ફરી પ્રયાસનો વિલંબ અપડેટ કરવામાં નિષ્ફળ"
   },
   "settings": {
     "title": "સેટિંગ્સ",

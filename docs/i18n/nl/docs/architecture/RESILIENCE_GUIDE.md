@@ -10,6 +10,8 @@ OmniRoute heeft drie verschillende maar verwante veerkrachtmechanismen. Elk heef
 
 > Bron: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Voorrang van omgeving en dashboard bij veerkrachtschakelaars.** De optionele veerkrachtschakelaars die vanuit de omgeving worden geïnitialiseerd — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — leveren uitsluitend de _standaardwaarde_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Een boolean die is opgeslagen in `resilienceSettings` (Dashboard → **Instellingen → Veerkracht** / `PATCH /api/resilience`, opgeslagen in `key_value`) heeft voorrang op de omgevingswaarde: de normalisatie (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) behoudt een bestaande opgeslagen boolean. Zo’n omgevingsvariabele op `true` zetten verandert dus niets als het dashboard in die installatie al `false` heeft opgeslagen. Wijzig de schakelaar in **Instellingen → Veerkracht**, of wis het opgeslagen veld.
+
 ## 1. Provider Circuit Breaker
 
 **Bereik:** volledige provider (bijv. `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ Onder de drempel wordt de provider **niet** als afkoelend beschouwd; een succes 
 - API-sleutel-basis: 3s
 - API-sleutel-429: geeft voorkeur aan upstream `Retry-After`/reset-headers/parseerbare reset-tekst
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Wachttijd voor nieuwe pogingen per provider.** De detailpagina van de provider heeft een keuzelijst **Wachttijd voor nieuwe pogingen** (Auto, van 15s tot 1h). Deze slaat `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` op (1–21600, via `PATCH /api/resilience`). Als een fout wegens een frequentielimiet geen upstream-aanwijzing voor een nieuwe poging bevat, vervangt deze waarde de geschaalde backoff voor de provider en zet ze `backoffLevel` terug op 0 (`open-sse/services/rotationConfig.ts::overrideFor`). De prioriteit bij zo’n fout, van hoog naar laag: upstream-aanwijzing, dan `providerSpecificData.rotationOverrides.rateLimitResetSeconds` per verbinding, dan de wachttijd van de provider, dan de omgevingsvariabele `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, en ten slotte de geschaalde backoff. Auto verwijdert het veld. Dit beïnvloedt alleen de reden frequentielimiet, nooit terminale toestanden.
 
 **Thundering-herd-bescherming:** voorkomt dat gelijktijdige fouten de cooldown te ver verlengen of `backoffLevel` dubbel ophogen.
 
@@ -595,7 +599,7 @@ De watchdog vereist een opwarmperiode gevolgd door een volledig rollend venster 
 hij kan afbreken. Hij telt tekst-delta's uit Chat Completions- en Responses API-output-events
 (een conservatieve UTF-8-byte-proxy), negeert events met alleen usage en lege events, en
 stelt het oordeel uit zolang er tool-call- of reasoning-events in behandeling zijn. Hij is standaard
-uitgeschakeld en kan worden ingeschakeld met `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`;
+uitgeschakeld en kan worden ingeschakeld met `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (die omgevingswaarde levert alleen de standaardwaarde; een opgeslagen boolean in `resilienceSettings.streamRecovery.throughputWatchdog.enabled` heeft voorrang; zie de opmerking over omgeving en dashboard bovenaan deze handleiding);
 het venster, de opwarmperiode, het minimumtempo en de minimale meetbare output worden
 begrensd door de normale normalisatielaag voor resilience-instellingen.
 

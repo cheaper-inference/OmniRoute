@@ -10,6 +10,8 @@ OmniRoute ima tri ločene, a med seboj povezane mehanizme odpornosti. Vsak ima d
 
 > Vir: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Prednost okolja in nadzorne plošče pri stikalih odpornosti.** Izbirna stikala z začetnimi vrednostmi iz okolja — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — določijo samo _privzeto vrednost_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Logična vrednost, shranjena v `resilienceSettings` (Nadzorna plošča → **Nastavitve → Odpornost** / `PATCH /api/resilience`, shranjena v `key_value`), prevlada nad okoljem: normalizacija (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) ohrani obstoječo shranjeno logično vrednost. Če je plošča že shranila `false`, nastavitev okolja na `true` ničesar ne spremeni — spremenite stikalo v **Nastavitve → Odpornost** ali počistite shranjeno polje.
+
 ## 1. Prekinjevalnik vezja ponudnika
 
 **Obseg:** celoten ponudnik (npr. `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ Pod pragom ponudnik **ne** velja za ohlajenega; uspeh okno počisti. Vnosi na ra
 - Osnova API-ključ: 3 s
 - API-ključ 429: ima prednost izvorne glave `Retry-After`/ponastavitvene glave/razčlenljivo besedilo ponastavitve
 - Umik: `baseCooldownMs * 2 ** failureIndex`
+
+**Zamik ponovitve po ponudniku.** Stran ponudnika ima izbiro **Zamik ponovitve** (Auto, od 15s do 1h). Shrani `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 prek `PATCH /api/resilience`). Če napaka omejevanja zahtev ne vsebuje napotka nadrejenega strežnika za ponovitev, ta vrednost nadomesti stopnjevani zamik ponudnika in ponastavi `backoffLevel` na 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Vrstni red od najvišje prednosti: napotek strežnika, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` povezave, zamik ponudnika, spremenljivka `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, stopnjevani zamik. Auto odstrani polje. Vpliva le na razlog omejevanja zahtev, nikoli na končna stanja.
 
 **Zaščita pred učinkom »thundering herd«:** preprečuje, da bi sočasne odpovedi prekomerno podaljšale premor ali dvakrat povečale `backoffLevel`.
 
@@ -600,7 +604,7 @@ okno. Šteje besedilne delte iz izhodnih dogodkov Chat Completions in Responses
 API (konzervativni približek bajtov UTF-8), prezre dogodke samo s podatki o
 porabi in prazne dogodke ter odloži presojo, dokler so v teku dogodki klicov
 orodij ali sklepanja. Privzeto je onemogočen, omogočite pa ga z
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; okno, ogrevanje, najmanjšo hitrost in
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ta vrednost okolja določi le privzeto vrednost — shranjena logična vrednost `resilienceSettings.streamRecovery.throughputWatchdog.enabled` ima prednost; glejte opombo o prednosti okolja in nadzorne plošče na začetku vodnika); okno, ogrevanje, najmanjšo hitrost in
 najmanjši merljiv izhod omejuje običajna plast normalizacije nastavitev
 odpornosti.
 

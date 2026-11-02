@@ -10,6 +10,8 @@ OmniRoute har tre distinkte, men relaterte resiliensmekanismer. Hver har et ulik
 
 > Kilde: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Prioritet mellom miljø og kontrollpanel for robusthetsbrytere.** De valgfrie robusthetsbryterne som initialiseres fra miljøet — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — angir bare _standardverdien_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). En boolsk verdi lagret i `resilienceSettings` (Kontrollpanel → **Innstillinger → Robusthet** / `PATCH /api/resilience`, lagret i `key_value`) har forrang fremfor miljøverdien: normaliseringen (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) beholder den lagrede boolske verdien når den finnes. Å sette en slik miljøvariabel til `true` på en installasjon der kontrollpanelet allerede har lagret `false`, endrer derfor ingenting. Endre bryteren i **Innstillinger → Robusthet**, eller fjern det lagrede feltet.
+
 ## 1. Leverandør-circuit breaker
 
 **Omfang:** hele leverandøren (f.eks. `glm`, `openai`, `anthropic`).
@@ -94,6 +96,8 @@ Regresjonsvakt: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API-nøkkel-basis: 3s
 - API-nøkkel 429: foretrekker oppstrøms `Retry-After`/tilbakestillingsheadere/parserbar tilbakestillingstekst
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Ventetid før nytt forsøk per leverandør.** Detaljsiden for leverandøren har en valgliste for **Ventetid før nytt forsøk** (Auto, fra 15s til 1h). Den lagrer `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, gjennom `PATCH /api/resilience`). Når en feil for frekvensbegrensning mangler et retry-hint fra oppstrømstjenesten, erstatter denne verdien leverandørens skalerte backoff og setter `backoffLevel` tilbake til 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Prioriteten ved en slik feil, høyest først: oppstrøms retry-hint, deretter `providerSpecificData.rotationOverrides.rateLimitResetSeconds` for forbindelsen, så leverandørens ventetid, så miljøvariabelen `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, og til slutt skalert backoff. Auto fjerner feltet. Dette gjelder bare årsaken frekvensbegrensning, aldri terminale tilstander.
 
 **Vern mot «thundering herd»:** forhindrer at samtidige feil forlenger nedkjølingen for mye eller øker `backoffLevel` dobbelt.
 
@@ -607,7 +611,7 @@ Ratebegrensningsbeskyttelse per tilkobling spores via det boolske feltet `rateLi
 
 Den valgfrie `resilienceSettings.streamRecovery.throughputWatchdog`-beskyttelsen oppdager en upstream som fortsatt sender chunks, men som produserer assistent-output under den konfigurerte raten for nyttig output. Den er bevisst adskilt fra inaktivitetstidsavbruddet: heartbeats og metadata tilbakestiller ingen av timerne og teller ikke som fremdrift. Den er også adskilt fra den harde forsøksfristen (#9153), som forblir et absolutt sikkerhetstak uavhengig av output-kvalitet.
 
-Vakthunden krever en oppvarmingsperiode etterfulgt av et komplett rullerende vindu før den kan avbryte. Den teller tekstdeltaer fra Chat Completions- og Responses API-outputhendelser (en konservativ UTF-8-byte-proxy), ignorerer hendelser som kun inneholder bruksdata samt tomme hendelser, og utsetter vurderingen mens verktøykall- eller resonneringshendelser er underveis. Den er deaktivert som standard og kan aktiveres med `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; vinduet, oppvarmingen, minimumsraten og minimum målbar output avgrenses av det vanlige normaliseringslaget for resilience-innstillinger.
+Vakthunden krever en oppvarmingsperiode etterfulgt av et komplett rullerende vindu før den kan avbryte. Den teller tekstdeltaer fra Chat Completions- og Responses API-outputhendelser (en konservativ UTF-8-byte-proxy), ignorerer hendelser som kun inneholder bruksdata samt tomme hendelser, og utsetter vurderingen mens verktøykall- eller resonneringshendelser er underveis. Den er deaktivert som standard og kan aktiveres med `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (miljøverdien angir bare standardverdien; en lagret boolsk verdi i `resilienceSettings.streamRecovery.throughputWatchdog.enabled` har forrang; se merknaden om miljø og kontrollpanel øverst i denne veiledningen); vinduet, oppvarmingen, minimumsraten og minimum målbar output avgrenses av det vanlige normaliseringslaget for resilience-innstillinger.
 
 Når den er aktivert, anvendes et vakthundsavbrudd kun på det aktive upstream-forsøket. Før noen klientsynlige bytes kan den eksisterende tidliggjenopprettingsstien for samme konto gjenåpne forsøket. Etter commit spilles strømmen aldri blindt av på nytt; bare den eksisterende sikre kontrakten for fortsettelse midt i strømmen kan sy sammen et suffiks. Finaliseringen forblir en engangsoperasjon, slik at bruksregnskap og semaforfrigjøring ikke dupliseres.
 

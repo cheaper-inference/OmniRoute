@@ -10,6 +10,8 @@
 
 > Источник: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Приоритет среды и панели для переключателей устойчивости.** Включаемые по желанию переключатели, инициализируемые из среды — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — задают только _значение по умолчанию_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Логическое значение, сохранённое в `resilienceSettings` (Панель → **Настройки → Устойчивость** / `PATCH /api/resilience`, хранение в `key_value`), важнее переменной среды: нормализация (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) сохраняет имеющееся логическое значение. Поэтому установка переменной среды в `true`, если панель уже сохранила `false`, ничего не меняет — переключите настройку в **Настройки → Устойчивость** либо удалите сохранённое поле.
+
 ## 1. Circuit Breaker провайдера
 
 **Область действия:** провайдер целиком (например, `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@
 - API-ключ, базовый: 3 с
 - API-ключ 429: предпочитает заголовки `Retry-After`/reset от апстрима или парсящийся текст о времени сброса
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Задержка повторной попытки для провайдера.** На странице провайдера есть выбор **Задержка повтора** (Auto, от 15s до 1h). Он сохраняет `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 через `PATCH /api/resilience`). Если ошибка ограничения частоты не содержит указания upstream о повторе, это значение заменяет нарастающую задержку провайдера и сбрасывает `backoffLevel` в 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Приоритет от высшего к низшему: указание upstream, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` соединения, задержка провайдера, переменная `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, нарастающая задержка. Auto удаляет поле. Это влияет только на причину ограничения частоты, но никогда на терминальные состояния.
 
 **Защита от «thundering herd»:** не позволяет одновременным сбоям чрезмерно продлевать кулдаун или дважды увеличивать `backoffLevel`.
 
@@ -515,7 +519,7 @@ heartbeat-сообщения и метаданные не сбрасывают �
 по байтам UTF-8), игнорирует события, содержащие только usage, и пустые события, а
 также приостанавливает оценку, пока в обработке находятся события вызова инструментов
 или рассуждений. По умолчанию он отключён и может быть включён с помощью
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; окно, прогрев, минимальная скорость и
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (эта переменная среды задаёт только значение по умолчанию — сохранённое логическое значение `resilienceSettings.streamRecovery.throughputWatchdog.enabled` имеет приоритет; см. примечание о приоритете среды и панели в начале руководства); окно, прогрев, минимальная скорость и
 минимальный измеримый вывод ограничиваются обычным слоем нормализации настроек
 устойчивости.
 

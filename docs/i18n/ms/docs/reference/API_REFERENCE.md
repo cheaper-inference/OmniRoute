@@ -887,7 +887,7 @@ Kos carian Firecrawl direkodkan setiap blok permulaan bagi 10 hasil yang dikemba
 ISO) dan Tavily menerima `start_date` (`YYYY-MM-DD`). Tarikh eksplisit dalam `provider_options`
 mengatasi tarikh yang dipetakan.
 
-Hasil Exa mengekalkan `id`, `highlight_scores`, `summary`, `subpages`, `entities` dan `extras` dalam
+Hasil Exa mengekalkan `id`, `highlights` (semua petikan yang diserlahkan, bukan hanya petikan pertama yang digunakan sebagai `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` dan `extras` dalam
 `provider_raw`. Hasil Tavily mengekalkan `images` dan `favicon`.
 
 Linkup: Kos carian pautan direkodkan pada $0.005 untuk `depth` `fast` dan `standard` dan $0.05 untuk `deep` ( [Harga pautan](https://docs.linkup.so/pages/documentation/development/pricing) ), sama ada `depth` datang daripada `provider_options` atau tetapan sambungan.
@@ -1297,11 +1297,29 @@ peringkat kedua masih boleh menghasilkan penaakulan kelihatan yang diminta sebag
 
 | Titik akhir           | Kaedah   | Penerangan                            |
 | --------------------- | -------- | ------------------------------------- |
+| `/api/models`         | GET/PUT  | Senarai model / kemas kini alias      |
 | `/api/models/alias`   | GET/POST | Alias model                           |
 | `/api/models/catalog` | GET      | Semua model mengikut penyedia + jenis |
 | `/api/combos*`        | Pelbagai | Pengurusan kombo                      |
 | `/api/keys*`          | Pelbagai | Pengurusan kunci API                  |
 | `/api/pricing`        | GET      | Harga model                           |
+
+#### Asal usul had model
+
+`GET /api/models?withLimits=1` (turut menerima `true`; `0`/`false` atau tidak menyertakannya mengekalkan muatan lalai) menambah `contextWindow`, `maxInputTokens`, `maxOutputTokens` dan objek `capsSource` pada setiap baris model. `capsSource` menamakan peraturan yang membekalkan setiap had supaya had yang tidak dijangka, contohnya 128k pada model 1M, dapat dijejaki asalnya. Nilai yang diselesaikan sama dengan nilai yang digunakan oleh penghalaan; bendera ini hanya menambah medan dan tidak pernah mengubah nilai. Sebarang nilai `withLimits` yang lain ditolak dengan `400`.
+
+| Nilai `capsSource`                           | Asal                                                                         |
+| -------------------------------------------- | ---------------------------------------------------------------------------- |
+| `override:context`                           | Penggantian tetingkap konteks yang disimpan (`model_context_overrides`)      |
+| `override:max_input` / `override:max_output` | Penggantian keupayaan `max_input_tokens` / `max_output_tokens` yang disimpan |
+| `static-authoritative:<provider>/<model>`    | Jadual tetingkap konteks statik yang menjadi rujukan berwibawa               |
+| `synced:<provider>/<model>`                  | Baris keupayaan yang disegerakkan daripada models.dev                        |
+| `registry:<provider>/<model>`                | Entri pendaftaran penyedia                                                   |
+| `spec:<model>`                               | Spesifikasi model statik                                                     |
+| Awalan `effort-base:`                        | Baris yang dipinjam daripada model asas bagi varian dengan akhiran effort    |
+| `none`                                       | Tiada sumber menyatakan had tersebut; nilainya ialah `null`                  |
+
+Pelaksanaan: `getResolvedModelCapabilitiesWithLimitSources()` dalam `src/lib/modelCapabilities.ts` dan rantaian keutamaan dalam `src/lib/modelCapabilityLimits.ts`.
 
 ### Penggunaan & Analitik
 

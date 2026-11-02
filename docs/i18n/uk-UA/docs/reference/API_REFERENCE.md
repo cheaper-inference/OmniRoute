@@ -887,7 +887,7 @@ Tavily також приймає `search_type: "finance"` (`topic: "finance"`).
 ISO), а Tavily — `start_date` (`YYYY-MM-DD`). Явно задана дата в `provider_options`
 перевизначає зіставлене значення.
 
-Результати Exa зберігають `id`, `highlight_scores`, `summary`, `subpages`, `entities` і `extras` у
+Результати Exa зберігають `id`, `highlights` (усі виділені фрагменти, а не лише перший, використаний як `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` і `extras` у
 `provider_raw`. Результати Tavily зберігають `images` і `favicon`.
 
 Linkup: Вартість пошуку підключення зареєстрована на рівні 0,005 доларів США для `depth` `fast` і `standard` і 0,05 доларів США для `deep` ( [ціна підключення](https://docs.linkup.so/pages/documentation/development/pricing) ), незалежно від того, чи походить `depth` від `provider_options` чи налаштувань з’єднання.
@@ -1296,13 +1296,31 @@ OpenAI-сумісне підключення надсилає тіло Chat Comp
 
 ### Маршрутизація та конфігурація
 
-| Кінцева точка         | Метод    | Опис                              |
-| --------------------- | -------- | --------------------------------- |
-| `/api/models/alias`   | GET/POST | Псевдоніми моделей                |
-| `/api/models/catalog` | GET      | Усі моделі за провайдером і типом |
-| `/api/combos*`        | Різні    | Керування комбінаціями            |
-| `/api/keys*`          | Різні    | Керування ключами API             |
-| `/api/pricing`        | GET      | Ціни моделей                      |
+| Кінцева точка         | Метод    | Опис                                  |
+| --------------------- | -------- | ------------------------------------- |
+| `/api/models`         | GET/PUT  | Список моделей / оновлення псевдоніма |
+| `/api/models/alias`   | GET/POST | Псевдоніми моделей                    |
+| `/api/models/catalog` | GET      | Усі моделі за провайдером і типом     |
+| `/api/combos*`        | Різні    | Керування комбінаціями                |
+| `/api/keys*`          | Різні    | Керування ключами API                 |
+| `/api/pricing`        | GET      | Ціни моделей                          |
+
+#### Походження обмежень моделей
+
+`GET /api/models?withLimits=1` (також приймає `true`; `0`/`false` або відсутність параметра залишає типову відповідь без змін) додає до кожної моделі `contextWindow`, `maxInputTokens`, `maxOutputTokens` та об’єкт `capsSource`. `capsSource` вказує правило, що надало кожне обмеження, тож можна простежити походження несподіваного значення, наприклад 128k для моделі 1M. Це ті самі визначені значення, які використовує маршрутизація; параметр лише додає поля й ніколи не змінює значень. Будь-яке інше значення `withLimits` відхиляється з кодом `400`.
+
+| Значення `capsSource`                        | Джерело                                                                       |
+| -------------------------------------------- | ----------------------------------------------------------------------------- |
+| `override:context`                           | Збережене перевизначення вікна контексту (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | Збережене перевизначення можливостей `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Статична авторитетна таблиця вікон контексту                                  |
+| `synced:<provider>/<model>`                  | Запис можливостей, синхронізований із models.dev                              |
+| `registry:<provider>/<model>`                | Запис реєстру провайдерів                                                     |
+| `spec:<model>`                               | Статична специфікація моделі                                                  |
+| `effort-base:` префікс                       | Запис базової моделі для варіанта із суфіксом рівня зусиль                    |
+| `none`                                       | Жодне джерело не оголошує обмеження (значення — `null`)                       |
+
+Реалізація: `getResolvedModelCapabilitiesWithLimitSources()` у `src/lib/modelCapabilities.ts` і ланцюжки пріоритетів у `src/lib/modelCapabilityLimits.ts`.
 
 ### Використання й аналітика
 

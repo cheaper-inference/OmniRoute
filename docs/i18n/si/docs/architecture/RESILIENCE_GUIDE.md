@@ -10,6 +10,8 @@ OmniRoute හි වෙනස් නමුත් අන්යෝන්යව ස
 
 > මූලාශ්රය: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **ඔරොත්තු දීමේ ස්විච් සඳහා පරිසරය හා පුවරුවේ ප්‍රමුඛතාව.** කැමැත්තෙන් සක්‍රිය කරන, පරිසරයෙන් ආරම්භක අගය ගන්නා ස්විච් — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — සපයන්නේ _පෙරනිමිය_ පමණි (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). `resilienceSettings` හි ස්ථිරව සුරැකි බූලියන් අගය (පුවරුව → **සැකසුම් → ඔරොත්තු දීම** / `PATCH /api/resilience`, ගබඩාව `key_value`) පරිසර අගයට වඩා ප්‍රමුඛය: සාමාන්‍යකරණය (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) පවතින සුරැකි බූලියන් අගය රඳවා ගනී. පුවරුව දැනටමත් `false` සුරැකූ විට පරිසරය `true` කිරීමෙන් වෙනසක් නැත; **සැකසුම් → ඔරොත්තු දීම** ස්විචය වෙනස් කරන්න හෝ සුරැකි ක්ෂේත්‍රය ඉවත් කරන්න.
+
 ## 1. Provider Circuit Breaker
 
 **විෂය පථය:** සම්පූර්ණ provider එක (උදා., `glm`, `openai`, `anthropic`).
@@ -93,6 +95,8 @@ Regression ආරක්ෂකය: `tests/unit/provider-cooldown-window-gate.test
 - API-key මූලික: 3s
 - API-key 429: upstream `Retry-After`/reset ශීර්ෂක/විග්රහ කළ හැකි reset පාඨය වඩාත් කැමති
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**සැපයුම්කරු අනුව නැවත උත්සාහ ප්‍රමාදය.** සැපයුම්කරු පිටුවේ **නැවත උත්සාහ ප්‍රමාදය** තේරීම ඇත (Auto, 15s සිට 1h). එය `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` සුරකියි (`PATCH /api/resilience` හරහා 1–21600). වේග සීමා දෝෂයට ඉහළ සේවාවෙන් නැවත උත්සාහ ඉඟියක් නැත්නම්, මෙය සැපයුම්කරුගේ වැඩිවන රැඳී සිටීම වෙනුවට යෙදී `backoffLevel` 0 කරයි (`open-sse/services/rotationConfig.ts::overrideFor`). ඉහළ සිට ප්‍රමුඛතාව: ඉහළ සේවාවේ ඉඟිය, සම්බන්ධතාවේ `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, සැපයුම්කරු ප්‍රමාදය, පරිසරයේ `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, වැඩිවන රැඳී සිටීම. Auto ක්ෂේත්‍රය ඉවත් කරයි. මෙය වේග සීමා හේතුවට පමණක් බලපායි, අවසාන තත්ත්වයන්ට කිසිවිටෙක බලපාන්නේ නැත.
 
 **Anti-thundering-herd ආරක්ෂාව:** එකවර සිදුවන අසාර්ථකතාවන් සීතලනය අධික ලෙස දීර්ඝ කිරීම හෝ `backoffLevel` දෙවරක් වැඩි කිරීම වළක්වයි.
 
@@ -595,7 +599,7 @@ prompt-compression / translation කාර්යයකට පෙර සිදු
 
 විකල්ප `resilienceSettings.streamRecovery.throughputWatchdog` ආරක්ෂකය, තවමත් chunks යවමින් සිටින නමුත් වින්යාසගත කළ ප්රයෝජනවත්-ප්රතිදාන අනුපාතයට වඩා අඩුවෙන් assistant ප්රතිදානය ජනනය කරන upstream එකක් හඳුනා ගනී. එය idle timeout එකෙන් හිතාමතාම වෙන් කර ඇත: heartbeats සහ metadata කිසිම timer එකක් reset නොකරන අතර ප්රගතියක් ලෙස ද ගණන් නොගැනේ. එය දෘඪ attempt deadline (#9153) වෙතින් ද වෙනස් වේ — එය ප්රතිදාන ගුණාත්මකභාවය කුමක් වුවත් නිරපේක්ෂ ආරක්ෂක උපරිමයක් ලෙස පවතී.
 
-අත්හිටුවීමට හැකි වීමට පෙර watchdog එකට warm-up කාලයක් සහ ඉන්පසු සම්පූර්ණ rolling window එකක් අවශ්ය වේ. එය Chat Completions සහ Responses API ප්රතිදාන events වලින් text deltas ගණන් කරයි (ප්රවේශම් සහිත UTF-8 byte ප්රොක්සියක්), usage-only සහ හිස් events නොසලකා හරින අතර, tool-call හෝ reasoning events ක්රියාත්මක වෙමින් පවතින අතරතුර තීරණය අත්හිටුවයි. එය පෙරනිමියෙන් අක්රීය කර ඇති අතර `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` මගින් සක්රීය කළ හැක; window, warm-up, අවම අනුපාතය සහ අවම මැනිය හැකි ප්රතිදානය සාමාන්ය resilience-settings normalization ස්ථරය මගින් සීමා කෙරේ.
+අත්හිටුවීමට හැකි වීමට පෙර watchdog එකට warm-up කාලයක් සහ ඉන්පසු සම්පූර්ණ rolling window එකක් අවශ්ය වේ. එය Chat Completions සහ Responses API ප්රතිදාන events වලින් text deltas ගණන් කරයි (ප්රවේශම් සහිත UTF-8 byte ප්රොක්සියක්), usage-only සහ හිස් events නොසලකා හරින අතර, tool-call හෝ reasoning events ක්රියාත්මක වෙමින් පවතින අතරතුර තීරණය අත්හිටුවයි. එය පෙරනිමියෙන් අක්රීය කර ඇති අතර `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (එම පරිසර අගය පෙරනිමිය පමණක් සකසයි — සුරැකි `resilienceSettings.streamRecovery.throughputWatchdog.enabled` බූලියන් අගය ප්‍රමුඛය; මාර්ගෝපදේශය මුල ඇති පරිසරය/පුවරුවේ ප්‍රමුඛතා සටහන බලන්න) මගින් සක්රීය කළ හැක; window, warm-up, අවම අනුපාතය සහ අවම මැනිය හැකි ප්රතිදානය සාමාන්ය resilience-settings normalization ස්ථරය මගින් සීමා කෙරේ.
 
 සක්රීය කළ විට, watchdog අත්හිටුවීමක් යොදනු ලැබෙන්නේ ක්රියාත්මක upstream attempt එකට පමණි. client-දෘශ්ය bytes කිසිවකට පෙර, පවතින same-account early-recovery මාවතට attempt එක නැවත විවෘත කළ හැක. commit එකකට පසු, stream එක කිසිවිටෙක අන්ධ ලෙස නැවත ධාවනය නොකෙරේ; පවතින ආරක්ෂිත mid-stream continuation කොන්ත්රාත්තුවට පමණක් suffix එකක් එකතු කළ හැක. Finalization එක single-shot ලෙස පවතින බැවින්, usage ගිණුම්කරණය සහ semaphore මුදාහැරීම අනුපිටපත් නොවේ.
 

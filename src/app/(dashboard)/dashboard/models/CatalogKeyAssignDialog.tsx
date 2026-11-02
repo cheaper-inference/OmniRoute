@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Input, Modal } from "@/shared/components";
-import Checkbox from "@/shared/components/Checkbox";
 import { RadioGroup, RadioGroupItem } from "@omniroute/ui-kit/radio-group";
+import { Button, Checkbox, Input, Modal } from "@/shared/components";
 import { useNotificationStore } from "@/store/notificationStore";
 import {
   assignRunToastType,
@@ -176,15 +175,14 @@ function AssignKeyRow({
   const isTarget = usable && selected.has(key.id);
   return (
     <div key={key.id} className="rounded border border-border p-3">
-      <label className="flex items-center gap-2">
-        <Checkbox
-          aria-label={t("selectApiKey", { name: key.name })}
-          checked={isTarget}
-          disabled={running || !usable}
-          onChange={() => setSelected(toggle(selected, key.id))}
-        />
-        <span>{key.name}</span>
-      </label>
+      <Checkbox
+        className="flex items-center gap-2"
+        aria-label={t("selectApiKey", { name: key.name })}
+        label={key.name}
+        checked={isTarget}
+        disabled={running || !usable}
+        onChange={() => setSelected(toggle(selected, key.id))}
+      />
       <p className="text-xs text-text-muted">
         {summary.allModels
           ? t("allModelsAccess")
@@ -232,15 +230,14 @@ function AssignKeyHints({
   return (
     <>
       {isTarget && all && action === "add" && (
-        <label className="mt-2 flex items-start gap-2 text-sm">
-          <Checkbox
-            data-testid={`switch-restricted-${key.id}`}
-            checked={switches.has(key.id)}
-            disabled={running}
-            onChange={() => setSwitches(toggle(switches, key.id))}
-          />
-          {t("switchRestrictedConfirm")}
-        </label>
+        <Checkbox
+          className="mt-2 flex items-start gap-2"
+          data-testid={`switch-restricted-${key.id}`}
+          label={t("switchRestrictedConfirm")}
+          checked={switches.has(key.id)}
+          disabled={running}
+          onChange={() => setSwitches(toggle(switches, key.id))}
+        />
       )}
       {isTarget && all && action === "remove" && (
         <p className="text-xs">{t("removeNoChangeHint")}</p>
@@ -287,21 +284,19 @@ function AssignDialogControls({ context }: { context: AssignDialogContext }) {
         </p>
       )}
       <RadioGroup
+        orientation="horizontal"
         name="assign-action"
+        aria-label={t("assignToKeys")}
         value={action}
         disabled={running}
-        orientation="horizontal"
-        onValueChange={(value) => {
-          if (value === "add" || value === "remove") setAction(value);
+        onValueChange={(next) => {
+          if (next === "add" || next === "remove") setAction(next);
         }}
       >
-        {(["add", "remove"] as const).map((mode) => (
-          <RadioGroupItem
-            key={mode}
-            value={mode}
-            label={t(mode === "add" ? "assignActionAdd" : "assignActionRemove")}
-          />
-        ))}
+        {(["add", "remove"] as const).map((mode) => {
+          const label = t(mode === "add" ? "assignActionAdd" : "assignActionRemove");
+          return <RadioGroupItem key={mode} value={mode} aria-label={label} label={label} />;
+        })}
       </RadioGroup>
       <Input
         value={search}

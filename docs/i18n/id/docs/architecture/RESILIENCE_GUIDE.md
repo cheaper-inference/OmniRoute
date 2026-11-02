@@ -10,6 +10,8 @@ OmniRoute memiliki tiga mekanisme ketahanan yang berbeda tetapi saling terkait. 
 
 > Sumber: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Prioritas lingkungan dan dasbor untuk sakelar ketahanan.** Sakelar ketahanan opsional yang diinisialisasi dari lingkungan — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — hanya menyediakan _nilai bawaan_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean yang disimpan dalam `resilienceSettings` (Dasbor → **Pengaturan → Ketahanan** / `PATCH /api/resilience`, disimpan dalam `key_value`) mengungguli nilai lingkungan: normalisasi (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) mempertahankan boolean tersimpan jika sudah ada. Karena itu, mengatur variabel lingkungan tersebut ke `true` pada penerapan yang dasbornya sudah menyimpan `false` tidak mengubah apa pun. Ubah sakelar di **Pengaturan → Ketahanan**, atau hapus kolom yang disimpan.
+
 ## 1. Circuit Breaker Provider
 
 **Cakupan:** seluruh provider (mis., `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ Di bawah ambang, provider **tidak** dianggap sedang cooldown; keberhasilan mengh
 - Basis API-key: 3s
 - API-key 429: lebih memilih header `Retry-After`/reset upstream/teks reset yang dapat di-parse
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Jeda percobaan ulang per penyedia.** Halaman detail penyedia memiliki pilihan **Jeda percobaan ulang** (Auto, dari 15s hingga 1h). Pilihan ini menyimpan `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, melalui `PATCH /api/resilience`). Jika kesalahan batas laju tidak membawa petunjuk percobaan ulang dari upstream, nilai tersebut menggantikan backoff berskala untuk penyedia dan mengembalikan `backoffLevel` ke 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Urutan prioritas untuk kesalahan batas laju, dari tertinggi: petunjuk upstream, lalu `providerSpecificData.rotationOverrides.rateLimitResetSeconds` per koneksi, lalu jeda percobaan ulang penyedia, lalu variabel lingkungan `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, lalu backoff berskala. Auto menghapus kolom tersebut. Pengaturan ini hanya memengaruhi alasan batas laju, bukan status terminal.
 
 **Pelindung anti-thundering-herd:** mencegah kegagalan konkuren memperpanjang cooldown secara berlebihan atau menaikkan `backoffLevel` dua kali.
 
@@ -596,7 +600,7 @@ window) yang lengkap sebelum dapat membatalkan. Ia menghitung delta teks dari ev
 output Chat Completions dan Responses API (proksi byte UTF-8 yang konservatif),
 mengabaikan event yang hanya berisi usage dan event kosong, serta menunda penilaian
 selama event tool-call atau reasoning sedang berlangsung. Fitur ini dinonaktifkan
-secara default dan dapat diaktifkan dengan `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`;
+secara default dan dapat diaktifkan dengan `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (nilai lingkungan tersebut hanya menetapkan nilai bawaan; boolean yang disimpan dalam `resilienceSettings.streamRecovery.throughputWatchdog.enabled` memiliki prioritas; lihat catatan prioritas lingkungan dan dasbor di bagian awal panduan ini);
 jendela, warm-up, laju minimum, dan output terukur minimum dibatasi oleh lapisan
 normalisasi resilience-settings yang biasa.
 

@@ -10,6 +10,8 @@ OmniRoute tiene tres mecanismos de resiliencia distintos pero relacionados. Cada
 
 > Fuente: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Precedencia entre entorno y panel para las opciones de resiliencia.** Las opciones de resiliencia de activación voluntaria inicializadas desde el entorno — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — solo proporcionan el _valor predeterminado_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Un booleano persistido en `resilienceSettings` (Panel → **Configuración → Resiliencia** / `PATCH /api/resilience`, almacenado en `key_value`) prevalece sobre el entorno: la normalización (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) conserva el booleano almacenado siempre que exista. Por tanto, establecer esa variable de entorno en `true` en un despliegue donde el panel ya guardó `false` no cambia nada: cambie la opción en **Configuración → Resiliencia** o borre el campo almacenado.
+
 ## 1. Circuit Breaker de proveedor
 
 **Alcance:** proveedor completo (p. ej., `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ Por debajo del umbral, el proveedor **no** se considera en enfriamiento; un éxi
 - Base de clave API: 3s
 - 429 de clave API: prefiere los encabezados de restablecimiento/`Retry-After` del servidor de origen o texto de restablecimiento analizable
 - Retroceso: `baseCooldownMs * 2 ** failureIndex`
+
+**Espera de reintento por proveedor.** La página de detalle del proveedor incluye el selector **Espera de reintento** (Automático, de 15s a 1h). Guarda `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, mediante `PATCH /api/resilience`). Cuando un error de límite de frecuencia no trae una indicación de reintento del servicio de origen, ese valor sustituye la espera progresiva escalada del proveedor y restablece `backoffLevel` a 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Precedencia para un error de límite de frecuencia, de mayor a menor: indicación de reintento del servicio de origen, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` de la conexión, espera de reintento del proveedor, variable de entorno `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` y espera progresiva escalada. Automático elimina el campo. Solo afecta al motivo de límite de frecuencia, nunca a estados terminales.
 
 **Protección antiestampida (thundering herd):** evita que los fallos concurrentes extiendan en exceso el enfriamiento o incrementen dos veces `backoffLevel`.
 
@@ -563,7 +567,7 @@ antes de poder abortar. Cuenta los deltas de texto de los eventos de salida de C
 y de la Responses API (una aproximación conservadora basada en bytes UTF-8), ignora los eventos
 de solo uso y los eventos vacíos, y suspende la evaluación mientras hay eventos de llamada a
 herramientas o de razonamiento en curso. Está desactivado por defecto y puede activarse con
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; la ventana, el calentamiento, la tasa mínima y la
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ese valor de entorno solo establece el predeterminado: prevalece el booleano guardado en `resilienceSettings.streamRecovery.throughputWatchdog.enabled`; consulte la nota sobre precedencia entre entorno y panel al principio de esta guía); la ventana, el calentamiento, la tasa mínima y la
 salida medible mínima están acotados por la capa habitual de normalización de la configuración
 de resiliencia.
 

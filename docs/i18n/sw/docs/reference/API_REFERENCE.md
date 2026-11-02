@@ -884,7 +884,7 @@ Gharama ya utafutaji ya Firecrawl inarekodiwa kwa kila block iliyoanza ya matoke
 na Tavily hupokea `start_date` (`YYYY-MM-DD`). Tarehe iliyobainishwa moja kwa moja katika `provider_options`
 hubatilisha ile iliyolinganishwa.
 
-Matokeo ya Exa hudumisha `id`, `highlight_scores`, `summary`, `subpages`, `entities` na `extras` katika
+Matokeo ya Exa hudumisha `id`, `highlights` (dondoo zote zilizoangaziwa, si ya kwanza tu inayotumika kama `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` na `extras` katika
 `provider_raw`. Matokeo ya Tavily hudumisha `images` na `favicon`.
 
 Linkup: Gharama ya utafutaji ya kiunganishi imerekodiwa kuwa $0.005 kwa `depth` `fast` na `standard` na $0.05 kwa `deep` ( [Bei ya kiunganishi](https://docs.linkup.so/pages/documentation/development/pricing) ), iwe `depth` inatoka `provider_options` au mipangilio ya muunganisho.
@@ -1293,11 +1293,29 @@ hatua ya pili bado inaweza kutoa uhoji wake unaoonekana ulioombwa kama maandishi
 
 | Endpoint              | Mbinu      | Maelezo                                     |
 | --------------------- | ---------- | ------------------------------------------- |
+| `/api/models`         | GET/PUT    | Orodha ya modeli / kusasisha jina mbadala   |
 | `/api/models/alias`   | GET/POST   | Majina mbadala ya modeli                    |
 | `/api/models/catalog` | GET        | Modeli zote kulingana na mtoa huduma + aina |
 | `/api/combos*`        | Mbalimbali | Usimamizi wa michanganyiko                  |
 | `/api/keys*`          | Mbalimbali | Usimamizi wa funguo za API                  |
 | `/api/pricing`        | GET        | Bei za modeli                               |
+
+#### Chanzo cha mipaka ya modeli
+
+`GET /api/models?withLimits=1` pia hukubali `true`; `0`/`false` au kuacha kigezo huhifadhi jibu la kawaida bila mabadiliko. Huongeza `contextWindow`, `maxInputTokens`, `maxOutputTokens` na kitu `capsSource` kwa kila modeli. `capsSource` hutaja kanuni iliyotoa kila mpaka, ili thamani isiyotarajiwa kama 128k kwa modeli ya 1M ifuatiliwe hadi chanzo chake. Thamani zilizotatuliwa ndizo zinazotumiwa na uelekezaji; kigezo huongeza sehemu tu, hakibadili thamani. Thamani nyingine yoyote ya `withLimits` hukataliwa kwa `400`.
+
+| Thamani ya `capsSource`                      | Chanzo                                                                            |
+| -------------------------------------------- | --------------------------------------------------------------------------------- |
+| `override:context`                           | Thamani mbadala ya dirisha la muktadha iliyohifadhiwa (`model_context_overrides`) |
+| `override:max_input` / `override:max_output` | Ubadilishaji wa uwezo uliohifadhiwa `max_input_tokens` / `max_output_tokens`      |
+| `static-authoritative:<provider>/<model>`    | Jedwali tuli lenye mamlaka la madirisha ya muktadha                               |
+| `synced:<provider>/<model>`                  | Rekodi ya uwezo iliyosawazishwa kutoka models.dev                                 |
+| `registry:<provider>/<model>`                | Ingizo la sajili ya watoa huduma                                                  |
+| `spec:<model>`                               | Maelezo tuli ya modeli                                                            |
+| `effort-base:` kiambishi awali               | Rekodi ya modeli ya msingi ya toleo lenye kiambishi cha kiwango cha juhudi        |
+| `none`                                       | Hakuna chanzo kinachotaja mpaka (thamani ni `null`)                               |
+
+Utekelezaji: `getResolvedModelCapabilitiesWithLimitSources()` katika `src/lib/modelCapabilities.ts` na minyororo ya kipaumbele katika `src/lib/modelCapabilityLimits.ts`.
 
 ### Matumizi na Uchanganuzi
 

@@ -834,7 +834,7 @@ Firecrawl 검색 비용은 반환된 결과 10개의 시작 블록당 $0.002(2�
 타임스탬프)가, Tavily에는 `start_date`(`YYYY-MM-DD`)가 전달됩니다. `provider_options`에 명시된 날짜는
 매핑된 날짜를 재정의합니다.
 
-Exa 결과는 `id`, `highlight_scores`, `summary`, `subpages`, `entities`, `extras`를
+Exa 결과는 `id`, `highlights` (`snippet`으로 쓰는 첫 항목뿐 아니라 강조된 모든 발췌문), `highlight_scores`, `summary`, `subpages`, `entities`, `extras`를
 `provider_raw`에 유지합니다. Tavily 결과는 `images`와 `favicon`을 유지합니다.
 
 링크업 검색 비용은 `depth` `provider_options` 또는 연결 설정에서 가져온 것인지 여부에 관계없이 `depth` `fast` 및 `standard` 의 경우 $0.005, `deep` 의 경우 $0.05로 기록됩니다( [링크업 가격](https://docs.linkup.so/pages/documentation/development/pricing) ).
@@ -1234,11 +1234,29 @@ Claude Code 자동 모드 분류기 요청에 명시적인 추론 컨트롤이 �
 
 | 엔드포인트            | 메서드   | 설명                         |
 | --------------------- | -------- | ---------------------------- |
+| `/api/models`         | GET/PUT  | 모델 목록 / 별칭 업데이트    |
 | `/api/models/alias`   | GET/POST | 모델 별칭                    |
 | `/api/models/catalog` | GET      | 제공업체 및 유형별 모든 모델 |
 | `/api/combos*`        | 다양     | 콤보 관리                    |
 | `/api/keys*`          | 다양     | API 키 관리                  |
 | `/api/pricing`        | GET      | 모델 가격                    |
+
+#### 모델 제한값의 출처
+
+`GET /api/models?withLimits=1`은 각 모델 행에 `contextWindow`, `maxInputTokens`, `maxOutputTokens`와 `capsSource` 객체를 추가합니다. `true`도 허용하며, `0`/`false` 또는 생략 시 기본 페이로드는 그대로 유지됩니다. `capsSource`는 각 제한값을 제공한 규칙을 명시하므로, 예를 들어 1M 모델에 128k가 적용되는 것처럼 예상과 다른 제한의 출처를 추적할 수 있습니다. 해석된 값은 라우팅에서 사용하는 값과 같으며, 이 플래그는 필드만 추가하고 값을 바꾸지 않습니다. 다른 `withLimits` 값은 `400`으로 거부됩니다.
+
+| `capsSource`의 값                            | 출처                                                                |
+| -------------------------------------------- | ------------------------------------------------------------------- |
+| `override:context`                           | 저장된 컨텍스트 창 재정의 값 (`model_context_overrides`)            |
+| `override:max_input` / `override:max_output` | 저장된 기능 제한 `max_input_tokens` / `max_output_tokens` 재정의 값 |
+| `static-authoritative:<provider>/<model>`    | 기준이 되는 정적 컨텍스트 창 표                                     |
+| `synced:<provider>/<model>`                  | models.dev에서 동기화한 기능 정보 행                                |
+| `registry:<provider>/<model>`                | 공급자 레지스트리 항목                                              |
+| `spec:<model>`                               | 정적 모델 사양                                                      |
+| `effort-base:` 접두사                        | effort 접미사가 있는 변형의 기본 모델에서 가져온 행                 |
+| `none`                                       | 어떤 출처도 제한을 선언하지 않아 값이 `null`임                      |
+
+구현은 `src/lib/modelCapabilities.ts`의 `getResolvedModelCapabilitiesWithLimitSources()`와 `src/lib/modelCapabilityLimits.ts`의 우선순위 체인을 참조하세요.
 
 ### 사용량 및 분석
 

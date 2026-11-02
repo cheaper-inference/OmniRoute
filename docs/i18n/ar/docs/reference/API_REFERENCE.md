@@ -887,7 +887,7 @@ Firecrawl: يتم تسجيل تكلفة بحث الزحف الناري لكل ك
 بتنسيق ISO)، ويحصل Tavily على `start_date` ‏(`YYYY-MM-DD`). ويتجاوز التاريخ المحدد صراحةً في `provider_options`
 التاريخ المعيَّن تلقائيًا.
 
-تحتفظ نتائج Exa بـ`id` و`highlight_scores` و`summary` و`subpages` و`entities` و`extras` في
+تحتفظ نتائج Exa بـ`id` و`highlights` (جميع المقاطع المبرزة، وليس المقطع الأول المستخدم بوصفه `snippet` فقط)، `highlight_scores` و`summary` و`subpages` و`entities` و`extras` في
 `provider_raw`. وتحتفظ نتائج Tavily بـ`images` و`favicon`.
 
 Linkup: يتم تسجيل تكلفة البحث عن الارتباط بمبلغ 0.005 USD لـ `depth` `fast` و `standard` و0.05 USD لـ `deep` ( [تسعير الارتباط](https://docs.linkup.so/pages/documentation/development/pricing) )، سواء أتى `depth` من `provider_options` أو من إعدادات الاتصال.
@@ -1295,13 +1295,31 @@ https://chatgpt.com/backend-api/wham/usage` و`GET .../wham/rate-limit-reset-cre
 
 ### التوجيه والإعدادات
 
-| نقطة النهاية          | الطريقة  | الوصف                            |
-| --------------------- | -------- | -------------------------------- |
-| `/api/models/alias`   | GET/POST | الأسماء المستعارة للنماذج        |
-| `/api/models/catalog` | GET      | جميع النماذج حسب المزوّد + النوع |
-| `/api/combos*`        | متنوع    | إدارة التركيبات                  |
-| `/api/keys*`          | متنوع    | إدارة مفاتيح API                 |
-| `/api/pricing`        | GET      | تسعير النماذج                    |
+| نقطة النهاية          | الطريقة  | الوصف                              |
+| --------------------- | -------- | ---------------------------------- |
+| `/api/models`         | GET/PUT  | قائمة النماذج / تحديث الاسم البديل |
+| `/api/models/alias`   | GET/POST | الأسماء المستعارة للنماذج          |
+| `/api/models/catalog` | GET      | جميع النماذج حسب المزوّد + النوع   |
+| `/api/combos*`        | متنوع    | إدارة التركيبات                    |
+| `/api/keys*`          | متنوع    | إدارة مفاتيح API                   |
+| `/api/pricing`        | GET      | تسعير النماذج                      |
+
+#### مصدر حدود النموذج
+
+يضيف `GET /api/models?withLimits=1` (وتُقبل أيضًا `true`؛ أما `0`/`false` أو حذف المعامل فيُبقي الاستجابة الافتراضية دون تغيير) الحقول `contextWindow` و`maxInputTokens` و`maxOutputTokens` وكائن `capsSource` إلى كل صف نموذج. يحدد `capsSource` القاعدة التي وفّرت كل حد، لتتبّع مصدر قيمة غير متوقعة، مثل 128k في نموذج بسعة 1M. القيم المحسومة هي نفسها التي يستخدمها التوجيه؛ لا يضيف الخيار سوى حقول، ولا يغيّر أي قيمة مطلقًا. تُرفض أي قيمة أخرى لـ `withLimits` بالرمز `400`.
+
+| `capsSource` القيمة                          | المصدر                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------- |
+| `override:context`                           | تجاوز محفوظ بصورة دائمة لنافذة السياق (`model_context_overrides`)         |
+| `override:max_input` / `override:max_output` | تجاوز محفوظ بصورة دائمة للقدرتين `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | جدول ثابت ومعتمد لنوافذ السياق                                            |
+| `synced:<provider>/<model>`                  | صف قدرات تمت مزامنته من models.dev                                        |
+| `registry:<provider>/<model>`                | إدخال في سجل المزوّدين                                                    |
+| `spec:<model>`                               | مواصفة ثابتة للنموذج                                                      |
+| `effort-base:` بادئة                         | صف مأخوذ من النموذج الأساسي لنسخة تحمل لاحقة مستوى الجهد                  |
+| `none`                                       | لا يصرّح أي مصدر بالحد (القيمة هي `null`)                                 |
+
+التنفيذ: `getResolvedModelCapabilitiesWithLimitSources()` في `src/lib/modelCapabilities.ts` وسلاسل الأولوية في `src/lib/modelCapabilityLimits.ts`.
 
 ### الاستخدام والتحليلات
 

@@ -819,7 +819,7 @@ Genel `time_range` artık her iki sağlayıcıya da ulaşır: Exa `startPublishe
 zaman damgası), Tavily ise `start_date` (`YYYY-MM-DD`) alır. `provider_options` içindeki açıkça belirtilmiş
 bir tarih, eşlenen tarihin üzerine yazılır.
 
-Exa sonuçları `id`, `highlight_scores`, `summary`, `subpages`, `entities` ve `extras` alanlarını
+Exa sonuçları `id`, `highlights` (yalnızca `snippet` olarak kullanılan ilk parça değil, vurgulanan tüm parçalar), `highlight_scores`, `summary`, `subpages`, `entities` ve `extras` alanlarını
 `provider_raw` içinde tutar. Tavily sonuçları `images` ve `favicon` alanlarını tutar.
 
 `depth` `provider_options` veya bağlantı ayarlarından gelmesine bakılmaksızın, bağlantı arama maliyeti `depth` `fast` ve `standard` için 0,005 ABD doları ve `deep` ( [Bağlantı fiyatlandırması](https://docs.linkup.so/pages/documentation/development/pricing) ) için 0,05 ABD doları olarak kaydedilir.
@@ -1228,13 +1228,31 @@ görünür akıl yürütmeyi sıradan metin olarak üretmeye devam edebilir.
 
 ### Yönlendirme ve Yapılandırma
 
-| Uç Nokta              | Yöntem   | Açıklama                            |
-| --------------------- | -------- | ----------------------------------- |
-| `/api/models/alias`   | GET/POST | Model takma adları                  |
-| `/api/models/catalog` | GET      | Sağlayıcı ve türe göre tüm modeller |
-| `/api/combos*`        | Çeşitli  | Kombinasyon yönetimi                |
-| `/api/keys*`          | Çeşitli  | API anahtarı yönetimi               |
-| `/api/pricing`        | GET      | Model fiyatlandırması               |
+| Uç Nokta              | Yöntem   | Açıklama                              |
+| --------------------- | -------- | ------------------------------------- |
+| `/api/models`         | GET/PUT  | Model listesi / takma ad güncellemesi |
+| `/api/models/alias`   | GET/POST | Model takma adları                    |
+| `/api/models/catalog` | GET      | Sağlayıcı ve türe göre tüm modeller   |
+| `/api/combos*`        | Çeşitli  | Kombinasyon yönetimi                  |
+| `/api/keys*`          | Çeşitli  | API anahtarı yönetimi                 |
+| `/api/pricing`        | GET      | Model fiyatlandırması                 |
+
+#### Model sınırlarının kaynağı
+
+`GET /api/models?withLimits=1` (`true` da kabul edilir; `0`/`false` veya parametrenin atlanması varsayılan yanıtı değiştirmez) her model satırına `contextWindow`, `maxInputTokens`, `maxOutputTokens` ve bir `capsSource` nesnesi ekler. `capsSource` her sınırı sağlayan kuralı belirtir; örneğin 1M modelde 128k gibi beklenmeyen bir değerin kaynağı izlenebilir. Çözümlenen değerler yönlendirmenin kullandıklarıyla aynıdır; seçenek yalnızca alan ekler, hiçbir değeri değiştirmez. Diğer tüm `withLimits` değerleri `400` ile reddedilir.
+
+| `capsSource` değeri                          | Kaynak                                                                        |
+| -------------------------------------------- | ----------------------------------------------------------------------------- |
+| `override:context`                           | Kaydedilmiş bağlam penceresi geçersiz kılması (`model_context_overrides`)     |
+| `override:max_input` / `override:max_output` | Kaydedilmiş `max_input_tokens` / `max_output_tokens` yetenek geçersiz kılması |
+| `static-authoritative:<provider>/<model>`    | Statik yetkili bağlam penceresi tablosu                                       |
+| `synced:<provider>/<model>`                  | models.dev üzerinden eşitlenmiş yetenek satırı                                |
+| `registry:<provider>/<model>`                | Sağlayıcı kayıt defteri girdisi                                               |
+| `spec:<model>`                               | Statik model belirtimi                                                        |
+| `effort-base:` ön eki                        | Çaba son eki taşıyan varyantın temel modelinden alınan satır                  |
+| `none`                                       | Hiçbir kaynak sınırı bildirmiyor (değer `null`)                               |
+
+Uygulama: `src/lib/modelCapabilities.ts` içindeki `getResolvedModelCapabilitiesWithLimitSources()` ve `src/lib/modelCapabilityLimits.ts` içindeki öncelik zincirleri.
 
 ### Kullanım ve Analiz
 

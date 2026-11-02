@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Isso irá capturar os provedores/modelos atualmente conectados que correspondem a este modelo em uma combinação editável.",
     "duplicateAutoComboFailedPrefix": "Falha ao duplicar a combinação automática:",
     "duplicateAutoComboUnknownError": "Erro desconhecido",
-    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}"
+    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}",
+    "exportCombos": "Exportar",
+    "exportCombosFailed": "Falha ao exportar combos",
+    "importCombos": "Importar",
+    "importCombosTitle": "Importar combos",
+    "importCombosInvalidFile": "Este arquivo não é uma exportação de combos válida.",
+    "importCombosSummary": "Combos no arquivo: {total} ({fresh} novos, {conflicting} com um nome que já existe).",
+    "importCombosMergeHint": "Mesclar mantém todos os combos existentes e ignora os que têm um nome que já existe. Conexões e credenciais nunca são importadas.",
+    "importCombosReplaceHint": "Substituir tudo exclui seus combos existentes ({current}) e importa o arquivo no lugar. Isso não pode ser desfeito.",
+    "importCombosMerge": "Mesclar",
+    "importCombosReplace": "Substituir tudo",
+    "importCombosDone": "Combos importados: {created}. Ignorados: {skipped}.",
+    "importCombosFailed": "Falha ao importar combos",
+    "importCombosWarnings": "Importado com avisos"
   },
   "costs": {
     "title": "Custos",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "Conector personalizado do ChatGPT",
     "doctorChecking": "Verificando status…",
     "doctorCheck": "Verificar status do doctor",
-    "fallbackRetryBackendTitle": "Backend de nova tentativa de fallback"
+    "fallbackRetryBackendTitle": "Backend de nova tentativa de fallback",
+    "retryDelayTitle": "Atraso de nova tentativa",
+    "retryDelayDesc": "Quanto tempo uma conexão descansa após um erro de limite de taxa quando o provedor não informa quando tentar de novo. Automático usa o backoff embutido; um horário de reset enviado pelo provedor sempre prevalece.",
+    "retryDelayAuto": "Automático",
+    "retryDelaySaved": "Atraso de nova tentativa salvo",
+    "retryDelayUpdateFailed": "Falha ao atualizar o atraso de nova tentativa"
   },
   "settings": {
     "title": "Configurações",

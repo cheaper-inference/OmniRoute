@@ -10,6 +10,8 @@ OmniRoute ir trīs atšķirīgi, bet savstarpēji saistīti noturības mehānism
 
 > Avots: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Vides un informācijas paneļa prioritāte noturības slēdžiem.** Izvēles noturības slēdži, kuru sākotnējās vērtības iegūst no vides — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — nosaka tikai _noklusēto vērtību_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Loģiskai vērtībai, kas saglabāta `resilienceSettings` (Informācijas panelis → **Iestatījumi → Noturība** / `PATCH /api/resilience`, glabāta `key_value`), ir prioritāte pār vides vērtību: normalizācija (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) patur saglabāto loģisko vērtību, ja tāda ir. Tādēļ šāda vides mainīgā iestatīšana uz `true` neko nemaina instalācijā, kur panelis jau saglabājis `false`. Mainiet slēdzi sadaļā **Iestatījumi → Noturība** vai izdzēsiet saglabāto lauku.
+
 ## 1. Pakalpojumu sniedzēja ķēdes pārtraucējs
 
 **Tvērums:** viss pakalpojumu sniedzējs (piem., `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ Zem sliekšņa pakalpojumu sniedzējs **netiek** uzskatīts par dzesējamu; veik
 - API atslēgas bāze: 3 s
 - API atslēgas 429: dod priekšroku augšup straumes `Retry-After`/atiestatīšanas galvenēm/parsējamam atiestatīšanas tekstam
 - Atkāpe: `baseCooldownMs * 2 ** failureIndex`
+
+**Atkārtota mēģinājuma aizture katram pakalpojumu sniedzējam.** Sniedzēja detalizētajā lapā ir izvēlne **Atkārtota mēģinājuma aizture** (Auto, no 15s līdz 1h). Tā saglabā `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, izmantojot `PATCH /api/resilience`). Ja ātruma ierobežojuma kļūdā nav augšupējā servera norādes par atkārtošanas laiku, šī vērtība aizstāj sniedzēja mērogoto backoff aizturi un atiestata `backoffLevel` uz 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Šādas kļūdas prioritāšu secība, sākot ar augstāko: augšupējā servera norāde, tad savienojuma `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, tad sniedzēja atkārtota mēģinājuma aizture, tad vides `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, un visbeidzot mērogotā backoff aizture. Auto noņem lauku. Tas ietekmē tikai ātruma ierobežojuma iemeslu, nekad terminālos stāvokļus.
 
 **Aizsardzība pret kļūmju lavīnu (thundering herd):** neļauj vienlaicīgām kļūmēm pārmērīgi pagarināt dzesēšanu vai divkārši palielināt `backoffLevel`.
 
@@ -590,7 +594,7 @@ Katra savienojuma pieprasījumu biežuma ierobežojuma aizsardzība tiek izsekot
 
 Neobligātais `resilienceSettings.streamRecovery.throughputWatchdog` aizsargmehānisms atklāj augšupstraumi, kas joprojām sūta gabalus, bet rada asistenta izvadi zem konfigurētā noderīgās izvades ātruma. Tas apzināti atšķiras no dīkstāves taimauta: sirdspuksti un metadati neatiestata nevienu taimeri un netiek uzskatīti par progresu. Tas atšķiras arī no stingrā mēģinājuma termiņa (#9153), kas paliek absolūta drošības augšējā robeža neatkarīgi no izvades kvalitātes.
 
-Pirms sardze var pārtraukt, tai nepieciešams uzsilšanas periods, kam seko pilns slīdošais logs. Tā skaita teksta deltas no Chat Completions un Responses API izvades notikumiem (konservatīvs UTF-8 baitu aizstājējrādītājs), ignorē notikumus tikai ar lietojuma datiem un tukšus notikumus un aptur vērtēšanu, kamēr izpildē ir rīku izsaukumu vai spriešanas notikumi. Tā pēc noklusējuma ir atspējota, un to var iespējot ar `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; logu, uzsilšanas periodu, minimālo ātrumu un minimālo mērāmo izvadi ierobežo parastais noturības iestatījumu normalizācijas slānis.
+Pirms sardze var pārtraukt, tai nepieciešams uzsilšanas periods, kam seko pilns slīdošais logs. Tā skaita teksta deltas no Chat Completions un Responses API izvades notikumiem (konservatīvs UTF-8 baitu aizstājējrādītājs), ignorē notikumus tikai ar lietojuma datiem un tukšus notikumus un aptur vērtēšanu, kamēr izpildē ir rīku izsaukumu vai spriešanas notikumi. Tā pēc noklusējuma ir atspējota, un to var iespējot ar `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (šī vides vērtība nosaka tikai noklusējumu; saglabātai loģiskai `resilienceSettings.streamRecovery.throughputWatchdog.enabled` vērtībai ir prioritāte; skatiet piezīmi par vides un paneļa prioritāti šīs rokasgrāmatas sākumā); logu, uzsilšanas periodu, minimālo ātrumu un minimālo mērāmo izvadi ierobežo parastais noturības iestatījumu normalizācijas slānis.
 
 Kad sardze ir iespējota, tās pārtraukums tiek piemērots tikai aktīvajam augšupstraumes mēģinājumam. Pirms jebkādiem klientam redzamiem baitiem esošais tā paša konta agrīnās atkopšanas ceļš var atjaunot mēģinājumu. Pēc fiksācijas straume nekad netiek akli atkārtota; tikai esošais drošais vidusstraumes turpināšanas kontrakts var salīmēt sufiksu. Pabeigšana paliek vienreiz izpildāma, tāpēc lietojuma uzskaite un semafora atbrīvošana netiek dublētas.
 

@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Bu shablonga mos keladigan, hozir ulangan provayderlar/modellarning joriy holatini tahrirlanadigan kombinatsiya sifatida saqlaydi.",
     "duplicateAutoComboFailedPrefix": "Avtomatik kombinatsiyani nusxalab bo‘lmadi:",
     "duplicateAutoComboUnknownError": "Noma’lum xato",
-    "duplicateAutoComboTitle": "{name} asosida statik kombinatsiya yaratish"
+    "duplicateAutoComboTitle": "{name} asosida statik kombinatsiya yaratish",
+    "exportCombos": "Eksport qilish",
+    "exportCombosFailed": "Kombinatsiyalarni eksport qilib bo‘lmadi",
+    "importCombos": "Import qilish",
+    "importCombosTitle": "Kombinatsiyalarni import qilish",
+    "importCombosInvalidFile": "Bu fayl kombinatsiyalarning yaroqli eksporti emas.",
+    "importCombosSummary": "Fayldagi kombinatsiyalar: {total} ({fresh} ta yangi, {conflicting} ta nomi allaqachon mavjud).",
+    "importCombosMergeHint": "Birlashtirish barcha mavjud kombinatsiyalarni saqlab qoladi va nomi allaqachon mavjud bo‘lganlarini o‘tkazib yuboradi. Ulanishlar va hisob ma’lumotlari hech qachon import qilinmaydi.",
+    "importCombosReplaceHint": "Hammasini almashtirish mavjud kombinatsiyalaringizni ({current}) o‘chiradi va ularning o‘rniga faylni import qiladi. Buni bekor qilib bo‘lmaydi.",
+    "importCombosMerge": "Birlashtirish",
+    "importCombosReplace": "Hammasini almashtirish",
+    "importCombosDone": "Import qilingan kombinatsiyalar: {created}. O‘tkazib yuborilgan: {skipped}.",
+    "importCombosFailed": "Kombinatsiyalarni import qilib bo‘lmadi",
+    "importCombosWarnings": "Ogohlantirishlar bilan import qilindi"
   },
   "costs": {
     "title": "Xarajatlar",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ChatGPT o‘zlashtirilgan konnektor",
     "doctorChecking": "Holat tekshirilmoqda…",
     "doctorCheck": "Doctor holatini tekshirish",
-    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend"
+    "fallbackRetryBackendTitle": "Zaxira takrorlash orqali backend",
+    "retryDelayTitle": "Qayta urinish kechikishi",
+    "retryDelayDesc": "Provayder qachon qayta urinish kerakligini aytmaganda, tezlik cheklovi xatosidan keyin ulanish qancha vaqt dam oladi. Avtomatik rejim o‘rnatilgan kutishdan foydalanadi; provayder yuborgan tiklash vaqti har doim ustun turadi.",
+    "retryDelayAuto": "Avtomatik",
+    "retryDelaySaved": "Qayta urinish kechikishi saqlandi",
+    "retryDelayUpdateFailed": "Qayta urinish kechikishini yangilab bo‘lmadi"
   },
   "settings": {
     "title": "Sozlamalar",

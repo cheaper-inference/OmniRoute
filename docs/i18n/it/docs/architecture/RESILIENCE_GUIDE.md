@@ -10,6 +10,8 @@ OmniRoute dispone di tre meccanismi di resilienza distinti ma correlati. Ognuno 
 
 > Fonte: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Precedenza tra ambiente e dashboard per le opzioni di resilienza.** Le opzioni di resilienza facoltative inizializzate dall’ambiente — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — forniscono soltanto il _valore predefinito_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Un booleano persistito in `resilienceSettings` (Dashboard → **Impostazioni → Resilienza** / `PATCH /api/resilience`, memorizzato in `key_value`) prevale sul valore d’ambiente: la normalizzazione (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) conserva il booleano salvato quando esiste. Impostare una di queste variabili d’ambiente su `true` in un’installazione in cui la dashboard ha già salvato `false` non cambia quindi nulla. Occorre cambiare l’opzione in **Impostazioni → Resilienza**, oppure cancellare il campo salvato.
+
 ## 1. Provider Circuit Breaker
 
 **Ambito:** l'intero provider (ad es. `glm`, `openai`, `anthropic`).
@@ -91,6 +93,8 @@ Guardia di regressione: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - Base API-key: 3s
 - API-key 429: preferisce gli header upstream `Retry-After`/reset o il testo di reset analizzabile
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Ritardo dei tentativi per provider.** La pagina dei dettagli del provider offre una selezione **Ritardo dei tentativi** (Auto, da 15s a 1h). Salva `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, tramite `PATCH /api/resilience`). Quando un errore di limite di frequenza non contiene indicazioni upstream su quando riprovare, quel valore sostituisce il backoff scalato del provider e azzera `backoffLevel` a 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Per questi errori, l’ordine di precedenza dal più alto è: indicazione upstream, poi `providerSpecificData.rotationOverrides.rateLimitResetSeconds` della connessione, poi ritardo del provider, poi variabile d’ambiente `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, infine backoff scalato. Auto rimuove il campo. L’impostazione riguarda soltanto il motivo di limite di frequenza, mai gli stati terminali.
 
 **Protezione anti-thundering-herd:** impedisce che errori concorrenti estendano eccessivamente il cooldown o incrementino due volte `backoffLevel`.
 
@@ -622,7 +626,7 @@ prima di poter interrompere. Conta i delta di testo dagli eventi di output di Ch
 Completions e Responses API (un proxy conservativo in byte UTF-8), ignora gli eventi
 vuoti o di solo utilizzo e sospende la valutazione mentre sono in corso eventi di
 chiamata di strumenti o di ragionamento. È disabilitato per impostazione predefinita e
-può essere abilitato con `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; la finestra, il
+può essere abilitato con `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (quel valore d’ambiente fornisce soltanto il valore predefinito: un booleano salvato in `resilienceSettings.streamRecovery.throughputWatchdog.enabled` prevale; vedere la nota sulla precedenza tra ambiente e dashboard all’inizio di questa guida); la finestra, il
 riscaldamento, la velocità minima e l'output minimo misurabile sono limitati dal normale
 livello di normalizzazione delle impostazioni di resilienza.
 

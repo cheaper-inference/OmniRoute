@@ -44,26 +44,31 @@ Bu sayı bir tahmin olduğundan:
 
 ### Fiyatlandırma kaynağı
 
-Maliyetler, aşağıdaki öncelik sırasına göre çözümlenen bir fiyatlandırma tablosundan gelir
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Maliyetler [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) içindeki birleşik fiyat tablosundan şu sırayla alınır (**en yüksek öncelik önce**):
 
-1. **Kullanıcı geçersiz kılmaları** — gösterge panelinde / `PATCH /api/pricing`
-   aracılığıyla belirlediğiniz fiyatlar.
-2. **Senkronize edilmiş harici fiyatlandırma** — senkronizasyon etkinleştirildiğinde
-   LiteLLM'in herkese açık `model_prices_and_context_window.json` dosyasından alınır
-   (geçersiz kılmalarınızın üzerine hiçbir zaman yazmaması için ayrı bir
-   `pricing_synced` ad alanında saklanır).
-3. **Sabit kodlanmış varsayılanlar** — OmniRoute ile birlikte sunulur.
+1. **Kullanıcı geçersiz kılmaları** — panelde veya `PATCH /api/pricing` ile ayarlanan fiyatlar (`pricing` ad alanı).
+2. **models.dev eşitlemesi** — `https://models.dev/api.json` kaynağından alınan fiyatlar (`models_dev_pricing` ad alanı).
+3. **LiteLLM eşitlemesi** — LiteLLM projesinin herkese açık `model_prices_and_context_window.json` dosyasından alınan fiyatlar (`pricing_synced` ad alanı).
+4. **Yerleşik varsayılanlar** — [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) içinde dağıtılan ücretler.
 
-Harici fiyatlandırma senkronizasyonu **isteğe bağlıdır** ve varsayılan olarak devre
-dışıdır. İlgili ortam değişkenleri
-([`.env.example`](../../.env.example) dosyasına bakın):
+Aynı sağlayıcı/model için üst katmanlar alt katmanların eşleşen alanlarının üzerine yazar; üstte olmayan alanlar alttan gelebilir. Bağımsız eşitleme işleri birlikte çalışırken de sıra sabittir. `GET /api/pricing?includeSources=1`, `pricing` ve `sourceMap` döndürür; model etiketleri (`user`, `modelsDev`, `litellm`, `default`) o modeli içeren en yüksek öncelikli katmanı belirtir.
 
-| Ortam değişkeni         | Varsayılan | Amaç                                                                         |
-| ----------------------- | ---------- | ---------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`    | Başlangıçta arka plan LiteLLM fiyatlandırma senkronizasyonunu etkinleştirir. |
-| `PRICING_SYNC_INTERVAL` | `86400`    | **Saniye** cinsinden senkronizasyon aralığı (varsayılan olarak günlük).      |
-| `PRICING_SYNC_SOURCES`  | `litellm`  | Virgülle ayrılmış kaynak listesi (şu anda yalnızca `litellm` desteklenir).   |
+**LiteLLM eşitlemesi** isteğe bağlıdır ve varsayılan olarak kapalıdır. Ortam değişkenleri ([`.env.example`](../../.env.example) dosyasına bakın):
+
+| Ortam değişkeni         | Varsayılan | Amaç                                                                                 |
+| ----------------------- | ---------- | ------------------------------------------------------------------------------------ |
+| `PRICING_SYNC_ENABLED`  | `false`    | Arka planda LiteLLM fiyat eşitlemesini açar.                                         |
+| `PRICING_SYNC_INTERVAL` | `86400`    | **Saniye** cinsinden senkronizasyon aralığı (varsayılan olarak günlük).              |
+| `PRICING_SYNC_SOURCES`  | `litellm`  | Kaynak seçimi yalnızca bu eşitlemeye aittir; şu anda yalnızca `litellm` desteklenir. |
+
+**models.dev eşitlemesi**, LiteLLM eşitlemesinden bağımsızdır ve o da varsayılan olarak kapalıdır. Ayarlardan açın (models.dev eşitlemesi) veya bu değişkenleri kullanın:
+
+| Ortam değişkeni            | Varsayılan       | Amaç                                                                                                                         |
+| -------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(ayarlanmamış)_ | Ayarlanmamışsa Ayarlar anahtarını izler; `1/true/on/yes` zorla açar, `0/false/off/no` Ayarlar açmış olsa bile zorla kapatır. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`          | Saniye cinsinden varsayılan models.dev eşitleme aralığı (günlük).                                                            |
+
+`PRICING_SYNC_SOURCES`, models.dev eşitlemesini **açmaz**; yalnızca LiteLLM eşitlemesini yönetir. Kullanıcı geçersiz kılmasını silmek eşitlenmiş ad alanlarının hiçbirini temizlemez; sıradaki kullanılabilir fiyat katmanı geçerli olur. Fiyatsız bir modelde elle geçersiz kılma eklemeden önce her iki eşitleme ayarını ve `sourceMap` değerini kontrol edin.
 
 ### Maliyet formülü
 
@@ -170,16 +175,16 @@ Aksi belirtilmedikçe bunların tümü yönetim kimlik doğrulaması gerektirir 
 
 ### Fiyatlandırma
 
-| Yöntem   | Uç nokta                | Amaç                                                                                                                                           |
-| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Geçerli birleştirilmiş fiyatlandırma (kullanıcı + senkronize edilmiş + varsayılanlar). Her girdinin kaynağını görmek için `?includeSources=1`. |
-| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` için fiyatlandırmayı geçersiz kılın.                                                   |
-| `DELETE` | `/api/pricing`          | Fiyatlandırmayı varsayılanlara sıfırlayın (isteğe bağlı olarak `?provider=&model=` ile kapsamlandırılır).                                      |
-| `GET`    | `/api/pricing/defaults` | 1 milyon başına varsayılan geri dönüş oranlarını gösterin.                                                                                     |
-| `GET`    | `/api/pricing/models`   | Modele göre anahtarlanmış fiyatlandırma.                                                                                                       |
-| `POST`   | `/api/pricing/sync`     | Harici kaynaklardan (LiteLLM) manuel senkronizasyon başlatın.                                                                                  |
-| `GET`    | `/api/pricing/sync`     | Geçerli senkronizasyon durumu.                                                                                                                 |
-| `DELETE` | `/api/pricing/sync`     | Senkronize edilmiş tüm fiyatlandırma verilerini temizleyin.                                                                                    |
+| Yöntem   | Uç nokta                | Amaç                                                                                                                                                                    |
+| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Dört katmanın birleşik fiyatları (kullanıcı, models.dev, LiteLLM, varsayılanlar). `?includeSources=1`, `pricing` + `sourceMap` döndürür.                                |
+| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` için fiyatlandırmayı geçersiz kılın.                                                                            |
+| `DELETE` | `/api/pricing`          | Kullanıcı fiyat geçersiz kılmalarını kaldırır (isteğe bağlı `?provider=&model=` kapsamıyla); eşitlenmiş fiyatlar veya yerleşik varsayılanlar yedek kaynak olarak kalır. |
+| `GET`    | `/api/pricing/defaults` | 1 milyon başına varsayılan geri dönüş oranlarını gösterin.                                                                                                              |
+| `GET`    | `/api/pricing/models`   | Modele göre anahtarlanmış fiyatlandırma.                                                                                                                                |
+| `POST`   | `/api/pricing/sync`     | Harici kaynaklardan (LiteLLM) manuel senkronizasyon başlatın.                                                                                                           |
+| `GET`    | `/api/pricing/sync`     | Geçerli senkronizasyon durumu.                                                                                                                                          |
+| `DELETE` | `/api/pricing/sync`     | Yalnızca LiteLLM ile eşitlenen fiyatları (`pricing_synced`) temizler; models.dev verileri ayrıdır.                                                                      |
 
 ### Maliyetle ilgili diğer uç noktalar
 

@@ -10,6 +10,8 @@ Tá trí mheicníocht athléimneachta éagsúil ach gaolmhar ag OmniRoute. Tá r
 
 > Foinse: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Tosaíocht idir an timpeallacht agus an painéal do lasca athléimneachta.** Ní thugann na lasca athléimneachta a chaithfear a chumasú go sainráite, agus a dtosaítear ón timpeallacht — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — ach an _réamhshocrú_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Tá tosaíocht ag luach Boole a stóráiltear go buan in `resilienceSettings` (Painéal → **Socruithe → Athléimneacht** / `PATCH /api/resilience`, stóráilte in `key_value`) ar luach na timpeallachta: coinníonn an normalú (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) an luach Boole sábháilte nuair atá sé ann. Mar sin, má shábháil an painéal `false` cheana féin, ní athraíonn sé aon rud an athróg timpeallachta sin a shocrú go `true` san imscaradh. Athraigh an lasc in **Socruithe → Athléimneacht**, nó glan an réimse stóráilte.
+
 ## 1. Bristeoir Cuarda an tSoláthraí
 
 **Raon feidhme:** an soláthraí iomlán (m.sh., `glm`, `openai`, `anthropic`).
@@ -88,6 +90,8 @@ Garda cúlchéimnithe: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - Bunfhuarú eochair API: 3s
 - Eochair API 429: tugtar tosaíocht do cheanntásca `Retry-After`/athshocraithe ón sruthuas nó do théacs athshocraithe inpharsáilte
 - Cúlchoigeartú: `baseCooldownMs * 2 ** failureIndex`
+
+**Moill athiarrachta de réir soláthraí.** Tá roghnóir **Moill athiarrachta** ar leathanach sonraí an tsoláthraí (Uathoibríoch, ó 15s go 1h). Sábhálann sé `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 trí `PATCH /api/resilience`). Mura bhfuil treoir athiarrachta ón tseirbhís in aghaidh srutha ag earráid teorannaithe ráta, cuirtear an luach seo in ionad na moille méadaithí scálaithe don soláthraí agus athshocraítear `backoffLevel` go 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Seo ord tosaíochta earráide teorannaithe ráta, an ceann is airde ar dtús: treoir athiarrachta in aghaidh srutha, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` don nasc, moill athiarrachta an tsoláthraí, athróg timpeallachta `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, ansin an mhoill mhéadaitheach scálaithe. Baineann Uathoibríoch an réimse. Ní bhaineann sé ach leis an gcúis teorannaithe ráta, agus ní bhaineann sé riamh le staideanna deiridh.
 
 **Cosaint frith-thréad toirní:** cuireann sé cosc ar theipeanna comhuaineacha an fuarú a ró-shíneadh nó `backoffLevel` a mhéadú faoi dhó.
 
@@ -492,7 +496,7 @@ sular féidir léi scor. Comhaireann sí deilte téacs ó theagmhais aschuir Cha
 agus Responses API (seachthomhas coimeádach beart UTF-8), déanann sí neamhaird de
 theagmhais úsáide amháin agus de theagmhais fholmha, agus cuireann sí breithiúnas ar fionraí
 fad atá teagmhais glao uirlise nó réasúnaithe ar siúl. Tá sí díchumasaithe de réir
-réamhshocraithe agus is féidir í a chumasú le `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`;
+réamhshocraithe agus is féidir í a chumasú le `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ní thugann an luach timpeallachta sin ach an réamhshocrú — tá tosaíocht ag luach Boole sábháilte in `resilienceSettings.streamRecovery.throughputWatchdog.enabled`; féach an nóta ar thosaíocht na timpeallachta agus an phainéil ag barr na treorach seo);
 cuireann gnáthshraith normalaithe na socruithe athléimneachta teorainn leis an bhfuinneog,
 leis an téamh, leis an íosráta agus leis an íosmhéid aschuir intomhaiste.
 

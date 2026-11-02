@@ -37,23 +37,31 @@ Minħabba li n-numru huwa stima:
 
 ### Is-sors tal-ipprezzar
 
-L-ispejjeż jiġu minn tabella tal-ipprezzar riżolta skont din l-ordni ta' preċedenza
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+L-ispejjeż jiġu mit-tabella magħquda tal-prezzijiet f’[`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), f’din l-ordni ta’ preċedenza (**l-ogħla l-ewwel**):
 
-1. **Sovrastrutturi tal-utent** — prezzijiet li tissettja fid-dashboard / permezz ta' `PATCH /api/pricing`.
-2. **Ipprezzar estern sinkronizzat** — miksub mill-
-   `model_prices_and_context_window.json` pubbliku ta' LiteLLM meta s-sinkronizzazzjoni tkun attivata (maħżun fi namespace
-   `pricing_synced` separat sabiex qatt ma jissostitwixxi s-sovrastrutturi tiegħek).
-3. **Valuri predefiniti hardcoded** — inklużi ma' OmniRoute.
+1. **Valuri sostitwiti mill-utent** — prezzijiet issettjati fid-dashboard jew permezz ta’ `PATCH /api/pricing` (l-ispazju tal-ismijiet `pricing`).
+2. **Sinkronizzazzjoni models.dev** — prezzijiet miksuba minn `https://models.dev/api.json` (l-ispazju tal-ismijiet `models_dev_pricing`).
+3. **Sinkronizzazzjoni LiteLLM** — prezzijiet miksuba mill-fajl pubbliku `model_prices_and_context_window.json` ta’ LiteLLM (l-ispazju tal-ismijiet `pricing_synced`).
+4. **Valuri awtomatiċi fil-kodiċi** — rati inklużi f’[`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Is-sinkronizzazzjoni tal-ipprezzar estern hija **opt-in**, diżattivata b'mod predefinit. Il-varjabbli tal-ambjent rilevanti
-(ara [`.env.example`](../../.env.example)):
+Għall-istess fornitur/mudell, il-valuri mis-saffi bi prijorità ogħla jissostitwixxu l-oqsma korrispondenti fis-saffi aktar baxxi; oqsma li huma nieqsa minn saff ta’ fuq xorta jistgħu jiġu minn saff ta’ taħt. L-ordni tibqa’ fissa anki meta ż-żewġ kompiti indipendenti ta’ sinkronizzazzjoni jaħdmu fl-istess ħin. `GET /api/pricing?includeSources=1` jirritorna `pricing` u `sourceMap`; it-tikketti għal kull mudell (`user`, `modelsDev`, `litellm`, `default`) jidentifikaw is-saff bl-ogħla prijorità li fih dak il-mudell.
 
-| Varjabbli tal-ambjent   | Valur predefinit | Għan                                                                             |
-| ----------------------- | ---------------- | -------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`          | Attiva s-sinkronizzazzjoni tal-ipprezzar ta' LiteLLM fl-isfond waqt l-istartjar. |
-| `PRICING_SYNC_INTERVAL` | `86400`          | Intervall tas-sinkronizzazzjoni f'**sekondi** (kuljum b'mod predefinit).         |
-| `PRICING_SYNC_SOURCES`  | `litellm`        | Lista ta' sorsi separati b'virgola (illum huwa appoġġjat biss `litellm`).        |
+Is-**sinkronizzazzjoni LiteLLM** teħtieġ attivazzjoni espliċita u hija diżattivata b’mod awtomatiku. Il-varjabbli tal-ambjent tagħha (ara [`.env.example`](../../.env.example)) huma:
+
+| Varjabbli tal-ambjent   | Valur predefinit | Għan                                                                                        |
+| ----------------------- | ---------------- | ------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`          | Attiva s-sinkronizzazzjoni tal-prezzijiet LiteLLM fl-isfond.                                |
+| `PRICING_SYNC_INTERVAL` | `86400`          | Intervall tas-sinkronizzazzjoni f'**sekondi** (kuljum b'mod predefinit).                    |
+| `PRICING_SYNC_SOURCES`  | `litellm`        | Għażla tas-sors għal din is-sinkronizzazzjoni biss; bħalissa huwa appoġġjat biss `litellm`. |
+
+Is-**sinkronizzazzjoni models.dev** hija separata mis-sinkronizzazzjoni LiteLLM u wkoll diżattivata b’mod awtomatiku. Attivaha f’Settings (sinkronizzazzjoni models.dev), jew uża dawn il-varjabbli:
+
+| Varjabbli tal-ambjent      | Valur awtomatiku   | Għan                                                                                                                                                              |
+| -------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(mhux issettjat)_ | Meta mhux issettjat, isegwi s-swiċċ f’Settings; `1/true/on/yes` jimponi l-attivazzjoni u `0/false/off/no` jimponi d-diżattivazzjoni, anki jekk Settings jattivah. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`            | Intervall awtomatiku tas-sinkronizzazzjoni models.dev f’sekondi, kuljum.                                                                                          |
+
+`PRICING_SYNC_SOURCES` **ma jattivax** models.dev; jikkontrolla biss is-sinkronizzazzjoni LiteLLM. It-tħassir ta’ valur sostitwit mill-utent ma jbattal l-ebda wieħed mill-ispazji tal-ismijiet sinkronizzati; jidħol fis-seħħ is-saff tal-prezzijiet li jmiss disponibbli. Għal mudell mingħajr prezz, iċċekkja ż-żewġ settings tas-sinkronizzazzjoni u `sourceMap` qabel iżżid valur manwali li jissostitwixxi l-prezz.
 
 ### Il-formula tal-ispiża
 
@@ -168,16 +176,16 @@ ma jkunx indikat mod ieħor.
 
 ### Ipprezzar
 
-| Metodu   | Endpoint                | Għan                                                                                                                       |
-| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Ipprezzar magħqud attwali (tal-utent + sinkronizzat + predefinit). `?includeSources=1` biex tara s-sors għal kull entrata. |
-| `PATCH`  | `/api/pricing`          | Issostitwixxi l-ipprezzar għal `{ provider: { model: { input, output, cached, … } } }`.                                    |
-| `DELETE` | `/api/pricing`          | Irrisettja l-ipprezzar għall-valuri predefiniti (b’mod fakultattiv limitat permezz ta’ `?provider=&model=`).               |
-| `GET`    | `/api/pricing/defaults` | Uri r-rati predefiniti ta’ fallback għal kull miljun.                                                                      |
-| `GET`    | `/api/pricing/models`   | Ipprezzar organizzat skont il-mudell.                                                                                      |
-| `POST`   | `/api/pricing/sync`     | Attiva sinkronizzazzjoni manwali minn sorsi esterni (LiteLLM).                                                             |
-| `GET`    | `/api/pricing/sync`     | Status attwali tas-sinkronizzazzjoni.                                                                                      |
-| `DELETE` | `/api/pricing/sync`     | Ħassar id-data kollha tal-ipprezzar sinkronizzat.                                                                          |
+| Metodu   | Endpoint                | Għan                                                                                                                                                                                 |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Prezzijiet magħquda minn erba’ saffi (utent, models.dev, LiteLLM, valuri awtomatiċi). `?includeSources=1` jirritorna `pricing` + `sourceMap`.                                        |
+| `PATCH`  | `/api/pricing`          | Issostitwixxi l-ipprezzar għal `{ provider: { model: { input, output, cached, … } } }`.                                                                                              |
+| `DELETE` | `/api/pricing`          | Neħħi l-prezzijiet sostitwiti mill-utent, b’ambitu fakultattiv permezz ta’ `?provider=&model=`; ir-rati sinkronizzati jew il-valuri awtomatiċi integrati jibqgħu bħala alternattivi. |
+| `GET`    | `/api/pricing/defaults` | Uri r-rati predefiniti ta’ fallback għal kull miljun.                                                                                                                                |
+| `GET`    | `/api/pricing/models`   | Ipprezzar organizzat skont il-mudell.                                                                                                                                                |
+| `POST`   | `/api/pricing/sync`     | Attiva sinkronizzazzjoni manwali minn sorsi esterni (LiteLLM).                                                                                                                       |
+| `GET`    | `/api/pricing/sync`     | Status attwali tas-sinkronizzazzjoni.                                                                                                                                                |
+| `DELETE` | `/api/pricing/sync`     | Ħassar biss il-prezzijiet sinkronizzati minn LiteLLM (`pricing_synced`); id-data ta’ models.dev hija separata.                                                                       |
 
 ### Endpoints oħra rilevanti għall-ispejjeż
 

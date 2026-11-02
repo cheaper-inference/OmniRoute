@@ -40,23 +40,31 @@ Kadangi šis skaičius yra įvertis:
 
 ### Kainodaros šaltinis
 
-Kainos gaunamos iš kainų lentelės, parenkamos pagal šią pirmumo tvarką
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Kainos gaunamos iš sujungtos kainodaros lentelės [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), tokia pirmumo tvarka (**aukščiausias prioritetas pirmas**):
 
-1. **Naudotojo pakeitimai** — kainos, kurias nustatote valdymo skydelyje / per `PATCH /api/pricing`.
-2. **Sinchronizuota išorinė kainodara** — gaunama iš viešo „LiteLLM“
-   `model_prices_and_context_window.json`, kai sinchronizavimas įjungtas (saugoma atskiroje
-   `pricing_synced` vardų srityje, todėl niekada neperrašo jūsų pakeitimų).
-3. **Kode įrašytos numatytosios reikšmės** — pateikiamos kartu su „OmniRoute“.
+1. **Naudotojo perrašytos kainos** — kainos, nustatytos valdymo skyde arba per `PATCH /api/pricing` (vardų sritis `pricing`).
+2. **models.dev sinchronizavimas** — kainos, gaunamos iš `https://models.dev/api.json` (vardų sritis `models_dev_pricing`).
+3. **LiteLLM sinchronizavimas** — kainos, gaunamos iš viešo LiteLLM failo `model_prices_and_context_window.json` (vardų sritis `pricing_synced`).
+4. **Kode pateiktos numatytosios kainos** — tarifai, įtraukti į [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Išorinės kainodaros sinchronizavimas yra **pasirenkamas** ir pagal numatytuosius nustatymus išjungtas. Susiję aplinkos kintamieji
-(žr. [`.env.example`](../../.env.example)):
+Tam pačiam teikėjui ir modeliui aukštesnio prioriteto sluoksnių reikšmės perrašo atitinkamus žemesnių sluoksnių laukus; laukus, kurių nėra aukštesniame sluoksnyje, vis dar gali pateikti žemesnis. Tvarka nekinta, net kai abi nepriklausomos sinchronizavimo užduotys vykdomos vienu metu. `GET /api/pricing?includeSources=1` grąžina `pricing` ir `sourceMap`; kiekvieno modelio žymos (`user`, `modelsDev`, `litellm`, `default`) nurodo aukščiausio prioriteto sluoksnį, kuriame yra tas modelis.
 
-| Aplinkos kintamasis     | Numatytoji reikšmė | Paskirtis                                                                   |
-| ----------------------- | ------------------ | --------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`            | Įjungti foninį „LiteLLM“ kainodaros sinchronizavimą paleidimo metu.         |
-| `PRICING_SYNC_INTERVAL` | `86400`            | Sinchronizavimo intervalas **sekundėmis** (numatyta — kasdien).             |
-| `PRICING_SYNC_SOURCES`  | `litellm`          | Kableliais atskirtas šaltinių sąrašas (šiuo metu palaikomas tik `litellm`). |
+**LiteLLM sinchronizavimas** įjungiamas pasirinktinai ir pagal numatymą yra išjungtas. Jo aplinkos kintamieji (žr. [`.env.example`](../../.env.example)) yra:
+
+| Aplinkos kintamasis     | Numatytoji reikšmė | Paskirtis                                                                                   |
+| ----------------------- | ------------------ | ------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`            | Įjungti foninį LiteLLM kainų sinchronizavimą.                                               |
+| `PRICING_SYNC_INTERVAL` | `86400`            | Sinchronizavimo intervalas **sekundėmis** (numatyta — kasdien).                             |
+| `PRICING_SYNC_SOURCES`  | `litellm`          | Šaltinio parinkimas taikomas tik šiam sinchronizavimui; šiuo metu palaikomas tik `litellm`. |
+
+**models.dev sinchronizavimas** yra atskiras nuo LiteLLM sinchronizavimo ir taip pat pagal numatymą išjungtas. Įjunkite jį Nustatymuose (models.dev sinchronizavimas) arba naudokite šiuos kintamuosius:
+
+| Aplinkos kintamasis        | Numatytoji reikšmė | Paskirtis                                                                                                                                                     |
+| -------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nenustatyta)_    | Jei nenustatyta, laikomasi Nustatymų jungiklio; `1/true/on/yes` priverstinai įjungia, o `0/false/off/no` priverstinai išjungia, net jei Nustatymuose įjungta. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`            | Numatytasis models.dev sinchronizavimo intervalas sekundėmis, kartą per dieną.                                                                                |
+
+`PRICING_SYNC_SOURCES` models.dev **neįjungia**; jis valdo tik LiteLLM sinchronizavimą. Pašalinus naudotojo perrašytą kainą, abi sinchronizuotos vardų sritys lieka nepakeistos; įsigalioja kitas prieinamas kainodaros sluoksnis. Prieš rankiniu būdu nustatydami kainą jos neturinčiam modeliui, patikrinkite abiejų sinchronizavimų nustatymus ir `sourceMap`.
 
 ### Kainos formulė
 
@@ -170,16 +178,16 @@ nurodyta kitaip.
 
 ### Kainodara
 
-| Metodas  | Galinis taškas          | Paskirtis                                                                                                                                      |
-| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Dabartinė sujungta kainodara (naudotojo + sinchronizuota + numatytoji). Naudokite `?includeSources=1`, kad matytumėte kiekvieno įrašo šaltinį. |
-| `PATCH`  | `/api/pricing`          | Pakeisti `{ provider: { model: { input, output, cached, … } } }` kainodarą.                                                                    |
-| `DELETE` | `/api/pricing`          | Atkurti numatytąją kainodarą (aprėptį galima pasirinktinai nustatyti naudojant `?provider=&model=`).                                           |
-| `GET`    | `/api/pricing/defaults` | Rodyti numatytuosius atsarginius tarifus už 1 mln. vienetų.                                                                                    |
-| `GET`    | `/api/pricing/models`   | Kainodara pagal modelį.                                                                                                                        |
-| `POST`   | `/api/pricing/sync`     | Suaktyvinti rankinį sinchronizavimą iš išorinių šaltinių (LiteLLM).                                                                            |
-| `GET`    | `/api/pricing/sync`     | Dabartinė sinchronizavimo būsena.                                                                                                              |
-| `DELETE` | `/api/pricing/sync`     | Išvalyti visus sinchronizuotus kainodaros duomenis.                                                                                            |
+| Metodas  | Galinis taškas          | Paskirtis                                                                                                                                                                              |
+| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Sujungta keturių sluoksnių kainodara (naudotojo, models.dev, LiteLLM, numatytoji). `?includeSources=1` grąžina `pricing` + `sourceMap`.                                                |
+| `PATCH`  | `/api/pricing`          | Pakeisti `{ provider: { model: { input, output, cached, … } } }` kainodarą.                                                                                                            |
+| `DELETE` | `/api/pricing`          | Pašalinti naudotojo perrašytas kainas, pasirinktinai apribojant pagal `?provider=&model=`; sinchronizuoti tarifai arba įtaisytos numatytosios kainos lieka kaip atsarginiai variantai. |
+| `GET`    | `/api/pricing/defaults` | Rodyti numatytuosius atsarginius tarifus už 1 mln. vienetų.                                                                                                                            |
+| `GET`    | `/api/pricing/models`   | Kainodara pagal modelį.                                                                                                                                                                |
+| `POST`   | `/api/pricing/sync`     | Suaktyvinti rankinį sinchronizavimą iš išorinių šaltinių (LiteLLM).                                                                                                                    |
+| `GET`    | `/api/pricing/sync`     | Dabartinė sinchronizavimo būsena.                                                                                                                                                      |
+| `DELETE` | `/api/pricing/sync`     | Išvalyti tik LiteLLM sinchronizuotas kainas (`pricing_synced`); models.dev duomenys laikomi atskirai.                                                                                  |
 
 ### Kiti su išlaidomis susiję galiniai taškai
 

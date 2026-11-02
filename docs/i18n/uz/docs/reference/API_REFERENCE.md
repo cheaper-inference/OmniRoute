@@ -823,7 +823,7 @@ Umumiy `time_range` endi ikkala provayderga ham uzatiladi: Exa `startPublishedDa
 vaqt belgisi), Tavily esa `start_date`ni (`YYYY-MM-DD`) oladi. `provider_options` ichida
 aniq ko‘rsatilgan sana moslashtirilgan sana o‘rnini bosadi.
 
-Exa natijalari `id`, `highlight_scores`, `summary`, `subpages`, `entities` va `extras`ni
+Exa natijalari `id`, `highlights` (`snippet` sifatida ishlatiladigan faqat birinchi parcha emas, barcha ajratilgan parchalar), `highlight_scores`, `summary`, `subpages`, `entities` va `extras`ni
 `provider_raw` ichida saqlab qoladi. Tavily natijalari `images` va `favicon`ni saqlab qoladi.
 
 Linkup qidiruv narxi `depth` `fast` va `standard` uchun $0,005 va `deep` uchun $0,05 ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` dan keladimi yoki ulanish sozlamalaridan qatʼiy nazar qayd etiladi.
@@ -1219,11 +1219,29 @@ sifatida yaratishi mumkin.
 
 | Yakuniy nuqta         | Metod    | Tavsif                                    |
 | --------------------- | -------- | ----------------------------------------- |
+| `/api/models`         | GET/PUT  | Modellar ro‘yxati / taxallusni yangilash  |
 | `/api/models/alias`   | GET/POST | Model taxalluslari                        |
 | `/api/models/catalog` | GET      | Provayder va tur bo‘yicha barcha modellar |
 | `/api/combos*`        | Turli    | Kombinatsiyalarni boshqarish              |
 | `/api/keys*`          | Turli    | API kalitlarini boshqarish                |
 | `/api/pricing`        | GET      | Modellarning narxlari                     |
+
+#### Model cheklovlarining kelib chiqishi
+
+`GET /api/models?withLimits=1` (`true` ham qabul qilinadi; `0`/`false` yoki parametrni bermaslik standart javobni o‘zgartirmaydi) har bir modelga `contextWindow`, `maxInputTokens`, `maxOutputTokens` va `capsSource` obyektini qo‘shadi. `capsSource` har bir cheklovni bergan qoidani ko‘rsatadi; masalan, 1M modeldagi 128k kabi kutilmagan qiymat manbasini aniqlash mumkin. Aniqlangan qiymatlar yo‘naltirish ishlatadigan qiymatlar bilan bir xil; parametr faqat maydon qo‘shadi, qiymatni hech qachon o‘zgartirmaydi. Boshqa `withLimits` qiymatlari `400` bilan rad etiladi.
+
+| `capsSource` qiymati                         | Manba                                                                      |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `override:context`                           | Saqlangan kontekst oynasi almashtirishi (`model_context_overrides`)        |
+| `override:max_input` / `override:max_output` | Saqlangan `max_input_tokens` / `max_output_tokens` imkoniyat almashtirishi |
+| `static-authoritative:<provider>/<model>`    | Kontekst oynalarining statik ustuvor jadvali                               |
+| `synced:<provider>/<model>`                  | models.dev orqali sinxronlangan imkoniyatlar qatori                        |
+| `registry:<provider>/<model>`                | Provayderlar reyestridagi yozuv                                            |
+| `spec:<model>`                               | Modelning statik tavsifi                                                   |
+| `effort-base:` prefiksi                      | Harakat darajasi qo‘shimchali variantning asosiy modelidan olingan qator   |
+| `none`                                       | Hech bir manba cheklovni belgilamagan (qiymat `null`)                      |
+
+Amalga oshirish: `src/lib/modelCapabilities.ts` ichidagi `getResolvedModelCapabilitiesWithLimitSources()` va `src/lib/modelCapabilityLimits.ts` ichidagi ustuvorlik zanjirlari.
 
 ### Foydalanish va tahlil
 

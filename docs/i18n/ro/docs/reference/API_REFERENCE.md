@@ -887,7 +887,7 @@ Câmpul generic `time_range` ajunge acum la ambii furnizori: Exa primește `star
 iar Tavily primește `start_date` (`YYYY-MM-DD`). O dată explicită din `provider_options`
 o suprascrie pe cea mapată.
 
-Rezultatele Exa păstrează `id`, `highlight_scores`, `summary`, `subpages`, `entities` și `extras` în
+Rezultatele Exa păstrează `id`, `highlights` (toate fragmentele evidențiate, nu doar primul folosit ca `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` și `extras` în
 `provider_raw`. Rezultatele Tavily păstrează `images` și `favicon`.
 
 Linkup: Costul de căutare a conexiunii este înregistrat la 0,005 USD pentru `depth` `fast` și `standard` și la 0,05 USD pentru `deep` ( [prețuri de conectare](https://docs.linkup.so/pages/documentation/development/pricing) ), indiferent dacă `depth` provine din `provider_options` sau din setările conexiunii.
@@ -1296,13 +1296,31 @@ a doua etapă poate produce în continuare raționamentul vizibil solicitat ca t
 
 ### Rutare și configurare
 
-| Endpoint              | Metodă   | Descriere                          |
-| --------------------- | -------- | ---------------------------------- |
-| `/api/models/alias`   | GET/POST | Aliasuri de modele                 |
-| `/api/models/catalog` | GET      | Toate modelele după furnizor + tip |
-| `/api/combos*`        | Diverse  | Gestionarea combinațiilor          |
-| `/api/keys*`          | Diverse  | Gestionarea cheilor API            |
-| `/api/pricing`        | GET      | Tarifele modelelor                 |
+| Endpoint              | Metodă   | Descriere                           |
+| --------------------- | -------- | ----------------------------------- |
+| `/api/models`         | GET/PUT  | Listă de modele / actualizare alias |
+| `/api/models/alias`   | GET/POST | Aliasuri de modele                  |
+| `/api/models/catalog` | GET      | Toate modelele după furnizor + tip  |
+| `/api/combos*`        | Diverse  | Gestionarea combinațiilor           |
+| `/api/keys*`          | Diverse  | Gestionarea cheilor API             |
+| `/api/pricing`        | GET      | Tarifele modelelor                  |
+
+#### Proveniența limitelor modelelor
+
+`GET /api/models?withLimits=1` (acceptă și `true`; `0`/`false` sau omiterea păstrează răspunsul implicit neschimbat) adaugă `contextWindow`, `maxInputTokens`, `maxOutputTokens` și un obiect `capsSource` fiecărui model. `capsSource` identifică regula care a furnizat fiecare limită, astfel încât o valoare neașteptată, de exemplu 128k pentru un model de 1M, să poată fi urmărită până la sursă. Valorile rezolvate sunt aceleași folosite de rutare; opțiunea doar adaugă câmpuri, fără să modifice valori. Orice altă valoare `withLimits` este respinsă cu `400`.
+
+| Valoare `capsSource`                         | Origine                                                                             |
+| -------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `override:context`                           | Suprascriere persistentă a ferestrei de context (`model_context_overrides`)         |
+| `override:max_input` / `override:max_output` | Suprascriere persistentă a capabilităților `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Tabel static autoritativ pentru ferestrele de context                               |
+| `synced:<provider>/<model>`                  | Înregistrare de capabilități sincronizată din models.dev                            |
+| `registry:<provider>/<model>`                | Intrare în registrul furnizorilor                                                   |
+| `spec:<model>`                               | Specificație statică a modelului                                                    |
+| `effort-base:` prefix                        | Înregistrare preluată de la modelul de bază al variantei cu sufix de efort          |
+| `none`                                       | Nicio sursă nu declară limita (valoarea este `null`)                                |
+
+Implementare: `getResolvedModelCapabilitiesWithLimitSources()` în `src/lib/modelCapabilities.ts` și lanțurile de precedență din `src/lib/modelCapabilityLimits.ts`.
 
 ### Utilizare și analiză
 

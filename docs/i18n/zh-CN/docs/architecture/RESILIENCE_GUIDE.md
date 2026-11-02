@@ -10,6 +10,8 @@ OmniRoute 有三个不同但相互关联的弹性机制。它们各自的作用�
 
 > 来源：[diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **弹性开关的环境变量与仪表盘优先级。** 从环境变量初始化、需主动启用的开关 — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`、`PROVIDER_COOLDOWN_ENABLED`、`STREAM_RECOVERY_ENABLED`、`STREAM_RECOVERY_MIDSTREAM_ENABLED`、`STREAM_THROUGHPUT_WATCHDOG_ENABLED` — 只提供_默认值_（`DEFAULT_RESILIENCE_SETTINGS`，`src/lib/resilience/settings.ts`）。持久保存在 `resilienceSettings` 中的布尔值（仪表盘 → **设置 → 弹性** / `PATCH /api/resilience`，存储于 `key_value`）优先于环境变量：规范化逻辑（`toBoolean`，`src/lib/resilience/settings/normalize.ts`）会保留已有的布尔值。因此，若仪表盘已保存 `false`，再将相应环境变量设为 `true` 不会改变行为；应在**设置 → 弹性**中切换开关，或清除已保存的字段。
+
 ## 1. 提供者熔断器（Provider Circuit Breaker）
 
 **作用范围：**整个提供者（例如 `glm`、`openai`、`anthropic`）。
@@ -92,6 +94,8 @@ OmniRoute 有三个不同但相互关联的弹性机制。它们各自的作用�
 - API 密钥基础值：3 秒
 - API 密钥 429：优先采用上游 `Retry-After`/重置标头/可解析的重置文本
 - 退避：`baseCooldownMs * 2 ** failureIndex`
+
+**各提供商的重试延迟。** 提供商详情页有**重试延迟**选择项（Auto，15s 至 1h），保存到 `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`（通过 `PATCH /api/resilience` 接受 1–21600）。限流错误未携带上游重试提示时，该值替代提供商的递增退避，并将 `backoffLevel` 重置为 0（`open-sse/services/rotationConfig.ts::overrideFor`）。限流错误的优先级从高到低为：上游重试提示、连接级 `providerSpecificData.rotationOverrides.rateLimitResetSeconds`、提供商重试延迟、环境变量 `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`、递增退避。Auto 会移除该字段。此设置只影响限流原因，绝不影响终止状态。
 
 **防惊群保护：** 防止并发故障过度延长冷却时间或对 `backoffLevel` 重复递增。
 
@@ -451,7 +455,7 @@ quota_exhausted / auth_error / not_found / not_found_local:
 
 可选的 `resilienceSettings.streamRecovery.throughputWatchdog` 防护机制用于检测这样一种上游：它仍在发送数据块，但产生的助手输出低于配置的有效输出速率。它与空闲超时（idle timeout）刻意区分开：心跳和元数据既不会重置这两个计时器中的任何一个，也不算作有效进展。它同样区别于硬性尝试截止期限（#9153）——无论输出质量如何，后者始终是绝对的安全上限。
 
-看门狗必须先经过一段预热期，随后再积累一个完整的滚动窗口，才能触发中止。它统计来自 Chat Completions 与 Responses API 输出事件的文本增量（采用保守的 UTF-8 字节近似值），忽略仅含用量的事件与空事件，并在工具调用或推理事件进行期间暂停判定。该功能默认禁用，可通过 `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` 启用；窗口、预热期、最小速率与最小可测量输出均由常规的弹性设置规范化层进行边界约束。
+看门狗必须先经过一段预热期，随后再积累一个完整的滚动窗口，才能触发中止。它统计来自 Chat Completions 与 Responses API 输出事件的文本增量（采用保守的 UTF-8 字节近似值），忽略仅含用量的事件与空事件，并在工具调用或推理事件进行期间暂停判定。该功能默认禁用，可通过 `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` （该环境变量只设置默认值 — 已保存的 `resilienceSettings.streamRecovery.throughputWatchdog.enabled` 布尔值优先；参见本指南开头关于环境变量与仪表盘优先级的说明） 启用；窗口、预热期、最小速率与最小可测量输出均由常规的弹性设置规范化层进行边界约束。
 
 启用后，看门狗中止仅作用于当前活跃的上游尝试。在任何客户端可见字节产生之前，现有的同账户早期恢复路径可以重新打开该尝试。提交（commit）之后，流绝不会被盲目重放；只有现有的安全流中续传契约才能拼接后缀。终结（Finalization）仍为单次执行，因此用量统计与信号量释放不会重复发生。
 

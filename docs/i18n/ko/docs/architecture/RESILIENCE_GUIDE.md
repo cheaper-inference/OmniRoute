@@ -10,6 +10,8 @@ OmniRoute에는 서로 구별되지만 관련된 세 가지 복원력(resilience
 
 > 출처: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **복원력 스위치에서 환경 변수와 대시보드의 우선순위.** 환경 변수로 초기값을 설정하는 선택적 복원력 스위치 — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — 는 _기본값_만 제공합니다(`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). `resilienceSettings`에 저장된 불리언 값(대시보드 → **설정 → 복원력** / `PATCH /api/resilience`로 설정하고 `key_value`에 저장)이 환경 변수 값보다 우선합니다. 정규화(`toBoolean`, `src/lib/resilience/settings/normalize.ts`)는 저장된 불리언이 있으면 그 값을 유지합니다. 따라서 대시보드에서 이미 `false`를 저장한 배포 환경에서는 해당 환경 변수를 `true`로 설정해도 아무것도 바뀌지 않습니다. **설정 → 복원력**에서 스위치를 바꾸거나 저장된 필드를 지우세요.
+
 ## 1. 프로바이더 서킷 브레이커
 
 **범위:** 프로바이더 전체(예: `glm`, `openai`, `anthropic`).
@@ -86,6 +88,8 @@ OmniRoute에는 서로 구별되지만 관련된 세 가지 복원력(resilience
 - API 키 기본: 3초
 - API 키 429: 업스트림 `Retry-After`/리셋 헤더/파싱 가능한 리셋 텍스트를 우선 적용
 - 백오프: `baseCooldownMs * 2 ** failureIndex`
+
+**공급자별 재시도 지연.** 공급자 상세 페이지에는 **재시도 지연** 선택 항목이 있습니다(Auto, 15s부터 1h까지). `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`를 저장합니다(1–21600, `PATCH /api/resilience` 사용). 속도 제한 오류에 업스트림 재시도 힌트가 없으면 이 값이 공급자의 조정된 백오프를 대체하고 `backoffLevel`을 0으로 재설정합니다(`open-sse/services/rotationConfig.ts::overrideFor`). 속도 제한 오류의 우선순위는 높은 순서대로 업스트림 재시도 힌트, 연결별 `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, 공급자별 재시도 지연, 환경 변수 `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, 조정된 백오프입니다. Auto는 필드를 제거합니다. 속도 제한 사유에만 영향을 주며 종료 상태에는 영향을 주지 않습니다.
 
 **썬더링 허드(thundering herd) 방지 가드:** 동시에 발생한 실패로 인해 쿨다운이 과도하게 연장되거나 `backoffLevel`이 이중으로 증가하는 것을 방지합니다.
 
@@ -510,7 +514,7 @@ antigravity 쿼터 패밀리나 codex 스코프를 넘나드는 별칭은 자기
 Chat Completions 및 Responses API 출력 이벤트의 텍스트 델타를
 집계하며(보수적인 UTF-8 바이트 프록시), 사용량 전용 및 빈 이벤트는 무시하고,
 도구 호출 또는 추론 이벤트가 진행 중인 동안에는 판단을 유보합니다. 이는
-기본적으로 비활성화되어 있으며 `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`로
+기본적으로 비활성화되어 있으며 `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (이 환경 변수 값은 기본값만 제공하며, 저장된 `resilienceSettings.streamRecovery.throughputWatchdog.enabled` 불리언 값이 우선합니다. 이 가이드 앞부분의 환경 변수와 대시보드 우선순위 설명을 참조하세요)로
 활성화할 수 있습니다. 윈도우, 워밍업, 최소 속도 및 최소 측정 가능 출력은
 일반적인 복원력 설정 정규화 계층에 의해 제한됩니다.
 

@@ -10,6 +10,8 @@ Ang OmniRoute ay may tatlong magkakaiba ngunit magkakaugnay na mekanismo ng resi
 
 > Pinagmulan: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Priyoridad ng environment at dashboard para sa mga switch ng katatagan.** Ang mga opsyonal na switch ng katatagan na sinisimulan mula sa environment — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — ay nagbibigay lamang ng _paunang halaga_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Mas may priyoridad kaysa environment ang boolean na naka-save sa `resilienceSettings` (Dashboard → **Mga Setting → Katatagan** / `PATCH /api/resilience`, iniimbak sa `key_value`): pinananatili ng normalization (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) ang naka-save na boolean kapag mayroon nito. Kaya walang mababago kung itatakda ang naturang environment variable sa `true` sa isang installation na may `false` nang na-save mula sa dashboard. Baguhin ang switch sa **Mga Setting → Katatagan**, o alisin ang naka-save na field.
+
 ## 1. Circuit Breaker ng Provider
 
 **Saklaw:** buong provider (hal., `glm`, `openai`, `anthropic`).
@@ -89,6 +91,8 @@ Pananggalang sa regression: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - Base ng API-key: 3s
 - API-key 429: mas ginugusto ang upstream `Retry-After`/reset headers/parseable na reset text
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Tagal bago muling sumubok para sa bawat provider.** May pagpipiliang **Tagal bago muling sumubok** sa pahina ng detalye ng provider (Auto, mula 15s hanggang 1h). Sine-save nito ang `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, sa pamamagitan ng `PATCH /api/resilience`). Kapag walang upstream retry hint ang rate-limit error, pinapalitan ng halagang ito ang scaled backoff ng provider at ibinabalik ang `backoffLevel` sa 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Ang priyoridad para sa rate-limit error, mula sa pinakamataas: upstream retry hint, kasunod ang `providerSpecificData.rotationOverrides.rateLimitResetSeconds` ng koneksyon, pagkatapos ang tagal ng provider bago muling sumubok, pagkatapos ang environment variable na `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, at panghuli ang scaled backoff. Inaalis ng Auto ang field. Rate-limit na dahilan lamang ang naaapektuhan, hindi kailanman ang mga terminal na estado.
 
 **Pananggalang sa thundering-herd:** pumipigil sa magkakasabay na mga failure na labis na magpahaba ng cooldown o dobleng mag-increment ng `backoffLevel`.
 
@@ -494,7 +498,7 @@ output event ng Chat Completions at Responses API (isang konserbatibong UTF-8 by
 proxy), binabalewala ang mga event na usage-only at walang laman, at ipinagpapaliban
 ang paghuhusga habang may mga tool-call o reasoning event na kasalukuyang
 isinasagawa. Naka-disable ito bilang default at maaaring i-enable gamit ang
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; ang window, warm-up, minimum na rate, at
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (paunang halaga lamang ang ibinibigay ng environment na iyon; mas may priyoridad ang naka-save na boolean sa `resilienceSettings.streamRecovery.throughputWatchdog.enabled`; tingnan ang tala tungkol sa priyoridad ng environment at dashboard sa simula ng gabay na ito); ang window, warm-up, minimum na rate, at
 minimum na nasusukat na output ay may hangganang itinakda ng normal na
 resilience-settings normalization layer.
 

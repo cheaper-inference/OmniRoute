@@ -26,6 +26,7 @@ test("codexAccount/write exposes the direct connection reader from db/providers"
 });
 
 function assertPassiveCodexBoundary(source: string) {
+  assert.match(source, /export function isPassiveCodex\b/, "passive predicate must exist");
   assert.match(
     source,
     /export async function resolvePassiveCodex\b/,
@@ -47,7 +48,24 @@ test("passiveCodex.ts does not import src/ directly", () => {
 test("passive boundary rejects empty sources, missing seams and direct src imports", () => {
   const source = readFileSync("open-sse/services/tokenRefresh/passiveCodex.ts", "utf8");
   assertPassiveCodexBoundary(source);
-  assert.throws(() => assertPassiveCodexBoundary(""), /passive resolver must exist/);
+  assert.throws(() => assertPassiveCodexBoundary(""), /passive predicate must exist/);
+  assert.throws(
+    () =>
+      assertPassiveCodexBoundary(
+        source.replace("export function isPassiveCodex", "function hiddenPassivePredicate")
+      ),
+    /passive predicate must exist/
+  );
+  assert.throws(
+    () =>
+      assertPassiveCodexBoundary(
+        source.replace(
+          "export async function resolvePassiveCodex",
+          "async function hiddenPassiveResolver"
+        )
+      ),
+    /passive resolver must exist/
+  );
   assert.throws(
     () => assertPassiveCodexBoundary(source.replace("../codexAccount/write.ts", "./other.ts")),
     /existing Codex connection seam/

@@ -4185,7 +4185,20 @@
     "duplicateAutoComboSnapshotMsg": "এটি এই টেমপ্লেটের সাথে মিলে যায় এমন বর্তমান সংযুক্ত প্রদানকারী/মডেলগুলিকে একটি সম্পাদনযোগ্য কম্বোতে স্ন্যাপশট নেবে।",
     "duplicateAutoComboFailedPrefix": "অটোকম্বো ডুপ্লিকেশন ব্যর্থ:",
     "duplicateAutoComboUnknownError": "অজানা ত্রুটি",
-    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন"
+    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন",
+    "exportCombos": "এক্সপোর্ট",
+    "exportCombosFailed": "কম্বো এক্সপোর্ট করা যায়নি",
+    "importCombos": "ইমপোর্ট",
+    "importCombosTitle": "কম্বো ইমপোর্ট করুন",
+    "importCombosInvalidFile": "এই ফাইলটি বৈধ কম্বো এক্সপোর্ট নয়।",
+    "importCombosSummary": "ফাইলে থাকা কম্বো: {total} ({fresh}টি নতুন, {conflicting}টির নাম আগে থেকেই আছে)।",
+    "importCombosMergeHint": "মার্জ সব বিদ্যমান কম্বো রেখে দেয় এবং যেগুলোর নাম আগে থেকেই আছে সেগুলো এড়িয়ে যায়। সংযোগ ও ক্রেডেনশিয়াল কখনো ইমপোর্ট করা হয় না।",
+    "importCombosReplaceHint": "সব প্রতিস্থাপন আপনার বিদ্যমান কম্বো ({current}) মুছে ফেলে এবং তার বদলে ফাইলটি ইমপোর্ট করে। এটি পূর্বাবস্থায় ফেরানো যাবে না।",
+    "importCombosMerge": "মার্জ করুন",
+    "importCombosReplace": "সব প্রতিস্থাপন করুন",
+    "importCombosDone": "ইমপোর্ট করা কম্বো: {created}। এড়িয়ে যাওয়া: {skipped}।",
+    "importCombosFailed": "কম্বো ইমপোর্ট করা যায়নি",
+    "importCombosWarnings": "সতর্কতাসহ ইমপোর্ট হয়েছে"
   },
   "costs": {
     "title": "খরচ",
@@ -7050,7 +7063,12 @@
     "chatgptConnectorLabel": "চ্যাটজিপিটি কাস্টম কানেক্টর",
     "doctorChecking": "স্ট্যাটাস যাচাই করা হচ্ছে…",
     "doctorCheck": "ডক্টর স্ট্যাটাস যাচাই করুন",
-    "fallbackRetryBackendTitle": "ফলব্যাক রিট্রাই ব্যাকএন্ড"
+    "fallbackRetryBackendTitle": "ফলব্যাক রিট্রাই ব্যাকএন্ড",
+    "retryDelayTitle": "পুনরায় চেষ্টার বিলম্ব",
+    "retryDelayDesc": "প্রদানকারী কখন আবার চেষ্টা করতে হবে তা না জানালে রেট-লিমিট ত্রুটির পরে সংযোগটি কতক্ষণ বিশ্রামে থাকবে। স্বয়ংক্রিয় মোড অন্তর্নির্মিত ব্যাকঅফ ব্যবহার করে; প্রদানকারীর পাঠানো রিসেট সময় সর্বদা অগ্রাধিকার পায়।",
+    "retryDelayAuto": "স্বয়ংক্রিয়",
+    "retryDelaySaved": "পুনরায় চেষ্টার বিলম্ব সংরক্ষিত হয়েছে",
+    "retryDelayUpdateFailed": "পুনরায় চেষ্টার বিলম্ব আপডেট করতে ব্যর্থ"
   },
   "settings": {
     "title": "সেটিংস",

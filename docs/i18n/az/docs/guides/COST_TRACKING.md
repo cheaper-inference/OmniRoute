@@ -42,25 +42,31 @@ Bu rəqəm təxmini olduğuna görə:
 
 ### Qiymət mənbəyi
 
-Xərclər aşağıdakı üstünlük sırasına əsasən müəyyən edilən qiymət cədvəlindən götürülür
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Xərclər [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) daxilindəki birləşdirilmiş qiymət cədvəlindən bu üstünlük sırası ilə alınır (**ən yüksək əvvəl**):
 
-1. **İstifadəçi əvəzləmələri** — idarə panelində / `PATCH /api/pricing` vasitəsilə təyin
-   etdiyiniz qiymətlər.
-2. **Sinxronlaşdırılmış xarici qiymətlər** — sinxronizasiya aktiv olduqda LiteLLM-in açıq
-   `model_prices_and_context_window.json` faylından əldə edilir (əvəzləmələrinizi heç vaxt
-   dəyişdirməməsi üçün ayrıca `pricing_synced` ad fəzasında saxlanılır).
-3. **Sərt kodlaşdırılmış standart dəyərlər** — OmniRoute ilə birlikdə təqdim olunur.
+1. **İstifadəçi əvəzləmələri** — paneldə və ya `PATCH /api/pricing` vasitəsilə təyin edilmiş qiymətlər (`pricing` ad məkanı).
+2. **models.dev sinxronlaşdırması** — `https://models.dev/api.json` ünvanından alınmış qiymətlər (`models_dev_pricing` ad məkanı).
+3. **LiteLLM sinxronlaşdırması** — LiteLLM-in açıq `model_prices_and_context_window.json` faylından alınmış qiymətlər (`pricing_synced` ad məkanı).
+4. **Koddakı standart dəyərlər** — [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) daxilində təqdim olunan tariflər.
 
-Xarici qiymət sinxronizasiyası **seçim əsasında aktivləşdirilir** və standart olaraq
-deaktivdir. Müvafiq mühit dəyişənləri
-([`.env.example`](../../.env.example) faylına baxın):
+Eyni provayder/model üçün yüksək üstünlüklü təbəqələr aşağı təbəqələrdəki uyğun sahələrin üzərinə yazır; yuxarı təbəqədə olmayan sahələr yenə aşağı təbəqədən götürülə bilər. Hər iki müstəqil sinxronlaşdırma işi eyni vaxtda işləsə də sıra sabit qalır. `GET /api/pricing?includeSources=1` sorğusu `pricing` və `sourceMap` qaytarır; sonuncunun model üzrə etiketləri (`user`, `modelsDev`, `litellm`, `default`) həmin modeli ehtiva edən ən yüksək üstünlüklü təbəqəni göstərir.
 
-| Mühit dəyişəni          | Standart  | Məqsəd                                                                   |
-| ----------------------- | --------- | ------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`   | Başlanğıcda LiteLLM qiymət sinxronizasiyasını fonda aktivləşdirir.       |
-| `PRICING_SYNC_INTERVAL` | `86400`   | **Saniyə** ilə sinxronizasiya intervalı (standart olaraq gündəlik).      |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Vergüllə ayrılmış mənbə siyahısı (hazırda yalnız `litellm` dəstəklənir). |
+**LiteLLM sinxronlaşdırması** ayrıca aktivləşdirilməlidir və standart olaraq söndürülüb. Onun mühit dəyişənləri (baxın: [`.env.example`](../../.env.example)) bunlardır:
+
+| Mühit dəyişəni          | Standart  | Məqsəd                                                                             |
+| ----------------------- | --------- | ---------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Arxa planda LiteLLM qiymət sinxronlaşdırmasını aktivləşdirir.                      |
+| `PRICING_SYNC_INTERVAL` | `86400`   | **Saniyə** ilə sinxronizasiya intervalı (standart olaraq gündəlik).                |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Yalnız bu sinxronlaşdırma üçün mənbə seçimi; hazırda yalnız `litellm` dəstəklənir. |
+
+**models.dev sinxronlaşdırması** LiteLLM sinxronlaşdırmasından ayrıdır və o da standart olaraq söndürülüb. Parametrlərdə (models.dev sinxronlaşdırması) aktivləşdirin və ya bu dəyişənlərdən istifadə edin:
+
+| Mühit dəyişəni             | Standart dəyər      | Məqsəd                                                                                                                                                           |
+| -------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(təyin edilməyib)_ | Təyin edilmədikdə Parametrlər keçidinə uyğun davranır; `1/true/on/yes` məcburi aktivləşdirir, `0/false/off/no` isə Parametrlər aktiv etsə belə məcburi söndürür. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`             | models.dev sinxronlaşdırmasının saniyə ilə standart intervalı (gündəlik).                                                                                        |
+
+`PRICING_SYNC_SOURCES` models.dev-i **aktivləşdirmir**; yalnız LiteLLM sinxronlaşdırmasını idarə edir. İstifadəçi əvəzləməsinin silinməsi sinxronlaşdırılmış ad məkanlarının heç birini təmizləmir; növbəti mövcud qiymət təbəqəsi qüvvəyə minir. Qiymətsiz model üçün əl ilə əvəzləmə əlavə etməzdən əvvəl hər iki sinxronlaşdırma parametrini və `sourceMap` dəyərini yoxlayın.
 
 ### Xərc düsturu
 
@@ -177,16 +183,16 @@ Qeyd edilmədiyi halda, bunların hamısı idarəetmə autentifikasiyası tələ
 
 ### Qiymətqoyma
 
-| Metod    | Son nöqtə               | Məqsəd                                                                                                                             |
-| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Cari birləşdirilmiş qiymətlər (istifadəçi + sinxronlaşdırılmış + standart). Hər qeyd üzrə mənbəni görmək üçün `?includeSources=1`. |
-| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` üçün qiymətləri əvəz edin.                                                 |
-| `DELETE` | `/api/pricing`          | Qiymətləri standart dəyərlərə sıfırlayın (istəyə görə `?provider=&model=` ilə məhdudlaşdırıla bilər).                              |
-| `GET`    | `/api/pricing/defaults` | Hər 1M üzrə standart ehtiyat tariflərini göstərin.                                                                                 |
-| `GET`    | `/api/pricing/models`   | Model üzrə indekslənmiş qiymətlər.                                                                                                 |
-| `POST`   | `/api/pricing/sync`     | Xarici mənbələrdən (LiteLLM) əl ilə sinxronlaşdırmanı başladın.                                                                    |
-| `GET`    | `/api/pricing/sync`     | Cari sinxronlaşdırma statusu.                                                                                                      |
-| `DELETE` | `/api/pricing/sync`     | Bütün sinxronlaşdırılmış qiymət məlumatlarını silin.                                                                               |
+| Metod    | Son nöqtə               | Məqsəd                                                                                                                                                                       |
+| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Dörd təbəqənin birləşdirilmiş qiymətləri (istifadəçi, models.dev, LiteLLM, standartlar). `?includeSources=1` sorğusu `pricing` + `sourceMap` qaytarır.                       |
+| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` üçün qiymətləri əvəz edin.                                                                                           |
+| `DELETE` | `/api/pricing`          | İstifadəçi qiymət əvəzləmələrini silir (istəyə görə `?provider=&model=` ilə məhdudlaşdırılır); sinxronlaşdırılmış tariflər və daxili standartlar ehtiyat variant kimi qalır. |
+| `GET`    | `/api/pricing/defaults` | Hər 1M üzrə standart ehtiyat tariflərini göstərin.                                                                                                                           |
+| `GET`    | `/api/pricing/models`   | Model üzrə indekslənmiş qiymətlər.                                                                                                                                           |
+| `POST`   | `/api/pricing/sync`     | Xarici mənbələrdən (LiteLLM) əl ilə sinxronlaşdırmanı başladın.                                                                                                              |
+| `GET`    | `/api/pricing/sync`     | Cari sinxronlaşdırma statusu.                                                                                                                                                |
+| `DELETE` | `/api/pricing/sync`     | Yalnız LiteLLM-dən sinxronlaşdırılmış qiymətləri təmizləyir (`pricing_synced`); models.dev məlumatları ayrıdır.                                                              |
 
 ### Xərclərlə əlaqəli digər son nöqtələr
 

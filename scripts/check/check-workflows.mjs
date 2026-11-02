@@ -287,8 +287,10 @@ export function runZizmor(workflowsDir) {
 // Scheduled-run guard: scheduled executions stay in the upstream repository
 // ---------------------------------------------------------------------------
 
-const SCHEDULED_GUARD_EVENT = "github.event_name != 'schedule'";
-const SCHEDULED_GUARD_REPO = "github.repository";
+const SCHEDULED_GUARD_EVENT = /^github\.event_name\s*!=\s*'schedule'$/;
+const SCHEDULED_GUARD_REPO = /^github\.repository\s*==\s*'cheaper-inference\/OmniRoute'$/;
+const MAX_SCHEDULED_CONDITION_LENGTH = 16_384;
+const MAX_SCHEDULED_CONDITION_DEPTH = 64;
 
 /**
  * Reads the trigger section of a parsed workflow document. The `on` key is
@@ -319,16 +321,82 @@ function hasScheduleTrigger(onSection) {
 }
 
 /**
- * Whether a job-level `if` carries the upstream-only scheduled-run guard.
+ * Prove that a scheduled run in a fork is blocked. Only the two known
+ * predicates establish protection; all other GitHub atoms remain opaque.
+ * AND needs one blocking operand, OR needs every operand to block. This is
+ * structural reasoning, never execution of expressions or function calls.
+ * @param {string} source expression without the optional Actions wrapper
+ * @param {number} depth recursive grouping depth
+ * @returns {boolean|null} proven protection, unknown, or malformed structure
+ */
+function blocksForkSchedule(source, depth = 0) {
+  const expression = source.trim();
+  if (!expression || depth > MAX_SCHEDULED_CONDITION_DEPTH) return null;
+  let nesting = 0;
+  let quoted = false;
+  let outerEnd = -1;
+  const andOffsets = [];
+  const orOffsets = [];
+  for (let index = 0; index < expression.length; index++) {
+    const character = expression[index];
+    if (quoted) {
+      if (character === "'") {
+        if (expression[index + 1] === "'") index++;
+        else quoted = false;
+      }
+      continue;
+    }
+    if (character === "'") quoted = true;
+    else if (character === '"' || character === "{" || character === "}") return null;
+    else if (character === "(") {
+      nesting++;
+      if (depth + nesting > MAX_SCHEDULED_CONDITION_DEPTH) return null;
+    } else if (character === ")") {
+      if (--nesting < 0) return null;
+      if (nesting === 0 && outerEnd === -1) outerEnd = index;
+    } else if (character === "&" || character === "|") {
+      if (expression[index + 1] !== character) return null;
+      if (nesting === 0) (character === "&" ? andOffsets : orOffsets).push(index);
+      index++;
+    }
+  }
+  if (quoted || nesting !== 0) return null;
+  // Split OR first because AND binds more tightly. Inspect every operand so
+  // an already blocking operand cannot conceal malformed logical structure.
+  const offsets = orOffsets.length > 0 ? orOffsets : andOffsets;
+  if (offsets.length > 0) {
+    let start = 0;
+    const operands = [];
+    for (const offset of [...offsets, expression.length]) {
+      operands.push(blocksForkSchedule(expression.slice(start, offset), depth + 1));
+      start = offset + 2;
+    }
+    if (operands.includes(null)) return null;
+    return orOffsets.length > 0 ? operands.every(Boolean) : operands.some(Boolean);
+  }
+  if (expression.startsWith("(") && outerEnd === expression.length - 1) {
+    return blocksForkSchedule(expression.slice(1, -1), depth + 1);
+  }
+  // Do not normalize literal contents: 'schedule ' is not 'schedule'.
+  return SCHEDULED_GUARD_EVENT.test(expression) || SCHEDULED_GUARD_REPO.test(expression);
+}
+
+/**
+ * Whether a job-level `if` proves the upstream-only scheduled-run restriction.
+ * Unconditional equality with the canonical repository is a stricter guard.
  * @param {unknown} condition the job's `if` value
  * @returns {boolean}
  */
 function hasScheduledGuard(condition) {
-  return (
-    typeof condition === "string" &&
-    condition.includes(SCHEDULED_GUARD_EVENT) &&
-    condition.includes(SCHEDULED_GUARD_REPO)
-  );
+  if (typeof condition !== "string" || condition.length > MAX_SCHEDULED_CONDITION_LENGTH) {
+    return false;
+  }
+  let expression = condition.trim();
+  if (expression.startsWith("${{")) {
+    if (!expression.endsWith("}}")) return false;
+    expression = expression.slice(3, -2).trim();
+  }
+  return blocksForkSchedule(expression) === true;
 }
 
 /**
@@ -514,8 +582,8 @@ function main() {
   if ((STRICT || RATCHET) && scheduledGuardFindings.length > 0) {
     console.error(
       `\n[check-workflows] FAIL — ${scheduledGuardFindings.length} scheduled job(s) without the upstream-only guard.\n` +
-        "  Scheduled runs must stay in cheaper-inference/OmniRoute: keep the job-level `if:` naming both\n" +
-        "  `github.event_name != 'schedule'` and `github.repository`."
+        "  Scheduled runs must stay in cheaper-inference/OmniRoute: restrict the job-level `if:`\n" +
+        "  to the canonical repository, or require that repository whenever the event is schedule."
     );
     process.exit(1);
   }

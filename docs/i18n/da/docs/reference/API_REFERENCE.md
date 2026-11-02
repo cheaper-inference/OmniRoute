@@ -889,7 +889,7 @@ Det generiske `time_range` når nu begge udbydere: Exa får `startPublishedDate`
 tidsstempel), og Tavily får `start_date` (`YYYY-MM-DD`). En eksplicit dato i `provider_options`
 tilsidesætter den tilknyttede dato.
 
-Exa-resultater bevarer `id`, `highlight_scores`, `summary`, `subpages`, `entities` og `extras` i
+Exa-resultater bevarer `id`, `highlights` (alle fremhævede uddrag, ikke kun det første, der bruges som `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` og `extras` i
 `provider_raw`. Tavily-resultater bevarer `images` og `favicon`.
 
 Linkup-søgningsomkostninger registreres til $0,005 for `depth` `fast` og `standard` og $0,05 for `deep` ( [Linkup-prissætning](https://docs.linkup.so/pages/documentation/development/pricing) ), uanset om `depth` kommer fra `provider_options` eller forbindelsens indstillinger.
@@ -1301,11 +1301,29 @@ stopsekvenser og reelle upstream-tilladelsesafgørelser; det andet trin kan stad
 
 | Slutpunkt             | Metode      | Beskrivelse                        |
 | --------------------- | ----------- | ---------------------------------- |
+| `/api/models`         | GET/PUT     | Modelliste / opdatering af alias   |
 | `/api/models/alias`   | GET/POST    | Modelaliasser                      |
 | `/api/models/catalog` | GET         | Alle modeller efter udbyder + type |
 | `/api/combos*`        | Forskellige | Administration af kombinationer    |
 | `/api/keys*`          | Forskellige | Administration af API-nøgler       |
 | `/api/pricing`        | GET         | Modelpriser                        |
+
+#### Oprindelsen til modelgrænser
+
+`GET /api/models?withLimits=1` (også `true`; `0`/`false` eller udeladelse bevarer standardsvaret uændret) føjer `contextWindow`, `maxInputTokens`, `maxOutputTokens` og et `capsSource`-objekt til hver modelrække. `capsSource` angiver reglen bag hver grænse, så en overraskende grænse, for eksempel 128k på en 1M-model, kan spores til sin oprindelse. De beregnede værdier er de samme, som routingen bruger; flaget tilføjer kun felter og ændrer aldrig en værdi. Alle andre værdier af `withLimits` afvises med `400`.
+
+| `capsSource` værdi                           | Oprindelse                                                                     |
+| -------------------------------------------- | ------------------------------------------------------------------------------ |
+| `override:context`                           | Gemt tilsidesættelse af kontekstvinduet (`model_context_overrides`)            |
+| `override:max_input` / `override:max_output` | Gemt tilsidesættelse af kapaciteterne `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Statisk autoritativ tabel over kontekstvinduer                                 |
+| `synced:<provider>/<model>`                  | Kapacitetsrække synkroniseret fra models.dev                                   |
+| `registry:<provider>/<model>`                | Post i udbyderregistret                                                        |
+| `spec:<model>`                               | Statisk modelspecifikation                                                     |
+| `effort-base:` præfiks                       | Række hentet fra grundmodellen til en variant med et indsatssuffiks            |
+| `none`                                       | Ingen kilde angiver grænsen (værdien er `null`)                                |
+
+Implementering: `getResolvedModelCapabilitiesWithLimitSources()` i `src/lib/modelCapabilities.ts` og prioritetskæderne i `src/lib/modelCapabilityLimits.ts`.
 
 ### Brug og analyse
 

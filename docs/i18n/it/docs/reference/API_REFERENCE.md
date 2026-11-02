@@ -887,7 +887,7 @@ Il campo generico `time_range` ora raggiunge entrambi i provider: Exa riceve `st
 ISO) e Tavily riceve `start_date` (`YYYY-MM-DD`). Una data esplicita in `provider_options`
 sovrascrive quella mappata.
 
-I risultati di Exa mantengono `id`, `highlight_scores`, `summary`, `subpages`, `entities` ed `extras` in
+I risultati di Exa mantengono `id`, `highlights` (tutti i passaggi evidenziati, non soltanto il primo usato come `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ed `extras` in
 `provider_raw`. I risultati di Tavily mantengono `images` e `favicon`.
 
 Linkup: Il costo della ricerca di collegamento è registrato a $ 0,005 per `depth` `fast` e `standard` e $ 0,05 per `deep` ( [prezzo di collegamento](https://docs.linkup.so/pages/documentation/development/pricing) ), indipendentemente dal fatto che `depth` provenga da `provider_options` o dalle impostazioni della connessione.
@@ -1298,13 +1298,31 @@ il ragionamento visibile richiesto come testo ordinario.
 
 ### Instradamento e configurazione
 
-| Endpoint              | Metodo   | Descrizione                         |
-| --------------------- | -------- | ----------------------------------- |
-| `/api/models/alias`   | GET/POST | Alias dei modelli                   |
-| `/api/models/catalog` | GET      | Tutti i modelli per provider + tipo |
-| `/api/combos*`        | Vari     | Gestione delle combinazioni         |
-| `/api/keys*`          | Vari     | Gestione delle chiavi API           |
-| `/api/pricing`        | GET      | Prezzi dei modelli                  |
+| Endpoint              | Metodo   | Descrizione                                    |
+| --------------------- | -------- | ---------------------------------------------- |
+| `/api/models`         | GET/PUT  | Elenco dei modelli / aggiornamento degli alias |
+| `/api/models/alias`   | GET/POST | Alias dei modelli                              |
+| `/api/models/catalog` | GET      | Tutti i modelli per provider + tipo            |
+| `/api/combos*`        | Vari     | Gestione delle combinazioni                    |
+| `/api/keys*`          | Vari     | Gestione delle chiavi API                      |
+| `/api/pricing`        | GET      | Prezzi dei modelli                             |
+
+#### Origine dei limiti dei modelli
+
+`GET /api/models?withLimits=1` (anche `true`; `0`/`false` o la sua omissione lasciano invariato il payload predefinito) aggiunge `contextWindow`, `maxInputTokens`, `maxOutputTokens` e un oggetto `capsSource` a ogni riga di modello. `capsSource` indica la regola che ha fornito ciascun limite, consentendo di risalire all’origine di un valore inatteso, per esempio 128k per un modello da 1M. I valori risolti sono gli stessi usati dal routing: il parametro aggiunge soltanto campi e non modifica mai un valore. Qualsiasi altro valore di `withLimits` viene rifiutato con `400`.
+
+| Valore di `capsSource`                       | Origine                                                                         |
+| -------------------------------------------- | ------------------------------------------------------------------------------- |
+| `override:context`                           | Sostituzione persistita della finestra di contesto (`model_context_overrides`)  |
+| `override:max_input` / `override:max_output` | Sostituzione persistita delle capacità `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Tabella statica autorevole delle finestre di contesto                           |
+| `synced:<provider>/<model>`                  | Riga delle capacità sincronizzata da models.dev                                 |
+| `registry:<provider>/<model>`                | Voce del registro dei provider                                                  |
+| `spec:<model>`                               | Specifica statica del modello                                                   |
+| Prefisso `effort-base:`                      | Riga presa dal modello base di una variante con suffisso di effort              |
+| `none`                                       | Nessuna fonte dichiara il limite; il valore è `null`                            |
+
+Implementazione: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts` e le catene di precedenza in `src/lib/modelCapabilityLimits.ts`.
 
 ### Utilizzo e analisi
 

@@ -42,23 +42,31 @@ Raqam taxminiy boʻlgani sababli:
 
 ### Narxlar manbasi
 
-Xarajatlar quyidagi ustuvorlik tartibida aniqlanadigan narxlar jadvalidan olinadi
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Xarajatlar [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) ichidagi birlashtirilgan narx jadvalidan olinadi, tartib quyidagicha (**eng ustuvor birinchi**):
 
-1. **Foydalanuvchi qiymatlari** — boshqaruv panelida / `PATCH /api/pricing` orqali siz belgilagan narxlar.
-2. **Sinxronlangan tashqi narxlar** — sinxronlash yoqilganida LiteLLM'ning ommaviy
-   `model_prices_and_context_window.json` faylidan olinadi (qiymatlaringizni hech qachon
-   almashtirib yubormasligi uchun alohida `pricing_synced` nomlar makonida saqlanadi).
-3. **Kodga kiritilgan standart qiymatlar** — OmniRoute bilan birga taqdim etiladi.
+1. **Foydalanuvchi almashtirishlari** — panelda yoki `PATCH /api/pricing` orqali belgilangan narxlar (`pricing` nomlar sohasi).
+2. **models.dev sinxronlashi** — `https://models.dev/api.json` dan olingan narxlar (`models_dev_pricing` nomlar sohasi).
+3. **LiteLLM sinxronlashi** — LiteLLM ning ochiq `model_prices_and_context_window.json` faylidan olingan narxlar (`pricing_synced` nomlar sohasi).
+4. **Ichki standartlar** — [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) bilan yetkaziladigan tariflar.
 
-Tashqi narxlarni sinxronlash **ixtiyoriy**, standart holatda oʻchirilgan. Tegishli muhit oʻzgaruvchilari
-([`.env.example`](../../.env.example) fayliga qarang):
+Bir xil provayder/model uchun yuqori qatlam quyi qatlamning mos maydonlarini almashtiradi; yuqorida yo‘q maydonlar quyidan olinishi mumkin. Har ikkala mustaqil sinxronlash bir vaqtda ishlasa ham tartib o‘zgarmaydi. `GET /api/pricing?includeSources=1` so‘rovi `pricing` va `sourceMap` ni qaytaradi; model belgilari (`user`, `modelsDev`, `litellm`, `default`) model mavjud bo‘lgan eng yuqori qatlamni bildiradi.
 
-| Muhit oʻzgaruvchisi     | Standart  | Maqsad                                                                                     |
-| ----------------------- | --------- | ------------------------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`   | Ishga tushishda LiteLLM narxlarini fonda sinxronlashni yoqish.                             |
-| `PRICING_SYNC_INTERVAL` | `86400`   | **Soniyalardagi** sinxronlash oraligʻi (standart — har kuni).                              |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Vergul bilan ajratilgan manbalar roʻyxati (hozircha faqat `litellm` qoʻllab-quvvatlanadi). |
+**LiteLLM sinxronlashi** ixtiyoriy yoqiladi va standart holatda o‘chiq. Uning muhit o‘zgaruvchilari ([`.env.example`](../../.env.example) ga qarang):
+
+| Muhit oʻzgaruvchisi     | Standart  | Maqsad                                                                            |
+| ----------------------- | --------- | --------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Fondagi LiteLLM narx sinxronlashini yoqadi.                                       |
+| `PRICING_SYNC_INTERVAL` | `86400`   | **Soniyalardagi** sinxronlash oraligʻi (standart — har kuni).                     |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Manba tanlovi faqat shu sinxronlashga tegishli; hozir faqat `litellm` qo‘llanadi. |
+
+**models.dev sinxronlashi** LiteLLM sinxronlashidan mustaqil va u ham standart holatda o‘chiq. Sozlamalarda yoqing (models.dev sinxronlashi) yoki shu o‘zgaruvchilardan foydalaning:
+
+| Muhit o‘zgaruvchisi        | Standart          | Vazifa                                                                                                                                              |
+| -------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(belgilanmagan)_ | Belgilanmasa Sozlamalar tugmasiga ergashadi; `1/true/on/yes` majburan yoqadi, `0/false/off/no` esa Sozlamalar yoqqan bo‘lsa ham majburan o‘chiradi. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | models.dev sinxronlashining soniyalardagi standart oralig‘i (har kuni).                                                                             |
+
+`PRICING_SYNC_SOURCES` models.dev ni **yoqmaydi**; faqat LiteLLM sinxronlashini boshqaradi. Foydalanuvchi almashtirishini o‘chirish sinxronlangan nomlar sohalaridan hech birini tozalamaydi; keyingi mavjud narx qatlami kuchga kiradi. Narxi yo‘q modelga qo‘lda almashtirish qo‘shishdan avval ikkala sinxronlash sozlamasini va `sourceMap` ni tekshiring.
 
 ### Xarajat formulasi
 
@@ -179,16 +187,16 @@ Quyidagilarning barchasi, alohida qayd etilmagan bo‘lsa, boshqaruv autentifika
 
 ### Narxlash
 
-| Metod    | Yakuniy nuqta           | Maqsad                                                                                                                               |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET`    | `/api/pricing`          | Joriy birlashtirilgan narxlar (foydalanuvchi + sinxronlangan + standart). Har bir yozuv manbasini ko‘rish uchun `?includeSources=1`. |
-| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` uchun narxlarni qayta belgilash.                                             |
-| `DELETE` | `/api/pricing`          | Narxlarni standart qiymatlarga qaytarish (ixtiyoriy ravishda `?provider=&model=` bilan cheklash mumkin).                             |
-| `GET`    | `/api/pricing/defaults` | Har 1M uchun standart zaxira tariflarini ko‘rsatish.                                                                                 |
-| `GET`    | `/api/pricing/models`   | Model bo‘yicha kalitlangan narxlar.                                                                                                  |
-| `POST`   | `/api/pricing/sync`     | Tashqi manbalardan (LiteLLM) qo‘lda sinxronlashni boshlash.                                                                          |
-| `GET`    | `/api/pricing/sync`     | Joriy sinxronlash holati.                                                                                                            |
-| `DELETE` | `/api/pricing/sync`     | Barcha sinxronlangan narxlash ma’lumotlarini tozalash.                                                                               |
+| Metod    | Yakuniy nuqta           | Maqsad                                                                                                                                                                |
+| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | To‘rt qatlamning birlashgan narxlari (foydalanuvchi, models.dev, LiteLLM, standartlar). `?includeSources=1` so‘rovi `pricing` + `sourceMap` qaytaradi.                |
+| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` uchun narxlarni qayta belgilash.                                                                              |
+| `DELETE` | `/api/pricing`          | Foydalanuvchi narx almashtirishlarini olib tashlaydi (ixtiyoriy `?provider=&model=` doirasida); sinxronlangan tariflar yoki ichki standartlar zaxira sifatida qoladi. |
+| `GET`    | `/api/pricing/defaults` | Har 1M uchun standart zaxira tariflarini ko‘rsatish.                                                                                                                  |
+| `GET`    | `/api/pricing/models`   | Model bo‘yicha kalitlangan narxlar.                                                                                                                                   |
+| `POST`   | `/api/pricing/sync`     | Tashqi manbalardan (LiteLLM) qo‘lda sinxronlashni boshlash.                                                                                                           |
+| `GET`    | `/api/pricing/sync`     | Joriy sinxronlash holati.                                                                                                                                             |
+| `DELETE` | `/api/pricing/sync`     | Faqat LiteLLM sinxronlagan narxlarni (`pricing_synced`) tozalaydi; models.dev ma’lumotlari alohida.                                                                   |
 
 ### Xarajatlarga aloqador boshqa yakuniy nuqtalar
 

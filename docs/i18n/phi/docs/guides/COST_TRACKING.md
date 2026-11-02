@@ -40,23 +40,31 @@ Dahil pagtatantiya ang numero:
 
 ### Ang pinagmulan ng pagpepresyo
 
-Nagmumula ang mga gastos sa isang pricing table na tinutukoy ayon sa sumusunod na pagkakasunod-sunod ng priyoridad
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Nanggagaling ang mga gastos sa pinagsamang talahanayan ng presyo sa [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), sa ganitong pagkakasunod ng priyoridad (**pinakamataas muna**):
 
-1. **Mga override ng user** — mga presyong itinakda mo sa dashboard / sa pamamagitan ng `PATCH /api/pricing`.
-2. **Naka-sync na external pricing** — kinukuha mula sa pampublikong
-   `model_prices_and_context_window.json` ng LiteLLM kapag naka-enable ang sync (iniimbak sa hiwalay na
-   `pricing_synced` namespace upang hindi nito kailanman ma-overwrite ang iyong mga override).
-3. **Mga hardcoded na default** — kasama sa OmniRoute.
+1. **Mga override ng user** — mga presyong itinakda sa dashboard o sa pamamagitan ng `PATCH /api/pricing` (namespace na `pricing`).
+2. **Pag-sync mula sa models.dev** — mga presyong kinukuha sa `https://models.dev/api.json` (namespace na `models_dev_pricing`).
+3. **Pag-sync mula sa LiteLLM** — mga presyong kinukuha sa pampublikong `model_prices_and_context_window.json` ng LiteLLM (namespace na `pricing_synced`).
+4. **Mga paunang halagang nasa code** — mga rate na kasama sa [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Ang external pricing sync ay **opt-in** at naka-disable bilang default. Mga nauugnay na env var
-(tingnan ang [`.env.example`](../../.env.example)):
+Para sa parehong provider/modelo, pinapatungan ng mga halaga mula sa layer na may mas mataas na priyoridad ang katumbas na mga field sa mas mababang layer; ang mga field na wala sa itaas ay maaari pa ring manggaling sa ibaba. Nakapirmi ang pagkakasunod kahit sabay tumatakbo ang dalawang magkahiwalay na sync job. Nagbabalik ang `GET /api/pricing?includeSources=1` ng `pricing` at `sourceMap`; tinutukoy ng mga label bawat modelo (`user`, `modelsDev`, `litellm`, `default`) ang layer na may pinakamataas na priyoridad na naglalaman ng modelong iyon.
 
-| Env var                 | Default   | Layunin                                                                                                 |
-| ----------------------- | --------- | ------------------------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | I-enable ang background na LiteLLM pricing sync sa startup.                                             |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Interval ng sync sa **segundo** (araw-araw bilang default).                                             |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Listahan ng mga source na pinaghihiwalay ng kuwit (`litellm` lamang ang sinusuportahan sa kasalukuyan). |
+Opsyonal ang **pag-sync mula sa LiteLLM** at naka-disable ito bilang default. Ang mga environment variable nito (tingnan ang [`.env.example`](../../.env.example)) ay:
+
+| Env var                 | Default   | Layunin                                                                                           |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | I-enable ang pag-sync ng presyo mula sa LiteLLM sa background.                                    |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Interval ng sync sa **segundo** (araw-araw bilang default).                                       |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Pagpili ng pinagmumulan para lamang sa sync na ito; sa kasalukuyan, `litellm` lang ang suportado. |
+
+Hiwalay ang **pag-sync mula sa models.dev** sa pag-sync mula sa LiteLLM at naka-disable din bilang default. I-enable ito sa Mga Setting (pag-sync mula sa models.dev), o gamitin ang mga variable na ito:
+
+| Environment variable       | Paunang halaga      | Layunin                                                                                                                                                                               |
+| -------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(hindi nakatakda)_ | Kung hindi nakatakda, sinusunod ang switch sa Mga Setting; ipinipilit ng `1/true/on/yes` ang pag-enable at ng `0/false/off/no` ang pag-disable, kahit naka-enable ito sa Mga Setting. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`             | Karaniwang pagitan ng pag-sync mula sa models.dev sa mga segundo, araw-araw.                                                                                                          |
+
+**Hindi** ini-enable ng `PRICING_SYNC_SOURCES` ang models.dev; pag-sync mula sa LiteLLM lamang ang kinokontrol nito. Hindi binubura ng pag-alis ng override ng user ang alinman sa mga naka-sync na namespace; nagiging epektibo ang susunod na available na layer ng presyo. Para sa modelong walang presyo, suriin ang parehong sync setting at ang `sourceMap` bago magdagdag ng manual na override.
 
 ### Ang formula ng gastos
 
@@ -169,16 +177,16 @@ may ibang nakasaad.
 
 ### Pagpepresyo
 
-| Paraan   | Endpoint                | Layunin                                                                                                                         |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Kasalukuyang pinagsamang pagpepresyo (user + synced + mga default). `?includeSources=1` upang makita ang source ng bawat entry. |
-| `PATCH`  | `/api/pricing`          | I-override ang pagpepresyo para sa `{ provider: { model: { input, output, cached, … } } }`.                                     |
-| `DELETE` | `/api/pricing`          | I-reset ang pagpepresyo sa mga default (opsyonal na nililimitahan ayon sa `?provider=&model=`).                                 |
-| `GET`    | `/api/pricing/defaults` | Ipakita ang mga default na fallback rate sa bawat 1M.                                                                           |
-| `GET`    | `/api/pricing/models`   | Pagpepresyong naka-key ayon sa model.                                                                                           |
-| `POST`   | `/api/pricing/sync`     | Mag-trigger ng manual na pag-sync mula sa mga external source (LiteLLM).                                                        |
-| `GET`    | `/api/pricing/sync`     | Kasalukuyang status ng pag-sync.                                                                                                |
-| `DELETE` | `/api/pricing/sync`     | I-clear ang lahat ng naka-sync na datos ng pagpepresyo.                                                                         |
+| Paraan   | Endpoint                | Layunin                                                                                                                                                                        |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Pinagsamang presyo mula sa apat na layer (user, models.dev, LiteLLM, mga paunang halaga). Nagbabalik ang `?includeSources=1` ng `pricing` + `sourceMap`.                       |
+| `PATCH`  | `/api/pricing`          | I-override ang pagpepresyo para sa `{ provider: { model: { input, output, cached, … } } }`.                                                                                    |
+| `DELETE` | `/api/pricing`          | Alisin ang mga override ng presyo ng user, na maaaring limitahan gamit ang `?provider=&model=`; nananatiling reserba ang mga naka-sync na rate o nakapaloob na paunang halaga. |
+| `GET`    | `/api/pricing/defaults` | Ipakita ang mga default na fallback rate sa bawat 1M.                                                                                                                          |
+| `GET`    | `/api/pricing/models`   | Pagpepresyong naka-key ayon sa model.                                                                                                                                          |
+| `POST`   | `/api/pricing/sync`     | Mag-trigger ng manual na pag-sync mula sa mga external source (LiteLLM).                                                                                                       |
+| `GET`    | `/api/pricing/sync`     | Kasalukuyang status ng pag-sync.                                                                                                                                               |
+| `DELETE` | `/api/pricing/sync`     | Burahin lamang ang mga presyong na-sync mula sa LiteLLM (`pricing_synced`); hiwalay ang data ng models.dev.                                                                    |
 
 ### Iba pang mga endpoint na nauugnay sa gastos
 

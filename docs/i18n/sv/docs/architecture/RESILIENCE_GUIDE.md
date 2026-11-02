@@ -10,6 +10,8 @@ OmniRoute har tre distinkta men relaterade resiliensmekanismer. Var och en har e
 
 > Källa: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Prioritet mellan miljö och kontrollpanel för motståndskraftens reglage.** De valfria reglagen som initieras från miljön — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — anger endast _standardvärdet_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Ett booleskt värde sparat i `resilienceSettings` (Kontrollpanel → **Inställningar → Motståndskraft** / `PATCH /api/resilience`, lagrat i `key_value`) har företräde framför miljön: normaliseringen (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) behåller ett befintligt sparat booleskt värde. Att sätta miljövariabeln till `true` när kontrollpanelen redan har sparat `false` ändrar därför ingenting — ändra reglaget i **Inställningar → Motståndskraft** eller rensa det sparade fältet.
+
 ## 1. Kretsbrytare för provider
 
 **Omfattning:** hela providern (t.ex. `glm`, `openai`, `anthropic`).
@@ -95,6 +97,8 @@ Regressionsskydd: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API-nyckelbas: 3 s
 - API-nyckel 429: föredrar uppströms `Retry-After`/återställningsheaders/tolkbar återställningstext
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Fördröjning av återförsök per leverantör.** Leverantörens detaljsida har valet **Fördröjning av återförsök** (Auto, 15s till 1h). Det sparar `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 via `PATCH /api/resilience`). När ett frekvensbegränsningsfel saknar uppströms anvisning om återförsök ersätter värdet leverantörens stegvis ökade väntan och återställer `backoffLevel` till 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Prioritet från högst: uppströms anvisning, anslutningens `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, leverantörens fördröjning, miljövariabeln `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, stegvis ökad väntan. Auto tar bort fältet. Det påverkar bara frekvensbegränsningsorsaken, aldrig terminala tillstånd.
 
 **Skydd mot thundering herd:** förhindrar att samtidiga fel överförlänger nedkylningen eller höjer `backoffLevel` dubbelt.
 
@@ -593,7 +597,7 @@ kan avbryta. Den räknar textdeltor från Chat Completions- och Responses API-
 outputhändelser (en konservativ UTF-8-byte-proxy), ignorerar händelser som bara bär
 usage-data eller är tomma, och avstår från bedömning medan verktygsanrops- eller
 reasoning-händelser pågår. Den är avstängd som standard och kan aktiveras med
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; fönster, uppvärmning, minimitakt och minsta
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (miljövärdet anger bara standardvärdet — ett sparat booleskt `resilienceSettings.streamRecovery.throughputWatchdog.enabled` har företräde; se noteringen om miljöns och kontrollpanelens prioritet i början av guiden); fönster, uppvärmning, minimitakt och minsta
 mätbara output begränsas av det vanliga normaliseringslagret för resilience-
 inställningarna.
 

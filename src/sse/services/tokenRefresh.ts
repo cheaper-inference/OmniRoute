@@ -2,6 +2,7 @@
 import * as log from "../utils/logger";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
+import { registerCredentialRefresher } from "@omniroute/open-sse/utils/registeredCredentialRefresher.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import { resolveProxyForConnection } from "@/lib/db/settings";
@@ -360,6 +361,8 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
 }
 
 // Local-specific: Refresh GitHub and Copilot tokens together
+registerCredentialRefresher(checkAndRefreshToken);
+
 export async function refreshGitHubAndCopilotTokens(credentials: any) {
   const newGitHubCredentials = await refreshGitHubToken(credentials.refreshToken, credentials);
   if (newGitHubCredentials?.accessToken) {

@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "이 템플릿과 일치하는 현재 연결된 제공자/모델을 편집 가능한 콤보로 스냅샷합니다.",
     "duplicateAutoComboFailedPrefix": "자동 콤보 복제 실패:",
     "duplicateAutoComboUnknownError": "알 수 없는 오류",
-    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기"
+    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기",
+    "exportCombos": "내보내기",
+    "exportCombosFailed": "콤보를 내보내지 못했습니다",
+    "importCombos": "가져오기",
+    "importCombosTitle": "콤보 가져오기",
+    "importCombosInvalidFile": "이 파일은 유효한 콤보 내보내기 파일이 아닙니다.",
+    "importCombosSummary": "파일의 콤보: {total}개 (새 콤보 {fresh}개, 이미 존재하는 이름 {conflicting}개).",
+    "importCombosMergeHint": "병합은 기존 콤보를 모두 유지하고 이름이 이미 존재하는 콤보는 건너뜁니다. 연결과 자격 증명은 절대 가져오지 않습니다.",
+    "importCombosReplaceHint": "모두 바꾸기는 기존 콤보({current}개)를 삭제하고 대신 파일을 가져옵니다. 이 작업은 되돌릴 수 없습니다.",
+    "importCombosMerge": "병합",
+    "importCombosReplace": "모두 바꾸기",
+    "importCombosDone": "가져온 콤보: {created}개. 건너뜀: {skipped}개.",
+    "importCombosFailed": "콤보를 가져오지 못했습니다",
+    "importCombosWarnings": "경고와 함께 가져왔습니다"
   },
   "costs": {
     "title": "비용",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ChatGPT 커스텀 커넥터",
     "doctorChecking": "상태를 확인하는 중…",
     "doctorCheck": "doctor 상태 확인",
-    "fallbackRetryBackendTitle": "폴백 재시도 백엔드"
+    "fallbackRetryBackendTitle": "폴백 재시도 백엔드",
+    "retryDelayTitle": "재시도 지연",
+    "retryDelayDesc": "공급자가 재시도 시점을 알려주지 않을 때 속도 제한 오류 후 연결이 쉬는 시간입니다. 자동은 기본 제공 백오프를 사용하며, 공급자가 보낸 재설정 시간이 항상 우선합니다.",
+    "retryDelayAuto": "자동",
+    "retryDelaySaved": "재시도 지연이 저장되었습니다",
+    "retryDelayUpdateFailed": "재시도 지연을 업데이트하지 못했습니다"
   },
   "settings": {
     "title": "설정",

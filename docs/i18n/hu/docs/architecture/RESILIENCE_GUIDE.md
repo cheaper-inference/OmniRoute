@@ -10,6 +10,8 @@ Az OmniRoute három különálló, de egymással összefüggő rezilienciamechan
 
 > Forrás: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **A környezet és a vezérlőpult elsőbbsége az ellenálló képesség kapcsolóinál.** A környezetből inicializált, külön bekapcsolandó ellenállóképességi kapcsolók — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — csak az _alapértéket_ adják (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). A `resilienceSettings` alatt tartósan tárolt logikai érték (Vezérlőpult → **Beállítások → Ellenálló képesség** / `PATCH /api/resilience`, a `key_value` tárban) megelőzi a környezeti értéket: a normalizálás (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) megtartja a mentett logikai értéket, ha van ilyen. Ezért ha a vezérlőpult már `false` értéket mentett, a megfelelő környezeti változó `true` értékre állítása a telepítésben semmit sem változtat. A **Beállítások → Ellenálló képesség** kapcsolóját módosítsa, vagy törölje a mentett mezőt.
+
 ## 1. Szolgáltatószintű circuit breaker
 
 **Hatókör:** a teljes szolgáltató (pl. `glm`, `openai`, `anthropic`).
@@ -88,6 +90,8 @@ Regressziós ellenőrzés: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API-kulcs alapérték: 3 mp
 - API-kulcs 429: előnyben részesíti az upstream `Retry-After`/reset-fejléceket vagy az értelmezhető reset-szöveget
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Szolgáltatónkénti újrapróbálkozási késleltetés.** A szolgáltató részletező oldalán van egy **Újrapróbálkozási késleltetés** választó (Automatikus, 15s és 1h között). A `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` értéket menti (1–21600, a `PATCH /api/resilience` útján). Ha a gyakoriságkorlátozási hibához nem tartozik újrapróbálkozási jelzés a felsőbb szolgáltatástól, ez az érték váltja fel a szolgáltató skálázott visszavárakozását, és 0 értékre állítja a `backoffLevel` mezőt (`open-sse/services/rotationConfig.ts::overrideFor`). Gyakoriságkorlátozáskor a csökkenő elsőbbség: felsőbb szolgáltatási újrapróbálkozási jelzés, kapcsolatonkénti `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, szolgáltatói késleltetés, `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` környezeti változó, majd skálázott visszavárakozás. Az Automatikus eltávolítja a mezőt. Kizárólag a gyakoriságkorlátozási okot érinti, a végállapotokat soha.
 
 **Thundering-herd elleni védelem:** megakadályozza, hogy az egyidejű hibák túlzottan meghosszabbítsák a cooldownt, vagy kétszeresen növeljék a `backoffLevel` értékét.
 
@@ -423,7 +427,7 @@ szükség. A Chat Completions és a Responses API kimeneti eseményeinek szöveg
 számolja (konzervatív UTF-8 bájtközelítésként), figyelmen kívül hagyja a kizárólag
 használati adatot tartalmazó és az üres eseményeket, és felfüggeszti az értékelést, amíg
 eszközhívási vagy érvelési események vannak folyamatban. Alapértelmezetten le van tiltva,
-és a `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` beállítással engedélyezhető; az ablak, a
+és a `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ez a környezeti érték csak az alapértéket adja — a mentett `resilienceSettings.streamRecovery.throughputWatchdog.enabled` logikai érték elsőbbséget élvez; lásd a környezet és a vezérlőpult elsőbbségéről szóló megjegyzést az útmutató elején) beállítással engedélyezhető; az ablak, a
 bemelegítés, a minimális sebesség és a minimális mérhető kimenet korlátait a szokásos
 resilience-beállítási normalizálási réteg szabja meg.
 

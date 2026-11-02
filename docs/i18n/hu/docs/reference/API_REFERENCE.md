@@ -872,7 +872,7 @@ Az általános `time_range` mostantól mindkét szolgáltatóhoz eljut: az Exa a
 időbélyeg), a Tavily pedig a `start_date` (`YYYY-MM-DD`) mezőt kapja. A `provider_options` között kifejezetten megadott dátum
 felülírja a leképezett értéket.
 
-Az Exa-találatok megőrzik az `id`, `highlight_scores`, `summary`, `subpages`, `entities` és `extras` mezőket a
+Az Exa-találatok megőrzik az `id`, `highlights` (minden kiemelt részlet, nem csupán a `snippet` mezőhöz használt első), `highlight_scores`, `summary`, `subpages`, `entities` és `extras` mezőket a
 `provider_raw` mezőben. A Tavily-találatok megőrzik az `images` és `favicon` mezőket.
 
 A linkup keresési költsége 0,005 USD `depth` `fast` és `standard`, és 0,05 USD `deep` ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) esetében, függetlenül attól, hogy `depth` `provider_options` ből vagy a kapcsolat beállításaiból származik.
@@ -1275,11 +1275,29 @@ döntéseit; a második szakasz továbbra is előállíthatja a kért látható 
 
 | Végpont               | Metódus   | Leírás                                    |
 | --------------------- | --------- | ----------------------------------------- |
+| `/api/models`         | GET/PUT   | Modelllista / álnév frissítése            |
 | `/api/models/alias`   | GET/POST  | Modellaliaszok                            |
 | `/api/models/catalog` | GET       | Összes modell szolgáltató + típus szerint |
 | `/api/combos*`        | Különböző | Kombókezelés                              |
 | `/api/keys*`          | Különböző | API-kulcs-kezelés                         |
 | `/api/pricing`        | GET       | Modellárazás                              |
+
+#### A modellkorlátok eredete
+
+`GET /api/models?withLimits=1` (a `true` is elfogadott; `0`/`false` vagy a paraméter elhagyása változatlanul hagyja az alapértelmezett választ) minden modellsorhoz hozzáadja a `contextWindow`, `maxInputTokens` és `maxOutputTokens` mezőt, valamint egy `capsSource` objektumot. A `capsSource` megnevezi az egyes korlátokat meghatározó szabályt, így visszakövethető például egy 1M-es modell meglepő 128k-s korlátja. A feloldott értékek ugyanazok, amelyeket az útválasztás használ; a kapcsoló csak mezőket ad hozzá, értéket sohasem változtat. A `withLimits` minden más értékét `400` válasszal utasítja el.
+
+| `capsSource` érték                           | Eredet                                                                           |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| `override:context`                           | Tartósan tárolt kontextusablak-felülírás (`model_context_overrides`)             |
+| `override:max_input` / `override:max_output` | A `max_input_tokens` / `max_output_tokens` képességek tartósan tárolt felülírása |
+| `static-authoritative:<provider>/<model>`    | A kontextusablakok statikus, mérvadó táblája                                     |
+| `synced:<provider>/<model>`                  | A models.dev szolgáltatásból szinkronizált képességsor                           |
+| `registry:<provider>/<model>`                | Bejegyzés a szolgáltatói nyilvántartásban                                        |
+| `spec:<model>`                               | Statikus modellspecifikáció                                                      |
+| `effort-base:` előtag                        | Az erőfeszítés-utótaggal ellátott változat alapmodelljétől átvett sor            |
+| `none`                                       | Egyetlen forrás sem adja meg a korlátot (az érték `null`)                        |
+
+Megvalósítás: `getResolvedModelCapabilitiesWithLimitSources()` a `src/lib/modelCapabilities.ts` fájlban, valamint a prioritási láncok a `src/lib/modelCapabilityLimits.ts` fájlban.
 
 ### Használat és analitika
 

@@ -868,7 +868,7 @@ Tavily `search_type: "finance"` (`topic: "finance"`) પણ સ્વીકા�
 ટાઇમસ્ટૅમ્પ) અને Tavily ને `start_date` (`YYYY-MM-DD`) મળે છે. `provider_options` માં સ્પષ્ટ રીતે આપેલી તારીખ
 મેપ કરેલી તારીખને ઓવરરાઇડ કરે છે.
 
-Exa પરિણામો `id`, `highlight_scores`, `summary`, `subpages`, `entities` અને `extras` ને
+Exa પરિણામો `id`, `highlights` (બધા હાઇલાઇટ કરેલા અંશો, માત્ર `snippet` તરીકે વપરાયેલો પ્રથમ અંશ નહીં), `highlight_scores`, `summary`, `subpages`, `entities` અને `extras` ને
 `provider_raw` માં જાળવી રાખે છે. Tavily પરિણામો `images` અને `favicon` ને જાળવી રાખે છે.
 
 લિંકઅપ શોધ કિંમત `depth` `fast` અને `standard` માટે $0.005 અને `deep` ( [Linkup કિંમત નિર્ધારણ](https://docs.linkup.so/pages/documentation/development/pricing) ) માટે $0.05 રેકોર્ડ કરવામાં આવી છે, પછી ભલે `depth` `provider_options` અથવા કનેક્શનની સેટિંગ્સમાંથી આવે.
@@ -1265,11 +1265,29 @@ Claude Code ઑટો-મોડ ક્લાસિફાયર વિનંત�
 
 | એન્ડપોઇન્ટ            | પદ્ધતિ   | વર્ણન                           |
 | --------------------- | -------- | ------------------------------- |
+| `/api/models`         | GET/PUT  | મોડેલ સૂચિ / ઉપનામ અપડેટ        |
 | `/api/models/alias`   | GET/POST | મોડેલ ઉપનામો                    |
 | `/api/models/catalog` | GET      | પ્રદાતા + પ્રકાર મુજબ બધા મોડેલ |
 | `/api/combos*`        | વિવિધ    | કોમ્બો વ્યવસ્થાપન               |
 | `/api/keys*`          | વિવિધ    | API કી વ્યવસ્થાપન               |
 | `/api/pricing`        | GET      | મોડેલની કિંમત                   |
+
+#### મોડેલ મર્યાદાઓનો સ્રોત
+
+`GET /api/models?withLimits=1` (તેમાં `true` પણ સ્વીકાર્ય છે; `0`/`false` અથવા પરિમાણ છોડવાથી ડિફૉલ્ટ પ્રતિસાદ બદલાતો નથી) દરેક મોડેલ પંક્તિમાં `contextWindow`, `maxInputTokens`, `maxOutputTokens` અને `capsSource` ઑબ્જેક્ટ ઉમેરે છે. `capsSource` દરેક મર્યાદા આપનાર નિયમનું નામ જણાવે છે, જેથી અણધારી મર્યાદાનો સ્રોત શોધી શકાય, જેમ કે 1M મોડેલ પર 128k. નક્કી થયેલાં મૂલ્યો રાઉટિંગ વાપરે છે તે જ છે; આ ફ્લૅગ માત્ર ફીલ્ડ ઉમેરે છે અને ક્યારેય મૂલ્ય બદલતો નથી. `withLimits` નું અન્ય કોઈ પણ મૂલ્ય `400` સાથે નકારવામાં આવે છે.
+
+| `capsSource` મૂલ્ય                           | સ્રોત                                                                      |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `override:context`                           | કાયમી રીતે સાચવેલો સંદર્ભ વિન્ડો ઓવરરાઇડ (`model_context_overrides`)       |
+| `override:max_input` / `override:max_output` | કાયમી રીતે સાચવેલો `max_input_tokens` / `max_output_tokens` ક્ષમતા ઓવરરાઇડ |
+| `static-authoritative:<provider>/<model>`    | સંદર્ભ વિન્ડોની સ્થિર અધિકૃત કોષ્ટક                                        |
+| `synced:<provider>/<model>`                  | models.dev માંથી સિંક થયેલી ક્ષમતા પંક્તિ                                  |
+| `registry:<provider>/<model>`                | પ્રદાતા રજિસ્ટ્રીની નોંધ                                                   |
+| `spec:<model>`                               | મોડેલનું સ્થિર વિશિષ્ટીકરણ                                                 |
+| `effort-base:` ઉપસર્ગ                        | પ્રયાસ-સ્તર પ્રત્યય ધરાવતા પ્રકારના મૂળ મોડેલમાંથી લીધેલી પંક્તિ           |
+| `none`                                       | કોઈ સ્રોત મર્યાદા જાહેર કરતો નથી (મૂલ્ય `null` છે)                         |
+
+અમલીકરણ: `src/lib/modelCapabilities.ts` માં `getResolvedModelCapabilitiesWithLimitSources()` અને `src/lib/modelCapabilityLimits.ts` માં અગ્રતાની શૃંખલાઓ.
 
 ### ઉપયોગ અને વિશ્લેષણ
 

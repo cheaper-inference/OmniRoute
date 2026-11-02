@@ -811,7 +811,7 @@ Firecrawl axtarış dəyəri 10 qaytarılmış nəticənin hər bloku üçün 0,
 zaman möhürü), Tavily isə `start_date` (`YYYY-MM-DD`) alır. `provider_options` daxilində açıq şəkildə göstərilmiş tarix
 xəritələnmiş tarixi əvəz edir.
 
-Exa nəticələri `id`, `highlight_scores`, `summary`, `subpages`, `entities` və `extras` sahələrini
+Exa nəticələri `id`, `highlights` (yalnız `snippet` kimi istifadə edilən ilk parça deyil, bütün vurğulanmış parçalar), `highlight_scores`, `summary`, `subpages`, `entities` və `extras` sahələrini
 `provider_raw` daxilində saxlayır. Tavily nəticələri `images` və `favicon` sahələrini saxlayır.
 
 Linkup axtarış dəyəri `depth` `fast` və `standard` üçün 0,005 ABŞ dolları və `deep` üçün 0,05 ABŞ dolları ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` və ya əlaqə parametrlərindən gəlir olsun, qeydə alınır.
@@ -1220,11 +1220,29 @@ qərarlarını saxlayır; ikinci mərhələ yenə də tələb edilən görünən
 
 | Son nöqtə             | Metod    | Təsvir                                |
 | --------------------- | -------- | ------------------------------------- |
+| `/api/models`         | GET/PUT  | Model siyahısı / ləqəbin yenilənməsi  |
 | `/api/models/alias`   | GET/POST | Model ləqəbləri                       |
 | `/api/models/catalog` | GET      | Provayder və növə görə bütün modellər |
 | `/api/combos*`        | Müxtəlif | Kombinasiyaların idarə edilməsi       |
 | `/api/keys*`          | Müxtəlif | API açarlarının idarə edilməsi        |
 | `/api/pricing`        | GET      | Model qiymətləri                      |
+
+#### Model limitlərinin mənşəyi
+
+`GET /api/models?withLimits=1` (həmçinin `true`; `0`/`false` və ya parametrin buraxılması standart cavabı dəyişməz saxlayır) hər model sətrinə `contextWindow`, `maxInputTokens`, `maxOutputTokens` və `capsSource` obyekti əlavə edir. `capsSource` hər limiti müəyyən edən qaydanı göstərir; beləliklə, məsələn, 1M modelində 128k kimi gözlənilməz limitin mənşəyini izləmək olar. Hesablanmış dəyərlər marşrutlaşdırmanın istifadə etdiyi dəyərlərlə eynidir; bayraq yalnız sahələr əlavə edir, heç bir dəyəri dəyişmir. `withLimits` üçün digər bütün dəyərlər `400` ilə rədd edilir.
+
+| `capsSource` dəyəri                          | Mənşə                                                                       |
+| -------------------------------------------- | --------------------------------------------------------------------------- |
+| `override:context`                           | Daimi saxlanılmış kontekst pəncərəsi əvəzləməsi (`model_context_overrides`) |
+| `override:max_input` / `override:max_output` | Daimi saxlanılmış `max_input_tokens` / `max_output_tokens` imkan əvəzləməsi |
+| `static-authoritative:<provider>/<model>`    | Kontekst pəncərələrinin statik, əsas götürülən cədvəli                      |
+| `synced:<provider>/<model>`                  | models.dev-dən sinxronlaşdırılmış imkan sətri                               |
+| `registry:<provider>/<model>`                | Provayder reyestri qeydi                                                    |
+| `spec:<model>`                               | Statik model spesifikasiyası                                                |
+| `effort-base:` prefiksi                      | Səy səviyyəsi şəkilçisi olan variantın baza modelindən götürülmüş sətir     |
+| `none`                                       | Heç bir mənbə limiti bəyan etmir (dəyər `null` olur)                        |
+
+İcra: `src/lib/modelCapabilities.ts` daxilində `getResolvedModelCapabilitiesWithLimitSources()` və `src/lib/modelCapabilityLimits.ts` daxilində üstünlük zəncirləri.
 
 ### İstifadə və analitika
 

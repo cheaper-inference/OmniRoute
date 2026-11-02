@@ -4185,7 +4185,20 @@
     "duplicateAutoComboSnapshotMsg": "This will snapshot the currently connected providers/models that match this template into an editable combo.",
     "duplicateAutoComboFailedPrefix": "Failed to duplicate auto-combo:",
     "duplicateAutoComboUnknownError": "Unknown error",
-    "duplicateAutoComboTitle": "Create a static combo from {name}"
+    "duplicateAutoComboTitle": "Create a static combo from {name}",
+    "exportCombos": "Export",
+    "exportCombosFailed": "Failed to export combos",
+    "importCombos": "Import",
+    "importCombosTitle": "Import combos",
+    "importCombosInvalidFile": "This file is not a valid combos export.",
+    "importCombosSummary": "Combos in the file: {total} ({fresh} new, {conflicting} with a name that already exists).",
+    "importCombosMergeHint": "Merge keeps every existing combo and skips the ones whose name already exists. Connections and credentials are never imported.",
+    "importCombosReplaceHint": "Replace all deletes your existing combos ({current}) and imports the file instead. This cannot be undone.",
+    "importCombosMerge": "Merge",
+    "importCombosReplace": "Replace all",
+    "importCombosDone": "Combos imported: {created}. Skipped: {skipped}.",
+    "importCombosFailed": "Failed to import combos",
+    "importCombosWarnings": "Imported with warnings"
   },
   "costs": {
     "title": "Costs",
@@ -7050,7 +7063,12 @@
     "chatgptConnectorLabel": "ChatGPT custom connector",
     "doctorChecking": "Checking status…",
     "doctorCheck": "Check doctor status",
-    "fallbackRetryBackendTitle": "Fallback retry backend"
+    "fallbackRetryBackendTitle": "Fallback retry backend",
+    "retryDelayTitle": "Retry delay",
+    "retryDelayDesc": "How long a connection rests after a rate-limit error when the provider does not say when to retry. Auto uses the built-in backoff; a reset time sent by the provider always wins.",
+    "retryDelayAuto": "Auto",
+    "retryDelaySaved": "Retry delay saved",
+    "retryDelayUpdateFailed": "Failed to update retry delay"
   },
   "settings": {
     "title": "Settings",

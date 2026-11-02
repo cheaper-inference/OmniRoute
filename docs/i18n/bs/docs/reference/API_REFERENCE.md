@@ -887,7 +887,7 @@ Generički `time_range` sada se prosljeđuje obama pružaocima: Exa dobija `star
 vremensku oznaku), a Tavily dobija `start_date` (`YYYY-MM-DD`). Eksplicitni datum u `provider_options`
 nadjačava mapirani datum.
 
-Exa rezultati zadržavaju `id`, `highlight_scores`, `summary`, `subpages`, `entities` i `extras` u
+Exa rezultati zadržavaju `id`, `highlights` (svi istaknuti odlomci, a ne samo prvi koji se koristi kao `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` i `extras` u
 `provider_raw`. Tavily rezultati zadržavaju `images` i `favicon`.
 
 Linkup: Trošak pretraživanja veze se bilježi na 0,005 USD za `depth` `fast` i `standard` i 0,05 USD za `deep` ( [cijene povezivanja](https://docs.linkup.so/pages/documentation/development/pricing) ), bez obzira da li `depth` dolazi iz `provider_options` ili postavki veze.
@@ -1295,13 +1295,31 @@ druga faza i dalje može proizvesti traženo vidljivo zaključivanje kao običan
 
 ### Usmjeravanje i konfiguracija
 
-| Krajnja tačka         | Metoda   | Opis                              |
-| --------------------- | -------- | --------------------------------- |
-| `/api/models/alias`   | GET/POST | Aliasi modela                     |
-| `/api/models/catalog` | GET      | Svi modeli prema pružaocu + vrsti |
-| `/api/combos*`        | Razne    | Upravljanje kombinacijama         |
-| `/api/keys*`          | Razne    | Upravljanje API ključevima        |
-| `/api/pricing`        | GET      | Cijene modela                     |
+| Krajnja tačka         | Metoda   | Opis                                 |
+| --------------------- | -------- | ------------------------------------ |
+| `/api/models`         | GET/PUT  | Lista modela / ažuriranje pseudonima |
+| `/api/models/alias`   | GET/POST | Aliasi modela                        |
+| `/api/models/catalog` | GET      | Svi modeli prema pružaocu + vrsti    |
+| `/api/combos*`        | Razne    | Upravljanje kombinacijama            |
+| `/api/keys*`          | Razne    | Upravljanje API ključevima           |
+| `/api/pricing`        | GET      | Cijene modela                        |
+
+#### Porijeklo ograničenja modela
+
+`GET /api/models?withLimits=1` (prihvata i `true`; `0`/`false` ili izostavljanje parametra ostavlja podrazumijevani odgovor nepromijenjenim) dodaje `contextWindow`, `maxInputTokens`, `maxOutputTokens` i objekt `capsSource` u svaki red modela. `capsSource` navodi pravilo iz kojeg potiče svako ograničenje, pa se može utvrditi porijeklo neočekivane vrijednosti, npr. 128k za model od 1M. Razriješene vrijednosti iste su kao one koje koristi usmjeravanje; zastavica samo dodaje polja i nikada ne mijenja vrijednost. Svaka druga vrijednost parametra `withLimits` odbija se sa `400`.
+
+| `capsSource` vrijednost                      | Porijeklo                                                                        |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| `override:context`                           | Trajno sačuvana zamjena veličine kontekstnog prozora (`model_context_overrides`) |
+| `override:max_input` / `override:max_output` | Trajno sačuvana zamjena mogućnosti `max_input_tokens` / `max_output_tokens`      |
+| `static-authoritative:<provider>/<model>`    | Statička mjerodavna tabela kontekstnih prozora                                   |
+| `synced:<provider>/<model>`                  | Red mogućnosti sinhronizovan iz models.dev                                       |
+| `registry:<provider>/<model>`                | Stavka registra pružalaca                                                        |
+| `spec:<model>`                               | Statička specifikacija modela                                                    |
+| `effort-base:` prefiks                       | Red preuzet iz osnovnog modela varijante sa sufiksom nivoa napora                |
+| `none`                                       | Nijedan izvor ne navodi ograničenje (vrijednost je `null`)                       |
+
+Implementacija: `getResolvedModelCapabilitiesWithLimitSources()` u `src/lib/modelCapabilities.ts` i lanci prvenstva u `src/lib/modelCapabilityLimits.ts`.
 
 ### Upotreba i analitika
 

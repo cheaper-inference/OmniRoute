@@ -13,6 +13,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   scan:
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     uses: ./.github/workflows/codeql.yml
     permissions:
       contents: read

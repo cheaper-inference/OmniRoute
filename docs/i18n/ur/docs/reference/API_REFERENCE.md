@@ -881,7 +881,7 @@ Tavily، `search_type: "finance"` (`topic: "finance"`) کو بھی قبول کر
 ٹائم اسٹیمپ) اور Tavily کو `start_date` (`YYYY-MM-DD`) ملتا ہے۔ `provider_options`
 میں واضح طور پر دی گئی تاریخ میپ کردہ تاریخ پر فوقیت رکھتی ہے۔
 
-Exa کے نتائج، `id`، `highlight_scores`، `summary`، `subpages`، `entities` اور `extras` کو
+Exa کے نتائج، `id`، `highlights` (تمام نمایاں اقتباسات، صرف پہلا نہیں جو `snippet` کے طور پر استعمال ہوتا ہے)، `highlight_scores`، `summary`، `subpages`، `entities` اور `extras` کو
 `provider_raw` میں برقرار رکھتے ہیں۔ Tavily کے نتائج `images` اور `favicon` کو برقرار رکھتے ہیں۔
 
 لنک اپ کی تلاش کی قیمت `depth` `fast` اور `standard` کے لیے $0.005 اور `deep` کے لیے $0.05 ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) ریکارڈ کی گئی ہے، چاہے `depth` `provider_options` سے آیا ہو یا کنکشن کی ترتیبات سے۔
@@ -1292,11 +1292,29 @@ Claude Code خودکار موڈ کی کلاسیفائر درخواستیں، ج�
 
 | اینڈ پوائنٹ           | طریقہ    | تفصیل                                   |
 | --------------------- | -------- | --------------------------------------- |
+| `/api/models`         | GET/PUT  | ماڈل کی فہرست / عرف کی تازہ کاری        |
 | `/api/models/alias`   | GET/POST | ماڈل عرف                                |
 | `/api/models/catalog` | GET      | فراہم کنندہ + قسم کے لحاظ سے تمام ماڈلز |
 | `/api/combos*`        | مختلف    | کومبو کا نظم                            |
 | `/api/keys*`          | مختلف    | API کلید کا نظم                         |
 | `/api/pricing`        | GET      | ماڈل کی قیمتیں                          |
+
+#### ماڈل کی حدود کا ماخذ
+
+`GET /api/models?withLimits=1` میں `true` بھی قابل قبول ہے؛ `0`/`false` یا پیرامیٹر نہ دینے سے طے شدہ جواب نہیں بدلتا۔ یہ ہر ماڈل میں `contextWindow`، `maxInputTokens`، `maxOutputTokens` اور `capsSource` آبجیکٹ شامل کرتا ہے۔ `capsSource` ہر حد فراہم کرنے والا قاعدہ بتاتا ہے، تاکہ 1M ماڈل پر 128k جیسی غیر متوقع قدر کا ماخذ مل سکے۔ طے کردہ قدریں وہی ہیں جو روٹنگ استعمال کرتی ہے؛ یہ اختیار صرف فیلڈ بڑھاتا ہے، قدر نہیں بدلتا۔ باقی تمام `withLimits` قدریں `400` کے ساتھ مسترد ہوتی ہیں۔
+
+| `capsSource` کی قدر                          | ماخذ                                                                       |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `override:context`                           | محفوظ کردہ سیاقی ونڈو کی متبادل قدر (`model_context_overrides`)            |
+| `override:max_input` / `override:max_output` | محفوظ کردہ صلاحیت کی متبادل قدریں `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | سیاقی ونڈو کا مستند جامد جدول                                              |
+| `synced:<provider>/<model>`                  | models.dev سے ہم وقت کی گئی صلاحیت کی قطار                                 |
+| `registry:<provider>/<model>`                | فراہم کنندہ رجسٹری کا اندراج                                               |
+| `spec:<model>`                               | ماڈل کی جامد تفصیل                                                         |
+| `effort-base:` سابقہ                         | کوشش کے لاحقے والی قسم کے بنیادی ماڈل سے لی گئی قطار                       |
+| `none`                                       | کوئی ماخذ حد نہیں بتاتا (قدر `null` ہے)                                    |
+
+نفاذ: `src/lib/modelCapabilities.ts` میں `getResolvedModelCapabilitiesWithLimitSources()` اور `src/lib/modelCapabilityLimits.ts` میں ترجیحی سلسلے۔
 
 ### استعمال اور تجزیات
 

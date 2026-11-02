@@ -10,6 +10,8 @@ OmniRoute har tre forskellige, men beslægtede robusthedsmekanismer. Hver har si
 
 > Kilde: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Prioritet mellem miljø og kontrolpanel for robusthedsindstillinger.** De robusthedsfunktioner, som kræver aktiv tilmelding og initialiseres fra miljøet — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — leverer kun _standardværdien_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). En boolesk værdi gemt i `resilienceSettings` (Kontrolpanel → **Indstillinger → Robusthed** / `PATCH /api/resilience`, lagret i `key_value`) har forrang for miljøværdien: Normaliseringen (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) beholder den gemte booleske værdi, når den findes. At sætte en sådan miljøvariabel til `true` i en installation, hvor kontrolpanelet allerede har gemt `false`, ændrer derfor intet. Skift indstillingen under **Indstillinger → Robusthed**, eller ryd det gemte felt.
+
 ## 1. Udbyder-circuitbreaker
 
 **Omfang:** hele udbyderen (f.eks. `glm`, `openai`, `anthropic`).
@@ -88,6 +90,8 @@ Regressionssikring: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API-nøgle-basis: 3 s
 - API-nøgle 429: foretrækker opstrøms `Retry-After`/reset-headere/parserbar reset-tekst
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Ventetid før genforsøg pr. udbyder.** Udbyderens detaljeside har en vælger til **Ventetid før genforsøg** (Automatisk, 15s til 1h). Den gemmer `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 via `PATCH /api/resilience`). Når en fejl om hastighedsbegrænsning ikke indeholder et genforsøgshint fra upstream-tjenesten, erstatter denne værdi udbyderens skalerede tilbageholdelsestid og nulstiller `backoffLevel` til 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Ved hastighedsbegrænsning gælder denne rækkefølge, højest først: upstream-genforsøgshint, forbindelsens `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, udbyderens genforsøgsventetid, miljøvariablen `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` og den skalerede tilbageholdelsestid. Automatisk fjerner feltet. Kun årsagen hastighedsbegrænsning påvirkes, aldrig terminale tilstande.
 
 **Værn mod thundering herd:** forhindrer samtidige fejl i at forlænge nedkølingen for meget eller i at inkrementere `backoffLevel` dobbelt.
 
@@ -538,7 +542,7 @@ Completions og Responses API (en konservativ UTF-8-byte-proxy), ignorerer
 hændelser, der kun indeholder forbrugsdata, samt tomme hændelser, og udskyder
 vurderingen, mens værktøjskald- eller ræsonnementshændelser er undervejs. Den er
 deaktiveret som standard og kan aktiveres med
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; vinduet, opvarmningen, minimumsraten og
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (miljøværdien angiver kun standarden — en gemt boolesk værdi i `resilienceSettings.streamRecovery.throughputWatchdog.enabled` har forrang; se bemærkningen om prioritet mellem miljø og kontrolpanel øverst i denne vejledning); vinduet, opvarmningen, minimumsraten og
 det mindste målbare output afgrænses af det sædvanlige normaliseringslag for
 resilience-indstillinger.
 

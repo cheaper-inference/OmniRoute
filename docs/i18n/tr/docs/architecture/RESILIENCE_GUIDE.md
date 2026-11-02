@@ -10,6 +10,8 @@ OmniRoute'un birbiriyle ilişkili ancak farklı üç dayanıklılık mekanizmas�
 
 > Kaynak: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Dayanıklılık anahtarlarında ortam ve panel önceliği.** Ortamdan başlangıç değeri alan isteğe bağlı anahtarlar — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — yalnızca _varsayılanı_ sağlar (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). `resilienceSettings` içinde kalıcı olarak kaydedilen boole değeri (Panel → **Ayarlar → Dayanıklılık** / `PATCH /api/resilience`, `key_value` içinde saklanır) ortam değerinden önce gelir: normalleştirme (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) varsa kayıtlı boole değerini korur. Panel zaten `false` kaydetmişse ortam değişkenini `true` yapmak hiçbir şeyi değiştirmez; **Ayarlar → Dayanıklılık** anahtarını değiştirin veya kayıtlı alanı temizleyin.
+
 ## 1. Sağlayıcı Devre Kesici (Provider Circuit Breaker)
 
 **Kapsam:** sağlayıcının tamamı (ör. `glm`, `openai`, `anthropic`).
@@ -94,6 +96,8 @@ Regresyon koruması: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API anahtarı tabanı: 3sn
 - API anahtarı 429: yukarı akışın `Retry-After`/sıfırlama başlıklarını/ayrıştırılabilir sıfırlama metnini tercih eder
 - Geri çekilme: `baseCooldownMs * 2 ** failureIndex`
+
+**Sağlayıcıya özel yeniden deneme gecikmesi.** Sağlayıcı ayrıntı sayfasında **Yeniden deneme gecikmesi** seçimi vardır (Auto, 15s ile 1h arası). `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` alanını kaydeder (`PATCH /api/resilience` ile 1–21600). Hız sınırı hatasında üst hizmetten yeniden deneme ipucu yoksa bu değer sağlayıcının artan beklemesinin yerini alır ve `backoffLevel` değerini 0 yapar (`open-sse/services/rotationConfig.ts::overrideFor`). En yüksekten sıralama: üst hizmet ipucu, bağlantının `providerSpecificData.rotationOverrides.rateLimitResetSeconds` değeri, sağlayıcı gecikmesi, `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` ortam değişkeni, artan bekleme. Auto alanı kaldırır. Yalnızca hız sınırı nedenini etkiler, son durumları asla etkilemez.
 
 **Thundering-herd koruması:** eşzamanlı hataların bekleme süresini aşırı uzatmasını veya `backoffLevel` değerini iki kez artırmasını engeller.
 
@@ -581,7 +585,7 @@ tam bir kayan pencere (rolling window) gerektirir. Chat Completions ve Responses
 çıktı olaylarından gelen metin deltalarını sayar (muhafazakâr bir UTF-8 bayt yaklaşımı),
 yalnızca kullanım (usage) içeren ve boş olayları yok sayar ve tool-call ya da reasoning
 olayları devam ederken değerlendirmeyi askıya alır. Varsayılan olarak devre dışıdır ve
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` ile etkinleştirilebilir; pencere, ısınma
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (bu ortam değeri yalnızca varsayılanı belirler — kayıtlı `resilienceSettings.streamRecovery.throughputWatchdog.enabled` boole değeri önceliklidir; bu kılavuzun başındaki ortam/panel önceliği notuna bakın) ile etkinleştirilebilir; pencere, ısınma
 süresi, minimum hız ve minimum ölçülebilir çıktı değerleri, normal resilience-settings
 normalizasyon katmanı tarafından sınırlandırılır.
 

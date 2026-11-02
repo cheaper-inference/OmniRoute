@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
-import Image from "next/image";
 import Icon from "@/shared/components/Icon";
+import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
+import Image from "next/image";
 import CliStatusBadge from "./CliStatusBadge";
 import { useTranslations } from "next-intl";
 import { DEFAULT_DISPLAY_BASE_URL } from "@/shared/hooks";
@@ -262,7 +262,7 @@ function PiCardHeader({ tool, t, isExpanded, onToggle, statusBadge }) {
               }}
             />
           ) : (
-            <span style={{ color: tool.color }}>
+            <span className="inline-flex" style={{ color: tool.color }}>
               <Icon name="terminal" size={20} />
             </span>
           )}
@@ -297,7 +297,7 @@ function PiRuntimeStatus({ t, piStatus, cliReady }) {
       <Icon
         name={cliReady ? "check_circle" : "warning"}
         size={18}
-        className={`${cliReady ? "text-success" : "text-warning"}`}
+        className={cliReady ? "text-success" : "text-warning"}
       />
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium">{runtimeHeadline(t, piStatus, cliReady)}</p>
@@ -403,8 +403,7 @@ function PiModelField({ t, selectedModel, onChange, onPick, onManual, hasActiveP
         <Button variant="outline" size="sm" onClick={onPick} disabled={!hasActiveProviders}>
           {t("select")}
         </Button>
-        <Button variant="ghost" size="sm" onClick={onManual}>
-          <Icon name="edit" size={16} />
+        <Button variant="ghost" size="sm" icon="edit" onClick={onManual}>
           {t("manualConfig")}
         </Button>
       </div>
@@ -444,21 +443,21 @@ function PiActionButtons({ t, configured, canReset, selectedModel, actions, onAp
       <Button
         variant="primary"
         size="sm"
+        icon="save"
         onClick={onApply}
         disabled={!selectedModel}
         loading={actions.applying}
       >
-        <Icon name="save" size={14} className="mr-1" />
         {configured ? t("updateConfig") : t("applyConfig")}
       </Button>
       {canReset && (
         <Button
           variant="outline"
           size="sm"
+          icon="restart_alt"
           onClick={actions.handleReset}
           loading={actions.restoring}
         >
-          <Icon name="restart_alt" size={14} className="mr-1" />
           {t("reset")}
         </Button>
       )}
@@ -519,9 +518,9 @@ function PiBackupsSection({ t, backups, restoringBackup, onRestore, showBackups,
       <Button
         variant="ghost"
         size="sm"
+        className="text-text-muted"
         aria-expanded={showBackups}
         onClick={() => setShowBackups(!showBackups)}
-        className="flex items-center gap-2 text-sm text-text-muted hover:text-text transition-colors"
       >
         <Icon
           name="chevron_right"

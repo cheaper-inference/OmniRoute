@@ -40,23 +40,31 @@ Mivel az érték becslés:
 
 ### Az árak forrása
 
-A költségek egy ártáblázatból származnak, amelyet a rendszer a következő prioritási sorrendben old fel
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+A költségek a [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) összevont ártáblájából származnak, az alábbi elsőbbségi sorrendben (**legmagasabb elöl**):
 
-1. **Felhasználói felülírások** — az irányítópulton / a `PATCH /api/pricing` használatával megadott árak.
-2. **Szinkronizált külső árak** — a LiteLLM nyilvános
-   `model_prices_and_context_window.json` fájljából lekérve, ha a szinkronizálás engedélyezve van (külön
-   `pricing_synced` névtérben tárolva, így soha nem írja felül a saját beállításaidat).
-3. **Beépített alapértékek** — az OmniRoute részeként szállítva.
+1. **Felhasználói felülírások** — a vezérlőpulton vagy a `PATCH /api/pricing` útján megadott árak (a `pricing` névtérben).
+2. **models.dev-szinkronizálás** — a `https://models.dev/api.json` címről letöltött árak (a `models_dev_pricing` névtérben).
+3. **LiteLLM-szinkronizálás** — a LiteLLM nyilvános `model_prices_and_context_window.json` fájljából származó árak (a `pricing_synced` névtérben).
+4. **Beépített alapértékek** — a [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) alatt szállított díjak.
 
-A külső árak szinkronizálása **külön engedélyezendő**, és alapértelmezés szerint ki van kapcsolva. A kapcsolódó környezeti változók
-(lásd: [`.env.example`](../../.env.example)):
+Azonos szolgáltató/modell esetén a magasabb prioritású rétegek felülírják az alsóbb rétegek megfelelő mezőit; a felső rétegből hiányzó mezők továbbra is származhatnak alsóbb rétegből. A sorrend akkor is rögzített, ha mindkét független szinkronizálási feladat egyszerre fut. A `GET /api/pricing?includeSources=1` visszaadja a `pricing` és `sourceMap` objektumot; az utóbbi modellenkénti címkéi (`user`, `modelsDev`, `litellm`, `default`) a modellt tartalmazó legmagasabb prioritású réteget jelölik.
 
-| Környezeti változó      | Alapérték | Rendeltetés                                                                |
-| ----------------------- | --------- | -------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | A háttérben futó LiteLLM-árszinkronizálás engedélyezése indításkor.        |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Szinkronizálási időköz **másodpercben** (alapértelmezés szerint naponta).  |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Vesszővel elválasztott forráslista (jelenleg csak a `litellm` támogatott). |
+A **LiteLLM-szinkronizálás** külön bekapcsolást igényel, alapértelmezés szerint ki van kapcsolva. Környezeti változói (lásd [`.env.example`](../../.env.example)):
+
+| Környezeti változó      | Alapérték | Rendeltetés                                                                                |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------------ |
+| `PRICING_SYNC_ENABLED`  | `false`   | Bekapcsolja a LiteLLM-árak háttérben történő szinkronizálását.                             |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Szinkronizálási időköz **másodpercben** (alapértelmezés szerint naponta).                  |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Forrásválasztás kizárólag ehhez a szinkronizáláshoz; jelenleg csak a `litellm` támogatott. |
+
+A **models.dev-szinkronizálás** a LiteLLM-szinkronizálástól független, és szintén alapból ki van kapcsolva. A Beállításokban (models.dev-szinkronizálás) kapcsolható be, vagy ezekkel a változókkal:
+
+| Környezeti változó         | Alapérték           | Rendeltetés                                                                                                                                                                  |
+| -------------------------- | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nincs beállítva)_ | Beállítatlanul a Beállítások kapcsolóját követi; `1/true/on/yes` kényszeríti a bekapcsolást, `0/false/off/no` pedig a kikapcsolást, akkor is, ha a Beállítások engedélyezné. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`             | A models.dev-szinkronizálás alapértelmezett időköze másodpercben (naponta).                                                                                                  |
+
+A `PRICING_SYNC_SOURCES` **nem** kapcsolja be a models.dev szinkronizálását; csak a LiteLLM-szinkronizálást vezérli. A felhasználói felülírás törlése egyik szinkronizált névteret sem üríti ki; a következő elérhető árréteg lép életbe. Árazatlan modellnél mindkét szinkronizálási beállítást és a `sourceMap` értékét ellenőrizze, mielőtt kézi felülírást ad hozzá.
 
 ### A költségképlet
 
@@ -169,16 +177,16 @@ Eltérő jelzés hiányában mindegyikhez felügyeleti hitelesítés szükséges
 
 ### Árazás
 
-| Metódus  | Végpont                 | Rendeltetés                                                                                                                                   |
-| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Aktuális egyesített árazás (felhasználói + szinkronizált + alapértelmezett). A `?includeSources=1` megjeleníti az egyes bejegyzések forrását. |
-| `PATCH`  | `/api/pricing`          | A(z) `{ provider: { model: { input, output, cached, … } } }` árazásának felülbírálása.                                                        |
-| `DELETE` | `/api/pricing`          | Az árazás visszaállítása az alapértelmezett értékekre (opcionálisan a `?provider=&model=` paraméterekkel szűkítve).                           |
-| `GET`    | `/api/pricing/defaults` | Az alapértelmezett, 1 millió egységre vetített tartalék díjak megjelenítése.                                                                  |
-| `GET`    | `/api/pricing/models`   | Modell szerint kulcsolt árazás.                                                                                                               |
-| `POST`   | `/api/pricing/sync`     | Kézi szinkronizálás indítása külső forrásokból (LiteLLM).                                                                                     |
-| `GET`    | `/api/pricing/sync`     | Aktuális szinkronizálási állapot.                                                                                                             |
-| `DELETE` | `/api/pricing/sync`     | Az összes szinkronizált árazási adat törlése.                                                                                                 |
+| Metódus  | Végpont                 | Rendeltetés                                                                                                                                                                |
+| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Négy réteg összevont árazása (felhasználó, models.dev, LiteLLM, alapértékek). A `?includeSources=1` visszaadja a `pricing` + `sourceMap` objektumot.                       |
+| `PATCH`  | `/api/pricing`          | A(z) `{ provider: { model: { input, output, cached, … } } }` árazásának felülbírálása.                                                                                     |
+| `DELETE` | `/api/pricing`          | Eltávolítja a felhasználói árfelülírásokat (opcionálisan a `?provider=&model=` szerint szűkítve); a szinkronizált díjak és beépített alapértékek tartalékként megmaradnak. |
+| `GET`    | `/api/pricing/defaults` | Az alapértelmezett, 1 millió egységre vetített tartalék díjak megjelenítése.                                                                                               |
+| `GET`    | `/api/pricing/models`   | Modell szerint kulcsolt árazás.                                                                                                                                            |
+| `POST`   | `/api/pricing/sync`     | Kézi szinkronizálás indítása külső forrásokból (LiteLLM).                                                                                                                  |
+| `GET`    | `/api/pricing/sync`     | Aktuális szinkronizálási állapot.                                                                                                                                          |
+| `DELETE` | `/api/pricing/sync`     | Csak a LiteLLM-ből szinkronizált árazást törli (`pricing_synced`); a models.dev adatai különállók.                                                                         |
 
 ### Egyéb, költségekkel kapcsolatos végpontok
 

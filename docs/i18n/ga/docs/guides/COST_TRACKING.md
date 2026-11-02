@@ -40,23 +40,31 @@ coigilteas is ea 'costas' na deaise, ní bille").
 
 ### Foinse na praghsála
 
-Tagann costais ó thábla praghsála a réitítear san ord tosaíochta seo
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Tagann na costais ón tábla praghsála cumaiscthe in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), san ord tosaíochta seo (**an tosaíocht is airde ar dtús**):
 
-1. **Sáruithe úsáideora** — praghsanna a shocraíonn tú sa deais / trí `PATCH /api/pricing`.
-2. **Praghsáil sheachtrach shioncronaithe** — faighte ó
-   `model_prices_and_context_window.json` poiblí LiteLLM nuair atá sioncronú cumasaithe (stóráilte in ainmspás
-   `pricing_synced` ar leith ionas nach bhforscríobhann sé do chuid sáruithe choíche).
-3. **Luachanna réamhshocraithe crua-chódaithe** — a sheoltar le OmniRoute.
+1. **Sáruithe úsáideora** — praghsanna socraithe sa phainéal nó trí `PATCH /api/pricing` (an t-ainmspás `pricing`).
+2. **Sioncronú models.dev** — praghsanna faighte ó `https://models.dev/api.json` (an t-ainmspás `models_dev_pricing`).
+3. **Sioncronú LiteLLM** — praghsanna ó chomhad poiblí `model_prices_and_context_window.json` de chuid LiteLLM (an t-ainmspás `pricing_synced`).
+4. **Réamhshocruithe sa chód** — rátaí a sheachadtar in [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Is gá **rogha a dhéanamh go sainráite** chun sioncronú praghsála seachtraí a úsáid; tá sé díchumasaithe de réir réamhshocraithe. Athróga timpeallachta ábhartha
-(féach [`.env.example`](../../.env.example)):
+Don soláthraí/samhail chéanna, forscríobhann sraitheanna tosaíochta níos airde na réimsí comhfhreagracha sna sraitheanna ísle; is féidir le réimsí nach bhfuil i sraith uachtarach teacht ó shraith íochtarach fós. Fanann an t-ord seasta fiú nuair a ritheann an dá thasc sioncronaithe neamhspleácha ag an am céanna. Tugann `GET /api/pricing?includeSources=1` `pricing` agus `sourceMap` ar ais; aithníonn a lipéid in aghaidh samhla (`user`, `modelsDev`, `litellm`, `default`) an tsraith tosaíochta is airde ina bhfuil an tsamhail sin.
 
-| Athróg timpeallachta    | Réamhshocrú | Cuspóir                                                                          |
-| ----------------------- | ----------- | -------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`     | Cumasaigh sioncronú praghsála LiteLLM sa chúlra ag am tosaithe.                  |
-| `PRICING_SYNC_INTERVAL` | `86400`     | Eatramh sioncronaithe i **soicindí** (gach lá de réir réamhshocraithe).          |
-| `PRICING_SYNC_SOURCES`  | `litellm`   | Liosta foinsí deighilte le camóga (ní thacaítear ach le `litellm` faoi láthair). |
+Ní mór **sioncronú LiteLLM** a chumasú go sainráite; tá sé díchumasaithe de réir réamhshocraithe. Is iad seo a athróga timpeallachta (féach [`.env.example`](../../.env.example)):
+
+| Athróg timpeallachta    | Réamhshocrú | Cuspóir                                                                              |
+| ----------------------- | ----------- | ------------------------------------------------------------------------------------ |
+| `PRICING_SYNC_ENABLED`  | `false`     | Cumasaíonn sé sioncronú praghsanna LiteLLM sa chúlra.                                |
+| `PRICING_SYNC_INTERVAL` | `86400`     | Eatramh sioncronaithe i **soicindí** (gach lá de réir réamhshocraithe).              |
+| `PRICING_SYNC_SOURCES`  | `litellm`   | Roghnú foinsí don sioncronú seo amháin; ní thacaítear ach le `litellm` faoi láthair. |
+
+Tá **sioncronú models.dev** ar leithligh ó shioncronú LiteLLM agus tá sé díchumasaithe de réir réamhshocraithe freisin. Cumasaigh é sna Socruithe (sioncronú models.dev), nó úsáid na hathróga seo:
+
+| Athróg timpeallachta       | Réamhshocrú   | Cuspóir                                                                                                                                                                                                 |
+| -------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(gan socrú)_ | Mura bhfuil luach socraithe, leanann sé an lasc sna Socruithe; cuireann `1/true/on/yes` ar siúl é go héigeantach agus cuireann `0/false/off/no` as é go héigeantach, fiú má chumasaíonn na Socruithe é. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Eatramh réamhshocraithe shioncronú models.dev i soicindí (go laethúil).                                                                                                                                 |
+
+**Ní** chumasaíonn `PRICING_SYNC_SOURCES` models.dev; ní rialaíonn sé ach sioncronú LiteLLM. Ní ghlanann sárú úsáideora a scriosadh ceachtar ainmspás sioncronaithe; tagann an chéad sraith praghsála eile atá ar fáil i bhfeidhm. Maidir le samhail gan phraghas, seiceáil an dá shocrú sioncronaithe agus `sourceMap` sula gcuireann tú sárú láimhe leis.
 
 ### Foirmle an chostais
 
@@ -170,16 +178,16 @@ luaitear a mhalairt.
 
 ### Praghsáil
 
-| Modh     | Críochphointe           | Cuspóir                                                                                                                                       |
-| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Praghsáil chumaiscthe reatha (úsáideoir + sioncronaithe + réamhshocruithe). `?includeSources=1` chun an fhoinse do gach iontráil a fheiceáil. |
-| `PATCH`  | `/api/pricing`          | Sáraigh praghsáil do `{ provider: { model: { input, output, cached, … } } }`.                                                                 |
-| `DELETE` | `/api/pricing`          | Athshocraigh praghsáil chuig na réamhshocruithe (scópáilte go roghnach le `?provider=&model=`).                                               |
-| `GET`    | `/api/pricing/defaults` | Taispeáin rátaí cúltaca réamhshocraithe in aghaidh 1M.                                                                                        |
-| `GET`    | `/api/pricing/models`   | Praghsáil eochraithe de réir samhla.                                                                                                          |
-| `POST`   | `/api/pricing/sync`     | Cuir tús le sioncronú láimhe ó fhoinsí seachtracha (LiteLLM).                                                                                 |
-| `GET`    | `/api/pricing/sync`     | Stádas reatha an tsioncronaithe.                                                                                                              |
-| `DELETE` | `/api/pricing/sync`     | Glan na sonraí praghsála sioncronaithe go léir.                                                                                               |
+| Modh     | Críochphointe           | Cuspóir                                                                                                                                                               |
+| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Praghsáil chumaiscthe ceithre shraith (úsáideoir, models.dev, LiteLLM, réamhshocruithe). Tugann `?includeSources=1` `pricing` + `sourceMap` ar ais.                   |
+| `PATCH`  | `/api/pricing`          | Sáraigh praghsáil do `{ provider: { model: { input, output, cached, … } } }`.                                                                                         |
+| `DELETE` | `/api/pricing`          | Baineann sé sáruithe praghais úsáideora (teoranta go roghnach le `?provider=&model=`); fanann rátaí sioncronaithe agus réamhshocruithe ionsuite mar roghanna cúltaca. |
+| `GET`    | `/api/pricing/defaults` | Taispeáin rátaí cúltaca réamhshocraithe in aghaidh 1M.                                                                                                                |
+| `GET`    | `/api/pricing/models`   | Praghsáil eochraithe de réir samhla.                                                                                                                                  |
+| `POST`   | `/api/pricing/sync`     | Cuir tús le sioncronú láimhe ó fhoinsí seachtracha (LiteLLM).                                                                                                         |
+| `GET`    | `/api/pricing/sync`     | Stádas reatha an tsioncronaithe.                                                                                                                                      |
+| `DELETE` | `/api/pricing/sync`     | Glanann sé praghsáil shioncronaithe LiteLLM amháin (`pricing_synced`); tá sonraí models.dev ar leithligh.                                                             |
 
 ### Críochphointí eile a bhaineann le costais
 

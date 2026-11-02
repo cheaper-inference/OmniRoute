@@ -41,23 +41,31 @@ Kwa sababu nambari hiyo ni makadirio:
 
 ### Chanzo cha bei
 
-Gharama hutoka kwenye jedwali la bei linalotatuliwa kwa mpangilio huu wa kipaumbele
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Gharama hutoka kwenye jedwali la bei lililounganishwa katika [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), kwa mpangilio huu (**kipaumbele cha juu kwanza**):
 
-1. **Mabadiliko ya mtumiaji** — bei unazoweka kwenye dashibodi / kupitia `PATCH /api/pricing`.
-2. **Bei za nje zilizosawazishwa** — zinazopakuliwa kutoka kwenye
-   `model_prices_and_context_window.json` ya umma ya LiteLLM wakati usawazishaji umewashwa
-   (huhifadhiwa katika nafasi tofauti ya majina ya `pricing_synced` ili zisibadilishe kamwe mabadiliko yako).
-3. **Chaguo-msingi zilizowekwa moja kwa moja kwenye msimbo** — husambazwa pamoja na OmniRoute.
+1. **Mabadiliko ya mtumiaji** — bei za dashibodi au `PATCH /api/pricing` (eneo la majina `pricing`).
+2. **Usawazishaji wa models.dev** — bei kutoka `https://models.dev/api.json` (eneo la majina `models_dev_pricing`).
+3. **Usawazishaji wa LiteLLM** — bei kutoka faili ya umma `model_prices_and_context_window.json` ya LiteLLM (eneo la majina `pricing_synced`).
+4. **Chaguo-msingi zilizojengewa ndani** — viwango vinavyotolewa katika [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Usawazishaji wa bei za nje ni wa **kujiunga kwa hiari**, na umezimwa kwa chaguo-msingi. Vigeu husika vya mazingira
-(tazama [`.env.example`](../../.env.example)):
+Kwa mtoa huduma/modeli ileile, tabaka za juu hubadilisha sehemu zinazolingana za chini; sehemu zinazokosekana juu zinaweza kutoka chini. Mpangilio haubadiliki hata kazi zote mbili huru za usawazishaji zikiendeshwa pamoja. `GET /api/pricing?includeSources=1` hurudisha `pricing` na `sourceMap`; lebo za modeli (`user`, `modelsDev`, `litellm`, `default`) hutaja tabaka lenye kipaumbele cha juu linaloijumuisha.
 
-| Kigeu cha mazingira     | Chaguo-msingi | Madhumuni                                                                           |
-| ----------------------- | ------------- | ----------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`       | Washa usawazishaji wa bei wa LiteLLM wa chinichini wakati wa kuanza.                |
-| `PRICING_SYNC_INTERVAL` | `86400`       | Kipindi cha usawazishaji kwa **sekunde** (chaguo-msingi ni kila siku).              |
-| `PRICING_SYNC_SOURCES`  | `litellm`     | Orodha ya vyanzo iliyotenganishwa kwa koma (`litellm` pekee ndiyo inayotumika leo). |
+**Usawazishaji wa LiteLLM** huwashwa kwa hiari na umezimwa kwa chaguo-msingi. Vigezo vyake vya mazingira (tazama [`.env.example`](../../.env.example)) ni:
+
+| Kigeu cha mazingira     | Chaguo-msingi | Madhumuni                                                                         |
+| ----------------------- | ------------- | --------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`       | Huwasha usawazishaji wa bei za LiteLLM chinichini.                                |
+| `PRICING_SYNC_INTERVAL` | `86400`       | Kipindi cha usawazishaji kwa **sekunde** (chaguo-msingi ni kila siku).            |
+| `PRICING_SYNC_SOURCES`  | `litellm`     | Uchaguzi wa chanzo ni wa usawazishaji huu tu; kwa sasa `litellm` pekee inatumika. |
+
+**Usawazishaji wa models.dev** ni tofauti na ule wa LiteLLM, na pia umezimwa kwa chaguo-msingi. Uwashe katika Mipangilio (usawazishaji wa models.dev) au tumia vigezo hivi:
+
+| Kigezo cha mazingira       | Chaguo-msingi   | Kusudi                                                                                                                                                |
+| -------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(hakijawekwa)_ | Bila thamani hufuata swichi ya Mipangilio; `1/true/on/yes` hulazimisha kuwasha na `0/false/off/no` hulazimisha kuzima hata Mipangilio ikiwa imewasha. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Kipindi cha kawaida cha usawazishaji wa models.dev kwa sekunde (kila siku).                                                                           |
+
+`PRICING_SYNC_SOURCES` **haiwashi** models.dev; inadhibiti usawazishaji wa LiteLLM tu. Kufuta mabadiliko ya mtumiaji hakufuti eneo lolote la majina lililosawazishwa; tabaka linalofuata la bei linalopatikana huanza kutumika. Kwa modeli isiyo na bei, kagua mipangilio yote miwili ya usawazishaji na `sourceMap` kabla ya kuweka bei kwa mkono.
 
 ### Fomula ya gharama
 
@@ -171,16 +179,16 @@ ilipobainishwa vinginevyo.
 
 ### Bei
 
-| Mbinu    | Mwisho                  | Madhumuni                                                                                                                           |
-| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Bei ya sasa iliyounganishwa (ya mtumiaji + iliyosawazishwa + chaguomsingi). `?includeSources=1` ili kuona chanzo kwa kila kipengee. |
-| `PATCH`  | `/api/pricing`          | Batilisha bei kwa `{ provider: { model: { input, output, cached, … } } }`.                                                          |
-| `DELETE` | `/api/pricing`          | Rejesha bei kwenye chaguomsingi (kwa hiari ikiwa na upeo wa `?provider=&model=`).                                                   |
-| `GET`    | `/api/pricing/defaults` | Onyesha viwango chaguomsingi vya mbadala kwa kila milioni 1.                                                                        |
-| `GET`    | `/api/pricing/models`   | Bei zilizopangwa kwa modeli.                                                                                                        |
-| `POST`   | `/api/pricing/sync`     | Anzisha usawazishaji mwenyewe kutoka vyanzo vya nje (LiteLLM).                                                                      |
-| `GET`    | `/api/pricing/sync`     | Hali ya sasa ya usawazishaji.                                                                                                       |
-| `DELETE` | `/api/pricing/sync`     | Futa data yote ya bei iliyosawazishwa.                                                                                              |
+| Mbinu    | Mwisho                  | Madhumuni                                                                                                                                       |
+| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Bei zilizounganishwa kutoka tabaka nne (mtumiaji, models.dev, LiteLLM, chaguo-msingi). `?includeSources=1` hurudisha `pricing` + `sourceMap`.   |
+| `PATCH`  | `/api/pricing`          | Batilisha bei kwa `{ provider: { model: { input, output, cached, … } } }`.                                                                      |
+| `DELETE` | `/api/pricing`          | Huondoa mabadiliko ya bei ya mtumiaji (kwa hiari yakilenga `?provider=&model=`); bei zilizosawazishwa au chaguo-msingi za ndani hubaki mbadala. |
+| `GET`    | `/api/pricing/defaults` | Onyesha viwango chaguomsingi vya mbadala kwa kila milioni 1.                                                                                    |
+| `GET`    | `/api/pricing/models`   | Bei zilizopangwa kwa modeli.                                                                                                                    |
+| `POST`   | `/api/pricing/sync`     | Anzisha usawazishaji mwenyewe kutoka vyanzo vya nje (LiteLLM).                                                                                  |
+| `GET`    | `/api/pricing/sync`     | Hali ya sasa ya usawazishaji.                                                                                                                   |
+| `DELETE` | `/api/pricing/sync`     | Hufuta bei zilizosawazishwa za LiteLLM tu (`pricing_synced`); data ya models.dev ni tofauti.                                                    |
 
 ### Miisho mingine inayohusiana na gharama
 

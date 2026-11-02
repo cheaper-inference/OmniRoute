@@ -4185,7 +4185,20 @@
     "duplicateAutoComboSnapshotMsg": "Isto irá capturar os provedores/modelos atualmente conectados que correspondem a este modelo em uma combinação editável.",
     "duplicateAutoComboFailedPrefix": "Falha ao duplicar a combinação automática:",
     "duplicateAutoComboUnknownError": "Erro desconhecido",
-    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}"
+    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}",
+    "exportCombos": "Exportar",
+    "exportCombosFailed": "Falha ao exportar as combinações",
+    "importCombos": "Importar",
+    "importCombosTitle": "Importar combinações",
+    "importCombosInvalidFile": "Este ficheiro não é uma exportação de combinações válida.",
+    "importCombosSummary": "Combinações no ficheiro: {total} ({fresh} novas, {conflicting} com um nome que já existe).",
+    "importCombosMergeHint": "Juntar mantém todas as combinações existentes e ignora as que têm um nome que já existe. Ligações e credenciais nunca são importadas.",
+    "importCombosReplaceHint": "Substituir tudo elimina as suas combinações existentes ({current}) e importa o ficheiro no seu lugar. Esta ação não pode ser anulada.",
+    "importCombosMerge": "Juntar",
+    "importCombosReplace": "Substituir tudo",
+    "importCombosDone": "Combinações importadas: {created}. Ignoradas: {skipped}.",
+    "importCombosFailed": "Falha ao importar as combinações",
+    "importCombosWarnings": "Importado com avisos"
   },
   "costs": {
     "title": "Custos",
@@ -7050,7 +7063,12 @@
     "chatgptConnectorLabel": "Conector personalizado do ChatGPT",
     "doctorChecking": "A verificar o estado…",
     "doctorCheck": "Verificar estado do diagnóstico",
-    "fallbackRetryBackendTitle": "Back-end de nova tentativa de recurso"
+    "fallbackRetryBackendTitle": "Back-end de nova tentativa de recurso",
+    "retryDelayTitle": "Atraso de nova tentativa",
+    "retryDelayDesc": "Quanto tempo uma ligação descansa após um erro de limite de taxa quando o fornecedor não indica quando tentar novamente. Automático usa o backoff integrado; uma hora de reposição enviada pelo fornecedor prevalece sempre.",
+    "retryDelayAuto": "Automático",
+    "retryDelaySaved": "Atraso de nova tentativa guardado",
+    "retryDelayUpdateFailed": "Falha ao atualizar o atraso de nova tentativa"
   },
   "settings": {
     "title": "Configurações",

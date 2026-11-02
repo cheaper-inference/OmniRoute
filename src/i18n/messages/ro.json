@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Acesta va captura furnizorii/modelurile conectate în prezent care se potrivesc cu acest șablon într-o combinație editabilă.",
     "duplicateAutoComboFailedPrefix": "Duplicarea combinației automate a eșuat:",
     "duplicateAutoComboUnknownError": "Eroare necunoscută",
-    "duplicateAutoComboTitle": "Creați o combinație statică din {name}"
+    "duplicateAutoComboTitle": "Creați o combinație statică din {name}",
+    "exportCombos": "Exportă",
+    "exportCombosFailed": "Exportul combo-urilor a eșuat",
+    "importCombos": "Importă",
+    "importCombosTitle": "Importă combo-uri",
+    "importCombosInvalidFile": "Acest fișier nu este un export valid de combo-uri.",
+    "importCombosSummary": "Combo-uri în fișier: {total} ({fresh} noi, {conflicting} cu un nume care există deja).",
+    "importCombosMergeHint": "Îmbinarea păstrează toate combo-urile existente și le omite pe cele al căror nume există deja. Conexiunile și credențialele nu sunt importate niciodată.",
+    "importCombosReplaceHint": "Înlocuiește tot șterge combo-urile existente ({current}) și importă fișierul în locul lor. Acțiunea nu poate fi anulată.",
+    "importCombosMerge": "Îmbină",
+    "importCombosReplace": "Înlocuiește tot",
+    "importCombosDone": "Combo-uri importate: {created}. Omise: {skipped}.",
+    "importCombosFailed": "Importul combo-urilor a eșuat",
+    "importCombosWarnings": "Importat cu avertismente"
   },
   "costs": {
     "title": "Costuri",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "Conector personalizat pentru ChatGPT",
     "doctorChecking": "Verificarea stării…",
     "doctorCheck": "Verifică starea doctorului",
-    "fallbackRetryBackendTitle": "Backend de reîncercare pentru fallback"
+    "fallbackRetryBackendTitle": "Backend de reîncercare pentru fallback",
+    "retryDelayTitle": "Întârziere la reîncercare",
+    "retryDelayDesc": "Cât timp se odihnește o conexiune după o eroare de limită de rată atunci când furnizorul nu indică momentul reîncercării. Modul automat folosește backoff-ul integrat; un timp de resetare trimis de furnizor are întotdeauna prioritate.",
+    "retryDelayAuto": "Automat",
+    "retryDelaySaved": "Întârzierea la reîncercare a fost salvată",
+    "retryDelayUpdateFailed": "Actualizarea întârzierii la reîncercare a eșuat"
   },
   "settings": {
     "title": "Setări",

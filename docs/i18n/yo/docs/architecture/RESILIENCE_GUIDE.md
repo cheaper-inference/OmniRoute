@@ -10,6 +10,8 @@ OmniRoute ní àwọn ètò ìfaradà mẹ́ta tí ó yàtọ̀ sí ara wọn �
 
 > Orísun: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Àṣẹ àyíká àti pátákó fún àwọn bọ́tìnnì ìfaradà.** Àwọn bọ́tìnnì tí a gbọ́dọ̀ yàn láti ṣiṣẹ́, tí àyíká sì ń fún ní iye ìbẹ̀rẹ̀ — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — kan pèsè _àiyipada_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean tí a fipamọ́ sínú `resilienceSettings` (Pátákó → **Ètò → Ìfaradà** / `PATCH /api/resilience`, nínú `key_value`) ní àṣẹ ju iye àyíká lọ: ìṣàtúnṣe (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) pa boolean tó ti wà mọ́. Nítorí náà, fífi àyíká sí `true` nígbà tí pátákó ti fipamọ́ `false` kò yí nǹkan padà — yí bọ́tìnnì ní **Ètò → Ìfaradà** tàbí pa ààyè tí a fipamọ́ rẹ́.
+
 ## 1. Circuit Breaker Olùpèsè
 
 **Àyíká:** gbogbo olùpèsè (f.i., `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ Lábẹ́ ààlà náà, a **kò** ka olùpèsè náà sí ẹni tó ń tutù; �
 - API-key ìpìlẹ̀: 3s
 - API-key 429: ń fẹ́ àkòrí `Retry-After`/ìtún-ìṣètò/Ọ̀rọ̀ ìtún-ìṣètò tí a lè ṣàlàyè láti ìsàtẹ̀yìn
 - Ìdàfẹ́yìn: `baseCooldownMs * 2 ** failureIndex`
+
+**Ìdádúró àtúngbìyàn fún olùpèsè kọ̀ọ̀kan.** Ojú ìwé olùpèsè ní àṣàyàn **Ìdádúró àtúngbìyàn** (Auto, 15s sí 1h). Ó fipamọ́ `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 nípasẹ̀ `PATCH /api/resilience`). Bí àṣìṣe ààlà ìwọ̀n kò bá ní ìtọ́nisọ́nà àtúngbìyàn láti iṣẹ́ òkè, iye yìí rọ́pò ìdádúró tí ń pọ̀ sí i fún olùpèsè, ó sì dá `backoffLevel` padà sí 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Àṣẹ láti òkè: ìtọ́nisọ́nà iṣẹ́ òkè, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` ìsopọ̀, ìdádúró olùpèsè, àyípadà `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, ìdádúró tí ń pọ̀ sí i. Auto yọ ààyè náà. Ó kan ìdí ààlà ìwọ̀n nìkan, kì í kan ipò ìparí.
 
 **Ààbò ìkọlu àpapọ̀ (anti-thundering-herd):** ń dín àwọn ìkùnà tí ń ṣẹlẹ̀ lásìkò kannáà lọ́wọ́ lílò ìsinmi gùn ju bó yẹ lọ tàbí ṣíṣe ìfikún-meji lórí `backoffLevel`.
 
@@ -566,7 +570,7 @@ dáwọ́ dúró. Ó ń ka àwọn ìyípadà ọ̀rọ̀ láti àwọn ìṣẹ
 Responses API (àṣojú báìtì UTF-8 tó ṣọ́ra), ó ń fọ́wọ́ rí àwọn ìṣẹ̀lẹ̀ lílò-nìkan àti
 àwọn ẹ̀yí òfo, ó sì ń dáwọ́ ìdájọ́ rẹ̀ dúró nígbà tí àwọn ìṣẹ̀lẹ̀ ìpè-irinṣẹ́ tàbí
 ìròyìn bá ń lọ lọ́wọ́. A ti pa á rẹ́rẹ́ láti ìbẹ̀rẹ̀, a sì lè mú ú ṣiṣẹ́ pẹ̀lú
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; fèrèsé náà, ìgbọ́násí, oṣùwọn kéréjù,
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (iye àyíká yìí kan ṣètò àiyipada — boolean `resilienceSettings.streamRecovery.throughputWatchdog.enabled` tí a fipamọ́ ni ó ṣáájú; wo àlàyé àṣẹ àyíká/pátákó ní ìbẹ̀rẹ̀ ìtọ́sọ́nà yìí); fèrèsé náà, ìgbọ́násí, oṣùwọn kéréjù,
 àti àbájáde kéréjù tí a lè wọn, gbogbo wọn ni ìlà ìwọ̀ntúnwọ̀nsì àwọn àtòpò
 ààbò-ìfaradà deéde ń ṣàkóso wọn.
 

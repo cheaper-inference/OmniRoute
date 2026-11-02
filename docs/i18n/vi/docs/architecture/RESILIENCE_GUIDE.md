@@ -10,6 +10,8 @@ OmniRoute có ba cơ chế khả năng phục hồi (resilience) riêng biệt n
 
 > Nguồn: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Ưu tiên môi trường và bảng điều khiển cho công tắc phục hồi.** Các công tắc cần chủ động bật, lấy giá trị đầu từ môi trường — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — chỉ cung cấp _mặc định_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean lưu trong `resilienceSettings` (Bảng điều khiển → **Cài đặt → Khả năng phục hồi** / `PATCH /api/resilience`, lưu tại `key_value`) ưu tiên hơn môi trường: chuẩn hóa (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) giữ boolean đã lưu nếu có. Đặt biến môi trường thành `true` khi bảng điều khiển đã lưu `false` không thay đổi gì; hãy đổi công tắc trong **Cài đặt → Khả năng phục hồi** hoặc xóa trường đã lưu.
+
 ## 1. Circuit Breaker cấp Provider
 
 **Phạm vi:** toàn bộ provider (ví dụ: `glm`, `openai`, `anthropic`).
@@ -88,6 +90,8 @@ Kiểm thử bảo vệ hồi quy: `tests/unit/provider-cooldown-window-gate.tes
 - API-key cơ bản: 3s
 - API-key 429: ưu tiên header `Retry-After`/header reset/văn bản reset có thể phân tích từ upstream
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Độ trễ thử lại theo nhà cung cấp.** Trang nhà cung cấp có lựa chọn **Độ trễ thử lại** (Auto, từ 15s đến 1h), lưu `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 qua `PATCH /api/resilience`). Nếu lỗi giới hạn tốc độ không có gợi ý thử lại từ upstream, giá trị này thay thời gian chờ tăng dần của nhà cung cấp và đặt `backoffLevel` về 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Thứ tự ưu tiên từ cao: gợi ý upstream, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` của kết nối, độ trễ nhà cung cấp, biến `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, thời gian chờ tăng dần. Auto xóa trường. Chỉ tác động nguyên nhân giới hạn tốc độ, không bao giờ tác động trạng thái kết thúc.
 
 **Cơ chế chống thundering-herd:** ngăn các lỗi đồng thời làm cooldown bị kéo dài quá mức hoặc tăng `backoffLevel` hai lần.
 
@@ -612,7 +616,7 @@ hoàn chỉnh trước khi có thể abort. Nó đếm các text delta từ các
 Completions và Responses API (một proxy byte UTF-8 ở mức bảo thủ), bỏ qua các event
 chỉ chứa usage và event rỗng, đồng thời tạm ngưng đánh giá khi các event tool-call hoặc
 reasoning đang được xử lý. Nó bị tắt
-theo mặc định và có thể được bật bằng `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`;
+theo mặc định và có thể được bật bằng `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (giá trị môi trường chỉ khởi tạo mặc định — boolean đã lưu `resilienceSettings.streamRecovery.throughputWatchdog.enabled` được ưu tiên; xem ghi chú ưu tiên môi trường/bảng điều khiển ở đầu hướng dẫn);
 window, warm-up, tốc độ tối thiểu và output có thể đo tối thiểu đều bị giới hạn bởi
 lớp chuẩn hóa resilience-settings thông thường.
 

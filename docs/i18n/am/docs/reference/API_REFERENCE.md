@@ -866,7 +866,7 @@ Tavily `search_type: "finance"`ንም (`topic: "finance"`) ይቀበላል።
 የጊዜ ማህተም) እና Tavily `start_date`ን (`YYYY-MM-DD`) ያገኛሉ። በ`provider_options`
 ውስጥ በግልጽ የተገለጸ ቀን በካርታ የተዛመደውን ቀን ይተካል።
 
-የExa ውጤቶች `id`፣ `highlight_scores`፣ `summary`፣ `subpages`፣ `entities` እና `extras`ን በ
+የExa ውጤቶች `id`፣ `highlights` (ሁሉም የደመቁ የጽሑፍ ክፍሎች፣ እንደ `snippet` የተጠቀመው የመጀመሪያው ብቻ ሳይሆን)፣ `highlight_scores`፣ `summary`፣ `subpages`፣ `entities` እና `extras`ን በ
 `provider_raw` ውስጥ እንዳሉ ያቆያሉ። የTavily ውጤቶች `images`ን እና `favicon`ን እንዳሉ ያቆያሉ።
 
 Linkup: የማገናኘት ፍለጋ ዋጋ በ$0.005 ለ `depth` `fast` እና `standard` እና $0.05 ለ `deep` ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) )፣ `depth` ከ `provider_options` ወይም የግንኙነት መቼቶች ይመዘገባል።
@@ -1273,13 +1273,31 @@ OpenAI-ተኳሃኝ ግንኙነት የChat Completions ይዘት ሲያሰራ�
 
 ### ማስተላለፍ እና ውቅር
 
-| መጨረሻ ነጥብ              | ዘዴ       | መግለጫ                  |
-| --------------------- | -------- | --------------------- |
-| `/api/models/alias`   | GET/POST | የሞዴል ቅጽል ስሞች          |
-| `/api/models/catalog` | GET      | ሁሉም ሞዴሎች በአቅራቢ + ዓይነት |
-| `/api/combos*`        | የተለያዩ    | የጥምረት አስተዳደር          |
-| `/api/keys*`          | የተለያዩ    | የAPI ቁልፍ አስተዳደር       |
-| `/api/pricing`        | GET      | የሞዴል ዋጋ አሰጣጥ          |
+| መጨረሻ ነጥብ              | ዘዴ       | መግለጫ                     |
+| --------------------- | -------- | ------------------------ |
+| `/api/models`         | GET/PUT  | የሞዴል ዝርዝር / የቅጽል ስም ማዘመን |
+| `/api/models/alias`   | GET/POST | የሞዴል ቅጽል ስሞች             |
+| `/api/models/catalog` | GET      | ሁሉም ሞዴሎች በአቅራቢ + ዓይነት    |
+| `/api/combos*`        | የተለያዩ    | የጥምረት አስተዳደር             |
+| `/api/keys*`          | የተለያዩ    | የAPI ቁልፍ አስተዳደር          |
+| `/api/pricing`        | GET      | የሞዴል ዋጋ አሰጣጥ             |
+
+#### የሞዴል ገደቦች ምንጭ
+
+`GET /api/models?withLimits=1` (`true` ደግሞ ይቀበላል፤ `0`/`false` ወይም መለኪያውን መተው ነባሪውን ምላሽ ሳይለውጥ ያቆያል) `contextWindow`፣ `maxInputTokens`፣ `maxOutputTokens` እና የ`capsSource` ነገርን በእያንዳንዱ የሞዴል ረድፍ ላይ ይጨምራል። `capsSource` እያንዳንዱን ገደብ የሰጠውን ደንብ ይጠቅሳል፤ ስለዚህ እንደ 1M ሞዴል ላይ 128k ያለ ያልተጠበቀ ገደብ ከየት እንደመጣ ማወቅ ይቻላል። የተወሰኑት እሴቶች ማዞሪያው የሚጠቀምባቸው እሴቶች ናቸው፤ ምልክቱ መስኮችን ብቻ ይጨምራል እንጂ እሴትን ፈጽሞ አይቀይርም። ሌላ ማንኛውም የ`withLimits` እሴት በ`400` ይከለከላል።
+
+| `capsSource` እሴት                             | ምንጭ                                                            |
+| -------------------------------------------- | -------------------------------------------------------------- |
+| `override:context`                           | በቋሚነት የተቀመጠ የአውድ መስኮት መተኪያ (`model_context_overrides`)         |
+| `override:max_input` / `override:max_output` | በቋሚነት የተቀመጠ የ`max_input_tokens` / `max_output_tokens` አቅም መተኪያ |
+| `static-authoritative:<provider>/<model>`    | የአውድ መስኮቶች ቋሚ ባለሥልጣን ሰንጠረዥ                                     |
+| `synced:<provider>/<model>`                  | ከmodels.dev የተመሳሰለ የአቅም ረድፍ                                    |
+| `registry:<provider>/<model>`                | በአቅራቢዎች መዝገብ ውስጥ ያለ ግቤት                                        |
+| `spec:<model>`                               | ቋሚ የሞዴል መግለጫ                                                   |
+| `effort-base:` ቅድመ ቅጥያ                       | የጥረት ደረጃ ቅጥያ ካለው ልዩ ሞዴል መሠረታዊ ሞዴል የተወሰደ ረድፍ                    |
+| `none`                                       | ማንኛውም ምንጭ ገደቡን አይገልጽም (እሴቱ `null` ነው)                          |
+
+ትግበራ፦ `getResolvedModelCapabilitiesWithLimitSources()` በ`src/lib/modelCapabilities.ts` ውስጥ፣ እና የቅድሚያ ሰንሰለቶች በ`src/lib/modelCapabilityLimits.ts` ውስጥ።
 
 ### አጠቃቀም እና ትንታኔ
 

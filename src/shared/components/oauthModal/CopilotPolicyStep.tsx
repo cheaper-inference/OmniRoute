@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 
@@ -20,10 +21,12 @@ export default function CopilotPolicyStep({ startOAuthFlow, onClose }: CopilotPo
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-lg border border-warning/30 bg-warning-bg p-3 flex gap-2">
-        <Icon name="warning" size={16} className="text-warning leading-5 shrink-0 mt-0.5" />
-        <p className="text-sm text-warning font-medium">{t("copilotPolicyTitle")}</p>
-      </div>
+      <Alert
+        variant="warning"
+        dismissible={false}
+        icon={<Icon name="warning" size={16} />}
+        title={t("copilotPolicyTitle")}
+      />
 
       <ul className="flex flex-col gap-2 text-sm text-text-muted list-none">
         <li className="flex gap-2">

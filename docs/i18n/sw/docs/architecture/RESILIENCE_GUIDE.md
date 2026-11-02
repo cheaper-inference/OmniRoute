@@ -10,6 +10,8 @@ OmniRoute ina mifumo mitatu tofauti lakini inayohusiana ya ustahimilivu (resilie
 
 > Chanzo: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Kipaumbele cha mazingira na dashibodi kwa swichi za ustahimilivu.** Swichi zinazowashwa kwa hiari na kuanzishwa kutoka mazingira — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — hutoa _chaguo-msingi_ tu (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean iliyohifadhiwa katika `resilienceSettings` (Dashibodi → **Mipangilio → Ustahimilivu** / `PATCH /api/resilience`, huhifadhiwa katika `key_value`) ina kipaumbele kuliko mazingira: urekebishaji (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) huhifadhi boolean iliyopo. Kuweka mazingira kuwa `true` wakati dashibodi tayari imehifadhi `false` hakubadili chochote; badili swichi katika **Mipangilio → Ustahimilivu** au futa sehemu iliyohifadhiwa.
+
 ## 1. Mvunja Mzunguko wa Mtoa Huduma (Provider Circuit Breaker)
 
 **Wigo:** mtoa huduma mzima (k.m., `glm`, `openai`, `anthropic`).
@@ -88,6 +90,8 @@ Ulinzi dhidi ya kurudi nyuma: `tests/unit/provider-cooldown-window-gate.test.ts`
 - Msingi wa API-key: 3s
 - API-key 429: hupendelea vichwa vya `Retry-After`/reset vya upstream au maandishi ya reset yanayoweza kuchambuliwa
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Muda wa kusubiri jaribio jipya kwa mtoa huduma.** Ukurasa wa mtoa huduma una chaguo **Muda wa kujaribu tena** (Auto, 15s hadi 1h). Huhifadhi `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 kupitia `PATCH /api/resilience`). Hitilafu ya kikomo cha kasi ikiwa haina dokezo la kujaribu tena kutoka huduma ya juu, thamani hii hubadilisha kusubiri kunakoongezeka kwa mtoa huduma na kurudisha `backoffLevel` kuwa 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Kipaumbele kutoka juu: dokezo la huduma ya juu, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` ya muunganisho, muda wa mtoa huduma, kigezo `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, kusubiri kunakoongezeka. Auto huondoa sehemu. Huathiri sababu ya kikomo cha kasi pekee, kamwe hali za mwisho.
 
 **Ulinzi dhidi ya thundering-herd:** huzuia kushindwa kwa wakati mmoja kupanua kupooza kupita kiasi au kuongeza `backoffLevel` mara mbili.
 
@@ -533,7 +537,7 @@ maandishi kutoka kwa matukio ya pato ya Chat Completions na Responses API
 (kiwakilishi cha bytes cha UTF-8 cha kihafidhina), hupuuza matukio ya matumizi-pekee
 na yaliyo tupu, na kusitisha hukumu wakati matukio ya wito wa zana au ya kufikiri
 (reasoning) yanaendelea. Umezimwa kwa chaguo-msingi na unaweza kuwashwa kwa
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; dirisha, kipindi cha kujiandaa, kiwango
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (thamani hii ya mazingira huweka chaguo-msingi tu — boolean iliyohifadhiwa ya `resilienceSettings.streamRecovery.throughputWatchdog.enabled` ina kipaumbele; tazama dokezo la kipaumbele cha mazingira/dashibodi mwanzoni mwa mwongozo); dirisha, kipindi cha kujiandaa, kiwango
 cha chini, na pato la chini linaloweza kupimika vimezuiliwa na safu ya kawaida ya
 uwekaji sawa wa mipangilio ya ustahimilivu.
 

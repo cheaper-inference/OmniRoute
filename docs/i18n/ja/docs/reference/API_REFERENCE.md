@@ -845,7 +845,7 @@ Firecrawl の検索コストは、返された 10 件の結果の開始ブロッ
 （`YYYY-MM-DD`）が渡されます。`provider_options` で明示的に指定された日付は、
 マッピングされた日付を上書きします。
 
-Exa の結果では、`id`、`highlight_scores`、`summary`、`subpages`、`entities`、`extras` が
+Exa の結果では、`id`、`highlights`（`snippet` に使う最初の抜粋だけでなく、すべてのハイライト）、 `highlight_scores`、`summary`、`subpages`、`entities`、`extras` が
 `provider_raw` に保持されます。Tavily の結果では、`images` と `favicon` が保持されます。
 
 リンクアップ検索コストは、 `depth` `provider_options`からのものか接続の設定からのものかに関係なく、 `depth` `fast`および`standard`については 0.005 ドル、 `deep`については 0.05 ドル ([リンクアップ価格設定](https://docs.linkup.so/pages/documentation/development/pricing)) で記録されます。
@@ -1252,11 +1252,29 @@ effort/thinking ヘッダー、ルーティングルール、および解決済�
 
 | エンドポイント        | メソッド | 説明                                 |
 | --------------------- | -------- | ------------------------------------ |
+| `/api/models`         | GET/PUT  | モデル一覧の取得 / エイリアスの更新  |
 | `/api/models/alias`   | GET/POST | モデルエイリアス                     |
 | `/api/models/catalog` | GET      | プロバイダーおよびタイプ別の全モデル |
 | `/api/combos*`        | 各種     | コンボ管理                           |
 | `/api/keys*`          | 各種     | APIキー管理                          |
 | `/api/pricing`        | GET      | モデル料金                           |
+
+#### モデルの上限値の出所
+
+`GET /api/models?withLimits=1`（`true` も有効。`0`/`false` または省略時は既定のペイロードを変更しません）は、各モデル行に `contextWindow`、`maxInputTokens`、`maxOutputTokens` と `capsSource` オブジェクトを追加します。`capsSource` は各上限値を決めたルールを示すため、1M のモデルに 128k が設定されている場合など、予想外の上限の出所を追跡できます。解決された値はルーティングで使う値と同じです。このフラグはフィールドを追加するだけで、値を変更しません。それ以外の `withLimits` の値は `400` で拒否されます。
+
+| `capsSource` の値                            | 出所                                                                        |
+| -------------------------------------------- | --------------------------------------------------------------------------- |
+| `override:context`                           | 永続化されたコンテキストウィンドウの上書き設定（`model_context_overrides`） |
+| `override:max_input` / `override:max_output` | 永続化された機能上限 `max_input_tokens` / `max_output_tokens` の上書き設定  |
+| `static-authoritative:<provider>/<model>`    | 正式な基準となる静的なコンテキストウィンドウ表                              |
+| `synced:<provider>/<model>`                  | models.dev から同期された機能情報の行                                       |
+| `registry:<provider>/<model>`                | プロバイダーレジストリの項目                                                |
+| `spec:<model>`                               | 静的なモデル仕様                                                            |
+| 接頭辞 `effort-base:`                        | effort 接尾辞を持つバリアントの基本モデルから借用した行                     |
+| `none`                                       | どの出所にも上限の定義がなく、値は `null`                                   |
+
+実装は `src/lib/modelCapabilities.ts` の `getResolvedModelCapabilitiesWithLimitSources()` と、`src/lib/modelCapabilityLimits.ts` の優先順位の連鎖を参照してください。
 
 ### 使用状況と分析
 

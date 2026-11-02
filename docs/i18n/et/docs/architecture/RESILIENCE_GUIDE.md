@@ -10,6 +10,8 @@ OmniRoute'il on kolm eristatavat, kuid omavahel seotud vastupidavuse mehhanismi.
 
 > Allikas: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Keskkonna ja juhtpaneeli prioriteet tõrketaluvuse lülitites.** Keskkonnast algväärtustatud ja eraldi lubamist vajavad tõrketaluvuse lülitid — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — annavad ainult _vaikeväärtuse_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Objekti `resilienceSettings` püsivalt salvestatud tõeväärtus (Juhtpaneel → **Seaded → Tõrketaluvus** / `PATCH /api/resilience`, talletatud `key_value` sees) on keskkonnaväärtusest ülimuslik: normaliseerimine (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) säilitab olemasoleva salvestatud tõeväärtuse. Sellise keskkonnamuutuja määramine väärtusele `true` paigalduses, kus juhtpaneel on juba salvestanud `false`, ei muuda seega midagi. Muutke lülitit jaotises **Seaded → Tõrketaluvus** või tühjendage salvestatud väli.
+
 ## 1. Pakkuja katkestaja
 
 **Ulatus:** kogu teenusepakkuja (nt `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ Alates sellest künnist ei peeta teenusepakkujat jahutavas olekus; edukas pärin
 - API-võtme alus: 3 s
 - API-võtme 429: eelistab ülesvoo `Retry-After`/lähtestamispäiseid/parsitavat lähtestamisteksti
 - Tagasiastumine: `baseCooldownMs * 2 ** failureIndex`
+
+**Pakkujapõhine korduskatse viivitus.** Pakkuja üksikasjade lehel on valik **Korduskatse viivitus** (Automaatne, 15s kuni 1h). See salvestab `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 liidese `PATCH /api/resilience` kaudu). Kui sageduspiirangu viga ei sisalda ülesvooluteenuse korduskatse juhist, asendab see väärtus pakkuja skaleeritud kasvava ooteaja ja lähtestab `backoffLevel` väärtusele 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Sageduspiirangu vea korral on prioriteet kõrgeimast alates: ülesvoolu korduskatse juhis, ühenduse `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, pakkuja korduskatse viivitus, keskkonnamuutuja `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` ning skaleeritud kasvav ooteaeg. Automaatne eemaldab välja. See mõjutab ainult sageduspiirangu põhjust, mitte kunagi lõppolekuid.
 
 **Thundering-herd-efekti vastane kaitse:** hoiab ära, et samaaegsed tõrked cooldown'i liigselt pikendaksid või `backoffLevel` väärtust topelt suurendaksid.
 
@@ -497,7 +501,7 @@ liuvaken. See loeb tekstideltaid Chat Completionsi ja Responses API
 väljundsündmustest (konservatiivne UTF-8 baidipõhine asendusmõõt), ignoreerib
 ainult kasutusandmeid sisaldavaid ja tühje sündmusi ning peatab hinnangu, kuni
 tööriistakõne või arutlussündmused on pooleli. See on vaikimisi välja lülitatud
-ja selle saab sisse lülitada sättega `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`;
+ja selle saab sisse lülitada sättega `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (see keskkonnaväärtus annab ainult vaikeväärtuse — salvestatud `resilienceSettings.streamRecovery.throughputWatchdog.enabled` tõeväärtus on ülimuslik; vaadake selle juhendi alguses märkust keskkonna ja juhtpaneeli prioriteedi kohta);
 akent, soojenemist, minimummäära ja minimaalset mõõdetavat väljundit piirab
 tavaline resilience-sätete normaliseerimiskiht.
 

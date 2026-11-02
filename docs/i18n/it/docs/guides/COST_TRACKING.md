@@ -43,25 +43,31 @@ Poiché il valore è una stima:
 
 ### La fonte dei prezzi
 
-I costi provengono da una tabella dei prezzi determinata secondo il seguente ordine di
-precedenza ([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+I costi provengono dalla tabella dei prezzi combinata in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), secondo questo ordine di precedenza (**priorità più alta per prima**):
 
-1. **Sostituzioni dell'utente** — i prezzi impostati nella dashboard / tramite `PATCH /api/pricing`.
-2. **Prezzi esterni sincronizzati** — recuperati dal file pubblico
-   `model_prices_and_context_window.json` di LiteLLM quando la sincronizzazione è abilitata
-   (memorizzati in uno spazio dei nomi `pricing_synced` separato, in modo da non sovrascrivere
-   mai le tue sostituzioni).
-3. **Valori predefiniti codificati** — inclusi in OmniRoute.
+1. **Sostituzioni dell’utente** — prezzi impostati nella dashboard o tramite `PATCH /api/pricing` (spazio dei nomi `pricing`).
+2. **Sincronizzazione models.dev** — prezzi recuperati da `https://models.dev/api.json` (spazio dei nomi `models_dev_pricing`).
+3. **Sincronizzazione LiteLLM** — prezzi recuperati dal file pubblico `model_prices_and_context_window.json` di LiteLLM (spazio dei nomi `pricing_synced`).
+4. **Valori predefiniti nel codice** — tariffe incluse in [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-La sincronizzazione dei prezzi esterni è **facoltativa** e disabilitata per impostazione
-predefinita. Variabili d'ambiente pertinenti
-(vedi [`.env.example`](../../.env.example)):
+Per lo stesso provider/modello, i valori dei livelli prioritari sovrascrivono i campi corrispondenti dei livelli inferiori; i campi assenti da un livello superiore possono ancora provenire da uno inferiore. L’ordine resta fisso anche quando entrambi i processi indipendenti di sincronizzazione vengono eseguiti contemporaneamente. `GET /api/pricing?includeSources=1` restituisce `pricing` e `sourceMap`; le etichette per modello (`user`, `modelsDev`, `litellm`, `default`) identificano il livello con la priorità più alta che contiene quel modello.
 
-| Variabile d'ambiente    | Valore predefinito | Scopo                                                                                     |
-| ----------------------- | ------------------ | ----------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`            | Abilita la sincronizzazione in background dei prezzi LiteLLM all'avvio.                   |
-| `PRICING_SYNC_INTERVAL` | `86400`            | Intervallo di sincronizzazione in **secondi** (giornaliero per impostazione predefinita). |
-| `PRICING_SYNC_SOURCES`  | `litellm`          | Elenco di fonti separate da virgole (attualmente è supportato solo `litellm`).            |
+La **sincronizzazione LiteLLM** è facoltativa e disabilitata per impostazione predefinita. Le sue variabili d’ambiente (vedere [`.env.example`](../../.env.example)) sono:
+
+| Variabile d'ambiente    | Valore predefinito | Scopo                                                                                                |
+| ----------------------- | ------------------ | ---------------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`            | Abilita la sincronizzazione in background dei prezzi LiteLLM.                                        |
+| `PRICING_SYNC_INTERVAL` | `86400`            | Intervallo di sincronizzazione in **secondi** (giornaliero per impostazione predefinita).            |
+| `PRICING_SYNC_SOURCES`  | `litellm`          | Selezione della fonte soltanto per questa sincronizzazione; attualmente è supportato solo `litellm`. |
+
+La **sincronizzazione models.dev** è separata dalla sincronizzazione LiteLLM ed è anch’essa disabilitata per impostazione predefinita. Abilitarla nelle Impostazioni (sincronizzazione models.dev) oppure usare queste variabili:
+
+| Variabile d’ambiente       | Valore predefinito | Scopo                                                                                                                                                                        |
+| -------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(non impostata)_  | Se non impostata, segue l’opzione delle Impostazioni; `1/true/on/yes` forza l’attivazione e `0/false/off/no` forza la disattivazione, anche se le Impostazioni la abilitano. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`            | Intervallo predefinito della sincronizzazione models.dev in secondi, con frequenza giornaliera.                                                                              |
+
+`PRICING_SYNC_SOURCES` **non** abilita models.dev: controlla soltanto la sincronizzazione LiteLLM. Eliminare una sostituzione dell’utente non cancella nessuno degli spazi dei nomi sincronizzati; diventa effettivo il successivo livello di prezzi disponibile. Per un modello senza prezzo, controllare entrambe le impostazioni di sincronizzazione e `sourceMap` prima di aggiungere una sostituzione manuale.
 
 ### La formula del costo
 
@@ -184,16 +190,16 @@ Tutti questi endpoint richiedono l'autenticazione di gestione (loopback/JWT, tra
 
 ### Prezzi
 
-| Metodo   | Endpoint                | Scopo                                                                                                                    |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `GET`    | `/api/pricing`          | Prezzi combinati correnti (utente + sincronizzati + predefiniti). `?includeSources=1` per vedere l'origine di ogni voce. |
-| `PATCH`  | `/api/pricing`          | Sostituisce i prezzi per `{ provider: { model: { input, output, cached, … } } }`.                                        |
-| `DELETE` | `/api/pricing`          | Ripristina i prezzi predefiniti (facoltativamente limitato tramite `?provider=&model=`).                                 |
-| `GET`    | `/api/pricing/defaults` | Mostra le tariffe di fallback predefinite per 1 milione.                                                                 |
-| `GET`    | `/api/pricing/models`   | Prezzi indicizzati per modello.                                                                                          |
-| `POST`   | `/api/pricing/sync`     | Avvia una sincronizzazione manuale da fonti esterne (LiteLLM).                                                           |
-| `GET`    | `/api/pricing/sync`     | Stato corrente della sincronizzazione.                                                                                   |
-| `DELETE` | `/api/pricing/sync`     | Cancella tutti i dati dei prezzi sincronizzati.                                                                          |
+| Metodo   | Endpoint                | Scopo                                                                                                                                                                               |
+| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Prezzi combinati dei quattro livelli (utente, models.dev, LiteLLM, valori predefiniti). `?includeSources=1` restituisce `pricing` + `sourceMap`.                                    |
+| `PATCH`  | `/api/pricing`          | Sostituisce i prezzi per `{ provider: { model: { input, output, cached, … } } }`.                                                                                                   |
+| `DELETE` | `/api/pricing`          | Rimuove le sostituzioni dei prezzi dell’utente, facoltativamente limitate da `?provider=&model=`; le tariffe sincronizzate o i valori predefiniti incorporati restano come ripiego. |
+| `GET`    | `/api/pricing/defaults` | Mostra le tariffe di fallback predefinite per 1 milione.                                                                                                                            |
+| `GET`    | `/api/pricing/models`   | Prezzi indicizzati per modello.                                                                                                                                                     |
+| `POST`   | `/api/pricing/sync`     | Avvia una sincronizzazione manuale da fonti esterne (LiteLLM).                                                                                                                      |
+| `GET`    | `/api/pricing/sync`     | Stato corrente della sincronizzazione.                                                                                                                                              |
+| `DELETE` | `/api/pricing/sync`     | Cancella soltanto i prezzi sincronizzati da LiteLLM (`pricing_synced`); i dati models.dev sono separati.                                                                            |
 
 ### Altri endpoint rilevanti per i costi
 

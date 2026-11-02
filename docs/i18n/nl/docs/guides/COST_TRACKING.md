@@ -44,24 +44,31 @@ Omdat het bedrag een schatting is:
 
 ### De prijsbron
 
-Kosten zijn afkomstig uit een prijstabel die in deze volgorde van prioriteit wordt bepaald
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Kosten zijn gebaseerd op de samengevoegde prijstabel in [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), met deze prioriteitsvolgorde (**hoogste eerst**):
 
-1. **Gebruikersoverschrijvingen** — prijzen die je instelt op het dashboard / via `PATCH /api/pricing`.
-2. **Gesynchroniseerde externe prijzen** — opgehaald uit LiteLLM's openbare
-   `model_prices_and_context_window.json` wanneer synchronisatie is ingeschakeld (opgeslagen
-   in een afzonderlijke `pricing_synced`-naamruimte, zodat je overschrijvingen nooit worden
-   overschreven).
-3. **Hardgecodeerde standaardwaarden** — meegeleverd met OmniRoute.
+1. **Gebruikersoverschrijvingen** — prijzen ingesteld in het dashboard of via `PATCH /api/pricing` (de naamruimte `pricing`).
+2. **Synchronisatie met models.dev** — prijzen opgehaald uit `https://models.dev/api.json` (de naamruimte `models_dev_pricing`).
+3. **Synchronisatie met LiteLLM** — prijzen opgehaald uit het openbare bestand `model_prices_and_context_window.json` van LiteLLM (de naamruimte `pricing_synced`).
+4. **In de code vastgelegde standaardwaarden** — tarieven meegeleverd in [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Externe prijssynchronisatie is **optioneel** en standaard uitgeschakeld. Relevante
-omgevingsvariabelen (zie [`.env.example`](../../.env.example)):
+Voor dezelfde provider en hetzelfde model overschrijven waarden uit lagen met hogere prioriteit de overeenkomstige velden in lagere lagen. Velden die in een hogere laag ontbreken, kunnen nog steeds uit een lagere laag komen. De volgorde blijft vast, ook als beide onafhankelijke synchronisatietaken tegelijk lopen. `GET /api/pricing?includeSources=1` retourneert `pricing` en `sourceMap`; de labels per model (`user`, `modelsDev`, `litellm`, `default`) wijzen de laag met de hoogste prioriteit aan die dat model bevat.
 
-| Omgevingsvariabele      | Standaard | Doel                                                                                      |
-| ----------------------- | --------- | ----------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Schakel de LiteLLM-prijssynchronisatie op de achtergrond in bij het opstarten.            |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Synchronisatie-interval in **seconden** (standaard dagelijks).                            |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Door komma's gescheiden lijst met bronnen (momenteel wordt alleen `litellm` ondersteund). |
+**Synchronisatie met LiteLLM** is optioneel en standaard uitgeschakeld. De omgevingsvariabelen hiervoor (zie [`.env.example`](../../.env.example)) zijn:
+
+| Omgevingsvariabele      | Standaard | Doel                                                                                          |
+| ----------------------- | --------- | --------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Prijssynchronisatie met LiteLLM op de achtergrond inschakelen.                                |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Synchronisatie-interval in **seconden** (standaard dagelijks).                                |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Bronkeuze uitsluitend voor deze synchronisatie; momenteel wordt alleen `litellm` ondersteund. |
+
+**Synchronisatie met models.dev** staat los van de synchronisatie met LiteLLM en is eveneens standaard uitgeschakeld. Schakel haar in via Instellingen (synchronisatie met models.dev), of gebruik deze variabelen:
+
+| Omgevingsvariabele         | Standaard          | Doel                                                                                                                                                                                          |
+| -------------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(niet ingesteld)_ | Zonder waarde volgt dit de schakelaar in Instellingen; `1/true/on/yes` dwingt inschakeling af en `0/false/off/no` dwingt uitschakeling af, ook als Instellingen de synchronisatie inschakelt. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`            | Standaardinterval van de synchronisatie met models.dev in seconden, dagelijks.                                                                                                                |
+
+`PRICING_SYNC_SOURCES` schakelt models.dev **niet** in; deze variabele bestuurt uitsluitend de synchronisatie met LiteLLM. Een gebruikersoverschrijving verwijderen wist geen van beide gesynchroniseerde naamruimten: de volgende beschikbare prijslaag wordt actief. Controleer bij een model zonder prijs beide synchronisatie-instellingen en `sourceMap` voordat u een handmatige overschrijving toevoegt.
 
 ### De kostenformule
 
@@ -179,16 +186,16 @@ anders vermeld.
 
 ### Prijzen
 
-| Methode  | Endpoint                | Doel                                                                                                                                  |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Huidige samengevoegde prijzen (gebruiker + gesynchroniseerd + standaardwaarden). `?includeSources=1` om de bron per item te bekijken. |
-| `PATCH`  | `/api/pricing`          | Overschrijf prijzen voor `{ provider: { model: { input, output, cached, … } } }`.                                                     |
-| `DELETE` | `/api/pricing`          | Stel prijzen opnieuw in op de standaardwaarden (optioneel beperkt via `?provider=&model=`).                                           |
-| `GET`    | `/api/pricing/defaults` | Toon standaard fallbacktarieven per 1 miljoen.                                                                                        |
-| `GET`    | `/api/pricing/models`   | Prijzen geïndexeerd per model.                                                                                                        |
-| `POST`   | `/api/pricing/sync`     | Start een handmatige synchronisatie vanuit externe bronnen (LiteLLM).                                                                 |
-| `GET`    | `/api/pricing/sync`     | Huidige synchronisatiestatus.                                                                                                         |
-| `DELETE` | `/api/pricing/sync`     | Wis alle gesynchroniseerde prijsgegevens.                                                                                             |
+| Methode  | Endpoint                | Doel                                                                                                                                                                                       |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Samengevoegde prijzen uit vier lagen (gebruiker, models.dev, LiteLLM, standaardwaarden). `?includeSources=1` retourneert `pricing` + `sourceMap`.                                          |
+| `PATCH`  | `/api/pricing`          | Overschrijf prijzen voor `{ provider: { model: { input, output, cached, … } } }`.                                                                                                          |
+| `DELETE` | `/api/pricing`          | Gebruikersoverschrijvingen van prijzen verwijderen, eventueel beperkt met `?provider=&model=`; gesynchroniseerde tarieven of ingebouwde standaardwaarden blijven beschikbaar als terugval. |
+| `GET`    | `/api/pricing/defaults` | Toon standaard fallbacktarieven per 1 miljoen.                                                                                                                                             |
+| `GET`    | `/api/pricing/models`   | Prijzen geïndexeerd per model.                                                                                                                                                             |
+| `POST`   | `/api/pricing/sync`     | Start een handmatige synchronisatie vanuit externe bronnen (LiteLLM).                                                                                                                      |
+| `GET`    | `/api/pricing/sync`     | Huidige synchronisatiestatus.                                                                                                                                                              |
+| `DELETE` | `/api/pricing/sync`     | Alleen door LiteLLM gesynchroniseerde prijzen wissen (`pricing_synced`); gegevens van models.dev staan daar los van.                                                                       |
 
 ### Andere kostenrelevante endpoints
 

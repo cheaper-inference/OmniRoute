@@ -10,6 +10,8 @@ OmniRoute ma trzy odrębne, ale powiązane ze sobą mechanizmy odporności. Każ
 
 > Źródło: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Pierwszeństwo środowiska i panelu dla przełączników odporności.** Opcjonalne przełączniki inicjowane ze środowiska — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — dostarczają tylko _wartość domyślną_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Wartość logiczna utrwalona w `resilienceSettings` (Panel → **Ustawienia → Odporność** / `PATCH /api/resilience`, zapisywana w `key_value`) ma pierwszeństwo: normalizacja (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) zachowuje istniejącą zapisaną wartość logiczną. Ustawienie zmiennej środowiskowej na `true`, gdy panel zapisał już `false`, niczego nie zmienia — zmień przełącznik w **Ustawienia → Odporność** albo usuń zapisane pole.
+
 ## 1. Circuit Breaker dostawcy
 
 **Zakres:** cały dostawca (np. `glm`, `openai`, `anthropic`).
@@ -94,6 +96,8 @@ Test regresyjny: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - Klucz API bazowy: 3 s
 - Klucz API 429: preferuje nagłówki `Retry-After`/reset z serwera nadrzędnego lub możliwy do sparsowania tekst resetu
 - Wycofywanie: `baseCooldownMs * 2 ** failureIndex`
+
+**Opóźnienie ponowienia dla dostawcy.** Strona szczegółów dostawcy ma listę **Opóźnienie ponowienia** (Auto, od 15s do 1h). Zapisuje `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 przez `PATCH /api/resilience`). Gdy błąd limitu żądań nie zawiera wskazówki ponowienia z upstreamu, ta wartość zastępuje skalowane opóźnienie dostawcy i zeruje `backoffLevel` do 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Kolejność od najwyższego priorytetu: wskazówka upstreamu, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` połączenia, opóźnienie dostawcy, zmienna `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, skalowane opóźnienie. Auto usuwa pole. Zmiana dotyczy wyłącznie przyczyny limitu żądań, nigdy stanów końcowych.
 
 **Ochrona przed efektem thundering herd:** zapobiega nadmiernemu wydłużaniu wyciszenia lub podwójnemu zwiększaniu `backoffLevel` przez równoczesne błędy.
 
@@ -513,7 +517,7 @@ przerwać. Liczy delty tekstowe ze zdarzeń wyjściowych Chat Completions i Resp
 (konserwatywny zastępczy pomiar bajtów UTF-8), ignoruje zdarzenia zawierające wyłącznie
 dane o zużyciu oraz zdarzenia puste i wstrzymuje ocenę, gdy w toku są zdarzenia wywołania
 narzędzi lub rozumowania. Jest domyślnie wyłączony i można go włączyć za pomocą
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; okno, rozgrzewka, minimalne tempo i minimalny
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ta zmienna środowiskowa ustala tylko wartość domyślną — zapisana wartość logiczna `resilienceSettings.streamRecovery.throughputWatchdog.enabled` ma pierwszeństwo; zobacz uwagę o pierwszeństwie środowiska i panelu na początku przewodnika); okno, rozgrzewka, minimalne tempo i minimalny
 mierzalny wynik są ograniczane przez standardową warstwę normalizacji ustawień odporności.
 
 Po włączeniu przerwanie przez watchdoga jest stosowane wyłącznie do aktywnej próby

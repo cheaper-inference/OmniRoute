@@ -868,7 +868,7 @@ Obecné pole `time_range` se nyní předává oběma poskytovatelům: Exa obdrž
 razítko ISO) a Tavily obdrží `start_date` (`YYYY-MM-DD`). Explicitní datum v `provider_options`
 má přednost před namapovanou hodnotou.
 
-Výsledky Exa uchovávají `id`, `highlight_scores`, `summary`, `subpages`, `entities` a `extras` v
+Výsledky Exa uchovávají `id`, `highlights` (všechny zvýrazněné úryvky, nejen první použitý jako `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` a `extras` v
 `provider_raw`. Výsledky Tavily uchovávají `images` a `favicon`.
 
 Linkup: Náklady na vyhledávání propojení jsou zaznamenány ve výši 0,005 USD za `depth` `fast` a `standard` a 0,05 USD za `deep` ( [cena za propojení](https://docs.linkup.so/pages/documentation/development/pricing) ), ať už `depth` pochází ze `provider_options` nebo z nastavení připojení.
@@ -1279,11 +1279,29 @@ druhá fáze může i nadále vytvářet požadované viditelné uvažování ja
 
 | Koncový bod           | Metoda   | Popis                                     |
 | --------------------- | -------- | ----------------------------------------- |
+| `/api/models`         | GET/PUT  | Seznam modelů / aktualizace aliasu        |
 | `/api/models/alias`   | GET/POST | Aliasy modelů                             |
 | `/api/models/catalog` | GET      | Všechny modely podle poskytovatele a typu |
 | `/api/combos*`        | Různé    | Správa kombinací                          |
 | `/api/keys*`          | Různé    | Správa klíčů API                          |
 | `/api/pricing`        | GET      | Ceny modelů                               |
+
+#### Původ limitů modelu
+
+`GET /api/models?withLimits=1` (také `true`; `0`/`false` nebo vynechání parametru ponechá výchozí odpověď beze změny) přidá do každého řádku modelu `contextWindow`, `maxInputTokens`, `maxOutputTokens` a objekt `capsSource`. `capsSource` označuje pravidlo, které poskytlo daný limit, takže lze dohledat původ nečekané hodnoty, například 128k u modelu s 1M. Vyhodnocené hodnoty jsou stejné jako při směrování; přepínač pouze přidává pole a nikdy hodnotu nemění. Jakákoli jiná hodnota `withLimits` je odmítnuta s `400`.
+
+| `capsSource` hodnota                         | Původ                                                                       |
+| -------------------------------------------- | --------------------------------------------------------------------------- |
+| `override:context`                           | Trvale uložené přepsání kontextového okna (`model_context_overrides`)       |
+| `override:max_input` / `override:max_output` | Trvale uložené přepsání schopností `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Statická autoritativní tabulka kontextových oken                            |
+| `synced:<provider>/<model>`                  | Řádek schopností synchronizovaný z models.dev                               |
+| `registry:<provider>/<model>`                | Položka registru poskytovatelů                                              |
+| `spec:<model>`                               | Statická specifikace modelu                                                 |
+| `effort-base:` předpona                      | Řádek převzatý ze základního modelu varianty s příponou úsilí               |
+| `none`                                       | Žádný zdroj limit nedeklaruje (hodnota je `null`)                           |
+
+Implementace: `getResolvedModelCapabilitiesWithLimitSources()` v `src/lib/modelCapabilities.ts` a řetězce priorit v `src/lib/modelCapabilityLimits.ts`.
 
 ### Využití a analytika
 

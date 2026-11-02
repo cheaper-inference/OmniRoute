@@ -41,23 +41,31 @@ Koska luku on arvio:
 
 ### Hinnoittelulähde
 
-Kustannukset perustuvat hinnoittelutaulukkoon, joka ratkaistaan seuraavassa
-etusijajärjestyksessä ([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Kustannukset perustuvat tiedoston [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) yhdistettyyn hintataulukkoon tässä etusijajärjestyksessä (**korkein ensin**):
 
-1. **Käyttäjän ohitukset** — hinnat, jotka määrität hallintapaneelissa / `PATCH /api/pricing`-rajapinnan kautta.
-2. **Synkronoitu ulkoinen hinnoittelu** — noudetaan LiteLLM:n julkisesta
-   `model_prices_and_context_window.json`-tiedostosta, kun synkronointi on käytössä (tallennetaan erilliseen
-   `pricing_synced`-nimiavaruuteen, joten se ei koskaan korvaa omia ohituksiasi).
-3. **Kiinteästi määritetyt oletusarvot** — toimitetaan OmniRouten mukana.
+1. **Käyttäjän ohitukset** — hallintapaneelissa tai rajapinnalla `PATCH /api/pricing` asetetut hinnat (nimiavaruus `pricing`).
+2. **models.dev-synkronointi** — osoitteesta `https://models.dev/api.json` noudetut hinnat (nimiavaruus `models_dev_pricing`).
+3. **LiteLLM-synkronointi** — LiteLLM-palvelun julkisesta tiedostosta `model_prices_and_context_window.json` noudetut hinnat (nimiavaruus `pricing_synced`).
+4. **Koodiin sisältyvät oletusarvot** — hakemistossa [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) toimitetut hinnat.
 
-Ulkoisen hinnoittelun synkronointi on **valinnainen** ja oletusarvoisesti pois käytöstä. Olennaiset ympäristömuuttujat
-(katso [`.env.example`](../../.env.example)):
+Samalla palveluntarjoaja-/malliparilla korkeamman etusijan kerrokset korvaavat alempien kerrosten vastaavat kentät; ylemmästä kerroksesta puuttuvat kentät voivat yhä tulla alemmasta. Järjestys pysyy kiinteänä myös molempien riippumattomien synkronointitöiden suoriutuessa yhtä aikaa. `GET /api/pricing?includeSources=1` palauttaa `pricing`- ja `sourceMap`-oliot. Jälkimmäisen mallikohtaiset tunnisteet (`user`, `modelsDev`, `litellm`, `default`) ilmaisevat mallin sisältävän korkeimman etusijan kerroksen.
 
-| Ympäristömuuttuja       | Oletus    | Tarkoitus                                                                      |
-| ----------------------- | --------- | ------------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`   | Ota LiteLLM-hinnoittelun taustasynkronointi käyttöön käynnistyksen yhteydessä. |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Synkronointiväli **sekunteina** (oletuksena päivittäin).                       |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Pilkuilla eroteltu lähdeluettelo (vain `litellm` on tällä hetkellä tuettu).    |
+**LiteLLM-synkronointi** on otettava erikseen käyttöön, ja se on oletusarvoisesti pois käytöstä. Sen ympäristömuuttujat (katso [`.env.example`](../../.env.example)) ovat:
+
+| Ympäristömuuttuja       | Oletus    | Tarkoitus                                                                              |
+| ----------------------- | --------- | -------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Ottaa LiteLLM-hintojen synkronoinnin käyttöön taustalla.                               |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Synkronointiväli **sekunteina** (oletuksena päivittäin).                               |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Lähteiden valinta vain tälle synkronoinnille; tällä hetkellä vain `litellm` on tuettu. |
+
+**models.dev-synkronointi** on erillinen LiteLLM-synkronoinnista ja myös oletusarvoisesti pois käytöstä. Ota se käyttöön Asetuksissa (models.dev-synkronointi) tai näillä muuttujilla:
+
+| Ympäristömuuttuja          | Oletusarvo      | Tarkoitus                                                                                                                                                      |
+| -------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(ei asetettu)_ | Asettamattomana noudattaa Asetusten valitsinta; `1/true/on/yes` pakottaa käyttöön ja `0/false/off/no` pois käytöstä, vaikka Asetukset ottaisivat sen käyttöön. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | models.dev-synkronoinnin oletusväli sekunteina (päivittäin).                                                                                                   |
+
+`PRICING_SYNC_SOURCES` **ei** ota models.dev-synkronointia käyttöön; se ohjaa vain LiteLLM-synkronointia. Käyttäjän ohituksen poistaminen ei tyhjennä kumpaakaan synkronoitua nimiavaruutta, vaan seuraava saatavilla oleva hintakerros tulee voimaan. Tarkista hinnoittelemattoman mallin kohdalla molemmat synkronointiasetukset ja `sourceMap` ennen manuaalisen ohituksen lisäämistä.
 
 ### Kustannuskaava
 
@@ -174,16 +182,16 @@ kautta), ellei toisin mainita.
 
 ### Hinnoittelu
 
-| Menetelmä | Päätepiste              | Tarkoitus                                                                                                                                             |
-| --------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`     | `/api/pricing`          | Nykyinen yhdistetty hinnoittelu (käyttäjän määrittämät + synkronoidut + oletusarvot). Parametri `?includeSources=1` näyttää kunkin merkinnän lähteen. |
-| `PATCH`   | `/api/pricing`          | Ohita hinnoittelu rakenteelle `{ provider: { model: { input, output, cached, … } } }`.                                                                |
-| `DELETE`  | `/api/pricing`          | Palauta oletushinnoittelu (valinnaisesti rajattuna parametrilla `?provider=&model=`).                                                                 |
-| `GET`     | `/api/pricing/defaults` | Näytä oletusarvoiset varahinnat miljoonaa yksikköä kohti.                                                                                             |
-| `GET`     | `/api/pricing/models`   | Mallin mukaan avainnettu hinnoittelu.                                                                                                                 |
-| `POST`    | `/api/pricing/sync`     | Käynnistä manuaalinen synkronointi ulkoisista lähteistä (LiteLLM).                                                                                    |
-| `GET`     | `/api/pricing/sync`     | Nykyinen synkronoinnin tila.                                                                                                                          |
-| `DELETE`  | `/api/pricing/sync`     | Tyhjennä kaikki synkronoidut hinnoittelutiedot.                                                                                                       |
+| Menetelmä | Päätepiste              | Tarkoitus                                                                                                                                                                    |
+| --------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`     | `/api/pricing`          | Neljän kerroksen yhdistetty hinnoittelu (käyttäjä, models.dev, LiteLLM, oletusarvot). `?includeSources=1` palauttaa `pricing` + `sourceMap`.                                 |
+| `PATCH`   | `/api/pricing`          | Ohita hinnoittelu rakenteelle `{ provider: { model: { input, output, cached, … } } }`.                                                                                       |
+| `DELETE`  | `/api/pricing`          | Poistaa käyttäjän hintaohitukset (valinnaisesti rajattuna parametrilla `?provider=&model=`); synkronoidut hinnat ja sisäänrakennetut oletusarvot säilyvät varavaihtoehtoina. |
+| `GET`     | `/api/pricing/defaults` | Näytä oletusarvoiset varahinnat miljoonaa yksikköä kohti.                                                                                                                    |
+| `GET`     | `/api/pricing/models`   | Mallin mukaan avainnettu hinnoittelu.                                                                                                                                        |
+| `POST`    | `/api/pricing/sync`     | Käynnistä manuaalinen synkronointi ulkoisista lähteistä (LiteLLM).                                                                                                           |
+| `GET`     | `/api/pricing/sync`     | Nykyinen synkronoinnin tila.                                                                                                                                                 |
+| `DELETE`  | `/api/pricing/sync`     | Tyhjentää vain LiteLLM-synkronoidut hinnat (`pricing_synced`); models.dev-tiedot ovat erilliset.                                                                             |
 
 ### Muut kustannuksiin liittyvät päätepisteet
 

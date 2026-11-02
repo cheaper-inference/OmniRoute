@@ -10,6 +10,8 @@
 
 > מקור: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **קדימות הסביבה ולוח הבקרה במתגי העמידות.** מתגי העמידות המחייבים הפעלה מפורשת ומאותחלים מהסביבה — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — מספקים רק את _ברירת המחדל_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). ערך בוליאני שנשמר באופן קבוע ב־`resilienceSettings` (לוח הבקרה → **הגדרות → עמידות** / `PATCH /api/resilience`, מאוחסן ב־`key_value`) גובר על ערך הסביבה: הנרמול (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) משמר ערך בוליאני שמור בכל פעם שהוא קיים. לכן הגדרת משתנה סביבה כזה ל־`true` בפריסה שבה לוח הבקרה כבר שמר `false` אינה משנה דבר. שנו את המתג ב־**הגדרות → עמידות**, או נקו את השדה השמור.
+
 ## 1. מפסק מעגל ברמת ספק (Provider Circuit Breaker)
 
 **היקף:** ספק שלם (למשל, `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@
 - בסיס מפתח API: 3 שניות
 - 429 במפתח API: מעדיף כותרות `Retry-After`/reset מה-upstream או טקסט reset הניתן לניתוח
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**השהיית ניסיון חוזר לפי ספק.** דף פרטי הספק כולל בורר **השהיית ניסיון חוזר** (אוטומטי, מ־15s עד 1h). הוא שומר את `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 דרך `PATCH /api/resilience`). כאשר שגיאת הגבלת קצב אינה כוללת הנחיית ניסיון חוזר מהשירות במעלה הזרם, ערך זה מחליף את זמן ההמתנה ההדרגתי המותאם של הספק ומאפס את `backoffLevel` ל־0 (`open-sse/services/rotationConfig.ts::overrideFor`). עבור שגיאת הגבלת קצב, סדר הקדימות מהגבוה לנמוך הוא: הנחיה מהשירות במעלה הזרם, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` של החיבור, השהיית הספק, משתנה הסביבה `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` וזמן ההמתנה ההדרגתי המותאם. אוטומטי מסיר את השדה. ההשפעה מוגבלת לסיבת הגבלת הקצב, ולעולם אינה חלה על מצבים סופיים.
 
 **מנגנון הגנה מפני אפקט העדר הרועם (thundering herd):** מונע מכשלים בו-זמניים מלהאריך את הצינון יתר על המידה או מלהעלות את `backoffLevel` פעמיים.
 
@@ -473,7 +477,7 @@ upstream שעדיין שולח chunks אך מפיק פלט assistant בקצב ה
 שהוא יכול לבטל. הוא סופר דלתאות טקסט מאירועי פלט של Chat Completions ו-Responses API
 (פרוקסי שמרני של בתים ב-UTF-8), מתעלם מאירועי usage בלבד ומאירועים ריקים,
 ומשעה את השיפוט בזמן שאירועי tool-call או reasoning נמצאים באוויר. הוא מושבת
-כברירת מחדל וניתן להפעלה עם `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; החלון,
+כברירת מחדל וניתן להפעלה עם `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ערך הסביבה הזה רק קובע את ברירת המחדל — ערך בוליאני שמור ב־`resilienceSettings.streamRecovery.throughputWatchdog.enabled` גובר עליו; ראו את ההערה על קדימות הסביבה ולוח הבקרה בתחילת המדריך); החלון,
 החימום, הקצב המינימלי והפלט המינימלי הניתן למדידה מוגבלים על ידי שכבת
 נרמול הגדרות ה-resilience הרגילה.
 

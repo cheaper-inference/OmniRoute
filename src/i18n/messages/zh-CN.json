@@ -4185,7 +4185,20 @@
     "duplicateAutoComboSnapshotMsg": "这将把与此模板匹配的当前连接提供者/模型快照到可编辑的组合中。",
     "duplicateAutoComboFailedPrefix": "复制自动组合失败：",
     "duplicateAutoComboUnknownError": "未知错误",
-    "duplicateAutoComboTitle": "从{name}创建静态组合"
+    "duplicateAutoComboTitle": "从{name}创建静态组合",
+    "exportCombos": "导出",
+    "exportCombosFailed": "导出组合失败",
+    "importCombos": "导入",
+    "importCombosTitle": "导入组合",
+    "importCombosInvalidFile": "此文件不是有效的组合导出文件。",
+    "importCombosSummary": "文件中的组合：{total}（新增 {fresh}，名称已存在 {conflicting}）。",
+    "importCombosMergeHint": "合并会保留所有现有组合，并跳过名称已存在的组合。连接和凭据永远不会被导入。",
+    "importCombosReplaceHint": "全部替换会删除你现有的组合（{current}），并改为导入该文件。此操作无法撤销。",
+    "importCombosMerge": "合并",
+    "importCombosReplace": "全部替换",
+    "importCombosDone": "已导入组合：{created}。已跳过：{skipped}。",
+    "importCombosFailed": "导入组合失败",
+    "importCombosWarnings": "已导入，但有警告"
   },
   "costs": {
     "title": "成本",
@@ -7050,7 +7063,12 @@
     "chatgptConnectorLabel": "ChatGPT 自定义连接器",
     "doctorChecking": "正在检查状态…",
     "doctorCheck": "检查诊断状态",
-    "fallbackRetryBackendTitle": "回退重试后端"
+    "fallbackRetryBackendTitle": "回退重试后端",
+    "retryDelayTitle": "重试延迟",
+    "retryDelayDesc": "当提供者未告知何时重试时，连接在速率限制错误后休眠的时长。自动模式使用内置退避；提供者发送的重置时间始终优先。",
+    "retryDelayAuto": "自动",
+    "retryDelaySaved": "重试延迟已保存",
+    "retryDelayUpdateFailed": "更新重试延迟失败"
   },
   "settings": {
     "title": "设置",

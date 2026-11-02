@@ -41,23 +41,31 @@ Keďže toto číslo je odhad:
 
 ### Zdroj cien
 
-Náklady pochádzajú z cenovej tabuľky určenej podľa nasledujúceho poradia priorít
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Náklady vychádzajú zo zlúčenej cenovej tabuľky v [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), v tomto poradí (**najvyššia priorita prvá**):
 
-1. **Používateľské prepísania** — ceny, ktoré nastavíte na ovládacom paneli alebo prostredníctvom `PATCH /api/pricing`.
-2. **Synchronizované externé ceny** — načítané z verejného súboru
-   `model_prices_and_context_window.json` služby LiteLLM, keď je synchronizácia povolená (ukladajú sa v samostatnom
-   mennom priestore `pricing_synced`, takže nikdy neprepíšu vaše vlastné nastavenia).
-3. **Predvolené hodnoty zapísané v kóde** — dodávané s OmniRoute.
+1. **Používateľské prepísania** — ceny z panela alebo `PATCH /api/pricing` (menný priestor `pricing`).
+2. **Synchronizácia models.dev** — ceny z `https://models.dev/api.json` (menný priestor `models_dev_pricing`).
+3. **Synchronizácia LiteLLM** — ceny z verejného súboru `model_prices_and_context_window.json` projektu LiteLLM (menný priestor `pricing_synced`).
+4. **Zabudované predvolené hodnoty** — sadzby dodávané v [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Synchronizácia externých cien je **voliteľná** a predvolene vypnutá. Súvisiace premenné prostredia
-(pozri [`.env.example`](../../.env.example)):
+Pre rovnakého poskytovateľa/model vyššie vrstvy prepíšu zodpovedajúce polia nižších; chýbajúce polia môžu stále pochádzať z nižšej vrstvy. Poradie zostáva pevné, aj keď obe nezávislé synchronizácie bežia súčasne. `GET /api/pricing?includeSources=1` vráti `pricing` a `sourceMap`; označenia modelov (`user`, `modelsDev`, `litellm`, `default`) identifikujú vrstvu s najvyššou prioritou obsahujúcu daný model.
 
-| Premenná prostredia     | Predvolené | Účel                                                                    |
-| ----------------------- | ---------- | ----------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`    | Povolenie synchronizácie cien LiteLLM na pozadí pri spustení.           |
-| `PRICING_SYNC_INTERVAL` | `86400`    | Interval synchronizácie v **sekundách** (predvolene raz denne).         |
-| `PRICING_SYNC_SOURCES`  | `litellm`  | Zoznam zdrojov oddelených čiarkami (dnes je podporovaný iba `litellm`). |
+**Synchronizácia LiteLLM** sa zapína voliteľne a predvolene je vypnutá. Jej premenné prostredia (pozrite [`.env.example`](../../.env.example)) sú:
+
+| Premenná prostredia     | Predvolené | Účel                                                                                 |
+| ----------------------- | ---------- | ------------------------------------------------------------------------------------ |
+| `PRICING_SYNC_ENABLED`  | `false`    | Zapne synchronizáciu cien LiteLLM na pozadí.                                         |
+| `PRICING_SYNC_INTERVAL` | `86400`    | Interval synchronizácie v **sekundách** (predvolene raz denne).                      |
+| `PRICING_SYNC_SOURCES`  | `litellm`  | Výber zdroja platí iba pre túto synchronizáciu; aktuálne sa podporuje iba `litellm`. |
+
+**Synchronizácia models.dev** je oddelená od synchronizácie LiteLLM a tiež predvolene vypnutá. Zapnite ju v Nastaveniach (synchronizácia models.dev) alebo použite tieto premenné:
+
+| Premenná prostredia        | Predvolené      | Účel                                                                                                                                       |
+| -------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nenastavená)_ | Ak nie je nastavená, platí prepínač Nastavení; `1/true/on/yes` vynúti zapnutie a `0/false/off/no` vypnutie, aj keď ju Nastavenia zapínajú. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Predvolený interval synchronizácie models.dev v sekundách (denne).                                                                         |
+
+`PRICING_SYNC_SOURCES` **nezapína** models.dev; riadi iba synchronizáciu LiteLLM. Vymazanie používateľského prepísania nevymaže žiadny synchronizovaný menný priestor; začne platiť ďalšia dostupná cenová vrstva. Pri modeli bez ceny skontrolujte obe nastavenia synchronizácie a `sourceMap` pred pridaním ručného prepísania.
 
 ### Vzorec na výpočet nákladov
 
@@ -171,16 +179,16 @@ nie je uvedené inak.
 
 ### Ceny
 
-| Metóda   | Koncový bod             | Účel                                                                                                                              |
-| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Aktuálne zlúčené ceny (používateľské + synchronizované + predvolené). Pomocou `?includeSources=1` zobrazíte zdroj každej položky. |
-| `PATCH`  | `/api/pricing`          | Prepísanie cien pre `{ provider: { model: { input, output, cached, … } } }`.                                                      |
-| `DELETE` | `/api/pricing`          | Obnovenie predvolených cien (voliteľne obmedzené pomocou `?provider=&model=`).                                                    |
-| `GET`    | `/api/pricing/defaults` | Zobrazenie predvolených záložných sadzieb za 1 milión.                                                                            |
-| `GET`    | `/api/pricing/models`   | Ceny podľa modelu.                                                                                                                |
-| `POST`   | `/api/pricing/sync`     | Spustenie manuálnej synchronizácie z externých zdrojov (LiteLLM).                                                                 |
-| `GET`    | `/api/pricing/sync`     | Aktuálny stav synchronizácie.                                                                                                     |
-| `DELETE` | `/api/pricing/sync`     | Vymazanie všetkých synchronizovaných cenových údajov.                                                                             |
+| Metóda   | Koncový bod             | Účel                                                                                                                                                                   |
+| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Zlúčené ceny štyroch vrstiev (používateľ, models.dev, LiteLLM, predvolené). `?includeSources=1` vráti `pricing` + `sourceMap`.                                         |
+| `PATCH`  | `/api/pricing`          | Prepísanie cien pre `{ provider: { model: { input, output, cached, … } } }`.                                                                                           |
+| `DELETE` | `/api/pricing`          | Odstráni používateľské prepísania cien (voliteľne obmedzené cez `?provider=&model=`); synchronizované sadzby a zabudované predvolené ceny zostávajú záložnými zdrojmi. |
+| `GET`    | `/api/pricing/defaults` | Zobrazenie predvolených záložných sadzieb za 1 milión.                                                                                                                 |
+| `GET`    | `/api/pricing/models`   | Ceny podľa modelu.                                                                                                                                                     |
+| `POST`   | `/api/pricing/sync`     | Spustenie manuálnej synchronizácie z externých zdrojov (LiteLLM).                                                                                                      |
+| `GET`    | `/api/pricing/sync`     | Aktuálny stav synchronizácie.                                                                                                                                          |
+| `DELETE` | `/api/pricing/sync`     | Vymaže iba ceny synchronizované cez LiteLLM (`pricing_synced`); údaje models.dev sú oddelené.                                                                          |
 
 ### Ďalšie koncové body súvisiace s nákladmi
 

@@ -40,23 +40,31 @@ Oleh sebab angka tersebut ialah anggaran:
 
 ### Sumber harga
 
-Kos diperoleh daripada jadual harga yang ditentukan mengikut tertib keutamaan ini
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Kos datang daripada jadual harga gabungan dalam [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), mengikut susunan keutamaan ini (**yang tertinggi dahulu**):
 
-1. **Penggantian pengguna** — harga yang anda tetapkan dalam papan pemuka / melalui `PATCH /api/pricing`.
-2. **Harga luaran yang disegerakkan** — diambil daripada
-   `model_prices_and_context_window.json` awam LiteLLM apabila penyegerakan didayakan (disimpan dalam ruang nama
-   `pricing_synced` yang berasingan supaya ia tidak menimpa penggantian anda).
-3. **Nilai lalai berkod keras** — disertakan bersama OmniRoute.
+1. **Penggantian pengguna** — harga yang ditetapkan melalui papan pemuka atau `PATCH /api/pricing` (ruang nama `pricing`).
+2. **Penyegerakan models.dev** — harga yang diambil daripada `https://models.dev/api.json` (ruang nama `models_dev_pricing`).
+3. **Penyegerakan LiteLLM** — harga yang diambil daripada fail awam `model_prices_and_context_window.json` milik LiteLLM (ruang nama `pricing_synced`).
+4. **Nilai lalai dalam kod** — kadar yang disertakan dalam [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Penyegerakan harga luaran adalah **ikut serta**, dan dilumpuhkan secara lalai. Pemboleh ubah persekitaran yang berkaitan
-(lihat [`.env.example`](../../.env.example)):
+Bagi penyedia/model yang sama, nilai daripada lapisan berkeutamaan lebih tinggi menulis ganti medan yang sepadan dalam lapisan lebih rendah; medan yang tiada pada lapisan atas masih boleh datang daripada lapisan bawah. Susunan ini kekal walaupun kedua-dua tugas penyegerakan bebas berjalan serentak. `GET /api/pricing?includeSources=1` mengembalikan `pricing` dan `sourceMap`; label bagi setiap model (`user`, `modelsDev`, `litellm`, `default`) mengenal pasti lapisan berkeutamaan tertinggi yang mengandungi model itu.
 
-| Pemboleh ubah persekitaran | Lalai     | Tujuan                                                                   |
-| -------------------------- | --------- | ------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`     | `false`   | Dayakan penyegerakan harga LiteLLM latar belakang ketika permulaan.      |
-| `PRICING_SYNC_INTERVAL`    | `86400`   | Selang penyegerakan dalam **saat** (lalai setiap hari).                  |
-| `PRICING_SYNC_SOURCES`     | `litellm` | Senarai sumber dipisahkan koma (hanya `litellm` disokong pada masa ini). |
+**Penyegerakan LiteLLM** ialah pilihan dan dinyahaktifkan secara lalai. Pemboleh ubah persekitarannya (lihat [`.env.example`](../../.env.example)) ialah:
+
+| Pemboleh ubah persekitaran | Lalai     | Tujuan                                                                                  |
+| -------------------------- | --------- | --------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`     | `false`   | Aktifkan penyegerakan harga LiteLLM di latar belakang.                                  |
+| `PRICING_SYNC_INTERVAL`    | `86400`   | Selang penyegerakan dalam **saat** (lalai setiap hari).                                 |
+| `PRICING_SYNC_SOURCES`     | `litellm` | Pemilihan sumber untuk penyegerakan ini sahaja; buat masa ini hanya `litellm` disokong. |
+
+**Penyegerakan models.dev** berasingan daripada penyegerakan LiteLLM dan turut dinyahaktifkan secara lalai. Aktifkannya dalam Tetapan (penyegerakan models.dev) atau gunakan pemboleh ubah berikut:
+
+| Pemboleh ubah persekitaran | Lalai                | Tujuan                                                                                                                                                             |
+| -------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `MODELS_DEV_SYNC_ENABLED`  | _(tidak ditetapkan)_ | Jika tidak ditetapkan, ia mengikut suis Tetapan; `1/true/on/yes` memaksa pengaktifan dan `0/false/off/no` memaksa penyahaktifan, walaupun Tetapan mengaktifkannya. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`              | Selang lalai penyegerakan models.dev dalam saat, iaitu setiap hari.                                                                                                |
+
+`PRICING_SYNC_SOURCES` **tidak** mengaktifkan models.dev; ia hanya mengawal penyegerakan LiteLLM. Memadam penggantian pengguna tidak mengosongkan mana-mana ruang nama yang disegerakkan; lapisan harga tersedia yang seterusnya mula berkuat kuasa. Untuk model tanpa harga, semak kedua-dua tetapan penyegerakan dan `sourceMap` sebelum menambah penggantian manual.
 
 ### Formula kos
 
@@ -170,16 +178,16 @@ dinyatakan sebaliknya.
 
 ### Penetapan Harga
 
-| Kaedah   | Titik akhir             | Tujuan                                                                                                                          |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Penetapan harga tergabung semasa (pengguna + disegerakkan + lalai). `?includeSources=1` untuk melihat sumber bagi setiap entri. |
-| `PATCH`  | `/api/pricing`          | Ubah ganti penetapan harga untuk `{ provider: { model: { input, output, cached, … } } }`.                                       |
-| `DELETE` | `/api/pricing`          | Tetapkan semula penetapan harga kepada lalai (boleh diskopkan dengan `?provider=&model=`).                                      |
-| `GET`    | `/api/pricing/defaults` | Tunjukkan kadar sandaran lalai bagi setiap 1J.                                                                                  |
-| `GET`    | `/api/pricing/models`   | Penetapan harga yang dikunci mengikut model.                                                                                    |
-| `POST`   | `/api/pricing/sync`     | Cetuskan penyegerakan manual daripada sumber luaran (LiteLLM).                                                                  |
-| `GET`    | `/api/pricing/sync`     | Status penyegerakan semasa.                                                                                                     |
-| `DELETE` | `/api/pricing/sync`     | Kosongkan semua data penetapan harga yang disegerakkan.                                                                         |
+| Kaedah   | Titik akhir             | Tujuan                                                                                                                                                            |
+| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Harga gabungan empat lapisan (pengguna, models.dev, LiteLLM, lalai). `?includeSources=1` mengembalikan `pricing` + `sourceMap`.                                   |
+| `PATCH`  | `/api/pricing`          | Ubah ganti penetapan harga untuk `{ provider: { model: { input, output, cached, … } } }`.                                                                         |
+| `DELETE` | `/api/pricing`          | Buang penggantian harga pengguna, dengan skop pilihan melalui `?provider=&model=`; kadar yang disegerakkan atau nilai lalai terbina dalam kekal sebagai sandaran. |
+| `GET`    | `/api/pricing/defaults` | Tunjukkan kadar sandaran lalai bagi setiap 1J.                                                                                                                    |
+| `GET`    | `/api/pricing/models`   | Penetapan harga yang dikunci mengikut model.                                                                                                                      |
+| `POST`   | `/api/pricing/sync`     | Cetuskan penyegerakan manual daripada sumber luaran (LiteLLM).                                                                                                    |
+| `GET`    | `/api/pricing/sync`     | Status penyegerakan semasa.                                                                                                                                       |
+| `DELETE` | `/api/pricing/sync`     | Kosongkan harga yang disegerakkan oleh LiteLLM sahaja (`pricing_synced`); data models.dev adalah berasingan.                                                      |
 
 ### Titik akhir lain yang berkaitan dengan kos
 

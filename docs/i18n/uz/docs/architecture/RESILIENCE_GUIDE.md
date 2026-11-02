@@ -10,6 +10,8 @@ OmniRoute uchta alohida, lekin bir-biri bilan bog'liq chidamlilik mexanizmiga eg
 
 > Manba: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Bardoshlilik tugmalarida muhit va panel ustuvorligi.** Muhitdan boshlang‘ich qiymat oladigan ixtiyoriy tugmalar — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — faqat _standart qiymatni_ beradi (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). `resilienceSettings` ichida doimiy saqlangan mantiqiy qiymat (Panel → **Sozlamalar → Bardoshlilik** / `PATCH /api/resilience`, `key_value` ichida saqlanadi) muhit qiymatidan ustun: normallashtirish (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) mavjud saqlangan mantiqiy qiymatni saqlab qoladi. Panel avval `false` saqlagan bo‘lsa, muhit o‘zgaruvchisini `true` qilish hech narsani o‘zgartirmaydi — **Sozlamalar → Bardoshlilik** tugmasini o‘zgartiring yoki saqlangan maydonni tozalang.
+
 ## 1. Provayder avtomatik uzgichi (Circuit Breaker)
 
 **Qamrov:** butun provayder (masalan, `glm`, `openai`, `anthropic`).
@@ -87,6 +89,8 @@ Regressiyadan himoya qiluvchi test: `tests/unit/provider-cooldown-window-gate.te
 - API-kalit bazaviy: 3s
 - API-kalit 429: upstream `Retry-After`/reset sarlavhalari/tahlil qilinadigan reset matnini afzal ko'radi
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Har bir provayder uchun qayta urinish kechikishi.** Provayder tafsilotlari sahifasida **Qayta urinish kechikishi** tanlovi bor (Auto, 15s dan 1h gacha). U `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` ni saqlaydi (`PATCH /api/resilience` orqali 1–21600). Tezlik cheklovi xatosida yuqori xizmatning qayta urinish ko‘rsatmasi bo‘lmasa, qiymat provayderning o‘suvchi kutishini almashtiradi va `backoffLevel` ni 0 ga qaytaradi (`open-sse/services/rotationConfig.ts::overrideFor`). Ustuvorlik yuqoridan: yuqori xizmat ko‘rsatmasi, ulanishdagi `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, provayder kechikishi, `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` muhit o‘zgaruvchisi, o‘suvchi kutish. Auto maydonni olib tashlaydi. Bu faqat tezlik cheklovi sababiga ta’sir qiladi, yakuniy holatlarga hech qachon ta’sir qilmaydi.
 
 **Thundering herd'ga qarshi himoya:** bir vaqtning o'zida yuzaga kelgan xatolar sovush davrini haddan tashqari uzaytirib yubormasligini yoki `backoffLevel`ni ikki marta oshirib yubormasligini ta'minlaydi.
 
@@ -509,7 +513,7 @@ Har bir ulanish uchun rate-limit himoyasi provayder ulanishlaridagi `rateLimitPr
 
 Ixtiyoriy `resilienceSettings.streamRecovery.throughputWatchdog` nazoratchisi hali ham bo'laklar yuborayotgan, lekin sozlangan foydali-chiqish tezligidan past assistent chiqishi ishlab chiqarayotgan upstreamni aniqlaydi. U bo'sh turish timeout'idan ataylab farq qiladi: heartbeat'lar va metadata hech qaysi taymerni qayta o'rnatmaydi va taraqqiyot deb hisoblanmaydi. U shuningdek qattiq urinish deadline'idan (#9153) ham farq qiladi, chunki u chiqish sifatidan qat'i nazar mutlaq xavfsizlik chegarasi bo'lib qoladi.
 
-Kuzatuvchi abort qilishidan oldin isinish davri va undan so'ng to'liq siljiydigan oynani talab qiladi. U Chat Completions va Responses API chiqish hodisalaridagi matn deltalarini sanaydi (ehtiyotkor UTF-8 bayt proksisi), faqat usage'dan iborat va bo'sh hodisalarni e'tiborga olmaydi hamda tool-call yoki reasoning hodisalari jarayonda bo'lganda baho berishni to'xtatib turadi. U sukut bo'yicha o'chirilgan va `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` bilan yoqilishi mumkin; oyna, isinish davri, minimal tezlik va minimal o'lchanadigan chiqish odatiy resilience-settings normalizatsiya qatlami tomonidan chegaralanadi.
+Kuzatuvchi abort qilishidan oldin isinish davri va undan so'ng to'liq siljiydigan oynani talab qiladi. U Chat Completions va Responses API chiqish hodisalaridagi matn deltalarini sanaydi (ehtiyotkor UTF-8 bayt proksisi), faqat usage'dan iborat va bo'sh hodisalarni e'tiborga olmaydi hamda tool-call yoki reasoning hodisalari jarayonda bo'lganda baho berishni to'xtatib turadi. U sukut bo'yicha o'chirilgan va `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (bu muhit qiymati faqat standartni belgilaydi — saqlangan `resilienceSettings.streamRecovery.throughputWatchdog.enabled` mantiqiy qiymati ustun; qo‘llanma boshidagi muhit va panel ustuvorligi izohiga qarang) bilan yoqilishi mumkin; oyna, isinish davri, minimal tezlik va minimal o'lchanadigan chiqish odatiy resilience-settings normalizatsiya qatlami tomonidan chegaralanadi.
 
 Yoqilganda, kuzatuvchi aborti faqat faol upstream urinishiga nisbatan qo'llaniladi. Mijozga ko'rinadigan birorta baytdan oldin mavjud bir akkauntli erta tiklash yo'li urinishni qayta ochishi mumkin. Commitdan keyin oqim hech qachon ko'r-ko'rona qayta ijro etilmaydi; faqat mavjud xavfsiz oqim-ichida davom ettirish kontrakti suffiksni tikib qo'sha oladi. Yakunlash bir martalik bo'lib qoladi, shu bois usage hisobi va semaforni bo'shatish takrorlanmaydi.
 

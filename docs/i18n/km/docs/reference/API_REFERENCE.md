@@ -887,7 +887,7 @@ Tavily ក៏ទទួលយក `search_type: "finance"` (`topic: "finance"`) �
 ហើយ Tavily ទទួលបាន `start_date` (`YYYY-MM-DD`)។ កាលបរិច្ឆេទដែលបានបញ្ជាក់ជាក់លាក់នៅក្នុង `provider_options`
 នឹងជំនួសតម្លៃដែលបានផ្គូផ្គង។
 
-លទ្ធផល Exa រក្សាទុក `id`, `highlight_scores`, `summary`, `subpages`, `entities` និង `extras` នៅក្នុង
+លទ្ធផល Exa រក្សាទុក `id`, `highlights` (គ្រប់សម្រង់ដែលបានរំលេច មិនមែនតែសម្រង់ដំបូងដែលប្រើជា `snippet` ប៉ុណ្ណោះទេ), `highlight_scores`, `summary`, `subpages`, `entities` និង `extras` នៅក្នុង
 `provider_raw`។ លទ្ធផល Tavily រក្សាទុក `images` និង `favicon`។
 
 Linkup: តម្លៃនៃការស្វែងរកតំណភ្ជាប់ត្រូវបានកត់ត្រានៅ $0.005 សម្រាប់ `depth` `fast` និង `standard` និង $0.05 សម្រាប់ `deep` ( [តម្លៃភ្ជាប់](https://docs.linkup.so/pages/documentation/development/pricing) ) ថាតើ `depth` មកពី `provider_options` ឬការកំណត់នៃការតភ្ជាប់។
@@ -1295,13 +1295,31 @@ reasoning ដែលបានកំណត់យ៉ាងជាក់លាក់�
 
 ### Routing និងការកំណត់រចនាសម្ព័ន្ធ
 
-| Endpoint              | វិធីសាស្ត្រ | សេចក្ដីពិពណ៌នា                         |
-| --------------------- | ----------- | -------------------------------------- |
-| `/api/models/alias`   | GET/POST    | ឈ្មោះក្លែងក្លាយរបស់ម៉ូដែល              |
-| `/api/models/catalog` | GET         | ម៉ូដែលទាំងអស់តាមអ្នកផ្ដល់សេវា + ប្រភេទ |
-| `/api/combos*`        | ផ្សេងៗ      | ការគ្រប់គ្រង Combo                     |
-| `/api/keys*`          | ផ្សេងៗ      | ការគ្រប់គ្រង API key                   |
-| `/api/pricing`        | GET         | តម្លៃម៉ូដែល                            |
+| Endpoint              | វិធីសាស្ត្រ | សេចក្ដីពិពណ៌នា                             |
+| --------------------- | ----------- | ------------------------------------------ |
+| `/api/models`         | GET/PUT     | ធ្វើបច្ចុប្បន្នភាពបញ្ជីម៉ូដែល / ឈ្មោះជំនួស |
+| `/api/models/alias`   | GET/POST    | ឈ្មោះក្លែងក្លាយរបស់ម៉ូដែល                  |
+| `/api/models/catalog` | GET         | ម៉ូដែលទាំងអស់តាមអ្នកផ្ដល់សេវា + ប្រភេទ     |
+| `/api/combos*`        | ផ្សេងៗ      | ការគ្រប់គ្រង Combo                         |
+| `/api/keys*`          | ផ្សេងៗ      | ការគ្រប់គ្រង API key                       |
+| `/api/pricing`        | GET         | តម្លៃម៉ូដែល                                |
+
+#### ប្រភពនៃដែនកំណត់របស់ម៉ូដែល
+
+`GET /api/models?withLimits=1` បន្ថែម `contextWindow`, `maxInputTokens`, `maxOutputTokens` និងវត្ថុ `capsSource` ទៅក្នុងជួរនីមួយៗរបស់ម៉ូដែល។ `true` ក៏ត្រូវបានទទួលយកដែរ; ការប្រើ `0`/`false` ឬការមិនដាក់ប៉ារ៉ាម៉ែត្រនេះ ទុកមាតិកាចម្លើយលំនាំដើមឱ្យនៅដដែល។ `capsSource` បញ្ជាក់ឈ្មោះច្បាប់ដែលផ្តល់ដែនកំណត់នីមួយៗ ដូច្នេះអាចតាមរកប្រភពនៃដែនកំណត់ដែលមិនរំពឹងទុកបាន ដូចជា 128k លើម៉ូដែល 1M។ តម្លៃដែលបានកំណត់គឺជាតម្លៃដូចគ្នាដែលការកំណត់ផ្លូវប្រើ; ទង់នេះបន្ថែមតែវាល ហើយមិនដែលផ្លាស់ប្តូរតម្លៃឡើយ។ តម្លៃផ្សេងទៀតរបស់ `withLimits` ត្រូវបានបដិសេធដោយ `400`។
+
+| តម្លៃ `capsSource`                           | ប្រភពដើម                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `override:context`                           | តម្លៃជំនួសបង្អួចបរិបទដែលបានរក្សាទុក (`model_context_overrides`)            |
+| `override:max_input` / `override:max_output` | តម្លៃជំនួសសមត្ថភាព `max_input_tokens` / `max_output_tokens` ដែលបានរក្សាទុក |
+| `static-authoritative:<provider>/<model>`    | តារាងថេរដែលជាប្រភពយោងផ្លូវការសម្រាប់បង្អួចបរិបទ                            |
+| `synced:<provider>/<model>`                  | ជួរទិន្នន័យសមត្ថភាពដែលបានធ្វើសមកាលកម្មពី models.dev                        |
+| `registry:<provider>/<model>`                | ធាតុនៅក្នុងបញ្ជីចុះឈ្មោះរបស់អ្នកផ្តល់សេវា                                  |
+| `spec:<model>`                               | លក្ខណៈបច្ចេកទេសថេររបស់ម៉ូដែល                                               |
+| បុព្វបទ `effort-base:`                       | ជួរទិន្នន័យដែលយកពីម៉ូដែលមូលដ្ឋាននៃវ៉ារ្យ៉ង់ដែលមានបច្ច័យ effort             |
+| `none`                                       | គ្មានប្រភពណាប្រកាសដែនកំណត់នេះទេ (តម្លៃគឺ `null`)                           |
+
+ការអនុវត្ត៖ `getResolvedModelCapabilitiesWithLimitSources()` នៅក្នុង `src/lib/modelCapabilities.ts` និងលំដាប់អាទិភាពនៅក្នុង `src/lib/modelCapabilityLimits.ts`។
 
 ### ការប្រើប្រាស់ និងការវិភាគ
 

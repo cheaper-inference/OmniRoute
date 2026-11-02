@@ -882,7 +882,7 @@ Tavily `search_type: "finance"` (`topic: "finance"`) ਨੂੰ ਵੀ ਸਵੀ�
 ਟਾਈਮਸਟੈਂਪ) ਮਿਲਦਾ ਹੈ ਅਤੇ Tavily ਨੂੰ `start_date` (`YYYY-MM-DD`) ਮਿਲਦਾ ਹੈ। `provider_options` ਵਿੱਚ ਦਿੱਤੀ ਸਪਸ਼ਟ ਮਿਤੀ
 ਮੈਪ ਕੀਤੀ ਮਿਤੀ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦੀ ਹੈ।
 
-Exa ਦੇ ਨਤੀਜੇ `id`, `highlight_scores`, `summary`, `subpages`, `entities` ਅਤੇ `extras` ਨੂੰ
+Exa ਦੇ ਨਤੀਜੇ `id`, `highlights` (ਹਰੇਕ ਉਭਾਰਿਆ ਹੋਇਆ ਅੰਸ਼, ਸਿਰਫ਼ ਉਹ ਪਹਿਲਾ ਅੰਸ਼ ਨਹੀਂ ਜੋ `snippet` ਵਜੋਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ), `highlight_scores`, `summary`, `subpages`, `entities` ਅਤੇ `extras` ਨੂੰ
 `provider_raw` ਵਿੱਚ ਬਰਕਰਾਰ ਰੱਖਦੇ ਹਨ। Tavily ਦੇ ਨਤੀਜੇ `images` ਅਤੇ `favicon` ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦੇ ਹਨ।
 
 ਲਿੰਕਅੱਪ ਖੋਜ ਦੀ ਲਾਗਤ `depth` `fast` ਅਤੇ `standard` ਲਈ $0.005 ਅਤੇ `deep` ( [ਲਿੰਕਅੱਪ ਕੀਮਤ](https://docs.linkup.so/pages/documentation/development/pricing) ) ਲਈ $0.05 ਦਰਜ ਕੀਤੀ ਗਈ ਹੈ, ਭਾਵੇਂ `depth` `provider_options` ਜਾਂ ਕਨੈਕਸ਼ਨ ਦੀਆਂ ਸੈਟਿੰਗਾਂ ਤੋਂ ਆਉਂਦਾ ਹੈ।
@@ -1291,13 +1291,31 @@ Claude Code ਆਟੋ-ਮੋਡ ਕਲਾਸੀਫਾਇਰ ਬੇਨਤੀਆ�
 
 ### ਰੂਟਿੰਗ ਅਤੇ ਸੰਰਚਨਾ
 
-| ਐਂਡਪੌਇੰਟ              | ਵਿਧੀ     | ਵੇਰਵਾ                           |
-| --------------------- | -------- | ------------------------------- |
-| `/api/models/alias`   | GET/POST | ਮਾਡਲ ਉਪਨਾਮ                      |
-| `/api/models/catalog` | GET      | ਪ੍ਰਦਾਤਾ + ਕਿਸਮ ਅਨੁਸਾਰ ਸਾਰੇ ਮਾਡਲ |
-| `/api/combos*`        | ਵੱਖ-ਵੱਖ  | ਕੰਬੋ ਪ੍ਰਬੰਧਨ                    |
-| `/api/keys*`          | ਵੱਖ-ਵੱਖ  | API ਕੁੰਜੀ ਪ੍ਰਬੰਧਨ               |
-| `/api/pricing`        | GET      | ਮਾਡਲ ਕੀਮਤ-ਨਿਰਧਾਰਨ               |
+| ਐਂਡਪੌਇੰਟ              | ਵਿਧੀ     | ਵੇਰਵਾ                              |
+| --------------------- | -------- | ---------------------------------- |
+| `/api/models`         | GET/PUT  | ਮਾਡਲ ਸੂਚੀ / ਬਦਲਵੇਂ ਨਾਂ ਅੱਪਡੇਟ ਕਰਨਾ |
+| `/api/models/alias`   | GET/POST | ਮਾਡਲ ਉਪਨਾਮ                         |
+| `/api/models/catalog` | GET      | ਪ੍ਰਦਾਤਾ + ਕਿਸਮ ਅਨੁਸਾਰ ਸਾਰੇ ਮਾਡਲ    |
+| `/api/combos*`        | ਵੱਖ-ਵੱਖ  | ਕੰਬੋ ਪ੍ਰਬੰਧਨ                       |
+| `/api/keys*`          | ਵੱਖ-ਵੱਖ  | API ਕੁੰਜੀ ਪ੍ਰਬੰਧਨ                  |
+| `/api/pricing`        | GET      | ਮਾਡਲ ਕੀਮਤ-ਨਿਰਧਾਰਨ                  |
+
+#### ਮਾਡਲ ਦੀਆਂ ਹੱਦਾਂ ਦੇ ਸਰੋਤ
+
+`GET /api/models?withLimits=1` ਹਰ ਮਾਡਲ ਦੀ ਕਤਾਰ ਵਿੱਚ `contextWindow`, `maxInputTokens`, `maxOutputTokens` ਅਤੇ ਇੱਕ `capsSource` ਆਬਜੈਕਟ ਜੋੜਦਾ ਹੈ। `true` ਵੀ ਮਨਜ਼ੂਰ ਹੈ; `0`/`false` ਦੇਣ ਜਾਂ ਇਸ ਨੂੰ ਛੱਡਣ ਨਾਲ ਡਿਫ਼ਾਲਟ ਜਵਾਬ ਦੀ ਸਮੱਗਰੀ ਨਹੀਂ ਬਦਲਦੀ। `capsSource` ਦੱਸਦਾ ਹੈ ਕਿ ਹਰੇਕ ਹੱਦ ਕਿਸ ਨਿਯਮ ਤੋਂ ਮਿਲੀ ਹੈ, ਤਾਂ ਜੋ ਅਣਉਮੀਦੀ ਹੱਦ ਦਾ ਸਰੋਤ ਲੱਭਿਆ ਜਾ ਸਕੇ, ਮਿਸਾਲ ਵਜੋਂ 1M ਮਾਡਲ ਉੱਤੇ 128k। ਨਿਰਧਾਰਤ ਮੁੱਲ ਉਹੀ ਹਨ ਜੋ ਰਾਊਟਿੰਗ ਵਰਤਦੀ ਹੈ; ਇਹ ਫਲੈਗ ਸਿਰਫ਼ ਫੀਲਡ ਜੋੜਦਾ ਹੈ ਅਤੇ ਕਿਸੇ ਮੁੱਲ ਨੂੰ ਨਹੀਂ ਬਦਲਦਾ। `withLimits` ਦਾ ਕੋਈ ਵੀ ਹੋਰ ਮੁੱਲ `400` ਨਾਲ ਰੱਦ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+
+| `capsSource` ਦਾ ਮੁੱਲ                         | ਸਰੋਤ                                                                 |
+| -------------------------------------------- | -------------------------------------------------------------------- |
+| `override:context`                           | ਸੰਭਾਲਿਆ ਹੋਇਆ ਸੰਦਰਭ-ਵਿੰਡੋ ਦਾ ਓਵਰਰਾਈਡ (`model_context_overrides`)      |
+| `override:max_input` / `override:max_output` | ਸੰਭਾਲਿਆ ਹੋਇਆ `max_input_tokens` / `max_output_tokens` ਸਮਰੱਥਾ ਓਵਰਰਾਈਡ |
+| `static-authoritative:<provider>/<model>`    | ਸੰਦਰਭ-ਵਿੰਡੋ ਦੀ ਸਥਿਰ ਅਧਿਕਾਰਤ ਸਾਰਣੀ                                    |
+| `synced:<provider>/<model>`                  | models.dev ਤੋਂ ਸਮਕਾਲੀ ਕੀਤੀ ਸਮਰੱਥਾ ਕਤਾਰ                               |
+| `registry:<provider>/<model>`                | ਪ੍ਰਦਾਤਾ ਦੀ ਰਜਿਸਟਰੀ ਐਂਟਰੀ                                             |
+| `spec:<model>`                               | ਮਾਡਲ ਦੀ ਸਥਿਰ ਵਿਸ਼ੇਸ਼ਤਾ                                               |
+| `effort-base:` ਅਗੇਤਰ                         | effort ਪਿਛੇਤਰ ਵਾਲੇ ਰੂਪ ਦੇ ਆਧਾਰ ਮਾਡਲ ਤੋਂ ਲਈ ਗਈ ਕਤਾਰ                   |
+| `none`                                       | ਕੋਈ ਸਰੋਤ ਹੱਦ ਘੋਸ਼ਿਤ ਨਹੀਂ ਕਰਦਾ (ਮੁੱਲ `null` ਹੁੰਦਾ ਹੈ)                 |
+
+ਲਾਗੂਕਰਨ: `src/lib/modelCapabilities.ts` ਵਿੱਚ `getResolvedModelCapabilitiesWithLimitSources()` ਅਤੇ `src/lib/modelCapabilityLimits.ts` ਵਿੱਚ ਤਰਜੀਹ ਦੀਆਂ ਲੜੀਆਂ।
 
 ### ਵਰਤੋਂ ਅਤੇ ਵਿਸ਼ਲੇਸ਼ਣ
 

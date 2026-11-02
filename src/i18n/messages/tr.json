@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Bu, bu şablona uygun olarak şu anda bağlı olan sağlayıcıları/modelleri düzenlenebilir bir kombinasyonda yakalayacaktır.",
     "duplicateAutoComboFailedPrefix": "Otomatik kombinasyon kopyalanamadı:",
     "duplicateAutoComboUnknownError": "Bilinmeyen hata",
-    "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur"
+    "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur",
+    "exportCombos": "Dışa aktar",
+    "exportCombosFailed": "Kombolar dışa aktarılamadı",
+    "importCombos": "İçe aktar",
+    "importCombosTitle": "Komboları içe aktar",
+    "importCombosInvalidFile": "Bu dosya geçerli bir kombo dışa aktarımı değil.",
+    "importCombosSummary": "Dosyadaki kombolar: {total} ({fresh} yeni, {conflicting} adı zaten mevcut).",
+    "importCombosMergeHint": "Birleştir mevcut tüm komboları korur ve adı zaten mevcut olanları atlar. Bağlantılar ve kimlik bilgileri asla içe aktarılmaz.",
+    "importCombosReplaceHint": "Tümünü değiştir mevcut kombolarınızı ({current}) siler ve yerine dosyayı içe aktarır. Bu işlem geri alınamaz.",
+    "importCombosMerge": "Birleştir",
+    "importCombosReplace": "Tümünü değiştir",
+    "importCombosDone": "İçe aktarılan kombolar: {created}. Atlanan: {skipped}.",
+    "importCombosFailed": "Kombolar içe aktarılamadı",
+    "importCombosWarnings": "Uyarılarla içe aktarıldı"
   },
   "costs": {
     "title": "Maliyetler",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ChatGPT özel bağlantı noktası",
     "doctorChecking": "Durum kontrol ediliyor…",
     "doctorCheck": "Doktor durumunu kontrol et",
-    "fallbackRetryBackendTitle": "Yedekleme yeniden deneme arka ucu"
+    "fallbackRetryBackendTitle": "Yedekleme yeniden deneme arka ucu",
+    "retryDelayTitle": "Yeniden deneme gecikmesi",
+    "retryDelayDesc": "Sağlayıcı ne zaman yeniden deneneceğini belirtmediğinde, hız sınırı hatasından sonra bağlantının ne kadar bekleyeceği. Otomatik mod yerleşik geri çekilmeyi kullanır; sağlayıcının gönderdiği sıfırlama zamanı her zaman önceliklidir.",
+    "retryDelayAuto": "Otomatik",
+    "retryDelaySaved": "Yeniden deneme gecikmesi kaydedildi",
+    "retryDelayUpdateFailed": "Yeniden deneme gecikmesi güncellenemedi"
   },
   "settings": {
     "title": "Ayarlar",

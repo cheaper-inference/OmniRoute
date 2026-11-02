@@ -887,7 +887,7 @@ Exa และ Tavily อ่านฟิลด์เฉพาะของผู�
 แบบ ISO) และ Tavily จะได้รับ `start_date` (`YYYY-MM-DD`) วันที่ที่ระบุไว้อย่างชัดเจนใน `provider_options`
 จะมีลำดับความสำคัญเหนือกว่าค่าที่แมปไว้
 
-ผลลัพธ์ของ Exa จะเก็บ `id`, `highlight_scores`, `summary`, `subpages`, `entities` และ `extras` ไว้ใน
+ผลลัพธ์ของ Exa จะเก็บ `id`, `highlights` (ทุกข้อความที่เน้น ไม่ใช่เพียงข้อความแรกที่ใช้เป็น `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` และ `extras` ไว้ใน
 `provider_raw` ส่วนผลลัพธ์ของ Tavily จะเก็บ `images` และ `favicon`
 
 ค่าใช้จ่ายในการค้นหาลิงก์อัปจะถูกบันทึกไว้ที่ 0.005 ดอลลาร์สำหรับ `depth` `fast` และ `standard` และ 0.05 ดอลลาร์สำหรับ `deep` ( [การกำหนดราคาลิงก์อัป](https://docs.linkup.so/pages/documentation/development/pricing) ) ไม่ว่า `depth` จะมาจาก `provider_options` หรือการตั้งค่าของการเชื่อมต่อก็ตาม
@@ -1296,11 +1296,29 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 
 | จุดเชื่อมต่อ          | เมธอด    | คำอธิบาย                                |
 | --------------------- | -------- | --------------------------------------- |
+| `/api/models`         | GET/PUT  | รายการโมเดล / อัปเดตชื่อแฝง             |
 | `/api/models/alias`   | GET/POST | นามแฝงของโมเดล                          |
 | `/api/models/catalog` | GET      | โมเดลทั้งหมดแยกตามผู้ให้บริการ + ประเภท |
 | `/api/combos*`        | หลากหลาย | การจัดการคอมโบ                          |
 | `/api/keys*`          | หลากหลาย | การจัดการคีย์ API                       |
 | `/api/pricing`        | GET      | ราคาของโมเดล                            |
+
+#### ที่มาของขีดจำกัดโมเดล
+
+`GET /api/models?withLimits=1` รับ `true` ได้ด้วย; `0`/`false` หรือการละพารามิเตอร์จะคงคำตอบเริ่มต้นไว้ โดยเพิ่ม `contextWindow`, `maxInputTokens`, `maxOutputTokens` และออบเจ็กต์ `capsSource` ให้แต่ละโมเดล `capsSource` ระบุกฎที่ให้ขีดจำกัดแต่ละค่า จึงสืบหาค่าที่ผิดคาด เช่น 128k ในโมเดล 1M ได้ ค่าที่คำนวณตรงกับค่าที่การกำหนดเส้นทางใช้ พารามิเตอร์นี้เพิ่มเฉพาะฟิลด์ ไม่เปลี่ยนค่า ค่า `withLimits` อื่นทั้งหมดถูกปฏิเสธด้วย `400`
+
+| ค่า `capsSource`                             | ที่มา                                                                 |
+| -------------------------------------------- | --------------------------------------------------------------------- |
+| `override:context`                           | ค่าทับหน้าต่างบริบทที่บันทึกไว้ (`model_context_overrides`)           |
+| `override:max_input` / `override:max_output` | ค่าทับความสามารถที่บันทึกไว้ `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | ตารางหน้าต่างบริบทแบบคงที่ที่เป็นแหล่งอ้างอิงหลัก                     |
+| `synced:<provider>/<model>`                  | แถวความสามารถที่ซิงก์จาก models.dev                                   |
+| `registry:<provider>/<model>`                | รายการในทะเบียนผู้ให้บริการ                                           |
+| `spec:<model>`                               | ข้อกำหนดโมเดลแบบคงที่                                                 |
+| `effort-base:` คำนำหน้า                      | แถวที่ยืมจากโมเดลฐานของรุ่นที่มีส่วนต่อท้ายระดับความพยายาม            |
+| `none`                                       | ไม่มีแหล่งใดระบุขีดจำกัด (ค่าเป็น `null`)                             |
+
+การทำงาน: `getResolvedModelCapabilitiesWithLimitSources()` ใน `src/lib/modelCapabilities.ts` และลำดับความสำคัญใน `src/lib/modelCapabilityLimits.ts`
 
 ### การใช้งานและการวิเคราะห์
 

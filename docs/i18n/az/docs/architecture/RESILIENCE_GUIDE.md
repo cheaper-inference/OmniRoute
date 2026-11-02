@@ -10,6 +10,8 @@ OmniRoute-da üç fərqli, lakin bir-biri ilə əlaqəli dayanıqlılıq (resili
 
 > Mənbə: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Dayanıqlıq keçidləri üçün mühit və panel üstünlüyü.** Mühitdən ilkin dəyər alan və ayrıca aktivləşdirilməli olan dayanıqlıq keçidləri — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — yalnız _standart dəyəri_ verir (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). `resilienceSettings` daxilində daimi saxlanılmış məntiqi dəyər (İdarəetmə paneli → **Parametrlər → Dayanıqlıq** / `PATCH /api/resilience`, `key_value` daxilində saxlanılır) mühit dəyərindən üstün olur: normallaşdırma (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) saxlanılmış məntiqi dəyər mövcud olduqda onu qoruyur. Panelin artıq `false` saxladığı quraşdırmada belə mühit dəyişənini `true` etmək heç nəyi dəyişmir. **Parametrlər → Dayanıqlıq** bölməsində keçidi dəyişin və ya saxlanılmış sahəni təmizləyin.
+
 ## 1. Provayder Circuit Breaker-i
 
 **Əhatə dairəsi:** bütöv provayder (məs., `glm`, `openai`, `anthropic`).
@@ -86,6 +88,8 @@ Reqressiya mühafizəsi: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API açarı baza: 3s
 - API açarı 429: yuxarı axının `Retry-After`/reset başlıqlarına/təhlil edilə bilən reset mətninə üstünlük verir
 - Geri çəkilmə: `baseCooldownMs * 2 ** failureIndex`
+
+**Hər provayder üçün təkrar cəhd gecikməsi.** Provayderin təfərrüat səhifəsində **Təkrar cəhd gecikməsi** seçimi var (Avtomatik, 15s-dən 1h-dək). Bu seçim `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` dəyərini saxlayır (1–21600, `PATCH /api/resilience` vasitəsilə). Tezlik limiti xətasında yuxarı xidmətin təkrar cəhd göstərişi yoxdursa, bu dəyər provayderin miqyaslanmış artan gözləməsini əvəz edir və `backoffLevel` səviyyəsini 0-a qaytarır (`open-sse/services/rotationConfig.ts::overrideFor`). Tezlik limiti xətası üçün üstünlük yüksəkdən aşağıya belədir: yuxarı xidmətin təkrar cəhd göstərişi, bağlantının `providerSpecificData.rotationOverrides.rateLimitResetSeconds` dəyəri, provayderin təkrar cəhd gecikməsi, `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` mühit dəyişəni və miqyaslanmış artan gözləmə. Avtomatik sahəni silir. Bu yalnız tezlik limiti səbəbinə təsir edir, son vəziyyətlərə heç vaxt təsir etmir.
 
 **Eyni anda hücum qarşısının alınması (anti-thundering-herd) mühafizəsi:** paralel uğursuzluqların soyuma müddətini həddindən artıq uzatmasının və ya `backoffLevel`-i iki dəfə artırmasının qarşısını alır.
 
@@ -588,7 +592,7 @@ Bağlantı səviyyəsində rate-limit qorunması provayder bağlantılarındakı
 
 İstəyə bağlı `resilienceSettings.streamRecovery.throughputWatchdog` mühafizəsi hələ də parçalar göndərən, lakin konfiqurasiya edilmiş faydalı çıxış sürətindən aşağı assistent çıxışı istehsal edən upstream-i aşkarlayır. O, qəsdən boşdayanma taymautundan fərqləndirilir: heartbeat-lər və metadata heç bir taymeri sıfırlamır və irəliləyiş kimi sayılmır. O, həmçinin çıxış keyfiyyətindən asılı olmayaraq mütləq təhlükəsizlik həddi olaraq qalan sərt cəhd son müddətindən (#9153) də fərqlidir.
 
-Nəzarətçi dayandırma edə bilməzdən əvvəl istiləşmə dövrü və ardınca tam sürüşən pəncərə tələb edir. O, Chat Completions və Responses API çıxış hadisələrindən mətn deltalarını sayır (ehtiyatlı UTF-8 bayt əvəzedicisi), yalnız-istifadə və boş hadisələri nəzərə almır, alət çağırışı və ya mühakimə hadisələri icra olunarkən isə qərarı təxirə salır. O, defolt olaraq sönülüdür və `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` ilə aktivləşdirilə bilər; pəncərə, istiləşmə, minimum sürət və minimum ölçülə bilən çıxış standart dayanıqlılıq-parametrləri normallaşdırma qatı ilə məhdudlaşdırılır.
+Nəzarətçi dayandırma edə bilməzdən əvvəl istiləşmə dövrü və ardınca tam sürüşən pəncərə tələb edir. O, Chat Completions və Responses API çıxış hadisələrindən mətn deltalarını sayır (ehtiyatlı UTF-8 bayt əvəzedicisi), yalnız-istifadə və boş hadisələri nəzərə almır, alət çağırışı və ya mühakimə hadisələri icra olunarkən isə qərarı təxirə salır. O, defolt olaraq sönülüdür və `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (bu mühit dəyəri yalnız standartı təyin edir — saxlanılmış `resilienceSettings.streamRecovery.throughputWatchdog.enabled` məntiqi dəyəri üstün olur; bu təlimatın əvvəlində mühit və panel üstünlüyü barədə qeydə baxın) ilə aktivləşdirilə bilər; pəncərə, istiləşmə, minimum sürət və minimum ölçülə bilən çıxış standart dayanıqlılıq-parametrləri normallaşdırma qatı ilə məhdudlaşdırılır.
 
 Aktiv olduqda, nəzarətçi dayandırması yalnız aktiv upstream cəhdinə tətbiq olunur. Müştəriyə görünən hər hansı baytdan əvvəl mövcud eyni-hesab erkən bərpa yolu cəhdi yenidən aça bilər. Commit-dən sonra axın heç vaxt kor-koranə təkrarlanmır; yalnız mövcud təhlükəsiz axın-arası davam etdirmə müqaviləsi suffiksi birləşdirə bilər. Yekunlaşdırma birdəfəlik qalır, buna görə istifadə uçotu və semafor buraxılışı təkrarlanmır.
 

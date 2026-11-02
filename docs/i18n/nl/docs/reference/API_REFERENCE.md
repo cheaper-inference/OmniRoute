@@ -887,7 +887,7 @@ De algemene `time_range` bereikt nu beide providers: Exa ontvangt `startPublishe
 tijdstempel) en Tavily ontvangt `start_date` (`YYYY-MM-DD`). Een expliciete datum in `provider_options`
 overschrijft de toegewezen datum.
 
-Exa-resultaten behouden `id`, `highlight_scores`, `summary`, `subpages`, `entities` en `extras` in
+Exa-resultaten behouden `id`, `highlights` (alle gemarkeerde passages, niet alleen de eerste die als `snippet` wordt gebruikt), `highlight_scores`, `summary`, `subpages`, `entities` en `extras` in
 `provider_raw`. Tavily-resultaten behouden `images` en `favicon`.
 
 Linkup: De zoekkosten voor koppelingen worden vastgelegd op $0,005 voor `depth` `fast` en `standard` en $0,05 voor `deep` ( [Linkup-prijzen](https://docs.linkup.so/pages/documentation/development/pricing) ), ongeacht of `depth` afkomstig is van `provider_options` of van de instellingen van de verbinding.
@@ -1296,11 +1296,29 @@ de tweede fase kan de aangevraagde zichtbare redenering nog steeds als gewone te
 
 | Endpoint              | Methode  | Beschrijving                      |
 | --------------------- | -------- | --------------------------------- |
+| `/api/models`         | GET/PUT  | Modellijst / alias bijwerken      |
 | `/api/models/alias`   | GET/POST | Modelaliassen                     |
 | `/api/models/catalog` | GET      | Alle modellen per provider + type |
 | `/api/combos*`        | Diverse  | Combinatiebeheer                  |
 | `/api/keys*`          | Diverse  | Beheer van API-sleutels           |
 | `/api/pricing`        | GET      | Modelprijzen                      |
+
+#### Herkomst van modellimieten
+
+`GET /api/models?withLimits=1` (ook `true`; `0`/`false` of weglaten houdt de standaardpayload ongewijzigd) voegt `contextWindow`, `maxInputTokens`, `maxOutputTokens` en een `capsSource`-object toe aan elke modelrij. `capsSource` vermeldt de regel die elke limiet heeft geleverd, zodat een onverwachte limiet, bijvoorbeeld 128k bij een model van 1M, naar zijn oorsprong kan worden herleid. De vastgestelde waarden zijn dezelfde als die voor routering; de vlag voegt uitsluitend velden toe en verandert nooit een waarde. Elke andere waarde van `withLimits` wordt afgewezen met `400`.
+
+| Waarde van `capsSource`                      | Herkomst                                                                               |
+| -------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `override:context`                           | Opgeslagen overschrijving van het contextvenster (`model_context_overrides`)           |
+| `override:max_input` / `override:max_output` | Opgeslagen overschrijving van de capaciteiten `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Gezaghebbende statische tabel met contextvensters                                      |
+| `synced:<provider>/<model>`                  | Uit models.dev gesynchroniseerde rij met capaciteiten                                  |
+| `registry:<provider>/<model>`                | Vermelding in het providerregister                                                     |
+| `spec:<model>`                               | Statische modelspecificatie                                                            |
+| Voorvoegsel `effort-base:`                   | Rij overgenomen van het basismodel van een variant met een effort-achtervoegsel        |
+| `none`                                       | Geen bron vermeldt de limiet; de waarde is `null`                                      |
+
+Implementatie: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts` en de prioriteitsketens in `src/lib/modelCapabilityLimits.ts`.
 
 ### Gebruik en analyse
 

@@ -381,16 +381,17 @@ function NamedCombosManager() {
               const selected = outputStyles.find((style) => style.id === id);
               return (
                 <div key={id} className="flex items-center justify-between gap-2">
-                  <label className="flex min-w-0 items-center gap-2 text-sm text-text-main">
-                    <input
-                      type="checkbox"
-                      data-testid={`combo-output-style-toggle-${id}`}
-                      checked={Boolean(selected)}
-                      onChange={(event) => setOutputStyle(id, { enabled: event.target.checked })}
-                    />
-                    <span className="truncate">{styleLabel}</span>
-                  </label>
-                  <select
+                  <Checkbox
+                    className="min-w-0 flex-1"
+                    data-testid={`combo-output-style-toggle-${id}`}
+                    label={<span className="truncate">{styleLabel}</span>}
+                    checked={Boolean(selected)}
+                    onChange={(event) => setOutputStyle(id, { enabled: event.target.checked })}
+                  />
+                  <Select
+                    compact
+                    className="w-24 shrink-0"
+                    selectClassName="text-xs"
                     value={selected?.level ?? "full"}
                     aria-label={`${styleLabel} level`}
                     disabled={!selected}
@@ -400,12 +401,11 @@ function NamedCombosManager() {
                         level: event.target.value as OutputStyleSelection["level"],
                       })
                     }
-                    className="w-24 shrink-0 rounded-lg border border-border bg-bg px-2 py-1 text-xs text-text-main disabled:opacity-50"
                   >
                     <option value="lite">{tSettings("compressionLevel.lite")}</option>
                     <option value="full">{tSettings("compressionLevel.full")}</option>
                     <option value="ultra">{tSettings("compressionLevel.ultra")}</option>
-                  </select>
+                  </Select>
                 </div>
               );
             })}

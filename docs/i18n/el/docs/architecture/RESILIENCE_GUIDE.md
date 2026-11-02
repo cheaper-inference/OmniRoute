@@ -10,6 +10,8 @@
 
 > Πηγή: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Προτεραιότητα περιβάλλοντος και πίνακα ελέγχου για τους διακόπτες ανθεκτικότητας.** Οι διακόπτες ανθεκτικότητας που απαιτούν ρητή ενεργοποίηση και αρχικοποιούνται από το περιβάλλον — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — δίνουν μόνο την _προεπιλογή_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Μια λογική τιμή αποθηκευμένη μόνιμα στο `resilienceSettings` (Πίνακας ελέγχου → **Ρυθμίσεις → Ανθεκτικότητα** / `PATCH /api/resilience`, αποθηκευμένη στο `key_value`) υπερισχύει του περιβάλλοντος: η κανονικοποίηση (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) διατηρεί την αποθηκευμένη λογική τιμή όποτε υπάρχει. Επομένως, η ρύθμιση μιας τέτοιας μεταβλητής περιβάλλοντος σε `true` σε εγκατάσταση όπου ο πίνακας έχει ήδη αποθηκεύσει `false` δεν αλλάζει τίποτα. Αλλάξτε τον διακόπτη στις **Ρυθμίσεις → Ανθεκτικότητα** ή διαγράψτε το αποθηκευμένο πεδίο.
+
 ## 1. Διακόπτης Κυκλώματος Παρόχου (Circuit Breaker)
 
 **Εύρος:** ολόκληρος ο πάροχος (π.χ., `glm`, `openai`, `anthropic`).
@@ -88,6 +90,8 @@
 - Βάση API-key: 3s
 - API-key 429: προτιμά τις επικεφαλίδες upstream `Retry-After`/reset ή αναλύσιμο κείμενο χρόνου επαναφοράς
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Καθυστέρηση επανάληψης ανά πάροχο.** Η σελίδα λεπτομερειών του παρόχου έχει επιλογέα **Καθυστέρηση επανάληψης** (Αυτόματα, από 15s έως 1h). Αποθηκεύει το `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 μέσω `PATCH /api/resilience`). Όταν ένα σφάλμα ορίου ρυθμού δεν περιέχει υπόδειξη επανάληψης από την ανάντη υπηρεσία, αυτή η τιμή αντικαθιστά την κλιμακωμένη προοδευτική αναμονή του παρόχου και επαναφέρει το `backoffLevel` στο 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Για σφάλμα ορίου ρυθμού, η προτεραιότητα από την υψηλότερη είναι: ανάντη υπόδειξη επανάληψης, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` της σύνδεσης, καθυστέρηση του παρόχου, μεταβλητή περιβάλλοντος `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` και κλιμακωμένη προοδευτική αναμονή. Η επιλογή Αυτόματα αφαιρεί το πεδίο. Επηρεάζει μόνο την αιτία ορίου ρυθμού, ποτέ τις τερματικές καταστάσεις.
 
 **Προστασία από thundering herd:** αποτρέπει τις ταυτόχρονες αποτυχίες από το να παρατείνουν υπερβολικά το cooldown ή να αυξήσουν διπλά το `backoffLevel`.
 
@@ -606,7 +610,7 @@ quota_exhausted / auth_error / not_found / not_found_local:
 και Responses API (ένας συντηρητικός δείκτης προσέγγισης σε bytes UTF-8), αγνοεί συμβάντα
 μόνο-χρήσης και κενά συμβάντα, και αναστέλλει την κρίση όσο συμβάντα tool-call ή reasoning
 είναι σε εξέλιξη. Είναι απενεργοποιημένος από προεπιλογή και μπορεί να ενεργοποιηθεί με
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`· το παράθυρο, η προθέρμανση, ο ελάχιστος ρυθμός
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (αυτή η τιμή περιβάλλοντος δίνει μόνο την προεπιλογή — η αποθηκευμένη λογική τιμή `resilienceSettings.streamRecovery.throughputWatchdog.enabled` υπερισχύει· δείτε τη σημείωση για την προτεραιότητα περιβάλλοντος και πίνακα στην αρχή του οδηγού)· το παράθυρο, η προθέρμανση, ο ελάχιστος ρυθμός
 και η ελάχιστη μετρήσιμη έξοδος περιορίζονται από το κανονικό επίπεδο κανονικοποίησης
 των ρυθμίσεων ανθεκτικότητας.
 

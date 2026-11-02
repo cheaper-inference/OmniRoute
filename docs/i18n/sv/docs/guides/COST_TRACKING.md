@@ -40,23 +40,31 @@ Eftersom siffran är en uppskattning:
 
 ### Priskällan
 
-Kostnaderna hämtas från en pristabell som väljs enligt följande prioritetsordning
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Kostnader hämtas från den sammanslagna pristabellen i [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), i denna ordning (**högst prioritet först**):
 
-1. **Användaråsidosättningar** – priser som du anger i kontrollpanelen/via `PATCH /api/pricing`.
-2. **Synkroniserade externa priser** – hämtas från LiteLLM:s offentliga
-   `model_prices_and_context_window.json` när synkronisering är aktiverad (lagras i ett separat
-   `pricing_synced`-namnområde så att dina åsidosättningar aldrig skrivs över).
-3. **Hårdkodade standardvärden** – levereras med OmniRoute.
+1. **Användaråsidosättningar** — priser satta i kontrollpanelen eller via `PATCH /api/pricing` (namnrymden `pricing`).
+2. **models.dev-synkronisering** — priser från `https://models.dev/api.json` (namnrymden `models_dev_pricing`).
+3. **LiteLLM-synkronisering** — priser från LiteLLM:s offentliga `model_prices_and_context_window.json` (namnrymden `pricing_synced`).
+4. **Inbyggda standardvärden** — priser som levereras i [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Extern prissynkronisering är **frivillig** och inaktiverad som standard. Relevanta miljövariabler
-(se [`.env.example`](../../.env.example)):
+För samma leverantör/modell skriver högre lager över motsvarande fält i lägre lager; fält som saknas i ett högre lager kan fortfarande komma från ett lägre. Ordningen är fast även när båda oberoende synkroniseringsjobben körs samtidigt. `GET /api/pricing?includeSources=1` returnerar `pricing` och `sourceMap`; modellernas etiketter (`user`, `modelsDev`, `litellm`, `default`) anger det högst prioriterade lagret som innehåller modellen.
 
-| Miljövariabel           | Standard  | Syfte                                                            |
-| ----------------------- | --------- | ---------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Aktivera LiteLLM:s prissynkronisering i bakgrunden vid start.    |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Synkroniseringsintervall i **sekunder** (dagligen som standard). |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Kommaseparerad källista (endast `litellm` stöds för närvarande). |
+**LiteLLM-synkronisering** kräver aktivt val och är avstängd som standard. Dess miljövariabler (se [`.env.example`](../../.env.example)) är:
+
+| Miljövariabel           | Standard  | Syfte                                                                              |
+| ----------------------- | --------- | ---------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Aktiverar synkronisering av LiteLLM-priser i bakgrunden.                           |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Synkroniseringsintervall i **sekunder** (dagligen som standard).                   |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Källvalet gäller bara denna synkronisering; för närvarande stöds endast `litellm`. |
+
+**models.dev-synkronisering** är fristående från LiteLLM-synkroniseringen och är också avstängd som standard. Aktivera den i Inställningar (models.dev-synkronisering) eller använd dessa variabler:
+
+| Miljövariabel              | Standardvärde | Syfte                                                                                                                                                          |
+| -------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(inte satt)_ | Om värdet saknas följs reglaget i Inställningar; `1/true/on/yes` tvingar på och `0/false/off/no` tvingar av, även om Inställningar aktiverar synkroniseringen. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Standardintervall för models.dev-synkronisering i sekunder (dagligen).                                                                                         |
+
+`PRICING_SYNC_SOURCES` aktiverar **inte** models.dev; det styr bara LiteLLM-synkroniseringen. Att ta bort en användaråsidosättning rensar ingen av de synkroniserade namnrymderna; nästa tillgängliga prislager träder i kraft. Kontrollera båda synkroniseringsinställningarna och `sourceMap` för en modell utan pris innan du lägger till en manuell åsidosättning.
 
 ### Kostnadsformeln
 
@@ -170,16 +178,16 @@ annat anges.
 
 ### Prissättning
 
-| Metod    | Slutpunkt               | Syfte                                                                                                                      |
-| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Aktuell sammanslagen prissättning (användare + synkroniserad + standardvärden). `?includeSources=1` visar källan per post. |
-| `PATCH`  | `/api/pricing`          | Åsidosätt prissättning för `{ provider: { model: { input, output, cached, … } } }`.                                        |
-| `DELETE` | `/api/pricing`          | Återställ prissättningen till standardvärden (kan valfritt avgränsas med `?provider=&model=`).                             |
-| `GET`    | `/api/pricing/defaults` | Visa standardiserade reservpriser per 1 miljon.                                                                            |
-| `GET`    | `/api/pricing/models`   | Prissättning indexerad efter modell.                                                                                       |
-| `POST`   | `/api/pricing/sync`     | Utlös en manuell synkronisering från externa källor (LiteLLM).                                                             |
-| `GET`    | `/api/pricing/sync`     | Aktuell synkroniseringsstatus.                                                                                             |
-| `DELETE` | `/api/pricing/sync`     | Rensa alla synkroniserade prisuppgifter.                                                                                   |
+| Metod    | Slutpunkt               | Syfte                                                                                                                                                              |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Sammanslagna priser från fyra lager (användare, models.dev, LiteLLM, standardvärden). `?includeSources=1` returnerar `pricing` + `sourceMap`.                      |
+| `PATCH`  | `/api/pricing`          | Åsidosätt prissättning för `{ provider: { model: { input, output, cached, … } } }`.                                                                                |
+| `DELETE` | `/api/pricing`          | Tar bort användarens prisåsidosättningar (valfritt avgränsade med `?provider=&model=`); synkroniserade priser eller inbyggda standardvärden finns kvar som reserv. |
+| `GET`    | `/api/pricing/defaults` | Visa standardiserade reservpriser per 1 miljon.                                                                                                                    |
+| `GET`    | `/api/pricing/models`   | Prissättning indexerad efter modell.                                                                                                                               |
+| `POST`   | `/api/pricing/sync`     | Utlös en manuell synkronisering från externa källor (LiteLLM).                                                                                                     |
+| `GET`    | `/api/pricing/sync`     | Aktuell synkroniseringsstatus.                                                                                                                                     |
+| `DELETE` | `/api/pricing/sync`     | Rensar endast priser synkroniserade från LiteLLM (`pricing_synced`); models.dev-data är separata.                                                                  |
 
 ### Andra kostnadsrelevanta slutpunkter
 

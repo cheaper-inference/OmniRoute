@@ -850,7 +850,7 @@ Tavily ले `search_type: "finance"` (`topic: "finance"`) पनि स्व�
 टाइमस्ट्याम्प) र Tavily ले `start_date` (`YYYY-MM-DD`) प्राप्त गर्छ। `provider_options`
 मा स्पष्ट रूपमा दिइएको मितिले म्याप गरिएको मितिलाई ओभरराइड गर्छ।
 
-Exa का नतिजाहरूले `id`, `highlight_scores`, `summary`, `subpages`, `entities` र `extras` लाई
+Exa का नतिजाहरूले `id`, `highlights` (सबै हाइलाइट गरिएका अंश, `snippet` का रूपमा प्रयोग हुने पहिलो अंश मात्र होइन), `highlight_scores`, `summary`, `subpages`, `entities` र `extras` लाई
 `provider_raw` मा कायम राख्छन्। Tavily का नतिजाहरूले `images` र `favicon` कायम राख्छन्।
 
 लिङ्कअप खोज लागत `depth` `fast` र `standard` को लागि $ 0.005 र `deep` ( [Linkup मूल्य निर्धारण](https://docs.linkup.so/pages/documentation/development/pricing) ) को लागि $ 0.05 मा रेकर्ड गरिएको छ, चाहे `depth` `provider_options` बाट आउँछ वा जडानको सेटिङहरू।
@@ -1234,11 +1234,29 @@ headers, routing नियमहरू, र समाधान गरिएक�
 
 | Endpoint              | विधि     | विवरण                               |
 | --------------------- | -------- | ----------------------------------- |
+| `/api/models`         | GET/PUT  | मोडेल सूची / वैकल्पिक नाम अद्यावधिक |
 | `/api/models/alias`   | GET/POST | मोडेल उपनामहरू                      |
 | `/api/models/catalog` | GET      | प्रदायक + प्रकारअनुसार सबै मोडेलहरू |
 | `/api/combos*`        | विभिन्न  | कम्बो व्यवस्थापन                    |
 | `/api/keys*`          | विभिन्न  | API कुञ्जी व्यवस्थापन               |
 | `/api/pricing`        | GET      | मोडेल मूल्य निर्धारण                |
+
+#### मोडेलका सीमाहरूको स्रोत
+
+`GET /api/models?withLimits=1` ले हरेक मोडेलको पङ्क्तिमा `contextWindow`, `maxInputTokens`, `maxOutputTokens` र `capsSource` वस्तु थप्छ। `true` पनि स्वीकारिन्छ; `0`/`false` दिएमा वा यसलाई छोडेमा पूर्वनिर्धारित प्रतिक्रियाको सामग्री यथावत् रहन्छ। `capsSource` ले प्रत्येक सीमा दिने नियमको नाम बताउँछ, त्यसैले अनपेक्षित सीमाको, जस्तै 1M मोडेलमा 128k को, मूल स्रोत पत्ता लगाउन सकिन्छ। निर्धारण गरिएका मानहरू राउटिङले प्रयोग गर्ने मानहरूकै बराबर हुन्; यो फ्ल्यागले फिल्ड मात्र थप्छ र कुनै मान परिवर्तन गर्दैन। `withLimits` का अरू सबै मान `400` सहित अस्वीकार गरिन्छन्।
+
+| `capsSource` को मान                          | स्रोत                                                                             |
+| -------------------------------------------- | --------------------------------------------------------------------------------- |
+| `override:context`                           | सुरक्षित गरिएको सन्दर्भ-विन्डोको प्रतिस्थापन मान (`model_context_overrides`)      |
+| `override:max_input` / `override:max_output` | सुरक्षित गरिएका `max_input_tokens` / `max_output_tokens` क्षमताका प्रतिस्थापन मान |
+| `static-authoritative:<provider>/<model>`    | सन्दर्भ-विन्डोको स्थिर आधिकारिक तालिका                                            |
+| `synced:<provider>/<model>`                  | models.dev बाट समक्रमण गरिएको क्षमताको पङ्क्ति                                    |
+| `registry:<provider>/<model>`                | प्रदायकको रजिस्ट्री प्रविष्टि                                                     |
+| `spec:<model>`                               | मोडेलको स्थिर विवरण                                                               |
+| `effort-base:` उपसर्ग                        | effort प्रत्यय भएको रूपको आधार मोडेलबाट लिइएको पङ्क्ति                            |
+| `none`                                       | कुनै स्रोतले सीमा घोषणा गर्दैन (मान `null` हुन्छ)                                 |
+
+कार्यान्वयन: `src/lib/modelCapabilities.ts` मा रहेको `getResolvedModelCapabilitiesWithLimitSources()` र `src/lib/modelCapabilityLimits.ts` मा रहेका प्राथमिकताका शृङ्खला।
 
 ### प्रयोग र विश्लेषण
 

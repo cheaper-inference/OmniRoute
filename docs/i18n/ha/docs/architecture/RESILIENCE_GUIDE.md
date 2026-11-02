@@ -10,6 +10,8 @@ OmniRoute tana da makanikan juriya guda uku masu bambanta amma masu alaƙa. Kowa
 
 > Tushe: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Fifiko tsakanin muhalli da allon sarrafawa ga maɓallan juriya.** Maɓallan juriya da sai an zaɓi kunna su, waɗanda ake ba ƙimar farko daga muhalli — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — suna samar da _ƙimar tsoho_ kawai (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Ƙimar gaskiya/ƙarya da aka adana na dindindin a `resilienceSettings` (Allon sarrafawa → **Saituna → Juriya** / `PATCH /api/resilience`, a cikin `key_value`) tana rinjayar ƙimar muhalli: daidaita ƙima (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) yana riƙe ƙimar gaskiya/ƙarya da aka adana muddin tana akwai. Saboda haka, saita irin wannan canjin muhalli zuwa `true` a shigarwar da allon sarrafawa ya riga ya adana `false` ba ya sauya komai. Sauya maɓallin a **Saituna → Juriya**, ko share filin da aka adana.
+
 ## 1. Circuit Breaker na Mai Ba da Sabis
 
 **Fanni:** dukkan mai ba da sabis (misali, `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ A ƙasan wannan ƙofa, **ba** a ɗaukar mai ba da sabis a sanyaya (cooling); nas
 - Tushen API-key: 3s
 - API-key 429: yana fifita kanun `Retry-After` na upstream / kanun reset / rubutun reset da za a iya fassarawa
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Jinkirin sake gwadawa ga kowane mai samarwa.** Shafin cikakkun bayanan mai samarwa yana da zaɓin **Jinkirin sake gwadawa** (Ta atomatik, daga 15s zuwa 1h). Yana adana `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, ta `PATCH /api/resilience`). Idan kuskuren iyakar yawan kira bai ƙunshi umarnin sake gwadawa daga sabis na sama ba, wannan ƙima tana maye gurbin jinkirin ƙaruwa da aka daidaita na mai samarwa kuma tana mayar da `backoffLevel` zuwa 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Ga kuskuren iyakar yawan kira, fifiko daga mafi girma shi ne: umarnin sake gwadawa na sama, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` na haɗin kai, jinkirin mai samarwa, canjin muhalli `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, sannan jinkirin ƙaruwa da aka daidaita. Zaɓin atomatik yana cire filin. Wannan yana shafar dalilin iyakar yawan kira kawai, ba ya taɓa shafar jihohin ƙarshe.
 
 **Kariya ga thundering herd:** yana hana gazawu da yawa a lokaci guda daga tsawaita cooldown fiye da kima ko ƙara `backoffLevel` ninki biyu.
 
@@ -434,7 +438,7 @@ ya iya yanke aiki. Yana ƙidaya text deltas daga abubuwan fitarwa na Chat Comple
 Responses API (wani wakilin byte na UTF-8 mai tsaro), yana watsi da abubuwan da suka shafi
 usage kawai da waɗanda babu komai a cikinsu, kuma yana dakatar da hukunci yayin da abubuwan
 kiran kayan aiki ko reasoning suke a gudana. An kashe shi ta tashi (default) kuma ana iya
-kunna shi da `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; tagar, dumamawar, ƙarancin ƙimar,
+kunna shi da `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (wannan ƙimar muhalli tana samar da tsoho ne kawai — ƙimar gaskiya/ƙarya da aka adana a `resilienceSettings.streamRecovery.throughputWatchdog.enabled` tana rinjaye; duba bayanin fifikon muhalli da allon sarrafawa a farkon wannan jagora); tagar, dumamawar, ƙarancin ƙimar,
 da ƙarancin fitarwar da za a iya aunawa an ƙuntata su ta matakin daidaitawa na saitunan
 resilience na al'ada.
 

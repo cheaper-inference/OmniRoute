@@ -866,7 +866,7 @@ Il-`time_range` ġeneriku issa jasal għand iż-żewġ fornituri: Exa jirċievi 
 ISO) u Tavily jirċievi `start_date` (`YYYY-MM-DD`). Data espliċita f’`provider_options`
 tieħu preċedenza fuq dik immappjata.
 
-Ir-riżultati ta’ Exa jżommu `id`, `highlight_scores`, `summary`, `subpages`, `entities` u `extras` f’
+Ir-riżultati ta’ Exa jżommu `id`, `highlights` (is-siltiet enfasizzati kollha, mhux biss l-ewwel waħda użata bħala `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` u `extras` f’
 `provider_raw`. Ir-riżultati ta’ Tavily jżommu `images` u `favicon`.
 
 L-ispiża tat-tfittxija tal-linkup hija rreġistrata għal $0.005 għal `depth` `fast` u `standard` u $0.05 għal `deep` ( [prezzijiet tal-Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), kemm jekk `depth` ġej minn `provider_options` jew mis-settings tal-konnessjoni.
@@ -1277,11 +1277,29 @@ it-tieni stadju xorta jista’ jipproduċi r-raġunament viżibbli mitlub tiegħ
 
 | Endpoint              | Metodu   | Deskrizzjoni                                 |
 | --------------------- | -------- | -------------------------------------------- |
+| `/api/models`         | GET/PUT  | Lista tal-mudelli / aġġornament tal-alias    |
 | `/api/models/alias`   | GET/POST | Psewdonimi tal-mudelli                       |
 | `/api/models/catalog` | GET      | Il-mudelli kollha skont il-fornitur + it-tip |
 | `/api/combos*`        | Diversi  | Ġestjoni tal-kombinazzjonijiet               |
 | `/api/keys*`          | Diversi  | Ġestjoni taċ-ċwievet API                     |
 | `/api/pricing`        | GET      | Ipprezzar tal-mudelli                        |
+
+#### L-oriġini tal-limiti tal-mudelli
+
+`GET /api/models?withLimits=1` (jaċċetta wkoll `true`; `0`/`false` jew in-nuqqas tal-parametru jħallu l-payload awtomatiku mhux mibdul) iżid `contextWindow`, `maxInputTokens`, `maxOutputTokens` u oġġett `capsSource` ma’ kull ringiela ta’ mudell. `capsSource` isemmi r-regola li tat kull limitu, sabiex limitu mhux mistenni, pereżempju 128k fuq mudell ta’ 1M, ikun jista’ jiġi traċċat għall-oriġini tiegħu. Il-valuri determinati huma l-istess li juża r-routing; il-parametru jżid biss oqsma u qatt ma jbiddel valur. Kull valur ieħor ta’ `withLimits` jiġi miċħud b’`400`.
+
+| Valur ta’ `capsSource`                       | Oriġini                                                                                      |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `override:context`                           | Valur ta’ sostituzzjoni salvat għat-tieqa tal-kuntest (`model_context_overrides`)            |
+| `override:max_input` / `override:max_output` | Valuri ta’ sostituzzjoni salvati għall-kapaċitajiet `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Tabella statika awtorevoli tat-twieqi tal-kuntest                                            |
+| `synced:<provider>/<model>`                  | Ringiela ta’ kapaċitajiet sinkronizzata minn models.dev                                      |
+| `registry:<provider>/<model>`                | Entrata fir-reġistru tal-fornituri                                                           |
+| `spec:<model>`                               | Speċifikazzjoni statika tal-mudell                                                           |
+| Prefiss `effort-base:`                       | Ringiela meħuda mill-mudell bażi ta’ varjant b’suffiss effort                                |
+| `none`                                       | L-ebda sors ma jiddikjara l-limitu; il-valur huwa `null`                                     |
+
+Implimentazzjoni: `getResolvedModelCapabilitiesWithLimitSources()` f’`src/lib/modelCapabilities.ts` u l-ktajjen ta’ preċedenza f’`src/lib/modelCapabilityLimits.ts`.
 
 ### Użu u Analitika
 

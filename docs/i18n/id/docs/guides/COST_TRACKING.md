@@ -41,23 +41,31 @@ Karena angka tersebut merupakan perkiraan:
 
 ### Sumber harga
 
-Biaya berasal dari tabel harga yang ditentukan berdasarkan urutan prioritas berikut
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Biaya berasal dari tabel harga gabungan dalam [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), dengan urutan prioritas berikut (**tertinggi lebih dahulu**):
 
-1. **Penggantian oleh pengguna** — harga yang Anda tetapkan di dasbor / melalui `PATCH /api/pricing`.
-2. **Harga eksternal yang disinkronkan** — diambil dari
-   `model_prices_and_context_window.json` publik milik LiteLLM saat sinkronisasi diaktifkan (disimpan dalam namespace
-   `pricing_synced` terpisah sehingga tidak pernah menimpa penggantian Anda).
-3. **Nilai default yang dikodekan langsung** — disertakan bersama OmniRoute.
+1. **Penggantian oleh pengguna** — harga yang diatur melalui dasbor atau `PATCH /api/pricing` (namespace `pricing`).
+2. **Sinkronisasi models.dev** — harga yang diambil dari `https://models.dev/api.json` (namespace `models_dev_pricing`).
+3. **Sinkronisasi LiteLLM** — harga yang diambil dari berkas publik `model_prices_and_context_window.json` milik LiteLLM (namespace `pricing_synced`).
+4. **Nilai bawaan dalam kode** — tarif yang disertakan dalam [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Sinkronisasi harga eksternal bersifat **opsional**, dan dinonaktifkan secara default. Variabel lingkungan yang relevan
-(lihat [`.env.example`](../../.env.example)):
+Untuk penyedia/model yang sama, nilai dari lapisan berprioritas lebih tinggi menimpa kolom yang sama pada lapisan di bawahnya; kolom yang tidak ada di lapisan atas masih dapat berasal dari lapisan bawah. Urutan ini tetap berlaku meskipun kedua tugas sinkronisasi independen berjalan bersamaan. `GET /api/pricing?includeSources=1` mengembalikan `pricing` dan `sourceMap`; label per model (`user`, `modelsDev`, `litellm`, `default`) menunjukkan lapisan berprioritas tertinggi yang memuat model itu.
 
-| Variabel lingkungan     | Default   | Tujuan                                                                |
-| ----------------------- | --------- | --------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Mengaktifkan sinkronisasi harga LiteLLM di latar belakang saat mulai. |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Interval sinkronisasi dalam **detik** (default harian).               |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Daftar sumber yang dipisahkan koma (saat ini hanya `litellm`).        |
+**Sinkronisasi LiteLLM** bersifat opsional dan dinonaktifkan secara bawaan. Variabel lingkungannya (lihat [`.env.example`](../../.env.example)) adalah:
+
+| Variabel lingkungan     | Default   | Tujuan                                                                                 |
+| ----------------------- | --------- | -------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Aktifkan sinkronisasi harga LiteLLM di latar belakang.                                 |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Interval sinkronisasi dalam **detik** (default harian).                                |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Pemilihan sumber hanya untuk sinkronisasi ini; saat ini hanya `litellm` yang didukung. |
+
+**Sinkronisasi models.dev** terpisah dari sinkronisasi LiteLLM dan juga dinonaktifkan secara bawaan. Aktifkan melalui Pengaturan (sinkronisasi models.dev), atau gunakan variabel berikut:
+
+| Variabel lingkungan        | Bawaan           | Tujuan                                                                                                                                                        |
+| -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(tidak diatur)_ | Jika tidak diatur, mengikuti sakelar Pengaturan; `1/true/on/yes` memaksa aktif dan `0/false/off/no` memaksa nonaktif, bahkan jika Pengaturan mengaktifkannya. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`          | Interval bawaan sinkronisasi models.dev dalam detik, yaitu setiap hari.                                                                                       |
+
+`PRICING_SYNC_SOURCES` **tidak** mengaktifkan models.dev; variabel ini hanya mengendalikan sinkronisasi LiteLLM. Menghapus penggantian harga pengguna tidak menghapus namespace tersinkron mana pun; lapisan harga berikutnya yang tersedia mulai berlaku. Untuk model tanpa harga, periksa kedua pengaturan sinkronisasi dan `sourceMap` sebelum menambahkan penggantian manual.
 
 ### Rumus biaya
 
@@ -171,16 +179,16 @@ jika dinyatakan lain.
 
 ### Harga
 
-| Metode   | Endpoint                | Tujuan                                                                                                                     |
-| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Harga gabungan saat ini (pengguna + tersinkronisasi + bawaan). Gunakan `?includeSources=1` untuk melihat sumber per entri. |
-| `PATCH`  | `/api/pricing`          | Mengganti harga untuk `{ provider: { model: { input, output, cached, … } } }`.                                             |
-| `DELETE` | `/api/pricing`          | Mengatur ulang harga ke nilai bawaan (opsional, dicakup berdasarkan `?provider=&model=`).                                  |
-| `GET`    | `/api/pricing/defaults` | Menampilkan tarif fallback bawaan per 1 juta.                                                                              |
-| `GET`    | `/api/pricing/models`   | Harga yang dikunci berdasarkan model.                                                                                      |
-| `POST`   | `/api/pricing/sync`     | Memicu sinkronisasi manual dari sumber eksternal (LiteLLM).                                                                |
-| `GET`    | `/api/pricing/sync`     | Status sinkronisasi saat ini.                                                                                              |
-| `DELETE` | `/api/pricing/sync`     | Menghapus semua data harga yang telah disinkronkan.                                                                        |
+| Metode   | Endpoint                | Tujuan                                                                                                                                             |
+| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Harga gabungan dari empat lapisan (pengguna, models.dev, LiteLLM, bawaan). `?includeSources=1` mengembalikan `pricing` + `sourceMap`.              |
+| `PATCH`  | `/api/pricing`          | Mengganti harga untuk `{ provider: { model: { input, output, cached, … } } }`.                                                                     |
+| `DELETE` | `/api/pricing`          | Hapus penggantian harga pengguna, dengan cakupan opsional `?provider=&model=`; tarif tersinkron atau nilai bawaan tetap tersedia sebagai cadangan. |
+| `GET`    | `/api/pricing/defaults` | Menampilkan tarif fallback bawaan per 1 juta.                                                                                                      |
+| `GET`    | `/api/pricing/models`   | Harga yang dikunci berdasarkan model.                                                                                                              |
+| `POST`   | `/api/pricing/sync`     | Memicu sinkronisasi manual dari sumber eksternal (LiteLLM).                                                                                        |
+| `GET`    | `/api/pricing/sync`     | Status sinkronisasi saat ini.                                                                                                                      |
+| `DELETE` | `/api/pricing/sync`     | Hapus hanya harga yang disinkronkan dari LiteLLM (`pricing_synced`); data models.dev terpisah.                                                     |
 
 ### Endpoint lain yang berkaitan dengan biaya
 

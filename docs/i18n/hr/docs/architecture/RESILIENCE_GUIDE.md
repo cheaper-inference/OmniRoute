@@ -10,6 +10,8 @@ OmniRoute ima tri različita, ali međusobno povezana mehanizma otpornosti. Svak
 
 > Izvor: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Prvenstvo okruženja i nadzorne ploče za postavke otpornosti.** Izborni prekidači otpornosti inicijalizirani iz okruženja — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — daju samo _zadanu vrijednost_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Logička vrijednost trajno spremljena u `resilienceSettings` (Nadzorna ploča → **Postavke → Otpornost** / `PATCH /api/resilience`, pohranjena u `key_value`) ima prednost nad vrijednošću iz okruženja: normalizacija (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) zadržava spremljenu logičku vrijednost kad postoji. Postavljanje takve varijable okruženja na `true` u instalaciji u kojoj je nadzorna ploča već spremila `false` zato ništa ne mijenja. Promijenite prekidač u **Postavke → Otpornost** ili izbrišite spremljeno polje.
+
 ## 1. Prekidač kruga pružatelja (circuit breaker)
 
 **Opseg:** cijeli pružatelj (npr. `glm`, `openai`, `anthropic`).
@@ -94,6 +96,8 @@ Zaštita od regresije: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API-ključ osnova: 3s
 - API-ključ 429: daje prednost upstream `Retry-After`/reset zaglavljima/tekstu o resetiranju koji se može parsirati
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Odgoda ponovnog pokušaja po pružatelju.** Stranica s pojedinostima pružatelja ima izbornik **Odgoda ponovnog pokušaja** (Automatski, od 15s do 1h). Sprema `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 putem `PATCH /api/resilience`). Ako pogreška ograničenja učestalosti nema uputu za ponovni pokušaj iz uzvodnog servisa, ta vrijednost zamjenjuje skalirano progresivno čekanje pružatelja i vraća `backoffLevel` na 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Za takvu pogrešku prvenstvo, od najvišeg, imaju: uzvodna uputa za ponovni pokušaj, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` za pojedinu vezu, odgoda pružatelja, varijabla okruženja `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` i skalirano progresivno čekanje. Automatski uklanja polje. Utječe samo na razlog ograničenja učestalosti, nikad na završna stanja.
 
 **Zaštita od thundering-herd efekta:** sprječava da istovremeni neuspjesi pretjerano produlje cooldown ili dvostruko povećaju `backoffLevel`.
 
@@ -508,7 +512,7 @@ prije nego što može prekinuti. Broji tekstualne delte iz Chat Completions i
 Responses API izlaznih događaja (konzervativni UTF-8 bajt proxy), ignorira događaje
 koji sadrže samo potrošnju i prazne događaje, te odgađa prosudbu dok su događaji
 poziva alata ili rasuđivanja u tijeku. Zadano je onemogućen i može se omogućiti s
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; prozor, zagrijavanje, minimalna stopa i
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ta vrijednost okruženja određuje samo zadanu vrijednost — spremljena logička vrijednost `resilienceSettings.streamRecovery.throughputWatchdog.enabled` ima prednost; pogledajte napomenu o prvenstvu okruženja i nadzorne ploče na početku ovog vodiča); prozor, zagrijavanje, minimalna stopa i
 minimalni mjerljivi izlaz ograničeni su uobičajenim slojem normalizacije postavki
 otpornosti.
 

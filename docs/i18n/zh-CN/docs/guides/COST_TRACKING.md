@@ -29,21 +29,31 @@ OmniRoute 通过将 token 数量乘以模型的定价费率，为每次补全计
 
 ### 定价来源
 
-成本来自一个按以下优先顺序解析的定价表
-（[`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)）：
+成本取自 [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) 中合并后的价格表，优先级如下（**最高优先**）：
 
-1. **用户覆盖设置**——你在仪表板中或通过 `PATCH /api/pricing` 设置的价格。
-2. **已同步的外部定价**——启用同步后，从 LiteLLM 的公开 `model_prices_and_context_window.json` 获取（存储在独立的 `pricing_synced` 命名空间中，因此绝不会覆盖你的自定义设置）。
-3. **硬编码默认值**——随 OmniRoute 一同提供。
+1. **用户覆盖值** — 在仪表盘或通过 `PATCH /api/pricing` 设置的价格（`pricing` 命名空间）。
+2. **models.dev 同步** — 从 `https://models.dev/api.json` 获取的价格（`models_dev_pricing` 命名空间）。
+3. **LiteLLM 同步** — 从 LiteLLM 的公开文件 `model_prices_and_context_window.json` 获取的价格（`pricing_synced` 命名空间）。
+4. **内置默认值** — [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) 中随软件发布的费率。
 
-外部定价同步需要**主动启用**，默认处于禁用状态。相关环境变量如下
-（请参阅 [`.env.example`](../../.env.example)）：
+对于同一个提供商/模型，高优先级层会覆盖低优先级层的对应字段；高层缺失的字段仍可来自低层。即使两个独立同步任务同时运行，此顺序也不改变。`GET /api/pricing?includeSources=1` 返回 `pricing` 和 `sourceMap`；每个模型的标签（`user`、`modelsDev`、`litellm`、`default`）标明包含该模型的最高优先级层。
 
-| 环境变量                | 默认值    | 用途                                           |
-| ----------------------- | --------- | ---------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | 启用启动时的后台 LiteLLM 定价同步。            |
-| `PRICING_SYNC_INTERVAL` | `86400`   | 同步间隔，单位为**秒**（默认为每天一次）。     |
-| `PRICING_SYNC_SOURCES`  | `litellm` | 以逗号分隔的来源列表（目前仅支持 `litellm`）。 |
+**LiteLLM 同步**需主动启用，默认关闭。其环境变量如下（参见 [`.env.example`](../../.env.example)）：
+
+| 环境变量                | 默认值    | 用途                                               |
+| ----------------------- | --------- | -------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | 启用后台 LiteLLM 价格同步。                        |
+| `PRICING_SYNC_INTERVAL` | `86400`   | 同步间隔，单位为**秒**（默认为每天一次）。         |
+| `PRICING_SYNC_SOURCES`  | `litellm` | 此来源选择仅适用于本项同步；目前仅支持 `litellm`。 |
+
+**models.dev 同步**独立于 LiteLLM 同步，也默认关闭。可在设置中启用（models.dev 同步），或使用下列变量：
+
+| 环境变量                   | 默认值     | 用途                                                                                                    |
+| -------------------------- | ---------- | ------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(未设置)_ | 未设置时遵循设置中的开关；`1/true/on/yes` 强制开启，`0/false/off/no` 强制关闭，即使设置中已启用也如此。 |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`    | 默认 models.dev 同步间隔，单位为秒（每天一次）。                                                        |
+
+`PRICING_SYNC_SOURCES` **不会**启用 models.dev；它只控制 LiteLLM 同步。删除用户覆盖值不会清空任何一个同步命名空间；下一个可用的价格层会生效。对于没有价格的模型，添加手动覆盖值之前，应先检查两项同步设置及 `sourceMap`。
 
 ### 成本公式
 
@@ -137,16 +147,16 @@ OmniRoute 通过将 token 数量乘以模型的定价费率，为每次补全计
 
 ### 定价
 
-| 方法     | 端点                    | 用途                                                                                            |
-| -------- | ----------------------- | ----------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | 当前合并后的定价（用户定价 + 同步定价 + 默认定价）。使用 `?includeSources=1` 查看各条目的来源。 |
-| `PATCH`  | `/api/pricing`          | 覆盖 `{ provider: { model: { input, output, cached, … } } }` 的定价。                           |
-| `DELETE` | `/api/pricing`          | 将定价重置为默认值（可选择通过 `?provider=&model=` 限定作用域）。                               |
-| `GET`    | `/api/pricing/defaults` | 显示每 100 万单位的默认回退费率。                                                               |
-| `GET`    | `/api/pricing/models`   | 按模型键控的定价。                                                                              |
-| `POST`   | `/api/pricing/sync`     | 触发从外部来源（LiteLLM）手动同步。                                                             |
-| `GET`    | `/api/pricing/sync`     | 当前同步状态。                                                                                  |
-| `DELETE` | `/api/pricing/sync`     | 清除所有已同步的定价数据。                                                                      |
+| 方法     | 端点                    | 用途                                                                                                  |
+| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | 合并四层价格（用户、models.dev、LiteLLM、默认值）。`?includeSources=1` 返回 `pricing` + `sourceMap`。 |
+| `PATCH`  | `/api/pricing`          | 覆盖 `{ provider: { model: { input, output, cached, … } } }` 的定价。                                 |
+| `DELETE` | `/api/pricing`          | 移除用户价格覆盖值（可用 `?provider=&model=` 限定范围）；同步费率或内置默认值仍作为回退来源。         |
+| `GET`    | `/api/pricing/defaults` | 显示每 100 万单位的默认回退费率。                                                                     |
+| `GET`    | `/api/pricing/models`   | 按模型键控的定价。                                                                                    |
+| `POST`   | `/api/pricing/sync`     | 触发从外部来源（LiteLLM）手动同步。                                                                   |
+| `GET`    | `/api/pricing/sync`     | 当前同步状态。                                                                                        |
+| `DELETE` | `/api/pricing/sync`     | 仅清除 LiteLLM 同步价格（`pricing_synced`）；models.dev 数据单独存储。                                |
 
 ### 其他与成本相关的端点
 

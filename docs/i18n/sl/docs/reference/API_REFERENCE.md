@@ -887,7 +887,7 @@ Splošno polje `time_range` se zdaj posreduje obema ponudnikoma: Exa prejme `sta
 žig ISO), Tavily pa `start_date` (`YYYY-MM-DD`). Izrecno navedeni datum v `provider_options`
 preglasi preslikanega.
 
-Rezultati Exa v `provider_raw` ohranijo `id`, `highlight_scores`, `summary`, `subpages`, `entities` in
+Rezultati Exa v `provider_raw` ohranijo `id`, `highlights` (vse poudarjene odlomke, ne le prvega, uporabljenega kot `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` in
 `extras`. Rezultati Tavily ohranijo `images` in `favicon`.
 
 Linkup: Stroški iskanja povezav so zabeleženi pri 0,005 USD za `depth` `fast` in `standard` ter 0,05 USD za `deep` ( [Cene povezav](https://docs.linkup.so/pages/documentation/development/pricing) ), ne glede na to, ali `depth` izvira iz `provider_options` ali nastavitev povezave.
@@ -1295,13 +1295,31 @@ o dovoljenjih; druga stopnja lahko svoje zahtevano vidno sklepanje še vedno ust
 
 ### Usmerjanje in konfiguracija
 
-| Končna točka          | Metoda   | Opis                             |
-| --------------------- | -------- | -------------------------------- |
-| `/api/models/alias`   | GET/POST | Vzdevki modelov                  |
-| `/api/models/catalog` | GET      | Vsi modeli po ponudniku in vrsti |
-| `/api/combos*`        | Različno | Upravljanje kombinacij           |
-| `/api/keys*`          | Različno | Upravljanje ključev API          |
-| `/api/pricing`        | GET      | Cene modelov                     |
+| Končna točka          | Metoda   | Opis                                 |
+| --------------------- | -------- | ------------------------------------ |
+| `/api/models`         | GET/PUT  | Seznam modelov / posodobitev vzdevka |
+| `/api/models/alias`   | GET/POST | Vzdevki modelov                      |
+| `/api/models/catalog` | GET      | Vsi modeli po ponudniku in vrsti     |
+| `/api/combos*`        | Različno | Upravljanje kombinacij               |
+| `/api/keys*`          | Različno | Upravljanje ključev API              |
+| `/api/pricing`        | GET      | Cene modelov                         |
+
+#### Izvor omejitev modela
+
+`GET /api/models?withLimits=1` (sprejme tudi `true`; `0`/`false` ali izpuščen parameter ohrani privzeti odgovor) vsakemu modelu doda `contextWindow`, `maxInputTokens`, `maxOutputTokens` in objekt `capsSource`. `capsSource` navede pravilo za vsako omejitev, zato je mogoče izslediti nepričakovano vrednost, na primer 128k pri modelu 1M. Razrešene vrednosti so enake tistim pri usmerjanju; parameter samo doda polja in nikoli ne spremeni vrednosti. Druge vrednosti `withLimits` so zavrnjene s kodo `400`.
+
+| Vrednost `capsSource`                        | Izvor                                                                       |
+| -------------------------------------------- | --------------------------------------------------------------------------- |
+| `override:context`                           | Shranjena preglasitev kontekstnega okna (`model_context_overrides`)         |
+| `override:max_input` / `override:max_output` | Shranjena preglasitev zmogljivosti `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Statična avtoritativna tabela kontekstnih oken                              |
+| `synced:<provider>/<model>`                  | Zapis zmogljivosti, sinhroniziran iz models.dev                             |
+| `registry:<provider>/<model>`                | Vnos v registru ponudnikov                                                  |
+| `spec:<model>`                               | Statična specifikacija modela                                               |
+| `effort-base:` predpona                      | Zapis osnovnega modela za različico s pripono ravni napora                  |
+| `none`                                       | Noben vir ne določa omejitve (vrednost je `null`)                           |
+
+Izvedba: `getResolvedModelCapabilitiesWithLimitSources()` v `src/lib/modelCapabilities.ts` in verige prednosti v `src/lib/modelCapabilityLimits.ts`.
 
 ### Uporaba in analitika
 

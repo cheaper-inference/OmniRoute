@@ -38,23 +38,31 @@ Kuna see arv on hinnanguline:
 
 ### Hinnateabe allikas
 
-Maksumused pärinevad hinnatabelist, mis määratakse järgmises tähtsuse järjekorras
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Kulud pärinevad ühendatud hinnatabelist failis [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), selles prioriteedijärjekorras (**kõrgeim esimesena**):
 
-1. **Kasutaja ülekirjutused** — hinnad, mille määrate juhtpaneelil / lõpp-punkti `PATCH /api/pricing` kaudu.
-2. **Sünkroonitud väline hinnateave** — hangitakse LiteLLM-i avalikust failist
-   `model_prices_and_context_window.json`, kui sünkroonimine on lubatud (salvestatakse eraldi
-   nimeruumi `pricing_synced`, et see ei kirjutaks kunagi teie ülekirjutusi üle).
-3. **Programmisisene vaikehinnastus** — sisaldub OmniRoute'is.
+1. **Kasutaja ülekirjutused** — juhtpaneelis või liidese `PATCH /api/pricing` kaudu määratud hinnad (nimeruum `pricing`).
+2. **models.dev sünkroonimine** — aadressilt `https://models.dev/api.json` saadud hinnad (nimeruum `models_dev_pricing`).
+3. **LiteLLM sünkroonimine** — hinnad LiteLLM avalikust failist `model_prices_and_context_window.json` (nimeruum `pricing_synced`).
+4. **Koodi sisseehitatud vaikeväärtused** — kaasasolevad hinnad kataloogis [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Välise hinnateabe sünkroonimine on **valikuline** ja vaikimisi keelatud. Asjakohased keskkonnamuutujad
-(vt [`.env.example`](../../.env.example)):
+Sama pakkuja/mudeli puhul kirjutavad kõrgema prioriteediga kihid üle madalamate kihtide vastavad väljad; ülemises kihis puuduvad väljad võivad endiselt tulla alumisest. Järjekord on fikseeritud ka siis, kui mõlemad sõltumatud sünkroonimistööd töötavad korraga. `GET /api/pricing?includeSources=1` tagastab `pricing` ja `sourceMap`; viimase mudelipõhised sildid (`user`, `modelsDev`, `litellm`, `default`) osutavad kõrgeima prioriteediga kihile, mis seda mudelit sisaldab.
 
-| Keskkonnamuutuja        | Vaikeväärtus | Otstarve                                                                  |
-| ----------------------- | ------------ | ------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`      | Lubab LiteLLM-i hinnateabe taustal sünkroonimise käivitamisel.            |
-| `PRICING_SYNC_INTERVAL` | `86400`      | Sünkroonimisintervall **sekundites** (vaikimisi kord päevas).             |
-| `PRICING_SYNC_SOURCES`  | `litellm`    | Komadega eraldatud allikate loend (praegu toetatakse ainult `litellm`-i). |
+**LiteLLM sünkroonimine** tuleb eraldi lubada ja see on vaikimisi keelatud. Selle keskkonnamuutujad (vt [`.env.example`](../../.env.example)) on:
+
+| Keskkonnamuutuja        | Vaikeväärtus | Otstarve                                                                              |
+| ----------------------- | ------------ | ------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`      | Lubab LiteLLM hindade sünkroonimise taustal.                                          |
+| `PRICING_SYNC_INTERVAL` | `86400`      | Sünkroonimisintervall **sekundites** (vaikimisi kord päevas).                         |
+| `PRICING_SYNC_SOURCES`  | `litellm`    | Allikate valik ainult selle sünkroonimise jaoks; praegu on toetatud ainult `litellm`. |
+
+**models.dev sünkroonimine** on LiteLLM sünkroonimisest eraldi ja samuti vaikimisi keelatud. Lubage see Seadetes (models.dev sünkroonimine) või kasutage neid muutujaid:
+
+| Keskkonnamuutuja           | Vaikeväärtus  | Otstarve                                                                                                                                             |
+| -------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(määramata)_ | Määramata väärtuse korral järgitakse Seadete lülitit; `1/true/on/yes` sunnib sisse ja `0/false/off/no` sunnib välja, isegi kui Seaded selle lubavad. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`       | models.dev sünkroonimise vaikeintervall sekundites (iga päev).                                                                                       |
+
+`PRICING_SYNC_SOURCES` **ei** luba models.dev sünkroonimist, vaid juhib ainult LiteLLM sünkroonimist. Kasutaja ülekirjutuse kustutamine ei tühjenda kumbagi sünkroonitud nimeruumi; jõustub järgmine saadaolev hinnakiht. Hinnata mudeli puhul kontrollige enne käsitsi ülekirjutuse lisamist mõlemat sünkroonimisseadet ja `sourceMap`.
 
 ### Maksumuse valem
 
@@ -168,16 +176,16 @@ pole märgitud teisiti.
 
 ### Hinnastamine
 
-| Meetod   | Lõpp-punkt              | Otstarve                                                                                                                |
-| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Praegune ühendatud hinnastamine (kasutaja + sünkroonitud + vaikeväärtused). `?includeSources=1` kuvab iga kirje allika. |
-| `PATCH`  | `/api/pricing`          | Hinnastamise alistamine kujul `{ provider: { model: { input, output, cached, … } } }`.                                  |
-| `DELETE` | `/api/pricing`          | Hinnastamise lähtestamine vaikeväärtustele (soovi korral piiratud parameetritega `?provider=&model=`).                  |
-| `GET`    | `/api/pricing/defaults` | Vaikimisi varumäärade kuvamine 1 miljoni kohta.                                                                         |
-| `GET`    | `/api/pricing/models`   | Mudeli järgi võtmetatud hinnastamine.                                                                                   |
-| `POST`   | `/api/pricing/sync`     | Välisallikatest (LiteLLM) käsitsi sünkroonimise käivitamine.                                                            |
-| `GET`    | `/api/pricing/sync`     | Praegune sünkroonimisolek.                                                                                              |
-| `DELETE` | `/api/pricing/sync`     | Kõigi sünkroonitud hinnastamisandmete kustutamine.                                                                      |
+| Meetod   | Lõpp-punkt              | Otstarve                                                                                                                                                                    |
+| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Nelja kihi ühendatud hinnad (kasutaja, models.dev, LiteLLM, vaikeväärtused). `?includeSources=1` tagastab `pricing` + `sourceMap`.                                          |
+| `PATCH`  | `/api/pricing`          | Hinnastamise alistamine kujul `{ provider: { model: { input, output, cached, … } } }`.                                                                                      |
+| `DELETE` | `/api/pricing`          | Eemaldab kasutaja hinnaülekirjutused (valikuliselt piiratud parameetriga `?provider=&model=`); sünkroonitud hinnad ja sisseehitatud vaikeväärtused jäävad varuvõimalusteks. |
+| `GET`    | `/api/pricing/defaults` | Vaikimisi varumäärade kuvamine 1 miljoni kohta.                                                                                                                             |
+| `GET`    | `/api/pricing/models`   | Mudeli järgi võtmetatud hinnastamine.                                                                                                                                       |
+| `POST`   | `/api/pricing/sync`     | Välisallikatest (LiteLLM) käsitsi sünkroonimise käivitamine.                                                                                                                |
+| `GET`    | `/api/pricing/sync`     | Praegune sünkroonimisolek.                                                                                                                                                  |
+| `DELETE` | `/api/pricing/sync`     | Tühjendab ainult LiteLLM sünkroonitud hinnad (`pricing_synced`); models.dev andmed on eraldi.                                                                               |
 
 ### Muud kuludega seotud lõpp-punktid
 

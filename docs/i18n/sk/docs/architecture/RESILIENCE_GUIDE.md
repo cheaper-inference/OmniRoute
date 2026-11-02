@@ -10,6 +10,8 @@ OmniRoute má tri odlišné, no vzájomne súvisiace mechanizmy odolnosti. Každ
 
 > Zdroj: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Prednosť prostredia a panela pri prepínačoch odolnosti.** Voliteľné prepínače inicializované z prostredia — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — poskytujú len _predvolenú hodnotu_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Logická hodnota uložená v `resilienceSettings` (Panel → **Nastavenia → Odolnosť** / `PATCH /api/resilience`, uložená v `key_value`) má prednosť pred prostredím: normalizácia (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) zachová existujúcu uloženú logickú hodnotu. Nastavenie premennej prostredia na `true`, ak panel už uložil `false`, preto nič nezmení — prepnite nastavenie v **Nastavenia → Odolnosť** alebo vymažte uložené pole.
+
 ## 1. Circuit breaker poskytovateľa
 
 **Rozsah:** celý poskytovateľ (napr. `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ Pod prahom sa poskytovateľ **nepovažuje** za chladnúceho; úspech okno vymaž
 - Základ pre API kľúč: 3 s
 - API kľúč 429: preferuje hlavičky `Retry-After`/reset z upstreamu alebo parsovateľný text resetu
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Oneskorenie opakovania podľa poskytovateľa.** Detail poskytovateľa obsahuje výber **Oneskorenie opakovania** (Auto, od 15s do 1h). Ukladá `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 cez `PATCH /api/resilience`). Ak chyba obmedzenia frekvencie neobsahuje pokyn upstreamu na opakovanie, hodnota nahradí stupňované čakanie poskytovateľa a vynuluje `backoffLevel` na 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Poradie od najvyššej prednosti: pokyn upstreamu, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` spojenia, oneskorenie poskytovateľa, premenná `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, stupňované čakanie. Auto odstráni pole. Ovplyvňuje iba dôvod obmedzenia frekvencie, nikdy koncové stavy.
 
 **Ochrana proti efektu thundering herd:** zabraňuje súbežným zlyhaniam nadmerne predlžovať cooldown alebo dvakrát inkrementovať `backoffLevel`.
 
@@ -530,7 +534,7 @@ až potom môže prerušiť. Počíta textové delty z výstupných udalostí Ch
 Responses API (konzervatívny odhad v bajtoch UTF-8), ignoruje udalosti obsahujúce iba
 usage a prázdne udalosti a pozastavuje posudzovanie, kým prebiehajú udalosti volania
 nástrojov alebo uvažovania (reasoning). Predvolene je vypnutý a možno ho povoliť
-pomocou `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; okno, zahrievanie, minimálna
+pomocou `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (táto hodnota prostredia určuje iba predvolenú hodnotu — uložená logická hodnota `resilienceSettings.streamRecovery.throughputWatchdog.enabled` má prednosť; pozrite poznámku o prednosti prostredia a panela na začiatku príručky); okno, zahrievanie, minimálna
 rýchlosť a minimálny merateľný výstup sú ohraničené štandardnou normalizačnou vrstvou
 nastavení odolnosti (resilience settings).
 

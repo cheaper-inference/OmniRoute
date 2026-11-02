@@ -888,7 +888,7 @@ Yanzu `time_range` na gama-gari yana isa ga dukkan masu samarwar biyu: Exa yana 
 timestamp), Tavily kuma yana samun `start_date` (`YYYY-MM-DD`). Kwanan wata da aka fayyace kai tsaye a `provider_options`
 yana maye gurbin wanda aka tsara.
 
-Sakamakon Exa yana riƙe `id`, `highlight_scores`, `summary`, `subpages`, `entities` da `extras` a cikin
+Sakamakon Exa yana riƙe `id`, `highlights` (duk ɓangarorin da aka haskaka, ba na farko da aka yi amfani da shi a matsayin `snippet` kawai ba), `highlight_scores`, `summary`, `subpages`, `entities` da `extras` a cikin
 `provider_raw`. Sakamakon Tavily yana riƙe `images` da `favicon`.
 
 Linkup: Ana yin rikodin farashin neman haɗin kai a $0.005 don `depth` `fast` da `standard` da $0.05 don `deep` ( [Farashin haɗin gwiwa](https://docs.linkup.so/pages/documentation/development/pricing) ), ko `depth` ya fito daga `provider_options` ko saitunan haɗin.
@@ -1294,13 +1294,31 @@ sama; mataki na biyu har yanzu zai iya samar da tunaninsa da aka nema wanda ake 
 
 ### Turawa & Daidaitawa
 
-| Mahaɗar API           | Hanya       | Bayani                               |
-| --------------------- | ----------- | ------------------------------------ |
-| `/api/models/alias`   | GET/POST    | Laƙabin samfura                      |
-| `/api/models/catalog` | GET         | Duk samfura bisa mai samarwa + nau'i |
-| `/api/combos*`        | Daban-daban | Gudanar da combo                     |
-| `/api/keys*`          | Daban-daban | Gudanar da maɓallan API              |
-| `/api/pricing`        | GET         | Farashin samfura                     |
+| Mahaɗar API           | Hanya       | Bayani                                |
+| --------------------- | ----------- | ------------------------------------- |
+| `/api/models`         | GET/PUT     | Jerin samfura / sabunta sunan madadin |
+| `/api/models/alias`   | GET/POST    | Laƙabin samfura                       |
+| `/api/models/catalog` | GET         | Duk samfura bisa mai samarwa + nau'i  |
+| `/api/combos*`        | Daban-daban | Gudanar da combo                      |
+| `/api/keys*`          | Daban-daban | Gudanar da maɓallan API               |
+| `/api/pricing`        | GET         | Farashin samfura                      |
+
+#### Asalin iyakokin samfurin
+
+`GET /api/models?withLimits=1` (ana kuma karɓar `true`; `0`/`false` ko rashin saka siga yana barin amsar tsoho yadda take) yana ƙara `contextWindow`, `maxInputTokens`, `maxOutputTokens` da abu na `capsSource` ga kowane layin samfurin. `capsSource` yana nuna dokar da ta samar da kowace iyaka, domin a iya gano asalin iyaka mai ban mamaki, misali 128k a samfurin 1M. Waɗannan ƙimomin da aka warware su ne waɗanda tsarin karkatarwa yake amfani da su; tutar tana ƙara filaye ne kawai, ba ta taɓa sauya ƙima. Ana ƙin duk wata ƙimar `withLimits` dabam da amsar `400`.
+
+| `capsSource` ƙima                            | Asali                                                                              |
+| -------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `override:context`                           | Sauyin taga mahalli da aka adana na dindindin (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | Sauyin iyawar `max_input_tokens` / `max_output_tokens` da aka adana na dindindin   |
+| `static-authoritative:<provider>/<model>`    | Teburin tagogin mahalli na tsaye mai iko                                           |
+| `synced:<provider>/<model>`                  | Layin iyawa da aka daidaita daga models.dev                                        |
+| `registry:<provider>/<model>`                | Bayanan rajistar mai samarwa                                                       |
+| `spec:<model>`                               | Ƙayyadaddun bayanan samfurin na tsaye                                              |
+| `effort-base:` gaban suna                    | Layin da aka aro daga samfurin tushe na nau’in da ke da ƙarin sunan matakin ƙoƙari |
+| `none`                                       | Babu tushe da ya bayyana iyakar (ƙimar ita ce `null`)                              |
+
+Aiwatarwa: `getResolvedModelCapabilitiesWithLimitSources()` a `src/lib/modelCapabilities.ts` da jerin fifiko a `src/lib/modelCapabilityLimits.ts`.
 
 ### Amfani & Nazari
 

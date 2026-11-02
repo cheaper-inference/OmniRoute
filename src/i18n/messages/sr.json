@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Овим ће тренутно повезани провајдери/модели који одговарају овом шаблону бити снимљени у комбинацију која се може уређивати.",
     "duplicateAutoComboFailedPrefix": "Neuspešno dupliranje auto-kombinacije:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
-    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}"
+    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}",
+    "exportCombos": "Извези",
+    "exportCombosFailed": "Извоз комбинација није успео",
+    "importCombos": "Увези",
+    "importCombosTitle": "Увези комбинације",
+    "importCombosInvalidFile": "Ова датотека није исправан извоз комбинација.",
+    "importCombosSummary": "Комбинације у датотеци: {total} ({fresh} нових, {conflicting} са именом које већ постоји).",
+    "importCombosMergeHint": "Спајање задржава све постојеће комбинације и прескаче оне чије име већ постоји. Везе и акредитиви се никада не увозе.",
+    "importCombosReplaceHint": "Замени све брише ваше постојеће комбинације ({current}) и уместо њих увози датотеку. Ово се не може опозвати.",
+    "importCombosMerge": "Споји",
+    "importCombosReplace": "Замени све",
+    "importCombosDone": "Увезене комбинације: {created}. Прескочено: {skipped}.",
+    "importCombosFailed": "Увоз комбинација није успео",
+    "importCombosWarnings": "Увезено са упозорењима"
   },
   "costs": {
     "title": "Troškovi",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ChatGPT прилагођени конектор",
     "doctorChecking": "Провера статуса…",
     "doctorCheck": "Провери статус лекара",
-    "fallbackRetryBackendTitle": "Задња резорна линија за поновни покушај"
+    "fallbackRetryBackendTitle": "Задња резорна линија за поновни покушај",
+    "retryDelayTitle": "Кашњење поновног покушаја",
+    "retryDelayDesc": "Колико дуго веза мирује након грешке ограничења брзине када добављач не наведе када поново покушати. Аутоматски режим користи уграђено одлагање; време ресетовања које пошаље добављач увек има предност.",
+    "retryDelayAuto": "Аутоматски",
+    "retryDelaySaved": "Кашњење поновног покушаја је сачувано",
+    "retryDelayUpdateFailed": "Ажурирање кашњења поновног покушаја није успело"
   },
   "settings": {
     "title": "Подешавања",

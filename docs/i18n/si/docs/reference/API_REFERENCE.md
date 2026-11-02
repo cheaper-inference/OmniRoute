@@ -882,7 +882,7 @@ Tavily විසින් `search_type: "finance"` (`topic: "finance"`) ද ප�
 timestamp) ලැබෙන අතර Tavily වෙත `start_date` (`YYYY-MM-DD`) ලැබේ. `provider_options` තුළ ඇති පැහැදිලි දිනයක්
 සිතියම්ගත කළ දිනය අභිබවා යයි.
 
-Exa ප්රතිඵල `id`, `highlight_scores`, `summary`, `subpages`, `entities` සහ `extras`
+Exa ප්රතිඵල `id`, `highlights` (`snippet` ලෙස ගන්නා පළමු කොටස පමණක් නොව, උද්දීපනය කළ සියලු කොටස්), `highlight_scores`, `summary`, `subpages`, `entities` සහ `extras`
 `provider_raw` තුළ රඳවා ගනී. Tavily ප්රතිඵල `images` සහ `favicon` රඳවා ගනී.
 
 Linkup සෙවුම් පිරිවැය `depth` `fast` සහ `standard` සඳහා $0.005 සහ `deep` සඳහා $0.05 ( [Linkup මිලකරණය](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` පැමිණෙන්නේ `provider_options` හෝ සම්බන්ධතා සැකසුම් වලින් වුවද.
@@ -1290,13 +1290,31 @@ Claude-ආකෘති ඉල්ලීම්වල ඇති වර්ගීක�
 
 ### මාර්ගගත කිරීම සහ වින්යාසය
 
-| අන්ත ලක්ෂ්යය          | ක්රමය    | විස්තරය                             |
-| --------------------- | -------- | ----------------------------------- |
-| `/api/models/alias`   | GET/POST | ආකෘති අන්වර්ථ නාම                   |
-| `/api/models/catalog` | GET      | සැපයුම්කරු + වර්ගය අනුව සියලු ආකෘති |
-| `/api/combos*`        | විවිධ    | සංයෝජන කළමනාකරණය                    |
-| `/api/keys*`          | විවිධ    | API යතුරු කළමනාකරණය                 |
-| `/api/pricing`        | GET      | ආකෘති මිලකරණය                       |
+| අන්ත ලක්ෂ්යය          | ක්රමය    | විස්තරය                                    |
+| --------------------- | -------- | ------------------------------------------ |
+| `/api/models`         | GET/PUT  | මාදිලි ලැයිස්තුව / අන්වර්ථ නාම යාවත්කාලීනය |
+| `/api/models/alias`   | GET/POST | ආකෘති අන්වර්ථ නාම                          |
+| `/api/models/catalog` | GET      | සැපයුම්කරු + වර්ගය අනුව සියලු ආකෘති        |
+| `/api/combos*`        | විවිධ    | සංයෝජන කළමනාකරණය                           |
+| `/api/keys*`          | විවිධ    | API යතුරු කළමනාකරණය                        |
+| `/api/pricing`        | GET      | ආකෘති මිලකරණය                              |
+
+#### මාදිලි සීමාවල මූලාශ්‍රය
+
+`GET /api/models?withLimits=1` සඳහා `true` ද පිළිගනී; `0`/`false` හෝ පරාමිතිය නොදීම පෙරනිමි ප්‍රතිචාරය වෙනස් නොකරයි. එය සෑම මාදිලියකටම `contextWindow`, `maxInputTokens`, `maxOutputTokens` සහ `capsSource` වස්තුව එක් කරයි. එක් එක් සීමාව සැපයූ රීතිය `capsSource` පෙන්වන නිසා, 1M මාදිලියක 128k වැනි අනපේක්ෂිත අගයක මූලය සොයාගත හැක. නිර්ණය කළ අගයන් මාර්ගගත කිරීම භාවිත කරන ඒවාමය; ධජය ක්ෂේත්‍ර පමණක් එක් කරයි, අගයන් වෙනස් නොකරයි. වෙනත් `withLimits` අගයන් `400` සමඟ ප්‍රතික්ෂේප වේ.
+
+| `capsSource` අගය                             | මූලාශ්‍රය                                                        |
+| -------------------------------------------- | ---------------------------------------------------------------- |
+| `override:context`                           | සුරැකි සන්දර්භ කවුළු ආදේශය (`model_context_overrides`)           |
+| `override:max_input` / `override:max_output` | සුරැකි හැකියා ආදේශ `max_input_tokens` / `max_output_tokens`      |
+| `static-authoritative:<provider>/<model>`    | ප්‍රමුඛ මූලාශ්‍රය වන ස්ථිතික සන්දර්භ කවුළු වගුව                  |
+| `synced:<provider>/<model>`                  | models.dev වෙතින් සමමුහුර්ත කළ හැකියා පේළිය                      |
+| `registry:<provider>/<model>`                | සැපයුම්කරු ලේඛනයේ සටහන                                           |
+| `spec:<model>`                               | ස්ථිතික මාදිලි පිරිවිතරය                                         |
+| `effort-base:` පෙරඈඳුම                       | උත්සාහ මට්ටමේ පසුඈඳුමක් ඇති ප්‍රභේදයේ මූලික මාදිලියෙන් ගත් පේළිය |
+| `none`                                       | කිසිදු මූලාශ්‍රයක් සීමාව දක්වා නැත (අගය `null`)                  |
+
+ක්‍රියාත්මක කිරීම: `src/lib/modelCapabilities.ts` හි `getResolvedModelCapabilitiesWithLimitSources()` සහ `src/lib/modelCapabilityLimits.ts` හි ප්‍රමුඛතා දාම.
 
 ### භාවිතය සහ විශ්ලේෂණ
 

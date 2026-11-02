@@ -887,7 +887,7 @@ Tavily такође прихвата `search_type: "finance"` (`topic: "finance"
 временска ознака), а Tavily добија `start_date` (`YYYY-MM-DD`). Експлицитни датум у `provider_options`
 има предност над мапираним датумом.
 
-Exa резултати задржавају `id`, `highlight_scores`, `summary`, `subpages`, `entities` и `extras` у
+Exa резултати задржавају `id`, `highlights` (све истакнуте одломке, не само први који се користи као `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` и `extras` у
 `provider_raw`. Tavily резултати задржавају `images` и `favicon`.
 
 Linkup: Цена претраге везе је 0,005 УСД за `depth` `fast` и `standard` и 0,05 УСД за `deep` ( [цене везе](https://docs.linkup.so/pages/documentation/development/pricing) ), без обзира да ли `depth` долази из `provider_options` или подешавања везе.
@@ -1298,11 +1298,29 @@ Claude формата, а не називе модела или ограниче
 
 | Крајња тачка          | Метод     | Опис                              |
 | --------------------- | --------- | --------------------------------- |
+| `/api/models`         | GET/PUT   | Списак модела / ажурирање алијаса |
 | `/api/models/alias`   | GET/POST  | Алијаси модела                    |
 | `/api/models/catalog` | GET       | Сви модели према добављачу и типу |
 | `/api/combos*`        | Различити | Управљање комбинацијама           |
 | `/api/keys*`          | Различити | Управљање API кључевима           |
 | `/api/pricing`        | GET       | Цене модела                       |
+
+#### Порекло ограничења модела
+
+`GET /api/models?withLimits=1` (прихвата и `true`; `0`/`false` или изостављање оставља подразумевани одговор непромењеним) додаје сваком моделу `contextWindow`, `maxInputTokens`, `maxOutputTokens` и објекат `capsSource`. `capsSource` наводи правило које је дало свако ограничење, па се може утврдити порекло неочекиване вредности, нпр. 128k за модел 1M. Разрешене вредности су исте које користи рутирање; параметар само додаје поља, никада не мења вредности. Свака друга вредност `withLimits` одбија се кодом `400`.
+
+| Вредност `capsSource`                        | Порекло                                                                  |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| `override:context`                           | Сачувано преписивање контекстног прозора (`model_context_overrides`)     |
+| `override:max_input` / `override:max_output` | Сачувано преписивање могућности `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Статичка меродавна табела контекстних прозора                            |
+| `synced:<provider>/<model>`                  | Запис могућности синхронизован из models.dev                             |
+| `registry:<provider>/<model>`                | Ставка регистра провајдера                                               |
+| `spec:<model>`                               | Статичка спецификација модела                                            |
+| `effort-base:` префикс                       | Запис преузет из основног модела варијанте са суфиксом нивоа напора      |
+| `none`                                       | Ниједан извор не наводи ограничење (вредност је `null`)                  |
+
+Имплементација: `getResolvedModelCapabilitiesWithLimitSources()` у `src/lib/modelCapabilities.ts` и ланци приоритета у `src/lib/modelCapabilityLimits.ts`.
 
 ### Коришћење и аналитика
 

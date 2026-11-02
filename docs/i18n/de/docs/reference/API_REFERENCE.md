@@ -880,7 +880,7 @@ Das generische `time_range` erreicht nun beide Anbieter: Exa erhält `startPubli
 Zeitstempel) und Tavily erhält `start_date` (`YYYY-MM-DD`). Ein explizites Datum in `provider_options`
 überschreibt den zugeordneten Wert.
 
-Exa-Ergebnisse behalten `id`, `highlight_scores`, `summary`, `subpages`, `entities` und `extras` in
+Exa-Ergebnisse behalten `id`, `highlights` (alle hervorgehobenen Textstellen, nicht nur die erste als `snippet` verwendete), `highlight_scores`, `summary`, `subpages`, `entities` und `extras` in
 `provider_raw`. Tavily-Ergebnisse behalten `images` und `favicon`.
 
 Die Linkup-Suchkosten betragen 0,005 $ für `depth` `fast` und `standard` und 0,05 $ für `deep` ( [Linkup-Preise](https://docs.linkup.so/pages/documentation/development/pricing) ), unabhängig davon, ob `depth` von `provider_options` oder den Verbindungseinstellungen stammt.
@@ -1289,11 +1289,29 @@ bei; die zweite Stufe kann ihr angefordertes sichtbares Reasoning weiterhin als 
 
 | Endpunkt              | Methode  | Beschreibung                       |
 | --------------------- | -------- | ---------------------------------- |
+| `/api/models`         | GET/PUT  | Modellliste / Alias aktualisieren  |
 | `/api/models/alias`   | GET/POST | Modellaliase                       |
 | `/api/models/catalog` | GET      | Alle Modelle nach Anbieter und Typ |
 | `/api/combos*`        | Diverse  | Combo-Verwaltung                   |
 | `/api/keys*`          | Diverse  | API-Schlüsselverwaltung            |
 | `/api/pricing`        | GET      | Modellpreise                       |
+
+#### Herkunft der Modellgrenzen
+
+`GET /api/models?withLimits=1` (auch `true`; `0`/`false` oder das Weglassen erhält die Standardantwort unverändert) ergänzt jede Modellzeile um `contextWindow`, `maxInputTokens`, `maxOutputTokens` und ein `capsSource`-Objekt. `capsSource` nennt die Regel, aus der die jeweilige Grenze stammt; so lässt sich etwa eine unerwartete Grenze von 128k bei einem 1M-Modell zurückverfolgen. Die aufgelösten Werte entsprechen denen des Routings; das Flag ergänzt ausschließlich Felder und ändert niemals einen Wert. Andere Werte für `withLimits` werden mit `400` abgelehnt.
+
+| `capsSource` Wert                            | Herkunft                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `override:context`                           | Gespeicherte Überschreibung des Kontextfensters (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | Gespeicherte Überschreibung der Fähigkeiten `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Statische maßgebliche Tabelle der Kontextfenster                                     |
+| `synced:<provider>/<model>`                  | Von models.dev synchronisierte Fähigkeitszeile                                       |
+| `registry:<provider>/<model>`                | Eintrag im Anbieterregister                                                          |
+| `spec:<model>`                               | Statische Modellspezifikation                                                        |
+| `effort-base:` Präfix                        | Vom Basismodell einer Variante mit Aufwandssuffix übernommene Zeile                  |
+| `none`                                       | Keine Quelle deklariert die Grenze (Wert ist `null`)                                 |
+
+Implementierung: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts` und die Prioritätsketten in `src/lib/modelCapabilityLimits.ts`.
 
 ### Nutzung und Analysen
 

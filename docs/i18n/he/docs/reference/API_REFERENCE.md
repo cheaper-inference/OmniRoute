@@ -887,7 +887,7 @@ Tavily מקבל גם `search_type: "finance"` ‏(`topic: "finance"`).
 ו-Tavily מקבל `start_date` ‏(`YYYY-MM-DD`). תאריך מפורש ב-`provider_options`
 דורס את התאריך שמופה.
 
-תוצאות Exa שומרות את `id`, `highlight_scores`, `summary`, `subpages`, `entities` ו-`extras` בתוך
+תוצאות Exa שומרות את `id`, `highlights` (כל הקטעים המודגשים, ולא רק הראשון המשמש בתור `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ו-`extras` בתוך
 `provider_raw`. תוצאות Tavily שומרות את `images` ואת `favicon`.
 
 Linkup: עלות חיפוש קישור נרשמת ב-$0.005 עבור `depth` `fast` ו- `standard` ו-$0.05 עבור `deep` ( [מחיר Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), בין אם `depth` מגיע מ- `provider_options` או מהגדרות החיבור.
@@ -1295,13 +1295,31 @@ https://chatgpt.com/backend-api/wham/usage`, ‏`GET .../wham/rate-limit-reset-c
 
 ### ניתוב ותצורה
 
-| נקודת קצה             | שיטה     | תיאור                   |
-| --------------------- | -------- | ----------------------- |
-| `/api/models/alias`   | GET/POST | כינויים למודלים         |
-| `/api/models/catalog` | GET      | כל המודלים לפי ספק וסוג |
-| `/api/combos*`        | שונות    | ניהול שילובים           |
-| `/api/keys*`          | שונות    | ניהול מפתחות API        |
-| `/api/pricing`        | GET      | תמחור מודלים            |
+| נקודת קצה             | שיטה     | תיאור                      |
+| --------------------- | -------- | -------------------------- |
+| `/api/models`         | GET/PUT  | רשימת מודלים / עדכון כינוי |
+| `/api/models/alias`   | GET/POST | כינויים למודלים            |
+| `/api/models/catalog` | GET      | כל המודלים לפי ספק וסוג    |
+| `/api/combos*`        | שונות    | ניהול שילובים              |
+| `/api/keys*`          | שונות    | ניהול מפתחות API           |
+| `/api/pricing`        | GET      | תמחור מודלים               |
+
+#### מקור מגבלות המודל
+
+`GET /api/models?withLimits=1` (גם `true` מתקבל; `0`/`false` או השמטת הפרמטר משאירים את תשובת ברירת המחדל ללא שינוי) מוסיף לכל שורת מודל את `contextWindow`, `maxInputTokens`, `maxOutputTokens` ואובייקט `capsSource`. `capsSource` מציין את הכלל שסיפק כל מגבלה, כך שאפשר לאתר את המקור של מגבלה מפתיעה, למשל 128k במודל של 1M. הערכים שנקבעו הם אותם ערכים המשמשים לניתוב; הדגל רק מוסיף שדות ולעולם אינו משנה ערך. כל ערך אחר של `withLimits` נדחה עם `400`.
+
+| `capsSource` ערך                             | מקור                                                                       |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `override:context`                           | עקיפה שמורה באופן קבוע של חלון ההקשר (`model_context_overrides`)           |
+| `override:max_input` / `override:max_output` | עקיפה שמורה באופן קבוע של היכולות `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | טבלה סטטית מוסמכת של חלונות הקשר                                           |
+| `synced:<provider>/<model>`                  | שורת יכולות שסונכרנה מ־models.dev                                          |
+| `registry:<provider>/<model>`                | רשומה במרשם הספקים                                                         |
+| `spec:<model>`                               | מפרט סטטי של המודל                                                         |
+| `effort-base:` תחילית                        | שורה שנלקחה ממודל הבסיס של גרסה עם סיומת רמת מאמץ                          |
+| `none`                                       | אף מקור אינו מצהיר על המגבלה (הערך הוא `null`)                             |
+
+מימוש: `getResolvedModelCapabilitiesWithLimitSources()` בתוך `src/lib/modelCapabilities.ts` ושרשראות הקדימות בתוך `src/lib/modelCapabilityLimits.ts`.
 
 ### שימוש וניתוח נתונים
 

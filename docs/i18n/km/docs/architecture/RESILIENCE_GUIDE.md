@@ -10,6 +10,8 @@ OmniRoute មានយន្តការភាពធន់ (resilience) បី�
 
 > ប្រភព: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **អាទិភាពរវាងបរិស្ថាននិងផ្ទាំងគ្រប់គ្រងសម្រាប់កុងតាក់ភាពធន់។** កុងតាក់ភាពធន់ដែលបើកតាមជម្រើស ហើយទទួលតម្លៃដំបូងពីបរិស្ថាន — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — ផ្តល់តែ _តម្លៃលំនាំដើម_ ប៉ុណ្ណោះ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`)។ តម្លៃប៊ូលីនដែលបានរក្សាទុកក្នុង `resilienceSettings` (ផ្ទាំងគ្រប់គ្រង → **ការកំណត់ → ភាពធន់** / `PATCH /api/resilience`, រក្សាទុកក្នុង `key_value`) មានអាទិភាពលើតម្លៃបរិស្ថាន៖ ការធ្វើនិយតកម្ម (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) រក្សាតម្លៃប៊ូលីនដែលបានរក្សាទុក នៅពេលវាមាន។ ដូច្នេះ នៅក្នុងការដាក់ឱ្យប្រើដែលផ្ទាំងគ្រប់គ្រងបានរក្សាទុក `false` រួចហើយ ការកំណត់អថេរបរិស្ថានបែបនេះជា `true` មិនផ្លាស់ប្តូរអ្វីឡើយ — សូមប្តូរកុងតាក់នៅក្នុង **ការកំណត់ → ភាពធន់** ឬសម្អាតវាលដែលបានរក្សាទុក។
+
 ## 1. Circuit Breaker កម្រិត Provider
 
 **វិសាលភាព:** ទាំងមូល provider (ឧ. `glm`, `openai`, `anthropic`)។
@@ -88,6 +90,8 @@ OmniRoute មានយន្តការភាពធន់ (resilience) បី�
 - មូលដ្ឋាន API-key: 3 វិនាទី
 - API-key 429: ផ្តល់អាទិភាពដល់ `Retry-After`/ក្បាលសាឡើងវិញ (reset headers)/អត្ថបទសាឡើងវិញដែលអាចញ៉ាំងបាន ពីខាងលើ
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**រយៈពេលពន្យារការព្យាយាមម្តងទៀតសម្រាប់អ្នកផ្តល់សេវានីមួយៗ។** ទំព័រលម្អិតរបស់អ្នកផ្តល់សេវាមានបញ្ជីជ្រើស **រយៈពេលពន្យារការព្យាយាមម្តងទៀត** (Auto, ពី 15s ដល់ 1h)។ វារក្សាទុក `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 តាមរយៈ `PATCH /api/resilience`)។ នៅពេលកំហុសកំណត់អត្រាមិនមានសញ្ញាណែនាំឱ្យព្យាយាមម្តងទៀតពីសេវាខាងលើ តម្លៃនេះជំនួសរយៈពេលរង់ចាំដែលបានកែសម្រួលតាមមាត្រដ្ឋានរបស់អ្នកផ្តល់សេវា ហើយកំណត់ `backoffLevel` ឡើងវិញជា 0 (`open-sse/services/rotationConfig.ts::overrideFor`)។ អាទិភាពសម្រាប់កំហុសកំណត់អត្រា ចាប់ពីខ្ពស់បំផុត៖ សញ្ញាណែនាំការព្យាយាមម្តងទៀតពីសេវាខាងលើ បន្ទាប់មក `providerSpecificData.rotationOverrides.rateLimitResetSeconds` របស់ការតភ្ជាប់នីមួយៗ បន្ទាប់មករយៈពេលពន្យារការព្យាយាមរបស់អ្នកផ្តល់សេវា បន្ទាប់មកអថេរបរិស្ថាន `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` ហើយបន្ទាប់មករយៈពេលរង់ចាំដែលបានកែសម្រួលតាមមាត្រដ្ឋាន។ Auto ដកវាលចេញ។ វាប៉ះពាល់តែមូលហេតុកំណត់អត្រាប៉ុណ្ណោះ ហើយមិនដែលប៉ះពាល់ស្ថានភាពបញ្ចប់ទេ។
 
 **ការការពារប្រឆាំងនឹង thundering-herd:** ការពារកុំឱ្យការបរាជ័យកើតឡើងព្រមគ្នាបន្លាយពេលផ្អាកលើសកំណត់ ឬបន្ថែម `backoffLevel` ទ្វេដង។
 
@@ -433,7 +437,7 @@ quota_exhausted / auth_error / not_found / not_found_local:
 
 ការការពារ `resilienceSettings.streamRecovery.throughputWatchdog` ដែលជាជម្រើស រកឃើញ upstream ដែលនៅតែផ្ញើ chunks ប៉ុន្តែបង្កើតលទ្ធផល assistant ក្រោមអត្រាលទ្ធផលមានប្រយោជន៍ដែលបានកំណត់។ វាត្រូវបានធ្វើឱ្យខុសពី idle timeout ដោយចេតនា៖ heartbeats និង metadata មិនកំណត់ឡើងវិញឧបករណ៍រាប់ពេលណាមួយទេ ហើយមិនត្រូវបានរាប់ថាជាវឌ្ឍនភាពទេ។ វាក៏ខុសពី hard attempt deadline (#9153) ដែរ ដែលនៅតែជាព្រលឹងសុវត្ថិភាពដាច់ខាត ដោយមិនគិតពីគុណភាពលទ្ធផល។
 
-Watchdog ទាមទាររយៈពេល warm-up តាមដោយ rolling window ពេញលេញ មុនពេលវាអាចបោះបង់ (abort) បាន។ វារាប់ text deltas ពីព្រឹត្តិការណ៍លទ្ធផល Chat Completions និង Responses API (proxy បៃបី UTF-8 ដោយប្រុងប្រយ័ត្ន) មិនអើពើនឹងព្រឹត្តិការណ៍ដែលមានតែ usage និងព្រឹត្តិការណ៍ទទេ ហើយផ្អាកការវិនិច្ឆ័យ ខណៈពេលដែលព្រឹត្តិការណ៍ tool-call ឬ reasoning កំពុងដំណើរការ។ វាត្រូវបានបិទជាលំនាំដើម ហើយអាចបើកបានដោយ `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; window, warm-up, អត្រាអប្បបរមា និងលទ្ធផលដែលអាចវាស់វែងបានអប្បបរមា ត្រូវបានកំណត់ព្រំដោយស្រទាប់ normalization នៃការកំណត់ resilience ធម្មតា។
+Watchdog ទាមទាររយៈពេល warm-up តាមដោយ rolling window ពេញលេញ មុនពេលវាអាចបោះបង់ (abort) បាន។ វារាប់ text deltas ពីព្រឹត្តិការណ៍លទ្ធផល Chat Completions និង Responses API (proxy បៃបី UTF-8 ដោយប្រុងប្រយ័ត្ន) មិនអើពើនឹងព្រឹត្តិការណ៍ដែលមានតែ usage និងព្រឹត្តិការណ៍ទទេ ហើយផ្អាកការវិនិច្ឆ័យ ខណៈពេលដែលព្រឹត្តិការណ៍ tool-call ឬ reasoning កំពុងដំណើរការ។ វាត្រូវបានបិទជាលំនាំដើម ហើយអាចបើកបានដោយ `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (តម្លៃបរិស្ថាននោះផ្តល់តែតម្លៃលំនាំដើម — តម្លៃប៊ូលីន `resilienceSettings.streamRecovery.throughputWatchdog.enabled` ដែលបានរក្សាទុកមានអាទិភាព; សូមមើលកំណត់សម្គាល់អំពីអាទិភាពបរិស្ថាននិងផ្ទាំងគ្រប់គ្រងនៅដើមមគ្គុទ្ទេសក៍នេះ); window, warm-up, អត្រាអប្បបរមា និងលទ្ធផលដែលអាចវាស់វែងបានអប្បបរមា ត្រូវបានកំណត់ព្រំដោយស្រទាប់ normalization នៃការកំណត់ resilience ធម្មតា។
 
 នៅពេលបើក ការបោះបង់របស់ watchdog ត្រូវបានអនុវត្តតែលើការព្យាយាម upstream ដែលសកម្មប៉ុណ្ណោះ។ មុនពេលមានបៃណាមួយដែលអាចមើលឃើញដោយ client ផ្លូវ early-recovery គណនីដូចគ្នាដែលមានស្រាប់ អាចបើកការព្យាយាមឡើងវិញបាន។ បន្ទាប់ពី commit ស្ទ្រីមមិនត្រូវបាន replay ដោយងងឹតងងុលទេ; មានតែកិច្ចសន្យាបន្តកណ្តាលស្ទ្រីមដោយសុវត្ថិភាពដែលមានស្រាប់ប៉ុណ្ណោះ ដែលអាចប៉ះ (stitch) suffix បាន។ Finalization នៅតែជា single-shot ដូច្នេះការគណនា usage និងការដោះលែង semaphore មិនត្រូវបានស្ទួនទេ។
 

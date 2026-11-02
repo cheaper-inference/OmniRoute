@@ -40,23 +40,31 @@ Vì con số này là một ước tính:
 
 ### Nguồn giá
 
-Chi phí được lấy từ một bảng giá, được phân giải theo thứ tự ưu tiên sau
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Chi phí lấy từ bảng giá hợp nhất trong [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), theo thứ tự (**ưu tiên cao nhất trước**):
 
-1. **Ghi đè của người dùng** — mức giá bạn đặt trong bảng điều khiển / thông qua `PATCH /api/pricing`.
-2. **Giá bên ngoài đã đồng bộ** — được lấy từ
-   `model_prices_and_context_window.json` công khai của LiteLLM khi tính năng đồng bộ được bật (được lưu trong một
-   không gian tên `pricing_synced` riêng biệt để không bao giờ ghi đè các thiết lập của bạn).
-3. **Giá mặc định được mã hóa cứng** — đi kèm với OmniRoute.
+1. **Ghi đè của người dùng** — giá đặt trong bảng điều khiển hoặc qua `PATCH /api/pricing` (không gian tên `pricing`).
+2. **Đồng bộ models.dev** — giá từ `https://models.dev/api.json` (không gian tên `models_dev_pricing`).
+3. **Đồng bộ LiteLLM** — giá từ tệp công khai `model_prices_and_context_window.json` của LiteLLM (không gian tên `pricing_synced`).
+4. **Mặc định tích hợp** — mức giá đi kèm [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Tính năng đồng bộ giá bên ngoài là **tùy chọn tham gia** và bị tắt theo mặc định. Các biến môi trường liên quan
-(xem [`.env.example`](../../.env.example)):
+Với cùng nhà cung cấp/mô hình, lớp trên ghi đè trường tương ứng ở lớp dưới; trường thiếu vẫn lấy từ lớp dưới. Thứ tự cố định ngay cả khi cả hai tác vụ đồng bộ độc lập chạy đồng thời. `GET /api/pricing?includeSources=1` trả về `pricing` và `sourceMap`; nhãn từng mô hình (`user`, `modelsDev`, `litellm`, `default`) chỉ lớp ưu tiên cao nhất chứa mô hình.
 
-| Biến môi trường         | Mặc định  | Mục đích                                                                  |
-| ----------------------- | --------- | ------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Bật đồng bộ giá LiteLLM nền khi khởi động.                                |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Khoảng thời gian đồng bộ tính bằng **giây** (mặc định hằng ngày).         |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Danh sách nguồn được phân tách bằng dấu phẩy (hiện chỉ hỗ trợ `litellm`). |
+**Đồng bộ LiteLLM** cần chủ động bật, mặc định tắt. Các biến môi trường của nó (xem [`.env.example`](../../.env.example)):
+
+| Biến môi trường         | Mặc định  | Mục đích                                                          |
+| ----------------------- | --------- | ----------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Bật đồng bộ giá LiteLLM trong nền.                                |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Khoảng thời gian đồng bộ tính bằng **giây** (mặc định hằng ngày). |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Chọn nguồn chỉ cho đồng bộ này; hiện chỉ hỗ trợ `litellm`.        |
+
+**Đồng bộ models.dev** độc lập với đồng bộ LiteLLM và cũng mặc định tắt. Bật trong Cài đặt (đồng bộ models.dev) hoặc dùng các biến sau:
+
+| Biến môi trường            | Mặc định     | Mục đích                                                                                                          |
+| -------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(chưa đặt)_ | Chưa đặt thì theo công tắc Cài đặt; `1/true/on/yes` buộc bật và `0/false/off/no` buộc tắt, kể cả khi Cài đặt bật. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Khoảng đồng bộ models.dev mặc định tính bằng giây (hằng ngày).                                                    |
+
+`PRICING_SYNC_SOURCES` **không** bật models.dev; nó chỉ điều khiển đồng bộ LiteLLM. Xóa ghi đè người dùng không xóa không gian tên đồng bộ nào; lớp giá khả dụng tiếp theo có hiệu lực. Với mô hình chưa có giá, kiểm tra cả hai cài đặt đồng bộ và `sourceMap` trước khi ghi đè thủ công.
 
 ### Công thức tính chi phí
 
@@ -170,16 +178,16 @@ có ghi chú khác.
 
 ### Định giá
 
-| Phương thức | Endpoint                | Mục đích                                                                                                        |
-| ----------- | ----------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `GET`       | `/api/pricing`          | Giá tổng hợp hiện tại (người dùng + đã đồng bộ + mặc định). Dùng `?includeSources=1` để xem nguồn của từng mục. |
-| `PATCH`     | `/api/pricing`          | Ghi đè giá cho `{ provider: { model: { input, output, cached, … } } }`.                                         |
-| `DELETE`    | `/api/pricing`          | Đặt lại giá về mặc định (có thể giới hạn phạm vi bằng `?provider=&model=`).                                     |
-| `GET`       | `/api/pricing/defaults` | Hiển thị mức giá dự phòng mặc định trên mỗi 1 triệu đơn vị.                                                     |
-| `GET`       | `/api/pricing/models`   | Giá được lập chỉ mục theo mô hình.                                                                              |
-| `POST`      | `/api/pricing/sync`     | Kích hoạt đồng bộ thủ công từ các nguồn bên ngoài (LiteLLM).                                                    |
-| `GET`       | `/api/pricing/sync`     | Trạng thái đồng bộ hiện tại.                                                                                    |
-| `DELETE`    | `/api/pricing/sync`     | Xóa toàn bộ dữ liệu giá đã đồng bộ.                                                                             |
+| Phương thức | Endpoint                | Mục đích                                                                                                                       |
+| ----------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`       | `/api/pricing`          | Giá hợp nhất bốn lớp (người dùng, models.dev, LiteLLM, mặc định). `?includeSources=1` trả về `pricing` + `sourceMap`.          |
+| `PATCH`     | `/api/pricing`          | Ghi đè giá cho `{ provider: { model: { input, output, cached, … } } }`.                                                        |
+| `DELETE`    | `/api/pricing`          | Xóa ghi đè giá của người dùng (có thể giới hạn bằng `?provider=&model=`); giá đồng bộ hoặc mặc định tích hợp vẫn làm dự phòng. |
+| `GET`       | `/api/pricing/defaults` | Hiển thị mức giá dự phòng mặc định trên mỗi 1 triệu đơn vị.                                                                    |
+| `GET`       | `/api/pricing/models`   | Giá được lập chỉ mục theo mô hình.                                                                                             |
+| `POST`      | `/api/pricing/sync`     | Kích hoạt đồng bộ thủ công từ các nguồn bên ngoài (LiteLLM).                                                                   |
+| `GET`       | `/api/pricing/sync`     | Trạng thái đồng bộ hiện tại.                                                                                                   |
+| `DELETE`    | `/api/pricing/sync`     | Chỉ xóa giá đồng bộ LiteLLM (`pricing_synced`); dữ liệu models.dev riêng biệt.                                                 |
 
 ### Các endpoint khác liên quan đến chi phí
 

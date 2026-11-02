@@ -857,7 +857,7 @@ Tavily, `search_type: "finance"`ను కూడా అంగీకరిస్�
 టైమ్స్టాంప్), Tavilyకు `start_date` (`YYYY-MM-DD`) లభిస్తాయి. `provider_options`లో స్పష్టంగా పేర్కొన్న తేదీ
 మ్యాప్ చేసిన తేదీని ఓవర్రైడ్ చేస్తుంది.
 
-Exa ఫలితాలు `id`, `highlight_scores`, `summary`, `subpages`, `entities` మరియు `extras`ను
+Exa ఫలితాలు `id`, `highlights` (`snippet` గా వాడే మొదటిది మాత్రమే కాకుండా అన్ని హైలైట్ భాగాలు), `highlight_scores`, `summary`, `subpages`, `entities` మరియు `extras`ను
 `provider_raw`లో ఉంచుతాయి. Tavily ఫలితాలు `images` మరియు `favicon`ను ఉంచుతాయి.
 
 లింక్అప్ శోధన ధర `depth` `fast` మరియు `standard` కోసం $0.005 మరియు `deep` కోసం $0.05 ( [Linkup ప్రైసింగ్](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` లేదా కనెక్షన్ సెట్టింగ్ల నుండి వచ్చినా నమోదు చేయబడుతుంది.
@@ -1266,11 +1266,29 @@ Claude Code ఆటో-మోడ్ క్లాసిఫైయర్ అభ్�
 
 | ఎండ్పాయింట్           | పద్ధతి   | వివరణ                                 |
 | --------------------- | -------- | ------------------------------------- |
+| `/api/models`         | GET/PUT  | మోడల్ జాబితా / మారుపేరు నవీకరణ        |
 | `/api/models/alias`   | GET/POST | మోడల్ మారుపేర్లు                      |
 | `/api/models/catalog` | GET      | ప్రొవైడర్ + రకం ఆధారంగా అన్ని మోడళ్లు |
 | `/api/combos*`        | వివిధ    | కాంబో నిర్వహణ                         |
 | `/api/keys*`          | వివిధ    | API కీ నిర్వహణ                        |
 | `/api/pricing`        | GET      | మోడల్ ధరలు                            |
+
+#### మోడల్ పరిమితుల మూలం
+
+`GET /api/models?withLimits=1` కోసం `true` కూడా చెల్లుతుంది; `0`/`false` లేదా పరామితిని వదిలేయడం డిఫాల్ట్ ప్రతిస్పందనను మార్చదు. ప్రతి మోడల్‌కు `contextWindow`, `maxInputTokens`, `maxOutputTokens`, `capsSource` ఆబ్జెక్టును జోడిస్తుంది. `capsSource` ప్రతి పరిమితిని ఇచ్చిన నియమాన్ని చూపుతుంది; 1M మోడల్‌లో 128k వంటి అనూహ్య విలువను మూలం వరకు అనుసరించవచ్చు. నిర్ణయించిన విలువలనే రూటింగ్ వాడుతుంది; ఫ్లాగ్ ఫీల్డ్‌లను మాత్రమే జోడిస్తుంది, విలువలను మార్చదు. ఇతర `withLimits` విలువలు `400` తో తిరస్కరించబడతాయి.
+
+| `capsSource` విలువ                           | మూలం                                                                       |
+| -------------------------------------------- | -------------------------------------------------------------------------- |
+| `override:context`                           | భద్రపరిచిన సందర్భ విండో ఓవర్‌రైడ్ (`model_context_overrides`)              |
+| `override:max_input` / `override:max_output` | భద్రపరిచిన సామర్థ్య ఓవర్‌రైడ్ `max_input_tokens` / `max_output_tokens`     |
+| `static-authoritative:<provider>/<model>`    | స్థిరమైన అధికారిక సందర్భ విండో పట్టిక                                      |
+| `synced:<provider>/<model>`                  | models.dev నుంచి సమకాలీకరించిన సామర్థ్య వరుస                               |
+| `registry:<provider>/<model>`                | ప్రొవైడర్ రిజిస్ట్రీ నమోదు                                                 |
+| `spec:<model>`                               | స్థిర మోడల్ వివరాలు                                                        |
+| `effort-base:` ఉపసర్గ                        | ప్రయత్న స్థాయి ప్రత్యయం ఉన్న వేరియంట్ యొక్క మూల మోడల్ నుంచి తీసుకున్న వరుస |
+| `none`                                       | ఏ మూలమూ పరిమితిని పేర్కొనలేదు (విలువ `null`)                               |
+
+అమలు: `src/lib/modelCapabilities.ts` లోని `getResolvedModelCapabilitiesWithLimitSources()` మరియు `src/lib/modelCapabilityLimits.ts` లోని ప్రాధాన్యత శ్రేణులు.
 
 ### వినియోగం & విశ్లేషణలు
 

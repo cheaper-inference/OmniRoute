@@ -887,7 +887,7 @@ A na-edekọ ọnụ ahịa ọchụchọ Firecrawl n'otu ngọngọ mmalite nke
 ebe Tavily na-enweta `start_date` (`YYYY-MM-DD`). Ụbọchị akọwapụtara kpọmkwem na `provider_options`
 na-ebute ụzọ karịa nke e mapụtara.
 
-Nsonaazụ Exa na-edobe `id`, `highlight_scores`, `summary`, `subpages`, `entities` na `extras` n'ime
+Nsonaazụ Exa na-edobe `id`, `highlights` (akụkụ ederede ọ bụla e mere ka ọ pụta ìhè, ọ bụghị naanị nke mbụ e ji dị ka `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` na `extras` n'ime
 `provider_raw`. Nsonaazụ Tavily na-edobe `images` na `favicon`.
 
 A na-edekọ ọnụ ahịa ọchụchọ Linkup na $0.005 maka `depth` `fast` na `standard` na $0.05 maka `deep` ( [ọnụahịa Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), ma `depth` sitere na `provider_options` ma ọ bụ ntọala njikọ.
@@ -1298,11 +1298,29 @@ ezigbo sitere n'elu; usoro nke abụọ ka nwere ike iwepụta ntụgharị uche
 
 | Ebe njedebe           | Usoro        | Nkọwa                                |
 | --------------------- | ------------ | ------------------------------------ |
+| `/api/models`         | GET/PUT      | Imelite ndepụta mọdẹl / aha ọzọ      |
 | `/api/models/alias`   | GET/POST     | Aha nnọchi anya model                |
 | `/api/models/catalog` | GET          | Model niile dịka onye na-eweta + ụdị |
 | `/api/combos*`        | Dị iche iche | Njikwa combo                         |
 | `/api/keys*`          | Dị iche iche | Njikwa igodo API                     |
 | `/api/pricing`        | GET          | Ọnụahịa model                        |
+
+#### Ebe mmachi mọdẹl si abịa
+
+`GET /api/models?withLimits=1` na-agbakwunye `contextWindow`, `maxInputTokens`, `maxOutputTokens` na ihe `capsSource` n’ahịrị mọdẹl ọ bụla. A na-anabatakwa `true`; iji `0`/`false` ma ọ bụ ịhapụ paramita a na-ahapụ ọdịnaya nzaghachi ndabara ka ọ dị. `capsSource` na-akpọ aha iwu nyere mmachi ọ bụla, ka e wee nwee ike ịchọpụta ebe mmachi a na-atụghị anya ya si bịa, dịka 128k n’elu mọdẹl 1M. Uru ndị a chọpụtara bụ otu uru ahụ a na-eji ahọrọ ụzọ; ọkọlọtọ a na-agbakwunye naanị ubi data, ọ naghị agbanwe uru ọ bụla. A na-ajụ uru `withLimits` ọ bụla ọzọ site na `400`.
+
+| Uru `capsSource`                             | Ebe o si abịa                                                            |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| `override:context`                           | Uru nnọchi windo konteksti echekwara (`model_context_overrides`)         |
+| `override:max_input` / `override:max_output` | Uru nnọchi ikike `max_input_tokens` / `max_output_tokens` echekwara      |
+| `static-authoritative:<provider>/<model>`    | Tebụl windo konteksti kwụ ọtọ nke bụ isi ntụaka a tụkwasịrị obi          |
+| `synced:<provider>/<model>`                  | Ahịrị ikike emekọrịtara site na models.dev                               |
+| `registry:<provider>/<model>`                | Ndenye n’akwụkwọ ndebanye onye na-eweta ọrụ                              |
+| `spec:<model>`                               | Nkọwa mọdẹl kwụ ọtọ                                                      |
+| nganiihu `effort-base:`                      | Ahịrị e nwetara n’isi mọdẹl nke ụdị nwere mgbakwunye effort n’azụ aha ya |
+| `none`                                       | Ọ dịghị ebe data si abịa nke kwupụtara mmachi ahụ (uru ya bụ `null`)     |
+
+Mmejuputa: `getResolvedModelCapabilitiesWithLimitSources()` n’ime `src/lib/modelCapabilities.ts` na usoro ibu ụzọ n’ime `src/lib/modelCapabilityLimits.ts`.
 
 ### Ojiji & Ntụle data
 

@@ -10,6 +10,8 @@ OmniRoute ሦስት የተለያዩ ግን የተያያዙ የመቋቋም አ�
 
 > ምንጭ: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **ለመቋቋም መቀየሪያዎች የአካባቢ እና የዳሽቦርድ ቅድሚያ።** በምርጫ የሚነቁና የመነሻ እሴታቸውን ከአካባቢ የሚያገኙ የመቋቋም መቀየሪያዎች — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`፣ `PROVIDER_COOLDOWN_ENABLED`፣ `STREAM_RECOVERY_ENABLED`፣ `STREAM_RECOVERY_MIDSTREAM_ENABLED`፣ `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — _ነባሪውን_ ብቻ ይሰጣሉ (`DEFAULT_RESILIENCE_SETTINGS`፣ `src/lib/resilience/settings.ts`)። በ`resilienceSettings` ውስጥ በቋሚነት የተቀመጠ የእውነት/ሐሰት እሴት (ዳሽቦርድ → **ቅንብሮች → መቋቋም** / `PATCH /api/resilience`፣ በ`key_value` የተከማቸ) ከአካባቢ እሴቱ በላይ ቅድሚያ ይወስዳል፤ መደበኛ ማድረጉ (`toBoolean`፣ `src/lib/resilience/settings/normalize.ts`) የተቀመጠ የእውነት/ሐሰት እሴት ካለ ያቆየዋል። ስለዚህ ዳሽቦርዱ አስቀድሞ `false` ባስቀመጠበት መጫኛ ውስጥ እንዲህ ያለውን የአካባቢ ተለዋዋጭ ወደ `true` ማድረግ ምንም አይቀይርም። መቀየሪያውን በ**ቅንብሮች → መቋቋም** ውስጥ ይቀይሩ ወይም የተቀመጠውን መስክ ያጽዱ።
+
 ## 1. የአቅራቢ ሰርኪት ብሬከር (Circuit Breaker)
 
 **መድረክ:** ሙሉ አቅራቢ (ለምሳሌ፣ `glm`፣ `openai`፣ `anthropic`)።
@@ -87,6 +89,8 @@ OmniRoute ሦስት የተለያዩ ግን የተያያዙ የመቋቋም አ�
 - API-key መሠረት: 3 ሰከንድ
 - API-key 429: ከላይኛው አገልግሎት የሚመጣውን `Retry-After`/የዳግም ማስጀመሪያ ራስጌዎች/ሊተነተን የሚችል የዳግም ማስጀመሪያ ጽሑፍ ይመርጣል
 - የመጠበቂያ ጊዜ: `baseCooldownMs * 2 ** failureIndex`
+
+**ለእያንዳንዱ አቅራቢ የድጋሚ ሙከራ መዘግየት።** የአቅራቢው ዝርዝር ገጽ **የድጋሚ ሙከራ መዘግየት** ምርጫ አለው (ራስ-ሰር፣ ከ15s እስከ 1h)። `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` ያስቀምጣል (1–21600፣ በ`PATCH /api/resilience` በኩል)። የጥሪ ፍጥነት ገደብ ስህተት ከላይኛው አገልግሎት የድጋሚ ሙከራ ፍንጭ ከሌለው፣ ይህ እሴት የአቅራቢውን በመጠን የሚጨምር የመጠበቂያ ጊዜ ይተካል እና `backoffLevel`ን ወደ 0 ይመልሳል (`open-sse/services/rotationConfig.ts::overrideFor`)። ለፍጥነት ገደብ ስህተት ቅድሚያው ከከፍተኛው ጀምሮ፦ የላይኛው አገልግሎት የድጋሚ ሙከራ ፍንጭ፣ የግንኙነቱ `providerSpecificData.rotationOverrides.rateLimitResetSeconds`፣ የአቅራቢው የድጋሚ ሙከራ መዘግየት፣ የአካባቢ ተለዋዋጭ `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`፣ ከዚያም በመጠን የሚጨምር የመጠበቂያ ጊዜ ነው። ራስ-ሰር መስኩን ያስወግዳል። ይህ የፍጥነት ገደብ ምክንያትን ብቻ ይነካል፤ የመጨረሻ ሁኔታዎችን ፈጽሞ አይነካም።
 
 **የድንገተኛ የጋራ ጭነት መከላከያ:** በአንድ ጊዜ የሚከሰቱ ውድቀቶች የማቀዝቀዣ ጊዜውን ከመጠን በላይ እንዳያራዝሙ ወይም `backoffLevel`ን ሁለት ጊዜ እንዳይጨምሩ ይከላከላል።
 
@@ -457,7 +461,7 @@ quota_exhausted / auth_error / not_found / not_found_local:
 
 አማራጭው `resilienceSettings.streamRecovery.throughputWatchdog` ጥበቃ ክፍሎችን (chunks) መላኩን የቀጠለ ግን የተወሰነውን ጠቃሚ-ውጤት መጠን በታች የሚያመነጭ upstream ያገኛል። ይህ ከ idle timeout በእቅድ የተለየ ነው፦ heartbeats እና metadata ሁለቱንም ሰዓት-ቆጣሪዎች (timers) አያገናኙትም እና እንደ እድገት አይቆጠሩም። እንዲሁም ከጠንካራው የሙከራ ጊዜ ገደብ (hard attempt deadline) (#9153) የተለየ ነው፣ ይህም ምንም ቢሆን የውጤት ጥራት ቢሆን ፍፁም የደህንነት ጣቢያ (absolute safety ceiling) ነው።
 
-ቁጥጥሩ ማቋረጥ (abort) ከመፈጸሙ በፊት የማሞቂያ ጊዜ (warm-up period) ተከትሎ ሙሉ የሚንሸራተተው መስኮት (rolling window) ይጠይቃል። ከ Chat Completions እና Responses API የውጤት ክስተቶች የጽሑፍ deltas ይቆጥራል (ተጠናክሮ የተወሰደ የ UTF-8 ባይት ተወካይ)፣ usage-ብቻ እና ባዶ ክስተቶችን ይተዋል፣ እና የ tool-call ወይም የ reasoning ክስተቶች እየተካሄዱ ሳሉ ፍረጃውን ያግዳል። በነባሪነት ተሰናክሏል እና በ `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` ማንቃት ይቻላል፤ መስኮቱ፣ ማሞቂያው፣ ዝቅተኛው መጠን እና ዝቅተኛው ሊለካ የሚችል ውጤት በመደበኛው resilience-settings normalization layer የተወሰኑ ናቸው።
+ቁጥጥሩ ማቋረጥ (abort) ከመፈጸሙ በፊት የማሞቂያ ጊዜ (warm-up period) ተከትሎ ሙሉ የሚንሸራተተው መስኮት (rolling window) ይጠይቃል። ከ Chat Completions እና Responses API የውጤት ክስተቶች የጽሑፍ deltas ይቆጥራል (ተጠናክሮ የተወሰደ የ UTF-8 ባይት ተወካይ)፣ usage-ብቻ እና ባዶ ክስተቶችን ይተዋል፣ እና የ tool-call ወይም የ reasoning ክስተቶች እየተካሄዱ ሳሉ ፍረጃውን ያግዳል። በነባሪነት ተሰናክሏል እና በ `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ያ የአካባቢ እሴት ነባሪውን ብቻ ይሰጣል — የተቀመጠው `resilienceSettings.streamRecovery.throughputWatchdog.enabled` የእውነት/ሐሰት እሴት ቅድሚያ ይኖረዋል፤ በዚህ መመሪያ መጀመሪያ ያለውን የአካባቢ እና የዳሽቦርድ ቅድሚያ ማስታወሻ ይመልከቱ) ማንቃት ይቻላል፤ መስኮቱ፣ ማሞቂያው፣ ዝቅተኛው መጠን እና ዝቅተኛው ሊለካ የሚችል ውጤት በመደበኛው resilience-settings normalization layer የተወሰኑ ናቸው።
 
 በነቃ ሁኔታ ላይ ሲሆን፣ የቁጥጥሩ ማቋረጥ (watchdog abort) በንቁ upstream ሙከራ ላይ ብቻ ነው የሚተገበረው። ለደንበኛ ከሚታዩ ባይቶች በፊት፣ ያለው ተመሳሳይ-መለያ (same-account) ቀደም-ተኮር ማገገሚያ መንገድ ሙከራውን እንደገና መክፈት ይችላል። ከ commit በኋላ፣ ፍሰቱ በዘንግ በማንም ሁኔታ አይደገምም፤ ያለው ደህንነቱ የተጠበቀ የመካከለኛ-ፍሰት ቀጣይነት (safe mid-stream continuation) ውል ብቻ ነው suffix ማገናኘት የሚችለው። Finalization አንድ-ጊዜ ብቻ (single-shot) ስለሚሆን፣ የ usage አገላለጥ እና semaphore መልቀቂያ አይደገሙም።
 

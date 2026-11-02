@@ -40,23 +40,31 @@ Nítorí pé nọ́mbà náà jẹ́ ìṣírò:
 
 ### Orísun iye owó
 
-Àwọn iye owó wá láti inú tábìlì iye owó tí a yàn ní ìtòlẹ́sẹẹsẹ ààyò yìí
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Iye owó wá láti tábìlì iye tí a so pọ̀ nínú [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), ní àtòjọ yìí (**àṣẹ gíga jù lọ lákọ̀ọ́kọ́**):
 
-1. **Àwọn àtúnṣe olùlò** — àwọn iye owó tí o ṣètò nínú dásíbọ́ọ̀dù / nípasẹ̀ `PATCH /api/pricing`.
-2. **Iye owó òde tí a múṣiṣẹ́pọ̀** — tí a gbà láti inú
-   `model_prices_and_context_window.json` gbogbogbòò ti LiteLLM nígbà tí a bá mú ìṣiṣẹ́pọ̀ ṣiṣẹ́ (a tọ́jú rẹ̀ sínú namespace
-   `pricing_synced` ọ̀tọ̀, kí ó má bàa pa àwọn àtúnṣe rẹ rẹ́).
-3. **Àwọn iye aiyípadà tí a kọ sínú kóòdù** — tí a fi ránṣẹ́ pẹ̀lú OmniRoute.
+1. **Ìròpọ̀ aṣàmúlò** — iye tí a ṣètò ní pátákó tàbí nípasẹ̀ `PATCH /api/pricing` (àgbègbè orúkọ `pricing`).
+2. **Ìmúdọ̀gba models.dev** — iye láti `https://models.dev/api.json` (àgbègbè orúkọ `models_dev_pricing`).
+3. **Ìmúdọ̀gba LiteLLM** — iye láti fáìlì gbangba `model_prices_and_context_window.json` ti LiteLLM (àgbègbè orúkọ `pricing_synced`).
+4. **Àiyipada inú ètò** — iye tí ó wà nínú [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Ìṣiṣẹ́pọ̀ iye owó òde jẹ́ **èyí tí o gbọ́dọ̀ yan láti mú ṣiṣẹ́**, a sì pa á nípa àiyẹsẹ̀. Àwọn env var tó yẹ
-(wo [`.env.example`](../../.env.example)):
+Fún olùpèsè/àwòṣe kan náà, ìpele òkè rọ́pò ààyè tó bá mu ní ìpele ìsàlẹ̀; ààyè tí kò sí ní òkè tún lè wá láti ìsàlẹ̀. Àtòjọ kò yí padà bí iṣẹ́ ìmúdọ̀gba méjèèjì tí ó jẹ́ olómìnira ṣe ń ṣiṣẹ́ lẹ́ẹ̀kan náà. `GET /api/pricing?includeSources=1` dá `pricing` àti `sourceMap` padà; àmì àwòṣe (`user`, `modelsDev`, `litellm`, `default`) sọ ìpele àṣẹ gíga jù tí ó ní àwòṣe náà.
 
-| Env var                 | Àiyẹsẹ̀    | Ète                                                                              |
-| ----------------------- | --------- | -------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Mú ìṣiṣẹ́pọ̀ iye owó LiteLLM abẹ́lẹ̀ ṣiṣẹ́ nígbà ìbẹ̀rẹ̀.                               |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Àárín àkókò ìṣiṣẹ́pọ̀ ní **ìṣẹ́jú-àáyá** (àiyẹsẹ̀ jẹ́ ojoojúmọ́).                      |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Àtòjọ àwọn orísun tí kọ́má pín (ìwọ̀n `litellm` nìkan ni a ṣe àtìlẹ́yìn fún lónìí). |
+**Ìmúdọ̀gba LiteLLM** nílò kí a yàn án, ó sì ti pa ní àiyipada. Àwọn àyípadà àyíká rẹ̀ (wo [`.env.example`](../../.env.example)) ni:
+
+| Env var                 | Àiyẹsẹ̀    | Ète                                                                                 |
+| ----------------------- | --------- | ----------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Mú ìmúdọ̀gba iye owó LiteLLM ṣiṣẹ́ ní abẹ́lẹ̀.                                          |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Àárín àkókò ìṣiṣẹ́pọ̀ ní **ìṣẹ́jú-àáyá** (àiyẹsẹ̀ jẹ́ ojoojúmọ́).                         |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Yíyan orísun jẹ́ fún ìmúdọ̀gba yìí nìkan; `litellm` nìkan ni a ṣe àtìlẹ́yìn fún báyìí. |
+
+**Ìmúdọ̀gba models.dev** yàtọ̀ sí ìmúdọ̀gba LiteLLM, ó sì ti pa ní àiyipada pẹ̀lú. Mú un ṣiṣẹ́ nínú Ètò (ìmúdọ̀gba models.dev) tàbí lo àwọn àyípadà wọ̀nyí:
+
+| Àyípadà àyíká              | Àiyipada    | Iṣẹ́                                                                                                                            |
+| -------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `MODELS_DEV_SYNC_ENABLED`  | _(kò ṣètò)_ | Bí kò bá ṣètò, ó tẹ̀lé bọ́tìnnì Ètò; `1/true/on/yes` fi dandan ṣiṣẹ́, `0/false/off/no` sì fi dandan pa á, bí Ètò tilẹ̀ mú un ṣiṣẹ́. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`     | Àkókò àiyipada ìmúdọ̀gba models.dev ní ìṣẹ́jú-àáyá (lójoojúmọ́).                                                                  |
+
+`PRICING_SYNC_SOURCES` **kò** mú models.dev ṣiṣẹ́; ó kan ṣàkóso ìmúdọ̀gba LiteLLM. Pípa ìròpọ̀ aṣàmúlò rẹ́ kò pa èyíkéyìí àgbègbè orúkọ tí a mú dọ́gba; ìpele iye tó kàn tí ó wà ló bẹ̀rẹ̀ sí ṣiṣẹ́. Fún àwòṣe tí kò ní iye, ṣàyẹ̀wò ètò ìmúdọ̀gba méjèèjì àti `sourceMap` kí o tó fi ìròpọ̀ ọwọ́ kún un.
 
 ### Àgbékalẹ̀ ìṣírò iye owó
 
@@ -170,16 +178,16 @@ bí a bá sọ ohun mìíràn.
 
 ### Ìfowópamọ́
 
-| Ọ̀nà      | Endpoint                | Ète                                                                                                                         |
-| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Ìfowópamọ́ àpapọ̀ lọ́wọ́lọ́wọ́ (olùlò + èyí tí a múṣiṣẹ́pọ̀ + àwọn àìyípadà). `?includeSources=1` láti rí orísun fún àkọọlẹ̀ kọ̀ọ̀kan. |
-| `PATCH`  | `/api/pricing`          | Ṣàtúnṣe ìfowópamọ́ fún `{ provider: { model: { input, output, cached, … } } }`.                                              |
-| `DELETE` | `/api/pricing`          | Dá ìfowópamọ́ padà sí àwọn àìyípadà (a lè fi ààlà sí i pẹ̀lú `?provider=&model=`).                                            |
-| `GET`    | `/api/pricing/defaults` | Ṣàfihàn àwọn òṣùwọ̀n ìpadàsẹ́yìn àìyípadà fún 1M kọ̀ọ̀kan.                                                                      |
-| `GET`    | `/api/pricing/models`   | Ìfowópamọ́ tí a tò nípasẹ̀ àwòṣe.                                                                                             |
-| `POST`   | `/api/pricing/sync`     | Bẹ̀rẹ̀ ìmúṣiṣẹ́pọ̀ afọwọ́ṣe láti àwọn orísun òde (LiteLLM).                                                                      |
-| `GET`    | `/api/pricing/sync`     | Ipò ìmúṣiṣẹ́pọ̀ lọ́wọ́lọ́wọ́.                                                                                                     |
-| `DELETE` | `/api/pricing/sync`     | Pa gbogbo dátà ìfowópamọ́ tí a múṣiṣẹ́pọ̀ rẹ́.                                                                                  |
+| Ọ̀nà      | Endpoint                | Ète                                                                                                                       |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Iye ìpele mẹ́rin tí a so pọ̀ (aṣàmúlò, models.dev, LiteLLM, àiyipada). `?includeSources=1` dá `pricing` + `sourceMap` padà. |
+| `PATCH`  | `/api/pricing`          | Ṣàtúnṣe ìfowópamọ́ fún `{ provider: { model: { input, output, cached, … } } }`.                                            |
+| `DELETE` | `/api/pricing`          | Yọ ìròpọ̀ iye aṣàmúlò (a lè dín ààlà kù pẹ̀lú `?provider=&model=`); iye tí a mú dọ́gba tàbí àiyipada inú ètò ṣì jẹ́ àfidípò.  |
+| `GET`    | `/api/pricing/defaults` | Ṣàfihàn àwọn òṣùwọ̀n ìpadàsẹ́yìn àìyípadà fún 1M kọ̀ọ̀kan.                                                                    |
+| `GET`    | `/api/pricing/models`   | Ìfowópamọ́ tí a tò nípasẹ̀ àwòṣe.                                                                                           |
+| `POST`   | `/api/pricing/sync`     | Bẹ̀rẹ̀ ìmúṣiṣẹ́pọ̀ afọwọ́ṣe láti àwọn orísun òde (LiteLLM).                                                                    |
+| `GET`    | `/api/pricing/sync`     | Ipò ìmúṣiṣẹ́pọ̀ lọ́wọ́lọ́wọ́.                                                                                                   |
+| `DELETE` | `/api/pricing/sync`     | Pa iye tí LiteLLM mú dọ́gba nìkan rẹ́ (`pricing_synced`); dátà models.dev wà lọ́tọ̀.                                          |
 
 ### Àwọn endpoint mìíràn tó ní í ṣe pẹ̀lú ìnáwó
 

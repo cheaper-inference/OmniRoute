@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "यसले यो टेम्प्लेटसँग मेल खाने हाल जडान भएका प्रदायक/मोडेलहरूको स्न्यापसट लिएर सम्पादनयोग्य कम्बो बनाउनेछ।",
     "duplicateAutoComboFailedPrefix": "स्वचालित कम्बो डुप्लिकेट गर्न असफल भयो:",
     "duplicateAutoComboUnknownError": "अज्ञात त्रुटि",
-    "duplicateAutoComboTitle": "{name} बाट स्थिर कम्बो सिर्जना गर्नुहोस्"
+    "duplicateAutoComboTitle": "{name} बाट स्थिर कम्बो सिर्जना गर्नुहोस्",
+    "exportCombos": "निर्यात गर्नुहोस्",
+    "exportCombosFailed": "कम्बो निर्यात गर्न असफल भयो",
+    "importCombos": "आयात गर्नुहोस्",
+    "importCombosTitle": "कम्बो आयात गर्नुहोस्",
+    "importCombosInvalidFile": "यो फाइल मान्य कम्बो निर्यात होइन।",
+    "importCombosSummary": "फाइलमा भएका कम्बो: {total} ({fresh} नयाँ, {conflicting} पहिले नै अवस्थित नाम भएका)।",
+    "importCombosMergeHint": "मर्जले सबै अवस्थित कम्बो राख्छ र जसको नाम पहिले नै छ ती छोड्छ। जडान र क्रेडेन्सियलहरू कहिल्यै आयात गरिँदैनन्।",
+    "importCombosReplaceHint": "सबै बदल्नुहोस्ले तपाईंका अवस्थित कम्बो ({current}) मेटाउँछ र तिनको सट्टा फाइल आयात गर्छ। यसलाई पूर्ववत गर्न सकिँदैन।",
+    "importCombosMerge": "मर्ज गर्नुहोस्",
+    "importCombosReplace": "सबै बदल्नुहोस्",
+    "importCombosDone": "आयात गरिएका कम्बो: {created}। छोडिएका: {skipped}।",
+    "importCombosFailed": "कम्बो आयात गर्न असफल भयो",
+    "importCombosWarnings": "चेतावनीसहित आयात गरियो"
   },
   "costs": {
     "title": "लागत",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ChatGPT कस्टम कनेक्टर",
     "doctorChecking": "स्थिति जाँच गर्दै…",
     "doctorCheck": "डक्टर स्थिति जाँच गर्नुहोस्",
-    "fallbackRetryBackendTitle": "फोल्ब्याक रिट्राइ ब्याकएण्ड"
+    "fallbackRetryBackendTitle": "फोल्ब्याक रिट्राइ ब्याकएण्ड",
+    "retryDelayTitle": "पुन: प्रयास ढिलाइ",
+    "retryDelayDesc": "प्रदायकले फेरि कहिले प्रयास गर्ने भनेर नबताउँदा दर-सीमा त्रुटिपछि जडान कति समय विश्राम गर्छ। स्वचालित मोडले भित्री ब्याकअफ प्रयोग गर्छ; प्रदायकले पठाएको रिसेट समयलाई सधैं प्राथमिकता हुन्छ।",
+    "retryDelayAuto": "स्वचालित",
+    "retryDelaySaved": "पुन: प्रयास ढिलाइ सुरक्षित गरियो",
+    "retryDelayUpdateFailed": "पुन: प्रयास ढिलाइ अद्यावधिक गर्न असफल"
   },
   "settings": {
     "title": "सेटिङहरू",

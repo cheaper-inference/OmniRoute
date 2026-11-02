@@ -10,6 +10,8 @@ OmniRoute are trei mecanisme de reziliență distincte, dar înrudite. Fiecare a
 
 > Sursă: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Precedența între mediu și panou pentru comutatoarele de reziliență.** Comutatoarele opționale inițializate din mediu — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — furnizează doar _valoarea implicită_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Un boolean persistat în `resilienceSettings` (Panou → **Setări → Reziliență** / `PATCH /api/resilience`, stocat în `key_value`) are prioritate față de mediu: normalizarea (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) păstrează booleanul stocat când acesta există. Setarea variabilei de mediu la `true`, dacă panoul a salvat deja `false`, nu schimbă nimic — modificați comutatorul în **Setări → Reziliență** sau ștergeți câmpul stocat.
+
 ## 1. Circuit Breaker la nivel de furnizor
 
 **Domeniu de aplicare:** întregul furnizor (de ex., `glm`, `openai`, `anthropic`).
@@ -88,6 +90,8 @@ Test de regresie: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - Bază cheie API: 3s
 - Cheie API 429: preferă antetele `Retry-After`/reset din amonte sau textul de resetare analizabil
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Întârzierea reîncercării per furnizor.** Pagina furnizorului are selectorul **Întârziere reîncercare** (Auto, de la 15s la 1h). Salvează `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, prin `PATCH /api/resilience`). Când eroarea de limitare nu conține indicații upstream de reîncercare, valoarea înlocuiește întârzierea progresivă a furnizorului și resetează `backoffLevel` la 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Ordinea descrescătoare a priorității: indicația upstream, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` al conexiunii, întârzierea furnizorului, variabila `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, apoi întârzierea progresivă. Auto elimină câmpul. Se aplică doar motivului de limitare a cererilor, niciodată stărilor terminale.
 
 **Protecție anti-thundering-herd:** împiedică erorile concurente să prelungească excesiv cooldown-ul sau să incrementeze de două ori `backoffLevel`.
 
@@ -494,7 +498,7 @@ Protecția per conexiune împotriva limitării ratei este urmărită prin câmpu
 
 Mecanismul de protecție opțional `resilienceSettings.streamRecovery.throughputWatchdog` detectează un upstream care încă trimite chunk-uri, dar produce rezultat de asistent sub rata de rezultat util configurată. Este deliberat distinct de timeout-ul de inactivitate: heartbeat-urile și metadatele nu resetează niciunul dintre cronometre și nu contează drept progres. De asemenea, este distinct de termenul limită strict al încercării (#9153), care rămâne un plafon absolut de siguranță indiferent de calitatea rezultatului.
 
-Watchdog-ul necesită o perioadă de încălzire urmată de o fereastră glisantă completă înainte de a putea abandona. Numără deltele de text din evenimentele de ieșire Chat Completions și Responses API (un proxy conservator în octeți UTF-8), ignoră evenimentele doar cu date de utilizare și pe cele goale și suspendă evaluarea cât timp evenimente de apel de instrumente sau de raționament sunt în desfășurare. Este dezactivat implicit și poate fi activat cu `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; fereastra, perioada de încălzire, rata minimă și rezultatul minim măsurabil sunt limitate de stratul obișnuit de normalizare a setărilor de reziliență.
+Watchdog-ul necesită o perioadă de încălzire urmată de o fereastră glisantă completă înainte de a putea abandona. Numără deltele de text din evenimentele de ieșire Chat Completions și Responses API (un proxy conservator în octeți UTF-8), ignoră evenimentele doar cu date de utilizare și pe cele goale și suspendă evaluarea cât timp evenimente de apel de instrumente sau de raționament sunt în desfășurare. Este dezactivat implicit și poate fi activat cu `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (valoarea din mediu stabilește doar valoarea implicită — booleanul salvat în `resilienceSettings.streamRecovery.throughputWatchdog.enabled` are prioritate; consultați nota despre precedența mediu/panou de la începutul acestui ghid); fereastra, perioada de încălzire, rata minimă și rezultatul minim măsurabil sunt limitate de stratul obișnuit de normalizare a setărilor de reziliență.
 
 Când este activat, un abandon declanșat de watchdog se aplică doar încercării upstream active. Înainte de orice octeți vizibili clientului, calea existentă de recuperare timpurie pe același cont poate redeschide încercarea. După commit, fluxul nu este niciodată reluat orbește; doar contractul existent de continuare sigură în mijlocul fluxului poate coase un sufix. Finalizarea rămâne single-shot, astfel încât contabilizarea utilizării și eliberarea semaforului nu sunt duplicate.
 

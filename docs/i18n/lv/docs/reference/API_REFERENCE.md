@@ -887,7 +887,7 @@ Vispārīgais `time_range` tagad tiek nodots abiem pakalpojumu sniedzējiem: Exa
 laikspiedolu), bet Tavily saņem `start_date` (`YYYY-MM-DD`). Laukā `provider_options`
 tieši norādītam datumam ir prioritāte pār kartēto datumu.
 
-Exa rezultāti saglabā `id`, `highlight_scores`, `summary`, `subpages`, `entities` un `extras` laukā
+Exa rezultāti saglabā `id`, `highlights` (visi izceltie fragmenti, ne tikai pirmais, ko izmanto kā `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` un `extras` laukā
 `provider_raw`. Tavily rezultāti saglabā `images` un `favicon`.
 
 Linkup: Saites meklēšanas izmaksas tiek reģistrētas USD 0,005 par `depth` `fast` un `standard` un USD 0,05 par `deep` ( [Saistīšanas cenas](https://docs.linkup.so/pages/documentation/development/pricing) ) neatkarīgi no tā, vai `depth` nāk no `provider_options` vai savienojuma iestatījumiem.
@@ -1296,13 +1296,31 @@ spriedumus; otrais posms joprojām var izveidot pieprasīto redzamo spriešanu k
 
 ### Maršrutēšana un konfigurācija
 
-| Galapunkts            | Metode   | Apraksts                              |
-| --------------------- | -------- | ------------------------------------- |
-| `/api/models/alias`   | GET/POST | Modeļu aizstājvārdi                   |
-| `/api/models/catalog` | GET      | Visi modeļi pēc nodrošinātāja un tipa |
-| `/api/combos*`        | Dažādas  | Kombināciju pārvaldība                |
-| `/api/keys*`          | Dažādas  | API atslēgu pārvaldība                |
-| `/api/pricing`        | GET      | Modeļu cenas                          |
+| Galapunkts            | Metode   | Apraksts                                     |
+| --------------------- | -------- | -------------------------------------------- |
+| `/api/models`         | GET/PUT  | Modeļu saraksts / aizstājvārda atjaunināšana |
+| `/api/models/alias`   | GET/POST | Modeļu aizstājvārdi                          |
+| `/api/models/catalog` | GET      | Visi modeļi pēc nodrošinātāja un tipa        |
+| `/api/combos*`        | Dažādas  | Kombināciju pārvaldība                       |
+| `/api/keys*`          | Dažādas  | API atslēgu pārvaldība                       |
+| `/api/pricing`        | GET      | Modeļu cenas                                 |
+
+#### Modeļu ierobežojumu izcelsme
+
+`GET /api/models?withLimits=1` (der arī `true`; `0`/`false` vai parametra izlaišana atstāj noklusēto atbildes saturu nemainītu) katrai modeļa rindai pievieno `contextWindow`, `maxInputTokens`, `maxOutputTokens` un objektu `capsSource`. `capsSource` norāda noteikumu, kas sniedzis katru ierobežojumu, lai varētu izsekot negaidītas vērtības izcelsmei, piemēram, 128k ierobežojumam modelim ar 1M. Atrisinātās vērtības ir tās pašas, ko izmanto maršrutēšana; karodziņš tikai pievieno laukus un nekad nemaina vērtības. Jebkura cita `withLimits` vērtība tiek noraidīta ar `400`.
+
+| `capsSource` vērtība                         | Izcelsme                                                                         |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| `override:context`                           | Saglabāta konteksta loga aizstājošā vērtība (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | Saglabātas iespēju `max_input_tokens` / `max_output_tokens` aizstājošās vērtības |
+| `static-authoritative:<provider>/<model>`    | Autoritatīva statiska konteksta logu tabula                                      |
+| `synced:<provider>/<model>`                  | No models.dev sinhronizēta iespēju rinda                                         |
+| `registry:<provider>/<model>`                | Pakalpojumu sniedzēju reģistra ieraksts                                          |
+| `spec:<model>`                               | Statiska modeļa specifikācija                                                    |
+| Prefikss `effort-base:`                      | Rinda, kas aizgūta no varianta ar effort sufiksu pamata modeļa                   |
+| `none`                                       | Neviens avots nenorāda ierobežojumu; vērtība ir `null`                           |
+
+Īstenojums: `getResolvedModelCapabilitiesWithLimitSources()` failā `src/lib/modelCapabilities.ts` un prioritāšu ķēdes failā `src/lib/modelCapabilityLimits.ts`.
 
 ### Lietojums un analītika
 

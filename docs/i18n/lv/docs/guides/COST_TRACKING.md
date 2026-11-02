@@ -40,23 +40,31 @@ Tā kā šis skaitlis ir aptuvens novērtējums:
 
 ### Cenu avots
 
-Izmaksas tiek iegūtas no cenu tabulas, kas tiek noteikta šādā prioritātes secībā
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Izmaksas iegūst no apvienotās cenu tabulas [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), ievērojot šādu prioritāšu secību (**augstākā vispirms**):
 
-1. **Lietotāja pārrakstītās vērtības** — cenas, kuras iestatāt informācijas panelī / izmantojot `PATCH /api/pricing`.
-2. **Sinhronizētās ārējās cenas** — tiek iegūtas no LiteLLM publiskā
-   `model_prices_and_context_window.json`, ja ir iespējota sinhronizācija (tās tiek glabātas atsevišķā
-   `pricing_synced` nosaukumvietā, tāpēc tās nekad nepārraksta jūsu iestatītās vērtības).
-3. **Kodā iekļautās noklusējuma vērtības** — tiek piegādātas kopā ar OmniRoute.
+1. **Lietotāja norādītās cenas** — cenas, kas iestatītas panelī vai ar `PATCH /api/pricing` (nosaukumvieta `pricing`).
+2. **models.dev sinhronizācija** — cenas, kas iegūtas no `https://models.dev/api.json` (nosaukumvieta `models_dev_pricing`).
+3. **LiteLLM sinhronizācija** — cenas, kas iegūtas no publiskā LiteLLM faila `model_prices_and_context_window.json` (nosaukumvieta `pricing_synced`).
+4. **Kodā iekļautās noklusētās cenas** — likmes, kas piegādātas [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Ārējo cenu sinhronizācija ir **jāiespējo manuāli**, un pēc noklusējuma tā ir atspējota. Attiecīgie vides mainīgie
-(skatiet [`.env.example`](../../.env.example)):
+Tam pašam sniedzējam un modelim augstākas prioritātes slāņu vērtības pārraksta atbilstošos laukus zemākajos slāņos; augšējā slānī trūkstošie lauki joprojām var nākt no zemāka slāņa. Secība ir nemainīga arī tad, ja abi neatkarīgie sinhronizācijas uzdevumi darbojas vienlaikus. `GET /api/pricing?includeSources=1` atgriež `pricing` un `sourceMap`; katra modeļa etiķetes (`user`, `modelsDev`, `litellm`, `default`) norāda augstākās prioritātes slāni, kurā modelis ir iekļauts.
 
-| Vides mainīgais         | Noklusējums | Nolūks                                                                         |
-| ----------------------- | ----------- | ------------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`     | Iespējot LiteLLM cenu sinhronizāciju fonā palaišanas laikā.                    |
-| `PRICING_SYNC_INTERVAL` | `86400`     | Sinhronizācijas intervāls **sekundēs** (pēc noklusējuma reizi dienā).          |
-| `PRICING_SYNC_SOURCES`  | `litellm`   | Ar komatiem atdalīts avotu saraksts (pašlaik tiek atbalstīts tikai `litellm`). |
+**LiteLLM sinhronizācija** ir izvēles funkcija un pēc noklusējuma ir atspējota. Tās vides mainīgie (skatiet [`.env.example`](../../.env.example)) ir:
+
+| Vides mainīgais         | Noklusējums | Nolūks                                                                           |
+| ----------------------- | ----------- | -------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`     | Iespējot LiteLLM cenu sinhronizāciju fonā.                                       |
+| `PRICING_SYNC_INTERVAL` | `86400`     | Sinhronizācijas intervāls **sekundēs** (pēc noklusējuma reizi dienā).            |
+| `PRICING_SYNC_SOURCES`  | `litellm`   | Avota izvēle tikai šai sinhronizācijai; pašlaik tiek atbalstīts tikai `litellm`. |
+
+**models.dev sinhronizācija** ir nodalīta no LiteLLM sinhronizācijas un arī pēc noklusējuma atspējota. Iespējojiet to Iestatījumos (models.dev sinhronizācija) vai izmantojiet šos mainīgos:
+
+| Vides mainīgais            | Noklusējums       | Mērķis                                                                                                                                                            |
+| -------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nav iestatīts)_ | Ja nav iestatīts, tiek ievērots Iestatījumu slēdzis; `1/true/on/yes` piespiedu kārtā ieslēdz, bet `0/false/off/no` izslēdz, pat ja Iestatījumos tas ir iespējots. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Noklusētais models.dev sinhronizācijas intervāls sekundēs, reizi dienā.                                                                                           |
+
+`PRICING_SYNC_SOURCES` **neiespējo** models.dev; tas vada tikai LiteLLM sinhronizāciju. Lietotāja norādītas cenas dzēšana neiztīra nevienu sinhronizēto nosaukumvietu; spēkā stājas nākamais pieejamais cenu slānis. Modelim bez cenas pārbaudiet abus sinhronizācijas iestatījumus un `sourceMap`, pirms pievienojat manuāli norādītu cenu.
 
 ### Izmaksu formula
 
@@ -170,16 +178,16 @@ nav norādīts citādi.
 
 ### Cenu noteikšana
 
-| Metode   | Galapunkts              | Mērķis                                                                                                                                     |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET`    | `/api/pricing`          | Pašreizējās apvienotās cenas (lietotāja + sinhronizētās + noklusējuma). Izmantojiet `?includeSources=1`, lai redzētu katra ieraksta avotu. |
-| `PATCH`  | `/api/pricing`          | Pārraksta cenas struktūrai `{ provider: { model: { input, output, cached, … } } }`.                                                        |
-| `DELETE` | `/api/pricing`          | Atiestata cenas uz noklusējuma vērtībām (tvērumu pēc izvēles var ierobežot ar `?provider=&model=`).                                        |
-| `GET`    | `/api/pricing/defaults` | Parāda noklusējuma rezerves likmes uz 1 miljonu.                                                                                           |
-| `GET`    | `/api/pricing/models`   | Cenas, kas indeksētas pēc modeļa.                                                                                                          |
-| `POST`   | `/api/pricing/sync`     | Aktivizē manuālu sinhronizāciju no ārējiem avotiem (LiteLLM).                                                                              |
-| `GET`    | `/api/pricing/sync`     | Pašreizējais sinhronizācijas statuss.                                                                                                      |
-| `DELETE` | `/api/pricing/sync`     | Notīra visus sinhronizētos cenu datus.                                                                                                     |
+| Metode   | Galapunkts              | Mērķis                                                                                                                                                             |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Apvienotās četru slāņu cenas (lietotāja, models.dev, LiteLLM, noklusētās). `?includeSources=1` atgriež `pricing` + `sourceMap`.                                    |
+| `PATCH`  | `/api/pricing`          | Pārraksta cenas struktūrai `{ provider: { model: { input, output, cached, … } } }`.                                                                                |
+| `DELETE` | `/api/pricing`          | Noņemt lietotāja norādītās cenas, pēc izvēles ierobežojot ar `?provider=&model=`; sinhronizētās likmes vai iebūvētās noklusētās cenas paliek kā rezerves varianti. |
+| `GET`    | `/api/pricing/defaults` | Parāda noklusējuma rezerves likmes uz 1 miljonu.                                                                                                                   |
+| `GET`    | `/api/pricing/models`   | Cenas, kas indeksētas pēc modeļa.                                                                                                                                  |
+| `POST`   | `/api/pricing/sync`     | Aktivizē manuālu sinhronizāciju no ārējiem avotiem (LiteLLM).                                                                                                      |
+| `GET`    | `/api/pricing/sync`     | Pašreizējais sinhronizācijas statuss.                                                                                                                              |
+| `DELETE` | `/api/pricing/sync`     | Iztīrīt tikai no LiteLLM sinhronizētās cenas (`pricing_synced`); models.dev dati ir nodalīti.                                                                      |
 
 ### Citi ar izmaksām saistīti galapunkti
 

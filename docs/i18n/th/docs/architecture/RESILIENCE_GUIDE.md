@@ -10,6 +10,8 @@ OmniRoute มีกลไกด้านความทนทาน (resilience)
 
 > ที่มา: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **ลำดับความสำคัญของสภาพแวดล้อมกับแดชบอร์ดสำหรับสวิตช์ความยืดหยุ่น** สวิตช์ที่ต้องเลือกเปิดและรับค่าเริ่มจากสภาพแวดล้อม — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — ให้เพียง_ค่าเริ่มต้น_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`) ค่าบูลีนที่บันทึกใน `resilienceSettings` (แดชบอร์ด → **การตั้งค่า → ความยืดหยุ่น** / `PATCH /api/resilience` เก็บใน `key_value`) มีสิทธิ์เหนือค่าสภาพแวดล้อม การปรับรูปแบบ (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) คงค่าบูลีนที่บันทึกไว้หากมี ดังนั้นตั้งค่าสภาพแวดล้อมเป็น `true` เมื่อแดชบอร์ดบันทึก `false` ไว้แล้วจะไม่เปลี่ยนอะไร ให้เปลี่ยนสวิตช์ใน **การตั้งค่า → ความยืดหยุ่น** หรือล้างฟิลด์ที่บันทึกไว้
+
 ## 1. Circuit Breaker ระดับผู้ให้บริการ
 
 **ขอบเขต:** ผู้ให้บริการทั้งราย (เช่น `glm`, `openai`, `anthropic`)
@@ -86,6 +88,8 @@ OmniRoute มีกลไกด้านความทนทาน (resilience)
 - พื้นฐานของ API-key: 3 วินาที
 - API-key 429: ให้ความสำคัญกับ `Retry-After` จาก upstream / reset headers / ข้อความ reset ที่ parse ได้
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**เวลาหน่วงลองใหม่รายผู้ให้บริการ** หน้ารายละเอียดมีตัวเลือก **เวลาหน่วงลองใหม่** (Auto, 15s ถึง 1h) ซึ่งบันทึก `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 ผ่าน `PATCH /api/resilience`) หากข้อผิดพลาดจำกัดอัตราไม่มีคำแนะนำลองใหม่จากต้นทาง ค่านี้แทนเวลารอที่เพิ่มตามขั้นและรีเซ็ต `backoffLevel` เป็น 0 (`open-sse/services/rotationConfig.ts::overrideFor`) ลำดับจากสูงสุด: คำแนะนำต้นทาง, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` ของการเชื่อมต่อ, เวลาหน่วงผู้ให้บริการ, ตัวแปร `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, เวลารอเพิ่มตามขั้น Auto ลบฟิลด์นี้ มีผลเฉพาะสาเหตุจำกัดอัตรา ไม่กระทบสถานะสิ้นสุด
 
 **การป้องกัน thundering herd:** ป้องกันไม่ให้ความล้มเหลวพร้อมกันหลายรายการทำให้คูลดาวน์ยาวเกินจริง หรือเพิ่ม `backoffLevel` ซ้ำสองครั้ง
 
@@ -555,7 +559,7 @@ abort ได้ โดยจะนับ text delta จาก output event ข�
 (ใช้ตัวประมาณค่าแบบ UTF-8 byte อย่างระมัดระวัง) ไม่นับ event ที่มีแต่ usage และ event
 ว่างเปล่า และระงับการตัดสินในขณะที่ tool-call หรือ reasoning event กำลังดำเนินการอยู่
 โดยค่าเริ่มต้นจะถูกปิดใช้งาน และสามารถเปิดใช้งานได้ด้วย
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` ส่วนค่า window, warm-up,
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ค่าสภาพแวดล้อมนี้ให้เพียงค่าเริ่มต้น — ค่าบูลีน `resilienceSettings.streamRecovery.throughputWatchdog.enabled` ที่บันทึกไว้มีสิทธิ์เหนือกว่า ดูหมายเหตุลำดับสภาพแวดล้อมกับแดชบอร์ดตอนต้นคู่มือ) ส่วนค่า window, warm-up,
 minimum rate และ minimum measurable output จะถูกจำกัดขอบเขตโดยชั้น normalization
 ของ resilience-settings ตามปกติ
 

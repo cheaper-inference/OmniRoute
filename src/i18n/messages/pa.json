@@ -4185,7 +4185,20 @@
     "duplicateAutoComboSnapshotMsg": "ਇਹ ਇਸ ਟੈਂਪਲੇਟ ਨਾਲ ਮੇਲ ਖਾਂਦੇ ਮੌਜੂਦਾ ਕਨੈਕਟ ਕੀਤੇ ਪ੍ਰਦਾਤਾਵਾਂ/ਮਾਡਲਾਂ ਦਾ ਸਨੈਪਸ਼ਾਟ ਲੈ ਕੇ ਇੱਕ ਸੰਪਾਦਨਯੋਗ ਕੌਂਬੋ ਬਣਾਏਗਾ।",
     "duplicateAutoComboFailedPrefix": "ਆਟੋ-ਕੌਂਬੋ ਦੀ ਨਕਲ ਬਣਾਉਣ ਵਿੱਚ ਅਸਫਲ:",
     "duplicateAutoComboUnknownError": "ਅਣਜਾਣ ਗਲਤੀ",
-    "duplicateAutoComboTitle": "{name} ਤੋਂ ਇੱਕ ਸਥਿਰ ਕੌਂਬੋ ਬਣਾਓ"
+    "duplicateAutoComboTitle": "{name} ਤੋਂ ਇੱਕ ਸਥਿਰ ਕੌਂਬੋ ਬਣਾਓ",
+    "exportCombos": "ਨਿਰਯਾਤ ਕਰੋ",
+    "exportCombosFailed": "ਕੌਂਬੋ ਨਿਰਯਾਤ ਕਰਨ ਵਿੱਚ ਅਸਫਲ",
+    "importCombos": "ਆਯਾਤ ਕਰੋ",
+    "importCombosTitle": "ਕੌਂਬੋ ਆਯਾਤ ਕਰੋ",
+    "importCombosInvalidFile": "ਇਹ ਫ਼ਾਈਲ ਇੱਕ ਵੈਧ ਕੌਂਬੋ ਨਿਰਯਾਤ ਨਹੀਂ ਹੈ।",
+    "importCombosSummary": "ਫ਼ਾਈਲ ਵਿੱਚ ਕੌਂਬੋ: {total} ({fresh} ਨਵੇਂ, {conflicting} ਪਹਿਲਾਂ ਤੋਂ ਮੌਜੂਦ ਨਾਮ ਵਾਲੇ)।",
+    "importCombosMergeHint": "ਮਿਲਾਓ ਸਾਰੇ ਮੌਜੂਦਾ ਕੌਂਬੋ ਰੱਖਦਾ ਹੈ ਅਤੇ ਜਿਨ੍ਹਾਂ ਦਾ ਨਾਮ ਪਹਿਲਾਂ ਤੋਂ ਮੌਜੂਦ ਹੈ ਉਨ੍ਹਾਂ ਨੂੰ ਛੱਡ ਦਿੰਦਾ ਹੈ। ਕਨੈਕਸ਼ਨ ਅਤੇ ਕ੍ਰੇਡੈਂਸ਼ੀਅਲ ਕਦੇ ਵੀ ਆਯਾਤ ਨਹੀਂ ਕੀਤੇ ਜਾਂਦੇ।",
+    "importCombosReplaceHint": "ਸਭ ਬਦਲੋ ਤੁਹਾਡੇ ਮੌਜੂਦਾ ਕੌਂਬੋ ({current}) ਮਿਟਾ ਦਿੰਦਾ ਹੈ ਅਤੇ ਉਨ੍ਹਾਂ ਦੀ ਥਾਂ ਫ਼ਾਈਲ ਆਯਾਤ ਕਰਦਾ ਹੈ। ਇਸਨੂੰ ਵਾਪਸ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ।",
+    "importCombosMerge": "ਮਿਲਾਓ",
+    "importCombosReplace": "ਸਭ ਬਦਲੋ",
+    "importCombosDone": "ਆਯਾਤ ਕੀਤੇ ਕੌਂਬੋ: {created}। ਛੱਡੇ ਗਏ: {skipped}।",
+    "importCombosFailed": "ਕੌਂਬੋ ਆਯਾਤ ਕਰਨ ਵਿੱਚ ਅਸਫਲ",
+    "importCombosWarnings": "ਚੇਤਾਵਨੀਆਂ ਨਾਲ ਆਯਾਤ ਕੀਤਾ ਗਿਆ"
   },
   "costs": {
     "title": "ਲਾਗਤਾਂ",
@@ -7050,7 +7063,12 @@
     "chatgptConnectorLabel": "ਛੇਟਜੀਪੀਟੀ ਕਸਟਮ ਕਨੈਕਟਰ",
     "doctorChecking": "ਸਥਿਤੀ ਦੀ ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ…",
     "doctorCheck": "ਡਾਕਟਰ ਸਥਿਤੀ ਦੀ ਜਾਂਚ ਕਰੋ",
-    "fallbackRetryBackendTitle": "ਫਾਲਬੈਕ ਰੀਟ੍ਰਾਈ ਬੈਕਏਂਡ"
+    "fallbackRetryBackendTitle": "ਫਾਲਬੈਕ ਰੀਟ੍ਰਾਈ ਬੈਕਏਂਡ",
+    "retryDelayTitle": "ਮੁੜ ਕੋਸ਼ਿਸ਼ ਦੇਰੀ",
+    "retryDelayDesc": "ਜਦੋਂ ਪ੍ਰਦਾਤਾ ਇਹ ਨਹੀਂ ਦੱਸਦਾ ਕਿ ਮੁੜ ਕਦੋਂ ਕੋਸ਼ਿਸ਼ ਕਰਨੀ ਹੈ, ਤਾਂ ਰੇਟ-ਲਿਮਿਟ ਗਲਤੀ ਤੋਂ ਬਾਅਦ ਕਨੈਕਸ਼ਨ ਕਿੰਨੀ ਦੇਰ ਆਰਾਮ ਕਰਦਾ ਹੈ। ਆਟੋਮੈਟਿਕ ਮੋਡ ਬਿਲਟ-ਇਨ ਬੈਕਆਫ ਵਰਤਦਾ ਹੈ; ਪ੍ਰਦਾਤਾ ਵੱਲੋਂ ਭੇਜੇ ਰੀਸੈੱਟ ਸਮੇਂ ਨੂੰ ਹਮੇਸ਼ਾ ਤਰਜੀਹ ਮਿਲਦੀ ਹੈ।",
+    "retryDelayAuto": "ਆਟੋਮੈਟਿਕ",
+    "retryDelaySaved": "ਮੁੜ ਕੋਸ਼ਿਸ਼ ਦੇਰੀ ਸੁਰੱਖਿਅਤ ਕੀਤੀ ਗਈ",
+    "retryDelayUpdateFailed": "ਮੁੜ ਕੋਸ਼ਿਸ਼ ਦੇਰੀ ਅੱਪਡੇਟ ਕਰਨ ਵਿੱਚ ਅਸਫਲ"
   },
   "settings": {
     "title": "ਸੈਟਿੰਗਾਂ",

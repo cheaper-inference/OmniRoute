@@ -40,23 +40,31 @@ Deoarece valoarea este o estimare:
 
 ### Sursa prețurilor
 
-Costurile provin dintr-un tabel de prețuri determinat în următoarea ordine de prioritate
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Costurile provin din tabelul de prețuri combinat din [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), în această ordine (**prioritatea cea mai mare prima**):
 
-1. **Suprascrieri ale utilizatorului** — prețurile pe care le setați în panoul de control / prin `PATCH /api/pricing`.
-2. **Prețuri externe sincronizate** — preluate din fișierul public
-   `model_prices_and_context_window.json` al LiteLLM atunci când sincronizarea este activată (stocate într-un spațiu de nume
-   separat, `pricing_synced`, astfel încât să nu suprascrie niciodată setările dumneavoastră).
-3. **Valori implicite predefinite** — incluse în OmniRoute.
+1. **Suprascrieri ale utilizatorului** — prețuri stabilite în panou sau prin `PATCH /api/pricing` (spațiul de nume `pricing`).
+2. **Sincronizare models.dev** — prețuri preluate de la `https://models.dev/api.json` (spațiul de nume `models_dev_pricing`).
+3. **Sincronizare LiteLLM** — prețuri din fișierul public `model_prices_and_context_window.json` al LiteLLM (spațiul de nume `pricing_synced`).
+4. **Valori implicite încorporate** — tarife distribuite în [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Sincronizarea prețurilor externe este **opțională** și dezactivată în mod implicit. Variabile de mediu relevante
-(consultați [`.env.example`](../../.env.example)):
+Pentru același furnizor/model, nivelurile superioare suprascriu câmpurile corespunzătoare din nivelurile inferioare; câmpurile absente de sus pot proveni în continuare de jos. Ordinea rămâne fixă chiar dacă ambele sincronizări independente rulează simultan. `GET /api/pricing?includeSources=1` returnează `pricing` și `sourceMap`; etichetele per model (`user`, `modelsDev`, `litellm`, `default`) identifică nivelul cu cea mai mare prioritate care conține modelul.
 
-| Variabilă de mediu      | Valoare implicită | Scop                                                                             |
-| ----------------------- | ----------------- | -------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`           | Activează sincronizarea în fundal a prețurilor LiteLLM la pornire.               |
-| `PRICING_SYNC_INTERVAL` | `86400`           | Intervalul de sincronizare în **secunde** (implicit, zilnic).                    |
-| `PRICING_SYNC_SOURCES`  | `litellm`         | Lista de surse separată prin virgule (în prezent, doar `litellm` este acceptat). |
+**Sincronizarea LiteLLM** necesită activare explicită și este dezactivată implicit. Variabilele sale de mediu (vedeți [`.env.example`](../../.env.example)) sunt:
+
+| Variabilă de mediu      | Valoare implicită | Scop                                                                                           |
+| ----------------------- | ----------------- | ---------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`           | Activează sincronizarea prețurilor LiteLLM în fundal.                                          |
+| `PRICING_SYNC_INTERVAL` | `86400`           | Intervalul de sincronizare în **secunde** (implicit, zilnic).                                  |
+| `PRICING_SYNC_SOURCES`  | `litellm`         | Selectarea sursei se aplică doar acestei sincronizări; momentan este acceptat numai `litellm`. |
+
+**Sincronizarea models.dev** este separată de cea LiteLLM și este de asemenea dezactivată implicit. Activați-o în Setări (sincronizare models.dev) sau folosiți aceste variabile:
+
+| Variabilă de mediu         | Implicit     | Scop                                                                                                                                                           |
+| -------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nesetată)_ | Dacă lipsește, urmează comutatorul din Setări; `1/true/on/yes` forțează activarea, iar `0/false/off/no` forțează dezactivarea chiar dacă Setările o activează. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`      | Intervalul implicit de sincronizare models.dev în secunde (zilnic).                                                                                            |
+
+`PRICING_SYNC_SOURCES` **nu** activează models.dev; controlează doar sincronizarea LiteLLM. Ștergerea unei suprascrieri a utilizatorului nu golește niciun spațiu de nume sincronizat; devine activ următorul nivel de prețuri disponibil. Pentru un model fără preț, verificați ambele setări de sincronizare și `sourceMap` înainte de a adăuga o suprascriere manuală.
 
 ### Formula de calcul al costului
 
@@ -175,16 +183,16 @@ Toate acestea necesită autentificare de administrare (loopback/JWT, prin
 
 ### Tarifare
 
-| Metodă   | Endpoint                | Scop                                                                                                                                   |
-| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Tarifarea combinată curentă (utilizator + sincronizată + valori implicite). `?includeSources=1` pentru a vedea sursa fiecărei intrări. |
-| `PATCH`  | `/api/pricing`          | Înlocuirea tarifării pentru `{ provider: { model: { input, output, cached, … } } }`.                                                   |
-| `DELETE` | `/api/pricing`          | Resetarea tarifării la valorile implicite (opțional, delimitată prin `?provider=&model=`).                                             |
-| `GET`    | `/api/pricing/defaults` | Afișarea tarifelor de rezervă implicite per 1M.                                                                                        |
-| `GET`    | `/api/pricing/models`   | Tarifare indexată după model.                                                                                                          |
-| `POST`   | `/api/pricing/sync`     | Declanșarea unei sincronizări manuale din surse externe (LiteLLM).                                                                     |
-| `GET`    | `/api/pricing/sync`     | Starea curentă a sincronizării.                                                                                                        |
-| `DELETE` | `/api/pricing/sync`     | Ștergerea tuturor datelor de tarifare sincronizate.                                                                                    |
+| Metodă   | Endpoint                | Scop                                                                                                                                                                |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Prețuri combinate din patru niveluri (utilizator, models.dev, LiteLLM, implicite). `?includeSources=1` returnează `pricing` + `sourceMap`.                          |
+| `PATCH`  | `/api/pricing`          | Înlocuirea tarifării pentru `{ provider: { model: { input, output, cached, … } } }`.                                                                                |
+| `DELETE` | `/api/pricing`          | Elimină suprascrierile de preț ale utilizatorului (opțional restrânse prin `?provider=&model=`); tarifele sincronizate sau implicite încorporate rămân alternative. |
+| `GET`    | `/api/pricing/defaults` | Afișarea tarifelor de rezervă implicite per 1M.                                                                                                                     |
+| `GET`    | `/api/pricing/models`   | Tarifare indexată după model.                                                                                                                                       |
+| `POST`   | `/api/pricing/sync`     | Declanșarea unei sincronizări manuale din surse externe (LiteLLM).                                                                                                  |
+| `GET`    | `/api/pricing/sync`     | Starea curentă a sincronizării.                                                                                                                                     |
+| `DELETE` | `/api/pricing/sync`     | Șterge doar prețurile sincronizate LiteLLM (`pricing_synced`); datele models.dev sunt separate.                                                                     |
 
 ### Alte endpointuri relevante pentru costuri
 

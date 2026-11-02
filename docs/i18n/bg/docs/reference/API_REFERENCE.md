@@ -887,7 +887,7 @@ Tavily приема също `search_type: "finance"` (`topic: "finance"`).
 времеви маркер), а Tavily получава `start_date` (`YYYY-MM-DD`). Изрично зададена дата в `provider_options`
 има предимство пред съпоставената стойност.
 
-Резултатите от Exa запазват `id`, `highlight_scores`, `summary`, `subpages`, `entities` и `extras` в
+Резултатите от Exa запазват `id`, `highlights` (всички откроени откъси, а не само първият, използван като `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` и `extras` в
 `provider_raw`. Резултатите от Tavily запазват `images` и `favicon`.
 
 Linkup: Разходите за търсене на връзка се записват на $0,005 за `depth` `fast` и `standard` и $0,05 за `deep` ( [ценообразуване на връзка](https://docs.linkup.so/pages/documentation/development/pricing) ), независимо дали `depth` идва от `provider_options` или от настройките на връзката.
@@ -1296,13 +1296,31 @@ https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-cred
 
 ### Маршрутизиране и конфигурация
 
-| Крайна точка          | Метод    | Описание                         |
-| --------------------- | -------- | -------------------------------- |
-| `/api/models/alias`   | GET/POST | Псевдоними на модели             |
-| `/api/models/catalog` | GET      | Всички модели по доставчик + тип |
-| `/api/combos*`        | Различни | Управление на комбинации         |
-| `/api/keys*`          | Различни | Управление на API ключове        |
-| `/api/pricing`        | GET      | Ценообразуване на моделите       |
+| Крайна точка          | Метод    | Описание                                  |
+| --------------------- | -------- | ----------------------------------------- |
+| `/api/models`         | GET/PUT  | Списък с модели / обновяване на псевдоним |
+| `/api/models/alias`   | GET/POST | Псевдоними на модели                      |
+| `/api/models/catalog` | GET      | Всички модели по доставчик + тип          |
+| `/api/combos*`        | Различни | Управление на комбинации                  |
+| `/api/keys*`          | Различни | Управление на API ключове                 |
+| `/api/pricing`        | GET      | Ценообразуване на моделите                |
+
+#### Произход на ограниченията на модела
+
+`GET /api/models?withLimits=1` (приема се и `true`; `0`/`false` или пропускането на параметъра запазва стандартния отговор непроменен) добавя `contextWindow`, `maxInputTokens`, `maxOutputTokens` и обект `capsSource` към всеки ред за модел. `capsSource` посочва правилото, определило всяко ограничение, за да се проследи произходът на неочаквана стойност, например 128k за модел с 1M. Определените стойности са същите, които използва маршрутизирането; флагът само добавя полета и никога не променя стойност. Всяка друга стойност на `withLimits` се отхвърля с `400`.
+
+| `capsSource` стойност                        | Произход                                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `override:context`                           | Трайно съхранено заместване на контекстния прозорец (`model_context_overrides`)       |
+| `override:max_input` / `override:max_output` | Трайно съхранено заместване на възможностите `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Статична определяща таблица на контекстните прозорци                                  |
+| `synced:<provider>/<model>`                  | Ред с възможности, синхронизиран от models.dev                                        |
+| `registry:<provider>/<model>`                | Запис в регистъра на доставчиците                                                     |
+| `spec:<model>`                               | Статична спецификация на модела                                                       |
+| `effort-base:` префикс                       | Ред, зает от базовия модел на вариант със суфикс за ниво на усилие                    |
+| `none`                                       | Нито един източник не задава ограничението (стойността е `null`)                      |
+
+Реализация: `getResolvedModelCapabilitiesWithLimitSources()` в `src/lib/modelCapabilities.ts` и веригите за приоритет в `src/lib/modelCapabilityLimits.ts`.
 
 ### Използване и анализи
 

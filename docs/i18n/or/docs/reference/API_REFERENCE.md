@@ -864,7 +864,7 @@ Fire 0.002 (2 କ୍ରେଡିଟ୍) ରେ ଗୋଟିଏ ବ୍ଲକ୍ �
 ଟାଇମ୍ଷ୍ଟାମ୍ପ) ପାଏ ଏବଂ Tavily `start_date` (`YYYY-MM-DD`) ପାଏ। `provider_options` ରେ ଥିବା ଏକ ସ୍ପଷ୍ଟ ତାରିଖ
 ମ୍ୟାପ୍ କରାଯାଇଥିବା ତାରିଖକୁ ଓଭର୍ରାଇଡ୍ କରେ।
 
-Exa ଫଳାଫଳଗୁଡ଼ିକ `id`, `highlight_scores`, `summary`, `subpages`, `entities` ଏବଂ `extras` କୁ
+Exa ଫଳାଫଳଗୁଡ଼ିକ `id`, `highlights` (ପ୍ରତ୍ୟେକ ହାଇଲାଇଟ୍ କରାଯାଇଥିବା ଅଂଶ, କେବଳ `snippet` ଭାବେ ବ୍ୟବହୃତ ପ୍ରଥମ ଅଂଶ ନୁହେଁ), `highlight_scores`, `summary`, `subpages`, `entities` ଏବଂ `extras` କୁ
 `provider_raw` ରେ ରଖେ। Tavily ଫଳାଫଳଗୁଡ଼ିକ `images` ଏବଂ `favicon` କୁ ରଖେ।
 
 ଲିଙ୍କଅପ୍ ସନ୍ଧାନ ମୂଲ୍ୟ `depth` `fast` ଏବଂ `standard` ପାଇଁ $ 0.005 ଏବଂ `deep` ( [ଲିଙ୍କଅପ୍ ମୂଲ୍ୟ](https://docs.linkup.so/pages/documentation/development/pricing) ) ପାଇଁ $ 0.05 ରେକର୍ଡ କରାଯାଇଛି, `depth` `provider_options` ରୁ ହେଉ କିମ୍ବା ସଂଯୋଗର ସେଟିଂସମୂହ \|
@@ -1275,11 +1275,29 @@ Claude Code ଅଟୋ-ମୋଡ୍ କ୍ଲାସିଫାୟର୍ ଅନୁ�
 
 | ଏଣ୍ଡପଏଣ୍ଟ             | ପଦ୍ଧତି   | ବର୍ଣ୍ଣନା                                |
 | --------------------- | -------- | --------------------------------------- |
+| `/api/models`         | GET/PUT  | ମଡେଲ୍ ତାଲିକା / ବିକଳ୍ପ ନାମ ଅଦ୍ୟତନ        |
 | `/api/models/alias`   | GET/POST | ମଡେଲ୍ ଉପନାମ                             |
 | `/api/models/catalog` | GET      | ପ୍ରଦାନକାରୀ + ପ୍ରକାର ଅନୁଯାୟୀ ସମସ୍ତ ମଡେଲ୍ |
 | `/api/combos*`        | ବିଭିନ୍ନ  | କମ୍ବୋ ପରିଚାଳନା                          |
 | `/api/keys*`          | ବିଭିନ୍ନ  | API କୀ ପରିଚାଳନା                         |
 | `/api/pricing`        | GET      | ମଡେଲ୍ ମୂଲ୍ୟ ନିର୍ଦ୍ଧାରଣ                  |
+
+#### ମଡେଲ୍ ସୀମାର ଉତ୍ସ
+
+`GET /api/models?withLimits=1` ପ୍ରତ୍ୟେକ ମଡେଲ୍ ଧାଡ଼ିରେ `contextWindow`, `maxInputTokens`, `maxOutputTokens` ଏବଂ ଏକ `capsSource` ଅବଜେକ୍ଟ ଯୋଡ଼େ। `true` ମଧ୍ୟ ଗ୍ରହଣ କରାଯାଏ; `0`/`false` ଦେଲେ କିମ୍ବା ଏହାକୁ ଛାଡ଼ିଦେଲେ ଡିଫଲ୍ଟ ପ୍ରତିକ୍ରିୟାର ବିଷୟବସ୍ତୁ ଅପରିବର୍ତ୍ତିତ ରହେ। `capsSource` ପ୍ରତ୍ୟେକ ସୀମା ପ୍ରଦାନ କରିଥିବା ନିୟମର ନାମ ଦିଏ, ତେଣୁ ଅପ୍ରତ୍ୟାଶିତ ସୀମାର ଉତ୍ସ ଖୋଜାଯାଇପାରେ, ଯଥା 1M ମଡେଲ୍‌ରେ 128k। ନିର୍ଦ୍ଧାରିତ ମୂଲ୍ୟଗୁଡ଼ିକ ରାଉଟିଂ ବ୍ୟବହାର କରୁଥିବା ମୂଲ୍ୟ ସହ ସମାନ; ଏହି ଫ୍ଲାଗ୍ କେବଳ ଫିଲ୍ଡ ଯୋଡ଼େ ଏବଂ କୌଣସି ମୂଲ୍ୟ ବଦଳାଏ ନାହିଁ। `withLimits` ର ଅନ୍ୟ ସମସ୍ତ ମୂଲ୍ୟ `400` ସହ ପ୍ରତ୍ୟାଖ୍ୟାନ ହୁଏ।
+
+| `capsSource` ମୂଲ୍ୟ                           | ଉତ୍ସ                                                              |
+| -------------------------------------------- | ----------------------------------------------------------------- |
+| `override:context`                           | ସଂରକ୍ଷିତ କନଟେକ୍ସଟ୍-ୱିଣ୍ଡୋ ଓଭରରାଇଡ୍ (`model_context_overrides`)    |
+| `override:max_input` / `override:max_output` | ସଂରକ୍ଷିତ `max_input_tokens` / `max_output_tokens` କ୍ଷମତା ଓଭରରାଇଡ୍ |
+| `static-authoritative:<provider>/<model>`    | କନଟେକ୍ସଟ୍-ୱିଣ୍ଡୋର ସ୍ଥିର ପ୍ରାମାଣିକ ସାରଣୀ                           |
+| `synced:<provider>/<model>`                  | models.dev ରୁ ସିଙ୍କ୍ ହୋଇଥିବା କ୍ଷମତା ଧାଡ଼ି                         |
+| `registry:<provider>/<model>`                | ପ୍ରଦାତା ରେଜିଷ୍ଟ୍ରିର ଏଣ୍ଟ୍ରି                                       |
+| `spec:<model>`                               | ମଡେଲ୍‌ର ସ୍ଥିର ବିନିର୍ଦ୍ଦେଶ                                         |
+| `effort-base:` ଉପସର୍ଗ                        | effort ପ୍ରତ୍ୟୟ ଥିବା ରୂପର ମୂଳ ମଡେଲ୍‌ରୁ ନିଆଯାଇଥିବା ଧାଡ଼ି            |
+| `none`                                       | କୌଣସି ଉତ୍ସ ସୀମା ଘୋଷଣା କରେ ନାହିଁ (ମୂଲ୍ୟ `null` ଅଟେ)                |
+
+କାର୍ଯ୍ୟାନ୍ୱୟନ: `src/lib/modelCapabilities.ts` ରେ `getResolvedModelCapabilitiesWithLimitSources()` ଏବଂ `src/lib/modelCapabilityLimits.ts` ରେ ପ୍ରାଥମିକତା କ୍ରମର ଶୃଙ୍ଖଳା।
 
 ### ବ୍ୟବହାର ଏବଂ ବିଶ୍ଳେଷଣ
 

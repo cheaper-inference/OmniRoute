@@ -10,6 +10,8 @@ OmniRoute には、個別ではあるものの相互に関連する3つのレジ
 
 > ソース: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **レジリエンスの切り替えにおける環境変数とダッシュボードの優先順位。** 環境変数から初期値を与える任意有効化のレジリエンス設定 — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`、`PROVIDER_COOLDOWN_ENABLED`、`STREAM_RECOVERY_ENABLED`、`STREAM_RECOVERY_MIDSTREAM_ENABLED`、`STREAM_THROUGHPUT_WATCHDOG_ENABLED` — は、_既定値_（`DEFAULT_RESILIENCE_SETTINGS`、`src/lib/resilience/settings.ts`）だけを提供します。`resilienceSettings` に永続化された真偽値（ダッシュボード → **設定 → レジリエンス** / `PATCH /api/resilience` で設定し、`key_value` に保存）が環境変数より優先されます。正規化処理（`toBoolean`、`src/lib/resilience/settings/normalize.ts`）は、保存済みの真偽値があればそれを保持します。そのため、ダッシュボードですでに `false` を保存した環境では、該当する環境変数を `true` にしても何も変わりません。**設定 → レジリエンス** のスイッチを切り替えるか、保存されたフィールドを削除してください。
+
 ## 1. プロバイダーサーキットブレーカー
 
 **スコープ:** プロバイダー全体（例: `glm`、`openai`、`anthropic`）。
@@ -85,6 +87,8 @@ OmniRoute には、個別ではあるものの相互に関連する3つのレジ
 - APIキー ベース: 3s
 - APIキー 429: アップストリームの `Retry-After` / リセットヘッダー / パース可能なリセットテキストを優先
 - バックオフ: `baseCooldownMs * 2 ** failureIndex`
+
+**プロバイダーごとの再試行待ち時間。** プロバイダーの詳細ページには **再試行待ち時間** の選択欄があります（Auto、15s から 1h）。`resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` に保存します（1–21600、`PATCH /api/resilience` 経由）。レート制限エラーに上流の再試行時刻のヒントがない場合、この値がプロバイダーの段階的に調整されたバックオフを置き換え、`backoffLevel` を 0 に戻します（`open-sse/services/rotationConfig.ts::overrideFor`）。レート制限エラーでの優先順位は、高い順に、上流の再試行ヒント、接続ごとの `providerSpecificData.rotationOverrides.rateLimitResetSeconds`、プロバイダーごとの再試行待ち時間、環境変数 `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`、調整されたバックオフです。Auto はフィールドを削除します。影響するのはレート制限という理由だけで、終端状態には影響しません。
 
 **サンダリングハード防止ガード:** 同時に発生した障害によってクールダウンが過度に延長されたり、`backoffLevel` が二重にインクリメントされたりするのを防ぐ。
 
@@ -480,7 +484,7 @@ quota_exhausted / auth_error / not_found / not_found_local:
 出力イベントからテキストデルタをカウントし (保守的な UTF-8 バイトのプロキシ)、
 usage のみのイベントや空のイベントは無視し、ツール呼び出しや推論イベントが進行中の
 間は判定を保留します。デフォルトでは無効で、
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` で有効にできます。ウィンドウ、
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` （この環境変数は既定値を与えるだけで、保存済みの `resilienceSettings.streamRecovery.throughputWatchdog.enabled` の真偽値が優先されます。このガイド冒頭の、環境変数とダッシュボードの優先順位に関する注記を参照してください） で有効にできます。ウィンドウ、
 ウォームアップ、最小レート、最小測定可能出力は、通常の resilience 設定の正規化
 レイヤーによって制約されます。
 

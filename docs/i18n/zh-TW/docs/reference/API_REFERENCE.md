@@ -843,7 +843,7 @@ Firecrawl 搜尋成本記錄為每個啟動區塊（包含 10 個返回結果）
 時間戳記），而 Tavily 會收到 `start_date`（`YYYY-MM-DD`）。`provider_options`
 中的明確日期會覆寫對應產生的日期。
 
-Exa 結果會將 `id`、`highlight_scores`、`summary`、`subpages`、`entities` 和 `extras` 保留在
+Exa 結果會將 `id`、`highlights`（保留所有醒目片段，而非僅保留用作 `snippet` 的第一個）， `highlight_scores`、`summary`、`subpages`、`entities` 和 `extras` 保留在
 `provider_raw` 中。Tavily 結果會保留 `images` 和 `favicon`。
 
 Linkup 的搜尋費用依 `depth` 記錄：`fast` 和 `standard` 為 $0.005，`deep` 為 $0.05（[Linkup 定價](https://docs.linkup.so/pages/documentation/development/pricing)），不論 `depth` 來自 `provider_options` 還是連線設定。
@@ -1208,11 +1208,29 @@ Claude Code 自動模式分類器請求在不含
 
 | 端點                  | 方法     | 說明                         |
 | --------------------- | -------- | ---------------------------- |
+| `/api/models`         | GET/PUT  | 模型清單 / 別名更新          |
 | `/api/models/alias`   | GET/POST | 模型別名                     |
 | `/api/models/catalog` | GET      | 依提供者與類型分類的所有模型 |
 | `/api/combos*`        | 多種     | 組合管理                     |
 | `/api/keys*`          | 多種     | API 金鑰管理                 |
 | `/api/pricing`        | GET      | 模型定價                     |
+
+#### 模型限制的來源
+
+`GET /api/models?withLimits=1`（也接受 `true`；`0`/`false` 或省略參數都會維持預設回應不變）會為每筆模型資料加入 `contextWindow`、`maxInputTokens`、`maxOutputTokens` 與 `capsSource` 物件。`capsSource` 標示每項限制由哪條規則提供，方便追查非預期數值，例如 1M 模型為何只有 128k 限制。解析後的值與路由使用的值完全相同；此參數僅新增欄位，絕不更改數值。任何其他 `withLimits` 值都會被拒絕並傳回 `400`。
+
+| `capsSource` 數值                            | 來源                                                        |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| `override:context`                           | 已儲存的上下文視窗覆寫值（`model_context_overrides`）       |
+| `override:max_input` / `override:max_output` | 已儲存的能力覆寫值 `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | 靜態權威上下文視窗表                                        |
+| `synced:<provider>/<model>`                  | 從 models.dev 同步的能力資料列                              |
+| `registry:<provider>/<model>`                | 供應商登錄表項目                                            |
+| `spec:<model>`                               | 靜態模型規格                                                |
+| `effort-base:` 前綴                          | 取自帶推理強度後綴之變體所對應的基礎模型資料列              |
+| `none`                                       | 沒有任何來源宣告此限制（值為 `null`）                       |
+
+實作見 `src/lib/modelCapabilities.ts` 中的 `getResolvedModelCapabilitiesWithLimitSources()`，以及 `src/lib/modelCapabilityLimits.ts` 中的優先順序鏈。
 
 ### 使用情況與分析
 

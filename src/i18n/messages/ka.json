@@ -4185,7 +4185,20 @@
     "duplicateAutoComboSnapshotMsg": "ამჟამად დაკავშირებული პროვაიდერებისა და მოდელების, რომლებიც ამ შაბლონს შეესაბამება, მიმდინარე მდგომარეობა დაფიქსირდება რედაქტირებად კომბოდ.",
     "duplicateAutoComboFailedPrefix": "ავტოკომბოს დუბლირება ვერ მოხერხდა:",
     "duplicateAutoComboUnknownError": "უცნობი შეცდომა",
-    "duplicateAutoComboTitle": "სტატიკური კომბოს შექმნა {name}-დან"
+    "duplicateAutoComboTitle": "სტატიკური კომბოს შექმნა {name}-დან",
+    "exportCombos": "ექსპორტი",
+    "exportCombosFailed": "კომბოების ექსპორტი ვერ მოხერხდა",
+    "importCombos": "იმპორტი",
+    "importCombosTitle": "კომბოების იმპორტი",
+    "importCombosInvalidFile": "ეს ფაილი არ არის კომბოების სწორი ექსპორტი.",
+    "importCombosSummary": "კომბოები ფაილში: {total} ({fresh} ახალი, {conflicting} უკვე არსებული სახელით).",
+    "importCombosMergeHint": "გაერთიანება ინარჩუნებს ყველა არსებულ კომბოს და გამოტოვებს მათ, ვისი სახელიც უკვე არსებობს. კავშირები და ავტორიზაციის მონაცემები არასოდეს იმპორტირდება.",
+    "importCombosReplaceHint": "„ყველას ჩანაცვლება“ შლის თქვენს არსებულ კომბოებს ({current}) და მათ ნაცვლად ფაილს იმპორტირებს. ამის გაუქმება შეუძლებელია.",
+    "importCombosMerge": "გაერთიანება",
+    "importCombosReplace": "ყველას ჩანაცვლება",
+    "importCombosDone": "იმპორტირებული კომბოები: {created}. გამოტოვებული: {skipped}.",
+    "importCombosFailed": "კომბოების იმპორტი ვერ მოხერხდა",
+    "importCombosWarnings": "იმპორტირდა გაფრთხილებებით"
   },
   "costs": {
     "title": "ხარჯები",
@@ -7050,7 +7063,12 @@
     "chatgptConnectorLabel": "ChatGPT-ის თვითონ შესქმნელი კონექტორი",
     "doctorChecking": "სტატუსის შემოწმება…",
     "doctorCheck": "დოქტორის სტატუსის შემოწმება",
-    "fallbackRetryBackendTitle": "სარეზერვო ხელახალი ცდის backend"
+    "fallbackRetryBackendTitle": "სარეზერვო ხელახალი ცდის backend",
+    "retryDelayTitle": "ხელახალი ცდის დაყოვნება",
+    "retryDelayDesc": "რამდენ ხანს ისვენებს კავშირი სიჩქარის ლიმიტის შეცდომის შემდეგ, როცა პროვაიდერი არ მიუთითებს, როდის სცადოს ხელახლა. ავტომატური რეჟიმი იყენებს ჩაშენებულ დაყოვნებას; პროვაიდერის მიერ გამოგზავნილ განულების დროს ყოველთვის აქვს უპირატესობა.",
+    "retryDelayAuto": "ავტომატური",
+    "retryDelaySaved": "ხელახალი ცდის დაყოვნება შენახულია",
+    "retryDelayUpdateFailed": "ხელახალი ცდის დაყოვნების განახლება ვერ მოხერხდა"
   },
   "settings": {
     "title": "პარამეტრები",

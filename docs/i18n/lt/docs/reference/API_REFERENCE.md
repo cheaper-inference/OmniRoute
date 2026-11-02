@@ -888,7 +888,7 @@ Bendrasis `time_range` dabar perduodamas abiem teikėjams: Exa gauna `startPubli
 laiko žymą), o Tavily gauna `start_date` (`YYYY-MM-DD`). Aiškiai nurodyta data lauke `provider_options`
 turi pirmenybę prieš susietąją.
 
-Exa rezultatuose `id`, `highlight_scores`, `summary`, `subpages`, `entities` ir `extras` išlaikomi
+Exa rezultatuose `id`, `highlights` (visos paryškintos ištraukos, ne tik pirmoji, naudojama kaip `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ir `extras` išlaikomi
 lauke `provider_raw`. Tavily rezultatuose išlaikomi `images` ir `favicon`.
 
 Linkup: Susiejimo paieškos kaina įrašoma 0,005 USD už `depth` `fast` ir `standard` ir 0,05 USD už `deep` ( [susiejimo kainodara](https://docs.linkup.so/pages/documentation/development/pricing) ), nesvarbu, ar `depth` gaunama iš `provider_options` ar ryšio nustatymų.
@@ -1295,13 +1295,31 @@ sprendimus; antrasis etapas vis dar gali pateikti prašomą matomą samprotavim�
 
 ### Maršrutizavimas ir konfigūracija
 
-| Galinis taškas        | Metodas  | Aprašymas                           |
-| --------------------- | -------- | ----------------------------------- |
-| `/api/models/alias`   | GET/POST | Modelių alternatyvieji pavadinimai  |
-| `/api/models/catalog` | GET      | Visi modeliai pagal teikėją ir tipą |
-| `/api/combos*`        | Įvairūs  | Derinių valdymas                    |
-| `/api/keys*`          | Įvairūs  | API raktų valdymas                  |
-| `/api/pricing`        | GET      | Modelių kainodara                   |
+| Galinis taškas        | Metodas  | Aprašymas                                               |
+| --------------------- | -------- | ------------------------------------------------------- |
+| `/api/models`         | GET/PUT  | Modelių sąrašas / alternatyvaus pavadinimo atnaujinimas |
+| `/api/models/alias`   | GET/POST | Modelių alternatyvieji pavadinimai                      |
+| `/api/models/catalog` | GET      | Visi modeliai pagal teikėją ir tipą                     |
+| `/api/combos*`        | Įvairūs  | Derinių valdymas                                        |
+| `/api/keys*`          | Įvairūs  | API raktų valdymas                                      |
+| `/api/pricing`        | GET      | Modelių kainodara                                       |
+
+#### Modelių ribų kilmė
+
+`GET /api/models?withLimits=1` (taip pat tinka `true`; `0`/`false` arba parametro nepateikimas nekeičia numatytojo atsakymo turinio) į kiekvieną modelio eilutę įtraukia `contextWindow`, `maxInputTokens`, `maxOutputTokens` ir objektą `capsSource`. `capsSource` nurodo kiekvieną ribą pateikusią taisyklę, todėl galima atsekti netikėtos ribos kilmę, pavyzdžiui, 128k ribą 1M modeliui. Gautos reikšmės yra tos pačios, kurias naudoja maršrutizavimas; ši parinktis tik prideda laukus ir niekada nekeičia reikšmių. Bet kuri kita `withLimits` reikšmė atmetama su `400`.
+
+| `capsSource` reikšmė                         | Kilmė                                                                            |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| `override:context`                           | Išsaugota konteksto lango ribos perrašymo reikšmė (`model_context_overrides`)    |
+| `override:max_input` / `override:max_output` | Išsaugotos galimybių `max_input_tokens` / `max_output_tokens` perrašymo reikšmės |
+| `static-authoritative:<provider>/<model>`    | Autoritetinga statinė konteksto langų lentelė                                    |
+| `synced:<provider>/<model>`                  | Iš models.dev sinchronizuota galimybių eilutė                                    |
+| `registry:<provider>/<model>`                | Teikėjų registro įrašas                                                          |
+| `spec:<model>`                               | Statinė modelio specifikacija                                                    |
+| Priešdėlis `effort-base:`                    | Eilutė, paimta iš varianto su effort priesaga bazinio modelio                    |
+| `none`                                       | Joks šaltinis ribos nenurodo; reikšmė yra `null`                                 |
+
+Įgyvendinimas: `getResolvedModelCapabilitiesWithLimitSources()` faile `src/lib/modelCapabilities.ts` ir pirmumo sekos faile `src/lib/modelCapabilityLimits.ts`.
 
 ### Naudojimas ir analizė
 

@@ -1195,7 +1195,10 @@ async function main() {
         id: "pack-artifact",
         label: "Package artifact (npm pack policy)",
         run: runPackArtifactGate,
-        timeout: 20 * 60 * 1000,
+        // Public full runs 41393875079 / 41445094765 completed this shared
+        // build + stamp + package budget in 23m47s / 39m57s (#18693).
+        // Keep a finite cap; timeout, cancellation, and cleanup still fail closed.
+        timeout: 40 * 60 * 1000,
       });
     }
     // With --suites-from only the build lane is left for this slot.

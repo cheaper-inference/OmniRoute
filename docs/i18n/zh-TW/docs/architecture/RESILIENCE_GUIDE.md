@@ -10,6 +10,8 @@ OmniRoute 有三個各自獨立但彼此相關的韌性機制。每個機制的�
 
 > 來源:[diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **韌性開關的環境變數與儀表板優先順序。** 由環境變數初始化、需主動啟用的開關 — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`、`PROVIDER_COOLDOWN_ENABLED`、`STREAM_RECOVERY_ENABLED`、`STREAM_RECOVERY_MIDSTREAM_ENABLED`、`STREAM_THROUGHPUT_WATCHDOG_ENABLED` — 僅提供_預設值_（`DEFAULT_RESILIENCE_SETTINGS`，`src/lib/resilience/settings.ts`）。持久儲存於 `resilienceSettings` 的布林值（儀表板 → **設定 → 韌性** / `PATCH /api/resilience`，儲存在 `key_value`）優先於環境變數：正規化邏輯（`toBoolean`，`src/lib/resilience/settings/normalize.ts`）會保留既有的布林值。因此，若儀表板已儲存 `false`，再將環境變數設為 `true` 並不會改變行為；請在**設定 → 韌性**中切換開關，或清除已儲存的欄位。
+
 ## 1. 提供者斷路器(Provider Circuit Breaker)
 
 **範圍:**整個提供者(例如 `glm`、`openai`、`anthropic`)。
@@ -92,6 +94,8 @@ OmniRoute 有三個各自獨立但彼此相關的韌性機制。每個機制的�
 - API 金鑰基礎：3 秒
 - API 金鑰 429：優先採用上游的 `Retry-After`/重置標頭/可解析的重置文字
 - 退避：`baseCooldownMs * 2 ** failureIndex`
+
+**各供應商的重試延遲。** 供應商詳細資料頁有**重試延遲**選項（Auto，15s 至 1h），儲存至 `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds`（透過 `PATCH /api/resilience` 接受 1–21600）。速率限制錯誤沒有上游重試提示時，此值會取代供應商的遞增退避，並將 `backoffLevel` 重設為 0（`open-sse/services/rotationConfig.ts::overrideFor`）。速率限制錯誤的優先順序由高至低為：上游重試提示、連線層級 `providerSpecificData.rotationOverrides.rateLimitResetSeconds`、供應商重試延遲、環境變數 `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`、遞增退避。Auto 會移除該欄位。這只影響速率限制原因，絕不影響終止狀態。
 
 **防驚群（thundering-herd）保護：**防止並發失敗過度延長冷卻時間，或重複累加 `backoffLevel`。
 
@@ -428,7 +432,7 @@ quota_exhausted / auth_error / not_found / not_found_local:
 window），才能觸發中止。它會計算來自 Chat Completions 與 Responses API 輸出
 事件的文字增量（採用保守的 UTF-8 位元組代理值），忽略僅含用量與空的事件，
 並在工具呼叫或推理事件進行中時暫停判斷。它預設為停用，可透過
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` 啟用；窗口、暖身期、最低速率與
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` （該環境變數僅設定預設值 — 已儲存的 `resilienceSettings.streamRecovery.throughputWatchdog.enabled` 布林值優先；請參閱本指南開頭關於環境變數與儀表板優先順序的說明） 啟用；窗口、暖身期、最低速率與
 最低可測量輸出皆由一般的 resilience-settings 正規化層加以限制。
 
 啟用後，看門狗的中止僅套用於當前作用中的上游嘗試。在任何對客戶端可見的

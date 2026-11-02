@@ -43,23 +43,31 @@ Ponieważ liczba jest szacunkiem:
 
 ### Źródło cen
 
-Koszty pochodzą z tabeli cen rozwiązywanej w tej kolejności pierwszeństwa
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Koszty wynikają ze scalonej tabeli cen w [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), w następującej kolejności (**najwyższy priorytet pierwszy**):
 
-1. **Nadpisania użytkownika** — ceny ustawione w dashboardzie / przez `PATCH /api/pricing`.
-2. **Zsynchronizowane ceny zewnętrzne** — pobierane z publicznego pliku LiteLLM
-   `model_prices_and_context_window.json`, gdy sync jest włączony (przechowywane w osobnej
-   przestrzeni nazw `pricing_synced`, więc nigdy nie nadpisują Twoich override’ów).
-3. **Zakodowane na stałe domyślne** — dostarczane z OmniRoute.
+1. **Nadpisania użytkownika** — ceny z panelu lub `PATCH /api/pricing` (przestrzeń nazw `pricing`).
+2. **Synchronizacja models.dev** — ceny pobrane z `https://models.dev/api.json` (przestrzeń nazw `models_dev_pricing`).
+3. **Synchronizacja LiteLLM** — ceny z publicznego pliku `model_prices_and_context_window.json` projektu LiteLLM (przestrzeń nazw `pricing_synced`).
+4. **Wbudowane wartości domyślne** — stawki dostarczane w [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Zewnętrzny sync cen jest **opt-in**, domyślnie wyłączony. Istotne zmienne środowiskowe
-(zob. [`.env.example`](../../.env.example)):
+Dla tego samego dostawcy/modelu wyższe warstwy nadpisują odpowiadające pola niższych; brakujące pola mogą nadal pochodzić z niższej warstwy. Kolejność jest stała także wtedy, gdy oba niezależne zadania synchronizacji działają jednocześnie. `GET /api/pricing?includeSources=1` zwraca `pricing` i `sourceMap`; etykiety modeli (`user`, `modelsDev`, `litellm`, `default`) wskazują najwyższą warstwę zawierającą dany model.
 
-| Env var                 | Default   | Cel                                                          |
-| ----------------------- | --------- | ------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`   | Włącza w tle sync cen LiteLLM przy starcie.                  |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Interwał sync w **sekundach** (domyślnie codziennie).        |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Lista źródeł rozdzielona przecinkami (dziś tylko `litellm`). |
+**Synchronizacja LiteLLM** wymaga włączenia i domyślnie jest wyłączona. Jej zmienne środowiskowe (zobacz [`.env.example`](../../.env.example)) to:
+
+| Env var                 | Default   | Cel                                                                                          |
+| ----------------------- | --------- | -------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Włącza synchronizację cen LiteLLM w tle.                                                     |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Interwał sync w **sekundach** (domyślnie codziennie).                                        |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Wybór źródła dotyczy tylko tej synchronizacji; obecnie obsługiwane jest wyłącznie `litellm`. |
+
+**Synchronizacja models.dev** jest niezależna od synchronizacji LiteLLM i również domyślnie wyłączona. Włącz ją w Ustawieniach (synchronizacja models.dev) lub użyj tych zmiennych:
+
+| Zmienna środowiskowa       | Domyślnie        | Zastosowanie                                                                                                                                                    |
+| -------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nieustawiona)_ | Brak wartości oznacza użycie przełącznika w Ustawieniach; `1/true/on/yes` wymusza włączenie, a `0/false/off/no` wyłączenie, nawet jeśli Ustawienia ją włączają. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`          | Domyślny odstęp synchronizacji models.dev w sekundach (codziennie).                                                                                             |
+
+`PRICING_SYNC_SOURCES` **nie** włącza models.dev; steruje wyłącznie synchronizacją LiteLLM. Usunięcie nadpisania użytkownika nie czyści żadnej ze zsynchronizowanych przestrzeni nazw; zaczyna obowiązywać następna dostępna warstwa cen. Dla modelu bez ceny sprawdź oba ustawienia synchronizacji i `sourceMap`, zanim dodasz ręczne nadpisanie.
 
 ### Formuła kosztu
 
@@ -177,16 +185,16 @@ nie zaznaczono inaczej.
 
 ### Pricing
 
-| Method   | Endpoint                | Cel                                                                                                |
-| -------- | ----------------------- | -------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Bieżące scalone ceny (user + synced + defaults). `?includeSources=1`, by zobaczyć źródło per wpis. |
-| `PATCH`  | `/api/pricing`          | Nadpisanie cen dla `{ provider: { model: { input, output, cached, … } } }`.                        |
-| `DELETE` | `/api/pricing`          | Reset cen do domyślnych (opcjonalnie scoped przez `?provider=&model=`).                            |
-| `GET`    | `/api/pricing/defaults` | Pokazuje domyślne stawki fallback per-1M.                                                          |
-| `GET`    | `/api/pricing/models`   | Ceny kluczowane po modelu.                                                                         |
-| `POST`   | `/api/pricing/sync`     | Ręczny sync ze źródeł zewnętrznych (LiteLLM).                                                      |
-| `GET`    | `/api/pricing/sync`     | Bieżący status sync.                                                                               |
-| `DELETE` | `/api/pricing/sync`     | Czyści wszystkie zsynchronizowane dane cenowe.                                                     |
+| Method   | Endpoint                | Cel                                                                                                                                                                      |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Scalone ceny z czterech warstw (użytkownik, models.dev, LiteLLM, domyślne). `?includeSources=1` zwraca `pricing` + `sourceMap`.                                          |
+| `PATCH`  | `/api/pricing`          | Nadpisanie cen dla `{ provider: { model: { input, output, cached, … } } }`.                                                                                              |
+| `DELETE` | `/api/pricing`          | Usuwa nadpisania cen użytkownika (opcjonalnie ograniczone przez `?provider=&model=`); zsynchronizowane ceny i wbudowane wartości domyślne pozostają źródłami zapasowymi. |
+| `GET`    | `/api/pricing/defaults` | Pokazuje domyślne stawki fallback per-1M.                                                                                                                                |
+| `GET`    | `/api/pricing/models`   | Ceny kluczowane po modelu.                                                                                                                                               |
+| `POST`   | `/api/pricing/sync`     | Ręczny sync ze źródeł zewnętrznych (LiteLLM).                                                                                                                            |
+| `GET`    | `/api/pricing/sync`     | Bieżący status sync.                                                                                                                                                     |
+| `DELETE` | `/api/pricing/sync`     | Czyści wyłącznie ceny zsynchronizowane przez LiteLLM (`pricing_synced`); dane models.dev są oddzielne.                                                                   |
 
 ### Inne endpointy związane z kosztami
 

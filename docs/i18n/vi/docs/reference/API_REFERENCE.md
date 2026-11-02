@@ -863,7 +863,7 @@ Trường `time_range` chung giờ đây được chuyển đến cả hai nhà 
 ISO) và Tavily nhận `start_date` (`YYYY-MM-DD`). Ngày được chỉ định rõ ràng trong `provider_options`
 sẽ ghi đè ngày được ánh xạ.
 
-Kết quả Exa giữ lại `id`, `highlight_scores`, `summary`, `subpages`, `entities` và `extras` trong
+Kết quả Exa giữ lại `id`, `highlights` (mọi đoạn nổi bật, không chỉ đoạn đầu dùng làm `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` và `extras` trong
 `provider_raw`. Kết quả Tavily giữ lại `images` và `favicon`.
 
 Linkup: Chi phí tìm kiếm liên kết được ghi nhận ở mức 0,005 USD cho `depth` `fast` và `standard` và 0,05 USD cho `deep` ( [Giá liên kết](https://docs.linkup.so/pages/documentation/development/pricing) ), cho dù `depth` đến từ `provider_options` hay cài đặt của kết nối.
@@ -1274,11 +1274,29 @@ giai đoạn thứ hai vẫn có thể tạo phần suy luận hiển thị đư
 
 | Điểm cuối             | Phương thức | Mô tả                                   |
 | --------------------- | ----------- | --------------------------------------- |
+| `/api/models`         | GET/PUT     | Danh sách mô hình / cập nhật bí danh    |
 | `/api/models/alias`   | GET/POST    | Bí danh mô hình                         |
 | `/api/models/catalog` | GET         | Tất cả mô hình theo nhà cung cấp + loại |
 | `/api/combos*`        | Nhiều loại  | Quản lý combo                           |
 | `/api/keys*`          | Nhiều loại  | Quản lý khóa API                        |
 | `/api/pricing`        | GET         | Giá mô hình                             |
+
+#### Nguồn gốc giới hạn mô hình
+
+`GET /api/models?withLimits=1` cũng nhận `true`; `0`/`false` hoặc bỏ tham số giữ nguyên phản hồi mặc định. Nó thêm `contextWindow`, `maxInputTokens`, `maxOutputTokens` và đối tượng `capsSource` vào từng mô hình. `capsSource` chỉ ra quy tắc cung cấp từng giới hạn, giúp truy nguồn giá trị bất thường như 128k trên mô hình 1M. Các giá trị đã phân giải giống hệt giá trị định tuyến dùng; cờ chỉ thêm trường, không đổi giá trị. Mọi giá trị `withLimits` khác đều bị từ chối bằng `400`.
+
+| Giá trị `capsSource`                         | Nguồn                                                           |
+| -------------------------------------------- | --------------------------------------------------------------- |
+| `override:context`                           | Ghi đè cửa sổ ngữ cảnh đã lưu (`model_context_overrides`)       |
+| `override:max_input` / `override:max_output` | Ghi đè năng lực đã lưu `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Bảng cửa sổ ngữ cảnh tĩnh có thẩm quyền                         |
+| `synced:<provider>/<model>`                  | Dòng năng lực đồng bộ từ models.dev                             |
+| `registry:<provider>/<model>`                | Mục đăng ký nhà cung cấp                                        |
+| `spec:<model>`                               | Đặc tả mô hình tĩnh                                             |
+| `effort-base:` tiền tố                       | Dòng mượn từ mô hình cơ sở của biến thể có hậu tố mức nỗ lực    |
+| `none`                                       | Không nguồn nào khai báo giới hạn (giá trị là `null`)           |
+
+Triển khai: `getResolvedModelCapabilitiesWithLimitSources()` trong `src/lib/modelCapabilities.ts` và chuỗi ưu tiên trong `src/lib/modelCapabilityLimits.ts`.
 
 ### Mức sử dụng & Phân tích
 

@@ -10,6 +10,8 @@ OmniRoute má tři odlišné, ale vzájemně související mechanismy odolnosti.
 
 > Zdroj: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Priorita prostředí a panelu u přepínačů odolnosti.** Volitelné přepínače odolnosti inicializované z prostředí — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — poskytují pouze _výchozí hodnotu_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Booleovská hodnota trvale uložená v `resilienceSettings` (Panel → **Nastavení → Odolnost** / `PATCH /api/resilience`, uloženo v `key_value`) má přednost před hodnotou prostředí: normalizace (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) zachová uloženou booleovskou hodnotu, kdykoli existuje. Nastavení takové proměnné prostředí na `true` v nasazení, kde panel již uložil `false`, tedy nic nezmění. Přepněte volbu v **Nastavení → Odolnost** nebo vymažte uložené pole.
+
 ## 1. Circuit breaker poskytovatele
 
 **Rozsah:** celý poskytovatel (např. `glm`, `openai`, `anthropic`).
@@ -94,6 +96,8 @@ Regresní test: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - Základ pro API klíč: 3 s
 - API klíč 429: preferuje upstreamové hlavičky `Retry-After`/reset nebo parsovatelný text resetu
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Prodleva opakování pro poskytovatele.** Stránka podrobností poskytovatele obsahuje výběr **Prodleva opakování** (Automaticky, od 15s do 1h). Ukládá `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600 přes `PATCH /api/resilience`). Pokud chyba omezení frekvence neobsahuje pokyn k opakování od nadřazené služby, tato hodnota nahradí škálovanou prodlevu poskytovatele a nastaví `backoffLevel` zpět na 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Pro chybu omezení frekvence platí toto sestupné pořadí priorit: pokyn nadřazené služby, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` daného připojení, prodleva poskytovatele, proměnná prostředí `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` a škálovaná prodleva. Automaticky pole odstraní. Ovlivňuje pouze důvod omezení frekvence, nikdy koncové stavy.
 
 **Ochrana proti thundering-herd:** zabraňuje souběžným selháním nadměrně prodlužovat cooldown nebo dvakrát navyšovat `backoffLevel`.
 
@@ -547,7 +551,7 @@ může provést abort. Počítá textové delty z Chat Completions a výstupníc
 Responses API (konzervativní proxy v podobě UTF-8 bajtů), ignoruje události
 obsahující pouze usage a prázdné události a pozastavuje posuzování, dokud
 probíhají události volání nástrojů nebo uvažování. Ve výchozím nastavení je
-vypnutý a lze jej zapnout pomocí `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; okno,
+vypnutý a lze jej zapnout pomocí `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (tato hodnota prostředí pouze nastavuje výchozí hodnotu — uložená booleovská hodnota `resilienceSettings.streamRecovery.throughputWatchdog.enabled` má přednost; viz poznámka o prioritě prostředí a panelu na začátku této příručky); okno,
 zahřívání, minimální rychlost a minimální měřitelný výstup jsou omezeny
 normální vrstvou normalizace resilience-settings.
 

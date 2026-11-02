@@ -10,6 +10,8 @@ OmniRoute għandu tliet mekkaniżmi ta' reżiljenza distinti iżda relatati. Kul
 
 > Sors: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Preċedenza bejn l-ambjent u d-dashboard għas-swiċċijiet tar-reżiljenza.** Is-swiċċijiet tar-reżiljenza li jeħtieġu attivazzjoni espliċita u li jibdew b’valur mill-ambjent — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — jipprovdu biss il-_valur awtomatiku_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean salvat f’`resilienceSettings` (Dashboard → **Settings → Reżiljenza** / `PATCH /api/resilience`, maħżun f’`key_value`) jieħu preċedenza fuq il-valur tal-ambjent: in-normalizzazzjoni (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) iżżomm il-boolean salvat meta dan jeżisti. Għalhekk, issettjar ta’ varjabbli bħal din għal `true` fuq installazzjoni fejn id-dashboard diġà salva `false` ma jbiddel xejn. Ibdel is-swiċċ f’**Settings → Reżiljenza**, jew neħħi l-qasam salvat.
+
 ## 1. Circuit Breaker tal-Provider
 
 **Ambitu:** il-provider kollu (eż., `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ Taħt il-limitu, il-provider **mhux** ikkunsidrat li qed jkessaħ; suċċess iħ
 - Bażi API-key: 3s
 - API-key 429: jippreferi l-headers `Retry-After`/reset minn upstream jew test ta' reset li jista' jiġi analizzat
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Dewmien bejn tentattivi għal kull fornitur.** Il-paġna tad-dettalji tal-fornitur għandha għażla **Dewmien bejn tentattivi** (Auto, minn 15s sa 1h). Din issalva `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, permezz ta’ `PATCH /api/resilience`). Meta żball ta’ limitu tar-rata ma jkollux indikazzjoni upstream dwar meta għandu jsir tentattiv ieħor, dan il-valur jissostitwixxi l-backoff skalat tal-fornitur u jreġġa’ `backoffLevel` għal 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Il-preċedenza għal żball bħal dan, mill-ogħla: indikazzjoni upstream, imbagħad `providerSpecificData.rotationOverrides.rateLimitResetSeconds` tal-konnessjoni, imbagħad id-dewmien tal-fornitur, imbagħad il-varjabbli tal-ambjent `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, u fl-aħħar il-backoff skalat. Auto tneħħi l-qasam. Dan jaffettwa biss ir-raġuni tal-limitu tar-rata, qatt l-istati terminali.
 
 **Protezzjoni kontra t-thundering herd:** tevita li fallimenti konkurrenti jestendu żżejjed it-tkessiħ jew iżidu l-`backoffLevel` darbtejn.
 
@@ -489,7 +493,7 @@ Completions u tar-Responses API (proxy konservattiv tal-bytes UTF-8), tinjora
 avvenimenti li jirrappurtaw biss l-użu u avvenimenti vojta, u tissospendi l-ġudizzju
 waqt li jkunu għaddejjin avvenimenti ta' tool-call jew ta' reasoning. Hija
 diżattivata bil-default u tista' tiġi attivata b'
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; it-tieqa, il-warm-up, ir-rata minima, u
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (dak il-valur tal-ambjent jipprovdi biss il-valur awtomatiku; boolean salvat f’`resilienceSettings.streamRecovery.throughputWatchdog.enabled` jieħu preċedenza; ara n-nota dwar il-preċedenza bejn l-ambjent u d-dashboard fil-bidu ta’ din il-gwida); it-tieqa, il-warm-up, ir-rata minima, u
 l-output minimu li jista' jiġi mkejjel huma delimitati mis-saff normali ta'
 normalizzazzjoni tas-settings tar-reżiljenza.
 

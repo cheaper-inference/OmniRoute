@@ -10,6 +10,8 @@ O OmniRoute tem três mecanismos de resiliência distintos mas relacionados. Cad
 
 > Fonte: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Precedência entre ambiente e painel nos controlos de resiliência.** Os controlos opcionais iniciados pelo ambiente — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — fornecem apenas a _predefinição_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Um booleano persistido em `resilienceSettings` (Painel → **Definições → Resiliência** / `PATCH /api/resilience`, armazenado em `key_value`) prevalece sobre o ambiente: a normalização (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) conserva o booleano guardado sempre que exista. Definir a variável de ambiente como `true` quando o painel já guardou `false` não altera nada; mude o controlo em **Definições → Resiliência** ou elimine o campo guardado.
+
 ## 1. Circuit Breaker de Fornecedor
 
 **Âmbito:** fornecedor inteiro (p. ex., `glm`, `openai`, `anthropic`).
@@ -90,6 +92,8 @@ Proteção de regressão: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - Base de chave API: 3s
 - 429 de chave API: prefere os cabeçalhos a montante `Retry-After`/de reposição/texto de reposição analisável
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Atraso entre tentativas por fornecedor.** A página do fornecedor tem um seletor **Atraso entre tentativas** (Auto, de 15s a 1h). Guarda `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, através de `PATCH /api/resilience`). Sem indicação de nova tentativa do serviço a montante num erro de limite de pedidos, este valor substitui a espera progressiva do fornecedor e repõe `backoffLevel` em 0 (`open-sse/services/rotationConfig.ts::overrideFor`). A precedência, da maior para a menor, é: indicação a montante, `providerSpecificData.rotationOverrides.rateLimitResetSeconds` da ligação, atraso do fornecedor, variável `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS` e espera progressiva. Auto remove o campo. Só afeta o motivo de limite de pedidos, nunca estados terminais.
 
 **Proteção anti-thundering-herd:** impede que falhas concorrentes prolonguem excessivamente o cooldown ou incrementem duas vezes o `backoffLevel`.
 
@@ -594,7 +598,7 @@ APIs Chat Completions e Responses (uma aproximação conservadora em bytes UTF-8
 ignora eventos apenas de utilização e eventos vazios, e suspende a avaliação
 enquanto houver eventos de chamada de ferramentas ou de raciocínio em curso. Está
 desativado por predefinição e pode ser ativado com
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; a janela, o aquecimento, a taxa mínima
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (esse valor de ambiente apenas fornece a predefinição — um booleano guardado em `resilienceSettings.streamRecovery.throughputWatchdog.enabled` prevalece; consulte a nota sobre precedência entre ambiente e painel no início deste guia); a janela, o aquecimento, a taxa mínima
 e a saída mensurável mínima são limitados pela camada normal de normalização das
 definições de resiliência.
 

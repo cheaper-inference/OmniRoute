@@ -10,6 +10,8 @@ OmniRoute mempunyai tiga mekanisme daya tahan yang berbeza tetapi saling berkait
 
 > Sumber: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Keutamaan persekitaran berbanding papan pemuka untuk suis ketahanan.** Suis ketahanan pilihan yang dimulakan daripada persekitaran — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — hanya membekalkan _nilai lalai_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean yang disimpan dalam `resilienceSettings` (Papan pemuka → **Tetapan → Ketahanan** / `PATCH /api/resilience`, disimpan dalam `key_value`) mengatasi nilai persekitaran: penormalan (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) mengekalkan boolean tersimpan jika ada. Oleh itu, menetapkan pemboleh ubah persekitaran tersebut kepada `true` pada pemasangan yang papan pemukanya sudah menyimpan `false` tidak mengubah apa-apa. Tukar suis dalam **Tetapan → Ketahanan**, atau kosongkan medan yang disimpan.
+
 ## 1. Pemutus Litar Pembekal
 
 **Skop:** keseluruhan pembekal (cth., `glm`, `openai`, `anthropic`).
@@ -88,6 +90,8 @@ Pengawal regresi: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - Asas kunci API: 3s
 - 429 kunci API: mengutamakan pengepala `Retry-After`/reset huluan/teks reset yang boleh dihuraikan
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Jeda cuba semula bagi setiap penyedia.** Halaman butiran penyedia mempunyai pilihan **Jeda cuba semula** (Auto, daripada 15s hingga 1h). Ia menyimpan `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, melalui `PATCH /api/resilience`). Apabila ralat had kadar tidak membawa petunjuk cuba semula daripada huluan, nilai itu menggantikan backoff berskala bagi penyedia dan menetapkan semula `backoffLevel` kepada 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Keutamaan untuk ralat had kadar, bermula daripada yang tertinggi: petunjuk huluan, kemudian `providerSpecificData.rotationOverrides.rateLimitResetSeconds` bagi sambungan, kemudian jeda cuba semula penyedia, kemudian pemboleh ubah persekitaran `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, dan akhirnya backoff berskala. Auto membuang medan tersebut. Ia hanya mempengaruhi sebab had kadar, bukan keadaan terminal.
 
 **Pelindung anti-thundering-herd:** menghalang kegagalan serentak daripada melanjutkan tempoh bertenang secara berlebihan atau menaikkan `backoffLevel` dua kali.
 
@@ -543,7 +547,7 @@ Completions dan Responses API (proksi bait UTF-8 yang konservatif), mengabaikan
 peristiwa yang hanya mengandungi penggunaan serta peristiwa kosong, dan menangguhkan
 penilaian semasa peristiwa panggilan alat atau penaakulan sedang berlangsung. Ia
 dilumpuhkan secara lalai dan boleh didayakan dengan
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; tetingkap, pemanasan, kadar minimum, dan
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (nilai persekitaran itu hanya menetapkan nilai lalai; boolean yang disimpan dalam `resilienceSettings.streamRecovery.throughputWatchdog.enabled` diberi keutamaan; lihat nota keutamaan persekitaran dan papan pemuka pada awal panduan ini); tetingkap, pemanasan, kadar minimum, dan
 output minimum yang boleh diukur dihadkan oleh lapisan normalisasi tetapan ketahanan
 yang biasa.
 

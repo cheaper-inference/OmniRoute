@@ -41,23 +41,31 @@ Ker je številka le ocena:
 
 ### Vir cen
 
-Stroški izhajajo iz cenika, ki se razreši po naslednjem prednostnem vrstnem redu
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Stroški izhajajo iz združene tabele cen v [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), v tem vrstnem redu (**najvišja prednost najprej**):
 
-1. **Uporabniške preglasitve** — cene, ki jih nastavite na nadzorni plošči / prek `PATCH /api/pricing`.
-2. **Sinhronizirane zunanje cene** — pridobljene iz LiteLLM-ove javne datoteke
-   `model_prices_and_context_window.json`, ko je sinhronizacija omogočena (shranjene v
-   ločenem imenskem prostoru `pricing_synced`, zato nikoli ne prepišejo vaših preglasitev).
-3. **Vnaprej določene privzete vrednosti** — vključene v OmniRoute.
+1. **Uporabniške preglasitve** — cene iz plošče ali `PATCH /api/pricing` (imenski prostor `pricing`).
+2. **Sinhronizacija models.dev** — cene iz `https://models.dev/api.json` (imenski prostor `models_dev_pricing`).
+3. **Sinhronizacija LiteLLM** — cene iz javne datoteke `model_prices_and_context_window.json` projekta LiteLLM (imenski prostor `pricing_synced`).
+4. **Vgrajene privzete vrednosti** — tarife iz [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Sinhronizacija zunanjih cen je **izbirna** in privzeto onemogočena. Ustrezne okoljske
-spremenljivke (glejte [`.env.example`](../../.env.example)):
+Za istega ponudnika/model višje plasti preglasijo ujemajoča se polja nižjih; manjkajoča polja še vedno lahko izvirajo iz nižje plasti. Vrstni red ostane stalen tudi ob sočasnem izvajanju obeh neodvisnih sinhronizacij. `GET /api/pricing?includeSources=1` vrne `pricing` in `sourceMap`; oznake modelov (`user`, `modelsDev`, `litellm`, `default`) označujejo najvišjo plast, ki vsebuje model.
 
-| Okoljska spremenljivka  | Privzeto  | Namen                                                               |
-| ----------------------- | --------- | ------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Omogoči sinhronizacijo cen LiteLLM v ozadju ob zagonu.              |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Interval sinhronizacije v **sekundah** (privzeto enkrat dnevno).    |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Seznam virov, ločen z vejicami (trenutno je podprt samo `litellm`). |
+**Sinhronizacija LiteLLM** zahteva izrecen vklop in je privzeto izklopljena. Njene spremenljivke okolja (glejte [`.env.example`](../../.env.example)) so:
+
+| Okoljska spremenljivka  | Privzeto  | Namen                                                                         |
+| ----------------------- | --------- | ----------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Omogoči sinhronizacijo cen LiteLLM v ozadju.                                  |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Interval sinhronizacije v **sekundah** (privzeto enkrat dnevno).              |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Izbira vira velja samo za to sinhronizacijo; trenutno je podprt le `litellm`. |
+
+**Sinhronizacija models.dev** je ločena od sinhronizacije LiteLLM in prav tako privzeto izklopljena. Vklopite jo v Nastavitvah (sinhronizacija models.dev) ali uporabite spremenljivke:
+
+| Spremenljivka okolja       | Privzeto          | Namen                                                                                                                                   |
+| -------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nenastavljena)_ | Nenastavljena sledi stikalu v Nastavitvah; `1/true/on/yes` vsili vklop, `0/false/off/no` pa izklop, tudi če je v Nastavitvah omogočena. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Privzeti interval sinhronizacije models.dev v sekundah (dnevno).                                                                        |
+
+`PRICING_SYNC_SOURCES` **ne** omogoči models.dev; nadzoruje samo sinhronizacijo LiteLLM. Izbris uporabniške preglasitve ne počisti nobenega sinhroniziranega imenskega prostora; velja naslednja razpoložljiva cenovna plast. Pri modelu brez cene preverite obe nastavitvi sinhronizacije in `sourceMap`, preden dodate ročno preglasitev.
 
 ### Formula za izračun stroškov
 
@@ -178,16 +186,16 @@ razen kjer je navedeno drugače.
 
 ### Cene
 
-| Metoda   | Končna točka            | Namen                                                                                                                |
-| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Trenutne združene cene (uporabniške + sinhronizirane + privzete). `?includeSources=1` prikaže vir posameznega vnosa. |
-| `PATCH`  | `/api/pricing`          | Preglasitev cen za `{ provider: { model: { input, output, cached, … } } }`.                                          |
-| `DELETE` | `/api/pricing`          | Ponastavitev cen na privzete vrednosti (izbirno omejeno z `?provider=&model=`).                                      |
-| `GET`    | `/api/pricing/defaults` | Prikaz privzetih nadomestnih tarif na 1 milijon enot.                                                                |
-| `GET`    | `/api/pricing/models`   | Cene, indeksirane po modelu.                                                                                         |
-| `POST`   | `/api/pricing/sync`     | Sprožitev ročne sinhronizacije iz zunanjih virov (LiteLLM).                                                          |
-| `GET`    | `/api/pricing/sync`     | Trenutno stanje sinhronizacije.                                                                                      |
-| `DELETE` | `/api/pricing/sync`     | Izbris vseh sinhroniziranih podatkov o cenah.                                                                        |
+| Metoda   | Končna točka            | Namen                                                                                                                                                         |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Združene cene štirih plasti (uporabnik, models.dev, LiteLLM, privzete). `?includeSources=1` vrne `pricing` + `sourceMap`.                                     |
+| `PATCH`  | `/api/pricing`          | Preglasitev cen za `{ provider: { model: { input, output, cached, … } } }`.                                                                                   |
+| `DELETE` | `/api/pricing`          | Odstrani uporabniške preglasitve cen (po želji omejene z `?provider=&model=`); sinhronizirane tarife in vgrajene privzete vrednosti ostanejo nadomestni viri. |
+| `GET`    | `/api/pricing/defaults` | Prikaz privzetih nadomestnih tarif na 1 milijon enot.                                                                                                         |
+| `GET`    | `/api/pricing/models`   | Cene, indeksirane po modelu.                                                                                                                                  |
+| `POST`   | `/api/pricing/sync`     | Sprožitev ročne sinhronizacije iz zunanjih virov (LiteLLM).                                                                                                   |
+| `GET`    | `/api/pricing/sync`     | Trenutno stanje sinhronizacije.                                                                                                                               |
+| `DELETE` | `/api/pricing/sync`     | Počisti samo cene, sinhronizirane z LiteLLM (`pricing_synced`); podatki models.dev so ločeni.                                                                 |
 
 ### Druge končne točke, povezane s stroški
 

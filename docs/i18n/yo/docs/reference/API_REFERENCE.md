@@ -864,7 +864,7 @@ Iye owo wiwa Firecrawl jẹ igbasilẹ fun bulọọki ti o bẹrẹ ti awọn a
 àti Tavily ń gba `start_date` (`YYYY-MM-DD`). Déètì tí a sọ ní pàtó nínú `provider_options`
 máa ń rọ́pò èyí tí a ti ṣe mapping rẹ̀.
 
-Àwọn àbájáde Exa máa ń pa `id`, `highlight_scores`, `summary`, `subpages`, `entities` àti `extras` mọ́ sínú
+Àwọn àbájáde Exa máa ń pa `id`, `highlights` (gbogbo àwọn àyọkà tí a tẹnumọ́, kì í ṣe àkọ́kọ́ tí a lò gẹ́gẹ́ bí `snippet` nìkan), `highlight_scores`, `summary`, `subpages`, `entities` àti `extras` mọ́ sínú
 `provider_raw`. Àwọn àbájáde Tavily máa ń pa `images` àti `favicon` mọ́.
 
 Linkup: Iye owo wiwa ọna asopọ jẹ igbasilẹ ni $0.005 fun `depth` `fast` ati `standard` ati $0.05 fun `deep` ( [Ifowoleri Ọna asopọ](https://docs.linkup.so/pages/documentation/development/pricing) ), boya `depth` wa lati `provider_options` tabi awọn eto asopọ.
@@ -1275,11 +1275,29 @@ gidi láti ọ̀dọ̀ upstream mọ́; ìpele kejì ṣì lè ṣe ìrònú tí
 
 | Endpoint              | Method    | Àlàyé                                |
 | --------------------- | --------- | ------------------------------------ |
+| `/api/models`         | GET/PUT   | Àtòjọ àwòṣe / àtúnṣe orúkọ àfidípò   |
 | `/api/models/alias`   | GET/POST  | Àwọn orúkọ ìnagijẹ awoṣe             |
 | `/api/models/catalog` | GET       | Gbogbo àwọn awoṣe nípa olùpèsè + irú |
 | `/api/combos*`        | Oríṣiríṣi | Ìṣàkóso combo                        |
 | `/api/keys*`          | Oríṣiríṣi | Ìṣàkóso kọ́kọ́rọ́ API                   |
 | `/api/pricing`        | GET       | Ìdíyelé awoṣe                        |
+
+#### Orísun àwọn ààlà àwòṣe
+
+`GET /api/models?withLimits=1` tún gba `true`; `0`/`false` tàbí àìfi àṣàyàn náà sílẹ̀ kò yí ìdáhùn àiyipada padà. Ó fi `contextWindow`, `maxInputTokens`, `maxOutputTokens` àti ohun `capsSource` kún àwòṣe kọ̀ọ̀kan. `capsSource` sọ òfin tí ó pèsè ààlà kọ̀ọ̀kan, kí a lè tọ iye àjèjì, bí 128k fún àwòṣe 1M, dé orísun rẹ̀. Àwọn iye tí a pinnu náà ni ìdarí ọ̀nà ń lò; àṣàyàn yìí kan fi ààyè kún un, kò yí iye padà. Iye `withLimits` mìíràn ni a kọ̀ pẹ̀lú `400`.
+
+| Iye `capsSource`                             | Orísun                                                            |
+| -------------------------------------------- | ----------------------------------------------------------------- |
+| `override:context`                           | Ìròpọ̀ fèrèsé àyíká tí a fipamọ́ (`model_context_overrides`)        |
+| `override:max_input` / `override:max_output` | Ìròpọ̀ agbára tí a fipamọ́ `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Tábìlì fèrèsé àyíká tí kò yí padà, tí ó jẹ́ aláṣẹ                  |
+| `synced:<provider>/<model>`                  | Ìlà agbára tí a mú bá models.dev mu                               |
+| `registry:<provider>/<model>`                | Àkọsílẹ̀ inú ìforúkọsílẹ̀ olùpèsè                                   |
+| `spec:<model>`                               | Àlàyé àwòṣe tí kò yí padà                                         |
+| `effort-base:` ìpele ìbẹ̀rẹ̀                   | Ìlà tí a yá láti àwòṣe ìpìlẹ̀ fún ẹ̀yà tó ní àfikún ìpele ìsapá     |
+| `none`                                       | Kò sí orísun tó sọ ààlà náà (iye jẹ́ `null`)                       |
+
+Ìmúṣẹ: `getResolvedModelCapabilitiesWithLimitSources()` nínú `src/lib/modelCapabilities.ts` àti ìtòlẹ́sẹẹsẹ àṣẹ nínú `src/lib/modelCapabilityLimits.ts`.
 
 ### Ìlò àti Ìtúpalẹ̀
 

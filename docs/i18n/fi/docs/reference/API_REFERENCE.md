@@ -887,7 +887,7 @@ Yleinen `time_range` välitetään nyt molemmille palveluntarjoajille: Exa saa k
 aikaleima) ja Tavily kentän `start_date` (`YYYY-MM-DD`). Kohdassa `provider_options`
 eksplisiittisesti määritetty päivämäärä ohittaa muunnetun arvon.
 
-Exan tulokset säilyttävät kentät `id`, `highlight_scores`, `summary`, `subpages`, `entities` ja `extras`
+Exan tulokset säilyttävät kentät `id`, `highlights` (kaikki korostetut katkelmat, eivät vain ensimmäinen `snippet`-kenttään käytetty katkelma), `highlight_scores`, `summary`, `subpages`, `entities` ja `extras`
 kohdassa `provider_raw`. Tavilyn tulokset säilyttävät kentät `images` ja `favicon`.
 
 Linkup: Linkityshaun hinta kirjataan 0,005 $ `depth` `fast` ja `standard` ja 0,05 $ `deep` lle ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) riippumatta siitä, tuleeko `depth` `provider_options` tai yhteyden asetuksista.
@@ -1300,11 +1300,29 @@ toinen vaihe voi edelleen tuottaa pyydetyn näkyvän päättelynsä tavallisena 
 
 | Päätepiste            | Menetelmä | Kuvaus                                          |
 | --------------------- | --------- | ----------------------------------------------- |
+| `/api/models`         | GET/PUT   | Malliluettelo / aliaksen päivitys               |
 | `/api/models/alias`   | GET/POST  | Mallien aliakset                                |
 | `/api/models/catalog` | GET       | Kaikki mallit palveluntarjoajan + tyypin mukaan |
 | `/api/combos*`        | Eri       | Yhdistelmien hallinta                           |
 | `/api/keys*`          | Eri       | API-avainten hallinta                           |
 | `/api/pricing`        | GET       | Mallien hinnoittelu                             |
+
+#### Mallirajojen alkuperä
+
+`GET /api/models?withLimits=1` (myös `true`; `0`/`false` tai parametrin pois jättäminen säilyttää oletusvastauksen ennallaan) lisää jokaiseen malliriviin kentät `contextWindow`, `maxInputTokens` ja `maxOutputTokens` sekä `capsSource`-olion. `capsSource` nimeää kunkin rajan määrittäneen säännön, joten yllättävän arvon, kuten 128k:n rajan 1M-mallissa, alkuperä voidaan selvittää. Ratkaistut arvot ovat samoja, joita reititys käyttää; valitsin vain lisää kenttiä eikä koskaan muuta arvoa. Kaikki muut `withLimits`-arvot hylätään vastauksella `400`.
+
+| `capsSource` arvo                            | Alkuperä                                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `override:context`                           | Tallennettu konteksti-ikkunan ohitus (`model_context_overrides`)                      |
+| `override:max_input` / `override:max_output` | Tallennettu ominaisuuksien `max_input_tokens` / `max_output_tokens` ohitus            |
+| `static-authoritative:<provider>/<model>`    | Konteksti-ikkunoiden staattinen määräävä taulukko                                     |
+| `synced:<provider>/<model>`                  | models.dev-palvelusta synkronoitu ominaisuusrivi                                      |
+| `registry:<provider>/<model>`                | Palveluntarjoajarekisterin merkintä                                                   |
+| `spec:<model>`                               | Staattinen mallimääritys                                                              |
+| `effort-base:` etuliite                      | Ponnistelutasoa ilmaisevan päätteen sisältävän muunnelman perusmallista lainattu rivi |
+| `none`                                       | Mikään lähde ei määritä rajaa (arvo on `null`)                                        |
+
+Toteutus: `getResolvedModelCapabilitiesWithLimitSources()` tiedostossa `src/lib/modelCapabilities.ts` sekä etusijaketjut tiedostossa `src/lib/modelCapabilityLimits.ts`.
 
 ### Käyttö ja analytiikka
 

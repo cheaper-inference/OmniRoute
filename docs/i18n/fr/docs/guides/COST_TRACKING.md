@@ -44,24 +44,31 @@ Comme ce chiffre est une estimation :
 
 ### La source des tarifs
 
-Les coûts proviennent d’une grille tarifaire déterminée selon l’ordre de priorité suivant
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)) :
+Les coûts proviennent de la table de tarification fusionnée dans [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), selon cet ordre de priorité (**la plus élevée en premier**) :
 
-1. **Remplacements définis par l’utilisateur** — les prix que vous définissez dans le tableau de bord ou via `PATCH /api/pricing`.
-2. **Tarifs externes synchronisés** — récupérés depuis le fichier public
-   `model_prices_and_context_window.json` de LiteLLM lorsque la synchronisation est activée
-   (stockés dans un espace de noms `pricing_synced` distinct afin de ne jamais écraser vos
-   remplacements).
-3. **Valeurs par défaut codées en dur** — fournies avec OmniRoute.
+1. **Redéfinitions utilisateur** — tarifs définis dans le tableau de bord ou via `PATCH /api/pricing` (espace de noms `pricing`).
+2. **Synchronisation models.dev** — tarifs récupérés depuis `https://models.dev/api.json` (espace de noms `models_dev_pricing`).
+3. **Synchronisation LiteLLM** — tarifs issus du fichier public `model_prices_and_context_window.json` de LiteLLM (espace de noms `pricing_synced`).
+4. **Valeurs par défaut du code** — tarifs livrés dans [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-La synchronisation des tarifs externes est **facultative** et désactivée par défaut. Variables
-d’environnement concernées (voir [`.env.example`](../../.env.example)) :
+Pour un même fournisseur/modèle, les couches prioritaires remplacent les champs correspondants des couches inférieures ; les champs absents d’une couche supérieure peuvent toujours provenir d’une couche inférieure. Cet ordre reste fixe même lorsque les deux tâches de synchronisation indépendantes s’exécutent simultanément. `GET /api/pricing?includeSources=1` renvoie `pricing` et `sourceMap`, dont les étiquettes par modèle (`user`, `modelsDev`, `litellm`, `default`) identifient la couche la plus prioritaire contenant ce modèle.
 
-| Variable d’environnement | Valeur par défaut | Rôle                                                                                         |
-| ------------------------ | ----------------- | -------------------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`   | `false`           | Active la synchronisation des tarifs LiteLLM en arrière-plan au démarrage.                   |
-| `PRICING_SYNC_INTERVAL`  | `86400`           | Intervalle de synchronisation en **secondes** (quotidien par défaut).                        |
-| `PRICING_SYNC_SOURCES`   | `litellm`         | Liste de sources séparées par des virgules (seul `litellm` est actuellement pris en charge). |
+La **synchronisation LiteLLM** nécessite une activation volontaire et est désactivée par défaut. Ses variables d’environnement (voir [`.env.example`](../../.env.example)) sont :
+
+| Variable d’environnement | Valeur par défaut | Rôle                                                                                                           |
+| ------------------------ | ----------------- | -------------------------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`   | `false`           | Active la synchronisation des tarifs LiteLLM en arrière-plan.                                                  |
+| `PRICING_SYNC_INTERVAL`  | `86400`           | Intervalle de synchronisation en **secondes** (quotidien par défaut).                                          |
+| `PRICING_SYNC_SOURCES`   | `litellm`         | Sélection des sources pour cette synchronisation uniquement ; actuellement, seul `litellm` est pris en charge. |
+
+La **synchronisation models.dev** est distincte de celle de LiteLLM et est également désactivée par défaut. Activez-la dans Paramètres (synchronisation models.dev) ou utilisez ces variables :
+
+| Variable d’environnement   | Valeur par défaut | Rôle                                                                                                                                                                        |
+| -------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(non définie)_   | Si elle n’est pas définie, suit l’option des Paramètres ; `1/true/on/yes` force l’activation et `0/false/off/no` force la désactivation, même si les Paramètres l’activent. |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`           | Intervalle par défaut de synchronisation models.dev en secondes (quotidien).                                                                                                |
+
+`PRICING_SYNC_SOURCES` n’active **pas** models.dev ; cette variable contrôle uniquement la synchronisation LiteLLM. Supprimer une redéfinition utilisateur n’efface aucun des espaces de noms synchronisés ; la couche de tarification suivante disponible prend effet. Pour un modèle sans tarif, vérifiez les deux paramètres de synchronisation et `sourceMap` avant d’ajouter une redéfinition manuelle.
 
 ### La formule de calcul du coût
 
@@ -184,16 +191,16 @@ Tous nécessitent une authentification de gestion (boucle locale/JWT, via
 
 ### Tarification
 
-| Méthode  | Point de terminaison    | Objectif                                                                                                                                         |
-| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET`    | `/api/pricing`          | Tarification fusionnée actuelle (utilisateur + synchronisée + valeurs par défaut). `?includeSources=1` pour afficher la source de chaque entrée. |
-| `PATCH`  | `/api/pricing`          | Remplacer la tarification pour `{ provider: { model: { input, output, cached, … } } }`.                                                          |
-| `DELETE` | `/api/pricing`          | Réinitialiser la tarification aux valeurs par défaut (éventuellement limitée par `?provider=&model=`).                                           |
-| `GET`    | `/api/pricing/defaults` | Afficher les tarifs de repli par défaut par million.                                                                                             |
-| `GET`    | `/api/pricing/models`   | Tarification indexée par modèle.                                                                                                                 |
-| `POST`   | `/api/pricing/sync`     | Déclencher une synchronisation manuelle depuis des sources externes (LiteLLM).                                                                   |
-| `GET`    | `/api/pricing/sync`     | État actuel de la synchronisation.                                                                                                               |
-| `DELETE` | `/api/pricing/sync`     | Effacer toutes les données tarifaires synchronisées.                                                                                             |
+| Méthode  | Point de terminaison    | Objectif                                                                                                                                                                          |
+| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Tarification fusionnée de quatre couches (utilisateur, models.dev, LiteLLM, valeurs par défaut). `?includeSources=1` renvoie `pricing` + `sourceMap`.                             |
+| `PATCH`  | `/api/pricing`          | Remplacer la tarification pour `{ provider: { model: { input, output, cached, … } } }`.                                                                                           |
+| `DELETE` | `/api/pricing`          | Supprime les redéfinitions de prix utilisateur (éventuellement limitées par `?provider=&model=`) ; les tarifs synchronisés ou les valeurs intégrées restent disponibles en repli. |
+| `GET`    | `/api/pricing/defaults` | Afficher les tarifs de repli par défaut par million.                                                                                                                              |
+| `GET`    | `/api/pricing/models`   | Tarification indexée par modèle.                                                                                                                                                  |
+| `POST`   | `/api/pricing/sync`     | Déclencher une synchronisation manuelle depuis des sources externes (LiteLLM).                                                                                                    |
+| `GET`    | `/api/pricing/sync`     | État actuel de la synchronisation.                                                                                                                                                |
+| `DELETE` | `/api/pricing/sync`     | Efface uniquement les tarifs synchronisés par LiteLLM (`pricing_synced`) ; les données models.dev sont distinctes.                                                                |
 
 ### Autres points de terminaison liés aux coûts
 

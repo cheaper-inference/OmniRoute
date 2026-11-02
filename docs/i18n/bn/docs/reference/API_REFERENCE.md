@@ -883,7 +883,7 @@ Tavily `search_type: "finance"`-ও গ্রহণ করে (`topic: "finance"
 টাইমস্ট্যাম্প) এবং Tavily পায় `start_date` (`YYYY-MM-DD`)। `provider_options`-এ দেওয়া সুস্পষ্ট তারিখ
 ম্যাপ করা তারিখটিকে ওভাররাইড করে।
 
-Exa-এর ফলাফলগুলো `id`, `highlight_scores`, `summary`, `subpages`, `entities` এবং `extras`
+Exa-এর ফলাফলগুলো `id`, `highlights` (হাইলাইট করা সব অংশ, শুধু `snippet` হিসেবে ব্যবহৃত প্রথম অংশটি নয়), `highlight_scores`, `summary`, `subpages`, `entities` এবং `extras`
 `provider_raw`-এ সংরক্ষণ করে। Tavily-এর ফলাফলগুলো `images` এবং `favicon` সংরক্ষণ করে।
 
 লিংকআপ সার্চ খরচ `depth` `fast` এবং `standard` জন্য $0.005 এবং `deep` এর জন্য $0.05 রেকর্ড করা হয়েছে ( [লিঙ্কআপ মূল্য](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` থেকে আসে বা সংযোগের সেটিংস থেকে।
@@ -1291,13 +1291,31 @@ Claude Code অটো-মোড ক্লাসিফায়ার অনু�
 
 ### রাউটিং ও কনফিগ
 
-| এন্ডপয়েন্ট           | মেথড     | বিবরণ                             |
-| --------------------- | -------- | --------------------------------- |
-| `/api/models/alias`   | GET/POST | মডেলের উপনাম                      |
-| `/api/models/catalog` | GET      | প্রোভাইডার + ধরন অনুযায়ী সব মডেল |
-| `/api/combos*`        | বিভিন্ন  | কম্বো ব্যবস্থাপনা                 |
-| `/api/keys*`          | বিভিন্ন  | API কী ব্যবস্থাপনা                |
-| `/api/pricing`        | GET      | মডেলের মূল্য নির্ধারণ             |
+| এন্ডপয়েন্ট           | মেথড     | বিবরণ                               |
+| --------------------- | -------- | ----------------------------------- |
+| `/api/models`         | GET/PUT  | মডেলের তালিকা / বিকল্প নাম হালনাগাদ |
+| `/api/models/alias`   | GET/POST | মডেলের উপনাম                        |
+| `/api/models/catalog` | GET      | প্রোভাইডার + ধরন অনুযায়ী সব মডেল   |
+| `/api/combos*`        | বিভিন্ন  | কম্বো ব্যবস্থাপনা                   |
+| `/api/keys*`          | বিভিন্ন  | API কী ব্যবস্থাপনা                  |
+| `/api/pricing`        | GET      | মডেলের মূল্য নির্ধারণ               |
+
+#### মডেলের সীমার উৎস
+
+`GET /api/models?withLimits=1` (এছাড়াও `true` গ্রহণযোগ্য; `0`/`false` বা প্যারামিটার বাদ দিলে ডিফল্ট প্রতিক্রিয়া অপরিবর্তিত থাকে) প্রতিটি মডেলের সারিতে `contextWindow`, `maxInputTokens`, `maxOutputTokens` এবং একটি `capsSource` অবজেক্ট যোগ করে। `capsSource` প্রতিটি সীমা নির্ধারণকারী নিয়মের নাম জানায়, যাতে অপ্রত্যাশিত সীমার উৎস খুঁজে পাওয়া যায়, যেমন 1M মডেলে 128k। নির্ধারিত মানগুলো রাউটিংয়ে ব্যবহৃত মানেরই সমান; এই ফ্ল্যাগ শুধু ফিল্ড যোগ করে, কখনো কোনো মান বদলায় না। `withLimits`-এর অন্য যেকোনো মান `400` দিয়ে প্রত্যাখ্যাত হয়।
+
+| `capsSource` মান                             | উৎস                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------- |
+| `override:context`                           | স্থায়ীভাবে সংরক্ষিত প্রসঙ্গ উইন্ডোর ওভাররাইড (`model_context_overrides`)       |
+| `override:max_input` / `override:max_output` | স্থায়ীভাবে সংরক্ষিত `max_input_tokens` / `max_output_tokens` সক্ষমতার ওভাররাইড |
+| `static-authoritative:<provider>/<model>`    | প্রসঙ্গ উইন্ডোর স্থির প্রামাণ্য সারণি                                           |
+| `synced:<provider>/<model>`                  | models.dev থেকে সিঙ্ক করা সক্ষমতার সারি                                         |
+| `registry:<provider>/<model>`                | প্রদানকারী রেজিস্ট্রির এন্ট্রি                                                  |
+| `spec:<model>`                               | মডেলের স্থির বিবরণ                                                              |
+| `effort-base:` উপসর্গ                        | প্রচেষ্টার মাত্রা নির্দেশক প্রত্যয়যুক্ত সংস্করণের মূল মডেল থেকে নেওয়া সারি    |
+| `none`                                       | কোনো উৎস সীমাটি ঘোষণা করে না (মান `null`)                                       |
+
+বাস্তবায়ন: `src/lib/modelCapabilities.ts`-এ `getResolvedModelCapabilitiesWithLimitSources()` এবং `src/lib/modelCapabilityLimits.ts`-এ অগ্রাধিকারের শৃঙ্খল।
 
 ### ব্যবহার ও বিশ্লেষণ
 

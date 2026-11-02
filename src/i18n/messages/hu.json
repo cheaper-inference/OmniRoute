@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Ez rögzíti az éppen csatlakoztatott szolgáltatókat/modelleket, amelyek megfelelnek ennek a sablonnak, egy szerkeszthető kombinációba.",
     "duplicateAutoComboFailedPrefix": "Az automatikus kombináció duplikálása sikertelen:",
     "duplicateAutoComboUnknownError": "Ismeretlen hiba",
-    "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból"
+    "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból",
+    "exportCombos": "Exportálás",
+    "exportCombosFailed": "A combók exportálása sikertelen",
+    "importCombos": "Importálás",
+    "importCombosTitle": "Combók importálása",
+    "importCombosInvalidFile": "Ez a fájl nem érvényes combo-export.",
+    "importCombosSummary": "Combók a fájlban: {total} ({fresh} új, {conflicting} már létező névvel).",
+    "importCombosMergeHint": "Az egyesítés megtartja az összes meglévő combót, és kihagyja azokat, amelyek neve már létezik. A kapcsolatok és a hitelesítő adatok soha nem kerülnek importálásra.",
+    "importCombosReplaceHint": "Az Összes cseréje törli a meglévő combókat ({current}), és helyettük a fájlt importálja. Ez nem vonható vissza.",
+    "importCombosMerge": "Egyesítés",
+    "importCombosReplace": "Összes cseréje",
+    "importCombosDone": "Importált combók: {created}. Kihagyva: {skipped}.",
+    "importCombosFailed": "A combók importálása sikertelen",
+    "importCombosWarnings": "Importálva figyelmeztetésekkel"
   },
   "costs": {
     "title": "Költségek",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ChatGPT egyedi csatlakozó",
     "doctorChecking": "Állapot ellenőrzése…",
     "doctorCheck": "Orvos állapotának ellenőrzése",
-    "fallbackRetryBackendTitle": "Visszaterelési újrapróbálkozás háttérrendszere"
+    "fallbackRetryBackendTitle": "Visszaterelési újrapróbálkozás háttérrendszere",
+    "retryDelayTitle": "Újrapróbálkozási késleltetés",
+    "retryDelayDesc": "Mennyi ideig pihen egy kapcsolat sebességkorlát-hiba után, ha a szolgáltató nem adja meg, mikor lehet újra próbálkozni. Az automatikus mód a beépített visszalépést használja; a szolgáltató által küldött visszaállítási idő mindig elsőbbséget élvez.",
+    "retryDelayAuto": "Automatikus",
+    "retryDelaySaved": "Újrapróbálkozási késleltetés mentve",
+    "retryDelayUpdateFailed": "Nem sikerült frissíteni az újrapróbálkozási késleltetést"
   },
   "settings": {
     "title": "Beállítások elemre",

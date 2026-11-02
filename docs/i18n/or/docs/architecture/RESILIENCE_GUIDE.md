@@ -10,6 +10,8 @@ OmniRoute ରେ ତିନୋଟି ପୃଥକ କିନ୍ତୁ ପରସ୍
 
 > ଉତ୍ସ: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **ସହନଶୀଳତା ସ୍ୱିଚ୍‌ଗୁଡ଼ିକ ପାଇଁ ପରିବେଶ ଓ ଡ୍ୟାଶବୋର୍ଡର ପ୍ରାଥମିକତା।** ପରିବେଶରୁ ପ୍ରାରମ୍ଭିକ ମୂଲ୍ୟ ପାଉଥିବା, ଇଚ୍ଛାନୁସାରେ ଚାଲୁ କରିବାକୁ ପଡ଼ୁଥିବା ସହନଶୀଳତା ସ୍ୱିଚ୍‌ଗୁଡ଼ିକ — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — କେବଳ _ଡିଫଲ୍ଟ ମୂଲ୍ୟ_ ଦିଅନ୍ତି (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`)। `resilienceSettings` ରେ ସଂରକ୍ଷିତ ବୁଲିୟନ୍ ମୂଲ୍ୟ (ଡ୍ୟାଶବୋର୍ଡ → **ସେଟିଂସ୍ → ସହନଶୀଳତା** / `PATCH /api/resilience`, `key_value` ରେ ସଂରକ୍ଷିତ) ପରିବେଶର ମୂଲ୍ୟଠାରୁ ପ୍ରାଧାନ୍ୟ ପାଏ: ନର୍ମାଲାଇଜେସନ୍ (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) ସଂରକ୍ଷିତ ବୁଲିୟନ୍ ମୂଲ୍ୟ ଥିଲେ ତାହାକୁ ରଖେ। ତେଣୁ ଡ୍ୟାଶବୋର୍ଡ ପୂର୍ବରୁ `false` ସଂରକ୍ଷଣ କରିଥିବା ଡିପ୍ଲୟମେଣ୍ଟରେ ସେହି ପରିବେଶ ଚଳକୁ `true` କଲେ କିଛି ବଦଳେ ନାହିଁ — **ସେଟିଂସ୍ → ସହନଶୀଳତା** ରେ ସ୍ୱିଚ୍ ବଦଳାନ୍ତୁ କିମ୍ବା ସଂରକ୍ଷିତ ଫିଲ୍ଡ ସଫା କରନ୍ତୁ।
+
 ## 1. ପ୍ରୋଭାଇଡର ସର୍କିଟ ବ୍ରେକର
 
 **ପରିସର:** ସମ୍ପୂର୍ଣ୍ଣ ପ୍ରୋଭାଇଡର (ଯେପରିକି `glm`, `openai`, `anthropic`)।
@@ -85,6 +87,8 @@ OmniRoute ରେ ତିନୋଟି ପୃଥକ କିନ୍ତୁ ପରସ୍
 - API-key ଆଧାର: 3s
 - API-key 429: ଅପ୍ଷ୍ଟ୍ରିମ୍ `Retry-After`/ରିସେଟ୍ ହେଡର୍/ପାର୍ସ କରାଯାଇପାରୁଥିବା ରିସେଟ୍ ଟେକ୍ସ୍ଟକୁ ପ୍ରାଥମିକତା ଦିଏ
 - ବ୍ୟାକ୍ଅଫ୍: `baseCooldownMs * 2 ** failureIndex`
+
+**ପ୍ରଦାତା ଅନୁଯାୟୀ ପୁନଃଚେଷ୍ଟା ବିଳମ୍ବ।** ପ୍ରଦାତାର ବିବରଣୀ ପୃଷ୍ଠାରେ **ପୁନଃଚେଷ୍ଟା ବିଳମ୍ବ** ବାଛିବାର ବିକଳ୍ପ ଅଛି (Auto, 15s ରୁ 1h ପର୍ଯ୍ୟନ୍ତ)। ଏହା `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` ସଂରକ୍ଷଣ କରେ (1–21600, `PATCH /api/resilience` ମାଧ୍ୟମରେ)। ରେଟ୍-ଲିମିଟ୍ ତ୍ରୁଟି ସହ ଅପଷ୍ଟ୍ରିମ୍ ପୁନଃଚେଷ୍ଟା ସଙ୍କେତ ନଥିଲେ, ଏହି ମୂଲ୍ୟ ପ୍ରଦାତାର ଅନୁପାତ ଅନୁଯାୟୀ ସମାଯୋଜିତ ବ୍ୟାକଅଫ୍‌କୁ ପ୍ରତିସ୍ଥାପନ କରେ ଏବଂ `backoffLevel` କୁ 0 ରେ ପୁନଃସ୍ଥାପନ କରେ (`open-sse/services/rotationConfig.ts::overrideFor`)। ରେଟ୍-ଲିମିଟ୍ ତ୍ରୁଟିର ପ୍ରାଥମିକତା, ସର୍ବୋଚ୍ଚରୁ ଆରମ୍ଭ କରି: ଅପଷ୍ଟ୍ରିମ୍ ପୁନଃଚେଷ୍ଟା ସଙ୍କେତ, ତାପରେ ପ୍ରତ୍ୟେକ ସଂଯୋଗର `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, ପରେ ପ୍ରଦାତାର ପୁନଃଚେଷ୍ଟା ବିଳମ୍ବ, ପରେ ପରିବେଶର `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, ତାପରେ ଅନୁପାତ ଅନୁଯାୟୀ ସମାଯୋଜିତ ବ୍ୟାକଅଫ୍। Auto ଫିଲ୍ଡ ହଟାଏ। ଏହା କେବଳ ରେଟ୍-ଲିମିଟ୍ କାରଣକୁ ପ୍ରଭାବିତ କରେ, ଚୂଡ଼ାନ୍ତ ଅବସ୍ଥାକୁ କେବେ ନୁହେଁ।
 
 **ଆଣ୍ଟି-ଥଣ୍ଡରିଂ-ହର୍ଡ ସୁରକ୍ଷା:** ଏକାସାଙ୍ଗରେ ଘଟୁଥିବା ବିଫଳତାଗୁଡ଼ିକ ଯେପରି କୁଲ୍ଡାଉନ୍କୁ ଅତ୍ୟଧିକ ବଢ଼ାଇ ନ ଦିଅନ୍ତି କିମ୍ବା `backoffLevel`କୁ ଦୁଇଥର ବୃଦ୍ଧି ନ କରନ୍ତି, ତାହା ସୁନିଶ୍ଚିତ କରେ।
 
@@ -577,7 +581,7 @@ prompt-compression / translation କାର୍ଯ୍ୟ ପୂର୍ବରୁ ଘ
 
 ଐଚ୍ଛିକ `resilienceSettings.streamRecovery.throughputWatchdog` ଗାର୍ଡ ସେହି ଅପଷ୍ଟ୍ରିମ୍କୁ ଚିହ୍ନଟ କରେ ଯାହା ଏବେବି chunk ପଠାଉଛି କିନ୍ତୁ କନଫିଗର କରାଯାଇଥିବା ଉପଯୋଗୀ-ଆଉଟପୁଟ୍ ହାର ଠାରୁ କମ୍ assistant ଆଉଟପୁଟ୍ ଉତ୍ପନ୍ନ କରୁଛି। ଏହା ଇଚ୍ଛାକୃତ ଭାବରେ idle ଟାଇମ୍ଆଉଟ୍ଠାରୁ ପୃଥକ: heartbeat ଏବଂ ମେଟାଡାଟା କୌଣସି ଟାଇମର୍ ରିସେଟ୍ କରନ୍ତି ନାହିଁ ଏବଂ ଅଗ୍ରଗତି ଭାବରେ ଗଣାଯାଆନ୍ତି ନାହିଁ। ଏହା ମଧ୍ୟ କଠୋର ପ୍ରୟାସ ସମୟସୀମା (#9153)ଠାରୁ ପୃଥକ, ଯାହା ଆଉଟପୁଟ୍ ଗୁଣବତ୍ତା ନିର୍ବିଶେଷରେ ଏକ ନିରପେକ୍ଷ ସୁରକ୍ଷା ସୀମା ଭାବରେ ରହେ।
 
-ୱାଚ୍ଡଗ୍ abort କରିବା ପୂର୍ବରୁ ଏକ warm-up ଅବଧି ଏବଂ ତାପରେ ଏକ ସମ୍ପୂର୍ଣ୍ଣ rolling ୱିଣ୍ଡୋ ଆବଶ୍ୟକ କରେ। ଏହା Chat Completions ଏବଂ Responses API ଆଉଟପୁଟ୍ ଇଭେଣ୍ଟରୁ text delta ଗଣେ (ଏକ ରକ୍ଷଣାତ୍ମକ UTF-8 byte proxy), usage-only ଏବଂ ଖାଲି ଇଭେଣ୍ଟକୁ ଅଣଦେଖା କରେ, ଏବଂ tool-call କିମ୍ବା reasoning ଇଭେଣ୍ଟ ଚାଲୁଥିବା ବେଳେ ବିଚାର ସ୍ଥଗିତ କରେ। ଏହା ଡିଫଲ୍ଟ ଭାବରେ ଅକ୍ଷମ ଅଟେ ଏବଂ `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` ସହିତ ସକ୍ଷମ କରାଯାଇପାରିବ; ୱିଣ୍ଡୋ, warm-up, ସର୍ବନିମ୍ନ ହାର ଏବଂ ସର୍ବନିମ୍ନ ମାପଯୋଗ୍ୟ ଆଉଟପୁଟ୍ ସାଧାରଣ resilience-settings normalization ସ୍ତର ଦ୍ୱାରା ସୀମାବଦ୍ଧ।
+ୱାଚ୍ଡଗ୍ abort କରିବା ପୂର୍ବରୁ ଏକ warm-up ଅବଧି ଏବଂ ତାପରେ ଏକ ସମ୍ପୂର୍ଣ୍ଣ rolling ୱିଣ୍ଡୋ ଆବଶ୍ୟକ କରେ। ଏହା Chat Completions ଏବଂ Responses API ଆଉଟପୁଟ୍ ଇଭେଣ୍ଟରୁ text delta ଗଣେ (ଏକ ରକ୍ଷଣାତ୍ମକ UTF-8 byte proxy), usage-only ଏବଂ ଖାଲି ଇଭେଣ୍ଟକୁ ଅଣଦେଖା କରେ, ଏବଂ tool-call କିମ୍ବା reasoning ଇଭେଣ୍ଟ ଚାଲୁଥିବା ବେଳେ ବିଚାର ସ୍ଥଗିତ କରେ। ଏହା ଡିଫଲ୍ଟ ଭାବରେ ଅକ୍ଷମ ଅଟେ ଏବଂ `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ସେହି ପରିବେଶ ମୂଲ୍ୟ କେବଳ ଡିଫଲ୍ଟ ଦିଏ — ସଂରକ୍ଷିତ `resilienceSettings.streamRecovery.throughputWatchdog.enabled` ବୁଲିୟନ୍ ମୂଲ୍ୟ ପ୍ରାଧାନ୍ୟ ପାଏ; ଏହି ମାର୍ଗଦର୍ଶିକାର ଆରମ୍ଭରେ ପରିବେଶ ଓ ଡ୍ୟାଶବୋର୍ଡ ପ୍ରାଥମିକତା ବିଷୟକ ଟିପ୍ପଣୀ ଦେଖନ୍ତୁ) ସହିତ ସକ୍ଷମ କରାଯାଇପାରିବ; ୱିଣ୍ଡୋ, warm-up, ସର୍ବନିମ୍ନ ହାର ଏବଂ ସର୍ବନିମ୍ନ ମାପଯୋଗ୍ୟ ଆଉଟପୁଟ୍ ସାଧାରଣ resilience-settings normalization ସ୍ତର ଦ୍ୱାରା ସୀମାବଦ୍ଧ।
 
 ସକ୍ଷମ ହେଲେ, ୱାଚ୍ଡଗ୍ abort କେବଳ ସକ୍ରିୟ ଅପଷ୍ଟ୍ରିମ୍ ପ୍ରୟାସରେ ପ୍ରୟୋଗ ହୁଏ। କୌଣସି client-ଦୃଶ୍ୟମାନ byte ପୂର୍ବରୁ, ବିଦ୍ୟମାନ ସମାନ-ଆକାଉଣ୍ଟ early-recovery ପଥ ପ୍ରୟାସକୁ ପୁନର୍ବାର ଖୋଲିପାରେ। commit ପରେ, ଷ୍ଟ୍ରିମ୍ କେବେବି ଅନ୍ଧ ଭାବରେ ପୁନର୍ଚାଳନ ହୁଏ ନାହିଁ; କେବଳ ବିଦ୍ୟମାନ ସୁରକ୍ଷିତ mid-stream continuation ଚୁକ୍ତି ଏକ suffix ଯୋଡ଼ିପାରେ। Finalization single-shot ରହେ, ତେଣୁ usage ହିସାବ ଏବଂ semaphore ରିଲିଜ୍ ନକଲ ହୁଏ ନାହିଁ।
 

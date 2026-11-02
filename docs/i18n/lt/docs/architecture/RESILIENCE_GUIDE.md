@@ -10,6 +10,8 @@ OmniRoute turi tris skirtingus, bet tarpusavyje susijusius atsparumo mechanizmus
 
 > Šaltinis: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Aplinkos ir valdymo skydo nustatymų pirmumas atsparumo jungikliams.** Pasirinktinai įjungiami atsparumo jungikliai, kurių pradinės reikšmės gaunamos iš aplinkos — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — nustato tik _numatytąją reikšmę_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Loginė reikšmė, išsaugota `resilienceSettings` (Valdymo skydas → **Nustatymai → Atsparumas** / `PATCH /api/resilience`, laikoma `key_value`), turi pirmumą prieš aplinkos reikšmę: normalizavimas (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) išlaiko jau esamą išsaugotą loginę reikšmę. Todėl nustačius tokį aplinkos kintamąjį į `true`, kai valdymo skydas jau išsaugojo `false`, niekas nepasikeičia. Pakeiskite jungiklį skiltyje **Nustatymai → Atsparumas** arba pašalinkite išsaugotą lauką.
+
 ## 1. Tiekėjo grandinės pertraukiklis (circuit breaker)
 
 **Apimtis:** visas tiekėjas (pvz., `glm`, `openai`, `anthropic`).
@@ -88,6 +90,8 @@ Regresijos apsauga: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API rakto bazinis: 3 s
 - API rakto 429: pirmenybė teikiama upstream `Retry-After` / „reset" antraštėms / analizuojamam „reset" tekstui
 - Atidėjimas: `baseCooldownMs * 2 ** failureIndex`
+
+**Pakartotinio bandymo delsa kiekvienam teikėjui.** Teikėjo informacijos puslapyje yra pasirinkimas **Pakartotinio bandymo delsa** (Auto, nuo 15s iki 1h). Jis išsaugo `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, per `PATCH /api/resilience`). Kai užklausų dažnio ribojimo klaidoje nėra aukštesniojo serverio nurodymo, kada kartoti, ši reikšmė pakeičia teikėjui proporcingai keičiamą backoff delsą ir nustato `backoffLevel` į 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Pirmumo tvarka tokiai klaidai, pradedant didžiausiu: aukštesniojo serverio nurodymas, tada ryšio `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, tada teikėjo pakartotinio bandymo delsa, tada aplinkos `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, galiausiai proporcingai keičiama backoff delsa. Auto pašalina lauką. Tai veikia tik dažnio ribojimo priežastį, niekada ne terminalines būsenas.
 
 **Apsauga nuo „thundering herd" efekto:** neleidžia vienalaikiams gedimams pernelyg pratęsti atvėsimo arba dvigubai padidinti `backoffLevel`.
 
@@ -573,7 +577,7 @@ pilnas slenkantis langas. Jis skaičiuoja teksto deltas iš Chat Completions ir
 Responses API išvesties įvykių (konservatyvus UTF-8 baitų atitikmuo), ignoruoja tik
 naudojimo rodiklius turinčius ir tuščius įvykius bei atideda sprendimą, kol dar
 vykdomi įrankių iškvietimo ar samprotavimo įvykiai. Jis pagal numatymą išjungtas ir
-gali būti įjungtas nustatant `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; langą,
+gali būti įjungtas nustatant `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ši aplinkos reikšmė nustato tik numatytąją reikšmę; išsaugota loginė `resilienceSettings.streamRecovery.throughputWatchdog.enabled` reikšmė turi pirmumą; žr. pastabą apie aplinkos ir valdymo skydo pirmumą šio vadovo pradžioje); langą,
 įšilimą, minimalų greitį ir minimalią išmatuojamą išvestį apriboja įprastas
 atsparumo nustatymų normalizavimo sluoksnis.
 

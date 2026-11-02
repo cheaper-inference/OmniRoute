@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Esto capturará los proveedores/modelos conectados actualmente que coincidan con esta plantilla en una combinación editable.",
     "duplicateAutoComboFailedPrefix": "Error al duplicar la combinación automática:",
     "duplicateAutoComboUnknownError": "Error desconocido",
-    "duplicateAutoComboTitle": "Crear una combinación estática de {name}"
+    "duplicateAutoComboTitle": "Crear una combinación estática de {name}",
+    "exportCombos": "Exportar",
+    "exportCombosFailed": "No se pudieron exportar las combinaciones",
+    "importCombos": "Importar",
+    "importCombosTitle": "Importar combinaciones",
+    "importCombosInvalidFile": "Este archivo no es una exportación de combinaciones válida.",
+    "importCombosSummary": "Combinaciones en el archivo: {total} ({fresh} nuevas, {conflicting} con un nombre que ya existe).",
+    "importCombosMergeHint": "Combinar conserva todas las combinaciones existentes y omite las que tienen un nombre que ya existe. Las conexiones y credenciales nunca se importan.",
+    "importCombosReplaceHint": "Reemplazar todo elimina tus combinaciones existentes ({current}) e importa el archivo en su lugar. Esta acción no se puede deshacer.",
+    "importCombosMerge": "Combinar",
+    "importCombosReplace": "Reemplazar todo",
+    "importCombosDone": "Combinaciones importadas: {created}. Omitidas: {skipped}.",
+    "importCombosFailed": "No se pudieron importar las combinaciones",
+    "importCombosWarnings": "Importado con advertencias"
   },
   "costs": {
     "title": "Costos",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "Conector personalizado de ChatGPT",
     "doctorChecking": "Comprobando estado…",
     "doctorCheck": "Comprobar estado de doctor",
-    "fallbackRetryBackendTitle": "Backend de reintento alternativo"
+    "fallbackRetryBackendTitle": "Backend de reintento alternativo",
+    "retryDelayTitle": "Retraso de reintento",
+    "retryDelayDesc": "Cuánto tiempo descansa una conexión tras un error de límite de velocidad cuando el proveedor no indica cuándo reintentar. Automático usa el retroceso integrado; un tiempo de restablecimiento enviado por el proveedor siempre tiene prioridad.",
+    "retryDelayAuto": "Automático",
+    "retryDelaySaved": "Retraso de reintento guardado",
+    "retryDelayUpdateFailed": "No se pudo actualizar el retraso de reintento"
   },
   "settings": {
     "title": "Configuración",

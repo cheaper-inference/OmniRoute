@@ -40,23 +40,31 @@ N'ihi na ọnụọgụ ahụ bụ atụmatụ:
 
 ### Isi mmalite ọnụahịa
 
-Ọnụ ahịa na-abịa site na tebụl ọnụahịa a na-ahọrọ n'usoro mkpa a
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+A na-enweta ụgwọ site na tebụl ọnụahịa ejikọtara na [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), n’usoro ibu ụzọ a (**nke kacha elu buru ụzọ**):
 
-1. **Mgbanwe onye ọrụ** — ọnụahịa ndị ị debere na dashboard / site na `PATCH /api/pricing`.
-2. **Ọnụahịa mpụga emekọrịtara** — nke a na-eweta site na LiteLLM public
-   `model_prices_and_context_window.json` mgbe agbanyere mmekọrịta (a na-echekwa ya n'ime namespace
-   `pricing_synced` dị iche ka ọ ghara idechi mgbanwe gị).
-3. **Ntọala etinyere kpọmkwem** — nke so OmniRoute abịa.
+1. **Uru nnọchi onye ọrụ** — ọnụahịa a tọrọ na dashboard ma ọ bụ site na `PATCH /api/pricing` (oghere aha `pricing`).
+2. **Mmekọrịta models.dev** — ọnụahịa e wetara site na `https://models.dev/api.json` (oghere aha `models_dev_pricing`).
+3. **Mmekọrịta LiteLLM** — ọnụahịa e wetara site na faịlụ ọha LiteLLM bụ `model_prices_and_context_window.json` (oghere aha `pricing_synced`).
+4. **Uru ndabara etinyere n’ime koodu** — ọnụego a na-enye na [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Mmekọrịta ọnụahịa mpụga bụ **opt-in**, a gbanyụrụ ya na ndabara. Env var ndị metụtara ya
-(hụ [`.env.example`](../../.env.example)):
+Maka otu onye na-eweta ọrụ/mọdẹl, uru sitere n’ọkwa nwere ibu ụzọ dị elu na-edechi ubi data kwekọrọ na ha n’ọkwa dị n’okpuru; ubi data na-adịghị n’ọkwa elu ka nwere ike isi n’ọkwa ala bịa. Usoro a anaghị agbanwe ọbụlagodi mgbe ọrụ mmekọrịta abụọ ahụ nọọrọ onwe ha na-arụkọ ọrụ n’otu oge. `GET /api/pricing?includeSources=1` na-eweghachi `pricing` na `sourceMap`; akara nke mọdẹl ọ bụla (`user`, `modelsDev`, `litellm`, `default`) na-egosi ọkwa nwere ibu ụzọ kacha elu n’etiti ọkwa ndị nwere mọdẹl ahụ.
 
-| Env var                 | Ndabara   | Ebumnuche                                                                |
-| ----------------------- | --------- | ------------------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`   | Gbanwuo mmekọrịta ọnụahịa LiteLLM n'azụ mgbe mmalite.                    |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Oge etiti mmekọrịta n'ime **sekọnd** (ndabara bụ kwa ụbọchị).            |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Ndepụta isi mmalite e kewara na comma (naanị `litellm` ka akwadoro taa). |
+**Mmekọrịta LiteLLM** chọrọ ka a họrọ ịgbanye ya, agbanyụghịkwa ya na ndabara. Ihe na-agbanwe na gburugburu ya bụ ndị a (lee [`.env.example`](../../.env.example)):
+
+| Env var                 | Ndabara   | Ebumnuche                                                                         |
+| ----------------------- | --------- | --------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Gbanye mmekọrịta ọnụahịa LiteLLM nke na-arụ n’azụ.                                |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Oge etiti mmekọrịta n'ime **sekọnd** (ndabara bụ kwa ụbọchị).                     |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Nhọrọ isi mmalite maka naanị mmekọrịta a; ugbu a, naanị `litellm` ka a na-akwado. |
+
+**Mmekọrịta models.dev** dị iche na mmekọrịta LiteLLM, agbanyụghịkwa ya na ndabara. Gbanye ya na Ntọala (mmekọrịta models.dev) ma ọ bụ jiri ihe na-agbanwe ndị a:
+
+| Ihe na-agbanwe na gburugburu | Uru ndabara  | Ebumnuche                                                                                                                                                           |
+| ---------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`    | _(etọbeghị)_ | Mgbe etọbeghị ya, ọ na-eso ngbanwe dị na Ntọala; `1/true/on/yes` na-amanye ya ịgbanye, ebe `0/false/off/no` na-amanye ya ịgbanyụ, ọbụlagodi ma Ntọala agbanyere ya. |
+| `MODELS_DEV_SYNC_INTERVAL`   | `86400`      | Oge ndabara n’etiti mmekọrịta models.dev n’ime sekọnd (kwa ụbọchị).                                                                                                 |
+
+`PRICING_SYNC_SOURCES` **anaghị** agbanye models.dev; ọ na-achị naanị mmekọrịta LiteLLM. Ihichapụ uru nnọchi onye ọrụ anaghị ehichapụ oghere aha mmekọrịta ọ bụla n’ime ha; ọkwa ọnụahịa ọzọ dị njikere ga-amalite ịdị irè. Maka mọdẹl na-enweghị ọnụahịa, lelee ntọala mmekọrịta abụọ ahụ na `sourceMap` tupu itinye uru nnọchi n’aka.
 
 ### Usoro mgbako ọnụ ahịa
 
@@ -169,16 +177,16 @@ ebe e kwuru ihe ọzọ.
 
 ### Pricing
 
-| Usoro    | Endpoint                | Ebumnuche                                                                                                                     |
-| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Pricing agwakọtara ugbu a (onye ọrụ + nke emekọrịtara + ndabara). Jiri `?includeSources=1` ịhụ isi mmalite nke ndenye ọ bụla. |
-| `PATCH`  | `/api/pricing`          | Gbanwee pricing maka `{ provider: { model: { input, output, cached, … } } }`.                                                 |
-| `DELETE` | `/api/pricing`          | Tọgharịa pricing ka ọ bụrụ ndabara (enwere ike ịhazi scope site na `?provider=&model=`).                                      |
-| `GET`    | `/api/pricing/defaults` | Gosi fallback rate ndabara kwa 1M.                                                                                            |
-| `GET`    | `/api/pricing/models`   | Pricing nke e ji model mee key.                                                                                               |
-| `POST`   | `/api/pricing/sync`     | Malite mmekọrịta aka site na isi mmalite mpụga (LiteLLM).                                                                     |
-| `GET`    | `/api/pricing/sync`     | Ọnọdụ sync ugbu a.                                                                                                            |
-| `DELETE` | `/api/pricing/sync`     | Hichapụ data pricing niile e mere sync.                                                                                       |
+| Usoro    | Endpoint                | Ebumnuche                                                                                                                                                                                                   |
+| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Ọnụahịa ejikọtara site n’ọkwa anọ (onye ọrụ, models.dev, LiteLLM, uru ndabara). `?includeSources=1` na-eweghachi `pricing` + `sourceMap`.                                                                   |
+| `PATCH`  | `/api/pricing`          | Gbanwee pricing maka `{ provider: { model: { input, output, cached, … } } }`.                                                                                                                               |
+| `DELETE` | `/api/pricing`          | Wepụ uru nnọchi ọnụahịa onye ọrụ, jiri `?provider=&model=` kpachie ebe ọ metụtara ma ọ bụrụ na ịchọrọ; ọnụego e wetara site na mmekọrịta ma ọ bụ uru ndabara etinyere na usoro ga-anọgide dị ka ihe nnọchi. |
+| `GET`    | `/api/pricing/defaults` | Gosi fallback rate ndabara kwa 1M.                                                                                                                                                                          |
+| `GET`    | `/api/pricing/models`   | Pricing nke e ji model mee key.                                                                                                                                                                             |
+| `POST`   | `/api/pricing/sync`     | Malite mmekọrịta aka site na isi mmalite mpụga (LiteLLM).                                                                                                                                                   |
+| `GET`    | `/api/pricing/sync`     | Ọnọdụ sync ugbu a.                                                                                                                                                                                          |
+| `DELETE` | `/api/pricing/sync`     | Hichapụ naanị ọnụahịa e wetara site na mmekọrịta LiteLLM (`pricing_synced`); data models.dev nọ iche.                                                                                                       |
 
 ### Endpoint ndị ọzọ metụtara ọnụahịa
 

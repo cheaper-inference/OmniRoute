@@ -869,7 +869,7 @@ Sroicheann an `time_range` cineálach an dá sholáthraí anois: faigheann Exa `
 agus faigheann Tavily `start_date` (`YYYY-MM-DD`). Sáraíonn dáta sainráite in `provider_options`
 an ceann mapáilte.
 
-Coinníonn torthaí Exa `id`, `highlight_scores`, `summary`, `subpages`, `entities` agus `extras` in
+Coinníonn torthaí Exa `id`, `highlights` (gach sliocht aibhsithe, ní hamháin an chéad cheann a úsáidtear mar `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` agus `extras` in
 `provider_raw`. Coinníonn torthaí Tavily `images` agus `favicon`.
 
 Taifeadtar costas cuardaigh Linkup ag $0.005 le haghaidh `depth` `fast` agus `standard` agus $0.05 le haghaidh `deep` ( [Praghsáil Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), cibé an dtagann `depth` ó `provider_options` nó ó shocruithe an naisc.
@@ -1279,11 +1279,29 @@ is féidir leis an dara céim fós a réasúnaíocht infheicthe iarrtha a tháir
 
 | Críochphointe         | Modh     | Cur síos                                 |
 | --------------------- | -------- | ---------------------------------------- |
+| `/api/models`         | GET/PUT  | Liosta samhlacha / ailias a nuashonrú    |
 | `/api/models/alias`   | GET/POST | Ailiasanna samhlacha                     |
 | `/api/models/catalog` | GET      | Gach samhail de réir soláthraí + cineáil |
 | `/api/combos*`        | Éagsúil  | Bainistiú teaglamaí                      |
 | `/api/keys*`          | Éagsúil  | Bainistiú eochracha API                  |
 | `/api/pricing`        | GET      | Praghsáil samhlacha                      |
+
+#### Bunús theorainneacha na samhla
+
+Cuireann `GET /api/models?withLimits=1` (glactar le `true` freisin; fágann `0`/`false` nó an paraiméadar a fhágáil ar lár an freagra réamhshocraithe gan athrú) `contextWindow`, `maxInputTokens`, `maxOutputTokens` agus oibiacht `capsSource` le gach ró samhla. Ainmníonn `capsSource` an riail a sholáthair gach teorainn, ionas gur féidir bunús luach gan choinne a aimsiú, mar shampla 128k ar shamhail 1M. Is iad na luachanna réitithe céanna a úsáideann an ródú; ní chuireann an bhratach ach réimsí leis agus ní athraíonn sí luach riamh. Diúltaítear d’aon luach eile ar `withLimits` le `400`.
+
+| `capsSource` luach                           | Bunús                                                                          |
+| -------------------------------------------- | ------------------------------------------------------------------------------ |
+| `override:context`                           | Sárú buan ar fhuinneog an chomhthéacs (`model_context_overrides`)              |
+| `override:max_input` / `override:max_output` | Sárú buan ar na cumais `max_input_tokens` / `max_output_tokens`                |
+| `static-authoritative:<provider>/<model>`    | Tábla statach údarásach d’fhuinneoga comhthéacs                                |
+| `synced:<provider>/<model>`                  | Ró cumais sioncronaithe ó models.dev                                           |
+| `registry:<provider>/<model>`                | Iontráil i gclárlann na soláthraithe                                           |
+| `spec:<model>`                               | Sonraíocht statach na samhla                                                   |
+| `effort-base:` réimír                        | Ró a fuarthas ar iasacht ó bhunsamhail leagain a bhfuil iarmhír iarrachta aige |
+| `none`                                       | Ní dhearbhaíonn foinse ar bith an teorainn (is é `null` an luach)              |
+
+Cur chun feidhme: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts` agus na slabhraí tosaíochta in `src/lib/modelCapabilityLimits.ts`.
 
 ### Úsáid & Anailísíocht
 

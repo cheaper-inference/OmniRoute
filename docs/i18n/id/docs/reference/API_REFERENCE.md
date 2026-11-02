@@ -887,7 +887,7 @@ Biaya pencarian Firecrawl dicatat per blok yang dimulai dari 10 hasil yang dikem
 ISO) dan Tavily mendapatkan `start_date` (`YYYY-MM-DD`). Tanggal eksplisit dalam `provider_options`
 menggantikan tanggal hasil pemetaan.
 
-Hasil Exa mempertahankan `id`, `highlight_scores`, `summary`, `subpages`, `entities`, dan `extras` dalam
+Hasil Exa mempertahankan `id`, `highlights` (semua sorotan, bukan hanya sorotan pertama yang digunakan sebagai `snippet`), `highlight_scores`, `summary`, `subpages`, `entities`, dan `extras` dalam
 `provider_raw`. Hasil Tavily mempertahankan `images` dan `favicon`.
 
 Biaya pencarian linkup dicatat sebesar $0,005 untuk `depth` `fast` dan `standard` dan $0,05 untuk `deep` ( [Harga linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), baik `depth` berasal dari `provider_options` atau pengaturan koneksi.
@@ -1297,11 +1297,29 @@ aktualnya; tahap kedua tetap dapat menghasilkan penalaran terlihat yang diminta 
 
 | Endpoint              | Metode   | Deskripsi                                |
 | --------------------- | -------- | ---------------------------------------- |
+| `/api/models`         | GET/PUT  | Daftar model / pembaruan alias           |
 | `/api/models/alias`   | GET/POST | Alias model                              |
 | `/api/models/catalog` | GET      | Semua model berdasarkan penyedia + jenis |
 | `/api/combos*`        | Beragam  | Pengelolaan kombo                        |
 | `/api/keys*`          | Beragam  | Pengelolaan kunci API                    |
 | `/api/pricing`        | GET      | Harga model                              |
+
+#### Asal batas model
+
+`GET /api/models?withLimits=1` (juga menerima `true`; `0`/`false` atau menghilangkannya mempertahankan payload bawaan) menambahkan `contextWindow`, `maxInputTokens`, `maxOutputTokens`, dan objek `capsSource` pada setiap baris model. `capsSource` menyebutkan aturan yang menghasilkan setiap batas sehingga batas yang tidak terduga, misalnya 128k pada model 1M, dapat ditelusuri asalnya. Nilai hasil resolusi sama dengan yang digunakan perutean; flag ini hanya menambahkan kolom dan tidak pernah mengubah nilai. Nilai `withLimits` lainnya ditolak dengan `400`.
+
+| Nilai `capsSource`                           | Asal                                                                           |
+| -------------------------------------------- | ------------------------------------------------------------------------------ |
+| `override:context`                           | Penggantian jendela konteks yang disimpan (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | Penggantian kapabilitas `max_input_tokens` / `max_output_tokens` yang disimpan |
+| `static-authoritative:<provider>/<model>`    | Tabel jendela konteks statis yang menjadi acuan resmi                          |
+| `synced:<provider>/<model>`                  | Baris kapabilitas yang disinkronkan dari models.dev                            |
+| `registry:<provider>/<model>`                | Entri registri penyedia                                                        |
+| `spec:<model>`                               | Spesifikasi model statis                                                       |
+| Awalan `effort-base:`                        | Baris yang dipinjam dari model dasar suatu varian dengan akhiran effort        |
+| `none`                                       | Tidak ada sumber yang menyatakan batas tersebut; nilainya `null`               |
+
+Implementasi: `getResolvedModelCapabilitiesWithLimitSources()` dalam `src/lib/modelCapabilities.ts` dan rantai prioritas dalam `src/lib/modelCapabilityLimits.ts`.
 
 ### Penggunaan & Analitik
 

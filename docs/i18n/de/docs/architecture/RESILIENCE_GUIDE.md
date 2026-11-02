@@ -10,6 +10,8 @@ OmniRoute verfügt über drei unterschiedliche, aber verwandte Resilienzmechanis
 
 > Quelle: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Vorrang von Umgebung oder Dashboard bei Resilienzschaltern.** Die ausdrücklich zu aktivierenden Resilienzschalter aus der Umgebung — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — liefern ausschließlich den _Standardwert_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Ein in `resilienceSettings` gespeicherter boolescher Wert (Dashboard → **Einstellungen → Resilienz** / `PATCH /api/resilience`, gespeichert in `key_value`) hat Vorrang vor der Umgebung: Die Normalisierung (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) behält einen vorhandenen gespeicherten booleschen Wert bei. Eine solche Umgebungsvariable in einer Bereitstellung auf `true` zu setzen, obwohl das Dashboard bereits `false` gespeichert hat, ändert daher nichts. Ändern Sie den Schalter in **Einstellungen → Resilienz** oder löschen Sie das gespeicherte Feld.
+
 ## 1. Provider-Circuit-Breaker
 
 **Geltungsbereich:** gesamter Provider (z. B. `glm`, `openai`, `anthropic`).
@@ -88,6 +90,8 @@ Regressionsabsicherung: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - API-Schlüssel-Basis: 3s
 - API-Schlüssel 429: bevorzugt Upstream-`Retry-After`/Reset-Header/parsbaren Reset-Text
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Wiederholungsverzögerung je Anbieter.** Die Anbieterdetailseite enthält eine Auswahl **Wiederholungsverzögerung** (Automatisch, 15s bis 1h). Sie speichert `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, über `PATCH /api/resilience`). Enthält ein Fehler wegen Ratenbegrenzung keinen Wiederholungshinweis des vorgelagerten Dienstes, ersetzt dieser Wert den skalierten Backoff des Anbieters und setzt `backoffLevel` auf 0 zurück (`open-sse/services/rotationConfig.ts::overrideFor`). Bei Ratenbegrenzungsfehlern gilt absteigend folgende Priorität: vorgelagerter Wiederholungshinweis, verbindungsspezifisches `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, Wiederholungsverzögerung des Anbieters, Umgebungsvariable `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, skalierter Backoff. Automatisch entfernt das Feld. Betroffen ist ausschließlich der Grund Ratenbegrenzung, niemals ein Endzustand.
 
 **Schutz vor Thundering Herd:** verhindert, dass gleichzeitig auftretende Fehler den Cooldown übermäßig verlängern oder `backoffLevel` doppelt erhöhen.
 
@@ -552,7 +556,7 @@ bevor er abbrechen kann. Er zählt Text-Deltas aus Chat-Completions- und
 Responses-API-Ausgabeereignissen (ein konservativer UTF-8-Byte-Proxy), ignoriert reine
 Usage-Ereignisse und leere Ereignisse und setzt die Beurteilung aus, solange Tool-Call- oder
 Reasoning-Ereignisse unterwegs sind. Er ist standardmäßig deaktiviert und kann mit
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` aktiviert werden; Fenster, Aufwärmphase,
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (dieser Umgebungswert liefert nur den Standardwert — ein gespeicherter boolescher Wert in `resilienceSettings.streamRecovery.throughputWatchdog.enabled` hat Vorrang; siehe den Hinweis zur Priorität von Umgebung und Dashboard am Anfang dieses Leitfadens) aktiviert werden; Fenster, Aufwärmphase,
 Mindestrate und minimale messbare Ausgabe werden durch die normale
 Normalisierungsschicht der Resilience-Einstellungen begrenzt.
 

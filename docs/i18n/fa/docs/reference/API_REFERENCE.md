@@ -863,7 +863,7 @@ Tavily همچنین `search_type: "finance"` (`topic: "finance"`) را میپذ�
 و Tavily مقدار `start_date` (`YYYY-MM-DD`) را دریافت میکند. تاریخ صریح در `provider_options`
 مقدار نگاشتشده را بازنویسی میکند.
 
-نتایج Exa مقادیر `id`، `highlight_scores`، `summary`، `subpages`، `entities` و `extras` را در
+نتایج Exa مقادیر `id`، `highlights` (همهٔ بخش‌های برجسته، نه فقط نخستین بخشی که به‌عنوان `snippet` استفاده می‌شود)، `highlight_scores`، `summary`، `subpages`، `entities` و `extras` را در
 `provider_raw` نگه میدارند. نتایج Tavily مقادیر `images` و `favicon` را نگه میدارند.
 
 Linkup: هزینه جستجوی پیوند 0.005 دلار برای `depth` `fast` و `standard` و 0.05 دلار برای `deep` ( [قیمت گذاری پیوندها](https://docs.linkup.so/pages/documentation/development/pricing) ) ثبت می شود، چه `depth` از `provider_options` باشد یا از تنظیمات اتصال.
@@ -1273,13 +1273,31 @@ https://chatgpt.com/backend-api/wham/usage`، `GET .../wham/rate-limit-reset-cre
 
 ### مسیریابی و پیکربندی
 
-| نقطه پایانی           | متد      | توضیحات                            |
-| --------------------- | -------- | ---------------------------------- |
-| `/api/models/alias`   | GET/POST | نامهای مستعار مدل                  |
-| `/api/models/catalog` | GET      | همه مدلها بر اساس ارائهدهنده و نوع |
-| `/api/combos*`        | متنوع    | مدیریت ترکیبها                     |
-| `/api/keys*`          | متنوع    | مدیریت کلید API                    |
-| `/api/pricing`        | GET      | قیمتگذاری مدل                      |
+| نقطه پایانی           | متد      | توضیحات                               |
+| --------------------- | -------- | ------------------------------------- |
+| `/api/models`         | GET/PUT  | فهرست مدل‌ها / به‌روزرسانی نام مستعار |
+| `/api/models/alias`   | GET/POST | نامهای مستعار مدل                     |
+| `/api/models/catalog` | GET      | همه مدلها بر اساس ارائهدهنده و نوع    |
+| `/api/combos*`        | متنوع    | مدیریت ترکیبها                        |
+| `/api/keys*`          | متنوع    | مدیریت کلید API                       |
+| `/api/pricing`        | GET      | قیمتگذاری مدل                         |
+
+#### منشأ محدودیت‌های مدل
+
+`GET /api/models?withLimits=1` (مقدار `true` نیز پذیرفته می‌شود؛ `0`/`false` یا حذف پارامتر، پاسخ پیش‌فرض را بدون تغییر نگه می‌دارد) فیلدهای `contextWindow`، `maxInputTokens` و `maxOutputTokens` و یک شیء `capsSource` را به هر ردیف مدل اضافه می‌کند. `capsSource` قاعده‌ای را نام می‌برد که هر محدودیت از آن آمده است، تا منشأ مقدار غیرمنتظره‌ای مانند 128k روی مدل 1M قابل ردیابی باشد. مقادیر تعیین‌شده همان‌هایی هستند که مسیریابی استفاده می‌کند؛ پرچم فقط فیلد اضافه می‌کند و هرگز مقداری را تغییر نمی‌دهد. هر مقدار دیگر برای `withLimits` با `400` رد می‌شود.
+
+| `capsSource` مقدار                           | منشأ                                                                 |
+| -------------------------------------------- | -------------------------------------------------------------------- |
+| `override:context`                           | بازنویسی پایدارِ پنجرهٔ زمینه (`model_context_overrides`)            |
+| `override:max_input` / `override:max_output` | بازنویسی پایدارِ قابلیت‌های `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | جدول ایستای مرجع برای پنجره‌های زمینه                                |
+| `synced:<provider>/<model>`                  | ردیف قابلیت همگام‌شده از models.dev                                  |
+| `registry:<provider>/<model>`                | ورودی در دفتر ثبت ارائه‌دهندگان                                      |
+| `spec:<model>`                               | مشخصات ایستای مدل                                                    |
+| `effort-base:` پیشوند                        | ردیفی برگرفته از مدل پایهٔ گونه‌ای با پسوند میزان تلاش               |
+| `none`                                       | هیچ منبعی محدودیت را اعلام نمی‌کند (مقدار `null` است)                |
+
+پیاده‌سازی: `getResolvedModelCapabilitiesWithLimitSources()` در `src/lib/modelCapabilities.ts` و زنجیره‌های اولویت در `src/lib/modelCapabilityLimits.ts`.
 
 ### استفاده و تحلیلها
 

@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Dit maakt een momentopname van de momenteel verbonden providers/modellen die overeenkomen met dit sjabloon in een bewerkbare combinatie.",
     "duplicateAutoComboFailedPrefix": "Automatische combinatie dupliceren mislukt:",
     "duplicateAutoComboUnknownError": "Onbekende fout",
-    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}"
+    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}",
+    "exportCombos": "Exporteren",
+    "exportCombosFailed": "Exporteren van combinaties mislukt",
+    "importCombos": "Importeren",
+    "importCombosTitle": "Combinaties importeren",
+    "importCombosInvalidFile": "Dit bestand is geen geldige export van combinaties.",
+    "importCombosSummary": "Combinaties in het bestand: {total} ({fresh} nieuw, {conflicting} met een naam die al bestaat).",
+    "importCombosMergeHint": "Samenvoegen behoudt alle bestaande combinaties en slaat de combinaties over waarvan de naam al bestaat. Verbindingen en inloggegevens worden nooit geïmporteerd.",
+    "importCombosReplaceHint": "Alles vervangen verwijdert je bestaande combinaties ({current}) en importeert in plaats daarvan het bestand. Dit kan niet ongedaan worden gemaakt.",
+    "importCombosMerge": "Samenvoegen",
+    "importCombosReplace": "Alles vervangen",
+    "importCombosDone": "Geïmporteerde combinaties: {created}. Overgeslagen: {skipped}.",
+    "importCombosFailed": "Importeren van combinaties mislukt",
+    "importCombosWarnings": "Geïmporteerd met waarschuwingen"
   },
   "costs": {
     "title": "Kosten",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "ChatGPT aangepaste connector",
     "doctorChecking": "Status wordt gecontroleerd…",
     "doctorCheck": "Doctor-status controleren",
-    "fallbackRetryBackendTitle": "Fallback-back-end voor opnieuw proberen"
+    "fallbackRetryBackendTitle": "Fallback-back-end voor opnieuw proberen",
+    "retryDelayTitle": "Vertraging voor nieuwe poging",
+    "retryDelayDesc": "Hoe lang een verbinding rust na een rate-limitfout wanneer de provider niet aangeeft wanneer opnieuw te proberen. Automatisch gebruikt de ingebouwde backoff; een door de provider gestuurde resettijd gaat altijd voor.",
+    "retryDelayAuto": "Automatisch",
+    "retryDelaySaved": "Vertraging voor nieuwe poging opgeslagen",
+    "retryDelayUpdateFailed": "Bijwerken van vertraging voor nieuwe poging mislukt"
   },
   "settings": {
     "title": "Instellingen",

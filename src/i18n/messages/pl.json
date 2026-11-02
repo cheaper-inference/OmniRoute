@@ -4108,7 +4108,20 @@
     "duplicateAutoComboSnapshotMsg": "Spowoduje to przechwycenie aktualnie połączonych dostawców/modeli pasujących do tego szablonu w edytowalnej kombinacji.",
     "duplicateAutoComboFailedPrefix": "Nie udało się skopiować automatycznej kombinacji:",
     "duplicateAutoComboUnknownError": "Nieznany błąd",
-    "duplicateAutoComboTitle": "Utwórz statyczną kombinację z {name}"
+    "duplicateAutoComboTitle": "Utwórz statyczną kombinację z {name}",
+    "exportCombos": "Eksportuj",
+    "exportCombosFailed": "Nie udało się wyeksportować combo",
+    "importCombos": "Importuj",
+    "importCombosTitle": "Importuj combo",
+    "importCombosInvalidFile": "Ten plik nie jest prawidłowym eksportem combo.",
+    "importCombosSummary": "Combo w pliku: {total} ({fresh} nowych, {conflicting} z nazwą, która już istnieje).",
+    "importCombosMergeHint": "Scal zachowuje wszystkie istniejące combo i pomija te, których nazwa już istnieje. Połączenia i dane uwierzytelniające nigdy nie są importowane.",
+    "importCombosReplaceHint": "Zastąp wszystkie usuwa istniejące combo ({current}) i importuje w ich miejsce plik. Tej operacji nie można cofnąć.",
+    "importCombosMerge": "Scal",
+    "importCombosReplace": "Zastąp wszystkie",
+    "importCombosDone": "Zaimportowane combo: {created}. Pominięte: {skipped}.",
+    "importCombosFailed": "Nie udało się zaimportować combo",
+    "importCombosWarnings": "Zaimportowano z ostrzeżeniami"
   },
   "costs": {
     "title": "Koszty",
@@ -6973,7 +6986,12 @@
     "chatgptConnectorLabel": "Niestandardowy konektor ChatGPT",
     "doctorChecking": "Sprawdzanie statusu…",
     "doctorCheck": "Sprawdź status narzędzia diagnostycznego",
-    "fallbackRetryBackendTitle": "Alternatywny backend ponawiania"
+    "fallbackRetryBackendTitle": "Alternatywny backend ponawiania",
+    "retryDelayTitle": "Opóźnienie ponowienia",
+    "retryDelayDesc": "Jak długo połączenie odpoczywa po błędzie limitu żądań, gdy dostawca nie podaje, kiedy spróbować ponownie. Tryb automatyczny używa wbudowanego wycofania; czas resetu wysłany przez dostawcę zawsze ma pierwszeństwo.",
+    "retryDelayAuto": "Automatycznie",
+    "retryDelaySaved": "Zapisano opóźnienie ponowienia",
+    "retryDelayUpdateFailed": "Nie udało się zaktualizować opóźnienia ponowienia"
   },
   "settings": {
     "title": "Ustawienia",

@@ -837,7 +837,7 @@ Tavily देखील `search_type: "finance"` (`topic: "finance"`) स्व�
 टाइमस्टॅम्प) मिळतो आणि Tavily ला `start_date` (`YYYY-MM-DD`) मिळतो. `provider_options` मधील
 स्पष्ट तारीख मॅप केलेल्या तारखेला अधिलिखित करते.
 
-Exa परिणामांमध्ये `id`, `highlight_scores`, `summary`, `subpages`, `entities` आणि `extras` हे
+Exa परिणामांमध्ये `id`, `highlights` (प्रत्येक ठळक उतारा; फक्त `snippet` म्हणून वापरलेला पहिला उतारा नव्हे), `highlight_scores`, `summary`, `subpages`, `entities` आणि `extras` हे
 `provider_raw` मध्ये कायम ठेवले जातात. Tavily परिणामांमध्ये `images` आणि `favicon` कायम ठेवले जातात.
 
 लिंकअप शोध खर्च `depth` `fast` आणि `standard` साठी $0.005 आणि `deep` ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) साठी $0.05 वर रेकॉर्ड केला जातो, `depth` `provider_options` किंवा कनेक्शन सेटिंग्जमधून आलेला असला तरीही.
@@ -1244,13 +1244,31 @@ Claude Code ऑटो-मोड क्लासिफायर विनंत�
 
 ### राउटिंग आणि कॉन्फिगरेशन
 
-| एंडपॉइंट              | पद्धत    | वर्णन                               |
-| --------------------- | -------- | ----------------------------------- |
-| `/api/models/alias`   | GET/POST | मॉडेलची उपनावे                      |
-| `/api/models/catalog` | GET      | प्रदाता + प्रकारानुसार सर्व मॉडेल्स |
-| `/api/combos*`        | विविध    | कॉम्बो व्यवस्थापन                   |
-| `/api/keys*`          | विविध    | API की व्यवस्थापन                   |
-| `/api/pricing`        | GET      | मॉडेलचे मूल्यनिर्धारण               |
+| एंडपॉइंट              | पद्धत    | वर्णन                                     |
+| --------------------- | -------- | ----------------------------------------- |
+| `/api/models`         | GET/PUT  | मॉडेलची यादी / पर्यायी नावे अद्ययावत करणे |
+| `/api/models/alias`   | GET/POST | मॉडेलची उपनावे                            |
+| `/api/models/catalog` | GET      | प्रदाता + प्रकारानुसार सर्व मॉडेल्स       |
+| `/api/combos*`        | विविध    | कॉम्बो व्यवस्थापन                         |
+| `/api/keys*`          | विविध    | API की व्यवस्थापन                         |
+| `/api/pricing`        | GET      | मॉडेलचे मूल्यनिर्धारण                     |
+
+#### मॉडेलच्या मर्यादांचे मूळ
+
+`GET /api/models?withLimits=1` प्रत्येक मॉडेलच्या नोंदीत `contextWindow`, `maxInputTokens`, `maxOutputTokens` आणि `capsSource` ऑब्जेक्ट जोडते. `true` हे मूल्यही चालते; `0`/`false` दिल्यास किंवा हा पर्याय वगळल्यास पूर्वनिर्धारित प्रतिसाद जसाच्या तसा राहतो. `capsSource` प्रत्येक मर्यादा कोणत्या नियमातून आली ते सांगते, त्यामुळे अनपेक्षित मर्यादेचा, उदाहरणार्थ 1M मॉडेलवरील 128k मर्यादेचा, उगम शोधता येतो. निश्चित केलेली मूल्ये राउटिंगमध्ये वापरल्या जाणाऱ्या मूल्यांप्रमाणेच असतात; हा फ्लॅग केवळ फील्ड जोडतो, कोणतेही मूल्य बदलत नाही. `withLimits` चे इतर कोणतेही मूल्य `400` प्रतिसादासह नाकारले जाते.
+
+| `capsSource` चे मूल्य                        | उगम                                                                           |
+| -------------------------------------------- | ----------------------------------------------------------------------------- |
+| `override:context`                           | जतन केलेले संदर्भ-विंडोचे अधिलिखित मूल्य (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | जतन केलेली `max_input_tokens` / `max_output_tokens` क्षमतांची अधिलिखित मूल्ये |
+| `static-authoritative:<provider>/<model>`    | संदर्भ-विंडोसाठी स्थिर अधिकृत तक्ता                                           |
+| `synced:<provider>/<model>`                  | models.dev मधून समक्रमित केलेली क्षमतांची नोंद                                |
+| `registry:<provider>/<model>`                | प्रदात्याच्या रजिस्ट्रीमधील नोंद                                              |
+| `spec:<model>`                               | मॉडेलचे स्थिर विनिर्देश                                                       |
+| `effort-base:` उपसर्ग                        | effort प्रत्यय असलेल्या प्रकाराच्या मूळ मॉडेलमधून घेतलेली नोंद                |
+| `none`                                       | कोणताही स्रोत मर्यादा घोषित करत नाही (मूल्य `null` असते)                      |
+
+अंमलबजावणी: `src/lib/modelCapabilities.ts` मधील `getResolvedModelCapabilitiesWithLimitSources()` आणि `src/lib/modelCapabilityLimits.ts` मधील प्राधान्यक्रमाच्या साखळ्या.
 
 ### वापर आणि विश्लेषण
 

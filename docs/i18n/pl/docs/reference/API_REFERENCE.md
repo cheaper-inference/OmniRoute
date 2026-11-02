@@ -887,7 +887,7 @@ Ogólne pole `time_range` jest teraz przekazywane do obu dostawców: Exa otrzymu
 ISO), a Tavily otrzymuje `start_date` (`YYYY-MM-DD`). Data jawnie określona w `provider_options`
 zastępuje wartość wynikającą z mapowania.
 
-Wyniki Exa zachowują `id`, `highlight_scores`, `summary`, `subpages`, `entities` oraz `extras` w
+Wyniki Exa zachowują `id`, `highlights` (wszystkie wyróżnione fragmenty, a nie tylko pierwszy używany jako `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` oraz `extras` w
 `provider_raw`. Wyniki Tavily zachowują `images` i `favicon`.
 
 Linkup: Koszt wyszukiwania łącza jest rejestrowany na poziomie 0,005 USD dla `depth` `fast` i `standard` oraz 0,05 USD dla `deep` ( [cena łącza](https://docs.linkup.so/pages/documentation/development/pricing) ), niezależnie od tego, czy `depth` pochodzi z `provider_options`, czy z ustawień połączenia.
@@ -1297,11 +1297,29 @@ z systemu nadrzędnego; drugi etap nadal może generować żądane widoczne rozu
 
 | Endpoint              | Metoda   | Opis                                    |
 | --------------------- | -------- | --------------------------------------- |
+| `/api/models`         | GET/PUT  | Lista modeli / aktualizacja aliasu      |
 | `/api/models/alias`   | GET/POST | Aliasy modeli                           |
 | `/api/models/catalog` | GET      | Wszystkie modele według dostawcy i typu |
 | `/api/combos*`        | Różne    | Zarządzanie kombinacjami                |
 | `/api/keys*`          | Różne    | Zarządzanie kluczami API                |
 | `/api/pricing`        | GET      | Ceny modeli                             |
+
+#### Pochodzenie limitów modelu
+
+`GET /api/models?withLimits=1` (również `true`; `0`/`false` lub pominięcie parametru pozostawia domyślną odpowiedź bez zmian) dodaje do każdego modelu `contextWindow`, `maxInputTokens`, `maxOutputTokens` oraz obiekt `capsSource`. `capsSource` wskazuje regułę dostarczającą każdy limit, więc można ustalić pochodzenie zaskakującej wartości, np. 128k dla modelu 1M. Są to te same rozstrzygnięte wartości, których używa routing; parametr tylko dodaje pola i nigdy nie zmienia wartości. Każda inna wartość `withLimits` jest odrzucana kodem `400`.
+
+| Wartość `capsSource`                         | Pochodzenie                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| `override:context`                           | Zapisane nadpisanie okna kontekstu (`model_context_overrides`)           |
+| `override:max_input` / `override:max_output` | Zapisane nadpisanie możliwości `max_input_tokens` / `max_output_tokens`  |
+| `static-authoritative:<provider>/<model>`    | Statyczna autorytatywna tabela okien kontekstu                           |
+| `synced:<provider>/<model>`                  | Wiersz możliwości zsynchronizowany z models.dev                          |
+| `registry:<provider>/<model>`                | Wpis w rejestrze dostawców                                               |
+| `spec:<model>`                               | Statyczna specyfikacja modelu                                            |
+| `effort-base:` prefiks                       | Wiersz pobrany z modelu bazowego wariantu z przyrostkiem poziomu wysiłku |
+| `none`                                       | Żadne źródło nie deklaruje limitu (wartość to `null`)                    |
+
+Implementacja: `getResolvedModelCapabilitiesWithLimitSources()` w `src/lib/modelCapabilities.ts` oraz łańcuchy pierwszeństwa w `src/lib/modelCapabilityLimits.ts`.
 
 ### Użycie i analityka
 

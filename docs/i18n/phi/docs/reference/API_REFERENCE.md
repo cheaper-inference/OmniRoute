@@ -886,7 +886,7 @@ Nakararating na ngayon sa parehong provider ang generic na `time_range`: natatan
 timestamp) at natatanggap ng Tavily ang `start_date` (`YYYY-MM-DD`). Ino-override ng tahasang petsa sa `provider_options`
 ang naka-map na petsa.
 
-Pinananatili ng mga resulta ng Exa ang `id`, `highlight_scores`, `summary`, `subpages`, `entities` at `extras` sa
+Pinananatili ng mga resulta ng Exa ang `id`, `highlights` (lahat ng naka-highlight na sipi, hindi lamang ang unang ginagamit bilang `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` at `extras` sa
 `provider_raw`. Pinananatili ng mga resulta ng Tavily ang `images` at `favicon`.
 
 Ang gastos sa paghahanap ng linkup ay naitala sa $0.005 para sa `depth` `fast` at `standard` at $0.05 para sa `deep` ( [Pagpepresyo ng linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), kung `depth` ay nagmula sa `provider_options` o sa mga setting ng koneksyon.
@@ -1295,13 +1295,31 @@ verdict; maaari pa ring gawin ng ikalawang stage ang hinihinging nakikitang reas
 
 ### Routing at Configuration
 
-| Endpoint              | Paraan   | Paglalarawan                           |
-| --------------------- | -------- | -------------------------------------- |
-| `/api/models/alias`   | GET/POST | Mga alias ng modelo                    |
-| `/api/models/catalog` | GET      | Lahat ng modelo ayon sa provider + uri |
-| `/api/combos*`        | Iba-iba  | Pamamahala ng combo                    |
-| `/api/keys*`          | Iba-iba  | Pamamahala ng API key                  |
-| `/api/pricing`        | GET      | Pagpepresyo ng modelo                  |
+| Endpoint              | Paraan   | Paglalarawan                                 |
+| --------------------- | -------- | -------------------------------------------- |
+| `/api/models`         | GET/PUT  | Listahan ng mga modelo / pag-update ng alias |
+| `/api/models/alias`   | GET/POST | Mga alias ng modelo                          |
+| `/api/models/catalog` | GET      | Lahat ng modelo ayon sa provider + uri       |
+| `/api/combos*`        | Iba-iba  | Pamamahala ng combo                          |
+| `/api/keys*`          | Iba-iba  | Pamamahala ng API key                        |
+| `/api/pricing`        | GET      | Pagpepresyo ng modelo                        |
+
+#### Pinagmulan ng mga limitasyon ng modelo
+
+Ang `GET /api/models?withLimits=1` (maaari ring `true`; pinananatili ng `0`/`false` o pag-alis ng parameter ang karaniwang payload) ay nagdaragdag ng `contextWindow`, `maxInputTokens`, `maxOutputTokens` at isang `capsSource` object sa bawat hanay ng modelo. Tinutukoy ng `capsSource` ang tuntuning nagbigay ng bawat limitasyon, kaya matutunton ang pinagmulan ng hindi inaasahang limitasyon, halimbawa 128k sa modelong 1M. Pareho ang mga nabuong halaga at ang ginagamit sa routing; nagdaragdag lamang ng mga field ang flag at hindi kailanman nagbabago ng halaga. Tinatanggihan ang anumang ibang halaga ng `withLimits` na may `400`.
+
+| Halaga ng `capsSource`                       | Pinagmulan                                                                       |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| `override:context`                           | Naka-save na override ng context window (`model_context_overrides`)              |
+| `override:max_input` / `override:max_output` | Naka-save na override ng mga kakayahang `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | Awtoritatibong static na talahanayan ng context window                           |
+| `synced:<provider>/<model>`                  | Hanay ng mga kakayahang na-sync mula sa models.dev                               |
+| `registry:<provider>/<model>`                | Entry sa rehistro ng mga provider                                                |
+| `spec:<model>`                               | Static na espesipikasyon ng modelo                                               |
+| Unlaping `effort-base:`                      | Hanay na hiniram mula sa batayang modelo ng isang variant na may effort suffix   |
+| `none`                                       | Walang pinagmumulang nagtatakda ng limitasyon; ang halaga ay `null`              |
+
+Implementasyon: `getResolvedModelCapabilitiesWithLimitSources()` sa `src/lib/modelCapabilities.ts` at ang mga pagkakasunod ng priyoridad sa `src/lib/modelCapabilityLimits.ts`.
 
 ### Paggamit at Analytics
 

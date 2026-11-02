@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "@omniroute/ui-kit/popover";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Popover, PopoverContent, PopoverTrigger } from "@omniroute/ui-kit/popover";
+import { Switch } from "@omniroute/ui-kit/switch";
 import { Button } from "@/shared/components";
+import { cn } from "@/shared/utils/cn";
 import { useNotificationStore } from "@/store/notificationStore";
 import {
   countKeysAllowing,
@@ -16,6 +17,8 @@ import {
   type AccessKind,
 } from "./keyAccessAssignUtils";
 import type { ApiKeyAccessIndex } from "./useApiKeyAccessIndex";
+
+const POPOVER_GAP = 4;
 
 function keyAccessHint(
   access: ReturnType<typeof getModelAccess>,
@@ -80,21 +83,20 @@ function KeyAccessRow({
           </Link>
         )}
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        type="button"
-        role="switch"
+      <Switch
+        checked={access.allowed}
         aria-checked={access.allowed}
         aria-label={t("toggleKeyAccess", { item: id, name: accessKey.name })}
         aria-busy={pending || undefined}
         title={hint ?? undefined}
         disabled={disabled || lastItem}
-        className="aria-busy:opacity-60"
-        onClick={() => void toggle()}
-      >
-        {access.allowed ? "✓" : "−"}
-      </Button>
+        className={cn(
+          "ci-switch--compact",
+          (disabled || lastItem) && "opacity-50",
+          pending && "opacity-60"
+        )}
+        onCheckedChange={() => void toggle()}
+      />
     </div>
   );
 }
@@ -113,16 +115,18 @@ export default function CatalogKeyAccessButton({
 }: CatalogKeyAccessButtonProps) {
   const t = useTranslations("modelCatalog");
   const cliTools = useTranslations("cliTools");
-  const [open, setOpen] = useState(false);
   const now = index.checkedAt;
   const usableKeys = index.keys.filter((key) => isKeyUsable(key, now));
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    // The kit Popover portals to <body> (the table's scroll container cannot clip it) and owns
+    // positioning, Escape, outside dismissal and returning focus to the trigger.
+    <Popover>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
           size="sm"
           data-testid={`key-access-${kind}-${id}`}
+          className="text-primary"
           onClick={() => void index.ensureLoaded()}
         >
           {index.keys.length
@@ -135,9 +139,15 @@ export default function CatalogKeyAccessButton({
       <PopoverContent
         aria-label={t("keyAccessButton")}
         align="end"
-        sideOffset={4}
-        collisionPadding={4}
-        className="w-80 max-h-80 overflow-auto p-3 text-left"
+        sideOffset={POPOVER_GAP}
+        collisionPadding={POPOVER_GAP}
+        className="max-h-80 w-80 overflow-auto p-3 text-left"
+        // Focus stays where it was on open, and only focus leaving an element closes the panel:
+        // focus arriving from nowhere (a modal mounting elsewhere) is not the user leaving it.
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onFocusOutside={(event) => {
+          if (!event.detail.originalEvent.relatedTarget) event.preventDefault();
+        }}
       >
         {index.loading && <p className="text-sm text-text-muted">{t("keysLoading")}</p>}
         {index.error && <Button onClick={() => void index.refresh()}>{t("keysRetry")}</Button>}

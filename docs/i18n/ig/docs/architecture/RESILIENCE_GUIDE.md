@@ -10,6 +10,8 @@ OmniRoute nwere usoro resilience atọ dị iche iche mana metụtara ibe ha. Nk
 
 > Isi mmalite: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Ibu ụzọ n’etiti gburugburu na dashboard maka ngbanwe ike ịnagide ọdịda.** Ngbanwe ike ịnagide ọdịda nke a na-ahọrọ ịgbanye, ndị na-enweta uru mbido site na gburugburu — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — na-enye naanị _uru ndabara_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Uru Boolean echekwara na `resilienceSettings` (Dashboard → **Ntọala → Ike ịnagide ọdịda** / `PATCH /api/resilience`, echekwara na `key_value`) na-ebu ụzọ karịa uru gburugburu: nhazi ka ọ bụrụ otu ụdị (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) na-edobe uru Boolean echekwara mgbe ọ bụla o dị. Ya mere, ịtọ ihe na-agbanwe na gburugburu dị otú ahụ ka ọ bụrụ `true` n’ebe etinyere usoro nke dashboard echekwala `false` anaghị agbanwe ihe ọ bụla — gbanwee ya na **Ntọala → Ike ịnagide ọdịda** ma ọ bụ hichapụ ubi data echekwara.
+
 ## 1. Mgbochi Sekiti Provider
 
 **Oke:** provider niile (dịka `glm`, `openai`, `anthropic`).
@@ -85,6 +87,8 @@ N'okpuru ọkọlọtọ ahụ, **anaghị** agụ provider dị ka nke na-adị
 - API-key ndabara: 3s
 - API-key 429: na-ahọrọ ndị isi `Retry-After`/reset nke upstream ma ọ bụ ederede reset a pụrụ ịgụ
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**Oge ichere tupu ịnwale ọzọ maka onye na-eweta ọrụ ọ bụla.** Ihu nkọwa onye na-eweta ọrụ nwere nhọrọ **Oge ichere tupu ịnwale ọzọ** (Auto, site na 15s ruo 1h). Ọ na-echekwa `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, site na `PATCH /api/resilience`). Mgbe njehie mmachi ọnụego enweghị ndụmọdụ ịnwale ọzọ sitere n’ọrụ dị n’elu, uru a na-anọchi nkwụsị a gbanwere nha ya maka onye na-eweta ọrụ ma tọghachi `backoffLevel` na 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Maka njehie mmachi ọnụego, usoro ibu ụzọ site na nke kacha elu bụ: ndụmọdụ ịnwale ọzọ sitere n’ọrụ dị n’elu, mgbe ahụ `providerSpecificData.rotationOverrides.rateLimitResetSeconds` nke njikọ ọ bụla, mgbe ahụ oge ichere tupu ịnwale ọzọ nke onye na-eweta ọrụ, mgbe ahụ ihe na-agbanwe na gburugburu `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, ma emesịa nkwụsị a gbanwere nha ya. Auto na-ewepụ ubi data ahụ. Ọ na-emetụta naanị ihe kpatara mmachi ọnụego, ọ naghị emetụta ọnọdụ ikpeazụ ọ bụla.
 
 **Nchekwa megide thundering-herd:** na-egbochi ọdịda ndị na-eme n'otu oge izu oke ịgbatị oge nkwụsịtụ karịrị ọ dị mkpa ma ọ bụ ịgbakwụnye `backoffLevel` ugboro abụọ.
 
@@ -469,7 +473,7 @@ A na-esochi nchebe rate-limit nke njikọ ọ bụla site na ubi boolean `rateLi
 
 Nchele nhọrọ `resilienceSettings.streamRecovery.throughputWatchdog` na-achọpụta upstream nke ka na-eziga chunks ma na-emepụta output nke assistant dị n'okpuru ọnụego output bara uru e debeere. E mere ya ka ọ dị iche na idle timeout n'ebumuche: heartbeats na metadata anaghị edozigharị oge elekere (timer) ọ bụla, ha anaghịkwa agụ dị ka ọganihu. Ọ dịkwa iche na hard attempt deadline (#9153), nke ka na-anọgide dị ka ọnụ nchekwa zuru oke n'agbanyeghị àgwà output.
 
-Nchele ahụ chọrọ oge warm-up nke sochiri windo na-agagharị (rolling window) zuru oke tupu ọ nwee ike ịkwụsị (abort). Ọ na-agụ text deltas sitere na Chat Completions na events output nke Responses API (ihe nnọchi byte UTF-8 e ji ụzọ gbochie gụọ), ọ na-eleghara events bụ naanị usage na ndị dị oghere anya, ọ na-atụkwụsịkwa ikpe mgbe events tool-call ma ọ bụ reasoning ka nọ n'ụzọ. A gbanyụsịrị ya n'ụzọ ndabara, enwere ike ịgbanye ya site na `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; windo, warm-up, ọnụego kacha nta, na output kacha nta a nwere ike ịtụle, ha niile ka n'okpuru oke nke ọwa normalization nke resilience-settings nkịtị.
+Nchele ahụ chọrọ oge warm-up nke sochiri windo na-agagharị (rolling window) zuru oke tupu ọ nwee ike ịkwụsị (abort). Ọ na-agụ text deltas sitere na Chat Completions na events output nke Responses API (ihe nnọchi byte UTF-8 e ji ụzọ gbochie gụọ), ọ na-eleghara events bụ naanị usage na ndị dị oghere anya, ọ na-atụkwụsịkwa ikpe mgbe events tool-call ma ọ bụ reasoning ka nọ n'ụzọ. A gbanyụsịrị ya n'ụzọ ndabara, enwere ike ịgbanye ya site na `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (uru gburugburu ahụ na-enye naanị uru ndabara — uru Boolean `resilienceSettings.streamRecovery.throughputWatchdog.enabled` echekwara na-ebu ụzọ; lee nkọwa ibu ụzọ n’etiti gburugburu na dashboard dị na mbido nduzi a); windo, warm-up, ọnụego kacha nta, na output kacha nta a nwere ike ịtụle, ha niile ka n'okpuru oke nke ọwa normalization nke resilience-settings nkịtị.
 
 Mgbe a gbanyere ya, ịkwụsị nke nchele na-emetụta naanị mgbalị (attempt) upstream na-arụ ọrụ. Tupu bytes ọ bụla rụọ aka onye ahịa, ụzọ early-recovery nke otu akaụntụ dị adị nwere ike imepegharị mgbalị ahụ. Mgbe e mesịrị commit, anaghị achọpụtaghachi (replay) stream ahụ n'ụzọ na-enweghị nlele; naanị nkwekọrịta safe mid-stream continuation dị adị nwere ike ijikọ suffix. Finalization ka na-abụ otu ugbororo (single-shot), n'ihi ya ịgụ usage na mwepụta semaphore anaghị eme ugboro abụọ.
 

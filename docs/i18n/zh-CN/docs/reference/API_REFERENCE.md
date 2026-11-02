@@ -844,7 +844,7 @@ Firecrawl 搜索成本记录为每个启动块（包含 10 个返回结果），
 时间戳），Tavily 获取 `start_date`（`YYYY-MM-DD`）。`provider_options` 中显式指定的日期
 会覆盖映射得到的日期。
 
-Exa 结果会在 `provider_raw` 中保留 `id`、`highlight_scores`、`summary`、`subpages`、`entities` 和 `extras`。
+Exa 结果会在 `provider_raw` 中保留 `id`、`highlights`（保留所有高亮片段，而非仅保留用作 `snippet` 的第一个）， `highlight_scores`、`summary`、`subpages`、`entities` 和 `extras`。
 Tavily 结果会保留 `images` 和 `favicon`。
 
 Linkup 的搜索费用按 `depth` 记录：`fast` 和 `standard` 为 $0.005，`deep` 为 $0.05（[Linkup 定价](https://docs.linkup.so/pages/documentation/development/pricing)），无论 `depth` 来自 `provider_options` 还是连接设置。
@@ -1213,11 +1213,29 @@ OpenAI 兼容连接分发 Chat Completions 请求体时适用；Responses 请求
 
 | 端点                  | 方法     | 描述                         |
 | --------------------- | -------- | ---------------------------- |
+| `/api/models`         | GET/PUT  | 模型列表 / 别名更新          |
 | `/api/models/alias`   | GET/POST | 模型别名                     |
 | `/api/models/catalog` | GET      | 按提供者和类型分类的所有模型 |
 | `/api/combos*`        | 多种     | 组合管理                     |
 | `/api/keys*`          | 多种     | API 密钥管理                 |
 | `/api/pricing`        | GET      | 模型定价                     |
+
+#### 模型限制的来源
+
+`GET /api/models?withLimits=1`（也接受 `true`；`0`/`false` 或省略参数均保持默认响应不变）会为每个模型条目添加 `contextWindow`、`maxInputTokens`、`maxOutputTokens` 和 `capsSource` 对象。`capsSource` 标明每项限制来自哪条规则，便于追查意外值，例如 1M 模型为何只有 128k 限制。解析后的值与路由使用的值完全相同；该参数只增加字段，从不改变数值。其他任何 `withLimits` 值都会被拒绝并返回 `400`。
+
+| `capsSource` 取值                            | 来源                                                        |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| `override:context`                           | 已保存的上下文窗口覆盖值（`model_context_overrides`）       |
+| `override:max_input` / `override:max_output` | 已保存的能力覆盖值 `max_input_tokens` / `max_output_tokens` |
+| `static-authoritative:<provider>/<model>`    | 静态权威上下文窗口表                                        |
+| `synced:<provider>/<model>`                  | 从 models.dev 同步的能力条目                                |
+| `registry:<provider>/<model>`                | 提供商注册表条目                                            |
+| `spec:<model>`                               | 静态模型规格                                                |
+| `effort-base:` 前缀                          | 从带推理强度后缀的变体所对应的基础模型借用的条目            |
+| `none`                                       | 没有任何来源声明该限制（值为 `null`）                       |
+
+实现见 `src/lib/modelCapabilities.ts` 中的 `getResolvedModelCapabilitiesWithLimitSources()`，以及 `src/lib/modelCapabilityLimits.ts` 中的优先级链。
 
 ### 使用情况与分析
 

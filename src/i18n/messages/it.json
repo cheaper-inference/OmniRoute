@@ -4185,7 +4185,20 @@
     "duplicateAutoComboSnapshotMsg": "Questo catturerà i fornitori/modelli attualmente connessi che corrispondono a questo modello in una combinazione modificabile.",
     "duplicateAutoComboFailedPrefix": "Duplicazione della combinazione automatica fallita:",
     "duplicateAutoComboUnknownError": "Errore sconosciuto",
-    "duplicateAutoComboTitle": "Crea una combinazione statica da {name}"
+    "duplicateAutoComboTitle": "Crea una combinazione statica da {name}",
+    "exportCombos": "Esporta",
+    "exportCombosFailed": "Impossibile esportare le combinazioni",
+    "importCombos": "Importa",
+    "importCombosTitle": "Importa combinazioni",
+    "importCombosInvalidFile": "Questo file non è un'esportazione di combinazioni valida.",
+    "importCombosSummary": "Combinazioni nel file: {total} ({fresh} nuove, {conflicting} con un nome già esistente).",
+    "importCombosMergeHint": "Unisci mantiene tutte le combinazioni esistenti e salta quelle il cui nome esiste già. Connessioni e credenziali non vengono mai importate.",
+    "importCombosReplaceHint": "Sostituisci tutto elimina le combinazioni esistenti ({current}) e importa il file al loro posto. L'operazione non può essere annullata.",
+    "importCombosMerge": "Unisci",
+    "importCombosReplace": "Sostituisci tutto",
+    "importCombosDone": "Combinazioni importate: {created}. Saltate: {skipped}.",
+    "importCombosFailed": "Impossibile importare le combinazioni",
+    "importCombosWarnings": "Importato con avvisi"
   },
   "costs": {
     "title": "Costi",
@@ -7050,7 +7063,12 @@
     "chatgptConnectorLabel": "Connettore personalizzato di ChatGPT",
     "doctorChecking": "Verifica dello stato…",
     "doctorCheck": "Verifica dello stato di doctor",
-    "fallbackRetryBackendTitle": "Backend di riprova di fallback"
+    "fallbackRetryBackendTitle": "Backend di riprova di fallback",
+    "retryDelayTitle": "Ritardo tra i tentativi",
+    "retryDelayDesc": "Per quanto tempo una connessione resta a riposo dopo un errore di limite di frequenza quando il provider non indica quando riprovare. La modalità automatica usa il backoff integrato; un orario di reset inviato dal provider ha sempre la precedenza.",
+    "retryDelayAuto": "Automatico",
+    "retryDelaySaved": "Ritardo tra i tentativi salvato",
+    "retryDelayUpdateFailed": "Impossibile aggiornare il ritardo tra i tentativi"
   },
   "settings": {
     "title": "Impostazioni",
