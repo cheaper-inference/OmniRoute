@@ -1001,10 +1001,39 @@ export function shouldMarkAccountExhaustedFrom429(
   );
 }
 
-export function classifyLockoutReason(status: number): string {
+export function classifyLockoutReason(status: number, errorText?: string): string {
   if (status === 429) return "rate_limit";
-  if (status === 403) return "quota_exhausted";
+  if (status === 403) {
+    // Check if errorText contains quota exhaustion signal
+    if (errorText && looksLikeQuotaExhausted(errorText)) {
+      return "quota_exhausted";
+    }
+    return "auth_error";
+  }
   return "unknown";
+}
+
+/**
+ * Lockout SCOPE override for a 403 that carries no quota proof.
+ *
+ * `resolveLockoutScope(status)` maps every 403 to the quota-family key, which
+ * parks every sibling model of the connection for the cooldown. That is the
+ * right scope when the body proves the account's quota is exhausted, but a 403
+ * without that proof (restricted key, forbidden route, unauthorized model) is
+ * about one model endpoint, not the account's quota — it should lock the exact
+ * provider/connection/model tuple only. This returns `"exact"` in that case and
+ * `undefined` otherwise, leaving the default status-based scope untouched.
+ *
+ * Mirrors `classifyLockoutReason`: the same quota-proof signal (`looksLikeQuotaExhausted`)
+ * that decides between `quota_exhausted` and `auth_error` decides the scope.
+ */
+export function classifyLockoutScope(
+  status: number,
+  errorText?: string
+): exactModelLock.LockoutScope | undefined {
+  if (status !== 403) return undefined;
+  if (errorText && looksLikeQuotaExhausted(errorText)) return undefined;
+  return "exact";
 }
 
 export type DecayResult = { cleared: boolean; newFailureCount: number };
