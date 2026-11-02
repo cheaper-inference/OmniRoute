@@ -489,7 +489,7 @@ Se käsittelee seuraavat:
 
 | Tiedosto                      | Tarkoitus                                             |
 | ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Chat-mallirekisteri 377-palveluntarjoajan luettelossa |
+| `providerRegistry.ts`         | Chat-mallirekisteri 380-palveluntarjoajan luettelossa |
 | `providerModels.ts`           | Mallialiakset, muotojen kartoitus                     |
 | `constants.ts`                | Aikakatkaisut, rajat, tilakoodit                      |
 | `defaultThinkingSignature.ts` | Oletusarvoinen Claude ajatteleva allekirjoitus        |

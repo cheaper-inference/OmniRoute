@@ -444,7 +444,7 @@ A pín un sí àwọn àkójọpọ̀ abẹ́-ìtọ́sọ́nà tó dojú kọ i
 
 ---
 
-## 4. `open-sse/` - Ṣiṣan ẹrọ ṣiṣanwọle aaye iṣẹ
+## 4. `open-sse/` — śiśanwọle engine aaye iṣẹ
 
 Aaye iṣẹ npm lọtọ ti a tẹjade bi `@omniroute/open-sse`. Ni ṣiṣe ṣiṣe ibeere, awọn alaṣẹ, awọn onitumọ, awọn iṣẹ, oluyipada, ati olupin MCP.
 
@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 oke-ipele executor modulu (`*.ts` iyokuro `base.ts`, `index.ts` ati awọn idanwo — awọn iwọn `npm run check:docs-counts` kika). Gbogbo kilasi alaṣẹ n gbooro `BaseExecutor` (`base.ts`), taara tabi nipasẹ `DefaultExecutor` tabi alaṣẹ miiran; awọn modulu ti o ku jẹ awọn oluranlọwọ olupese (awọn eto irinṣẹ, awọn alamuuṣẹ fetch/TTS, awọn olutọju quirk). Awọn alaṣẹ pẹlu:
+156 awọn modulu alaṣẹ ipele oke (`*.ts` iyokuro `base.ts`, `index.ts` ati awọn idanwo — awọn iwọn `npm run check:docs-counts` kika). Gbogbo kilasi alaṣẹ n gbooro `BaseExecutor` (`base.ts`), taara tabi nipasẹ `DefaultExecutor` tabi alaṣẹ miiran; awọn modulu ti o ku jẹ awọn oluranlọwọ olupese fun olupese (awọn eto irinṣẹ, awọn alamuuṣẹ fetch/TTS, awọn olutọju quirk). Awọn alaṣẹ pẹlu:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`( zqr , zqs , zqt ati iranlọwọ `claudeIdentity.ts` ) `index.ts`
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (shared identity helper) and `index.ts` (registry).
 
-> Akiyesi: Awọn olupese ti a ko ṣe akojọ si nibi ti wa ni iranṣẹ nipasẹ `default.ts` ni lilo oluṣe adaṣe ibaramu OpenAI jeneriki. Katalogi olupese ni kikun (awọn olupese 377) ngbe ni `src/shared/constants/providers.ts`.
+> Akiyesi: Awọn olupese ti a ko ṣe akojọ si nibi ti wa ni iranṣẹ nipasẹ `default.ts` ni lilo oluṣe adaṣe ibaramu OpenAI jeneriki. Katalogi olupese ni kikun (awọn olupese 380) ngbe ni `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ Itumọ ibudo-ati-sọ (OpenAI ni ibudo).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Awọn idahun API ↔ Oluyipada Iwiregbe Ipari (ti a lo nipasẹ ọna `responses/` apeja-gbogbo).
+- `responsesTransformer.ts` — -based `TransformStream` Awọn idahun API ↔ oluyipada Iwiregbe Ipari (ti a lo nipasẹ ọna `responses/` -gbogbo).
 
 ### 4.5 `open-sse/services/`
 
@@ -519,7 +519,7 @@ Awọn ifojusi (akojọ kikun labẹ `open-sse/services/`):
 | Caching           | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Oye ipa ọna       | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Mimu awoṣe        | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Funmorawon        | `compression/` - ni kikun funmorawon engine onirin                                                                                                                                                                                                       |
+| Funmorawon        | `compression/` — ni kikun funmorawon engine onirin                                                                                                                                                                                                       |
 | Tokini + igba     | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Ipele / farahan   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / nẹtiwọki     | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,20 +528,20 @@ Awọn ifojusi (akojọ kikun labẹ `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 oto irinṣẹ** ti firanṣẹ ni `server.ts` (45 canonical ni `schemas/tools.ts` + iranti, ogbon, GitHub-ogbon, pool, gamification, itanna, Notion, Obsidian, agbegbe-corpus ati funmorawon modulu — union kà nipa `countUniqueMcpTools`).
+- **110 oto irinṣẹ** ti firanṣẹ ni `server.ts` (45 canonical ni `schemas/tools.ts` + iranti, ogbon, GitHub-ogbon, pool, gamification, itanna, Notion, Obsidian, agbegbe-korpus ati funmorawon modulu — union kà nipa `countUniqueMcpTools`).
 - **3 awọn gbigbe** : stdio, HTTP Streamable, SSE.
-- **33 dopin** fi agbara mu ni akoko asiko — akojọ ipilẹ ni `src/shared/constants/mcpScopes.ts`, ṣeto ni kikun jẹ iṣọkan ti awọn iwọn ti a sọ nipasẹ module ọpa kọọkan.
+- **33 dopin** fi agbara mu ni asiko asiko — akojọ ipilẹ ni `src/shared/constants/mcpScopes.ts`, ni kikun ṣeto ni awọn Euroopu ti awọn dopin kede nipa kọọkan ọpa module.
 - Tabili iṣayẹwo: `mcp_tool_audit` (ti a gbejade nipasẹ `audit.ts`).
 - Awọn faili: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, pẹlu awọn idanwo labẹ `__tests__/`.
 - Wo [MCP-SERVER.md](../frameworks/MCP-SERVER.md) fun katalogi irinṣẹ ni kikun.
 
 ### 4.7 `open-sse/config/`
 
-Awọn iforukọsilẹ awọn olupese (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), fun-kika awoṣe awọn iforukọsilẹ (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, zqh , `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`), awọn oluranlọwọ idanimọ (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts` `toolCloaking.ts`, crede , crede , crede , crede , `antigravityUpstream.ts`, cr , crede `videoRegistry.ts` `codexClient.ts` `maritalk.ts` `credentialLoader.ts` `defaultThinkingSignature.ts` awọn oluyipada awọsanma (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, zqbh, `registryUtils.ts`).
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-`thinkTagParser.ts` alakoko ṣiṣanwọle `kieTask.ts` `usageTracking.ts` `cursorVersionDetector.ts` olupese: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts` `ollamaTransform.ts` `streamPayloadCollector.ts` `awsSigV4.ts` `streamReadiness.ts` `sleep.ts` `sseHeartbeat.ts` `tlsClient.ts` `proxyDispatcher.ts` `proxyFetch.ts` `cursorAgentProtobuf.ts` `cacheControlPolicy.ts` `networkProxy.ts` `cursorChecksum.ts` `requestLogger.ts` `comfyuiClient.ts` `progressTracker.ts` `bypassHandler.ts` `cors.ts` `aiSdkCompat.ts` `logger.ts` `urlSanitize.ts` `error.ts`
+Awọn alakoko ṣiṣanwọle `kieTask.ts` `awsSigV4.ts` `cursorVersionDetector.ts` olupese `thinkTagParser.ts` `stream.ts`, `streamHandler.ts` `usageTracking.ts` `streamHelpers.ts`, `streamPayloadCollector.ts` `ollamaTransform.ts` `streamReadiness.ts` `sleep.ts` `sseHeartbeat.ts` `tlsClient.ts` `proxyDispatcher.ts` `proxyFetch.ts` `cursorAgentProtobuf.ts` `cacheControlPolicy.ts` `networkProxy.ts` `cursorChecksum.ts` `requestLogger.ts` `comfyuiClient.ts` `progressTracker.ts` `bypassHandler.ts` `cors.ts` `aiSdkCompat.ts` `logger.ts` `urlSanitize.ts` `error.ts`
 
 ---
 

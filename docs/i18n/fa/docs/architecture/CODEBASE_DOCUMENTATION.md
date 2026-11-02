@@ -446,7 +446,7 @@ server/
 
 ---
 
-## 4. `open-sse/` - فضای کار موتور جریان
+## 4. `open-sse/` — استریمینگ موتور فضای کار
 
 فضای کاری npm جداگانه منتشر شده به عنوان `@omniroute/open-sse`. دارای پردازش درخواست، مجریان، مترجمان، خدمات، ترانسفورماتور و سرور MCP است.
 
@@ -468,7 +468,7 @@ open-sse/
 
 ### 4.1 `open-sse/handlers/`
 
-| گرداننده                | هدف                                                            |
+| هندلر                   | هدف                                                            |
 | ----------------------- | -------------------------------------------------------------- |
 | `chatCore.ts`           | خط لوله چت اصلی (کش، محدودیت نرخ، مسیریابی ترکیبی، ارسال مجری) |
 | `responsesHandler.ts`   | پاسخ OpenAI نقطه ورود API                                      |
@@ -483,16 +483,16 @@ open-sse/
 | `search.ts`             | جستجوی وب                                                      |
 | `sseParser.ts`          | تجزیه کننده رویداد SSE                                         |
 | `usageExtractor.ts`     | تعداد توکنها را از جریانهای بالادست خارج کنید                  |
-| `responseSanitizer.ts`  | نوار نویز خاص ارائه دهنده                                      |
+| `responseSanitizer.ts`  | نویز خاص ارائه دهنده را حذف کنید                               |
 | `responseTranslator.ts` | بین پاسخ ارائه دهنده و لایه مترجم چسب بزنید                    |
 
 ### 4.2 `open-sse/executors/`
 
-156 ماژول اجرایی سطح بالا (`*.ts` منهای `base.ts`، `index.ts` و تست - تعداد `npm run check:docs-counts` اندازه گیری می شود). هر کلاس اجرا کننده `BaseExecutor` (`base.ts`)، مستقیماً یا از طریق `DefaultExecutor` یا مجری دیگری گسترش می یابد. ماژولهای باقیمانده کمککنندههای هر ارائهدهنده هستند (طرحوارههای ابزار، آداپتورهای fetch/TTS ، کنترلکنندههای عجیب و غریب). مجریان عبارتند از:
+156 ماژول مجری سطح بالا (`*.ts` منهای `base.ts`، `index.ts` و تست — تعداد `npm run check:docs-counts` اندازه گیری می شود). هر کلاس اجرا کننده `BaseExecutor` (`base.ts`) را مستقیماً یا از طریق `DefaultExecutor` یا مجری دیگری گسترش می دهد. ماژولهای باقیمانده کمککنندههای هر ارائهدهنده هستند (طرحوارههای ابزار، آداپتورهای fetch/TTS ، کنترلکنندههای عجیب و غریب). مجریان عبارتند از:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, `index.ts`, `claudeIdentity.ts`.
 
-> توجه: ارائه دهندگانی که در اینجا فهرست نشده اند توسط `default.ts` با استفاده از مجری عمومی سازگار با OpenAI ارائه می شوند. کاتالوگ کامل ارائه دهنده (377 ارائه دهنده) در `src/shared/constants/providers.ts` زندگی می کند.
+> توجه: ارائه دهندگانی که در اینجا فهرست نشده اند توسط `default.ts` با استفاده از مجری عمومی سازگار با OpenAI ارائه می شوند. کاتالوگ کامل ارائه دهنده (380 ارائه دهنده) در `src/shared/constants/providers.ts` زندگی می کند.
 
 ### 4.3 `open-sse/translator/`
 
@@ -506,7 +506,7 @@ open-sse/
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based پاسخها مبدل تکمیلهای چت API ↔ (استفاده شده توسط مسیر `responses/` catch-all).
+- `responsesTransformer.ts` — `TransformStream` -based پاسخها API ↔ مبدل تکمیلهای چت (استفاده شده توسط مسیر `responses/` catch-all).
 
 ### 4.5 `open-sse/services/`
 
@@ -521,7 +521,7 @@ open-sse/
 | ذخیره سازی        | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | هوش مسیریابی      | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | جابجایی مدل       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| فشرده سازی        | `compression/` - سیم کشی موتور فشرده سازی کامل                                                                                                                                                                                                           |
+| فشرده سازی        | سیم کشی موتور تراکم کامل `compression/` —                                                                                                                                                                                                                |
 | جلسه توکن +       | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | ردیف / آشکار      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / شبکه         | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -530,9 +530,9 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 ابزار منحصر به فرد** سیمی در `server.ts` (45 متعارف در حافظه `schemas/tools.ts` + ، مهارتها، مهارتهای GitHub، استخر، گیمیفیکیشن، پلاگین، Notion، Obsidian، پیکره محلی و ماژولهای فشردهسازی - اتحاد شمارش شده توسط `countUniqueMcpTools`).
+- **110 ابزار منحصر به فرد** سیمشده در `server.ts` (45 متعارف در حافظه `schemas/tools.ts` + ، مهارتها، مهارتهای GitHub، استخر، گیمیفیکیشن، افزونه، Notion، Obsidian، ماژولهای محلی و فشردهسازی، اتحادیه — شمارش شده توسط `countUniqueMcpTools`).
 - **3 حمل و نقل** : stdio, HTTP Streamable, SSE.
-- **33 دامنه** در زمان اجرا اجرا می شود - لیست پایه در `src/shared/constants/mcpScopes.ts`، مجموعه کامل ترکیبی از دامنه های اعلام شده توسط هر ماژول ابزار است.
+- **33 دامنه** مجموعه کامل که در زمان اجرا لیست پایه — در `src/shared/constants/mcpScopes.ts` اعمال می شود، اتحاد دامنه های اعلام شده توسط هر ماژول ابزار است.
 - جدول حسابرسی: `mcp_tool_audit` (جمعیت `audit.ts`).
 - فایل ها: `server.ts`، `index.ts`، `httpTransport.ts`، `audit.ts`، `scopeEnforcement.ts`، `runtimeHeartbeat.ts`، `descriptionCompressor.ts`، `schemas/{tools, a2a, audit, index}.ts`، `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`، به علاوه تست های زیر `__tests__/`.
 - برای کاتالوگ کامل ابزار به [MCP-SERVER.md](../frameworks/MCP-SERVER.md) مراجعه کنید.

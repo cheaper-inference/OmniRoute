@@ -4,11 +4,13 @@
 
 ---
 
-OmniRoute ma trzy odrębne, ale powiązane ze sobą mechanizmy odporności. Każdy z nich ma inny zakres i cel. Podczas debugowania zachowania routingu należy je traktować osobno.
+OmniRoute ma trzy różne, ale powiązane mechanizmy odporności. Każde z nich ma inny zakres i cel. Trzymaj je oddzielnie podczas debugowania zachowania routingu.
 
-![3-warstwowy model odporności](../diagrams/exported/resilience-3layers.svg)
+![3-layer resilience model](../diagrams/exported/resilience-3layers.svg)
 
-> Źródło: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+> źródło: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+
+> **Pierwszeństwo środowiska i pulpitu nawigacyjnego dla przełączników odporności.** Przełączniki odporności opt-in wysyłane ze środowiska — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — dostarczają tylko _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Wartość logiczna pozostała w `resilienceSettings` (Dashboard →** Ustawienia → Odporność** / `PATCH /api/resilience`, przechowywany w `key_value`) wygrywa z wartością env: normalizacja (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) utrzymuje przechowywaną wartość logiczną, gdy taka istnieje. Ustawienie takiego env var na `true` we wdrożeniu, w którym pulpit nawigacyjny został już zapisany, `false` dlatego nic nie zmienia — przełącz przełącznik** Ustawienia → Odporność** (lub wyczyść zapisane pole).
 
 ## 1. Circuit Breaker dostawcy
 
@@ -68,161 +70,120 @@ wykładniczy backoff `minRetryCooldownMs → maxRetryCooldownMs`. Nadpisania:
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 Test regresyjny: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Okres wyciszenia połączenia
+## 2. Czas odnowienia połączenia
 
-**Zakres:** pojedyncze połączenie/konto/klucz dostawcy.
+**Zakres:** pojedynczy dostawca connection/account/key.
 
-**Cel:** pominięcie jednego wadliwego klucza, podczas gdy pozostałe połączenia tego samego dostawcy nadal obsługują żądania.
+**Zamiar:** pomiń jeden zły klucz, podczas gdy inne połączenia tego samego dostawcy będą nadal działać.
 
-**Implementacja:**
+**Realizacja:**
 
-- Oznaczanie jako niedostępne: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Znak niedostępny: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Wybór: `getProviderCredentials*` w tym samym pliku
-- Obliczanie wyciszenia: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Obliczenie czasu odnowienia: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Ustawienia: `src/lib/resilience/settings.ts`
 
-**Pola przypisane do połączenia:**
+**Pola na połączenie:**
 
-- `rateLimitedUntil` — znacznik czasu, do którego trwa wyciszenie
+- `rateLimitedUntil` — znacznik czasu do upłynięcia czasu odnowienia
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — licznik wykładniczego wycofywania
+- `backoffLevel` — wykładniczy licznik backoffów
 
-**Domyślne okresy wyciszenia:**
+**Domyślne czasy odnowienia:**
 
-- OAuth bazowy: 5 s
-- Klucz API bazowy: 3 s
-- Klucz API 429: preferuje nagłówki `Retry-After`/reset z serwera nadrzędnego lub możliwy do sparsowania tekst resetu
-- Wycofywanie: `baseCooldownMs * 2 ** failureIndex`
+- podstawa OAuth : 5s
+- Baza kluczy API: 3s
+- Klucz API 429: preferuje tekst resetowania `Retry-After`/reset headers/parseable
+- Wycofanie: `baseCooldownMs * 2 ** failureIndex`
 
-**Ochrona przed efektem thundering herd:** zapobiega nadmiernemu wydłużaniu wyciszenia lub podwójnemu zwiększaniu `backoffLevel` przez równoczesne błędy.
+**Opóźnienie ponownej próby dla każdego dostawcy.** Na stronie szczegółów dostawcy znajduje się plik** Opóźnienie ponownej próby** wybierz (Auto, 15 s do 1 godz.). Oszczędza `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1–21600, do `PATCH /api/resilience`). Gdy błąd ograniczenia szybkości nie zawiera wskazówki dotyczącej ponownej próby w górę, ta wartość zastępuje skalowane wycofywanie dla dostawcy i resetuje `backoffLevel` do 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Pierwszeństwo błędu o ograniczonej szybkości, najpierw najwyższe: wskazówka dotycząca ponownej próby w górę strumienia, następnie `providerSpecificData.rotationOverrides.rateLimitResetSeconds` dla każdego połączenia, następnie opóźnienie ponownej próby dla każdego dostawcy, następnie env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, a następnie skalowane wycofywanie. Auto usuwa pole. Wpływa tylko na przyczynę ograniczenia szybkości, nigdy na stany końcowe.
 
-**Odpowiedzi 429 dotyczące limitu współbieżności nie podnoszą poziomu wycofywania.** Odpowiedź `429`, której treść zgłasza limit współbieżności ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`), oznacza, że konto jest sprawne, ale zajęte.
-`checkFallbackError()` zwraca powód `concurrency_limited`: natychmiast przełącza awaryjnie na następne połączenie, wycisza bieżące na stały czas `CONCURRENCY_LIMIT_COOLDOWN_MS` (1 s) lub zgodnie ze wskazówką ponowienia z serwera nadrzędnego, pozostawia `backoffLevel` bez zmian i ustawia `skipProviderBreaker`.
-Jawna treść dotycząca kwoty nadal ma pierwszeństwo, więc treść pasująca również do wzorca kwoty pozostaje oceniana jako kwota. Wykrywanie: `looksLikeConcurrencyLimit()` w `src/shared/utils/classify429.ts`; ocena: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (typ `FailureKind` wyłącznika) pozostaje bez zmian i nadal odczytuje `rate_limit` dla takich treści.
+**Straż stadna przeciw piorunom:** zapobiega jednoczesnym awariom spowodowanym nadmiernym wydłużeniem czasu odnowienia lub podwójnym zwiększeniem `backoffLevel`.
 
-**Zatrzymania treści strumienia nie wyciszają konta.** Gdy strażnik zatrzymania treści
-(`open-sse/utils/streamHandler.ts`) porzuca strumień, który nie wysłał wyników modelu na czas, `markAccountUnavailable()` zapisuje błąd na połączeniu, ale nie ustawia wyciszenia: zatrzymanie dotyczy tego konkretnego żądania — najczęściej długiej tury wnioskowania bez jeszcze żadnych wyników. Operatorzy mogą włączyć wyciszenie z powrotem za pomocą `resilienceSettings.streamStallCooldown.enabled` (domyślnie `false`).
+**Numery 429 z limitem współbieżności nie wspinają się po drabinie wycofywania.** `429` którego treść zgłasza limit współbieżności („zbyt wiele jednoczesnych żądań”, „limit współbieżności”, „limit żądań równoległych”, GLM `并发数过高`) oznacza, że konto jest w dobrym stanie, ale jest zajęte. `checkFallbackError()` zwraca powód `concurrency_limited`: przejście awaryjne do następnego połączenia, ochłodź to, aby uzyskać stałą `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) lub wskazówkę dotyczącą ponownej próby w górę, pozostaw `backoffLevel` bez zmian i ustaw `skipProviderBreaker`. Wyraźna treść kwot nadal wygrywa, zatem treść, która również pasuje do wzorca kwot, pozostaje werdyktem dotyczącym kwot. Wykrywanie: `looksLikeConcurrencyLimit()` w `src/shared/utils/classify429.ts`; werdykt: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` ( `FailureKind` wyłącznika) pozostaje niezmieniony i nadal odczytuje `rate_limit` dla tych ciał.
 
-**Opcjonalny sygnał opóźnienia dla wyboru konta `p2c`.** Każda wysłana próba zapisuje czas do pierwszego bajta i wynik dla połączenia (oraz dla połączenia + modelu) w oknie kroczącym w pamięci: ostatnie 20 próbek w ciągu 15 minut
-(`open-sse/services/connectionLatencyTracker.ts`, zapisywane z `safeLogEvents()` w
-`src/sse/handlers/chatHelpers.ts`). Gdy `resilienceSettings.p2cLatency.weight` jest większa od `0` (zakres 0–20, domyślnie `0` = wyłączone), `compareP2CConnections()` w `src/sse/services/auth.ts` dodaje maksymalnie `weight` punktów każdemu kandydatowi z pary. Połowa tej wartości pochodzi z opóźnienia jako stosunku do szybszego kandydata (dwukrotnie wolniejszy otrzymuje pełną połowę), a połowa z kroczącego wskaźnika błędów.
-Ten składnik obowiązuje tylko wtedy, gdy obaj kandydaci mają co najmniej 3 próbki, więc nowe konta nie są karane, a jego maksimum pozostaje poniżej kar za zablokowaną i wyczerpaną kwotę. Nie tworzy własnego obwodu zabezpieczającego: zawodzące konta nadal obsługują warstwy wyciszenia, blokady i wyłącznika. Ustawia się go za pomocą `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
+**Stragany z treściami strumieniowymi nie chłodzą konta.** Kiedy moduł nadzorujący przeciągnięcie zawartości (`open-sse/utils/streamHandler.ts`) rezygnuje ze strumienia, który nie wysłał na czas żadnych danych wyjściowych modelu, `markAccountUnavailable()` rejestruje błąd połączenia, ale nie ustawia czasu oczekiwania: przeciągnięcie należy do tego żądania, najczęściej jest to długi obrót rozumowania bez jeszcze żadnych wyników. Operatorzy mogą ponownie włączyć się za pomocą `resilienceSettings.streamStallCooldown.enabled` (domyślnie `false`).
 
-**Ramki wnioskowania odnawiają budżet zatrzymania treści.** Model wnioskujący może myśleć przez wiele minut przed pierwszym widocznym tokenem: Claude przesyła strumieniowo ramki `thinking_delta`, których tekst myślenia może być pusty, a Responses API przesyła strumieniowo jeden element wnioskowania za drugim. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) rozpoznaje te ramki, a strażnik odnawia swój budżet przy każdej z nich zamiast przerywać turę. Nadal nie są one wynikami modelu, więc tura kończąca się samym wnioskowaniem jest nadal zgłaszana jako pusta, a tura, która przestaje wnioskować i wysyła tylko sygnały heartbeat, nadal uruchamia strażnika.
+**Sygnał opóźnienia zgody na wybór konta `p2c`.** Każda wysłana próba rejestruje czas do pierwszego bajtu i wynik na połączenie (i na model połączenia + ) w przewijanym oknie w pamięci: ostatnie 20 próbek w ciągu 15 minut (`open-sse/services/connectionLatencyTracker.ts`, zapisane z `safeLogEvents()` w `src/sse/handlers/chatHelpers.ts`). Kiedy `resilienceSettings.p2cLatency.weight` jest powyżej `0` (zakres 0-20, domyślnie `0` = wyłączone), `compareP2CConnections()` w `src/sse/services/auth.ts` dodaje punkty `weight` każdemu kandydatowi z pary. Połowa tego wynika z opóźnienia jako stosunku do szybszego kandydata (dwa razy wolniejsza jest pełna połowa), a połowa z kroczącego współczynnika błędów. Termin ten ma zastosowanie tylko wtedy, gdy obaj kandydaci mają co najmniej 3 próbki, więc nowe konta nie są karane, a jego pułap pozostaje poniżej kar za zablokowanie kwoty i wyczerpanie kwoty. Nie dodaje żadnego własnego obwodu: uszkodzone konta są nadal obsługiwane przez warstwy odnowienia, blokady i wyłącznika. Ustaw to za pomocą `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-Binarne ramki `reasoningContentEvent` Kiro z niepustym podpisem zachowują tę aktywność wnioskowania przez egzekutor jako pustą deltę `reasoning_content`. Podpis nie jest przekazywany dalej. Metadane, niekompletne ramki i puste podpisy nie odnawiają budżetu treści; niezależny limit czasu aktywnego strumienia i anulowanie przez klienta nadal obowiązują (`open-sse/executors/kiro/reasoning.ts`).
+**Ramy rozumowania wznawiają budżet związany z przeciągnięciem treści.** Model rozumowania może myśleć przez kilka minut przed pierwszym widocznym znacznikiem: Claude przesyła strumieniowo ramki `thinking_delta`, których tekst myślący może być pusty, a API Odpowiedzi przesyła strumieniowo jeden element rozumowania po drugim. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) rozpoznaje te ramki i watchdog ponownie uruchamia swój budżet na każdej z nich, zamiast anulować turę. Nadal nie są to dane wyjściowe modelu, więc tura kończąca się jedynie rozumowaniem jest nadal zgłaszana jako pusta, a tura, która zatrzymuje rozumowanie i wysyła tylko uderzenia serca, nadal uruchamia watchdog.
 
-**Stany końcowe (NIE wyciszenia):**
+Binarne ramki `reasoningContentEvent` Kiro z niepustą sygnaturą zachowują tę aktywność rozumowania poprzez executor jako pustą deltę `reasoning_content`. Podpis nie jest przekazywany. Metadane, niekompletne ramki i puste podpisy nie powodują ponownego uruchomienia budżetu treści; niezależny limit czasu aktywnego strumienia i anulowanie klienta nadal obowiązują (`open-sse/executors/kiro/reasoning.ts`).
 
-- `banned` — ustawiany przez wykrywanie zakazanych słów kluczowych / blokady konta (patrz [BAN_DETECTION](../security/BAN_DETECTION.md)) oraz przez trzy kolejne odmowy żądań z serwera nadrzędnego (`request_rejected`, np. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); pojedyncza odmowa jedynie wycisza połączenie
-- `expired` (przechodzi w stan końcowy po ograniczonej liczbie ponownych prób — `EXPIRED_RETRY_MAX = 3` z wykładniczym wycofywaniem — dzięki czemu przejściowe błędy OAuth mogą się samoistnie naprawić, zanim konto zostanie trwale dezaktywowane)
+**Stany terminala (czasy odnowienia NOT ):**
+
+- `banned` — ustawione przez wykrycie zakazanego słowa kluczowego/banu na konto (zobacz [BAN_DETECTION](../security/BAN_DETECTION.md) ) i trzy kolejne odmowy na żądanie (`request_rejected`, np. Anthropic OAuth 403 „Żądanie niedozwolone” — `open-sse/services/requestRejectedStreak.ts`); pojedyncza odmowa tylko schładza połączenie
+- `expired` (przejście do terminala po ograniczonych ponownych próbach — `EXPIRED_RETRY_MAX = 3` z wykładniczym wycofywaniem — więc przejściowe błędy OAuth mogą się samonaprawiać, zanim konto zostanie trwale dezaktywowane)
 - `credits_exhausted`
 
-Stany te utrzymują się do zmiany poświadczeń lub ich zresetowania przez operatora. Nie nadpisuj stanów końcowych przejściowym stanem wyciszenia.
+Trwają one do momentu zmiany poświadczeń lub ich zresetowania przez operatora. Nie zastępuj stanów końcowych przejściowym stanem ochłodzenia.
 
-**Odzyskiwanie leniwe:** gdy `rateLimitedUntil` minie, połączenie znów staje się dostępne. Po pomyślnym użyciu `clearAccountError()` czyści wszystkie pola błędów.
+**Leniwe odzyskiwanie:** kiedy `rateLimitedUntil` minie, połączenie stanie się ponownie możliwe. Po pomyślnym użyciu `clearAccountError()` czyści wszystkie pola błędów.
 
-### Limit wykorzystania Claude OAuth: tor o niższym priorytecie + reset limitu sesji
+### Claude OAuth ściana użytkowania: resetowanie limitu sesji + linii o niższym priorytecie
 
-**Zakres:** jedno połączenie subskrypcji Claude (OAuth). Obie funkcje są **włączane indywidualnie dla każdego połączenia** (Edytuj połączenie → sekcja Claude → `lowPriorityMode` / `autoLimitReset` w
-`providerSpecificData`, obie domyślnie wyłączone) i odzwierciedlają polecenia `/low-priority` oraz `/limit-reset` z Claude Code (kontrakt protokołu przechwycony z Claude Code 2.1.263).
+**Zakres:** jedno połączenie w ramach subskrypcji Claude (OAuth). Obie funkcje są** wyrazić zgodę na każde połączenie** (Edytuj sekcję połączenia → Claude → `lowPriorityMode` / `autoLimitReset` w `providerSpecificData`, oba domyślnie wyłączone) i lustrzane odbicie poleceń `/low-priority` i `/limit-reset` kodu Claude (umowa przewodowa przechwycona z kodu Claude 2.1.263).
 
-**Implementacja:**
+**Realizacja:**
 
-- Maszyna stanów + klasyfikacja odpowiedzi: `open-sse/services/claudeLowPriority.ts`
-- Klient resetowania statusu/przypisania: `open-sse/services/claudeLimitReset.ts`
-- Hak wykonawcy (wstrzykiwanie nagłówka + ponowienie na tym samym koncie): `open-sse/executors/base.ts::execute()`
-- Trwałość typu opt-in: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Klasyfikacja odpowiedzi maszyny stanowej + : `open-sse/services/claudeLowPriority.ts`
+- Zresetuj klienta status/claim : `open-sse/services/claudeLimitReset.ts`
+- Hak executora (wstrzyknięcie nagłówka + ponowienie próby na tym samym koncie): `open-sse/executors/base.ts::execute()`
+- Trwałość zgody: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Wyzwalacz:** 5-godzinny mur limitu użycia — odpowiedź `429`, której nagłówki zawierają
-`anthropic-ratelimit-unified-status: rejected` oraz, gdy konto kwalifikuje się,
-`anthropic-ratelimit-unified-slow-offer: treatment`. Nic nie jest wysyłane przed tym pierwszym
-429 muru; gwałtowne 429 bez nagłówków unified przechodzi normalną ścieżką cooldown.
+**Spust:** ściana 5-godzinnego użytkowania — a `429` której nagłówki zawierają `anthropic-ratelimit-unified-status: rejected` i, jeśli konto się kwalifikuje, `anthropic-ratelimit-unified-slow-offer: treatment`. Nic nie jest wysyłane przed pierwszą ścianą 429; seria 429 bez zunifikowanych nagłówków przechodzi normalną ścieżkę odnowienia.
 
-**Tor o niższym priorytecie** (`lowPriorityMode`):
+**Pas o niższym priorytecie** (`lowPriorityMode`):
 
-- Przy 429 muru wykonawca akceptuje ofertę i natychmiast ponawia żądanie na **tym samym**
-  koncie z nagłówkiem `anthropic-usage-limit: slow`; tor pozostaje aktywny do ogłoszonego
-  `anthropic-ratelimit-unified-reset` (+60 s marginesu), a każde żądanie w tym oknie niesie
-  ten nagłówek. Przechwycone 429 nigdy nie dociera do `handleChatCore`, więc połączenie
-  **nie** jest umieszczane w cooldown ani nie jest od niego odwracane.
-- `anthropic-ratelimit-unified-slow-status` w kolejnych odpowiedziach: `active` / `not_needed`
-  utrzymują tor; `slot_busy` (429) lub `529` oczekują przez czas wskazany przez serwer w
-  `anthropic-ratelimit-unified-slow-retry-after` (domyślnie 20 s, ograniczenie 5–600 s, jitter ±30%)
-  i ponawiają, z ograniczeniem przez `anthropic-ratelimit-unified-slow-max-wait` (domyślnie 20 min,
-  ograniczenie 1 min–6 h) — po przekroczeniu tego tor kończy się, a 10-minutowy okres wyciszenia
-  blokuje ponowną akceptację. Oczekiwanie jest dodatkowo ograniczone tym, co pozostało
-  z własnego limitu czasu rozpoczęcia upstream żądania (`resolveFetchStartTimeout`, domyślnie
-  10 min) minus margines 5 s: bez tego ograniczenia domyślne 20-minutowe max-wait przetrwałoby
-  żądanie, a uśpienie zostałoby przerwane w trakcie oczekiwania, co ujawniłoby `TimeoutError`
-  zamiast łagodnego zakończenia `max_wait` + wyciszenia.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, przewinięcie okna 5-godzinnego
-  lub `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (co kończy tor jako
-  `extra_usage` przy dowolnym statusie, ponieważ płatne przekroczenie pokrywa teraz mur)
-  kończą tor; odpowiedź przechodzi wtedy normalną ścieżką cooldown. `budget_exhausted` jest
-  zapamiętywane do ogłoszonego resetu budżetu (≤ 8 dni).
-- Sprawdzenie muru uruchamia się po wewnętrznych ponowieniach wykonawcy wynikających z błędów
-  400 (edycja kontekstu, ograniczenia thinking/effort, automatyczne uczenie parametrów), więc
-  429 muru, które ujawni się dopiero przy jednym z tych ponowień, nadal jest przechwytywane
-  zamiast docierać do ścieżki cooldown.
-- Stan jest przechowywany w pamięci dla każdego połączenia (restart kosztuje jedno dodatkowe
-  429 muru na ponowną akceptację).
+- Na ścianie 429 wykonawca akceptuje ofertę i natychmiast ponawia próbę** To samo** konto w `anthropic-usage-limit: slow`; linia pozostaje aktywna aż do ogłoszenia `anthropic-ratelimit-unified-reset` (łaska + 60.), a każde żądanie w tym oknie zawiera nagłówek. Przechwycone 429 nigdy nie dociera do `handleChatCore`, więc połączenie jest takie** nie** podlega odnowieniu i nie jest odwracany.
+- `anthropic-ratelimit-unified-slow-status` w przypadku późniejszych odpowiedzi: `active` / `not_needed` trzymaj pas; `slot_busy` (429) lub `529` czekaj `anthropic-ratelimit-unified-slow-retry-after` serwera (domyślnie 20 s, zacisk 5–600 s, ± 30% jitter) i spróbuj ponownie, ograniczony `anthropic-ratelimit-unified-slow-max-wait` (domyślnie 20 min, zacisk 1 min–6 h) — poza końcem linii i 10-minutowy odpoczynek blokuje ponowną akceptację. Czas oczekiwania jest dodatkowo ograniczony przez pozostałą część limitu czasu żądania w górę strumienia (`resolveFetchStartTimeout`, domyślnie 10 min) minus 5 s margines: bez tego ograniczenia domyślny 20-minutowy maksymalny czas oczekiwania przekroczyłby żądanie, a uśpienie zostałoby przerwane w połowie oczekiwania, wyświetlając `TimeoutError` zamiast eleganckiego ochłodzenia `max_wait` end +.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, rolowanie w ciągu 5 godzin lub `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (które kończy się jako `extra_usage` w dowolnym statusie, ponieważ płatna nadwyżka obejmuje teraz ścianę) zakończ pas; odpowiedź następnie płynie normalną ścieżką odnowienia. `budget_exhausted` jest pamiętany do czasu ogłoszonego resetu budżetu (≤ 8 dni).
+- Sprawdzanie ściany odbywa się po 400 własnych próbach executora opartych na próbach (edycja kontekstu, zaciski thinking/effort, automatyczne uczenie się parametrów), więc ściana 429, która pojawia się tylko przy jednej z tych prób, jest nadal przechwytywana, zamiast dotrzeć do ścieżki odnowienia.
+- Stan znajduje się w pamięci na każde połączenie (ponowne zaakceptowanie kosztuje jedną dodatkową ścianę 429).
 
-**Reset limitu sesji** (`autoLimitReset`, próbowane przed torem, gdy oba są włączone):
+**Reset limitu sesji** (`autoLimitReset`, próbowałem przed linią, gdy oba są włączone):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → blok `juniper_tide`;
-  gdy `arm: "reset"` i `available: true`,
-  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` z
-  `{ "program": "juniper_tide" }` (UUID organizacji z
-  `providerSpecificData.organizationUUID`, zapasowo bootstrap).
-- `result: reset|not_limited` → żądanie jest ponawiane z pełną prędkością (bez nagłówka slow).
-  `already_used` / `not_offered` zapamiętują `next_available_at` (domyślnie tydzień); każdy
-  niepowodzenie wycofuje się o 15 minut. Reset jest raz w tygodniu i nadal liczy się do
-  tygodniowego limitu.
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` blok; kiedy `arm: "reset"` i `available: true`, `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` z `{ "program": "juniper_tide" }` (organizacja UUID z `providerSpecificData.organizationUUID`, powrót do bootstrapu).
+- `result: reset|not_limited` → żądanie jest ponawiane z pełną szybkością (bez powolnego nagłówka). `already_used` / `not_offered` memoise `next_available_at` (domyślnie jeden tydzień); każda awaria cofa się o 15 minut. Reset odbywa się raz w tygodniu i nadal wlicza się do limitu tygodniowego.
 
-Testy regresji: `tests/unit/claude-low-priority-mode.test.ts`,
-`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+Strażnicy regresji: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
 ### Powinowactwo sesji (#7274)
 
-**Zakres:** jedna sesja klienta (nagłówek `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) przypięta do jednego połączenia, dla **dowolnego** dostawcy.
+**Zakres:** jedna sesja klienta (nagłówek `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` ) przypięta do jednego połączenia, dla** każdy** dostawca.
 
-**Cel:** utrzymanie wieloturowego agenta (Claude Code, aider, niestandardowych agentów) na tym samym koncie między żądaniami, zmniejszając utratę kontekstu między kontami oraz powtarzające się 429 zimnego startu u dostawców ze stanem sesji przypisanym do konta.
+**Zamiar:** utrzymuj agenta wieloobrotowego (kod Claude, pomocnik, agenci niestandardowi) na tym samym koncie w przypadku różnych żądań, redukując utratę kontekstu między kontami i powtarzające się błędy 429 zimnego startu u dostawców ze stanem sesji dla każdego konta.
 
-**Implementacja:**
+**Realizacja:**
 
-- Rozwiązywanie TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Wybór/tworzenie przypięcia: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- rozdzielczość TTL : `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- Pin selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
 - Ekstrakcja nagłówka (ogólna, dowolny dostawca): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Utrwalona tabela przypięć: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Ustawienie: `sessionAffinityTtlMs` (globalny TTL w ms, `0` wyłącza) — `src/lib/db/settings.ts`. Zmieniona nazwa z ustawienia wyłącznie dla Codex `codexSessionAffinityTtlMs` przez migrację `124_generic_session_affinity_ttl.sql`, która przenosi wcześniej skonfigurowany TTL Codex jako nową wartość domyślną.
+- Utrwalony stół z pinami: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Ustawienie: `sessionAffinityTtlMs` (globalne TTL w ms, `0` wyłączone) — `src/lib/db/settings.ts`. Zmieniono nazwę z `codexSessionAffinityTtlMs` dostępnego tylko w Kodeksie przez migrację `124_generic_session_affinity_ttl.sql`, która przenosi wszelkie wcześniej skonfigurowane Codex TTL jako nowe domyślne.
 
-Przed #7274 funkcja `resolveSessionAffinityTtlMs()` twardo zwracała `0` dla każdego dostawcy poza `codex`, więc ustawienie TTL (i nagłówki sesji) nie miało żadnego efektu gdziekolwiek indziej, mimo że mechanizm przypinania i ekstrakcja nagłówków były już niezależne od dostawcy. Poprawka usunęła to wczesne zakończenie; TTL ma teraz jednolite zastosowanie do każdego dostawcy, gdy zostanie ustawiony globalnie powyżej `0`.
+Przed numerem #7274 `resolveSessionAffinityTtlMs()` przesiadało się na `0` dla każdego dostawcy z wyjątkiem `codex`, więc ustawienie TTL (i nagłówki sesji) nie miało żadnego wpływu nigdzie indziej, mimo że mechanizm przypinania i wyodrębnianie nagłówków były już niezależne od dostawcy. Poprawka usunęła ten wcześniejszy powrót; TTL ma teraz jednolite zastosowanie do każdego dostawcy po ustawieniu globalnym powyżej `0`.
 
-Trzy nagłówki powinowactwa sesji nigdy nie są przekazywane upstream — wykonawcy budują własne nagłówki upstream od zera zamiast przekazywać nagłówki klienta, więc pozostaje to wyłącznie wewnętrznym identyfikatorem korelacji.
+Trzy nagłówki powinowactwa sesji nigdy nie są przesyłane dalej. Wykonawcy — budują od zera własne nagłówki nadrzędne, zamiast przekazywać przez nie nagłówki klientów, więc pozostaje to jedynie wewnętrznym identyfikatorem korelacji.
 
-### Wyłączne dzierżawy połączeń zarządzanych sesji
+### Ekskluzywne dzierżawy połączeń sesji zarządzanych
 
-**Zakres:** jedna aktywna zarządzana sesja/klient HTTP posiada jedno kwalifikujące się połączenie OmniRoute.
+**Zakres:** jeden aktywny zarządzany HTTP client/session posiada jedno kwalifikujące się połączenie OmniRoute.
 
-**Cel:** zapewnienie trwałego, wyłącznego posiadania połączenia dla klientów, którzy potrzebują
-twardego ogrodzenia routingu między żądaniami. Różni się to od powinowactwa sesji, które jest
-miękką preferencją ciągłości: wyłączna dzierżawa utrwala stan cyklu życia w SQLite, wymusza
-globalną unikalność aktywnego właściciela i aktywnego połączenia oraz odrzuca nieaktualną
-generację przed wysłaniem do dostawcy.
+**Zamiar:** zapewniają trwałą, wyłączną własność połączenia klientom, którzy potrzebują twardego ogrodzenia routingu między żądaniami. Różni się to od powinowactwa sesji, które jest preferencją miękkiej ciągłości: dzierżawa na wyłączność utrzymuje stan cyklu życia w SQLite, wymusza globalną unikalność aktywnego właściciela i aktywnego połączenia oraz odrzuca nieaktualne generowanie przed wysłaniem dostawcy.
 
-Funkcja jest włączana indywidualnie dla każdego klucza API (opt-in). Klucz zarządzany musi mieć zakres `lease:exclusive` oraz jawnie określoną, niepustą listę `allowedConnections`. Z punktu końcowego cyklu życia może korzystać dowolny klient HTTP; nie jest wymagana nazwa klienta, user-agent, dostawca, metoda OAuth ani model. Dzierżawa obejmuje połączenie, a nie model, więc zmiana modelu zachowuje powiązanie, o ile połączenie pozostaje kwalifikowalne na zwykłych zasadach. Zwykłe reguły dotyczące modelu, limitów, kondycji, cooldownu i list dozwolonych pozostają rozstrzygające i mogą przenieść tę samą generację na inne wolne, kwalifikowalne połączenie.
+Ta funkcja polega na wyrażeniu zgody na klucz API. Klucz zarządzany musi mieć zakres `lease:exclusive` i jawną, niepustą listę `allowedConnections`. Każdy klient HTTP może korzystać z punktu końcowego cyklu życia; nie jest wymagana nazwa klienta, klient użytkownika, dostawca, metoda OAuth ani model. Dzierżawa jest właścicielem połączenia, a nie modelu, zatem zmiana modelu zachowuje ważność, podczas gdy połączenie pozostaje zwykle kwalifikowalne. Normalne reguły dotyczące modelu, przydziału, stanu zdrowia, czasu odnowienia i listy dozwolonych pozostają miarodajne i mogą spowodować przeniesienie tej samej generacji do innego kwalifikującego się bezpłatnego połączenia.
 
-Cykl życia obsługuje punkt końcowy `POST /api/v1/session-leases` z akcjami JSON `acquire`, `renew` i `release`. Zarządzane żądania inferencji przedstawiają nieprzejrzystą wartość `X-OmniRoute-Lease-Owner` oraz dokładną wartość `X-OmniRoute-Lease-Generation`. Wartość właściciela składa się z prefiksu `vlo_`, po którym następuje 43 znaków base64url; przechowywany jest wyłącznie jej skrót SHA-256. Każda ostateczna bariera wysyłki wiąże również uwierzytelniony identyfikator klucza API oraz identyfikator aktywnego połączenia. Nagłówki sterujące dzierżawą są usuwane z dzienników, zachowanych migawek żądań oraz nagłówków wykonawcy upstream.
+Cykl życia to `POST /api/v1/session-leases` z działaniami JSON `acquire`, `renew` i `release`. Zarządzane żądania wnioskowania przedstawiają nieprzezroczystą wartość `X-OmniRoute-Lease-Owner` i dokładną `X-OmniRoute-Lease-Generation`. Właściciel używa `vlo_` po którym następują 43 znaki base64url; przechowywany jest tylko skrót SHA-256. Każde końcowe zabezpieczenie wysyłki wiąże również uwierzytelniony klucz API ID i aktywne połączenie ID. Nagłówki kontroli dzierżawy są usuwane z dzienników, zachowywanych migawek żądań i nagłówków nadrzędnego modułu wykonującego.
 
-Jeśli zwykły routing dysponuje kwalifikowalnymi zarządzanymi kandydatami, lecz każdy wolny kandydat jest zajęty przez obcą aktywną dzierżawę, OmniRoute zwraca HTTP `429`, kod lease-capacity-unavailable, stan waiting-for-capacity oraz ograniczoną wartość `Retry-After` wyprowadzoną z najwcześniejszego istotnego momentu wygaśnięcia. Zwykły brak kwalifikowalnych kandydatów nie stanowi rywalizacji o dzierżawę i zachowuje dotychczasową semantykę błędów routingu.
+Jeśli zwykły routing ma kwalifikujących się zarządzanych kandydatów, ale każdy wolny kandydat jest zajęty przez zagraniczną aktywną dzierżawę, OmniRoute zwraca HTTP `429`, kod niedostępności pojemności dzierżawy, stan oczekiwania na pojemność i ograniczony `Retry-After` uzyskany z najwcześniejszego odpowiedniego wygaśnięcia. Zwykłe puste uprawnienia nie stanowią rywalizacji o dzierżawę i zachowują istniejącą semantykę błędów routingu.
 
-Powiązane mechanizmy pozostają odrębne:
+Powiązane mechanizmy pozostają oddzielne:
 
-- Zajętość sesji OAuth to miękka dystrybucja w obrębie procesu dla kont OAuth.
-- Semafory kont przyznają zezwolenia na współbieżność żądań i kończą się po zakończeniu żądania.
-- Wyłączne dzierżawy zarządzanych sesji stanowią trwałą własność cyklu życia z barierą generacji.
+- zajętość sesji OAuth to lokalna, miękka dystrybucja procesowa dla kont OAuth.
+- Semafory kont udzielają zezwoleń na współbieżność żądań i kończą się po zakończeniu żądania.
+- Ekskluzywne dzierżawy sesji zarządzanych to trwała własność przez cały cykl życia z ogrodzeniem pokoleń.
 
 ---
 
@@ -499,29 +460,13 @@ Ochrona limitów szybkości dla poszczególnych połączeń jest śledzona za po
 
 ---
 
-## 6. Watchdog przepustowości wolnego strumienia (#9709)
+## 6. Kontroler przepustowości wolnego strumienia (#9709)
 
-Opcjonalne zabezpieczenie `resilienceSettings.streamRecovery.throughputWatchdog` wykrywa
-upstream, który wciąż wysyła fragmenty, ale generuje dane wyjściowe asystenta w tempie
-poniżej skonfigurowanego tempa użytecznych danych wyjściowych. Jest celowo odrębny od
-limitu czasu bezczynności: heartbeaty i metadane nie resetują żadnego z timerów ani nie
-liczą się jako postęp. Jest również odrębny od twardego terminu próby (#9153), który
-pozostaje bezwzględnym sufitem bezpieczeństwa niezależnie od jakości danych wyjściowych.
+Opcjonalny moduł `resilienceSettings.streamRecovery.throughputWatchdog` Guard wykrywa sygnał nadrzędny, który w dalszym ciągu wysyła fragmenty, ale generuje sygnał wyjściowy asystenta poniżej skonfigurowanej użytecznej szybkości wyjściowej. Celowo różni się od limitu czasu bezczynności: puls i metadane nie resetują żadnego licznika czasu i nie liczą się jako postęp. Różni się on także od terminu trudnej próby (#9153), który pozostaje absolutnym pułapem bezpieczeństwa niezależnie od jakości wydruku.
 
-Watchdog wymaga okresu rozgrzewki, a po nim pełnego okna kroczącego, zanim będzie mógł
-przerwać. Liczy delty tekstowe ze zdarzeń wyjściowych Chat Completions i Responses API
-(konserwatywny zastępczy pomiar bajtów UTF-8), ignoruje zdarzenia zawierające wyłącznie
-dane o zużyciu oraz zdarzenia puste i wstrzymuje ocenę, gdy w toku są zdarzenia wywołania
-narzędzi lub rozumowania. Jest domyślnie wyłączony i można go włączyć za pomocą
-`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; okno, rozgrzewka, minimalne tempo i minimalny
-mierzalny wynik są ograniczane przez standardową warstwę normalizacji ustawień odporności.
+Watchdog wymaga okresu rozgrzewania, po którym następuje pełne okno przewijania, zanim będzie mógł przerwać. Zlicza różnice tekstowe ze zdarzeń wyjściowych zakończenia czatu i odpowiedzi API (konserwatywny serwer proxy bajtów UTF-8 ), ignoruje zdarzenia przeznaczone tylko do użycia i puste oraz wstrzymuje ocenę podczas wykonywania zdarzeń wywołania narzędzia lub wnioskowania. Jest domyślnie wyłączona i można ją włączyć za pomocą `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (ta wartość env inicjuje tylko domyślne — a zapisana wartość logiczna `resilienceSettings.streamRecovery.throughputWatchdog.enabled` wygrywa; zobacz uwagę dotyczącą pierwszeństwa env-vs-dashboard na górze tego przewodnika); okno, rozgrzewka, minimalna szybkość i minimalna mierzalna moc są ograniczone przez normalną warstwę normalizacji ustawień odporności.
 
-Po włączeniu przerwanie przez watchdoga jest stosowane wyłącznie do aktywnej próby
-upstream. Przed wysłaniem jakichkolwiek bajtów widocznych dla klienta istniejąca ścieżka
-wczesnego odzyskiwania w ramach tego samego konta może ponownie otworzyć próbę. Po
-zatwierdzeniu strumień nigdy nie jest ślepo odtwarzany; tylko istniejący kontrakt
-bezpiecznej kontynuacji w trakcie strumienia może doszyć sufiks. Finalizacja pozostaje
-jednorazowa, więc rozliczanie zużycia i zwalnianie semafora nie są powielane.
+Po włączeniu przerwanie watchdoga jest stosowane tylko do aktywnej próby przesyłania danych. Przed jakimikolwiek bajtami widocznymi dla klienta istniejąca ścieżka wczesnego odzyskiwania dla tego samego konta może ponownie otworzyć próbę. Po zatwierdzeniu strumień nigdy nie jest odtwarzany na ślepo; tylko istniejąca bezpieczna umowa kontynuacji strumienia środkowego może wszyć przyrostek. Finalizacja pozostaje jednorazowa, więc rozliczanie użycia i wydanie semafora nie są duplikowane.
 
 ---
 

@@ -446,7 +446,7 @@ server/
 
 ---
 
-## 4. `open-sse/` — 串流引擎工作區
+## 4. `open-sse/` —串流引擎工作區
 
 單獨的 npm 工作區發佈為`@omniroute/open-sse`。擁有請求處理、執行器、翻譯器、服務、變壓器和MCP伺服器。
 
@@ -488,11 +488,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 個頂級執行器模組（`*.ts`減去`base.ts`、 `index.ts`和測試 - `npm run check:docs-counts`測量的計數）。每個執行器類別直接或透過`DefaultExecutor`或另一個執行器擴展`BaseExecutor` (`base.ts`)；其餘模組是每個提供者的幫助程式（工具模式、 fetch/TTS適配器、怪異處理程序）。執行者包括：
+156 個頂級執行器模組（`*.ts`減去`base.ts`、 `index.ts`並測試—計數`npm run check:docs-counts`測量值）。每個執行器類別直接或透過`DefaultExecutor`或另一個執行器擴展`BaseExecutor` (`base.ts`)；其餘模組是每個提供者的幫助程式（工具模式、 fetch/TTS適配器、怪異處理程序）。執行者包括：
 
-`antigravity`、 `azure-openai`、 `blackbox-web`、 `cliproxyapi`、 `chatgpt-web-codex`、 `cloudflare-ai`、 `codex`、 `commandCode`、 `cursor`、 `default`、 `devin-cli`、 `muse-spark-web`、 `nlpcloud`、 `opencode`、 `perplexity-web`、 `petals`、 `pollinations`、 `qoder`、 `vertex`、 zqo 、 zqp 、 `devin-desktop`、 `claudeIdentity.ts` （註冊表`index.ts` 。
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (shared identity helper) and `index.ts` (registry).
 
-> 注意：此處未列出的提供者由`default.ts`使用通用 OpenAI 相容執行器提供服務。完整的提供者目錄（377 個提供者）位於`src/shared/constants/providers.ts`。
+> 注意：此處未列出的提供者由`default.ts`使用通用 OpenAI 相容執行器提供服務。完整的提供者目錄（380 個提供者）位於`src/shared/constants/providers.ts`。
 
 ### 4.3 `open-sse/translator/`
 
@@ -521,7 +521,7 @@ open-sse/
 | 快取           | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | 路由智能       | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | 模型處理       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| 壓縮           | `compression/` — 全壓縮引擎接線                                                                                                                                                                                                                          |
+| 壓縮           | `compression/` —全壓縮引擎接線                                                                                                                                                                                                                           |
 | 令牌+會話      | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | 等級/清單      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP /網絡       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -530,9 +530,9 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 個獨特的工具**連接到`server.ts` （ `schemas/tools.ts` +記憶體、技能、GitHub 技能、池、遊戲化、插件、 Notion、 Obsidian、本地語料庫和壓縮模組中的 45 個規範 - 由`countUniqueMcpTools`計數的聯合）。
+- **110 個獨特的工具**連接到`server.ts` （ `schemas/tools.ts` +記憶體、技能、GitHub 技能、池、遊戲化、插件、 Notion、 Obsidian、本地語料庫和壓縮模組—聯合中的 45 個規範由`countUniqueMcpTools`計數）。
 - **3 次運輸**：stdio、 HTTP可串流、 SSE。
-- **33 個範圍**在運行時強制 - `src/shared/constants/mcpScopes.ts`中的基本列表，完整集是每個工具模組聲明的範圍的並集。
+- **33 個範圍**在運行時強制執行`src/shared/constants/mcpScopes.ts`中的—基列表，完整集是每個工具模組聲明的範圍的並集。
 - 審核表： `mcp_tool_audit` （由`audit.ts`填充）。
 - 檔案： `server.ts`、 `index.ts`、 `httpTransport.ts`、 `audit.ts`、 `scopeEnforcement.ts`、 `runtimeHeartbeat.ts`、 `descriptionCompressor.ts`、 `schemas/{tools, a2a, audit, index}.ts`、 `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`，以及`__tests__/`下的測試。
 - 請參閱[MCP-SERVER.md](../frameworks/MCP-SERVER.md)以了解完整的工具目錄。
@@ -543,7 +543,7 @@ open-sse/
 
 ### 4.8 `open-sse/utils/`
 
-串流原語和提供者助手： `stream.ts`、 `streamHandler.ts`、 `streamHelpers.ts`、 `streamPayloadCollector.ts`、 `streamReadiness.ts`、 `sseHeartbeat.ts`、 `proxyFetch.ts`、 `proxyDispatcher.ts`、 `tlsClient.ts`、 `networkProxy.ts`、 `awsSigV4.ts`、 `cacheControlPolicy.ts`、 `cursorChecksum.ts`、 `cursorAgentProtobuf.ts`、 `cursorVersionDetector.ts` `ollamaTransform.ts` `comfyuiClient.ts`、 `kieTask.ts`、 `bypassHandler.ts`、 `aiSdkCompat.ts`、 `thinkTagParser.ts`、 `urlSanitize.ts`、 `usageTracking.ts`、 `requestLogger.ts`、 `progressTracker.ts`、 `cors.ts`、 `error.ts`、 `logger.ts`、 `sleep.ts`。
+串流處理原語與提供者助手： `stream.ts`、 `streamHandler.ts`、 `streamHelpers.ts`、 `streamPayloadCollector.ts`、 `streamReadiness.ts`、 `sseHeartbeat.ts`、 `proxyFetch.ts`、 `proxyDispatcher.ts`、 `tlsClient.ts`、 `networkProxy.ts`、 `awsSigV4.ts`、 `cacheControlPolicy.ts`、 `cursorChecksum.ts`、 `cursorAgentProtobuf.ts`、 `cursorVersionDetector.ts`、 `comfyuiClient.ts`、 `kieTask.ts`、 `bypassHandler.ts`、 `urlSanitize.ts`、 `aiSdkCompat.ts`、 `thinkTagParser.ts` `usageTracking.ts`、 `requestLogger.ts`、 `progressTracker.ts`、 `cors.ts`、 `error.ts`、 `logger.ts`、 `sleep.ts`、 `ollamaTransform.ts`。
 
 ---
 

@@ -39,11 +39,11 @@ Comparație obiectivă a funcționalităților față de routere AI open-source 
 
 ## Când să alegi OmniRoute
 
-- Te auto-găzduiești și vrei** acoperire maximă a furnizorului** (377 de furnizori, 155 de intrări în catalog free/no-auth )
+- Te auto-găzduiești și vrei** acoperire maximă a furnizorului** (380 de furnizori, 155 de intrări în catalog free/no-auth )
 - Ai nevoie de un** server MCP încorporat** ( instrumente LLM, memorie, abilități expuse ca instrumente)
 - Ai nevoie** protocolul A2A** pentru fluxurile de lucru de la agent la agent
 - Tu vrei** ascuns amprenta** (JA3/JA4) pentru a evita detectarea de către CAPTCHAs în amonte
-- Ai nevoie** caracteristicile întreprinderii** (paravane, evals, audit track) fără factură SaaS
+- Ai nevoie** caracteristicile întreprinderii** (parapede, evals, audit track) fără factură SaaS
 
 ## Când să alegeți LiteLLM
 

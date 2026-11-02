@@ -451,7 +451,7 @@ Podzielone na wyspecjalizowane podkatalogi:
 
 ---
 
-## 4. `open-sse/` — Przestrzeń robocza silnika strumieniowego
+## 4. `open-sse/` — Obszar roboczy silnika strumieniowego
 
 Oddzielny obszar roboczy npm opublikowany jako `@omniroute/open-sse`. Jest właścicielem przetwarzania żądań, wykonawców, tłumaczy, usług, transformatora i serwera MCP.
 
@@ -497,7 +497,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (pomocnik tożsamości współdzielonej) i `index.ts` (rejestr).
 
-> Uwaga: dostawcy niewymienieni tutaj są obsługiwani przez `default.ts` przy użyciu ogólnego modułu wykonującego kompatybilnego z OpenAI. Pełny katalog dostawców (377 dostawców) znajduje się w `src/shared/constants/providers.ts`.
+> Uwaga: dostawcy niewymienieni tutaj są obsługiwani przez `default.ts` przy użyciu ogólnego modułu wykonującego kompatybilnego z OpenAI. Pełny katalog dostawców (380 dostawców) znajduje się w `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -535,9 +535,9 @@ Najważniejsze informacje (pełna lista pod `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unikalnych narzędzi** okablowane w `server.ts` (45 kanonicznych w `schemas/tools.ts` + pamięć, umiejętności, umiejętności GitHub, pula, gamifikacja, wtyczka, Notion, Obsidian, moduły lokalnego korpusu i kompresji — unia liczona przez `countUniqueMcpTools`).
+- **110 unikalnych narzędzi** podłączonych do `server.ts` (45 kanonicznych w `schemas/tools.ts` pamięci +, umiejętności, umiejętności GitHub, pula, gamifikacja, wtyczka, Notion, Obsidian, moduły lokalnego korpusu i kompresji — union liczone przez `countUniqueMcpTools`).
 - **3 transporty** : stdio, HTTP Streamable, SSE.
-- **33 zakresy** wymuszane w czasie wykonywania — lista podstawowa w `src/shared/constants/mcpScopes.ts`, pełny zestaw to suma zakresów zadeklarowanych przez każdy moduł narzędzia.
+- **33 zakresy** wymuszana w czasie wykonywania — base list w `src/shared/constants/mcpScopes.ts`, pełny zestaw jest sumą zakresów zadeklarowanych przez każdy moduł narzędzia.
 - Tabela audytu: `mcp_tool_audit` (wypełniona przez `audit.ts`).
 - Pliki: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus testy pod `__tests__/`.
 - Pełny katalog narzędzi można znaleźć [MCP-SERVER.md](../frameworks/MCP-SERVER.md).

@@ -16,7 +16,7 @@ OmniRoute on kohalik AI marsruutimise lüüs ja armatuurlaud, mis on ehitatud Ne
 
 Põhilised võimalused:
 
-- OpenAI-ga ühilduv API pind CLI/tools jaoks (377 pakkujat, 156 täitjamoodulit)
+- OpenAI-ga ühilduv API pind CLI/tools jaoks (380 pakkujat, 156 täitjamoodulit)
 - Request/response tõlge teenusepakkuja vormingute vahel
 - Mudeli kombineeritud varu (mitme mudeli jada)
 - Struktureeritud kombineeritud sammud (`provider + model + connection`) koos käitusaja järjestamisega `compositeTiers` järgi
@@ -28,7 +28,7 @@ Põhilised võimalused:
 - Heli transkriptsioon `/v1/audio/transcriptions` kaudu (18 pakkujat)
 - Tekst kõneks `/v1/audio/speech` kaudu (24 sisseehitatud pakkujat)
 - Video genereerimine `/v1/videos/generations` kaudu (ComfyUI + SD WebUI)
-- Muusika genereerimine `/v1/music/generations` (ComfyUI) kaudu
+- Muusika genereerimine `/v1/music/generations` kaudu (ComfyUI)
 - Veebiotsing `/v1/search` kaudu (20 pakkujat)
 - Modereerimine `/v1/moderations` kaudu
 - Ümberpaigutamine `/v1/rerank` kaudu
@@ -49,7 +49,7 @@ Põhilised võimalused:
 - Allkirjapõhine päringu deduplikatsiooni vahemälu
 - Domeenikiht: kulureeglid, varupoliitika, sulgemispoliitika
 - Konteksti edastamine: seansi üleandmise kokkuvõtted konto vaheldumise järjepidevuse jaoks
-- Domeeni oleku püsivus (SQLite läbikirjutamise vahemälu varude, eelarvete, lukustuste, kaitselülitite jaoks)
+- Domeeni oleku püsivus (SQLite -vahemälu varude, eelarvete, lukustuste, kaitselülitite jaoks)
 - Tsentraliseeritud taotluste hindamise poliitikamootor (lockout → budget → backback)
 - Taotlege telemeetriat p50/p95/p99 latentsusagregatsiooniga
 - Kombineeritud sihtmärgi telemeetria ja ajalooline kombineeritud sihtmärk tervise `combo_execution_key` / `combo_step_id` kaudu
@@ -64,7 +64,7 @@ Põhilised võimalused:
 - MITM puhverserver sertifikaadihalduse ja DNS -käsitlusega
 - Kiire süstimiskaitse vahevara
 - Kiire tihenduskonveier Cavemani, RTK, virnastatud konveierite, tihenduskombode, keelepakettide ja analüütikaga
-- ACP (agendi sideprotokolli) register
+- ACP (Agent Communication Protocol) register
 - Modulaarsed OAuth pakkujad (22 individuaalset moodulit `src/lib/oauth/providers/` all)
 - Uninstall/full-uninstall skriptid
 - OAuth keskkonna parandamise tegevus

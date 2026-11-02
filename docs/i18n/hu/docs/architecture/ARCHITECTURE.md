@@ -14,14 +14,14 @@ OmniRoute egy helyi AI útválasztási átjáró és műszerfal, amely Next.js r
 
 Alapvető képességek:
 
-- OpenAI-kompatibilis API felület CLI/tools (377 szolgáltató, 156 végrehajtó modul)
+- OpenAI-kompatibilis API felület CLI/tools (380 szolgáltató, 156 végrehajtó modul)
 - Request/response fordítás a szolgáltatói formátumok között
 - Modell kombinált tartalék (több modell sorozat)
 - Strukturált kombinált lépések (`provider + model + connection`) `compositeTiers` futásidejű sorrendjével
 - Fiókszintű tartalék (szolgáltatónként több fiók)
 - Kvóta előzetes ellenőrzése és kvóta-tudatos P2C -fiók kiválasztása a fő csevegési útvonalon
 - OAuth + API-kulcs szolgáltató kapcsolatkezelés (27 OAuth szolgáltató modul)
-- Generálás beágyazása `/v1/embeddings` keresztül (18 szolgáltató)
+- Generáció beágyazása `/v1/embeddings` keresztül (18 szolgáltató)
 - Képgenerálás `/v1/images/generations` keresztül (10 + szolgáltató, 20 + modell)
 - Hang átírása `/v1/audio/transcriptions` keresztül (18 szolgáltató)
 - Szövegfelolvasó `/v1/audio/speech` keresztül (24 beépített szolgáltató)
@@ -71,7 +71,7 @@ Alapvető képességek:
 - GLM Thinking (`glmt`) első osztályú szolgáltató előre beállított
 - Hibrid token számlálás (szolgáltató oldali `/messages/count_tokens` becslési tartalékkal)
 - Modell alias automatikus vetés (30 + proxy dialektusok közötti normalizálás indításkor)
-- Biztonságos kimenő letöltés SSRF védelemmel, privát URL blokkolással és konfigurálható újrapróbálkozással
+- Biztonságos kimenő lekérés SSRF védelemmel, privát URL blokkolással és konfigurálható újrapróbálkozással
 - Lehűlés-tudatos csevegési próbálkozások konfigurálható `requestRetry` és `maxRetryIntervalSec` segítségével
 - Futási környezet ellenőrzése Zod val indításkor
 - Megfelelőségi audit v2 oldalszámozással, szolgáltatói CRUD eseményekkel és SSRF által blokkolt érvényesítési naplózással

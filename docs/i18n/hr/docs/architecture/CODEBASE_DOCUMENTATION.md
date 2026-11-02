@@ -486,11 +486,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 izvršnih modula najviše razine (`*.ts` minus `base.ts`, `index.ts` i testovi — broj `npm run check:docs-counts` mjera). Svaka klasa izvršitelja proširuje `BaseExecutor` (`base.ts`), izravno ili preko `DefaultExecutor` ili drugog izvršitelja; preostali moduli su pomoćnici po pružatelju (sheme alata, fetch/TTS adapteri, rukovatelji quirkovima). Izvršitelji uključuju:
+156 izvršnih modula najviše razine (`*.ts` minus `base.ts`, `index.ts` i testovi — mjere `npm run check:docs-counts` ). Svaka klasa izvršitelja proširuje `BaseExecutor` (`base.ts`), izravno ili preko `DefaultExecutor` ili drugog izvršitelja; preostali moduli su pomoćnici po pružatelju (sheme alata, fetch/TTS adapteri, rukovatelji quirkovima). Izvršitelji uključuju:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (pomoćnik zajedničkog identiteta) i `index.ts` (registar).
 
-> Napomena: pružatelje koji nisu ovdje navedeni opslužuje `default.ts` pomoću generičkog izvršnog programa koji je kompatibilan s OpenAI-om. Cijeli katalog pružatelja (377 pružatelja) nalazi se u `src/shared/constants/providers.ts`.
+> Napomena: pružatelje koji nisu ovdje navedeni opslužuje `default.ts` pomoću generičkog izvršnog programa koji je kompatibilan s OpenAI-om. Cijeli katalog pružatelja (380 pružatelja) nalazi se u `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -504,7 +504,7 @@ Hub-and-spoke prijevod (OpenAI je središte).
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based odgovori API ↔ pretvarač dovršetaka razgovora (koristi ga `responses/` ruta za sve).
+- `responsesTransformer.ts` — `TransformStream` -based Odgovori API ↔ Pretvarač dovršetaka razgovora (koristi ga `responses/` ruta za sve).
 
 ### 4.5 `open-sse/services/`
 
@@ -528,9 +528,9 @@ Istaknuto (cijeli popis pod `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 jedinstvenih alata** ožičeno u `server.ts` (45 kanonskih u `schemas/tools.ts` + memoriji, vještinama, GitHub-vještinama, bazenu, igrifikaciji, dodatku, Notion, Obsidian, lokalnom korpusu i kompresijskim modulima — uniju broji `countUniqueMcpTools`).
+- **110 jedinstvenih alata** ožičeno u `server.ts` (45 kanonskih u `schemas/tools.ts` + memoriji, vještinama, GitHub-vještinama, skupu, igrifikaciji, dodatku, Notion, Obsidian, lokalnom korpusu i modulima za kompresiju — uniji koje broji `countUniqueMcpTools`).
 - **3 prijevoza** : stdio, HTTP Streamable, SSE.
-- **33 opsega** nametnuto za vrijeme izvođenja — osnovni popis u `src/shared/constants/mcpScopes.ts`, puni skup je unija opsega koje je deklarirao svaki modul alata.
+- **33 opsega** nametnut u vrijeme izvođenja — osnovni popis u `src/shared/constants/mcpScopes.ts`, puni skup je unija opsega koje je deklarirao svaki modul alata.
 - Tablica revizije: `mcp_tool_audit` (popunjava `audit.ts`).
 - Datoteke: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus testovi pod `__tests__/`.
 - Pogledajte [MCP-SERVER.md](../frameworks/MCP-SERVER.md) za cijeli katalog alata.

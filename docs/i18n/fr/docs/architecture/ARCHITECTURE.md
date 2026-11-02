@@ -14,7 +14,7 @@ OmniRoute est une passerelle de routage AI locale et un tableau de bord construi
 
 Capacités de base :
 
-- Surface API compatible OpenAI pour CLI/tools (377 fournisseurs, 156 modules d'exécution)
+- Surface API compatible OpenAI pour CLI/tools (380 fournisseurs, 156 modules d'exécution)
 - traduction Request/response dans tous les formats de fournisseurs
 - Modèle de secours combiné (séquence multimodèle)
 - Étapes combinées structurées (`provider + model + connection`) avec classement d'exécution par `compositeTiers`
@@ -33,7 +33,7 @@ Capacités de base :
 - Pensez à l'analyse des balises (`<think>...</think>`) pour les modèles de raisonnement
 - Désinfection des réponses pour une compatibilité stricte OpenAI SDK
 - Normalisation des rôles (développeur du système →, utilisateur du système →) pour une compatibilité entre fournisseurs
-- Conversion de sortie structurée (json_schema → Gemini ResponseSchema)
+- Conversion de sortie structurée (json_schema → Gemini responseSchema)
 - Persistance locale pour les fournisseurs, les clés, les alias, les combos, les paramètres, la tarification (122 modules DB )
 - suivi Usage/cost et journalisation des demandes
 - Synchronisation cloud en option pour la synchronisation multi-device/state

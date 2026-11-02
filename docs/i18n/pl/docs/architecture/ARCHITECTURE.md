@@ -21,7 +21,7 @@ OmniRoute to lokalna brama routingowa i pulpit nawigacyjny AI zbudowane na Next.
 
 Podstawowe możliwości:
 
-- Powierzchnia API kompatybilna z OpenAI dla CLI/tools (377 dostawców, 156 modułów wykonawczych)
+- Powierzchnia API kompatybilna z OpenAI dla CLI/tools (380 dostawców, 156 modułów wykonawczych)
 - Tłumaczenie Request/response w różnych formatach dostawców
 - Zastępczy zestaw modeli (sekwencja obejmująca wiele modeli)
 - Ustrukturyzowane kroki kombi (`provider + model + connection`) z porządkowaniem czasu wykonania przez `compositeTiers`
@@ -40,7 +40,7 @@ Podstawowe możliwości:
 - Pomyśl o analizie tagów (`<think>...</think>`) w celu uzyskania modeli rozumowania
 - Odkażanie odpowiedzi w celu zapewnienia ścisłej kompatybilności OpenAI SDK
 - Normalizacja ról (programista systemu →, użytkownik systemu →) w celu zapewnienia kompatybilności między dostawcami
-- Ustrukturyzowana konwersja danych wyjściowych (json_schema → Gemini respondSchema)
+- Konwersja danych wyjściowych strukturalnych (json_schema → Gemini responseSchema)
 - Lokalna trwałość dostawców, kluczy, aliasów, kombinacji, ustawień, cen (122 modułów DB )
 - śledzenie Usage/cost i rejestrowanie żądań
 - Opcjonalna synchronizacja w chmurze dla synchronizacji multi-device/state
@@ -81,7 +81,7 @@ Podstawowe możliwości:
 - Bezpieczne pobieranie wychodzące z funkcją SSRF Guard, prywatnym blokowaniem URL i konfigurowalną ponowną próbą
 - Ponowne próby czatu uwzględniające czas odnowienia za pomocą konfigurowalnych `requestRetry` i `maxRetryIntervalSec`
 - Sprawdzanie poprawności środowiska wykonawczego za pomocą Zod przy uruchomieniu
-- Audyt zgodności v2 z paginacją, zdarzeniami CRUD dostawcy i rejestrowaniem weryfikacji blokowanym przez SSRF
+- Audyt zgodności v2 z podziałem na strony, zdarzeniami CRUD dostawcy i rejestrowaniem weryfikacji blokowanym przez SSRF
 
 Podstawowy model środowiska wykonawczego:
 

@@ -14,7 +14,7 @@ OmniRoute - Next.js-da qurilgan mahalliy AI marshrutlash shlyuzi va asboblar pan
 
 Asosiy qobiliyatlar:
 
-- CLI/tools uchun OpenAI-mos API yuzasi (377 provayder, 156 ijrochi modul)
+- CLI/tools uchun OpenAI-mos API yuzasi (380 ta provayder, 156 ijrochi modul)
 - provayder formatlari bo'ylab Request/response tarjimasi
 - Model kombinatsiyasi (ko'p modelli ketma-ketlik)
 - Strukturaviy kombinatsiyalangan qadamlar (`provider + model + connection`) `compositeTiers` tomonidan ish vaqti tartibi
@@ -33,12 +33,12 @@ Asosiy qobiliyatlar:
 - Fikrlash modellari uchun tegni tahlil qilish (`<think>...</think>`) haqida o'ylang
 - Qattiq OpenAI SDK muvofiqligi uchun javob sanitarizatsiyasi
 - Provayderlararo muvofiqligi uchun rolni normallashtirish (ishlab chiquvchi → tizimi, tizim → foydalanuvchisi)
-- Strukturaviy chiqish konvertatsiyasi (json_schema → Gemini respondSchema)
+- Strukturaviy chiqish konvertatsiyasi (json_schema → Gemini responseSchema)
 - Provayderlar, kalitlar, taxalluslar, kombinatsiyalar, sozlamalar, narxlar uchun mahalliy barqarorlik (122 DB moduli)
 - Usage/cost kuzatuvi va so'rovlar jurnali
 - multi-device/state sinxronlash uchun ixtiyoriy bulutli sinxronlash
 - API kirishni boshqarish uchun IP allowlist/blocklist
-- Byudjetni o'ylash (passthrough/auto/custom/adaptive)
+- Fikrlash byudjetini boshqarish (passthrough/auto/custom/adaptive)
 - Global tizim tezkor in'ektsiya
 - Seansni kuzatish va barmoq izlari
 - Provayderga xos profillar bilan har bir hisob uchun kengaytirilgan tarif chegarasi
@@ -52,9 +52,9 @@ Asosiy qobiliyatlar:
 - p50/p95/p99 kechikish yig‘indisi bilan telemetriyani so‘rang
 - `combo_execution_key` / `combo_step_id` orqali birlashtirilgan maqsadli telemetriya va tarixiy kombinatsiyalangan maqsadli sog'liq
 - Oxir-oqibat kuzatish uchun korrelyatsiya ID (X-Request-Id).
-- Har bir API kalitidan voz kechish bilan muvofiqlik auditi jurnali
+- Har bir API kaliti uchun rad etish bilan muvofiqlik auditi jurnali
 - LLM sifatini ta'minlash uchun asosni baholash
-- Haqiqiy vaqtda provayderning o'chirgich holatiga ega sog'liqni saqlash paneli
+- Haqiqiy vaqtda provayderning elektron to'xtatuvchisi holatiga ega sog'liqni saqlash paneli
 - 3 ta transportga ega MCP Server (110 ta asbob) (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) ko'nikmalar va vazifalarning hayot aylanishiga ega
 - Xotira tizimi (ekstraktsiya, in'ektsiya, qidirish, umumlashtirish)
@@ -69,7 +69,7 @@ Asosiy qobiliyatlar:
 - OpenAI-ga mos keladigan WS mijozlari uchun WebSocket ko'prigi (`/v1/ws`)
 - Sinxronlash tokenini boshqarish (issue/revoke, ETag versiyasidagi konfiguratsiya paketini yuklab olish)
 - GLM Thinking (`glmt`) birinchi darajali provayder oldindan o'rnatilgan
-- Gibrid tokenlarni hisoblash (provayder tomonidagi `/messages/count_tokens` hisob-kitobi bilan)
+- Gibrid tokenlarni hisoblash (provayder tomonidagi `/messages/count_tokens` hisob-kitoblarni qaytarish bilan)
 - Model taxallusni avtomatik ekish (boshlang‘ichda 30 + o‘zaro proksi dialektini normallashtirish)
 - SSRF himoyasi, shaxsiy URL blokirovkasi va sozlanishi mumkin bo'lgan qayta urinish bilan xavfsiz chiqish
 - Sozlanishi mumkin bo'lgan `requestRetry` va `maxRetryIntervalSec` bilan sovish vaqtini hisobga olgan holda chat qayta uriladi

@@ -14,7 +14,7 @@ OmniRoute er en lokal AI routing gateway og dashboard bygget på Next.js. Det gi
 
 Kerneegenskaber:
 
-- OpenAI-kompatibel API overflade til CLI/tools (377 udbydere, 156 eksekveringsmoduler)
+- OpenAI-kompatibel API overflade til CLI/tools (380 udbydere, 156 eksekveringsmoduler)
 - Request/response -oversættelse på tværs af udbyderformater
 - Model combo fallback (multi-model sekvens)
 - Strukturerede combo-trin (`provider + model + connection`) med runtime-bestilling efter `compositeTiers`
@@ -39,7 +39,7 @@ Kerneegenskaber:
 - Valgfri skysynkronisering til multi-device/state synkronisering
 - IP allowlist/blocklist til API adgangskontrol
 - Tænkende budgetstyring (passthrough/auto/custom/adaptive)
-- Global systemprompt injektion
+- Global system prompt injektion
 - Sessionssporing og fingeraftryk
 - Forbedret prisbegrænsning pr. konto med udbyderspecifikke profiler
 - Circuit breaker mønster for udbyderens modstandsdygtighed
@@ -53,12 +53,12 @@ Kerneegenskaber:
 - Combo target telemetri og historisk combo target sundhed via `combo_execution_key` / `combo_step_id`
 - Korrelation ID (X-Request-Id) for ende-til-ende-sporing
 - Overholdelsesrevisionslogning med opt-out pr. API nøgle
-- Eval framework for LLM kvalitetssikring
+- Eval ramme for LLM kvalitetssikring
 - Sundhedsdashboard med udbyderens strømafbryderstatus i realtid
 - MCP Server (110 værktøjer) med 3 transporter (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) med færdigheder og opgavelivscyklus
 - Hukommelsessystem (ekstraktion, injektion, genfinding, opsummering)
-- Færdighedssystem (registrering, eksekvering, sandkasse, indbyggede færdigheder)
+- Færdighedssystem (registrering, udfører, sandkasse, indbyggede færdigheder)
 - MITM proxy med certifikathåndtering og DNS -håndtering
 - Hurtig mellemvare til injektionsbeskyttelse
 - Spørg komprimeringspipeline med Caveman, RTK, stacked pipelines, kompressionskombinationer, sprogpakker og analyser

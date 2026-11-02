@@ -14,7 +14,7 @@ OmniRoute je lokalni AI gateway i nadzorna ploča izgrađena na Next.js. Pruža 
 
 Osnovne mogućnosti:
 
-- OpenAI kompatibilna API površina za CLI/tools (377 provajdera, 156 izvršnih modula)
+- OpenAI kompatibilna API površina za CLI/tools (380 provajdera, 156 izvršnih modula)
 - Request/response prijevod preko formata provajdera
 - Kombinirani model (slijed više modela)
 - Strukturirani kombinovani koraci (`provider + model + connection`) sa poredanjem vremena izvođenja po `compositeTiers`
@@ -31,7 +31,7 @@ Osnovne mogućnosti:
 - Moderacije preko `/v1/moderations`
 - Ponovno rangiranje preko `/v1/rerank`
 - Razmislite o raščlanjivanju oznaka (`<think>...</think>`) za modele zaključivanja
-- Sanacija odgovora za strogu OpenAI SDK kompatibilnost
+- Sanitizacija odgovora za strogu OpenAI SDK kompatibilnost
 - Normalizacija uloga (programer → sistem, sistem → korisnik) za međuprovajdersku kompatibilnost
 - Strukturirana konverzija izlaza (json_schema → Gemini responseSchema)
 - Lokalna postojanost za provajdere, ključevi, aliasi, kombinacije, postavke, cijene (122 DB modula)
@@ -39,7 +39,7 @@ Osnovne mogućnosti:
 - Opcionalna sinhronizacija u oblaku za multi-device/state sinhronizaciju
 - IP allowlist/blocklist za API kontrolu pristupa
 - Razmišljanje o upravljanju budžetom (passthrough/auto/custom/adaptive)
-- Promptna injekcija globalnog sistema
+- Promptno ubrizgavanje globalnog sistema
 - Praćenje sesije i uzimanje otisaka prstiju
 - Poboljšano ograničenje stope po računu sa profilima specifičnim za provajdera
 - Uzorak prekidača za otpornost provajdera
@@ -57,7 +57,7 @@ Osnovne mogućnosti:
 - Zdravstvena kontrolna tabla sa statusom prekidača dobavljača u realnom vremenu
 - MCP server (110 alata) sa 3 transporta (stdio/SSE/Streamable HTTP)
 - A2A server (JSON-RPC 2.0 + SSE) sa vještinama i životnim ciklusom zadataka
-- Memorijski sistem (vađenje, ubrizgavanje, pronalaženje, sumiranje)
+- Sistem memorije (vađenje, ubrizgavanje, pronalaženje, sumiranje)
 - Sistem vještina (registrator, izvršilac, sandbox, ugrađene vještine)
 - MITM proxy sa upravljanjem certifikatima i DNS rukovanjem
 - Prompt injection guard Middleware
@@ -78,7 +78,7 @@ Osnovne mogućnosti:
 
 Primarni model vremena izvođenja:
 
-- rute Next.js aplikacija pod `src/app/api/*` implementiraju i nadzornu ploču APIs i kompatibilnost APIs
+- rute aplikacije Next.js pod `src/app/api/*` implementiraju i nadzornu ploču APIs i kompatibilnost APIs
 - Zajedničko SSE/routing jezgro u `src/sse/*` + `open-sse/*` upravlja izvršavanjem provajdera, prijevodom, streamingom, zamjenskim i korištenjem
 
 ## Referentni dijagrami

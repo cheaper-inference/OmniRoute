@@ -14,7 +14,7 @@ OmniRoute Next.js üzerine kurulu yerel bir AI yönlendirme ağ geçidi ve kontr
 
 Çekirdek yetenekler:
 
-- CLI/tools için OpenAI uyumlu API yüzeyi (377 sağlayıcı, 156 yürütücü modül)
+- CLI/tools için OpenAI uyumlu API yüzeyi (380 sağlayıcı, 156 yürütücü modül)
 - sağlayıcı formatları arasında Request/response çevirisi
 - Model birleşimi geri dönüşü (çoklu model dizisi)
 - `compositeTiers` tarafından çalışma zamanı sıralamasıyla yapılandırılmış birleşik adımlar (`provider + model + connection`)
@@ -33,7 +33,7 @@ OmniRoute Next.js üzerine kurulu yerel bir AI yönlendirme ağ geçidi ve kontr
 - Akıl yürütme modelleri için etiket ayrıştırmayı (`<think>...</think>`) düşünün
 - Sıkı OpenAI SDK uyumluluğu için yanıt sterilizasyonu
 - Sağlayıcılar arası uyumluluk için rol normalleştirme (geliştirici → sistemi, sistem → kullanıcısı)
-- Yapılandırılmış çıktı dönüşümü (json_schema → Gemini ResponseSchema)
+- Yapılandırılmış çıktı dönüşümü (json_schema → Gemini responseSchema)
 - Sağlayıcılar, anahtarlar, takma adlar, kombinasyonlar, ayarlar ve fiyatlandırma için yerel kalıcılık (122 DB modülü)
 - Usage/cost izleme ve istek günlüğü oluşturma
 - multi-device/state senkronizasyonu için isteğe bağlı bulut senkronizasyonu
@@ -42,7 +42,7 @@ OmniRoute Next.js üzerine kurulu yerel bir AI yönlendirme ağ geçidi ve kontr
 - Küresel sistem istemi enjeksiyonu
 - Oturum izleme ve parmak izi alma
 - Sağlayıcıya özel profillerle hesap başına geliştirilmiş oran sınırlaması
-- Sağlayıcı esnekliği için devre kesici modeli
+- Sağlayıcı esnekliği için devre kesici düzeni
 - Mutex kilitleme ile gök gürültüsüne karşı sürü koruması
 - İmza tabanlı istek tekilleştirme önbelleği
 - Etki alanı katmanı: maliyet kuralları, geri dönüş politikası, kilitleme politikası

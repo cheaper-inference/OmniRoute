@@ -1,0 +1,1 @@
+- **feat(combo):** new `expiry-first` combo routing strategy (the 21st) — orders targets by the provider-level expiry-first salvage score, using the quota window of the model family each target spends, with a relative tie band and priority order kept for targets without quota telemetry ([#17829](https://github.com/cheaper-inference/OmniRoute/pull/17829)) — thanks @HouMinXi

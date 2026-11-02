@@ -14,8 +14,8 @@ OmniRoute yra vietinis AI maršruto parinkimo šliuzas ir prietaisų skydelis, s
 
 Pagrindinės galimybės:
 
-- Su OpenAI suderinamas API paviršius, skirtas CLI/tools (377 teikėjai, 156 vykdymo moduliai)
-- Request/response vertimas iš įvairių teikėjų formatų
+- Su OpenAI suderinamas API paviršius, skirtas CLI/tools (380 teikėjų, 156 vykdymo moduliai)
+- Request/response vertimas tarp tiekėjo formatų
 - Atsarginis modelio derinys (kelių modelių seka)
 - Struktūriniai kombinuoti žingsniai (`provider + model + connection`) su vykdymo laiko tvarka pagal `compositeTiers`
 - Atsarginis paskyros lygis (kelios paskyros vienam teikėjui)
@@ -51,7 +51,7 @@ Pagrindinės galimybės:
 - Centralizuoto užklausų vertinimo politikos variklis (atsarginis blokavimas → budget → )
 - Prašyti telemetrijos su p50/p95/p99 delsos agregavimu
 - Kombinuota tikslinė telemetrija ir istorinė kombinuota tikslinė būklė per `combo_execution_key` / `combo_step_id`
-- Koreliacija ID (X-Request-Id) sekimui nuo galo iki galo
+- Koreliacija ID (X-Request-Id), skirta nuo galo iki galo sekti
 - Atitikties audito registravimas su atsisakymu pagal API raktą
 - Eval LLM kokybės užtikrinimo sistema
 - Sveikatos prietaisų skydelis su realaus laiko teikėjo grandinės pertraukiklio būsena

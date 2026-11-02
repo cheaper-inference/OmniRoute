@@ -10,13 +10,13 @@ _Kemas kini terakhir: 2026-06-28_
 
 ## Ringkasan Eksekutif
 
-OmniRoute ialah pintu masuk dan papan pemuka penghalaan AI tempatan yang dibina pada Next.js. Ia menyediakan satu titik akhir serasi OpenAI (`/v1/*`) dan laluan trafik merentasi berbilang penyedia huluan dengan terjemahan, sandaran, penyegaran token dan penjejakan penggunaan.
+OmniRoute ialah pintu masuk dan papan pemuka penghalaan AI tempatan yang dibina pada Next.js. Ia menyediakan satu titik akhir serasi OpenAI (`/v1/*`) dan laluan trafik merentas berbilang penyedia huluan dengan terjemahan, sandaran, penyegaran token dan penjejakan penggunaan.
 
 Keupayaan teras:
 
-- Permukaan API yang serasi OpenAI untuk CLI/tools (377 pembekal, 156 modul pelaksana)
+- Permukaan API yang serasi OpenAI untuk CLI/tools (380 pembekal, 156 modul pelaksana)
 - terjemahan Request/response merentas format pembekal
-- Sandaran kombo model (jujukan berbilang model)
+- Model kombo mundur (jujukan berbilang model)
 - Langkah kombo berstruktur (`provider + model + connection`) dengan pesanan masa jalan oleh `compositeTiers`
 - Saling balik peringkat akaun (berbilang akaun bagi setiap pembekal)
 - Pemilihan akaun P2C prapenerbangan dan kuota sedar kuota dalam laluan sembang utama
@@ -51,7 +51,7 @@ Keupayaan teras:
 - Enjin dasar untuk penilaian permintaan berpusat (kunci keluar bajet → → sandaran)
 - Minta telemetri dengan pengagregatan kependaman p50/p95/p99
 - Telemetri sasaran kombo dan kesihatan sasaran kombo sejarah melalui `combo_execution_key` / `combo_step_id`
-- ID korelasi (Id-Permintaan-X) untuk pengesanan hujung ke hujung
+- Korelasi ID (X-Request-Id) untuk pengesanan hujung ke hujung
 - Pengelogan audit pematuhan dengan memilih keluar setiap kunci API
 - Rangka kerja Eval untuk jaminan kualiti LLM
 - Papan pemuka kesihatan dengan status pemutus litar pembekal masa nyata
@@ -61,7 +61,7 @@ Keupayaan teras:
 - Sistem kemahiran (pendaftaran, pelaksana, kotak pasir, kemahiran terbina dalam)
 - proksi MITM dengan pengurusan sijil dan pengendalian DNS
 - Perisian tengah pengawal suntikan segera
-- Talian paip mampatan segera dengan Caveman, RTK, saluran paip bertindan, gabungan mampatan, pek bahasa dan analitis
+- Talian paip mampatan segera dengan Caveman, RTK, talian paip bertindan, gabungan mampatan, pek bahasa dan analitis
 - ACP (Protokol Komunikasi Agen) pendaftaran
 - Penyedia OAuth modular (22 modul individu di bawah `src/lib/oauth/providers/`)
 - skrip Uninstall/full-uninstall

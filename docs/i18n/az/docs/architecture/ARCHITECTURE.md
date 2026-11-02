@@ -10,11 +10,11 @@ _Son yenilənmə: 2026-06-28_
 
 ## İcra Xülasəsi
 
-OmniRoute Next.js üzərində qurulmuş yerli AI marşrutlaşdırma şlüzü və idarə panelidir. O, tək OpenAI-a uyğun son nöqtəni (`/v1/*`) təmin edir və tərcümə, geri qaytarma, işarənin yenilənməsi və istifadənin izlənməsi ilə çoxsaylı yuxarı provayderlər üzrə trafiki yönləndirir.
+OmniRoute Next.js üzərində qurulmuş yerli AI marşrutlaşdırma şlüzü və idarə panelidir. O, tək OpenAI-a uyğun son nöqtəni (`/v1/*`) təmin edir və tərcümə, geri qaytarma, işarənin yenilənməsi və istifadənin izlənməsi ilə bir çox yuxarı axın provayderləri arasında trafiki istiqamətləndirir.
 
 Əsas imkanlar:
 
-- CLI/tools üçün OpenAI uyğun API səthi (377 provayder, 156 icraçı modul)
+- CLI/tools üçün OpenAI uyğun API səthi (380 provayder, 156 icraçı modul)
 - provayder formatları arasında Request/response tərcüməsi
 - Model kombinasiyası (çox model ardıcıllığı)
 - Strukturlaşdırılmış kombinasiya addımları (`provider + model + connection`) `compositeTiers` tərəfindən iş vaxtı sifarişi ilə
@@ -33,7 +33,7 @@ OmniRoute Next.js üzərində qurulmuş yerli AI marşrutlaşdırma şlüzü və
 - Düşüncə modelləri üçün etiketin təhlilini (`<think>...</think>`) düşünün
 - Ciddi OpenAI SDK uyğunluğu üçün cavab sanitarizasiyası
 - Provayderlər arası uyğunluq üçün rolun normallaşdırılması (developer → sistemi, sistem → istifadəçisi)
-- Strukturlaşdırılmış çıxış çevrilməsi (json_schema → Gemini respondSchema)
+- Strukturlaşdırılmış çıxış çevrilməsi (json_schema → Gemini responseSchema)
 - Provayderlər, açarlar, ləqəblər, kombinlər, parametrlər, qiymətlər üçün yerli davamlılıq (122 DB modulu)
 - Usage/cost izləmə və sorğu qeydi
 - multi-device/state sinxronizasiyası üçün əlavə bulud sinxronizasiyası
@@ -44,7 +44,7 @@ OmniRoute Next.js üzərində qurulmuş yerli AI marşrutlaşdırma şlüzü və
 - Provayderə məxsus profillərlə hesab başına artırılmış tarif məhdudiyyəti
 - Provayderin davamlılığı üçün dövrə açarı nümunəsi
 - Muteks kilidləmə ilə ildırımdan qorunma
-- İmza əsaslı sorğu təkmilləşdirmə keşi
+- İmza əsaslı sorğunun təkmilləşdirmə keşi
 - Domen təbəqəsi: xərc qaydaları, ehtiyat siyasəti, bloklama siyasəti
 - Kontekst ötürülməsi: hesabın fırlanmasının davamlılığı üçün sessiyanın ötürülməsi xülasələri
 - Domen vəziyyətinin davamlılığı (qaytarmalar, büdcələr, blokajlar, elektrik açarları üçün SQLite yazma keşi)

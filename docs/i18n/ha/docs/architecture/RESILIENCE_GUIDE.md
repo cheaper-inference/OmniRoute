@@ -4,11 +4,13 @@
 
 ---
 
-OmniRoute tana da makanikan juriya guda uku masu bambanta amma masu alaƙa. Kowannensu yana da fanni da manufa daban. Riƙe su daban lokacin da kake gano kura-kurai (debugging) na halayen tsara hanya (routing).
+OmniRoute tana da hanyoyi daban-daban amma suna da alaƙa. Kowannensu yana da iyaka da manufa daban. Kiyaye su daban lokacin da za'a gyara halayen saɓo.
 
-![Tsarin juriya na matakai uku](../diagrams/exported/resilience-3layers.svg)
+![3-layer resilience model](../diagrams/exported/resilience-3layers.svg)
 
-> Tushe: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+> Source: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+
+> **Gabatar da Env-vs-dashboard don juriyar juriya.** Juriyar barin shiga yana jujjuya iri daga muhallin — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`, `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`, `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` — kawai yana ba da _default_ (`DEFAULT_RESILIENCE_SETTINGS`, `src/lib/resilience/settings.ts`). Boolean ya ci gaba a cikin `resilienceSettings` (Dashboard →** Saituna → Resilience** / `PATCH /api/resilience`, adana a cikin `key_value`) yayi nasara akan darajar env: daidaitawa (`toBoolean`, `src/lib/resilience/settings/normalize.ts`) yana adana boolean da aka adana a duk lokacin da akwai. Saita irin wannan env var zuwa `true` akan turawa inda dashboard ya rigaya ya ajiye `false` saboda haka babu abin da ya canza — ya juya zuwa** Saituna → Resilience** (ko share filin da aka adana) maimakon.
 
 ## 1. Circuit Breaker na Mai Ba da Sabis
 
@@ -59,153 +61,120 @@ Wani mataki na huɗu, mai **zaɓi** (`PROVIDER_COOLDOWN_ENABLED`, asali a **kash
 
 A ƙasan wannan ƙofa, **ba** a ɗaukar mai ba da sabis a sanyaya (cooling); nasara ɗaya tana share tagar. Shigarwar matakin haɗi (`provider:connectionId`) kuma suna ci gaba da amfani da jinkirin ƙaruwa (exponential backoff) na `minRetryCooldownMs → maxRetryCooldownMs` maimakon haka. Abubuwan maye gurbi (overrides): `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`. Mai kare koma baya (regression guard): `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Cooldown na Haɗi
+## 2. Haɗin Cooldown
 
-**Iyaka:** haɗi/asusun/mabuɗin masauki ɗaya.
+**Iyakar:** mai bada connection/account/key.
 
-**Dalili:** tsallake mabuɗi ɗaya marar kyau yayin da sauran haɗawa na wannan masauki su ci gaba da bautawa.
+**Manufar:** tsallake maɓalli mara kyau ɗaya yayin da sauran haɗin kai don mai bayarwa iri ɗaya ke ci gaba da hidima.
 
 **Aiwatarwa:**
 
-- Bayyana a matsayin ba a samu ba: `src/sse/services/auth.ts::markAccountUnavailable()`
-- Zaɓi: `getProviderCredentials*` a cikin wannan fayil ɗin
-- Lissafin cooldown: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Mark babu: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Zaɓi: `getProviderCredentials*` a cikin fayil iri ɗaya
+- Cooldown calc: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Saituna: `src/lib/resilience/settings.ts`
 
-**Filaye ga kowane haɗi:**
+**Filaye kowane haɗin gwiwa:**
 
-- `rateLimitedUntil` — alamar lokacin har sai cooldown ya ƙare
+- `rateLimitedUntil` — timestamp har sai lokacin sanyi ya ƙare
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — ƙidayar matakan exponential backoff
+- `backoffLevel` — mai jujjuyawa backoff counter
 
-**Cooldown na tsafo:**
+**Matsalolin sanyi:**
 
-- Tushen OAuth: 5s
-- Tushen API-key: 3s
-- API-key 429: yana fifita kanun `Retry-After` na upstream / kanun reset / rubutun reset da za a iya fassarawa
-- Backoff: `baseCooldownMs * 2 ** failureIndex`
+- OAuth : 5s
+- API-key tushe: 3s
+- API-key 429: ya fi son `Retry-After` na sama /sake saitin rubutun sake saitin headers/parseable
+- Baya: `baseCooldownMs * 2 ** failureIndex`
 
-**Kariya ga thundering herd:** yana hana gazawu da yawa a lokaci guda daga tsawaita cooldown fiye da kima ko ƙara `backoffLevel` ninki biyu.
+**Mai bayarwa ya sake gwada jinkiri.** Shafin daki-daki na mai bayarwa yana da a** Sake gwada jinkiri** zaɓi (Auto, 15s har zuwa 1h). Yana adana `resilienceSettings.providerQuotaOverrides[<providerId>].rateLimitCooldownSeconds` (1-21600, ta hanyar `PATCH /api/resilience`). Lokacin da kuskuren iyaka ba ya ɗauke da alamar sake gwadawa na sama, wannan ƙimar ta maye gurbin sikelin koma baya ga mai bayarwa kuma ta sake saita `backoffLevel` zuwa 0 (`open-sse/services/rotationConfig.ts::overrideFor`). Gabatarwa ga kuskuren iyakataccen ƙima, mafi girma na farko: alamar sake gwadawa na sama, sannan kowane haɗin `providerSpecificData.rotationOverrides.rateLimitResetSeconds`, sannan kowane mai bayarwa ya sake gwada jinkiri, sannan env `OMNIROUTE_ROTATION_RATE_LIMIT_RESET_SECONDS`, sa'an nan madaidaicin koma baya. Auto yana cire filin. Yana rinjayar kawai dalilin iyaka-ƙididdigar ƙima, ba za a taɓa samun jihohi ba.
 
-**429 na ƙimar concurrency ba sa hawa tsarin matakan backoff.** `429` wanda jikinsa ya bayar da rahoton ƙimar concurrency ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`) yana nufin asusun yana lafiya amma yana cikin aiki. `checkFallbackError()` yana mayar da dalili `concurrency_limited`: yi sauyawa zuwa haɗi na gaba nan take, sanya wannan a cooldown na `CONCURRENCY_LIMIT_COOLDOWN_MS` na dindindin (1s) ko alamar sake gwadawa ta upstream, bar `backoffLevel` ba a canza ba, kuma saita `skipProviderBreaker`. Jikin quota na bayyanannu har yanzu yana cin nasara, don haka jiki wanda kuma ya dace da tsarin quota zai ci gaba da kasancewa hukuncin quota. Gano: `looksLikeConcurrencyLimit()` a `src/shared/utils/classify429.ts`; hukunci: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (`FailureKind` na breaker) bai canza ba kuma har yanzu yana karanta `rate_limit` ga waɗannan jikuna.
+**Mai gadin garken tsawa:** yana hana gazawar lokaci guda daga wuce gona da iri ko ƙara `backoffLevel` biyu.
 
-**Tsayawar abun ciki na stream ba ta sanya asusun a cooldown.** Lokacin da watchdog na tsayawar abun ciki (`open-sse/utils/streamHandler.ts`) ya ƙyale stream wanda bai aika fitowar model a lokaci ba, `markAccountUnavailable()` yana rubuta kuskuren a kan haɗin amma ba ya saita cooldown: tsayawar tana da alaƙa da wannan buƙata, sau da yawa dogon zagayen reasoning da ba a fitar da komai ba tukuna. Masu aiki na iya sake shiga ciki ta `resilienceSettings.streamStallCooldown.enabled` (tsafo `false`).
+**Concurrency-iyaka 429 ba sa hawan tsani na baya.** `429` wanda jikinsa ya ba da rahoton iyakacin haɗin gwiwa ("buƙata masu yawa da yawa", "iyakan daidaitawa", "ƙaddarar buƙatar buƙata", GLM `并发数过高`) yana nufin asusun yana da lafiya amma yana aiki. `checkFallbackError()` ya dawo da dalili `concurrency_limited`: kasawa zuwa haɗin gaba yanzu, sanyaya wannan don tsayayyen `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) ko alamar sake gwadawa na sama, kiyaye `backoffLevel` baya canzawa, sannan saita `skipProviderBreaker`. Jikin keɓaɓɓen keɓaɓɓen har yanzu yana yin nasara, don haka jiki wanda shima yayi daidai da tsarin ƙididdiga yana tsayawa yanke hukunci. Ganewa: `looksLikeConcurrencyLimit()` a cikin `src/shared/utils/classify429.ts`; hukunci: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` ( `FailureKind` mai karyawa) baya canzawa kuma har yanzu yana karanta `rate_limit` ga waɗannan jikin.
 
-**Siginar latency mai buƙatar kunna (opt-in) don zaɓin asusun `p2c`.** Kowace gwaji da aka tura yana rubuta lokacin-zuwa-baiti-na-farko da sakamakonsa ga kowane haɗi (kuma ga haɗi + model) a cikin tagar juyawa da ke cikin ƙwaƙwalwa: samfuri 20 na ƙarshe a cikin minti 15 (`open-sse/services/connectionLatencyTracker.ts`, an rubuta su daga `safeLogEvents()` a `src/sse/handlers/chatHelpers.ts`). Lokacin da `resilienceSettings.p2cLatency.weight` ya wuce `0` (kewayon 0-20, tsafo `0` = a kashe), `compareP2CConnections()` a `src/sse/services/auth.ts` yana ƙara har maki `weight` ga kowane ɗan takara na biyun. Rabin wannan yana fitowa daga latency a matsayin ƙima zuwa ga ɗan takara mafi sauri (mai jinkiri ninki biyu yana ɗaukar cikakken rabon) kuma rabin daga ƙimar kuskure mai juyawa. Wannan ƙarin yana aiki ne kawai lokacin da dukansu ɗan takara biyu suna da aƙalla samfuri 3, don haka ba a hukunta sababbin asusu, kuma babban iyakarsa yana kasancewa ƙasa da hukuncin da aka toshe saboda quota da hukuncin ƙarewar quota. Ba ya ƙara zagaye na kansa: har yanzu ana tafiyar da asusan da suka gaza ta matakan cooldown, lockout da breaker. Saita shi da `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
+**Rukunin abun ciki na rafi ba sa sanyaya asusun.** Lokacin da mai lura da abun ciki (`open-sse/utils/streamHandler.ts`) ya daina kan rafi da ba a aika da samfuri a cikin lokaci ba, `markAccountUnavailable()` yana rubuta kuskuren akan haɗin amma bai saita sanyi ba: rumbun nasa ne na wannan buƙatar, mafi yawan lokuta dogon tunani yana juyawa ba tare da fitarwa ba tukuna. Masu aiki za su iya komawa tare da `resilienceSettings.streamStallCooldown.enabled` ( `false` tsoho).
 
-**Firem-firem na reasoning suna sake feshin kasafin tsayawar abun ciki.** Model na reasoning na iya tunani na mintuna kafin alama (token) ta farko da za a gani: Claude yana stream firem-firem `thinking_delta` waɗanda rubutun tunaninsu na iya zama fanko, kuma Responses API yana stream abubuwan reasoning ɗaya bayan ɗaya. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) yana gane waɗannan firem-firem, kuma watchdog yana sake feshin kasafinsa a kan kowanne maimakon ya soke zagayen. Har yanzu ba su fitowar model ba ne, don haka zagayen da ya ƙare da reasoning kawai har yanzu ana ba da rahotonsa a matsayin fanko, kuma zagayen da ya tsaya reasoning kuma ya aika heartbeat kawai har yanzu yana kunna watchdog.
+**Sigina na jinkiri don zaɓin asusun `p2c`.** Kowane yunƙurin da aka aika yana yin rikodin lokacinsa-zuwa-byte-farko da sakamakon kowane haɗin gwiwa (kuma kowane tsarin haɗin + ) a cikin taga mai jujjuyawa cikin ƙwaƙwalwar ajiya: samfuran 20 na ƙarshe a cikin mintuna 15 (`open-sse/services/connectionLatencyTracker.ts`, rubuta daga `safeLogEvents()` a `src/sse/handlers/chatHelpers.ts`). Lokacin da `resilienceSettings.p2cLatency.weight` ya kasance sama da `0` (kewayon 0-20, tsoho `0` = kashe), `compareP2CConnections()` a cikin `src/sse/services/auth.ts` yana ƙara maki `weight` ga kowane ɗan takarar biyu. Rabin abin ya zo daga latency a matsayin rabo ga ɗan takara mafi sauri (sau biyu kamar jinkirin ɗaukar cikakken rabin) da rabi daga ƙimar kuskuren birgima. Kalmar tana aiki ne kawai lokacin da 'yan takarar biyu ke da aƙalla samfurori 3, don haka ba a hukunta sabbin asusu ba, kuma rufin sa ya tsaya ƙasa da hukuncin da aka katange da ƙima. Ba ya ƙara da'ira na kansa: gazawar asusun har yanzu ana sarrafa su ta hanyar sanyaya, kullewa da yadudduka masu karyawa. Saita shi da `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-Firem-firem `reasoningContentEvent` na binary na Kiro masu sa hannu marar fanko suna kiyaye wannan aikin reasoning ta cikin executor a matsayin delta `reasoning_content` fanko. Ba a tura sa hannun ba. Metadata, firem-firem marasa cikakkuwa da sa hannu fanko ba sa sake feshin kasafin abun ciki; ƙimar lokacin active-stream mai zaman kanta da soke daga abokin ciniki har yanzu suna aiki (`open-sse/executors/kiro/reasoning.ts`).
+**Firam ɗin tunani zata sake farawa kasafin rumbun abun ciki.** Samfurin tunani na iya yin tunani na mintuna kafin alamar bayyanarsa ta farko: Claude rafi `thinking_delta` firam ɗin waɗanda rubutun tunaninsu na iya zama fanko, kuma Amsoshin API suna raɗawa abu ɗaya bayan ɗaya. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) yana gane waɗannan firam ɗin, kuma mai sa ido ya sake farawa kasafin kuɗinsa akan kowanne maimakon soke juyowa. Har yanzu ba su fito da samfuri ba, don haka juyowar da ta ƙare da tunani kawai har yanzu ana ba da rahoton a matsayin fanko, da juyowar da ta daina tunani sai kawai ta aika bugun zuciya har yanzu tana tafiya mai tsaro.
 
-**Matsayoyin ƙarshe (BA cooldown ba):**
+Kiro's binary firam ɗin `reasoningContentEvent` tare da sa hannu mara wofi suna adana wannan aikin tunani ta wurin mai zartarwa azaman `reasoning_content` delta mara komai. Ba a tura sa hannun ba. Metadata, firam ɗin da ba su cika ba da sa hannun wofi ba sa sake farawa kasafin abun ciki; Har yanzu ana amfani da lokacin ƙarewar rafi mai zaman kanta da sokewar abokin ciniki (`open-sse/executors/kiro/reasoning.ts`).
 
-- `banned` — an saita shi ta gano mabuɗan haramu / haramta asusun (dubi [BAN_DETECTION](../security/BAN_DETECTION.md)), da kuma ta ƙin buƙata na upstream uku a jere ga kowace buƙata (`request_rejected`, misali Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ƙin buƙata ɗaya kaɗai tana sanya haɗin a cooldown kawai
-- `expired` (yana koma ƙarshe bayan sake gwadawa masu iyaka — `EXPIRED_RETRY_MAX = 3` tare da exponential backoff — don kurakuran OAuth na wucin gadi su iya warware kansu kafin a kashe asusun har abada)
+**Jihohin ƙarshe (NOT cooldowns):**
+
+- `banned` — saita ta hanyar hana-keyword / gano haramcin asusu (duba [BAN_DETECTION](../security/BAN_DETECTION.md) ), da kuma ta hanyar ƙin yarda da buƙata guda uku a jere (`request_rejected`, misali Anthropic OAuth 403 "Ba a yarda da buƙatar" — `open-sse/services/requestRejectedStreak.ts`); ƙi ɗaya kawai yana kwantar da haɗin gwiwa
+- `expired` (canzawa zuwa tasha bayan an ɗaure ta sake gwadawa — `EXPIRED_RETRY_MAX = 3` tare da bayanan baya — don haka kurakuran OAuth na wucin gadi zasu iya warkar da kansu kafin a kashe asusun har abada)
 - `credits_exhausted`
 
-Waɗannan suna daurewa har sai an canza takardun shaida ko mai aiki ya sake saita su. Kada a rubuta matsayoyin ƙarshe da matsayin cooldown na wucin gadi.
+Waɗannan suna ci gaba har sai bayanan shaidar sun canza ko mai aiki ya sake saita su. Kar a sake rubuta jihohin tasha tare da yanayin sanyi na wucin gadi.
 
-**Dawowa ta hankali (lazy recovery):** lokacin da `rateLimitedUntil` ya wuce, haɗin yana sake zama mai cancanta. A kan amfani mai nasara, `clearAccountError()` yana share duk filayen kuskure.
+**Rage farfadowa:** lokacin da `rateLimitedUntil` ta wuce, haɗin zai sake cancanta. A cikin nasarar amfani, `clearAccountError()` yana share duk filayen kuskure.
 
-### Bangon amfani na Claude OAuth: hanyar ƙananan fifiko + sake saita iyakar zama
+### bangon amfani Claude OAuth : ƙananan fifikon layin + -iyakan sake saitin
 
-**Iyaka:** haɗin biyan kuɗi na Claude (OAuth) ɗaya. Dukkan fasalulluka biyu suna **bisa zaɓi ga kowane haɗi** (Gyara haɗi → sashen Claude → `lowPriorityMode` / `autoLimitReset` a cikin `providerSpecificData`, dukansu a kashe a tsafo) kuma suna kama da umarnin `/low-priority` da `/limit-reset` na Claude Code (yarjejeniyar wire da aka kama daga Claude Code 2.1.263).
+**Iyakar:** haɗin Claude guda ɗaya (OAuth). Dukansu siffofi ne** ficewa kowane haɗin gwiwa** (A gyara haɗin → Claude sashe → `lowPriorityMode` / `autoLimitReset` a cikin `providerSpecificData`, duka ba a kashe su ba) da madubi Claude Code's `/low-priority` da umarni `/limit-reset` (kwangilar waya da aka kama daga Claude Code 2.1.263).
 
 **Aiwatarwa:**
 
-- Injin hali + rarraba amsoshi: `open-sse/services/claudeLowPriority.ts`
-- Abokin ciniki na sake saita status/da'awa: `open-sse/services/claudeLimitReset.ts`
-- Ƙugiyar mai aiwatarwa (shigar da header + sake gwadawa wannan asusu): `open-sse/executors/base.ts::execute()`
-- Adanawa ta son rai: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Jiha inji + rabe-rabe martani: `open-sse/services/claudeLowPriority.ts`
+- Sake saita abokin ciniki status/claim : `open-sse/services/claudeLimitReset.ts`
+- ƙugiya mai zartarwa (alurar kai + gwadawa-asusu ɗaya): `open-sse/executors/base.ts::execute()`
+- Dagewar ficewa: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Abin hantsi:** bangon amfani na awa 5 — wata `429` wadda header ɗinta ke ɗauke da
-`anthropic-ratelimit-unified-status: rejected` kuma, sa'ad da asusun ya cancanta,
-`anthropic-ratelimit-unified-slow-offer: treatment`. Ba a aika komai kafin wannan bangon farko
-429; 429 ta fashewa marar unified headers tana bi hanyar sanyaya (cooldown) ta al'ada.
+**Tasiri:** bangon da ake amfani da shi na awa 5 — a `429` wanda kanunsa ke ɗauke da `anthropic-ratelimit-unified-status: rejected` kuma, lokacin da asusun ya cancanta, `anthropic-ratelimit-unified-slow-offer: treatment`. Ba a aika da wani abu kafin wannan bangon farko 429; fashewa 429 ba tare da haɗin kai ba yana tafiya ta hanyar kwantar da hankali na yau da kullun.
 
-**Hanyar ƙaramin fifiko** (`lowPriorityMode`):
+**Hanyar ƙananan fifiko** (`lowPriorityMode`):
 
-- A bangon 429, mai aiwatarwa yana karɓar tayin kuma nan take yana sake gwadawa **wannan**
-  asusu da `anthropic-usage-limit: slow`; hanyar tana kasance aiki har zuwa
-  `anthropic-ratelimit-unified-reset` da aka sanar (+60s karin jinkiri) kuma kowace buƙata a cikin
-  wannan tagar tana ɗauke da header ɗin. 429 da aka tsare ba ta taɓa isa `handleChatCore` ba, don
-  haka **ba** a sanya haɗin a cikin sanyaya ba kuma ba a juya shi zuwa wani ba.
-- `anthropic-ratelimit-unified-slow-status` a kan amsoshin da suka biyo baya: `active` /
-  `not_needed` suna riƙe hanyar; `slot_busy` (429) ko `529` suna jiran
-  `anthropic-ratelimit-unified-slow-retry-after` na uwar garken (tsoho 20s, ƙuntatawa 5–600s,
-  ±30% jitter) sannan sake gwadawa, wanda `anthropic-ratelimit-unified-slow-max-wait` ke takaita
-  (tsoho minti 20, ƙuntatawa minti 1–awa 6) — bayan haka hanyar tana ƙarewa kuma sanyayar minti 10
-  tana toshe sake karɓa. Ana ƙara ƙuntata jiran da abin da ya rage daga ƙarin lokacin fara-upstream
-  na buƙatar kanta (`resolveFetchStartTimeout`, minti 10 a tsoho) an rage margin na s 5: ba tare da
-  wannan ƙuntatawa ba, tsohon max-wait na minti 20 zai fi buƙatar tsira kuma za a soke barcin a
-  tsakiyar jira, yana fitar da `TimeoutError` maimakon ƙarewar `max_wait` mai ladabi + sanyaya.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, juyin tagar awa 5, ko
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (wanda ke ƙare ta a matsayin
-  `extra_usage` a kowane status, tun da overage mai biya yanzu yana rufe bangon) suna ƙare hanyar;
-  amsa kuma sai ta bi hanyar sanyaya ta al'ada. Ana tunawa da `budget_exhausted` har zuwa lokacin
-  sake saita kasafin kuɗi da aka sanar (≤ kwanaki 8).
-- Binciken bangon yana gudana bayan sake gwadawa na cikin ƙoƙari da 400 ke haifarwa na mai
-  aiwatarwa (gyaran context, ƙuntatawar thinking/effort, koyo kai tsaye na param), don haka bangon
-  429 wanda ke bayyana kawai a ɗayan waɗannan sake gwadawa har yanzu ana tsare shi maimakon ya isa
-  hanyar sanyaya.
-- Hali yana cikin ƙwaƙwalwa ga kowane haɗi (sake kunna yana neman ƙarin bangon 429 ɗaya don sake
-  karɓa).
+- A bango 429 mai zartarwa ya karɓi tayin kuma nan da nan ya sake gwadawa** iri daya** account with `anthropic-usage-limit: slow`; layin yana aiki har zuwa sanarwar `anthropic-ratelimit-unified-reset` ( alherin + 60s) kuma duk buƙatun da ke cikin wannan taga yana ɗauke da taken. 429 da aka katse baya kaiwa `handleChatCore`, don haka haɗin yana** ba** sanya a cikin sanyi kuma ba a juya baya ba.
+- `anthropic-ratelimit-unified-slow-status` akan martani daga baya: `active` / `not_needed` kiyaye hanya; `slot_busy` (429) ko a `529` jira `anthropic-ratelimit-unified-slow-retry-after` na uwar garken (tsoho na 20s, matsa 5-600s, ± 30% jitter) da sake gwadawa, daure da `anthropic-ratelimit-unified-slow-max-wait` (tsohon 20 min, matsa 1 min – 6 h) — ya wuce cewa layin ya ƙare da karɓar toshewar-minti 10 mai sanyi. Har ila yau, an rufe jira da abin da ya rage na buƙatun nasa na lokacin farawa na sama (`resolveFetchStartTimeout`, 10 min ta tsohuwa) a debe tazarar s 5: in ba tare da wannan hular max-jiran na tsawon minti 20 ba zai wuce abin da ake bukata kuma barcin za a zubar da shi a tsakiyar jira, yana zazzage `TimeoutError` maimakon kyakkyawan ƙarshen `max_wait` + kyau.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5h-window rollover, ko `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (wanda ya ƙare shi a matsayin `extra_usage` akan kowane matsayi, tun lokacin da aka biya overage yanzu ya rufe bango) ƙare layin; martanin ya gudana zuwa hanyar kwantar da hankali ta al'ada. ana tunawa da `budget_exhausted` har sai an sanar da sake saita kasafin kuɗi (≤ 8 days).
+- Duban bangon yana gudana bayan mai aiwatarwa na 400-kokarin intra-yunƙurin sake gwadawa (gyaran yanayi, clamps thinking/effort, param auto-learn), don haka bango 429 wanda kawai saman saman ɗaya daga cikin waɗancan sakewar har yanzu ana katsewa maimakon isa hanyar sanyaya.
+- Jiha tana cikin ƙwaƙwalwar ajiya kowace haɗi (sake farawa yana biyan ƙarin bango 429 don sake karɓa).
 
-**Sake saita iyakar zama** (`autoLimitReset`, ana gwada shi kafin hanyar sa'ad da dukkan biyu suna kunne):
+**Sake saitin iyaka-zama** (`autoLimitReset`, gwada kafin layin lokacin da duka biyu ke kunne):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → sashen `juniper_tide`;
-  sa'ad da `arm: "reset"` da `available: true`,
-  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` da
-  `{ "program": "juniper_tide" }` (UUID na ƙungiya daga
-  `providerSpecificData.organizationUUID`, fallback na bootstrap).
-- `result: reset|not_limited` → ana sake gwada buƙatar da cikakken sauri (babu slow header).
-  `already_used` / `not_offered` suna ajiye `next_available_at` (tsoho mako ɗaya); kowace gazawa
-  tana jinkirta minti 15. Sake saitawa sau ɗaya ne a mako kuma har yanzu yana ƙidaya zuwa iyakar
-  mako.
+- `juniper_tide` `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → ; lokacin da `arm: "reset"` da `available: true`, `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` tare da `{ "program": "juniper_tide" }` (ƙungiyar UUID daga `providerSpecificData.organizationUUID`, bootstrap fallback).
+- `result: reset|not_limited` → ana sake gwada buƙatar a cikin cikakken sauri (ba a hankali a kai ba). `already_used` / `not_offered` memoise `next_available_at` (tsohon mako guda); duk wani gazawar yana baya bayan mintuna 15. Sake saitin sau ɗaya ne a mako kuma har yanzu yana ƙidaya zuwa iyakar mako-mako.
 
-Matsaran regression: `tests/unit/claude-low-priority-mode.test.ts`,
-`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+Masu gadin koma baya: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
 ### Dangantakar zama (#7274)
 
-**Iyaka:** zama ɗaya na abokin ciniki (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) ɗaure zuwa haɗi ɗaya, ga **kowane** mai samarwa.
+**Iyakar:** zaman abokin ciniki ɗaya (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) an liƙa zuwa haɗi ɗaya, don** kowane** mai bayarwa.
 
-**Dalili:** riƙe wakili mai zagaye da yawa (Claude Code, aider, wakilai na musamman) a kan wannan asusu a duk faɗin buƙatoci, yana rage asarar context tsakanin asusu da maimaita 429 na fara-sanyi a masu samarwa masu halar zama ga kowane asusu.
+**Manufar:** kiyaye wakili mai juyi da yawa (Lambar Claude, mataimaki, wakilai na al'ada) akan asusu ɗaya a cikin buƙatun, rage asarar mahallin lissafin giciye da maimaita sanyi-fara 429 akan masu samarwa tare da yanayin zaman kowane-asusu.
 
 **Aiwatarwa:**
 
-- Warware TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Zaɓi/ƙirƙirar pin: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Cire header (na gaba ɗaya, kowane mai samarwa): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Teburin pin da aka adana: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Saiti: `sessionAffinityTtlMs` (TTL na duniya cikin ms, `0` yana kashewa) — `src/lib/db/settings.ts`. An sake masa suna daga `codexSessionAffinityTtlMs` na Codex kawai ta migration `124_generic_session_affinity_ttl.sql`, wadda ke mika kowane TTL na Codex da aka saita a baya a matsayin sabon tsoho.
+- ƙuduri TTL : `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- Pin selection/creation: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Fitar da kai (jini, kowane mai bayarwa): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Tebur mai tsayi: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Saita: `sessionAffinityTtlMs` ( TTL na duniya a cikin ms, `0` yana hana) — `src/lib/db/settings.ts`. An sake masa suna daga Codex-only `codexSessionAffinityTtlMs` ta ƙaura `124_generic_session_affinity_ttl.sql`, wanda ke ɗaukar kowane Codex TTL da aka saita a baya azaman sabon tsoho.
 
-Kafin #7274, `resolveSessionAffinityTtlMs()` yana dawowa da `0` nan take ga kowane mai samarwa sai `codex`, don haka saitin TTL (da header ɗin zama) ba su da tasiri a wani wuri ko da kuwa tsarin pinning da cirewar header sun riga sun zama masu zaman kansu ga mai samarwa. Gyaran ya cire wannan early-return; TTL yanzu yana aiki daidai ga kowane mai samarwa da zarar an saita shi a duniya sama da `0`.
+Kafin #7274, `resolveSessionAffinityTtlMs()` wuya-bailed zuwa `0` ga kowane mai bada sai dai `codex`, don haka saitin TTL (da kuma masu taken zaman) ba su da wani tasiri a ko'ina kuma duk da cewa tsarin pinning da cirewar kai sun riga sun kasance mai bayarwa-agnostic. Gyaran ya cire cewa da wuri-dawo; TTL yanzu yana aiki iri ɗaya ga kowane mai bayarwa da zarar an saita shi sama da `0` a duniya.
 
-Ba a taɓa tura header ukun na dangantakar zama zuwa upstream — masu aiwatarwa suna gina nasu header na upstream daga farko maimakon wuce header na abokin ciniki, don haka wannan yana kasance id na dangantaka na ciki kawai.
+Ba a taɓa tura shugabannin zaman-dangi guda uku masu aiwatar da — na sama suna gina nasu kan saman kai daga karce maimakon wucewa ta kan abokan ciniki, don haka wannan yana zama id ɗin haɗin gwiwa kawai.
 
-### Hayar haɗin zama mai gudanarwa na musamman
+### Keɓaɓɓen hayar haɗin haɗin zaman da aka gudanar
 
-**Iyaka:** abokin ciniki/zama HTTP na gudanarwa ɗaya mai aiki yana mallakar haɗin OmniRoute ɗaya wanda ya cancanta.
+**Iyakar:** HTTP client/session ɗaya mai aiki yana da haɗin haɗin OmniRoute guda ɗaya.
 
-**Dalili:** samar da mallakar haɗi na musamman mai dorewa ga abokan ciniki waɗanda ke buƙatar
-shinge mai ƙarfi na routing a duk faɗin buƙatoci. Wannan ya bambanta da dangantakar zama, wadda ke
-da fifiko na ci gaba mai laushi: haya ta musamman tana adana halar tsarin rayuwa a SQLite, tana
-ƙarfafa musamman mai mallaka mai aiki na duniya da haɗi mai aiki, kuma tana ƙin generation da ya
-lalace kafin aika zuwa mai samarwa.
+**Manufar:** samar da keɓantaccen mallakin haɗin gwiwa mai dorewa ga abokan ciniki waɗanda ke buƙatar shinge mai tsauri a cikin buƙatun. Wannan ya bambanta da kusancin zama, wanda shine fifikon ci gaba mai laushi: keɓancewar haya yana ci gaba da dorewar yanayin rayuwa a cikin SQLite, yana tilasta mai aiki na duniya da keɓancewar haɗin kai, kuma ya ƙi tsayayyen tsara kafin aika mai bada sabis.
 
-Wannan fasali ana kunna shi ta zaɓi (opt-in) ga kowane maɓallin API. Dole ne maɓalli mai gudanarwa ya sami ikon `lease:exclusive` da kuma jerin `allowedConnections` na bayyane wanda ba komai ba ne. Duk mai amfani da HTTP na iya amfani da ƙarshen rayuwar aiki (lifecycle endpoint); babu sunan abokin ciniki, user-agent, mai samarwa, hanyar OAuth, ko ƙira da ake buƙata. Hayar tana mallakar haɗi, ba ƙira ba, don haka canjin ƙira yana ci gaba da riƙe ɗaurewar muddin haɗin yana kasancewa ya cancanta yadda ya saba. Ka'idojin ƙira, ƙima, lafiya, lokacin hutu, da jerin izini na al'ada suna ci gaba da zama masu iko na ƙarshe kuma za su iya mayar da wannan ƙarnin zuwa wani haɗi na kyauta wanda ya cancanta.
+Siffar ta ficewa ta kowane maɓallin API. Maɓallin da aka sarrafa dole ne ya kasance yana da iyakar `lease:exclusive` da jerin `allowedConnections` maras komai. Duk wani abokin ciniki HTTP zai iya amfani da ƙarshen ƙarshen rayuwa; babu sunan abokin ciniki, wakilin mai amfani, mai bayarwa, hanyar OAuth, ko ƙira da ake buƙata. Yarjejeniyar ta mallaki haɗi, ba samfuri ba, don haka canjin ƙira yana riƙe da ɗaurin yayin da haɗin ke ci gaba da cancanta. Samfurin al'ada, adadin, lafiya, kwantar da hankali, da dokokin lissafin izini sun kasance masu iko kuma suna iya canzawa tsara guda zuwa wata hanyar haɗin kai kyauta.
 
-Rayuwar aiki ita ce `POST /api/v1/session-leases` tare da ayyukan JSON `acquire`, `renew`, da `release`. Buƙatun inference da ake gudanarwa suna gabatar da ƙimar `X-OmniRoute-Lease-Owner` mara bayyanakka da kuma ainihin `X-OmniRoute-Lease-Generation`. Mallakin yana amfani da `vlo_` wanda haruffa 43 na base64url ke bi bayansa; ana adana hash ɗin SHA-256 na shi kawai. Kowane shingen aika aiki na ƙarshe yana kuma ɗaure da ID na maɓallin API da aka tabbatar da kuma ID na haɗin da ke aiki. Ana cire kanun saƙon sarrafa haya daga rajistar ayyuka, hotunan buƙatun da aka riƙe, da kanun saƙon mai aiwatarwa na sama (upstream).
+Zagayowar rayuwa shine `POST /api/v1/session-leases` tare da ayyukan JSON `acquire`, `renew`, da `release`. Buƙatun ƙima da aka sarrafa suna gabatar da ƙimar `X-OmniRoute-Lease-Owner` mara ƙarfi da ainihin `X-OmniRoute-Lease-Generation`. Mai shi yana amfani da `vlo_` da haruffa 43 base64url; zanta SHA-256 ne kawai ake ajiyewa. Kowane shingen aikawa na ƙarshe kuma yana ɗaure ingantaccen maɓallin API ID da haɗin kai mai aiki ID. Ana cire masu kula da hayar daga cikin rajistan ayyukan, riƙon buƙatun buƙatun, da manyan kanan zartarwa.
 
-Idan jagorantarwa ta al'ada tana da 'yan takara masu gudanarwa waɗanda suka cancanta amma wata haya ta waje da ke aiki ta mamaye kowane ɗan takara na kyauta, OmniRoute zai mayar da HTTP `429`, lambar lease-capacity-unavailable, yanayin waiting-for-capacity, da `Retry-After` mai iyaka wanda aka samo daga ƙarewar lokaci mafi farko da ta dace. Rashin wanda ya cancanta na al'ada ba rikicin haya ba ne kuma yana kiyaye ma'anar kuskuren jagorantarwarsa na yanzu.
+Idan tsarin zirga-zirga na yau da kullun yana da ƴan takarar da suka cancanta amma kowane ɗan takara na kyauta yana shagaltar da shi ta hanyar haya mai aiki na waje, OmniRoute ya dawo da HTTP `429`, lambar iyawar haya-babu samuwa, yanayin jiran aiki, da `Retry-After` mai iyaka da aka samo daga ƙarshen ƙarshen ƙarshe. Cancantar fanko na yau da kullun ba jayayyar hayar ba ce kuma tana kiyaye tatsuniyoyi na kuskuren hanyar da ke akwai.
 
-Makanikun da suka danganta suna ci gaba da kasancewa daban:
+Hanyoyin da ke da alaƙa sun kasance dabam:
 
-- Zama na zaman OAuth (session occupancy) shi ne rarrabawa mai laushi a matakin tsari guda ga asusunan OAuth.
-- Semaphores na asusu suna ba da izinin aiwatar da buƙatu a lokaci guda (concurrency) kuma suna ƙarewa idan buƙata ta cika.
-- Hayar zaman da ake gudanarwa ta musamman (exclusive) ita ce mallakar rayuwar aiki mai dawwama tare da shingen ƙarni.
+- Zama zaman OAuth tsari ne mai sauƙi na rarrabawa na gida don asusun OAuth.
+- Semaphores na asusu suna ba da izinin buƙatu-kwance kuma suna ƙare lokacin da buƙata ta cika.
+- Keɓaɓɓen hayar hayar zaman da aka gudanar shine ikon keɓaɓɓiyar rayuwa tare da shingen tsara.
 
 ---
 
@@ -420,30 +389,13 @@ Ana bin diddigar kariyar rate-limit na kowane haɗi ta hanyar filin boolean `rat
 
 ---
 
-## 6. Mai sa ido kan ƙarfin fitarwar stream mai hankali (#9709)
+## 6. Slow-stream watchdog kayan aiki (#9709)
 
-Kariyar da ba wajaba ba `resilienceSettings.streamRecovery.throughputWatchdog` tana gano
-wani upstream da ke ci gaba da aika chunks amma yana fitar da sakamakon mataimaki a ƙasa da
-matsayin fitarwa mai amfani da aka saita. An niyya ta daban da ƙarewar lokacin zama banza
-(idle timeout): heartbeats da metadata ba sa sake saita ko ɗayan masu ƙidayar lokacin kuma
-ba sa ƙidaya azaman ci gaba. Hakanan tana bambanta da ƙarshen wa'adin ƙoƙari mai ƙarfi
-(#9153), wanda ya kasance bene na kariya na dindindin duk da ingancin fitarwa.
+Zaɓaɓɓen gadin `resilienceSettings.streamRecovery.throughputWatchdog` yana gano wani sama wanda har yanzu yana aika gungu amma yana samar da fitarwar mataimaka a ƙasa da daidaita ƙimar fitarwa mai amfani. Ya bambanta da gangan daga lokacin aiki mara amfani: bugun zuciya da sake saita metadata ba mai ƙidayar lokaci ba kuma ba a ƙidaya matsayin ci gaba. Hakanan ya bambanta da ƙayyadaddun ƙayyadaddun yunƙurin ƙarshe (#9153), wanda ya kasance cikakken rufin aminci ba tare da la'akari da ingancin fitarwa ba.
 
-Mai sa idon yana buƙatar lokacin dumamawa (warm-up) sannan cikakkiyar tagar rolling kafin
-ya iya yanke aiki. Yana ƙidaya text deltas daga abubuwan fitarwa na Chat Completions da
-Responses API (wani wakilin byte na UTF-8 mai tsaro), yana watsi da abubuwan da suka shafi
-usage kawai da waɗanda babu komai a cikinsu, kuma yana dakatar da hukunci yayin da abubuwan
-kiran kayan aiki ko reasoning suke a gudana. An kashe shi ta tashi (default) kuma ana iya
-kunna shi da `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; tagar, dumamawar, ƙarancin ƙimar,
-da ƙarancin fitarwar da za a iya aunawa an ƙuntata su ta matakin daidaitawa na saitunan
-resilience na al'ada.
+Mai sa ido yana buƙatar lokacin dumi tare da cikakkiyar taga mai jujjuyawa kafin ta iya zubar da ciki. Yana ƙidaya deltas na rubutu daga Cikakkun Taɗi da Amsoshi abubuwan fitarwa API (wakilin UTF-8 byte mai ra'ayin mazan jiya), yayi watsi da amfani-kawai da abubuwan da ba komai ba, kuma yana dakatar da hukunci yayin kiran kayan aiki ko abubuwan tunani suna cikin jirgi. An kashe shi ta tsohuwa kuma ana iya kunna shi tare da `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` (wannan darajar env kawai tsaba tsoho — da aka ajiye `resilienceSettings.streamRecovery.throughputWatchdog.enabled` boolean yayi nasara; duba bayanin gaban env-vs-dashboard a saman wannan jagorar); taga, dumama, mafi ƙarancin ƙima, da mafi ƙarancin abin da za a iya aunawa ana ɗaure su ta hanyar daidaita saiti na al'ada.
 
-Idan an kunna, yanke aikin mai sa ido ana amfani da shi kawai ga ƙoƙarin upstream da ke aiki.
-Kafin kowane bytes da abokin ciniki zai gani, hanyar dawowa da wuri ta wannan asusu ɗin da
-take akwai na iya sake buɗe ƙoƙarin. Bayan commit, ba a taɗa maimaita stream ɗin da duka;
-kwangilar ci gaba ta tsakiyar stream mai lafiya da take akwai kawai za ta iya ɗinka suffix.
-Kammalawa tana kasance har ɗaya kawai (single-shot), don haka ba a maimaita ƙidayar usage
-da sakin semaphore.
+Lokacin da aka kunna, ana amfani da zubar da ciki kawai ga ƙoƙarin sama mai aiki. Kafin kowane bayyani-abokin ciniki, hanyar dawo da wuri ɗaya na iya sake buɗe ƙoƙarin. Bayan aikatawa, ba a sake kunna rafi a makance; kwangilar ci gaba na tsakiyar rafi mai aminci ne kawai zai iya dinka kari. Ƙarshe ya kasance harbi ɗaya, don haka lissafin amfani da sakin semaphore ba a kwafin su ba.
 
 ---
 

@@ -14,7 +14,7 @@ OmniRoute adalah gateway perutean dan dasbor AI lokal yang dibangun di atas Next
 
 Kemampuan inti:
 
-- Permukaan API yang kompatibel dengan OpenAI untuk CLI/tools (377 penyedia, 156 modul pelaksana)
+- Permukaan API yang kompatibel dengan OpenAI untuk CLI/tools (380 penyedia, 156 modul pelaksana)
 - terjemahan Request/response lintas format penyedia
 - Penggantian kombo model (urutan multi-model)
 - Langkah kombo terstruktur (`provider + model + connection`) dengan pengurutan waktu proses berdasarkan `compositeTiers`
@@ -33,7 +33,7 @@ Kemampuan inti:
 - Pikirkan penguraian tag (`<think>...</think>`) untuk model penalaran
 - Sanitasi respons untuk kompatibilitas OpenAI SDK yang ketat
 - Normalisasi peran (pengembang sistem →, sistem → pengguna) untuk kompatibilitas lintas penyedia
-- Konversi keluaran terstruktur (json_schema → Gemini responSchema)
+- Konversi keluaran terstruktur (json_schema → Gemini responseSchema)
 - Persistensi lokal untuk penyedia, kunci, alias, kombo, pengaturan, harga (122 modul DB )
 - pelacakan Usage/cost dan pencatatan permintaan
 - Sinkronisasi cloud opsional untuk sinkronisasi multi-device/state
@@ -58,7 +58,7 @@ Kemampuan inti:
 - MCP Server (110 alat) dengan 3 transport (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) dengan keterampilan dan siklus hidup tugas
 - Sistem memori (ekstraksi, injeksi, pengambilan, ringkasan)
-- Sistem keterampilan (registrasi, pelaksana, kotak pasir, keterampilan bawaan)
+- Sistem keterampilan (registrasi, eksekutor, kotak pasir, keterampilan bawaan)
 - proksi MITM dengan manajemen sertifikat dan penanganan DNS
 - Middleware pelindung injeksi yang cepat
 - Pipeline kompresi cepat dengan Caveman, RTK, pipeline bertumpuk, kombo kompresi, paket bahasa, dan analitik

@@ -163,7 +163,7 @@ OmniRoute открива 6 A2A вештина повезаних у `src/lib/a2a
 | Хеалтх Репорт      | `health-report`      | Обједињује прекидач, хлађење, стање закључавања по провајдеру                                                                                                        | здравље, отпорност        | „Прикажи здравствени статус свих провајдера“ |
 | Листа могућности   | `list-capabilities`  | Враћа комплетан каталог вештина агената од 45 уноса (23 API + 21 CLI + 1 конфигурација) као табелу смањења вредности са сировим SKILL.md URLs за убацивање контекста | каталог, откриће, вештине | „Наведите све OmniRoute могућности“          |
 
-> Картица агента треба да буде усклађена са активним каталогом 377 провајдера; Број провајдера и метаподаци free/no-auth потичу из регистра времена извршавања.
+> Картица агента треба да буде усклађена са активним каталогом 380 провајдера; Број провајдера и метаподаци free/no-auth потичу из регистра времена извршавања.
 
 ### `list-capabilities` Детаљи вештине
 
@@ -197,17 +197,17 @@ JSON-RPC krajnja tačka `/a2a` je kanonska A2A ulazna tačka. REST krajnje tačk
 
 ---
 
-## Dodavanje nove vештine
+## Додавање нове вештине
 
-1. **Kreirajte fajl vештine:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Креирајте датотеку вештина:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Izvezite asinhronu funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Pratite oblik postojećih vештina kao što je `smartRouting.ts`.
+   Извезите асинхронизовану функцију `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Пратите облик постојећих вештина као што је `smartRouting.ts`.
 
-2. **Registrujte handler:** u `src/lib/a2a/taskExecution.ts`, dodajte stavku u `A2A_SKILL_HANDLERS`:
+2. **Руковалац регистром:** у `src/lib/a2a/taskExecution.ts`, додајте унос у `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...postojeće vештine
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ JSON-RPC krajnja tačka `/a2a` je kanonska A2A ulazna tačka. REST krajnje tačk
    };
    ```
 
-3. **Prikažite u Agent Card-u:** u `src/app/.well-known/agent.json/route.ts`, dodajte u niz `skills`:
+3. **Изложите на картици агента:** у `src/lib/a2a/agentCardMetadata.ts` (који деле `/.well-known/agent.json` и `/.well-known/agent-card.json`), додајте `skills` низу:
 
    ```json
    {
      "id": "your-skill",
      "name": "Your Skill",
-     "description": "Kratak opis fokusiran na nameru",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Primer pozivanja prirodnim jezikom"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Napišite testove:** `tests/unit/a2a-<your-skill>.test.ts`. Pokrijte uspešan tok i tok sa greškom.
+4. **Напишите тестове:** `tests/unit/a2a-<your-skill>.test.ts`. Цовер хаппи патх + еррор патх.
 
-5. **Dokumentujte** novu vештinu u tabeli `Available Skills` u ovom fajlu.
+5. **Документ** нова вештина у табели `Available Skills` ове датотеке.
 
 ---
 

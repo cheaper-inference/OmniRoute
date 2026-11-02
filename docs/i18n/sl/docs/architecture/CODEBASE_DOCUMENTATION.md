@@ -444,7 +444,7 @@ Razdeljeno v namensko usmerjene podimenike:
 
 ---
 
-## 4. `open-sse/` — Delovni prostor pretočnega mehanizma
+## 4. `open-sse/` — Delovni prostor mehanizma za pretakanje
 
 Ločen delovni prostor npm, objavljen kot `@omniroute/open-sse`. Lastnik obdelave zahtevkov, izvajalcev, prevajalcev, storitev, transformatorja in strežnika MCP.
 
@@ -480,7 +480,7 @@ open-sse/
 | `moderations.ts`        | Zmernost                                                                                                |
 | `search.ts`             | Spletno iskanje                                                                                         |
 | `sseParser.ts`          | razčlenjevalnik dogodkov SSE                                                                            |
-| `usageExtractor.ts`     | Potegnite števce žetonov iz tokov navzgor                                                               |
+| `usageExtractor.ts`     | Izvlecite števce žetonov iz gorvodnih tokov                                                             |
 | `responseSanitizer.ts`  | Odstrani šum, specifičen za ponudnika                                                                   |
 | `responseTranslator.ts` | Lepilo med odzivom ponudnika in plastjo prevajalca                                                      |
 
@@ -490,7 +490,7 @@ open-sse/
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts` (pomočnik pri skupni identiteti) in `index.ts` (register).
 
-> Opomba: ponudnike, ki niso navedeni tukaj, streže `default.ts` z uporabo splošnega izvajalca, združljivega z OpenAI. Celoten katalog ponudnikov (377 ponudnikov) živi v `src/shared/constants/providers.ts`.
+> Opomba: ponudnike, ki niso navedeni tukaj, streže `default.ts` z uporabo splošnega izvajalca, združljivega z OpenAI. Celoten katalog ponudnikov (380 ponudnikov) se nahaja v `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
@@ -519,7 +519,7 @@ Poudarki (celoten seznam pod `open-sse/services/`):
 | Predpomnjenje            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Usmerjevalna inteligenca | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Ravnanje z modelom       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Stiskanje                | `compression/` — ožičenje motorja s popolno kompresijo                                                                                                                                                                                                   |
+| Stiskanje                | `compression/` — napeljava motorja s polno kompresijo                                                                                                                                                                                                    |
 | Seja žetona +            | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Stopnja / manifest       | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / omrežje             | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -528,9 +528,9 @@ Poudarki (celoten seznam pod `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 edinstvenih orodij** ožičeno v `server.ts` (45 kanoničnih v `schemas/tools.ts` + pomnilnik, veščine, GitHub-skills, bazen, igrifikacija, vtičnik, Notion, Obsidian, lokalni korpus in moduli za stiskanje — združitev šteje `countUniqueMcpTools`).
+- **110 edinstvenih orodij** ožičeno v `server.ts` (45 kanoničnih v `schemas/tools.ts` + pomnilniku, spretnostih, GitHub-skills, bazenu, igrifikaciji, vtičniku, Notion, Obsidian, lokalnem korpusu in modulih za stiskanje — union, ki jih šteje `countUniqueMcpTools`).
 - **3 prevozi** : stdio, HTTP Streamable, SSE.
-- **33 obsegov** uveljavljeno med izvajanjem — osnovni seznam v `src/shared/constants/mcpScopes.ts`, celoten nabor je zveza obsegov, ki jih deklarira vsak modul orodja.
+- **33 obsegov** vsiljen v času izvajanja osnovni seznam — v `src/shared/constants/mcpScopes.ts`, celoten nabor je zveza obsegov, ki jih deklarira vsak modul orodja.
 - Pregledna tabela: `mcp_tool_audit` (napolnjena z `audit.ts`).
 - Datoteke: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus testi pod `__tests__/`.
 - Oglejte si [MCP-SERVER.md](../frameworks/MCP-SERVER.md) za celoten katalog orodij.

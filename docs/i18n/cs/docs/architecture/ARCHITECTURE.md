@@ -10,11 +10,11 @@ _Naposledy aktualizováno: 2026-06-28_
 
 ## Shrnutí
 
-OmniRoute je místní směrovací brána AI a řídicí panel postavený na Next.js. Poskytuje jeden koncový bod kompatibilní s OpenAI (`/v1/*`) a směruje provoz přes několik upstreamových poskytovatelů s překladem, záložním řešením, obnovením tokenu a sledováním využití.
+OmniRoute je místní směrovací brána AI a řídicí panel postavený na Next.js. Poskytuje jeden koncový bod kompatibilní s OpenAI (`/v1/*`) a směruje provoz přes několik upstream poskytovatelů s překladem, záložním řešením, obnovováním tokenů a sledováním využití.
 
 Základní schopnosti:
 
-- Povrch API kompatibilní s OpenAI pro CLI/tools (377 poskytovatelů, 156 spouštěcích modulů)
+- Povrch API kompatibilní s OpenAI pro CLI/tools (380 poskytovatelů, 156 spouštěcích modulů)
 - překlad Request/response napříč formáty poskytovatelů
 - Záložní kombinace modelu (sekvence více modelů)
 - Strukturované kombinované kroky (`provider + model + connection`) s řazením za běhu podle `compositeTiers`
@@ -78,7 +78,7 @@ Základní schopnosti:
 
 Primární runtime model:
 
-- Trasy aplikací Next.js pod `src/app/api/*` implementují řídicí panel APIs i kompatibilitu APIs
+- Trasy aplikací Next.js pod `src/app/api/*` implementují jak řídicí panel APIs, tak kompatibilitu APIs
 - Sdílené jádro SSE/routing v `src/sse/*` + `open-sse/*` se stará o spouštění poskytovatele, překlad, streamování, záložní řešení a používání
 
 ## Referenční diagramy
