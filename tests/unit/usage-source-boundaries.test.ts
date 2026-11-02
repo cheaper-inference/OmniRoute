@@ -54,7 +54,7 @@ for (const [name, build, prefix] of [
           assert.equal(params[param("rawCutoff")], rawCutoffDate);
           assert.equal(params[param("rawCutoffDate")], rawCutoffDate);
           assert.equal(params[param("sinceDate")], sinceIso?.split("T")[0]);
-          assert.equal(params[param("since")], undefined);
+          assert.equal(params[param("since")], sinceIso ?? undefined);
         } else {
           assert.equal(params[param("rawCutoff")], undefined);
           assert.equal(params[param("rawCutoffDate")], undefined);

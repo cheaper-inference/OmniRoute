@@ -119,7 +119,13 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
   // Raw rows start after the last published day, so that day is not counted twice.
   const rawConditions: string[] = [];
   if (needsAggregated) {
-    rawConditions.push("DATE(timestamp) > @rawCutoff");
+    rawConditions.push(
+      "(DATE(timestamp) > @rawCutoff OR NOT EXISTS (SELECT 1 FROM usage_daily_summary s WHERE s.date = DATE(usage_history.timestamp)))"
+    );
+    if (sinceIso) {
+      rawConditions.push("timestamp >= @since");
+      unifiedParams.since = sinceIso;
+    }
     unifiedParams.rawCutoff = rawCutoffDate;
   } else if (sinceIso) {
     rawConditions.push("timestamp >= @since");
@@ -227,7 +233,13 @@ export function buildPresetUnifiedSource(opts: BuildUnifiedSourceOptions): Unifi
 
   const rawConditions: string[] = [];
   if (needsAggregated) {
-    rawConditions.push("DATE(timestamp) > @presetRawCutoff");
+    rawConditions.push(
+      "(DATE(timestamp) > @presetRawCutoff OR NOT EXISTS (SELECT 1 FROM usage_daily_summary s WHERE s.date = DATE(usage_history.timestamp)))"
+    );
+    if (sinceIso) {
+      rawConditions.push("timestamp >= @presetSince");
+      presetParams.presetSince = sinceIso;
+    }
     presetParams.presetRawCutoff = rawCutoffDate;
   } else if (sinceIso) {
     rawConditions.push("timestamp >= @presetSince");

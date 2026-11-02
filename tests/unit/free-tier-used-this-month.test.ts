@@ -141,3 +141,21 @@ test("sumUsageTokensThisMonth counts a day published by the rollup once", async 
   assert.equal(raw.n, 1, "the rollup must leave the day's raw rows in place");
   assert.equal(sumUsageTokensThisMonth(), 140);
 });
+
+test("monthly totals preserve legacy no-pointer summaries without hiding unmatched raw keys", () => {
+  const db = getDbInstance();
+  db.exec("DELETE FROM usage_daily_summary; DELETE FROM usage_history; DELETE FROM rollup_state");
+  const day = new Date().toISOString().slice(0, 7) + "-05";
+  db.prepare(
+    "INSERT INTO usage_daily_summary(provider,model,service_tier,date,total_input_tokens,total_output_tokens) VALUES('groq','m','standard',?,100,0)"
+  ).run(day);
+  const insert = db.prepare(
+    "INSERT INTO usage_history(provider,model,service_tier,timestamp,tokens_input,tokens_output) VALUES(?,?,?,?,?,0)"
+  );
+  insert.run("GROQ", "M", "standard", day + "T12:00:00Z", 20);
+  insert.run("groq", "m", "priority", day + "T13:00:00Z", 30);
+  insert.run("other", "m", "standard", day + "T14:00:00Z", 40);
+  assert.equal(sumUsageTokensThisMonth(), 170);
+  db.exec("DELETE FROM usage_daily_summary");
+  assert.equal(sumUsageTokensThisMonth(), 90);
+});

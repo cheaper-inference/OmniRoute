@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 /**
  * Aggregation utility functions for usage data summarization.
  * Rolls up usage_history (and quota_snapshots) into daily summary tables.
@@ -144,7 +145,10 @@ export async function rollupHourlyQuota(
  * @param beforeDate - ISO timestamp/date boundary. Rows strictly before this value are rolled up.
  * @returns Aggregation result with counts
  */
-export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<AggregationResult> {
+export async function rollupUsageHistoryBeforeDate(
+  beforeDate: string,
+  options: { pause?: () => Promise<void> } = {}
+): Promise<AggregationResult> {
   const db = getDbInstance();
 
   const result: AggregationResult = {
@@ -155,10 +159,21 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
 
   try {
     const rollupStartedAt = new Date().toISOString();
+    const resetGeneration = readResetGeneration(db);
     const priced = await priceRange(db, null, beforeDate);
+    if (options.pause) await options.pause();
+    let resetStale = false;
     const insertRows = db.transaction((items: ArchivedRow[]) => {
+      if (readResetGeneration(db) !== resetGeneration) {
+        resetStale = true;
+        return 0;
+      }
       const changes = items.reduce(
-        (total, row) => total + summaryUpsert(db).run(...summaryValues(row)).changes,
+        (total, row) =>
+          total +
+          (isDayRebuildBlocked(db, row.date)
+            ? 0
+            : summaryUpsert(db).run(...summaryValues(row)).changes),
         0
       );
       // The Team upsert and raw-row processed marker are one transaction. If
@@ -169,6 +184,13 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
 
     result.processed = priced.shapes;
     result.inserted = insertRows(priced.rows);
+    if (resetStale) {
+      result.errors = 1;
+      console.warn(
+        "[Aggregation] Usage reset invalidated the priced range; no summary was written."
+      );
+      return result;
+    }
 
     console.log(
       `[Aggregation] usage_history rollup: ${result.inserted} rows for dates before ${beforeDate}`
@@ -336,6 +358,7 @@ type ArchivedRow = {
 };
 
 type DaySnapshot = {
+  resetGeneration: number;
   revision: number | null;
   rawCount: number;
 };
@@ -350,6 +373,7 @@ export type PublishResult = {
 export type PublishOptions = {
   pause?: () => Promise<void>;
   onCommit?: (db: UsageDb) => void;
+  canCommit?: (db: UsageDb) => boolean;
 };
 
 /**
@@ -365,7 +389,8 @@ export const PRICE_RANGE_FROM = `FROM usage_history INDEXED BY idx_uh_provider_m
 async function priceRange(
   db: UsageDb,
   fromIso: string | null,
-  toIso: string
+  toIso: string,
+  utcDay?: string
 ): Promise<{ rows: ArchivedRow[]; shapes: number }> {
   const rows = db
     .prepare(
@@ -387,12 +412,14 @@ async function priceRange(
         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
         (provider_cost_usd IS NOT NULL) as hasStoredCost,
         COALESCE(SUM(provider_cost_usd), 0) as storedCost
-${PRICE_RANGE_FROM}
+${PRICE_RANGE_FROM}${utcDay ? " AND DATE(timestamp) = ?" : ""}
       GROUP BY LOWER(provider), LOWER(model), DATE(timestamp), serviceTier,
         requestInputTokens, requestOutputTokens, requestCacheReadTokens,
         requestCacheCreationTokens, requestReasoningTokens, hasStoredCost`
     )
-    .all(toIso, fromIso, fromIso) as RequestShape[];
+    .all(
+      ...(utcDay ? [toIso, fromIso, fromIso, utcDay] : [toIso, fromIso, fromIso])
+    ) as RequestShape[];
 
   const pricedRows = await Promise.all(
     rows.map(async (row) => ({
@@ -468,12 +495,18 @@ ${PRICE_RANGE_FROM}
   };
 }
 
+function isDayRebuildBlocked(db: UsageDb, date: string): boolean {
+  return !!db
+    .prepare("SELECT 1 FROM usage_daily_summary WHERE date = ? AND raw_rebuild_safe = 0 LIMIT 1")
+    .get(date);
+}
+
 function summaryUpsert(db: UsageDb) {
   return db.prepare(
     `INSERT INTO usage_daily_summary
       (provider, model, service_tier, date, total_requests, total_input_tokens, total_output_tokens,
-       total_cache_read_tokens, total_cache_creation_tokens, total_reasoning_tokens, total_cost)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       total_cache_read_tokens, total_cache_creation_tokens, total_reasoning_tokens, total_cost, raw_rebuild_safe)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
      ON CONFLICT(provider, model, service_tier, date) DO UPDATE SET
       total_requests = excluded.total_requests,
       total_input_tokens = excluded.total_input_tokens,
@@ -481,7 +514,8 @@ function summaryUpsert(db: UsageDb) {
       total_cache_read_tokens = excluded.total_cache_read_tokens,
       total_cache_creation_tokens = excluded.total_cache_creation_tokens,
       total_reasoning_tokens = excluded.total_reasoning_tokens,
-      total_cost = excluded.total_cost`
+      total_cost = excluded.total_cost
+     WHERE usage_daily_summary.raw_rebuild_safe = 1`
   );
 }
 
@@ -503,8 +537,11 @@ function summaryValues(row: ArchivedRow): unknown[] {
 
 function dayBounds(date: string): { fromIso: string; toIso: string } {
   return {
-    fromIso: `${date}T00:00:00.000Z`,
-    toIso: `${nextUtcDate(date)}T00:00:00.000Z`,
+    // ISO offsets can place the same UTC day on either adjacent calendar date.
+    // Keep the indexed candidate scan bounded, then let SQLite DATE() select
+    // the exact UTC day before grouping/pricing.
+    fromIso: `${previousUtcDate(date)}T00:00:00.000Z`,
+    toIso: `${nextUtcDate(nextUtcDate(date))}T00:00:00.000Z`,
   };
 }
 
@@ -514,13 +551,25 @@ function nextUtcDate(date: string): string {
   return next.toISOString().slice(0, 10);
 }
 
+function readResetGeneration(db: UsageDb): number {
+  return (
+    db
+      .prepare("SELECT reset_generation FROM rollup_revision_counter WHERE singleton = 1")
+      .get() as { reset_generation: number }
+  ).reset_generation;
+}
+
 function readDaySnapshot(db: UsageDb, date: string): DaySnapshot {
   const dirty = db.prepare("SELECT revision FROM rollup_dirty_day WHERE date = ?").get(date) as
     { revision: number } | undefined;
   const raw = db
     .prepare("SELECT COUNT(*) AS n FROM usage_history WHERE DATE(timestamp) = ?")
     .get(date) as { n: number };
-  return { revision: dirty?.revision ?? null, rawCount: raw.n };
+  return {
+    revision: dirty?.revision ?? null,
+    rawCount: raw.n,
+    resetGeneration: readResetGeneration(db),
+  };
 }
 
 /**
@@ -532,9 +581,9 @@ export async function publishDay(
   options: PublishOptions = {}
 ): Promise<PublishResult> {
   const db = getDbInstance();
+  if (isDayRebuildBlocked(db, date)) return { published: false, reason: "retired" };
   const bounds = dayBounds(date);
   const snapshot = db.transaction(() => readDaySnapshot(db, date))() as DaySnapshot;
-  if (options.pause) await options.pause();
 
   if (snapshot.rawCount === 0 && snapshot.revision === null) {
     const existing = db
@@ -543,28 +592,45 @@ export async function publishDay(
     if (existing.n > 0) return { published: false, reason: "retired" };
   }
 
-  const priced = (await priceRange(db, bounds.fromIso, bounds.toIso)).rows.filter(
+  const priced = (await priceRange(db, bounds.fromIso, bounds.toIso, date)).rows.filter(
     (row) => row.date === date
   );
+  // Test seam after the pricing snapshot, before the atomic revision check.
+  if (options.pause) await options.pause();
 
   let stale = false;
+  let retired = false;
   try {
     db.immediate(() => {
+      if (options.canCommit && !options.canCommit(db)) {
+        stale = true;
+        return;
+      }
+      if (isDayRebuildBlocked(db, date)) {
+        retired = true;
+        return;
+      }
       const current = readDaySnapshot(db, date);
-      if (current.revision !== snapshot.revision) {
+      if (
+        current.revision !== snapshot.revision ||
+        current.resetGeneration !== snapshot.resetGeneration
+      ) {
         stale = true;
         return;
       }
       db.prepare("DELETE FROM usage_daily_summary WHERE date = ?").run(date);
       const upsert = summaryUpsert(db);
       for (const row of priced) upsert.run(...summaryValues(row));
-      db.prepare("DELETE FROM rollup_dirty_day WHERE date = ?").run(date);
+      db.prepare("UPDATE rollup_dirty_day SET published_revision = revision WHERE date = ?").run(
+        date
+      );
       options.onCommit?.(db);
     });
   } catch (error) {
     if (isWriteLockError(error)) return { published: false, reason: "busy" };
     throw error;
   }
+  if (retired) return { published: false, reason: "retired" };
   if (stale) return { published: false, reason: "stale" };
 
   return { published: true, reason: "ok" };
@@ -575,28 +641,41 @@ const DAILY_TIER = "daily";
 type RollupState = {
   lastCompleted: string | null;
   reading: string | null;
+  token: string | null;
+  expiresAt: number | null;
 };
 
-type RollupOptions = {
-  pause?: () => void;
-};
+const DAILY_LEASE_MS = 5 * 60 * 1000;
+type RollupOptions = { pause?: () => void };
 
 function readRollupState(db: UsageDb): RollupState {
   const row = db
-    .prepare("SELECT last_completed_date, reading_date FROM rollup_state WHERE tier = ?")
+    .prepare(
+      "SELECT last_completed_date, reading_date, reading_token, reading_expires_at FROM rollup_state WHERE tier = ?"
+    )
     .get(DAILY_TIER) as
-    { last_completed_date: string | null; reading_date: string | null } | undefined;
-  return { lastCompleted: row?.last_completed_date ?? null, reading: row?.reading_date ?? null };
+    | {
+        last_completed_date: string | null;
+        reading_date: string | null;
+        reading_token: string | null;
+        reading_expires_at: number | null;
+      }
+    | undefined;
+  return {
+    lastCompleted: row?.last_completed_date ?? null,
+    reading: row?.reading_date ?? null,
+    token: row?.reading_token ?? null,
+    expiresAt: row?.reading_expires_at ?? null,
+  };
 }
 
-function writeRollupState(db: UsageDb, state: RollupState): void {
-  db.prepare(
-    `INSERT INTO rollup_state (tier, last_completed_date, reading_date)
-     VALUES (?, ?, ?)
-     ON CONFLICT (tier) DO UPDATE SET
-       last_completed_date = excluded.last_completed_date,
-       reading_date = excluded.reading_date`
-  ).run(DAILY_TIER, state.lastCompleted, state.reading);
+function hasLiveClaim(state: RollupState): boolean {
+  return (
+    state.reading !== null &&
+    state.token !== null &&
+    state.expiresAt !== null &&
+    state.expiresAt > Date.now()
+  );
 }
 
 function previousUtcDate(date: string): string {
@@ -611,65 +690,69 @@ function earliestUsageDate(db: UsageDb): string | null {
   return row.day;
 }
 
-/**
- * Publish each closed UTC day through yesterday. The day being read is recorded
- * before it is priced and cleared with the publish, so a second call sees it
- * and returns without reading.
- */
+/** Publish closed UTC days, including dirty older days, under fenced leases. */
 export async function runDailyRollup(now: Date, options: RollupOptions = {}): Promise<void> {
   const db = getDbInstance();
   const yesterday = previousUtcDate(now.toISOString().slice(0, 10));
-  const state = db.transaction(() => readRollupState(db))() as RollupState;
-  if (state.reading !== null) return;
+  const state = readRollupState(db);
+  if (hasLiveClaim(state)) return;
 
+  const dirty = db
+    .prepare(
+      `SELECT date FROM rollup_dirty_day WHERE date <= ? AND revision > published_revision
+     AND NOT EXISTS (SELECT 1 FROM usage_daily_summary s
+       WHERE s.date = rollup_dirty_day.date AND s.raw_rebuild_safe = 0)
+     ORDER BY date`
+    )
+    .all(yesterday) as Array<{ date: string }>;
+  const dates = new Set(dirty.map((row) => row.date));
   const start =
     state.lastCompleted === null ? earliestUsageDate(db) : nextUtcDate(state.lastCompleted);
-  if (start === null || start > yesterday) return;
+  if (start !== null) {
+    for (let date = start; date <= yesterday; date = nextUtcDate(date)) dates.add(date);
+  }
 
-  for (let date = start; date <= yesterday; date = nextUtcDate(date)) {
-    // immediate() is typed to return void, so the result is captured inside the
-    // callback. BEGIN IMMEDIATE takes the write lock before the read, which a
-    // deferred transaction does not do until the first write.
+  for (const date of [...dates].sort()) {
+    const token = randomUUID();
     let held = false;
-    let release = true;
     db.immediate(() => {
       options.pause?.();
       const current = readRollupState(db);
-      if (current.reading !== null) return;
-      writeRollupState(db, { lastCompleted: current.lastCompleted, reading: date });
+      if (hasLiveClaim(current)) return;
+      db.prepare(
+        `INSERT INTO rollup_state (tier, last_completed_date, reading_date, reading_token, reading_expires_at)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(tier) DO UPDATE SET reading_date = excluded.reading_date,
+           reading_token = excluded.reading_token, reading_expires_at = excluded.reading_expires_at`
+      ).run(DAILY_TIER, current.lastCompleted, date, token, Date.now() + DAILY_LEASE_MS);
       held = true;
     });
     if (!held) return;
-
+    const ownsClaim = (tx: UsageDb) => {
+      const current = readRollupState(tx);
+      return current.reading === date && current.token === token;
+    };
     let published: PublishResult;
     try {
       published = await publishDay(date, {
+        canCommit: ownsClaim,
         onCommit: (tx) => {
-          const current = readRollupState(tx);
-          if (current.reading !== date) return;
-          const expected =
-            current.lastCompleted === null ? date : nextUtcDate(current.lastCompleted);
-          if (expected !== date) return;
-          writeRollupState(tx, { lastCompleted: date, reading: null });
-          release = false;
+          tx.prepare(
+            `UPDATE rollup_state SET last_completed_date = CASE
+               WHEN last_completed_date IS NULL OR last_completed_date < ? THEN ? ELSE last_completed_date END,
+             reading_date = NULL, reading_token = NULL, reading_expires_at = NULL
+             WHERE tier = ? AND reading_token = ?`
+          ).run(date, date, DAILY_TIER, token);
         },
       });
-    } catch (error) {
-      releaseHold(db, date);
-      throw error;
+    } finally {
+      // An expired owner must never clear a replacement owner's live claim.
+      db.prepare(
+        "UPDATE rollup_state SET reading_date = NULL, reading_token = NULL, reading_expires_at = NULL WHERE tier = ? AND reading_token = ?"
+      ).run(DAILY_TIER, token);
     }
-
-    if (release) releaseHold(db, date);
-    if (!published.published) return;
+    if (!published.published && published.reason !== "retired") return;
   }
-}
-
-function releaseHold(db: UsageDb, date: string): void {
-  db.transaction(() => {
-    const current = readRollupState(db);
-    if (current.reading !== date) return;
-    writeRollupState(db, { lastCompleted: current.lastCompleted, reading: null });
-  })();
 }
 
 /**

@@ -158,3 +158,51 @@ test("rows inside the retention window are left alone", async () => {
   assert.equal(rawTeamRows("team-a").n, 1, "the row is younger than retention");
   assert.deepEqual(teamSummaryRows("team-a"), [], "and is not summarised early");
 });
+
+test("startup deletion blocks rebuilding the archived summary from late raw rows", async () => {
+  resetStorage();
+  const { publishDay } = await import("../../src/lib/usage/aggregateHistory.ts");
+  const { saveRequestUsage } = await import("../../src/lib/usage/usageHistory.ts");
+  insertTeamUsage({ timestamp: "2026-01-01T12:00:00.000Z", teamId: null });
+  insertTeamUsage({ timestamp: "2026-01-01T13:00:00.000Z", teamId: null });
+  await publishDay("2026-01-01");
+  await runStartupCleanup("2026-01-03T12:00:00.000Z", 1);
+  await saveRequestUsage({
+    provider: "anthropic",
+    model: "claude",
+    timestamp: "2026-01-01T14:00:00.000Z",
+    success: true,
+    tokens: { input: 10, output: 1 },
+  });
+  assert.equal((await publishDay("2026-01-01")).reason, "retired");
+  const summary = core
+    .getDbInstance()
+    .prepare(
+      "SELECT SUM(total_requests) AS n, MIN(raw_rebuild_safe) AS safe FROM usage_daily_summary WHERE date = ?"
+    )
+    .get("2026-01-01") as { n: number; safe: number };
+  assert.deepEqual({ ...summary }, { n: 2, safe: 0 });
+});
+
+test("startup retirement marking failure leaves raw rows and summary intact", async () => {
+  resetStorage();
+  const { publishDay } = await import("../../src/lib/usage/aggregateHistory.ts");
+  const timestamp = "2026-01-01T12:00:00.000Z";
+  insertTeamUsage({ timestamp, teamId: null });
+  await publishDay("2026-01-01");
+  const db = core.getDbInstance();
+  db.exec(`CREATE TRIGGER reject_startup_retirement
+    BEFORE UPDATE OF raw_rebuild_safe ON usage_daily_summary
+    WHEN NEW.raw_rebuild_safe = 0 BEGIN SELECT RAISE(ABORT, 'test marker failure'); END`);
+  const result = await runStartupCleanup("2026-01-03T12:00:00.000Z", 1);
+  assert.equal(result.deletedUsage, 0);
+  assert.equal(usageRowsAt(timestamp).n, 1);
+  assert.equal(
+    (
+      db.prepare("SELECT raw_rebuild_safe AS safe FROM usage_daily_summary").get() as {
+        safe: number;
+      }
+    ).safe,
+    1
+  );
+});

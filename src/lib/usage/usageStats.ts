@@ -146,6 +146,7 @@ function buildUsageSourceSql(aggregationEnabled: boolean) {
       1 as request_count
     FROM usage_history
     WHERE DATE(timestamp) > ?
+       OR NOT EXISTS (SELECT 1 FROM usage_daily_summary s WHERE s.date = DATE(usage_history.timestamp))
 
     UNION ALL
 

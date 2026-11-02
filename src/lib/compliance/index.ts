@@ -525,13 +525,23 @@ export async function cleanupExpiredLogs() {
     } catch (error) {
       foldError = error;
     }
-    deletedUsage = db
-      .prepare(
-        `DELETE FROM usage_history WHERE timestamp < ?
-         AND (billing_team_id IS NULL OR billing_team_id = ''
-           OR team_rollup_processed_at IS NOT NULL)`
-      )
-      .run(usageCutoff).changes;
+    deletedUsage = db.transaction(() => {
+      // Once any source rows leave, that day's summary must not be rebuilt
+      // from a partial late-arrival set. Keep the marker and delete atomic.
+      db.prepare(
+        `UPDATE usage_daily_summary SET raw_rebuild_safe = 0
+         WHERE date IN (SELECT DATE(timestamp) FROM usage_history WHERE timestamp < ?
+           AND (billing_team_id IS NULL OR billing_team_id = ''
+             OR team_rollup_processed_at IS NOT NULL))`
+      ).run(usageCutoff);
+      return db
+        .prepare(
+          `DELETE FROM usage_history WHERE timestamp < ?
+           AND (billing_team_id IS NULL OR billing_team_id = ''
+             OR team_rollup_processed_at IS NOT NULL)`
+        )
+        .run(usageCutoff).changes;
+    })();
     if (foldError) {
       console.error(
         "[compliance] Team usage fold failed; unmarked Team rows are kept, not deleted",

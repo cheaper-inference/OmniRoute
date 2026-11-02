@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
-import { RESET_USAGE_HISTORY_PERIODS, resetUsageHistory } from "@/lib/db/cleanup";
+import {
+  RESET_USAGE_HISTORY_PERIODS,
+  resetUsageHistory,
+  UsageResetBoundaryError,
+} from "@/lib/db/cleanup";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 
@@ -61,7 +65,12 @@ export async function POST(request: Request) {
       },
       { status: result.errors > 0 ? 500 : 200 }
     );
-  } catch {
+  } catch (error) {
+    if (error instanceof UsageResetBoundaryError) {
+      return NextResponse.json(buildErrorBody(409, UsageResetBoundaryError.publicMessage), {
+        status: 409,
+      });
+    }
     return NextResponse.json(buildErrorBody(500, "Failed to reset usage history"), {
       status: 500,
     });

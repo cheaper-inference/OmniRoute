@@ -162,13 +162,15 @@ type UsageDb = ReturnType<typeof getDbInstance>;
 
 /** Next monotonic revision. The caller already holds the write transaction. */
 export function nextRevision(db: UsageDb): number {
-  const current = db.prepare("SELECT MAX(revision) AS revision FROM rollup_dirty_day").get() as {
-    revision: number | null;
-  };
-  return (current?.revision ?? 0) + 1;
+  const current = db
+    .prepare(
+      "UPDATE rollup_revision_counter SET revision = revision + 1 WHERE singleton = 1 RETURNING revision"
+    )
+    .get() as { revision: number };
+  return current.revision;
 }
 
-function markDayDirty(db: UsageDb, timestamp: string): void {
+export function markDayDirty(db: UsageDb, timestamp: string): void {
   const day = db.prepare("SELECT DATE(?) AS day").get(timestamp) as { day: string };
   db.prepare(
     `INSERT INTO rollup_dirty_day (date, revision, marked_at)

@@ -11,9 +11,9 @@ import type { SqliteAdapter } from "./adapters/types.ts";
  *    `tokens_input`/`tokens_output` and an ISO `timestamp`), which hold the current month's
  *    actual usage.
  *
- * A published day is counted from the summary. Its raw rows stay excluded while
- * the day is at or before the published pointer, which is the same cutoff the
- * analytics read uses. `daily_usage_summary` is the quota rollup and is not read here.
+ * A published key is counted from the summary. Raw rows are excluded only when
+ * their normalized provider/model/service-tier/date key has a summary, so
+ * invalidating a partial reset boundary immediately exposes surviving raw rows. `daily_usage_summary` is the quota rollup and is not read here.
  */
 export function sumUsageTokensThisMonth(db: SqliteAdapter = getDbInstance()): number {
   try {
@@ -25,9 +25,11 @@ export function sumUsageTokensThisMonth(db: SqliteAdapter = getDbInstance()): nu
              FROM usage_history
              WHERE timestamp >= strftime('%Y-%m-01T00:00:00.000Z','now')
                AND timestamp < strftime('%Y-%m-01T00:00:00.000Z','now','+1 month')
-               AND DATE(timestamp) > COALESCE(
-                 (SELECT last_completed_date FROM rollup_state WHERE tier = 'daily'),
-                 '0000-01-01'
+               AND NOT EXISTS (
+                 SELECT 1 FROM usage_daily_summary s WHERE s.date = DATE(usage_history.timestamp)
+                   AND s.provider = LOWER(usage_history.provider)
+                   AND s.model = LOWER(usage_history.model)
+                   AND s.service_tier = COALESCE(NULLIF(usage_history.service_tier, ''), 'standard')
                )
            ), 0) +
            COALESCE((

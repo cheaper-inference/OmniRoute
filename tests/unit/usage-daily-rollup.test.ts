@@ -296,6 +296,19 @@ test("cleanup does not republish a date it already retired", async () => {
   assert.equal(rawRows("2026-01-01"), 1);
 });
 
+test("cleanup preserves an archived day when a real late write marks it dirty", async () => {
+  await recordUsageRow("2026-01-01");
+  await recordUsageRow("2026-01-01");
+  await retire("2026-01-01");
+  assert.equal(summaryRequests("2026-01-01"), 2);
+  assert.equal(rawRows("2026-01-01"), 0);
+  await recordUsageRow("2026-01-01");
+  assert.equal(typeof revision("2026-01-01"), "number");
+  await cleanup.cleanupUsageHistory();
+  assert.equal(summaryRequests("2026-01-01"), 2);
+  assert.equal(rawRows("2026-01-01"), 1);
+});
+
 test("a null pointer reads raw rows only", () => {
   const { unifiedSource } = buildUnifiedSource({
     sinceIso: "2026-01-01T00:00:00Z",
@@ -657,4 +670,108 @@ test("a usage reset deletes the published usage day", async () => {
   assert.equal(scoped.errors, 0);
   assert.equal(scoped.deletedDailySummary, 1);
   assert.equal(summaryRequests(day), 0);
+});
+
+test("all publishers preserve a retired day, including a new late provider", async () => {
+  const day = "2026-01-01";
+  await recordUsageRow(day);
+  await recordUsageRow(day);
+  await retire(day);
+  await recordUsageRow(day);
+  insertUsageRow({ day, provider: "new-provider" });
+  assert.equal((await aggregateHistory.publishDay(day)).reason, "retired");
+  const range = await aggregateHistory.rollupUsageHistoryBeforeDate("2026-01-02");
+  assert.equal(range.errors, 0);
+  assert.equal(range.inserted, 0);
+  assert.equal(summaryRequests(day), 2);
+  assert.equal(rawRows(day), 2);
+});
+
+test("retirement during pricing is rechecked before replacing the summary", async () => {
+  const day = "2026-01-01";
+  await recordUsageRow(day);
+  await recordUsageRow(day);
+  const result = await aggregateHistory.publishDay(day, {
+    pause: async () => {
+      await retire(day);
+      await recordUsageRow(day);
+    },
+  });
+  assert.equal(result.reason, "retired");
+  assert.equal(summaryRequests(day), 2);
+  assert.equal(rawRows(day), 1);
+});
+
+test("complete published raw rows can still be retired", async () => {
+  const day = "2026-01-01";
+  await recordUsageRow(day);
+  await aggregateHistory.runDailyRollup(new Date("2026-01-02T00:00:00Z"));
+  assert.equal(rawRows(day), 1);
+  assert.equal((await retire(day)).errors, 0);
+  assert.equal(rawRows(day), 0);
+  assert.equal(summaryRequests(day), 1);
+});
+
+test("failed retirement marking rolls back the raw deletion and summary", async () => {
+  const day = "2026-01-01";
+  await recordUsageRow(day);
+  core.getDbInstance().exec(`CREATE TRIGGER reject_retirement
+    BEFORE UPDATE OF raw_rebuild_safe ON usage_daily_summary
+    WHEN NEW.raw_rebuild_safe = 0 BEGIN SELECT RAISE(ABORT, 'test retirement failure'); END`);
+  assert.equal((await retire(day)).errors, 1);
+  assert.equal(rawRows(day), 1);
+  assert.equal(summaryRequests(day), 0);
+  assert.equal(pointer(), null);
+});
+
+test("migration conservatively protects old summaries and reset removes that protection", async () => {
+  const day = "2026-01-01";
+  const db = core.getDbInstance();
+  db.exec("ALTER TABLE usage_daily_summary DROP COLUMN raw_rebuild_safe");
+  insertPublishedDay({ day, requests: 7, input: 70, output: 10 });
+  const sql = fs.readFileSync(
+    new URL("../../src/lib/db/migrations/226_usage_summary_rebuild_safety.sql", import.meta.url),
+    "utf8"
+  );
+  assert.throws(() =>
+    db.transaction(() => {
+      db.exec(sql);
+      throw new Error("rollback");
+    })()
+  );
+  assert.equal(
+    (db.prepare("PRAGMA table_info(usage_daily_summary)").all() as Array<{ name: string }>).some(
+      (column) => column.name === "raw_rebuild_safe"
+    ),
+    false
+  );
+  db.transaction(() => db.exec(sql))();
+  await recordUsageRow(day);
+  assert.equal((await aggregateHistory.publishDay(day)).reason, "retired");
+  assert.equal(summaryRequests(day), 7);
+  assert.equal(rawRows(day), 1);
+  assert.equal((await cleanup.resetUsageHistory("all")).errors, 0);
+  await recordUsageRow(day);
+  assert.equal((await aggregateHistory.publishDay(day)).published, true);
+  assert.equal(summaryRequests(day), 1);
+});
+
+test("reopening the database does not reapply migration 226", async () => {
+  const day = "2026-01-01";
+  await recordUsageRow(day);
+  await retire(day);
+  core.resetDbInstance();
+  const db = core.getDbInstance();
+  const applied = db
+    .prepare("SELECT COUNT(*) AS n FROM _omniroute_migrations WHERE version = 226")
+    .get() as { n: number };
+  assert.equal(applied.n, 1);
+  assert.equal(
+    (db.prepare("PRAGMA table_info(usage_daily_summary)").all() as Array<{ name: string }>).filter(
+      (column) => column.name === "raw_rebuild_safe"
+    ).length,
+    1
+  );
+  assert.equal(summaryRequests(day), 1);
+  assert.equal((await aggregateHistory.publishDay(day)).reason, "retired");
 });

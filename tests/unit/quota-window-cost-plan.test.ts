@@ -52,10 +52,11 @@ test("the three quota cost queries use the expression index", () => {
 
 test("the daily rollup range scan stays on its own index", async () => {
   const { PRICE_RANGE_FROM } = await import("../../src/lib/usage/aggregateHistory.ts");
-  const text = planOf(
-    `SELECT * ${PRICE_RANGE_FROM}`,
-    ["2026-10-29T00:00:00.000Z", "2026-10-22T00:00:00.000Z", "2026-10-22T00:00:00.000Z"]
-  );
+  const text = planOf(`SELECT * ${PRICE_RANGE_FROM}`, [
+    "2026-10-29T00:00:00.000Z",
+    "2026-10-22T00:00:00.000Z",
+    "2026-10-22T00:00:00.000Z",
+  ]);
   assert.match(text, /idx_uh_provider_model_timestamp/);
   assert.doesNotMatch(text, /idx_uh_provider_timestamp/);
 });
