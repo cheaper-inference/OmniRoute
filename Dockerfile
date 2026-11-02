@@ -4,7 +4,7 @@
 # trusts the compromised eMudhra intermediates (https://emudhra.we-have-a-problem.com/).
 # 26.12.1 is the first 26.x that rejects them; tests/unit/build/docker-ca-baseline.test.mjs
 # keeps it from going below that.
-FROM node:26.12.1-trixie-slim AS base
+FROM node:26.13.0-trixie-slim AS base
 WORKDIR /app
 
 # Mirrors for builders whose network cannot reach the default sources
