@@ -28,6 +28,11 @@ const adapters: Record<string, string> = {
   "src/lib/db/apiKeys": `
     export async function getApiKeyMetadata(){return {id:"fixture",scopes:["manage"]};}
     export async function validateApiKey(key){return key==="synthetic-management-key";}`,
+  "src/lib/db/ssoIdentities": `
+    export function getSsoShadowSecret(){throw new Error("Unexpected fixture SSO lookup");}
+    export function provisionSsoIdentity(){throw new Error("Unexpected fixture SSO provisioning");}`,
+  "src/lib/db/apiKeyGroups": `
+    export function filterExistingActiveKeyGroupIds(){throw new Error("Unexpected fixture SSO groups");}`,
   "src/sse/services/auth": `
     export function extractApiKey(request){return request.headers.get("authorization")?.slice(7)||null;}
     export async function isValidApiKey(key){return key==="synthetic-management-key";}
@@ -63,7 +68,7 @@ for (const basePath of ["", "/omniroute"]) {
       let child: ChildProcess | undefined;
       let closed: Promise<unknown[]> | undefined;
       try {
-        await build({
+        const result = await build({
           stdin: {
             contents: `
             export {runAuthzPipeline} from "./src/server/authz/pipeline";
@@ -74,6 +79,7 @@ for (const basePath of ["", "/omniroute"]) {
           },
           outfile: bundle,
           bundle: true,
+          metafile: true,
           platform: "node",
           format: "cjs",
           packages: "external",
@@ -104,6 +110,13 @@ for (const basePath of ["", "/omniroute"]) {
             },
           ],
         });
+        assert.deepEqual(
+          Object.keys(result.metafile!.inputs).filter(
+            (file) => !file.startsWith("fixture:") && /(?:^|\/)src\/lib\/db\//.test(file)
+          ),
+          [],
+          "HTTP fixture must not bundle real database modules"
+        );
         const write = (name: string, text: string) => {
           const target = path.join(root, name);
           fs.mkdirSync(path.dirname(target), { recursive: true });

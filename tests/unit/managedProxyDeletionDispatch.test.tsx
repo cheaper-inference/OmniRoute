@@ -24,6 +24,19 @@ vi.mock("@/lib/db/apiKeys", () => ({
   getApiKeyMetadata: async () => ({ id: "synthetic-key", scopes: ["manage"] }),
   validateApiKey: async () => state.validKey,
 }));
+vi.mock("@/lib/db/ssoIdentities", () => ({
+  getSsoShadowSecret: () => {
+    throw new Error("Unexpected fixture SSO lookup");
+  },
+  provisionSsoIdentity: () => {
+    throw new Error("Unexpected fixture SSO provisioning");
+  },
+}));
+vi.mock("@/lib/db/apiKeyGroups", () => ({
+  filterExistingActiveKeyGroupIds: () => {
+    throw new Error("Unexpected fixture SSO groups");
+  },
+}));
 vi.mock("@/sse/services/auth", () => ({
   extractApiKey: (request: Request) => request.headers.get("authorization")?.slice(7) || null,
   isValidApiKey: async () => state.validKey,
