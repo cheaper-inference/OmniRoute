@@ -33,7 +33,7 @@ vi.mock("next-intl/server", () => ({ getTranslations: async () => (key: string) 
 
 vi.mock("fumadocs-ui/layouts/docs/page", () => ({
   DocsPage: ({ toc, children }: { toc: unknown; children: React.ReactNode }) => (
-    <main data-toc={JSON.stringify(toc)}>{children}</main>
+    <main data-toc={encodeURIComponent(JSON.stringify(toc))}>{children}</main>
   ),
   DocsBody: ({ children }: { children: React.ReactNode }) => <article>{children}</article>,
 }));
@@ -116,17 +116,19 @@ async function renderDoc(slug: string[], cookie?: string) {
 }
 
 const tocOf = (html: string) =>
-  JSON.parse(
-    (html.match(/data-toc="([^"]*)"/)?.[1] ?? "[]")
-      .replaceAll("&quot;", '"')
-      .replaceAll("&amp;", "&")
-      .replaceAll("&#x27;", "'")
-  );
+  JSON.parse(decodeURIComponent(html.match(/data-toc="([^"]*)"/)?.[1] ?? "%5B%5D"));
 
 describe("translated /docs pages (#18699)", () => {
   let tmpRoot: string;
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    // Load the page and its lazy jsdom/marked imports up front: on a busy runner that alone can
+    // outlast the first test's timeout.
+    await Promise.all([
+      import("../../src/app/docs/[...slug]/page"),
+      import("../../src/lib/docsSanitizer"),
+      import("marked"),
+    ]);
     tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "docs-i18n-18699-"));
     writeMirror(tmpRoot, "pt-BR", "getting-started/QUICK-START.md", QUICK_START_PT);
     writeMirror(
@@ -182,7 +184,7 @@ describe("translated /docs pages (#18699)", () => {
       recursive: true,
     });
     vi.spyOn(process, "cwd").mockReturnValue(tmpRoot);
-  });
+  }, 180_000);
 
   afterAll(() => {
     vi.restoreAllMocks();
