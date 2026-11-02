@@ -14,7 +14,7 @@ import {
   findField,
   decodeStringField,
 } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
-import { processFrame, type StreamCtx } from "../../open-sse/executors/cursor.ts";
+import { newStreamCtx, processFrame } from "../../open-sse/executors/cursor.ts";
 
 describe("Part B - Cursor interaction_query auto-response", () => {
   it("decodes interaction_query with id and variantField", () => {
@@ -74,7 +74,8 @@ describe("Part B - Cursor interaction_query auto-response", () => {
 
     const irFields = decodeFields(irField.bytes);
     const idField = findField(irFields, 1);
-    assert.equal(Number(idField?.varint), 101);
+    assert.ok(idField && idField.wireType === 0);
+    assert.equal(Number(idField.varint), 101);
 
     const variantField = findField(irFields, 3);
     assert.ok(variantField && variantField.wireType === 2);
@@ -131,25 +132,7 @@ describe("Part B - Cursor interaction_query auto-response", () => {
       },
     } as unknown as ClientHttp2Stream;
 
-    const ctx: StreamCtx = {
-      controller: {
-        enqueue() {},
-        close() {},
-        error() {},
-      } as unknown as ReadableStreamDefaultController<Uint8Array>,
-      encoder: new TextEncoder(),
-      created: 12345,
-      model: "cursor-fast",
-      totalText: "",
-      thinkingText: "",
-      receivedText: false,
-      emittedRoleChunk: false,
-      endReason: null,
-      toolCalls: [],
-      toolCallArgBuffers: new Map(),
-      toolCallIndexMap: new Map(),
-      requiresColdResume: false,
-    };
+    const ctx = newStreamCtx("cursor-fast", () => {});
 
     const acked = new Set<string>();
 

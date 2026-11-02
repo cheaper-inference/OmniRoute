@@ -37,6 +37,45 @@ export function isPlanningLeakPrefix(text: string): boolean {
   return true;
 }
 
+type JsonScanState = { depth: number; inString: boolean; escaped: boolean };
+
+function advanceInsideString(state: JsonScanState, ch: string): void {
+  if (state.escaped) {
+    state.escaped = false;
+  } else if (ch === "\\") {
+    state.escaped = true;
+  } else if (ch === '"') {
+    state.inString = false;
+  }
+}
+
+function advanceOutsideString(state: JsonScanState, ch: string): void {
+  if (ch === '"') {
+    state.inString = true;
+  } else if (ch === "{") {
+    state.depth += 1;
+  } else if (ch === "}") {
+    state.depth -= 1;
+  }
+}
+
+/** Index of the `}` closing the object that opens at `text[0]`, or -1 if it never closes. */
+function findJsonObjectEnd(text: string): number {
+  const state: JsonScanState = { depth: 0, inString: false, escaped: false };
+
+  for (let index = 0; index < text.length; index += 1) {
+    const ch = text[index];
+    if (state.inString) {
+      advanceInsideString(state, ch);
+      continue;
+    }
+    advanceOutsideString(state, ch);
+    if (ch === "}" && state.depth === 0) return index;
+  }
+
+  return -1;
+}
+
 export function splitLeadingJsonObject(
   text: string
 ): { prefixLength: number; jsonText: string; rest: string } | undefined {
@@ -44,45 +83,14 @@ export function splitLeadingJsonObject(
   const trimmed = text.slice(prefixLength);
   if (!trimmed.startsWith("{")) return undefined;
 
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
+  const endIndex = findJsonObjectEnd(trimmed);
+  if (endIndex === -1) return undefined;
 
-  for (let index = 0; index < trimmed.length; index += 1) {
-    const ch = trimmed[index];
-    if (inString) {
-      if (escaped) {
-        escaped = false;
-        continue;
-      }
-      if (ch === "\\") {
-        escaped = true;
-        continue;
-      }
-      if (ch === '"') inString = false;
-      continue;
-    }
-    if (ch === '"') {
-      inString = true;
-      continue;
-    }
-    if (ch === "{") {
-      depth += 1;
-      continue;
-    }
-    if (ch !== "}") continue;
-    depth -= 1;
-    if (depth !== 0) continue;
-
-    const jsonText = trimmed.slice(0, index + 1);
-    return {
-      prefixLength: prefixLength + index + 1,
-      jsonText,
-      rest: trimmed.slice(index + 1),
-    };
-  }
-
-  return undefined;
+  return {
+    prefixLength: prefixLength + endIndex + 1,
+    jsonText: trimmed.slice(0, endIndex + 1),
+    rest: trimmed.slice(endIndex + 1),
+  };
 }
 
 export type BufferedPlanningResult =

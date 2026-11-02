@@ -25,6 +25,21 @@ describe("Part C - Antigravity Gemini planning-JSON leak stripping", () => {
     assert.equal(split.rest, "\nActual response");
   });
 
+  it("keeps braces and escaped quotes inside JSON strings out of the depth count", () => {
+    const leaked = '  {"thought":"a } \\" { b","nested":{"k":"}"}}tail';
+    const split = splitLeadingJsonObject(leaked);
+    assert.ok(split);
+    assert.equal(split.jsonText, '{"thought":"a } \\" { b","nested":{"k":"}"}}');
+    assert.equal(split.rest, "tail");
+    assert.equal(split.prefixLength, leaked.length - "tail".length);
+  });
+
+  it("returns undefined for an unterminated object and for non-object text", () => {
+    assert.equal(splitLeadingJsonObject('{"thought":"open'), undefined);
+    assert.equal(splitLeadingJsonObject('{"thought":"closed quote"'), undefined);
+    assert.equal(splitLeadingJsonObject("plain text"), undefined);
+  });
+
   it("consumePlanningLeak handles complete leak, incomplete buffer, and plain text", () => {
     const leak = consumePlanningLeak('{"thought":"planning..."}\nVisible text', false);
     assert.deepEqual(leak, { kind: "leak", visibleText: "\nVisible text" });
