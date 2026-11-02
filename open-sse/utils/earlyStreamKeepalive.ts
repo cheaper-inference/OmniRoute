@@ -38,12 +38,13 @@ import { mergeAbortSignals } from "../executors/base/mergeAbortSignals.ts";
 
 const ENCODER = new TextEncoder();
 const KEEPALIVE_FRAME = ENCODER.encode(": keepalive\n\n");
-// OpenAI-compatible keepalive: a syntactically valid empty streaming chunk.
+// OpenAI-compatible keepalive: a JSON chunk without an application choice.
 // Some OpenAI-compatible clients parse every non-empty SSE line as JSON and
 // reject legal SSE comments before their first provider chunk arrives.
-// id/model stay brand-neutral — these frames go to the client, not upstream.
+// An empty delta before the assistant role creates an untyped LangChain message
+// and drops later tool calls (#18410). No choices also avoids claiming its ID.
 export const OPENAI_KEEPALIVE_FRAME = ENCODER.encode(
-  'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk","created":0,"model":"keepalive","choices":[{"index":0,"delta":{},"finish_reason":null}]}\n\n'
+  'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk","created":0,"model":"keepalive","choices":[]}\n\n'
 );
 // The first slow-path frame must be a valid OpenAI chunk without creating
 // visible reasoning that clients persist into the conversation.

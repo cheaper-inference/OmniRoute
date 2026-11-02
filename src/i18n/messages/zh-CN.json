@@ -3052,7 +3052,7 @@
     "piModelHelp": "Pi 不会自动发现自定义端点—模型，您选择的模型会显式写入models.json中。",
     "piManualConfigTitle": "或者手动编辑~/.pi/agent/models.json",
     "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
-    "piManualConfigHint": "然后启动 Pi 并选择omniroute提供商。设置PI_CODING_AGENT_DIR以移动整个代理目录。",
+    "piManualConfigHint": "然后启动 Pi 并选择omniroute提供者。设置PI_CODING_AGENT_DIR以移动整个代理目录。",
     "piUnownedNote": "该条目是在OmniRoute之外添加的（例如 pi-gui 的自定义端点）。申请就会采纳；重置仅删除OmniRoute写入的条目。",
     "whenToUseLabel": "何时使用",
     "openToolDocs": "打开工具文档",
@@ -3378,7 +3378,7 @@
     "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "使用可从运行 Pi 的机器访问的URL 。与 OpenAI 兼容的 /v1 端点会自动添加。",
-    "piManualMergeHint": "仅预览。将此providers.omniroute条目合并到models.json中，以便您的其他提供商和设置保持不变。",
+    "piManualMergeHint": "仅预览。将此providers.omniroute条目合并到models.json中，以便您的其他提供者和设置保持不变。",
     "removeMapping": "移除映射",
     "customUrl": "自定义 URL",
     "customEndpointAria": "自定义端点",
@@ -11686,7 +11686,7 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth 尚未配置。在 {applicationsUrl} 注册一个 OAuth 应用，使用重定向 URI {redirectUri} 和范围 \"{scopes}\"，然后设置 {clientIdEnv}（可选地设置 {clientSecretEnv}）并重启。",
     "gitlabDuoSetupDescription": "在应用程序注册并在此 OmniRoute 实例上设置环境变量后，单击继续以开始 OAuth 登录。",
     "continue": "继续",
-    "copilotPolicyTitle": "实验提供商：政策状态不明确",
+    "copilotPolicyTitle": "实验提供者：政策状态不明确",
     "copilotPolicyLine1": "OmniRoute通过 api.githubcopilot.com 连接， GitHub尚未将其发布为通用第三方推理API。此集成是实验性的，可能会发生更改，恕不另行通知。",
     "copilotPolicyLine2": "只能连接您自己的GitHub帐户。切勿共享凭据、池帐户或尝试超出您的计划限制。",
     "copilotPolicyLine3": "免费和学生计划用户只能收到自动模型选择。您的Copilot计划条款和任何使用限制仍由您负责。",
@@ -14410,270 +14410,6 @@
       "UNPRICED_USAGE_BUDGET_POLICY": {
         "label": "未定价用量的预算策略",
         "description": "按密钥设置的每日/每周 USD 限额，如何处理其提供者/模型没有定价记录的成功用量。fail_closed（默认）会把该窗口视为已超额，确保未知成本不会绕过硬性上限。count_as_zero 把这部分用量按 $0 计入，已定价的消费仍照常限制。无论哪种策略，未定价的模型都会显示在仪表板首页。"
-      },
-      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
-        "label": "记录账户 ID 日志",
-        "description": "在 AUTH 日志行中包含账户前缀（例如 \"Using '<provider>' account: abc12345...\"）。默认关闭，使账户标识符在共享/多租户进程日志中被隐藏。与调试模式相互独立；开关调试模式不会显示此项。"
-      },
-      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
-        "label": "OIDC 启用时禁用密码登录",
-        "description": "启用 OIDC 后禁用密码登录，用户只能通过 OIDC 单点登录认证。关闭（默认）时密码登录和 OIDC 均可用。"
-      },
-      "AUDIO_REMOTE_PROVIDER_NODES": {
-        "label": "远程音频提供者节点",
-        "description": "允许 /v1/audio/* 路由使用部署在 localhost 之外的 OpenAI 兼容提供者节点。默认关闭——把音频路由到远程主机会改变出口身份，必须由运维明确决定。回环节点始终允许，不受影响。"
-      },
-      "RERANK_REMOTE_PROVIDER_NODES": {
-        "label": "远程 Rerank 提供者节点",
-        "description": "允许 POST /v1/rerank（以及记忆引擎内部经回环调用它的重排步骤）使用部署在 localhost 之外的 OpenAI 兼容提供者节点——例如运行 TEI、Infinity、vLLM 的局域网机器或 Tailscale 对端。默认关闭——路由到远程主机会改变出口身份，必须由运维明确决定。回环节点始终允许且不受影响。远程节点还须通过提供者出站 URL 策略。"
-      },
-      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
-        "label": "轮换共享出口守卫",
-        "description": "多账户轮换执行器遇到网络异常（超时、连接拒绝/重置）时，若失败账户没有专用代理，施加短冷却并在该请求的余下部分跳过其他无代理账户，而不是逐个重试。默认开启（安全：不改变出口 IP，只降低共享出口账户的延迟/冷却风险）。关闭可恢复首个无代理抛出时立即传播。"
-      },
-      "PROXY_SKIP_RECENTLY_FAILED": {
-        "label": "跳过近期失败的代理",
-        "description": "代理池和 opencode 的按账户轮换在一段进程级时间内不再选用刚失败的代理（TCP 探测被拒，或经它收到 429），该时间每次重复翻倍、有上限。不写入任何代理状态；所有候选都被搁置时选择不变。默认开启；PROXY_SKIP_RECENTLY_FAILED=false 时选择顺序与纯轮换完全一致。"
-      },
-      "PROXY_POOL_SHARED_EGRESS_ORDER": {
-        "label": "共享出口池排序",
-        "description": "对按出口地址配额的提供者，把与近期被拒成员观测到相同出口地址的池成员排在健康成员之后。只调顺序，绝不排除。依赖 PROXY_SKIP_RECENTLY_FAILED 提供它读取的拒绝信号。默认关闭：选择顺序与纯轮换完全一致。"
-      },
-      "ROTATION_ATTRIBUTION": {
-        "label": "轮换归因日志",
-        "description": "opencode 轮换记录由哪个账户服务或被跳过（仅脱敏 id，绝不记录完整账户 id），并把代理日志条目关联到其请求，便于运维区分被跳过的账户和未使用的账户。默认关闭：不写额外日志行，不写额外列。"
-      },
-      "PROXY_POOL_EGRESS_OBSERVATION": {
-        "label": "代理池出口观测",
-        "description": "在仪表盘的代理池下展示最近 24 小时服务过其成员的观测出口 IP 数量、使用它们的连接数，以及单个 IP 后最多承载的连接数。只读，由代理日志计算，绝不用于路由。默认关闭：池编辑器不变，观测路由返回 null。"
-      },
-      "PROXY_OPERATOR_EGRESS_ENABLED": {
-        "label": "运维推送出口观测",
-        "description": "接受运维按池成员推送的带日期观测地址，与日志读取合并后用于展示和池排序。默认关闭：推送路由返回 404，池读取行为与之前完全一致。"
-      },
-      "OPENCODE_RESPONSES_STALL_ROTATION": {
-        "label": "OpenCode Responses 停滞轮换",
-        "description": "对 OpenCode 执行器，监视流式 Responses 回复的首个正文字节（窗口：RESPONSES_FIRST_BYTE_TIMEOUT_MS，默认 15000）。超过窗口仍静默的 2xx Responses 流视为停滞：冷却该账户并把请求轮换到下一个账户一次；第二次停滞立即失败。默认关闭：停滞的流保持现状等待，直到流就绪超时。"
-      },
-      "OPENCODE_USER_BLOCKED_ROTATION": {
-        "label": "OpenCode user_blocked 轮换",
-        "description": "对 OpenCode 执行器，当上游返回带 user_blocked 拒绝的 403 或 451（非地域封锁、非 Cloudflare 指纹拒绝）时，冷却被拒账户并轮换到下一个账户，每请求最多一次；第二次拒绝原样返回且不记成功。默认关闭：绕过上游用户封禁看起来像是规避行为，还会把标记扩散到整个账户舰队，因此除非运维明确开启，拒绝原样返回。"
-      },
-      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
-        "label": "OpenCode 瞬时故障切换退避",
-        "description": "对 OpenCode 多账户轮换，连续两次尝试因瞬时上游错误（5xx 或空 400 拒绝）失败后，先暂停再派发到下一个账户。暂停从 1.5 秒起，每次连续失败翻倍，每次暂停上限 6 秒、每请求上限 10 秒，客户端断开时跳过，等待前释放失败响应体。默认关闭：故障切换保持立即进行。"
-      },
-      "FLUSH_EMPTY_RETRY_ENABLED": {
-        "label": "空轮次冲刷重试",
-        "description": "对翻译后的流式轮次，当上游轮次没有可用内容（仅推理完成或零有效块）时，在向客户端暴露任何内容之前，经正常凭据路径做有界重试（上限 STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX）。默认关闭：空轮次保持现状（空 200 或空内容 502）。"
-      },
-      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
-        "label": "空流兄弟恢复",
-        "description": "Claude/Codex 流式：在首个生命周期事件后短暂探测（最多 1 秒 / 64 KiB）可用输出；以无内容结束的流变为 empty_content 失败，并把现有有界重试用在另一个合格连接上（不冷却、不锁定模型），round-robin 组合在客户端断开后停止重试。探测内还把 refusal、pause_turn 和 model_context_window_exceeded 视为合法的空终止。默认关闭：就绪、空内容处理和组合重试与之前完全一致。"
-      },
-      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
-        "label": "流迟到输出探测",
-        "description": "流式输出探测：前 64 个转发块之后，每 16 块抽样一块检查首个可见输出，使迟到开始的输出仍把流标记为已产出。此后出现的孤立 5xx 保持请求级，而不再记为模型级锁定，firstOutputMs 回填为当前抽样间隔内的首个输出块。默认关闭：只探测前 64 个转发块，与之前一致。"
-      },
-      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
-        "label": "OpenCode 限流 429 提前停止",
-        "description": "对 OpenCode 多账户轮换，遇到首个被判定为真实限流的 429（带可解析 Retry-After 头，或正文指明速率/用量限制）时停止账户波次，并原样返回该上游 429（状态码、正文、Retry-After 和配额头），而不是试完所有剩余账户。未分类的 429 继续轮换。默认关闭：免费层按出口 IP 限流（#9611），每个 429 都轮换到下一账户，波次耗尽时返回最后一个上游 429。"
-      },
-      "OPENCODE_PARK_AND_RESUME": {
-        "label": "OpenCode 429 挂起恢复",
-        "description": "对 OpenCode 多账户轮换，在反复出现瞬时 429（或新的池紧张标记）后带心跳挂起请求，然后重放一段最多 3 个顺序账户的有上限行程，而不是把整个舰队扇出。默认关闭：每个 429 都轮换到下一账户，与之前一致。"
-      },
-      "STREAM_READINESS_STALL_RETRY": {
-        "label": "流就绪停滞重试",
-        "description": "对流式聊天请求，当首个上游正文在产出可用事件前停滞时，经同一路由路径以相同就绪预算做一次有界的第二次尝试，不惩罚账户。默认关闭：首个正文停滞直接判请求失败，不重试。"
-      },
-      "OPENCODE_POOL_RESELECT": {
-        "label": "OpenCode 429 池重选",
-        "description": "对 OpenCode 多账户轮换，在环境池上下文下，无代理账户从按出口配额的提供者收到 429 后，向连接池请求另一个成员做下次尝试，而不是重试同一出口地址。只排序，不排除：池耗尽时保持现状。默认关闭：每个 429 都轮换到下一账户，与之前一致。"
-      },
-      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
-        "label": "OpenCode v2 客户端指纹",
-        "description": "在 OpenCode Zen/Go 请求上发送 OpenCode v2 CLI 客户端指纹（#16571）：User-Agent opencode/latest/<2.x>/cli 与 x-opencode-client cli；仅当客户端 User-Agent 是 2.x OpenCode 客户端时才保留它；在受门控的免费层请求上不发 x-opencode-request，会话镜像到 x-opencode-session-id/x-session-affinity/x-session-id，注入的占位工具使用 v2 CLI 的 read/shell schema，丢弃 \"none\" 的 tool_choice。默认关闭：每个 OpenCode 请求逐字节保持现有身份、头和正文。"
-      },
-      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
-        "label": "OpenCode Zen 出口 IP 锁定",
-        "description": "把 OpenCode Zen（opencode-zen）加入默认出口 IP 锁定家族，一个 Zen 连接上的 429 会同时冷却共享其出口 IP 的所有兄弟 Zen 连接。默认关闭：Zen 按 key 隔离，各连接各自冷却，与之前一致。显式的 OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS 值始终优先于此标志。"
-      },
-      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
-        "label": "OpenCode 全文错误规则",
-        "description": "让内置 OpenCode 错误规则（opencode-zen、opencode-go、opencode-cli）匹配上游错误全文，使 organization_quota_exceeded 或 \"monthly usage limit reached\" 等正文标记把 429 判定为配额耗尽并施加连接级锁定。默认关闭：这些规则只看结构化错误码，此类 429 仍是短限流，与之前一致。"
-      },
-      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
-        "label": "Cloudflare Workers AI 全文错误规则",
-        "description": "让内置 Cloudflare Workers AI 错误规则匹配上游错误全文，使 \"daily free allocation\" 正文的 429 判定为配额耗尽而非短限流。默认关闭：规则只看结构化错误码，与之前一致。"
-      },
-      "CAPABILITY_FILTER_ENABLED": {
-        "label": "能力过滤器",
-        "description": "目标模型缺少所需能力（视觉、工具、结构化输出、上下文窗口）时，在派发前拒绝请求。保护绕过组合层兼容过滤器的直连单提供者请求。"
-      },
-      "USAGE_LIMIT_IGNORE_UNPRICED": {
-        "label": "USD 配额忽略未定价用量",
-        "description": "在按 key 的 USD 用量配额中，把没有价格的模型用量按 $0 计，而不是视为配额已超。默认关闭：未定价模型或路由别名可能隐藏真实花费，因此配额按失败关闭处理。"
-      },
-      "RADAR_ENABLED": {
-        "label": "Radar",
-        "description": "启用 OmniRoute Radar 模块（目录源订阅与同步）。默认关闭；启用只解锁 UI——数据同步仍需单独开启。"
-      },
-      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
-        "label": "模型端点能力门",
-        "description": "强制校验可信的模型端点标签（由提供者目录声明、从特定模型 id 推断、或由运维设置）：对模型不服务的端点，在 /v1/chat/completions、/v1/embeddings、/v1/rerank、/v1/images/generations、/v1/videos/generations、/v1/music/generations 和 /v1/audio/* 派发前以 HTTP 400 拒绝；在 /v1/models 中隐藏其标签端点没有 OmniRoute 适配器的模型；对此类模型的仪表盘模型测试返回 422。默认关闭：端点标签仅作信息展示，请求派发与之前完全一致。"
-      },
-      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
-        "label": "通用上下文交接",
-        "description": "组合路由切换模型时生成并注入对话摘要。关闭则把模型切换视为相互独立，并为所有现有和未来的组合阻止后台交接请求。"
-      },
-      "REASONING_REPLAY_ENABLED": {
-        "label": "推理重放",
-        "description": "在多轮对话间缓存并重放模型推理。关闭则停止存储和重新注入推理内容。"
-      },
-      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
-        "label": "Codex App-Server 传输",
-        "description": "允许 Codex 使用本地 app-server WebSocket JSON-RPC 传输（codexTransport=app-server）。关闭时，选择了 app-server 的连接回退到 Codex 的其他传输。"
-      },
-      "EXPOSE_CC_DISCOVERY_ALIASES": {
-        "label": "Claude Code 发现别名",
-        "description": "在 /v1/models 上公布 claude/'<provider>'/'<model>' 镜像 id，使 Claude Code 网关的模型发现能列出非 Claude 模型。警告：全局启用会让所有客户端的目录条目翻倍。"
-      },
-      "NO_THINKING_ALIAS_ENABLED": {
-        "label": "无思考模型别名",
-        "description": "no-think/'<provider>'/'<model>' 网关别名的总开关。开（默认）：/v1/models 为每个合格的带思考能力 Claude 模型公布一个无思考变体，请求中的 no-think/ id 解析回真实模型并抑制推理。关：不公布变体，no-think/ id 按未知模型 id 处理。此开关开启时，每个模型 ModelSpec.noThinkingAlias 的单独选择仍然有效。"
-      },
-      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
-        "label": "禁用思考档位变体",
-        "description": "禁止在 /v1/models 目录中生成思考档位变体（如 -low、-medium、-high）。"
-      },
-      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
-        "label": "自适应虚拟准入通道",
-        "description": "为提供者派发启用按租户自适应的虚拟准入通道（#9654）：一个租户的突发不再把另一个租户打到 503。OMNIROUTE_CHAT_VIRTUAL_LANES 环境变量优先于此仪表盘开关；变更在服务器重启后生效。"
-      },
-      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
-        "label": "功能网关镜像",
-        "description": "对规范属主没有活动凭据、但某个有活动凭据的透传网关能路由的模型，在 /v1/models 上公布 '<gateway-alias>'/'<model>' 镜像 id。警告：全局启用会为所有客户端增加目录条目。"
-      },
-      "NEWAPI_AGGREGATOR_BALANCE": {
-        "label": "New-API 聚合余额",
-        "description": "为 New-API / One-API / Sub2API 聚合兼容节点启用余额检测。启用后，设置了聚合标记的兼容节点会在仪表盘和配额预检路由中报告余额。"
-      },
-      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
-        "label": "隐藏已删除搜索连接",
-        "description": "搜索统计和最近搜索只统计仍有活连接的提供者（duckduckgo-free 等无 key 提供者始终计入）。关闭则保留所有带提供者 id 的搜索行。"
-      },
-      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
-        "label": "严格免费徽章",
-        "description": "仪表盘提供者页：只在提供者认可的信号上显示 Free 徽章——去掉显示名启发式、非布尔 free 字段，以及无文档免费层的注册提供者上的 :free 后缀。关闭则保持历史徽章规则。"
-      },
-      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
-        "label": "自动组合：空池返回 503",
-        "description": "当自动组合的候选池在工具调用预过滤前已为空（所有目标都被冷却、锁定或耗尽跳过）时，返回 503 no_eligible_targets，而不是旧版 400 \"No target supports tool calling\" capability_mismatch。默认关闭：空池保持旧版 400。"
-      },
-      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
-        "label": "Mistral 含糊 401 软锁定",
-        "description": "裸 Mistral 401（'{\"detail\":\"Unauthorized\"}'，无明确认证信号）在 key 被吊销和配额耗尽时逐字节相同。启用后，此类 401 冷却连接而不是按过期停放，一小时内最多 3 次；下一次仍按过期停放，使被吊销的 key 最终收敛。默认关闭：每个裸 Mistral 401 都按过期停放，与之前一致。"
-      },
-      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
-        "label": "Batch 与文件自动清理",
-        "description": "让自动清理扫描删除早于 OMNIROUTE_BATCH_RETENTION_DAYS 的终态（已完成/失败/取消/过期）Batch API 作业及其逐行检查点，并清除超过各自 expires_at 的上传文件 BLOB 内容。默认关闭：在运维开启前，每个现有部署完全保持这些数据不变。运维触发的 DELETE /api/v1/batches/delete-completed 路由两种情况下都不受影响——它是独立、无条件的公开 API 契约。"
-      },
-      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
-        "label": "Antigravity 账户租用",
-        "description": "把选中的 Antigravity 账户为挑选它的请求的流式生命周期保留，使并发重试或凭据交接不能重选已承诺给在飞流的账户。租用按（连接、可调用上游模型）限定范围，一个账户仍可同时服务两个不同模型。当该模型的所有合格账户都已租出时，请求返回带有限 Retry-After 的结构化 503 POOL_BUSY，而不是堆到繁忙账户上。默认关闭：账户选择与之前完全一致，不做任何保留。"
-      },
-      "COMBO_AUTO_PRUNE_STALE_STEPS": {
-        "label": "自动清理过期组合步骤",
-        "description": "对权威实时目录的模型同步成功后，移除钉在目录已不再列出的模型上的组合步骤，每个被移除步骤记一条审计。同步失败、降级或仅免费层时绝不清理，也绝不清空组合。默认关闭：过期步骤只做标记。"
-      },
-      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
-        "label": "Claude OAuth 摘要式思考",
-        "description": "让请求可读思考（thinking.display \"summarized\"）的 Claude OAuth 请求去掉 redact-thinking-2026-02-12 这个 Anthropic beta——否则 Anthropic 会返回空的、仅含签名的思考块。默认关闭：该 beta 是 Claude Code OAuth 线上指纹的一部分，OAuth 请求保持原样。API key 的 Claude 请求无此标志已支持摘要式思考；OMNIROUTE_REDACT_THINKING=false 也只在此标志开启时作用于 OAuth。"
-      },
-      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
-        "label": "Kiro 工具调用修复",
-        "description": "当流式 Kiro 响应在任何可见输出前发出畸形的 tool_call 包装（缺 input.name 或 input.arguments）时，抑制它并用一条纠正指令重发请求一次，而不是以 invalid_kiro_tool_call 结束该轮。重试多花一次 Kiro 请求；第二次失败以 kiro_tool_call_repair_retry_failed 结束该轮。默认开启。设为 false 则在首个畸形包装时直接失败该轮。"
-      },
-      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
-        "label": "models.dev 思考档位",
-        "description": "当运维未覆盖且提供者注册表也未声明时，使用 models.dev 公布的推理档位（收敛到已知档位词表），并把声明的空档位列表按\"无档位\"处理，用于 /v1/models 的 effort_tiers 和组合档位交集。默认关闭：effort_tiers 和解析出的 supportedThinkingEfforts 与之前完全一致。"
-      },
-      "LMARENA_SYNTHESIZED_CX_ENABLED": {
-        "label": "Arena 合成 cx 遥测",
-        "description": "给每个没有运维提供 providerSpecificData.cx 的 Arena（lmarena）create-evaluation 请求附带一个合成的程序化 cx 客户端交互 blob（即 arena.ai 自身对无记录交互页面发送的值）。默认关闭：cx 字段是 Arena 的反自动化信号，因此 OmniRoute 只转发运维从真实浏览器会话捕获的值（providerSpecificData.cx），否则完全不发送 cx。上游收益未经证实；仅当 Arena 开始拒绝无 cx 的请求时再启用。"
-      },
-      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
-        "label": "原生 Codex 反应式压缩",
-        "description": "让反应式（阈值）和最后手段的上下文压缩也能改写原生 Codex 透传历史（POST /v1/responses 到 codex 提供者），当它们超出上下文预算时使用 Responses input[] 适配器。默认关闭：原生 Codex 历史归 Codex 客户端所有，永不被压缩改写；超大请求保持上下文预算检查失败，与之前一致。要求全局压缩已开启且模型未被排除。"
-      },
-      "QUOTA_WINDOW_BOUNDED_PARK": {
-        "label": "配额窗口：遵守有界停放",
-        "description": "让按窗口的配额策略（账户选择使用的 session/周阈值）遵守有界耗尽停放：有上限的停放期限过后，或缓存的配额观测比停放上限更旧时，窗口停止排除该账户直到获取新的配额。默认关闭：缓存的窗口按其最后报告的百分比一直阻断到自身重置时间。"
-      },
-      "IMAGE_GENERATION_LONG_JOBS": {
-        "label": "图像生成：长作业",
-        "description": "对 OpenAI 兼容图像生成：使用连接的超时（providerSpecificData.timeoutMs），否则用中央上游 fetch 超时（FETCH_TIMEOUT_MS，再 REQUEST_TIMEOUT_MS，默认 600 秒），代替固定 120 秒图像预算；调用方取消的请求以 499 结束；让 Playground 以带保活心跳的 SSE 流接收长图像作业。默认关闭：应用固定预算且不传播调用方取消。覆盖响应体读取的截止期限始终开启。"
-      },
-      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
-        "label": "目录镜像细化",
-        "description": "细化 /v1/models 上的 claude/ 发现和功能网关镜像。默认关闭：两个镜像通道与之前行为完全一致。开启：claude/ 发现镜像还覆盖列出的推理档位变体（-low/-medium/-high/-xhigh），跳过请求路径无法实体化的内置 auto/* id，跳过已列出的别名；功能网关镜像跳过组合和 OmniRoute 合成的 id（claude/、no-think/），从 owned_by 取属主，绝不把属主当自己的网关，跳过在 blockedProviders 中禁用的网关和不在网关权威实时目录中的模型。"
-      },
-      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
-        "label": "代理健康：被拒重置失败连击",
-        "description": "在代理健康扫描中，让目标拒绝的探测（401/403/429：代理转发了，但目标拒绝了该出口 IP）像正常服务的探测一样重置代理的连续失败计数。默认关闭：拒绝保持中性并保留连击（#10654）。5xx 两种情况下都无结论，拒绝也绝不会移除、禁用或重新激活代理。"
-      },
-      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
-        "label": "Grok 订阅图像",
-        "description": "注册 xai-oauth（xao）和 grok-cli 图像路由，并把 OpenAI 质量 high/hd 映射为 xAI 的 medium。默认关闭：API key 的 xAI 图像路径保持现有 OpenAI 兼容请求，不注册订阅路由。"
-      },
-      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
-        "label": "xAI OAuth 实时模型发现",
-        "description": "用 OAuth bearer token 从 https://api.x.ai/v1/models 为 xai-oauth 连接拉取实时 xAI 模型目录，代替冻结的静态种子。默认开启。把标志设为 false 则继续用静态种子。HTTP 失败时发现路由回退到种子；标志读取本身不发 HTTP。"
-      },
-      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
-        "label": "Anthropic 兼容：对话中途 system 轮",
-        "description": "在普通 anthropic-compatible-* 中继（claude → claude 透传）上，把对话中途的 role:system 轮保留在 messages[] 里，而不是提升到顶层 system 参数，使缓存的提示词前缀跨轮稳定。仅当客户端自己发送了 mid-conversation-system-2026-04-07 这个 anthropic-beta 时生效（原样转发上游）。默认关闭：每个 system 轮与之前一样提升，因为不支持该 beta 的中继会以 400 拒绝 role:system 消息。"
-      },
-      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
-        "label": "数据库健康检查：推迟启动扫描",
-        "description": "把启动时的数据库完整性/健康检查放到服务器开始接收请求之后（经 setImmediate），而不是阻塞启动直到完成。默认关闭：启动与 #13717 之前一样阻塞在检查上，损坏的数据库仍会在服务首个请求前被抓住。开启：启动立即返回，检查（现在是有界/分页的，对真实文件型数据库还在可取消的子进程中隔离）紧随其后运行。"
-      },
-      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
-        "label": "OpenCode 已发布目录路由",
-        "description": "让没有显式注册端点的 OpenCode Zen 和 OpenCode Go 模型从每 6 小时后台读取的 models.opencode.ai 已发布目录获取请求面（@ai-sdk/openai 用 Responses，@ai-sdk/anthropic 用 Messages）。默认关闭：端点与之前一样来自注册表启发式，且从不拉取该目录。"
-      },
-      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
-        "label": "Auto 请求：解析后能力权重",
-        "description": "让 auto/* 请求（resolveModelOrError 和 auto 路由包装）用解析出的模型能力（视觉、推理、思考）和观测质量分构建候选池，像 /v1/models 目录一样一次批量读取。默认关闭：请求时快照权重与之前完全一致（能力按需解析且不进入权重）。开启：这些信号进入快照权重，候选权重乃至选择结果可能改变。"
-      },
-      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
-        "label": "自动组合：无 key 传输门",
-        "description": "把传输需要本地浏览器（browserBacked）或本地安装 CLI（isLocalCli）的无 key（免认证）提供者挡在 auto/* 候选池外，避免卡住的成员把 auto 请求拖到单目标超时（#17036）。默认关闭：每个支持模拟工具调用的免认证提供者与之前一样留在池中。直接 '<alias>'/'<model>' 调用两种方式都可用。"
-      },
-      "CODEBUDDY_CN_INLINE_REASONING": {
-        "label": "CodeBuddy CN：内联推理重放",
-        "description": "对需要推理重放的 codebuddy-cn 思考模型（DeepSeek-V4 / Kimi-K2 家族），把每个重放的 assistant reasoning_content 作为可见 '<thought>' 块内联到消息内容前面，使其在丢弃 reasoning_content 字段的网关下也能存活（#13632）。默认关闭：codebuddy-cn 请求原样发送；reasoning_content 字段本身始终保留。"
-      },
-      "PROVIDER_SAFETY_STOPS_TERMINAL": {
-        "label": "提供者安全停止：终态",
-        "description": "把显式的提供者安全停止（misalignment_policy_violation、content_policy_violation，或标记为 provider_safety_rejection 的精确旧文 'blocked by our safety systems' 拒绝）保持为终态、请求级拒绝：其代码在 HTTP、Responses、WebSocket 和已完成流错误中原样保留，组合遇到它就停止而不再重试其他目标，并取消已准入的兄弟请求（#17049）。默认关闭：这些错误保持现有处理，组合路由不变。"
-      },
-      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
-        "label": "凭据健康：重测自动禁用的连接",
-        "description": "让凭据健康扫描重测被网关自己关闭的连接（标记 autoDisabledAt；每个最多每 6 小时一次、每次扫描最多 5 个），重测通过就把连接切回开启（#16190）。默认关闭：被关闭的连接保持关闭，直到运维重新启用或重测，与之前一致。运维禁用的连接和永久封禁后关闭的连接绝不重测。"
-      },
-      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
-        "label": "凭据门：仅认证诊断",
-        "description": "收窄组合凭据门：缓存的失败凭据探测只在诊断证明是坏凭据（upstream_auth_error、auth_missing、token_expired、token_refresh_failed、reauth_required、account_deactivated、auth_required）时才阻断连接。无结论的失败（超时、限流、故障、不支持的探测和无类型的调度错误）按未知处理，连接继续接收流量。默认关闭：任何缓存的探测错误在缓存 TTL（5 分钟）内都阻断连接。"
-      },
-      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
-        "label": "组合：遇内容策略拒绝即停",
-        "description": "当组合目标返回精确的内容策略拒绝（code 或 type 为 cyber_policy / content_policy_violation）时，停止组合并返回该拒绝，即使剩余目标是不同模型，不再前进到下一目标。默认关闭：该拒绝不冷却账户也不触发提供者断路器，组合与之前一样前进到下一目标。"
-      },
-      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
-        "label": "冷却重试：跳过 403/410 拒绝",
-        "description": "当所有账户都在冷却、且最早结束的冷却由 403（拒绝访问）或 410（已删除）引起时，立即返回该拒绝，而不是等冷却结束再重发请求；续约中的 agentrouter 连接级配额 403 会以 errorCode 429 持久化，保持可重试。默认关闭：只有 401 跳过等待，每个拒绝都按到达时的状态码持久化。"
       }
     }
   },
