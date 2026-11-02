@@ -40,7 +40,9 @@ export function resolveCustomJsonNodeConfig(
  * Explicit "Send test request" for a custom JSON node: exactly ONE real request with
  * `ping` as the latest user text, through the same executor (template, auth, custom
  * headers, outbound guard, no retry) that serves chat traffic. Upstream bodies are never
- * echoed back — only the status.
+ * echoed back — only the status. It deliberately keeps the runtime outbound guard rather
+ * than the validation guard the other validate paths use: the probe has to prove the same
+ * policy chat traffic will run under.
  */
 export async function probeCustomJsonEndpoint(input: {
   baseUrl: string;
