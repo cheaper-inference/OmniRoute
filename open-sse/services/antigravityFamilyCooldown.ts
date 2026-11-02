@@ -4,9 +4,9 @@
  */
 import { lockModel } from "./accountFallback.ts";
 import {
+  type AntigravityQuotaFamily,
   getAntigravityQuotaFamily,
   isAntigravityQuotaProvider,
-  type AntigravityQuotaFamily,
 } from "./antigravityQuotaFamily.ts";
 
 type JsonRecord = Record<string, unknown>;
