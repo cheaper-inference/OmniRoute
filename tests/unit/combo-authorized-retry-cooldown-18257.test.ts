@@ -65,8 +65,44 @@ test.after(async () => {
   fs.rmSync(dataDir, { recursive: true, force: true });
 });
 
+// Every duration below is written in "base" milliseconds and multiplied by TIME_SCALE inside
+// run(), so the ordering margins (retry delay < cooldown end < fresh mutation, etc.) stay
+// proportional but are wide enough to survive a starved event loop on a loaded CI runner.
+const TIME_SCALE = 4;
+const TIGHT_BUDGET_MS = 150;
+// Budget scenarios need two waits once scaled (the 50 ms safety margin in production is NOT
+// scaled): ~600 ms for the original cooldown (700 ms) and ~450 ms for a fresh extension that
+// lands at 260 ms and runs to ~1160 ms. normalizeComboCooldownWait floors budgetMs at maxWaitMs,
+// so the tight budget is effectively the 800 ms ceiling: it fits the first wait but not the
+// second, while the 1800 ms budget fits both with the same ceiling.
+// Guard scenarios (abort, deadline, removal) fire at 65-80 ms (x TIME_SCALE) into a cooldown:
+// a long cooldown keeps the trigger well inside the wait even when timers slip under load.
+const LONG_COOLDOWN_MS = 250;
+const LONG_COOLDOWN_SETTLE_MS = 300;
+const LONG_EXTENSION = { cooldownMs: 175, changeAfterMs: 65, extendMs: 225 };
+const LONG_EXTENSION_MAX_WAIT_MS = 200;
+const SCALED_CONFIG_KEYS = ["comboTimeoutMs", "hedgeDelayMs", "retryDelayMs"];
+const SCALED_WAIT_KEYS = ["maxWaitMs", "budgetMs"];
+const SCALED_OPTION_KEYS = [
+  "cooldownMs",
+  "abortAfterMs",
+  "changeAfterMs",
+  "removeAfterMs",
+  "extendMs",
+  "settleMs",
+];
+
+function scaleKeys<T extends Record<string, unknown> | undefined>(source: T, keys: string[]): T {
+  if (!source) return source;
+  const scaled: Record<string, unknown> = { ...source };
+  for (const key of keys) {
+    if (typeof scaled[key] === "number") scaled[key] = (scaled[key] as number) * TIME_SCALE;
+  }
+  return scaled as T;
+}
+
 async function run(
-  options: {
+  rawOptions: {
     cooldownMs?: number;
     row?: Record<string, unknown>;
     config?: Record<string, unknown>;
@@ -86,6 +122,11 @@ async function run(
     credentialProbe?: "active" | "network_error" | "upstream_auth_error";
   } = {}
 ) {
+  const options = {
+    ...scaleKeys(rawOptions, SCALED_OPTION_KEYS),
+    config: scaleKeys(rawOptions.config, SCALED_CONFIG_KEYS),
+    waitSettings: scaleKeys(rawOptions.waitSettings, SCALED_WAIT_KEYS),
+  };
   const connection = await createProviderConnection({
     provider: "openai",
     authType: "apikey",
@@ -144,7 +185,7 @@ async function run(
           maxRetries: 1,
           maxSetRetries: 0,
           maxGlobalAttempts: 2,
-          retryDelayMs: 40,
+          retryDelayMs: 40 * TIME_SCALE,
           fallbackDelayMs: 0,
           ...options.config,
         },
@@ -179,7 +220,7 @@ async function run(
           if (cooledConnection) {
             timers.push(
               setTimeout(() => {
-                until = Date.now() + (options.cooldownMs ?? 120);
+                until = Date.now() + (options.cooldownMs ?? 120 * TIME_SCALE);
                 writes.push(
                   updateProviderConnection(cooledConnection.id, {
                     testStatus: "unavailable",
@@ -229,9 +270,9 @@ async function run(
         resilienceSettings: {
           comboCooldownWait: {
             enabled: true,
-            maxWaitMs: 1000,
+            maxWaitMs: 1000 * TIME_SCALE,
             maxAttempts: 3,
-            budgetMs: 1000,
+            budgetMs: 1000 * TIME_SCALE,
             ...options.waitSettings,
           },
         },
@@ -326,20 +367,21 @@ test("a positive cached probe remains visible after a persisted-cooldown retry",
 });
 
 test("a cached network_error cannot increase the existing cooldown wait budget", async () => {
-  for (const budgetMs of [200, 400]) {
+  const GENEROUS_BUDGET_MS = 450;
+  for (const budgetMs of [TIGHT_BUDGET_MS, GENEROUS_BUDGET_MS]) {
+    const generous = budgetMs === GENEROUS_BUDGET_MS;
     const { response, calls, until, connection, cachedProbe } = await run({
       credentialProbe: "network_error",
-      changeAfterMs: 65,
-      extendMs: 220,
+      ...LONG_EXTENSION,
       config: { comboTimeoutMs: 1000 },
-      waitSettings: { maxWaitMs: 200, budgetMs },
+      waitSettings: { maxWaitMs: LONG_EXTENSION_MAX_WAIT_MS, budgetMs },
     });
-    assert.equal(response.status, budgetMs === 200 ? 502 : 200);
-    assert.equal(calls.length, budgetMs === 200 ? 1 : 2);
+    assert.equal(response.status, generous ? 200 : 502);
+    assert.equal(calls.length, generous ? 2 : 1);
     assert.ok(until > calls[0].at);
     assert.equal(connection?.testStatus, "unavailable");
     assert.equal(cachedProbe?.lastErrorType, "network_error");
-    if (budgetMs === 400) {
+    if (generous) {
       assert.ok(
         calls[1].at >= until,
         "the same wait ceiling and deadline permit a larger total budget"
@@ -358,7 +400,8 @@ for (const guard of [
       credentialProbe: "network_error",
       abortAfterMs: guard.abortAfterMs,
       config: { comboTimeoutMs: guard.comboTimeoutMs },
-      settleMs: 220,
+      cooldownMs: LONG_COOLDOWN_MS,
+      settleMs: LONG_COOLDOWN_SETTLE_MS,
     });
     assert.equal(response.status, guard.status);
     assert.equal(calls.length, 1, "waiting past expiry must not dispatch after cancellation");
@@ -399,9 +442,12 @@ for (const waitSettings of [{ enabled: false }, { maxWaitMs: 50 }, { maxAttempts
   });
 }
 
-for (const waitSettings of [{ maxAttempts: 1 }, { maxWaitMs: 200, budgetMs: 200 }]) {
+for (const waitSettings of [
+  { maxAttempts: 1 },
+  { maxWaitMs: LONG_EXTENSION_MAX_WAIT_MS, budgetMs: TIGHT_BUDGET_MS },
+]) {
   test(`extensions respect the shared request limits: ${JSON.stringify(waitSettings)}`, async () => {
-    const { response, calls } = await run({ changeAfterMs: 65, extendMs: 220, waitSettings });
+    const { response, calls } = await run({ ...LONG_EXTENSION, waitSettings });
     assert.equal(response.status, 502);
     assert.equal(calls.length, 1);
   });
@@ -429,7 +475,11 @@ for (const row of [
 
 for (const abortAfterMs of [10, 65]) {
   test(`client abort during retry waiting prevents delayed dispatch (${abortAfterMs}ms)`, async () => {
-    const { response, calls } = await run({ abortAfterMs, settleMs: 180 });
+    const { response, calls } = await run({
+      abortAfterMs,
+      cooldownMs: LONG_COOLDOWN_MS,
+      settleMs: LONG_COOLDOWN_SETTLE_MS,
+    });
     assert.equal(response.status, 499);
     assert.equal(calls.length, 1);
   });
@@ -457,7 +507,11 @@ for (const hedgeDelayMs of [10, 70]) {
 
 for (const comboTimeoutMs of [20, 80]) {
   test(`the original combo deadline cancels a retry delay or cooldown wait (${comboTimeoutMs}ms)`, async () => {
-    const { response, calls } = await run({ config: { comboTimeoutMs }, settleMs: 220 });
+    const { response, calls } = await run({
+      config: { comboTimeoutMs },
+      cooldownMs: LONG_COOLDOWN_MS,
+      settleMs: LONG_COOLDOWN_SETTLE_MS,
+    });
     assert.equal(response.status, 504);
     assert.equal(calls.length, 1);
   });
@@ -505,7 +559,10 @@ test("an explicit transient deadline expired during the fixed delay recovers una
 });
 
 test("a connection removed during the confirmed cooldown wait cannot dispatch", async () => {
-  const { response, calls, connection } = await run({ removeAfterMs: 65 });
+  const { response, calls, connection } = await run({
+    removeAfterMs: 65,
+    cooldownMs: LONG_COOLDOWN_MS,
+  });
   assert.equal(response.status, 502);
   assert.equal(calls.length, 1);
   assert.equal(connection, null);
@@ -524,7 +581,9 @@ test("missing/read-failed rows preserve ordinary fallthrough but cannot reopen a
   }
 });
 
-for (const waitSettings of [{ maxAttempts: 1 }, { maxWaitMs: 200, budgetMs: 200 }]) {
+// normalizeComboCooldownWait floors budgetMs at maxWaitMs, so keep maxWaitMs (x TIME_SCALE = 480)
+// just under budgetMs (x TIME_SCALE = 520): one ~375 ms wait fits, a second one cannot.
+for (const waitSettings of [{ maxAttempts: 1 }, { maxWaitMs: 120, budgetMs: 130 }]) {
   test(`different targets share the existing request wait allowance: ${JSON.stringify(waitSettings)}`, async () => {
     const { response, calls } = await run({
       coolingFallback: true,
