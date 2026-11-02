@@ -122,3 +122,27 @@ test("music catalog GET hides providers without active credentials", async () =>
   assert.ok(ids.includes("kie/suno-v4.0"));
   assert.ok(!ids.includes("vertex/lyria-002"));
 });
+
+test("music catalog GET lists a discovered music model once when its registry also ships it", async () => {
+  await seedConnection("gemini");
+  const db = core.getDbInstance();
+  const connectionId = db
+    .prepare("SELECT id FROM provider_connections WHERE provider = ?")
+    .get("gemini").id;
+  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
+    "syncedAvailableModels",
+    `gemini:${connectionId}`,
+    JSON.stringify([
+      // Discovery tags AI Studio's Lyria as `music` (geminiModelsParser), so this id now
+      // arrives twice: once from the synced snapshot and once from MUSIC_PROVIDERS. The
+      // synced row is the richer one, so the catalog must merge them, not list both.
+      { id: "lyria-3-pro-preview", name: "Lyria 3 Pro", supportedEndpoints: ["music"] },
+    ])
+  );
+
+  const ids = await listedIds(musicRoute, "/v1/music/generations");
+
+  assert.equal(ids.filter((id) => id === "gemini/lyria-3-pro-preview").length, 1);
+  // A registry-only neighbour still lists: it has no discovery snapshot of its own.
+  assert.equal(ids.filter((id) => id === "gemini/lyria-3-clip-preview").length, 1);
+});

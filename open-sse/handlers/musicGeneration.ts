@@ -33,6 +33,7 @@ import {
 } from "../utils/kieTask.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import { handleFalMusicGeneration } from "./mediaGeneration/fal.ts";
+import { handleGeminiMusicGeneration } from "./mediaGeneration/geminiMusic.ts";
 import { handleSyntxMusicGeneration } from "./syntxAudio.ts";
 import { handleMinimaxMusicGeneration } from "./mediaGeneration/minimaxMusic.ts";
 import { handleElevenLabsMusicGeneration } from "./mediaGeneration/elevenLabsMusic.ts";
@@ -134,6 +135,17 @@ export async function handleMusicGeneration({ body, credentials, log, signal = n
 
   if (providerConfig.format === "elevenlabs-music") {
     return handleElevenLabsMusicGeneration({ model, body, credentials });
+  }
+
+  if (providerConfig.format === "gemini-lyria") {
+    return handleGeminiMusicGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+    });
   }
 
   if (providerConfig.format === "comfyui") {

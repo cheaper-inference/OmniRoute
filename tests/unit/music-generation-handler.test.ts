@@ -290,3 +290,77 @@ test("handleMusicGeneration returns provider errors for ComfyUI failures and log
     globalThis.setTimeout = originalSetTimeout;
   }
 });
+
+test("handleMusicGeneration calls Gemini Lyria through :generateContent and normalizes inline audio", async () => {
+  const originalFetch = globalThis.fetch;
+  let requestedUrl;
+  let requestedHeaders;
+  let requestedBody;
+
+  globalThis.fetch = async (url, options = {}) => {
+    requestedUrl = String(url);
+    requestedHeaders = options.headers;
+    requestedBody = JSON.parse(String(options.body || "{}"));
+    return new Response(
+      JSON.stringify({
+        candidates: [
+          {
+            content: {
+              role: "model",
+              parts: [
+                { text: "<instrumental>" },
+                { inlineData: { mimeType: "audio/mpeg", data: "SUQzAAA" } },
+              ],
+            },
+            finishReason: "STOP",
+          },
+        ],
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  };
+
+  try {
+    const result = await handleMusicGeneration({
+      body: { model: "gemini/lyria-3-clip-preview", prompt: "short calm piano loop" },
+      credentials: { apiKey: "gemini-key" },
+      log: null,
+    });
+
+    assert.equal(
+      requestedUrl,
+      "https://generativelanguage.googleapis.com/v1beta/models/lyria-3-clip-preview:generateContent"
+    );
+    assert.equal(requestedHeaders["x-goog-api-key"], "gemini-key");
+    assert.equal(requestedBody.contents[0].parts[0].text, "short calm piano loop");
+    assert.equal(requestedBody.generationConfig, undefined);
+    assert.equal(result.success, true);
+    assert.deepEqual(result.data.data, [{ b64_json: "SUQzAAA", format: "mp3" }]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("handleMusicGeneration surfaces Gemini Lyria upstream errors without swallowing the status", async () => {
+  const originalFetch = globalThis.fetch;
+
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify({ error: { message: "model not found", status: "NOT_FOUND" } }), {
+      status: 404,
+      headers: { "content-type": "application/json" },
+    });
+
+  try {
+    const result = await handleMusicGeneration({
+      body: { model: "gemini/lyria-3-pro-preview", prompt: "x" },
+      credentials: { apiKey: "gemini-key" },
+      log: null,
+    });
+
+    assert.equal(result.success, false);
+    assert.equal(result.status, 404);
+    assert.match(result.error, /model not found/);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
