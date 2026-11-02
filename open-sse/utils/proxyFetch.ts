@@ -297,9 +297,7 @@ export function noteUpstreamDispatch(): void {
 export function readUpstreamDispatchedAt(): number | null {
   try {
     const sink = getAppliedProxyContext().getStore();
-    return sink && typeof sink.upstreamDispatchedAt === "number"
-      ? sink.upstreamDispatchedAt
-      : null;
+    return sink && typeof sink.upstreamDispatchedAt === "number" ? sink.upstreamDispatchedAt : null;
   } catch {
     return null;
   }

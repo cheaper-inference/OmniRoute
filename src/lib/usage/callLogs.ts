@@ -670,9 +670,11 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
         : null,
     addedWaitCause: toStringOrNull(entry.addedWaitCause),
     // Ms this execution waited from start to the first upstream dispatch
-    // (migration 215). Null when nothing was dispatched (rejected before egress).
+    // (migration 224). Null when nothing was dispatched (rejected before egress).
     queueWaitMs:
-      typeof entry.queueWaitMs === "number" && Number.isFinite(entry.queueWaitMs) && entry.queueWaitMs >= 0
+      typeof entry.queueWaitMs === "number" &&
+      Number.isFinite(entry.queueWaitMs) &&
+      entry.queueWaitMs >= 0
         ? entry.queueWaitMs
         : null,
     modelPinned: entry.modelPinned ? 1 : 0,

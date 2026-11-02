@@ -24,7 +24,11 @@ import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { isEstimatedUsage } from "../../utils/usageTracking.ts";
 import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
 import { attachLogMeta } from "./cacheUsageMeta.ts";
-import { readAddedWait, readUpstreamDispatchedAt, queueWaitMsFromDispatch } from "../../utils/proxyFetch.ts";
+import {
+  readAddedWait,
+  readUpstreamDispatchedAt,
+  queueWaitMsFromDispatch,
+} from "../../utils/proxyFetch.ts";
 import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
 
 const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
