@@ -1443,6 +1443,23 @@ Allow users to report issues directly from the Dashboard.
 
 ---
 
+## Render Free-Tier Keep-Alive
+
+Render spins a free web service down after about 15 minutes without inbound traffic. The standalone
+launcher (`scripts/dev/run-standalone.mjs`, which the Docker image runs) can ping the service's own public URL to
+prevent that. It does nothing unless a public URL is available, and it logs only when the status
+changes.
+
+| Variable                     | Default                  | Description                                                                                                  |
+| ---------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `SELF_PING_ENABLED`          | on when a URL is set     | `0`, `false`, `off` or `no` turns the pinger off. Use it on paid Render plans, where nothing spins down.     |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`    | Base URL to ping. Render sets `RENDER_EXTERNAL_URL` itself on every plan, so the pinger is on there by default. |
+| `SELF_PING_PATH`             | `/api/monitoring/health` | Path on that URL. Must start with `/`; anything else disables the pinger with a warning.                     |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                    | Seconds between pings, after a first ping 60 seconds in. Values below `30` fall back to `180`.               |
+
+A service kept awake for a whole month uses about 744 instance hours, so check it against Render's
+current free-tier allowance.
+
 ## Deployment Scenarios
 
 For relay backend SRE guidance (ts/bifrost/auto behavior, 9router vs CLIProxyAPI placement, and high-throughput fallback strategy), see [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md).
