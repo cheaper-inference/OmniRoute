@@ -1980,4 +1980,4 @@ See [Rosebud](../providers/ROSEBUD.md).
 
 | Variable | Default | Source File | Description |
 | --- | --- | --- | --- |
-| `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0` | `src/lib/providerModels/modelSyncTimings.ts` | Set to `1` to log phase timing, a generated request ID and success/error outcomes during model synchronization. Disabled for all other values. Logs omit request, account, catalog and error payloads. |
+| `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0` | `src/lib/providerModels/modelSyncTimings.ts` | Set to `1` to log phase timing, a generated request ID and phase success/error outcomes during model synchronization. Disabled for all other values. Logs omit request, account, catalog and error payloads. |
