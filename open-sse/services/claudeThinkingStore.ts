@@ -23,8 +23,6 @@
  *   replayable (non-empty signature / data); a partial set would reorder the turn.
  */
 
-import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../config/defaultThinkingSignature.ts";
-
 export type ClaudeSignedThinkingBlock =
   | { type: "thinking"; thinking: string; signature: string }
   | { type: "redacted_thinking"; data: string };
@@ -265,15 +263,10 @@ function forgetEntriesHolding(blocks: unknown[]) {
  * active tool-use cycle is otherwise preserved verbatim by the recovery, so any
  * block this store restored there is dropped (forgotten) so later turns do not
  * replay it again; the remaining turn keeps its valid shape without a fabricated
- * placeholder (#17324/#17344). With `keepToolUsePlaceholder` (manual extended
- * thinking) a tool_use turn left without any thinking block gets the #5312
- * placeholder back, because that mode rejects a tool_use turn with no precursor.
- * Returns null when the content holds no server-restored block.
+ * placeholder (#17324/#17344). Returns null when the content holds no
+ * server-restored block.
  */
-export function downgradeRestoredClaudeThinking(
-  content: unknown,
-  options: { keepToolUsePlaceholder?: boolean } = {}
-): unknown[] | null {
+export function downgradeRestoredClaudeThinking(content: unknown): unknown[] | null {
   if (!Array.isArray(content) || entries.size === 0) return null;
   const restored = content.filter(isStoredBlock);
   if (restored.length === 0) return null;
@@ -285,21 +278,8 @@ export function downgradeRestoredClaudeThinking(
   // tool_use ids and re-triggers the "latest assistant message cannot be modified" 400
   // while their cache is warm).
   const kept = content.filter((block) => !restored.includes(block));
-  // Manual extended thinking (`thinking.type: "enabled"`) still requires the assistant
-  // tool_use turn to open with a thinking/redacted_thinking block, which is why the
-  // translator keeps the #5312 placeholder for that mode; recovery mirrors it.
-  if (options.keepToolUsePlaceholder) {
-    const hasThinking = kept.some((block) => {
-      const type = (block as Record<string, unknown> | null)?.type;
-      return type === "thinking" || type === "redacted_thinking";
-    });
-    const hasToolUse = kept.some(
-      (block) => (block as Record<string, unknown> | null)?.type === "tool_use"
-    );
-    if (!hasThinking && hasToolUse) {
-      kept.unshift({ type: "redacted_thinking", data: DEFAULT_THINKING_CLAUDE_SIGNATURE });
-    }
-  }
+  // Inject nothing (the DEFAULT blob is a foreign encrypted thought);
+  // the recovery caller disables manual thinking when the final tool turn is left bare.
   return kept;
 }
 
