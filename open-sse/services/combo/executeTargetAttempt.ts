@@ -65,6 +65,8 @@ import {
   resolvePersistedConnectionCooldownSkipReason,
   isModelScoped400,
   requestScopedReplayKey,
+  clampDeadlineFailureBudget,
+  isReadinessDeadlineFailure,
 } from "./comboPredicates.ts";
 import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
@@ -1223,6 +1225,33 @@ export async function executeTargetAttempt(
       code: structuredError?.code,
     });
     state.lastStatus = result.status;
+    // Opt-in sub-budget for readiness-deadline failures
+    // (OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES). A stalled upstream fails the
+    // readiness window (tens of seconds to minutes) on EVERY target, and each
+    // rotation re-dispatches the full body — a few of them multiply user
+    // latency and gateway memory while the global-attempts cap (calibrated
+    // for fast failures) still has plenty of headroom. With the budget set,
+    // exhausting it terminates the combo with a clean 504 instead of
+    // rotating further targets. Unset (default) = disabled, zero change.
+    if (isReadinessDeadlineFailure(result.status, errorText || "")) {
+      state.deadlineFailures++;
+      const deadlineFailureBudget = clampDeadlineFailureBudget(
+        process.env.OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES
+      );
+      if (deadlineFailureBudget > 0 && state.deadlineFailures >= deadlineFailureBudget) {
+        deps.log.warn(
+          "COMBO",
+          `Readiness-deadline failure budget (${deadlineFailureBudget}) exhausted — terminating combo instead of rotating further targets`
+        );
+        return {
+          ok: false,
+          response: errorResponse(
+            504,
+            `Stream readiness deadline failed on ${state.deadlineFailures} targets — terminating to avoid amplifying a stalled upstream; retry shortly`
+          ),
+        };
+      }
+    }
     state.fallbackCount++;
     // Wire combo failures into the resilience dashboard (model-level lockout)
     // alongside the provider-level cooldown below — they govern different scopes.
