@@ -188,8 +188,6 @@ export const OCR_PROVIDERS: Record<string, OcrProvider> = {
     authHeader: "bearer",
     models: [
       { id: "mistral-ocr-latest", name: "Mistral OCR" },
-      { id: "mistral-ocr-2503", name: "Mistral OCR 2503" },
-      { id: "mistral-ocr-2505", name: "Mistral OCR 2505" },
       { id: "mistral-ocr-2512", name: "Mistral OCR 3" },
     ],
   },

@@ -599,8 +599,6 @@ export function normalizeDiscoveredModels(
     if (caps.audio_speech === true) declaredEndpointsFromCaps.push("audio-speech");
     if (caps.audio_transcription === true) declaredEndpointsFromCaps.push("audio-transcriptions");
     if (caps.ocr === true) declaredEndpointsFromCaps.push("ocr");
-    if (caps.embeddings === true || caps.embedding === true)
-      declaredEndpointsFromCaps.push("embeddings");
     if (caps.completion_chat === true) declaredEndpointsFromCaps.push("chat");
 
     const hasNonChatCaps = declaredEndpointsFromCaps.some((e) => e !== "chat");
@@ -760,7 +758,7 @@ export function normalizeDiscoveredModels(
       ...(record.alwaysThinking === true ? { alwaysThinking: true } : {}),
       ...(typeof record.supportsTools === "boolean"
         ? { supportsTools: record.supportsTools }
-        : caps.function_calling === true || caps.tools === true
+        : caps.function_calling === true
           ? { supportsTools: true }
           : {}),
       ...(typeof record.supportsVideo === "boolean" ? { supportsVideo: record.supportsVideo } : {}),

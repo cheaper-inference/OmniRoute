@@ -4,10 +4,12 @@ import assert from "node:assert/strict";
 import { detectVisionInput, normalizeDiscoveredModels } from "@/lib/providerModels/modelDiscovery";
 import { buildSyncedCapabilities } from "@/app/api/v1/models/syncedCapabilities";
 import {
+  AUDIO_SPEECH_PROVIDERS,
   parseTranscriptionModel,
   parseSpeechModel,
 } from "@omniroute/open-sse/config/audioRegistry.ts";
 import { parseOcrModel } from "@omniroute/open-sse/config/ocrRegistry.ts";
+import { mistralProvider } from "@omniroute/open-sse/config/providers/registry/mistral/index.ts";
 
 // Mistral's /v1/models cards (BaseModelCard per the Mistral OpenAPI spec) carry
 // `max_context_length` (total prompt+output window) and a `capabilities` object of
@@ -146,17 +148,47 @@ test("mistral audio and ocr registries correctly parse mistral models", () => {
   assert.equal(stt.provider, "mistral");
   assert.equal(stt.model, "voxtral-mini-latest");
 
-  const tts = parseSpeechModel("voxtral-mini-tts-latest");
-  assert.equal(tts.provider, "mistral");
-  assert.equal(tts.model, "voxtral-mini-tts-latest");
-
   const ocr = parseOcrModel("mistral-ocr-latest");
   assert.equal(ocr.provider, "mistral");
   assert.equal(ocr.model, "mistral-ocr-latest");
 
-  const ocrVersioned = parseOcrModel("mistral-ocr-2503");
+  const ocrVersioned = parseOcrModel("mistral-ocr-2512");
   assert.equal(ocrVersioned.provider, "mistral");
-  assert.equal(ocrVersioned.model, "mistral-ocr-2503");
+  assert.equal(ocrVersioned.model, "mistral-ocr-2512");
+});
+
+test("mistral speech stays out of the generic path until it has a format handler", () => {
+  // Mistral takes `voice_id` and answers JSON base64 `audio_data`; the default speech
+  // path sends `voice` and streams the body back as audio.
+  assert.equal(AUDIO_SPEECH_PROVIDERS.mistral, undefined);
+  assert.equal(parseSpeechModel("mistral/voxtral-mini-tts-3-0").provider, null);
+  assert.equal(parseSpeechModel("voxtral-mini-tts-latest").provider, null);
+});
+
+test("static mistral rows carry the ids and windows of Mistral's model cards", () => {
+  const rows = new Map(mistralProvider.models.map((model) => [model.id, model]));
+  assert.deepEqual(Object.fromEntries([...rows].map(([id, model]) => [id, model.contextLength])), {
+    "mistral-large-latest": 262144,
+    "mistral-large-4": 1048576,
+    "mistral-medium-3-5": 262144,
+    "mistral-small-latest": 262144,
+    "devstral-latest": 262144,
+    "codestral-latest": 131072,
+    "ministral-14b-latest": 262144,
+    "ministral-8b-latest": 262144,
+    "ministral-3b-latest": 262144,
+    "voxtral-small-latest": 32768,
+  });
+  // Retired by Mistral on 2026-05-31; the id would only answer an upstream error.
+  assert.equal(rows.has("pixtral-large-latest"), false);
+});
+
+test("a capability flag Mistral does not publish adds no tool support", () => {
+  // ModelCapabilities in Mistral's OpenAPI spec has `function_calling`, not `tools`.
+  const [row] = normalizeDiscoveredModels([
+    { id: "some-model", object: "model", capabilities: { tools: true } },
+  ]);
+  assert.equal(row.supportsTools, undefined);
 });
 
 test("buildSyncedCapabilities exports tool_calling when model supportsTools", () => {

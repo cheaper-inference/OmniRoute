@@ -84,8 +84,7 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     authType: "apikey",
     authHeader: "bearer",
     models: [
-      { id: "voxtral-mini-latest", name: "Voxtral Mini Transcribe" },
-      { id: "voxtral-mini-transcribe", name: "Voxtral Mini Transcribe" },
+      { id: "voxtral-mini-latest", name: "Voxtral Mini Transcribe 2" },
       { id: "voxtral-mini-2602", name: "Voxtral Mini Transcribe 2" },
       { id: "voxtral-mini-transcribe-3", name: "Voxtral Mini Transcribe 3" },
     ],
@@ -383,17 +382,9 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     ],
   },
 
-  mistral: {
-    id: "mistral",
-    baseUrl: "https://api.mistral.ai/v1/audio/speech",
-    authType: "apikey",
-    authHeader: "bearer",
-    models: [
-      { id: "voxtral-mini-tts-latest", name: "Voxtral Mini TTS" },
-      { id: "voxtral-mini-tts-2603", name: "Voxtral Mini TTS 2603" },
-      { id: "voxtral-tts-3", name: "Voxtral TTS 3" },
-    ],
-  },
+  // Mistral is deliberately absent. Its /v1/audio/speech takes `voice_id` and answers
+  // JSON `{ "audio_data": "<base64>" }`, while the default path below sends `voice` and
+  // streams the body back as audio. Listing it needs a dedicated format handler.
 
   hyperbolic: {
     id: "hyperbolic",
