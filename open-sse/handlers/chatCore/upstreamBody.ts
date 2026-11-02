@@ -173,10 +173,45 @@ function capToolList(tools: unknown[], limit: number): unknown[] {
   return tools.filter((tool) => (isFallbackTool(tool) ? pinnedRoom-- > 0 : room-- > 0));
 }
 
+const MAX_LOGGED_DROPPED_TOOLS = 15;
+
+function toolDisplayName(tool: unknown): string {
+  if (!tool || typeof tool !== "object") return "?";
+  const record = tool as Record<string, unknown>;
+  const fn = record.function as Record<string, unknown> | undefined;
+  const name = typeof record.name === "string" ? record.name : fn?.name;
+  return typeof name === "string" ? name : "?";
+}
+
+// Cap the list and make the loss visible: one WARN line naming (a bounded sample of)
+// the dropped tools, so a missing tool is never silent (#18120).
+function applyToolCap(
+  bodyToSend: Body,
+  tools: unknown[],
+  limit: number,
+  provider: string | null | undefined,
+  log?: LoggerLike
+): Body {
+  const truncatedTools = capToolList(tools, limit);
+  const kept = new Set(truncatedTools);
+  const dropped = tools.filter((tool) => !kept.has(tool)).map(toolDisplayName);
+  const sample = dropped.slice(0, MAX_LOGGED_DROPPED_TOOLS).join(", ");
+  const more =
+    dropped.length > MAX_LOGGED_DROPPED_TOOLS
+      ? ` (+${dropped.length - MAX_LOGGED_DROPPED_TOOLS} more)`
+      : "";
+  log?.warn?.(
+    "TOOL_LIMIT",
+    `Truncated ${tools.length} tools to ${limit} for ${provider}; dropped: ${sample}${more}`
+  );
+  return { ...bodyToSend, tools: truncatedTools };
+}
+
 function truncateToolList(
   bodyToSend: Body,
   provider: string | null | undefined,
   bypassDefaultToolLimit: boolean,
+  targetFormat: string | null | undefined,
   log?: LoggerLike
 ): Body {
   if (!Array.isArray(bodyToSend.tools)) return bodyToSend;
@@ -184,28 +219,20 @@ function truncateToolList(
   const knownLimit = getKnownToolLimit(provider);
   if (knownLimit !== null) {
     if (bodyToSend.tools.length > knownLimit) {
-      const originalCount = bodyToSend.tools.length;
-      const truncatedTools = capToolList(bodyToSend.tools, knownLimit);
-      bodyToSend = { ...bodyToSend, tools: truncatedTools };
-      log?.debug?.(
-        "TOOL_LIMIT",
-        `Truncated ${originalCount} tools to ${knownLimit} for ${provider}`
-      );
+      bodyToSend = applyToolCap(bodyToSend, bodyToSend.tools, knownLimit, provider, log);
     }
     return bodyToSend;
   }
 
   if (bypassDefaultToolLimit === true) return bodyToSend;
+  // The Anthropic Messages API has no tool-count limit: the generic default cap is meant
+  // for OpenAI-style providers and silently dropped Claude Code built-ins (#18120).
+  // Documented or learned limits (handled above) still apply.
+  if (targetFormat === FORMATS.CLAUDE) return bodyToSend;
 
   const effectiveToolLimit = getEffectiveToolLimit(provider);
   if (bodyToSend.tools.length > effectiveToolLimit) {
-    const originalCount = bodyToSend.tools.length;
-    const truncatedTools = capToolList(bodyToSend.tools, effectiveToolLimit);
-    bodyToSend = { ...bodyToSend, tools: truncatedTools };
-    log?.debug?.(
-      "TOOL_LIMIT",
-      `Truncated ${originalCount} tools to ${effectiveToolLimit} for ${provider}`
-    );
+    bodyToSend = applyToolCap(bodyToSend, bodyToSend.tools, effectiveToolLimit, provider, log);
   }
   return bodyToSend;
 }
@@ -289,7 +316,12 @@ async function injectPromptCacheKey(
 ): Promise<Body> {
   if (
     targetFormat === FORMATS.OPENAI &&
-    providerSupportsCaching(provider, undefined, connectionCacheOverride) &&
+    providerSupportsCaching(
+      provider,
+      undefined,
+      connectionCacheOverride,
+      bodyToSend.model as string
+    ) &&
     !bodyToSend.prompt_cache_key &&
     Array.isArray(bodyToSend.messages) &&
     !["nvidia", "xai"].includes(provider)
@@ -479,7 +511,13 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
       `Kept ${disclosure.stats.after}/${disclosure.stats.before} tools by relevance`
     );
   }
-  bodyToSend = truncateToolList(bodyToSend, provider, bypassDefaultToolLimit ?? false, log);
+  bodyToSend = truncateToolList(
+    bodyToSend,
+    provider,
+    bypassDefaultToolLimit ?? false,
+    targetFormat,
+    log
+  );
   const connectionCacheOverride = resolveConnectionCacheOverride(credentials?.providerSpecificData);
   bodyToSend = await injectPromptCacheKey(
     bodyToSend,

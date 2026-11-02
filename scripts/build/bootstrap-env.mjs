@@ -176,17 +176,25 @@ function parseEnvFile(filePath) {
     const eqIdx = trimmed.indexOf("=");
     if (eqIdx < 1) continue;
     const key = trimmed.slice(0, eqIdx).trim();
-    const val = unquoteEnvValue(trimmed.slice(eqIdx + 1).trim());
+    const val = parseEnvValue(trimmed.slice(eqIdx + 1));
     env[key] = val;
   }
   return env;
 }
 
-function unquoteEnvValue(value) {
-  if (value.length < 2) return value;
-  const quote = value[0];
-  if ((quote !== '"' && quote !== "'") || value[value.length - 1] !== quote) return value;
-  return value.slice(1, -1);
+// Mirrors bin/cli/utils/parseEnvValue.mjs so Docker boot reads the same value as
+// the command-line reader: a `#` preceded by whitespace outside quotes starts a
+// comment, while a `#` inside quotes or without preceding whitespace is data. A
+// value holding only a comment maps to an empty string so the existing
+// empty-value filter drops it instead of persisting the comment text.
+function parseEnvValue(raw) {
+  const value = String(raw).trim();
+  if (!value) return "";
+  if (value.startsWith("#")) return "";
+  const quoted = value.match(/^(['"])([\s\S]*)\1\s*(?:#.*)?$/);
+  if (quoted) return quoted[2];
+  const commentIdx = value.search(/\s#/);
+  return (commentIdx === -1 ? value : value.slice(0, commentIdx)).trim();
 }
 
 // ── Write a simple KEY=VALUE env file ───────────────────────────────────────

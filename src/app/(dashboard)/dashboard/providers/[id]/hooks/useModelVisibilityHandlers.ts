@@ -265,11 +265,17 @@ export function useModelVisibilityHandlers({
     if (!confirm(t("clearAllModelsConfirm"))) return;
     setClearingModels(true);
     try {
-      const res = await fetch(
-        `/api/provider-models?provider=${encodeURIComponent(providerStorageAlias)}&all=true`,
-        { method: "DELETE" }
+      const targetProviders = Array.from(
+        new Set([providerStorageAlias, providerId].filter(Boolean))
       );
-      if (res.ok) {
+      const responses = await Promise.all(
+        targetProviders.map((targetProvider) =>
+          fetch(`/api/provider-models?provider=${encodeURIComponent(targetProvider)}&all=true`, {
+            method: "DELETE",
+          })
+        )
+      );
+      if (responses.every((res) => res.ok)) {
         // Also delete all aliases that belong to this provider
         await Promise.all(
           providerAliasEntries.map(([alias]) =>

@@ -57,9 +57,9 @@ export const ciTokens = {
     },
   },
   font: {
-    ui: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
-    display: '"Instrument Serif", Georgia, "Times New Roman", serif',
-    mono: '"IBM Plex Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace',
+    ui: '"Switzer", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+    display: '"Switzer", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+    mono: '"Switzer", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
     size: {
       12: "0.75rem",
       14: "0.875rem",
@@ -79,7 +79,7 @@ export const ciTokens = {
       regular: 400,
       medium: 500,
       semibold: 600,
-      bold: 700,
+      bold: 600,
     },
   },
   space: {

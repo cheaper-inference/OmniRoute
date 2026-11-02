@@ -7,8 +7,10 @@
  * to the `cli_not_found` envelope.
  *
  * This suite is the static/hermetic replacement for a `docker build`:
- *   - it PARSES the Dockerfile (runner-cli stage) and guards the mechanism: the
- *     exact-pinned install, root-only install layer, stage isolation;
+ *   - it PARSES the Dockerfile (the CLI install lives in runner-cli-core, which
+ *     both runner-cli-no-docker and runner-cli build FROM — #17972) and guards
+ *     the mechanism: the exact-pinned install, root-only install layer, stage
+ *     isolation;
  *   - it ties the Dockerfile to the names the application looks for
  *     (`qodercli` on PATH, `CLI_QODER_BIN`, `cli_not_found`);
  *   - it exercises the application's own resolution against a stub on PATH to
@@ -98,17 +100,32 @@ function splitSpec(spec: string): { name: string; version: string } {
 
 // ─── Dockerfile: the install itself ──────────────────────────────────────────
 
+// #17972: the CLI install moved into runner-cli-core; runner-cli-no-docker and the
+// backward-compatible runner-cli (still the last stage, i.e. the default target) both
+// build FROM it, so every assertion about the install now reads runner-cli-core.
+const CLI_CORE = "runner-cli-core";
+const CLI_FLAVORS = ["runner-cli-no-docker", "runner-cli"] as const;
+
 test("#9292: the Dockerfile still has runner-base / runner-web / runner-cli stages", () => {
   assert.deepEqual(
     stages.map((s) => s.name).filter((n) => n.startsWith("runner")),
-    ["runner-base", "runner-web", "runner-cli"]
+    ["runner-base", "runner-web", CLI_CORE, ...CLI_FLAVORS]
   );
-  assert.equal(stage("runner-cli").base, "runner-base");
+  assert.equal(stages[stages.length - 1].name, "runner-cli", "runner-cli stays the default target");
+  assert.equal(stage(CLI_CORE).base, "runner-base");
+  for (const flavor of CLI_FLAVORS) assert.equal(stage(flavor).base, CLI_CORE);
 });
 
 test("#9292: runner-cli installs @qoder-ai/qodercli at the exact pinned version", () => {
-  const installs = globalNpmInstalls(stage("runner-cli"));
-  assert.equal(installs.length, 1, "exactly one global-npm layer in runner-cli");
+  const installs = globalNpmInstalls(stage(CLI_CORE));
+  assert.equal(installs.length, 1, `exactly one global-npm layer in ${CLI_CORE}`);
+  for (const flavor of CLI_FLAVORS) {
+    assert.deepEqual(
+      globalNpmInstalls(stage(flavor)),
+      [],
+      `${flavor} must inherit the CLIs from ${CLI_CORE}, not reinstall them`
+    );
+  }
   const specs = installs[0].map(splitSpec);
   const qoder = specs.filter((s) => s.name === QODER_PACKAGE);
   assert.equal(qoder.length, 1, `${QODER_PACKAGE} must be installed exactly once`);
@@ -116,7 +133,7 @@ test("#9292: runner-cli installs @qoder-ai/qodercli at the exact pinned version"
 });
 
 test("#9292: every global CLI in runner-cli is an exact x.y.z pin (#12576) and the siblings are kept", () => {
-  const specs = globalNpmInstalls(stage("runner-cli"))[0].map(splitSpec);
+  const specs = globalNpmInstalls(stage(CLI_CORE))[0].map(splitSpec);
   for (const { name, version } of specs) {
     assert.match(
       version,
@@ -135,7 +152,7 @@ test("#9292: every global CLI in runner-cli is an exact x.y.z pin (#12576) and t
 });
 
 test("#9292: the qodercli install runs as root and the stage hands back to the node user", () => {
-  const instr = stage("runner-cli").instructions;
+  const instr = stage(CLI_CORE).instructions;
   const installIdx = instr.findIndex((i) => i.includes(QODER_PACKAGE));
   assert.ok(installIdx > 0);
   const userBefore = instr
@@ -149,10 +166,20 @@ test("#9292: the qodercli install runs as root and the stage hands back to the n
     instr.slice(installIdx).some((i) => i === "USER node"),
     "USER node comes after the install layer"
   );
+  for (const flavor of CLI_FLAVORS) {
+    const userLastFlavor = stage(flavor)
+      .instructions.filter((i) => /^USER\b/.test(i))
+      .pop();
+    // runner-cli-no-docker has no instructions and inherits USER node from the core.
+    assert.ok(
+      userLastFlavor === undefined || userLastFlavor === "USER node",
+      `${flavor} must not stay root`
+    );
+  }
 });
 
 test("#9292: PATH is not overridden in runner stages (npm -g bins land in /usr/local/bin, already on PATH)", () => {
-  for (const name of ["runner-base", "runner-cli"]) {
+  for (const name of ["runner-base", CLI_CORE, ...CLI_FLAVORS]) {
     const overrides = stage(name).instructions.filter(
       (i) => /^ENV\s+(PATH|NPM_CONFIG_PREFIX)\b/.test(i) || /^ENV\s+PATH=/.test(i)
     );

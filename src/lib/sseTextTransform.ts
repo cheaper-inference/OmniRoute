@@ -52,6 +52,13 @@ export const METADATA_KEYS = new Set([
   "response_id",
   "previous_response_id",
   "status",
+  // Anthropic usage / thinking-signature metadata and non-standard OpenAI-compatible
+  // request ids (#18006): opaque strings, never answer text. Treating them as content
+  // spliced them into the next real text delta.
+  "inference_geo",
+  "speed",
+  "signature",
+  "request_id",
 ]);
 
 // Responses API events whose `delta` carries tool-call arguments (JSON), not answer text.
@@ -134,7 +141,8 @@ export function createSseTextTransform(
     field: FieldCategory,
     isStopSignal?: boolean,
     index?: string | number,
-    isSnapshot?: boolean
+    isSnapshot?: boolean,
+    fieldName?: string
   ) => string,
   onFlush?: (lastJson: any, isJsonStream?: boolean, lastContentJson?: any) => any,
   onCancel?: () => void,
@@ -231,6 +239,8 @@ export function createSseTextTransform(
             for (const key of Object.keys(obj)) {
               if (typeof obj[key] === "string") {
                 const val = obj[key];
+                // Preserve Chat Completions aliases without changing native-format routing.
+                const fieldName = Array.isArray(json.choices) ? key : undefined;
                 const field =
                   key === "delta" && obj === json && isResponsesToolArgsDelta(json)
                     ? "toolArgs"
@@ -240,14 +250,21 @@ export function createSseTextTransform(
                 }
                 if (field === "toolArgs" || field === "partialJson") {
                   if (opts?.processToolArgs === true) {
-                    obj[key] = processor(val, field, isStopSignal, compositeKey, isSnapshot);
+                    obj[key] = processor(
+                      val,
+                      field,
+                      isStopSignal,
+                      compositeKey,
+                      isSnapshot,
+                      fieldName
+                    );
                   } else {
                     obj[key] = val;
                   }
                   matched = true;
                   continue;
                 }
-                obj[key] = processor(val, field, isStopSignal, compositeKey, isSnapshot);
+                obj[key] = processor(val, field, isStopSignal, compositeKey, isSnapshot, fieldName);
                 matched = true;
               } else if (typeof obj[key] === "object") {
                 sanitizeObject(obj[key], choiceIdx, toolIdx, isArray ? parentKey : key);
@@ -258,12 +275,17 @@ export function createSseTextTransform(
           sanitizeObject(json, 0, 0);
 
           if (!matched) {
-            console.warn(
+            // Normal state for control-only chunks (closing frame, usage-only frame): not a
+            // sanitizer fault, so keep it out of the warn level (#18047).
+            console.debug(
               "[SSE-TRANSFORM] No string fields sanitized in SSE JSON chunk. Keys:",
               Object.keys(json).slice(0, 5).join(", ")
             );
           } else {
             lastContentJson = json;
+            // New content after an earlier stop-signal flush (e.g. a thinking block closed
+            // before the text block starts): re-arm so the next stop signal drains it.
+            flushed = false;
           }
 
           if (isStopSignal && onFlush && !flushed) {

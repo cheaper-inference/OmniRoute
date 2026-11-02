@@ -434,6 +434,14 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "llama3.3-70b-instruct-fp8",
     "qwen25-coder-32b-instruct",
   ]),
+  runcrate: buildModels([
+    "deepseek-ai/DeepSeek-V4.1-Flash",
+    "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+    "zai-org/GLM-5.3",
+    "zai-org/GLM-5.3-Flash",
+    "Qwen/Qwen3.8-Flash",
+    "openai/gpt-oss-120b",
+  ]),
   sambanova: buildModels([
     "MiniMax-M2.7",
     "DeepSeek-V3.2",

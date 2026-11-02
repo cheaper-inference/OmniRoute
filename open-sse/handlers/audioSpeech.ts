@@ -27,6 +27,7 @@ import { GttsUpstreamError, normalizeGttsLang, synthesizeGtts } from "../executo
 import { handleFishAudioSpeech } from "../executors/fishAudioTts.ts";
 import { handleDashscopeTtsSpeech } from "../executors/dashscopeTts.ts";
 import { errorResponse } from "../utils/error.ts";
+import { handleGrokSpeech } from "./grokMedia.ts";
 import { resolveElevenLabsVoiceId } from "./elevenLabsVoiceMap.ts";
 import {
   audioErrorResponse,
@@ -921,6 +922,10 @@ export async function handleAudioSpeech({
 
   try {
     // Route to provider-specific handler
+    if (providerConfig.format === "grok-tts") {
+      return handleGrokSpeech(providerConfig, body, credentials);
+    }
+
     if (providerConfig.format === "uc-tts") {
       const { handleUcTextToSpeech } = await import("./uc/ucTts.ts");
       const result = await handleUcTextToSpeech({

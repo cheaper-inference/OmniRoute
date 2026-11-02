@@ -25,6 +25,7 @@ import { cn } from "@/shared/utils/cn";
 import Badge from "./Badge";
 import Button from "./Button";
 import Icon from "./Icon";
+import { computeBarRange, type TimelineLog } from "./RequestTimeline.utils";
 
 // HTTP status → kit Badge tone (2xx success, 4xx warning, 5xx error).
 function httpStatusTone(status: number) {
@@ -362,6 +363,18 @@ function formatConnectionId(value) {
   return value.length > 8 ? `${value.slice(0, 8)}...` : value;
 }
 
+function getRequestTimeRange(log: TimelineLog & { detailState?: string }) {
+  return computeBarRange(
+    {
+      ...log,
+      timestamp: log.timestamp ?? "",
+      // Fetched detail state takes precedence over a preview flag retained by the modal merge.
+      completed: log.detailState ? log.detailState === "in-memory" : log.completed,
+    },
+    Date.now()
+  );
+}
+
 export default function RequestLoggerDetail({
   log,
   detail,
@@ -405,6 +418,8 @@ export default function RequestLoggerDetail({
     e.preventDefault();
   };
 
+  const timingLog = { ...log, ...detail };
+  const { startMs, endMs } = getRequestTimeRange(timingLog);
   const protocolKey = log.sourceFormat || log.provider;
   const protocol = getProtocolColor(protocolKey, log.provider);
   const providerColor = PROVIDER_COLORS[log.provider] || {
@@ -592,7 +607,7 @@ export default function RequestLoggerDetail({
           <div className="flex flex-wrap items-center gap-2 min-w-0 sm:gap-3">
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                {log.active ? (
+                {timingLog.active ? (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-bold bg-warning/20 text-warning border border-warning/30">
                     <span className="inline-block h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
                   </span>
@@ -689,19 +704,19 @@ export default function RequestLoggerDetail({
 
         <div className="p-4 flex flex-col gap-6 sm:p-6">
           {/* Metadata Grid */}
-          {log.active ? (
+          {timingLog.active ? (
             <div className="flex flex-wrap gap-4 p-4 bg-bg-subtle rounded-xl border border-border">
               <div className="min-w-[140px] flex-1">
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
                   {t("startedAt")}
                 </div>
-                <div className="text-sm font-medium">{formatDate(log.timestamp)}</div>
+                <div className="text-sm font-medium">{formatDate(startMs)}</div>
               </div>
               <div className="min-w-[100px] flex-1">
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
                   {t("duration")}
                 </div>
-                <div className="text-sm font-medium">{formatDuration(log.duration)}</div>
+                <div className="text-sm font-medium">{formatDuration(timingLog.duration)}</div>
               </div>
               <div className="min-w-[100px] flex-1">
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
@@ -746,29 +761,19 @@ export default function RequestLoggerDetail({
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
                   {t("startedAt")}
                 </div>
-                <div className="text-sm font-medium">
-                  {(() => {
-                    try {
-                      const ts = new Date(log.timestamp).getTime();
-                      if (!Number.isFinite(ts)) return "\u2014";
-                      return formatDate(new Date(ts - (log.duration || 0)).toISOString());
-                    } catch {
-                      return "\u2014";
-                    }
-                  })()}
-                </div>
+                <div className="text-sm font-medium">{formatDate(startMs)}</div>
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
                   {t("endedAt")}
                 </div>
-                <div className="text-sm font-medium">{formatDate(log.timestamp)}</div>
+                <div className="text-sm font-medium">{formatDate(endMs)}</div>
               </div>
               <div>
                 <div className="text-[10px] text-text-muted uppercase tracking-wider mb-1">
                   {t("duration")}
                 </div>
-                <div className="text-sm font-medium">{formatDuration(log.duration)}</div>
+                <div className="text-sm font-medium">{formatDuration(timingLog.duration)}</div>
               </div>
               {typeof log.ttft === "number" && log.ttft > 0 && (
                 <div>
@@ -1035,13 +1040,16 @@ export default function RequestLoggerDetail({
               <div className="flex flex-col gap-1">
                 {[...relatedLogs]
                   .sort((a, b) => {
-                    const aStart = new Date(a.timestamp).getTime() - (a.duration || 0);
-                    const bStart = new Date(b.timestamp).getTime() - (b.duration || 0);
-                    return aStart - bStart;
+                    const aStart = getRequestTimeRange(a).startMs;
+                    const bStart = getRequestTimeRange(b).startMs;
+                    return (
+                      (Number.isFinite(aStart) ? aStart : 0) -
+                      (Number.isFinite(bStart) ? bStart : 0)
+                    );
                   })
                   .map((r) => {
                     const isCurrent = r.id === log.id;
-                    const startTime = new Date(new Date(r.timestamp).getTime() - (r.duration || 0));
+                    const { startMs } = getRequestTimeRange(r);
                     return (
                       <Button
                         key={r.id}
@@ -1065,7 +1073,9 @@ export default function RequestLoggerDetail({
                         <span className="font-mono text-text-muted">{r.id}</span>
                         <span className="text-text-muted">{r.model}</span>
                         <span className="text-text-muted text-[10px]">
-                          {startTime.toLocaleTimeString(locale, { hour12: false })}
+                          {Number.isFinite(startMs)
+                            ? new Date(startMs).toLocaleTimeString(locale, { hour12: false })
+                            : "—"}
                         </span>
                         <span className="text-text-muted ml-auto">
                           {formatDuration(r.duration)}
