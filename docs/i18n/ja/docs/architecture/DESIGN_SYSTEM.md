@@ -61,7 +61,7 @@
 
 ## 5. キットのアップデート
 
-`npm run check:ui-kit-upstream` 、 `packages/ui-kit/UPSTREAM.md`に固定されているバージョンとアップストリーム リポジトリの最新の`v*`タグを比較し、リリースがリリースされると同期コマンドを出力します。毎週の`UI Kit upstream watch`ワークフロー (`.github/workflows/ui-kit-upstream-watch.yml`) は同じチェックを実行し、ピンが遅れている間 1 つの追跡問題を未解決のままにします。アップストリーム リポジトリはプライベートであるため、ワークフローは`UI_KIT_READ_TOKEN`シークレットに読み取り専用トークンを必要とし、それがないと不活性なままになります。
+`npm run check:ui-kit-upstream` 、 `packages/ui-kit/UPSTREAM.md`に固定されているバージョンとアップストリーム リポジトリの最新の`v*`タグを比較し、リリースがリリースされると同期コマンドを出力します。毎週の`UI Kit upstream watch`ワークフロー (`.github/workflows/ui-kit-upstream-watch.yml`) は同じチェックを実行し、ピンが遅れている間 1 つの追跡問題を未解決のままにします。アップストリーム リポジトリはプライベートであるため、ワークフローには`UI_KIT_READ_TOKEN`シークレットに読み取り専用トークンが必要です。アップストリームを読み取ることができない場合 (トークンがない、トークンが動作を停止した、またはGitHubに到達できない)、実行は緑色のままですが、警告が書き込まれ、別の問題が 1 つ開いたままになります。後の実行で再びアップストリームを読み取ることができると、問題は自動的に閉じられます。
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`そのコミット時に上流の`src/` (`latest` =最新の`v*`タグ) を`packages/ui-kit/src`にコピーし、単一の許可された変換を適用し (相対インポートから`.js`サフィックスを削除します)、 `packages/ui-kit/package.json`および`package-lock.json`のワークスペースのバージョンを上流のバージョンに設定します。次に、 `git diff packages/ui-kit`を確認し、両方のテーマでプロバイダー、設定、コンボ、使用法、およびエンドポイントのビジュアルパスを実行し、 `npm run check:ui-kit-snapshot`と`npm run test:vitest:ui`を実行して、アップストリームの変更ログでPR開きます。
 
