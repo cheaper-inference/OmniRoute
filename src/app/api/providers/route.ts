@@ -1,3 +1,4 @@
+import { projectProviderPrefixCollisions } from "@/lib/providers/providerPrefixCollision";
 import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
 import {
   getDiscoveryStatesForConnections,
@@ -164,7 +165,7 @@ export async function GET(request: Request) {
     } catch (error) {
       console.error("Failed to read the stored discovery outcomes:", error);
     }
-    const safeConnections = connections.map((c) => {
+    const safeConnections = (await projectProviderPrefixCollisions(connections)).map((c) => {
       const providerSpecificData = c.providerSpecificData
         ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData, { revealKeys })
         : undefined;

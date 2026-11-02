@@ -21,6 +21,7 @@ import { getLearnedReasoningEffortForModel } from "@omniroute/open-sse/services/
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { ANTIGRAVITY_MODEL_ALIASES } from "@omniroute/open-sse/config/antigravityModelAliases.ts";
 import { getRegisteredProviderEffortBaseModelId } from "@omniroute/open-sse/utils/registeredEffortVariants.ts";
+import { canGrandfatherProviderPrefix } from "@/lib/providers/providerPrefixCollision";
 import { getReservedProviderPrefixes } from "@/shared/constants/reservedProviderPrefixes";
 import { getProviderByAlias } from "@/shared/constants/providers";
 import {
@@ -581,19 +582,13 @@ export async function getModelInfo(modelStr) {
     // Ensure prefixToCheck is always a concise identifier, not a full model string
     const prefixToCheck = parsed.providerAlias || parsed.provider;
 
-    // Compatible-node prefixes are user-defined. They must not be allowed to
-    // shadow built-in provider ids/aliases (e.g. `cf` → cloudflare-ai). When
-    // prefixToCheck matches a built-in registry id/alias, skip the compatible-
-    // node prefix lookup so the request still routes to the built-in provider.
-    // Internal UUID-prefixed node ids (e.g. "openai-compatible-responses-...")
-    // are never in the reserved set, so the #2778 combo path still works.
-    // Ported from upstream 9router 047fdc89. Set shared with the write-path
-    // validation guard (src/shared/constants/reservedProviderPrefixes.ts) so
-    // both sides can never drift apart.
+    // New nodes still cannot claim reserved prefixes. Persisted legacy nodes
+    // keep a live builtin's prefix only while it has no active configured
+    // connections (#17278). Retirement guards above always run first.
     const isReservedPrefix =
       typeof prefixToCheck === "string" && getReservedProviderPrefixes().has(prefixToCheck);
 
-    if (!isReservedPrefix) {
+    if (!isReservedPrefix || (await canGrandfatherProviderPrefix(prefixToCheck))) {
       // Check OpenAI Compatible nodes
       // Match by node.prefix (user-defined alias) OR node.id (internal UUID id stored by
       // combo steps), so that combo targets using the internal node id still resolve
