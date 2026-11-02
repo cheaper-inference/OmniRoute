@@ -163,7 +163,7 @@ nochtar OmniRoute 6 scil A2A sreangaithe i `src/lib/a2a/taskExecution.ts::A2A_SK
 | Tuarascáil Sláinte     | `health-report`      | Comhiomláin scoradáin chiorcaid, fuarú, staid frithdhúnadh in aghaidh an tsoláthraí                                                                                            | sláinte, athléimneacht           | "Taispeáin stádas sláinte gach soláthraí"   |
 | Cumais Liosta          | `list-capabilities`  | Seoltar ar ais an chatalóg iomlán 45-iontráil Scileanna Gníomhaire (23 API + 21 CLI + 1 config) mar tábla marcála síos le amh SKILL.md URLs le haghaidh instealladh comhthéacs | catalóg, fionnachtain, scileanna | "Liostaigh gach acmhainn OmniRoute "        |
 
-> Ba cheart an Cárta Gníomhaire a choinneáil ar chomhréim leis an gcatalóg bheo 377-soláthraí; Faightear comhaireamh soláthraithe agus meiteashonraí free/no-auth ón gclár ama rite.
+> Ba cheart an Cárta Gníomhaire a choinneáil ar chomhréim leis an gcatalóg bheo 380-soláthraí; Faightear comhaireamh soláthraithe agus meiteashonraí free/no-auth ón gclár ama rite.
 
 ### `list-capabilities` Scil Sonraigh
 
@@ -201,13 +201,13 @@ Is é críochphointe JSON-RPC `/a2a` an pointe iontrála canónta A2A. Soláthra
 
 1. **Cruthaigh comhad scile:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Easpórtáil feidhm aisioncronach `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Lean struchtúr na scileanna atá ann cheana, amhail `smartRouting.ts`.
+   Easpórtáil feidhm asincréite `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Lean cruth na scileanna atá ann cheana féin mar `smartRouting.ts`.
 
-2. **Cláraigh an láimhseálaí:** in `src/lib/a2a/taskExecution.ts`, cuir iontráil le `A2A_SKILL_HANDLERS`:
+2. **Láimhseálaí clárúcháin:** in `src/lib/a2a/taskExecution.ts`, cuir iontráil le `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...scileanna atá ann cheana
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ Is é críochphointe JSON-RPC `/a2a` an pointe iontrála canónta A2A. Soláthra
    };
    ```
 
-3. **Nocht i gCárta an Ghníomhaire é:** in `src/lib/a2a/agentCardMetadata.ts` (atá comhroinnte ag `/.well-known/agent.json` agus `/.well-known/agent-card.json`), cuir leis an eagar `skills`:
+3. **Nochtadh i gCárta Gníomhaire:** in `src/lib/a2a/agentCardMetadata.ts` (roinnte ag `/.well-known/agent.json` agus `/.well-known/agent-card.json`), cuir leis an eagar `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ Is é críochphointe JSON-RPC `/a2a` an pointe iontrála canónta A2A. Soláthra
    }
    ```
 
-4. **Scríobh tástálacha:** `tests/unit/a2a-<your-skill>.test.ts`. Clúdaigh an cás rathúil agus an cás earráide.
+4. **Scríobh trialacha:** `tests/unit/a2a-<your-skill>.test.ts`. Clúdach cosán sásta conair earráide +.
 
-5. **Doiciméadaigh** an scil nua i dtábla `Available Skills` an chomhaid seo.
+5. **Doiciméad** an scil nua i dtábla `Available Skills` an chomhaid seo.
 
 ---
 
@@ -266,7 +266,7 @@ curtha isteach → ar siúl → críochnaithe
 
 ---
 
-## Comhtháthú Samplaí
+## Samplaí Comhtháthaithe
 
 ### Python (iarratais)
 
