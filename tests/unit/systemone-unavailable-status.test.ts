@@ -6,7 +6,8 @@
  * 400 "No credentials for provider: ollama-local". The connection exists, so a 400 that
  * reads like a missing key sends the operator to the wrong fix. A temporary block must be
  * 429 with Retry-After; a model the host does not have must say so (404); only a backend
- * with no usable connection at all keeps the 400 "No credentials" error.
+ * with no usable connection at all keeps the 400 "No credentials" error, and says whether
+ * the connection is still waiting for its first test or was disabled.
  */
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -115,5 +116,34 @@ test("a backend with no active connection keeps the 400 'No credentials' error",
 
   assert.equal(response.status, 400);
   assert.match(await errorOf(response), /No credentials for provider: ollama-local/);
+  assert.equal(calls, 0);
+});
+
+test("a connection still waiting for its first connection test says so, keeping the 400 prefix", async () => {
+  await providers.updateProviderConnection(connectionId, {
+    isActive: false,
+    testStatus: "unknown",
+  });
+  stub(() => Response.json(REPLY));
+
+  const response = await POST(post("ollama-local/nimble"));
+
+  assert.equal(response.status, 400);
+  const message = await errorOf(response);
+  assert.match(message, /^No credentials for provider: ollama-local/);
+  assert.match(message, /not verified yet/);
+  assert.equal(calls, 0);
+});
+
+test("a disabled connection that passed its test is reported as inactive, not unverified", async () => {
+  await providers.updateProviderConnection(connectionId, { isActive: false, testStatus: "active" });
+  stub(() => Response.json(REPLY));
+
+  const response = await POST(post("ollama-local/nimble"));
+
+  assert.equal(response.status, 400);
+  const message = await errorOf(response);
+  assert.match(message, /connection inactive/);
+  assert.doesNotMatch(message, /not verified/);
   assert.equal(calls, 0);
 });

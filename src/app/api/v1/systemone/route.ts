@@ -112,23 +112,49 @@ async function resolveAllowedConnections(
  * so the caller pulls the model instead of re-checking its keys. Retryable lockouts never
  * get here, they come back as all-rate-limited (429).
  */
-async function lockedModelResponse(
+type ConnectionRow = { id: string; isActive?: boolean; testStatus?: string | null };
+
+/**
+ * A new connection is created inactive and only turns active once its automatic
+ * connection test passes. Reported on #14667 (live TypeSafe key, 2026-10-23): a request
+ * sent in that window read "No credentials for provider: typesafe", which looks like the
+ * key was lost. Keep the 400 and its prefix, and say which state the connection is in.
+ */
+function noCredentialsResponse(provider: string, rows: ConnectionRow[]): Response {
+  const base = `No credentials for provider: ${provider}`;
+  const inactive = rows.filter((row) => !row.isActive);
+  const pending = inactive.filter((row) => !row.testStatus || row.testStatus === "unknown");
+  const detail = pending.length
+    ? " (connection not verified yet: wait for its connection test to pass, or run it)"
+    : inactive.length
+      ? " (connection inactive: enable it or re-run its connection test)"
+      : "";
+  return errorResponse(HTTP_STATUS.BAD_REQUEST, base + detail);
+}
+
+/**
+ * The selector returns no credentials both when the backend has no usable connection and
+ * when every connection locked this one model after the upstream said it does not have it
+ * (Ollama 404 model_not_found). The second case is not a credentials problem: answer 404
+ * so the caller pulls the model instead of re-checking its keys. Retryable lockouts never
+ * get here, they come back as all-rate-limited (429).
+ */
+async function noUsableConnectionResponse(
   provider: string,
   model: string,
   allowed: string[] | null
-): Promise<Response | null> {
-  const active = (await getProviderConnections({ provider, isActive: true })).filter(
-    (row: { id: string }) => !allowed || allowed.includes(row.id)
+): Promise<Response> {
+  const rows = ((await getProviderConnections({ provider })) as ConnectionRow[]).filter(
+    (row) => !allowed || allowed.includes(row.id)
   );
-  if (!active.length) return null;
-  const locked = active.every((row: { id: string }) =>
-    Boolean(getModelLockoutInfo(provider, row.id, model))
-  );
-  if (!locked) return null;
-  return errorResponse(
-    HTTP_STATUS.NOT_FOUND,
-    `Model ${model} is not available on ${provider}: the upstream reported it missing`
-  );
+  const active = rows.filter((row) => row.isActive);
+  if (active.length && active.every((row) => getModelLockoutInfo(provider, row.id, model))) {
+    return errorResponse(
+      HTTP_STATUS.NOT_FOUND,
+      `Model ${model} is not available on ${provider}: the upstream reported it missing`
+    );
+  }
+  return noCredentialsResponse(provider, rows);
 }
 
 async function postHandler(request: Request) {
@@ -154,10 +180,7 @@ async function postHandler(request: Request) {
     canonicalModel
   );
   if (!credentials) {
-    return (
-      (await lockedModelResponse(target.provider, canonicalModel, connections.ids)) ??
-      errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${target.provider}`)
-    );
+    return noUsableConnectionResponse(target.provider, canonicalModel, connections.ids);
   }
   if (isAllRateLimitedCredentials(credentials)) {
     return rateLimitedProviderResponse(target.provider, credentials);

@@ -760,7 +760,8 @@ POST /v1/segment     { "content": "...", "return_chunks": true }
 #   typesafe/jev-latest              -> TypeSafe direct
 #   openrouter/typesafe/jev-1.13     -> through OpenRouter
 #   ollama-local/<model>             -> local Ollama >= 0.35
-# An unqualified id such as jev-latest keeps using OpenRouter. TypeSafe SDKs work with baseURL = OmniRoute.
+# An unqualified id such as jev-latest keeps using OpenRouter. TypeSafe SDKs work with baseURL = OmniRoute,
+# but must send typesafe/jev-latest (not jev-latest) to use a native TypeSafe key.
 POST /v1/systemone   { "model": "typesafe/jev-latest", "state": "...", "questions": { "q": { "type": "noul", "instructions": "..." } } }
 GET  /v1/systemone/models   # models of the configured backends: { object: "list", data: [{ id, name, pricing, ... }] }
 
