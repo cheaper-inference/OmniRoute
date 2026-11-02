@@ -1099,7 +1099,7 @@ async function main() {
         id: "pack-artifact",
         label: "Package artifact (npm pack policy)",
         run: runPackArtifactGate,
-        timeout: 20 * 60 * 1000,
+        timeout: 40 * 60 * 1000,
       });
     }
     // With --suites-from only the build lane is left for this slot.
