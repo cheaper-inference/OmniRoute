@@ -1446,7 +1446,7 @@ Allow users to report issues directly from the Dashboard.
 ## Render Free-Tier Keep-Alive
 
 Render spins a free web service down after about 15 minutes without inbound traffic. The standalone
-launcher (`scripts/dev/run-standalone.mjs`, the Docker `CMD`) can ping the service's own public URL to
+launcher (`scripts/dev/run-standalone.mjs`, which the Docker image runs) can ping the service's own public URL to
 prevent that. It does nothing unless a public URL is available, and it logs only when the status
 changes.
 
