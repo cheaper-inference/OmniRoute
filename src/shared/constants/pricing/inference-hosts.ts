@@ -377,33 +377,14 @@ export const DEFAULT_PRICING_INFERENCE = {
     "qwen-3-32b": { input: 0.4, output: 0.8, cached: 0, reasoning: 0, cache_creation: 0 },
   },
   nvidia: {
+    // Models confirmed active in open-sse/config/providers/registry/nvidia/index.ts
     "nvidia/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "openai/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "moonshotai/kimi-k2.5": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "z-ai/glm4.7": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "deepseek-ai/deepseek-v3.2": {
-      input: 0,
-      output: 0,
-      cached: 0,
-      reasoning: 0,
-      cache_creation: 0,
-    },
-    "nvidia/llama-3.3-70b-instruct": {
-      input: 0,
-      output: 0,
-      cached: 0,
-      reasoning: 0,
-      cache_creation: 0,
-    },
-    "meta/llama-4-maverick-17b-128e-instruct": {
-      input: 0,
-      output: 0,
-      cached: 0,
-      reasoning: 0,
-      cache_creation: 0,
-    },
-    "deepseek/deepseek-r1": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
+    // Removed stale rows no longer present in the NVIDIA NIM registry:
+    // "moonshotai/kimi-k2.5", "z-ai/glm4.7", "deepseek-ai/deepseek-v3.2",
+    // "nvidia/llama-3.3-70b-instruct", "meta/llama-4-maverick-17b-128e-instruct",
+    // "deepseek/deepseek-r1"
   },
   nebius: {
     "openai/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
