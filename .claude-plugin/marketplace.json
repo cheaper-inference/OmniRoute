@@ -1,0 +1,24 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "shahass92-plugins",
+  "description": "Claude Code plugins maintained in this fork under contrib/claude-plugins/.",
+  "owner": {
+    "name": "shahass92-commits"
+  },
+  "plugins": [
+    {
+      "name": "cinematic-ui",
+      "source": "./contrib/claude-plugins/cinematic-ui",
+      "description": "Director-and-film research workflow for designing and building cinematic websites.",
+      "version": "1.0.0",
+      "author": {
+        "name": "akseolabs-seo",
+        "url": "https://github.com/akseolabs-seo"
+      },
+      "homepage": "https://github.com/akseolabs-seo/cinematic-ui",
+      "license": "MIT",
+      "category": "design",
+      "keywords": ["cinematic", "web-design", "film-director", "storyboard"]
+    }
+  ]
+}
