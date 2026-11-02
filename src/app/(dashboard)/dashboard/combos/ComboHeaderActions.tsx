@@ -205,6 +205,7 @@ export default function ComboHeaderActions({ onCreate, onImported }: ComboHeader
       >
         {t("importCombos")}
       </Button>
+      {/* kit-exception: Hidden native file picker behind the import button (the adapters have no file input). */}
       <input
         ref={fileInputRef}
         type="file"
