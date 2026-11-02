@@ -126,9 +126,11 @@ function main() {
       process.stderr.write(
         `[api-typecheck] REFUSING to update — ${refusal}:\n` +
           regressions
-            .map((r) => `  + ${r.file} ${r.code} (baseline ${r.baselineCount} -> live ${r.liveCount})`)
+            .map(
+              (r) => `  + ${r.file} ${r.code} (baseline ${r.baselineCount} -> live ${r.liveCount})`
+            )
             .join("\n") +
-          `\n\nFix those, or pass --force if accepting the debt is a deliberate decision.\n`
+          `\n\nFix those, or pass --force-regressions if accepting the debt is a deliberate decision.\n`
       );
       process.exit(1);
     }

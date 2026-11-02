@@ -16,7 +16,7 @@
 //
 //   1. `--update` refuses to rewrite the baseline while the live run contains a
 //      new or raised pair, so widening it to get green has to be a deliberate
-//      `--force`.
+//      `--force-regressions` (or `--force-nocheck` for the nocheck/program guards).
 //   2. `@ts-nocheck` is scanned across the build scope and frozen. A file using
 //      it reports no diagnostics, so nothing else here can see that it opted out.
 //
@@ -174,9 +174,11 @@ function main() {
       process.stderr.write(
         `[build-typecheck] REFUSING to update — ${refusal}:\n` +
           regressions
-            .map((r) => `  + ${r.file} ${r.code} (baseline ${r.baselineCount} -> live ${r.liveCount})`)
+            .map(
+              (r) => `  + ${r.file} ${r.code} (baseline ${r.baselineCount} -> live ${r.liveCount})`
+            )
             .join("\n") +
-          `\n\nFix those, or pass --force if accepting the debt is a deliberate decision.\n`
+          `\n\nFix those, or pass --force-regressions if accepting the debt is a deliberate decision.\n`
       );
       process.exit(1);
     }
@@ -185,7 +187,7 @@ function main() {
         `[build-typecheck] REFUSING to update — ${addedNoCheck.length} new @ts-nocheck file(s):\n` +
           addedNoCheck.map((f) => `  + ${f}`).join("\n") +
           `\n\n@ts-nocheck makes a file invisible to every diagnostic, so it is not a way ` +
-          `to record debt. Fix the file, or pass --force with a written reason.\n`
+          `to record debt. Fix the file, or pass --force-nocheck with a written reason.\n`
       );
       process.exit(1);
     }
@@ -208,7 +210,7 @@ function main() {
           programDrift.map((d) => `  ~ ${d}`).join("\n") +
           `\n\nShrinking the program removes diagnostics without fixing them, so the ` +
           `frozen counts stop describing this codebase. Revert the change, or pass ` +
-          `--force if the program really is meant to change.\n`
+          `--force-nocheck if the program really is meant to change.\n`
       );
       process.exit(1);
     }
@@ -217,9 +219,7 @@ function main() {
       process.stderr.write(
         `[build-typecheck] REFUSING to update — ${suppressionRegressions.length} file(s) gained ` +
           `line-level @ts-ignore/@ts-expect-error:\n` +
-          suppressionRegressions
-            .map((r) => `  + ${r.file} (${r.was} -> ${r.live})`)
-            .join("\n") +
+          suppressionRegressions.map((r) => `  + ${r.file} (${r.was} -> ${r.live})`).join("\n") +
           `\n\nA suppression deletes the diagnostic, so rewriting the baseline here would ` +
           `record the deletion as progress.\n`
       );
@@ -260,7 +260,9 @@ function main() {
       `[build-typecheck] ${improvements.length} baselined error(s) are gone ` +
         `— run 'node scripts/check/check-build-typecheck.mjs --update' to ratchet the baseline down:\n` +
         improvements
-          .map((i) => `  - ${i.file} ${i.code} (baseline ${i.baselineCount} -> live ${i.liveCount})`)
+          .map(
+            (i) => `  - ${i.file} ${i.code} (baseline ${i.baselineCount} -> live ${i.liveCount})`
+          )
           .join("\n")
     );
   }
