@@ -1,0 +1,1 @@
+- **fix(perplexity-web):** an unmapped model name now returns a local `404 model_not_found` before any upstream call, instead of being forwarded to Perplexity as a raw `model_preference` ([#17822](https://github.com/diegosouzapw/OmniRoute/pull/17822)) — thanks @HouMinXi

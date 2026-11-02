@@ -1,0 +1,1 @@
+- Preserve safe structured model-discovery failure diagnostics without exposing upstream body text, credentials, or malformed headers, while keeping intentional no-auth catalogs syncable.

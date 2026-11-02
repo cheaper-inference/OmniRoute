@@ -72,6 +72,16 @@ curl -i \
 
 Filleann eochair nach bhfuil scóip bainistíochta aici (nó gan Bearer) `403 LOCAL_ONLY`. Ní féidir an t-iarmhír comharsanachta `/api/cli-tools/runtime/*` a sheachbhóthar go feasach - féach [Tairmeanna Cosanta Acmhainní — Marcáil Tharmainn Scóip Bainistíochta](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Bailíochtú Origin
+
+Tar éis fíordheimhnithe, déantar ceanntásc `Origin` gach iarratais chuig `/api/mcp/*` — na transports agus na bealaí bainistíochta ar nós `status`, `tools`, `audit`, `restart` — a bhailíochtú, cibé cé hé an glaoiteoir (eochair API, comhartha CLI, seisiún painéil, nó loopback gan ainm agus logáil isteach díchumasaithe). Seo í an chosaint ar DNS rebinding a éilíonn sonraíocht MCP Streamable HTTP.
+
+- **Gan cheanntásc `Origin`** → ceadaithe. Ní sheolann OmniRoute CLI, an SDK ná cliaint IDE é.
+- **`Origin` ceadaithe** → `localhost` / `127.0.0.1` / `[::1]` ar aon phort, nó bunús poiblí OmniRoute féin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, an bunús a chuireann seachfhreastalaí droim ar ais iontaofa ar aghaidh (`OMNIROUTE_TRUST_PROXY`, ach amháin nuair nach bhfuil base URL socraithe), nó óstach IP loopback/LAN a rochtainítear go díreach. Ní dhéanann ceanntásc `Host` leis féin bunús iontaofa riamh.
+- **Aon `Origin` eile, `null` san áireamh** → `403` le corp earráide JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Glactar fós le seisiún painéil a chuireann comhartha CSRF bailí i láthair, mar a dhéantar le scríbhinní eile an phainéil.
+
+Teastaíonn `OMNIROUTE_PUBLIC_BASE_URL` ó chliant MCP brabhsálaí a fhreastalaítear taobh thiar de sheachfhreastalaí droim ar ais; níl liosta ceadaithe ann do bhunúis eile. Ní sheiceáiltear Origin ar réamhiarratas CORS (`OPTIONS`); seiceáiltear an t-iarratas a leanann é.
+
 ## Cumraíocht IDE
 
 Féach [Cumraíocht Chliaint MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) le haghaidh Claude Desktop,

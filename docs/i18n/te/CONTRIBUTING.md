@@ -169,84 +169,85 @@ refactor(db): రేట్ లిమిట్ టేబుల్లను ఏక
 ## పరీక్షలను అమలు చేయడం
 
 ```bash
-# అన్ని పరీక్షలు (unit + vitest + ecosystem + e2e)
+# అన్ని పరీక్షలు (యూనిట్ + vitest + ఎకోసిస్టమ్ + e2e)
 npm run test:all
 
-# ఒకే పరీక్ష ఫైల్ (Node.js స్థానిక టెస్ట్ రన్నర్ — చాలా పరీక్షలు దీనినే ఉపయోగిస్తాయి)
+# ఒకే పరీక్ష ఫైల్ (Node.js స్థానిక టెస్ట్ రన్నర్ — చాలా పరీక్షలు దీన్నే ఉపయోగిస్తాయి)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# మీ మార్పు ప్రభావితం చేసిన unit పరీక్షలు మాత్రమే (CI గేట్లోని అదే TIA సెలెక్టర్, #8084)
-npm run test:scoped            # చివరి commitలోని మార్పులు (లేదా working tree)
-npm run test:scoped:staged     # staged మార్పులు మాత్రమే — pre-commit అమలుతో బాగా సరిపోతుంది
-npm run test:scoped:full       # ముందుగా import-graph మ్యాప్ను మళ్లీ నిర్మిస్తుంది (ఫైళ్లను జోడించిన/తరలించిన తర్వాత)
-# Exit 1 + "run the full suite" అంటే hub ఫైల్ (tsconfig, package.json, …) లేదా మ్యాప్ చేయని
-# source మారిందని అర్థం — selector సురక్షితంగా విఫలమవుతుంది, అది ఎప్పుడూ నిశ్శబ్దంగా దాటవేయదు.
+# మీ మార్పు ప్రభావితం చేసిన యూనిట్ పరీక్షలు మాత్రమే (CI గేట్లో ఉన్న అదే TIA సెలెక్టర్, #8084)
+npm run test:scoped            # చివరి కమిట్లోని మార్పులు (లేదా వర్కింగ్ ట్రీలోనివి)
+npm run test:scoped:staged     # స్టేజ్ చేసిన మార్పులు మాత్రమే — ప్రీ-కమిట్ అమలుతో బాగా సరిపోతుంది
+npm run test:scoped:full       # ముందుగా ఇంపోర్ట్-గ్రాఫ్ మ్యాప్ను మళ్లీ నిర్మిస్తుంది (ఫైళ్లను జోడించిన/తరలించిన తర్వాత)
+# Exit 1 + "పూర్తి సూట్ను అమలు చేయండి" అంటే హబ్ ఫైల్ (tsconfig, package.json, …) లేదా
+# మ్యాప్ చేయని సోర్స్ మారిందని అర్థం — సెలెక్టర్ సురక్షితంగా విఫలమవుతుంది, అది ఎప్పుడూ నిశ్శబ్దంగా దాటవేయదు.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (MCP సర్వర్, autoCombo, క్యాష్)
 npm run test:vitest
 
 # E2E పరీక్షలు (Playwright అవసరం)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# ప్రోటోకాల్ క్లయింట్ల E2E (MCP ట్రాన్స్పోర్ట్లు, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem అనుకూలత పరీక్షలు
+# ఎకోసిస్టమ్ అనుకూలత పరీక్షలు
 npm run test:ecosystem
 
-# Coverage గేట్: statements/lines/functions/branchesకు 60%
+# కవరేజ్ గేట్: స్టేట్మెంట్లు/లైన్లు/ఫంక్షన్లు/బ్రాంచ్లకు 60%
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format తనిఖీ
+# లింట్ + ఫార్మాట్ తనిఖీ
 npm run lint
 npm run check
 
-# గేట్ చేయబడిన నిజమైన upstream combo smoke (VPS యాక్సెస్ + నిజమైన provider credits అవసరం)
-# ఇది నిజమైన providersను ఉపయోగిస్తుంది — కొద్దిగా ఖర్చవుతుంది. CIలో ఎప్పుడూ అమలు కాదు. గేట్ లేకపోతే సక్రమంగా దాటవేయబడుతుంది.
-# అవసరం: ssh root@192.168.0.15 యాక్సెస్ (VPS నుండి read-only DB snapshotను source చేస్తుంది).
+# గేట్ చేయబడిన వాస్తవ అప్స్ట్రీమ్ కాంబో స్మోక్ పరీక్ష (VPS యాక్సెస్ + వాస్తవ ప్రొవైడర్ క్రెడిట్లు అవసరం)
+# వాస్తవ ప్రొవైడర్లను ఉపయోగిస్తుంది — కొంత ఖర్చవుతుంది. CIలో ఎప్పుడూ అమలు కాదు. గేట్ లేకపోతే సజావుగా దాటవేస్తుంది.
+# అవసరం: ssh root@192.168.0.15 యాక్సెస్ (VPS నుండి రీడ్-ఓన్లీ DB స్నాప్షాట్ను సోర్స్ చేస్తుంది).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS ప్రత్యక్ష smoke — సాధారణ Node ESM scripts, ప్రత్యక్ష .15 serverను నేరుగా ఉపయోగిస్తాయి.
-# అవసరం: ssh root@192.168.0.15 యాక్సెస్ (SSH sqlite ద్వారా combos సృష్టించబడతాయి/తొలగించబడతాయి).
-# నిజమైన providersను ఉపయోగిస్తుంది (చిన్న ఖర్చు). __live_test__* combosను మాత్రమే సృష్టిస్తుంది/తొలగిస్తుంది. CIలో ఎప్పుడూ అమలు కాదు.
-# .15లో REQUIRE_API_KEY=false కాబట్టి API key అవసరం లేదు, కానీ సెట్ చేసి ఉంటే COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEYను గౌరవిస్తుంది.
-npm run test:combo:live:vps              # 7 HTTP సందర్భాలు (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # నిజమైన cross-provider failover సందర్భాన్ని జోడిస్తుంది (మొత్తం 8)
+# Phase-3 VPS లైవ్ స్మోక్ పరీక్ష — సాధారణ Node ESM స్క్రిప్ట్లు, లైవ్ .15 సర్వర్ను నేరుగా ఉపయోగిస్తాయి.
+# అవసరం: ssh root@192.168.0.15 యాక్సెస్ (SSH sqlite ద్వారా కాంబోలు సృష్టించబడతాయి/తొలగించబడతాయి).
+# వాస్తవ ప్రొవైడర్లను ఉపయోగిస్తుంది (స్వల్ప ఖర్చు). __live_test__* కాంబోలను మాత్రమే సృష్టిస్తుంది/తొలగిస్తుంది. CIలో ఎప్పుడూ అమలు కాదు.
+# .15లో REQUIRE_API_KEY=false కాబట్టి API కీ అవసరం లేదు, అయితే సెట్ చేసి ఉంటే COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEYలను గౌరవిస్తుంది.
+npm run test:combo:live:vps              # 7 HTTP సందర్భాలు (ప్రాధాన్యత/రౌండ్-రాబిన్/వెయిటెడ్/ఖర్చు/ఫ్యూజన్/ఆటో + హెల్త్)
+npm run test:combo:live:vps:failover     # వాస్తవ క్రాస్-ప్రొవైడర్ ఫెయిల్ఓవర్ సందర్భాన్ని జోడిస్తుంది (మొత్తం 8)
 ```
 
-Coverage గమనికలు:
+కవరేజ్ గమనికలు:
 
-- `npm run test:coverage` ప్రధాన unit test suiteకు source coverageను కొలుస్తుంది, `tests/**`ను మినహాయిస్తుంది, అలాగే `open-sse/**`ను చేర్చుతుంది
-- Pull requests తప్పనిసరిగా statements/lines/functions/branches coverage గేట్ను **60%+** వద్ద ఉంచాలి
-- ఒక PR `src/`, `open-sse/`, `electron/`, లేదా `bin/`లోని production codeను మార్చితే, అదే PRలో automated testsను జోడించాలి లేదా నవీకరించాలి
-- `npm run coverage:report` తాజా coverage run నుండి వివరణాత్మక file-by-file reportను ముద్రిస్తుంది
-- `npm run test:coverage:legacy` చారిత్రక పోలిక కోసం పాత metricను అలాగే ఉంచుతుంది
-- దశలవారీ coverage మెరుగుదల roadmap కోసం `docs/ops/COVERAGE_PLAN.md` చూడండి
+- `npm run test:coverage` ప్రధాన యూనిట్ టెస్ట్ సూట్కు సంబంధించిన సోర్స్ కవరేజ్ను కొలుస్తుంది, `tests/**`ను మినహాయిస్తుంది మరియు `open-sse/**`ను చేర్చుతుంది
+- పుల్ రిక్వెస్ట్లు స్టేట్మెంట్లు/లైన్లు/ఫంక్షన్లు/బ్రాంచ్ల కవరేజ్ గేట్ను **60%+** వద్ద తప్పనిసరిగా కొనసాగించాలి
+- ఒక PR `src/`, `open-sse/`, `electron/` లేదా `bin/`లోని ప్రొడక్షన్ కోడ్ను మార్చితే, అదే PRలో ఆటోమేటెడ్ పరీక్షలను జోడించాలి లేదా నవీకరించాలి
+- `npm run coverage:report` తాజా కవరేజ్ అమలు నుంచి వివరణాత్మకమైన ఫైల్-వారీ నివేదికను ముద్రిస్తుంది
+- `npm run test:coverage:legacy` చారిత్రక పోలిక కోసం పాత మెట్రిక్ను అలాగే ఉంచుతుంది
+- దశలవారీ కవరేజ్ మెరుగుదల రోడ్మ్యాప్ కోసం `docs/ops/COVERAGE_PLAN.md`ను చూడండి
 
-### Pull Request అవసరాలు
+### పుల్ రిక్వెస్ట్ అవసరాలు
 
-PRను తెరవడానికి ముందు, మీరు మార్చిన వాటికి సంబంధించిన focused loopను అమలు చేయడానికి
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)ను ఉపయోగించండి. పూర్తి unit suite (4 CI shards), Vitest, **60%+** coverage గేట్, మరియు
-production build CI బాధ్యత — వాటిని స్థానికంగా అమలు చేయడం వల్ల PR
-తనిఖీలు ఇప్పటికే అందించని అదనపు సంకేతమేదీ రాదు, అలాగే చిన్న machinesలో అది hostను పూర్తిగా వినియోగించవచ్చు (#8084):
+PRను తెరవడానికి ముందు, మీరు మార్చిన అంశానికి సంబంధించిన కేంద్రీకృత లూప్ను అమలు చేయడానికి
+[కాంట్రిబ్యూషన్ గోల్డెన్ పాత్](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)ను ఉపయోగించండి. పూర్తి యూనిట్ సూట్ (4 CI షార్డ్లు), Vitest, **60%+** కవరేజ్ గేట్ మరియు
+ప్రొడక్షన్ బిల్డ్ CI బాధ్యత — వాటిని స్థానికంగా అమలు చేయడం వల్ల PR తనిఖీలు ఇప్పటికే ఇవ్వని అదనపు సంకేతమేదీ లభించదు,
+అలాగే చిన్న మెషీన్లలో అది హోస్ట్ను పూర్తిగా వినియోగించవచ్చు (#8084):
 
-- మీ మార్పును cover చేసే test filesను అమలు చేయండి: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- మీ మార్పును కవర్ చేసే టెస్ట్ ఫైళ్లను అమలు చేయండి: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint`ను అమలు చేయండి
-- production code మారినప్పుడల్లా అదే PRలో automated testsను చేర్చండి లేదా నవీకరించండి
-- production code మారినప్పుడు, మార్చిన లేదా జోడించిన test filesను PR వివరణలో చేర్చండి
-- CIలో project secrets configure చేసి ఉన్నప్పుడు PRపై SonarQube ఫలితాన్ని తనిఖీ చేయండి
+- ప్రొడక్షన్ కోడ్ మారినప్పుడల్లా అదే PRలో ఆటోమేటెడ్ పరీక్షలను చేర్చండి లేదా నవీకరించండి
+- `node:test` ఫైళ్లలో, ప్రతి టాప్-లెవల్ `await`ను (`await import(...)` వంటిది) మొదటి `test()` / `describe()`కు ముందు ఉంచండి: `--test-force-exit` కింద, దాని తర్వాత నమోదు చేసిన పరీక్షలు నిశ్శబ్దంగా అసలు అమలు కాకపోవచ్చు (#18045; `npm run check:test-tla-order` ద్వారా అమలు చేయబడుతుంది)
+- ప్రొడక్షన్ కోడ్ మారినప్పుడు, మార్చిన లేదా జోడించిన టెస్ట్ ఫైళ్లను PR వివరణలో చేర్చండి
+- CIలో ప్రాజెక్ట్ సీక్రెట్లు కాన్ఫిగర్ చేసి ఉన్నప్పుడు, PRలో SonarQube ఫలితాన్ని తనిఖీ చేయండి
 
-ప్రస్తుత పరీక్ష స్థితి: కింది వాటిని cover చేసే **122 unit test files**:
+ప్రస్తుత పరీక్ష స్థితి: వీటిని కవర్ చేస్తున్న **122 యూనిట్ టెస్ట్ ఫైళ్లు**:
 
-- Provider translators మరియు format conversion
-- Rate limiting, circuit breaker, మరియు resilience
-- Semantic cache, idempotency, progress tracking
-- Database operations మరియు schema (21 DB modules)
-- OAuth flows మరియు authentication
-- API endpoint validation (Zod v4)
-- MCP server tools మరియు scope enforcement
-- Memory మరియు Skills systems
+- ప్రొవైడర్ ట్రాన్స్లేటర్లు మరియు ఫార్మాట్ మార్పిడి
+- రేట్ లిమిటింగ్, సర్క్యూట్ బ్రేకర్ మరియు స్థితిస్థాపకత
+- సెమాంటిక్ క్యాష్, ఐడెంపొటెన్సీ, పురోగతి ట్రాకింగ్
+- డేటాబేస్ ఆపరేషన్లు మరియు స్కీమా (21 DB మాడ్యూల్లు)
+- OAuth ఫ్లోలు మరియు ప్రామాణీకరణ
+- API ఎండ్పాయింట్ ధ్రువీకరణ (Zod v4)
+- MCP సర్వర్ టూల్స్ మరియు స్కోప్ అమలు
+- మెమరీ మరియు స్కిల్స్ సిస్టమ్లు
 
 ---
 

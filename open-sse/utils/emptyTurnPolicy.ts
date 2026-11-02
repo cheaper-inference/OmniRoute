@@ -1,4 +1,5 @@
 import { getRegistryEntry } from "../config/providerRegistry.ts";
+import { inheritTruncatedStreamPolicy } from "./truncatedStreamPolicy.ts";
 
 type NativeProtocol = "openai" | "claude" | "openai-responses";
 type EmptyTurnExecution = {
@@ -183,8 +184,13 @@ export function hasTrustedEmptyTurn(response: Response): boolean {
   );
 }
 
+/**
+ * Copy the per-Response turn verdicts onto a wrapper: the trusted empty-turn record and
+ * the cut-stream marker (#18460 follow-up, `truncatedStreamPolicy.ts`). Every chatCore /
+ * chat.ts wrapper already routes through here, so both travel the same path to the combo.
+ */
 export function inheritEmptyTurnPolicy(source: Response, target: Response): Response {
   const execution = executions.get(source);
   if (execution) executions.set(target, execution);
-  return target;
+  return inheritTruncatedStreamPolicy(source, target);
 }

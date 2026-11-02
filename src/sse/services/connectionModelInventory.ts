@@ -1,4 +1,5 @@
 import { splitCodexReasoningSuffix } from "@omniroute/open-sse/executors/codex/reasoningSuffix.ts";
+import { isRegisteredImageModel } from "@omniroute/open-sse/config/imageRegistry";
 import { isModelAdvertisedByConnection } from "@/domain/connectionModelRules";
 import { isSelfHostedChatProvider } from "@/shared/constants/providers";
 import { type ProviderConnectionView } from "@/lib/db/providers/lazyConnectionView";
@@ -7,6 +8,18 @@ import {
   SYNCED_AVAILABLE_MODELS_MALFORMED,
   type SyncedAvailableModelsByConnection,
 } from "@/lib/db/models";
+
+/**
+ * The Codex live catalog (`/backend-api/codex/models`), and so every synced Codex
+ * inventory, lists chat models only. Registered Codex image models are served by the
+ * dedicated Images routes, so the inventory carries no evidence about them and must not
+ * filter accounts for them — otherwise every Codex account is ineligible and
+ * `/v1/images/generations` fails with "No credentials for image provider: codex".
+ */
+function isCodexImageModel(requestedModel: string): boolean {
+  const rawModel = requestedModel.slice(requestedModel.lastIndexOf("/") + 1);
+  return isRegisteredImageModel("codex", rawModel);
+}
 
 /**
  * Does this connection's synced inventory advertise the requested model?
@@ -30,9 +43,15 @@ export function isRequestedModelAdvertised(
 
 /**
  * Self-hosted hosts and Codex subscription accounts can advertise different
- * inventories. For Codex, once an account inventory is known, unsynchronized
- * accounts are not eligible guesses for models advertised by another account.
- * With no inventories at all, retain the existing bootstrap/offline behavior.
+ * inventories. For Codex, once an account inventory advertises the requested
+ * model, unsynchronized accounts are not eligible guesses for it. With no
+ * inventories at all, retain the existing bootstrap/offline behavior.
+ *
+ * #18311: a Codex model that no synced inventory lists (a user-added custom
+ * model, or one released after the last sync) carries no evidence about which
+ * account can serve it, so Codex accounts are not filtered for it and the
+ * upstream decides. Filtering every account answered a misleading
+ * provider_not_configured despite active accounts.
  */
 export async function loadAdvertisedModelsForConnections(
   connections: ProviderConnectionView[],
@@ -45,7 +64,9 @@ export async function loadAdvertisedModelsForConnections(
     connections
       .map((c) => c.provider)
       .filter(
-        (p): p is string => typeof p === "string" && (isSelfHostedChatProvider(p) || p === "codex")
+        (p): p is string =>
+          typeof p === "string" &&
+          (isSelfHostedChatProvider(p) || (p === "codex" && !isCodexImageModel(requestedModel)))
       )
   );
   if (inventoryProviders.size === 0) return advertised;
@@ -60,10 +81,16 @@ export async function loadAdvertisedModelsForConnections(
       }
       // Malformed persisted rows: fail open for the whole provider.
       if (byConnection[SYNCED_AVAILABLE_MODELS_MALFORMED]) return;
-      if (
-        providerId === "codex" &&
-        Object.values(byConnection).some((models) => Array.isArray(models) && models.length > 0)
-      ) {
+      if (providerId === "codex") {
+        const advertisedByAnyAccount = Object.values(byConnection).some(
+          (models) =>
+            Array.isArray(models) &&
+            // An empty set means "advertises everything" to the matcher, so an
+            // empty row must not count as evidence for the requested model.
+            models.length > 0 &&
+            isRequestedModelAdvertised(providerId, requestedModel, new Set(models.map((m) => m.id)))
+        );
+        if (!advertisedByAnyAccount) return;
         for (const connection of connections) {
           if (connection.provider === providerId) advertised.set(connection.id, new Set());
         }

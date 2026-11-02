@@ -482,19 +482,19 @@ createResponsesApiTransformStream(): TransformStream
 
 ---
 
-## သတ်မှတ်ချက်များ
+## ဖွဲ့စည်းမှု
 
-`open-sse/config/` တွင် configuration layer ကို သိမ်းဆည်းထားသည်-
+`open-sse/config/` configuration layer ကို ကိုင်ထားသည်။
 
-| ဖိုင်                             | ရည်ရွယ်ချက်                                                              |
-| --------------------------------- | ------------------------------------------------------------------------ |
-| `providerRegistry.ts`             | provider 375 ခု ပါဝင်သော catalog အပေါ် အခြေခံထားသည့် chat-model registry |
-| `providerModels.ts`               | Model alias များ၊ format mapping                                         |
-| `constants.ts`                    | Timeout များ၊ limit များ၊ status code များ                               |
-| `defaultThinkingSignature.ts`     | Default Claude thinking signature                                        |
-| `modelStrip.ts` (services ထဲတွင်) | Provider တစ်ခုချင်းစီအတွက် field stripping                               |
+| ဖို                                   | ရည်ရွယ်ချက်                                                 |
+| ------------------------------------- | ----------------------------------------------------------- |
+| `providerRegistry.ts`                 | 377-ပံ့ပိုးပေးသူ ကတ်တလောက်အတွက် ချတ်မော်ဒယ် မှတ်ပုံတင်ခြင်း |
+| `providerModels.ts`                   | မော်ဒယ်အမည်တူများ၊ ဖော်မတ်မြေပုံဆွဲခြင်း။                   |
+| `constants.ts`                        | အချိန်ကုန်ခြင်း၊ ကန့်သတ်ချက်များ၊ အခြေအနေကုဒ်များ           |
+| `defaultThinkingSignature.ts`         | မူရင်း Claude တွေးခေါ်မှု လက်မှတ်                           |
+| `modelStrip.ts` (ဝန်ဆောင်မှုများတွင်) | ဝန်ဆောင်မှုပေးသူ အကွက်ကို ထုတ်ယူခြင်း။                      |
 
-### Provider Registry Schema
+### ဝန်ဆောင်မှုပေးသူ မှတ်ပုံတင်ခြင်း အစီအစဉ်
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Module load လုပ်ချိန်တွင် Zod validation က provider config အားလုံး မှန်ကန်ကြောင်း သေချာစေသည်။
+module load တွင်Zod validation သည် provider configs အားလုံးကို တရားဝင်ကြောင်း သေချာစေသည်။
 
 ---
 

@@ -69,6 +69,7 @@ import { getQoderUsage, parseQoderUserStatusUsage } from "./usage/qoder.ts";
 export { parseQoderUserStatusUsage } from "./usage/qoder.ts";
 import { getOpencodeUsage } from "./usage/opencode.ts";
 import { getDeepseekUsage } from "./usage/deepseek.ts";
+import { getStepfunUsage } from "./usage/stepfun.ts";
 import { getMoonshotOpenPlatformUsage } from "./moonshotQuotaFetcher.ts";
 import {
   isKimiCodingConnection,
@@ -95,6 +96,7 @@ import { getAgentrouterUsage } from "./usage/agentrouter.ts";
 import { getKilocodeUsage } from "./usage/kilocode.ts";
 import { getChatPlaygroundUsage } from "./usage/chatplayground.ts";
 import { getCloudflareAiUsage } from "./usage/cloudflareAi.ts";
+import { getMuseUsage } from "./usage/museCode.ts";
 
 type JsonRecord = Record<string, unknown>;
 type UsageProviderConnection = JsonRecord & {
@@ -139,12 +141,15 @@ export async function getUsageForProvider(
     return await getMoonshotOpenPlatformUsage(connection);
   }
 
-  // openai-compatible-* ids are generated per connection, so they can never
+  // openai-/anthropic-compatible-* ids are generated per connection, so they can never
   // appear in the switch below or in USAGE_FETCHER_PROVIDERS. The connection
   // itself declares where its quota lives (#13616); without that declaration
   // this returns a message and the sync treats it as "nothing to show", exactly
   // as it did before.
-  if (typeof provider === "string" && provider.startsWith("openai-compatible-")) {
+  if (
+    typeof provider === "string" &&
+    (provider.startsWith("openai-compatible-") || provider.startsWith("anthropic-compatible-"))
+  ) {
     return await getOpenAiCompatibleUsage(apiKey, providerSpecificData);
   }
 
@@ -219,6 +224,11 @@ export async function getUsageForProvider(
       return await getApmixUsage(apiKey || "");
     case "deepseek":
       return await getDeepseekUsage(id || "", apiKey || "");
+    case "stepfun":
+      // Account balance (GET /v1/accounts). The base-URL override in
+      // providerSpecificData selects the platform (api.stepfun.com China vs
+      // api.stepfun.ai international) — the same override the chat path uses.
+      return await getStepfunUsage(apiKey || "", providerSpecificData);
     case "moonshot":
     case "kimi":
       return await getMoonshotOpenPlatformUsage(connection);
@@ -295,6 +305,9 @@ export async function getUsageForProvider(
     case "cloudflare-ai":
       // Daily neurons from GraphQL Analytics (needs Account Analytics: Read on the token).
       return await getCloudflareAiUsage(apiKey || "", providerSpecificData);
+    case "muse-code":
+      // Muse Code has no usage/balance API. Return persisted subscription metadata.
+      return await getMuseUsage(accessToken, providerSpecificData, id || "");
     default:
       return { message: `Usage API not implemented for ${provider}` };
   }

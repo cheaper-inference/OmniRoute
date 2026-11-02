@@ -19,6 +19,10 @@ import { LRUCache } from "./cacheLayer";
 import { getDbInstance } from "./db/core";
 import { toNumber } from "@/shared/utils/numeric";
 import { conversationSignatureFields } from "../../open-sse/utils/conversationSignatureFields";
+import { startSemanticCachePruneJob } from "./jobs/semanticCachePruneJob";
+
+// Like reasoning-cache cleanup, start from the consumer module, independent of boot path.
+startSemanticCachePruneJob();
 
 type JsonRecord = Record<string, unknown>;
 
@@ -399,9 +403,9 @@ export function recordSemanticCacheHit(signature: string, tokensSaved = 0): void
   try {
     const db = getDbInstance();
     if (signature) {
-      db.prepare(
-        "UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ? OR prompt_hash = ?"
-      ).run(signature, signature.slice(0, 16));
+      db.prepare("UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ?").run(
+        signature
+      );
     }
     incrementMetric("hits");
     if (tokensSaved > 0) {

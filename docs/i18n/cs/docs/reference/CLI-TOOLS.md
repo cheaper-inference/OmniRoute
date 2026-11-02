@@ -4,17 +4,17 @@
 
 ---
 
-Poslední aktualizace: 2026-08-23
+Poslední aktualizace: 23.08.2026
 
-OmniRoute se integruje se třemi kategoriemi nástrojů CLI rozdělenými mezi tři vyhrazené stránky řídicího panelu:
+OmniRoute se integruje se třemi kategoriemi nástrojů CLI rozmístěnými na třech vyhrazených stránkách řídicího panelu:
 
-| Stránka        | Trasa                   | Koncept                                                                                | Počet       |
-| -------------- | ----------------------- | -------------------------------------------------------------------------------------- | ----------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Programovací nástroje směrované na OmniRoute (Klient → CLI → OmniRoute → Poskytovatel) | 26          |
-| **CLI Agents** | `/dashboard/cli-agents` | Autonomní agenti směrovaní na OmniRoute (stejný tok, širší rozsah)                     | 10          |
-| **ACP Agents** | `/dashboard/acp-agents` | CLI, které OmniRoute spouští jako backend přes stdio/ACP (obrácený tok)                | viz registr |
+| Strana         | Trasa                   | Pojem                                                                               | Počítat     |
+| -------------- | ----------------------- | ----------------------------------------------------------------------------------- | ----------- |
+| **CLI kódy**   | `/dashboard/cli-code`   | Kódovací nástroje, na které ukazujete OmniRoute (poskytovatel → CLI → OmniRoute → ) | 26          |
+| **CLI agenti** | `/dashboard/cli-agents` | Autonomní agenti, na které ukazujete OmniRoute (stejný tok, širší rozsah)           | 11          |
+| **ACP agenti** | `/dashboard/acp-agents` | CLIs který se OmniRoute vytvoří jako backend přes stdio/ACP (reverzní tok)          | viz registr |
 
-Starší trasy jsou přesměrovány pomocí 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Přesměrování starších tras přes 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -45,7 +45,7 @@ ACP Agents (obrácený tok spouštění):
 
 ## Automatická konfigurace pomocí `setup-*`
 
-Konfiguraci jednotlivých nástrojů nemusíte psát ručně. OmniRoute poskytuje pro každé podporované CLI příkaz `setup-*`, který načte **aktuální** katalog modelů ze spuštěné instance OmniRoute (místní nebo vzdálené) a zapíše vlastní konfiguraci nástroje do vašeho počítače:
+Nemusíte psát konfiguraci každého nástroje ručně. OmniRoute dodává příkaz `setup-*` na podporované CLI, který čte** žít** katalog modelů ze spuštěného OmniRoute (lokálního nebo vzdáleného) a zapíše vlastní konfiguraci nástroje na váš počítač:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -53,19 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Každý z nich podporuje `--remote <url> --api-key <key>` (konfigurace místního nástroje pro vzdálenou instanci OmniRoute), `--dry-run` (náhled bez zápisu) a `--port`. Nástroje bez automatického zjišťování modelů (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) přijímají `--model <id>` (a `--yes` pro neinteraktivní spuštění). `setup-5dive` je jediný postup, který nezapisuje do `$HOME`: konfiguruje flotilu agentů 5dive zapsáním kořenovým uživatelem vlastněného ověřovacího profilu na hostiteli flotily, takže se znovu spustí prostřednictvím `sudo` a nemá vlastní vzdálený režim. Chcete-li spustit CLI se správně předanými proměnnými prostředí, aniž by se zapsala jakákoli konfigurace, použijte obecný spouštěč `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — cíle a aliasy pocházejí z `bin/cli/cli-manifest.mjs`); starší spouštěče pro jednotlivé nástroje `omniroute launch` (Claude Code) a `omniroute launch-codex` (Codex) zůstávají dostupné. Gemini CLI lze pouze spouštět: je cílem příkazu `omniroute run`, ale nemá postup `setup-*`/`configure`.
+Každý z nich přijímá `--remote <url> --api-key <key>` (konfigurace lokálního nástroje proti vzdálenému OmniRoute), `--dry-run` (náhled bez zápisu) a `--port`. Nástroje bez automatického zjišťování modelu (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) berou `--model <id>` (a `--yes` pro neinteraktivní běhy). `setup-5dive` je jediný recept, který se nezapisuje pod `$HOME`: konfiguruje flotilu agentů 5dive zapsáním auth profilu vlastněného uživatelem root na hostitele flotily, takže se znovu spustí přes `sudo` a nemá vlastní vzdálený režim. Chcete-li spustit CLI s vloženým správným env a bez napsané konfigurace, použijte obecný spouštěč `omniroute run <target>` (claude, codex, aider, husa, opencode, qwen, gemini, Whycodes — cíle a aliasy pocházejí z `bin/cli/cli-manifest.mjs`); starší spouštěče pro jednotlivé nástroje `omniroute launch` (Claude Code) a `omniroute launch-codex` (Codex) zůstávají dostupné. Gemini CLI je pouze spuštění: je to cíl `omniroute run` ale nemá žádný recept na `setup-*`/`configure`.
 
-> **Kompletní reference:** hlavní tabulku — co jednotlivé příkazy zapisují, všechny příznaky, místní a vzdálený režim a které nástroje vyžadují příponu `/v1` — najdete v dokumentu
-> **[Integrace CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Kompletní reference:** hlavní tabulka – to, co zapisuje každý příkaz, každý příznak, místní vs. vzdálené a které nástroje vyžadují příponu `/v1` – žije v** [Integrace CLI](../guides/CLI-INTEGRATIONS.md)** .
 
-### Spouštění těchto příkazů uvnitř kontejneru
+### Spuštění těchto uvnitř kontejneru
 
-Příkaz `setup-*` spuštěný uvnitř kontejneru OmniRoute zapisuje do domovského adresáře samotného kontejneru, který žádné CLI na hostiteli nečte a který po zániku kontejneru zmizí. OmniRoute tuto situaci rozpozná a namísto zápisu skončí s kódem `2` a zobrazí pokyny. Existují dva podporované postupy — nainstalovat CLI na hostitele a připojit se ke kontejneru pomocí `omniroute connect`, nebo připojit konfigurační adresáře pomocí bind mountu a nastavit `CLI_CONFIG_HOME` (profil compose `host`). Každý příkaz `setup-*` a také `omniroute configure` a `omniroute config set` podporují `--allow-container-write`, pokud skutečně chcete konfigurovat CLI samotného kontejneru; stejného výsledku lze pro server dosáhnout pomocí `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`. Viz
-[Průvodce Dockerem → Konfigurace nástrojů CLI na hostiteli](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Příkaz `setup-*` provedený uvnitř kontejneru OmniRoute zapíše do vlastního domova kontejneru, který žádný hostitel CLI nečte a který zmizí s kontejnerem. OmniRoute to detekuje a ukončí `2` s instrukcemi místo zápisu. Dva podporované způsoby vpřed — nainstalujte CLI na hostitele a `omniroute connect` do kontejneru nebo připojte konfigurační adresáře pomocí vazby a nastavte `CLI_CONFIG_HOME` (profil `host` pro vytvoření). Každý příkaz `setup-*` plus `omniroute configure` a `omniroute config set` přijímá `--allow-container-write` při konfiguraci vlastního kontejneru CLIs je to, co jste vlastně mysleli; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` dělá totéž pro server. Viz [průvodce Docker → Konfigurace nástrojů hostitele CLI](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Koncový bod apply** řídicího panelu (`POST /api/cli-tools/apply`) vynucuje stejnou ochranu: v kontejneru požadavek na zápis, jehož cíl není připojen z hostitele pomocí bind mountu, odpoví kódem **`422`** s `containerEphemeralTarget: true`, bezpečným textem chyby a — u nástrojů s postupem pro hostitele (claude, codex, opencode, cline, kilo, continue) — také s `hostSetupCommand` (např. `omniroute setup-opencode`), který je třeba spustit na hostiteli; nic se nezapíše. `dryRun: true` funguje i nadále v režimu kontejneru a vrací redigovaný náhled a cílovou cestu, aniž by se dotkl disku. Obsah náhledu nepředstavuje konfiguraci obsahující přihlašovací údaje, kterou by bylo možné zkopírovat nebo importovat. Použijte původní vstupy nástroje, základní URL, klíče API a modelu na hostiteli nebo použijte uvedený instalační příkaz na straně hostitele. Informace o záhlaví náhledu a kontraktu požadavku najdete v dokumentu [Zabezpečení konfigurace CLI](../security/CLI-CONFIGURATION.md). Toto chování je záměrné a proti regresím je chráněno testem `tests/unit/api/cli-tools/apply-container-guard.test.ts` — chybu 422 se nikdy nepokoušejte „opravit“ odstraněním této ochrany.
+Palubní deska** použít koncový bod** (`POST /api/cli-tools/apply`) vynucuje stejnou ochranu: v kontejneru odpovídá zápis, jehož cíl není připojen k hostiteli.**`422`** se `containerEphemeralTarget: true`, textem bezpečné chyby a — pro nástroje s receptem hostitele (claude, codex, opencode, cline, kilo, continue) — `hostSetupCommand` (např. `omniroute setup-opencode`), který se má místo toho spustit na hostiteli; nic není napsáno. `dryRun: true` pokračuje v práci v režimu kontejneru a vrací zredigovanou cílovou cestu + náhledu, aniž byste se dotkli disku. Obsah náhledu není konfigurace nesoucí pověření ke kopírování nebo importu. Použijte s původními vstupy tool/base URL/API key/model na hostiteli nebo použijte uvedený příkaz nastavení na straně hostitele. Viz [zabezpečení konfigurace CLI](../security/CLI-CONFIGURATION.md) pro záhlaví náhledu a smlouvu požadavku. Toto chování je záměrné a regresně chráněné `tests/unit/api/cli-tools/apply-container-guard.test.ts` — nikdy „neopravujte“ 422 odstraněním ochrany.
 
 ---
 
@@ -108,59 +107,60 @@ jednoho rozhraní bez ostatních způsobí selhání sady testů namísto vzniku
 
 ---
 
-## 1. Katalog CLI Code (27 nástrojů)
+## 1. Katalog kódů CLI (27 nástrojů)
 
-Všechny nástroje, které se zobrazují v `/dashboard/cli-code`. Nástroje s `baseUrlSupport: none` jsou připojeny prostřednictvím MITM nebo ručního návodu namísto vlastní základní URL:
+Všechny nástroje, které se objevují v `/dashboard/cli-code`. Ti s `baseUrlSupport: none` jsou propojeni přes MITM nebo manuální průvodce namísto vlastní základny URL:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| id            | jméno                      | prodejce            | baseUrlSupport | configType         | acpSpawnable |
+| ------------- | -------------------------- | ------------------- | -------------- | ------------------ | ------------ |
+| claude        | Claude kód                 | Anthropic           | plný           | env                | věrný        |
+| kodex         | OpenAI Codex CLI           | OpenAI              | plný           | zvyk               | věrný        |
+| zcode         | ZCode (kódovací plán GLM ) | Z.ai                | žádný          | zvyk               | falešný      |
+| klinovat      | Cline                      | OSS (ex-Claude Dev) | plný           | zvyk               | věrný        |
+| kilo          | Kilový kód                 | Kilo-Org            | plný           | zvyk               | falešný      |
+| roo           | Roo Code                   | Roo (OSS)           | plný           | průvodce           | falešný      |
+| pokračovat    | Pokračovat                 | pokračovat.dev      | plný           | průvodce           | falešný      |
+| pomocník      | Aider                      | OSS (P. Gauthier)   | plný           | průvodce           | věrný        |
+| kovárna       | ForgeCode                  | Antinomie HQ        | plný           | zvyk               | věrný        |
+| jcode         | jcode                      | 1jehuang (OSS)      | plný           | zvyk               | falešný      |
+| deepseek-tui  | DeepSeek TUI               | Hunter Bown (OSS)   | plný           | zvyk               | falešný      |
+| cowhale       | CodeWhale                  | Hmbown (OSS)        | plný           | zvyk               | falešný      |
+| opencode      | OpenCode                   | Anomálie (ex-SST)   | plný           | průvodce           | věrný        |
+| droid         | Tovární Droid              | Továrna AI          | částečný       | průvodce           | falešný      |
+| druhý pilot   | GitHub Copilot CLI         | GitHub/MS           | plný           | zvyk               | falešný      |
+| kurzor-cli    | Cursor CLI                 | Jakákoli koule      | částečný       | průvodce           | věrný        |
+| koruška       | Koruška                    | leonardcser (OSS)   | plný           | zvyk               | falešný      |
+| pí            | Pi (pi-coding-agent)       | M. Zechner (OSS)    | plný           | zvyk               | falešný      |
+| grok-stavět   | Grok sestavit              | xAI                 | plný           | zvyk               | falešný      |
+| rozdrtit      | Rozdrtit                   | OSS (kouzlo)        | plný           | zvyk               | falešný      |
+| qwen          | Qwen kód                   | Alibaba             | plný           | průvodce           | věrný        |
+| zed           | Zed                        | Zed Industries      | plný           | průvodce           | falešný      |
+| kurzor        | Cursor                     | Jakákoli koule      | žádný          | průvodce           | falešný      |
+| antigravitace | Antigravity                | Google              | žádný          | mitm               | falešný      |
+| hermes        | Hermes                     | Nous Research       | žádný          | průvodce           | falešný      |
+| kiro          | Kiro AI                    | Amazon              | žádný          | mitm               | falešný      |
+| zvyk          | Vlastní CLI                | —                   | plný           | zakázkový stavitel | falešný      |
 
-Nástroje s `baseUrlSupport: "partial"` zobrazují na kartě řídicího panelu odznak „⚠ Částečná základní URL“.
+Nástroje se `baseUrlSupport: "partial"` zobrazují na kartě palubní desky odznak „⚠ Base URL parcial“.
 ---
 
-## 2. Katalog agentů CLI (10 nástrojů)
+## 2. Katalog agentů CLI (11 nástrojů)
 
-Autonomní agenti, kteří se zobrazují v `/dashboard/cli-agents`:
+Autonomní agenti, kteří se objevují v `/dashboard/cli-agents`:
 
-| id           | název            | dodavatel                | podpora baseUrl | spustitelný přes ACP |
-| ------------ | ---------------- | ------------------------ | --------------- | -------------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | full            | false                |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full            | true                 |
-| goose        | Goose            | Block / Linux Foundation | full            | true                 |
-| interpreter  | Open Interpreter | OSS                      | full            | true                 |
-| warp         | Warp AI          | Warp Inc.                | partial         | true                 |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full            | false                |
-| omp          | Oh My Pi         | OSS                      | full            | true                 |
-| letta        | Letta CLI        | Letta                    | full            | false                |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full            | false                |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full            | false                |
+| id             | jméno                | prodejce                 | baseUrlSupport | acpSpawnable |
+| -------------- | -------------------- | ------------------------ | -------------- | ------------ |
+| hermes-agent   | Agent Hermes         | Nous Research            | plný           | falešný      |
+| otevřený dráp  | OpenClaw             | OSS (P. Steinberger)     | plný           | věrný        |
+| husa           | Husa                 | Block / Linux Foundation | plný           | věrný        |
+| tlumočník      | Otevřete Interpreter | OSS                      | plný           | věrný        |
+| osnova         | Warp AI              | Warp Inc.                | částečný       | věrný        |
+| paluba agentů  | Agent Deck           | asheshgoplani (OSS)      | plný           | falešný      |
+| omp            | Ach můj Pi           | OSS                      | plný           | věrný        |
+| letta          | Letta CLI            | Letta                    | plný           | falešný      |
+| primární agent | Hlavní agent         | Prime Intellect (OSS)    | plný           | falešný      |
+| 5 ponor        | 5 ponor              | OSS (5dive-ai)           | plný           | falešný      |
+| proč kódy      | WhyCodes             | Proč Corporation         | plný           | falešný      |
 
 ---
 

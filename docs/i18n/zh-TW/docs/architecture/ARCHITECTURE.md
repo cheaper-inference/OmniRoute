@@ -17,77 +17,76 @@ _最後更新：2026-06-28_
 
 ## 執行摘要
 
-OmniRoute 是一個以 Next.js 建置的本機 AI 路由閘道與儀表板。
-它提供單一的 OpenAI 相容端點（`/v1/*`），並透過格式轉換、備援、權杖重新整理及用量追蹤，將流量路由至多個上游提供者。
+OmniRoute是基於Next.js建構的本機AI路由閘道器和儀表板。它提供單一 OpenAI 相容端點 (`/v1/*`)，並透過轉換、回退、令牌刷新和使用追蹤在多個上游提供者之間路由流量。
 
-核心功能：
+核心能力：
 
-- 為 CLI／工具提供 OpenAI 相容的 API 介面（375 個提供者、156 個執行器模組）
-- 在不同提供者格式之間轉換請求／回應
-- 模型組合備援（多模型序列）
-- 結構化組合步驟（`provider + model + connection`），並依 `compositeTiers` 進行執行階段排序
-- 帳戶層級備援（每個提供者可有多個帳戶）
-- 主要聊天路徑中的配額預檢，以及具配額感知能力的 P2C 帳戶選擇
-- OAuth + API 金鑰提供者連線管理（27 個 OAuth 提供者模組）
-- 透過 `/v1/embeddings` 產生嵌入向量（18 個提供者）
-- 透過 `/v1/images/generations` 產生影像（10+ 個提供者、20+ 個模型）
-- 透過 `/v1/audio/transcriptions` 進行音訊轉錄（18 個提供者）
-- 透過 `/v1/audio/speech` 將文字轉換為語音（24 個內建提供者）
-- 透過 `/v1/videos/generations` 產生影片（ComfyUI + SD WebUI）
-- 透過 `/v1/music/generations` 產生音樂（ComfyUI）
-- 透過 `/v1/search` 進行網頁搜尋（20 個提供者）
-- 透過 `/v1/moderations` 進行內容審核
-- 透過 `/v1/rerank` 進行重新排序
-- 為推理模型解析思考標籤（``）
-- 為嚴格的 OpenAI SDK 相容性進行回應清理
-- 為跨提供者相容性進行角色正規化（developer→system、system→user）
+- 用於CLI/tools的 OpenAI 相容API表面（377 個提供者，156 個執行器模組）
+- 跨提供者格式的Request/response翻譯
+- 模型組合後備（多模型序列）
+- 結構化組合步驟 (`provider + model + connection`)，運行時按`compositeTiers`排序
+- 帳戶級回退（每個提供者多個帳戶）
+- 主聊天路徑中的配額預檢和配額感知P2C帳戶選擇
+- OAuth + API 金鑰提供者連線管理（27 個OAuth提供者模組）
+- 透過`/v1/embeddings`嵌入產生（18 個提供者）
+- 透過`/v1/images/generations`產生圖像（10 個+提供者，20 個+模型）
+- 透過`/v1/audio/transcriptions`進行音訊轉錄（18 個提供者）
+- 透過`/v1/audio/speech`進行文字轉語音（24 個內建提供者）
+- 透過`/v1/videos/generations`產生視訊 (ComfyUI + SD WebUI)
+- 透過`/v1/music/generations` (ComfyUI) 產生音樂
+- 透過`/v1/search`進行網路搜尋（20 個提供者）
+- 透過`/v1/moderations`進行審核
+- 透過`/v1/rerank`重新排名
+- 考慮標籤解析（`<think>...</think>`）用於推理模型
+- 回應清理以實現嚴格的OpenAI SDK相容性
+- 角色規範化（開發者→系統、系統→用戶）以實現跨提供者相容性
 - 結構化輸出轉換（json_schema → Gemini responseSchema）
-- 對提供者、金鑰、別名、組合、設定及定價進行本機持久化（122 個資料庫模組）
-- 用量／成本追蹤與請求記錄
-- 用於多裝置／狀態同步的選用雲端同步
-- 用於 API 存取控制的 IP 允許清單／封鎖清單
-- 思考預算管理（直通／自動／自訂／自適應）
-- 全域系統提示詞注入
-- 工作階段追蹤與指紋辨識
-- 每個帳戶具備提供者專用設定檔的增強型速率限制
-- 提升提供者韌性的斷路器模式
-- 使用互斥鎖定提供防止驚群效應的保護
-- 以簽章為基礎的請求去重快取
-- 領域層：成本規則、備援政策、鎖定政策
-- Context Relay：用於維持帳戶輪替連續性的工作階段交接摘要
-- 領域狀態持久化（針對備援、預算、鎖定及斷路器的 SQLite 直寫式快取）
-- 用於集中式請求評估的政策引擎（鎖定 → 預算 → 備援）
-- 具備 p50／p95／p99 延遲彙總的請求遙測
-- 透過 `combo_execution_key`／`combo_step_id` 提供組合目標遙測與歷史組合目標健康狀態
-- 用於端對端追蹤的關聯 ID（X-Request-Id）
-- 可按 API 金鑰選擇退出的合規稽核記錄
-- 用於 LLM 品質保證的評估框架
-- 顯示即時提供者斷路器狀態的健康狀態儀表板
-- MCP Server（110 項工具），支援 3 種傳輸方式（stdio／SSE／Streamable HTTP）
-- A2A Server（JSON-RPC 2.0 + SSE），具備技能與任務生命週期
-- 記憶系統（擷取、注入、檢索、摘要）
-- 技能系統（登錄檔、執行器、沙箱、內建技能）
-- 具備憑證管理與 DNS 處理功能的 MITM Proxy
-- 提示詞注入防護中介軟體
-- 提示詞壓縮管線，支援 Caveman、RTK、堆疊式管線、壓縮組合、語言套件及分析
-- ACP（Agent Communication Protocol）登錄檔
-- 模組化 OAuth 提供者（`src/lib/oauth/providers/` 下有 22 個獨立模組）
-- 解除安裝／完整解除安裝指令碼
-- OAuth 環境修復動作
-- 適用於 OpenAI 相容 WS 用戶端的 WebSocket 橋接器（`/v1/ws`）
-- 同步權杖管理（核發／撤銷、下載以 ETag 進行版本控制的設定套件）
-- GLM Thinking（`glmt`）一級提供者預設
-- 混合式權杖計數（提供者端 `/messages/count_tokens`，並以估算作為備援）
-- 模型別名自動植入（啟動時進行 30+ 項跨代理方言正規化）
-- 具備 SSRF 防護、私人 URL 封鎖及可設定重試機制的安全對外擷取
-- 可感知冷卻時間的聊天重試，並提供可設定的 `requestRetry` 與 `maxRetryIntervalSec`
-- 啟動時使用 Zod 進行執行階段環境驗證
-- 合規稽核 v2，支援分頁、提供者 CRUD 事件及遭 SSRF 封鎖的驗證記錄
+- 提供者、金鑰、別名、組合、設定、定價的本地持久性（122 個DB模組）
+- Usage/cost追蹤和請求記錄
+- 用於multi-device/state同步的可選雲端同步
+- IP allowlist/blocklist用於API存取控制
+- 預算管理思維（passthrough/auto/custom/adaptive）
+- 全域系統提示注入
+- 會話追蹤和指紋識別
+- 透過特定於提供者的設定檔增強每個帳戶的速率限制
+- 提供者彈性的斷路器模式
+- 透過互斥鎖實現防雷群保護
+- 基於簽名的請求重複資料刪除快取
+- 領域層：成本規則、回退策略、鎖定策略
+- 上下文中繼：帳戶輪換連續性的會話切換摘要
+- 網域狀態持久性（用於回退、預算、鎖定、斷路器的SQLite直寫式快取）
+- 用於集中請求評估的策略引擎（鎖定→預算→後備）
+- 使用p50/p95/p99延遲聚合請求遙測
+- 透過`combo_execution_key` / `combo_step_id`組合目標遙測和歷史組合目標健康狀況
+- 用於端對端追蹤的關聯ID (X-Request-Id)
+- 根據API金鑰選擇退出的合規性審核日誌記錄
+- LLM品質保證評估框架
+- 具有即時提供者斷路器狀態的健康儀表板
+- MCP伺服器（110 個工具），具有 3 種傳輸方式 (stdio/SSE/Streamable HTTP)
+- A2A伺服器（JSON-RPC 2.0 + SSE）具有技能和任務生命週期
+- 記憶系統（擷取、注射、檢索、總結）
+- 技能係統（註冊中心、執行器、沙箱、內建技能）
+- 具有憑證管理和DNS處理功能的MITM代理
+- 提示注入防護中介軟體
+- 使用 Caveman、 RTK、堆疊管道、壓縮組合、語言套件和分析來提示壓縮管道
+- ACP （代理通訊協定）註冊表
+- 模組化OAuth提供者（ `src/lib/oauth/providers/`下有 22 個單獨的模組）
+- Uninstall/full-uninstall腳本
+- OAuth環境修復行動
+- 用於相容於 OpenAI 的WS客戶端的WebSocket橋接器 (`/v1/ws`)
+- 同步令牌管理（issue/revoke、ETag 版本設定包下載）
+- GLM思維（`glmt`）一流提供者預設
+- 混合令牌計數（具有估計回退的提供者端`/messages/count_tokens` ）
+- 模型別名自動播種（啟動時 30 個+跨代理方言標準化）
+- 透過SSRF防護、私有URL阻止和可配置重試進行安全出站提取
+- 使用可設定的`requestRetry`和`maxRetryIntervalSec`進行冷卻感知聊天重試
+- 啟動時使用Zod驗證運行環境
+- 具有分頁、提供者CRUD事件和 SSRF 阻止的驗證日誌記錄的合規性審核 v2
 
-主要執行階段模型：
+主要運行時模型：
 
-- `src/app/api/*` 下的 Next.js 應用程式路由同時實作儀表板 API 與相容性 API
-- `src/sse/*` + `open-sse/*` 中的共用 SSE／路由核心負責處理提供者執行、格式轉換、串流、備援及用量
+- `src/app/api/*`下的Next.js應用程式路由同時實作儀表板APIs和相容性APIs
+- `src/sse/*` + `open-sse/*`中的共享SSE/routing核心處理提供者執行、轉換、串流、回退和使用
 
 ## 參考圖表
 
@@ -121,43 +120,50 @@ v3.8.0 平台的標準版本控制 Mermaid 原始檔位於
 - 本地程序外的提供者 SLA/控制平面
 - 外部 CLI 二進位檔案本身（Claude CLI、Codex CLI 等）
 
-## 儀表板表面（目前版本）
+## 儀表板介面（目前）
 
 `src/app/(dashboard)/dashboard/` 下的主要頁面：
 
 - `/dashboard` — 快速入門 + 提供者概覽
 - `/dashboard/endpoint` — 端點代理 + MCP + A2A + API 端點分頁
 - `/dashboard/providers` — 提供者連線與憑證
-- `/dashboard/combos` — 組合策略、範本、逐步建置器、模型路由規則、手動持久化排序
-- `/dashboard/auto-combo` — 自動組合引擎：評分權重、模式套件、虛擬工廠預設、遙測
-- `/dashboard/costs` — 成本彙總與定價檢視
-- `/dashboard/analytics` — 用量分析、評估、組合目標健康狀態
-- `/dashboard/limits` — 配額/速率控制
-- `/dashboard/cli-tools` — CLI 入門、執行環境偵測、設定產生
-- `/dashboard/agents` — 偵測到的 ACP 代理 + 自訂代理註冊
-- `/dashboard/cloud-agents` — 雲端託管代理任務（Codex Cloud、Devin、Jules）與任務生命週期
-- `/dashboard/skills` — A2A 技能註冊表、沙箱執行、內建技能目錄
-- `/dashboard/memory` — 持久對話記憶體檢視與檢索
-- `/dashboard/webhooks` — 外送 Webhook 訂閱、金鑰輪換、重試統計
-- `/dashboard/batch` — 批次任務提交與進度
-- `/dashboard/cache` — 讀取快取與推理快取統計、清除控制
-- `/dashboard/playground` — 針對任何已設定組合/模型的互動式聊天測試區
-- `/dashboard/changelog` — 應用內更新日誌檢視器（渲染 `CHANGELOG.md`）
-- `/dashboard/system` — 執行時期診斷、版本資訊、環境驗證表面
-- `/dashboard/onboarding` — 新安裝的首次執行設定精靈
-- `/dashboard/media` — 圖片/影片/音樂測試區
+- `/dashboard/combos` — 組合策略、範本、步驟式建構器、模型路由規則、手動持久化排序
+- `/dashboard/auto-combo` — Auto Combo Engine：評分權重、模式套件、虛擬工廠預設、遙測
+- `/dashboard/costs` — 成本彙總與定價可見性
+- `/dashboard/analytics` — 使用情況分析、評估、組合目標健康狀態
+- `/dashboard/limits` — 配額／速率控制
+- `/dashboard/cli-tools` — CLI 初始設定、執行階段偵測、設定產生
+- `/dashboard/agents` — 偵測到的 ACP 代理程式 + 自訂代理程式註冊
+- `/dashboard/cloud-agents` — 雲端託管代理程式任務（Codex Cloud、Devin、Jules）與任務生命週期
+- `/dashboard/skills` — A2A 技能登錄、沙箱執行、內建技能目錄
+- `/dashboard/memory` — 持久化對話記憶的檢查與擷取
+- `/dashboard/webhooks` — 對外 webhook 訂閱、密鑰輪替、重試統計資料
+- `/dashboard/batch` — 批次工作提交與進度
+- `/dashboard/cache` — 旁路讀取與推理快取統計資料、逐出控制
+- `/dashboard/playground` — 使用任何已設定組合／模型的互動式聊天測試場
+- `/dashboard/changelog` — 應用程式內的變更日誌檢視器（轉譯 `CHANGELOG.md`）
+- `/dashboard/system` — 執行階段診斷、版本資訊、環境驗證介面
+- `/dashboard/onboarding` — 新安裝項目的首次執行設定精靈
+- `/dashboard/media` — 圖片／影片／音樂測試場
 - `/dashboard/search-tools` — 搜尋提供者測試與歷史記錄
-- `/dashboard/health` — 運行時間、斷路器、速率限制、配額監控工作階段
-- `/dashboard/logs` — 請求/代理/稽核/主控台記錄
-- `/dashboard/settings` — 系統設定分頁（一般、路由、組合預設等）
+- `/dashboard/health` — 運作時間、斷路器、速率限制、受配額監控的工作階段
+- `/dashboard/logs` — 請求／代理／稽核／主控台日誌
+- `/dashboard/settings` — 系統設定分頁（一般、路由、組合預設值等）
 - `/dashboard/context/caveman` — Caveman 壓縮規則、語言套件、預覽與輸出模式
-- `/dashboard/context/rtk` — RTK 命令輸出過濾器、預覽與執行時期安全設定
-- `/dashboard/context/combos` — 指派給路由組合的命名壓縮管線
-- `/dashboard/translator` — 轉換器檢視與請求格式轉換預覽
-- `/dashboard/audit` — 合規稽核記錄瀏覽器，含分頁與結構化中繼資料
-- `/dashboard/usage` — 與 `usage_history` 關聯的每次請求用量瀏覽器
+- `/dashboard/context/rtk` — RTK 命令輸出篩選器、預覽與執行階段安全設定
+- `/dashboard/context/combos` — 指派給路由組合的具名壓縮管線
+- `/dashboard/translator` — 翻譯器檢查與請求格式轉換預覽
+- `/dashboard/audit` — 具備分頁與結構化中繼資料的合規稽核日誌瀏覽器
+- `/dashboard/usage` — 與 `usage_history` 關聯的逐請求使用情況瀏覽器
 - `/dashboard/compression` — 壓縮分析、統計資料與管線指派
 - `/dashboard/api-manager` — API 金鑰生命週期與模型權限
+
+UI 層：每個頁面都會在單一殼層內轉譯 — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx`（套件的
+`SidebarProvider`/`SidebarInset`，以及 OmniRoute 的 `Sidebar.tsx` 和 `Header.tsx`）。頁面會從
+`@/shared/components`（位於 `packages/ui-kit` 的內嵌 Keak CI UI Kit 之轉接器）或套件元件子路徑（`@omniroute/ui-kit/table`、`…/page-header`）匯入其
+建構區塊，並透過 `<Icon>`（`ICON_MAP` → Lucide）使用圖示。佈景主題（預設為 `system`，可使用淺色／深色）與設計權杖
+皆透過 `src/app/globals.css` 中的橋接層由套件提供。詳細資訊：`docs/architecture/DESIGN_SYSTEM.md`。
 
 ## 高層級系統上下文
 
@@ -355,150 +361,122 @@ OmniRoute 可以安裝、監督並路由至本地運行的 AI 工具程序，
 
 ## 主要子系統 (v3.8.0)
 
-### A. Auto Combo 引擎
+### A. 汽車組合發動機
 
-Auto Combo 會在請求時動態評分並選擇路由目標，而非依賴靜態的 combo 定義。它為 `auto/*` 模型前綴系列提供支援。
+自動組合在請求時動態評分和選擇路由目標，而不是依賴靜態組合定義。它為`auto/*`模型前綴系列提供支援。
 
-- 引擎進入點：`open-sse/services/autoCombo/`（`autoComboEngine.ts`、
-  `scoringEngine.ts`、`virtualFactory.ts`、`modePacks.ts`）
-- 解析器：`src/domain/comboResolver.ts`（自動偵測 `auto/` 前綴）
-- 儀表板：`/dashboard/auto-combo`
-- 遙測：`auto_combo_decisions` SQLite 資料表
+- 引擎條目： `open-sse/services/autoCombo/` （`autoComboEngine.ts`， `scoringEngine.ts`， `virtualFactory.ts`， `modePacks.ts`）
+- 解析器： `src/domain/comboResolver.ts` （自動偵測`auto/`前綴）
+- 儀表板： `/dashboard/auto-combo`
+- 遙測： `auto_combo_decisions` SQLite表
 
-主要功能：
+關鍵能力：
 
-- **20 種路由策略**（優先順序、加權、優先填滿、輪詢、P2C、隨機、
-  最少使用、成本最佳化、重設感知、重設視窗、餘裕、配額加權、
-  嚴格隨機、**自動**、lkgp、內容最佳化、快取最佳化、內容中繼、**融合**、
-  管線）—
-  auto 是 v3.8.0 的主打新增功能；`fusion`（面板扇出 + 評審合成，
-  `open-sse/services/fusion.ts`）則新增於 v3.8.36。
-- **16 因子評分**：配額、健康狀態、成本倒數、延遲倒數、任務適配度，以及
-  其他十個因子。標準因子表及其預設權重位於
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — 在此重述會使其
-  多出另一個可能過時之處。
-- **虛擬工廠**會在沒有相符的具名 combo 時具現化暫時性 combo，
-  並從健康且啟用中的提供者連線取得候選項目。
-- **自動前綴**：`auto/coding`、`auto/cheap`、`auto/fast`、`auto/offline`、
-  `auto/smart`、`auto/lkgp` — 每個前綴均由經過調校的權重設定檔支援。
-- **6 個模式套件**：`ship-fast`、`cost-saver`、`quality-first`、`offline-friendly`、
-  `reliability-first` 和 `chaos-mode` — 可從儀表板呼叫的預設權重組態。
-  （請勿與上述 `auto/*` 前綴混淆，後者是請求時變體。）
+- **20種路由策略**（優先順序、加權、先填充、循環、 P2C、隨機、最少使用、成本優化、重置感知、重置視窗、淨空、配額加權、嚴格隨機、**汽車**、lkgp、上下文優化、快取優化、上下文中繼、**融合**，管道） — auto是v3.8.0中的標題添加； `fusion` （面板扇出+判斷綜合， `open-sse/services/fusion.ts`）是 v3.8.36 中的新增功能。
+- **16因素評分**：配額、運作狀況、逆成本、逆延遲、任務適合度等等。因素的規範表及其預設權重位於[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —中，在這裡重述它會使其成為第二個過時的地方。
+- **虛擬工廠**當不存在匹配的命名組合時，會實現臨時組合，從健康的活躍提供者連接中尋找候選人。
+- **自動前綴**： `auto/coding`、 `auto/cheap`、 `auto/fast`、 `auto/offline`、 `auto/smart`、 `auto/lkgp` —每個都由調整後的權重配置檔案支援。
+- **6 個模式包**： `ship-fast`、 `cost-saver`、 `quality-first`、 `offline-friendly`、 `reliability-first`和`chaos-mode` —可從儀表板呼叫的預設權重配置。 （不要與上面的`auto/*`前綴混淆，它們是請求時的變體。）
 
-如需完整的演算法細節（因子公式、權重調校），請參閱
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md)。
+有關完整的演算法詳細資訊（因子公式、權重調整），請參閱[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) 。
 
-### B. Cloud Agents
+### B. 雲端代理
 
-Cloud Agents 將第三方託管程式碼代理平台（Codex Cloud、Devin、
-Jules）封裝於統一、由資料庫支援的任務生命週期之後。所有任務建立／檢查
-端點都需要管理驗證。
+雲端代理將第三方託管程式碼代理平台（Codex Cloud、 Devin、 Jules）包裝在統一的資料庫支援的任務生命週期後面。所有任務creation/inspection端點都需要管理身份驗證。
 
-- 模組根目錄：`src/lib/cloudAgent/`（`baseAgent.ts`、`registry.ts`、`api.ts`、
-  `types.ts`、`db.ts`，以及 `agents/` 下各代理的子目錄）
-- 各代理實作：`agents/codex/`、`agents/devin/`、`agents/jules/`
-- 公開端點：`/api/v1/agents/tasks/*`（列出／建立／取得／取消）
-- 管理端點：`/api/cloud/*`（佈建、狀態、批次）
-- 儀表板：`/dashboard/cloud-agents`
-- 儲存：`cloud_agent_tasks` 資料表
+- 模組根： `src/lib/cloudAgent/` （`baseAgent.ts`、 `registry.ts`、 `api.ts`、 `types.ts`、 `db.ts`，以及`agents/`下的每個代理子目錄）
+- 每個代理實作： `agents/codex/`、 `agents/devin/`、 `agents/jules/`
+- 公共端點： `/api/v1/agents/tasks/*` （list/create/get/cancel）
+- 管理端點： `/api/cloud/*` （設定、狀態、批次）
+- 儀表板： `/dashboard/cloud-agents`
+- 儲存： `cloud_agent_tasks`表
 
-如需各代理的佈建及 OAuth 詳細資訊，請參閱
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md)。
+有關每個代理配置和OAuth詳細信息，請參閱[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) 。
 
-### C. 防護機制
+### C、護欄
 
-防護機制模組是一個可熱重新載入的中介軟體層，用於檢查請求與回應中是否包含
-PII、提示詞注入及不安全的視覺內容。發生違規時，會以 HTTP **503** 加上
-結構化錯誤代碼立即中止請求，讓下游呼叫端可以重試或分支處理。
+Guardrails 模組是一個可熱重載的中間件層，用於檢查PII、提示注入和不安全視覺內容的請求和回應。違規使HTTP短路請求**503**加上結構化錯誤代碼，允許下游呼叫者重試或分支。
 
-- 模組根目錄：`src/lib/guardrails/`（`base.ts`、`registry.ts`、`piiMasker.ts`、
-  `promptInjection.ts`、`visionBridge.ts`、`visionBridgeHelpers.ts`）
-- 熱重新載入：登錄檔會監看組態變更，並就地重建處理鏈
-- 接入點：聊天處理常式進入點、圖片產生處理常式、回應清理器
-- HTTP 契約：違規會以 `503` 呈現，並帶有 `error.code = "GUARDRAIL_VIOLATION"`
+- 模組根： `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- 熱重載：註冊表監視配置更改並就地重建鏈
+- 存取點：聊天處理程序入口、影像產生處理程序、回應清理程序
+- HTTP合約：違規行為表現為`503`和`error.code = "GUARDRAIL_VIOLATION"`
 
-如需規則集編寫及閾值調校，請參閱
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md)。
+有關規則集創作和閾值調整，請參閱[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) 。
 
-### D. 領域層
+### D. 域層
 
-`src/domain/` 命名空間集中管理原則決策，讓路由處理常式不必自行組合
-鎖定／預算／回退邏輯。
+`src/domain/`命名空間集中了策略決策，因此路由處理程序不必自行組裝lockout/budget/fallback邏輯。
 
-- 原則引擎：`src/domain/policyEngine.ts` — 執行前評估的單一進入點
-  （鎖定 → 預算 → 回退順序）
-- 成本規則：`src/domain/costRules.ts`
-- 回退原則：`src/domain/fallbackPolicy.ts`
-- 鎖定原則：`src/domain/lockoutPolicy.ts`
-- 以標籤為基礎的路由：`src/domain/tagRouter.ts`
-- Combo 解析器：`src/domain/comboResolver.ts` — 將 combo 名稱、auto/\*
-  前綴及萬用字元模型目標解析為具體執行計畫
-- 連線／模型規則聯結器：`src/domain/connectionModelRules.ts`
-- 模型可用性快照：`src/domain/modelAvailability.ts`
-- 提供者到期追蹤：`src/domain/providerExpiration.ts`
-- 配額快取：`src/domain/quotaCache.ts`
-- 降級狀態：`src/domain/degradation.ts`
-- 組態稽核：`src/domain/configAudit.ts`
-- OmniRoute 回應中繼資料建構器：`src/domain/omnirouteResponseMeta.ts`
-- 評估子系統：`src/domain/assessment/` — 定期評估工作
+- 策略引擎： `src/domain/policyEngine.ts` —執行前評估的單一入口點（鎖定→預算→後備排序）
+- 費用規則： `src/domain/costRules.ts`
+- 後備策略： `src/domain/fallbackPolicy.ts`
+- 鎖定政策： `src/domain/lockoutPolicy.ts`
+- 基於標籤的路由： `src/domain/tagRouter.ts`
+- 組合解析器： `src/domain/comboResolver.ts` —將組合名稱、auto/\* 前綴和通配符模型目標解析為特定的執行計劃
+- Connection/model規則加入者： `src/domain/connectionModelRules.ts`
+- 模型可用性快照： `src/domain/modelAvailability.ts`
+- 提供者到期追蹤： `src/domain/providerExpiration.ts`
+- 配額快取： `src/domain/quotaCache.ts`
+- 降解狀態： `src/domain/degradation.ts`
+- 設定審核： `src/domain/configAudit.ts`
+- OmniRoute回應元資料產生器： `src/domain/omnirouteResponseMeta.ts`
+- 評量子系統： `src/domain/assessment/` —定期評量作業
 
-### E. 授權管線
+### E. 授權管道
 
-授權管線會對每個傳入請求進行分類，並在分派前套用適當的原則鏈。
+授權管道對每個傳入請求進行分類，並在分派之前應用適當的策略鏈。
 
-- 管線進入點：`src/server/authz/pipeline.ts`
-- 請求分類器：`src/server/authz/classify.ts` — 區分公開相容性路由與管理路由
-- 公開路由清單：`src/shared/constants/publicApiRoutes.ts`
-- 原則：`src/server/authz/policies/` — 可組合的述詞
-  （`requireApiKey`、`requireManagement`、`requireFreshAuth` 等）
-- 標頭公用程式：`src/server/authz/headers.ts`
-- 判定輔助程式：`src/server/authz/assertAuth.ts`
-- 請求內容：`src/server/authz/context.ts`
+- 管道入口： `src/server/authz/pipeline.ts`
+- 請求分類器： `src/server/authz/classify.ts` —區分公共相容路由與管理路由
+- 公共路線庫存： `src/shared/constants/publicApiRoutes.ts`
+- 策略： `src/server/authz/policies/` —可組合謂詞（`requireApiKey`、 `requireManagement`、 `requireFreshAuth`等）
+- 標頭實用程式： `src/server/authz/headers.ts`
+- 斷言小幫手： `src/server/authz/assertAuth.ts`
+- 請求上下文： `src/server/authz/context.ts`
 
-公開路由與管理路由之間有嚴格界線：代理／冷卻 API 及
-提供者異動需要管理驗證（若缺少則回傳 HTTP 401）。
+公共路由與管理路由是一個硬邊界： agent/cooldown APIs和提供者突變需要管理身份驗證（如果缺少，則為HTTP 401）。
 
-如需完整的路由分類規則，請參閱
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md)。
+完整的路由分類規則請參考[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) 。
 
-### F. 工作流程 FSM 與任務感知路由器
+### F. 工作流程FSM與任務感知路由器
 
-這是一個位於 combo 選擇之上的有限狀態機驅動路由器，會根據偵測到的
-工作流程階段（規劃、執行、審查）及背景任務親和性導向流量。
+有限狀態機驅動的路由器位於組合選擇之上，可根據偵測到的工作流程階段（計畫、執行、審查）和背景任務關聯來引導流量。
 
-- 工作流程 FSM：`open-sse/services/workflowFSM.ts`
-- 任務感知路由器：`open-sse/services/taskAwareRouter.ts`
-- 背景任務偵測器：`open-sse/services/backgroundTaskDetector.ts`
-- 意圖分類器：`open-sse/services/intentClassifier.ts`
+- 工作流程FSM: `open-sse/services/workflowFSM.ts`
+- 任務感知路由器： `open-sse/services/taskAwareRouter.ts`
+- 後台任務偵測器： `open-sse/services/backgroundTaskDetector.ts`
+- 意圖分類器： `open-sse/services/intentClassifier.ts`
 
-FSM 的狀態轉換會納入 Auto Combo 的評分機制，讓背景／自動化任務偏向使用成本較低的模型，而互動式規劃／審查回合則偏向使用能力較強的模型。
+FSM轉換納入 Auto Combo 的評分中，偏向於background/automation任務的較便宜的模型，以及用於互動式planning/review轉彎的更強的模型。
 
-### G. 提供者專屬的韌性機制
+### G. 特定於提供者的彈性
 
-多個提供者配備專用的韌性與隱匿模組，並建立於全域斷路器／連線冷卻／模型鎖定層之上：
+一些提供者提供了專用的彈性和隱形模組，這些模組搭載在全域斷路器/連接冷卻/模型鎖定層上：
 
-- Antigravity 429 引擎：`open-sse/services/antigravity429Engine.ts`（輪替身分、清除回應標頭，並透過 `antigravityCredits.ts`、`antigravityHeaderScrub.ts`、`antigravityHeaders.ts`、`antigravityIdentity.ts`、`antigravityVersion.ts` 驅動點數／版本追蹤）
-- ModelScope 配額政策：`open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH（相容性通道交握）：`open-sse/services/claudeCodeCCH.ts`，以及 `claudeCodeCompatible.ts`、`claudeCodeConstraints.ts`、`claudeCodeExtraRemap.ts`、`claudeCodeToolRemapper.ts`
-- Claude Code 指紋塑形：`open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code 混淆：`open-sse/services/claudeCodeObfuscation.ts`
+- Antigravity 429 引擎： `open-sse/services/antigravity429Engine.ts` （輪換身分、清理反應標頭、透過`antigravityCredits.ts`、 `antigravityHeaderScrub.ts`、 `antigravityHeaders.ts`、 `antigravityIdentity.ts`、 `antigravityVersion.ts`驅動credits/version追蹤）
+- Antigravity 429 防護： `open-sse/services/antigravity429Guard.ts` （所有主機上的上游 429 的每個請求預算， `ANTIGRAVITY_MAX_429_ATTEMPTS`；本地應答拒絕正文的相同重新發送； `src/sse/handlers/chat.ts`不會透過冷卻感知重試重新啟動此類請求）
+- ModelScope配額保單： `open-sse/services/modelscopePolicy.ts`
+- Claude代碼CCH （相容通道握手）： `open-sse/services/claudeCodeCCH.ts`，加上`claudeCodeCompatible.ts`、 `claudeCodeConstraints.ts`、 `claudeCodeExtraRemap.ts`、 `claudeCodeToolRemapper.ts`
+- Claude代碼指紋整形： `open-sse/services/claudeCodeFingerprint.ts`
+- Claude代碼混淆： `open-sse/services/claudeCodeObfuscation.ts`
 
-如需完整的隱匿策略手冊與操作指南，請參閱 `docs/security/STEALTH_GUIDE.md`（位於 git 中；未編譯至 `/docs`）。
+有關完整的隱形劇本和操作指南，請參閱`docs/security/STEALTH_GUIDE.md` （git；未編譯到`/docs`）。
 
-### H. Webhook、推理快取、讀取快取
+### H. Webhooks、推理快取、讀取快取
 
-- **Webhook** — 用於提供者／帳戶／任務事件的對外派送。
-  - 派送器：`src/lib/webhookDispatcher.ts`
-  - 儲存空間：`webhooks` SQLite 資料表（透過 `src/lib/db/webhooks.ts`）
-  - 儀表板：`/dashboard/webhooks`（訂閱、密鑰、重試歷程）
-  - 如需事件分類與重試語意，請參閱 [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md)。
-- **推理快取** — 為會輸出思考權杖的提供者（Claude、GLMT 等）提供可重播的推理區塊，讓連續對話回合可略過重複思考。
-  - 資料庫層：`src/lib/db/reasoningCache.ts`
-  - 服務層：`open-sse/services/reasoningCache.ts`
-  - 如需重播語意，請參閱 [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md)。
-- **讀取快取** — 以簽章為鍵的短期回應快取，用於合併故障上游 SDK 發出的相同重試請求。
-  - 資料庫層：`src/lib/db/readCache.ts`
-  - 統計資料端點：`GET /api/cache/stats`，儀表板位於 `/dashboard/cache`
+- **網路鉤子**—用於provider/account/task事件的出站調度。
+  - 調度員： `src/lib/webhookDispatcher.ts`
+  - 儲存： `webhooks` SQLite表（透過`src/lib/db/webhooks.ts`）
+  - 儀表板： `/dashboard/webhooks` （訂閱、機密、重試歷史）
+  - 有關事件分類和重試語義，請參閱[`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) 。
+- **推理快取**—可重播推理區塊，用於發出思考標記（Claude、 GLMT等）的提供者，因此連續回合可以跳過重新思考。
+  - DB層： `src/lib/db/reasoningCache.ts`
+  - 服務層： `open-sse/services/reasoningCache.ts`
+  - 有關重播語義，請參閱[`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) 。
+- **讀取快取**—短期回應快取，由簽名鍵控，用於崩潰來自損壞的上游SDKs相同重試。
+  - DB層： `src/lib/db/readCache.ts`
+  - 統計端點： `GET /api/cache/stats`，儀表板位於`/dashboard/cache`
 
 ## 3) 持久化層
 

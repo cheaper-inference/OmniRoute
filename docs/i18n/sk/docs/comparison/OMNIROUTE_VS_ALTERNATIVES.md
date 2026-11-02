@@ -37,13 +37,13 @@ Objektívne porovnanie funkcií oproti populárnym open-source AI smerovačom.
 | **Podpora tunelov (Cloudflared, Tailscale, Ngrok)**    |                      ✅                      |       ❌       |        n/a        |     n/a      |
 | **Licencia**                                           |                     MIT                      |      MIT       |   proprietárna    | proprietárna |
 
-## Kedy si vybrať OmniRoute
+## Kedy zvoliť OmniRoute
 
-- Používate self-hosting a chcete **maximálne pokrytie poskytovateľov** (375 poskytovateľov, 155 bezplatných položiek katalógu bez autentifikácie)
-- Potrebujete **vstavaný MCP server** (nástroje LLM, pamäť a zručnosti vystavené ako nástroje)
-- Potrebujete **protokol A2A** pre workflow medzi agentmi (agent-to-agent)
-- Chcete **fingerprint stealth** (JA3/JA4), aby ste sa vyhli detekcii zo strany upstream CAPTCHA
-- Potrebujete **enterprise funkcie** (guardrails, evals, audit trail) bez faktúry za SaaS
+- Ste self-hostiteľ a chcete** maximálne pokrytie poskytovateľa** (377 poskytovateľov, 155 záznamov v katalógu free/no-auth )
+- Potrebujete a** vstavaný server MCP** (LLM nástroje, pamäť, zručnosti vystavené ako nástroje)
+- Potrebujete** protokol A2A** pre pracovné toky agent-agent
+- chceš** tajnosť odtlačkov prstov** (JA3/JA4), aby sa predišlo detekcii protiprúdovým CAPTCHAs
+- Potrebujete** podnikové funkcie** (zábradlia, evals, audit trail) bez účtu SaaS
 
 ## Kedy si vybrať LiteLLM
 

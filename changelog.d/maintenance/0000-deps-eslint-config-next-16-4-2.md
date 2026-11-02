@@ -1,0 +1,1 @@
+- **deps:** align `eslint-config-next` (and its `@next/eslint-plugin-next`) with `next` at `16.4.2`; the security bump to `next` 16.4.2 left the lint config on `16.3.8`. Exact pin, lockfile-only change.

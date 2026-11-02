@@ -633,27 +633,29 @@ sudo systemctl enable --now omniroute-update.path
 
 ያልተሳካ አሂድ ወደ loop እንዳይገባ፣ service-ው pull ከማድረጉ በፊት ጥያቄውን ያስወግዳል። `DOCKER_UPDATE_TRIGGER_FILE` ከሌለ ዳሽቦርዱ በእጅ የሚሰራውን የትዕዛዝ ሂደት ይቀጥላል።
 
-## ተገኝነት፦ ነባሪው SQLite አንድ replica ብቻ ነው
+## ተገኝነት፡ ነባሪ SQLite ነጠላ-ብዜት ነው።
 
-መደበኛው Docker / Kubernetes OmniRoute **አንድ Node process + አንድ SQLite writer** ነው። በዚህ topology ላይ ከፍተኛ ተገኝነት **አይደገፍም**።
+የአክሲዮን Docker / Kubernetes OmniRoute ነው።** አንድ መስቀለኛ ሂደት + አንድ SQLite ጸሐፊ** . ከፍተኛ ተደራሽነት ነው።** አይደገፍም።** በዚያ ቶፖሎጂ ላይ.
 
-| ገደብ                                          | ውጤት                                                                                                                                                                                                                                                                      |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| አንድ writer                                   | በአንድ SQLite file ላይ ብዙ replicas **አታስኪዱ**። ይህ DB-ውን ያበላሻል።                                                                                                                                                                                                               |
-| እንደገና መፍጠር / እንደገና ማስጀመር / የHEALTHCHECK kill | በሂደት ላይ ያሉ SSE፣ የዳሽቦርድ sessions እና በmemory ውስጥ ያለ state **ሙሉ በሙሉ ይቋረጣሉ**። እያንዳንዱ የተገናኘ client ይቋረጣል። endpoint በሌለበት ጊዜ የሚመጡ አዳዲስ ጥያቄዎች ከOmniRoute JSON ይልቅ የreverse-proxy **`502 Bad Gateway: Unknown error`** ያገኛሉ — clients ይህን ከprovider failure (#11015) መለየት አይችሉም። |
-| ከ`/healthz` ጋር ተመሳሳይ event loop              | የተጨናነቀ catalog ወይም compression tick probes-ን ሊያዘገይ ይችላል፤ አጭር timeout ከዚያ **ብቸኛውን** replica እንደገና ያስጀምራል።                                                                                                                                                                 |
+| ገደብ                                       | መዘዝ                                                                                                                                                                                                                                   |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ነጠላ ጸሐፊ                                   | መ ስ ራ ት** አይደለም** በተመሳሳዩ SQLite ፋይል ላይ ብዙ ቅጂዎችን ያሂዱ። DB ያበላሻል።                                                                                                                                                                        |
+| እንደገና ፍጠር / እንደገና አስጀምር / HEALTHCHECK ግድያ | **ሙሉ መቋረጥ** የበረራ ውስጥ SSE፣ ዳሽቦርድ ክፍለ ጊዜዎች እና የማህደረ ትውስታ ሁኔታ። እያንዳንዱ የተገናኘ ደንበኛ ይወድቃል። በባዶ-ፍጻሜ መስኮቱ ወቅት አዲስ ጥያቄዎች ተገላቢጦሽ ተኪ ያገኛሉ**`502 Bad Gateway: Unknown error`** OmniRoute JSON አይደለም — ደንበኞች ይህንን ከአቅራቢው ውድቀት (#11015) መለየት አይችሉም። |
+| እንደ `/healthz` ተመሳሳይ የክስተት ዑደት            | ሥራ የበዛበት ካታሎግ ወይም የመጨመቂያ ምልክት መመርመሪያዎችን ሊያዘገይ ይችላል; አጭር ጊዜ ካለፈ በኋላ እንደገና ይጀምራል** ብቻ** ግልባጭ                                                                                                                                            |
 
-**የProbe ሰንጠረዥ** ([የKubernetes probe ምክሮችን](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ደግሞ ይመልከቱ)፦
+**የፍተሻ ማትሪክስ** (በተጨማሪ [የኩበርኔትስ የምርመራ ምክሮችን](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ይመልከቱ)
 
-| Probe      | ዒላማ                                                    | አይጠቀሙ                                        |
-| ---------- | ------------------------------------------------------ | -------------------------------------------- |
-| Liveness   | በ`PORT` ላይ TCP (ነባሪ `20128`)፣ ወይም ለስላሳ HTTP `/healthz` | `/api/monitoring/health`                     |
-| Readiness  | HTTP `GET /healthz`                                    | የevent-loop መጨናነቅን እንደመሞት የሚቆጥሩ ጥብቅ timeouts |
-| ጥልቅ / ለሰዎች | `/api/monitoring/health`                               | አውቶማቲክ የkubelet liveness                     |
+| መርማሪ      | ዒላማ                                                  | አይጠቀሙ                                 |
+| --------- | ---------------------------------------------------- | ------------------------------------- |
+| መኖር       | TCP በ `PORT` (ነባሪ `20128`)፣ ወይም ለስላሳ HTTP `/healthz` | `/api/monitoring/health`              |
+| ዝግጁነት     | HTTP `GET /healthz`                                  | የክስተት-ሉፕን እንደ ሞተ የሚቆጥሩ ጥብቅ የጊዜ ማብቂያዎች |
+| ጥልቅ / ሰዎች | `/api/monitoring/health`                             | አውቶሜትድ kubelet ህያውነት                  |
 
-**ዝማኔዎች፦** እያንዳንዱ session እንደሚቋረጥ ይጠብቁ። ከቻሉ clients-ን drain ያድርጉ፤ በነባሪው SQLite ላይ rolling update የለም። Compose `restart: unless-stopped` ከDocker `HEALTHCHECK` ጋር container-ው Unhealthy ሲሆን ብቸኛውን process ይተካል — የተጽዕኖው ስፋትም ተመሳሳይ ነው።
+**ማሻሻያዎች፡** እያንዳንዱ ክፍለ ጊዜ እንደሚቀንስ ይጠብቁ. ከቻሉ ደንበኞችን አፍስሱ; በነባሪ SQLite ላይ ምንም የሚንከባለል ዝማኔ የለም። `restart: unless-stopped` ፕላስ Docker `HEALTHCHECK` ፃፍ እንዲሁም መያዣው ጤናማ ካልሆነ - ተመሳሳይ ፍንዳታ ራዲየስ በሚሆንበት ጊዜ ብቸኛውን ሂደት ይተካል።
 
-ለ**አንድ replica** የKubernetes snippet (Recreate ያስፈልጋል፤ በአንድ SQLite file ላይ `replicas`ን አይጨምሩ)፦
+ዝግጁ የሆኑ መግለጫዎች እና የ Helm ገበታ በ `deploy/kubernetes/` እና `deploy/helm/omniroute/` - የ [Kubernetes የማሰማራት መመሪያን](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) ይመልከቱ።
+
+ኩበርኔትስ ቅንጭብጭብ ለ** ነጠላ ቅጂ** (ዳግም መፍጠር ያስፈልጋል፡ በአንድ SQLite ፋይል ላይ `replicas` ከፍ አታድርጉ)
 
 ```yaml
 spec:
@@ -680,9 +682,9 @@ spec:
             periodSeconds: 20
 ```
 
-የ`preStop` መቆየት kube ከSIGTERM በፊት የService endpointsን እንዲያስወግድ ያደርገዋል፤ በዚህም **አዲስ** ትራፊክ ወደ እየተቋረጠ ያለው ሂደት መድረሱን ያቆማል። በሂደት ላይ ያለ `/v1/responses` SSE በከፍተኛ ክብደት የመግቢያ ፈቃዶች (#11015) አማካኝነት እስከ `SHUTDOWN_TIMEOUT_MS` (ነባሪው 30 ሰከንድ) ድረስ እንዲጠናቀቅ ይደረጋል። አሁንም ወደ ሂደቱ የሚደርሱ አዲስ ጥያቄዎች `503` + `Retry-After: 5` ያገኛሉ። ተተኪው Ready እስኪሆን ድረስ ያለው የRecreate ባዶ-endpoint ክፍተት ሙሉ መቋረጥ ሆኖ ይቀጥላል—ይህ የSQLite topology ነው፣ የprobe የተሳሳተ ውቅረት አይደለም።
+`preStop` እንቅልፍ kube እንዲጥል ያስችለዋል የአገልግሎት የመጨረሻ ነጥቦች ከ SIGTERM በፊት** አዲስ** ትራፊክ ወደ ሞት ሂደት መምታት ያቆማል። በበረራ ላይ `/v1/responses` SSE እስከ `SHUTDOWN_TIMEOUT_MS` (ነባሪ 30ዎች) በከባድ ክብደት ማስገቢያ የሊዝ ውል (#11015) ይፈሳል። አሁንም ወደ ሂደቱ የሚደርሱ አዳዲስ ጥያቄዎች `503` + `Retry-After: 5` ያገኛሉ። ተተኪው ዝግጁ እስኪሆን ድረስ ባዶ-መጨረሻ ነጥብ ክፍተቱን እንደገና ይፍጠሩ ከባድ መቋረጥ ነው - ይህ SQLite ቶፖሎጂ ነው እንጂ የመርማሪ ስህተት አይደለም።
 
-External Postgres / multi-writer HA **በሰነድ የተደገፈ መደበኛ መንገድ አይደለም**። HA ካስፈለገዎት፣ አንድ replica ብቻ ይጠቀሙ ወይም ፕሮጀክቱ ሞክሮ በተናጠል በሰነድ ያስቀመጠውን topology ያሂዱ። የPostgres/MySQL ሥራው በ[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ውስጥ ይገኛል። ያ እስኪለቀቅ ድረስ፣ የ**ትልቅ** `/v1/responses` አቅምን ለማባዛት ብቸኛው የሚደገፍ መንገድ N እርስ በርሳቸው ገለልተኛ ሂደቶችን (ቀጣዩን ክፍል ይመልከቱ) ማስኬድ ነው፤ በአንድ volume ላይ `replicas > 1` ማድረግ አይደለም።
+ውጫዊ Postgres / ባለብዙ ጸሃፊ HA ነው።** አይደለም** የተመዘገበ የአክሲዮን መንገድ። HA ከፈለጉ፣ ነጠላ ቅጂ ያስቀምጡ ወይም ፕሮጀክቱ የፈተነውን እና በተናጠል የመዘገበውን ቶፖሎጂ ያካሂዱ። የ Postgres/MySQL ስራ በ [# 8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) ውስጥ ይኖራል. እስከዚያ መርከቦች ድረስ፣ ብቸኛው የሚደገፍ መንገድ ማባዛት።** ትልቅ** `/v1/responses` አቅም N ገለልተኛ ሂደቶች ነው (ቀጣይ ክፍል)፣ በአንድ ጥራዝ ላይ `replicas > 1` አይደለም።
 
 ## ማስፋፋት፦ N ገለልተኛ ሂደቶች
 

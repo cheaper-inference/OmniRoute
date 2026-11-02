@@ -4,17 +4,17 @@
 
 ---
 
-마지막 업데이트: 2026-08-23
+최종 업데이트 날짜: 2026-08-23
 
-OmniRoute는 전용 대시보드 페이지 세 곳에 분산된 세 가지 범주의 CLI 도구와 통합됩니다:
+OmniRoute 3개의 전용 대시보드 페이지에 분산된 3가지 범주의 CLI 도구와 통합됩니다.
 
-| 페이지         | 경로                    | 개념                                                                           | 개수            |
-| -------------- | ----------------------- | ------------------------------------------------------------------------------ | --------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute를 가리키도록 설정하는 코딩 도구(Client → CLI → OmniRoute → Provider) | 26              |
-| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute를 가리키도록 설정하는 자율 에이전트(동일한 흐름, 더 넓은 범위)       | 10              |
-| **ACP Agents** | `/dashboard/acp-agents` | OmniRoute가 stdio/ACP를 통해 백엔드로 실행하는 CLI(역방향 흐름)                | 레지스트리 참조 |
+| 페이지           | 노선                    | 개념                                                                     | 세다            |
+| ---------------- | ----------------------- | ------------------------------------------------------------------------ | --------------- |
+| **CLI 코드**     | `/dashboard/cli-code`   | OmniRoute 를 가리키는 코딩 도구(클라이언트 → CLI → OmniRoute → Provider) | 26              |
+| **CLI 에이전트** | `/dashboard/cli-agents` | OmniRoute 를 가리키는 자율 에이전트(동일한 흐름, 더 넓은 범위)           | 11              |
+| **ACP 에이전트** | `/dashboard/acp-agents` | OmniRoute 가 stdio/ACP 통해 백엔드로 생성되는 CLIs (역방향 흐름)         | 레지스트리 보기 |
 
-레거시 경로는 308을 통해 리디렉션됩니다: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+레거시 경로는 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents` 통해 리디렉션됩니다.
 
 ---
 
@@ -43,11 +43,9 @@ ACP Agents(역방향 실행 흐름):
 
 ---
 
-## `setup-*`을 사용한 자동 구성
+## `setup-*` 로 자동 구성
 
-각 도구의 구성을 직접 작성할 필요가 없습니다. OmniRoute는 지원되는 각 CLI에 대해 `setup-*`
-명령을 제공합니다. 이 명령은 실행 중인 OmniRoute(로컬 또는 원격)에서 **실시간** 모델 카탈로그를
-읽고 해당 도구의 자체 구성을 사용자의 머신에 작성합니다.
+각 도구의 구성을 직접 작성할 필요는 없습니다. OmniRoute 는 지원되는 CLI 당 `setup-*` 명령을 제공합니다.** 살다** 실행 중인 OmniRoute (로컬 또는 원격)에서 모델 카탈로그를 생성하고 컴퓨터에 도구 자체 구성을 작성합니다.
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,52 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-각 명령은 `--remote <url> --api-key <key>`(로컬 도구가 원격 OmniRoute를 사용하도록 구성),
-`--dry-run`(작성하지 않고 미리 보기), `--port`를 지원합니다. 모델 자동 검색을 지원하지 않는
-도구(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive)는 `--model <id>`를 사용하며, 비대화형
-실행에는 `--yes`도 사용합니다. `setup-5dive`는 `$HOME` 아래에 작성하지 않는 유일한
-구성 방식입니다. 이 명령은 플릿 호스트에 root 소유의 인증 프로필을 작성하여 5dive 에이전트
-플릿을 구성하므로 `sudo`를 통해 자신을 다시 실행하며, 자체적인 원격 모드는 없습니다. 올바른
-환경 변수를 주입한 상태로 구성을 전혀 작성하지 않고 CLI를 실행하려면 범용
-`omniroute run <target>` 실행기를 사용하세요(claude, codex, aider, goose, opencode, qwen,
-gemini — 대상과 별칭은 `bin/cli/cli-manifest.mjs`에서 가져옴). 기존의 도구별 실행기인
-`omniroute launch`(Claude Code)와 `omniroute launch-codex`(Codex)도 계속 사용할 수
-있습니다. Gemini CLI는 실행 전용입니다. 즉, `omniroute run` 대상이지만
-`setup-*`/`configure` 구성 방식은 없습니다.
+각각은 `--remote <url> --api-key <key>` (원격 OmniRoute 에 대해 로컬 도구 구성), `--dry-run` (쓰기 없이 미리보기) 및 `--port` 허용합니다. 모델 자동 검색 기능이 없는 도구(Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes)는 `--model <id>` (비대화형 실행의 경우 `--yes` )를 사용합니다. `setup-5dive` 는 `$HOME` 아래에 작성되지 않는 유일한 레시피입니다. 플릿 호스트에 루트 소유 인증 프로필을 작성하여 5dive 에이전트 플릿을 구성하므로 `sudo` 통해 재실행되며 자체 원격 모드가 없습니다. 올바른 환경이 주입되고 구성이 전혀 작성되지 않은 상태에서 CLI 시작하려면 일반 `omniroute run <target>` 실행 프로그램(claude, codex, aider, goose, opencode, qwen, gemini, Whycodes - 대상 및 별칭은 `bin/cli/cli-manifest.mjs` 에서 가져옴)을 사용하세요. 레거시 도구별 실행기 `omniroute launch` (Claude Code) 및 `omniroute launch-codex` (Codex)은 계속 사용할 수 있습니다. Gemini CLI 는 실행 전용입니다. `omniroute run` 대상이지만 `setup-*`/`configure` 레시피가 없습니다.
 
-> **전체 참고 자료:** 각 명령이 작성하는 항목, 모든 플래그, 로컬과 원격의 차이, 그리고
-> 어떤 도구에 `/v1` 접미사가 필요한지를 정리한 마스터 표는
-> **[CLI 통합](../guides/CLI-INTEGRATIONS.md)**에 있습니다.
+> **전체 참조:** 마스터 테이블 — 각 명령이 작성하는 내용, 모든 플래그, 로컬 대 원격, `/v1` 접미사를 원하는 도구 —** [CLI 통합](../guides/CLI-INTEGRATIONS.md)** .
 
-### 컨테이너 내부에서 실행하기
+### 컨테이너 내부에서 실행
 
-OmniRoute 컨테이너 내부에서 실행한 `setup-*` 명령은 컨테이너 자체의 홈 디렉터리에
-작성합니다. 호스트의 CLI는 이를 읽지 않으며, 해당 내용은 컨테이너와 함께 사라집니다.
-OmniRoute는 이를 감지하고 작성하는 대신 안내와 함께 종료 코드 `2`로 종료합니다. 지원되는
-해결 방법은 두 가지입니다. 호스트에 CLI를 설치하고 `omniroute connect`로 컨테이너에
-연결하거나, 구성 디렉터리를 바인드 마운트하고 `CLI_CONFIG_HOME`(compose의 `host`
-프로필)을 설정하세요. 모든 `setup-*` 명령과 `omniroute configure` 및
-`omniroute config set`은 실제로 컨테이너 자체의 CLI를 구성하려는 경우 사용할 수 있도록
-`--allow-container-write`를 지원합니다. 서버에서는
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`가 동일한 기능을 수행합니다. 자세한
-내용은 [Docker 가이드 → 호스트 CLI 도구 구성](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)을
-참조하세요.
+OmniRoute 컨테이너 내부에서 실행되는 `setup-*` 명령은 컨테이너의 자체 홈에 기록되며, 호스트 CLI 는 이를 읽지 않고 컨테이너와 함께 사라집니다. OmniRoute 이를 감지하고 쓰기 대신 명령으로 `2` 종료합니다. 지원되는 두 가지 방법은 호스트에 CLI 설치하고 컨테이너에 `omniroute connect` 설치하거나 구성 디렉토리를 바인드 마운트하고 `CLI_CONFIG_HOME` (compose `host` 프로필)를 설정하는 것입니다. `omniroute configure` 및 `omniroute config set` 과 함께 모든 `setup-*` 명령은 컨테이너 자체 CLIs 구성할 때 실제로 의미하는 바인 `--allow-container-write` 허용합니다. `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` 서버에 대해서도 동일한 작업을 수행합니다. [Docker 가이드 → 호스트 CLI 도구 구성을](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) 참조하세요.
 
-대시보드의 **적용 엔드포인트**(`POST /api/cli-tools/apply`)도 동일한 보호 장치를
-적용합니다. 컨테이너에서 대상이 호스트로부터 바인드 마운트되지 않은 쓰기 요청에는 안전한
-오류 메시지 및 `containerEphemeralTarget: true`와 함께 **`422`**로 응답하며,
-호스트 구성 방식이 있는 도구(claude, codex, opencode, cline, kilo, continue)의 경우
-호스트에서 대신 실행할 `hostSetupCommand`(예: `omniroute setup-opencode`)도
-제공합니다. 아무것도 작성되지 않습니다. `dryRun: true`는 컨테이너 모드에서도 계속
-작동하며, 디스크를 건드리지 않고 민감 정보가 제거된 미리 보기와 대상 경로를 반환합니다.
-미리 보기 콘텐츠는 복사하거나 가져올 수 있는 자격 증명 포함 구성이 아닙니다. 원래의
-도구/기본 URL/API 키/모델 입력값으로 호스트에서 적용하거나, 안내된 호스트 측 설정 명령을
-사용하세요. 미리 보기 헤더와 요청 계약에 대해서는
-[CLI 구성 보안](../security/CLI-CONFIGURATION.md)을 참조하세요. 이 동작은 의도된 것이며
-`tests/unit/api/cli-tools/apply-container-guard.test.ts`로 회귀 방지 테스트가
-적용됩니다. 보호 장치를 제거하여 422 오류를 절대로 "수정"하지 마세요.
+대시보드의** 끝점 적용** (`POST /api/cli-tools/apply`)는 동일한 보호를 적용합니다. 컨테이너에서 대상이 호스트에서 바인드 마운트되지 않은 쓰기가 응답합니다.**`422`** `containerEphemeralTarget: true` 사용하면 안전한 오류 텍스트와 — 호스트 레시피가 있는 도구(claude, codex, opencode, cline, kilo, continue)의 경우 — 대신 호스트에서 실행할 `hostSetupCommand` (예: `omniroute setup-opencode`); 아무것도 쓰여 있지 않습니다. `dryRun: true` 컨테이너 모드에서 계속 작동하며 디스크를 건드리지 않고 수정된 미리 보기 + 대상 경로를 반환합니다. 미리보기 콘텐츠는 복사하거나 가져올 수 있는 자격 증명 구성이 아닙니다. 호스트에 원래 tool/base URL/API key/model 입력을 적용하거나 표시된 호스트 측 설정 명령을 사용합니다. 미리보기 헤더 및 요청 계약에 대해서는 [CLI 구성 보안을](../security/CLI-CONFIGURATION.md) 참조하세요. 이 동작은 의도적이며 `tests/unit/api/cli-tools/apply-container-guard.test.ts` 에 의해 회귀 방지됩니다. 가드를 제거하여 422를 "수정"하지 마십시오.
 
 ---
 
@@ -136,59 +100,60 @@ OmniRoute는 이를 감지하고 작성하는 대신 안내와 함께 종료 코
 
 ---
 
-## 1. CLI Code 카탈로그(도구 27개)
+## 1. CLI Code 카탈로그(27개 도구)
 
-`/dashboard/cli-code`에 표시되는 모든 도구입니다. `baseUrlSupport: none`인 도구는 사용자 지정 기본 URL 대신 MITM 또는 수동 가이드를 통해 연결됩니다.
+`/dashboard/cli-code` 에 나타나는 모든 도구. `baseUrlSupport: none` 사용하는 것은 사용자 정의 기본 URL 대신 MITM 또는 수동 가이드를 통해 연결됩니다.
 
-| id           | 이름                    | 공급업체            | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (구 Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (구 SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| ID             | 이름                   | 공급업체            | baseUrl지원 | 구성 유형       | acp생성 가능 |
+| -------------- | ---------------------- | ------------------- | ----------- | --------------- | ------------ |
+| 클로드         | Claude 코드            | Anthropic           | 가득한      | 환경            | 진실         |
+| 사본           | OpenAI Codex CLI       | OpenAI              | 가득한      | 관습            | 진실         |
+| z코드          | ZCode(GLM 코딩 계획)   | Z.ai                | 없음        | 관습            | 거짓         |
+| 클라인         | Cline                  | OSS (전 Claude Dev) | 가득한      | 관습            | 진실         |
+| 킬로           | 킬로 코드              | 킬로 조직           | 가득한      | 관습            | 거짓         |
+| 루             | 루코드                 | 루(OSS)             | 가득한      | 가이드          | 거짓         |
+| 계속하다       | 계속하다               | 계속.dev            | 가득한      | 가이드          | 거짓         |
+| 보조원         | 에이더                 | OSS (P. Gauthier)   | 가득한      | 가이드          | 진실         |
+| 노             | ForgeCode              | 안티노미 HQ         | 가득한      | 관습            | 진실         |
+| 제이코드       | 제이코드               | 1제황(OSS)          | 가득한      | 관습            | 거짓         |
+| deepseek-tui   | DeepSeek TUI           | 헌터 보운(OSS)      | 가득한      | 관습            | 거짓         |
+| 코드 고래      | CodeWhale              | 흠보운(OSS)         | 가득한      | 관습            | 거짓         |
+| 오픈코드       | OpenCode               | 이상 현상(SST 이전) | 가득한      | 가이드          | 진실         |
+| 드로이드       | 팩토리 드로이드        | 팩토리 AI           | 부분적인    | 가이드          | 거짓         |
+| 부조종사       | GitHub Copilot CLI     | GitHub/MS           | 가득한      | 관습            | 거짓         |
+| 커서-cli       | Cursor CLI             | 모든 구             | 부분적인    | 가이드          | 진실         |
+| 빙어           | 빙어                   | 레오나르드서(OSS)   | 가득한      | 관습            | 거짓         |
+| 파이           | Pi(파이 코딩 에이전트) | M. 제크너(OSS)      | 가득한      | 관습            | 거짓         |
+| 그로크 빌드    | Grok 빌드              | xAI                 | 가득한      | 관습            | 거짓         |
+| 으깨다         | 으깨다                 | OSS (매력)          | 가득한      | 관습            | 거짓         |
+| 퀀             | Qwen 코드              | Alibaba             | 가득한      | 가이드          | 진실         |
+| 제드 자의 명칭 | Zed                    | Zed 산업            | 가득한      | 가이드          | 거짓         |
+| 커서           | Cursor                 | 모든 구             | 없음        | 가이드          | 거짓         |
+| 반중력         | Antigravity            | Google              | 없음        | 미트            | 거짓         |
+| 헤르메스       | 헤르메스               | 누스 연구           | 없음        | 가이드          | 거짓         |
+| 키로           | Kiro AI                | Amazon              | 없음        | 미트            | 거짓         |
+| 관습           | 맞춤 CLI               | —                   | 가득한      | 맞춤형 제작업체 | 거짓         |
 
-`baseUrlSupport: "partial"`인 도구의 대시보드 카드에는 "⚠ 부분적 Base URL" 배지가 표시됩니다.
+`baseUrlSupport: "partial"` 포함된 도구는 대시보드 카드에 "⚠ Base URL parcial" 배지를 표시합니다.
 ---
 
-## 2. CLI 에이전트 카탈로그(도구 10개)
+## 2. CLI 에이전트 카탈로그(11개 도구)
 
-`/dashboard/cli-agents`에 표시되는 자율 에이전트:
+`/dashboard/cli-agents` 에 나타나는 자율 에이전트:
 
-| id           | 이름             | 공급업체                 | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| ID                | 이름              | 공급업체               | baseUrl지원 | acp생성 가능 |
+| ----------------- | ----------------- | ---------------------- | ----------- | ------------ |
+| 헤르메스 에이전트 | 헤르메스 에이전트 | 누스 연구              | 가득한      | 거짓         |
+| 발톱을 벌린       | OpenClaw          | OSS (P. Steinberger)   | 가득한      | 진실         |
+| 거위              | 거위              | 블록/ Linux 파운데이션 | 가득한      | 진실         |
+| 통역사            | 공개 통역사       | OSS                    | 가득한      | 진실         |
+| 경사              | Warp AI           | (주)Warp               | 부분적인    | 진실         |
+| 에이전트 덱       | 에이전트 덱       | 애쉬고플라니(OSS)      | 가득한      | 거짓         |
+| 굉장하다          | 오 마이 파이      | OSS                    | 가득한      | 진실         |
+| 레타              | 레타 CLI          | 레타                   | 가득한      | 거짓         |
+| 주 대리인         | 프라임 에이전트   | 프라임 인텔렉트(OSS)   | 가득한      | 거짓         |
+| 5다이빙           | 5다이빙           | OSS (5dive-ai)         | 가득한      | 거짓         |
+| 이유 코드         | WhyCodes          | 왜 법인인가?           | 가득한      | 거짓         |
 
 ---
 
