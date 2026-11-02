@@ -64,3 +64,38 @@ export function modelsMatchingSearch<TModel extends PricingFilterModel>(
     (model) => matchesSearch(model.id, searchQuery) || matchesSearch(model.name, searchQuery)
   );
 }
+
+/**
+ * The providers the Compare models view groups (#18642): the Auth filter and the
+ * Providers (All / Configured only) filter of the provider view, without search,
+ * coverage or sort, which describe providers rather than models.
+ */
+export function providersForComparison<
+  TProvider extends PricingFilterProvider & { authType?: string },
+>(
+  providers: ReadonlyArray<TProvider>,
+  {
+    authFilter,
+    displayMode,
+    connectedProviderIds,
+    blockedProviders,
+  }: {
+    authFilter: string;
+    displayMode: PricingDisplayMode;
+    connectedProviderIds: ReadonlySet<string>;
+    blockedProviders: unknown;
+  }
+): TProvider[] {
+  return providers.filter((provider) => {
+    const auth = (provider.authType || "unknown").toLowerCase();
+    const authMatches =
+      authFilter === "all" ||
+      auth === authFilter ||
+      (authFilter === "unknown" && !["oauth", "apikey"].includes(auth));
+    return (
+      authMatches &&
+      (displayMode === "all" ||
+        isPricingProviderConfigured(provider, connectedProviderIds, blockedProviders))
+    );
+  });
+}
