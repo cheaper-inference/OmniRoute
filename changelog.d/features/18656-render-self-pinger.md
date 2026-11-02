@@ -1,0 +1,1 @@
+- **feat(deploy):** the standalone launcher can keep a Render free web service awake by pinging its own public URL; inert unless `SELF_PING_URL` or `RENDER_EXTERNAL_URL` is set, with `SELF_PING_ENABLED=false` to opt out ([#18656](https://github.com/cheaper-inference/OmniRoute/pull/18656)) — thanks @Seizethewind
