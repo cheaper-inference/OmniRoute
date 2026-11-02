@@ -376,6 +376,29 @@ const providerIdSuffixSchema = z
   .optional()
   .nullable();
 
+/** A custom JSON API node is an openai-compatible node with its own config; never a preset. */
+function addCustomJsonNodeIssues(
+  value: { apiType?: string; preset?: string; type?: string },
+  ctx: z.RefinementCtx
+): void {
+  if (value.apiType !== "custom-json") return;
+  if (value.preset) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Presets cannot create custom JSON API nodes",
+      path: ["apiType"],
+    });
+    return;
+  }
+  if ((value.type || "openai-compatible") !== "openai-compatible") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Custom JSON API nodes must use the openai-compatible type",
+      path: ["apiType"],
+    });
+  }
+}
+
 export const createProviderNodeSchema = z
   .object({
     // #6874: name/prefix are required in general, but a `preset` (e.g.
@@ -441,13 +464,7 @@ export const createProviderNodeSchema = z
         path: ["prefix"],
       });
     }
-    if (value.preset && value.apiType === "custom-json") {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Presets cannot create custom JSON API nodes",
-        path: ["apiType"],
-      });
-    }
+    addCustomJsonNodeIssues(value, ctx);
     if (value.preset === "vibeproxy-openai") {
       // Preset supplies name/prefix/apiType — but baseUrl is still mandatory
       // (a local proxy's host/port is operator-specific, unlike the generic
@@ -484,13 +501,6 @@ export const createProviderNodeSchema = z
         code: z.ZodIssueCode.custom,
         message: reservedProviderPrefixMessage(value.prefix.trim()),
         path: ["prefix"],
-      });
-    }
-    if (nodeType !== "openai-compatible" && value.apiType === "custom-json") {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Custom JSON API nodes must use the openai-compatible type",
-        path: ["apiType"],
       });
     }
     if (nodeType === "openai-compatible" && !value.apiType) {

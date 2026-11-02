@@ -24,8 +24,8 @@ import {
   normalizeCustomJsonConfig,
 } from "../utils/customJson.ts";
 import { errorResponse } from "../utils/error.ts";
+import { getProviderOutboundGuard } from "./dispatchPin.ts";
 import { SafeOutboundFetchError, safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
-import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -86,24 +86,69 @@ function buildCompletionResponse(text: string, model: string, stream: boolean): 
   });
 }
 
+type PreparedRequest = {
+  config: CustomJsonConfig;
+  payload: JsonRecord;
+  headers: Record<string, string>;
+  /** Request logs persist the returned headers: never keep the credential there. */
+  loggedHeaders: Record<string, string>;
+};
+
+function prepareRequest(input: ExecuteInput, providerData: JsonRecord, endpoint: string) {
+  const config = normalizeCustomJsonConfig(providerData.customJson, endpoint);
+  const payload = buildCustomJsonRequest(config, input.model, input.body);
+  const built = buildCustomJsonHeaders(config, input.credentials?.apiKey);
+  const headers: Record<string, string> = { ...built.base };
+  applyCustomHeaders(headers, providerData.customHeaders);
+  const authNames = new Set<string>();
+  for (const [name, value] of Object.entries(built.auth)) {
+    setHeader(headers, name, value);
+    authNames.add(name.toLowerCase());
+  }
+  const loggedHeaders = Object.fromEntries(
+    Object.entries(headers).map(([name, value]) => [
+      name,
+      authNames.has(name.toLowerCase()) ? REDACTED : value,
+    ])
+  );
+  return { config, payload, headers, loggedHeaders } satisfies PreparedRequest;
+}
+
+async function callEndpoint(input: ExecuteInput, endpoint: string, prepared: PreparedRequest) {
+  try {
+    return await safeOutboundFetch(endpoint, {
+      method: prepared.config.method,
+      headers: prepared.headers,
+      body: JSON.stringify(prepared.payload),
+      guard: getProviderOutboundGuard(),
+      retry: false,
+      allowRedirect: false,
+      signal: input.signal ?? undefined,
+    });
+  } catch (error) {
+    if (input.signal?.aborted) throw input.signal.reason ?? error;
+    return errorResponse(fetchFailureStatus(error), "Custom JSON endpoint request failed");
+  }
+}
+
+async function completionFromReply(input: ExecuteInput, config: CustomJsonConfig, reply: Response) {
+  try {
+    const text = extractCustomJsonText(config, JSON.parse(await reply.text()));
+    return buildCompletionResponse(text, input.model, input.stream === true);
+  } catch (error) {
+    if (input.signal?.aborted) throw input.signal.reason ?? error;
+    const reason = error instanceof CustomJsonError ? error.message : "invalid JSON";
+    return errorResponse(502, `Custom JSON response: ${reason}`);
+  }
+}
+
 export async function executeCustomJson(input: ExecuteInput): Promise<ExecutorExecuteResult> {
   const providerData = asRecord(input.credentials?.providerSpecificData);
   const endpoint = typeof providerData.baseUrl === "string" ? providerData.baseUrl.trim() : "";
-  const headers: Record<string, string> = {};
-  const redactedNames: string[] = [];
-  let config: CustomJsonConfig;
-  let payload: JsonRecord;
 
+  let prepared: PreparedRequest;
   try {
-    config = normalizeCustomJsonConfig(providerData.customJson, endpoint);
-    payload = buildCustomJsonRequest(config, input.model, input.body);
-    const built = buildCustomJsonHeaders(config, input.credentials?.apiKey);
-    Object.assign(headers, built.base);
-    applyCustomHeaders(headers, providerData.customHeaders);
-    for (const [name, value] of Object.entries(built.auth)) {
-      setHeader(headers, name, value);
-      redactedNames.push(name.toLowerCase());
-    }
+    prepared = prepareRequest(input, providerData, endpoint);
   } catch (error) {
     const known = error instanceof CustomJsonError;
     const response = errorResponse(
@@ -113,45 +158,13 @@ export async function executeCustomJson(input: ExecuteInput): Promise<ExecutorEx
     return { response, url: endpoint, headers: {} };
   }
 
-  // Request logs persist the returned headers: never keep the credential there.
-  const loggedHeaders = Object.fromEntries(
-    Object.entries(headers).map(([name, value]) => [
-      name,
-      redactedNames.includes(name.toLowerCase()) ? REDACTED : value,
-    ])
-  );
-  const result = { url: endpoint, headers: loggedHeaders, transformedBody: payload };
-
-  let upstream: Response;
-  try {
-    upstream = await safeOutboundFetch(endpoint, {
-      method: config.method,
-      headers,
-      body: JSON.stringify(payload),
-      guard: getProviderOutboundGuard(),
-      retry: false,
-      allowRedirect: false,
-      signal: input.signal ?? undefined,
-    });
-  } catch (error) {
-    if (input.signal?.aborted) throw input.signal.reason ?? error;
-    return {
-      ...result,
-      response: errorResponse(fetchFailureStatus(error), "Custom JSON endpoint request failed"),
-    };
-  }
-
+  const result = {
+    url: endpoint,
+    headers: prepared.loggedHeaders,
+    transformedBody: prepared.payload,
+  };
+  const upstream = await callEndpoint(input, endpoint, prepared);
   // Upstream errors pass through unchanged; chatCore parses and sanitizes them.
   if (!upstream.ok) return { ...result, response: upstream };
-
-  let text: string;
-  try {
-    text = extractCustomJsonText(config, JSON.parse(await upstream.text()));
-  } catch (error) {
-    if (input.signal?.aborted) throw input.signal.reason ?? error;
-    const reason = error instanceof CustomJsonError ? error.message : "invalid JSON";
-    return { ...result, response: errorResponse(502, `Custom JSON response: ${reason}`) };
-  }
-
-  return { ...result, response: buildCompletionResponse(text, input.model, input.stream === true) };
+  return { ...result, response: await completionFromReply(input, prepared.config, upstream) };
 }

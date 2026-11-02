@@ -34,6 +34,67 @@ function sanitizeClaudeCodeCompatibleBaseUrl(baseUrl: string) {
     .replace(/\/(?:v\d+\/)?messages(?:\?[^#]*)?$/i, "");
 }
 
+function sanitizeNodeBaseUrl(nodeType: unknown, id: string, baseUrl: string): string {
+  if (nodeType !== "anthropic-compatible") return baseUrl;
+  return isClaudeCodeCompatibleProvider(id)
+    ? sanitizeClaudeCodeCompatibleBaseUrl(baseUrl)
+    : sanitizeAnthropicBaseUrl(baseUrl);
+}
+
+async function reregisterMoonshotFetcher(
+  updated: JsonRecord | null | undefined,
+  id: string,
+  prefix: string,
+  baseUrl: string
+) {
+  try {
+    const { registerMoonshotFetchersForNodes } =
+      await import("@omniroute/open-sse/services/moonshotQuotaFetcher.ts");
+    registerMoonshotFetchersForNodes([
+      { id: typeof updated?.id === "string" ? updated.id : id, prefix, baseUrl },
+    ]);
+  } catch (error) {
+    console.warn("Moonshot fetcher re-register after node update skipped:", error);
+  }
+}
+
+/** Every existing connection follows the node's settings, custom JSON config included. */
+async function syncNodeConnections(
+  id: string,
+  updated: JsonRecord,
+  node: { prefix: string; baseUrl: string; apiType?: string; customJsonConfig: unknown }
+) {
+  const connections = await getProviderConnections({ provider: id });
+  await Promise.all(
+    connections.flatMap((connectionRaw) => {
+      const connection = asRecord(connectionRaw);
+      const connectionId = typeof connection.id === "string" ? connection.id : "";
+      if (!connectionId) return [];
+
+      const providerSpecificData = {
+        ...asRecord(connection.providerSpecificData),
+        prefix: node.prefix,
+        baseUrl: node.baseUrl,
+        nodeName: updated.name,
+        chatPath: updated.chatPath || undefined,
+        customHeaders: updated.customHeaders || undefined,
+      } as JsonRecord;
+      if (updated.modelsPath) {
+        providerSpecificData.modelsPath = updated.modelsPath;
+      } else {
+        delete providerSpecificData.modelsPath;
+      }
+      if (node.apiType !== undefined) {
+        providerSpecificData.apiType = node.apiType;
+        if (node.customJsonConfig) providerSpecificData.customJson = node.customJsonConfig;
+        else delete providerSpecificData.customJson;
+      }
+
+      return [updateProviderConnection(connectionId, { providerSpecificData })];
+    })
+  );
+}
+
 // PUT /api/provider-nodes/[id] - Update provider node
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   let rawBody: unknown;
@@ -90,14 +151,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Invalid OpenAI compatible API type" }, { status: 400 });
     }
 
-    let sanitizedBaseUrl = baseUrl.trim();
-
-    // Sanitize Base URL for Anthropic Compatible
-    if (node.type === "anthropic-compatible") {
-      sanitizedBaseUrl = isClaudeCodeCompatibleProvider(id)
-        ? sanitizeClaudeCodeCompatibleBaseUrl(sanitizedBaseUrl)
-        : sanitizeAnthropicBaseUrl(sanitizedBaseUrl);
-    }
+    const sanitizedBaseUrl = sanitizeNodeBaseUrl(node.type, id, baseUrl.trim());
     const baseUrlError = validateProviderNodeBaseUrl(sanitizedBaseUrl);
     if (baseUrlError) return baseUrlError;
     const customJsonNode = resolveCustomJsonNodeConfig(
@@ -130,54 +184,14 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const updated = await updateProviderNode(id, updates);
 
-    try {
-      const { registerMoonshotFetchersForNodes } =
-        await import("@omniroute/open-sse/services/moonshotQuotaFetcher.ts");
-      registerMoonshotFetchersForNodes([
-        {
-          id: typeof updated?.id === "string" ? updated.id : id,
-          prefix: prefix.trim(),
-          baseUrl: sanitizedBaseUrl,
-        },
-      ]);
-    } catch (error) {
-      console.warn("Moonshot fetcher re-register after node update skipped:", error);
-    }
+    await reregisterMoonshotFetcher(updated, id, prefix.trim(), sanitizedBaseUrl);
 
-    const connections = await getProviderConnections({ provider: id });
-    await Promise.all(
-      connections.flatMap((connectionRaw) => {
-        const connection = asRecord(connectionRaw);
-        const connectionId = typeof connection.id === "string" ? connection.id : "";
-        if (!connectionId) return [];
-
-        const providerSpecificData = {
-          ...asRecord(connection.providerSpecificData),
-          prefix: prefix.trim(),
-          baseUrl: sanitizedBaseUrl,
-          nodeName: updated.name,
-          chatPath: updated.chatPath || undefined,
-          customHeaders: updated.customHeaders || undefined,
-        } as JsonRecord;
-        if (updated.modelsPath) {
-          providerSpecificData.modelsPath = updated.modelsPath;
-        } else {
-          delete providerSpecificData.modelsPath;
-        }
-        if (node.type === "openai-compatible") {
-          providerSpecificData.apiType = apiType;
-          // Every existing connection follows the node's custom JSON config (or drops it).
-          if (customJsonNode.config) providerSpecificData.customJson = customJsonNode.config;
-          else delete providerSpecificData.customJson;
-        }
-
-        return [
-          updateProviderConnection(connectionId, {
-            providerSpecificData,
-          }),
-        ];
-      })
-    );
+    await syncNodeConnections(id, updated, {
+      prefix: prefix.trim(),
+      baseUrl: sanitizedBaseUrl,
+      apiType: node.type === "openai-compatible" ? apiType : undefined,
+      customJsonConfig: customJsonNode.config,
+    });
 
     return NextResponse.json({ node: updated });
   } catch (error) {

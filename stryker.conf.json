@@ -39,6 +39,7 @@
     "testFiles": [
       "tests/unit/muse-session-ownership.test.ts",
       "tests/unit/muse-empty-response-retry.test.ts",
+      "tests/unit/custom-json-muse-no-replay.test.ts",
       "tests/unit/deepseek-api-flash-vision.test.ts",
       "tests/unit/provider-limits-recovery.test.ts",
       "tests/unit/veoaifree-optional-credentials.test.ts",
