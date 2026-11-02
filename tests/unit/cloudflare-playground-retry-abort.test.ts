@@ -4,36 +4,11 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { CloudflarePlaygroundExecutor } from "../../open-sse/executors/cloudflare-playground.ts";
 import {
-  CloudflarePlaygroundExecutor,
-  type CfTransport,
-  type CfTransportStartResult,
-} from "../../open-sse/executors/cloudflare-playground.ts";
-
-const cfFrame = (chatId: string, body: unknown) =>
-  JSON.stringify({ id: chatId, type: "cf_agent_use_chat_response", body: JSON.stringify(body) });
-
-const buildSuccessFrames = (chatId: string, text: string) => [
-  cfFrame(chatId, { type: "start" }),
-  cfFrame(chatId, { type: "text-start", id: "t1" }),
-  cfFrame(chatId, { type: "text-delta", delta: text, id: "t1" }),
-  cfFrame(chatId, { type: "finish", messageMetadata: { finishReason: "stop" } }),
-  JSON.stringify({ id: chatId, type: "cf_agent_use_chat_response", done: true }),
-];
-
-class FakeTransport implements CfTransport {
-  constructor(private framesList: string[]) {}
-
-  async start(): Promise<CfTransportStartResult> {
-    return { ok: true };
-  }
-
-  async *frames(): AsyncGenerator<string> {
-    for (const frame of this.framesList) yield frame;
-  }
-
-  async close(): Promise<void> {}
-}
+  buildSuccessFrames,
+  FakeTransport,
+} from "../fixtures/cloudflare-playground/executorHarness.ts";
 
 const READ_TOOL = {
   type: "function",

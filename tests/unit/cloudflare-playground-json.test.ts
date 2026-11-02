@@ -70,6 +70,11 @@ test("a type value that is not the marker does not make a payload a call", () =>
   assert.equal(hasMalformedCfToolIntent(text, TOOL_NAMES, TEST_TOOLS), false);
 });
 
+test("a bare schema keyword in prose is not a botched discriminator", () => {
+  const text = 'The column is typed {"type": "string", "maxLength": 10} in the file.';
+  assert.equal(hasMalformedCfToolIntent(text, TOOL_NAMES, TEST_TOOLS), false);
+});
+
 test("a typed envelope is stripped from the content with its own bytes", () => {
   const text =
     '{"type": "tool_call", "name": "bash", "arguments": {"command": "pwd"}, "_nonce": "abcd1234"}';

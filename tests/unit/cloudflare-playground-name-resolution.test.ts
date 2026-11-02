@@ -552,6 +552,8 @@ test("D8: every retry reminder repeats the placeholder, not the caller's first t
     "missing_name",
     "invalid_name",
     "missing_arguments",
+    "fabricated_result",
+    "empty_response",
     "malformed_intent",
   ] as const;
   for (const failure of failures) {
