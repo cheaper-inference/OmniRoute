@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — ច្រកទ្វារ AI ឥតគិតថ្លៃ
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — កុំឈប់សរសេរកូដ។ រាល់ឧបករណ៍ AI → អ្នកផ្តល់សេវា 377 — ឥតគិតថ្លៃ 150+ — តាមរយៈ endpoint តែមួយ។ Claude Code, Codex, Cursor, Cline, Copilot និង Antigravity ភ្ជាប់ទៅ Claude / GPT / Gemini ដោយឥតគិតថ្លៃ ជាមួយការប្តូរទៅជម្រើសបម្រុងដោយស្វ័យប្រវត្តិ។ ការបង្ហាប់ជាន់គ្នា RTK + Caveman សន្សំ token បាន 15–95% (ជាមធ្យម ~89%) — មិនប៉ះដែនកំណត់ទៀតឡើយ។ អ្នកផ្តល់សេវា AI 377 · កម្រិតឥតគិតថ្លៃ 150+ · token ឥតគិតថ្លៃ ~1.62B/ខែ · យុទ្ធសាស្ត្រកំណត់ផ្លូវ 20 · ចាប់ផ្តើមដោយ $0។"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — កុំឈប់សរសេរកូដ។ រាល់ឧបករណ៍ AI → អ្នកផ្តល់សេវា 380 — ឥតគិតថ្លៃ 150+ — តាមរយៈ endpoint តែមួយ។ Claude Code, Codex, Cursor, Cline, Copilot និង Antigravity ភ្ជាប់ទៅ Claude / GPT / Gemini ដោយឥតគិតថ្លៃ ជាមួយការប្តូរទៅជម្រើសបម្រុងដោយស្វ័យប្រវត្តិ។ ការបង្ហាប់ជាន់គ្នា RTK + Caveman សន្សំ token បាន 15–95% (ជាមធ្យម ~89%) — មិនប៉ះដែនកំណត់ទៀតឡើយ។ អ្នកផ្តល់សេវា AI 380 · កម្រិតឥតគិតថ្លៃ 150+ · token ឥតគិតថ្លៃ ~1.62B/ខែ · យុទ្ធសាស្ត្រកំណត់ផ្លូវ 20 · ចាប់ផ្តើមដោយ $0។"/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                               |             v3.8.50              | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------- | :------------------------------: | :---------: | :-------------------: |
-| អ្នកផ្តល់សេវា🌐               |               352                |   **358**   |          377          |
+| អ្នកផ្តល់សេវា🌐               |               352                |   **358**   |          380          |
 | 🧠 គំរូជជែកតែមួយគត់ IDs       |               1320               |  **1374**   |         1475          |
 | 🖼️ ស្ពាន Modality             | 🆕 ចក្ខុវិស័យ + អូឌីយ៉ូ + វីដេអូ |      ✓      |           ✓           |
 | 📡 រ៉ាដាកាតាឡុកឥតគិតថ្លៃ      |          🆕 ជ្រើសរើសចូល          |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ មុខងារ</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 បន្សំ</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 អ្នកផ្តល់សេវា</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 អ្នកផ្តល់សេវា</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ការសន្យា — ចំណុចបញ្ចប់តែមួយ និងអ្នកផ្តល់សេវា 377។ ការបម្លែងសម្រាប់ស្វ័យប្រវត្តិបន្តផ្តល់ផ្លូវ ខណៈគោលដៅមានសុខភាពល្អមួយផ្សេងទៀតនៅតែមាន។ ឋានៈប្រាំមួយ៖ ការបម្លែងសម្រាប់ដែលមានភាពធន់នៅទូទាំងអ្នកផ្តល់សេវា 377 · សន្សំតូកខិនរហូតដល់ 95% លើការងារដែលមានសិទ្ធិ · $0 ដើម្បីចាប់ផ្តើម ជាមួយកម្រិតឥតគិតថ្លៃ 150+ និងអ្នកផ្តល់សេវាឥតគិតថ្លៃជារៀងរហូត/គ្មានកូនសោ 52 · ការរួមបញ្ចូល CLI/agent 37 តាមការកំណត់តែមួយ · ភាពឆបគ្នារបស់ OpenAI, Claude, Gemini និង Responses API នៅ /v1 · ឧបករណ៍គ្រប់គ្រងផលិតកម្ម រួមទាំង circuit breakers, TLS stealth, ឧបករណ៍ MCP 110, A2A, អង្គចងចាំ, guardrails, evals និងការប្រកាសតេស្តស្ថិត 56,000+ នៅទូទាំងឯកសារតេស្តដែលតាមដាន 7,800+។"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="ការសន្យា — ចំណុចបញ្ចប់តែមួយ និងអ្នកផ្តល់សេវា 380។ ការបម្លែងសម្រាប់ស្វ័យប្រវត្តិបន្តផ្តល់ផ្លូវ ខណៈគោលដៅមានសុខភាពល្អមួយផ្សេងទៀតនៅតែមាន។ ឋានៈប្រាំមួយ៖ ការបម្លែងសម្រាប់ដែលមានភាពធន់នៅទូទាំងអ្នកផ្តល់សេវា 380 · សន្សំតូកខិនរហូតដល់ 95% លើការងារដែលមានសិទ្ធិ · $0 ដើម្បីចាប់ផ្តើម ជាមួយកម្រិតឥតគិតថ្លៃ 150+ និងអ្នកផ្តល់សេវាឥតគិតថ្លៃជារៀងរហូត/គ្មានកូនសោ 52 · ការរួមបញ្ចូល CLI/agent 37 តាមការកំណត់តែមួយ · ភាពឆបគ្នារបស់ OpenAI, Claude, Gemini និង Responses API នៅ /v1 · ឧបករណ៍គ្រប់គ្រងផលិតកម្ម រួមទាំង circuit breakers, TLS stealth, ឧបករណ៍ MCP 110, A2A, អង្គចងចាំ, guardrails, evals និងការប្រកាសតេស្តស្ថិត 56,000+ នៅទូទាំងឯកសារតេស្តដែលតាមដាន 7,800+។"/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="អ្វីដែលធ្វើឱ្យ OmniRoute លេចធ្លោខុសពីគេ — រូបភាពសង្ខេបលក្ខណៈពិសេសតាមពេលវេលា ប្រៀបធៀបជាមួយ 9router, OpenRouter, CLIProxyAPI និង LiteLLM លើសមត្ថភាពចំនួន 13។ OmniRoute៖ អ្នកផ្តល់សេវា 377, កម្រិតប្រើប្រាស់ឥតគិតថ្លៃជាង 150 ដែលភ្ជាប់មកស្រាប់, យុទ្ធសាស្ត្រកំណត់ផ្លូវ 20, ការបង្ហាប់តូខឹនដោយម៉ាស៊ីន 12, ម៉ាស៊ីនមេ MCP ដែលភ្ជាប់មកស្រាប់ជាមួយឧបករណ៍ 110, ពិធីការភ្នាក់ងារ A2A, អង្គចងចាំអចិន្ត្រៃយ៍, របាំងការពារ, ភ្នាក់ងារក្លោដ, ការលាក់ស្នាមសម្គាល់ TLS, Desktop/Termux/PWA និងភាសាមូលដ្ឋានចំណុចប្រទាក់អ្នកប្រើ i18n ចំនួន 67។ OmniRoute ប្រើអាជ្ញាបណ្ណ MIT និងអាចបង្ហោះដោយខ្លួនឯងបាន។ សមត្ថភាព និងចំនួនរបស់ដៃគូប្រកួតប្រជែងអាចផ្លាស់ប្តូរ; សូមមើលវិធីសាស្ត្រដែលបានភ្ជាប់។"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="អ្វីដែលធ្វើឱ្យ OmniRoute លេចធ្លោខុសពីគេ — រូបភាពសង្ខេបលក្ខណៈពិសេសតាមពេលវេលា ប្រៀបធៀបជាមួយ 9router, OpenRouter, CLIProxyAPI និង LiteLLM លើសមត្ថភាពចំនួន 13។ OmniRoute៖ អ្នកផ្តល់សេវា 380, កម្រិតប្រើប្រាស់ឥតគិតថ្លៃជាង 150 ដែលភ្ជាប់មកស្រាប់, យុទ្ធសាស្ត្រកំណត់ផ្លូវ 20, ការបង្ហាប់តូខឹនដោយម៉ាស៊ីន 12, ម៉ាស៊ីនមេ MCP ដែលភ្ជាប់មកស្រាប់ជាមួយឧបករណ៍ 110, ពិធីការភ្នាក់ងារ A2A, អង្គចងចាំអចិន្ត្រៃយ៍, របាំងការពារ, ភ្នាក់ងារក្លោដ, ការលាក់ស្នាមសម្គាល់ TLS, Desktop/Termux/PWA និងភាសាមូលដ្ឋានចំណុចប្រទាក់អ្នកប្រើ i18n ចំនួន 67។ OmniRoute ប្រើអាជ្ញាបណ្ណ MIT និងអាចបង្ហោះដោយខ្លួនឯងបាន។ សមត្ថភាព និងចំនួនរបស់ដៃគូប្រកួតប្រជែងអាចផ្លាស់ប្តូរ; សូមមើលវិធីសាស្ត្រដែលបានភ្ជាប់។"/>
 
 <sub>📊 វិធីសាស្ត្រពេញលេញ &amp; ព័ត៌មានលម្អិតតាមលក្ខណៈពិសេសនីមួយៗ ប្រៀបធៀបជាមួយ 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar គឺជាមុខងារដែលត្រូវជ្រើសរ�
 - **🖼️ Endpoint ថ្មីៗ** — `/v1/ocr` (Mistral OCR) និង `/v1/audio/translations` (បែប Whisper) បំពេញផ្ទៃមេឌៀឱ្យពេញលេញ។ → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 ការបង្កើតរូបភាព / វីដេអូ / សំឡេង** — API តែមួយសម្រាប់មេឌៀ: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind និងអ្នកផ្តល់សេវាសំឡេងដូចជា ElevenLabs។ → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 ការដាក់ឱ្យដំណើរការ និងប្រតិបត្តិការ** — `basePath` សម្រាប់ reverse-proxy, ការរកឃើញភាសាកម្មវិធីរុករកដោយស្វ័យប្រវត្តិ, ការតាមដានឧបករណ៍តាម key, ការទុកចិត្ត MITM ដោយគ្មាន root, ការធ្វើមូលដ្ឋានីយកម្ម zh-TW។ → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 អ្នកផ្តល់សេវា និង agent បន្ថែម** — cloud agent (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ជាមួយការចូលតាមកម្មវិធីរុករក + OAuth, កាត Ollama ថ្នាក់ដំបូង, Claude Opus 5 & Sonnet 5, ភាពជាដៃគូផ្លូវការ Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… និង **កាតាឡុកអ្នកផ្តល់សេវា 377** ដែលបានធ្វើបច្ចុប្បន្នភាព។ → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 អ្នកផ្តល់សេវា និង agent បន្ថែម** — cloud agent (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) ជាមួយការចូលតាមកម្មវិធីរុករក + OAuth, កាត Ollama ថ្នាក់ដំបូង, Claude Opus 5 & Sonnet 5, ភាពជាដៃគូផ្លូវការ Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… និង **កាតាឡុកអ្នកផ្តល់សេវា 380** ដែលបានធ្វើបច្ចុប្បន្នភាព។ → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 ភាពថ្លាត្រង់នៃការនាំផ្លូវ** — រាល់ការឆ្លើយតបមាន header `X-OmniRoute-Decision` ដែលបញ្ជាក់ឈ្មោះយុទ្ធសាស្ត្រ/អ្នកផ្តល់សេវា/ភាពយឺតយ៉ាវដែលបានផ្តល់សេវា, យុទ្ធសាស្ត្រ combo `cache-optimized` ថ្មី + កត្តា `cacheAffinity` របស់ Auto-Combo នាំសំណើដដែលៗត្រឡប់ទៅការតភ្ជាប់ដែលកាន់បុព្វបទដែលបានឃ្លាំងទុក ហើយ endpoint អានតែប៉ុណ្ណោះ `/v1/auto-combo/{channel}/candidates` បង្ហាញពីបញ្ជីបេក្ខជនផ្ទាល់របស់ឆានែល `auto/*`។ → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ ដំណើរការក្នុងស្រុក & ហេដ្ឋារចនាសម្ព័ន្ធ** — Redis ក្នុងស្រុកដោយការចុចតែម្តង, ឧបករណ៍ deploy relay សម្រាប់ Cloudflare Workers / Deno Deploy, Bifrost & Mux ជាសេវាកម្ម embedded ដែលមានការត្រួតពិនិត្យ។ → [សេវាកម្ម Embedded](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 អ្វីៗផ្សេងទៀតដែលមានក្នុងប្រអប់** — ក្របខ័ណ្ឌ plugin + marketplace, ក្របខ័ណ្ឌជំនាញ Omni/Agent/GitHub, ការរួមបញ្ចូល Obsidian vault (ឧបករណ៍ MCP ចំនួន 22), Batch & Files APIs ដែលឆបគ្នានឹង OpenAI, cache response តាមអត្ថន័យ, gamification ជាមួយតារាងពិន្ទុ, ការរកឃើញ agent ACP (agent ដែលមានស្រាប់ចំនួន 15), ការនាំចេញ log តាមកាលវិភាគទៅ BigQuery, `auto/chaos` ការបញ្ជូនចេញ (fan-out) ម៉ូដែលច្រើនបែបស្របគ្នា, ស្ពាន Telegram bot, កម្មវិធីគ្រប់គ្រងកំណែក្នុងកម្មវិធី និងចំណាត់ថ្នាក់អ្នកផ្តល់សេវាឥតគិតថ្លៃ LMArena-ELO។ → [ឯកសារ](docs/README.md)
@@ -684,11 +684,11 @@ omniroute configure codex          # also: claude opencode qwen aider goose gemi
 
 <div align="center">
 
-## 🌐 អ្នកផ្តល់សេវា AI ចំនួន 377 — 153 ត្រូវបានសម្គាល់ក្នុងកាតាឡុកថាឥតគិតថ្លៃ
+## 🌐 អ្នកផ្តល់សេវា AI ចំនួន 380 — 153 ត្រូវបានសម្គាល់ក្នុងកាតាឡុកថាឥតគិតថ្លៃ
 
 </div>
 
-> **អ្នកផ្តល់សេវាដែលបានចុះបញ្ជីចំនួន 377** នៅទូទាំងបណ្តុំផ្លូវការសម្រាប់ការជជែក មេឌៀ ការស្វែងរក មូលដ្ឋាន cloud-agent និងប្រព័ន្ធ រួមទាំង **153 ដែលមាន metadata សម្រាប់ការរុករក `hasFree: true`**។ បញ្ជីចុះឈ្មោះម៉ូដែលជជែកគ្របដណ្តប់លើ **អ្នកផ្តល់សេវា 239 / គូអ្នកផ្តល់សេវា-ម៉ូដែលផ្សេងគ្នា 3,059 / ID ម៉ូដែលដើម 1,475**។ កាតាឡុកថវិកាឥតគិតថ្លៃដាច់ដោយឡែកមាន **ទិន្នន័យតាមម៉ូដែល 471 ជួរ** **កញ្ចប់កូតាដែលកើតឡើងដដែលៗ 34** និង **អ្នកផ្តល់សេវាឥតគិតថ្លៃជារៀងរហូតដែលមានកូតាកើតឡើងដដែលៗ/មិនត្រូវការសោ 52**។ ទាំងនេះប្រើភាគបែងខុសគ្នាដោយចេតនា។ និយមន័យ និងការគណនាដែលបានលុបកញ្ចប់កូតាស្ទួនមាននៅក្នុង [ឯកសារយោងអំពីអ្នកផ្តល់សេវា](docs/reference/PROVIDER_REFERENCE.md) និង [កម្រិតប្រើប្រាស់ឥតគិតថ្លៃ](docs/reference/FREE_TIERS.md)។
+> **អ្នកផ្តល់សេវាដែលបានចុះបញ្ជីចំនួន 380** នៅទូទាំងបណ្តុំផ្លូវការសម្រាប់ការជជែក មេឌៀ ការស្វែងរក មូលដ្ឋាន cloud-agent និងប្រព័ន្ធ រួមទាំង **153 ដែលមាន metadata សម្រាប់ការរុករក `hasFree: true`**។ បញ្ជីចុះឈ្មោះម៉ូដែលជជែកគ្របដណ្តប់លើ **អ្នកផ្តល់សេវា 239 / គូអ្នកផ្តល់សេវា-ម៉ូដែលផ្សេងគ្នា 3,059 / ID ម៉ូដែលដើម 1,475**។ កាតាឡុកថវិកាឥតគិតថ្លៃដាច់ដោយឡែកមាន **ទិន្នន័យតាមម៉ូដែល 471 ជួរ** **កញ្ចប់កូតាដែលកើតឡើងដដែលៗ 34** និង **អ្នកផ្តល់សេវាឥតគិតថ្លៃជារៀងរហូតដែលមានកូតាកើតឡើងដដែលៗ/មិនត្រូវការសោ 52**។ ទាំងនេះប្រើភាគបែងខុសគ្នាដោយចេតនា។ និយមន័យ និងការគណនាដែលបានលុបកញ្ចប់កូតាស្ទួនមាននៅក្នុង [ឯកសារយោងអំពីអ្នកផ្តល់សេវា](docs/reference/PROVIDER_REFERENCE.md) និង [កម្រិតប្រើប្រាស់ឥតគិតថ្លៃ](docs/reference/FREE_TIERS.md)។
 
 <div align="center">
 
@@ -1290,7 +1290,7 @@ process ដូចគ្នានៅលើ port តែមួយ ដូច្ន�
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ភាសា</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> នៅទូទាំង <code>src/</code> និង <code>open-sse/</code> (គ្មាន <code>any</code> នៅក្នុងស្នូលតាំងពី v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, ការកត់ត្រា WAL) + LowDB (JSON ជំនាន់ចាស់) — ម៉ូឌុលដែន 147, migrations 213</td></tr>
+  <tr><td nowrap><b>មូលដ្ឋានទិន្នន័យ</b></td><td>better-sqlite3 (SQLite, ការកត់ត្រា WAL) + LowDB (JSON ជំនាន់ចាស់) — ម៉ូឌុលដែន 147, migrations 219</td></tr>
   <tr><td nowrap><b>អង្គចងចាំ</b></td><td>ការស្វែងរកអត្ថបទពេញជាមួយ SQLite FTS5 + vector embeddings ដែលបាន quantize ជា int8 និង decay បែប typed</td></tr>
   <tr><td nowrap><b>Schemas</b></td><td>Zod 4 — ការផ្ទៀងផ្ទាត់ I/O នៃឧបករណ៍ MCP + កិច្ចសន្យា API</td></tr>
   <tr><td nowrap><b>ព្រូតូកូល</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

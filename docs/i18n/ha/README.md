@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Ƙofar AI ta Kyauta
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kada ka taɓa daina rubuta lamba. Kowane kayan aikin AI → masu samarwa 377 — sama da 150 kyauta — ta hanyar endpoint guda ɗaya. Claude Code, Codex, Cursor, Cline, Copilot da Antigravity zuwa Claude / GPT / Gemini na KYAUTA tare da sauyawa ta atomatik idan an samu matsala. Haɗaɗɗen matse bayanai na RTK + Caveman yana rage amfani da tokens da 15–95% (~89% a matsakaici) — kada ka taɓa kaiwa iyaka. Masu samar da AI 377 · matakan kyauta sama da 150 · ~1.62B tokens kyauta/wata · dabarun routing 20 · $0 don farawa."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kada ka taɓa daina rubuta lamba. Kowane kayan aikin AI → masu samarwa 380 — sama da 150 kyauta — ta hanyar endpoint guda ɗaya. Claude Code, Codex, Cursor, Cline, Copilot da Antigravity zuwa Claude / GPT / Gemini na KYAUTA tare da sauyawa ta atomatik idan an samu matsala. Haɗaɗɗen matse bayanai na RTK + Caveman yana rage amfani da tokens da 15–95% (~89% a matsakaici) — kada ka taɓa kaiwa iyaka. Masu samar da AI 380 · matakan kyauta sama da 150 · ~1.62B tokens kyauta/wata · dabarun routing 20 · $0 don farawa."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                          |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------ | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Masu bayarwa          |            352            |   **358**   |          377          |
+| 🌐 Masu bayarwa          |            352            |   **358**   |          380          |
 | 🧠 Unique chat model IDs |           1320            |  **1374**   |         1475          |
 | 🖼️ Modality Bridge       | 🆕 vision + audio + video |      ✓      |           ✓           |
 | 📡 Radar free catalog    |         🆕 ficewa         |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Fasali</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Masu Samar da Sabis</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Masu Samar da Sabis</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Alƙawarin — Endpoint guda da masu samarwa 377. Fallback ta atomatik na ci gaba da watsa buƙatu muddin wata manufa mai lafiya ta kasance. Ginshiƙai shida: fallback mai juriya a kan masu samarwa 377 · har 95% ceton token a kan ayyukan da suka cancanta · $0 don farawa da matakan kyauta 150+ da masu samarwa 52 na kyauta har abada na lokaci-lokaci/marasa maɓalli · haɗin CLI/agent 37 ta saitin guda · dacewa da OpenAI, Claude, Gemini da Responses API a /v1 · sarrafa samarwa ciki har da circuit breakers, TLS stealth, kayan aikin MCP 110, A2A, memory, guardrails, evals da sanarwar gwaje-gwaje na tsaye 56,000+ a cikin fayilolin gwaji 7,800+ da aka bibiya."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Alƙawarin — Endpoint guda da masu samarwa 380. Fallback ta atomatik na ci gaba da watsa buƙatu muddin wata manufa mai lafiya ta kasance. Ginshiƙai shida: fallback mai juriya a kan masu samarwa 380 · har 95% ceton token a kan ayyukan da suka cancanta · $0 don farawa da matakan kyauta 150+ da masu samarwa 52 na kyauta har abada na lokaci-lokaci/marasa maɓalli · haɗin CLI/agent 37 ta saitin guda · dacewa da OpenAI, Claude, Gemini da Responses API a /v1 · sarrafa samarwa ciki har da circuit breakers, TLS stealth, kayan aikin MCP 110, A2A, memory, guardrails, evals da sanarwar gwaje-gwaje na tsaye 56,000+ a cikin fayilolin gwaji 7,800+ da aka bibiya."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Dukkan dabaru **20** — haɗa su yadda kake so a kowane mataki na haɗi:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Abin da ya bambanta OmniRoute — kwatancen fasaloli na wani takamaiman lokaci da 9router, OpenRouter, CLIProxyAPI da LiteLLM a fannoni 13. OmniRoute: masu samarwa 377, matakan amfani kyauta sama da 150 da aka haɗa, dabarun karkatarwa 20, matse token mai injina 12, sabar MCP da aka gina ciki mai kayan aiki 110, yarjejeniyar wakili ta A2A, ma'adanar bayani mai dorewa, matakan kariya, wakilan gajimare, ɓoye sawun yatsan TLS, Desktop/Termux/PWA da yarukan UI na i18n guda 67. OmniRoute yana ƙarƙashin lasisin MIT kuma ana iya masaukinsa da kai. Ƙwarewa da ƙididdigar masu fafatawa na iya canzawa; duba hanyar binciken da aka haɗa."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Abin da ya bambanta OmniRoute — kwatancen fasaloli na wani takamaiman lokaci da 9router, OpenRouter, CLIProxyAPI da LiteLLM a fannoni 13. OmniRoute: masu samarwa 380, matakan amfani kyauta sama da 150 da aka haɗa, dabarun karkatarwa 20, matse token mai injina 12, sabar MCP da aka gina ciki mai kayan aiki 110, yarjejeniyar wakili ta A2A, ma'adanar bayani mai dorewa, matakan kariya, wakilan gajimare, ɓoye sawun yatsan TLS, Desktop/Termux/PWA da yarukan UI na i18n guda 67. OmniRoute yana ƙarƙashin lasisin MIT kuma ana iya masaukinsa da kai. Ƙwarewa da ƙididdigar masu fafatawa na iya canzawa; duba hanyar binciken da aka haɗa."/>
 
 <sub>📊 Cikakkiyar hanyar bincike &amp; bayanan kowane fasali idan aka kwatanta da 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar na zaɓi ne kuma GET-only. Abokin hulɗar OmniRoute ba ya loda prompts, zi
 - **🖼️ New endpoints** — `/v1/ocr` (Mistral OCR) da `/v1/audio/translations` (salon Whisper) suna cika saman media. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Image / video / audio generation** — API ɗaya ga media: xAI Grok Imagine & Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, da speech providers kamar ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment & ops** — reverse-proxy `basePath`, gano harshen browser kai tsaye, bin diddigar na'ura na kowane key, root-less MITM trust, zh-TW localization. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 More providers & agents** — cloud agents (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) tare da browser + OAuth login, Ollama first-class card, Claude Opus 5 & Sonnet 5, haɗin gwiwar Kimi na hukuma (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… da sabon **377-provider catalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 More providers & agents** — cloud agents (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) tare da browser + OAuth login, Ollama first-class card, Claude Opus 5 & Sonnet 5, haɗin gwiwar Kimi na hukuma (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… da sabon **380-provider catalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Routing transparency** — kowane response yana ɗauke da header na `X-OmniRoute-Decision` wanda ke bayyana strategy/provider/latency da ya yi aiki da shi, sabon dabarar combo na `cache-optimized` + factor na Auto-Combo `cacheAffinity` yana mayar da buƙatun da suka maimaita zuwa connection da ke riƙe da cached prefix, kuma read-only endpoint na `/v1/auto-combo/{channel}/candidates` yana nuna live candidate pool na channel na `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Ayyukan gida da kayan aiki** — Redis na gida ta danna ɗaya, masu shigar da relay na Cloudflare Workers / Deno Deploy, Bifrost & Mux a matsayin ayyukan da aka saka a ciki ƙarƙashin kulawa. → [Ayyukan da aka Saka a Ciki](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Har ila a cikin akwatin** — tsarin plugin da kasuwa, tsarin ƙwarewar Omni/Agent/GitHub, haɗin kai na Obsidian vault (kayan aikin MCP 22), APIs na Batch & Files masu jituwa da OpenAI, ma'ajin amsoshi na ma'ana, gamification tare da teburin manya, ganowar wakilan ACP (wakilai 15 da aka gina a ciki), fitar da log da aka tsara zuwa BigQuery, `auto/chaos` fan-out na samfura da yawa a kwarara, gadar bot na Telegram, mai sarrafa siga a cikin app da matsayin masu samarwa kyauta na LMArena-ELO. → [Docs](docs/README.md)
@@ -684,11 +684,11 @@ Kowane umarni yana girmama mahallin nesa mai aiki (`omniroute connect <host>`), 
 
 <div align="center">
 
-## 🌐 Masu Samar da AI 377 — 153 da Kasidar ta Alama a Matsayin Kyauta
+## 🌐 Masu Samar da AI 380 — 153 da Kasidar ta Alama a Matsayin Kyauta
 
 </div>
 
-> **Masu samarwa 377 da aka yi wa rajista** a cikin tarin hukuma na hira, kafofin watsa labarai, bincike, na gida, wakilin-gajimare da tsarin kwamfuta, ciki har da **153 masu ɗauke da bayanan ganowa na `hasFree: true`**. Rajistar samfurin hira ta ƙunshi **masu samarwa 239 / nau'i-nau'in haɗin mai samarwa da samfuri 3,059 / ID na samfuri na asali 1,475**; kasidar kasafin kyauta ta daban tana da **layuka 471 na kowane samfuri**, **rumbunan albarkatu masu maimaituwa 34** da kuma **masu samar da sabis na kyauta-har-abada masu maimaituwa/marasa buƙatar maɓalli 52**. Waɗannan ma'aunan jimla ne daban bisa tsari; ma'anoni da lissafe-lissafen da aka cire maimaituwar rumbuna suna cikin [Manunin Masu Samarwa](docs/reference/PROVIDER_REFERENCE.md) da [Matakan Kyauta](docs/reference/FREE_TIERS.md).
+> **Masu samarwa 380 da aka yi wa rajista** a cikin tarin hukuma na hira, kafofin watsa labarai, bincike, na gida, wakilin-gajimare da tsarin kwamfuta, ciki har da **153 masu ɗauke da bayanan ganowa na `hasFree: true`**. Rajistar samfurin hira ta ƙunshi **masu samarwa 239 / nau'i-nau'in haɗin mai samarwa da samfuri 3,059 / ID na samfuri na asali 1,475**; kasidar kasafin kyauta ta daban tana da **layuka 471 na kowane samfuri**, **rumbunan albarkatu masu maimaituwa 34** da kuma **masu samar da sabis na kyauta-har-abada masu maimaituwa/marasa buƙatar maɓalli 52**. Waɗannan ma'aunan jimla ne daban bisa tsari; ma'anoni da lissafe-lissafen da aka cire maimaituwar rumbuna suna cikin [Manunin Masu Samarwa](docs/reference/PROVIDER_REFERENCE.md) da [Matakan Kyauta](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1290,7 +1290,7 @@ Ma'aunai na asali a 2026-10-18: **bidiyoyi na musamman 1.976** · **sanannun kal
   <tr><td nowrap><b>Lokacin Aiki</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Harshe</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> a cikin <code>src/</code> da <code>open-sse/</code> (babu <code>any</code> a jigon tsarin tun daga v2.0)</td></tr>
   <tr><td nowrap><b>Tsarin Aiki</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma'ajin Bayanai</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON na dā) — modules 147 na yankuna, migrations 213</td></tr>
+  <tr><td nowrap><b>Ma'ajin Bayanai</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON na dā) — modules 147 na yankuna, migrations 219</td></tr>
   <tr><td nowrap><b>Ƙwaƙwalwa</b></td><td>SQLite FTS5 binciken cikakken rubutu + vector embeddings masu int8-quantized, decay mai nau'i</td></tr>
   <tr><td nowrap><b>Tsare-tsare</b></td><td>Zod 4 — tantance I/O na kayan aikin MCP + kwangilolin API</td></tr>
   <tr><td nowrap><b>Ƙa'idodin Sadarwa</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
