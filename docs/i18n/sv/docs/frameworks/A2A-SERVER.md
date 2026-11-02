@@ -199,9 +199,9 @@ JSON-RPC-slutpunkten `/a2a` är den kanoniska startpunkten för A2A. REST-slutpu
 
 ## Lägga till en ny färdighet
 
-1. **Skapa färdighetsfilen:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Skapa en färdighetsfil:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportera en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Följ strukturen för befintliga färdigheter såsom `smartRouting.ts`.
+   Exportera en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Följ strukturen för befintliga färdigheter, såsom `smartRouting.ts`.
 
 2. **Registrera hanteraren:** lägg till en post i `A2A_SKILL_HANDLERS` i `src/lib/a2a/taskExecution.ts`:
 
@@ -215,15 +215,15 @@ JSON-RPC-slutpunkten `/a2a` är den kanoniska startpunkten för A2A. REST-slutpu
    };
    ```
 
-3. **Exponera i agentkortet:** lägg till följande i arrayen `skills` i `src/app/.well-known/agent.json/route.ts`:
+3. **Exponera i agentkortet:** lägg till följande i arrayen `skills` i `src/lib/a2a/agentCardMetadata.ts` (som delas av `/.well-known/agent.json` och `/.well-known/agent-card.json`):
 
    ```json
    {
      "id": "your-skill",
-     "name": "Din färdighet",
-     "description": "Kortfattad, avsiktsfokuserad beskrivning",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Exempel på anrop med naturligt språk"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 

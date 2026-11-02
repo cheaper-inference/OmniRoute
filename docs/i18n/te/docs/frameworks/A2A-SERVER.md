@@ -197,17 +197,17 @@ JSON-RPC ఎండ్పాయింట్ `/a2a` ప్రామాణిక A2
 
 ---
 
-## కొత్త నైపుణ్యాన్ని జోడించడం
+## కొత్త స్కిల్ను జోడించడం
 
-1. **నైపుణ్య ఫైల్ను సృష్టించండి:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **స్కిల్ ఫైల్ను సృష్టించండి:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` అనే async ఫంక్షన్ను ఎగుమతి చేయండి. `smartRouting.ts` వంటి ఇప్పటికే ఉన్న నైపుణ్యాల నిర్మాణాన్ని అనుసరించండి.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` అనే async ఫంక్షన్ను export చేయండి. `smartRouting.ts` వంటి ఇప్పటికే ఉన్న స్కిల్స్ నిర్మాణాన్ని అనుసరించండి.
 
 2. **హ్యాండ్లర్ను నమోదు చేయండి:** `src/lib/a2a/taskExecution.ts`లో, `A2A_SKILL_HANDLERS`కు ఒక ఎంట్రీని జోడించండి:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ఇప్పటికే ఉన్న నైపుణ్యాలు
+     // ...ఇప్పటికే ఉన్న స్కిల్స్
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ JSON-RPC ఎండ్పాయింట్ `/a2a` ప్రామాణిక A2
    };
    ```
 
-3. **Agent Cardలో అందుబాటులో ఉంచండి:** `src/app/.well-known/agent.json/route.ts`లో, `skills` అర్రేకు జోడించండి:
+3. **Agent Cardలో అందుబాటులో ఉంచండి:** `src/lib/a2a/agentCardMetadata.ts`లో (`/.well-known/agent.json` మరియు `/.well-known/agent-card.json` రెండూ దీనిని పంచుకుంటాయి), `skills` arrayకు జోడించండి:
 
    ```json
    {
      "id": "your-skill",
-     "name": "మీ నైపుణ్యం",
-     "description": "సంక్షిప్తమైన, ఉద్దేశ్య-కేంద్రీకృత వివరణ",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["సహజ భాషలో నమూనా ఆహ్వానం"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **పరీక్షలు రాయండి:** `tests/unit/a2a-<your-skill>.test.ts`. విజయవంతమైన మార్గం + దోష మార్గాన్ని కవర్ చేయండి.
+4. **పరీక్షలను వ్రాయండి:** `tests/unit/a2a-<your-skill>.test.ts`. విజయవంతమైన మార్గం + లోప మార్గాన్ని కవర్ చేయండి.
 
-5. ఈ ఫైల్లోని `Available Skills` పట్టికలో కొత్త నైపుణ్యాన్ని **డాక్యుమెంట్ చేయండి**.
+5. ఈ ఫైల్లోని `Available Skills` పట్టికలో కొత్త స్కిల్ను **డాక్యుమెంట్ చేయండి**.
 
 ---
 

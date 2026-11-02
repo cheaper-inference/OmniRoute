@@ -215,7 +215,7 @@ OmniRoute розкриває 6 навичок A2A, підключених до `
    };
    ```
 
-3. **Опублікуйте в картці агента:** у `src/app/.well-known/agent.json/route.ts` додайте до масиву `skills`:
+3. **Додайте до картки агента:** у `src/lib/a2a/agentCardMetadata.ts` (спільному для `/.well-known/agent.json` і `/.well-known/agent-card.json`) додайте до масиву `skills`:
 
    ```json
    {
@@ -227,7 +227,7 @@ OmniRoute розкриває 6 навичок A2A, підключених до `
    }
    ```
 
-4. **Напишіть тести:** `tests/unit/a2a-<your-skill>.test.ts`. Перевірте успішний сценарій і сценарій помилки.
+4. **Напишіть тести:** `tests/unit/a2a-<your-skill>.test.ts`. Охопіть успішний сценарій і сценарій із помилкою.
 
 5. **Задокументуйте** нову навичку в таблиці `Available Skills` цього файлу.
 
