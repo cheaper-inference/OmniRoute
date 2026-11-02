@@ -1,0 +1,1 @@
+- **fix(build):** Select webpack automatically for production builds with at most 16 GiB of detected process memory (or unknown limits), including container-constrained hosts, to avoid Turbopack OOM. Preserve explicit bundler overrides and warn when low-memory Turbopack is forced (#18184 - thanks @fabioKoruja00).

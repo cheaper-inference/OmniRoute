@@ -849,47 +849,40 @@ apelant fără sesiune (la preluare, ștergere, anulare și la verificarea `inpu
 
 ---
 
-## API-ul de căutare
+## Caută API
 
-Abstractizare pentru furnizorii web/de căutare (Tavily, Brave, Exa, Serper etc.).
+abstracția furnizorului Web/search (Tavily, Brave, Exa, Serper etc.).
 
-| Metodă | Cale                   | Descriere                                                                                           |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Listează furnizorii de căutare configurați și capabilitățile acestora                               |
-| POST   | `/v1/search`           | Execută o interogare de căutare — corp validat prin `v1SearchSchema`, acceptă caching și coalescing |
-| GET    | `/v1/search/analytics` | Statistici per furnizor privind rezultatele/ latența/cache-ul                                       |
+| Metodă | Cale                   | Descriere                                                                                      |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Listați capabilitățile + ale furnizorilor de căutare configurați                               |
+| POST   | `/v1/search`           | Rulați o interogare de căutare — body validată de `v1SearchSchema`, acceptă caching/coalescing |
+| GET    | `/v1/search/analytics` | Statistici hit/latency/cache per furnizor                                                      |
 
-**Autentificare:** Cheie API Bearer (`extractApiKey` + `isValidApiKey`). Politica de căutare este aplicată prin `enforceApiKeyPolicy`.
+**Auth:** Cheie API purtător (`extractApiKey` + `isValidApiKey`). Politica de căutare aplicată prin `enforceApiKeyPolicy`.
 
-### `provider_options` pentru Exa și Tavily
+### Exa și Tavily `provider_options`
 
-Exa și Tavily citesc câmpurile specifice furnizorului dintr-un obiect cu spațiu de nume:
-`provider_options.exa` (sau `provider_options["exa-search"]`) și `provider_options.tavily`
-(sau `provider_options["tavily-search"]`). Sunt transmise mai departe doar cheile de mai jos. Fiecare este
-verificată în raport cu propria schemă Zod din `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-iar o cheie cu un tip incorect este eliminată. Orice altă cheie este ignorată, inclusiv autentificarea, URL-ul de bază,
-`stream` și `outputSchema`. Cheile fără imbricare utilizate de alți furnizori (`cx`, `depth`, ...) funcționează
-ca înainte.
+Exa și Tavily citesc câmpuri specifice furnizorului dintr-o pungă cu spații de nume: `provider_options.exa` (sau `provider_options["exa-search"]`) și `provider_options.tavily` (sau `provider_options["tavily-search"]`). Sunt redirecționate doar cheile de mai jos. Fiecare este verificat cu propria sa schemă Zod în `open-sse/handlers/search/providerOptionsPassthrough.ts` și o cheie cu tipul greșit este abandonată. Orice altă cheie este ignorată, inclusiv auth, base URL, `stream` și `outputSchema`. Tastele plate utilizate de alți furnizori (`cx`, `depth`, ...) funcționează ca înainte.
 
-| Furnizor | Câmpuri de nivel superior                                                                                                                                                                                                                                                                                                                                                 | Imbricate                                                                                                                                                                   |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitive fără imbricare), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                     | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` îmbinate peste valoarea implicită `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                           |
+| Furnizor | Câmpuri de nivel superior                                                                                                                                                                                                                                                                                                                                                 | Imbricat                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitive plate), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` a fuzionat peste `{ text: true, highlights: true }` implicit |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                          |
 
-Câmpurile generice au întotdeauna prioritate: `query`, `max_results`, `filters` (domenii), `country` și
-subiectul derivat din `search_type`. Pentru Exa, `search_type: "news"` păstrează `category: "news"`.
-Tavily acceptă și `search_type: "finance"` (`topic: "finance"`).
+Câmpurile generice câștigă întotdeauna: `query`, `max_results`, `filters` (domenii), `country` și subiectul derivat din `search_type`. Pe Exa, `search_type: "news"` păstrează `category: "news"`. Tavily acceptă și `search_type: "finance"` (`topic: "finance"`).
 
-Câmpul generic `time_range` ajunge acum la ambii furnizori: Exa primește `startPublishedDate` (marcaj temporal ISO),
-iar Tavily primește `start_date` (`YYYY-MM-DD`). O dată explicită din `provider_options`
-o suprascrie pe cea mapată.
+Costul de căutare Firecrawl este înregistrat pentru fiecare bloc început de 10 rezultate returnate, la 0,002 USD (2 credite) un bloc și cel puțin un bloc pe apel ( [facturare Firecrawl](https://docs.firecrawl.dev/billing) ): 11 rezultate costă 0,004 USD.
 
-Rezultatele Exa păstrează `id`, `highlight_scores`, `summary`, `subpages`, `entities` și `extras` în
-`provider_raw`. Rezultatele Tavily păstrează `images` și `favicon`.
+`time_range` generic ajunge acum la ambii furnizori: Exa primește `startPublishedDate` (ISO timestamp ) și Tavily primește `start_date` (`YYYY-MM-DD`). O dată explicită în `provider_options` o înlocuiește pe cea mapată.
 
-Contabilizarea costurilor utilizează în continuare registrul fără imbricare `costPerQuery`. Tavily facturează
-`search_depth: "advanced"` cu mai multe credite per apel, iar această diferență nu este reflectată în
-`usage.search_cost_usd`.
+Rezultatele exa păstrează `id`, `highlight_scores`, `summary`, `subpages`, `entities` și `extras` în `provider_raw`. Rezultatele Tavily păstrează `images` și `favicon`.
+
+Costul de căutare a conexiunii este înregistrat la 0,005 USD pentru `depth` `fast` și `standard` și la 0,05 USD pentru `deep` ( [prețuri de conectare](https://docs.linkup.so/pages/documentation/development/pricing) ), indiferent dacă `depth` provine din `provider_options` sau din setările conexiunii.
+
+Exa `type: "lite"` (Exa 3.0) acceptă un set mai mic de câmpuri și respinge întreaga cerere atunci când este setat orice alt câmp. Pentru lite, `additionalQueries`, `systemPrompt` și fiecare tastă `contents` cu excepția `text` și `highlights` sunt abandonate înainte de apel. `subpages`, `subpageTarget`, `highlights.numSentences` și `highlights.highlightsPerUrl` depreciate nu mai sunt redirecționate.
+
+Contabilitatea costurilor este registrul plat `costPerQuery`, cu excepția Exa, care urmează prețul propriu al Exa: 0,007 USD per apel pentru `auto` (și `fast` moștenit) sau 0,004 USD pentru `lite` (și `instant` moștenit), acoperind 10 rezultate; 0,001 USD pentru fiecare rezultat suplimentar; și 0,001 USD per rezultat returnat când `contents.summary` este setat. Tavily este înregistrat la 1 credit (0,008 USD) pentru `search_depth` `basic`, `fast` și `ultra-fast` și 2 credite (0,016 USD) pentru `advanced` ( [credite Tavily API](https://docs.tavily.com/documentation/api-credits) ). Un apel cu `auto_parameters: true` pe care Tavily face upgrade la avansat este încă înregistrat la 1 credit.
 
 ---
 

@@ -645,27 +645,29 @@ sudo systemctl enable --now omniroute-update.path
 Service náà máa ń yọ ìbéèrè náà kúrò kí ó tó fa àwòrán náà kalẹ̀, kí ìṣiṣẹ́ tó kùnà má bà á lọ sínú ìyípo. Láìsí
 `DOCKER_UPDATE_TRIGGER_FILE`, dashboard náà yóò tẹ̀síwájú pẹ̀lú ìlànà àṣẹ ọwọ́.
 
-## Wíwà-nílẹ̀: SQLite àkọ́kọ́bẹ̀rẹ̀ jẹ́ replica kan ṣoṣo
+## Wiwa: aiyipada SQLite jẹ ẹda-ẹyọkan
 
-OmniRoute Docker / Kubernetes àkọ́kọ́ ní **process Node kan + writer SQLite kan**. Wíwà-nílẹ̀ gíga **kò ní àtìlẹ́yìn** lórí topology yẹn.
+Iṣura Docker / Kubernetes OmniRoute jẹ** Ilana Node kan + ọkan SQLite onkqwe** . Ga wiwa ni** ko ni atilẹyin** lori topology yẹn.
 
-| Ìdíwọ́                                  | Àbájáde                                                                                                                                                                                                                                                                                                                            |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Writer kan ṣoṣo                        | **Má ṣe** ṣiṣẹ́ ọ̀pọ̀ replica lórí fáìlì SQLite kan náà. Èyí máa ba DB náà jẹ́.                                                                                                                                                                                                                                                        |
-| Ìtúnṣẹ̀dá / ìtúnṣiṣẹ́ / pípa HEALTHCHECK | **Ìdádúró pátápátá** fún SSE tó ń lọ lọ́wọ́, àwọn session dashboard, àti state inú memory. Gbogbo client tó sopọ̀ yóò já. Àwọn ìbéèrè tuntun ní àkókò tí endpoint ṣófo yóò gba **`502 Bad Gateway: Unknown error`** láti ọ̀dọ̀ reverse-proxy, kì í ṣe JSON OmniRoute — àwọn client kò lè yà èyí sọ́tọ̀ kúrò nínú ìkùnà provider (#11015). |
-| Event loop kan náà bí `/healthz`       | Catalog tó dí tàbí tick compression lè mú kí àwọn probe pẹ́; timeout kúkúrú yóò sì tún replica **kan ṣoṣo** náà bẹ̀rẹ̀.                                                                                                                                                                                                               |
+| Ihamọ                           | Abajade                                                                                                                                                                                                                                                                                     |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Onkọwe nikan                    | Ṣe** kii ṣe** ṣiṣe ọpọlọpọ awọn ẹda lodi si faili SQLite kanna. Iyẹn ba DB jẹ.                                                                                                                                                                                                              |
+| Tun / tun bẹrẹ / HEALTHCHECK pa | **Ilọkuro ni kikun** ti SSE in-flight, awọn akoko dasibodu, ati ipo iranti. Gbogbo ti sopọ ni ose silẹ. Awọn ibeere titun lakoko ferese opin-opin gba aṣoju-pada**`502 Bad Gateway: Unknown error`** , kii ṣe OmniRoute JSON — awọn alabara ko le ṣe iyatọ eyi lati ikuna olupese (#11015). |
+| Lupu iṣẹlẹ kanna bi `/healthz`  | Katalogi ti o nšišẹ tabi ami titẹkuro le ṣe idaduro awọn iwadii; akoko kukuru kan lẹhinna tun bẹrẹ** nikan** ajọra.                                                                                                                                                                         |
 
-**Matrix probe** (tún wo [àwọn àbá probe Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Matrix ibere** (wo tun [Kubernetes awọn iṣeduro iwadii](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Probe           | Ohun àfojúsùn                                                  | Má ṣe lò ó fún                                     |
-| --------------- | -------------------------------------------------------------- | -------------------------------------------------- |
-| Liveness        | TCP lórí `PORT` (àkọ́kọ́bẹ̀rẹ̀ `20128`), tàbí HTTP rírọ̀ `/healthz` | `/api/monitoring/health`                           |
-| Readiness       | HTTP `GET /healthz`                                            | Àwọn timeout tó há tó ń ka event-loop tó dí sí òkú |
-| Ìjìnlẹ̀ / ènìyàn | `/api/monitoring/health`                                       | Liveness kubelet aládàáṣiṣẹ́                        |
+| Iwadii       | Àfojúsùn                                                     | Maṣe lo                                           |
+| ------------ | ------------------------------------------------------------ | ------------------------------------------------- |
+| Igbesi aye   | TCP lori `PORT` (aiyipada `20128`), tabi zqd HTTP `/healthz` | `/api/monitoring/health`                          |
+| Imurasilẹ    | HTTP `GET /healthz`                                          | Awọn akoko wiwọ ti o tọju iṣẹlẹ-lupu nšišẹ bi okú |
+| Jin / eniyan | `/api/monitoring/health`                                     | Aládàáṣiṣẹ kubelet liveness                       |
 
-**Àwọn ìgbéga:** retí pé gbogbo session yóò já. Yọ àwọn client kúrò díẹ̀díẹ̀ bí o bá lè ṣe bẹ́ẹ̀; kò sí ìmúdójúìwọ̀n rolling lórí SQLite àkọ́kọ́bẹ̀rẹ̀. Compose `restart: unless-stopped` pẹ̀lú Docker `HEALTHCHECK` yóò tún rọ́pò process kan ṣoṣo náà nígbà tí container bá jẹ́ Unhealthy — agbègbè ìpalára kan náà.
+**Awọn ilọsiwaju:** reti gbogbo igba lati ju silẹ. Sisan awọn onibara ti o ba le; ko si imudojuiwọn yiyi lori aiyipada SQLite. Ṣajọ `restart: unless-stopped` pẹlu Docker `HEALTHCHECK` yoo tun rọpo ilana nikan nigbati eiyan naa ko ni ilera — rediosi bugbamu kanna.
 
-Àpẹẹrẹ kóòdù Kubernetes fún **replica kan ṣoṣo** (Recreate jẹ́ dandan; má ṣe gbé `replicas` ga lórí fáìlì SQLite kan):
+Awọn ifihan ti o ti ṣetan ati iwe aworan Helm kan n gbe ni `deploy/kubernetes/` ati `deploy/helm/omniroute/` — wo [itọsọna imuṣiṣẹ Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes snippet fun a** nikan ajọra** (Atunse nilo; maṣe gbe `replicas` ga si faili SQLite kan):
 
 ```yaml
 spec:
@@ -692,9 +694,9 @@ spec:
             periodSeconds: 20
 ```
 
-Ìdádúró `preStop` ń jẹ́ kí kube yọ àwọn endpoint Service kúrò kí SIGTERM tó dé, kí ìrìnnà **tuntun** má bàa máa dé sí process tí ó ń dáwọ́ dúró. SSE `/v1/responses` tí ó ti ń ṣiṣẹ́ ni a máa ń jẹ́ kí ó parí fún àkókò tí kò ju `SHUTDOWN_TIMEOUT_MS` lọ (30s ní àìyípadà) nípasẹ̀ àwọn lease ìgbàwọlé heavyweight (#11015). Àwọn ìbéèrè tuntun tí ó ṣì dé sí process náà yóò gba `503` + `Retry-After: 5`. Àlàfo endpoint-òfo ti Recreate títí tí replacement yóò fi di Ready ṣì jẹ́ ìdádúró iṣẹ́ pátápátá — topology SQLite ni ìyẹn, kì í ṣe àṣìṣe ìṣètò probe.
+`preStop` sun jẹ ki kube ju awọn aaye ipari Iṣẹ silẹ ṣaaju SIGTERM bẹ** titun** ijabọ duro kọlu ilana ti o ku. Ninu ọkọ ofurufu `/v1/responses` SSE ti wa ni imugbẹ to `SHUTDOWN_TIMEOUT_MS` (aiyipada 30s) nipasẹ awọn iyalo gbigba iwuwo iwuwo (#11015). Awọn ibeere titun ti o tun de ilana naa gba `503` + `Retry-After: 5`. Tun aafo opin-ofo ti o ṣofo titi di igba ti rirọpo yoo Ti ṣetan wa ni ijade lile kan - iyẹn ni SQLite topology, kii ṣe ṣiṣapẹrẹ aṣiṣe.
 
-Postgres ti ita / HA multi-writer **kì í ṣe** ọ̀nà stock tí a ti ṣàkọsílẹ̀. Tí o bá nílò HA, lo replica kan ṣoṣo tàbí ṣiṣẹ́ topology kan tí project náà ti dán wò tí ó sì ti ṣàkọsílẹ̀ lọ́tọ̀. Iṣẹ́ Postgres/MySQL wà ní [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Títí tí ìyẹn yóò fi jáde, ọ̀nà kan ṣoṣo tí a ṣe àtìlẹ́yìn fún láti pọ̀ sí agbára `/v1/responses` **ńlá** ni àwọn process olómìnira N (abala tó kàn), kì í ṣe `replicas > 1` lórí volume kan.
+Ita Postgres / olona-onkqwe HA ni** kii ṣe** ọna iṣura ti o ni akọsilẹ. Ti o ba nilo HA, tọju ajọra ẹyọkan tabi ṣiṣẹ topology ti iṣẹ akanṣe ti ni idanwo ati ti ṣe akọsilẹ lọtọ. Iṣẹ Postgres/MySQL n gbe ni [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Titi di awọn ọkọ oju omi yẹn, ọna atilẹyin nikan lati pọ si** nla** agbara `/v1/responses` jẹ awọn ilana ominira N (apakan atẹle), kii ṣe `replicas > 1` lori iwọn didun kan.
 
 ## Ìfẹ̀síwájú ní ìwọ̀n: àwọn process olómìnira N
 

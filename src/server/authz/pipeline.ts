@@ -431,6 +431,10 @@ export async function runAuthzPipeline(
     }
 
     const rejection = rejectionResponse(outcome, classification, requestId);
+    // Rejections keep the presence-based relax: their bodies are fixed error
+    // envelopes (no data), and browser/Electron clients with a revoked or
+    // mistyped key must still be able to read the 401 instead of an opaque
+    // CORS failure (#5242).
     applyCorsHeaders(rejection, request, corsRelaxOrigin);
     return rejection;
   }
@@ -477,7 +481,20 @@ export async function runAuthzPipeline(
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
   response.headers.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
-  applyCorsHeaders(response, request, corsRelaxOrigin);
+  // Only relax CORS for a CLIENT_API request whose credential actually
+  // validated. requestCarriesTokenOrPreflight() looks at header presence, and on
+  // a keyless install (REQUIRE_API_KEY=false) clientApiPolicy serves an
+  // unvalidated credential as anonymous; an anonymous response keeps the
+  // fail-closed origin policy.
+  const relaxForValidatedCredential =
+    corsRelaxOrigin &&
+    (classification.routeClass !== "CLIENT_API" || outcome.subject.kind !== "anonymous");
+  applyCorsHeaders(response, request, relaxForValidatedCredential);
+  if (corsRelaxOrigin && !relaxForValidatedCredential) {
+    // The anonymous response still negotiates content-encoding: keep the
+    // `Vary: Accept-Encoding` that applyCorsHeaders() stamps on this surface (#6737).
+    response.headers.append("Vary", "Accept-Encoding");
+  }
   if (managementDashboardRoute) {
     await refreshDashboardSessionIfNeeded(response, request);
   }

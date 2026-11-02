@@ -115,118 +115,118 @@ OmniRoute/
 
 ```
 src/
-├── app/                 # App Router (పేజీలు + API రూట్లు + స్థితి పేజీలు + ల్యాండింగ్ పేజీ)
-├── lib/                 # ప్రధాన లైబ్రరీలు / డొమైన్ మాడ్యూల్లు (80 ఉపడైరెక్టరీలు + ~70 అగ్ర-స్థాయి ఫైళ్లు)
-├── domain/              # స్వచ్ఛమైన డొమైన్ లాజిక్ (పాలసీ ఇంజిన్, ఫాల్బ్యాక్, ఖర్చు, లాకౌట్, comboResolver, అసెస్మెంట్)
-├── server/              # సర్వర్కు మాత్రమే పరిమితమైన మాడ్యూల్లు (authz పైప్లైన్, cors, auth మిడిల్వేర్) — క్లయింట్ నుండి దిగుమతి చేయడం సాధ్యం కాదు
-├── shared/              # సురక్షితమైన చోట సర్వర్ మరియు క్లయింట్ మధ్య భాగస్వామ్యం చేసేవి (స్థిరాంకాలు, రకాలు, ధ్రువీకరణ, కాంట్రాక్టులు, యుటిలిటీలు)
-├── i18n/                # next-intl కాన్ఫిగరేషన్ + ఒక్కో లొకేల్కు సందేశ JSON (67 లొకేల్లు)
-├── middleware/          # Next.js మిడిల్వేర్ (అభ్యర్థన మెరుగుదల, లొకేల్ గుర్తింపు)
-├── mitm/                # MITM ప్రాక్సీ కోర్: సర్టిఫికేట్ జనరేషన్/ఇన్స్టాలేషన్, హ్యాండ్లర్లు, టార్గెట్లు, ఇన్స్పెక్టర్, మాస్క్లు, పాస్త్రూ
-│   ├── handlers/        # MitmHandlerBaseను విస్తరించే 9 IDE-ఏజెంట్ హ్యాండ్లర్ క్లాస్లు (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # ట్రాఫిక్ క్యాప్చర్ లేయర్: బఫర్ (ఇన్-మెమరీ రింగ్), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # మోడల్ అడాప్టర్ అనుసంధాన కోడ్ (లెగసీ షిమ్)
-├── scripts/             # కోడ్బేస్లోని నిర్వహణ స్క్రిప్ట్లు (ఉదా., backfillAggregation)
-├── sse/                 # లెగసీ SSE హ్యాండ్లర్లు/సర్వీసులు (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # లెగసీ ఇన్-మెమరీ స్టోర్ (src/lib/db కోసం దశలవారీగా తొలగించబడుతోంది)
-├── types/               # భాగస్వామ్య TS టైప్ ఫైళ్లు
-├── instrumentation.ts   # Next.js టెలిమెట్రీ హుక్ (బ్రౌజర్ + ఎడ్జ్)
-├── instrumentation-node.ts  # Nodeకు మాత్రమే పరిమితమైన ఇన్స్ట్రుమెంటేషన్
-└── proxy.ts             # HTTP-ప్రాక్సీ ఎంట్రీ షిమ్
+├── app/                 # App Router (pages + API routes + status pages + landing)
+├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
+├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
+├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
+├── middleware/          # Next.js middleware (request enrichment, locale detection)
+├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter glue (legacy shim)
+├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
+├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Legacy in-memory store (being phased out for src/lib/db)
+├── types/               # Shared TS type files
+├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
+├── instrumentation-node.ts  # Node-only instrumentation
+└── proxy.ts             # HTTP-proxy entry shim
 ```
 
-### `src/app/` — App Router (Next.js 16)
+### `src/app/` — యాప్ రూటర్ (Next.js 16)
 
-| మార్గం                                                                       | ఉద్దేశ్యం                                                                                                                                                                                                                                                                                                              |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | పబ్లిక్ OpenAI-అనుకూల API (~25 ఉప-రూట్లు: చాట్, కంప్లీషన్లు, ఎంబెడ్డింగ్లు, ఫైళ్లు, బ్యాచ్లు, ఆడియో, చిత్రాలు, వీడియోలు, సంగీతం, రీర్యాంక్, మోడరేషన్లు, శోధన, ws, ఏజెంట్లు, ఖాతాలు, ప్రొవైడర్లు మొదలైనవి)                                                                                                              |
-| `app/api/v1beta/`                                                            | Gemini-శైలి API ఎండ్పాయింట్లు                                                                                                                                                                                                                                                                                          |
-| `app/api/playground/`                                                        | Playground Studio రూట్లు: `improve-prompt/` (POST — LLM ప్రాంప్ట్ రీరైటర్), `presets/` (GET జాబితా / POST సృష్టి), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` చూడండి                                                                                                                |
-| `app/api/` (v1 కానివి)                                                       | నిర్వహణ/అడ్మిన్ రూట్లు (~60 డైరెక్టరీలు: ప్రొవైడర్లు, కాంబోలు, సెట్టింగ్లు, mcp, a2a, మూల్యాంకనాలు, మెమరీ, నైపుణ్యాలు, వెబ్హుక్లు, అనుపాలన, స్థితిస్థాపకత, పర్యవేక్షణ, టన్నెల్లు, cli-టూల్స్ మొదలైనవి)                                                                                                                 |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 రూట్లు (సర్వర్ నియంత్రణ, ఏజెంట్ స్థితి/DNS/మ్యాపింగ్లు, బైపాస్, సర్టిఫికేట్, అప్స్ట్రీమ్-CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` చూడండి.                                                                                                                        |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ రూట్లు (అభ్యర్థనలు, సెషన్లు, హోస్ట్లు, క్యాప్చర్-మోడ్లు, ఎగుమతి, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` చూడండి.                                                                                                                              |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 ప్రవేశ స్థానం (`POST /a2a`)                                                                                                                                                                                                                                                                           |
-| `app/.well-known/agent.json/`                                                | A2A ఏజెంట్ కార్డ్ (డిస్కవరీ)                                                                                                                                                                                                                                                                                           |
-| `app/(dashboard)/dashboard/`                                                 | డ్యాష్బోర్డ్ UI పేజీలు (50+ విభాగాలు, ~118 page.tsx ఫైళ్లు: ప్రొవైడర్లు, కాంబోలు, సెట్టింగ్లు, మెమరీ, నైపుణ్యాలు, వెబ్హుక్లు, మూల్యాంకనాలు, ఆడిట్, బ్యాచ్, క్యాష్, ఖర్చులు, ఆరోగ్యం, సిస్టమ్, కార్యకలాపం మొదలైనవి)                                                                                                     |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 ట్యాబ్లు: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` చూడండి                                                                                                                                                                     |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (ప్లాన్ 21): `page.tsx` (3-ట్యాబ్ షెల్), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge డ్యాష్బోర్డ్ పేజీ — సర్వర్ కార్డ్, 9 ఏజెంట్ కార్డులు, సెటప్ విజార్డ్, మోడల్ మ్యాపింగ్, బైపాస్ జాబితా. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` చూడండి.                                                                                                                                            |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector డ్యాష్బోర్డ్ పేజీ — DevTools స్ప్లిట్, 7 వివరాల ట్యాబ్లు, 4 క్యాప్చర్ మోడ్ టాగుల్లు, సెషన్ రికార్డర్, సందర్భ రంగీకరణ. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` చూడండి.                                                                                                                |
-| `app/(dashboard)/dashboard/activity/`                                        | కార్యకలాపాల ఫీడ్ పేజీ (గ్రూప్ B): `page.tsx` (సర్వర్) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` చూడండి                                                                                                          |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | కోటా భాగస్వామ్య పేజీ (గ్రూప్ B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                           |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | ప్రొవైడర్ ప్లాన్ కాన్ఫిగరేషన్ పేజీ (గ్రూప్ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — ఒక్కో కనెక్షన్కు కోటా డైమెన్షన్ల ఓవర్రైడ్                                                                                                                                                                                 |
-| `app/docs/`                                                                  | ఎంబెడెడ్ డాక్యుమెంటేషన్ వ్యూయర్ (`docs/*.md`ను రెండర్ చేస్తుంది)                                                                                                                                                                                                                                                       |
-| `app/landing/`                                                               | మార్కెటింగ్ ల్యాండింగ్ పేజీ                                                                                                                                                                                                                                                                                            |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | ప్రామాణీకరణ-సంబంధిత పేజీలు                                                                                                                                                                                                                                                                                             |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP లోప పేజీలు                                                                                                                                                                                                                                                                                                        |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | స్టాటిక్/స్థితి పేజీలు                                                                                                                                                                                                                                                                                                 |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | రూట్ లేఅవుట్, హోమ్, PWA మానిఫెస్ట్, గ్లోబల్ CSS                                                                                                                                                                                                                                                                        |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | లోప హద్దులు                                                                                                                                                                                                                                                                                                            |
+| మార్గం                                                                       | ప్రయోజనం                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | పబ్లిక్ OpenAI-compat API (~ 25 ఉప-మార్గాలు: చాట్, పూర్తిలు, ఎంబెడ్డింగ్లు, ఫైల్లు, బ్యాచ్లు, ఆడియో, చిత్రాలు, వీడియోలు, సంగీతం, రీర్యాంక్, మోడరేషన్లు, శోధన, ws, ఏజెంట్లు, ఖాతాలు, ప్రొవైడర్లు మొదలైనవి)                                                                                   |
+| `app/api/v1beta/`                                                            | జెమిని-శైలి API ముగింపు బిందువులు                                                                                                                                                                                                                                                           |
+| `app/api/playground/`                                                        | ప్లేగ్రౌండ్ స్టూడియో మార్గాలు: `improve-prompt/` (POST — LLM ప్రాంప్ట్ రీరైటర్), `presets/` (GET జాబితా / POST సృష్టించు), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` చూడండి                                                                             |
+| `app/api/` (నాన్-v1)                                                         | Management/admin మార్గాలు (~ 60 డైరెక్టరీలు: ప్రొవైడర్లు, కాంబోలు, సెట్టింగ్లు, mcp, a2a, evals, మెమరీ, నైపుణ్యాలు, webhooks, సమ్మతి, స్థితిస్థాపకత, పర్యవేక్షణ, సొరంగాలు, cli-టూల్స్ మొదలైనవి)                                                                                             |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 మార్గాలు (సర్వర్ నియంత్రణ, ఏజెంట్ state/DNS/mappings, బైపాస్, సర్ట్, అప్స్ట్రీమ్-CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` చూడండి.                                                                                                     |
+| `app/api/tools/traffic-inspector/`                                           | ట్రాఫిక్ ఇన్స్పెక్టర్ REST + WS API — 16 + మార్గాలు (అభ్యర్థనలు, సెషన్లు, హోస్ట్లు, క్యాప్చర్-మోడ్లు, ఎగుమతి, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` చూడండి.                                                                                            |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 ఎంట్రీ పాయింట్ (`POST /a2a`)                                                                                                                                                                                                                                               |
+| `app/.well-known/agent.json/`                                                | A2A ఏజెంట్ కార్డ్ (ఆవిష్కరణ)                                                                                                                                                                                                                                                                |
+| `app/(dashboard)/dashboard/`                                                 | డ్యాష్బోర్డ్ UI పేజీలు (50 + విభాగాలు, ~ 118 page.tsx ఫైల్లు: ప్రొవైడర్లు, కాంబోలు, సెట్టింగ్లు, మెమరీ, నైపుణ్యాలు, వెబ్హూక్స్, ఈవాల్లు, ఆడిట్, బ్యాచ్, కాష్, ఖర్చులు, ఆరోగ్యం, సిస్టమ్, కార్యాచరణ మొదలైనవి)                                                                                |
+| `app/(dashboard)/dashboard/search-tools/`                                    | శోధన సాధనాల స్టూడియో UI (3 ట్యాబ్లు: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` చూడండి                                                                                                                                         |
+| `app/(dashboard)/dashboard/memory/`                                          | మెమరీ స్టూడియో (ప్లాన్ 21): `page.tsx` (3-టాబ్ షెల్), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` Statetting |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge డాష్బోర్డ్ పేజీ — సర్వర్ కార్డ్, 9 ఏజెంట్ కార్డ్లు, సెటప్ విజార్డ్, మోడల్ మ్యాపింగ్, బైపాస్ జాబితా. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` చూడండి.                                                                                                                   |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | ట్రాఫిక్ ఇన్స్పెక్టర్ డ్యాష్బోర్డ్ పేజీ — DevTools స్ప్లిట్, 7 వివరాల ట్యాబ్లు, 4 క్యాప్చర్ మోడ్ టోగుల్స్, సెషన్ రికార్డర్, కాంటెక్స్ట్ కలరైజేషన్. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` చూడండి.                                                                          |
+| `app/(dashboard)/dashboard/activity/`                                        | కార్యాచరణ ఫీడ్ పేజీ (గ్రూప్ B): `page.tsx` (సర్వర్) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` చూడండి                                                                                 |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | కోటా షేరింగ్ పేజీ (గ్రూప్ B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                   |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | ప్రొవైడర్ ప్లాన్ కాన్ఫిగర్ పేజీ (గ్రూప్ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — కోటా కొలతలు ప్రతి కనెక్షన్ ఓవర్రైడ్                                                                                                                                                               |
+| `app/docs/`                                                                  | పొందుపరిచిన డాక్యుమెంటేషన్ వీక్షకుడు ( `docs/*.md` రెండర్లు)                                                                                                                                                                                                                                |
+| `app/landing/`                                                               | మార్కెటింగ్ ల్యాండింగ్ పేజీ                                                                                                                                                                                                                                                                 |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | ప్రామాణీకరణ సంబంధిత పేజీలు                                                                                                                                                                                                                                                                  |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP లోపం పేజీలు                                                                                                                                                                                                                                                                            |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status పేజీలు                                                                                                                                                                                                                                                                        |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | రూట్ లేఅవుట్, హోమ్, PWA మానిఫెస్ట్, గ్లోబల్ CSS                                                                                                                                                                                                                                             |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | లోపం సరిహద్దులు                                                                                                                                                                                                                                                                             |
 
-### `src/lib/` — కోర్ లైబ్రరీలు (~50 మాడ్యూళ్లు)
+### `src/lib/` — కోర్ లైబ్రరీలు (~ 50 మాడ్యూల్స్)
 
-| మాడ్యూల్                                 | ఉద్దేశ్యం                                                                                                                                                                                                                                                                                                                 |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A ప్రోటోకాల్ టాస్క్ మేనేజర్, నైపుణ్యాలు (5), స్ట్రీమింగ్                                                                                                                                                                                                                                                                |
-| `acp/`                                   | CLI ఏజెంట్ రిజిస్ట్రీ (స్థానిక CLI డిస్కవరీ — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` చూడండి)                                                                                                                                                                                                                          |
-| `api/`                                   | భాగస్వామ్య API సహాయకాలు (`requireManagementAuth`, ధ్రువీకరణ)                                                                                                                                                                                                                                                              |
-| `auth/`                                  | సెషన్, పాస్వర్డ్ హ్యాషింగ్, టోకెన్ ధ్రువీకరణ                                                                                                                                                                                                                                                                              |
-| `batches/`                               | OpenAI Batches API హ్యాండ్లర్లు                                                                                                                                                                                                                                                                                           |
-| `catalog/`                               | ప్రొవైడర్ కేటలాగ్ Zod ధ్రువీకరణ + సామర్థ్య నిర్ధారణ                                                                                                                                                                                                                                                                       |
-| `cloudAgent/`                            | క్లౌడ్ ఏజెంట్లు (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` చూడండి                                                                                                                                                                                                                                     |
-| `combos/`                                | కాంబో నిర్ధారణ + పునఃక్రమీకరణ సహాయకాలు                                                                                                                                                                                                                                                                                    |
-| `audit/`                                 | యాక్టివిటీ ఫీడ్ సహాయకాలు: `highLevelActions.ts` (అనుమతి జాబితా + `isHighLevelAction()`), `activityIcons.ts` (చర్య → ఐకాన్/క్రియ మ్యాప్), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` చూడండి                                                                                      |
-| `compliance/`                            | ఆడిట్ లాగ్ + ప్రొవైడర్ ఆడిట్ — `docs/security/COMPLIANCE.md` చూడండి                                                                                                                                                                                                                                                       |
-| `compression/`                           | కంప్రెషన్ ఇంజిన్ అనుసంధాన కోడ్ (ఇంజిన్లు `open-sse/services/compression/`లో ఉన్నాయి)                                                                                                                                                                                                                                      |
-| `config/`                                | రన్టైమ్ కాన్ఫిగరేషన్ సహాయకాలు                                                                                                                                                                                                                                                                                             |
-| `db/`                                    | 120+ డొమైన్ DB మాడ్యూల్స్ + 168 మైగ్రేషన్లు (SQLite కోసం ఎల్లప్పుడూ దీని ద్వారానే వెళ్లండి)                                                                                                                                                                                                                               |
-| `quota/`                                 | కోటా షేరింగ్ ఇంజిన్: `dimensions.ts` (రకాలు/Zod), `types.ts` (QuotaStore ఇంటర్ఫేస్), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` చూడండి |
-| `radar/`                                 | Radar ఉచిత-మోడల్ క్యాటలాగ్ క్లయింట్: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` చూడండి                                                                                                                                       |
-| `display/`                               | UI ఫార్మాటింగ్ సహాయకాలు (ఖర్చు, లేటెన్సీ మొదలైనవి)                                                                                                                                                                                                                                                                        |
-| `embeddings/`                            | ఎంబెడ్డింగ్స్ సర్వీస్ సహాయకాలు                                                                                                                                                                                                                                                                                            |
-| `env/`                                   | ఎన్విరాన్మెంట్ వేరియబుల్ పార్సింగ్ + ధ్రువీకరణ                                                                                                                                                                                                                                                                            |
-| `evals/`                                 | మూల్యాంకన ఫ్రేమ్వర్క్ (సూట్లు, రన్నర్, రన్టైమ్) — `docs/frameworks/EVALS.md` చూడండి                                                                                                                                                                                                                                       |
-| `guardrails/`                            | PII మాస్కర్, ప్రాంప్ట్ ఇంజెక్షన్, విజన్ బ్రిడ్జ్ — `docs/security/GUARDRAILS.md` చూడండి                                                                                                                                                                                                                                   |
-| `jobs/`                                  | బ్యాక్గ్రౌండ్ జాబ్లు (cron-తరహా)                                                                                                                                                                                                                                                                                          |
-| `memory/`                                | సంభాషణాత్మక మెమరీ (SQLite FTS5 + sqlite-vec హైబ్రిడ్ RRF + Qdrant టైర్ 2) — `docs/frameworks/MEMORY.md` చూడండి                                                                                                                                                                                                            |
-| `memory/embedding/`                      | బహుళ-మూలాల ఎంబెడ్డింగ్ లేయర్: `index.ts` (రిజాల్వర్), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ప్లాన్ 21)                                                                                                                                                                          |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ర్యాపర్ — KNN బ్రూట్-ఫోర్స్ + హైబ్రిడ్ RRF (FTS5 + వెక్టర్, k=60). లేజీ-ఇనిషియలైజేషన్; sqlite-vec అందుబాటులో లేనప్పుడు సజావుగా దిగజారుతుంది. (ప్లాన్ 21)                                                                                                                                                |
-| `memory/reindex.ts`                      | `runReindexBatch()` — బ్యాక్గ్రౌండ్లో `needs_reindex=1` ఉన్న మెమరీలను ప్రాసెస్ చేస్తుంది; `POST /api/memory/reindex` మరియు లేజీ-బ్యాక్ఫిల్ పాత్ ద్వారా కాల్ చేయబడుతుంది. (ప్లాన్ 21)                                                                                                                                      |
-| `monitoring/`                            | హెల్త్ చెక్లు, మెట్రిక్స్ ఉద్గారం                                                                                                                                                                                                                                                                                         |
-| `oauth/`                                 | 22 ప్రొవైడర్ మాడ్యూల్ల కోసం OAuth/ఇంపోర్ట్ ఫ్లోలు (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                             |
-| `plugins/`                               | ప్లగిన్ రిజిస్ట్రీ                                                                                                                                                                                                                                                                                                        |
-| `promptCache/`                           | Anthropic-శైలి ప్రాంప్ట్ క్యాష్ బ్రేక్పాయింట్లు                                                                                                                                                                                                                                                                           |
-| `skills/`                                | స్కిల్స్ ఫ్రేమ్వర్క్ (అంతర్నిర్మిత + మార్కెట్ప్లేస్ + SkillsSH) — `docs/frameworks/SKILLS.md` చూడండి                                                                                                                                                                                                                      |
-| `playground/`                            | Playground Studio భాగస్వామ్య సహాయకాలు: `codeExport.ts` (curl/Python/TS జనరేటర్), `promptImprover.ts` (మెటా-ప్రాంప్ట్ బిల్డర్), `streamMetrics.ts` (ప్యూర్ TTFT/TPS), `types.ts` (ధరల పట్టిక) — `docs/frameworks/PLAYGROUND_STUDIO.md` చూడండి                                                                              |
-| `webhookDispatcher.ts`                   | HMAC వెబ్హుక్ డెలివరీ — `docs/frameworks/WEBHOOKS.md` చూడండి                                                                                                                                                                                                                                                              |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | టన్నెల్ మేనేజర్లు — `docs/ops/TUNNELS_GUIDE.md` చూడండి                                                                                                                                                                                                                                                                    |
-| `cloudSync.ts`, `initCloudSync.ts`       | స్థితికి ఐచ్ఛిక క్లౌడ్ సింక్                                                                                                                                                                                                                                                                                              |
-| `localDb.ts`                             | db మాడ్యూళ్ల కోసం రీ-ఎక్స్పోర్ట్ బ్యారెల్ (లాజిక్ లేదు — రీ-ఎక్స్పోర్ట్లు మాత్రమే)                                                                                                                                                                                                                                        |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | అభ్యర్థన క్యాషింగ్ + ఐడెంపోటెన్సీ                                                                                                                                                                                                                                                                                         |
-| (మరో ~30 అగ్ర-స్థాయి ఫైళ్లు)             | ప్రత్యేక సహాయకాలు (logEnv, modelsDevSync, piiSanitizer, మొదలైనవి)                                                                                                                                                                                                                                                         |
+| మాడ్యూల్                                 | ప్రయోజనం                                                                                                                                                                                                                                                                                                           |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `a2a/`                                   | A2A ప్రోటోకాల్ టాస్క్ మేనేజర్, నైపుణ్యాలు (5), స్ట్రీమింగ్                                                                                                                                                                                                                                                         |
+| `acp/`                                   | CLI ఏజెంట్ రిజిస్ట్రీ (స్థానిక CLI ఆవిష్కరణ — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` చూడండి)                                                                                                                                                                                                                   |
+| `api/`                                   | షేర్డ్ API సహాయకులు (`requireManagementAuth`, ధ్రువీకరణ)                                                                                                                                                                                                                                                           |
+| `auth/`                                  | సెషన్, పాస్వర్డ్ హ్యాషింగ్, టోకెన్ ధ్రువీకరణ                                                                                                                                                                                                                                                                       |
+| `batches/`                               | OpenAI బ్యాచ్లు API హ్యాండ్లర్లు                                                                                                                                                                                                                                                                                   |
+| `catalog/`                               | ప్రొవైడర్ కేటలాగ్ Zod ధ్రువీకరణ + సామర్థ్యం రిజల్యూషన్                                                                                                                                                                                                                                                             |
+| `cloudAgent/`                            | క్లౌడ్ ఏజెంట్లు (Codex క్లౌడ్, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` చూడండి                                                                                                                                                                                                                             |
+| `combos/`                                | కాంబో రిజల్యూషన్ + హెల్పర్లను రీఆర్డర్ చేయండి                                                                                                                                                                                                                                                                      |
+| `audit/`                                 | కార్యాచరణ ఫీడ్ సహాయకులు: `highLevelActions.ts` (అనుమతించబడిన జాబితా + `isHighLevelAction()`), `activityIcons.ts` (యాక్షన్ → icon/verb మ్యాప్), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` చూడండి                                                                         |
+| `compliance/`                            | ఆడిట్ లాగ్ + ప్రొవైడర్ ఆడిట్ — `docs/security/COMPLIANCE.md` చూడండి                                                                                                                                                                                                                                                |
+| `compression/`                           | కంప్రెషన్ ఇంజిన్ జిగురు (ఇంజిన్లు `open-sse/services/compression/` లో నివసిస్తాయి)                                                                                                                                                                                                                                 |
+| `config/`                                | రన్టైమ్ కాన్ఫిగర్ సహాయకులు                                                                                                                                                                                                                                                                                         |
+| `db/`                                    | 120 + డొమైన్ DB మాడ్యూల్స్ + 168 మైగ్రేషన్లు ( SQLite కోసం ఎల్లప్పుడూ ఇక్కడకు వెళ్లండి)                                                                                                                                                                                                                            |
+| `quota/`                                 | కోటా షేరింగ్ ఇంజిన్: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore ఇంటర్ఫేస్), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | రాడార్ ఫ్రీ-మోడల్ కేటలాగ్ క్లయింట్: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` చూడండి                                                                                                                                 |
+| `display/`                               | UI ఫార్మాటింగ్ సహాయకులు (ఖర్చు, జాప్యం మొదలైనవి)                                                                                                                                                                                                                                                                   |
+| `embeddings/`                            | పొందుపరిచే సేవా సహాయకులు                                                                                                                                                                                                                                                                                           |
+| `env/`                                   | ఎన్వి వేరియబుల్ పార్సింగ్ + ధ్రువీకరణ                                                                                                                                                                                                                                                                              |
+| `evals/`                                 | Eval ఫ్రేమ్వర్క్ (సూట్లు, రన్నర్, రన్టైమ్) — `docs/frameworks/EVALS.md` చూడండి                                                                                                                                                                                                                                     |
+| `guardrails/`                            | PII మాస్కర్, ప్రాంప్ట్ ఇంజెక్షన్, విజన్ బ్రిడ్జ్ — `docs/security/GUARDRAILS.md` చూడండి                                                                                                                                                                                                                            |
+| `jobs/`                                  | నేపథ్య ఉద్యోగాలు (క్రాన్ లాంటివి)                                                                                                                                                                                                                                                                                  |
+| `memory/`                                | సంభాషణ మెమరీ (SQLite FTS5 + sqlite-vec హైబ్రిడ్ RRF + Qdrant 2) — `docs/frameworks/MEMORY.md` చూడండి                                                                                                                                                                                                               |
+| `memory/embedding/`                      | మల్టీ-సోర్స్ ఎంబెడ్డింగ్ లేయర్: `index.ts` (రిసోల్వర్), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ప్లాన్ 21)                                                                                                                                                                 |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 రేపర్ — KNN బ్రూట్-ఫోర్స్ + హైబ్రిడ్ RRF (FTS5 + వెక్టర్, k = 60). Lazy-init, sqlite-vec అందుబాటులో లేనప్పుడు సునాయాసంగా క్షీణిస్తుంది. (ప్రణాళిక 21)                                                                                                                                            |
+| `memory/reindex.ts`                      | `runReindexBatch()` — నేపథ్యంలో `needs_reindex=1` తో జ్ఞాపకాలను ప్రాసెస్ చేస్తుంది; `POST /api/memory/reindex` మరియు లేజీ-బ్యాక్ఫిల్ పాత్ ద్వారా పిలుస్తారు. (ప్రణాళిక 21)                                                                                                                                         |
+| `monitoring/`                            | ఆరోగ్య తనిఖీలు, కొలమానాలు ఉద్గారాలు                                                                                                                                                                                                                                                                                |
+| `oauth/`                                 | OAuth/import 22 ప్రొవైడర్ మాడ్యూల్స్ కోసం ప్రవహిస్తుంది (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kirood, openference, kirood, openference, xai-oauth, zed-hosted, zed)                                   |
+| `plugins/`                               | ప్లగిన్ రిజిస్ట్రీ                                                                                                                                                                                                                                                                                                 |
+| `promptCache/`                           | ఆంత్రోపిక్-శైలి ప్రాంప్ట్ కాష్ బ్రేక్పాయింట్లు                                                                                                                                                                                                                                                                     |
+| `skills/`                                | నైపుణ్యాల ఫ్రేమ్వర్క్ (అంతర్నిర్మిత + మార్కెట్ప్లేస్ + SkillsSH) — `docs/frameworks/SKILLS.md` చూడండి                                                                                                                                                                                                              |
+| `playground/`                            | ప్లేగ్రౌండ్ స్టూడియో భాగస్వామ్య సహాయకులు: `codeExport.ts` (curl/Python/TS జనరేటర్), `promptImprover.ts` (మెటా-ప్రాంప్ట్ బిల్డర్), `streamMetrics.ts` (ప్యూర్ TTFT/TPS), `types.ts` (ధరల పట్టిక) — `docs/frameworks/PLAYGROUND_STUDIO.md` చూడండి                                                                    |
+| `webhookDispatcher.ts`                   | HMAC webhook డెలివరీ — `docs/frameworks/WEBHOOKS.md` చూడండి                                                                                                                                                                                                                                                        |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | టన్నెల్ నిర్వాహకులు — `docs/ops/TUNNELS_GUIDE.md` చూడండి                                                                                                                                                                                                                                                           |
+| `cloudSync.ts`, `initCloudSync.ts`       | స్థితి యొక్క ఐచ్ఛిక క్లౌడ్ సమకాలీకరణ                                                                                                                                                                                                                                                                               |
+| `localDb.ts`                             | db మాడ్యూల్స్ కోసం బారెల్ను తిరిగి ఎగుమతి చేయండి (లాజిక్ లేదు - రీ-ఎగుమతులు మాత్రమే)                                                                                                                                                                                                                               |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | కాషింగ్ + ఐడెంపోటెన్సీని అభ్యర్థించండి                                                                                                                                                                                                                                                                             |
+| (~ 30 మరిన్ని ఉన్నత-స్థాయి ఫైల్లు)       | ప్రత్యేక సహాయకులు (logEnv, modelsDevSync, piiSanitizer మొదలైనవి)                                                                                                                                                                                                                                                   |
 
-### `src/lib/db/` — డేటాబేస్ (147 మాడ్యూళ్లు + 208 మైగ్రేషన్లు)
+### `src/lib/db/` — డేటాబేస్ (147 మాడ్యూల్స్ + 208 మైగ్రేషన్లు)
 
-| ఉపడైరెక్టరీ               | ప్రయోజనం                                                                                                                                                                             |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `db/core.ts`              | WAL జర్నలింగ్తో `getDbInstance()` సింగిల్టన్                                                                                                                                         |
-| `db/migrations/`          | సంస్కరణ చేయబడిన SQL ఫైళ్లు (ఐడెంపోటెంట్, ట్రాన్సాక్షనల్). `073_memory_vec.sql` అనేది `memory_vec_meta` + `needs_reindex` కాలమ్ను జోడిస్తుంది (ప్రణాళిక 21).                          |
-| `db/playgroundPresets.ts` | Playground Studio ప్రీసెట్ల కోసం CRUD మాడ్యూల్ (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)        |
-| `db/memoryVec.ts`         | `memory_vec_meta` కోసం CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, మొదలైనవి (ప్రణాళిక 21)                 |
-| `db/<domain>.ts`          | ప్రతి డొమైన్కు ఒక మాడ్యూల్: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, మొదలైనవి. |
+| సబ్దిర్                   | ప్రయోజనం                                                                                                                                                                                           |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | WAL జర్నలింగ్తో`getDbInstance()` singleton                                                                                                                                                         |
+| `db/migrations/`          | వెర్షన్ చేయబడిన SQL ఫైల్లు (ఐడెంపోటెంట్, లావాదేవీలు). `073_memory_vec.sql` `memory_vec_meta` + `needs_reindex` కాలమ్ను జోడిస్తుంది (ప్లాన్ 21).                                                    |
+| `db/playgroundPresets.ts` | ప్లేగ్రౌండ్ స్టూడియో ప్రీసెట్ల కోసంCRUD మాడ్యూల్ (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                    |
+| `db/memoryVec.ts`         | `memory_vec_meta` కోసంCRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, మొదలైనవి (ప్లాన్ 21)                                  |
+| `db/<domain>.ts`          | ఒక్కో డొమైన్కు ఒక మాడ్యూల్: ప్రొవైడర్లు, కాంబోలు, apiKeys, యూజర్లు, సెషన్లు, వినియోగం, ఆడిట్ లాగ్, వెబ్హూక్స్, నైపుణ్యాలు, memory_entries, cloud_agent_tasks, evals* \* , రీజనింగ్_కాష్, మొదలైనవి. |
 
 ### `src/domain/`
 
-| మాడ్యూల్               | ప్రయోజనం                                     |
-| ---------------------- | -------------------------------------------- |
-| `policy.ts`            | పాలసీ ఇంజిన్                                 |
-| `fallbackPolicy.ts`    | ఫాల్బ్యాక్ నిర్ణయ వృక్షం                     |
-| `costRules.ts`         | వ్యయ గణన నియమాలు                             |
-| `lockoutPolicy.ts`     | మోడల్/కనెక్షన్ లాకౌట్ పాలసీ                  |
-| `tagRouter.ts`         | ట్యాగ్-ఆధారిత రూటింగ్                        |
-| `comboResolver.ts`     | కాంబో పరిష్కారం (కాంబో ఇంజిన్ ఉపయోగిస్తుంది) |
-| `modelAvailability.ts` | ఒక్కో మోడల్కు లభ్యత తనిఖీ                    |
-| `assessment/`          | మోడల్ అంచనా (RFC-AUTO-ASSESSMENT యొక్క దశ 1) |
+| మాడ్యూల్               | ప్రయోజనం                                                |
+| ---------------------- | ------------------------------------------------------- |
+| `policy.ts`            | పాలసీ ఇంజిన్                                            |
+| `fallbackPolicy.ts`    | ఫాల్బ్యాక్ నిర్ణయం చెట్టు                               |
+| `costRules.ts`         | ఖర్చు గణన నియమాలు                                       |
+| `lockoutPolicy.ts`     | Model/connection లాక్అవుట్ విధానం                       |
+| `tagRouter.ts`         | ట్యాగ్ ఆధారిత రూటింగ్                                   |
+| `comboResolver.ts`     | కాంబో రిజల్యూషన్ (కాంబో ఇంజిన్ ద్వారా ఉపయోగించబడుతుంది) |
+| `modelAvailability.ts` | ప్రతి మోడల్ లభ్యత తనిఖీ                                 |
+| `assessment/`          | మోడల్ అంచనా (RFC-AUTO-అసెస్మెంట్ యొక్క దశ 1)            |
 
 ### `src/server/`
 
@@ -238,23 +238,23 @@ src/
 
 ### `src/shared/`
 
-| మాడ్యూల్                         | ప్రయోజనం                                                                                                 |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `components/`                    | డాష్బోర్డ్ కాంపోనెంట్ API: `packages/ui-kit` పై అడాప్టర్లు — `docs/architecture/DESIGN_SYSTEM.md` చూడండి |
-| `constants/iconMap.ts`           | `ICON_MAP`: స్క్రీన్లు ఉపయోగించే ఐకాన్ పేర్లు → Lucide కాంపోనెంట్లు (`<Icon>`)                           |
-| `constants/providers.ts`         | Zod ధ్రువీకరణతో **376 ప్రొవైడర్లు** (అధికారిక మూలం)                                                      |
-| `constants/cliTools.ts`          | బాహ్య CLI సాధనాల రిజిస్ట్రీ                                                                              |
-| `constants/routingStrategies.ts` | ప్రాధాన్యతలతో **20 రూటింగ్ వ్యూహాలు**                                                                    |
-| `constants/publicApiRoutes.ts`   | (నిర్వహణకు బదులుగా) Bearer ప్రమాణీకరణ అవసరమైన రూట్లు                                                     |
-| `constants/upstreamHeaders.ts`   | అప్స్ట్రీమ్ అభ్యర్థనల కోసం హెడర్ నిరాకరణ జాబితా                                                          |
-| `validation/schemas.ts`          | ~80 Zod స్కీమాలు (API కాంట్రాక్ట్లకు ఏకైక అధికారిక మూలం)                                                 |
-| `validation/helpers.ts`          | Zod ధ్రువీకరణ సహాయకాలు (`validateBody`, మొదలైనవి)                                                        |
-| `types/`                         | భాగస్వామ్య TS రకాలు                                                                                      |
-| `contracts/`                     | పబ్లిక్ API కాంట్రాక్ట్లు (`package.json`లోని `files:` ద్వారా వినియోగించబడతాయి)                          |
-| `utils/circuitBreaker.ts`        | ప్రొవైడర్ సర్క్యూట్ బ్రేకర్ (`docs/architecture/RESILIENCE_GUIDE.md` చూడండి)                             |
-| `utils/apiAuth.ts`               | API కీ ధ్రువీకరణ, స్కోప్ తనిఖీ                                                                           |
-| `utils/fetchTimeout.ts`          | అప్స్ట్రీమ్ fetch కోసం టైమ్అవుట్/అబార్ట్ ర్యాపర్లు                                                       |
-| `utils/releaseNotes.ts`          | మూసివేసిన v2/లెగసీ ప్రకటన పార్సర్, స్థానికీకరణ మరియు ID తొలగింపు                                         |
+| మాడ్యూల్                         | ప్రయోజనం                                                                                                  |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `components/`                    | డాష్బోర్డ్ కాంపోనెంట్ API: `packages/ui-kit` మీద అడాప్టర్లు — `docs/architecture/DESIGN_SYSTEM.md` చూడండి |
+| `constants/iconMap.ts`           | `ICON_MAP`: స్క్రీన్ల ద్వారా ఉపయోగించబడే ఐకాన్ పేర్లు → లూసైడ్ భాగాలు (`<Icon>`)                          |
+| `constants/providers.ts`         | **377 ప్రొవైడర్లు** Zod ధ్రువీకరణతో (సత్యం యొక్క మూలం)                                                    |
+| `constants/cliTools.ts`          | బాహ్య CLI టూల్ రిజిస్ట్రీ                                                                                 |
+| `constants/routingStrategies.ts` | **20 రూటింగ్ వ్యూహాలు** ప్రాధాన్యతలతో                                                                     |
+| `constants/publicApiRoutes.ts`   | బేరర్ (వర్సెస్ మేనేజ్మెంట్) ప్రమాణీకరణ అవసరమయ్యే మార్గాలు                                                 |
+| `constants/upstreamHeaders.ts`   | అప్స్ట్రీమ్ అభ్యర్థనల కోసం హెడర్ నిరాకరణ                                                                  |
+| `validation/schemas.ts`          | ~ 80 Zod స్కీమాలు ( API కాంట్రాక్ట్ల కోసం సత్యం యొక్క ఒకే మూలం)                                           |
+| `validation/helpers.ts`          | Zod ధ్రువీకరణ సహాయకులు (`validateBody`, మొదలైనవి)                                                         |
+| `types/`                         | షేర్డ్ TS రకాలు                                                                                           |
+| `contracts/`                     | పబ్లిక్ API ఒప్పందాలు ( `package.json` లో `files:` వినియోగించబడతాయి)                                      |
+| `utils/circuitBreaker.ts`        | ప్రొవైడర్ సర్క్యూట్ బ్రేకర్ ( `docs/architecture/RESILIENCE_GUIDE.md` చూడండి)                             |
+| `utils/apiAuth.ts`               | API కీ ధ్రువీకరణ, స్కోప్ తనిఖీ                                                                            |
+| `utils/fetchTimeout.ts`          | అప్స్ట్రీమ్ పొందడం కోసంTimeout/abort రేపర్లు                                                              |
+| `utils/releaseNotes.ts`          | క్లోజ్డ్ v2/legacy ప్రకటన పార్సర్, స్థానికీకరణ మరియు ID తొలగింపు                                          |
 
 ---
 
@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — పబ్లిక్ డాక్యుమెంటేషన్ (7 రూట్ ఫైళ్ళు + 17 సబ్డైరెక్టరీలు)
+## `docs/` — పబ్లిక్ డాక్యుమెంటేషన్ (7 రూట్ ఫైల్లు + 17 సబ్డిర్స్)
 
-### టాప్-లెవల్ గైడ్లు
+### ఉన్నత స్థాయి మార్గదర్శకులు
 
-| డాక్యుమెంట్                 | ఉద్దేశ్యం                                                                             |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | ఉన్నత-స్థాయి ఆర్కిటెక్చర్, సబ్సిస్టమ్ మ్యాప్, డ్యాష్బోర్డ్ ఉపరితలం                    |
-| `CODEBASE_DOCUMENTATION.md` | ఇంజనీరింగ్ రిఫరెన్స్: డైరెక్టరీలు, మాడ్యూల్లు, కన్వెన్షన్లు                           |
-| `FEATURES.md`               | v3.8 హైలైట్లతో ఫీచర్ మ్యాట్రిక్స్                                                     |
-| `USER_GUIDE.md`             | ఎండ్-యూజర్ మాన్యువల్ (సెటప్, మోడళ్ళు, కాంబోలు, CLIs, ఆడియో మొదలైనవి)                  |
-| `API_REFERENCE.md`          | అథ్ మోడల్తో API ఎండ్పాయింట్ రిఫరెన్స్                                                 |
-| `openapi.yaml`              | OpenAPI 3.0 స్పెక్ (121 పాత్లు)                                                       |
-| `SETUP_GUIDE.md`            | ఇన్స్టాల్ పద్ధతులు (npm, npx, Docker, Electron, Termux, సోర్స్)                       |
-| `ENVIRONMENT.md`            | అన్ని env వేరియబుల్స్ (~800 డాక్యుమెంట్ చేయబడినవి, ~3,050 లైన్లు `.env.example`)      |
-| `TROUBLESHOOTING.md`        | సాధారణ ఎర్రర్లు + v3.8.0 తెలిసిన ఇష్యూలు                                              |
-| `RELEASE_CHECKLIST.md`      | పూర్తి రిలీజ్ ఫ్లో (స్కిల్స్, husky, కన్వెన్షనల్ కమిట్లు, డిప్లాయ్)                   |
-| `COVERAGE_PLAN.md`          | కవరేజ్ లక్ష్యాలు మరియు ప్రస్తుత స్థితి                                                |
-| `FREE_TIERS.md`             | క్యూరేట్ చేసిన ఫ్రీ-టైర్ ప్రొవైడర్లు (48+ ఫ్రీ + 11 OAuth)                            |
-| `CLI-TOOLS.md`              | బాహ్య CLI ఇంటిగ్రేషన్లు + అంతర్గత OmniRoute CLI                                       |
-| `I18N.md`                   | i18n ఆర్కిటెక్చర్, భాషను జోడించడం, 67 లొకేల్లు                                        |
-| `UNINSTALL.md`              | క్లీన్ అన్ఇన్స్టాల్ దశలు                                                              |
-| `PROVIDER_REFERENCE.md`     | 376 ప్రొవైడర్ల **ఆటో-జెనరేటెడ్** క్యాటలాగ్ (రీజెన్: `npm run gen:provider-reference`) |
+| డాక్                        | ప్రయోజనం                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | హై-లెవల్ ఆర్కిటెక్చర్, సబ్సిస్టమ్ మ్యాప్, డాష్బోర్డ్ ఉపరితలం                                      |
+| `CODEBASE_DOCUMENTATION.md` | ఇంజనీరింగ్ సూచన: డైరెక్టరీలు, మాడ్యూల్స్, సమావేశాలు                                               |
+| `FEATURES.md`               | v3.8 హైలైట్లతో ఫీచర్ మ్యాట్రిక్స్                                                                 |
+| `USER_GUIDE.md`             | తుది వినియోగదారు మాన్యువల్ (సెటప్, మోడల్స్, కాంబోస్, CLIs, ఆడియో మొదలైనవి)                        |
+| `API_REFERENCE.md`          | auth మోడల్తోAPI ఎండ్పాయింట్ రిఫరెన్స్                                                             |
+| `openapi.yaml`              | OpenAPI 3.0 స్పెక్ (121 మార్గాలు)                                                                 |
+| `SETUP_GUIDE.md`            | ఇన్స్టాల్ పద్ధతులు (npm, npx, Docker, Electron, Termux, మూలం)                                     |
+| `ENVIRONMENT.md`            | అన్ని env vars (~ 800 డాక్యుమెంట్ చేయబడింది, ~ 3,050 లైన్లు `.env.example`)                       |
+| `TROUBLESHOOTING.md`        | సాధారణ లోపాలు + v3.8.0 తెలిసిన సమస్యలు                                                            |
+| `RELEASE_CHECKLIST.md`      | పూర్తి విడుదల ప్రవాహం (నైపుణ్యాలు, హస్కీ, సంప్రదాయ కమిట్లు, విస్తరణ)                              |
+| `COVERAGE_PLAN.md`          | కవరేజ్ లక్ష్యాలు మరియు ప్రస్తుత స్థితి                                                            |
+| `FREE_TIERS.md`             | క్యూరేటెడ్ ఫ్రీ-టైర్ ప్రొవైడర్లు (48 + ఉచిత + 11 OAuth)                                           |
+| `CLI-TOOLS.md`              | బాహ్య CLI ఇంటిగ్రేషన్లు + అంతర్గత OmniRoute CLI                                                   |
+| `I18N.md`                   | i18n ఆర్కిటెక్చర్, ఒక భాషను జోడించడం, 67 లొకేల్స్                                                 |
+| `UNINSTALL.md`              | అన్ఇన్స్టాల్ దశలను శుభ్రం చేయండి                                                                  |
+| `PROVIDER_REFERENCE.md`     | **స్వయంచాలకంగా రూపొందించబడింది** 377 ప్రొవైడర్ల జాబితా (రీజెన్: `npm run gen:provider-reference`) |
 
-### సబ్సిస్టమ్ డీప్-డైవ్లు
+### సబ్సిస్టమ్ డీప్-డైవ్స్
 
-| డాక్యుమెంట్                                    | ఉద్దేశ్యం                                                                      |
+| డాక్                                           | ప్రయోజనం                                                                       |
 | ---------------------------------------------- | ------------------------------------------------------------------------------ |
-| `MCP-SERVER.md`                                | MCP సర్వర్: 110 టూల్స్, 3 ట్రాన్స్పోర్ట్లు, 33 స్కోప్లు, REST ఎండ్పాయింట్లు    |
-| `A2A-SERVER.md`                                | A2A v0.3: JSON-RPC, 6 స్కిల్స్, REST హెల్పర్లు, ఏజెంట్ కార్డ్                  |
-| `AGENT_PROTOCOLS_GUIDE.md`                     | యూనిఫైడ్ గైడ్: A2A vs ACP vs క్లౌడ్ ఏజెంట్లు                                   |
-| `CLOUD_AGENT.md`                               | Codex Cloud / Devin / Jules ఆర్కెస్ట్రేషన్                                     |
-| `SKILLS.md`                                    | స్కిల్స్ ఫ్రేమ్వర్క్ (బిల్ట్-ఇన్ + మార్కెట్ప్లేస్ + SkillsSH + శాండ్బాక్స్)    |
-| `RADAR.md`                                     | Radar ఫ్రీ-మోడల్ క్యాటలాగ్ ఓవర్లే (`RADAR_ENABLED`, డిఫాల్ట్గా ఆఫ్)            |
+| `MCP-SERVER.md`                                | MCP సర్వర్: 110 సాధనాలు, 3 రవాణాలు, 33 స్కోప్లు, REST ముగింపు పాయింట్లు        |
+| `A2A-SERVER.md`                                | A2A v0.3: JSON-RPC, 6 నైపుణ్యాలు, REST సహాయకులు, ఏజెంట్ కార్డ్                 |
+| `AGENT_PROTOCOLS_GUIDE.md`                     | ఏకీకృత గైడ్: A2A vs ACP vs క్లౌడ్ ఏజెంట్లు                                     |
+| `CLOUD_AGENT.md`                               | Codex క్లౌడ్ / Devin / Jules ఆర్కెస్ట్రేషన్                                    |
+| `SKILLS.md`                                    | నైపుణ్యాల ఫ్రేమ్వర్క్ (అంతర్నిర్మిత + మార్కెట్ప్లేస్ + SkillsSH + శాండ్బాక్స్) |
+| `RADAR.md`                                     | రాడార్ ఫ్రీ-మోడల్ కేటలాగ్ ఓవర్లే (`RADAR_ENABLED`, డిఫాల్ట్గా ఆఫ్)             |
 | `MEMORY.md`                                    | మెమరీ సిస్టమ్ (SQLite FTS5 + Qdrant)                                           |
-| `EVALS.md`                                     | Eval ఫ్రేమ్వర్క్ (సూట్లు, రన్లు, రూబ్రిక్లు)                                   |
+| `EVALS.md`                                     | ఎవాల్ ఫ్రేమ్వర్క్ (సూట్లు, పరుగులు, రూబ్రిక్స్)                                |
 | `GUARDRAILS.md`                                | PII మాస్కర్, ప్రాంప్ట్ ఇంజెక్షన్, విజన్ బ్రిడ్జ్                               |
-| `COMPLIANCE.md`                                | ఆడిట్ లాగ్, రిటెన్షన్, noLog ఆప్ట్-అవుట్                                       |
-| `WEBHOOKS.md`                                  | HMAC-సైన్ చేసిన వెబ్హుక్ డెలివరీ                                               |
-| `REASONING_REPLAY.md`                          | `reasoning_content` కోసం హైబ్రిడ్ మెమరీ/SQLite కాషే                            |
-| `AUTHZ_GUIDE.md`                               | అథరైజేషన్ పైప్లైన్ (`classify` → `policies` → `enforce`)                       |
-| `RESILIENCE_GUIDE.md`                          | సర్క్యూట్ బ్రేకర్ + కూల్డౌన్ + మోడల్ లాక్అవుట్                                 |
-| `docs/security/STEALTH_GUIDE.md` (git మాత్రమే) | TLS ఫింగర్ప్రింటింగ్ (JA3/JA4), Claude Code CCH, MITM సర్ట్                    |
-| `AUTO-COMBO.md`                                | ఆటో కాంబో ఇంజిన్ (16-ఫ్యాక్టర్ స్కోరింగ్, 6 మోడ్ ప్యాక్లు, వర్చువల్ ఫ్యాక్టరీ) |
+| `COMPLIANCE.md`                                | ఆడిట్ లాగ్, రిటెన్షన్, నోలాగ్ నిలిపివేత                                        |
+| `WEBHOOKS.md`                                  | HMAC సంతకం చేసిన వెబ్హుక్ డెలివరీ                                              |
+| `REASONING_REPLAY.md`                          | `reasoning_content` కోసం హైబ్రిడ్ memory/SQLite కాష్                           |
+| `AUTHZ_GUIDE.md`                               | ఆథరైజేషన్ పైప్లైన్ (`classify` → `policies` → `enforce`)                       |
+| `RESILIENCE_GUIDE.md`                          | సర్క్యూట్ బ్రేకర్ + కూల్డౌన్ + మోడల్ లాకౌట్                                    |
+| `docs/security/STEALTH_GUIDE.md` (git మాత్రమే) | TLS వేలిముద్ర (JA3/JA4), Claude కోడ్ CCH, MITM సర్ట్                           |
+| `AUTO-COMBO.md`                                | ఆటో కాంబో ఇంజిన్ (16-కారకాల స్కోరింగ్, 6 మోడ్ ప్యాక్లు, వర్చువల్ ఫ్యాక్టరీ)    |
 
-### కంప్రెషన్
+### కుదింపు
 
-| డాక్యుమెంట్                     | ఉద్దేశ్యం                                      |
-| ------------------------------- | ---------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | కంప్రెషన్ మోడ్ల అవలోకనం + రోడ్మ్యాప్           |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK ఇంజిన్లు, రిజిస్ట్రీ కాంట్రాక్ట్ |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman రూల్ ప్యాక్ JSON స్కీమా                |
-| `COMPRESSION_LANGUAGE_PACKS.md` | ప్రతి-భాష రూల్ ప్యాక్ ఇన్వెంటరీ                |
-| `RTK_COMPRESSION.md`            | RTK డిక్లరేటివ్ పైప్లైన్ (56 ఫిల్టర్లు)        |
+| డాక్                            | ప్రయోజనం                                      |
+| ------------------------------- | --------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | కంప్రెషన్ మోడ్ల యొక్క అవలోకనం + రోడ్మ్యాప్    |
+| `COMPRESSION_ENGINES.md`        | కేవ్మ్యాన్ + RTK ఇంజిన్లు, రిజిస్ట్రీ ఒప్పందం |
+| `COMPRESSION_RULES_FORMAT.md`   | కేవ్మ్యాన్ రూల్ ప్యాక్ JSON స్కీమా            |
+| `COMPRESSION_LANGUAGE_PACKS.md` | ఒక్కో భాషకు సంబంధించిన రూల్ ప్యాక్ ఇన్వెంటరీ  |
+| `RTK_COMPRESSION.md`            | RTK డిక్లరేటివ్ పైప్లైన్ (56 ఫిల్టర్లు)       |
 
-### డిప్లాయ్మెంట్
+### విస్తరణ
 
-| డాక్                         | ఉద్దేశ్యం                                                             |
+| డాక్                         | ప్రయోజనం                                                              |
 | ---------------------------- | --------------------------------------------------------------------- |
 | `DOCKER_GUIDE.md`            | Docker బిల్డ్, ప్రొఫైల్స్ (base/cli/host/cliproxyapi), Redis సైడ్కార్ |
-| `VM_DEPLOYMENT_GUIDE.md`     | జెనరిక్ VM/VPS డిప్లాయ్మెంట్ (Ubuntu/Debian + nginx + systemd)        |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io డిప్లాయ్మెంట్ (ప్రస్తుతం చైనీస్-మాత్రమే)                       |
+| `VM_DEPLOYMENT_GUIDE.md`     | సాధారణ VM/VPS విస్తరణ (Ubuntu/Debian + nginx + systemd)               |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io విస్తరణ (ప్రస్తుతం చైనీస్-మాత్రమే)                             |
 | `TERMUX_GUIDE.md`            | Termux ద్వారా Android హెడ్లెస్                                        |
-| `PWA_GUIDE.md`               | Progressive Web App ఇన్స్టాల్ + సర్వీస్ వర్కర్                        |
-| `ELECTRON_GUIDE.md`          | డెస్క్టాప్ యాప్ బిల్డ్ + సైన్ + పంపిణీ                                |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                |
-| `PROXY_GUIDE.md`             | 4-స్థాయి అవుట్బౌండ్ ప్రాక్సీ + 1proxy మార్కెట్ప్లేస్                  |
+| `PWA_GUIDE.md`               | ప్రోగ్రెసివ్ వెబ్ యాప్ + సర్వీస్ వర్కర్ని ఇన్స్టాల్ చేస్తుంది         |
+| `ELECTRON_GUIDE.md`          | డెస్క్టాప్ యాప్ బిల్డ్ + సైన్ + డిస్ట్రిబ్యూట్                        |
+| `TUNNELS_GUIDE.md`           | క్లౌడ్ఫ్లేర్డ్ + ngrok + Tailscale ఫన్నెల్                            |
+| `PROXY_GUIDE.md`             | 4-స్థాయి అవుట్బౌండ్ ప్రాక్సీ + 1ప్రాక్సీ మార్కెట్ప్లేస్               |
 
-### సబ్డైరెక్టరీలు
+### ఉప డైరెక్టరీలు
 
-| సబ్డిర్               | ఉద్దేశ్యం                                                                                                                                                                                                                 |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | స్థానీకరించిన డాక్ అనువాదాలు (41 లొకేల్స్)                                                                                                                                                                                |
-| `docs/screenshots/`   | గైడ్ల కోసం ఇమేజ్ యాసెట్స్                                                                                                                                                                                                 |
-| `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) నుండి ప్లాన్స్/స్పెక్స్ + పరిశోధన — ఐసోలేటెడ్, విడివిడిగా వెర్షన్ చేయబడిన రిపో, ప్రధాన ట్రీ ద్వారా gitignore చేయబడింది. CLAUDE.md → "Planning & Research Artifacts" చూడండి. |
+| సబ్దిర్               | ప్రయోజనం                                                                                                                                                                                                        |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | స్థానికీకరించిన పత్ర అనువాదాలు (41 లొకేల్లు)                                                                                                                                                                    |
+| `docs/screenshots/`   | గైడ్ల కోసం చిత్ర ఆస్తులు                                                                                                                                                                                        |
+| `_tasks/superpowers/` | సూపర్ పవర్స్ (`writing-plans`/`brainstorming`) + పరిశోధన నుండిPlans/specs - వివిక్త, విడిగా-వెర్షన్ చేయబడిన రెపో, ప్రధాన వృక్షం ద్వారా పట్టించుకోలేదు. CLAUDE.md → "ప్లానింగ్ & రీసెర్చ్ ఆర్టిఫాక్ట్స్" చూడండి. |
 
 ---
 
