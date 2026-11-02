@@ -56,6 +56,9 @@ permissions:
 jobs:
   prepare:
     name: Resolve Docker release metadata
+    permissions:
+      contents: read
+      packages: read
     # Keep the explicit upstream scheduled-run guard on every job, including
     # publish jobs that currently exclude schedule entirely.
     if: >-
@@ -68,14 +71,26 @@ jobs:
       skip: ${{ steps.version.outputs.skip }}
     env:
       IMAGE_NAME: diegosouzapw/omniroute
+      GHCR_IMAGE_NAME: ghcr.io/cheaper-inference/omniroute
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           persist-credentials: false
-          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || '' }}
+          # Control scripts come from this workflow ref, not an older release tag.
+          # The build job below still checks out the requested version's source.
           # Need full tag history for semver comparison when deciding :latest.
           fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Resolve version, latest-promotion, and skip flag
         id: version
@@ -128,14 +143,19 @@ jobs:
           fi
           echo "promote_latest=$PROMOTE" >> "$GITHUB_OUTPUT"
 
-          # 3) Skip immutable version tags that already exist. Floating `main`
-          # and `next` channels are intentionally rebuilt on every matching push.
+          # Only skip a complete release in BOTH registries. An existing Node base
+          # image must not prevent repairing missing Web/Bun images or architectures.
+          # Dispatch is also the explicit repair path for stale latest aliases.
           SKIP="false"
-          if [ "$VERSION" != "main" ] && [ "$VERSION" != "next" ]; then
-            if docker manifest inspect "diegosouzapw/omniroute:${VERSION}" >/dev/null 2>&1; then
-              echo "Image diegosouzapw/omniroute:${VERSION} already exists on Docker Hub — skipping rebuild."
-              SKIP="true"
-            fi
+          if [ "$VERSION" != "main" ] && [ "$VERSION" != "next" ] && [ "$EVENT_NAME" != "workflow_dispatch" ]; then
+            SKIP="true"
+            for image in "$IMAGE_NAME" "$GHCR_IMAGE_NAME"; do
+              for suffix in "" -web -bun -web-bun; do
+                if ! node scripts/ci/docker-image-complete.mjs "${image}:${VERSION}${suffix}"; then
+                  SKIP="false"
+                fi
+              done
+            done
           fi
           echo "skip=$SKIP" >> "$GITHUB_OUTPUT"
 
@@ -294,7 +314,11 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}
             ${{ env.GHCR_IMAGE_NAME }}
-          cache-from: type=gha,scope=docker-web-${{ matrix.arch }}
+          # runner-web extends runner-base: reuse this run's base build as well
+          # as the previous Web cache, without mixing Node/Bun or architectures.
+          cache-from: |
+            type=gha,scope=docker-web-${{ matrix.arch }}
+            type=gha,scope=docker-${{ matrix.arch }}
           cache-to: type=gha,scope=docker-web-${{ matrix.arch }},mode=max,ignore-error=true
           no-cache: false
         env:
@@ -302,13 +326,8 @@ jobs:
 
       - name: Build and push BUN base platform image by digest
         id: build-bun-base
-        # Bun is a best-effort compatibility target, not a supported runtime
-        # (AGENTS.md -> Environment). Its `bun run build` has been OOM-killing on
-        # both arches; letting that sink the whole publish means the SUPPORTED
-        # runner-base / runner-web images never reach the registry either. The
-        # image is still built and pushed whenever it succeeds — only its power to
-        # block the release is removed.
-        continue-on-error: true
+        # Bun remains a compatibility runtime, but a published Bun tag must contain
+        # both architectures. A failed build must not produce a partial release.
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
           context: .
@@ -330,13 +349,8 @@ jobs:
 
       - name: Build and push BUN web platform image by digest
         id: build-bun-web
-        # Bun is a best-effort compatibility target, not a supported runtime
-        # (AGENTS.md -> Environment). Its `bun run build` has been OOM-killing on
-        # both arches; letting that sink the whole publish means the SUPPORTED
-        # runner-base / runner-web images never reach the registry either. The
-        # image is still built and pushed whenever it succeeds — only its power to
-        # block the release is removed.
-        continue-on-error: true
+        # Bun remains a compatibility runtime, but a published Bun tag must contain
+        # both architectures. A failed build must not produce a partial release.
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
           context: .
@@ -350,7 +364,9 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}
             ${{ env.GHCR_IMAGE_NAME }}
-          cache-from: type=gha,scope=docker-bun-web-${{ matrix.arch }}
+          cache-from: |
+            type=gha,scope=docker-bun-web-${{ matrix.arch }}
+            type=gha,scope=docker-bun-base-${{ matrix.arch }}
           cache-to: type=gha,scope=docker-bun-web-${{ matrix.arch }},mode=max,ignore-error=true
           no-cache: false
         env:
@@ -370,15 +386,8 @@ jobs:
           mkdir -p /tmp/digests/base /tmp/digests/web /tmp/digests/bun-base /tmp/digests/bun-web
           touch "/tmp/digests/base/${DIGEST_BASE#sha256:}"
           touch "/tmp/digests/web/${DIGEST_WEB#sha256:}"
-          # Empty when the (non-blocking) bun build produced no image. `if` blocks,
-          # not `[ -n ] && touch`: under `set -e` a failing AND-list aborts the step,
-          # which is precisely the case being handled here.
-          if [ -n "$DIGEST_BUN_BASE" ]; then
-            touch "/tmp/digests/bun-base/${DIGEST_BUN_BASE#sha256:}"
-          fi
-          if [ -n "$DIGEST_BUN_WEB" ]; then
-            touch "/tmp/digests/bun-web/${DIGEST_BUN_WEB#sha256:}"
-          fi
+          touch "/tmp/digests/bun-base/${DIGEST_BUN_BASE#sha256:}"
+          touch "/tmp/digests/bun-web/${DIGEST_BUN_WEB#sha256:}"
 
       - name: Upload base digests
         uses: actions/upload-artifact@v7
@@ -401,11 +410,7 @@ jobs:
         with:
           name: digests-bun-base-${{ matrix.arch }}
           path: /tmp/digests/bun-base/*
-          # `ignore`, not `error`: the bun build is non-blocking, so an absent
-          # digest is the expected outcome of a failed/skipped bun image — the
-          # manifest step already treats these tags as optional. Leaving `error`
-          # here just relocates the blocker from the manifest to the upload.
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 1
 
       - name: Upload bun-web digests
@@ -413,11 +418,7 @@ jobs:
         with:
           name: digests-bun-web-${{ matrix.arch }}
           path: /tmp/digests/bun-web/*
-          # `ignore`, not `error`: the bun build is non-blocking, so an absent
-          # digest is the expected outcome of a failed/skipped bun image — the
-          # manifest step already treats these tags as optional. Leaving `error`
-          # here just relocates the blocker from the manifest to the upload.
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 1
 
   merge:
@@ -443,7 +444,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           persist-credentials: false
-          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || '' }}
+          # Manifest validation must use the current workflow's helper on backfills.
           fetch-depth: 0
 
       - name: Set up Docker Buildx
@@ -477,9 +478,6 @@ jobs:
           merge-multiple: true
 
       - name: Download bun-base digests
-        # Non-blocking: the bun image is best-effort, so its artifact may not
-        # exist at all. The manifest step treats these tags as optional.
-        continue-on-error: true
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: digests-bun-base-*
@@ -487,9 +485,6 @@ jobs:
           merge-multiple: true
 
       - name: Download bun-web digests
-        # Non-blocking: the bun image is best-effort, so its artifact may not
-        # exist at all. The manifest step treats these tags as optional.
-        continue-on-error: true
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: digests-bun-web-*
@@ -499,21 +494,25 @@ jobs:
       - name: Guard against stale digests
         run: |
           set -euo pipefail
-          # One digest per arch (amd64 + arm64) at most; more means stale digests leaked in (#15184).
-          # An optional image (bun-web is best-effort) may have produced no digest at all: its
-          # download step then creates no directory, and `find <missing>` under pipefail used to
-          # abort this step with exit 1 and no message, taking every mandatory manifest down with
-          # it (v3.8.52 release run 39316002758). The manifest step already skips such images.
+          # Validate every flavor in both registries BEFORE moving any public tag.
+          # Counting alone cannot distinguish two AMD64 images from AMD64 + ARM64.
           for dir in base web bun-base bun-web; do
             if [ ! -d "/tmp/digests/$dir" ]; then
-              echo "digests in $dir: none (optional image produced no digest — skipped)"
-              continue
-            fi
-            count=$(find "/tmp/digests/$dir" -type f 2>/dev/null | wc -l)
-            if [ "$count" -gt 2 ]; then
-              echo "digests in $dir: found $count, expected at most 2 (stale digests leaked in)" >&2
+              echo "Missing digest directory: $dir" >&2
               exit 1
             fi
+            count=$(find "/tmp/digests/$dir" -type f | wc -l)
+            if [ "$count" -gt 2 ] || [ "$count" -lt 2 ]; then
+              echo "digests in $dir: found $count, expected exactly 2 (amd64 + arm64)" >&2
+              exit 1
+            fi
+            for image in "$IMAGE_NAME" "$GHCR_IMAGE_NAME"; do
+              refs=()
+              while IFS= read -r digest_file; do
+                refs+=("${image}@sha256:$(basename "$digest_file")")
+              done < <(find "/tmp/digests/$dir" -type f | sort)
+              node scripts/ci/docker-image-complete.mjs "${refs[@]}"
+            done
           done
 
       - name: Create Docker Hub version manifests
@@ -521,52 +520,38 @@ jobs:
           set -euo pipefail
 
           create_manifest() {
-            local image="$1" suffix="$2" dir="$3" optional="${4:-}"
+            local image="$1" suffix="$2" dir="$3"
             local refs=()
             while IFS= read -r digest_file; do
               refs+=("${image}@sha256:$(basename "$digest_file")")
             done < <(find "$dir" -type f | sort)
-            if [ "${#refs[@]}" -eq 0 ]; then
-              if [ -n "$optional" ]; then
-                echo "::warning::No image digests in $dir — skipping optional tag ${image}:${VERSION}${suffix}" >&2
-                return 0
-              fi
-              echo "No image digests in $dir" >&2
-              exit 1
-            fi
+            node scripts/ci/docker-image-complete.mjs "${refs[@]}"
             docker buildx imagetools create -t "${image}:${VERSION}${suffix}" "${refs[@]}"
           }
 
           create_manifest "${IMAGE_NAME}" "" /tmp/digests/base
           create_manifest "${IMAGE_NAME}" "-web" /tmp/digests/web
-          create_manifest "${IMAGE_NAME}" "-bun" /tmp/digests/bun-base optional
-          create_manifest "${IMAGE_NAME}" "-web-bun" /tmp/digests/bun-web optional
+          create_manifest "${IMAGE_NAME}" "-bun" /tmp/digests/bun-base
+          create_manifest "${IMAGE_NAME}" "-web-bun" /tmp/digests/bun-web
 
       - name: Create GHCR version manifests
         run: |
           set -euo pipefail
 
           create_manifest() {
-            local image="$1" suffix="$2" dir="$3" optional="${4:-}"
+            local image="$1" suffix="$2" dir="$3"
             local refs=()
             while IFS= read -r digest_file; do
               refs+=("${image}@sha256:$(basename "$digest_file")")
             done < <(find "$dir" -type f | sort)
-            if [ "${#refs[@]}" -eq 0 ]; then
-              if [ -n "$optional" ]; then
-                echo "::warning::No image digests in $dir — skipping optional tag ${image}:${VERSION}${suffix}" >&2
-                return 0
-              fi
-              echo "No image digests in $dir" >&2
-              exit 1
-            fi
+            node scripts/ci/docker-image-complete.mjs "${refs[@]}"
             docker buildx imagetools create -t "${image}:${VERSION}${suffix}" "${refs[@]}"
           }
 
           create_manifest "${GHCR_IMAGE_NAME}" "" /tmp/digests/base
           create_manifest "${GHCR_IMAGE_NAME}" "-web" /tmp/digests/web
-          create_manifest "${GHCR_IMAGE_NAME}" "-bun" /tmp/digests/bun-base optional
-          create_manifest "${GHCR_IMAGE_NAME}" "-web-bun" /tmp/digests/bun-web optional
+          create_manifest "${GHCR_IMAGE_NAME}" "-bun" /tmp/digests/bun-base
+          create_manifest "${GHCR_IMAGE_NAME}" "-web-bun" /tmp/digests/bun-web
 
       - name: Smoke-test published Docker image
         if: needs.prepare.outputs.version != 'main'
@@ -597,12 +582,12 @@ jobs:
             local suffix="$1"
             docker buildx imagetools create -t "${IMAGE_NAME}:latest${suffix}" "${IMAGE_NAME}:${VERSION}${suffix}"
           }
-          promote_tag ""
-          promote_tag "-web"
-          for suffix in -bun -web-bun; do
-            if docker buildx imagetools inspect "${IMAGE_NAME}:${VERSION}${suffix}" >/dev/null 2>&1; then
-              promote_tag "$suffix"
-            fi
+          # Validate every source before promoting any flavor.
+          for suffix in "" -web -bun -web-bun; do
+            node scripts/ci/docker-image-complete.mjs "${IMAGE_NAME}:${VERSION}${suffix}"
+          done
+          for suffix in "" -web -bun -web-bun; do
+            promote_tag "$suffix"
           done
 
       - name: Promote GHCR latest tags
@@ -613,12 +598,11 @@ jobs:
             local suffix="$1"
             docker buildx imagetools create -t "${GHCR_IMAGE_NAME}:latest${suffix}" "${GHCR_IMAGE_NAME}:${VERSION}${suffix}"
           }
-          promote_tag ""
-          promote_tag "-web"
-          for suffix in -bun -web-bun; do
-            if docker buildx imagetools inspect "${GHCR_IMAGE_NAME}:${VERSION}${suffix}" >/dev/null 2>&1; then
-              promote_tag "$suffix"
-            fi
+          for suffix in "" -web -bun -web-bun; do
+            node scripts/ci/docker-image-complete.mjs "${GHCR_IMAGE_NAME}:${VERSION}${suffix}"
+          done
+          for suffix in "" -web -bun -web-bun; do
+            promote_tag "$suffix"
           done
 
       - name: Inspect image
