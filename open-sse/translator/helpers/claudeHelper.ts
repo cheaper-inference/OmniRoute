@@ -460,6 +460,7 @@ export function prepareClaudeRequest(
   const isVertexClaudeProvider = provider === "vertex" || provider === "vertex-partner";
   const supportsPromptCaching =
     provider === "claude" ||
+    provider === "anthropic" ||
     isVertexClaudeProvider ||
     provider?.startsWith?.("anthropic-compatible-");
   // Vertex's documented default is a five-minute ephemeral cache. Omitting ttl is
