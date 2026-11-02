@@ -39,9 +39,10 @@ function fenceFor(row: RecordValue): CodexConnectionFence {
     connectionBinding: JSON.stringify([row.isActive, row.proxyEnabled, row.perKeyProxyEnabled]),
   });
 }
+export const STALE_CODEX_OPERATION_CODE = "codex_connection_changed";
 export class StaleCodexOperationError extends Error {
   readonly status = 409;
-  readonly code = "codex_connection_changed";
+  readonly code = STALE_CODEX_OPERATION_CODE;
   constructor() {
     super(
       "Codex connection changed while the operation was in flight; retry with current credentials."

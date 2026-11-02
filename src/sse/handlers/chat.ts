@@ -66,7 +66,12 @@ import {
 import { getPassthroughProviders } from "@omniroute/open-sse/config/providerRegistry.ts";
 import * as log from "../utils/logger";
 import { checkAndRefreshToken } from "../services/tokenRefresh";
-import { isCodexResponseCurrent, runWithCodexResponseFence } from "@/lib/db/codexConnectionFences";
+import {
+  isCodexResponseCurrent,
+  runWithCodexResponseFence,
+  STALE_CODEX_OPERATION_CODE,
+  StaleCodexOperationError,
+} from "@/lib/db/codexConnectionFences";
 import { createHookContext, runHooks, initPreRequestRegistry } from "@/lib/middleware/registry";
 import { rejectPeerRequest } from "@/shared/resilience/peerRouting";
 import { isRuntimeProviderRetirementError } from "@/shared/constants/providerRetirement";
@@ -1746,6 +1751,9 @@ async function handleSingleModelChat(
   // original early-EOF 502 so an exhausted sibling pool surfaces it verbatim (combo detection).
   let earlyEofOriginal: Response | null = null;
   const sameAccountTransportRetries = new Map<string, number>();
+  // A Codex snapshot that went stale before dispatch reached no upstream, so it is not an account
+  // failure: reselect the current row once instead of surfacing the fence to the client.
+  let staleCodexReselected = false;
   const occupancySessionKey =
     runtimeOptions.sessionAffinityKey ?? runtimeOptions.sessionId ?? `request:${randomUUID()}`;
   let initialPreselectedCredentials = runtimeOptions.preselectedCredentials;
@@ -2069,7 +2077,10 @@ async function handleSingleModelChat(
         );
       } catch (error) {
         releaseOAuthSession();
-        throw error;
+        if (!(error instanceof StaleCodexOperationError)) throw error;
+        if (staleCodexReselected) return errorResponse(error.status, error.message);
+        staleCodexReselected = true;
+        continue;
       }
       const museBindFailure =
         museOwner &&
@@ -2205,6 +2216,11 @@ async function handleSingleModelChat(
           )
         );
       else agyLease.release(leaseId);
+      if (result.errorCode === STALE_CODEX_OPERATION_CODE) {
+        if (staleCodexReselected) return result.response;
+        staleCodexReselected = true;
+        continue;
+      }
       const proxyLatency = Date.now() - proxyStartTime;
       const providerAlias = PROVIDER_ID_TO_ALIAS[provider] || provider;
       const effectiveTargetFormat =
