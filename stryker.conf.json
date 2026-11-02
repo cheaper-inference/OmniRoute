@@ -682,7 +682,10 @@
       "tests/unit/chat-antigravity-429-budget.test.ts",
       "tests/unit/combo-retry-cut-stream.test.ts",
       "tests/unit/combo/combo-set-retry-durable-exhaustion.test.ts",
-      "tests/unit/sse-cut-tool-call-arguments.test.ts"
+      "tests/unit/sse-cut-tool-call-arguments.test.ts",
+      "tests/unit/antigravity-argon-404.test.ts",
+      "tests/unit/combo/combo-resilience-no-provider-state.test.ts",
+      "tests/unit/singbox-routes-local-only.test.ts"
     ],
     "nodeArgs": [
       "--import",

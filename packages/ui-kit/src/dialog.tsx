@@ -20,6 +20,8 @@ export const DialogTrigger = forwardRef<HTMLButtonElement, DialogTriggerProps>(f
 
 export interface DialogContentProps extends Omit<ComponentProps<typeof DialogPrimitive.Content>, "asChild"> {
   showCloseButton?: boolean;
+  /** Wider review forms while retaining viewport scrolling on small screens. */
+  size?: "default" | "wide";
   overlayClassName?: string;
 }
 
@@ -27,6 +29,7 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(func
   className,
   overlayClassName,
   showCloseButton = true,
+  size = "default",
   forceMount,
   children,
   ...props
@@ -42,6 +45,7 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(func
         ref={ref}
         forceMount={forceMount}
         data-slot="dialog-content"
+        data-size={size}
         className={cn("ci-dialog", className)}
         {...props}
       >
