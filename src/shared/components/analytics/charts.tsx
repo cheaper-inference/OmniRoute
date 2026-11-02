@@ -81,7 +81,11 @@ export function StatCard({
     <span
       className={`text-2xl font-bold ${color} truncate cursor-default`}
       data-tooltip={tooltip}
-      title={tooltip ? undefined : String(value)}
+      title={
+        tooltip || (typeof value !== "string" && typeof value !== "number")
+          ? undefined
+          : String(value)
+      }
     >
       {value}
     </span>
