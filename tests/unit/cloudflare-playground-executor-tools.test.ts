@@ -782,16 +782,30 @@ test("a client disconnect during the retry delay opens no further session", asyn
   assert.ok(Date.now() - startedAt < 2000, "the 5 s delay must end with the abort");
 });
 
-test("a request already aborted skips the retry delay and every retry", async () => {
+/** Hands back a complete reply, then aborts as the attempt closes its transport. */
+class AbortOnCloseTransport extends FakeTransport {
+  constructor(
+    frames: string[],
+    private controller: AbortController
+  ) {
+    super(frames);
+  }
+
+  async close(): Promise<void> {
+    this.controller.abort();
+  }
+}
+
+test("an abort that lands as the attempt ends skips the delay and every retry", async () => {
   const rooms: string[] = [];
   const controller = new AbortController();
-  controller.abort();
+  const executor = new CloudflarePlaygroundExecutor((chatId) => {
+    rooms.push(chatId);
+    return new AbortOnCloseTransport(buildSuccessFrames(chatId, "<read><path>a.py"), controller);
+  });
   const startedAt = Date.now();
 
-  const result = await makeRetryingExecutorWithRealDelay(rooms).execute({
-    ...readArgs({}),
-    signal: controller.signal,
-  });
+  const result = await executor.execute({ ...readArgs({}), signal: controller.signal });
   await result.response.body?.cancel();
 
   assert.equal(rooms.length, 1);
@@ -801,10 +815,12 @@ test("a request already aborted skips the retry delay and every retry", async ()
 test("an aborted request does not take the colon retry either", async () => {
   const rooms: string[] = [];
   const controller = new AbortController();
-  controller.abort();
   const executor = new CloudflarePlaygroundExecutor((chatId) => {
     rooms.push(chatId);
-    return new FakeTransport(buildSuccessFrames(chatId, "Let me look at the file:"));
+    return new AbortOnCloseTransport(
+      buildSuccessFrames(chatId, "Let me look at the file:"),
+      controller
+    );
   });
 
   const result = await executor.execute({ ...readArgs({}), signal: controller.signal });
