@@ -1,10 +1,6 @@
 /**
- * Shared POST/GET handler for /v1/systemone and /v1/decisions (#13987).
- *
- * Both paths serve the identical System One decisions contract; /v1/decisions
- * exists so OpenRouter-alpha-shaped clients keep working against the gateway
- * base URL unchanged. Credential selection, rate-limit handling and usage
- * logging mirror /v1/classify (Jina passthrough).
+ * POST/GET handler for /v1/systemone (#13987). Credential selection, rate-limit
+ * handling and usage logging mirror /v1/classify (Jina passthrough).
  */
 
 import {

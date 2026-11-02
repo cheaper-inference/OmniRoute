@@ -1,5 +1,5 @@
 /**
- * #13987 — route-level coverage for POST/GET /v1/systemone and /v1/decisions.
+ * #13987 — route-level coverage for POST/GET /v1/systemone.
  *
  * The decisions route mirrors /v1/classify, so it must apply the same
  * API-key policy and the same connection scope (GHSA-3w2r): a key restricted
@@ -23,7 +23,6 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const systemOneRoute = await import("../../src/app/api/v1/systemone/route.ts");
-const decisionsRoute = await import("../../src/app/api/v1/decisions/route.ts");
 
 const DEAD_CONNECTION_ID = "00000000-0000-4000-8000-00000000dead";
 const VALID_BODY = {
@@ -83,7 +82,7 @@ test("#13987 route: the connection-scoped key is served only by its allowed conn
   const connA = await seedConnection("typesafe", "systemone-conn-A", "sk-typesafe-A");
   assert.notEqual(connA.id, connB.id);
   const key = await apiKeysDb.createApiKey("systemone-restricted-to-A", "machine-13987", [], {
-    allowedConnections: [connA.id],
+    allowedConnections: [String(connA.id)],
   });
   const disjointKey = await apiKeysDb.createApiKey("systemone-elsewhere", "machine-13987", [], {
     allowedConnections: [DEAD_CONNECTION_ID],
@@ -92,16 +91,13 @@ test("#13987 route: the connection-scoped key is served only by its allowed conn
 
   const upstream = stubUpstream();
   try {
-    for (const route of [systemOneRoute, decisionsRoute]) {
-      const pathname = route === systemOneRoute ? "/v1/systemone" : "/v1/decisions";
-      for (let i = 0; i < 3; i++) {
-        const response = await route.POST(postRequest(pathname, VALID_BODY, key.key));
-        assert.equal(response.status, 200, await response.clone().text());
-        const payload = (await response.json()) as { answers?: unknown };
-        assert.ok(payload.answers, "answers pass through");
-      }
+    for (let i = 0; i < 3; i++) {
+      const response = await systemOneRoute.POST(postRequest("/v1/systemone", VALID_BODY, key.key));
+      assert.equal(response.status, 200, await response.clone().text());
+      const payload = (await response.json()) as { answers?: unknown };
+      assert.ok(payload.answers, "answers pass through");
     }
-    assert.equal(upstream.upstreamAuth.length, 6);
+    assert.equal(upstream.upstreamAuth.length, 3);
     assert.deepEqual(
       [...new Set(upstream.upstreamAuth)],
       ["Bearer sk-typesafe-A"],
@@ -128,15 +124,15 @@ test("#13987 route: a scoped key is refused when the requested provider has no i
     "systemone-or-elsewhere",
     "machine-13987",
     [],
-    { allowedConnections: [connOnly.id] }
+    { allowedConnections: [String(connOnly.id)] }
   );
   apiKeysDb.clearApiKeyCaches();
 
   const upstream = stubUpstream();
   try {
     // typesafe/* needs a typesafe connection; the key is only scoped to an openrouter one.
-    const response = await decisionsRoute.POST(
-      postRequest("/v1/decisions", VALID_BODY, typesafeScopedKey.key)
+    const response = await systemOneRoute.POST(
+      postRequest("/v1/systemone", VALID_BODY, typesafeScopedKey.key)
     );
     assert.notEqual(response.status, 200);
     assert.equal(upstream.upstreamAuth.length, 0, "the typesafe pool is never used out of scope");
@@ -191,7 +187,7 @@ test("#13987 route: OPTIONS advertises GET/POST and GET lists a models envelope"
   assert.match(options.headers.get("Access-Control-Allow-Methods") ?? "", /POST/);
   assert.match(options.headers.get("Access-Control-Allow-Methods") ?? "", /GET/);
 
-  const listing = await decisionsRoute.GET(new Request("http://localhost/v1/decisions"));
+  const listing = await systemOneRoute.GET(new Request("http://localhost/v1/systemone"));
   assert.equal(listing.status, 200);
   const payload = (await listing.json()) as { object?: string; data?: unknown[] };
   assert.equal(payload.object, "list");

@@ -9,8 +9,8 @@ export const MODEL_SUPPORTED_ENDPOINT_VALUES = [
   "audio-transcriptions",
   "music",
   "images-generations",
-  // System One typed-decision models (TypeSafe Jev, …) — POST /v1/systemone
-  // (alias POST /v1/decisions). Not chat-capable; see classifyModelSupportedEndpoints.
+  // System One typed-decision models (TypeSafe Jev, …) — POST /v1/systemone.
+  // Not chat-capable; see classifyModelSupportedEndpoints.
   "decisions",
   // Persisted legacy values remain valid input and normalize on write/edit.
   "video",

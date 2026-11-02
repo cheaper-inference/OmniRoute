@@ -525,9 +525,8 @@ export const v1SegmentSchema = z
   })
   .catchall(z.unknown());
 
-// POST /v1/systemone (alias POST /v1/decisions) — System One typed decisions
-// (#13987). One `state` plus typed `questions` (noul / choice / score); the
-// backend is selected by the model id — `typesafe/…` or a bare `jev-*` alias
+// POST /v1/systemone — System One typed decisions (#13987). One `state` plus
+// typed `questions` (noul / choice / score); the backend is selected by the model id — `typesafe/…` or a bare `jev-*` alias
 // routes to native api.typesafe.ai, an `openrouter/…` prefix routes to
 // OpenRouter's alpha decisions endpoint.
 export const v1SystemOneSchema = z

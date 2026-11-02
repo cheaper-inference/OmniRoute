@@ -1,12 +1,12 @@
 /**
  * System One decisions proxy (#13987).
  *
- * POST /v1/systemone (alias POST /v1/decisions) forwards one typed-decision
- * request — a `state` plus a map of `questions` (`noul` / `choice` / `score`) —
- * to the backend selected by resolveSystemOneTarget. Both backends share the
- * same request/response wire shape, so the proxy is a model-rewriting
- * passthrough: answers, calibrated probabilities and usage (input/output
- * tokens, cost) flow through untouched. Decisions models are NOT chat models —
+ * POST /v1/systemone forwards one typed-decision request — a `state` plus a
+ * map of `questions` (`noul` / `choice` / `score`) — to the backend selected by
+ * resolveSystemOneTarget. Both backends share the same request/response wire
+ * shape, so the proxy is a model-rewriting passthrough: answers, calibrated
+ * probabilities and usage (input/output tokens, cost) flow through untouched.
+ * Decisions models are NOT chat models —
  * decisions-tagged models are excluded from chat pickers by the shared
  * classification (classifyModelSupportedEndpoints).
  *
@@ -28,7 +28,7 @@ export interface SystemOneCredentials {
 }
 
 export interface SystemOneProxyOptions {
-  /** Public path the client called ("/v1/systemone" or "/v1/decisions"). */
+  /** Public path the client called ("/v1/systemone"). */
   path: string;
   target: SystemOneTarget;
   body: {

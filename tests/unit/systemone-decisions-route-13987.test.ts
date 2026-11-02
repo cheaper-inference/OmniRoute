@@ -84,7 +84,7 @@ test("#13987: rewrites the model and passes answers/usage through untouched", as
     provider: "TypeSafe",
   };
   const response = await handleSystemOneProxy({
-    path: "/v1/decisions",
+    path: "/v1/systemone",
     target: resolveSystemOneTarget("openrouter/typesafe/jev-1.14")!,
     body: { model: "openrouter/typesafe/jev-1.14", state: "s", questions: { q: {} } },
     credentials: { apiKey: "test-key", connectionId: "conn-1" },
