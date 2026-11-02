@@ -163,7 +163,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` හි රැහැ
 | සෞඛ්ය වාර්තාව              | `health-report`      | එක් සැපයුම්කරුවෙකු සඳහා පරිපථ කඩනය, සිසිල් කිරීම, අගුලු දැමීමේ තත්වය එකතු කරයි                                                                                        | සෞඛ්යය, ඔරොත්තු දීමේ හැකියාව | "සියලු සැපයුම්කරුවන්ගේ සෞඛ්ය තත්ත්වය පෙන්වන්න" |
 | හැකියාවන් ලැයිස්තුගත කරන්න | `list-capabilities`  | සන්දර්භය එන්නත් කිරීම සඳහා raw SKILL.md URLs සමඟ ලකුණු සටහන් වගුවක් ලෙස සම්පූර්ණ ඇතුළත් කිරීම් 45 නියෝජිත නිපුණතා නාමාවලිය (23 API + 21 CLI + 1 config) ආපසු ලබා දෙයි | නාමාවලිය, සොයාගැනීම්, කුසලතා | "සියලු OmniRoute හැකියාවන් ලැයිස්තුගත කරන්න"   |
 
-> නියෝජිත කාඩ්පත සජීවී 377 සපයන්නන්ගේ නාමාවලිය සමඟ පෙළගස්වා තිබිය යුතුය; සපයන්නන්ගේ ගණන් සහ free/no-auth පාරදත්ත ධාවන කාල රෙජිස්ට්‍රියෙන් ලබා ගනී.
+> නියෝජිත කාඩ්පත සජීවී 380-සැපයුම්කරුවන්ගේ නාමාවලිය සමඟ සමපාතව තබාගත යුතුය; සපයන්නන්ගේ ගණන් සහ free/no-auth පාරදත්ත ධාවන කාල රෙජිස්ට්‍රියෙන් ලබා ගනී.
 
 ### `list-capabilities` කුසලතා විස්තර
 
@@ -197,17 +197,17 @@ JSON-RPC අන්ත ලක්ෂ්යය වන `/a2a`, සම්මත A2A �
 
 ---
 
-## නව Skill එකක් එක් කිරීම
+## නව කුසලතා එකතු කිරීම
 
-1. **Skill ගොනුව සාදන්න:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **කුසලතා ගොනුවක් සාදන්න:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` ආකාරයේ async function එකක් export කරන්න. `smartRouting.ts` වැනි පවතින skillsවල ව්යුහය අනුගමනය කරන්න.
+   async ශ්‍රිතයක් අපනයනය කරන්න `(task: A2ATask) => Promise<{ artifacts, metadata }>`. `smartRouting.ts` වැනි පවතින කුසලතා වල හැඩය අනුගමනය කරන්න.
 
-2. **Handler එක ලියාපදිංචි කරන්න:** `src/lib/a2a/taskExecution.ts` තුළ, `A2A_SKILL_HANDLERS` වෙත entry එකක් එක් කරන්න:
+2. **ලියාපදිංචි හසුරුවන්නා:** `src/lib/a2a/taskExecution.ts` හි, `A2A_SKILL_HANDLERS` වෙත ප්‍රවේශයක් එක් කරන්න:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...පවතින skills
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ JSON-RPC අන්ත ලක්ෂ්යය වන `/a2a`, සම්මත A2A �
    };
    ```
 
-3. **Agent Card එකෙහි නිරාවරණය කරන්න:** `src/lib/a2a/agentCardMetadata.ts` තුළ (`/.well-known/agent.json` සහ `/.well-known/agent-card.json` විසින් හවුලේ භාවිත කරනු ලැබේ), `skills` array එකට පහත දෑ එක් කරන්න:
+3. **නියෝජිත කාඩ්පත තුළ නිරාවරණය කරන්න:** `src/lib/a2a/agentCardMetadata.ts` හි ( `/.well-known/agent.json` සහ `/.well-known/agent-card.json` විසින් බෙදා ගන්නා ලද), `skills` අරාවට එකතු කරන්න:
 
    ```json
    {
      "id": "your-skill",
-     "name": "ඔබගේ Skill එක",
-     "description": "අභිප්රාය කේන්ද්ර කරගත් කෙටි විස්තරයක්",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["ස්වාභාවික භාෂාවෙන් සිදු කරන ආදර්ශ invocation එකක්"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Tests ලියන්න:** `tests/unit/a2a-<your-skill>.test.ts`. සාර්ථක මාර්ගය සහ දෝෂ මාර්ගය ආවරණය කරන්න.
+4. **පරීක්ෂණ ලියන්න:** `tests/unit/a2a-<your-skill>.test.ts` සතුටු මාර්ගය + දෝෂ මාර්ගය ආවරණය කරන්න.
 
-5. මෙම ගොනුවේ `Available Skills` වගුව තුළ නව skill එක **ලේඛනගත කරන්න**.
+5. **ලේඛනය** මෙම ගොනුවේ `Available Skills` වගුවේ නව කුසලතාව.
 
 ---
 

@@ -1,0 +1,1 @@
+- **fix(sse):** the GHE Copilot token base URL now strips trailing slashes in linear time instead of with a regex that went quadratic on a long run of slashes in `gheUrl` (#0000)
