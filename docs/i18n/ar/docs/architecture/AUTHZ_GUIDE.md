@@ -131,34 +131,34 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 تحتاج بعض إجراءات `MANAGEMENT` إلى **المشغّل فقط**: فمفتاح `manage` لا يكفي. فتصدير بيانات الاعتماد المخزّنة (`GET /api/settings/export-json` و`GET /api/db-backups/export` و`GET /api/db-backups/exportAll`)، واستعادة نسخة احتياطية فوق البيانات الحية (`POST /api/db-backups/import` بما فيه `dryRun=true`، و`POST /api/db-backups` للاستعادة بالمعرّف، و`POST /api/settings/import-json`)، وإتلاف نقاط الاستعادة (تنظيف `DELETE /api/db-backups`، و`PATCH /api/db-backups` لأن الاحتفاظ الذي يحفظه يقود التقليم التلقائي بعد كل نسخة احتياطية) كلها تتطلب جلسة لوحة التحكم، أو هوية CLI المحلية، أو تعطيل تسجيل الدخول. ويتطلب إصدار رمز مزامنة (`POST /api/sync/tokens`) وسكّ رمز وصول CLI بنطاق `admin` (`POST /api/cli/tokens`) جلسة لوحة التحكم أو هوية CLI المحلية في كل أوضاع تسجيل الدخول. ومفاتيح API بأي نطاق ورموز الوصول `oma_` ليست بيانات اعتماد للمشغّل: فتتلقى الخطأ `403` كلما اشترط المسار ذلك. ويقع الفحص في `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). وتغيير إعدادات تسجيل الدخول مقصور على المشغّل أيضًا: إذ لا يقبل `POST /api/settings/require-login` (لضبط كلمة مرور الإدارة أو تبديل `requireLogin`) إلا هذه البيانات بعد وجود كلمة مرور، أما نافذة التمهيد الأولي عند أول تشغيل (قبل وجود كلمة مرور) فتبقى كما هي، ويجب أن ترسل جلسة لوحة التحكم `currentPassword` لاستبدال كلمة المرور (فيعيد `403` عند غيابها أو خطئها، ويُدقَّق بوصفه `settings.update_failed`). وتحتفظ CLI المحلية، والنسخة التي عُطّل فيها تسجيل الدخول، بمسار الاسترداد، ويجوز لها ضبط كلمة مرور دون هذا الشرط، لأن كليهما مرتبط بالمضيف الذي يملك مجلد البيانات.
 
-## خط المعالجة
+## خط أنابيب
 
 ```
-الطلب الوارد → src/proxy.ts
-  → runAuthzPipeline() في src/server/authz/pipeline.ts
-    1. إزالة الترويسات الداخلية الموثوقة (x-omniroute-auth-*, x-omniroute-route-class)
-    2. إنشاء معرّف للطلب، وتصنيف المسار عبر classifyRoute()
-    3. إذا كان pathname == "/" → إعادة التوجيه إلى /dashboard
-    4. إذا كان النظام في وضع التفريغ (إيقاف تشغيل سلس) وكان المسار /api/* → 503
-    5. إذا لم تكن الطريقة GET وكان المسار /api/* → تطبيق حاجز checkBodySize()
-    6. إذا كانت الطريقة OPTIONS → استجابة تمهيدية لـ CORS بالحالة 204
-    7. إذا كان options.enforce == false → تمرير الطلب مع ترويسات فئة المسار
-    8. خلاف ذلك: POLICIES[routeClass].evaluate(ctx)
-       - السماح  → تعيين x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - الرفض → خطأ JSON يتضمن correlation_id (صفحات لوحة المعلومات → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-تُزال الترويسات الداخلية الموثوقة (المعرّفة في `src/server/authz/headers.ts`) **من الطلبات الواردة** قبل التصنيف — ولا يمكن للعملاء تعبئة `x-omniroute-auth-*` مسبقًا لانتحال هوية جهة ما.
+الرؤوس الداخلية الموثوقة (المحددة في `src/server/authz/headers.ts`) هي** جردت من الطلبات الواردة** قبل التصنيف، لا يمكن لعملاء — تعبئة `x-omniroute-auth-*` مسبقًا لانتحال شخصية موضوع ما.
 
-### عقود السياسات
+### عقود السياسة
 
-لكل فئة مسار سياسة في `src/server/authz/policies/`:
+كل فئة مسار لها سياسة في `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — تعيد دائمًا `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — تستخرج Bearer وتتحقق منه عبر `validateApiKey()`. ولا تنتقل إلى الوصول المجهول إلا عند تعطيل علامة الميزة الفعلية `REQUIRE_API_KEY`. تُحدَّد العلامة الفعلية من خلال `isRequireApiKeyEnabled()` (`تجاوز علامة الميزة في قاعدة البيانات > process.env.REQUIRE_API_KEY > القيمة الافتراضية`)، بحيث تتحكم علامات الميزات في لوحة المعلومات ومتغيرات البيئة في `/api/v1/*`، و`/api/v1beta/*`، والأسماء البديلة بشكل متسق؛ وتؤدي إخفاقات أداة الحل إلى الرفض الآمن. تسمح بطلبات جلسة لوحة المعلومات على مسارات واجهة API الخاصة بالعميل (بما فيها `/api/v1/models`، الذي يستخدمه كتالوج النماذج في لوحة المعلومات).
-- **`managementPolicy`** (`policies/management.ts`) — تقبل جلسة لوحة المعلومات، أو طلبات مزامنة النماذج الداخلية (المطابَقة مع `/api/providers/[name]/(sync-models|models)`)، أو تتخطى التحقق بالكامل إذا أعادت `isAuthRequired()` القيمة false. تعيد 403 (`AUTH_001`) عند وجود رمز Bearer لكنه غير صالح، وتعيد 401 خلاف ذلك. كما تفرض مستويات حراسة المسارات (LOCAL_ONLY / ALWAYS_PROTECTED) قبل أي فرع للمصادقة — راجع [مستويات حراسة المسارات](../security/ROUTE_GUARD_TIERS.md). يمكن الوصول إلى مسارات LOCAL_ONLY الموجودة في `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (حاليًا: `/api/mcp/`) من خارج عنوان الاسترجاع المحلي عندما يحمل مفتاح Bearer النطاق `manage`؛ وتظل جميع مسارات LOCAL_ONLY الأخرى مقتصرة بشكل صارم على عنوان الاسترجاع المحلي بغض النظر عن النطاق.
+- **`publicPolicy`** (`policies/public.ts`) — يُرجع دائمًا `allow({ kind: "anonymous", id: "anonymous" })`.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — يستخرج Bearer، ويتم التحقق من صحته عبر `validateApiKey()`. يصل إلى المجهول فقط عند تعطيل علامة ميزة `REQUIRE_API_KEY` الفعالة. يتم حل العلامة الفعالة من خلال `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) لذا فإن علامات ميزات لوحة المعلومات ومتغيرات البيئة تحكم `/api/v1/*` و `/api/v1beta/*` والأسماء المستعارة بشكل متسق؛ فشل محلل مغلقة. يسمح بطلبات جلسة لوحة المعلومات على مسارات API للعميل (بما في ذلك `/api/v1/models`، المستخدمة بواسطة كتالوج نموذج لوحة المعلومات). عند تمكين Entra ID SSO ، تتم معالجة الحامل الذي يمثل رمز Entra من الناحية الهيكلية (ثلاثة مقاطع base64url، `RS*` alg، `kid`) بواسطة فرع SSO** قبل** `validateApiKey()` وحكمه نهائي — فهو لا يصل أبدًا إلى مسار مفتاح واجهة برمجة التطبيقات (API) أو الفرع الذي يتحول إلى مجهول، لذلك لا يمكن أن يصبح انقطاع موفر الهوية وصولاً مفتوحًا. لا تتأثر مفاتيح API الثابتة. انظر [إنترا ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) يقبل — جلسة لوحة المعلومات، أو طلبات مزامنة النموذج الداخلي (المتطابقة مع `/api/providers/[name]/(sync-models|models)`)، أو يتخطى كليًا إذا أعاد `isAuthRequired()` خطأ. تُرجع 403 (`AUTH_001`) في حالة وجود رمز حامل ولكنه غير صالح، وتُرجع 401 بخلاف ذلك. يفرض أيضًا طبقات حماية الطريق (LOCAL_ONLY / ALWAYS_PROTECTED) قبل أي فرع مصادقة — راجع [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). يمكن الوصول إلى مسارات LOCAL_ONLY في `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (اليوم: `/api/mcp/`) من دون استرجاع عندما يحمل المفتاح Bearer نطاق `manage` ؛ تظل كافة مسارات LOCAL_ONLY الأخرى ذات استرجاع صارم بغض النظر عن النطاق.
 
-تعيد السياسة الناجحة `AuthSubject` بحيث تكون `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. ويمكن للمعالِجات اللاحقة قراءته عبر `assertAuth(request, "CLIENT_API")` في `src/server/authz/assertAuth.ts` بدلًا من إعادة تنفيذ منطق المصادقة.
+السياسة الناجحة ترجع `AuthSubject` مع `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. يمكن للمعالجات النهائية قراءتها عبر `assertAuth(request, "CLIENT_API")` في `src/server/authz/assertAuth.ts` بدلاً من إعادة تشغيل منطق المصادقة.
 
 ## قائمة المسارات العامة
 
@@ -307,23 +307,23 @@ export async function POST(request: Request) {
 
 ## تصحيح الأخطاء
 
-يُضيف خط الأنابيب دائمًا الترويسات التالية إلى الاستجابات:
+يقوم المسار دائمًا بختم الاستجابات بـ:
 
 ```
-x-request-id:               <معرّف الارتباط، يُعاد في نصوص الأخطاء>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-بالنسبة إلى الطلبات المُصادَق عليها، تتضمن ترويسات طلب المنبع (من جهة المعالج) أيضًا:
+بالنسبة للطلبات التي تمت مصادقتها، تتضمن رؤوس الطلب الأولية (جانب المعالج) أيضًا ما يلي:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<آخر 4 أحرف> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (اختياري)
-x-omniroute-auth-scopes:    قائمة مفصولة بفواصل
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-استخدم `assertAuth(req, expectedClass)` داخل المعالجات — إذ يرمي الخطأ `AuthzAssertionError` بالرمز `AUTHZ_NOT_INITIALIZED` إذا تم تجاوز البرمجية الوسيطة (وهو أمر مفيد لاكتشاف حالات التراجع في الإعدادات ضمن الاختبارات).
+استخدم `assertAuth(req, expectedClass)` داخل المعالجات — حيث يرمي `AuthzAssertionError` بالكود `AUTHZ_NOT_INITIALIZED` إذا تم تجاوز البرنامج الوسيط (مفيد في اكتشاف تراجعات التكوين في الاختبارات).
 
 ## انظر أيضًا
 

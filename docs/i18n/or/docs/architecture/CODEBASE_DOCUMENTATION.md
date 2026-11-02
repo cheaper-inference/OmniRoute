@@ -446,7 +446,7 @@ server/
 
 ---
 
-## 4। `open-sse/` - ଷ୍ଟ୍ରିମିଂ ଇଞ୍ଜିନ୍ କାର୍ଯ୍ୟକ୍ଷେତ୍ର \|
+## 4। `open-sse/` — ଷ୍ଟ୍ରିମିଂ ଇଞ୍ଜିନ୍ କାର୍ଯ୍ୟକ୍ଷେତ୍ର \|
 
 ଅଲଗା npm କାର୍ଯ୍ୟକ୍ଷେତ୍ର `@omniroute/open-sse` ଭାବରେ ପ୍ରକାଶିତ \| ଅନୁରୋଧ ପ୍ରକ୍ରିୟାକରଣ, କାର୍ଯ୍ୟନିର୍ବାହୀ, ଅନୁବାଦକ, ସେବା, ଟ୍ରାନ୍ସଫର୍ମର ଏବଂ MCP ସର୍ଭରର ମାଲିକ \|
 
@@ -488,11 +488,11 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 ଶୀର୍ଷ-ସ୍ତରୀୟ ନିର୍ବାହୀ ମଡ୍ୟୁଲ୍ (`*.ts` ମାଇନସ୍ `base.ts`, `index.ts` ଏବଂ ପରୀକ୍ଷା - ଗଣନା `npm run check:docs-counts` ମାପ) \| ପ୍ରତ୍ୟେକ ଏକଜେକ୍ୟୁଟର୍ ଶ୍ରେଣୀ `BaseExecutor` (`base.ts`) କୁ ସିଧାସଳଖ କିମ୍ବା `DefaultExecutor` କିମ୍ବା ଅନ୍ୟ ଏକଜେକ୍ୟୁଟର ମାଧ୍ୟମରେ ବିସ୍ତାର କରେ \| ଅବଶିଷ୍ଟ ମଡ୍ୟୁଲଗୁଡ଼ିକ ହେଉଛି ପ୍ରତି-ପ୍ରଦାନକାରୀ ସହାୟକକାରୀ (ଟୁଲ୍ ସ୍କିମା, fetch/TTS ଆଡାପ୍ଟର, କ୍ୱିକ୍ ହ୍ୟାଣ୍ଡେଲର୍) \| କାର୍ଯ୍ୟନିର୍ବାହୀମାନେ ଅନ୍ତର୍ଭୁକ୍ତ:
+156 ଟପ୍-ଲେଭଲ୍ ଏକଜେକ୍ୟୁଟର ମଡ୍ୟୁଲ୍ (`*.ts` ମାଇନସ୍ `base.ts`, `index.ts` ଏବଂ — ଗଣନା `npm run check:docs-counts` ମାପଗୁଡିକ ପରୀକ୍ଷା କରେ) \| ପ୍ରତ୍ୟେକ ଏକଜେକ୍ୟୁଟର ଶ୍ରେଣୀ `BaseExecutor` (`base.ts`) କୁ ସିଧାସଳଖ କିମ୍ବା `DefaultExecutor` କିମ୍ବା ଅନ୍ୟ ଏକଜେକ୍ୟୁଟର ମାଧ୍ୟମରେ ବିସ୍ତାର କରେ \| ଅବଶିଷ୍ଟ ମଡ୍ୟୁଲଗୁଡ଼ିକ ହେଉଛି ପ୍ରତି-ପ୍ରଦାନକାରୀ ସହାୟକକାରୀ (ଟୁଲ୍ ସ୍କିମା, fetch/TTS ଆଡାପ୍ଟର, କ୍ୱିକ୍ ହ୍ୟାଣ୍ଡେଲର୍) \| କାର୍ଯ୍ୟନିର୍ବାହୀମାନେ ଅନ୍ତର୍ଭୁକ୍ତ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex` `index.ts` `commandCode`, `cursor`, `default`, `devin-cli`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `muse-spark-web`, `devin-desktop`, Plus `claudeIdentity.ts`
 
-> ଟିପନ୍ତୁ: ଏଠାରେ ତାଲିକାଭୁକ୍ତ ପ୍ରଦାନକାରୀମାନେ ଜେନେରିକ୍ OpenAI- ସୁସଙ୍ଗତ ନିର୍ବାହକ ବ୍ୟବହାର କରି `default.ts` ଦ୍ୱାରା ପରିବେଷଣ କରାଯାଏ \| ପୂର୍ଣ୍ଣ ପ୍ରଦାନକାରୀ ତାଲିକା (377 ପ୍ରଦାନକାରୀ) `src/shared/constants/providers.ts` ରେ ରୁହନ୍ତି \|
+> ଟିପନ୍ତୁ: ଏଠାରେ ତାଲିକାଭୁକ୍ତ ପ୍ରଦାନକାରୀମାନେ ଜେନେରିକ୍ OpenAI- ସୁସଙ୍ଗତ ନିର୍ବାହକ ବ୍ୟବହାର କରି `default.ts` ଦ୍ୱାରା ପରିବେଷଣ କରାଯାଏ \| ପୂର୍ଣ୍ଣ ପ୍ରଦାନକାରୀ ତାଲିକା (380 ପ୍ରଦାନକାରୀ) `src/shared/constants/providers.ts` ରେ ରୁହନ୍ତି \|
 
 ### 4.3 `open-sse/translator/`
 
@@ -506,7 +506,7 @@ open-sse/
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` - `TransformStream` -based ପ୍ରତିକ୍ରିୟା API ↔ ଚାଟ୍ ସଂପୂର୍ଣ୍ଣ ରୂପାନ୍ତରକାରୀ ( `responses/` ମାର୍ଗ ଧରିବା ଦ୍ୱାରା ବ୍ୟବହୃତ) \|
+- `responsesTransformer.ts` — `TransformStream` -based ପ୍ରତିକ୍ରିୟା API ↔ ଚାଟ୍ ସଂପୂର୍ଣ୍ଣ ରୂପାନ୍ତରକାରୀ ( `responses/` ମାର୍ଗ ଧରିବା ଦ୍ୱାରା ବ୍ୟବହୃତ) \|
 
 ### 4.5 `open-sse/services/`
 
@@ -521,7 +521,7 @@ open-sse/
 | କ୍ୟାଚିଂ              | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | ମାର୍ଗ ବୁଦ୍ଧି         | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | ମଡେଲ୍ ନିୟନ୍ତ୍ରଣ \|   | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| ସଙ୍କୋଚନ \|           | `compression/` - ପୂର୍ଣ୍ଣ ସଙ୍କୋଚନ ଇଞ୍ଜିନ୍ ତାର \|                                                                                                                                                                                                          |
+| ସଙ୍କୋଚନ \|           | `compression/` — ପୂର୍ଣ୍ଣ ସଙ୍କୋଚନ ଇଞ୍ଜିନ୍ ତାର \|                                                                                                                                                                                                          |
 | ଟୋକେନ୍ + ଅଧିବେଶନ \|  | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | ସ୍ତର / ପ୍ରକାଶ        | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / ନେଟୱର୍କ         | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -530,16 +530,16 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 ଅନନ୍ୟ ଉପକରଣ \|** `server.ts` ରେ ତାରଯୁକ୍ତ ( `schemas/tools.ts` + ମେମୋରୀରେ 45 କାନୋନିକାଲ୍, କ skills ଶଳ, ଗିଥ୍ ହବ୍-କ skills ଶଳ, ପୁଲ୍, ଗେମିଫିକେସନ୍, ପ୍ଲଗଇନ୍, Notion, Obsidian, ଲୋକାଲ୍-କର୍ପସ୍ ଏବଂ ସଙ୍କୋଚନ ମଡ୍ୟୁଲ୍ - `countUniqueMcpTools` ଦ୍ୱାରା ଗଣାଯାଇଥିବା ୟୁନିଅନ୍) \|
+- **110 ଅନନ୍ୟ ଉପକରଣ \|** `server.ts` ରେ ତାରଯୁକ୍ତ ( `schemas/tools.ts` + ମେମୋରୀରେ 45 କାନୋନିକାଲ୍, କ skills ଶଳ, ଗିଥ୍ ହବ୍-କ skills ଶଳ, ପୁଲ୍, ଗେମିଫିକେସନ୍, ପ୍ଲଗଇନ୍, Notion, Obsidian, ଲୋକାଲ୍-କର୍ପସ୍ ଏବଂ ସଙ୍କୋଚନ ମଡ୍ୟୁଲ୍ — ୟୁନିଅନ୍ `countUniqueMcpTools` ଦ୍ୱାରା ଗଣିତ) \|
 - **3 ପରିବହନ** : stdio, HTTP ଷ୍ଟ୍ରିମେବଲ୍, SSE\|
-- **33 ଟି ସ୍କୋପ୍ \|** ଚାଲିବା ସମୟରେ ବାଧ୍ୟତାମୂଳକ - `src/shared/constants/mcpScopes.ts` ରେ ଆଧାର ତାଲିକା, ପୂର୍ଣ୍ଣ ସେଟ୍ ହେଉଛି ପ୍ରତ୍ୟେକ ଉପକରଣ ମଡ୍ୟୁଲ୍ ଦ୍ୱାରା ଘୋଷିତ ସ୍କୋପଗୁଡିକର ମିଳନ \|
+- **33 ଟି ସ୍କୋପ୍ \|** `src/shared/constants/mcpScopes.ts` ରେ ଚାଲିବା ସମୟ — ଆଧାର ତାଲିକାରେ ବାଧ୍ୟତାମୂଳକ, ପୂର୍ଣ୍ଣ ସେଟ୍ ହେଉଛି ପ୍ରତ୍ୟେକ ଉପକରଣ ମଡ୍ୟୁଲ୍ ଦ୍ୱାରା ଘୋଷିତ ସ୍କୋପଗୁଡିକର ମିଳନ \|
 - ଅଡିଟ୍ ଟେବୁଲ୍: `mcp_tool_audit` ( `audit.ts` ଦ୍ୱାରା ଜନବହୁଳ) \|
 - ଫାଇଲଗୁଡିକ: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, ଏବଂ `__tests__/` ଅଧୀନରେ ପରୀକ୍ଷା \|
 - ପୂର୍ଣ୍ଣ ଉପକରଣ ତାଲିକା ପାଇଁ [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ଦେଖନ୍ତୁ \|
 
 ### 4.7 `open-sse/config/`
 
-ପ୍ରଦାନକାରୀ ରେଜିଷ୍ଟ୍ରି (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), ପ୍ରତି ଫର୍ମାଟ୍ ମଡେଲ୍ ରେଜିଷ୍ଟ୍ରି (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), ପରିଚୟ ସହାୟକକାରୀ (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts` `codexClient.ts` `toolCloaking.ts`) ,`azureAi.ts`,`credentialLoader.ts`, zqy `registryUtils.ts` `watsonx.ts`, `oci.ts`, `bedrock.ts`, `datarobot.ts`, `petals.ts`, `glmProvider.ts`, `maritalk.ts`, `sap.ts` `ollamaModels.ts` `errorConfig.ts`, `constants.ts` `runway.ts` `defaultThinkingSignature.ts`
+Provider registries (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), per-format model registries (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), identity helpers (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`), credential helpers (`credentialLoader.ts`, `codexClient.ts`), and cloud adapters (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 

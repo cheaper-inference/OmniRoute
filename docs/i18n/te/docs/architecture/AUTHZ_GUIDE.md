@@ -134,31 +134,31 @@ JWT ధృవీకరించబడి, **అదే సమయంలో** `auth
 ## పైప్లైన్
 
 ```
-వచ్చే అభ్యర్థన → src/proxy.ts
-  → src/server/authz/pipeline.tsలో runAuthzPipeline()
-    1. విశ్వసనీయ అంతర్గత హెడర్లను తొలగించండి (x-omniroute-auth-*, x-omniroute-route-class)
-    2. అభ్యర్థన idని రూపొందించి, classifyRoute() ద్వారా రూట్ను వర్గీకరించండి
-    3. pathname == "/" అయితే → /dashboardకు మళ్లించండి
-    4. డ్రెయినింగ్లో ఉంటే (సజావైన షట్డౌన్) మరియు /api/* అయితే → 503
-    5. GET కాని /api/* అయితే → checkBodySize() గార్డ్
-    6. OPTIONS అయితే → CORS ప్రీఫ్లైట్ 204
-    7. options.enforce == false అయితే → route-class హెడర్లతో యథాతథంగా పంపండి
-    8. లేకపోతే: POLICIES[routeClass].evaluate(ctx)
-       - అనుమతిస్తే  → x-omniroute-auth-{kind,id,label,scopes} ముద్రించండి → NextResponse.next()
-       - తిరస్కరిస్తే → correlation_idతో JSON లోపం (డ్యాష్బోర్డ్ పేజీలు → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-విశ్వసనీయ అంతర్గత హెడర్లు (`src/server/authz/headers.ts`లో నిర్వచించబడినవి) వర్గీకరణకు ముందు **వచ్చే అభ్యర్థనల నుండి తొలగించబడతాయి** — ఒక సబ్జెక్ట్లా నటించడానికి క్లయింట్లు `x-omniroute-auth-*`ను ముందుగానే నింపలేరు.
+విశ్వసనీయ అంతర్గత శీర్షికలు ( `src/server/authz/headers.ts` లో నిర్వచించబడ్డాయి).** ఇన్కమింగ్ అభ్యర్థనల నుండి తీసివేయబడింది** వర్గీకరణకు ముందు — క్లయింట్లు ఒక సబ్జెక్ట్గా నటించడానికి `x-omniroute-auth-*` ప్రీ-పాపులేట్ చేయలేరు.
 
-### పాలసీ ఒప్పందాలు
+### విధాన ఒప్పందాలు
 
-ప్రతి రూట్ క్లాస్కు `src/server/authz/policies/`లో ఒక పాలసీ ఉంటుంది:
+ప్రతి రూట్ క్లాస్ `src/server/authz/policies/` లో ఒక విధానాన్ని కలిగి ఉంటుంది:
 
-- **`publicPolicy`** (`policies/public.ts`) — ఎల్లప్పుడూ `allow({ kind: "anonymous", id: "anonymous" })`ను అందిస్తుంది.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearerను సంగ్రహించి, `validateApiKey()` ద్వారా ధ్రువీకరిస్తుంది. ప్రభావవంతమైన `REQUIRE_API_KEY` ఫీచర్ ఫ్లాగ్ నిలిపివేయబడినప్పుడు మాత్రమే అనామక యాక్సెస్కు అనుమతిస్తుంది. ప్రభావవంతమైన ఫ్లాగ్ `isRequireApiKeyEnabled()` (`DB ఫీచర్ ఫ్లాగ్ ఓవర్రైడ్ > process.env.REQUIRE_API_KEY > డిఫాల్ట్`) ద్వారా పరిష్కరించబడుతుంది; కాబట్టి డ్యాష్బోర్డ్ ఫీచర్ ఫ్లాగ్లు మరియు ఎన్విరాన్మెంట్ వేరియబుల్స్ `/api/v1/*`, `/api/v1beta/*`, మరియు అలియాస్లను స్థిరంగా నియంత్రిస్తాయి; రిజాల్వర్ వైఫల్యాలు యాక్సెస్ను నిరాకరిస్తాయి. క్లయింట్ API రూట్లపై డ్యాష్బోర్డ్-సెషన్ అభ్యర్థనలను అనుమతిస్తుంది (డ్యాష్బోర్డ్ మోడల్ కేటలాగ్ ఉపయోగించే `/api/v1/models`తో సహా).
-- **`managementPolicy`** (`policies/management.ts`) — డ్యాష్బోర్డ్ సెషన్ను, అంతర్గత మోడల్-సింక్ అభ్యర్థనలను (`/api/providers/[name]/(sync-models|models)`తో సరిపోల్చబడినవి) అంగీకరిస్తుంది, లేదా `isAuthRequired()` falseను అందిస్తే పూర్తిగా దాటవేస్తుంది. Bearer టోకెన్ ఉన్నప్పటికీ అది చెల్లనప్పుడు 403 (`AUTH_001`)ను, లేకపోతే 401ను అందిస్తుంది. ఏ ప్రమాణీకరణ శాఖకు ముందైనా రూట్-గార్డ్ స్థాయిలను (LOCAL_ONLY / ALWAYS_PROTECTED) కూడా అమలు చేస్తుంది — [రూట్ గార్డ్ స్థాయిలు](../security/ROUTE_GUARD_TIERS.md) చూడండి. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`లోని LOCAL_ONLY పాత్లను (ప్రస్తుతం: `/api/mcp/`) Bearer కీ `manage` స్కోప్ను కలిగి ఉన్నప్పుడు లూప్బ్యాక్ కాని చిరునామా నుండి యాక్సెస్ చేయవచ్చు; స్కోప్తో సంబంధం లేకుండా మిగతా LOCAL_ONLY పాత్లన్నీ ఖచ్చితంగా లూప్బ్యాక్కే పరిమితమవుతాయి.
+- **`publicPolicy`** (`policies/public.ts`) — ఎల్లప్పుడూ `allow({ kind: "anonymous", id: "anonymous" })` ని అందిస్తుంది.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ఎక్స్ట్రాక్ట్స్ బేరర్, `validateApiKey()` ద్వారా చెల్లుబాటు అవుతుంది. ప్రభావవంతమైన `REQUIRE_API_KEY` ఫీచర్ ఫ్లాగ్ నిలిపివేయబడినప్పుడు మాత్రమే అనామకులకు వస్తుంది. ప్రభావవంతమైన ఫ్లాగ్ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ద్వారా పరిష్కరించబడుతుంది కాబట్టి డాష్బోర్డ్ ఫీచర్ ఫ్లాగ్లు మరియు ఎన్విరాన్మెంట్ వేరియబుల్స్ `/api/v1/*`, `/api/v1beta/*` మరియు మారుపేర్లను స్థిరంగా నియంత్రిస్తాయి; పరిష్కర్త వైఫల్యాలు విఫలమవుతాయి. క్లయింట్ API మార్గాల్లో డాష్బోర్డ్-సెషన్ అభ్యర్థనలను అనుమతిస్తుంది (డ్యాష్బోర్డ్ మోడల్ కేటలాగ్ ద్వారా ఉపయోగించబడుతుంది `/api/v1/models` తో సహా). Entra ID SSO ప్రారంభించబడినప్పుడు, నిర్మాణాత్మకంగా Entra టోకెన్ అయిన బేరర్ (మూడు base64url విభాగాలు, `RS*` alg, `kid`) SSO శాఖ ద్వారా నిర్వహించబడుతుంది.** ముందు** `validateApiKey()` మరియు దాని తీర్పు తుది — ఇది API-కీ మార్గం లేదా అనామక బ్రాంచ్కి దిగజారదు, కాబట్టి గుర్తింపు ప్రదాత అంతరాయం ఓపెన్ యాక్సెస్గా మారదు. స్టాటిక్ API కీలు ప్రభావితం కావు. [ఎంట్రా ID SSO](../security/ENTRA_SSO.md) చూడండి.
+- **`managementPolicy`** (`policies/management.ts`) — డాష్బోర్డ్ సెషన్, అంతర్గత మోడల్-సమకాలీకరణ అభ్యర్థనలను ( `/api/providers/[name]/(sync-models|models)` కి వ్యతిరేకంగా సరిపోల్చింది) అంగీకరిస్తుంది లేదా `isAuthRequired()` తప్పు అని తిరిగి ఇస్తే పూర్తిగా దాటవేస్తుంది. బేరర్ టోకెన్ ఉన్నప్పటికీ చెల్లదు, 401 లేకపోతే 403 (`AUTH_001`)ని అందిస్తుంది. ఏదైనా auth బ్రాంచ్ — ముందు రూట్-గార్డ్ టైర్లను (LOCAL_ONLY / ALWAYS_PROTECTED) అమలు చేస్తుంది, [రూట్ గార్డ్ టైర్లను](../security/ROUTE_GUARD_TIERS.md) చూడండి. బేరర్ కీ `manage` స్కోప్ను కలిగి ఉన్నప్పుడు `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ఈనాడు: `/api/mcp/`)లోని LOCAL_ONLY మార్గాలు నాన్-లూప్బ్యాక్ నుండి యాక్సెస్ చేయబడవచ్చు; స్కోప్తో సంబంధం లేకుండా అన్ని ఇతర LOCAL_ONLY మార్గాలు కఠినమైన-లూప్బ్యాక్గా ఉంటాయి.
 
-విజయవంతమైన పాలసీ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`తో `AuthSubject`ను అందిస్తుంది. దిగువస్థాయి హ్యాండ్లర్లు ప్రమాణీకరణ లాజిక్ను మళ్లీ అమలు చేయడానికి బదులుగా, `src/server/authz/assertAuth.ts`లోని `assertAuth(request, "CLIENT_API")` ద్వారా దాన్ని చదవవచ్చు.
+విజయవంతమైన పాలసీ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` తో `AuthSubject` ని అందిస్తుంది. డౌన్స్ట్రీమ్ హ్యాండ్లర్లు ప్రామాణీకరణ తర్కాన్ని మళ్లీ అమలు చేయడానికి బదులుగా `src/server/authz/assertAuth.ts` లో `assertAuth(request, "CLIENT_API")` ద్వారా చదవగలరు.
 
 ## పబ్లిక్ రూట్ల జాబితా
 
@@ -306,23 +306,23 @@ Client API key అమలు, నేరుగా `process.env.REQUIRE_API_KEY`న
 
 ## డీబగ్గింగ్
 
-పైప్లైన్ ఎల్లప్పుడూ ప్రతిస్పందనలకు వీటిని జోడిస్తుంది:
+పైప్లైన్ ఎల్లప్పుడూ దీనితో ప్రతిస్పందనలను స్టాంప్ చేస్తుంది:
 
 ```
-x-request-id:               <సహసంబంధ ఐడి, లోప ప్రతిస్పందనల్లో తిరిగి పంపబడుతుంది>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-ప్రమాణీకరించిన అభ్యర్థనల కోసం అప్స్ట్రీమ్ (హ్యాండ్లర్ వైపు) అభ్యర్థన హెడర్లలో ఇవి కూడా ఉంటాయి:
+ప్రామాణీకరించబడిన అభ్యర్థనల కోసం అప్స్ట్రీమ్ (హ్యాండ్లర్-సైడ్) అభ్యర్థన శీర్షికలు కూడా ఉన్నాయి:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<చివరి-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (ఐచ్ఛికం)
-x-omniroute-auth-scopes:    కామాలతో వేరు చేసిన జాబితా
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-హ్యాండ్లర్లలో `assertAuth(req, expectedClass)`ను ఉపయోగించండి — మిడిల్వేర్ను దాటవేసినట్లయితే, ఇది `AUTHZ_NOT_INITIALIZED` కోడ్తో `AuthzAssertionError`ను విసురుతుంది (పరీక్షల్లో కాన్ఫిగరేషన్ రిగ్రెషన్లను గుర్తించడానికి ఉపయోగకరం).
+మిడిల్వేర్ బైపాస్ చేయబడితే (పరీక్షలలో కాన్ఫిగరేషన్ `AUTHZ_NOT_INITIALIZED` క్యాచ్ చేయడంలో సహాయపడుతుంది) హ్యాండ్లర్స్ — లోపల `assertAuth(req, expectedClass)` `AuthzAssertionError`.
 
 ## వీటిని కూడా చూడండి
 

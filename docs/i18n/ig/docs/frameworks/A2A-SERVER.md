@@ -163,7 +163,7 @@ OmniRoute ekpughere nka A2A 6 etinyere na `src/lib/a2a/taskExecution.ts::A2A_SKI
 | Akụkọ ahụike           | `health-report`      | Na-achịkọta ihe mgbaji sekit, nkwụsịtụ, ọnọdụ mkpọchi maka onye na-eweta ya                                                              | ahụike, resilience      | "Gosi ọkwa ahụike nke ndị niile na-enye ya"  |
 | Ike ndepụta            | `list-capabilities`  | weghachite katalọgụ Skills Agent Skills 45 (23 API + 21 CLI + 1 config) dị ka tebụl akara nwere SKILL.md URLs raw maka ịgbanye okirikiri | katalọgụ, nchọpụta, nkà | "Depụta ikike OmniRoute niile"               |
 
-> Ekwesịrị idowe Kaadị Agent ka ọ dabara na katalọgụ ndị na-eweta 377 dị ndụ; Ọnụọgụ ndị na-eweta na free/no-auth metadata sitere na ndekọ oge ojiri gaa.
+> Ekwesịrị idowe Kaadị Agent ka ọ dabara na katalọgụ ndị na-eweta 380 dị ndụ; Ọnụọgụ ndị na-eweta na free/no-auth metadata sitere na ndekọ oge ojiri gaa.
 
 ### `list-capabilities` Skill nkọwa
 
@@ -197,17 +197,17 @@ Ebe njedebe JSON-RPC `/a2a` bụ ebe ntinye A2A izizi. Ebe njedebe REST ndị d�
 
 ---
 
-## Ịgbakwunye Nka Ọhụrụ
+## Na-agbakwunye nka Ọhụrụ
 
 1. **Mepụta faịlụ nka:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Bupụ ọrụ async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Soro nhazi nka ndị dị ugbu a dịka `smartRouting.ts`.
+   Bupụ ọrụ async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Soro udi nke nka dị dị ka `smartRouting.ts`.
 
-2. **Debanye onye njikwa:** n'ime `src/lib/a2a/taskExecution.ts`, tinye ntinye na `A2A_SKILL_HANDLERS`:
+2. **Onye njikwa aha:** na `src/lib/a2a/taskExecution.ts`, tinye ntinye na `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...nka ndị dị ugbu a
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ Ebe njedebe JSON-RPC `/a2a` bụ ebe ntinye A2A izizi. Ebe njedebe REST ndị d�
    };
    ```
 
-3. **Gosipụta ya na Kaadị Agent:** n'ime `src/lib/a2a/agentCardMetadata.ts` (nke `/.well-known/agent.json` na `/.well-known/agent-card.json` na-ejikọta ọnụ), gbakwunye ya na ndepụta `skills`:
+3. **Gosipụta na Kaadị Agent:** na `src/lib/a2a/agentCardMetadata.ts` (nke `/.well-known/agent.json` na `/.well-known/agent-card.json` kesara), tinye n'usoro `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ Ebe njedebe JSON-RPC `/a2a` bụ ebe ntinye A2A izizi. Ebe njedebe REST ndị d�
    }
    ```
 
-4. **Dee ule:** `tests/unit/a2a-<your-skill>.test.ts`. Kpuchie ụzọ nke ọma + ụzọ njehie.
+4. **Dee ule:** `tests/unit/a2a-<your-skill>.test.ts`. Na-ekpuchi ụzọ obi ụtọ + ụzọ njehie.
 
-5. **Detuo nkọwa** nka ọhụrụ ahụ na tebụl `Available Skills` nke faịlụ a.
+5. **Akwụkwọ** nka ọhụrụ dị na tebụl `Available Skills` faịlụ a.
 
 ---
 

@@ -242,19 +242,18 @@ env ద్వారా ప్రతి ప్రొవైడర్కు టా�
 
 ---
 
-## User-Agent ఓవర్రైడ్లు — env vars (`.env.example` విభాగం 12)
+## వినియోగదారు-ఏజెంట్ — env vars (`.env.example` విభాగం 12)ను భర్తీ చేస్తుంది
 
-| వేరియబుల్                | డిఫాల్ట్                                                        |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| వేరియబుల్           | డిఫాల్ట్                                      |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-డైనమిక్ లుకప్ ద్వారా `open-sse/executors/base.ts::buildHeaders()` వీటిని ఉపయోగిస్తుంది. **ప్రొవైడర్లు కొత్త CLI వెర్షన్లను విడుదల చేసినప్పుడు వీటిని అప్డేట్ చేయండి** — పాతబడిన UA స్ట్రింగ్లు కాలం చెల్లిన క్లయింట్లుగా తిరస్కరించబడటం ప్రారంభమవుతుంది.
+డైనమిక్ లుక్అప్ ద్వారా `open-sse/executors/base.ts::buildHeaders()` ద్వారా వినియోగించబడుతుంది.** ప్రొవైడర్లు కొత్త CLI వెర్షన్లను విడుదల చేసినప్పుడు వీటిని బంప్ చేయండి** — పాత UA స్ట్రింగ్లు పాత క్లయింట్లుగా తిరస్కరించబడటం ప్రారంభిస్తాయి.
 
 ## CLI అనుకూలత మోడ్ టాగిళ్లు (`.env.example` విభాగం 13)
 
