@@ -2,7 +2,8 @@
 // effect: their response — success, error or empty — must never be replayed on another
 // combo target (open-sse/services/combo/noReplayLatch.ts) nor on another account
 // (src/sse/handlers/chat.ts). Running the full chat.ts handler is too heavy here, so the
-// account-fallback side is covered through its seams plus a source-level wiring guard.
+// account-fallback side is covered through its seams plus a source-level wiring guard; the
+// Muse owner branch is driven through the real handler in custom-json-muse-no-replay.test.ts.
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";

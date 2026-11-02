@@ -2263,6 +2263,12 @@ async function handleSingleModelChat(
         releaseOAuthSession();
         return successResponse;
       }
+      // Custom JSON API node: the business call may already have taken effect. Surface
+      // its failure as-is — no account cooldown, no replay on this or another connection.
+      if (isNoReplayResponse(result.response)) {
+        return withSelectedConnectionHeader(result.response, credentials.connectionId);
+      }
+
       // Never let generic account fallback or affinity eviction move a Muse caller.
       if (museOwner) {
         const museDelayMs = muse.museRetryDelay(
@@ -2296,12 +2302,6 @@ async function handleSingleModelChat(
           }
         }
         return muse.museFailureResponse(museOwner, result);
-      }
-
-      // Custom JSON API node: the business call may already have taken effect. Surface
-      // its failure as-is — no account cooldown, no replay on another connection.
-      if (isNoReplayResponse(result.response)) {
-        return withSelectedConnectionHeader(result.response, credentials.connectionId);
       }
 
       // A hard-lease rejection must not mutate account state or retry.
