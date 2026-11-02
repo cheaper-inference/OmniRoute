@@ -13,6 +13,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { CodeBuddyIntlExecutor } from "../../open-sse/executors/codebuddy-intl.ts";
+import {
+  isDirectFetchContext,
+  runWithDirectFetchContext,
+} from "../../open-sse/utils/proxyFetch.ts";
 import { CODEBUDDY_TELEMETRY_FLAG } from "../../open-sse/executors/codebuddy-intl/reportTurn.ts";
 import {
   CODEBUDDY_REPORT_PATH,
@@ -194,6 +198,93 @@ test("execute() reports a cancelled turn as cancelled, not as an upstream error"
     const events = captured.report[0].events;
     const terminal = events.at(-1) as { status?: string };
     assert.equal(terminal.status, "cancelled");
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (previousFlag === undefined) delete process.env[CODEBUDDY_TELEMETRY_FLAG];
+    else process.env[CODEBUDDY_TELEMETRY_FLAG] = previousFlag;
+  }
+});
+
+test("execute() reports a stream that breaks after a 2xx as an error", async () => {
+  const captured: Captured = { report: [], traces: [], urls: [] };
+  const originalFetch = globalThis.fetch;
+  const previousFlag = process.env[CODEBUDDY_TELEMETRY_FLAG];
+  const telemetry = stubNetwork(captured);
+  const encoder = new TextEncoder();
+  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+    if (!String(url).includes("/v2/chat/completions")) return telemetry(url, init);
+    return new Response(
+      new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(encoder.encode(sse({ choices: [{ delta: { content: "Hola" } }] })));
+        },
+        pull(controller) {
+          controller.error(new Error("socket hang up"));
+        },
+      }),
+      { status: 200, headers: { "content-type": "text/event-stream" } }
+    );
+  }) as unknown as typeof fetch;
+  process.env[CODEBUDDY_TELEMETRY_FLAG] = "true";
+
+  try {
+    const exec = new CodeBuddyIntlExecutor();
+    const result = await exec.execute({
+      model: "glm-5.2",
+      body: bodyFor("rompe"),
+      stream: true,
+      credentials: creds,
+    });
+    const response = result instanceof Response ? result : result.response;
+    await assert.rejects(response.text(), /socket hang up/);
+    await new Promise((resolve) => setImmediate(resolve));
+
+    assert.equal(captured.report.length, 1, "a broken turn is still closed");
+    const terminal = captured.report[0].events.at(-1) as { status?: string };
+    assert.equal(terminal.status, "error");
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (previousFlag === undefined) delete process.env[CODEBUDDY_TELEMETRY_FLAG];
+    else process.env[CODEBUDDY_TELEMETRY_FLAG] = previousFlag;
+  }
+});
+
+test("execute() sends the report from the request's proxy context", async () => {
+  const captured: Captured = { report: [], traces: [], urls: [] };
+  const originalFetch = globalThis.fetch;
+  const previousFlag = process.env[CODEBUDDY_TELEMETRY_FLAG];
+  const telemetry = stubNetwork(captured);
+  const reportContexts: boolean[] = [];
+  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+    if (String(url).endsWith(CODEBUDDY_REPORT_PATH)) reportContexts.push(isDirectFetchContext());
+    return telemetry(url, init);
+  }) as unknown as typeof fetch;
+  process.env[CODEBUDDY_TELEMETRY_FLAG] = "true";
+
+  try {
+    const exec = new CodeBuddyIntlExecutor();
+    // The chat layer pins a connection's egress the same way. The direct sentinel stands in for
+    // the proxy because it can be observed without opening a socket.
+    const result = await runWithDirectFetchContext(() =>
+      exec.execute({
+        model: "glm-5.2",
+        body: bodyFor("contexto"),
+        stream: true,
+        credentials: creds,
+      })
+    );
+    // Consumed OUTSIDE the context by a client slower than the upstream: the stream goes idle
+    // between reads, so each pull runs in the reader's async context, not the request's.
+    const response = result instanceof Response ? result : result.response;
+    const reader = response.body!.getReader();
+    for (;;) {
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      const { done } = await reader.read();
+      if (done) break;
+    }
+    await new Promise((resolve) => setImmediate(resolve));
+
+    assert.deepEqual(reportContexts, [true]);
   } finally {
     globalThis.fetch = originalFetch;
     if (previousFlag === undefined) delete process.env[CODEBUDDY_TELEMETRY_FLAG];

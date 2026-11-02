@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash } from "node:crypto";
 import { CodeBuddyBaseExecutor, NEUTRAL_PROMPT, responseFromResult } from "./codebuddy/shared.ts";
 import { type ExecuteInput, type ExecutorExecuteResult, type ProviderCredentials } from "./base.ts";
@@ -19,6 +20,21 @@ import {
   type TurnObservation,
   type TurnOutcome,
 } from "./codebuddy-intl/turnObservation.ts";
+
+const TURN_OUTCOME_MESSAGES: Partial<Record<TurnOutcome, string>> = {
+  cancelled: "client closed the stream",
+  error: "upstream stream failed",
+};
+
+/**
+ * Report status of a finished turn. A stream that reached its natural end reports the HTTP
+ * verdict, and one that broke mid-body failed whatever its 2xx said. A turn the consumer
+ * abandoned is `cancelled`: it is NOT an upstream failure and must not be counted as one.
+ */
+function turnReportStatus(outcome: TurnOutcome, httpOk: boolean) {
+  if (outcome === "cancelled") return "cancelled" as const;
+  return outcome === "completed" && httpOk ? ("success" as const) : ("error" as const);
+}
 
 /**
  * Deterministic RFC-4122-v5-shaped UUID derived from a session key, mirroring
@@ -206,6 +222,11 @@ export class CodeBuddyIntlExecutor extends CodeBuddyBaseExecutor {
    * so the response is passed through `tapResponseForObservation` and the
    * report is emitted from its flush/cancel. Reporting at `return` time would
    * send an empty usage block and no first-token time — plausible, but false.
+   *
+   * @executorRecovery native
+   * @executorRecoveryReason Observation wrapper only: every attempt, body and retry stays in
+   * BaseExecutor.execute, so this override owns no recovery loop and never rewrites a payload.
+   * @executorRecoveryTest tests/unit/codebuddy-intl-execute-report-turn.test.ts
    */
   async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
     const startedAtMs = Date.now();
@@ -237,24 +258,25 @@ export class CodeBuddyIntlExecutor extends CodeBuddyBaseExecutor {
     if (!isCodeBuddyTelemetryEnabled()) return result;
 
     const response = responseFromResult(result);
+    // The report fires from the stream's end, in whichever async context consumes it. Pin the
+    // request's context so the side channel leaves through the connection's proxy, like the chat.
+    const inRequestContext = AsyncLocalStorage.snapshot();
     const finish = (observation: TurnObservation, outcome: TurnOutcome) => {
-      // A stream that reached its natural end reports the HTTP verdict; a turn
-      // the consumer abandoned is `cancelled` — it is NOT an upstream failure
-      // and must not be counted as one.
-      const status =
-        outcome === "cancelled" ? "cancelled" : response && response.ok ? "success" : "error";
-      void reportTurn({
-        op,
-        model,
-        startedAtMs,
-        endedAtMs: Date.now(),
-        ...(observation.firstTokenAtMs !== undefined
-          ? { firstTokenAtMs: observation.firstTokenAtMs }
-          : {}),
-        credentials: input.credentials,
-        status,
-        ...(observation.usage ? { usage: observation.usage } : {}),
-        ...(outcome === "cancelled" ? { message: "client closed the stream" } : {}),
+      const message = TURN_OUTCOME_MESSAGES[outcome];
+      inRequestContext(() => {
+        void reportTurn({
+          op,
+          model,
+          startedAtMs,
+          endedAtMs: Date.now(),
+          ...(observation.firstTokenAtMs !== undefined
+            ? { firstTokenAtMs: observation.firstTokenAtMs }
+            : {}),
+          credentials: input.credentials,
+          status: turnReportStatus(outcome, response?.ok === true),
+          ...(observation.usage ? { usage: observation.usage } : {}),
+          ...(message ? { message } : {}),
+        });
       });
     };
 
