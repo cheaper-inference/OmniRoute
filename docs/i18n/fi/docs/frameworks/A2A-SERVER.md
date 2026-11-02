@@ -215,19 +215,19 @@ JSON-RPC-päätepiste `/a2a` on ensisijainen A2A-käyttöpiste. Alla olevat REST
    };
    ```
 
-3. **Julkaise Agent Cardissa:** lisää tiedoston `src/app/.well-known/agent.json/route.ts` `skills`-taulukkoon:
+3. **Tuo esiin Agent Cardissa:** lisää tiedoston `src/lib/a2a/agentCardMetadata.ts` (jota `/.well-known/agent.json` ja `/.well-known/agent-card.json` käyttävät yhdessä) `skills`-taulukkoon:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Taitosi",
-     "description": "Lyhyt, käyttäjän tarkoitukseen keskittyvä kuvaus",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Esimerkki luonnollisen kielen kutsusta"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Kirjoita testit:** `tests/unit/a2a-<your-skill>.test.ts`. Kattaa onnistunut suorituspolku ja virhepolku.
+4. **Kirjoita testit:** `tests/unit/a2a-<your-skill>.test.ts`. Testaa onnistunut suorituspolku ja virhepolku.
 
 5. **Dokumentoi** uusi taito tämän tiedoston `Available Skills` -taulukossa.
 
