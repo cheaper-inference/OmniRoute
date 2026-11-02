@@ -10,6 +10,8 @@ const {
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const { clearAllModelLockouts, getAllModelLockouts, isModelLocked } =
   await import("../../open-sse/services/accountFallback.ts");
+const { clearCooldownState, getCooldownEntryCount } =
+  await import("../../open-sse/services/providerCooldownTracker.ts");
 
 function localQueueResponse() {
   return new Response(
@@ -100,7 +102,12 @@ function okResponse() {
   );
 }
 
-async function runSemaphoreCombo(strategy: string, models: string[], maxRetries = 0) {
+async function runSemaphoreCombo(
+  strategy: string,
+  models: string[],
+  maxRetries = 0,
+  settings: Record<string, unknown> = {}
+) {
   const calls: string[] = [];
   const response = await handleComboChat({
     body: { model: models[0] },
@@ -116,7 +123,7 @@ async function runSemaphoreCombo(strategy: string, models: string[], maxRetries 
     },
     isModelAvailable: async () => true,
     log: createLog() as never,
-    settings: {},
+    settings,
     allCombos: null,
   });
   return { response, calls };
@@ -186,11 +193,17 @@ for (const strategy of ["priority", "round-robin"]) {
 test("a full semaphore in a combo records no model lockout and no provider cooldown", async () => {
   clearAllModelLockouts();
   const models = ["openai/gpt-semaphore-lockout", "anthropic/claude-semaphore-lockout"];
+  clearCooldownState();
   const lockoutsBefore = getAllModelLockouts().length;
-  const { response } = await runSemaphoreCombo("priority", models);
+  // Both are operator opt-ins, so this enables them to prove the failure feeds neither.
+  const { response } = await runSemaphoreCombo("priority", models, 0, {
+    modelLockout: { enabled: true },
+    resilienceSettings: { providerCooldown: { enabled: true } },
+  });
   assert.equal(response.status, 200);
   await response.body?.cancel();
   assert.equal(getAllModelLockouts().length, lockoutsBefore);
   assert.equal(isModelLocked("openai", "", "gpt-semaphore-lockout"), false);
+  assert.equal(getCooldownEntryCount(), 0);
   clearAllModelLockouts();
 });
