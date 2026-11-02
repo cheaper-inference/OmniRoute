@@ -1,0 +1,1 @@
+- **feat(services):** the in-memory session TTL is now configurable via `OMNIROUTE_SESSION_TTL_MIN` (minutes; default stays 15 and invalid values keep the default) ([#18394](https://github.com/cheaper-inference/OmniRoute/pull/18394)) — thanks @jjxyxsjr
