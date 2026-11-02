@@ -9,7 +9,8 @@
  *  - full classification over OpenAI/Anthropic × JSON/SSE response shapes,
  *  - the positive controls (no tools pending / real tool call / structured
  *    answer are NEVER classified),
- *  - the env kill switch.
+ *  - the opt-in env flag,
+ *  - the streaming read stopping as soon as the verdict is settled.
  */
 import { test, describe, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
@@ -634,5 +635,131 @@ describe("classifyAgenticStallResponse", () => {
     assert.ok(verdict);
     const body = await response.json();
     assert.equal(body.choices[0].message.content, STALL_TEXT);
+  });
+
+  describe("streaming inspection stays bounded (the original branch is still unread)", () => {
+    const encoder = new TextEncoder();
+    const frame = (delta: Record<string, unknown>, finish: string | null = null) =>
+      `data: ${JSON.stringify({ choices: [{ delta, finish_reason: finish }] })}\n\n`;
+    const sse = (stream: ReadableStream<Uint8Array>) =>
+      new Response(stream, { status: 200, headers: { "content-type": "text/event-stream" } });
+
+    /** Fail fast instead of hanging the runner when the classifier never settles. */
+    async function settles<T>(work: Promise<T>): Promise<T | "pending"> {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const pending = new Promise<"pending">((resolve) => {
+        timer = setTimeout(() => resolve("pending"), 3000);
+      });
+      const outcome = await Promise.race([work, pending]);
+      clearTimeout(timer);
+      return outcome;
+    }
+
+    test("a stream past the inspection cap returns null instead of hanging on its tee", async () => {
+      const big = encoder.encode(`: ${"x".repeat(256 * 1024)}\n`);
+      let sent = 0;
+      const response = sse(
+        new ReadableStream<Uint8Array>({
+          pull(controller) {
+            if (sent++ >= 8) controller.close();
+            else controller.enqueue(big);
+          },
+        })
+      );
+      const verdict = await settles(
+        classifyAgenticStallResponse({ body: openAiToolTailBody(), response })
+      );
+      assert.equal(verdict, null);
+      await response.text();
+    });
+
+    test("a tool call settles the verdict while the stream is still open", async () => {
+      const response = sse(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(
+              encoder.encode(frame({ tool_calls: [{ index: 0, function: { name: "read_file" } }] }))
+            );
+          },
+        })
+      );
+      const verdict = await settles(
+        classifyAgenticStallResponse({ body: openAiToolTailBody(), response })
+      );
+      assert.equal(verdict, null);
+    });
+
+    test("prose past the narration length settles the verdict while the stream is still open", async () => {
+      const response = sse(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(encoder.encode(frame({ content: "word ".repeat(100) })));
+          },
+        })
+      );
+      const verdict = await settles(
+        classifyAgenticStallResponse({ body: openAiToolTailBody(), response })
+      );
+      assert.equal(verdict, null);
+    });
+
+    test("a long summary is read to its end and still classified", async () => {
+      const response = sse(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(encoder.encode(frame({ content: "<summary>" })));
+            controller.enqueue(encoder.encode(frame({ content: "progress ".repeat(200) })));
+            controller.enqueue(encoder.encode(frame({ content: "</summary>" })));
+            controller.enqueue(encoder.encode(frame({}, "stop")));
+            controller.close();
+          },
+        })
+      );
+      const verdict = await settles(
+        classifyAgenticStallResponse({ body: openAiToolTailBody(), response })
+      );
+      assert.notEqual(verdict, "pending");
+      assert.equal(
+        verdict && verdict !== "pending" ? verdict.signature : null,
+        "agentic_stall_no_toolcall"
+      );
+    });
+
+    test("an SSE frame split across chunks is folded whole", async () => {
+      const wire = encoder.encode(
+        frame({ content: STALL_TEXT }) + frame({}, "stop") + "data: [DONE]\n\n"
+      );
+      const response = sse(
+        new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(wire.slice(0, 21));
+            controller.enqueue(wire.slice(21));
+            controller.close();
+          },
+        })
+      );
+      const verdict = await settles(
+        classifyAgenticStallResponse({ body: openAiToolTailBody(), response })
+      );
+      assert.equal(
+        verdict && verdict !== "pending" ? verdict.signature : null,
+        "agentic_stall_no_toolcall"
+      );
+    });
+
+    test("an unclassifiable content-type leaves no unread clone behind", async () => {
+      const response = new Response("plain text", {
+        status: 200,
+        headers: { "content-type": "text/plain" },
+      });
+      let clones = 0;
+      const clone = response.clone.bind(response);
+      response.clone = () => {
+        clones++;
+        return clone();
+      };
+      await classifyAgenticStallResponse({ body: openAiToolTailBody(), response });
+      assert.equal(clones, 0);
+    });
   });
 });

@@ -36,13 +36,17 @@
  * gate silently skips every future imitator).
  *
  * The classifier reads the response via clone() ONLY — never disturbs the
- * body the client pipeline still needs (same contract as
- * applyComboStepResponseGuards). It must NEVER throw or break the request
+ * body the client pipeline still needs. It must NEVER throw or break the request
  * path: every failure mode returns null (not a stall).
+ *
+ * A streaming response is held back from the client while it is inspected, so the
+ * read stops as soon as the verdict is settled: a tool call or prose past the
+ * narration length cannot be a stall, whatever the rest of the stream carries.
+ * Only a summary-opened or still-short turn is read to its end.
  *
  * Opt-in flag: OMNIROUTE_AGENTIC_STALL_FAILOVER=1 (or "true") enables
  * classification. Default: OFF — new behavior-changing flags are opt-in. This
- * module is classification only; no combo call site consumes the verdict yet.
+ * module only classifies; `agenticStallFailover.ts` holds the combo's reaction.
  */
 
 export const AGENTIC_STALL_SIGNATURE = "agentic_stall_no_toolcall";
@@ -367,50 +371,64 @@ function applyAnthropicSseEvent(acc: SseAccumulator, event: Record<string, unkno
   ANTHROPIC_SSE_HANDLERS[type](acc, event);
 }
 
-/** Assemble the terminal assistant message from a buffered SSE payload,
- *  handling both OpenAI chat chunks and Anthropic message events. Returns
- *  null when nothing recognizable was seen (cannot classify). */
-function extractFromSse(payload: string): StallSignal | null {
+/** Fold one raw SSE line, handling both OpenAI chat chunks and Anthropic events. */
+function foldSseLine(acc: SseAccumulator, rawLine: string): void {
+  const parsed = parseSseDataLine(rawLine);
+  if (!parsed) return;
+  if (Array.isArray(parsed.choices)) applyOpenAiSseChunk(acc, parsed.choices);
+  else applyAnthropicSseEvent(acc, parsed);
+}
+
+/** Fold every complete line of `buffer`; returns the trailing incomplete line. */
+function foldCompleteSseLines(acc: SseAccumulator, buffer: string): string {
+  const lines = buffer.split(/\r?\n/);
+  const tail = lines.pop() ?? "";
+  for (const line of lines) foldSseLine(acc, line);
+  return tail;
+}
+
+/** True once nothing later in the stream can turn this turn into a stall: only a
+ *  summary opener survives past the short-narration length. */
+function cannotBecomeStall(acc: SseAccumulator): boolean {
+  if (acc.hasToolCalls) return true;
+  const text = acc.text.trim();
+  return text.length > SHORT_NARRATION_MAX_CHARS && !SUMMARY_PREFIX.test(text);
+}
+
+/** Assemble the terminal assistant message from a cloned SSE body, stopping early
+ *  once the verdict is settled. Returns null when the read stopped early, failed
+ *  or saw nothing recognizable (cannot classify). */
+async function readSseStallSignal(clone: Response): Promise<StallSignal | null> {
+  const reader = clone.body?.getReader();
+  if (!reader) return null;
   const acc: SseAccumulator = {
     finishReason: null,
     hasToolCalls: false,
     text: "",
     recognized: false,
   };
-  for (const rawLine of payload.split(/\r?\n/)) {
-    const parsed = parseSseDataLine(rawLine);
-    if (!parsed) continue;
-    if (Array.isArray(parsed.choices)) applyOpenAiSseChunk(acc, parsed.choices);
-    else applyAnthropicSseEvent(acc, parsed);
-  }
-  if (!acc.recognized) return null;
-  return { finishReason: acc.finishReason, hasToolCalls: acc.hasToolCalls, text: acc.text };
-}
-
-async function readClonedBodyText(clone: Response): Promise<string | null> {
+  const decoder = new TextDecoder();
+  let pending = "";
+  let bytes = 0;
   try {
-    if (!clone.body) return null;
-    const reader = clone.body.getReader();
-    const decoder = new TextDecoder();
-    let text = "";
-    let bytes = 0;
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
-      if (value) {
-        bytes += value.byteLength;
-        if (bytes > MAX_STALL_INSPECT_BYTES) {
-          await reader.cancel().catch(() => {});
-          return null; // too large to safely classify — treat as not-a-stall
-        }
-        text += decoder.decode(value, { stream: true });
+      bytes += value.byteLength;
+      pending = foldCompleteSseLines(acc, pending + decoder.decode(value, { stream: true }));
+      if (bytes > MAX_STALL_INSPECT_BYTES || cannotBecomeStall(acc)) {
+        // Never await this: a tee branch's cancel settles only when its sibling is
+        // cancelled too, and the sibling is the response the combo is about to return.
+        void reader.cancel().catch(() => {});
+        return null;
       }
     }
-    text += decoder.decode();
-    return text;
+    foldSseLine(acc, pending + decoder.decode());
   } catch {
     return null;
   }
+  if (!acc.recognized) return null;
+  return { finishReason: acc.finishReason, hasToolCalls: acc.hasToolCalls, text: acc.text };
 }
 
 export type AgenticStallVerdict = {
@@ -419,21 +437,20 @@ export type AgenticStallVerdict = {
 };
 
 /** Clone the response and extract its terminal stall signal (SSE or JSON).
- *  Returns null when the body cannot be read or classified. */
+ *  Returns null when the body cannot be read or classified. The content type is
+ *  read first: a clone nobody reads keeps buffering the body behind the client. */
 async function readStallSignal(response: Response): Promise<StallSignal | null> {
   if (!response || typeof response.clone !== "function") return null;
+  const ct = response.headers?.get?.("content-type") || "";
+  const isEventStream = ct.includes("text/event-stream");
+  if (!isEventStream && !ct.includes("application/json")) return null;
   let clone: Response;
   try {
     clone = response.clone();
   } catch {
     return null;
   }
-  const ct = clone.headers?.get?.("content-type") || "";
-  if (ct.includes("text/event-stream")) {
-    const text = await readClonedBodyText(clone);
-    return text == null ? null : extractFromSse(text);
-  }
-  if (!ct.includes("application/json")) return null;
+  if (isEventStream) return readSseStallSignal(clone);
   let parsed: unknown;
   try {
     parsed = await clone.json();
