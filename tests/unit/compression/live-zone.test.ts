@@ -288,5 +288,25 @@ describe("cache-aligned live-zone compression", () => {
         liveItems: 0,
       });
     });
+
+    it(`recompresses an unchanged ${field} history when instructions change`, async () => {
+      const calls: Array<Record<string, unknown>> = [];
+      const compress = toolCompressor(calls);
+      const first = {
+        instructions: "stable instructions",
+        [field]: [
+          { role: "user", content: "user turn" },
+          { role: "tool", content: "tool output" },
+        ],
+      };
+      await applyLiveZoneCompression(first, options, compress);
+      const edited = { ...first, instructions: "edited instructions" };
+      const editedResult = await applyLiveZoneCompression(edited, options, compress);
+
+      assert.equal(calls.length, 2, "changed instructions must not reuse the frozen prefix");
+      assert.equal(calls[1].instructions, "edited instructions");
+      assert.deepEqual(calls[1][field], first[field]);
+      assert.equal(editedResult.body.instructions, "edited instructions");
+    });
   }
 });
