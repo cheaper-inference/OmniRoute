@@ -142,6 +142,7 @@ import {
   mergeAlibabaFreeDrainedModels,
   rehydrateAlibabaFreeDrainedModelLocks,
 } from "@omniroute/open-sse/services/alibabaFreeTier.ts";
+import { isTransientCodexCapacity429 } from "@omniroute/open-sse/services/codexAccount/capacity429.ts";
 import {
   getCodexModelScope,
   getCodexQuotaWindowFilterForModel,
@@ -3082,6 +3083,29 @@ export async function markAccountUnavailable(
     }
     const errorMsg =
       sanitizeErrorMessage(describeUpstreamFailure(errorText)) || "Provider request failed";
+
+    // #18221: an explicit upstream Codex capacity 429 is not an exhausted
+    // account-wide quota window. Do not persist a virtual-child scope cooldown
+    // or lock sibling models; honor the operator's transient cooling opt-out.
+    if (
+      provider === "codex" &&
+      typeof model === "string" &&
+      model.trim().length > 0 &&
+      conn &&
+      isTransientCodexCapacity429(status, errorText, options.headers)
+    ) {
+      const modelCooldownMs = disableCooling ? 0 : Math.min(Math.max(cooldownMs, 5_000), 60_000);
+      if (modelCooldownMs > 0) {
+        lockExactModel(provider, connectionId, model, "model_capacity", modelCooldownMs);
+      }
+      await updateProviderConnection(connectionId, {
+        lastErrorType: "server_error",
+        lastError: "Codex model temporarily at capacity",
+        lastErrorAt: new Date().toISOString(),
+        errorCode: status,
+      });
+      return { shouldFallback: true, cooldownMs: modelCooldownMs };
+    }
 
     // T09: Codex per-scope lockout (do not block the whole account globally).
     if (

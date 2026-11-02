@@ -21,6 +21,7 @@ import {
 import { COOLDOWN_MS } from "../../config/errorConfig.ts";
 import { normalizeHeaders } from "../../utils/headers.ts";
 import { shouldSkipCredentialRefresh } from "./skipCredentialRefresh.ts";
+import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacity429.ts";
 
 export interface ChatCoreExecutorResult {
   response: Response;
@@ -186,22 +187,29 @@ async function recordUpstreamRateLimit(
   connectionId: string,
   model: string,
   attempt: ChatCoreExecutorResult
-): Promise<void> {
-  if (!connectionId) return;
+): Promise<boolean> {
+  if (!connectionId) return false;
   const status = attempt.response.status;
   try {
     state.recordRateLimitHeaders(provider, connectionId, attempt.response.headers, status, model);
   } catch {
     // best-effort
   }
+  let capacity429 = false;
   try {
     const text = await attempt.response.clone().text();
+    capacity429 =
+      provider === "codex" && isTransientCodexCapacity429(status, text, attempt.response.headers);
     // parseRetryAfterFromBody JSON.parses a string and falls back to "unknown"
     // on non-JSON, so the raw text is the safest thing to hand over.
-    if (text) state.recordRateLimitBody(provider, connectionId, text, status, model);
+    // Do not turn one Codex model-capacity response into a shared quota pause.
+    if (text && !capacity429) {
+      state.recordRateLimitBody(provider, connectionId, text, status, model);
+    }
   } catch {
     // Body already consumed/unreadable — the header signal above still applied.
   }
+  return capacity429;
 }
 
 function leaseMismatch(model: string, connectionId: string): ProviderExecutionOutcome {
@@ -407,7 +415,7 @@ export async function runProviderExecutionPipeline(
     // updateFromHeaders/updateFromResponseBody pair only runs on the streaming
     // leg — the non-streaming leg returns this pipeline's error outcome straight
     // to the caller, so without this the reservoir was never drained (#12945).
-    await recordUpstreamRateLimit(
+    const codexCapacity429 = await recordUpstreamRateLimit(
       state,
       target.provider,
       currentConnectionId(connection),
@@ -428,12 +436,14 @@ export async function runProviderExecutionPipeline(
       const retryAfterMs = retryAfterMsFrom(attempt);
       if (failedId && !excludedIds.includes(failedId)) excludedIds.push(failedId);
       if (failedId) {
-        await state.onCodexScopeRateLimited?.({
-          failedConnectionId: failedId,
-          model: wire.currentModel || target.requestedModel || null,
-          rateLimitedUntil: new Date(Date.now() + (retryAfterMs || 60_000)).toISOString(),
-          credentials: connection.getCredentials(),
-        });
+        if (!codexCapacity429) {
+          await state.onCodexScopeRateLimited?.({
+            failedConnectionId: failedId,
+            model: wire.currentModel || target.requestedModel || null,
+            rateLimitedUntil: new Date(Date.now() + (retryAfterMs || 60_000)).toISOString(),
+            credentials: connection.getCredentials(),
+          });
+        }
         await state.onClearSessionAffinity?.({ failedConnectionId: failedId });
       }
       const nextCreds = await connection
