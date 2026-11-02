@@ -12296,7 +12296,9 @@
       "failedTitle": "所有 {count} 次尝试均失败",
       "failed": "失败",
       "pinnedTitle": "通过上下文缓存会话固定选择的模型",
-      "pinned": "固定"
+      "pinned": "固定",
+      "recoveredAttemptsTitle": "请求经过 {count} 次尝试后恢复",
+      "latestOutcomeFailed": "最近一次请求结果失败"
     },
     "attempts": "尝试次数",
     "detail": {
@@ -12398,13 +12400,20 @@
       "continuesFromParent": "从父项继续",
       "continuesFrom": "从 {id} 继续",
       "viewConversation": "查看对话",
-      "openConversation": "打开对话 {id}"
+      "openConversation": "打开对话 {id}",
+      "omittedHttpAttempts": "未保留 {count} 次 HTTP 发送",
+      "noHttpResponse": "未观察到 HTTP 响应",
+      "transportError": "传输错误"
     },
     "tableLabel": "请求日志",
     "throughputPostFirstToken": "首个令牌后",
     "throughputEndToEnd": "端到端",
     "throughputRate": "{value} 个令牌/秒",
-    "throughputExplanation": "两种速率均使用输出令牌数和推理令牌数中的较大值。首个令牌后速率会排除有效的 TTFT；否则使用完整时长。端到端速率始终使用完整时长。缓冲响应可能具有较高的突发传输速率，但这并不意味着模型生成速度更快。"
+    "throughputExplanation": "两种速率均使用输出令牌数和推理令牌数中的较大值。首个令牌后速率会排除有效的 TTFT；否则使用完整时长。端到端速率始终使用完整时长。缓冲响应可能具有较高的突发传输速率，但这并不意味着模型生成速度更快。",
+    "omittedHttpAttempts": "未保留 {count} 次 HTTP 发送",
+    "upstreamStatus": "上游服务器 {status}",
+    "noHttpResponse": "未观察到 HTTP 响应",
+    "transportError": "传输错误"
   },
   "proxyLogger": {
     "filterAll": "全部",

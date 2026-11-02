@@ -12219,7 +12219,9 @@
       "failedTitle": "所有 {count} 次嘗試均失敗",
       "failed": "失敗",
       "pinnedTitle": "透過上下文快取會話固定選擇的模型",
-      "pinned": "固定"
+      "pinned": "固定",
+      "recoveredAttemptsTitle": "請求經過 {count} 次嘗試後恢復",
+      "latestOutcomeFailed": "最近一次請求結果失敗"
     },
     "attempts": "嘗試次數",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "接續自父項目",
       "continuesFrom": "接續自 {id}",
       "viewConversation": "檢視對話",
-      "openConversation": "開啟對話 {id}"
+      "openConversation": "開啟對話 {id}",
+      "omittedHttpAttempts": "未保留 {count} 次 HTTP 傳送",
+      "noHttpResponse": "未觀察到 HTTP 回應",
+      "transportError": "傳輸錯誤"
     },
     "tableLabel": "請求日誌",
     "throughputPostFirstToken": "首個權杖後",
     "throughputEndToEnd": "端對端",
     "throughputRate": "{value} 個權杖/秒",
-    "throughputExplanation": "兩種速率皆採用輸出與推理權杖數量中的較大值。首個權杖後速率會排除有效的 TTFT；否則會使用完整持續時間。端對端速率一律使用完整持續時間。緩衝回應可能具有較高的突發傳送速率，但不代表模型生成速度更快。"
+    "throughputExplanation": "兩種速率皆採用輸出與推理權杖數量中的較大值。首個權杖後速率會排除有效的 TTFT；否則會使用完整持續時間。端對端速率一律使用完整持續時間。緩衝回應可能具有較高的突發傳送速率，但不代表模型生成速度更快。",
+    "omittedHttpAttempts": "未保留 {count} 次 HTTP 傳送",
+    "upstreamStatus": "上游伺服器 {status}",
+    "noHttpResponse": "未觀察到 HTTP 回應",
+    "transportError": "傳輸錯誤"
   },
   "proxyLogger": {
     "filterAll": "全部",

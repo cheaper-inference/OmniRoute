@@ -12296,7 +12296,9 @@
       "failedTitle": "Alle {count} forsøg mislykkedes",
       "failed": "mislykkedes",
       "pinnedTitle": "Model valgt via kontekst-cache session fastgørelse",
-      "pinned": "fastgjort"
+      "pinned": "fastgjort",
+      "recoveredAttemptsTitle": "Anmodningen blev genoprettet efter {count} forsøg",
+      "latestOutcomeFailed": "Det seneste anmodningsresultat mislykkedes"
     },
     "attempts": "forsøg",
     "detail": {
@@ -12398,13 +12400,20 @@
       "continuesFromParent": "fortsætter fra overordnet",
       "continuesFrom": "Fortsætter fra {id}",
       "viewConversation": "vis samtale",
-      "openConversation": "Åbn samtale {id}"
+      "openConversation": "Åbn samtale {id}",
+      "omittedHttpAttempts": "{count} HTTP-afsendelser blev ikke gemt",
+      "noHttpResponse": "Intet HTTP-svar blev observeret",
+      "transportError": "Transportfejl"
     },
     "tableLabel": "Anmodningslogfiler",
     "throughputPostFirstToken": "Efter første token",
     "throughputEndToEnd": "Ende-til-ende",
     "throughputRate": "{value} tokens/sek.",
-    "throughputExplanation": "Begge hastigheder bruger det højeste af antallet af output- og reasoning-tokens. Efter første token udelader en gyldig TTFT; ellers bruges hele varigheden. Ende-til-ende bruger altid hele varigheden. Et bufret svar kan have en høj burst-leveringshastighed uden hurtigere modelgenerering."
+    "throughputExplanation": "Begge hastigheder bruger det højeste af antallet af output- og reasoning-tokens. Efter første token udelader en gyldig TTFT; ellers bruges hele varigheden. Ende-til-ende bruger altid hele varigheden. Et bufret svar kan have en høj burst-leveringshastighed uden hurtigere modelgenerering.",
+    "omittedHttpAttempts": "{count} HTTP-afsendelser blev ikke gemt",
+    "upstreamStatus": "Opstrømsserver {status}",
+    "noHttpResponse": "Intet HTTP-svar blev observeret",
+    "transportError": "Transportfejl"
   },
   "proxyLogger": {
     "filterAll": "Alle",

@@ -1,5 +1,4 @@
-import { saveUpstreamHttpAttempt } from "@/lib/usage/callLogs";
-import { TRANSPORT_ERROR_LABEL, NO_RESPONSE_LABEL } from "@/shared/utils/upstreamHttp";
+import { TRANSPORT_ERROR_LABEL, NO_RESPONSE_LABEL } from "../../utils/upstreamHttp.ts";
 import type {
   HttpAttemptCollector,
   HttpAttemptSelection,
@@ -21,7 +20,7 @@ import { logAuditEvent } from "@/lib/compliance";
 import { emit } from "@/lib/events/eventBus";
 import { maybeLogToolCallSpecViolation } from "./toolCallSpecViolationAudit.ts";
 import type { RequestCompletedPayload, RequestFailedPayload } from "@/lib/events/types";
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog, saveUpstreamHttpAttempt } from "@/lib/usageDb";
 import type { VideoBridgeLogRedactionEntry } from "@/lib/guardrails/videoBridge";
 import { redactVideoTranscriptFieldsForLog } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import { FORMATS } from "../../translator/formats.ts";

@@ -12219,7 +12219,9 @@
       "failedTitle": "Ниједан од {count} покушаја није успео",
       "failed": "неуспешно",
       "pinnedTitle": "Модел изабран путем закачивања у context-cache сесији",
-      "pinned": "закачено"
+      "pinned": "закачено",
+      "recoveredAttemptsTitle": "Захтев је опорављен после {count} покушаја",
+      "latestOutcomeFailed": "Исход последњег захтева није успешан"
     },
     "attempts": "покушаји",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "наставља се од надређеног",
       "continuesFrom": "Наставља се од {id}",
       "viewConversation": "прикажи разговор",
-      "openConversation": "Отвори разговор {id}"
+      "openConversation": "Отвори разговор {id}",
+      "omittedHttpAttempts": "{count} HTTP слања није сачувано",
+      "noHttpResponse": "HTTP одговор није забележен",
+      "transportError": "Грешка у преносу"
     },
     "tableLabel": "Евиденција захтева",
     "throughputPostFirstToken": "Nakon prvog tokena",
     "throughputEndToEnd": "Kraj do kraja",
     "throughputRate": "{value} tokena/s",
-    "throughputExplanation": "Obe brzine koriste veći od broja izlaznih i reasoning tokena. Brzina nakon prvog tokena isključuje važeći TTFT; u suprotnom koristi ukupno trajanje. Kraj do kraja uvek koristi ukupno trajanje. Baferovani odgovor može imati visoku brzinu isporuke u naletu bez brže generacije modela."
+    "throughputExplanation": "Obe brzine koriste veći od broja izlaznih i reasoning tokena. Brzina nakon prvog tokena isključuje važeći TTFT; u suprotnom koristi ukupno trajanje. Kraj do kraja uvek koristi ukupno trajanje. Baferovani odgovor može imati visoku brzinu isporuke u naletu bez brže generacije modela.",
+    "omittedHttpAttempts": "{count} HTTP слања није сачувано",
+    "upstreamStatus": "Надређени сервер {status}",
+    "noHttpResponse": "HTTP одговор није забележен",
+    "transportError": "Грешка у преносу"
   },
   "proxyLogger": {
     "filterAll": "Све",

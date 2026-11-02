@@ -12296,7 +12296,9 @@
       "failedTitle": "Tutti i {count} tentativi sono falliti",
       "failed": "fallito",
       "pinnedTitle": "Modello selezionato tramite il pinning della sessione context-cache",
-      "pinned": "pinnato"
+      "pinned": "pinnato",
+      "recoveredAttemptsTitle": "Richiesta recuperata dopo {count} tentativi",
+      "latestOutcomeFailed": "L'ultimo esito della richiesta è fallito"
     },
     "attempts": "tentativi",
     "detail": {
@@ -12398,13 +12400,20 @@
       "continuesFromParent": "continua dal padre",
       "continuesFrom": "Continua da {id}",
       "viewConversation": "visualizza conversazione",
-      "openConversation": "Apri conversazione {id}"
+      "openConversation": "Apri conversazione {id}",
+      "omittedHttpAttempts": "{count} invii HTTP non conservati",
+      "noHttpResponse": "Nessuna risposta HTTP osservata",
+      "transportError": "Errore di trasporto"
     },
     "tableLabel": "Log delle richieste",
     "throughputPostFirstToken": "Dopo il primo token",
     "throughputEndToEnd": "Da inizio a fine",
     "throughputRate": "{value} token/sec",
-    "throughputExplanation": "Entrambe le velocità usano il maggiore tra il conteggio dei token di output e di reasoning. La velocità dopo il primo token esclude un TTFT valido; in caso contrario usa la durata completa. La velocità da inizio a fine usa sempre la durata completa. Una risposta bufferizzata può avere un'elevata velocità di consegna a raffica senza una generazione del modello più rapida."
+    "throughputExplanation": "Entrambe le velocità usano il maggiore tra il conteggio dei token di output e di reasoning. La velocità dopo il primo token esclude un TTFT valido; in caso contrario usa la durata completa. La velocità da inizio a fine usa sempre la durata completa. Una risposta bufferizzata può avere un'elevata velocità di consegna a raffica senza una generazione del modello più rapida.",
+    "omittedHttpAttempts": "{count} invii HTTP non conservati",
+    "upstreamStatus": "Server a monte {status}",
+    "noHttpResponse": "Nessuna risposta HTTP osservata",
+    "transportError": "Errore di trasporto"
   },
   "proxyLogger": {
     "filterAll": "Tutti",

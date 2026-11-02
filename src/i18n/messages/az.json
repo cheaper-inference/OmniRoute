@@ -12296,7 +12296,9 @@
       "failedTitle": "Bütün {count} cəhdlər uğursuz oldu",
       "failed": "başarısız oldu",
       "pinnedTitle": "Kontekst-cache sessiya pinləmə vasitəsilə model seçildi",
-      "pinned": "sabitləşdirilmiş"
+      "pinned": "sabitləşdirilmiş",
+      "recoveredAttemptsTitle": "Sorğu {count} cəhddə bərpa edildi",
+      "latestOutcomeFailed": "Son sorğunun nəticəsi uğursuz oldu"
     },
     "attempts": "cəhdlər",
     "detail": {
@@ -12398,13 +12400,20 @@
       "continuesFromParent": "ana elementdən davam edir",
       "continuesFrom": "{id} elementindən davam edir",
       "viewConversation": "söhbətə bax",
-      "openConversation": "{id} söhbətini aç"
+      "openConversation": "{id} söhbətini aç",
+      "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
+      "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
+      "transportError": "Nəqliyyat xətası"
     },
     "tableLabel": "Sorğu jurnalları",
     "throughputPostFirstToken": "İlk tokendən sonra",
     "throughputEndToEnd": "Ucdan-uca",
     "throughputRate": "{value} token/san",
-    "throughputExplanation": "Hər iki sürət çıxış və düşünmə tokenlərinin sayından daha böyük olanını istifadə edir. İlk tokendən sonrakı sürət etibarlı TTFT-ni nəzərə almır; əks halda, tam müddətdən istifadə edir. Ucdan-uca sürət həmişə tam müddətdən istifadə edir. Buferlənmiş cavab model daha sürətli generasiya etmədən də yüksək ani çatdırılma sürətinə malik ola bilər."
+    "throughputExplanation": "Hər iki sürət çıxış və düşünmə tokenlərinin sayından daha böyük olanını istifadə edir. İlk tokendən sonrakı sürət etibarlı TTFT-ni nəzərə almır; əks halda, tam müddətdən istifadə edir. Ucdan-uca sürət həmişə tam müddətdən istifadə edir. Buferlənmiş cavab model daha sürətli generasiya etmədən də yüksək ani çatdırılma sürətinə malik ola bilər.",
+    "omittedHttpAttempts": "{count} HTTP göndərişi saxlanılmayıb",
+    "upstreamStatus": "Yuxarı server {status}",
+    "noHttpResponse": "HTTP cavabı müşahidə edilməyib",
+    "transportError": "Nəqliyyat xətası"
   },
   "proxyLogger": {
     "filterAll": "Hamısı",

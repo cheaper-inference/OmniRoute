@@ -12219,7 +12219,9 @@
       "failedTitle": "Semua {count} percobaan gagal",
       "failed": "gagal",
       "pinnedTitle": "Model yang dipilih melalui pinning sesi cache konteks",
-      "pinned": "tersemat"
+      "pinned": "tersemat",
+      "recoveredAttemptsTitle": "Permintaan pulih setelah {count} percobaan",
+      "latestOutcomeFailed": "Hasil permintaan terakhir gagal"
     },
     "attempts": "upaya",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "berlanjut dari induk",
       "continuesFrom": "Berlanjut dari {id}",
       "viewConversation": "lihat percakapan",
-      "openConversation": "Buka percakapan {id}"
+      "openConversation": "Buka percakapan {id}",
+      "omittedHttpAttempts": "{count} pengiriman HTTP tidak disimpan",
+      "noHttpResponse": "Tidak ada respons HTTP yang teramati",
+      "transportError": "Kesalahan transportasi"
     },
     "tableLabel": "Log permintaan",
     "throughputPostFirstToken": "Setelah token pertama",
     "throughputEndToEnd": "Ujung-ke-ujung",
     "throughputRate": "{value} token/detik",
-    "throughputExplanation": "Kedua laju menggunakan jumlah token output dan reasoning yang lebih besar. Laju setelah token pertama tidak menyertakan TTFT yang valid; jika tidak, laju tersebut menggunakan durasi penuh. Laju ujung-ke-ujung selalu menggunakan durasi penuh. Respons yang di-buffer dapat memiliki laju pengiriman burst yang tinggi tanpa pembuatan model yang lebih cepat."
+    "throughputExplanation": "Kedua laju menggunakan jumlah token output dan reasoning yang lebih besar. Laju setelah token pertama tidak menyertakan TTFT yang valid; jika tidak, laju tersebut menggunakan durasi penuh. Laju ujung-ke-ujung selalu menggunakan durasi penuh. Respons yang di-buffer dapat memiliki laju pengiriman burst yang tinggi tanpa pembuatan model yang lebih cepat.",
+    "omittedHttpAttempts": "{count} pengiriman HTTP tidak disimpan",
+    "upstreamStatus": "Server hulu {status}",
+    "noHttpResponse": "Tidak ada respons HTTP yang teramati",
+    "transportError": "Kesalahan transportasi"
   },
   "proxyLogger": {
     "filterAll": "Semua",

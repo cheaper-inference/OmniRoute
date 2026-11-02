@@ -12219,7 +12219,9 @@
       "failedTitle": "Theip ar gach {count} iarracht",
       "failed": "teipthe",
       "pinnedTitle": "Samhail roghnaithe trí phionnáil seisiúin taisce comhthéacs",
-      "pinned": "pionnáilte"
+      "pinned": "pionnáilte",
+      "recoveredAttemptsTitle": "Aisghabhadh an t-iarratas tar éis {count} iarracht",
+      "latestOutcomeFailed": "Theip ar thoradh an iarratais is déanaí"
     },
     "attempts": "iarrachtaí",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "leanann ón máthair",
       "continuesFrom": "Leanann ó {id}",
       "viewConversation": "féach ar an gcomhrá",
-      "openConversation": "Oscail comhrá {id}"
+      "openConversation": "Oscail comhrá {id}",
+      "omittedHttpAttempts": "Níor coinníodh {count} seoladh HTTP",
+      "noHttpResponse": "Níor breathnaíodh aon fhreagra HTTP",
+      "transportError": "Earráid iompair"
     },
     "tableLabel": "Logaí iarratais",
     "throughputPostFirstToken": "Tar éis an chéad token",
     "throughputEndToEnd": "Ó cheann go ceann",
     "throughputRate": "{value} token in aghaidh an tsoicind",
-    "throughputExplanation": "Úsáideann an dá ráta an ceann is mó de líon na dtoken aschuir agus réasúnaíochta. Fágann an ráta tar éis an chéad token TTFT bailí as an áireamh; murach sin úsáideann sé an fhad iomlán. Úsáideann ó cheann go ceann an fhad iomlán i gcónaí. Is féidir le freagra maolánach ráta seachadta pléasctha ard a bheith aige gan giniúint samhail níos tapúla."
+    "throughputExplanation": "Úsáideann an dá ráta an ceann is mó de líon na dtoken aschuir agus réasúnaíochta. Fágann an ráta tar éis an chéad token TTFT bailí as an áireamh; murach sin úsáideann sé an fhad iomlán. Úsáideann ó cheann go ceann an fhad iomlán i gcónaí. Is féidir le freagra maolánach ráta seachadta pléasctha ard a bheith aige gan giniúint samhail níos tapúla.",
+    "omittedHttpAttempts": "Níor coinníodh {count} seoladh HTTP",
+    "upstreamStatus": "Freastalaí réamhtheachtach {status}",
+    "noHttpResponse": "Níor breathnaíodh aon fhreagra HTTP",
+    "transportError": "Earráid iompair"
   },
   "proxyLogger": {
     "filterAll": "Go léir",

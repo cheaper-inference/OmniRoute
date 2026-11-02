@@ -12219,7 +12219,9 @@
       "failedTitle": "Les {count} tentatives ont échoué",
       "failed": "échec",
       "pinnedTitle": "Modèle sélectionné via l’épinglage de session du cache de contexte",
-      "pinned": "épinglé"
+      "pinned": "épinglé",
+      "recoveredAttemptsTitle": "Requête rétablie après {count} tentatives",
+      "latestOutcomeFailed": "Le dernier résultat de la requête est un échec"
     },
     "attempts": "tentatives",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "fait suite au parent",
       "continuesFrom": "Fait suite à {id}",
       "viewConversation": "afficher la conversation",
-      "openConversation": "Ouvrir la conversation {id}"
+      "openConversation": "Ouvrir la conversation {id}",
+      "omittedHttpAttempts": "{count} envois HTTP non conservés",
+      "noHttpResponse": "Aucune réponse HTTP observée",
+      "transportError": "Erreur de transport"
     },
     "tableLabel": "Journaux des requêtes",
     "throughputPostFirstToken": "Après le premier token",
     "throughputEndToEnd": "Bout en bout",
     "throughputRate": "{value} tokens/sec",
-    "throughputExplanation": "Les deux débits utilisent le plus grand des nombres de tokens de sortie et de raisonnement. Le débit après le premier token exclut un TTFT valide ; sinon, il utilise la durée totale. Le débit bout en bout utilise toujours la durée totale. Une réponse mise en mémoire tampon peut présenter un débit de livraison en rafale élevé sans génération de modèle plus rapide."
+    "throughputExplanation": "Les deux débits utilisent le plus grand des nombres de tokens de sortie et de raisonnement. Le débit après le premier token exclut un TTFT valide ; sinon, il utilise la durée totale. Le débit bout en bout utilise toujours la durée totale. Une réponse mise en mémoire tampon peut présenter un débit de livraison en rafale élevé sans génération de modèle plus rapide.",
+    "omittedHttpAttempts": "{count} envois HTTP non conservés",
+    "upstreamStatus": "Serveur amont {status}",
+    "noHttpResponse": "Aucune réponse HTTP observée",
+    "transportError": "Erreur de transport"
   },
   "proxyLogger": {
     "filterAll": "Tous",

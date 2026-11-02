@@ -12219,7 +12219,9 @@
       "failedTitle": "Lahat ng {count} pagtatangkang nabigo",
       "failed": "nabigo",
       "pinnedTitle": "Napiling modelo sa pamamagitan ng context-cache session pinning",
-      "pinned": "na-pin'{\" \"}'"
+      "pinned": "na-pin'{\" \"}'",
+      "recoveredAttemptsTitle": "Naibalik ang kahilingan matapos ang {count} pagtatangka",
+      "latestOutcomeFailed": "Nabigo ang pinakahuling resulta ng kahilingan"
     },
     "attempts": "mga pagtatangkang",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "nagpapatuloy mula sa parent",
       "continuesFrom": "Nagpapatuloy mula sa {id}",
       "viewConversation": "tingnan ang pag-uusap",
-      "openConversation": "Buksan ang pag-uusap na {id}"
+      "openConversation": "Buksan ang pag-uusap na {id}",
+      "omittedHttpAttempts": "Hindi napanatili ang {count} pagpapadala ng HTTP",
+      "noHttpResponse": "Walang naobserbahang tugon sa HTTP",
+      "transportError": "Error sa transportasyon"
     },
     "tableLabel": "Mga log ng request",
     "throughputPostFirstToken": "Pagkatapos ng unang token",
     "throughputEndToEnd": "Mula simula hanggang dulo",
     "throughputRate": "{value} token/seg",
-    "throughputExplanation": "Parehong rate ay gumagamit ng mas malaki sa bilang ng output at reasoning token. Ang pagkatapos ng unang token ay hindi kasama ang valid na TTFT; kung hindi, ginagamit nito ang buong tagal. Ang mula simula hanggang dulo ay palaging gumagamit ng buong tagal. Ang isang naka-buffer na tugon ay maaaring may mataas na burst delivery rate nang walang mas mabilis na henerasyon ng modelo."
+    "throughputExplanation": "Parehong rate ay gumagamit ng mas malaki sa bilang ng output at reasoning token. Ang pagkatapos ng unang token ay hindi kasama ang valid na TTFT; kung hindi, ginagamit nito ang buong tagal. Ang mula simula hanggang dulo ay palaging gumagamit ng buong tagal. Ang isang naka-buffer na tugon ay maaaring may mataas na burst delivery rate nang walang mas mabilis na henerasyon ng modelo.",
+    "omittedHttpAttempts": "Hindi napanatili ang {count} pagpapadala ng HTTP",
+    "upstreamStatus": "Upstream na server {status}",
+    "noHttpResponse": "Walang naobserbahang tugon sa HTTP",
+    "transportError": "Error sa transportasyon"
   },
   "proxyLogger": {
     "filterAll": "Lahat",

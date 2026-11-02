@@ -12219,7 +12219,9 @@
       "failedTitle": "Wszystkie {count} próby nie powiodły się",
       "failed": "niepowodzenie",
       "pinnedTitle": "Model wybrany za pomocą przypinania sesji pamięci podręcznej kontekstu",
-      "pinned": "przypięty"
+      "pinned": "przypięty",
+      "recoveredAttemptsTitle": "Żądanie odzyskano po {count} próbach",
+      "latestOutcomeFailed": "Ostatni wynik żądania był nieudany"
     },
     "attempts": "próby",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "kontynuuje z elementu nadrzędnego",
       "continuesFrom": "Kontynuuje od {id}",
       "viewConversation": "wyświetl rozmowę",
-      "openConversation": "Otwórz rozmowę {id}"
+      "openConversation": "Otwórz rozmowę {id}",
+      "omittedHttpAttempts": "Nie zachowano {count} wysłań HTTP",
+      "noHttpResponse": "Nie zaobserwowano odpowiedzi HTTP",
+      "transportError": "Błąd transportu"
     },
     "tableLabel": "Dzienniki żądań",
     "throughputPostFirstToken": "Po pierwszym tokenie",
     "throughputEndToEnd": "Od początku do końca",
     "throughputRate": "{value} tokenów/s",
-    "throughputExplanation": "Obie wartości tempa wykorzystują większą z liczb tokenów wyjściowych i tokenów rozumowania. Tempo po pierwszym tokenie pomija prawidłowy TTFT; w przeciwnym razie używa pełnego czasu trwania. Tempo od początku do końca zawsze używa pełnego czasu trwania. Buforowana odpowiedź może mieć wysokie chwilowe tempo dostarczania bez szybszego generowania przez model."
+    "throughputExplanation": "Obie wartości tempa wykorzystują większą z liczb tokenów wyjściowych i tokenów rozumowania. Tempo po pierwszym tokenie pomija prawidłowy TTFT; w przeciwnym razie używa pełnego czasu trwania. Tempo od początku do końca zawsze używa pełnego czasu trwania. Buforowana odpowiedź może mieć wysokie chwilowe tempo dostarczania bez szybszego generowania przez model.",
+    "omittedHttpAttempts": "Nie zachowano {count} wysłań HTTP",
+    "upstreamStatus": "Serwer nadrzędny {status}",
+    "noHttpResponse": "Nie zaobserwowano odpowiedzi HTTP",
+    "transportError": "Błąd transportu"
   },
   "proxyLogger": {
     "filterAll": "Wszystkie",

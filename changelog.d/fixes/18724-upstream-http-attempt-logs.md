@@ -1,1 +1,1 @@
-Logs now show intermediate chat HTTP sends from the shared HTTP executor and Antigravity as related request rows. Final rows retain their logical outcome and usage, while safe HTTP metadata keeps earlier failures visible without duplicating logical request counts or cost.
+- Logs now show intermediate chat HTTP sends from the shared HTTP executor and Antigravity as related request rows. Final rows retain their logical outcome and usage, while safe HTTP metadata keeps earlier failures visible without duplicating logical request counts or cost.

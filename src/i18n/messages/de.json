@@ -12219,7 +12219,9 @@
       "failedTitle": "Alle {count} Versuche sind fehlgeschlagen",
       "failed": "fehlgeschlagen",
       "pinnedTitle": "Modell über Kontext-Cache-Sitzungs-Pinning ausgewählt",
-      "pinned": "angeheftet"
+      "pinned": "angeheftet",
+      "recoveredAttemptsTitle": "Anfrage nach {count} Versuchen wiederhergestellt",
+      "latestOutcomeFailed": "Das letzte Anfrageergebnis war ein Fehler"
     },
     "attempts": "versuche",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "wird vom übergeordneten Element fortgesetzt",
       "continuesFrom": "Wird von {id} fortgesetzt",
       "viewConversation": "Konversation anzeigen",
-      "openConversation": "Konversation {id} öffnen"
+      "openConversation": "Konversation {id} öffnen",
+      "omittedHttpAttempts": "{count} HTTP-Sendungen nicht gespeichert",
+      "noHttpResponse": "Keine HTTP-Antwort beobachtet",
+      "transportError": "Transportfehler"
     },
     "tableLabel": "Anfrageprotokolle",
     "throughputPostFirstToken": "Nach erstem Token",
     "throughputEndToEnd": "End-to-End",
     "throughputRate": "{value} Tokens/Sek.",
-    "throughputExplanation": "Beide Raten verwenden den größeren der Token-Zählwerte für Ausgabe und Reasoning. „Nach erstem Token“ schließt eine gültige TTFT aus; andernfalls wird die volle Dauer verwendet. End-to-End verwendet immer die volle Dauer. Eine gepufferte Antwort kann eine hohe Burst-Lieferrate aufweisen, ohne dass das Modell schneller generiert."
+    "throughputExplanation": "Beide Raten verwenden den größeren der Token-Zählwerte für Ausgabe und Reasoning. „Nach erstem Token“ schließt eine gültige TTFT aus; andernfalls wird die volle Dauer verwendet. End-to-End verwendet immer die volle Dauer. Eine gepufferte Antwort kann eine hohe Burst-Lieferrate aufweisen, ohne dass das Modell schneller generiert.",
+    "omittedHttpAttempts": "{count} HTTP-Sendungen nicht gespeichert",
+    "upstreamStatus": "Vorgelagerter Server {status}",
+    "noHttpResponse": "Keine HTTP-Antwort beobachtet",
+    "transportError": "Transportfehler"
   },
   "proxyLogger": {
     "filterAll": "Alle",

@@ -12219,7 +12219,9 @@
       "failedTitle": "{count} ta urinishning barchasi muvaffaqiyatsiz tugadi",
       "failed": "muvaffaqiyatsiz tugadi",
       "pinnedTitle": "Model kontekst-kesh seansiga biriktirish orqali tanlangan",
-      "pinned": "biriktirilgan"
+      "pinned": "biriktirilgan",
+      "recoveredAttemptsTitle": "So‘rov {count} urinishdan keyin tiklandi",
+      "latestOutcomeFailed": "Oxirgi so‘rov natijasi muvaffaqiyatsiz bo‘ldi"
     },
     "attempts": "urinishlar",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "ota elementdan davom etadi",
       "continuesFrom": "{id} dan davom etadi",
       "viewConversation": "suhbatni koʻrish",
-      "openConversation": "{id} suhbatini ochish"
+      "openConversation": "{id} suhbatini ochish",
+      "omittedHttpAttempts": "{count} ta HTTP jo‘natmasi saqlanmadi",
+      "noHttpResponse": "HTTP javobi kuzatilmadi",
+      "transportError": "Uzatish xatosi"
     },
     "tableLabel": "Soʻrov jurnallari",
     "throughputPostFirstToken": "Birinchi tokendan keyin",
     "throughputEndToEnd": "Boshdan-oxirigacha",
     "throughputRate": "{value} token/sek",
-    "throughputExplanation": "Ikkala koʻrsatkich ham chiqish va mulohaza tokenlari sonidan kattasini ishlatadi. Birinchi tokendan keyingi koʻrsatkich haqiqiy TTFTni hisobga olmaydi; aks holda u toʻliq davomiylikdan foydalanadi. Boshdan-oxirigacha har doim toʻliq davomiylikdan foydalanadi. Buferlangan javob model tezroq generatsiya qilmasa ham, yuqori portlash yetkazib berish tezligiga ega boʻlishi mumkin."
+    "throughputExplanation": "Ikkala koʻrsatkich ham chiqish va mulohaza tokenlari sonidan kattasini ishlatadi. Birinchi tokendan keyingi koʻrsatkich haqiqiy TTFTni hisobga olmaydi; aks holda u toʻliq davomiylikdan foydalanadi. Boshdan-oxirigacha har doim toʻliq davomiylikdan foydalanadi. Buferlangan javob model tezroq generatsiya qilmasa ham, yuqori portlash yetkazib berish tezligiga ega boʻlishi mumkin.",
+    "omittedHttpAttempts": "{count} ta HTTP jo‘natmasi saqlanmadi",
+    "upstreamStatus": "Yuqori server {status}",
+    "noHttpResponse": "HTTP javobi kuzatilmadi",
+    "transportError": "Uzatish xatosi"
   },
   "proxyLogger": {
     "filterAll": "Barchasi",

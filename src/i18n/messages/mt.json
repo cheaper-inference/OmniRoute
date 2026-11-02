@@ -12296,7 +12296,9 @@
       "failedTitle": "{count} tentattivi fallew kollha",
       "failed": "falla",
       "pinnedTitle": "Mudell magħżul permezz tal-iffissar tas-sessjoni fil-cache tal-kuntest",
-      "pinned": "iffissat"
+      "pinned": "iffissat",
+      "recoveredAttemptsTitle": "It-talba rkuprat wara {count} tentattivi",
+      "latestOutcomeFailed": "L-aħħar riżultat tat-talba falla"
     },
     "attempts": "tentattivi",
     "detail": {
@@ -12398,13 +12400,20 @@
       "continuesFromParent": "ikompli mill-ġenitur",
       "continuesFrom": "Ikompli minn {id}",
       "viewConversation": "ara l-konverżazzjoni",
-      "openConversation": "Iftaħ il-konverżazzjoni {id}"
+      "openConversation": "Iftaħ il-konverżazzjoni {id}",
+      "omittedHttpAttempts": "{count} trażmissjonijiet HTTP ma nżammux",
+      "noHttpResponse": "Ma ġiet osservata l-ebda tweġiba HTTP",
+      "transportError": "Żball fit-trasport"
     },
     "tableLabel": "Reġistri tat-talbiet",
     "throughputPostFirstToken": "Wara l-ewwel token",
     "throughputEndToEnd": "Mit-tarf għat-tarf",
     "throughputRate": "{value} tokens/sec",
-    "throughputExplanation": "Iż-żewġ rati jużaw l-akbar fost l-għadd ta' tokens tal-output u tar-raġunament. Il-metrika 'Wara l-ewwel token' teskludi TTFT validu; inkella tuża t-tul sħiħ. Mit-tarf għat-tarf dejjem juża t-tul sħiħ. Risposta b'buffer tista' jkollha rata għolja ta' twassil f'daqqa mingħajr ġenerazzjoni aktar mgħaġġla mill-mudell."
+    "throughputExplanation": "Iż-żewġ rati jużaw l-akbar fost l-għadd ta' tokens tal-output u tar-raġunament. Il-metrika 'Wara l-ewwel token' teskludi TTFT validu; inkella tuża t-tul sħiħ. Mit-tarf għat-tarf dejjem juża t-tul sħiħ. Risposta b'buffer tista' jkollha rata għolja ta' twassil f'daqqa mingħajr ġenerazzjoni aktar mgħaġġla mill-mudell.",
+    "omittedHttpAttempts": "{count} trażmissjonijiet HTTP ma nżammux",
+    "upstreamStatus": "Server upstream {status}",
+    "noHttpResponse": "Ma ġiet osservata l-ebda tweġiba HTTP",
+    "transportError": "Żball fit-trasport"
   },
   "proxyLogger": {
     "filterAll": "Kollha",

@@ -12219,7 +12219,9 @@
       "failedTitle": "Az összes {count} kísérlet meghiúsult",
       "failed": "sikertelen",
       "pinnedTitle": "Modell kiválasztva a kontextus-cache munkamenet rögzítésével",
-      "pinned": "rögzített"
+      "pinned": "rögzített",
+      "recoveredAttemptsTitle": "A kérés {count} próbálkozás után helyreállt",
+      "latestOutcomeFailed": "A legutóbbi kérés eredménye sikertelen"
     },
     "attempts": "kísérletek",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "a szülő folytatása",
       "continuesFrom": "{id} folytatása",
       "viewConversation": "beszélgetés megtekintése",
-      "openConversation": "A(z) {id} beszélgetés megnyitása"
+      "openConversation": "A(z) {id} beszélgetés megnyitása",
+      "omittedHttpAttempts": "{count} HTTP-küldés nincs megőrizve",
+      "noHttpResponse": "Nem észlelt HTTP-választ",
+      "transportError": "Átviteli hiba"
     },
     "tableLabel": "Kérésnaplók",
     "throughputPostFirstToken": "Első token utáni",
     "throughputEndToEnd": "Végponttól végpontig",
     "throughputRate": "{value} token/mp",
-    "throughputExplanation": "Mindkét arány a kimeneti és a reasoning tokenszám közül a nagyobbat használja. Az első token utáni érték kizárja az érvényes TTFT-t; egyébként a teljes időtartamot használja. A végponttól végpontig érték mindig a teljes időtartamot használja. Egy puffereit válasz nagy burst átviteli sebességgel is rendelkezhet anélkül, hogy a modell gyorsabban generálna."
+    "throughputExplanation": "Mindkét arány a kimeneti és a reasoning tokenszám közül a nagyobbat használja. Az első token utáni érték kizárja az érvényes TTFT-t; egyébként a teljes időtartamot használja. A végponttól végpontig érték mindig a teljes időtartamot használja. Egy puffereit válasz nagy burst átviteli sebességgel is rendelkezhet anélkül, hogy a modell gyorsabban generálna.",
+    "omittedHttpAttempts": "{count} HTTP-küldés nincs megőrizve",
+    "upstreamStatus": "Felsőbb kiszolgáló {status}",
+    "noHttpResponse": "Nem észlelt HTTP-választ",
+    "transportError": "Átviteli hiba"
   },
   "proxyLogger": {
     "filterAll": "Összes",

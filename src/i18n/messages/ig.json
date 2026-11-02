@@ -12219,7 +12219,9 @@
       "failedTitle": "Nnwale {count} niile dara",
       "failed": "dara",
       "pinnedTitle": "Ahọpụtara ụdị site na ịkpọgide nnọkọ context-cache",
-      "pinned": "akpọgidere"
+      "pinned": "akpọgidere",
+      "recoveredAttemptsTitle": "Arịrịọ ahụ gbakere mgbe mbọ {count} gasịrị",
+      "latestOutcomeFailed": "Nsonaazụ arịrịọ ikpeazụ dara"
     },
     "attempts": "nnwale",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "na-aga n'ihu site na nke nne na nna",
       "continuesFrom": "Na-aga n'ihu site na {id}",
       "viewConversation": "lee mkparịta ụka",
-      "openConversation": "Mepee mkparịta ụka {id}"
+      "openConversation": "Mepee mkparịta ụka {id}",
+      "omittedHttpAttempts": "Edebeghị izipu HTTP {count}",
+      "noHttpResponse": "Ahụghị nzaghachi HTTP ọ bụla",
+      "transportError": "Njehie mbufe"
     },
     "tableLabel": "Ndekọ arịrịọ",
     "throughputPostFirstToken": "Mgbe token mbụ gasịrị",
     "throughputEndToEnd": "Site ná mmalite ruo ná ngwụcha",
     "throughputRate": "{value} token kwa sekọnd",
-    "throughputExplanation": "Ọnụego abụọ a na-eji nke ka ukwuu n'ime ọnụ ọgụgụ token mmepụta na token ntụgharị uche. Mgbe token mbụ gasịrị anaghị agụnye TTFT ziri ezi; ma ọ bụghị ya, ọ na-eji oge zuru ezu. Site ná mmalite ruo ná ngwụcha na-eji oge zuru ezu mgbe niile. Nzaghachi echekwara nwere ike inwe ọnụego nnyefe dị elu n'otu ntabi na-enweghị mmepụta model ọsọ ọsọ."
+    "throughputExplanation": "Ọnụego abụọ a na-eji nke ka ukwuu n'ime ọnụ ọgụgụ token mmepụta na token ntụgharị uche. Mgbe token mbụ gasịrị anaghị agụnye TTFT ziri ezi; ma ọ bụghị ya, ọ na-eji oge zuru ezu. Site ná mmalite ruo ná ngwụcha na-eji oge zuru ezu mgbe niile. Nzaghachi echekwara nwere ike inwe ọnụego nnyefe dị elu n'otu ntabi na-enweghị mmepụta model ọsọ ọsọ.",
+    "omittedHttpAttempts": "Edebeghị izipu HTTP {count}",
+    "upstreamStatus": "Sava dị n'elu {status}",
+    "noHttpResponse": "Ahụghị nzaghachi HTTP ọ bụla",
+    "transportError": "Njehie mbufe"
   },
   "proxyLogger": {
     "filterAll": "Ha niile",

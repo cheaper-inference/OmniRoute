@@ -12219,7 +12219,9 @@
       "failedTitle": "Tất cả {count} lần thử đều thất bại",
       "failed": "thất bại",
       "pinnedTitle": "Mô hình được chọn bằng cách ghim phiên context-cache",
-      "pinned": "đã ghim"
+      "pinned": "đã ghim",
+      "recoveredAttemptsTitle": "Yêu cầu đã được khôi phục sau {count} lần thử",
+      "latestOutcomeFailed": "Kết quả yêu cầu gần nhất đã thất bại"
     },
     "attempts": "lần thử",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "tiếp nối từ yêu cầu cha",
       "continuesFrom": "Tiếp nối từ {id}",
       "viewConversation": "xem hội thoại",
-      "openConversation": "Mở hội thoại {id}"
+      "openConversation": "Mở hội thoại {id}",
+      "omittedHttpAttempts": "{count} lần gửi HTTP không được lưu giữ",
+      "noHttpResponse": "Chưa quan sát thấy phản hồi HTTP",
+      "transportError": "Lỗi truyền tải"
     },
     "tableLabel": "Nhật ký yêu cầu",
     "throughputPostFirstToken": "Sau token đầu tiên",
     "throughputEndToEnd": "Từ đầu đến cuối",
     "throughputRate": "{value} token/giây",
-    "throughputExplanation": "Cả hai tốc độ đều dùng giá trị lớn hơn giữa số token đầu ra và số token suy luận. Sau token đầu tiên loại trừ TTFT hợp lệ; nếu không, nó dùng toàn bộ thời lượng. Từ đầu đến cuối luôn dùng toàn bộ thời lượng. Một phản hồi được đệm có thể có tốc độ gửi bùng nổ cao mà mô hình không tạo nhanh hơn."
+    "throughputExplanation": "Cả hai tốc độ đều dùng giá trị lớn hơn giữa số token đầu ra và số token suy luận. Sau token đầu tiên loại trừ TTFT hợp lệ; nếu không, nó dùng toàn bộ thời lượng. Từ đầu đến cuối luôn dùng toàn bộ thời lượng. Một phản hồi được đệm có thể có tốc độ gửi bùng nổ cao mà mô hình không tạo nhanh hơn.",
+    "omittedHttpAttempts": "{count} lần gửi HTTP không được lưu giữ",
+    "upstreamStatus": "Máy chủ thượng nguồn {status}",
+    "noHttpResponse": "Chưa quan sát thấy phản hồi HTTP",
+    "transportError": "Lỗi truyền tải"
   },
   "proxyLogger": {
     "filterAll": "Tất cả",

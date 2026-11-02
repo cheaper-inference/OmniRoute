@@ -12219,7 +12219,9 @@
       "failedTitle": "Nijedan od {count} pokušaja nije uspio",
       "failed": "neuspješno",
       "pinnedTitle": "Model odabran putem prikvačivanja sesije predmemorije konteksta",
-      "pinned": "prikvačeno"
+      "pinned": "prikvačeno",
+      "recoveredAttemptsTitle": "Zahtjev je oporavljen nakon {count} pokušaja",
+      "latestOutcomeFailed": "Ishod posljednjeg zahtjeva nije uspješan"
     },
     "attempts": "pokušaji",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "nastavlja se od nadređenog",
       "continuesFrom": "Nastavlja se od {id}",
       "viewConversation": "prikaži razgovor",
-      "openConversation": "Otvori razgovor {id}"
+      "openConversation": "Otvori razgovor {id}",
+      "omittedHttpAttempts": "{count} HTTP slanja nije sačuvano",
+      "noHttpResponse": "HTTP odgovor nije zabilježen",
+      "transportError": "Pogreška prijenosa"
     },
     "tableLabel": "Zapisi zahtjeva",
     "throughputPostFirstToken": "Nakon prvog tokena",
     "throughputEndToEnd": "Od početka do kraja",
     "throughputRate": "{value} tokena/s",
-    "throughputExplanation": "Obje brzine koriste veći od brojeva izlaznih tokena i tokena zaključivanja. Nakon prvog tokena isključuje valjani TTFT; inače koristi puno trajanje. Od početka do kraja uvijek koristi puno trajanje. Odgovor iz međuspremnika može imati visoku brzinu isporuke u rafalima, a da model ne generira brže."
+    "throughputExplanation": "Obje brzine koriste veći od brojeva izlaznih tokena i tokena zaključivanja. Nakon prvog tokena isključuje valjani TTFT; inače koristi puno trajanje. Od početka do kraja uvijek koristi puno trajanje. Odgovor iz međuspremnika može imati visoku brzinu isporuke u rafalima, a da model ne generira brže.",
+    "omittedHttpAttempts": "{count} HTTP slanja nije sačuvano",
+    "upstreamStatus": "Nadređeni poslužitelj {status}",
+    "noHttpResponse": "HTTP odgovor nije zabilježen",
+    "transportError": "Pogreška prijenosa"
   },
   "proxyLogger": {
     "filterAll": "Sve",

@@ -12219,7 +12219,9 @@
       "failedTitle": "Tüm {count} denemeler başarısız oldu",
       "failed": "başarısız",
       "pinnedTitle": "Bağlam önbellek oturumu sabitleme ile seçilen model",
-      "pinned": "sabitlenmiş"
+      "pinned": "sabitlenmiş",
+      "recoveredAttemptsTitle": "İstek {count} denemeden sonra kurtarıldı",
+      "latestOutcomeFailed": "Son istek sonucu başarısız oldu"
     },
     "attempts": "denemeler",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "üst öğeden devam eder",
       "continuesFrom": "{id} üzerinden devam eder",
       "viewConversation": "konuşmayı görüntüle",
-      "openConversation": "{id} konuşmasını aç"
+      "openConversation": "{id} konuşmasını aç",
+      "omittedHttpAttempts": "{count} HTTP gönderimi saklanmadı",
+      "noHttpResponse": "HTTP yanıtı gözlemlenmedi",
+      "transportError": "Aktarım hatası"
     },
     "tableLabel": "İstek günlükleri",
     "throughputPostFirstToken": "İlk token sonrası",
     "throughputEndToEnd": "Uçtan uca",
     "throughputRate": "{value} token/sn",
-    "throughputExplanation": "Her iki oran da çıktı ve akıl yürütme token sayılarından büyük olanını kullanır. İlk token sonrası, geçerli bir TTFT'yi hariç tutar; aksi durumda tam süreyi kullanır. Uçtan uca her zaman tam süreyi kullanır. Tamponlanmış bir yanıt, daha hızlı model üretimi olmadan yüksek ani teslim hızına sahip olabilir."
+    "throughputExplanation": "Her iki oran da çıktı ve akıl yürütme token sayılarından büyük olanını kullanır. İlk token sonrası, geçerli bir TTFT'yi hariç tutar; aksi durumda tam süreyi kullanır. Uçtan uca her zaman tam süreyi kullanır. Tamponlanmış bir yanıt, daha hızlı model üretimi olmadan yüksek ani teslim hızına sahip olabilir.",
+    "omittedHttpAttempts": "{count} HTTP gönderimi saklanmadı",
+    "upstreamStatus": "Üst sunucu {status}",
+    "noHttpResponse": "HTTP yanıtı gözlemlenmedi",
+    "transportError": "Aktarım hatası"
   },
   "proxyLogger": {
     "filterAll": "Tümü",

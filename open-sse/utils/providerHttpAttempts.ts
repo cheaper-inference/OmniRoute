@@ -1,8 +1,9 @@
+import {
+  currentHttpAttemptCollector,
+  isProviderRequestCaptureActive,
+} from "./providerRequestCaptureContext.ts";
 import { randomUUID } from "node:crypto";
-import type {
-  HttpAttemptRecord,
-  UpstreamHttpSummary,
-} from "../../src/shared/utils/upstreamHttp.ts";
+import type { HttpAttemptRecord, UpstreamHttpSummary } from "./upstreamHttp.ts";
 
 export type HttpAttemptMetadata = Pick<
   HttpAttemptRecord,
@@ -124,4 +125,34 @@ export class HttpAttemptCollector {
 export function selectHttpResponse(response: object): HttpAttemptSelection | null {
   const ref = responses.get(response);
   return ref ? (owners.get(ref)?.selection(response) ?? null) : null;
+}
+
+/** Observe only an explicit inference boundary. The exact Response/exception passes through. */
+export async function observeProviderHttpSend(
+  metadata: HttpAttemptMetadata,
+  send: () => Promise<Response>
+): Promise<Response> {
+  const collector = currentHttpAttemptCollector();
+  let ref: HttpAttemptRef | null = null;
+  try {
+    ref = collector?.begin(metadata) ?? null;
+  } catch {
+    /* logging is best effort */
+  }
+  try {
+    const response = await send();
+    try {
+      if (ref && isProviderRequestCaptureActive()) collector?.complete(ref, response);
+    } catch {
+      /* logging is best effort */
+    }
+    return response;
+  } catch (error) {
+    try {
+      if (ref && isProviderRequestCaptureActive()) collector?.complete(ref, null);
+    } catch {
+      /* logging is best effort */
+    }
+    throw error;
+  }
 }

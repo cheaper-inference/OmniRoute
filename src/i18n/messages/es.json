@@ -12219,7 +12219,9 @@
       "failedTitle": "Todos los {count} intentos fallaron",
       "failed": "fallido",
       "pinnedTitle": "Modelo seleccionado a través de la fijación de sesión del caché de contexto",
-      "pinned": "fijado"
+      "pinned": "fijado",
+      "recoveredAttemptsTitle": "Solicitud recuperada tras {count} intentos",
+      "latestOutcomeFailed": "El último resultado de la solicitud falló"
     },
     "attempts": "intentos",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "continúa desde el elemento principal",
       "continuesFrom": "Continúa desde {id}",
       "viewConversation": "ver conversación",
-      "openConversation": "Abrir conversación {id}"
+      "openConversation": "Abrir conversación {id}",
+      "omittedHttpAttempts": "{count} envíos HTTP no conservados",
+      "noHttpResponse": "No se observó ninguna respuesta HTTP",
+      "transportError": "Error de transporte"
     },
     "tableLabel": "Registros de solicitudes",
     "throughputPostFirstToken": "Después del primer token",
     "throughputEndToEnd": "De extremo a extremo",
     "throughputRate": "{value} tokens/seg",
-    "throughputExplanation": "Ambas tasas usan el mayor de los recuentos de tokens de salida y de razonamiento. La tasa posterior al primer token excluye un TTFT válido; de lo contrario, usa la duración completa. La tasa de extremo a extremo siempre usa la duración completa. Una respuesta almacenada en búfer puede tener una alta tasa de entrega en ráfaga sin una generación del modelo más rápida."
+    "throughputExplanation": "Ambas tasas usan el mayor de los recuentos de tokens de salida y de razonamiento. La tasa posterior al primer token excluye un TTFT válido; de lo contrario, usa la duración completa. La tasa de extremo a extremo siempre usa la duración completa. Una respuesta almacenada en búfer puede tener una alta tasa de entrega en ráfaga sin una generación del modelo más rápida.",
+    "omittedHttpAttempts": "{count} envíos HTTP no conservados",
+    "upstreamStatus": "Servidor de origen {status}",
+    "noHttpResponse": "No se observó ninguna respuesta HTTP",
+    "transportError": "Error de transporte"
   },
   "proxyLogger": {
     "filterAll": "Todos",

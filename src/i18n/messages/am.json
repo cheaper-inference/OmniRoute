@@ -12296,7 +12296,9 @@
       "failedTitle": "ሁሉም {count} ሙከራዎች አልተሳኩም",
       "failed": "አልተሳካም",
       "pinnedTitle": "ሞዴሉ በcontext-cache ክፍለ ጊዜ ማጣበቅ ተመርጧል",
-      "pinned": "ተያይዟል"
+      "pinned": "ተያይዟል",
+      "recoveredAttemptsTitle": "ጥያቄው በ{count} ሙከራዎች ተሳክቷል",
+      "latestOutcomeFailed": "የመጨረሻው ጥያቄ ውጤት አልተሳካም"
     },
     "attempts": "ሙከራዎች",
     "detail": {
@@ -12398,13 +12400,20 @@
       "continuesFromParent": "ከወላጅ ይቀጥላል",
       "continuesFrom": "ከ{id} ይቀጥላል",
       "viewConversation": "ውይይቱን ይመልከቱ",
-      "openConversation": "ውይይት {id}ን ይክፈቱ"
+      "openConversation": "ውይይት {id}ን ይክፈቱ",
+      "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+      "noHttpResponse": "የHTTP ምላሽ አልታየም",
+      "transportError": "የማጓጓዣ ስህተት"
     },
     "tableLabel": "የጥያቄ ምዝግብ ማስታወሻዎች",
     "throughputPostFirstToken": "ከመጀመሪያው ቶከን በኋላ",
     "throughputEndToEnd": "ከጫፍ እስከ ጫፍ",
     "throughputRate": "በሰከንድ {value} ቶከኖች",
-    "throughputExplanation": "ሁለቱም ፍጥነቶች ከውጤት እና ከምክንያታዊ ትንተና ቶከኖች ብዛት የሚበልጠውን ይጠቀማሉ። ከመጀመሪያው ቶከን በኋላ ያለው ፍጥነት ትክክለኛ TTFTን አያካትትም፤ ካልሆነ ግን ሙሉውን ቆይታ ይጠቀማል። ከጫፍ እስከ ጫፍ ሁልጊዜ ሙሉውን ቆይታ ይጠቀማል። በቋት የተያዘ ምላሽ የሞዴሉ ማመንጨት ሳይፈጥን ከፍተኛ የፈጣን ማድረስ ፍጥነት ሊኖረው ይችላል።"
+    "throughputExplanation": "ሁለቱም ፍጥነቶች ከውጤት እና ከምክንያታዊ ትንተና ቶከኖች ብዛት የሚበልጠውን ይጠቀማሉ። ከመጀመሪያው ቶከን በኋላ ያለው ፍጥነት ትክክለኛ TTFTን አያካትትም፤ ካልሆነ ግን ሙሉውን ቆይታ ይጠቀማል። ከጫፍ እስከ ጫፍ ሁልጊዜ ሙሉውን ቆይታ ይጠቀማል። በቋት የተያዘ ምላሽ የሞዴሉ ማመንጨት ሳይፈጥን ከፍተኛ የፈጣን ማድረስ ፍጥነት ሊኖረው ይችላል።",
+    "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+    "upstreamStatus": "የላይኛው አገልጋይ {status}",
+    "noHttpResponse": "የHTTP ምላሽ አልታየም",
+    "transportError": "የማጓጓዣ ስህተት"
   },
   "proxyLogger": {
     "filterAll": "ሁሉም",

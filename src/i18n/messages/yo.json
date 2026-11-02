@@ -12219,7 +12219,9 @@
       "failedTitle": "Gbogbo ìgbìyànjú {count} ló kùnà",
       "failed": "kùnà",
       "pinnedTitle": "A yan módẹ́lì nípasẹ̀ dídì session context-cache mọ́ ọn",
-      "pinned": "ti dì mọ́ ọn"
+      "pinned": "ti dì mọ́ ọn",
+      "recoveredAttemptsTitle": "Ìbéèrè náà padà bọ̀ sípò lẹ́yìn ìgbìyànjú {count}",
+      "latestOutcomeFailed": "Àbájáde ìbéèrè tó ṣẹ̀ṣẹ̀ dé kùnà"
     },
     "attempts": "àwọn ìgbìyànjú",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "ń tẹ̀síwájú láti ìbéèrè òbí",
       "continuesFrom": "Tẹ̀síwájú láti {id}",
       "viewConversation": "wo ìjíròrò",
-      "openConversation": "Ṣí ìjíròrò {id}"
+      "openConversation": "Ṣí ìjíròrò {id}",
+      "omittedHttpAttempts": "A kò fi ìfiránṣẹ́ HTTP {count} pamọ́",
+      "noHttpResponse": "A kò ṣàkíyèsí ìdáhùn HTTP kankan",
+      "transportError": "Àṣìṣe ìgbéjáde"
     },
     "tableLabel": "Àwọn àkọọlẹ̀ ìbéèrè",
     "throughputPostFirstToken": "Lẹ́yìn àkọ́kọ́ tọ́kẹ̀nì",
     "throughputEndToEnd": "Láti ìbẹ̀rẹ̀ dé ìparí",
     "throughputRate": "{value} tọ́kẹ̀nì/sẹ́kọ̀ndì",
-    "throughputExplanation": "Àwọn ìwọ̀n méjèèjì ń lo èyí tó tóbi jù nínú iye tọ́kẹ̀nì ìjáde àti ìrònú. Lẹ́yìn àkọ́kọ́ tọ́kẹ̀nì kò ní TTFT tó wúlò; bí bẹ́ẹ̀ kọ́, ó ń lo gbogbo àkókò. Láti ìbẹ̀rẹ̀ dé ìparí ń lo gbogbo àkókò nígbà gbogbo. Ìdáhùn tí a kó jọ lè ní ìwọ̀n ìfijíṣẹ́ gíga láìsí ìpilẹ̀ṣẹ̀ àwòkọ́ tó yára jù."
+    "throughputExplanation": "Àwọn ìwọ̀n méjèèjì ń lo èyí tó tóbi jù nínú iye tọ́kẹ̀nì ìjáde àti ìrònú. Lẹ́yìn àkọ́kọ́ tọ́kẹ̀nì kò ní TTFT tó wúlò; bí bẹ́ẹ̀ kọ́, ó ń lo gbogbo àkókò. Láti ìbẹ̀rẹ̀ dé ìparí ń lo gbogbo àkókò nígbà gbogbo. Ìdáhùn tí a kó jọ lè ní ìwọ̀n ìfijíṣẹ́ gíga láìsí ìpilẹ̀ṣẹ̀ àwòkọ́ tó yára jù.",
+    "omittedHttpAttempts": "A kò fi ìfiránṣẹ́ HTTP {count} pamọ́",
+    "upstreamStatus": "Olùpèsè òkè {status}",
+    "noHttpResponse": "A kò ṣàkíyèsí ìdáhùn HTTP kankan",
+    "transportError": "Àṣìṣe ìgbéjáde"
   },
   "proxyLogger": {
     "filterAll": "Gbogbo rẹ̀",

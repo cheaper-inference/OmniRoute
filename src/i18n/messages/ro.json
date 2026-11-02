@@ -12219,7 +12219,9 @@
       "failedTitle": "Toate cele {count} încercări au eșuat",
       "failed": "eșuat",
       "pinnedTitle": "Model selectat prin fixarea sesiunii context-cache",
-      "pinned": "fixat"
+      "pinned": "fixat",
+      "recoveredAttemptsTitle": "Cererea a fost recuperată după {count} încercări",
+      "latestOutcomeFailed": "Ultimul rezultat al cererii a eșuat"
     },
     "attempts": "încercări",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "continuă de la părinte",
       "continuesFrom": "Continuă de la {id}",
       "viewConversation": "vezi conversația",
-      "openConversation": "Deschide conversația {id}"
+      "openConversation": "Deschide conversația {id}",
+      "omittedHttpAttempts": "{count} trimiteri HTTP nu au fost păstrate",
+      "noHttpResponse": "Nu a fost observat niciun răspuns HTTP",
+      "transportError": "Eroare de transport"
     },
     "tableLabel": "Jurnale de solicitări",
     "throughputPostFirstToken": "După primul token",
     "throughputEndToEnd": "De la un capăt la altul",
     "throughputRate": "{value} tokeni/sec",
-    "throughputExplanation": "Ambele rate folosesc valoarea mai mare dintre numărul de tokeni de ieșire și cel de raționament. Rata după primul token exclude un TTFT valid; în caz contrar, folosește durata completă. Rata de la un capăt la altul folosește întotdeauna durata completă. Un răspuns tamponat poate avea o rată de livrare în rafală ridicată fără o generare mai rapidă a modelului."
+    "throughputExplanation": "Ambele rate folosesc valoarea mai mare dintre numărul de tokeni de ieșire și cel de raționament. Rata după primul token exclude un TTFT valid; în caz contrar, folosește durata completă. Rata de la un capăt la altul folosește întotdeauna durata completă. Un răspuns tamponat poate avea o rată de livrare în rafală ridicată fără o generare mai rapidă a modelului.",
+    "omittedHttpAttempts": "{count} trimiteri HTTP nu au fost păstrate",
+    "upstreamStatus": "Server amonte {status}",
+    "noHttpResponse": "Nu a fost observat niciun răspuns HTTP",
+    "transportError": "Eroare de transport"
   },
   "proxyLogger": {
     "filterAll": "Toate",

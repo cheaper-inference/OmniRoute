@@ -976,3 +976,30 @@ test("local tool execution error is unassociated while a following provider erro
     assert.equal(rows.find((row) => row.requestType === "upstream_http_attempt")?.status, 200);
   }
 });
+
+test("actual keyless inference with null credentials sends once and records null connection attribution", async () => {
+  const { OpencodeExecutor } = await import("../../open-sse/executors/opencode.ts");
+  const f = fixture();
+  let sends = 0;
+  globalThis.fetch = (async () => {
+    sends++;
+    return Response.json({ ok: true });
+  }) as typeof fetch;
+  const input = {
+    model: "big-pickle",
+    stream: false,
+    credentials: null,
+    body: { model: "big-pickle", messages: [{ role: "user", content: "fixture" }] },
+  };
+  const result = normalizeExecutorResult(
+    await runWithCapture(f.capture, () => new OpencodeExecutor("opencode-zen").execute(input))
+  );
+  assert.equal(sends, 1);
+  assert.equal(result.response.status, 200);
+  assert.equal(input.credentials, null);
+  const saved = await finish(f, result.upstreamHttpSelection);
+  assert.equal(saved.length, 1);
+  assert.equal(saved[0].upstreamHttp?.total, 1);
+  assert.equal(saved[0].upstreamHttp?.send?.status, 200);
+  assert.equal(saved[0].upstreamHttp?.send?.connectionId, null);
+});

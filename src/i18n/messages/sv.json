@@ -12219,7 +12219,9 @@
       "failedTitle": "Alla {count} försök misslyckades",
       "failed": "misslyckades",
       "pinnedTitle": "Modell vald via kontext-cache sessionspinning",
-      "pinned": "fäst"
+      "pinned": "fäst",
+      "recoveredAttemptsTitle": "Begäran återställdes efter {count} försök",
+      "latestOutcomeFailed": "Det senaste resultatet av begäran misslyckades"
     },
     "attempts": "försök",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "fortsätter från överordnad",
       "continuesFrom": "Fortsätter från {id}",
       "viewConversation": "visa konversation",
-      "openConversation": "Öppna konversation {id}"
+      "openConversation": "Öppna konversation {id}",
+      "omittedHttpAttempts": "{count} HTTP-sändningar sparades inte",
+      "noHttpResponse": "Inget HTTP-svar observerades",
+      "transportError": "Transportfel"
     },
     "tableLabel": "Förfrågningsloggar",
     "throughputPostFirstToken": "Efter första token",
     "throughputEndToEnd": "End-to-end",
     "throughputRate": "{value} tokens/sek",
-    "throughputExplanation": "Båda hastigheterna använder det största av antalet output- och reasoning-tokens. Efter första token bortser från en giltig TTFT; i övrigt används hela varaktigheten. End-to-end använder alltid hela varaktigheten. Ett buffrat svar kan ha en hög burst-leveranshastighet utan att modellgenereringen är snabbare."
+    "throughputExplanation": "Båda hastigheterna använder det största av antalet output- och reasoning-tokens. Efter första token bortser från en giltig TTFT; i övrigt används hela varaktigheten. End-to-end använder alltid hela varaktigheten. Ett buffrat svar kan ha en hög burst-leveranshastighet utan att modellgenereringen är snabbare.",
+    "omittedHttpAttempts": "{count} HTTP-sändningar sparades inte",
+    "upstreamStatus": "Uppströmsserver {status}",
+    "noHttpResponse": "Inget HTTP-svar observerades",
+    "transportError": "Transportfel"
   },
   "proxyLogger": {
     "filterAll": "Alla",

@@ -12219,7 +12219,9 @@
       "failedTitle": "כל {count} הניסיונות נכשלו",
       "failed": "נכשל",
       "pinnedTitle": "המודל נבחר באמצעות נעילת מושב מטמון ההקשר",
-      "pinned": "מוצמד"
+      "pinned": "מוצמד",
+      "recoveredAttemptsTitle": "הבקשה התאוששה לאחר {count} ניסיונות",
+      "latestOutcomeFailed": "תוצאת הבקשה האחרונה נכשלה"
     },
     "attempts": "ניסיונות",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "ממשיך מהאב",
       "continuesFrom": "ממשיך מ־{id}",
       "viewConversation": "הצגת השיחה",
-      "openConversation": "פתיחת השיחה {id}"
+      "openConversation": "פתיחת השיחה {id}",
+      "omittedHttpAttempts": "{count} שליחות HTTP לא נשמרו",
+      "noHttpResponse": "לא נצפתה תגובת HTTP",
+      "transportError": "שגיאת תעבורה"
     },
     "tableLabel": "יומני בקשות",
     "throughputPostFirstToken": "לאחר הטוקן הראשון",
     "throughputEndToEnd": "מקצה לקצה",
     "throughputRate": "{value} טוקנים/שנייה",
-    "throughputExplanation": "שני הקצבים משתמשים במספר הגדול מבין ספירות טוקני הפלט והחשיבה. הקצב שלאחר הטוקן הראשון אינו כולל TTFT תקף; אחרת הוא משתמש במשך המלא. קצב מקצה לקצה משתמש תמיד במשך המלא. לתגובה עם חוצץ יכולה להיות מהירות אספקה גבוהה בפרץ בלי יצירת מודל מהירה יותר."
+    "throughputExplanation": "שני הקצבים משתמשים במספר הגדול מבין ספירות טוקני הפלט והחשיבה. הקצב שלאחר הטוקן הראשון אינו כולל TTFT תקף; אחרת הוא משתמש במשך המלא. קצב מקצה לקצה משתמש תמיד במשך המלא. לתגובה עם חוצץ יכולה להיות מהירות אספקה גבוהה בפרץ בלי יצירת מודל מהירה יותר.",
+    "omittedHttpAttempts": "{count} שליחות HTTP לא נשמרו",
+    "upstreamStatus": "שרת במעלה הזרם {status}",
+    "noHttpResponse": "לא נצפתה תגובת HTTP",
+    "transportError": "שגיאת תעבורה"
   },
   "proxyLogger": {
     "filterAll": "הכול",

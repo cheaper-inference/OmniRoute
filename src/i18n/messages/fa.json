@@ -12219,7 +12219,9 @@
       "failedTitle": "تمام {count} تلاش‌ها ناموفق بود",
       "failed": "ناموفق",
       "pinnedTitle": "مدل انتخاب شده از طریق پین کردن جلسه کش زمینه",
-      "pinned": "سنجاق شده"
+      "pinned": "سنجاق شده",
+      "recoveredAttemptsTitle": "درخواست پس از {count} تلاش بازیابی شد",
+      "latestOutcomeFailed": "نتیجهٔ آخرین درخواست ناموفق بود"
     },
     "attempts": "تلاش‌ها",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "از والد ادامه مییابد",
       "continuesFrom": "از {id} ادامه مییابد",
       "viewConversation": "مشاهده مکالمه",
-      "openConversation": "باز کردن مکالمه {id}"
+      "openConversation": "باز کردن مکالمه {id}",
+      "omittedHttpAttempts": "{count} ارسال HTTP نگهداری نشد",
+      "noHttpResponse": "هیچ پاسخ HTTP مشاهده نشد",
+      "transportError": "خطای انتقال"
     },
     "tableLabel": "گزارشهای درخواست",
     "throughputPostFirstToken": "پس از نخستین توکن",
     "throughputEndToEnd": "سرتاسری",
     "throughputRate": "{value} توکن/ثانیه",
-    "throughputExplanation": "هر دو نرخ از بزرگترِ تعداد توکنهای خروجی و استدلال استفاده میکنند. نرخ پس از نخستین توکن، یک TTFT معتبر را کنار میگذارد؛ در غیر این صورت از کل مدت استفاده میکند. نرخ سرتاسری همیشه از کل مدت استفاده میکند. یک پاسخ بافرشده میتواند نرخ تحویل انفجاری بالایی داشته باشد بدون آنکه تولید مدل سریعتر شود."
+    "throughputExplanation": "هر دو نرخ از بزرگترِ تعداد توکنهای خروجی و استدلال استفاده میکنند. نرخ پس از نخستین توکن، یک TTFT معتبر را کنار میگذارد؛ در غیر این صورت از کل مدت استفاده میکند. نرخ سرتاسری همیشه از کل مدت استفاده میکند. یک پاسخ بافرشده میتواند نرخ تحویل انفجاری بالایی داشته باشد بدون آنکه تولید مدل سریعتر شود.",
+    "omittedHttpAttempts": "{count} ارسال HTTP نگهداری نشد",
+    "upstreamStatus": "سرور بالادستی {status}",
+    "noHttpResponse": "هیچ پاسخ HTTP مشاهده نشد",
+    "transportError": "خطای انتقال"
   },
   "proxyLogger": {
     "filterAll": "همه",

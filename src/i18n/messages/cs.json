@@ -12296,7 +12296,9 @@
       "failedTitle": "Všechny {count} pokusy selhaly",
       "failed": "neúspěšné",
       "pinnedTitle": "Model vybrán prostřednictvím připnutí relace kontextové cache",
-      "pinned": "připnutý"
+      "pinned": "připnutý",
+      "recoveredAttemptsTitle": "Požadavek byl obnoven po {count} pokusech",
+      "latestOutcomeFailed": "Výsledek posledního požadavku byl neúspěšný"
     },
     "attempts": "pokusy",
     "detail": {
@@ -12398,13 +12400,20 @@
       "continuesFromParent": "pokračuje z nadřazené položky",
       "continuesFrom": "Pokračuje z {id}",
       "viewConversation": "zobrazit konverzaci",
-      "openConversation": "Otevřít konverzaci {id}"
+      "openConversation": "Otevřít konverzaci {id}",
+      "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
+      "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
+      "transportError": "Chyba přenosu"
     },
     "tableLabel": "Protokoly požadavků",
     "throughputPostFirstToken": "Po prvním tokenu",
     "throughputEndToEnd": "Od začátku do konce",
     "throughputRate": "{value} tokenů/s",
-    "throughputExplanation": "Obě rychlosti používají větší z počtu výstupních tokenů a tokenů pro uvažování. Hodnota po prvním tokenu nezahrnuje platné TTFT; jinak používá celkovou dobu trvání. Hodnota od začátku do konce vždy používá celkovou dobu trvání. U bufferované odpovědi může být vysoká rychlost doručení v dávce, aniž by model generoval rychleji."
+    "throughputExplanation": "Obě rychlosti používají větší z počtu výstupních tokenů a tokenů pro uvažování. Hodnota po prvním tokenu nezahrnuje platné TTFT; jinak používá celkovou dobu trvání. Hodnota od začátku do konce vždy používá celkovou dobu trvání. U bufferované odpovědi může být vysoká rychlost doručení v dávce, aniž by model generoval rychleji.",
+    "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
+    "upstreamStatus": "Nadřazený server {status}",
+    "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
+    "transportError": "Chyba přenosu"
   },
   "proxyLogger": {
     "filterAll": "Vše",

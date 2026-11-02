@@ -12296,7 +12296,9 @@
       "failedTitle": "فشلت جميع المحاولات {count}",
       "failed": "فشل",
       "pinnedTitle": "تم اختيار النموذج عبر تثبيت جلسة ذاكرة التخزين المؤقت للسياق",
-      "pinned": "مثبت"
+      "pinned": "مثبت",
+      "recoveredAttemptsTitle": "تم استرداد الطلب عبر {count} من المحاولات",
+      "latestOutcomeFailed": "فشلت نتيجة الطلب الأخيرة"
     },
     "attempts": "محاولات",
     "detail": {
@@ -12398,13 +12400,20 @@
       "continuesFromParent": "يتابع من الأصل",
       "continuesFrom": "يتابع من {id}",
       "viewConversation": "عرض المحادثة",
-      "openConversation": "فتح المحادثة {id}"
+      "openConversation": "فتح المحادثة {id}",
+      "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
+      "noHttpResponse": "لم تُرصد أي استجابة HTTP",
+      "transportError": "خطأ في النقل"
     },
     "tableLabel": "سجلات الطلبات",
     "throughputPostFirstToken": "ما بعد الرمز الأول",
     "throughputEndToEnd": "من البداية إلى النهاية",
     "throughputRate": "{value} رمز/ثانية",
-    "throughputExplanation": "يستخدم كلا المعدلين العدد الأكبر بين رموز الإخراج ورموز الاستدلال. يستثني معدل ما بعد الرمز الأول قيمة TTFT صالحة؛ وإلا فإنه يستخدم المدة الكاملة. أما معدل البداية إلى النهاية فيستخدم دائمًا المدة الكاملة. قد يحقق الرد المخزّن مؤقتًا معدل تسليم لحظيًا مرتفعًا دون أن يكون توليد النموذج أسرع."
+    "throughputExplanation": "يستخدم كلا المعدلين العدد الأكبر بين رموز الإخراج ورموز الاستدلال. يستثني معدل ما بعد الرمز الأول قيمة TTFT صالحة؛ وإلا فإنه يستخدم المدة الكاملة. أما معدل البداية إلى النهاية فيستخدم دائمًا المدة الكاملة. قد يحقق الرد المخزّن مؤقتًا معدل تسليم لحظيًا مرتفعًا دون أن يكون توليد النموذج أسرع.",
+    "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
+    "upstreamStatus": "الخادم الأعلى {status}",
+    "noHttpResponse": "لم تُرصد أي استجابة HTTP",
+    "transportError": "خطأ في النقل"
   },
   "proxyLogger": {
     "filterAll": "الكل",

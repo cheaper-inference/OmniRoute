@@ -12219,7 +12219,9 @@
       "failedTitle": "Vseh {count} poskusov je bilo neuspešnih",
       "failed": "neuspešno",
       "pinnedTitle": "Model je bil izbran s pripenjanjem seje predpomnilnika konteksta",
-      "pinned": "pripeto"
+      "pinned": "pripeto",
+      "recoveredAttemptsTitle": "Zahteva je bila obnovljena po {count} poskusih",
+      "latestOutcomeFailed": "Zadnji rezultat zahteve je bil neuspešen"
     },
     "attempts": "poskusi",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "nadaljuje se od nadrejenega",
       "continuesFrom": "Nadaljuje se od {id}",
       "viewConversation": "ogled pogovora",
-      "openConversation": "Odpri pogovor {id}"
+      "openConversation": "Odpri pogovor {id}",
+      "omittedHttpAttempts": "{count} pošiljanj HTTP ni bilo shranjenih",
+      "noHttpResponse": "Odgovor HTTP ni bil zaznan",
+      "transportError": "Napaka prenosa"
     },
     "tableLabel": "Dnevniki zahtev",
     "throughputPostFirstToken": "Po prvem tokenu",
     "throughputEndToEnd": "Od začetka do konca",
     "throughputRate": "{value} tokenov/s",
-    "throughputExplanation": "Pri obeh stopnjah se upošteva večje od števila izhodnih in razmišljevalnih tokenov. Stopnja po prvem tokenu izključuje veljaven TTFT; sicer uporablja celotno trajanje. Stopnja od začetka do konca vedno uporablja celotno trajanje. Odgovor iz medpomnilnika ima lahko visoko stopnjo dostave v izbruhih, čeprav model ne generira hitreje."
+    "throughputExplanation": "Pri obeh stopnjah se upošteva večje od števila izhodnih in razmišljevalnih tokenov. Stopnja po prvem tokenu izključuje veljaven TTFT; sicer uporablja celotno trajanje. Stopnja od začetka do konca vedno uporablja celotno trajanje. Odgovor iz medpomnilnika ima lahko visoko stopnjo dostave v izbruhih, čeprav model ne generira hitreje.",
+    "omittedHttpAttempts": "{count} pošiljanj HTTP ni bilo shranjenih",
+    "upstreamStatus": "Nadrejeni strežnik {status}",
+    "noHttpResponse": "Odgovor HTTP ni bil zaznan",
+    "transportError": "Napaka prenosa"
   },
   "proxyLogger": {
     "filterAll": "Vse",

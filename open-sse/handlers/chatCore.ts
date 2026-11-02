@@ -929,8 +929,8 @@ async function handleChatCoreInner({
       )?.geminiPromptCache;
     }
     return persistAttemptLogsFor(args, {
-      httpAttempts: providerRequestCapture.httpAttempts,
       traceId,
+      httpAttempts: providerRequestCapture.httpAttempts,
       provider,
       connectionId,
       model,

@@ -12219,7 +12219,9 @@
       "failedTitle": "सभी {count} प्रयास विफल हो गए",
       "failed": "विफल",
       "pinnedTitle": "संदर्भ-कैश सत्र पिनिंग के माध्यम से मॉडल चुना गया",
-      "pinned": "पिन किया गया"
+      "pinned": "पिन किया गया",
+      "recoveredAttemptsTitle": "{count} प्रयासों के बाद अनुरोध बहाल हुआ",
+      "latestOutcomeFailed": "नवीनतम अनुरोध का परिणाम विफल रहा"
     },
     "attempts": "प्रयास",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "पैरेंट से जारी है",
       "continuesFrom": "{id} से जारी है",
       "viewConversation": "बातचीत देखें",
-      "openConversation": "बातचीत {id} खोलें"
+      "openConversation": "बातचीत {id} खोलें",
+      "omittedHttpAttempts": "{count} HTTP प्रेषण सहेजे नहीं गए",
+      "noHttpResponse": "कोई HTTP प्रतिक्रिया देखी नहीं गई",
+      "transportError": "परिवहन त्रुटि"
     },
     "tableLabel": "अनुरोध लॉग",
     "throughputPostFirstToken": "पहले टोकन के बाद",
     "throughputEndToEnd": "एंड-टू-एंड",
     "throughputRate": "{value} टोकन/सेकंड",
-    "throughputExplanation": "दोनों दरें आउटपुट और रीज़निंग टोकन गणनाओं में से बड़ी का उपयोग करती हैं। पहले टोकन के बाद की दर किसी वैध TTFT को शामिल नहीं करती; अन्यथा यह पूरी अवधि का उपयोग करती है। एंड-टू-एंड हमेशा पूरी अवधि का उपयोग करता है। बफ़र की गई प्रतिक्रिया की बर्स्ट डिलीवरी दर ऊँची हो सकती है, भले ही मॉडल जनरेशन तेज़ न हो।"
+    "throughputExplanation": "दोनों दरें आउटपुट और रीज़निंग टोकन गणनाओं में से बड़ी का उपयोग करती हैं। पहले टोकन के बाद की दर किसी वैध TTFT को शामिल नहीं करती; अन्यथा यह पूरी अवधि का उपयोग करती है। एंड-टू-एंड हमेशा पूरी अवधि का उपयोग करता है। बफ़र की गई प्रतिक्रिया की बर्स्ट डिलीवरी दर ऊँची हो सकती है, भले ही मॉडल जनरेशन तेज़ न हो।",
+    "omittedHttpAttempts": "{count} HTTP प्रेषण सहेजे नहीं गए",
+    "upstreamStatus": "अपस्ट्रीम सर्वर {status}",
+    "noHttpResponse": "कोई HTTP प्रतिक्रिया देखी नहीं गई",
+    "transportError": "परिवहन त्रुटि"
   },
   "proxyLogger": {
     "filterAll": "सभी",

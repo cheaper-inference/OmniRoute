@@ -12296,7 +12296,9 @@
       "failedTitle": "ਸਾਰੀਆਂ {count} ਕੋਸ਼ਿਸ਼ਾਂ ਅਸਫਲ ਰਹੀਆਂ",
       "failed": "ਅਸਫਲ",
       "pinnedTitle": "ਕਾਂਟੈਕਸਟ-ਕੈਸ਼ ਸੈਸ਼ਨ ਪਿਨਿੰਗ ਰਾਹੀਂ ਚੁਣਿਆ ਮਾਡਲ",
-      "pinned": "ਪਿੰਨ ਕੀਤਾ ਗਿਆ"
+      "pinned": "ਪਿੰਨ ਕੀਤਾ ਗਿਆ",
+      "recoveredAttemptsTitle": "{count} ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ ਬੇਨਤੀ ਬਹਾਲ ਹੋਈ",
+      "latestOutcomeFailed": "ਸਭ ਤੋਂ ਨਵੀਂ ਬੇਨਤੀ ਦਾ ਨਤੀਜਾ ਅਸਫਲ ਰਿਹਾ"
     },
     "attempts": "ਕੋਸ਼ਿਸ਼ਾਂ",
     "detail": {
@@ -12398,13 +12400,20 @@
       "continuesFromParent": "ਪੈਰੈਂਟ ਤੋਂ ਜਾਰੀ ਹੈ",
       "continuesFrom": "{id} ਤੋਂ ਜਾਰੀ ਹੈ",
       "viewConversation": "ਗੱਲਬਾਤ ਵੇਖੋ",
-      "openConversation": "ਗੱਲਬਾਤ {id} ਖੋਲ੍ਹੋ"
+      "openConversation": "ਗੱਲਬਾਤ {id} ਖੋਲ੍ਹੋ",
+      "omittedHttpAttempts": "{count} HTTP ਭੇਜਣ ਸੰਭਾਲੇ ਨਹੀਂ ਗਏ",
+      "noHttpResponse": "ਕੋਈ HTTP ਜਵਾਬ ਦੇਖਿਆ ਨਹੀਂ ਗਿਆ",
+      "transportError": "ਆਵਾਜਾਈ ਗਲਤੀ"
     },
     "tableLabel": "ਬੇਨਤੀ ਲੌਗ",
     "throughputPostFirstToken": "ਪਹਿਲੇ ਟੋਕਨ ਤੋਂ ਬਾਅਦ",
     "throughputEndToEnd": "ਸ਼ੁਰੂ ਤੋਂ ਅੰਤ ਤੱਕ",
     "throughputRate": "{value} ਟੋਕਨ/ਸਕਿੰਟ",
-    "throughputExplanation": "ਦੋਵੇਂ ਦਰਾਂ ਆਉਟਪੁੱਟ ਅਤੇ ਰੀਜ਼ਨਿੰਗ ਟੋਕਨ ਗਿਣਤੀਆਂ ਵਿੱਚੋਂ ਵੱਡੀ ਵਰਤਦੀਆਂ ਹਨ। ਪਹਿਲੇ ਟੋਕਨ ਤੋਂ ਬਾਅਦ ਵਾਲੀ ਦਰ ਇੱਕ ਵੈਧ TTFT ਨੂੰ ਛੱਡ ਦਿੰਦੀ ਹੈ; ਨਹੀਂ ਤਾਂ ਇਹ ਪੂਰੀ ਮਿਆਦ ਵਰਤਦੀ ਹੈ। ਸ਼ੁਰੂ ਤੋਂ ਅੰਤ ਤੱਕ ਹਮੇਸ਼ਾ ਪੂਰੀ ਮਿਆਦ ਵਰਤਦਾ ਹੈ। ਬਫ਼ਰ ਕੀਤਾ ਗਿਆ ਜਵਾਬ ਤੇਜ਼ ਮਾਡਲ ਜਨਰੇਸ਼ਨ ਤੋਂ ਬਿਨਾਂ ਵੀ ਉੱਚ ਬਰਸਟ ਡਿਲੀਵਰੀ ਦਰ ਰੱਖ ਸਕਦਾ ਹੈ।"
+    "throughputExplanation": "ਦੋਵੇਂ ਦਰਾਂ ਆਉਟਪੁੱਟ ਅਤੇ ਰੀਜ਼ਨਿੰਗ ਟੋਕਨ ਗਿਣਤੀਆਂ ਵਿੱਚੋਂ ਵੱਡੀ ਵਰਤਦੀਆਂ ਹਨ। ਪਹਿਲੇ ਟੋਕਨ ਤੋਂ ਬਾਅਦ ਵਾਲੀ ਦਰ ਇੱਕ ਵੈਧ TTFT ਨੂੰ ਛੱਡ ਦਿੰਦੀ ਹੈ; ਨਹੀਂ ਤਾਂ ਇਹ ਪੂਰੀ ਮਿਆਦ ਵਰਤਦੀ ਹੈ। ਸ਼ੁਰੂ ਤੋਂ ਅੰਤ ਤੱਕ ਹਮੇਸ਼ਾ ਪੂਰੀ ਮਿਆਦ ਵਰਤਦਾ ਹੈ। ਬਫ਼ਰ ਕੀਤਾ ਗਿਆ ਜਵਾਬ ਤੇਜ਼ ਮਾਡਲ ਜਨਰੇਸ਼ਨ ਤੋਂ ਬਿਨਾਂ ਵੀ ਉੱਚ ਬਰਸਟ ਡਿਲੀਵਰੀ ਦਰ ਰੱਖ ਸਕਦਾ ਹੈ।",
+    "omittedHttpAttempts": "{count} HTTP ਭੇਜਣ ਸੰਭਾਲੇ ਨਹੀਂ ਗਏ",
+    "upstreamStatus": "ਅੱਪਸਟ੍ਰੀਮ ਸਰਵਰ {status}",
+    "noHttpResponse": "ਕੋਈ HTTP ਜਵਾਬ ਦੇਖਿਆ ਨਹੀਂ ਗਿਆ",
+    "transportError": "ਆਵਾਜਾਈ ਗਲਤੀ"
   },
   "proxyLogger": {
     "filterAll": "ਸਾਰੇ",

@@ -12296,7 +12296,9 @@
       "failedTitle": "Todas as {count} tentativas falharam",
       "failed": "falhou",
       "pinnedTitle": "Modelo selecionado através do fixador de sessão do cache de contexto",
-      "pinned": "fixado"
+      "pinned": "fixado",
+      "recoveredAttemptsTitle": "Pedido recuperado após {count} tentativas",
+      "latestOutcomeFailed": "O resultado mais recente do pedido falhou"
     },
     "attempts": "tentativas",
     "detail": {
@@ -12398,13 +12400,20 @@
       "continuesFromParent": "continua a partir do elemento principal",
       "continuesFrom": "Continua a partir de {id}",
       "viewConversation": "ver conversa",
-      "openConversation": "Abrir conversa {id}"
+      "openConversation": "Abrir conversa {id}",
+      "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+      "noHttpResponse": "Não foi observada qualquer resposta HTTP",
+      "transportError": "Erro de transporte"
     },
     "tableLabel": "Registos de pedidos",
     "throughputPostFirstToken": "Após o primeiro token",
     "throughputEndToEnd": "Ponta a ponta",
     "throughputRate": "{value} tokens/s",
-    "throughputExplanation": "Ambas as taxas utilizam o maior valor entre a contagem de tokens de saída e de raciocínio. A taxa após o primeiro token exclui um TTFT válido; caso contrário, utiliza a duração total. A taxa ponta a ponta utiliza sempre a duração total. Uma resposta em buffer pode ter uma taxa de entrega em rajada elevada sem que a geração do modelo seja mais rápida."
+    "throughputExplanation": "Ambas as taxas utilizam o maior valor entre a contagem de tokens de saída e de raciocínio. A taxa após o primeiro token exclui um TTFT válido; caso contrário, utiliza a duração total. A taxa ponta a ponta utiliza sempre a duração total. Uma resposta em buffer pode ter uma taxa de entrega em rajada elevada sem que a geração do modelo seja mais rápida.",
+    "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+    "upstreamStatus": "Servidor a montante {status}",
+    "noHttpResponse": "Não foi observada qualquer resposta HTTP",
+    "transportError": "Erro de transporte"
   },
   "proxyLogger": {
     "filterAll": "Todos",

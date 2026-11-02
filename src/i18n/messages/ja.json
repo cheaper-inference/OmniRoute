@@ -12219,7 +12219,9 @@
       "failedTitle": "すべての{count}回の試行が失敗しました",
       "failed": "失敗しました",
       "pinnedTitle": "コンテキストキャッシュセッションピンニングを介して選択されたモデル",
-      "pinned": "ピン留めされた"
+      "pinned": "ピン留めされた",
+      "recoveredAttemptsTitle": "{count} 回の試行でリクエストが復旧しました",
+      "latestOutcomeFailed": "最新のリクエスト結果は失敗でした"
     },
     "attempts": "試行回数",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "親からの続き",
       "continuesFrom": "{id} からの続き",
       "viewConversation": "会話を表示",
-      "openConversation": "会話 {id} を開く"
+      "openConversation": "会話 {id} を開く",
+      "omittedHttpAttempts": "{count} 件の HTTP 送信は保持されていません",
+      "noHttpResponse": "HTTP 応答は確認されていません",
+      "transportError": "トランスポートエラー"
     },
     "tableLabel": "リクエストログ",
     "throughputPostFirstToken": "初回トークン以降",
     "throughputEndToEnd": "エンドツーエンド",
     "throughputRate": "{value} トークン/秒",
-    "throughputExplanation": "どちらのレートも、出力トークン数と推論トークン数のうち大きい方を使用します。初回トークン以降は、有効な TTFT を除外します。それ以外の場合は全体の時間を使用します。エンドツーエンドは常に全体の時間を使用します。バッファリングされたレスポンスでは、モデルの生成が速くなくても、高いバースト配信レートになることがあります。"
+    "throughputExplanation": "どちらのレートも、出力トークン数と推論トークン数のうち大きい方を使用します。初回トークン以降は、有効な TTFT を除外します。それ以外の場合は全体の時間を使用します。エンドツーエンドは常に全体の時間を使用します。バッファリングされたレスポンスでは、モデルの生成が速くなくても、高いバースト配信レートになることがあります。",
+    "omittedHttpAttempts": "{count} 件の HTTP 送信は保持されていません",
+    "upstreamStatus": "上流サーバー {status}",
+    "noHttpResponse": "HTTP 応答は確認されていません",
+    "transportError": "トランスポートエラー"
   },
   "proxyLogger": {
     "filterAll": "すべて",

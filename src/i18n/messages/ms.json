@@ -12219,7 +12219,9 @@
       "failedTitle": "Semua {count} percubaan gagal",
       "failed": "gagal",
       "pinnedTitle": "Model dipilih melalui penetapan sesi cache konteks",
-      "pinned": "disematkan"
+      "pinned": "disematkan",
+      "recoveredAttemptsTitle": "Permintaan pulih selepas {count} percubaan",
+      "latestOutcomeFailed": "Hasil permintaan terkini gagal"
     },
     "attempts": "cuba",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "bersambung daripada induk",
       "continuesFrom": "Bersambung daripada {id}",
       "viewConversation": "lihat perbualan",
-      "openConversation": "Buka perbualan {id}"
+      "openConversation": "Buka perbualan {id}",
+      "omittedHttpAttempts": "{count} penghantaran HTTP tidak disimpan",
+      "noHttpResponse": "Tiada respons HTTP diperhatikan",
+      "transportError": "Ralat pengangkutan"
     },
     "tableLabel": "Log permintaan",
     "throughputPostFirstToken": "Selepas-token-pertama",
     "throughputEndToEnd": "Hujung ke hujung",
     "throughputRate": "{value} token/saat",
-    "throughputExplanation": "Kedua-dua kadar menggunakan nilai yang lebih besar antara bilangan token output dan token penaakulan. Selepas-token-pertama mengecualikan TTFT yang sah; jika tidak, ia menggunakan tempoh penuh. Hujung ke hujung sentiasa menggunakan tempoh penuh. Respons yang dibufferkan boleh mempunyai kadar penghantaran semburan yang tinggi tanpa penjanaan model yang lebih pantas."
+    "throughputExplanation": "Kedua-dua kadar menggunakan nilai yang lebih besar antara bilangan token output dan token penaakulan. Selepas-token-pertama mengecualikan TTFT yang sah; jika tidak, ia menggunakan tempoh penuh. Hujung ke hujung sentiasa menggunakan tempoh penuh. Respons yang dibufferkan boleh mempunyai kadar penghantaran semburan yang tinggi tanpa penjanaan model yang lebih pantas.",
+    "omittedHttpAttempts": "{count} penghantaran HTTP tidak disimpan",
+    "upstreamStatus": "Pelayan huluan {status}",
+    "noHttpResponse": "Tiada respons HTTP diperhatikan",
+    "transportError": "Ralat pengangkutan"
   },
   "proxyLogger": {
     "filterAll": "Semua",

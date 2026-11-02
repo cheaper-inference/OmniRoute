@@ -12219,7 +12219,9 @@
       "failedTitle": "Všetkých {count} pokusov zlyhalo",
       "failed": "zlyhalo",
       "pinnedTitle": "Model vybraný prostredníctvom prichytávania relácie cache kontextu",
-      "pinned": "pripnuté"
+      "pinned": "pripnuté",
+      "recoveredAttemptsTitle": "Požiadavka bola obnovená po {count} pokusoch",
+      "latestOutcomeFailed": "Výsledok poslednej požiadavky bol neúspešný"
     },
     "attempts": "pokusy",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "pokračuje z nadradenej konverzácie",
       "continuesFrom": "Pokračuje z {id}",
       "viewConversation": "zobraziť konverzáciu",
-      "openConversation": "Otvoriť konverzáciu {id}"
+      "openConversation": "Otvoriť konverzáciu {id}",
+      "omittedHttpAttempts": "{count} odoslaní HTTP nebolo uchovaných",
+      "noHttpResponse": "Nebola zaznamenaná žiadna odpoveď HTTP",
+      "transportError": "Chyba prenosu"
     },
     "tableLabel": "Záznamy požiadaviek",
     "throughputPostFirstToken": "Po prvom tokene",
     "throughputEndToEnd": "Od začiatku do konca",
     "throughputRate": "{value} tokenov/s",
-    "throughputExplanation": "Obe rýchlosti používajú väčší z počtov výstupných tokenov a tokenov uvažovania. Hodnota Po prvom tokene nezahŕňa platný TTFT; inak používa celkové trvanie. Hodnota Od začiatku do konca vždy používa celkové trvanie. Odpoveď vo vyrovnávacej pamäti môže mať vysokú rýchlosť doručenia v dávke bez toho, aby model generoval rýchlejšie."
+    "throughputExplanation": "Obe rýchlosti používajú väčší z počtov výstupných tokenov a tokenov uvažovania. Hodnota Po prvom tokene nezahŕňa platný TTFT; inak používa celkové trvanie. Hodnota Od začiatku do konca vždy používa celkové trvanie. Odpoveď vo vyrovnávacej pamäti môže mať vysokú rýchlosť doručenia v dávke bez toho, aby model generoval rýchlejšie.",
+    "omittedHttpAttempts": "{count} odoslaní HTTP nebolo uchovaných",
+    "upstreamStatus": "Nadradený server {status}",
+    "noHttpResponse": "Nebola zaznamenaná žiadna odpoveď HTTP",
+    "transportError": "Chyba prenosu"
   },
   "proxyLogger": {
     "filterAll": "Všetko",

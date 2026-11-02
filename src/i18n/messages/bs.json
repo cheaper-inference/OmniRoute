@@ -12296,7 +12296,9 @@
       "failedTitle": "Svih {count} pokušaja nije uspjelo",
       "failed": "neuspjelo",
       "pinnedTitle": "Model odabran putem context-cache session pinning-a",
-      "pinned": "zakačeno"
+      "pinned": "zakačeno",
+      "recoveredAttemptsTitle": "Zahtjev je oporavljen kroz {count} pokušaja",
+      "latestOutcomeFailed": "Ishod posljednjeg zahtjeva nije uspješan"
     },
     "attempts": "pokušaja",
     "detail": {
@@ -12398,13 +12400,20 @@
       "continuesFromParent": "nastavlja se od nadređenog",
       "continuesFrom": "Nastavlja se od {id}",
       "viewConversation": "prikaži razgovor",
-      "openConversation": "Otvori razgovor {id}"
+      "openConversation": "Otvori razgovor {id}",
+      "omittedHttpAttempts": "{count} HTTP slanja nije sačuvano",
+      "noHttpResponse": "HTTP odgovor nije zabilježen",
+      "transportError": "Greška u prijenosu"
     },
     "tableLabel": "Zapisnici zahtjeva",
     "throughputPostFirstToken": "Nakon prvog tokena",
     "throughputEndToEnd": "Od početka do kraja",
     "throughputRate": "{value} tokena/s",
-    "throughputExplanation": "Obje stope koriste veću vrijednost između broja izlaznih tokena i tokena zaključivanja. Stopa nakon prvog tokena isključuje važeći TTFT; u suprotnom koristi puno trajanje. Stopa od početka do kraja uvijek koristi puno trajanje. Baferisani odgovor može imati visoku stopu isporuke u rafalu bez brže generacije modela."
+    "throughputExplanation": "Obje stope koriste veću vrijednost između broja izlaznih tokena i tokena zaključivanja. Stopa nakon prvog tokena isključuje važeći TTFT; u suprotnom koristi puno trajanje. Stopa od početka do kraja uvijek koristi puno trajanje. Baferisani odgovor može imati visoku stopu isporuke u rafalu bez brže generacije modela.",
+    "omittedHttpAttempts": "{count} HTTP slanja nije sačuvano",
+    "upstreamStatus": "Nadređeni server {status}",
+    "noHttpResponse": "HTTP odgovor nije zabilježen",
+    "transportError": "Greška u prijenosu"
   },
   "proxyLogger": {
     "filterAll": "Sve",

@@ -12219,7 +12219,9 @@
       "failedTitle": "Nepavyko nė vienas iš {count} bandymų",
       "failed": "nepavyko",
       "pinnedTitle": "Modelis pasirinktas naudojant konteksto podėlio seanso prisegimą",
-      "pinned": "prisegtas"
+      "pinned": "prisegtas",
+      "recoveredAttemptsTitle": "Užklausa atkurta po {count} bandymų",
+      "latestOutcomeFailed": "Paskutinės užklausos rezultatas nesėkmingas"
     },
     "attempts": "bandymai",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "tęsiama nuo pirminio elemento",
       "continuesFrom": "Tęsiama nuo {id}",
       "viewConversation": "Peržiūrėti pokalbį",
-      "openConversation": "Atidaryti pokalbį {id}"
+      "openConversation": "Atidaryti pokalbį {id}",
+      "omittedHttpAttempts": "{count} HTTP siuntimų neišsaugota",
+      "noHttpResponse": "HTTP atsakymas nepastebėtas",
+      "transportError": "Perdavimo klaida"
     },
     "tableLabel": "Užklausų žurnalai",
     "throughputPostFirstToken": "Po pirmojo tokeno",
     "throughputEndToEnd": "Nuo pradžios iki pabaigos",
     "throughputRate": "{value} tokenų/s",
-    "throughputExplanation": "Abi spartos apskaičiuojamos pagal didesnį iš išvesties ir samprotavimo tokenų skaičių. Skaičiuojant spartą po pirmojo tokeno, galiojanti TTFT neįtraukiama; kitu atveju naudojama visa trukmė. Skaičiuojant spartą nuo pradžios iki pabaigos, visada naudojama visa trukmė. Buferinis atsakas gali būti pateikiamas dideliu momentiniu greičiu, nors modelis nėra generuojamas greičiau."
+    "throughputExplanation": "Abi spartos apskaičiuojamos pagal didesnį iš išvesties ir samprotavimo tokenų skaičių. Skaičiuojant spartą po pirmojo tokeno, galiojanti TTFT neįtraukiama; kitu atveju naudojama visa trukmė. Skaičiuojant spartą nuo pradžios iki pabaigos, visada naudojama visa trukmė. Buferinis atsakas gali būti pateikiamas dideliu momentiniu greičiu, nors modelis nėra generuojamas greičiau.",
+    "omittedHttpAttempts": "{count} HTTP siuntimų neišsaugota",
+    "upstreamStatus": "Aukštesnysis serveris {status}",
+    "noHttpResponse": "HTTP atsakymas nepastebėtas",
+    "transportError": "Perdavimo klaida"
   },
   "proxyLogger": {
     "filterAll": "Visi",

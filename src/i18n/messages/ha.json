@@ -12219,7 +12219,9 @@
       "failedTitle": "Dukkan yunƙuran guda {count} sun gaza",
       "failed": "ya gaza",
       "pinnedTitle": "An zaɓi samfurin ta hanyar kafe shi ga zaman context-cache",
-      "pinned": "an kafe"
+      "pinned": "an kafe",
+      "recoveredAttemptsTitle": "An dawo da buƙatar bayan ƙoƙari {count}",
+      "latestOutcomeFailed": "Sakamakon buƙata ta ƙarshe ya gaza"
     },
     "attempts": "yunƙurai",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "ya ci gaba daga na sama",
       "continuesFrom": "Ya ci gaba daga {id}",
       "viewConversation": "duba tattaunawa",
-      "openConversation": "Buɗe tattaunawa {id}"
+      "openConversation": "Buɗe tattaunawa {id}",
+      "omittedHttpAttempts": "Ba a adana aikawar HTTP guda {count} ba",
+      "noHttpResponse": "Ba a lura da martanin HTTP ba",
+      "transportError": "Kuskuren jigila"
     },
     "tableLabel": "Rajistocin buƙatu",
     "throughputPostFirstToken": "Bayan farkon token",
     "throughputEndToEnd": "Daga farko zuwa ƙarshe",
     "throughputRate": "{value} token/daƙiƙa",
-    "throughputExplanation": "Duk ƙididdigar biyu suna amfani da mafi girman adadin token na fitarwa da na tunani. Bayan farkon token ba ya haɗa da TTFT mai inganci; in ba haka ba yana amfani da cikakken lokaci. Daga farko zuwa ƙarshe koyaushe yana amfani da cikakken lokaci. Amsa da aka tanada (buffered) na iya samun ƙimar isar da sauri mai yawa ba tare da saurin samar da samfurin ba."
+    "throughputExplanation": "Duk ƙididdigar biyu suna amfani da mafi girman adadin token na fitarwa da na tunani. Bayan farkon token ba ya haɗa da TTFT mai inganci; in ba haka ba yana amfani da cikakken lokaci. Daga farko zuwa ƙarshe koyaushe yana amfani da cikakken lokaci. Amsa da aka tanada (buffered) na iya samun ƙimar isar da sauri mai yawa ba tare da saurin samar da samfurin ba.",
+    "omittedHttpAttempts": "Ba a adana aikawar HTTP guda {count} ba",
+    "upstreamStatus": "Sabar da ke sama {status}",
+    "noHttpResponse": "Ba a lura da martanin HTTP ba",
+    "transportError": "Kuskuren jigila"
   },
   "proxyLogger": {
     "filterAll": "Duka",

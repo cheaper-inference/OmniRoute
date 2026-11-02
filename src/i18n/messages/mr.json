@@ -12219,7 +12219,9 @@
       "failedTitle": "सर्व {count} प्रयत्न अयशस्वी झाले",
       "failed": "अयशस्वी",
       "pinnedTitle": "संदर्भ-कॅश सत्र पिनिंगद्वारे मॉडेल निवडले गेले",
-      "pinned": "पिन केलेले"
+      "pinned": "पिन केलेले",
+      "recoveredAttemptsTitle": "{count} प्रयत्नांनंतर विनंती पुनर्प्राप्त झाली",
+      "latestOutcomeFailed": "नवीनतम विनंतीचा निकाल अयशस्वी झाला"
     },
     "attempts": "प्रयत्न",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "पालकापासून पुढे सुरू राहते",
       "continuesFrom": "{id} पासून पुढे सुरू राहते",
       "viewConversation": "संभाषण पहा",
-      "openConversation": "{id} संभाषण उघडा"
+      "openConversation": "{id} संभाषण उघडा",
+      "omittedHttpAttempts": "{count} HTTP प्रेषणे जतन केलेली नाहीत",
+      "noHttpResponse": "कोणताही HTTP प्रतिसाद दिसून आलेला नाही",
+      "transportError": "वाहतूक त्रुटी"
     },
     "tableLabel": "विनंती लॉग",
     "throughputPostFirstToken": "पहिल्या टोकननंतर",
     "throughputEndToEnd": "एंड-टू-एंड",
     "throughputRate": "{value} टोकन/सेकंद",
-    "throughputExplanation": "दोन्ही दर आउटपुट आणि रिझनिंग टोकन संख्यांपैकी मोठी संख्या वापरतात. पहिल्या टोकननंतरचा दर वैध TTFT वगळतो; अन्यथा तो संपूर्ण कालावधी वापरतो. एंड-टू-एंड नेहमी संपूर्ण कालावधी वापरतो. बफर्ड प्रतिसादात जलद मॉडेल जनरेशनशिवाय उच्च बर्स्ट डिलिव्हरी दर असू शकतो."
+    "throughputExplanation": "दोन्ही दर आउटपुट आणि रिझनिंग टोकन संख्यांपैकी मोठी संख्या वापरतात. पहिल्या टोकननंतरचा दर वैध TTFT वगळतो; अन्यथा तो संपूर्ण कालावधी वापरतो. एंड-टू-एंड नेहमी संपूर्ण कालावधी वापरतो. बफर्ड प्रतिसादात जलद मॉडेल जनरेशनशिवाय उच्च बर्स्ट डिलिव्हरी दर असू शकतो.",
+    "omittedHttpAttempts": "{count} HTTP प्रेषणे जतन केलेली नाहीत",
+    "upstreamStatus": "अपस्ट्रीम सर्व्हर {status}",
+    "noHttpResponse": "कोणताही HTTP प्रतिसाद दिसून आलेला नाही",
+    "transportError": "वाहतूक त्रुटी"
   },
   "proxyLogger": {
     "filterAll": "सर्व",

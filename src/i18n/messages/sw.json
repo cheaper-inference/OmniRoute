@@ -12219,7 +12219,9 @@
       "failedTitle": "Jaribio zote {count} zimefeli",
       "failed": "imeshindwa",
       "pinnedTitle": "Mfano umechaguliwa kupitia upanuzi wa muktadha wa kikao",
-      "pinned": "imefungwa"
+      "pinned": "imefungwa",
+      "recoveredAttemptsTitle": "Ombi limerejeshwa baada ya majaribio {count}",
+      "latestOutcomeFailed": "Matokeo ya ombi la mwisho yameshindwa"
     },
     "attempts": "jaribio",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "inaendelea kutoka kwa mzazi",
       "continuesFrom": "Inaendelea kutoka {id}",
       "viewConversation": "tazama mazungumzo",
-      "openConversation": "Fungua mazungumzo {id}"
+      "openConversation": "Fungua mazungumzo {id}",
+      "omittedHttpAttempts": "Matumaji {count} ya HTTP hayakuhifadhiwa",
+      "noHttpResponse": "Hakuna jibu la HTTP lililoonekana",
+      "transportError": "Hitilafu ya usafirishaji"
     },
     "tableLabel": "Kumbukumbu za maombi",
     "throughputPostFirstToken": "Baada ya tokeni ya kwanza",
     "throughputEndToEnd": "Mwanzo hadi mwisho",
     "throughputRate": "{value} tokeni/sek",
-    "throughputExplanation": "Viwango vyote viwili hutumia idadi kubwa zaidi kati ya tokeni za matokeo na tokeni za ufikiri. Baada-ya-tokeni-ya-kwanza haijumuishi TTFT halali; vinginevyo hutumia muda kamili. Mwanzo-hadi-mwisho hutumia muda kamili kila wakati. Jibu lililohifadhiwa linaweza kuwa na kiwango cha juu cha uwasilishaji wa mlipuko bila uzalishaji wa modeli wa haraka zaidi."
+    "throughputExplanation": "Viwango vyote viwili hutumia idadi kubwa zaidi kati ya tokeni za matokeo na tokeni za ufikiri. Baada-ya-tokeni-ya-kwanza haijumuishi TTFT halali; vinginevyo hutumia muda kamili. Mwanzo-hadi-mwisho hutumia muda kamili kila wakati. Jibu lililohifadhiwa linaweza kuwa na kiwango cha juu cha uwasilishaji wa mlipuko bila uzalishaji wa modeli wa haraka zaidi.",
+    "omittedHttpAttempts": "Matumaji {count} ya HTTP hayakuhifadhiwa",
+    "upstreamStatus": "Seva ya juu {status}",
+    "noHttpResponse": "Hakuna jibu la HTTP lililoonekana",
+    "transportError": "Hitilafu ya usafirishaji"
   },
   "proxyLogger": {
     "filterAll": "Zote",

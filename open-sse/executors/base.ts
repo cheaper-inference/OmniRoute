@@ -1,5 +1,8 @@
-import { observeProviderHttpSend } from "../utils/providerRequestLogging.ts";
-import { selectHttpResponse, type HttpAttemptSelection } from "../utils/providerHttpAttempts.ts";
+import {
+  observeProviderHttpSend,
+  selectHttpResponse,
+  type HttpAttemptSelection,
+} from "../utils/providerHttpAttempts.ts";
 import { HTTP_STATUS, FETCH_TIMEOUT_MS } from "../config/constants.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
 import { resolveProviderUserAgentOverride } from "./providerUserAgentOverride.ts";
@@ -1011,7 +1014,7 @@ export class BaseExecutor {
                       typeof (serializedBody as Record<string, unknown> | null)?.model === "string"
                         ? String((serializedBody as Record<string, unknown>).model)
                         : model,
-                    connectionId: requestCredentials.connectionId ?? null,
+                    connectionId: requestCredentials?.connectionId ?? null,
                     endpoint: "unknown",
                   },
                   () => dispatchGuarded(this.provider, url, init, requestCredentials)

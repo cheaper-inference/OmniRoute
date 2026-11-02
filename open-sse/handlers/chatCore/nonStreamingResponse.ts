@@ -922,9 +922,9 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         ? { _streamed: true, _format: "sse-json", summary: sanitizedMalformedResponse }
         : sanitizedMalformedResponse;
       persistAttemptLogs({
-        upstreamHttpSelection,
         status: HTTP_STATUS.BAD_GATEWAY,
         error: malformedDiagnostic,
+        upstreamHttpSelection,
         tokens: usage,
         responseBody: sanitizedMalformedResponse,
         providerRequest: finalBody || translatedBody,

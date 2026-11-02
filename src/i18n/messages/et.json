@@ -12219,7 +12219,9 @@
       "failedTitle": "Kõik {count} katset ebaõnnestusid",
       "failed": "ebaõnnestunud",
       "pinnedTitle": "Mudel valiti kontekstivahemälu seansi kinnistamise abil",
-      "pinned": "seansile kinnistatud"
+      "pinned": "seansile kinnistatud",
+      "recoveredAttemptsTitle": "Päring taastus {count} katsega",
+      "latestOutcomeFailed": "Viimase päringu tulemus ebaõnnestus"
     },
     "attempts": "katsed",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "jätkub ülemüksusest",
       "continuesFrom": "Jätkub üksusest {id}",
       "viewConversation": "Kuva vestlus",
-      "openConversation": "Ava vestlus {id}"
+      "openConversation": "Ava vestlus {id}",
+      "omittedHttpAttempts": "{count} HTTP saatmist ei säilitatud",
+      "noHttpResponse": "HTTP vastust ei täheldatud",
+      "transportError": "Transpordiviga"
     },
     "tableLabel": "Päringulogid",
     "throughputPostFirstToken": "Pärast esimest tokenit",
     "throughputEndToEnd": "Otsast lõpuni",
     "throughputRate": "{value} tokenit/sek",
-    "throughputExplanation": "Mõlemad kiirused kasutavad suuremat väljundi- ja arutlustokenite arvu. Esimese tokeni järgne kiirus jätab kehtiva TTFT välja; vastasel juhul kasutab see kogu kestust. Otsast-lõpuni kiirus kasutab alati kogu kestust. Puhverdatud vastusel võib olla kõrge puhanguline tarnimiskiirus, ilma et mudeli genereerimine oleks kiirem."
+    "throughputExplanation": "Mõlemad kiirused kasutavad suuremat väljundi- ja arutlustokenite arvu. Esimese tokeni järgne kiirus jätab kehtiva TTFT välja; vastasel juhul kasutab see kogu kestust. Otsast-lõpuni kiirus kasutab alati kogu kestust. Puhverdatud vastusel võib olla kõrge puhanguline tarnimiskiirus, ilma et mudeli genereerimine oleks kiirem.",
+    "omittedHttpAttempts": "{count} HTTP saatmist ei säilitatud",
+    "upstreamStatus": "Ülesvoolu server {status}",
+    "noHttpResponse": "HTTP vastust ei täheldatud",
+    "transportError": "Transpordiviga"
   },
   "proxyLogger": {
     "filterAll": "Kõik",

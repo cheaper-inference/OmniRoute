@@ -12219,7 +12219,9 @@
       "failedTitle": "Alle {count} pogingen zijn mislukt",
       "failed": "mislukt",
       "pinnedTitle": "Model geselecteerd via context-cache sessiepinnen",
-      "pinned": "vastgezet"
+      "pinned": "vastgezet",
+      "recoveredAttemptsTitle": "Verzoek hersteld na {count} pogingen",
+      "latestOutcomeFailed": "Het laatste verzoekresultaat is mislukt"
     },
     "attempts": "pogingen",
     "detail": {
@@ -12321,13 +12323,20 @@
       "continuesFromParent": "gaat verder vanaf bovenliggend item",
       "continuesFrom": "Gaat verder vanaf {id}",
       "viewConversation": "gesprek bekijken",
-      "openConversation": "Gesprek {id} openen"
+      "openConversation": "Gesprek {id} openen",
+      "omittedHttpAttempts": "{count} HTTP-verzendingen niet bewaard",
+      "noHttpResponse": "Geen HTTP-antwoord waargenomen",
+      "transportError": "Transportfout"
     },
     "tableLabel": "Aanvraaglogboeken",
     "throughputPostFirstToken": "Na eerste token",
     "throughputEndToEnd": "End-to-end",
     "throughputRate": "{value} tokens/sec",
-    "throughputExplanation": "Beide snelheden gebruiken het hoogste van de output- en reasoning-tokentellingen. Na eerste token sluit een geldige TTFT uit; anders wordt de volledige duur gebruikt. End-to-end gebruikt altijd de volledige duur. Een gebufferde respons kan een hoge piekleveringssnelheid hebben zonder dat het model sneller genereert."
+    "throughputExplanation": "Beide snelheden gebruiken het hoogste van de output- en reasoning-tokentellingen. Na eerste token sluit een geldige TTFT uit; anders wordt de volledige duur gebruikt. End-to-end gebruikt altijd de volledige duur. Een gebufferde respons kan een hoge piekleveringssnelheid hebben zonder dat het model sneller genereert.",
+    "omittedHttpAttempts": "{count} HTTP-verzendingen niet bewaard",
+    "upstreamStatus": "Upstreamserver {status}",
+    "noHttpResponse": "Geen HTTP-antwoord waargenomen",
+    "transportError": "Transportfout"
   },
   "proxyLogger": {
     "filterAll": "Alles",
