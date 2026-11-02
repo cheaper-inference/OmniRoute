@@ -1092,6 +1092,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
+  {
+    key: "CLOUDFLARE_PLAYGROUND_STRICT_TOOL_RECOVERY_ENABLED",
+    label: "Cloudflare Playground Strict Tool Recovery",
+    description:
+      "How Cloudflare Playground handles a reply that never becomes a valid tool call. Off by default: up to 3 repair retries, then the last reply is returned as a normal answer. On: up to 10 repair retries, 5 seconds apart, each in a new playground session, then HTTP 502 (streaming sends a tool_call_recovery_failed error chunk before [DONE]), so a stalled turn cannot look finished and combos can fall back.",
+    descriptionI18nKey: "featureFlagCloudflarePlaygroundStrictToolRecoveryEnabledDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
 
   // ──────────────── CLI (5) ────────────────
   {
