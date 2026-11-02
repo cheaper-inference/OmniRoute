@@ -21,6 +21,7 @@ const trace = await import("../../open-sse/services/combo/decisionTrace.ts");
 const { evaluateExecuteTargetGates } =
   await import("../../open-sse/services/combo/executeTargetGates.ts");
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
+const eventBus = await import("../../src/lib/events/eventBus.ts");
 
 function setFlag(enabled: boolean | null) {
   if (enabled === null) delete process.env[FLAG];
@@ -345,4 +346,31 @@ test("10. gate: a protected priority target stops with the safe 503", async () =
   const result = (decision as unknown as { result: { response: Response } }).result;
   assert.equal(result.response.status, 503);
   await result.response.body?.cancel();
+});
+
+test("11. composition: a skipped target emits no attempt and a 429 never feeds the breaker", async () => {
+  freshEnv("2");
+  setFlag(true);
+  breaker.resetCrashStormBreaker();
+  const { provider, failing, healthy } = uniqueModels("co");
+  breaker.recordCrashFailure(provider, "spawn x ENOENT", 500);
+  breaker.recordCrashFailure(provider, "spawn x ENOENT", 500);
+  const attempts: string[] = [];
+  const off = eventBus.on("combo.target.attempt", (payload: { model: string }) => {
+    attempts.push(payload.model);
+  });
+  try {
+    const { status, calls } = await runCombo([failing, healthy], failing, LOCAL_CRASH);
+    assert.equal(status, 200);
+    assert.deepEqual(calls, [healthy]);
+    assert.deepEqual(attempts, [healthy], "the skip happens before any attempt is announced");
+  } finally {
+    off();
+  }
+
+  // A full account semaphore is a 429: local, but not a crash, and it keeps its own retries.
+  breaker.resetCrashStormBreaker();
+  const other = uniqueModels("sm");
+  breaker.recordCrashFailure(other.provider, "spawn codex ENOENT", 429);
+  assert.deepEqual(breaker.crashStormStatus(), []);
 });
