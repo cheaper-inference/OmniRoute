@@ -22,6 +22,8 @@ import {
 } from "@/shared/constants/providers";
 import type { RegistryModel } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { getVideoProvider } from "@omniroute/open-sse/config/videoRegistry.ts";
+import { getMusicProvider } from "@omniroute/open-sse/config/musicRegistry.ts";
+import { getOcrProvider } from "@omniroute/open-sse/config/ocrRegistry.ts";
 import { appendSyncedEffortVariants } from "@omniroute/open-sse/utils/syncedEffortVariants";
 
 type JsonRecord = Record<string, unknown>;
@@ -212,6 +214,7 @@ function hasStaticMediaRoutingMetadata(model: ComboBuilderModelOption): boolean 
           "videos",
           "audio-speech",
           "audio-transcriptions",
+          "audio-generation",
           "search",
           "web-fetch",
         ].includes(endpoint)
@@ -466,6 +469,21 @@ function addStaticMediaModelOptions(
 
   const transcriptionProvider = getTranscriptionProvider(providerId);
   append(transcriptionProvider?.models, "audio", "audio-transcriptions", "audio-transcriptions");
+
+  if (providerId === "elevenlabs") {
+    append(
+      [{ id: "eleven_text_to_sound_v2", name: "Eleven Text to Sound V2" }],
+      "audio",
+      "audio-generation",
+      "audio-generation"
+    );
+  }
+
+  const musicProvider = getMusicProvider(providerId);
+  append(musicProvider?.models, "audio", "music", "music");
+
+  const ocrProvider = getOcrProvider(providerId);
+  append(ocrProvider?.models, "ocr", "ocr", "ocr");
 }
 
 function buildModelOptions(

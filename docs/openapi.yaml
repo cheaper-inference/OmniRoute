@@ -17862,6 +17862,27 @@ components:
             - context-optimized
             - fusion
           default: priority
+        routes:
+          type: object
+          description: >-
+            Optional endpoint-specific routing plans. The legacy top-level models, strategy and
+            config remain the Chat plan. A named route overrides them only for its capability.
+          additionalProperties: false
+          properties:
+            chat: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            search: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            web-fetch: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            embeddings: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            rerank: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            images: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            image-edits: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            videos: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            music: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            ocr: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-speech: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-transcriptions: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-translations: { $ref: "#/components/schemas/ComboCapabilityRoute" }
+            audio-generation: { $ref: "#/components/schemas/ComboCapabilityRoute" }
         universal_handoff:
           type: object
           nullable: true
@@ -17879,3 +17900,26 @@ components:
             ttlMinutes: { type: integer, minimum: 1, maximum: 10080 }
             preserveSystemPrompt: { type: boolean }
             relayMode: { type: string, enum: [schema-locked, standard] }
+
+    ComboCapabilityRoute:
+      type: object
+      required: [models]
+      additionalProperties: false
+      properties:
+        models:
+          type: array
+          minItems: 1
+          items:
+            oneOf:
+              - type: string
+                description: "provider/model reference"
+              - type: object
+                additionalProperties: true
+        strategy:
+          type: string
+          enum:
+            [priority, fill-first, round-robin, weighted, random, strict-random, least-used, p2c]
+          default: priority
+        config:
+          type: object
+          additionalProperties: true

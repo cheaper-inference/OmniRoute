@@ -41,6 +41,9 @@ test("capability matching uses registries rather than a model name containing se
   assert.equal(targetSupportsEndpoint("jina-reader/fetch", "chat"), false);
   assert.equal(targetSupportsEndpoint("unknown-compatible/custom", "chat"), true);
   assert.equal(targetSupportsEndpoint("toString/web", "search"), false);
+  assert.equal(targetSupportsEndpoint("elevenlabs/music_v1", "music"), true);
+  assert.equal(targetSupportsEndpoint("elevenlabs/music_v1", "chat"), false);
+  assert.equal(targetSupportsEndpoint("elevenlabs/not-a-music-model", "music"), false);
 });
 
 test("nested combo projection preserves step identity, account pins and priority", () => {
@@ -79,4 +82,69 @@ test("empty nested capability branches are pruned without hiding invalid cycles"
   assert.deepEqual(projectComboForEndpoint(root, [root, chat], "search").combo.models, []);
   const cycle = { name: "cycle", models: ["cycle"] };
   assert.equal(projectComboForEndpoint(cycle, [cycle], "search").combo.models.length, 1);
+});
+
+test("a capability route overrides the legacy chat plan without mutating the combo", () => {
+  const combo = {
+    name: "multi-surface",
+    strategy: "priority",
+    models: ["openai/gpt-4o"],
+    config: { maxRetries: 1 },
+    routes: {
+      music: {
+        strategy: "round-robin",
+        models: ["elevenlabs/music_v1", "suno/chirp-v4"],
+        config: { maxRetries: 0 },
+      },
+    },
+  };
+  const snapshot = JSON.stringify(combo);
+
+  const chat = projectComboForEndpoint(combo, [combo], "chat");
+  const music = projectComboForEndpoint(combo, [combo], "music");
+
+  assert.equal(chat.combo.strategy, "priority");
+  assert.deepEqual(
+    chat.combo.models.map((step) => step.model),
+    ["openai/gpt-4o"]
+  );
+  assert.equal(music.combo.strategy, "round-robin");
+  assert.deepEqual(
+    music.combo.models.map((step) => step.model),
+    ["elevenlabs/music_v1", "suno/chirp-v4"]
+  );
+  assert.deepEqual(music.combo.config, { maxRetries: 0 });
+  assert.equal(JSON.stringify(combo), snapshot);
+});
+
+test("nested combos select their own route for the requested capability", () => {
+  const child = {
+    name: "child",
+    models: ["openai/gpt-4o"],
+    routes: {
+      search: {
+        strategy: "priority",
+        models: ["tavily-search/web"],
+      },
+    },
+  };
+  const root = {
+    name: "root",
+    models: ["openai/gpt-4o-mini"],
+    routes: {
+      search: {
+        strategy: "fill-first",
+        models: [{ kind: "combo-ref", comboName: "child" }],
+      },
+    },
+  };
+
+  const projected = projectComboForEndpoint(root, [root, child], "search");
+  assert.equal(projected.combo.strategy, "fill-first");
+  assert.equal(projected.combo.models[0].kind, "combo-ref");
+  const projectedChild = projected.allCombos.find((combo) => combo.name === "child")!;
+  assert.deepEqual(
+    projectedChild.models.map((step) => step.model),
+    ["tavily-search/web"]
+  );
 });

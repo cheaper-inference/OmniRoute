@@ -13,7 +13,10 @@ const { getAllMusicModels, parseMusicModel } =
   await import("../../open-sse/config/musicRegistry.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
+const combosDb = await import("../../src/lib/db/combos.ts");
 const musicRoute = await import("../../src/app/api/v1/music/generations/route.ts");
+const nativeMusicRoute = await import("../../src/app/api/v1/music/route.ts");
+const nativeSoundRoute = await import("../../src/app/api/v1/sound-generation/route.ts");
 const originalFetch = globalThis.fetch;
 const credentials = { apiKey: "stored-elevenlabs-test-key" };
 const generate = (body: Record<string, unknown>, connection = credentials) =>
@@ -173,4 +176,140 @@ test("unified music route discovers ElevenLabs and generates with the scoped sto
   for (const model of ["music_v1", "music_v2", "music_v2_5"]) {
     assert.ok(catalog.data.some((entry: { id: string }) => entry.id === `elevenlabs/${model}`));
   }
+});
+
+test("unified music route applies an endpoint-specific round-robin combo", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "elevenlabs",
+    authType: "apikey",
+    name: "ElevenLabs combo test",
+    apiKey: credentials.apiKey,
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  await combosDb.createCombo({
+    name: "music-round-robin",
+    strategy: "priority",
+    models: ["openai/gpt-4o"],
+    routes: {
+      music: {
+        strategy: "round-robin",
+        models: ["elevenlabs/music_v1", "elevenlabs/music_v2"],
+      },
+    },
+  });
+  const key = await apiKeysDb.createApiKey("music combo client", "music-combo-machine", [], {
+    allowedConnections: [String(connection.id)],
+  });
+  const seen: string[] = [];
+  globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+    seen.push(JSON.parse(String(init?.body)).model_id);
+    return new Response("ID3music", { headers: { "content-type": "audio/mpeg" } });
+  }) as typeof fetch;
+
+  for (let requestIndex = 0; requestIndex < 2; requestIndex += 1) {
+    const response = await musicRoute.POST(
+      new Request("http://localhost/v1/music/generations", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${key.key}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "music-round-robin",
+          prompt: "Calm piano",
+          duration: 3,
+        }),
+      }),
+      {} as never
+    );
+    assert.equal(response.status, 200, await response.clone().text());
+  }
+  assert.deepEqual(seen, ["music_v1", "music_v2"]);
+});
+
+test("native music endpoint preserves binary output when model_id names a combo", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "elevenlabs",
+    authType: "apikey",
+    name: "ElevenLabs native combo test",
+    apiKey: credentials.apiKey,
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  await combosDb.createCombo({
+    name: "native-music-combo",
+    strategy: "priority",
+    models: ["openai/gpt-4o"],
+    routes: {
+      music: { strategy: "priority", models: ["elevenlabs/music_v2_5"] },
+    },
+  });
+  const key = await apiKeysDb.createApiKey("native combo client", "native-combo-machine", [], {
+    allowedConnections: [String(connection.id)],
+  });
+  globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+    assert.equal(JSON.parse(String(init?.body)).model_id, "music_v2_5");
+    return new Response("native-audio", { headers: { "content-type": "audio/mpeg" } });
+  }) as typeof fetch;
+  const response = await nativeMusicRoute.POST(
+    new Request("http://localhost/v1/music", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key.key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ model_id: "native-music-combo", prompt: "Calm piano" }),
+    })
+  );
+  assert.equal(response.status, 200, await response.clone().text());
+  assert.equal(await response.text(), "native-audio");
+});
+
+test("native sound endpoint applies its audio-generation capability route", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "elevenlabs",
+    authType: "apikey",
+    name: "ElevenLabs native sound combo test",
+    apiKey: credentials.apiKey,
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  await combosDb.createCombo({
+    name: "native-sound-combo",
+    strategy: "priority",
+    models: ["openai/gpt-4o"],
+    routes: {
+      "audio-generation": {
+        strategy: "priority",
+        models: ["elevenlabs/eleven_text_to_sound_v2"],
+      },
+    },
+  });
+  const key = await apiKeysDb.createApiKey("sound combo client", "sound-combo-machine", [], {
+    allowedConnections: [String(connection.id)],
+  });
+  globalThis.fetch = (async (_input: RequestInfo | URL, init?: RequestInit) => {
+    assert.equal(JSON.parse(String(init?.body)).model_id, "eleven_text_to_sound_v2");
+    return new Response("native-sound", { headers: { "content-type": "audio/mpeg" } });
+  }) as typeof fetch;
+  const response = await nativeSoundRoute.POST(
+    new Request("http://localhost/v1/sound-generation", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${key.key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model_id: "native-sound-combo",
+        text: "A soft bell",
+        duration_seconds: 1,
+      }),
+    })
+  );
+  assert.equal(response.status, 200, await response.clone().text());
+  assert.equal(await response.text(), "native-sound");
 });

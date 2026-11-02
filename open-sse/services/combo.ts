@@ -760,12 +760,6 @@ function resolveRegistryDeclaredTimeoutMs(provider: string, modelStr: string): n
  * one metadata-only log line for durability across restarts.
  */
 export async function handleComboChat(options: HandleComboChatOptions): Promise<Response> {
-  if (
-    (options.endpointCapability === "search" || options.endpointCapability === "web-fetch") &&
-    !["priority", "fill-first"].includes(options.combo.strategy || "priority")
-  ) {
-    return errorResponse(400, "Web endpoint combos support priority and fill-first strategies");
-  }
   const projected = projectComboForEndpoint(
     options.combo,
     options.allCombos,

@@ -247,7 +247,7 @@ export async function POST(request) {
         } catch {}
 
         return handleComboChat({
-          endpointCapability: "audio-transcriptions",
+          endpointCapability: "audio-translations",
           body: { model: modelStr } as any,
           combo: combo as any,
           handleSingleModel: async (_reqBody: any, targetModelStr: string) =>

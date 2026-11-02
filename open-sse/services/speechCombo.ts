@@ -39,6 +39,8 @@ import {
   narrowMediaConnectionScope,
   pinnedConnectionIds,
 } from "./mediaComboFallback.ts";
+import { projectComboForEndpoint } from "../../src/lib/combos/endpointCapabilities.ts";
+import { orderCapabilityTargets } from "../../src/lib/combos/capabilityTargetOrder.ts";
 
 /**
  * Execute a full combo strategy for a text-to-speech request.
@@ -59,9 +61,17 @@ export async function executeSpeechCombo(
   }
 
   const allCombos = await getCombos();
-  const resolvedTargets = resolveComboTargets(combo as never, allCombos as never);
+  const projected = projectComboForEndpoint(combo as never, allCombos as never, "audio-speech");
+  const resolvedTargets = resolveComboTargets(
+    projected.combo as never,
+    projected.allCombos as never
+  );
   if (!resolvedTargets || resolvedTargets.length === 0) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
+    const message =
+      Array.isArray(combo.models) && combo.models.length > 0
+        ? `No speech-capable targets in combo "${comboName}"`
+        : `Combo "${comboName}" has no usable targets`;
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, message);
   }
   const targets = await filterComboTargetsForKey(resolvedTargets, keyScope.isTargetAllowed);
   if (targets.length === 0) return comboTargetsNotAllowedResponse(comboName);
@@ -74,17 +84,22 @@ export async function executeSpeechCombo(
   // provider prefix without checking that the model behind it can speak, so a
   // chat model on a speech-capable provider (openai/gpt-4o) would otherwise be
   // accepted as a target and only fail once dispatched.
-  const speechTargets = targets.filter((t) => {
-    if (!t.modelStr) return false;
-    const { provider, model } = parseSpeechModel(t.modelStr, dynamicProviders);
-    if (!provider) return false;
-    const config =
-      getSpeechProvider(provider) || dynamicProviders.find((dp) => dp.id === provider) || null;
-    if (!config) return false;
-    // Dynamic provider nodes do not always enumerate their models; when the
-    // list is absent there is nothing to check against, so the target stands.
-    if (!Array.isArray(config.models) || config.models.length === 0) return true;
-    return config.models.some((m: { id: string }) => m.id === model || m.id === t.modelStr);
+  const speechTargets = orderCapabilityTargets({
+    comboName,
+    endpoint: "audio-speech",
+    strategy: projected.combo.strategy,
+    targets: targets.filter((t) => {
+      if (!t.modelStr) return false;
+      const { provider, model } = parseSpeechModel(t.modelStr, dynamicProviders);
+      if (!provider) return false;
+      const config =
+        getSpeechProvider(provider) || dynamicProviders.find((dp) => dp.id === provider) || null;
+      if (!config) return false;
+      // Dynamic provider nodes do not always enumerate their models; when the
+      // list is absent there is nothing to check against, so the target stands.
+      if (!Array.isArray(config.models) || config.models.length === 0) return true;
+      return config.models.some((m: { id: string }) => m.id === model || m.id === t.modelStr);
+    }),
   });
 
   if (speechTargets.length === 0) {
@@ -200,7 +215,7 @@ export async function executeSpeechCombo(
         costUsd,
         latencyMs: Date.now() - startTime,
         requestId: generateRequestId(),
-        strategy: "priority",
+        strategy: projected.combo.strategy || "priority",
         fallbackAttempts: fallbackCount,
       });
     }

@@ -898,8 +898,10 @@ chat skips the dedicated search/fetch providers and considers OpenAI. Compatibil
 comes from the search/fetch executor registries, not from words in a model name.
 Filtering precedes credential selection and dispatch, and never edits the saved combo.
 
-Web combinations support `priority` and `fill-first`. Other strategies return `400`
-rather than silently applying chat-specific synthesis or scoring to web results.
+Non-chat capability routes support `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, and `p2c`. Chat-only synthesis strategies such as
+`fusion`, `pipeline`, and `context-relay` are rejected on non-chat routes rather than being
+silently applied to search or generated media.
 The existing combo engine handles ordered fallback, including upstream quota failures,
 and retains step IDs, account pins, per-step account allowlists, nested references,
 caller connection/quota scopes and combo access policy. Results retain their native
@@ -911,6 +913,24 @@ Each combo attempt uses one explicit provider. It cannot invoke the native autom
 provider pool behind the combo's back. Explicit-provider requests retain their existing
 single-provider behavior. Direct chat requests targeting dedicated search/fetch providers
 return an actionable JSON `400` instead of falling through to an OpenAI-style executor.
+
+### Capability-specific combo routes
+
+Saved combos may contain a `routes` object whose keys are API capabilities. Every route owns
+its target list, strategy, and runtime config. The top-level `models`, `strategy`, and `config`
+remain the legacy-compatible Chat plan; old combos without `routes` continue to work unchanged.
+
+Supported route keys are `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, and `audio-generation`. Endpoint projection happens before credential
+selection, scoring, or dispatch. Nested combo references select the child combo's route for the
+same capability.
+
+`POST /v1/music/generations` and `POST /v1/ocr` accept a combo name in `model`. The native
+ElevenLabs-compatible `POST /v1/music` also accepts a combo name in `model_id`, but every usable
+target on that native endpoint must be an ElevenLabs music model so its binary response contract
+is preserved. `POST /v1/sound-generation` accepts an `audio-generation` combo in `model_id` under
+the same native-binary constraint. Use `/v1/music/generations` for heterogeneous music providers.
 
 ### Exa and Tavily `provider_options`
 
