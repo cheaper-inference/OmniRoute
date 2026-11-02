@@ -148,34 +148,34 @@ täydennetään:
 
 Osa `MANAGEMENT`-toiminnoista on **vain operaattorille**: `manage`-avain ei riitä. Tallennettujen tunnistetietojen vieminen (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), varmuuskopion palauttaminen nykyisen datan päälle (`POST /api/db-backups/import` mukaan lukien `dryRun=true`, `POST /api/db-backups` palautus tunnuksella, `POST /api/settings/import-json`) ja palautuspisteiden tuhoaminen (`DELETE /api/db-backups` siivous sekä `PATCH /api/db-backups`, koska tallennettu säilytysaika ohjaa jokaisen varmuuskopioinnin jälkeisen automaattisen siivouksen) vaativat dashboard-istunnon, paikallisen CLI-identiteetin tai sen, että kirjautuminen on poistettu käytöstä. Synkronointitunnuksen myöntäminen (`POST /api/sync/tokens`) ja `admin`-laajuuden CLI-käyttötunnuksen luominen (`POST /api/cli/tokens`) vaativat dashboard-istunnon tai paikallisen CLI-identiteetin kaikissa kirjautumistiloissa. API-avaimet millä tahansa laajuudella ja `oma_`-käyttötunnukset eivät ole operaattorin tunnistetietoja: ne saavat `403`-virheen aina, kun sellainen vaaditaan. Tarkistus on tiedostossa `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Kirjautumisasetusten muuttaminen on myös vain operaattorille: `POST /api/settings/require-login` (aseta hallintasalasana / vaihda `requireLogin`) hyväksyy nämä tunnistetiedot vain, kun salasana on jo olemassa. Ensimmäisen käynnistyksen bootstrap-ikkuna (ei vielä salasanaa) on ennallaan, ja dashboard-istunnon on lähetettävä `currentPassword`, jotta salasana voidaan korvata (`403`, kun se puuttuu tai on väärä, kirjattu tilaan `settings.update_failed`). Paikallinen CLI ja instanssi, jossa kirjautuminen on pois käytöstä, säilyttävät palautusreitin ja saavat asettaa salasanan ilman sitä, koska molemmat on sidottu isäntään, joka omistaa datahakemiston.
 
-## Putki
+## Putkilinja
 
 ```
-Saapuva pyyntö → src/proxy.ts
-  → runAuthzPipeline() tiedostossa src/server/authz/pipeline.ts
-    1. Poista luotetut sisäiset otsakkeet (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Luo pyynnön tunniste ja luokittele reitti funktiolla classifyRoute()
-    3. Jos pathname == "/" → uudelleenohjaa kohteeseen /dashboard
-    4. Jos tyhjennystila (hallittu sammutus) on käynnissä ja reitti on /api/* → 503
-    5. Jos menetelmä ei ole GET ja reitti on /api/* → suorita checkBodySize()-tarkistus
-    6. Jos menetelmä on OPTIONS → CORS-esitarkistus 204
-    7. Jos options.enforce == false → päästä läpi reittiluokan otsakkeiden kanssa
-    8. Muussa tapauksessa: POLICIES[routeClass].evaluate(ctx)
-       - hyväksy → lisää x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - hylkää  → JSON-virhe ja correlation_id (hallintapaneelin sivut → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Luotetut sisäiset otsakkeet (määritelty tiedostossa `src/server/authz/headers.ts`) **poistetaan saapuvista pyynnöistä** ennen luokittelua — asiakkaat eivät voi asettaa ennalta `x-omniroute-auth-*`-otsakkeita esiintyäkseen toisena subjektina.
+Luotetut sisäiset otsikot (määritelty muodossa `src/server/authz/headers.ts`) ovat** poistettu saapuvista pyynnöistä** ennen luokitusta — asiakkaat eivät voi esitäyttää `x-omniroute-auth-*` esiintyäkseen aiheena.
 
-### Käytäntösopimukset
+### Vakuutussopimukset
 
-Jokaisella reittiluokalla on käytäntö hakemistossa `src/server/authz/policies/`:
+Jokaisella reittiluokalla on käytäntö `src/server/authz/policies/`:ssa:
 
 - **`publicPolicy`** (`policies/public.ts`) — palauttaa aina `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — poimii Bearer-tunnisteen ja validoi sen funktiolla `validateApiKey()`. Siirtyy anonyymiin käyttöön vain, kun voimassa oleva `REQUIRE_API_KEY`-ominaisuuslippu on poistettu käytöstä. Voimassa oleva lippu ratkaistaan funktion `isRequireApiKeyEnabled()` avulla (`tietokannan ominaisuuslipun ohitus > process.env.REQUIRE_API_KEY > oletusarvo`), joten hallintapaneelin ominaisuusliput ja ympäristömuuttujat hallitsevat reittejä `/api/v1/*`, `/api/v1beta/*` ja aliaksia yhdenmukaisesti; ratkaisijan virheet estävät pääsyn. Sallii hallintapaneeli-istunnon pyynnöt asiakas-API-reiteillä (mukaan lukien `/api/v1/models`, jota hallintapaneelin malliluettelo käyttää).
-- **`managementPolicy`** (`policies/management.ts`) — hyväksyy hallintapaneeli-istunnon ja sisäiset mallien synkronointipyynnöt (jotka täsmäytetään malliin `/api/providers/[name]/(sync-models|models)`) tai ohittaa tarkistuksen kokonaan, jos `isAuthRequired()` palauttaa arvon false. Palauttaa tilakoodin 403 (`AUTH_001`), kun Bearer-tunnus on annettu mutta se on virheellinen, ja muussa tapauksessa tilakoodin 401. Pakottaa myös reittisuojausten tasot (LOCAL_ONLY / ALWAYS_PROTECTED) ennen mitään todennushaaraa — katso [Reittisuojausten tasot](../security/ROUTE_GUARD_TIERS.md). Kohdassa `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` olevia LOCAL_ONLY-polkuja (tällä hetkellä `/api/mcp/`) voidaan käyttää muualta kuin loopback-osoitteesta, kun Bearer-avaimella on `manage`-käyttöoikeus; kaikki muut LOCAL_ONLY-polut on rajattu tiukasti loopback-osoitteeseen käyttöoikeudesta riippumatta.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — poimii siirtotiestä, vahvistaa `validateApiKey()` kautta. Menee nimettömäksi vain, kun tehokas `REQUIRE_API_KEY` -ominaisuuden lippu on poistettu käytöstä. Tehokas lippu ratkaistaan `isRequireApiKeyEnabled()` :n (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) avulla, joten hallintapaneelin ominaisuusliput ja ympäristömuuttujat hallitsevat `/api/v1/*`, `/api/v1beta/*` ja aliaksia johdonmukaisesti. Ratkaisijavika epäonnistuu suljettu. Sallii kojelauta-istuntopyynnöt asiakkaan API reiteillä (mukaan lukien `/api/v1/models`, jota käytetään kojelautamalliluettelossa). Kun Entra ID SSO on käytössä, SSO -haara käsittelee siirtotietä, joka on rakenteellisesti Entra-tunnus (kolme base64url-segmenttiä, `RS*` alg, `kid`).** ennen** `validateApiKey()` ja sen tuomio on lopullinen — se ei koskaan putoa API-avaimen polulle tai degrade-anonyymiksi haaralle, joten identiteetintarjoajan katkosta ei voi tulla avointa pääsyä. Staattiset API -näppäimet eivät muutu. Katso [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — hyväksyy kojelautaistunnon, sisäiset mallisynkronointipyynnöt (verrataan `/api/providers/[name]/(sync-models|models)`) tai ohittaa kokonaan, jos `isAuthRequired()` palauttaa epätosi. Palauttaa 403 (`AUTH_001`), kun siirtotie on olemassa, mutta virheellinen, 401 muussa tapauksessa. Pakottaa myös reittivartijatasot (LOCAL_ONLY / ALWAYS_PROTECTED) ennen todennushaaraa — katso [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` :n LOCAL_ONLY polkuja (tänään: `/api/mcp/`) voidaan käyttää ei-paluupalkin kautta, kun siirtotieavain kantaa `manage` aluetta; kaikki muut LOCAL_ONLY polut pysyvät tiukkana takaisinkytkentäisinä laajuudesta riippumatta.
 
-Onnistunut käytäntö palauttaa `AuthSubject`-olion, jonka `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Myöhemmät käsittelijät voivat lukea sen kutsumalla `assertAuth(request, "CLIENT_API")` tiedostossa `src/server/authz/assertAuth.ts` sen sijaan, että ne suorittaisivat todennuslogiikan uudelleen.
+Onnistunut käytäntö palauttaa `AuthSubject` ja `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Alavirran käsittelijät voivat lukea sen `assertAuth(request, "CLIENT_API")` kautta `src/server/authz/assertAuth.ts` ssä sen sijaan, että he suorittaisivat todennuslogiikkaa uudelleen.
 
 ## Julkisten reittien luettelo
 
@@ -325,23 +325,23 @@ Päätepisteet `/api/v1/agents/tasks/*` ja `/api/resilience/model-cooldowns` **e
 
 ## Virheenkorjaus
 
-Putki lisää vastauksiin aina seuraavat otsakkeet:
+Liukulinja leimaa aina vastaukset seuraavasti:
 
 ```
-x-request-id:               <korrelaatiotunnus, toistetaan virhevastausten rungossa>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Todennettujen pyyntöjen käsittelijäpuolen upstream-pyyntöotsakkeet sisältävät lisäksi:
+Todennettujen pyyntöjen ylävirran (käsittelijän puolen) pyyntöotsikot sisältävät myös:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<viimeiset-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (valinnainen)
-x-omniroute-auth-scopes:    pilkuilla eroteltu luettelo
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Käytä käsittelijöissä funktiota `assertAuth(req, expectedClass)` — se heittää `AuthzAssertionError`-virheen koodilla `AUTHZ_NOT_INITIALIZED`, jos väliohjelmisto ohitettiin (tästä on hyötyä määritysregressioiden havaitsemisessa testeissä).
+Käytä `assertAuth(req, expectedClass)` käsittelijöiden sisällä — se heittää `AuthzAssertionError` koodilla `AUTHZ_NOT_INITIALIZED` jos väliohjelmisto ohitettiin (apua konfiguraatioregressioiden havaitsemiseen testeissä).
 
 ## Katso myös
 
