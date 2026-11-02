@@ -14326,6 +14326,10 @@
         "label": "Combo: Leállítás tartalom-irányelvi elutasításkor",
         "description": "Ha egy combo-célpont pontos tartalom-irányelvi elutasítással válaszol (cyber_policy / content_policy_violation kód vagy típus), állítsa le a combót, és küldje vissza ezt az elutasítást még akkor is, ha a fennmaradó célpontok más modellek, ahelyett, hogy továbblépne a következő célpontra. Alapértelmezés szerint kikapcsolva: az elutasítás soha nem helyezi nyugalmi állapotba a fiókot, nem oldja ki a provider breakert, és a combo pontosan úgy halad tovább a következő célpontra, mint korábban."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown újrapróbálkozás: 403/410 elutasítások kihagyása",
         "description": "Amikor minden fiók cooldown alatt van, és a legkorábban lejáró cooldownt egy 403 (hozzáférés megtagadva) vagy egy 410 (megszűnt) okozta, azonnal adja vissza ezt az elutasítást ahelyett, hogy megvárná a cooldown lejárását és újraküldené a kérést; egy megújuló agentrouter kapcsolati hatókörű kvóta 403 ekkor 429-es errorCode-dal kerül mentésre, így újrapróbálható marad. Alapértelmezés szerint kikapcsolva: csak a 401 hagyja ki a várakozást, és minden elutasítás azzal a státusszal kerül mentésre, amellyel érkezett."

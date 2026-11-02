@@ -14403,6 +14403,10 @@
         "label": "كومبو: التوقف عند رفض سياسة المحتوى",
         "description": "عندما يستجيب هدف كومبو برفض صريح لسياسة المحتوى (الرمز أو النوع cyber_policy / content_policy_violation)، يتم إيقاف الكومبو وإرجاع هذا الرفض حتى إذا كانت الأهداف المتبقية نماذج مختلفة، بدلاً من الانتقال إلى الهدف التالي. معطّل افتراضيًا: لا يؤدي الرفض مطلقًا إلى تهدئة الحساب أو تفعيل قاطع دائرة المزود، وينتقل الكومبو إلى هدفه التالي تمامًا كما كان في السابق."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "إعادة المحاولة أثناء التهدئة: تخطي حالات رفض 403/410",
         "description": "عندما تكون جميع الحسابات في فترة تهدئة وتكون فترة التهدئة التي تنتهي أولاً ناجمة عن خطأ 403 (تم رفض الوصول) أو 410 (لم يعد متاحًا)، يتم إرجاع هذا الرفض فورًا بدلاً من انتظار انتهاء التهدئة وإعادة إرسال الطلب؛ ويتم بعد ذلك حفظ خطأ 403 لحصة agentrouter المتجددة على مستوى الاتصال مع errorCode بقيمة 429 ليظل قابلاً لإعادة المحاولة. معطّل افتراضيًا: يتخطى الخطأ 401 فقط فترة الانتظار، ويتم حفظ كل رفض بنفس الحالة التي ورد بها."

@@ -14326,6 +14326,10 @@
         "label": "Combo: توقف در صورت رد ناشی از خط‌مشی محتوا",
         "description": "هنگامی که یکی از اهداف combo با یک رد صریح بر اساس خط‌مشی محتوا (کد یا نوع cyber_policy / content_policy_violation) پاسخ می‌دهد، combo متوقف شده و همان پاسخ رد بازگردانده می‌شود حتی اگر اهداف باقی‌مانده مدل‌های متفاوتی باشند، به‌جای اینکه به هدف بعدی برود. به‌طور پیش‌فرض غیرفعال است: این رد هرگز حساب را وارد دوره خنک‌سازی (cooldown) نکرده و مدارشکن ارائه‌دهنده را فعال نمی‌کند، و combo دقیقاً مانند گذشته به هدف بعدی خود پیش می‌رود."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "تلاش مجدد در دوره خنک‌سازی: صرف‌نظر از پاسخ‌های رد 403/410",
         "description": "هنگامی که همه حساب‌ها در دوره خنک‌سازی هستند و دوره‌ای که زودتر به پایان می‌رسد ناشی از خطای 403 (دسترسی رد شد) یا 410 (حذف‌شده) باشد، به جای انتظار برای اتمام دوره خنک‌سازی و ارسال مجدد درخواست، آن پاسخ رد فوراً بازگردانده می‌شود؛ سپس خطای 403 سهمیه با محدوده اتصال agentrouter که در حال تمدید است با errorCode 429 ذخیره می‌شود تا قابلیت تلاش مجدد را حفظ کند. به‌طور پیش‌فرض غیرفعال است: فقط خطای 401 از انتظار صرف‌نظر می‌کند و هر پاسخ رد با همان وضعیتی که دریافت شده، ذخیره می‌شود."

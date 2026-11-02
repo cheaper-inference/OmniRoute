@@ -14403,6 +14403,10 @@
         "label": "Combo៖ បញ្ឈប់នៅពេលមានការបដិសេធគោលការណ៍ខ្លឹមសារ",
         "description": "នៅពេលគោលដៅ combo ឆ្លើយតបមកវិញនូវការបដិសេធគោលការណ៍ខ្លឹមសារជាក់លាក់ (code ឬ type cyber_policy / content_policy_violation) សូមបញ្ឈប់ combo ហើយប្រគល់ការបដិសេធនោះត្រឡប់មកវិញ ទោះបីជាគោលដៅដែលនៅសល់ជាម៉ូដែលផ្សេងគ្នាក៏ដោយ ជាជាងបន្តទៅកាន់គោលដៅបន្ទាប់។ បិទតាមលំនាំដើម៖ ការបដិសេធមិនដែលធ្វើឱ្យគណនីផ្អាក ឬកាត់ផ្តាច់ provider breaker ឡើយ ហើយ combo នឹងបន្តទៅកាន់គោលដៅបន្ទាប់របស់វាដូចពីមុនទាំងស្រុង។"
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: រំលងការបដិសេធ 403/410",
         "description": "នៅពេលគណនីទាំងអស់កំពុងស្ថិតក្នុងស្ថានភាព cooling down ហើយ cooldown ដែលបញ្ចប់មុនគេបង្អស់ត្រូវបានបង្កឡើងដោយ 403 (access refused) ឬ 410 (gone) នោះវានឹងបញ្ជូនការបដិសេធនោះត្រឡប់មកវិញភ្លាមៗ ជំនួសឱ្យការរង់ចាំឱ្យចប់ cooldown ហើយផ្ញើសំណើឡើងវិញ; បន្ទាប់មក កូដ 403 នៃកូតាកម្រិត connection របស់ agentrouter ដែលបន្តជាថ្មី នឹងត្រូវបានរក្សាទុកជាមួយ errorCode 429 ដើម្បីឱ្យវានៅតែអាចព្យាយាមឡើងវិញបាន។ បិទតាមលំនាំដើម៖ មានតែ 401 ប៉ុណ្ណោះដែលរំលងការរង់ចាំ ហើយរាល់ការបដិសេធត្រូវបានរក្សាទុកជាមួយស្ថានភាពដែលទទួលបានមក។"

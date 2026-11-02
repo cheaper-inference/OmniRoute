@@ -14326,6 +14326,10 @@
         "label": "कम्बो: सामग्री-नीति अस्वीकृतिमा रोक्नुहोस्",
         "description": "जब कुनै कम्बो लक्ष्यले ठ्याक्कै सामग्री-नीति अस्वीकृति (कोड वा प्रकार cyber_policy / content_policy_violation) मार्फत जवाफ दिन्छ, तब अर्को लक्ष्यमा अगाडि बढ्नुको सट्टा, बाँकी लक्ष्यहरू फरक मोडेलहरू भए पनि कम्बोलाई रोक्नुहोस् र त्यो अस्वीकृति फिर्ता पठाउनुहोस्। पूर्वनिर्धारित रूपमा बन्द: यो अस्वीकृतिले कहिल्यै खातालाई कुल (cool) गर्दैन वा प्रदायक ब्रेकर ट्रिप गर्दैन, र कम्बो पहिले जस्तै ठ्याक्कै आफ्नो अर्को लक्ष्यमा अगाडि बढ्छ।"
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "कुलडाउन पुन: प्रयास: 403/410 अस्वीकृतिहरू छोड्नुहोस्",
         "description": "जब प्रत्येक खाता कुलडाउनमा हुन्छ र सबैभन्दा पहिले समाप्त हुने कुलडाउन 403 (पहुँच अस्वीकृत) वा 410 (gone) को कारणले भएको थियो भने, कुलडाउन समाप्त हुन पर्खेर अनुरोध पुन: पठाउनुको सट्टा तुरुन्तै उक्त अस्वीकृति फिर्ता गर्नुहोस्; नवीकरण भइरहेको agentrouter connection-scoped quota 403 लाई त्यसपछि errorCode 429 सँग सुरक्षित गरिन्छ ताकि यो पुन: प्रयासयोग्य रहोस्। पूर्वनिर्धारित रूपमा बन्द: केवल 401 ले मात्र प्रतीक्षा छोड्छ, र प्रत्येक अस्वीकृति जुन स्थितिमा आएको थियो त्यही स्थितिमै सुरक्षित गरिन्छ।"

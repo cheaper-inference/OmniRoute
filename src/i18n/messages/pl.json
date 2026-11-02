@@ -14326,6 +14326,10 @@
         "label": "Combo: zatrzymanie przy odmowie z powodu zasad treści",
         "description": "Gdy cel combo odpowie dokładną odmową z powodu zasad dotyczących treści (kod lub typ cyber_policy / content_policy_violation), zatrzymaj combo i zwróć tę odmowę, nawet jeśli pozostałe cele to inne modele, zamiast przechodzić do następnego celu. Domyślnie wyłączone: odmowa nigdy nie nakłada na konto okresu karencji ani nie aktywuje wyłącznika awaryjnego dostawcy, a combo przechodzi do kolejnego celu dokładnie tak jak dotychczas."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponawianie w okresie schładzania: pomijaj odmowy 403/410",
         "description": "Gdy wszystkie konta są w okresie schładzania, a okres schładzania, który kończy się jako pierwszy, został wywołany przez błąd 403 (odmowa dostępu) lub 410 (usunięto), zwróć tę odmowę natychmiast, zamiast czekać na zakończenie okresu schładzania i ponowne wysłanie żądania; odnawiający się błąd 403 limitu przydziału o zasięgu połączenia agentrouter jest wówczas zapisywany z errorCode 429, dzięki czemu zachowuje możliwość ponowienia. Domyślnie wyłączone: tylko błąd 401 pomija oczekiwanie, a każda odmowa jest zapisywana ze statusem, z jakim nadeszła."

@@ -14403,6 +14403,10 @@
         "label": "Combo: Ieqaf fuq Rifjut tal-Politika tal-Kontenut",
         "description": "Meta mira ta' combo twieġeb b'rifjut eżatt tal-politika tal-kontenut (kodiċi jew tip cyber_policy / content_policy_violation), waqqaf il-combo u rritorna dak ir-rifjut anke meta l-miri li jifdal ikunu mudelli differenti, minflok ma tkompli għall-mira li jmiss. Mitfi b'mod awtomatiku: ir-rifjut qatt ma jberred il-kont u lanqas ma jattiva l-breaker tal-fornitur, u l-combo tkompli għall-mira li jmiss tagħha eżattament bħal qabel."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Pruwa mill-Ġdid tal-Cooldown: Aqbeż ir-Rifjuti 403/410",
         "description": "Meta kull kont ikun f'cooldown u l-cooldown li jintemm l-ewwel kien ikkawżat minn 403 (aċċess irrifjutat) jew 410 (m'għadux jeżisti), irritorna dak ir-rifjut minnufih minflok ma tistenna li jintemm il-cooldown u terġa' tibgħat it-talba; 403 ta' kwota b'ambitu ta' konnessjoni ta' agentrouter li qed tiġġedded imbagħad jiġi ppersistit b'errorCode 429 sabiex jibqa' jista' jerġa' jiġi ppruvat. Iddiżattivat b'mod awtomatiku: 401 biss jaqbeż l-istennija, u kull rifjut jiġi ppersistit bl-istatus li jkun wasal bih."

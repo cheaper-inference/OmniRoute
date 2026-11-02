@@ -14403,6 +14403,10 @@
         "label": "Combo- Content-Policy ငြင်းပယ်မှုတွင် ရပ်တန့်မည်",
         "description": "combo ပစ်မှတ်တစ်ခုက တိကျသော content-policy ငြင်းပယ်မှု (ကုဒ် သို့မဟုတ် အမျိုးအစား cyber_policy / content_policy_violation) ဖြင့် တုံ့ပြန်သည့်အခါ နောက်ပစ်မှတ်သို့ ရှေ့ဆက်မည့်အစား combo ကို ရပ်တန့်ပြီး ကျန်ရှိသော ပစ်မှတ်များသည် မတူညီသော မော်ဒယ်များဖြစ်နေလျှင်ပင် ထိုငြင်းပယ်မှုကို ပြန်ပို့မည်ဖြစ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- ထိုငြင်းပယ်မှုသည် အကောင့်ကို အေးခဲစေခြင်း သို့မဟုတ် provider breaker ကို ဖြတ်တောက်စေခြင်း မရှိဘဲ combo သည် ယခင်အတိုင်းပင် နောက်ပစ်မှတ်သို့ ရှေ့ဆက်သွားမည်ဖြစ်သည်။"
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: 403/410 ငြင်းပယ်မှုများကို ကျော်ရန်",
         "description": "အကောင့်အားလုံး cooldown ဖြစ်နေပြီး အစောဆုံးပြီးဆုံးမည့် cooldown သည် 403 (access refused) သို့မဟုတ် 410 (gone) ကြောင့် ဖြစ်ပေါ်ခဲ့ပါက cooldown ကုန်ဆုံးသည်အထိ စောင့်ဆိုင်းကာ တောင်းဆိုမှုကို ထပ်မံပေးပို့မည့်အစား ထိုငြင်းပယ်မှုကို ချက်ချင်း ပြန်ပေးပါမည်။ သက်တမ်းတိုးနေသော agentrouter connection-scoped quota 403 ကို ထပ်မံကြိုးစားနိုင်စေရန် errorCode 429 ဖြင့် သိမ်းဆည်းထားမည်ဖြစ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- 401 တစ်ခုတည်းသာ စောင့်ဆိုင်းမှုကို ကျော်သွားမည်ဖြစ်ပြီး ငြင်းပယ်မှုတိုင်းကို ရောက်ရှိလာသည့် status အတိုင်း သိမ်းဆည်းထားမည်ဖြစ်သည်။"

@@ -14326,6 +14326,10 @@
         "label": "کوڈبو: کنٹینٹ-پولیسی رجحان پر رک جائیں",
         "description": "جب کوڈبو ٹارگٹ جواب میں بالکل کنٹینٹ-پولیسی رجحان (کوڈ یا ٹائپ cyber_policy / content_policy_violation) دیتا ہے، تو کوڈبو کو روک کر اس رجحان کو واپس کریں، چاہے باقی ٹارگٹس مختلف ماڈلز ہوں، اگلے ٹارگٹ پر آگے بڑھنے کے بجائے۔ بطورِ ڈیفالٹ بند: اس رجحان سے اکاؤنٹ کول یا پرووائیڈر بریکر ٹرائپ کبھی نہیں ہوتا، اور کوڈبو بالکل پہلے کی طرح اپنے اگلے ٹارگٹ پر آگے بڑھتا ہے۔"
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "کول ڈاؤن ری ٹرائی: 403/410 کی نافرمانی پر نظر انداز کریں",
         "description": "جب تمام اکاؤنٹس کول ڈاؤن ہو رہے ہوں اور سب سے پہلے ختم ہونے والا کول ڈاؤن 403 (رسیدگی کی منسوخی) یا 410 (ختم شدہ) کی وجہ سے ہوا ہو، تو ان کی نافرمانی کو فوری طور پر واپس کریں بغیر کول ڈاؤن کے انتظار کے اور درخواست دوبارہ بھیجنے کے؛ پھر تجدید کرنے والا ایجنٹ روٹر کنکشن اسکوپڈ کوٹا 403 کو errorCode 429 کے ساتھ محفوظ کیا جاتا ہے تاکہ وہ دوبارہ قابلِ کوشش رہے۔ بطورِ ڈیفالٹ بند: صرف 401 انتظار کو چھوٹا دیتا ہے، اور ہر نافرمانی اس اسٹیٹس کے ساتھ محفوظ کی جاتی ہے جس کے ساتھ وہ پہنچی۔"

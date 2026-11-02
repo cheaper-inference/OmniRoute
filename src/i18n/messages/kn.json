@@ -14326,6 +14326,10 @@
         "label": "ಕಾಂಬೋ: ಕಂಟೆಂಟ್-ಪಾಲಿಸಿ ತಿರಸ್ಕಾರದಲ್ಲಿ ನಿಲ್ಲಿಸಿ",
         "description": "ಕಾಂಬೋ ಗುರಿಯು ನಿಖರವಾದ ಕಂಟೆಂಟ್-ಪಾಲಿಸಿ ತಿರಸ್ಕಾರದೊಂದಿಗೆ (ಕೋಡ್ ಅಥವಾ ಪ್ರಕಾರ cyber_policy / content_policy_violation) ಉತ್ತರಿಸಿದಾಗ, ಮುಂದಿನ ಗುರಿಗೆ ಮುನ್ನಡೆಯುವ ಬದಲು, ಉಳಿದ ಗುರಿಗಳು ವಿಭಿನ್ನ ಮಾಡೆಲ್‌ಗಳಾಗಿದ್ದರೂ ಸಹ ಕಾಂಬೋವನ್ನು ನಿಲ್ಲಿಸಿ ಮತ್ತು ಆ ತಿರಸ್ಕಾರವನ್ನು ಹಿಂತಿರುಗಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ತಿರಸ್ಕಾರವು ಎಂದಿಗೂ ಖಾತೆಯನ್ನು ಕೂಲ್ ಮಾಡುವುದಿಲ್ಲ ಅಥವಾ ಪ್ರೊವೈಡರ್ ಬ್ರೇಕರ್ ಅನ್ನು ಟ್ರಿಪ್ ಮಾಡುವುದಿಲ್ಲ, ಮತ್ತು ಕಾಂಬೋ ಮೊದಲಿನಂತೆಯೇ ತನ್ನ ಮುಂದಿನ ಗುರಿಗೆ ಮುನ್ನಡೆಯುತ್ತದೆ."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "ಕೂಲ್‌ಡೌನ್ ಮರುಪ್ರಯತ್ನ: 403/410 ನಿರಾಕರಣೆಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಿ",
         "description": "ಪ್ರತಿಯೊಂದು ಖಾತೆಯು ಕೂಲ್‌ಡೌನ್‌ನಲ್ಲಿದ್ದಾಗ ಮತ್ತು ಮೊದಲು ಮುಕ್ತಾಯಗೊಳ್ಳುವ ಕೂಲ್‌ಡೌನ್ 403 (access refused) ಅಥವಾ 410 (gone) ನಿಂದ ಉಂಟಾಗಿದ್ದರೆ, ಕೂಲ್‌ಡೌನ್ ಮುಗಿಯುವವರೆಗೆ ಕಾಯ್ದು ವಿನಂತಿಯನ್ನು ಮರುಕಳುಹಿಸುವ ಬದಲು ಆ ನಿರಾಕರಣೆಯನ್ನು ತಕ್ಷಣವೇ ಹಿಂತಿರುಗಿಸಿ; ನವೀಕರಣಗೊಳ್ಳುತ್ತಿರುವ agentrouter connection-scoped quota 403 ಅನ್ನು ನಂತರ errorCode 429 ನೊಂದಿಗೆ ಉಳಿಸಲಾಗುತ್ತದೆ, ಇದರಿಂದಾಗಿ ಅದು ಮರುಪ್ರಯತ್ನಿಸಬಹುದಾದ ಸ್ಥಿತಿಯಲ್ಲೇ ಉಳಿಯುತ್ತದೆ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಕೇವಲ 401 ಮಾತ್ರ ಕಾಯುವಿಕೆಯನ್ನು ಬಿಟ್ಟುಬಿಡುತ್ತದೆ, ಮತ್ತು ಪ್ರತಿಯೊಂದು ನಿರಾಕರಣೆಯನ್ನು ಅದು ಬಂದ ಸ್ಥಿತಿಯೊಂದಿಗೆ ಉಳಿಸಲಾಗುತ್ತದೆ."

@@ -14403,6 +14403,10 @@
         "label": "Combo: arresto su rifiuto della content policy",
         "description": "Quando un target della combo risponde con un rifiuto esatto per la content policy (codice o tipo cyber_policy / content_policy_violation), arresta la combo e restituisci tale rifiuto anche se i target rimanenti sono modelli diversi, invece di passare al target successivo. Disattivato per impostazione predefinita: il rifiuto non mette mai l'account in cooldown né fa scattare il breaker del provider, e la combo passa al target successivo esattamente come prima."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Riprova durante il cooldown: Salta i rifiuti 403/410",
         "description": "Quando tutti gli account sono in cooldown e il cooldown che termina per primo è stato causato da un 403 (accesso rifiutato) o da un 410 (non più disponibile), restituisci subito tale rifiuto invece di attendere la fine del cooldown e inviare nuovamente la richiesta; un 403 di quota con ambito di connessione per un agentrouter in rinnovo viene quindi salvato con errorCode 429 affinché rimanga ritentabile. Disattivato per impostazione predefinita: solo un 401 salta l'attesa e ogni rifiuto viene salvato con lo stato con cui è arrivato."

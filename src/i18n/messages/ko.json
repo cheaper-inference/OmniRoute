@@ -14326,6 +14326,10 @@
         "label": "콤보: 콘텐츠 정책 거부 시 중단",
         "description": "콤보 대상이 정확한 콘텐츠 정책 거부(코드 또는 타입 cyber_policy / content_policy_violation)로 응답할 때, 다음 대상으로 넘어가는 대신 남아 있는 대상이 다른 모델이더라도 콤보를 중단하고 해당 거부를 반환합니다. 기본값은 꺼짐: 해당 거부는 계정을 쿨다운시키거나 프로바이더 차단기를 작동시키지 않으며, 콤보는 이전과 동일하게 다음 대상으로 진행합니다."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "쿨다운 재시도: 403/410 거부 건너뛰기",
         "description": "모든 계정이 쿨다운 중이고 가장 먼저 끝나는 쿨다운의 원인이 403(액세스 거부) 또는 410(사라짐)인 경우, 쿨다운이 끝날 때까지 대기한 뒤 요청을 재전송하는 대신 해당 거부 응답을 즉시 반환합니다. 이때 갱신 중인 agentrouter 연결 범위 할당량 403은 재시도 가능한 상태로 유지되도록 errorCode 429로 저장됩니다. 기본값은 비활성화입니다. 401만 대기를 건너뛰며, 모든 거부 응답은 수신된 상태 그대로 저장됩니다."

@@ -14326,6 +14326,10 @@
         "label": "Combo: Detener ante rechazo por política de contenido",
         "description": "Cuando un destino del combo responda con un rechazo exacto por política de contenido (código o tipo cyber_policy / content_policy_violation), detén el combo y devuelve ese rechazo incluso cuando los destinos restantes sean modelos diferentes, en lugar de avanzar al siguiente destino. Desactivado de forma predeterminada: el rechazo nunca enfría la cuenta ni dispara el disyuntor del proveedor, y el combo avanza a su siguiente destino exactamente como antes."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Reintento de enfriamiento: omitir rechazos 403/410",
         "description": "Cuando todas las cuentas están en enfriamiento y el enfriamiento que termina primero fue causado por un 403 (acceso denegado) o un 410 (ya no disponible), devuelve ese rechazo de inmediato en lugar de esperar a que termine el enfriamiento y reenviar la solicitud; un 403 de cuota con ámbito de conexión de agentrouter en renovación se persiste entonces con errorCode 429 para que siga siendo reintentable. Desactivado por defecto: solo un 401 omite la espera, y cada rechazo se persiste con el estado con el que llegó."

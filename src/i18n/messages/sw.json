@@ -14326,6 +14326,10 @@
         "label": "Mzingamano: Kumuisha kwa Kukataa kwa Sera ya Mwenendo",
         "description": "Tangu mzingamano wa awali wa kutoka amwajibu kukataa kwa sera ya mwenendo tu (mabao au aina cyber_policy / content_policy_violation), mzingamano anamwisha na kurejea kukataa kwa hata tangu awali wa mzingamano ni michoro tofauti, badala ya kwenda kwa mzingamano unaofuata. Imezimwa kwa chaguo-msingi: kukataa haina kufuruputa akaunti au kutosha mwingiliano, na mzingamano anakwenda kwa mzingamano unaofuata kama ya awali."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jaribio Tena la Kupumzika: Kuzima Ukwilizaji wa 403/410",
         "description": "Kitambaa kama akaunti zote zipo katika muda wa kupumzika na muda wa kupumzika unaomalizika kwanza ulisababishwa na 403 (ufikaji ukikata tamaa) au 410 (imeondoka), kurudi uasi huo mara moja badala ya kusubiri kupumzika kunakamilika na kutuma tena ombi; kuota ya mwingiliano wa agentrouter inayohakikisha 403 ya mpango wa mwingiliano inahifadhiwa na errorCode 429 ili ibaki iwezekan kufanya upya. Imezimwa kwa chaguo-msingi: 401 pekee ndio inayozima usubiri, na uasi wote unahifadhiwa na hali aliyoingia nayo."

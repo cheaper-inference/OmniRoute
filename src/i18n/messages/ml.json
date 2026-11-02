@@ -14403,6 +14403,10 @@
         "label": "കോംബോ: കണ്ടന്റ്-പോളിസി നിരസിക്കലിൽ നിർത്തുക",
         "description": "ഒരു കോംബോ ടാർഗെറ്റ് കൃത്യമായ കണ്ടന്റ്-പോളിസി നിരസിക്കൽ (കോഡ് അല്ലെങ്കിൽ തരം cyber_policy / content_policy_violation) നൽകി മറുപടി നൽകുമ്പോൾ, അടുത്ത ടാർഗെറ്റിലേക്ക് പോകുന്നതിന് പകരം, ബാക്കിയുള്ള ടാർഗെറ്റുകൾ വ്യത്യസ്‌ത മോഡലുകൾ ആണെങ്കിൽപ്പോലും കോംബോ അവസാനിപ്പിക്കുകയും ആ നിരസിക്കൽ തിരികെ നൽകുകയും ചെയ്യുക. സ്വതവേ ഓഫാണ്: ഈ നിരസിക്കൽ ഒരിക്കലും അക്കൗണ്ടിനെ കൂൾ ഡൗൺ ചെയ്യുകയോ പ്രൊവൈഡർ ബ്രേക്കർ ട്രിപ്പ് ചെയ്യുകയോ ഇല്ല, കൂടാതെ കോംബോ മുൻപത്തെപ്പോലെ തന്നെ അതിന്റെ അടുത്ത ടാർഗെറ്റിലേക്ക് നീങ്ങുകയും ചെയ്യും."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "കൂൾഡൗൺ റീട്രൈ: 403/410 നിരസിക്കലുകൾ ഒഴിവാക്കുക",
         "description": "എല്ലാ അക്കൗണ്ടുകളും കൂൾഡൗണിലായിരിക്കുകയും, ആദ്യം അവസാനിക്കുന്ന കൂൾഡൗണിന് കാരണം 403 (access refused) അല്ലെങ്കിൽ 410 (gone) ആകുകയും ചെയ്യുമ്പോൾ, കൂൾഡൗൺ സമയം കഴിയുന്നതുവരെ കാത്തിരുന്ന് അഭ്യർത്ഥന വീണ്ടും അയക്കുന്നതിന് പകരം ആ നിരസിക്കൽ ഉടനടി തിരികെ നൽകുക; പുതുക്കുന്ന agentrouter connection-scoped quota 403, വീണ്ടും ശ്രമിക്കാൻ സാധിക്കുന്ന വിധത്തിൽ errorCode 429 ആയി നിലനിർത്തപ്പെടും. ഡിഫോൾട്ടായി ഓഫാണ്: 401 മാത്രമേ കാത്തിരിപ്പ് ഒഴിവാക്കുകയുള്ളൂ, കൂടാതെ ഓരോ നിരസിക്കലും അത് ലഭിച്ച അതേ സ്റ്റാറ്റസിൽ തന്നെ നിലനിർത്തപ്പെടുന്നു."

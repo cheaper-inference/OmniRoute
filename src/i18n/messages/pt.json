@@ -14403,6 +14403,10 @@
         "label": "Combo: Parar em Caso de Recusa por Política de Conteúdo",
         "description": "Quando um destino do combo responder com uma recusa exata por política de conteúdo (código ou tipo cyber_policy / content_policy_violation), para o combo e devolve essa recusa, mesmo quando os restantes destinos forem modelos diferentes, em vez de avançar para o destino seguinte. Desativado por predefinição: a recusa nunca arrefece a conta nem aciona o disjuntor do fornecedor, e o combo avança para o destino seguinte exatamente como antes."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Nova tentativa em arrefecimento: ignorar recusas 403/410",
         "description": "Quando todas as contas estão em arrefecimento e o arrefecimento que termina primeiro foi causado por um 403 (acesso recusado) ou um 410 (removido), devolve essa recusa de imediato em vez de aguardar pelo fim do arrefecimento e reenviar o pedido; um 403 de quota com âmbito de ligação do agentrouter em renovação é então persistido com o errorCode 429 para permanecer passível de nova tentativa. Desativado por predefinição: apenas um 401 ignora a espera e cada recusa é persistida com o estado com que chegou."

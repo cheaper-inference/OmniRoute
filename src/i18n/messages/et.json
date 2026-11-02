@@ -14326,6 +14326,10 @@
         "label": "Kombo: peatu sisupoliitika keeldumisel",
         "description": "Kui kombo sihtmärk vastab täpse sisupoliitika keeldumisega (kood või tüüp cyber_policy / content_policy_violation), peata kombo ja tagasta see keeldumine isegi siis, kui ülejäänud sihtmärgid on erinevad mudelid, selle asemel et liikuda järgmise sihtmärgi juurde. Vaikimisi väljas: keeldumine ei vii kunagi kontot jahtumisperioodile ega rakenda teenusepakkuja kaitselülitit ning kombo liigub oma järgmise sihtmärgi juurde täpselt nagu varem."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jahtumisaja korduskatse: jäta 403/410 keeldumised vahele",
         "description": "Kui kõik kontod on jahtumisolekus ning esimesena lõppeva jahtumisaja põhjustas 403 (juurdepääsust keeldutud) või 410 (kadunud), tagasta see keeldumine kohe, selle asemel et jahtumisaeg ära oodata ja päring uuesti saata; uuenev agentrouter ühendusepõhise kvoodi 403 talletatakse seejärel koodiga errorCode 429, et see jääks uuesti proovitavaks. Vaikimisi väljas: ainult 401 jätab ootamise vahele ja iga keeldumine talletatakse staatusega, millega see saabus."

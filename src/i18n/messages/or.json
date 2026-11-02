@@ -14326,6 +14326,10 @@
         "label": "Combo: Content-Policy ପ୍ରତ୍ୟାଖ୍ୟାନରେ ଅଟକନ୍ତୁ",
         "description": "ଯେତେବେଳେ ଏକ combo ଟାର୍ଗେଟ୍ ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ content-policy ପ୍ରତ୍ୟାଖ୍ୟାନ (କୋଡ୍ କିମ୍ବା ପ୍ରକାର cyber_policy / content_policy_violation) ସହିତ ଉତ୍ତର ଦିଏ, ପରବର୍ତ୍ତୀ ଟାର୍ଗେଟକୁ ଅଗ୍ରସର ହେବା ପରିବର୍ତ୍ତେ, combo କୁ ଅଟକାନ୍ତୁ ଏବଂ ଅବଶିଷ୍ଟ ଟାର୍ଗେଟଗୁଡ଼ିକ ଭିନ୍ନ ମଡେଲ୍ ହୋଇଥିଲେ ମଧ୍ୟ ସେହି ପ୍ରତ୍ୟାଖ୍ୟାନକୁ ଫେରାନ୍ତୁ। ଡିଫଲ୍ଟ ଭାବରେ ବନ୍ଦ: ଏହି ପ୍ରତ୍ୟାଖ୍ୟାନ କଦାପି ଆକାଉଣ୍ଟକୁ କୁଲ୍ ଡାଉନ୍ କରେ ନାହିଁ କିମ୍ବା ପ୍ରୋଭାଇଡର୍ ବ୍ରେକର୍‌କୁ ଟ୍ରିପ୍ କରେ ନାହିଁ, ଏବଂ combo ପୂର୍ବ ଭଳି ଠିକ୍ ଏହାର ପରବର୍ତ୍ତୀ ଟାର୍ଗେଟକୁ ଅଗ୍ରସର ହୁଏ।"
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "କୁଲ୍‌ଡାଉନ୍ ପୁନଃପ୍ରୟାସ: 403/410 ପ୍ରତ୍ୟାଖ୍ୟାନଗୁଡ଼ିକୁ ଏଡ଼ାନ୍ତୁ",
         "description": "ଯେତେବେଳେ ପ୍ରତ୍ୟେକ ଆକାଉଣ୍ଟ କୁଲ୍‌ଡାଉନ୍ ଅବସ୍ଥାରେ ଥାଏ ଏବଂ ସର୍ବପ୍ରଥମେ ଶେଷ ହେଉଥିବା କୁଲ୍‌ଡାଉନ୍ ଏକ 403 (ଆକ୍ସେସ୍ ପ୍ରତ୍ୟାଖ୍ୟାତ) କିମ୍ବା ଏକ 410 (gone) କାରଣରୁ ହୋଇଥାଏ, ସେତେବେଳେ କୁଲ୍‌ଡାଉନ୍ ସରିବା ଯାଏଁ ଅପେକ୍ଷା କରି ପୁନର୍ବାର ଅନୁରୋଧ ପଠାଇବା ପରିବର୍ତ୍ତେ ତୁରନ୍ତ ସେହି ପ୍ରତ୍ୟାଖ୍ୟାନକୁ ଫେରାନ୍ତୁ; ଏକ ନବୀକରଣ ହେଉଥିବା agentrouter connection-scoped quota 403 ତା'ପରେ errorCode 429 ସହିତ ସଂରକ୍ଷିତ ହୁଏ ଯାହାଫଳରେ ଏହା ପୁନଃପ୍ରୟାସଯୋଗ୍ୟ ରହିଥାଏ। ଡିଫଲ୍ଟ ଭାବରେ ବନ୍ଦ: କେବଳ ଏକ 401 ଅପେକ୍ଷାକୁ ଏଡ଼ାଇଦିଏ, ଏବଂ ପ୍ରତ୍ୟେକ ପ୍ରତ୍ୟାଖ୍ୟାନ ଯେଉଁ ଷ୍ଟାଟସ୍ ସହିତ ଆସିଥିଲା ତାହା ସହିତ ହିଁ ସଂରକ୍ଷିତ ହୁଏ।"

@@ -14326,6 +14326,10 @@
         "label": "コンボ: コンテンツポリシー拒否時に停止",
         "description": "コンボターゲットが完全一致するコンテンツポリシー拒否（コードまたはタイプが cyber_policy / content_policy_violation）を返した場合、残りのターゲットが別のモデルであっても次のターゲットには進まず、コンボを停止してその拒否を返します。デフォルトはオフ: この拒否によってアカウントがクールダウンされたりプロバイダーブレーカーが作動したりすることはなく、コンボはこれまでと同様に次のターゲットへ進みます。"
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "クールダウン再試行: 403/410拒否をスキップ",
         "description": "すべてのアカウントがクールダウン中であり、最初に終了するクールダウンが403（アクセス拒否）または410（Gone）に起因する場合、クールダウンの終了を待ってリクエストを再送信するのではなく、直ちにその拒否を返します。その際、更新中の agentrouter 接続スコープクォータによる403は、再試行可能な状態を維持するために errorCode 429 として永続化されます。デフォルトではオフです。401のみが待機をスキップし、すべての拒否は受信時のステータスのまま永続化されます。"

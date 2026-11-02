@@ -14326,6 +14326,10 @@
         "label": "Combo: Tsaya Kan Ƙin Yarda na Manufar Abun Ciki",
         "description": "Lokacin da manufar combo ta ba da amsa tare da ainihin ƙin yarda na manufar abun ciki (lamba ko nau'in cyber_policy / content_policy_violation), tsayar da combo ɗin kuma mayar da wannan ƙin yardar ko da kuwa sauran manufofin samfura ne daban-daban, maimakon ci gaba zuwa manufa ta gaba. A kashe yake bisa asali: ƙin yardar ba ta taɓa kwantar da asusun ko kunna provider breaker ba, kuma combo yana ci gaba zuwa manufarsa ta gaba daidai kamar da."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Sake Gwajin Cooldown: Tsallake Ƙin Karɓa na 403/410",
         "description": "Yayin da kowane asusu ke cikin cooldown kuma cooldown ɗin da zai fara ƙarewa ya samo asali ne daga 403 (an hana izini) ko 410 (babu shi), mayar da wannan ƙin amincewar nan take maimakon jiran cooldown ɗin ya ƙare sannan a sake aika buƙatar; daga nan ana adana 403 na kason haɗin agentrouter mai sabuntawa tare da errorCode 429 domin ya ci gaba da kasancewa mai yiwuwar sake gwadawa. A kashe yake a asali: 401 kawai ke tsallake jiran, kuma ana adana kowane ƙin amincewa tare da matsayin da ya zo da shi."

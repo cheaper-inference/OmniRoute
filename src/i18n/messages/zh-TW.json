@@ -14326,6 +14326,10 @@
         "label": "組合：遇內容策略拒絕即停",
         "description": "當組合目標返回精確的內容策略拒絕（code 或 type 為 cyber_policy / content_policy_violation）時，停止組合並返回該拒絕，即使剩餘目標是不同模型，不再前進到下一目標。預設關閉：該拒絕不冷卻帳戶也不觸發提供者斷路器，組合與之前一樣前進到下一目標。"
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "冷卻重試：跳過 403/410 拒絕",
         "description": "當所有帳戶都在冷卻、且最早結束的冷卻由 403（拒絕訪問）或 410（已刪除）引起時，立即返回該拒絕，而不是等冷卻結束再重發請求；續約中的 agentrouter 連線級配額 403 會以 errorCode 429 持久化，保持可重試。預設關閉：只有 401 跳過等待，每個拒絕都按到達時的狀態碼持久化。"

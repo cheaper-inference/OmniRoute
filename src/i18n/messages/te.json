@@ -14326,6 +14326,10 @@
         "label": "కాంబో: కంటెంట్-పాలసీ తిరస్కరణ వద్ద ఆపండి",
         "description": "కాంబో లక్ష్యం ఖచ్చితమైన కంటెంట్-పాలసీ తిరస్కరణతో (code లేదా type cyber_policy / content_policy_violation) సమాధానం ఇచ్చినప్పుడు, తదుపరి లక్ష్యానికి వెళ్లే బదులు, మిగిలిన లక్ష్యాలు వేర్వేరు మోడల్‌లైనా కాంబోను ఆపి ఆ తిరస్కరణను తిరిగి ఇవ్వండి. డిఫాల్ట్‌గా ఆఫ్: తిరస్కరణ ఎప్పుడూ ఖాతాను కూల్‌డౌన్ చేయదు లేదా ప్రొవైడర్ బ్రేకర్‌ను ట్రిప్ చేయదు, మరియు కాంబో మునుపటిలాగే తదుపరి లక్ష్యానికి వెళ్తుంది."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "కూల్‌డౌన్ రీట్రై: 403/410 తిరస్కరణలను దాటవేయండి",
         "description": "ప్రతి ఖాతా కూల్‌డౌన్‌లో ఉండి, మొదట ముగిసే కూల్‌డౌన్ 403 (యాక్సెస్ నిరాకరించబడింది) లేదా 410 (ఇక లేదు) వల్ల వచ్చినప్పుడు, కూల్‌డౌన్ ముగిసే వరకు వేచి ఉండి అభ్యర్థనను మళ్లీ పంపే బదులు ఆ తిరస్కరణను వెంటనే తిరిగి ఇవ్వండి; పునరుద్ధరించబడే agentrouter కనెక్షన్-పరిధి కోటా 403 అప్పుడు errorCode 429తో నిల్వ చేయబడుతుంది, తద్వారా అది మళ్లీ ప్రయత్నించదగినదిగా ఉంటుంది. డిఫాల్ట్‌గా ఆఫ్: 401 మాత్రమే వేచి ఉండటాన్ని దాటవేస్తుంది, మరియు ప్రతి తిరస్కరణ అది వచ్చిన స్థితితోనే నిల్వ చేయబడుతుంది."

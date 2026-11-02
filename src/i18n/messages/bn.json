@@ -14403,6 +14403,10 @@
         "label": "কম্বো: কন্টেন্ট-পলিসি প্রত্যাখ্যানে থামুন",
         "description": "কোনো কম্বো টার্গেট যখন একটি সুনির্দিষ্ট কন্টেন্ট-পলিসি প্রত্যাখ্যান দিয়ে উত্তর দেয় (কোড বা টাইপ cyber_policy / content_policy_violation), তখন পরবর্তী টার্গেটে যাওয়ার পরিবর্তে কম্বোটি থামিয়ে দিন এবং অবশিষ্ট টার্গেটগুলো ভিন্ন মডেলের হলেও সেই প্রত্যাখ্যানটি ফেরত দিন। ডিফল্টভাবে নিষ্ক্রিয়: প্রত্যাখ্যানটি কখনই অ্যাকাউন্ট কুল করে না বা প্রোভাইডার ব্রেকারকে ট্রিপ করে না, এবং কম্বো আগের মতোই তার পরবর্তী টার্গেটে অগ্রসর হয়।"
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "কুলডাউন রিট্রাই: 403/410 প্রত্যাখ্যান এড়িয়ে যান",
         "description": "যখন প্রতিটি অ্যাকাউন্ট কুলডাউনে থাকে এবং যে কুলডাউনটি সবার আগে শেষ হয় সেটি 403 (access refused) বা 410 (gone)-এর কারণে হয়েছিল, তখন কুলডাউন শেষ হওয়া পর্যন্ত অপেক্ষা করে পুনরায় অনুরোধ পাঠানোর পরিবর্তে তৎক্ষণাৎ সেই প্রত্যাখ্যানটি ফেরত দিন; একটি রিনিউ হতে থাকা agentrouter connection-scoped quota 403 তখন errorCode 429 সহ পারসিস্ট করা হয় যাতে এটি পুনরায় চেষ্টাযোগ্য থাকে। ডিফল্টভাবে বন্ধ: কেবল একটি 401 এই অপেক্ষা এড়িয়ে যায়, এবং প্রতিটি প্রত্যাখ্যান যে স্ট্যাটাস নিয়ে এসেছিল সেটির সাথেই পারসিস্ট করা হয়।"

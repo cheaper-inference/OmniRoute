@@ -14326,6 +14326,10 @@
         "label": "கொம்போ (Combo): உள்ளடக்க-முறேக் நிராகரிப்பில் நிறுத்தவும்",
         "description": "ஒரு கொம்போ குறிப்பு ஒரு உரிய உள்ளடக்க-முறேக் நிராகரிப்பால் (குறியீடு அல்லது வகை cyber_policy / content_policy_violation) பதிலளிக்கிறபோது, அடுத்த குறிப்புக்கு செல்லாமல், மீதமுள்ள குறிப்புகள் வேறுபட்ட மாதிரிகள் என்றாலும், கொம்போவை நிறுத்தி அந்த நிராகரிப்பை திருப்பி அனுப்பவும். இயல்புநிலையில் அணைக்கப்பட்டது: நிராகரிப்பு ஒரு கணக்கை குளிர்விக்கவோ அல்லது பிராவிடர் பிரேக்கரை (provider breaker) அடிக்கவோ செய்யாது, மேலும் கொம்போ முன்பு இருந்தபடி அதன் அடுத்த குறிப்புக்கு செல்கிறது."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "குளோடோவேன் மீண்டும் முயற்சி: 403/410 நிராகரிப்புகளை தவிர்",
         "description": "ஒவ்வொரு கணக்கும் குளோடோவேனில் இருக்கும்போது, முதலில் முடிவடையும் குளோடோவேன் 403 (அணுகல் நிராகரிப்பு) அல்லது 410 (அகத்திரிப்பு) காரணமாக இருந்தால், கோரிக்கையை மீண்டும் அனுப்ப காத்திருக்காமல், அந்த நிராகரிப்பை உடனடியாக திருப்பி அனுப்பு; மறுபிரச்சினை செய்யப்படும் agentrouter கனெக்சன்-ஸ்கோபட் க்வோட்டா 403, மீண்டும் முயற்சி செய்யக்கூடியதாக இருக்க errorCode 429 உடன் சேமிக்கப்படும். இயல்பாக முடக்கப்பட்டுள்ளது: 401 மட்டுமே காத்திருப்பை தவிர்க்கும், ஒவ்வொரு நிராகரிப்பும் அது வந்த நிலையுடன் சேமிக்கப்படும்."

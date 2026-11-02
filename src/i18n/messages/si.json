@@ -14326,6 +14326,10 @@
         "label": "Combo: අන්තර්ගත ප්‍රතිපත්ති ප්‍රතික්ෂේපයකදී නවත්වන්න",
         "description": "combo ඉලක්කයක කතුවරයන් එකෙහි විවිධ ආදර්ශ ආරක්ෂක ක්‍රියාවකින් මතභා ස්‍රෝයානයක් (කෝඩ් හෝ විඳි cyber_policy / content_policy_violation) දැනුම් දෙන විට, ඉතිරි ඉලක්ක අලෙවියන් වෙනස් ආදර්ශ වුවත්, combo එක නවත්වන්න සහ එම මතභා ස්‍රෝයානය ආපතා කන්න, අනුප්‍රාප්තිවක් එවකරම ඊළඟ ඉලක්කයට යන අවස්ථාවට සරියටම තබා ගැනීම. පෙරනිමියෙන් අක්‍රියයි: මතභා ස්‍රෝයානය කිසිදා වරායකට උරුම නොකරන අතර, provider breaker එකක් ඉවැද්දර නොකරයි, සහ combo එක පෙර පරිද්ථ සේ ඊළඟ ඉලක්කයට යයි."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "සිසිලන කාලයේ නැවත උත්සාහය: 403/410 ප්‍රතික්ෂේප මඟ හරින්න",
         "description": "සියලු ගිණුම්වලම කුල්ඩාඩ්වයන් පවතින අතර, මුලින්ම අවසන් වන කුල්ඩාඩ්වය 403 (ප්‍රවේශය නොකිවීම) හෝ 410 (ඉවත් වී ඇත) හේතුවෙන් සිදුවුනහොත්, ඉල්ලීම් නැවත යැවීමට ඉවසා බලන වෙනුවට එම උරට්ටම ක්ෂණිකව ආපසු ලබා දෙන්න; පසුව, renewing agentrouter connection-scoped quota 403 යනු 429 යන error code එක සහිතව සුරැකේ, එමගින් එය නැවත වටිනා තත්ත්වයේ පවතිනු ලැබේ. ඩිෆෝල්ට් ආකාරයෙන් අක්‍රීයයි: 401 පමණක් ඉවසීම ඉවත් කරන අතර, ඒකූර්ත හැම උරට්ටමක්ම එය ප්‍රතිස්ථාපිත වූ තත්ත්වය සමඟ සුරැකේ."

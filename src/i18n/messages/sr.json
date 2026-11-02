@@ -14326,6 +14326,10 @@
         "label": "Combo: Заустави на одбијању политике садржаја",
         "description": "Када combo циљ одговори тачним одбијањем политике садржаја (код или тип cyber_policy / content_policy_violation), заустави combo и врати то одбијање чак и када су преостали циљеви различити модели, уместо да напредује ка следећем циљу. Подразумевано искључено: одбијање никада не хлади налог ни не окида осигурач пружалаца, а combo напредује ка свом следећем циљу тачно као и пре."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Поновно покретање након паузе: Прескачи одбијене захтеве 403/410",
         "description": "Када је свака налог на паузи, а пауза која истиче прво изазвана је одбијањем 403 (приступ одбијен) или 410 (нема), одмах врати то одбијање уместо што чека крај паузе и поново шаље захтев; обнављајућа везна квота agentrouter-а за сесију која даје 403 онда се трајно чува са кодом грешке 429 тако да остаје могућ поновни покус. Искључено подразумевано: само 401 прескаче чекање, а свако одбијање се трајно чува са статусом којим је стигло."

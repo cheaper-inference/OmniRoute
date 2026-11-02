@@ -14326,6 +14326,10 @@
         "label": "કોમ્બો: કન્ટેન્ટ-પોલિસી ઇનકાર પર અટકો",
         "description": "જ્યારે કોઈ કોમ્બો ટાર્ગેટ ચોક્કસ કન્ટેન્ટ-પોલિસી ઇનકાર (કોડ અથવા પ્રકાર cyber_policy / content_policy_violation) સાથે જવાબ આપે છે, ત્યારે આગળના ટાર્ગેટ પર જવાને બદલે, બાકીના ટાર્ગેટ અલગ મૉડલ હોય તો પણ કોમ્બોને અટકાવો અને તે ઇનકાર પરત કરો. ડિફૉલ્ટ રૂપે બંધ: આ ઇનકાર ક્યારેય એકાઉન્ટને કૂલ ડાઉન કરતો નથી અથવા પ્રોવાઇડર બ્રેકરને ટ્રિપ કરતો નથી, અને કોમ્બો પહેલાની જેમ જ તેના આગળના ટાર્ગેટ પર આગળ વધે છે."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "કૂલડાઉન પુનઃપ્રયાસ: 403/410 અસ્વીકારોને અવગણો",
         "description": "જ્યારે દરેક એકાઉન્ટ કૂલડાઉનમાં હોય અને સૌથી પહેલાં સમાપ્ત થનાર કૂલડાઉન 403 (ઍક્સેસ નકારાયેલ) અથવા 410 (ગાયબ) ને કારણે થયું હોય, ત્યારે કૂલડાઉન પૂરું થવાની રાહ જોઈને વિનંતી ફરીથી મોકલવાને બદલે તે અસ્વીકાર તરત જ પરત કરો; રિન્યૂ થતો agentrouter connection-scoped ક્વોટા 403 પછી errorCode 429 સાથે સંગ્રહિત કરવામાં આવે છે જેથી તે પુનઃપ્રયાસ કરી શકાય તેવો રહે. ડિફૉલ્ટ રૂપે બંધ: ફક્ત 401 જ પ્રતીક્ષાને અવગણે છે, અને દરેક અસ્વીકાર જે સ્ટેટસ સાથે આવ્યો હતો તે જ સ્ટેટસ સાથે સંગ્રહિત થાય છે."

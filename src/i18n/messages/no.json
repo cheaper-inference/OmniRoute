@@ -14326,6 +14326,10 @@
         "label": "Kombo: Stopp ved innholdspolicyavvisning",
         "description": "Når et kombomål svarer med en eksakt innholdspolicyavvisning (kode eller type cyber_policy / content_policy_violation), stopp komboen og returner denne avvisningen selv om de gjenværende målene er andre modeller, i stedet for å gå videre til neste mål. Deaktivert som standard: avvisningen kjøler aldri ned kontoen eller utløser leverandørens kretsbryter, og komboen går videre til sitt neste mål akkurat som før."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Gjenforsøk ved nedkjøling: Hopp over 403/410-avvisninger",
         "description": "Når alle kontoer er i nedkjøling og nedkjølingen som utløper først skyldtes en 403 (tilgang avvist) eller en 410 (borte), returner denne avvisningen umiddelbart i stedet for å vente ut nedkjølingen og sende forespørselen på nytt; en fornyende tilkoblingsavgrenset agentrouter-kvote-403 lagres deretter med errorCode 429 slik at den fortsatt kan prøves på nytt. Deaktivert som standard: bare en 401 hopper over ventetiden, og hver avvisning lagres med statusen den ankom med."

@@ -14326,6 +14326,10 @@
         "label": "Kombo: Berhenti atas Penolakan Dasar Kandungan",
         "description": "Apabila sasaran kombo membalas dengan penolakan dasar kandungan yang tepat (kod atau jenis cyber_policy / content_policy_violation), hentikan kombo dan kembalikan penolakan tersebut walaupun sasaran yang selebihnya adalah model yang berbeza, bukannya mara ke sasaran seterusnya. Dimatikan secara lalai: penolakan tidak sekali-kali menyejukkan akaun atau mencetuskan pemutus litar penyedia, dan kombo mara ke sasaran seterusnya sama seperti sebelum ini."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Percubaan Semula Tempoh Bertenang: Langkau Penolakan 403/410",
         "description": "Apabila setiap akaun sedang dalam tempoh bertenang dan tempoh bertenang yang tamat terlebih dahulu disebabkan oleh 403 (akses ditolak) atau 410 (tiada lagi), kembalikan penolakan tersebut serta-merta dan bukannya menunggu tempoh bertenang tamat lalu menghantar semula permintaan; kuota 403 berskop sambungan agentrouter yang memperbaharui kemudiannya dikekalkan dengan errorCode 429 supaya ia kekal boleh dicuba semula. Dimatikan secara lalai: hanya 401 yang melangkau penantian, dan setiap penolakan dikekalkan dengan status yang diterimanya."

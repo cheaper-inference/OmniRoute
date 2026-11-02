@@ -14326,6 +14326,10 @@
         "label": "कॉम्बो: कंटेंट-पॉलिसी रिफ्युझलवर थांबवा",
         "description": "जेव्हा एखादे कॉम्बो टार्गेट नेमक्या कंटेंट-पॉलिसी रिफ्युझलसह (कोड किंवा प्रकार cyber_policy / content_policy_violation) प्रतिसाद देते, तेव्हा पुढील टार्गेटकडे जाण्याऐवजी, उर्वरित टार्गेट्स वेगवेगळे मॉडेल्स असले तरीही कॉम्बो थांबवा आणि ते रिफ्युझल परत करा. बाय डीफॉल्ट बंद: हे रिफ्युझल कधीही खात्याला कूल करत नाही किंवा प्रोव्हायडर ब्रेकर ट्रिप करत नाही, आणि कॉम्बो अगदी पूर्वीप्रमाणेच त्याच्या पुढील टार्गेटकडे पुढे जातो."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "__MISSING__:Combo: Crash-Storm Breaker",
+        "description": "__MISSING__:Skip a provider's combo targets before dispatch (reason crash_storm) once the same self-inflicted failure (local execution error or executor contract violation, 5xx) repeats on it inside a sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) and OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). It never writes a cooldown or lock, and a genuine upstream 5xx never feeds it. Off by default: nothing is recorded and no target is skipped."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "कूलडाउन रिट्राय: 403/410 नकार वगळा",
         "description": "जेव्हा प्रत्येक खाते कूलडाउनमध्ये असते आणि सर्वात आधी संपणारा कूलडाउन हा 403 (अ‍ॅक्सेस नाकारला) किंवा 410 (नाहीसे झाले) मुळे झालेला असतो, तेव्हा कूलडाउन संपण्याची वाट पाहून विनंती पुन्हा पाठवण्याऐवजी तो नकार लगेच पाठवला जातो; नूतनीकरण होणारा agentrouter connection-scoped quota 403 हा नंतर errorCode 429 सह जतन केला जातो जेणेकरून तो पुन्हा प्रयत्न करण्यायोग्य राहील. डीफॉल्टनुसार बंद: केवळ 401 प्रतीक्षा वगळतो, आणि प्रत्येक नकार तो ज्या स्टेटससह आला होता त्याच स्टेटससह जतन केला जातो."
