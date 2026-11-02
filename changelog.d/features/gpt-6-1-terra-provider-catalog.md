@@ -1,1 +1,1 @@
-Add GPT-6.1 Terra to OpenAI API and Codex model catalogs, including Responses-only tool routing, supported reasoning tiers, verified token pricing, long-context rates, and Codex aliases.
+- **feat(models):** add GPT-6.1 Terra to OpenAI API and Codex model catalogs, including Responses-only tool routing, supported reasoning tiers, verified token pricing, long-context rates, and Codex aliases.
