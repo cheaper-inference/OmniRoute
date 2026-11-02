@@ -38,7 +38,16 @@ docs-only ಅಥವಾ catalog-only ವರ್ಗೀಕರಣವು ಕೋಡ್ 
 ತೀರ್ಪು ಜಾಬ್ನ `needs` ಪಟ್ಟಿಗೆ ಬಂಧಿಸುತ್ತವೆ, ಆದ್ದರಿಂದ ಹೊಸ ಅಥವಾ ತೆಗೆದುಹಾಕಿದ ಲೇನ್ ಮೌನವಾಗಿ ಕಣ್ಮರೆಯಾಗಲು ಸಾಧ್ಯವಿಲ್ಲ.
 ರಸೀದಿಗಳು ತಮ್ಮದೇ ಕಾರ್ಯಪ್ರವಾಹವನ್ನು ಒಳಗೊಳ್ಳುತ್ತವೆ; ಪ್ರಕಟಣೆ, ನಿಯೋಜನೆ ಅಥವಾ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸಲಹಾ ಸ್ಕ್ಯಾನರ್ನ ಆಂತರಿಕ ಅಂಶಗಳನ್ನು ಅಲ್ಲ. ಅನ್ವಯಿಸುವ ಪರಿಶೀಲನೆಗಳನ್ನು ಶಾಖೆಯ ನಿಯಮಗಳಲ್ಲಿ ಕಡ್ಡಾಯಗೊಳಿಸುವುದು ಪ್ರತ್ಯೇಕ ಆಡಳಿತಾತ್ಮಕ ಬದಲಾವಣೆಯಾಗಿದೆ; ಅವುಗಳ ಕಾರ್ಯಗಳನ್ನು ವ್ಯಾಖ್ಯಾನಿಸುವುದರಿಂದ ಮಾತ್ರ ಶಾಖೆಗೆ ರಕ್ಷಣೆ ದೊರೆಯುವುದಿಲ್ಲ.
 
-`API Route Typecheck` ಒಂದು ಸ್ವತಂತ್ರ ಕಾರ್ಯಪ್ರವಾಹ ಪರಿಶೀಲನೆಯಾಗಿದ್ದು, ಎರಡೂ ಸಮಗ್ರ ತೀರ್ಪುಗಳು ಮತ್ತು ಸ್ಥಳೀಯ ಪೂರ್ಣ ವೀಕ್ಷಕದ ಸ್ಥಿರ ಪ್ರೊಫೈಲ್ನ ಹೊರಗಿದೆ. ನಿಖರವಾದ ಅಭ್ಯರ್ಥಿಗಾಗಿ ಅದರ ಫಲಿತಾಂಶವನ್ನು ಪ್ರತ್ಯೇಕವಾಗಿ ಪರಿಶೀಲಿಸಿ. `.github/workflows/api-route-typecheck.yml` ಎಂಬುದು `main` ಅಥವಾ `release/**` ಗೆ ಬರುವ PRಗಳು, ಆ ಎರಡೂ ಶಾಖಾ ಕುಟುಂಬಗಳಿಗೆ ಮಾಡುವ ಪುಷ್ಗಳು ಮತ್ತು ಹಸ್ತಚಾಲಿತ ರವಾನೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತದೆ. ಇದಕ್ಕೆ ಪಥ ಫಿಲ್ಟರ್ ಇಲ್ಲ. PRನ ಮೂಲ ಶಾಖೆಯನ್ನು ಮರುಗುರಿಪಡಿಸುವುದು ಹೊಸ ಪರಿಶೀಲನೆಯನ್ನು ವಿನಂತಿಸುತ್ತದೆ; ಬಾಡಿ/ಶೀರ್ಷಿಕೆ ತಿದ್ದುಪಡಿಗಳು ವೀಕ್ಷಣೆಗಾಗಿ ಮಾತ್ರ ಇರುವ `Admission not requested / API Route Typecheck` ಹೆಸರನ್ನು ಬಳಸುತ್ತವೆ ಮತ್ತು ಪ್ರವೇಶ ಪರಿಶೀಲನೆಯನ್ನು ಬದಲಿಸಲಾಗುವುದಿಲ್ಲ. ಈ ಕಾರ್ಯಪ್ರವಾಹವು ವಿಲೀನ-ಗುಂಪು ಟ್ರಿಗರ್ ಅನ್ನು ಘೋಷಿಸುವುದಿಲ್ಲ. ಈ ಪರಿಶೀಲನೆಯನ್ನು ಕಡ್ಡಾಯಗೊಳಿಸುವ ಯಾವುದೇ ವಿಲೀನ-ಸರತಿ ಜಾರಿಯು ಮೊದಲು ಆ ಈವೆಂಟ್ಗಾಗಿ ಅದರ ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆಯನ್ನು ಸ್ಥಾಪಿಸಬೇಕು.
+`API Route Typecheck` ಒಂದು ಸ್ವತಂತ್ರ workflow ಪರಿಶೀಲನೆಯಾಗಿದೆ. ಇದು ಎರಡೂ ಒಟ್ಟುಗೂಡಿಸಿದ ತೀರ್ಪುಗಳಿಗೂ ಸ್ಥಳೀಯ ಪೂರ್ಣ observer-ನ ಸ್ಥಿರ profile-ಗೂ ಹೊರತಾಗಿದೆ. ನಿಖರವಾದ candidate-ಗಾಗಿ ಅದರ ಫಲಿತಾಂಶವನ್ನು ಪ್ರತ್ಯೇಕವಾಗಿ ಪರಿಶೀಲಿಸಿ. `.github/workflows/api-route-typecheck.yml`, `main` ಅಥವಾ `release/**` ಗೆ ಬರುವ PR-ಗಳಲ್ಲಿ, ಈ ಎರಡೂ branch ವರ್ಗಗಳಿಗೆ ಮಾಡುವ push-ಗಳಲ್ಲಿ, manual dispatch-ನಲ್ಲಿ ಮತ್ತು `checks_requested` ಬಗೆಯ `merge_group` ಘಟನೆಗಳಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ. ಇದಕ್ಕೆ path filter ಇಲ್ಲ. Merge group-ಗಳು `merge_group.head_sha` ಅನ್ನು checkout ಮಾಡುತ್ತವೆ; ಇತರ ಘಟನೆಗಳು `github.sha` ಅನ್ನು checkout ಮಾಡುತ್ತವೆ. ಎಲ್ಲಾ ಘಟನೆಗಳೂ ಒಂದೇ API diagnostic gate ಮತ್ತು gate unit test-ಗಳನ್ನು ಬಳಸುತ್ತವೆ.
+PR base ಬದಲಿಸಿದಾಗ ಹೊಸ ಪರಿಶೀಲನೆಯನ್ನು ಕೋರಲಾಗುತ್ತದೆ; body/title ಬದಲಾವಣೆಗಳು ವೀಕ್ಷಣೆಗೆ ಮಾತ್ರ ಇರುವ `Admission not requested / API Route Typecheck` ಹೆಸರನ್ನು ಬಳಸುತ್ತವೆ. ಅವು admission ಪರಿಶೀಲನೆಗೆ ಬದಲಿಯಾಗಲು ಸಾಧ್ಯವಿಲ್ಲ.
+
+### ಪರಿಶೀಲಿಸಿದ CI build ಅನ್ನು DAST ಬಳಸುತ್ತದೆ
+
+ಕಡ್ಡಾಯ `dast-smoke` CI job, `build` ನಂತರ `.github/workflows/dast-smoke.yml` ಅನ್ನು ಕರೆಯುತ್ತದೆ. ಬೆಂಬಲಿತ fork PR-ಗಳು, release ಗುರಿಯ PR-ಗಳು ಮತ್ತು merge group-ಗಳು ಸೇರಿದಂತೆ build ಅನುಸರಿಸುವ ಅದೇ code/draft ಆಯ್ಕೆಯನ್ನು ಇದು ಅನುಸರಿಸುತ್ತದೆ. DAST job ಇಲ್ಲದಿದ್ದರೂ, ವಿಫಲವಾದರೂ, ರದ್ದಾದರೂ ಅಥವಾ ಅನಿರೀಕ್ಷಿತವಾಗಿ ಬಿಟ್ಟುಹೋಗಿದ್ದರೂ `Gate / CI` ತಡೆಯಲ್ಪಡುತ್ತದೆ. ಮರುಬಳಕೆಯ workflow-ಗೆ ಸ್ವತಂತ್ರ PR/dispatch trigger ಇಲ್ಲ; ಕೈಯಾರೆ ಮಾಡುವ validation, CI dispatch ಅನ್ನು ಬಳಸುವುದರಿಂದ build ಮತ್ತು consumer ಒಂದೇ run-ನಲ್ಲಿ ಉಳಿಯುತ್ತವೆ.
+
+`scripts/ci/next-build-provenance.mjs`, ಸಂಪೂರ್ಣ Next artifact ಅನ್ನು ಅದರ tar digest, repository/event/run, producer attempt, head/base/checkout/tree, workflow ಗುರುತುಗಳು, lockfile, ನಿಖರವಾದ Node version/ABI, platform ಮತ್ತು bundler ವಿವರಗಳೊಂದಿಗೆ ಬಂಧಿಸುತ್ತದೆ. DAST, `needs.build.outputs` ನಿಂದ ಬದಲಿಸಲಾಗದ artifact ID ಅನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ; download digest ಪರಿಶೀಲನೆಯನ್ನು ಕಡ್ಡಾಯಗೊಳಿಸುತ್ತದೆ. ಅನುಮತಿಪಟ್ಟಿಯಲ್ಲಿರುವ ಎರಡು ಸದಸ್ಯರನ್ನು `scripts/ci/unpack-ci-build.py` ಮೂಲಕ ಹೊರತೆಗೆಯುವ ಮೊದಲು ZIP hash ಅನ್ನು ಸ್ವತಂತ್ರವಾಗಿ ಲೆಕ್ಕಿಸಿ producer digest ಜೊತೆ ಹೋಲಿಸುತ್ತದೆ. Next tree ಹೊರತೆಗೆಯುವ ಮೊದಲು manifest ಮತ್ತು tar archive ಕೂಡ ಸ್ವತಂತ್ರ producer output-ಗಳಿಗೆ ಹೊಂದಿಕೆಯಾಗಬೇಕು. Branch-ನ ಇತ್ತೀಚಿನ ಯಶಸ್ವಿ build ಅನ್ನು ಇದು ಎಂದಿಗೂ ಹುಡುಕುವುದಿಲ್ಲ. ID ಮತ್ತು ಎಲ್ಲಾ input-ಗಳು ಇನ್ನೂ ಹೊಂದಿದರೆ, ಭಾಗಶಃ rerun ಅದೇ producer attempt ಅನ್ನು ಮರುಬಳಸಬಹುದು; receipt ಎರಡೂ attempt-ಗಳನ್ನು ದಾಖಲಿಸುತ್ತದೆ.
+
+Consumer, repository ಓದಲು ಮಾತ್ರ ಅನುಮತಿ ಇರುವ hosted Linux runner-ನಲ್ಲಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ; repository secret-ಗಳು ಇರುವುದಿಲ್ಲ. Producer ಬಳಸಿದ ನಿಖರವಾದ Node version ಅನ್ನು ಸ್ಥಾಪಿಸಿ, `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` ಜೊತೆಗೆ CLI ಅನ್ನು ಸಿದ್ಧಪಡಿಸುತ್ತದೆ. ಯಾವುದೇ fallback build-ಗೂ ಮೊದಲು standalone server ಇಲ್ಲದ ಸ್ಥಿತಿಯನ್ನು `scripts/build/standaloneInput.mjs` ತಿರಸ್ಕರಿಸುತ್ತದೆ; ಸಾಮಾನ್ಯ ಸ್ಥಳೀಯ CLI build-ಗಳು ಈಗಿರುವ fallback ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ. Server readiness, Schemathesis ಮತ್ತು promptfoo ಎಲ್ಲವೂ ಬದಲಾಗದ 25 ನಿಮಿಷಗಳ job ಮಿತಿಯೊಳಗೆ ಯಶಸ್ವಿಯಾಗಬೇಕು. Provenance receipt input ಗುರುತು ಮತ್ತು bytes ಅನ್ನು ಸಾಬೀತುಪಡಿಸುತ್ತದೆ; ಯಶಸ್ವಿ DAST scan ಅನ್ನು ಅಲ್ಲ. Artifact ಅವಧಿ ಮುಗಿಯುವುದು, runner ಅಡಚಣೆ ಅಥವಾ scanner ವಿಫಲವಾಗುವುದು ಅಪೂರ್ಣ ಅಥವಾ ವಿಫಲ ಸಾಕ್ಷ್ಯವಾಗಿಯೇ ಉಳಿಯುತ್ತದೆ; advisory wrapper ಮೂಲಕ ಅದನ್ನು PASS ಆಗಿ ಪರಿವರ್ತಿಸಲಾಗದು.
 
 ### UI ಕಾರ್ಯಗತಗೊಳಿಸುವ ಸಾಮರ್ಥ್ಯ
 
@@ -192,17 +201,24 @@ CI ಯ ಏಕೈಕ ಅಧಿಕೃತ ಮೂಲವು `.github/workflows/ci.yml
 
 `test-coverage` ನಂತರ ಚಲಿಸುತ್ತದೆ. ವಿಫಲವಾದರೆ ವಿಲೀನವನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ.
 
-| ಸ್ಕ್ರಿಪ್ಟ್                   | ಪರಿಶೀಲಿಸುವುದು                                                                                                                                                                                              | ನಿರ್ಬಂಧಿಸುವುದೇ               |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| `quality:collect`            | `quality-metrics.json` ಅನ್ನು ಉತ್ಪಾದಿಸುತ್ತದೆ (ESLint ಎಚ್ಚರಿಕೆಗಳ ಎಣಿಕೆ, ವಿಲೀನಗೊಳಿಸಿದ ಶಾರ್ಡ್ ವರದಿಯಿಂದ ವ್ಯಾಪ್ತಿ)                                                                                               | ಹೌದು (ರ್ಯಾಚೆಟ್ಗಿಂತ ಮುಂಚಿನದು) |
-| `quality:ratchet`            | `quality-baseline.json` ನಲ್ಲಿರುವ ಪ್ರತಿಯೊಂದು ಮೆಟ್ರಿಕ್ ಹಿಮ್ಮೆಟ್ಟಿಲ್ಲ (ESLint ಎಚ್ಚರಿಕೆಗಳು ≤ ಬೇಸ್ಲೈನ್; ವ್ಯಾಪ್ತಿ ≥ ಬೇಸ್ಲೈನ್)                                                                                    | ಹೌದು                         |
-| `check:duplication`          | ಕೋಡ್ ನಕಲೀಕರಣವು (jscpd@4) `quality-baseline.json` ನಲ್ಲಿರುವ ಬೇಸ್ಲೈನ್ ಅನ್ನು ಮೀರುವುದಿಲ್ಲ                                                                                                                       | ಹೌದು                         |
-| `check:complexity`           | ಫೈಲ್-ಮಟ್ಟದ ಸೈಕ್ಲೊಮ್ಯಾಟಿಕ್ ಸಂಕೀರ್ಣತೆಯು ಮಿತಿಯನ್ನು ಮೀರುವುದಿಲ್ಲ (ಕೋರ್ ESLint `complexity` + `max-lines-per-function`)                                                                                          | ಹೌದು                         |
-| `check:cognitive-complexity` | ಕಾಗ್ನಿಟಿವ್ ಸಂಕೀರ್ಣತೆ ರ್ಯಾಚೆಟ್ (`eslint-plugin-sonarjs`) — ಪ್ರತ್ಯೇಕ ESLint ಪಾಸ್; CI ಎರಡನ್ನೂ ವಿಲೀನಗೊಳಿಸಿ ಒಂದೇ `check:complexity-ratchets` ಹಂತವಾಗಿ ಚಲಿಸುತ್ತದೆ                                                 | ಹೌದು                         |
-| `check:dead-code`            | ಬಳಕೆಯಾಗದ ಎಕ್ಸ್ಪೋರ್ಟ್ಗಳು / ಫೈಲ್ಗಳ ರ್ಯಾಚೆಟ್ (knip) ಬೇಸ್ಲೈನ್ಗೆ ಹೋಲಿಸಿದಾಗ ಹಿಮ್ಮೆಟ್ಟುವುದಿಲ್ಲ                                                                                                                    | ಹೌದು                         |
-| `check:compression-budget`   | ಸಂಕೋಚನ ಬೆಂಚ್ಮಾರ್ಕ್ ಬಜೆಟ್ — ಪ್ರತಿ-ಎಂಜಿನ್ ಟೋಕನ್-ಉಳಿತಾಯದ ಕನಿಷ್ಠ ಮಿತಿಗಳು ಹಿಮ್ಮೆಟ್ಟಬಾರದು                                                                                                                        | ಹೌದು                         |
-| `check:type-coverage`        | ಶೇಕಡಾವಾರು-ಟೈಪ್ಮಾಡಿದ ರ್ಯಾಚೆಟ್ (`type-coverage`) ಹಿಮ್ಮೆಟ್ಟುವುದಿಲ್ಲ; ಇದು ಬಹುಮಟ್ಟಿಗೆ `typecheck:noimplicit:core` ಅನ್ನು ಒಳಗೊಳ್ಳುತ್ತದೆ                                                                           | ಹೌದು                         |
-| `check:codeql-ratchet`       | ತೆರೆದಿರುವ CodeQL ಎಚ್ಚರಿಕೆಗಳ ಎಣಿಕೆ ಹಿಮ್ಮೆಟ್ಟುವುದಿಲ್ಲ (`gh api` ಮೂಲಕ ಓದುತ್ತದೆ; ಟೋಕನ್ ಇಲ್ಲದಿದ್ದರೆ ಸುರಕ್ಷಿತವಾಗಿ ಬಿಟ್ಟುಬಿಡುತ್ತದೆ) — ರಿಫ್ರೆಶ್ ಆವರ್ತನೆ ಮತ್ತು ಹಸ್ತಚಾಲಿತ ಟ್ರಿಗರ್ಗಾಗಿ: ಕೆಳಗಿನ "CodeQL ರ್ಯಾಚೆಟ್" ನೋಡಿ | ಹೌದು                         |
+| ಸ್ಕ್ರಿಪ್ಟ್                   | ಪರಿಶೀಲಿಸುವುದು                                                                                                                                              | ನಿರ್ಬಂಧಿಸುವುದೇ               |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `quality:collect`            | `quality-metrics.json` ಅನ್ನು ಉತ್ಪಾದಿಸುತ್ತದೆ (ESLint ಎಚ್ಚರಿಕೆಗಳ ಎಣಿಕೆ, ವಿಲೀನಗೊಳಿಸಿದ ಶಾರ್ಡ್ ವರದಿಯಿಂದ ವ್ಯಾಪ್ತಿ)                                               | ಹೌದು (ರ್ಯಾಚೆಟ್ಗಿಂತ ಮುಂಚಿನದು) |
+| `quality:ratchet`            | `quality-baseline.json` ನಲ್ಲಿರುವ ಪ್ರತಿಯೊಂದು ಮೆಟ್ರಿಕ್ ಹಿಮ್ಮೆಟ್ಟಿಲ್ಲ (ESLint ಎಚ್ಚರಿಕೆಗಳು ≤ ಬೇಸ್ಲೈನ್; ವ್ಯಾಪ್ತಿ ≥ ಬೇಸ್ಲೈನ್)                                    | ಹೌದು                         |
+| `check:duplication`          | ಕೋಡ್ ನಕಲೀಕರಣವು (jscpd@4) `quality-baseline.json` ನಲ್ಲಿರುವ ಬೇಸ್ಲೈನ್ ಅನ್ನು ಮೀರುವುದಿಲ್ಲ                                                                       | ಹೌದು                         |
+| `check:complexity`           | ಫೈಲ್-ಮಟ್ಟದ ಸೈಕ್ಲೊಮ್ಯಾಟಿಕ್ ಸಂಕೀರ್ಣತೆಯು ಮಿತಿಯನ್ನು ಮೀರುವುದಿಲ್ಲ (ಕೋರ್ ESLint `complexity` + `max-lines-per-function`)                                          | ಹೌದು                         |
+| `check:cognitive-complexity` | ಕಾಗ್ನಿಟಿವ್ ಸಂಕೀರ್ಣತೆ ರ್ಯಾಚೆಟ್ (`eslint-plugin-sonarjs`) — ಪ್ರತ್ಯೇಕ ESLint ಪಾಸ್; CI ಎರಡನ್ನೂ ವಿಲೀನಗೊಳಿಸಿ ಒಂದೇ `check:complexity-ratchets` ಹಂತವಾಗಿ ಚಲಿಸುತ್ತದೆ | ಹೌದು                         |
+| `check:dead-code`            | ಬಳಕೆಯಾಗದ ಎಕ್ಸ್ಪೋರ್ಟ್ಗಳು / ಫೈಲ್ಗಳ ರ್ಯಾಚೆಟ್ (knip) ಬೇಸ್ಲೈನ್ಗೆ ಹೋಲಿಸಿದಾಗ ಹಿಮ್ಮೆಟ್ಟುವುದಿಲ್ಲ                                                                    | ಹೌದು                         |
+| `check:compression-budget`   | ಸಂಕೋಚನ ಬೆಂಚ್ಮಾರ್ಕ್ ಬಜೆಟ್ — ಪ್ರತಿ-ಎಂಜಿನ್ ಟೋಕನ್-ಉಳಿತಾಯದ ಕನಿಷ್ಠ ಮಿತಿಗಳು ಹಿಮ್ಮೆಟ್ಟಬಾರದು                                                                        | ಹೌದು                         |
+| `check:type-coverage`        | ಶೇಕಡಾವಾರು-ಟೈಪ್ಮಾಡಿದ ರ್ಯಾಚೆಟ್ (`type-coverage`) ಹಿಮ್ಮೆಟ್ಟುವುದಿಲ್ಲ; ಇದು ಬಹುಮಟ್ಟಿಗೆ `typecheck:noimplicit:core` ಅನ್ನು ಒಳಗೊಳ್ಳುತ್ತದೆ                           | ಹೌದು                         |
+
+### Job-ಗಳು: `codeql-scan` ಮತ್ತು `codeql-admission`
+
+`codeql-scan` ಸಂರಚಿಸಿದ ಎಲ್ಲಾ analysis category-ಗಳನ್ನು ಉತ್ಪಾದಿಸುತ್ತದೆ. ಆ job ಯಶಸ್ವಿಯಾದ ನಂತರ, `codeql-admission` ಅದರ ನಿಖರವಾದ upload-ಗಳನ್ನು ಮತ್ತು candidate alert ratchet ಅನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ. ದಾಖಲೆಗಳನ್ನು ಮಾತ್ರ ಬದಲಿಸುವ candidate-ಗಳಿಗೂ ಇವೆರಡೂ `Gate / CI` ಯ ಕಡ್ಡಾಯ dependency-ಗಳಾಗಿವೆ. ಆಡಳಿತಾತ್ಮಕ activation ಮತ್ತು canary ಅವಶ್ಯಕತೆಗಳನ್ನು ಕೆಳಗಿನ “CodeQL ratchet” ವಿಭಾಗದಲ್ಲಿ ವಿವರಿಸಲಾಗಿದೆ.
+
+| Script                 | ಪರಿಶೀಲಿಸುವುದು                                                                                                                                                                                                     | ತಡೆಯುತ್ತದೆಯೇ |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `check:codeql-ratchet` | Alert ratchet-ಗೂ ಮೊದಲು candidate ref/SHA ಮತ್ತು ಸಂರಚಿಸಿದ ಎಲ್ಲಾ analysis category-ಗಳು ಪ್ರಸ್ತುತವಾಗಿರಬೇಕು; ಸಾಕ್ಷ್ಯ ಇಲ್ಲದಿದ್ದರೆ ತಡೆಯುತ್ತದೆ. ಒಟ್ಟಾರೆ inventory ಪ್ರತ್ಯೇಕವಾಗಿಯೇ ಉಳಿಯುತ್ತದೆ — ಕೆಳಗಿನ “CodeQL ratchet” ನೋಡಿ | ಹೌದು         |
 
 ### ಜಾಬ್: `quality-extended`
 
@@ -454,32 +470,24 @@ git add quality-baseline.json
 ನವೀಕರಿಸದೆ ಮೆಟ್ರಿಕ್ ಅನ್ನು ಸುಧಾರಿಸುವ PR ಅನ್ನು `--require-tighten` ಪತ್ತೆಹಚ್ಚುತ್ತದೆ (ಹಂತ 6A.5,
 ಅನುಷ್ಠಾನ ಬಾಕಿಯಿದೆ).
 
-### CodeQL ರ್ಯಾಚೆಟ್: ರಿಫ್ರೆಶ್ ಆವರ್ತನೆ ಮತ್ತು ಹಸ್ತಚಾಲಿತ ಟ್ರಿಗರ್
+### CodeQL ratchet: candidate admission ಮತ್ತು repository inventory
 
-`check:codeql-ratchet` **ರೆಪೊ ಸ್ಥಿತಿಯನ್ನು ಓದುತ್ತದೆ; ಅದನ್ನು ವೇಳಾಪಟ್ಟಿಯ ಪ್ರಕಾರ ರಿಫ್ರೆಶ್ ಮಾಡಲಾಗುತ್ತದೆ — ಪ್ರತಿ PR ಗೆ ಅಲ್ಲ.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ವರದಿ ಮಾಡುವ
-`state: configured`, `schedule: weekly` ಎಂಬುದು GitHub ನ ಡೀಫಾಲ್ಟ್-ಸೆಟಪ್ ಸ್ಕ್ಯಾನ್ ಆಗಿದ್ದು,
-ಪ್ರತಿ ಪುಶ್ಗೆ ನಡೆಯುವ ವಿಶ್ಲೇಷಣೆಯಲ್ಲ. ಪರಿಣಾಮ: ಎಚ್ಚರಿಕೆಗಳನ್ನು ಸರಿಪಡಿಸುವ PR ವಿಲೀನಗೊಂಡ ನಂತರವೂ,
-ಮುಂದಿನ ನಿಗದಿತ ಸ್ಕ್ಯಾನ್ ನಡೆಯುವವರೆಗೆ ರ್ಯಾಚೆಟ್ ಹಳೆಯ, ಹೆಚ್ಚಿನ ಸಂಖ್ಯೆಯನ್ನೇ ಓದುತ್ತಿರುತ್ತದೆ —
-ಆದ್ದರಿಂದ ಸ್ಕ್ಯಾನ್ ನವೀಕರಿಸುವವರೆಗೆ, ಸರಿಪಡಿಸಿದ PR ನ ಸ್ವಂತ ಫಾಲೋ-ಅಪ್ಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ಪ್ರತಿಯೊಂದು
-ತೆರೆದ PR ನಲ್ಲಿಯೂ ಅದು ಹಿಂಜರಿತವನ್ನು ವರದಿ ಮಾಡುತ್ತದೆ.
+ಸ್ಪಷ್ಟವಾದ dependency ಸರಣಿಯ ಮೂಲಕ candidate CodeQL admission ಅನ್ನು CI ನಿರ್ವಹಿಸುತ್ತದೆ: `codeql-scan`, `codeql.yml` ನಲ್ಲಿನ ನಾಲ್ಕು ಭಾಷೆಗಳ matrix ಅನ್ನು ಕರೆಯುತ್ತದೆ; ನಂತರ `codeql-admission`, `node scripts/check/check-codeql-ratchet.mjs --candidate` ಅನ್ನು ನಡೆಸುತ್ತದೆ. `Gate / CI` ಎರಡೂ ಫಲಿತಾಂಶಗಳನ್ನು ಕಡ್ಡಾಯಗೊಳಿಸುತ್ತದೆ. Quality ತನ್ನ ಸಂಖ್ಯಾತ್ಮಕ ಪರಿಶೀಲನೆಗಳನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ, ಆದರೆ producer ಮುಗಿಯುವ ಮೊದಲು scanner ಅನ್ನು ವಿಚಾರಿಸುವುದಿಲ್ಲ; `Gate / Quality` ಒಂದೇ ಪೂರ್ಣ candidate admission ಅಲ್ಲ. ದಾಖಲೆಗಳನ್ನು ಮಾತ್ರ ಬದಲಿಸುವ candidate-ಗಳಿಗೂ CodeQL ಕಡ್ಡಾಯವಾಗಿಯೇ ಇರುತ್ತದೆ.
 
-**ಹಸ್ತಚಾಲಿತ ರಿಫ್ರೆಶ್**: `gh workflow run codeql.yml --ref release/vX.Y.Z` ವಿಶ್ಲೇಷಣೆಯನ್ನು
-ಮತ್ತೆ ಚಲಾಯಿಸಿ, ಕೆಲವೇ ನಿಮಿಷಗಳಲ್ಲಿ ಎಚ್ಚರಿಕೆಗಳನ್ನು ಮರುಪ್ರಕಟಿಸುತ್ತದೆ. ಮೊದಲು `.github/workflows/codeql.yml`
-ಓದಿ — GitHub ನ **"default setup" ಜೊತೆಗೆ ಅದು ಸಂಘರ್ಷಿಸುವುದರಿಂದಲೇ** ಇದು `workflow_dispatch`-ಗೆ ಮಾತ್ರ
-ಸೀಮಿತವಾಗಿದೆ ಎಂದು ಅದರ ಹೆಡರ್ ವಿವರಿಸುತ್ತದೆ (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). `push`/`pull_request`/
-`schedule` ಟ್ರಿಗರ್ಗಳನ್ನು ಮರುಸ್ಥಾಪಿಸಲು ಮೊದಲು **ಮಾಲೀಕರ ಕ್ರಮ** ಅಗತ್ಯ: Settings → Code security →
-CodeQL: Default → Advanced. ಆ ಬದಲಾವಣೆ ಮಾಡದೆ `schedule:` ಟ್ರಿಗರ್ ಸೇರಿಸಬೇಡಿ — ಅದು
-ವಿಫಲಗೊಳ್ಳುವ ರನ್ಗಳನ್ನು ಮಾತ್ರ ಉಂಟುಮಾಡುತ್ತದೆ.
+`config/quality/codeql-admission-policy.json` ನಲ್ಲಿನ policy, Actions, C/C++, JavaScript/TypeScript ಮತ್ತು Python ಅನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ; query suite default, threat model remote ಮತ್ತು build mode none ಕೂಡ ಆಯ್ಕೆಗಳಾಗಿವೆ. Producer preflight ಬಾಕಿಯಿರುವ activation ದಾಖಲೆ ಮತ್ತು ಸ್ಪಷ್ಟ target ಪಟ್ಟಿಗೆ ಹೊರತಾದ branch-ಗಳನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ. ಆರಂಭಿಕ target-ಗಳು main ಮತ್ತು release/v3.8.53; ಮುಂದಿನ release-ಗೆ ಪರಿಶೀಲಿಸಿದ onboarding ಅಗತ್ಯ. CI-ಯ ಈಗಿರುವ ವಿಸ್ತೃತ release PR trigger ಉಳಿಯುತ್ತದೆ. ಆದರೆ onboarding ಆಗದ target, ಅಳೆಯದ PASS ಪಡೆಯುವುದಕ್ಕೆ ಬದಲಾಗಿ extraction-ಗೂ ಮೊದಲು HOLD ಎಂದು ವರದಿ ಮಾಡುತ್ತದೆ.
 
-**ಸಂಖ್ಯೆ ಕಡಿಮೆಯಾದ ನಂತರ ಬೇಸ್ಲೈನ್ ಅನ್ನು ಬಿಗಿಗೊಳಿಸಿ** — `node scripts/check/check-codeql-ratchet.mjs
---update` ಹೊಸದಾಗಿ ಅಳೆಯಲಾದ ಸಂಖ್ಯೆಯನ್ನು `quality-baseline.json` →
-`metrics.codeqlAlerts.value` ಗೆ ಬರೆಯುತ್ತದೆ; ಹೀಗಾಗಿ ಹಳೆಯ ಗರಿಷ್ಠ ಮಿತಿಯವರೆಗೆ ಮತ್ತೆ ಹಿಂಜರಿಯುವುದನ್ನು
-ರ್ಯಾಚೆಟ್ ಮೌನವಾಗಿ ಅನುಮತಿಸುವುದಿಲ್ಲ. ಕಾರ್ಯನಿರ್ವಹಿತ ಉದಾಹರಣೆ (2026-09-02/03): PR #12502 ನೈಜವಾದ
-7 ಎಚ್ಚರಿಕೆಗಳನ್ನು ಸರಿಪಡಿಸಿತು (ಅಳೆಯಲಾದ ತೆರೆದ ಎಚ್ಚರಿಕೆಗಳು 13 → 6); ಅದಕ್ಕೆ ಹೊಂದುವಂತೆ PR #12530
-ಸ್ಥಿರಗೊಳಿಸಲಾದ ಬೇಸ್ಲೈನ್ ಅನ್ನು 11 → 6 ಗೆ ಬಿಗಿಗೊಳಿಸಿತು; ನಂತರ ಉಳಿದ 6 ಎಚ್ಚರಿಕೆಗಳನ್ನು ಪ್ರತಿಯೊಂದು
-ಎಚ್ಚರಿಕೆಗೆ ಪ್ರತ್ಯೇಕ ಸಮರ್ಥನೆ ನೀಡಿ ವಜಾಗೊಳಿಸಿ, ತೆರೆದ ಎಚ್ಚರಿಕೆಗಳ ಸಂಖ್ಯೆಯನ್ನು 0 ಗೆ ಇಳಿಸಲಾಯಿತು.
+ಪ್ರತಿ matrix job ತನ್ನ ನಿಜವಾದ SARIF upload ID, ಭಾಷೆ, category, run ಮತ್ತು attempt, caller workflow ಗುರುತು, event ref/head/base/merge SHA ಹಾಗೂ policy hash ಅನ್ನು ದಾಖಲಿಸುತ್ತದೆ. ಅವಲಂಬಿತ job ಈ run-ನ receipt-ಗಳನ್ನು ಮಾತ್ರ download ಮಾಡಿ artifact digest-ಗಳನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ. ಎಲ್ಲಾ ನಾಲ್ಕು category-ಗಳು, ಯಶಸ್ವಿ producer ಮತ್ತು ಪ್ರತಿ ನಿಖರವಾದ upload-ನ ಪೂರ್ಣಗೊಂಡ processing ಅಗತ್ಯ. ಇದು branch-ನಲ್ಲಿ ಇತ್ತೀಚೆಗೆ ಕಂಡ analysis ಬದಲು API-ಯ sarif_id filter ಅನ್ನು ಬಳಸುತ್ತದೆ. ಭಾಗಶಃ rerun-ಗಳು ಅದೇ run ಮತ್ತು candidate-ನ ಹಿಂದಿನ attempt-ನಲ್ಲಿ ಯಶಸ್ವಿಯಾದ category-ಗಳನ್ನು, ಅವನ್ನು ಉತ್ಪಾದಿಸಿದ attempt ಗುರುತನ್ನು ಉಳಿಸಿಕೊಂಡು ಮರುಬಳಸಬಹುದು; ಪ್ರಸ್ತುತ producer ವಿಫಲವಾದರೆ ಹಿಂದಿನ ಹಸಿರು ಸಾಕ್ಷ್ಯವನ್ನು ಮರುಬಳಸಲಾಗದು.
+
+CodeQL action processing-ಗಾಗಿ ಕಾಯುತ್ತದೆ. ಆದರೆ pin ಮಾಡಿದ implementation, status ಓದುವ ವೈಫಲ್ಯ ಅಥವಾ ಕಾಯುವ ಮಿತಿ ಮುಗಿದ ನಂತರ ಎಚ್ಚರಿಕೆಯೊಂದಿಗೆ ಮುಂದುವರಿಯಬಹುದು. ಆದ್ದರಿಂದ admission ಮತ್ತೆ processing ಅನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ. Category-ಗಳು ಇಲ್ಲದಿರುವುದು, ಬಾಕಿ processing, ವಿಫಲವಾದ ಅಥವಾ ರದ್ದಾದ job-ಗಳು, ಹಳೆಯ ಗುರುತು, ಅಪೂರ್ಣ pagination ಅಥವಾ ಲಭ್ಯವಿಲ್ಲದ API-ಗಳು HOLD ಮತ್ತು exit 2 ಗೆ ಕಾರಣವಾಗುತ್ತವೆ. ಸ್ವತಂತ್ರ scanner workflow-ಗಾಗಿ ನಿಶ್ಚಿತ ಕಾಯುವಿಕೆ ಈಗ ಇಲ್ಲ. Alert query 0 ನೀಡಿದ ಕಾರಣಕ್ಕೆ scan ಮಾಡದ PR ಉತ್ತೀರ್ಣವಾಗಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅಳೆದ ಸಂಖ್ಯೆ `metrics.codeqlAlerts.value` ಗಿಂತ ಹೆಚ್ಚಾದರೆ exit 1 ಬರುತ್ತದೆ; ಮತ್ತೊಂದು branch-ನ alert-ಗಳನ್ನು ಒಳಗೊಳ್ಳಲು baseline ಹೆಚ್ಚಿಸಲಾಗುವುದಿಲ್ಲ. [Upload ಸ್ಥಿತಿ ಮತ್ತು analysis ಹುಡುಕಾಟ](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Receipt upload ಮತ್ತು analysis ID-ಗಳು, category-ಗಳು, tool version-ಗಳು, ref/SHA, baseline ಮತ್ತು alert ಸಂಖ್ಯೆಗಳನ್ನು ದಾಖಲಿಸುತ್ತದೆ. SARIF ಗುರುತು/result ಸಂಖ್ಯೆ, ಕನಿಷ್ಠ rule ಸಂಖ್ಯೆಗಳು ಮತ್ತು ನಿಖರವಾದ alert instance-ಗಳು ಕಡ್ಡಾಯವಾಗಿಯೇ ಇರುತ್ತವೆ. ಒಪ್ಪಿಕೊಳ್ಳುವ ಮೊದಲು PR/analysis ಗುರುತುಗಳನ್ನು ಮತ್ತೆ ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ. ಈ ಪರಿಶೀಲನೆಗಳು ಸಂರಚಿಸಿದ category coverage ಅನ್ನು ಸ್ಥಾಪಿಸುತ್ತವೆ; ಹೊರತೆಗೆದ ಪ್ರತಿಯೊಂದು source file-ನ inventory ಅನ್ನು ಅಲ್ಲ. C/C++ no-build extraction, project build ಸಮಯದಲ್ಲಿ ಉತ್ಪಾದಿಸುವ code ಅನ್ನು ಒಳಗೊಳ್ಳುವುದಿಲ್ಲ. Source exclusion-ಗಳ ಪರಿಶೀಲನೆ ಇನ್ನೂ ಅಗತ್ಯ; contributor attribution-ಗೆ ಹೋಲಿಸಬಹುದಾದ ನಿಖರ base ಸಾಕ್ಷ್ಯ ಬೇಕು.
+
+`codeql-maintenance.yml`, PR/main producer-ಗಳನ್ನು ನಕಲು ಮಾಡದೆ active release push scan-ಗಳು ಮತ್ತು ವಾರದ schedule ಅನ್ನು ಒದಗಿಸುತ್ತದೆ. `nightly-codeql-inventory.yml`, `--strict-measurement` ಜೊತೆಗೆ repository-ಯ ಒಟ್ಟಾರೆ baseline ಅನ್ನು ಪ್ರತ್ಯೇಕವಾಗಿ ಇಡುತ್ತದೆ; ಅಳತೆ ಲಭ್ಯವಿಲ್ಲದಾಗ ವಿಫಲವಾಗುತ್ತದೆ. ಸ್ಥಳೀಯ ಹಳೆಯ collector ಸರಾಗವಾಗಿ ಬಿಟ್ಟುಹೋಗುವುದು candidate admission ಅಲ್ಲ. ಪರಿಶೀಲಿಸಿದ ಕಡಿಮೆ ಒಟ್ಟಾರೆ ಸಂಖ್ಯೆಯ ನಂತರ ಸ್ಪಷ್ಟವಾದ `--update` ಮೂಲಕವೇ ಮಿತಿಯನ್ನು ಬಿಗಿಗೊಳಿಸಲಾಗುತ್ತದೆ.
+
+Default Setup ಸಂರಚಿಸಿರುವಾಗ Advanced workflow ಅನ್ನು ಪ್ರಕಟಿಸಬಾರದು: GitHub ಆ ಸಂಯೋಜನೆಯನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ. ಪರಿಶೀಲಿಸಿದ ಆಡಳಿತಾತ್ಮಕ ಬದಲಾವಣೆಯನ್ನು ಮತ್ತೆ ಓದಿ ದೃಢಪಡಿಸುವವರೆಗೂ ಅದರ version ಮಾಡಿದ policy ಬಾಕಿಯೇ ಇರುತ್ತದೆ. ಪ್ರಕಟಣೆಗೆ ಮೊದಲು operator repository, head/base/tree, policy/patch/rollback hash-ಗಳು ಮತ್ತು ಗಮನಿಸಿದ setup ಸ್ಥಿತಿಯನ್ನು ನಿಗದಿಪಡಿಸುತ್ತಾರೆ; `node scripts/quality/codeql-producer.mjs verify-admin-readback`, ನೀಡಿದ expected ಮತ್ತು actual JSON ದಾಖಲೆಗಳನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ. ಇದು ತಾಂತ್ರಿಕ ರಕ್ಷಣೆ; operator ಅನುಮೋದನೆ ಅಥವಾ ಹೊಸ readback-ಗಳನ್ನು ಪಡೆಯುವುದಕ್ಕೆ ಪರ್ಯಾಯ ಅಲ್ಲ. PR token ಎಂದಿಗೂ Administration access ಕೋರುವುದಿಲ್ಲ. Rollout ಮತ್ತು ಯಾವುದೇ scanner ಬದಲಾವಣೆಗೆ ಆ ಪ್ರತ್ಯೇಕ readback ಜೊತೆಗೆ ನೈಜ PR, fork ಮತ್ತು merge-group compatibility ಸಾಕ್ಷ್ಯ ಬೇಕು.
+
+Fork-ಗಳು hosted runner-ಗಳನ್ನು, credential-ಗಳನ್ನು ಉಳಿಸದ checkout ಅನ್ನು ಬಳಸುತ್ತವೆ; producer-ನಲ್ಲಿ project install/build ಇರುವುದಿಲ್ಲ ಮತ್ತು repository secret-ಗಳನ್ನು ಅನುವಂಶಿಕವಾಗಿ ಪಡೆಯುವುದಿಲ್ಲ. ಕಡಿಮೆ ಅಧಿಕಾರದ fork token ಜೊತೆ pull_request ಘಟನೆಗೆ SARIF upload ಅನ್ನು GitHub ಬೆಂಬಲಿಸುತ್ತದೆ; ಮೊದಲ ಬಾರಿಯ contribution ಕಾರ್ಯಗತಗೊಳಿಸುವ ಅನುಮೋದನೆ GitHub policy ಆಗಿಯೇ ಉಳಿಯುತ್ತದೆ. ನಂಬಲಾಗದ code ಕಾರ್ಯಗತಗೊಳಿಸಲು pull_request_target ಅನ್ನು ಎಂದಿಗೂ ಬಳಸಬಾರದು. Migration ಪೂರ್ಣಗೊಂಡಿದೆ ಎಂದು ಪರಿಗಣಿಸುವ ಮೊದಲು ನಿಯಂತ್ರಿತ canary-ಯಲ್ಲಿ ನಿಜವಾದ token permission-ಗಳು, analysis_key ಮತ್ತು ಎಲ್ಲಾ category environment-ಗಳನ್ನು ದೃಢಪಡಿಸಿ. [Fork upload ನಿಯಮಗಳು](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[ಪರಸ್ಪರ ಸಂಘರ್ಷಿಸುವ setup ವಿಧಾನಗಳು](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **ವಜಾಗೊಳಿಸುವಿಕೆಗಳು ಆಪರೇಟರ್ನ ನಿರ್ಧಾರ (ಕಠಿಣ ನಿಯಮ #14)** — ವಜಾಗೊಳಿಸುವಿಕೆಯ ಕಾಮೆಂಟ್ನಲ್ಲಿ
 ತಾಂತ್ರಿಕ ಸಮರ್ಥನೆಯನ್ನು ದಾಖಲಿಸದೆ CodeQL ಎಚ್ಚರಿಕೆಯನ್ನು ಎಂದಿಗೂ ವಜಾಗೊಳಿಸಬೇಡಿ: ಅಪ್ಸ್ಟ್ರೀಮ್-ಪ್ರೋಟೋಕಾಲ್
@@ -637,11 +645,7 @@ CI ಗೇಟ್ಗಳ ಜೊತೆಗೆ, OmniRoute ಒಂದು **ಆಯ್ಕ�
 ಬದಲಾವಣೆಗಳಾಗಿವೆ; ಫ್ಲಿಪ್ಗಳು/ತೆಗೆದುಹಾಕುವಿಕೆಗಳು ಆಪರೇಟರ್ಗಾಗಿ ಕಾಯ್ದಿರಿಸಲಾದ ನೀತಿ ನಿರ್ಧಾರಗಳಾಗಿವೆ.** ಕೆಳಗಿನ ಯಾವುದನ್ನೂ
 ಇನ್ನೂ ಅನ್ವಯಿಸಲಾಗಿಲ್ಲ.
 
-**ಮೇಲೆ ದಾಖಲಿಸದಿರುವವು ಸಹ** (ಸಲಹಾತ್ಮಕ, ಕಡಿಮೆ ಸಂಕೇತ): `docs-lint` ಜಾಬ್
-(markdownlint + Vale, ಸಂಪೂರ್ಣ ಜಾಬ್ `continue-on-error`) ಮತ್ತು ಪ್ರತ್ಯೇಕ ಸ್ಕ್ಯಾನರ್ ವರ್ಕ್ಫ್ಲೋಗಳು
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` ಎಂಬುದು
-`quality-baseline.json` ನಲ್ಲಿದೆ, ಆದರೆ `ci.yml` ನಲ್ಲಿ ತಡೆಹಿಡಿಯುವ ರ್ಯಾಚೆಟ್ಗೆ ಸಂಪರ್ಕಿಸಲಾಗಿಲ್ಲ — ಈ ಮೆಟ್ರಿಕ್
-ಪ್ರಸ್ತುತ ಅನಾಥವಾಗಿದೆ.
+**ಮೇಲೆ ದಾಖಲಿಸದ ಇತರವು** (ಸಲಹಾ ಸ್ವರೂಪ, ಕಡಿಮೆ ಉಪಯುಕ್ತ ಸೂಚನೆ): `docs-lint` job (markdownlint + Vale, ಸಂಪೂರ್ಣ job-ಗೆ `continue-on-error`) ಮತ್ತು ಸ್ವತಂತ್ರ scanner workflow-ಗಳಾದ `semgrep.yml` / `scorecard.yml`. ಮೇಲೆ ವಿವರಿಸಿದ activation ಅವಶ್ಯಕತೆಗಳಿಗೆ ಒಳಪಟ್ಟು CodeQL ಈಗ `Gate / CI` ಅಡಿಯಲ್ಲಿ ಕಡ್ಡಾಯ producer ಮತ್ತು admission job-ಗಳನ್ನು ಹೊಂದಿದೆ. `quality-baseline.json` ನಲ್ಲಿ `semgrepFindings: 0` ಇದೆ, ಆದರೆ ಅದನ್ನು `ci.yml` ನಲ್ಲಿನ ತಡೆಯುವ ratchet-ಗೆ ಸಂಪರ್ಕಿಸಿಲ್ಲ — ಈ metric ಪ್ರಸ್ತುತ ಸಂಪರ್ಕವಿಲ್ಲದೆ ಉಳಿದಿದೆ.
 
 ### ವಿಲೀನ / ನಕಲು ನಿವಾರಣೆ (ಯಾಂತ್ರಿಕ, ಕಡಿಮೆ ಅಪಾಯ)
 

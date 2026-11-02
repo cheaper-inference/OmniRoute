@@ -38,7 +38,16 @@ docs-only లేదా catalog-only వర్గీకరణ కోడ్ లే
 తీర్పు జాబ్ యొక్క `needs` జాబితాతో అనుసంధానిస్తాయి, తద్వారా కొత్తగా జోడించిన లేదా తొలగించిన లేన్ నిశ్శబ్దంగా అదృశ్యం కాలేదు.
 రసీదులు వాటి స్వంత వర్క్ఫ్లోను మాత్రమే కవర్ చేస్తాయి; ప్రచురణ, డిప్లాయ్మెంట్ లేదా ఇప్పటికే ఉన్న అడ్వైజరీ స్కానర్ అంతర్గత అంశాలను కాదు. వర్తించే తనిఖీలను బ్రాంచ్ నియమాలలో తప్పనిసరి చేయడం ఒక ప్రత్యేక పరిపాలనా మార్పు; వాటి జాబ్లను నిర్వచించడం మాత్రమే బ్రాంచ్ను రక్షించదు.
 
-`API Route Typecheck` అనేది సమగ్ర నిర్ణయాలు రెండింటికీ మరియు స్థానిక పూర్తి పరిశీలకుడి స్టాటిక్ ప్రొఫైల్కూ వెలుపల ఉండే స్వతంత్ర వర్క్ఫ్లో తనిఖీ. ఖచ్చితమైన అభ్యర్థి కోసం దాని ఫలితాన్ని విడిగా పరిశీలించండి. `.github/workflows/api-route-typecheck.yml` అనేది `main` లేదా `release/**` లోకి వచ్చే PRలు, ఈ రెండు బ్రాంచ్ కుటుంబాలలో దేనికైనా జరిగే పుష్లు, అలాగే మాన్యువల్ డిస్పాచ్పై రన్ అవుతుంది. దీనికి పాత్ ఫిల్టర్ లేదు. PR బేస్ను మళ్లీ లక్ష్యంగా చేయడం కొత్త తనిఖీని అభ్యర్థిస్తుంది; బాడీ/టైటిల్ సవరణలు పరిశీలన-మాత్రమే పేరు `Admission not requested / API Route Typecheck`ను ఉపయోగిస్తాయి మరియు అడ్మిషన్ తనిఖీని భర్తీ చేయలేవు. ఈ వర్క్ఫ్లో మెర్జ్-గ్రూప్ ట్రిగ్గర్ను ప్రకటించదు. ఈ తనిఖీని తప్పనిసరి చేసే ఏదైనా మెర్జ్-క్యూ రోల్అవుట్ ముందుగా ఆ ఈవెంట్ కోసం దీని అమలును ఏర్పాటు చేయాలి.
+`API Route Typecheck` ఒక స్వతంత్ర workflow తనిఖీ. ఇది రెండు సమగ్ర తీర్పులకు, స్థానిక పూర్తి observer యొక్క స్థిర profile-కు బయట ఉంటుంది. ఖచ్చితమైన candidate కోసం దాని ఫలితాన్ని విడిగా పరిశీలించాలి. `.github/workflows/api-route-typecheck.yml`, `main` లేదా `release/**` వైపు వచ్చే PR-లపై, ఆ రెండు branch వర్గాలకు జరిగే push-లపై, manual dispatch-పై, అలాగే `checks_requested` రకానికి చెందిన `merge_group` ఘటనలపై నడుస్తుంది. దీనికి path filter లేదు. Merge group-లు `merge_group.head_sha`-ను checkout చేస్తాయి; ఇతర ఘటనలు `github.sha`-ను checkout చేస్తాయి. అన్ని ఘటనలూ ఒకే API diagnostic gate-ను, gate unit test-లను ఉపయోగిస్తాయి.
+PR base-ను మార్చినప్పుడు కొత్త తనిఖీ కోరబడుతుంది; body/title సవరణలు పరిశీలన కోసం మాత్రమే ఉన్న `Admission not requested / API Route Typecheck` అనే పేరును ఉపయోగిస్తాయి. అవి admission తనిఖీకి ప్రత్యామ్నాయం కాలేవు.
+
+### ధృవీకరించిన CI build-ను DAST ఉపయోగిస్తుంది
+
+తప్పనిసరి `dast-smoke` CI job, `build` తర్వాత `.github/workflows/dast-smoke.yml`-ను పిలుస్తుంది. మద్దతు ఉన్న fork PR-లు, release-ను లక్ష్యంగా చేసుకున్న PR-లు, merge group-లతో సహా build అనుసరించే అదే code/draft ఎంపికను ఇది అనుసరిస్తుంది. DAST job లేకపోయినా, విఫలమైనా, రద్దయినా లేదా అనుకోకుండా దాటవేయబడినా `Gate / CI` నిరోధించబడుతుంది. పునర్వినియోగ workflow-కు స్వతంత్ర PR/dispatch trigger లేదు; manual validation CI dispatch-ను ఉపయోగిస్తుంది. అందువల్ల build, consumer ఒకే run-లో ఉంటాయి.
+
+`scripts/ci/next-build-provenance.mjs` పూర్తి Next artifact-ను దాని tar digest, repository/event/run, producer attempt, head/base/checkout/tree, workflow గుర్తింపులు, lockfile, ఖచ్చితమైన Node version/ABI, platform, bundler వివరాలతో బంధిస్తుంది. DAST, `needs.build.outputs` నుంచి మార్చలేని artifact ID-ను ఎంచుకుంటుంది; download digest ధృవీకరణను తప్పనిసరి చేస్తుంది. అనుమతించిన జాబితాలోని రెండు సభ్యాలను `scripts/ci/unpack-ci-build.py` ద్వారా వెలికితీయడానికి ముందు ZIP hash-ను స్వతంత్రంగా లెక్కించి producer digest-తో పోలుస్తుంది. Next tree వెలికితీతకు ముందు manifest, tar archive కూడా స్వతంత్ర producer output-లతో సరిపోవాలి. Branch-లో చివరిగా విజయవంతమైన build కోసం ఇది ఎప్పుడూ వెతకదు. ID, అన్ని input-లు ఇంకా సరిపోతే partial rerun అదే producer attempt-ను మళ్లీ ఉపయోగించవచ్చు; receipt రెండు attempt-లను నమోదు చేస్తుంది.
+
+Consumer repository-పై చదవడానికి మాత్రమే అనుమతి ఉన్న hosted Linux runner-లో ఉంటుంది; repository secret-లు అందుబాటులో ఉండవు. Producer వాడిన ఖచ్చితమైన Node version-ను ఇన్‌స్టాల్ చేసి, `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` తో CLI-ను తయారుచేస్తుంది. ఏ fallback build మొదలవకముందే standalone server లేకపోవడాన్ని `scripts/build/standaloneInput.mjs` తిరస్కరిస్తుంది; సాధారణ స్థానిక CLI build-లు వాటి ప్రస్తుత fallback-ను కొనసాగిస్తాయి. Server readiness, Schemathesis, promptfoo అన్నీ మారని 25 నిమిషాల job పరిమితిలో విజయవంతం కావాలి. Provenance receipt input గుర్తింపును, bytes-ను రుజువు చేస్తుంది; DAST scan విజయాన్ని కాదు. Artifact గడువు ముగియడం, runner అంతరాయం లేదా scanner వైఫల్యం అసంపూర్ణ లేదా విఫల ఆధారంగానే మిగులుతుంది; advisory wrapper ద్వారా దానిని PASS గా మార్చలేరు.
 
 ### UI అమలు సామర్థ్యం
 
@@ -208,17 +217,24 @@ dispatch మరియు merge groupలపై CIకి పూరకంగా ప
 
 `test-coverage` తర్వాత అమలవుతుంది. విఫలమైతే mergeను నిరోధిస్తుంది.
 
-| Script                       | ధృవీకరించేది                                                                                                                                                                                                        | నిరోధించేది                |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `quality:collect`            | `quality-metrics.json`ను ఉత్పత్తి చేస్తుంది (ESLint హెచ్చరికల సంఖ్య, విలీనం చేసిన shard నివేదిక నుండి coverage)                                                                                                     | అవును (ratchetకు upstream) |
-| `quality:ratchet`            | `quality-baseline.json`లోని ప్రతి metric క్షీణించలేదని నిర్ధారిస్తుంది (ESLint హెచ్చరికలు ≤ baseline; coverage ≥ baseline)                                                                                          | అవును                      |
-| `check:duplication`          | Code duplication (jscpd@4), `quality-baseline.json`లోని baselineను మించదని నిర్ధారిస్తుంది                                                                                                                          | అవును                      |
-| `check:complexity`           | ఫైల్-స్థాయి cyclomatic complexity పరిమితిని మించదని నిర్ధారిస్తుంది (core ESLint `complexity` + `max-lines-per-function`)                                                                                           | అవును                      |
-| `check:cognitive-complexity` | Cognitive complexity ratchet (`eslint-plugin-sonarjs`) — ప్రత్యేక ESLint pass; CI రెండింటినీ ఒకే `check:complexity-ratchets` దశగా విలీనం చేసి అమలు చేస్తుంది                                                        | అవును                      |
-| `check:dead-code`            | ఉపయోగించని exports / files ratchet (knip), baselineతో పోలిస్తే క్షీణించదని నిర్ధారిస్తుంది                                                                                                                          | అవును                      |
-| `check:compression-budget`   | Compression benchmark budget — ప్రతి-engine token-savings కనిష్ఠ పరిమితులు క్షీణించకూడదు                                                                                                                            | అవును                      |
-| `check:type-coverage`        | Percent-typed ratchet (`type-coverage`) క్షీణించదని నిర్ధారిస్తుంది; ఇది `typecheck:noimplicit:core`ను చాలావరకు తనలో కలుపుకుంటుంది                                                                                  | అవును                      |
-| `check:codeql-ratchet`       | తెరిచి ఉన్న CodeQL alertల సంఖ్య క్షీణించదని నిర్ధారిస్తుంది (`gh api` ద్వారా చదువుతుంది; token లేకపోతే సురక్షితంగా skip చేస్తుంది) — refresh cadence మరియు manual trigger కోసం: దిగువన ఉన్న "CodeQL ratchet" చూడండి | అవును                      |
+| Script                       | ధృవీకరించేది                                                                                                                                                 | నిరోధించేది                |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
+| `quality:collect`            | `quality-metrics.json`ను ఉత్పత్తి చేస్తుంది (ESLint హెచ్చరికల సంఖ్య, విలీనం చేసిన shard నివేదిక నుండి coverage)                                              | అవును (ratchetకు upstream) |
+| `quality:ratchet`            | `quality-baseline.json`లోని ప్రతి metric క్షీణించలేదని నిర్ధారిస్తుంది (ESLint హెచ్చరికలు ≤ baseline; coverage ≥ baseline)                                   | అవును                      |
+| `check:duplication`          | Code duplication (jscpd@4), `quality-baseline.json`లోని baselineను మించదని నిర్ధారిస్తుంది                                                                   | అవును                      |
+| `check:complexity`           | ఫైల్-స్థాయి cyclomatic complexity పరిమితిని మించదని నిర్ధారిస్తుంది (core ESLint `complexity` + `max-lines-per-function`)                                    | అవును                      |
+| `check:cognitive-complexity` | Cognitive complexity ratchet (`eslint-plugin-sonarjs`) — ప్రత్యేక ESLint pass; CI రెండింటినీ ఒకే `check:complexity-ratchets` దశగా విలీనం చేసి అమలు చేస్తుంది | అవును                      |
+| `check:dead-code`            | ఉపయోగించని exports / files ratchet (knip), baselineతో పోలిస్తే క్షీణించదని నిర్ధారిస్తుంది                                                                   | అవును                      |
+| `check:compression-budget`   | Compression benchmark budget — ప్రతి-engine token-savings కనిష్ఠ పరిమితులు క్షీణించకూడదు                                                                     | అవును                      |
+| `check:type-coverage`        | Percent-typed ratchet (`type-coverage`) క్షీణించదని నిర్ధారిస్తుంది; ఇది `typecheck:noimplicit:core`ను చాలావరకు తనలో కలుపుకుంటుంది                           | అవును                      |
+
+### Job-లు: `codeql-scan` మరియు `codeql-admission`
+
+`codeql-scan` కాన్ఫిగర్ చేసిన అన్ని analysis category-లను ఉత్పత్తి చేస్తుంది. ఆ job విజయవంతమైన తర్వాత `codeql-admission` దాని ఖచ్చితమైన upload-లను, candidate alert ratchet-ను ధృవీకరిస్తుంది. కేవలం documentation మార్చే candidate-లతో సహా రెండూ `Gate / CI`-కి తప్పనిసరి dependency-లు. పరిపాలనా activation, canary అవసరాలు దిగువ “CodeQL ratchet” విభాగంలో వివరించబడ్డాయి.
+
+| Script                 | ధృవీకరించేది                                                                                                                                                                                                                | నిరోధించేదా |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `check:codeql-ratchet` | Alert ratchet-కు ముందు candidate ref/SHA, కాన్ఫిగర్ చేసిన అన్ని analysis category-లు ప్రస్తుత స్థితికి చెందినవిగా ఉండాలి; ఆధారం లేకుంటే నిరోధించబడుతుంది. మొత్తం inventory విడిగానే ఉంటుంది — దిగువ “CodeQL ratchet” చూడండి | అవును       |
 
 ### Job: `quality-extended`
 
@@ -467,32 +483,24 @@ git add quality-baseline.json
 బేస్లైన్ను నవీకరించని PRను `--require-tighten` గుర్తిస్తుంది (దశ 6A.5,
 అమలు పెండింగ్లో ఉంది).
 
-### CodeQL రాచెట్: రిఫ్రెష్ తరచుదనం మరియు మాన్యువల్ ట్రిగ్గర్
+### CodeQL ratchet: candidate admission మరియు repository inventory
 
-`check:codeql-ratchet` **షెడ్యూల్ ప్రకారం రిఫ్రెష్ అయ్యే రెపో స్థితిని చదువుతుంది — ప్రతి PRకు కాదు.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` అనేది
-`state: configured`, `schedule: weekly` అని నివేదిస్తుంది: ఇది GitHub డిఫాల్ట్-సెటప్ స్కాన్,
-ప్రతి పుష్కు జరిగే విశ్లేషణ కాదు. పర్యవసానంగా: అలర్ట్లను సరిచేసే PR మెర్జ్ అయిన తర్వాత,
-తదుపరి షెడ్యూల్ చేసిన స్కాన్ అమలయ్యే వరకు రాచెట్ పాత, ఎక్కువ కౌంట్నే చదువుతూ ఉంటుంది —
-కాబట్టి స్కాన్ తాజా స్థితిని అందుకునే వరకు, పరిష్కార PRకు సంబంధించిన తదుపరి PRలతో సహా,
-తెరిచి ఉన్న ప్రతి PRలోనూ అది రిగ్రెషన్ను నివేదిస్తుంది.
+స్పష్టమైన dependency శ్రేణి ద్వారా candidate CodeQL admission-కు CI బాధ్యత వహిస్తుంది: `codeql-scan`, `codeql.yml`-లోని నాలుగు భాషల matrix-ను పిలుస్తుంది; తర్వాత `codeql-admission`, `node scripts/check/check-codeql-ratchet.mjs --candidate`-ను నడుపుతుంది. `Gate / CI` రెండు ఫలితాలనూ కోరుతుంది. Quality తన సంఖ్యాపరమైన తనిఖీలను కొనసాగిస్తుంది, కానీ producer పూర్తవకముందు scanner-ను ప్రశ్నించదు; `Gate / Quality` ఒక్కటే పూర్తి candidate admission కాదు. Documentation మాత్రమే మారే candidate-లకు కూడా CodeQL తప్పనిసరి.
 
-**మాన్యువల్ రిఫ్రెష్**: `gh workflow run codeql.yml --ref release/vX.Y.Z` విశ్లేషణను
-మళ్లీ అమలు చేసి, కొన్ని నిమిషాల్లోనే అలర్ట్లను తిరిగి ప్రచురిస్తుంది. ముందుగా
-`.github/workflows/codeql.yml`ను చదవండి — GitHub యొక్క "డిఫాల్ట్ సెటప్"తో ఇది విభేదిస్తుంది
-కాబట్టే ఇది `workflow_dispatch`కు మాత్రమే పరిమితమైందని దాని హెడర్ వివరిస్తుంది
-(`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`).
-`push`/`pull_request`/`schedule` ట్రిగ్గర్లను పునరుద్ధరించడానికి ముందుగా **ఓనర్ చర్య**
-అవసరం: Settings → Code security → CodeQL: Default → Advanced. ఆ మార్పు చేయకుండా
-`schedule:` ట్రిగ్గర్ను జోడించవద్దు — అది విఫలమయ్యే రన్లను మాత్రమే ఉత్పత్తి చేస్తుంది.
+`config/quality/codeql-admission-policy.json`-లోని policy Actions, C/C++, JavaScript/TypeScript, Python-ను ఎంచుకుంటుంది; query suite default, threat model remote, build mode none కూడా ఎంపికవుతాయి. Producer preflight పెండింగ్ activation రికార్డును, స్పష్టమైన target జాబితా బయట ఉన్న branch-లను తిరస్కరిస్తుంది. మొదటి target-లు main, release/v3.8.53; తర్వాతి release-కు సమీక్షించిన onboarding అవసరం. CI-లో ఇప్పటికే ఉన్న విస్తృత release PR trigger కొనసాగుతుంది. అయితే onboarding కాని target కొలవని PASS పొందకుండా, extraction-కు ముందే HOLD నివేదిస్తుంది.
 
-**కౌంట్ తగ్గిన తర్వాత బేస్లైన్ను కఠినతరం చేయండి** —
-`node scripts/check/check-codeql-ratchet.mjs --update` కొత్తగా కొలిచిన కౌంట్ను
-`quality-baseline.json` → `metrics.codeqlAlerts.value`లో వ్రాస్తుంది, తద్వారా పాత గరిష్ఠ
-పరిమితి వరకు తిరిగి రిగ్రెషన్ జరగడాన్ని రాచెట్ నిశ్శబ్దంగా అనుమతించదు. పూర్తి ఉదాహరణ
-(2026-09-02/03): PR #12502 7 వాస్తవ అలర్ట్లను సరిచేసింది (కొలిచిన ఓపెన్ అలర్ట్లు
-13 → 6); దానికి సరిపోలేలా PR #12530 స్థిరీకరించిన బేస్లైన్ను 11 → 6కు కఠినతరం చేసింది;
-ఆపై మిగిలిన 6 అలర్ట్లను ఒక్కో అలర్ట్కు సమర్థనతో డిస్మిస్ చేసి, ఓపెన్ కౌంట్ను 0కు తగ్గించారు.
+ప్రతి matrix job తన నిజమైన SARIF upload ID, భాష, category, run, attempt, caller workflow గుర్తింపు, event ref/head/base/merge SHA, policy hash-ను నమోదు చేస్తుంది. దానిపై ఆధారపడే job ఈ run receipt-లను మాత్రమే download చేసి artifact digest-లను ధృవీకరిస్తుంది. నాలుగు category-లు, విజయవంతమైన producer, ప్రతి ఖచ్చితమైన upload processing పూర్తవడం అవసరం. Branch-లో చివరిగా కనిపించిన analysis బదులు API sarif_id filter-ను ఉపయోగిస్తుంది. Partial rerun-లు అదే run, candidate-కు చెందిన పూర్వ attempt-లో విజయవంతమైన category-లను, ఉత్పత్తి చేసిన attempt గుర్తింపును కొనసాగిస్తూ మళ్లీ ఉపయోగించవచ్చు; ప్రస్తుత producer విఫలమైతే పూర్వ పచ్చని ఆధారాన్ని తిరిగి ఉపయోగించలేరు.
+
+CodeQL action processing కోసం వేచి ఉంటుంది; అయితే pin చేసిన implementation status చదవడం విఫలమైనా లేదా నిరీక్షణ పరిమితి ముగిసినా హెచ్చరించి కొనసాగవచ్చు. అందుకే admission processing-ను మళ్లీ ధృవీకరిస్తుంది. Category-లు లేకపోవడం, processing పెండింగ్‌లో ఉండడం, job-లు విఫలం లేదా రద్దు కావడం, పాత గుర్తింపు, అసంపూర్ణ pagination, API-లు అందుబాటులో లేకపోవడం HOLD తో exit 2 ఇస్తాయి. స్వతంత్ర scanner workflow కోసం స్థిర నిరీక్షణ ఇక లేదు. Alert query 0 ఇచ్చిందనే కారణంతో scan చేయని PR పాస్ కావడం సాధ్యం కాదు. కొలిచిన సంఖ్య `metrics.codeqlAlerts.value` కంటే ఎక్కువైతే exit 1 వస్తుంది; మరో branch alert-లను చేర్చుకోవడానికి baseline పెంచరు. [Upload స్థితి మరియు analysis శోధన](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Receipt upload, analysis ID-లు, category-లు, tool version-లు, ref/SHA, baseline, alert సంఖ్యలను నమోదు చేస్తుంది. SARIF గుర్తింపు/result సంఖ్య, కనిష్ఠ rule సంఖ్యలు, ఖచ్చితమైన alert instance-లు తప్పనిసరిగానే ఉంటాయి. అంగీకరించే ముందు PR/analysis గుర్తింపులను మళ్లీ తనిఖీ చేస్తారు. ఈ తనిఖీలు కాన్ఫిగర్ చేసిన category coverage-ను నిర్ధారిస్తాయి; వెలికితీసిన ప్రతి source file inventory-ను కాదు. C/C++ no-build extraction project build సమయంలో ఉత్పత్తి అయ్యే code-ను చేర్చదు. Source exclusion-లకు ఇంకా సమీక్ష అవసరం; contributor attribution కోసం పోల్చదగిన ఖచ్చితమైన base ఆధారం కావాలి.
+
+`codeql-maintenance.yml` PR/main producer-లను నకలు చేయకుండా active release push scan-లను, వారపు schedule-ను అందిస్తుంది. `nightly-codeql-inventory.yml`, `--strict-measurement` తో repository మొత్తానికి చెందిన baseline-ను విడిగా ఉంచుతుంది; కొలత అందుబాటులో లేకపోతే విఫలమవుతుంది. స్థానిక పాత collector సాఫీగా దాటవేయడం candidate admission కాదు. ధృవీకరించిన తక్కువ మొత్తం సంఖ్య తర్వాత స్పష్టమైన `--update` ద్వారానే పరిమితిని కఠినం చేస్తారు.
+
+Default Setup కాన్ఫిగర్ అయి ఉన్నప్పుడు Advanced workflow-ను ప్రచురించకూడదు: GitHub ఆ కలయికను తిరస్కరిస్తుంది. సమీక్షించిన పరిపాలనా మార్పును తిరిగి చదివి నిర్ధారించేవరకు దాని version చేసిన policy పెండింగ్‌లో ఉంటుంది. ప్రచురణకు ముందు operator repository, head/base/tree, policy/patch/rollback hash-లు, గమనించిన setup స్థితిని నిర్దిష్టంగా నమోదు చేస్తారు; `node scripts/quality/codeql-producer.mjs verify-admin-readback` అందించిన expected, actual JSON రికార్డులను తనిఖీ చేస్తుంది. ఇది సాంకేతిక రక్షణ; operator ఆమోదం కాదు, తాజా readback-లు పొందడానికి ప్రత్యామ్నాయం కూడా కాదు. PR token ఎప్పుడూ Administration access కోరదు. Rollout, ఏ scanner మార్పుకైనా ఆ ప్రత్యేక readback తో పాటు నిజమైన PR, fork, merge-group compatibility ఆధారం అవసరం.
+
+Fork-లు hosted runner-లు, credential-లు నిల్వ చేయని checkout-ను ఉపయోగిస్తాయి; producer-లో project install/build ఉండదు, repository secret-లు వారసత్వంగా అందవు. పరిమిత fork token తో pull_request ఘటనలో SARIF upload-కు GitHub మద్దతు ఇస్తుంది; మొదటిసారి contribution అమలుకు ఆమోదం GitHub policy పరిధిలోనే ఉంటుంది. నమ్మలేని code అమలుకు pull_request_target-ను ఎప్పుడూ ఉపయోగించకూడదు. Migration పూర్తయిందని భావించే ముందు నియంత్రిత canary-లో నిజమైన token permission-లు, analysis_key, అన్ని category environment-లను నిర్ధారించాలి. [Fork upload నియమాలు](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[పరస్పరం విరుద్ధమైన setup విధానాలు](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **డిస్మిసల్లు ఆపరేటర్ నిర్ణయం (కఠిన నియమం #14)** — డిస్మిసల్ కామెంట్లో సాంకేతిక
 సమర్థనను నమోదు చేయకుండా CodeQL అలర్ట్ను ఎప్పుడూ డిస్మిస్ చేయవద్దు: అప్స్ట్రీమ్-ప్రోటోకాల్
@@ -650,11 +658,7 @@ TypeScript లాంగ్వేజ్ సర్వర్ను అందుబ�
 మార్పులు; ఫ్లిప్లు/తొలగింపులు ఆపరేటర్కు కేటాయించిన విధాన నిర్ణయాలు.** దిగువన ఉన్నవేవీ
 ఇంకా వర్తింపజేయబడలేదు.
 
-**పైన డాక్యుమెంట్ చేయనివి కూడా** (సలహాత్మకం, తక్కువ సంకేతం): `docs-lint` జాబ్
-(markdownlint + Vale, మొత్తం జాబ్కు `continue-on-error`) మరియు స్వతంత్ర స్కానర్ వర్క్ఫ్లోలు
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` అనేది
-`quality-baseline.json`లో ఉంది, కానీ `ci.yml`లో బ్లాకింగ్ రాచెట్కు అనుసంధానించబడలేదు — ఈ మెట్రిక్
-ప్రస్తుతం అనాథగా ఉంది.
+**పైన ఇంకా నమోదు చేయనివి** (సలహా మాత్రమే, తక్కువ ఉపయోగకర సంకేతం): `docs-lint` job (markdownlint + Vale, మొత్తం job-కు `continue-on-error`), స్వతంత్ర scanner workflow-లు `semgrep.yml` / `scorecard.yml`. పైన వివరించిన activation అవసరాలకు లోబడి CodeQL ఇప్పుడు `Gate / CI` కింద తప్పనిసరి producer, admission job-లను కలిగి ఉంది. `quality-baseline.json`-లో `semgrepFindings: 0` ఉంది, కానీ అది `ci.yml`-లో నిరోధించే ratchet-కు అనుసంధానించబడలేదు — ప్రస్తుతం ఈ metric అనుసంధానం లేకుండా ఉంది.
 
 ### విలీనం / నకిలీల తొలగింపు (యాంత్రికం, తక్కువ ప్రమాదం)
 

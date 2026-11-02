@@ -15,7 +15,7 @@ Claude Code-ին՝ `AGENTS.md`-ում արդեն սահմանված կանոնն
 
 Պարտադիր worktree արձանագրության ամբողջական նկարագրությունը (բազային ճյուղի հաստատում, `.claude/worktrees/` կանոնական
 ուղի, `cp -al` node_modules, քանդման կանոններ) գտնվում է
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)-ում (ամփոփված է `AGENTS.md`-ում →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md)-ում (ամփոփված է `AGENTS.md`-ում →
 Git աշխատանքային հոսք → "Worktree մեկուսացում")։ Claude Code-ին հատուկ կետեր․
 
 - Հաստատեք բազային ճյուղը օպերատորի հետ `AskUserQuestion`-ի միջոցով (Կոշտ կանոն #19), եթե նա

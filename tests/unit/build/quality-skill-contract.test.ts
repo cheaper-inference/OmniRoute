@@ -15,6 +15,8 @@ test("versioned admission consumers and shared merge rules are covered by the dr
     "merge-prs/SKILL.md",
     "merge-batch/SKILL.md",
     "i18n-waves/SKILL.md",
+    "i18n-waves/scripts/bootstrap.sh",
+    "i18n-waves/scripts/wave.sh",
     "_shared/merge-gates.md",
     "_shared/validation-gate.md",
     "_shared/protected-surfaces.md",
@@ -102,7 +104,12 @@ test("the batch-merge consumer cannot be omitted or independently changed", () =
   }
 });
 
-for (const relativePath of ["_shared/protected-surfaces.md", "_shared/credit-preservation.md"]) {
+for (const relativePath of [
+  "_shared/protected-surfaces.md",
+  "_shared/credit-preservation.md",
+  "i18n-waves/scripts/bootstrap.sh",
+  "i18n-waves/scripts/wave.sh",
+]) {
   test(`shared instruction dependency ${relativePath} cannot be missing or drifted`, () => {
     const dir = mkdtempSync(join(tmpdir(), "omniroute-shared-contract-"));
     const root = join(dir, "skills");

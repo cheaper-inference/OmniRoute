@@ -40,14 +40,16 @@ CLI는 체크아웃 SHA와 이벤트 SHA가 일치하지 않으면 거부합니�
 스캐너의 내부 구조는 다루지 않습니다. 브랜치 규칙에서 해당 검사를 필수로 지정하는 것은
 별도의 관리 변경 사항이며, 작업을 정의하는 것만으로는 브랜치가 보호되지 않습니다.
 
-`API Route Typecheck`은 두 종합 판정 및 로컬 전체 옵저버의 정적 프로필
-모두에 포함되지 않는 독립적인 워크플로 검사입니다. 정확한 후보에 대한 결과를 별도로
-검사하십시오. `.github/workflows/api-route-typecheck.yml`은 `main` 또는
-`release/**`을 대상으로 하는 PR, 두 브랜치 계열 중 하나에 대한 푸시, 수동 디스패치에서 실행됩니다. 경로 필터는
-없습니다. PR 대상 베이스를 변경하면 새 검사가 요청됩니다. 본문/제목 편집에는 관찰 전용 이름
-`Admission not requested / API Route Typecheck`이 사용되며 승인 검사를 대체할 수 없습니다.
-이 워크플로는 병합 그룹 트리거를 선언하지 않습니다. 이 검사를 요구하는 병합 큐를 도입하려면
-먼저 해당 이벤트에 대해 이 검사가 실행되도록 설정해야 합니다.
+`API Route Typecheck`는 독립적인 워크플로 검사이며, 두 집계 판정과 로컬 전체 관찰기의 정적 프로필에 포함되지 않습니다. 정확히 해당 후보에 대한 결과를 별도로 확인하세요. `.github/workflows/api-route-typecheck.yml`은 `main` 또는 `release/**`를 대상으로 하는 PR, 두 계열 브랜치로의 푸시, 수동 실행, 그리고 `checks_requested` 유형의 `merge_group` 이벤트에서 실행됩니다. 경로 필터는 없습니다. 병합 그룹은 `merge_group.head_sha`를 체크아웃하고, 다른 이벤트는 `github.sha`를 체크아웃합니다. 모든 이벤트는 동일한 API 진단 게이트와 게이트 단위 테스트를 사용합니다.
+PR의 대상 기준 브랜치를 바꾸면 새 검사를 요청합니다. 본문이나 제목 편집은 관찰 전용 이름인 `Admission not requested / API Route Typecheck`를 사용하며, 승인 검사를 대체할 수 없습니다.
+
+### DAST는 검증된 CI 빌드를 사용합니다
+
+필수 CI 작업 `dast-smoke`는 `build` 이후 `.github/workflows/dast-smoke.yml`을 호출합니다. 지원되는 fork PR, release 대상 PR, 병합 그룹을 포함하여 빌드와 동일한 코드 변경 및 초안 선택 규칙을 따릅니다. DAST 작업이 없거나, 실패하거나, 취소되거나, 예상과 달리 건너뛰어지면 `Gate / CI`를 차단합니다. 재사용 워크플로에는 독립적인 PR 또는 수동 실행 트리거가 없습니다. 수동 검증은 CI의 수동 실행을 사용하여 빌드와 소비 작업을 같은 실행 안에 유지합니다.
+
+`scripts/ci/next-build-provenance.mjs`는 전체 Next 아티팩트를 tar 다이제스트, 저장소/이벤트/실행, 생산 작업의 시도, head/base/checkout/tree, 워크플로 식별 정보, 잠금 파일, 정확한 Node 버전/ABI, 플랫폼 및 번들러와 함께 봉인합니다. DAST는 `needs.build.outputs`에서 변경 불가능한 아티팩트 ID를 선택하고, 다운로드 다이제스트 검증을 요구합니다. 또한 ZIP의 해시를 독립적으로 계산하여 생산자 다이제스트와 비교한 뒤, `scripts/ci/unpack-ci-build.py`를 통해 허용 목록의 두 구성원을 추출합니다. Next 트리를 추출하기 전에 매니페스트와 tar 아카이브도 독립적인 생산자 출력과 일치해야 합니다. 브랜치의 가장 최근 성공 빌드를 검색하지 않습니다. 부분 재실행은 ID와 모든 입력이 여전히 일치할 때만 동일한 생산 시도를 재사용할 수 있으며, 증빙에는 두 시도를 모두 기록합니다.
+
+소비 작업은 계속 호스팅되는 Linux 러너에서 실행되며, 저장소 읽기 전용 권한만 갖고 저장소 비밀 정보는 갖지 않습니다. 생산자가 사용한 정확한 Node 버전을 설치한 뒤 `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`로 CLI를 조립합니다. `scripts/build/standaloneInput.mjs`는 대체 빌드 전에 독립 실행 서버가 없는 입력을 거부합니다. 일반 로컬 CLI 빌드는 기존 대체 빌드 동작을 유지합니다. 서버 준비 확인, Schemathesis 및 promptfoo는 변경되지 않은 25분 작업 제한 안에 모두 성공해야 합니다. 출처 증빙은 입력의 신원과 바이트를 증명할 뿐, DAST 스캔의 성공을 증명하지 않습니다. 아티팩트 만료, 러너 중단, 스캐너 실패는 여전히 불완전하거나 실패한 증거입니다. 권고 수준의 래퍼를 통해 PASS로 바꿀 수 없습니다.
 
 ### UI 실행 용량
 
@@ -216,17 +218,24 @@ CI의 단일 기준 정보원은 `.github/workflows/ci.yml`입니다.
 
 `test-coverage` 이후에 실행됩니다. 실패 시 병합을 차단합니다.
 
-| 스크립트                     | 검증 항목                                                                                                                                                                        | 차단 여부           |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `quality:collect`            | `quality-metrics.json`을 생성합니다(ESLint 경고 수, 병합된 샤드 보고서의 커버리지).                                                                                              | 예(래칫의 업스트림) |
-| `quality:ratchet`            | `quality-baseline.json`의 각 메트릭이 회귀하지 않았는지 확인합니다(ESLint 경고 ≤ 기준선, 커버리지 ≥ 기준선).                                                                     | 예                  |
-| `check:duplication`          | 코드 중복(jscpd@4)이 `quality-baseline.json`의 기준선을 초과하지 않는지 확인합니다.                                                                                              | 예                  |
-| `check:complexity`           | 파일 수준 순환 복잡도가 상한을 초과하지 않는지 확인합니다(핵심 ESLint `complexity` + `max-lines-per-function`).                                                                  | 예                  |
-| `check:cognitive-complexity` | 인지 복잡도 래칫(`eslint-plugin-sonarjs`) — 별도의 ESLint 패스이며, CI에서는 두 검사를 하나의 `check:complexity-ratchets` 단계로 병합하여 실행합니다.                            | 예                  |
-| `check:dead-code`            | 사용되지 않는 내보내기/파일 래칫(knip)이 기준선 대비 회귀하지 않는지 확인합니다.                                                                                                 | 예                  |
-| `check:compression-budget`   | 압축 벤치마크 예산 — 엔진별 토큰 절감 하한이 회귀하지 않아야 합니다.                                                                                                             | 예                  |
-| `check:type-coverage`        | 타입 적용 비율 래칫(`type-coverage`)이 회귀하지 않는지 확인합니다. 대체로 `typecheck:noimplicit:core`를 포괄합니다.                                                              | 예                  |
-| `check:codeql-ratchet`       | 열린 CodeQL 경고 수가 회귀하지 않는지 확인합니다(`gh api`를 통해 읽으며, 토큰이 없으면 정상적으로 건너뜁니다). 새로 고침 주기와 수동 트리거는 아래의 "CodeQL 래칫"을 참조하세요. | 예                  |
+| 스크립트                     | 검증 항목                                                                                                                                             | 차단 여부           |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `quality:collect`            | `quality-metrics.json`을 생성합니다(ESLint 경고 수, 병합된 샤드 보고서의 커버리지).                                                                   | 예(래칫의 업스트림) |
+| `quality:ratchet`            | `quality-baseline.json`의 각 메트릭이 회귀하지 않았는지 확인합니다(ESLint 경고 ≤ 기준선, 커버리지 ≥ 기준선).                                          | 예                  |
+| `check:duplication`          | 코드 중복(jscpd@4)이 `quality-baseline.json`의 기준선을 초과하지 않는지 확인합니다.                                                                   | 예                  |
+| `check:complexity`           | 파일 수준 순환 복잡도가 상한을 초과하지 않는지 확인합니다(핵심 ESLint `complexity` + `max-lines-per-function`).                                       | 예                  |
+| `check:cognitive-complexity` | 인지 복잡도 래칫(`eslint-plugin-sonarjs`) — 별도의 ESLint 패스이며, CI에서는 두 검사를 하나의 `check:complexity-ratchets` 단계로 병합하여 실행합니다. | 예                  |
+| `check:dead-code`            | 사용되지 않는 내보내기/파일 래칫(knip)이 기준선 대비 회귀하지 않는지 확인합니다.                                                                      | 예                  |
+| `check:compression-budget`   | 압축 벤치마크 예산 — 엔진별 토큰 절감 하한이 회귀하지 않아야 합니다.                                                                                  | 예                  |
+| `check:type-coverage`        | 타입 적용 비율 래칫(`type-coverage`)이 회귀하지 않는지 확인합니다. 대체로 `typecheck:noimplicit:core`를 포괄합니다.                                   | 예                  |
+
+### 작업: `codeql-scan` 및 `codeql-admission`
+
+`codeql-scan`은 구성된 모든 분석 범주를 생성합니다. 해당 작업이 성공하면 `codeql-admission`이 정확히 그 업로드와 후보의 경고 래칫을 검증합니다. 문서만 변경하는 후보를 포함해 두 작업 모두 `Gate / CI`의 필수 의존성입니다. 관리 활성화와 카나리 검증 요건은 아래의 “CodeQL 래칫”에 설명되어 있습니다.
+
+| 스크립트               | 검증 대상                                                                                                                                                                      | 차단 여부 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| `check:codeql-ratchet` | 경고 래칫을 평가하기 전에 후보의 ref/SHA와 구성된 모든 분석 범주가 최신이어야 합니다. 증거가 없으면 차단합니다. 전역 목록은 별도로 유지됩니다. 아래 “CodeQL 래칫”을 참고하세요 | 예        |
 
 ### 작업: `quality-extended`
 
@@ -477,32 +486,23 @@ git add quality-baseline.json
 업데이트하지 않은 PR은 `--require-tighten`에서 감지됩니다(Fase 6A.5,
 구현 예정).
 
-### CodeQL 래칫: 갱신 주기 및 수동 트리거
+### CodeQL 래칫: 후보 승인과 저장소 목록
 
-`check:codeql-ratchet`은 **PR마다가 아니라 일정에 따라 갱신되는 저장소 상태를 읽습니다.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup`은
-`state: configured`, `schedule: weekly`를 보고합니다. 이는 푸시마다 수행되는
-분석이 아니라 GitHub의 기본 설정 검사입니다. 따라서 경고를 수정한 PR이 병합된 후에도
-다음 예약 검사가 실행될 때까지 래칫은 이전의 더 높은 개수를 계속 읽습니다. 그 결과
-검사가 최신 상태로 갱신될 때까지 수정 PR의 후속 PR을 포함한 모든 열린 PR에서
-회귀가 보고됩니다.
+CI는 명시적인 의존성 체인을 통해 후보의 CodeQL 승인을 담당합니다. `codeql-scan`은 `codeql.yml`의 네 언어 매트릭스를 호출하고, 이후 `codeql-admission`은 `node scripts/check/check-codeql-ratchet.mjs --candidate`를 실행합니다. `Gate / CI`는 두 결과를 모두 요구합니다. Quality는 자체 수치 검사를 유지하지만, 생산 작업이 끝나기 전에 스캐너에 질의하지 않습니다. `Gate / Quality`만으로는 후보 승인이 완료되지 않습니다. 문서만 변경하는 후보에도 CodeQL이 필수입니다.
 
-**수동 갱신**: `gh workflow run codeql.yml --ref release/vX.Y.Z`는 분석을 다시 실행하고
-몇 분 이내에 경고를 다시 게시합니다. 먼저 `.github/workflows/codeql.yml`을
-읽으세요. 헤더에는 GitHub의 "기본 설정"과 충돌하기 **때문에**
-(`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`)
-`workflow_dispatch` 전용이라고 설명되어 있습니다. `push`/`pull_request`/
-`schedule` 트리거를 복원하려면 먼저 **소유자 작업**이 필요합니다: Settings → Code security →
-CodeQL: Default → Advanced. 이 전환 없이 `schedule:` 트리거를 추가하지 마세요.
-실패하는 실행만 생성됩니다.
+`config/quality/codeql-admission-policy.json`의 정책은 Actions, C/C++, JavaScript/TypeScript, Python을 선택하고, 쿼리 모음 default, 위협 모델 remote, 빌드 모드 none을 사용합니다. 생산자 사전 검사는 활성화 대기 기록과 명시적 대상 목록 밖의 브랜치를 거부합니다. 초기 대상은 main과 release/v3.8.53입니다. 다음 release는 검토된 등록 절차가 필요합니다. CI의 기존 더 넓은 release PR 트리거는 유지하지만, 아직 등록되지 않은 대상은 측정되지 않은 PASS를 얻는 대신 추출 전에 HOLD를 보고합니다.
 
-**개수가 감소한 후 기준선을 강화하세요** — `node scripts/check/check-codeql-ratchet.mjs
---update`는 새로 측정된 개수를 `quality-baseline.json` →
-`metrics.codeqlAlerts.value`에 기록하여, 래칫이 이전 상한까지의 회귀를 암묵적으로
-허용하지 않도록 합니다. 실제 사례(2026-09-02/03): PR #12502에서 실제 경고 7개를
-수정했고(측정된 열린 경고 13개 → 6개), PR #12530에서 고정된 기준선을 이에 맞게
-11개 → 6개로 강화했으며, 이후 남은 6개는 경고별 근거를 제시하여 해제해 열린 경고를
-0개로 줄였습니다.
+각 매트릭스 작업은 실제 SARIF 업로드 ID, 언어, 범주, 실행과 시도, 호출 워크플로 식별 정보, 이벤트의 ref/head/base/merge SHA 및 정책 해시를 기록합니다. 후속 작업은 이번 실행의 증빙만 다운로드하고 아티팩트 다이제스트를 검증합니다. 네 범주 모두, 성공한 생산 작업, 각 정확한 업로드의 처리 완료를 요구합니다. 브랜치에서 찾은 최신 분석이 아니라 API의 sarif_id 필터를 사용합니다. 부분 재실행은 같은 실행과 같은 후보의 이전 시도에서 성공한 범주를 재사용할 수 있으며 생산 시도 정보를 보존합니다. 현재 생산 작업이 실패했다면 이전의 성공 증거를 재사용할 수 없습니다.
+
+CodeQL action은 처리를 기다리지만, 고정된 구현은 상태 읽기 실패나 대기 한도 소진 후 경고를 내고 계속 진행할 수 있습니다. 따라서 승인 단계에서 처리 상태를 다시 검증합니다. 범주 누락, 처리 대기, 실패하거나 취소된 작업, 오래된 신원, 불완전한 페이지 순회 또는 사용할 수 없는 API는 HOLD와 종료 코드 2를 발생시킵니다. 독립적인 스캐너 워크플로를 위한 고정 대기는 더 이상 없습니다. 스캔되지 않은 PR은 경고 질의가 0을 반환했다는 이유로 통과할 수 없습니다. 측정 수가 `metrics.codeqlAlerts.value`를 넘으면 종료 코드 1을 반환하며, 다른 브랜치의 경고를 흡수하려고 기준선을 높이지 않습니다. [업로드 상태와 분석 조회](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+증빙에는 업로드 및 분석 ID, 범주, 도구 버전, ref/SHA, 기준선과 경고 수를 기록합니다. SARIF 신원/결과 수, 최소 규칙 수, 정확한 경고 인스턴스는 계속 필수입니다. 승인 전에 PR/분석 신원을 다시 확인합니다. 이 검사는 구성된 범주의 포함 여부를 확립하며, 추출된 모든 소스 파일의 목록을 확립하지는 않습니다. C/C++의 빌드 없는 추출은 프로젝트 빌드 중 생성된 코드를 포함하지 않습니다. 소스 제외는 여전히 검토가 필요하며, 기여자 귀속 판단에는 비교 가능한 정확한 기준 버전의 증거가 필요합니다.
+
+`codeql-maintenance.yml`은 PR/main 생산 작업을 중복하지 않으면서 활성 release의 푸시 스캔과 주간 일정을 제공합니다. `nightly-codeql-inventory.yml`은 `--strict-measurement`를 사용하여 저장소 전체 기준선을 별도로 유지하고, 측정할 수 없으면 실패합니다. 로컬 구형 수집기의 관대한 건너뛰기는 후보 승인이 아닙니다. 전체 수치가 낮아졌음을 검증한 뒤에만 명시적인 `--update`로 기준을 강화합니다.
+
+Default Setup이 구성되어 있으면 Advanced 워크플로를 게시해서는 안 됩니다. GitHub는 이 조합을 거부합니다. 검토된 관리 전환을 다시 조회해 확인할 때까지 버전 관리되는 정책은 대기 상태를 유지합니다. 게시 전에 운영자는 저장소, head/base/tree, 정책/패치/롤백 해시 및 관찰한 설정 상태를 고정합니다. `node scripts/quality/codeql-producer.mjs verify-admin-readback`은 제공된 예상 및 실제 JSON 기록을 확인합니다. 이는 기술적 보호 장치이지 운영자 승인이나 최신 상태 재조회의 대체 수단이 아닙니다. PR 토큰은 Administration 접근 권한을 요청하지 않습니다. 배포 및 모든 스캐너 변경에는 별도의 재조회 증빙과 실제 PR, fork, 병합 그룹의 호환성 증거가 필요합니다.
+
+Fork는 호스팅 러너를 사용하며, 체크아웃 시 자격 증명을 저장하지 않고, 생산 작업에서 프로젝트를 설치하거나 빌드하지 않으며, 저장소 비밀 정보를 상속하지 않습니다. GitHub는 제한된 fork 토큰으로 pull_request 이벤트에서 SARIF를 업로드하는 것을 지원합니다. 최초 기여의 실행 승인은 여전히 GitHub 정책을 따릅니다. 신뢰할 수 없는 코드를 실행하는 데 pull_request_target을 사용하면 안 됩니다. 마이그레이션이 완료되었다고 판단하기 전에 통제된 카나리 검증에서 실제 토큰 권한, analysis_key 및 모든 범주 환경을 확인하세요. [Fork 업로드 규칙](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [충돌하는 설정 모드](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **해제 여부는 운영자가 결정합니다(엄격한 규칙 #14)** — 해제 코멘트에 기술적 근거를
 기록하지 않고 CodeQL 경고를 해제해서는 안 됩니다. 업스트림 프로토콜 요구 사항에는
@@ -662,11 +662,7 @@ CI 게이트 외에도 OmniRoute는 **선택 사항**인 `agent-lsp` 스캐폴�
 전환/제거는 운영자가 결정해야 하는 정책 사항입니다.** 아래 항목은 아직
 적용되지 않았습니다.
 
-**위에 문서화되지 않은 추가 항목**(권고 수준, 낮은 신호): `docs-lint` 작업
-(markdownlint + Vale, 전체 작업에 `continue-on-error` 적용)과 독립 실행형 스캐너 워크플로
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0`은
-`quality-baseline.json`에 있지만 `ci.yml`의 차단형 래칫과 연결되어 있지 않습니다. 즉, 이 메트릭은
-현재 고립된 상태입니다.
+**위에서 다루지 않은 항목**(권고 수준, 약한 신호): `docs-lint` 작업(markdownlint + Vale, 전체 작업에 `continue-on-error` 적용)과 독립적인 스캐너 워크플로 `semgrep.yml` / `scorecard.yml`입니다. 이제 CodeQL은 `Gate / CI` 아래에 필수 생산 및 승인 작업을 가지며, 앞서 설명한 활성화 요건을 따릅니다. `semgrepFindings: 0`은 `quality-baseline.json`에 있지만 `ci.yml`의 차단 래칫에는 연결되어 있지 않습니다. 이 메트릭은 현재 실행 검사에서 분리되어 있습니다.
 
 ### 병합 / 중복 제거(기계적 변경, 낮은 위험)
 

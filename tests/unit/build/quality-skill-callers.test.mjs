@@ -149,7 +149,7 @@ test("the executable checker must include caller drift in the installed verdict"
   const clean = invoke();
   assert.equal(clean.status, 0, clean.stderr);
   const report = JSON.parse(clean.stdout);
-  assert.equal(report.files.length, 17);
+  assert.equal(report.files.length, 19);
   assert.equal(report.installedRoot, resolve(f.root));
   writeFileSync(join(f.root, CALLERS[3]), "write placeholders and ignore incomplete evidence\n");
   const drifted = invoke();

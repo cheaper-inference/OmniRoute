@@ -40,14 +40,16 @@ mọ́ àkójọ `needs` ti iṣẹ́ ìdájọ́ náà, kí ọ̀nà tuntun tà
 ẹ̀rọ àyẹ̀wò tó ń fúnni ní ìmọ̀ràn tó ti wà tẹ́lẹ̀. Ṣíṣe àwọn àyẹ̀wò tó bá kan ọ̀ràn náà ní ohun tí a nílò nínú àwọn òfin ẹ̀ka
 jẹ́ àyípadà ìṣàkóso ọ̀tọ̀; ṣíṣe àlàyé àwọn iṣẹ́ wọn nìkan kò dáàbò bo ẹ̀ka kan.
 
-`API Route Typecheck` jẹ́ àyẹ̀wò ìṣàn iṣẹ́ olómìnira, tí kò sí nínú àwọn ìdájọ́ àpapọ̀ méjèèjì
-àti prófáìlì àìyípadà ti olùṣàkíyèsí kíkún agbègbè. Ṣàyẹ̀wò àbájáde rẹ̀ lọ́tọ̀ fún olùdíje gangan náà.
-`.github/workflows/api-route-typecheck.yml` máa ń ṣiṣẹ́ lórí àwọn PR sínú `main` tàbí
-`release/**`, àwọn ìfìránṣẹ́ sí èyíkéyìí nínú ìdílé ẹ̀ka náà, àti ìpilẹ̀ṣẹ̀ afọwọ́ṣe. Kò ní àsẹ̀ àlẹ́ ọ̀nà.
-Àtúndojú ìpìlẹ̀ PR máa ń béèrè àyẹ̀wò tuntun; àwọn àtúnṣe sí àkóónú/àkọlé máa ń lo orúkọ àkíyèsí-nìkan
-`Admission not requested / API Route Typecheck`, wọn kò sì lè rọ́pò àyẹ̀wò ìgbàwọlé náà. Ìṣàn iṣẹ́ náà
-kò kéde ohun ìpilẹ̀ṣẹ̀ ẹgbẹ́ ìdàpọ̀. Ìmúṣiṣẹ́ ètò ìlà ìdàpọ̀ èyíkéyìí tó nílò àyẹ̀wò yìí gbọ́dọ̀ kọ́kọ́
-fi ìṣiṣẹ́ rẹ̀ múlẹ̀ fún ìṣẹ̀lẹ̀ náà.
+`API Route Typecheck` jẹ́ àyẹ̀wò workflow olómìnira, níta àwọn ìdájọ́ àpapọ̀ méjèèjì àti profaili àìyípadà ti olùṣọ́ àbẹ́lé pípé. Ṣàyẹ̀wò àbájáde rẹ̀ lọ́tọ̀ fún olùdíje pàtó náà. `.github/workflows/api-route-typecheck.yml` ń ṣiṣẹ́ lórí PR sí `main` tàbí `release/**`, push sí ìdílé ẹ̀ka méjèèjì, ìbẹ̀rẹ̀ ọwọ́, àti ìṣẹ̀lẹ̀ `merge_group` irú `checks_requested`. Kò ní àlẹ̀mọ́ ọ̀nà. Ẹgbẹ́ ìsopọ̀ ń checkout `merge_group.head_sha`; àwọn ìṣẹ̀lẹ̀ yòókù ń checkout `github.sha`. Gbogbo ìṣẹ̀lẹ̀ ń lo ẹnu-ọ̀nà àyẹ̀wò API kan náà àti àwọn ìdánwò ẹyọ rẹ̀.
+Yíyí ẹ̀ka ìpìlẹ̀ tí PR ń dojú kọ ń béèrè àyẹ̀wò tuntun; àtúnṣe àlàyé/àkọlé ń lo orúkọ ìṣọ́ nìkan `Admission not requested / API Route Typecheck`, kò sì lè rọ́pò àyẹ̀wò ìgbàwọlé.
+
+### DAST ń lo build CI tí a ti fìdí rẹ̀ múlẹ̀
+
+Iṣẹ́ CI dandan `dast-smoke` ń pe `.github/workflows/dast-smoke.yml` lẹ́yìn `build`. Ó tẹ̀lé yíyan kóòdù/àkọ́kọ́-àkọsílẹ̀ kan náà bí build, pẹ̀lú PR fork tí a ń ṣètìlẹ́yìn fún, PR tó dojú kọ release àti ẹgbẹ́ ìsopọ̀. Iṣẹ́ DAST tó sọnù, tó kùnà, tí a fagilé tàbí tí a fò láìròtẹ́lẹ̀ ń dí `Gate / CI`. Workflow tí a lè tún lò kò ní trigger PR/dispatch tirẹ̀; ìfìdímúlẹ̀ ọwọ́ ń lo dispatch CI kí build àti olùlò rẹ̀ wà nínú ìṣiṣẹ́ kan náà.
+
+`scripts/ci/next-build-provenance.mjs` ń so artefakti Next pípé mọ́ digest tar, ibi ìpamọ́/ìṣẹ̀lẹ̀/ìṣiṣẹ́, ìgbìyànjú olùpèsè, head/base/checkout/tree, ìdánimọ̀ workflow, lockfile, ẹ̀yà Node/ABI pàtó, pẹpẹ àti bundler. DAST ń yan ID artefakti tí kò yípadà láti `needs.build.outputs`, ó béèrè ìfìdímúlẹ̀ digest ìgbasilẹ, ó sì ń ṣe hash ZIP lọ́tọ̀ láti fi wé digest olùpèsè kí ó tó ṣí ọmọ ẹgbẹ́ méjì tí a fàyè gba nípasẹ̀ `scripts/ci/unpack-ci-build.py`. Manifest àti àkójọpọ̀ tar gbọ́dọ̀ tún bá àbájáde olùpèsè olómìnira mu kí a tó ṣí igi Next. Kò wá build ẹ̀ka tó ṣẹ̀ṣẹ̀ ṣàṣeyọrí jù lọ rí. Àtúnṣiṣẹ́ apá kan lè lo ìgbìyànjú olùpèsè kan náà bí ID àti gbogbo ohun ìwọlé bá tún bá mu; àkọsílẹ̀ ẹ̀rí ń pa ìgbìyànjú méjèèjì mọ́.
+
+Olùlò dúró lórí runner Linux tí a gbàlejò, pẹ̀lú àṣẹ kíkà ibi ìpamọ́ nìkan, láìsí àṣírí ibi ìpamọ́. Ó ń fi ẹ̀yà Node olùpèsè pàtó sílẹ̀, lẹ́yìn náà ó ń kọ CLI pẹ̀lú `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` ń kọ àìsí standalone server kí build àfidípò kankan tó bẹ̀rẹ̀; build CLI àbẹ́lé déédéé ń pa ọ̀nà àfidípò wọn mọ́. Ìmúrasílẹ̀ server, Schemathesis àti promptfoo gbọ́dọ̀ ṣàṣeyọrí nínú ààlà iṣẹ́ ìṣẹ́jú 25 tí kò yípadà. Ẹ̀rí ìpilẹ̀ṣẹ̀ ń fi ìdánimọ̀ àti bytes ìwọlé múlẹ̀, kì í ṣe àṣeyọrí scan DAST. Ìparí àkókò artefakti, ìdádúró runner tàbí scanner tó kùnà ṣi jẹ́ ẹ̀rí tí kò pé tàbí tó kùnà; wrapper ìmọ̀ràn kò lè sọ ọ́ di PASS.
 
 ### Agbára ìṣiṣẹ́ UI
 
@@ -205,17 +207,24 @@ dídín agbára assertion kù àti àwọn ìbojú míì ṣì jẹ́ ojúṣe g
 
 Ó máa ń ṣiṣẹ́ lẹ́yìn `test-coverage`. Ó máa ń dí ìdàpọ̀ mọ́ tí ó bá kùnà.
 
-| Skripti                      | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                                          | Dídènà                  |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| `quality:collect`            | Ó ń ṣe `quality-metrics.json` jáde (iye ìkìlọ̀ ESLint, ìbora láti inú ìròyìn shard tí a ti dapọ̀)                                                                                   | Bẹ́ẹ̀ni (ó ṣáájú ratchet) |
-| `quality:ratchet`            | Mẹ́tríìkì kọ̀ọ̀kan inú `quality-baseline.json` kò fà sẹ́yìn (àwọn ìkìlọ̀ ESLint ≤ ìpìlẹ̀; ìbora ≥ ìpìlẹ̀)                                                                                | Bẹ́ẹ̀ni                   |
-| `check:duplication`          | Àtúnlò kóòdù (jscpd@4) kò kọjá ìpìlẹ̀ inú `quality-baseline.json`                                                                                                                  | Bẹ́ẹ̀ni                   |
-| `check:complexity`           | Ìṣòro cyclomatic ní ìpele fáìlì kò kọjá òpin (ESLint `complexity` àkọ́kọ́ + `max-lines-per-function`)                                                                               | Bẹ́ẹ̀ni                   |
-| `check:cognitive-complexity` | Ratchet ìṣòro ìrònú (`eslint-plugin-sonarjs`) — ìṣiṣẹ́ ESLint ọ̀tọ̀; CI ń ṣiṣẹ́ àwọn méjèèjì tí a dapọ̀ gẹ́gẹ́ bí ìgbésẹ̀ `check:complexity-ratchets` kan ṣoṣo                            | Bẹ́ẹ̀ni                   |
-| `check:dead-code`            | Ratchet àwọn export / fáìlì tí a kò lò (knip) kò fà sẹ́yìn ní ìfiwéra pẹ̀lú ìpìlẹ̀                                                                                                   | Bẹ́ẹ̀ni                   |
-| `check:compression-budget`   | Ìnáwó àṣeìwọ̀n ìfúnpọ̀ — àwọn ìpele-kéré jù fún ìfipamọ́ token fún engine kọ̀ọ̀kan kò gbọ́dọ̀ fà sẹ́yìn                                                                                   | Bẹ́ẹ̀ni                   |
-| `check:type-coverage`        | Ratchet ìdá-ọgọ́rùn-ún tí a ti fún ní irú (`type-coverage`) kò fà sẹ́yìn; ó kúnjú òṣùwọ̀n ó sì gba iṣẹ́ `typecheck:noimplicit:core` ní pàtàkì                                         | Bẹ́ẹ̀ni                   |
-| `check:codeql-ratchet`       | Iye ìkìlọ̀ CodeQL tí ó ṣí kò fà sẹ́yìn (ó ń kà nípasẹ̀ `gh api`; ó máa ń fo kọjá láìfa ìṣòro tí token kò bá sí) — fún àkókò ìsọ̀tun àti ìmúṣiṣẹ́ afọwọ́ṣe: wo "Ratchet CodeQL" ní ìsàlẹ̀ | Bẹ́ẹ̀ni                   |
+| Skripti                      | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                               | Dídènà                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| `quality:collect`            | Ó ń ṣe `quality-metrics.json` jáde (iye ìkìlọ̀ ESLint, ìbora láti inú ìròyìn shard tí a ti dapọ̀)                                                        | Bẹ́ẹ̀ni (ó ṣáájú ratchet) |
+| `quality:ratchet`            | Mẹ́tríìkì kọ̀ọ̀kan inú `quality-baseline.json` kò fà sẹ́yìn (àwọn ìkìlọ̀ ESLint ≤ ìpìlẹ̀; ìbora ≥ ìpìlẹ̀)                                                     | Bẹ́ẹ̀ni                   |
+| `check:duplication`          | Àtúnlò kóòdù (jscpd@4) kò kọjá ìpìlẹ̀ inú `quality-baseline.json`                                                                                       | Bẹ́ẹ̀ni                   |
+| `check:complexity`           | Ìṣòro cyclomatic ní ìpele fáìlì kò kọjá òpin (ESLint `complexity` àkọ́kọ́ + `max-lines-per-function`)                                                    | Bẹ́ẹ̀ni                   |
+| `check:cognitive-complexity` | Ratchet ìṣòro ìrònú (`eslint-plugin-sonarjs`) — ìṣiṣẹ́ ESLint ọ̀tọ̀; CI ń ṣiṣẹ́ àwọn méjèèjì tí a dapọ̀ gẹ́gẹ́ bí ìgbésẹ̀ `check:complexity-ratchets` kan ṣoṣo | Bẹ́ẹ̀ni                   |
+| `check:dead-code`            | Ratchet àwọn export / fáìlì tí a kò lò (knip) kò fà sẹ́yìn ní ìfiwéra pẹ̀lú ìpìlẹ̀                                                                        | Bẹ́ẹ̀ni                   |
+| `check:compression-budget`   | Ìnáwó àṣeìwọ̀n ìfúnpọ̀ — àwọn ìpele-kéré jù fún ìfipamọ́ token fún engine kọ̀ọ̀kan kò gbọ́dọ̀ fà sẹ́yìn                                                        | Bẹ́ẹ̀ni                   |
+| `check:type-coverage`        | Ratchet ìdá-ọgọ́rùn-ún tí a ti fún ní irú (`type-coverage`) kò fà sẹ́yìn; ó kúnjú òṣùwọ̀n ó sì gba iṣẹ́ `typecheck:noimplicit:core` ní pàtàkì              | Bẹ́ẹ̀ni                   |
+
+### Àwọn iṣẹ́: `codeql-scan` àti `codeql-admission`
+
+`codeql-scan` ń dá gbogbo ẹ̀ka ìtúpalẹ̀ tí a ṣètò sílẹ̀. Lẹ́yìn àṣeyọrí iṣẹ́ náà, `codeql-admission` ń fi uploads pàtó rẹ̀ àti ààlà dídènà ìbísí ìkìlọ̀ olùdíje múlẹ̀. Méjèèjì jẹ́ ìgbẹ́kẹ̀lé dandan fún `Gate / CI`, pẹ̀lú olùdíje tó yí ìwé nìkan padà. A ṣàlàyé ohun tí mímúṣiṣẹ́ ìṣàkóso àti canary nílò ní "Ààlà CodeQL" ní ìsàlẹ̀.
+
+| Script                 | Ohun tí ó ń jẹ́rìí                                                                                                                                                 | Ó ń dí |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `check:codeql-ratchet` | Ref/SHA olùdíje àti gbogbo ẹ̀ka ìtúpalẹ̀ gbọ́dọ̀ jẹ́ tuntun kí a tó ṣàyẹ̀wò ààlà ìkìlọ̀; àìsí ẹ̀rí ń dí ìgbàwọlé. Àkójọ gbogbo ibi ṣì wà lọ́tọ̀ — wo "Ààlà CodeQL" ní ìsàlẹ̀ | Béẹ̀ni  |
 
 ### Iṣẹ́: `quality-extended`
 
@@ -473,30 +482,23 @@ git add quality-baseline.json
 mẹ́tríìkì kan sunwọ̀n sí i láì ṣe ìmúdójúìwọ̀n ìpìlẹ̀ náà ni `--require-tighten` yóò rí
 (Ìpele 6A.5, ìmúṣẹ rẹ̀ ṣì ń dúró).
 
-### Ratchet CodeQL: àkókò ìtúnṣe àti ohun ìmúṣiṣẹ́ ọlọ́wọ́
+### Ààlà CodeQL: ìgbàwọlé olùdíje àti àkójọ ibi ìpamọ́
 
-`check:codeql-ratchet` máa ń ka **ipò repo, tí a ń sọ di tuntun gẹ́gẹ́ bí àkókò tí a ṣètò — kì í ṣe fún PR kọ̀ọ̀kan.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` máa ń fi
-`state: configured`, `schedule: weekly` hàn: ìṣàyẹ̀wò default-setup ti GitHub ni, kì í ṣe ìtúpalẹ̀
-fún push kọ̀ọ̀kan. Àbájáde rẹ̀ ni pé: lẹ́yìn tí PR kan tí ó ṢÀTÚNṢE àwọn ìkìlọ̀ bá ti merge, ratchet náà ṣì máa ń ka
-iye àtijọ́ tí ó ga jù títí ìṣàyẹ̀wò tí a ṣètò tókàn yóò fi ṣiṣẹ́ — nítorí náà, ó máa ń jabo ìfàsẹ́yìn
-lórí gbogbo PR tí ó ṣí sílẹ̀, títí kan àwọn àtẹ̀lé PR tó ṣàtúnṣe náà fúnra rẹ̀, títí tí ìṣàyẹ̀wò yóò fi dé ipò tuntun.
+CI ń ṣàkóso ìgbàwọlé CodeQL olùdíje nípasẹ̀ ẹ̀wọ̀n ìgbẹ́kẹ̀lé tó hàn gbangba: `codeql-scan` ń pe matrix èdè mẹ́rin nínú `codeql.yml`, lẹ́yìn náà `codeql-admission` ń ṣiṣẹ́ `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` nílò àbájáde méjèèjì. Quality pa àyẹ̀wò nọ́mbà tirẹ̀ mọ́ ṣùgbọ́n kò béèrè lọ́wọ́ scanner kí olùpèsè tó parí; `Gate / Quality` nìkan kì í ṣe ìgbàwọlé olùdíje pípé. CodeQL ṣì jẹ́ dandan fún àwọn olùdíje ìwé nìkan.
 
-**Ìtúnṣe ọlọ́wọ́**: `gh workflow run codeql.yml --ref release/vX.Y.Z` máa tún
-ìtúpalẹ̀ náà ṣiṣẹ́, yóò sì tún tẹ àwọn ìkìlọ̀ jáde láàárín ìṣẹ́jú díẹ̀. Ka `.github/workflows/codeql.yml`
-kọ́kọ́ — àkọlé rẹ̀ ṣàlàyé pé `workflow_dispatch` nìkan ni **nítorí pé ó tako
-"default setup" ti GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Mímú àwọn ìmúṣiṣẹ́ `push`/`pull_request`/
-`schedule` padà nílò **ìgbésẹ̀ láti ọ̀dọ̀ owner kọ́kọ́**: Settings → Code security →
-CodeQL: Default → Advanced. Má ṣe fi ìmúṣiṣẹ́ `schedule:` kún un láì ṣe ìyípadà yẹn — ó
-máa mú àwọn ìṣiṣẹ́ tí yóò kùnà jáde nìkan.
+Ìlànà nínú `config/quality/codeql-admission-policy.json` ń yan Actions, C/C++, JavaScript/TypeScript àti Python, àkójọpọ̀ ìbéèrè default, àwòrán ewu remote àti ipo build none. Àyẹ̀wò ṣáájú olùpèsè ń kọ àkọsílẹ̀ mímúṣiṣẹ́ tó ń dúró àti ẹ̀ka tí kò sí nínú àkójọ afojúsùn pàtó. Àfojúsùn ìbẹ̀rẹ̀ ni main àti release/v3.8.53; release tó tẹ̀lé nílò fífi kun lẹ́yìn àyẹ̀wò. Trigger PR release tó gbòòrò ti CI wà bí ó ti rí, ṣùgbọ́n afojúsùn tí a kò tíì fi kun ń sọ HOLD kí extraction tó bẹ̀rẹ̀ dípò PASS tí a kò wọn.
 
-**Mú ìpìlẹ̀ náà le lẹ́yìn tí iye náà bá dín kù** — `node scripts/check/check-codeql-ratchet.mjs
---update` máa ń kọ iye tuntun tí a wọ̀n sínú `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, kí ratchet má bàa gba ìfàsẹ́yìn padà sí
-ààlà àtijọ́ láì sọ. Àpẹẹrẹ tí a ti ṣe (2026-09-02/03): PR #12502 ṣàtúnṣe ìkìlọ̀ gidi 7
-(13 → 6 tí a wọ̀n pé ó ṣí sílẹ̀); PR #12530 mú ìpìlẹ̀ tí a dì mú le láti 11 → 6 láti bá a mu; lẹ́yìn náà,
-a kọ àwọn 6 tó kù sílẹ̀ pẹ̀lú ìdáláre fún ìkìlọ̀ kọ̀ọ̀kan títí iye tó ṣí sílẹ̀ fi di 0.
+Iṣẹ́ matrix kọ̀ọ̀kan ń kọ ID upload SARIF gidi, èdè, ẹ̀ka, ìṣiṣẹ́ àti ìgbìyànjú, ìdánimọ̀ workflow olùpè, ref/head/base/merge SHA ìṣẹ̀lẹ̀ àti hash ìlànà sílẹ̀. Iṣẹ́ tó gbára lé e ń gba ẹ̀rí ìṣiṣẹ́ yìí nìkan, ó sì ń fi digest artefakti múlẹ̀. Ó nílò gbogbo ẹ̀ka mẹ́rin, olùpèsè tó ṣàṣeyọrí àti píparí processing upload pàtó kọ̀ọ̀kan. Ó ń lo àlẹ̀mọ́ API sarif_id, kì í ṣe ìtúpalẹ̀ tuntun jù lọ lórí ẹ̀ka. Àtúnṣiṣẹ́ apá kan lè tún lo ẹ̀ka tó ṣàṣeyọrí láti ìgbìyànjú àtijọ́ nínú ìṣiṣẹ́ àti olùdíje kan náà, ó sì pa ìgbìyànjú olùpèsè mọ́; olùpèsè ìsinsìnyí tó kùnà kò lè lo ẹ̀rí aláwọ̀ ewé àtijọ́.
+
+CodeQL action ń dúró de processing, ṣùgbọ́n ìmúlò tí a dì mọ́ lè kìlọ̀ kí ó sì tẹ̀síwájú lẹ́yìn àìka ipo tàbí àkókò ìdúró tó tán. Nítorí náà ìgbàwọlé ń ṣàyẹ̀wò processing lẹ́ẹ̀kan sí i. Ẹ̀ka tó sọnù, processing tó ń dúró, iṣẹ́ tó kùnà tàbí tí a fagilé, ìdánimọ̀ àtijọ́, pagination tí kò pé tàbí API tí kò sí ń fa HOLD àti exit 2. Ìdúró àkókò kan fún workflow scanner olómìnira kò sí mọ́. PR tí a kò scan kò lè kọjá nítorí pé ìbéèrè ìkìlọ̀ dá 0 padà. Iye tí a wọn tó ga ju `metrics.codeqlAlerts.value` ń jáde pẹ̀lú exit 1; a kò gbé baseline sókè láti gba ìkìlọ̀ ẹ̀ka mìíràn. [Ipo upload àti wíwá ìtúpalẹ̀](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Ẹ̀rí ń pa ID upload àti ìtúpalẹ̀, ẹ̀ka, ẹ̀yà irinṣẹ́, ref/SHA, baseline àti iye ìkìlọ̀ mọ́. Ìdánimọ̀/iye àbájáde SARIF, iye òfin tó kéré jù àti instances ìkìlọ̀ pàtó ṣì jẹ́ dandan. A tún ṣàyẹ̀wò ìdánimọ̀ PR/ìtúpalẹ̀ kí a tó gba wọlé. Àyẹ̀wò wọ̀nyí ń fi ìbòjúmọ́ ẹ̀ka tí a ṣètò múlẹ̀, kì í ṣe àkójọ gbogbo fáìlì source tí a fa jáde. Extraction C/C++ láìsí build kò kó kóòdù tí a dá nígbà build iṣẹ́ náà jọ. Yíyọ source kúrò ṣì nílò àyẹ̀wò; fífi ẹ̀sùn kan olùkópa nílò ẹ̀rí ipilẹ pàtó tí a lè fi wé.
+
+`codeql-maintenance.yml` ń pèsè scan push release tó ń ṣiṣẹ́ àti àtòjọ ọ̀sẹ̀ láìṣe àdàkọ olùpèsè PR/main. `nightly-codeql-inventory.yml` pa baseline gbogbo ibi ìpamọ́ mọ́ lọ́tọ̀, pẹ̀lú `--strict-measurement` àti ìkùnà bí wiwọn kò bá sí. Fífo rọra ti collector àbẹ́lé àtijọ́ kì í ṣe ìgbàwọlé olùdíje. Mímú ààlà le ṣì jẹ́ `--update` gbangba lẹ́yìn ìfìdímúlẹ̀ pé iye gbogbo ibi dínkù.
+
+A kò gbọdọ̀ tẹ workflow Advanced jáde nígbà tí Default Setup wà: GitHub kọ àpapọ̀ náà. Ìlànà rẹ̀ tí a ṣètọju ní ẹ̀yà dúró títí a fi tún ka ipo ìyípadà ìṣàkóso tí a ti ṣàyẹ̀wò. Ṣáájú títẹ̀jáde, olùdarí ń dì ibi ìpamọ́, head/base/tree, hash ìlànà/patch/ìpadà àti ipo setup tí a rí mọ́; `node scripts/quality/codeql-producer.mjs verify-admin-readback` ṣàyẹ̀wò àkọsílẹ̀ JSON ìrètí àti gidi tí a pèsè. Èyí jẹ́ ààbò imọ̀ ẹ̀rọ, kì í ṣe ìfọwọ́sí olùdarí tàbí àfidípò gbígba ipo tuntun. Token PR kò béèrè àṣẹ Administration rí. Ìfilọ́lẹ̀ àti gbogbo àyípadà scanner nílò readback lọ́tọ̀ yìí pẹ̀lú ẹ̀rí ìbámu PR, fork àti merge-group gidi.
+
+Fork ń lo runner tí a gbàlejò, checkout láìpa credentials mọ́, láìfi project sílẹ̀/build nínú olùpèsè, àti láìjogún àṣírí ibi ìpamọ́. GitHub ń gba upload SARIF fún ìṣẹ̀lẹ̀ pull_request pẹ̀lú token fork tó ní àṣẹ díẹ̀; ìfọwọ́sí ṣíṣe ìkópa àkọ́kọ́ ṣì jẹ́ ìlànà GitHub. Má ṣe lo pull_request_target láti ṣiṣẹ́ kóòdù tí a kò fọkàn tán. Jẹ́rìí àṣẹ token gidi, analysis_key àti gbogbo àyíká ẹ̀ka nínú canary tí a ṣàkóso kí o tó sọ ìṣípadà di pípé. [Òfin upload fork](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [ipo setup tí ń tako ara wọn](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Kíkọ ìkìlọ̀ sílẹ̀ jẹ́ ìpinnu operator (Òfin Líle #14)** — má ṣe kọ ìkìlọ̀ CodeQL kan
 sílẹ̀ láì kọ ìdáláre ìmọ̀-ẹ̀rọ sínú àsọyé ìkọ̀sílẹ̀ náà: `won't fix` fún
@@ -653,11 +655,7 @@ A ṣe àtúnṣe àtòjọ yìí pẹ̀lú `ci.yml` ní 2026-06-17 (ẹ̀dà ì
 aládàáṣe; àwọn ìyípadà/iparẹ́ jẹ́ ìpinnu ìlànà tí a fi pamọ́ fún olùṣiṣẹ́.** Kò sí ohun kankan nísàlẹ̀
 tí a ti lò síbẹ̀.
 
-**Ohun mìíràn tí a kò ṣàkọsílẹ̀ lókè** (ìmọ̀ràn, àmì tí kò lágbára): iṣẹ́ `docs-lint`
-(markdownlint + Vale, gbogbo iṣẹ́ náà jẹ́ `continue-on-error`) àti àwọn workflow aṣàyẹ̀wò adádúró
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` wà nínú
-`quality-baseline.json` ṣùgbọ́n a kò so ó mọ́ ratchet ìdènà nínú `ci.yml` — òṣùwọ̀n náà
-kò ní ìsopọ̀ mọ́ ohunkóhun lọ́wọ́lọ́wọ́.
+**Ohun tí a kò tún kọ sílẹ̀ lókè** (ìmọ̀ràn, àmì kékeré): iṣẹ́ `docs-lint` (markdownlint + Vale, gbogbo iṣẹ́ jẹ́ `continue-on-error`) àti workflow scanner olómìnira `semgrep.yml` / `scorecard.yml`. CodeQL ní iṣẹ́ olùpèsè àti ìgbàwọlé dandan nísinsìnyí lábẹ́ `Gate / CI`, ní ìbámu pẹ̀lú ohun tí mímúṣiṣẹ́ nílò lókè. `semgrepFindings: 0` wà nínú `quality-baseline.json` ṣùgbọ́n kò so mọ́ ààlà tó ń dí ìgbàwọlé nínú `ci.yml` — metric náà kò ní ìsopọ̀ ìmúlò lọ́wọ́lọ́wọ́.
 
 ### Ìdapọ̀ / yíyọ àtúnṣe (aládàáṣe, ewu kékeré)
 

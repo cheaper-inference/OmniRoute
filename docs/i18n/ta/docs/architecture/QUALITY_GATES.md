@@ -38,7 +38,16 @@ checkout/event SHA பொருந்தாமையை CLI நிராகர�
 பணிப்பாய்வுச் சோதனைகள் கொள்கை உறுப்பினர்தன்மையைத் தீர்ப்புப் பணியின் `needs` பட்டியலுடன் பிணைக்கின்றன.
 ரசீதுகள் அவற்றின் சொந்தப் பணிப்பாய்வை மட்டுமே உள்ளடக்குகின்றன; வெளியீடு, பயன்பாட்டுநிறுவல் அல்லது ஏற்கனவே உள்ள ஆலோசனை ஸ்கேனரின் உள்செயல்பாடுகளை அல்ல. பொருந்தக்கூடிய சரிபார்ப்புகளை கிளை விதிகளில் கட்டாயமாக்குவது ஒரு தனியான நிர்வாக மாற்றமாகும்; அவற்றின் பணிகளை வரையறுப்பது மட்டுமே ஒரு கிளையைப் பாதுகாக்காது.
 
-`API Route Typecheck` என்பது இரண்டு ஒருங்கிணைந்த முடிவுகளுக்கும் உள்ளூர் முழுமையான கண்காணிப்பாளரின் நிலையான சுயவிவரத்திற்கும் வெளியே உள்ள ஒரு சுயாதீன பணிப்பாய்வு சரிபார்ப்பாகும். துல்லியமான வேட்புநிலைக்காக அதன் முடிவைத் தனியாக ஆய்வு செய்யவும். `.github/workflows/api-route-typecheck.yml` ஆனது `main` அல்லது `release/**` கிளைகளுக்கான PR-கள், இந்த இரு கிளைக் குடும்பங்களில் ஏதேனும் ஒன்றிற்கான push-கள் மற்றும் கைமுறை இயக்கம் ஆகியவற்றில் இயங்குகிறது. இதில் பாதை வடிகட்டி இல்லை. PR அடிப்படைக் கிளையை மாற்றுவது ஒரு புதிய சரிபார்ப்பைக் கோருகிறது; body/title திருத்தங்கள் கண்காணிப்புக்கு மட்டுமான `Admission not requested / API Route Typecheck` என்ற பெயரைப் பயன்படுத்துகின்றன, மேலும் அவை அனுமதிச் சரிபார்ப்பை மாற்றியமைக்க முடியாது. இந்தப் பணிப்பாய்வு merge-group தூண்டியை அறிவிக்கவில்லை. இந்தச் சரிபார்ப்பைக் கட்டாயமாக்கும் எந்தவொரு merge-queue அறிமுகமும், முதலில் அந்த நிகழ்விற்காக இது செயல்படுவதை நிறுவ வேண்டும்.
+`API Route Typecheck` என்பது இரண்டு ஒருங்கிணைந்த தீர்ப்புகளுக்கும் உள்ளூர் முழு observer-இன் நிலையான profile-க்கும் வெளியே இயங்கும் தனித்த workflow சோதனை. குறிப்பிட்ட candidate-க்கான அதன் முடிவைத் தனியாக ஆய்வு செய்ய வேண்டும். `.github/workflows/api-route-typecheck.yml`, `main` அல்லது `release/**` நோக்கிய PR-களிலும், இந்த இரண்டு branch வகைகளுக்கான push-களிலும், கையால் தொடங்கும்போதும், `checks_requested` வகையிலான `merge_group` நிகழ்வுகளிலும் இயங்குகிறது. இதில் path filter இல்லை. Merge group-கள் `merge_group.head_sha`-ஐ checkout செய்கின்றன; மற்ற நிகழ்வுகள் `github.sha`-ஐ checkout செய்கின்றன. எல்லா நிகழ்வுகளும் ஒரே API diagnostic gate-யும் gate unit test-களையும் பயன்படுத்துகின்றன.
+PR-இன் base மாற்றப்படும்போது புதிய சோதனை கோரப்படும்; body/title திருத்தங்கள், கவனிப்புக்கு மட்டுமான `Admission not requested / API Route Typecheck` என்ற பெயரைப் பயன்படுத்துகின்றன. அவை admission சோதனைக்கு மாற்றாக அமைய முடியாது.
+
+### சரிபார்க்கப்பட்ட CI build-ஐ DAST பயன்படுத்துகிறது
+
+கட்டாயமான `dast-smoke` CI job, `build`-க்குப் பிறகு `.github/workflows/dast-smoke.yml`-ஐ அழைக்கிறது. ஆதரிக்கப்படும் fork PR-கள், release-ஐ இலக்காகக் கொண்ட PR-கள் மற்றும் merge group-கள் உட்பட, build பயன்படுத்தும் அதே code/draft தேர்வை இது பின்பற்றுகிறது. DAST job இல்லாவிட்டாலும், தோல்வியடைந்தாலும், ரத்துசெய்யப்பட்டாலும் அல்லது எதிர்பாராத விதமாகத் தவிர்க்கப்பட்டாலும் `Gate / CI` தடுக்கப்படும். மீண்டும் பயன்படுத்தக்கூடிய இந்த workflow-க்கு தனியான PR/dispatch trigger இல்லை; கையால் செய்யும் validation, CI-இன் dispatch-ஐப் பயன்படுத்துகிறது. இதனால் build-உம் consumer-உம் ஒரே run-இல் இருக்கும்.
+
+`scripts/ci/next-build-provenance.mjs`, முழுமையான Next artifact-ஐ அதன் tar digest, repository/event/run, producer attempt, head/base/checkout/tree, workflow அடையாளங்கள், lockfile, துல்லியமான Node version/ABI, platform மற்றும் bundler ஆகியவற்றுடன் உறுதிப்படுத்துகிறது. DAST, `needs.build.outputs`-இலிருந்து மாற்ற முடியாத artifact ID-ஐத் தேர்ந்தெடுத்து, download digest சரிபார்ப்பைக் கட்டாயப்படுத்துகிறது. அனுமதிப்பட்டியலில் உள்ள அதன் இரண்டு உறுப்புகளை `scripts/ci/unpack-ci-build.py` வழியாகப் பிரித்தெடுக்கும் முன், ZIP-இன் hash-ஐத் தனியாகக் கணக்கிட்டு producer digest-உடன் ஒப்பிடுகிறது. Next tree-ஐப் பிரித்தெடுப்பதற்கு முன் manifest-உம் tar archive-உம் தனித்த producer output-களுடன் பொருந்த வேண்டும். Branch-இன் கடைசியாக வெற்றிபெற்ற build-ஐ இது ஒருபோதும் தேடுவதில்லை. ID-யும் எல்லா input-களும் தொடர்ந்து பொருந்தினால், பகுதியளவு rerun அதே producer attempt-ஐ மீண்டும் பயன்படுத்தலாம்; receipt இரண்டு attempt-களையும் பதிவு செய்கிறது.
+
+Consumer, repository-ஐ வாசிக்க மட்டுமே அனுமதி கொண்டதும் repository secret-கள் இல்லாததுமான hosted Linux runner-இல் இயங்குகிறது. Producer பயன்படுத்திய அதே துல்லியமான Node version-ஐ நிறுவி, `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` உடன் CLI-ஐ உருவாக்குகிறது. எந்த fallback build-க்கும் முன்பாகவே standalone server இல்லாத நிலையை `scripts/build/standaloneInput.mjs` நிராகரிக்கிறது; வழக்கமான உள்ளூர் CLI build-கள் அவற்றின் தற்போதைய fallback-ஐத் தக்கவைத்துள்ளன. Server readiness, Schemathesis மற்றும் promptfoo அனைத்தும் மாற்றப்படாத 25 நிமிட job வரம்புக்குள் வெற்றிபெற வேண்டும். Provenance receipt, input-இன் அடையாளத்தையும் bytes-ஐயும் நிரூபிக்கிறது; DAST scan வெற்றிபெற்றதை அது நிரூபிக்காது. Artifact காலாவதி, runner தடங்கல் அல்லது scanner தோல்வி ஆகியவை முழுமையற்ற அல்லது தோல்வியடைந்த சான்றாகவே இருக்கும்; advisory wrapper மூலம் அவற்றை PASS ஆக மாற்ற முடியாது.
 
 ### UI செயலாக்கத் திறன்
 
@@ -209,17 +218,24 @@ test-ஐக் குறிப்பிட வேண்டும், குற�
 
 `test-coverage`-க்குப் பிறகு இயங்குகிறது. தோல்வியுற்றால் merge செய்வதைத் தடுக்கிறது.
 
-| Script                       | சரிபார்ப்பது                                                                                                                                                                                                                   | தடுக்கும் தன்மை              |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
-| `quality:collect`            | `quality-metrics.json`-ஐ வெளியிடுகிறது (ESLint எச்சரிக்கை எண்ணிக்கை, ஒன்றிணைக்கப்பட்ட shard அறிக்கையிலிருந்து coverage)                                                                                                        | ஆம் (ratchet-க்கு முந்தையது) |
-| `quality:ratchet`            | `quality-baseline.json`-இல் உள்ள ஒவ்வொரு metric-உம் பின்னடையவில்லை (ESLint எச்சரிக்கைகள் ≤ baseline; coverage ≥ baseline)                                                                                                      | ஆம்                          |
-| `check:duplication`          | Code duplication (jscpd@4), `quality-baseline.json`-இல் உள்ள baseline-ஐத் தாண்டவில்லை                                                                                                                                          | ஆம்                          |
-| `check:complexity`           | கோப்பு-நிலை cyclomatic complexity வரம்பைத் தாண்டவில்லை (மைய ESLint `complexity` + `max-lines-per-function`)                                                                                                                    | ஆம்                          |
-| `check:cognitive-complexity` | Cognitive complexity ratchet (`eslint-plugin-sonarjs`) — தனித்த ESLint இயக்கம்; CI இரண்டையும் ஒற்றை `check:complexity-ratchets` படிநிலையாக ஒன்றிணைத்து இயக்குகிறது                                                             | ஆம்                          |
-| `check:dead-code`            | பயன்படுத்தப்படாத exports / files ratchet (knip), baseline-உடன் ஒப்பிடும்போது பின்னடையவில்லை                                                                                                                                    | ஆம்                          |
-| `check:compression-budget`   | Compression benchmark budget — engine-வாரியான token-savings குறைந்தபட்ச அளவுகள் பின்னடையக்கூடாது                                                                                                                               | ஆம்                          |
-| `check:type-coverage`        | Percent-typed ratchet (`type-coverage`) பின்னடையவில்லை; பெருமளவில் `typecheck:noimplicit:core`-ஐ உள்ளடக்குகிறது                                                                                                                | ஆம்                          |
-| `check:codeql-ratchet`       | திறந்த CodeQL alert எண்ணிக்கை பின்னடையவில்லை (`gh api` வழியாகப் படிக்கிறது; token இல்லாவிட்டால் சுமுகமாகத் தவிர்க்கிறது) — புதுப்பிப்பு இடைவெளி மற்றும் கைமுறைத் தூண்டலுக்கு: கீழே உள்ள "CodeQL ratchet" பகுதியைப் பார்க்கவும் | ஆம்                          |
+| Script                       | சரிபார்ப்பது                                                                                                                                                       | தடுக்கும் தன்மை              |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
+| `quality:collect`            | `quality-metrics.json`-ஐ வெளியிடுகிறது (ESLint எச்சரிக்கை எண்ணிக்கை, ஒன்றிணைக்கப்பட்ட shard அறிக்கையிலிருந்து coverage)                                            | ஆம் (ratchet-க்கு முந்தையது) |
+| `quality:ratchet`            | `quality-baseline.json`-இல் உள்ள ஒவ்வொரு metric-உம் பின்னடையவில்லை (ESLint எச்சரிக்கைகள் ≤ baseline; coverage ≥ baseline)                                          | ஆம்                          |
+| `check:duplication`          | Code duplication (jscpd@4), `quality-baseline.json`-இல் உள்ள baseline-ஐத் தாண்டவில்லை                                                                              | ஆம்                          |
+| `check:complexity`           | கோப்பு-நிலை cyclomatic complexity வரம்பைத் தாண்டவில்லை (மைய ESLint `complexity` + `max-lines-per-function`)                                                        | ஆம்                          |
+| `check:cognitive-complexity` | Cognitive complexity ratchet (`eslint-plugin-sonarjs`) — தனித்த ESLint இயக்கம்; CI இரண்டையும் ஒற்றை `check:complexity-ratchets` படிநிலையாக ஒன்றிணைத்து இயக்குகிறது | ஆம்                          |
+| `check:dead-code`            | பயன்படுத்தப்படாத exports / files ratchet (knip), baseline-உடன் ஒப்பிடும்போது பின்னடையவில்லை                                                                        | ஆம்                          |
+| `check:compression-budget`   | Compression benchmark budget — engine-வாரியான token-savings குறைந்தபட்ச அளவுகள் பின்னடையக்கூடாது                                                                   | ஆம்                          |
+| `check:type-coverage`        | Percent-typed ratchet (`type-coverage`) பின்னடையவில்லை; பெருமளவில் `typecheck:noimplicit:core`-ஐ உள்ளடக்குகிறது                                                    | ஆம்                          |
+
+### Job-கள்: `codeql-scan` மற்றும் `codeql-admission`
+
+`codeql-scan` அமைக்கப்பட்ட அனைத்து analysis category-களையும் உருவாக்குகிறது. அந்த job வெற்றிபெற்ற பிறகு, அதன் குறிப்பிட்ட upload-களையும் candidate alert ratchet-ஐயும் `codeql-admission` சரிபார்க்கிறது. ஆவணங்கள் மட்டும் மாற்றப்படும் candidate-கள் உட்பட, இரண்டும் `Gate / CI`-இன் கட்டாய dependency-கள். நிர்வாகச் செயல்படுத்தலும் canary தேவைகளும் கீழுள்ள “CodeQL ratchet” பகுதியில் விளக்கப்பட்டுள்ளன.
+
+| Script                 | சரிபார்ப்பது                                                                                                                                                                                                                                     | தடுக்கும் தன்மை |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------- |
+| `check:codeql-ratchet` | Alert ratchet-க்கு முன் candidate ref/SHA-வும் அமைக்கப்பட்ட அனைத்து analysis category-களும் தற்போதையதாக இருக்க வேண்டும்; சான்று இல்லாவிட்டால் தடுக்கப்படும். மொத்த inventory தனியாகவே இருக்கும் — கீழுள்ள “CodeQL ratchet” பகுதியைப் பார்க்கவும் | ஆம்             |
 
 ### பணி: `quality-extended`
 
@@ -481,31 +497,24 @@ git add quality-baseline.json
 ஒரு அளவீட்டை மேம்படுத்தும் PR, `--require-tighten` மூலம் கண்டறியப்படும் (கட்டம் 6A.5,
 செயல்படுத்தல் நிலுவையில் உள்ளது).
 
-### CodeQL ராட்செட்: புதுப்பிப்பு இடைவெளி மற்றும் கைமுறைத் தூண்டல்
+### CodeQL ratchet: candidate admission மற்றும் repository inventory
 
-`check:codeql-ratchet`, **ஒவ்வொரு PR-க்கும் அல்லாமல், அட்டவணைப்படி புதுப்பிக்கப்படும் ரெப்போ நிலையையே**
-படிக்கிறது. `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup`,
-`state: configured`, `schedule: weekly` எனத் தெரிவிக்கிறது: இது GitHub-இன் இயல்புநிலை அமைப்பு ஸ்கேன்,
-ஒவ்வொரு push-க்கும் செய்யப்படும் பகுப்பாய்வு அல்ல. விளைவு: விழிப்பூட்டல்களைச் சரிசெய்யும் PR மெர்ஜ் செய்யப்பட்ட பிறகு,
-அடுத்த திட்டமிடப்பட்ட ஸ்கேன் இயங்கும் வரை ராட்செட் பழைய, அதிகமான எண்ணிக்கையையே தொடர்ந்து படிக்கும் — எனவே ஸ்கேன்
-புதுப்பிக்கப்படும் வரை, சரிசெய்த PR-இன் சொந்த தொடர்ச்சிப் PR-கள் உட்பட, திறந்திருக்கும் ஒவ்வொரு PR-இலும் இது பின்னடைவைத் தெரிவிக்கும்.
+தெளிவான dependency தொடரின் வழியாக candidate-இன் CodeQL admission-ஐ CI நிர்வகிக்கிறது: `codeql-scan`, `codeql.yml`-இல் உள்ள நான்கு மொழிகளின் matrix-ஐ அழைக்கிறது; அதன் பிறகு `codeql-admission`, `node scripts/check/check-codeql-ratchet.mjs --candidate`-ஐ இயக்குகிறது. `Gate / CI` இரண்டு முடிவுகளையும் கோருகிறது. Quality தனது எண்ணியல் சோதனைகளைத் தக்கவைத்தாலும் producer முடிவதற்கு முன் scanner-ஐ வினவாது; `Gate / Quality` மட்டும் முழுமையான candidate admission அல்ல. ஆவணங்கள் மட்டும் மாற்றப்படும் candidate-களுக்கும் CodeQL கட்டாயமாகவே உள்ளது.
 
-**கைமுறைப் புதுப்பிப்பு**: `gh workflow run codeql.yml --ref release/vX.Y.Z` பகுப்பாய்வை மீண்டும்
-இயக்கி, சில நிமிடங்களுக்குள் விழிப்பூட்டல்களை மீண்டும் வெளியிடுகிறது. முதலில் `.github/workflows/codeql.yml`-ஐப்
-படிக்கவும் — GitHub-இன் "இயல்புநிலை அமைப்புடன்" முரண்படுவதன் காரணமாகவே அது `workflow_dispatch`-க்கு மட்டுமே
-உரியது என்பதை அதன் தலைப்பு விளக்குகிறது (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). `push`/`pull_request`/
-`schedule` தூண்டல்களை மீட்டமைப்பதற்கு முதலில் **உரிமையாளரின் நடவடிக்கை** தேவை: Settings → Code security →
-CodeQL: Default → Advanced. அந்த மாற்றத்தைச் செய்யாமல் `schedule:` தூண்டலைச் சேர்க்க வேண்டாம் — அது
-தோல்வியடையும் ரன்களை மட்டுமே உருவாக்கும்.
+`config/quality/codeql-admission-policy.json`-இல் உள்ள policy, Actions, C/C++, JavaScript/TypeScript மற்றும் Python-ஐத் தேர்ந்தெடுக்கிறது; query suite default, threat model remote, build mode none ஆகியவற்றையும் தேர்ந்தெடுக்கிறது. Producer preflight, நிலுவையிலுள்ள activation பதிவையும் வெளிப்படையான target பட்டியலுக்கு வெளியேயுள்ள branch-களையும் நிராகரிக்கிறது. தொடக்க target-கள் main மற்றும் release/v3.8.53; அடுத்த release-க்கு ஆய்வு செய்யப்பட்ட onboarding தேவை. CI-இன் தற்போதைய விரிவான release PR trigger தொடர்கிறது. ஆனால் onboarding செய்யப்படாத target, அளவிடப்படாத PASS பெறுவதற்குப் பதிலாக extraction-க்கு முன் HOLD என அறிவிக்கிறது.
 
-**எண்ணிக்கை குறைந்த பிறகு அடிப்படையை இறுக்கவும்** — `node scripts/check/check-codeql-ratchet.mjs
---update`, புதிதாக அளவிடப்பட்ட எண்ணிக்கையை `quality-baseline.json` →
-`metrics.codeqlAlerts.value`-இல் எழுதுகிறது; எனவே பழைய உச்சவரம்பு வரை மீண்டும் ஏற்படும் பின்னடைவை ராட்செட்
-மறைமுகமாக அனுமதிக்காது. செயல்முறை எடுத்துக்காட்டு (2026-09-02/03): PR #12502, 7 உண்மையான விழிப்பூட்டல்களைச்
-சரிசெய்தது (அளவிடப்பட்ட திறந்த விழிப்பூட்டல்கள் 13 → 6); PR #12530, பொருந்தும் வகையில் உறையவைக்கப்பட்ட அடிப்படையை
-11 → 6 என இறுக்கியது; பின்னர் மீதமிருந்த 6 விழிப்பூட்டல்களும் ஒவ்வொன்றிற்குமான நியாயவிளக்கத்துடன் நிராகரிக்கப்பட்டு,
-திறந்த விழிப்பூட்டல்களின் எண்ணிக்கை 0 ஆகக் குறைக்கப்பட்டது.
+ஒவ்வொரு matrix job-உம் தனது உண்மையான SARIF upload ID, மொழி, category, run மற்றும் attempt, caller workflow அடையாளம், event ref/head/base/merge SHA மற்றும் policy hash ஆகியவற்றைப் பதிவு செய்கிறது. அதனைச் சார்ந்த job இந்த run-இன் receipt-களை மட்டுமே download செய்து artifact digest-களைச் சரிபார்க்கிறது. நான்கு category-களும், வெற்றிபெற்ற producer-உம், ஒவ்வொரு குறிப்பிட்ட upload-இன் processing முடிவடைந்த நிலையும் தேவை. Branch-இல் கடைசியாகக் கிடைத்த analysis-ஐப் பயன்படுத்தாமல், API-இன் sarif_id filter-ஐப் பயன்படுத்துகிறது. பகுதியளவு rerun-கள், அதே run மற்றும் candidate-இன் முந்தைய attempt-இல் வெற்றிபெற்ற category-களை, அவற்றை உருவாக்கிய attempt அடையாளத்தைப் பாதுகாத்து மீண்டும் பயன்படுத்தலாம்; தற்போதைய producer தோல்வியடைந்திருந்தால் முந்தைய பச்சைச் சான்றை மீண்டும் பயன்படுத்த முடியாது.
+
+CodeQL action processing-க்காகக் காத்திருக்கிறது. ஆனால் அதன் pin செய்யப்பட்ட implementation, status வாசிப்பு தோல்விக்குப் பிறகோ காத்திருப்பு வரம்பு முடிந்த பிறகோ எச்சரிக்கையுடன் தொடரக்கூடும். எனவே admission processing-ஐ மீண்டும் சரிபார்க்கிறது. Category-கள் இல்லாமை, நிலுவையிலுள்ள processing, தோல்வியடைந்த அல்லது ரத்தான job-கள், பழைய அடையாளம், முழுமையற்ற pagination அல்லது API கிடைக்காமை ஆகியவை HOLD-ஐ உருவாக்கி exit 2 தருகின்றன. தனியாக இயங்கும் scanner workflow-க்கான நிர்ணயிக்கப்பட்ட காத்திருப்பு இனி இல்லை. Alert query 0 கொடுத்ததற்காக scan செய்யப்படாத PR தேர்ச்சி பெற முடியாது. அளவிடப்பட்ட எண்ணிக்கை `metrics.codeqlAlerts.value`-ஐ மீறினால் exit 1 தரப்படும்; மற்றொரு branch-இன் alert-களை உள்ளடக்க baseline உயர்த்தப்படாது. [Upload நிலையும் analysis தேடலும்](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Receipt, upload மற்றும் analysis ID-கள், category-கள், tool version-கள், ref/SHA, baseline மற்றும் alert எண்ணிக்கைகளைப் பதிவு செய்கிறது. SARIF அடையாளம்/result எண்ணிக்கை, குறைந்தபட்ச rule எண்ணிக்கைகள் மற்றும் துல்லியமான alert instance-கள் தொடர்ந்து கட்டாயமாகும். ஏற்றுக்கொள்வதற்கு முன் PR/analysis அடையாளங்கள் மீண்டும் சரிபார்க்கப்படுகின்றன. இந்தச் சோதனைகள் அமைக்கப்பட்ட category-களின் coverage-ஐ நிறுவுகின்றன; பிரித்தெடுக்கப்பட்ட ஒவ்வொரு source file-இன் inventory-ஐ அல்ல. C/C++ no-build extraction, project build-இன் போது உருவாக்கப்படும் code-ஐ உள்ளடக்காது. Source exclusion-கள் இன்னும் ஆய்வு செய்யப்பட வேண்டும்; contributor-க்கு attribution வழங்க ஒப்பிடத்தக்க துல்லியமான base சான்று தேவை.
+
+`codeql-maintenance.yml`, PR/main producer-களை நகலெடுக்காமல் active release push scan-களையும் வாராந்திர schedule-ஐயும் வழங்குகிறது. `nightly-codeql-inventory.yml`, `--strict-measurement` உடன் repository முழுவதற்குமான baseline-ஐத் தனியாக வைத்திருக்கிறது; அளவீடு கிடைக்காதபோது தோல்வியடைகிறது. உள்ளூர் பழைய collector பிழையின்றித் தவிர்ப்பது candidate admission அல்ல. சரிபார்க்கப்பட்ட குறைந்த மொத்த எண்ணிக்கைக்குப் பிறகு வெளிப்படையான `--update` மூலமே இறுக்குதல் செய்யப்படுகிறது.
+
+Default Setup அமைக்கப்பட்டிருக்கும் நிலையில் Advanced workflow-ஐ வெளியிடக்கூடாது: GitHub அந்த இணைப்பை நிராகரிக்கிறது. ஆய்வு செய்யப்பட்ட நிர்வாக மாற்றம் மீண்டும் வாசித்து உறுதிசெய்யப்படும் வரை, அதன் version செய்யப்பட்ட policy நிலுவையிலேயே இருக்கும். வெளியீட்டிற்கு முன் operator, repository, head/base/tree, policy/patch/rollback hash-கள் மற்றும் காணப்பட்ட setup நிலை ஆகியவற்றை உறுதியாகப் பதிவு செய்கிறார்; `node scripts/quality/codeql-producer.mjs verify-admin-readback`, வழங்கப்பட்ட expected மற்றும் actual JSON பதிவுகளைச் சோதிக்கிறது. இது ஒரு தொழில்நுட்பத் தடுப்பு; operator ஒப்புதலோ புதிய readback-களைப் பெறுவதற்கான மாற்றோ அல்ல. PR token ஒருபோதும் Administration access கோராது. Rollout-க்கும் scanner மாற்றங்கள் அனைத்திற்கும் அந்தத் தனியான readback-உடன் உண்மையான PR, fork மற்றும் merge-group compatibility சான்றும் தேவை.
+
+Fork-கள் hosted runner-களையும், credential-களைச் சேமிக்காத checkout-ஐயும் பயன்படுத்துகின்றன; producer-இல் project install/build இல்லை, repository secret-களும் மரபாக வழங்கப்படாது. குறைக்கப்பட்ட fork token உடன் pull_request நிகழ்வுக்கான SARIF upload-ஐ GitHub ஆதரிக்கிறது; முதன்முறை contribution-ஐ இயக்குவதற்கான ஒப்புதல் தொடர்ந்து GitHub policy-க்கு உட்பட்டது. நம்பத்தகாத code-ஐ இயக்க pull_request_target-ஐ ஒருபோதும் பயன்படுத்தக்கூடாது. Migration முடிந்ததாகக் கருதும் முன், கட்டுப்படுத்தப்பட்ட canary-யில் உண்மையான token permission-கள், analysis_key மற்றும் அனைத்து category environment-களையும் உறுதிப்படுத்த வேண்டும். [Fork upload விதிகள்](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[முரண்படும் setup முறைகள்](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **நிராகரிப்புகள் ஆபரேட்டரின் முடிவு (கடுமையான விதி #14)** — நிராகரிப்புக் கருத்தில் தொழில்நுட்ப
 நியாயவிளக்கத்தைப் பதிவு செய்யாமல் ஒருபோதும் CodeQL விழிப்பூட்டலை நிராகரிக்க வேண்டாம்: அப்ஸ்ட்ரீம் நெறிமுறைத்
@@ -660,11 +669,7 @@ CI வாயில்களுக்கு அப்பால், OmniRoute ஒ�
 மாற்றங்கள்; நிலைமாற்றங்கள்/நீக்கங்கள் இயக்குநருக்காக ஒதுக்கப்பட்ட கொள்கை முடிவுகள்.** கீழே உள்ள எதுவும்
 இன்னும் செயல்படுத்தப்படவில்லை.
 
-**மேலே ஆவணப்படுத்தப்படாதவையும் உள்ளன** (ஆலோசனை மட்டுமே, குறைந்த சமிக்ஞை): `docs-lint` பணி
-(markdownlint + Vale, முழுப் பணிக்கும் `continue-on-error`) மற்றும் தனித்தியங்கும் ஸ்கேனர் பணிப்பாய்வுகளான
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` என்பது
-`quality-baseline.json`-இல் உள்ளது; ஆனால் `ci.yml`-இல் தடைசெய்யும் ராட்செட்டுடன் இணைக்கப்படவில்லை — இந்த அளவீடு
-தற்போது தனிமைப்படுத்தப்பட்டுள்ளது.
+**மேலே ஆவணப்படுத்தப்படாத மற்றவை** (ஆலோசனை மட்டுமே; குறைந்த பயனுள்ள சிக்னல்): `docs-lint` job (markdownlint + Vale, முழு job-க்கும் `continue-on-error`) மற்றும் தனித்த scanner workflow-களான `semgrep.yml` / `scorecard.yml`. மேலே கூறப்பட்ட activation தேவைகளுக்கு உட்பட்டு, CodeQL இப்போது `Gate / CI`-இன் கீழ் கட்டாய producer மற்றும் admission job-களைக் கொண்டுள்ளது. `quality-baseline.json`-இல் `semgrepFindings: 0` உள்ளது; ஆனால் அது `ci.yml`-இல் தடுக்கக்கூடிய ratchet-உடன் இணைக்கப்படவில்லை — இந்த metric தற்போது இணைப்பின்றி உள்ளது.
 
 ### இணைத்தல் / நகல்நீக்கம் (இயந்திரரீதியானது, குறைந்த ஆபத்து)
 

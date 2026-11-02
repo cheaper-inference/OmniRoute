@@ -214,16 +214,16 @@ function makeLiteralClaimValidator(expected, opts) {
         };
 }
 
-// Reads every code-derived fact in ONE tsx subprocess — the same functions the app
-// serves at runtime, never a hardcoded copy. DATA_DIR is redirected to a throwaway dir
-// so importing the MCP tool modules cannot touch the operator's real SQLite file.
+// Reads catalog calculations in one subprocess. Registry, CLI and MCP metadata
+// are parsed from their source declarations without initializing application modules.
+// DATA_DIR remains isolated as a defensive boundary for future pure-data imports.
 // Returns null when tsx is unavailable — caller must treat it as a failing check, not a skip.
 function readCodeFacts() {
   const script = [
     'import {computeFreeModelTotals,FREE_MODEL_BUDGETS} from "./open-sse/config/freeModelCatalog.ts";',
     'import {FREE_TIER_PROVIDER_SET} from "./open-sse/config/freeTierProviders.ts";',
-    'import {generateProviderPluginManifest} from "./open-sse/config/providerPluginManifestRegistry.ts";',
-    'import {REGISTRY} from "./open-sse/config/providers/index.ts";',
+    'import {generateProviderPluginManifestFromRegistry} from "./open-sse/config/providerPluginManifest.ts";',
+    'import {readStaticCountMetadata} from "./scripts/check/lib/staticCountMetadata.mjs";',
     'import fs2 from "node:fs";',
     'import path2 from "node:path";',
     'const __rtxt=fs2.readFileSync(path2.join(process.cwd(),"src/lib/freeProviderRankings.ts"),"utf8");',
@@ -234,20 +234,6 @@ function readCodeFacts() {
     'const __ik=__itxt.match(/DEFAULT_INTELLIGENT_WEIGHTS[^=]*=\\s*\\{([\\s\\S]*?)\\n\\};/)?.[1]?.split("\\n").filter(l=>l.includes(":")).length??0;',
     'import {MODE_PACKS} from "./open-sse/services/autoCombo/modePacks.ts";',
     'import {ENGINE_IDS} from "./open-sse/services/compression/engineCatalog.ts";',
-    'import {CLI_TOOLS} from "./src/shared/constants/cliTools.ts";',
-    'import {countUniqueMcpTools} from "./open-sse/mcp-server/toolCount.ts";',
-    'import {MCP_TOOLS} from "./open-sse/mcp-server/schemas/tools.ts";',
-    'import {memoryTools} from "./open-sse/mcp-server/tools/memoryTools.ts";',
-    'import {skillTools} from "./open-sse/mcp-server/tools/skillTools.ts";',
-    'import {agentSkillTools} from "./open-sse/mcp-server/tools/agentSkillTools.ts";',
-    'import {githubSkillTools} from "./open-sse/mcp-server/tools/githubSkillTools.ts";',
-    'import {poolTools} from "./open-sse/mcp-server/tools/poolTools.ts";',
-    'import {gamificationTools} from "./open-sse/mcp-server/tools/gamificationTools.ts";',
-    'import {pluginTools} from "./open-sse/mcp-server/tools/pluginTools.ts";',
-    'import {notionTools} from "./open-sse/mcp-server/tools/notionTools.ts";',
-    'import {obsidianTools} from "./open-sse/mcp-server/tools/obsidianTools.ts";',
-    'import {localCorpusTools} from "./open-sse/mcp-server/tools/localCorpusTools.ts";',
-    'import {compressionTools} from "./open-sse/mcp-server/tools/compressionTools.ts";',
     // Live provider total — the SAME collections gen-provider-reference.ts unions, so the
     // doc-vs-live check below cannot drift from the generator's definition of "provider".
     'import * as PROV from "./src/shared/constants/providers.ts";',
@@ -257,13 +243,8 @@ function readCodeFacts() {
     "PROV.SYSTEM_PROVIDERS];",
     "const pids=new Set();",
     "for(const c of provCols)for(const p of Object.values(c||{}))if(p&&p.id)pids.add(p.id);",
-    "const cols={MCP_TOOLS,memoryTools,skillTools,agentSkillTools,githubSkillTools,poolTools,",
-    "gamificationTools,pluginTools,notionTools,obsidianTools,localCorpusTools,compressionTools};",
-    "const sc=new Set();",
-    "for(const col of Object.values(cols))for(const t of Object.values(col))",
-    "for(const x of (t?.scopes||[]))sc.add(x);",
-    "const t=computeFreeModelTotals();const cli=Object.values(CLI_TOOLS);",
-    "const by=(c)=>cli.filter(x=>x.category===c).length;",
+    "const metadata=readStaticCountMetadata(process.cwd());const REGISTRY=metadata.registry;",
+    "const t=computeFreeModelTotals();",
     // "Free forever" = every provider whose free access renews or needs no key at all.
     // one-time-initial (signup credits) and discontinued pools are excluded on purpose,
     // and so is every eligibility-gated row: a provider nobody can sign up for without
@@ -275,14 +256,14 @@ function readCodeFacts() {
     'console.log("@@"+JSON.stringify({freeSteady:t.steadyRecurringTokens,entries:t.perModel.length,',
     "freeFirst:t.firstMonthRealisticTokens,freeGated:t.gatedRecurringTokens,",
     "freePools:t.poolCount,engines:ENGINE_IDS.length,",
-    "cliTotal:cli.length,cliCode:by('code'),cliAgent:by('agent'),",
-    "mcpTools:countUniqueMcpTools(cols),mcpScopes:sc.size,providers:pids.size,freeForever:ff.size,",
+    "cliTotal:metadata.cliTotal,cliCode:metadata.cliCode,cliAgent:metadata.cliAgent,",
+    "mcpTools:metadata.mcpTools,mcpScopes:metadata.mcpScopes,providers:pids.size,freeForever:ff.size,",
     "modePacks:Object.keys(MODE_PACKS),catalogDate:__cat,sortBy:__sb,intelligentKeys:__ik,",
     "hardStop:FREE_MODEL_BUDGETS.filter(e=>e.hardStopGuaranteed===true).length,",
     "trainsOnPrompts:FREE_MODEL_BUDGETS.filter(e=>e.trainsOnPrompts===true).length,",
     "freeTierCount:FREE_TIER_PROVIDER_SET.size,",
     "freeTierReg:FREE_TIER_PROVIDER_SET.size-[...FREE_TIER_PROVIDER_SET].filter(x=>!(x in REGISTRY)).length,",
-    'manifestFreeTier:generateProviderPluginManifest().providers.filter(p=>p.capabilities.includes("free-tier")).length}));',
+    'manifestFreeTier:generateProviderPluginManifestFromRegistry(REGISTRY).providers.filter(p=>p.capabilities.includes("free-tier")).length}));',
   ].join("");
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "docs-counts-"));
   try {

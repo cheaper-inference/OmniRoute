@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "setup": "advanced",
+  "analysisKey": ".github/workflows/ci.yml:analyze",
+  "querySuite": "default",
+  "threatModel": "remote",
+  "buildMode": "none",
+  "languages": ["actions", "c-cpp", "javascript-typescript", "python"],
+  "reviewedSetup": {
+    "state": "not-configured",
+    "query_suite": "default",
+    "threat_model": "remote",
+    "languages": ["actions", "c-cpp", "javascript-typescript", "python"],
+    "updated_at": null,
+    "observedAt": null
+  },
+  "minimumRules": {
+    "actions": 17,
+    "c-cpp": 58,
+    "javascript-typescript": 87,
+    "python": 43
+  },
+  "activationStatus": "PENDING_DEFAULT_SETUP_TRANSITION",
+  "producerReceiptsRequired": true,
+  "targetBranches": ["main", "release/v3.8.53"]
+}

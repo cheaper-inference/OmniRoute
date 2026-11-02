@@ -107,6 +107,11 @@ test(
       const gate = JSON.parse(result.stdout);
       assert.equal(gate.receipt.exitCode, 0);
       assert.equal(gate.receipt.outcome, "CLEANUP_ERROR");
+      assert.equal(gate.receipt.processGroupObservation.status, "UNKNOWN");
+      assert.equal(gate.receipt.processGroupObservation.directoryError, "PROC_STAT_EACCES");
+      assert.equal(gate.receipt.processGroupObservation.root.kind, "NOT_SCANNED");
+      assert.deepEqual(gate.receipt.processGroupObservation.ownMembers, []);
+      assert.deepEqual(gate.receipt.processGroupObservation.unassignedErrors, {});
       assert.notEqual(gate.code, 0);
     } finally {
       rmSync(directory, { recursive: true, force: true });

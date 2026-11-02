@@ -43,14 +43,16 @@ astfel încât un flux nou sau eliminat să nu poată dispărea neobservat. Dove
 ale unui scaner consultativ existent. Stabilirea verificărilor aplicabile drept obligatorii în regulile pentru ramuri
 este o modificare administrativă separată; definirea joburilor lor nu protejează, în sine, o ramură.
 
-`API Route Typecheck` este o verificare independentă a fluxului de lucru, în afara ambelor verdicte agregate
-și a profilului static al observatorului local complet. Inspectați separat rezultatul acesteia pentru candidatul exact.
-`.github/workflows/api-route-typecheck.yml` rulează pentru PR-uri către `main` sau
-`release/**`, pentru push-uri către oricare dintre familiile de ramuri și pentru declanșarea manuală. Nu are niciun filtru de cale.
-Redirecționarea bazei unui PR solicită o verificare nouă; modificările corpului/titlului folosesc numele exclusiv pentru observare
-`Admission not requested / API Route Typecheck` și nu pot înlocui verificarea de admitere.
-Fluxul de lucru nu declară un declanșator pentru grupul de îmbinare. Orice implementare a unei cozi de îmbinare care necesită
-această verificare trebuie mai întâi să stabilească executarea ei pentru evenimentul respectiv.
+`API Route Typecheck` este o verificare independentă de workflow, în afara ambelor verdicte agregate și a profilului static al observatorului local complet. Examinați-i separat rezultatul pentru candidatul exact. `.github/workflows/api-route-typecheck.yml` rulează pentru PR-uri către `main` sau `release/**`, push-uri către ambele familii de ramuri, porniri manuale și evenimente `merge_group` de tip `checks_requested`. Nu are filtru de căi. Grupurile de integrare fac checkout la `merge_group.head_sha`; celelalte evenimente la `github.sha`. Toate evenimentele folosesc aceeași verificare diagnostică API și testele unitare ale acesteia.
+Schimbarea ramurii țintă a unui PR solicită o nouă verificare; editarea descrierii sau titlului folosește numele exclusiv observațional `Admission not requested / API Route Typecheck` și nu poate înlocui verificarea de admitere.
+
+### DAST consumă build-ul CI verificat
+
+Jobul CI obligatoriu `dast-smoke` apelează `.github/workflows/dast-smoke.yml` după `build`. Urmează aceeași selecție de cod și schițe ca build-ul, inclusiv PR-uri acceptate din fork-uri, PR-uri către release și grupuri de integrare. Un job DAST absent, eșuat, anulat sau omis neașteptat blochează `Gate / CI`. Workflow-ul reutilizabil nu are declanșator PR sau manual independent; validarea manuală folosește pornirea CI, astfel încât build-ul și consumatorul să rămână în aceeași execuție.
+
+`scripts/ci/next-build-provenance.mjs` sigilează întregul artefact Next cu amprenta tar, repository/eveniment/execuție, încercarea producătorului, head/base/checkout/tree, identitățile workflow-urilor, lockfile, versiunea și ABI-ul exacte Node, platforma și bundler-ul. DAST selectează ID-ul imuabil al artefactului din `needs.build.outputs`, cere verificarea amprentei descărcării și calculează independent hash-ul ZIP față de amprenta producătorului înainte să extragă cele două componente permise prin `scripts/ci/unpack-ci-build.py`. Manifestul și arhiva tar trebuie, de asemenea, să corespundă ieșirilor independente ale producătorului înainte de extragerea arborelui Next. Nu caută niciodată ultimul build reușit al unei ramuri. O reluare parțială poate refolosi aceeași încercare a producătorului dacă ID-ul și toate intrările încă se potrivesc; recipisa consemnează ambele încercări.
+
+Consumatorul rămâne pe un runner Linux găzduit, cu acces numai pentru citire la repository și fără secretele acestuia. Instalează versiunea exactă Node a producătorului, apoi asamblează CLI cu `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` respinge lipsa unui server standalone înainte de orice build de rezervă; build-urile CLI locale obișnuite păstrează mecanismul de rezervă existent. Disponibilitatea serverului, Schemathesis și promptfoo trebuie toate să reușească în limita neschimbată de 25 de minute a jobului. Recipisa de proveniență dovedește identitatea și octeții intrărilor, nu o scanare DAST reușită. Expirarea artefactului, întreruperea runner-ului sau eșecul scanner-ului rămân dovezi incomplete ori negative; un wrapper consultativ nu le poate transforma în PASS.
 
 ### Capacitatea de execuție a interfeței
 
@@ -231,17 +233,24 @@ Rulează pentru fiecare PR către `main`. Blochează îmbinarea în caz de eșec
 
 Rulează după `test-coverage`. Blochează fuzionarea în caz de eșec.
 
-| Script                       | Validează                                                                                                                                                                                                    | Blocant                                 |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- |
-| `quality:collect`            | Generează `quality-metrics.json` (numărul de avertismente ESLint, acoperirea din raportul combinat al fragmentelor)                                                                                          | Da (în amonte de mecanismul cu clichet) |
-| `quality:ratchet`            | Nicio metrică din `quality-baseline.json` nu a regresat (avertismente ESLint ≤ baza de referință; acoperire ≥ baza de referință)                                                                             | Da                                      |
-| `check:duplication`          | Duplicarea codului (jscpd@4) nu depășește baza de referință din `quality-baseline.json`                                                                                                                      | Da                                      |
-| `check:complexity`           | Complexitatea ciclomatică la nivel de fișier nu depășește limita (regulile ESLint de bază `complexity` + `max-lines-per-function`)                                                                           | Da                                      |
-| `check:cognitive-complexity` | Mecanism cu clichet pentru complexitatea cognitivă (`eslint-plugin-sonarjs`) — rulare ESLint separată; CI le rulează pe ambele, reunite în pasul unic `check:complexity-ratchets`                            | Da                                      |
-| `check:dead-code`            | Mecanismul cu clichet pentru exporturile/fișierele neutilizate (knip) nu regresează față de baza de referință                                                                                                | Da                                      |
-| `check:compression-budget`   | Bugetul etalonului de compresie — pragurile minime per motor pentru economisirea tokenurilor nu trebuie să regreseze                                                                                         | Da                                      |
-| `check:type-coverage`        | Mecanismul cu clichet pentru procentul de cod tipizat (`type-coverage`) nu regresează; înlocuiește în mare parte `typecheck:noimplicit:core`                                                                 | Da                                      |
-| `check:codeql-ratchet`       | Numărul de alerte CodeQL deschise nu regresează (citit prin `gh api`; omitere controlată fără token) — pentru cadența actualizării și declanșarea manuală, consultați „Mecanismul cu clichet CodeQL” mai jos | Da                                      |
+| Script                       | Validează                                                                                                                                                                         | Blocant                                 |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `quality:collect`            | Generează `quality-metrics.json` (numărul de avertismente ESLint, acoperirea din raportul combinat al fragmentelor)                                                               | Da (în amonte de mecanismul cu clichet) |
+| `quality:ratchet`            | Nicio metrică din `quality-baseline.json` nu a regresat (avertismente ESLint ≤ baza de referință; acoperire ≥ baza de referință)                                                  | Da                                      |
+| `check:duplication`          | Duplicarea codului (jscpd@4) nu depășește baza de referință din `quality-baseline.json`                                                                                           | Da                                      |
+| `check:complexity`           | Complexitatea ciclomatică la nivel de fișier nu depășește limita (regulile ESLint de bază `complexity` + `max-lines-per-function`)                                                | Da                                      |
+| `check:cognitive-complexity` | Mecanism cu clichet pentru complexitatea cognitivă (`eslint-plugin-sonarjs`) — rulare ESLint separată; CI le rulează pe ambele, reunite în pasul unic `check:complexity-ratchets` | Da                                      |
+| `check:dead-code`            | Mecanismul cu clichet pentru exporturile/fișierele neutilizate (knip) nu regresează față de baza de referință                                                                     | Da                                      |
+| `check:compression-budget`   | Bugetul etalonului de compresie — pragurile minime per motor pentru economisirea tokenurilor nu trebuie să regreseze                                                              | Da                                      |
+| `check:type-coverage`        | Mecanismul cu clichet pentru procentul de cod tipizat (`type-coverage`) nu regresează; înlocuiește în mare parte `typecheck:noimplicit:core`                                      | Da                                      |
+
+### Joburi: `codeql-scan` și `codeql-admission`
+
+`codeql-scan` produce toate categoriile de analiză configurate. După reușita acestui job, `codeql-admission` validează încărcările sale exacte și ratchet-ul alertelor candidatului. Ambele sunt dependențe obligatorii pentru `Gate / CI`, inclusiv la candidații care modifică doar documentația. Cerințele de activare administrativă și canary sunt descrise mai jos la „Ratchet CodeQL”.
+
+| Script                 | Validează                                                                                                                                                                                                    | Blocant |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `check:codeql-ratchet` | Ref/SHA al candidatului și toate categoriile configurate trebuie să fie actuale înainte de ratchet-ul alertelor; lipsa dovezilor blochează. Inventarul global rămâne separat — vezi „Ratchet CodeQL” mai jos | Da      |
 
 ### Job: `quality-extended`
 
@@ -500,30 +509,24 @@ Includeți acest fișier în același commit cu modificarea care a îmbunătăț
 metrică fără a actualiza linia de referință va fi detectat de `--require-tighten` (Faza 6A.5,
 implementare în așteptare).
 
-### Ratchet CodeQL: frecvența reîmprospătării și declanșarea manuală
+### Ratchet CodeQL: admiterea candidatului și inventarul repository-ului
 
-`check:codeql-ratchet` citește **starea depozitului, reîmprospătată conform unei planificări — nu pentru fiecare PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` raportează
-`state: configured`, `schedule: weekly`: scanarea cu configurarea implicită a GitHub, nu o analiză
-la fiecare push. Consecință: după îmbinarea unui PR care REMEDIAZĂ alerte, mecanismul ratchet continuă să citească
-numărul vechi, mai mare, până când rulează următoarea scanare programată — astfel încât raportează o regresie
-pentru fiecare PR deschis, inclusiv pentru modificările ulterioare ale PR-ului de remediere, până când scanarea se actualizează.
+CI gestionează admiterea candidatului prin CodeQL folosind un lanț explicit de dependențe: `codeql-scan` apelează matricea celor patru limbaje din `codeql.yml`, apoi `codeql-admission` rulează `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` cere ambele rezultate. Quality păstrează verificările sale numerice, dar nu interoghează scanner-ul înainte de terminarea producătorului; doar `Gate / Quality` nu reprezintă admiterea completă a candidatului. CodeQL rămâne obligatoriu pentru candidații care modifică numai documentația.
 
-**Reîmprospătare manuală**: `gh workflow run codeql.yml --ref release/vX.Y.Z` rulează din nou
-analiza și republică alertele în câteva minute. Citiți mai întâi `.github/workflows/codeql.yml`
-— antetul său explică faptul că este exclusiv `workflow_dispatch` **deoarece intră în conflict cu
-„configurarea implicită” a GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Restabilirea declanșatorilor `push`/`pull_request`/
-`schedule` necesită mai întâi o **acțiune din partea proprietarului**: Settings → Code security →
-CodeQL: Default → Advanced. Nu adăugați un declanșator `schedule:` fără această comutare — acesta
-va produce doar rulări eșuate.
+Politica din `config/quality/codeql-admission-policy.json` selectează Actions, C/C++, JavaScript/TypeScript și Python, suita de interogări default, modelul de amenințări remote și modul de build none. Verificarea preliminară a producătorului respinge o înregistrare de activare în așteptare și ramurile din afara listei explicite de ținte. Țintele inițiale sunt main și release/v3.8.53; următorul release necesită o integrare revizuită. Declanșatorul CI existent mai larg pentru PR-uri de release se păstrează, însă o țintă neintegrată raportează HOLD înainte de extracție în loc să obțină un PASS nemăsurat.
 
-**Restrângeți linia de referință după scăderea numărului** — `node scripts/check/check-codeql-ratchet.mjs
---update` scrie noul număr măsurat în `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, astfel încât mecanismul ratchet să nu permită în mod neobservat o regresie până
-la vechiul plafon. Exemplu practic (2026-09-02/03): PR #12502 a remediat 7 alerte reale
-(13 → 6 alerte deschise măsurate); PR #12530 a restrâns linia de referință înghețată de la 11 → 6 pentru a corespunde; cele
-6 rămase au fost apoi respinse, fiecare cu o justificare individuală, până la 0 alerte deschise.
+Fiecare job al matricei înregistrează ID-ul real al încărcării SARIF, limbajul, categoria, execuția și încercarea, identitatea workflow-ului apelant, ref/head/base/merge SHA al evenimentului și hash-ul politicii. Jobul dependent descarcă numai recipisele acestei execuții și validează amprentele artefactelor. Cere toate cele patru categorii, un producător reușit și procesarea completă a fiecărei încărcări exacte. Folosește filtrul sarif_id al API-ului, nu ultima analiză găsită pe o ramură. Reluările parțiale pot refolosi categorii reușite dintr-o încercare anterioară a aceleiași execuții și aceluiași candidat, păstrând încercarea producătoare; un producător curent eșuat nu poate refolosi dovezi verzi anterioare.
+
+Acțiunea CodeQL așteaptă procesarea, dar implementarea fixată poate avertiza și continua după o eroare de citire a stării sau epuizarea așteptării. Admiterea verifică așadar din nou procesarea. Categoriile lipsă, procesarea în așteptare, joburile eșuate sau anulate, identitatea învechită, paginarea incompletă ori API-urile indisponibile produc HOLD și cod de ieșire 2. Nu mai există așteptare fixă pentru un workflow de scanner independent. Un PR nescanat nu poate trece deoarece o interogare de alerte a returnat 0. Un număr măsurat peste `metrics.codeqlAlerts.value` iese cu 1; baseline-ul nu este crescut pentru a absorbi alertele altei ramuri. [Starea încărcării și căutarea analizelor](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Recipisa înregistrează ID-uri de încărcare și analiză, categorii, versiuni de instrumente, ref/SHA, baseline și numere de alerte. Identitatea SARIF și numărul de rezultate, numerele minime de reguli și instanțele exacte de alertă rămân obligatorii. Identitățile PR și analiză sunt reverificate înainte de acceptare. Aceste verificări stabilesc acoperirea categoriilor configurate, nu inventarul fiecărui fișier sursă extras. Extracția C/C++ fără build nu include codul generat în timpul build-ului proiectului. Excluderile surselor încă necesită revizuire, iar atribuirea către un contributor necesită dovezi comparabile pe baza exactă.
+
+`codeql-maintenance.yml` furnizează scanări la push pentru release-ul activ și programarea săptămânală, fără a dubla producătorii PR/main. `nightly-codeql-inventory.yml` păstrează separat baseline-ul întregului repository, cu `--strict-measurement` și eșec când măsurarea nu este disponibilă. Omiterea tolerată a vechiului colector local nu reprezintă admiterea candidatului. Înăsprirea rămâne un `--update` explicit după verificarea unui număr global mai mic.
+
+Workflow-ul Advanced nu trebuie publicat cât timp este configurat Default Setup: GitHub respinge această combinație. Politica versionată rămâne în așteptare până la recitirea tranziției administrative revizuite. Înainte de publicare, un operator fixează repository-ul, head/base/tree, hash-uri de politică/patch/revenire și starea observată a configurării; `node scripts/quality/codeql-producer.mjs verify-admin-readback` verifică înregistrările JSON așteptate și reale furnizate. Este o protecție tehnică, nu aprobarea operatorului și nici înlocuitor pentru obținerea unor recitiri proaspete. Tokenul PR nu cere niciodată acces Administration. Introducerea și orice modificare a scanner-ului necesită acea recitire separată plus dovezi reale de compatibilitate PR, fork și grup de integrare.
+
+Fork-urile folosesc runners găzduite, checkout fără păstrarea acreditărilor, nicio instalare sau compilare a proiectului în producător și niciun secret moștenit din repository. GitHub acceptă încărcarea SARIF pentru evenimentul pull_request cu tokenul restrâns al fork-ului; aprobarea execuției pentru prima contribuție rămâne politica GitHub. Nu folosiți niciodată pull_request_target pentru a executa cod în care nu aveți încredere. Confirmați permisiunile reale ale tokenului, analysis_key și toate mediile categoriilor în canary-ul controlat înainte de a considera migrarea completă. [Reguli de încărcare din fork](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[moduri de configurare incompatibile](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Respingerea alertelor este decizia operatorului (Regula strictă #14)** — nu respingeți niciodată o alertă CodeQL
 fără a consemna justificarea tehnică în comentariul de respingere: `won't fix` pentru
@@ -680,11 +683,7 @@ a identificat următorii candidați pentru raționalizare. **Combinările sunt m
 mecanice; activările/dezactivările sau eliminările sunt decizii de politică rezervate operatorului.** Nimic din cele de mai jos
 nu este aplicat încă.
 
-**De asemenea, nedocumentate mai sus** (consultative, semnal slab): jobul `docs-lint`
-(markdownlint + Vale, întregul job cu `continue-on-error`) și fluxurile de lucru autonome de scanare
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` se află în
-`quality-baseline.json`, dar nu este conectat la un mecanism de limitare blocant în `ci.yml` — metrica este
-în prezent orfană.
+**De asemenea nedocumentate mai sus** (consultative, semnal redus): jobul `docs-lint` (markdownlint + Vale, întregul job cu `continue-on-error`) și workflow-urile scanner independente `semgrep.yml` / `scorecard.yml`. CodeQL are acum joburi obligatorii de producător și admitere sub `Gate / CI`, supuse cerințelor de activare descrise mai sus. `semgrepFindings: 0` se află în `quality-baseline.json`, dar nu este conectat la un ratchet blocant în `ci.yml` — metrica este momentan orfană.
 
 ### Combinare / deduplicare (mecanică, risc mai redus)
 

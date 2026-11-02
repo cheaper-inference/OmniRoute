@@ -40,14 +40,16 @@ Resit meliputi aliran kerja mereka sendiri, bukan penerbitan, pelaksanaan, atau 
 pengimbas yang bersifat nasihat sedia ada. Menjadikan semakan yang berkenaan sebagai wajib dalam peraturan cabang
 ialah perubahan pentadbiran yang berasingan; mentakrifkan tugasnya tidak dengan sendirinya melindungi sesuatu cabang.
 
-`API Route Typecheck` ialah semakan aliran kerja bebas, di luar kedua-dua keputusan agregat
-dan profil statik pemerhati penuh tempatan. Periksa hasilnya secara berasingan untuk calon yang tepat.
-`.github/workflows/api-route-typecheck.yml` dijalankan pada PR ke `main` atau
-`release/**`, tolakan ke salah satu keluarga cabang, dan pencetusan manual. Ia tidak mempunyai penapis laluan.
-Penyasaran semula pangkalan PR meminta semakan baharu; suntingan isi kandungan/tajuk menggunakan nama pemerhatian sahaja
-`Admission not requested / API Route Typecheck` dan tidak boleh menggantikan semakan kemasukan.
-Aliran kerja tersebut tidak mengisytiharkan pencetus kumpulan gabungan. Sebarang pelaksanaan giliran gabungan yang memerlukan
-semakan ini mesti terlebih dahulu memastikan pelaksanaannya untuk peristiwa tersebut.
+`API Route Typecheck` ialah semakan aliran kerja bebas, di luar kedua-dua keputusan agregat serta profil statik pemerhati penuh setempat. Periksa hasilnya secara berasingan untuk calon yang tepat. `.github/workflows/api-route-typecheck.yml` berjalan bagi PR ke `main` atau `release/**`, tolakan ke kedua-dua keluarga cabang, pencetusan manual, dan peristiwa `merge_group` jenis `checks_requested`. Tiada penapis laluan. Kumpulan penggabungan melakukan checkout `merge_group.head_sha`; peristiwa lain melakukan checkout `github.sha`. Semua peristiwa menggunakan gerbang diagnostik API dan ujian unit gerbang yang sama.
+Penukaran cabang asas sasaran PR meminta semakan baharu; suntingan isi atau tajuk menggunakan nama pemerhatian sahaja `Admission not requested / API Route Typecheck` dan tidak boleh menggantikan semakan penerimaan.
+
+### DAST menggunakan binaan CI yang telah disahkan
+
+Tugas CI wajib `dast-smoke` memanggil `.github/workflows/dast-smoke.yml` selepas `build`. Ia mengikut pemilihan perubahan kod dan draf yang sama dengan binaan, termasuk PR fork yang disokong, PR bersasaran release dan kumpulan penggabungan. Tugas DAST yang tiada, gagal, dibatalkan atau dilangkau secara tidak dijangka menyekat `Gate / CI`. Aliran kerja boleh guna semula ini tidak mempunyai pencetus PR atau manual bebas; pengesahan manual menggunakan pencetusan CI supaya binaan dan penggunanya kekal dalam satu pelaksanaan.
+
+`scripts/ci/next-build-provenance.mjs` memeterai artifak Next lengkap bersama cerna tar, repositori/peristiwa/pelaksanaan, cubaan pengeluar, head/base/checkout/tree, identiti aliran kerja, fail kunci, versi/ABI Node yang tepat, platform dan pembundel. DAST memilih ID artifak yang tidak boleh berubah daripada `needs.build.outputs`, mewajibkan pengesahan cerna muat turun, dan mengira hash ZIP secara bebas berbanding cerna pengeluar sebelum mengekstrak dua ahlinya yang dibenarkan melalui `scripts/ci/unpack-ci-build.py`. Manifes dan arkib tar juga mesti sepadan dengan output bebas pengeluar sebelum pepohon Next diekstrak. Ia tidak pernah mencari binaan berjaya terkini pada cabang. Pelaksanaan semula separa boleh menggunakan semula cubaan pengeluar yang sama apabila ID serta semua input masih sepadan; rekod bukti mencatat kedua-dua cubaan.
+
+Pengguna artifak kekal pada runner Linux terhos dengan kebenaran repositori baca sahaja dan tanpa rahsia repositori. Ia memasang versi Node pengeluar yang tepat, kemudian memasang komponen CLI dengan `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` menolak ketiadaan pelayan kendiri sebelum sebarang binaan sandaran; binaan CLI setempat biasa mengekalkan sandaran sedia ada. Kesediaan pelayan, Schemathesis dan promptfoo semuanya mesti berjaya dalam had tugas 25 minit yang tidak berubah. Rekod asal usul membuktikan identiti dan bait input, bukan kejayaan imbasan DAST. Artifak luput, gangguan runner atau pengimbas gagal kekal sebagai bukti tidak lengkap atau gagal; pembalut bersifat nasihat tidak boleh menjadikannya PASS.
 
 ### Kapasiti pelaksanaan UI
 
@@ -218,17 +220,24 @@ Dijalankan pada setiap PR ke `main`. Menyekat penggabungan jika gagal.
 
 Dijalankan selepas `test-coverage`. Menyekat penggabungan jika gagal.
 
-| Skrip                        | Mengesahkan                                                                                                                                                                                                | Menyekat                            |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| `quality:collect`            | Menghasilkan `quality-metrics.json` (kiraan amaran ESLint, liputan daripada laporan serpihan yang digabungkan)                                                                                             | Ya (huluan kepada mekanisme ambang) |
-| `quality:ratchet`            | Setiap metrik dalam `quality-baseline.json` tidak mengalami regresi (amaran ESLint ≤ garis dasar; liputan ≥ garis dasar)                                                                                   | Ya                                  |
-| `check:duplication`          | Penduaan kod (jscpd@4) tidak melebihi garis dasar dalam `quality-baseline.json`                                                                                                                            | Ya                                  |
-| `check:complexity`           | Kerumitan siklomatik peringkat fail tidak melebihi had (ESLint teras `complexity` + `max-lines-per-function`)                                                                                              | Ya                                  |
-| `check:cognitive-complexity` | Mekanisme ambang kerumitan kognitif (`eslint-plugin-sonarjs`) — laluan ESLint berasingan; CI menjalankan kedua-duanya secara tergabung sebagai satu langkah `check:complexity-ratchets`                    | Ya                                  |
-| `check:dead-code`            | Mekanisme ambang eksport / fail yang tidak digunakan (knip) tidak mengalami regresi berbanding garis dasar                                                                                                 | Ya                                  |
-| `check:compression-budget`   | Bajet penanda aras pemampatan — tahap minimum penjimatan token bagi setiap enjin tidak boleh mengalami regresi                                                                                             | Ya                                  |
-| `check:type-coverage`        | Mekanisme ambang peratusan berkod jenis (`type-coverage`) tidak mengalami regresi; sebahagian besarnya merangkumi `typecheck:noimplicit:core`                                                              | Ya                                  |
-| `check:codeql-ratchet`       | Kiraan amaran CodeQL terbuka tidak mengalami regresi (dibaca melalui `gh api`; dilangkau dengan selamat tanpa token) — kekerapan muat semula dan pencetus manual: lihat "Mekanisme ambang CodeQL" di bawah | Ya                                  |
+| Skrip                        | Mengesahkan                                                                                                                                                                             | Menyekat                            |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `quality:collect`            | Menghasilkan `quality-metrics.json` (kiraan amaran ESLint, liputan daripada laporan serpihan yang digabungkan)                                                                          | Ya (huluan kepada mekanisme ambang) |
+| `quality:ratchet`            | Setiap metrik dalam `quality-baseline.json` tidak mengalami regresi (amaran ESLint ≤ garis dasar; liputan ≥ garis dasar)                                                                | Ya                                  |
+| `check:duplication`          | Penduaan kod (jscpd@4) tidak melebihi garis dasar dalam `quality-baseline.json`                                                                                                         | Ya                                  |
+| `check:complexity`           | Kerumitan siklomatik peringkat fail tidak melebihi had (ESLint teras `complexity` + `max-lines-per-function`)                                                                           | Ya                                  |
+| `check:cognitive-complexity` | Mekanisme ambang kerumitan kognitif (`eslint-plugin-sonarjs`) — laluan ESLint berasingan; CI menjalankan kedua-duanya secara tergabung sebagai satu langkah `check:complexity-ratchets` | Ya                                  |
+| `check:dead-code`            | Mekanisme ambang eksport / fail yang tidak digunakan (knip) tidak mengalami regresi berbanding garis dasar                                                                              | Ya                                  |
+| `check:compression-budget`   | Bajet penanda aras pemampatan — tahap minimum penjimatan token bagi setiap enjin tidak boleh mengalami regresi                                                                          | Ya                                  |
+| `check:type-coverage`        | Mekanisme ambang peratusan berkod jenis (`type-coverage`) tidak mengalami regresi; sebahagian besarnya merangkumi `typecheck:noimplicit:core`                                           | Ya                                  |
+
+### Tugas: `codeql-scan` dan `codeql-admission`
+
+`codeql-scan` menghasilkan semua kategori analisis yang dikonfigurasikan. Selepas tugas itu berjaya, `codeql-admission` mengesahkan muat naiknya yang tepat dan ratchet amaran calon. Kedua-duanya ialah kebergantungan wajib `Gate / CI`, termasuk bagi calon yang hanya mengubah dokumentasi. Keperluan pengaktifan pentadbiran dan ujian canary diterangkan dalam “Ratchet CodeQL” di bawah.
+
+| Skrip                  | Perkara yang disahkan                                                                                                                                                                                        | Menyekat |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| `check:codeql-ratchet` | Ref/SHA calon dan semua kategori analisis yang dikonfigurasikan mesti terkini sebelum ratchet amaran dinilai; bukti yang tiada menyekat. Inventori global kekal berasingan — lihat “Ratchet CodeQL” di bawah | Ya       |
 
 ### Tugas: `quality-extended`
 
@@ -493,30 +502,23 @@ Komit fail ini bersama-sama perubahan yang meningkatkan metrik tersebut. PR yang
 metrik tanpa mengemas kini garis dasar akan dikesan oleh `--require-tighten` (Fasa 6A.5,
 menunggu pelaksanaan).
 
-### Ratchet CodeQL: kekerapan penyegaran dan pencetus manual
+### Ratchet CodeQL: penerimaan calon dan inventori repositori
 
-`check:codeql-ratchet` membaca **keadaan repositori, yang disegarkan mengikut jadual — bukan bagi setiap PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` melaporkan
-`state: configured`, `schedule: weekly`: imbasan persediaan lalai GitHub, bukan analisis bagi setiap push.
-Akibatnya: selepas PR yang MEMBAIKI amaran digabungkan, ratchet terus membaca
-bilangan lama yang lebih tinggi sehingga imbasan berjadual seterusnya dijalankan — maka ia melaporkan regresi
-pada setiap PR terbuka, termasuk PR susulan kepada PR pembaikan itu sendiri, sehingga imbasan tersebut dikemas kini.
+CI mengurus penerimaan calon bagi CodeQL melalui rantai kebergantungan yang jelas: `codeql-scan` memanggil matriks empat bahasa dalam `codeql.yml`, kemudian `codeql-admission` menjalankan `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` memerlukan kedua-dua hasil. Quality mengekalkan semakan angka sendiri tetapi tidak menyoal pengimbas sebelum pengeluar selesai; `Gate / Quality` sahaja bukan penerimaan calon yang lengkap. CodeQL kekal wajib bagi calon yang hanya mengubah dokumentasi.
 
-**Penyegaran manual**: `gh workflow run codeql.yml --ref release/vX.Y.Z` menjalankan semula
-analisis dan menerbitkan semula amaran dalam beberapa minit. Baca `.github/workflows/codeql.yml`
-terlebih dahulu — pengepalanya menjelaskan bahawa ia hanya menggunakan `workflow_dispatch` **kerana ia bercanggah dengan
-"persediaan lalai" GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Mengembalikan pencetus `push`/`pull_request`/
-`schedule` memerlukan **tindakan pemilik terlebih dahulu**: Settings → Code security →
-CodeQL: Default → Advanced. Jangan tambah pencetus `schedule:` tanpa pertukaran itu — ia
-hanya akan menghasilkan pelaksanaan yang gagal.
+Dasar dalam `config/quality/codeql-admission-policy.json` memilih Actions, C/C++, JavaScript/TypeScript dan Python, set pertanyaan default, model ancaman remote dan mod binaan none. Prasemakan pengeluar menolak rekod pengaktifan yang masih tertunda serta cabang di luar senarai sasaran yang jelas. Sasaran awal ialah main dan release/v3.8.53; release seterusnya memerlukan proses kemasukan yang telah disemak. Pencetus PR release CI sedia ada yang lebih luas dikekalkan, tetapi sasaran yang belum dimasukkan melaporkan HOLD sebelum pengekstrakan, bukannya mendapat PASS tanpa pengukuran.
 
-**Ketatkan garis dasar selepas bilangannya menurun** — `node scripts/check/check-codeql-ratchet.mjs
---update` menulis bilangan baharu yang diukur ke dalam `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, supaya ratchet tidak secara senyap membenarkan regresi kembali
-kepada had lama. Contoh pelaksanaan (2026-09-02/03): PR #12502 membaiki 7 amaran sebenar
-(13 → 6 amaran terbuka yang diukur); PR #12530 mengetatkan garis dasar beku daripada 11 → 6 agar sepadan; baki
-6 amaran kemudiannya ditolak dengan justifikasi bagi setiap amaran sehingga menjadi 0 amaran terbuka.
+Setiap tugas matriks merekodkan ID muat naik SARIF sebenar, bahasa, kategori, pelaksanaan dan cubaan, identiti aliran kerja pemanggil, ref/head/base/merge SHA peristiwa serta hash dasar. Tugas bergantung hanya memuat turun rekod bukti pelaksanaan ini dan mengesahkan cerna artifak. Ia memerlukan keempat-empat kategori, pengeluar yang berjaya serta pemprosesan selesai bagi setiap muat naik yang tepat. Ia menggunakan penapis sarif_id API, bukan analisis terkini yang ditemui pada cabang. Pelaksanaan semula separa boleh menggunakan semula kategori yang berjaya daripada cubaan terdahulu bagi pelaksanaan dan calon yang sama, sambil mengekalkan cubaan penghasilan; pengeluar semasa yang gagal tidak boleh menggunakan semula bukti hijau terdahulu.
+
+Action CodeQL menunggu pemprosesan, tetapi pelaksanaannya yang dipinkan boleh memberi amaran lalu meneruskan selepas kegagalan membaca status atau had menunggu habis. Oleh itu, penerimaan mengesahkan pemprosesan sekali lagi. Kategori tiada, pemprosesan tertunda, tugas gagal atau dibatalkan, identiti lapuk, penomboran halaman tidak lengkap atau API tidak tersedia menghasilkan HOLD dan kod keluar 2. Tiada lagi masa menunggu tetap untuk aliran kerja pengimbas bebas. PR yang belum diimbas tidak boleh lulus hanya kerana pertanyaan amaran mengembalikan 0. Bilangan terukur yang melebihi `metrics.codeqlAlerts.value` menghasilkan kod keluar 1; garis dasar tidak dinaikkan untuk menyerap amaran cabang lain. [Status muat naik dan carian analisis](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Rekod bukti mencatat ID muat naik dan analisis, kategori, versi alat, ref/SHA, garis dasar serta bilangan amaran. Identiti/bilangan hasil SARIF, bilangan peraturan minimum dan kejadian amaran yang tepat kekal wajib. Identiti PR/analisis disemak semula sebelum diterima. Semakan ini membuktikan liputan kategori yang dikonfigurasikan, bukan inventori setiap fail sumber yang diekstrak. Pengekstrakan C/C++ tanpa binaan tidak merangkumi kod yang dijana semasa binaan projek. Pengecualian sumber masih memerlukan semakan, dan atribusi penyumbang memerlukan bukti asas yang tepat serta boleh dibandingkan.
+
+`codeql-maintenance.yml` menyediakan imbasan tolakan release aktif dan jadual mingguan tanpa menduplikasi pengeluar PR/main. `nightly-codeql-inventory.yml` mengekalkan garis dasar seluruh repositori secara berasingan, menggunakan `--strict-measurement` dan gagal apabila pengukuran tidak tersedia. Langkauan bertoleransi oleh pengumpul setempat lama bukan penerimaan calon. Pengetatan kekal sebagai `--update` yang jelas selepas bilangan global yang lebih rendah disahkan.
+
+Aliran kerja Advanced tidak boleh diterbitkan semasa Default Setup dikonfigurasikan: GitHub menolak gabungan tersebut. Dasar berversi kekal tertunda sehingga peralihan pentadbiran yang telah disemak dibaca semula untuk pengesahan. Sebelum penerbitan, pengendali meminkan repositori, head/base/tree, hash dasar/tampalan/undur balik dan keadaan tetapan yang diperhatikan; `node scripts/quality/codeql-producer.mjs verify-admin-readback` memeriksa rekod JSON jangkaan dan sebenar yang dibekalkan. Ini ialah perlindungan teknikal, bukan kelulusan pengendali atau pengganti mendapatkan bacaan semula terkini. Token PR tidak pernah meminta akses Administration. Pelancaran dan sebarang perubahan pengimbas memerlukan bacaan semula berasingan itu serta bukti keserasian PR, fork dan kumpulan penggabungan sebenar.
+
+Fork menggunakan runner terhos, checkout tanpa menyimpan kelayakan, tiada pemasangan/binaan projek dalam pengeluar dan tiada rahsia repositori yang diwarisi. GitHub menyokong muat naik SARIF bagi peristiwa pull_request menggunakan token fork yang dikurangkan kebenarannya; kelulusan pelaksanaan sumbangan pertama kekal mengikut dasar GitHub. Jangan sekali-kali menggunakan pull_request_target untuk melaksanakan kod yang tidak dipercayai. Sahkan kebenaran token sebenar, analysis_key dan semua persekitaran kategori dalam canary terkawal sebelum menganggap migrasi selesai. [Peraturan muat naik fork](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [mod tetapan yang bercanggah](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Penolakan ialah keputusan pengendali (Peraturan Tegas #14)** — jangan sekali-kali menolak amaran CodeQL
 tanpa merekodkan justifikasi teknikal dalam ulasan penolakan: `won't fix` untuk
@@ -673,11 +675,7 @@ mengenal pasti calon rasionalisasi berikut. **Penggabungan tersebut ialah peruba
 mekanikal; penukaran/pengguguran ialah keputusan dasar yang dikhaskan untuk pengendali.** Tiada apa-apa di bawah
 yang telah dilaksanakan lagi.
 
-**Turut tidak didokumentasikan di atas** (nasihat sahaja, isyarat rendah): tugas `docs-lint`
-(markdownlint + Vale, keseluruhan tugas `continue-on-error`) dan aliran kerja pengimbas kendiri
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` terdapat dalam
-`quality-baseline.json` tetapi tidak disambungkan kepada ratchet penyekat dalam `ci.yml` — metrik itu
-kini terbiar.
+**Turut belum didokumentasikan di atas** (nasihat, isyarat rendah): tugas `docs-lint` (markdownlint + Vale, seluruh tugas menggunakan `continue-on-error`) serta aliran kerja pengimbas kendiri `semgrep.yml` / `scorecard.yml`. CodeQL kini mempunyai tugas pengeluar dan penerimaan wajib di bawah `Gate / CI`, tertakluk pada keperluan pengaktifan yang diterangkan di atas. `semgrepFindings: 0` terdapat dalam `quality-baseline.json` tetapi tidak disambungkan kepada ratchet yang menyekat dalam `ci.yml` — metrik ini kini tiada semakan pelaksana yang berkaitan.
 
 ### Gabung / nyahduplikasi (mekanikal, risiko lebih rendah)
 

@@ -40,7 +40,16 @@ CLI atmeta išregistruoto kodo ir įvykio SHA neatitiktį. Darbo eigos testai su
 politikos narystę su rezultatą pateikiančios užduoties `needs` sąrašu, kad nauja ar
 pašalinta vykdymo šaka negalėtų nepastebimai dingti. Kvitai apima tik savo darbo eigą, o ne publikavimą, diegimą ar esamo rekomendacinio skaitytuvo vidinę veiklą. Atitinkamų patikrų nustatymas kaip privalomų šakų taisyklėse yra atskiras administracinis pakeitimas; vien jų užduočių apibrėžimas šakos neapsaugo.
 
-`API Route Typecheck` yra nepriklausoma darbo eigos patikra, nepatenkanti nei į bendrus verdiktus, nei į vietinio visapusiško stebėtojo statinį profilį. Jos rezultatą tikrinkite atskirai konkrečiam kandidatui. `.github/workflows/api-route-typecheck.yml` vykdoma PR užklausoms į `main` arba `release/**`, pakeitimų siuntimams į bet kurios iš šių šakų grupę ir rankiniam paleidimui. Joje nėra kelių filtro. Pakeitus PR bazinę šaką, prašoma atlikti naują patikrą; turinio ar pavadinimo pakeitimams naudojamas tik stebėjimui skirtas pavadinimas `Admission not requested / API Route Typecheck`, todėl jie negali pakeisti priėmimo patikros. Darbo eigoje neapibrėžtas sujungimo grupės aktyviklis. Prieš diegiant sujungimo eilę, kuriai būtina ši patikra, pirmiausia reikia užtikrinti, kad ji būtų vykdoma tam įvykiui.
+`API Route Typecheck` yra nepriklausoma darbo eigos patikra, nepriklausanti nei vienam iš dviejų bendrų verdiktų, nei viso vietinio stebėtojo statiniam profiliui. Jos rezultatą tikrinkite atskirai konkrečiam kandidatui. `.github/workflows/api-route-typecheck.yml` vykdoma PR į `main` arba `release/**`, siunčiant pakeitimus į abiejų šeimų šakas, paleidus rankiniu būdu ir gavus `checks_requested` tipo `merge_group` įvykius. Kelių filtro nėra. Sujungimo grupės pasiima `merge_group.head_sha`; kiti įvykiai pasiima `github.sha`. Visi įvykiai naudoja tuos pačius API diagnostikos vartus ir jų vienetų testus.
+Pakeitus PR bazinę šaką prašoma naujos patikros; aprašo ar pavadinimo pakeitimai naudoja tik stebėjimui skirtą pavadinimą `Admission not requested / API Route Typecheck` ir negali pakeisti priėmimo patikros.
+
+### DAST naudoja patikrintą CI komponavimo rezultatą
+
+Privaloma CI užduotis `dast-smoke` po `build` iškviečia `.github/workflows/dast-smoke.yml`. Ji taiko tokią pačią kodo ir juodraščių atranką kaip komponavimas, įskaitant palaikomus PR iš išsišakojimų, PR į leidimo šaką ir sujungimo grupes. Trūkstama, nesėkminga, atšaukta ar netikėtai praleista DAST užduotis blokuoja `Gate / CI`. Pakartotinai naudojama darbo eiga neturi savarankiško PR ar rankinio paleidimo trigerio; rankinis tikrinimas naudoja CI paleidimą, kad komponuotojas ir vartotojas liktų tame pačiame vykdyme.
+
+`scripts/ci/next-build-provenance.mjs` užantspauduoja visą Next artefaktą su jo tar maišos reikšme, saugykla/įvykiu/vykdymu, gamintojo bandymu, head/base/checkout/tree reikšmėmis, darbo eigų tapatybėmis, priklausomybių užrakto failu, tikslia Node versija ir ABI, platforma bei paketavimo įrankiu. DAST pasirenka nekintamą artefakto ID iš `needs.build.outputs`, reikalauja patikrinti atsisiuntimo maišos reikšmę ir nepriklausomai apskaičiuoja ZIP maišą bei palygina ją su gamintojo reikšme, prieš išskleisdamas du leidžiamus įrašus per `scripts/ci/unpack-ci-build.py`. Manifestas ir tar archyvas taip pat turi atitikti nepriklausomus gamintojo išvesties duomenis prieš išskleidžiant Next medį. Niekada neieškoma naujausio sėkmingo šakos komponavimo. Dalinis pakartotinis vykdymas gali pakartotinai naudoti tą patį gamintojo bandymą, jei jo ID ir visi įvesties duomenys vis dar sutampa; patvirtinimo įrašas išsaugo abu bandymus.
+
+Vartotojas lieka platformos priglobtame Linux vykdiklyje su tik skaitymo teisėmis saugykloje ir be saugyklos paslapčių. Jis įdiegia tikslią gamintojo Node versiją, tada surenka CLI su `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` atmeta trūkstamą autonominį serverį prieš bet kokį atsarginį komponavimą; įprasti vietiniai CLI komponavimai išlaiko esamą atsarginį būdą. Serverio pasirengimas, Schemathesis ir promptfoo turi būti sėkmingi per nepakeistą 25 minučių užduoties ribą. Kilmės patvirtinimo įrašas įrodo įvesties tapatybę ir baitus, o ne sėkmingą DAST skenavimą. Artefakto galiojimo pabaiga, vykdiklio pertrūkis ar skenerio klaida lieka neišsamiais arba nesėkmingais įrodymais; patariamoji apgauba negali jų paversti PASS.
 
 ### UI vykdymo pajėgumas
 
@@ -218,17 +227,24 @@ Vykdoma kiekvienam į `main` nukreiptam PR. Nesėkmės atveju sujungimas blokuoj
 
 Vykdoma po `test-coverage`. Nesėkmės atveju neleidžia sujungti pakeitimų.
 
-| Scenarijus                   | Tikrina                                                                                                                                                                                                                   | Blokuojantis                  |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `quality:collect`            | Sugeneruoja `quality-metrics.json` („ESLint“ įspėjimų skaičių ir aprėptį iš sujungtos segmentų ataskaitos)                                                                                                                | Taip (prieš reketinę patikrą) |
-| `quality:ratchet`            | Nė viena `quality-baseline.json` metrika nepablogėjo („ESLint“ įspėjimai ≤ bazinis lygis; aprėptis ≥ bazinis lygis)                                                                                                       | Taip                          |
-| `check:duplication`          | Kodo dubliavimas (jscpd@4) neviršija `quality-baseline.json` bazinio lygio                                                                                                                                                | Taip                          |
-| `check:complexity`           | Failo lygmens ciklomatinis sudėtingumas neviršija ribos (pagrindinės „ESLint“ taisyklės `complexity` + `max-lines-per-function`)                                                                                          | Taip                          |
-| `check:cognitive-complexity` | Kognityvinio sudėtingumo reketinė patikra (`eslint-plugin-sonarjs`) — atskiras „ESLint“ vykdymas; CI abu sujungia į vieną `check:complexity-ratchets` veiksmą                                                             | Taip                          |
-| `check:dead-code`            | Nenaudojamų eksportų / failų reketinė patikra (knip) nepablogėjo, palyginti su baziniu lygiu                                                                                                                              | Taip                          |
-| `check:compression-budget`   | Glaudinimo našumo testo biudžetas — kiekvieno variklio minimali sutaupytų leksemų riba neturi sumažėti                                                                                                                    | Taip                          |
-| `check:type-coverage`        | Tipais aprašytos dalies procentinė reketinė patikra (`type-coverage`) nepablogėjo; iš esmės apima `typecheck:noimplicit:core`                                                                                             | Taip                          |
-| `check:codeql-ratchet`       | Atvirų „CodeQL“ įspėjimų skaičius nepadidėjo (nuskaitoma per `gh api`; jei nėra prieigos rakto, patikra korektiškai praleidžiama) — atnaujinimo dažnį ir rankinį paleidimą žr. toliau, skiltyje „CodeQL reketinė patikra“ | Taip                          |
+| Scenarijus                   | Tikrina                                                                                                                                                       | Blokuojantis                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `quality:collect`            | Sugeneruoja `quality-metrics.json` („ESLint“ įspėjimų skaičių ir aprėptį iš sujungtos segmentų ataskaitos)                                                    | Taip (prieš reketinę patikrą) |
+| `quality:ratchet`            | Nė viena `quality-baseline.json` metrika nepablogėjo („ESLint“ įspėjimai ≤ bazinis lygis; aprėptis ≥ bazinis lygis)                                           | Taip                          |
+| `check:duplication`          | Kodo dubliavimas (jscpd@4) neviršija `quality-baseline.json` bazinio lygio                                                                                    | Taip                          |
+| `check:complexity`           | Failo lygmens ciklomatinis sudėtingumas neviršija ribos (pagrindinės „ESLint“ taisyklės `complexity` + `max-lines-per-function`)                              | Taip                          |
+| `check:cognitive-complexity` | Kognityvinio sudėtingumo reketinė patikra (`eslint-plugin-sonarjs`) — atskiras „ESLint“ vykdymas; CI abu sujungia į vieną `check:complexity-ratchets` veiksmą | Taip                          |
+| `check:dead-code`            | Nenaudojamų eksportų / failų reketinė patikra (knip) nepablogėjo, palyginti su baziniu lygiu                                                                  | Taip                          |
+| `check:compression-budget`   | Glaudinimo našumo testo biudžetas — kiekvieno variklio minimali sutaupytų leksemų riba neturi sumažėti                                                        | Taip                          |
+| `check:type-coverage`        | Tipais aprašytos dalies procentinė reketinė patikra (`type-coverage`) nepablogėjo; iš esmės apima `typecheck:noimplicit:core`                                 | Taip                          |
+
+### Užduotys: `codeql-scan` ir `codeql-admission`
+
+`codeql-scan` sukuria visas sukonfigūruotas analizės kategorijas. Sėkmingai pasibaigus šiai užduočiai, `codeql-admission` patikrina jos tikslius įkėlimus ir kandidato perspėjimų ratchet ribą. Abi yra privalomos `Gate / CI` priklausomybės, įskaitant kandidatus, keičiančius tik dokumentaciją. Administracinio aktyvinimo ir bandomojo paleidimo reikalavimai aprašyti toliau esančioje skiltyje „CodeQL ratchet“.
+
+| Scenarijus             | Tikrina                                                                                                                                                                                                              | Blokuoja |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `check:codeql-ratchet` | Kandidato ref/SHA ir visos sukonfigūruotos analizės kategorijos turi būti aktualios prieš perspėjimų ratchet patikrą; trūkstant įrodymų blokuojama. Bendras inventorius lieka atskiras — žr. toliau „CodeQL ratchet“ | Taip     |
 
 ### Užduotis: `quality-extended`
 
@@ -493,31 +509,24 @@ git add quality-baseline.json
 rodiklį neatnaujindamas bazinės reikšmės, bus aptiktas naudojant `--require-tighten` (6A.5 etapas,
 įgyvendinimas dar laukiamas).
 
-### CodeQL reketas: atnaujinimo dažnis ir rankinis paleidimas
+### CodeQL ratchet: kandidato priėmimas ir saugyklos inventorius
 
-`check:codeql-ratchet` nuskaito **saugyklos būseną, atnaujinamą pagal tvarkaraštį, o ne kiekvienam PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` pateikia
-`state: configured`, `schedule: weekly`: tai GitHub numatytojo nustatymo nuskaitymas, o ne
-kiekvieno išsiuntimo analizė. Pasekmė: sujungus įspėjimus IŠTAISANTĮ PR, reketas toliau
-nuskaito seną, didesnį skaičių, kol bus paleistas kitas suplanuotas nuskaitymas, todėl
-jis praneša apie regresiją kiekviename atvirame PR, įskaitant ir taisančio PR tolesnius
-pakeitimus, kol nuskaitymo rezultatai pasivys.
+CI valdo kandidato CodeQL priėmimą per aiškią priklausomybių grandinę: `codeql-scan` iškviečia keturių kalbų matricą faile `codeql.yml`, tada `codeql-admission` vykdo `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` reikalauja abiejų rezultatų. Quality išlaiko savo skaitines patikras, bet neužklausia skenerio prieš gamintojui baigiant darbą; vien `Gate / Quality` nėra visapusiškas kandidato priėmimas. CodeQL lieka privalomas ir tik dokumentaciją keičiantiems kandidatams.
 
-**Rankinis atnaujinimas**: `gh workflow run codeql.yml --ref release/vX.Y.Z` iš naujo paleidžia
-analizę ir per kelias minutes pakartotinai paskelbia įspėjimus. Pirmiausia perskaitykite `.github/workflows/codeql.yml`
-— jo antraštėje paaiškinta, kad jis skirtas **tik `workflow_dispatch`**, nes **konfliktuoja su
-GitHub „default setup“** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Norint atkurti `push`/`pull_request`/
-`schedule` paleidiklius, pirmiausia būtinas **savininko veiksmas**: Settings → Code security →
-CodeQL: Default → Advanced. Nepridėkite `schedule:` paleidiklio neatlikę šio perjungimo — jis
-tik sukurs nesėkmingus paleidimus.
+Politika faile `config/quality/codeql-admission-policy.json` pasirenka Actions, C/C++, JavaScript/TypeScript ir Python, užklausų rinkinį default, grėsmių modelį remote ir komponavimo režimą none. Gamintojo išankstinė patikra atmeta laukiantį aktyvinimo įrašą ir šakas, kurių nėra aiškiame tikslų sąraše. Pradiniai tikslai yra main ir release/v3.8.53; kitą leidimą reikia įtraukti po peržiūros. Esamas platesnis CI leidimo PR trigeris paliekamas, tačiau neįtrauktas tikslas prieš išgavimą praneša HOLD, užuot gavęs neišmatuotą PASS.
 
-**Sumažėjus skaičiui, sugriežtinkite bazinę reikšmę** — `node scripts/check/check-codeql-ratchet.mjs
---update` įrašo naują išmatuotą skaičių į `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, kad reketas tyliai neleistų regresijos iki ankstesnės viršutinės
-ribos. Praktinis pavyzdys (2026-09-02/03): PR #12502 ištaisė 7 realius įspėjimus
-(13 → 6 išmatuoti atviri); PR #12530 sugriežtino užfiksuotą bazinę reikšmę nuo 11 iki 6, kad ji atitiktų rezultatą; likę
-6 įspėjimai tuomet buvo atmesti, kiekvienam pateikiant atskirą pagrindimą, kol atvirų įspėjimų liko 0.
+Kiekviena matricos užduotis įrašo faktinį SARIF įkėlimo ID, kalbą, kategoriją, vykdymą ir bandymą, iškviečiančios darbo eigos tapatybę, įvykio ref/head/base/merge SHA ir politikos maišą. Priklausoma užduotis atsisiunčia tik šio vykdymo patvirtinimo įrašus ir patikrina artefaktų maišos reikšmes. Ji reikalauja visų keturių kategorijų, sėkmingo gamintojo ir baigto kiekvieno tikslaus įkėlimo apdorojimo. Ji naudoja API sarif_id filtrą, o ne naujausią šakoje rastą analizę. Daliniai pakartotiniai vykdymai gali panaudoti sėkmingas kategorijas iš ankstesnio to paties vykdymo ir kandidato bandymo, išsaugodami jas sukūrusį bandymą; nesėkmingas dabartinis gamintojas negali panaudoti ankstesnių žalių įrodymų.
+
+CodeQL veiksmas laukia apdorojimo, tačiau jo fiksuota realizacija gali įspėti ir tęsti po būsenos nuskaitymo klaidos arba pasibaigus laukimo limitui. Todėl priėmimo patikra apdorojimą tikrina dar kartą. Trūkstamos kategorijos, laukiantis apdorojimas, nesėkmingos ar atšauktos užduotys, pasenusi tapatybė, nepilnas puslapių nuskaitymas ar nepasiekiamos API duoda HOLD ir išėjimo kodą 2. Fiksuoto nepriklausomos skenerio darbo eigos laukimo nebelieka. Neskenuotas PR negali būti priimtas vien todėl, kad perspėjimų užklausa grąžino 0. Išmatuotas skaičius virš `metrics.codeqlAlerts.value` baigiasi kodu 1; bazinė riba nedidinama, kad sutalpintų kitos šakos perspėjimus. [Įkėlimo būsena ir analizės paieška](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Patvirtinimo įrašas išsaugo įkėlimų ir analizių ID, kategorijas, įrankių versijas, ref/SHA, bazinę ribą ir perspėjimų skaičius. SARIF tapatybė ir rezultatų skaičius, mažiausi taisyklių skaičiai ir tikslūs perspėjimų atvejai lieka privalomi. PR ir analizės tapatybės prieš priimant patikrinamos dar kartą. Šios patikros nustato sukonfigūruotų kategorijų aprėptį, o ne kiekvieno išgauto šaltinio failo inventorių. C/C++ išgavimas be komponavimo neapima kodo, sugeneruoto komponuojant projektą. Šaltinio išimtis vis dar reikia peržiūrėti, o priskyrimui prisidėjusiam autoriui reikia palyginamų tikslios bazės įrodymų.
+
+`codeql-maintenance.yml` teikia aktyvaus leidimo pakeitimų siuntimo skenavimus ir savaitinį tvarkaraštį, nedubliuodamas PR/main gamintojų. `nightly-codeql-inventory.yml` atskirai palaiko visos saugyklos bazinę ribą su `--strict-measurement` ir klaida, jei matavimas neįmanomas. Senojo vietinio rinktuvo toleruojamas praleidimas nėra kandidato priėmimas. Griežtinimas lieka aiškus `--update` veiksmas po patikrinto mažesnio bendro skaičiaus.
+
+Advanced darbo eigos negalima skelbti, kol sukonfigūruotas Default Setup: GitHub atmeta tokį derinį. Jos versijuota politika lieka laukianti, kol peržiūrėtas administracinis perėjimas patvirtinamas pakartotinai nuskaitant būseną. Prieš skelbiant operatorius užfiksuoja saugyklą, head/base/tree, politikos/pataisos/grąžinimo maišas ir stebėtą sąrankos būseną; `node scripts/quality/codeql-producer.mjs verify-admin-readback` patikrina pateiktus tikėtinus ir faktinius JSON įrašus. Tai techninė apsauga, o ne operatoriaus patvirtinimas ar naujų būsenos nuskaitymų pakaitalas. PR prieigos raktas niekada neprašo Administration prieigos. Diegimui ir bet kokiam skenerio pakeitimui reikia šio atskiro būsenos nuskaitymo bei tikrų PR, išsišakojimų ir sujungimo grupių suderinamumo įrodymų.
+
+Išsišakojimai naudoja platformos priglobtus vykdiklius, checkout be išsaugotų prisijungimo duomenų, gamintojas neįdiegia ir nekomponuoja projekto, o saugyklos paslaptys nepaveldimos. GitHub palaiko SARIF įkėlimą pull_request įvykiui su ribotu išsišakojimo prieigos raktu; pirmojo indėlio vykdymo patvirtinimas lieka GitHub politikos dalimi. Niekada nenaudokite pull_request_target nepatikimam kodui vykdyti. Prieš laikydami migraciją baigta, kontroliuojamame bandomajame paleidime patvirtinkite faktines prieigos rakto teises, analysis_key ir visų kategorijų aplinkas. [Įkėlimo iš išsišakojimų taisyklės](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[nesuderinami sąrankos režimai](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Sprendimą dėl atmetimo priima operatorius (griežta taisyklė #14)** — niekada neatmeskite CodeQL įspėjimo
 atmetimo komentare neįrašę techninio pagrindimo: `won't fix`, kai tai aukštesnio lygmens protokolo
@@ -678,11 +687,7 @@ nustatė toliau nurodytus racionalizavimo kandidatus. **Sujungimai yra mechanini
 pakeitimai; perjungimai ir atsisakymai yra operatoriui palikti politikos sprendimai.** Niekas iš toliau
 nurodytų pakeitimų dar nepritaikyta.
 
-**Taip pat pirmiau nedokumentuota** (rekomendacinio pobūdžio, silpnas signalas): `docs-lint` užduotis
-(markdownlint + Vale, visai užduočiai taikoma `continue-on-error`) ir atskiros nuskaitymo darbų sekos
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` yra faile
-`quality-baseline.json`, tačiau nėra susietas su blokuojančiu regresijos slenksčiu faile `ci.yml` — šiuo metu šis rodiklis
-yra nesusietas.
+**Taip pat neaprašyta aukščiau** (patariamoji, menko signalo): užduotis `docs-lint` (markdownlint + Vale, visa užduotis su `continue-on-error`) ir atskiros skenerių darbo eigos `semgrep.yml` / `scorecard.yml`. CodeQL dabar turi privalomas gamintojo ir priėmimo užduotis po `Gate / CI`, laikantis aukščiau aprašytų aktyvinimo reikalavimų. `semgrepFindings: 0` yra faile `quality-baseline.json`, tačiau faile `ci.yml` nesusietas su blokuojančiu ratchet — metrika šiuo metu nesusieta.
 
 ### Sujungimas / dubliavimo šalinimas (mechaniniai pakeitimai, mažesnė rizika)
 

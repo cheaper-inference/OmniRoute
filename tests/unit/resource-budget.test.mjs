@@ -312,7 +312,7 @@ function processGroupProbe(body) {
         "  fields[17] = String(threadCount);",
         '  return `${pid} (fixture process) ${fields.join(" ")}`;',
         "}",
-        "fs.readdirSync = () => [...records.keys()].map((pid) => ({ name: String(pid), isDirectory: () => true }));",
+        "fs.readdirSync = (_path, options) => options?.withFileTypes ? [...records.keys()].map((pid) => ({ name: String(pid), isDirectory: () => true })) : [...records.keys()].map(String);",
         "fs.readFileSync = (path) => {",
         '  const pid = Number(String(path).split("/")[2]);',
         "  reads.set(pid, (reads.get(pid) ?? 0) + 1);",

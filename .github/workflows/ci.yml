@@ -253,6 +253,65 @@ jobs:
       # it was advisory (continue-on-error) and largely subsumed by the blocking
       # check:type-coverage ratchet in quality-gate. Local: npm run typecheck:noimplicit:core.
 
+  codeql-scan:
+    name: CodeQL producer
+    needs: changes
+    if: ${{ (github.event_name != 'pull_request' || github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') }}
+    uses: ./.github/workflows/codeql.yml
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    with:
+      admission: true
+      ci-workflow-ref: ${{ github.workflow_ref }}
+      ci-workflow-sha: ${{ github.workflow_sha }}
+
+  codeql-admission:
+    name: CodeQL exact upload admission
+    needs: [changes, codeql-scan]
+    if: ${{ always() && (github.event_name != 'pull_request' || github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          package-manager-cache: false
+          node-version: ${{ env.CI_NODE_VERSION }}
+      # Same-run artifacts only; each language and attempt has its own filename.
+      - name: Download producer upload receipts
+        if: ${{ needs.codeql-scan.result == 'success' }}
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          pattern: codeql-upload-${{ github.run_id }}-*
+          path: codeql-producer-receipts
+          merge-multiple: false
+          digest-mismatch: error
+      - name: Admit only completed exact producer uploads
+        if: ${{ always() }}
+        run: node scripts/check/check-codeql-ratchet.mjs --candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CODEQL_PRODUCER_RESULT: ${{ needs.codeql-scan.result }}
+          CODEQL_PRODUCER_RECEIPTS_PATH: codeql-producer-receipts
+          CODEQL_RECEIPT_PATH: .artifacts/codeql-candidate.json
+      - name: Retain CodeQL candidate receipt
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: codeql-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .artifacts/codeql-candidate.json
+          if-no-files-found: error
+          retention-days: 14
+
   quality-gate:
     name: Quality Ratchet
     runs-on: ubuntu-latest
@@ -261,7 +320,7 @@ jobs:
     needs: [changes, test-coverage, lint]
     # Run even when test-coverage was SKIPPED/FAILED (e.g. a single flaky Coverage
     # Shard breaks the shard→coverage→ratchet chain). The DETERMINISTIC ratchets
-    # (eslint / complexity / cognitive-complexity / duplication / codeql) do NOT need
+    # (eslint / complexity / cognitive-complexity / duplication) do NOT need
     # the coverage artifact and MUST still run so cycle drift is measured on the
     # release PR — otherwise a flake silently skips the whole gate (incident: v3.8.36
     # release PR #4854, where the drift cascade only surfaced post-merge in #5029).
@@ -269,11 +328,8 @@ jobs:
     # the ratchet runs with --allow-missing, so absent coverage is skipped, not failed.
     # Path filter: code-only — pure docs/i18n PRs have nothing for these ratchets to guard.
     if: ${{ !cancelled() && (github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && needs.changes.outputs.code == 'true' && (needs.lint.result == 'success' || needs.lint.result == 'failure'))) }}
-    # security-events: read lets the CodeQL ratchet read open code-scanning alerts
-    # via `gh api .../code-scanning/alerts`. contents: read keeps checkout working.
     permissions:
       contents: read
-      security-events: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -349,14 +405,7 @@ jobs:
         run: npm run check:type-coverage
       - name: Compression budget ratchet (F2.4 / N4)
         run: npm run check:compression-budget
-      # CodeQL alerts ratchet — BLOQUEANTE (promovido de advisory na v3.8.26).
-      # Lê metrics.codeqlAlerts.value de quality-baseline.json e sai 1 SOMENTE numa
-      # regressão real (alertas abertos > baseline). Falha de medição (gh/auth/api)
-      # é skip gracioso com exit 0 — security-events:read no job-level permissions.
-      - name: CodeQL alerts ratchet (blocking)
-        run: npm run check:codeql-ratchet
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # CodeQL admission is the sibling job after all four producer categories.
       - name: Append summary
         if: always()
         run: cat .artifacts/quality-ratchet.md >> "$GITHUB_STEP_SUMMARY"
@@ -371,7 +420,7 @@ jobs:
   # Extended quality ratchets are blocking; circular-deps remains advisory.
   # Install every external auditor at its pinned version before measuring. A
   # failed installation must remain visible instead of letting a gate self-skip.
-  # The CodeQL ratchet runs in quality-gate, not here.
+  # CodeQL candidate admission is owned by codeql-admission after its producer.
   quality-extended:
     name: Quality Gates (Extended)
     runs-on: ubuntu-latest
@@ -408,7 +457,7 @@ jobs:
       # CLI entrypoint now fails loudly here instead of reporting a silent pass.
       - name: Bundle size (ratchet, blocking)
         run: npm run check:bundle-size -- --ratchet
-      # CodeQL ratchet foi PROMOVIDO a BLOQUEANTE no job quality-gate (v3.8.26) —
+      # CodeQL candidate admission is blocking in the codeql-admission job —
       # não roda aqui para evitar duplo run/duplo report.
       - name: Install security scanners (gitleaks/osv/actionlint/zizmor/oasdiff)
         env:
@@ -736,6 +785,14 @@ jobs:
       group: heavy-build-${{ github.ref == 'refs/heads/main' && 'main' || github.ref }}
       cancel-in-progress: false
     if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
+    outputs:
+      artifact-id: ${{ steps.next-build-upload.outputs.artifact-id }}
+      artifact-digest: ${{ steps.next-build-upload.outputs.artifact-digest }}
+      manifest-sha256: ${{ steps.next-build-provenance.outputs.manifest-sha256 }}
+      archive-sha256: ${{ steps.next-build-provenance.outputs.archive-sha256 }}
+      node-version: ${{ steps.next-build-provenance.outputs.node-version }}
+      bundler: ${{ steps.next-build-provenance.outputs.bundler }}
+      producer-attempt: ${{ steps.next-build-provenance.outputs.producer-attempt }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -775,15 +832,46 @@ jobs:
         # Keep standalone/node_modules intact: package/electron jobs consume the
         # Next-traced standalone tree and must not replace it with root node_modules.
         run: |
-          tar -czf "$RUNNER_TEMP/e2e-build.tar.gz" \
+          mkdir -p "$RUNNER_TEMP/next-build-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          tar -czf "$RUNNER_TEMP/next-build-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/e2e-build.tar.gz" \
             --exclude='.build/next/cache' \
             .build/next
+      - name: Seal Next.js build provenance
+        id: next-build-provenance
+        env:
+          OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request') && '1' || '0' }}
+        run: |
+          node scripts/ci/next-build-provenance.mjs create \
+            "$RUNNER_TEMP/next-build-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/e2e-build.tar.gz" \
+            "$RUNNER_TEMP/next-build-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/next-build-provenance.json"
       - name: Upload Next.js build for downstream jobs
+        id: next-build-upload
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: next-build
-          path: ${{ runner.temp }}/e2e-build.tar.gz
+          path: |
+            ${{ runner.temp }}/next-build-${{ github.run_id }}-${{ github.run_attempt }}/e2e-build.tar.gz
+            ${{ runner.temp }}/next-build-${{ github.run_id }}-${{ github.run_attempt }}/next-build-provenance.json
+          if-no-files-found: error
           retention-days: 1
+
+  dast-smoke:
+    name: DAST smoke
+    needs: [changes, build]
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
+    uses: ./.github/workflows/dast-smoke.yml
+    permissions:
+      contents: read
+    with:
+      artifact-id: ${{ needs.build.outputs.artifact-id }}
+      artifact-digest: ${{ needs.build.outputs.artifact-digest }}
+      manifest-sha256: ${{ needs.build.outputs.manifest-sha256 }}
+      archive-sha256: ${{ needs.build.outputs.archive-sha256 }}
+      node-version: ${{ needs.build.outputs.node-version }}
+      bundler: ${{ needs.build.outputs.bundler }}
+      producer-attempt: ${{ needs.build.outputs.producer-attempt }}
+      ci-workflow-ref: ${{ github.workflow_ref }}
+      ci-workflow-sha: ${{ github.workflow_sha }}
 
   package-artifact:
     name: Package Artifact
@@ -1595,6 +1683,8 @@ jobs:
       - changes
       - lint
       - quality-gate
+      - codeql-scan
+      - codeql-admission
       - quality-extended
       - docs-sync-strict
       - docs-lint
@@ -1603,6 +1693,7 @@ jobs:
       - i18n
       - pr-test-policy
       - build
+      - dast-smoke
       - package-artifact
       - electron-package-smoke
       - test-unit

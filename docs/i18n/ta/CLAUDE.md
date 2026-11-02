@@ -11,7 +11,7 @@
 ## Worktree தனிமைப்படுத்தல் — Claude Code-க்கு உரிய விவரங்கள்
 
 முழுமையான கட்டாய worktree நெறிமுறை (base-branch உறுதிப்படுத்தல், `.claude/worktrees/` அதிகாரப்பூர்வ பாதை, `cp -al` node_modules, teardown விதிகள்)
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)-இல் உள்ளது (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md)-இல் உள்ளது (`AGENTS.md` →
 Git Workflow → "Worktree isolation"-இல் சுருக்கமாகக் கொடுக்கப்பட்டுள்ளது). Claude Code-க்கு உரிய குறிப்புகள்:
 
 - அவர்கள் ஏற்கனவே உங்களிடம் சொல்லாவிட்டால், `AskUserQuestion` மூலம் operator-உடன்

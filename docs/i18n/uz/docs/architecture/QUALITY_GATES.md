@@ -41,7 +41,16 @@ CLI checkout/hodisa SHA mos kelmasligini rad etadi. Ish jarayoni testlari siyosa
 vazifasining `needs` roʻyxatiga bogʻlaydi, shuning uchun yangi yoki olib tashlangan yoʻnalish
 sezdirmasdan yoʻqolib qolmaydi. Tasdiq qaydlari nashr qilish, joylashtirish yoki mavjud tavsiya beruvchi skanerning ichki tuzilishini emas, faqat o‘z ish jarayonini qamrab oladi. Tegishli tekshiruvlarni tarmoq qoidalarida majburiy qilish alohida ma’muriy o‘zgarishdir; ularning vazifalarini belgilashning o‘zi tarmoqni himoya qilmaydi.
 
-`API Route Typecheck` — har ikkala jamlangan xulosadan ham, mahalliy to‘liq kuzatuvchining statik profilidan ham tashqarida bo‘lgan mustaqil ish jarayoni tekshiruvi. Aniq nomzod uchun uning natijasini alohida tekshiring. `.github/workflows/api-route-typecheck.yml` `main` yoki `release/**` tarmoqlariga yo‘naltirilgan PR’larda, ushbu tarmoq oilalaridan biriga push qilinganda va qo‘lda ishga tushirilganda bajariladi. Unda yo‘l filtri yo‘q. PR asosiy tarmog‘ini qayta yo‘naltirish yangi tekshiruvni talab qiladi; tavsif/sarlavha tahrirlari faqat kuzatuv uchun mo‘ljallangan `Admission not requested / API Route Typecheck` nomidan foydalanadi va qabul tekshiruvining o‘rnini bosa olmaydi. Ish jarayonida birlashtirish guruhi uchun trigger e’lon qilinmagan. Ushbu tekshiruvni talab qiladigan har qanday birlashtirish navbatini joriy etishdan oldin uning mazkur hodisa uchun bajarilishi ta’minlanishi kerak.
+`API Route Typecheck` ikkala umumlashtirilgan hukmdan va to‘liq mahalliy kuzatuvchining statik profilidan tashqaridagi mustaqil ish jarayoni tekshiruvidir. Uning natijasini aynan tekshirilayotgan nomzod uchun alohida ko‘ring. `.github/workflows/api-route-typecheck.yml` `main` yoki `release/**` ga yo‘naltirilgan PR-larda, har ikkala tarmoq oilasiga push qilinganda, qo‘lda ishga tushirilganda hamda `checks_requested` turidagi `merge_group` hodisalarida ishlaydi. Yo‘l filtri yo‘q. Birlashtirish guruhlari `merge_group.head_sha`, boshqa hodisalar esa `github.sha` nusxasini oladi. Barcha hodisalar bir xil API diagnostika darvozasi va uning birlik testlaridan foydalanadi.
+PR-ning asosiy maqsad tarmog‘i o‘zgarsa, yangi tekshiruv so‘raladi; matn/sarlavha tahrirlari faqat kuzatuv uchun `Admission not requested / API Route Typecheck` nomidan foydalanadi va qabul tekshiruvining o‘rnini bosa olmaydi.
+
+### DAST tekshirilgan CI yig‘ilmasidan foydalanadi
+
+Majburiy `dast-smoke` CI vazifasi `build` dan keyin `.github/workflows/dast-smoke.yml` ni chaqiradi. U yig‘ishdagi kod/qoralama tanloviga amal qiladi; qo‘llab-quvvatlanadigan fork PR-lari, release ga yo‘naltirilgan PR-lar va birlashtirish guruhlari ham shular jumlasidan. Yo‘q, xato tugagan, bekor qilingan yoki kutilmaganda o‘tkazib yuborilgan DAST vazifasi `Gate / CI` ni to‘sadi. Qayta ishlatiladigan jarayonning mustaqil PR/dispatch triggeri yo‘q; qo‘lda tekshirish CI dispatch orqali amalga oshiriladi, shunda yig‘uvchi va iste’molchi bir ishga tushirishda qoladi.
+
+`scripts/ci/next-build-provenance.mjs` to‘liq Next artefaktini tar xeshi, repozitoriy/hodisa/ishga tushirish, ishlab chiqaruvchi urinishi, head/base/checkout/tree, jarayon identifikatorlari, lockfile, aniq Node versiyasi/ABI, platforma va bundler bilan bog‘laydi. DAST o‘zgarmas artefakt ID-sini `needs.build.outputs` dan tanlaydi, yuklab olish xeshini tekshirishni talab qiladi va `scripts/ci/unpack-ci-build.py` orqali ruxsat berilgan ikki a’zoni ochishdan oldin ZIP xeshini mustaqil hisoblab, ishlab chiqaruvchi xeshi bilan solishtiradi. Next daraxti ochilishidan oldin manifest va tar arxivi ham ishlab chiqaruvchining mustaqil chiqishlariga mos kelishi shart. U hech qachon tarmoqning eng so‘nggi muvaffaqiyatli yig‘ilmasini qidirmaydi. Qisman qayta ishga tushirish ID va barcha kirishlar mos qolsa, ayni ishlab chiqaruvchi urinishini ishlatishi mumkin; dalil qaydi ikkala urinishni saqlaydi.
+
+Iste’molchi faqat repozitoriyni o‘qish huquqiga ega va repozitoriy sirlari berilmagan hosted Linux runnerda qoladi. Ishlab chiqaruvchining aniq Node versiyasini o‘rnatib, CLI ni `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` bilan yig‘adi. `scripts/build/standaloneInput.mjs` har qanday zaxira yig‘ishdan oldin yo‘q standalone serverni rad etadi; odatiy mahalliy CLI yig‘ishlari mavjud zaxira yo‘lini saqlaydi. Server tayyorligi, Schemathesis va promptfoo o‘zgarmagan 25 daqiqalik vazifa chegarasida muvaffaqiyatli tugashi kerak. Kelib chiqish qaydi kirishlarning identifikatsiyasi va baytlarini tasdiqlaydi, muvaffaqiyatli DAST skanini emas. Artefakt muddati tugashi, runner to‘xtashi yoki skaner xatosi dalilni to‘liqsiz yoki muvaffaqiyatsiz qoldiradi; maslahat xarakteridagi qobiq uni PASS ga aylantira olmaydi.
 
 ### UI bajarish sigʻimi
 
@@ -203,17 +212,24 @@ tasdiqlarni zaiflashtirish va boshqa niqoblash holatlari mustaqil ravishda blokl
 
 `test-coverage`dan keyin ishga tushadi. Xatolik yuz bersa, birlashtirishni bloklaydi.
 
-| Skript                       | Tekshiradi                                                                                                                                                                                                                                           | Bloklovchi            |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| `quality:collect`            | `quality-metrics.json` faylini yaratadi (ESLint ogohlantirishlari soni, birlashtirilgan shard hisobotidan qamrov)                                                                                                                                    | Ha (ratchetdan oldin) |
-| `quality:ratchet`            | `quality-baseline.json` ichidagi har bir koʻrsatkich regressiyaga uchramaganini tekshiradi (ESLint ogohlantirishlari ≤ bazaviy koʻrsatkich; qamrov ≥ bazaviy koʻrsatkich)                                                                            | Ha                    |
-| `check:duplication`          | Kod takrorlanishi (jscpd@4) `quality-baseline.json` ichidagi bazaviy koʻrsatkichdan oshmasligini tekshiradi                                                                                                                                          | Ha                    |
-| `check:complexity`           | Fayl darajasidagi siklomatik murakkablik chegaradan oshmasligini tekshiradi (asosiy ESLint `complexity` + `max-lines-per-function`)                                                                                                                  | Ha                    |
-| `check:cognitive-complexity` | Kognitiv murakkablik ratcheti (`eslint-plugin-sonarjs`) — alohida ESLint tekshiruvi; CI ikkalasini yagona `check:complexity-ratchets` bosqichi sifatida birlashtirib ishga tushiradi                                                                 | Ha                    |
-| `check:dead-code`            | Ishlatilmaydigan eksportlar/fayllar ratcheti (knip) bazaviy koʻrsatkichga nisbatan regressiyaga uchramaganini tekshiradi                                                                                                                             | Ha                    |
-| `check:compression-budget`   | Siqish samaradorligi sinovi budjeti — har bir mexanizm uchun token tejashning minimal chegaralari regressiyaga uchramasligi kerak                                                                                                                    | Ha                    |
-| `check:type-coverage`        | Turlashtirilgan kod foizi ratcheti (`type-coverage`) regressiyaga uchramaganini tekshiradi; asosan `typecheck:noimplicit:core` vazifasini ham qamrab oladi                                                                                           | Ha                    |
-| `check:codeql-ratchet`       | Ochiq CodeQL ogohlantirishlari soni regressiyaga uchramaganini tekshiradi (`gh api` orqali oʻqiydi; tokensiz holatda muammosiz oʻtkazib yuboradi) — yangilash davriyligi va qoʻlda ishga tushirish uchun quyidagi "CodeQL ratcheti" boʻlimiga qarang | Ha                    |
+| Skript                       | Tekshiradi                                                                                                                                                                           | Bloklovchi            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| `quality:collect`            | `quality-metrics.json` faylini yaratadi (ESLint ogohlantirishlari soni, birlashtirilgan shard hisobotidan qamrov)                                                                    | Ha (ratchetdan oldin) |
+| `quality:ratchet`            | `quality-baseline.json` ichidagi har bir koʻrsatkich regressiyaga uchramaganini tekshiradi (ESLint ogohlantirishlari ≤ bazaviy koʻrsatkich; qamrov ≥ bazaviy koʻrsatkich)            | Ha                    |
+| `check:duplication`          | Kod takrorlanishi (jscpd@4) `quality-baseline.json` ichidagi bazaviy koʻrsatkichdan oshmasligini tekshiradi                                                                          | Ha                    |
+| `check:complexity`           | Fayl darajasidagi siklomatik murakkablik chegaradan oshmasligini tekshiradi (asosiy ESLint `complexity` + `max-lines-per-function`)                                                  | Ha                    |
+| `check:cognitive-complexity` | Kognitiv murakkablik ratcheti (`eslint-plugin-sonarjs`) — alohida ESLint tekshiruvi; CI ikkalasini yagona `check:complexity-ratchets` bosqichi sifatida birlashtirib ishga tushiradi | Ha                    |
+| `check:dead-code`            | Ishlatilmaydigan eksportlar/fayllar ratcheti (knip) bazaviy koʻrsatkichga nisbatan regressiyaga uchramaganini tekshiradi                                                             | Ha                    |
+| `check:compression-budget`   | Siqish samaradorligi sinovi budjeti — har bir mexanizm uchun token tejashning minimal chegaralari regressiyaga uchramasligi kerak                                                    | Ha                    |
+| `check:type-coverage`        | Turlashtirilgan kod foizi ratcheti (`type-coverage`) regressiyaga uchramaganini tekshiradi; asosan `typecheck:noimplicit:core` vazifasini ham qamrab oladi                           | Ha                    |
+
+### Vazifalar: `codeql-scan` va `codeql-admission`
+
+`codeql-scan` sozlangan barcha tahlil toifalarini yaratadi. Bu vazifa muvaffaqiyatli tugagach, `codeql-admission` aynan uning yuklashlari va nomzod ogohlantirishlarining ortmaslik chegarasini tekshiradi. Ikkalasi ham faqat hujjatlarni o‘zgartirgan nomzodlar uchun ham `Gate / CI` ning majburiy bog‘liqligidir. Ma’muriy faollashtirish va canary talablari quyidagi "CodeQL ortmaslik chegarasi" bo‘limida bayon qilingan.
+
+| Skript                 | Nimani tekshiradi                                                                                                                                                                                                                            | To‘sadi |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `check:codeql-ratchet` | Ogohlantirishlar chegarasi tekshirilishidan oldin nomzod ref/SHA va barcha sozlangan tahlil toifalari joriy bo‘lishi shart; dalil yo‘qligi qabulni to‘sadi. Global inventar alohida qoladi — quyidagi "CodeQL ortmaslik chegarasi" ga qarang | Ha      |
 
 ### Vazifa: `quality-extended`
 
@@ -480,34 +496,23 @@ Bu faylni metrikani yaxshilagan o‘zgarish bilan birga commit qiling. Metrikani
 bazaviy darajani yangilamagan PR `--require-tighten` orqali aniqlanadi (6A.5-bosqich,
 amalga oshirilishi kutilmoqda).
 
-### CodeQL ratcheti: yangilash davriyligi va qo‘lda ishga tushirish
+### CodeQL ortmaslik chegarasi: nomzodni qabul qilish va repozitoriy inventari
 
-`check:codeql-ratchet` **har bir PR uchun emas, jadval asosida yangilanadigan repo holatini** o‘qiydi.
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` buyrug‘i
-`state: configured`, `schedule: weekly` deb xabar beradi: bu har bir push uchun
-tahlil emas, GitHub’ning default-setup skanidir. Natijada: ogohlantirishlarni TUZATADIGAN PR
-merge qilingandan so‘ng ratchet keyingi rejalashtirilgan skan ishga tushguniga qadar eski,
-yuqoriroq sonni o‘qishda davom etadi — shu sababli skan yangilanmaguncha har bir ochiq PR’da,
-jumladan tuzatuvchi PR’ning keyingi o‘zgarishlarida ham regressiya haqida xabar beradi.
+CI nomzodning CodeQL bo‘yicha qabulini aniq bog‘liqlik zanjiri orqali boshqaradi: `codeql-scan` `codeql.yml` dagi to‘rt tilli matritsani chaqiradi, so‘ng `codeql-admission` `node scripts/check/check-codeql-ratchet.mjs --candidate` ni bajaradi. `Gate / CI` ikkala natijani talab qiladi. Quality o‘z sonli tekshiruvlarini saqlaydi, ammo ishlab chiqaruvchi tugamasdan skanerga so‘rov yubormaydi; yolg‘iz `Gate / Quality` nomzodni to‘liq qabul qilish emas. Faqat hujjatlarni o‘zgartiruvchi nomzodlarda ham CodeQL majburiy.
 
-**Qo‘lda yangilash**: `gh workflow run codeql.yml --ref release/vX.Y.Z` tahlilni qayta
-ishga tushiradi va ogohlantirishlarni bir necha daqiqa ichida qayta e’lon qiladi. Avval
-`.github/workflows/codeql.yml` faylini o‘qing — uning sarlavhasida bu faqat
-`workflow_dispatch` orqali ishlashi **GitHub’ning "default setup" konfiguratsiyasi bilan
-ziddiyatga kirishishi sababli** ekani tushuntirilgan (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). `push`/`pull_request`/
-`schedule` triggerlarini qayta tiklash uchun avval **egasi amal bajarishi kerak**:
-Settings → Code security → CodeQL: Default → Advanced. Bu o‘zgartirishsiz `schedule:`
-triggerini qo‘shmang — u faqat muvaffaqiyatsiz ishga tushirishlarni keltirib chiqaradi.
+`config/quality/codeql-admission-policy.json` siyosati Actions, C/C++, JavaScript/TypeScript va Python ni, default so‘rov to‘plamini, remote tahdid modelini va none yig‘ish rejimini tanlaydi. Ishlab chiqaruvchining dastlabki tekshiruvi kutilayotgan faollashtirish qaydini va aniq maqsad ro‘yxatiga kirmaydigan tarmoqlarni rad etadi. Dastlabki maqsadlar main va release/v3.8.53; keyingi release ni qo‘shish ko‘rib chiqilishi kerak. CI ning kengroq release PR triggeri saqlanadi, lekin hali qo‘shilmagan maqsad o‘lchanmagan PASS olish o‘rniga ajratib olishdan oldin HOLD bildiradi.
 
-**Son kamaygandan keyin bazaviy darajani qat’iylashtiring** — `node scripts/check/check-codeql-ratchet.mjs
---update` yangi o‘lchangan sonni `quality-baseline.json` →
-`metrics.codeqlAlerts.value` ichiga yozadi, shuning uchun ratchet eski yuqori chegaragacha
-bo‘lgan regressiyaga yashirincha ruxsat bermaydi. Amaliy misol (2026-09-02/03): PR #12502
-7 ta haqiqiy ogohlantirishni tuzatdi (o‘lchangan ochiq ogohlantirishlar 13 → 6); PR #12530
-mos kelishi uchun muzlatilgan bazaviy darajani 11 → 6 ga qat’iylashtirdi; qolgan 6 tasi
-keyin har bir ogohlantirish uchun asos keltirilgan holda yopildi va ochiq ogohlantirishlar
-soni 0 ga tushirildi.
+Har bir matritsa vazifasi haqiqiy SARIF yuklash ID-si, til, toifa, ishga tushirish va urinish, chaqiruvchi jarayon identifikatsiyasi, hodisaning ref/head/base/merge SHA-si va siyosat xeshini qayd etadi. Bog‘liq vazifa faqat shu ishga tushirishning qaydlarini yuklab oladi va artefakt xeshlarini tekshiradi. Barcha to‘rt toifa, muvaffaqiyatli ishlab chiqaruvchi va har bir aniq yuklashning qayta ishlanishi tugashi talab qilinadi. Tarmoqda topilgan eng yangi tahlil emas, API ning sarif_id filtri ishlatiladi. Qisman qayta ishga tushirish ayni ishga tushirish va nomzodning oldingi urinishidagi muvaffaqiyatli toifalarni, ishlab chiqarilgan urinishni saqlab, qayta ishlatishi mumkin; joriy ishlab chiqaruvchi xato tugasa, oldingi yashil dalil ishlatilmaydi.
+
+CodeQL action qayta ishlashni kutadi, lekin mahkamlangan tatbiqi holatni o‘qish xatosidan yoki kutish tugaganidan keyin ogohlantirib davom etishi mumkin. Shu sabab qabul qayta ishlashni yana tekshiradi. Yetishmayotgan toifalar, kutilayotgan qayta ishlash, xato yoki bekor qilingan vazifalar, eskirgan identifikatsiya, to‘liqsiz sahifalash yoki mavjud bo‘lmagan API-lar HOLD va chiqish 2 ni beradi. Mustaqil skaner jarayonini qat’iy vaqt kutish qolmagan. Skan qilinmagan PR ogohlantirish so‘rovi 0 qaytargani uchun o‘ta olmaydi. O‘lchangan son `metrics.codeqlAlerts.value` dan oshsa, chiqish 1 bo‘ladi; boshqa tarmoq ogohlantirishlarini sig‘dirish uchun bazaviy chegara oshirilmaydi. [Yuklash holati va tahlil qidiruvi](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Qayd yuklash va tahlil ID-lari, toifalar, vosita versiyalari, ref/SHA, bazaviy chegara va ogohlantirish sonlarini saqlaydi. SARIF identifikatsiyasi/natijalar soni, minimal qoida sonlari va aniq ogohlantirish nusxalari majburiy qoladi. Qabuldan oldin PR/tahlil identifikatsiyalari qayta tekshiriladi. Bu tekshiruvlar barcha ajratilgan manba fayllari inventarini emas, sozlangan toifalar qamrovini tasdiqlaydi. C/C++ ning yig‘ishsiz ajratishi loyiha yig‘ilayotganda hosil bo‘ladigan kodni qamramaydi. Manba istisnolari hali ham ko‘rib chiqilishi kerak; mas’uliyatni hissa qo‘shuvchiga bog‘lash uchun solishtiriladigan aniq baza dalili zarur.
+
+`codeql-maintenance.yml` PR/main ishlab chiqaruvchilarini takrorlamay, faol release push skanlari va haftalik jadvalni ta’minlaydi. `nightly-codeql-inventory.yml` `--strict-measurement` bilan repozitoriy bo‘yicha bazaviy chegarani alohida saqlaydi va o‘lchash imkonsiz bo‘lsa xato beradi. Eski mahalliy kollektorning yumshoq o‘tkazib yuborishi nomzod qabuliga teng emas. Chegarani qat’iylashtirish global sonning kamayishi tekshirilgach, ochiq `--update` amali bo‘lib qoladi.
+
+Default Setup sozlangan paytda Advanced jarayoni e’lon qilinmasligi kerak: GitHub bu birikmani rad etadi. Versiyalangan siyosat ko‘rib chiqilgan ma’muriy o‘tish holati qayta o‘qilmaguncha kutilayotgan holatda turadi. E’lon qilishdan oldin operator repozitoriy, head/base/tree, siyosat/patch/qaytarish xeshlari va kuzatilgan sozlash holatini mahkamlaydi; `node scripts/quality/codeql-producer.mjs verify-admin-readback` berilgan kutilayotgan va haqiqiy JSON qaydlarini tekshiradi. Bu texnik to‘siq; operator roziligi yoki yangi holatni olish o‘rnini bosmaydi. PR tokeni hech qachon Administration huquqini so‘ramaydi. Joriy etish va skanerdagi har qanday o‘zgarish alohida qayta o‘qish hamda haqiqiy PR, fork va merge-group moslik dalilini talab qiladi.
+
+Fork-lar hosted runnerlarda, saqlanmagan hisob ma’lumotlari bilan checkout qilib ishlaydi; ishlab chiqaruvchida loyiha o‘rnatish/yig‘ish ham, meros repozitoriy sirlari ham yo‘q. GitHub cheklangan fork tokeni bilan pull_request hodisasiga SARIF yuklashni qo‘llab-quvvatlaydi; ilk hissa ijrosiga ruxsat GitHub siyosati bo‘lib qoladi. Ishonchsiz kodni bajarish uchun pull_request_target ishlatmang. Migratsiyani tugallangan deyishdan oldin nazoratli canary da haqiqiy token huquqlari, analysis_key va barcha toifa muhitlarini tekshiring. [Fork yuklash qoidalari](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [zid sozlash rejimlari](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Ogohlantirishlarni yopish operatorning qaroridir (Qat’iy qoida #14)** — yopish izohida
 texnik asosni qayd etmasdan hech qachon CodeQL ogohlantirishini yopmang: yuqori oqim
@@ -664,11 +669,7 @@ quyidagi ratsionalizatsiya nomzodlarini aniqladi. **Birlashtirishlar CI’dagi m
 o‘zgarishlardir; almashtirishlar/olib tashlashlar esa operator ixtiyoridagi siyosiy qarorlardir.** Quyidagilarning hech biri
 hali qo‘llanilmagan.
 
-**Yuqorida hujjatlashtirilmagan yana bir qism** (tavsiya xususiyatida, signal darajasi past): `docs-lint` vazifasi
-(markdownlint + Vale, butun vazifa uchun `continue-on-error`) va mustaqil skaner ish jarayonlari
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0`
-`quality-baseline.json` ichida mavjud, ammo `ci.yml` ichidagi bloklovchi ratchet’ga ulanmagan — metrika
-hozirda yetim holatda.
+**Yuqorida yana hujjatlashtirilmaganlar** (maslahat xarakterida, signali past): `docs-lint` vazifasi (markdownlint + Vale, butun vazifa `continue-on-error`) va mustaqil `semgrep.yml` / `scorecard.yml` skaner jarayonlari. CodeQL endi yuqoridagi faollashtirish talablariga muvofiq `Gate / CI` da majburiy ishlab chiqaruvchi va qabul vazifalariga ega. `semgrepFindings: 0` `quality-baseline.json` da bor, ammo `ci.yml` da bloklovchi ortmaslik chegarasiga ulanmagan — metrik hozir bog‘lanishsiz qolgan.
 
 ### Birlashtirish / takrorlarni yo‘qotish (mexanik, xavfi pastroq)
 

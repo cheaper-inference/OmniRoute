@@ -39,14 +39,16 @@ checkout/event SHA නොගැළපීමක් CLI විසින් ප්�
 `needs` ලැයිස්තුවට බැඳ තබයි. ලදුපත් ආවරණය කරන්නේ ඒවාටම අදාළ කාර්ය ප්රවාහය පමණක් වන අතර, ප්රකාශනය, යෙදවීම හෝ පවතින උපදේශන ස්කෑනරයක අභ්යන්තර ක්රියාකාරීත්වය නොවේ. අදාළ පරීක්ෂා ශාඛා රීති තුළ අනිවාර්ය කිරීම
 වෙනම පරිපාලන වෙනසකි; ඒවායේ කාර්යයන් අර්ථ දැක්වීමෙන් පමණක් ශාඛාවක් ආරක්ෂා නොවේ.
 
-`API Route Typecheck` යනු සමස්ත තීන්දු දෙකෙන් සහ දේශීය පූර්ණ නිරීක්ෂකයාගේ ස්ථිතික පැතිකඩෙන්
-පරිබාහිර වූ ස්වාධීන කාර්ය ප්රවාහ පරීක්ෂාවකි. නිශ්චිත අපේක්ෂකයා සඳහා එහි ප්රතිඵලය වෙනම
-පරීක්ෂා කරන්න. `.github/workflows/api-route-typecheck.yml` `main` හෝ
-`release/**` වෙත යොමු වන PR, එම ශාඛා පවුල් දෙකෙන් ඕනෑම එකකට කෙරෙන push සහ අතින් සිදු කරන dispatch මත ධාවනය වේ. එයට මාර්ග පෙරහනක් නොමැත.
-PR පදනම නැවත ඉලක්ක කිරීම නව පරීක්ෂාවක් ඉල්ලා සිටී; body/title සංස්කරණ නිරීක්ෂණය සඳහා පමණක් වන
-`Admission not requested / API Route Typecheck` නාමය භාවිත කරන අතර, ඒවාට ඇතුළත් කිරීමේ පරීක්ෂාව ප්රතිස්ථාපනය කළ නොහැක.
-කාර්ය ප්රවාහය merge-group ප්රේරකයක් ප්රකාශ නොකරයි. මෙම පරීක්ෂාව අනිවාර්ය කරන ඕනෑම merge-queue දියත් කිරීමක්
-පළමුව එම සිදුවීම සඳහා එය ක්රියාත්මක වන බව තහවුරු කළ යුතුය.
+`API Route Typecheck` ස්වාධීන workflow පරීක්ෂාවකි. එය ඒකාබද්ධ තීරණ දෙකෙන් සහ දේශීය සම්පූර්ණ observer හි ස්ථාවර profile එකෙන් පිටත පවතී. නිශ්චිත candidate සඳහා එහි ප්‍රතිඵලය වෙනම පරීක්ෂා කරන්න. `.github/workflows/api-route-typecheck.yml`, `main` හෝ `release/**` වෙත යොමු වන PR සඳහාත්, එම branch වර්ග දෙකට සිදුවන push සඳහාත්, manual dispatch සඳහාත්, `checks_requested` වර්ගයේ `merge_group` සිදුවීම් සඳහාත් ක්‍රියාත්මක වේ. එයට path filter එකක් නැත. Merge group විසින් `merge_group.head_sha` checkout කරයි; අනෙක් සිදුවීම් `github.sha` checkout කරයි. සියලු සිදුවීම් එකම API diagnostic gate සහ gate unit test භාවිත කරයි.
+PR base එක වෙනස් කළ විට නව පරීක්ෂාවක් ඉල්ලනු ලැබේ; body/title සංස්කරණ නිරීක්ෂණයට පමණක් වූ `Admission not requested / API Route Typecheck` නම භාවිත කරයි. ඒවා admission පරීක්ෂාව වෙනුවට යොදාගත නොහැක.
+
+### DAST භාවිත කරන්නේ තහවුරු කළ CI build එකයි
+
+අනිවාර්ය `dast-smoke` CI job එක, `build` පසු `.github/workflows/dast-smoke.yml` කැඳවයි. සහාය දක්වන fork PR, release ඉලක්ක කරන PR සහ merge group ඇතුළුව build එකේම code/draft තේරීම එය අනුගමනය කරයි. DAST job එක නොමැති නම්, අසාර්ථක නම්, අවලංගු නම් හෝ අනපේක්ෂිතව මඟහැරී ඇත්නම් `Gate / CI` අවහිර වේ. නැවත භාවිත කළ හැකි workflow එකට ස්වාධීන PR/dispatch trigger එකක් නැත; අතින් කරන validation සඳහා CI dispatch යොදාගන්නා නිසා build සහ consumer එකම run එක තුළ පවතී.
+
+`scripts/ci/next-build-provenance.mjs`, සම්පූර්ණ Next artifact එක එහි tar digest, repository/event/run, producer attempt, head/base/checkout/tree, workflow අනන්‍යතා, lockfile, නිශ්චිත Node version/ABI, platform සහ bundler සමඟ බැඳ තහවුරු කරයි. DAST, `needs.build.outputs` වෙතින් වෙනස් කළ නොහැකි artifact ID තෝරා, download digest තහවුරු කිරීම අනිවාර්ය කරයි. අවසර ලැයිස්තුවේ සාමාජිකයන් දෙදෙනා `scripts/ci/unpack-ci-build.py` හරහා උපුටාගැනීමට පෙර ZIP hash ස්වාධීනව ගණනය කර producer digest සමඟ සසඳයි. Next tree උපුටාගැනීමට පෙර manifest සහ tar archive ද ස්වාධීන producer output සමඟ ගැළපිය යුතුය. Branch එකේ අවසන් සාර්ථක build එක කිසිවිටක සොයන්නේ නැත. ID සහ සියලු input තවමත් ගැළපේ නම් partial rerun එකට එම producer attempt නැවත භාවිත කළ හැක; receipt එක attempt දෙකම සටහන් කරයි.
+
+Consumer ක්‍රියාත්මක වන්නේ repository කියවීමට පමණක් අවසර ඇති hosted Linux runner එකකය; repository secret නොමැත. එය producer භාවිත කළ නිශ්චිත Node version ස්ථාපනය කර `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` සමඟ CLI සකස් කරයි. ඕනෑම fallback build එකකට පෙර standalone server නොමැති අවස්ථාව `scripts/build/standaloneInput.mjs` ප්‍රතික්ෂේප කරයි; සාමාන්‍ය දේශීය CLI build දැනට ඇති fallback රඳවාගනී. Server readiness, Schemathesis සහ promptfoo සියල්ල වෙනස් නොකළ මිනිත්තු 25 job සීමාව තුළ සාර්ථක විය යුතුය. Provenance receipt එක input අනන්‍යතාව සහ bytes සනාථ කරයි; සාර්ථක DAST scan එකක් සනාථ නොකරයි. Artifact කල් ඉකුත් වීම, runner බාධාව හෝ scanner අසාර්ථක වීම අසම්පූර්ණ හෝ අසාර්ථක සාක්ෂි ලෙසම පවතී; advisory wrapper එකක් හරහා ඒවා PASS බවට පත් කළ නොහැක.
 
 ### UI ක්රියාත්මක කිරීමේ ධාරිතාව
 
@@ -211,17 +213,24 @@ Barrel re-exports සහ dynamic imports යනු resolution රෝගනිශ
 
 `test-coverage` පසු ධාවනය වේ. අසාර්ථක වුවහොත් merge කිරීම අවහිර කරයි.
 
-| ස්ක්රිප්ට් එක                | වලංගු කරන දේ                                                                                                                                                               | අවහිර කිරීම                |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `quality:collect`            | `quality-metrics.json` නිකුත් කරයි (ESLint අනතුරු ඇඟවීම් ගණන, ඒකාබද්ධ කළ shard වාර්තාවෙන් coverage)                                                                        | ඔව් (ratchet එකට upstream) |
-| `quality:ratchet`            | `quality-baseline.json` හි සෑම metric එකක්ම ප්රතිගමනය වී නොමැත (ESLint අනතුරු ඇඟවීම් ≤ baseline; coverage ≥ baseline)                                                      | ඔව්                        |
-| `check:duplication`          | කේත අනුපිටපත් වීම (jscpd@4) `quality-baseline.json` හි baseline එක නොඉක්මවයි                                                                                               | ඔව්                        |
-| `check:complexity`           | ගොනු මට්ටමේ cyclomatic complexity එක cap එක නොඉක්මවයි (core ESLint `complexity` + `max-lines-per-function`)                                                                | ඔව්                        |
-| `check:cognitive-complexity` | Cognitive complexity ratchet (`eslint-plugin-sonarjs`) — වෙනම ESLint pass එකකි; CI විසින් දෙකම තනි `check:complexity-ratchets` පියවර ලෙස ඒකාබද්ධ කර ධාවනය කරයි             | ඔව්                        |
-| `check:dead-code`            | භාවිත නොකළ exports / ගොනු ratchet එක (knip) baseline එකට සාපේක්ෂව ප්රතිගමනය නොවේ                                                                                           | ඔව්                        |
-| `check:compression-budget`   | Compression benchmark budget — engine එකකට අදාළ අවම token-savings අගයන් ප්රතිගමනය නොවිය යුතුය                                                                              | ඔව්                        |
-| `check:type-coverage`        | Percent-typed ratchet එක (`type-coverage`) ප්රතිගමනය නොවේ; බොහෝ දුරට `typecheck:noimplicit:core` ආවරණය කරයි                                                                | ඔව්                        |
-| `check:codeql-ratchet`       | විවෘත CodeQL alert ගණන ප්රතිගමනය නොවේ (`gh api` හරහා කියවයි; token එකක් නොමැති විට ආරක්ෂිතව මඟ හරියි) — refresh cadence සහ manual trigger සඳහා: පහත "CodeQL ratchet" බලන්න | ඔව්                        |
+| ස්ක්රිප්ට් එක                | වලංගු කරන දේ                                                                                                                                                   | අවහිර කිරීම                |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `quality:collect`            | `quality-metrics.json` නිකුත් කරයි (ESLint අනතුරු ඇඟවීම් ගණන, ඒකාබද්ධ කළ shard වාර්තාවෙන් coverage)                                                            | ඔව් (ratchet එකට upstream) |
+| `quality:ratchet`            | `quality-baseline.json` හි සෑම metric එකක්ම ප්රතිගමනය වී නොමැත (ESLint අනතුරු ඇඟවීම් ≤ baseline; coverage ≥ baseline)                                          | ඔව්                        |
+| `check:duplication`          | කේත අනුපිටපත් වීම (jscpd@4) `quality-baseline.json` හි baseline එක නොඉක්මවයි                                                                                   | ඔව්                        |
+| `check:complexity`           | ගොනු මට්ටමේ cyclomatic complexity එක cap එක නොඉක්මවයි (core ESLint `complexity` + `max-lines-per-function`)                                                    | ඔව්                        |
+| `check:cognitive-complexity` | Cognitive complexity ratchet (`eslint-plugin-sonarjs`) — වෙනම ESLint pass එකකි; CI විසින් දෙකම තනි `check:complexity-ratchets` පියවර ලෙස ඒකාබද්ධ කර ධාවනය කරයි | ඔව්                        |
+| `check:dead-code`            | භාවිත නොකළ exports / ගොනු ratchet එක (knip) baseline එකට සාපේක්ෂව ප්රතිගමනය නොවේ                                                                               | ඔව්                        |
+| `check:compression-budget`   | Compression benchmark budget — engine එකකට අදාළ අවම token-savings අගයන් ප්රතිගමනය නොවිය යුතුය                                                                  | ඔව්                        |
+| `check:type-coverage`        | Percent-typed ratchet එක (`type-coverage`) ප්රතිගමනය නොවේ; බොහෝ දුරට `typecheck:noimplicit:core` ආවරණය කරයි                                                    | ඔව්                        |
+
+### Job: `codeql-scan` සහ `codeql-admission`
+
+`codeql-scan` වින්‍යාස කළ සියලු analysis category නිපදවයි. එම job එක සාර්ථක වූ පසු `codeql-admission` එහි නිශ්චිත upload සහ candidate alert ratchet තහවුරු කරයි. ලේඛන පමණක් වෙනස් කරන candidate ඇතුළුව දෙකම `Gate / CI` හි අනිවාර්ය dependency වේ. පරිපාලන activation සහ canary අවශ්‍යතා පහත “CodeQL ratchet” කොටසේ විස්තර කෙරේ.
+
+| Script                 | තහවුරු කරන්නේ                                                                                                                                                                  | අවහිර කරයිද |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| `check:codeql-ratchet` | Alert ratchet ට පෙර candidate ref/SHA සහ වින්‍යාස කළ සියලු analysis category වත්මන් විය යුතුය; සාක්ෂි නැතිනම් අවහිර වේ. සමස්ත inventory වෙනම පවතී — පහත “CodeQL ratchet” බලන්න | ඔව්         |
 
 ### කාර්යය: `quality-extended`
 
@@ -471,32 +480,24 @@ git add quality-baseline.json
 නොකර ප්රමිතිකයක් වැඩිදියුණු කරන PR එකක් `--require-tighten` මඟින් හඳුනාගනු ඇත
 (අදියර 6A.5, ක්රියාත්මක කිරීම අපේක්ෂිතයි).
 
-### CodeQL ratchet: නැවුම් කිරීමේ වාර ගණන සහ අතින් ක්රියාත්මක කිරීම
+### CodeQL ratchet: candidate admission සහ repository inventory
 
-`check:codeql-ratchet` කියවන්නේ **කාලසටහනකට අනුව නැවුම් කරන repo තත්ත්වයයි — එක් එක් PR සඳහා නොවේ.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` මඟින්
-`state: configured`, `schedule: weekly` වාර්තා කරයි: මෙය එක් එක් push සඳහා කරන
-විශ්ලේෂණයක් නොව, GitHub හි default-setup scan එකයි. ප්රතිවිපාකය: alerts නිවැරදි කරන
-PR එකක් merge කිරීමෙන් පසුව, ඊළඟ කාලසටහන්ගත scan එක ක්රියාත්මක වන තුරු ratchet එක
-පැරණි, වැඩි ගණන දිගටම කියවයි — එබැවින් scan එක යාවත්කාලීන වන තුරු, නිවැරදි කිරීමේ
-PR එකටම අදාළ follow-up ඇතුළුව සෑම විවෘත PR එකකම එය පසුබැසීමක් වාර්තා කරයි.
+පැහැදිලි dependency දාමයක් හරහා candidate CodeQL admission සඳහා CI වගකීම දරයි: `codeql-scan`, `codeql.yml` හි භාෂා හතරේ matrix කැඳවයි; ඉන්පසු `codeql-admission`, `node scripts/check/check-codeql-ratchet.mjs --candidate` ක්‍රියාත්මක කරයි. `Gate / CI` ප්‍රතිඵල දෙකම ඉල්ලා සිටී. Quality තම සංඛ්‍යාත්මක පරීක්ෂා රඳවාගනී, එහෙත් producer අවසන් වීමට පෙර scanner විමසන්නේ නැත; `Gate / Quality` පමණක් සම්පූර්ණ candidate admission නොවේ. ලේඛන පමණක් වෙනස් කරන candidate සඳහා ද CodeQL අනිවාර්ය වේ.
 
-**අතින් නැවුම් කිරීම**: `gh workflow run codeql.yml --ref release/vX.Y.Z` මඟින්
-විශ්ලේෂණය නැවත ක්රියාත්මක කර මිනිත්තු කිහිපයක් ඇතුළත alerts නැවත ප්රකාශයට පත් කරයි.
-පළමුව `.github/workflows/codeql.yml` කියවන්න — එය `workflow_dispatch` පමණක් වන්නේ
-**එය GitHub හි "default setup" සමඟ ගැටෙන නිසා** බව එහි ශීර්ෂකය පැහැදිලි කරයි
-(`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`).
-`push`/`pull_request`/`schedule` triggers නැවත ස්ථාපනය කිරීමට පෙර **owner ක්රියාවක්**
-අවශ්ය වේ: Settings → Code security → CodeQL: Default → Advanced. එම මාරුව සිදු
-නොකර `schedule:` trigger එකක් එක් නොකරන්න — එයින් සිදුවන්නේ අසාර්ථක runs පමණි.
+`config/quality/codeql-admission-policy.json` හි policy එක Actions, C/C++, JavaScript/TypeScript සහ Python තෝරාගනී; query suite default, threat model remote සහ build mode none ද තෝරයි. Producer preflight, pending activation වාර්තාවක් සහ පැහැදිලි target ලැයිස්තුවෙන් පිටත branch ප්‍රතික්ෂේප කරයි. ආරම්භක target වන්නේ main සහ release/v3.8.53 ය; ඊළඟ release සඳහා සමාලෝචිත onboarding අවශ්‍ය වේ. CI හි පවතින පුළුල් release PR trigger රඳවාගනී. එහෙත් onboarding නොකළ target එකක් මැන නොබැලූ PASS ලබාගැනීම වෙනුවට extraction ට පෙර HOLD වාර්තා කරයි.
 
-**ගණන අඩු වූ පසු මූලික රේඛාව දැඩි කරන්න** — `node scripts/check/check-codeql-ratchet.mjs
---update` මඟින් අලුතින් මනින ලද ගණන `quality-baseline.json` →
-`metrics.codeqlAlerts.value` වෙත ලියයි. එබැවින් පැරණි උපරිම සීමාව දක්වා නැවත සිදුවන
-පසුබැසීමකට ratchet එක නිහඬව අවසර නොදෙයි. ක්රියාත්මක කළ උදාහරණය (2026-09-02/03):
-PR #12502 මඟින් සැබෑ alerts 7ක් නිවැරදි කරන ලදී (මනින ලද විවෘත alerts 13 → 6);
-PR #12530 මඟින් එයට ගැළපෙන ලෙස ස්ථාවර කළ මූලික රේඛාව 11 → 6 දක්වා දැඩි කරන ලදී;
-ඉතිරි 6 පසුව එක් එක් alert සඳහා හේතු දැක්වීමක් සහිතව ඉවත් කර, විවෘත ගණන 0 දක්වා අඩු කරන ලදී.
+සෑම matrix job එකක්ම තම සැබෑ SARIF upload ID, භාෂාව, category, run සහ attempt, caller workflow අනන්‍යතාව, event ref/head/base/merge SHA සහ policy hash සටහන් කරයි. එය මත රඳා පවතින job එක මෙම run එකේ receipt පමණක් download කර artifact digest තහවුරු කරයි. Category හතරම, සාර්ථක producer සහ සෑම නිශ්චිත upload එකකම processing අවසන් වීම අවශ්‍යය. Branch එකක අවසන් වරට හමු වූ analysis වෙනුවට API හි sarif_id filter භාවිත කරයි. Partial rerun මඟින් එකම run සහ candidate හි පෙර attempt එකක සාර්ථක category, ඒවා නිපදවූ attempt අනන්‍යතාව රඳවාගෙන නැවත භාවිත කළ හැක; වත්මන් producer අසාර්ථක නම් පෙර හරිත සාක්ෂි නැවත භාවිත කළ නොහැක.
+
+CodeQL action එක processing සඳහා රැඳී සිටී. එහෙත් pin කළ implementation එක status කියවීම අසාර්ථක වූ පසු හෝ රැඳී සිටීමේ සීමාව අවසන් වූ පසු අනතුරු ඇඟවීමක් සමඟ ඉදිරියට යා හැක. එබැවින් admission නැවත processing තහවුරු කරයි. Category නොමැති වීම, processing pending වීම, job අසාර්ථක හෝ අවලංගු වීම, පැරණි අනන්‍යතාව, අසම්පූර්ණ pagination හෝ API නොලැබීම HOLD සහ exit 2 ලබාදෙයි. ස්වාධීන scanner workflow එකක් සඳහා ස්ථාවර රැඳී සිටීමක් තවදුරටත් නැත. Alert query එක 0 ලබාදුන් නිසා පමණක් scan නොකළ PR එකක් සමත් විය නොහැක. මැනූ ගණන `metrics.codeqlAlerts.value` ට වැඩි නම් exit 1 ලැබේ; වෙනත් branch එකක alert ඇතුළත් කරගැනීමට baseline ඉහළ නොදමයි. [Upload තත්ත්වය සහ analysis සෙවීම](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Receipt එක upload සහ analysis ID, category, tool version, ref/SHA, baseline සහ alert ගණන් සටහන් කරයි. SARIF අනන්‍යතාව/result ගණන, අවම rule ගණන් සහ නිශ්චිත alert instance තවදුරටත් අනිවාර්යය. පිළිගැනීමට පෙර PR/analysis අනන්‍යතා නැවත පරීක්ෂා කරයි. මෙම පරීක්ෂා තහවුරු කරන්නේ වින්‍යාස කළ category coverage ය; උපුටාගත් සෑම source file එකකම inventory නොවේ. C/C++ no-build extraction එක project build අතරතුර නිපදවන code ඇතුළත් නොකරයි. Source exclusion තවමත් සමාලෝචනය කළ යුතු අතර contributor attribution සඳහා සැසඳිය හැකි නිශ්චිත base සාක්ෂි අවශ්‍ය වේ.
+
+`codeql-maintenance.yml`, PR/main producer දෙගුණ නොකර active release push scan සහ සතිපතා schedule සපයයි. `nightly-codeql-inventory.yml`, `--strict-measurement` සමඟ repository පුරා baseline වෙනම තබාගනී; මිනුම ලබාගත නොහැකි නම් අසාර්ථක වේ. දේශීය පැරණි collector බාධාවකින් තොරව මඟහැරීම candidate admission නොවේ. තහවුරු කළ අඩු සමස්ත ගණනකට පසු පැහැදිලි `--update` මඟින් පමණක් සීමාව දැඩි කරයි.
+
+Default Setup වින්‍යාස කර තිබියදී Advanced workflow ප්‍රකාශයට පත් නොකළ යුතුය: GitHub එම සංයෝජනය ප්‍රතික්ෂේප කරයි. සමාලෝචිත පරිපාලන මාරුව නැවත කියවා තහවුරු කරන තෙක් එහි version කළ policy pending ලෙස පවතී. ප්‍රකාශයට පෙර operator විසින් repository, head/base/tree, policy/patch/rollback hash සහ නිරීක්ෂණය කළ setup තත්ත්වය නිශ්චිතව සටහන් කරයි; `node scripts/quality/codeql-producer.mjs verify-admin-readback` සපයා ඇති expected සහ actual JSON වාර්තා පරීක්ෂා කරයි. මෙය තාක්ෂණික ආරක්ෂාවකි; operator අනුමැතියක් හෝ නැවුම් readback ලබාගැනීම වෙනුවට භාවිත කළ හැක්කක් නොවේ. PR token එක කිසිවිටක Administration access ඉල්ලන්නේ නැත. Rollout සහ ඕනෑම scanner වෙනසකට මෙම වෙනම readback සමඟ සැබෑ PR, fork සහ merge-group compatibility සාක්ෂි අවශ්‍ය වේ.
+
+Fork සඳහා hosted runner සහ credential ස්ථිරව නොතබන checkout භාවිත කෙරේ; producer තුළ project install/build නැත, repository secret උරුම නොවේ. අඩු බලතල ඇති fork token සමඟ pull_request සිදුවීම සඳහා SARIF upload කිරීමට GitHub සහාය දක්වයි; පළමු contribution ක්‍රියාත්මක කිරීමේ අනුමැතිය GitHub policy ලෙස පවතී. විශ්වාස කළ නොහැකි code ක්‍රියාත්මක කිරීමට pull_request_target කිසිවිටක භාවිත නොකරන්න. Migration සම්පූර්ණ යැයි සැලකීමට පෙර පාලිත canary එකේ සැබෑ token permission, analysis_key සහ සියලු category environment තහවුරු කරන්න. [Fork upload නීති](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[එකිනෙකට පටහැනි setup ක්‍රම](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **ඉවත් කිරීම් තීරණය කිරීම operator සතුය (දැඩි නීතිය #14)** — dismissal comment එකේ
 තාක්ෂණික හේතුව සටහන් නොකර කිසිවිටෙක CodeQL alert එකක් ඉවත් නොකරන්න: upstream-protocol
@@ -652,11 +653,7 @@ connection error එකක් log කිරීම පමණක් කරන අ�
 වෙනස්කම් වේ; මාරු කිරීම්/ඉවත් කිරීම් ක්රියාකරුට වෙන් කර ඇති ප්රතිපත්ති තීරණ වේ.** පහත කිසිවක්
 තවම යොදා නැත.
 
-**ඉහත ලේඛනගත කර නොමැති තවත් දෑ** (උපදේශනාත්මක, අඩු සංඥාවක් සහිත): `docs-lint` කාර්යය
-(markdownlint + Vale, සම්පූර්ණ කාර්යයම `continue-on-error`) සහ ස්වාධීන ස්කෑනර් කාර්ය ප්රවාහ
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` යන්න
-`quality-baseline.json` තුළ තිබුණද, `ci.yml` තුළ අවහිරකාරී රැචට් එකකට සම්බන්ධ කර නැත — මෙම මෙට්රික් එක
-දැනට අනාථව පවතී.
+**ඉහත ලේඛනගත නොකළ අනෙක් කරුණු** (උපදේශනමය, අඩු ප්‍රයෝජනවත් සංඥාවක්): `docs-lint` job එක (markdownlint + Vale, සම්පූර්ණ job එකට `continue-on-error`) සහ ස්වාධීන scanner workflow වන `semgrep.yml` / `scorecard.yml`. ඉහත විස්තර කළ activation අවශ්‍යතාවලට යටත්ව CodeQL හි දැන් `Gate / CI` යටතේ අනිවාර්ය producer සහ admission job ඇත. `quality-baseline.json` තුළ `semgrepFindings: 0` ඇතත් එය `ci.yml` හි අවහිර කරන ratchet එකකට සම්බන්ධ කර නැත — දැනට මෙම metric සම්බන්ධතාවක් නොමැතිව පවතී.
 
 ### ඒකාබද්ධ කිරීම / අනුපිටපත් ඉවත් කිරීම (යාන්ත්රික, අඩු අවදානම)
 

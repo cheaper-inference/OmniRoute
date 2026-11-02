@@ -39,14 +39,16 @@ CLIው በcheckout/event SHA መካከል ያለን አለመዛመድ ውድቅ
 ደረሰኞቹ የሚሸፍኑት የራሳቸውን የሥራ ፍሰት ብቻ ነው፤ ህትመትን፣ ማሰማራትን ወይም የነባር የማማከሪያ ስካነርን ውስጣዊ አሠራር አይሸፍኑም። ተፈጻሚነት ያላቸውን ፍተሻዎች በቅርንጫፍ ደንቦች ውስጥ አስገዳጅ ማድረግ
 የተለየ አስተዳደራዊ ለውጥ ነው፤ የሥራዎቻቸውን ትርጉም መወሰን ብቻውን ቅርንጫፍን አይጠብቅም።
 
-`API Route Typecheck` ከሁለቱም ድምር ውሳኔዎች
-እና ከአካባቢያዊው ሙሉ ታዛቢ የማይለወጥ መገለጫ ውጭ የሆነ ገለልተኛ የሥራ ፍሰት ፍተሻ ነው። ለትክክለኛው
-ዕጩ ውጤቱን በተናጠል ይመርምሩ። `.github/workflows/api-route-typecheck.yml` ወደ `main` ወይም
-`release/**` በሚገቡ PR-ዎች፣ ወደ ከሁለቱ የቅርንጫፍ ቤተሰቦች በአንዱ በሚደረጉ push-ዎች እና በእጅ ማስኬድ ላይ ይሠራል። የመንገድ ማጣሪያ የለውም።
-የPR መሠረትን ወደ ሌላ ዒላማ መቀየር አዲስ ፍተሻ ይጠይቃል፤ የይዘት/ርዕስ አርትዖቶች ለምልከታ ብቻ የሆነውን
-`Admission not requested / API Route Typecheck` ስም ይጠቀማሉ እና የመግቢያ ፍተሻውን ሊተኩ አይችሉም።
-የሥራ ፍሰቱ የውህደት-ቡድን ቀስቃሽ አይገልጽም። ይህን ፍተሻ አስገዳጅ የሚያደርግ
-ማንኛውም የውህደት-ወረፋ ሥራ ላይ ማዋል፣ መጀመሪያ ለዚያ ክስተት መፈጸሙን ማረጋገጥ አለበት።
+`API Route Typecheck` ከሁለቱም የተጠቃለሉ ውሳኔዎችና ከሙሉ አካባቢያዊ ተቆጣጣሪው ቋሚ መገለጫ ውጭ ያለ ገለልተኛ የስራ ፍሰት ምርመራ ነው። ውጤቱን ለዚያው ትክክለኛ እጩ ለብቻ ያረጋግጡ። `.github/workflows/api-route-typecheck.yml` ወደ `main` ወይም `release/**` በሚያመሩ PRዎች፣ ወደ ሁለቱ የቅርንጫፍ ቤተሰቦች በሚደረግ push፣ በእጅ ማስጀመርና `checks_requested` ዓይነት ባላቸው `merge_group` ክስተቶች ላይ ይሰራል። የመንገድ ማጣሪያ የለውም። የውህደት ቡድኖች `merge_group.head_sha`፣ ሌሎች ክስተቶች `github.sha` ቅጂን ያወጣሉ። ሁሉም ክስተቶች ተመሳሳይ የAPI ምርመራ በርና የበሩን ክፍል ፈተናዎች ይጠቀማሉ።
+የPR መሠረታዊ ዒላማ ቅርንጫፍ ለውጥ አዲስ ምርመራ ይጠይቃል፤ የጽሑፍ/ርዕስ ማስተካከያዎች ለክትትል ብቻ `Admission not requested / API Route Typecheck` ስምን ይጠቀማሉ፣ የተቀባይነት ምርመራንም ሊተኩ አይችሉም።
+
+### DAST የተረጋገጠውን የCI ግንባታ ይጠቀማል
+
+አስገዳጁ የCI ስራ `dast-smoke` ከ`build` በኋላ `.github/workflows/dast-smoke.yml`ን ይጠራል። እንደ ግንባታው ተመሳሳይ የኮድ/ረቂቅ ምርጫ ይከተላል፤ የሚደገፉ fork PRዎች፣ releaseን የሚያነጣጥሩ PRዎችና የውህደት ቡድኖችም ይካተታሉ። የጎደለ፣ የከሸፈ፣ የተሰረዘ ወይም ባልተጠበቀ ሁኔታ የተዘለለ DAST ስራ `Gate / CI`ን ይዘጋል። ዳግም የሚጠቀሙበት ፍሰት የራሱ PR/dispatch ማስነሻ የለውም፤ የእጅ ማረጋገጫ CI dispatchን ይጠቀማል፣ ስለዚህ ግንባታና ተጠቃሚው በአንድ ሩጫ ይቆያሉ።
+
+`scripts/ci/next-build-provenance.mjs` ሙሉውን Next ቅርስ ከtar ሃሽ፣ ማከማቻ/ክስተት/ሩጫ፣ አምራች ሙከራ፣ head/base/checkout/tree፣ የፍሰት መለያዎች፣ lockfile፣ ትክክለኛው Node ስሪት/ABI፣ መድረክና bundler ጋር ያስተሳስራል። DAST የማይለወጠውን የቅርስ ID ከ`needs.build.outputs` ይመርጣል፣ የወረደውን ሃሽ ማረጋገጥ ይጠይቃል፣ እና በ`scripts/ci/unpack-ci-build.py` በኩል የተፈቀዱ ሁለት አባላትን ከመክፈቱ በፊት ZIP ሃሽን በራሱ አስልቶ ከአምራቹ ሃሽ ጋር ያነጻጽራል። Next ዛፍ ከመከፈቱ በፊት ማኒፌስቱና tar ማህደሩም ከአምራቹ ገለልተኛ ውጤቶች ጋር መመሳሰል አለባቸው። በቅርንጫፉ ላይ የመጨረሻውን የተሳካ ግንባታ ፈጽሞ አይፈልግም። IDና ሁሉም ግብዓቶች አሁንም ከተመሳሰሉ፣ ከፊል ዳግም ሩጫ ያንኑ የአምራች ሙከራ ሊጠቀም ይችላል፤ የማስረጃ መዝገቡ ሁለቱንም ሙከራዎች ይይዛል።
+
+ተጠቃሚው ማከማቻውን የማንበብ ፈቃድ ብቻ ባለው አስተናጋጅ Linux runner ላይ፣ ያለ ማከማቻ ምስጢሮች ይቆያል። የአምራቹን ትክክለኛ Node ስሪት ይጭናል፣ ከዚያ CLIን በ`OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` ይገነባል። `scripts/build/standaloneInput.mjs` ማንኛውም አማራጭ ግንባታ ከመጀመሩ በፊት የጎደለ standalone serverን ይከለክላል፤ መደበኛ አካባቢያዊ CLI ግንባታዎች ያላቸውን አማራጭ ይጠብቃሉ። የserver ዝግጁነት፣ Schemathesisና promptfoo ሁሉም በማይለወጠው የ25 ደቂቃ የስራ ገደብ ውስጥ መሳካት አለባቸው። የመነሻ መዝገብ የግብዓት መለያና ባይቶችን ያረጋግጣል፣ የተሳካ DAST ቅኝትን አይደለም። የቅርስ ጊዜ ማለፍ፣ runner መቋረጥ ወይም scanner መክሸፍ ያልተሟላ ወይም የከሸፈ ማስረጃ ነው፤ አማካሪ wrapper ይህን PASS ሊያደርገው አይችልም።
 
 ### የUI አፈጻጸም አቅም
 
@@ -210,17 +212,24 @@ dispatch እና merge groups ላይ CIን ያሟላል። PRs በpath የተጣ�
 
 ከ`test-coverage` በኋላ ይሰራል። ካልተሳካ mergeን ያግዳል።
 
-| Script                       | የሚያረጋግጠው                                                                                                                                            | አጋጅ               |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| `quality:collect`            | `quality-metrics.json`ን ያመነጫል (የESLint ማስጠንቀቂያዎች ብዛት፣ ከተዋሃደው shard report የሚገኝ coverage)                                                            | አዎ (ከratchet በፊት) |
-| `quality:ratchet`            | በ`quality-baseline.json` ውስጥ ያለ እያንዳንዱ metric ወደ ኋላ አልተመለሰም (የESLint ማስጠንቀቂያዎች ≤ baseline፤ coverage ≥ baseline)                                     | አዎ                |
-| `check:duplication`          | የcode ድግግሞሽ (jscpd@4) በ`quality-baseline.json` ውስጥ ካለው baseline አይበልጥም                                                                              | አዎ                |
-| `check:complexity`           | የፋይል-ደረጃ cyclomatic complexity ከcap አይበልጥም (ዋናው ESLint `complexity` + `max-lines-per-function`)                                                     | አዎ                |
-| `check:cognitive-complexity` | የcognitive complexity ratchet (`eslint-plugin-sonarjs`) — የተለየ ESLint pass፤ CI ሁለቱንም በአንድ `check:complexity-ratchets` ደረጃ ተዋህደው እንዲሰሩ ያደርጋል         | አዎ                |
-| `check:dead-code`            | ጥቅም ላይ ያልዋሉ exports / ፋይሎች ratchet (knip) ከbaseline አንጻር ወደ ኋላ አይመለስም                                                                               | አዎ                |
-| `check:compression-budget`   | የcompression benchmark budget — የእያንዳንዱ-engine token-savings floors ወደ ኋላ መመለስ የለባቸውም                                                               | አዎ                |
-| `check:type-coverage`        | የpercent-typed ratchet (`type-coverage`) ወደ ኋላ አይመለስም፤ በአብዛኛው `typecheck:noimplicit:core`ን ይሸፍናል                                                    | አዎ                |
-| `check:codeql-ratchet`       | ክፍት የCodeQL alert ብዛት ወደ ኋላ አይመለስም (በ`gh api` ያነባል፤ token ከሌለ ችግር ሳይፈጥር ይዘላል) — የrefresh cadence እና manual trigger፦ ከታች ያለውን "CodeQL ratchet" ይመልከቱ | አዎ                |
+| Script                       | የሚያረጋግጠው                                                                                                                                    | አጋጅ               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `quality:collect`            | `quality-metrics.json`ን ያመነጫል (የESLint ማስጠንቀቂያዎች ብዛት፣ ከተዋሃደው shard report የሚገኝ coverage)                                                    | አዎ (ከratchet በፊት) |
+| `quality:ratchet`            | በ`quality-baseline.json` ውስጥ ያለ እያንዳንዱ metric ወደ ኋላ አልተመለሰም (የESLint ማስጠንቀቂያዎች ≤ baseline፤ coverage ≥ baseline)                             | አዎ                |
+| `check:duplication`          | የcode ድግግሞሽ (jscpd@4) በ`quality-baseline.json` ውስጥ ካለው baseline አይበልጥም                                                                      | አዎ                |
+| `check:complexity`           | የፋይል-ደረጃ cyclomatic complexity ከcap አይበልጥም (ዋናው ESLint `complexity` + `max-lines-per-function`)                                             | አዎ                |
+| `check:cognitive-complexity` | የcognitive complexity ratchet (`eslint-plugin-sonarjs`) — የተለየ ESLint pass፤ CI ሁለቱንም በአንድ `check:complexity-ratchets` ደረጃ ተዋህደው እንዲሰሩ ያደርጋል | አዎ                |
+| `check:dead-code`            | ጥቅም ላይ ያልዋሉ exports / ፋይሎች ratchet (knip) ከbaseline አንጻር ወደ ኋላ አይመለስም                                                                       | አዎ                |
+| `check:compression-budget`   | የcompression benchmark budget — የእያንዳንዱ-engine token-savings floors ወደ ኋላ መመለስ የለባቸውም                                                       | አዎ                |
+| `check:type-coverage`        | የpercent-typed ratchet (`type-coverage`) ወደ ኋላ አይመለስም፤ በአብዛኛው `typecheck:noimplicit:core`ን ይሸፍናል                                            | አዎ                |
+
+### ስራዎች፦ `codeql-scan` እና `codeql-admission`
+
+`codeql-scan` የተዋቀሩ የትንተና ምድቦችን ሁሉ ያመነጫል። ይህ ስራ ከተሳካ በኋላ `codeql-admission` ትክክለኛ ሰቀላዎቹንና የእጩውን ማስጠንቀቂያ አለመጨመር ገደብ ያረጋግጣል። ሁለቱም ሰነዶችን ብቻ ለሚቀይሩ እጩዎችም ጨምሮ የ`Gate / CI` አስገዳጅ ጥገኞች ናቸው። የአስተዳደር ማንቃትና canary መስፈርቶች ከታች ባለው "የCodeQL ገደብ" ተገልጸዋል።
+
+| ስክሪፕት                  | የሚያረጋግጠው                                                                                                                     | ይከለክላል |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `check:codeql-ratchet` | የማስጠንቀቂያ ገደቡ ከመፈተሹ በፊት የእጩ ref/SHAና ሁሉም ምድቦች ወቅታዊ መሆን አለባቸው፤ የጎደለ ማስረጃ ይከለክላል። አጠቃላይ ዝርዝር ለብቻ ይቆያል — ከታች "የCodeQL ገደብ" ይመልከቱ | አዎ     |
 
 ### ሥራ፦ `quality-extended`
 
@@ -470,32 +479,23 @@ git add quality-baseline.json
 ሳያዘምን መለኪያን የሚያሻሽል PR በ`--require-tighten` ይያዛል (ደረጃ 6A.5፣
 ትግበራው በመጠባበቅ ላይ ነው)።
 
-### የCodeQL ratchet፦ የማደሻ ድግግሞሽ እና በእጅ ማስጀመር
+### የCodeQL ገደብ፦ የእጩ ተቀባይነትና የማከማቻ ዝርዝር
 
-`check:codeql-ratchet` **በጊዜ ሰሌዳ የሚታደሰውን የrepo ሁኔታ እንጂ በእያንዳንዱ PR የሚታደሰውን አያነብም።**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup`
-`state: configured`፣ `schedule: weekly` የሚል ውጤት ይሰጣል፦ ይህ የGitHub default-setup scan እንጂ
-በእያንዳንዱ push የሚካሄድ analysis አይደለም። ውጤቱም፦ alertsን የሚያስተካክል PR merge ከተደረገ በኋላ፣
-ቀጣዩ በጊዜ ሰሌዳ የተያዘ scan እስኪካሄድ ድረስ ratchet የቆየውን ከፍተኛ ብዛት ማንበቡን ይቀጥላል፤
-ስለዚህ scanው እስኪያዘምን ድረስ በሁሉም ክፍት PR ላይ፣ የማስተካከያው PR ተከታይ ለውጦችንም ጨምሮ፣
-ወደኋላ መመለስ እንዳለ ያሳያል።
+CI በግልጽ የጥገኝነት ሰንሰለት የእጩ CodeQL ተቀባይነትን ይቆጣጠራል፦ `codeql-scan` በ`codeql.yml` ያለውን የአራት ቋንቋ ማትሪክስ ይጠራል፣ ከዚያ `codeql-admission` `node scripts/check/check-codeql-ratchet.mjs --candidate`ን ያስኬዳል። `Gate / CI` ሁለቱንም ውጤቶች ይጠይቃል። Quality የቁጥር ምርመራዎቹን ይጠብቃል፣ ግን አምራቹ ሳይጨርስ scannerን አይጠይቅም፤ `Gate / Quality` ብቻ ሙሉ የእጩ ተቀባይነት አይደለም። ሰነድ ብቻ ለሚቀይሩ እጩዎችም CodeQL አስገዳጅ ነው።
 
-**በእጅ ማደስ**፦ `gh workflow run codeql.yml --ref release/vX.Y.Z` analysisን እንደገና
-ያስኬድና alertsን በደቂቃዎች ውስጥ እንደገና ያትማል። መጀመሪያ `.github/workflows/codeql.yml`ን
-ያንብቡ፤ ራስጌው `workflow_dispatch`-ብቻ የሆነው **ከGitHub "default setup" ጋር ስለሚጋጭ**
-መሆኑን ያብራራል (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`)። የ`push`/`pull_request`/
-`schedule` triggersን መልሶ ማስጀመር በመጀመሪያ **የowner እርምጃ** ይፈልጋል፦ Settings → Code security →
-CodeQL: Default → Advanced። ያንን ለውጥ ሳያደርጉ `schedule:` trigger አይጨምሩ፤
-ውድቀት የሚያጋጥማቸውን runs ብቻ ይፈጥራል።
+በ`config/quality/codeql-admission-policy.json` ያለው ፖሊሲ Actions፣ C/C++፣ JavaScript/TypeScriptና Python፣ default የጥያቄ ስብስብ፣ remote የስጋት ሞዴልና none የግንባታ ሁኔታን ይመርጣል። የአምራች ቅድመ ምርመራ በመጠባበቅ ላይ ያለ የማንቃት መዝገብና ከግልጽ ዒላማ ዝርዝሩ ውጭ ያሉ ቅርንጫፎችን ይከለክላል። መጀመሪያ ዒላማዎቹ mainና release/v3.8.53 ናቸው፤ ቀጣዩ release የተገመገመ መጨመር ይፈልጋል። የCI ሰፊ የrelease PR ማስነሻ ይጠበቃል፣ ግን ያልተጨመረ ዒላማ ያልተለካ PASS ከማግኘት ይልቅ ከextraction በፊት HOLD ይላል።
 
-**ብዛቱ ከቀነሰ በኋላ መነሻ መስመሩን ያጥብቁ**፦ `node scripts/check/check-codeql-ratchet.mjs
---update` አዲሱን የተለካ ብዛት ወደ `quality-baseline.json` →
-`metrics.codeqlAlerts.value` ይጽፋል፤ በዚህም ratchet እንደገና ወደ ቀድሞው ከፍተኛ ገደብ
-የሚደረግን ወደኋላ መመለስ በዝምታ እንዳይፈቅድ ያደርጋል። የተሰራ ምሳሌ (2026-09-02/03)፦ PR #12502
-7 እውነተኛ alertsን አስተካክሏል (13 → 6 የተለኩ ክፍት alerts)፤ PR #12530 ከዚህ ጋር እንዲዛመድ
-የቀዘቀዘውን መነሻ መስመር ከ11 → 6 አጥብቋል፤ ቀሪዎቹ 6 alerts ከዚያ በኋላ ለእያንዳንዱ alert
-ምክንያት በመመዝገብ እስከ 0 ክፍት alerts ድረስ dismiss ተደርገዋል።
+እያንዳንዱ የማትሪክስ ስራ ትክክለኛ SARIF የሰቀላ ID፣ ቋንቋ፣ ምድብ፣ ሩጫና ሙከራ፣ የጠሪ ፍሰት መለያ፣ የክስተት ref/head/base/merge SHAና የፖሊሲ ሃሽን ይመዘግባል። ጥገኛው ስራ የዚህን ሩጫ ማስረጃ ብቻ ያወርዳል፣ የቅርስ ሃሾችንም ያረጋግጣል። አራቱንም ምድቦች፣ የተሳካ አምራችና የእያንዳንዱ ትክክለኛ ሰቀላ ማቀናበር መጠናቀቅ ይጠይቃል። በቅርንጫፍ ላይ የተገኘውን አዲሱን ትንተና ሳይሆን የAPI sarif_id ማጣሪያ ይጠቀማል። ከፊል ዳግም ሩጫ የአምራች ሙከራውን ጠብቆ የዚያው ሩጫና እጩ የቀድሞ ሙከራ የተሳኩ ምድቦችን ሊጠቀም ይችላል፤ አሁን የከሸፈ አምራች የቀድሞ አረንጓዴ ማስረጃን መጠቀም አይችልም።
+
+CodeQL action ማቀናበርን ይጠብቃል፣ ግን የተወሰነው አተገባበሩ ሁኔታን ማንበብ ሲከሽፍ ወይም የጥበቃ ጊዜ ሲያልቅ አስጠንቅቆ ሊቀጥል ይችላል። ስለዚህ ተቀባይነት ማቀናበርን እንደገና ያረጋግጣል። የጎደሉ ምድቦች፣ በመጠባበቅ ላይ ያለ ማቀናበር፣ የከሸፉ/የተሰረዙ ስራዎች፣ ያረጀ መለያ፣ ያልተሟላ የገጽ መዳሰስ ወይም የማይገኙ APIዎች HOLDና exit 2 ያመጣሉ። ለገለልተኛ scanner ፍሰት ቋሚ ጥበቃ አይቀርም። ያልተቃኘ PR የማስጠንቀቂያ ጥያቄ 0 ስለመለሰ ማለፍ አይችልም። ከ`metrics.codeqlAlerts.value` የሚበልጥ የተለካ ቁጥር exit 1 ይሰጣል፤ የሌላ ቅርንጫፍ ማስጠንቀቂያ ለማስገባት መነሻ ገደቡ አይጨምርም። [የሰቀላ ሁኔታና ትንተና ፍለጋ](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+መዝገቡ የሰቀላና ትንተና IDዎች፣ ምድቦች፣ የመሳሪያ ስሪቶች፣ ref/SHA፣ መነሻ ገደብና የማስጠንቀቂያ ቁጥሮችን ይይዛል። የSARIF መለያ/የውጤት ቁጥር፣ ዝቅተኛ የደንብ ቁጥሮችና ትክክለኛ የማስጠንቀቂያ ክስተቶች አስገዳጅ ይቆያሉ። ከመቀበል በፊት የPR/ትንተና መለያዎች ዳግም ይመረመራሉ። እነዚህ ምርመራዎች የተዋቀሩ ምድቦችን ሽፋን ያረጋግጣሉ፣ የተወጣ እያንዳንዱ ምንጭ ፋይል ዝርዝር አይደሉም። ያለ ግንባታ የC/C++ extraction በፕሮጀክት ግንባታ ጊዜ የሚመነጭ ኮድን አያካትትም። የምንጭ ማግለሎች አሁንም ግምገማ ይፈልጋሉ፤ ችግርን ለአስተዋጽኦ አድራጊ ለማስጠጋት ተነጻጻሪ ትክክለኛ የመሠረት ማስረጃ ያስፈልጋል።
+
+`codeql-maintenance.yml` የPR/main አምራቾችን ሳይደግም የንቁ release push ቅኝቶችንና የሳምንት መርሐግብር ይሰጣል። `nightly-codeql-inventory.yml` የሙሉ ማከማቻ መነሻ ገደብን ለብቻ ይጠብቃል፣ `--strict-measurement`ን ይጠቀማል፣ መለካት ካልተቻለም ይከሽፋል። የቀድሞ አካባቢያዊ ሰብሳቢ ለስላሳ መዝለል የእጩ ተቀባይነት አይደለም። ገደብ ማጥበቅ ዝቅ ያለ አጠቃላይ ቁጥር ከተረጋገጠ በኋላ ግልጽ `--update` እርምጃ ይቆያል።
+
+Default Setup ተዋቅሮ እያለ Advanced ፍሰት መታተም የለበትም፦ GitHub ይህን ጥምረት ይከለክላል። በስሪት የተያዘ ፖሊሲው የተገመገመው የአስተዳደር ሽግግር ሁኔታ እንደገና እስኪነበብ ድረስ በመጠባበቅ ላይ ይቆያል። ከማተም በፊት ኦፕሬተሩ ማከማቻ፣ head/base/tree፣ የፖሊሲ/patch/rollback ሃሾችና የታየ የsetup ሁኔታን ይወስናል፤ `node scripts/quality/codeql-producer.mjs verify-admin-readback` የቀረቡትን የሚጠበቁና ትክክለኛ JSON መዝገቦች ያረጋግጣል። ይህ ቴክኒካዊ ጠባቂ ነው፣ የኦፕሬተር ፈቃድ ወይም አዲስ ሁኔታ የማምጣት ምትክ አይደለም። የPR ቶከን የAdministration ፈቃድ ፈጽሞ አይጠይቅም። ማስጀመርና ማንኛውም የscanner ለውጥ ያንን ልዩ readbackና እውነተኛ የPR፣ forkና merge-group ተኳሃኝነት ማስረጃ ይጠይቃሉ።
+
+Forkዎች አስተናጋጅ runners፣ የመግቢያ መረጃ የማያስቀምጥ checkout፣ በአምራቹ ውስጥ ያለ ፕሮጀክት install/build፣ እንዲሁም ያለ የተወረሱ የማከማቻ ምስጢሮች ይሰራሉ። GitHub ለpull_request ክስተት የSARIF ሰቀላን በተቀነሰ ፈቃድ ያለው fork ቶከን ይደግፋል፤ የመጀመሪያ አስተዋጽኦ ማስኬጃ ፈቃድ የGitHub ፖሊሲ ይቆያል። የማይታመን ኮድ ለማስኬድ pull_request_targetን ፈጽሞ አይጠቀሙ። ሽግግሩ ተጠናቋል ከማለት በፊት በተቆጣጠረ canary ውስጥ ትክክለኛ የቶከን ፈቃዶች፣ analysis_keyና ሁሉም የምድብ አካባቢዎችን ያረጋግጡ። [የfork ሰቀላ ደንቦች](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible)፣ [የሚጋጩ የsetup ሁኔታዎች](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Dismissals የoperator ውሳኔ ናቸው (ጥብቅ ደንብ #14)**፦ በdismissal አስተያየቱ ውስጥ ቴክኒካዊ
 ምክንያቱን ሳይመዘግቡ የCodeQL alertን በፍጹም dismiss አያድርጉ፦ ለupstream-protocol መስፈርት `won't fix`፣
@@ -652,11 +652,7 @@ diagnosticsን እንዲፈቱ ያደርጋል — የ"የተፈጠረ symbol" �
 ለውጦች ናቸው፤ መቀየሮቹ/ማስወገዶቹ ለኦፕሬተሩ የተተዉ የፖሊሲ ውሳኔዎች ናቸው።** ከታች ያለው ምንም ነገር
 እስካሁን ተግባራዊ አልተደረገም።
 
-**በተጨማሪም ከላይ ያልተመዘገቡ** (አማካሪ፣ ዝቅተኛ ምልክት ያላቸው)፦ የ`docs-lint` ሥራ
-(markdownlint + Vale፣ ሙሉው ሥራ `continue-on-error`) እና ራሳቸውን የቻሉ የስካነር የሥራ ፍሰቶች
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`። `semgrepFindings: 0` በ
-`quality-baseline.json` ውስጥ አለ፣ ነገር ግን በ`ci.yml` ውስጥ ከአጋጅ ራቼት ጋር አልተገናኘም — መለኪያው
-በአሁኑ ጊዜ የተገለለ ነው።
+**ከላይ ያልተሰነዱትም** (አማካሪ፣ ዝቅተኛ ጠቋሚ)፦ `docs-lint` ስራ (markdownlint + Vale፣ ሙሉ ስራው `continue-on-error`) እና ገለልተኛ የscanner ፍሰቶች `semgrep.yml` / `scorecard.yml`። CodeQL አሁን ከላይ ባሉት የማንቃት መስፈርቶች ስር በ`Gate / CI` ውስጥ አስገዳጅ የአምራችና የተቀባይነት ስራዎች አሉት። `semgrepFindings: 0` በ`quality-baseline.json` ውስጥ አለ፣ ግን በ`ci.yml` ከከልካይ ገደብ ጋር አልተገናኘም — ይህ መለኪያ በአሁኑ ጊዜ ያለ ግንኙነት ነው።
 
 ### ውህደት / ድግግሞሽ ማስወገድ (ሜካኒካዊ፣ ዝቅተኛ አደጋ)
 

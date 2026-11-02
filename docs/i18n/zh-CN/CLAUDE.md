@@ -11,7 +11,7 @@
 ## Worktree 隔离 — Claude Code 特定说明
 
 完整的强制性 worktree 协议（基础分支确认、`.claude/worktrees/` 规范路径、`cp -al` node_modules、清理规则）见
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)（摘要见 `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md)（摘要见 `AGENTS.md` →
 Git 工作流 → “Worktree 隔离”）。Claude Code 特有的要点：
 
 - 除非操作者已经告知你，否则通过 `AskUserQuestion` 与其确认基础分支（硬性规则 #19）。

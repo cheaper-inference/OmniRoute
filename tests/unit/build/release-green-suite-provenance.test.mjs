@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -99,18 +107,24 @@ function observe(
         },
       })
     );
+    // Unrelated gates return fixed output. Shell builtins retain real child
+    // process boundaries without starting a Node VM for every simulated gate.
     const executable = (name, body) =>
-      writeFileSync(join(dir, "bin", name), `#!${process.execPath}\n${body}`, { mode: 0o755 });
-    executable("git", `console.log("${sha}");`);
+      writeFileSync(join(dir, "bin", name), `#!/bin/sh\n${body}`, { mode: 0o755 });
+    executable("git", `printf '%s\\n' '${sha}'`);
     executable(
       "npx",
-      'console.log(JSON.stringify([{filePath:"fixture.ts",errorCount:0,warningCount:0}]));'
+      `printf '%s\\n' '[{"filePath":"fixture.ts","errorCount":0,"warningCount":0}]'`
     );
     executable(
       "npm",
       `
-      if(process.argv[3] === "check:complexity-ratchets") console.log("complexity=0\\ncognitiveComplexity=0\\n[complexity] OK — 0 violações (baseline 0)\\n[cognitive-complexity] OK — 0 violações (baseline 0)");
-      if(process.argv[3] === "check:workflows") console.log("workflowAuditState=MEASURED\\nworkflowFindings=0\\nprovenanceRunnerFindings=0\\nscheduledGuardFindings=0");
+      case "$2" in
+        check:complexity-ratchets)
+          printf '%s\\n' 'complexity=0' 'cognitiveComplexity=0' '[complexity] OK — 0 violações (baseline 0)' '[cognitive-complexity] OK — 0 violações (baseline 0)' ;;
+        check:workflows)
+          printf '%s\\n' 'workflowAuditState=MEASURED' 'workflowFindings=0' 'provenanceRunnerFindings=0' 'scheduledGuardFindings=0' ;;
+      esac
     `
     );
     for (const name of names) {
@@ -171,6 +185,36 @@ function observe(
       result.stderr
     );
     return { status: result.status, report };
+  } catch (error) {
+    // Preserve only structured process evidence before this owned fixture is
+    // removed. Do not open the raw command logs or expose command/output fields.
+    const diagnostics = [];
+    const commandDirectory = join(dir, "_artifacts/release-green/commands");
+    try {
+      for (const file of readdirSync(commandDirectory)) {
+        if (!/^[0-9a-f-]+\.log\.json$/i.test(file)) continue;
+        try {
+          const receipt = JSON.parse(readFileSync(join(commandDirectory, file), "utf8"));
+          if (["PASS", "FAIL"].includes(receipt.outcome)) continue;
+          diagnostics.push({
+            outcome: receipt.outcome,
+            exitCode: receipt.exitCode,
+            signal: receipt.signal,
+            spawnError: receipt.spawnError,
+            cleanupError: receipt.cleanupError,
+            processGroupObservation: receipt.processGroupObservation ?? null,
+          });
+        } catch {
+          diagnostics.push({ captureCode: "COMMAND_RECEIPT_UNREADABLE" });
+        }
+      }
+    } catch {
+      diagnostics.push({ captureCode: "COMMAND_RECEIPT_DIRECTORY_UNREADABLE" });
+    }
+    if (error instanceof Error && diagnostics.length > 0) {
+      error.message += `\nOwned process diagnostics: ${JSON.stringify(diagnostics)}`;
+    }
+    throw error;
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -463,6 +507,8 @@ for (const [name, mcpExit, expected] of [
   test(`hosted ${name} executes the complete assigned runner set (MCP exit ${mcpExit})`, () => {
     const dir = mkdtempSync(join(tmpdir(), "hosted-vitest-shard-"));
     try {
+      // These executable stubs use require(), even when TMPDIR inherits an ESM package.
+      writeFileSync(join(dir, "package.json"), '{"type":"commonjs"}');
       const calls = join(dir, "calls.jsonl");
       writeFileSync(
         join(dir, "npm"),

@@ -226,7 +226,8 @@
 @@ -72,14 +89,17 @@
  | Script | Para quê |
  |---|---|
- | `bootstrap.sh <branch> [base]` | Reconhecimento + worktree + diagnóstico num comando. Só lê. Painel em `_artifacts/i18n-waves/bootstrap-<branch>.txt`. |
+-| `bootstrap.sh <branch> [base]` | Reconhecimento + worktree + diagnóstico num comando. Só lê. Painel em `_artifacts/i18n-waves/bootstrap-<branch>.txt`. |
++| `bootstrap.sh <branch> <base>` | Prepara/reutiliza a worktree e faz diagnóstico/probe; não é somente leitura. Exige base explícita, autorização desses efeitos e ambiente privado injetado. Painel em `_artifacts/i18n-waves/bootstrap-<branch>.txt`. |
 -| `wave.sh <worktree> <nome>` | A onda (seção 5 da skill). Lock por worktree; probe/backoff de cota; drift via `--json` em arquivo; commit+push por doc; readoção dirigida. `FILES=…`, `FORCE=1`, `QUOTA_WAIT/MAX`, `DOWN_WAIT/MAX`. |
 -| `readopt_targets.py <doc…>` | Rehash de `target_hash` só dos docs dados; `source_hash` intocado. Substitui o adopt global. |
 +| `wave.sh <worktree> <nome>` | A onda (seção 5 da skill). Lock por worktree; probe/backoff de cota; drift via `--json` em arquivo; commit+push por doc dentro da autoridade vigente; rehash dirigido exige a revisão de proveniência descrita acima. `FILES=…`, `FORCE=1`, `QUOTA_WAIT/MAX`, `DOWN_WAIT/MAX`. |

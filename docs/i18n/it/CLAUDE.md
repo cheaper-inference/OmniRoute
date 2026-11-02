@@ -15,7 +15,7 @@ a Claude Code: perfezionamenti operativi delle regole già definite in `AGENTS.m
 
 Il protocollo completo e obbligatorio per i worktree (conferma del branch di base, percorso
 canonico `.claude/worktrees/`, `cp -al` per node_modules, regole di teardown) si trova in
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (riepilogato in `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (riepilogato in `AGENTS.md` →
 Workflow Git → "Isolamento dei worktree"). Punti specifici per Claude Code:
 
 - Conferma il branch di base con l'operatore tramite `AskUserQuestion` (Regola ferrea n. 19), a meno che

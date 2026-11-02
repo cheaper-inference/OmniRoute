@@ -23,7 +23,7 @@ import { listenWithRetry } from "./listen-with-retry.mjs";
 
 const { maybeHandleDisallowedMethod } = methodGuard;
 const { wrapRequestListenerWithHeadResponseGuard } = headResponseGuard;
-const { handleH2cUpgrade } = h2cUpgradeGuard;
+const { handleH2cUpgrade, createH2cUpgradeCallback } = h2cUpgradeGuard;
 
 // Pre-read DATA_DIR from local .env before bootstrap resolves paths
 if (!process.env.DATA_DIR) {
@@ -203,6 +203,7 @@ async function start() {
   });
 
   const server = http.createServer(
+    { shouldUpgradeCallback: createH2cUpgradeCallback(() => server) },
     wrapRequestListenerWithHeadResponseGuard((req, res) => {
       // Absorb client-abort errors (browser closes the socket during
       // navigation/HMR/bfcache) on the request/response streams so they never

@@ -41,14 +41,15 @@ nuevo o eliminado no pueda desaparecer silenciosamente. Los comprobantes cubren 
 de un escáner consultivo existente. Hacer obligatorias las comprobaciones aplicables en las reglas de rama
 es un cambio administrativo independiente; definir sus jobs no protege por sí mismo una rama.
 
-`API Route Typecheck` es una comprobación de flujo de trabajo independiente, ajena tanto a los veredictos agregados
-como al perfil estático del observador local completo. Inspeccione su resultado por separado para el candidato exacto.
-`.github/workflows/api-route-typecheck.yml` se ejecuta en PR dirigidas a `main` o
-`release/**`, en pushes a cualquiera de las dos familias de ramas y mediante activación manual. No tiene ningún filtro de rutas.
-Los cambios de rama base de una PR solicitan una nueva comprobación; las ediciones del cuerpo o del título usan el nombre
-exclusivo de observación `Admission not requested / API Route Typecheck` y no pueden sustituir la comprobación de admisión.
-El flujo de trabajo no declara un activador de grupo de fusión. Cualquier implementación de una cola de fusión que requiera
-esta comprobación debe establecer primero su ejecución para ese evento.
+`API Route Typecheck` es una comprobación independiente del workflow, fuera de ambos veredictos agregados y del perfil estático del observador local completo. Examine su resultado por separado para la candidata exacta. `.github/workflows/api-route-typecheck.yml` se ejecuta en PR dirigidos a `main` o `release/**`, pushes a cualquiera de esas familias de ramas, ejecución manual y eventos `merge_group` de tipo `checks_requested`. No tiene filtro de rutas. Los grupos de merge hacen checkout de `merge_group.head_sha`; los demás eventos, de `github.sha`. Todos los eventos usan la misma puerta de diagnóstico de API y las pruebas unitarias de esa puerta. Cambiar la base de un PR solicita una comprobación nueva; las ediciones de cuerpo/título usan el nombre exclusivamente de observación `Admission not requested / API Route Typecheck` y no pueden sustituir la comprobación de admisión.
+
+### DAST consume el build de CI verificado
+
+El job obligatorio `dast-smoke` de CI llama a `.github/workflows/dast-smoke.yml` después de `build`. Sigue la misma selección de código/borrador que el build, incluidos los PR de forks admitidos, los PR dirigidos a release y los grupos de merge. Un job DAST ausente, fallido, cancelado u omitido inesperadamente bloquea `Gate / CI`. El workflow reutilizable no tiene un disparador independiente de PR/ejecución manual; la validación manual usa la ejecución manual de CI para mantener el build y el consumidor en la misma ejecución.
+
+`scripts/ci/next-build-provenance.mjs` sella el artefacto Next completo con su digest del tar, repositorio/evento/ejecución, intento del productor, head/base/checkout/tree, identidades de workflow, lockfile, versión exacta/ABI de Node, plataforma y bundler. DAST selecciona el ID inmutable del artefacto desde `needs.build.outputs`, exige verificar el digest de la descarga y calcula de forma independiente el hash del ZIP para compararlo con el digest del productor antes de extraer sus dos miembros permitidos mediante `scripts/ci/unpack-ci-build.py`. El manifiesto y el archivo tar también deben coincidir con salidas independientes del productor antes de extraer el árbol Next. Nunca busca el último build correcto de la rama. Una reejecución parcial puede reutilizar ese mismo intento del productor cuando su ID y todas las entradas todavía coinciden; el recibo registra ambos intentos.
+
+El consumidor permanece en un runner Linux alojado con permiso de repositorio de solo lectura y sin secretos del repositorio. Instala la versión exacta de Node del productor y después ensambla la CLI con `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` rechaza la ausencia de un servidor standalone antes de cualquier build de respaldo; los builds locales normales de la CLI mantienen su respaldo existente. La disponibilidad del servidor, Schemathesis y promptfoo deben completarse correctamente dentro del límite inalterado de 25 minutos del job. Un recibo de procedencia acredita la identidad de las entradas y los bytes, no un escaneo DAST correcto. La caducidad del artefacto, la interrupción del runner o el fallo de un escáner siguen siendo evidencia incompleta o fallida; no pueden convertirse en PASS mediante un wrapper consultivo.
 
 ### Capacidad de ejecución de la interfaz de usuario
 
@@ -220,17 +221,24 @@ Se ejecuta en cada PR dirigido a `main`. Bloquea la fusión si falla.
 
 Se ejecuta después de `test-coverage`. Bloquea la fusión en caso de fallo.
 
-| Script                       | Valida                                                                                                                                                                                                                          | Bloqueante                       |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| `quality:collect`            | Genera `quality-metrics.json` (recuento de advertencias de ESLint, cobertura del informe combinado de fragmentos)                                                                                                               | Sí (antes del ajuste progresivo) |
-| `quality:ratchet`            | Ninguna métrica de `quality-baseline.json` ha empeorado (advertencias de ESLint ≤ línea base; cobertura ≥ línea base)                                                                                                           | Sí                               |
-| `check:duplication`          | La duplicación de código (jscpd@4) no supera la línea base de `quality-baseline.json`                                                                                                                                           | Sí                               |
-| `check:complexity`           | La complejidad ciclomática por archivo no supera el límite (`complexity` principal de ESLint + `max-lines-per-function`)                                                                                                        | Sí                               |
-| `check:cognitive-complexity` | Ajuste progresivo de la complejidad cognitiva (`eslint-plugin-sonarjs`) — ejecución independiente de ESLint; CI ejecuta ambos combinados en el único paso `check:complexity-ratchets`                                           | Sí                               |
-| `check:dead-code`            | El ajuste progresivo de exportaciones o archivos sin usar (knip) no empeora con respecto a la línea base                                                                                                                        | Sí                               |
-| `check:compression-budget`   | Presupuesto del benchmark de compresión — los umbrales mínimos de ahorro de tokens por motor no deben empeorar                                                                                                                  | Sí                               |
-| `check:type-coverage`        | El ajuste progresivo del porcentaje con tipos (`type-coverage`) no empeora; reemplaza en gran medida a `typecheck:noimplicit:core`                                                                                              | Sí                               |
-| `check:codeql-ratchet`       | El recuento de alertas abiertas de CodeQL no empeora (se obtiene mediante `gh api`; se omite correctamente si no hay token) — frecuencia de actualización y activación manual: consulte "Ajuste progresivo de CodeQL" más abajo | Sí                               |
+| Script                       | Valida                                                                                                                                                                                | Bloqueante                       |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `quality:collect`            | Genera `quality-metrics.json` (recuento de advertencias de ESLint, cobertura del informe combinado de fragmentos)                                                                     | Sí (antes del ajuste progresivo) |
+| `quality:ratchet`            | Ninguna métrica de `quality-baseline.json` ha empeorado (advertencias de ESLint ≤ línea base; cobertura ≥ línea base)                                                                 | Sí                               |
+| `check:duplication`          | La duplicación de código (jscpd@4) no supera la línea base de `quality-baseline.json`                                                                                                 | Sí                               |
+| `check:complexity`           | La complejidad ciclomática por archivo no supera el límite (`complexity` principal de ESLint + `max-lines-per-function`)                                                              | Sí                               |
+| `check:cognitive-complexity` | Ajuste progresivo de la complejidad cognitiva (`eslint-plugin-sonarjs`) — ejecución independiente de ESLint; CI ejecuta ambos combinados en el único paso `check:complexity-ratchets` | Sí                               |
+| `check:dead-code`            | El ajuste progresivo de exportaciones o archivos sin usar (knip) no empeora con respecto a la línea base                                                                              | Sí                               |
+| `check:compression-budget`   | Presupuesto del benchmark de compresión — los umbrales mínimos de ahorro de tokens por motor no deben empeorar                                                                        | Sí                               |
+| `check:type-coverage`        | El ajuste progresivo del porcentaje con tipos (`type-coverage`) no empeora; reemplaza en gran medida a `typecheck:noimplicit:core`                                                    | Sí                               |
+
+### Jobs: `codeql-scan` y `codeql-admission`
+
+`codeql-scan` produce todas las categorías de análisis configuradas. Cuando ese job finaliza correctamente, `codeql-admission` valida sus cargas exactas y el ratchet de alertas de la candidata. Ambos son dependencias obligatorias de `Gate / CI`, incluidas las candidatas que solo cambian documentación. Los requisitos de activación administrativa y canary se describen más abajo en "Ratchet de CodeQL".
+
+| Script                 | Valida                                                                                                                                                                                                                                        | Bloqueante |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `check:codeql-ratchet` | La ref/SHA de la candidata y todas las categorías de análisis configuradas deben estar actualizadas antes del ratchet de alertas; la falta de evidencia bloquea. El inventario global permanece separado: véase "Ratchet de CodeQL" más abajo | Sí         |
 
 ### Trabajo: `quality-extended`
 
@@ -492,30 +500,23 @@ Confirma este archivo junto con el cambio que mejoró la métrica. Un PR que mej
 métrica sin actualizar la línea base será detectado por `--require-tighten` (Fase 6A.5,
 implementación pendiente).
 
-### Ratchet de CodeQL: frecuencia de actualización y activación manual
+### Ratchet de CodeQL: admisión de la candidata e inventario del repositorio
 
-`check:codeql-ratchet` lee **el estado del repositorio, actualizado según una programación, no en cada PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` informa
-`state: configured`, `schedule: weekly`: es el análisis de configuración predeterminada de GitHub, no un
-análisis por cada push. Consecuencia: después de que se fusiona un PR que CORRIGE alertas, el ratchet sigue leyendo
-el recuento anterior, más alto, hasta que se ejecuta el siguiente análisis programado, por lo que informa de una regresión
-en cada PR abierto, incluidos los PR de seguimiento del propio PR correctivo, hasta que el análisis se actualiza.
+CI controla la admisión CodeQL de la candidata mediante una cadena explícita de dependencias: `codeql-scan` llama a la matriz de cuatro lenguajes de `codeql.yml` y luego `codeql-admission` ejecuta `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` exige ambos resultados. Quality mantiene sus propias comprobaciones numéricas, pero no consulta el escáner antes de que termine el productor; `Gate / Quality` por sí solo no constituye la admisión completa de la candidata. CodeQL sigue siendo obligatorio para candidatas que solo cambian documentación.
 
-**Actualización manual**: `gh workflow run codeql.yml --ref release/vX.Y.Z` vuelve a ejecutar el
-análisis y republica las alertas en cuestión de minutos. Lee `.github/workflows/codeql.yml`
-primero: su encabezado explica que solo usa `workflow_dispatch` **porque entra en conflicto con
-la "configuración predeterminada" de GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Restaurar los activadores `push`/`pull_request`/
-`schedule` requiere primero una **acción del propietario**: Settings → Code security →
-CodeQL: Default → Advanced. No añadas un activador `schedule:` sin realizar ese cambio, ya que
-solo producirá ejecuciones fallidas.
+La política de `config/quality/codeql-admission-policy.json` selecciona Actions, C/C++, JavaScript/TypeScript y Python, suite de consultas default, modelo de amenazas remote y modo de build none. La comprobación previa del productor rechaza un registro de activación pendiente y las ramas fuera de la lista explícita de destinos. Los destinos iniciales son main y release/v3.8.53; la próxima release necesita una incorporación revisada. Se mantiene el disparador más amplio de CI ya existente para PR de release, pero un destino no incorporado informa HOLD antes de la extracción en lugar de obtener un PASS sin medición.
 
-**Ajusta la línea base después de que disminuya el recuento**: `node scripts/check/check-codeql-ratchet.mjs
---update` escribe el nuevo recuento medido en `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, para que el ratchet no permita silenciosamente una regresión hasta
-el límite anterior. Ejemplo práctico (2026-09-02/03): el PR #12502 corrigió 7 alertas reales
-(13 → 6 abiertas según la medición); el PR #12530 ajustó la línea base congelada de 11 → 6 para que coincidiera; las
-6 restantes se descartaron después con una justificación individual para cada alerta, hasta llegar a 0 abiertas.
+Cada job de la matriz registra su ID real de carga SARIF, lenguaje, categoría, ejecución e intento, identidad del workflow llamante, ref/head/base/merge SHA del evento y hash de la política. El job dependiente descarga únicamente los recibos de esta ejecución y valida los digests de los artefactos. Exige las cuatro categorías, un productor correcto y el procesamiento finalizado de cada carga exacta. Usa el filtro sarif_id de la API, no el análisis más reciente encontrado en una rama. Las reejecuciones parciales pueden reutilizar categorías correctas de un intento anterior de la misma ejecución y candidata, conservando el intento productor; un productor actual fallido no puede reutilizar evidencia verde anterior.
+
+La action de CodeQL espera al procesamiento, pero su implementación fijada puede advertir y continuar tras un fallo al leer el estado o agotar la espera. Por ello, la admisión verifica de nuevo el procesamiento. Categorías ausentes, procesamiento pendiente, jobs fallidos o cancelados, identidad obsoleta, paginación incompleta o API no disponibles producen HOLD y salida 2. Ya no hay una espera fija por un workflow independiente de escáner. Un PR no escaneado no puede aprobarse porque una consulta de alertas devolviera 0. Un recuento medido superior a `metrics.codeqlAlerts.value` termina con 1; la baseline no se eleva para absorber alertas de otra rama. [Estado de carga y consulta de análisis](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+El recibo registra ID de carga y análisis, categorías, versiones de herramientas, ref/SHA, baseline y cantidades de alertas. La identidad y el recuento de resultados SARIF, los recuentos mínimos de reglas y las instancias exactas de alertas siguen siendo obligatorios. Las identidades del PR/análisis se vuelven a comprobar antes de aceptar. Estas comprobaciones establecen cobertura de las categorías configuradas, no un inventario de cada archivo fuente extraído. La extracción C/C++ sin build no incluye código generado durante un build del proyecto. Las exclusiones de fuentes aún requieren revisión, y la atribución a colaboradores necesita evidencia comparable de la base exacta.
+
+`codeql-maintenance.yml` proporciona escaneos de pushes a la release activa y la programación semanal sin duplicar los productores de PR/main. `nightly-codeql-inventory.yml` mantiene separada la baseline de todo el repositorio, con `--strict-measurement` y un fallo cuando la medición no está disponible. Que el recolector local heredado pueda omitir la recogida sin fallar no constituye admisión de la candidata. El ajuste a la baja sigue siendo un `--update` explícito tras verificar un recuento global inferior.
+
+El workflow Advanced no debe publicarse mientras esté configurado Default Setup: GitHub rechaza esa combinación. Su política versionada permanece pendiente hasta que se vuelva a leer la transición administrativa revisada. Antes de publicar, un operador fija repositorio, head/base/tree, hashes de política/patch/rollback y estado de configuración observado; `node scripts/quality/codeql-producer.mjs verify-admin-readback` comprueba los registros JSON esperados y reales proporcionados. Es una protección técnica, no la aprobación del operador ni un sustituto de obtener lecturas recientes del estado. El token del PR nunca solicita acceso Administration. El despliegue y cualquier cambio de escáner requieren esa lectura separada, además de evidencia real de compatibilidad con PR, fork y merge-group.
+
+Los forks usan runners alojados, checkout sin credenciales persistidas, ninguna instalación/build del proyecto en el productor y ningún secreto heredado del repositorio. GitHub admite cargas SARIF para el evento pull_request con su token reducido de fork; la aprobación de la ejecución de una primera contribución sigue siendo política de GitHub. Nunca use pull_request_target para ejecutar código no confiable. Confirme los permisos reales del token, analysis_key y todos los entornos de categorías en el canary controlado antes de considerar terminada la migración. [Reglas de carga de forks](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [modos de configuración incompatibles](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Los descartes son decisión del operador (Regla estricta #14)**: nunca descartes una alerta de CodeQL
 sin registrar la justificación técnica en el comentario de descarte: `won't fix` para
@@ -672,11 +673,7 @@ identificó los siguientes candidatos para racionalización. **Las fusiones son 
 mecánicos de CI; las activaciones/eliminaciones son decisiones de política reservadas
 para el operador.** Aún no se ha aplicado nada de lo indicado a continuación.
 
-**Tampoco documentados anteriormente** (consultivos, señal débil): el trabajo `docs-lint`
-(markdownlint + Vale, trabajo completo con `continue-on-error`) y los flujos de trabajo
-independientes de análisis `semgrep.yml` / `codeql.yml` / `scorecard.yml`.
-`semgrepFindings: 0` está en `quality-baseline.json`, pero no está conectado a un ratchet
-bloqueante en `ci.yml`; actualmente, la métrica está huérfana.
+**Tampoco documentados arriba** (consultivos, señal baja): el job `docs-lint` (markdownlint + Vale, job completo con `continue-on-error`) y los workflows independientes de escáner `semgrep.yml` / `scorecard.yml`. CodeQL ahora tiene jobs obligatorios de producción y admisión bajo `Gate / CI`, sujetos a los requisitos de activación descritos arriba. `semgrepFindings: 0` figura en `quality-baseline.json`, pero no está conectado a un ratchet bloqueante en `ci.yml`: actualmente la métrica está huérfana.
 
 ### Fusión / deduplicación (mecánica, menor riesgo)
 

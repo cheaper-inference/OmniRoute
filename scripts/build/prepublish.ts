@@ -27,6 +27,7 @@ import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { assembleStandalone } from "./assembleStandalone.mjs";
+import { ensureStandaloneInput } from "./standaloneInput.mjs";
 import { buildMitmUtilities } from "./buildMitm.mjs";
 import { isNativeExecutable, resolveLocalBinEntry } from "./buildToolRunner.mjs";
 import { resolveBundledNpmEntry } from "./resolveNpmEntry.ts";
@@ -177,21 +178,17 @@ if (existsSync(DIST_DIR)) {
 // If the artifact is absent we invoke it exactly once.
 const NEXT_DIST = process.env.NEXT_DIST_DIR || ".build/next";
 const standaloneServerJs = join(ROOT, NEXT_DIST, "standalone", "server.js");
-if (!existsSync(standaloneServerJs)) {
-  console.log("  🏗️  .build/next/standalone not found — running `npm run build` once...");
-  execFileSync(process.execPath, ["scripts/build/build-next-isolated.mjs"], {
-    cwd: ROOT,
-    stdio: "inherit",
-  });
-  if (!existsSync(standaloneServerJs)) {
-    console.error(
-      "\n  ❌ Standalone build not found after `npm run build` at:",
-      standaloneServerJs
-    );
-    console.error("     Make sure next.config.mjs has: output: 'standalone'");
-    process.exit(1);
-  }
-}
+ensureStandaloneInput({
+  serverPath: standaloneServerJs,
+  requirePrebuilt: process.env.OMNIROUTE_REQUIRE_PREBUILT_NEXT === "1",
+  build: () => {
+    console.log("  🏗️  .build/next/standalone not found — running `npm run build` once...");
+    execFileSync(process.execPath, ["scripts/build/build-next-isolated.mjs"], {
+      cwd: ROOT,
+      stdio: "inherit",
+    });
+  },
+});
 console.log("  ✅ Standalone artifact present:", standaloneServerJs);
 
 // ── Step 3–7: Assemble standalone into dist/ ───────────────

@@ -40,14 +40,16 @@ Saklaw ng mga resibo ang sarili nilang workflow, hindi ang paglalathala, deploym
 ng isang umiiral na advisory scanner. Ang pagtatakda sa mga naaangkop na pagsusuri bilang required sa mga branch rule
 ay isang hiwalay na administratibong pagbabago; ang pagtukoy sa kanilang mga job ay hindi mismo nagpoprotekta sa isang branch.
 
-Ang `API Route Typecheck` ay isang independiyenteng pagsusuri ng workflow, sa labas ng parehong pinagsama-samang verdict
-at ng static profile ng lokal na full observer. Siyasatin nang hiwalay ang resulta nito para sa eksaktong
-candidate. Tumatakbo ang `.github/workflows/api-route-typecheck.yml` sa mga PR papunta sa `main` o
-`release/**`, sa mga push sa alinmang pamilya ng branch, at sa manual dispatch. Wala itong path filter.
-Humihiling ang mga retarget ng PR base ng bagong pagsusuri; ginagamit ng mga pag-edit sa body/title ang pangalan na para lamang sa obserbasyon na
-`Admission not requested / API Route Typecheck` at hindi maaaring pumalit sa admission check.
-Hindi nagdedeklara ang workflow ng merge-group trigger. Dapat munang tiyakin ng anumang rollout ng merge queue na nangangailangan
-ng pagsusuring ito ang pagpapatakbo nito para sa event na iyon.
+Ang `API Route Typecheck` ay hiwalay na pagsusuri ng workflow, nasa labas ng parehong pinagsamang pasya at ng static na profile ng lokal na buong observer. Suriin nang hiwalay ang resulta para sa eksaktong kandidato. Tumatakbo ang `.github/workflows/api-route-typecheck.yml` sa mga PR patungong `main` o `release/**`, mga push sa dalawang pamilya ng branch, manwal na pagpapatakbo, at mga event na `merge_group` na may uring `checks_requested`. Wala itong path filter. Kinukuha ng mga merge group sa checkout ang `merge_group.head_sha`; ginagamit ng ibang event ang `github.sha`. Pare-pareho ang API diagnostic gate at mga unit test ng gate para sa lahat ng event.
+Humihiling ng bagong pagsusuri ang pagbabago ng target na base branch ng PR; ang pag-edit ng nilalaman o pamagat ay gumagamit ng pangalang pang-obserbasyon lamang na `Admission not requested / API Route Typecheck` at hindi makapapalit sa pagsusuri para sa pagtanggap.
+
+### Ginagamit ng DAST ang napatunayang CI build
+
+Tinatawag ng kinakailangang CI job na `dast-smoke` ang `.github/workflows/dast-smoke.yml` pagkatapos ng `build`. Sinusunod nito ang kaparehong pagpili ng mga pagbabago sa code at draft na ginagamit ng build, kasama ang suportadong fork PR, mga PR na target ang release, at mga merge group. Ang nawawala, nabigo, kinansela, o di-inaasahang nilaktawang DAST job ay humaharang sa `Gate / CI`. Walang sariling PR o manwal na trigger ang reusable workflow; ginagamit ng manwal na validation ang dispatch ng CI upang manatili sa iisang run ang build at ang gumagamit nito.
+
+Sineselyuhan ng `scripts/ci/next-build-provenance.mjs` ang buong Next artifact kasama ang tar digest, repository/event/run, attempt ng producer, head/base/checkout/tree, mga pagkakakilanlan ng workflow, lockfile, eksaktong bersyon/ABI ng Node, platform, at bundler. Pinipili ng DAST ang di-nababagong artifact ID mula sa `needs.build.outputs`, inaatasan ang pag-verify ng digest ng download, at hiwalay na kinukuwenta ang hash ng ZIP laban sa digest ng producer bago kunin ang dalawang kasaping nasa allowlist gamit ang `scripts/ci/unpack-ci-build.py`. Dapat ding tumugma ang manifest at tar archive sa mga hiwalay na output ng producer bago kunin ang Next tree. Hindi ito naghahanap ng pinakahuling matagumpay na build ng branch. Maaaring gamitin muli ng bahagyang rerun ang parehong attempt ng producer kung tugma pa rin ang ID at lahat ng input; itinatala ng resibo ang parehong attempt.
+
+Nananatili ang consumer sa hosted Linux runner na may read-only na pahintulot sa repository at walang repository secrets. Ini-install nito ang eksaktong bersyon ng Node ng producer, saka binubuo ang CLI gamit ang `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. Tinatanggihan ng `scripts/build/standaloneInput.mjs` ang kawalan ng standalone server bago ang anumang fallback build; pinananatili ng karaniwang lokal na CLI build ang umiiral na fallback. Kailangang magtagumpay ang kahandaan ng server, Schemathesis, at promptfoo sa loob ng hindi nagbagong limitasyong 25 minuto ng job. Pinatutunayan ng resibo ng pinagmulan ang pagkakakilanlan at mga byte ng input, hindi ang matagumpay na DAST scan. Ang nag-expire na artifact, naantalang runner, o nabigong scanner ay nananatiling kulang o bigong ebidensiya; hindi ito maaaring maging PASS sa pamamagitan ng advisory wrapper.
 
 ### Kapasidad sa pagpapatupad ng UI
 
@@ -217,17 +219,24 @@ Tumatakbo sa bawat PR patungo sa `main`. Hinaharang ang merge kapag nabigo.
 
 Tumatakbo pagkatapos ng `test-coverage`. Hinaharang ang merge kapag nabigo.
 
-| Script                       | Bineberipika                                                                                                                                                                                                                          | Humaharang               |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `quality:collect`            | Gumagawa ng `quality-metrics.json` (bilang ng babala ng ESLint, coverage mula sa pinagsamang ulat ng shard)                                                                                                                           | Oo (upstream ng ratchet) |
-| `quality:ratchet`            | Hindi nag-regress ang bawat metric sa `quality-baseline.json` (mga babala ng ESLint ≤ baseline; coverage ≥ baseline)                                                                                                                  | Oo                       |
-| `check:duplication`          | Hindi lumalampas sa baseline sa `quality-baseline.json` ang pagdodoble ng code (jscpd@4)                                                                                                                                              | Oo                       |
-| `check:complexity`           | Hindi lumalampas sa cap ang cyclomatic complexity sa antas ng file (pangunahing `complexity` ng ESLint + `max-lines-per-function`)                                                                                                    | Oo                       |
-| `check:cognitive-complexity` | Ratchet ng cognitive complexity (`eslint-plugin-sonarjs`) — hiwalay na pagpapatakbo ng ESLint; parehong pinagsasama ng CI bilang iisang hakbang na `check:complexity-ratchets`                                                        | Oo                       |
-| `check:dead-code`            | Hindi nag-regress kumpara sa baseline ang ratchet ng mga hindi ginagamit na export / file (knip)                                                                                                                                      | Oo                       |
-| `check:compression-budget`   | Badyet ng benchmark sa compression — hindi dapat mag-regress ang minimum na matitipid na token para sa bawat engine                                                                                                                   | Oo                       |
-| `check:type-coverage`        | Hindi nag-regress ang ratchet ng porsiyento ng naka-type na code (`type-coverage`); malaking bahagi nito ay sumasaklaw sa `typecheck:noimplicit:core`                                                                                 | Oo                       |
-| `check:codeql-ratchet`       | Hindi nag-regress ang bilang ng bukas na alerto ng CodeQL (binabasa sa pamamagitan ng `gh api`; maayos na nilalaktawan kapag walang token) — para sa dalas ng pag-refresh at manual na trigger: tingnan ang "CodeQL ratchet" sa ibaba | Oo                       |
+| Script                       | Bineberipika                                                                                                                                                                   | Humaharang               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
+| `quality:collect`            | Gumagawa ng `quality-metrics.json` (bilang ng babala ng ESLint, coverage mula sa pinagsamang ulat ng shard)                                                                    | Oo (upstream ng ratchet) |
+| `quality:ratchet`            | Hindi nag-regress ang bawat metric sa `quality-baseline.json` (mga babala ng ESLint ≤ baseline; coverage ≥ baseline)                                                           | Oo                       |
+| `check:duplication`          | Hindi lumalampas sa baseline sa `quality-baseline.json` ang pagdodoble ng code (jscpd@4)                                                                                       | Oo                       |
+| `check:complexity`           | Hindi lumalampas sa cap ang cyclomatic complexity sa antas ng file (pangunahing `complexity` ng ESLint + `max-lines-per-function`)                                             | Oo                       |
+| `check:cognitive-complexity` | Ratchet ng cognitive complexity (`eslint-plugin-sonarjs`) — hiwalay na pagpapatakbo ng ESLint; parehong pinagsasama ng CI bilang iisang hakbang na `check:complexity-ratchets` | Oo                       |
+| `check:dead-code`            | Hindi nag-regress kumpara sa baseline ang ratchet ng mga hindi ginagamit na export / file (knip)                                                                               | Oo                       |
+| `check:compression-budget`   | Badyet ng benchmark sa compression — hindi dapat mag-regress ang minimum na matitipid na token para sa bawat engine                                                            | Oo                       |
+| `check:type-coverage`        | Hindi nag-regress ang ratchet ng porsiyento ng naka-type na code (`type-coverage`); malaking bahagi nito ay sumasaklaw sa `typecheck:noimplicit:core`                          | Oo                       |
+
+### Mga job: `codeql-scan` at `codeql-admission`
+
+Ginagawa ng `codeql-scan` ang lahat ng naka-configure na kategorya ng analysis. Kapag nagtagumpay ang job na iyon, sinusuri ng `codeql-admission` ang mismong mga upload nito at ang alert ratchet ng kandidato. Parehong kinakailangang dependency ng `Gate / CI`, kahit para sa kandidatong dokumentasyon lamang ang binabago. Inilalarawan sa “CodeQL ratchet” sa ibaba ang mga kinakailangan sa administratibong activation at canary testing.
+
+| Script                 | Sinusuri                                                                                                                                                                                                                                                     | Nakaharang |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- |
+| `check:codeql-ratchet` | Kailangang kasalukuyan ang ref/SHA ng kandidato at lahat ng naka-configure na kategorya ng analysis bago suriin ang alert ratchet; humaharang ang kulang na ebidensiya. Hiwalay pa rin ang pangkalahatang imbentaryo — tingnan ang “CodeQL ratchet” sa ibaba | Oo         |
 
 ### Trabaho: `quality-extended`
 
@@ -501,30 +510,23 @@ I-commit ang file na ito kasama ng pagbabagong nagpahusay sa metric. Ang isang P
 sa isang metric nang hindi ina-update ang baseline ay matutukoy ng `--require-tighten` (Yugto 6A.5,
 nakabinbin ang implementasyon).
 
-### CodeQL ratchet: dalas ng pag-refresh at manual na pag-trigger
+### CodeQL ratchet: pagtanggap ng kandidato at imbentaryo ng repository
 
-Binabasa ng `check:codeql-ratchet` ang **estado ng repo, na nire-refresh ayon sa iskedyul — hindi sa bawat PR.**
-Iniuulat ng `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ang
-`state: configured`, `schedule: weekly`: ang default-setup scan ng GitHub, hindi isang pagsusuri sa bawat push.
-Bunga nito: pagkatapos ma-merge ang isang PR na NAG-AAYOS ng mga alert, patuloy na binabasa ng ratchet
-ang luma at mas mataas na bilang hanggang sa tumakbo ang susunod na nakaiskedyul na scan — kaya nag-uulat ito
-ng regression sa bawat bukas na PR, kabilang ang mga follow-up ng mismong nag-ayos na PR, hanggang makahabol ang scan.
+Pinangangasiwaan ng CI ang pagtanggap ng kandidato sa CodeQL sa pamamagitan ng malinaw na hanay ng mga dependency: tinatawag ng `codeql-scan` ang matrix ng apat na wika sa `codeql.yml`, pagkatapos ay pinapatakbo ng `codeql-admission` ang `node scripts/check/check-codeql-ratchet.mjs --candidate`. Kailangan ng `Gate / CI` ang parehong resulta. Pinananatili ng Quality ang sarili nitong numerikong mga pagsusuri ngunit hindi ito nagtatanong sa scanner bago matapos ang producer; hindi kumpletong pagtanggap ng kandidato ang `Gate / Quality` lamang. Kailangan pa rin ang CodeQL sa mga kandidatong dokumentasyon lamang ang binabago.
 
-**Manual na pag-refresh**: Muling pinapatakbo ng `gh workflow run codeql.yml --ref release/vX.Y.Z` ang
-pagsusuri at muling inilalathala ang mga alert sa loob ng ilang minuto. Basahin muna ang `.github/workflows/codeql.yml`
-— ipinapaliwanag ng header nito na `workflow_dispatch`-only ito **dahil sumasalungat ito sa
-"default setup" ng GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Ang pagpapanumbalik sa mga trigger na `push`/`pull_request`/
-`schedule` ay nangangailangan muna ng **pagkilos ng owner**: Settings → Code security →
-CodeQL: Default → Advanced. Huwag magdagdag ng `schedule:` trigger nang hindi ginagawa ang pagbabagong iyon — mga bigong run
-lamang ang magiging resulta nito.
+Pinipili ng patakaran sa `config/quality/codeql-admission-policy.json` ang Actions, C/C++, JavaScript/TypeScript at Python, query suite na default, threat model na remote, at build mode na none. Tinatanggihan ng paunang pagsusuri ng producer ang nakabinbing activation record at mga branch na wala sa tahasang listahan ng mga target. Ang mga unang target ay main at release/v3.8.53; nangangailangan ang susunod na release ng nasuring proseso ng pag-enrol. Pinananatili ang umiiral na mas malawak na release PR trigger ng CI, ngunit nag-uulat ng HOLD ang hindi pa naka-enrol na target bago ang extraction sa halip na makakuha ng PASS nang walang pagsukat.
 
-**Higpitan ang baseline pagkatapos bumaba ang bilang** — isinusulat ng `node scripts/check/check-codeql-ratchet.mjs
---update` ang bagong nasukat na bilang sa `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, upang hindi tahimik na pahintulutan ng ratchet ang regression pabalik
-sa lumang pinakamataas na limitasyon. Halimbawang isinagawa (2026-09-02/03): inayos ng PR #12502 ang 7 tunay na alert
-(13 → 6 na nasukat na bukas); hinigpitan ng PR #12530 ang naka-freeze na baseline mula 11 → 6 upang tumugma; ang
-natitirang 6 ay pagkatapos ay na-dismiss na may hiwalay na katwiran para sa bawat alert hanggang maging 0 ang bukas.
+Itinatala ng bawat matrix job ang tunay na SARIF upload ID, wika, kategorya, run at attempt, pagkakakilanlan ng tumatawag na workflow, ref/head/base/merge SHA ng event, at hash ng patakaran. Ang kasunod na job ay nagda-download lamang ng mga resibo ng run na ito at nagsusuri ng mga artifact digest. Kailangan nito ang lahat ng apat na kategorya, matagumpay na producer, at tapos na pagproseso ng bawat eksaktong upload. Ginagamit nito ang sarif_id filter ng API, hindi ang pinakahuling analysis na nakita sa branch. Maaaring gamitin muli ng bahagyang rerun ang mga matagumpay na kategorya mula sa naunang attempt ng parehong run at kandidato, habang pinananatili ang attempt na gumawa ng mga ito; hindi maaaring gamitin ng kasalukuyang bigong producer ang naunang berdeng ebidensiya.
+
+Naghihintay ang CodeQL action sa pagproseso, ngunit maaaring magbabala at magpatuloy ang nakapirming implementasyon nito matapos mabigo ang pagbasa ng status o maubos ang paghihintay. Kaya muling sinusuri ng pagtanggap ang pagproseso. Ang kulang na kategorya, nakabinbing pagproseso, bigo o kinanselang job, lumang pagkakakilanlan, di-kumpletong pagination, o hindi magamit na API ay nagbibigay ng HOLD at exit code 2. Wala nang takdang paghihintay para sa hiwalay na scanner workflow. Hindi maaaring pumasa ang hindi na-scan na PR dahil lamang nagbalik ng 0 ang alert query. Lumalabas sa code 1 ang nasukat na bilang na lampas sa `metrics.codeqlAlerts.value`; hindi itinataas ang baseline upang saluhin ang mga alert ng ibang branch. [Status ng upload at paghahanap ng analysis](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Itinatala ng resibo ang mga upload at analysis ID, kategorya, bersyon ng tool, ref/SHA, baseline, at bilang ng mga alert. Kailangan pa rin ang pagkakakilanlan/bilang ng resulta ng SARIF, minimum na bilang ng mga rule, at eksaktong mga alert instance. Muling sinusuri ang mga pagkakakilanlan ng PR/analysis bago tanggapin. Pinatutunayan ng mga pagsusuring ito ang saklaw ng mga naka-configure na kategorya, hindi ang imbentaryo ng bawat na-extract na source file. Hindi kasama sa extraction ng C/C++ na walang build ang code na ginawa habang bino-build ang proyekto. Kailangan pa ring suriin ang mga ibinukod na source, at kailangan ng maihahambing na ebidensiya mula sa eksaktong base para sa pag-uugnay ng mga pagbabago sa kontribyutor.
+
+Nagbibigay ang `codeql-maintenance.yml` ng push scan sa aktibong release at lingguhang iskedyul nang hindi inuulit ang mga producer ng PR/main. Pinananatili ng `nightly-codeql-inventory.yml` na hiwalay ang baseline ng buong repository, gumagamit ng `--strict-measurement`, at nabibigo kapag hindi makapagsukat. Ang mahinahong paglaktaw ng lumang lokal na collector ay hindi pagtanggap ng kandidato. Ang pagpapahigpit ay nangangailangan pa rin ng tahasang `--update` matapos mapatunayan ang mas mababang pangkalahatang bilang.
+
+Hindi dapat ilathala ang Advanced workflow habang naka-configure ang Default Setup: tinatanggihan ng GitHub ang kombinasyong iyon. Nananatiling nakabinbin ang patakarang may bersyon hanggang mabasa muli at makumpirma ang nasuring administratibong paglipat. Bago ilathala, itinatakda ng operator ang repository, head/base/tree, mga hash ng patakaran/patch/rollback, at naobserbahang setup state; sinusuri ng `node scripts/quality/codeql-producer.mjs verify-admin-readback` ang ibinigay na inaasahan at aktuwal na JSON record. Teknikal na pananggalang ito, hindi pag-apruba ng operator o kapalit ng pagkuha ng sariwang readback. Hindi kailanman humihiling ang PR token ng access sa Administration. Kailangan ng rollout at anumang pagbabago ng scanner ang hiwalay na readback na iyon, kasama ang tunay na ebidensiya ng compatibility ng PR, fork, at merge group.
+
+Gumagamit ang mga fork ng hosted runner, checkout na hindi nagpapanatili ng credentials, walang project install/build sa producer, at walang minanang repository secrets. Sinusuportahan ng GitHub ang SARIF upload para sa pull_request event gamit ang limitadong fork token nito; nananatiling patakaran ng GitHub ang pag-apruba sa pagpapatakbo ng unang kontribusyon. Huwag kailanman gamitin ang pull_request_target upang patakbuhin ang hindi pinagkakatiwalaang code. Kumpirmahin ang aktuwal na pahintulot ng token, analysis_key, at lahat ng category environment sa kontroladong canary bago ituring na kumpleto ang migrasyon. [Mga tuntunin sa upload ng fork](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [magkasalungat na setup mode](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Ang mga dismissal ay pagpapasya ng operator (Mahigpit na Panuntunan #14)** — huwag kailanman mag-dismiss ng CodeQL alert
 nang hindi itinatala ang teknikal na katwiran sa dismissal comment: `won't fix` para sa
@@ -681,11 +683,7 @@ ang mga sumusunod na kandidatong maaaring rasyonalisahin. **Ang mga pagsasanib a
 pagbabago sa CI; ang mga pagpapalit/pag-aalis ay mga desisyon sa patakaran na nakalaan sa operator.** Wala pa
 sa mga nasa ibaba ang inilalapat.
 
-**Hindi rin nakadokumento sa itaas** (advisory, mababang signal): ang `docs-lint` job
-(markdownlint + Vale, may `continue-on-error` ang buong job) at ang mga standalone scanner workflow na
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. Nasa
-`quality-baseline.json` ang `semgrepFindings: 0` ngunit hindi ito nakakabit sa isang blocking ratchet sa `ci.yml` — kasalukuyang
-ulila ang metric.
+**Hindi rin dokumentado sa itaas** (payo lamang, mahinang signal): ang `docs-lint` job (markdownlint + Vale, buong job na `continue-on-error`) at ang hiwalay na mga scanner workflow na `semgrep.yml` / `scorecard.yml`. Mayroon na ngayong kinakailangang producer at acceptance job ang CodeQL sa ilalim ng `Gate / CI`, alinsunod sa mga kinakailangan sa activation na inilalarawan sa itaas. Nasa `quality-baseline.json` ang `semgrepFindings: 0` ngunit hindi ito nakakabit sa humaharang na ratchet sa `ci.yml` — kasalukuyang walang nagpapatupad na pagsusuri ang metric na ito.
 
 ### Pagsamahin / alisin ang duplikasyon (mekanikal, mas mababang panganib)
 

@@ -15,7 +15,7 @@ za Claude Code — gre za operativne dopolnitve pravil, ki so že opredeljena v 
 
 Celoten obvezni protokol za worktree-je (potrditev osnovne veje, kanonična pot
 `.claude/worktrees/`, `cp -al` za node_modules, pravila za razgradnjo) je v
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (povzet v `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (povzet v `AGENTS.md` →
 Git Workflow → "Worktree isolation"). Posebnosti za Claude Code:
 
 - Z operaterjem potrdite osnovno vejo prek `AskUserQuestion` (Hard Rule #19), razen če vam

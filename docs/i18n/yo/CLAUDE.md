@@ -15,7 +15,7 @@ Claude Code NÌKAN — àwọn àtúnṣe ìṣiṣẹ́ sí àwọn òfin tí a
 
 Ìlànà worktree tó jẹ́ dandan ní kíkun (ìjẹ́rìsí base branch, ọ̀nà ìlànà `.claude/worktrees/`,
 `cp -al` node_modules, àwọn òfin ìtúká) wà nínú
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (tí a ṣe àkótán rẹ̀ nínú `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (tí a ṣe àkótán rẹ̀ nínú `AGENTS.md` →
 Git Workflow → "Worktree isolation"). Àwọn kókó pàtó fún Claude Code:
 
 - Jẹ́rìsí base branch náà pẹ̀lú olùṣàkóso nípasẹ̀ `AskUserQuestion` (Hard Rule #19) àyafi tí wọ́n bá

@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -204,7 +213,32 @@ function observe({
     );
     assert.equal(result.error, undefined);
     assert.notEqual(result.stdout.trim(), "", result.stderr);
-    return { status: result.status, report: JSON.parse(result.stdout) };
+    // Capture only structured receipts from this owned fixture before cleanup.
+    // Raw command logs and process environment are never opened here.
+    const diagnostics: Record<string, unknown>[] = [];
+    const commandDirectory = join(dir, "_artifacts/release-green/commands");
+    try {
+      for (const file of readdirSync(commandDirectory)) {
+        if (!/^[0-9a-f-]+\.log\.json$/i.test(file)) continue;
+        try {
+          const receipt = JSON.parse(readFileSync(join(commandDirectory, file), "utf8"));
+          if (["PASS", "FAIL"].includes(receipt.outcome)) continue;
+          diagnostics.push({
+            outcome: receipt.outcome,
+            exitCode: receipt.exitCode,
+            signal: receipt.signal,
+            spawnError: receipt.spawnError,
+            cleanupError: receipt.cleanupError,
+            processGroupObservation: receipt.processGroupObservation ?? null,
+          });
+        } catch {
+          diagnostics.push({ captureCode: "COMMAND_RECEIPT_UNREADABLE" });
+        }
+      }
+    } catch {
+      diagnostics.push({ captureCode: "COMMAND_RECEIPT_DIRECTORY_UNREADABLE" });
+    }
+    return { status: result.status, report: JSON.parse(result.stdout), diagnostics };
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -249,7 +283,11 @@ test(
       [1, 0, false],
     ] as const) {
       const result = observe({ scanners: "valid", findings, baseline });
-      assert.equal(result.status, 0);
+      assert.equal(
+        result.status,
+        0,
+        `Owned process diagnostics: ${JSON.stringify(result.diagnostics)}`
+      );
       assert.equal(result.report.releaseGreen, true);
       assert.deepEqual(result.report.hardFailures, []);
       for (const id of ["workflow-lint", "check:workflows"]) {

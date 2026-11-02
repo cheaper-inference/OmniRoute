@@ -40,14 +40,16 @@ Kvittensen täcker sitt eget arbetsflöde, inte publicering, driftsättning elle
 av en befintlig advisory-skanner. Att göra de tillämpliga kontrollerna obligatoriska i grenreglerna
 är en separat administrativ ändring; att definiera deras jobb skyddar inte i sig en gren.
 
-`API Route Typecheck` är en oberoende arbetsflödeskontroll, utanför både de aggregerade utlåtandena
-och den lokala fullständiga observatörens statiska profil. Granska dess resultat separat för den exakta
-kandidaten. `.github/workflows/api-route-typecheck.yml` körs för PR:er till `main` eller
-`release/**`, pushar till endera grenfamiljen samt manuell körning. Det har inget sökvägsfilter.
-Ändringar av målgren för en PR begär en ny kontroll; redigeringar av brödtext/rubrik använder det observationsspecifika namnet
-`Admission not requested / API Route Typecheck` och kan inte ersätta antagningskontrollen.
-Arbetsflödet deklarerar ingen utlösare för sammanslagningsgrupper. En lansering av en sammanslagningskö som kräver
-den här kontrollen måste först säkerställa att den körs för den händelsen.
+`API Route Typecheck` är en fristående workflowkontroll, utanför båda samlade utslagen och den fullständiga lokala observatörens statiska profil. Granska resultatet separat för den exakta kandidaten. `.github/workflows/api-route-typecheck.yml` körs för PR:er mot `main` eller `release/**`, pushar till båda grenfamiljerna, manuella starter och `merge_group`-händelser av typen `checks_requested`. Det finns inget sökvägsfilter. Mergegrupper checkar ut `merge_group.head_sha`; andra händelser checkar ut `github.sha`. Alla händelser använder samma diagnostiska API-grind och grindens enhetstester.
+Ändrad målgren för en PR begär en ny kontroll; ändringar av beskrivning eller titel använder det enbart observerande namnet `Admission not requested / API Route Typecheck` och kan inte ersätta godkännandekontrollen.
+
+### DAST använder det verifierade CI-bygget
+
+Det obligatoriska CI-jobbet `dast-smoke` anropar `.github/workflows/dast-smoke.yml` efter `build`. Det följer samma urval av kod och utkast som bygget, inklusive stödda PR:er från fork, PR:er mot release och mergegrupper. Ett DAST-jobb som saknas, misslyckas, avbryts eller oväntat hoppas över blockerar `Gate / CI`. Det återanvändbara arbetsflödet har ingen egen PR-trigger eller manuell trigger; manuell validering använder CI:s start så att bygge och konsument stannar i samma körning.
+
+`scripts/ci/next-build-provenance.mjs` förseglar hela Next-artefakten med tar-kontrollsumman, repository/händelse/körning, producentförsök, head/base/checkout/tree, workflowidentiteter, låsfil, exakt Node-version/ABI, plattform och bundler. DAST väljer det oföränderliga artefakt-ID:t från `needs.build.outputs`, kräver verifiering av nedladdningens kontrollsumma och beräknar oberoende ZIP-hashen mot producentens kontrollsumma innan de två tillåtna medlemmarna packas upp via `scripts/ci/unpack-ci-build.py`. Manifestet och tar-arkivet måste också matcha producentens oberoende utdata innan Next-trädet packas upp. Den söker aldrig efter grenens senaste lyckade bygge. En partiell omkörning kan återanvända samma producentförsök om dess ID och alla indata fortfarande stämmer; kvittot registrerar båda försöken.
+
+Konsumenten stannar på en värdbaserad Linux-runner med skrivskyddad repositorybehörighet och utan repositoryhemligheter. Den installerar producentens exakta Node-version och sätter sedan ihop CLI med `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` avvisar en saknad fristående server före något reservbygge; vanliga lokala CLI-byggen behåller sin befintliga reservlösning. Serverberedskap, Schemathesis och promptfoo måste alla lyckas inom jobbets oförändrade gräns på 25 minuter. Ett provenienskvitto bevisar indatas identitet och byte, inte en lyckad DAST-skanning. Utgången artefakt, runneravbrott eller skannerfel förblir ofullständiga eller negativa bevis; de kan inte bli PASS via ett rådgivande omslag.
 
 ### Körningskapacitet för användargränssnittet
 
@@ -218,17 +220,24 @@ Körs för varje PR till `main`. Blockerar sammanslagning vid fel.
 
 Körs efter `test-coverage`. Blockerar sammanslagning vid fel.
 
-| Skript                       | Validerar                                                                                                                                                                             | Blockerande               |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `quality:collect`            | Genererar `quality-metrics.json` (antal ESLint-varningar, täckning från den sammanslagna delrapporten)                                                                                | Ja (före spärrmekanismen) |
-| `quality:ratchet`            | Inget mätvärde i `quality-baseline.json` har försämrats (ESLint-varningar ≤ baslinjen; täckning ≥ baslinjen)                                                                          | Ja                        |
-| `check:duplication`          | Kodduplicering (jscpd@4) överskrider inte baslinjen i `quality-baseline.json`                                                                                                         | Ja                        |
-| `check:complexity`           | Cyklomatisk komplexitet på filnivå överskrider inte gränsen (ESLint-kärnans `complexity` + `max-lines-per-function`)                                                                  | Ja                        |
-| `check:cognitive-complexity` | Spärrmekanism för kognitiv komplexitet (`eslint-plugin-sonarjs`) — separat ESLint-körning; CI kör båda sammanslagna som det enda steget `check:complexity-ratchets`                   | Ja                        |
-| `check:dead-code`            | Spärrmekanismen för oanvända exporter/filer (knip) försämras inte jämfört med baslinjen                                                                                               | Ja                        |
-| `check:compression-budget`   | Budget för komprimeringsprestandatest — minimikraven för tokenbesparing per motor får inte försämras                                                                                  | Ja                        |
-| `check:type-coverage`        | Spärrmekanismen för procentandel typad kod (`type-coverage`) försämras inte; ersätter till stor del `typecheck:noimplicit:core`                                                       | Ja                        |
-| `check:codeql-ratchet`       | Antalet öppna CodeQL-varningar försämras inte (läses via `gh api`; hoppas över utan fel om token saknas) — uppdateringsfrekvens och manuell utlösare: se ”CodeQL-spärrmekanism” nedan | Ja                        |
+| Skript                       | Validerar                                                                                                                                                           | Blockerande               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `quality:collect`            | Genererar `quality-metrics.json` (antal ESLint-varningar, täckning från den sammanslagna delrapporten)                                                              | Ja (före spärrmekanismen) |
+| `quality:ratchet`            | Inget mätvärde i `quality-baseline.json` har försämrats (ESLint-varningar ≤ baslinjen; täckning ≥ baslinjen)                                                        | Ja                        |
+| `check:duplication`          | Kodduplicering (jscpd@4) överskrider inte baslinjen i `quality-baseline.json`                                                                                       | Ja                        |
+| `check:complexity`           | Cyklomatisk komplexitet på filnivå överskrider inte gränsen (ESLint-kärnans `complexity` + `max-lines-per-function`)                                                | Ja                        |
+| `check:cognitive-complexity` | Spärrmekanism för kognitiv komplexitet (`eslint-plugin-sonarjs`) — separat ESLint-körning; CI kör båda sammanslagna som det enda steget `check:complexity-ratchets` | Ja                        |
+| `check:dead-code`            | Spärrmekanismen för oanvända exporter/filer (knip) försämras inte jämfört med baslinjen                                                                             | Ja                        |
+| `check:compression-budget`   | Budget för komprimeringsprestandatest — minimikraven för tokenbesparing per motor får inte försämras                                                                | Ja                        |
+| `check:type-coverage`        | Spärrmekanismen för procentandel typad kod (`type-coverage`) försämras inte; ersätter till stor del `typecheck:noimplicit:core`                                     | Ja                        |
+
+### Jobb: `codeql-scan` och `codeql-admission`
+
+`codeql-scan` producerar alla konfigurerade analyskategorier. När jobbet har lyckats validerar `codeql-admission` dess exakta uppladdningar och kandidatens varningsspärr. Båda är obligatoriska beroenden till `Gate / CI`, även för kandidater som bara ändrar dokumentation. Kraven på administrativ aktivering och canary-test beskrivs under ”CodeQL-spärr” nedan.
+
+| Skript                 | Validerar                                                                                                                                                                                        | Blockerande |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| `check:codeql-ratchet` | Kandidatens ref/SHA och alla konfigurerade analyskategorier måste vara aktuella före varningsspärren; saknade bevis blockerar. Det globala inventariet förblir separat — se ”CodeQL-spärr” nedan | Ja          |
 
 ### Jobb: `quality-extended`
 
@@ -488,30 +497,24 @@ Checka in den här filen tillsammans med ändringen som förbättrade mätvärde
 mätvärde utan att uppdatera baslinjen kommer att upptäckas av `--require-tighten` (fas 6A.5,
 implementering återstår).
 
-### CodeQL-ratchet: uppdateringsintervall och manuell utlösning
+### CodeQL-spärr: kandidatgodkännande och repositoryinventering
 
-`check:codeql-ratchet` läser **lagringsplatsens tillstånd, som uppdateras enligt ett schema — inte för varje PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` rapporterar
-`state: configured`, `schedule: weekly`: GitHubs standardskanning, inte en analys för
-varje push. Konsekvens: efter att en PR som ÅTGÄRDAR aviseringar har slagits samman fortsätter ratchet-motorn att läsa
-det gamla, högre antalet tills nästa schemalagda skanning körs — därför rapporteras en regression
-för varje öppen PR, inklusive uppföljningar till den åtgärdande PR:en, tills skanningen har hunnit ikapp.
+CI ansvarar för kandidatens CodeQL-godkännande genom en uttrycklig beroendekedja: `codeql-scan` anropar matrisen för fyra språk i `codeql.yml`, sedan kör `codeql-admission` kommandot `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` kräver båda resultaten. Quality behåller sina egna numeriska kontroller men frågar inte skannern innan producenten är klar; enbart `Gate / Quality` är inget fullständigt kandidatgodkännande. CodeQL förblir obligatoriskt även för kandidater som bara ändrar dokumentation.
 
-**Manuell uppdatering**: `gh workflow run codeql.yml --ref release/vX.Y.Z` kör om
-analysen och publicerar aviseringarna på nytt inom några minuter. Läs `.github/workflows/codeql.yml`
-först — dess sidhuvud förklarar att den endast använder `workflow_dispatch` **eftersom den står i konflikt med
-GitHubs "default setup"** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Att återställa utlösare för `push`/`pull_request`/
-`schedule` kräver **först en åtgärd av ägaren**: Settings → Code security →
-CodeQL: Default → Advanced. Lägg inte till en `schedule:`-utlösare utan denna ändring — den
-kommer endast att ge misslyckade körningar.
+Policyn i `config/quality/codeql-admission-policy.json` väljer Actions, C/C++, JavaScript/TypeScript och Python, frågesviten default, hotmodellen remote och byggläget none. Producentens förkontroll avvisar en väntande aktiveringspost och grenar utanför den uttryckliga mållistan. De första målen är main och release/v3.8.53; nästa release kräver granskad anslutning. CI:s befintliga bredare trigger för release-PR:er behålls, men ett mål som inte anslutits rapporterar HOLD före extraktion i stället för att få ett omätt PASS.
 
-**Skärp baslinjen när antalet har minskat** — `node scripts/check/check-codeql-ratchet.mjs
---update` skriver det nya uppmätta antalet till `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, så att ratchet-motorn inte underförstått tillåter en regression tillbaka
-upp till det gamla taket. Genomfört exempel (2026-09-02/03): PR #12502 åtgärdade 7 verkliga aviseringar
-(13 → 6 uppmätta öppna); PR #12530 skärpte den frysta baslinjen från 11 → 6 för att matcha; de
-återstående 6 avfärdades sedan med en motivering per avisering tills antalet öppna var 0.
+Varje matrisjobb registrerar sitt faktiska SARIF-uppladdnings-ID, språk, kategori, körning och försök, anropande workflowidentitet, händelsens ref/head/base/merge-SHA och policyhash. Det beroende jobbet laddar bara ned denna körnings kvitton och validerar artefakternas kontrollsummor. Det kräver alla fyra kategorier, en lyckad producent och slutförd behandling av varje exakt uppladdning. Det använder API:ets sarif_id-filter, inte den senaste analysen på en gren. Partiella omkörningar får återanvända lyckade kategorier från ett tidigare försök i samma körning och kandidat med bevarat producentförsök; en misslyckad aktuell producent får inte återanvända tidigare gröna bevis.
+
+CodeQL-åtgärden väntar på behandling, men den fastlåsta implementationen kan varna och fortsätta efter fel vid statusläsning eller uttömd väntan. Godkännandet kontrollerar därför behandlingen igen. Saknade kategorier, väntande behandling, misslyckade eller avbrutna jobb, föråldrad identitet, ofullständig sidindelning eller otillgängliga API:er ger HOLD och avslutskod 2. Ingen fast väntan på ett separat skannerarbetsflöde finns kvar. En oskannad PR kan inte godkännas för att en varningsfråga returnerade 0. Ett uppmätt antal över `metrics.codeqlAlerts.value` ger avslutskod 1; baslinjen höjs inte för att absorbera en annan grens varningar. [Uppladdningsstatus och analyssökning](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Kvittot registrerar uppladdnings- och analys-ID:n, kategorier, verktygsversioner, ref/SHA, baslinje och varningsantal. SARIF-identitet/resultatantal, minsta regelantal och exakta varningsinstanser är fortsatt obligatoriska. PR- och analysidentiteter kontrolleras igen före godkännande. Kontrollerna fastställer täckning av konfigurerade kategorier, inte en förteckning över varje extraherad källfil. C/C++-extraktion utan bygge omfattar inte kod som genereras när projektet byggs. Källundantag måste fortfarande granskas, och tillskrivning till bidragsgivare kräver jämförbara bevis från den exakta basen.
+
+`codeql-maintenance.yml` tillhandahåller pushskanningar för aktiv release och veckoschemat utan att duplicera PR/main-producenter. `nightly-codeql-inventory.yml` håller den repositoryövergripande baslinjen separat, med `--strict-measurement` och fel när mätning saknas. Den äldre lokala insamlarens tolererade överhoppning är inget kandidatgodkännande. Skärpning förblir en uttrycklig `--update` efter verifierat lägre globalt antal.
+
+Advanced-arbetsflödet får inte publiceras medan Default Setup är konfigurerat: GitHub avvisar den kombinationen. Den versionshanterade policyn förblir väntande tills den granskade administrativa övergången har lästs tillbaka. Före publicering låser en operatör repository, head/base/tree, policy-/patch-/återställningshashar och observerat konfigurationsläge; `node scripts/quality/codeql-producer.mjs verify-admin-readback` kontrollerar de angivna förväntade och faktiska JSON-posterna. Det är ett tekniskt skydd, inte operatörsgodkännande eller en ersättning för att hämta färska tillståndsavläsningar. PR-token begär aldrig Administration-åtkomst. Utrullning och varje skannerändring kräver den separata avläsningen samt verkliga kompatibilitetsbevis för PR, fork och mergegrupp.
+
+Forkar använder värdbaserade runners, checkout utan beständiga autentiseringsuppgifter, ingen projektinstallation eller projektbyggnad hos producenten och inga ärvda repositoryhemligheter. GitHub stöder SARIF-uppladdning för händelsen pull_request med dess begränsade forktoken; körningsgodkännande för förstagångsbidrag förblir GitHub-policy. Använd aldrig pull_request_target för att köra opålitlig kod. Bekräfta faktiska tokenbehörigheter, analysis_key och alla kategorimiljöer i ett kontrollerat canary-test innan migreringen betraktas som klar. [Regler för forkuppladdning](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[motstridiga konfigurationslägen](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Avfärdanden är operatörens beslut (hård regel #14)** — avfärda aldrig en CodeQL-avisering
 utan att dokumentera den tekniska motiveringen i avfärdandekommentaren: `won't fix` för
@@ -668,11 +671,7 @@ identifierade följande rationaliseringskandidater. **Sammanslagningarna är mek
 ändringar; växlingarna/borttagningarna är policybeslut som är förbehållna operatören.** Inget nedan
 har tillämpats ännu.
 
-**Inte heller dokumenterat ovan** (rådgivande, låg signal): jobbet `docs-lint`
-(markdownlint + Vale, hela jobbet `continue-on-error`) och de fristående skanningsarbetsflödena
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` finns i
-`quality-baseline.json` men är inte kopplat till en blockerande spärrmekanism i `ci.yml` — mätvärdet är
-för närvarande frikopplat.
+**Också odokumenterade ovan** (rådgivande, låg signal): jobbet `docs-lint` (markdownlint + Vale, hela jobbet med `continue-on-error`) och de fristående skannerarbetsflödena `semgrep.yml` / `scorecard.yml`. CodeQL har nu obligatoriska producent- och godkännandejobb under `Gate / CI`, med aktiveringskraven som beskrivs ovan. `semgrepFindings: 0` finns i `quality-baseline.json` men är inte kopplad till en blockerande spärr i `ci.yml` — mätvärdet är för närvarande föräldralöst.
 
 ### Slå samman/deduplicera (mekaniskt, lägre risk)
 

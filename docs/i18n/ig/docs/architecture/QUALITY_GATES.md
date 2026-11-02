@@ -39,7 +39,16 @@ CLI na-ajụ checkout/event SHA mismatch. Nnwale workflow na-ejikọta ndị so 
 na ndepụta `needs` nke ọrụ verdict ka ụzọ ọhụrụ ma ọ bụ nke ewepụrụ ghara ịla n'iyi na nzuzo.
 Akwụkwọ nnata ndị ahụ na-ekpuchi usoro ọrụ nke ha, ọ bụghị mbipụta, mbugharị, ma ọ bụ usoro ime nke nyocha advisory dị adị. Ime ka nyocha ndị metụtara ya bụrụ ihe a chọrọ n’iwu branch bụ mgbanwe nchịkwa dị iche; ịkọwa jobs ha anaghị echebe branch n’onwe ya.
 
-`API Route Typecheck` bụ nyocha workflow kwụụrụ onwe ya, nke dị n’èzí ma mkpebi nchịkọta abụọ ahụ ma profaịlụ static nke local full observer. Nyochaa nsonaazụ ya iche maka candidate ahụ kpọmkwem. `.github/workflows/api-route-typecheck.yml` na-agba ọsọ na PR ndị na-abanye na `main` ma ọ bụ `release/**`, na push gaa n’ezinụlọ branch nke ọ bụla n’ime ha, yana manual dispatch. O nweghị path filter. Mgbanwe ebe PR base na-atụ aka na-arịọ nyocha ọhụrụ; ndezi body/title na-eji aha observation-only `Admission not requested / API Route Typecheck` ma enweghị ike dochie admission check. Workflow ahụ ekwupụtaghị merge-group trigger. Mgbasawanye merge-queue ọ bụla chọrọ nyocha a ga-ebu ụzọ hụ na e guzobere mmezu ya maka event ahụ.
+`API Route Typecheck` bụ nyocha workflow kwụụrụ onwe ya, n'èzí mkpebi mkpokọta abụọ na profaịlụ static nke onye nlekọta mpaghara zuru ezu. Lelee nsonaazụ ya iche maka kpọmkwem candidate ahụ. `.github/workflows/api-route-typecheck.yml` na-agba na PR gaa `main` ma ọ bụ `release/**`, push gaa ezinụlọ alaka abụọ ahụ, mmalite aka, na ihe omume `merge_group` nke ụdị `checks_requested`. Ọ nweghị nzacha ụzọ. Otu njikọta na-checkout `merge_group.head_sha`; ihe omume ndị ọzọ na-checkout `github.sha`. Ha niile na-eji otu ọnụ ụzọ nchọpụta API na ule unit nke ọnụ ụzọ ahụ.
+Ịgbanwe alaka ntọala PR na-achọ na-arịọ nyocha ọhụrụ; mgbanwe ederede/aha na-eji aha nlekọta naanị `Admission not requested / API Route Typecheck` ma ọ pụghị dochie nyocha nnabata.
+
+### DAST na-eji build CI a kwadoro
+
+Ọrụ CI a chọrọ `dast-smoke` na-akpọ `.github/workflows/dast-smoke.yml` mgbe `build` gasịrị. Ọ na-agbaso otu nhọrọ koodu/draft dịka build, gụnyere fork PR ndị akwadoro, PR na-eche release na otu njikọta. Ọrụ DAST na-adịghị, dara, a kagburu ma ọ bụ a gafere n'atụghị anya na-egbochi `Gate / CI`. Workflow a na-eji ọzọ enweghị PR/dispatch trigger nke onwe ya; nkwado aka na-eji dispatch CI ka build na onye na-eji ya nọrọ n'otu run.
+
+`scripts/ci/next-build-provenance.mjs` na-ejikọta artefact Next zuru ezu na tar digest, repository/ihe omume/run, attempt onye nrụpụta, head/base/checkout/tree, njirimara workflow, lockfile, ụdị Node/ABI kpọmkwem, platform na bundler. DAST na-ahọrọ ID artefact na-adịghị agbanwe site na `needs.build.outputs`, na-achọ nkwenye digest nke download, ma na-agbakọ hash ZIP n'onwe ya tụnyere digest onye nrụpụta tupu ọ mepee ihe abụọ enyere ikike site na `scripts/ci/unpack-ci-build.py`. Manifest na tar archive ga-adakọkwa na output onye nrụpụta nwere onwe ya tupu e meghee osisi Next. Ọ naghị achọ build alaka kacha ọhụrụ gara nke ọma. Imegharị akụkụ run nwere ike iji otu attempt onye nrụpụta ma ọ bụrụ na ID na input niile ka dakọtara; ndekọ ihe akaebe na-edobe attempt abụọ.
+
+Onye na-eji build na-anọ na hosted Linux runner nwere ikike ịgụ repository naanị, na-enweghị ihe nzuzo repository. Ọ na-etinye ụdị Node kpọmkwem nke onye nrụpụta, wee wuo CLI na `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` na-ajụ standalone server na-adịghị tupu fallback build ọ bụla; build CLI mpaghara nkịtị na-edobe fallback ha dị ugbu a. Njikere server, Schemathesis na promptfoo niile ga-aga nke ọma n'ime oke ọrụ nke nkeji 25 a na-agbanweghị. Ndekọ mmalite na-akwado njirimara na bytes input, ọ bụghị scan DAST gara nke ọma. Artefact kubiri oge, runner akwụsịrị ma ọ bụ scanner dara ka bụ ihe akaebe ezughị ezu ma ọ bụ dara; wrapper ndụmọdụ apụghị ime ka ọ bụrụ PASS.
 
 ### Ikike mmezu UI
 
@@ -210,17 +219,24 @@ ime ka assertion ghara isi ike na ụdị masking ndị ọzọ ka bụ ọrụ 
 
 Ọ na-agba ọsọ mgbe `test-coverage` gachara. Ọ na-egbochi njikọta ma ọ bụrụ na ọ daa.
 
-| Skripụ                       | Ihe ọ na-akwado                                                                                                                                                                                                           | Na-egbochi              |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| `quality:collect`            | Na-ewepụta `quality-metrics.json` (ọnụọgụ ịdọ aka ná ntị ESLint, mkpuchi sitere na akụkọ shard ejikọtaranụ)                                                                                                               | Ee (ọ dị n’elu ratchet) |
-| `quality:ratchet`            | Metrik ọ bụla dị na `quality-baseline.json` alaghachighị azụ (ịdọ aka ná ntị ESLint ≤ akara ntọala; mkpuchi ≥ akara ntọala)                                                                                               | Ee                      |
-| `check:duplication`          | Mmegharị koodu ugboro ugboro (jscpd@4) anaghị agafe akara ntọala dị na `quality-baseline.json`                                                                                                                            | Ee                      |
-| `check:complexity`           | Mgbagwoju anya cyclomatic n’ogo faịlụ anaghị agafe oke ahụ (ESLint isi `complexity` + `max-lines-per-function`)                                                                                                           | Ee                      |
-| `check:cognitive-complexity` | Ratchet mgbagwoju anya echiche (`eslint-plugin-sonarjs`) — ngafe ESLint dị iche; CI na-agba ha abụọ dịka otu nzọụkwụ `check:complexity-ratchets` ejikọtaranụ                                                              | Ee                      |
-| `check:dead-code`            | Ratchet mbupụ / faịlụ ndị a na-ejighị (knip) anaghị alaghachi azụ ma e jiri ya tụnyere akara ntọala                                                                                                                       | Ee                      |
-| `check:compression-budget`   | Mmefu benchmark mkpakọ — opekempe nchekwa token maka engine ọ bụla agaghị alaghachi azụ                                                                                                                                   | Ee                      |
-| `check:type-coverage`        | Ratchet pasent nke e nyere ụdị (`type-coverage`) anaghị alaghachi azụ; ọ na-ekpuchikarị `typecheck:noimplicit:core`                                                                                                       | Ee                      |
-| `check:codeql-ratchet`       | Ọnụọgụ ọkwa ịdọ aka ná ntị CodeQL mepere emepe anaghị alaghachi azụ (na-agụ site na `gh api`; na-amafere ya n’enweghị nsogbu ma ọ bụrụ na token adịghị) — maka ugboro mmelite na mbido aka: lee "Ratchet CodeQL" n’okpuru | Ee                      |
+| Skripụ                       | Ihe ọ na-akwado                                                                                                                                              | Na-egbochi              |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| `quality:collect`            | Na-ewepụta `quality-metrics.json` (ọnụọgụ ịdọ aka ná ntị ESLint, mkpuchi sitere na akụkọ shard ejikọtaranụ)                                                  | Ee (ọ dị n’elu ratchet) |
+| `quality:ratchet`            | Metrik ọ bụla dị na `quality-baseline.json` alaghachighị azụ (ịdọ aka ná ntị ESLint ≤ akara ntọala; mkpuchi ≥ akara ntọala)                                  | Ee                      |
+| `check:duplication`          | Mmegharị koodu ugboro ugboro (jscpd@4) anaghị agafe akara ntọala dị na `quality-baseline.json`                                                               | Ee                      |
+| `check:complexity`           | Mgbagwoju anya cyclomatic n’ogo faịlụ anaghị agafe oke ahụ (ESLint isi `complexity` + `max-lines-per-function`)                                              | Ee                      |
+| `check:cognitive-complexity` | Ratchet mgbagwoju anya echiche (`eslint-plugin-sonarjs`) — ngafe ESLint dị iche; CI na-agba ha abụọ dịka otu nzọụkwụ `check:complexity-ratchets` ejikọtaranụ | Ee                      |
+| `check:dead-code`            | Ratchet mbupụ / faịlụ ndị a na-ejighị (knip) anaghị alaghachi azụ ma e jiri ya tụnyere akara ntọala                                                          | Ee                      |
+| `check:compression-budget`   | Mmefu benchmark mkpakọ — opekempe nchekwa token maka engine ọ bụla agaghị alaghachi azụ                                                                      | Ee                      |
+| `check:type-coverage`        | Ratchet pasent nke e nyere ụdị (`type-coverage`) anaghị alaghachi azụ; ọ na-ekpuchikarị `typecheck:noimplicit:core`                                          | Ee                      |
+
+### Ọrụ: `codeql-scan` na `codeql-admission`
+
+`codeql-scan` na-emepụta ụdị nyocha niile ahaziri. Mgbe ọrụ ahụ gara nke ọma, `codeql-admission` na-enyocha kpọmkwem uploads ya na oke na-egbochi mmụba alert candidate. Ha abụọ bụ dependencies a chọrọ maka `Gate / CI`, gụnyere candidates na-agbanwe naanị akwụkwọ. A kọwara ihe activation nchịkwa na canary chọrọ n'okpuru "Oke CodeQL".
+
+| Script                 | Ihe ọ na-enyocha                                                                                                                                                              | Na-egbochi |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `check:codeql-ratchet` | Ref/SHA candidate na ụdị nyocha niile ahaziri ga-abụ nke ugbu a tupu ule oke alert; enweghị ihe akaebe na-egbochi. Inventory zuru ụwa na-anọ iche — lee "Oke CodeQL" n'okpuru | Ee         |
 
 ### Ọrụ: `quality-extended`
 
@@ -486,31 +502,23 @@ Commit faịlụ a yana mgbanwe nke mere ka metriki ahụ ka mma. A ga-eji `--re
 chọpụta PR nke mere ka metriki ka mma na-emeliteghị ntọala ahụ (Oge 6A.5,
 mmejuputa ya ka na-echere).
 
-### Ratchet CodeQL: ugboro ume ọhụrụ na mkpali aka
+### Oke CodeQL: nnabata candidate na inventory repository
 
-`check:codeql-ratchet` na-agụ **ọnọdụ repo, nke a na-eme ka ọ dị ọhụrụ dịka nhazi oge si dị — ọ bụghị maka PR ọ bụla.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` na-akọ
-`state: configured`, `schedule: weekly`: nke a bụ nyocha default-setup nke GitHub, ọ bụghị
-nyocha maka push ọ bụla. Nsonaazụ ya bụ: mgbe PR nke NA-EDOZI ọkwa ịdọ aka ná ntị jikọtara,
-ratchet ahụ na-aga n'ihu ịgụ ọnụọgụ ochie ahụ dị elu ruo mgbe nyocha ọzọ ahaziri oge ya
-malitere — ya mere, ọ na-akọ ndaghachi azụ na PR niile mepere emepe, gụnyere mgbanwe
-ndị na-esochi PR ahụ doziri nsogbu ahụ, ruo mgbe nyocha ahụ ruru eru.
+CI na-ahụ maka nnabata CodeQL candidate site n'agbụ dependency doro anya: `codeql-scan` na-akpọ matrix asụsụ anọ na `codeql.yml`, mgbe ahụ `codeql-admission` na-agba `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` chọrọ nsonaazụ abụọ. Quality na-edobe ule ọnụọgụ ya mana ọ naghị ajụ scanner tupu onye nrụpụta agwụ; `Gate / Quality` naanị abụghị nnabata candidate zuru ezu. CodeQL ka dị mkpa maka candidates akwụkwọ naanị.
 
-**Iji aka mee ka ọ dị ọhụrụ**: `gh workflow run codeql.yml --ref release/vX.Y.Z` na-emegharị
-nyocha ahụ ma bipụtaghachi ọkwa ịdọ aka ná ntị n'ime nkeji ole na ole. Buru ụzọ gụọ
-`.github/workflows/codeql.yml` — nkụnye isi ya na-akọwa na ọ bụ naanị `workflow_dispatch`
-**n'ihi na ọ na-emegide "default setup" nke GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Iweghachi mkpali `push`/`pull_request`/
-`schedule` chọrọ ka **onye nwe ya buru ụzọ mee ihe**: Settings → Code security →
-CodeQL: Default → Advanced. Etinyekwala mkpali `schedule:` na-enweghị mgbanwe ahụ — naanị
-ihe ọ ga-emepụta bụ run ndị na-ada ada.
+Iwu dị na `config/quality/codeql-admission-policy.json` na-ahọrọ Actions, C/C++, JavaScript/TypeScript na Python, query suite default, threat model remote na build mode none. Preflight onye nrụpụta na-ajụ activation record ka na-eche na alaka ndị na-anọghị na target list doro anya. Targets mbụ bụ main na release/v3.8.53; release ọzọ chọrọ onboarding a nyochara. A na-edobe release PR trigger CI sara mbara, mana target a na-etinyebeghị na-akọ HOLD tupu extraction kama inweta PASS a na-atụghị.
 
-**Mee ka ntọala ahụ sie ike mgbe ọnụọgụ ahụ gbadara** — `node scripts/check/check-codeql-ratchet.mjs
---update` na-ede ọnụọgụ ọhụrụ a tụrụ n'ime `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, ka ratchet ahụ ghara ikwe na nzuzo ka ndaghachi azụ laghachi
-n'ókè ochie ahụ. Ọmụmaatụ e mere (2026-09-02/03): PR #12502 doziri ezigbo ọkwa ịdọ aka ná ntị 7
-(13 → 6 e tụrụ ka ndị ka mepere emepe); PR #12530 mere ka ntọala akpọchiri akpọchi sie ike site na 11 → 6 ka ha kwekọọ; e mesịrị,
-a kagburu ndị 6 fọdụrụ site n'inye ihe kpatara nke ọ bụla ruo mgbe ndị mepere emepe ruru 0.
+Ọrụ matrix ọ bụla na-edekọ ID upload SARIF n'ezie, asụsụ, category, run na attempt, njirimara workflow na-akpọ ya, event ref/head/base/merge SHA na hash iwu. Ọrụ dependent na-ebudata naanị receipts nke run a ma na-enyocha digest artefact. Ọ chọrọ categories anọ niile, onye nrụpụta gara nke ọma na processing nke kpọmkwem upload ọ bụla agwụla. Ọ na-eji filter API sarif_id, ọ bụghị analysis kacha ọhụrụ achọtara n'alaka. Partial rerun nwere ike iji categories gara nke ọma site na attempt mbụ nke otu run na candidate, na-echekwa attempt mepụtara ha; onye nrụpụta ugbu a dara apụghị iji ihe akaebe akwụkwọ ndụ gara aga.
+
+CodeQL action na-echere processing, mana implementation a pin nwere ike ịdọ aka ná ntị wee gaa n'ihu mgbe ịgụ status dara ma ọ bụ oge ichere gwụrụ. N'ihi ya nnabata na-enyocha processing ọzọ. Categories na-adịghị, processing na-eche, jobs dara ma ọ bụ a kagburu, identity ochie, pagination ezughị ezu ma ọ bụ API na-adịghị adị na-enye HOLD na exit 2. Oge ichere a kapịrị ọnụ maka workflow scanner nọọrọ onwe ya adịghịzi. PR a na-scanbeghị apụghị ịgafe n'ihi na query alert weghachiri 0. Ọnụọgụ a tụrụ karịrị `metrics.codeqlAlerts.value` na-enye exit 1; a naghị ebuli baseline ka ọ nabata alert alaka ọzọ. [Status upload na ịchọ analysis](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Receipt na-edekọ IDs upload na analysis, categories, versions ngwaọrụ, ref/SHA, baseline na ọnụọgụ alert. Identity/result count SARIF, minimum rule counts na alert instances kpọmkwem ka dị mkpa. A na-enyocha identity PR/analysis ọzọ tupu nnabata. Ule ndị a na-egosi coverage categories ahaziri, ọ bụghị inventory nke source file ọ bụla e wepụtara. Extraction C/C++ enweghị build anaghị agụnye koodu a na-emepụta n'oge project build. Source exclusions ka chọrọ review; ịtụnye nsogbu n'aka contributor chọrọ ihe akaebe exact-base a pụrụ iji tụnyere.
+
+`codeql-maintenance.yml` na-enye active-release push scans na weekly schedule na-enweghị imepụtaghachi PR/main producers. `nightly-codeql-inventory.yml` na-edobe baseline repository niile iche, jiri `--strict-measurement`, ma daa mgbe measurement adịghị. Graceful skip nke legacy collector mpaghara abụghị nnabata candidate. Ịkpa oke ike ka bụ explicit `--update` mgbe a kwadoro ọnụ ọgụgụ global belatara.
+
+A gaghị ebipụta Advanced workflow mgbe Default Setup ka ahaziri: GitHub na-ajụ ngwakọta ahụ. Versioned policy ya na-anọ pending ruo mgbe a gụrụghachiri administrative transition a nyochara. Tupu publication, operator na-pin repository, head/base/tree, hashes policy/patch/rollback na setup state a hụrụ; `node scripts/quality/codeql-producer.mjs verify-admin-readback` na-enyocha expected na actual JSON records enyere. Nke a bụ technical guard, ọ bụghị operator approval ma ọ bụ nnọchi maka ịweta readback ọhụrụ. PR token anaghị arịọ Administration access. Rollout na scanner change ọ bụla chọrọ readback ahụ iche tinyere ezigbo ihe akaebe compatibility PR, fork na merge-group.
+
+Forks na-eji hosted runners, checkout anaghị echekwa credentials, enweghị project install/build na producer, na-enweghị inherited repository secrets. GitHub na-akwado SARIF upload maka pull_request event na reduced fork token ya; approval ịgba contribution mbụ ka bụ policy GitHub. Ejila pull_request_target agba untrusted code. Kwenye actual token permissions, analysis_key na category environments niile na controlled canary tupu ịsị migration zuru ezu. [Iwu fork upload](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [setup modes na-emegide ibe ha](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Mkpebi ịkagbu bụ nke onye njikwa (Iwu Siri Ike #14)** — ekagbula ọkwa ịdọ aka ná ntị CodeQL
 n'edekọghị ihe kpatara ya n'ụzọ teknụzụ na nkọwa mkpebi ịkagbu ahụ: `won't fix` maka
@@ -667,11 +675,7 @@ chọpụtara ndị na-esonụ dịka ndị a pụrụ ịtụle maka ntụghar�
 ọrụ nkịtị; ịgbanwe/ịhapụ ha bụ mkpebi amụma echekwabara maka onye na-arụ ọrụ ahụ.** Ọ dịghị ihe dị n'okpuru
 e tinyere n'ọrụ ugbu a.
 
-**Ndị ọzọ a na-edeghị n'elu** (ndụmọdụ, mgbaàmà dị ala): ọrụ `docs-lint`
-(markdownlint + Vale, ọrụ ahụ dum nwere `continue-on-error`) na usoro ọrụ nyocha kwụụrụ onwe ha
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` dị na
-`quality-baseline.json` mana ejikọtaghị ya na ratchet na-egbochi na `ci.yml` — metrik ahụ
-enweghịzi ihe ejikọtara ya ugbu a.
+**Ihe a na-edeghịkwa n'elu** (ndụmọdụ, signal dị ala): ọrụ `docs-lint` (markdownlint + Vale, ọrụ niile bụ `continue-on-error`) na standalone scanner workflows `semgrep.yml` / `scorecard.yml`. CodeQL nwere required producer na admission jobs ugbu a n'okpuru `Gate / CI`, dabere n'ihe activation chọrọ e kwuru n'elu. `semgrepFindings: 0` dị na `quality-baseline.json` mana ejikọghị ya na blocking ratchet na `ci.yml` — metric a enweghị njikọ ọrụ ugbu a.
 
 ### Jikọta / wepụ oyiri (ọrụ nkịtị, ihe ize ndụ dị ala)
 

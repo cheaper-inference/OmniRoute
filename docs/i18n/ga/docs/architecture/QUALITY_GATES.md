@@ -42,14 +42,16 @@ jab an fhíoraisc ionas nach féidir le lána nua nó bainte imeacht gan rabhadh
 scanóra comhairleach atá ann cheana. Is athrú riaracháin ar leith é na seiceálacha infheidhme a dhéanamh éigeantach i rialacha brainse;
 ní chosnaítear brainse trína gcuid jabanna a shainiú amháin.
 
-Is seiceáil neamhspleách sreafa oibre é `API Route Typecheck`, lasmuigh den dá fhíorasc chomhiomlána
-agus de phróifíl statach an bhreathnóra iomláin áitiúil. Scrúdaigh a thoradh ar leithligh don iarrthóir beacht.
-Ritheann `.github/workflows/api-route-typecheck.yml` ar PRanna isteach i `main` nó
-`release/**`, ar bhrúnna chuig ceachtar teaghlach brainse, agus trí thosú de láimh. Níl aon scagaire conairí aige.
-Iarrann athspriocdhíriú bhonn PR seiceáil nua; úsáideann athruithe ar an gcorp/teideal an t-ainm breathnóireachta amháin
-`Admission not requested / API Route Typecheck` agus ní féidir leo teacht in áit na seiceála iontrála.
-Ní dhearbhaíonn an sreabhadh oibre truicear grúpa cumaiscthe. Ní mór d’aon chur i bhfeidhm scuaine cumaiscthe a éilíonn
-an tseiceáil seo a feidhmiú don teagmhas sin a bhunú ar dtús.
+Is seiceáil neamhspleách sreafa oibre é `API Route Typecheck`, lasmuigh den dá bhreithiúnas comhiomlánaithe agus de phróifíl statach an bhreathnóra iomláin áitiúil. Scrúdaigh a thoradh ar leith don iarrthóir beacht. Ritheann `.github/workflows/api-route-typecheck.yml` ar PRanna chuig `main` nó `release/**`, ar bhrúnna chuig ceachtar teaghlach brainsí, ar sheoladh láimhe, agus ar imeachtaí `merge_group` den chineál `checks_requested`. Níl aon scagaire cosán aige. Faigheann grúpaí cumaisc `merge_group.head_sha` le checkout; faigheann imeachtaí eile `github.sha`. Úsáideann gach imeacht an geata diagnóiseach API céanna agus tástálacha aonaid an gheata.
+Iarrann athrú ar spriocbhrainse bonn an PR seiceáil nua; úsáideann athruithe ar an gcorp nó ar an teideal an t-ainm breathnóireachta amháin `Admission not requested / API Route Typecheck` agus ní féidir leo ionad na seiceála iontrála a ghlacadh.
+
+### Úsáideann DAST an tógáil CI fíoraithe
+
+Glaonn an jab éigeantach CI `dast-smoke` ar `.github/workflows/dast-smoke.yml` tar éis `build`. Leanann sé an roghnú céanna cóid agus dréachtaí leis an tógáil, lena n-áirítear PRanna tacaithe ó forkanna, PRanna atá dírithe ar bhrainse eisiúna, agus grúpaí cumaisc. Cuireann jab DAST atá ar iarraidh, teipthe, curtha ar ceal nó scipeáilte gan choinne bac ar `Gate / CI`. Níl truicear neamhspleách PR ná seolta láimhe ag an sreabhadh oibre in-athúsáidte; úsáideann bailíochtú láimhe seoladh CI chun an tógáil agus an tomhaltóir a choinneáil san aon rith amháin.
+
+Séalaíonn `scripts/ci/next-build-provenance.mjs` an déantán iomlán Next lena achoimre tar, stór/imeacht/rith, iarracht an táirgeora, head/base/checkout/tree, aitheantais sreafa oibre, comhad glasála, leagan beacht Node agus ABI, ardán agus cuachtaire. Roghnaíonn DAST ID do-athraithe an déantáin ó `needs.build.outputs`, éilíonn sé fíorú achoimre an íoslódála, agus ríomhann sé hais ZIP go neamhspleách lena cur i gcomparáid le hachoimre an táirgeora sula mbaintear an dá bhall ceadaithe amach trí `scripts/ci/unpack-ci-build.py`. Caithfidh an manifest agus an chartlann tar teacht le haschuir neamhspleácha an táirgeora freisin sula mbaintear crann Next amach. Ní lorgaíonn sé riamh an tógáil rathúil is déanaí ar an mbrainse. Féadfaidh athrith páirteach an iarracht chéanna ón táirgeoir a athúsáid má mheaitseálann a ID agus gach ionchur fós; taifeadann an admháil an dá iarracht.
+
+Fanann an tomhaltóir ar reathaí Linux óstáilte le cead léite amháin don stór agus gan rúin an stóir. Suiteálann sé leagan beacht Node an táirgeora, ansin cuireann sé an CLI le chéile le `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. Diúltaíonn `scripts/build/standaloneInput.mjs` do fhreastalaí neamhspleách atá ar iarraidh roimh aon tógáil chúltaca; coinníonn gnáth-thógálacha áitiúla CLI an cúltaca atá acu cheana. Caithfidh ullmhacht an fhreastalaí, Schemathesis agus promptfoo a bheith rathúil ar fad laistigh de theorainn neamhathraithe an jab de 25 nóiméad. Cruthaíonn admháil tionscnaimh aitheantas agus bearta na n-ionchur, seachas scanadh rathúil DAST. Fanann dul in éag an déantáin, briseadh an reathaí nó teip an scanóra mar fhianaise neamhiomlán nó theipthe; ní féidir le cumhdach comhairleach PASS a dhéanamh di.
 
 ### Acmhainn forghníomhaithe an chomhéadain úsáideora
 
@@ -216,17 +218,24 @@ Ritheann sé ar gach PR chuig `main`. Cuireann teip bac ar chumasc.
 
 Ritheann sé tar éis `test-coverage`. Cuireann sé bac ar chumasc má theipeann air.
 
-| Script                       | Bailíochtaíonn                                                                                                                                                                                      | Blocála                         |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| `quality:collect`            | Aschuireann sé `quality-metrics.json` (líon rabhaidh ESLint, clúdach ón tuairisc chomhcheangailte bloghanna)                                                                                        | Tá (réamhtheachtach don raicín) |
-| `quality:ratchet`            | Níor chúlaigh aon mhéadracht in `quality-baseline.json` (rabhaidh ESLint ≤ bonnlíne; clúdach ≥ bonnlíne)                                                                                            | Tá                              |
-| `check:duplication`          | Ní sháraíonn dúbláil cóid (jscpd@4) an bhonnlíne in `quality-baseline.json`                                                                                                                         | Tá                              |
-| `check:complexity`           | Ní sháraíonn castacht chioglamatach ar leibhéal comhaid an uasteorainn (`complexity` lárnach ESLint + `max-lines-per-function`)                                                                     | Tá                              |
-| `check:cognitive-complexity` | Raicín castachta cognaíche (`eslint-plugin-sonarjs`) — pas ESLint ar leith; ritheann CI an dá cheann cumasctha mar an chéim aonair `check:complexity-ratchets`                                      | Tá                              |
-| `check:dead-code`            | Ní théann raicín easpórtálacha / comhad neamhúsáidte (knip) ar gcúl i gcomparáid leis an mbonnlíne                                                                                                  | Tá                              |
-| `check:compression-budget`   | Buiséad tagarmhairc comhbhrúite — ní mór nach rachadh íosleibhéil choigilteas comharthaí in aghaidh an innill ar gcúl                                                                               | Tá                              |
-| `check:type-coverage`        | Ní théann an raicín céatadáin clóscríofa (`type-coverage`) ar gcúl; ionadaíonn sé `typecheck:noimplicit:core` den chuid is mó                                                                       | Tá                              |
-| `check:codeql-ratchet`       | Ní théann líon na bhfoláireamh oscailte CodeQL ar gcúl (léann sé trí `gh api`; scipeáil shéimh gan chomhartha) — maidir le minicíocht athnuachana agus truicear láimhe: féach "Raicín CodeQL" thíos | Tá                              |
+| Script                       | Bailíochtaíonn                                                                                                                                                 | Blocála                         |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `quality:collect`            | Aschuireann sé `quality-metrics.json` (líon rabhaidh ESLint, clúdach ón tuairisc chomhcheangailte bloghanna)                                                   | Tá (réamhtheachtach don raicín) |
+| `quality:ratchet`            | Níor chúlaigh aon mhéadracht in `quality-baseline.json` (rabhaidh ESLint ≤ bonnlíne; clúdach ≥ bonnlíne)                                                       | Tá                              |
+| `check:duplication`          | Ní sháraíonn dúbláil cóid (jscpd@4) an bhonnlíne in `quality-baseline.json`                                                                                    | Tá                              |
+| `check:complexity`           | Ní sháraíonn castacht chioglamatach ar leibhéal comhaid an uasteorainn (`complexity` lárnach ESLint + `max-lines-per-function`)                                | Tá                              |
+| `check:cognitive-complexity` | Raicín castachta cognaíche (`eslint-plugin-sonarjs`) — pas ESLint ar leith; ritheann CI an dá cheann cumasctha mar an chéim aonair `check:complexity-ratchets` | Tá                              |
+| `check:dead-code`            | Ní théann raicín easpórtálacha / comhad neamhúsáidte (knip) ar gcúl i gcomparáid leis an mbonnlíne                                                             | Tá                              |
+| `check:compression-budget`   | Buiséad tagarmhairc comhbhrúite — ní mór nach rachadh íosleibhéil choigilteas comharthaí in aghaidh an innill ar gcúl                                          | Tá                              |
+| `check:type-coverage`        | Ní théann an raicín céatadáin clóscríofa (`type-coverage`) ar gcúl; ionadaíonn sé `typecheck:noimplicit:core` den chuid is mó                                  | Tá                              |
+
+### Jabanna: `codeql-scan` agus `codeql-admission`
+
+Táirgeann `codeql-scan` gach catagóir anailíse chumraithe. Tar éis don jab sin éirí leis, bailíochtaíonn `codeql-admission` a uaslódálacha beachta agus ratchet foláireamh an iarrthóra. Is spleáchais éigeantacha de chuid `Gate / CI` iad araon, lena n-áirítear iarrthóirí a athraíonn doiciméid amháin. Déantar cur síos ar na riachtanais ghníomhachtaithe riaracháin agus ar riachtanais na trialach canary faoi “CodeQL ratchet” thíos.
+
+| Script                 | Cad a bhailíochtaítear                                                                                                                                                                                                                 | Blocálach |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `check:codeql-ratchet` | Caithfidh ref/SHA an iarrthóra agus gach catagóir anailíse chumraithe a bheith cothrom le dáta roimh ratchet na bhfoláireamh; cuireann fianaise ar iarraidh bac air. Fanann an fardal domhanda ar leith — féach “CodeQL ratchet” thíos | Tá        |
 
 ### Tasc: `quality-extended`
 
@@ -476,30 +485,24 @@ Cuir an comhad seo leis an gcoimit taobh leis an athrú a d'fheabhsaigh an mhéa
 `--require-tighten` PR a fheabhsaíonn méadracht gan an bhunlíne a nuashonrú (Céim 6A.5,
 cur chun feidhme ar feitheamh).
 
-### Raicín CodeQL: minicíocht athnuachana agus truicear láimhe
+### Ratchet CodeQL: iontráil iarrthóra agus fardal stóir
 
-Léann `check:codeql-ratchet` **staid an stórtha, a athnuaitear de réir sceidil — ní do gach PR.**
-Tuairiscíonn `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup`
-`state: configured`, `schedule: weekly`: scanadh socraithe réamhshocraithe GitHub, ní anailís
-do gach brú. Dá thoradh sin: tar éis PR a DHEISÍONN foláirimh a chumasc, leanann an raicín air ag léamh
-an tseanchomhaireamh níos airde go dtí go ritear an chéad scanadh sceidealaithe eile — mar sin tuairiscíonn sé cúlú
-ar gach PR oscailte, lena n-áirítear PRanna leantacha an PR deisiúcháin féin, go dtí go dtagann an scanadh suas leis.
+Tá iontráil CodeQL an iarrthóra faoi chúram CI trí shlabhra sainráite spleáchas: glaonn `codeql-scan` ar an maitrís ceithre theanga in `codeql.yml`, ansin ritheann `codeql-admission` `node scripts/check/check-codeql-ratchet.mjs --candidate`. Éilíonn `Gate / CI` an dá thoradh. Coinníonn Quality a sheiceálacha uimhriúla féin ach ní dhéanann sé fiosrú ar an scanóir sula gcríochnaíonn an táirgeoir; ní iontráil iomlán iarrthóra é `Gate / Quality` leis féin. Fanann CodeQL éigeantach d'iarrthóirí a athraíonn doiciméid amháin.
 
-**Athnuachan láimhe**: ritheann `gh workflow run codeql.yml --ref release/vX.Y.Z` an
-anailís arís agus athfhoilsíonn sé foláirimh laistigh de nóiméid. Léigh `.github/workflows/codeql.yml`
-ar dtús — mínítear ina cheanntásc gur `workflow_dispatch`-amháin atá ann **toisc go dtagann sé salach ar
-“shocrú réamhshocraithe” GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Chun truicir `push`/`pull_request`/
-`schedule` a athbhunú, teastaíonn **gníomh ón úinéir ar dtús**: Socruithe → Slándáil cóid →
-CodeQL: Réamhshocrú → Ardleibhéal. Ná cuir truicear `schedule:` leis gan an lasc sin — ní
-chruthóidh sé ach rití a dteipeann orthu.
+Roghnaíonn an beartas in `config/quality/codeql-admission-policy.json` Actions, C/C++, JavaScript/TypeScript agus Python, sraith fiosrúchán default, samhail bagairtí remote agus mód tógála none. Diúltaíonn réamhsheiceáil an táirgeora do thaifead gníomhachtaithe ar feitheamh agus do bhrainsí lasmuigh den liosta sainráite spriocanna. Is iad main agus release/v3.8.53 na spriocanna tosaigh; caithfear an chéad eisiúint eile a ionduchtú tar éis athbhreithnithe. Coinnítear truicear CI níos leithne atá ann cheana do PRanna eisiúna, ach tuairiscíonn sprioc nár ionduchtaíodh HOLD roimh eastóscadh seachas PASS neamhthomhaiste a fháil.
 
-**Teannaigh an bhunlíne tar éis don chomhaireamh titim** — scríobhann `node scripts/check/check-codeql-ratchet.mjs
---update` an comhaireamh nua tomhaiste isteach in `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, ionas nach gceadóidh an raicín go ciúin cúlú ar ais
-go dtí an seanuasteorainn. Sampla oibrithe (2026-09-02/03): dheisigh PR #12502 7 bhfíorfholáireamh
-(13 → 6 cinn oscailte arna dtomhas); theannaigh PR #12530 an bhunlíne reoite ó 11 → 6 chun teacht leis; díbríodh
-na 6 cinn eile ansin le bonn cirt ar leith do gach foláireamh, síos go 0 cinn oscailte.
+Taifeadann gach jab maitríse a ID iarbhír uaslódála SARIF, teanga, catagóir, rith agus iarracht, aitheantas an tsreafa oibre a rinne an glao, ref/head/base/merge SHA an imeachta agus hais an bheartais. Ní íoslódálann an jab spleách ach admhálacha an rith seo agus bailíochtaíonn sé achoimrí na ndéantán. Éilíonn sé na ceithre chatagóir ar fad, táirgeoir rathúil agus próiseáil chríochnaithe gach uaslódála beachta. Úsáideann sé scagaire sarif_id an API, seachas an anailís is déanaí a aimsítear ar bhrainse. Féadfaidh athrithí páirteacha catagóirí rathúla ó iarracht níos luaithe den rith agus den iarrthóir céanna a athúsáid, agus an iarracht táirgthe á caomhnú; ní féidir le táirgeoir reatha teipthe fianaise ghlas roimhe sin a athúsáid.
+
+Fanann gníomh CodeQL leis an bpróiseáil, ach féadfaidh a chur chun feidhme pinnithe rabhadh a thabhairt agus leanúint ar aghaidh tar éis teip ar léamh stádais nó tar éis ídiú na tréimhse feithimh. Dá bhrí sin, fíoraíonn an iontráil an phróiseáil arís. Tugann catagóirí ar iarraidh, próiseáil ar feitheamh, jabanna teipthe nó curtha ar ceal, aitheantas as dáta, léamh neamhiomlán na leathanach nó APIanna nach bhfuil ar fáil HOLD agus cód scoir 2. Ní fhanann aon tréimhse sheasta feithimh ar shreabhadh oibre scanóra neamhspleách. Ní féidir le PR nár scanadh pas a fháil de bharr gur thug fiosrú foláireamh 0 ar ais. Scoireann comhaireamh tomhaiste os cionn `metrics.codeqlAlerts.value` le 1; ní ardaítear an bhunlíne chun foláirimh brainse eile a ionsú. [Stádas uaslódála agus cuardach anailíse](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Taifeadann an admháil IDanna uaslódála agus anailíse, catagóirí, leaganacha uirlisí, ref/SHA, bunlíne agus líon na bhfoláireamh. Fanann aitheantas agus comhaireamh torthaí SARIF, íoschomhairimh rialacha agus cásanna beachta foláireamh éigeantach. Déantar aitheantais PR/anailíse a athsheiceáil roimh ghlacadh. Bunaíonn na seiceálacha seo clúdach na gcatagóirí cumraithe, ní fardal de gach comhad foinse eastósctha. Ní chuimsíonn eastóscadh C/C++ gan tógáil cód a ghintear le linn tógáil tionscadail. Tá athbhreithniú fós ag teastáil ar eisiamh foinsí, agus teastaíonn fianaise inchomparáide ar an mbonn beacht chun rud a chur i leith rannchuiditheora.
+
+Soláthraíonn `codeql-maintenance.yml` scananna brú na heisiúna gníomhaí agus an sceideal seachtainiúil gan táirgeoirí PR/main a dhúbailt. Coinníonn `nightly-codeql-inventory.yml` bunlíne an stóir iomláin ar leith, le `--strict-measurement` agus teip nuair nach bhfuil tomhas ar fáil. Ní iontráil iarrthóra é an scipeáil lamhálach atá ag an seanbhailitheoir áitiúil. Fanann géarú mar `--update` sainráite tar éis comhaireamh domhanda níos ísle a bheith fíoraithe.
+
+Ní cheadaítear an sreabhadh oibre Advanced a fhoilsiú fad atá Default Setup cumraithe: diúltaíonn GitHub don chomhcheangal sin. Fanann a bheartas leaganaithe ar feitheamh go dtí go léitear siar an t-aistriú riaracháin athbhreithnithe. Roimh fhoilsiú, pinneann oibreoir an stór, head/base/tree, haiseanna beartais/paistí/aisrollta agus an staid chumraíochta bhreathnaithe; seiceálann `node scripts/quality/codeql-producer.mjs verify-admin-readback` na taifid JSON ionchais agus iarbhír a cuireadh ar fáil. Is cosaint theicniúil é seo, ní ceadú oibreora ná ionad ar léamha siar úra a fháil. Ní iarrann comhartha rochtana PR rochtain Administration riamh. Éilíonn an cur i bhfeidhm agus aon athrú scanóra an léamh siar ar leith sin móide fianaise chomhoiriúnachta ó PRanna, forkanna agus grúpaí cumaisc fíora.
+
+Úsáideann forkanna reathaithe óstáilte, checkout gan dintiúir bhuana, gan suiteáil ná tógáil tionscadail sa táirgeoir, agus gan rúin stóir oidhreachta. Tacaíonn GitHub le huaslódáil SARIF don imeacht pull_request lena chomhartha teoranta fork; fanann ceadú forghníomhaithe don chéad rannchuidiú faoi bheartas GitHub. Ná húsáid pull_request_target riamh chun cód neamhiontaofa a rith. Deimhnigh ceadanna iarbhír an chomhartha, analysis_key agus timpeallachtaí gach catagóire sa triail canary rialaithe sula measann tú an imirce críochnaithe. [Rialacha uaslódála ó forkanna](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[móid chumraíochta atá ag teacht salach ar a chéile](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Is é cinneadh an oibreora iad na díbirtí (Riail Dhocht #14)** — ná díbir foláireamh CodeQL riamh
 gan an bonn cirt teicniúil a thaifeadadh sa nóta díbeartha: `won't fix` i gcás
@@ -656,11 +659,7 @@ in athbhreithniú ROI ar an tacar réitithe. **Is athruithe meicniúla CI iad na
 is cinntí beartais iad na haistrithe/baintí atá curtha in áirithe don oibreoir.** Níl aon rud thíos
 curtha i bhfeidhm fós.
 
-**Neamhdhoiciméadaithe thuas freisin** (comhairleach, comhartha lag): an jab `docs-lint`
-(markdownlint + Vale, `continue-on-error` don jab iomlán) agus na sreafaí oibre scanóra neamhspleácha
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. Tá `semgrepFindings: 0` in
-`quality-baseline.json` ach níl sé ceangailte le raicín blocála in `ci.yml` — tá an mhéadracht
-ina dílleachta faoi láthair.
+**Gan doiciméadú thuas freisin** (comhairleach, lag ó thaobh comhartha de): an jab `docs-lint` (markdownlint + Vale, `continue-on-error` ar an jab iomlán) agus na sreafaí oibre neamhspleácha scanóra `semgrep.yml` / `scorecard.yml`. Tá jabanna éigeantacha táirgeora agus iontrála ag CodeQL anois faoi `Gate / CI`, faoi réir na riachtanas gníomhachtaithe a thuairiscítear thuas. Tá `semgrepFindings: 0` in `quality-baseline.json` ach níl sé ceangailte le ratchet blocálach in `ci.yml` — tá an mhéadracht gan cheangal faoi láthair.
 
 ### Cumasc / dí-dhúbláil (meicniúil, riosca níos ísle)
 

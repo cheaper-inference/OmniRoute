@@ -38,7 +38,16 @@ CLI lükkab tagasi väljavõtte/sündmuse SHA mittevastavuse. Töövootestid seo
 otsusetöö `needs` loendiga, et uus või eemaldatud rada ei saaks märkamatult kaduda.
 Kviitungid hõlmavad omaenda töövoogu, mitte avaldamist, juurutamist ega olemasoleva nõuandva skanneri sisemist toimimist. Kohaldatavate kontrollide kohustuslikuks muutmine harureeglites on eraldiseisev haldusmuudatus; nende tööde määratlemine ei kaitse iseenesest haru.
 
-`API Route Typecheck` on sõltumatu töövookontroll, mis jääb väljapoole mõlemat koondotsust ja kohaliku täieliku vaatleja staatilist profiili. Kontrollige selle tulemust täpse kandidaadi jaoks eraldi. `.github/workflows/api-route-typecheck.yml` käivitub `main`- või `release/**`-harusse suunatud PR-ide, kummagi haruperekonna tõukamiste ja käsitsi käivitamise korral. Sellel puudub teefilter. PR-i sihtharu muutmine taotleb uut kontrolli; keha või pealkirja muutmisel kasutatakse ainult vaatlemiseks mõeldud nime `Admission not requested / API Route Typecheck` ning see ei saa vastuvõtukontrolli asendada. Töövoog ei deklareeri liitmisrühma päästikut. Iga liitmisjärjekorra kasutuselevõtt, mis seda kontrolli nõuab, peab esmalt tagama selle käivitamise vastava sündmuse korral.
+`API Route Typecheck` on sõltumatu töövookontroll, mis ei kuulu kummagi koondotsuse ega täieliku kohaliku vaatleja staatilise profiili alla. Kontrollige selle tulemust täpse kandidaadi jaoks eraldi. `.github/workflows/api-route-typecheck.yml` käivitub `main` või `release/**` sihtharuga PR-ide, mõlemasse haruperekonda tehtud tõugete, käsitsi käivitamise ning `checks_requested` tüüpi `merge_group` sündmuste puhul. Teefiltrit ei ole. Ühendamisrühmad võtavad välja `merge_group.head_sha`; teised sündmused võtavad välja `github.sha`. Kõik sündmused kasutavad sama API diagnostikaväravat ja selle ühikteste.
+PR-i baasharu muutmine nõuab uut kontrolli; kirjelduse või pealkirja muutmisel kasutatakse ainult vaatlemiseks mõeldud nime `Admission not requested / API Route Typecheck` ning see ei saa asendada vastuvõtukontrolli.
+
+### DAST kasutab kontrollitud CI-järku
+
+Kohustuslik CI-töö `dast-smoke` kutsub pärast tööd `build` välja `.github/workflows/dast-smoke.yml`. See järgib sama koodi- ja mustandivalikut nagu järgu koostamine, sealhulgas toetatud kahvlite PR-id, väljalaskeharu sihtivad PR-id ning ühendamisrühmad. Puuduv, nurjunud, tühistatud või ootamatult vahele jäetud DAST-töö blokeerib `Gate / CI`. Taaskasutataval töövoolul puudub iseseisev PR-i või käsitsi käivitamise päästik; käsitsi valideerimine kasutab CI käivitamist, et koostaja ja tarbija jääksid samasse käitusse.
+
+`scripts/ci/next-build-provenance.mjs` pitseerib kogu Next-artefakti koos tar-kokkuvõtte, hoidla/sündmuse/käituse, tootja katse, head/base/checkout/tree väärtuste, töövoo identiteetide, lukufaili, täpse Node versiooni ja ABI, platvormi ning pakkijaga. DAST valib muutumatu artefakti ID väärtusest `needs.build.outputs`, nõuab allalaadimise kokkuvõtte kontrollimist ning arvutab ZIP-räsi sõltumatult ja võrdleb seda tootja kokkuvõttega, enne kui eraldab selle kaks lubatud liiget skriptiga `scripts/ci/unpack-ci-build.py`. Ka manifest ja tar-arhiiv peavad enne Next-puu lahtipakkimist vastama tootja sõltumatutele väljunditele. Kunagi ei otsita haru viimast edukat järku. Osaline korduskäitus võib sama tootja katset uuesti kasutada, kui selle ID ja kõik sisendid endiselt ühtivad; tõend salvestab mõlemad katsed.
+
+Tarbija jääb hallatud Linuxi käitajale, millel on hoidlas ainult lugemisõigus ja puuduvad hoidla saladused. See paigaldab tootja täpse Node versiooni ning paneb siis kokku CLI sättega `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` lükkab puuduva eraldiseisva serveri tagasi enne mis tahes varukoostamist; tavalised kohalikud CLI-koostamised säilitavad senise varumeetodi. Serveri valmisolek, Schemathesis ja promptfoo peavad kõik õnnestuma töö muutumatu 25-minutilise piirangu jooksul. Päritolutõend kinnitab sisendite identiteeti ja baite, mitte DAST-skanni õnnestumist. Artefakti aegumine, käitaja katkestus või skanneri nurjumine jääb puudulikuks või ebaõnnestunud tõendiks; nõuandva ümbrise abil ei saa sellest PASS tulemust teha.
 
 ### Kasutajaliidese käivitusmaht
 
@@ -208,17 +217,24 @@ Käivitatakse iga `main`-harusse suunatud PR-i puhul. Ebaõnnestumise korral blo
 
 Käivitatakse pärast tööd `test-coverage`. Tõrke korral blokeerib mestimise.
 
-| Skript                       | Kontrollib                                                                                                                                                                                                  | Blokeeriv                   |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| `quality:collect`            | Väljastab faili `quality-metrics.json` (ESLinti hoiatuste arv, ühendatud osade aruandest pärinev testikattuvus)                                                                                             | Jah (ratcheti eelnev etapp) |
-| `quality:ratchet`            | Ükski faili `quality-baseline.json` mõõdik pole halvenenud (ESLinti hoiatused ≤ lähtetase; testikattuvus ≥ lähtetase)                                                                                       | Jah                         |
-| `check:duplication`          | Koodi dubleerimine (jscpd@4) ei ületa failis `quality-baseline.json` määratud lähtetaset                                                                                                                    | Jah                         |
-| `check:complexity`           | Failitaseme tsüklomaatiline keerukus ei ületa ülempiiri (ESLinti tuumreeglid `complexity` + `max-lines-per-function`)                                                                                       | Jah                         |
-| `check:cognitive-complexity` | Kognitiivse keerukuse ratchet (`eslint-plugin-sonarjs`) — eraldiseisev ESLinti käivitus; CI käivitab mõlemad ühendatuna ühe etapina `check:complexity-ratchets`                                             | Jah                         |
-| `check:dead-code`            | Kasutamata eksportide/failide ratchet (knip) ei halvene võrreldes lähtetasemega                                                                                                                             | Jah                         |
-| `check:compression-budget`   | Tihendamise võrdlustesti eelarve — mootoripõhised minimaalsed tokenisäästu määrad ei tohi halveneda                                                                                                         | Jah                         |
-| `check:type-coverage`        | Tüübitud koodi protsendi ratchet (`type-coverage`) ei halvene; asendab suures osas kontrolli `typecheck:noimplicit:core`                                                                                    | Jah                         |
-| `check:codeql-ratchet`       | Avatud CodeQL-i hoiatuste arv ei halvene (loetakse käsuga `gh api`; tokeni puudumisel jäetakse kontroll veatult vahele) — värskendamissagedus ja käsitsi käivitamine: vt allpool jaotist „CodeQL-i ratchet“ | Jah                         |
+| Skript                       | Kontrollib                                                                                                                                                      | Blokeeriv                   |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `quality:collect`            | Väljastab faili `quality-metrics.json` (ESLinti hoiatuste arv, ühendatud osade aruandest pärinev testikattuvus)                                                 | Jah (ratcheti eelnev etapp) |
+| `quality:ratchet`            | Ükski faili `quality-baseline.json` mõõdik pole halvenenud (ESLinti hoiatused ≤ lähtetase; testikattuvus ≥ lähtetase)                                           | Jah                         |
+| `check:duplication`          | Koodi dubleerimine (jscpd@4) ei ületa failis `quality-baseline.json` määratud lähtetaset                                                                        | Jah                         |
+| `check:complexity`           | Failitaseme tsüklomaatiline keerukus ei ületa ülempiiri (ESLinti tuumreeglid `complexity` + `max-lines-per-function`)                                           | Jah                         |
+| `check:cognitive-complexity` | Kognitiivse keerukuse ratchet (`eslint-plugin-sonarjs`) — eraldiseisev ESLinti käivitus; CI käivitab mõlemad ühendatuna ühe etapina `check:complexity-ratchets` | Jah                         |
+| `check:dead-code`            | Kasutamata eksportide/failide ratchet (knip) ei halvene võrreldes lähtetasemega                                                                                 | Jah                         |
+| `check:compression-budget`   | Tihendamise võrdlustesti eelarve — mootoripõhised minimaalsed tokenisäästu määrad ei tohi halveneda                                                             | Jah                         |
+| `check:type-coverage`        | Tüübitud koodi protsendi ratchet (`type-coverage`) ei halvene; asendab suures osas kontrolli `typecheck:noimplicit:core`                                        | Jah                         |
+
+### Tööd: `codeql-scan` ja `codeql-admission`
+
+`codeql-scan` loob kõik seadistatud analüüsikategooriad. Pärast selle töö õnnestumist kontrollib `codeql-admission` selle täpseid üleslaadimisi ja kandidaadi hoiatuste ratchet-piiri. Mõlemad on `Gate / CI` kohustuslikud sõltuvused, sealhulgas ainult dokumentatsiooni muutvate kandidaatide puhul. Haldusliku aktiveerimise ja proovikäituse nõudeid kirjeldatakse allpool jaotises „CodeQL ratchet”.
+
+| Skript                 | Kontrollib                                                                                                                                                                                                | Blokeeriv |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `check:codeql-ratchet` | Kandidaadi ref/SHA ja kõik seadistatud analüüsikategooriad peavad enne hoiatuste ratchet-kontrolli olema ajakohased; puuduvad tõendid blokeerivad. Üldinventuur jääb eraldi — vt allpool „CodeQL ratchet” | Jah       |
 
 ### Töö: `quality-extended`
 
@@ -477,30 +493,24 @@ Kommiteerige see fail koos muudatusega, mis mõõdikut parandas. PR, mis paranda
 mõõdikut ilma baastaset värskendamata, tuvastatakse lipuga `--require-tighten` (etapp 6A.5,
 rakendamine on ootel).
 
-### CodeQL-i ratchet: värskendamissagedus ja käsitsi käivitamine
+### CodeQL ratchet: kandidaatide vastuvõtt ja hoidla inventuur
 
-`check:codeql-ratchet` loeb **hoidla olekut, mida värskendatakse ajakava alusel — mitte iga PR-i korral.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` annab tulemuseks
-`state: configured`, `schedule: weekly`: see on GitHubi vaikeseadistuse kontroll, mitte iga tõuke
-korral tehtav analüüs. Tagajärg: pärast hoiatusi PARANDAVA PR-i mestimist loeb ratchet
-endiselt vana, suuremat arvu kuni järgmise ajastatud kontrolli käivitumiseni — seega teatab see
-halvenemisest iga avatud PR-i puhul, sealhulgas parandava PR-i enda järelmuudatuste puhul, kuni kontroll järele jõuab.
+CI vastutab kandidaadi CodeQL-vastuvõtu eest selgesõnalise sõltuvusahela kaudu: `codeql-scan` kutsub välja faili `codeql.yml` nelja keele maatriksi ning seejärel käivitab `codeql-admission` käsu `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` nõuab mõlemat tulemust. Quality säilitab oma arvulised kontrollid, kuid ei päri skannerilt enne tootja lõpetamist; `Gate / Quality` üksi ei ole kandidaadi täielik vastuvõtt. CodeQL jääb kohustuslikuks ka ainult dokumentatsiooni muutvate kandidaatide puhul.
 
-**Käsitsi värskendamine**: `gh workflow run codeql.yml --ref release/vX.Y.Z` käivitab
-analüüsi uuesti ja avaldab hoiatused mõne minuti jooksul uuesti. Lugege esmalt faili `.github/workflows/codeql.yml`
-— selle päis selgitab, et see on ainult `workflow_dispatch`-põhine, **sest see on vastuolus
-GitHubi „vaikeseadistusega“** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Käivitajate `push`/`pull_request`/
-`schedule` taastamine nõuab esmalt **omaniku toimingut**: Settings → Code security →
-CodeQL: Default → Advanced. Ärge lisage käivitajat `schedule:` ilma seda ümberlülitust tegemata — see
-tekitab ainult nurjunud käivitusi.
+Faili `config/quality/codeql-admission-policy.json` poliitika valib Actions, C/C++, JavaScript/TypeScript ja Python, päringukomplekti default, ohumudeli remote ning koostamisrežiimi none. Tootja eelkontroll lükkab tagasi ootel aktiveerimiskirje ja selgesõnalisest sihtloendist välja jäävad harud. Esialgsed sihtmärgid on main ja release/v3.8.53; järgmine väljalase vajab üle vaadatud liitumist. CI olemasolev laiem väljalaske-PR-i päästik säilib, kuid veel liitmata sihtmärk teatab enne eraldamist HOLD, selle asemel et saada mõõtmata PASS.
 
-**Pärast arvu vähenemist karmistage baastaset** — `node scripts/check/check-codeql-ratchet.mjs
---update` kirjutab uue mõõdetud arvu faili `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, et ratchet ei lubaks vaikimisi halvenemist tagasi
-vana ülempiirini. Läbitöötatud näide (2026-09-02/03): PR #12502 parandas 7 tegelikku hoiatust
-(13 → 6 mõõdetud avatud hoiatust); PR #12530 karmistas fikseeritud baastaseme 11 → 6, et see vastaks tulemusele;
-ülejäänud 6 märgiti seejärel iga hoiatuse kohta esitatud põhjendusega lahendatuks, kuni avatuks jäi 0 hoiatust.
+Iga maatriksitöö salvestab oma tegeliku SARIF-üleslaadimise ID, keele, kategooria, käituse ja katse, kutsuva töövoo identiteedi, sündmuse ref/head/base/merge SHA ning poliitikaräsi. Sõltuv töö laadib alla ainult selle käituse tõendid ja kontrollib artefaktide kokkuvõtteid. See nõuab kõiki nelja kategooriat, edukat tootjat ning iga täpse üleslaadimise töötlemise lõpetamist. See kasutab API sarif_id filtrit, mitte harult leitud viimast analüüsi. Osalised korduskäitused võivad uuesti kasutada sama käituse ja kandidaadi varasema katse edukaid kategooriaid, säilitades tootva katse; nurjunud praegune tootja ei saa varasemat rohelist tõendit uuesti kasutada.
+
+CodeQL-toiming ootab töötlemist, kuid selle fikseeritud teostus võib oleku lugemise tõrke või ooteaja ammendumise järel hoiatada ja jätkata. Seetõttu kontrollib vastuvõtt töötlemist uuesti. Puuduvad kategooriad, ootel töötlemine, nurjunud või tühistatud tööd, aegunud identiteet, puudulik lehekülgede läbimine või kättesaamatud API-d annavad HOLD ning väljumiskoodi 2. Sõltumatu skanneritöövoo kindlat ooteaega enam ei ole. Skannimata PR ei saa läbi minna pelgalt seepärast, et hoiatuste päring tagastas 0. Mõõdetud arv üle `metrics.codeqlAlerts.value` annab väljumiskoodi 1; baastaset ei tõsteta teise haru hoiatuste mahutamiseks. [Üleslaadimise olek ja analüüsi otsing](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Tõend salvestab üleslaadimis- ja analüüsi-ID-d, kategooriad, tööriistaversioonid, ref/SHA, baastaseme ning hoiatuste arvud. SARIF-identiteet ja tulemuste arv, reeglite miinimumarvud ning täpsed hoiatusjuhud jäävad kohustuslikuks. PR-i ja analüüsi identiteete kontrollitakse enne vastuvõttu uuesti. Need kontrollid kinnitavad seadistatud kategooriate katvust, mitte kõigi eraldatud lähtefailide inventuuri. C/C++ eraldamine ilma koostamiseta ei hõlma projekti koostamisel genereeritud koodi. Lähtekoodi välistused vajavad endiselt ülevaatust ning panustajale omistamine vajab võrreldavaid tõendeid täpse baasi kohta.
+
+`codeql-maintenance.yml` pakub aktiivse väljalaske tõugete skanne ja iganädalast ajakava ilma PR/main-tootjaid dubleerimata. `nightly-codeql-inventory.yml` hoiab kogu hoidla baastaset eraldi, kasutades `--strict-measurement` ning nurjudes, kui mõõtmine pole kättesaadav. Kohaliku pärandkoguja lubav vahelejätmine ei ole kandidaadi vastuvõtt. Karmistamine toimub endiselt selgesõnalise `--update` abil pärast kontrollitud väiksemat üleüldist arvu.
+
+Advanced-töövoogu ei tohi avaldada, kui Default Setup on seadistatud: GitHub lükkab selle kombinatsiooni tagasi. Selle versioonitud poliitika jääb ootele, kuni üle vaadatud halduslik üleminek on tagasi loetud. Enne avaldamist fikseerib operaator hoidla, head/base/tree väärtused, poliitika/paiga/tagasipööramise räsid ja vaadeldud seadistusoleku; `node scripts/quality/codeql-producer.mjs verify-admin-readback` kontrollib esitatud oodatud ja tegelikke JSON-kirjeid. See on tehniline kaitse, mitte operaatori heakskiit ega värskete tagasilugemiste hankimise asendus. PR-token ei taotle kunagi Administration-juurdepääsu. Kasutuselevõtt ja iga skannerimuudatus nõuavad seda eraldi tagasilugemist ning tõendeid ühilduvusest päris PR-ide, kahvlite ja ühendamisrühmadega.
+
+Kahvlid kasutavad hallatud käitajaid, checkout'i ilma püsivalt salvestatud autentimisandmeteta, tootjas puudub projekti paigaldamine või koostamine ning puuduvad päritud hoidlasaladused. GitHub toetab SARIF-üleslaadimist pull_request sündmuse korral vähendatud õigustega kahvlitokeniga; esmakordse panustamise käivitamise heakskiit jääb GitHub-poliitikaks. Ärge kunagi kasutage pull_request_target sündmust ebausaldatud koodi käivitamiseks. Enne migratsiooni lõpetatuks pidamist kinnitage kontrollitud proovikäituses tokeni tegelikud õigused, analysis_key ja kõigi kategooriate keskkonnad. [Kahvlitest üleslaadimise reeglid](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[vastuolus seadistusrežiimid](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Hoiatuste lahendatuks märkimise otsustab operaator (range reegel #14)** — ärge märkige CodeQL-i hoiatust
 kunagi lahendatuks ilma tehnilist põhjendust lahendatuks märkimise kommentaari lisamata: `won't fix`
@@ -656,11 +666,7 @@ tuvastas järgmised ratsionaliseerimise kandidaadid. **Liitmised on mehaanilised
 muudatused; aktiveerimised/eemaldamised on operaatorile jäetud poliitikaotsused.** Midagi
 alltoodust pole veel rakendatud.
 
-**Eespool on dokumenteerimata ka** (nõuandev, nõrk signaal): töö `docs-lint`
-(markdownlint + Vale, kogu tööl `continue-on-error`) ja eraldiseisvad skanneri töövood
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` sisaldub failis
-`quality-baseline.json`, kuid pole failis `ci.yml` ühendatud blokeeriva põrkmehhanismiga — mõõdik on
-praegu orb.
+**Samuti eespool dokumenteerimata** (nõuandev, vähese signaaliga): töö `docs-lint` (markdownlint + Vale, kogu töö `continue-on-error`) ning eraldiseisvad skanneritöövood `semgrep.yml` / `scorecard.yml`. CodeQL sisaldab nüüd kohustuslikke tootmis- ja vastuvõtutöid `Gate / CI` all, järgides eespool kirjeldatud aktiveerimisnõudeid. `semgrepFindings: 0` on failis `quality-baseline.json`, kuid pole failis `ci.yml` seotud blokeeriva ratchet-kontrolliga — mõõdik on praegu sidumata.
 
 ### Liitmine / dubleerimise eemaldamine (mehaaniline, väiksema riskiga)
 

@@ -14,6 +14,8 @@ const CONTRACTS = [
   "merge-prs/SKILL.md",
   "merge-batch/SKILL.md",
   "i18n-waves/SKILL.md",
+  "i18n-waves/scripts/bootstrap.sh",
+  "i18n-waves/scripts/wave.sh",
   "_shared/merge-gates.md",
   "_shared/validation-gate.md",
   "_shared/protected-surfaces.md",

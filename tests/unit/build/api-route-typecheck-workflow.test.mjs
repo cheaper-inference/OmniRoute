@@ -100,6 +100,30 @@ function pullRequest(action, base = "release/v3.8.53", changes) {
   };
 }
 
+// GitHub merge_group payloads have a synthetic head and no pull_request object.
+function mergeGroup(base = "main", action = "checks_requested") {
+  const sha = "c".repeat(40);
+  const ref = `refs/heads/gh-readonly-queue/${base}/pr-123-${sha.slice(0, 7)}`;
+  return {
+    github: {
+      workflow: checkName,
+      event_name: "merge_group",
+      ref,
+      sha,
+      run_id: 3456,
+      event: {
+        action,
+        merge_group: {
+          head_sha: sha,
+          head_ref: ref,
+          base_sha: "b".repeat(40),
+          base_ref: `refs/heads/${base}`,
+        },
+      },
+    },
+  };
+}
+
 // This workflow uses only literal branches and release/**. GitHub applies a PR
 // branches filter to the destination, not changes.base.ref.from or the head.
 function triggered(context) {
@@ -107,6 +131,7 @@ function triggered(context) {
   if (!Object.hasOwn(workflow.on, eventName)) return false;
   if (eventName === "workflow_dispatch") return true;
   const trigger = workflow.on[eventName];
+  if (eventName === "merge_group") return trigger.types.includes(event.action);
   if (eventName === "pull_request" && !trigger.types.includes(event.action)) return false;
   if (eventName === "push" && !ref.startsWith("refs/heads/")) return false;
   const branch = eventName === "pull_request" ? event.pull_request.base.ref : ref.slice(11);
@@ -141,9 +166,10 @@ test("API typecheck preserves the pinned runtime, merge checkout and diagnostic 
   assert.deepEqual(Object.keys(workflow.jobs), ["api-typecheck"]);
   assert.equal(job["continue-on-error"], undefined);
   assert.equal(job.needs, undefined);
-  // Cache selection is exercised by event below; the toolchain and gate steps
-  // must otherwise retain their exact behavior and pins.
+  // Checkout and cache selection are exercised by event below; the toolchain
+  // and gate steps must otherwise retain their exact behavior and pins.
   const steps = structuredClone(job.steps);
+  delete steps[0].with.ref;
   delete steps[1].with.cache;
   delete steps[1].with["package-manager-cache"];
   if (steps[2].with) {
@@ -297,5 +323,76 @@ test("API release pushes install without caches while existing events keep their
     const context = pullRequest(action, "release/v3.8.53", { base: { ref: { from: "main" } } });
     assert.equal(render(setupNode.with.cache, context), "npm");
     assert.equal(render(install.with.cache, context), "true");
+  }
+});
+
+test("API merge-group checks_requested events schedule the required check without PR metadata", () => {
+  assert.deepEqual(workflow.on.merge_group, { types: ["checks_requested"] });
+  for (const base of ["main", "release/v3.8.53", "release/candidate/next"]) {
+    const context = mergeGroup(base);
+    assert.equal(Object.hasOwn(context.github.event, "pull_request"), false);
+    assert.equal(scheduled(context), true, base);
+    assert.equal(render(job.name, context), checkName);
+  }
+});
+
+test("API merge groups reject other activity types and retain unconditional file coverage", () => {
+  assert.ok(workflow.on.merge_group);
+  for (const action of ["destroyed", "opened", "edited", ""]) {
+    assert.equal(triggered(mergeGroup("main", action)), false, action);
+  }
+  assert.equal(workflow.on.merge_group.paths, undefined);
+  assert.equal(workflow.on.merge_group["paths-ignore"], undefined);
+});
+
+test("API checkout uses the synthetic merge-group head and the event SHA for existing events", () => {
+  const checkout = job.steps[0];
+  const context = mergeGroup();
+  // Different sentinels expose accidental fallback to another event/branch SHA.
+  context.github.sha = "a".repeat(40);
+  assert.equal(render(checkout.with.ref ?? "", context), context.github.event.merge_group.head_sha);
+  assert.notEqual(
+    render(checkout.with.ref ?? "", context),
+    context.github.event.merge_group.base_sha
+  );
+  for (const eventName of ["pull_request", "push", "workflow_dispatch"]) {
+    const existing = eventName === "pull_request" ? pullRequest("synchronize") : mergeGroup();
+    existing.github.event_name = eventName;
+    existing.github.sha = "d".repeat(40);
+    if (eventName === "pull_request") existing.github.event.pull_request.head.sha = "e".repeat(40);
+    assert.equal(render(checkout.with.ref ?? "", existing), existing.github.sha, eventName);
+  }
+});
+
+test("API merge-group concurrency cannot cancel a PR or a different synthetic candidate", () => {
+  const context = mergeGroup();
+  const group = render(workflow.concurrency.group, context);
+  assert.notEqual(group, render(workflow.concurrency.group, pullRequest("synchronize")));
+  const other = mergeGroup();
+  other.github.ref += "-other";
+  assert.notEqual(group, render(workflow.concurrency.group, other));
+  const rerun = structuredClone(context);
+  rerun.github.run_id++;
+  assert.equal(group, render(workflow.concurrency.group, rerun));
+  assert.equal(workflow.concurrency["cancel-in-progress"], true);
+});
+
+test("API fork PRs and merge groups stay on hosted read-only jobs without repository secrets", () => {
+  const fork = pullRequest("synchronize", "main");
+  fork.github.event.pull_request.head.repo = { fork: true, full_name: "contributor/OmniRoute" };
+  assert.equal(scheduled(fork), true);
+  assert.equal(scheduled(mergeGroup()), true);
+  assert.equal(job["runs-on"], "ubuntu-latest");
+  assert.deepEqual(workflow.permissions, { contents: "read" });
+  assert.equal(job.steps[0].with["persist-credentials"], false);
+  assert.equal(workflow.on.pull_request_target, undefined);
+  assert.equal(JSON.stringify(workflow).includes("secrets."), false);
+});
+
+test("API merge groups preserve the existing non-release-push cache policy", () => {
+  for (const base of ["main", "release/v3.8.53"]) {
+    const context = mergeGroup(base);
+    assert.equal(render(job.steps[1].with.cache, context), "npm");
+    assert.equal(render(job.steps[2].with.cache, context), "true");
   }
 });

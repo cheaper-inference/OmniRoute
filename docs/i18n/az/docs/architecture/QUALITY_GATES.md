@@ -37,7 +37,16 @@ CLI checkout/hadisə SHA uyğunsuzluğunu rədd edir. İş axını testləri siy
 hökm tapşırığının `needs` siyahısına bağlayır ki, yeni və ya silinmiş xətt səssizcə
 yoxa çıxmasın. Təsdiqlər yalnız öz iş axınını əhatə edir; dərc edilməni, yerləşdirməni və ya mövcud tövsiyə xarakterli skanerin daxili mexanizmlərini əhatə etmir. Müvafiq yoxlamaların budaq qaydalarında məcburi edilməsi ayrıca inzibati dəyişiklikdir; onların tapşırıqlarının müəyyənləşdirilməsi öz-özlüyündə budağı qorumur.
 
-`API Route Typecheck` hər iki ümumiləşdirilmiş qərardan və lokal tam müşahidəçinin statik profilindən kənarda olan müstəqil iş axını yoxlamasıdır. Dəqiq namizəd üçün onun nəticəsini ayrıca yoxlayın. `.github/workflows/api-route-typecheck.yml` `main` və ya `release/**` budaqlarına yönəlmiş PR-lərdə, bu budaq ailələrindən hər hansı birinə göndərişlərdə və əl ilə işə salındıqda icra olunur. Onun yol filtri yoxdur. PR-in baza budağının yenidən hədəflənməsi yeni yoxlama tələb edir; mətn/başlıq redaktələri yalnız müşahidə üçün nəzərdə tutulmuş `Admission not requested / API Route Typecheck` adından istifadə edir və qəbul yoxlamasını əvəz edə bilməz. İş axını birləşdirmə qrupu trigger-i elan etmir. Bu yoxlamanı tələb edən hər hansı birləşdirmə növbəsi tətbiqi əvvəlcə həmin hadisə üçün onun icrasını təmin etməlidir.
+`API Route Typecheck` hər iki ümumi nəticədən və tam yerli müşahidəçinin statik profilindən kənar, müstəqil iş axını yoxlamasıdır. Dəqiq namizəd üçün onun nəticəsini ayrıca yoxlayın. `.github/workflows/api-route-typecheck.yml` `main` və ya `release/**` hədəfli PR-lərdə, hər iki budaq ailəsinə push zamanı, əl ilə başladılmada və `checks_requested` tipli `merge_group` hadisələrində işləyir. Yol filtri yoxdur. Birləşdirmə qrupları `merge_group.head_sha`, digər hadisələr isə `github.sha` versiyasını çıxarır. Bütün hadisələr eyni API diaqnostika keçidini və onun vahid testlərini istifadə edir.
+PR-in əsas hədəf budağının dəyişməsi yeni yoxlama tələb edir; mətn/başlıq dəyişiklikləri yalnız müşahidə üçün `Admission not requested / API Route Typecheck` adından istifadə edir və qəbul yoxlamasını əvəz edə bilməz.
+
+### DAST yoxlanmış CI yığımını istifadə edir
+
+Məcburi `dast-smoke` CI işi `build` işindən sonra `.github/workflows/dast-smoke.yml` axınını çağırır. Dəstəklənən fork PR-ləri, release hədəfli PR-lər və birləşdirmə qrupları daxil olmaqla, yığımla eyni kod/qaralama seçim qaydalarını izləyir. Olmayan, uğursuz, ləğv edilmiş və ya gözlənilmədən ötürülmüş DAST işi `Gate / CI` keçidini bloklayır. Təkrar istifadə olunan axının ayrıca PR/dispatch tətikləyicisi yoxdur; əl ilə yoxlama CI dispatch mexanizmindən istifadə edir ki, yığım və istehlakçı eyni icrada qalsın.
+
+`scripts/ci/next-build-provenance.mjs` tam Next artefaktını tar heşi, repozitoriya/hadisə/icra, istehsalçı cəhdi, head/base/checkout/tree, iş axını identifikatorları, lockfile, dəqiq Node versiyası/ABI, platforma və paketləyici ilə bağlayır. DAST dəyişməz artefakt ID-sini `needs.build.outputs` çıxışından seçir, endirmə heşinin yoxlanmasını tələb edir və `scripts/ci/unpack-ci-build.py` vasitəsilə icazəli iki üzvü çıxarmazdan əvvəl ZIP heşini müstəqil hesablayıb istehsalçı heşi ilə müqayisə edir. Next ağacını çıxarmazdan əvvəl manifest və tar arxivi də istehsalçının müstəqil çıxışlarına uyğun gəlməlidir. Budağın ən son uğurlu yığımını heç vaxt axtarmır. Qismən təkrar icra ID və bütün girişlər uyğun qaldıqda həmin istehsalçı cəhdini təkrar istifadə edə bilər; sübut qeydi hər iki cəhdi saxlayır.
+
+İstehlakçı repozitoriyaya yalnız oxuma icazəsi olan, repozitoriya sirləri verilməyən hosted Linux icraçısında qalır. İstehsalçının dəqiq Node versiyasını quraşdırır, sonra `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` ilə CLI yığır. `scripts/build/standaloneInput.mjs` ehtiyat yığımdan əvvəl olmayan standalone serveri rədd edir; adi yerli CLI yığımları mövcud ehtiyat yolunu saxlayır. Serverin hazırlığı, Schemathesis və promptfoo dəyişməyən 25 dəqiqəlik iş həddində uğurla tamamlanmalıdır. Mənşə qeydi girişlərin kimliyini və baytlarını sübut edir, uğurlu DAST skanını yox. Artefaktın vaxtının bitməsi, icraçının dayanması və ya skaner xətası natamam və ya uğursuz sübut olaraq qalır; məsləhətçi örtük onu PASS edə bilməz.
 
 ### UI icra tutumu
 
@@ -197,17 +206,24 @@ təsdiqləmələrin zəiflədilməsi və digər maskalama halları müstəqil ş
 
 `test-coverage` tamamlandıqdan sonra icra olunur. Uğursuzluq halında birləşdirməni bloklayır.
 
-| Skript                       | Yoxlayır                                                                                                                                                                                                              | Bloklayıcı             |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `quality:collect`            | `quality-metrics.json` yaradır (ESLint xəbərdarlıqlarının sayı, birləşdirilmiş hissə hesabatından əhatə göstəricisi)                                                                                                  | Bəli (ratçetdən əvvəl) |
-| `quality:ratchet`            | `quality-baseline.json` daxilindəki hər bir göstəricinin geriləmədiyini yoxlayır (ESLint xəbərdarlıqları ≤ baza; əhatə ≥ baza)                                                                                        | Bəli                   |
-| `check:duplication`          | Kod təkrarlanmasının (jscpd@4) `quality-baseline.json` daxilindəki bazanı aşmadığını yoxlayır                                                                                                                         | Bəli                   |
-| `check:complexity`           | Fayl səviyyəsindəki siklomatik mürəkkəbliyin həddi aşmadığını yoxlayır (əsas ESLint `complexity` + `max-lines-per-function`)                                                                                          | Bəli                   |
-| `check:cognitive-complexity` | Koqnitiv mürəkkəblik ratçeti (`eslint-plugin-sonarjs`) — ayrıca ESLint keçidi; CI hər ikisini vahid `check:complexity-ratchets` addımı kimi birləşdirərək icra edir                                                   | Bəli                   |
-| `check:dead-code`            | İstifadə olunmayan ixraclar/fayllar üçün ratçetin (knip) baza ilə müqayisədə geriləmədiyini yoxlayır                                                                                                                  | Bəli                   |
-| `check:compression-budget`   | Sıxılma etalon testi büdcəsi — hər mühərrik üzrə token qənaəti üçün minimum hədlər geriləməməlidir                                                                                                                    | Bəli                   |
-| `check:type-coverage`        | Tipləndirilmiş faiz ratçetinin (`type-coverage`) geriləmədiyini yoxlayır; əsasən `typecheck:noimplicit:core` yoxlamasını əhatə edir                                                                                   | Bəli                   |
-| `check:codeql-ratchet`       | Açıq CodeQL xəbərdarlıqlarının sayının geriləmədiyini yoxlayır (`gh api` vasitəsilə oxuyur; token olmadıqda problemsiz ötürür) — yeniləmə tezliyi və əl ilə işə salma üçün aşağıdakı "CodeQL ratchet" bölməsinə baxın | Bəli                   |
+| Skript                       | Yoxlayır                                                                                                                                                            | Bloklayıcı             |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `quality:collect`            | `quality-metrics.json` yaradır (ESLint xəbərdarlıqlarının sayı, birləşdirilmiş hissə hesabatından əhatə göstəricisi)                                                | Bəli (ratçetdən əvvəl) |
+| `quality:ratchet`            | `quality-baseline.json` daxilindəki hər bir göstəricinin geriləmədiyini yoxlayır (ESLint xəbərdarlıqları ≤ baza; əhatə ≥ baza)                                      | Bəli                   |
+| `check:duplication`          | Kod təkrarlanmasının (jscpd@4) `quality-baseline.json` daxilindəki bazanı aşmadığını yoxlayır                                                                       | Bəli                   |
+| `check:complexity`           | Fayl səviyyəsindəki siklomatik mürəkkəbliyin həddi aşmadığını yoxlayır (əsas ESLint `complexity` + `max-lines-per-function`)                                        | Bəli                   |
+| `check:cognitive-complexity` | Koqnitiv mürəkkəblik ratçeti (`eslint-plugin-sonarjs`) — ayrıca ESLint keçidi; CI hər ikisini vahid `check:complexity-ratchets` addımı kimi birləşdirərək icra edir | Bəli                   |
+| `check:dead-code`            | İstifadə olunmayan ixraclar/fayllar üçün ratçetin (knip) baza ilə müqayisədə geriləmədiyini yoxlayır                                                                | Bəli                   |
+| `check:compression-budget`   | Sıxılma etalon testi büdcəsi — hər mühərrik üzrə token qənaəti üçün minimum hədlər geriləməməlidir                                                                  | Bəli                   |
+| `check:type-coverage`        | Tipləndirilmiş faiz ratçetinin (`type-coverage`) geriləmədiyini yoxlayır; əsasən `typecheck:noimplicit:core` yoxlamasını əhatə edir                                 | Bəli                   |
+
+### İşlər: `codeql-scan` və `codeql-admission`
+
+`codeql-scan` bütün konfiqurasiya edilmiş analiz kateqoriyalarını yaradır. Bu iş uğurla bitdikdən sonra `codeql-admission` onun dəqiq yükləmələrini və namizəd xəbərdarlıqlarının geriləməmə həddini yoxlayır. Hər ikisi yalnız sənədləri dəyişən namizədlər də daxil olmaqla `Gate / CI` üçün məcburi asılılıqdır. İnzibati aktivləşdirmə və canary tələbləri aşağıdakı "CodeQL geriləməmə həddi" bölməsində izah olunur.
+
+| Skript                 | Yoxladığı                                                                                                                                                                                                                | Bloklayır |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| `check:codeql-ratchet` | Xəbərdarlıq həddi yoxlanmazdan əvvəl namizədin ref/SHA-sı və bütün analiz kateqoriyaları aktual olmalıdır; çatışmayan sübut bloklayır. Ümumi inventar ayrıca qalır — aşağıdakı "CodeQL geriləməmə həddi" bölməsinə baxın | Bəli      |
 
 ### Tapşırıq: `quality-extended`
 
@@ -472,32 +488,23 @@ Bu faylı metrikanı yaxşılaşdıran dəyişikliklə birlikdə commit edin. Me
 yaxşılaşdırıb baza səviyyəsini yeniləməyən PR `--require-tighten` tərəfindən aşkarlanacaq
 (Mərhələ 6A.5, icrası gözlənilir).
 
-### CodeQL ratchet-i: yeniləmə tezliyi və əl ilə işə salma
+### CodeQL geriləməmə həddi: namizədin qəbulu və repozitoriya inventarı
 
-`check:codeql-ratchet` **hər PR üzrə deyil, cədvəl əsasında yenilənən repozitoriya vəziyyətini** oxuyur.
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` əmri
-`state: configured`, `schedule: weekly` bildirir: bu, hər push üçün analiz deyil,
-GitHub-un standart quraşdırma skanıdır. Nəticə etibarilə, xəbərdarlıqları ARADAN QALDIRAN
-PR birləşdirildikdən sonra ratchet növbəti planlaşdırılmış skan işə düşənədək köhnə,
-daha yüksək sayı oxumağa davam edir — buna görə də skan yenilənənədək bütün açıq
-PR-lərdə, o cümlədən düzəliş PR-nin sonrakı dəyişikliklərində geriləmə bildirir.
+CI açıq asılılıq zənciri ilə namizədin CodeQL qəbuluna cavabdehdir: `codeql-scan` `codeql.yml` daxilində dörd dilli matrisi çağırır, sonra `codeql-admission` `node scripts/check/check-codeql-ratchet.mjs --candidate` əmrini icra edir. `Gate / CI` hər iki nəticəni tələb edir. Quality öz rəqəmsal yoxlamalarını saxlayır, lakin istehsalçı bitmədən skaneri sorğulamır; təkcə `Gate / Quality` tam namizəd qəbulu deyil. Yalnız sənədləri dəyişən namizədlər üçün də CodeQL məcburidir.
 
-**Əl ilə yeniləmə**: `gh workflow run codeql.yml --ref release/vX.Y.Z` analizi yenidən
-işə salır və xəbərdarlıqları bir neçə dəqiqə ərzində təkrar dərc edir. Əvvəlcə
-`.github/workflows/codeql.yml` faylını oxuyun — onun başlığı bunun **GitHub-un "default setup"
-rejimi ilə ziddiyyət təşkil etdiyinə görə** yalnız `workflow_dispatch` olduğunu izah edir
-(`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`).
-`push`/`pull_request`/`schedule` trigger-lərini bərpa etmək üçün əvvəlcə **sahib tərəfindən əməliyyat**
-tələb olunur: Settings → Code security → CodeQL: Default → Advanced. Bu keçid edilmədən
-`schedule:` trigger-i əlavə etməyin — bu, yalnız uğursuz icralar yaradacaq.
+`config/quality/codeql-admission-policy.json` siyasəti Actions, C/C++, JavaScript/TypeScript və Python dillərini, default sorğu dəstini, remote təhdid modelini və none yığım rejimini seçir. İstehsalçının ilkin yoxlaması gözləyən aktivləşdirmə qeydini və açıq hədəf siyahısından kənar budaqları rədd edir. İlk hədəflər main və release/v3.8.53-dür; növbəti release üçün nəzərdən keçirilmiş əlavə edilmə tələb olunur. CI-nin daha geniş release PR tətikləyicisi saxlanır, lakin əlavə edilməmiş hədəf ölçülməmiş PASS almaq əvəzinə çıxarışdan əvvəl HOLD bildirir.
 
-**Say azaldıqdan sonra baza səviyyəsini sərtləşdirin** — `node scripts/check/check-codeql-ratchet.mjs
---update` yeni ölçülmüş sayı `quality-baseline.json` →
-`metrics.codeqlAlerts.value` daxilinə yazır, beləliklə ratchet köhnə yuxarı həddə doğru
-geriləməyə səssizcə icazə vermir. İşlənmiş nümunə (2026-09-02/03): PR #12502 7 real
-xəbərdarlığı aradan qaldırdı (ölçülmüş açıq xəbərdarlıq sayı 13 → 6); PR #12530 uyğunluq
-üçün dondurulmuş baza səviyyəsini 11 → 6 olaraq sərtləşdirdi; qalan 6 xəbərdarlıq isə
-sonradan hər xəbərdarlıq üzrə əsaslandırma ilə rədd edilərək açıq xəbərdarlıqların sayı 0-a endirildi.
+Hər matris işi faktiki SARIF yükləmə ID-sini, dili, kateqoriyanı, icranı və cəhdi, çağıran iş axınının kimliyini, hadisənin ref/head/base/merge SHA-sını və siyasət heşini qeyd edir. Asılı iş yalnız bu icranın qeydlərini endirir və artefakt heşlərini yoxlayır. Dörd kateqoriyanın hamısını, uğurlu istehsalçını və hər dəqiq yükləmənin işlənməsinin tamamlanmasını tələb edir. Budaqda tapılan ən yeni analizi deyil, API-nin sarif_id filtrini istifadə edir. Qismən təkrar icralar eyni icra və namizədin əvvəlki cəhdindəki uğurlu kateqoriyaları, istehsal cəhdini qoruyaraq istifadə edə bilər; hazırkı uğursuz istehsalçı əvvəlki yaşıl sübutdan istifadə edə bilməz.
+
+CodeQL action işlənməni gözləyir, lakin sabitlənmiş tətbiqi statusun oxunması uğursuz olduqda və ya gözləmə bitdikdə xəbərdarlıq edib davam edə bilər. Buna görə qəbul işlənməni yenidən yoxlayır. Çatışmayan kateqoriyalar, gözləyən işlənmə, uğursuz və ya ləğv edilmiş işlər, köhnəlmiş kimlik, natamam səhifələmə və ya əlçatmaz API-lər HOLD və çıxış 2 yaradır. Müstəqil skaner axını üçün sabit gözləmə artıq yoxdur. Skan edilməmiş PR xəbərdarlıq sorğusu 0 qaytardığına görə keçə bilməz. `metrics.codeqlAlerts.value` həddini aşan ölçülmüş say çıxış 1 yaradır; başqa budağın xəbərdarlıqlarını qəbul etmək üçün baza həddi artırılmır. [Yükləmə statusu və analiz axtarışı](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Sübut qeydi yükləmə və analiz ID-lərini, kateqoriyaları, alət versiyalarını, ref/SHA-nı, baza həddini və xəbərdarlıq saylarını saxlayır. SARIF kimliyi/nəticə sayı, minimum qayda sayları və dəqiq xəbərdarlıq nümunələri məcburi qalır. Qəbuldan əvvəl PR/analiz kimlikləri yenidən yoxlanır. Bu yoxlamalar bütün çıxarılmış mənbə fayllarının inventarını deyil, seçilmiş kateqoriyaların əhatəsini təsdiqləyir. C/C++ yığımsız çıxarışı layihə yığımı zamanı yaranan kodu əhatə etmir. Mənbə istisnaları hələ də nəzərdən keçirilməlidir; məsuliyyəti töhfəçiyə aid etmək müqayisə edilə bilən dəqiq baza sübutu tələb edir.
+
+`codeql-maintenance.yml` PR/main istehsalçılarını təkrarlamadan aktiv release push skanlarını və həftəlik cədvəli təmin edir. `nightly-codeql-inventory.yml` `--strict-measurement` ilə repozitoriya üzrə baza həddini ayrıca saxlayır və ölçmə mümkün olmadıqda uğursuz olur. Köhnə yerli toplayıcının yumşaq ötürməsi namizəd qəbulu deyil. Həddi sərtləşdirmək yalnız aşağı ümumi say yoxlandıqdan sonra açıq `--update` əməliyyatı olaraq qalır.
+
+Default Setup qurulmuşkən Advanced axını dərc edilməməlidir: GitHub bu birləşməni rədd edir. Versiyalanmış siyasət nəzərdən keçirilmiş inzibati keçidin vəziyyəti yenidən oxunana qədər gözləmədə qalır. Dərcdən əvvəl operator repozitoriyanı, head/base/tree-ni, siyasət/patch/geri qaytarma heşlərini və müşahidə olunan quruluş vəziyyətini sabitləyir; `node scripts/quality/codeql-producer.mjs verify-admin-readback` təqdim olunmuş gözlənilən və faktiki JSON qeydlərini yoxlayır. Bu texniki qoruyucudur, operator razılığı və ya yeni vəziyyət oxumalarının əvəzi deyil. PR tokeni heç vaxt Administration icazəsi istəmir. Keçid və hər skaner dəyişikliyi həmin ayrıca vəziyyət oxumasını və real PR, fork və merge-group uyğunluq sübutunu tələb edir.
+
+Fork-lar hosted icraçılardan, etimad məlumatları saxlanmayan checkout-dan istifadə edir; istehsalçıda layihə quraşdırılması/yığımı və miras repozitoriya sirləri yoxdur. GitHub məhdud fork tokeni ilə pull_request hadisəsi üçün SARIF yükləməsini dəstəkləyir; ilk töhfənin icra təsdiqi GitHub siyasəti olaraq qalır. Etibarsız kodu icra etmək üçün pull_request_target istifadə etməyin. Miqrasiyanı tamamlanmış saymazdan əvvəl idarə olunan canary-də faktiki token icazələrini, analysis_key-ni və bütün kateqoriya mühitlərini yoxlayın. [Fork yükləmə qaydaları](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [ziddiyyətli quruluş rejimləri](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Rəddetmələr operatorun qərarıdır (Sərt Qayda #14)** — rəddetmə şərhində texniki
 əsaslandırmanı qeyd etmədən heç vaxt CodeQL xəbərdarlığını rədd etməyin: yuxarı axın
@@ -655,11 +662,7 @@ aşağıdakı rasionallaşdırma namizədlərini müəyyən etdi. **Birləşdirm
 dəyişiklikləridir; keçidlər və ləğvlər operator üçün saxlanılmış siyasət qərarlarıdır.** Aşağıdakılardan
 heç biri hələ tətbiq edilməyib.
 
-**Yuxarıda sənədləşdirilməyənlər də var** (tövsiyə xarakterli, aşağı siqnallı): `docs-lint` işi
-(markdownlint + Vale, bütün iş üçün `continue-on-error`) və müstəqil skaner iş axınları
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0`
-`quality-baseline.json` daxilindədir, lakin `ci.yml` daxilində bloklayıcı reket mexanizminə qoşulmayıb — bu metrika
-hazırda təcrid olunub.
+**Yuxarıda həmçinin sənədləşdirilməyənlər** (məsləhətçi, zəif siqnal): `docs-lint` işi (markdownlint + Vale, bütün iş `continue-on-error`) və müstəqil `semgrep.yml` / `scorecard.yml` skaner axınları. CodeQL artıq yuxarıdakı aktivləşdirmə tələblərinə uyğun olaraq `Gate / CI` daxilində məcburi istehsalçı və qəbul işlərinə malikdir. `semgrepFindings: 0` `quality-baseline.json` daxilindədir, amma `ci.yml` daxilində bloklayıcı geriləməmə həddinə qoşulmayıb — metrik hazırda əlaqəsizdir.
 
 ### Birləşdirmə / dublikatların aradan qaldırılması (mexaniki, daha aşağı risk)
 

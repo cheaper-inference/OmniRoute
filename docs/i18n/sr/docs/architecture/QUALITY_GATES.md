@@ -42,14 +42,16 @@ CLI одбија неподударност SHA вредности преузе�
 постојећег саветодавног скенера. Постављање применљивих провера као обавезних у правилима гране
 представља засебну административну измену; само дефинисање њихових послова не штити грану.
 
-`API Route Typecheck` је независна провера тока рада, изван оба збирна исхода
-и статичког профила локалног потпуног посматрача. Засебно проверите њен резултат за тачно одређеног
-кандидата. `.github/workflows/api-route-typecheck.yml` се покреће за PR-ове усмерене ка `main` или
-`release/**`, при слању измена у било коју од тих породица грана и при ручном покретању. Нема филтер путања.
-Промена циљне гране PR-а захтева нову проверу; измене тела/наслова користе назив само за посматрање
-`Admission not requested / API Route Typecheck` и не могу да замене проверу пријема.
-Ток рада не дефинише окидач за групу спајања. Свако увођење реда за спајање које захтева
-ову проверу мора најпре да обезбеди њено извршавање за тај догађај.
+`API Route Typecheck` nezavisna je provera radnog toka, izvan obe zbirne ocene i statičkog profila lokalnog potpunog posmatrača. Njen rezultat pregledajte zasebno za tačno određenog kandidata. `.github/workflows/api-route-typecheck.yml` pokreće se za PR-ove prema `main` ili `release/**`, slanja u obe skupine grana, ručno pokretanje i događaje `merge_group` vrste `checks_requested`. Nema filtera putanja. Grupe spajanja pri checkoutu koriste `merge_group.head_sha`; ostali događaji koriste `github.sha`. Svi događaji koriste istu dijagnostičku proveru API-ja i jedinične testove te provere.
+Promena ciljne osnovne grane PR-a zahteva novu proveru; izmene opisa/naslova koriste naziv samo za posmatranje `Admission not requested / API Route Typecheck` i ne mogu zameniti proveru prihvata.
+
+### DAST koristi provereni build iz CI-ja
+
+Obavezni CI posao `dast-smoke` poziva `.github/workflows/dast-smoke.yml` posle `build`. Prati isti izbor prema kodu i statusu nacrta kao build, uključujući podržane PR-ove iz forkova, PR-ove prema granama izdanja i grupe spajanja. DAST posao koji nedostaje, nije uspeo, otkazan je ili neočekivano preskočen blokira `Gate / CI`. Ponovno upotrebljivi radni tok nema nezavisan okidač za PR/ručno pokretanje; ručna validacija koristi pokretanje CI-ja kako bi build i potrošač ostali unutar istog izvođenja.
+
+`scripts/ci/next-build-provenance.mjs` zapečaćuje celi artefakt Next njegovim sažetkom tar arhive, repozitorijumom/događajem/izvođenjem, pokušajem proizvođača, head/base/checkout/tree, identitetima radnih tokova, datotekom zaključavanja, tačnom verzijom/ABI-jem Node, platformom i bundlerom. DAST bira nepromenljivi ID artefakta iz `needs.build.outputs`, zahteva proveru sažetka preuzimanja i nezavisno upoređuje hash ZIP-a sa sažetkom proizvođača pre izdvajanja njegova dva dozvoljena člana putem `scripts/ci/unpack-ci-build.py`. Manifest i tar arhiva takođe moraju odgovarati nezavisnim izlazima proizvođača pre izdvajanja stabla Next. Nikada ne traži poslednji uspešni build grane. Delimično ponovno izvođenje može koristiti isti pokušaj proizvođača ako se njegov ID i svi ulazi još podudaraju; potvrda beleži oba pokušaja.
+
+Potrošač ostaje na hostanom Linux runneru sa ovlašćenjem samo za čitanje repozitorijuma i bez tajni repozitorijuma. Instalira tačnu verziju Node proizvođača, zatim sastavlja CLI uz `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` odbija nedostajući samostalni server pre bilo kakvog zamenskog builda; uobičajeni lokalni CLI buildovi zadržavaju postojeći zamenski postupak. Spremnost servera, Schemathesis i promptfoo moraju svi uspeti unutar nepromenjenog ograničenja posla od 25 minuta. Potvrda o poreklu dokazuje identitet i bajtove ulaza, a ne uspešno DAST skeniranje. Istek artefakta, prekid runnera ili neuspešan skener ostaju nepotpuni ili neuspešni dokazi; savetodavni omotač ne može ih pretvoriti u PASS.
 
 ### Капацитет извршавања корисничког интерфејса
 
@@ -226,17 +228,24 @@ Markdown датотеке у корену, `llm.txt`, стање/конфигу�
 
 Покреће се након `test-coverage`. У случају неуспеха блокира спајање.
 
-| Скрипта                      | Проверава                                                                                                                                                                                                | Блокирајуће                                    |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `quality:collect`            | Генерише `quality-metrics.json` (број ESLint упозорења, покривеност из обједињеног извештаја сегмената)                                                                                                  | Да (претходи механизму постепеног пооштравања) |
-| `quality:ratchet`            | Ниједна метрика у `quality-baseline.json` није регресирала (ESLint упозорења ≤ основна линија; покривеност ≥ основна линија)                                                                             | Да                                             |
-| `check:duplication`          | Дуплирање кода (jscpd@4) не премашује основну линију у `quality-baseline.json`                                                                                                                           | Да                                             |
-| `check:complexity`           | Цикломатска сложеност на нивоу датотеке не премашује ограничење (основна ESLint правила `complexity` + `max-lines-per-function`)                                                                         | Да                                             |
-| `check:cognitive-complexity` | Постепено пооштравање когнитивне сложености (`eslint-plugin-sonarjs`) — засебно покретање ESLint-а; CI покреће оба обједињена у један корак `check:complexity-ratchets`                                  | Да                                             |
-| `check:dead-code`            | Постепено пооштравање за некоришћене експорте / датотеке (knip) не регресира у односу на основну линију                                                                                                  | Да                                             |
-| `check:compression-budget`   | Буџет референтног теста компресије — минималне уштеде токена по механизму не смеју да регресирају                                                                                                        | Да                                             |
-| `check:type-coverage`        | Постепено пооштравање процента типизираног кода (`type-coverage`) не регресира; у великој мери обухвата `typecheck:noimplicit:core`                                                                      | Да                                             |
-| `check:codeql-ratchet`       | Број отворених CodeQL упозорења не регресира (чита се путем `gh api`; безбедно се прескаче без токена) — учесталост освежавања и ручно покретање: погледајте „Постепено пооштравање CodeQL-а“ у наставку | Да                                             |
+| Скрипта                      | Проверава                                                                                                                                                               | Блокирајуће                                    |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `quality:collect`            | Генерише `quality-metrics.json` (број ESLint упозорења, покривеност из обједињеног извештаја сегмената)                                                                 | Да (претходи механизму постепеног пооштравања) |
+| `quality:ratchet`            | Ниједна метрика у `quality-baseline.json` није регресирала (ESLint упозорења ≤ основна линија; покривеност ≥ основна линија)                                            | Да                                             |
+| `check:duplication`          | Дуплирање кода (jscpd@4) не премашује основну линију у `quality-baseline.json`                                                                                          | Да                                             |
+| `check:complexity`           | Цикломатска сложеност на нивоу датотеке не премашује ограничење (основна ESLint правила `complexity` + `max-lines-per-function`)                                        | Да                                             |
+| `check:cognitive-complexity` | Постепено пооштравање когнитивне сложености (`eslint-plugin-sonarjs`) — засебно покретање ESLint-а; CI покреће оба обједињена у један корак `check:complexity-ratchets` | Да                                             |
+| `check:dead-code`            | Постепено пооштравање за некоришћене експорте / датотеке (knip) не регресира у односу на основну линију                                                                 | Да                                             |
+| `check:compression-budget`   | Буџет референтног теста компресије — минималне уштеде токена по механизму не смеју да регресирају                                                                       | Да                                             |
+| `check:type-coverage`        | Постепено пооштравање процента типизираног кода (`type-coverage`) не регресира; у великој мери обухвата `typecheck:noimplicit:core`                                     | Да                                             |
+
+### Poslovi: `codeql-scan` i `codeql-admission`
+
+`codeql-scan` proizvodi sve konfigurisane kategorije analize. Posle što taj posao uspe, `codeql-admission` proverava njegove tačno određene učitane rezultate i ratchet upozorenja kandidata. Oba su obavezne zavisnosti za `Gate / CI`, uključujući kandidate koji menjaju samo dokumentaciju. Zahtevi za administrativnu aktivaciju i canary opisani su niže pod „CodeQL ratchet”.
+
+| Skripta                | Proverava                                                                                                                                                                                             | Blokira |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `check:codeql-ratchet` | Ref/SHA kandidata i sve konfigurisane kategorije analize moraju biti aktuelni pre ratcheta upozorenja; nedostatak dokaza blokira. Globalni inventar ostaje odvojen — pogledajte „CodeQL ratchet” niže | Da      |
 
 ### Задатак: `quality-extended`
 
@@ -495,30 +504,23 @@ git add quality-baseline.json
 метрику без ажурирања основне вредности биће откривен помоћу `--require-tighten` (Фаза 6A.5,
 имплементација је у току).
 
-### CodeQL чегртаљка: учесталост освежавања и ручно покретање
+### CodeQL ratchet: prihvat kandidata i inventar repozitorijuma
 
-`check:codeql-ratchet` чита **стање репозиторијума које се освежава по распореду — не за сваки PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` пријављује
-`state: configured`, `schedule: weekly`: GitHub скенирање са подразумеваним подешавањем, а не анализу
-при сваком слању измена. Последица: након спајања PR-а који ИСПРАВЉА упозорења, чегртаљка наставља да чита
-стари, већи број све док се не покрене следеће заказано скенирање — па пријављује назадовање
-на сваком отвореном PR-у, укључујући и накнадне измене самог PR-а са исправком, све док скенирање не ажурира стање.
+CI upravlja CodeQL prihvatom kandidata kroz izričit lanac zavisnosti: `codeql-scan` poziva matricu četiriju jezika u `codeql.yml`, zatim `codeql-admission` pokreće `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` zahteva oba rezultata. Quality zadržava vlastite numeričke provere, ali ne ispituje skener pre nego što proizvođač završi; sam `Gate / Quality` nije potpuni prihvat kandidata. CodeQL ostaje obavezan za kandidate koji menjaju samo dokumentaciju.
 
-**Ручно освежавање**: `gh workflow run codeql.yml --ref release/vX.Y.Z` поново покреће
-анализу и за неколико минута поново објављује упозорења. Прво прочитајте `.github/workflows/codeql.yml`
-— његово заглавље објашњава да користи само `workflow_dispatch` **зато што је у сукобу са
-GitHub-овим „подразумеваним подешавањем“** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Враћање окидача `push`/`pull_request`/
-`schedule` најпре захтева **радњу власника**: Settings → Code security →
-CodeQL: Default → Advanced. Немојте додавати окидач `schedule:` без тог пребацивања — то
-ће само произвести неуспешна покретања.
+Pravila u `config/quality/codeql-admission-policy.json` biraju Actions, C/C++, JavaScript/TypeScript i Python, skup upita default, model pretnji remote i način builda none. Predprovera proizvođača odbija zapis aktivacije na čekanju i grane izvan izričite liste ciljeva. Početni ciljevi su main i release/v3.8.53; sledeće izdanje treba pregledano uključivanje. Postojeći širi CI okidač za PR-ove prema granama izdanja ostaje, ali neuključen cilj prijavljuje HOLD pre ekstrakcije umesto da dobije nemereni PASS.
 
-**Пооштрите основну вредност након што број опадне** — `node scripts/check/check-codeql-ratchet.mjs
---update` уписује нови измерени број у `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, тако да чегртаљка прећутно не дозволи назадовање до
-старе горње границе. Практичан пример (2026-09-02/03): PR #12502 исправио је 7 стварних упозорења
-(13 → 6 измерених отворених); PR #12530 пооштрио је замрзнуту основну вредност са 11 → 6 како би се подударала; преосталих
-6 упозорења је затим одбачено уз појединачна образложења, чиме је број отворених упозорења сведен на 0.
+Svaki posao matrice beleži stvarni ID učitavanja SARIF, jezik, kategoriju, izvođenje i pokušaj, identitet pozivajućeg radnog toka, ref/head/base/merge SHA događaja i hash pravila. Zavisni posao preuzima samo potvrde tog izvođenja i proverava sažetke artefakata. Zahteva sve četiri kategorije, uspešnog proizvođača i završenu obradu svakog tačno određenog učitavanja. Koristi API filter sarif_id, a ne najnoviju analizu pronađenu na grani. Delimična ponovna izvođenja mogu ponovno koristiti uspešne kategorije iz ranijeg pokušaja istog izvođenja i kandidata, uz očuvanje pokušaja koji ih je proizveo; trenutni neuspešni proizvođač ne može ponovno koristiti prethodne zelene dokaze.
+
+Akcija CodeQL čeka obradu, ali njena fiksirana implementacija može upozoriti i nastaviti posle neuspešnog čitanja statusa ili isteka čekanja. Prihvat zato ponovno proverava obradu. Kategorije koje nedostaju, obrada na čekanju, neuspešni ili otkazani poslovi, zastareli identitet, nepotpuna paginacija ili nedostupni API-ji proizvode HOLD i izlazni kod 2. Više nema fiksnog čekanja na nezavisni radni tok skenera. Neskenirani PR ne može proći zato što je upit upozorenja vratio 0. Izmereni broj iznad `metrics.codeqlAlerts.value` daje izlazni kod 1; baseline se ne podiže kako bi prihvatio upozorenja druge grane. [Status učitavanja i dohvat analize](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Potvrda beleži ID-jeve učitavanja i analiza, kategorije, verzije alata, ref/SHA, baseline i brojeve upozorenja. Identitet/broj rezultata SARIF, minimalni brojevi pravila i tačne instance upozorenja ostaju obavezni. Identiteti PR-a/analize ponovno se proveravaju pre prihvata. Te provere utvrđuju pokrivenost konfigurisanih kategorija, a ne inventar svake izdvojene izvorne datoteke. Ekstrakcija C/C++ bez builda ne uključuje kod generisan tokom builda projekta. Isključenja izvora i dalje treba pregledati, a pripisivanje odgovornosti doprinosiocu zahteva uporedive dokaze s tačno određene osnovne revizije.
+
+`codeql-maintenance.yml` osigurava skeniranja pri slanju u aktivnu granu izdanja i nedeljni raspored bez dupliciranja proizvođača za PR/main. `nightly-codeql-inventory.yml` drži baseline celog repozitorijuma odvojenim, uz `--strict-measurement` i neuspeh kada merenje nije dostupno. Tolerantno preskakanje starog lokalnog sakupljača nije prihvat kandidata. Postroživanje ostaje izričit `--update` posle proverenog nižeg globalnog broja.
+
+Radni tok Advanced ne sme se objaviti dok je konfigurisan Default Setup: GitHub odbija tu kombinaciju. Njegova verzionisana pravila ostaju na čekanju dok se pregledani administrativni prelaz ne potvrdi povratnim očitanjem. Pre objave operater fiksira repozitorijum, head/base/tree, hash vrednosti pravila/zakrpe/povrata i opaženo stanje postavki; `node scripts/quality/codeql-producer.mjs verify-admin-readback` proverava dostavljene očekivane i stvarne JSON zapise. To je tehnička zaštita, a ne odobrenje operatera niti zamena za dohvat svežih povratnih očitanja. Token PR-a nikada ne traži pristup Administration. Uvođenje i svaka promena skenera zahtevaju to zasebno povratno očitanje te stvarne dokaze kompatibilnosti za PR, fork i grupu spajanja.
+
+Forkovi koriste hostane runnere, checkout bez pohranjenih pristupnih podataka, bez instalacije/builda projekta u proizvođaču i bez nasleđenih tajni repozitorijuma. GitHub podržava učitavanje SARIF za događaj pull_request sa ograničenim tokenom forka; odobrenje izvođenja prvog doprinosa ostaje pravilom GitHub. Nikada nemojte koristiti pull_request_target za izvršavanje nepouzdanog koda. Potvrdite stvarna ovlašćenja tokena, analysis_key i sva okruženja kategorija u kontrolisanom canaryju pre nego što migraciju smatrate završenom. [Pravila učitavanja iz forkova](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [sukobljeni načini postavljanja](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Одбацивање је одлука оператера (Строго правило #14)** — никада немојте одбацити CodeQL упозорење
 без навођења техничког образложења у коментару о одбацивању: `won't fix` за
@@ -675,11 +677,7 @@ CodeQL: Default → Advanced. Немојте додавати окидач `sche
 измене; укључивања/уклањања су одлуке о политици резервисане за оператера.** Ништа од наведеног
 још није примењено.
 
-**Такође није документовано изнад** (саветодавно, слаб сигнал): посао `docs-lint`
-(markdownlint + Vale, цео посао има `continue-on-error`) и самостални токови рада скенера
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` се налази у
-`quality-baseline.json`, али није повезан са блокирајућим механиз­мом постепеног пооштравања у `ci.yml` — метрика је
-тренутно неповезана.
+**Takođe nije dokumentovano iznad** (savetodavno, niske informativne vrednosti): posao `docs-lint` (markdownlint + Vale, celi posao `continue-on-error`) i samostalni radni tokovi skenera `semgrep.yml` / `scorecard.yml`. CodeQL sada ima obavezne poslove proizvođača i prihvata pod `Gate / CI`, uz gore opisane zahteve aktivacije. `semgrepFindings: 0` nalazi se u `quality-baseline.json`, ali nije povezan s blokirajućim ratchetom u `ci.yml` — metrika je trenutno nepovezana.
 
 ### Спајање / дедупликација (механички, мањи ризик)
 

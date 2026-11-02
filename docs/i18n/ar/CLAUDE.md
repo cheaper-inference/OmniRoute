@@ -15,7 +15,7 @@
 
 بروتوكول عزل Worktree الإلزامي الكامل (تأكيد الفرع الأساسي، المسار القياسي
 `.claude/worktrees/`، نسخ node_modules باستخدام `cp -al`، قواعد الإزالة) موجود في
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (وملخّص في `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (وملخّص في `AGENTS.md` →
 سير عمل Git → "عزل Worktree"). النقاط الخاصة بـ Claude Code:
 
 - أكّد الفرع الأساسي مع المشغّل عبر `AskUserQuestion` (القاعدة الصارمة رقم 19) ما لم يكن قد

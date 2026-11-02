@@ -40,14 +40,16 @@ Rasitan sun shafi tsarin aikinsu ne kawai, ba wallafawa, turawa zuwa aiki, ko ab
 na na'urar bincike mai ba da shawara da ake da ita ba. Sanya binciken da suka dace su zama wajibi a ƙa'idojin reshe
 wani canjin gudanarwa ne na daban; bayyana ayyukansu kaɗai ba ya kare reshe.
 
-`API Route Typecheck` binciken tsarin aiki ne mai zaman kansa, wanda yake wajen duka hukuncin haɗaka
-da bayanin martabar tsaye na cikakken mai sa ido na gida. Bincika sakamakonsa daban don ainihin
-ɗan takarar. `.github/workflows/api-route-typecheck.yml` yana gudana kan PRs masu nufin `main` ko
-`release/**`, turawa zuwa kowane ɗaya daga cikin rukunin rassan, da kuma ƙaddamarwa da hannu. Ba shi da matatar hanya.
-Sake sauya reshen tushe na PR yana neman sabon bincike; gyare-gyaren jiki/take suna amfani da sunan sa ido kawai
-`Admission not requested / API Route Typecheck` kuma ba za su iya maye gurbin binciken karɓa ba.
-Tsarin aikin bai ayyana abin tayar da merge-group ba. Duk wani ƙaddamar da jerin gwanon haɗewa da ke buƙatar
-wannan binciken dole ne da farko ya tabbatar da gudanarsa don wannan aukuwar.
+`API Route Typecheck` binciken workflow ne mai zaman kansa, a wajen hukuncin jimilla biyu da tsarin tsaye na cikakken mai lura na gida. A duba sakamakonsa dabam don takamaiman ɗan takarar. `.github/workflows/api-route-typecheck.yml` yana gudana ga PR zuwa `main` ko `release/**`, push zuwa kowane dangin rassan biyu, ƙaddamarwa da hannu, da abubuwan `merge_group` masu nau'in `checks_requested`. Ba shi da matatar hanya. Ƙungiyoyin haɗawa suna checkout na `merge_group.head_sha`; sauran abubuwa suna checkout na `github.sha`. Dukkan abubuwa suna amfani da ƙofar binciken API da gwaje-gwajen raka'arta iri ɗaya.
+Sauya reshen tushe da PR ke nufa yana neman sabon bincike; gyaran jiki/take yana amfani da sunan lura kawai `Admission not requested / API Route Typecheck` kuma ba zai maye gurbin binciken karɓa ba.
+
+### DAST yana amfani da ingantaccen build na CI
+
+Aikin CI na dole `dast-smoke` yana kiran `.github/workflows/dast-smoke.yml` bayan `build`. Yana bin zaɓin lamba/daftari irin na build, ciki har da PR na fork da ake tallafawa, PR masu nufin release da ƙungiyoyin haɗawa. Aikin DAST da ya ɓace, ya gaza, aka soke ko aka tsallake ba zato yana toshe `Gate / CI`. Workflow mai sake amfani ba shi da trigger na PR/dispatch mai zaman kansa; tabbatarwa da hannu tana amfani da dispatch na CI domin build da mai amfani da shi su kasance cikin gudu guda.
+
+`scripts/ci/next-build-provenance.mjs` yana ɗaure cikakken artefakt na Next da digest na tar, ma'ajiya/abu/gudu, yunƙurin mai samarwa, head/base/checkout/tree, shaidar workflow, lockfile, ainihin sigar Node/ABI, dandali da bundler. DAST yana zaɓar ID na artefakt marar sauyawa daga `needs.build.outputs`, yana buƙatar tantance digest na saukewa, sannan da kansa ya lissafa hash na ZIP ya gwada da digest na mai samarwa kafin buɗe mambobi biyu da aka yarda ta `scripts/ci/unpack-ci-build.py`. Manifest da kundin tar ma dole su dace da fitowar mai samarwa mai zaman kanta kafin buɗe bishiyar Next. Ba ya taɓa neman build na ƙarshe da ya yi nasara a reshe. Maimaita wani sashe na gudu zai iya amfani da wannan yunƙurin mai samarwa idan ID da dukkan bayanan shigarwa har yanzu sun dace; takardar shaida tana rubuta yunƙurin biyu.
+
+Mai amfani yana kasancewa kan runner na Linux da ake host, da izinin karanta ma'ajiya kawai, ba tare da sirrin ma'ajiya ba. Yana shigar da ainihin sigar Node na mai samarwa, sai ya haɗa CLI da `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` yana ƙin rashin standalone server kafin kowane build na madadin; build na CLI na gida na al'ada suna riƙe madadinsu. Shirye-shiryen server, Schemathesis da promptfoo duk dole su yi nasara cikin iyakar minti 25 ta aikin wadda ba ta canza ba. Shaidar asali tana tabbatar da ainihi da bytes na shigarwa, ba nasarar scan na DAST ba. Ƙarewar artefakt, katsewar runner ko gazawar scanner suna kasancewa shaida marar cika ko mai gazawa; wrapper na shawara ba zai mai da su PASS ba.
 
 ### Ƙarfin aiwatar da UI
 
@@ -217,17 +219,24 @@ Yana gudana a kan kowane PR zuwa `main`. Yana hana merge idan ya gaza.
 
 Yana gudana bayan `test-coverage`. Yana hana haɗewa idan an gaza.
 
-| Skrif                        | Abin da yake tabbatarwa                                                                                                                                                                                   | Mai hanawa             |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `quality:collect`            | Yana fitar da `quality-metrics.json` (ƙidayar gargaɗin ESLint, ɗaukar gwaji daga rahoton guntu da aka haɗa)                                                                                               | I (yana gaban ratchet) |
-| `quality:ratchet`            | Kowace ma'auni a cikin `quality-baseline.json` ba ta taɓarɓare ba (gargaɗin ESLint ≤ ma'aunin asali; ɗaukar gwaji ≥ ma'aunin asali)                                                                       | I                      |
-| `check:duplication`          | Maimaita lamba (jscpd@4) bai zarce ma'aunin asali a cikin `quality-baseline.json` ba                                                                                                                      | I                      |
-| `check:complexity`           | Sarƙaƙƙiyar cyclomatic ta matakin fayil ba ta zarce iyakar da aka saita ba (ainihin ESLint `complexity` + `max-lines-per-function`)                                                                       | I                      |
-| `check:cognitive-complexity` | Ratchet na sarƙaƙƙiyar fahimta (`eslint-plugin-sonarjs`) — zagayen ESLint daban; CI yana gudanar da dukansu a haɗe a matsayin mataki guda na `check:complexity-ratchets`                                  | I                      |
-| `check:dead-code`            | Ratchet na exports / fayilolin da ba a amfani da su (knip) bai taɓarɓare idan aka kwatanta da ma'aunin asali ba                                                                                           | I                      |
-| `check:compression-budget`   | Kasafin gwajin ma'aunin matsawa — dole ne mafi ƙarancin adana token na kowane engine kada ya taɓarɓare                                                                                                    | I                      |
-| `check:type-coverage`        | Ratchet na kaso mai nau'i (`type-coverage`) bai taɓarɓare ba; galibi yana mamaye `typecheck:noimplicit:core`                                                                                              | I                      |
-| `check:codeql-ratchet`       | Ƙidayar faɗakarwar CodeQL da ke buɗe ba ta taɓarɓare ba (yana karantawa ta `gh api`; yana tsallakewa cikin sauƙi idan babu token) — don mitar sabuntawa da kunnawa da hannu: duba "CodeQL ratchet" a ƙasa | I                      |
+| Skrif                        | Abin da yake tabbatarwa                                                                                                                                                  | Mai hanawa             |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
+| `quality:collect`            | Yana fitar da `quality-metrics.json` (ƙidayar gargaɗin ESLint, ɗaukar gwaji daga rahoton guntu da aka haɗa)                                                              | I (yana gaban ratchet) |
+| `quality:ratchet`            | Kowace ma'auni a cikin `quality-baseline.json` ba ta taɓarɓare ba (gargaɗin ESLint ≤ ma'aunin asali; ɗaukar gwaji ≥ ma'aunin asali)                                      | I                      |
+| `check:duplication`          | Maimaita lamba (jscpd@4) bai zarce ma'aunin asali a cikin `quality-baseline.json` ba                                                                                     | I                      |
+| `check:complexity`           | Sarƙaƙƙiyar cyclomatic ta matakin fayil ba ta zarce iyakar da aka saita ba (ainihin ESLint `complexity` + `max-lines-per-function`)                                      | I                      |
+| `check:cognitive-complexity` | Ratchet na sarƙaƙƙiyar fahimta (`eslint-plugin-sonarjs`) — zagayen ESLint daban; CI yana gudanar da dukansu a haɗe a matsayin mataki guda na `check:complexity-ratchets` | I                      |
+| `check:dead-code`            | Ratchet na exports / fayilolin da ba a amfani da su (knip) bai taɓarɓare idan aka kwatanta da ma'aunin asali ba                                                          | I                      |
+| `check:compression-budget`   | Kasafin gwajin ma'aunin matsawa — dole ne mafi ƙarancin adana token na kowane engine kada ya taɓarɓare                                                                   | I                      |
+| `check:type-coverage`        | Ratchet na kaso mai nau'i (`type-coverage`) bai taɓarɓare ba; galibi yana mamaye `typecheck:noimplicit:core`                                                             | I                      |
+
+### Ayyuka: `codeql-scan` da `codeql-admission`
+
+`codeql-scan` yana samar da dukkan rukunin nazari da aka saita. Bayan aikin ya yi nasara, `codeql-admission` yana tantance ainihin uploads ɗinsa da iyakar hana ƙarin gargaɗin ɗan takarar. Dukansu dogaro ne na dole ga `Gate / CI`, har ga masu sauya takardu kawai. Ana bayanin buƙatun kunna na gudanarwa da canary a "Iyakar CodeQL" a ƙasa.
+
+| Script                 | Abin da yake tantancewa                                                                                                                                                                             | Yana toshewa |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `check:codeql-ratchet` | Ref/SHA na ɗan takarar da dukkan rukunin nazari da aka saita dole su zama na yanzu kafin iyakar gargaɗi; rashin shaida yana toshewa. Jerin gama-gari ya kasance dabam — duba "Iyakar CodeQL" a ƙasa | I            |
 
 ### Aiki: `quality-extended`
 
@@ -488,30 +497,23 @@ Yi commit na wannan fayil tare da canjin da ya inganta ma'aunin. PR da ya ingant
 ma'auni ba tare da sabunta ma'aunin ba, `--require-tighten` zai gano shi (Mataki 6A.5,
 ana jiran aiwatarwa).
 
-### Ratchet na CodeQL: lokacin sabuntawa da kunnawa da hannu
+### Iyakar CodeQL: karɓar ɗan takara da jerin ma'ajiya
 
-`check:codeql-ratchet` yana karanta **yanayin repo, wanda ake sabuntawa bisa jadawali — ba a kowane PR ba.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` yana bayar da rahoton
-`state: configured`, `schedule: weekly`: binciken default-setup na GitHub ne, ba bincike
-a kowane push ba. Sakamako: bayan an haɗa PR da ya GYARA faɗakarwa, ratchet zai ci gaba da karanta
-tsohon adadi mafi girma har sai an gudanar da bincike na gaba da aka tsara — don haka yana bayar da rahoton koma-baya
-a kan kowane buɗaɗɗen PR, har da PR na bin diddigin gyaran kansa, har sai binciken ya sabunta.
+CI yana da alhakin karɓar ɗan takara na CodeQL ta sarƙar dogaro a bayyane: `codeql-scan` yana kiran matrix na harsuna huɗu a `codeql.yml`, sai `codeql-admission` ya gudanar da `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` yana buƙatar sakamakon biyu. Quality yana riƙe bincikensa na lambobi amma ba ya tambayar scanner kafin mai samarwa ya gama; `Gate / Quality` shi kaɗai ba cikakken karɓar ɗan takara ba ne. CodeQL ya kasance na dole har ga sauya takardu kawai.
 
-**Sabuntawa da hannu**: `gh workflow run codeql.yml --ref release/vX.Y.Z` yana sake gudanar da
-binciken kuma yana sake wallafa faɗakarwa cikin mintuna. Fara da karanta `.github/workflows/codeql.yml`
-— taken kansa yana bayyana cewa `workflow_dispatch` kaɗai ne **saboda yana cin karo da
-"default setup" na GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Maido da masu kunnawa na `push`/`pull_request`/
-`schedule` yana buƙatar **matakin mai repo da farko**: Settings → Code security →
-CodeQL: Default → Advanced. Kada a ƙara mai kunnawa na `schedule:` ba tare da wannan sauyin ba — zai
-samar da ayyukan da ke gazawa ne kawai.
+Manufar `config/quality/codeql-admission-policy.json` tana zaɓar Actions, C/C++, JavaScript/TypeScript da Python, tarin tambaya default, samfurin barazana remote da yanayin build none. Binciken farko na mai samarwa yana ƙin rikodin kunnawa mai jira da rassan da ba su cikin jerin manufofi a bayyane. Manufofin farko su ne main da release/v3.8.53; release na gaba yana buƙatar shigarwa da aka bita. Trigger na PR na release mai faɗi na CI yana nan, amma manufar da ba a shigar ba tana bayar da HOLD kafin extraction maimakon PASS marar aunawa.
 
-**Tsaurara ma'aunin bayan adadin ya ragu** — `node scripts/check/check-codeql-ratchet.mjs
---update` yana rubuta sabon adadin da aka auna cikin `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, domin ratchet kada ya amince da koma-baya zuwa tsohon
-iyaka ba tare da bayyana ba. Misalin da aka aiwatar (2026-09-02/03): PR #12502 ya gyara faɗakarwa na gaske guda 7
-(13 → 6 da aka auna a buɗe); PR #12530 ya tsaurara daskararren ma'aunin daga 11 → 6 don su dace; sannan
-aka yi watsi da sauran 6 tare da hujjar kowace faɗakarwa har suka koma 0 a buɗe.
+Kowane aikin matrix yana rubuta ainihin ID na upload na SARIF, harshe, rukuni, gudu da yunƙuri, shaidar workflow mai kira, ref/head/base/merge SHA na abin da ya faru da hash na manufa. Aikin da ya dogara yana sauke shaidun wannan gudu kawai kuma ya tabbatar da digest na artefakt. Yana buƙatar dukkan rukuni huɗu, mai samarwa da ya yi nasara da kammala sarrafa kowane takamaiman upload. Yana amfani da matatar API sarif_id, ba sabon nazari da aka samu kan reshe ba. Maimaita sashe na iya sake amfani da rukuni masu nasara daga yunƙurin baya na wannan gudu da ɗan takara, yana riƙe yunƙurin samarwa; mai samarwa na yanzu da ya gaza ba zai yi amfani da tsohuwar koriyar shaida ba.
+
+CodeQL action yana jiran sarrafawa, amma aiwatarwarsa da aka ƙayyade na iya gargadi ya ci gaba bayan gaza karanta hali ko ƙarewar jira. Saboda haka karɓa yana sake tabbatar da sarrafawa. Rukuni masu ɓacewa, sarrafawa mai jira, ayyuka da suka gaza ko aka soke, tsohuwar shaida, rashin cika shafukan sakamako ko APIs marasa samuwa suna haifar da HOLD da exit 2. Babu sauran tsayayyen jira na workflow na scanner mai zaman kansa. PR da ba a scan ba ba zai wuce domin tambayar gargaɗi ta dawo da 0 ba. Adadin da aka auna ya zarce `metrics.codeqlAlerts.value` yana fitar da exit 1; ba a ɗaga baseline don ɗaukar gargaɗin wani reshe. [Halin upload da neman nazari](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Shaida tana rubuta IDs na upload da nazari, rukuni, sigogin kayan aiki, ref/SHA, baseline da adadin gargaɗi. Shaidar SARIF/adadin sakamako, mafi ƙarancin adadin dokoki da ainihin instances na gargaɗi duk suna nan a matsayin dole. Ana sake duba shaidar PR/nazari kafin karɓa. Binciken yana tabbatar da ɗaukar rukunin da aka saita, ba jerin kowane fayil na source da aka cire ba. Extraction na C/C++ ba tare da build ba ba ya haɗa lambar da aka samar lokacin build na aikin. Keɓance source har yanzu yana buƙatar bita, kuma ɗora alhaki ga mai gudummawa yana buƙatar shaida mai kwatantuwa ta ainihin reshen tushe.
+
+`codeql-maintenance.yml` yana kawo scan na push na release mai aiki da jadawalin mako-mako ba tare da maimaita masu samarwa na PR/main ba. `nightly-codeql-inventory.yml` yana ware baseline na dukkan ma'ajiya, da `--strict-measurement` da gazawa idan aunawa ba ta samuwa. Tsallakewa cikin sauƙi na tsohon collector na gida ba karɓar ɗan takara ba ne. Tsaurara iyaka ya kasance aikin `--update` a bayyane bayan tantance raguwar adadin gama-gari.
+
+Ba za a wallafa workflow na Advanced yayin da aka saita Default Setup ba: GitHub yana ƙin haɗin. Manufarsa mai sigogi tana jiran har sai an sake karanta halin sauyin gudanarwa da aka bita. Kafin wallafawa, operator yana ƙayyade ma'ajiya, head/base/tree, hash na manufa/patch/rollback da halin setup da aka gani; `node scripts/quality/codeql-producer.mjs verify-admin-readback` yana duba bayanan JSON na abin da ake tsammani da ainihi da aka bayar. Wannan kariya ce ta fasaha, ba amincewar operator ko madadin ɗauko sabon hali ba. Token na PR ba ya neman izinin Administration. Ƙaddamarwa da kowane sauyin scanner suna buƙatar wannan readback na dabam da shaida ta ainihin dacewar PR, fork da merge-group.
+
+Forks suna amfani da runners da ake host, checkout ba tare da riƙe credentials ba, babu shigarwa/build na aikin a mai samarwa kuma babu gado na sirrin ma'ajiya. GitHub yana tallafa upload na SARIF ga abin pull_request da token na fork mai rage izini; amincewar gudu na gudummawar farko ta kasance manufar GitHub. Kada a yi amfani da pull_request_target don gudanar da lambar da ba a amince da ita ba. Tabbatar da ainihin izinin token, analysis_key da dukkan muhallin rukuni a canary da ake sarrafawa kafin ɗaukar hijira a matsayin cikakkiya. [Dokokin upload na fork](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [yanayin setup masu karo](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Yin watsi da faɗakarwa shawarar mai gudanarwa ce (Doka Mai Tsauri #14)** — kada a taɓa yin watsi da faɗakarwar CodeQL
 ba tare da rubuta hujjar fasaha a sharhin yin watsi ba: `won't fix` don
@@ -668,11 +670,7 @@ ta gano waɗannan abubuwan da za a iya sauƙaƙawa. **Haɗe-haɗen sauye-sauyen 
 kai-tsaye; sauya matsayi/cirewa kuwa shawarwarin manufofi ne da aka keɓe wa mai gudanarwa.** Har yanzu ba a
 aiwatar da komai daga cikin abubuwan da ke ƙasa ba.
 
-**Waɗannan ma ba a rubuta bayaninsu a sama ba** (na shawara, ƙarancin sigina): aikin `docs-lint`
-(markdownlint + Vale, gabaɗayan aikin yana da `continue-on-error`) da kuma keɓantattun tsarin aikin na'urorin dubawa
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` yana cikin
-`quality-baseline.json` amma ba a haɗa shi da ratchet mai toshewa a `ci.yml` ba — a halin yanzu
-ma'aunin ba shi da alaƙa da wani tsari.
+**Waɗanda kuma ba a rubuta a sama ba** (na shawara, sigina kaɗan): aikin `docs-lint` (markdownlint + Vale, dukkan aikin `continue-on-error`) da workflow na scanner masu zaman kansu `semgrep.yml` / `scorecard.yml`. CodeQL yanzu yana da ayyukan samarwa da karɓa na dole ƙarƙashin `Gate / CI`, bisa buƙatun kunnawa da aka bayyana sama. `semgrepFindings: 0` yana cikin `quality-baseline.json` amma ba a haɗa shi da iyaka mai toshewa a `ci.yml` ba — wannan ma'auni yanzu ba shi da haɗin aiki.
 
 ### Haɗewa / cire maimaituwa (na kai-tsaye, ƙarancin haɗari)
 

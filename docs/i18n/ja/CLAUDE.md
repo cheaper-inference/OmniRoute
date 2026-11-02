@@ -15,7 +15,7 @@ Claude Code にのみ適用されます — `AGENTS.md` ですでに定義され
 
 必須の worktree プロトコル全体(ベースブランチの確認、正規パス `.claude/worktrees/`、
 `cp -al` による node_modules、ティアダウンルール)は
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) に記載されています(`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) に記載されています(`AGENTS.md` →
 Git Workflow → "Worktree isolation" に要約あり)。Claude Code 固有のポイント:
 
 - オペレーターがすでに指示していない限り、`AskUserQuestion` を通じてオペレーターにベースブランチを
