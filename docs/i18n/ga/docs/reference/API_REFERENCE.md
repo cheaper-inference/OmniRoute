@@ -29,6 +29,7 @@ Le haghaidh an phrótacail shonraigh atá comhoiriúnach le OpenAI agus mhaitrí
 - [Sruthú WebSocket](#websocket-streaming)
 - [Tuairisciú Cuótaí & Fadhbanna](#quotas--issues-reporting)
 - [Taisce Shéimeantach](#semantic-cache)
+- [Comhoiriúnacht bhainistíochta CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [Deais & Bainistíocht](#dashboard--management)
 - [Bainistíocht Teaglamaí](#combo-management)
 - [Crúcaí Gréasáin](#webhooks)
@@ -993,6 +994,18 @@ críochnú.
 
 **Údarú:** Eochair API Bearer (`isAuthenticated`).
 
+### Athshlánú seisiúin cuóta (rogha shainráite)
+
+Is féidir `POST /v1/chat/completions` nó `POST /v1/responses` neamhshruthaithe a theipeann le hearráid chuóta chríochnaitheach (`402`/`429`/`503` a deir ina corp go bhfuil an cuóta nó na creidmheasanna ídithe) a chur ar leataobh agus a athsheinm níos déanaí in ionad an earráid a thabhairt ar ais. Roghnaíonn an glaoiteoir é seo in aghaidh an iarratais le trí cheanntásc:
+
+| Ceanntásc                    | Luach                                              |
+| ---------------------------- | -------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                             |
+| `x-omniroute-session`        | ID seisiúin, `[A-Za-z0-9._:-]{1,128}`              |
+| `x-omniroute-recovery-turn`  | ID seala atá uathúil sa seisiún (an riail chéanna) |
+
+Níl incháilithe ach sealanna `stream: false` gan uirlisí, stair uirlisí nó `previous_response_id`, agus gan pionna `x-omniroute-connection`; caithfear `STORAGE_ENCRYPTION_KEY` a shocrú (stóráiltear an t-iarratas criptithe ar feadh suas le 24 h). Ansin is é `202` an freagra le `recovery.poll`; fiosraigh `GET /v1/quota-recoveries/{id}` (`202` agus é ar feitheamh, `200` leis an gcorp athshlánaithe nuair atá sé críochnaithe) nó cealaigh le `DELETE`. Ní fheiceann ach an eochair API a chruthaigh iad na ticéid. Críochnaíonn athsheinm a bhfuil toradh éiginnte aige le `needs_confirmation` in ionad é a sheoladh faoi dhó. Foinse: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Úsáid féinseirbhíse (`/api/usage/om-usage`)
@@ -1161,6 +1174,28 @@ Is féidir le hiarraidh ar bith an taisce a sheachaint beag beann ar shocruithe 
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Comhoiriúnacht bhainistíochta CLIProxyAPI
+
+Freagraíonn OmniRoute na trí chríochphointe bainistíochta [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) a ghlaonn deaiseanna úsáide chun teorainneacha síntiúis Claude agus Codex a léamh (mar shampla foinse teorann úsáide `cliproxy` T3 Code). Dírigh bun-URL an chliaint ar OmniRoute agus úsáid eochair API leis an scóip `manage` mar eochair bhainistíochta. Cuirtear na bealaí ar fáil ag `/v0/management/*` agus `/api/v0/management/*`.
+
+| Modh | Cosán                        | Cur síos                                                                                                                                                           |
+| ---- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET  | `/v0/management/auth-files`  | Naisc OAuth Claude agus Codex mar `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Gan chomharthaí                                          |
+| POST | `/v0/management/api-call`    | Corp `{ auth_index, method, url, header?, data? }`. Seolann sé iarratas ón liosta ceadaithe le comhartha an chuntais agus tugann sé `{ status_code, body }` ar ais |
+| POST | `/v0/management/reset-quota` | Corp `{ auth_index }`. Glanann sé fuarú naisc, glasálacha samhlacha agus fuaruithe Codex de réir scóipe do chuntas amháin                                          |
+
+- Is é `auth_index` ID naisc OmniRoute. Is é `provider` ná `claude` nó `codex` (naisc OAuth amháin; ní liostaítear an soláthraí eochrach API `anthropic`). Do Codex, is é `id_token.chatgpt_account_id` ID an spáis oibre stóráilte agus is é `plan_type` an plean stóráilte.
+- Ní seachfhreastalaí ginearálta é `api-call`. Ní ghlacann sé ach le Claude `GET
+https://api.anthropic.com/api/oauth/usage` agus Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` agus `POST .../wham/rate-limit-reset-credits/consume`, gach ceann acu do chuntas den soláthraí comhfhreagrach amháin. Tugann aon rud eile `403` ar ais gan teagmháil a dhéanamh leis an réamhtheachtaí. Déantar neamhaird de cheanntásc `Authorization` an ghlaoiteora (lena n-áirítear an t-ionadchoinneálaí `$TOKEN$`): cuireann OmniRoute comhartha rochtana an naisc isteach, á athnuachan ar dtús má tá sé gar d'éag, agus ní chuireann sé ar aghaidh ach ceanntásca ceadaithe (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Úsáidtear ID stóráilte an spáis oibre mar réamhshocrú má tá `Chatgpt-Account-Id` ar iarraidh. Más é `401` an chéad fhreagra réamhtheachtach, athnuann sé uair amháin agus ní dhéanann sé iarracht eile ach má athraíonn an comhartha rochtana. Téann gach iarracht réamhtheachtach thar am tar éis 15 soicind agus úsáideann sí seachfhreastalaí an naisc.
+- Fágann `reset-quota` staideanna críochnaitheacha (banned, expired, credits_exhausted) mar atá. Tugann `auth_index` anaithnid `404` ar ais.
+
+**Fíordheimhniú:** seisiún deaise nó eochair API leis an scóip `manage`, riachtanach fiú nuair atá logáil isteach díchumasaithe (tá na cosáin in `ALWAYS_PROTECTED_API_PATHS`). Faigheann eochracha tátail amháin `403`. Foinse: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

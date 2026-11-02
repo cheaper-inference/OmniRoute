@@ -165,7 +165,7 @@ OmniRoute, `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` içinde bağlanmı
 | Sistem Durumu Raporu  | `health-report`      | Sağlayıcı başına devre kesici, bekleme süresi ve kilitlenme durumunu bir araya getirir                                                                                    | sistem durumu, dayanıklılık | "Tüm sağlayıcıların durumunu göster"         |
 | Yetenekleri Listeleme | `list-capabilities`  | Bağlam ekleme amacıyla ham SKILL.md URL'lerini içeren bir markdown tablosu olarak 45 öğelik Agent Skills kataloğunun tamamını (23 API + 21 CLI + 1 yapılandırma) döndürür | katalog, keşif, yetenekler  | "Tüm OmniRoute yeteneklerini listele"        |
 
-> Agent Card, etkin 377 sağlayıcılı katalogla uyumlu tutulmalıdır; sağlayıcı sayıları ve ücretsiz/kimlik doğrulamasız kullanım meta verileri çalışma zamanı kayıt defterinden alınır.
+> Agent Card, etkin 380 sağlayıcılı katalogla uyumlu tutulmalıdır; sağlayıcı sayıları ve ücretsiz/kimlik doğrulamasız kullanım meta verileri çalışma zamanı kayıt defterinden alınır.
 
 ### `list-capabilities` Yeteneğinin Ayrıntıları
 
@@ -217,7 +217,7 @@ JSON-RPC uç noktası `/a2a`, standart A2A giriş noktasıdır. Aşağıdaki RES
    };
    ```
 
-3. **Agent Card'da kullanıma sunun:** `src/app/.well-known/agent.json/route.ts` içinde `skills` dizisine ekleyin:
+3. **Agent Card'da kullanıma sunun:** `src/lib/a2a/agentCardMetadata.ts` dosyasında (`/.well-known/agent.json` ve `/.well-known/agent-card.json` tarafından paylaşılır), `skills` dizisine şunu ekleyin:
 
    ```json
    {

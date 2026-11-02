@@ -489,8 +489,9 @@ SSE), beide standaard uit.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Niet ingesteld
   betekent elk type (het gedrag van voordat deze instelling bestond). Het
   `ssn_us`-patroon van de request-engine mapt naar `ssn`. Sjablonen (Minimaal,
-  Standaard, Financieel, Braziliaans, VS, Volledig) vullen alleen de
+  Standaard, Financieel, Braziliaans, VS, GDPR, POPIA, Volledig) vullen alleen de
   selectievakjes in de UI.
+- **GDPR- en POPIA-identificatoren** — twaalf ingebouwde ID's voor persoonlijke identificatoren uit de EU en Zuid-Afrika (tabel hieronder). Hun reguliere expressies, validators en jurisdictielabels staan in één tabel, `src/shared/utils/piiPatterns.ts`, die zowel de responssanitizer (`src/lib/piiSanitizer.ts`) als de verzoekmaskering (`src/shared/utils/inputSanitizer.ts`) gebruiken. Een overeenkomst wordt alleen geredigeerd als de validator deze accepteert; een kale reeks cijfers is nooit voldoende. Een beheerder die een beperkte selectie heeft opgeslagen voordat deze ID's bestonden, behoudt het eerdere gedrag totdat de nieuwe ID's worden aangevinkt.
 - **Aangepaste patronen** — maximaal 20 regex- of wildcardpatronen (`*` =
   maximaal 64 niet-witruimtetekens, `?` = één). Matches worden
   `[CUSTOM_REDACTED]`. Elk patroon gaat door `compilePiiCustomPattern()`
@@ -516,6 +517,25 @@ De instellingen staan in de tabel `key_value` (namespace `pii_settings`,
 
 Alle drie vereisen beheerdersauthenticatie en valideren de body met Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR- (EU) en POPIA-identificatoren (Zuid-Afrika)
+
+| ID                  | Identificator                    | Validatie                                                                                     |
+| ------------------- | -------------------------------- | --------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                             | Bekend land, exacte lengte voor dat land, ISO 13616 MOD-97-10                                 |
+| `eu_vat`            | EU-btw-nummer                    | Bekend lidstaatvoorvoegsel en het nummerformaat van die staat (geen VIES-opzoeking)           |
+| `es_dni_nie`        | Spaanse DNI / NIE                | Controleletter (waarde modulo 23); NIE is `X/Y/Z` + 7 cijfers                                 |
+| `it_codice_fiscale` | Italiaanse Codice Fiscale        | Controleletter uit de tabellen voor oneven/even posities                                      |
+| `pl_pesel`          | Poolse PESEL                     | Gewogen controlesom en plausibele bereiken voor de gecodeerde geboortemaand/-dag              |
+| `nl_bsn`            | Nederlands BSN                   | 11-proef (gewichten 9..2, -1)                                                                 |
+| `de_steuer_id`      | Duitse Steuer-ID                 | ISO 7064 Mod 11,10 plus de regels voor de cijferstructuur (geen eerste 0)                     |
+| `se_personnummer`   | Zweeds personnummer              | Luhn over de laatste tien cijfers en een aannemelijke geboortedatum (10 of 12 cijfers)        |
+| `za_id`             | Zuid-Afrikaans identiteitsnummer | Luhn over alle 13 cijfers, geldige geboortemaand/-dag, staatsburgerschapscijfer 0 of 1        |
+| `za_phone`          | Zuid-Afrikaans telefoonnummer    | Voorvoegsel `+27` / `27`, of de nationale vorm `0..` geschreven met een spatie of koppelteken |
+| `za_vat`            | Zuid-Afrikaans btw-nummer        | 10 cijfers beginnend met `4` **en** "VAT" / "BTW" in de 48 voorafgaande tekens                |
+| `za_tax_ref`        | Zuid-Afrikaans belastingnummer   | 10 cijfers beginnend met `0`-`3`, Luhn, **en** "tax" / "SARS" in de 48 voorafgaande tekens    |
+
+Omdat de formaten met alleen cijfers overeenkomen met ordernummers, buildnummers en tijdstempels, vereisen de zwakste (`za_vat`, `za_tax_ref`) het trefwoord als aanwijzing; een los tiencijferig nummer `0..` wordt niet als Zuid-Afrikaans telefoonnummer behandeld. IBAN's met spaties (`GB29 NWBK ...`) worden niet herkend. Bij streaming wordt de aanwijzing alleen binnen het huidige fragment gezocht. De ID's staan vóór de generieke telefoonpatronen, zodat een gevalideerde identificator zijn eigen tijdelijke aanduiding behoudt (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). De sjablonen `gdpr` en `popia` selecteren respectievelijk de EU- en Zuid-Afrikaanse ID's. Maskering zelf blijft alleen na expliciete inschakeling actief (Hard Rule #20): niets hier verandert de standaardwaarde van een functievlag.
 
 ### Prompt-injectie (`promptInjection.ts`)
 

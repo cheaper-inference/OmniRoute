@@ -163,7 +163,7 @@ OmniRoute tarjoaa 6 A2A-taitoa, jotka on kytketty kohdassa `src/lib/a2a/taskExec
 | Terveysraportti         | `health-report`      | Koostaa palveluntarjoajakohtaisesti katkaisijan, jäähdytysjakson ja lukituksen tilan                                                                                   | terveys, vikasietoisuus     | "Näytä kaikkien palveluntarjoajien terveystila" |
 | Ominaisuuksien luettelo | `list-capabilities`  | Palauttaa koko 45 kohdan Agent Skills -luettelon (23 API + 21 CLI + 1 määritys) markdown-taulukkona sekä raakoina SKILL.md-URL-osoitteina kontekstin lisäämistä varten | luettelo, haku, taidot      | "Luettele kaikki OmniRouten ominaisuudet"       |
 
-> Agent Card tulee pitää yhdenmukaisena ajantasaisen 377 palveluntarjoajan luettelon kanssa. Palveluntarjoajien määrät sekä maksuttomuutta ja tunnistautumattomuutta koskevat metatiedot haetaan ajonaikaisesta rekisteristä.
+> Agent Card tulee pitää yhdenmukaisena ajantasaisen 380 palveluntarjoajan luettelon kanssa. Palveluntarjoajien määrät sekä maksuttomuutta ja tunnistautumattomuutta koskevat metatiedot haetaan ajonaikaisesta rekisteristä.
 
 ### `list-capabilities`-taidon tiedot
 
@@ -215,7 +215,7 @@ JSON-RPC-päätepiste `/a2a` on ensisijainen A2A-käyttöpiste. Alla olevat REST
    };
    ```
 
-3. **Julkaise Agent Cardissa:** lisää tiedoston `src/app/.well-known/agent.json/route.ts` `skills`-taulukkoon:
+3. **Tuo esiin Agent Cardissa:** lisää tiedoston `src/lib/a2a/agentCardMetadata.ts` (jota `/.well-known/agent.json` ja `/.well-known/agent-card.json` käyttävät yhdessä) `skills`-taulukkoon:
 
    ```json
    {

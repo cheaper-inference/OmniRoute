@@ -42,6 +42,10 @@ omniroute launch --profile glm52  # استخدام Claude Code للنموذج gl
 
 > تُقرأ متغيرات البيئة **مرة واحدة عند بدء التشغيل** — أعد تشغيل Claude Code بعد تغييرها.
 
+لاستخدام بيانات اعتماد تتجدد بدل سلسلة ثابتة، اضبط `apiKeyHelper` في `~/.claude/settings.json` على أمر يطبع بيانات الاعتماد الحالية إلى stdout. يخزّن Claude Code ناتجه مؤقتًا لخمس دقائق افتراضيًا (يمكن تجاوز ذلك باستخدام `CLAUDE_CODE_API_KEY_HELPER_TTL_MS`)، ويرسل القيمة في كل من `Authorization: Bearer` و`x-api-key`. يجب أن يطبع السكربت بيانات الاعتماد وحدها؛ إذ تؤدي إضافة لافتة نصية بجانبها إلى فشل الأداة المساعدة في v2.1.227+.
+
+هكذا يعمل Entra ID SSO: يطبع `scripts/cli/omniroute-sso.mjs token` رمز وصول Entra قصير العمر يتحقق منه OmniRoute بدل مفتاح API. راجع [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 يضبط `omniroute launch` جميع هذه المتغيرات نيابةً عنك: فهو يستخرج عنوان URL الأساسي والرمز
 من السياق النشط (وبذلك يعمل `omniroute connect <vps>` ثم `omniroute launch`
 مباشرةً)، ويتحقق من سلامة الخادم، ثم يشغّل `claude` عبر `exec`.

@@ -40,6 +40,10 @@ Claude Code se comunica con la **API de mensajes de Anthropic** y se dirige a un
 
 > Las variables de entorno se leen **una sola vez al iniciar**; reinicia Claude Code después de cambiarlas.
 
+Para usar una credencial que rota en lugar de una cadena fija, configura `apiKeyHelper` en `~/.claude/settings.json` con un comando que imprima la credencial actual en stdout. Claude Code almacena su salida en caché durante cinco minutos de forma predeterminada (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` cambia ese plazo) y envía el valor tanto en `Authorization: Bearer` como en `x-api-key`. El script debe imprimir únicamente la credencial; añadir un mensaje de presentación hace fallar al asistente en v2.1.227+.
+
+Así funciona Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` imprime un token de acceso de Entra de corta duración que OmniRoute verifica en lugar de una clave API. Consulta [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` configura todo esto por ti: resuelve la URL base y el token a partir del contexto activo (por lo que ejecutar `omniroute connect <vps>` y después `omniroute launch` funciona directamente), comprueba el estado del servidor y ejecuta `claude`.
 
 ---

@@ -462,8 +462,9 @@ implicit.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Neconfigurat
   înseamnă toate tipurile (comportamentul de dinainte ca această setare să
   existe). Modelul `ssn_us` al motorului de cereri este mapat la `ssn`.
-  Șabloanele (Minimal, Standard, Financiar, Brazilian, SUA, Complet) doar
+  Șabloanele (Minimal, Standard, Financiar, Brazilian, SUA, GDPR, POPIA, Complet) doar
   completează casetele de bifat din interfață.
+- **Identificatori GDPR și POPIA** — doisprezece ID-uri încorporate care acoperă identificatori personali din UE și Africa de Sud (tabelul de mai jos). Expresiile regulate, validatorii și etichetele de jurisdicție se află într-un singur tabel, `src/shared/utils/piiPatterns.ts`, folosit atât de sanitizarea răspunsurilor (`src/lib/piiSanitizer.ts`), cât și de mascarea cererilor (`src/shared/utils/inputSanitizer.ts`). O potrivire este ascunsă doar când validatorul său o acceptă; un simplu șir de cifre nu este niciodată suficient. Un operator care a salvat o selecție restrânsă înainte de existența acestor ID-uri păstrează comportamentul anterior până când bifează noile ID-uri.
 - **Modele personalizate** — până la 20 de modele regex sau wildcard (`*` =
   până la 64 de caractere care nu sunt spații albe, `?` = unul). Potrivirile
   devin `[CUSTOM_REDACTED]`. Fiecare model trece prin
@@ -491,6 +492,25 @@ Setările se află în tabelul `key_value` (namespace `pii_settings`,
 
 Toate cele trei necesită autentificare de management și validează corpul cu
 Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Identificatori GDPR (UE) și POPIA (Africa de Sud)
+
+| ID                  | Identificator                   | Validare                                                                                      |
+| ------------------- | ------------------------------- | --------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                            | Țară cunoscută, lungime exactă pentru țara respectivă, ISO 13616 MOD-97-10                    |
+| `eu_vat`            | Număr TVA din UE                | Prefix cunoscut al statului membru și formatul numărului din acel stat (fără interogare VIES) |
+| `es_dni_nie`        | DNI / NIE spaniol               | Literă de control (valoare mod 23); NIE este `X/Y/Z` + 7 cifre                                |
+| `it_codice_fiscale` | Codice Fiscale italian          | Literă de control din tabelele pentru poziții impare/pare                                     |
+| `pl_pesel`          | PESEL polonez                   | Sumă de control ponderată și intervale plauzibile ale lunii/zilei de naștere codificate       |
+| `nl_bsn`            | BSN neerlandez                  | Verificare 11 (ponderi 9..2, -1)                                                              |
+| `de_steuer_id`      | Steuer-ID german                | ISO 7064 Mod 11,10 plus regulile structurii cifrelor (fără 0 inițial)                         |
+| `se_personnummer`   | Personnummer suedez             | Luhn pe ultimele zece cifre și dată de naștere plauzibilă (10 sau 12 cifre)                   |
+| `za_id`             | Număr de identitate sud-african | Luhn pe toate cele 13 cifre, lună/zi de naștere validă, cifră de cetățenie 0 sau 1            |
+| `za_phone`          | Telefon sud-african             | Prefix `+27` / `27` sau forma națională `0..` scrisă cu spațiu sau cratimă                    |
+| `za_vat`            | Număr TVA sud-african           | 10 cifre începând cu `4` **și** „VAT” / „BTW” în cele 48 de caractere anterioare              |
+| `za_tax_ref`        | Referință fiscală sud-africană  | 10 cifre începând cu `0`-`3`, Luhn **și** „tax” / „SARS” în cele 48 de caractere anterioare   |
+
+Deoarece formatele numai din cifre se suprapun cu numere de comenzi, numere de build și timestampuri, cele mai slabe (`za_vat`, `za_tax_ref`) necesită indiciul cuvântului-cheie, iar un simplu număr `0..` de zece cifre nu este tratat ca telefon sud-african. IBAN-urile cu spații (`GB29 NWBK ...`) nu sunt detectate. Pe calea streaming, indiciul este căutat numai în fragmentul curent. ID-urile preced tiparele generice de telefon, astfel încât un identificator validat își păstrează propriul substituent (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Șabloanele `gdpr` și `popia` selectează ID-urile UE, respectiv pe cele sud-africane. Mascarea în sine rămâne cu activare explicită (Hard Rule #20): nimic de aici nu modifică valoarea implicită a unui indicator de funcționalitate.
 
 ### Prompt Injection (`promptInjection.ts`)
 

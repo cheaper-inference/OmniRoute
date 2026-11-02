@@ -43,6 +43,10 @@ Umgebungsvariablen auf einen benutzerdefinierten Endpunkt ausgerichtet (es gibt 
 
 > Umgebungsvariablen werden **einmal beim Start** gelesen — starte Claude Code nach Änderungen neu.
 
+Für rotierende Zugangsdaten statt einer festen Zeichenfolge setzen Sie `apiKeyHelper` in `~/.claude/settings.json` auf einen Befehl, der die aktuellen Zugangsdaten auf stdout ausgibt. Claude Code speichert dessen Ausgabe standardmäßig fünf Minuten zwischen (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` überschreibt diese Dauer) und sendet den Wert sowohl in `Authorization: Bearer` als auch in `x-api-key`. Das Skript darf ausschließlich die Zugangsdaten ausgeben; ein zusätzlicher Banner lässt den Helfer unter v2.1.227+ fehlschlagen.
+
+So funktioniert Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` gibt ein kurzlebiges Entra-Zugriffstoken aus, das OmniRoute anstelle eines API-Schlüssels überprüft. Siehe [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` setzt all diese Variablen für dich: Der Befehl ermittelt die Basis-URL und das Token
 aus dem aktiven Kontext (sodass `omniroute connect <vps>` gefolgt von `omniroute launch`
 direkt funktioniert), prüft den Serverzustand und führt `claude` aus.

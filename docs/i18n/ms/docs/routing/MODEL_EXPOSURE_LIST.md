@@ -61,3 +61,15 @@ Eksport seting (`GET /api/settings/export-json`) menyertakan kedua-dua tatasusun
 seting lain — tidak seperti penapis eksport langkah kombo `hidePaidModels`, tiada risiko penghidratan semula
 di sini: id yang dilarang dan dibenamkan dalam langkah kombo yang dieksport ialah pilihan penghalaan eksplisit pengendali sendiri,
 bukannya sesuatu yang perlu dibuang oleh sempadan eksport.
+
+## Penyenaraian combo sahaja (`exposeCombosOnly`)
+
+Boolean berasingan, juga perlu diaktifkan sendiri dan bernilai `false` secara lalai, untuk pemasangan yang menjadikan combo sebagai model awam sementara penyedia hanya menjadi backend. Apabila nilainya `true`, penyenaraian awam (`GET /v1/models`, `GET /v1` dan laluan penemuan `/v1` lain yang menggunakan `getUnifiedModelsResponse()`) mengekalkan hanya baris dengan `owned_by: "combo"`: combo pengguna serta combo terbina dalam `auto/*` (melainkan disembunyikan oleh `hideAutoCombos`). Ia menggunakan ujian baris yang sama seperti `catalogScope: "combos"` bagi setiap kunci, dan penapis benarkan/tolak/skop kunci itu sendiri masih digunakan di atasnya.
+
+Togol dalam **Settings → Routing → Models API listing**, atau dengan `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Seperti senarai di atas, ia hanya mengubah perkara yang diiklankan:
+
+- id `provider/model` yang dinyatakan secara eksplisit masih dihantar, dan `GET /v1/models/{id}` masih menyelesaikannya;
+- katalog papan pemuka (`GET /api/models/catalog`, digunakan oleh pemilih model) tidak dikecilkan;
+- ia tidak dicerminkan ke dalam kumpulan calon `auto/*`, jadi combo `auto/*` mengekalkan keseluruhan kumpulannya.

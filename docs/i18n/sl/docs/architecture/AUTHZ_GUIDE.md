@@ -162,9 +162,10 @@ Vsak razred poti ima pravilnik v `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — vedno vrne `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — pridobi Bearer in ga preveri prek `validateApiKey()`. Na anonimni dostop preide le, ko je veljavna funkcijska zastavica `REQUIRE_API_KEY` onemogočena. Veljavna zastavica se razreši prek `isRequireApiKeyEnabled()` (`preglasitev funkcijske zastavice v podatkovni zbirki > process.env.REQUIRE_API_KEY > privzeta vrednost`), zato funkcijske zastavice nadzorne plošče in okoljske spremenljivke dosledno urejajo `/api/v1/*`, `/api/v1beta/*` ter vzdevke; napake razreševalnika povzročijo varno zavrnitev dostopa. Na poteh odjemalskega API-ja dovoljuje zahteve s sejo nadzorne plošče (vključno z `/api/v1/models`, ki jo uporablja katalog modelov nadzorne plošče).
+  Ko je Entra ID SSO omogočen, Bearer s strukturo žetona Entra (trije odseki base64url, algoritem `RS*`, `kid`) obravnava veja SSO **pred** `validateApiKey()`, njena odločitev pa je dokončna — nikoli ne preide na pot ključa API ali v vejo, ki dostop zniža na anonimnega. Izpad ponudnika identitete zato ne more odpreti dostopa. Statični ključi API ostanejo nespremenjeni. Glejte [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — sprejme sejo nadzorne plošče, notranje zahteve za sinhronizacijo modelov (ujemanje z `/api/providers/[name]/(sync-models|models)`) ali preverjanje v celoti preskoči, če `isAuthRequired()` vrne false. Ko je žeton Bearer prisoten, vendar neveljaven, vrne 403 (`AUTH_001`), sicer pa 401. Pred katero koli vejo avtentikacije uveljavi tudi ravni varovanja poti (LOCAL_ONLY / ALWAYS_PROTECTED) — glejte [Ravni varovanja poti](../security/ROUTE_GUARD_TIERS.md). Do poti LOCAL_ONLY v `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (trenutno: `/api/mcp/`) je mogoče dostopati iz naslovov, ki niso povratne zanke, kadar ima ključ Bearer obseg `manage`; vse druge poti LOCAL_ONLY ostanejo strogo omejene na povratno zanko ne glede na obseg.
 
-Uspešen pravilnik vrne `AuthSubject` s `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Nadaljnji obdelovalniki ga lahko preberejo prek `assertAuth(request, "CLIENT_API")` v `src/server/authz/assertAuth.ts`, namesto da bi znova izvajali logiko avtentikacije.
+Uspešen pravilnik vrne `AuthSubject` s `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Nadaljnji obdelovalniki ga lahko preberejo prek `assertAuth(request, "CLIENT_API")` v `src/server/authz/assertAuth.ts`, namesto da bi znova izvajali logiko avtentikacije.
 
 ## Seznam javnih poti
 
@@ -320,8 +321,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Pri overjenih zahtevah glave zahteve v zalednem sistemu (na strani obdelovalnika) vključujejo tudi:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<zadnje 4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<zadnje 4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (neobvezno)
 x-omniroute-auth-scopes:    seznam, ločen z vejicami
 ```

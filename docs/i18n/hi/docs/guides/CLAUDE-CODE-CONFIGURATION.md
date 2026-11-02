@@ -42,6 +42,10 @@ Claude Code **Anthropic Messages API** से संचार करता ह�
 
 > Env vars को **स्टार्टअप पर केवल एक बार** पढ़ा जाता है — उन्हें बदलने के बाद Claude Code पुनः शुरू करें।
 
+स्थिर स्ट्रिंग के बजाय बदलने वाले क्रेडेंशियल के लिए, `~/.claude/settings.json` में `apiKeyHelper` को ऐसे कमांड पर सेट करें जो वर्तमान क्रेडेंशियल stdout पर छापे। Claude Code उसका आउटपुट डिफ़ॉल्ट रूप से पाँच मिनट कैश करता है (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` इस अवधि को बदलता है) और मान को `Authorization: Bearer` तथा `x-api-key` दोनों में भेजता है। स्क्रिप्ट को केवल क्रेडेंशियल ही छापना चाहिए; उसके साथ अतिरिक्त बैनर टेक्स्ट होने पर v2.1.227+ में सहायक विफल हो जाता है।
+
+Entra ID SSO इस तरह काम करता है: `scripts/cli/omniroute-sso.mjs token` कम अवधि वाला Entra एक्सेस टोकन छापता है, जिसे OmniRoute API कुंजी के बजाय सत्यापित करता है। [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) देखें।
+
 `omniroute launch` आपके लिए इन सभी को सेट करता है: यह सक्रिय context से base URL + token
 resolve करता है (इसलिए `omniroute connect <vps>` और फिर `omniroute launch`
 सीधे काम करता है), server का health-check करता है और `claude` को exec करता है।

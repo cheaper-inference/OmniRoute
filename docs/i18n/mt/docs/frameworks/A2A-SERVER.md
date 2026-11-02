@@ -163,7 +163,7 @@ OmniRoute jesponi 6 ħiliet A2A marbuta f’`src/lib/a2a/taskExecution.ts::A2A_S
 | Rapport tas-Saħħa      | `health-report`      | Jaggreġa l-istat tas-circuit breaker, tal-cooldown u tal-lockout għal kull fornitur                                                                                                               | saħħa, reżiljenza         | "Uri l-istat tas-saħħa tal-fornituri kollha" |
 | Elenka l-Kapaċitajiet  | `list-capabilities`  | Jirritorna l-katalgu sħiħ ta’ 45 entrata tal-Ħiliet tal-Aġent (23 API + 21 CLI + konfigurazzjoni waħda) bħala tabella markdown b’URLs mhux ipproċessati ta’ SKILL.md għall-injezzjoni tal-kuntest | katalgu, skoperta, ħiliet | "Elenka l-kapaċitajiet kollha ta’ OmniRoute" |
 
-> Il-Karta tal-Aġent għandha tinżamm allinjata mal-katalgu attiv ta’ 377 fornitur; l-għadd tal-fornituri u l-metadata dwar aċċess bla ħlas/mingħajr awtentikazzjoni jittieħdu mir-reġistru waqt it-tħaddim.
+> Il-Karta tal-Aġent għandha tinżamm allinjata mal-katalgu attiv ta’ 380 fornitur; l-għadd tal-fornituri u l-metadata dwar aċċess bla ħlas/mingħajr awtentikazzjoni jittieħdu mir-reġistru waqt it-tħaddim.
 
 ### Dettalji tal-Ħila `list-capabilities`
 
@@ -215,7 +215,7 @@ Il-punt ta' dħul JSON-RPC `/a2a` huwa l-punt A2A kanoniku. L-estremitajiet REST
    };
    ```
 
-3. **Esponiha fl-Agent Card:** f’`src/app/.well-known/agent.json/route.ts`, żid mal-array `skills`:
+3. **Esponiha fil-Kard tal-Aġent:** f'`src/lib/a2a/agentCardMetadata.ts` (kondiviż minn `/.well-known/agent.json` u `/.well-known/agent-card.json`), żid mal-array `skills`:
 
    ```json
    {

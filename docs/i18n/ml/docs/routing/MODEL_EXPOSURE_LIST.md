@@ -61,3 +61,15 @@
 — `hidePaidModels`-ന്റെ കോംബോ-സ്റ്റെപ്പ് എക്സ്പോർട്ട് ഫിൽട്ടറിൽനിന്ന് വ്യത്യസ്തമായി, ഇവിടെ വീണ്ടും ഹൈഡ്രേറ്റ് ചെയ്യപ്പെടാനുള്ള
 അപകടസാധ്യതയില്ല: എക്സ്പോർട്ട് ചെയ്ത കോംബോ സ്റ്റെപ്പിൽ ഉൾച്ചേർത്ത ഒരു നിരസിക്കപ്പെട്ട id എന്നത് ഓപ്പറേറ്ററുടെ സ്വന്തം വ്യക്തമായ റൂട്ടിങ്
 തിരഞ്ഞെടുപ്പാണ്; എക്സ്പോർട്ട് അതിർത്തി നീക്കംചെയ്യേണ്ട ഒന്നല്ല അത്.
+
+## Combo കൾ മാത്രമുള്ള പട്ടിക (`exposeCombosOnly`)
+
+Combo കൾ പൊതുവായ model മുഖവും provider കൾ backend കൾ മാത്രവുമായ deployment കൾക്കുള്ള പ്രത്യേക boolean ഓപ്ഷൻ; ഇതും തിരഞ്ഞെടുത്ത് സജീവമാക്കേണ്ടതും സ്വതേ `false` ആയതുമാണ്. ഇത് `true` ആകുമ്പോൾ public listing (`GET /v1/models`, `GET /v1`, `getUnifiedModelsResponse()` അടിസ്ഥാനമാക്കിയ മറ്റ് `/v1` discovery route കൾ) `owned_by: "combo"` ഉള്ള വരികൾ മാത്രം നിലനിർത്തുന്നു: user combo കളും built-in `auto/*` combo കളും (`hideAutoCombos` അവ മറയ്ക്കുന്നില്ലെങ്കിൽ). ഓരോ key യുടെയും `catalogScope: "combos"` ഉപയോഗിക്കുന്ന അതേ row test ആണ് ഇത് ഉപയോഗിക്കുന്നത്; key യുടെ സ്വന്തം allow/deny/scope filter കളും അതിനുമുകളിൽ ബാധകമാണ്.
+
+**Settings → Routing → Models API listing** ൽ അല്ലെങ്കിൽ `PATCH /api/settings {"exposeCombosOnly": true}` വഴി ഇത് മാറ്റുക.
+
+മുകളിലെ പട്ടികകളെപ്പോലെ, ഇത് ലഭ്യത പ്രസിദ്ധീകരിക്കുന്നതിനെ മാത്രം മാറ്റുന്നു:
+
+- വ്യക്തമായി നൽകിയ `provider/model` ID ഇപ്പോഴും dispatch ചെയ്യും; `GET /v1/models/{id}` ഇപ്പോഴും അത് resolve ചെയ്യും;
+- dashboard catalog (`GET /api/models/catalog`, model picker കൾ ഉപയോഗിക്കുന്നത്) ചുരുക്കുന്നില്ല;
+- ഇത് `auto/*` candidate pool കളിലേക്ക് പ്രതിഫലിപ്പിക്കുന്നില്ല, അതിനാൽ `auto/*` combo കൾ മുഴുവൻ pool നിലനിർത്തുന്നു.

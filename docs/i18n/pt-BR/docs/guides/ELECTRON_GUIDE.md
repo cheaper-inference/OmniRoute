@@ -64,6 +64,19 @@ O workspace `electron/` também disponibiliza:
 - `npm run build:mac-x64` / `build:mac-arm64` — compilações do macOS para uma única arquitetura
 - `npm run pack` — compilação somente do diretório para testes locais (sem instalador)
 
+## Pacotes opcionais de runtime
+
+As compilações desktop podem publicar arquivos opcionais de runtime junto de seus instaladores. O conteúdo do servidor instalado contém `optional-packs.index.json` (em `resources/app` no Windows e Linux). Para a entrada `browser-runtime`, leia `packs[].tarball` e baixe **esse nome exato de arquivo na mesma release**. Os nomes dos arquivos incluem um digest SHA-256; compilações diferentes podem exigir arquivos diferentes. Mantenha inalterado o nome do arquivo baixado.
+
+Copie o índice do aplicativo instalado e o arquivo selecionado para um único diretório; depois use a CLI da mesma release:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` exibe o estado de instalação e verificação, não o nome do arquivo. O índice incluído seleciona o arquivo. A instalação verifica o checksum do arquivo antes da extração e os checksums de seus pacotes antes de substituir um pacote instalado. Ela lê arquivos locais; não baixa arquivos ausentes. Reinicie o aplicativo após a instalação. Se a release não tiver um asset correspondente, o pacote opcional não estará disponível pelos assets dessa release.
+
 ## Estrutura de Diretórios
 
 ```

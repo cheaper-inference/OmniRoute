@@ -29,6 +29,7 @@
 - [البث عبر WebSocket](#websocket-streaming)
 - [الحصص والإبلاغ عن المشكلات](#quotas--issues-reporting)
 - [ذاكرة التخزين المؤقت الدلالية](#semantic-cache)
+- [توافق إدارة CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [لوحة المعلومات والإدارة](#dashboard--management)
 - [إدارة التركيبات](#combo-management)
 - [خطافات الويب](#webhooks)
@@ -1012,6 +1013,18 @@ codex exec "Responda apenas: PONG"
 
 **المصادقة:** مفتاح API من نوع Bearer ‏(`isAuthenticated`).
 
+### استعادة جلسة الحصة (تفعيل اختياري)
+
+يمكن تعليق طلب `POST /v1/chat/completions` أو `POST /v1/responses` غير متدفق يفشل بخطأ حصة نهائي (`402`/`429`/`503` يشير متنه إلى نفاد الحصة أو الرصيد)، ثم إعادة إرساله لاحقًا بدلًا من إرجاع الخطأ. يفعّل المستدعي ذلك لكل طلب باستخدام ثلاث ترويسات:
+
+| الترويسة                     | القيمة                                     |
+| ---------------------------- | ------------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                                     |
+| `x-omniroute-session`        | معرّف الجلسة، `[A-Za-z0-9._:-]{1,128}`     |
+| `x-omniroute-recovery-turn`  | معرّف دور فريد داخل الجلسة (القاعدة نفسها) |
+
+لا تتأهل إلا أدوار `stream: false` الخالية من الأدوات وسجل الأدوات و`previous_response_id`، ومن تثبيت `x-omniroute-connection`، ويجب ضبط `STORAGE_ENCRYPTION_KEY` (يُخزَّن الطلب مشفرًا لمدة تصل إلى 24 h). تصبح الاستجابة حينئذ `202` مع `recovery.poll`؛ استعلم دوريًا عبر `GET /v1/quota-recoveries/{id}` (`202` أثناء الانتظار، و`200` مع المتن المستعاد عند الاكتمال)، أو ألغِ عبر `DELETE`. لا يرى التذاكر إلا مفتاح API الذي أنشأها. تنتهي إعادة الإرسال ذات النتيجة غير المؤكدة بالحالة `needs_confirmation` بدلًا من إرسالها مرتين. المصدر: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## الاستخدام بالخدمة الذاتية (`/api/usage/om-usage`)
@@ -1179,6 +1192,28 @@ DELETE /api/cache/stats
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## توافق إدارة CLIProxyAPI
+
+يجيب OmniRoute عن نقاط نهاية الإدارة الثلاث لـ[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) التي تستدعيها لوحات الاستخدام لقراءة حدود اشتراكات Claude وCodex (مثل مصدر حدود الاستخدام `cliproxy` في T3 Code). وجّه عنوان URL الأساسي للعميل إلى OmniRoute، واستخدم مفتاح API بنطاق `manage` بوصفه مفتاح الإدارة. تُقدَّم المسارات عند `/v0/management/*` وعند `/api/v0/management/*`.
+
+| الطريقة | المسار                       | الوصف                                                                                                                |
+| ------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/v0/management/auth-files`  | اتصالات Claude وCodex OAuth بالشكل `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. دون رموز  |
+| POST    | `/v0/management/api-call`    | المتن `{ auth_index, method, url, header?, data? }`. يرسل طلبًا مسموحًا به برمز الحساب ويعيد `{ status_code, body }` |
+| POST    | `/v0/management/reset-quota` | المتن `{ auth_index }`. يمسح تهدئة الاتصال وحظر النماذج وفترات تهدئة Codex لكل نطاق لحساب واحد                       |
+
+- `auth_index` هو معرّف اتصال OmniRoute. يكون `provider` هو `claude` أو `codex` (اتصالات OAuth فقط؛ لا يُدرَج مزوّد مفتاح API المسمى `anthropic`). في Codex، يكون `id_token.chatgpt_account_id` معرّف مساحة العمل المخزن و`plan_type` الخطة المخزنة.
+- ليس `api-call` وكيلًا عامًا. يقبل فقط طلب Claude `GET
+https://api.anthropic.com/api/oauth/usage` وطلبات Codex `GET
+https://chatgpt.com/backend-api/wham/usage` و`GET .../wham/rate-limit-reset-credits` و`POST .../wham/rate-limit-reset-credits/consume`، وكلٌّ منها لحساب المزوّد المطابق فقط. يعيد أي شيء آخر `403` دون الاتصال بالمنبع. تُتجاهَل ترويسة `Authorization` الخاصة بالمستدعي (بما في ذلك العنصر النائب `$TOKEN$`): يحقن OmniRoute رمز وصول الاتصال، ويحدّثه أولًا إذا اقتربت صلاحيته من الانتهاء، ويمرر الترويسات المسموحة فقط (`anthropic-beta`؛ `OpenAI-Beta` و`Originator` و`Chatgpt-Account-Id`؛ `Accept` و`Content-Type`). عند غياب `Chatgpt-Account-Id`، تُستخدم افتراضيًا هوية مساحة العمل المخزنة. إذا كانت استجابة المنبع الأولى `401`، يجري تحديثًا واحدًا ولا يعيد المحاولة إلا عند تغير رمز الوصول. تنتهي مهلة كل محاولة إلى المنبع بعد 15 ثانية وتستخدم وكيل الاتصال.
+- يترك `reset-quota` الحالات النهائية (banned, expired, credits_exhausted) دون تغيير. يعيد `auth_index` غير المعروف `404`.
+
+**المصادقة:** جلسة لوحة تحكم أو مفتاح API بنطاق `manage`، وهي مطلوبة حتى عند تعطيل تسجيل الدخول (المسارات ضمن `ALWAYS_PROTECTED_API_PATHS`). تحصل المفاتيح المخصصة للاستدلال فقط على `403`. المصدر: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

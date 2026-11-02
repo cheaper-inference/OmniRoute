@@ -515,7 +515,8 @@ Il-guardrail qatt ma jimblokka; jinnnota biss (`meta.detections`, `meta.redacted
 
 **Dashboard → Settings → Security → PII masking** tagħżel _x'jinmaska_. Ma tixgħilx il-masking: dak jibqa' `PII_REDACTION_ENABLED` (request) u `PII_RESPONSE_SANITIZATION` (response + SSE), it-tnejn mitfija b'mod default.
 
-- **Għażla għal kull tip** — l-ids built-in huma elenkati f'`src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Jekk ma jkunx issettjat, dan ifisser kull tip (l-imġieba li kienet hemm qabel ma ġie introdott dan l-issettjar). Il-mudell `ssn_us` tal-magna tar-requests jimmappa għal `ssn`. It-templates (Minimal, Standard, Financial, Brazilian, USA, Full) jimlew biss il-checkboxes fl-UI.
+- **Għażla għal kull tip** — l-ids built-in huma elenkati f'`src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Jekk ma jkunx issettjat, dan ifisser kull tip (l-imġieba li kienet hemm qabel ma ġie introdott dan l-issettjar). Il-mudell `ssn_us` tal-magna tar-requests jimmappa għal `ssn`. It-templates (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) jimlew biss il-checkboxes fl-UI.
+- **Identifikaturi GDPR u POPIA** — tnax-il ID integrat li jkopru identifikaturi personali tal-UE u tal-Afrika t'Isfel (tabella hawn taħt). Ir-regexes, il-validaturi u t-tags tal-ġurisdizzjoni tagħhom jinsabu f'tabella waħda, `src/shared/utils/piiPatterns.ts`, li jużaw kemm is-sanitizer tat-tweġibiet (`src/lib/piiSanitizer.ts`) kif ukoll il-masker tat-talbiet (`src/shared/utils/inputSanitizer.ts`). Match jiġi redatt biss meta l-validatur tiegħu jaċċettah; sensiela ta' ċifri waħedha qatt ma tkun biżżejjed. Operatur li salva għażla mnaqqsa qabel ma dawn l-IDs kienu jeżistu jżomm l-imġiba li kellu sakemm jintgħażlu l-IDs ġodda.
 - **Mudelli personalizzati** — sa 20 mudell regex jew wildcard (`*` = sa 64 karattru li mhux whitespace, `?` = wieħed). Il-matches isiru `[CUSTOM_REDACTED]`. Kull mudell jgħaddi minn `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): massimu ta' 500 karattru, flags limitati għal `g i m s u`, irid jikkompilja, irid jgħaddi minn `safe-regex` (backtracking katastrofiku), u ma jistax jaqbel ma' string vojta jew ma' placeholder ta' masking. Mudell li jfalli jiġi rrifjutat meta jiġi ffrankat u meta jiġi ttestjat, u ringiela maħżuna li tfalli tiġi njorata waqt ir-runtime minflok li tiġi kkompilata. Il-mudelli personalizzati jaħdmu biss sakemm il-masking tkun mixgħula.
 - **Kontaturi tad-detekzjonijiet** — għaddijiet għal kull tip (qatt ma l-valuri li nqabblu), miżmuma fil-memorja u jiġu resettjati ma' kull restart (`src/lib/pii/piiDetectionStats.ts`). Jiżdiedu biss sakemm il-masking tkun mixgħula.
 
@@ -528,6 +529,25 @@ L-issettjarijiet jinħażnu fit-tabella `key_value` (namespace `pii_settings`, `
 | `POST` | `/api/settings/pii/test` | Dry-run ta' mudell wieħed fuq kampjun ta' massimu 8 KB; xejn ma jinħażen          |
 
 It-tlieta kollha jeħtieġu awtentikazzjoni ta' ġestjoni (management auth) u jivvalidaw il-body b'Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Identifikaturi GDPR (UE) u POPIA (Afrika t'Isfel)
+
+| ID                  | Identifikatur                          | Validazzjoni                                                                                   |
+| ------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                                   | Pajjiż magħruf, tul eżatt għal dak il-pajjiż, ISO 13616 MOD-97-10                              |
+| `eu_vat`            | Numru tal-VAT tal-UE                   | Prefiss magħruf ta' stat membru u l-format tan-numru ta' dak l-istat (mingħajr tfittxija VIES) |
+| `es_dni_nie`        | DNI / NIE Spanjol                      | Ittra ta' kontroll (valur mod 23); NIE huwa `X/Y/Z` + 7 ċifri                                  |
+| `it_codice_fiscale` | Codice Fiscale Taljan                  | Ittra ta' kontroll mit-tabelli tal-pożizzjonijiet fard/żewġ                                    |
+| `pl_pesel`          | PESEL Pollakk                          | Checksum peżat u meded plawżibbli tax-xahar/jum tat-twelid ikkodifikati                        |
+| `nl_bsn`            | BSN Olandiż                            | Prova 11 (piżijiet 9..2, -1)                                                                   |
+| `de_steuer_id`      | Steuer-ID Ġermaniż                     | ISO 7064 Mod 11,10 flimkien mar-regoli tal-istruttura taċ-ċifri (mingħajr 0 fil-bidu)          |
+| `se_personnummer`   | personnummer Żvediż                    | Luhn fuq l-aħħar għaxar ċifri u data tat-twelid plawżibbli (10 jew 12-il ċifra)                |
+| `za_id`             | Numru tal-ID tal-Afrika t'Isfel        | Luhn fuq it-13-il ċifra kollha, xahar/jum tat-twelid validu, ċifra taċ-ċittadinanza 0 jew 1    |
+| `za_phone`          | Telefon tal-Afrika t'Isfel             | Prefiss `+27` / `27`, jew il-forma nazzjonali `0..` miktuba bi spazju jew sing                 |
+| `za_vat`            | Numru tal-VAT tal-Afrika t'Isfel       | 10 ċifri li jibdew b'`4` **u** "VAT" / "BTW" fit-48 karattru ta' qabel                         |
+| `za_tax_ref`        | Referenza tat-taxxa tal-Afrika t'Isfel | 10 ċifri li jibdew b'`0`-`3`, Luhn, **u** "tax" / "SARS" fit-48 karattru ta' qabel             |
+
+Għax formati b'ċifri biss jaħbtu ma' numri ta' ordnijiet, numri ta' builds u timestamps, l-aktar dgħajfa (`za_vat`, `za_tax_ref`) jeħtieġu ħjiel ta' keyword, u numru `0..` ta' għaxar ċifri waħdu ma jitqiesx bħala numru tat-telefon tal-Afrika t'Isfel. IBANs bi spazji (`GB29 NWBK ...`) ma jiġux matched. Fuq il-mogħdija streaming il-ħjiel jitfittex biss fil-chunk attwali. L-IDs jiġu qabel il-patterns ġeneriċi tat-telefon, sabiex identifikatur validat iżomm il-placeholder tiegħu stess (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). It-templates `gdpr` u `popia` jagħżlu rispettivament l-IDs tal-UE u tal-Afrika t'Isfel. Il-masking innifsu jibqa' b'attivazzjoni espliċita (Hard Rule #20): xejn hawn ma jbiddel default ta' feature flag.
 
 ### Injezzjoni tal-Prompt (`promptInjection.ts`)
 

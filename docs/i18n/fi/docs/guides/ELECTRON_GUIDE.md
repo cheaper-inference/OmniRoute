@@ -64,6 +64,19 @@ Vahvistettu tiedostosta `electron/package.json`:
 - `npm run build:mac-x64` / `build:mac-arm64` — yhden arkkitehtuurin macOS-koonnit
 - `npm run pack` — vain hakemiston tuottava koonti paikallista testausta varten (ei asennusohjelmaa)
 
+## Valinnaiset ajonaikaiset paketit
+
+Työpöytäkoosteet voivat julkaista valinnaisia ajonaikaisia arkistoja asennusohjelmiensa rinnalla. Asennettu palvelinsisältö sisältää tiedoston `optional-packs.index.json` (Windowsissa ja Linuxissa sijainnissa `resources/app`). Lue `browser-runtime`-merkinnän `packs[].tarball` ja lataa **täsmälleen kyseisen niminen tiedosto samasta julkaisusta**. Arkistojen nimissä on SHA-256-tiiviste; eri koosteet voivat tarvita eri arkistoja. Säilytä ladatun tiedoston nimi muuttumattomana.
+
+Kopioi asennetun sovelluksen indeksi ja valittu arkisto samaan hakemistoon ja käytä sitten saman julkaisun CLI:tä:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` näyttää asennuksen ja tarkistuksen tilan, ei arkiston tiedostonimeä. Mukana toimitettu indeksi valitsee arkiston. Asennus tarkistaa arkiston tarkistussumman ennen purkamista ja pakettien tarkistussummat ennen asennetun paketin korvaamista. Se lukee paikallisia tiedostoja; se ei lataa puuttuvia arkistoja. Käynnistä sovellus uudelleen asennuksen jälkeen. Jos julkaisussa ei ole vastaavaa tiedostoa, valinnaista pakettia ei ole saatavilla tämän julkaisun tiedostoista.
+
 ## Hakemistorakenne
 
 ```

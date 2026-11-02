@@ -66,3 +66,15 @@ como qualquer outro campo de configuração — diferentemente do filtro de expo
 combo de `hidePaidModels`, não há risco de reidratação aqui: um id negado incorporado a uma etapa
 de combo exportada é uma escolha explícita de roteamento do próprio operador, não algo que o limite
 da exportação precise remover.
+
+## Listagem somente de combos (`exposeCombosOnly`)
+
+Um booleano separado, também de ativação explícita e `false` por padrão, para implantações em que os combos são a interface pública de modelos e os provedores são apenas backends. Quando é `true`, a listagem pública (`GET /v1/models`, `GET /v1` e as outras rotas de descoberta `/v1` construídas sobre `getUnifiedModelsResponse()`) mantém apenas linhas com `owned_by: "combo"`: combos do usuário mais os combos integrados `auto/*` (a menos que `hideAutoCombos` os oculte). Usa o mesmo teste de linha de `catalogScope: "combos"` por chave, e os filtros de permissão/negação/escopo da própria chave continuam sendo aplicados por cima.
+
+Alterne em **Configurações → Roteamento → Listagem da API de modelos**, ou com `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Assim como as listas acima, isto altera somente o que é anunciado:
+
+- um ID explícito `provider/model` continua sendo encaminhado, e `GET /v1/models/{id}` continua resolvendo-o;
+- o catálogo do dashboard (`GET /api/models/catalog`, usado pelos seletores de modelo) não é reduzido;
+- isto não é espelhado nos pools de candidatos `auto/*`, portanto os combos `auto/*` mantêm seu pool completo.

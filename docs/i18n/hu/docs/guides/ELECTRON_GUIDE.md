@@ -65,6 +65,19 @@ Az `electron/` munkaterület a következőket is biztosítja:
 - `npm run build:mac-x64` / `build:mac-arm64` — egyetlen architektúrához készült macOS-build
 - `npm run pack` — csak könyvtárat létrehozó build helyi teszteléshez (telepítő nélkül)
 
+## Választható futtatókörnyezeti csomagok
+
+Az asztali buildek a telepítők mellett választható futtatókörnyezeti archívumokat is közzétehetnek. A telepített szerverfájlok tartalmazzák az `optional-packs.index.json` fájlt (Windows és Linux alatt a `resources/app` könyvtárban). A `browser-runtime` bejegyzésnél olvassa ki a `packs[].tarball` értéket, és töltse le **pontosan ezt a nevű fájlt ugyanabból a kiadásból**. Az archívumnevek SHA-256 lenyomatot tartalmaznak; a különböző buildek eltérő archívumokat igényelhetnek. Ne változtassa meg a letöltött fájl nevét.
+
+Másolja a telepített alkalmazás indexét és a kiválasztott archívumot egy könyvtárba, majd használja az ugyanabból a kiadásból származó CLI-t:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+A `packs list` a telepítés és ellenőrzés állapotát mutatja, nem az archívum fájlnevét. Az archívumot a mellékelt index választja ki. A telepítés a kibontás előtt ellenőrzi az archívum ellenőrzőösszegét, a telepített csomag lecserélése előtt pedig a csomagok ellenőrzőösszegeit. Helyi fájlokat olvas; a hiányzó archívumokat nem tölti le. Telepítés után indítsa újra az alkalmazást. Ha a kiadáshoz nincs megfelelő fájl, a választható csomag nem érhető el az adott kiadás fájljain keresztül.
+
 ## Könyvtárstruktúra
 
 ```

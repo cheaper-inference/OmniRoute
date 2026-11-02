@@ -499,6 +499,26 @@ test("ACP client times out, cancels, and terminates a stuck process", async () =
   }
 });
 
+test("an already-cancelled ACP request keeps its cancellation code while draining", async () => {
+  const tmpDir = sandboxTmp("devin-agentic-cancelled-drain-");
+  const scriptFile = writeScenarioMock(tmpDir, `rl.on("line", () => {});`);
+  const previousShutdown = globalThis.__omnirouteShutdown;
+  const controller = new AbortController();
+  controller.abort();
+  globalThis.__omnirouteShutdown = { init: false, shuttingDown: true, activeRequests: 0 };
+  try {
+    const cancelled = await executeTextRequest(scriptFile, controller.signal);
+    assert.equal(cancelled.response.status, 499);
+    const body = await cancelled.response.json();
+    assert.equal(body.error.code, "acp_cancelled");
+    assert.equal(body.error.type, "devin_agentic_error");
+  } finally {
+    if (previousShutdown === undefined) delete globalThis.__omnirouteShutdown;
+    else globalThis.__omnirouteShutdown = previousShutdown;
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
 test("premature tool narration is repaired once into a validated tool_use", async () => {
   const tmpDir = sandboxTmp("devin-agentic-repair-");
   const stateFile = path.join(tmpDir, "spawn-count");

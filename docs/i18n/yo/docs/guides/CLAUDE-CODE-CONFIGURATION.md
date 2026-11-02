@@ -42,6 +42,10 @@ endpoint àkànṣe nípasẹ̀ àwọn environment variables (kò ní flag `--b
 
 > A máa ń ka àwọn env vars **lẹ́ẹ̀kan ṣoṣo nígbà ìbẹ̀rẹ̀** — tún Claude Code bẹ̀rẹ̀ lẹ́yìn tí o bá yí wọn padà.
 
+Fún ẹ̀rí ìdánimọ̀ tí a ń yí padà dípò ọ̀wọ́ lẹ́tà tí kò yí padà, ṣètò `apiKeyHelper` nínú `~/.claude/settings.json` sí àṣẹ tí ń tẹ ẹ̀rí ìdánimọ̀ lọwọlọwọ sí stdout. Claude Code ń fi èsì náà pamọ́ sínú cache fún ìṣẹ́jú márùn-ún ní ìṣètò àkọ́kọ́ (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` lè yí àkókò náà padà), ó sì ń fi iye náà ránṣẹ́ nínú `Authorization: Bearer` àti `x-api-key` méjèèjì. Ẹ̀rọ-àṣẹ gbọ́dọ̀ tẹ ẹ̀rí ìdánimọ̀ nìkan — ọ̀rọ̀ ìkíni àfikún yóò mú olùrànlọ́wọ́ kùnà lórí v2.1.227+.
+
+Báyìí ni Entra ID SSO ṣe ń ṣiṣẹ́: `scripts/cli/omniroute-sso.mjs token` ń tẹ token ìwọlé Entra tí àkókò rẹ̀ kúrú, tí OmniRoute ń ṣàyẹ̀wò dípò kọ́kọ́rọ́ API. Wo [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` máa ń ṣètò gbogbo wọ̀nyí fún ọ: ó máa ń yanjú base URL + token
 láti inú àyíká tó ń ṣiṣẹ́ (nítorí náà `omniroute connect <vps>` lẹ́yìn náà `omniroute launch`
 yóò kàn ṣiṣẹ́), ó máa ń yẹ ìlera server wò, ó sì máa ń ṣiṣẹ́ `claude`.

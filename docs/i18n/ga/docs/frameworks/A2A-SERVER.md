@@ -163,7 +163,7 @@ Nochtann OmniRoute 6 scil A2A atá sreangaithe in `src/lib/a2a/taskExecution.ts:
 | Tuairisc Sláinte    | `health-report`      | Comhiomlánaíonn staid an scoradáin chiorcaid, an tsuaimhnithe agus an fhrithdhúnta do gach soláthraí                                                                  | sláinte, athléimneacht     | "Taispeáin stádas sláinte gach soláthraí"      |
 | Liostaigh Cumais    | `list-capabilities`  | Filleann catalóg iomlán 45 iontráil Scileanna Gníomhaire (23 API + 21 CLI + 1 chumraíocht) mar thábla markdown le URLanna amha SKILL.md chun comhthéacs a instealladh | catalóg, aimsiú, scileanna | "Liostaigh cumais uile OmniRoute"              |
 
-> Ba cheart Cárta an Ghníomhaire a choinneáil ailínithe leis an gcatalóg bheo de 377 soláthraí; faightear líon na soláthraithe agus na meiteashonraí saor in aisce/gan fíordheimhniú ón gclárlann am rite.
+> Ba cheart Cárta an Ghníomhaire a choinneáil ailínithe leis an gcatalóg bheo de 380 soláthraí; faightear líon na soláthraithe agus na meiteashonraí saor in aisce/gan fíordheimhniú ón gclárlann am rite.
 
 ### Sonraí na Scile `list-capabilities`
 
@@ -215,7 +215,7 @@ Is é críochphointe JSON-RPC `/a2a` an pointe iontrála canónta A2A. Soláthra
    };
    ```
 
-3. **Nocht sa Chárta Gníomhaire é:** in `src/app/.well-known/agent.json/route.ts`, cuir leis an eagar `skills` é:
+3. **Nocht i gCárta an Ghníomhaire é:** in `src/lib/a2a/agentCardMetadata.ts` (atá comhroinnte ag `/.well-known/agent.json` agus `/.well-known/agent-card.json`), cuir leis an eagar `skills`:
 
    ```json
    {

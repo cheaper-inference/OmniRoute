@@ -10,7 +10,7 @@ OmniRoute integrējas ar trīs kategoriju CLI rīkiem, kas sadalīti trīs īpa�
 
 | Lapa           | Maršruts                | Koncepcija                                                                                      | Skaits           |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
-| **CLI kodi**   | `/dashboard/cli-code`   | Kodēšanas rīki, kurus novirzāt uz OmniRoute (Klients → CLI → OmniRoute → Pakalpojuma sniedzējs) | 27               |
+| **CLI kodi**   | `/dashboard/cli-code`   | Kodēšanas rīki, kurus novirzāt uz OmniRoute (Klients → CLI → OmniRoute → Pakalpojuma sniedzējs) | 28               |
 | **CLI aģenti** | `/dashboard/cli-agents` | Autonomi aģenti, kurus novirzāt uz OmniRoute (tā pati plūsma, plašāks tvērums)                  | 11               |
 | **ACP aģenti** | `/dashboard/acp-agents` | CLI, kurus OmniRoute palaiž kā aizmugursistēmas, izmantojot stdio/ACP (apgrieztā plūsma)        | skatiet reģistru |
 
@@ -145,7 +145,7 @@ vienai saskarnei, bet ne pārējām, testu komplekts neizdodas, nevis ļauj neat
 
 ---
 
-## 1. CLI Code katalogs (27 rīki)
+## 1. CLI Code katalogs (28 rīki)
 
 Visi rīki, kas redzami sadaļā `/dashboard/cli-code`. Rīki ar `baseUrlSupport: none` tiek savienoti, izmantojot MITM vai manuālu pamācību, nevis pielāgotu bāzes URL:
 
@@ -172,6 +172,7 @@ Visi rīki, kas redzami sadaļā `/dashboard/cli-code`. Rīki ar `baseUrlSupport
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -268,7 +269,7 @@ Jaunajiem rīkiem ar `configType: "custom"` ir īpaši iestatījumu API maršrut
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, mantotais)                                     |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primārais + mantotā `~/.deepseek` sinhronizācija) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                         |
-| `POST /api/cli-tools/pi-settings`           | Pi programmēšanas aģents                                                      |
+| `POST /api/cli-tools/pi-settings`           | Pi programmēšanas aģents (`~/.pi/agent/models.json`, `providers.omniroute`)   |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                         |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + īpaša `.env` atslēga)                    |
 
@@ -374,7 +375,7 @@ pip install aider-chat
 cargo install smelt  # Balstīts uz Rust
 
 # Pi programmēšanas aģents
-# instalēšanas norādījumus skatiet vietnē https://github.com/zechnerj/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # instalēšanas norādījumus skatiet vietnē https://github.com/1jehuang/jcode
@@ -487,6 +488,38 @@ EOF
 
 > Izmantojiet `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`,
 > lai nosūtītu domāšanas variantus.
+
+---
+
+#### Pi Coding Agent
+
+Instalējiet oficiālo Pi Coding Agent pakotni ar `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi lasa pielāgotos nodrošinātājus no `~/.pi/agent/models.json`; iestatiet `PI_CODING_AGENT_DIR` uz absolūtu ceļu (vai ceļu ar prefiksu `~`), lai pārvietotu visu aģenta direktoriju. Panelis ievēro šo pārrakstījumu. Pi neatklāj modeļus no pielāgotiem galapunktiem, tāpēc OmniRoute ieraksta izvēlēto modeli `models[]`, izmantojot Pi `openai-completions` API un OmniRoute ar OpenAI saderīgo `/v1` galapunktu.
+
+Sadaļā **CLI Tools → Pi** izvēlieties galapunktu, API atslēgu un modeli, pārskatiet nodrošinātāja priekšskatījumu un lietojiet. Priekšskatījums ir nodrošinātāja fragments: manuāli konfigurējot Pi, apvienojiet `providers.omniroute` ar esošo `models.json`, lai citi nodrošinātāji un iestatījumi paliktu neskarti.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi atkārtoti ielādē `models.json`, kad atverat `/model`. Pārbaudiet konfigurēto maršrutu ar izvēlēto nodrošinātāja ID un modeļa ID:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Atsauces: [Pi modeļi un pielāgoti nodrošinātāji](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi vides mainīgie](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi instalēšanas norādījumi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API مؤلفههای داشبورد: آداپتورهایی بر روی `packages/ui-kit` — به `docs/architecture/DESIGN_SYSTEM.md` مراجعه کنید |
 | `constants/iconMap.ts`           | `ICON_MAP`: نام آیکونهای استفادهشده در صفحهها → مؤلفههای Lucide (`<Icon>`)                                       |
-| `constants/providers.ts`         | **۳۷۷ ارائهدهنده** با اعتبارسنجی Zod (منبع حقیقت)                                                                |
+| `constants/providers.ts`         | **۳۸۰ ارائهدهنده** با اعتبارسنجی Zod (منبع حقیقت)                                                                |
 | `constants/cliTools.ts`          | رجیستری ابزارهای CLI خارجی                                                                                       |
 | `constants/routingStrategies.ts` | **۲۰ راهبرد مسیریابی** با اولویتها                                                                               |
 | `constants/publicApiRoutes.ts`   | مسیرهایی که به احراز هویت Bearer (در مقابل مدیریتی) نیاز دارند                                                   |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | یکپارچهسازیهای CLI خارجی + CLI داخلی OmniRoute                                                      |
 | `I18N.md`                   | معماری i18n، افزودن زبان، ۶۷ لوکیل                                                                  |
 | `UNINSTALL.md`              | مراحل حذف نصب تمیز                                                                                  |
-| `PROVIDER_REFERENCE.md`     | کاتالوگ **تولیدشده بهصورت خودکار** از ۳۷۷ ارائهدهنده (تولید مجدد: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | کاتالوگ **تولیدشده بهصورت خودکار** از ۳۸۰ ارائهدهنده (تولید مجدد: `npm run gen:provider-reference`) |
 
 ### بررسیهای عمیق زیرسیستمها
 

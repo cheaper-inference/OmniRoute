@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ፋይል                            | ዓላማ                                       |
 | ------------------------------ | ----------------------------------------- |
-| `providerRegistry.ts`          | በ377 አቅራቢዎች ካታሎግ ላይ የተመሠረተ የውይይት ሞዴል መዝገብ |
+| `providerRegistry.ts`          | በ380 አቅራቢዎች ካታሎግ ላይ የተመሠረተ የውይይት ሞዴል መዝገብ |
 | `providerModels.ts`            | የሞዴል ተለዋጭ ስሞች፣ የቅርጸት ማዛመድ                 |
 | `constants.ts`                 | የጊዜ ገደቦች፣ ገደቦች፣ የሁኔታ ኮዶች                  |
 | `defaultThinkingSignature.ts`  | ነባሪ የClaude አስተሳሰብ ፊርማ                    |

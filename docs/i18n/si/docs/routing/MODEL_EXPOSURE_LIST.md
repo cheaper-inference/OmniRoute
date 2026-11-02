@@ -59,3 +59,15 @@
 `hidePaidModels` හි combo-step අපනයන පෙරහන මෙන් නොව, මෙහි නැවත සජලනය වීමේ අවදානමක් නොමැත:
 අපනයනය කළ combo පියවරක අන්තර්ගත ප්රතික්ෂේපිත id එකක් යනු ක්රියාකරුගේම පැහැදිලි මාර්ගගත කිරීමේ තේරීමක් මිස,
 අපනයන සීමාවේදී ඉවත් කළ යුතු දෙයක් නොවේ.
+
+## Combo පමණක් ලැයිස්තුගත කිරීම (`exposeCombosOnly`)
+
+Combo පොදු model මුහුණත වන අතර provider backend පමණක් වන deployment සඳහා වෙනම boolean විකල්පයකි; මෙයද කැමැත්තෙන් සක්‍රිය කළ යුතු අතර පෙරනිමිය `false` වේ. එය `true` විට public listing (`GET /v1/models`, `GET /v1` සහ `getUnifiedModelsResponse()` මත පදනම් වූ අනෙකුත් `/v1` discovery route) රඳවාගන්නේ `owned_by: "combo"` සහිත row පමණි: user combo සහ built-in `auto/*` combo (`hideAutoCombos` ඒවා සඟවන්නේ නැත්නම්). එය per-key `catalogScope: "combos"` භාවිත කරන එම row පරීක්ෂාවම යොදන අතර, key හි තමන්ගේ allow/deny/scope filter තවමත් ඊට අමතරව අදාළ වේ.
+
+**Settings → Routing → Models API listing** තුළ හෝ `PATCH /api/settings {"exposeCombosOnly": true}` මඟින් මෙය මාරු කරන්න.
+
+ඉහත ලැයිස්තු මෙන් මෙය වෙනස් කරන්නේ ලබාගත හැකි බව ප්‍රකාශ කිරීම පමණි:
+
+- පැහැදිලි `provider/model` ID තවමත් dispatch වන අතර `GET /v1/models/{id}` තවමත් එය resolve කරයි;
+- dashboard catalog (`GET /api/models/catalog`, model picker භාවිත කරන) පටු නොකරයි;
+- මෙය `auto/*` candidate pool තුළට පිළිබිඹු නොවන නිසා `auto/*` combo තම සම්පූර්ණ pool තබාගනී.

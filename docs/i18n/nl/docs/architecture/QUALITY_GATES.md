@@ -38,14 +38,7 @@ De ontvangstbewijzen bestrijken hun eigen workflow, niet publicatie, implementat
 van een bestaande adviserende scanner. Het verplicht stellen van de toepasselijke controles in branchregels
 is een afzonderlijke administratieve wijziging; het definiëren van hun jobs beschermt een branch niet op zichzelf.
 
-`API Route Typecheck` is een onafhankelijke workflowcontrole, buiten beide geaggregeerde eindoordelen
-en het statische profiel van de lokale volledige observer. Controleer het resultaat afzonderlijk voor de exacte
-kandidaat. `.github/workflows/api-route-typecheck.yml` wordt uitgevoerd voor PR's naar `main` of
-`release/**`, pushes naar een van beide branchfamilies en handmatige activering. Het bevat geen padfilter.
-Het opnieuw instellen van het PR-basisdoel vraagt om een nieuwe controle; wijzigingen aan de body/titel gebruiken de alleen voor observatie bestemde naam
-`Admission not requested / API Route Typecheck` en kunnen de toelatingscontrole niet vervangen.
-De workflow declareert geen trigger voor een mergegroep. Elke uitrol van een mergewachtrij waarvoor
-deze controle verplicht is, moet eerst de uitvoering ervan voor die gebeurtenis instellen.
+`API Route Typecheck` is een onafhankelijke workflowcontrole, buiten beide samengestelde oordelen en het statische profiel van de lokale volledige observer. Bekijk het resultaat afzonderlijk voor de exacte kandidaat. `.github/workflows/api-route-typecheck.yml` draait voor PR's naar `main` of `release/**`, pushes naar beide branchfamilies, handmatige dispatch en `merge_group`-events van het type `checks_requested`. Er is geen padfilter. Mergegroepen checken `merge_group.head_sha` uit; andere events checken `github.sha` uit. Alle events gebruiken dezelfde API-diagnostische gate en unittests van de gate. Een wijziging van de doelbranch van een PR vraagt een nieuwe controle aan; wijzigingen aan body/titel gebruiken de uitsluitend observerende naam `Admission not requested / API Route Typecheck` en kunnen de toelatingscontrole niet vervangen.
 
 ### Bewaard bewijs in de acceptatiereducer
 
@@ -61,6 +54,14 @@ zonder bewijs, een ontbrekend of gewijzigd bestand, een onveilig pad of een symb
 verificatie. Ontbrekende bestanden zijn niet gelijkwaardig aan lege, geslaagde logs. Bestaande
 controles van SHA/uitvoering/poging blijven onafhankelijk: overeenkomende bytes kunnen een verouderd
 ontvangstbewijs niet redden. Bestandsintegriteit is geen bewijs voor de authenticiteit van de uitvoering of de promotie van artefacten.
+
+### DAST gebruikt de geverifieerde CI-build
+
+De verplichte CI-job `dast-smoke` roept `.github/workflows/dast-smoke.yml` aan na `build`. Hij volgt dezelfde code-/conceptselectie als de build, inclusief ondersteunde fork-PR's, PR's naar een releasebranch en mergegroepen. Een ontbrekende, mislukte, geannuleerde of onverwacht overgeslagen DAST-job blokkeert `Gate / CI`. De herbruikbare workflow heeft geen zelfstandige PR-/dispatchtrigger; handmatige validatie gebruikt de dispatch van CI zodat build en afnemer in één run blijven.
+
+`scripts/ci/next-build-provenance.mjs` verzegelt het volledige Next-artifact met de tar-digest, repository/event/run, poging van de producer, head/base/checkout/tree, workflow-identiteiten, lockfile, exacte Node-versie/ABI, platform en bundler. DAST kiest de onveranderlijke artifact-ID uit `needs.build.outputs`, vereist verificatie van de download-digest en hasht de ZIP zelfstandig tegen de digest van de producer voordat de twee toegelaten onderdelen worden uitgepakt via `scripts/ci/unpack-ci-build.py`. Manifest en tar-archief moeten ook overeenkomen met onafhankelijke produceroutputs voordat de Next-tree wordt uitgepakt. Er wordt nooit naar de laatste geslaagde branchbuild gezocht. Een gedeeltelijke heruitvoering mag dezelfde producerpoging hergebruiken wanneer de ID en alle invoer nog overeenkomen; het bewijsrecord legt beide pogingen vast.
+
+De afnemer blijft op een gehoste Linux-runner met alleen leestoegang tot de repository en zonder repositorygeheimen. Hij installeert de exacte Node-versie van de producer en stelt vervolgens de CLI samen met `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` weigert een ontbrekende standalone-server vóór een eventuele fallbackbuild; normale lokale CLI-builds behouden hun bestaande fallback. Servergereedheid, Schemathesis en promptfoo moeten allemaal slagen binnen de ongewijzigde joblimiet van 25 minuten. Een herkomstbewijs bewijst de identiteit en bytes van de invoer, geen geslaagde DAST-scan. Een verlopen artifact, onderbroken runner of mislukte scanner blijft onvolledig of mislukt bewijs; een advisory-wrapper kan er geen PASS van maken.
 
 ### UI-uitvoeringscapaciteit
 
@@ -222,17 +223,24 @@ Wordt uitgevoerd bij elke PR naar `main`. Blokkeert samenvoegen bij een fout.
 
 Wordt uitgevoerd na `test-coverage`. Blokkeert samenvoegen bij een fout.
 
-| Script                       | Valideert                                                                                                                                                                                                                    | Blokkerend                               |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| `quality:collect`            | Genereert `quality-metrics.json` (aantal ESLint-waarschuwingen, dekking uit het samengevoegde shardrapport)                                                                                                                  | Ja (voorafgaand aan het ratelmechanisme) |
-| `quality:ratchet`            | Geen enkele metriek in `quality-baseline.json` is verslechterd (ESLint-waarschuwingen ≤ basislijn; dekking ≥ basislijn)                                                                                                      | Ja                                       |
-| `check:duplication`          | Codeduplicatie (jscpd@4) overschrijdt de basislijn in `quality-baseline.json` niet                                                                                                                                           | Ja                                       |
-| `check:complexity`           | Cyclomatische complexiteit op bestandsniveau overschrijdt de limiet niet (ESLint-kernregels `complexity` + `max-lines-per-function`)                                                                                         | Ja                                       |
-| `check:cognitive-complexity` | Ratelmechanisme voor cognitieve complexiteit (`eslint-plugin-sonarjs`) — afzonderlijke ESLint-uitvoering; CI voert beide samengevoegd uit als de ene stap `check:complexity-ratchets`                                        | Ja                                       |
-| `check:dead-code`            | Het ratelmechanisme voor ongebruikte exports/bestanden (knip) verslechtert niet ten opzichte van de basislijn                                                                                                                | Ja                                       |
-| `check:compression-budget`   | Budget voor compressiebenchmarks — minimale tokenbesparingen per engine mogen niet verslechteren                                                                                                                             | Ja                                       |
-| `check:type-coverage`        | Het ratelmechanisme voor het percentage getypeerde code (`type-coverage`) verslechtert niet; omvat `typecheck:noimplicit:core` grotendeels                                                                                   | Ja                                       |
-| `check:codeql-ratchet`       | Het aantal openstaande CodeQL-waarschuwingen neemt niet toe (uitgelezen via `gh api`; wordt zonder token zonder fout overgeslagen) — vernieuwingsfrequentie en handmatige activering: zie "CodeQL-ratelmechanisme" hieronder | Ja                                       |
+| Script                       | Valideert                                                                                                                                                                             | Blokkerend                               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `quality:collect`            | Genereert `quality-metrics.json` (aantal ESLint-waarschuwingen, dekking uit het samengevoegde shardrapport)                                                                           | Ja (voorafgaand aan het ratelmechanisme) |
+| `quality:ratchet`            | Geen enkele metriek in `quality-baseline.json` is verslechterd (ESLint-waarschuwingen ≤ basislijn; dekking ≥ basislijn)                                                               | Ja                                       |
+| `check:duplication`          | Codeduplicatie (jscpd@4) overschrijdt de basislijn in `quality-baseline.json` niet                                                                                                    | Ja                                       |
+| `check:complexity`           | Cyclomatische complexiteit op bestandsniveau overschrijdt de limiet niet (ESLint-kernregels `complexity` + `max-lines-per-function`)                                                  | Ja                                       |
+| `check:cognitive-complexity` | Ratelmechanisme voor cognitieve complexiteit (`eslint-plugin-sonarjs`) — afzonderlijke ESLint-uitvoering; CI voert beide samengevoegd uit als de ene stap `check:complexity-ratchets` | Ja                                       |
+| `check:dead-code`            | Het ratelmechanisme voor ongebruikte exports/bestanden (knip) verslechtert niet ten opzichte van de basislijn                                                                         | Ja                                       |
+| `check:compression-budget`   | Budget voor compressiebenchmarks — minimale tokenbesparingen per engine mogen niet verslechteren                                                                                      | Ja                                       |
+| `check:type-coverage`        | Het ratelmechanisme voor het percentage getypeerde code (`type-coverage`) verslechtert niet; omvat `typecheck:noimplicit:core` grotendeels                                            | Ja                                       |
+
+### Jobs: `codeql-scan` en `codeql-admission`
+
+`codeql-scan` produceert alle geconfigureerde analysecategorieën. Nadat die job slaagt, valideert `codeql-admission` de exacte uploads en de waarschuwingsratchet van de kandidaat. Beide zijn verplichte afhankelijkheden van `Gate / CI`, ook voor kandidaten met uitsluitend documentatie. De eisen voor administratieve activering en canary staan hieronder bij "CodeQL-ratchet".
+
+| Script                 | Valideert                                                                                                                                                                                                             | Blokkerend |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `check:codeql-ratchet` | Kandidaatref/SHA en alle geconfigureerde analysecategorieën moeten actueel zijn vóór de waarschuwingsratchet; ontbrekend bewijs blokkeert. De globale inventaris blijft afzonderlijk — zie "CodeQL-ratchet" hieronder | Ja         |
 
 ### Taak: `quality-extended`
 
@@ -507,31 +515,23 @@ Commit dit bestand samen met de wijziging die de metriek heeft verbeterd. Een PR
 metriek verbetert zonder de basislijn bij te werken, wordt onderschept door `--require-tighten` (Fase 6A.5,
 implementatie in behandeling).
 
-### CodeQL-ratchet: vernieuwingsfrequentie en handmatige trigger
+### CodeQL-ratchet: toelating van kandidaten en repository-inventaris
 
-`check:codeql-ratchet` leest **de status van de repository, die volgens een schema wordt vernieuwd — niet per PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` rapporteert
-`state: configured`, `schedule: weekly`: de standaardconfiguratiescan van GitHub, niet een
-analyse per push. Gevolg: nadat een PR die waarschuwingen OPLOST is gemerged, blijft de ratchet
-het oude, hogere aantal lezen totdat de volgende geplande scan wordt uitgevoerd — waardoor deze
-bij elke open PR een regressie rapporteert, inclusief bij vervolg-PR's van de reparerende PR zelf,
-totdat de scan is bijgewerkt.
+CI beheert de CodeQL-toelating van kandidaten via een expliciete afhankelijkheidsketen: `codeql-scan` roept de matrix met vier talen in `codeql.yml` aan, waarna `codeql-admission` `node scripts/check/check-codeql-ratchet.mjs --candidate` uitvoert. `Gate / CI` vereist beide resultaten. Quality behoudt zijn eigen numerieke controles, maar bevraagt de scanner niet voordat de producer klaar is; alleen `Gate / Quality` is geen volledige kandidaattoelating. CodeQL blijft verplicht voor kandidaten met uitsluitend documentatie.
 
-**Handmatig vernieuwen**: `gh workflow run codeql.yml --ref release/vX.Y.Z` voert de
-analyse opnieuw uit en publiceert de waarschuwingen binnen enkele minuten opnieuw. Lees eerst
-`.github/workflows/codeql.yml` — de header legt uit dat deze uitsluitend via `workflow_dispatch`
-wordt uitgevoerd **omdat dit conflicteert met de "default setup" van GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Voor het herstellen van `push`/`pull_request`/
-`schedule`-triggers is **eerst een actie van een eigenaar vereist**: Settings → Code security →
-CodeQL: Default → Advanced. Voeg geen `schedule:`-trigger toe zonder die omschakeling — dit
-levert alleen mislukte uitvoeringen op.
+Het beleid in `config/quality/codeql-admission-policy.json` kiest Actions, C/C++, JavaScript/TypeScript en Python, querysuite default, dreigingsmodel remote en buildmodus none. De voorafgaande producercontrole weigert een nog niet afgerond activeringsrecord en branches buiten de expliciete doellijst. De eerste doelen zijn main en release/v3.8.53; de volgende release vereist beoordeelde opname. De bestaande bredere CI-trigger voor release-PR's blijft behouden, maar een nog niet opgenomen doel meldt HOLD vóór extractie in plaats van een ongemeten PASS te krijgen.
 
-**Verscherp de basislijn nadat het aantal is afgenomen** — `node scripts/check/check-codeql-ratchet.mjs
---update` schrijft het nieuwe gemeten aantal naar `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, zodat de ratchet niet stilzwijgend een regressie tot aan
-de oude bovengrens toestaat. Uitgewerkt voorbeeld (2026-09-02/03): PR #12502 verhielp 7 echte waarschuwingen
-(13 → 6 gemeten openstaand); PR #12530 verscherpte de vastgelegde basislijn van 11 → 6 zodat deze overeenkwam;
-de resterende 6 werden vervolgens, met een rechtvaardiging per waarschuwing, verworpen tot er 0 openstonden.
+Elke matrixjob registreert de daadwerkelijke SARIF-upload-ID, taal, categorie, run en poging, identiteit van de aanroepende workflow, eventref/head/base/merge-SHA en beleidshash. De afhankelijke job downloadt alleen bewijsrecords van deze run en valideert artifact-digests. Alle vier categorieën, een geslaagde producer en voltooide verwerking van elke exacte upload zijn vereist. Hij gebruikt het sarif_id-filter van de API, niet de laatste analyse die op een branch wordt gevonden. Gedeeltelijke heruitvoeringen mogen geslaagde categorieën uit een eerdere poging van dezelfde run en kandidaat hergebruiken, met behoud van de producerpoging; een mislukte huidige producer mag eerder groen bewijs niet hergebruiken.
+
+De CodeQL-action wacht op verwerking, maar de vastgepinde implementatie kan waarschuwen en doorgaan na een fout bij het lezen van de status of een verstreken wachttijd. Daarom verifieert toelating de verwerking opnieuw. Ontbrekende categorieën, verwerking in afwachting, mislukte of geannuleerde jobs, verouderde identiteit, onvolledige paginering of onbeschikbare API's leveren HOLD en afsluitcode 2 op. Er blijft geen vaste wachttijd voor een onafhankelijke scannerworkflow over. Een niet-gescande PR kan niet slagen doordat een waarschuwingquery 0 retourneerde. Een gemeten aantal boven `metrics.codeqlAlerts.value` eindigt met code 1; de baseline wordt niet verhoogd om waarschuwingen van een andere branch op te nemen. [Uploadstatus en analyse opzoeken](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Het bewijsrecord bevat upload- en analyse-ID's, categorieën, toolversies, ref/SHA, baseline en aantallen waarschuwingen. SARIF-identiteit/resultaataantal, minimale aantallen regels en exacte waarschuwingsinstanties blijven verplicht. PR-/analyse-identiteiten worden vóór acceptatie opnieuw gecontroleerd. Deze controles stellen dekking van de geconfigureerde categorieën vast, geen inventaris van elk geëxtraheerd bronbestand. C/C++-extractie zonder build omvat geen code die tijdens een projectbuild wordt gegenereerd. Bronuitsluitingen blijven beoordeling vereisen, en toeschrijving aan een bijdrager vereist vergelijkbaar bewijs voor de exacte basis.
+
+`codeql-maintenance.yml` levert pushscans voor de actieve release en de wekelijkse planning zonder PR/main-producers te dupliceren. `nightly-codeql-inventory.yml` houdt de repositorybrede baseline afzonderlijk, met `--strict-measurement` en een fout wanneer meting niet beschikbaar is. Het netjes overslaan door de lokale legacycollector is geen kandidaattoelating. Aanscherpen blijft een expliciete `--update` na verificatie van een lager globaal aantal.
+
+De Advanced-workflow mag niet worden gepubliceerd zolang Default Setup is geconfigureerd: GitHub weigert die combinatie. Het geversioneerde beleid blijft in afwachting totdat de beoordeelde administratieve overgang is teruggelezen. Vóór publicatie legt een operator repository, head/base/tree, policy-/patch-/rollbackhashes en de waargenomen setupstatus vast; `node scripts/quality/codeql-producer.mjs verify-admin-readback` controleert de aangeleverde verwachte en werkelijke JSON-records. Dit is een technische beveiliging, geen operatorgoedkeuring of vervanging voor het ophalen van actuele teruglezingen. Het PR-token vraagt nooit Administration-toegang. Uitrol en elke scannerwijziging vereisen die afzonderlijke teruglezing plus echt compatibiliteitsbewijs voor PR's, forks en mergegroepen.
+
+Forks gebruiken gehoste runners, checkout zonder opgeslagen credentials, geen projectinstallatie/build in de producer en geen overgenomen repositorygeheimen. GitHub ondersteunt SARIF-upload voor het pull_request-event met het beperkte forktoken; goedkeuring van uitvoering bij een eerste bijdrage blijft GitHub-beleid. Gebruik nooit pull_request_target om niet-vertrouwde code uit te voeren. Bevestig de feitelijke tokenrechten, analysis_key en alle categorieomgevingen in de gecontroleerde canary voordat de migratie als voltooid wordt beschouwd. [Regels voor forkuploads](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [conflicterende setupmodi](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Verwerpingen zijn de beslissing van de operator (Harde regel #14)** — verwerp nooit een CodeQL-waarschuwing
 zonder de technische rechtvaardiging vast te leggen in de verwerpingsopmerking: `won't fix` voor
@@ -688,11 +688,7 @@ heeft de volgende kandidaten voor rationalisatie opgeleverd. **De samenvoegingen
 mechanische CI-wijzigingen; de omzettingen/verwijderingen zijn beleidsbeslissingen die
 aan de operator zijn voorbehouden.** Niets van het onderstaande is al toegepast.
 
-**Hierboven eveneens niet gedocumenteerd** (adviserend, weinig signaal): de `docs-lint`-job
-(markdownlint + Vale, volledige job met `continue-on-error`) en de zelfstandige scannerworkflows
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` staat in
-`quality-baseline.json`, maar is niet gekoppeld aan een blokkerende ratchet in `ci.yml` — de metriek
-is momenteel verweesd.
+**Hierboven eveneens niet gedocumenteerd** (advisory, beperkt signaal): de job `docs-lint` (markdownlint + Vale, de hele job `continue-on-error`) en de zelfstandige scannerworkflows `semgrep.yml` / `scorecard.yml`. CodeQL heeft nu verplichte producer- en toelatingsjobs onder `Gate / CI`, onder voorbehoud van de hierboven beschreven activeringseisen. `semgrepFindings: 0` staat in `quality-baseline.json`, maar is niet verbonden met een blokkerende ratchet in `ci.yml` — de metriek is momenteel verweesd.
 
 ### Samenvoegen / dedupliceren (mechanisch, lager risico)
 

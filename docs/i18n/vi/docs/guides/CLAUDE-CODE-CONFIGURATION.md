@@ -42,6 +42,10 @@ tùy chỉnh bằng các biến môi trường (không có cờ `--base-url`):
 
 > Các biến môi trường chỉ được đọc **một lần khi khởi động** — hãy khởi động lại Claude Code sau khi thay đổi chúng.
 
+Đối với thông tin xác thực được luân phiên thay vì một chuỗi cố định, hãy đặt `apiKeyHelper` trong `~/.claude/settings.json` thành lệnh in thông tin xác thực hiện tại ra stdout. Claude Code mặc định lưu đầu ra vào bộ nhớ đệm trong năm phút (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ghi đè khoảng thời gian này) và gửi giá trị trong cả `Authorization: Bearer` lẫn `x-api-key`. Script phải chỉ in thông tin xác thực — thêm một dòng giới thiệu sẽ làm trình trợ giúp thất bại trên v2.1.227+.
+
+Entra ID SSO hoạt động theo cách này: `scripts/cli/omniroute-sso.mjs token` in token truy cập Entra có thời hạn ngắn để OmniRoute xác minh thay cho khóa API. Xem [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` thiết lập tất cả các biến này cho bạn: lệnh này phân giải URL cơ sở + token
 từ ngữ cảnh đang hoạt động (vì vậy, sau khi chạy `omniroute connect <vps>` rồi `omniroute launch`,
 mọi thứ sẽ tự hoạt động), kiểm tra tình trạng máy chủ và thực thi `claude`.

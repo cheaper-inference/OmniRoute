@@ -10,7 +10,7 @@
 
 | الصفحة                 | المسار                  | المفهوم                                                               | العدد      |
 | ---------------------- | ----------------------- | --------------------------------------------------------------------- | ---------- |
-| **أدوات CLI البرمجية** | `/dashboard/cli-code`   | أدوات برمجة توجهها إلى OmniRoute (العميل ← CLI ← OmniRoute ← المزوّد) | 27         |
+| **أدوات CLI البرمجية** | `/dashboard/cli-code`   | أدوات برمجة توجهها إلى OmniRoute (العميل ← CLI ← OmniRoute ← المزوّد) | 28         |
 | **وكلاء CLI**          | `/dashboard/cli-agents` | وكلاء مستقلون توجههم إلى OmniRoute (التدفق نفسه، بنطاق أوسع)          | 11         |
 | **وكلاء ACP**          | `/dashboard/acp-agents` | أدوات CLI يشغّلها OmniRoute كواجهة خلفية عبر stdio/ACP (تدفق عكسي)    | راجع السجل |
 
@@ -146,7 +146,7 @@ OmniRoute بعيد)، و`--dry-run` (للمعاينة دون كتابة)، و`--
 
 ---
 
-## 1. كتالوج CLI Code ‏(27 أداة)
+## 1. كتالوج CLI Code ‏(28 أداة)
 
 جميع الأدوات التي تظهر في `/dashboard/cli-code`. الأدوات التي تحمل `baseUrlSupport: none` تُربط عبر MITM أو دليل يدوي بدلًا من عنوان URL أساسي مخصص:
 
@@ -173,6 +173,7 @@ OmniRoute بعيد)، و`--dry-run` (للمعاينة دون كتابة)، و`--
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -269,7 +270,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI ‏(OPENAI_BASE_URL، قديم)                               |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale ‏(OPENAI_BASE_URL، أساسي + مزامنة قديمة مع `~/.deepseek`) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                               |
-| `POST /api/cli-tools/pi-settings`           | وكيل البرمجة Pi                                                     |
+| `POST /api/cli-tools/pi-settings`           | وكيل البرمجة Pi (`~/.pi/agent/models.json`, `providers.omniroute`)  |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build ‏(~/.grok/config.toml، `[model.omniroute]`)              |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code ‏(`~/.qwen/settings.json` + مفتاح `.env` مخصص)            |
 
@@ -375,7 +376,7 @@ pip install aider-chat
 cargo install smelt  # مستند إلى Rust
 
 # وكيل البرمجة Pi
-# راجع https://github.com/zechnerj/pi-coding-agent لمعرفة كيفية التثبيت
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # راجع https://github.com/1jehuang/jcode لمعرفة كيفية التثبيت
@@ -488,6 +489,40 @@ EOF
 
 > استخدم `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > لإرسال متغيرات التفكير.
+
+---
+
+#### Pi Coding Agent
+
+ثبّت حزمة Pi Coding Agent الرسمية باستخدام `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. يقرأ Pi المزوّدين المخصصين من `~/.pi/agent/models.json`؛ واضبط `PI_CODING_AGENT_DIR` على مسار مطلق (أو مسار يبدأ بـ`~`) لنقل دليل الوكيل كاملًا. تتبع لوحة التحكم هذا التجاوز. لا يكتشف Pi النماذج من نقاط النهاية المخصصة، لذا يكتب OmniRoute النموذج المحدد في `models[]` باستخدام API `openai-completions` الخاص بـPi ونقطة نهاية OmniRoute المتوافقة مع OpenAI وهي `/v1`.
+
+في **أدوات CLI → Pi**، اختر نقطة نهاية ومفتاح API ونموذجًا، وراجع معاينة المزوّد، ثم طبّق. المعاينة مقطع لمزوّد: ادمج `providers.omniroute` في `models.json` الموجود عند إعداد Pi يدويًا، للحفاظ على المزوّدين والإعدادات الأخرى.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+يعيد Pi تحميل `models.json` عند فتح `/model`. اختبر المسار المضبوط بمعرّف المزوّد ومعرّف النموذج اللذين اخترتهما:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+المراجع: [نماذج Pi والمزوّدون المخصصون](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)،
+[متغيرات بيئة Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)،
+[تعليمات تثبيت Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

@@ -13,7 +13,7 @@
 
 ## Abin Da Yake
 
-OmniRoute tana rajistar masu samarwa 377, ciki har da shigarwar katalogi 155 da aka yi wa alama **kyauta/no-auth**
+OmniRoute tana rajistar masu samarwa 380, ciki har da shigarwar katalogi 155 da aka yi wa alama **kyauta/no-auth**
 (no-auth,
 OAuth na matakin kyauta, ko API key na matakin kyauta — duba
 [Jagorar Matakan Kyauta](../getting-started/FREE-TIERS-GUIDE.md) da cikakken

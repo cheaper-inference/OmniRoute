@@ -571,7 +571,8 @@ Aizsargmehānisms nekad nebloķē; tas tikai anotē (`meta.detections`, `meta.re
 
 **Vadības panelis → Iestatījumi → Drošība → PII maskēšana** izvēlas, _kas_ tiek maskēts. Tas neieslēdz maskēšanu: to joprojām nosaka `PII_REDACTION_ENABLED` (pieprasījums) un `PII_RESPONSE_SANITIZATION` (atbilde + SSE), kas abi pēc noklusējuma ir izslēgti.
 
-- **Atlase pēc tipa** — iebūvētie identifikatori ir uzskaitīti `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Ja nav iestatīts, tiek izmantoti visi tipi (uzvedība, kāda bija pirms šī iestatījuma pastāvēšanas). Pieprasījumu dzinēja `ssn_us` šablons tiek kartēts uz `ssn`. Veidnes (Minimal, Standard, Financial, Brazilian, USA, Full) tikai aizpilda izvēles rūtiņas lietotāja saskarnē.
+- **Atlase pēc tipa** — iebūvētie identifikatori ir uzskaitīti `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Ja nav iestatīts, tiek izmantoti visi tipi (uzvedība, kāda bija pirms šī iestatījuma pastāvēšanas). Pieprasījumu dzinēja `ssn_us` šablons tiek kartēts uz `ssn`. Veidnes (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) tikai aizpilda izvēles rūtiņas lietotāja saskarnē.
+- **GDPR un POPIA identifikatori** — divpadsmit iebūvēti ID ES un Dienvidāfrikas personas identifikatoriem (tabula tālāk). To regulārās izteiksmes, validatori un jurisdikciju birkas atrodas vienā tabulā `src/shared/utils/piiPatterns.ts`, ko izmanto gan atbildes attīrītājs (`src/lib/piiSanitizer.ts`), gan pieprasījuma maskētājs (`src/shared/utils/inputSanitizer.ts`). Atbilstību aizklāj tikai tad, ja validators to pieņem; ar vienkāršu ciparu virkni nekad nepietiek. Operators, kurš saglabājis sašaurinātu atlasi pirms šo ID parādīšanās, saglabā iepriekšējo darbību, līdz atzīmē jaunos ID.
 - **Pielāgotie šabloni** — līdz 20 regulāro izteiksmju vai aizstājējzīmju šabloniem (`*` = līdz 64 rakstzīmēm bez atstarpēm, `?` = viena). Atbilstības kļūst par `[CUSTOM_REDACTED]`. Katrs šablons iet caur `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): ne vairāk kā 500 rakstzīmes, karodziņi ierobežoti līdz `g i m s u`, tam ir jākompilējas, jāiztur `safe-regex` pārbaude (katastrofālā atgriezeniskā meklēšana) un tas nedrīkst atbilst tukšai virknei vai slēpšanas vietturim. Šablons, kas neiztur pārbaudi, tiek noraidīts gan saglabājot, gan testējot, un saglabāta rinda, kas neiztur pārbaudi, izpildlaikā tiek izlaista, nevis kompilēta. Pielāgotie šabloni darbojas tikai, kamēr maskēšana ir ieslēgta.
 - **Konstatējumu skaitītāji** — skaitļi pa tipiem (nekad atbilstošās vērtības), kas tiek turēti atmiņā un atiestatīti pārstartējot (`src/lib/pii/piiDetectionStats.ts`). Tie palielinās tikai, kamēr maskēšana ir ieslēgta.
 
@@ -584,6 +585,25 @@ Iestatījumi atrodas tabulā `key_value` (nosaukumvieta `pii_settings`, `src/lib
 | `POST` | `/api/settings/pii/test` | Testa izpilde vienam šablonam pret paraugu, kas nepārsniedz 8 KB; nekas netiek saglabāts |
 
 Visas trīs prasa pārvaldības autentifikāciju un pārbauda pieprasījuma ķermeni ar Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR (ES) un POPIA (Dienvidāfrika) identifikatori
+
+| ID                  | Identifikators                 | Pārbaude                                                                               |
+| ------------------- | ------------------------------ | -------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                           | Zināma valsts, precīzs šīs valsts garums, ISO 13616 MOD-97-10                          |
+| `eu_vat`            | ES PVN numurs                  | Zināms dalībvalsts prefikss un šīs valsts numura formāts (bez VIES vaicājuma)          |
+| `es_dni_nie`        | Spānijas DNI / NIE             | Kontrolburts (vērtība mod 23); NIE ir `X/Y/Z` + 7 cipari                               |
+| `it_codice_fiscale` | Itālijas Codice Fiscale        | Kontrolburts no nepāra/pāra pozīciju tabulām                                           |
+| `pl_pesel`          | Polijas PESEL                  | Svērta kontrolsumma un ticami kodētā dzimšanas mēneša/dienas diapazoni                 |
+| `nl_bsn`            | Nīderlandes BSN                | 11 pārbaude (svari 9..2, -1)                                                           |
+| `de_steuer_id`      | Vācijas Steuer-ID              | ISO 7064 Mod 11,10 un ciparu struktūras noteikumi (bez sākuma 0)                       |
+| `se_personnummer`   | Zviedrijas personnummer        | Luhn pēdējiem desmit cipariem un ticams dzimšanas datums (10 vai 12 cipari)            |
+| `za_id`             | Dienvidāfrikas ID numurs       | Luhn visiem 13 cipariem, derīgs dzimšanas mēnesis/diena, pilsonības cipars 0 vai 1     |
+| `za_phone`          | Dienvidāfrikas tālrunis        | Prefikss `+27` / `27` vai nacionālā forma `0..` ar atstarpi vai defisi                 |
+| `za_vat`            | Dienvidāfrikas PVN numurs      | 10 cipari, kas sākas ar `4`, **un** "VAT" / "BTW" iepriekšējās 48 rakstzīmēs           |
+| `za_tax_ref`        | Dienvidāfrikas nodokļu atsauce | 10 cipari, kas sākas ar `0`-`3`, Luhn **un** "tax" / "SARS" iepriekšējās 48 rakstzīmēs |
+
+Tā kā tikai ciparu formāti sakrīt ar pasūtījumu numuriem, būvējumu numuriem un laika zīmogiem, vājākajiem (`za_vat`, `za_tax_ref`) vajadzīgs atslēgvārda signāls, un vienkāršs desmitciparu `0..` numurs netiek uzskatīts par Dienvidāfrikas tālruni. IBAN ar atstarpēm (`GB29 NWBK ...`) netiek atpazīti. Straumēšanas ceļā signālu meklē tikai pašreizējā gabalā. ID ir pirms vispārīgajiem tālruņu šabloniem, tāpēc pārbaudīts identifikators saglabā savu vietturi (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Veidnes `gdpr` un `popia` izvēlas attiecīgi ES un Dienvidāfrikas ID. Pati maskēšana paliek ieslēdzama pēc izvēles (Hard Rule #20): nekas šeit nemaina funkcijas karodziņa noklusējumu.
 
 ### Uzvednes injekcija (`promptInjection.ts`)
 

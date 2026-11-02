@@ -160,9 +160,10 @@ Klas ụzọ ọ bụla nwere policy na `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — na-eweghachi `allow({ kind: "anonymous", id: "anonymous" })` mgbe niile.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — na-ewepụta Bearer, wee jiri `validateApiKey()` nyochaa ya. Ọ na-adaba na anonymous naanị mgbe agbanyụrụ ọkọlọtọ atụmatụ `REQUIRE_API_KEY` dị irè. A na-ekpebi ọkọlọtọ dị irè site na `isRequireApiKeyEnabled()` (`mgbanwe ọkọlọtọ atụmatụ DB > process.env.REQUIRE_API_KEY > uru ndabara`) ka Dashboard Feature Flags na environment variables nwee ike ịchịkwa `/api/v1/*`, `/api/v1beta/*`, na aha nnọchi n'otu ụzọ; ọdịda resolver na-eme ka usoro ahụ jụ arịrịọ. Ọ na-ekwe arịrịọ oge nnọkọ dashboard n'ụzọ client API (gụnyere `/api/v1/models`, nke katalọgụ model dashboard na-eji).
+  Mgbe agbanyere Entra ID SSO, Bearer nwere nhazi token Entra (akụkụ base64url atọ, algọridim `RS*`, `kid`) na-aga n’alaka SSO **tupu** `validateApiKey()`, mkpebi alaka ahụ bụkwa nke ikpeazụ. Ọ naghị aga n’ụzọ igodo API ma ọ bụ n’alaka na-agbanwe onye ahụ ka ọ bụrụ onye amaghị aha. Ya mere, nkwụsị ọrụ nke onye na-enye njirimara enweghị ike ime ka ohere banye bụrụ nke ghe oghe. Nke a anaghị emetụta igodo API ndị na-adịgide. Lee [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — na-anabata oge nnọkọ dashboard, arịrịọ model-sync ime (nke e jiri `/api/providers/[name]/(sync-models|models)` tụnyere), ma ọ bụ na-awụfe kpamkpam ma ọ bụrụ na `isAuthRequired()` weghachiri false. Ọ na-eweghachi 403 (`AUTH_001`) mgbe token Bearer dị mana ọ bụghị nke ziri ezi, ma ọ bụghị ya ọ na-eweghachi 401. Ọ na-amanyekwa ọkwa route-guard (LOCAL_ONLY / ALWAYS_PROTECTED) tupu ngalaba nkwenye njirimara ọ bụla — lee [Ọkwa Route Guard](../security/ROUTE_GUARD_TIERS.md). Enwere ike ịnweta ụzọ LOCAL_ONLY dị na `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ugbu a: `/api/mcp/`) site na ebe na-abụghị loopback mgbe igodo Bearer nwere scope `manage`; ụzọ LOCAL_ONLY ndị ọzọ niile ga-anọgide na-achọ loopback kpọmkwem n'agbanyeghị scope.
 
-Policy gara nke ọma na-eweghachi `AuthSubject` nwere `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Ndị handler nọ n'okpuru nwere ike iji `assertAuth(request, "CLIENT_API")` dị na `src/server/authz/assertAuth.ts` gụọ ya kama ịmegharị logic nkwenye njirimara ọzọ.
+Policy gara nke ọma na-eweghachi `AuthSubject` nwere `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Ndị handler nọ n'okpuru nwere ike iji `assertAuth(request, "CLIENT_API")` dị na `src/server/authz/assertAuth.ts` gụọ ya kama ịmegharị logic nkwenye njirimara ọzọ.
 
 ## Ndepụta Ụzọ Ọha
 
@@ -320,8 +321,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Maka arịrịọ ndị enyochala njirimara ha, nkụnye isi arịrịọ upstream (n'akụkụ handler) na-agụnyekwa:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (nhọrọ)
 x-omniroute-auth-scopes:    ndepụta e ji rikoma kewaa
 ```

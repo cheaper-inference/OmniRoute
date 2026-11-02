@@ -488,7 +488,7 @@ Time se obrađuju:
 
 | Datoteka                      | Svrha                                                 |
 | ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Registar modela za razgovor za katalog 377 pružatelja |
+| `providerRegistry.ts`         | Registar modela za razgovor za katalog 380 pružatelja |
 | `providerModels.ts`           | Aliasi modela, mapiranje formata                      |
 | `constants.ts`                | Vremenska ograničenja, limiti, statusni kodovi        |
 | `defaultThinkingSignature.ts` | Zadani Claudeov potpis razmišljanja                   |

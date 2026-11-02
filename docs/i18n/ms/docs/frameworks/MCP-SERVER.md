@@ -313,12 +313,12 @@ Katalog alat ialah [Skop alat MCP](#mcp-tool-scopes).
 Kedudukan tersebut ialah `scopeSatisfies`. Ia tidak merujuk jadual MCP dan pemadan MCP
 juga tidak merujuknya.
 
-| Ruang nama           | Kelayakan                                                            | Pemeriksa                        | Kelulusan membolehkan                                                     |
-| :------------------- | :------------------------------------------------------------------- | :------------------------------- | :------------------------------------------------------------------------ |
-| Pengurusan kunci API | `api_keys.scopes`                                                    | `hasManageScope`                 | REST pengurusan untuk kunci Bearer tersebut                               |
-| Tambahan kunci API   | tatasusunan yang sama, satu rentetan tepat                           | pembantu yang dinamakan di bawah | Hanya keupayaan itu sahaja                                                |
-| Skop alat MCP        | tatasusunan yang sama, atau MCP `_meta`, atau `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                   | Alat tersebut, setelah penguatkuasaan diaktifkan                          |
-| Token akses          | `oma_live_…`                                                         | `scopeSatisfies`                 | Laluan pengurusan yang kaedah dan laluannya memerlukan kedudukan tersebut |
+| Ruang nama           | Kelayakan                                                                                          | Pemeriksa                        | Kelulusan membolehkan                                                     |
+| :------------------- | :------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------------------------------------ |
+| Pengurusan kunci API | `api_keys.scopes`                                                                                  | `hasManageScope`                 | REST pengurusan untuk kunci Bearer tersebut                               |
+| Tambahan kunci API   | tatasusunan yang sama, satu rentetan tepat                                                         | pembantu yang dinamakan di bawah | Hanya keupayaan itu sahaja                                                |
+| Skop alat MCP        | tatasusunan yang sama, jika tidak `_meta` MCP (HTTP/SSE sahaja), jika tidak `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                   | Alat tersebut, setelah penguatkuasaan diaktifkan                          |
+| Token akses          | `oma_live_…`                                                                                       | `scopeSatisfies`                 | Laluan pengurusan yang kaedah dan laluannya memerlukan kedudukan tersebut |
 
 Penciptaan setiap kelayakan diterangkan dalam
 [Pengesahan Pengurusan](../guides/MANAGEMENT-AUTH.md).
@@ -367,7 +367,10 @@ Penguatkuasaan dimatikan melainkan `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (lalai
 `false`). Semasa ia dimatikan, `evaluateToolScopes` membenarkan panggilan dan melangkau
 katalog. Semasa ia diaktifkan, HTTP menggunakan `api_keys.scopes` milik kunci Bearer sebagai
 `authInfo` (lihat [Pengikatan skop HTTP bagi setiap kunci](#per-key-http-scope-binding-7895)).
-Apabila tiada skop kunci dapat ditentukan, set yang diberikan beralih kepada MCP `_meta`, kemudian
+Apabila tiada skop kunci yang dapat diselesaikan, set yang diberikan berpelan
+turun ke `_meta` MCP (dihormati hanya untuk pemanggil HTTP/SSE, dalam konteks
+pengesahan HTTP; `_meta` pemanggil stdio diabaikan kerana klien mengawalnya dan
+ia tidak membawa identiti setiap pemanggil), kemudian
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Skop token akses
@@ -465,8 +468,7 @@ dan menyerahkannya kepada `transport.handleRequest(req, { authInfo })` SDK MCP, 
 sandaran `_meta` dan pemboleh ubah persekitaran `OMNIROUTE_MCP_SCOPES` — perubahan ini hanya mengisi sumber pertama
 yang berkeutamaan tertinggi itu, yang sebelum ini tidak dibekalkan melalui HTTP. Apabila tiada kunci API dapat
 dikenal pasti (tiada pengepala, kunci tidak sah), `authInfo` kekal `undefined` dan proses penyelesaian beralih kepada
-rantaian `meta`/persekitaran sedia ada tanpa perubahan. stdio tidak mempunyai identiti khusus pemanggil (lihat
-`mcpCallerIdentity.ts`) dan tidak terjejas — ia kekal menggunakan rantaian sandaran `_meta`/persekitaran.
+rantaian `meta`/persekitaran sedia ada tanpa perubahan. stdio tiada identiti pemanggil individu (lihat `mcpCallerIdentity.ts`) dan tidak terjejas oleh pengikatan mengikut kunci — ia melangkau langkah `_meta` (`_meta` hanya dihormati dalam konteks auth HTTP, #15159) dan menyelesaikannya daripada kunci env `OMNIROUTE_MCP_SCOPES` sahaja.
 
 **Penguatkuasaan diwajibkan untuk pemanggil HTTP/SSE berskop terhad tanpa mengira
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Nilai lalai `false` bagi `OMNIROUTE_MCP_ENFORCE_SCOPES` hanya

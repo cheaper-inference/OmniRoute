@@ -29,6 +29,7 @@ OpenAI-අනුකූල ප්රොටෝකෝලය සහ සැපයු�
 - [WebSocket ප්රවාහය](#websocket-streaming)
 - [කෝටා සහ ගැටලු වාර්තාකරණය](#quotas--issues-reporting)
 - [අර්ථකථන හැඹිලිය](#semantic-cache)
+- [CLIProxyAPI කළමනාකරණ අනුකූලතාව](#cliproxyapi-management-compatibility)
 - [උපකරණ පුවරුව සහ කළමනාකරණය](#dashboard--management)
 - [සංයෝජන කළමනාකරණය](#combo-management)
 - [Webhooks](#webhooks)
@@ -1006,6 +1007,18 @@ completion එක stream කරයි.
 
 **සත්යාපනය:** Bearer API යතුර (`isAuthenticated`).
 
+### Quota අවසන් වූ session ප්‍රතිසාධනය (කැමැත්තෙන් සක්‍රිය කළ යුතුයි)
+
+Streaming නොවන `POST /v1/chat/completions` හෝ `POST /v1/responses` request එකක් terminal quota error එකකින් අසාර්ථක වුවහොත් (`402`/`429`/`503`, එහි body quota හෝ credits අවසන් බව කියයි), error ආපසු දීම වෙනුවට එය රඳවා පසුව replay කළ හැක. Caller එක් එක් request සඳහා header තුනකින් මෙය කැමැත්තෙන් සක්‍රිය කරයි:
+
+| Header                       | අගය                                    |
+| ---------------------------- | -------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                 |
+| `x-omniroute-session`        | session ID, `[A-Za-z0-9._:-]{1,128}`   |
+| `x-omniroute-recovery-turn`  | session තුළ අනන්‍ය turn ID (එම නීතියම) |
+
+Tool, tool history හෝ `previous_response_id` නොමැති, `x-omniroute-connection` pin නොමැති `stream: false` turn පමණක් සුදුසුය; `STORAGE_ENCRYPTION_KEY` සැකසී තිබිය යුතුය (request උපරිම 24 h encrypted ලෙස ගබඩා කරයි). එවිට response `202` සහ `recovery.poll` සමඟ ලැබේ; `GET /v1/quota-recoveries/{id}` poll කරන්න (pending විට `202`, අවසන් විට ප්‍රතිසාධිත body සමඟ `200`), නැතිනම් `DELETE` මඟින් අවලංගු කරන්න. Ticket පෙනෙන්නේ ඒවා නිර්මාණය කළ API key එකට පමණි. ප්‍රතිඵලය අවිනිශ්චිත replay එකක් දෙවරක් යැවීම වෙනුවට `needs_confirmation` හි අවසන් වේ. මූලාශ්‍රය: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## ස්වයං-සේවා භාවිතය (`/api/usage/om-usage`)
@@ -1174,6 +1187,28 @@ API යතුරුවලට `cacheDefaultMode` හරහා අර්ථාන�
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI කළමනාකරණ අනුකූලතාව
+
+Claude සහ Codex subscription සීමා කියවීමට usage dashboard අමතන [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) management endpoint තුනට OmniRoute පිළිතුරු දෙයි (උදාහරණයක් ලෙස T3 Code හි `cliproxy` usage-limit source). Client හි base URL OmniRoute වෙත යොමු කර, `manage` scope සහිත API key එක එහි management key ලෙස භාවිත කරන්න. Route `/v0/management/*` සහ `/api/v0/management/*` යටතේ සේවය කරයි.
+
+| ක්‍රමය | මාර්ගය                       | විස්තරය                                                                                                                                |
+| ------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude සහ Codex OAuth connection, `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` ලෙස. Token නැත                |
+| POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. අවසර ලැයිස්තුවේ request එකක් account token සමඟ යවා `{ status_code, body }` ලබාදෙයි |
+| POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. එක් account එකක connection cooldown, model lockout සහ Codex හි scope අනුව cooldown ඉවත් කරයි                    |
+
+- `auth_index` යනු OmniRoute connection ID යි. `provider` යනු `claude` හෝ `codex` යි (OAuth connection පමණි; `anthropic` API-key provider ලැයිස්තුගත නොවේ). Codex සඳහා `id_token.chatgpt_account_id` ගබඩා කළ workspace ID වන අතර `plan_type` ගබඩා කළ plan වේ.
+- `api-call` සාමාන්‍ය proxy එකක් නොවේ. එය Claude `GET
+https://api.anthropic.com/api/oauth/usage` සහ Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume` පමණක් පිළිගනී; එක් එක් එක ගැළපෙන provider ගේ account සඳහා පමණි. අන් සියල්ල upstream අමතන්නේ නැතිව `403` ලබාදෙයි. Caller හි `Authorization` header (`$TOKEN$` placeholder ඇතුළුව) නොසලකා හරියි: OmniRoute connection හි access token ඇතුළත් කරයි, කල් ඉකුත් වීමට ආසන්න නම් මුලින් refresh කරයි, අවසර ලැයිස්තුවේ header පමණක් ඉදිරියට යවයි (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` නොමැති නම් ගබඩා කළ workspace ID පෙරනිමිය වේ. පළමු upstream response `401` නම් එක් වරක් refresh කර, access token වෙනස් වුවහොත් පමණක් නැවත උත්සාහ කරයි. සෑම upstream උත්සාහයකටම තත්පර 15 ක timeout ඇති අතර connection හි proxy භාවිත කරයි.
+- `reset-quota` terminal තත්ත්ව (banned, expired, credits_exhausted) වෙනස් නොකරයි. නොදන්නා `auth_index` සඳහා `404` ලැබේ.
+
+**අනන්‍යතාව තහවුරු කිරීම:** dashboard session හෝ `manage` scope සහිත API key, login අක්‍රිය වුවද අනිවාර්යය (මාර්ග `ALWAYS_PROTECTED_API_PATHS` තුළ ඇත). Inference-only key වලට `403` ලැබේ. මූලාශ්‍රය: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

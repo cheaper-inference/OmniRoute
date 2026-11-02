@@ -572,7 +572,8 @@ múchta de réir réamhshocraithe.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Mura socraítear é, ciallaíonn sé gach
   cineál (an t-iompar a bhí ann sular cuireadh an socrú seo leis). Mapálann patrún
   `ssn_us` inneall an iarratais go `ssn`. Ní dhéanann teimpléid (Íosta, Caighdeánach, Airgeadais,
-  Brasaíleach, SAM, Iomlán) ach na ticbhoscaí sa chomhéadan úsáideora a líonadh.
+  Brasaíleach, SAM, GDPR, POPIA, Iomlán) ach na ticbhoscaí sa chomhéadan úsáideora a líonadh.
+- **Aitheantóirí GDPR agus POPIA** — dhá ID déag ionsuite a chlúdaíonn aitheantóirí pearsanta an AE agus na hAfraice Theas (tábla thíos). Tá a slonn rialta, a mbailíochtóirí agus a gclibeanna dlínse in aon tábla amháin, `src/shared/utils/piiPatterns.ts`, a úsáideann glantóir na bhfreagraí (`src/lib/piiSanitizer.ts`) agus mascóir na n-iarratas (`src/shared/utils/inputSanitizer.ts`) araon. Ní cheiltear meaitseáil ach nuair a ghlacann a bailíochtóir léi; ní leor rith lom digití choíche. Coinníonn oibreoir a shábháil roghnú cúngaithe sula raibh na IDanna seo ann an t-iompar a bhí aige go dtí go gcuirtear tic leis na IDanna nua.
 - **Patrúin shaincheaptha** — suas le 20 patrún slonn ionadaíochta nó saoróg (`*` = suas le 64
   carachtar nach spás bán iad, `?` = ceann amháin). Déantar `[CUSTOM_REDACTED]` de na meaitseálacha.
   Téann gach patrún trí `compilePiiCustomPattern()`
@@ -597,6 +598,25 @@ Coinnítear na socruithe sa tábla `key_value` (ainmspás `pii_settings`,
 
 Éilíonn na trí cinn fíordheimhniú bainistíochta agus bailíochtaíonn siad an corp le Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Aitheantóirí GDPR (AE) agus POPIA (an Afraic Theas)
+
+| ID                  | Aitheantóir                       | Bailíochtú                                                                              |
+| ------------------- | --------------------------------- | --------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                              | Tír aitheanta, fad cruinn don tír sin, ISO 13616 MOD-97-10                              |
+| `eu_vat`            | Uimhir CBL an AE                  | Réimír ballstáit aitheanta agus formáid uimhir an stáit sin (gan chuardach VIES)        |
+| `es_dni_nie`        | DNI / NIE na Spáinne              | Litir rialaithe (luach mod 23); is é NIE `X/Y/Z` + 7 ndigit                             |
+| `it_codice_fiscale` | Codice Fiscale na hIodáile        | Litir rialaithe ó tháblaí suíomhanna corr/réidh                                         |
+| `pl_pesel`          | PESEL na Polainne                 | Suim sheiceála ualaithe agus raonta sochreidte míosa/lae breithe ionchódaithe           |
+| `nl_bsn`            | BSN na hÍsiltíre                  | Seiceáil 11 (meáchain 9..2, -1)                                                         |
+| `de_steuer_id`      | Steuer-ID na Gearmáine            | ISO 7064 Mod 11,10 agus rialacha struchtúr digití (gan 0 tosaigh)                       |
+| `se_personnummer`   | personnummer na Sualainne         | Luhn thar na deich ndigit dheireanacha agus dáta breithe sochreidte (10 nó 12 dhigit)   |
+| `za_id`             | Uimhir ID na hAfraice Theas       | Luhn thar na 13 dhigit uile, mí/lá breithe bailí, digit saoránachta 0 nó 1              |
+| `za_phone`          | Teileafón na hAfraice Theas       | Réimír `+27` / `27`, nó an fhoirm náisiúnta `0..` scríofa le spás nó fleiscín           |
+| `za_vat`            | Uimhir CBL na hAfraice Theas      | 10 ndigit a thosaíonn le `4` **agus** "VAT" / "BTW" sna 48 carachtar roimhe             |
+| `za_tax_ref`        | Tagairt chánach na hAfraice Theas | 10 ndigit a thosaíonn le `0`-`3`, Luhn, **agus** "tax" / "SARS" sna 48 carachtar roimhe |
+
+Ós rud é go dtagann formáidí digití amháin salach ar uimhreacha ordaithe, uimhreacha tógála agus stampaí ama, tá leid eochairfhocail de dhíth ar na cinn is laige (`za_vat`, `za_tax_ref`), agus ní chaitear le huimhir lom deich ndigit `0..` mar uimhir theileafóin na hAfraice Theas. Ní mheaitseáiltear IBANanna le spásanna (`GB29 NWBK ...`). Ar an gcosán sruthaithe ní lorgaítear an leid ach laistigh den bhloc reatha. Tagann na IDanna roimh na patrúin ghinearálta teileafóin, mar sin coinníonn aitheantóir bailíochtaithe a ionadchoinneálaí féin (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Roghnaíonn na teimpléid `gdpr` agus `popia` IDanna an AE agus na hAfraice Theas faoi seach. Fanann mascadh féin roghnach (Hard Rule #20): ní athraíonn aon rud anseo réamhshocrú brataí gné.
 
 ### Instealladh Leid (`promptInjection.ts`)
 

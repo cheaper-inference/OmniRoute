@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | ড্যাশবোর্ড কম্পোনেন্ট API: `packages/ui-kit`-এর ওপর অ্যাডাপ্টার — `docs/architecture/DESIGN_SYSTEM.md` দেখুন |
 | `constants/iconMap.ts`           | `ICON_MAP`: স্ক্রিনগুলোতে ব্যবহৃত আইকনের নাম → Lucide কম্পোনেন্ট (`<Icon>`)                                  |
-| `constants/providers.ts`         | Zod যাচাইকরণসহ **377টি প্রোভাইডার** (সত্যের একক উৎস)                                                         |
+| `constants/providers.ts`         | Zod যাচাইকরণসহ **380টি প্রোভাইডার** (সত্যের একক উৎস)                                                         |
 | `constants/cliTools.ts`          | বাহ্যিক CLI টুল রেজিস্ট্রি                                                                                   |
 | `constants/routingStrategies.ts` | অগ্রাধিকারসহ **20টি রাউটিং কৌশল**                                                                            |
 | `constants/publicApiRoutes.ts`   | যেসব রুটে (ম্যানেজমেন্টের পরিবর্তে) Bearer প্রমাণীকরণ প্রয়োজন                                               |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | এক্সটার্নাল CLI ইন্টিগ্রেশন + ইন্টার্নাল OmniRoute CLI                                          |
 | `I18N.md`                   | i18n আর্কিটেকচার, ভাষা যোগ করার পদ্ধতি, ৬৭টি লোকেল                                              |
 | `UNINSTALL.md`              | পরিষ্কার আনইনস্টল করার ধাপ                                                                      |
-| `PROVIDER_REFERENCE.md`     | ৩৭৭টি প্রোভাইডারের **স্বয়ংক্রিয়ভাবে তৈরি** ক্যাটালগ (রিজেন: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | ৩৮০টি প্রোভাইডারের **স্বয়ংক্রিয়ভাবে তৈরি** ক্যাটালগ (রিজেন: `npm run gen:provider-reference`) |
 
 ### সাবসিস্টেম গভীর বিশ্লেষণ
 

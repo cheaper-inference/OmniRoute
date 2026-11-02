@@ -38,14 +38,8 @@ Potrdila pokrivajo lasten potek dela, ne pa objave, uvedbe ali notranjega delova
 obstoječega svetovalnega pregledovalnika. Določitev ustreznih preverjanj kot obveznih v pravilih vej
 je ločena administrativna sprememba; opredelitev njihovih opravil sama po sebi ne zaščiti veje.
 
-`API Route Typecheck` je neodvisno preverjanje poteka dela, zunaj obeh skupnih končnih presoj
-in statičnega profila lokalnega popolnega opazovalca. Njegov rezultat za točno določenega
-kandidata preverite ločeno. `.github/workflows/api-route-typecheck.yml` se izvaja pri zahtevah PR v `main` ali
-`release/**`, potiskih v katero koli od teh družin vej in ročnem proženju. Nima filtra poti.
-Preusmeritve ciljne veje zahteve PR zahtevajo novo preverjanje; urejanja telesa/naslova uporabljajo zgolj opazovalno ime
-`Admission not requested / API Route Typecheck` in ne morejo nadomestiti preverjanja za sprejem.
-Potek dela ne določa sprožilca za skupino združevanja. Vsaka uvedba čakalne vrste za združevanje, ki zahteva
-to preverjanje, mora najprej zagotoviti njegovo izvajanje za ta dogodek.
+`API Route Typecheck` je neodvisno preverjanje delovnega toka, zunaj obeh skupnih ocen in statičnega profila lokalnega popolnega opazovalnika. Njegov rezultat preverite posebej za točno določenega kandidata. `.github/workflows/api-route-typecheck.yml` se izvaja ob PR-jih v `main` ali `release/**`, potiskih v obe družini vej, ročnem zagonu in dogodkih `merge_group` vrste `checks_requested`. Nima filtra poti. Skupine združevanja pri checkout uporabijo `merge_group.head_sha`; drugi dogodki uporabijo `github.sha`. Vsi dogodki uporabljajo ista diagnostična vrata API in enotske teste vrat.
+Sprememba ciljne osnovne veje PR-ja zahteva novo preverjanje; spremembe opisa/naslova uporabijo ime, namenjeno samo opazovanju, `Admission not requested / API Route Typecheck` in ne morejo nadomestiti preverjanja za sprejem.
 
 ### Ohranjena dokazila v reduktorju sprejema
 
@@ -61,6 +55,14 @@ brez dokazila, manjkajoča ali spremenjena datoteka, nevarna pot ali simbolna po
 preverjanje. Manjkajoče datoteke niso enakovredne praznim dnevnikom uspešne izvedbe. Obstoječa
 preverjanja SHA/izvedbe/poskusa ostanejo neodvisna: ujemajoči se bajti ne morejo rešiti zastarelega
 potrdila. Celovitost datoteke ni dokaz pristnosti izvedbe ali promocije artefakta.
+
+### DAST uporablja preverjeno gradnjo CI
+
+Obvezno opravilo CI `dast-smoke` po `build` pokliče `.github/workflows/dast-smoke.yml`. Uporablja isti izbor glede na kodo in stanje osnutka kot gradnja, vključno s podprtimi PR-ji iz razcepov, PR-ji v veje izdaj in skupinami združevanja. Manjkajoče, neuspešno, preklicano ali nepričakovano preskočeno opravilo DAST blokira `Gate / CI`. Delovni tok za ponovno uporabo nima neodvisnega sprožilca PR/ročnega zagona; ročno preverjanje uporablja zagon CI, da gradnja in porabnik ostaneta v istem izvajanju.
+
+`scripts/ci/next-build-provenance.mjs` zapečati celoten artefakt Next z njegovim izvlečkom tar, repozitorijem/dogodkom/izvajanjem, poskusom proizvajalca, head/base/checkout/tree, identitetami delovnih tokov, zaklepno datoteko, točno različico/ABI Node, platformo in paketnikom. DAST izbere nespremenljivi ID artefakta iz `needs.build.outputs`, zahteva preverjanje izvlečka prenosa in neodvisno primerja zgoščeno vrednost ZIP z izvlečkom proizvajalca, preden s `scripts/ci/unpack-ci-build.py` razširi njegova dva dovoljena člana. Pred razširitvijo drevesa Next se morata tudi manifest in arhiv tar ujemati z neodvisnimi izhodi proizvajalca. Nikoli ne išče zadnje uspešne gradnje veje. Delna ponovitev lahko ponovno uporabi isti poskus proizvajalca, če se njegov ID in vsi vhodi še vedno ujemajo; potrdilo zabeleži oba poskusa.
+
+Porabnik ostane na gostovanem izvajalniku Linux z dovoljenjem za repozitorij samo za branje in brez skrivnosti repozitorija. Namesti točno različico Node proizvajalca, nato sestavi CLI z `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` zavrne manjkajoči samostojni strežnik pred kakršno koli nadomestno gradnjo; običajne lokalne gradnje CLI ohranijo obstoječi nadomestni postopek. Pripravljenost strežnika, Schemathesis in promptfoo morajo vsi uspeti znotraj nespremenjene omejitve opravila 25 minut. Potrdilo o izvoru dokazuje identiteto in bajte vhodov, ne uspešnega pregleda DAST. Potek veljavnosti artefakta, prekinitev izvajalnika ali neuspešen pregledovalnik ostajajo nepopolni ali neuspešni dokazi; svetovalni ovoj jih ne more spremeniti v PASS.
 
 ### Zmogljivost izvajanja uporabniškega vmesnika
 
@@ -209,17 +211,24 @@ Izvede se pri vsakem PR-ju v `main`. Ob neuspehu blokira združitev.
 
 Izvede se po `test-coverage`. Ob neuspehu blokira združitev.
 
-| Skript                       | Preverja                                                                                                                                                                                           | Blokira                                    |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `quality:collect`            | Ustvari `quality-metrics.json` (število opozoril ESLint, pokritost iz združenega poročila segmentov)                                                                                               | Da (predhodni korak mehanizma zategovanja) |
-| `quality:ratchet`            | Nobena metrika v `quality-baseline.json` se ni poslabšala (opozorila ESLint ≤ izhodišče; pokritost ≥ izhodišče)                                                                                    | Da                                         |
-| `check:duplication`          | Podvajanje kode (jscpd@4) ne presega izhodišča v `quality-baseline.json`                                                                                                                           | Da                                         |
-| `check:complexity`           | Ciklomatska kompleksnost na ravni datoteke ne presega omejitve (osnovni pravili ESLint `complexity` + `max-lines-per-function`)                                                                    | Da                                         |
-| `check:cognitive-complexity` | Mehanizem zategovanja kognitivne kompleksnosti (`eslint-plugin-sonarjs`) — ločen prehod ESLint; CI oba izvede združeno kot en sam korak `check:complexity-ratchets`                                | Da                                         |
-| `check:dead-code`            | Mehanizem zategovanja za neuporabljene izvoze/datoteke (knip) se glede na izhodišče ne poslabša                                                                                                    | Da                                         |
-| `check:compression-budget`   | Proračun primerjalnega preizkusa stiskanja — spodnje meje prihranka žetonov za posamezen mehanizem se ne smejo poslabšati                                                                          | Da                                         |
-| `check:type-coverage`        | Mehanizem zategovanja odstotka tipiziranosti (`type-coverage`) se ne poslabša; večinoma zajema `typecheck:noimplicit:core`                                                                         | Da                                         |
-| `check:codeql-ratchet`       | Število odprtih opozoril CodeQL se ne poveča (bere prek `gh api`; brez žetona preverjanje varno preskoči) — pogostost osveževanja in ročni sprožilec: glejte »Mehanizem zategovanja CodeQL« spodaj | Da                                         |
+| Skript                       | Preverja                                                                                                                                                            | Blokira                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `quality:collect`            | Ustvari `quality-metrics.json` (število opozoril ESLint, pokritost iz združenega poročila segmentov)                                                                | Da (predhodni korak mehanizma zategovanja) |
+| `quality:ratchet`            | Nobena metrika v `quality-baseline.json` se ni poslabšala (opozorila ESLint ≤ izhodišče; pokritost ≥ izhodišče)                                                     | Da                                         |
+| `check:duplication`          | Podvajanje kode (jscpd@4) ne presega izhodišča v `quality-baseline.json`                                                                                            | Da                                         |
+| `check:complexity`           | Ciklomatska kompleksnost na ravni datoteke ne presega omejitve (osnovni pravili ESLint `complexity` + `max-lines-per-function`)                                     | Da                                         |
+| `check:cognitive-complexity` | Mehanizem zategovanja kognitivne kompleksnosti (`eslint-plugin-sonarjs`) — ločen prehod ESLint; CI oba izvede združeno kot en sam korak `check:complexity-ratchets` | Da                                         |
+| `check:dead-code`            | Mehanizem zategovanja za neuporabljene izvoze/datoteke (knip) se glede na izhodišče ne poslabša                                                                     | Da                                         |
+| `check:compression-budget`   | Proračun primerjalnega preizkusa stiskanja — spodnje meje prihranka žetonov za posamezen mehanizem se ne smejo poslabšati                                           | Da                                         |
+| `check:type-coverage`        | Mehanizem zategovanja odstotka tipiziranosti (`type-coverage`) se ne poslabša; večinoma zajema `typecheck:noimplicit:core`                                          | Da                                         |
+
+### Opravili: `codeql-scan` in `codeql-admission`
+
+`codeql-scan` ustvari vse nastavljene kategorije analize. Ko to opravilo uspe, `codeql-admission` preveri njegove točno določene prenose in ratchet opozoril kandidata. Obe sta obvezni odvisnosti `Gate / CI`, tudi za kandidate, ki spreminjajo samo dokumentacijo. Zahteve za skrbniško aktivacijo in canary so opisane spodaj v razdelku »Ratchet CodeQL«.
+
+| Skript                 | Preverja                                                                                                                                                                                           | Blokira |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `check:codeql-ratchet` | Ref/SHA kandidata in vse nastavljene kategorije analize morajo biti aktualni pred ratchetom opozoril; manjkajoči dokazi blokirajo. Globalni inventar ostaja ločen — glejte »Ratchet CodeQL« spodaj | Da      |
 
 ### Opravilo: `quality-extended`
 
@@ -487,30 +496,23 @@ To datoteko objavite skupaj s spremembo, ki je izboljšala metriko. Zahtevo PR, 
 metriko brez posodobitve osnovnega stanja, bo zaznal `--require-tighten` (faza 6A.5,
 implementacija je v pripravi).
 
-### Zaskočka CodeQL: pogostost osveževanja in ročni sprožilec
+### Ratchet CodeQL: sprejem kandidata in inventar repozitorija
 
-`check:codeql-ratchet` bere **stanje repozitorija, ki se osvežuje po urniku — ne za vsak PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` poroča
-`state: configured`, `schedule: weekly`: gre za pregled s privzeto nastavitvijo GitHuba, ne za
-analizo ob vsakem potisku. Posledica: ko je PR, ki ODPRAVI opozorila, združen, zaskočka še naprej
-bere staro, višje število do naslednjega načrtovanega pregleda — zato poroča o poslabšanju
-pri vsakem odprtem PR-ju, vključno z nadaljnjimi spremembami popravljalnega PR-ja, dokler pregled ne dohiti stanja.
+CI upravlja sprejem kandidata prek CodeQL z izrecno verigo odvisnosti: `codeql-scan` pokliče matriko štirih jezikov v `codeql.yml`, nato `codeql-admission` izvede `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` zahteva oba rezultata. Quality ohrani svoja številčna preverjanja, vendar ne poizveduje pri pregledovalniku, preden proizvajalec konča; sam `Gate / Quality` ni popoln sprejem kandidata. CodeQL ostaja obvezen za kandidate, ki spreminjajo samo dokumentacijo.
 
-**Ročna osvežitev**: `gh workflow run codeql.yml --ref release/vX.Y.Z` znova zažene
-analizo in v nekaj minutah ponovno objavi opozorila. Najprej preberite `.github/workflows/codeql.yml`
-— glava datoteke pojasnjuje, da uporablja samo `workflow_dispatch`, **ker je v navzkrižju s
-GitHubovo »privzeto nastavitvijo«** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Za obnovitev sprožilcev `push`/`pull_request`/
-`schedule` je najprej potrebno **dejanje lastnika**: Settings → Code security →
-CodeQL: Default → Advanced. Ne dodajajte sprožilca `schedule:`, dokler ta preklop ni opravljen — povzročil
-bo samo neuspešne zagone.
+Pravilnik v `config/quality/codeql-admission-policy.json` izbere Actions, C/C++, JavaScript/TypeScript in Python, zbirko poizvedb default, model groženj remote in način gradnje none. Predhodno preverjanje proizvajalca zavrne čakajoči zapis aktivacije in veje zunaj izrecnega seznama ciljev. Začetna cilja sta main in release/v3.8.53; naslednja izdaja zahteva pregledano vključitev. Obstoječi širši sprožilec CI za PR-je v veje izdaj se ohrani, vendar nevključen cilj pred ekstrakcijo sporoči HOLD, namesto da bi dobil neizmerjeni PASS.
 
-**Po zmanjšanju števila zaostrite osnovno stanje** — `node scripts/check/check-codeql-ratchet.mjs
---update` zapiše novo izmerjeno število v `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, tako da zaskočka ne dovoli neopaznega poslabšanja nazaj
-do stare zgornje meje. Praktični primer (2026-09-02/03): PR #12502 je odpravil 7 resničnih opozoril
-(13 → 6 izmerjenih odprtih); PR #12530 je zaostril zamrznjeno osnovno stanje z 11 → 6, da se je ujemalo;
-preostalih 6 je bilo nato zavrnjenih z utemeljitvijo za vsako opozorilo posebej, tako da je število odprtih padlo na 0.
+Vsako opravilo matrike zabeleži dejanski ID prenosa SARIF, jezik, kategorijo, izvajanje in poskus, identiteto klicnega delovnega toka, ref/head/base/merge SHA dogodka in zgoščeno vrednost pravilnika. Odvisno opravilo prenese samo potrdila tega izvajanja in preveri izvlečke artefaktov. Zahteva vse štiri kategorije, uspešnega proizvajalca in končano obdelavo vsakega točno določenega prenosa. Uporablja filter API sarif_id, ne zadnje analize, najdene na veji. Delne ponovitve lahko znova uporabijo uspešne kategorije iz prejšnjega poskusa istega izvajanja in kandidata ter ohranijo poskus, ki jih je ustvaril; neuspešen trenutni proizvajalec ne more ponovno uporabiti prejšnjih zelenih dokazov.
+
+Akcija CodeQL čaka na obdelavo, vendar lahko njena pripeta implementacija po napaki pri branju stanja ali izčrpanem čakanju izda opozorilo in nadaljuje. Zato sprejem ponovno preveri obdelavo. Manjkajoče kategorije, čakajoča obdelava, neuspešna ali preklicana opravila, zastarela identiteta, nepopolno straničenje ali nedosegljivi API-ji povzročijo HOLD in izhod 2. Ni več fiksnega čakanja na neodvisni delovni tok pregledovalnika. Nepregledan PR ne more uspeti zato, ker je poizvedba opozoril vrnila 0. Izmerjeno število nad `metrics.codeqlAlerts.value` povzroči izhod 1; baseline se ne zviša za vključitev opozoril druge veje. [Stanje prenosa in iskanje analize](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Potrdilo zabeleži ID-je prenosov in analiz, kategorije, različice orodij, ref/SHA, baseline in števila opozoril. Identiteta/število rezultatov SARIF, najmanjša števila pravil in točno določeni primerki opozoril ostajajo obvezni. Identitete PR-ja/analize se pred sprejemom ponovno preverijo. Ta preverjanja dokazujejo pokritost nastavljenih kategorij, ne inventarja vseh izvlečenih izvornih datotek. Ekstrakcija C/C++ brez gradnje ne vključuje kode, ustvarjene med gradnjo projekta. Izključitve virov še vedno potrebujejo pregled, pripisovanje odgovornosti prispevalcem pa primerljive dokaze iz točno določene osnove.
+
+`codeql-maintenance.yml` zagotavlja preglede ob potisku v aktivno vejo izdaje in tedenski razpored brez podvajanja proizvajalcev za PR/main. `nightly-codeql-inventory.yml` ohranja baseline celotnega repozitorija ločen, z `--strict-measurement` in neuspehom, ko meritev ni na voljo. Prizanesljivo preskakovanje starega lokalnega zbiralnika ni sprejem kandidata. Zaostritev ostaja izrecen `--update` po potrjenem nižjem globalnem številu.
+
+Delovnega toka Advanced ni dovoljeno objaviti, dokler je nastavljen Default Setup: GitHub to kombinacijo zavrne. Njegov različiceni pravilnik ostaja v čakanju, dokler pregledani skrbniški prehod ni potrjen s ponovnim branjem. Pred objavo operater pripne repozitorij, head/base/tree, zgoščene vrednosti pravilnika/popravka/povrnitve in opaženo stanje nastavitev; `node scripts/quality/codeql-producer.mjs verify-admin-readback` preveri podane pričakovane in dejanske zapise JSON. To je tehnična zaščita, ne odobritev operaterja ali nadomestilo za pridobivanje svežih povratnih odčitkov. Token PR-ja nikoli ne zahteva dostopa Administration. Uvedba in vsaka sprememba pregledovalnika zahtevata ta ločen povratni odčitek ter dejanske dokaze o združljivosti za PR, razcep in skupino združevanja.
+
+Razcepi uporabljajo gostovane izvajalnike, checkout brez ohranjenih poverilnic, brez namestitve/gradnje projekta pri proizvajalcu in brez podedovanih skrivnosti repozitorija. GitHub podpira prenos SARIF za dogodek pull_request z omejenim tokenom razcepa; odobritev izvajanja prvega prispevka ostaja pravilnik GitHub. Nikoli ne uporabljajte pull_request_target za izvajanje nezaupanja vredne kode. Preden migracijo štejete za končano, v nadzorovanem canary preverite dejanska dovoljenja tokena, analysis_key in vsa okolja kategorij. [Pravila za prenose iz razcepov](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [nasprotujoči si načini nastavitev](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Zavrnitve so odločitev upravljavca (strogo pravilo št. 14)** — opozorila CodeQL nikoli ne zavrnite,
 ne da bi v komentarju ob zavrnitvi navedli tehnično utemeljitev: `won't fix` za
@@ -667,11 +669,7 @@ opredelil naslednje kandidate za racionalizacijo. **Združitve so mehanske sprem
 preklopi/opustitve so politične odločitve, pridržane upravljavcu.** Nič od spodaj
 navedenega še ni uveljavljeno.
 
-**Prav tako zgoraj ni dokumentirano** (svetovalno, šibek signal): opravilo `docs-lint`
-(markdownlint + Vale, celotno opravilo ima `continue-on-error`) in samostojni delovni tokovi
-pregledovalnikov `semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` je v
-`quality-baseline.json`, vendar ni povezan z blokirajočim mehanizmom raglje v `ci.yml` — metrika
-je trenutno osirotela.
+**Zgoraj prav tako nedokumentirano** (svetovalno, z nizko informativno vrednostjo): opravilo `docs-lint` (markdownlint + Vale, celotno opravilo `continue-on-error`) in samostojna delovna toka pregledovalnikov `semgrep.yml` / `scorecard.yml`. CodeQL ima zdaj obvezni opravili proizvajalca in sprejema pod `Gate / CI`, ob upoštevanju zgoraj opisanih zahtev za aktivacijo. `semgrepFindings: 0` je v `quality-baseline.json`, vendar ni povezan z blokirajočim ratchetom v `ci.yml` — metrika trenutno ni povezana z uveljavljanjem.
 
 ### Združitev / odstranjevanje podvajanj (mehansko, manjše tveganje)
 

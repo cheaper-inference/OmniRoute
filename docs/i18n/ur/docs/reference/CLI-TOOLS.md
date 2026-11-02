@@ -10,7 +10,7 @@ OmniRoute تین زمروں کے CLI ٹولز کے ساتھ انضمام کرت�
 
 | صفحہ           | روٹ                     | تصور                                                                                     | تعداد         |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------------- | ------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | کوڈنگ ٹولز جنہیں آپ OmniRoute کی طرف بھیجتے ہیں (کلائنٹ → CLI → OmniRoute → فراہم کنندہ) | 27            |
+| **CLI Code's** | `/dashboard/cli-code`   | کوڈنگ ٹولز جنہیں آپ OmniRoute کی طرف بھیجتے ہیں (کلائنٹ → CLI → OmniRoute → فراہم کنندہ) | 28            |
 | **CLI Agents** | `/dashboard/cli-agents` | خود مختار ایجنٹس جنہیں آپ OmniRoute کی طرف بھیجتے ہیں (وہی بہاؤ، وسیع تر دائرۂ کار)      | 11            |
 | **ACP Agents** | `/dashboard/acp-agents` | وہ CLIs جنہیں OmniRoute پسِ منظر کے طور پر stdio/ACP کے ذریعے چلاتا ہے (معکوس بہاؤ)      | رجسٹری دیکھیں |
 
@@ -142,7 +142,7 @@ OmniRoute کنٹینر کے اندر چلائی گئی `setup-*` کمانڈ کن
 
 ---
 
-## 1. CLI Code کا کیٹلاگ (27 ٹولز)
+## 1. CLI Code کا کیٹلاگ (28 ٹولز)
 
 وہ تمام ٹولز جو `/dashboard/cli-code` میں ظاہر ہوتے ہیں۔ جن میں `baseUrlSupport: none` ہے، وہ حسبِ ضرورت base URL کے بجائے MITM یا دستی رہنما کے ذریعے منسلک کیے گئے ہیں:
 
@@ -169,6 +169,7 @@ OmniRoute کنٹینر کے اندر چلائی گئی `setup-*` کمانڈ کن
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -265,7 +266,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL، لیگیسی)                                 |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL، بنیادی + لیگیسی `~/.deepseek` ہم وقت سازی) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                  |
-| `POST /api/cli-tools/pi-settings`           | Pi کوڈنگ ایجنٹ                                                         |
+| `POST /api/cli-tools/pi-settings`           | Pi کوڈنگ ایجنٹ (`~/.pi/agent/models.json`, `providers.omniroute`)      |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml، `[model.omniroute]`)                  |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + مخصوص `.env` کلید)                |
 
@@ -371,7 +372,7 @@ pip install aider-chat
 cargo install smelt  # Rust پر مبنی
 
 # Pi coding agent
-# انسٹالیشن کے لیے https://github.com/zechnerj/pi-coding-agent دیکھیں
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # انسٹالیشن کے لیے https://github.com/1jehuang/jcode دیکھیں
@@ -485,6 +486,40 @@ EOF
 > thinking variants بھیجنے کے لیے
 > `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > استعمال کریں۔
+
+---
+
+#### Pi Coding Agent
+
+سرکاری Pi Coding Agent پیکیج `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` سے نصب کریں۔ Pi اپنی مرضی کے فراہم کنندگان `~/.pi/agent/models.json` سے پڑھتا ہے؛ پوری ایجنٹ ڈائریکٹری منتقل کرنے کے لیے `PI_CODING_AGENT_DIR` کو مطلق راستے (یا `~` سے شروع ہونے والے راستے) پر رکھیں۔ ڈیش بورڈ اس متبادل کی پیروی کرتا ہے۔ Pi اپنی مرضی کے اینڈپوائنٹس سے ماڈل دریافت نہیں کرتا، اس لیے OmniRoute منتخب ماڈل `models[]` میں، Pi کی `openai-completions` API اور OmniRoute کے OpenAI موافق `/v1` اینڈپوائنٹ کے ساتھ لکھتا ہے۔
+
+**CLI ٹولز → Pi** میں اینڈپوائنٹ، API کلید اور ماڈل چنیں، فراہم کنندہ کا پیش منظر دیکھیں، پھر نافذ کریں۔ پیش منظر فراہم کنندہ کا ایک حصہ ہے: Pi دستی طور پر ترتیب دیتے وقت `providers.omniroute` کو موجودہ `models.json` میں ملائیں تاکہ دوسرے فراہم کنندگان اور ترتیبات محفوظ رہیں۔
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+`/model` کھولنے پر Pi، `models.json` دوبارہ لوڈ کرتا ہے۔ منتخب فراہم کنندہ اور ماڈل کی IDs سے ترتیب دیا گیا راستہ آزمائیں:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+حوالے: [Pi ماڈل اور اپنی مرضی کے فراہم کنندگان](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)،
+[Pi ماحولیاتی متغیرات](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)،
+[Pi تنصیب کی ہدایات](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md)۔
 
 ---
 

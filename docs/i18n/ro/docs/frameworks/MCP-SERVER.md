@@ -315,12 +315,12 @@ token de acces `oma_live_…` sunt trei permisiuni diferite. Apelanții care tri
 Această ierarhie este gestionată de `scopeSatisfies`. Aceasta nu consultă tabelul MCP, iar mecanismul de
 potrivire MCP nu o consultă.
 
-| Spațiu de nume                   | Credențială                                                      | Mecanism de verificare               | Ce permite trecerea verificării                                        |
-| :------------------------------- | :--------------------------------------------------------------- | :----------------------------------- | :--------------------------------------------------------------------- |
-| Administrare prin cheia API      | `api_keys.scopes`                                                | `hasManageScope`                     | API-ul REST de administrare pentru cheia Bearer respectivă             |
-| Permisiune aditivă a cheii API   | aceeași matrice, un singur șir exact                             | funcția auxiliară menționată mai jos | Numai capabilitatea respectivă                                         |
-| Scope-uri ale instrumentelor MCP | aceeași matrice, altfel `_meta` MCP, apoi `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                       | Instrumentul respectiv, după activarea aplicării regulilor             |
-| Token de acces                   | `oma_live_…`                                                     | `scopeSatisfies`                     | Ruta de administrare a cărei metodă și cale necesită nivelul respectiv |
+| Spațiu de nume                   | Credențială                                                                       | Mecanism de verificare               | Ce permite trecerea verificării                                        |
+| :------------------------------- | :-------------------------------------------------------------------------------- | :----------------------------------- | :--------------------------------------------------------------------- |
+| Administrare prin cheia API      | `api_keys.scopes`                                                                 | `hasManageScope`                     | API-ul REST de administrare pentru cheia Bearer respectivă             |
+| Permisiune aditivă a cheii API   | aceeași matrice, un singur șir exact                                              | funcția auxiliară menționată mai jos | Numai capabilitatea respectivă                                         |
+| Scope-uri ale instrumentelor MCP | același tablou, altfel `_meta` MCP (doar HTTP/SSE), altfel `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                       | Instrumentul respectiv, după activarea aplicării regulilor             |
+| Token de acces                   | `oma_live_…`                                                                      | `scopeSatisfies`                     | Ruta de administrare a cărei metodă și cale necesită nivelul respectiv |
 
 Emiterea fiecărei credențiale este descrisă în
 [Autentificarea pentru administrare](../guides/MANAGEMENT-AUTH.md).
@@ -369,7 +369,9 @@ Aplicarea regulilor este dezactivată dacă `OMNIROUTE_MCP_ENFORCE_SCOPES` nu es
 `false`). Cât timp este dezactivată, `evaluateToolScopes` permite apelul și ignoră
 catalogul. Când este activată, HTTP utilizează `api_keys.scopes` ale cheii Bearer drept
 `authInfo` (consultați [Asocierea scope-urilor HTTP per cheie](#per-key-http-scope-binding-7895)).
-Când nu poate fi determinat niciun scope al cheii, setul acordat este preluat din `_meta` MCP, apoi din
+Când nu se rezolvă niciun scope de cheie, mulțimea acordată revine la `_meta` MCP (onorat doar
+pentru apelanții HTTP/SSE, într-un context de autentificare HTTP; `_meta` al unui apelant stdio este ignorat
+deoarece clientul îl controlează și nu transportă nicio identitate per-apelant), apoi
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Scope-urile tokenurilor de acces
@@ -467,8 +469,10 @@ Prin HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` rezolvă acum valorile rea
 `_meta` și rezerva bazată pe variabila de mediu `OMNIROUTE_MCP_SCOPES` — această modificare doar populează prima sursă,
 cea cu prioritatea cea mai mare, care anterior nu era alimentată prin HTTP. Când nu este rezolvată nicio cheie API
 (antet absent, cheie nevalidă), `authInfo` rămâne `undefined`, iar rezolvarea continuă prin lanțul
-existent `meta`/mediu, fără modificări. stdio nu are identitate pentru fiecare apelant (consultați
-`mcpCallerIdentity.ts`) și nu este afectat — rămâne pe lanțul de rezervă `_meta`/mediu.
+existent `meta`/mediu, fără modificări. stdio nu are identitate per apelant (vezi
+`mcpCallerIdentity.ts`) și nu este afectat de legarea pe cheie — sare peste pasul `_meta`
+(`_meta` este luat în considerare doar într-un context de autentificare HTTP, #15159) și
+rezolvă exclusiv din variabila de mediu `OMNIROUTE_MCP_SCOPES`.
 
 **Aplicarea este activată forțat pentru apelanții HTTP/SSE cu domenii restrânse, indiferent de
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Valoarea implicită `false` pentru `OMNIROUTE_MCP_ENFORCE_SCOPES` este sigură doar

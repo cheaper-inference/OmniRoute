@@ -61,6 +61,19 @@
 - `npm run build:mac-x64` / `build:mac-arm64` — single-arch macOS builds
 - `npm run pack` — പ്രാദേശിക പരിശോധനയ്ക്കുള്ള directory-only build (installer ഇല്ല)
 
+## ഐച്ഛിക runtime pack കൾ
+
+Desktop build കൾക്ക് installer കൾക്കൊപ്പം ഐച്ഛിക runtime archive കൾ പ്രസിദ്ധീകരിക്കാം. ഇൻസ്റ്റാൾ ചെയ്ത server payload ൽ `optional-packs.index.json` ഉണ്ട് (Windows, Linux എന്നിവയിൽ `resources/app` നു കീഴിൽ). `browser-runtime` entry ക്കായി `packs[].tarball` വായിച്ച് **അതേ release ൽ നിന്നുള്ള കൃത്യമായ അതേ filename ഡൗൺലോഡ് ചെയ്യുക**. Archive പേരുകളിൽ SHA-256 digest ഉൾപ്പെടും; വ്യത്യസ്ത build കൾക്ക് വ്യത്യസ്ത archive കൾ വേണ്ടിവരാം. ഡൗൺലോഡ് ചെയ്ത filename മാറ്റരുത്.
+
+ഇൻസ്റ്റാൾ ചെയ്ത app ന്റെ index ഉം തിരഞ്ഞെടുത്ത archive ഉം ഒരേ directory യിൽ പകർത്തിയശേഷം അതേ release ന്റെ CLI ഉപയോഗിക്കുക:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` installation, verification നിലകളാണ് കാണിക്കുന്നത്; archive filename അല്ല. കൂടെയുള്ള index ആണ് archive തിരഞ്ഞെടുക്കുന്നത്. Installation, extraction ന് മുമ്പ് archive checksum ഉം ഇൻസ്റ്റാൾ ചെയ്ത pack മാറ്റുന്നതിനുമുമ്പ് package checksum കളും പരിശോധിക്കുന്നു. ഇത് local file കൾ വായിക്കുന്നു; കാണാത്ത archive കൾ ഡൗൺലോഡ് ചെയ്യുന്നില്ല. Installation കഴിഞ്ഞ് application വീണ്ടും ആരംഭിക്കുക. Release ൽ ചേരുന്ന asset ഇല്ലെങ്കിൽ, ആ release ന്റെ asset കളിലൂടെ optional pack ലഭ്യമല്ല.
+
 ## ഡയറക്ടറി ഘടന
 
 ```

@@ -13,7 +13,7 @@
 
 ## Wat het is
 
-OmniRoute registreert 377 providers, waaronder 155 catalogusvermeldingen gemarkeerd als **gratis/no-auth**
+OmniRoute registreert 380 providers, waaronder 155 catalogusvermeldingen gemarkeerd als **gratis/no-auth**
 (no-auth,
 OAuth met gratis tier, of API-sleutel met gratis tier — zie de
 [Gids voor gratis tiers](../getting-started/FREE-TIERS-GUIDE.md) en het volledige

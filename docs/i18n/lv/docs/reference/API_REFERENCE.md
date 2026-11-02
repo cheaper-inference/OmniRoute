@@ -29,6 +29,7 @@ Detalizētu informāciju par ar OpenAI saderīgo protokolu un pakalpojumu sniedz
 - [WebSocket straumēšana](#websocket-streaming)
 - [Kvotas un ziņošana par problēmām](#quotas--issues-reporting)
 - [Semantiskā kešatmiņa](#semantic-cache)
+- [Saderība ar CLIProxyAPI pārvaldību](#cliproxyapi-management-compatibility)
 - [Informācijas panelis un pārvaldība](#dashboard--management)
 - [Kombināciju pārvaldība](#combo-management)
 - [Tīmekļa aizķeres](#webhooks)
@@ -1012,6 +1013,18 @@ pabeigto atbildi.
 
 **Autentifikācija:** Bearer API atslēga (`isAuthenticated`).
 
+### Kvotas sesijas atkopšana (jāieslēdz atsevišķi)
+
+Nestraumēts `POST /v1/chat/completions` vai `POST /v1/responses`, kas beidzas ar galīgu kvotas kļūdu (`402`/`429`/`503`, kuras saturs norāda, ka kvota vai kredīti ir izsmelti), var tikt atlikts un atkārtots vēlāk, nevis atgriezt kļūdu. Izsaucējs to ieslēdz katram pieprasījumam ar trim galvenēm:
+
+| Galvene                      | Vērtība                                                |
+| ---------------------------- | ------------------------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                                                 |
+| `x-omniroute-session`        | sesijas ID, `[A-Za-z0-9._:-]{1,128}`                   |
+| `x-omniroute-recovery-turn`  | gājiena ID, kas ir unikāls sesijā (tas pats noteikums) |
+
+Der tikai `stream: false` gājieni bez rīkiem, rīku vēstures vai `previous_response_id` un bez `x-omniroute-connection` piesaistes; jāiestata `STORAGE_ENCRYPTION_KEY` (pieprasījums tiek glabāts šifrēts līdz 24 h). Tad atbilde ir `202` ar `recovery.poll`; pārbaudiet `GET /v1/quota-recoveries/{id}` (`202` gaidīšanas laikā, `200` ar atkopto saturu pēc pabeigšanas) vai atceliet ar `DELETE`. Pieteikumus redz tikai tos izveidojusī API atslēga. Atkārtojums ar neskaidru iznākumu beidzas ar `needs_confirmation`, nevis tiek nosūtīts divreiz. Avots: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Pašapkalpošanās lietojuma dati (`/api/usage/om-usage`)
@@ -1180,6 +1193,28 @@ Jebkurš pieprasījums var apiet kešatmiņu neatkarīgi no atslēgas iestatīju
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Saderība ar CLIProxyAPI pārvaldību
+
+OmniRoute atbild uz trim [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) pārvaldības galapunktiem, kurus lietojuma paneļi izsauc, lai nolasītu Claude un Codex abonementu limitus (piemēram, T3 Code lietojuma limitu avots `cliproxy`). Norādiet klienta bāzes URL uz OmniRoute un izmantojiet API atslēgu ar tvērumu `manage` kā pārvaldības atslēgu. Maršruti ir pieejami `/v0/management/*` un `/api/v0/management/*`.
+
+| Metode | Ceļš                         | Apraksts                                                                                                                                    |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude un Codex OAuth savienojumi formā `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Bez marķieriem              |
+| POST   | `/v0/management/api-call`    | Saturs `{ auth_index, method, url, header?, data? }`. Nosūta atļauto pieprasījumu ar konta marķieri un atgriež `{ status_code, body }`      |
+| POST   | `/v0/management/reset-quota` | Saturs `{ auth_index }`. Notīra viena konta savienojuma nogaidīšanas periodu, modeļu bloķējumus un Codex nogaidīšanas periodus pa tvērumiem |
+
+- `auth_index` ir OmniRoute savienojuma ID. `provider` ir `claude` vai `codex` (tikai OAuth savienojumi; API atslēgas nodrošinātājs `anthropic` nav sarakstā). Codex gadījumā `id_token.chatgpt_account_id` ir saglabātais darbvietas ID un `plan_type` ir saglabātais plāns.
+- `api-call` nav vispārīgs starpniekserveris. Tas pieņem tikai Claude `GET
+https://api.anthropic.com/api/oauth/usage` un Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` un `POST .../wham/rate-limit-reset-credits/consume`, katru tikai atbilstošā nodrošinātāja kontam. Viss cits atgriež `403`, nesazinoties ar augšupējo pakalpojumu. Izsaucēja `Authorization` galvene (ieskaitot vietturi `$TOKEN$`) tiek ignorēta: OmniRoute ievieto savienojuma piekļuves marķieri, vispirms atjaunojot to, ja tuvojas derīguma beigas, un pārsūta tikai atļautās galvenes (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Trūkstošai `Chatgpt-Account-Id` noklusējums ir saglabātais darbvietas ID. Ja pirmā augšupējā atbilde ir `401`, tas atjauno vienreiz un atkārto tikai tad, ja piekļuves marķieris mainās. Katram augšupējam mēģinājumam ir 15 sekunžu taimauts, un tas izmanto savienojuma starpniekserveri.
+- `reset-quota` nemaina galīgos stāvokļus (banned, expired, credits_exhausted). Nezināms `auth_index` atgriež `404`.
+
+**Autentifikācija:** paneļa sesija vai API atslēga ar `manage` tvērumu, obligāta arī tad, kad pieteikšanās ir atspējota (ceļi ir `ALWAYS_PROTECTED_API_PATHS`). Atslēgas tikai inferencei saņem `403`. Avots: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

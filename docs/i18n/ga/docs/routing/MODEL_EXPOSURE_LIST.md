@@ -70,3 +70,15 @@ mar aon le gach réimse socruithe eile — murab ionann agus scagaire easpórtá
 `hidePaidModels`, níl aon bhaol ath-hiodráitithe anseo: is éard atá in aitheantas diúltaithe atá
 leabaithe i gcéim teaglama easpórtáilte ná rogha ródaithe shainráite an oibreora féin, ní rud
 nach mór don teorainn easpórtála a bhaint.
+
+## Liostú teaglamaí amháin (`exposeCombosOnly`)
+
+Luach Boole ar leith, roghnach freisin agus `false` de réir réamhshocraithe, le haghaidh imscaradh ina bhfuil teaglamaí mar dhromchla poiblí na samhlacha agus soláthraithe mar innill chúil amháin. Nuair atá sé `true`, ní choinníonn an liostú poiblí (`GET /v1/models`, `GET /v1`, agus na bealaí fionnachtana `/v1` eile atá bunaithe ar `getUnifiedModelsResponse()`) ach rónna le `owned_by: "combo"`: teaglamaí úsáideora agus teaglamaí ionsuite `auto/*` (mura bhfolaíonn `hideAutoCombos` iad). Úsáideann sé an tástáil ró chéanna le `catalogScope: "combos"` in aghaidh na heochrach, agus cuirtear scagairí ceadaithe/diúltaithe/scóipe na heochrach féin i bhfeidhm anuas air fós.
+
+Scoránaigh é in **Settings → Routing → Models API listing**, nó le `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Cosúil leis na liostaí thuas, ní athraíonn sé ach fógairt:
+
+- seoltar ID follasach `provider/model` fós, agus réitíonn `GET /v1/models/{id}` é fós;
+- ní chaolaítear catalóg na deaise (`GET /api/models/catalog`, a úsáideann roghnóirí samhlacha);
+- ní léirítear é sna linnte iarrthóirí `auto/*`, mar sin coinníonn teaglamaí `auto/*` a linn iomlán.

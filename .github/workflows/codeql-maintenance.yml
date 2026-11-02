@@ -1,0 +1,22 @@
+name: CodeQL maintenance scans
+# CI already produces scans for PRs, merge groups and main pushes. Retain the
+# release push and weekly default-branch scans without duplicate PR producers.
+on:
+  push:
+    branches: ["release/v3.8.53"]
+  schedule:
+    - cron: "10 5 * * 1"
+permissions:
+  contents: read
+concurrency:
+  group: codeql-maintenance-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  scan:
+    uses: ./.github/workflows/codeql.yml
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    with:
+      admission: false

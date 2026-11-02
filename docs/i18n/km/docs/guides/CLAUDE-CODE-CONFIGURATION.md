@@ -42,6 +42,10 @@ Claude Code ទាក់ទងតាម **Anthropic Messages API** ហើយត�
 
 > Env vars ត្រូវបានអាន **តែមួយដងនៅពេលចាប់ផ្ដើម** — ចាប់ផ្ដើម Claude Code ឡើងវិញបន្ទាប់ពីផ្លាស់ប្ដូរពួកវា។
 
+ដើម្បីប្រើព័ត៌មានផ្ទៀងផ្ទាត់ដែលផ្លាស់ប្តូរជាប្រចាំជំនួសឱ្យខ្សែអក្សរថេរ សូមកំណត់ `apiKeyHelper` ក្នុង `~/.claude/settings.json` ជាពាក្យបញ្ជាដែលបោះពុម្ពព័ត៌មានផ្ទៀងផ្ទាត់បច្ចុប្បន្នទៅ stdout។ តាមលំនាំដើម Claude Code រក្សាទុកលទ្ធផលរបស់វាក្នុងឃ្លាំងសម្ងាត់រយៈពេលប្រាំនាទី (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` អាចប្តូររយៈពេលនេះ) ហើយផ្ញើតម្លៃនៅក្នុងទាំង `Authorization: Bearer` និង `x-api-key`។ ស្គ្រីបត្រូវបោះពុម្ពតែព័ត៌មានផ្ទៀងផ្ទាត់ប៉ុណ្ណោះ៖ ការបោះពុម្ពបដាបន្ថែមជាមួយវាធ្វើឱ្យ helper បរាជ័យនៅក្នុង v2.1.227+។
+
+Entra ID SSO ដំណើរការតាមរបៀបនេះ៖ `scripts/cli/omniroute-sso.mjs token` បោះពុម្ពថូខឹនចូលប្រើ Entra ដែលមានសុពលភាពខ្លី ហើយ OmniRoute ផ្ទៀងផ្ទាត់ថូខឹននោះជំនួសឱ្យកូនសោ API។ សូមមើល [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md)។
+
 `omniroute launch` កំណត់អថេរទាំងអស់នេះជូនអ្នក៖ វាកំណត់ base URL + token
 ពី context ដែលកំពុងសកម្ម (ដូច្នេះ `omniroute connect <vps>` រួច `omniroute launch`
 នឹងដំណើរការភ្លាមៗ) ពិនិត្យស្ថានភាព server ហើយប្រតិបត្តិ `claude`។

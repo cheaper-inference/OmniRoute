@@ -165,9 +165,10 @@ Cada clase de ruta tiene una política en `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — siempre devuelve `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extrae Bearer y lo valida mediante `validateApiKey()`. Solo recurre al acceso anónimo cuando la marca de funcionalidad efectiva `REQUIRE_API_KEY` está deshabilitada. La marca efectiva se resuelve mediante `isRequireApiKeyEnabled()` (`anulación de la marca de funcionalidad de la base de datos > process.env.REQUIRE_API_KEY > valor predeterminado`), de modo que las marcas de funcionalidad del panel y las variables de entorno rijan de forma coherente `/api/v1/*`, `/api/v1beta/*` y los alias; los fallos del resolutor deniegan el acceso. Permite solicitudes con sesión del panel en las rutas de la API de cliente (incluida `/api/v1/models`, utilizada por el catálogo de modelos del panel).
+  Cuando Entra ID SSO está habilitado, un Bearer que tiene la estructura de un token de Entra (tres segmentos base64url, algoritmo `RS*`, `kid`) se procesa en la rama SSO **antes** de `validateApiKey()`, y su decisión es definitiva. Nunca pasa a la ruta de clave API ni a la rama que rebaja la autenticación a acceso anónimo, por lo que una caída del proveedor de identidad no puede abrir el acceso. Las claves API estáticas no se ven afectadas. Consulta [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — acepta sesiones del panel y solicitudes internas de sincronización de modelos (comparadas con `/api/providers/[name]/(sync-models|models)`), o se omite por completo si `isAuthRequired()` devuelve false. Devuelve 403 (`AUTH_001`) cuando hay un token Bearer presente pero no es válido y 401 en caso contrario. También aplica los niveles de protección de rutas (LOCAL_ONLY / ALWAYS_PROTECTED) antes de cualquier rama de autenticación; consulte [Niveles de protección de rutas](../security/ROUTE_GUARD_TIERS.md). Se puede acceder a las rutas LOCAL_ONLY incluidas en `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (actualmente: `/api/mcp/`) desde direcciones que no sean de loopback cuando la clave Bearer contiene el ámbito `manage`; todas las demás rutas LOCAL_ONLY siguen limitadas estrictamente a loopback, independientemente del ámbito.
 
-Una política correcta devuelve `AuthSubject` con `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Los controladores posteriores pueden leerlo mediante `assertAuth(request, "CLIENT_API")` en `src/server/authz/assertAuth.ts`, en lugar de volver a ejecutar la lógica de autenticación.
+Una política correcta devuelve `AuthSubject` con `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Los controladores posteriores pueden leerlo mediante `assertAuth(request, "CLIENT_API")` en `src/server/authz/assertAuth.ts`, en lugar de volver a ejecutar la lógica de autenticación.
 
 ## Lista de rutas públicas
 
@@ -325,8 +326,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Para las solicitudes autenticadas, los encabezados de solicitud del upstream (del lado del controlador) también incluyen:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<últimos-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<últimos-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (opcional)
 x-omniroute-auth-scopes:    lista separada por comas
 ```

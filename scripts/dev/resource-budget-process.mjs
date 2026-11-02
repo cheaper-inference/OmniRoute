@@ -74,20 +74,79 @@ function readProcessRecord(pid) {
   }
 }
 
-export function listProcessGroupMembers(processGroup) {
+function processScanReason(error) {
+  const knownCodes = new Set([
+    "EACCES",
+    "EPERM",
+    "EIO",
+    "EBADF",
+    "ENOENT",
+    "ESRCH",
+    "EMFILE",
+    "ENFILE",
+    "ENOTDIR",
+  ]);
+  if (knownCodes.has(error?.code)) return `PROC_STAT_${error.code}`;
+  const parseReasons = new Map([
+    ["invalid /proc/<pid>/stat format", "PROC_STAT_FORMAT_INVALID"],
+    ["missing process start time", "PROC_STAT_START_TICKS_MISSING"],
+    ["missing process group", "PROC_STAT_GROUP_MISSING"],
+  ]);
+  return parseReasons.get(error?.message) ?? "PROC_STAT_UNCLASSIFIED_ERROR";
+}
+
+export function listProcessGroupMembers(processGroup, { includeDiagnostics = false } = {}) {
   const members = [];
   let unknown = false;
+  const diagnostics = includeDiagnostics
+    ? {
+        schemaVersion: 1,
+        processGroup,
+        root: { pid: processGroup, kind: "NOT_LISTED" },
+        ownMembers: [],
+        unassignedErrors: {},
+      }
+    : null;
+  const result = () =>
+    diagnostics
+      ? {
+          members,
+          unknown,
+          diagnostics: { ...diagnostics, status: unknown ? "UNKNOWN" : "COMPLETE" },
+        }
+      : { members, unknown };
   let entries;
   try {
-    entries = readdirSync("/proc", { withFileTypes: true });
-  } catch {
-    return { members, unknown: true };
+    // Dirent conversion may lstat a PID that exits during enumeration. Names
+    // avoid that whole-scan race; each stat below keeps its own failure policy.
+    entries = readdirSync("/proc");
+  } catch (error) {
+    unknown = true;
+    if (diagnostics) {
+      diagnostics.root.kind = "NOT_SCANNED";
+      diagnostics.directoryError = processScanReason(error);
+    }
+    return result();
   }
-  for (const entry of entries) {
-    if (!entry.isDirectory() || !/^[0-9]+$/.test(entry.name)) continue;
-    const pid = Number(entry.name);
+  for (const name of entries) {
+    if (!/^[0-9]+$/.test(name)) continue;
+    const pid = Number(name);
     try {
       const stat = parseProcStat(readFileSync(`/proc/${pid}/stat`, "utf8"));
+      if (diagnostics && pid === processGroup && stat.processGroup !== processGroup) {
+        diagnostics.root.kind = "GROUP_MISMATCH";
+      }
+      if (diagnostics && stat.processGroup === processGroup) {
+        const member = {
+          pid,
+          startTicks: stat.startTicks,
+          state: stat.state,
+          threadCount: stat.threadCount,
+          executable: !isExitedZombie(stat),
+        };
+        diagnostics.ownMembers.push(member);
+        if (pid === processGroup) diagnostics.root = { ...member, kind: "PRESENT" };
+      }
       // A single-thread zombie has exited; only its parent/subreaper can reap it.
       // A zombie thread-group leader may still have live threads, so its thread
       // count must be exactly one before excluding it from executable members.
@@ -95,12 +154,24 @@ export function listProcessGroupMembers(processGroup) {
         members.push({ pid, startTicks: stat.startTicks });
       }
     } catch (error) {
+      const missing = error.code === "ENOENT" || error.code === "ESRCH";
+      if (diagnostics) {
+        const reasonCode = processScanReason(error);
+        if (pid === processGroup) {
+          diagnostics.root = { pid, kind: missing ? "MISSING" : "UNKNOWN", reasonCode };
+        } else if (!missing) {
+          // Membership is unproved. Retain only category counts, never that PID,
+          // its stat/command/environment, or a platform error message with a path.
+          diagnostics.unassignedErrors[reasonCode] =
+            (diagnostics.unassignedErrors[reasonCode] ?? 0) + 1;
+        }
+      }
       // procfs can return ESRCH when a process exits after its stat file is opened.
       // Both disappearance errors prove this PID is gone; other failures stay unknown.
-      if (error.code !== "ENOENT" && error.code !== "ESRCH") unknown = true;
+      if (!missing) unknown = true;
     }
   }
-  return { members, unknown };
+  return result();
 }
 
 export async function killVerifiedGroupMembers(processGroup, leaderPid, timeoutMs) {

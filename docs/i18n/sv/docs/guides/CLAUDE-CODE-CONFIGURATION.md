@@ -42,6 +42,10 @@ slutpunkt med miljövariabler (det har ingen `--base-url`-flagga):
 
 > Miljövariabler läses **en gång vid uppstart** — starta om Claude Code efter att du har ändrat dem.
 
+För en autentiseringsuppgift som roteras i stället för en fast sträng anger du `apiKeyHelper` i `~/.claude/settings.json` som ett kommando som skriver den aktuella uppgiften till stdout. Claude Code cachelagrar normalt utdata i fem minuter (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ändrar tiden) och skickar värdet i både `Authorization: Bearer` och `x-api-key`. Skriptet måste skriva enbart autentiseringsuppgiften — en extra inledande text gör att hjälpfunktionen misslyckas i v2.1.227+.
+
+Så fungerar Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` skriver en kortlivad Entra-åtkomsttoken som OmniRoute verifierar i stället för en API-nyckel. Se [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` ställer in allt detta åt dig: kommandot hämtar bas-URL:en och token
 från den aktiva kontexten (så `omniroute connect <vps>` följt av `omniroute launch`
 fungerar direkt), hälsokontrollerar servern och kör `claude` via exec.

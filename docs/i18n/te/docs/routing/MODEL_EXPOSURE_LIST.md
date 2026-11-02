@@ -64,3 +64,15 @@
 అరేలను యథాతథంగా కలిగి ఉంటుంది — `hidePaidModels` యొక్క కాంబో-స్టెప్ ఎక్స్పోర్ట్ ఫిల్టర్కు భిన్నంగా,
 ఇక్కడ రీ-హైడ్రేషన్ ప్రమాదం లేదు: ఎక్స్పోర్ట్ చేసిన కాంబో స్టెప్లో పొందుపరిచిన తిరస్కరించబడిన id
 ఆపరేటర్ స్వయంగా చేసిన స్పష్టమైన రూటింగ్ ఎంపిక; దాన్ని ఎక్స్పోర్ట్ సరిహద్దు తొలగించాల్సిన అవసరం లేదు.
+
+## Combo లను మాత్రమే జాబితా చేయడం (`exposeCombosOnly`)
+
+Combo లు బహిరంగ model ఉపరితలంగా, provider లు backend లుగా మాత్రమే ఉన్న deployment ల కోసం ప్రత్యేక boolean ఎంపిక; దీన్ని కూడా ఎంచుకుని సక్రియం చేయాలి, డిఫాల్ట్ `false`. ఇది `true` అయినప్పుడు public listing (`GET /v1/models`, `GET /v1`, `getUnifiedModelsResponse()` ఆధారిత ఇతర `/v1` discovery route లు) `owned_by: "combo"` ఉన్న row లను మాత్రమే ఉంచుతుంది: user combo లు, built-in `auto/*` combo లు (`hideAutoCombos` వాటిని దాచకపోతే). ప్రతి key యొక్క `catalogScope: "combos"` వాడే అదే row పరీక్షను ఇది వాడుతుంది; key సొంత allow/deny/scope filter లు కూడా అదనంగా వర్తిస్తాయి.
+
+**Settings → Routing → Models API listing** లో లేదా `PATCH /api/settings {"exposeCombosOnly": true}` తో దీన్ని మార్చండి.
+
+పై జాబితాలలాగే ఇది లభ్యతను ప్రకటించడాన్ని మాత్రమే మారుస్తుంది:
+
+- స్పష్టంగా ఇచ్చిన `provider/model` ID ఇంకా dispatch అవుతుంది; `GET /v1/models/{id}` దాన్ని ఇంకా resolve చేస్తుంది;
+- dashboard catalog (`GET /api/models/catalog`, model picker లు ఉపయోగించేది) కుదించబడదు;
+- ఇది `auto/*` candidate pool లలో ప్రతిబింబించదు, కాబట్టి `auto/*` combo లు పూర్తి pool ను ఉంచుకుంటాయి.

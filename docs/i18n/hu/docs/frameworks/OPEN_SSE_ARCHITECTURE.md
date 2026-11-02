@@ -488,7 +488,7 @@ Az `open-sse/config/` tartalmazza a konfigurációs réteget:
 
 | Fájl                                     | Rendeltetés                                                          |
 | ---------------------------------------- | -------------------------------------------------------------------- |
-| `providerRegistry.ts`                    | Csevegésimodell-regiszter a 377 szolgáltatót tartalmazó katalógushoz |
+| `providerRegistry.ts`                    | Csevegésimodell-regiszter a 380 szolgáltatót tartalmazó katalógushoz |
 | `providerModels.ts`                      | Modellaliasok, formátumleképezés                                     |
 | `constants.ts`                           | Időtúllépések, korlátok, állapotkódok                                |
 | `defaultThinkingSignature.ts`            | Alapértelmezett Claude-gondolkodási aláírás                          |

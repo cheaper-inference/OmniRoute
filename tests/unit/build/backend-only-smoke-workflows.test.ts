@@ -5,6 +5,9 @@
 // "Build CLI bundle" step silently runs a full Next.js production build inline,
 // which is the actual source of the multi-minute variance/timeouts reported in #7226.
 //
+// DAST now consumes CI's verified full build; dast-workflow-contract.test.mjs
+// prevents a fallback build in that consumer. The remaining nightlies still build.
+//
 // npm-publish.yml is intentionally excluded: its "Build CLI bundle (standalone app)"
 // step legitimately ships the full dashboard UI in the published npm package.
 import test from "node:test";
@@ -60,7 +63,6 @@ interface Target {
 }
 
 const TARGETS: Target[] = [
-  { file: "dast-smoke.yml", jobName: "dast-smoke", stepName: "Build CLI bundle" },
   { file: "nightly-schemathesis.yml", jobName: "schemathesis", stepName: "Build CLI bundle" },
   { file: "nightly-resilience.yml", jobName: "k6-soak", stepName: "Build CLI bundle" },
   { file: "nightly-llm-security.yml", jobName: "promptfoo-guard", stepName: "Build CLI bundle" },
@@ -87,7 +89,10 @@ test("npm-publish.yml 'Build CLI bundle (standalone app)' step must NOT be backe
   const publishJob = Object.values(doc.jobs).find((job) =>
     job.steps.some((s) => s.name === "Build CLI bundle (standalone app)")
   );
-  assert.ok(publishJob, "npm-publish.yml must have a job with a 'Build CLI bundle (standalone app)' step");
+  assert.ok(
+    publishJob,
+    "npm-publish.yml must have a job with a 'Build CLI bundle (standalone app)' step"
+  );
   const step = publishJob!.steps.find((s) => s.name === "Build CLI bundle (standalone app)")!;
   assert.equal(
     isBackendOnly(step),

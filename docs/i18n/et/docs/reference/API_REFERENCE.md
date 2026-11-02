@@ -29,6 +29,7 @@ OpenAI-ga ühilduva protokolli ja teenusepakkujate võimaluste maatriksi üksika
 - [WebSocketi voogedastus](#websocket-streaming)
 - [Kvoodid ja probleemidest teatamine](#quotas--issues-reporting)
 - [Semantiline vahemälu](#semantic-cache)
+- [CLIProxyAPI haldusühilduvus](#cliproxyapi-management-compatibility)
 - [Töölaud ja haldus](#dashboard--management)
 - [Kombinatsioonide haldus](#combo-management)
 - [Veebihaagid](#webhooks)
@@ -1010,6 +1011,18 @@ lõpetuse.
 
 **Autentimine:** Bearer API-võti (`isAuthenticated`).
 
+### Kvoodiseansi taastamine (eraldi lubatav)
+
+Voogedastuseta `POST /v1/chat/completions` või `POST /v1/responses`, mis ebaõnnestub lõpliku kvoodiveaga (`402`/`429`/`503`, mille sisu ütleb, et kvoot või krediit on ammendatud), saab vea tagastamise asemel ootele panna ja hiljem taasesitada. Kutsuja lubab selle iga päringu jaoks kolme päisega:
+
+| Päis                         | Väärtus                                        |
+| ---------------------------- | ---------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                         |
+| `x-omniroute-session`        | seansi ID, `[A-Za-z0-9._:-]{1,128}`            |
+| `x-omniroute-recovery-turn`  | seansi piires kordumatu vooru ID (sama reegel) |
+
+Sobivad ainult `stream: false`-voorud ilma tööriistade, tööriistaajaloo või `previous_response_id`-ta ning ilma `x-omniroute-connection`-kinnituseta; `STORAGE_ENCRYPTION_KEY` peab olema määratud (päring salvestatakse krüptitult kuni 24 h). Vastus on siis `202` koos `recovery.poll`-iga; päri `GET /v1/quota-recoveries/{id}` (`202` ootel olekus, `200` koos taastatud sisuga pärast lõpetamist) või tühista käsuga `DELETE`. Pileteid näeb ainult need loonud API-võti. Ebakindla tulemusega taasesitus lõpeb olekuga `needs_confirmation`, mitte seda ei saadeta kaks korda. Allikas: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Iseteeninduslik kasutus (`/api/usage/om-usage`)
@@ -1178,6 +1191,28 @@ Iga päring saab võtme sätetest olenemata vahemälust mööduda:
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI haldusühilduvus
+
+OmniRoute vastab kolmele [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) halduslõpp-punktile, mida kasutusnäidikud kutsuvad Claude'i ja Codexi tellimuslimiitide lugemiseks (näiteks T3 Code'i kasutuslimiitide allikas `cliproxy`). Suuna kliendi baas-URL OmniRoute'ile ja kasuta haldusvõtmena API-võtit ulatusega `manage`. Marsruudid on saadaval aadressidel `/v0/management/*` ja `/api/v0/management/*`.
+
+| Meetod | Tee                          | Kirjeldus                                                                                                                       |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude'i ja Codexi OAuthi ühendused kujul `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Tokeneid pole |
+| POST   | `/v0/management/api-call`    | Sisu `{ auth_index, method, url, header?, data? }`. Saadab lubatud päringu konto tokeniga ja tagastab `{ status_code, body }`   |
+| POST   | `/v0/management/reset-quota` | Sisu `{ auth_index }`. Eemaldab ühe konto ühenduse ooteaja, mudelilukustused ja Codexi ulatusepõhised ooteajad                  |
+
+- `auth_index` on OmniRoute'i ühenduse ID. `provider` on `claude` või `codex` (ainult OAuthi ühendused; API-võtmega pakkujat `anthropic` ei loetleta). Codexi puhul on `id_token.chatgpt_account_id` salvestatud tööruumi ID ja `plan_type` salvestatud pakett.
+- `api-call` ei ole üldine proksi. See lubab ainult Claude'i `GET
+https://api.anthropic.com/api/oauth/usage` ja Codexi `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ning `POST .../wham/rate-limit-reset-credits/consume`, igaüht ainult vastava pakkuja kontole. Kõik muu tagastab `403` ülesvooluteenusega ühendust võtmata. Kutsuja `Authorization`-päist (ka kohatäitjat `$TOKEN$`) eiratakse: OmniRoute lisab ühenduse pääsutokeni, värskendades seda esmalt läheneva aegumise korral, ning edastab ainult lubatud päised (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Puuduva `Chatgpt-Account-Id` vaikeväärtus on salvestatud tööruumi ID. Kui esimene ülesvooluvastus on `401`, värskendab see ühe korra ja proovib uuesti ainult pääsutokeni muutumisel. Iga ülesvoolukatse aegub 15 sekundi järel ja kasutab ühenduse proksit.
+- `reset-quota` jätab lõppolekud (banned, expired, credits_exhausted) muutmata. Tundmatu `auth_index` tagastab `404`.
+
+**Autentimine:** juhtpaneeli seanss või API-võti ulatusega `manage`, nõutav ka keelatud sisselogimise korral (teed on loendis `ALWAYS_PROTECTED_API_PATHS`). Ainult inferentsi võtmed saavad `403`. Allikas: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

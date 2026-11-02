@@ -3,57 +3,65 @@
 // docs/diagrams/comparison-table.svg; tests/unit/docs/readme-comparison-table-svg.test.ts fails
 // when the committed file no longer matches this generator, so a stale picture cannot ship.
 //
-//   node scripts/docs/gen-readme-comparison-table.mjs [--out path.svg]
+//   node --import tsx/esm scripts/docs/gen-readme-comparison-table.mjs [--out path.svg]
 //
 // Everything the table draws lives in COMPARISON_TABLE_COPY (derived from ROWS): it is both
 // the drawn text and the subset input for the embedded fonts. The canonical numbers stay in
 // <text>/<desc> because scripts/check/check-docs-counts-sync.mjs reads them from the raw file.
 // The table is a dated snapshot of each project's docs — cells are kept verbatim; only the
-// provider total follows the live code (377), which the counts gate enforces.
+// provider/strategy totals follow measured code; competitor snapshot cells remain unchanged.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { CURRENT_DOC_COUNTS } from "./lib/read-count-facts.ts";
 import { buildFontFaceCss } from "./readme-fonts.mjs";
 import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
 
 // Cells: a string is drawn as text; "yes" / "mid" / "no" draw the check / partial / cross glyph.
 // Column order: OmniRoute, 9router, OpenRouter, CLIProxyAPI, LiteLLM.
-const ROWS = [
-  { label: "Providers", cells: ["377", "40+", "400+*", "~5", "100+"] },
-  { label: "Free providers built-in", cells: ["150+", "yes", "mid", "no", "no"] },
-  { label: "Routing strategies", cells: ["20", "2", "3", "2", "6"] },
-  { label: "Token compression", cells: ["12 eng", "yes", "mid", "no", "no"] },
-  { label: "Built-in MCP server (own tools)", cells: ["110", "no", "mid", "no", "mid"] },
-  { label: "A2A agent protocol", cells: ["yes", "no", "no", "no", "yes"] },
-  { label: "Persistent memory", cells: ["yes", "no", "no", "no", "no"] },
-  { label: "Guardrails (PII / injection)", cells: ["yes", "no", "yes", "no", "yes"] },
-  { label: "Cloud agents (Codex/Devin/Jules)", cells: ["yes", "no", "no", "no", "no"] },
-  { label: "TLS fingerprint stealth (JA3/JA4)", cells: ["yes", "no", "no", "no", "no"] },
-  { label: "Desktop · Termux · PWA", cells: ["yes", "mid", "mid", "mid", "mid"] },
-  { label: "i18n UI locales", cells: ["67", "6", "no", "no", "no"] },
-  { label: "Self-hosted · 100% MIT", cells: ["MIT", "MIT", "no", "MIT", "open-core"] },
-];
+export function buildComparisonRows(counts = CURRENT_DOC_COUNTS) {
+  return [
+    { label: "Providers", cells: [String(counts.providers), "40+", "400+*", "~5", "100+"] },
+    { label: "Free providers built-in", cells: ["150+", "yes", "mid", "no", "no"] },
+    { label: "Routing strategies", cells: [String(counts.strategies), "2", "3", "2", "6"] },
+    { label: "Token compression", cells: ["12 eng", "yes", "mid", "no", "no"] },
+    { label: "Built-in MCP server (own tools)", cells: ["110", "no", "mid", "no", "mid"] },
+    { label: "A2A agent protocol", cells: ["yes", "no", "no", "no", "yes"] },
+    { label: "Persistent memory", cells: ["yes", "no", "no", "no", "no"] },
+    { label: "Guardrails (PII / injection)", cells: ["yes", "no", "yes", "no", "yes"] },
+    { label: "Cloud agents (Codex/Devin/Jules)", cells: ["yes", "no", "no", "no", "no"] },
+    { label: "TLS fingerprint stealth (JA3/JA4)", cells: ["yes", "no", "no", "no", "no"] },
+    { label: "Desktop · Termux · PWA", cells: ["yes", "mid", "mid", "mid", "mid"] },
+    { label: "i18n UI locales", cells: ["67", "6", "no", "no", "no"] },
+    { label: "Self-hosted · 100% MIT", cells: ["MIT", "MIT", "no", "MIT", "open-core"] },
+  ];
+}
 
 const GLYPHS = new Set(["yes", "mid", "no"]);
 const isText = (c) => !GLYPHS.has(c);
 
-export const COMPARISON_TABLE_COPY = {
-  kicker: ["WHAT SETS OMNIROUTE APART"],
-  headline: ["Every router does routing. ", "OmniRoute does the whole platform."],
-  columns: ["OmniRoute", "9router", "OpenRouter", "CLIProxyAPI", "LiteLLM"],
-  rows: ROWS.map((r) => r.label),
-  values: [...new Set(ROWS.flatMap((r) => r.cells.filter(isText)))],
-  foot: [
-    "full • partial • none  ·  *OpenRouter counts models & is a hosted SaaS, not self-hosted.",
-    "verified from each project's docs",
-  ],
-};
+export function buildComparisonCopy(rows = buildComparisonRows()) {
+  return {
+    kicker: ["WHAT SETS OMNIROUTE APART"],
+    headline: ["Every router does routing. ", "OmniRoute does the whole platform."],
+    columns: ["OmniRoute", "9router", "OpenRouter", "CLIProxyAPI", "LiteLLM"],
+    rows: rows.map((r) => r.label),
+    values: [...new Set(rows.flatMap((r) => r.cells.filter(isText)))],
+    foot: [
+      "full • partial • none  ·  *OpenRouter counts models & is a hosted SaaS, not self-hosted.",
+      "verified from each project's docs",
+    ],
+  };
+}
+
+export const COMPARISON_TABLE_COPY = buildComparisonCopy();
 
 const COL_X = [440, 604, 760, 916, 1080];
 const ROW_Y0 = 196;
 const ROW_H = 42;
 
-export async function renderComparisonTable() {
-  const C = COMPARISON_TABLE_COPY;
+export async function renderComparisonTable({ counts = CURRENT_DOC_COUNTS } = {}) {
+  const ROWS = buildComparisonRows(counts);
+  const C = buildComparisonCopy(ROWS);
   const { css } = await buildFontFaceCss({
     ui: [C.headline[0], ...C.rows, ...C.values].join(""),
     uiBold: [C.headline[1], ...C.columns, ...C.values].join(""),
@@ -104,7 +112,7 @@ export async function renderComparisonTable() {
       viewBox: "0 0 1200 780",
       title:
         "Comparison table: OmniRoute versus 9router, OpenRouter, CLIProxyAPI and LiteLLM across 13 capabilities.",
-      desc: "OmniRoute is the only one with the full set: 377 providers, 150+ free providers built-in, 20 routing strategies, 12-engine token compression, a built-in MCP server with 110 tools, A2A protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, desktop/Termux/PWA, 67 UI locales and 100% MIT self-hosted. 9router has free providers, RTK compression and translation but no MCP, A2A, memory, guardrails, cloud agents or stealth. OpenRouter is a hosted SaaS with 400+ models, guardrails and a hosted MCP but is not self-hosted and lacks A2A, memory, cloud agents and stealth. CLIProxyAPI is a light OAuth proxy with two routing strategies. LiteLLM has 100+ providers, A2A and extensive guardrails but no memory, compression, free tier, stealth or cloud agents. Static-header comparison table where each capability row fades in top to bottom; the OmniRoute column is highlighted and shows a check or a leading value in every row, while competitors show a mix of checks, partials and crosses. Light and dark follow the viewer's color scheme.",
+      desc: `OmniRoute is the only one with the full set: ${counts.providers} providers, 150+ free providers built-in, ${counts.strategies} routing strategies, 12-engine token compression, a built-in MCP server with 110 tools, A2A protocol, persistent memory, guardrails, cloud agents, TLS fingerprint stealth, desktop/Termux/PWA, 67 UI locales and 100% MIT self-hosted. 9router has free providers, RTK compression and translation but no MCP, A2A, memory, guardrails, cloud agents or stealth. OpenRouter is a hosted SaaS with 400+ models, guardrails and a hosted MCP but is not self-hosted and lacks A2A, memory, cloud agents and stealth. CLIProxyAPI is a light OAuth proxy with two routing strategies. LiteLLM has 100+ providers, A2A and extensive guardrails but no memory, compression, free tier, stealth or cloud agents. Static-header comparison table where each capability row fades in top to bottom; the OmniRoute column is highlighted and shows a check or a leading value in every row, while competitors show a mix of checks, partials and crosses. Light and dark follow the viewer's color scheme.`,
       fontFaceCss: css,
       extraCss: `.cmp-strong{font-weight:600;fill:var(--ink)}`,
     }) +

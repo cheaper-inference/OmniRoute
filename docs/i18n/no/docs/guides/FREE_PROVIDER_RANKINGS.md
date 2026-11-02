@@ -13,7 +13,7 @@
 
 ## Hva det er
 
-OmniRoute registrerer 377 leverandører, inkludert 155 katalogoppføringer merket **free/no-auth** (no-auth, OAuth på gratisnivå eller API-nøkkel på gratisnivå — se [veiledningen for gratisnivåer](../getting-started/FREE-TIERS-GUIDE.md) og hele [katalogen over gratisnivåer](../reference/FREE_TIERS.md)). Haken er at gratisleverandører varierer enormt i modellkvalitet. En no-auth-leverandør som tilbyr en banebrytende modell er langt mer nyttig enn én som tilbyr en liten eldre modell.
+OmniRoute registrerer 380 leverandører, inkludert 155 katalogoppføringer merket **free/no-auth** (no-auth, OAuth på gratisnivå eller API-nøkkel på gratisnivå — se [veiledningen for gratisnivåer](../getting-started/FREE-TIERS-GUIDE.md) og hele [katalogen over gratisnivåer](../reference/FREE_TIERS.md)). Haken er at gratisleverandører varierer enormt i modellkvalitet. En no-auth-leverandør som tilbyr en banebrytende modell er langt mer nyttig enn én som tilbyr en liten eldre modell.
 
 **Free Provider Rankings** svarer på «**hvilken gratisleverandør gir meg den beste modellen?**» ved å koble hver gratisleverandørs katalog til **kvalitetspoeng basert på crowdsourcing** fra **Arena AI-topplisten** (ELO basert på menneskelige preferanser, samme idé som bak LMArena-chatbotarenaen). Leverandørene rangeres deretter etter styrken til deres **beste gratismodell**.
 

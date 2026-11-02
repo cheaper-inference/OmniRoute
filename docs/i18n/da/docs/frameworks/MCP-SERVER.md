@@ -315,12 +315,12 @@ adgangstoken til en muterende administrationsrute, får HTTP 403
 Denne rangering håndteres af `scopeSatisfies`. Den konsulterer ikke MCP-tabellen, og MCP-
 matcheren konsulterer heller ikke den.
 
-| Navnerum                | Legitimationsoplysninger                                       | Kontrollør               | En godkendelse tillader                                     |
-| :---------------------- | :------------------------------------------------------------- | :----------------------- | :---------------------------------------------------------- |
-| API-nøgleadministration | `api_keys.scopes`                                              | `hasManageScope`         | REST-administration for den pågældende Bearer-nøgle         |
-| Additivt API-nøglescope | samme array, én nøjagtig streng                                | hjælperen nævnt nedenfor | Kun den ene funktionalitet                                  |
-| MCP-værktøjsscopes      | samme array, ellers MCP `_meta`, ellers `OMNIROUTE_MCP_SCOPES` | `scopeMatches`           | Det pågældende værktøj, når håndhævelse er slået til        |
-| Adgangstoken            | `oma_live_…`                                                   | `scopeSatisfies`         | Den administrationsrute, hvis metode og sti kræver den rang |
+| Navnerum                | Legitimationsoplysninger                                                      | Kontrollør               | En godkendelse tillader                                     |
+| :---------------------- | :---------------------------------------------------------------------------- | :----------------------- | :---------------------------------------------------------- |
+| API-nøgleadministration | `api_keys.scopes`                                                             | `hasManageScope`         | REST-administration for den pågældende Bearer-nøgle         |
+| Additivt API-nøglescope | samme array, én nøjagtig streng                                               | hjælperen nævnt nedenfor | Kun den ene funktionalitet                                  |
+| MCP-værktøjsscopes      | samme array, ellers MCP `_meta` (kun HTTP/SSE), ellers `OMNIROUTE_MCP_SCOPES` | `scopeMatches`           | Det pågældende værktøj, når håndhævelse er slået til        |
+| Adgangstoken            | `oma_live_…`                                                                  | `scopeSatisfies`         | Den administrationsrute, hvis metode og sti kræver den rang |
 
 Oprettelse af hver legitimationsoplysning er beskrevet i
 [Administrationsgodkendelse](../guides/MANAGEMENT-AUTH.md).
@@ -369,7 +369,10 @@ Håndhævelse er slået fra, medmindre `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (stan
 `false`). Mens den er slået fra, tillader `evaluateToolScopes` kaldet og springer
 kataloget over. Mens den er slået til, bruger HTTP Bearer-nøglens `api_keys.scopes` som
 `authInfo` (se [HTTP-scopebinding pr. nøgle](#per-key-http-scope-binding-7895)).
-Når ingen nøglescopes kan findes, fortsætter det tildelte sæt til MCP `_meta` og derefter
+Når ingen nøglescopes
+kan findes, falder det tildelte sæt gennem til MCP `_meta` (anerkendes kun for
+HTTP/SSE-kaldere, inden for en HTTP-auth-kontekst; en stdio-callers `_meta` ignoreres,
+fordi klienten kontrollerer den, og den rummer ingen identitet pr. kaller), og derefter
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Adgangstokenscopes
@@ -468,8 +471,10 @@ og videregiver det til MCP-SDK'ets `transport.handleRequest(req, { authInfo })`,
 `_meta` og reservemekanismen med miljøvariablen `OMNIROUTE_MCP_SCOPES` — dette udfylder blot den første
 kilde med højeste prioritet, som tidligere ikke blev tilført data over HTTP. Når ingen API-nøgle kan slås op
 (intet headerfelt, ugyldig nøgle), forbliver `authInfo` `undefined`, og opslaget fortsætter uændret gennem den
-eksisterende `meta`/miljøvariabelkæde. stdio har ingen identitet pr. klient (se
-`mcpCallerIdentity.ts`) og påvirkes ikke — den fortsætter med reservemekanismen via `_meta`/miljøvariabelkæden.
+eksisterende `meta`/miljøvariabelkæde. stdio har ingen identitet pr. opkalder (se
+`mcpCallerIdentity.ts`) og påvirkes ikke af per-nøgle-binding — det springer `_meta`-trinnet over
+(`_meta` respekteres kun inden for en HTTP-auth-kontekst, #15159) og opløses udelukkende ud fra
+miljøvariablen `OMNIROUTE_MCP_SCOPES`.
 
 **Håndhævelse aktiveres tvungent for HTTP/SSE-klienter med snævre områder uanset
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** At `OMNIROUTE_MCP_ENFORCE_SCOPES` som standard er `false`, er kun

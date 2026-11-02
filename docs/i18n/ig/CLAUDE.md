@@ -15,7 +15,7 @@ naanị Claude Code — mmezi etu e si arụ ọrụ nke iwu ndị akọwarala n
 
 Usoro ịkewapụ worktree zuru oke nke bụ iwu (ịkwenye base-branch, ụzọ canonical
 `.claude/worktrees/`, `cp -al` node_modules, iwu ịwepụ) nọ na
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (nke a chịkọtara n'ụzọ mkpirikpi na `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (nke a chịkọtara n'ụzọ mkpirikpi na `AGENTS.md` →
 Usoro ọrụ Git → "Ịkewapụ worktree"). Ihe ndị metụtara naanị Claude Code:
 
 - Kwenye base branch n'aka onye na-arụ ọrụ ahụ site na `AskUserQuestion` (Iwu Ike #19) ọ bụrụ na ha

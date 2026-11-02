@@ -42,6 +42,10 @@ nukreipiamas aplinkos kintamaisiais (jis neturi `--base-url` parametro):
 
 > Aplinkos kintamieji nuskaitomi **vieną kartą paleidimo metu** — juos pakeitę paleiskite Claude Code iš naujo.
 
+Jei autentifikavimo duomuo periodiškai keičiamas, o ne yra pastovi eilutė, `apiKeyHelper` faile `~/.claude/settings.json` nurodykite komandą, kuri dabartinį duomenį išveda į stdout. Claude Code pagal numatytąją nuostatą išvestį saugo podėlyje penkias minutes (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` pakeičia šią trukmę) ir reikšmę siunčia tiek `Authorization: Bearer`, tiek `x-api-key`. Scenarijus turi išvesti tik autentifikavimo duomenį: papildomas informacinis tekstas sutrikdo pagalbinę priemonę nuo v2.1.227+.
+
+Taip veikia Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` išveda trumpai galiojantį Entra prieigos žetoną, kurį OmniRoute tikrina vietoje API rakto. Žr. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` visa tai nustato už jus: iš aktyvaus konteksto nustato bazinį URL ir prieigos raktą
 (todėl po `omniroute connect <vps>` komanda `omniroute launch`
 tiesiog veikia), patikrina serverio būklę ir paleidžia `claude`.

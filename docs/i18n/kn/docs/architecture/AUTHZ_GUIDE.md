@@ -156,9 +156,10 @@ JWT ಮೌಲ್ಯೀಕರಣಗೊಂಡು **ಮತ್ತು** `authenticate
 
 - **`publicPolicy`** (`policies/public.ts`) — ಯಾವಾಗಲೂ `allow({ kind: "anonymous", id: "anonymous" })` ಅನ್ನು ಹಿಂದಿರುಗಿಸುತ್ತದೆ.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer ಅನ್ನು ಹೊರತೆಗೆದು, `validateApiKey()` ಮೂಲಕ ಮೌಲ್ಯೀಕರಿಸುತ್ತದೆ. ಪರಿಣಾಮಕಾರಿ `REQUIRE_API_KEY` ಫೀಚರ್ ಫ್ಲ್ಯಾಗ್ ನಿಷ್ಕ್ರಿಯವಾಗಿರುವಾಗ ಮಾತ್ರ ಅನಾಮಧೇಯ ಬಳಕೆಗೆ ಮುಂದುವರಿಯುತ್ತದೆ. ಪರಿಣಾಮಕಾರಿ ಫ್ಲ್ಯಾಗ್ ಅನ್ನು `isRequireApiKeyEnabled()` (`DB ಫೀಚರ್ ಫ್ಲ್ಯಾಗ್ ಓವರ್ರೈಡ್ > process.env.REQUIRE_API_KEY > ಡೀಫಾಲ್ಟ್`) ಮೂಲಕ ನಿರ್ಧರಿಸಲಾಗುತ್ತದೆ; ಆದ್ದರಿಂದ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಫೀಚರ್ ಫ್ಲ್ಯಾಗ್ಗಳು ಮತ್ತು ಎನ್ವಿರಾನ್ಮೆಂಟ್ ವೇರಿಯಬಲ್ಗಳು `/api/v1/*`, `/api/v1beta/*`, ಮತ್ತು ಅಲಿಯಾಸ್ಗಳನ್ನು ಏಕರೂಪವಾಗಿ ನಿಯಂತ್ರಿಸುತ್ತವೆ; ರಿಸಲ್ವರ್ ವೈಫಲ್ಯಗಳ ಸಂದರ್ಭದಲ್ಲಿ ಪ್ರವೇಶವನ್ನು ನಿರಾಕರಿಸಲಾಗುತ್ತದೆ. ಕ್ಲೈಂಟ್ API ರೂಟ್ಗಳಲ್ಲಿ ಡ್ಯಾಶ್ಬೋರ್ಡ್-ಸೆಷನ್ ವಿನಂತಿಗಳನ್ನು ಅನುಮತಿಸುತ್ತದೆ (ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಮಾಡೆಲ್ ಕ್ಯಾಟಲಾಗ್ ಬಳಸುವ `/api/v1/models` ಸೇರಿದಂತೆ).
+  Entra ID SSO ಸಕ್ರಿಯವಾಗಿರುವಾಗ, Entra ಟೋಕನ್‌ನ ರಚನೆಯಿರುವ Bearer ಅನ್ನು (ಮೂರು base64url ಭಾಗಗಳು, `RS*` ಅಲ್ಗಾರಿದಮ್, `kid`) SSO ಶಾಖೆಯು `validateApiKey()` ಗಿಂತ **ಮೊದಲು** ನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ಅದರ ತೀರ್ಮಾನವೇ ಅಂತಿಮವಾಗಿರುತ್ತದೆ. ಅದು ಎಂದಿಗೂ API-key ಮಾರ್ಗಕ್ಕಾಗಲಿ ಅನಾಮಧೇಯ ಪ್ರವೇಶಕ್ಕೆ ಇಳಿಸುವ ಶಾಖೆಗಾಗಲಿ ಹೋಗುವುದಿಲ್ಲ. ಹೀಗಾಗಿ ಗುರುತು ಪೂರೈಕೆದಾರರ ಸೇವೆ ಸ್ಥಗಿತಗೊಂಡರೆ ಪ್ರವೇಶ ಎಲ್ಲರಿಗೂ ತೆರೆದುಕೊಳ್ಳುವುದಿಲ್ಲ. ಸ್ಥಿರ API ಕೀಗಳಿಗೆ ಯಾವುದೇ ಪರಿಣಾಮವಿಲ್ಲ. [Entra ID SSO](../security/ENTRA_SSO.md) ನೋಡಿ.
 - **`managementPolicy`** (`policies/management.ts`) — ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಸೆಷನ್, ಆಂತರಿಕ ಮಾಡೆಲ್-ಸಿಂಕ್ ವಿನಂತಿಗಳನ್ನು (`/api/providers/[name]/(sync-models|models)` ಗೆ ಹೊಂದಾಣಿಕೆ ಮಾಡಲಾಗುತ್ತದೆ) ಸ್ವೀಕರಿಸುತ್ತದೆ, ಅಥವಾ `isAuthRequired()` false ಅನ್ನು ಹಿಂದಿರುಗಿಸಿದರೆ ಸಂಪೂರ್ಣವಾಗಿ ಬಿಟ್ಟುಬಿಡುತ್ತದೆ. Bearer ಟೋಕನ್ ಇದ್ದರೂ ಅದು ಅಮಾನ್ಯವಾಗಿದ್ದರೆ 403 (`AUTH_001`), ಇಲ್ಲದಿದ್ದರೆ 401 ಅನ್ನು ಹಿಂದಿರುಗಿಸುತ್ತದೆ. ಯಾವುದೇ ದೃಢೀಕರಣ ಶಾಖೆಗೂ ಮೊದಲು ರೂಟ್-ಗಾರ್ಡ್ ಶ್ರೇಣಿಗಳನ್ನೂ (LOCAL_ONLY / ALWAYS_PROTECTED) ಜಾರಿಗೊಳಿಸುತ್ತದೆ — [ರೂಟ್ ಗಾರ್ಡ್ ಶ್ರೇಣಿಗಳು](../security/ROUTE_GUARD_TIERS.md) ನೋಡಿ. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ನಲ್ಲಿರುವ LOCAL_ONLY ಪಥಗಳನ್ನು (ಪ್ರಸ್ತುತ: `/api/mcp/`) Bearer ಕೀ `manage` ಸ್ಕೋಪ್ ಹೊಂದಿರುವಾಗ ಲೂಪ್ಬ್ಯಾಕ್ ಅಲ್ಲದ ಮೂಲದಿಂದ ಪ್ರವೇಶಿಸಬಹುದು; ಸ್ಕೋಪ್ ಯಾವುದೇ ಆಗಿರಲಿ, ಉಳಿದ ಎಲ್ಲ LOCAL_ONLY ಪಥಗಳು ಕಟ್ಟುನಿಟ್ಟಾಗಿ ಲೂಪ್ಬ್ಯಾಕ್ಗೆ ಮಾತ್ರ ಸೀಮಿತವಾಗಿರುತ್ತವೆ.
 
-ಯಶಸ್ವಿಯಾದ ಪಾಲಿಸಿಯು `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` ಹೊಂದಿರುವ `AuthSubject` ಅನ್ನು ಹಿಂದಿರುಗಿಸುತ್ತದೆ. ಡೌನ್ಸ್ಟ್ರೀಮ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳು ದೃಢೀಕರಣ ಲಾಜಿಕ್ ಅನ್ನು ಮರುಚಾಲನೆ ಮಾಡುವ ಬದಲು `src/server/authz/assertAuth.ts` ನಲ್ಲಿರುವ `assertAuth(request, "CLIENT_API")` ಮೂಲಕ ಅದನ್ನು ಓದಬಹುದು.
+ಯಶಸ್ವಿಯಾದ ಪಾಲಿಸಿಯು `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ಹೊಂದಿರುವ `AuthSubject` ಅನ್ನು ಹಿಂದಿರುಗಿಸುತ್ತದೆ. ಡೌನ್ಸ್ಟ್ರೀಮ್ ಹ್ಯಾಂಡ್ಲರ್ಗಳು ದೃಢೀಕರಣ ಲಾಜಿಕ್ ಅನ್ನು ಮರುಚಾಲನೆ ಮಾಡುವ ಬದಲು `src/server/authz/assertAuth.ts` ನಲ್ಲಿರುವ `assertAuth(request, "CLIENT_API")` ಮೂಲಕ ಅದನ್ನು ಓದಬಹುದು.
 
 ## ಸಾರ್ವಜನಿಕ ರೂಟ್ಗಳ ಪಟ್ಟಿ
 
@@ -318,8 +319,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ದೃಢೀಕೃತ ವಿನಂತಿಗಳಿಗಾಗಿ ಅಪ್ಸ್ಟ್ರೀಮ್ (ಹ್ಯಾಂಡ್ಲರ್-ಬದಿಯ) ವಿನಂತಿ ಹೆಡರ್ಗಳು ಇವುಗಳನ್ನೂ ಒಳಗೊಂಡಿರುತ್ತವೆ:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<ಕೊನೆಯ-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<ಕೊನೆಯ-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (ಐಚ್ಛಿಕ)
 x-omniroute-auth-scopes:    ಅಲ್ಪವಿರಾಮದಿಂದ-ಬೇರ್ಪಡಿಸಿದ ಪಟ್ಟಿ
 ```

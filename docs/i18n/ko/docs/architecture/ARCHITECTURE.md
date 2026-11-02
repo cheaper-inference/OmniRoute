@@ -15,7 +15,7 @@ OmniRoute는 Next.js 기반으로 구축된 로컬 AI 라우팅 게이트웨이�
 
 핵심 기능:
 
-- CLI/도구용 OpenAI 호환 API 인터페이스(377개 제공자, 156개 실행기 모듈)
+- CLI/도구용 OpenAI 호환 API 인터페이스(380개 제공자, 156개 실행기 모듈)
 - 제공자 형식 간 요청/응답 변환
 - 모델 조합 폴백(다중 모델 시퀀스)
 - `compositeTiers`를 기준으로 런타임 순서가 결정되는 구조화된 조합 단계(`provider + model + connection`)

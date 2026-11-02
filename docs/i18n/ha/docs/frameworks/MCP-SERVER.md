@@ -315,12 +315,12 @@ zuwa hanyar gudanarwa mai yin canji za su samu HTTP 403
 Wannan matakin shi ne `scopeSatisfies`. Ba ya duba jadawalin MCP, haka kuma mai daidaita MCP
 ba ya duba shi.
 
-| Rukuni                    | Shaidar shiga                                                               | Mai dubawa                      | Abin da samun izini ke ba da dama                                          |
-| :------------------------ | :-------------------------------------------------------------------------- | :------------------------------ | :------------------------------------------------------------------------- |
-| Gudanar da maɓallin API   | `api_keys.scopes`                                                           | `hasManageScope`                | REST na gudanarwa don wannan maɓallin Bearer                               |
-| Ƙarin izinin maɓallin API | jerin guda, daidaitacciyar kirtani guda                                     | mataimakin da aka ambata a ƙasa | Wannan damar kaɗai                                                         |
-| Iyakokin kayan aikin MCP  | jerin guda, in ba haka ba MCP `_meta`, in ba haka ba `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                  | Wannan kayan aikin, bayan an kunna tilasta doka                            |
-| Alamar samun dama         | `oma_live_…`                                                                | `scopeSatisfies`                | Hanyar gudanarwa wadda hanyar HTTP da hanyarta suke buƙatar wannan matakin |
+| Rukuni                    | Shaidar shiga                                                                                | Mai dubawa                      | Abin da samun izini ke ba da dama                                          |
+| :------------------------ | :------------------------------------------------------------------------------------------- | :------------------------------ | :------------------------------------------------------------------------- |
+| Gudanar da maɓallin API   | `api_keys.scopes`                                                                            | `hasManageScope`                | REST na gudanarwa don wannan maɓallin Bearer                               |
+| Ƙarin izinin maɓallin API | jerin guda, daidaitacciyar kirtani guda                                                      | mataimakin da aka ambata a ƙasa | Wannan damar kaɗai                                                         |
+| Iyakokin kayan aikin MCP  | jerin guda, idan babu sai MCP `_meta` (HTTP/SSE kawai), idan babu sai `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                  | Wannan kayan aikin, bayan an kunna tilasta doka                            |
+| Alamar samun dama         | `oma_live_…`                                                                                 | `scopeSatisfies`                | Hanyar gudanarwa wadda hanyar HTTP da hanyarta suke buƙatar wannan matakin |
 
 An bayyana yadda ake ƙirƙirar kowace shaida a cikin
 [Tabbatar da Shaidar Gudanarwa](../guides/MANAGEMENT-AUTH.md).
@@ -369,8 +369,7 @@ Tilasta doka a kashe yake sai idan `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (tsoho
 `false`). Yayin da yake kashe, `evaluateToolScopes` yana ba da damar kiran kuma yana tsallake
 kasidar. Yayin da yake kunne, HTTP yana amfani da `api_keys.scopes` na maɓallin Bearer a matsayin
 `authInfo` (duba [Ɗaure iyakar izinin HTTP ga kowane maɓalli](#per-key-http-scope-binding-7895)).
-Lokacin da ba a sami iyakokin izinin maɓalli ba, rukunin da aka bayar yana koma wa MCP `_meta`, sannan
-`OMNIROUTE_MCP_SCOPES`.
+Idan ba a samu scopes na maɓallin ba, saitin izinin da aka bayar zai koma ga MCP `_meta` (ana amfani da shi ne kawai ga masu kira ta HTTP/SSE, cikin mahallin tantancewa na HTTP; ana watsi da `_meta` na mai kira ta stdio saboda abokin ciniki ne ke sarrafa shi kuma ba ya ɗauke da shaidar kowane mai kira), sannan ga `OMNIROUTE_MCP_SCOPES`.
 
 #### Iyakokin izinin alamar samun dama
 
@@ -467,8 +466,7 @@ kuma yana miƙa shi ga `transport.handleRequest(req, { authInfo })` na MCP SDK, 
 madadin `_meta` da env na `OMNIROUTE_MCP_SCOPES` — wannan kawai yana cike wannan tushe na farko,
 mafi fifiko, wanda a baya ba a samar masa da bayanai ta HTTP ba. Idan ba a gano wani maɓallin API ba
 (babu header, ko maɓalli ba daidai ba), `authInfo` zai kasance `undefined`, sannan ganowa zai koma zuwa
-jerin `meta`/env da ake da shi ba tare da canji ba. stdio ba shi da shaidar kowane mai kira (duba
-`mcpCallerIdentity.ts`) kuma wannan bai shafe shi ba — yana ci gaba da amfani da jerin madadin `_meta`/env.
+jerin `meta`/env da ake da shi ba tare da canji ba. stdio ba shi da shaidar kowane mai kira (duba `mcpCallerIdentity.ts`) kuma ɗaurewa bisa kowane maɓalli ba ya shafarsa — yana tsallake matakin `_meta` (ana amfani da `_meta` ne kawai cikin mahallin tantancewa na HTTP, #15159) kuma yana tantance scopes daga maɓallin muhalli `OMNIROUTE_MCP_SCOPES` kawai.
 
 **Ana tilasta aiwatar da iyakoki ga masu kiran HTTP/SSE masu ƙuntatattun iyakoki ba tare da la’akari da
 `OMNIROUTE_MCP_ENFORCE_SCOPES` ba.** Kasancewar tsoffin ƙimar `OMNIROUTE_MCP_ENFORCE_SCOPES` ita ce `false`

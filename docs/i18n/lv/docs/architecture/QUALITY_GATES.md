@@ -40,7 +40,8 @@ un mēģinājums. CLI noraida neatbilstību starp izrakstījuma un notikuma SHA.
 Darbplūsmas testi sasaista dalību politikā ar sprieduma uzdevuma `needs` sarakstu,
 lai jauns vai noņemts izpildes zars nevarētu nemanāmi pazust. Kvītis aptver savu darbplūsmu, nevis publicēšanu, izvietošanu vai esoša konsultatīva skenera iekšējo darbību. Piemērojamo pārbaužu noteikšana par obligātām zaru kārtulās ir atsevišķas administratīvas izmaiņas; to uzdevumu definēšana pati par sevi zaru neaizsargā.
 
-`API Route Typecheck` ir neatkarīga darbplūsmas pārbaude ārpus abiem apkopotajiem spriedumiem un lokālā pilnā novērotāja statiskā profila. Pārbaudiet tās rezultātu atsevišķi precīzajam kandidātam. `.github/workflows/api-route-typecheck.yml` tiek izpildīts PR pieprasījumiem uz `main` vai `release/**`, izmaiņu nosūtīšanai uz jebkuru no šīm zaru saimēm un manuālai palaišanai. Tam nav ceļu filtra. PR bāzes zara maiņa pieprasa jaunu pārbaudi; pamatteksta/virsraksta labojumi izmanto tikai novērošanai paredzēto nosaukumu `Admission not requested / API Route Typecheck` un nevar aizstāt uzņemšanas pārbaudi. Darbplūsma nedeklarē apvienošanas grupas trigeri. Jebkurai apvienošanas rindas ieviešanai, kurai šī pārbaude ir obligāta, vispirms jānodrošina tās izpilde šim notikumam.
+`API Route Typecheck` ir neatkarīga darbplūsmas pārbaude ārpus abiem kopējiem spriedumiem un pilnā lokālā novērotāja statiskā profila. Tās rezultāts jāpārbauda atsevišķi precīzajam kandidātam. `.github/workflows/api-route-typecheck.yml` darbojas PR ar mērķi `main` vai `release/**`, izmaiņu nosūtīšanai uz abām zaru saimēm, manuālai palaišanai un `merge_group` notikumiem ar tipu `checks_requested`. Ceļu filtra nav. Apvienošanas grupas izgūst `merge_group.head_sha`; citi notikumi izgūst `github.sha`. Visi notikumi izmanto vienus un tos pašus API diagnostikas vārtus un to vienībtestus.
+PR bāzes zara maiņa pieprasa jaunu pārbaudi; apraksta vai virsraksta rediģēšana izmanto tikai novērošanai paredzēto nosaukumu `Admission not requested / API Route Typecheck` un nevar aizstāt pieņemšanas pārbaudi.
 
 ### Saglabātie pierādījumi pieņemšanas reducētājā
 
@@ -58,6 +59,14 @@ tukšiem sekmīgas izpildes žurnāliem. Esošās SHA, izpildes gadījuma un mē
 pārbaudes paliek neatkarīgas: atbilstoši baiti nevar padarīt novecojušu apliecinājumu
 derīgu. Failu integritāte nav izpildes autentiskuma vai artefakta virzīšanas
 pierādījums.
+
+### DAST izmanto pārbaudīto CI būvējumu
+
+Obligātais CI darbs `dast-smoke` pēc `build` izsauc `.github/workflows/dast-smoke.yml`. Tas ievēro to pašu koda un melnrakstu atlasi kā būvēšana, ieskaitot atbalstītus atzarojumu PR, PR uz laidiena zaru un apvienošanas grupas. Trūkstošs, neveiksmīgs, atcelts vai negaidīti izlaists DAST darbs bloķē `Gate / CI`. Atkārtoti izmantojamajai darbplūsmai nav neatkarīga PR vai manuālas palaišanas trigera; manuāla validēšana izmanto CI palaišanu, lai būvētājs un patērētājs paliktu vienā izpildē.
+
+`scripts/ci/next-build-provenance.mjs` aizzīmogo pilno Next artefaktu ar tā tar kontrolsummu, repozitoriju/notikumu/izpildi, ražotāja mēģinājumu, head/base/checkout/tree vērtībām, darbplūsmu identitātēm, atkarību fiksācijas failu, precīzu Node versiju un ABI, platformu un komplektētāju. DAST izvēlas nemainīgo artefakta ID no `needs.build.outputs`, pieprasa lejupielādes kontrolsummas pārbaudi un neatkarīgi aprēķina ZIP jaucējvērtību, salīdzinot to ar ražotāja kontrolsummu, pirms izpako abus atļautos ierakstus ar `scripts/ci/unpack-ci-build.py`. Arī manifestam un tar arhīvam jāsakrīt ar neatkarīgajiem ražotāja izvadiem pirms Next koka izpakošanas. Tas nekad nemeklē zara jaunāko veiksmīgo būvējumu. Daļēja atkārtota izpilde var izmantot to pašu ražotāja mēģinājumu, ja tā ID un visi ievaddati joprojām sakrīt; apliecinājums reģistrē abus mēģinājumus.
+
+Patērētājs paliek mitinātā Linux izpildītājā ar repozitorija tikai lasīšanas tiesībām un bez repozitorija noslēpumiem. Tas instalē ražotāja precīzo Node versiju un tad saliek CLI ar `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` noraida trūkstošu patstāvīgo serveri pirms jebkādas rezerves būvēšanas; parastie lokālie CLI būvējumi saglabā esošo rezerves darbību. Servera gatavībai, Schemathesis un promptfoo visiem jābūt veiksmīgiem nemainītajā darba 25 minūšu ierobežojumā. Izcelsmes apliecinājums pierāda ievaddatu identitāti un baitus, nevis veiksmīgu DAST skenēšanu. Artefakta termiņa beigas, izpildītāja pārtraukums vai skenera kļūme paliek nepilnīgs vai neveiksmīgs pierādījums; informatīvs aptinums nevar to pārvērst par PASS.
 
 ### UI izpildes jauda
 
@@ -225,17 +234,24 @@ Tiek palaists katram PR uz `main`. Kļūmes gadījumā bloķē sapludināšanu.
 
 Tiek izpildīts pēc `test-coverage`. Kļūmes gadījumā bloķē sapludināšanu.
 
-| Skripts                      | Ko pārbauda                                                                                                                                                                                                                              | Bloķējošs                      |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| `quality:collect`            | Izveido `quality-metrics.json` (ESLint brīdinājumu skaits, pārklājums no apvienotā segmentu pārskata)                                                                                                                                    | Jā (pirms sprūdrata pārbaudes) |
-| `quality:ratchet`            | Neviena `quality-baseline.json` metrika nav pasliktinājusies (ESLint brīdinājumi ≤ bāzes līmenis; pārklājums ≥ bāzes līmenis)                                                                                                            | Jā                             |
-| `check:duplication`          | Koda dublēšanās (`jscpd@4`) nepārsniedz `quality-baseline.json` norādīto bāzes līmeni                                                                                                                                                    | Jā                             |
-| `check:complexity`           | Faila līmeņa ciklomātiskā sarežģītība nepārsniedz robežvērtību (pamata ESLint `complexity` + `max-lines-per-function`)                                                                                                                   | Jā                             |
-| `check:cognitive-complexity` | Kognitīvās sarežģītības sprūdrata pārbaude (`eslint-plugin-sonarjs`) — atsevišķa ESLint pārbaude; CI abas izpilda apvienoti vienā `check:complexity-ratchets` solī                                                                       | Jā                             |
-| `check:dead-code`            | Neizmantoto eksportu/failu sprūdrata pārbaude (`knip`) neuzrāda pasliktinājumu salīdzinājumā ar bāzes līmeni                                                                                                                             | Jā                             |
-| `check:compression-budget`   | Saspiešanas etalonpārbaudes budžets — katram dzinim noteiktais minimālais marķieru ietaupījums nedrīkst samazināties                                                                                                                     | Jā                             |
-| `check:type-coverage`        | Tipizētā koda procentuālās daļas sprūdrata pārbaude (`type-coverage`) neuzrāda pasliktinājumu; lielā mērā aizstāj `typecheck:noimplicit:core`                                                                                            | Jā                             |
-| `check:codeql-ratchet`       | Atvērto CodeQL brīdinājumu skaits nepalielinās (nolasa, izmantojot `gh api`; ja nav pilnvaras marķiera, pārbaude tiek korekti izlaista) — atsvaidzināšanas biežumu un manuālu palaišanu skatiet tālāk sadaļā "CodeQL sprūdrata pārbaude" | Jā                             |
+| Skripts                      | Ko pārbauda                                                                                                                                                        | Bloķējošs                      |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| `quality:collect`            | Izveido `quality-metrics.json` (ESLint brīdinājumu skaits, pārklājums no apvienotā segmentu pārskata)                                                              | Jā (pirms sprūdrata pārbaudes) |
+| `quality:ratchet`            | Neviena `quality-baseline.json` metrika nav pasliktinājusies (ESLint brīdinājumi ≤ bāzes līmenis; pārklājums ≥ bāzes līmenis)                                      | Jā                             |
+| `check:duplication`          | Koda dublēšanās (`jscpd@4`) nepārsniedz `quality-baseline.json` norādīto bāzes līmeni                                                                              | Jā                             |
+| `check:complexity`           | Faila līmeņa ciklomātiskā sarežģītība nepārsniedz robežvērtību (pamata ESLint `complexity` + `max-lines-per-function`)                                             | Jā                             |
+| `check:cognitive-complexity` | Kognitīvās sarežģītības sprūdrata pārbaude (`eslint-plugin-sonarjs`) — atsevišķa ESLint pārbaude; CI abas izpilda apvienoti vienā `check:complexity-ratchets` solī | Jā                             |
+| `check:dead-code`            | Neizmantoto eksportu/failu sprūdrata pārbaude (`knip`) neuzrāda pasliktinājumu salīdzinājumā ar bāzes līmeni                                                       | Jā                             |
+| `check:compression-budget`   | Saspiešanas etalonpārbaudes budžets — katram dzinim noteiktais minimālais marķieru ietaupījums nedrīkst samazināties                                               | Jā                             |
+| `check:type-coverage`        | Tipizētā koda procentuālās daļas sprūdrata pārbaude (`type-coverage`) neuzrāda pasliktinājumu; lielā mērā aizstāj `typecheck:noimplicit:core`                      | Jā                             |
+
+### Darbi: `codeql-scan` un `codeql-admission`
+
+`codeql-scan` izveido visas konfigurētās analīzes kategorijas. Pēc šī darba sekmīgas pabeigšanas `codeql-admission` validē tā precīzās augšupielādes un kandidāta brīdinājumu ratchet robežu. Abi ir obligātas `Gate / CI` atkarības, arī kandidātiem ar izmaiņām tikai dokumentācijā. Administratīvās aktivizēšanas un izmēģinājuma prasības ir aprakstītas tālāk sadaļā “CodeQL ratchet”.
+
+| Skripts                | Pārbauda                                                                                                                                                                                                                | Bloķējošs |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `check:codeql-ratchet` | Kandidāta ref/SHA un visām konfigurētajām analīzes kategorijām jābūt aktuālām pirms brīdinājumu ratchet pārbaudes; trūkstoši pierādījumi bloķē. Kopējā inventarizācija paliek atsevišķa — skatīt tālāk “CodeQL ratchet” | Jā        |
 
 ### Uzdevums: `quality-extended`
 
@@ -501,32 +517,24 @@ Komitojiet šo failu kopā ar izmaiņām, kas uzlaboja metriku. PR, kas uzlabo m
 neatjauninot bāzes līniju, tiks konstatēts ar `--require-tighten` (6A.5. fāze,
 ieviešana vēl nav pabeigta).
 
-### CodeQL ratchet: atsvaidzināšanas biežums un manuāla palaišana
+### CodeQL ratchet: kandidāta pieņemšana un repozitorija inventarizācija
 
-`check:codeql-ratchet` nolasa **repozitorija stāvokli, kas tiek atsvaidzināts pēc grafika, nevis katram PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ziņo
-`state: configured`, `schedule: weekly`: tas ir GitHub noklusējuma iestatījuma skenējums, nevis
-analīze pēc katras izmaiņu nosūtīšanas. Sekas: pēc tam, kad tiek sapludināts PR, kas IZLABO
-brīdinājumus, ratchet turpina nolasīt veco, lielāko skaitu, līdz tiek izpildīts nākamais
-ieplānotais skenējums, tādēļ tas ziņo par regresiju katrā atvērtajā PR, tostarp paša
-labojuma PR turpmākajās izmaiņās, līdz skenējums atjaunina datus.
+CI pārvalda kandidāta CodeQL pieņemšanu ar skaidru atkarību ķēdi: `codeql-scan` izsauc četru valodu matricu failā `codeql.yml`, pēc tam `codeql-admission` izpilda `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` pieprasa abus rezultātus. Quality saglabā savas skaitliskās pārbaudes, bet nevaicā skenerim pirms ražotāja pabeigšanas; `Gate / Quality` viens pats nav pilnīga kandidāta pieņemšana. CodeQL paliek obligāts arī kandidātiem, kas maina tikai dokumentāciju.
 
-**Manuāla atsvaidzināšana**: `gh workflow run codeql.yml --ref release/vX.Y.Z` atkārtoti palaiž
-analīzi un dažu minūšu laikā atkārtoti publicē brīdinājumus. Vispirms izlasiet
-`.github/workflows/codeql.yml` — tā galvenē ir paskaidrots, ka tas izmanto tikai
-`workflow_dispatch`, **jo tas konfliktē ar GitHub "default setup"**
-(`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`).
-Lai atjaunotu `push`/`pull_request`/`schedule` trigerus, vispirms nepieciešama
-**īpašnieka darbība**: Settings → Code security → CodeQL: Default → Advanced.
-Nepievienojiet `schedule:` trigeri bez šīs pārslēgšanas — tas radīs tikai nesekmīgas izpildes.
+Politika failā `config/quality/codeql-admission-policy.json` izvēlas Actions, C/C++, JavaScript/TypeScript un Python, vaicājumu kopu default, apdraudējumu modeli remote un būvēšanas režīmu none. Ražotāja priekšpārbaude noraida gaidošu aktivizēšanas ierakstu un zarus ārpus skaidri noteiktā mērķu saraksta. Sākotnējie mērķi ir main un release/v3.8.53; nākamajam laidienam nepieciešama pārskatīta pievienošana. Esošais plašākais CI trigeris laidiena PR tiek saglabāts, bet nepievienots mērķis pirms iegūšanas ziņo HOLD, nevis saņem nemērītu PASS.
 
-**Samaziniet bāzes līniju pēc skaita krituma** — `node scripts/check/check-codeql-ratchet.mjs
---update` ieraksta jauno izmērīto skaitu faila `quality-baseline.json` laukā
-`metrics.codeqlAlerts.value`, lai ratchet klusējot nepieļautu regresiju atpakaļ līdz
-vecajai augšējai robežai. Praktisks piemērs (2026-09-02/03): PR #12502 izlaboja 7 reālus
-brīdinājumus (izmērītais atvērto brīdinājumu skaits: 13 → 6); PR #12530 samazināja fiksēto
-bāzes līniju no 11 līdz 6, lai tā atbilstu faktiskajam skaitam; atlikušie 6 pēc tam tika
-noraidīti, katram brīdinājumam norādot pamatojumu, līdz atvērto brīdinājumu skaits sasniedza 0.
+Katrs matricas darbs reģistrē savu faktisko SARIF augšupielādes ID, valodu, kategoriju, izpildi un mēģinājumu, izsaucošās darbplūsmas identitāti, notikuma ref/head/base/merge SHA un politikas jaucējvērtību. Atkarīgais darbs lejupielādē tikai šīs izpildes apliecinājumus un pārbauda artefaktu kontrolsummas. Tas pieprasa visas četras kategorijas, veiksmīgu ražotāju un pabeigtu katras precīzās augšupielādes apstrādi. Tas izmanto API sarif_id filtru, nevis jaunāko zarā atrasto analīzi. Daļējas atkārtotas izpildes var izmantot veiksmīgas kategorijas no agrāka tās pašas izpildes un kandidāta mēģinājuma, saglabājot ražojošo mēģinājumu; neveiksmīgs pašreizējais ražotājs nevar izmantot iepriekšējus zaļus pierādījumus.
+
+CodeQL darbība gaida apstrādi, bet tās fiksētā realizācija var brīdināt un turpināt pēc statusa nolasīšanas kļūmes vai gaidīšanas limita sasniegšanas. Tādēļ pieņemšana pārbauda apstrādi vēlreiz. Trūkstošas kategorijas, gaidoša apstrāde, neveiksmīgi vai atcelti darbi, novecojusi identitāte, nepilnīga lapošana vai nepieejamas API rada HOLD un izejas kodu 2. Vairs nav fiksētas gaidīšanas uz neatkarīgu skenera darbplūsmu. Neskenēts PR nevar iziet pārbaudi tāpēc, ka brīdinājumu vaicājums atgrieza 0. Izmērīts skaits virs `metrics.codeqlAlerts.value` beidzas ar kodu 1; bāzes līmeni nepaaugstina, lai ietilpinātu cita zara brīdinājumus. [Augšupielādes statuss un analīzes meklēšana](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Apliecinājums reģistrē augšupielāžu un analīžu ID, kategorijas, rīku versijas, ref/SHA, bāzes līmeni un brīdinājumu skaitu. SARIF identitāte un rezultātu skaits, minimālie noteikumu skaiti un precīzi brīdinājumu gadījumi paliek obligāti. PR un analīzes identitātes pirms pieņemšanas pārbauda atkārtoti. Šīs pārbaudes pierāda konfigurēto kategoriju pārklājumu, nevis visu iegūto avota failu inventarizāciju. C/C++ iegūšana bez būvēšanas neietver kodu, kas ģenerēts projekta būvēšanas laikā. Avotu izņēmumi joprojām jāpārskata, un attiecināšanai uz ieguldījuma autoru vajadzīgi salīdzināmi pierādījumi par precīzo bāzi.
+
+`codeql-maintenance.yml` nodrošina aktīvā laidiena izmaiņu nosūtīšanas skenēšanu un iknedēļas grafiku, nedublējot PR/main ražotājus. `nightly-codeql-inventory.yml` uztur atsevišķu visa repozitorija bāzes līmeni ar `--strict-measurement` un kļūmi, ja mērījums nav pieejams. Vecā lokālā savācēja pieļaujoša izlaišana nav kandidāta pieņemšana. Stingrāka robeža joprojām prasa skaidru `--update` pēc pārbaudīta zemāka kopējā skaita.
+
+Advanced darbplūsmu nedrīkst publicēt, kamēr ir konfigurēts Default Setup: GitHub noraida šo kombināciju. Tās versētā politika paliek gaidoša, līdz pārskatītā administratīvā pāreja ir nolasīta atpakaļ. Pirms publicēšanas operators fiksē repozitoriju, head/base/tree, politikas/ielāpa/atcelšanas jaucējvērtības un novēroto iestatījuma stāvokli; `node scripts/quality/codeql-producer.mjs verify-admin-readback` pārbauda iesniegtos sagaidāmos un faktiskos JSON ierakstus. Tā ir tehniska aizsardzība, nevis operatora apstiprinājums vai svaigu atpakaļnolasījumu iegūšanas aizstājējs. PR tokens nekad nepieprasa Administration piekļuvi. Ieviešanai un jebkurai skenera maiņai vajadzīga šī atsevišķā atpakaļnolasīšana un reāli saderības pierādījumi PR, atzarojumiem un apvienošanas grupām.
+
+Atzarojumi izmanto mitinātus izpildītājus, checkout bez saglabātiem akreditācijas datiem, neveic projekta instalēšanu vai būvēšanu ražotājā un nemanto repozitorija noslēpumus. GitHub atbalsta SARIF augšupielādi pull_request notikumam ar ierobežoto atzarojuma tokenu; pirmā ieguldījuma izpildes apstiprināšana joprojām ir GitHub politika. Nekad neizmantojiet pull_request_target, lai izpildītu neuzticamu kodu. Pirms migrācijas atzīšanas par pabeigtu kontrolētajā izmēģinājumā apstipriniet faktiskās tokena tiesības, analysis_key un visu kategoriju vides. [Augšupielādes noteikumi atzarojumiem](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[konfliktējoši iestatīšanas režīmi](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Par noraidīšanu lemj operators (Stingrais noteikums #14)** — nekad nenoraidiet CodeQL
 brīdinājumu, noraidīšanas komentārā nenorādot tehnisko pamatojumu: `won't fix`, ja to
@@ -684,11 +692,7 @@ tika noteikti tālāk minētie racionalizācijas kandidāti. **Apvienošanas ir 
 izmaiņas; režīma maiņa/noņemšana ir operatoram atstāti politikas lēmumi.** Nekas no tālāk
 minētā vēl nav ieviests.
 
-**Iepriekš nav dokumentēti arī** (konsultatīvi, zems signāla līmenis): `docs-lint` darbs
-(markdownlint + Vale, visam darbam iestatīts `continue-on-error`) un savrupās skenēšanas darbplūsmas
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` ir norādīts
-`quality-baseline.json`, taču nav piesaistīts bloķējošam sliekšņa mehānismam failā `ci.yml` — šis rādītājs
-pašlaik ir nesaistīts.
+**Arī iepriekš nav dokumentēti** (informatīvi, ar zemu signāla vērtību): darbs `docs-lint` (markdownlint + Vale, viss darbs ar `continue-on-error`) un atsevišķās skeneru darbplūsmas `semgrep.yml` / `scorecard.yml`. CodeQL tagad ir obligāti ražotāja un pieņemšanas darbi zem `Gate / CI`, ievērojot iepriekš aprakstītās aktivizēšanas prasības. `semgrepFindings: 0` ir failā `quality-baseline.json`, bet failā `ci.yml` nav piesaistīts bloķējošam ratchet — metrika pašlaik ir nepiesaistīta.
 
 ### Apvienošana / dublikātu novēršana (mehāniski, zemāks risks)
 

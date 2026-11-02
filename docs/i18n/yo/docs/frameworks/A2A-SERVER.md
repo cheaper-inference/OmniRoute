@@ -163,7 +163,7 @@ OmniRoute ń ṣí ọgbọ́n A2A mẹ́fà síta, tí a so pọ̀ nínú `src/
 | Ìròyìn Ìlera       | `health-report`      | Ń ṣàkójọpọ̀ ipò circuit breaker, cooldown, àti lockout fún olùpèsè kọ̀ọ̀kan                                                                                       | ìlera, ìfaradà             | "Ṣàfihàn ipò ìlera gbogbo àwọn olùpèsè"        |
 | Ṣàkójọ Àwọn Agbára | `list-capabilities`  | Ń dá gbogbo àkójọ Agent Skills tó ní àkọsílẹ̀ 45 padà (23 API + 21 CLI + 1 ìṣètò) gẹ́gẹ́ bí tábìlì markdown pẹ̀lú àwọn URL SKILL.md gidi fún fífi àyíká ọ̀rọ̀ kún un | àkójọ, ìṣàwárí, àwọn ọgbọ́n | "Ṣàkójọ gbogbo àwọn agbára OmniRoute"          |
 
-> Ó yẹ kí Àkọsílẹ̀ Agent wà ní ìbámu pẹ̀lú àkójọ olùpèsè 377 tó ń ṣiṣẹ́; iye àwọn olùpèsè àti metadata ọ̀fẹ́/tí kò nílò ìfọwọ́sí wá láti inú ìforúkọsílẹ̀ runtime.
+> Ó yẹ kí Àkọsílẹ̀ Agent wà ní ìbámu pẹ̀lú àkójọ olùpèsè 380 tó ń ṣiṣẹ́; iye àwọn olùpèsè àti metadata ọ̀fẹ́/tí kò nílò ìfọwọ́sí wá láti inú ìforúkọsílẹ̀ runtime.
 
 ### Àlàyé Ọgbọ́n `list-capabilities`
 
@@ -215,7 +215,7 @@ Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-
    };
    ```
 
-3. **Ṣàfihàn rẹ̀ nínú Káàdì Aṣojú:** nínú `src/app/.well-known/agent.json/route.ts`, fi kún àkójọpọ̀ `skills`:
+3. **Ṣàfihàn rẹ̀ nínú Káàdì Agent:** nínú `src/lib/a2a/agentCardMetadata.ts` (tí `/.well-known/agent.json` àti `/.well-known/agent-card.json` ń lò papọ̀), fi kún àkójọpọ̀ `skills`:
 
    ```json
    {

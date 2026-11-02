@@ -471,8 +471,10 @@ sukut bo'yicha o'chirilgan.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) da sanab o'tilgan.
   O'rnatilmagan holat har bir turni anglatadi (bu sozlama mavjud bo'lmasdan
   oldingi xatti-harakat). So'rov dvigatelining `ssn_us` andozasi `ssn` ga
-  moslanadi. Shablonlar (Minimal, Standard, Financial, Brazilian, USA, Full)
+  moslanadi. Shablonlar (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full)
   faqat UI dagi belgilash katakchalarini to'ldiradi.
+- **GDPR va POPIA identifikatorlari** — Yevropa Ittifoqi va Janubiy Afrika shaxsiy identifikatorlarini qamrab olgan o‘n ikki ichki ID (quyidagi jadval). Ularning muntazam ifodalari, tekshiruvchilari va yurisdiksiya teglari bitta `src/shared/utils/piiPatterns.ts` jadvalida; undan javob tozalagichi (`src/lib/piiSanitizer.ts`) ham, so‘rov niqoblagichi (`src/shared/utils/inputSanitizer.ts`) ham foydalanadi. Moslik faqat tekshiruvchi qabul qilganda yashiriladi; raqamlarning o‘zi hech qachon yetmaydi. Bu ID’lardan oldin toraytirilgan tanlov saqlagan operator yangi ID’larni belgilaguncha oldingi xatti-harakatni saqlaydi.
+
 - **Maxsus andozalar** — 20 tagacha regex yoki wildcard andozalari (`*` = 64
   tagacha bo'shliq bo'lmagan belgilar, `?` = bitta). Mosliklar
   `[CUSTOM_REDACTED]` ga aylanadi. Har bir andoza `compilePiiCustomPattern()`
@@ -500,6 +502,25 @@ Sozlamalar `key_value` jadvalida saqlanadi (`pii_settings` nom maydoni,
 
 Uchtalasi ham boshqaruv autentifikatsiyasini talab qiladi va tanani Zod bilan
 tekshiradi (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR (Yevropa Ittifoqi) va POPIA (Janubiy Afrika) identifikatorlari
+
+| ID                  | Identifikator                 | Tekshirish                                                                       |
+| ------------------- | ----------------------------- | -------------------------------------------------------------------------------- |
+| `iban`              | IBAN                          | Ma’lum mamlakat, shu mamlakat uchun aniq uzunlik, ISO 13616 MOD-97-10            |
+| `eu_vat`            | YI VAT raqami                 | Ma’lum a’zo mamlakat prefiksi va uning raqam formati (VIES qidiruvi yo‘q)        |
+| `es_dni_nie`        | Ispan DNI / NIE               | Nazorat harfi (qiymat mod 23); NIE — `X/Y/Z` + 7 raqam                           |
+| `it_codice_fiscale` | Italyan Codice Fiscale        | Toq/juft o‘rin jadvallaridan nazorat harfi                                       |
+| `pl_pesel`          | Polsha PESEL                  | Vaznli nazorat yig‘indisi va kodlangan tug‘ilgan oy/kun uchun mantiqli oraliqlar |
+| `nl_bsn`            | Niderland BSN                 | 11-proof tekshiruvi (vaznlar 9..2, -1)                                           |
+| `de_steuer_id`      | Nemis Steuer-ID               | ISO 7064 Mod 11,10 va raqam tuzilishi qoidalari (boshida 0 yo‘q)                 |
+| `se_personnummer`   | Shved personnummer            | Oxirgi o‘n raqamga Luhn va mantiqli tug‘ilgan sana (10 yoki 12 raqam)            |
+| `za_id`             | Janubiy Afrika shaxsiy raqami | Barcha 13 raqamga Luhn, to‘g‘ri tug‘ilgan oy/kun, fuqarolik raqami 0 yoki 1      |
+| `za_phone`          | Janubiy Afrika telefoni       | `+27` / `27` prefiksi yoki bo‘shliq/defisli milliy `0..` shakli                  |
+| `za_vat`            | Janubiy Afrika VAT raqami     | `4` bilan boshlangan 10 raqam **va** oldingi 48 belgida "VAT" / "BTW"            |
+| `za_tax_ref`        | Janubiy Afrika soliq havolasi | `0`-`3` bilan boshlangan 10 raqam, Luhn **va** oldingi 48 belgida "tax" / "SARS" |
+
+Faqat raqamli shakllar buyurtma raqami, yig‘ilma raqami va vaqt belgilariga mos kelib qolishi sababli, eng zaiflari (`za_vat`, `za_tax_ref`) kalit so‘z ishorasini talab qiladi; oddiy o‘n raqamli `0..` Janubiy Afrika telefoni hisoblanmaydi. Bo‘shliqli IBAN’lar (`GB29 NWBK ...`) topilmaydi. Oqim yo‘lida ishora faqat joriy bo‘lak ichida qidiriladi. ID’lar umumiy telefon andozalaridan oldin turadi, shuning uchun tekshirilgan identifikator o‘z o‘rinbosarini saqlaydi (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` va `popia` andozalari mos ravishda YI va Janubiy Afrika ID’larini tanlaydi. Niqoblashning o‘zi ixtiyoriy qoladi (Qat’iy qoida #20): bu yerda hech narsa xususiyat bayrog‘ining standartini o‘zgartirmaydi.
 
 ### Prompt Injection (`promptInjection.ts`)
 

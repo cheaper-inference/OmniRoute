@@ -42,6 +42,10 @@ Claude Code ከ **Anthropic Messages API** ጋር ይገናኛል፣ እናም �
 
 > የአካባቢ ተለዋዋጮች **በማስጀመሪያ ጊዜ አንድ ጊዜ** ይነበባሉ — ከቀየሯቸው በኋላ Claude Codeን እንደገና ያስጀምሩ።
 
+ቋሚ ሕብረቁምፊ ሳይሆን የሚቀያየር ማረጋገጫ ለመጠቀም፣ በ`~/.claude/settings.json` ውስጥ `apiKeyHelper`ን የአሁኑን ማረጋገጫ ወደ stdout የሚያትም ትዕዛዝ ያድርጉት። Claude Code በነባሪ ውጤቱን ለአምስት ደቂቃዎች ያስቀምጣል (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ይህን ይተካል)፣ እሴቱንም በ`Authorization: Bearer` እና `x-api-key` ሁለቱም ይልካል። ስክሪፕቱ ማረጋገጫውን ብቻ ማተም አለበት፤ ከእሱ ጋር ያለ ማስታወቂያ ጽሑፍ በv2.1.227+ ላይ አጋዡን ያስከሽፋል።
+
+Entra ID SSO የሚሰራው እንዲህ ነው፦ `scripts/cli/omniroute-sso.mjs token` አጭር ዕድሜ ያለው የEntra መዳረሻ ቶከን ያትማል፣ OmniRouteም ከAPI ቁልፍ ይልቅ እሱን ያረጋግጣል። [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md)ን ይመልከቱ።
+
 `omniroute launch` እነዚህን ሁሉ ያዋቅርልዎታል፦ መሠረታዊ URL + ቶከንን
 ከንቁው አውድ ይፈታል (ስለዚህ `omniroute connect <vps>` ከዚያም `omniroute launch`
 በቀጥታ ይሠራል)፣ የሰርቨሩን ጤና ይፈትሻል፣ እና `claude`ን ያስኬዳል።

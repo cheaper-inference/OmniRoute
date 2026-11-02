@@ -374,7 +374,8 @@ Completions の `messages` および Responses API の `input` 内のトップ�
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) にリストされています。未設定の場合は
   すべてのタイプが対象になります (この設定が存在する前の動作)。リクエストエンジンの
   `ssn_us` パターンは `ssn` にマッピングされます。テンプレート (Minimal、Standard、Financial、
-  Brazilian、USA、Full) は UI のチェックボックスを埋めるだけです。
+  Brazilian、USA、 GDPR、 POPIA、Full) は UI のチェックボックスを埋めるだけです。
+- **GDPR と POPIA の識別子** — EU と南アフリカの個人識別子を対象とする十二の組み込み ID です（下表）。正規表現、検証関数、管轄地域のタグは、応答サニタイザー（`src/lib/piiSanitizer.ts`）とリクエストマスカー（`src/shared/utils/inputSanitizer.ts`）が共用する一つの表 `src/shared/utils/piiPatterns.ts` にあります。一致箇所がマスキングされるのは検証関数が受理した場合だけで、単なる数字の並びだけでは不十分です。これらの ID が追加される前に対象を絞って保存した運用者の設定は、新しい ID にチェックを入れるまで以前の動作を維持します。
 - **カスタムパターン** — 最大 20 個の正規表現またはワイルドカードパターン (`*` = 空白以外の
   最大 64 文字、`?` = 1 文字)。一致箇所は `[CUSTOM_REDACTED]` になります。
   すべてのパターンは `compilePiiCustomPattern()`
@@ -399,6 +400,25 @@ Completions の `messages` および Responses API の `input` 内のトップ�
 
 3 つすべて管理用認証が必要で、Zod
 (`src/shared/validation/schemas/piiSettings.ts`) によってボディが検証されます。
+
+#### GDPR（EU）と POPIA（南アフリカ）の識別子
+
+| ID                  | 識別子                      | 検証                                                                      |
+| ------------------- | --------------------------- | ------------------------------------------------------------------------- |
+| `iban`              | IBAN                        | 既知の国、その国に対する正確な長さ、ISO 13616 MOD-97-10                   |
+| `eu_vat`            | EU VAT 番号                 | 既知の加盟国接頭辞と、その国の番号形式（VIES 照会なし）                   |
+| `es_dni_nie`        | スペインの DNI / NIE        | 検査文字（値 mod 23）。NIE は `X/Y/Z` + 7 桁                              |
+| `it_codice_fiscale` | イタリアの Codice Fiscale   | 奇数位置・偶数位置の表から得る検査文字                                    |
+| `pl_pesel`          | ポーランドの PESEL          | 重み付きチェックサムと、符号化された出生月・日の妥当な範囲                |
+| `nl_bsn`            | オランダの BSN              | 11-proof（重み 9..2、-1）                                                 |
+| `de_steuer_id`      | ドイツの Steuer-ID          | ISO 7064 Mod 11,10 と桁構造の規則（先頭の 0 は不可）                      |
+| `se_personnummer`   | スウェーデンの personnummer | 末尾の十桁に対する Luhn と妥当な生年月日（10 桁または 12 桁）             |
+| `za_id`             | 南アフリカの ID 番号        | 全 13 桁に対する Luhn、有効な出生月・日、市民権の桁が 0 または 1          |
+| `za_phone`          | 南アフリカの電話番号        | `+27` / `27` の接頭辞、または空白かハイフンを入れた国内形式 `0..`         |
+| `za_vat`            | 南アフリカの VAT 番号       | `4` で始まる 10 桁、**かつ**直前の 48 文字以内に "VAT" / "BTW"            |
+| `za_tax_ref`        | 南アフリカの税務参照番号    | `0`-`3` で始まる 10 桁、Luhn、**かつ**直前の 48 文字以内に "tax" / "SARS" |
+
+数字だけの形式は注文番号、ビルド番号、タイムスタンプと衝突するため、判別力の弱い形式（`za_vat`、`za_tax_ref`）にはキーワードの手掛かりが必要です。区切りのない十桁の `0..` 番号は南アフリカの電話番号として扱いません。空白入り IBAN（`GB29 NWBK ...`）には一致しません。ストリーミング経路では、手掛かりを探すのは現在のチャンク内だけです。これらの ID は汎用の電話番号パターンより先に置かれるため、検証済みの識別子は固有のプレースホルダー（`[IBAN_REDACTED]`、`[NL_BSN_REDACTED]`、...）を維持します。`gdpr` と `popia` のテンプレートは、それぞれ EU と南アフリカの ID を選択します。マスキング自体は明示的な有効化が必要なままです（Hard Rule #20）。ここに記載した内容は、機能フラグの既定値を変更しません。
 
 ### プロンプトインジェクション (`promptInjection.ts`)
 

@@ -181,9 +181,10 @@ API кључеви било ког опсега и токени за прист�
 
 - **`publicPolicy`** (`policies/public.ts`) — увек враћа `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — издваја Bearer и проверава га преко `validateApiKey()`. Прелази на анонимни приступ само када је ефективна заставица функције `REQUIRE_API_KEY` онемогућена. Ефективна заставица се одређује преко `isRequireApiKeyEnabled()` (`DB замена заставице функције > process.env.REQUIRE_API_KEY > подразумевана вредност`), тако да заставице функција на контролној табли и променљиве окружења доследно управљају рутама `/api/v1/*`, `/api/v1beta/*` и алијасима; грешке механизма за одређивање доводе до одбијања приступа. Дозвољава захтеве са сесијом контролне табле на клијентским API рутама (укључујући `/api/v1/models`, коју користи каталог модела на контролној табли).
+  Када је Entra ID SSO омогућен, Bearer који има структуру Entra токена (три base64url сегмента, алгоритам `RS*`, `kid`) обрађује SSO грана **пре** `validateApiKey()`, а њена одлука је коначна — никада не прелази на путању API кључа нити на грану која своди приступ на анонимни. Зато недоступност добављача идентитета не може да отвори приступ. Статички API кључеви нису погођени. Погледајте [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — прихвата сесију контролне табле, интерне захтеве за синхронизацију модела (који се подударају са `/api/providers/[name]/(sync-models|models)`) или у потпуности прескаче проверу ако `isAuthRequired()` врати false. Враћа 403 (`AUTH_001`) када је Bearer токен присутан, али неважећи, а у супротном 401. Такође примењује нивое заштите рута (LOCAL_ONLY / ALWAYS_PROTECTED) пре било које гране аутентификације — погледајте [Нивои заштите рута](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY путањама у `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (тренутно: `/api/mcp/`) може се приступити ван loopback интерфејса када Bearer кључ садржи опсег `manage`; све остале LOCAL_ONLY путање остају строго ограничене на loopback без обзира на опсег.
 
-Успешна смерница враћа `AuthSubject` са `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Накнадни обрађивачи могу да га прочитају преко `assertAuth(request, "CLIENT_API")` у `src/server/authz/assertAuth.ts`, уместо да поново извршавају логику аутентификације.
+Успешна смерница враћа `AuthSubject` са `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Накнадни обрађивачи могу да га прочитају преко `assertAuth(request, "CLIENT_API")` у `src/server/authz/assertAuth.ts`, уместо да поново извршавају логику аутентификације.
 
 ## Листа јавних рута
 
@@ -354,8 +355,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 За аутентификоване захтеве, заглавља захтева прослеђеног узводној страни (руковаоцу) такође садрже:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<последње 4 цифре> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<последње 4 цифре> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (опционо)
 x-omniroute-auth-scopes:    листа раздвојена зарезима
 ```

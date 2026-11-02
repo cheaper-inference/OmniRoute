@@ -394,7 +394,9 @@ OmniRoute 绝不会根据这些元数据启动转录：经过验证的提示会�
 
 **仪表盘 → 设置 → 安全 → PII 脱敏** 用于选择脱敏的_对象_。它并不负责开启脱敏：开启仍由 `PII_REDACTION_ENABLED`（请求）和 `PII_RESPONSE_SANITIZATION`（响应 + SSE）控制，二者默认均为关闭。
 
-- **按类型选择** — 内置 id 列于 `src/shared/constants/piiTypes.ts`（`PII_BUILTIN_TYPES`）。未设置表示启用所有类型（即此设置引入之前的行为）。请求引擎的 `ssn_us` 模式会映射到 `ssn`。模板（Minimal、Standard、Financial、Brazilian、USA、Full）仅用于填充 UI 中的复选框。
+- **按类型选择** — 内置 id 列于 `src/shared/constants/piiTypes.ts`（`PII_BUILTIN_TYPES`）。未设置表示启用所有类型（即此设置引入之前的行为）。请求引擎的 `ssn_us` 模式会映射到 `ssn`。模板（Minimal、Standard、Financial、Brazilian、USA、 GDPR、 POPIA、Full）仅用于填充 UI 中的复选框。
+- **GDPR 和 POPIA 标识符**——十二个内置 ID，覆盖欧盟和南非的个人标识符（见下表）。其正则表达式、验证器和司法辖区标签集中在 `src/shared/utils/piiPatterns.ts` 一张表中，由响应清理器（`src/lib/piiSanitizer.ts`）和请求脱敏器（`src/shared/utils/inputSanitizer.ts`）共同使用。只有验证器接受匹配时才会脱敏；单纯一串数字始终不够。如果操作员在这些 ID 出现前已保存缩小后的选择，则在勾选新 ID 之前会保持原有行为。
+
 - **自定义模式** — 最多 20 个正则或通配符模式（`*` = 最多 64 个非空白字符，`?` = 一个字符）。匹配内容会被替换为 `[CUSTOM_REDACTED]`。每个模式都会经过 `compilePiiCustomPattern()`（`src/shared/utils/piiCustomPatterns.ts`）校验：最多 500 个字符，标志位仅限 `g i m s u`，必须能编译，必须通过 `safe-regex` 检查（防止灾难性回溯），且不得匹配空字符串或脱敏占位符。校验失败的模式在保存和测试时都会被拒绝；已存储的某条记录若校验失败，则会在运行时被跳过，而不会被编译。自定义模式仅在脱敏开启时运行。
 - **检测计数器** — 按类型计数（绝不记录匹配到的具体值），保存在内存中，重启后重置（`src/lib/pii/piiDetectionStats.ts`）。计数仅在脱敏开启时增加。
 
@@ -407,6 +409,25 @@ OmniRoute 绝不会根据这些元数据启动转录：经过验证的提示会�
 | `POST` | `/api/settings/pii/test` | 针对最多 8 KB 的样本对单个模式进行试运行；不存储任何内容   |
 
 这三个接口都需要管理权限认证，并使用 Zod 校验请求体（`src/shared/validation/schemas/piiSettings.ts`）。
+
+#### GDPR（欧盟）和 POPIA（南非）标识符
+
+| ID                  | 标识符                | 验证                                                                                  |
+| ------------------- | --------------------- | ------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                  | 已知国家、该国家的精确长度、ISO 13616 MOD-97-10                                       |
+| `eu_vat`            | 欧盟 VAT 号码         | 已知成员国前缀及该国号码格式（不查询 VIES）                                           |
+| `es_dni_nie`        | 西班牙 DNI / NIE      | 校验字母（数值 mod 23）；NIE 为 `X/Y/Z` + 7 位数字                                    |
+| `it_codice_fiscale` | 意大利 Codice Fiscale | 根据奇数/偶数位置表计算校验字母                                                       |
+| `pl_pesel`          | 波兰 PESEL            | 加权校验和及编码出生月/日的合理范围                                                   |
+| `nl_bsn`            | 荷兰 BSN              | 11-proof 校验（权重 9..2, -1）                                                        |
+| `de_steuer_id`      | 德国 Steuer-ID        | ISO 7064 Mod 11,10 及数字结构规则（首位不能为 0）                                     |
+| `se_personnummer`   | 瑞典 personnummer     | 对最后十位数字执行 Luhn 校验，并检查出生日期合理性（10 或 12 位）                     |
+| `za_id`             | 南非身份证号          | 对全部 13 位数字执行 Luhn 校验、有效出生月/日、公民身份位为 0 或 1                    |
+| `za_phone`          | 南非电话号码          | `+27` / `27` 前缀，或包含空格或连字符的国内 `0..` 格式                                |
+| `za_vat`            | 南非 VAT 号码         | 以 `4` 开头的 10 位数字，**并且**前面的 48 个字符内包含 "VAT" / "BTW"                 |
+| `za_tax_ref`        | 南非税务编号          | 以 `0`-`3` 开头的 10 位数字、Luhn 校验，**并且**前面的 48 个字符内包含 "tax" / "SARS" |
+
+纯数字格式可能与订单号、构建号和时间戳冲突，因此最弱的格式（`za_vat`、`za_tax_ref`）需要关键词提示；单纯十位数字的 `0..` 不会被视为南非电话号码。带空格的 IBAN（`GB29 NWBK ...`）不会匹配。流式路径仅在当前片段内查找提示。这些 ID 位于通用电话模式之前，因此经验证的标识符保留自己的占位符（`[IBAN_REDACTED]`、`[NL_BSN_REDACTED]`、...）。`gdpr` 和 `popia` 模板分别选择欧盟和南非 ID。脱敏本身仍需主动启用（硬性规则 #20）：这里没有任何内容改变功能标志的默认值。
 
 ### 提示注入（`promptInjection.ts`）
 

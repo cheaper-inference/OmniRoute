@@ -171,9 +171,10 @@ server, `/api/settings/require-login`, `/api/auth/status`) அந்த helper �
 
 - **`publicPolicy`** (`policies/public.ts`) — எப்போதும் `allow({ kind: "anonymous", id: "anonymous" })` என்பதைத் திருப்பித் தரும்.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer-ஐப் பிரித்தெடுத்து, `validateApiKey()` வழியாகச் சரிபார்க்கிறது. நடைமுறையிலுள்ள `REQUIRE_API_KEY` அம்சக் கொடி முடக்கப்பட்டிருக்கும்போது மட்டுமே பெயரிலாப் பயன்பாட்டிற்கு வழிவிடுகிறது. நடைமுறையிலுள்ள கொடி `isRequireApiKeyEnabled()` (`DB அம்சக் கொடி மேலெழுதல் > process.env.REQUIRE_API_KEY > இயல்புநிலை`) வழியாகத் தீர்மானிக்கப்படுவதால், கட்டுப்பாட்டுப் பலகையின் அம்சக் கொடிகளும் சூழல் மாறிகளும் `/api/v1/*`, `/api/v1beta/*` மற்றும் மாற்றுப் பெயர்களை ஒரே மாதிரியாகக் கட்டுப்படுத்துகின்றன; தீர்மானிப்பான் தோல்விகள் அணுகலை மறுக்கும். கிளையன்ட் API வழித்தடங்களில் கட்டுப்பாட்டுப் பலகை அமர்வுக் கோரிக்கைகளை அனுமதிக்கிறது (கட்டுப்பாட்டுப் பலகையின் மாதிரிப் பட்டியல் பயன்படுத்தும் `/api/v1/models` உட்பட).
+  Entra ID SSO இயக்கப்பட்டிருக்கும்போது, Entra டோக்கனின் கட்டமைப்பைக் கொண்ட Bearer (மூன்று base64url பகுதிகள், `RS*` வழிமுறை, `kid`) `validateApiKey()` க்கு **முன்பே** SSO கிளையால் கையாளப்படுகிறது. அதன் முடிவே இறுதியானது — அது API விசைப் பாதைக்கோ பெயரில்லா அணுகலாகத் தரமிறக்கும் கிளைக்கோ ஒருபோதும் செல்லாது. எனவே அடையாள வழங்குநர் செயலிழந்தாலும் அணுகல் அனைவருக்கும் திறந்துவிடப்படாது. நிலையான API விசைகள் பாதிக்கப்படாது. [Entra ID SSO](../security/ENTRA_SSO.md) பார்க்கவும்.
 - **`managementPolicy`** (`policies/management.ts`) — கட்டுப்பாட்டுப் பலகை அமர்வு, உள் மாதிரி-ஒத்திசைவுக் கோரிக்கைகள் (`/api/providers/[name]/(sync-models|models)` உடன் பொருத்தப்படுபவை) ஆகியவற்றை ஏற்கிறது அல்லது `isAuthRequired()` false என்பதைத் திருப்பினால் முழுமையாகத் தவிர்க்கிறது. Bearer டோக்கன் இருந்தும் செல்லுபடியாகாதபோது 403 (`AUTH_001`) என்பதையும், இல்லையெனில் 401 என்பதையும் திருப்பித் தருகிறது. எந்த அங்கீகாரக் கிளைக்கும் முன்பாக வழித்தடப் பாதுகாப்பு அடுக்குகளையும் (LOCAL_ONLY / ALWAYS_PROTECTED) செயல்படுத்துகிறது — [வழித்தடப் பாதுகாப்பு அடுக்குகள்](../security/ROUTE_GUARD_TIERS.md) என்பதைப் பார்க்கவும். `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-இல் உள்ள LOCAL_ONLY பாதைகளை (தற்போது: `/api/mcp/`) Bearer விசை `manage` வரம்பைக் கொண்டிருக்கும்போது loopback அல்லாத இடங்களிலிருந்து அணுகலாம்; மற்ற அனைத்து LOCAL_ONLY பாதைகளும் வரம்பைப் பொருட்படுத்தாமல் கண்டிப்பாக loopback-க்கு மட்டுமே கட்டுப்படுத்தப்பட்டிருக்கும்.
 
-வெற்றிகரமான கொள்கை `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` கொண்ட `AuthSubject`-ஐத் திருப்பித் தருகிறது. கீழ்நிலை கையாளிகள் அங்கீகாரத் தர்க்கத்தை மீண்டும் இயக்குவதற்குப் பதிலாக, `src/server/authz/assertAuth.ts`-இல் உள்ள `assertAuth(request, "CLIENT_API")` வழியாக அதைப் படிக்கலாம்.
+வெற்றிகரமான கொள்கை `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` கொண்ட `AuthSubject`-ஐத் திருப்பித் தருகிறது. கீழ்நிலை கையாளிகள் அங்கீகாரத் தர்க்கத்தை மீண்டும் இயக்குவதற்குப் பதிலாக, `src/server/authz/assertAuth.ts`-இல் உள்ள `assertAuth(request, "CLIENT_API")` வழியாக அதைப் படிக்கலாம்.
 
 ## பொது Routes பட்டியல்
 
@@ -320,8 +321,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 அங்கீகரிக்கப்பட்ட கோரிக்கைகளுக்கு, அப்ஸ்ட்ரீம் (ஹேண்ட்லர்-பக்க) கோரிக்கை தலைப்புகளில் பின்வருவனவும் அடங்கும்:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<கடைசி-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<கடைசி-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (விருப்பத்தேர்வு)
 x-omniroute-auth-scopes:    காற்புள்ளியால் பிரிக்கப்பட்ட பட்டியல்
 ```

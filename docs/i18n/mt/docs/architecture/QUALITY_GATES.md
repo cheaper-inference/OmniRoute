@@ -36,7 +36,8 @@ Is-CLI jirrifjuta nuqqas ta’ qbil bejn ix-SHA taċ-checkout u dak tal-avvenime
 mal-lista `needs` tal-job tal-verdett sabiex lane ġdida jew imneħħija ma tkunx tista’ tisparixxi mingħajr ma jiġi nnutat.
 L-irċevuti jkopru l-fluss tax-xogħol tagħhom stess, mhux il-pubblikazzjoni, id-distribuzzjoni, jew il-mekkaniżmi interni ta’ skaner konsultattiv eżistenti. Li l-kontrolli applikabbli jsiru obbligatorji fir-regoli tal-fergħat hija bidla amministrattiva separata; id-definizzjoni tal-kompiti tagħhom minnha nnifisha ma tipproteġix fergħa.
 
-`API Route Typecheck` huwa kontroll indipendenti tal-fluss tax-xogħol, barra miż-żewġ verdetti aggregati u mill-profil statiku tal-osservatur sħiħ lokali. Spezzjona r-riżultat tiegħu separatament għall-kandidat eżatt. `.github/workflows/api-route-typecheck.yml` jitħaddem fuq PRs lejn `main` jew `release/**`, fuq pushes lejn kwalunkwe waħda miż-żewġ familji ta’ fergħat, u permezz ta’ tħaddim manwali. Ma għandu l-ebda filtru tal-mogħdijiet. It-tibdil tal-fergħa bażi tal-PR jitlob kontroll ġdid; il-modifiki fil-korp/titlu jużaw l-isem ta’ osservazzjoni biss `Admission not requested / API Route Typecheck` u ma jistgħux jissostitwixxu l-kontroll tal-ammissjoni. Il-fluss tax-xogħol ma jiddikjarax skattatur għal grupp ta’ merges. Kwalunkwe introduzzjoni ta’ kju ta’ merges li teħtieġ dan il-kontroll trid l-ewwel tistabbilixxi t-tħaddim tiegħu għal dak l-avveniment.
+`API Route Typecheck` huwa kontroll indipendenti tal-fluss tax-xogħol, barra miż-żewġ verdetti aggregati u mill-profil statiku tal-osservatur lokali sħiħ. Eżamina r-riżultat tiegħu separatament għall-kandidat eżatt. `.github/workflows/api-route-typecheck.yml` jitħaddem għal PRs lejn `main` jew `release/**`, għal pushes lejn iż-żewġ familji ta' fergħat, għal tnedija manwali, u għal avvenimenti `merge_group` tat-tip `checks_requested`. M'għandu ebda filtru tal-mogħdijiet. Il-gruppi ta' amalgamazzjoni jagħmlu checkout ta' `merge_group.head_sha`; avvenimenti oħra jagħmlu checkout ta' `github.sha`. L-avvenimenti kollha jużaw l-istess gate dijanjostiku tal-API u t-testijiet unitarji tal-gate.
+Tibdil fil-fergħa bażi fil-mira ta' PR jitlob kontroll ġdid; editjar tad-deskrizzjoni jew tat-titlu juża l-isem għall-osservazzjoni biss `Admission not requested / API Route Typecheck` u ma jistax jissostitwixxi l-kontroll tal-ammissjoni.
 
 ### Evidenza miżmuma fir-reducer tal-aċċettazzjoni
 
@@ -52,6 +53,14 @@ mingħajr evidenza, file nieqes jew mibdul, path mhux sikura jew symlink jipprev
 l-verifika. Files neqsin mhumiex ekwivalenti għal logs vojta li rnexxew. Il-checks eżistenti
 ta’ SHA/run/attempt jibqgħu indipendenti: bytes li jaqblu ma jistgħux isalvaw riċevuta
 skaduta. L-integrità tal-file mhijiex prova tal-awtentiċità tal-eżekuzzjoni jew tal-promotion tal-artifact.
+
+### DAST jikkonsma l-build CI ivverifikat
+
+Il-job CI obbligatorju `dast-smoke` isejjaħ `.github/workflows/dast-smoke.yml` wara `build`. Isegwi l-istess għażla ta' kodiċi u abbozzi bħall-build, inklużi PRs appoġġjati minn forks, PRs immirati lejn fergħat tar-rilaxx u gruppi ta' amalgamazzjoni. Job DAST nieqes, fallut, ikkanċellat jew maqbuż bla mistenni jimblokka `Gate / CI`. Il-fluss tax-xogħol li jista' jerġa' jintuża m'għandux trigger indipendenti għal PR jew tnedija manwali; il-validazzjoni manwali tuża t-tnedija ta' CI sabiex il-build u l-konsumatur jibqgħu fl-istess eżekuzzjoni.
+
+`scripts/ci/next-build-provenance.mjs` jissiġilla l-artefatt Next sħiħ bid-digest tar tiegħu, ir-repożitorju/avveniment/eżekuzzjoni, it-tentattiv tal-produttur, head/base/checkout/tree, l-identitajiet tal-flussi tax-xogħol, il-lockfile, il-verżjoni eżatta ta' Node u l-ABI, il-pjattaforma u l-bundler. DAST jagħżel l-ID immutabbli tal-artefatt minn `needs.build.outputs`, jitlob il-verifika tad-digest tat-tniżżil, u jikkalkula l-hash taż-ZIP indipendentement biex iqabblu mad-digest tal-produttur qabel ma joħroġ iż-żewġ membri permessi permezz ta' `scripts/ci/unpack-ci-build.py`. Il-manifest u l-arkivju tar għandhom ukoll jaqblu mal-outputs indipendenti tal-produttur qabel ma tiġi estratta s-siġra Next. Qatt ma jfittex l-aħħar build ta' suċċess ta' fergħa. Eżekuzzjoni mill-ġdid parzjali tista' tuża mill-ġdid l-istess tentattiv tal-produttur meta l-ID tiegħu u l-inputs kollha jibqgħu jaqblu; ir-riċevuta tirreġistra ż-żewġ tentattivi.
+
+Il-konsumatur jibqa' fuq runner Linux ospitat b'permess ta' qari biss għar-repożitorju u mingħajr sigrieti tar-repożitorju. Jinstalla l-verżjoni eżatta ta' Node tal-produttur, imbagħad jiġbor il-CLI b'`OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` jirrifjuta server standalone nieqes qabel kwalunkwe build ta' riżerva; il-builds CLI lokali normali jżommu l-mekkaniżmu ta' riżerva eżistenti tagħhom. Il-prontezza tas-server, Schemathesis u promptfoo għandhom kollha jirnexxu fil-limitu mhux mibdul ta' 25 minuta tal-job. Riċevuta tal-provenjenza tipprova l-identità u l-bytes tal-inputs, mhux skan DAST ta' suċċess. Skadenza tal-artefatt, interruzzjoni tar-runner jew skaner fallut jibqgħu evidenza mhux kompluta jew falluta; wrapper konsultattiv ma jistax ibiddilhom f'PASS.
 
 ### Kapaċità tal-eżekuzzjoni tal-UI
 
@@ -216,17 +225,24 @@ Jitħaddem fuq kull PR lejn `main`. Jimblokka l-merge jekk ifalli.
 
 Jaħdem wara `test-coverage`. Jibblokka l-merge jekk ifalli.
 
-| Skritt                       | Jivvalida                                                                                                                                                                                                                   | Jimblokka              |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `quality:collect`            | Joħroġ `quality-metrics.json` (għadd ta’ twissijiet ta’ ESLint, kopertura mir-rapport magħqud tax-shards)                                                                                                                   | Iva (qabel ir-ratchet) |
-| `quality:ratchet`            | Kull metrika f’`quality-baseline.json` ma marritx lura (twissijiet ta’ ESLint ≤ il-linja bażi; kopertura ≥ il-linja bażi)                                                                                                   | Iva                    |
-| `check:duplication`          | Id-duplikazzjoni tal-kodiċi (jscpd@4) ma taqbiżx il-linja bażi f’`quality-baseline.json`                                                                                                                                    | Iva                    |
-| `check:complexity`           | Il-kumplessità ċiklomatika fil-livell tal-fajl ma taqbiżx il-limitu (ir-regoli ewlenin ta’ ESLint `complexity` + `max-lines-per-function`)                                                                                  | Iva                    |
-| `check:cognitive-complexity` | Ratchet tal-kumplessità konjittiva (`eslint-plugin-sonarjs`) — pass separat ta’ ESLint; is-CI jħaddem lit-tnejn magħqudin bħala l-pass uniku `check:complexity-ratchets`                                                    | Iva                    |
-| `check:dead-code`            | Ir-ratchet ta’ exports/fajls mhux użati (knip) ma jmurx lura meta mqabbel mal-linja bażi                                                                                                                                    | Iva                    |
-| `check:compression-budget`   | Baġit tal-benchmark tal-kompressjoni — il-limiti minimi tal-iffrankar ta’ tokens għal kull engine ma jridux imorru lura                                                                                                     | Iva                    |
-| `check:type-coverage`        | Ir-ratchet tal-perċentwal ittajpjat (`type-coverage`) ma jmurx lura; fil-biċċa l-kbira jissostitwixxi `typecheck:noimplicit:core`                                                                                           | Iva                    |
-| `check:codeql-ratchet`       | L-għadd ta’ twissijiet CodeQL miftuħa ma jmurx lura (jaqra permezz ta’ `gh api`; jaqbeż mingħajr żball jekk ma jkunx hemm token) — għall-frekwenza tal-aġġornament u l-attivazzjoni manwali: ara "CodeQL ratchet" hawn taħt | Iva                    |
+| Skritt                       | Jivvalida                                                                                                                                                                | Jimblokka              |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------- |
+| `quality:collect`            | Joħroġ `quality-metrics.json` (għadd ta’ twissijiet ta’ ESLint, kopertura mir-rapport magħqud tax-shards)                                                                | Iva (qabel ir-ratchet) |
+| `quality:ratchet`            | Kull metrika f’`quality-baseline.json` ma marritx lura (twissijiet ta’ ESLint ≤ il-linja bażi; kopertura ≥ il-linja bażi)                                                | Iva                    |
+| `check:duplication`          | Id-duplikazzjoni tal-kodiċi (jscpd@4) ma taqbiżx il-linja bażi f’`quality-baseline.json`                                                                                 | Iva                    |
+| `check:complexity`           | Il-kumplessità ċiklomatika fil-livell tal-fajl ma taqbiżx il-limitu (ir-regoli ewlenin ta’ ESLint `complexity` + `max-lines-per-function`)                               | Iva                    |
+| `check:cognitive-complexity` | Ratchet tal-kumplessità konjittiva (`eslint-plugin-sonarjs`) — pass separat ta’ ESLint; is-CI jħaddem lit-tnejn magħqudin bħala l-pass uniku `check:complexity-ratchets` | Iva                    |
+| `check:dead-code`            | Ir-ratchet ta’ exports/fajls mhux użati (knip) ma jmurx lura meta mqabbel mal-linja bażi                                                                                 | Iva                    |
+| `check:compression-budget`   | Baġit tal-benchmark tal-kompressjoni — il-limiti minimi tal-iffrankar ta’ tokens għal kull engine ma jridux imorru lura                                                  | Iva                    |
+| `check:type-coverage`        | Ir-ratchet tal-perċentwal ittajpjat (`type-coverage`) ma jmurx lura; fil-biċċa l-kbira jissostitwixxi `typecheck:noimplicit:core`                                        | Iva                    |
+
+### Jobs: `codeql-scan` u `codeql-admission`
+
+`codeql-scan` jipproduċi l-kategoriji kollha ta' analiżi kkonfigurati. Wara li dak il-job jirnexxi, `codeql-admission` jivvalida l-uploads eżatti tiegħu u r-ratchet tat-twissijiet tal-kandidat. It-tnejn huma dipendenzi obbligatorji ta' `Gate / CI`, inklużi kandidati li jibdlu d-dokumentazzjoni biss. Ir-rekwiżiti tal-attivazzjoni amministrattiva u tat-test canary huma deskritti taħt “CodeQL ratchet” hawn taħt.
+
+| Skript                 | Jivvalida                                                                                                                                                                                                                        | Jimblokka |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `check:codeql-ratchet` | Ir-ref/SHA tal-kandidat u l-kategoriji kollha tal-analiżi kkonfigurati għandhom ikunu aġġornati qabel ir-ratchet tat-twissijiet; evidenza nieqsa timblokka. L-inventarju globali jibqa' separat — ara “CodeQL ratchet” hawn taħt | Iva       |
 
 ### Kompitu: `quality-extended`
 
@@ -491,32 +507,24 @@ Agħmel commit ta’ dan il-fajl flimkien mal-bidla li tejbet il-metrika. PR li 
 metrika mingħajr ma taġġorna l-linja bażi tinqabad minn `--require-tighten` (Fażi 6A.5,
 l-implimentazzjoni għadha pendenti).
 
-### Ratchet ta’ CodeQL: frekwenza tal-aġġornament u attivazzjoni manwali
+### Ratchet CodeQL: ammissjoni tal-kandidat u inventarju tar-repożitorju
 
-`check:codeql-ratchet` jaqra **l-istat tar-repożitorju, aġġornat skont skeda — mhux għal kull PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` jirrapporta
-`state: configured`, `schedule: weekly`: l-iskan tad-default setup ta’ GitHub, mhux analiżi
-għal kull push. Konsegwenza: wara li jingħaqad PR li JIRRANĠA l-allerti, ir-ratchet jibqa’
-jaqra l-għadd l-antik u ogħla sakemm jitħaddem l-iskan skedat li jmiss — għalhekk jirrapporta
-rigressjoni fuq kull PR miftuħ, inklużi l-bidliet sussegwenti tal-istess PR li jkun wettaq
-it-tiswija, sakemm l-iskan ilaħħaq.
+CI huwa responsabbli għall-ammissjoni CodeQL tal-kandidat permezz ta' katina espliċita ta' dipendenzi: `codeql-scan` isejjaħ il-matriċi ta' erba' lingwi f'`codeql.yml`, imbagħad `codeql-admission` iħaddem `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` jitlob iż-żewġ riżultati. Quality iżomm il-kontrolli numeriċi tiegħu stess iżda ma jistaqsix lill-iskaner qabel ma jispiċċa l-produttur; `Gate / Quality` waħdu mhuwiex ammissjoni kompluta tal-kandidat. CodeQL jibqa' obbligatorju għal kandidati li jibdlu d-dokumentazzjoni biss.
 
-**Aġġornament manwali**: `gh workflow run codeql.yml --ref release/vX.Y.Z` jerġa’ jħaddem
-l-analiżi u jerġa’ jippubblika l-allerti fi ftit minuti. L-ewwel aqra `.github/workflows/codeql.yml`
-— l-intestatura tiegħu tispjega li huwa għal `workflow_dispatch` biss **għax joħloq kunflitt mad-
-"default setup" ta’ GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Ir-restawr tal-attivaturi `push`/`pull_request`/
-`schedule` l-ewwel jirrikjedi **azzjoni mis-sid**: Settings → Code security →
-CodeQL: Default → Advanced. Iżżidx attivatur `schedule:` mingħajr dik il-bidla — dan
-jirriżulta biss f’eżekuzzjonijiet li jfallu.
+Il-politika f'`config/quality/codeql-admission-policy.json` tagħżel Actions, C/C++, JavaScript/TypeScript u Python, is-suite tal-queries default, il-mudell tat-theddid remote u l-modalità tal-build none. Il-kontroll preliminari tal-produttur jirrifjuta rekord ta' attivazzjoni pendenti u fergħat barra mil-lista espliċita tal-miri. Il-miri inizjali huma main u release/v3.8.53; ir-rilaxx li jmiss jeħtieġ inklużjoni riveduta. It-trigger CI eżistenti u usa' għal PRs tar-rilaxx jinżamm, iżda mira li għadha ma ġietx inkluża tirrapporta HOLD qabel l-estrazzjoni minflok tikseb PASS mhux imkejjel.
 
-**Issikka l-linja bażi wara li jonqos l-għadd** — `node scripts/check/check-codeql-ratchet.mjs
---update` jikteb l-għadd il-ġdid imkejjel f’`quality-baseline.json` →
-`metrics.codeqlAlerts.value`, sabiex ir-ratchet ma jippermettix b’mod sieket rigressjoni lura
-sal-limitu l-antik. Eżempju prattiku (2026-09-02/03): PR #12502 irranġa 7 allerti reali
-(13 → 6 miftuħa kif imkejla); PR #12530 issikka l-linja bażi ffriżata minn 11 → 6 biex taqbel;
-is-6 li kien fadal imbagħad ġew miċħuda b’ġustifikazzjoni għal kull allert sakemm ma baqa’
-ebda wieħed miftuħ.
+Kull job fil-matriċi jirreġistra l-ID reali tal-upload SARIF tiegħu, il-lingwa, il-kategorija, l-eżekuzzjoni u t-tentattiv, l-identità tal-fluss tax-xogħol li għamel is-sejħa, ir-ref/head/base/merge SHA tal-avveniment u l-hash tal-politika. Il-job dipendenti jniżżel biss ir-riċevuti ta' din l-eżekuzzjoni u jivvalida d-digests tal-artefatti. Jitlob l-erba' kategoriji kollha, produttur ta' suċċess u l-ipproċessar komplut ta' kull upload eżatt. Juża l-filtru sarif_id tal-API, mhux l-aħħar analiżi misjuba fuq fergħa. Eżekuzzjonijiet mill-ġdid parzjali jistgħu jerġgħu jużaw kategoriji ta' suċċess minn tentattiv preċedenti tal-istess eżekuzzjoni u kandidat, filwaqt li jżommu t-tentattiv li pproduċihom; produttur attwali fallut ma jistax jerġa' juża evidenza ħadra preċedenti.
+
+L-azzjoni CodeQL tistenna l-ipproċessar, iżda l-implimentazzjoni tagħha ffissata tista' twissi u tkompli wara żball fil-qari tal-istatus jew wara li jintemm il-ħin tal-istennija. Għalhekk l-ammissjoni terġa' tivverifika l-ipproċessar. Kategoriji neqsin, ipproċessar pendenti, jobs falluti jew ikkanċellati, identità skaduta, paġinazzjoni mhux kompluta jew APIs mhux disponibbli jagħtu HOLD u kodiċi ta' ħruġ 2. M'għadx hemm stennija fissa għal fluss tax-xogħol indipendenti tal-iskaner. PR li ma ġiex skannjat ma jistax jgħaddi għax query tat-twissijiet irritornat 0. Għadd imkejjel ogħla minn `metrics.codeqlAlerts.value` joħroġ b'1; il-linja bażi ma titgħolliex biex tassorbi t-twissijiet ta' fergħa oħra. [Status tal-upload u tfittxija tal-analiżi](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Ir-riċevuta tirreġistra IDs tal-uploads u tal-analiżijiet, kategoriji, verżjonijiet tal-għodod, ref/SHA, linja bażi u għadd ta' twissijiet. L-identità SARIF u l-għadd tar-riżultati, l-għadd minimu tar-regoli u l-istanzi eżatti tat-twissijiet jibqgħu obbligatorji. L-identitajiet tal-PR u tal-analiżi jerġgħu jiġu ċċekkjati qabel l-aċċettazzjoni. Dawn il-kontrolli jistabbilixxu l-kopertura tal-kategoriji kkonfigurati, mhux inventarju ta' kull fajl tas-sors estratt. L-estrazzjoni C/C++ mingħajr build ma tinkludix kodiċi ġġenerat matul il-build tal-proġett. L-esklużjonijiet tas-sors għadhom jeħtieġu reviżjoni, u l-attribuzzjoni lill-kontributur teħtieġ evidenza komparabbli tal-bażi eżatta.
+
+`codeql-maintenance.yml` jipprovdi skans għal pushes tar-rilaxx attiv u l-iskeda ta' kull ġimgħa mingħajr ma jidduplika l-produtturi PR/main. `nightly-codeql-inventory.yml` iżomm il-linja bażi tar-repożitorju kollu separata, b'`--strict-measurement` u falliment meta l-kejl ma jkunx disponibbli. Il-qbiż tollerat tal-kollettur lokali l-antik mhuwiex ammissjoni tal-kandidat. L-issikkar jibqa' `--update` espliċitu wara għadd globali aktar baxx ivverifikat.
+
+Il-fluss tax-xogħol Advanced ma għandux jiġi ppubblikat waqt li Default Setup huwa kkonfigurat: GitHub jirrifjuta dik il-kombinazzjoni. Il-politika tiegħu taħt kontroll tal-verżjoni tibqa' pendenti sakemm it-tranżizzjoni amministrattiva riveduta tinqara lura. Qabel il-pubblikazzjoni, operatur jiffissa r-repożitorju, head/base/tree, il-hashes tal-politika/patch/rollback u l-istat osservat tal-konfigurazzjoni; `node scripts/quality/codeql-producer.mjs verify-admin-readback` jiċċekkja r-rekords JSON mistennija u reali pprovduti. Din hija protezzjoni teknika, mhux approvazzjoni tal-operatur jew sostitut għall-ġbir ta' qari lura frisk. It-token tal-PR qatt ma jitlob aċċess Administration. It-tnedija u kwalunkwe bidla fl-iskaner jeħtieġu dak il-qari lura separat flimkien ma' evidenza reali ta' kompatibbiltà għal PRs, forks u gruppi ta' amalgamazzjoni.
+
+Il-forks jużaw runners ospitati, checkout mingħajr kredenzjali persistenti, ebda installazzjoni jew build tal-proġett fil-produttur, u ebda sigriet tar-repożitorju li jintiret. GitHub jappoġġja upload SARIF għall-avveniment pull_request bit-token imnaqqas tal-fork; l-approvazzjoni tal-eżekuzzjoni għall-ewwel kontribuzzjoni tibqa' politika ta' GitHub. Qatt tuża pull_request_target biex tesegwixxi kodiċi mhux fdat. Ikkonferma l-permessi reali tat-token, analysis_key u l-ambjenti tal-kategoriji kollha fit-test canary kkontrollat qabel tqis il-migrazzjoni kompluta. [Regoli tal-upload minn forks](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[modalitajiet ta' konfigurazzjoni f'kunflitt](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Iċ-ċaħdiet huma deċiżjoni tal-operatur (Regola Stretta #14)** — qatt tiċħad allert ta’ CodeQL
 mingħajr ma tirreġistra l-ġustifikazzjoni teknika fil-kumment taċ-ċaħda: `won't fix` għal
@@ -673,11 +681,7 @@ identifika l-kandidati ta’ razzjonalizzazzjoni li ġejjin. **L-għaqdiet huma 
 il-qlib/tneħħijiet huma deċiżjonijiet ta’ politika riżervati għall-operatur.** Għadu ma ġie applikat
 xejn minn dan ta’ hawn taħt.
 
-**Lanqas ma huma ddokumentati hawn fuq** (konsultattivi, sinjal baxx): il-job `docs-lint`
-(markdownlint + Vale, il-job kollu b’`continue-on-error`) u l-workflows awtonomi tal-iscanners
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` jinsab
-f’`quality-baseline.json` iżda mhuwiex imqabbad ma’ ratchet li jimblokka f’`ci.yml` — il-metrika
-bħalissa hija orfni.
+**Ukoll mhux dokumentati hawn fuq** (konsultattivi, b'sinjal baxx): il-job `docs-lint` (markdownlint + Vale, il-job kollu b'`continue-on-error`) u l-flussi tax-xogħol indipendenti tal-iskaner `semgrep.yml` / `scorecard.yml`. CodeQL issa għandu jobs obbligatorji tal-produttur u tal-ammissjoni taħt `Gate / CI`, soġġetti għar-rekwiżiti tal-attivazzjoni deskritti hawn fuq. `semgrepFindings: 0` jinsab f'`quality-baseline.json` iżda mhuwiex marbut ma' ratchet li jimblokka f'`ci.yml` — il-metrika bħalissa hija orfni.
 
 ### Għaqda / deduplikazzjoni (mekkaniċi, riskju aktar baxx)
 

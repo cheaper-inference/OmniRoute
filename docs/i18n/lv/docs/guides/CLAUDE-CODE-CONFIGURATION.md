@@ -43,6 +43,10 @@ pielāgotu galapunktu ar vides mainīgajiem (tam nav karodziņa `--base-url`):
 > Vides mainīgie tiek nolasīti **vienu reizi palaišanas laikā** — pēc to maiņas
 > restartējiet Claude Code.
 
+Akreditācijas datiem, kas tiek periodiski nomainīti, nevis ir fiksēta virkne, iestatiet `apiKeyHelper` failā `~/.claude/settings.json` uz komandu, kas pašreizējo akreditācijas vērtību izvada stdout. Claude Code pēc noklusējuma glabā izvadi kešatmiņā piecas minūtes (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` aizstāj šo ilgumu) un vērtību nosūta gan `Authorization: Bearer`, gan `x-api-key`. Skripts drīkst izvadīt tikai akreditācijas vērtību: papildu reklāmkarogs izraisa palīgrīka kļūmi versijā v2.1.227+.
+
+Tā darbojas Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` izvada īslaicīgu Entra piekļuves pilnvaru, kuru OmniRoute pārbauda API atslēgas vietā. Skatiet [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` iestata tos visus jūsu vietā: tas nosaka bāzes URL un pilnvaru
 no aktīvā konteksta (tādēļ pēc `omniroute connect <vps>` komanda `omniroute launch`
 vienkārši darbojas), pārbauda servera darbspēju un izpilda `claude`.

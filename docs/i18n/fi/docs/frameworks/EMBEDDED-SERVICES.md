@@ -5,8 +5,8 @@
 ---
 
 > **Versio:** v3.8.44
-> **Viimeksi päivitetty:** 2026-09-16
-> **Kohderyhmä:** Upotettuja palveluita (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua) lisäävät, ylläpitävät tai virheenkorjaavat ohjelmistokehittäjät.
+> **Viimeksi päivitetty:** 2026-10-28
+> **Kohderyhmä:** Kehittäjät, jotka lisäävät tai ylläpitävät upotettuja palveluja tai selvittävät niiden virheitä (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Upotetut palvelut ovat paikallisesti asennettuja prosessien rinnakkaistyökaluja, jotka OmniRoute asentaa, valvoo ja
 tarjoaa ensiluokkaisina reitityskohteina. Toisin kuin ulkoiset palveluntarjoajat (joihin muodostetaan yhteys internetin kautta
@@ -31,19 +31,20 @@ API-avaimilla), upotetut palvelut suoritetaan samalla koneella kuin OmniRoute, j
 
 ### Miksi upotettuja palveluita?
 
-Seitsemän palvelua on upotettu:
+Upotettuja palveluja on kahdeksan:
 
-| Palvelu         | npm-paketti                         | Oletusportti | Tarkoitus                                                                                                                                                                                                                                                                                                                                                                             |
-| --------------- | ----------------------------------- | :----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                           |    20130     | AI-reititin, jota OmniRoute voi käyttää alipalveluntarjoajana. Mallit tarjotaan muodossa `9router/{sub}/{model}`                                                                                                                                                                                                                                                                      |
-| **CLIProxyAPI** | GitHub-julkaisubinaari (`cliproxy`) |     8317     | Paikallinen välityssovitin Anthropic CLI -todennusprosesseille. Tarjoaa varareitityksen OAuth-tunnusten vanhentuessa                                                                                                                                                                                                                                                                  |
-| **Mux**         | `mux` (headless `mux server`)       |     8322     | Paikallinen agenttien orkestrointitaustaprosessi (coder/mux). Vain elinkaaren hallinta — ei reitityskohde (ei LLM-välitystä).                                                                                                                                                                                                                                                         |
-| **Bifrost**     | `@maximhq/bifrost`                  |     8080     | Go-pohjainen AI-yhdyskäytävän välitystaustajärjestelmä. Kun se on käynnissä, välitysreitti (`/v1/relay/`) valitsee sen automaattisesti                                                                                                                                                                                                                                                |
-| **Dario**       | `@askalf/dario`                     |     3456     | Claude-tilausvälityspalvelin — CLIProxyAPI:n vaihtoehto/varajärjestelmä Claude Code -muotoiselle liikenteelle; syötetty avain asetetaan muuttujaan `DARIO_ADMIN_TOKEN`, joka suojaa sen `/admin/*`-OAuth-hallintatasoa                                                                                                                                                                |
-| **open-wa**     | `@open-wa/wa-automate`              |     8323     | WhatsApp Web -automaatio (Puppeteerin kautta toimiva headless Chromium). Vain elinkaaren hallinta — ei reitityskohde.                                                                                                                                                                                                                                                                 |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                |    20135     | Kehotepakkauksen sivupalvelu — aito LLMLingua-2 ONNX -malli (Microsoftin algoritmin JS/TS-porttaus). `open-sse/services/compression/engines/llmlingua/index.ts` välittää `/compress`-pyynnöt sille HTTP:n kautta ja käyttää varajärjestelmänä prosessin sisäistä työntekijäsäietaustajärjestelmää, kun sivupalvelu ei ole käytettävissä. Vain elinkaaren hallinta — ei reitityskohde. |
+| Palvelu         | npm-paketti                                  | Oletusportti | Tarkoitus                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------- | -------------------------------------------- | :----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                    |    20130     | AI-reititin, jota OmniRoute voi käyttää alipalveluntarjoajana. Mallit tarjotaan muodossa `9router/{sub}/{model}`                                                                                                                                                                                                                                                                      |
+| **CLIProxyAPI** | GitHub-julkaisubinaari (`cliproxy`)          |     8317     | Paikallinen välityssovitin Anthropic CLI -todennusprosesseille. Tarjoaa varareitityksen OAuth-tunnusten vanhentuessa                                                                                                                                                                                                                                                                  |
+| **Mux**         | `mux` (headless `mux server`)                |     8322     | Paikallinen agenttien orkestrointitaustaprosessi (coder/mux). Vain elinkaaren hallinta — ei reitityskohde (ei LLM-välitystä).                                                                                                                                                                                                                                                         |
+| **Bifrost**     | `@maximhq/bifrost`                           |     8080     | Go-pohjainen AI-yhdyskäytävän välitystaustajärjestelmä. Kun se on käynnissä, välitysreitti (`/v1/relay/`) valitsee sen automaattisesti                                                                                                                                                                                                                                                |
+| **Dario**       | `@askalf/dario`                              |     3456     | Claude-tilausvälityspalvelin — CLIProxyAPI:n vaihtoehto/varajärjestelmä Claude Code -muotoiselle liikenteelle; syötetty avain asetetaan muuttujaan `DARIO_ADMIN_TOKEN`, joka suojaa sen `/admin/*`-OAuth-hallintatasoa                                                                                                                                                                |
+| **open-wa**     | `@open-wa/wa-automate`                       |     8323     | WhatsApp Web -automaatio (Puppeteerin kautta toimiva headless Chromium). Vain elinkaaren hallinta — ei reitityskohde.                                                                                                                                                                                                                                                                 |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                         |    20135     | Kehotepakkauksen sivupalvelu — aito LLMLingua-2 ONNX -malli (Microsoftin algoritmin JS/TS-porttaus). `open-sse/services/compression/engines/llmlingua/index.ts` välittää `/compress`-pyynnöt sille HTTP:n kautta ja käyttää varajärjestelmänä prosessin sisäistä työntekijäsäietaustajärjestelmää, kun sivupalvelu ei ole käytettävissä. Vain elinkaaren hallinta — ei reitityskohde. |
+| **sing-box**    | GitHub-julkaisun binääritiedosto (`singbox`) |    20140     | TPROXY-apuprosessi, joka tukee `applyTproxy()`-toiminnon läpinäkyvää välityspalvelinkaappausta (`src/mitm/tproxy/setup.ts`). Asennusohjelma lataa kiinnitetyn version julkaisun ja tarkistaa sen tarkistussumman. Vain elinkaarta hallitaan; palvelu ei ole reitityskohde eikä välitä LLM-liikennettä.                                                                                |
 
-Kaikki seitsemän noudattavat samaa valvontamallia:
+Kaikki kahdeksan noudattavat samaa valvontamallia:
 
 - OmniRoute asentaa ne hakemistoon `DATA_DIR/services/{name}/` (erillään OmniRouten omasta `package.json`-tiedostosta)
 - OmniRoute käynnistää ne aliprosesseina ja valvoo niitä
@@ -576,7 +577,27 @@ vastaus) palautuu prosessin sisäiseen työntekijäsäikeen taustajärjestelmä�
 
 ---
 
-### 4.8 Käänteinen välityspalvelin (upotettu 9Router-hallintapaneeli)
+### 4.8 sing-boxin päätepisteet (8 reittiä)
+
+sing-boxin päätepisterakenne on sama kuin Muxin: ei `rotate-key`-reittiä eikä API-avaimen syöttöä (`needsApiKey: false` tiedostossa `bootstrap.ts`). Vain sen elinkaarta hallitaan; se ei koskaan toimi reititys- tai LLM-palveluntarjoajana. `install()` lataa virallisen GitHub-julkaisun binääritiedoston (`SagerNet/sing-box`) kiinnitetylle versiolle (`SINGBOX_PINNED_VERSION` tiedostossa `src/lib/services/installers/singbox.ts`) ja tarkistaa SHA256-arvon samaan tiedostoon sisällytettyä tarkistussummaa vasten ennen kuin binääritiedostoa kirjoitetaan levylle. Kaikki muut pyydetyt versiot hylätään.
+
+| Menetelmä | Polku                                        | Kuvaus                                                                                                                  |
+| --------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `POST`    | `/api/services/singbox/install`              | Lataa ja tarkista sing-boxin kiinnitetty julkaisu                                                                       |
+| `POST`    | `/api/services/singbox/start`                | Käynnistä sing-box (`sing-box run -c config.json`)                                                                      |
+| `POST`    | `/api/services/singbox/stop`                 | Pysäytä sing-box                                                                                                        |
+| `POST`    | `/api/services/singbox/restart`              | Käynnistä sing-box uudelleen                                                                                            |
+| `POST`    | `/api/services/singbox/update`               | Tarkista tai asenna kiinnitetty julkaisu uudelleen                                                                      |
+| `GET`     | `/api/services/singbox/status`               | Nykyinen tila ja tietokannan tila                                                                                       |
+| `POST`    | `/api/services/singbox/auto-start`           | Ota automaattinen käynnistys käyttöön tai pois käytöstä                                                                 |
+| `POST`    | `/api/services/singbox/auto-restart-adopted` | Ota hallintaan otetun, ennestään olemassa olevan prosessin automaattinen uudelleenkäynnistys käyttöön tai pois käytöstä |
+| `GET`     | `/api/services/singbox/logs`                 | Seuraa SSE-lokin loppua jaetun dynaamisen `[name]/logs`-reitin kautta                                                   |
+
+**TPROXY-kytkentä:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) kirjoittaa `config.json`-tiedoston ja käynnistää valvojan ennen kuin `applyTproxy()` asentaa TPROXY-palomuurisäännöt. Jos valvoja puuttuu tai ei saavuta `running`-tilaa, tilanne kirjataan nyt virhetasolla sen sijaan, että epäonnistuminen sivuutettaisiin hiljaa. Näin ylläpitäjä voi havaita, että TPROXY-säännöt otettiin käyttöön ilman niiden takana toimivaa kuuntelijaa.
+
+---
+
+### 4.9 Käänteinen välityspalvelin (upotettu 9Router-hallintapaneeli)
 
 Hallintapaneeli upottaa 9Router-verkkokäyttöliittymän iframe-kehykseen sisäisen käänteisen
 välityspalvelimen kautta osoitteessa:

@@ -618,7 +618,8 @@ guardrail କଦାପି ଅଟକାଏ ନାହିଁ; ଏହା କେବ�
 
 **Dashboard → Settings → Security → PII masking** _କ'ଣ_ mask ହେବ ତାହା ଚୟନ କରେ। ଏହା masking କୁ ଚାଲୁ କରେ ନାହିଁ: ତାହା ଏବେବି `PII_REDACTION_ENABLED` (request) ଏବଂ `PII_RESPONSE_SANITIZATION` (response + SSE), ଉଭୟ ଡିଫଲ୍ଟ ଭାବରେ ବନ୍ଦ ଅଛି।
 
-- **ପ୍ରତି-ପ୍ରକାର ଚୟନ** — built-in id ଗୁଡ଼ିକ `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) ରେ ତାଲିକାଭୁକ୍ତ। Unset ଅର୍ଥ ସମସ୍ତ ପ୍ରକାର (ଏହି ସେଟିଂ ନ ଥିବା ପୂର୍ବରୁ ଥିବା ବ୍ୟବହାର)। request engine ର `ssn_us` ପ୍ୟାଟର୍ନ `ssn` ସହିତ ମ୍ୟାପ୍ ହୁଏ। Template ଗୁଡ଼ିକ (Minimal, Standard, Financial, Brazilian, USA, Full) କେବଳ UI ରେ checkbox ଗୁଡ଼ିକୁ ପୂରଣ କରେ।
+- **ପ୍ରତି-ପ୍ରକାର ଚୟନ** — built-in id ଗୁଡ଼ିକ `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) ରେ ତାଲିକାଭୁକ୍ତ। Unset ଅର୍ଥ ସମସ୍ତ ପ୍ରକାର (ଏହି ସେଟିଂ ନ ଥିବା ପୂର୍ବରୁ ଥିବା ବ୍ୟବହାର)। request engine ର `ssn_us` ପ୍ୟାଟର୍ନ `ssn` ସହିତ ମ୍ୟାପ୍ ହୁଏ। Template ଗୁଡ଼ିକ (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) କେବଳ UI ରେ checkbox ଗୁଡ଼ିକୁ ପୂରଣ କରେ।
+- **GDPR ଏବଂ POPIA ପରିଚୟ** — EU ଏବଂ ଦକ୍ଷିଣ ଆଫ୍ରିକାର ବ୍ୟକ୍ତିଗତ ପରିଚୟ ଅନ୍ତର୍ଭୁକ୍ତ କରୁଥିବା ବାରଟି built-in ID (ତଳ ଟେବୁଲ୍)। ସେମାନଙ୍କ regex, validator ଏବଂ jurisdiction tag ଗୋଟିଏ ଟେବୁଲ୍ `src/shared/utils/piiPatterns.ts` ରେ ଅଛି; response sanitizer (`src/lib/piiSanitizer.ts`) ଏବଂ request masker (`src/shared/utils/inputSanitizer.ts`) ଉଭୟ ତାହା ବ୍ୟବହାର କରନ୍ତି। Validator ଗ୍ରହଣ କଲେ ମାତ୍ର match ଲୁଚାଯାଏ; ଖାଲି ଅଙ୍କର ଧାଡ଼ି କେବେ ଯଥେଷ୍ଟ ନୁହେଁ। ଏହି ID ଆସିବା ପୂର୍ବରୁ ସଙ୍କୁଚିତ ଚୟନ ସଞ୍ଚୟ କରିଥିବା operator, ନୂଆ ID tick ନକରିବା ପର୍ଯ୍ୟନ୍ତ ପୁରୁଣା ଆଚରଣ ରଖେ।
 - **କଷ୍ଟମ୍ ପ୍ୟାଟର୍ନ** — 20 ପର୍ଯ୍ୟନ୍ତ regex କିମ୍ବା wildcard ପ୍ୟାଟର୍ନ (`*` = 64 ପର୍ଯ୍ୟନ୍ତ non-whitespace ଅକ୍ଷର, `?` = ଗୋଟିଏ)। ମ୍ୟାଚ୍ଗୁଡ଼ିକ `[CUSTOM_REDACTED]` ହୋଇଯାଏ। ପ୍ରତ୍ୟେକ ପ୍ୟାଟର୍ନ `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`) ମାଧ୍ୟମରେ ଯାଏ: ସର୍ବାଧିକ 500 ଅକ୍ଷର, flag ଗୁଡ଼ିକ `g i m s u` ରେ ସୀମିତ, କମ୍ପାଇଲ୍ ହେବାକୁ ପଡ଼ିବ, `safe-regex` (catastrophic backtracking) ପାସ୍ କରିବାକୁ ପଡ଼ିବ, ଏବଂ ଖାଲି string କିମ୍ବା redaction placeholder ସହିତ ମ୍ୟାଚ୍ କରିବା ଉଚିତ୍ ନୁହେଁ। ବିଫଳ ହେଉଥିବା ପ୍ୟାଟର୍ନକୁ ସଞ୍ଚୟ ଏବଂ ପରୀକ୍ଷା ସମୟରେ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ, ଏବଂ ବିଫଳ ହେଉଥିବା ସଞ୍ଚିତ ଧାଡ଼ିକୁ runtime ରେ କମ୍ପାଇଲ୍ ନ କରି ଏଡ଼ାଇ ଦିଆଯାଏ। କଷ୍ଟମ୍ ପ୍ୟାଟର୍ନ କେବଳ masking ଚାଲୁ ଥିବା ବେଳେ ଚାଲେ।
 - **Detection ଗଣନା** — ପ୍ରତି-ପ୍ରକାର ଗଣନା (ମ୍ୟାଚ୍ ହୋଇଥିବା ମୂଲ୍ୟ କଦାପି ନୁହେଁ), ମେମୋରିରେ ରଖାଯାଏ ଏବଂ ପୁନଃଆରମ୍ଭରେ ରିସେଟ୍ ହୁଏ (`src/lib/pii/piiDetectionStats.ts`)। masking ଚାଲୁ ଥିବା ବେଳେ ହିଁ ସେଗୁଡ଼ିକ ବୃଦ୍ଧି ପାଏ।
 
@@ -631,6 +632,25 @@ guardrail କଦାପି ଅଟକାଏ ନାହିଁ; ଏହା କେବ�
 | `POST` | `/api/settings/pii/test` | ସର୍ବାଧିକ 8 KB ନମୁନା ବିରୁଦ୍ଧରେ ଗୋଟିଏ ପ୍ୟାଟର୍ନର dry-run; କିଛି ସଞ୍ଚିତ ହୁଏ ନାହିଁ |
 
 ତିନିଗୋଟି ଯାକ management auth ଆବଶ୍ୟକ କରେ ଏବଂ Zod (`src/shared/validation/schemas/piiSettings.ts`) ସହିତ body କୁ ବୈଧ କରେ।
+
+#### GDPR (EU) ଏବଂ POPIA (ଦକ୍ଷିଣ ଆଫ୍ରିକା) ପରିଚୟ
+
+| ID                  | ପରିଚୟ                        | ଯାଞ୍ଚ                                                                       |
+| ------------------- | ---------------------------- | --------------------------------------------------------------------------- |
+| `iban`              | IBAN                         | ଜଣା ଦେଶ, ସେହି ଦେଶ ପାଇଁ ସଠିକ୍ ଲମ୍ବ, ISO 13616 MOD-97-10                      |
+| `eu_vat`            | EU VAT ନମ୍ବର                 | ଜଣା ସଦସ୍ୟ ରାଷ୍ଟ୍ରର prefix ଏବଂ ସେହି ରାଷ୍ଟ୍ରର ନମ୍ବର ଆକୃତି (VIES lookup ନାହିଁ) |
+| `es_dni_nie`        | ସ୍ପେନର DNI / NIE             | ଯାଞ୍ଚ ଅକ୍ଷର (ମୂଲ୍ୟ mod 23); NIE ହେଉଛି `X/Y/Z` + 7 ଅଙ୍କ                      |
+| `it_codice_fiscale` | ଇଟାଲୀର Codice Fiscale        | ବିଜୋଡ଼/ଯୁଗ୍ମ ସ୍ଥାନ ଟେବୁଲ୍‌ରୁ ଯାଞ୍ଚ ଅକ୍ଷର                                    |
+| `pl_pesel`          | ପୋଲାଣ୍ଡର PESEL               | ଓଜନଯୁକ୍ତ checksum ଏବଂ encode ହୋଇଥିବା ଜନ୍ମ ମାସ/ଦିନର ଯୁକ୍ତିସଙ୍ଗତ ସୀମା         |
+| `nl_bsn`            | ଡଚ୍ BSN                      | 11 ଯାଞ୍ଚ (ଓଜନ 9..2, -1)                                                     |
+| `de_steuer_id`      | ଜର୍ମାନ୍ Steuer-ID            | ISO 7064 Mod 11,10 ଏବଂ ଅଙ୍କ-ଗଠନ ନିୟମ (ଆରମ୍ଭରେ 0 ନାହିଁ)                      |
+| `se_personnummer`   | ସ୍ୱିଡେନର personnummer        | ଶେଷ ଦଶ ଅଙ୍କ ଉପରେ Luhn ଏବଂ ଯୁକ୍ତିସଙ୍ଗତ ଜନ୍ମ ତାରିଖ (10 କିମ୍ବା 12 ଅଙ୍କ)        |
+| `za_id`             | ଦକ୍ଷିଣ ଆଫ୍ରିକା ID ନମ୍ବର      | ସବୁ 13 ଅଙ୍କ ଉପରେ Luhn, ବୈଧ ଜନ୍ମ ମାସ/ଦିନ, ନାଗରିକତା ଅଙ୍କ 0 କିମ୍ବା 1           |
+| `za_phone`          | ଦକ୍ଷିଣ ଆଫ୍ରିକା ଫୋନ୍          | `+27` / `27` prefix, କିମ୍ବା space/hyphen ସହ ଲେଖା ଜାତୀୟ `0..` ଆକୃତି          |
+| `za_vat`            | ଦକ୍ଷିଣ ଆଫ୍ରିକା VAT ନମ୍ବର     | `4` ରୁ ଆରମ୍ଭ 10 ଅଙ୍କ **ଏବଂ** ପୂର୍ବର 48 ଅକ୍ଷରରେ "VAT" / "BTW"                |
+| `za_tax_ref`        | ଦକ୍ଷିଣ ଆଫ୍ରିକା tax reference | `0`-`3` ରୁ ଆରମ୍ଭ 10 ଅଙ୍କ, Luhn, **ଏବଂ** ପୂର୍ବର 48 ଅକ୍ଷରରେ "tax" / "SARS"    |
+
+କେବଳ ଅଙ୍କ ଥିବା ଆକୃତି order number, build number ଏବଂ timestamp ସହ ମେଳ ଖାଉଥିବାରୁ, ଦୁର୍ବଳତମଗୁଡ଼ିକ (`za_vat`, `za_tax_ref`) ପାଇଁ keyword ସଙ୍କେତ ଦରକାର; ଖାଲି ଦଶ-ଅଙ୍କର `0..` ନମ୍ବରକୁ ଦକ୍ଷିଣ ଆଫ୍ରିକା phone number ଭାବେ ଗଣାଯାଏ ନାହିଁ। Space ଥିବା IBAN (`GB29 NWBK ...`) match ହୁଏ ନାହିଁ। Streaming ପଥରେ ସଙ୍କେତ କେବଳ ବର୍ତ୍ତମାନ chunk ଭିତରେ ଖୋଜାଯାଏ। ID ଗୁଡ଼ିକ generic phone pattern ପୂର୍ବରୁ ଥାଏ, ତେଣୁ ଯାଞ୍ଚ ହୋଇଥିବା ପରିଚୟ ନିଜ placeholder ରଖେ (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...)। `gdpr` ଏବଂ `popia` template ଯଥାକ୍ରମେ EU ଏବଂ ଦକ୍ଷିଣ ଆଫ୍ରିକା ID ବାଛେ। Masking ନିଜେ ବାଛି ସକ୍ରିୟ କରିବାକୁ ହୁଏ (Hard Rule #20): ଏଠାରେ କିଛି feature-flag ର ଡିଫଲ୍ଟ ବଦଳାଏ ନାହିଁ।
 
 ### Prompt Injection (`promptInjection.ts`)
 

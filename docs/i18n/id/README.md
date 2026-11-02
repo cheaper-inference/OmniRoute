@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Gateway AI Gratis
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan pernah berhenti membuat kode. Setiap alat AI → 377 penyedia — 150+ gratis — melalui satu endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke Claude / GPT / Gemini GRATIS dengan fallback otomatis. Kompresi bertumpuk RTK + Caveman menghemat 15–95% token (rata-rata ~89%) — jangan pernah mencapai batas. 377 penyedia AI · 150+ tingkat gratis · ~1,62 miliar token gratis/bulan · 20 strategi routing · mulai dari $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan pernah berhenti membuat kode. Setiap alat AI → 380 penyedia — 150+ gratis — melalui satu endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke Claude / GPT / Gemini GRATIS dengan fallback otomatis. Kompresi bertumpuk RTK + Caveman menghemat 15–95% token (rata-rata ~89%) — jangan pernah mencapai batas. 380 penyedia AI · 150+ tingkat gratis · ~1,62 miliar token gratis/bulan · 20 strategi routing · mulai dari $0."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Gunakan akun penyedia Anda sendiri.** Ini adalah perkiraan agregat dari tingkat gratis pihak ketiga yang memenuhi syarat secara terpisah, bukan pemberian token dari OmniRoute. Daftar, dapatkan kredensial jika diperlukan, lalu hubungkan penyedia yang dapat Anda gunakan; setiap penyedia mengendalikan batas, ketersediaan, dan ketentuannya sendiri.
 >
-> Menggabungkan tingkat gratis secara manual sangat merepotkan — puluhan SDK, puluhan batas laju, dan Anda tidak tahu berapa banyak yang sebenarnya tersedia. OmniRoute mengatalogkan **484 entri tingkat gratis dalam 34 kunci pool berulang** dan menghitung jumlah token utama dari **17 pool dengan anggaran bulanan positif yang dipublikasikan ditambah lima batas Groq per model**, yang dideduplikasi berdasarkan pool bersama. Kuota yang hanya tersedia setelah pemeriksaan identitas regional (saat ini: ModelScope) ditampilkan secara terpisah, +~6 juta di balik verifikasi identitas regional, dan tidak pernah dijumlahkan ke angka utama. Hasilnya tetap terlihat di dasbor (`/dashboard/free-tiers`).
+> Menggabungkan tingkat gratis secara manual sangat merepotkan — puluhan SDK, puluhan batas laju, dan Anda tidak tahu berapa banyak yang sebenarnya tersedia. OmniRoute mengatalogkan **485 entri tingkat gratis dalam 34 kunci pool berulang** dan menghitung jumlah token utama dari **17 pool dengan anggaran bulanan positif yang dipublikasikan ditambah lima batas Groq per model**, yang dideduplikasi berdasarkan pool bersama. Kuota yang hanya tersedia setelah pemeriksaan identitas regional (saat ini: ModelScope) ditampilkan secara terpisah, +~6 juta di balik verifikasi identitas regional, dan tidak pernah dijumlahkan ke angka utama. Hasilnya tetap terlihat di dasbor (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kartu anggaran tingkat gratis OmniRoute: ~1,62 miliar token gratis per bulan secara berkelanjutan, hingga ~2,22 miliar pada bulan pertama dengan kredit pendaftaran, dari 34 kunci pool berulang terdokumentasi yang mencakup 484 entri tingkat gratis yang dikatalogkan di balik satu endpoint. Perhitungan transparan yang dideduplikasi berdasarkan pool — setiap pool bersama dihitung satu kali, termasuk 17 pool berulang dengan anggaran token bulanan positif yang dipublikasikan ditambah lima batas Groq per model; 12 penyedia ditandai untuk dihindari dalam katalog risiko ketentuan agar Anda dapat memutuskan sendiri. Bilah anggaran mencakup Mistral 1 miliar, Nara 210 juta, LLM7 150 juta, xKiro 150 juta, Groq 30 juta (lima batas per model), dan pool yang lebih kecil, ditambah kredit pendaftaran bulan pertama serta penyedia gratis permanen tanpa batas token yang ditampilkan secara terpisah agar tidak pernah memperbesar angka utama. Penggunaan/sisa secara langsung di /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kartu anggaran tingkat gratis OmniRoute: ~1,62 miliar token gratis per bulan secara berkelanjutan, hingga ~2,22 miliar pada bulan pertama dengan kredit pendaftaran, dari 34 kunci pool berulang terdokumentasi yang mencakup 485 entri tingkat gratis yang dikatalogkan di balik satu endpoint. Perhitungan transparan yang dideduplikasi berdasarkan pool — setiap pool bersama dihitung satu kali, termasuk 17 pool berulang dengan anggaran token bulanan positif yang dipublikasikan ditambah lima batas Groq per model; 12 penyedia ditandai untuk dihindari dalam katalog risiko ketentuan agar Anda dapat memutuskan sendiri. Bilah anggaran mencakup Mistral 1 miliar, Nara 210 juta, LLM7 150 juta, xKiro 150 juta, Groq 30 juta (lima batas per model), dan pool yang lebih kecil, ditambah kredit pendaftaran bulan pertama serta penyedia gratis permanen tanpa batas token yang ditampilkan secara terpisah agar tidak pernah memperbesar angka utama. Penggunaan/sisa secara langsung di /dashboard/free-tiers."/>
 
 > Ringkasan animasi dari halaman langsung `/dashboard/free-tiers`. Metodologi lengkap (deduplikasi pool, tingkat kredit, ketentuan penyedia): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -71,7 +71,7 @@
 
 |                            |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Penyedia                |           352           |   **358**   |          377          |
+| 🌐 Penyedia                |           352           |   **358**   |          380          |
 | 🧠 ID model chat unik      |          1320           |  **1374**   |         1475          |
 | 🖼️ Jembatan Modalitas      | 🆕 visi + audio + video |      ✓      |           ✓           |
 | 📡 Katalog gratis Radar    |    🆕 pilihan aktif     |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Fitur</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinasi</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Penyedia</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Penyedia</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji Kami — Satu endpoint dan 377 penyedia. Fallback otomatis mempertahankan perutean selama tersedia target sehat lainnya. Enam pilar: fallback tangguh di 377 penyedia · penghematan token hingga 95% pada beban kerja yang memenuhi syarat · mulai dari $0 dengan 150+ tingkat gratis dan 52 penyedia gratis selamanya yang berulang/tanpa kunci · 37 integrasi CLI/agen melalui satu konfigurasi · kompatibilitas API OpenAI, Claude, Gemini, dan Responses di /v1 · kontrol produksi yang mencakup circuit breaker, penyamaran TLS, 110 alat MCP, A2A, memori, guardrail, evaluasi, serta 56.000+ deklarasi pengujian statis di 7.800+ file pengujian yang dilacak."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Janji Kami — Satu endpoint dan 380 penyedia. Fallback otomatis mempertahankan perutean selama tersedia target sehat lainnya. Enam pilar: fallback tangguh di 380 penyedia · penghematan token hingga 95% pada beban kerja yang memenuhi syarat · mulai dari $0 dengan 150+ tingkat gratis dan 52 penyedia gratis selamanya yang berulang/tanpa kunci · 39 integrasi CLI/agen melalui satu konfigurasi · kompatibilitas API OpenAI, Claude, Gemini, dan Responses di /v1 · kontrol produksi yang mencakup circuit breaker, penyamaran TLS, 110 alat MCP, A2A, memori, guardrail, evaluasi, serta 56.000+ deklarasi pengujian statis di 7.800+ file pengujian yang dilacak."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Seluruh **20** strategi — padukan sesuai kebutuhan pada setiap langkah combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Hal yang membedakan OmniRoute — cuplikan fitur pada waktu tertentu dibandingkan dengan 9router, OpenRouter, CLIProxyAPI, dan LiteLLM dalam 13 kapabilitas. OmniRoute: 377 penyedia, lebih dari 150 tingkat gratis bawaan, 20 strategi perutean, kompresi token dengan 12 mesin, server MCP bawaan dengan 110 alat, protokol agen A2A, memori persisten, mekanisme pengaman, agen cloud, penyamaran sidik jari TLS, Desktop/Termux/PWA, dan 67 lokal UI i18n. OmniRoute berlisensi MIT dan dapat di-hosting sendiri. Kapabilitas serta jumlah milik pesaing dapat berubah; lihat metodologi yang ditautkan."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Hal yang membedakan OmniRoute — cuplikan fitur pada waktu tertentu dibandingkan dengan 9router, OpenRouter, CLIProxyAPI, dan LiteLLM dalam 13 kapabilitas. OmniRoute: 380 penyedia, lebih dari 150 tingkat gratis bawaan, 20 strategi perutean, kompresi token dengan 12 mesin, server MCP bawaan dengan 110 alat, protokol agen A2A, memori persisten, mekanisme pengaman, agen cloud, penyamaran sidik jari TLS, Desktop/Termux/PWA, dan 67 lokal UI i18n. OmniRoute berlisensi MIT dan dapat di-hosting sendiri. Kapabilitas serta jumlah milik pesaing dapat berubah; lihat metodologi yang ditautkan."/>
 
 <sub>📊 Metodologi lengkap &amp; detail per fitur dibandingkan dengan 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar bersifat pilihan dan hanya menggunakan GET. Klien OmniRoute tidak mengungg
 - **🖼️ Endpoint baru** — `/v1/ocr` (Mistral OCR) dan `/v1/audio/translations` (bergaya Whisper) melengkapi cakupan media. → [Referensi API](docs/reference/API_REFERENCE.md)
 - **🎨 Pembuatan gambar / video / audio** — satu API untuk media: xAI Grok Imagine & video Novita AI, ComfyUI, Magnific, Adobe Firefly, Segmind, serta penyedia suara seperti ElevenLabs. → [Referensi API](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment & operasi** — `basePath` proksi terbalik, deteksi otomatis bahasa peramban, pelacakan perangkat per kunci, kepercayaan MITM tanpa root, serta lokalisasi zh-TW. → [Lingkungan](docs/reference/ENVIRONMENT.md)
-- **🤝 Lebih banyak penyedia & agen** — agen cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) dengan peramban + login OAuth, kartu kelas utama Ollama, Claude Opus 5 & Sonnet 5, kemitraan resmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… serta **katalog 377 penyedia** yang telah diperbarui. → [Penyedia](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Lebih banyak penyedia & agen** — agen cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) dengan peramban + login OAuth, kartu kelas utama Ollama, Claude Opus 5 & Sonnet 5, kemitraan resmi Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… serta **katalog 380 penyedia** yang telah diperbarui. → [Penyedia](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparansi perutean** — setiap respons membawa header `X-OmniRoute-Decision` yang menyebutkan strategi/penyedia/latensi yang melayaninya, strategi kombo `cache-optimized` baru + faktor `cacheAffinity` Auto-Combo mengarahkan permintaan berulang kembali ke koneksi yang menyimpan prefiks dalam cache, dan endpoint baca-saja `/v1/auto-combo/{channel}/candidates` mengekspos kumpulan kandidat aktif dari kanal `auto/*`. → [Kombo Otomatis](docs/routing/AUTO-COMBO.md)
 - **⚡ Performa & infrastruktur lokal** — Redis lokal sekali klik, alat deployment relai Cloudflare Workers / Deno Deploy, serta Bifrost & Mux sebagai layanan tertanam yang diawasi. → [Layanan Tertanam](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Juga tersedia** — framework plugin + marketplace, framework skill Omni/Agent/GitHub, integrasi vault Obsidian (22 alat MCP), API Batch & Files yang kompatibel dengan OpenAI, cache respons semantik, gamifikasi dengan papan peringkat, penemuan agen ACP (15 agen bawaan), ekspor log terjadwal ke BigQuery, fan-out multi-model paralel `auto/chaos`, bridge bot Telegram, pengelola versi dalam aplikasi, serta peringkat penyedia gratis LMArena-ELO. → [Dokumentasi](docs/README.md)
@@ -657,7 +657,7 @@ Radar bersifat pilihan dan hanya menggunakan GET. Klien OmniRoute tidak mengungg
 <b>＋ juga kompatibel dengan</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>semua alat yang kompatibel dengan OpenAI</b>
 </div>
 
-<sub>📖 Penyiapan per alat untuk seluruh 38 alat (27 CLI Code + 11 CLI Agent) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Penyiapan per alat untuk seluruh 39 alat (28 CLI Code + 11 CLI Agent) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ masuk ke riwayat shell Anda. → [Integrasi CLI](docs/guides/CLI-INTEGRATIONS.md
 
 <div align="center">
 
-## 🌐 377 Penyedia AI — 153 Ditandai Gratis dalam Katalog
+## 🌐 380 Penyedia AI — 156 Ditandai Gratis dalam Katalog
 
 </div>
 
-> **377 penyedia terdaftar** di seluruh koleksi kanonis untuk chat, media, pencarian, lokal, agen cloud, dan sistem, termasuk **153 yang memiliki metadata penemuan `hasFree: true`**. Registri model chat mencakup **239 penyedia / 3.059 pasangan penyedia-model yang berbeda / 1.475 ID model mentah**; katalog anggaran gratis yang terpisah memiliki **484 baris per model**, **34 kumpulan berulang**, dan **52 penyedia gratis selamanya yang berulang/tanpa kunci**. Penyebut ini sengaja dibuat berbeda; definisi dan penghitungan dengan kumpulan yang telah dideduplikasi tersedia di [Referensi Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Tingkat Gratis](docs/reference/FREE_TIERS.md).
+> **380 penyedia terdaftar** di seluruh koleksi kanonis untuk chat, media, pencarian, lokal, agen cloud, dan sistem, termasuk **156 yang memiliki metadata penemuan `hasFree: true`**. Registri model chat mencakup **239 penyedia / 3.059 pasangan penyedia-model yang berbeda / 1.475 ID model mentah**; katalog anggaran gratis yang terpisah memiliki **485 baris per model**, **34 kumpulan berulang**, dan **52 penyedia gratis selamanya yang berulang/tanpa kunci**. Penyebut ini sengaja dibuat berbeda; definisi dan penghitungan dengan kumpulan yang telah dideduplikasi tersedia di [Referensi Penyedia](docs/reference/PROVIDER_REFERENCE.md) dan [Tingkat Gratis](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1308,7 +1308,7 @@ Metrik kanonis pada 2026-10-18: **1.976 video unik** · **20.220.289 tayangan ya
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Bahasa</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> di seluruh <code>src/</code> dan <code>open-sse/</code> (tanpa <code>any</code> di inti sejak v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Basis data</b></td><td>better-sqlite3 (SQLite, penjurnalan WAL) + LowDB (JSON lama) — 147 modul domain, 213 migrasi</td></tr>
+  <tr><td nowrap><b>Basis data</b></td><td>better-sqlite3 (SQLite, penjurnalan WAL) + LowDB (JSON lama) — 147 modul domain, 219 migrasi</td></tr>
   <tr><td nowrap><b>Memori</b></td><td>Teks lengkap SQLite FTS5 + penyematan vektor terkuantisasi int8, peluruhan bertipe</td></tr>
   <tr><td nowrap><b>Skema</b></td><td>Zod 4 — validasi I/O alat MCP + kontrak API</td></tr>
   <tr><td nowrap><b>Protokol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1371,7 +1371,7 @@ Metrik kanonis pada 2026-10-18: **1.976 video unik** · **20.220.289 tayangan ya
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Panduan Ketahanan</a></b></td><td>Circuit breaker, periode jeda, antrean, pencegahan thundering herd, spoofing TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Mesin Auto-Combo</a></b></td><td>Penilaian 16 faktor, paket mode, pemulihan mandiri</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Panduan Proxy</a></b></td><td>Sistem proxy 3 tingkat, marketplace 1proxy, CRUD registri</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tingkat Gratis</a></b></td><td>Direktori terkonsolidasi: 34 pool berulang yang terdokumentasi / 484 entri tingkat gratis yang dikatalogkan</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tingkat Gratis</a></b></td><td>Direktori terkonsolidasi: 34 pool berulang yang terdokumentasi / 485 entri tingkat gratis yang dikatalogkan</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeri Fitur</a></b></td><td>Tur visual dashboard dengan tangkapan layar</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentasi Basis Kode</a></b></td><td>Panduan basis kode yang ramah bagi pemula</td></tr>
 </table>

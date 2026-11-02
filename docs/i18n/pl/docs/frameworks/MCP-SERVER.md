@@ -316,12 +316,12 @@ tokenie dostępu `oma_live_…` to trzy różne uprawnienia. Wywołujący, któr
 Za tę hierarchię odpowiada `scopeSatisfies`. Nie korzysta on z tabeli MCP, a mechanizm
 dopasowywania MCP nie korzysta z niego.
 
-| Przestrzeń nazw              | Poświadczenie                                                                       | Mechanizm sprawdzający    | Co umożliwia pomyślna kontrola                                |
-| :--------------------------- | :---------------------------------------------------------------------------------- | :------------------------ | :------------------------------------------------------------ |
-| Zarządzanie kluczami API     | `api_keys.scopes`                                                                   | `hasManageScope`          | Zarządzający interfejs REST dla danego klucza Bearer          |
-| Dodatkowe zakresy klucza API | ta sama tablica, jeden dokładny ciąg                                                | pomocnik wskazany poniżej | Tylko tę jedną funkcję                                        |
-| Zakresy narzędzi MCP         | ta sama tablica, w przeciwnym razie `_meta` MCP, a następnie `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | Dane narzędzie, gdy wymuszanie jest włączone                  |
-| Token dostępu                | `oma_live_…`                                                                        | `scopeSatisfies`          | Trasę zarządzania, której metoda i ścieżka wymagają tej rangi |
+| Przestrzeń nazw              | Poświadczenie                                                                                               | Mechanizm sprawdzający    | Co umożliwia pomyślna kontrola                                |
+| :--------------------------- | :---------------------------------------------------------------------------------------------------------- | :------------------------ | :------------------------------------------------------------ |
+| Zarządzanie kluczami API     | `api_keys.scopes`                                                                                           | `hasManageScope`          | Zarządzający interfejs REST dla danego klucza Bearer          |
+| Dodatkowe zakresy klucza API | ta sama tablica, jeden dokładny ciąg                                                                        | pomocnik wskazany poniżej | Tylko tę jedną funkcję                                        |
+| Zakresy narzędzi MCP         | ta sama tablica, w przeciwnym razie MCP `_meta` (tylko HTTP/SSE), w przeciwnym razie `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | Dane narzędzie, gdy wymuszanie jest włączone                  |
+| Token dostępu                | `oma_live_…`                                                                                                | `scopeSatisfies`          | Trasę zarządzania, której metoda i ścieżka wymagają tej rangi |
 
 Tworzenie każdego poświadczenia opisano w sekcji
 [Uwierzytelnianie zarządzania](../guides/MANAGEMENT-AUTH.md).
@@ -370,8 +370,10 @@ Wymuszanie jest wyłączone, chyba że `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (wart
 `false`). Gdy jest wyłączone, `evaluateToolScopes` zezwala na wywołanie i pomija
 katalog. Gdy jest włączone, HTTP używa `api_keys.scopes` klucza Bearer jako
 `authInfo` (zobacz [Powiązanie zakresów HTTP z poszczególnymi kluczami](#per-key-http-scope-binding-7895)).
-Jeśli nie uda się rozpoznać żadnych zakresów klucza, zestaw przyznanych zakresów przechodzi do `_meta` MCP, a następnie
-do `OMNIROUTE_MCP_SCOPES`.
+Gdy żadne zakresy klucza nie zostaną rozwiązane, przyznany zestaw przechodzi do MCP `_meta` (honorowane wyłącznie
+dla wywołujących HTTP/SSE, w kontekście uwierzytelniania HTTP; `_meta` wywołującego stdio jest ignorowane,
+ponieważ kontroluje je klient i nie niesie ono tożsamości wywołującego), a następnie
+`OMNIROUTE_MCP_SCOPES`.
 
 #### Zakresy tokenów dostępu
 
@@ -470,9 +472,10 @@ nadawała `authInfo` wyższy priorytet niż `_meta` i mechanizm rezerwowy zmienn
 `OMNIROUTE_MCP_SCOPES` — ta zmiana jedynie wypełnia pierwsze źródło o najwyższym priorytecie,
 które wcześniej nie było zasilane przez HTTP. Gdy nie zostanie rozpoznany żaden klucz API
 (brak nagłówka, nieprawidłowy klucz), `authInfo` pozostaje `undefined`, a rozpoznawanie przechodzi
-do istniejącego łańcucha `meta`/zmiennej środowiskowej bez zmian. stdio nie ma tożsamości osobnej
-dla każdego klienta (zobacz `mcpCallerIdentity.ts`) i ta zmiana go nie dotyczy — nadal korzysta
-z rezerwowego łańcucha `_meta`/zmiennej środowiskowej.
+do istniejącego łańcucha `meta`/zmiennej środowiskowej bez zmian. stdio nie ma tożsamości wywołującego (patrz `mcpCallerIdentity.ts`)
+i nie jest objęte przypisaniem do kluczy — pomija krok `_meta` (`_meta` jest respektowany
+wyłącznie wewnątrz kontekstu uwierzytelniania HTTP, #15159) i rozpoznaje wyłącznie na
+podstawie klucza env `OMNIROUTE_MCP_SCOPES`.
 
 **Egzekwowanie zakresów jest wymuszane dla klientów HTTP/SSE o wąskich zakresach niezależnie od
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Domyślna wartość `false` dla `OMNIROUTE_MCP_ENFORCE_SCOPES` jest

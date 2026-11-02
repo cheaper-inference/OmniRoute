@@ -42,6 +42,10 @@ personalizzato mediante variabili d'ambiente (non dispone di un flag `--base-url
 
 > Le variabili d'ambiente vengono lette **una sola volta all'avvio** — riavvia Claude Code dopo averle modificate.
 
+Per una credenziale che ruota invece di una stringa fissa, imposta `apiKeyHelper` in `~/.claude/settings.json` su un comando che stampi la credenziale corrente su stdout. Claude Code conserva il risultato nella cache per cinque minuti per impostazione predefinita (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` modifica questa durata) e invia il valore sia in `Authorization: Bearer` sia in `x-api-key`. Lo script deve stampare esclusivamente la credenziale: un banner aggiuntivo causa il fallimento dell'helper nelle versioni v2.1.227+.
+
+Entra ID SSO funziona così: `scripts/cli/omniroute-sso.mjs token` stampa un token di accesso Entra di breve durata, che OmniRoute verifica al posto di una chiave API. Vedi [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` le imposta tutte automaticamente: determina l'URL di base e il token
 dal contesto attivo (quindi, dopo `omniroute connect <vps>`, `omniroute launch`
 funziona immediatamente), verifica lo stato del server ed esegue `claude`.

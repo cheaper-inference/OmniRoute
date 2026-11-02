@@ -520,7 +520,8 @@ Guardrail ba ya taɓa toshewa; kawai yana yin annotation (`meta.detections`, `me
 
 **Dashboard → Settings → Security → PII masking** shine yake zaɓar _abin da_ za a mask. Ba ya kunna masking: wannan har yanzu `PII_REDACTION_ENABLED` ne (request) da `PII_RESPONSE_SANITIZATION` (response + SSE), dukansu a kashe suke ta tsoho.
 
-- **Zabin kowane nau'i** — an lissafa idanun da aka gina ciki a cikin `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Rashin saita yana nufin kowane nau'i (halin da ake ciki kafin wannan saitin ya wanzu). Alamar `ssn_us` na injin request tana daidaitawa zuwa `ssn`. Templates (Minimal, Standard, Financial, Brazilian, USA, Full) kawai suna cika checkbox-ovi a cikin UI.
+- **Zabin kowane nau'i** — an lissafa idanun da aka gina ciki a cikin `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Rashin saita yana nufin kowane nau'i (halin da ake ciki kafin wannan saitin ya wanzu). Alamar `ssn_us` na injin request tana daidaitawa zuwa `ssn`. Templates (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) kawai suna cika checkbox-ovi a cikin UI.
+- **Alamomin GDPR da POPIA** — built-in id goma sha biyu da suka shafi alamomin sirri na EU da Afirka ta Kudu (teburin ƙasa). Regex, validator da alamar jurisdiction ɗinsu suna cikin tebur guda, `src/shared/utils/piiPatterns.ts`, wanda response sanitizer (`src/lib/piiSanitizer.ts`) da request masker (`src/shared/utils/inputSanitizer.ts`) duka suke amfani da shi. Match ana ɓoye shi ne kawai idan validator ya karɓe shi; layin lambobi kaɗai bai isa ba. Operator da ya adana zaɓi mai ƙanƙanta kafin waɗannan id su kasance yana riƙe halin da yake da shi har sai an zaɓi sabbin id.
 - **Alamu na musamman** — har zuwa alamu 20 na regex ko wildcard (`*` = har zuwa haruffa 64 marasa sarari, `?` = guda ɗaya). Abubuwan da suka dace suna zama `[CUSTOM_REDACTED]`. Kowane alama yana wucewa ta `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): aƙalla haruffa 500, flags an ƙayyade su zuwa `g i m s u`, dole ne ya compile, dole ne ya wuce `safe-regex` (catastrophic backtracking), kuma bai kamata ya dace da string fanko ko redaction placeholder ba. Alamar da ta gaza ana ƙin ta lokacin adanawa da lokacin gwaji, kuma ana tsallake jerin da aka adana wanda ya gaza a lokacin gudanarwa maimakon a compile shi. Alamu na musamman suna gudana ne kawai yayin da masking yana kunne.
 - **Ƙididdigar gano abubuwa** — ƙidayar kowane nau'i (ba maƙasudin da suka dace ba), ana riƙe da su a cikin memory kuma ana sake saita su a lokacin sake kunna (`src/lib/pii/piiDetectionStats.ts`). Suna ƙaruwa ne kawai yayin da masking yana kunne.
 
@@ -533,6 +534,25 @@ Saitunan suna rayuwa a cikin teburin `key_value` (namespace `pii_settings`, `src
 | `POST` | `/api/settings/pii/test` | Dry-run alama ɗaya akan samfurin aƙalla 8 KB; ba a adana komai           |
 
 Dukkan su uku suna buƙatar izinin gudanarwa kuma suna inganta jikin da Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Alamomin GDPR (EU) da POPIA (Afirka ta Kudu)
+
+| Id                  | Alama                           | Tabbatarwa                                                                                   |
+| ------------------- | ------------------------------- | -------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                            | Ƙasar da aka sani, tsawon daidai na wannan ƙasa, ISO 13616 MOD-97-10                         |
+| `eu_vat`            | Lambar VAT ta EU                | Prefix na ƙasa memba da aka sani da tsarin lambarta (babu VIES lookup)                       |
+| `es_dni_nie`        | DNI / NIE na Sifaniya           | Harafin dubawa (daraja mod 23); NIE shi ne `X/Y/Z` + lambobi 7                               |
+| `it_codice_fiscale` | Codice Fiscale na Italiya       | Harafin dubawa daga teburin matsayi mara/cikakken rabo da biyu                               |
+| `pl_pesel`          | PESEL na Poland                 | Weighted checksum da iyakokin watan/ranar haihuwa da aka encode masu ma'ana                  |
+| `nl_bsn`            | BSN na Netherlands              | Gwajin 11 (weights 9..2, -1)                                                                 |
+| `de_steuer_id`      | Steuer-ID na Jamus              | ISO 7064 Mod 11,10 da ƙa'idar tsarin lambobi (babu 0 a farko)                                |
+| `se_personnummer`   | personnummer na Sweden          | Luhn a lambobi goma na ƙarshe da ranar haihuwa mai yiwuwa (lambobi 10 ko 12)                 |
+| `za_id`             | Lambar ID ta Afirka ta Kudu     | Luhn a duk lambobi 13, watan/ranar haihuwa masu inganci, lambar ɗan ƙasa 0 ko 1              |
+| `za_phone`          | Wayar Afirka ta Kudu            | Prefix `+27` / `27`, ko tsarin gida `0..` da aka rubuta da sarari ko alamar haɗi             |
+| `za_vat`            | Lambar VAT ta Afirka ta Kudu    | Lambobi 10 da suka fara da `4` **da kuma** "VAT" / "BTW" a haruffa 48 da ke gabansu          |
+| `za_tax_ref`        | Lambar haraji ta Afirka ta Kudu | Lambobi 10 da suka fara `0`-`3`, Luhn, **da kuma** "tax" / "SARS" a haruffa 48 da ke gabansu |
+
+Saboda tsarin lambobi kawai yana cin karo da order number, build number da timestamp, mafi raunin su (`za_vat`, `za_tax_ref`) suna buƙatar alamar keyword, kuma lambar `0..` mai lambobi goma kaɗai ba a ɗaukarta lambar wayar Afirka ta Kudu. Ba a match IBAN masu sarari (`GB29 NWBK ...`). A hanyar streaming ana neman alamar ne a cikin chunk na yanzu kawai. Id suna gaban generic phone pattern, don haka identifier da aka tabbatar yana riƙe placeholder na kansa (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Template `gdpr` da `popia` suna zaɓar id na EU da Afirka ta Kudu bi da bi. Masking da kansa yana nan sai an zaɓi kunnawa (Hard Rule #20): babu wani abu a nan da ke canza default na feature flag.
 
 ### Prompt Injection (`promptInjection.ts`)
 

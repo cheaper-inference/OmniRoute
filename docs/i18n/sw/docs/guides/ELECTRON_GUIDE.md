@@ -64,6 +64,19 @@ Nafasi ya kazi ya `electron/` pia hutoa:
 - `npm run build:mac-x64` / `build:mac-arm64` — miundo ya macOS ya usanifu mmoja
 - `npm run pack` — ujenzi wa saraka pekee kwa majaribio ya ndani (bila kisakinishaji)
 
+## Runtime pack za hiari
+
+Build za desktop zinaweza kuchapisha runtime archive za hiari pamoja na installer zake. Server payload iliyosakinishwa ina `optional-packs.index.json` (chini ya `resources/app` kwenye Windows na Linux). Kwa entry ya `browser-runtime`, soma `packs[].tarball` na upakue **jina hilo hilo la faili kutoka release hiyo hiyo**. Majina ya archive yana SHA-256 digest; build tofauti zinaweza kuhitaji archive tofauti. Hifadhi jina la faili lililopakuliwa bila kulibadilisha.
+
+Nakili index ya app iliyosakinishwa na archive iliyochaguliwa kwenye saraka moja, kisha tumia CLI ya release hiyo hiyo:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` huonyesha hali ya usakinishaji na uthibitishaji, si jina la faili la archive. Index iliyoambatanishwa huchagua archive. Usakinishaji huthibitisha checksum ya archive kabla ya kufungua yaliyomo na checksum za package kabla ya kubadilisha pack iliyosakinishwa. Husoma faili za ndani; haupakui archive zinazokosekana. Anzisha application tena baada ya usakinishaji. Ikiwa release haina asset inayolingana, pack ya hiari haipatikani kupitia asset za release hiyo.
+
 ## Mpangilio wa Saraka
 
 ```

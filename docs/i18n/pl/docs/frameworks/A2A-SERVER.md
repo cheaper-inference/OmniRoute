@@ -163,7 +163,7 @@ OmniRoute udostępnia 6 umiejętności A2A połączonych w `src/lib/a2a/taskExec
 | Raport o stanie         | `health-report`      | Agreguje stan mechanizmu circuit breaker, okresu wyciszenia i blokady dla każdego dostawcy                                                                                                    | stan, odporność                   | „Pokaż stan wszystkich dostawców”          |
 | Lista możliwości        | `list-capabilities`  | Zwraca pełny, zawierający 45 pozycji katalog Agent Skills (23 API + 21 CLI + 1 konfiguracja) jako tabelę markdown z nieprzetworzonymi adresami URL plików SKILL.md do wstrzykiwania kontekstu | katalog, wykrywanie, umiejętności | „Wyświetl wszystkie możliwości OmniRoute”  |
 
-> Agent Card powinien być zgodny z aktualnym katalogiem 377 dostawców; liczba dostawców oraz metadane dotyczące bezpłatnego dostępu i braku konieczności uwierzytelniania pochodzą z rejestru środowiska uruchomieniowego.
+> Agent Card powinien być zgodny z aktualnym katalogiem 380 dostawców; liczba dostawców oraz metadane dotyczące bezpłatnego dostępu i braku konieczności uwierzytelniania pochodzą z rejestru środowiska uruchomieniowego.
 
 ### Szczegóły umiejętności `list-capabilities`
 
@@ -215,7 +215,7 @@ Punkt końcowy JSON-RPC `/a2a` jest kanonicznym punktem wejścia A2A. Poniższe 
    };
    ```
 
-3. **Udostępnij w karcie agenta:** w pliku `src/app/.well-known/agent.json/route.ts` dodaj element do tablicy `skills`:
+3. **Udostępnij w karcie agenta:** w pliku `src/lib/a2a/agentCardMetadata.ts` (współdzielonym przez `/.well-known/agent.json` i `/.well-known/agent-card.json`) dodaj element do tablicy `skills`:
 
    ```json
    {

@@ -163,7 +163,7 @@ OmniRoute na-ekpughe nka A2A 6 e jikọtara na `src/lib/a2a/taskExecution.ts::A2
 | Akụkọ Ọnọdụ Ahụike       | `health-report`      | Na-achịkọta ọnọdụ circuit breaker, cooldown, na lockout maka onye na-enye ọrụ ọ bụla                                                                            | ahụike, nkwụsi ike         | "Gosi ọnọdụ ahụike nke ndị na-enye ọrụ niile" |
 | Depụta Ikike             | `list-capabilities`  | Na-eweghachi katalọgụ Agent Skills zuru ezu nwere ndenye 45 (API 23 + CLI 21 + nhazi 1) dịka tebụl markdown nwere URL SKILL.md raw maka itinye ọnọdụ gburugburu | katalọgụ, nchọpụta, nka    | "Depụta ikike OmniRoute niile"                |
 
-> E kwesịrị idowe Agent Card ka ọ kwekọọ na katalọgụ dị ndụ nke ndị na-enye ọrụ 377; a na-enweta ọnụọgụ ndị na-enye ọrụ na metadata efu/na-achọghị-njirimara site na runtime registry.
+> E kwesịrị idowe Agent Card ka ọ kwekọọ na katalọgụ dị ndụ nke ndị na-enye ọrụ 380; a na-enweta ọnụọgụ ndị na-enye ọrụ na metadata efu/na-achọghị-njirimara site na runtime registry.
 
 ### Nkọwa Nka `list-capabilities`
 
@@ -215,7 +215,7 @@ Ebe njedebe JSON-RPC `/a2a` bụ ebe ntinye A2A izizi. Ebe njedebe REST ndị d�
    };
    ```
 
-3. **Gosipụta ya na Kaadị Agent:** n'ime `src/app/.well-known/agent.json/route.ts`, gbakwunye na njedebe array `skills`:
+3. **Gosipụta ya na Kaadị Agent:** n'ime `src/lib/a2a/agentCardMetadata.ts` (nke `/.well-known/agent.json` na `/.well-known/agent-card.json` na-ejikọta ọnụ), gbakwunye ya na ndepụta `skills`:
 
    ```json
    {

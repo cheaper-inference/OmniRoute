@@ -153,3 +153,15 @@ test("combo/<name> prefix behaviour is unchanged", async () => {
   assert.equal(resolved?.name, "lordx.1");
   assert.equal(await sseModelService.getCombo("combo/missing"), null);
 });
+
+test("namespaced combo lookups refresh cached misses and hits after writes", async () => {
+  const requested = "my-client/cache-refresh";
+  assert.equal(await sseModelService.getCombo(requested), null);
+
+  await seedCombo("cache-refresh");
+  const resolved = (await sseModelService.getCombo(requested)) as ComboLike | null;
+  assert.equal(resolved?.name, "cache-refresh");
+
+  assert.equal(await combosDb.deleteComboByName("cache-refresh"), true);
+  assert.equal(await sseModelService.getCombo(requested), null);
+});

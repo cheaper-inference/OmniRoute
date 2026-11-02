@@ -5,8 +5,8 @@
 ---
 
 > **Verzija:** v3.8.44
-> **Posljednje ažuriranje:** 2026-09-16
-> **Ciljana publika:** Inženjeri koji dodaju, održavaju ili otklanjaju pogreške u ugrađenim servisima (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Posljednje ažuriranje:** 2026-10-28
+> **Publika:** Inženjeri koji dodaju, održavaju ili otklanjaju pogreške u ugrađenim servisima (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Ugrađeni servisi lokalno su instalirani pomoćni procesni alati koje OmniRoute instalira, nadzire i
 izlaže kao punopravne ciljeve usmjeravanja. Za razliku od vanjskih pružatelja usluga (kojima se pristupa putem interneta
@@ -31,7 +31,7 @@ pomoću API ključeva), ugrađeni servisi izvode se na istom računalu kao OmniR
 
 ### Zašto ugrađene usluge?
 
-Ugrađeno je sedam usluga:
+Ugrađeno je osam servisa:
 
 | Usluga          | npm paket                                       | Zadani port | Namjena                                                                                                                                                                                                                                                                                                                                                                 |
 | --------------- | ----------------------------------------------- | :---------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,8 +42,9 @@ Ugrađeno je sedam usluga:
 | **Dario**       | `@askalf/dario`                                 |    3456     | Proxy za Claude pretplatu — alternativa/pričuvna opcija za CLIProxyAPI za promet u formatu Claude Code; umetnuti ključ postaje `DARIO_ADMIN_TOKEN`, koji štiti njegovu OAuth upravljačku ravninu `/admin/*`                                                                                                                                                             |
 | **open-wa**     | `@open-wa/wa-automate`                          |    8323     | Automatizacija aplikacije WhatsApp Web (Chromium bez sučelja putem Puppeteera). Upravlja se samo životnim ciklusom — nije cilj usmjeravanja.                                                                                                                                                                                                                            |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                            |    20135    | Pomoćna usluga za sažimanje upita — stvarni ONNX model LLMLingua-2 (JS/TS port Microsoftova algoritma). `open-sse/services/compression/engines/llmlingua/index.ts` šalje `/compress` toj usluzi putem HTTP-a, a kada pomoćna usluga ne radi, prelazi na pozadinski sustav s radnom dretvom unutar procesa. Upravlja se samo životnim ciklusom — nije cilj usmjeravanja. |
+| **sing-box**    | Binarna datoteka izdanja s GitHuba (`singbox`)  |    20140    | Pomoćni proces TPROXY koji podržava presretanje transparentnim proxyjem u `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Instalacijski program preuzima izdanje fiksirane verzije s provjerenim kontrolnim zbrojem. Upravlja se samo životnim ciklusom; nije odredište usmjeravanja i ne posreduje LLM promet.                                                           |
 
-Svih sedam usluga slijedi isti nadzorni model:
+Svih osam slijedi isti model nadzora:
 
 - OmniRoute ih instalira u `DATA_DIR/services/{name}/` (izolirano od vlastite datoteke `package.json` sustava OmniRoute)
 - OmniRoute ih pokreće kao podređene procese i nadzire ih
@@ -582,7 +583,27 @@ radne dretve unutar procesa (`./worker.ts`).
 
 ---
 
-### 4.8 Obrnuti proxy (ugrađena nadzorna ploča 9Router)
+### 4.8 Krajnje točke sing-boxa (8 ruta)
+
+sing-box ima istu strukturu krajnjih točaka kao Mux: nema rute `rotate-key` ni umetanja API ključa (`needsApiKey: false` u `bootstrap.ts`). Upravlja se samo njegovim životnim ciklusom; nikad nije pružatelj usmjeravanja ili LLM-a. `install()` preuzima službenu binarnu datoteku GitHub izdanja (`SagerNet/sing-box`) za fiksiranu verziju (`SINGBOX_PINNED_VERSION` u `src/lib/services/installers/singbox.ts`) i provjerava njezin SHA256 prema kontrolnom zbroju ugrađenom u istu datoteku prije nego što je uopće zapiše na disk. Svaka druga zatražena verzija se odbija.
+
+| Metoda | Putanja                                      | Opis                                                                                       |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `POST` | `/api/services/singbox/install`              | Preuzmi i provjeri fiksirano izdanje sing-boxa                                             |
+| `POST` | `/api/services/singbox/start`                | Pokreni sing-box (`sing-box run -c config.json`)                                           |
+| `POST` | `/api/services/singbox/stop`                 | Zaustavi sing-box                                                                          |
+| `POST` | `/api/services/singbox/restart`              | Ponovno pokreni sing-box                                                                   |
+| `POST` | `/api/services/singbox/update`               | Ponovno provjeri ili instaliraj fiksirano izdanje                                          |
+| `GET`  | `/api/services/singbox/status`               | Trenutačno stanje i stanje u bazi podataka                                                 |
+| `POST` | `/api/services/singbox/auto-start`           | Uključi ili isključi automatsko pokretanje                                                 |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Uključi ili isključi automatsko ponovno pokretanje preuzetog, prethodno postojećeg procesa |
+| `GET`  | `/api/services/singbox/logs`                 | Prati kraj SSE zapisnika preko zajedničke dinamičke rute `[name]/logs`                     |
+
+**Povezivanje TPROXY-ja:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) zapisuje `config.json` i pokreće nadzornik prije nego što `applyTproxy()` postavi pravila vatrozida TPROXY. Ako nadzornik nedostaje ili ne dosegne stanje `running`, to se sada bilježi na razini pogreške umjesto da se neuspjeh prešuti. Operater tako može utvrditi da su pravila TPROXY primijenjena bez funkcionalnog procesa za slušanje iza njih.
+
+---
+
+### 4.9 Obrnuti proxy (ugrađena nadzorna ploča 9Router)
 
 Nadzorna ploča ugrađuje web-sučelje 9Router unutar iframea putem internog
 obrnutog proxyja na:

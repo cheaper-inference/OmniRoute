@@ -488,7 +488,7 @@ Nke a na-ahụ maka:
 
 | Faịlụ                         | Ebumnuche                                             |
 | ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Ndebanye ụdị nkata maka katalọgụ ndị na-eweta ọrụ 377 |
+| `providerRegistry.ts`         | Ndebanye ụdị nkata maka katalọgụ ndị na-eweta ọrụ 380 |
 | `providerModels.ts`           | Aha nnọchi ụdị, nhazi usoro                           |
 | `constants.ts`                | Oge nchere, oke, koodu ọkwa                           |
 | `defaultThinkingSignature.ts` | Mbinye aka ndabara nke echiche Claude                 |

@@ -29,6 +29,7 @@ Fún protocol tó bá OpenAI mu àti àtẹ matrix agbára provider tó dojú k�
 - [Ìṣànwọ́lé WebSocket](#websocket-streaming)
 - [Àwọn Ìpín & Jíjíṣẹ́ Ìṣòro](#quotas--issues-reporting)
 - [Kaṣe Ìtumọ̀](#semantic-cache)
+- [Ìbámu ìṣàkóso CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [Pẹpẹ Ìdarí & Ìṣàkóso](#dashboard--management)
 - [Ìṣàkóso Combo](#combo-management)
 - [Webhooks](#webhooks)
@@ -989,6 +990,18 @@ agbègbè: ChatGPT ń dá `codex.rate_limits` + `response.created` padà, ó sì
 
 **Ìfàṣẹsí:** Kọ́kọ́rọ́ API Bearer (`isAuthenticated`).
 
+### Ìmúpadà quota session (ìfẹ́ ẹni láti mú ṣiṣẹ́)
+
+Non-streaming `POST /v1/chat/completions` tàbí `POST /v1/responses` tó kùnà pẹ̀lú terminal quota error (`402`/`429`/`503` tí body rẹ̀ sọ pé quota tàbí credit ti tán) lè dúró kí a sì tún ṣe é lẹ́yìn náà dípò fífi àṣìṣe padà. Ẹni tó ń pè é ń yan láti mú un ṣiṣẹ́ fún request kọ̀ọ̀kan pẹ̀lú header mẹ́ta:
+
+| Header                       | Iye                                           |
+| ---------------------------- | --------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                        |
+| `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`          |
+| `x-omniroute-recovery-turn`  | turn id tí ó yàtọ̀ nínú session (òfin kan náà) |
+
+Turn `stream: false` nìkan tí kò ní tools, ìtàn tools tàbí `previous_response_id`, tí kò sì ní `x-omniroute-connection` pin, ló yẹ; a sì gbọ́dọ̀ ṣètò `STORAGE_ENCRYPTION_KEY` (a ń tọ́jú request náà ní ìkọ̀kọ̀ pẹ̀lú encryption fún àkókò tó lè tó wákàtí 24). Ìdáhùn náà yóò jẹ́ `202` pẹ̀lú `recovery.poll`; máa bi `GET /v1/quota-recoveries/{id}` ní ìgbà díẹ̀díẹ̀ (`202` nígbà tó ń dúró, `200` pẹ̀lú body tí a mú padà nígbà tó parí), tàbí fagilé pẹ̀lú `DELETE`. API key tó dá ticket sílẹ̀ nìkan ló lè rí i. Replay tí àbájáde rẹ̀ kò dájú ń parí ní `needs_confirmation` dípò kí a rán an lẹ́ẹ̀mejì. Orísun: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Lílò iṣẹ́-àdáṣe (`/api/usage/om-usage`)
@@ -1157,6 +1170,28 @@ olùpèsè orísun**, nítorí náà `X-OmniRoute-Response-Latency` tí a jùm�
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Ìbámu ìṣàkóso CLIProxyAPI
+
+OmniRoute ń dáhùn management endpoint mẹ́ta ti [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) tí usage dashboard ń pè láti ka ààlà ìforúkọsílẹ̀ Claude àti Codex (fún àpẹẹrẹ orísun usage-limit `cliproxy` ti T3 Code). Tọ́ka base URL client sí OmniRoute, kí o sì lo API key tó ní scope `manage` gẹ́gẹ́ bí management key. Àwọn route wà ní `/v0/management/*` àti `/api/v0/management/*`.
+
+| Ọ̀nà  | Path                         | Àlàyé                                                                                                                                                   |
+| ---- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v0/management/auth-files`  | OAuth connection Claude àti Codex gẹ́gẹ́ bí `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Kò ní token                           |
+| POST | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Ó ń rán request tó wà ní àkójọ tí a yọ̀ǹda pẹ̀lú token àkọọ́lẹ̀, ó sì ń dá `{ status_code, body }` padà |
+| POST | `/v0/management/reset-quota` | Body `{ auth_index }`. Ó ń pa connection cooldown, model lockout àti Codex per-scope cooldown ti àkọọ́lẹ̀ kan rẹ́                                          |
+
+- `auth_index` ni connection id OmniRoute. `provider` jẹ́ `claude` tàbí `codex` (OAuth connection nìkan; a kò ṣe àkójọ API-key provider `anthropic`). Fún Codex, `id_token.chatgpt_account_id` ni workspace id tí a tọ́jú, `plan_type` sì ni plan tí a tọ́jú.
+- `api-call` kì í ṣe proxy gbogbogbò. Ó ń gba Claude `GET
+https://api.anthropic.com/api/oauth/usage` àti Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` àti `POST .../wham/rate-limit-reset-credits/consume` nìkan, ọ̀kọ̀ọ̀kan fún àkọọ́lẹ̀ provider tó bá a mu nìkan. Ohun mìíràn ń dá `403` padà láì kan sí upstream. A kò kọbi ara sí header `Authorization` ẹni tó pè é (pẹ̀lú placeholder `$TOKEN$`): OmniRoute ń fi access token connection sínú rẹ̀, ó ń kọ́kọ́ ṣe refresh bí ó bá fẹ́ parí, ó sì ń fi header tí a yọ̀ǹda nìkan ránṣẹ́ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Bí `Chatgpt-Account-Id` kò bá sí, workspace id tí a tọ́jú ni a ń lò ní ìṣètò àkọ́kọ́. Bí ìdáhùn upstream àkọ́kọ́ bá jẹ́ `401`, ó ń ṣe refresh lẹ́ẹ̀kan, ó sì ń gbìyànjú lẹ́ẹ̀kan sí i kìkì bí access token bá yí padà. Upstream attempt kọ̀ọ̀kan ń parí àkókò lẹ́yìn ìṣẹ́jú-àáyá 15, ó sì ń lo proxy connection.
+- `reset-quota` ń fi terminal state (banned, expired, credits_exhausted) sílẹ̀ bí wọ́n ti rí. `auth_index` tí a kò mọ̀ ń dá `404` padà.
+
+**Ìfìdímúlẹ̀ ìwọlé:** dashboard session tàbí API key tó ní scope `manage` ṣe pàtàkì, bí a bá tiẹ̀ pa login (àwọn path wà ní `ALWAYS_PROTECTED_API_PATHS`). Key fún inference nìkan ń gba `403`. Orísun: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

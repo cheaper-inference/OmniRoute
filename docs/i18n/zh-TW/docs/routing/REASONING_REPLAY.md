@@ -161,6 +161,22 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 - **寫入也受條件限制：** `chatCore.ts` 中的兩個呼叫位置（非串流和串流）都只會在 `requiresReasoningReplay(provider, model)` 為 `true` 時呼叫 `cacheReasoningFromAssistantMessage()`——這與讀取端檢查的述詞相同。從不使用重播提供者的安裝環境，不必再為每個包含推理內容的回應支付寫入、索引更新及 try/catch 的成本。
 - **非嚴格模式提供者：** 當 `requiresReasoningReplay` 為 `false` 且目標格式為 OpenAI 時，轉譯器會從傳出訊息中**移除**任何 `reasoning_content` 欄位——OpenAI Chat Completions 不接受此欄位。
 
+## Muse 不透明推理的擁有權
+
+Muse（`muse-code`）傳回與呼叫端綁定的不透明推理（`encrypted_content`）。使用其他帳戶或重新核發的憑證重播它會在上游失敗，因此原生 OAuth 請求採用工作階段層級的擁有權，而非逐請求輪替（`src/sse/services/museSessionOwnership.ts`，在 `src/sse/handlers/chat.ts` 中強制執行）。明確選取的 API 金鑰連線及僅使用 API 金鑰的設定保留既有路由，不使用這種擁有權模式。
+
+- 每個輪次都應提供穩定的工作階段 ID：`x-omniroute-session-id`、`x-omniroute-session`、`x-session-id` 或 `x-codex-session-id`；也可在請求本文中使用 `prompt_cache_key`、`session_id`、`conversation_id` 或 `metadata.session_id`（依此優先順序）。當有兩個或更多作用中的原生 OAuth 帳戶時，缺失或空白 ID 會傳回 400；只有一個 OAuth 帳戶時沒有其他輪替目標，因此這類請求保持未固定路由。範圍包含呼叫端的 OmniRoute API 金鑰 ID。
+- 新的獨立工作階段會在 API 金鑰連線政策允許的作用中原生 OAuth 帳戶間循序輪替，依連線 ID 排序。輪替會略過處於連線冷卻、終止狀態（`banned`、`expired`、`credits_exhausted`）或對請求模型已鎖定的帳戶；Muse 上游失敗與其他提供者一樣記錄冷卻和斷路器狀態。明確強制的連線會在新工作階段中略過輪替，但不能取代已提供過成功回應的擁有者。
+- 在擁有者提供成功回應之前，若其無法使用，會將工作階段重新分配給健康帳戶。首次成功回應之後，工作階段固定到該擁有者，直到閒置滿 30 天（`MUSE_SESSION_IDLE_TTL_MS`）。
+- 每次接續和工具結果輪次都固定到工作階段擁有者：連線、帳戶身分和推論憑證世代；在上游嘗試之前會再次檢查，包括憑證更新後的重試。Responses 呼叫 ID/項目參照和 Chat Completions 工具呼叫 ID 必須已針對該工作階段和世代記錄。
+- SQLite `key_value` 記錄位於 `muse_session_ownership` 命名空間（`src/lib/db/museSessionOwnership.ts`），可在重新啟動之間保留擁有權和輪替游標。每次認領和提供回應都會更新工作階段活動時間戳記；閒置超過 `MUSE_SESSION_IDLE_TTL_MS` 的工作階段會被清理（擁有者固定、已回應旗標，以及記錄的不透明內容/參照雜湊），最多每 10 分鐘一次且分批限量執行，因此之後重播其歷程時會因擁有者未知而安全拒絕。記錄包含連線 ID，以及帳戶身分、憑證、不透明內容和接續參照的雜湊，不包含祕密或對話歷程。用戶端必須保留並傳送完整歷程和不透明推理。
+- 對未知或外來的不透明推理、缺失的擁有者、無法使用的擁有者帳戶，或已有歷程記錄時發生的世代變更，系統會以明確的 4xx/503 安全拒絕；絕不會靜默跨帳戶容錯移轉，也絕不會捨棄推理。
+- 同一帳戶重新核發的金鑰，只有在工作階段未記錄可重播歷程時才會採用；已有記錄的工作階段會繼續安全拒絕，直到重新開始。
+- 空白上游回應（`upstream_empty_response` / `empty_response`，未向呼叫端輸出任何內容）最多在同一擁有者上重試兩次，分別等待 0.5 s 和 1.5 s（`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`）。如果所有嘗試均為空白，則傳回原始 502，不標記冷卻或斷路器，因此偶發空白回應不會鎖定擁有者。
+- 所有 `muse-code` 請求都略過語意快取讀取和寫入，包括串流寫入，避免快取的不透明輸出被分配給其他工作階段擁有者。
+
+迴歸保護：`tests/unit/muse-session-ownership.test.ts`、`tests/unit/muse-session-ownership-retention.test.ts`、`tests/unit/muse-empty-response-retry.test.ts` 和 `tests/unit/chatcore-semantic-cache.test.ts`。
+
 ## 另請參閱
 
 - [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — 斷路器、冷卻期、模型鎖定

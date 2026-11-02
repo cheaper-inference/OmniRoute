@@ -10,7 +10,7 @@ OmniRoute ਤਿੰਨ ਸ਼੍ਰੇਣੀਆਂ ਦੇ CLI ਟੂਲਾਂ �
 
 | ਪੰਨਾ           | ਰੂਟ                     | ਧਾਰਨਾ                                                                                           | ਗਿਣਤੀ        |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ------------ |
-| **CLI Code's** | `/dashboard/cli-code`   | ਕੋਡਿੰਗ ਟੂਲ ਜਿਨ੍ਹਾਂ ਨੂੰ ਤੁਸੀਂ OmniRoute ਵੱਲ ਇਸ਼ਾਰਾ ਕਰਦੇ ਹੋ (ਕਲਾਇੰਟ → CLI → OmniRoute → ਪ੍ਰਦਾਤਾ)  | 27           |
+| **CLI Code's** | `/dashboard/cli-code`   | ਕੋਡਿੰਗ ਟੂਲ ਜਿਨ੍ਹਾਂ ਨੂੰ ਤੁਸੀਂ OmniRoute ਵੱਲ ਇਸ਼ਾਰਾ ਕਰਦੇ ਹੋ (ਕਲਾਇੰਟ → CLI → OmniRoute → ਪ੍ਰਦਾਤਾ)  | 28           |
 | **CLI Agents** | `/dashboard/cli-agents` | ਖੁਦਮੁਖਤਿਆਰ ਏਜੰਟ ਜਿਨ੍ਹਾਂ ਨੂੰ ਤੁਸੀਂ OmniRoute ਵੱਲ ਇਸ਼ਾਰਾ ਕਰਦੇ ਹੋ (ਉਹੀ ਪ੍ਰਵਾਹ, ਵਧੇਰੇ ਵਿਸ਼ਾਲ ਦਾਇਰਾ) | 11           |
 | **ACP Agents** | `/dashboard/acp-agents` | ਉਹ CLI ਜਿਨ੍ਹਾਂ ਨੂੰ OmniRoute stdio/ACP ਰਾਹੀਂ ਬੈਕਐਂਡ ਵਜੋਂ ਚਲਾਉਂਦਾ ਹੈ (ਉਲਟਾ ਪ੍ਰਵਾਹ)               | ਰਜਿਸਟਰੀ ਵੇਖੋ |
 
@@ -145,7 +145,7 @@ kilo, continue) — ਹੋਸਟ ਉੱਤੇ ਚਲਾਉਣ ਲਈ ਇੱਕ `
 
 ---
 
-## 1. CLI Code ਦਾ ਕੈਟਾਲਾਗ (27 ਟੂਲ)
+## 1. CLI Code ਦਾ ਕੈਟਾਲਾਗ (28 ਟੂਲ)
 
 ਉਹ ਸਾਰੇ ਟੂਲ ਜੋ `/dashboard/cli-code` ਵਿੱਚ ਦਿਖਾਈ ਦਿੰਦੇ ਹਨ। ਜਿਨ੍ਹਾਂ ਦਾ `baseUrlSupport: none` ਹੈ, ਉਹ ਕਸਟਮ ਬੇਸ URL ਦੀ ਬਜਾਏ MITM ਜਾਂ ਮੈਨੁਅਲ ਗਾਈਡ ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤੇ ਜਾਂਦੇ ਹਨ:
 
@@ -172,6 +172,7 @@ kilo, continue) — ਹੋਸਟ ਉੱਤੇ ਚਲਾਉਣ ਲਈ ਇੱਕ `
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -261,16 +262,16 @@ interface ToolBatchStatus {
 
 `configType: "custom"` ਵਾਲੇ ਨਵੇਂ ਟੂਲਾਂ ਲਈ ਸਮਰਪਿਤ ਸੈਟਿੰਗ API ਰੂਟ ਹਨ:
 
-| ਰੂਟ                                         | ਟੂਲ                                                           |
-| ------------------------------------------- | ------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                       |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url ਫਲੈਗ)                                       |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, ਪੁਰਾਤਨ)                        |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ਮੁੱਖ + ਪੁਰਾਤਨ `~/.deepseek` ਸਿੰਕ) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                         |
-| `POST /api/cli-tools/pi-settings`           | Pi ਕੋਡਿੰਗ ਏਜੰਟ                                                |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)         |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + ਸਮਰਪਿਤ `.env` ਕੁੰਜੀ)     |
+| ਰੂਟ                                         | ਟੂਲ                                                               |
+| ------------------------------------------- | ----------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                           |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url ਫਲੈਗ)                                           |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, ਪੁਰਾਤਨ)                            |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ਮੁੱਖ + ਪੁਰਾਤਨ `~/.deepseek` ਸਿੰਕ)     |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                             |
+| `POST /api/cli-tools/pi-settings`           | Pi ਕੋਡਿੰਗ ਏਜੰਟ (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)             |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + ਸਮਰਪਿਤ `.env` ਕੁੰਜੀ)         |
 
 ਸਾਰੇ ਰੂਟ ਗਲਤੀ ਜਵਾਬਾਂ ਲਈ `sanitizeErrorMessage()` ਦੀ ਵਰਤੋਂ ਕਰਦੇ ਹਨ (ਸਖ਼ਤ ਨਿਯਮ #12)।
 
@@ -374,7 +375,7 @@ pip install aider-chat
 cargo install smelt  # Rust-ਅਧਾਰਿਤ
 
 # Pi ਕੋਡਿੰਗ ਏਜੰਟ
-# ਇੰਸਟਾਲੇਸ਼ਨ ਲਈ https://github.com/zechnerj/pi-coding-agent ਵੇਖੋ
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # ਇੰਸਟਾਲੇਸ਼ਨ ਲਈ https://github.com/1jehuang/jcode ਵੇਖੋ
@@ -487,6 +488,38 @@ EOF
 
 > ਥਿੰਕਿੰਗ ਵੇਰੀਐਂਟ ਭੇਜਣ ਲਈ `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > ਵਰਤੋ।
+
+---
+
+#### Pi Coding Agent
+
+ਅਧਿਕਾਰਤ Pi Coding Agent ਪੈਕੇਜ `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` ਨਾਲ ਇੰਸਟਾਲ ਕਰੋ। Pi ਕਸਟਮ ਪ੍ਰਦਾਤਾ `~/.pi/agent/models.json` ਤੋਂ ਪੜ੍ਹਦਾ ਹੈ; ਪੂਰੀ ਏਜੰਟ ਡਾਇਰੈਕਟਰੀ ਹਿਲਾਉਣ ਲਈ `PI_CODING_AGENT_DIR` ਨੂੰ ਪੂਰੇ ਮਾਰਗ (ਜਾਂ `~` ਨਾਲ ਸ਼ੁਰੂ ਹੁੰਦੇ ਮਾਰਗ) 'ਤੇ ਸੈੱਟ ਕਰੋ। ਡੈਸ਼ਬੋਰਡ ਇਸ ਓਵਰਰਾਈਡ ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ। Pi ਕਸਟਮ ਐਂਡਪੁਆਇੰਟਾਂ ਤੋਂ ਮਾਡਲ ਨਹੀਂ ਲੱਭਦਾ, ਇਸ ਲਈ OmniRoute ਚੁਣਿਆ ਮਾਡਲ `models[]` ਵਿੱਚ Pi ਦੀ `openai-completions` API ਅਤੇ OmniRoute ਦੇ OpenAI-ਅਨੁਕੂਲ `/v1` ਐਂਡਪੁਆਇੰਟ ਨਾਲ ਲਿਖਦਾ ਹੈ।
+
+**CLI Tools → Pi** ਵਿੱਚ ਐਂਡਪੁਆਇੰਟ, API ਕੁੰਜੀ ਅਤੇ ਮਾਡਲ ਚੁਣੋ, ਪ੍ਰਦਾਤਾ ਪੂਰਵਦਰਸ਼ਨ ਦੀ ਜਾਂਚ ਕਰੋ ਅਤੇ ਲਾਗੂ ਕਰੋ। ਪੂਰਵਦਰਸ਼ਨ ਪ੍ਰਦਾਤਾ ਦਾ ਟੁਕੜਾ ਹੈ: Pi ਨੂੰ ਹੱਥੀਂ ਸੰਰਚਿਤ ਕਰਦੇ ਸਮੇਂ `providers.omniroute` ਨੂੰ ਆਪਣੇ ਮੌਜੂਦਾ `models.json` ਵਿੱਚ ਮਿਲਾਓ ਤਾਂ ਕਿ ਹੋਰ ਪ੍ਰਦਾਤਾ ਅਤੇ ਸੈਟਿੰਗਾਂ ਅਖੰਡ ਰਹਿਣ।
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+ਜਦੋਂ ਤੁਸੀਂ `/model` ਖੋਲ੍ਹਦੇ ਹੋ ਤਾਂ Pi `models.json` ਮੁੜ ਲੋਡ ਕਰਦਾ ਹੈ। ਆਪਣੇ ਚੁਣੇ ਪ੍ਰਦਾਤਾ ID ਅਤੇ ਮਾਡਲ ID ਨਾਲ ਸੰਰਚਿਤ ਰੂਟ ਦੀ ਜਾਂਚ ਕਰੋ:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+ਹਵਾਲੇ: [Pi ਮਾਡਲ ਅਤੇ ਕਸਟਮ ਪ੍ਰਦਾਤਾ](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi ਇੰਸਟਾਲੇਸ਼ਨ ਹਦਾਇਤਾਂ](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

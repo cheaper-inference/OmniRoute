@@ -405,7 +405,9 @@ OpenAI 相容 multipart 端點進行轉錄,所選的聊天模型則
 
 **儀表板 → 設定 → 安全性 → PII 遮罩** 選擇要遮罩的_對象_。它並不負責開啟遮罩：開關仍是 `PII_REDACTION_ENABLED`（請求）與 `PII_RESPONSE_SANITIZATION`（回應 + SSE），兩者預設皆關閉。
 
-- **各類型選擇** — 內建 id 列於 `src/shared/constants/piiTypes.ts`（`PII_BUILTIN_TYPES`）。未設定表示涵蓋所有類型（即此設定出現之前的行為）。請求引擎的 `ssn_us` 模式會對應到 `ssn`。範本（Minimal、Standard、Financial、Brazilian、USA、Full）只會填入 UI 中的核取方塊。
+- **各類型選擇** — 內建 id 列於 `src/shared/constants/piiTypes.ts`（`PII_BUILTIN_TYPES`）。未設定表示涵蓋所有類型（即此設定出現之前的行為）。請求引擎的 `ssn_us` 模式會對應到 `ssn`。範本（Minimal、Standard、Financial、Brazilian、USA、 GDPR、 POPIA、Full）只會填入 UI 中的核取方塊。
+- **GDPR 和 POPIA 識別碼**——十二個內建 ID，涵蓋歐盟和南非的個人識別碼（見下表）。其規則運算式、驗證器和司法管轄區標籤集中在 `src/shared/utils/piiPatterns.ts` 一張表中，由回應清理器（`src/lib/piiSanitizer.ts`）和請求遮罩器（`src/shared/utils/inputSanitizer.ts`）共同使用。只有驗證器接受符合結果時才會遮罩；單純一串數字始終不夠。如果操作員在這些 ID 出現前已儲存縮小後的選擇，則在勾選新 ID 之前會保持原有行為。
+
 - **自訂模式** — 最多 20 個 regex 或萬用字元模式（`*` = 最多 64 個非空白字元，`?` = 一個字元）。符合的內容會變成 `[CUSTOM_REDACTED]`。每個模式都會經過 `compilePiiCustomPattern()`（`src/shared/utils/piiCustomPatterns.ts`）：最多 500 個字元，旗標僅限 `g i m s u`，必須能成功編譯，必須通過 `safe-regex` 檢查（災難性回溯），且不得符合空字串或遮罩佔位符。未通過的模式在儲存與測試時都會被拒絕；已儲存的列若未通過檢查，執行時期會被略過而不予編譯。自訂模式僅在遮罩開啟時執行。
 - **偵測計數器** — 各類型計數（絕不記錄符合的值），保存在記憶體中，重新啟動時重置（`src/lib/pii/piiDetectionStats.ts`）。僅在遮罩開啟時才會增加。
 
@@ -418,6 +420,25 @@ OpenAI 相容 multipart 端點進行轉錄,所選的聊天模型則
 | `POST` | `/api/settings/pii/test` | 針對最多 8 KB 的樣本對單一模式進行試跑（dry-run）；不會儲存任何內容 |
 
 三個方法皆需要管理驗證（management auth），並使用 Zod 驗證請求主體（`src/shared/validation/schemas/piiSettings.ts`）。
+
+#### GDPR（歐盟）和 POPIA（南非）識別碼
+
+| ID                  | 識別碼                | 驗證                                                                                  |
+| ------------------- | --------------------- | ------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                  | 已知國家、該國家的精確長度、ISO 13616 MOD-97-10                                       |
+| `eu_vat`            | 歐盟 VAT 號碼         | 已知會員國前綴及該國號碼格式（不查詢 VIES）                                           |
+| `es_dni_nie`        | 西班牙 DNI / NIE      | 檢查字母（數值 mod 23）；NIE 為 `X/Y/Z` + 7 位數字                                    |
+| `it_codice_fiscale` | 義大利 Codice Fiscale | 根據奇數/偶數位置表計算檢查字母                                                       |
+| `pl_pesel`          | 波蘭 PESEL            | 加權總和檢查碼及編碼出生月/日的合理範圍                                               |
+| `nl_bsn`            | 荷蘭 BSN              | 11-proof 檢查（權重 9..2, -1）                                                        |
+| `de_steuer_id`      | 德國 Steuer-ID        | ISO 7064 Mod 11,10 及數字結構規則（首位不能為 0）                                     |
+| `se_personnummer`   | 瑞典 personnummer     | 對最後十位數字執行 Luhn 檢查，並檢查出生日期合理性（10 或 12 位）                     |
+| `za_id`             | 南非身分證號碼        | 對全部 13 位數字執行 Luhn 檢查、有效出生月/日、公民身分位為 0 或 1                    |
+| `za_phone`          | 南非電話號碼          | `+27` / `27` 前綴，或包含空格或連字號的國內 `0..` 格式                                |
+| `za_vat`            | 南非 VAT 號碼         | 以 `4` 開頭的 10 位數字，**而且**前面的 48 個字元內包含 "VAT" / "BTW"                 |
+| `za_tax_ref`        | 南非稅務編號          | 以 `0`-`3` 開頭的 10 位數字、Luhn 檢查，**而且**前面的 48 個字元內包含 "tax" / "SARS" |
+
+純數字格式可能與訂單號碼、建置號碼和時間戳記衝突，因此最弱的格式（`za_vat`、`za_tax_ref`）需要關鍵字提示；單純十位數字的 `0..` 不會被視為南非電話號碼。含空格的 IBAN（`GB29 NWBK ...`）不會比對成功。串流路徑僅在目前區塊內尋找提示。這些 ID 位於通用電話模式之前，因此經驗證的識別碼保留自己的預留位置（`[IBAN_REDACTED]`、`[NL_BSN_REDACTED]`、...）。`gdpr` 和 `popia` 範本分別選擇歐盟和南非 ID。遮罩本身仍須主動啟用（硬性規則 #20）：這裡沒有任何內容改變功能旗標的預設值。
 
 ### Prompt Injection（`promptInjection.ts`）
 

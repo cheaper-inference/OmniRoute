@@ -163,9 +163,10 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 - **`publicPolicy`** (`policies/public.ts`) — હંમેશા `allow({ kind: "anonymous", id: "anonymous" })` પરત કરે છે.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer કાઢે છે, `validateApiKey()` દ્વારા તેને માન્ય કરે છે. અસરકારક `REQUIRE_API_KEY` ફીચર ફ્લૅગ અક્ષમ હોય ત્યારે જ અનામી ઍક્સેસ પર આગળ વધે છે. અસરકારક ફ્લૅગનું નિરાકરણ `isRequireApiKeyEnabled()` (`DB ફીચર ફ્લૅગ ઓવરરાઇડ > process.env.REQUIRE_API_KEY > ડિફૉલ્ટ`) દ્વારા થાય છે, જેથી ડૅશબોર્ડ ફીચર ફ્લૅગ્સ અને એન્વાયર્નમેન્ટ વેરિએબલ્સ `/api/v1/*`, `/api/v1beta/*` અને ઉપનામોને સુસંગત રીતે નિયંત્રિત કરે; રિઝોલ્વર નિષ્ફળતાઓ સુરક્ષિત રીતે ઍક્સેસ નકારે છે. ક્લાયન્ટ API રૂટ્સ પર ડૅશબોર્ડ-સેશન રિક્વેસ્ટ્સને મંજૂરી આપે છે (ડૅશબોર્ડ મૉડલ કૅટલૉગ દ્વારા ઉપયોગમાં લેવાતા `/api/v1/models` સહિત).
+  Entra ID SSO સક્રિય હોય ત્યારે, રચનાની દૃષ્ટિએ Entra ટોકન જેવું Bearer (ત્રણ base64url ભાગો, `RS*` અલ્ગોરિધમ, `kid`) `validateApiKey()` **પહેલાં** SSO શાખામાં પ્રક્રિયા પામે છે અને તેનો નિર્ણય અંતિમ હોય છે. તે ક્યારેય API કી તપાસવાના માર્ગે કે અનામી પ્રવેશ સુધી ઉતારતી શાખામાં આગળ વધતું નથી; તેથી ઓળખ પ્રદાતાની સેવા બંધ પડે તો પણ ખુલ્લો પ્રવેશ મળી શકતો નથી. સ્થિર API કીઓ પર અસર થતી નથી. [Entra ID SSO](../security/ENTRA_SSO.md) જુઓ.
 - **`managementPolicy`** (`policies/management.ts`) — ડૅશબોર્ડ સેશન, આંતરિક મૉડલ-સિંક રિક્વેસ્ટ્સ (`/api/providers/[name]/(sync-models|models)` સામે મેળ ખાતી) સ્વીકારે છે અથવા જો `isAuthRequired()` false પરત કરે તો સંપૂર્ણપણે અવગણે છે. Bearer ટોકન હાજર પરંતુ અમાન્ય હોય ત્યારે 403 (`AUTH_001`), અન્યથા 401 પરત કરે છે. કોઈપણ પ્રમાણીકરણ શાખા પહેલાં રૂટ-ગાર્ડ સ્તરો (LOCAL_ONLY / ALWAYS_PROTECTED) પણ લાગુ કરે છે — [રૂટ ગાર્ડ સ્તરો](../security/ROUTE_GUARD_TIERS.md) જુઓ. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` માં રહેલા LOCAL_ONLY પાથ્સ (હાલમાં: `/api/mcp/`) ને Bearer કી `manage` સ્કોપ ધરાવતી હોય ત્યારે non-loopback પરથી ઍક્સેસ કરી શકાય છે; અન્ય તમામ LOCAL_ONLY પાથ્સ સ્કોપને ધ્યાનમાં લીધા વિના strict-loopback જ રહે છે.
 
-સફળ પૉલિસી `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` સાથે `AuthSubject` પરત કરે છે. ડાઉનસ્ટ્રીમ હૅન્ડલર્સ પ્રમાણીકરણ લૉજિક ફરીથી ચલાવવાને બદલે `src/server/authz/assertAuth.ts` માં `assertAuth(request, "CLIENT_API")` દ્વારા તેને વાંચી શકે છે.
+સફળ પૉલિસી `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` સાથે `AuthSubject` પરત કરે છે. ડાઉનસ્ટ્રીમ હૅન્ડલર્સ પ્રમાણીકરણ લૉજિક ફરીથી ચલાવવાને બદલે `src/server/authz/assertAuth.ts` માં `assertAuth(request, "CLIENT_API")` દ્વારા તેને વાંચી શકે છે.
 
 ## જાહેર રૂટ્સની સૂચિ
 
@@ -312,8 +313,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 પ્રમાણિત વિનંતીઓ માટે અપસ્ટ્રીમ (હેન્ડલર-સાઇડ) વિનંતીના હેડર્સમાં નીચેના પણ સામેલ હોય છે:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (વૈકલ્પિક)
 x-omniroute-auth-scopes:    અલ્પવિરામથી અલગ કરેલી સૂચિ
 ```

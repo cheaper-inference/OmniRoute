@@ -5,8 +5,8 @@
 ---
 
 > **Verze:** v3.8.44
-> **Poslední aktualizace:** 2026-09-16
-> **Pro koho je určeno:** Inženýři, kteří přidávají, udržují nebo ladí vložené služby (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Poslední aktualizace:** 2026-10-28
+> **Pro koho:** Inženýři, kteří přidávají, udržují nebo ladí vestavěné služby (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Vložené služby jsou lokálně nainstalované pomocné procesní nástroje, které OmniRoute instaluje, spravuje a
 zpřístupňuje jako plnohodnotné cíle směrování. Na rozdíl od externích poskytovatelů (kteří jsou dostupní přes internet
@@ -31,7 +31,7 @@ pomocí API klíčů) běží vložené služby na stejném počítači jako Omn
 
 ### Proč integrované služby?
 
-Je integrováno sedm služeb:
+Vestavěno je osm služeb:
 
 | Služba          | npm balíček                                  | Výchozí port | Účel                                                                                                                                                                                                                                                                                                                                                                                          |
 | --------------- | -------------------------------------------- | :----------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,8 +42,9 @@ Je integrováno sedm služeb:
 | **Dario**       | `@askalf/dario`                              |     3456     | Proxy předplatného Claude — alternativa/záložní řešení ke CLIProxyAPI pro provoz ve formátu Claude Code; vložený klíč se stane `DARIO_ADMIN_TOKEN`, který zabezpečuje jeho řídicí rovinu OAuth `/admin/*`                                                                                                                                                                                     |
 | **open-wa**     | `@open-wa/wa-automate`                       |     8323     | Automatizace WhatsApp Web (bezobslužný Chromium prostřednictvím Puppeteer). Pouze se spravovaným životním cyklem — není cílem směrování.                                                                                                                                                                                                                                                      |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                         |    20135     | Doprovodná služba pro kompresi promptů — skutečný model LLMLingua-2 ONNX (port algoritmu společnosti Microsoft pro JS/TS). `open-sse/services/compression/engines/llmlingua/index.ts` odesílá požadavky `/compress` přes HTTP této službě a při její nedostupnosti přechází na backend pracovního vlákna běžící v rámci procesu. Pouze se spravovaným životním cyklem — není cílem směrování. |
+| **sing-box**    | Binární soubor vydání z GitHubu (`singbox`)  |    20140     | Pomocný proces TPROXY zajišťující zachytávání transparentním proxy v `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Instalátor stahuje vydání s pevně určenou verzí a ověřeným kontrolním součtem. Spravuje se pouze životní cyklus; nejde o cíl směrování ani o proxy pro LLM.                                                                                                                |
 
-Všech sedm používá stejný model dohledu:
+Všech osm používá stejný model dohledu:
 
 - OmniRoute je instaluje do `DATA_DIR/services/{name}/` (izolovaně od vlastního souboru `package.json` služby OmniRoute)
 - OmniRoute je spouští a monitoruje jako podřízené procesy
@@ -586,7 +587,27 @@ se použije záložní backend pracovního vlákna běžící v rámci procesu
 
 ---
 
-### 4.8 Reverzní proxy (vložený řídicí panel 9Router)
+### 4.8 Koncové body sing-box (8 tras)
+
+sing-box má stejnou strukturu koncových bodů jako Mux: žádná trasa `rotate-key` ani vkládání API klíče (`needsApiKey: false` v `bootstrap.ts`). Spravuje se jen jeho životní cyklus; nikdy nejde o poskytovatele směrování nebo LLM. `install()` stáhne oficiální binární soubor vydání z GitHubu (`SagerNet/sing-box`) pro pevně určenou verzi (`SINGBOX_PINNED_VERSION` v `src/lib/services/installers/singbox.ts`) a ještě před zápisem na disk ověří jeho SHA256 proti kontrolnímu součtu vloženému do stejného souboru. Každá jiná požadovaná verze je odmítnuta.
+
+| Metoda | Cesta                                        | Popis                                                                       |
+| ------ | -------------------------------------------- | --------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Stáhnout a ověřit pevně určené vydání sing-box                              |
+| `POST` | `/api/services/singbox/start`                | Spustit sing-box (`sing-box run -c config.json`)                            |
+| `POST` | `/api/services/singbox/stop`                 | Zastavit sing-box                                                           |
+| `POST` | `/api/services/singbox/restart`              | Restartovat sing-box                                                        |
+| `POST` | `/api/services/singbox/update`               | Znovu ověřit nebo přeinstalovat pevně určené vydání                         |
+| `GET`  | `/api/services/singbox/status`               | Aktuální stav a stav v databázi                                             |
+| `POST` | `/api/services/singbox/auto-start`           | Zapnout či vypnout automatické spuštění                                     |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Zapnout či vypnout automatický restart převzatého, již existujícího procesu |
+| `GET`  | `/api/services/singbox/logs`                 | Sledovat konec protokolu SSE přes sdílenou dynamickou trasu `[name]/logs`   |
+
+**Zapojení TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) zapíše `config.json` a spustí správce dříve, než `applyTproxy()` nainstaluje pravidla firewallu TPROXY. Pokud správce chybí nebo nedosáhne stavu `running`, chyba se nyní zaznamená na úrovni error místo tichého potlačení. Obsluha tak pozná, že pravidla TPROXY byla použita, přestože za nimi nefunguje naslouchající proces.
+
+---
+
+### 4.9 Reverzní proxy (vložený řídicí panel 9Router)
 
 Řídicí panel vkládá webové uživatelské rozhraní 9Router do prvku iframe
 prostřednictvím interního reverzního proxy na adrese:

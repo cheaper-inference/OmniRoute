@@ -314,12 +314,12 @@ kwenye njia ya usimamizi inayobadilisha data hupokea HTTP 403
 Daraja hilo ni `scopeSatisfies`. Halirejelei jedwali la MCP, na kilinganishi cha MCP
 pia hakirejelei daraja hilo.
 
-| Nafasi ya majina            | Kitambulisho                                                              | Kikaguzi                          | Kufaulu kunaruhusu                                                 |
-| :-------------------------- | :------------------------------------------------------------------------ | :-------------------------------- | :----------------------------------------------------------------- |
-| Usimamizi wa ufunguo wa API | `api_keys.scopes`                                                         | `hasManageScope`                  | REST ya usimamizi kwa ufunguo huo wa Bearer                        |
-| Nyongeza ya ufunguo wa API  | safu ileile, mfuatano mmoja unaolingana kikamilifu                        | kisaidizi kilichotajwa hapa chini | Uwezo huo mmoja pekee                                              |
-| Wigo wa zana za MCP         | safu ileile, vinginevyo `_meta` ya MCP, vinginevyo `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                    | Zana hiyo, mara utekelezaji wa masharti unapowashwa                |
-| Tokeni ya ufikiaji          | `oma_live_…`                                                              | `scopeSatisfies`                  | Njia ya usimamizi ambayo mbinu na njia yake zinahitaji daraja hilo |
+| Nafasi ya majina            | Kitambulisho                                                                                   | Kikaguzi                          | Kufaulu kunaruhusu                                                 |
+| :-------------------------- | :--------------------------------------------------------------------------------------------- | :-------------------------------- | :----------------------------------------------------------------- |
+| Usimamizi wa ufunguo wa API | `api_keys.scopes`                                                                              | `hasManageScope`                  | REST ya usimamizi kwa ufunguo huo wa Bearer                        |
+| Nyongeza ya ufunguo wa API  | safu ileile, mfuatano mmoja unaolingana kikamilifu                                             | kisaidizi kilichotajwa hapa chini | Uwezo huo mmoja pekee                                              |
+| Wigo wa zana za MCP         | array hiyo hiyo, vinginevyo `_meta` ya MCP (HTTP/SSE pekee), vinginevyo `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                    | Zana hiyo, mara utekelezaji wa masharti unapowashwa                |
+| Tokeni ya ufikiaji          | `oma_live_…`                                                                                   | `scopeSatisfies`                  | Njia ya usimamizi ambayo mbinu na njia yake zinahitaji daraja hilo |
 
 Uundaji wa kila kitambulisho umeelezwa katika
 [Uthibitishaji wa Usimamizi](../guides/MANAGEMENT-AUTH.md).
@@ -368,7 +368,9 @@ Utekelezaji wa masharti umezimwa isipokuwa `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (
 `false`). Ukiwa umezimwa, `evaluateToolScopes` huruhusu mwito na kuruka
 katalogi. Ukiwa umewashwa, HTTP hutumia `api_keys.scopes` ya ufunguo wa Bearer kama
 `authInfo` (angalia [Ufungamanishaji wa wigo wa HTTP kwa kila ufunguo](#per-key-http-scope-binding-7895)).
-Wakati hakuna wigo wa ufunguo unaopatikana, seti iliyotolewa hujaribu `_meta` ya MCP, kisha
+Pale hakuna maeneo ya key yanayotatua, seti iliyotolewa inashuka hadi `_meta` ya MCP (inazingatiwa
+tu kwa watazaji wa HTTP/SSE, ndani ya muktadha wa uthibitishaji wa HTTP; `_meta` ya mtumiaji wa
+stdio haizingatiwi kwa sababu mteja huidhibiti na hana kitambulisho cha kila mtumiaji), kisha
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Wigo wa tokeni ya ufikiaji
@@ -466,8 +468,7 @@ na kuzipitisha kwa `transport.handleRequest(req, { authInfo })` ya MCP SDK, ili
 `_meta` na hali mbadala ya env ya `OMNIROUTE_MCP_SCOPES` — hii inajaza tu chanzo hicho cha kwanza,
 chenye kipaumbele cha juu zaidi, ambacho awali hakikuwa kikijazwa kupitia HTTP. Wakati hakuna ufunguo wa API unaotambuliwa
 (hakuna kichwa, ufunguo batili), `authInfo` hubaki `undefined` na utambuzi huendelea kwenye
-msururu uliopo wa `meta`/env bila mabadiliko. stdio haina utambulisho wa kila mpigaji (angalia
-`mcpCallerIdentity.ts`) na haiathiriki — hubaki kwenye msururu wa hali mbadala wa `_meta`/env.
+msururu uliopo wa `meta`/env bila mabadiliko. stdio haina utambulisho kwa kila mtumizi (tazama `mcpCallerIdentity.ts`) na haathariwi na ufungashaji wa kila ufunguo — inaruka hatua ya `_meta` (`_meta` inaheshimiwa ndani ya muktadha wa uthibitisho wa HTTP pekee, #15159) na hutatua kutoka kwenye ufunguo wa mazingira `OMNIROUTE_MCP_SCOPES` pekee.
 
 **Utekelezaji unalazimishwa kwa wapigaji wa HTTP/SSE wenye mawanda finyu bila kujali
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Thamani chaguo-msingi ya `false` ya `OMNIROUTE_MCP_ENFORCE_SCOPES` ni salama tu

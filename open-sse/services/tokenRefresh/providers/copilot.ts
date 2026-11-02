@@ -3,6 +3,7 @@
 // provenance notes (ported idea from KooshaPari's PR #7338, redone on tip).
 import { getGitHubCopilotRefreshHeaders } from "../../../config/providerHeaderProfiles.ts";
 import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { stripTrailingSlashes } from "../../../utils/urlSanitize.ts";
 
 /**
  * Refresh GitHub Copilot token using a GitHub access token.
@@ -20,7 +21,7 @@ export async function refreshCopilotToken(
   baseUrl: string = "https://api.github.com"
 ) {
   try {
-    const tokenUrl = `${baseUrl.replace(/\/+$/, "")}/copilot_internal/v2/token`;
+    const tokenUrl = `${stripTrailingSlashes(baseUrl)}/copilot_internal/v2/token`;
     const response = await runWithProxyContext(proxyConfig, () =>
       fetch(tokenUrl, {
         headers: getGitHubCopilotRefreshHeaders(`token ${githubAccessToken}`),

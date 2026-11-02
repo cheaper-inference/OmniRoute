@@ -314,12 +314,12 @@ Zugriffstoken an eine verändernde Verwaltungsroute senden, erhalten HTTP 403:
 Diese Rangfolge wird durch `scopeSatisfies` bestimmt. Diese Funktion berücksichtigt weder die MCP-Tabelle noch
 berücksichtigt der MCP-Matcher diese Rangfolge.
 
-| Namensraum              | Anmeldedaten                                                    | Prüfer                    | Eine erfolgreiche Prüfung erlaubt                                  |
-| :---------------------- | :-------------------------------------------------------------- | :------------------------ | :----------------------------------------------------------------- |
-| API-Schlüsselverwaltung | `api_keys.scopes`                                               | `hasManageScope`          | Verwaltungs-REST für diesen Bearer-Schlüssel                       |
-| Additiver API-Schlüssel | dasselbe Array, eine exakte Zeichenfolge                        | der unten genannte Helper | Nur diese eine Fähigkeit                                           |
-| MCP-Tool-Scopes         | dasselbe Array, sonst MCP `_meta`, sonst `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | Dieses Tool, sobald die Durchsetzung aktiviert ist                 |
-| Zugriffstoken           | `oma_live_…`                                                    | `scopeSatisfies`          | Die Verwaltungsroute, deren Methode und Pfad diesen Rang erfordern |
+| Namensraum              | Anmeldedaten                                                                   | Prüfer                    | Eine erfolgreiche Prüfung erlaubt                                  |
+| :---------------------- | :----------------------------------------------------------------------------- | :------------------------ | :----------------------------------------------------------------- |
+| API-Schlüsselverwaltung | `api_keys.scopes`                                                              | `hasManageScope`          | Verwaltungs-REST für diesen Bearer-Schlüssel                       |
+| Additiver API-Schlüssel | dasselbe Array, eine exakte Zeichenfolge                                       | der unten genannte Helper | Nur diese eine Fähigkeit                                           |
+| MCP-Tool-Scopes         | dasselbe Array, sonst MCP `_meta` (nur HTTP/SSE), sonst `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | Dieses Tool, sobald die Durchsetzung aktiviert ist                 |
+| Zugriffstoken           | `oma_live_…`                                                                   | `scopeSatisfies`          | Die Verwaltungsroute, deren Methode und Pfad diesen Rang erfordern |
 
 Das Erstellen der einzelnen Anmeldedaten wird unter
 [Verwaltungsauthentifizierung](../guides/MANAGEMENT-AUTH.md) behandelt.
@@ -368,8 +368,7 @@ Die Durchsetzung ist deaktiviert, sofern `OMNIROUTE_MCP_ENFORCE_SCOPES=true` nic
 `false`). Solange sie deaktiviert ist, erlaubt `evaluateToolScopes` den Aufruf und überspringt den
 Katalog. Wenn sie aktiviert ist, verwendet HTTP die `api_keys.scopes` des Bearer-Schlüssels als
 `authInfo` (siehe [HTTP-Scope-Bindung pro Schlüssel](#per-key-http-scope-binding-7895)).
-Wenn keine Schlüssel-Scopes aufgelöst werden, fällt die gewährte Menge zunächst auf MCP `_meta` und anschließend auf
-`OMNIROUTE_MCP_SCOPES` zurück.
+Wenn keine Schlüssel-Scopes aufgelöst werden, fällt die gewährte Menge auf MCP `_meta` zurück (nur für HTTP/SSE-Aufrufer innerhalb eines HTTP-Authentifizierungskontexts berücksichtigt; die `_meta` eines stdio-Aufrufers werden ignoriert, da der Client sie kontrolliert und sie keine aufruferspezifische Identität enthalten), danach auf `OMNIROUTE_MCP_SCOPES`.
 
 #### Zugriffstoken-Scopes
 
@@ -467,8 +466,7 @@ und übergibt sie an `transport.handleRequest(req, { authInfo })` des MCP SDK, s
 `_meta` und dem Env-Fallback `OMNIROUTE_MCP_SCOPES` — dadurch wird lediglich diese erste Quelle
 mit der höchsten Priorität befüllt, die zuvor über HTTP keine Daten erhielt. Wenn kein API-Schlüssel ermittelt wird
 (kein Header, ungültiger Schlüssel), bleibt `authInfo` auf `undefined` gesetzt, und die Auflösung greift unverändert auf die
-bestehende Meta-/Env-Kette zurück. stdio besitzt keine aufruferspezifische Identität (siehe
-`mcpCallerIdentity.ts`) und ist nicht betroffen — es verwendet weiterhin die `_meta`-/Env-Fallback-Kette.
+bestehende Meta-/Env-Kette zurück. stdio besitzt keine aufruferspezifische Identität (siehe `mcpCallerIdentity.ts`) und wird durch die Bindung pro Schlüssel nicht beeinflusst — es überspringt den `_meta`-Schritt (`_meta` wird nur innerhalb eines HTTP-Authentifizierungskontexts berücksichtigt, #15159) und ermittelt die Scopes ausschließlich aus der Umgebungsvariablen `OMNIROUTE_MCP_SCOPES`.
 
 **Die Durchsetzung wird für HTTP/SSE-Aufrufer mit eingeschränkten Berechtigungsbereichen unabhängig von
 `OMNIROUTE_MCP_ENFORCE_SCOPES` erzwungen.** Dass `OMNIROUTE_MCP_ENFORCE_SCOPES` standardmäßig auf `false` gesetzt ist, ist nur

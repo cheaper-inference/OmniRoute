@@ -42,6 +42,10 @@ endpoint przez zmienne środowiskowe (nie ma flagi `--base-url`):
 
 > Zmienne środowiskowe są odczytywane **raz przy starcie** — po zmianie zrestartuj Claude Code.
 
+Jeśli dane uwierzytelniające są rotowane zamiast mieć stałą wartość, ustaw `apiKeyHelper` w `~/.claude/settings.json` na polecenie wypisujące bieżące dane uwierzytelniające na stdout. Claude Code domyślnie przechowuje wynik w pamięci podręcznej przez pięć minut (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` zmienia ten czas) i wysyła wartość zarówno w `Authorization: Bearer`, jak i `x-api-key`. Skrypt musi wypisać wyłącznie dane uwierzytelniające — dodatkowy baner powoduje błąd mechanizmu pomocniczego w v2.1.227+.
+
+Tak działa Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` wypisuje krótkotrwały token dostępu Entra, który OmniRoute weryfikuje zamiast klucza API. Zobacz [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` ustawia to wszystko za Ciebie: rozwiązuje bazowy URL + token
 z aktywnego kontekstu (więc `omniroute connect <vps>`, a potem `omniroute launch`
 po prostu działa), sprawdza zdrowie serwera i execuje `claude`.

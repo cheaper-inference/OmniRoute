@@ -163,7 +163,7 @@ OmniRoute eksponerer 6 A2A-færdigheder, der er forbundet i `src/lib/a2a/taskExe
 | Tilstandsrapport    | `health-report`      | Samler status for circuit breaker, nedkøling og spærring pr. udbyder                                                                                       | health, resilience         | "Vis tilstandsstatus for alle udbydere"     |
 | Vis funktioner      | `list-capabilities`  | Returnerer hele kataloget med 45 agentfærdigheder (23 API + 21 CLI + 1 konfiguration) som en markdown-tabel med rå SKILL.md-URL'er til kontekstindsættelse | catalog, discovery, skills | "Vis alle OmniRoute-funktioner"             |
 
-> Agentkortet bør holdes synkroniseret med det aktive katalog med 377 udbydere. Antallet af udbydere samt metadata om gratis adgang og adgang uden godkendelse hentes fra runtime-registreringsdatabasen.
+> Agentkortet bør holdes synkroniseret med det aktive katalog med 380 udbydere. Antallet af udbydere samt metadata om gratis adgang og adgang uden godkendelse hentes fra runtime-registreringsdatabasen.
 
 ### Detaljer om færdigheden `list-capabilities`
 
@@ -215,7 +215,7 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
    };
    ```
 
-3. **Eksponér på agentkortet:** Tilføj følgende til `skills`-arrayet i `src/app/.well-known/agent.json/route.ts`:
+3. **Eksponér i agentkortet:** Tilføj til arrayet `skills` i `src/lib/a2a/agentCardMetadata.ts` (som deles af `/.well-known/agent.json` og `/.well-known/agent-card.json`):
 
    ```json
    {

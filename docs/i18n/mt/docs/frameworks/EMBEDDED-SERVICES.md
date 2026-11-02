@@ -5,8 +5,8 @@
 ---
 
 > **Verżjoni:** v3.8.44
-> **Aġġornat l-aħħar:** 2026-09-16
-> **Udjenza:** Inġiniera li jżidu, iżommu, jew jiddebaggjaw servizzi inkorporati (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Aġġornat l-aħħar:** 2026-10-28
+> **Għal min:** Inġiniera li jżidu, iżommu jew jiddijanjostikaw problemi fis-servizzi inkorporati (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Is-servizzi inkorporati huma għodod sidecar ta’ proċessi installati lokalment li OmniRoute jinstalla, jissorvelja, u
 jesponi bħala miri tar-routing tal-ewwel klassi. Għall-kuntrarju tal-fornituri esterni (li jiġu aċċessati permezz tal-internet
@@ -31,7 +31,7 @@ bl-użu ta’ API keys), is-servizzi inkorporati jitħaddmu fuq l-istess magna b
 
 ### Għaliex servizzi integrati?
 
-Hemm seba' servizzi integrati:
+Hemm tmien servizzi inkorporati:
 
 | Servizz         | Pakkett npm                                      | Port predefinit | Għan                                                                                                                                                                                                                                                                                                                                                                                                           |
 | --------------- | ------------------------------------------------ | :-------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,8 +42,9 @@ Hemm seba' servizzi integrati:
 | **Dario**       | `@askalf/dario`                                  |      3456       | Proxy għall-abbonament ta' Claude — alternattiva/failover għal CLIProxyAPI għal traffiku fl-għamla ta' Claude Code; iċ-ċavetta injettata ssir `DARIO_ADMIN_TOKEN`, li tikkontrolla l-aċċess għall-pjan ta' kontroll OAuth `/admin/*` tiegħu                                                                                                                                                                    |
 | **open-wa**     | `@open-wa/wa-automate`                           |      8323       | Awtomazzjoni ta' WhatsApp Web (Chromium mingħajr interfaċċa grafika permezz ta' Puppeteer). Jiġi ġestit biss iċ-ċiklu tal-ħajja tiegħu — mhuwiex destinazzjoni tar-routing.                                                                                                                                                                                                                                    |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                             |      20135      | Servizz sidecar għall-kompressjoni tal-prompts — mudell ONNX reali LLMLingua-2 (port JS/TS tal-algoritmu ta' Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` jibgħat `/compress` lejh permezz ta' HTTP, u jaqleb għall-backend tal-worker thread fl-istess proċess meta s-sidecar ma jkunx disponibbli. Jiġi ġestit biss iċ-ċiklu tal-ħajja tiegħu — mhuwiex destinazzjoni tar-routing. |
+| **sing-box**    | Binarju tar-rilaxx fuq GitHub (`singbox`)        |      20140      | Proċess anċillari TPROXY li jappoġġja l-interċettazzjoni bi proxy trasparenti ta’ `applyTproxy()` (`src/mitm/tproxy/setup.ts`). L-installatur iniżżel ir-rilaxx fiss u jivverifika ċ-checksum. Jiġi ġestit biss iċ-ċiklu tal-ħajja: mhuwiex destinazzjoni tar-routing u ma jipproksjax talbiet LLM.                                                                                                            |
 
-Is-seba' kollha jsegwu l-istess mudell ta' superviżjoni:
+It-tmienja kollha jsegwu l-istess mudell ta’ superviżjoni:
 
 - OmniRoute jinstallahom taħt `DATA_DIR/services/{name}/` (iżolati mill-`package.json` ta' OmniRoute stess)
 - OmniRoute iniedihom u jimmonitorjahom bħala proċessi sekondarji
@@ -580,7 +581,27 @@ jaqa’ lura fuq il-backend tal-worker thread fil-proċess (`./worker.ts`).
 
 ---
 
-### 4.8 Proxy invers (inkorporazzjoni tad-dashboard ta’ 9Router)
+### 4.8 Endpoints ta’ sing-box (8 rotot)
+
+sing-box għandu l-istess struttura tal-endpoints bħal Mux: l-ebda rotta `rotate-key` u l-ebda inserzjoni ta’ ċavetta API (`needsApiKey: false` f’`bootstrap.ts`). Jiġi ġestit biss iċ-ċiklu tal-ħajja; qatt mhu fornitur tar-routing jew LLM. `install()` iniżżel il-binarju tar-rilaxx uffiċjali minn GitHub (`SagerNet/sing-box`) għall-verżjoni fissa (`SINGBOX_PINNED_VERSION` f’`src/lib/services/installers/singbox.ts`) u jivverifika s-SHA256 tiegħu maċ-checksum inkorporat fl-istess fajl qabel jiktbu fuq id-diska. Kull verżjoni oħra mitluba tiġi miċħuda.
+
+| Metodu | Mogħdija                                     | Deskrizzjoni                                                                             |
+| ------ | -------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Niżżel u vverifika r-rilaxx fiss ta’ sing-box                                            |
+| `POST` | `/api/services/singbox/start`                | Ibda sing-box (`sing-box run -c config.json`)                                            |
+| `POST` | `/api/services/singbox/stop`                 | Waqqaf sing-box                                                                          |
+| `POST` | `/api/services/singbox/restart`              | Erġa’ ibda sing-box                                                                      |
+| `POST` | `/api/services/singbox/update`               | Erġa’ vverifika jew installa mill-ġdid ir-rilaxx fiss                                    |
+| `GET`  | `/api/services/singbox/status`               | L-istatus kurrenti u l-istatus fid-DB                                                    |
+| `POST` | `/api/services/singbox/auto-start`           | Ixgħel jew itfi l-bidu awtomatiku                                                        |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Ixgħel jew itfi l-bidu mill-ġdid awtomatiku għal proċess adottat li kien diġà jeżisti    |
+| `GET`  | `/api/services/singbox/logs`                 | Segwi l-aħħar entrati tal-log permezz ta’ SSE bir-rotta dinamika kondiviża `[name]/logs` |
+
+**Konnessjoni TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) jikteb `config.json` u jibda s-superviżur qabel ma `applyTproxy()` jinstalla r-regoli tal-firewall TPROXY. Jekk is-superviżur ikun nieqes jew ma jilħaqx l-istat `running`, issa dan jiġi rreġistrat fil-livell ta’ żball minflok il-falliment jiġi injorat fis-skiet. B’hekk l-operatur jista’ jinduna li r-regoli TPROXY ġew applikati mingħajr listener li jaħdem warajhom.
+
+---
+
+### 4.9 Proxy invers (inkorporazzjoni tad-dashboard ta’ 9Router)
 
 Id-dashboard jinkorpora l-interfaċċa web ta’ 9Router ġewwa iframe permezz ta’
 proxy invers intern f’dan l-indirizz:

@@ -304,12 +304,12 @@ hozzáférési tokent küldenek egy állapotmódosító felügyeleti útvonalnak
 Ezt a rangsort a `scopeSatisfies` kezeli. Nem veszi figyelembe az MCP-táblázatot, és az MCP
 illesztője sem veszi figyelembe ezt a rangsort.
 
-| Névtér                 | Hitelesítő adat                                                    | Ellenőrző                          | A sikeres ellenőrzés ezt engedélyezi                                             |
-| :--------------------- | :----------------------------------------------------------------- | :--------------------------------- | :------------------------------------------------------------------------------- |
-| API-kulcsos felügyelet | `api_keys.scopes`                                                  | `hasManageScope`                   | Felügyeleti REST az adott Bearer-kulcshoz                                        |
-| API-kulcsos kiegészítő | ugyanaz a tömb, egyetlen pontos karakterlánc                       | az alább megnevezett segédfüggvény | Csak az adott képesség                                                           |
-| MCP-eszközhatókörök    | ugyanaz a tömb, egyébként MCP `_meta`, majd `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                     | Az adott eszköz, miután a kikényszerítés be van kapcsolva                        |
-| Hozzáférési token      | `oma_live_…`                                                       | `scopeSatisfies`                   | Az a felügyeleti útvonal, amelynek metódusa és elérési útja ezt a rangot igényli |
+| Névtér                 | Hitelesítő adat                                                                         | Ellenőrző                          | A sikeres ellenőrzés ezt engedélyezi                                             |
+| :--------------------- | :-------------------------------------------------------------------------------------- | :--------------------------------- | :------------------------------------------------------------------------------- |
+| API-kulcsos felügyelet | `api_keys.scopes`                                                                       | `hasManageScope`                   | Felügyeleti REST az adott Bearer-kulcshoz                                        |
+| API-kulcsos kiegészítő | ugyanaz a tömb, egyetlen pontos karakterlánc                                            | az alább megnevezett segédfüggvény | Csak az adott képesség                                                           |
+| MCP-eszközhatókörök    | ugyanaz a tömb, egyébként MCP `_meta` (csak HTTP/SSE), egyébként `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                     | Az adott eszköz, miután a kikényszerítés be van kapcsolva                        |
+| Hozzáférési token      | `oma_live_…`                                                                            | `scopeSatisfies`                   | Az a felügyeleti útvonal, amelynek metódusa és elérési útja ezt a rangot igényli |
 
 Az egyes hitelesítő adatok kibocsátását a
 [Felügyeleti hitelesítés](../guides/MANAGEMENT-AUTH.md) ismerteti.
@@ -357,8 +357,7 @@ A kikényszerítés ki van kapcsolva, kivéve, ha `OMNIROUTE_MCP_ENFORCE_SCOPES=
 `false`). Amíg ki van kapcsolva, az `evaluateToolScopes` engedélyezi a hívást, és kihagyja a
 katalógust. Amikor be van kapcsolva, a HTTP a Bearer-kulcs `api_keys.scopes` értékét használja
 `authInfo`-ként (lásd: [Kulcsonkénti HTTP-hatókör-hozzárendelés](#kulcsonkénti-http-hatókör-hozzárendelés-7895)).
-Ha nem oldható fel egyetlen kulcshatókör sem, a megadott halmaz először az MCP `_meta`, majd az
-`OMNIROUTE_MCP_SCOPES` értékére vált vissza.
+Ha egyetlen kulcskör hatókör sem oldódik fel, a megadott halmaz átesik az MCP `_meta`-ra (csak HTTP/SSE hívók számára érvényes, HTTP-hitelesítési kontextuson belül; a stdio hívó `_meta` mezője figyelmen kívül marad, mert azt a kliens szabályozza, és nem hordoz hívónkénti identitást), majd az `OMNIROUTE_MCP_SCOPES` értékre.
 
 #### Hozzáférési tokenek hatókörei
 
@@ -456,8 +455,7 @@ A `scopeEnforcement.ts` fájlban található `resolveCallerScopeContext()` már 
 a `_meta` és az `OMNIROUTE_MCP_SCOPES` környezetiváltozó-tartalékmegoldással szemben — ez a módosítás csupán feltölti ezt az első,
 legmagasabb prioritású forrást, amely HTTP-n keresztül korábban nem kapott adatot. Ha egyetlen API-kulcs sem oldható fel
 (nincs fejléc, vagy érvénytelen a kulcs), az `authInfo` értéke `undefined` marad, és a feloldás változatlanul továbblép a
-meglévő `meta`/környezeti láncra. A stdio nem rendelkezik hívónkénti identitással (lásd:
-`mcpCallerIdentity.ts`), ezért ez nem érinti — továbbra is a `_meta`/környezeti tartalékláncot használja.
+meglévő `meta`/környezeti láncra. A stdio-nak nincs hívónkénti identitása (lásd `mcpCallerIdentity.ts`), és a kulcsonkénti kötés nem érinti — kihagyja a `_meta` lépést (a `_meta` csak HTTP hitelesítési kontextusban érvényesül, #15159), és kizárólag az `OMNIROUTE_MCP_SCOPES` környezeti kulcsból oldja fel.
 
 **A hatókör-érvényesítés a szűk hatókörű HTTP/SSE-hívóknál az
 `OMNIROUTE_MCP_ENFORCE_SCOPES` értékétől függetlenül kötelező.** Az `OMNIROUTE_MCP_ENFORCE_SCOPES` alapértelmezett `false`

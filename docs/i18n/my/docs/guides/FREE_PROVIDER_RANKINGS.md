@@ -13,7 +13,7 @@
 
 ## ဆိုသည်မှာ
 
-OmniRoute သည် provider 377 ခုကို မှတ်ပုံတင်ထားပြီး၊ ၎င်းတို့ထဲတွင် **အခမဲ့/no-auth** ဟု သတ်မှတ်ထားသော catalog entry 155 ခု ပါဝင်သည် (no-auth၊ free-tier OAuth၊ သို့မဟုတ် free-tier API key — [အခမဲ့ Tier လမ်းညွှန်](../getting-started/FREE-TIERS-GUIDE.md) နှင့် အပြည့်အစုံ [အခမဲ့ Tier directory](../reference/FREE_TIERS.md) ကို ကြည့်ပါ)။ အခက်အခဲမှာ- အခမဲ့ provider များသည် model အရည်အသွေးအရ ကြီးစွာကွာဟနေကြသည်။ frontier model ကို ဝန်ဆောင်မှုပေးနေသော no-auth provider တစ်ခုသည် legacy model အသေးစားကို ဝန်ဆောင်မှုပေးနေသော provider တစ်ခုထက် အလွန်အသုံးဝင်သည်။
+OmniRoute သည် provider 380 ခုကို မှတ်ပုံတင်ထားပြီး၊ ၎င်းတို့ထဲတွင် **အခမဲ့/no-auth** ဟု သတ်မှတ်ထားသော catalog entry 155 ခု ပါဝင်သည် (no-auth၊ free-tier OAuth၊ သို့မဟုတ် free-tier API key — [အခမဲ့ Tier လမ်းညွှန်](../getting-started/FREE-TIERS-GUIDE.md) နှင့် အပြည့်အစုံ [အခမဲ့ Tier directory](../reference/FREE_TIERS.md) ကို ကြည့်ပါ)။ အခက်အခဲမှာ- အခမဲ့ provider များသည် model အရည်အသွေးအရ ကြီးစွာကွာဟနေကြသည်။ frontier model ကို ဝန်ဆောင်မှုပေးနေသော no-auth provider တစ်ခုသည် legacy model အသေးစားကို ဝန်ဆောင်မှုပေးနေသော provider တစ်ခုထက် အလွန်အသုံးဝင်သည်။
 
 **အခမဲ့ Provider အဆင့်သတ်မှတ်ချက်များ** (Free Provider Rankings) သည် "**အကောင်းဆုံး model ကို ပေးနိုင်မည့် အခမဲ့ provider မှာ ဘယ်တစ်ခုလဲ?**" ဟူသော မေးခွန်းကို အဖြေပေးသည်။ ၎င်းက အခမဲ့ provider တစ်ခုချင်းစီ၏ catalog ကို **Arena AI leaderboard** (လူ့ဦးစားပေးမှုအခြေပြု ELO — LMArena chatbot arena နောက်ကွယ်ရှိ အယူအဆနှင့် အလားတူဖြစ်သည်) ထံမှ **လူထုပါဝင်ရေးသားထားသော အရည်အသွေး အမှတ်များ** နှင့် ပေါင်းစပ်ခြင်းဖြင့် ဖြစ်သည်။ ထို့နောက် provider များကို ၎င်းတို့၏ **အကောင်းဆုံး အခမဲ့ model** ၏ စွမ်းဆောင်ရည်အလိုက် အဆင့်သတ်မှတ်ထားသည်။
 

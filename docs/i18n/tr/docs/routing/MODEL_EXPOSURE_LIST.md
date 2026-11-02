@@ -65,3 +65,15 @@ her iki diziyi de olduğu gibi içerir — `hidePaidModels` ayarının kombinasy
 filtresinden farklı olarak burada yeniden yükleme riski yoktur: dışa aktarılan bir kombinasyon
 adımına gömülü engellenmiş bir kimlik, operatörün kendi açık yönlendirme tercihidir; dışa aktarma
 sınırının kaldırması gereken bir şey değildir.
+
+## Yalnızca kombo listeleme (`exposeCombosOnly`)
+
+Komboların herkese açık model yüzeyi, sağlayıcıların ise yalnızca arka uç olduğu kurulumlar için ayrı bir Boole değeri; bu da isteğe bağlıdır ve varsayılanı `false` olur. `true` olduğunda herkese açık liste (`GET /v1/models`, `GET /v1` ve `getUnifiedModelsResponse()` üzerine kurulu diğer `/v1` keşif yolları) yalnızca `owned_by: "combo"` içeren satırları tutar: kullanıcı komboları ve yerleşik `auto/*` komboları (`hideAutoCombos` bunları gizlemiyorsa). Anahtar başına `catalogScope: "combos"` ile aynı satır testini kullanır; anahtarın kendi izin/ret/kapsam filtreleri bunun üzerine uygulanmaya devam eder.
+
+**Settings → Routing → Models API listing** bölümünde veya `PATCH /api/settings {"exposeCombosOnly": true}` ile değiştirin.
+
+Yukarıdaki listeler gibi yalnızca duyurulan içeriği değiştirir:
+
+- açık bir `provider/model` kimliği hâlâ gönderilir ve `GET /v1/models/{id}` onu hâlâ çözümler;
+- pano kataloğu (model seçicilerinin kullandığı `GET /api/models/catalog`) daraltılmaz;
+- `auto/*` aday havuzlarına yansıtılmaz; bu nedenle `auto/*` komboları tam havuzlarını korur.

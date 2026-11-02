@@ -432,12 +432,8 @@ jobs:
     # 2026-08-30: a cold full lint with the eslint-plugin-react-hooks 7 compiler rules is
     # killed on the 7 GB hosted runner without a message (status null → exit 1, the
     # JSON never written); the box lints it in ~12 min with the heap below.
-    # G0 (trilho .50): security-events:read lets the CodeQL ratchet below read open
-    # code-scanning alerts via `gh api .../code-scanning/alerts` (same as ci.yml's
-    # quality-gate job). contents: read keeps checkout working.
     permissions:
       contents: read
-      security-events: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -481,13 +477,8 @@ jobs:
         run: node scripts/quality/check-quality-ratchet.mjs --allow-missing --summary .artifacts/quality-ratchet.md
       - name: Require-tighten (blocking)
         run: node scripts/quality/check-quality-ratchet.mjs --allow-missing --require-tighten
-      # CodeQL alerts ratchet — same semantics as ci.yml quality-gate: exits 1 ONLY
-      # on a real regression (open alerts > baseline in quality-baseline.json);
-      # a measurement failure (gh/auth/api) self-skips with exit 0.
-      - name: CodeQL alerts ratchet (blocking)
-        run: npm run check:codeql-ratchet
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # CodeQL has one authority: CI/codeql-admission, after its four producer jobs.
+      # Gate / Quality alone does not certify the candidate without Gate / CI.
       - name: Append ratchet summary
         if: always()
         run: cat .artifacts/quality-ratchet.md >> "$GITHUB_STEP_SUMMARY" || true

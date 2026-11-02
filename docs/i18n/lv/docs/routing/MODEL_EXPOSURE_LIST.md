@@ -62,3 +62,15 @@ Iestatījumu eksports (`GET /api/settings/export-json`) ietver abus masīvus nem
 iestatījumu lauku — atšķirībā no `hidePaidModels` kombinācijas soļa eksporta filtra šeit nav atkārtotas ielādes
 riska: eksportētā kombinācijas solī iegults liegts identifikators ir paša operatora nepārprotama maršrutēšanas
 izvēle, nevis kaut kas tāds, kas būtu jāizņem uz eksporta robežas.
+
+## Tikai kombināciju saraksts (`exposeCombosOnly`)
+
+Atsevišķa loģiskā vērtība, arī ieslēdzama pēc izvēles un pēc noklusējuma `false`, izvietojumiem, kuros kombinācijas ir publiskais modeļu interfeiss, bet nodrošinātāji ir tikai aizmugursistēmas. Kad tā ir `true`, publiskais saraksts (`GET /v1/models`, `GET /v1` un citi `/v1` atklāšanas maršruti, kas balstīti uz `getUnifiedModelsResponse()`) saglabā tikai rindas ar `owned_by: "combo"`: lietotāja kombinācijas un iebūvētās `auto/*` kombinācijas (ja tās neslēpj `hideAutoCombos`). Tā izmanto to pašu rindu pārbaudi kā atslēgas `catalogScope: "combos"`, un papildus joprojām darbojas pašas atslēgas atļaušanas/aizliegšanas/tvēruma filtri.
+
+Pārslēdziet to sadaļā **Settings → Routing → Models API listing** vai ar `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Tāpat kā iepriekšējie saraksti, tas maina tikai publisko izziņošanu:
+
+- tiešs `provider/model` ID joprojām tiek nosūtīts, un `GET /v1/models/{id}` to joprojām atrisina;
+- paneļa katalogs (`GET /api/models/catalog`, ko izmanto modeļu atlasītāji) netiek sašaurināts;
+- tas netiek pārnests uz `auto/*` kandidātu kopām, tāpēc `auto/*` kombinācijas saglabā pilnu kopu.

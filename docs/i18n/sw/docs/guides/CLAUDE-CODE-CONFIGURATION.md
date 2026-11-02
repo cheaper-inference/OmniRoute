@@ -42,6 +42,10 @@ kupitia vigezo vya mazingira (haina chaguo la `--base-url`):
 
 > Vigezo vya mazingira husomwa **mara moja wakati wa kuanza** — anzisha upya Claude Code baada ya kuvibadilisha.
 
+Kwa kitambulisho kinachobadilishwa mara kwa mara badala ya mfuatano usiobadilika, weka `apiKeyHelper` katika `~/.claude/settings.json` kuwa amri inayoandika kitambulisho cha sasa kwenye stdout. Claude Code huhifadhi matokeo kwenye akiba kwa dakika tano kwa chaguo-msingi (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` hubadilisha muda huo) na kutuma thamani katika `Authorization: Bearer` na `x-api-key` zote mbili. Skripti lazima iandike kitambulisho pekee — ujumbe wa utangulizi unaoongezwa husababisha msaidizi kushindwa katika v2.1.227+.
+
+Hivi ndivyo Entra ID SSO inavyofanya kazi: `scripts/cli/omniroute-sso.mjs token` huandika tokeni ya ufikiaji ya Entra yenye muda mfupi, ambayo OmniRoute huthibitisha badala ya ufunguo wa API. Tazama [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` hukuwekea vyote hivi: hutatua URL ya msingi + tokeni
 kutoka kwenye muktadha unaotumika (kwa hivyo `omniroute connect <vps>` kisha `omniroute launch`
 hufanya kazi moja kwa moja), hukagua afya ya seva, na hutekeleza `claude`.

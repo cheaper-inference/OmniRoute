@@ -42,6 +42,10 @@ tụnye ya aka na endpoint ahaziri iche (o nweghị ọkọlọtọ `--base-url`
 
 > A na-agụ env vars **naanị otu ugboro mgbe mmalite** — malitegharịa Claude Code mgbe ị gbanwere ha.
 
+Maka nzere nnweta na-agbanwe oge ụfọdụ kama eriri ederede na-adịgide, tọọ `apiKeyHelper` n’ime `~/.claude/settings.json` ka ọ bụrụ iwu na-ebipụta nzere ugbu a na stdout. Claude Code na-echekwa ihe ọ bipụtara na cache ruo nkeji ise na ndabara (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` na-agbanwe oge ahụ), ma na-eziga uru ahụ na `Authorization: Bearer` na `x-api-key` abụọ. Skript ga-ebipụta naanị nzere ahụ: banner ọzọ so ya na-eme ka helper daa na v2.1.227+.
+
+Nke a bụ otú Entra ID SSO si arụ ọrụ: `scripts/cli/omniroute-sso.mjs token` na-ebipụta token nnweta Entra nke na-adị obere oge, OmniRoute na-enyochakwa ya kama igodo API. Lee [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` na-edozi ihe ndị a niile maka gị: ọ na-achọpụta base URL + token
 site na ọnọdụ na-arụ ọrụ (ya mere `omniroute connect <vps>` wee bụrụ `omniroute launch`
 ga-arụ ọrụ ozugbo), na-enyocha ahụike sava, ma na-eme exec nke `claude`.

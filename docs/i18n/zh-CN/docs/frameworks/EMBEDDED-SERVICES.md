@@ -5,8 +5,8 @@
 ---
 
 > **版本：** v3.8.44
-> **最后更新：** 2026-09-16
-> **适用对象：** 添加、维护或调试嵌入式服务（9Router、CLIProxyAPI、Mux、Bifrost、open-wa、LLMLingua）的工程师。
+> **最后更新：** 2026-10-28
+> **读者：** 添加、维护或调试嵌入式服务的工程师（9Router、CLIProxyAPI、Mux、Bifrost、open-wa、LLMLingua、sing-box）。
 
 嵌入式服务是本地安装的进程伴生工具，由 OmniRoute 负责安装、监控，并将其作为一等路由目标提供。与外部提供者（通过 API 密钥经由互联网访问）不同，嵌入式服务与 OmniRoute 在同一台机器上运行，并通过环回网络进行通信。
 
@@ -29,7 +29,7 @@
 
 ### 为什么使用嵌入式服务？
 
-内置了七项服务：
+共内嵌八项服务：
 
 | 服务            | npm 包                                | 默认端口 | 用途                                                                                                                                                                                                                                                        |
 | --------------- | ------------------------------------- | :------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -40,8 +40,9 @@
 | **Dario**       | `@askalf/dario`                       |   3456   | Claude 订阅代理——针对 Claude-Code 形式流量的 CLIProxyAPI 替代方案/故障转移方案；注入的密钥将成为 `DARIO_ADMIN_TOKEN`，用于保护其 `/admin/*` OAuth 控制平面                                                                                                  |
 | **open-wa**     | `@open-wa/wa-automate`                |   8323   | WhatsApp Web 自动化（通过 Puppeteer 使用无头 Chromium）。仅管理生命周期——不是路由目标。                                                                                                                                                                     |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                  |  20135   | 提示词压缩边车服务——真正的 LLMLingua-2 ONNX 模型（Microsoft 算法的 JS/TS 移植版）。`open-sse/services/compression/engines/llmlingua/index.ts` 通过 HTTP 将 `/compress` 分派给它，并在边车服务停机时回退到进程内工作线程后端。仅管理生命周期——不是路由目标。 |
+| **sing-box**    | GitHub 发布版二进制文件（`singbox`）  |  20140   | TPROXY 辅助进程，为 `applyTproxy()` 的透明代理拦截提供支持（`src/mitm/tproxy/setup.ts`）。安装程序下载固定版本且通过校验和验证的发布包。仅管理其生命周期；它不是路由目标，也不代理 LLM 请求。                                                               |
 
-所有七项服务均遵循相同的监管模型：
+这八项服务都采用相同的进程监管模型：
 
 - OmniRoute 将它们安装在 `DATA_DIR/services/{name}/` 下（与 OmniRoute 自身的 `package.json` 隔离）
 - OmniRoute 将它们作为子进程启动并进行监控
@@ -572,7 +573,27 @@ ONNX 词元分类模型，会在首次调用
 
 ---
 
-### 4.8 反向代理（9Router 仪表板嵌入）
+### 4.8 sing-box 端点（8 条路由）
+
+sing-box 的端点结构与 Mux 相同：没有 `rotate-key` 路由，也不注入 API 密钥（`bootstrap.ts` 中为 `needsApiKey: false`）。它仅接受生命周期管理，绝不作为路由或 LLM 提供方。`install()` 下载固定版本的官方 GitHub 发布版二进制文件（`SagerNet/sing-box`）；版本由 `src/lib/services/installers/singbox.ts` 中的 `SINGBOX_PINNED_VERSION` 指定。在写入磁盘前，它会使用同一源文件中内置的校验和验证 SHA256；请求任何其他版本都会被拒绝。
+
+| 方法   | 路径                                         | 说明                                                    |
+| ------ | -------------------------------------------- | ------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | 下载并验证固定版本的 sing-box 发布包                    |
+| `POST` | `/api/services/singbox/start`                | 启动 sing-box（`sing-box run -c config.json`）          |
+| `POST` | `/api/services/singbox/stop`                 | 停止 sing-box                                           |
+| `POST` | `/api/services/singbox/restart`              | 重启 sing-box                                           |
+| `POST` | `/api/services/singbox/update`               | 重新验证或重新安装固定版本                              |
+| `GET`  | `/api/services/singbox/status`               | 实时状态及数据库状态                                    |
+| `POST` | `/api/services/singbox/auto-start`           | 开启或关闭自动启动                                      |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | 开启或关闭已接管的既有进程的自动重启                    |
+| `GET`  | `/api/services/singbox/logs`                 | 通过 SSE 持续跟踪日志（使用共享动态路由 `[name]/logs`） |
+
+**TPROXY 集成：** `ensureSingboxTproxy()`（`src/mitm/tproxy/setup.ts`）先写入 `config.json` 并启动监管程序，随后 `applyTproxy()` 才安装 TPROXY 防火墙规则。如果监管程序缺失或未能进入 `running` 状态，现在会记录错误级别日志，而不是静默吞掉失败。这样，运维人员就能识别出 TPROXY 规则已应用、但其后没有正常监听进程的情况。
+
+---
+
+### 4.9 反向代理（9Router 仪表板嵌入）
 
 仪表板通过位于以下路径的内部反向
 代理，将 9Router Web UI 嵌入 iframe：

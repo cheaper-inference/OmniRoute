@@ -10,7 +10,7 @@ OmniRoute, மூன்று பிரத்யேக டாஷ்போர்�
 
 | பக்கம்         | வழித்தடம்               | கருத்து                                                                                        | எண்ணிக்கை               |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute-ஐ நோக்கி நீங்கள் அமைக்கும் குறியீட்டு கருவிகள் (Client → CLI → OmniRoute → Provider) | 27                      |
+| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute-ஐ நோக்கி நீங்கள் அமைக்கும் குறியீட்டு கருவிகள் (Client → CLI → OmniRoute → Provider) | 28                      |
 | **CLI Agents** | `/dashboard/cli-agents` | OmniRoute-ஐ நோக்கி நீங்கள் அமைக்கும் தன்னாட்சி முகவர்கள் (அதே ஓட்டம், பரந்த நோக்கம்)           | 11                      |
 | **ACP Agents** | `/dashboard/acp-agents` | stdio/ACP வழியாகப் பின்தளமாக OmniRoute தொடங்கும் CLI-கள் (தலைகீழ் ஓட்டம்)                      | பதிவேட்டைப் பார்க்கவும் |
 
@@ -104,7 +104,7 @@ Dashboard-இன் **பயன்படுத்தும் endpoint** (`POST 
 
 ---
 
-## 1. CLI Code-இன் கருவிப் பட்டியல் (27 கருவிகள்)
+## 1. CLI Code-இன் கருவிப் பட்டியல் (28 கருவிகள்)
 
 `/dashboard/cli-code`-இல் தோன்றும் அனைத்து கருவிகளும். `baseUrlSupport: none` கொண்டவை தனிப்பயன் அடிப்படை URL-க்குப் பதிலாக MITM அல்லது கைமுறை வழிகாட்டி மூலம் இணைக்கப்பட்டுள்ளன:
 
@@ -131,6 +131,7 @@ Dashboard-இன் **பயன்படுத்தும் endpoint** (`POST 
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -220,16 +221,16 @@ interface ToolBatchStatus {
 
 `configType: "custom"` கொண்ட புதிய கருவிகளுக்கென பிரத்யேக அமைப்புகள் API வழித்தடங்கள் உள்ளன:
 
-| வழித்தடம்                                   | கருவி                                                               |
-| ------------------------------------------- | ------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                             |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url கொடி)                                             |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, பழையது)                              |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, முதன்மை + பழைய `~/.deepseek` ஒத்திசைவு) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                               |
-| `POST /api/cli-tools/pi-settings`           | Pi குறியீட்டு முகவர்                                                |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)               |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + பிரத்யேக `.env` விசை)          |
+| வழித்தடம்                                   | கருவி                                                                   |
+| ------------------------------------------- | ----------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                 |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url கொடி)                                                 |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, பழையது)                                  |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, முதன்மை + பழைய `~/.deepseek` ஒத்திசைவு)     |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                   |
+| `POST /api/cli-tools/pi-settings`           | Pi குறியீட்டு முகவர் (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                   |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + பிரத்யேக `.env` விசை)              |
 
 அனைத்து வழித்தடங்களும் பிழை பதில்களுக்காக `sanitizeErrorMessage()`-ஐப் பயன்படுத்துகின்றன (கடுமையான விதி #12).
 
@@ -333,7 +334,7 @@ pip install aider-chat
 cargo install smelt  # Rust அடிப்படையிலானது
 
 # Pi நிரலாக்க முகவர்
-# நிறுவுவதற்கு https://github.com/zechnerj/pi-coding-agent ஐப் பார்க்கவும்
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # நிறுவுவதற்கு https://github.com/1jehuang/jcode ஐப் பார்க்கவும்
@@ -446,6 +447,38 @@ EOF
 
 > சிந்தனை வகைகளை அனுப்ப, `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > என்பதைப் பயன்படுத்தவும்.
+
+---
+
+#### Pi Coding Agent
+
+அதிகாரப்பூர்வ Pi Coding Agent package ஐ `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` மூலம் நிறுவவும். Pi custom provider களை `~/.pi/agent/models.json` இலிருந்து வாசிக்கிறது; முழு agent directory ஐ மாற்ற `PI_CODING_AGENT_DIR` ஐ absolute path ஆக (அல்லது `~` முன்னொட்டுள்ள path ஆக) அமைக்கவும். Dashboard அந்த override ஐப் பின்பற்றும். Pi custom endpoint களிலிருந்து model களைக் கண்டறியாது; எனவே Pi இன் `openai-completions` API மற்றும் OmniRoute இன் OpenAI-compatible `/v1` endpoint வழியாகத் தேர்ந்த model ஐ OmniRoute `models[]` இல் எழுதுகிறது.
+
+**CLI Tools → Pi** இல் endpoint, API key மற்றும் model ஐத் தேர்ந்தெடுத்து, provider preview ஐப் பார்த்து, பின்னர் பயன்படுத்தவும். Preview என்பது provider fragment: Pi ஐக் கைமுறையாக configure செய்யும்போது பிற provider களும் அமைப்புகளும் மாறாமல் இருக்க `providers.omniroute` ஐ உங்கள் தற்போதைய `models.json` உடன் merge செய்யவும்.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+நீங்கள் `/model` திறக்கும்போது Pi `models.json` ஐ மீண்டும் load செய்கிறது. நீங்கள் தேர்ந்த provider ID மற்றும் model ID கொண்டு configure செய்த route ஐச் சோதிக்கவும்:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+குறிப்புகள்: [Pi model களும் custom provider களும்](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi environment variable கள்](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi நிறுவல் வழிமுறைகள்](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

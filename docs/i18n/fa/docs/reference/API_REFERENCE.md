@@ -29,6 +29,7 @@
 - [استریم WebSocket](#websocket-streaming)
 - [گزارش سهمیهها و مشکلات](#quotas--issues-reporting)
 - [کش معنایی](#semantic-cache)
+- [سازگاری مدیریت CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [داشبورد و مدیریت](#dashboard--management)
 - [مدیریت ترکیبها](#combo-management)
 - [وبهوکها](#webhooks)
@@ -989,6 +990,18 @@ CLI آدرس `base_url + /responses` را به WebSocket ارتقا میدهد �
 
 **احراز هویت:** کلید API از نوع Bearer (`isAuthenticated`).
 
+### بازیابی نشست سهمیه (فعال‌سازی اختیاری)
+
+درخواست غیرجریانی `POST /v1/chat/completions` یا `POST /v1/responses` که با خطای نهایی سهمیه شکست می‌خورد (`402`/`429`/`503` با بدنه‌ای که پایان سهمیه یا اعتبار را می‌گوید)، می‌تواند به‌جای برگرداندن خطا کنار گذاشته و بعداً بازپخش شود. فراخواننده با سه هدر برای هر درخواست آن را فعال می‌کند:
+
+| هدر                          | مقدار                                 |
+| ---------------------------- | ------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                |
+| `x-omniroute-session`        | شناسهٔ نشست، `[A-Za-z0-9._:-]{1,128}` |
+| `x-omniroute-recovery-turn`  | شناسهٔ نوبت یکتا در نشست (همان قاعده) |
+
+فقط نوبت‌های `stream: false` بدون ابزار، سابقهٔ ابزار یا `previous_response_id` و بدون تثبیت `x-omniroute-connection` واجد شرایط‌اند؛ `STORAGE_ENCRYPTION_KEY` نیز باید تنظیم باشد (درخواست تا 24 h به‌صورت رمز‌شده ذخیره می‌شود). پاسخ در این صورت `202` همراه `recovery.poll` است؛ `GET /v1/quota-recoveries/{id}` را دوره‌ای بخوانید (`202` هنگام انتظار، `200` با بدنهٔ بازیابی‌شده پس از تکمیل) یا با `DELETE` لغو کنید. بلیت‌ها فقط برای کلید API سازندهٔ آن‌ها قابل مشاهده‌اند. بازپخشی که نتیجه‌اش نامطمئن باشد به `needs_confirmation` ختم می‌شود و دوبار ارسال نمی‌شود. منبع: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## استفاده سلفسرویس (`/api/usage/om-usage`)
@@ -1157,6 +1170,28 @@ DELETE /api/cache/stats
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## سازگاری مدیریت CLIProxyAPI
+
+OmniRoute به سه نقطهٔ پایانی مدیریت [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) پاسخ می‌دهد که داشبوردهای مصرف برای خواندن محدودیت اشتراک Claude و Codex فراخوانی می‌کنند (برای مثال منبع محدودیت مصرف `cliproxy` در T3 Code). URL پایهٔ مشتری را به OmniRoute هدایت کنید و یک کلید API با دامنهٔ `manage` را کلید مدیریت قرار دهید. مسیرها در `/v0/management/*` و `/api/v0/management/*` ارائه می‌شوند.
+
+| روش  | مسیر                         | توضیح                                                                                                                               |
+| ---- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v0/management/auth-files`  | اتصال‌های OAuth مربوط به Claude و Codex به شکل `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. بدون توکن    |
+| POST | `/v0/management/api-call`    | بدنهٔ `{ auth_index, method, url, header?, data? }`. درخواست مجاز را با توکن حساب می‌فرستد و `{ status_code, body }` را برمی‌گرداند |
+| POST | `/v0/management/reset-quota` | بدنهٔ `{ auth_index }`. زمان استراحت اتصال، قفل مدل‌ها و زمان استراحت هر دامنهٔ Codex را برای یک حساب پاک می‌کند                    |
+
+- `auth_index` شناسهٔ اتصال OmniRoute است. `provider` برابر `claude` یا `codex` است (فقط اتصال‌های OAuth؛ ارائه‌دهندهٔ کلید API با نام `anthropic` فهرست نمی‌شود). برای Codex، `id_token.chatgpt_account_id` شناسهٔ ذخیره‌شدهٔ فضای کاری و `plan_type` طرح ذخیره‌شده است.
+- `api-call` پراکسی عمومی نیست. فقط Claude `GET
+https://api.anthropic.com/api/oauth/usage` و Codex `GET
+https://chatgpt.com/backend-api/wham/usage`، `GET .../wham/rate-limit-reset-credits` و `POST .../wham/rate-limit-reset-credits/consume` را می‌پذیرد؛ هرکدام فقط برای حساب ارائه‌دهندهٔ متناظر. هر چیز دیگری بدون تماس با بالادست `403` می‌دهد. هدر `Authorization` فراخواننده (از جمله جای‌نگهدار `$TOKEN$`) نادیده گرفته می‌شود: OmniRoute توکن دسترسی اتصال را تزریق می‌کند، در نزدیکی انقضا ابتدا آن را تازه می‌کند و فقط هدرهای مجاز را می‌فرستد (`anthropic-beta`؛ `OpenAI-Beta`، `Originator`، `Chatgpt-Account-Id`؛ `Accept`، `Content-Type`). اگر `Chatgpt-Account-Id` نباشد، شناسهٔ ذخیره‌شدهٔ فضای کاری پیش‌فرض است. اگر نخستین پاسخ بالادست `401` باشد، یک بار نوسازی می‌کند و فقط در صورت تغییر توکن دسترسی دوباره تلاش می‌کند. مهلت هر تلاش بالادست 15 ثانیه است و از پراکسی اتصال استفاده می‌کند.
+- `reset-quota` به وضعیت‌های نهایی (banned, expired, credits_exhausted) دست نمی‌زند. `auth_index` ناشناخته `404` می‌دهد.
+
+**احراز هویت:** نشست داشبورد یا کلید API با دامنهٔ `manage`، حتی با ورود غیرفعال لازم است (مسیرها در `ALWAYS_PROTECTED_API_PATHS` هستند). کلیدهای صرفاً استنتاجی `403` می‌گیرند. منبع: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

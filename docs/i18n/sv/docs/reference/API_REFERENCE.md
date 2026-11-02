@@ -29,6 +29,7 @@ För det specifika OpenAI-kompatibla protokollet och matrisen över leverantörs
 - [WebSocket-strömning](#websocket-streaming)
 - [Kvoter och problemrapportering](#quotas--issues-reporting)
 - [Semantisk cache](#semantic-cache)
+- [Kompatibilitet med CLIProxyAPI-hantering](#cliproxyapi-management-compatibility)
 - [Kontrollpanel och hantering](#dashboard--management)
 - [Kombinationshantering](#combo-management)
 - [Webhooks](#webhooks)
@@ -1011,6 +1012,18 @@ slutförandet.
 
 **Autentisering:** Bearer-API-nyckel (`isAuthenticated`).
 
+### Återställning av kvotsessioner (kräver aktivering)
+
+En icke-strömmande `POST /v1/chat/completions` eller `POST /v1/responses` som misslyckas med ett terminalt kvotfel (`402`/`429`/`503` vars innehåll säger att kvoten eller krediterna är slut) kan parkeras och spelas upp igen senare i stället för att returnera felet. Anroparen aktiverar detta per begäran med tre headers:
+
+| Header                       | Värde                                            |
+| ---------------------------- | ------------------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                                           |
+| `x-omniroute-session`        | sessions-ID, `[A-Za-z0-9._:-]{1,128}`            |
+| `x-omniroute-recovery-turn`  | tur-ID som är unikt inom sessionen (samma regel) |
+
+Endast turer med `stream: false` utan verktyg, verktygshistorik eller `previous_response_id`, och utan en `x-omniroute-connection`-koppling, är tillåtna; dessutom måste `STORAGE_ENCRYPTION_KEY` vara satt (begäran lagras krypterad i upp till 24 h). Svaret blir då `202` med `recovery.poll`; polla `GET /v1/quota-recoveries/{id}` (`202` medan den väntar, `200` med det återställda innehållet när den är klar) eller avbryt med `DELETE`. Ärenden är endast synliga för API-nyckeln som skapade dem. En upprepning med osäkert utfall slutar i `needs_confirmation` i stället för att skickas två gånger. Källa: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Självbetjäningsanvändning (`/api/usage/om-usage`)
@@ -1179,6 +1192,28 @@ Alla begäranden kan förbigå cachen oavsett nyckelinställningarna:
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Kompatibilitet med CLIProxyAPI-hantering
+
+OmniRoute besvarar de tre hanteringsendpunkterna från [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) som användningspaneler anropar för att läsa abonnemangsgränser för Claude och Codex (till exempel T3 Codes källa `cliproxy` för användningsgränser). Rikta klientens bas-URL mot OmniRoute och använd en API-nyckel med behörighetsomfånget `manage` som hanteringsnyckel. Rutterna finns på `/v0/management/*` och `/api/v0/management/*`.
+
+| Metod | Sökväg                       | Beskrivning                                                                                                                                  |
+| ----- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/v0/management/auth-files`  | Claude- och Codex-OAuth-anslutningar som `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Inga token                  |
+| POST  | `/v0/management/api-call`    | Innehåll `{ auth_index, method, url, header?, data? }`. Skickar en tillåten begäran med kontots token och returnerar `{ status_code, body }` |
+| POST  | `/v0/management/reset-quota` | Innehåll `{ auth_index }`. Rensar anslutningsnedkylning, modellåsningar och Codex-nedkylningar per omfång för ett konto                      |
+
+- `auth_index` är OmniRoute-anslutningens id. `provider` är `claude` eller `codex` (endast OAuth-anslutningar; API-nyckelleverantören `anthropic` listas inte). För Codex är `id_token.chatgpt_account_id` det lagrade arbetsyte-id:t och `plan_type` det lagrade abonnemanget.
+- `api-call` är ingen generell proxy. Den accepterar endast Claude `GET
+https://api.anthropic.com/api/oauth/usage` och Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` och `POST .../wham/rate-limit-reset-credits/consume`, var och en endast för ett konto hos motsvarande leverantör. Allt annat returnerar `403` utan att kontakta uppströmstjänsten. Anroparens `Authorization`-huvud (inklusive platshållaren `$TOKEN$`) ignoreras: OmniRoute infogar anslutningens åtkomsttoken, förnyar den först när den snart löper ut och vidarebefordrar endast tillåtna huvuden (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Ett saknat `Chatgpt-Account-Id` får det lagrade arbetsyte-id:t som standard. Om det första uppströmssvaret är `401` förnyar den en gång och försöker igen endast när åtkomsttoken ändras. Varje uppströmsförsök får timeout efter 15 sekunder och använder anslutningens proxy.
+- `reset-quota` lämnar terminala tillstånd (banned, expired, credits_exhausted) oförändrade. Ett okänt `auth_index` returnerar `404`.
+
+**Autentisering:** panelsession eller API-nyckel med omfånget `manage`, vilket krävs även när inloggning är avstängd (sökvägarna finns i `ALWAYS_PROTECTED_API_PATHS`). Nycklar enbart för inferens får `403`. Källa: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

@@ -156,7 +156,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` daxilində əlaqəl
 | Sağlamlıq Hesabatı          | `health-report`      | Hər provayder üzrə dövrə açarı, gözləmə müddəti və bloklama vəziyyətini ümumiləşdirir                                                                                  | sağlamlıq, dayanıqlılıq        | "Bütün provayderlərin sağlamlıq vəziyyətini göstər" |
 | İmkanların Siyahısı         | `list-capabilities`  | Kontekst inyeksiyası üçün xam SKILL.md URL-ləri olan tam 45 elementlik Agent Bacarıqları kataloqunu (23 API + 21 CLI + 1 konfiqurasiya) markdown cədvəli kimi qaytarır | kataloq, aşkarlama, bacarıqlar | "Bütün OmniRoute imkanlarını siyahıya al"           |
 
-> Agent Kartı fəaliyyətdə olan 377 provayderlik kataloqla uyğun saxlanmalıdır; provayder sayı və pulsuz/autentifikasiyasız metadata icra zamanı reyestrdən əldə edilir.
+> Agent Kartı fəaliyyətdə olan 380 provayderlik kataloqla uyğun saxlanmalıdır; provayder sayı və pulsuz/autentifikasiyasız metadata icra zamanı reyestrdən əldə edilir.
 
 ### `list-capabilities` Bacarığının Təfərrüatları
 
@@ -208,7 +208,7 @@ JSON-RPC son nöqtəsi `/a2a` əsas A2A giriş nöqtəsidir. Aşağıdakı REST 
    };
    ```
 
-3. **Agent Kartında təqdim edin:** `src/app/.well-known/agent.json/route.ts` faylında `skills` massivinə əlavə edin:
+3. **Agent Kartında təqdim edin:** `src/lib/a2a/agentCardMetadata.ts` faylında (`/.well-known/agent.json` və `/.well-known/agent-card.json` tərəfindən paylaşılır) `skills` massivinə əlavə edin:
 
    ```json
    {

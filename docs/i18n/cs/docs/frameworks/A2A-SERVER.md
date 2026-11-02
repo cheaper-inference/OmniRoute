@@ -163,7 +163,7 @@ OmniRoute zpřístupňuje 6 dovedností A2A propojených v `src/lib/a2a/taskExec
 | Zpráva o stavu           | `health-report`      | Agreguje stav jističe, dobu čekání a stav uzamčení pro jednotlivé poskytovatele                                                                                   | stav, odolnost                  | „Zobraz stav všech poskytovatelů“       |
 | Seznam funkcí            | `list-capabilities`  | Vrací úplný katalog 45 dovedností agenta (23 API + 21 CLI + 1 konfigurace) jako markdownovou tabulku s přímými adresami URL souborů SKILL.md pro vložení kontextu | katalog, zjišťování, dovednosti | „Vypiš všechny funkce OmniRoute“        |
 
-> Karta agenta by měla být udržována v souladu s aktuálním katalogem 377 poskytovatelů; počty poskytovatelů a metadata o bezplatném přístupu bez ověření pocházejí z registru za běhu.
+> Karta agenta by měla být udržována v souladu s aktuálním katalogem 380 poskytovatelů; počty poskytovatelů a metadata o bezplatném přístupu bez ověření pocházejí z registru za běhu.
 
 ### Podrobnosti o dovednosti `list-capabilities`
 
@@ -215,7 +215,7 @@ Koncový bod JSON-RPC `/a2a` je kanonickým vstupním bodem A2A. Níže uvedené
    };
    ```
 
-3. **Zveřejněte ji na kartě agenta:** v souboru `src/app/.well-known/agent.json/route.ts` ji přidejte do pole `skills`:
+3. **Zpřístupněte dovednost v kartě agenta:** v souboru `src/lib/a2a/agentCardMetadata.ts` (sdíleném koncovými body `/.well-known/agent.json` a `/.well-known/agent-card.json`) přidejte položku do pole `skills`:
 
    ```json
    {

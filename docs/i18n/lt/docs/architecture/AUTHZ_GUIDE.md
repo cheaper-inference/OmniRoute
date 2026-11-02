@@ -166,9 +166,10 @@ Kiekviena maršrutų klasė turi politiką kataloge `src/server/authz/policies/`
 
 - **`publicPolicy`** (`policies/public.ts`) — visada grąžina `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — išskiria Bearer, patikrina naudodama `validateApiKey()`. Anoniminė prieiga leidžiama tik tada, kai galiojanti `REQUIRE_API_KEY` funkcijos žyma yra išjungta. Galiojanti žyma nustatoma naudojant `isRequireApiKeyEnabled()` (`DB funkcijos žymos perrašymas > process.env.REQUIRE_API_KEY > numatytoji reikšmė`), todėl valdymo skydelio funkcijų žymos ir aplinkos kintamieji nuosekliai valdo `/api/v1/*`, `/api/v1beta/*` ir alternatyvius maršrutus; sprendiklio klaidos užblokuoja prieigą. Kliento API maršrutuose leidžia valdymo skydelio sesijos užklausas (įskaitant `/api/v1/models`, kurį naudoja valdymo skydelio modelių katalogas).
+  Kai įjungtas Entra ID SSO, Bearer, kurio struktūra atitinka Entra prieigos žetoną (trys base64url segmentai, `RS*` algoritmas, `kid`), apdorojamas SSO šakoje **prieš** `validateApiKey()`, o jos sprendimas yra galutinis. Žetonas niekada neperduodamas API rakto keliui ar šakai, kuri pereina prie anoniminės prieigos, todėl tapatybės teikėjo sutrikimas negali atverti laisvos prieigos. Statiniai API raktai nepaveikiami. Žr. [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — priima valdymo skydelio sesiją, vidines modelių sinchronizavimo užklausas (atitinkančias `/api/providers/[name]/(sync-models|models)`) arba visiškai praleidžia patikrą, jei `isAuthRequired()` grąžina false. Kai pateiktas Bearer prieigos raktas yra netinkamas, grąžina 403 (`AUTH_001`), kitu atveju — 401. Be to, prieš bet kurią autentifikavimo šaką taiko maršrutų apsaugos lygius (LOCAL_ONLY / ALWAYS_PROTECTED) — žr. [Maršrutų apsaugos lygiai](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY` keliai, esantys `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (šiuo metu: `/api/mcp/`), gali būti pasiekiami ne iš vietinio grįžtamojo ryšio adreso, kai Bearer raktas turi `manage` aprėptį; visi kiti `LOCAL_ONLY` keliai išlieka griežtai pasiekiami tik per vietinį grįžtamojo ryšio adresą, nepriklausomai nuo aprėpties.
 
-Sėkminga politika grąžina `AuthSubject`, kurio `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Tolesnės apdorojimo funkcijos gali jį nuskaityti naudodamos `assertAuth(request, "CLIENT_API")`, esančią `src/server/authz/assertAuth.ts`, užuot iš naujo vykdžiusios autentifikavimo logiką.
+Sėkminga politika grąžina `AuthSubject`, kurio `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Tolesnės apdorojimo funkcijos gali jį nuskaityti naudodamos `assertAuth(request, "CLIENT_API")`, esančią `src/server/authz/assertAuth.ts`, užuot iš naujo vykdžiusios autentifikavimo logiką.
 
 ## Viešųjų maršrutų sąrašas
 
@@ -326,8 +327,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Autentifikuotų užklausų atveju aukštesnio lygio sistemos (apdorojimo funkcijos pusėje) užklausų antraštėse taip pat yra:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<paskutiniai 4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<paskutiniai 4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (neprivaloma)
 x-omniroute-auth-scopes:    kableliais atskirtas sąrašas
 ```

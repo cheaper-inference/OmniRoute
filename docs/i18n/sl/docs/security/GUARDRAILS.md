@@ -399,7 +399,8 @@ Ne vklaplja zakrivanja: to sta še vedno `PII_REDACTION_ENABLED` (zahteva) in
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Nenastavljeno pomeni vse
   vrste (obnašanje pred uvedbo te nastavitve). Vzorec `ssn_us` mehanizma zahtev se
   preslika v `ssn`. Predloge (Minimal, Standard, Financial,
-  Brazilian, USA, Full) le izpolnijo potrditvena polja v uporabniškem vmesniku.
+  Brazilian, USA, GDPR, POPIA, Full) le izpolnijo potrditvena polja v uporabniškem vmesniku.
+- **Identifikatorji GDPR in POPIA** — dvanajst vgrajenih ID-jev, ki pokrivajo osebne identifikatorje EU in Južne Afrike (spodnja tabela). Njihovi regularni izrazi, preverjevalniki in oznake pristojnosti so v eni tabeli, `src/shared/utils/piiPatterns.ts`, ki jo uporabljata čistilnik odgovorov (`src/lib/piiSanitizer.ts`) in maskirnik zahtev (`src/shared/utils/inputSanitizer.ts`). Ujemanje se zakrije samo, če ga preverjevalnik sprejme; sam niz števk nikoli ne zadošča. Operater, ki je shranil zožen izbor pred nastankom teh ID-jev, ohrani prejšnje vedenje, dokler ne označi novih ID-jev.
 - **Vzorci po meri** — do 20 regularnih ali nadomestnih vzorcev (`*` = do 64
   ne-presledkovnih znakov, `?` = en znak). Zadetki postanejo `[CUSTOM_REDACTED]`.
   Vsak vzorec gre skozi `compilePiiCustomPattern()`
@@ -424,6 +425,25 @@ Nastavitve so shranjene v tabeli `key_value` (imenski prostor `pii_settings`,
 
 Vsi trije zahtevajo upravljalsko avtentikacijo in preverjajo telo z Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Identifikatorji GDPR (EU) in POPIA (Južna Afrika)
+
+| ID                  | Identifikator                          | Preverjanje                                                                          |
+| ------------------- | -------------------------------------- | ------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                                   | Znana država, točna dolžina za to državo, ISO 13616 MOD-97-10                        |
+| `eu_vat`            | Številka DDV v EU                      | Znana predpona države članice in oblika številke te države (brez poizvedbe VIES)     |
+| `es_dni_nie`        | Španski DNI / NIE                      | Kontrolna črka (vrednost mod 23); NIE je `X/Y/Z` + 7 števk                           |
+| `it_codice_fiscale` | Italijanski Codice Fiscale             | Kontrolna črka iz tabel lihih/sodih položajev                                        |
+| `pl_pesel`          | Poljski PESEL                          | Utežena kontrolna vsota in verjetni razponi kodiranega meseca/dneva rojstva          |
+| `nl_bsn`            | Nizozemski BSN                         | Preizkus 11 (uteži 9..2, -1)                                                         |
+| `de_steuer_id`      | Nemški Steuer-ID                       | ISO 7064 Mod 11,10 in pravila zgradbe števk (brez začetne 0)                         |
+| `se_personnummer`   | Švedski personnummer                   | Luhn za zadnjih deset števk in verjeten datum rojstva (10 ali 12 števk)              |
+| `za_id`             | Južnoafriška identifikacijska številka | Luhn za vseh 13 števk, veljaven mesec/dan rojstva, števka državljanstva 0 ali 1      |
+| `za_phone`          | Južnoafriški telefon                   | Predpona `+27` / `27` ali nacionalna oblika `0..`, zapisana s presledkom ali vezajem |
+| `za_vat`            | Južnoafriška številka DDV              | 10 števk z začetno `4` **in** "VAT" / "BTW" v predhodnih 48 znakih                   |
+| `za_tax_ref`        | Južnoafriška davčna referenca          | 10 števk z začetno `0`-`3`, Luhn **in** "tax" / "SARS" v predhodnih 48 znakih        |
+
+Ker se oblike samo s števkami prekrivajo s številkami naročil, gradenj in časovnimi žigi, najšibkejše (`za_vat`, `za_tax_ref`) potrebujejo namig ključne besede; sama desetmestna številka `0..` se ne šteje za južnoafriški telefon. IBAN s presledki (`GB29 NWBK ...`) se ne ujema. Pri pretakanju se namig išče samo v trenutnem kosu. ID-ji so pred splošnimi telefonskimi vzorci, zato preverjen identifikator ohrani lastno nadomestno oznako (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Predlogi `gdpr` in `popia` izbereta ID-je EU oziroma Južne Afrike. Samo maskiranje še vedno zahteva izrecno vključitev (Hard Rule #20): nič od tega ne spremeni privzete vrednosti funkcijske zastavice.
 
 ### Vbrizgavanje pozivov (`promptInjection.ts`)
 

@@ -156,9 +156,10 @@ Kull klassi ta’ rotta għandha politika f’`src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — dejjem tirritorna `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — testratta l-Bearer u tivvalidah permezz ta’ `validateApiKey()`. Tgħaddi għal aċċess anonimu biss meta l-feature flag effettiv `REQUIRE_API_KEY` ikun diżattivat. Il-flag effettiv jiġi riżolt permezz ta’ `isRequireApiKeyEnabled()` (`override tal-feature flag fid-DB > process.env.REQUIRE_API_KEY > valur predefinit`) sabiex il-Feature Flags tad-Dashboard u l-varjabbli tal-ambjent jirregolaw `/api/v1/*`, `/api/v1beta/*`, u l-aliases b’mod konsistenti; fallimenti tar-resolver iwasslu għal rifjut awtomatiku. Tippermetti talbiet b’sessjoni tad-dashboard fuq rotot tal-API tal-klijent (inkluża `/api/v1/models`, użata mill-katalgu tal-mudelli tad-dashboard).
+  Meta Entra ID SSO ikun attivat, Bearer li għandu l-istruttura ta’ token Entra (tliet segmenti base64url, algoritmu `RS*`, `kid`) jiġi ttrattat mill-fergħa SSO **qabel** `validateApiKey()`, u d-deċiżjoni tagħha tkun finali. Qatt ma jgħaddi għall-mogħdija taċ-ċavetta API jew għall-fergħa li tnaqqas l-aċċess għal wieħed anonimu; għalhekk qtugħ fis-servizz tal-fornitur tal-identità ma jistax iwassal għal aċċess miftuħ. Iċ-ċwievet API statiċi ma jintlaqtux. Ara [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — taċċetta sessjoni tad-dashboard, talbiet interni għas-sinkronizzazzjoni tal-mudelli (imqabbla ma’ `/api/providers/[name]/(sync-models|models)`), jew taqbeż il-verifika kompletament jekk `isAuthRequired()` tirritorna false. Tirritorna 403 (`AUTH_001`) meta jkun preżenti token Bearer iżda jkun invalidu, u 401 f’każijiet oħra. Tinforza wkoll il-livelli tal-gwardja tar-rotot (LOCAL_ONLY / ALWAYS_PROTECTED) qabel kwalunkwe fergħa tal-awtentikazzjoni — ara [Livelli tal-Gwardja tar-Rotot](../security/ROUTE_GUARD_TIERS.md). Il-paths LOCAL_ONLY f’`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (illum: `/api/mcp/`) jistgħu jiġu aċċessati minn indirizzi li mhumiex loopback meta ċ-ċavetta Bearer ikollha l-ambitu `manage`; il-paths LOCAL_ONLY l-oħra kollha jibqgħu limitati strettament għal loopback irrispettivament mill-ambitu.
 
-Politika li tirnexxi tirritorna `AuthSubject` b’`kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Il-handlers downstream jistgħu jaqrawh permezz ta’ `assertAuth(request, "CLIENT_API")` f’`src/server/authz/assertAuth.ts` minflok jerġgħu jeżegwixxu l-loġika tal-awtentikazzjoni.
+Politika li tirnexxi tirritorna `AuthSubject` b’`kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Il-handlers downstream jistgħu jaqrawh permezz ta’ `assertAuth(request, "CLIENT_API")` f’`src/server/authz/assertAuth.ts` minflok jerġgħu jeżegwixxu l-loġika tal-awtentikazzjoni.
 
 ## Lista ta’ Rotot Pubbliċi
 
@@ -303,8 +304,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Għal talbiet awtentikati, l-intestaturi tat-talba upstream (min-naħa tal-handler) jinkludu wkoll:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```

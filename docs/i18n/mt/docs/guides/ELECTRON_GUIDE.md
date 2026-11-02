@@ -64,6 +64,19 @@ L-ispazju tax-xogħol `electron/` jesponi wkoll:
 - `npm run build:mac-x64` / `build:mac-arm64` — builds ta’ macOS għal arkitettura waħda
 - `npm run pack` — build ta’ direttorju biss għall-ittestjar lokali (mingħajr installatur)
 
+## Pakketti runtime fakultattivi
+
+Builds tad-desktop jistgħu jippubblikaw arkivji runtime fakultattivi flimkien mal-installaturi tagħhom. Il-kontenut tas-server installat fih `optional-packs.index.json` (taħt `resources/app` fuq Windows u Linux). Għall-entrata `browser-runtime`, aqra `packs[].tarball` u niżżel **dak l-isem eżatt tal-fajl mill-istess release**. L-ismijiet tal-arkivji jinkludu digest SHA-256; builds differenti jistgħu jeħtieġu arkivji differenti. Żomm l-isem tal-fajl imniżżel mhux mibdul.
+
+Ikkopja l-indiċi tal-app installata u l-arkivju magħżul fl-istess direttorju, imbagħad uża l-CLI mill-istess release:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` juri l-istat tal-installazzjoni u l-verifika, mhux l-isem tal-fajl tal-arkivju. L-indiċi inkluż jagħżel l-arkivju. L-installazzjoni tivverifika l-checksum tal-arkivju qabel l-estrazzjoni u l-checksums tal-pakketti qabel tissostitwixxi pakkett installat. Taqra fajls lokali; ma tniżżilx arkivji neqsin. Erġa' ibda l-applikazzjoni wara l-installazzjoni. Jekk ir-release ma għandhiex asset li jaqbel, il-pakkett fakultattiv ma jkunx disponibbli permezz tal-assets ta' dik ir-release.
+
 ## Tqassim tad-Direttorji
 
 ```

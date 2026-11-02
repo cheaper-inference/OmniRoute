@@ -12,7 +12,7 @@
 
 ## Mis see on
 
-OmniRoute registreerib 377 teenusepakkujat, sealhulgas 155 kataloogikirjet, mis on märgistatud kui **free/no-auth**
+OmniRoute registreerib 380 teenusepakkujat, sealhulgas 155 kataloogikirjet, mis on märgistatud kui **free/no-auth**
 (no-auth, tasuta taseme OAuth või tasuta taseme API-võti — vaata
 [tasuta tasemete juhendit](../getting-started/FREE-TIERS-GUIDE.md) ja täielikku
 [tasuta tasemete kataloogi](../reference/FREE_TIERS.md)). Konks on selles: tasuta

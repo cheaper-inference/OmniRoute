@@ -10,7 +10,7 @@ OmniRoute በሦስት ልዩ የዳሽቦርድ ገጾች ላይ ከተከፋ�
 
 | ገጽ             | መስመር                    | ጽንሰ-ሐሳብ                                                                      | ብዛት             |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------- | --------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | ወደ OmniRoute የሚያመለክቷቸው የኮድ መጻፊያ መሣሪያዎች (Client → CLI → OmniRoute → Provider) | 27              |
+| **CLI Code's** | `/dashboard/cli-code`   | ወደ OmniRoute የሚያመለክቷቸው የኮድ መጻፊያ መሣሪያዎች (Client → CLI → OmniRoute → Provider) | 28              |
 | **CLI Agents** | `/dashboard/cli-agents` | ወደ OmniRoute የሚያመለክቷቸው ራስ-ገዝ ወኪሎች (ተመሳሳይ ፍሰት፣ ሰፋ ያለ ወሰን)                     | 11              |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute በstdio/ACP በኩል እንደ backend የሚያስነሳቸው CLIs (ተቃራኒ ፍሰት)                | registryን ይመልከቱ |
 
@@ -118,7 +118,7 @@ kilo, continue) — በምትኩ በአስተናጋጁ ላይ የሚሰራ `host
 
 ---
 
-## 1. የCLI Code ካታሎግ (27 መሣሪያዎች)
+## 1. የCLI Code ካታሎግ (28 መሣሪያዎች)
 
 በ`/dashboard/cli-code` ውስጥ የሚታዩ ሁሉም መሣሪያዎች። `baseUrlSupport: none` ያላቸው መሣሪያዎች ብጁ base URL ከመጠቀም ይልቅ በMITM ወይም በእጅ ማዋቀሪያ መመሪያ በኩል ተገናኝተዋል፦
 
@@ -145,6 +145,7 @@ kilo, continue) — በምትኩ በአስተናጋጁ ላይ የሚሰራ `host
 | grok-build   | Grok Build              | xAI                   | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)           | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba               | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)         | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries        | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere             | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                | none           | mitm           | false        |
@@ -234,16 +235,16 @@ interface ToolBatchStatus {
 
 `configType: "custom"` ያላቸው አዳዲስ መሣሪያዎች የተለዩ የቅንብር API መስመሮች አሏቸው፦
 
-| መስመር                                        | መሣሪያ                                                       |
-| ------------------------------------------- | ---------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                    |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url ፍላግ)                                     |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL፣ የቀድሞ)                       |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL፣ ዋና + የቀድሞ `~/.deepseek` ማመሳሰል) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                      |
-| `POST /api/cli-tools/pi-settings`           | Pi የኮድ ኤጀንት                                                |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml፣ `[model.omniroute]`)      |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + የተለየ `.env` ቁልፍ)      |
+| መስመር                                        | መሣሪያ                                                           |
+| ------------------------------------------- | -------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                        |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url ፍላግ)                                         |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL፣ የቀድሞ)                           |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL፣ ዋና + የቀድሞ `~/.deepseek` ማመሳሰል)     |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                          |
+| `POST /api/cli-tools/pi-settings`           | Pi የኮድ ኤጀንት (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml፣ `[model.omniroute]`)          |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + የተለየ `.env` ቁልፍ)          |
 
 ሁሉም መስመሮች ለስህተት ምላሾች `sanitizeErrorMessage()`ን ይጠቀማሉ (ጥብቅ ደንብ #12)።
 
@@ -345,7 +346,7 @@ pip install aider-chat
 cargo install smelt  # Rust-ተኮር
 
 # Pi coding agent
-# ለመጫን https://github.com/zechnerj/pi-coding-agent ይመልከቱ
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # ለመጫን https://github.com/1jehuang/jcode ይመልከቱ
@@ -458,6 +459,38 @@ EOF
 
 > የthinking variantsን ለመላክ `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > ይጠቀሙ።
+
+---
+
+#### Pi Coding Agent
+
+ኦፊሴላዊውን የPi Coding Agent package በ`npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` ይጫኑ። Pi ብጁ provider-ዎችን ከ`~/.pi/agent/models.json` ያነባል፤ መላውን የagent ማውጫ ለማንቀሳቀስ `PI_CODING_AGENT_DIR` ወደ ሙሉ መንገድ (ወይም በ`~` የሚጀምር መንገድ) ያዘጋጁ። dashboard-ው ይህን ምትክ ቅንብር ይከተላል። Pi ከብጁ endpoint-ዎች model-ዎችን አያገኝም፣ ስለዚህ OmniRoute የተመረጠውን model በ`models[]` ውስጥ የPi `openai-completions` API እና ከOpenAI ጋር የሚስማማውን የOmniRoute `/v1` endpoint በመጠቀም ይጽፋል።
+
+በ**CLI Tools → Pi** ውስጥ endpoint፣ API key እና model ይምረጡ፣ የprovider ቅድመ እይታን ይመርምሩ፣ ከዚያ ይተግብሩ። ቅድመ እይታው የprovider ክፍል ነው፤ Pi በእጅ ሲያዋቅሩ `providers.omniroute` ወደ ነባሩ `models.json` ያዋህዱ፣ ሌሎች provider-ዎችና ቅንብሮች እንዳይቀየሩ።
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+`/model` ሲከፍቱ Pi `models.json` እንደገና ይጭናል። ያዋቀሩትን መንገድ በመረጡት provider id እና model id ይሞክሩ፦
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+ማጣቀሻዎች፦ [የPi model-ዎችና ብጁ provider-ዎች](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)፣ [የPi የአካባቢ ተለዋዋጮች](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)፣ [የPi መጫኛ መመሪያዎች](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md)።
 
 ---
 

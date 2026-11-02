@@ -157,9 +157,10 @@ Cookie სესიად ითვლება მხოლოდ მაში�
 
 - **`publicPolicy`** (`policies/public.ts`) — ყოველთვის აბრუნებს `allow({ kind: "anonymous", id: "anonymous" })`-ს.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — ამოიღებს Bearer-ს და ამოწმებს `validateApiKey()`-ის მეშვეობით. ანონიმურ წვდომაზე გადადის მხოლოდ მაშინ, როდესაც ეფექტური `REQUIRE_API_KEY` ფუნქციური ალამი გამორთულია. ეფექტური ალამი განისაზღვრება `isRequireApiKeyEnabled()`-ის მეშვეობით (`DB ფუნქციური ალმის უპირატესი მნიშვნელობა > process.env.REQUIRE_API_KEY > ნაგულისხმევი მნიშვნელობა`), რათა მართვის პანელის ფუნქციურმა ალმებმა და გარემოს ცვლადებმა თანმიმდევრულად მართონ `/api/v1/*`, `/api/v1beta/*` და მათი ფსევდონიმები; გამხსნელის შეცდომის შემთხვევაში წვდომა იკეტება. კლიენტის API მარშრუტებზე უშვებს მართვის პანელის სესიის მქონე მოთხოვნებსაც (მათ შორის `/api/v1/models`, რომელსაც მართვის პანელის მოდელების კატალოგი იყენებს).
+  როდესაც Entra ID SSO ჩართულია, Bearer-ს, რომელსაც Entra ტოკენის სტრუქტურა აქვს (სამი base64url სეგმენტი, `RS*` ალგორითმი, `kid`), SSO განშტოება ამუშავებს **მანამდე**, სანამ `validateApiKey()` შესრულდება, და მისი გადაწყვეტილება საბოლოოა. ტოკენი არასდროს გადადის API გასაღების გზაზე ან ანონიმურ წვდომაზე დაქვეითების განშტოებაში, ამიტომ იდენტობის პროვაიდერის შეფერხება ღია წვდომად ვერ გადაიქცევა. სტატიკურ API გასაღებებზე ეს არ მოქმედებს. იხილეთ [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — იღებს მართვის პანელის სესიას, მოდელების სინქრონიზაციის შიდა მოთხოვნებს (რომლებიც ემთხვევა `/api/providers/[name]/(sync-models|models)`-ს), ან შემოწმებას მთლიანად გამოტოვებს, თუ `isAuthRequired()` დააბრუნებს false-ს. აბრუნებს 403-ს (`AUTH_001`), როდესაც Bearer ტოკენი წარმოდგენილია, მაგრამ არავალიდურია; სხვა შემთხვევაში — 401-ს. ასევე, ავთენტიფიკაციის ნებისმიერ განშტოებამდე უზრუნველყოფს მარშრუტის დამცავი დონეების (LOCAL_ONLY / ALWAYS_PROTECTED) დაცვას — იხილეთ [მარშრუტის დამცავი დონეები](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-ში მოქცეულ LOCAL_ONLY ბილიკებზე (ამჟამად: `/api/mcp/`) წვდომა შესაძლებელია არა-loopback მისამართებიდანაც, როდესაც Bearer გასაღებს აქვს `manage` წვდომის სფერო; ყველა სხვა LOCAL_ONLY ბილიკი წვდომის სფეროს მიუხედავად მხოლოდ loopback-ზე რჩება მკაცრად შეზღუდული.
 
-წარმატებული პოლიტიკა აბრუნებს `AuthSubject`-ს, სადაც `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. შემდგომ დამმუშავებლებს მისი წაკითხვა შეუძლიათ `assertAuth(request, "CLIENT_API")`-ის მეშვეობით `src/server/authz/assertAuth.ts`-ში, ავთენტიფიკაციის ლოგიკის ხელახლა შესრულების ნაცვლად.
+წარმატებული პოლიტიკა აბრუნებს `AuthSubject`-ს, სადაც `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. შემდგომ დამმუშავებლებს მისი წაკითხვა შეუძლიათ `assertAuth(request, "CLIENT_API")`-ის მეშვეობით `src/server/authz/assertAuth.ts`-ში, ავთენტიფიკაციის ლოგიკის ხელახლა შესრულების ნაცვლად.
 
 ## საჯარო მარშრუტების სია
 
@@ -310,8 +311,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ავთენტიფიცირებული მოთხოვნებისთვის ზემდგომი მხარის (დამმუშავებლის მხარეს არსებული) მოთხოვნის სათაურები ასევე მოიცავს:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<ბოლო-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<ბოლო-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (არასავალდებულო)
 x-omniroute-auth-scopes:    მძიმით გამოყოფილი სია
 ```

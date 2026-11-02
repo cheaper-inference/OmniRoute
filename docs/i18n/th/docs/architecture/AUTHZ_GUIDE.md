@@ -156,9 +156,10 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 - **`publicPolicy`** (`policies/public.ts`) — จะคืนค่า `allow({ kind: "anonymous", id: "anonymous" })` เสมอ
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — ดึง Bearer ออกมา, ตรวจสอบความถูกต้องผ่าน `validateApiKey()` จะเปลี่ยนไปใช้ anonymous ก็ต่อเมื่อแฟล็กคุณสมบัติ `REQUIRE_API_KEY` ที่มีผลบังคับใช้ถูกปิดใช้งาน แฟล็กที่มีผลบังคับใช้จะถูกแก้ไขผ่าน `isRequireApiKeyEnabled()` (การแทนที่แฟล็กคุณสมบัติของ DB > `process.env.REQUIRE_API_KEY` > ค่าเริ่มต้น) ดังนั้นแฟล็กคุณสมบัติของแดชบอร์ดและตัวแปรสภาพแวดล้อมจึงควบคุม `/api/v1/*`, `/api/v1beta/*` และชื่อแทนได้อย่างสอดคล้องกัน; ความล้มเหลวในการแก้ไขจะทำให้การเข้าถึงถูกปฏิเสธ อนุญาตคำขอเซสชันแดชบอร์ดบนเส้นทาง API ของไคลเอ็นต์ (รวมถึง `/api/v1/models` ที่ใช้โดยแคตตาล็อกโมเดลของแดชบอร์ด)
+  เมื่อเปิดใช้ Entra ID SSO แล้ว Bearer ที่มีโครงสร้างเป็นโทเค็น Entra (ส่วน base64url สามส่วน อัลกอริทึม `RS*` และ `kid`) จะถูกจัดการโดยแขนง SSO **ก่อน** `validateApiKey()` และผลตัดสินของแขนงนี้ถือเป็นที่สิ้นสุด โดยจะไม่ไหลต่อไปยังเส้นทางคีย์ API หรือแขนงที่ลดระดับเป็นการเข้าถึงแบบไม่ระบุตัวตน ดังนั้นการหยุดให้บริการของผู้ให้บริการข้อมูลประจำตัวจึงไม่ทำให้ระบบเปิดให้เข้าถึงอย่างอิสระ คีย์ API แบบคงที่ไม่ได้รับผลกระทบ ดู [Entra ID SSO](../security/ENTRA_SSO.md)
 - **`managementPolicy`** (`policies/management.ts`) — ยอมรับเซสชันแดชบอร์ด, คำขอซิงค์โมเดลภายใน (ที่ตรงกับ `/api/providers/[name]/(sync-models|models)`) หรือข้ามทั้งหมดหาก `isAuthRequired()` คืนค่าเป็น false คืนค่า 403 (`AUTH_001`) เมื่อมีโทเค็น Bearer แต่ไม่ถูกต้อง, มิฉะนั้นจะคืนค่า 401 นอกจากนี้ยังบังคับใช้ระดับการป้องกันเส้นทาง (LOCAL_ONLY / ALWAYS_PROTECTED) ก่อนที่จะมีการตรวจสอบการยืนยันตัวตนใดๆ — ดู [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) เส้นทาง LOCAL_ONLY ใน `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ปัจจุบัน: `/api/mcp/`) อาจเข้าถึงได้จากภายนอก loopback เมื่อคีย์ Bearer มีขอบเขต `manage`; เส้นทาง LOCAL_ONLY อื่นๆ ทั้งหมดจะยังคงเป็น strict-loopback โดยไม่คำนึงถึงขอบเขต
 
-นโยบายที่สำเร็จจะคืนค่า `AuthSubject` ที่มี `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` แฮนเดิลเลอร์ปลายน้ำสามารถอ่านได้ผ่าน `assertAuth(request, "CLIENT_API")` ใน `src/server/authz/assertAuth.ts` แทนที่จะเรียกใช้ตรรกะการยืนยันตัวตนซ้ำ
+นโยบายที่สำเร็จจะคืนค่า `AuthSubject` ที่มี `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` แฮนเดิลเลอร์ปลายน้ำสามารถอ่านได้ผ่าน `assertAuth(request, "CLIENT_API")` ใน `src/server/authz/assertAuth.ts` แทนที่จะเรียกใช้ตรรกะการยืนยันตัวตนซ้ำ
 
 ## รายการเส้นทางสาธารณะ
 
@@ -303,8 +304,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 สำหรับการร้องขอที่ผ่านการรับรองความถูกต้อง ส่วนหัวการร้องขอต้นน้ำ (ฝั่งแฮนเดิลเลอร์) จะรวมถึง:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```

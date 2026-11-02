@@ -61,6 +61,19 @@ OmniRoute **Electron 41** + **electron-builder 26.10** əsasında qurulmuş plat
 - `npm run build:mac-x64` / `build:mac-arm64` — tək arxitekturalı macOS yığımları
 - `npm run pack` — lokal sınaq üçün yalnız qovluq şəklində yığım (quraşdırıcı olmadan)
 
+## İxtiyari icra vaxtı paketləri
+
+Masaüstü quruluşları quraşdırıcıları ilə yanaşı ixtiyari icra vaxtı arxivləri yayımlaya bilər. Quraşdırılmış server məzmununda `optional-packs.index.json` olur (Windows və Linux-da `resources/app` altında). `browser-runtime` qeydi üçün `packs[].tarball` oxuyun və **eyni buraxılışdan məhz həmin fayl adını** endirin. Arxiv adlarında SHA-256 heşi var; fərqli quruluşlar fərqli arxiv tələb edə bilər. Endirilmiş fayl adını dəyişməyin.
+
+Quraşdırılmış tətbiqin indeksini və seçilmiş arxivi bir qovluğa köçürün, sonra eyni buraxılışın CLI-sini işlədin:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` arxiv fayl adını deyil, quraşdırma və yoxlama vəziyyətini göstərir. Daxil edilmiş indeks arxivi seçir. Quraşdırma çıxarmadan əvvəl arxivin yoxlama cəmini, quraşdırılmış paketi əvəz etməzdən əvvəl isə paketlərin yoxlama cəmlərini yoxlayır. Yerli faylları oxuyur; çatışmayan arxivləri endirmir. Quraşdırmadan sonra tətbiqi yenidən başladın. Buraxılışda uyğun fayl yoxdursa, ixtiyari paket həmin buraxılışın faylları vasitəsilə əlçatan deyil.
+
 ## Qovluq strukturu
 
 ```

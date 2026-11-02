@@ -42,6 +42,10 @@ krajnjoj tački pomoću promenljivih okruženja (nema opciju `--base-url`):
 
 > Promenljive okruženja se čitaju **samo jednom pri pokretanju** — ponovo pokrenite Claude Code nakon što ih promenite.
 
+За акредитив који се ротира уместо фиксног низа, подесите `apiKeyHelper` у `~/.claude/settings.json` на команду која исписује тренутни акредитив на stdout. Claude Code подразумевано кешира излаз пет минута (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` мења тај рок) и шаље вредност и у `Authorization: Bearer` и у `x-api-key`. Скрипта мора да испише искључиво акредитив — додатна уводна порука изазива отказ помоћног програма у v2.1.227+.
+
+Тако функционише Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` исписује краткотрајни Entra приступни токен који OmniRoute проверава уместо API кључа. Погледајте [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` podešava sve ovo umesto vas: razrešava osnovni URL i token
 iz aktivnog konteksta (tako da `omniroute connect <vps>`, a zatim `omniroute launch`
 jednostavno radi), proverava stanje servera i izvršava `claude`.

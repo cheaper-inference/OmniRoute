@@ -61,6 +61,19 @@ OmniRoute, **Electron 41** + **electron-builder 26.10** ఆధారంగా �
 - `npm run build:mac-x64` / `build:mac-arm64` — ఒకే ఆర్కిటెక్చర్కు సంబంధించిన macOS బిల్డ్లు
 - `npm run pack` — స్థానిక పరీక్ష కోసం డైరెక్టరీ-మాత్రమే బిల్డ్ (ఇన్స్టాలర్ లేదు)
 
+## ఐచ్ఛిక runtime pack లు
+
+Desktop build లు installer లతో పాటు ఐచ్ఛిక runtime archive లను ప్రచురించవచ్చు. Install చేసిన server payload లో `optional-packs.index.json` ఉంటుంది (Windows, Linux లో `resources/app` కింద). `browser-runtime` entry కోసం `packs[].tarball` చదివి, **అదే release నుంచి ఖచ్చితంగా ఆ filename ను డౌన్‌లోడ్ చేయండి**. Archive పేర్లలో SHA-256 digest ఉంటుంది; వేర్వేరు build లకు వేర్వేరు archive లు అవసరం కావచ్చు. డౌన్‌లోడ్ చేసిన filename మార్చవద్దు.
+
+Install చేసిన app index, ఎంచుకున్న archive ను ఒకే directory లోకి కాపీ చేసి, అదే release CLI ఉపయోగించండి:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` installation, verification స్థితులను చూపుతుంది; archive filename ను కాదు. తోడుగా ఉన్న index archive ను ఎంచుకుంటుంది. Installation, extraction కు ముందు archive checksum ను, install చేసిన pack ను భర్తీ చేసే ముందు package checksum లను తనిఖీ చేస్తుంది. ఇది local file లను చదువుతుంది; లేని archive లను డౌన్‌లోడ్ చేయదు. Installation తర్వాత application ను పునఃప్రారంభించండి. Release లో సరిపోలే asset లేకపోతే, ఆ release asset ల ద్వారా optional pack అందుబాటులో ఉండదు.
+
 ## డైరెక్టరీ నిర్మాణం
 
 ```

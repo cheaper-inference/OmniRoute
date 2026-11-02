@@ -42,6 +42,10 @@ na musamman ta hanyar environment variables (ba shi da tutar `--base-url`):
 
 > Ana karanta environment variables **sau ɗaya kawai a lokacin farawa** — sake kunna Claude Code bayan canza su.
 
+Don amfani da shaidar shiga da ke sauyawa maimakon rubutu na dindindin, saita `apiKeyHelper` a cikin `~/.claude/settings.json` zuwa umarnin da ke fitar da shaidar shiga ta yanzu zuwa stdout. Claude Code yana adana fitowarsa a cache na mintuna biyar a matsayin tsohon saiti (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` yana canza wannan lokaci), kuma yana aika ƙimar a cikin duka `Authorization: Bearer` da `x-api-key`. Dole ne script ɗin ya fitar da shaidar shiga kaɗai; ƙarin saƙon banner tare da ita yana sa mataimakin ya gaza a v2.1.227+.
+
+Haka Entra ID SSO yake aiki: `scripts/cli/omniroute-sso.mjs token` yana fitar da token na shiga Entra mai ɗan gajeren lokaci, wanda OmniRoute ke tantancewa maimakon maɓallin API. Duba [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` yana saita maka duk waɗannan: yana gano base URL + token
 daga mahallin da ke aiki (saboda haka `omniroute connect <vps>` sannan `omniroute launch`
 kawai zai yi aiki), yana duba lafiyar sabar, sannan yana aiwatar da `claude`.

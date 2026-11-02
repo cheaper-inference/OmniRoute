@@ -313,12 +313,12 @@ idarəetmə marşrutuna `read` giriş tokeni göndərən çağıranlar HTTP 403
 xətası alır. Bu dərəcələndirmə `scopeSatisfies` vasitəsilə aparılır. O, MCP cədvəlinə
 müraciət etmir və MCP uyğunlaşdırıcısı da ona müraciət etmir.
 
-| Ad fəzası                        | Etimadnamə                                                           | Yoxlayıcı                      | Uğurlu yoxlamanın icazə verdiyi əməl                        |
-| :------------------------------- | :------------------------------------------------------------------- | :----------------------------- | :---------------------------------------------------------- |
-| API açarının idarə edilməsi      | `api_keys.scopes`                                                    | `hasManageScope`               | Həmin Bearer açarı üçün idarəetmə REST interfeysi           |
-| API açarının əlavə əhatə dairəsi | eyni massiv, bir dəqiq sətir                                         | aşağıda adı göstərilən köməkçi | Yalnız həmin bir imkan                                      |
-| MCP alət əhatə dairələri         | eyni massiv, əks halda MCP `_meta`, əks halda `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | Məcburi tətbiq aktiv olduqdan sonra həmin alət              |
-| Giriş tokeni                     | `oma_live_…`                                                         | `scopeSatisfies`               | Metodu və yolu həmin dərəcəni tələb edən idarəetmə marşrutu |
+| Ad fəzası                        | Etimadnamə                                                                           | Yoxlayıcı                      | Uğurlu yoxlamanın icazə verdiyi əməl                        |
+| :------------------------------- | :----------------------------------------------------------------------------------- | :----------------------------- | :---------------------------------------------------------- |
+| API açarının idarə edilməsi      | `api_keys.scopes`                                                                    | `hasManageScope`               | Həmin Bearer açarı üçün idarəetmə REST interfeysi           |
+| API açarının əlavə əhatə dairəsi | eyni massiv, bir dəqiq sətir                                                         | aşağıda adı göstərilən köməkçi | Yalnız həmin bir imkan                                      |
+| MCP alət əhatə dairələri         | eyni massiv, yoxdursa MCP `_meta` (yalnız HTTP/SSE), yoxdursa `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | Məcburi tətbiq aktiv olduqdan sonra həmin alət              |
+| Giriş tokeni                     | `oma_live_…`                                                                         | `scopeSatisfies`               | Metodu və yolu həmin dərəcəni tələb edən idarəetmə marşrutu |
 
 Hər etimadnamənin yaradılması
 [İdarəetmə autentifikasiyası](../guides/MANAGEMENT-AUTH.md) bölməsində izah edilir.
@@ -368,8 +368,11 @@ MCP alət əhatə dairələri arasında heç bir iyerarxiya yoxdur.
 `false`). O deaktiv olduqda `evaluateToolScopes` çağırışa icazə verir və kataloqu
 ötürür. Aktiv olduqda HTTP, Bearer açarının `api_keys.scopes` dəyərini `authInfo` kimi
 istifadə edir ([Açar üzrə HTTP əhatə dairəsinin bağlanması](#per-key-http-scope-binding-7895)
-bölməsinə baxın). Heç bir açar əhatə dairəsi müəyyən edilmədikdə verilmiş çoxluq əvvəlcə
-MCP `_meta`, sonra isə `OMNIROUTE_MCP_SCOPES` dəyərinə keçir.
+Heç bir açar
+scope-u həll olunmasa, verilmiş dəstə MCP `_meta`-ya (yalnız HTTP/SSE çağıranlar
+üçün, HTTP autentifikasiya kontekstində nəzərə alınır; stdio çağıranının `_meta`-sı
+nəzərə alınmır, çünki onu klient idarə edir və o, çağıran üzrə şəxsiyyət daşımır),
+sonra isə `OMNIROUTE_MCP_SCOPES`-ə keçir.
 
 #### Giriş tokeninin əhatə dairələri
 
@@ -469,8 +472,7 @@ hər alət çağırışına çatan `extra.authInfo.scopes` Bearer açarının ö
 `_meta` və `OMNIROUTE_MCP_SCOPES` mühit ehtiyat variantından üstünlük verirdi — bu dəyişiklik yalnız HTTP üzərindən əvvəllər məlumat almayan həmin birinci,
 ən yüksək prioritetli mənbəni doldurur. Heç bir API açarı müəyyən edilmədikdə
 (başlıq yoxdur, açar etibarsızdır), `authInfo` `undefined` olaraq qalır və müəyyənləşdirmə dəyişmədən mövcud
-`meta`/mühit zəncirinə keçir. stdio hər çağıran üçün ayrıca identikliyə malik deyil (bax:
-`mcpCallerIdentity.ts`) və bu dəyişiklikdən təsirlənmir — o, `_meta`/mühit ehtiyat zəncirində qalır.
+`meta`/mühit zəncirinə keçir. stdio-nun çağıran başına şəxsiyyəti yoxdur (bax: `mcpCallerIdentity.ts`) və açar başına bağlanmadan təsirlənmir — o, `_meta` addımını keçir (`_meta` yalnız HTTP auth kontekstində nəzərə alınır, #15159) və yalnız `OMNIROUTE_MCP_SCOPES` mühit açarından həll olunur.
 
 **Dar əhatə dairəli HTTP/SSE çağıranları üçün tətbiqetmə
 `OMNIROUTE_MCP_ENFORCE_SCOPES` dəyərindən asılı olmayaraq məcburi aktivləşdirilir.** `OMNIROUTE_MCP_ENFORCE_SCOPES` üçün standart `false` dəyəri yalnız

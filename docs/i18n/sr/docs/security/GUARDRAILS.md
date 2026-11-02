@@ -466,8 +466,9 @@ oba podrazumevano isključena.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Nepodešeno znači
   svi tipovi (ponašanje od pre nego što je ovo podešavanje uvedeno). Obrazac
   `ssn_us` u mehanizmu za obradu zahteva se preslikava na `ssn`. Šabloni
-  (Minimal, Standard, Financial, Brazilian, USA, Full) samo popunjavaju polja
+  (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) samo popunjavaju polja
   za potvrdu u korisničkom interfejsu.
+- **Идентификатори GDPR-а и POPIA-е** — дванаест уграђених ID-јева који покривају личне идентификаторе EU-а и Јужне Африке (табела у наставку). Њихови регуларни изрази, валидатори и ознаке надлежности налазе се у једној табели, `src/shared/utils/piiPatterns.ts`, коју користе и чистач одговора (`src/lib/piiSanitizer.ts`) и маскер захтева (`src/shared/utils/inputSanitizer.ts`). Подударање се прикрива само када га валидатор прихвати; сам низ цифри никад није довољан. Оператер који је сачувао сужени избор пре настанка тих ID-јева задржава претходно понашање док не означи нове ID-јеве.
 - **Prilagođeni obrasci** — do 20 regex ili wildcard obrazaca (`*` = do 64
   karaktera koji nisu beline, `?` = jedan). Poklapanja postaju
   `[CUSTOM_REDACTED]`. Svaki obrazac prolazi kroz
@@ -495,6 +496,25 @@ Podešavanja se čuvaju u tabeli `key_value` (imenski prostor `pii_settings`,
 
 Sve tri zahtevaju autentifikaciju za upravljanje i validiraju telo zahteva
 pomoću Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Идентификатори GDPR-а (EU) и POPIA-е (Јужна Африка)
+
+| ID                  | Идентификатор                     | Провера                                                                          |
+| ------------------- | --------------------------------- | -------------------------------------------------------------------------------- |
+| `iban`              | IBAN                              | Позната држава, тачна дужина за ту државу, ISO 13616 MOD-97-10                   |
+| `eu_vat`            | ПДВ број EU-а                     | Познати префикс државе чланице и формат броја те државе (без упита VIES)         |
+| `es_dni_nie`        | Шпански DNI / NIE                 | Контролно слово (вредност mod 23); NIE је `X/Y/Z` + 7 цифри                      |
+| `it_codice_fiscale` | Италијански Codice Fiscale        | Контролно слово из табела непарних/парних положаја                               |
+| `pl_pesel`          | Пољски PESEL                      | Пондерисани контролни збир и прихватљиви распони кодираног месеца/дана рођења    |
+| `nl_bsn`            | Холандски BSN                     | Провера 11 (тежине 9..2, -1)                                                     |
+| `de_steuer_id`      | Немачки Steuer-ID                 | ISO 7064 Mod 11,10 и правила структуре цифри (без почетне 0)                     |
+| `se_personnummer`   | Шведски personnummer              | Luhn над последњих десет цифри и веродостојан датум рођења (10 или 12 цифри)     |
+| `za_id`             | Јужноафрички идентификациони број | Luhn над свих 13 цифри, ваљан месец/дан рођења, цифра држављанства 0 или 1       |
+| `za_phone`          | Јужноафрички телефон              | Префикс `+27` / `27` или национални облик `0..` написан с размаком или спојницом |
+| `za_vat`            | Јужноафрички ПДВ број             | 10 цифри с почетном `4` **и** "VAT" / "BTW" у претходних 48 знакова              |
+| `za_tax_ref`        | Јужноафричка пореска референца    | 10 цифри с почетном `0`-`3`, Luhn **и** "tax" / "SARS" у претходних 48 знакова   |
+
+Будући да се формати састављени само од цифри преклапају с бројевима поруџбина, градњи и временским ознакама, најслабији (`za_vat`, `za_tax_ref`) захтевају назнаку кључне речи, а сам десетоцифрени број `0..` не сматра се јужноафричким телефонским бројем. IBAN-и с размацима (`GB29 NWBK ...`) не препознају се. При стримовању назнака се тражи само унутар тренутног блока. ID-јеви се налазе испред општих телефонских образаца, па проверени идентификатор задржава сопствену заменску ознаку (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Шаблони `gdpr` и `popia` бирају идентификаторе EU-а односно Јужне Африке. Само маскирање и даље захтева изричито укључивање (Hard Rule #20): ништа овде не мења подразумевану вредност заставице функционалности.
 
 ### Prompt Injection (`promptInjection.ts`)
 

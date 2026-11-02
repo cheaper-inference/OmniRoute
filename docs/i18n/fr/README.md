@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — La passerelle d'IA gratuite
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ne cessez jamais de coder. Chaque outil d'IA → 377 fournisseurs — plus de 150 gratuits — via un point de terminaison unique. Claude Code, Codex, Cursor, Cline, Copilot et Antigravity vers Claude / GPT / Gemini GRATUITS avec basculement automatique. La compression combinée RTK + Caveman économise 15 à 95 % de jetons (environ 89 % en moyenne) — ne dépassez jamais les limites. 377 fournisseurs d'IA · plus de 150 offres gratuites · environ 1,62 milliard de jetons gratuits/mois · 20 stratégies de routage · 0 $ pour commencer."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ne cessez jamais de coder. Chaque outil d'IA → 380 fournisseurs — plus de 150 gratuits — via un point de terminaison unique. Claude Code, Codex, Cursor, Cline, Copilot et Antigravity vers Claude / GPT / Gemini GRATUITS avec basculement automatique. La compression combinée RTK + Caveman économise 15 à 95 % de jetons (environ 89 % en moyenne) — ne dépassez jamais les limites. 380 fournisseurs d'IA · plus de 150 offres gratuites · environ 1,62 milliard de jetons gratuits/mois · 20 stratégies de routage · 0 $ pour commencer."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Utilisez vos propres comptes fournisseurs.** Il s’agit d’une estimation agrégée des offres gratuites de tiers auxquelles vous êtes séparément admissible, et non d’une allocation de tokens fournie par OmniRoute. Inscrivez-vous, obtenez des identifiants lorsque cela est nécessaire et connectez les fournisseurs que vous pouvez utiliser ; chaque fournisseur contrôle ses limites, sa disponibilité et ses conditions.
 >
-> Cumuler manuellement les offres gratuites est fastidieux — des dizaines de SDK, des dizaines de limites de débit et aucune idée de la quantité dont vous disposez réellement. OmniRoute répertorie **484 entrées d’offres gratuites réparties entre 34 clés de pools récurrents** et calcule le total de tokens annoncé à partir des **17 pools disposant d’un budget mensuel positif publié, auxquels s’ajoutent cinq plafonds Groq par modèle**, avec déduplication des pools partagés. Les quotas qui ne deviennent disponibles qu’après une vérification d’identité régionale (actuellement : ModelScope) sont affichés séparément, soit +~6M après vérification d’identité régionale, et ne sont jamais inclus dans le total annoncé. Le résultat reste visible dans le tableau de bord (`/dashboard/free-tiers`).
+> Cumuler manuellement les offres gratuites est fastidieux — des dizaines de SDK, des dizaines de limites de débit et aucune idée de la quantité dont vous disposez réellement. OmniRoute répertorie **485 entrées d’offres gratuites réparties entre 34 clés de pools récurrents** et calcule le total de tokens annoncé à partir des **17 pools disposant d’un budget mensuel positif publié, auxquels s’ajoutent cinq plafonds Groq par modèle**, avec déduplication des pools partagés. Les quotas qui ne deviennent disponibles qu’après une vérification d’identité régionale (actuellement : ModelScope) sont affichés séparément, soit +~6M après vérification d’identité régionale, et ne sont jamais inclus dans le total annoncé. Le résultat reste visible dans le tableau de bord (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Carte du budget des offres gratuites d’OmniRoute : ~1.62B de tokens gratuits par mois en régime permanent, jusqu’à ~2.22B le premier mois avec les crédits d’inscription, provenant de 34 clés documentées de pools récurrents couvrant 484 entrées d’offres gratuites répertoriées derrière un seul point de terminaison. Calcul transparent avec déduplication des pools — chaque pool partagé n’est compté qu’une seule fois, y compris 17 pools récurrents disposant d’un budget mensuel positif de tokens publié, auxquels s’ajoutent cinq plafonds Groq par modèle ; 12 fournisseurs sont marqués comme étant à éviter dans le catalogue des risques liés aux conditions afin que vous puissiez décider. La barre de budget comprend Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (cinq plafonds par modèle) et des pools plus petits, ainsi que les crédits d’inscription du premier mois et les fournisseurs gratuits en permanence sans plafond de tokens, présentés séparément afin qu’ils ne gonflent jamais le total annoncé. Utilisation et solde restants en direct sur /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Carte du budget des offres gratuites d’OmniRoute : ~1.62B de tokens gratuits par mois en régime permanent, jusqu’à ~2.22B le premier mois avec les crédits d’inscription, provenant de 34 clés documentées de pools récurrents couvrant 485 entrées d’offres gratuites répertoriées derrière un seul point de terminaison. Calcul transparent avec déduplication des pools — chaque pool partagé n’est compté qu’une seule fois, y compris 17 pools récurrents disposant d’un budget mensuel positif de tokens publié, auxquels s’ajoutent cinq plafonds Groq par modèle ; 12 fournisseurs sont marqués comme étant à éviter dans le catalogue des risques liés aux conditions afin que vous puissiez décider. La barre de budget comprend Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (cinq plafonds par modèle) et des pools plus petits, ainsi que les crédits d’inscription du premier mois et les fournisseurs gratuits en permanence sans plafond de tokens, présentés séparément afin qu’ils ne gonflent jamais le total annoncé. Utilisation et solde restants en direct sur /dashboard/free-tiers."/>
 
 > Résumé animé de la page en direct `/dashboard/free-tiers`. Méthodologie complète (déduplication des pools, niveaux de crédits, conditions des fournisseurs) : **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -71,7 +71,7 @@
 
 |                                     |          v3.8.50          | **v3.8.51** |        `v3.8.53+`        |
 | ----------------------------------- | :-----------------------: | :---------: | :----------------------: |
-| 🌐 Fournisseurs                     |            352            |   **358**   |           377            |
+| 🌐 Fournisseurs                     |            352            |   **358**   |           380            |
 | 🧠 ID uniques de modèles de chat    |           1320            |  **1374**   |           1475           |
 | 🖼️ Passerelle multimodale           | 🆕 vision + audio + vidéo |      ✓      |            ✓             |
 | 📡 Catalogue gratuit de Radar       |    🆕 sur inscription     |      ✓      |            ✓             |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Fonctionnalités</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Fournisseurs</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Fournisseurs</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI et MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La promesse — Un point de terminaison unique et 377 fournisseurs. Le basculement automatique maintient le routage tant qu’une autre cible opérationnelle est disponible. Six piliers : basculement résilient entre 377 fournisseurs · jusqu’à 95 % d’économie de jetons sur les charges de travail éligibles · démarrage à 0 $ avec plus de 150 offres gratuites et 52 fournisseurs récurrents/sans clé gratuits à vie · 37 intégrations CLI/agents via une configuration unique · compatibilité avec les API OpenAI, Claude, Gemini et Responses sur /v1 · contrôles de production comprenant des disjoncteurs, la furtivité TLS, 110 outils MCP, A2A, la mémoire, des garde-fous, des évaluations et plus de 56 000 déclarations de tests statiques réparties dans plus de 7 800 fichiers de test suivis."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La promesse — Un point de terminaison unique et 380 fournisseurs. Le basculement automatique maintient le routage tant qu’une autre cible opérationnelle est disponible. Six piliers : basculement résilient entre 380 fournisseurs · jusqu’à 95 % d’économie de jetons sur les charges de travail éligibles · démarrage à 0 $ avec plus de 150 offres gratuites et 52 fournisseurs récurrents/sans clé gratuits à vie · 39 intégrations CLI/agents via une configuration unique · compatibilité avec les API OpenAI, Claude, Gemini et Responses sur /v1 · contrôles de production comprenant des disjoncteurs, la furtivité TLS, 110 outils MCP, A2A, la mémoire, des garde-fous, des évaluations et plus de 56 000 déclarations de tests statiques réparties dans plus de 7 800 fichiers de test suivis."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Les **20** stratégies — à combiner librement à chaque étape du combo :
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ce qui distingue OmniRoute — un instantané daté des fonctionnalités comparant 9router, OpenRouter, CLIProxyAPI et LiteLLM selon 13 capacités. OmniRoute : 377 fournisseurs, plus de 150 offres gratuites intégrées, 20 stratégies de routage, compression des jetons avec 12 moteurs, serveur MCP intégré doté de 110 outils, protocole d’agents A2A, mémoire persistante, garde-fous, agents cloud, dissimulation de l’empreinte TLS, Desktop/Termux/PWA et interface utilisateur traduite dans 67 langues. OmniRoute est sous licence MIT et peut être auto-hébergé. Les capacités et les chiffres des concurrents peuvent évoluer ; consultez la méthodologie indiquée par le lien."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ce qui distingue OmniRoute — un instantané daté des fonctionnalités comparant 9router, OpenRouter, CLIProxyAPI et LiteLLM selon 13 capacités. OmniRoute : 380 fournisseurs, plus de 150 offres gratuites intégrées, 20 stratégies de routage, compression des jetons avec 12 moteurs, serveur MCP intégré doté de 110 outils, protocole d’agents A2A, mémoire persistante, garde-fous, agents cloud, dissimulation de l’empreinte TLS, Desktop/Termux/PWA et interface utilisateur traduite dans 67 langues. OmniRoute est sous licence MIT et peut être auto-hébergé. Les capacités et les chiffres des concurrents peuvent évoluer ; consultez la méthodologie indiquée par le lien."/>
 
 <sub>📊 Méthodologie complète et détails par fonctionnalité par rapport à 9router, OpenRouter, CLIProxyAPI et LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar est facultatif et utilise uniquement des requêtes GET. Le client OmniRout
 - **🖼️ Nouveaux points de terminaison** — `/v1/ocr` (Mistral OCR) et `/v1/audio/translations` (façon Whisper) complètent la gamme multimédia. → [Référence de l'API](docs/reference/API_REFERENCE.md)
 - **🎨 Génération d'images, de vidéos et d'audio** — une seule API pour les médias : xAI Grok Imagine et les vidéos Novita AI, ComfyUI, Magnific, Adobe Firefly, Segmind, ainsi que des fournisseurs vocaux comme ElevenLabs. → [Référence de l'API](docs/reference/API_REFERENCE.md)
 - **🌍 Déploiement et exploitation** — `basePath` pour le proxy inverse, détection automatique de la langue du navigateur, suivi des appareils par clé, confiance MITM sans privilèges root et localisation zh-TW. → [Environnement](docs/reference/ENVIRONMENT.md)
-- **🤝 Davantage de fournisseurs et d'agents** — agents cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) avec navigateur + connexion OAuth, fiche dédiée à Ollama, Claude Opus 5 et Sonnet 5, partenariat officiel avec Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… et un **catalogue actualisé de 377 fournisseurs**. → [Fournisseurs](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Davantage de fournisseurs et d'agents** — agents cloud (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) avec navigateur + connexion OAuth, fiche dédiée à Ollama, Claude Opus 5 et Sonnet 5, partenariat officiel avec Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… et un **catalogue actualisé de 380 fournisseurs**. → [Fournisseurs](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparence du routage** — chaque réponse contient un en-tête `X-OmniRoute-Decision` indiquant la stratégie, le fournisseur et la latence qui l'ont servie ; une nouvelle stratégie de combo `cache-optimized` et le facteur Auto-Combo `cacheAffinity` redirigent les requêtes répétées vers la connexion détenant le préfixe en cache ; enfin, un point de terminaison en lecture seule `/v1/auto-combo/{channel}/candidates` expose le pool actif de candidats d'un canal `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Performances et infrastructure locales** — Redis local en un clic, outils de déploiement de relais Cloudflare Workers / Deno Deploy, Bifrost et Mux en tant que services intégrés supervisés. → [Services intégrés](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Également inclus** — framework de plugins + place de marché, frameworks de compétences Omni/Agent/GitHub, intégration de coffres Obsidian (22 outils MCP), API Batch et Files compatibles avec OpenAI, cache sémantique des réponses, ludification avec classements, découverte d’agents ACP (15 agents intégrés), exportation planifiée des journaux vers BigQuery, diffusion parallèle multimodèle `auto/chaos`, passerelle de bot Telegram, gestionnaire de versions intégré à l’application et classements LMArena-ELO des fournisseurs gratuits. → [Documentation](docs/README.md)
@@ -657,7 +657,7 @@ Radar est facultatif et utilise uniquement des requêtes GET. Le client OmniRout
 <b>＋ fonctionne également avec</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>tout outil compatible avec OpenAI</b>
 </div>
 
-<sub>📖 Configuration de chacun des 38 outils (27 CLI de codage + 11 agents CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Extension OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Configuration de chacun des 39 outils (28 CLI de codage + 11 agents CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Extension OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ que les secrets apparaissent dans l’historique de votre shell. → [Intégrati
 
 <div align="center">
 
-## 🌐 377 fournisseurs d’IA — 153 répertoriés comme gratuits
+## 🌐 380 fournisseurs d’IA — 156 répertoriés comme gratuits
 
 </div>
 
-> **377 fournisseurs enregistrés** dans les collections canoniques de chat, de médias, de recherche, locales, d’agents cloud et système, dont **153 disposant de la métadonnée de découverte `hasFree: true`**. Le registre des modèles de chat couvre **239 fournisseurs / 3 059 paires fournisseur-modèle distinctes / 1 475 identifiants de modèles bruts** ; le catalogue distinct des budgets gratuits comporte **484 entrées par modèle**, **34 pools récurrents** et **52 fournisseurs gratuits à vie récurrents/sans clé**. Ces dénominateurs sont différents par conception ; les définitions et les calculs dédupliqués par pool figurent dans la [Référence des fournisseurs](docs/reference/PROVIDER_REFERENCE.md) et les [Offres gratuites](docs/reference/FREE_TIERS.md).
+> **380 fournisseurs enregistrés** dans les collections canoniques de chat, de médias, de recherche, locales, d’agents cloud et système, dont **156 disposant de la métadonnée de découverte `hasFree: true`**. Le registre des modèles de chat couvre **239 fournisseurs / 3 059 paires fournisseur-modèle distinctes / 1 475 identifiants de modèles bruts** ; le catalogue distinct des budgets gratuits comporte **485 entrées par modèle**, **34 pools récurrents** et **52 fournisseurs gratuits à vie récurrents/sans clé**. Ces dénominateurs sont différents par conception ; les définitions et les calculs dédupliqués par pool figurent dans la [Référence des fournisseurs](docs/reference/PROVIDER_REFERENCE.md) et les [Offres gratuites](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1311,7 +1311,7 @@ Métriques canoniques au 2026-10-18 : **1.976 vidéos uniques** · **20.220.289 
   <tr><td nowrap><b>Environnement d’exécution</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Langage</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> dans <code>src/</code> et <code>open-sse/</code> (aucun <code>any</code> dans le cœur depuis la v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Base de données</b></td><td>better-sqlite3 (SQLite, journalisation WAL) + LowDB (ancien format JSON) — 147 modules métier, 213 migrations</td></tr>
+  <tr><td nowrap><b>Base de données</b></td><td>better-sqlite3 (SQLite, journalisation WAL) + LowDB (ancien format JSON) — 147 modules métier, 219 migrations</td></tr>
   <tr><td nowrap><b>Mémoire</b></td><td>Recherche en texte intégral SQLite FTS5 + plongements vectoriels quantifiés en int8, décroissance typée</td></tr>
   <tr><td nowrap><b>Schémas</b></td><td>Zod 4 — validation des entrées/sorties des outils MCP + contrats d’API</td></tr>
   <tr><td nowrap><b>Protocoles</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1374,7 +1374,7 @@ Métriques canoniques au 2026-10-18 : **1.976 vidéos uniques** · **20.220.289 
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Guide de résilience</a></b></td><td>Disjoncteurs, délais de récupération, file d’attente, prévention des afflux simultanés, usurpation TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Moteur Auto-Combo</a></b></td><td>Notation selon 16 facteurs, packs de modes, autoréparation</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Guide des proxys</a></b></td><td>Système de proxys à 3 niveaux, place de marché 1proxy, opérations CRUD sur le registre</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Offres gratuites</a></b></td><td>Répertoire consolidé : 34 pools récurrents documentés / 484 entrées d’offres gratuites cataloguées</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Offres gratuites</a></b></td><td>Répertoire consolidé : 34 pools récurrents documentés / 485 entrées d’offres gratuites cataloguées</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galerie des fonctionnalités</a></b></td><td>Visite visuelle du tableau de bord avec captures d’écran</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Documentation du code source</a></b></td><td>Présentation du code source adaptée aux débutants</td></tr>
 </table>

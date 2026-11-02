@@ -10,7 +10,7 @@ OmniRoute uchta alohida boshqaruv paneli sahifasida joylashgan CLI vositalarinin
 
 | Sahifa         | Yoʻnalish               | Tushuncha                                                                                  | Soni             |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------ | ---------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute’ga yoʻnaltiriladigan dasturlash vositalari (Mijoz → CLI → OmniRoute → Provayder) | 27               |
+| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute’ga yoʻnaltiriladigan dasturlash vositalari (Mijoz → CLI → OmniRoute → Provayder) | 28               |
 | **CLI Agents** | `/dashboard/cli-agents` | OmniRoute’ga yoʻnaltiriladigan avtonom agentlar (xuddi shu oqim, kengroq qamrov)           | 11               |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute stdio/ACP orqali backend sifatida ishga tushiradigan CLI’lar (teskari oqim)      | reyestrga qarang |
 
@@ -102,7 +102,7 @@ Kataloglangan vositalarning hammasini ham aniqlash, sozlash yoki ishga tushirish
 
 ---
 
-## 1. CLI Code katalogi (27 ta vosita)
+## 1. CLI Code katalogi (28 ta vosita)
 
 `/dashboard/cli-code` sahifasida ko‘rsatiladigan barcha vositalar. `baseUrlSupport: none` qiymatiga ega vositalar maxsus asosiy URL o‘rniga MITM yoki qo‘llanma orqali sozlanadi:
 
@@ -129,6 +129,7 @@ Kataloglangan vositalarning hammasini ham aniqlash, sozlash yoki ishga tushirish
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -218,16 +219,16 @@ interface ToolBatchStatus {
 
 `configType: "custom"` ga ega yangi vositalar uchun maxsus sozlamalar API marshrutlari mavjud:
 
-| Marshrut                                    | Vosita                                                               |
-| ------------------------------------------- | -------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                              |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url bayrogʻi)                                          |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, eski usul)                            |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, asosiy + eski `~/.deepseek` sinxronlash) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                |
-| `POST /api/cli-tools/pi-settings`           | Pi dasturlash agenti                                                 |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + maxsus `.env` kaliti)           |
+| Marshrut                                    | Vosita                                                                  |
+| ------------------------------------------- | ----------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                 |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url bayrogʻi)                                             |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, eski usul)                               |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, asosiy + eski `~/.deepseek` sinxronlash)    |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                   |
+| `POST /api/cli-tools/pi-settings`           | Pi dasturlash agenti (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                   |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + maxsus `.env` kaliti)              |
 
 Barcha marshrutlar xato javoblari uchun `sanitizeErrorMessage()` dan foydalanadi (Qatʼiy qoida #12).
 
@@ -331,7 +332,7 @@ pip install aider-chat
 cargo install smelt  # Rust asosida
 
 # Pi dasturlash agenti
-# o‘rnatish uchun https://github.com/zechnerj/pi-coding-agent sahifasiga qarang
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # o‘rnatish uchun https://github.com/1jehuang/jcode sahifasiga qarang
@@ -444,6 +445,40 @@ EOF
 > Fikrlash variantlarini yuborish uchun
 > `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > buyrugʻidan foydalaning.
+
+---
+
+#### Pi Coding Agent
+
+Rasmiy Pi Coding Agent paketini `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` bilan o‘rnating. Pi maxsus provayderlarni `~/.pi/agent/models.json` dan o‘qiydi; agent katalogini butunlay ko‘chirish uchun `PI_CODING_AGENT_DIR` ni mutlaq yo‘lga (yoki `~` bilan boshlanuvchi yo‘lga) belgilang. Panel shu almashtiruvchi sozlamaga amal qiladi. Pi maxsus manzillardan modellarni topmaydi, shuning uchun OmniRoute tanlangan modelni Pi’ning `openai-completions` API’si va OmniRoute’ning OpenAI-mos `/v1` nuqtasidan foydalanib `models[]` ga yozadi.
+
+**CLI vositalari → Pi** da manzil, API kaliti va modelni tanlang, provayder ko‘rinishini tekshiring, so‘ng qo‘llang. Oldindan ko‘rinish provayder parchasidir: Pi’ni qo‘lda sozlashda boshqa provayderlar va sozlamalar saqlanishi uchun `providers.omniroute` ni mavjud `models.json` ga birlashtiring.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+`/model` ochilganda Pi `models.json` ni qayta yuklaydi. Tanlagan provayder va model ID’laringiz bilan sozlangan yo‘lni sinang:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Manbalar: [Pi modellari va maxsus provayderlar](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md),
+[Pi muhit o‘zgaruvchilari](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md),
+[Pi o‘rnatish ko‘rsatmalari](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

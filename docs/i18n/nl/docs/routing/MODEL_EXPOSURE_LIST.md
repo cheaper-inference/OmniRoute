@@ -67,3 +67,15 @@ ander instellingenveld — in tegenstelling tot het exportfilter voor combostapp
 `hidePaidModels` is hier geen risico op rehydratatie: een geweigerde id die is opgenomen in een
 geëxporteerde combostap is de expliciete routeringskeuze van de operator zelf, niet iets wat aan de
 exportgrens moet worden verwijderd.
+
+## Alleen combo's weergeven (`exposeCombosOnly`)
+
+Een afzonderlijke booleaanse instelling, eveneens expliciet in te schakelen en standaard `false`, voor implementaties waarin combo's het publieke modelaanbod vormen en providers alleen backends zijn. Bij `true` behoudt de publieke lijst (`GET /v1/models`, `GET /v1` en de andere `/v1`-ontdekkingsroutes op basis van `getUnifiedModelsResponse()`) alleen rijen met `owned_by: "combo"`: gebruikerscombo's plus de ingebouwde `auto/*`-combo's (tenzij `hideAutoCombos` ze verbergt). Dezelfde rijtest als bij `catalogScope: "combos"` per sleutel wordt gebruikt; de eigen toestaan/weigeren/scopefilters van een sleutel blijven daarbovenop gelden.
+
+Schakel dit in of uit via **Settings → Routing → Models API listing**, of met `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Net als de bovenstaande lijsten verandert dit alleen wat wordt aangekondigd:
+
+- een expliciete `provider/model`-ID wordt nog steeds verwerkt en `GET /v1/models/{id}` blijft deze opzoeken;
+- de dashboardcatalogus (`GET /api/models/catalog`, gebruikt door de modelkiezers) wordt niet beperkt;
+- dit wordt niet overgenomen in de kandidatenpools van `auto/*`, zodat `auto/*`-combo's hun volledige pool behouden.

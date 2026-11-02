@@ -64,6 +64,19 @@ Workspace `electron/` cũng cung cấp:
 - `npm run build:mac-x64` / `build:mac-arm64` — các bản dựng macOS cho từng kiến trúc
 - `npm run pack` — bản dựng chỉ gồm thư mục để kiểm thử cục bộ (không có trình cài đặt)
 
+## Các gói runtime tùy chọn
+
+Bản dựng máy tính để bàn có thể phát hành các tệp lưu trữ runtime tùy chọn cùng bộ cài đặt. Phần máy chủ đã cài chứa `optional-packs.index.json` (nằm dưới `resources/app` trên Windows và Linux). Với mục `browser-runtime`, đọc `packs[].tarball` và tải **đúng tên tệp đó từ cùng bản phát hành**. Tên tệp lưu trữ chứa mã băm SHA-256; các bản dựng khác nhau có thể cần các tệp khác nhau. Giữ nguyên tên tệp đã tải.
+
+Sao chép chỉ mục của ứng dụng đã cài và tệp lưu trữ đã chọn vào cùng một thư mục, rồi dùng CLI từ cùng bản phát hành:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` hiển thị trạng thái cài đặt và xác minh, không phải tên tệp lưu trữ. Chỉ mục đi kèm chọn tệp lưu trữ. Quá trình cài đặt xác minh checksum của tệp lưu trữ trước khi giải nén và checksum của các gói trước khi thay thế một gói đã cài. Nó đọc tệp cục bộ; không tải xuống tệp lưu trữ còn thiếu. Khởi động lại ứng dụng sau khi cài. Nếu bản phát hành không có tài sản tương ứng, không thể lấy gói tùy chọn đó qua các tài sản của bản phát hành ấy.
+
 ## Bố cục thư mục
 
 ```

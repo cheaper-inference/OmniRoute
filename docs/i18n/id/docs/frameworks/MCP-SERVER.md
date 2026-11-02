@@ -310,12 +310,12 @@ Katalog alat terdapat di [Cakupan alat MCP](#mcp-tool-scopes).
 `Access token scope 'read' is insufficient; 'write' required.`
 Peringkat tersebut adalah `scopeSatisfies`. Fungsi ini tidak memeriksa tabel MCP, dan pencocok MCP juga tidak memeriksanya.
 
-| Namespace             | Kredensial                                                                         | Pemeriksa                         | Kelulusan mengizinkan                                                   |
-| :-------------------- | :--------------------------------------------------------------------------------- | :-------------------------------- | :---------------------------------------------------------------------- |
-| Pengelolaan kunci API | `api_keys.scopes`                                                                  | `hasManageScope`                  | REST pengelolaan untuk kunci Bearer tersebut                            |
-| Aditif kunci API      | array yang sama, satu string persis                                                | pembantu yang disebutkan di bawah | Hanya satu kapabilitas tersebut                                         |
-| Cakupan alat MCP      | array yang sama, jika tidak ada MCP `_meta`, jika tidak ada `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                    | Alat tersebut, setelah penerapan diaktifkan                             |
-| Token akses           | `oma_live_…`                                                                       | `scopeSatisfies`                  | Rute pengelolaan yang metode dan path-nya memerlukan peringkat tersebut |
+| Namespace             | Kredensial                                                                                          | Pemeriksa                         | Kelulusan mengizinkan                                                   |
+| :-------------------- | :-------------------------------------------------------------------------------------------------- | :-------------------------------- | :---------------------------------------------------------------------- |
+| Pengelolaan kunci API | `api_keys.scopes`                                                                                   | `hasManageScope`                  | REST pengelolaan untuk kunci Bearer tersebut                            |
+| Aditif kunci API      | array yang sama, satu string persis                                                                 | pembantu yang disebutkan di bawah | Hanya satu kapabilitas tersebut                                         |
+| Cakupan alat MCP      | array yang sama, jika tidak ada `_meta` MCP (hanya HTTP/SSE), jika tidak ada `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                    | Alat tersebut, setelah penerapan diaktifkan                             |
+| Token akses           | `oma_live_…`                                                                                        | `scopeSatisfies`                  | Rute pengelolaan yang metode dan path-nya memerlukan peringkat tersebut |
 
 Penerbitan setiap kredensial dibahas dalam
 [Autentikasi Pengelolaan](../guides/MANAGEMENT-AUTH.md).
@@ -352,7 +352,10 @@ Pemanggilan yang sama gagal untuk `admin`, `mcp:connect`, `read`, dan `write` ji
 
 Penerapan dinonaktifkan kecuali `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (nilai default
 `false`). Saat dinonaktifkan, `evaluateToolScopes` mengizinkan pemanggilan dan melewati katalog. Saat diaktifkan, HTTP menggunakan `api_keys.scopes` milik kunci Bearer sebagai `authInfo` (lihat [Pengikatan cakupan HTTP per kunci](#per-key-http-scope-binding-7895)).
-Jika tidak ada cakupan kunci yang dapat ditentukan, kumpulan cakupan yang diberikan akan beralih ke MCP `_meta`, lalu ke `OMNIROUTE_MCP_SCOPES`.
+Ketika tidak ada cakupan key yang ter-resolve, himpunan yang diberikan jatuh ke `_meta` MCP (hanya dihormati
+untuk pemanggil HTTP/SSE, di dalam konteks autentikasi HTTP; `_meta` milik pemanggil stdio diabaikan
+karena dikendalikan klien dan tidak membawa identitas per-pemanggil), lalu
+`OMNIROUTE_MCP_SCOPES`.
 
 #### Cakupan token akses
 
@@ -443,8 +446,7 @@ dan meneruskannya ke `transport.handleRequest(req, { authInfo })` milik SDK MCP,
 fallback `_meta` dan variabel lingkungan `OMNIROUTE_MCP_SCOPES` — perubahan ini hanya mengisi sumber pertama
 dengan prioritas tertinggi tersebut, yang sebelumnya tidak terisi melalui HTTP. Ketika tidak ada kunci API yang dapat ditemukan
 (tidak ada header atau kunci tidak valid), `authInfo` tetap `undefined` dan proses resolusi beralih ke
-rantai meta/variabel lingkungan yang sudah ada tanpa perubahan. stdio tidak memiliki identitas per pemanggil (lihat
-`mcpCallerIdentity.ts`) dan tidak terpengaruh — stdio tetap menggunakan rantai fallback `_meta`/variabel lingkungan.
+rantai meta/variabel lingkungan yang sudah ada tanpa perubahan. stdio tidak memiliki identitas per-pemanggil (lihat `mcpCallerIdentity.ts`) dan tidak terpengaruh oleh pengikatan per-key — stdio melewati langkah `_meta` (`_meta` hanya dihormati di dalam konteks autentikasi HTTP, #15159) dan menyelesaikan dari env key `OMNIROUTE_MCP_SCOPES` saja.
 
 **Penerapan cakupan dipaksakan untuk pemanggil HTTP/SSE bercakupan terbatas, terlepas dari
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Nilai default `false` untuk `OMNIROUTE_MCP_ENFORCE_SCOPES` hanya

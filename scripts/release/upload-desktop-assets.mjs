@@ -9,9 +9,10 @@ export function desktopAssets(directory) {
     .filter(
       (entry) =>
         entry.isFile() &&
-        /(?:\.dmg|\.exe|\.AppImage|\.deb|\.blockmap|\.yml|\.source\.tar\.gz|\.source\.zip)$/.test(
+        (/(?:\.dmg|\.exe|\.AppImage|\.deb|\.blockmap|\.yml|\.source\.tar\.gz|\.source\.zip)$/.test(
           entry.name
-        )
+        ) ||
+          /^optional-pack-[a-z0-9-]+-[a-f0-9]{64}\.tar\.gz$/.test(entry.name))
     )
     .map((entry) => join(directory, entry.name))
     .sort();

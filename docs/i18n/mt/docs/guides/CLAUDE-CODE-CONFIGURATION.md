@@ -42,6 +42,10 @@ personalizzat permezz ta’ varjabbli tal-ambjent (m’għandux flag `--base-url
 
 > Il-varjabbli tal-ambjent jinqraw **darba biss waqt l-istartjar** — erġa’ ibda Claude Code wara li tibdilhom.
 
+Għal kredenzjali li jinbidlu perjodikament minflok string fissa, issettja `apiKeyHelper` f’`~/.claude/settings.json` għal kmand li jistampa l-valur attwali tal-kredenzjali fuq stdout. Claude Code iżomm l-output fil-cache għal ħames minuti b’mod awtomatiku (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` jissostitwixxi dak it-tul) u jibgħat il-valur kemm f’`Authorization: Bearer` kif ukoll f’`x-api-key`. L-iskript irid jistampa l-kredenzjali biss: banner addizzjonali jikkawża falliment tal-helper f’v2.1.227+.
+
+Hekk jaħdem Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` jistampa token ta’ aċċess Entra b’ħajja qasira li OmniRoute jivverifika minflok ċavetta API. Ara [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` jissettjahom kollha għalik: isolvi l-URL ewlieni + it-token
 mill-kuntest attiv (għalhekk `omniroute connect <vps>` u mbagħad `omniroute launch`
 jaħdmu direttament), jiċċekkja s-saħħa tas-server, u jeżegwixxi `claude`.

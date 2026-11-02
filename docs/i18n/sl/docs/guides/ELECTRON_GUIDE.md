@@ -64,6 +64,19 @@ Delovni prostor `electron/` ponuja tudi:
 - `npm run build:mac-x64` / `build:mac-arm64` — gradnje macOS za posamezno arhitekturo
 - `npm run pack` — gradnja samo imenika za lokalno preizkušanje (brez namestitvenega programa)
 
+## Izbirni izvajalni paketi
+
+Namizne gradnje lahko poleg namestitvenih programov objavijo izbirne izvajalne arhive. Nameščena strežniška vsebina vključuje `optional-packs.index.json` (pod `resources/app` v Windows in Linux). Za vnos `browser-runtime` preberite `packs[].tarball` in prenesite **točno to ime datoteke iz iste izdaje**. Imena arhivov vsebujejo izvleček SHA-256; različne gradnje lahko potrebujejo različne arhive. Ime prenesene datoteke pustite nespremenjeno.
+
+Kopirajte indeks nameščene aplikacije in izbrani arhiv v en imenik, nato uporabite CLI iz iste izdaje:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` prikaže stanje namestitve in preverjanja, ne imena arhiva. Arhiv izbere priloženi indeks. Namestitev preveri kontrolno vsoto arhiva pred razširitvijo in kontrolne vsote paketov pred zamenjavo nameščenega paketa. Bere lokalne datoteke; manjkajočih arhivov ne prenaša. Po namestitvi znova zaženite aplikacijo. Če izdaja nima ustrezne priložene datoteke, izbirni paket ni na voljo med datotekami te izdaje.
+
 ## Razporeditev imenikov
 
 ```

@@ -156,7 +156,7 @@ OmniRoute nodrošina 6 A2A prasmes, kas piesaistītas `src/lib/a2a/taskExecution
 | Darbspējas pārskats     | `health-report`      | Apkopo ķēdes pārtraucēja, nogaidīšanas perioda un bloķēšanas stāvokli katram nodrošinātājam                                                                  | darbspēja, noturība          | "Parādīt visu nodrošinātāju darbspējas statusu" |
 | Iespēju saraksts        | `list-capabilities`  | Atgriež pilnu 45 ierakstu Agent Skills katalogu (23 API + 21 CLI + 1 konfigurācija) kā Markdown tabulu ar neapstrādātiem SKILL.md URL konteksta ievietošanai | katalogs, atklāšana, prasmes | "Uzskaitīt visas OmniRoute iespējas"            |
 
-> Agent Card jāuztur saskaņots ar aktuālo 377 nodrošinātāju katalogu; nodrošinātāju skaits un bezmaksas/bez autentifikācijas metadati tiek iegūti no izpildlaika reģistra.
+> Agent Card jāuztur saskaņots ar aktuālo 380 nodrošinātāju katalogu; nodrošinātāju skaits un bezmaksas/bez autentifikācijas metadati tiek iegūti no izpildlaika reģistra.
 
 ### Prasmes `list-capabilities` detalizēts apraksts
 
@@ -208,7 +208,7 @@ JSON-RPC galapunkts `/a2a` ir oficiālais A2A ieejas punkts. Tālāk minētie RE
    };
    ```
 
-3. **Publicējiet aģenta kartītē:** failā `src/app/.well-known/agent.json/route.ts` pievienojiet masīvam `skills`:
+3. **Publicējiet aģenta kartē:** failā `src/lib/a2a/agentCardMetadata.ts` (ko kopīgi izmanto `/.well-known/agent.json` un `/.well-known/agent-card.json`) papildiniet masīvu `skills`:
 
    ```json
    {

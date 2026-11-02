@@ -14,7 +14,7 @@ Claude Code සඳහා පමණි — `AGENTS.md` තුළ දැනටම�
 ## Worktree හුදෙකලා කිරීම — Claude Code සඳහා විශේෂිත කරුණු
 
 සම්පූර්ණ අනිවාර්ය worktree ප්රොටොකෝලය (base-branch තහවුරු කිරීම, `.claude/worktrees/` නිල මාවත, `cp -al` node_modules, ඉවත් කිරීමේ නීති)
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) හි ඇත (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) හි ඇත (`AGENTS.md` →
 Git වැඩ ප්රවාහය → "Worktree හුදෙකලා කිරීම" හි සාරාංශගත කර ඇත). Claude-Code-විශේෂිත කරුණු:
 
 - ක්රියාකරු දැනටමත් ඔබට පවසා නොමැති නම්, `AskUserQuestion` හරහා ක්රියාකරු සමඟ base branch

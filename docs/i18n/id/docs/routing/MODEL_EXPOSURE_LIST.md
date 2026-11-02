@@ -66,3 +66,15 @@ field pengaturan lainnya — tidak seperti filter ekspor langkah kombo milik `hi
 ada risiko rehidrasi di sini: ID yang ditolak dan disematkan dalam langkah kombo yang diekspor
 merupakan pilihan perutean eksplisit milik operator sendiri, bukan sesuatu yang perlu dihapus oleh
 batas ekspor.
+
+## Daftar khusus combo (`exposeCombosOnly`)
+
+Boolean terpisah, juga opt-in dan bernilai `false` secara default, untuk deployment yang menjadikan combo sebagai model publik sementara provider hanya menjadi backend. Saat bernilai `true`, daftar publik (`GET /v1/models`, `GET /v1`, dan rute penemuan `/v1` lain yang memakai `getUnifiedModelsResponse()`) hanya mempertahankan baris dengan `owned_by: "combo"`: combo pengguna serta combo bawaan `auto/*` (kecuali disembunyikan oleh `hideAutoCombos`). Pengujian barisnya sama dengan `catalogScope: "combos"` per kunci, dan filter izinkan/tolak/scope milik kunci tetap diterapkan di atasnya.
+
+Ubah di **Settings → Routing → Models API listing**, atau dengan `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Seperti daftar di atas, opsi ini hanya mengubah apa yang diumumkan:
+
+- id `provider/model` yang eksplisit tetap dikirim, dan `GET /v1/models/{id}` tetap menemukannya;
+- katalog dashboard (`GET /api/models/catalog`, yang dipakai pemilih model) tidak dipersempit;
+- opsi ini tidak dicerminkan ke kumpulan kandidat `auto/*`, sehingga combo `auto/*` mempertahankan seluruh kumpulannya.

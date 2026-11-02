@@ -488,7 +488,7 @@ Este processa:
 
 | Ficheiro                       | Finalidade                                                      |
 | ------------------------------ | --------------------------------------------------------------- |
-| `providerRegistry.ts`          | Registo de modelos de chat sobre o catálogo de 377 fornecedores |
+| `providerRegistry.ts`          | Registo de modelos de chat sobre o catálogo de 380 fornecedores |
 | `providerModels.ts`            | Aliases de modelos, mapeamento de formatos                      |
 | `constants.ts`                 | Tempos limite, limites, códigos de estado                       |
 | `defaultThinkingSignature.ts`  | Assinatura de raciocínio predefinida do Claude                  |

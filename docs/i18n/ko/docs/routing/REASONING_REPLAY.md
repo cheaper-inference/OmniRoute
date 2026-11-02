@@ -161,6 +161,22 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 - **쓰기에도 게이트 적용:** `chatCore.ts`의 두 호출 지점(비스트리밍 및 스트리밍)은 `requiresReasoningReplay(provider, model)`이 `true`일 때만 `cacheReasoningFromAssistantMessage()`를 호출합니다. 이는 읽기 측에서 확인하는 것과 동일한 조건자입니다. 재생 제공자를 전혀 사용하지 않는 설치 환경에서는 추론이 포함된 모든 응답에 대한 쓰기, 인덱스 업데이트 및 try/catch 비용이 더 이상 발생하지 않습니다.
 - **비엄격 제공자:** `requiresReasoningReplay`가 `false`이고 대상 형식이 OpenAI인 경우, 변환기는 발신 메시지에서 모든 `reasoning_content` 필드를 **제거합니다**. OpenAI Chat Completions는 이 필드를 허용하지 않습니다.
 
+## Muse 불투명 추론의 소유권
+
+Muse(`muse-code`)는 호출자에 연결된 불투명 추론(`encrypted_content`)을 반환합니다. 이를 다른 계정이나 재발급한 자격 증명으로 재전송하면 업스트림에서 실패하므로, 네이티브 OAuth 요청은 요청별 로테이션 대신 세션 단위 소유권을 사용합니다(`src/sse/services/museSessionOwnership.ts`, 적용 위치 `src/sse/handlers/chat.ts`). 명시적으로 선택한 API 키 연결과 API 키 전용 구성은 이 소유권 모드 없이 기존 라우팅을 유지합니다.
+
+- 매 턴에 안정적인 세션 ID를 제공하세요. `x-omniroute-session-id`, `x-omniroute-session`, `x-session-id`, `x-codex-session-id`를 쓰거나 본문에서 `prompt_cache_key`, `session_id`, `conversation_id`, `metadata.session_id`를 사용하세요(우선순위는 이 순서). 네이티브 OAuth 계정이 둘 이상 활성화되어 있을 때 ID가 없거나 공백이면 400을 반환합니다. OAuth 계정이 하나뿐이면 로테이션할 대상이 없으므로 해당 요청은 고정되지 않은 라우팅을 유지합니다. 범위에는 호출자의 OmniRoute API 키 ID가 포함됩니다.
+- 새 독립 세션은 API 키 연결 정책이 허용하는 활성 네이티브 OAuth 계정 사이에서 연결 ID 순서로 라운드로빈 배정됩니다. 라운드로빈은 연결 쿨다운 중이거나 최종 상태(`banned`, `expired`, `credits_exhausted`)이거나 요청한 모델에 대해 잠긴 계정을 건너뜁니다. Muse 업스트림 실패도 다른 제공자처럼 쿨다운과 브레이커 상태를 기록합니다. 명시적으로 강제한 연결은 새 세션에서 라운드로빈을 우회하지만, 소유자가 성공 응답을 제공한 후에는 그 소유자를 덮어쓸 수 없습니다.
+- 소유자가 성공 응답을 제공하기 전까지, 소유자를 사용할 수 없게 된 세션은 정상 계정에 다시 확보됩니다. 첫 성공 응답 이후에는 세션이 30일 동안 유휴 상태가 될 때까지 해당 소유자에 고정됩니다(`MUSE_SESSION_IDLE_TTL_MS`).
+- 모든 이어지는 요청과 도구 결과 턴은 세션 소유자에 고정됩니다. 연결, 계정 식별 정보, 추론 자격 증명의 세대를 자격 증명 갱신 후 재시도를 포함한 업스트림 시도 전에 다시 확인합니다. Responses 호출 ID/항목 참조와 Chat Completions 도구 호출 ID는 해당 세션과 세대에 대해 기록되어 있어야 합니다.
+- `muse_session_ownership` 네임스페이스의 SQLite `key_value` 레코드(`src/lib/db/museSessionOwnership.ts`)는 재시작 후에도 소유권과 로테이션 커서를 유지합니다. 매 확보 및 응답 제공 시 세션의 활동 시각을 갱신합니다. `MUSE_SESSION_IDLE_TTL_MS`보다 오래 유휴 상태인 세션은 최대 10분에 한 번, 크기가 제한된 배치로 정리됩니다(소유자 고정, 응답 제공 플래그, 기록된 불투명 내용/참조 해시). 따라서 이후 그 이력을 재전송하면 알 수 없는 소유자로 판단하여 안전하게 거부합니다. 레코드에는 연결 ID와 계정 식별 정보, 자격 증명, 불투명 내용, 연속 요청 참조의 해시가 들어가며, 비밀 정보나 대화 이력은 들어가지 않습니다. 클라이언트는 전체 이력과 불투명 추론을 보관하고 전송해야 합니다.
+- 알 수 없거나 다른 소유자의 불투명 추론, 누락된 소유자, 사용할 수 없는 소유자 계정, 또는 기록된 이력이 있는 상태에서의 세대 변경은 명시적 4xx/503으로 안전하게 거부됩니다. 다른 계정으로 조용히 장애 조치하거나 추론을 버리지 않습니다.
+- 동일한 계정에서 재발급한 키는 세션에 재전송 가능한 이력이 기록되지 않은 경우에만 채택됩니다. 기록된 세션은 새로 시작할 때까지 계속 안전하게 거부됩니다.
+- 빈 업스트림 응답(`upstream_empty_response` / `empty_response`, 호출자에게 아무것도 출력되지 않음)은 동일한 소유자에서 최대 두 번 재시도하며, 각각 0.5초와 1.5초 후에 수행합니다(`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`). 모든 시도가 비어 있으면 쿨다운이나 브레이커 표시 없이 원래 502를 반환하므로, 일시적으로 불안정한 응답이 소유자를 잠그지 않습니다.
+- 모든 `muse-code` 요청은 스트리밍 쓰기를 포함하여 의미 기반 캐시의 읽기와 쓰기를 우회하므로, 캐시된 불투명 출력에 다른 세션 소유자가 지정될 수 없습니다.
+
+회귀 방지 테스트: `tests/unit/muse-session-ownership.test.ts`, `tests/unit/muse-session-ownership-retention.test.ts`, `tests/unit/muse-empty-response-retry.test.ts` 및 `tests/unit/chatcore-semantic-cache.test.ts`.
+
 ## 참고 자료
 
 - [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — 회로 차단기, 쿨다운, 모델 잠금

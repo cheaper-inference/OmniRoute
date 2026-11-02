@@ -10,7 +10,7 @@ OmniRoute ინტეგრირებულია CLI ხელსაწყ�
 
 | გვერდი         | მარშრუტი                | კონცეფცია                                                                                        | რაოდენობა      |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------------ | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | კოდირების ხელსაწყოები, რომლებსაც OmniRoute-ზე მიუთითებთ (კლიენტი → CLI → OmniRoute → პროვაიდერი) | 27             |
+| **CLI Code's** | `/dashboard/cli-code`   | კოდირების ხელსაწყოები, რომლებსაც OmniRoute-ზე მიუთითებთ (კლიენტი → CLI → OmniRoute → პროვაიდერი) | 28             |
 | **CLI Agents** | `/dashboard/cli-agents` | ავტონომიური აგენტები, რომლებსაც OmniRoute-ზე მიუთითებთ (იგივე ნაკადი, უფრო ფართო არეალი)         | 11             |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI-ები, რომლებსაც OmniRoute stdio/ACP-ის საშუალებით ბექენდად უშვებს (შებრუნებული ნაკადი)        | იხილეთ რეესტრი |
 
@@ -137,7 +137,7 @@ kilo, continue) — `hostSetupCommand`-ით (მაგ., `omniroute setup-open
 
 ---
 
-## 1. CLI Code-ის კატალოგი (27 ინსტრუმენტი)
+## 1. CLI Code-ის კატალოგი (28 ინსტრუმენტი)
 
 ყველა ინსტრუმენტი, რომელიც `/dashboard/cli-code`-ში ჩანს. ინსტრუმენტები, რომელთა `baseUrlSupport: none`-ია, მორგებული საბაზისო URL-ის ნაცვლად MITM-ის ან სახელმძღვანელოს მეშვეობით არის დაკავშირებული:
 
@@ -164,6 +164,7 @@ kilo, continue) — `hostSetupCommand`-ით (მაგ., `omniroute setup-open
 | grok-build   | Grok Build              | xAI                     | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)             | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba                 | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)           | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries          | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere               | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                  | none           | mitm           | false        |
@@ -260,7 +261,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, მოძველებული)                                     |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ძირითადი + მოძველებული `~/.deepseek` სინქრონიზაცია) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                           |
-| `POST /api/cli-tools/pi-settings`           | Pi კოდირების აგენტი                                                             |
+| `POST /api/cli-tools/pi-settings`           | Pi კოდირების აგენტი (`~/.pi/agent/models.json`, `providers.omniroute`)          |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                           |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + გამოყოფილი `.env` გასაღები)                |
 
@@ -366,7 +367,7 @@ pip install aider-chat
 cargo install smelt  # Rust-ზე დაფუძნებული
 
 # Pi პროგრამირების აგენტი
-# ინსტალაციისთვის იხილეთ https://github.com/zechnerj/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # ინსტალაციისთვის იხილეთ https://github.com/1jehuang/jcode
@@ -478,6 +479,38 @@ EOF
 **ტესტი:** `opencode`
 
 > აზროვნების ვარიანტების გასაგზავნად გამოიყენეთ `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`.
+
+---
+
+#### Pi Coding Agent
+
+Pi Coding Agent-ის ოფიციალური პაკეტი დააინსტალირეთ `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`-ით. Pi მორგებულ პროვაიდერებს `~/.pi/agent/models.json`-იდან კითხულობს; აგენტის მთელი საქაღალდის გადასატანად `PI_CODING_AGENT_DIR`-ში აბსოლუტური გზა (ან `~`-ით დაწყებული გზა) მიუთითეთ. მართვის პანელი ამ გადაფარვას მიჰყვება. Pi მორგებული endpoint-ებიდან მოდელებს არ აღმოაჩენს, ამიტომ OmniRoute შერჩეულ მოდელს `models[]`-ში წერს Pi-ის `openai-completions` API-ითა და OmniRoute-ის OpenAI-სთან თავსებადი `/v1` endpoint-ით.
+
+**CLI Tools → Pi**-ში აირჩიეთ endpoint, API გასაღები და მოდელი, გადაამოწმეთ პროვაიდერის წინასწარი ხედი და შემდეგ გამოიყენეთ. წინასწარი ხედი პროვაიდერის ფრაგმენტია: Pi-ის ხელით გამართვისას `providers.omniroute` არსებულ `models.json`-ში ჩაამატეთ, რომ სხვა პროვაიდერები და პარამეტრები უცვლელი დარჩეს.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi ხელახლა ტვირთავს `models.json`-ს, როცა `/model`-ს გახსნით. გამართული მარშრუტი თქვენს მიერ შერჩეული პროვაიდერის id-ითა და მოდელის id-ით შეამოწმეთ:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+წყაროები: [Pi-ის მოდელები და მორგებული პროვაიდერები](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi-ის გარემოს ცვლადები](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi-ის ინსტალაციის ინსტრუქცია](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

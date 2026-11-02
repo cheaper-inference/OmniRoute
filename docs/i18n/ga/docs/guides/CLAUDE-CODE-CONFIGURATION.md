@@ -42,6 +42,10 @@ críochphointe saincheaptha le hathróga timpeallachta (níl bratach `--base-url
 
 > Léitear athróga timpeallachta **uair amháin ag am tosaithe** — atosaigh Claude Code tar éis iad a athrú.
 
+Chun dintiúr a rothlaíonn a úsáid in áit teaghráin sheasta, socraigh `apiKeyHelper` in `~/.claude/settings.json` mar ordú a phriontálann an dintiúr reatha chuig stdout. Cuireann Claude Code a aschur i dtaisce ar feadh cúig nóiméad de réir réamhshocraithe (sáraíonn `CLAUDE_CODE_API_KEY_HELPER_TTL_MS` an tréimhse sin) agus seolann sé an luach in `Authorization: Bearer` agus in `x-api-key` araon. Ní mór don script an dintiúr amháin a phriontáil; má bhíonn meirge bhreise leis, teipeann ar an gcúntóir in v2.1.227+.
+
+Seo mar a oibríonn Entra ID SSO: priontálann `scripts/cli/omniroute-sso.mjs token` comhartha rochtana gearrshaolach Entra a fhíoraíonn OmniRoute in áit eochrach API. Féach [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 Socraíonn `omniroute launch` iad seo go léir duit: réitíonn sé an bun-URL + an comhartha
 ón gcomhthéacs gníomhach (mar sin oibríonn `omniroute connect <vps>` agus ansin
 `omniroute launch` gan aon chumraíocht eile), déanann sé seiceáil sláinte ar an

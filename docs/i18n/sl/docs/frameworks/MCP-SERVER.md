@@ -313,12 +313,12 @@ dostopnem žetonu `oma_live_…` so tri različna dovoljenja. Klicatelji, ki po�
 To hierarhijo določa `scopeSatisfies`. Ne uporablja tabele MCP, prav tako je ne
 uporablja preverjevalnik ujemanja MCP.
 
-| Imenski prostor           | Poverilnica                                                 | Preverjevalnik            | Uspešno preverjanje dovoljuje                             |
-| :------------------------ | :---------------------------------------------------------- | :------------------------ | :-------------------------------------------------------- |
-| Upravljanje s ključem API | `api_keys.scopes`                                           | `hasManageScope`          | Upravljavski REST za ta ključ Bearer                      |
-| Dodatni obseg ključa API  | isto polje, en natančen niz                                 | spodaj imenovani pomočnik | Samo to posamezno zmožnost                                |
-| Obsegi orodij MCP         | isto polje, sicer `_meta` MCP, sicer `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | To orodje, ko je uveljavljanje omogočeno                  |
-| Dostopni žeton            | `oma_live_…`                                                | `scopeSatisfies`          | Upravljavsko pot, katere metoda in pot zahtevata to raven |
+| Imenski prostor           | Poverilnica                                                               | Preverjevalnik            | Uspešno preverjanje dovoljuje                             |
+| :------------------------ | :------------------------------------------------------------------------ | :------------------------ | :-------------------------------------------------------- |
+| Upravljanje s ključem API | `api_keys.scopes`                                                         | `hasManageScope`          | Upravljavski REST za ta ključ Bearer                      |
+| Dodatni obseg ključa API  | isto polje, en natančen niz                                               | spodaj imenovani pomočnik | Samo to posamezno zmožnost                                |
+| Obsegi orodij MCP         | isti niz, sicer MCP `_meta` (samo HTTP/SSE), sicer `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | To orodje, ko je uveljavljanje omogočeno                  |
+| Dostopni žeton            | `oma_live_…`                                                              | `scopeSatisfies`          | Upravljavsko pot, katere metoda in pot zahtevata to raven |
 
 Ustvarjanje posameznih poverilnic je opisano v razdelku
 [Preverjanje pristnosti za upravljanje](../guides/MANAGEMENT-AUTH.md).
@@ -367,8 +367,10 @@ Uveljavljanje je izklopljeno, razen če je `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (
 `false`). Ko je izklopljeno, `evaluateToolScopes` dovoli klic in preskoči
 katalog. Ko je vklopljeno, HTTP uporabi `api_keys.scopes` ključa Bearer kot
 `authInfo` (glejte [Vezava obsega HTTP na posamezni ključ](#per-key-http-scope-binding-7895)).
-Če ni mogoče razrešiti nobenega obsega ključa, se dodeljena množica najprej določi iz `_meta`
-MCP, nato pa iz `OMNIROUTE_MCP_SCOPES`.
+Ko se obsegi nobenega ključa ne razrešijo, se podeljeni nabor prelije na MCP
+`_meta` (upoštevan samo za klicatelje HTTP/SSE, znotraj HTTP avtentikacijskega
+konteksta; `_meta` klicatelja stdio je prezrt, ker ga nadzoruje odjemalec in ne
+nosi identitete posameznega klicatelja), nato na `OMNIROUTE_MCP_SCOPES`.
 
 #### Obsegi dostopnih žetonov
 
@@ -466,8 +468,7 @@ Funkcija `resolveCallerScopeContext()` iz `scopeEnforcement.ts` je že dajala pr
 nadomestnimi možnostmi `_meta` in okoljsko spremenljivko `OMNIROUTE_MCP_SCOPES` — ta sprememba le zapolni ta prvi vir
 z najvišjo prednostjo, ki pri uporabi HTTP prej ni prejemal podatkov. Kadar ni mogoče razrešiti nobenega ključa API
 (ni glave ali je ključ neveljaven), `authInfo` ostane `undefined`, razreševanje pa se nespremenjeno nadaljuje po
-obstoječi verigi `meta`/okolje. stdio nima identitete posameznega klicatelja (glejte
-`mcpCallerIdentity.ts`) in ta sprememba nanj ne vpliva — še naprej uporablja nadomestno verigo `_meta`/okolje.
+obstoječi verigi `meta`/okolje. stdio nima identitete posameznega klicatelja (glej `mcpCallerIdentity.ts`) in ni prizadeten z vezavo na posamezni ključ — preskoči korak `_meta` (`_meta` se upošteva le znotraj HTTP avtentikacijskega konteksta, #15159) in se razreši le iz env ključa `OMNIROUTE_MCP_SCOPES`.
 
 **Uveljavljanje je za klicatelje HTTP/SSE z ozko določenimi obsegi prisilno vklopljeno ne glede na
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Privzeta vrednost `false` za `OMNIROUTE_MCP_ENFORCE_SCOPES` je varna samo

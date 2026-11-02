@@ -391,6 +391,12 @@ jobs:
             [ -f "$file" ] && cp "$file" ../../release-assets/
           done
 
+          # Publish exactly the content-addressed packs named by this build.
+          cd ../..
+          node scripts/release/collect-optional-packs.mjs \
+            .build/electron-standalone/optional-packs.index.json \
+            .build/optional-packs release-assets
+
       - name: Upload artifacts
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:

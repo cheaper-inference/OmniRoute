@@ -172,9 +172,10 @@ Fiecare clasă de rută are o politică în `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — returnează întotdeauna `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extrage Bearer și îl validează prin `validateApiKey()`. Permite continuarea ca anonim numai când indicatorul de funcționalitate efectiv `REQUIRE_API_KEY` este dezactivat. Valoarea efectivă a indicatorului este determinată prin `isRequireApiKeyEnabled()` (`suprascriere prin indicatorul de funcționalitate din DB > process.env.REQUIRE_API_KEY > valoare implicită`), astfel încât indicatorii de funcționalitate din panoul de control și variabilele de mediu să controleze în mod consecvent `/api/v1/*`, `/api/v1beta/*` și aliasurile; erorile mecanismului de determinare duc la refuzarea accesului. Permite cereri cu sesiune a panoului de control pe rutele API pentru clienți (inclusiv `/api/v1/models`, utilizată de catalogul de modele al panoului de control).
+  Când Entra ID SSO este activat, un Bearer care are structura unui token Entra (trei segmente base64url, algoritm `RS*`, `kid`) este tratat de ramura SSO **înainte** de `validateApiKey()`, iar verdictul acesteia este definitiv — nu ajunge niciodată la calea pentru cheia API sau la ramura de degradare la acces anonim. Astfel, indisponibilitatea furnizorului de identitate nu poate deschide accesul. Cheile API statice nu sunt afectate. Consultați [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — acceptă sesiunea panoului de control, cererile interne de sincronizare a modelelor (potrivite cu `/api/providers/[name]/(sync-models|models)`) sau omite complet verificarea dacă `isAuthRequired()` returnează false. Returnează 403 (`AUTH_001`) când este prezent un token Bearer nevalid și 401 în caz contrar. De asemenea, aplică nivelurile de protecție a rutelor (LOCAL_ONLY / ALWAYS_PROTECTED) înaintea oricărei ramuri de autentificare — consultați [Nivelurile de protecție a rutelor](../security/ROUTE_GUARD_TIERS.md). Căile LOCAL_ONLY din `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (în prezent: `/api/mcp/`) pot fi accesate din afara interfeței loopback când cheia Bearer include domeniul `manage`; toate celelalte căi LOCAL_ONLY rămân limitate strict la interfața loopback, indiferent de domeniu.
 
-O politică reușită returnează `AuthSubject` cu `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Gestionarii din aval îl pot citi prin `assertAuth(request, "CLIENT_API")` în `src/server/authz/assertAuth.ts`, în loc să execute din nou logica de autentificare.
+O politică reușită returnează `AuthSubject` cu `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Gestionarii din aval îl pot citi prin `assertAuth(request, "CLIENT_API")` în `src/server/authz/assertAuth.ts`, în loc să execute din nou logica de autentificare.
 
 ## Lista rutelor publice
 
@@ -335,8 +336,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Pentru solicitările autentificate, antetele solicitării upstream (din partea handlerului) includ și:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<ultimele-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<ultimele-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (opțional)
 x-omniroute-auth-scopes:    listă separată prin virgule
 ```

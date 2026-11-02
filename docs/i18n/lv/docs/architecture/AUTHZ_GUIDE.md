@@ -165,9 +165,10 @@ Katrai maršrutu klasei ir politika direktorijā `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — vienmēr atgriež `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — izgūst Bearer un validē to ar `validateApiKey()`. Pāriet uz anonīmu piekļuvi tikai tad, ja efektīvais `REQUIRE_API_KEY` funkcionalitātes karogs ir atspējots. Efektīvais karogs tiek noteikts ar `isRequireApiKeyEnabled()` (`DB funkcionalitātes karoga pārrakstīšana > process.env.REQUIRE_API_KEY > noklusējums`), lai informācijas paneļa funkcionalitātes karogi un vides mainīgie konsekventi pārvaldītu `/api/v1/*`, `/api/v1beta/*` un aizstājējvārdus; atrisinātāja kļūmes izraisa piekļuves liegšanu. Atļauj informācijas paneļa sesijas pieprasījumus klienta API maršrutos (tostarp `/api/v1/models`, ko izmanto informācijas paneļa modeļu katalogs).
+  Ja Entra ID SSO ir iespējots, Bearer, kura struktūra atbilst Entra piekļuves pilnvarai (trīs base64url segmenti, algoritms `RS*`, `kid`), apstrādā SSO atzars **pirms** `validateApiKey()`, un tā lēmums ir galīgs. Pilnvara nekad nenonāk API atslēgas ceļā vai atzarā, kas pāriet uz anonīmu piekļuvi, tāpēc identitātes nodrošinātāja darbības pārtraukums nevar radīt brīvu piekļuvi. Statiskās API atslēgas tas neietekmē. Skatiet [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — pieņem informācijas paneļa sesiju un iekšējos modeļu sinhronizācijas pieprasījumus (kas atbilst `/api/providers/[name]/(sync-models|models)`) vai pilnībā izlaiž pārbaudi, ja `isAuthRequired()` atgriež false. Atgriež 403 (`AUTH_001`), ja Bearer pilnvara ir norādīta, bet nederīga; citos gadījumos atgriež 401. Pirms jebkura autentifikācijas atzara piemēro arī maršrutu aizsardzības līmeņus (LOCAL_ONLY / ALWAYS_PROTECTED) — skatiet [Maršrutu aizsardzības līmeņi](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY` ceļiem, kas iekļauti `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (pašlaik: `/api/mcp/`), var piekļūt no adresēm ārpus lokālās atgriezeniskās cilpas, ja Bearer atslēgai ir `manage` tvērums; visi pārējie `LOCAL_ONLY` ceļi neatkarīgi no tvēruma joprojām ir stingri pieejami tikai no lokālās atgriezeniskās cilpas.
 
-Sekmīga politika atgriež `AuthSubject` ar `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Pakārtotie apstrādātāji var to nolasīt ar `assertAuth(request, "CLIENT_API")` failā `src/server/authz/assertAuth.ts`, atkārtoti neizpildot autentifikācijas loģiku.
+Sekmīga politika atgriež `AuthSubject` ar `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Pakārtotie apstrādātāji var to nolasīt ar `assertAuth(request, "CLIENT_API")` failā `src/server/authz/assertAuth.ts`, atkārtoti neizpildot autentifikācijas loģiku.
 
 ## Publisko maršrutu saraksts
 
@@ -325,8 +326,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Autentificētiem pieprasījumiem augšupstraumes (apdarinātāja puses) pieprasījumu galvenēs ir iekļauts arī:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<pēdējie-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<pēdējie-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (neobligāts)
 x-omniroute-auth-scopes:    ar komatiem atdalīts saraksts
 ```

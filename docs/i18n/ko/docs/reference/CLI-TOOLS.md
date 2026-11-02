@@ -10,7 +10,7 @@ OmniRoute는 전용 대시보드 페이지 세 곳에 분산된 세 가지 범�
 
 | 페이지         | 경로                    | 개념                                                                           | 개수            |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------ | --------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute를 가리키도록 설정하는 코딩 도구(Client → CLI → OmniRoute → Provider) | 27              |
+| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute를 가리키도록 설정하는 코딩 도구(Client → CLI → OmniRoute → Provider) | 28              |
 | **CLI Agents** | `/dashboard/cli-agents` | OmniRoute를 가리키도록 설정하는 자율 에이전트(동일한 흐름, 더 넓은 범위)       | 11              |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute가 stdio/ACP를 통해 백엔드로 실행하는 CLI(역방향 흐름)                | 레지스트리 참조 |
 
@@ -137,7 +137,7 @@ OmniRoute는 이를 감지하고 작성하는 대신 안내와 함께 종료 코
 
 ---
 
-## 1. CLI Code 카탈로그(도구 27개)
+## 1. CLI Code 카탈로그(도구 28개)
 
 `/dashboard/cli-code`에 표시되는 모든 도구입니다. `baseUrlSupport: none`인 도구는 사용자 지정 기본 URL 대신 MITM 또는 수동 가이드를 통해 연결됩니다.
 
@@ -164,6 +164,7 @@ OmniRoute는 이를 감지하고 작성하는 대신 안내와 함께 종료 코
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -253,16 +254,16 @@ interface ToolBatchStatus {
 
 `configType: "custom"`인 신규 도구에는 전용 설정 API 라우트가 있습니다:
 
-| 라우트                                      | 도구                                                            |
-| ------------------------------------------- | --------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                         |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url 플래그)                                       |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, 레거시)                          |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, 기본 + 레거시 `~/.deepseek` 동기화) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                           |
-| `POST /api/cli-tools/pi-settings`           | Pi 코딩 에이전트                                                |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)           |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + 전용 `.env` 키)            |
+| 라우트                                      | 도구                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                             |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url 플래그)                                           |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, 레거시)                              |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, 기본 + 레거시 `~/.deepseek` 동기화)     |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                               |
+| `POST /api/cli-tools/pi-settings`           | Pi 코딩 에이전트 (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)               |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + 전용 `.env` 키)                |
 
 모든 라우트는 오류 응답에 `sanitizeErrorMessage()`를 사용합니다(필수 규칙 #12).
 
@@ -366,7 +367,7 @@ pip install aider-chat
 cargo install smelt  # Rust 기반
 
 # Pi 코딩 에이전트
-# 설치 방법은 https://github.com/zechnerj/pi-coding-agent 참조
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # 설치 방법은 https://github.com/1jehuang/jcode 참조
@@ -479,6 +480,40 @@ EOF
 
 > 사고 변형을 전송하려면 `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`을
 > 사용하세요.
+
+---
+
+#### Pi Coding Agent
+
+`npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`로 공식 Pi Coding Agent 패키지를 설치하세요. Pi는 `~/.pi/agent/models.json`에서 사용자 지정 제공자를 읽습니다. 에이전트 디렉터리 전체를 이동하려면 `PI_CODING_AGENT_DIR`를 절대 경로 또는 `~`로 시작하는 경로로 설정하세요. 대시보드도 이 재정의를 따릅니다. Pi는 사용자 지정 엔드포인트에서 모델을 검색하지 않으므로, OmniRoute는 Pi의 `openai-completions` API와 OmniRoute의 OpenAI 호환 `/v1` 엔드포인트를 사용하여 선택한 모델을 `models[]`에 기록합니다.
+
+**CLI 도구 → Pi**에서 엔드포인트, API 키, 모델을 선택하고 제공자 미리보기를 검토한 다음 적용하세요. 미리보기는 제공자 설정의 일부입니다. Pi를 수동으로 구성할 때는 `providers.omniroute`를 기존 `models.json`에 병합하여 다른 제공자와 설정을 그대로 유지하세요.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi는 `/model`를 열 때 `models.json`를 다시 읽습니다. 선택한 제공자 ID와 모델 ID로 구성된 경로를 테스트하세요.
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+참조: [Pi 모델과 사용자 지정 제공자](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md),
+[Pi 환경 변수](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md),
+[Pi 설치 안내](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

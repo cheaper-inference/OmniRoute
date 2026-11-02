@@ -13,7 +13,7 @@
 
 ## Cos'è
 
-OmniRoute registra 377 provider, incluse 155 voci di catalogo contrassegnate come **free/no-auth**
+OmniRoute registra 380 provider, incluse 155 voci di catalogo contrassegnate come **free/no-auth**
 (no-auth,
 OAuth con piano gratuito, o API key con piano gratuito — vedi la
 [Guida ai Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) e la

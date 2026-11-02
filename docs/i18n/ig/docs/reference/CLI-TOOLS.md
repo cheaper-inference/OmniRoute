@@ -10,7 +10,7 @@ OmniRoute na-ejikọta ya na ụdị ngwa CLI atọ e kesara n’ofe ibe dashboa
 
 | Ibe                     | Ụzọ                     | Echiche                                                                                         | Ọnụọgụ       |
 | ----------------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ------------ |
-| **Koodu CLI**           | `/dashboard/cli-code`   | Ngwa ide koodu ị na-atụnye na OmniRoute (Client → CLI → OmniRoute → Provider)                   | 27           |
+| **Koodu CLI**           | `/dashboard/cli-code`   | Ngwa ide koodu ị na-atụnye na OmniRoute (Client → CLI → OmniRoute → Provider)                   | 28           |
 | **Ndị nnọchi anya CLI** | `/dashboard/cli-agents` | Ndị nnọchi anya kwụụrụ onwe ha ị na-atụnye na OmniRoute (otu usoro ahụ, mana oke ya sara mbara) | 11           |
 | **Ndị nnọchi anya ACP** | `/dashboard/acp-agents` | CLI ndị OmniRoute na-ebido dị ka backend site na stdio/ACP (usoro ntụgharị azụ)                 | lee registry |
 
@@ -149,7 +149,7 @@ otu mpaghara na-enweghị ndị ọzọ na-eme ka test suite daa kama ikwe ka nd
 
 ---
 
-## 1. Katalọgụ CLI Code (ngwaọrụ 27)
+## 1. Katalọgụ CLI Code (ngwaọrụ 28)
 
 Ngwaọrụ niile pụtara na `/dashboard/cli-code`. A na-ejikọta ndị nwere `baseUrlSupport: none` site na MITM ma ọ bụ ntuziaka aka kama iji URL ntọala ahaziri iche:
 
@@ -176,6 +176,7 @@ Ngwaọrụ niile pụtara na `/dashboard/cli-code`. A na-ejikọta ndị nwere 
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -265,16 +266,16 @@ interface ToolBatchStatus {
 
 Ngwa ọrụ ọhụrụ nwere `configType: "custom"` nwere ụzọ API ntọala pụrụ iche:
 
-| Ụzọ                                         | Ngwa ọrụ                                                                       |
-| ------------------------------------------- | ------------------------------------------------------------------------------ |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                        |
-| `POST /api/cli-tools/jcode-settings`        | jcode (akara `--base-url`)                                                     |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, nke ochie)                                      |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, nke bụ isi + mmekọrịta nke ochie na `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                          |
-| `POST /api/cli-tools/pi-settings`           | Onye nnọchi anya Pi maka ide koodu                                             |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + igodo `.env` pụrụ iche)                   |
+| Ụzọ                                         | Ngwa ọrụ                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                               |
+| `POST /api/cli-tools/jcode-settings`        | jcode (akara `--base-url`)                                                            |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, nke ochie)                                             |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, nke bụ isi + mmekọrịta nke ochie na `~/.deepseek`)        |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                                 |
+| `POST /api/cli-tools/pi-settings`           | Onye nnọchi anya Pi maka ide koodu (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                                 |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + igodo `.env` pụrụ iche)                          |
 
 Ụzọ niile na-eji `sanitizeErrorMessage()` maka nzaghachi njehie (Iwu Siri Ike #12).
 
@@ -376,7 +377,7 @@ pip install aider-chat
 cargo install smelt  # Dabere na Rust
 
 # Pi coding agent
-# lee https://github.com/zechnerj/pi-coding-agent maka ntinye
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # lee https://github.com/1jehuang/jcode maka ntinye
@@ -489,6 +490,38 @@ EOF
 
 > Jiri `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > iji zipụ ụdị ndị na-eche echiche.
+
+---
+
+#### Pi Coding Agent
+
+Wụnye package Pi Coding Agent nke ndị mepụtara ya kwadoro site na `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi na-agụ custom provider site na `~/.pi/agent/models.json`; dozie `PI_CODING_AGENT_DIR` ka ọ bụrụ absolute path (ma ọ bụ path malitere na `~`) iji bugharịa directory agent dum. Dashboard na-eso mgbanwe ahụ. Pi anaghị achọpụta model site na custom endpoint, ya mere OmniRoute na-ede model a họọrọ na `models[]` site na API `openai-completions` Pi na endpoint `/v1` OmniRoute kwekọrọ na OpenAI.
+
+Na **CLI Tools → Pi**, họrọ endpoint, API key na model, lelee preview provider, wee tinye ya n'ọrụ. Preview bụ iberibe provider: jikọta `providers.omniroute` n'ime `models.json` dị ugbu a mgbe ị na-ahazi Pi n'aka ka provider na setting ndị ọzọ ghara imebi.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi na-eburu `models.json` ọzọ mgbe ị meghere `/model`. Jiri provider id na model id ị họọrọ nwalee route edoziri:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Ntụaka: [model na custom provider Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [environment variable Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [ntuziaka nrụnye Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

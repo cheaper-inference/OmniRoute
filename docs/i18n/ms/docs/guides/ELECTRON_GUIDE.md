@@ -64,6 +64,19 @@ Ruang kerja `electron/` turut menyediakan:
 - `npm run build:mac-x64` / `build:mac-arm64` — binaan macOS seni bina tunggal
 - `npm run pack` — binaan direktori sahaja untuk ujian setempat (tanpa pemasang)
 
+## Pek runtime pilihan
+
+Binaan desktop boleh menerbitkan arkib runtime pilihan bersama pemasangnya. Muatan pelayan yang dipasang mengandungi `optional-packs.index.json` (di bawah `resources/app` pada Windows dan Linux). Untuk entri `browser-runtime`, baca `packs[].tarball` dan muat turun **nama fail yang tepat itu daripada keluaran yang sama**. Nama arkib mengandungi digest SHA-256; binaan berlainan boleh memerlukan arkib berlainan. Kekalkan nama fail yang dimuat turun.
+
+Salin indeks aplikasi yang dipasang dan arkib terpilih ke dalam satu direktori, kemudian gunakan CLI daripada keluaran yang sama:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` memaparkan keadaan pemasangan dan pengesahan, bukannya nama fail arkib. Indeks yang dibekalkan memilih arkib. Pemasangan mengesahkan checksum arkib sebelum pengekstrakan serta checksum pakej sebelum mengganti pek yang dipasang. Ia membaca fail setempat; ia tidak memuat turun arkib yang tiada. Mulakan semula aplikasi selepas pemasangan. Jika keluaran tiada aset yang sepadan, pek pilihan itu tidak tersedia melalui aset keluaran tersebut.
+
 ## Susun Atur Direktori
 
 ```

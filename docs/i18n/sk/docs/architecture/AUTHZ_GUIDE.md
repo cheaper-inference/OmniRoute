@@ -163,9 +163,10 @@ Každá trieda trasy má svoju politiku v `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — vždy vráti `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extrahuje Bearer a overí ho pomocou `validateApiKey()`. Na anonymný prístup prejde iba vtedy, keď je efektívny príznak funkcie `REQUIRE_API_KEY` vypnutý. Efektívny príznak sa vyhodnotí pomocou `isRequireApiKeyEnabled()` (`prepísanie príznakom funkcie z DB > process.env.REQUIRE_API_KEY > predvolená hodnota`), takže príznaky funkcií ovládacieho panela a premenné prostredia konzistentne riadia `/api/v1/*`, `/api/v1beta/*` a aliasy; zlyhania vyhodnotenia vedú k zamietnutiu prístupu. Povoľuje požiadavky s reláciou ovládacieho panela na trasách klientskeho API (vrátane `/api/v1/models`, ktorú používa katalóg modelov ovládacieho panela).
+  Keď je zapnuté Entra ID SSO, Bearer so štruktúrou tokenu Entra (tri segmenty base64url, algoritmus `RS*`, `kid`) spracuje vetva SSO **pred** `validateApiKey()` a jej rozhodnutie je konečné — nikdy neprejde na cestu kľúča API ani do vetvy, ktorá znižuje prístup na anonymný. Výpadok poskytovateľa identity tak nemôže otvoriť prístup. Statických kľúčov API sa to netýka. Pozrite si [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — akceptuje reláciu ovládacieho panela, interné požiadavky na synchronizáciu modelov (zodpovedajúce `/api/providers/[name]/(sync-models|models)`) alebo sa úplne preskočí, ak `isAuthRequired()` vráti false. Vráti 403 (`AUTH_001`), keď je prítomný, ale neplatný token Bearer, inak 401. Pred každou vetvou overovania tiež vynucuje úrovne ochrany trás (LOCAL_ONLY / ALWAYS_PROTECTED) — pozrite si [Úrovne ochrany trás](../security/ROUTE_GUARD_TIERS.md). K trasám LOCAL_ONLY uvedeným v `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (aktuálne: `/api/mcp/`) možno pristupovať aj mimo spätnej slučky, ak má kľúč Bearer rozsah `manage`; všetky ostatné trasy LOCAL_ONLY zostávajú striktne obmedzené na spätnú slučku bez ohľadu na rozsah.
 
-Úspešná politika vráti `AuthSubject` s `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Následné obslužné rutiny ho môžu načítať pomocou `assertAuth(request, "CLIENT_API")` v `src/server/authz/assertAuth.ts` namiesto opätovného vykonávania logiky overovania.
+Úspešná politika vráti `AuthSubject` s `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Následné obslužné rutiny ho môžu načítať pomocou `assertAuth(request, "CLIENT_API")` v `src/server/authz/assertAuth.ts` namiesto opätovného vykonávania logiky overovania.
 
 ## Zoznam verejných trás
 
@@ -326,8 +327,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Pri autentifikovaných požiadavkách hlavičky požiadavky odoslanej upstreamu (na strane obslužného programu) obsahujú aj:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<posledné-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<posledné-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (voliteľné)
 x-omniroute-auth-scopes:    zoznam oddelený čiarkami
 ```

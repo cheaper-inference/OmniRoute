@@ -10,7 +10,7 @@ Az OmniRoute a CLI-eszközök három kategóriájával integrálódik, amelyek h
 
 | Oldal          | Útvonal                 | Koncepció                                                                                              | Darabszám             |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------------------ | --------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Az OmniRoute-ra irányított kódolási eszközök (Kliens → CLI → OmniRoute → Szolgáltató)                  | 27                    |
+| **CLI Code's** | `/dashboard/cli-code`   | Az OmniRoute-ra irányított kódolási eszközök (Kliens → CLI → OmniRoute → Szolgáltató)                  | 28                    |
 | **CLI Agents** | `/dashboard/cli-agents` | Az OmniRoute-ra irányított autonóm ügynökök (azonos folyamat, tágabb hatókör)                          | 11                    |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI-k, amelyeket az OmniRoute háttérrendszerként indít el stdio/ACP használatával (fordított folyamat) | lásd a nyilvántartást |
 
@@ -146,7 +146,7 @@ csak az egyik felülethez adnak hozzá a többi nélkül, a tesztcsomag hibával
 
 ---
 
-## 1. A CLI Code katalógusa (27 eszköz)
+## 1. A CLI Code katalógusa (28 eszköz)
 
 A `/dashboard/cli-code` oldalon megjelenő összes eszköz. A `baseUrlSupport: none` értékkel rendelkezők egyéni alap-URL helyett MITM-en vagy kézi útmutatón keresztül vannak bekötve:
 
@@ -173,6 +173,7 @@ A `/dashboard/cli-code` oldalon megjelenő összes eszköz. A `baseUrlSupport: n
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -269,7 +270,7 @@ A `configType: "custom"` értékkel rendelkező új eszközök dedikált beáll�
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, örökölt)                                         |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, elsődleges + örökölt `~/.deepseek` szinkronizálása) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                           |
-| `POST /api/cli-tools/pi-settings`           | Pi kódolóügynök                                                                 |
+| `POST /api/cli-tools/pi-settings`           | Pi kódolóügynök (`~/.pi/agent/models.json`, `providers.omniroute`)              |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                           |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedikált `.env`-kulcs)                     |
 
@@ -375,7 +376,7 @@ pip install aider-chat
 cargo install smelt  # Rust-alapú
 
 # Pi kódolóügynök
-# a telepítéshez lásd: https://github.com/zechnerj/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # a telepítéshez lásd: https://github.com/1jehuang/jcode
@@ -488,6 +489,38 @@ EOF
 
 > A gondolkodási változatok küldéséhez használja az `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > parancsot.
+
+---
+
+#### Pi Coding Agent
+
+Telepítse a hivatalos Pi Coding Agent csomagot az `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` paranccsal. A Pi az egyéni szolgáltatókat a `~/.pi/agent/models.json` fájlból olvassa; az ügynök teljes könyvtárának áthelyezéséhez állítsa a `PI_CODING_AGENT_DIR` értékét abszolút (vagy `~` előtagú) elérési útra. Az irányítópult követi ezt a felülírást. A Pi nem fedezi fel az egyéni végpontok modelljeit, ezért az OmniRoute a kiválasztott modellt a `models[]` mezőbe írja, a Pi `openai-completions` API-ját és az OmniRoute OpenAI-kompatibilis `/v1` végpontját használva.
+
+A **CLI Tools → Pi** felületen válasszon végpontot, API-kulcsot és modellt, ellenőrizze a szolgáltató előnézetét, majd alkalmazza. Az előnézet egy szolgáltatórészlet: a Pi kézi konfigurálásakor olvassza a `providers.omniroute` bejegyzést a meglévő `models.json` fájlba, hogy a többi szolgáltató és beállítás megmaradjon.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+A Pi a `/model` megnyitásakor újratölti a `models.json` fájlt. A kiválasztott szolgáltató- és modellazonosítóval tesztelje a beállított útvonalat:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Hivatkozások: [Pi-modellek és egyéni szolgáltatók](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi környezeti változók](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi telepítési útmutató](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

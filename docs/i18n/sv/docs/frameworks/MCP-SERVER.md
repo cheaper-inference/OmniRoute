@@ -315,12 +315,12 @@ Verktygskatalogen finns i [Omfång för MCP-verktyg](#mcp-tool-scopes).
 Den rangordningen är `scopeSatisfies`. Den använder inte MCP-tabellen, och MCP:s
 matchningsfunktion använder inte den.
 
-| Namnrymd            | Autentiseringsuppgift                                           | Kontroll              | Ett godkännande tillåter                                        |
-| :------------------ | :-------------------------------------------------------------- | :-------------------- | :-------------------------------------------------------------- |
-| API-nyckelhantering | `api_keys.scopes`                                               | `hasManageScope`      | Hanterings-REST för den Bearer-nyckeln                          |
-| Additiv API-nyckel  | samma matris, en exakt sträng                                   | hjälpfunktionen nedan | Endast den specifika funktionen                                 |
-| MCP-verktygsomfång  | samma matris, annars MCP `_meta`, annars `OMNIROUTE_MCP_SCOPES` | `scopeMatches`        | Verktyget, när kontrollen har aktiverats                        |
-| Åtkomsttoken        | `oma_live_…`                                                    | `scopeSatisfies`      | Hanteringsrutten vars metod och sökväg kräver den rangordningen |
+| Namnrymd            | Autentiseringsuppgift                                                            | Kontroll              | Ett godkännande tillåter                                        |
+| :------------------ | :------------------------------------------------------------------------------- | :-------------------- | :-------------------------------------------------------------- |
+| API-nyckelhantering | `api_keys.scopes`                                                                | `hasManageScope`      | Hanterings-REST för den Bearer-nyckeln                          |
+| Additiv API-nyckel  | samma matris, en exakt sträng                                                    | hjälpfunktionen nedan | Endast den specifika funktionen                                 |
+| MCP-verktygsomfång  | samma array, annars MCP `_meta` (endast HTTP/SSE), annars `OMNIROUTE_MCP_SCOPES` | `scopeMatches`        | Verktyget, när kontrollen har aktiverats                        |
+| Åtkomsttoken        | `oma_live_…`                                                                     | `scopeSatisfies`      | Hanteringsrutten vars metod och sökväg kräver den rangordningen |
 
 Hur varje autentiseringsuppgift utfärdas beskrivs i
 [Hanteringsautentisering](../guides/MANAGEMENT-AUTH.md).
@@ -369,8 +369,10 @@ Kontrollen är avstängd om inte `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (standardv�
 `false`). När den är avstängd tillåter `evaluateToolScopes` anropet och hoppar över
 katalogen. När den är aktiverad använder HTTP Bearer-nyckelns `api_keys.scopes` som
 `authInfo` (se [HTTP-bindning av omfång per nyckel](#per-key-http-scope-binding-7895)).
-När inga nyckelomfång kan fastställas går den beviljade uppsättningen vidare till MCP `_meta` och därefter
-`OMNIROUTE_MCP_SCOPES`.
+När inga nyckelscope löses ut faller den beviljade uppsättningen vidare till MCP
+`_meta` (endast hedrad för HTTP/SSE-anropare, inom ett HTTP-auth-kontext; en
+stdio-anropares `_meta` ignoreras eftersom klienten styr den och den bär ingen
+identitet per anropare), och sedan till `OMNIROUTE_MCP_SCOPES`.
 
 #### Åtkomsttokenomfång
 
@@ -468,8 +470,10 @@ och skickar den till MCP-SDK:ns `transport.handleRequest(req, { authInfo })`, s�
 reservlösningen `_meta` och miljövariabeln `OMNIROUTE_MCP_SCOPES` — detta fyller endast i den första
 källan med högst prioritet, som tidigare inte tillhandahölls över HTTP. När ingen API-nyckel kan
 hämtas (inget huvud, ogiltig nyckel) förblir `authInfo` `undefined` och matchningen fortsätter genom den
-befintliga `meta`-/miljövariabelkedjan utan ändringar. stdio har ingen identitet per anropare (se
-`mcpCallerIdentity.ts`) och påverkas inte — den fortsätter använda reservkedjan `_meta`/miljövariabel.
+befintliga `meta`-/miljövariabelkedjan utan ändringar. stdio saknar identitet per anropare (se
+`mcpCallerIdentity.ts`) och påverkas inte av bindning per nyckel — det hoppar över `_meta`-steget
+(`_meta` respekteras endast inom en HTTP-autentiseringskontext, #15159) och slår endast upp
+omfång utifrån miljönyckeln `OMNIROUTE_MCP_SCOPES`.
 
 **Tillämpning aktiveras obligatoriskt för HTTP/SSE-anropare med begränsad omfattning, oavsett
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Att `OMNIROUTE_MCP_ENFORCE_SCOPES` som standard är `false` är endast

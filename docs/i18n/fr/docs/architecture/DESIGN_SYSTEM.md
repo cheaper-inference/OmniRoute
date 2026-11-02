@@ -143,11 +143,9 @@
 
 ## 5. Mettre à jour le kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` copie le `src/` amont à ce commit dans
-`packages/ui-kit/src` et applique l'unique transformation autorisée (elle supprime le suffixe `.js` des
-imports relatifs). Ensuite : examiner `git diff packages/ui-kit`, faire une passe visuelle sur les providers, settings, combos,
-usage et endpoint dans les deux thèmes, exécuter `npm run check:ui-kit-snapshot` et `npm run test:vitest:ui`, et
-ouvrir la PR avec le changelog amont.
+`npm run check:ui-kit-upstream` compare la version épinglée dans `packages/ui-kit/UPSTREAM.md` avec la balise `v*` la plus récente du dépôt en amont et imprime la commande de synchronisation lorsqu'une version est publiée. Le flux de travail hebdomadaire `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) exécute la même vérification et maintient un problème de suivi ouvert pendant que la broche est en retard ; le dépôt en amont est privé, le workflow a donc besoin d'un jeton en lecture seule dans le secret `UI_KIT_READ_TOKEN` et reste inerte sans lui.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copie le `src/` en amont au niveau de ce commit (`latest` = la balise `v*` la plus récente) dans `packages/ui-kit/src`, applique la seule transformation autorisée (il supprime le suffixe `.js` des importations relatives) et définit la version de l'espace de travail dans `packages/ui-kit/package.json` et `package-lock.json` sur celle en amont. Ensuite : examinez `git diff packages/ui-kit`, effectuez une vérification visuelle des fournisseurs, des paramètres, des combos, de l'utilisation et du point de terminaison dans les deux thèmes, exécutez `npm run check:ui-kit-snapshot` et `npm run test:vitest:ui` et ouvrez le PR avec le journal des modifications en amont.
 
 ## 6. Diagrammes du README
 

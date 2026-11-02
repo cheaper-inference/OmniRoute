@@ -42,6 +42,10 @@ khusus melalui variabel lingkungan (tidak memiliki flag `--base-url`):
 
 > Variabel lingkungan dibaca **sekali saat dimulai** — mulai ulang Claude Code setelah mengubahnya.
 
+Untuk kredensial yang berotasi, bukan string tetap, atur `apiKeyHelper` dalam `~/.claude/settings.json` ke perintah yang mencetak kredensial saat ini ke stdout. Secara bawaan, Claude Code menyimpan keluarannya dalam cache selama lima menit (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` mengganti durasi tersebut) dan mengirim nilainya dalam `Authorization: Bearer` maupun `x-api-key`. Skrip harus mencetak kredensial saja: banner tambahan membuat helper gagal pada v2.1.227+.
+
+Begitulah Entra ID SSO bekerja: `scripts/cli/omniroute-sso.mjs token` mencetak token akses Entra berumur pendek yang diverifikasi OmniRoute sebagai pengganti kunci API. Lihat [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` mengatur semuanya untuk Anda: perintah ini menentukan URL dasar + token
 dari konteks aktif (sehingga `omniroute connect <vps>` lalu `omniroute launch`
 langsung berfungsi), memeriksa kesehatan server, dan menjalankan `claude` melalui exec.

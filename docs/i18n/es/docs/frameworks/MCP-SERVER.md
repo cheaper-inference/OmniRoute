@@ -315,12 +315,12 @@ token de acceso `oma_live_…` son tres concesiones diferentes. Los autores de l
 Ese rango corresponde a `scopeSatisfies`. No consulta la tabla de MCP y el comparador de MCP
 tampoco lo consulta.
 
-| Espacio de nombres                   | Credencial                                                           | Comprobador                | Una aprobación permite                                           |
-| :----------------------------------- | :------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------------------- |
-| Administración mediante clave de API | `api_keys.scopes`                                                    | `hasManageScope`           | API REST de administración para esa clave Bearer                 |
-| Ámbito aditivo de clave de API       | el mismo array, una cadena exacta                                    | el auxiliar indicado abajo | Solo esa capacidad                                               |
-| Ámbitos de herramientas MCP          | el mismo array, o bien `_meta` de MCP, o bien `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | Esa herramienta, una vez activada la aplicación de ámbitos       |
-| Token de acceso                      | `oma_live_…`                                                         | `scopeSatisfies`           | La ruta de administración cuyo método y ruta requieran ese rango |
+| Espacio de nombres                   | Credencial                                                                               | Comprobador                | Una aprobación permite                                           |
+| :----------------------------------- | :--------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------------------- |
+| Administración mediante clave de API | `api_keys.scopes`                                                                        | `hasManageScope`           | API REST de administración para esa clave Bearer                 |
+| Ámbito aditivo de clave de API       | el mismo array, una cadena exacta                                                        | el auxiliar indicado abajo | Solo esa capacidad                                               |
+| Ámbitos de herramientas MCP          | la misma matriz; si no, el `_meta` de MCP (solo HTTP/SSE); si no, `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | Esa herramienta, una vez activada la aplicación de ámbitos       |
+| Token de acceso                      | `oma_live_…`                                                                             | `scopeSatisfies`           | La ruta de administración cuyo método y ruta requieran ese rango |
 
 La emisión de cada credencial se explica en
 [Autenticación de administración](../guides/MANAGEMENT-AUTH.md).
@@ -369,8 +369,9 @@ La aplicación de ámbitos está desactivada salvo que `OMNIROUTE_MCP_ENFORCE_SC
 `false`). Mientras esté desactivada, `evaluateToolScopes` permite la llamada y omite el
 catálogo. Mientras esté activada, HTTP utiliza `api_keys.scopes` de la clave Bearer como
 `authInfo` (consulte [Vinculación de ámbitos HTTP por clave](#per-key-http-scope-binding-7895)).
-Cuando no se resuelve ningún ámbito de clave, el conjunto concedido pasa a `_meta` de MCP y, posteriormente,
-a `OMNIROUTE_MCP_SCOPES`.
+Cuando no se resuelven ámbitos de clave, el conjunto concedido pasa al `_meta` de MCP
+(honrado solo para llamantes HTTP/SSE, dentro de un contexto de autenticación HTTP; el `_meta` de un llamante stdio se ignora porque lo controla el cliente y no transporta identidad por llamante) y después a
+`OMNIROUTE_MCP_SCOPES`.
 
 #### Ámbitos de tokens de acceso
 
@@ -468,8 +469,7 @@ y los pasa al método `transport.handleRequest(req, { authInfo })` del SDK de MC
 `_meta` y la alternativa de la variable de entorno `OMNIROUTE_MCP_SCOPES`; este cambio solo rellena esa primera
 fuente, la de mayor prioridad, que anteriormente no recibía datos a través de HTTP. Cuando no se resuelve ninguna clave de API
 (sin encabezado o con una clave no válida), `authInfo` permanece como `undefined` y la resolución continúa con la
-cadena existente de `meta`/variable de entorno sin cambios. stdio no tiene identidad por cliente (consulte
-`mcpCallerIdentity.ts`) y no se ve afectado: continúa utilizando la cadena alternativa de `_meta`/variable de entorno.
+cadena existente de `meta`/variable de entorno sin cambios. stdio no tiene identidad por llamador (consulta `mcpCallerIdentity.ts`) y no le afecta la vinculación por clave: omite el paso de `_meta` (`_meta` solo se respeta dentro de un contexto de autenticación HTTP, #15159) y resuelve únicamente a partir de la clave de entorno `OMNIROUTE_MCP_SCOPES`.
 
 **La aplicación de ámbitos se activa obligatoriamente para los clientes HTTP/SSE con ámbitos restringidos, independientemente de
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Que `OMNIROUTE_MCP_ENFORCE_SCOPES` tenga como valor predeterminado `false` solo es

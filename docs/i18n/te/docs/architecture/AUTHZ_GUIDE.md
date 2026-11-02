@@ -156,9 +156,10 @@ JWT ధృవీకరించబడి, **అదే సమయంలో** `auth
 
 - **`publicPolicy`** (`policies/public.ts`) — ఎల్లప్పుడూ `allow({ kind: "anonymous", id: "anonymous" })`ను అందిస్తుంది.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearerను సంగ్రహించి, `validateApiKey()` ద్వారా ధ్రువీకరిస్తుంది. ప్రభావవంతమైన `REQUIRE_API_KEY` ఫీచర్ ఫ్లాగ్ నిలిపివేయబడినప్పుడు మాత్రమే అనామక యాక్సెస్కు అనుమతిస్తుంది. ప్రభావవంతమైన ఫ్లాగ్ `isRequireApiKeyEnabled()` (`DB ఫీచర్ ఫ్లాగ్ ఓవర్రైడ్ > process.env.REQUIRE_API_KEY > డిఫాల్ట్`) ద్వారా పరిష్కరించబడుతుంది; కాబట్టి డ్యాష్బోర్డ్ ఫీచర్ ఫ్లాగ్లు మరియు ఎన్విరాన్మెంట్ వేరియబుల్స్ `/api/v1/*`, `/api/v1beta/*`, మరియు అలియాస్లను స్థిరంగా నియంత్రిస్తాయి; రిజాల్వర్ వైఫల్యాలు యాక్సెస్ను నిరాకరిస్తాయి. క్లయింట్ API రూట్లపై డ్యాష్బోర్డ్-సెషన్ అభ్యర్థనలను అనుమతిస్తుంది (డ్యాష్బోర్డ్ మోడల్ కేటలాగ్ ఉపయోగించే `/api/v1/models`తో సహా).
+  Entra ID SSO ప్రారంభించి ఉన్నప్పుడు, Entra టోకెన్ నిర్మాణం గల Bearer (మూడు base64url భాగాలు, `RS*` అల్గోరిథమ్, `kid`) ను `validateApiKey()` కంటే **ముందే** SSO శాఖ నిర్వహిస్తుంది. దాని నిర్ణయమే తుది నిర్ణయం — అది API కీ మార్గానికి గానీ అనామక ప్రాప్యతకు తగ్గించే శాఖకు గానీ ఎప్పుడూ వెళ్లదు. అందువల్ల గుర్తింపు ప్రదాతలో అంతరాయం వచ్చినా అందరికీ ప్రాప్యత తెరుచుకోదు. స్థిరమైన API కీలపై ప్రభావం ఉండదు. [Entra ID SSO](../security/ENTRA_SSO.md) చూడండి.
 - **`managementPolicy`** (`policies/management.ts`) — డ్యాష్బోర్డ్ సెషన్ను, అంతర్గత మోడల్-సింక్ అభ్యర్థనలను (`/api/providers/[name]/(sync-models|models)`తో సరిపోల్చబడినవి) అంగీకరిస్తుంది, లేదా `isAuthRequired()` falseను అందిస్తే పూర్తిగా దాటవేస్తుంది. Bearer టోకెన్ ఉన్నప్పటికీ అది చెల్లనప్పుడు 403 (`AUTH_001`)ను, లేకపోతే 401ను అందిస్తుంది. ఏ ప్రమాణీకరణ శాఖకు ముందైనా రూట్-గార్డ్ స్థాయిలను (LOCAL_ONLY / ALWAYS_PROTECTED) కూడా అమలు చేస్తుంది — [రూట్ గార్డ్ స్థాయిలు](../security/ROUTE_GUARD_TIERS.md) చూడండి. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`లోని LOCAL_ONLY పాత్లను (ప్రస్తుతం: `/api/mcp/`) Bearer కీ `manage` స్కోప్ను కలిగి ఉన్నప్పుడు లూప్బ్యాక్ కాని చిరునామా నుండి యాక్సెస్ చేయవచ్చు; స్కోప్తో సంబంధం లేకుండా మిగతా LOCAL_ONLY పాత్లన్నీ ఖచ్చితంగా లూప్బ్యాక్కే పరిమితమవుతాయి.
 
-విజయవంతమైన పాలసీ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`తో `AuthSubject`ను అందిస్తుంది. దిగువస్థాయి హ్యాండ్లర్లు ప్రమాణీకరణ లాజిక్ను మళ్లీ అమలు చేయడానికి బదులుగా, `src/server/authz/assertAuth.ts`లోని `assertAuth(request, "CLIENT_API")` ద్వారా దాన్ని చదవవచ్చు.
+విజయవంతమైన పాలసీ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`తో `AuthSubject`ను అందిస్తుంది. దిగువస్థాయి హ్యాండ్లర్లు ప్రమాణీకరణ లాజిక్ను మళ్లీ అమలు చేయడానికి బదులుగా, `src/server/authz/assertAuth.ts`లోని `assertAuth(request, "CLIENT_API")` ద్వారా దాన్ని చదవవచ్చు.
 
 ## పబ్లిక్ రూట్ల జాబితా
 
@@ -316,8 +317,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ప్రమాణీకరించిన అభ్యర్థనల కోసం అప్స్ట్రీమ్ (హ్యాండ్లర్ వైపు) అభ్యర్థన హెడర్లలో ఇవి కూడా ఉంటాయి:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<చివరి-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<చివరి-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (ఐచ్ఛికం)
 x-omniroute-auth-scopes:    కామాలతో వేరు చేసిన జాబితా
 ```

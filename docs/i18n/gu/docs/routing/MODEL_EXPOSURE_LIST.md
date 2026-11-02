@@ -63,3 +63,15 @@ paid model તરફ રૂટ કરવાની મંજૂરી મળત�
 યથાવત્ સામેલ થાય છે — `hidePaidModels`ના combo-step export filterથી વિપરીત, અહીં re-hydrationનું
 કોઈ જોખમ નથી: exported combo stepમાં સમાવાયેલ નકારવામાં આવેલ id એ ઑપરેટરની પોતાની સ્પષ્ટ routing
 પસંદગી છે, જેને export boundaryએ દૂર કરવાની જરૂર નથી.
+
+## માત્ર combo ની યાદી (`exposeCombosOnly`)
+
+એક અલગ boolean, જેને પણ સ્પષ્ટ રીતે ચાલુ કરવું પડે છે અને જેનો ડિફૉલ્ટ `false` છે; એવા deployment માટે જ્યાં combo જાહેર મોડલ ઇન્ટરફેસ છે અને provider માત્ર backend છે. તે `true` હોય ત્યારે જાહેર યાદી (`GET /v1/models`, `GET /v1` અને `getUnifiedModelsResponse()` પર બનેલા બીજા `/v1` discovery route) માત્ર `owned_by: "combo"` ધરાવતી પંક્તિઓ રાખે છે: વપરાશકર્તાના combo અને અંદરથી મળતા `auto/*` combo (`hideAutoCombos` તેમને છુપાવતું ન હોય તો). તે દરેક key ના `catalogScope: "combos"` જેવી જ પંક્તિ ચકાસણી વાપરે છે, અને key ના પોતાના allow/deny/scope ફિલ્ટર તેના ઉપર પણ લાગુ રહે છે.
+
+તેને **સેટિંગ → રાઉટિંગ → Models API યાદી** માં અથવા `PATCH /api/settings {"exposeCombosOnly": true}` વડે બદલો.
+
+ઉપરની યાદીઓની જેમ, આ માત્ર જાહેર કરેલી યાદી બદલે છે:
+
+- સ્પષ્ટ `provider/model` ID હજી વિનંતી મોકલે છે અને `GET /v1/models/{id}` હજી તેને resolve કરે છે;
+- ડૅશબોર્ડ catalog (`GET /api/models/catalog`, જેને મોડલ પસંદગીકાર વાપરે છે) સંકુચિત થતો નથી;
+- આ `auto/*` ના candidate pool માં પ્રતિબિંબિત થતું નથી, તેથી `auto/*` combo પોતાનો સંપૂર્ણ pool રાખે છે.

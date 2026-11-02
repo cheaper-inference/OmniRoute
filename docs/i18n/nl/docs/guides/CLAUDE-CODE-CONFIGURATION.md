@@ -42,6 +42,10 @@ naar een aangepast endpoint verwezen (het heeft geen `--base-url`-vlag):
 
 > Omgevingsvariabelen worden **eenmalig bij het opstarten** gelezen — start Claude Code opnieuw nadat je ze hebt gewijzigd.
 
+Voor een toegangsgegeven dat periodiek wordt vernieuwd in plaats van een vaste tekenreeks, stelt u `apiKeyHelper` in `~/.claude/settings.json` in op een opdracht die het huidige toegangsgegeven naar stdout schrijft. Claude Code bewaart de uitvoer standaard vijf minuten in de cache (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` overschrijft die duur) en verstuurt de waarde zowel in `Authorization: Bearer` als in `x-api-key`. Het script mag uitsluitend het toegangsgegeven afdrukken: een extra banner laat de helper mislukken bij v2.1.227+.
+
+Zo werkt Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` drukt een kort geldig Entra-toegangstoken af dat OmniRoute controleert in plaats van een API-sleutel. Zie [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` stelt dit allemaal voor je in: het bepaalt de basis-URL en het token
 op basis van de actieve context (zodat `omniroute connect <vps>` gevolgd door `omniroute launch`
 direct werkt), voert een statuscontrole op de server uit en start `claude` via exec.

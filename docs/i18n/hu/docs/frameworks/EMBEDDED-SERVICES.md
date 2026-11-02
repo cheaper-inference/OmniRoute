@@ -5,8 +5,8 @@
 ---
 
 > **Verzió:** v3.8.44
-> **Legutóbbi frissítés:** 2026-09-16
-> **Célközönség:** Beágyazott szolgáltatásokat (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua) hozzáadó, karbantartó vagy hibakereső mérnökök.
+> **Legutóbbi frissítés:** 2026-10-28
+> **Célközönség:** A beágyazott szolgáltatásokat hozzáadó, karbantartó vagy hibakereséssel vizsgáló mérnökök (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 A beágyazott szolgáltatások helyileg telepített, kísérőfolyamatként működő eszközök, amelyeket az OmniRoute telepít és felügyel, valamint teljes értékű útválasztási célpontként tesz elérhetővé. A külső szolgáltatókkal ellentétben (amelyek API-kulcsok használatával, az interneten keresztül érhetők el) a beágyazott szolgáltatások ugyanazon a gépen futnak, mint az OmniRoute, és a visszacsatolási hálózati interfészen keresztül kommunikálnak.
 
@@ -29,7 +29,7 @@ A beágyazott szolgáltatások helyileg telepített, kísérőfolyamatként műk
 
 ### Miért beágyazott szolgáltatások?
 
-Hét szolgáltatás van beágyazva:
+Nyolc szolgáltatás van beágyazva:
 
 | Szolgáltatás    | npm-csomag                                    | Alapértelmezett port | Cél                                                                                                                                                                                                                                                                                                                                                                                     |
 | --------------- | --------------------------------------------- | :------------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -40,8 +40,9 @@ Hét szolgáltatás van beágyazva:
 | **Dario**       | `@askalf/dario`                               |         3456         | Claude-előfizetési proxy — a CLIProxyAPI alternatívája/tartalék megoldása Claude-Code-formátumú forgalomhoz; a beillesztett kulcsból `DARIO_ADMIN_TOKEN` lesz, amely védi a `/admin/*` OAuth-vezérlési síkot                                                                                                                                                                            |
 | **open-wa**     | `@open-wa/wa-automate`                        |         8323         | WhatsApp Web automatizálás (grafikus felület nélküli Chromium a Puppeteeren keresztül). Csak az életciklusa felügyelt — nem útválasztási cél.                                                                                                                                                                                                                                           |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                          |        20135         | Prompttömörítő segédfolyamat — valódi LLMLingua-2 ONNX-modell (a Microsoft algoritmusának JS/TS-portja). Az `open-sse/services/compression/engines/llmlingua/index.ts` HTTP-n keresztül továbbítja neki a `/compress` kéréseket, és ha a segédfolyamat nem érhető el, visszaáll a folyamaton belüli munkaszálas háttérrendszerre. Csak az életciklusa felügyelt — nem útválasztási cél. |
+| **sing-box**    | GitHub-kiadás bináris fájlja (`singbox`)      |        20140         | Az `applyTproxy()` átlátszó proxyelfogását támogató TPROXY-segédfolyamat (`src/mitm/tproxy/setup.ts`). A telepítő a rögzített verziójú, ellenőrzött ellenőrzőösszegű kiadást tölti le. Csak az életciklusát kezeli; nem útválasztási célpont, és nem végez LLM-proxyzást.                                                                                                               |
 
-Mind a hét ugyanazt a felügyeleti modellt követi:
+Mind a nyolc ugyanazt a felügyeleti modellt követi:
 
 - Az OmniRoute a `DATA_DIR/services/{name}/` alatt telepíti őket (az OmniRoute saját `package.json` fájljától elkülönítve)
 - Az OmniRoute gyermekfolyamatként indítja és figyeli őket
@@ -581,7 +582,27 @@ háttérmegoldáshoz (`./worker.ts`).
 
 ---
 
-### 4.8 Fordított proxy (a 9Router vezérlőpult beágyazása)
+### 4.8 sing-box-végpontok (8 útvonal)
+
+A sing-box végpontszerkezete megegyezik a Muxéval: nincs `rotate-key` útvonal, és nem történik API-kulcs beillesztése (`needsApiKey: false` a `bootstrap.ts` fájlban). Csak az életciklusát kezeli a rendszer; soha nem útválasztási vagy LLM-szolgáltató. Az `install()` letölti a hivatalos GitHub-kiadás bináris fájlját (`SagerNet/sing-box`) a rögzített verzióhoz (`SINGBOX_PINNED_VERSION` a `src/lib/services/installers/singbox.ts` fájlban), és még a lemezre írás előtt ellenőrzi annak SHA256 értékét az ugyanebbe a fájlba beépített ellenőrzőösszeggel. Minden más kért verziót elutasít.
+
+| Metódus | Útvonal                                      | Leírás                                                                                                  |
+| ------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `POST`  | `/api/services/singbox/install`              | A rögzített sing-box-kiadás letöltése és ellenőrzése                                                    |
+| `POST`  | `/api/services/singbox/start`                | A sing-box elindítása (`sing-box run -c config.json`)                                                   |
+| `POST`  | `/api/services/singbox/stop`                 | A sing-box leállítása                                                                                   |
+| `POST`  | `/api/services/singbox/restart`              | A sing-box újraindítása                                                                                 |
+| `POST`  | `/api/services/singbox/update`               | A rögzített kiadás újbóli ellenőrzése vagy telepítése                                                   |
+| `GET`   | `/api/services/singbox/status`               | Élő állapot és az adatbázisban tárolt állapot                                                           |
+| `POST`  | `/api/services/singbox/auto-start`           | Az automatikus indítás be- vagy kikapcsolása                                                            |
+| `POST`  | `/api/services/singbox/auto-restart-adopted` | Egy felügyelet alá vont, korábban már létező folyamat automatikus újraindításának be- vagy kikapcsolása |
+| `GET`   | `/api/services/singbox/logs`                 | Az SSE-napló végének követése a közös dinamikus `[name]/logs` útvonalon                                 |
+
+**TPROXY-kapcsolat:** Az `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) megírja a `config.json` fájlt és elindítja a felügyelőt, mielőtt az `applyTproxy()` telepíti a TPROXY tűzfalszabályokat. Ha a felügyelő hiányzik vagy nem éri el a `running` állapotot, a hiba csendes elnyelése helyett most hibaszintű naplóbejegyzés készül. Az üzemeltető így felismerheti, hogy a TPROXY-szabályok mögött nem működik figyelőfolyamat, noha a szabályokat már alkalmazták.
+
+---
+
+### 4.9 Fordított proxy (a 9Router vezérlőpult beágyazása)
 
 A vezérlőpult egy belső fordított proxyn keresztül, iframe-ben ágyazza be a
 9Router webes felhasználói felületét a következő címen:

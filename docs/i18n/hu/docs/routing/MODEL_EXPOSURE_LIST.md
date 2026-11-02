@@ -62,3 +62,15 @@ A beállítások exportja (`GET /api/settings/export-json`) mindkét tömböt v�
 beállításmezőt — a `hidePaidModels` kombinációlépéseket érintő exportszűrőjével ellentétben itt nincs újrahidratálási
 kockázat: az exportált kombinációlépésbe ágyazott tiltott azonosító az üzemeltető saját, explicit útválasztási
 döntése, nem pedig olyasmi, amit az exportálási határnak el kellene távolítania.
+
+## Csak kombókat tartalmazó lista (`exposeCombosOnly`)
+
+Külön logikai beállítás, amelyet szintén kifejezetten be kell kapcsolni, alapértéke pedig `false`; olyan telepítésekhez készült, ahol a kombók alkotják a nyilvános modellfelületet, a szolgáltatók pedig csak háttérrendszerek. `true` esetén a nyilvános lista (`GET /v1/models`, `GET /v1`, valamint a `getUnifiedModelsResponse()` alapú többi `/v1` felfedezési útvonal) csak az `owned_by: "combo"` sorokat tartja meg: a felhasználói kombókat és a beépített `auto/*` kombókat (kivéve, ha a `hideAutoCombos` elrejti őket). Ugyanazt a sorellenőrzést használja, mint a kulcsonkénti `catalogScope: "combos"`, és ezen felül továbbra is érvényesülnek a kulcs saját engedélyezési, tiltási és hatóköri szűrői.
+
+A **Beállítások → Útválasztás → Models API-lista** pontban vagy a `PATCH /api/settings {"exposeCombosOnly": true}` hívással kapcsolható.
+
+A fenti listákhoz hasonlóan csak a meghirdetést módosítja:
+
+- az explicit `provider/model` azonosító továbbra is továbbítja a kérést, és a `GET /v1/models/{id}` továbbra is feloldja;
+- az irányítópult katalógusa (a modellválasztók által használt `GET /api/models/catalog`) nem szűkül;
+- nem tükröződik az `auto/*` jelöltkészleteibe, így az `auto/*` kombók megtartják a teljes készletüket.

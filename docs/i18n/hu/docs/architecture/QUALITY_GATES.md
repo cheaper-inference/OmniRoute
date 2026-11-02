@@ -36,7 +36,8 @@ A CLI elutasítja, ha a checkout és az esemény SHA-ja eltér. A munkafolyamat-
 a döntési feladat `needs` listájához kötik, így egy új vagy eltávolított sáv nem tűnhet el észrevétlenül.
 A nyugták a saját munkafolyamatukra vonatkoznak, nem pedig a közzétételre, a telepítésre vagy egy meglévő tanácsadó jellegű vizsgáló belső működésére. Az alkalmazandó ellenőrzések kötelezővé tétele az ágszabályokban külön adminisztratív módosítás; a feladataik meghatározása önmagában nem védi az ágat.
 
-Az `API Route Typecheck` egy független munkafolyamat-ellenőrzés, amely kívül esik mindkét összesített eredményen és a helyi teljes megfigyelő statikus profilján. Az eredményét külön vizsgálja meg az adott jelölthöz. A `.github/workflows/api-route-typecheck.yml` a `main` vagy `release/**` ágra irányuló PR-ek, az e két ágcsalád valamelyikére történő pushok, valamint kézi indítás esetén fut le. Nem rendelkezik útvonalszűrővel. A PR célágának módosítása új ellenőrzést kér; a törzs vagy a cím szerkesztése a csak megfigyelésre szolgáló `Admission not requested / API Route Typecheck` nevet használja, és nem helyettesítheti a befogadási ellenőrzést. A munkafolyamat nem deklarál összevonásicsoport-triggert. Minden olyan összevonási sor bevezetése előtt, amely megköveteli ezt az ellenőrzést, először biztosítani kell, hogy az ellenőrzés az adott eseménynél is lefusson.
+Az `API Route Typecheck` önálló workflow-ellenőrzés, mindkét összesített döntésen és a teljes helyi megfigyelő statikus profilján kívül. Eredményét külön kell ellenőrizni a pontos jelölthöz. A `.github/workflows/api-route-typecheck.yml` a `main` vagy `release/**` célú PR-eknél, mindkét ágcsaládba történő pushnál, kézi indításkor és `checks_requested` típusú `merge_group` eseményeknél fut. Nincs útvonalszűrő. Az összevonási csoportok a `merge_group.head_sha`, más események a `github.sha` változatot veszik ki. Minden esemény ugyanazt az API-diagnosztikai kaput és annak egységtesztjeit használja.
+A PR célágának módosítása új ellenőrzést kér; a leírás vagy cím szerkesztése a csak megfigyelő `Admission not requested / API Route Typecheck` nevet használja, és nem helyettesítheti a befogadási ellenőrzést.
 
 ### Megőrzött bizonyítékok az elfogadási redukálóban
 
@@ -52,6 +53,14 @@ egy hiányzó vagy módosított fájl, egy nem biztonságos elérési út vagy e
 az ellenőrzést. A hiányzó fájlok nem egyenértékűek az üres, sikeres naplókkal. A meglévő
 SHA-/futás-/próbálkozás-ellenőrzések függetlenek maradnak: az egyező bájtok nem menthetnek meg egy elavult
 nyugtát. A fájlintegritás nem bizonyítja a végrehajtás hitelességét vagy az összetevő előléptetését.
+
+### A DAST az ellenőrzött CI-buildet használja
+
+A kötelező `dast-smoke` CI-feladat a `build` után meghívja a `.github/workflows/dast-smoke.yml` workflow-t. A buildével azonos kód- és piszkozatkiválasztást követ, beleértve a támogatott fork-PR-eket, kiadási célú PR-eket és összevonási csoportokat. A hiányzó, sikertelen, megszakított vagy váratlanul kihagyott DAST-feladat blokkolja a `Gate / CI` kaput. Az újrahasználható workflow-nak nincs önálló PR- vagy kézi indítója; a kézi validálás a CI indítását használja, hogy a build és a fogyasztó ugyanabban a futásban maradjon.
+
+A `scripts/ci/next-build-provenance.mjs` a teljes Next-artefaktumot rögzíti a tar-kivonattal, tároló/esemény/futás adataival, a termelő próbálkozásával, head/base/checkout/tree értékekkel, workflow-azonosságokkal, lockfile-lal, pontos Node-verzióval és ABI-val, platformmal és bundlerrel. A DAST a megváltoztathatatlan artefaktumazonosítót a `needs.build.outputs` értékéből választja, megköveteli a letöltés kivonatának ellenőrzését, és függetlenül hasonlítja a ZIP számított kivonatát a termelőéhez, mielőtt a két engedélyezett tagot kicsomagolja a `scripts/ci/unpack-ci-build.py` segítségével. A manifestnek és a tar-archívumnak is egyeznie kell a termelő független kimeneteivel a Next-fa kibontása előtt. Soha nem keresi az ág legutóbbi sikeres buildjét. A részleges újrafuttatás ugyanazt a termelői próbálkozást használhatja, ha azonosítója és minden bemenete továbbra is egyezik; a bizonylat mindkét próbálkozást rögzíti.
+
+A fogyasztó hosztolt Linux-runneren marad, csak olvasható tárolóengedéllyel és a tároló titkai nélkül. A termelő pontos Node-verzióját telepíti, majd összeállítja a CLI-t `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` beállítással. A `scripts/build/standaloneInput.mjs` bármilyen tartalék build előtt elutasítja a hiányzó önálló szervert; a szokásos helyi CLI-buildek megtartják meglévő tartalék eljárásukat. A szerver készenlétének, a Schemathesis és a promptfoo ellenőrzésének egyaránt sikerülnie kell a feladat változatlan, 25 perces korlátján belül. A származási bizonylat a bemenetek azonosságát és bájtjait bizonyítja, nem a DAST-vizsgálat sikerét. A lejárt artefaktum, megszakadt runner vagy hibás szkenner továbbra is hiányos vagy sikertelen bizonyíték; egy tájékoztató burkoló nem alakíthatja PASS eredménnyé.
 
 ### Felhasználói felületi végrehajtási kapacitás
 
@@ -197,17 +206,24 @@ Minden `main` ágra irányuló PR esetén lefut. Hiba esetén blokkolja az össz
 
 A `test-coverage` után fut. Hiba esetén blokkolja az egyesítést.
 
-| Szkript                      | Ellenőrzés                                                                                                                                                                                                                 | Blokkoló                               |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `quality:collect`            | Létrehozza a `quality-metrics.json` fájlt (ESLint-figyelmeztetések száma, lefedettség az egyesített szegmensjelentésből)                                                                                                   | Igen (a fokozatos szigorítás bemenete) |
-| `quality:ratchet`            | A `quality-baseline.json` minden metrikája regressziómentes (ESLint-figyelmeztetések ≤ alapérték; lefedettség ≥ alapérték)                                                                                                 | Igen                                   |
-| `check:duplication`          | A kódduplikáció (jscpd@4) nem haladja meg a `quality-baseline.json` fájlban megadott alapértéket                                                                                                                           | Igen                                   |
-| `check:complexity`           | A fájlszintű ciklomatikus komplexitás nem haladja meg a korlátot (az ESLint alapvető `complexity` + `max-lines-per-function` szabálya)                                                                                     | Igen                                   |
-| `check:cognitive-complexity` | Kognitívkomplexitás-fokozatos szigorítás (`eslint-plugin-sonarjs`) — külön ESLint-futtatás; a CI mindkettőt összevonva, egyetlen `check:complexity-ratchets` lépésként futtatja                                            | Igen                                   |
-| `check:dead-code`            | A nem használt exportok/fájlok fokozatos ellenőrzése (knip) nem mutat regressziót az alapértékhez képest                                                                                                                   | Igen                                   |
-| `check:compression-budget`   | Tömörítési teljesítményteszt kerete — a motoronkénti minimális tokenmegtakarítás nem romolhat                                                                                                                              | Igen                                   |
-| `check:type-coverage`        | A típusozottsági százalék fokozatos ellenőrzése (`type-coverage`) nem mutat regressziót; nagyrészt magában foglalja a `typecheck:noimplicit:core` ellenőrzést                                                              | Igen                                   |
-| `check:codeql-ratchet`       | A nyitott CodeQL-riasztások száma nem nőhet (beolvasás a `gh api` segítségével; token hiányában szabályos kihagyás) — a frissítési gyakoriságot és a kézi indítást lásd alább, a „CodeQL fokozatos szigorítása” szakaszban | Igen                                   |
+| Szkript                      | Ellenőrzés                                                                                                                                                                      | Blokkoló                               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `quality:collect`            | Létrehozza a `quality-metrics.json` fájlt (ESLint-figyelmeztetések száma, lefedettség az egyesített szegmensjelentésből)                                                        | Igen (a fokozatos szigorítás bemenete) |
+| `quality:ratchet`            | A `quality-baseline.json` minden metrikája regressziómentes (ESLint-figyelmeztetések ≤ alapérték; lefedettség ≥ alapérték)                                                      | Igen                                   |
+| `check:duplication`          | A kódduplikáció (jscpd@4) nem haladja meg a `quality-baseline.json` fájlban megadott alapértéket                                                                                | Igen                                   |
+| `check:complexity`           | A fájlszintű ciklomatikus komplexitás nem haladja meg a korlátot (az ESLint alapvető `complexity` + `max-lines-per-function` szabálya)                                          | Igen                                   |
+| `check:cognitive-complexity` | Kognitívkomplexitás-fokozatos szigorítás (`eslint-plugin-sonarjs`) — külön ESLint-futtatás; a CI mindkettőt összevonva, egyetlen `check:complexity-ratchets` lépésként futtatja | Igen                                   |
+| `check:dead-code`            | A nem használt exportok/fájlok fokozatos ellenőrzése (knip) nem mutat regressziót az alapértékhez képest                                                                        | Igen                                   |
+| `check:compression-budget`   | Tömörítési teljesítményteszt kerete — a motoronkénti minimális tokenmegtakarítás nem romolhat                                                                                   | Igen                                   |
+| `check:type-coverage`        | A típusozottsági százalék fokozatos ellenőrzése (`type-coverage`) nem mutat regressziót; nagyrészt magában foglalja a `typecheck:noimplicit:core` ellenőrzést                   | Igen                                   |
+
+### Feladatok: `codeql-scan` és `codeql-admission`
+
+A `codeql-scan` előállítja az összes konfigurált elemzési kategóriát. E feladat sikere után a `codeql-admission` ellenőrzi annak pontos feltöltéseit és a jelölt riasztási ratchetjét. Mindkettő a `Gate / CI` kötelező függősége, a csak dokumentációt módosító jelölteknél is. Az adminisztratív aktiválás és a canary-próba feltételeit az alábbi „CodeQL-ratchet” rész ismerteti.
+
+| Szkript                | Ellenőrzi                                                                                                                                                                                                                   | Blokkoló |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `check:codeql-ratchet` | A jelölt ref/SHA értékének és minden konfigurált elemzési kategóriának aktuálisnak kell lennie a riasztási ratchet előtt; a hiányzó bizonyíték blokkol. A globális leltár külön marad — lásd alább a „CodeQL-ratchet” részt | Igen     |
 
 ### Feladat: `quality-extended`
 
@@ -480,33 +496,24 @@ Ezt a fájlt a metrikát javító módosítással együtt commitolja. Ha egy PR 
 metrikát az alapérték frissítése nélkül, azt a `--require-tighten` észleli (6A.5. fázis,
 megvalósításra vár).
 
-### CodeQL-ratchet: frissítési gyakoriság és kézi indítás
+### CodeQL-ratchet: jelöltbefogadás és tárolóleltár
 
-A `check:codeql-ratchet` a **tároló ütemezetten frissített állapotát olvassa — nem PR-enként.**
-A `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` a következőt jelenti:
-`state: configured`, `schedule: weekly`: ez a GitHub alapértelmezett beállítású vizsgálata,
-nem pedig pushonkénti elemzés. Következmény: egy riasztásokat JAVÍTÓ PR egyesítése után a
-ratchet továbbra is a régi, magasabb számot olvassa a következő ütemezett vizsgálat
-lefutásáig — ezért minden nyitott PR esetében regressziót jelez, beleértve a javító PR
-utólagos módosításait is, amíg a vizsgálat utol nem éri az állapotot.
+A CI explicit függőségi lánccal kezeli a jelölt CodeQL-befogadását: a `codeql-scan` meghívja a `codeql.yml` négynyelvű mátrixát, majd a `codeql-admission` futtatja a `node scripts/check/check-codeql-ratchet.mjs --candidate` parancsot. A `Gate / CI` mindkét eredményt megköveteli. A Quality megtartja saját számszerű ellenőrzéseit, de nem kérdezi le a szkennert a termelő befejezése előtt; a `Gate / Quality` önmagában nem teljes jelöltbefogadás. A CodeQL a csak dokumentációt módosító jelölteknek is kötelező.
 
-**Kézi frissítés**: a `gh workflow run codeql.yml --ref release/vX.Y.Z` perceken belül
-újrafuttatja az elemzést, és ismét közzéteszi a riasztásokat. Először olvassa el a
-`.github/workflows/codeql.yml` fájlt — a fejlécében szerepel, hogy **azért csak
-`workflow_dispatch` használatával indítható, mert ütközik a GitHub „alapértelmezett
-beállításával”** (`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`).
-A `push`/`pull_request`/`schedule` eseményindítók visszaállításához először **tulajdonosi
-műveletre van szükség**: Beállítások → Kódbiztonság → CodeQL: Alapértelmezett → Speciális.
-E váltás nélkül ne adjon hozzá `schedule:` eseményindítót — az csak sikertelen futásokat
-eredményez.
+A `config/quality/codeql-admission-policy.json` szabályzata az Actions, C/C++, JavaScript/TypeScript és Python elemzést, a default lekérdezéscsomagot, a remote fenyegetésmodellt és a none buildmódot választja. A termelő előellenőrzése elutasítja a függő aktiválási rekordot és az explicit céllistán kívüli ágakat. A kezdeti célok main és release/v3.8.53; a következő kiadás ellenőrzött felvételt igényel. A meglévő, tágabb CI-indító megmarad a kiadási PR-ekhez, de a fel nem vett cél már a kinyerés előtt HOLD eredményt ad, mérés nélküli PASS helyett.
 
-**A darabszám csökkenése után szigorítsa az alapértéket** — a `node scripts/check/check-codeql-ratchet.mjs
---update` az újonnan mért darabszámot a `quality-baseline.json` →
-`metrics.codeqlAlerts.value` mezőbe írja, így a ratchet nem engedélyezi észrevétlenül,
-hogy a szám visszanőjön a régi felső határig. Kidolgozott példa (2026-09-02/03): a #12502
-PR 7 valódi riasztást javított (13 → 6 mért nyitott riasztás); a #12530 PR a rögzített
-alapértéket 11-ről 6-ra szigorította, hogy megfeleljen ennek; a fennmaradó 6 riasztást
-ezután riasztásonkénti indoklással elutasították, így 0 maradt nyitva.
+Minden mátrixfeladat rögzíti tényleges SARIF-feltöltésazonosítóját, nyelvét, kategóriáját, futását és próbálkozását, a hívó workflow azonosságát, az esemény ref/head/base/merge SHA értékét és a szabályzat kivonatát. A függő feladat csak e futás bizonylatait tölti le, és ellenőrzi az artefaktumok kivonatait. Mind a négy kategóriát, sikeres termelőt és minden pontos feltöltés befejezett feldolgozását megköveteli. Az API sarif_id szűrőjét használja, nem az ágon utoljára talált elemzést. Részleges újrafuttatások ugyanazon futás és jelölt korábbi próbálkozásának sikeres kategóriáit újrahasználhatják, megtartva az előállító próbálkozást; a jelenlegi sikertelen termelő nem használhat korábbi zöld bizonyítékot.
+
+A CodeQL-action vár a feldolgozásra, de rögzített implementációja figyelmeztetés után folytathatja a munkát állapotolvasási hiba vagy az elvárt várakozás kimerülése esetén. A befogadás ezért újra ellenőrzi a feldolgozást. Hiányzó kategóriák, függő feldolgozás, sikertelen vagy megszakított feladatok, elavult azonosság, hiányos lapozás vagy elérhetetlen API-k HOLD eredményt és 2-es kilépési kódot adnak. Nincs többé rögzített várakozás független szkenner-workflow-ra. A nem vizsgált PR nem mehet át attól, hogy a riasztáslekérdezés 0 eredményt adott. A `metrics.codeqlAlerts.value` fölötti mért szám 1-es kóddal lép ki; a baseline nem emelkedik egy másik ág riasztásainak befogadására. [Feltöltési állapot és elemzéskeresés](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+A bizonylat feltöltési és elemzési azonosítókat, kategóriákat, eszközverziókat, ref/SHA értéket, baseline-t és riasztásszámokat rögzít. A SARIF-azonosság és eredményszám, minimális szabályszámok és pontos riasztáspéldányok kötelezők maradnak. A PR- és elemzési azonosságokat elfogadás előtt újra ellenőrzik. E vizsgálatok a konfigurált kategóriák lefedettségét igazolják, nem minden kinyert forrásfájl leltárát. A build nélküli C/C++-kinyerés nem tartalmazza a projekt buildje során generált kódot. A forráskizárások továbbra is felülvizsgálatot igényelnek, a közreműködő felelősségének megállapításához pedig a pontos bázis összehasonlítható bizonyítéka kell.
+
+A `codeql-maintenance.yml` az aktív kiadás pushvizsgálatait és a heti ütemezést biztosítja a PR/main-termelők megkettőzése nélkül. A `nightly-codeql-inventory.yml` külön tartja az egész tároló baseline-ját, `--strict-measurement` beállítással és hibával, ha a mérés nem érhető el. A régi helyi gyűjtő megengedett kihagyása nem jelöltbefogadás. A szigorítás továbbra is explicit `--update`, ellenőrzött alacsonyabb globális szám után.
+
+Az Advanced workflow nem publikálható konfigurált Default Setup mellett: a GitHub elutasítja e kombinációt. Verziózott szabályzata függőben marad az ellenőrzött adminisztratív átállás visszaolvasásáig. Publikálás előtt egy operátor rögzíti a tárolót, head/base/tree értékeket, szabályzat-/patch-/visszaállítási kivonatokat és a megfigyelt beállítási állapotot; a `node scripts/quality/codeql-producer.mjs verify-admin-readback` ellenőrzi a megadott elvárt és tényleges JSON-rekordokat. Ez technikai védelem, nem operátori jóváhagyás, és nem helyettesíti a friss visszaolvasások lekérését. A PR-token soha nem kér Administration-hozzáférést. A bevezetés és minden szkennermódosítás e külön visszaolvasást, továbbá valós PR-, fork- és összevonásicsoport-kompatibilitási bizonyítékot igényel.
+
+A forkok hosztolt runnereket, tartós hitelesítő adatok nélküli checkoutot használnak, nincs projekttelepítés vagy projektbuild a termelőben, és nincsenek örökölt tárolótitkok. A GitHub támogatja a SARIF-feltöltést a pull_request eseménynél korlátozott forktokennel; az első hozzájárulás futtatási jóváhagyása továbbra is GitHub-szabályzat. Soha ne használja a pull_request_target eseményt nem megbízható kód futtatására. A migráció befejezettnek tekintése előtt az ellenőrzött canary-próbában erősítse meg a token tényleges engedélyeit, az analysis_key értéket és minden kategóriakörnyezetet. [Forkfeltöltési szabályok](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[ütköző beállítási módok](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Az elutasítás az üzemeltető döntése (14. szigorú szabály)** — soha ne utasítson el
 CodeQL-riasztást anélkül, hogy az elutasítási megjegyzésben rögzítené a műszaki indoklást:
@@ -663,11 +670,7 @@ az alábbi racionalizálási jelölteket azonosította. **Az összevonások mech
 az átállítások és eltávolítások az üzemeltető számára fenntartott szabályzati döntések.** Az
 alábbiak közül még semmi sincs alkalmazva.
 
-**A fentiekben szintén nincs dokumentálva** (tanácsadó jellegű, alacsony jelértékű): a `docs-lint` feladat
-(markdownlint + Vale, a teljes feladatra érvényes `continue-on-error`), valamint az önálló ellenőrzési munkafolyamatok:
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. A `semgrepFindings: 0` szerepel a
-`quality-baseline.json` fájlban, de nincs blokkoló racsnihoz kötve a `ci.yml` fájlban — a metrika
-jelenleg árva.
+**Fent szintén nem dokumentált** (tájékoztató, csekély jelértékű): a `docs-lint` feladat (markdownlint + Vale, teljes feladat `continue-on-error` beállítással) és az önálló `semgrep.yml` / `scorecard.yml` szkenner-workflow-k. A CodeQL most kötelező termelői és befogadási feladatokat használ a `Gate / CI` alatt, a fent ismertetett aktiválási követelmények mellett. A `semgrepFindings: 0` szerepel a `quality-baseline.json` fájlban, de nincs blokkoló ratchethez kötve a `ci.yml` fájlban — a metrika jelenleg árva.
 
 ### Összevonás / deduplikálás (mechanikus, alacsonyabb kockázat)
 

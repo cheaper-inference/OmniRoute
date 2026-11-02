@@ -477,7 +477,8 @@ SSE), kedua-duanya dimatikan secara lalai.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Tidak ditetapkan
   bermaksud semua jenis (tingkah laku sebelum tetapan ini wujud). Corak
   `ssn_us` enjin permintaan dipetakan kepada `ssn`. Templat (Minimal, Standard,
-  Financial, Brazilian, USA, Full) hanya mengisi kotak semak dalam UI.
+  Financial, Brazilian, USA, GDPR, POPIA, Full) hanya mengisi kotak semak dalam UI.
+- **Pengenal GDPR dan POPIA** — dua belas id terbina dalam yang meliputi pengenal peribadi Kesatuan Eropah dan Afrika Selatan (jadual di bawah). Regex, pengesah dan tag bidang kuasanya berada dalam satu jadual, `src/shared/utils/piiPatterns.ts`, yang digunakan oleh pembersih respons (`src/lib/piiSanitizer.ts`) dan penyamar permintaan (`src/shared/utils/inputSanitizer.ts`). Padanan hanya disamarkan apabila pengesahnya menerimanya; deretan digit semata-mata tidak pernah mencukupi. Operator yang menyimpan pilihan lebih sempit sebelum id ini wujud mengekalkan tingkah laku sebelumnya sehingga id baharu ditandakan.
 - **Corak tersuai** — sehingga 20 corak regex atau wildcard (`*` = sehingga 64
   aksara bukan ruang kosong, `?` = satu). Padanan menjadi `[CUSTOM_REDACTED]`.
   Setiap corak melalui `compilePiiCustomPattern()`
@@ -503,6 +504,25 @@ Tetapan disimpan dalam jadual `key_value` (namespace `pii_settings`,
 
 Ketiga-tiganya memerlukan pengesahan pengurusan dan mengesahkan body dengan
 Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Pengenal GDPR (Kesatuan Eropah) dan POPIA (Afrika Selatan)
+
+| Id                  | Pengenal                     | Pengesahan                                                                               |
+| ------------------- | ---------------------------- | ---------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                         | Negara dikenali, panjang tepat bagi negara itu, ISO 13616 MOD-97-10                      |
+| `eu_vat`            | Nombor VAT Kesatuan Eropah   | Awalan negara anggota dikenali dan format nombor negara itu (tanpa carian VIES)          |
+| `es_dni_nie`        | DNI / NIE Sepanyol           | Huruf kawalan (nilai mod 23); NIE ialah `X/Y/Z` + 7 digit                                |
+| `it_codice_fiscale` | Codice Fiscale Itali         | Huruf kawalan daripada jadual kedudukan ganjil/genap                                     |
+| `pl_pesel`          | PESEL Poland                 | Checksum berwajaran dan julat bulan/hari lahir terenkod yang munasabah                   |
+| `nl_bsn`            | BSN Belanda                  | Ujian 11 (wajaran 9..2, -1)                                                              |
+| `de_steuer_id`      | Steuer-ID Jerman             | ISO 7064 Mod 11,10 serta peraturan struktur digit (tiada 0 di hadapan)                   |
+| `se_personnummer`   | personnummer Sweden          | Luhn pada sepuluh digit terakhir dan tarikh lahir munasabah (10 atau 12 digit)           |
+| `za_id`             | Nombor ID Afrika Selatan     | Luhn pada kesemua 13 digit, bulan/hari lahir sah, digit kewarganegaraan 0 atau 1         |
+| `za_phone`          | Telefon Afrika Selatan       | Awalan `+27` / `27`, atau bentuk kebangsaan `0..` yang ditulis dengan ruang atau sempang |
+| `za_vat`            | Nombor VAT Afrika Selatan    | 10 digit bermula dengan `4` **dan** "VAT" / "BTW" dalam 48 aksara sebelumnya             |
+| `za_tax_ref`        | Rujukan cukai Afrika Selatan | 10 digit bermula `0`-`3`, Luhn, **dan** "tax" / "SARS" dalam 48 aksara sebelumnya        |
+
+Oleh sebab format digit sahaja bertembung dengan nombor pesanan, nombor binaan dan cap masa, format paling lemah (`za_vat`, `za_tax_ref`) memerlukan petunjuk kata kunci, dan nombor `0..` sepuluh digit tanpa pemisah tidak dianggap nombor telefon Afrika Selatan. IBAN berjarak (`GB29 NWBK ...`) tidak dipadankan. Pada laluan penstriman, petunjuk dicari dalam cebisan semasa sahaja. Id ini mendahului corak telefon generik, jadi pengenal yang disahkan mengekalkan pemegang tempatnya sendiri (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Templat `gdpr` dan `popia` masing-masing memilih id Kesatuan Eropah dan Afrika Selatan. Penyamaran itu sendiri kekal perlu diaktifkan secara pilihan (Hard Rule #20): tiada apa-apa di sini mengubah lalai bendera ciri.
 
 ### Suntikan Prompt (`promptInjection.ts`)
 

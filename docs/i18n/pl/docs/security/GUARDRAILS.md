@@ -422,8 +422,9 @@ SSE) — obie flagi są domyślnie wyłączone.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Brak ustawienia
   oznacza każdy typ (zachowanie sprzed wprowadzenia tej opcji). Wzorzec
   `ssn_us` silnika żądań jest mapowany na `ssn`. Szablony (Minimalny,
-  Standardowy, Finansowy, Brazylijski, USA, Pełny) wypełniają jedynie pola
+  Standardowy, Finansowy, Brazylijski, USA, GDPR, POPIA, Pełny) wypełniają jedynie pola
   wyboru w interfejsie użytkownika.
+- **Identyfikatory GDPR i POPIA** — dwanaście wbudowanych identyfikatorów obejmujących identyfikatory osobowe UE i Republiki Południowej Afryki (tabela poniżej). Ich wyrażenia regularne, walidatory i znaczniki jurysdykcji znajdują się w jednej tabeli, `src/shared/utils/piiPatterns.ts`, z której korzystają zarówno oczyszczanie odpowiedzi (`src/lib/piiSanitizer.ts`), jak i maskowanie żądań (`src/shared/utils/inputSanitizer.ts`). Dopasowanie jest maskowane tylko po zaakceptowaniu przez walidator; sam ciąg cyfr nigdy nie wystarcza. Operator, który zapisał zawężony wybór przed dodaniem tych identyfikatorów, zachowuje dotychczasowe działanie, dopóki nie zaznaczy nowych identyfikatorów.
 - **Wzorce niestandardowe** — maksymalnie 20 wzorców regex lub wildcard (`*` =
   do 64 znaków niebędących białymi znakami, `?` = jeden). Dopasowania stają się
   `[CUSTOM_REDACTED]`. Każdy wzorzec przechodzi przez
@@ -451,6 +452,25 @@ API:
 
 Wszystkie trzy wymagają uwierzytelnienia administracyjnego i walidują treść
 żądania za pomocą Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Identyfikatory GDPR (UE) i POPIA (Republika Południowej Afryki)
+
+| Id                  | Identyfikator                              | Walidacja                                                                                       |
+| ------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                                       | Znany kraj, dokładna długość dla tego kraju, ISO 13616 MOD-97-10                                |
+| `eu_vat`            | Numer VAT UE                               | Znany prefiks państwa członkowskiego i format numeru tego państwa (bez zapytania do VIES)       |
+| `es_dni_nie`        | Hiszpański DNI / NIE                       | Litera kontrolna (wartość mod 23); NIE to `X/Y/Z` + 7 cyfr                                      |
+| `it_codice_fiscale` | Włoski Codice Fiscale                      | Litera kontrolna z tabel pozycji nieparzystych/parzystych                                       |
+| `pl_pesel`          | Polski PESEL                               | Ważona suma kontrolna i wiarygodne zakresy zakodowanego miesiąca/dnia urodzenia                 |
+| `nl_bsn`            | Holenderski BSN                            | Próba 11 (wagi 9..2, -1)                                                                        |
+| `de_steuer_id`      | Niemiecki Steuer-ID                        | ISO 7064 Mod 11,10 oraz reguły struktury cyfr (bez początkowego 0)                              |
+| `se_personnummer`   | Szwedzki personnummer                      | Luhn dla ostatnich dziesięciu cyfr i wiarygodna data urodzenia (10 lub 12 cyfr)                 |
+| `za_id`             | Południowoafrykański numer identyfikacyjny | Luhn dla wszystkich 13 cyfr, prawidłowy miesiąc/dzień urodzenia, cyfra obywatelstwa 0 lub 1     |
+| `za_phone`          | Telefon południowoafrykański               | Prefiks `+27` / `27` albo format krajowy `0..` zapisany ze spacją lub łącznikiem                |
+| `za_vat`            | Południowoafrykański numer VAT             | 10 cyfr zaczynających się od `4` **oraz** "VAT" / "BTW" w poprzedzających 48 znakach            |
+| `za_tax_ref`        | Południowoafrykański numer podatkowy       | 10 cyfr zaczynających się od `0`-`3`, Luhn **oraz** "tax" / "SARS" w poprzedzających 48 znakach |
+
+Ponieważ formaty złożone tylko z cyfr kolidują z numerami zamówień, kompilacji i znacznikami czasu, najsłabsze (`za_vat`, `za_tax_ref`) wymagają wskazówki w postaci słowa kluczowego, a sam dziesięciocyfrowy numer `0..` nie jest traktowany jako południowoafrykański numer telefonu. IBAN ze spacjami (`GB29 NWBK ...`) nie są dopasowywane. Na ścieżce strumieniowej wskazówka jest wyszukiwana tylko w bieżącym fragmencie. Identyfikatory są sprawdzane przed ogólnymi wzorcami telefonów, więc zweryfikowany identyfikator zachowuje własny znacznik zastępczy (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Szablony `gdpr` i `popia` wybierają odpowiednio identyfikatory UE i RPA. Samo maskowanie nadal wymaga jawnego włączenia (Hard Rule #20): nic tutaj nie zmienia domyślnego ustawienia flagi funkcji.
 
 ### Iniekcja promptu (`promptInjection.ts`)
 

@@ -37,7 +37,8 @@ CLI hylkää uloskuittauksen ja tapahtuman SHA-arvojen ristiriidan. Työnkulkute
 käytännön jäsenyyden tulostyön `needs`-luetteloon, jotta uusi tai poistettu linja ei voi
 kadota huomaamatta. Kuitit kattavat oman työnkulkunsa, eivät julkaisemista, käyttöönottoa tai olemassa olevan neuvoa-antavan skannerin sisäistä toimintaa. Sovellettavien tarkistusten määrittäminen pakollisiksi haarasäännöissä on erillinen hallinnollinen muutos; töiden määrittäminen ei itsessään suojaa haaraa.
 
-`API Route Typecheck` on itsenäinen työnkulun tarkistus, joka ei kuulu kumpaankaan koostettuun lopputulokseen eikä paikallisen täyden tarkkailijan staattiseen profiiliin. Tarkista sen tulos erikseen täsmälliselle ehdokkaalle. `.github/workflows/api-route-typecheck.yml` suoritetaan PR-pyynnöille, joiden kohteena on `main` tai `release/**`, kumpaan tahansa haaraperheeseen tehtäville vienneille sekä manuaalisesta käynnistyksestä. Siinä ei ole polkusuodatinta. PR-pyynnön kohdehaaran vaihtaminen pyytää uuden tarkistuksen; leipätekstin tai otsikon muokkaukset käyttävät vain havainnointiin tarkoitettua nimeä `Admission not requested / API Route Typecheck`, eivätkä ne voi korvata hyväksymistarkistusta. Työnkulku ei määritä yhdistämisryhmän käynnistintä. Jos tämä tarkistus halutaan pakolliseksi yhdistämisjonon käyttöönotossa, sen suorittaminen kyseiselle tapahtumalle on ensin varmistettava.
+`API Route Typecheck` on itsenäinen työnkulun tarkistus molempien koontitulosten ja täydellisen paikallisen tarkkailijan staattisen profiilin ulkopuolella. Tarkista sen tulos erikseen täsmälliselle ehdokkaalle. `.github/workflows/api-route-typecheck.yml` suoritetaan haaroihin `main` tai `release/**` kohdistuville PR:ille, kumpaankin haaraperheeseen tehtäville pusheille, manuaalisille käynnistyksille ja `checks_requested`-tyypin `merge_group`-tapahtumille. Polkurajausta ei ole. Yhdistämisryhmät ottavat käyttöön `merge_group.head_sha`-version; muut tapahtumat `github.sha`-version. Kaikki tapahtumat käyttävät samaa API-diagnostiikkaporttia ja sen yksikkötestejä.
+PR:n kohdehaaran vaihtaminen pyytää uutta tarkistusta; kuvauksen tai otsikon muokkaus käyttää vain havainnointiin tarkoitettua nimeä `Admission not requested / API Route Typecheck` eikä voi korvata hyväksymistarkistusta.
 
 ### Säilytetty näyttö hyväksynnän koostajassa
 
@@ -54,6 +55,14 @@ estää todentamisen. Puuttuvat tiedostot eivät vastaa tyhjiä onnistuneita lok
 SHA-, suoritus- ja yritystarkistukset pysyvät toisistaan riippumattomina: vastaavat tavut eivät
 voi pelastaa vanhentunutta kuittia. Tiedoston eheys ei ole todiste suorituksen aitoudesta tai
 artefaktin ylennyksestä.
+
+### DAST käyttää varmennettua CI-koontia
+
+Pakollinen CI-työ `dast-smoke` kutsuu työnkulkua `.github/workflows/dast-smoke.yml` työn `build` jälkeen. Se noudattaa koonnin kanssa samaa koodin ja luonnosten valintaa, mukaan lukien tuetut fork-PR:t, julkaisuhaaraan kohdistuvat PR:t ja yhdistämisryhmät. Puuttuva, epäonnistunut, peruttu tai odottamatta ohitettu DAST-työ estää portin `Gate / CI`. Uudelleenkäytettävällä työnkululla ei ole itsenäistä PR- tai manuaalilaukaisinta; manuaalinen varmennus käyttää CI:n käynnistystä, jotta koonti ja kuluttaja pysyvät samassa ajossa.
+
+`scripts/ci/next-build-provenance.mjs` sinetöi koko Next-artefaktin tar-tiivisteellä, tietovarastolla/tapahtumalla/ajolla, tuottajan yrityksellä, head/base/checkout/tree-tiedoilla, työnkulkujen tunnisteilla, lukitustiedostolla, tarkalla Node-versiolla/ABI:lla, alustalla ja niputtajalla. DAST valitsee muuttumattoman artefaktitunnuksen arvosta `needs.build.outputs`, edellyttää lataustiivisteen varmennusta ja laskee ZIP-tiivisteen itsenäisesti tuottajan tiivisteeseen verrattavaksi ennen kahden sallittujen listalla olevan jäsenen purkamista komennolla `scripts/ci/unpack-ci-build.py`. Myös manifestin ja tar-arkiston on vastattava tuottajan itsenäisiä tulosteita ennen Next-puun purkua. Se ei koskaan etsi haaran viimeisintä onnistunutta koontia. Osittainen uusinta voi käyttää samaa tuottajan yritystä, jos sen tunniste ja kaikki syötteet yhä täsmäävät; tosite kirjaa molemmat yritykset.
+
+Kuluttaja pysyy ylläpidetyllä Linux-suorittimella, jolla on tietovarastoon vain lukuoikeus eikä tietovaraston salaisuuksia. Se asentaa tuottajan tarkan Node-version ja kokoaa sitten CLI:n asetuksella `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` hylkää puuttuvan itsenäisen palvelimen ennen mitään varakoontia; tavalliset paikalliset CLI-koonnit säilyttävät nykyisen varamenettelynsä. Palvelimen valmiuden, Schemathesis-tarkistuksen ja promptfoo-tarkistuksen on kaikkien onnistuttava työn muuttumattomassa 25 minuutin aikarajassa. Alkuperätosite todistaa syötteiden identiteetin ja tavut, ei onnistunutta DAST-skannausta. Artefaktin vanheneminen, suorittimen keskeytys tai skannerin epäonnistuminen ovat edelleen puutteellista tai epäonnistunutta näyttöä; neuvoa-antava kääre ei voi muuttaa niitä PASS-tulokseksi.
 
 ### Käyttöliittymän suorituskapasiteetti
 
@@ -211,17 +220,24 @@ Suoritetaan jokaiselle `main`-haaraan kohdistuvalle PR:lle. Epäonnistuminen est
 
 Suoritetaan työn `test-coverage` jälkeen. Estää yhdistämisen epäonnistuessaan.
 
-| Skripti                      | Tarkistaa                                                                                                                                                                                                 | Estävä                          |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| `quality:collect`            | Tuottaa tiedoston `quality-metrics.json` (ESLint-varoitusten määrä, kattavuus yhdistetystä osioiden raportista)                                                                                           | Kyllä (ennen räikkätarkistusta) |
-| `quality:ratchet`            | Yksikään tiedoston `quality-baseline.json` mittari ei ole heikentynyt (ESLint-varoituksia ≤ perustaso; kattavuus ≥ perustaso)                                                                             | Kyllä                           |
-| `check:duplication`          | Koodin päällekkäisyys (jscpd@4) ei ylitä tiedoston `quality-baseline.json` perustasoa                                                                                                                     | Kyllä                           |
-| `check:complexity`           | Tiedostotason syklomaattinen kompleksisuus ei ylitä enimmäisrajaa (ESLintin ydinmoduulin `complexity` + `max-lines-per-function`)                                                                         | Kyllä                           |
-| `check:cognitive-complexity` | Kognitiivisen kompleksisuuden räikkätarkistus (`eslint-plugin-sonarjs`) — erillinen ESLint-ajo; CI suorittaa molemmat yhdistettynä yhtenä `check:complexity-ratchets`-vaiheena                            | Kyllä                           |
-| `check:dead-code`            | Käyttämättömien vientien/tiedostojen räikkätarkistus (knip) ei heikkene perustasoon verrattuna                                                                                                            | Kyllä                           |
-| `check:compression-budget`   | Pakkausvertailun budjetti — moottorikohtaiset tunnistesäästöjen vähimmäisrajat eivät saa heikentyä                                                                                                        | Kyllä                           |
-| `check:type-coverage`        | Tyypitetyn osuuden räikkätarkistus (`type-coverage`) ei heikkene; korvaa suurelta osin tarkistuksen `typecheck:noimplicit:core`                                                                           | Kyllä                           |
-| `check:codeql-ratchet`       | Avoimien CodeQL-hälytysten määrä ei kasva (lukee komennolla `gh api`; ohitetaan hallitusti ilman tunnistetta) — päivitystiheys ja manuaalinen käynnistys: katso jäljempänä kohta "CodeQL-räikkätarkistus" | Kyllä                           |
+| Skripti                      | Tarkistaa                                                                                                                                                                      | Estävä                          |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------- |
+| `quality:collect`            | Tuottaa tiedoston `quality-metrics.json` (ESLint-varoitusten määrä, kattavuus yhdistetystä osioiden raportista)                                                                | Kyllä (ennen räikkätarkistusta) |
+| `quality:ratchet`            | Yksikään tiedoston `quality-baseline.json` mittari ei ole heikentynyt (ESLint-varoituksia ≤ perustaso; kattavuus ≥ perustaso)                                                  | Kyllä                           |
+| `check:duplication`          | Koodin päällekkäisyys (jscpd@4) ei ylitä tiedoston `quality-baseline.json` perustasoa                                                                                          | Kyllä                           |
+| `check:complexity`           | Tiedostotason syklomaattinen kompleksisuus ei ylitä enimmäisrajaa (ESLintin ydinmoduulin `complexity` + `max-lines-per-function`)                                              | Kyllä                           |
+| `check:cognitive-complexity` | Kognitiivisen kompleksisuuden räikkätarkistus (`eslint-plugin-sonarjs`) — erillinen ESLint-ajo; CI suorittaa molemmat yhdistettynä yhtenä `check:complexity-ratchets`-vaiheena | Kyllä                           |
+| `check:dead-code`            | Käyttämättömien vientien/tiedostojen räikkätarkistus (knip) ei heikkene perustasoon verrattuna                                                                                 | Kyllä                           |
+| `check:compression-budget`   | Pakkausvertailun budjetti — moottorikohtaiset tunnistesäästöjen vähimmäisrajat eivät saa heikentyä                                                                             | Kyllä                           |
+| `check:type-coverage`        | Tyypitetyn osuuden räikkätarkistus (`type-coverage`) ei heikkene; korvaa suurelta osin tarkistuksen `typecheck:noimplicit:core`                                                | Kyllä                           |
+
+### Työt: `codeql-scan` ja `codeql-admission`
+
+`codeql-scan` tuottaa kaikki määritetyt analyysiluokat. Työn onnistuttua `codeql-admission` varmentaa sen täsmälliset lähetykset ja ehdokkaan hälytysten kiristysrajan. Molemmat ovat portin `Gate / CI` pakollisia riippuvuuksia myös vain dokumentaatiota muuttaville ehdokkaille. Hallinnollisen aktivoinnin ja canary-kokeen vaatimukset kuvataan jäljempänä kohdassa ”CodeQL-kiristysraja”.
+
+| Skripti                | Varmentaa                                                                                                                                                                                                                            | Estävä |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ |
+| `check:codeql-ratchet` | Ehdokkaan ref/SHA ja kaikkien määritettyjen analyysiluokkien on oltava ajantasaisia ennen hälytysten kiristysrajaa; puuttuva näyttö estää etenemisen. Globaali inventaario pysyy erillisenä — katso ”CodeQL-kiristysraja” jäljempänä | Kyllä  |
 
 ### Työ: `quality-extended`
 
@@ -490,32 +506,24 @@ Commitoi tämä tiedosto yhdessä mittaria parantaneen muutoksen kanssa. PR, jok
 mittaria päivittämättä perustasoa, havaitaan `--require-tighten`-valitsimella (vaihe 6A.5,
 toteutus odottaa).
 
-### CodeQL-ratchet: päivitysväli ja manuaalinen käynnistys
+### CodeQL-kiristysraja: ehdokkaan hyväksyntä ja tietovaraston inventaario
 
-`check:codeql-ratchet` lukee **repositoriotilaa, joka päivitetään ajastetusti — ei PR-kohtaisesti.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ilmoittaa
-`state: configured`, `schedule: weekly`: kyseessä on GitHubin oletusasetuksen tarkistus, ei jokaisen
-pushin yhteydessä suoritettava analyysi. Tästä seuraa, että kun hälytyksiä KORJAAVA PR on yhdistetty,
-ratchet lukee edelleen vanhaa, suurempaa määrää seuraavan ajastetun tarkistuksen suorittamiseen asti —
-joten se ilmoittaa regressiosta jokaisessa avoimessa PR:ssä, myös korjaavan PR:n omissa
-jatkomuutoksissa, kunnes tarkistus saa tilanteen ajan tasalle.
+CI vastaa ehdokkaan CodeQL-hyväksynnästä nimenomaisella riippuvuusketjulla: `codeql-scan` kutsuu tiedoston `codeql.yml` neljän kielen matriisia, minkä jälkeen `codeql-admission` suorittaa komennon `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` vaatii molemmat tulokset. Quality säilyttää omat numeeriset tarkistuksensa, mutta ei kysy skannerilta ennen tuottajan valmistumista; pelkkä `Gate / Quality` ei ole täydellinen ehdokkaan hyväksyntä. CodeQL on pakollinen myös vain dokumentaatiota muuttaville ehdokkaille.
 
-**Manuaalinen päivitys**: `gh workflow run codeql.yml --ref release/vX.Y.Z` suorittaa
-analyysin uudelleen ja julkaisee hälytykset uudelleen muutamassa minuutissa. Lue ensin
-`.github/workflows/codeql.yml` — sen otsikko selittää, että se käyttää vain
-`workflow_dispatch`-käynnistystä, **koska se on ristiriidassa GitHubin oletusasetuksen kanssa**
-(`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`).
-`push`/`pull_request`/`schedule`-käynnistysten palauttaminen edellyttää ensin **omistajan toimenpidettä**:
-Settings → Code security → CodeQL: Default → Advanced. Älä lisää `schedule:`-käynnistystä ilman tätä
-vaihtoa — se tuottaa ainoastaan epäonnistuvia suorituksia.
+Tiedoston `config/quality/codeql-admission-policy.json` käytäntö valitsee Actions-, C/C++-, JavaScript/TypeScript- ja Python-analyysit, kyselyjoukon default, uhkamallin remote ja koontitilan none. Tuottajan esitarkistus hylkää odottavan aktivointitietueen sekä haarat, joita ei ole nimenomaisessa kohdeluettelossa. Ensimmäiset kohteet ovat main ja release/v3.8.53; seuraava julkaisu vaatii tarkistetun käyttöönoton. CI:n aiempi laajempi julkaisu-PR-laukaisin säilyy, mutta käyttöön ottamaton kohde ilmoittaa HOLD ennen erottelua eikä saa mittaamatonta PASS-tulosta.
 
-**Tiukenna perustasoa määrän laskettua** — `node scripts/check/check-codeql-ratchet.mjs
---update` kirjoittaa uuden mitatun määrän tiedostoon `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, jotta ratchet ei salli huomaamatta regressiota takaisin
-vanhaan ylärajaan. Käytännön esimerkki (2026-09-02/03): PR #12502 korjasi 7 todellista hälytystä
-(13 → 6 mitattua avointa hälytystä); PR #12530 tiukensi jäädytettyä perustasoa arvosta 11 arvoon 6
-vastaamaan mittaustulosta; jäljellä olevat 6 hälytystä hylättiin tämän jälkeen hälytyskohtaisin
-perusteluin, jolloin avoimia hälytyksiä jäi 0.
+Kukin matriisityö tallentaa todellisen SARIF-lähetyksen tunnuksen, kielen, luokan, ajon ja yrityksen, kutsuvan työnkulun identiteetin, tapahtuman ref/head/base/merge-SHA:n ja käytäntötiivisteen. Riippuvainen työ lataa vain kyseisen ajon tositteet ja varmentaa artefaktitiivisteet. Se edellyttää kaikkia neljää luokkaa, onnistunutta tuottajaa ja jokaisen täsmällisen lähetyksen käsittelyn valmistumista. Se käyttää API:n sarif_id-suodatinta, ei haarasta viimeksi löydettyä analyysia. Osittaiset uusinnat voivat käyttää saman ajon ja ehdokkaan aiemman yrityksen onnistuneita luokkia säilyttäen tuottavan yrityksen tiedon; epäonnistunut nykyinen tuottaja ei voi käyttää aiempaa vihreää näyttöä.
+
+CodeQL-toiminto odottaa käsittelyä, mutta sen lukittu toteutus voi varoittaa ja jatkaa tilan lukemisvirheen tai odotusajan loppumisen jälkeen. Siksi hyväksyntä tarkistaa käsittelyn uudelleen. Puuttuvat luokat, keskeneräinen käsittely, epäonnistuneet tai perutut työt, vanhentunut identiteetti, puutteellinen sivutus tai poissa käytöstä olevat API:t aiheuttavat HOLD-tuloksen ja poistumiskoodin 2. Itsenäisen skannerityönkulun kiinteää odotusta ei enää ole. Skannaamaton PR ei voi läpäistä siksi, että hälytyskysely palautti 0. Mitattu määrä yli arvon `metrics.codeqlAlerts.value` päättyy koodiin 1; vertailutasoa ei nosteta toisen haaran hälytysten sisällyttämiseksi. [Lähetyksen tila ja analyysihaku](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Tosite tallentaa lähetys- ja analyysitunnukset, luokat, työkalujen versiot, ref/SHA:n, vertailutason ja hälytysmäärät. SARIF-identiteetti ja tulosmäärä, sääntöjen vähimmäismäärät sekä täsmälliset hälytysesintymät pysyvät pakollisina. PR:n ja analyysin identiteetit tarkistetaan uudelleen ennen hyväksymistä. Nämä tarkistukset osoittavat määritettyjen luokkien kattavuuden, eivät jokaisen erotellun lähdetiedoston inventaariota. C/C++-erottelu ilman koontia ei sisällä projektin koonnin aikana tuotettua koodia. Lähdepoissulut vaativat edelleen tarkistusta, ja vastuun osoittaminen osallistujalle vaatii vertailukelpoista näyttöä täsmällisestä pohjaversiosta.
+
+`codeql-maintenance.yml` tarjoaa aktiivisen julkaisun push-skannaukset ja viikkoaikataulun kahdentamatta PR/main-tuottajia. `nightly-codeql-inventory.yml` pitää koko tietovaraston vertailutason erillään, käyttää asetusta `--strict-measurement` ja epäonnistuu, jos mittausta ei ole saatavilla. Vanhan paikallisen kerääjän sallittu ohitus ei ole ehdokkaan hyväksyntä. Kiristys on edelleen nimenomainen `--update` varmennetun pienemmän globaalin määrän jälkeen.
+
+Advanced-työnkulkua ei saa julkaista Default Setup -asetuksen ollessa käytössä: GitHub hylkää yhdistelmän. Versioitu käytäntö odottaa, kunnes tarkistettu hallinnollinen siirtymä on luettu takaisin. Ennen julkaisua operaattori lukitsee tietovaraston, head/base/tree-tiedot, käytäntö-/patch-/palautustiivisteet ja havaitun asetustilan; `node scripts/quality/codeql-producer.mjs verify-admin-readback` tarkistaa annetut odotetut ja todelliset JSON-tietueet. Se on tekninen suoja, ei operaattorin hyväksyntä eikä tuoreiden tilalukujen hakemisen korvike. PR-token ei koskaan pyydä Administration-oikeutta. Käyttöönotto ja kaikki skannerimuutokset vaativat erillisen takaisinluvun sekä todelliset PR-, fork- ja yhdistämisryhmäyhteensopivuuden näytöt.
+
+Forkit käyttävät ylläpidettyjä suorittimia, checkoutia ilman pysyviä tunnistetietoja, eivät asenna tai kokoa projektia tuottajassa eivätkä peri tietovaraston salaisuuksia. GitHub tukee SARIF-lähetystä pull_request-tapahtumassa rajoitetulla fork-tokenilla; ensikertalaisen suorituksen hyväksyntä pysyy GitHub-käytäntönä. Älä koskaan käytä pull_request_target-tapahtumaa epäluotettavan koodin ajamiseen. Vahvista tokenin todelliset oikeudet, analysis_key ja kaikki luokkaympäristöt hallitussa canary-kokeessa ennen migraation katsomista valmiiksi. [Fork-lähetysten säännöt](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[ristiriitaiset asetustilat](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Hylkäykset ovat operaattorin päätettävissä (ehdoton sääntö #14)** — älä koskaan hylkää
 CodeQL-hälytystä kirjaamatta teknistä perustelua hylkäyskommenttiin: `won't fix`, jos kyseessä
@@ -672,11 +680,7 @@ tunnistettiin seuraavat rationalisointiehdokkaat. **Yhdistämiset ovat mekaanisi
 CI-muutoksia; tilanvaihdot ja poistot ovat operaattorille varattuja käytäntöpäätöksiä.**
 Mitään alla mainittua ei ole vielä otettu käyttöön.
 
-**Yllä dokumentoimatta jäivät myös** (ohjeellisia, heikko signaali): `docs-lint`-työ
-(markdownlint + Vale, koko työssä `continue-on-error`) sekä erilliset tarkistustyönkulut
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` on
-`quality-baseline.json`-tiedostossa, mutta sitä ei ole kytketty estävään räikkään
-`ci.yml`-tiedostossa — metriikka on tällä hetkellä irrallinen.
+**Myös edellä dokumentoimattomia** (neuvoa-antavia, heikko signaali): työ `docs-lint` (markdownlint + Vale, koko työ asetuksella `continue-on-error`) ja itsenäiset skannerityönkulut `semgrep.yml` / `scorecard.yml`. CodeQL sisältää nyt pakolliset tuottaja- ja hyväksyntätyöt portin `Gate / CI` alla edellä kuvatuin aktivointiehdoin. `semgrepFindings: 0` on tiedostossa `quality-baseline.json`, mutta sitä ei ole kytketty estävään kiristysrajaan tiedostossa `ci.yml` — mittari on tällä hetkellä orpo.
 
 ### Yhdistäminen / päällekkäisyyksien poistaminen (mekaaninen, pienempi riski)
 

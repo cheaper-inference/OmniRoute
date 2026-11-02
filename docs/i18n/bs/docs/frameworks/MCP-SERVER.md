@@ -315,12 +315,12 @@ Katalog alata nalazi se u [Opsezi MCP alata](#mcp-tool-scopes).
 Taj rang provjerava `scopeSatisfies`. On ne koristi MCP tabelu, a ni MCP
 mehanizam za podudaranje ne koristi njega.
 
-| Prostor imena            | Vjerodajnica                                              | Provjera                        | Prolazak omogućava                                          |
-| :----------------------- | :-------------------------------------------------------- | :------------------------------ | :---------------------------------------------------------- |
-| Upravljanje API ključem  | `api_keys.scopes`                                         | `hasManageScope`                | Upravljački REST za taj Bearer ključ                        |
-| Dodatni opseg API ključa | isti niz, jedan tačno podudarajući niz znakova            | pomoćna funkcija navedena ispod | Samo tu pojedinačnu mogućnost                               |
-| Opsezi MCP alata         | isti niz, inače MCP `_meta`, inače `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                  | Taj alat, nakon uključivanja provođenja pravila             |
-| Pristupni token          | `oma_live_…`                                              | `scopeSatisfies`                | Upravljačku rutu čija metoda i putanja zahtijevaju taj rang |
+| Prostor imena            | Vjerodajnica                                                                          | Provjera                        | Prolazak omogućava                                          |
+| :----------------------- | :------------------------------------------------------------------------------------ | :------------------------------ | :---------------------------------------------------------- |
+| Upravljanje API ključem  | `api_keys.scopes`                                                                     | `hasManageScope`                | Upravljački REST za taj Bearer ključ                        |
+| Dodatni opseg API ključa | isti niz, jedan tačno podudarajući niz znakova                                        | pomoćna funkcija navedena ispod | Samo tu pojedinačnu mogućnost                               |
+| Opsezi MCP alata         | isti niz, u suprotnom MCP `_meta` (samo HTTP/SSE), u suprotnom `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                  | Taj alat, nakon uključivanja provođenja pravila             |
+| Pristupni token          | `oma_live_…`                                                                          | `scopeSatisfies`                | Upravljačku rutu čija metoda i putanja zahtijevaju taj rang |
 
 Izdavanje svake vjerodajnice objašnjeno je u
 [Upravljačka autentifikacija](../guides/MANAGEMENT-AUTH.md).
@@ -370,8 +370,10 @@ Provođenje pravila isključeno je osim ako je
 `evaluateToolScopes` dozvoljava poziv i preskače katalog. Dok je uključeno, HTTP
 koristi `api_keys.scopes` Bearer ključa kao `authInfo` (pogledajte
 [Povezivanje HTTP opsega po ključu](#per-key-http-scope-binding-7895)).
-Kada se ne razriješe opsezi ključa, skup dodijeljenih opsega prelazi na MCP
-`_meta`, a zatim na `OMNIROUTE_MCP_SCOPES`.
+Kada se osezi ključa ne razriješe, odobreni skup prelazi na MCP `_meta` (poštovan
+samo za HTTP/SSE pozivaoce, unutar HTTP auth konteksta; `_meta` stdio pozivaoca se
+ignoriše jer ga kontroliše klijent i ne nosi identitet po pozivaocu), zatim na
+`OMNIROUTE_MCP_SCOPES`.
 
 #### Opsezi pristupnih tokena
 
@@ -469,8 +471,7 @@ i prosljeđuje ih MCP SDK-ovom `transport.handleRequest(req, { authInfo })`, tak
 rezervne izvore `_meta` i varijablu okruženja `OMNIROUTE_MCP_SCOPES` — ovime se samo popunjava taj prvi
 izvor najvišeg prioriteta, koji se ranije nije popunjavao putem HTTP-a. Kada nijedan API ključ nije
 razriješen (nema zaglavlja, ključ je nevažeći), `authInfo` ostaje `undefined`, a razrješavanje se
-nepromijenjeno prebacuje na postojeći lanac `meta`/varijabla okruženja. stdio nema identitet po pozivaocu (pogledajte
-`mcpCallerIdentity.ts`) i ovo na njega ne utječe — ostaje na rezervnom lancu `_meta`/varijabla okruženja.
+nepromijenjeno prebacuje na postojeći lanac `meta`/varijabla okruženja. stdio nema identitet po pozivaocu (vidi `mcpCallerIdentity.ts`) i vezivanje po ključu ne utječe na njega — preskače korak `_meta` (`_meta` se uvažava samo unutar HTTP auth konteksta, #15159) i razrješava se isključivo iz env ključa `OMNIROUTE_MCP_SCOPES`.
 
 **Provođenje se prisilno uključuje za HTTP/SSE pozivaoce s usko ograničenim opsegom bez obzira na
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Zadana vrijednost `false` za `OMNIROUTE_MCP_ENFORCE_SCOPES` sigurna je samo

@@ -435,7 +435,8 @@ JPEG 프레임을 최대 16개 저장하고 10분 후 만료시키며, 범위가
 
 **대시보드 → 설정 → 보안 → PII 마스킹**은 마스킹되는 _대상_을 선택합니다. 마스킹을 켜지는 않습니다: 활성화는 여전히 `PII_REDACTION_ENABLED`(요청)와 `PII_RESPONSE_SANITIZATION`(응답 + SSE)이 담당하며, 둘 다 기본적으로 꺼져 있습니다.
 
-- **유형별 선택** — 기본 제공 ID는 `src/shared/constants/piiTypes.ts`(`PII_BUILTIN_TYPES`)에 나열되어 있습니다. 설정하지 않으면 모든 유형을 의미합니다(이 설정이 도입되기 전의 동작). 요청 엔진의 `ssn_us` 패턴은 `ssn`에 매핑됩니다. 템플릿(Minimal, Standard, Financial, Brazilian, USA, Full)은 UI의 체크박스를 채우기만 합니다.
+- **유형별 선택** — 기본 제공 ID는 `src/shared/constants/piiTypes.ts`(`PII_BUILTIN_TYPES`)에 나열되어 있습니다. 설정하지 않으면 모든 유형을 의미합니다(이 설정이 도입되기 전의 동작). 요청 엔진의 `ssn_us` 패턴은 `ssn`에 매핑됩니다. 템플릿(Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full)은 UI의 체크박스를 채우기만 합니다.
+- **GDPR 및 POPIA 식별자** — EU와 남아프리카공화국의 개인 식별자를 다루는 열두 개의 기본 제공 ID입니다(아래 표). 정규식, 검증기, 관할 지역 태그는 하나의 표 `src/shared/utils/piiPatterns.ts`에 있으며, 응답 정제기(`src/lib/piiSanitizer.ts`)와 요청 마스커(`src/shared/utils/inputSanitizer.ts`)가 함께 사용합니다. 일치 항목은 검증기가 허용할 때만 가려집니다. 단순한 숫자 나열만으로는 충분하지 않습니다. 이 ID들이 생기기 전에 좁혀진 선택을 저장한 운영자는 새 ID를 선택할 때까지 기존 동작을 유지합니다.
 - **사용자 정의 패턴** — 최대 20개의 정규식 또는 와일드카드 패턴(`*` = 최대 64개의 공백이 아닌 문자, `?` = 1개)을 지원합니다. 매치된 부분은 `[CUSTOM_REDACTED]`로 바뀝니다. 모든 패턴은 `compilePiiCustomPattern()`(`src/shared/utils/piiCustomPatterns.ts`)을 거칩니다: 최대 500자, 플래그는 `g i m s u`로 제한, 컴파일이 가능해야 하고, `safe-regex`(치명적 백트래킹) 검사를 통과해야 하며, 빈 문자열이나 마스킹 플레이스홀더와 매치되지 않아야 합니다. 검증에 실패한 패턴은 저장 시와 테스트 시 거부되고, 실패하는 저장된 행은 컴파일되지 않고 런타임에 건너뜁니다. 사용자 정의 패턴은 마스킹이 켜져 있을 때만 실행됩니다.
 - **탐지 카운터** — 유형별 횟수(매치된 값 자체는 절대 저장하지 않음)로, 메모리에 보관되며 재시작 시 초기화됩니다(`src/lib/pii/piiDetectionStats.ts`). 마스킹이 켜져 있을 때만 증가합니다.
 
@@ -448,6 +449,25 @@ JPEG 프레임을 최대 16개 저장하고 10분 후 만료시키며, 범위가
 | `POST` | `/api/settings/pii/test` | 최대 8KB 샘플에 대해 패턴 하나를 드라이런 실행; 아무것도 저장되지 않음 |
 
 세 API 모두 관리 인증이 필요하며 Zod(`src/shared/validation/schemas/piiSettings.ts`)로 본문을 검증합니다.
+
+#### GDPR(EU) 및 POPIA(남아프리카공화국) 식별자
+
+| ID                  | 식별자                          | 검증                                                                      |
+| ------------------- | ------------------------------- | ------------------------------------------------------------------------- |
+| `iban`              | IBAN                            | 알려진 국가, 해당 국가의 정확한 길이, ISO 13616 MOD-97-10                 |
+| `eu_vat`            | EU VAT 번호                     | 알려진 회원국 접두사 및 해당 국가의 번호 형식(VIES 조회 없음)             |
+| `es_dni_nie`        | 스페인 DNI / NIE                | 검증 문자(값 mod 23); NIE는 `X/Y/Z` + 7자리                               |
+| `it_codice_fiscale` | 이탈리아 Codice Fiscale         | 홀수/짝수 위치 표에서 얻는 검증 문자                                      |
+| `pl_pesel`          | 폴란드 PESEL                    | 가중 체크섬과 인코딩된 출생 월/일의 타당한 범위                           |
+| `nl_bsn`            | 네덜란드 BSN                    | 11-proof(가중치 9..2, -1)                                                 |
+| `de_steuer_id`      | 독일 Steuer-ID                  | ISO 7064 Mod 11,10 및 숫자 구조 규칙(첫 자리에 0 불가)                    |
+| `se_personnummer`   | 스웨덴 personnummer             | 마지막 열 자리에 대한 Luhn 및 타당한 생년월일(10자리 또는 12자리)         |
+| `za_id`             | 남아프리카공화국 ID 번호        | 전체 13자리에 대한 Luhn, 유효한 출생 월/일, 시민권 숫자 0 또는 1          |
+| `za_phone`          | 남아프리카공화국 전화번호       | `+27` / `27` 접두사 또는 공백이나 하이픈을 넣은 국내 `0..` 형식           |
+| `za_vat`            | 남아프리카공화국 VAT 번호       | `4`로 시작하는 10자리 **및** 앞선 48자 이내의 "VAT" / "BTW"               |
+| `za_tax_ref`        | 남아프리카공화국 세금 참조 번호 | `0`-`3`으로 시작하는 10자리, Luhn, **및** 앞선 48자 이내의 "tax" / "SARS" |
+
+숫자로만 이루어진 형식은 주문 번호, 빌드 번호, 타임스탬프와 겹치므로 가장 약한 형식(`za_vat`, `za_tax_ref`)에는 키워드 단서가 필요합니다. 구분자 없는 열 자리 `0..` 번호는 남아프리카공화국 전화번호로 취급하지 않습니다. 공백이 있는 IBAN(`GB29 NWBK ...`)은 일치시키지 않습니다. 스트리밍 경로에서는 현재 청크 안에서만 단서를 찾습니다. 이 ID는 일반 전화번호 패턴보다 앞에 있으므로 검증된 식별자는 고유한 자리표시자(`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...)를 유지합니다. `gdpr` 및 `popia` 템플릿은 각각 EU 및 남아프리카공화국 ID를 선택합니다. 마스킹 자체는 계속 명시적으로 활성화해야 합니다(Hard Rule #20). 여기서는 어떤 기능 플래그의 기본값도 변경하지 않습니다.
 
 ### 프롬프트 인젝션(`promptInjection.ts`)
 

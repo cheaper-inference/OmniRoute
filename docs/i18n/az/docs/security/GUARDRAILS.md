@@ -557,8 +557,10 @@ vasitəsilə olur — hər ikisi defolt olaraq sönülüdür.
   `src/shared/constants/piiTypes.ts` faylında (`PII_BUILTIN_TYPES`) sadalanır.
   Təyin edilməmiş halda bütün tiplər nəzərdə tutulur (bu parametr yaranmamışdan
   əvvəlki davranış). Sorğu mühərrikinin `ssn_us` nümunəsi `ssn`-ə
-  uyğunlaşdırılır. Şablonlar (Minimal, Standard, Financial, Brazilian, USA,
+  uyğunlaşdırılır. Şablonlar (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA,
   Full) yalnız İİ-dəki seçim qutularını doldurur.
+- **GDPR və POPIA identifikatorları** — Aİ və Cənubi Afrika şəxsi identifikatorlarını əhatə edən on iki daxili ID (aşağıdakı cədvəl). Onların müntəzəm ifadələri, yoxlayıcıları və yurisdiksiya etiketləri bir `src/shared/utils/piiPatterns.ts` cədvəlindədir; həm cavab təmizləyicisi (`src/lib/piiSanitizer.ts`), həm də sorğu maskalayıcısı (`src/shared/utils/inputSanitizer.ts`) onu istifadə edir. Uyğunluq yalnız yoxlayıcı qəbul etdikdə gizlədilir; təkcə rəqəm ardıcıllığı heç vaxt yetərli deyil. Bu ID-lər yaranmazdan əvvəl daraldılmış seçim saxlayan operator yeni ID-ləri seçənədək əvvəlki davranışı saxlayır.
+
 - **Xüsusi nümunələr** — 20-ə qədər regex və ya wildcard nümunəsi (`*` = 64-ə
   qədər boşluq olmayan simvol, `?` = bir). Uyğunluqlar `[CUSTOM_REDACTED]` olur.
   Hər nümunə `compilePiiCustomPattern()` funksiyasından keçir
@@ -584,6 +586,25 @@ Parametrlər `key_value` cədvəlində saxlanılır (namespace `pii_settings`,
 
 Hər üçü idarəetmə autentifikasiyası tələb edir və gövdəni Zod ilə yoxlayır
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR (Aİ) və POPIA (Cənubi Afrika) identifikatorları
+
+| ID                  | İdentifikator                   | Yoxlama                                                                       |
+| ------------------- | ------------------------------- | ----------------------------------------------------------------------------- |
+| `iban`              | IBAN                            | Məlum ölkə, həmin ölkə üçün dəqiq uzunluq, ISO 13616 MOD-97-10                |
+| `eu_vat`            | Aİ VAT nömrəsi                  | Məlum üzv ölkə prefiksi və onun nömrə formatı (VIES axtarışı yoxdur)          |
+| `es_dni_nie`        | İspan DNI / NIE                 | Nəzarət hərfi (dəyər mod 23); NIE, `X/Y/Z` + 7 rəqəmdir                       |
+| `it_codice_fiscale` | İtalyan Codice Fiscale          | Tək/cüt mövqe cədvəllərindən nəzarət hərfi                                    |
+| `pl_pesel`          | Polşa PESEL                     | Çəkili yoxlama cəmi və kodlanmış doğum ayı/günü üçün ağlabatan aralıqlar      |
+| `nl_bsn`            | Niderland BSN                   | 11-proof yoxlaması (çəkilər 9..2, -1)                                         |
+| `de_steuer_id`      | Alman Steuer-ID                 | ISO 7064 Mod 11,10 və rəqəm quruluşu qaydaları (başda 0 yoxdur)               |
+| `se_personnummer`   | İsveç personnummer              | Son on rəqəmdə Luhn və ağlabatan doğum tarixi (10 və ya 12 rəqəm)             |
+| `za_id`             | Cənubi Afrika şəxsiyyət nömrəsi | Bütün 13 rəqəmdə Luhn, düzgün doğum ayı/günü, vətəndaşlıq rəqəmi 0 və ya 1    |
+| `za_phone`          | Cənubi Afrika telefonu          | `+27` / `27` prefiksi və ya boşluq/defislə yazılan milli `0..` forması        |
+| `za_vat`            | Cənubi Afrika VAT nömrəsi       | `4` ilə başlayan 10 rəqəm **və** əvvəlki 48 simvolda "VAT" / "BTW"            |
+| `za_tax_ref`        | Cənubi Afrika vergi istinadı    | `0`-`3` ilə başlayan 10 rəqəm, Luhn **və** əvvəlki 48 simvolda "tax" / "SARS" |
+
+Yalnız rəqəmli formatlar sifariş nömrələri, quruluş nömrələri və vaxt nişanları ilə toqquşduğundan, ən zəifləri (`za_vat`, `za_tax_ref`) açar söz ipucu tələb edir; sadə onrəqəmli `0..` nömrəsi Cənubi Afrika telefonu sayılmır. Boşluqlu IBAN-lar (`GB29 NWBK ...`) uyğunlaşdırılmır. Axın yolunda ipucu yalnız cari hissədə axtarılır. ID-lər ümumi telefon nümunələrindən əvvəldir, buna görə yoxlanmış identifikator öz yer tutucusunu saxlayır (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` və `popia` şablonları müvafiq olaraq Aİ və Cənubi Afrika ID-lərini seçir. Maskalama özü ixtiyari qalır (Sərt Qayda #20): burada heç nə funksiya bayrağının standartını dəyişmir.
 
 ### Prompt inyeksiyası (`promptInjection.ts`)
 

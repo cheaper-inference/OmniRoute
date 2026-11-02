@@ -10,7 +10,7 @@ OmniRoute-ը ինտեգրվում է CLI գործիքների երեք կատե�
 
 | Էջ             | Ուղի                    | Հայեցակարգ                                                                                        | Քանակ       |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------------- | ----------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Կոդավորման գործիքներ, որոնք ուղղորդում եք դեպի OmniRoute (Հաճախորդ → CLI → OmniRoute → Մատակարար) | 27          |
+| **CLI Code's** | `/dashboard/cli-code`   | Կոդավորման գործիքներ, որոնք ուղղորդում եք դեպի OmniRoute (Հաճախորդ → CLI → OmniRoute → Մատակարար) | 28          |
 | **CLI Agents** | `/dashboard/cli-agents` | Ինքնավար գործակալներ, որոնք ուղղորդում եք դեպի OmniRoute (նույն հոսքը, ավելի լայն շրջանակ)        | 11          |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI-ներ, որոնք OmniRoute-ը գործարկում է որպես հետնամաս՝ stdio/ACP-ի միջոցով (հակադարձ հոսք)       | տես ռեեստրը |
 
@@ -103,7 +103,7 @@ OmniRoute-ի կոնտեյների ներսում կատարված `setup-*` հր
 
 ---
 
-## 1. CLI Code-ի կատալոգը (27 գործիք)
+## 1. CLI Code-ի կատալոգը (28 գործիք)
 
 Բոլոր գործիքները, որոնք ցուցադրվում են `/dashboard/cli-code`-ում։ `baseUrlSupport: none` ունեցողները հատուկ բազային URL-ի փոխարեն միացված են MITM-ի միջոցով կամ կարգավորվում են ձեռնարկի օգնությամբ․
 
@@ -130,6 +130,7 @@ OmniRoute-ի կոնտեյների ներսում կատարված `setup-*` հր
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -219,16 +220,16 @@ interface ToolBatchStatus {
 
 `configType: "custom"` ունեցող նոր գործիքներն ունեն կարգավորումների API-ի առանձին երթուղիներ.
 
-| Երթուղի                                     | Գործիք                                                                    |
-| ------------------------------------------- | ------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                   |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url դրոշակ)                                                 |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, հնացած)                                    |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, հիմնական + հնացած `~/.deepseek` համաժամացում) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                     |
-| `POST /api/cli-tools/pi-settings`           | Pi ծրագրավորման գործակալ                                                  |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                     |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + առանձին `.env` բանալի)               |
+| Երթուղի                                     | Գործիք                                                                      |
+| ------------------------------------------- | --------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                     |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url դրոշակ)                                                   |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, հնացած)                                      |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, հիմնական + հնացած `~/.deepseek` համաժամացում)   |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                       |
+| `POST /api/cli-tools/pi-settings`           | Pi ծրագրավորման գործակալ (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                       |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + առանձին `.env` բանալի)                 |
 
 Բոլոր երթուղիները սխալների պատասխանների համար օգտագործում են `sanitizeErrorMessage()`-ը (Խիստ կանոն #12)։
 
@@ -332,7 +333,7 @@ pip install aider-chat
 cargo install smelt  # Rust-ի վրա հիմնված
 
 # Pi ծրագրավորման գործակալ
-# տեղադրման համար տե՛ս https://github.com/zechnerj/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # տեղադրման համար տե՛ս https://github.com/1jehuang/jcode
@@ -445,6 +446,38 @@ EOF
 
 > Մտածողության տարբերակներ ուղարկելու համար օգտագործեք
 > `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`։
+
+---
+
+#### Pi Coding Agent
+
+Pi Coding Agent-ի պաշտոնական package-ը տեղադրեք `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`-ով։ Pi-ն հատուկ provider-ները կարդում է `~/.pi/agent/models.json`-ից․ agent-ի ամբողջ պանակը տեղափոխելու համար `PI_CODING_AGENT_DIR`-ը սահմանեք որպես բացարձակ ուղի (կամ `~`-ով սկսվող ուղի)։ Dashboard-ը հետևում է այդ վերասահմանմանը։ Pi-ն model-ներ չի հայտնաբերում հատուկ endpoint-ներից, ուստի OmniRoute-ը ընտրված model-ը գրում է `models[]`-ում՝ օգտագործելով Pi-ի `openai-completions` API-ն և OmniRoute-ի OpenAI-ի հետ համատեղելի `/v1` endpoint-ը։
+
+**CLI Tools → Pi** բաժնում ընտրեք endpoint, API key և model, ստուգեք provider-ի նախադիտումը, ապա կիրառեք։ Նախադիտումը provider-ի հատված է․ Pi-ն ձեռքով կարգավորելիս `providers.omniroute`-ը միացրեք ձեր գոյություն ունեցող `models.json`-ին, որպեսզի մյուս provider-ներն ու կարգավորումները մնան անփոփոխ։
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi-ն կրկին բեռնում է `models.json`-ը, երբ բացում եք `/model`-ը։ Կարգավորված route-ը փորձարկեք ձեր ընտրած provider id-ով և model id-ով․
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Հղումներ՝ [Pi-ի model-ներն ու հատուկ provider-ները](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi-ի միջավայրի փոփոխականները](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi-ի տեղադրման հրահանգները](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md)։
 
 ---
 

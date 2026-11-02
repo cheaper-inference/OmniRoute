@@ -69,3 +69,15 @@ b’kelma, bħal kull field ieħor tas-settings — għall-kuntrarju tal-filtru 
 tal-passi tal-combo ta’ `hidePaidModels`, hawnhekk m’hemm l-ebda riskju ta’ ridratazzjoni: ID
 ipprojbit inkorporat f’pass esportat ta’ combo huwa l-għażla espliċita tar-routing tal-operatur
 stess, mhux xi ħaġa li l-konfini tal-esportazzjoni jeħtieġ ineħħi.
+
+## Lista ta' combos biss (`exposeCombosOnly`)
+
+Boolean separat, ukoll b'attivazzjoni espliċita u `false` b'mod awtomatiku, għal deployments fejn il-combos huma l-wiċċ pubbliku tal-mudelli u l-fornituri huma biss backends. Meta jkun `true`, il-lista pubblika (`GET /v1/models`, `GET /v1`, u r-routes l-oħra ta' skoperta `/v1` mibnija fuq `getUnifiedModelsResponse()`) iżżomm biss ringieli b'`owned_by: "combo"`: combos tal-utent flimkien mal-combos integrati `auto/*` (sakemm `hideAutoCombos` ma jaħbihomx). Tuża l-istess test tar-ringiela bħal `catalogScope: "combos"` għal kull ċavetta, u l-filtri allow/deny/scope taċ-ċavetta stess għadhom japplikaw fuqhom.
+
+Ixgħel jew itfi f'**Settings → Routing → Models API listing**, jew b'`PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Bħal-listi ta' hawn fuq, ibiddel biss dak li jiġi reklamat:
+
+- ID espliċitu `provider/model` xorta jiġi dispatched, u `GET /v1/models/{id}` xorta jirriżolvih;
+- il-katalgu tad-dashboard (`GET /api/models/catalog`, użat mill-għażliet tal-mudelli) ma jiċċekkinx;
+- ma jiġix rifless fil-pools tal-kandidati `auto/*`, għalhekk il-combos `auto/*` iżommu l-pool sħiħ tagħhom.

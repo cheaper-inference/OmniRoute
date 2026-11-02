@@ -29,6 +29,7 @@ OmniRoute API 的核心參考文件。本文涵蓋公開的 `/v1` 介面及最�
 - [WebSocket 串流](#websocket-streaming)
 - [配額與問題回報](#quotas--issues-reporting)
 - [語意快取](#semantic-cache)
+- [CLIProxyAPI 管理相容性](#cliproxyapi-management-compatibility)
 - [儀表板與管理](#dashboard--management)
 - [組合管理](#combo-management)
 - [Webhook](#webhooks)
@@ -932,6 +933,18 @@ CLI 會將 `base_url + /responses` 升級為 WebSocket，而 OmniRoute 會將其
 
 **驗證：** Bearer API 金鑰（`isAuthenticated`）。
 
+### 配額工作階段復原（主動啟用）
+
+非串流 `POST /v1/chat/completions` 或 `POST /v1/responses` 若因終止性配額錯誤失敗（`402`/`429`/`503`，且回應本文表示配額或額度已耗盡），可以暫存並在稍後重播，而不是直接傳回錯誤。呼叫端透過三個標頭，為每個請求主動啟用：
+
+| 標頭                         | 值                                    |
+| ---------------------------- | ------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                |
+| `x-omniroute-session`        | 工作階段 ID，`[A-Za-z0-9._:-]{1,128}` |
+| `x-omniroute-recovery-turn`  | 工作階段內唯一的輪次 ID（相同規則）   |
+
+只有 `stream: false`、沒有工具、工具歷程或 `previous_response_id`，且沒有 `x-omniroute-connection` 固定的輪次才符合條件；還必須設定 `STORAGE_ENCRYPTION_KEY`（請求加密儲存最多 24 h）。此時傳回附有 `recovery.poll` 的 `202`；輪詢 `GET /v1/quota-recoveries/{id}`（等待時為 `202`，完成時為附復原本文的 `200`），或使用 `DELETE` 取消。票證僅對建立它的 API 金鑰可見。結果不確定的重播會進入 `needs_confirmation`，不會被重複傳送兩次。來源：`src/lib/quota/quotaSessionRecovery.ts`。
+
 ---
 
 ## 自助式用量查詢（`/api/usage/om-usage`）
@@ -1090,6 +1103,28 @@ API 金鑰可透過 `cacheDefaultMode` 選擇不讀取語意快取：
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI 管理相容性
+
+OmniRoute 支援 [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) 的三個管理端點，供用量面板讀取 Claude 和 Codex 訂閱限制（例如 T3 Code 的 `cliproxy` 用量限制來源）。將用戶端基底 URL 指向 OmniRoute，並使用具有 `manage` 權限範圍的 API 金鑰作為管理金鑰。這些路由同時透過 `/v0/management/*` 和 `/api/v0/management/*` 提供。
+
+| 方法 | 路徑                         | 說明                                                                                                                       |
+| ---- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v0/management/auth-files`  | 以 `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` 形式列出 Claude 和 Codex OAuth 連線。不含權杖    |
+| POST | `/v0/management/api-call`    | 請求本文為 `{ auth_index, method, url, header?, data? }`。使用帳戶權杖傳送允許清單內的請求，並傳回 `{ status_code, body }` |
+| POST | `/v0/management/reset-quota` | 請求本文為 `{ auth_index }`。清除一個帳戶的連線冷卻、模型鎖定和 Codex 各範圍冷卻                                           |
+
+- `auth_index` 是 OmniRoute 連線 ID。`provider` 為 `claude` 或 `codex`（僅限 OAuth 連線；不列出 API 金鑰提供者 `anthropic`）。對於 Codex，`id_token.chatgpt_account_id` 是已儲存的工作區 ID，`plan_type` 是已儲存的方案。
+- `api-call` 不是通用代理。僅接受 Claude `GET
+https://api.anthropic.com/api/oauth/usage`，以及 Codex `GET
+https://chatgpt.com/backend-api/wham/usage`、`GET .../wham/rate-limit-reset-credits` 和 `POST .../wham/rate-limit-reset-credits/consume`，且各自只能用於對應提供者的帳戶。其他請求會直接傳回 `403`，不聯絡上游。呼叫端的 `Authorization` 標頭（包括 `$TOKEN$` 預留位置）會被忽略：OmniRoute 注入連線的存取權杖，若即將到期則先更新，並僅轉送允許清單中的標頭（`anthropic-beta`；`OpenAI-Beta`、`Originator`、`Chatgpt-Account-Id`；`Accept`、`Content-Type`）。若缺少 `Chatgpt-Account-Id`，預設使用已儲存的工作區 ID。如果首次上游回應為 `401`，則更新一次，且僅在存取權杖變更時重試。每次上游嘗試的逾時為 15 秒，並使用該連線的代理。
+- `reset-quota` 不更改終止狀態（banned, expired, credits_exhausted）。未知的 `auth_index` 傳回 `404`。
+
+**驗證：**需要控制台工作階段或具有 `manage` 權限範圍的 API 金鑰，即使登入已停用也一樣（這些路徑屬於 `ALWAYS_PROTECTED_API_PATHS`）。僅有推論權限的金鑰會收到 `403`。來源：`src/lib/cliproxyCompat/managementApi.ts`。
 
 ---
 

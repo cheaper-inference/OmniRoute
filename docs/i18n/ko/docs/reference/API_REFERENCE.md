@@ -29,6 +29,7 @@ OpenAI 호환 프로토콜과 제공자 기능 매트릭스에 대한 상세 내
 - [WebSocket 스트리밍](#websocket-streaming)
 - [할당량 및 문제 보고](#quotas--issues-reporting)
 - [시맨틱 캐시](#semantic-cache)
+- [CLIProxyAPI 관리 호환성](#cliproxyapi-management-compatibility)
 - [대시보드 및 관리](#dashboard--management)
 - [콤보 관리](#combo-management)
 - [웹후크](#webhooks)
@@ -959,6 +960,18 @@ CLI는 `base_url + /responses`를 WebSocket으로 업그레이드하며, OmniRou
 
 **인증:** Bearer API 키(`isAuthenticated`).
 
+### 할당량 세션 복구(명시적으로 활성화)
+
+비스트리밍 `POST /v1/chat/completions` 또는 `POST /v1/responses`가 최종적인 할당량 오류(본문에 할당량이나 크레딧이 소진되었다고 명시된 `402`/`429`/`503`)로 실패하면 오류를 반환하는 대신 보류한 후 나중에 재실행할 수 있습니다. 호출자는 세 개의 헤더로 요청마다 이 기능을 활성화합니다.
+
+| 헤더                         | 값                                    |
+| ---------------------------- | ------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                |
+| `x-omniroute-session`        | 세션 ID, `[A-Za-z0-9._:-]{1,128}`     |
+| `x-omniroute-recovery-turn`  | 세션 내에서 고유한 턴 ID(동일한 규칙) |
+
+`stream: false` 턴 중 도구, 도구 이력, `previous_response_id`가 없고 `x-omniroute-connection` 고정도 없는 경우만 대상이며, `STORAGE_ENCRYPTION_KEY`를 설정해야 합니다(요청은 암호화되어 최대 24시간 저장됨). 그러면 응답은 `recovery.poll`를 포함하는 `202`가 됩니다. `GET /v1/quota-recoveries/{id}`를 폴링하거나(대기 중에는 `202`, 완료되면 복구된 본문과 함께 `200`), `DELETE`로 취소하세요. 티켓은 생성한 API 키에서만 볼 수 있습니다. 재실행 결과가 불확실하면 두 번 전송하지 않고 `needs_confirmation`로 종료합니다. 소스: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## 셀프서비스 사용량 조회(`/api/usage/om-usage`)
@@ -1115,6 +1128,28 @@ API 키는 `cacheDefaultMode`를 통해 시맨틱 캐시 읽기를 사용하지 
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI 관리 호환성
+
+OmniRoute는 사용량 대시보드가 Claude 및 Codex 구독 한도를 읽을 때 호출하는 세 개의 [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) 관리 엔드포인트에 응답합니다(예: T3 Code의 사용량 한도 소스 `cliproxy`). 클라이언트의 기본 URL을 OmniRoute로 지정하고 `manage` 범위가 있는 API 키를 관리 키로 사용하세요. 경로는 `/v0/management/*`와 `/api/v0/management/*`에서 제공됩니다.
+
+| 메서드 | 경로                         | 설명                                                                                                                                     |
+| ------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude 및 Codex OAuth 연결을 `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` 형식으로 반환합니다. 토큰은 없습니다 |
+| POST   | `/v0/management/api-call`    | 본문 `{ auth_index, method, url, header?, data? }`. 허용 목록에 있는 요청을 계정의 토큰으로 보내고 `{ status_code, body }`를 반환합니다  |
+| POST   | `/v0/management/reset-quota` | 본문 `{ auth_index }`. 한 계정의 연결 쿨다운, 모델 잠금 및 Codex 범위별 쿨다운을 해제합니다                                              |
+
+- `auth_index`는 OmniRoute 연결 ID입니다. `provider`는 `claude` 또는 `codex`입니다(OAuth 연결만 포함하며, API 키 제공자 `anthropic`는 나열하지 않음). Codex에서 `id_token.chatgpt_account_id`는 저장된 워크스페이스 ID이며 `plan_type`는 저장된 요금제입니다.
+- `api-call`는 범용 프록시가 아닙니다. Claude `GET
+https://api.anthropic.com/api/oauth/usage`와 Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume`만 허용하며 각각 해당 제공자의 계정에서만 사용할 수 있습니다. 그 외에는 업스트림에 연결하지 않고 `403`를 반환합니다. 호출자의 `Authorization` 헤더(`$TOKEN$` 자리표시자 포함)는 무시됩니다. OmniRoute는 연결의 액세스 토큰을 삽입하며, 만료가 가까우면 먼저 갱신합니다. 전달하는 헤더는 허용 목록에 있는 것뿐입니다(`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id`가 없으면 저장된 워크스페이스 ID를 기본값으로 사용합니다. 첫 업스트림 응답이 `401`이면 한 번 갱신한 뒤 액세스 토큰이 바뀐 경우에만 다시 시도합니다. 업스트림의 각 시도는 15초 후 시간 초과되며 연결의 프록시를 사용합니다.
+- `reset-quota`는 최종 상태(banned, expired, credits_exhausted)를 그대로 둡니다. 알 수 없는 `auth_index`는 `404`를 반환합니다.
+
+**인증:** 대시보드 세션 또는 `manage` 범위의 API 키가 필요하며, 로그인이 비활성화되어 있어도 필수입니다(해당 경로는 `ALWAYS_PROTECTED_API_PATHS`에 포함됨). 추론 전용 키에는 `403`를 반환합니다. 소스: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

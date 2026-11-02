@@ -417,8 +417,9 @@ Guardrail သည် ဘယ်တော့မှ block မလုပ်ပါ၊ �
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) တွင် ဖော်ပြထားသည်။
   မသတ်မှတ်ထားခြင်းသည် အမျိုးအစားအားလုံးကို ဆိုလိုသည် (ဤ setting မရှိခင်က
   အပြုအမှု)။ Request engine ၏ `ssn_us` pattern သည် `ssn` သို့ map လုပ်သည်။
-  Templates (Minimal, Standard, Financial, Brazilian, USA, Full) များသည် UI ရှိ
+  Templates (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) များသည် UI ရှိ
   checkbox များကိုသာ ဖြည့်သွင်းပေးသည်။
+- **GDPR နှင့် POPIA identifier များ** — EU နှင့် South Africa ၏ ကိုယ်ရေးအချက်အလက် identifier များအတွက် built-in id ဆယ့်နှစ်ခု (အောက်ပါဇယား)။ ၎င်းတို့၏ regex၊ validator နှင့် jurisdiction tag များသည် `src/shared/utils/piiPatterns.ts` ဇယားတစ်ခုတည်းတွင်ရှိပြီး response sanitizer (`src/lib/piiSanitizer.ts`) နှင့် request masker (`src/shared/utils/inputSanitizer.ts`) နှစ်ခုစလုံးက သုံးသည်။ validator က လက်ခံမှသာ match ကို ဖုံးကွယ်သည်။ digit များအစဉ်လိုက်ရှိနေခြင်းတစ်ခုတည်းက မလုံလောက်ပါ။ ဤ id များ မရှိမီ ကျဉ်းမြောင်းသောရွေးချယ်မှုကို သိမ်းထားသော operator အတွက် id အသစ်များကို အမှန်ခြစ်မရွေးမီ ယခင်အပြုအမူကို ထိန်းထားသည်။
 - **စိတ်ကြိုက် pattern များ** — regex သို့မဟုတ် wildcard pattern အများဆုံး
   ၂၀ ခု (`*` = whitespace မဟုတ်သော စာလုံး အများဆုံး ၆၄ လုံး၊ `?` = တစ်လုံး)။
   ကိုက်ညီမှုများသည် `[CUSTOM_REDACTED]` ဖြစ်သွားမည်။ Pattern တိုင်းသည်
@@ -447,6 +448,25 @@ Settings များသည် `key_value` table (namespace `pii_settings`၊
 
 သုံးခုလုံးသည် management auth လိုအပ်ပြီး body ကို Zod
 (`src/shared/validation/schemas/piiSettings.ts`) ဖြင့် validate လုပ်သည်။
+
+#### GDPR (EU) နှင့် POPIA (South Africa) identifier များ
+
+| Id                  | Identifier                        | စစ်ဆေးအတည်ပြုမှု                                                                       |
+| ------------------- | --------------------------------- | -------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                              | သိရှိထားသောနိုင်ငံ၊ ထိုနိုင်ငံအတွက် အလျားအတိအကျ၊ ISO 13616 MOD-97-10                   |
+| `eu_vat`            | EU VAT နံပါတ်                     | သိရှိထားသောအဖွဲ့ဝင်နိုင်ငံ prefix နှင့် ထိုနိုင်ငံ၏နံပါတ်ပုံစံ (VIES lookup မရှိ)      |
+| `es_dni_nie`        | စပိန် DNI / NIE                   | စစ်ဆေးအက္ခရာ (တန်ဖိုး mod 23)၊ NIE သည် `X/Y/Z` + 7 digit                               |
+| `it_codice_fiscale` | အီတလီ Codice Fiscale              | မ/စုံ နေရာဇယားများမှ စစ်ဆေးအက္ခရာ                                                      |
+| `pl_pesel`          | ပိုလန် PESEL                      | အလေးပေး checksum နှင့် encoded လုပ်ထားသော မွေးလ/ရက်၏ ယုတ္တိရှိသောအပိုင်းအခြားများ      |
+| `nl_bsn`            | ဒတ်ချ် BSN                        | 11 စမ်းသပ်မှု (အလေးများ 9..2, -1)                                                      |
+| `de_steuer_id`      | ဂျာမန် Steuer-ID                  | ISO 7064 Mod 11,10 နှင့် digit ဖွဲ့စည်းပုံစည်းမျဉ်းများ (ရှေ့ဆုံးတွင် 0 မရှိ)          |
+| `se_personnummer`   | ဆွီဒင် personnummer               | နောက်ဆုံးဆယ် digit ပေါ် Luhn နှင့် ယုတ္တိရှိသောမွေးရက် (10 သို့မဟုတ် 12 digit)         |
+| `za_id`             | South Africa ID နံပါတ်            | 13 digit အားလုံးပေါ် Luhn၊ မှန်ကန်သောမွေးလ/ရက်၊ နိုင်ငံသား digit 0 သို့မဟုတ် 1         |
+| `za_phone`          | South Africa ဖုန်း                | `+27` / `27` prefix သို့မဟုတ် space/တုံးတိုနှင့် ရေးထားသော ပြည်တွင်း `0..` ပုံစံ       |
+| `za_vat`            | South Africa VAT နံပါတ်           | `4` ဖြင့်စသော 10 digit **နှင့်** ရှေ့ရှိ 48 character အတွင်း "VAT" / "BTW"             |
+| `za_tax_ref`        | South Africa အခွန်ရည်ညွှန်းနံပါတ် | `0`-`3` ဖြင့်စသော 10 digit၊ Luhn၊ **နှင့်** ရှေ့ရှိ 48 character အတွင်း "tax" / "SARS" |
+
+digit သာပါသောပုံစံများသည် order number၊ build number နှင့် timestamp များနှင့် ရောထွေးနိုင်သောကြောင့် အားအနည်းဆုံးပုံစံများ (`za_vat`, `za_tax_ref`) တွင် keyword အရိပ်အမြွက် လိုအပ်ပြီး သီးခြားဆယ် digit `0..` နံပါတ်ကို South Africa ဖုန်းနံပါတ်ဟု မယူဆပါ။ space ပါသော IBAN များ (`GB29 NWBK ...`) ကို match မလုပ်ပါ။ streaming လမ်းကြောင်းတွင် အရိပ်အမြွက်ကို လက်ရှိ chunk အတွင်း၌သာ ရှာသည်။ ဤ id များသည် generic phone pattern များထက် ရှေ့ရောက်သဖြင့် အတည်ပြုပြီးသော identifier သည် ကိုယ်ပိုင် placeholder (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...) ကို ထိန်းထားသည်။ `gdpr` နှင့် `popia` template များသည် EU နှင့် South Africa id များကို အသီးသီးရွေးသည်။ masking ကိုယ်တိုင်သည် ရွေးချယ်ဖွင့်ရဆဲဖြစ်သည် (Hard Rule #20)။ ဤအရာများက feature-flag ၏ မူလတန်ဖိုးကို မပြောင်းပါ။
 
 ### Prompt Injection (`promptInjection.ts`)
 

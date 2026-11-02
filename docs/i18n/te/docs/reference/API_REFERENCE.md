@@ -29,6 +29,7 @@ OpenAI-అనుకూల ప్రోటోకాల్ మరియు ప్�
 - [WebSocket స్ట్రీమింగ్](#websocket-streaming)
 - [కోటాలు & సమస్యల నివేదన](#quotas--issues-reporting)
 - [సెమాంటిక్ క్యాష్](#semantic-cache)
+- [CLIProxyAPI నిర్వహణ అనుకూలత](#cliproxyapi-management-compatibility)
 - [డ్యాష్బోర్డ్ & నిర్వహణ](#dashboard--management)
 - [కాంబో నిర్వహణ](#combo-management)
 - [వెబ్హుక్లు](#webhooks)
@@ -981,6 +982,18 @@ CLI, `base_url + /responses`ను WebSocketకు అప్గ్రేడ్ �
 
 **ప్రామాణీకరణ:** Bearer API కీ (`isAuthenticated`).
 
+### Quota ముగిసిన session పునరుద్ధరణ (ఎంచుకుని సక్రియం చేయాలి)
+
+Streaming లేని `POST /v1/chat/completions` లేదా `POST /v1/responses` request ఒక terminal quota error తో విఫలమైతే (`402`/`429`/`503`, దాని body quota లేదా credits అయిపోయాయని చెబుతుంది), error తిరిగి ఇవ్వకుండా దాన్ని నిలిపి ఉంచి తరువాత replay చేయవచ్చు. Caller ప్రతి request కు మూడు header ల ద్వారా దీన్ని ఎంచుకుని సక్రియం చేస్తాడు:
+
+| Header                       | విలువ                                      |
+| ---------------------------- | ------------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                                     |
+| `x-omniroute-session`        | session ID, `[A-Za-z0-9._:-]{1,128}`       |
+| `x-omniroute-recovery-turn`  | session లో ప్రత్యేకమైన turn ID (అదే నియమం) |
+
+Tool లు, tool history లేదా `previous_response_id` లేని, `x-omniroute-connection` pin లేని `stream: false` turn లు మాత్రమే అర్హమైనవి; `STORAGE_ENCRYPTION_KEY` సెట్ చేసి ఉండాలి (request గరిష్ఠంగా 24 h వరకు encrypted గా నిల్వ ఉంటుంది). అప్పుడు response `202`, `recovery.poll` తో వస్తుంది; `GET /v1/quota-recoveries/{id}` ను poll చేయండి (pending లో `202`, పూర్తయితే పునరుద్ధరించిన body తో `200`) లేదా `DELETE` తో రద్దు చేయండి. Ticket లను సృష్టించిన API key కి మాత్రమే అవి కనిపిస్తాయి. ఫలితం అనిశ్చితంగా ఉన్న replay, రెండుసార్లు పంపబడకుండా `needs_confirmation` లో ముగుస్తుంది. మూలం: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## స్వీయ-సేవ వినియోగం (`/api/usage/om-usage`)
@@ -1149,6 +1162,28 @@ API కీలు `cacheDefaultMode` ద్వారా సెమాంటిక�
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI నిర్వహణ అనుకూలత
+
+Claude, Codex subscription పరిమితులను చదవడానికి usage dashboard లు పిలిచే మూడు [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) management endpoint లకు OmniRoute సమాధానం ఇస్తుంది (ఉదాహరణకు T3 Code లోని `cliproxy` usage-limit source). Client base URL ను OmniRoute కు మళ్లించి, `manage` scope ఉన్న API key ని management key గా ఉపయోగించండి. Route లు `/v0/management/*`, `/api/v0/management/*` వద్ద అందుబాటులో ఉంటాయి.
+
+| పద్ధతి | మార్గం                       | వివరణ                                                                                                                                     |
+| ------ | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude, Codex OAuth connection లు `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` రూపంలో. Token లు లేవు            |
+| POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. అనుమతిపట్టికలో ఉన్న request ను account token తో పంపి `{ status_code, body }` ఇస్తుంది |
+| POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. ఒక account యొక్క connection cooldown, model lockout లు, Codex scope వారీ cooldown లను తొలగిస్తుంది                 |
+
+- `auth_index` అనేది OmniRoute connection ID. `provider` అనేది `claude` లేదా `codex` (OAuth connection లు మాత్రమే; `anthropic` API-key provider జాబితాలో ఉండదు). Codex కోసం `id_token.chatgpt_account_id` నిల్వ చేసిన workspace ID, `plan_type` నిల్వ చేసిన plan.
+- `api-call` సాధారణ proxy కాదు. ఇది Claude `GET
+https://api.anthropic.com/api/oauth/usage`, Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume` ను మాత్రమే అంగీకరిస్తుంది; ప్రతి ఒక్కటి సంబంధిత provider account కు మాత్రమే. మిగిలినవన్నీ upstream ను సంప్రదించకుండా `403` ఇస్తాయి. Caller యొక్క `Authorization` header (`$TOKEN$` placeholder సహా) విస్మరించబడుతుంది: OmniRoute connection access token ను చేర్చి, గడువు సమీపిస్తే ముందుగా refresh చేస్తుంది; అనుమతిపట్టికలోని header లను మాత్రమే పంపిస్తుంది (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` లేకపోతే నిల్వ చేసిన workspace ID డిఫాల్ట్ అవుతుంది. మొదటి upstream response `401` అయితే ఒకసారి refresh చేసి, access token మారినప్పుడు మాత్రమే మళ్లీ ప్రయత్నిస్తుంది. ప్రతి upstream ప్రయత్నానికి 15 సెకన్ల timeout ఉంటుంది; అది connection proxy ని ఉపయోగిస్తుంది.
+- `reset-quota` terminal స్థితులను (banned, expired, credits_exhausted) మార్చదు. తెలియని `auth_index` కు `404` వస్తుంది.
+
+**గుర్తింపు నిర్ధారణ:** dashboard session లేదా `manage` scope ఉన్న API key; login నిలిపివేసినా తప్పనిసరి (మార్గాలు `ALWAYS_PROTECTED_API_PATHS` లో ఉన్నాయి). Inference-only key లకు `403` వస్తుంది. మూలం: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

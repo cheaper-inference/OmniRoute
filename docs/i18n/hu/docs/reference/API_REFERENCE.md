@@ -29,6 +29,7 @@ A célzott OpenAI-kompatibilis protokollt és a szolgáltatói képességmátrix
 - [WebSocket-adatfolyam](#websocket-streaming)
 - [Kvóták és problémák jelentése](#quotas--issues-reporting)
 - [Szemantikai gyorsítótár](#semantic-cache)
+- [CLIProxyAPI-kezelési kompatibilitás](#cliproxyapi-management-compatibility)
 - [Irányítópult és felügyelet](#dashboard--management)
 - [Kombinációk kezelése](#combo-management)
 - [Webhookok](#webhooks)
@@ -996,6 +997,18 @@ befejezést.
 
 **Hitelesítés:** Bearer API-kulcs (`isAuthenticated`).
 
+### Munkamenet-helyreállítás kvótakimerülés után (külön bekapcsolandó)
+
+Egy nem streamelt `POST /v1/chat/completions` vagy `POST /v1/responses`, amely végleges kvótahibával meghiúsul (`402`/`429`/`503`, amelynek törzse a kvóta vagy kreditek kimerülését jelzi), félretehető és később újrajátszható a hiba visszaadása helyett. A hívó kérésenként három fejléccel kapcsolja be:
+
+| Fejléc                       | Érték                                                            |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                                           |
+| `x-omniroute-session`        | munkamenet-azonosító, `[A-Za-z0-9._:-]{1,128}`                   |
+| `x-omniroute-recovery-turn`  | a munkameneten belül egyedi fordulóazonosító (ugyanaz a szabály) |
+
+Csak a `stream: false` fordulók jogosultak, eszközök, eszközelőzmények, `previous_response_id` és `x-omniroute-connection` rögzítés nélkül, és a `STORAGE_ENCRYPTION_KEY` beállítása is szükséges (a kérés legfeljebb 24 h ideig titkosítva tárolódik). A válasz ekkor `202` és `recovery.poll`; kérdezze le a `GET /v1/quota-recoveries/{id}` végpontot (`202`, amíg függőben van, befejezéskor `200` a helyreállított törzzsel), vagy szakítsa meg `DELETE` használatával. A helyreállítási jegyek csak az őket létrehozó API-kulcs számára láthatók. A bizonytalan kimenetelű újrajátszás `needs_confirmation` állapotban végződik, nem kerül kétszer elküldésre. Forrás: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Önkiszolgáló használat (`/api/usage/om-usage`)
@@ -1153,6 +1166,28 @@ Bármely kérés megkerülheti a gyorsítótárat a kulcs beállításaitól fü
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI-kezelési kompatibilitás
+
+Az OmniRoute válaszol a [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) három kezelési végpontjára, amelyeket a használati irányítópultok a Claude- és Codex-előfizetések korlátainak lekérdezésére hívnak (például a T3 Code `cliproxy` használatikorlát-forrása). A kliens alap-URL-jét irányítsa az OmniRoute-ra, kezelési kulcsként pedig használjon `manage` hatókörű API-kulcsot. Az útvonalak a `/v0/management/*` és `/api/v0/management/*` alatt érhetők el.
+
+| Metódus | Útvonal                      | Leírás                                                                                                                                   |
+| ------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/v0/management/auth-files`  | Claude- és Codex-OAuth-kapcsolatok `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` formában. Tokenek nélkül       |
+| POST    | `/v0/management/api-call`    | Törzs: `{ auth_index, method, url, header?, data? }`. Engedélyezett kérést küld a fiók tokenjével, és `{ status_code, body }` választ ad |
+| POST    | `/v0/management/reset-quota` | Törzs: `{ auth_index }`. Egy fiók kapcsolati várakozási idejét, modellkizárásait és hatókörönkénti Codex-várakozási idejét törli         |
+
+- Az `auth_index` az OmniRoute kapcsolatazonosítója. A `provider` értéke `claude` vagy `codex` (csak OAuth-kapcsolatok; az API-kulcsos `anthropic` szolgáltató nincs a listában). Codex esetén az `id_token.chatgpt_account_id` a tárolt munkaterület-azonosító, a `plan_type` pedig a tárolt előfizetési csomag.
+- Az `api-call` nem általános proxy. Csak a Claude `GET
+https://api.anthropic.com/api/oauth/usage`, valamint a Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` és `POST .../wham/rate-limit-reset-credits/consume` hívásokat fogadja, mindegyiket csak a megfelelő szolgáltató fiókjához. Minden más `403` választ ad az upstream megkeresése nélkül. A hívó `Authorization` fejlécét (a `$TOKEN$` helyőrzőt is beleértve) figyelmen kívül hagyja: az OmniRoute beilleszti a kapcsolat hozzáférési tokenjét, közeli lejárat esetén előbb frissíti, és csak az engedélyezett fejléceket továbbítja (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Hiányzó `Chatgpt-Account-Id` esetén a tárolt munkaterület-azonosítót használja. Ha az első upstream-válasz `401`, egyszer frissít, és csak akkor próbálkozik újra, ha megváltozik a hozzáférési token. Minden upstream-próbálkozás időkorlátja 15 másodperc, és a kapcsolat proxyját használja.
+- A `reset-quota` érintetlenül hagyja a végállapotokat (banned, expired, credits_exhausted). Ismeretlen `auth_index` esetén `404` a válasz.
+
+**Hitelesítés:** irányítópult-munkamenet vagy `manage` hatókörű API-kulcs, kikapcsolt bejelentkezés esetén is kötelező (az útvonalak az `ALWAYS_PROTECTED_API_PATHS` részei). A csak inferenciára szolgáló kulcsok `403` választ kapnak. Forrás: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

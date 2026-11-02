@@ -13,7 +13,7 @@
 
 ## 簡介
 
-OmniRoute 註冊了 377 家提供者，其中包括 155 個標記為 **free/no-auth** 的目錄項目（no-auth、免費方案 OAuth 或免費方案 API 金鑰——請參閱[免費方案指南](../getting-started/FREE-TIERS-GUIDE.md)與完整的[免費方案目錄](../reference/FREE_TIERS.md)）。但問題在於：免費提供者的模型品質差異極大。一家提供前沿模型的 no-auth 提供者，遠比提供小型舊模型的提供者來得實用。
+OmniRoute 註冊了 380 家提供者，其中包括 155 個標記為 **free/no-auth** 的目錄項目（no-auth、免費方案 OAuth 或免費方案 API 金鑰——請參閱[免費方案指南](../getting-started/FREE-TIERS-GUIDE.md)與完整的[免費方案目錄](../reference/FREE_TIERS.md)）。但問題在於：免費提供者的模型品質差異極大。一家提供前沿模型的 no-auth 提供者，遠比提供小型舊模型的提供者來得實用。
 
 **免費提供者排名（Free Provider Rankings）**透過將每個免費提供者的目錄，與來自 **Arena AI 排行榜**的**群眾外包品質分數**（人類偏好 ELO，與 LMArena 聊天機器人競技場背後的概念相同）進行聯結，回答「**哪家免費提供者能提供最佳模型？**」這個問題。接著再依據各家**最佳免費模型**的實力對提供者進行排名。
 

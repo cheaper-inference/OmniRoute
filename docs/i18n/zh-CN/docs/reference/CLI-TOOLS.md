@@ -10,7 +10,7 @@ OmniRoute 集成了三类 CLI 工具，分别位于三个专用的仪表板页�
 
 | 页面           | 路由                    | 概念                                                           | 数量       |
 | -------------- | ----------------------- | -------------------------------------------------------------- | ---------- |
-| **CLI 代码**   | `/dashboard/cli-code`   | 指向 OmniRoute 的编码工具（客户端 → CLI → OmniRoute → 提供者） | 27         |
+| **CLI 代码**   | `/dashboard/cli-code`   | 指向 OmniRoute 的编码工具（客户端 → CLI → OmniRoute → 提供者） | 28         |
 | **CLI 智能体** | `/dashboard/cli-agents` | 指向 OmniRoute 的自主智能体（流程相同，但范围更广）            | 11         |
 | **ACP 智能体** | `/dashboard/acp-agents` | OmniRoute 通过 stdio/ACP 生成并作为后端使用的 CLI（反向流程）  | 参见注册表 |
 
@@ -111,7 +111,7 @@ omniroute setup-whycodes
 
 ---
 
-## 1. CLI Code 工具目录（27 个工具）
+## 1. CLI Code 工具目录（28 个工具）
 
 所有显示在 `/dashboard/cli-code` 中的工具。其中，`baseUrlSupport: none` 的工具通过 MITM 或手动指南接入，而不是使用自定义基础 URL：
 
@@ -138,6 +138,7 @@ omniroute setup-whycodes
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -234,7 +235,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI（OPENAI_BASE_URL，旧版）                            |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale（OPENAI_BASE_URL，主要配置 + 旧版 `~/.deepseek` 同步） |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                            |
-| `POST /api/cli-tools/pi-settings`           | Pi 编码智能体                                                    |
+| `POST /api/cli-tools/pi-settings`           | Pi 编码智能体 (`~/.pi/agent/models.json`, `providers.omniroute`) |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build（~/.grok/config.toml，`[model.omniroute]`）           |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code（`~/.qwen/settings.json` + 专用 `.env` 键）            |
 
@@ -340,7 +341,7 @@ pip install aider-chat
 cargo install smelt  # 基于 Rust
 
 # Pi 编码代理
-# 安装方法请参阅 https://github.com/zechnerj/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # 安装方法请参阅 https://github.com/1jehuang/jcode
@@ -453,6 +454,40 @@ EOF
 
 > 使用 `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > 发送思考变体。
+
+---
+
+#### Pi Coding Agent
+
+使用 `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` 安装官方 Pi Coding Agent 包。Pi 从 `~/.pi/agent/models.json` 读取自定义提供者；将 `PI_CODING_AGENT_DIR` 设为绝对路径（或以 `~` 开头的路径），即可移动整个代理目录。控制面板遵循该覆盖设置。Pi 不会从自定义端点发现模型，因此 OmniRoute 使用 Pi 的 `openai-completions` API 和 OmniRoute 兼容 OpenAI 的 `/v1` 端点，将选定模型写入 `models[]`。
+
+在 **CLI 工具 → Pi** 中选择端点、API 密钥和模型，检查提供者预览，然后应用。预览是一个提供者片段：手动配置 Pi 时，请将 `providers.omniroute` 合并到现有 `models.json` 中，以保留其他提供者和设置。
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+打开 `/model` 时，Pi 会重新加载 `models.json`。使用所选提供者 ID 和模型 ID 测试已配置的路由：
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+参考：[Pi 模型和自定义提供者](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)、
+[Pi 环境变量](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)、
+[Pi 安装说明](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md)。
 
 ---
 

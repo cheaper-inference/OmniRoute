@@ -315,12 +315,12 @@ tilgangstoken til en muterende administrasjonsrute, får HTTP 403:
 Denne rangeringen er `scopeSatisfies`. Den bruker ikke MCP-tabellen, og MCP-
 samsvarskontrollen bruker ikke den.
 
-| Navnerom                  | Påloggingsopplysning                                             | Kontroll                  | Godkjenning tillater                                              |
-| :------------------------ | :--------------------------------------------------------------- | :------------------------ | :---------------------------------------------------------------- |
-| API-nøkkeladministrasjon  | `api_keys.scopes`                                                | `hasManageScope`          | Administrasjons-REST for den Bearer-nøkkelen                      |
-| Additivt API-nøkkelomfang | samme matrise, én eksakt streng                                  | hjelperen angitt nedenfor | Bare den ene funksjonen                                           |
-| Omfang for MCP-verktøy    | samme matrise, ellers MCP `_meta`, ellers `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | Det aktuelle verktøyet når håndheving er aktivert                 |
-| Tilgangstoken             | `oma_live_…`                                                     | `scopeSatisfies`          | Administrasjonsruten hvis metode og bane krever denne rangeringen |
+| Navnerom                  | Påloggingsopplysning                                                          | Kontroll                  | Godkjenning tillater                                              |
+| :------------------------ | :---------------------------------------------------------------------------- | :------------------------ | :---------------------------------------------------------------- |
+| API-nøkkeladministrasjon  | `api_keys.scopes`                                                             | `hasManageScope`          | Administrasjons-REST for den Bearer-nøkkelen                      |
+| Additivt API-nøkkelomfang | samme matrise, én eksakt streng                                               | hjelperen angitt nedenfor | Bare den ene funksjonen                                           |
+| Omfang for MCP-verktøy    | samme array, ellers MCP `_meta` (kun HTTP/SSE), ellers `OMNIROUTE_MCP_SCOPES` | `scopeMatches`            | Det aktuelle verktøyet når håndheving er aktivert                 |
+| Tilgangstoken             | `oma_live_…`                                                                  | `scopeSatisfies`          | Administrasjonsruten hvis metode og bane krever denne rangeringen |
 
 Oppretting av hver påloggingsopplysning er beskrevet i
 [Administrasjonsautentisering](../guides/MANAGEMENT-AUTH.md).
@@ -369,7 +369,9 @@ Håndheving er deaktivert med mindre `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (standa
 `false`). Mens den er deaktivert, tillater `evaluateToolScopes` kallet og hopper over
 katalogen. Mens den er aktivert, bruker HTTP Bearer-nøkkelens `api_keys.scopes` som
 `authInfo` (se [HTTP-omfangsbinding per nøkkel](#per-key-http-scope-binding-7895)).
-Når ingen nøkkelomfang kan fastslås, går det innvilgede settet videre til MCP `_meta` og deretter
+Når ingen nøkkelscopes løses, faller det tildelte settet gjennom til MCP `_meta` (kun
+anerkjent for HTTP/SSE-kallere, innenfor en HTTP-autentiseringskontekst; en stdio-kallers `_meta` ignoreres
+fordi klienten kontrollerer den, og den bærer ingen identitet per kaller), deretter
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Tilgangstokenomfang
@@ -468,8 +470,7 @@ og sender det til MCP-SDK-ens `transport.handleRequest(req, { authInfo })`, slik
 `_meta` og reservemekanismen med miljøvariabelen `OMNIROUTE_MCP_SCOPES` — dette fyller bare ut den første
 kilden med høyest prioritet, som tidligere ikke ble tilført over HTTP. Når ingen API-nøkkel blir funnet
 (ingen header, ugyldig nøkkel), forblir `authInfo` `undefined`, og oppslaget går videre til den
-eksisterende `meta`-/miljøvariabelkjeden uendret. stdio har ingen identitet per klient (se
-`mcpCallerIdentity.ts`) og påvirkes ikke — den fortsetter å bruke reservekjeden med `_meta`/miljøvariabel.
+eksisterende `meta`-/miljøvariabelkjeden uendret. stdio har ingen identitet per innringer (se `mcpCallerIdentity.ts`) og påvirkes ikke av per-nøkkel-tilknytningen — det hopper over `_meta`-steget (`_meta` respekteres bare innenfor en HTTP-autentiseringskontekst, #15159) og løses fra `OMNIROUTE_MCP_SCOPES`-miljønøkkelen alene.
 
 **Håndheving tvinges på for HTTP/SSE-klienter med avgrenset omfang, uavhengig av
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** At `OMNIROUTE_MCP_ENFORCE_SCOPES` som standard er `false`, er bare

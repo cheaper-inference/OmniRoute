@@ -42,6 +42,10 @@ aracılığıyla özel bir uç noktaya yönlendirilir (`--base-url` bayrağı yo
 
 > Ortam değişkenleri **başlangıçta yalnızca bir kez** okunur — bunları değiştirdikten sonra Claude Code'u yeniden başlatın.
 
+Sabit bir dize yerine dönüşümlü olarak yenilenen bir kimlik bilgisi için `~/.claude/settings.json` içindeki `apiKeyHelper` değerini güncel kimlik bilgisini stdout üzerine yazan bir komuta ayarlayın. Claude Code çıktıyı varsayılan olarak beş dakika önbelleğe alır (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` bu süreyi değiştirir) ve değeri hem `Authorization: Bearer` hem de `x-api-key` içinde gönderir. Betik yalnızca kimlik bilgisini yazmalıdır — ek bir tanıtım yazısı v2.1.227+ sürümlerinde yardımcının başarısız olmasına yol açar.
+
+Entra ID SSO bu şekilde çalışır: `scripts/cli/omniroute-sso.mjs token`, OmniRoute tarafından API anahtarı yerine doğrulanan kısa ömürlü bir Entra erişim belirteci yazdırır. Bkz. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` bunların tümünü sizin için ayarlar: temel URL'yi ve belirteci
 etkin bağlamdan çözümler (böylece `omniroute connect <vps>` ve ardından
 `omniroute launch` doğrudan çalışır), sunucunun sistem durumunu denetler ve

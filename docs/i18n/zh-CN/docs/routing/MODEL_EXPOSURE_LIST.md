@@ -57,3 +57,15 @@
 设置导出（`GET /api/settings/export-json`）会像其他设置字段一样，原样包含这两个数组——与
 `hidePaidModels` 的组合步骤导出过滤器不同，此处不存在重新导入风险：嵌入在已导出组合步骤中的被拒绝 ID，
 是运维人员自己明确作出的路由选择，并非导出边界需要剔除的内容。
+
+## 仅列出组合（`exposeCombosOnly`）
+
+这是一个独立的布尔设置，同样需要主动启用，默认值为 `false`，适用于以组合为公开模型接口、提供者仅作为后端的部署。设为 `true` 时，公开列表（`GET /v1/models`、`GET /v1`，以及基于 `getUnifiedModelsResponse()` 的其他 `/v1` 发现路由）只保留 `owned_by: "combo"` 的行：用户组合加上内置 `auto/*` 组合（除非 `hideAutoCombos` 隐藏它们）。它采用与每个密钥的 `catalogScope: "combos"` 相同的行判断，密钥自身的允许/拒绝/范围过滤仍会在此基础上生效。
+
+可在 **设置 → 路由 → Models API 列表** 中切换，或使用 `PATCH /api/settings {"exposeCombosOnly": true}`。
+
+与上面的列表一样，它仅改变对外公布的内容：
+
+- 显式 `provider/model` ID 仍可分发请求，`GET /v1/models/{id}` 仍可解析它；
+- 控制面板目录（模型选择器使用的 `GET /api/models/catalog`）不会缩小；
+- 它不会同步到 `auto/*` 候选池，因此 `auto/*` 组合保留完整候选池。

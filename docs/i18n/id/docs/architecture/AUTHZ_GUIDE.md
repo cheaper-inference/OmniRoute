@@ -168,9 +168,10 @@ Setiap kelas rute memiliki kebijakan di `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — selalu mengembalikan `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — mengekstrak Bearer, memvalidasinya melalui `validateApiKey()`. Hanya beralih ke anonim ketika feature flag efektif `REQUIRE_API_KEY` dinonaktifkan. Flag efektif ditentukan melalui `isRequireApiKeyEnabled()` (`penggantian feature flag DB > process.env.REQUIRE_API_KEY > default`) sehingga Feature Flags Dashboard dan variabel lingkungan mengatur `/api/v1/*`, `/api/v1beta/*`, serta aliasnya secara konsisten; kegagalan resolver akan menolak akses secara default. Mengizinkan permintaan sesi dashboard pada rute API klien (termasuk `/api/v1/models`, yang digunakan oleh katalog model dashboard).
+  Ketika Entra ID SSO diaktifkan, Bearer yang strukturnya merupakan token Entra (tiga segmen base64url, algoritme `RS*`, `kid`) ditangani oleh cabang SSO **sebelum** `validateApiKey()`, dan keputusannya bersifat final. Token itu tidak pernah diteruskan ke jalur kunci API atau cabang penurunan menjadi anonim, sehingga gangguan penyedia identitas tidak dapat berubah menjadi akses terbuka. Kunci API statis tidak terpengaruh. Lihat [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — menerima sesi dashboard, permintaan sinkronisasi model internal (dicocokkan dengan `/api/providers/[name]/(sync-models|models)`), atau melewatkan pemeriksaan sepenuhnya jika `isAuthRequired()` mengembalikan false. Mengembalikan 403 (`AUTH_001`) ketika token Bearer tersedia tetapi tidak valid, dan 401 jika tidak. Kebijakan ini juga memberlakukan tingkatan penjaga rute (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum cabang autentikasi apa pun — lihat [Tingkatan Penjaga Rute](../security/ROUTE_GUARD_TIERS.md). Path LOCAL_ONLY di `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (saat ini: `/api/mcp/`) dapat diakses dari non-loopback ketika kunci Bearer memiliki scope `manage`; semua path LOCAL_ONLY lainnya tetap dibatasi secara ketat ke loopback terlepas dari scope.
 
-Kebijakan yang berhasil mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Handler downstream dapat membacanya melalui `assertAuth(request, "CLIENT_API")` di `src/server/authz/assertAuth.ts` tanpa menjalankan ulang logika autentikasi.
+Kebijakan yang berhasil mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Handler downstream dapat membacanya melalui `assertAuth(request, "CLIENT_API")` di `src/server/authz/assertAuth.ts` tanpa menjalankan ulang logika autentikasi.
 
 ## Daftar Rute Publik
 
@@ -321,8 +322,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Untuk permintaan yang diautentikasi, header permintaan upstream (di sisi handler) juga mencakup:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<4 karakter terakhir> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<4 karakter terakhir> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (opsional)
 x-omniroute-auth-scopes:    daftar yang dipisahkan koma
 ```

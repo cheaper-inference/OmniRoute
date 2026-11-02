@@ -29,6 +29,7 @@ Para consultar el protocolo específico compatible con OpenAI y la matriz de cap
 - [Streaming mediante WebSocket](#websocket-streaming)
 - [Cuotas e informes de problemas](#quotas--issues-reporting)
 - [Caché semántica](#semantic-cache)
+- [Compatibilidad con la gestión de CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [Panel de control y administración](#dashboard--management)
 - [Administración de combinaciones](#combo-management)
 - [Webhooks](#webhooks)
@@ -988,6 +989,18 @@ finalización.
 
 **Autenticación:** clave de API Bearer (`isAuthenticated`).
 
+### Recuperación de sesión por cuota (activación explícita)
+
+Un `POST /v1/chat/completions` o `POST /v1/responses` sin streaming que falle con un error terminal de cuota (`402`/`429`/`503` cuyo cuerpo indique que se han agotado la cuota o los créditos) puede quedar en espera y reproducirse después, en lugar de devolver el error. El llamador lo activa por solicitud mediante tres cabeceras:
+
+| Cabecera                     | Valor                                               |
+| ---------------------------- | --------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                              |
+| `x-omniroute-session`        | ID de sesión, `[A-Za-z0-9._:-]{1,128}`              |
+| `x-omniroute-recovery-turn`  | ID de turno único dentro de la sesión (misma regla) |
+
+Solo son elegibles los turnos `stream: false` sin herramientas, historial de herramientas ni `previous_response_id`, y sin asociación `x-omniroute-connection`; además, debe estar definida `STORAGE_ENCRYPTION_KEY` (la solicitud se almacena cifrada durante un máximo de 24 h). La respuesta es entonces `202` con `recovery.poll`; consulte `GET /v1/quota-recoveries/{id}` (`202` mientras está pendiente, `200` con el cuerpo recuperado al completarse) o cancele con `DELETE`. Los tickets solo son visibles para la clave de API que los creó. Una reproducción cuyo resultado sea incierto termina en `needs_confirmation` en lugar de enviarse dos veces. Fuente: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Uso de autoservicio (`/api/usage/om-usage`)
@@ -1156,6 +1169,28 @@ Cualquier solicitud puede omitir la caché independientemente de la configuraci�
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Compatibilidad con la gestión de CLIProxyAPI
+
+OmniRoute responde a los tres endpoints de gestión de [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) que los paneles de uso llaman para leer los límites de las suscripciones Claude y Codex (por ejemplo, la fuente de límites de uso `cliproxy` de T3 Code). Apunte la URL base del cliente a OmniRoute y use una clave de API con el ámbito `manage` como clave de gestión. Las rutas se sirven en `/v0/management/*` y en `/api/v0/management/*`.
+
+| Método | Ruta                         | Descripción                                                                                                                                      |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/v0/management/auth-files`  | Conexiones OAuth Claude y Codex como `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Sin tokens                          |
+| POST   | `/v0/management/api-call`    | Cuerpo `{ auth_index, method, url, header?, data? }`. Envía una solicitud permitida con el token de la cuenta y devuelve `{ status_code, body }` |
+| POST   | `/v0/management/reset-quota` | Cuerpo `{ auth_index }`. Borra la espera de la conexión, los bloqueos de modelo y las esperas por ámbito de Codex de una cuenta                  |
+
+- `auth_index` es el ID de conexión de OmniRoute. `provider` es `claude` o `codex` (solo conexiones OAuth; no se incluye el proveedor con clave de API `anthropic`). Para Codex, `id_token.chatgpt_account_id` es el ID de espacio de trabajo almacenado y `plan_type` es el plan almacenado.
+- `api-call` no es un proxy genérico. Solo acepta Claude `GET
+https://api.anthropic.com/api/oauth/usage` y Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` y `POST .../wham/rate-limit-reset-credits/consume`, cada uno solo para una cuenta del proveedor correspondiente. Cualquier otra solicitud devuelve `403` sin contactar al upstream. Se ignora el encabezado `Authorization` del llamante (incluido el marcador `$TOKEN$`): OmniRoute inyecta el token de acceso de la conexión, lo renueva primero cuando está próximo a caducar y reenvía solo los encabezados permitidos (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Si falta `Chatgpt-Account-Id`, se utiliza el ID de espacio de trabajo almacenado. Si la primera respuesta del upstream es `401`, se renueva una vez y solo se reintenta cuando cambia el token de acceso. Cada intento al upstream tiene un tiempo límite de 15 segundos y usa el proxy de la conexión.
+- `reset-quota` deja intactos los estados terminales (banned, expired, credits_exhausted). Un `auth_index` desconocido devuelve `404`.
+
+**Autenticación:** sesión del panel o clave de API con ámbito `manage`, obligatoria incluso cuando el inicio de sesión está deshabilitado (las rutas están en `ALWAYS_PROTECTED_API_PATHS`). Las claves solo de inferencia reciben `403`. Fuente: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

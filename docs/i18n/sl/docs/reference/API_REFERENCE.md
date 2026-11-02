@@ -29,6 +29,7 @@ Za podrobneje obravnavan protokol, združljiv z OpenAI, in matriko zmogljivosti 
 - [Pretočno pošiljanje prek WebSocket](#websocket-streaming)
 - [Poročanje o kvotah in težavah](#quotas--issues-reporting)
 - [Semantični predpomnilnik](#semantic-cache)
+- [Združljivost upravljanja CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [Nadzorna plošča in upravljanje](#dashboard--management)
 - [Upravljanje kombinacij](#combo-management)
 - [Spletni kavlji](#webhooks)
@@ -1011,6 +1012,18 @@ dokončanje.
 
 **Avtentikacija:** API-ključ Bearer (`isAuthenticated`).
 
+### Obnova seje po izčrpanju kvote (izrecna vključitev)
+
+Zahtevo `POST /v1/chat/completions` ali `POST /v1/responses`, ki ne uporablja pretakanja in odpove z dokončno napako kvote (`402`/`429`/`503`, katere telo pravi, da je kvota ali dobroimetje izčrpano), je mogoče odložiti in pozneje ponoviti namesto vrnitve napake. Klicatelj to vključi za posamezno zahtevo s tremi glavami:
+
+| Glava                        | Vrednost                                        |
+| ---------------------------- | ----------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                          |
+| `x-omniroute-session`        | ID seje, `[A-Za-z0-9._:-]{1,128}`               |
+| `x-omniroute-recovery-turn`  | ID poteze, enoličen znotraj seje (isto pravilo) |
+
+Primerne so samo poteze `stream: false` brez orodij, zgodovine orodij ali `previous_response_id` in brez pripetja `x-omniroute-connection`; nastavljen mora biti `STORAGE_ENCRYPTION_KEY` (zahteva je šifrirano shranjena do 24 h). Odgovor je nato `202` z `recovery.poll`; preverjajte `GET /v1/quota-recoveries/{id}` (`202` med čakanjem, `200` z obnovljenim telesom ob zaključku) ali prekličite z `DELETE`. Zahtevki so vidni samo API ključu, ki jih je ustvaril. Ponovitev z negotovim izidom se konča z `needs_confirmation`, namesto da bi bila poslana dvakrat. Vir: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Samopostrežna uporaba (`/api/usage/om-usage`)
@@ -1179,6 +1192,28 @@ Vsaka zahteva lahko obide predpomnilnik ne glede na nastavitve ključa:
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Združljivost upravljanja CLIProxyAPI
+
+OmniRoute odgovarja na tri upravljavske končne točke [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI), ki jih nadzorne plošče uporabe kličejo za branje omejitev naročnin Claude in Codex (na primer vir omejitev `cliproxy` v T3 Code). Osnovni URL odjemalca usmerite na OmniRoute in kot upravljavski ključ uporabite API ključ z obsegom `manage`. Poti so na voljo na `/v0/management/*` in `/api/v0/management/*`.
+
+| Metoda | Pot                          | Opis                                                                                                                          |
+| ------ | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Povezave Claude in Codex OAuth kot `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Brez žetonov       |
+| POST   | `/v0/management/api-call`    | Telo `{ auth_index, method, url, header?, data? }`. Pošlje dovoljeno zahtevo z žetonom računa in vrne `{ status_code, body }` |
+| POST   | `/v0/management/reset-quota` | Telo `{ auth_index }`. Počisti premor povezave, zaklepe modelov in premore Codex po obsegu za en račun                        |
+
+- `auth_index` je ID povezave OmniRoute. `provider` je `claude` ali `codex` (samo povezave OAuth; ponudnik z API ključem `anthropic` ni naveden). Za Codex je `id_token.chatgpt_account_id` shranjeni ID delovnega prostora, `plan_type` pa shranjeni paket.
+- `api-call` ni splošen posrednik. Sprejme samo Claude `GET
+https://api.anthropic.com/api/oauth/usage` in Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ter `POST .../wham/rate-limit-reset-credits/consume`, vsako samo za račun ustreznega ponudnika. Vse drugo vrne `403`, ne da bi stopilo v stik z upstreamom. Klicateljeva glava `Authorization` (tudi nadomestna oznaka `$TOKEN$`) se prezre: OmniRoute vstavi dostopni žeton povezave, ga najprej osveži, če je blizu poteka, in posreduje samo dovoljene glave (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Manjkajoča `Chatgpt-Account-Id` privzeto dobi shranjeni ID delovnega prostora. Če je prvi upstream odgovor `401`, žeton enkrat osveži in poskusi znova samo, če se dostopni žeton spremeni. Vsak upstream poskus poteče po 15 sekundah in uporablja posrednik povezave.
+- `reset-quota` ne spreminja dokončnih stanj (banned, expired, credits_exhausted). Neznani `auth_index` vrne `404`.
+
+**Overjanje:** seja nadzorne plošče ali API ključ z obsegom `manage`, obvezno tudi pri onemogočeni prijavi (poti so v `ALWAYS_PROTECTED_API_PATHS`). Ključi samo za inferenco dobijo `403`. Vir: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

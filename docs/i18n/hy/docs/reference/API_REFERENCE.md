@@ -29,6 +29,7 @@ OpenAI-ի հետ համատեղելի մասնագիտացված արձանագ�
 - [WebSocket հոսքային փոխանցում](#websocket-streaming)
 - [Քվոտաների և խնդիրների մասին հաղորդում](#quotas--issues-reporting)
 - [Իմաստաբանական քեշ](#semantic-cache)
+- [Համատեղելիություն CLIProxyAPI-ի կառավարման հետ](#cliproxyapi-management-compatibility)
 - [Կառավարման վահանակ և կառավարում](#dashboard--management)
 - [Համակցությունների կառավարում](#combo-management)
 - [Վեբհուկեր](#webhooks)
@@ -984,6 +985,18 @@ CLI-ն `base_url + /responses` հասցեն արդիականացնում է WebS
 
 **Նույնականացում՝** Bearer API բանալի (`isAuthenticated`)։
 
+### Քվոտայի session-ի վերականգնում (ընտրովի միացում)
+
+Ոչ հոսքային `POST /v1/chat/completions` կամ `POST /v1/responses` հարցումը, որը ձախողվում է վերջնական քվոտայի սխալով (`402`/`429`/`503`, որի body-ն ասում է, որ քվոտան կամ կրեդիտները սպառվել են), կարելի է պահել սպասման մեջ և կրկնել ավելի ուշ՝ սխալը վերադարձնելու փոխարեն։ Կանչողը սա միացնում է յուրաքանչյուր request-ի համար երեք header-ով․
+
+| Header                       | Արժեք                                          |
+| ---------------------------- | ---------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                         |
+| `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`           |
+| `x-omniroute-recovery-turn`  | session-ի ներսում եզակի turn id (նույն կանոնը) |
+
+Թույլատրելի են միայն `stream: false` turn-երը՝ առանց tools-ի, գործիքների պատմության կամ `previous_response_id`-ի և առանց `x-omniroute-connection` pin-ի, և `STORAGE_ENCRYPTION_KEY`-ը պետք է սահմանված լինի (request-ը պահվում է գաղտնագրված՝ մինչև 24 ժամ)։ Պատասխանն այնուհետև `202` է՝ `recovery.poll`-ով․ պարբերաբար հարցրեք `GET /v1/quota-recoveries/{id}` (`202`՝ սպասման ընթացքում, `200`՝ վերականգնված body-ով ավարտվելուց հետո), կամ չեղարկեք `DELETE`-ով։ Ticket-ները տեսանելի են միայն դրանք ստեղծած API key-ին։ Replay-ը, որի արդյունքն անորոշ է, ավարտվում է `needs_confirmation`-ով՝ կրկնակի ուղարկվելու փոխարեն։ Աղբյուր՝ `src/lib/quota/quotaSessionRecovery.ts`։
+
 ---
 
 ## Ինքնասպասարկման օգտագործում (`/api/usage/om-usage`)
@@ -1151,6 +1164,28 @@ API բանալիները կարող են հրաժարվել սեմանտիկ ք�
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Համատեղելիություն CLIProxyAPI-ի կառավարման հետ
+
+OmniRoute-ը պատասխանում է [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)-ի կառավարման երեք endpoint-ներին, որոնք usage dashboard-ները կանչում են Claude-ի և Codex-ի բաժանորդագրության սահմանափակումները կարդալու համար (օրինակ՝ T3 Code-ի `cliproxy` usage-limit աղբյուրը)։ Client-ի base URL-ն ուղղեք OmniRoute-ին և որպես կառավարման բանալի օգտագործեք `manage` scope-ով API key։ Route-երը հասանելի են `/v0/management/*` և `/api/v0/management/*` հասցեներով։
+
+| Մեթոդ | Ուղի                         | Նկարագրություն                                                                                                                                   |
+| ----- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET   | `/v0/management/auth-files`  | Claude-ի և Codex-ի OAuth կապերը՝ `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` ձևով։ Առանց token-ների                   |
+| POST  | `/v0/management/api-call`    | Body՝ `{ auth_index, method, url, header?, data? }`։ Հաշվի token-ով ուղարկում է թույլատրելի ցանկի request և վերադարձնում `{ status_code, body }` |
+| POST  | `/v0/management/reset-quota` | Body՝ `{ auth_index }`։ Մաքրում է մեկ հաշվի connection cooldown-ը, model lockout-ները և Codex-ի per-scope cooldown-ները                          |
+
+- `auth_index`-ը OmniRoute connection id-ն է։ `provider`-ը `claude` կամ `codex` է (միայն OAuth կապեր․ `anthropic` API-key provider-ը չի նշվում)։ Codex-ի համար `id_token.chatgpt_account_id`-ը պահված workspace id-ն է, իսկ `plan_type`-ը՝ պահված plan-ը։
+- `api-call`-ը ընդհանուր proxy չէ։ Այն ընդունում է միայն Claude-ի `GET
+https://api.anthropic.com/api/oauth/usage`-ը և Codex-ի `GET
+https://chatgpt.com/backend-api/wham/usage`-ը, `GET .../wham/rate-limit-reset-credits`-ը և `POST .../wham/rate-limit-reset-credits/consume`-ը, յուրաքանչյուրը՝ միայն համապատասխան provider-ի հաշվի համար։ Մնացած ամեն ինչ վերադարձնում է `403`՝ առանց upstream-ի հետ կապվելու։ Կանչողի `Authorization` header-ը (ներառյալ `$TOKEN$` տեղապահը) անտեսվում է․ OmniRoute-ը տեղադրում է connection-ի access token-ը՝ նախ թարմացնելով այն, եթե ժամկետը մոտենում է ավարտին, և փոխանցում միայն թույլատրելի header-ները (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)։ Բացակայող `Chatgpt-Account-Id`-ի լռելյայն արժեքը պահված workspace id-ն է։ Եթե upstream-ի առաջին պատասխանը `401` է, այն մեկ անգամ թարմացնում է և նորից փորձում միայն access token-ի փոփոխվելու դեպքում։ Յուրաքանչյուր upstream փորձի ժամանակը սպառվում է 15 վայրկյանից հետո, և այն օգտագործում է connection-ի proxy-ն։
+- `reset-quota`-ն վերջնական վիճակները (banned, expired, credits_exhausted) թողնում է անփոփոխ։ Անհայտ `auth_index`-ը վերադարձնում է `404`։
+
+**Նույնականացում․** պահանջվում է dashboard session կամ `manage` scope-ով API key, նույնիսկ երբ login-ն անջատված է (ուղիները ներառված են `ALWAYS_PROTECTED_API_PATHS`-ում)։ Միայն inference-ի key-երը ստանում են `403`։ Աղբյուր՝ `src/lib/cliproxyCompat/managementApi.ts`։
 
 ---
 

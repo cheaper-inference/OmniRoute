@@ -61,3 +61,15 @@ Izvoz podešavanja (`GET /api/settings/export-json`) uključuje oba niza doslovn
 polje podešavanja — za razliku od filtera za izvoz koraka kombinacije u `hidePaidModels`, ovde ne postoji rizik
 od ponovne hidratacije: zabranjeni identifikator ugrađen u izvezeni korak kombinacije predstavlja eksplicitan izbor usmeravanja
 samog operatera, a ne nešto što granica izvoza treba da ukloni.
+
+## Списак само combo модела (`exposeCombosOnly`)
+
+Засебна логичка опција, такође с изричитим укључивањем и подразумевано `false`, за инсталације у којима су combo модели јавна понуда модела, а провајдери само позадински системи. Када је `true`, јавни списак (`GET /v1/models`, `GET /v1` и остале руте откривања `/v1` засноване на `getUnifiedModelsResponse()`) задржава само редове с `owned_by: "combo"`: корисничке combo моделе и уграђене combo моделе `auto/*` (осим ако их скрива `hideAutoCombos`). Користи исти тест реда као `catalogScope: "combos"` по кључу, а сопствени филтри допуштења, забрана и опсега кључа и даље се додатно примењују.
+
+Укључите или искључите опцију у **Settings → Routing → Models API listing** или путем `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Као и претходни спискови, мења само оглашавање доступности:
+
+- изричит ID `provider/model` и даље се усмерава, а `GET /v1/models/{id}` и даље га разрешава;
+- каталог надзорне плоче (`GET /api/models/catalog`, који користе бирачи модела) не сужава се;
+- опција се не пресликава у скупове кандидата `auto/*`, па combo модели `auto/*` задржавају пуни скуп.

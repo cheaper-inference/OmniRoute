@@ -213,6 +213,7 @@ export {
   type AccordionItemData,
   type AccordionItemProps,
   type AccordionProps,
+  type AccordionTriggerProps,
   type AccordionType,
   type AccordionVariant,
 } from "./accordion";
@@ -345,10 +346,12 @@ export {
 export { SearchableSelect } from "./searchable-select";
 export type { SearchableSelectProps, SearchableSelectOption } from "./searchable-select";
 export { Wizard, type WizardProps } from "./wizard";
-export { ChoiceCard, SetupProgressCard, SaveChangesBar, type ChoiceCardProps, type ChoiceCardTone, type SetupProgressCardProps, type SaveChangesBarProps } from "./onboarding-patterns";
+export { ChoiceCard, MultiChoiceCard, SetupLayout, SetupBenefits, SetupProgressCard, SaveChangesBar, type MultiChoiceCardProps, type SetupLayoutProps, type SetupBenefitsProps, type ChoiceCardProps, type ChoiceCardTone, type SetupProgressCardProps, type SaveChangesBarProps } from "./onboarding-patterns";
 export { AnnouncementCarousel, type AnnouncementCarouselProps, type AnnouncementItem, type AnnouncementMediaState } from "./announcement-carousel";
 
 export { BrandLoader, type BrandLoaderProps, type BrandLoaderVariant } from "./brand-loader";
+export { LoadingScreen, type LoadingScreenProps, type LoadingMessage } from "./loading-screen";
+export { SubmitButton, type SubmitButtonProps } from "./submit-button";
 
 export { TableLoadingRegion, TableLoadingState, type TableLoadingRegionProps, type TableLoadingStateProps } from "./table-loading";
 export { KeakMark, KeakLogo, ProductIcon, ProductLockup, ProductSwitcher, EditorialSection, EditorialCard,
@@ -362,3 +365,8 @@ export { IntegrationSetup, type IntegrationSetupProps, type IntegrationSetupStep
 
 export { IntegrationResources, type IntegrationResource, type IntegrationResourcesProps } from "./integration-resources";
 export { TokenSavingsList, ClientQuickStart, OverviewPanels, type TokenSavingsItem, type QuickStartIntegration, type OverviewPanelsProps } from "./overview-patterns";
+export { RecoveryState, type RecoveryStateProps } from "./recovery-state";
+export { SuccessTransition, type SuccessTransitionProps } from "./success-transition";
+export { SecretValue, type SecretValueProps } from "./secret-value";
+
+export { SetupSelectionSummary, type SetupSelectionSummaryProps } from "./onboarding-patterns";

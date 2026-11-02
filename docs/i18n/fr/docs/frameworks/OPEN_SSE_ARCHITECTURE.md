@@ -488,7 +488,7 @@ Celui-ci gère :
 
 | Fichier                             | Rôle                                                                   |
 | ----------------------------------- | ---------------------------------------------------------------------- |
-| `providerRegistry.ts`               | Registre des modèles de chat couvrant le catalogue de 377 fournisseurs |
+| `providerRegistry.ts`               | Registre des modèles de chat couvrant le catalogue de 380 fournisseurs |
 | `providerModels.ts`                 | Alias de modèles, correspondance des formats                           |
 | `constants.ts`                      | Délais d’expiration, limites, codes d’état                             |
 | `defaultThinkingSignature.ts`       | Signature de réflexion Claude par défaut                               |

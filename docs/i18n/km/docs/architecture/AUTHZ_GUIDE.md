@@ -156,9 +156,10 @@ Header ខាងក្នុងដែលទុកចិត្តបាន (ក�
 
 - **`publicPolicy`** (`policies/public.ts`) — តែងតែត្រឡប់ `allow({ kind: "anonymous", id: "anonymous" })`។
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — ទាញយក Bearer ហើយផ្ទៀងផ្ទាត់តាមរយៈ `validateApiKey()`។ វាបន្តទៅជា anonymous តែនៅពេល feature flag `REQUIRE_API_KEY` ដែលមានប្រសិទ្ធភាពត្រូវបានបិទប៉ុណ្ណោះ។ Flag ដែលមានប្រសិទ្ធភាពត្រូវបានកំណត់តាមរយៈ `isRequireApiKeyEnabled()` (`ការកំណត់ជាន់លើដោយ DB feature flag > process.env.REQUIRE_API_KEY > តម្លៃលំនាំដើម`) ដូច្នេះ Dashboard Feature Flags និង environment variables គ្រប់គ្រង `/api/v1/*`, `/api/v1beta/*` និង alias ឱ្យស្របគ្នា; ប្រសិនបើ resolver បរាជ័យ ប្រព័ន្ធនឹងបិទជាលំនាំដើម។ អនុញ្ញាត request ដែលមាន dashboard session នៅលើ client API route (រួមទាំង `/api/v1/models` ដែលត្រូវបានប្រើដោយបញ្ជី model របស់ dashboard)។
+  នៅពេលបើក Entra ID SSO នោះ Bearer ដែលមានរចនាសម្ព័ន្ធជាថូខឹន Entra (ផ្នែក base64url ចំនួនបី អាល់ហ្គូរីត `RS*` និង `kid`) ត្រូវបានដំណើរការដោយសាខា SSO **មុន** `validateApiKey()` ហើយសេចក្តីសម្រេចរបស់សាខានោះគឺជាសេចក្តីសម្រេចចុងក្រោយ។ វាមិនបន្តទៅផ្លូវ API-key ឬសាខាដែលបន្ថយទៅការចូលប្រើដោយអនាមិកឡើយ ដូច្នេះការផ្អាកសេវារបស់អ្នកផ្តល់អត្តសញ្ញាណមិនអាចធ្វើឱ្យការចូលប្រើបើកចំហសម្រាប់គ្រប់គ្នាបានទេ។ កូនសោ API ថេរមិនរងផលប៉ះពាល់ឡើយ។ សូមមើល [Entra ID SSO](../security/ENTRA_SSO.md)។
 - **`managementPolicy`** (`policies/management.ts`) — ទទួលយក dashboard session, request សមកាលកម្ម model ខាងក្នុង (ដែលផ្គូផ្គងនឹង `/api/providers/[name]/(sync-models|models)`) ឬរំលងទាំងស្រុង ប្រសិនបើ `isAuthRequired()` ត្រឡប់ false។ ត្រឡប់ 403 (`AUTH_001`) នៅពេលមាន Bearer token ប៉ុន្តែមិនត្រឹមត្រូវ ហើយត្រឡប់ 401 ក្នុងករណីផ្សេងទៀត។ វាក៏អនុវត្តកម្រិត route guard (LOCAL_ONLY / ALWAYS_PROTECTED) មុន auth branch ណាមួយផងដែរ — សូមមើល [កម្រិត Route Guard](../security/ROUTE_GUARD_TIERS.md)។ Path ប្រភេទ LOCAL_ONLY នៅក្នុង `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (បច្ចុប្បន្ន៖ `/api/mcp/`) អាចត្រូវបានចូលប្រើពី non-loopback នៅពេល Bearer key មាន scope `manage`; path ប្រភេទ LOCAL_ONLY ផ្សេងទៀតទាំងអស់ នៅតែតម្រូវឱ្យជា strict-loopback ដោយមិនគិតពី scope។
 
-Policy ដែលជោគជ័យត្រឡប់ `AuthSubject` ដែលមាន `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`។ Handler នៅខ្សែដំណើរការបន្ទាប់អាចអានវាតាមរយៈ `assertAuth(request, "CLIENT_API")` នៅក្នុង `src/server/authz/assertAuth.ts` ជំនួសឱ្យការដំណើរការ logic សម្រាប់ auth ឡើងវិញ។
+Policy ដែលជោគជ័យត្រឡប់ `AuthSubject` ដែលមាន `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`។ Handler នៅខ្សែដំណើរការបន្ទាប់អាចអានវាតាមរយៈ `assertAuth(request, "CLIENT_API")` នៅក្នុង `src/server/authz/assertAuth.ts` ជំនួសឱ្យការដំណើរការ logic សម្រាប់ auth ឡើងវិញ។
 
 ## បញ្ជី Route សាធារណៈ
 
@@ -303,8 +304,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 សម្រាប់សំណើដែលបានផ្ទៀងផ្ទាត់អត្តសញ្ញាណ បឋមកថាសំណើនៅ upstream (ខាង handler) ក៏រួមបញ្ចូលផងដែរ៖
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<លេខ 4 ខ្ទង់ចុងក្រោយ> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<លេខ 4 ខ្ទង់ចុងក្រោយ> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (ស្រេចចិត្ត)
 x-omniroute-auth-scopes:    បញ្ជីដែលបំបែកដោយសញ្ញាក្បៀស
 ```

@@ -542,8 +542,9 @@ vypnuto.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Nenastavená hodnota
   znamená všechny typy (chování z doby před existencí tohoto nastavení). Vzor
   `ssn_us` v enginu požadavků se mapuje na `ssn`. Šablony (Minimální,
-  Standardní, Finanční, Brazilská, USA, Plná) pouze vyplňují zaškrtávací
+  Standardní, Finanční, Brazilská, USA, GDPR, POPIA, Plná) pouze vyplňují zaškrtávací
   políčka v UI.
+- **Identifikátory GDPR a POPIA** — dvanáct vestavěných ID pokrývajících osobní identifikátory EU a Jihoafrické republiky (tabulka níže). Jejich regulární výrazy, validátory a jurisdikční značky jsou v jedné tabulce `src/shared/utils/piiPatterns.ts`, kterou používá sanitizér odpovědí (`src/lib/piiSanitizer.ts`) i maskování požadavků (`src/shared/utils/inputSanitizer.ts`). Shoda se rediguje pouze tehdy, pokud ji validátor přijme; samotná řada číslic nikdy nestačí. Provozovatel, který uložil zúžený výběr před vznikem těchto ID, zachová dosavadní chování, dokud nová ID nezaškrtne.
 - **Vlastní vzory** — až 20 regex nebo wildcard vzorů (`*` = až 64 nebílých
   znaků, `?` = jeden). Shody se nahrazují za `[CUSTOM_REDACTED]`. Každý vzor
   prochází `compilePiiCustomPattern()`
@@ -568,6 +569,25 @@ Nastavení jsou uložena v tabulce `key_value` (namespace `pii_settings`,
 
 Všechny tři vyžadují autentizaci pro správu a validují tělo požadavku pomocí
 Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Identifikátory GDPR (EU) a POPIA (Jihoafrická republika)
+
+| ID                  | Identifikátor                   | Ověření                                                                             |
+| ------------------- | ------------------------------- | ----------------------------------------------------------------------------------- |
+| `iban`              | IBAN                            | Známá země, přesná délka pro tuto zemi, ISO 13616 MOD-97-10                         |
+| `eu_vat`            | DIČ EU                          | Známá předpona členského státu a jeho formát čísla (bez dotazu do VIES)             |
+| `es_dni_nie`        | Španělské DNI / NIE             | Kontrolní písmeno (hodnota mod 23); NIE je `X/Y/Z` + 7 číslic                       |
+| `it_codice_fiscale` | Italské Codice Fiscale          | Kontrolní písmeno z tabulek lichých/sudých pozic                                    |
+| `pl_pesel`          | Polské PESEL                    | Vážený kontrolní součet a přípustné rozsahy zakódovaného měsíce/dne narození        |
+| `nl_bsn`            | Nizozemské BSN                  | Kontrola 11 (váhy 9..2, -1)                                                         |
+| `de_steuer_id`      | Německé Steuer-ID               | ISO 7064 Mod 11,10 a pravidla struktury číslic (bez úvodní 0)                       |
+| `se_personnummer`   | Švédské personnummer            | Luhn pro posledních deset číslic a pravděpodobné datum narození (10 nebo 12 číslic) |
+| `za_id`             | Jihoafrické identifikační číslo | Luhn pro všech 13 číslic, platný měsíc/den narození, číslice občanství 0 nebo 1     |
+| `za_phone`          | Jihoafrický telefon             | Předpona `+27` / `27` nebo národní tvar `0..` zapsaný s mezerou či spojovníkem      |
+| `za_vat`            | Jihoafrické DIČ                 | 10 číslic začínajících `4` **a** "VAT" / "BTW" v předchozích 48 znacích             |
+| `za_tax_ref`        | Jihoafrické daňové číslo        | 10 číslic začínajících `0`-`3`, Luhn **a** "tax" / "SARS" v předchozích 48 znacích  |
+
+Protože čistě číselné formáty kolidují s čísly objednávek, sestavení a časovými značkami, nejslabší z nich (`za_vat`, `za_tax_ref`) vyžadují klíčové slovo a samotné desetimístné číslo `0..` se nepovažuje za jihoafrický telefon. IBAN s mezerami (`GB29 NWBK ...`) se neshoduje. Při streamování se klíčové slovo hledá pouze v aktuálním bloku. ID předcházejí obecným telefonním vzorům, takže ověřený identifikátor zachovává vlastní zástupný symbol (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Šablony `gdpr` a `popia` vybírají identifikátory EU, respektive Jihoafrické republiky. Maskování samo zůstává volitelné (Hard Rule #20): nic zde nemění výchozí hodnotu příznaku funkce.
 
 ### Prompt Injection (`promptInjection.ts`)
 

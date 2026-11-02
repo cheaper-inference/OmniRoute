@@ -42,6 +42,10 @@ Claude Code взаємодіє з **Anthropic Messages API** і спрямову
 
 > Змінні середовища зчитуються **лише один раз під час запуску** — перезапустіть Claude Code після їх зміни.
 
+Для облікових даних, які регулярно оновлюються, замість фіксованого рядка задайте в `apiKeyHelper` файла `~/.claude/settings.json` команду, що виводить поточні облікові дані у stdout. Claude Code типово кешує результат на п’ять хвилин (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` змінює цей термін) і надсилає значення як у `Authorization: Bearer`, так і в `x-api-key`. Скрипт має виводити лише облікові дані — додатковий вступний напис спричиняє відмову допоміжного засобу у v2.1.227+.
+
+Саме так працює Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` виводить короткочасний токен доступу Entra, який OmniRoute перевіряє замість ключа API. Див. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` задає всі ці змінні за вас: він визначає базову URL-адресу й токен
 з активного контексту (тому після `omniroute connect <vps>` команда `omniroute launch`
 просто працює), перевіряє стан сервера та виконує `claude`.

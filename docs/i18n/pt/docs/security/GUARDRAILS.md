@@ -558,7 +558,8 @@ ambos desativados por predefinição.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Não definido significa
   todos os tipos (o comportamento anterior à existência desta definição). O padrão
   `ssn_us` do motor de pedidos é mapeado para `ssn`. Os modelos (Minimal, Standard,
-  Financial, Brazilian, USA, Full) apenas preenchem as caixas de verificação na IU.
+  Financial, Brazilian, USA, GDPR, POPIA, Full) apenas preenchem as caixas de verificação na IU.
+- **Identificadores GDPR e POPIA** — doze IDs integrados que cobrem identificadores pessoais da UE e da África do Sul (tabela abaixo). Suas regexes, validadores e tags de jurisdição ficam em uma única tabela, `src/shared/utils/piiPatterns.ts`, consumida tanto pelo sanitizador de respostas (`src/lib/piiSanitizer.ts`) quanto pelo mascarador de pedidos (`src/shared/utils/inputSanitizer.ts`). Uma correspondência só é ocultada quando seu validador a aceita; uma sequência isolada de dígitos nunca basta. Um operador que salvou uma seleção restrita antes da existência desses IDs mantém o comportamento anterior até marcar os novos IDs.
 - **Padrões personalizados** — até 20 padrões regex ou de wildcard (`*` = até 64
   caracteres diferentes de espaço em branco, `?` = um). As correspondências
   tornam-se `[CUSTOM_REDACTED]`. Todos os padrões passam por
@@ -584,6 +585,25 @@ As definições residem na tabela `key_value` (namespace `pii_settings`,
 
 Os três exigem autenticação de gestão e validam o corpo com Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Identificadores GDPR (UE) e POPIA (África do Sul)
+
+| ID                  | Identificador                  | Validação                                                                                  |
+| ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                           | País conhecido, comprimento exato para esse país, ISO 13616 MOD-97-10                      |
+| `eu_vat`            | Número VAT da UE               | Prefixo de Estado-membro conhecido e formato de número desse Estado (sem consulta ao VIES) |
+| `es_dni_nie`        | DNI / NIE espanhol             | Letra de controle (valor mod 23); NIE é `X/Y/Z` + 7 dígitos                                |
+| `it_codice_fiscale` | Codice Fiscale italiano        | Letra de controle das tabelas de posições ímpares/pares                                    |
+| `pl_pesel`          | PESEL polaco                   | Checksum ponderado e faixas plausíveis de mês/dia de nascimento codificados                |
+| `nl_bsn`            | BSN neerlandês                 | Prova de 11 (pesos 9..2, -1)                                                               |
+| `de_steuer_id`      | Steuer-ID alemão               | ISO 7064 Mod 11,10 mais as regras de estrutura dos dígitos (sem 0 inicial)                 |
+| `se_personnummer`   | personnummer sueco             | Luhn sobre os últimos dez dígitos e data de nascimento plausível (10 ou 12 dígitos)        |
+| `za_id`             | Número de ID sul-africano      | Luhn sobre todos os 13 dígitos, mês/dia de nascimento válidos, dígito de cidadania 0 ou 1  |
+| `za_phone`          | Telefone sul-africano          | Prefixo `+27` / `27`, ou a forma nacional `0..` escrita com espaço ou hífen                |
+| `za_vat`            | Número VAT sul-africano        | 10 dígitos começando com `4` **e** "VAT" / "BTW" nos 48 caracteres anteriores              |
+| `za_tax_ref`        | Referência fiscal sul-africana | 10 dígitos começando com `0`-`3`, Luhn **e** "tax" / "SARS" nos 48 caracteres anteriores   |
+
+Como os formatos compostos apenas por dígitos colidem com números de pedido, números de build e timestamps, os mais fracos (`za_vat`, `za_tax_ref`) exigem a palavra-chave de contexto, e um número isolado de dez dígitos `0..` não é tratado como telefone sul-africano. IBANs com espaços (`GB29 NWBK ...`) não são reconhecidos. No caminho de streaming, a pista de contexto é buscada somente dentro do chunk atual. Os IDs vêm antes dos padrões genéricos de telefone, portanto um identificador validado mantém seu próprio marcador (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Os templates `gdpr` e `popia` selecionam os IDs da UE e da África do Sul, respectivamente. O mascaramento em si continua dependendo de ativação explícita (Hard Rule #20): nada aqui altera a predefinição de uma flag de funcionalidade.
 
 ### Injeção de Prompts (`promptInjection.ts`)
 

@@ -10,7 +10,7 @@ OmniRoute משתלב עם שלוש קטגוריות של כלי CLI, הפרוס�
 
 | דף            | נתיב                    | עיקרון                                                              | כמות      |
 | ------------- | ----------------------- | ------------------------------------------------------------------- | --------- |
-| **קוד CLI**   | `/dashboard/cli-code`   | כלי פיתוח שמופנים אל OmniRoute (לקוח ← CLI ← OmniRoute ← ספק)       | 27        |
+| **קוד CLI**   | `/dashboard/cli-code`   | כלי פיתוח שמופנים אל OmniRoute (לקוח ← CLI ← OmniRoute ← ספק)       | 28        |
 | **סוכני CLI** | `/dashboard/cli-agents` | סוכנים אוטונומיים שמופנים אל OmniRoute (אותה זרימה, היקף רחב יותר)  | 11        |
 | **סוכני ACP** | `/dashboard/acp-agents` | כלי CLI ש-OmniRoute מפעיל כצד אחורי באמצעות stdio/ACP (זרימה הפוכה) | ראו רישום |
 
@@ -146,7 +146,7 @@ kilo, continue)—גם `hostSetupCommand` (לדוגמה, `omniroute setup-openco
 
 ---
 
-## 1. הקטלוג של CLI Code ‏(27 כלים)
+## 1. הקטלוג של CLI Code ‏(28 כלים)
 
 כל הכלים שמופיעים ב-`/dashboard/cli-code`. כלים עם `baseUrlSupport: none` מחוברים באמצעות MITM או מדריך ידני במקום כתובת URL בסיסית מותאמת אישית:
 
@@ -173,6 +173,7 @@ kilo, continue)—גם `hostSetupCommand` (לדוגמה, `omniroute setup-openco
 | grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)          | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries         | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
@@ -269,7 +270,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, מדור קודם)                          |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ראשי + סנכרון מדור קודם `~/.deepseek`) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                              |
-| `POST /api/cli-tools/pi-settings`           | סוכן התכנות Pi                                                     |
+| `POST /api/cli-tools/pi-settings`           | סוכן התכנות Pi (`~/.pi/agent/models.json`, `providers.omniroute`)  |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)              |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + מפתח `.env` ייעודי)           |
 
@@ -375,7 +376,7 @@ pip install aider-chat
 cargo install smelt  # מבוסס Rust
 
 # סוכן הקידוד Pi
-# להוראות התקנה, ראו https://github.com/zechnerj/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # להוראות התקנה, ראו https://github.com/1jehuang/jcode
@@ -488,6 +489,40 @@ EOF
 
 > השתמשו ב-`opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > כדי לשלוח וריאנטים עם חשיבה.
+
+---
+
+#### Pi Coding Agent
+
+התקינו את חבילת Pi Coding Agent הרשמית באמצעות `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi קורא ספקים מותאמים מ־`~/.pi/agent/models.json`; הגדירו את `PI_CODING_AGENT_DIR` לנתיב מוחלט (או נתיב עם תחילית `~`) כדי להזיז את כל תיקיית הסוכן. לוח הבקרה פועל לפי ההגדרה החלופית. Pi אינו מגלה מודלים מנקודות קצה מותאמות, ולכן OmniRoute כותב את המודל שנבחר ב־`models[]` באמצעות API ‏`openai-completions` של Pi ונקודת הקצה `/v1` של OmniRoute התואמת ל־OpenAI.
+
+ב־**כלי CLI → Pi**, בחרו נקודת קצה, מפתח API ומודל, בדקו את תצוגת הספק ואז החילו. התצוגה היא מקטע ספק: בעת הגדרת Pi ידנית מזגו את `providers.omniroute` לתוך `models.json` הקיים כדי לשמור על ספקים והגדרות אחרים.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi טוען שוב את `models.json` כשפותחים `/model`. בדקו את הנתיב שהוגדר באמצעות מזהה הספק ומזהה המודל שבחרתם:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+מקורות: [מודלים וספקים מותאמים של Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md),
+[משתני סביבה של Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md),
+[הוראות התקנת Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

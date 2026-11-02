@@ -310,12 +310,12 @@ A dènà àwọn transport SSE àti Streamable HTTP méjèèjì títí a ó fi m
 `Access token scope 'read' is insufficient; 'write' required.`
 Ipò ìpele yẹn ni `scopeSatisfies`. Kò tọ́ka sí tábìlì MCP, bẹ́ẹ̀ sì ni olùbámu MCP kò tọ́ka sí i.
 
-| Ààyè-orúkọ               | Ẹ̀rí ìdánimọ̀                                                                    | Olùṣàyẹ̀wò                     | Ohun tí ìfọwọ́sí ń gbà láàyè                          |
-| :----------------------- | :----------------------------------------------------------------------------- | :---------------------------- | :--------------------------------------------------- |
-| Ìṣàkóso kọ́kọ́rọ́ API       | `api_keys.scopes`                                                              | `hasManageScope`              | REST ìṣàkóso fún kọ́kọ́rọ́ Bearer yẹn                   |
-| Àfikún kọ́kọ́rọ́ API        | àkójọpọ̀ kan náà, ọ̀rọ̀ kan tó bá mu pẹ̀lú rẹ̀ pátápátá                             | olùrànlọ́wọ́ tí a dárúkọ nísàlẹ̀ | Agbára kan ṣoṣo yẹn                                  |
-| Àwọn ìwọ̀n-àyè irinṣẹ́ MCP | àkójọpọ̀ kan náà, bí kò bá sí, MCP `_meta`, bí kò bá sí, `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | Irinṣẹ́ yẹn, nígbà tí ìmúṣẹ bá ti ṣiṣẹ́                |
-| Àmì ìwọlé                | `oma_live_…`                                                                   | `scopeSatisfies`              | Ipa-ọ̀nà ìṣàkóso tí ọ̀nà àti ipa-ọ̀nà rẹ̀ nílò ìpele yẹn |
+| Ààyè-orúkọ               | Ẹ̀rí ìdánimọ̀                                                                                     | Olùṣàyẹ̀wò                     | Ohun tí ìfọwọ́sí ń gbà láàyè                          |
+| :----------------------- | :---------------------------------------------------------------------------------------------- | :---------------------------- | :--------------------------------------------------- |
+| Ìṣàkóso kọ́kọ́rọ́ API       | `api_keys.scopes`                                                                               | `hasManageScope`              | REST ìṣàkóso fún kọ́kọ́rọ́ Bearer yẹn                   |
+| Àfikún kọ́kọ́rọ́ API        | àkójọpọ̀ kan náà, ọ̀rọ̀ kan tó bá mu pẹ̀lú rẹ̀ pátápátá                                              | olùrànlọ́wọ́ tí a dárúkọ nísàlẹ̀ | Agbára kan ṣoṣo yẹn                                  |
+| Àwọn ìwọ̀n-àyè irinṣẹ́ MCP | àkójọpọ̀ kan náà, bí kò bá sí, MCP `_meta` (HTTP/SSE nìkan), bí kò bá sí, `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | Irinṣẹ́ yẹn, nígbà tí ìmúṣẹ bá ti ṣiṣẹ́                |
+| Àmì ìwọlé                | `oma_live_…`                                                                                    | `scopeSatisfies`              | Ipa-ọ̀nà ìṣàkóso tí ọ̀nà àti ipa-ọ̀nà rẹ̀ nílò ìpele yẹn |
 
 Bí a ṣe ń dá ẹ̀rí ìdánimọ̀ kọ̀ọ̀kan jáde wà nínú
 [Ìfàṣẹsí Ìṣàkóso](../guides/MANAGEMENT-AUTH.md).
@@ -359,8 +359,7 @@ yàtọ̀ sí `*` tó wà ní òpin.
 `false`). Nígbà tí kò ṣiṣẹ́, `evaluateToolScopes` máa gba ìpè náà láàyè, yóò sì fo
 àkójọ náà. Nígbà tí ó bá ṣiṣẹ́, HTTP máa ń lo `api_keys.scopes` ti kọ́kọ́rọ́ Bearer gẹ́gẹ́ bí
 `authInfo` (wo [Ìsopọ̀ ìwọ̀n-àyè HTTP fún kọ́kọ́rọ́ kọ̀ọ̀kan](#per-key-http-scope-binding-7895)).
-Nígbà tí kò bá sí ìwọ̀n-àyè kọ́kọ́rọ́ kankan tí a rí, àkójọpọ̀ tí a fúnni máa lọ sí MCP `_meta`, lẹ́yìn náà
-`OMNIROUTE_MCP_SCOPES`.
+Nígbà tí kò bá sí ìwọ̀n-àyè kọ́kọ́rọ́ kankan tí a rí, àkójọpọ̀ tí a fúnni máa lọ sí MCP `_meta` (a ń ka a sí fún àwọn olùpè HTTP/SSE nìkan, nínú àyíká ìfàṣẹsí HTTP; a kò ka `_meta` ti olùpè stdio sí, nítorí client ló ń ṣàkóso rẹ̀, kò sì ní ìdánimọ̀ fún olùpè kọ̀ọ̀kan), lẹ́yìn náà sí `OMNIROUTE_MCP_SCOPES`.
 
 #### Àwọn ìwọ̀n-àyè àmì ìwọlé
 
@@ -452,8 +451,7 @@ báyìí, ó sì ń fi ránṣẹ́ sí `transport.handleRequest(req, { authInfo
 `_meta` àti àṣàyàn-padà env `OMNIROUTE_MCP_SCOPES` tẹ́lẹ̀ — èyí kàn ń fi iye sínú orísun àkọ́kọ́,
 tó ní ipò gíga jù lọ yẹn, èyí tí kò rí ìfúnni tẹ́lẹ̀ lórí HTTP. Nígbà tí kò bá sí kọ́kọ́rọ́ API tí a lè pinnu
 (kò sí header, kọ́kọ́rọ́ kò tọ́), `authInfo` máa wà ní `undefined`, ìpinnu yóò sì tẹ̀ síwájú sí
-ọ̀wọ̀ `meta`/env tó ti wà láìsí ìyípadà. stdio kò ní ìdánimọ̀ olùpè-kọ̀ọ̀kan (wo
-`mcpCallerIdentity.ts`) kò sì kan án — ó dúró lórí ọ̀wọ̀ àṣàyàn-padà `_meta`/env.
+ọ̀wọ̀ `meta`/env tó ti wà láìsí ìyípadà. stdio kò ní ìdánimọ̀ fún olùpè kọ̀ọ̀kan (wo `mcpCallerIdentity.ts`), ìsopọ̀ fún kọ́kọ́rọ́ kọ̀ọ̀kan kò sì ní ipa lórí rẹ̀ — ó fo ìgbésẹ̀ `_meta` (`_meta` ni a ń ka sí nínú àyíká ìfàṣẹsí HTTP nìkan, #15159), ó sì ń rí ìwọ̀n-àyè láti inú kọ́kọ́rọ́ àyíká `OMNIROUTE_MCP_SCOPES` nìkan.
 
 **A fipá mú ìmúṣẹ ṣiṣẹ́ fún àwọn olùpè HTTP/SSE tó ní ààyè kékeré láìka
 `OMNIROUTE_MCP_ENFORCE_SCOPES` sí.** Bí `OMNIROUTE_MCP_ENFORCE_SCOPES` ṣe ń lo `false` gẹ́gẹ́ bí àìpé jẹ́

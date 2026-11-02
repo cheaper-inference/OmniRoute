@@ -49,8 +49,10 @@ const FREE_BUDGETS = FREE_MODEL_BUDGETS.filter((m) => grantsFreeAccess(m.freeTyp
 
 /** Provider ids that have at least one documented free model. */
 // SiliconFlow has a live free-labelled catalog but the shipped ten-flagship list
-// was actually billable (#17028). Accept only verified per-model live evidence.
-const LIVE_EVIDENCE_ONLY_PROVIDERS = ["siliconflow"] as const;
+// was actually billable (#17028). Token Harbor's catalogued campaign ended;
+// its remaining free offers have a rolling allowance, not an uncapped budget.
+// Accept per-model live evidence with a paid-evidence veto for both providers.
+const LIVE_EVIDENCE_ONLY_PROVIDERS: readonly string[] = ["siliconflow", "tokenharbor"];
 export const PROVIDERS_WITH_FREE_MODELS: Set<string> = new Set([
   ...FREE_BUDGETS.map((m) => m.provider),
   ...LIVE_EVIDENCE_ONLY_PROVIDERS,
@@ -68,6 +70,20 @@ const FREE_MODEL_IDS_BY_PROVIDER: Map<string, Set<string>> = (() => {
   }
   return map;
 })();
+
+// Known retirements take precedence over stale payload flags and :free suffixes.
+const DISCONTINUED_MODEL_IDS = new Set(
+  FREE_MODEL_BUDGETS.filter((m) => !grantsFreeAccess(m.freeType)).map(
+    (m) => `${m.provider}/${m.modelId}`
+  )
+);
+
+function isDiscontinuedCatalogModel(provider: string, modelId: unknown): boolean {
+  return (
+    typeof modelId === "string" &&
+    DISCONTINUED_MODEL_IDS.has(`${resolveProviderId(provider)}/${modelId}`)
+  );
+}
 
 /** Whether the given provider exposes any documented free models. Accepts a provider id or alias. */
 export function providerHasFreeModels(providerId: string | undefined | null): boolean {
@@ -102,10 +118,9 @@ export function isCatalogFreeModel(provider: string, modelId: unknown): boolean 
  * shipped-catalog entry, or a payload signal on a provider with a documented free tier.
  */
 export function isFreeModel(provider: string, model: FreeModelCandidate): boolean {
-  // SiliconFlow's old unconditional free entries were pay-as-you-go (#17028).
-  // With an active price or explicit paid flag, do not trust even an isFree=true
-  // marker or :free suffix: a wrong verdict here can trigger a real charge.
-  if (resolveProviderId(provider) === "siliconflow") {
+  if (isDiscontinuedCatalogModel(provider, model.id)) return false;
+  // Live evidence cannot override an active price or an explicit paid flag.
+  if (LIVE_EVIDENCE_ONLY_PROVIDERS.includes(resolveProviderId(provider))) {
     return !hasPayloadPaidEvidence(model) && hasPayloadFreeEvidence(model);
   }
   if (isCatalogFreeModel(provider, model.id)) return true;
@@ -153,9 +168,9 @@ export function isModelFreeBadge(
   model: FreeBadgeCandidate,
   options: { strict?: boolean } = {}
 ): boolean {
-  // A display name, truthy string or cached Free badge is not proof against
-  // SiliconFlow billing. Apply the same live-evidence gate as free-only import.
-  if (resolveProviderId(provider) === "siliconflow") {
+  if (isDiscontinuedCatalogModel(provider, model.id)) return false;
+  // Match free-only import for providers whose current offers require live evidence.
+  if (LIVE_EVIDENCE_ONLY_PROVIDERS.includes(resolveProviderId(provider))) {
     return isFreeModel(provider, {
       id: model.id,
       pricing: model.pricing,

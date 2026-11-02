@@ -10,7 +10,7 @@ OmniRoute 整合了三類 CLI 工具，分布於三個專屬的儀表板頁面�
 
 | 頁面             | 路由                    | 概念                                                               | 數量         |
 | ---------------- | ----------------------- | ------------------------------------------------------------------ | ------------ |
-| **CLI 程式碼**   | `/dashboard/cli-code`   | 指向 OmniRoute 的程式設計工具（用戶端 → CLI → OmniRoute → 提供者） | 27           |
+| **CLI 程式碼**   | `/dashboard/cli-code`   | 指向 OmniRoute 的程式設計工具（用戶端 → CLI → OmniRoute → 提供者） | 28           |
 | **CLI 代理程式** | `/dashboard/cli-agents` | 指向 OmniRoute 的自主代理程式（流程相同，但範圍更廣）              | 11           |
 | **ACP 代理程式** | `/dashboard/acp-agents` | OmniRoute 透過 stdio/ACP 產生並作為後端使用的 CLI（反向流程）      | 請參閱登錄表 |
 
@@ -127,7 +127,7 @@ kilo、continue）——一個可改在主機上執行的 `hostSetupCommand`（�
 
 ---
 
-## 1. CLI Code 的目錄（27 項工具）
+## 1. CLI Code 的目錄（28 項工具）
 
 所有顯示於 `/dashboard/cli-code` 的工具。`baseUrlSupport: none` 的工具會透過 MITM 或手動指南連接，而不是使用自訂基礎 URL：
 
@@ -154,6 +154,7 @@ kilo、continue）——一個可改在主機上執行的 `hostSetupCommand`（�
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -243,16 +244,16 @@ interface ToolBatchStatus {
 
 具有 `configType: "custom"` 的新工具會使用專用的設定 API 路由：
 
-| 路由                                        | 工具                                                             |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                          |
-| `POST /api/cli-tools/jcode-settings`        | jcode（--base-url 旗標）                                         |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI（OPENAI_BASE_URL，舊版）                            |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale（OPENAI_BASE_URL，主要設定 + 舊版 `~/.deepseek` 同步） |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                            |
-| `POST /api/cli-tools/pi-settings`           | Pi 程式設計代理                                                  |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build（~/.grok/config.toml、`[model.omniroute]`）           |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code（`~/.qwen/settings.json` + 專用 `.env` 金鑰）          |
+| 路由                                        | 工具                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                            |
+| `POST /api/cli-tools/jcode-settings`        | jcode（--base-url 旗標）                                           |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI（OPENAI_BASE_URL，舊版）                              |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale（OPENAI_BASE_URL，主要設定 + 舊版 `~/.deepseek` 同步）   |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                              |
+| `POST /api/cli-tools/pi-settings`           | Pi 程式設計代理 (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build（~/.grok/config.toml、`[model.omniroute]`）             |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code（`~/.qwen/settings.json` + 專用 `.env` 金鑰）            |
 
 所有路由皆使用 `sanitizeErrorMessage()` 產生錯誤回應（硬性規則 #12）。
 
@@ -356,7 +357,7 @@ pip install aider-chat
 cargo install smelt  # 基於 Rust
 
 # Pi 程式設計代理
-# 安裝方式請參閱 https://github.com/zechnerj/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # 安裝方式請參閱 https://github.com/1jehuang/jcode
@@ -469,6 +470,40 @@ EOF
 
 > 使用 `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > 來傳送思考變體。
+
+---
+
+#### Pi Coding Agent
+
+使用 `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` 安裝官方 Pi Coding Agent 套件。Pi 從 `~/.pi/agent/models.json` 讀取自訂提供者；將 `PI_CODING_AGENT_DIR` 設為絕對路徑（或以 `~` 開頭的路徑），即可移動整個代理目錄。控制台遵循此覆寫設定。Pi 不會從自訂端點探索模型，因此 OmniRoute 使用 Pi 的 `openai-completions` API 和 OmniRoute 相容 OpenAI 的 `/v1` 端點，將選定模型寫入 `models[]`。
+
+在 **CLI 工具 → Pi** 中選擇端點、API 金鑰和模型，檢查提供者預覽，然後套用。預覽是一個提供者片段：手動設定 Pi 時，請將 `providers.omniroute` 合併到現有 `models.json` 中，以保留其他提供者和設定。
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+開啟 `/model` 時，Pi 會重新載入 `models.json`。使用所選提供者 ID 和模型 ID 測試已設定的路由：
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+參考：[Pi 模型和自訂提供者](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)、
+[Pi 環境變數](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)、
+[Pi 安裝說明](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md)。
 
 ---
 

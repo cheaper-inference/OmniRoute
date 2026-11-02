@@ -5,8 +5,8 @@
 ---
 
 > **Version:** v3.8.44
-> **Senast uppdaterad:** 2026-09-16
-> **Målgrupp:** Ingenjörer som lägger till, underhåller eller felsöker inbäddade tjänster (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Senast uppdaterad:** 2026-10-28
+> **Målgrupp:** Ingenjörer som lägger till, underhåller eller felsöker inbyggda tjänster (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Inbäddade tjänster är lokalt installerade sidovagnsverktyg för processer som OmniRoute installerar, övervakar och
 exponerar som fullvärdiga routningsmål. Till skillnad från externa leverantörer (som nås via internet
@@ -31,19 +31,20 @@ med API-nycklar) körs inbäddade tjänster på samma dator som OmniRoute och ko
 
 ### Varför inbäddade tjänster?
 
-Sju tjänster är inbäddade:
+Åtta tjänster är inbyggda:
 
-| Tjänst          | npm-paket                                | Standardport | Syfte                                                                                                                                                                                                                                                                                                                                                     |
-| --------------- | ---------------------------------------- | :----------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                                |    20130     | AI-router som OmniRoute kan använda som underleverantör. Modeller exponeras som `9router/{sub}/{model}`                                                                                                                                                                                                                                                   |
-| **CLIProxyAPI** | Binärfil från GitHub-utgåva (`cliproxy`) |     8317     | Lokal proxyadapter för Anthropic CLI-autentiseringsflöden. Tillhandahåller reservroutning när OAuth-token upphör att gälla                                                                                                                                                                                                                                |
-| **Mux**         | `mux` (huvudlös `mux server`)            |     8322     | Lokal demon för agentorkestrering (coder/mux). Endast livscykelhanterad — inte ett routningsmål (ingen LLM-proxyhantering).                                                                                                                                                                                                                               |
-| **Bifrost**     | `@maximhq/bifrost`                       |     8080     | Go-baserad reläbackend för AI-gateway. När den körs väljs den automatiskt av relärouten (`/v1/relay/`)                                                                                                                                                                                                                                                    |
-| **Dario**       | `@askalf/dario`                          |     3456     | Proxy för Claude-prenumeration — alternativ/reservlösning till CLIProxyAPI för trafik formad som Claude Code; den injicerade nyckeln blir `DARIO_ADMIN_TOKEN`, som skyddar dess OAuth-kontrollplan under `/admin/*`                                                                                                                                       |
-| **open-wa**     | `@open-wa/wa-automate`                   |     8323     | WhatsApp Web-automatisering (huvudlös Chromium via Puppeteer). Endast livscykelhanterad — inte ett routningsmål.                                                                                                                                                                                                                                          |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                     |    20135     | Sidotjänst för promptkomprimering — en riktig LLMLingua-2 ONNX-modell (JS/TS-portning av Microsofts algoritm). `open-sse/services/compression/engines/llmlingua/index.ts` skickar `/compress` till den via HTTP och faller tillbaka på processens interna worker-trådsbackend när sidotjänsten är nere. Endast livscykelhanterad — inte ett routningsmål. |
+| Tjänst          | npm-paket                                  | Standardport | Syfte                                                                                                                                                                                                                                                                                                                                                     |
+| --------------- | ------------------------------------------ | :----------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                  |    20130     | AI-router som OmniRoute kan använda som underleverantör. Modeller exponeras som `9router/{sub}/{model}`                                                                                                                                                                                                                                                   |
+| **CLIProxyAPI** | Binärfil från GitHub-utgåva (`cliproxy`)   |     8317     | Lokal proxyadapter för Anthropic CLI-autentiseringsflöden. Tillhandahåller reservroutning när OAuth-token upphör att gälla                                                                                                                                                                                                                                |
+| **Mux**         | `mux` (huvudlös `mux server`)              |     8322     | Lokal demon för agentorkestrering (coder/mux). Endast livscykelhanterad — inte ett routningsmål (ingen LLM-proxyhantering).                                                                                                                                                                                                                               |
+| **Bifrost**     | `@maximhq/bifrost`                         |     8080     | Go-baserad reläbackend för AI-gateway. När den körs väljs den automatiskt av relärouten (`/v1/relay/`)                                                                                                                                                                                                                                                    |
+| **Dario**       | `@askalf/dario`                            |     3456     | Proxy för Claude-prenumeration — alternativ/reservlösning till CLIProxyAPI för trafik formad som Claude Code; den injicerade nyckeln blir `DARIO_ADMIN_TOKEN`, som skyddar dess OAuth-kontrollplan under `/admin/*`                                                                                                                                       |
+| **open-wa**     | `@open-wa/wa-automate`                     |     8323     | WhatsApp Web-automatisering (huvudlös Chromium via Puppeteer). Endast livscykelhanterad — inte ett routningsmål.                                                                                                                                                                                                                                          |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                       |    20135     | Sidotjänst för promptkomprimering — en riktig LLMLingua-2 ONNX-modell (JS/TS-portning av Microsofts algoritm). `open-sse/services/compression/engines/llmlingua/index.ts` skickar `/compress` till den via HTTP och faller tillbaka på processens interna worker-trådsbackend när sidotjänsten är nere. Endast livscykelhanterad — inte ett routningsmål. |
+| **sing-box**    | Binärfil från en GitHub-utgåva (`singbox`) |    20140     | TPROXY-hjälpprocess som stöder den transparenta proxyavlyssningen i `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Installationsprogrammet hämtar den låsta utgåvan och verifierar kontrollsumman. Endast livscykeln hanteras — tjänsten är inget routningsmål och förmedlar inte LLM-trafik.                                                              |
 
-Alla sju följer samma övervakningsmodell:
+Alla åtta följer samma övervakningsmodell:
 
 - OmniRoute installerar dem under `DATA_DIR/services/{name}/` (isolerade från OmniRoutes egen `package.json`)
 - OmniRoute startar och övervakar dem som underprocesser
@@ -584,7 +585,27 @@ sker återgång till den processinterna worker-trådsbackendmodulen
 
 ---
 
-### 4.8 Omvänd proxy (inbäddning av 9Router-instrumentpanelen)
+### 4.8 Sing-box-endpoints (8 rutter)
+
+sing-box har samma endpointstruktur som Mux — ingen `rotate-key`-rutt och ingen injicering av API-nyckel (`needsApiKey: false` i `bootstrap.ts`). Endast livscykeln hanteras; tjänsten är aldrig en routnings- eller LLM-leverantör. `install()` hämtar den officiella binärfilen från GitHub-utgåvan (`SagerNet/sing-box`) för den låsta versionen (`SINGBOX_PINNED_VERSION` i `src/lib/services/installers/singbox.ts`) och kontrollerar dess SHA256 mot en kontrollsumma inbyggd i samma fil innan något skrivs till disk. Begäran om varje annan version avvisas.
+
+| Metod  | Sökväg                                       | Beskrivning                                                                  |
+| ------ | -------------------------------------------- | ---------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Hämta och verifiera den låsta sing-box-utgåvan                               |
+| `POST` | `/api/services/singbox/start`                | Starta sing-box (`sing-box run -c config.json`)                              |
+| `POST` | `/api/services/singbox/stop`                 | Stoppa sing-box                                                              |
+| `POST` | `/api/services/singbox/restart`              | Starta om sing-box                                                           |
+| `POST` | `/api/services/singbox/update`               | Verifiera eller installera den låsta utgåvan på nytt                         |
+| `GET`  | `/api/services/singbox/status`               | Aktuell status och status i databasen                                        |
+| `POST` | `/api/services/singbox/auto-start`           | Slå på eller av automatisk start                                             |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Slå på eller av automatisk omstart för en övertagen, redan befintlig process |
+| `GET`  | `/api/services/singbox/logs`                 | Följ nya loggrader via SSE (den delade dynamiska rutten `[name]/logs`)       |
+
+**TPROXY-koppling:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) skriver `config.json` och startar processövervakaren innan `applyTproxy()` installerar TPROXY-brandväggsreglerna. Om övervakaren saknas eller inte når tillståndet `running` loggas det nu på felnivå i stället för att felet tyst ignoreras. Operatören kan därmed se att TPROXY-reglerna har tillämpats utan en fungerande lyssnare bakom dem.
+
+---
+
+### 4.9 Omvänd proxy (inbäddning av 9Router-instrumentpanelen)
 
 Instrumentpanelen bäddar in 9Routers webbgränssnitt i en iframe via en intern
 omvänd proxy på:

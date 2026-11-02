@@ -61,6 +61,19 @@ OmniRoute, **Electron 41** + **electron-builder 26.10** ಆಧಾರಿತ ಕ�
 - `npm run build:mac-x64` / `build:mac-arm64` — ಏಕ-ಆರ್ಕಿಟೆಕ್ಚರ್ macOS ನಿರ್ಮಾಣಗಳು
 - `npm run pack` — ಸ್ಥಳೀಯ ಪರೀಕ್ಷೆಗಾಗಿ ಡೈರೆಕ್ಟರಿ-ಮಾತ್ರ ನಿರ್ಮಾಣ (ಇನ್ಸ್ಟಾಲರ್ ಇಲ್ಲ)
 
+## ಐಚ್ಛಿಕ runtime ಪ್ಯಾಕ್‌ಗಳು
+
+Desktop build ಗಳು ತಮ್ಮ installer ಗಳ ಜೊತೆಗೆ ಐಚ್ಛಿಕ runtime archive ಗಳನ್ನೂ ಪ್ರಕಟಿಸಬಹುದು. ಸ್ಥಾಪಿಸಿದ server payload ನಲ್ಲಿ `optional-packs.index.json` ಇರುತ್ತದೆ (Windows ಮತ್ತು Linux ನಲ್ಲಿ `resources/app` ಅಡಿಯಲ್ಲಿ). `browser-runtime` entry ಗಾಗಿ `packs[].tarball` ಓದಿ, **ಅದೇ ಬಿಡುಗಡೆಗೆ ಸೇರಿದ ನಿಖರವಾಗಿ ಅದೇ ಫೈಲ್ ಹೆಸರನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ**. Archive ಹೆಸರುಗಳಲ್ಲಿ SHA-256 digest ಇರುತ್ತದೆ; ವಿಭಿನ್ನ build ಗಳಿಗೆ ವಿಭಿನ್ನ archive ಗಳು ಬೇಕಾಗಬಹುದು. ಡೌನ್‌ಲೋಡ್ ಮಾಡಿದ ಫೈಲ್ ಹೆಸರನ್ನು ಬದಲಿಸಬೇಡಿ.
+
+ಸ್ಥಾಪಿಸಿದ app ನ index ಮತ್ತು ಆಯ್ದ archive ಅನ್ನು ಒಂದೇ directory ಗೆ ನಕಲಿಸಿ, ನಂತರ ಅದೇ ಬಿಡುಗಡೆಯ CLI ಬಳಸಿ:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` ಸ್ಥಾಪನೆ ಮತ್ತು ಪರಿಶೀಲನೆಯ ಸ್ಥಿತಿಯನ್ನು ತೋರಿಸುತ್ತದೆ, archive ಹೆಸರನ್ನಲ್ಲ. ಜೊತೆಯಲ್ಲಿರುವ index archive ಅನ್ನು ಆಯ್ಕೆಮಾಡುತ್ತದೆ. ಸ್ಥಾಪನೆ archive ತೆರೆಯುವ ಮೊದಲು ಅದರ checksum ಅನ್ನು ಮತ್ತು ಸ್ಥಾಪಿತ pack ಅನ್ನು ಬದಲಿಸುವ ಮೊದಲು ಅದರ package checksum ಗಳನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ. ಇದು ಸ್ಥಳೀಯ ಫೈಲ್‌ಗಳನ್ನು ಓದುತ್ತದೆ; ಕಾಣೆಯಾದ archive ಗಳನ್ನು ಡೌನ್‌ಲೋಡ್ ಮಾಡುವುದಿಲ್ಲ. ಸ್ಥಾಪನೆಯ ನಂತರ application ಅನ್ನು ಮರುಪ್ರಾರಂಭಿಸಿ. ಬಿಡುಗಡೆಯಲ್ಲಿ ಹೊಂದುವ asset ಇಲ್ಲದಿದ್ದರೆ, ಆ ಬಿಡುಗಡೆಯ asset ಗಳ ಮೂಲಕ ಐಚ್ಛಿಕ pack ಲಭ್ಯವಿರುವುದಿಲ್ಲ.
+
 ## ಡೈರೆಕ್ಟರಿ ವಿನ್ಯಾಸ
 
 ```

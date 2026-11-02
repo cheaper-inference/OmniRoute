@@ -13,7 +13,7 @@
 
 ## Ohun Tó Jẹ́
 
-OmniRoute forúkọsilẹ̀ àwọn olùpèsè 377, pẹ̀lú àwọn ìkọsílẹ̀ kátálógì 155 tí a fìdí **ọ́fẹ́/no-auth**
+OmniRoute forúkọsilẹ̀ àwọn olùpèsè 380, pẹ̀lú àwọn ìkọsílẹ̀ kátálógì 155 tí a fìdí **ọ́fẹ́/no-auth**
 mọ́lẹ̀ (no-auth, OAuth ìpele-ọ̀fẹ́, tàbí kìlé API ìpele-ọ̀fẹ́ — wo
 [Ìtọ́nisọ́nà Àwọn Ìpele Ọ̀fẹ́](../getting-started/FREE-TIERS-GUIDE.md) àti
 [àkópọ̀ Àwọn Ìpele Ọ̀fẹ́](../reference/FREE_TIERS.md) kíkún). Kókó ọ̀rọ̀ rẹ̀ ni: àwọn olùpèsè ọ̀fẹ́

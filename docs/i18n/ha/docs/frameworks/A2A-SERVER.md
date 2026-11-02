@@ -163,7 +163,7 @@ OmniRoute yana samar da ƙwarewar A2A guda 6 waɗanda aka haɗa a cikin `src/lib
 | Rahoton Lafiya                | `health-report`      | Yana tattara matsayin circuit breaker, cooldown, da lockout na kowane mai samarwa                                                                                         | lafiya, juriya                   | "Nuna matsayin lafiyar duk masu samarwa"    |
 | Jerin Iyawa                   | `list-capabilities`  | Yana dawo da cikakken kundin Agent Skills mai bayanai 45 (API 23 + CLI 21 + config 1) a matsayin teburin markdown tare da ɗanyen URL na SKILL.md don saka mahallin bayani | kundi, ganowa, ƙwarewa           | "Jera dukkan iyawar OmniRoute"              |
 
-> Ya kamata a ci gaba da daidaita Agent Card da kundin masu samarwa 377 mai aiki; ana samo adadin masu samarwa da bayanan kyauta/marasa buƙatar tantancewa daga runtime registry.
+> Ya kamata a ci gaba da daidaita Agent Card da kundin masu samarwa 380 mai aiki; ana samo adadin masu samarwa da bayanan kyauta/marasa buƙatar tantancewa daga runtime registry.
 
 ### Cikakken Bayanin Ƙwarewar `list-capabilities`
 
@@ -215,7 +215,7 @@ Matsayar JSON-RPC ta `/a2a` ita ce babbar mashigar A2A. Matsayoyin REST da ke ƙ
    };
    ```
 
-3. **Bayyana a Katin Wakili:** a cikin `src/app/.well-known/agent.json/route.ts`, ƙara zuwa jerin `skills`:
+3. **Bayyana a cikin Katin Wakili:** a cikin `src/lib/a2a/agentCardMetadata.ts` (wanda `/.well-known/agent.json` da `/.well-known/agent-card.json` suke amfani da shi tare), ƙara zuwa jerin `skills`:
 
    ```json
    {

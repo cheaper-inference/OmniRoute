@@ -613,7 +613,8 @@ SSE), keduanya nonaktif secara default.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Jika tidak diatur,
   berarti semua tipe (perilaku sebelum pengaturan ini ada). Pola `ssn_us` pada
   engine request dipetakan ke `ssn`. Template (Minimal, Standard, Financial,
-  Brazilian, USA, Full) hanya mengisi kotak centang di UI.
+  Brazilian, USA, GDPR, POPIA, Full) hanya mengisi kotak centang di UI.
+- **Pengenal GDPR dan POPIA** — dua belas id bawaan yang mencakup pengenal pribadi Uni Eropa dan Afrika Selatan (tabel di bawah). Regex, validator, dan tag yurisdiksinya berada dalam satu tabel, `src/shared/utils/piiPatterns.ts`, yang dipakai baik oleh sanitizer respons (`src/lib/piiSanitizer.ts`) maupun penyamar permintaan (`src/shared/utils/inputSanitizer.ts`). Kecocokan hanya disamarkan jika validatornya menerimanya; deretan angka saja tidak pernah cukup. Operator yang menyimpan pilihan yang dipersempit sebelum id ini ada mempertahankan perilaku sebelumnya sampai id baru dicentang.
 - **Pola kustom** — hingga 20 pola regex atau wildcard (`*` = hingga 64 karakter
   non-whitespace, `?` = satu karakter). Kecocokan menjadi `[CUSTOM_REDACTED]`.
   Setiap pola melalui `compilePiiCustomPattern()`
@@ -639,6 +640,25 @@ Pengaturan disimpan di tabel `key_value` (namespace `pii_settings`,
 
 Ketiganya memerlukan autentikasi manajemen dan memvalidasi body dengan Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Pengenal GDPR (Uni Eropa) dan POPIA (Afrika Selatan)
+
+| Id                  | Pengenal                       | Validasi                                                                                     |
+| ------------------- | ------------------------------ | -------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                           | Negara dikenal, panjang tepat untuk negara tersebut, ISO 13616 MOD-97-10                     |
+| `eu_vat`            | Nomor VAT Uni Eropa            | Prefiks negara anggota dikenal dan format nomor negara tersebut (tanpa pencarian VIES)       |
+| `es_dni_nie`        | DNI / NIE Spanyol              | Huruf kontrol (nilai mod 23); NIE berupa `X/Y/Z` + 7 angka                                   |
+| `it_codice_fiscale` | Codice Fiscale Italia          | Huruf kontrol dari tabel posisi ganjil/genap                                                 |
+| `pl_pesel`          | PESEL Polandia                 | Checksum berbobot dan rentang bulan/hari lahir terenkode yang masuk akal                     |
+| `nl_bsn`            | BSN Belanda                    | Uji 11 (bobot 9..2, -1)                                                                      |
+| `de_steuer_id`      | Steuer-ID Jerman               | ISO 7064 Mod 11,10 serta aturan struktur angka (tanpa 0 di awal)                             |
+| `se_personnummer`   | personnummer Swedia            | Luhn pada sepuluh angka terakhir dan tanggal lahir yang masuk akal (10 atau 12 angka)        |
+| `za_id`             | Nomor ID Afrika Selatan        | Luhn pada seluruh 13 angka, bulan/hari lahir valid, angka kewarganegaraan 0 atau 1           |
+| `za_phone`          | Telepon Afrika Selatan         | Prefiks `+27` / `27`, atau bentuk nasional `0..` yang ditulis dengan spasi atau tanda hubung |
+| `za_vat`            | Nomor VAT Afrika Selatan       | 10 angka yang diawali `4` **dan** "VAT" / "BTW" dalam 48 karakter sebelumnya                 |
+| `za_tax_ref`        | Referensi pajak Afrika Selatan | 10 angka yang diawali `0`-`3`, Luhn, **dan** "tax" / "SARS" dalam 48 karakter sebelumnya     |
+
+Karena format yang hanya berisi angka bertabrakan dengan nomor pesanan, nomor build, dan stempel waktu, format terlemah (`za_vat`, `za_tax_ref`) memerlukan petunjuk kata kunci; nomor `0..` sepuluh angka tanpa pemisah tidak dianggap sebagai nomor telepon Afrika Selatan. IBAN dengan spasi (`GB29 NWBK ...`) tidak dicocokkan. Pada jalur streaming, petunjuk hanya dicari dalam chunk saat ini. Id tersebut ditempatkan sebelum pola telepon generik, sehingga pengenal yang tervalidasi mempertahankan placeholder-nya sendiri (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Template `gdpr` dan `popia` masing-masing memilih id Uni Eropa dan Afrika Selatan. Penyamaran tetap opt-in (Hard Rule #20): tidak ada yang mengubah default feature flag di sini.
 
 ### Prompt Injection (`promptInjection.ts`)
 

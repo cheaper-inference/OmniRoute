@@ -37,7 +37,8 @@ CLI ଏକ ଚେକ୍ଆଉଟ୍/ଇଭେଣ୍ଟ SHA ଅମେଳକୁ �
 ନିଷ୍ପତ୍ତି ଜବ୍ର `needs` ତାଲିକା ସହ ବାନ୍ଧିଥାଏ, ଯାହାଦ୍ୱାରା ଏକ ନୂଆ କିମ୍ବା ଅପସାରିତ ଲେନ୍ ନିରବରେ ଅଦୃଶ୍ୟ ହୋଇପାରିବ ନାହିଁ।
 ରସିଦଗୁଡ଼ିକ କେବଳ ସେମାନଙ୍କ ନିଜସ୍ୱ କାର୍ଯ୍ୟପ୍ରବାହକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ, ପ୍ରକାଶନ, ଡିପ୍ଲୟମେଣ୍ଟ କିମ୍ବା ଏକ ବିଦ୍ୟମାନ ଆଡଭାଇଜରି ସ୍କାନର୍ର ଆଭ୍ୟନ୍ତରୀଣ ବିଷୟକୁ ନୁହେଁ। ପ୍ରଯୁଜ୍ୟ ଯାଞ୍ଚଗୁଡ଼ିକୁ ବ୍ରାଞ୍ଚ ନିୟମରେ ଆବଶ୍ୟକୀୟ କରିବା ଏକ ପୃଥକ ପ୍ରଶାସନିକ ପରିବର୍ତ୍ତନ; ସେମାନଙ୍କ ଜବ୍ଗୁଡ଼ିକୁ ପରିଭାଷିତ କରିବା ମାତ୍ର ଦ୍ୱାରା କୌଣସି ବ୍ରାଞ୍ଚ ସୁରକ୍ଷିତ ହୁଏ ନାହିଁ।
 
-`API Route Typecheck` ହେଉଛି ଏକ ସ୍ୱାଧୀନ କାର୍ଯ୍ୟପ୍ରବାହ ଯାଞ୍ଚ, ଯାହା ଉଭୟ ସମନ୍ୱିତ ନିଷ୍କର୍ଷ ଏବଂ ସ୍ଥାନୀୟ ପୂର୍ଣ୍ଣ ପର୍ଯ୍ୟବେକ୍ଷକଙ୍କ ଷ୍ଟାଟିକ୍ ପ୍ରୋଫାଇଲ୍ର ବାହାରେ ଅଛି। ସଠିକ୍ ପ୍ରାର୍ଥୀ ପାଇଁ ଏହାର ଫଳାଫଳକୁ ପୃଥକ ଭାବରେ ଯାଞ୍ଚ କରନ୍ତୁ। `.github/workflows/api-route-typecheck.yml` `main` କିମ୍ବା `release/**`କୁ ଲକ୍ଷ୍ୟ କରୁଥିବା PR, ଉଭୟ ବ୍ରାଞ୍ଚ ପରିବାରକୁ କରାଯାଉଥିବା ପୁଶ୍ ଏବଂ ମାନୁଆଲ୍ ଡିସ୍ପାଚ୍ରେ ଚାଲେ। ଏଥିରେ କୌଣସି ପାଥ୍ ଫିଲ୍ଟର୍ ନାହିଁ। PR ବେସ୍କୁ ପୁନଃଲକ୍ଷ୍ୟ କରିବା ଏକ ନୂତନ ଯାଞ୍ଚର ଅନୁରୋଧ କରେ; ବଡି/ଟାଇଟଲ୍ ସମ୍ପାଦନାଗୁଡ଼ିକ କେବଳ-ପର୍ଯ୍ୟବେକ୍ଷଣ ନାମ `Admission not requested / API Route Typecheck` ବ୍ୟବହାର କରେ ଏବଂ ଆଡମିସନ୍ ଯାଞ୍ଚକୁ ପ୍ରତିସ୍ଥାପନ କରିପାରେ ନାହିଁ। କାର୍ଯ୍ୟପ୍ରବାହଟି କୌଣସି ମର୍ଜ୍-ଗ୍ରୁପ୍ ଟ୍ରିଗର୍ ଘୋଷଣା କରେ ନାହିଁ। ଏହି ଯାଞ୍ଚକୁ ଆବଶ୍ୟକ କରୁଥିବା ଯେକୌଣସି ମର୍ଜ୍-କ୍ୟୁ ରୋଲଆଉଟ୍କୁ ପ୍ରଥମେ ସେହି ଇଭେଣ୍ଟ ପାଇଁ ଏହାର ନିଷ୍ପାଦନ ସୁନିଶ୍ଚିତ କରିବାକୁ ପଡ଼ିବ।
+`API Route Typecheck` ଏକ ସ୍ୱତନ୍ତ୍ର workflow ଯାଞ୍ଚ। ଏହା ଦୁଇଟି ସମନ୍ୱିତ ନିଷ୍ପତ୍ତି ଓ ସ୍ଥାନୀୟ ପୂର୍ଣ୍ଣ observer-ର ସ୍ଥିର profile ବାହାରେ ରହେ। ନିର୍ଦ୍ଦିଷ୍ଟ candidate ପାଇଁ ଏହାର ଫଳାଫଳ ଅଲଗା ଯାଞ୍ଚ କରନ୍ତୁ। `.github/workflows/api-route-typecheck.yml`, `main` କିମ୍ବା `release/**` କୁ ଆସୁଥିବା PR, ଏହି ଦୁଇ branch ବର୍ଗକୁ push, manual dispatch ଏବଂ `checks_requested` ପ୍ରକାରର `merge_group` ଘଟଣାରେ ଚାଲେ। ଏଥିରେ path filter ନାହିଁ। Merge group ଗୁଡ଼ିକ `merge_group.head_sha` checkout କରନ୍ତି; ଅନ୍ୟ ଘଟଣାଗୁଡ଼ିକ `github.sha` checkout କରନ୍ତି। ସମସ୍ତ ଘଟଣା ସମାନ API diagnostic gate ଓ gate unit test ବ୍ୟବହାର କରନ୍ତି।
+PR-ର base ବଦଳିଲେ ନୂଆ ଯାଞ୍ଚ ମଗାଯାଏ; body/title ସମ୍ପାଦନ କେବଳ ପର୍ଯ୍ୟବେକ୍ଷଣ ପାଇଁ `Admission not requested / API Route Typecheck` ନାମ ବ୍ୟବହାର କରେ। ଏଗୁଡ଼ିକ admission ଯାଞ୍ଚର ସ୍ଥାନ ନେଇପାରିବ ନାହିଁ।
 
 ### ଗ୍ରହଣ ରିଡ୍ୟୁସର୍ରେ ସଂରକ୍ଷିତ ପ୍ରମାଣ
 
@@ -53,6 +54,14 @@ CLI ଏକ ଚେକ୍ଆଉଟ୍/ଇଭେଣ୍ଟ SHA ଅମେଳକୁ �
 ଯାଞ୍ଚକୁ ପ୍ରତିରୋଧ କରେ। ଅନୁପସ୍ଥିତ ଫାଇଲ୍ଗୁଡ଼ିକ ଖାଲି ସଫଳ ଲଗ୍ଗୁଡ଼ିକ ସହ ସମତୁଲ୍ୟ ନୁହେଁ। ବିଦ୍ୟମାନ
 SHA/ରନ୍/ପ୍ରୟାସ ଯାଞ୍ଚଗୁଡ଼ିକ ସ୍ୱାଧୀନ ରହେ: ମେଳ ଖାଉଥିବା ବାଇଟ୍ ଏକ ପୁରୁଣା
 ରସିଦ୍କୁ ଉଦ୍ଧାର କରିପାରିବ ନାହିଁ। ଫାଇଲ୍ ଅଖଣ୍ଡତା ନିଷ୍ପାଦନର ପ୍ରାମାଣିକତା କିମ୍ବା ଆର୍ଟିଫ୍ୟାକ୍ଟ ପ୍ରମୋସନ୍ର ପ୍ରମାଣ ନୁହେଁ।
+
+### ଯାଞ୍ଚ ହୋଇଥିବା CI build କୁ DAST ବ୍ୟବହାର କରେ
+
+ବାଧ୍ୟତାମୂଳକ `dast-smoke` CI job, `build` ପରେ `.github/workflows/dast-smoke.yml` କୁ ଡାକେ। ସମର୍ଥିତ fork PR, release ଲକ୍ଷ୍ୟ କରୁଥିବା PR ଓ merge group ସହିତ build ଅନୁସରଣ କରୁଥିବା ସମାନ code/draft ଚୟନକୁ ଏହା ଅନୁସରଣ କରେ। DAST job ନଥିଲେ, ବିଫଳ କିମ୍ବା ବାତିଲ ହେଲେ, ଅଥବା ଅପ୍ରତ୍ୟାଶିତ ଭାବେ ଛାଡ଼ି ଦିଆଗଲେ `Gate / CI` ଅବରୋଧ ହୁଏ। ପୁନଃବ୍ୟବହାରଯୋଗ୍ୟ workflow-ର ସ୍ୱତନ୍ତ୍ର PR/dispatch trigger ନାହିଁ; manual validation ପାଇଁ CI dispatch ବ୍ୟବହୃତ ହୁଏ, ଯାହା ଫଳରେ build ଓ consumer ଏକେ run ଭିତରେ ରହନ୍ତି।
+
+`scripts/ci/next-build-provenance.mjs`, ସମ୍ପୂର୍ଣ୍ଣ Next artifact କୁ ତାହାର tar digest, repository/event/run, producer attempt, head/base/checkout/tree, workflow ପରିଚୟ, lockfile, ସଠିକ୍ Node version/ABI, platform ଓ bundler ସହିତ ବାନ୍ଧି ପ୍ରମାଣିତ କରେ। DAST, `needs.build.outputs` ରୁ ଅପରିବର୍ତ୍ତନୀୟ artifact ID ବାଛେ ଓ download digest ଯାଞ୍ଚ ବାଧ୍ୟତାମୂଳକ କରେ। ଅନୁମତି ତାଲିକାର ଦୁଇଟି ସଦସ୍ୟକୁ `scripts/ci/unpack-ci-build.py` ମାଧ୍ୟମରେ ବାହାର କରିବା ପୂର୍ବରୁ ZIP hash ସ୍ୱତନ୍ତ୍ର ଭାବେ ଗଣନା କରି producer digest ସହ ମେଳାଏ। Next tree ବାହାର କରିବା ପୂର୍ବରୁ manifest ଓ tar archive ମଧ୍ୟ ସ୍ୱତନ୍ତ୍ର producer output ସହିତ ମେଳ ଖାଇବା ଆବଶ୍ୟକ। Branch-ର ସର୍ବଶେଷ ସଫଳ build କୁ ଏହା କେବେ ଖୋଜେ ନାହିଁ। ID ଓ ସବୁ input ଏବେ ମଧ୍ୟ ମେଳ ଖାଉଥିଲେ partial rerun ସେହି producer attempt କୁ ପୁଣି ବ୍ୟବହାର କରିପାରେ; receipt ଦୁଇଟି attempt କୁ ରେକର୍ଡ କରେ।
+
+Consumer କେବଳ repository ପଢ଼ିବା ଅନୁମତି ଥିବା hosted Linux runner ରେ ଚାଲେ; repository secret ନଥାଏ। Producer ବ୍ୟବହାର କରିଥିବା ସଠିକ୍ Node version ସ୍ଥାପନ କରି, `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` ସହ CLI ତିଆରି କରେ। ଯେକୌଣସି fallback build ପୂର୍ବରୁ standalone server ନଥିବା ସ୍ଥିତିକୁ `scripts/build/standaloneInput.mjs` ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ; ସାଧାରଣ ସ୍ଥାନୀୟ CLI build ସେମାନଙ୍କ ପୂର୍ବ fallback ରଖନ୍ତି। Server readiness, Schemathesis ଓ promptfoo ସବୁ ଅପରିବର୍ତ୍ତିତ 25 ମିନିଟ୍ job ସୀମା ମଧ୍ୟରେ ସଫଳ ହେବା ଦରକାର। Provenance receipt input ପରିଚୟ ଓ bytes ପ୍ରମାଣ କରେ, ସଫଳ DAST scan ନୁହେଁ। Artifact ଅବଧି ଶେଷ, runner ବାଧା କିମ୍ବା scanner ବିଫଳତା ଅସମ୍ପୂର୍ଣ୍ଣ କିମ୍ବା ବିଫଳ ପ୍ରମାଣ ହୋଇ ରହେ; advisory wrapper ମାଧ୍ୟମରେ ଏହାକୁ PASS କରାଯାଇପାରିବ ନାହିଁ।
 
 ### UI ନିଷ୍ପାଦନ କ୍ଷମତା
 
@@ -191,17 +200,24 @@ assertion ଦୁର୍ବଳୀକରଣ ଏବଂ ଅନ୍ୟ masking, ସ୍�
 
 `test-coverage` ପରେ ଚାଲେ। ବିଫଳ ହେଲେ ମର୍ଜକୁ ଅବରୋଧ କରେ।
 
-| ସ୍କ୍ରିପ୍ଟ                    | ଯାହାକୁ ବୈଧ କରେ                                                                                                                                                                       | ଅବରୋଧକାରୀ                |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
-| `quality:collect`            | `quality-metrics.json` ନିର୍ଗତ କରେ (ESLint ଚେତାବନୀ ଗଣନା, ମର୍ଜ ହୋଇଥିବା ଶାର୍ଡ ରିପୋର୍ଟରୁ କଭରେଜ୍)                                                                                         | ହଁ (ରାଚେଟ୍ର ଅପ୍ଷ୍ଟ୍ରିମ୍) |
-| `quality:ratchet`            | `quality-baseline.json`ର ପ୍ରତ୍ୟେକ ମେଟ୍ରିକ୍ରେ ରିଗ୍ରେସନ୍ ହୋଇନାହିଁ (ESLint ଚେତାବନୀ ≤ ବେସ୍ଲାଇନ୍; କଭରେଜ୍ ≥ ବେସ୍ଲାଇନ୍)                                                                     | ହଁ                       |
-| `check:duplication`          | କୋଡ୍ ନକଲକରଣ (jscpd@4) `quality-baseline.json`ରେ ଥିବା ବେସ୍ଲାଇନ୍କୁ ଅତିକ୍ରମ କରେ ନାହିଁ                                                                                                   | ହଁ                       |
-| `check:complexity`           | ଫାଇଲ୍-ସ୍ତରୀୟ ସାଇକ୍ଲୋମାଟିକ୍ ଜଟିଳତା ସୀମାକୁ ଅତିକ୍ରମ କରେ ନାହିଁ (ମୂଳ ESLint `complexity` + `max-lines-per-function`)                                                                      | ହଁ                       |
-| `check:cognitive-complexity` | ଜ୍ଞାନାତ୍ମକ ଜଟିଳତା ରାଚେଟ୍ (`eslint-plugin-sonarjs`) — ପୃଥକ ESLint ପାସ୍; CI ଉଭୟକୁ ଏକକ `check:complexity-ratchets` ପଦକ୍ଷେପ ଭାବେ ମର୍ଜ କରି ଚଲାଏ                                           | ହଁ                       |
-| `check:dead-code`            | ଅବ୍ୟବହୃତ ଏକ୍ସପୋର୍ଟ / ଫାଇଲ୍ ରାଚେଟ୍ (knip) ବେସ୍ଲାଇନ୍ ତୁଳନାରେ ରିଗ୍ରେସ୍ କରେ ନାହିଁ                                                                                                        | ହଁ                       |
-| `check:compression-budget`   | କମ୍ପ୍ରେସନ୍ ବେଞ୍ଚମାର୍କ ବଜେଟ୍ — ପ୍ରତି-ଇଞ୍ଜିନ୍ ଟୋକେନ୍-ସଞ୍ଚୟର ସର୍ବନିମ୍ନ ସୀମା ରିଗ୍ରେସ୍ କରିବା ଉଚିତ୍ ନୁହେଁ                                                                                  | ହଁ                       |
-| `check:type-coverage`        | ଶତକଡ଼ା-ଟାଇପ୍ଡ ରାଚେଟ୍ (`type-coverage`) ରିଗ୍ରେସ୍ କରେ ନାହିଁ; ମୁଖ୍ୟତଃ `typecheck:noimplicit:core`କୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ                                                                     | ହଁ                       |
-| `check:codeql-ratchet`       | ଖୋଲା CodeQL ଆଲର୍ଟ ଗଣନା ରିଗ୍ରେସ୍ କରେ ନାହିଁ (`gh api` ମାଧ୍ୟମରେ ପଢ଼େ; ଟୋକେନ୍ ନଥିଲେ ସୁରକ୍ଷିତ ଭାବେ ଏଡ଼ାଇଯାଏ) — ରିଫ୍ରେଶ୍ ଆବୃତ୍ତି ଏବଂ ମାନୁଆଲ୍ ଟ୍ରିଗର୍ ପାଇଁ: ନିମ୍ନରେ "CodeQL ରାଚେଟ୍" ଦେଖନ୍ତୁ | ହଁ                       |
+| ସ୍କ୍ରିପ୍ଟ                    | ଯାହାକୁ ବୈଧ କରେ                                                                                                                             | ଅବରୋଧକାରୀ                |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
+| `quality:collect`            | `quality-metrics.json` ନିର୍ଗତ କରେ (ESLint ଚେତାବନୀ ଗଣନା, ମର୍ଜ ହୋଇଥିବା ଶାର୍ଡ ରିପୋର୍ଟରୁ କଭରେଜ୍)                                               | ହଁ (ରାଚେଟ୍ର ଅପ୍ଷ୍ଟ୍ରିମ୍) |
+| `quality:ratchet`            | `quality-baseline.json`ର ପ୍ରତ୍ୟେକ ମେଟ୍ରିକ୍ରେ ରିଗ୍ରେସନ୍ ହୋଇନାହିଁ (ESLint ଚେତାବନୀ ≤ ବେସ୍ଲାଇନ୍; କଭରେଜ୍ ≥ ବେସ୍ଲାଇନ୍)                           | ହଁ                       |
+| `check:duplication`          | କୋଡ୍ ନକଲକରଣ (jscpd@4) `quality-baseline.json`ରେ ଥିବା ବେସ୍ଲାଇନ୍କୁ ଅତିକ୍ରମ କରେ ନାହିଁ                                                         | ହଁ                       |
+| `check:complexity`           | ଫାଇଲ୍-ସ୍ତରୀୟ ସାଇକ୍ଲୋମାଟିକ୍ ଜଟିଳତା ସୀମାକୁ ଅତିକ୍ରମ କରେ ନାହିଁ (ମୂଳ ESLint `complexity` + `max-lines-per-function`)                            | ହଁ                       |
+| `check:cognitive-complexity` | ଜ୍ଞାନାତ୍ମକ ଜଟିଳତା ରାଚେଟ୍ (`eslint-plugin-sonarjs`) — ପୃଥକ ESLint ପାସ୍; CI ଉଭୟକୁ ଏକକ `check:complexity-ratchets` ପଦକ୍ଷେପ ଭାବେ ମର୍ଜ କରି ଚଲାଏ | ହଁ                       |
+| `check:dead-code`            | ଅବ୍ୟବହୃତ ଏକ୍ସପୋର୍ଟ / ଫାଇଲ୍ ରାଚେଟ୍ (knip) ବେସ୍ଲାଇନ୍ ତୁଳନାରେ ରିଗ୍ରେସ୍ କରେ ନାହିଁ                                                              | ହଁ                       |
+| `check:compression-budget`   | କମ୍ପ୍ରେସନ୍ ବେଞ୍ଚମାର୍କ ବଜେଟ୍ — ପ୍ରତି-ଇଞ୍ଜିନ୍ ଟୋକେନ୍-ସଞ୍ଚୟର ସର୍ବନିମ୍ନ ସୀମା ରିଗ୍ରେସ୍ କରିବା ଉଚିତ୍ ନୁହେଁ                                        | ହଁ                       |
+| `check:type-coverage`        | ଶତକଡ଼ା-ଟାଇପ୍ଡ ରାଚେଟ୍ (`type-coverage`) ରିଗ୍ରେସ୍ କରେ ନାହିଁ; ମୁଖ୍ୟତଃ `typecheck:noimplicit:core`କୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ                           | ହଁ                       |
+
+### Job: `codeql-scan` ଓ `codeql-admission`
+
+`codeql-scan` ବିନ୍ୟାସ ହୋଇଥିବା ସମସ୍ତ analysis category ଉତ୍ପାଦନ କରେ। ସେହି job ସଫଳ ହେବା ପରେ `codeql-admission` ତାହାର ନିର୍ଦ୍ଦିଷ୍ଟ upload ଓ candidate alert ratchet ଯାଞ୍ଚ କରେ। କେବଳ documentation ବଦଳୁଥିବା candidate ସମେତ ଦୁଇଟି ଯାକ `Gate / CI` ର ବାଧ୍ୟତାମୂଳକ dependency। ପ୍ରଶାସନିକ activation ଓ canary ଆବଶ୍ୟକତା ତଳେ “CodeQL ratchet” ରେ ବର୍ଣ୍ଣିତ।
+
+| Script                 | କଣ ଯାଞ୍ଚ କରେ                                                                                                                                                                              | ଅବରୋଧ କରେ କି |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| `check:codeql-ratchet` | Alert ratchet ପୂର୍ବରୁ candidate ref/SHA ଓ ବିନ୍ୟାସ ହୋଇଥିବା ସମସ୍ତ analysis category ସାମ୍ପ୍ରତିକ ହେବା ଆବଶ୍ୟକ; ପ୍ରମାଣ ନଥିଲେ ଅବରୋଧ ହୁଏ। ସମଗ୍ର inventory ଅଲଗା ରହେ — ତଳେ “CodeQL ratchet” ଦେଖନ୍ତୁ | ହଁ           |
 
 ### ଜବ୍: `quality-extended`
 
@@ -464,30 +480,24 @@ git add quality-baseline.json
 କୌଣସି ମେଟ୍ରିକ୍କୁ ଉନ୍ନତ କରୁଥିବା PR `--require-tighten` ଦ୍ୱାରା ଚିହ୍ନଟ ହେବ (ପର୍ଯ୍ୟାୟ 6A.5,
 କାର୍ଯ୍ୟକାରିତା ଅପେକ୍ଷାରେ ଅଛି)।
 
-### CodeQL ରାଚେଟ୍: ରିଫ୍ରେଶ୍ ଅନ୍ତରାଳ ଏବଂ ମାନୁଆଲ୍ ଟ୍ରିଗର୍
+### CodeQL ratchet: candidate admission ଓ repository inventory
 
-`check:codeql-ratchet` **ରିପୋ ଅବସ୍ଥା ପଢ଼େ, ଯାହା ଏକ ସୂଚୀ ଅନୁସାରେ ରିଫ୍ରେଶ୍ ହୁଏ — ପ୍ରତ୍ୟେକ PR ପାଇଁ ନୁହେଁ।**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` ରିପୋର୍ଟ କରେ
-`state: configured`, `schedule: weekly`: ଏହା GitHubର ଡିଫଲ୍ଟ-ସେଟଅପ୍ ସ୍କାନ୍, ପ୍ରତ୍ୟେକ ପୁସ୍ ପାଇଁ
-ବିଶ୍ଳେଷଣ ନୁହେଁ। ପରିଣାମ: ଆଲର୍ଟଗୁଡ଼ିକୁ ଠିକ୍ କରୁଥିବା ଏକ PR ମର୍ଜ ହେବା ପରେ, ପରବର୍ତ୍ତୀ ନିର୍ଦ୍ଧାରିତ
-ସ୍କାନ୍ ଚାଲିବା ପର୍ଯ୍ୟନ୍ତ ରାଚେଟ୍ ପୁରୁଣା, ଅଧିକ ସଂଖ୍ୟା ପଢ଼ିବା ଜାରି ରଖେ — ତେଣୁ ସ୍କାନ୍ ଅଦ୍ୟତନ ହେବା
-ପର୍ଯ୍ୟନ୍ତ ଏହା ପ୍ରତ୍ୟେକ ଖୋଲା PRରେ, ଠିକ୍ କରୁଥିବା PRର ନିଜସ୍ୱ ଫଲୋ-ଅପ୍ଗୁଡ଼ିକ ସମେତ, ଅବନତି ରିପୋର୍ଟ କରେ।
+ସ୍ପଷ୍ଟ dependency ଶୃଙ୍ଖଳ ମାଧ୍ୟମରେ candidate CodeQL admission ର ଦାୟିତ୍ୱ CI ନିଏ: `codeql-scan`, `codeql.yml` ର ଚାରିଟି ଭାଷା matrix କୁ ଡାକେ; ତାପରେ `codeql-admission`, `node scripts/check/check-codeql-ratchet.mjs --candidate` ଚଲାଏ। `Gate / CI` ଦୁଇଟି ଫଳାଫଳ ଆବଶ୍ୟକ କରେ। Quality ନିଜ ସଂଖ୍ୟାଭିତ୍ତିକ ଯାଞ୍ଚ ରଖେ, କିନ୍ତୁ producer ସମାପ୍ତ ହେବା ପୂର୍ବରୁ scanner କୁ ପଚାରେ ନାହିଁ; କେବଳ `Gate / Quality` ସମ୍ପୂର୍ଣ୍ଣ candidate admission ନୁହେଁ। କେବଳ documentation ବଦଳୁଥିବା candidate ପାଇଁ ମଧ୍ୟ CodeQL ବାଧ୍ୟତାମୂଳକ ରହେ।
 
-**ମାନୁଆଲ୍ ରିଫ୍ରେଶ୍**: `gh workflow run codeql.yml --ref release/vX.Y.Z` ବିଶ୍ଳେଷଣକୁ
-ପୁନଃ ଚଳାଏ ଏବଂ କିଛି ମିନିଟ୍ ମଧ୍ୟରେ ଆଲର୍ଟଗୁଡ଼ିକୁ ପୁନଃ ପ୍ରକାଶ କରେ। ପ୍ରଥମେ `.github/workflows/codeql.yml`
-ପଢ଼ନ୍ତୁ — ଏହାର ହେଡର୍ ବ୍ୟାଖ୍ୟା କରେ ଯେ ଏହା କେବଳ `workflow_dispatch` **କାରଣ ଏହା
-GitHubର "default setup" ସହିତ ଦ୍ୱନ୍ଦ୍ୱ କରେ** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`)। `push`/`pull_request`/
-`schedule` ଟ୍ରିଗର୍ଗୁଡ଼ିକୁ ପୁନଃସ୍ଥାପନ କରିବା ପାଇଁ ପ୍ରଥମେ ଏକ **ମାଲିକଙ୍କ କାର୍ଯ୍ୟ** ଆବଶ୍ୟକ: Settings → Code security →
-CodeQL: Default → Advanced। ସେହି ସ୍ୱିଚ୍ ବିନା `schedule:` ଟ୍ରିଗର୍ ଯୋଡ଼ନ୍ତୁ ନାହିଁ — ଏହା
-କେବଳ ବିଫଳ ରନ୍ଗୁଡ଼ିକ ସୃଷ୍ଟି କରିବ।
+`config/quality/codeql-admission-policy.json` ର policy Actions, C/C++, JavaScript/TypeScript ଓ Python ବାଛେ; query suite default, threat model remote ଓ build mode none ମଧ୍ୟ ବାଛେ। Producer preflight ଅପେକ୍ଷାରତ activation ରେକର୍ଡ ଏବଂ ସ୍ପଷ୍ଟ target ତାଲିକା ବାହାରର branch କୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ। ପ୍ରାରମ୍ଭିକ target ହେଉଛି main ଓ release/v3.8.53; ପରବର୍ତ୍ତୀ release ପାଇଁ ସମୀକ୍ଷିତ onboarding ଆବଶ୍ୟକ। CI ର ବର୍ତ୍ତମାନ ବିସ୍ତୃତ release PR trigger ରହିବ, କିନ୍ତୁ onboarding ହୋଇନଥିବା target ମାପ ନହୋଇଥିବା PASS ପାଇବା ବଦଳରେ extraction ପୂର୍ବରୁ HOLD ଜଣାଏ।
 
-**ସଂଖ୍ୟା କମିବା ପରେ ବେସ୍ଲାଇନ୍କୁ କଠୋର କରନ୍ତୁ** — `node scripts/check/check-codeql-ratchet.mjs
---update` ନୂଆ ମପାଯାଇଥିବା ସଂଖ୍ୟାକୁ `quality-baseline.json` →
-`metrics.codeqlAlerts.value` ମଧ୍ୟରେ ଲେଖେ, ଯାହାଦ୍ୱାରା ରାଚେଟ୍ ନିରବରେ ପୁରୁଣା ସର୍ବୋଚ୍ଚ ସୀମାକୁ
-ପୁନଃ ଅବନତି ହେବାକୁ ଅନୁମତି ଦିଏ ନାହିଁ। କାର୍ଯ୍ୟକାରୀ ଉଦାହରଣ (2026-09-02/03): PR #12502 7ଟି ପ୍ରକୃତ ଆଲର୍ଟ
-ଠିକ୍ କଲା (13 → 6 ମପାଯାଇଥିବା ଖୋଲା ଆଲର୍ଟ); PR #12530 ମେଳ କରିବା ପାଇଁ ସ୍ଥିରୀକୃତ ବେସ୍ଲାଇନ୍କୁ 11 → 6 କରି କଠୋର କଲା; ତାହାପରେ
-ଅବଶିଷ୍ଟ 6ଟିକୁ ପ୍ରତ୍ୟେକ ଆଲର୍ଟ ପାଇଁ ଯଥାର୍ଥ କାରଣ ଦେଇ ଖାରଜ କରାଗଲା, ଫଳରେ ଖୋଲା ଆଲର୍ଟ ସଂଖ୍ୟା 0 ହେଲା।
+ପ୍ରତ୍ୟେକ matrix job ନିଜ ପ୍ରକୃତ SARIF upload ID, ଭାଷା, category, run ଓ attempt, caller workflow ପରିଚୟ, event ref/head/base/merge SHA ଓ policy hash ରେକର୍ଡ କରେ। ନିର୍ଭରଶୀଳ job କେବଳ ଏହି run ର receipt download କରି artifact digest ଯାଞ୍ଚ କରେ। ସମସ୍ତ ଚାରିଟି category, ସଫଳ producer ଓ ପ୍ରତ୍ୟେକ ନିର୍ଦ୍ଦିଷ୍ଟ upload ର ସମାପ୍ତ processing ଦରକାର। Branch ରେ ସର୍ବଶେଷ ମିଳିଥିବା analysis ବଦଳରେ API ର sarif_id filter ବ୍ୟବହାର କରେ। Partial rerun ଗୁଡ଼ିକ ସମାନ run ଓ candidate ର ପୂର୍ବ attempt ର ସଫଳ category କୁ, ଉତ୍ପାଦନ କରିଥିବା attempt ପରିଚୟ ରଖି, ପୁଣି ବ୍ୟବହାର କରିପାରନ୍ତି; ବର୍ତ୍ତମାନ producer ବିଫଳ ହେଲେ ପୁରୁଣା ସବୁଜ ପ୍ରମାଣ ବ୍ୟବହାର କରିପାରିବ ନାହିଁ।
+
+CodeQL action processing ପାଇଁ ଅପେକ୍ଷା କରେ, କିନ୍ତୁ pin କରାଯାଇଥିବା implementation status ପଢ଼ା ବିଫଳ ହେଲେ କିମ୍ବା ଅପେକ୍ଷା ସୀମା ସରିଲେ ଚେତାବନୀ ଦେଇ ଆଗକୁ ଚାଲିପାରେ। ତେଣୁ admission processing ପୁଣି ଯାଞ୍ଚ କରେ। Category ନଥିବା, processing ଅପେକ୍ଷାରତ ରହିବା, job ବିଫଳ କିମ୍ବା ବାତିଲ ହେବା, ପୁରୁଣା ପରିଚୟ, ଅସମ୍ପୂର୍ଣ୍ଣ pagination କିମ୍ବା API ଉପଲବ୍ଧ ନଥିବା ହେଲେ HOLD ଓ exit 2 ମିଳେ। ସ୍ୱତନ୍ତ୍ର scanner workflow ପାଇଁ ନିର୍ଦ୍ଧାରିତ ଅପେକ୍ଷା ଆଉ ନାହିଁ। Alert query 0 ଦେଇଥିବା ମାତ୍ରେ scan ହୋଇନଥିବା PR ପାସ୍ ହୋଇପାରିବ ନାହିଁ। ମାପିଥିବା ସଂଖ୍ୟା `metrics.codeqlAlerts.value` ଠାରୁ ଅଧିକ ହେଲେ exit 1 ହୁଏ; ଅନ୍ୟ branch ର alert କୁ ଗ୍ରହଣ କରିବା ପାଇଁ baseline ବଢ଼ାଯାଏ ନାହିଁ। [Upload ସ୍ଥିତି ଓ analysis ସନ୍ଧାନ](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Receipt upload ଓ analysis ID, category, tool version, ref/SHA, baseline ଓ alert ସଂଖ୍ୟା ରେକର୍ଡ କରେ। SARIF ପରିଚୟ/result ସଂଖ୍ୟା, ସର୍ବନିମ୍ନ rule ସଂଖ୍ୟା ଓ ସଠିକ୍ alert instance ବାଧ୍ୟତାମୂଳକ ରହେ। ଗ୍ରହଣ କରିବା ପୂର୍ବରୁ PR/analysis ପରିଚୟ ପୁଣି ଯାଞ୍ଚ ହୁଏ। ଏହି ଯାଞ୍ଚ ବିନ୍ୟାସ କରାଯାଇଥିବା category coverage ନିଶ୍ଚିତ କରେ, ବାହାର କରାଯାଇଥିବା ପ୍ରତ୍ୟେକ source file ର inventory ନୁହେଁ। C/C++ no-build extraction ଭିତରେ project build ସମୟରେ ଉତ୍ପାଦିତ code ରହେ ନାହିଁ। Source exclusion ର ସମୀକ୍ଷା ଏବେ ମଧ୍ୟ ଦରକାର; contributor attribution ପାଇଁ ତୁଳନାଯୋଗ୍ୟ ସଠିକ୍ base ପ୍ରମାଣ ଆବଶ୍ୟକ।
+
+`codeql-maintenance.yml`, PR/main producer କୁ ନକଲ ନକରି active release push scan ଓ ସାପ୍ତାହିକ schedule ଦିଏ। `nightly-codeql-inventory.yml`, `--strict-measurement` ସହ repository ବ୍ୟାପୀ baseline ଅଲଗା ରଖେ ଏବଂ ମାପ ଉପଲବ୍ଧ ନଥିଲେ ବିଫଳ ହୁଏ। ସ୍ଥାନୀୟ ପୁରୁଣା collector ତ୍ରୁଟି ବିନା ଛାଡ଼ିଦେବା candidate admission ନୁହେଁ। ଯାଞ୍ଚ ହୋଇଥିବା କମ୍ ସମଗ୍ର ସଂଖ୍ୟା ପରେ ସ୍ପଷ୍ଟ `--update` ମାଧ୍ୟମରେ ସୀମା କଠୋର କରାଯାଏ।
+
+Default Setup ବିନ୍ୟାସ ହୋଇଥିବା ବେଳେ Advanced workflow ପ୍ରକାଶ କରିବା ଉଚିତ ନୁହେଁ: GitHub ଏହି ସଂଯୋଗ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ। ସମୀକ୍ଷିତ ପ୍ରଶାସନିକ ପରିବର୍ତ୍ତନ ପୁଣି ପଢ଼ି ନିଶ୍ଚିତ ହେବା ପର୍ଯ୍ୟନ୍ତ version କରାଯାଇଥିବା policy ଅପେକ୍ଷାରତ ରହେ। ପ୍ରକାଶ ପୂର୍ବରୁ operator repository, head/base/tree, policy/patch/rollback hash ଓ ଦେଖାଯାଇଥିବା setup ସ୍ଥିତିକୁ ନିର୍ଦ୍ଦିଷ୍ଟ କରନ୍ତି; `node scripts/quality/codeql-producer.mjs verify-admin-readback` ଦିଆଯାଇଥିବା expected ଓ actual JSON ରେକର୍ଡ ଯାଞ୍ଚ କରେ। ଏହା ଏକ ବୈଷୟିକ ସୁରକ୍ଷା, operator ଅନୁମୋଦନ କିମ୍ବା ତାଜା readback ଆଣିବାର ବିକଳ୍ପ ନୁହେଁ। PR token କେବେ Administration access ମାଗେ ନାହିଁ। Rollout ଓ ଯେକୌଣସି scanner ପରିବର୍ତ୍ତନ ପାଇଁ ସେହି ଅଲଗା readback ସହ ପ୍ରକୃତ PR, fork ଓ merge-group compatibility ପ୍ରମାଣ ଦରକାର।
+
+Fork ଗୁଡ଼ିକ hosted runner ଓ credential ସଞ୍ଚୟ ନକରୁଥିବା checkout ବ୍ୟବହାର କରନ୍ତି; producer ରେ project install/build ନଥାଏ ଓ repository secret ଉତ୍ତରାଧିକାରରେ ମିଳେ ନାହିଁ। କମ୍ ଅଧିକାର ଥିବା fork token ସହ pull_request ଘଟଣାରେ SARIF upload କୁ GitHub ସମର୍ଥନ କରେ; ପ୍ରଥମ contribution ଚଲାଇବା ପାଇଁ ଅନୁମୋଦନ GitHub policy ହୋଇ ରହେ। ଅବିଶ୍ୱସନୀୟ code ଚଲାଇବାକୁ pull_request_target କେବେ ବ୍ୟବହାର କରନ୍ତୁ ନାହିଁ। Migration ସମ୍ପୂର୍ଣ୍ଣ ବୋଲି ଧରିବା ପୂର୍ବରୁ ନିୟନ୍ତ୍ରିତ canary ରେ ପ୍ରକୃତ token permission, analysis_key ଓ ସବୁ category environment ନିଶ୍ଚିତ କରନ୍ତୁ। [Fork upload ନିୟମ](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[ପରସ୍ପର ବିରୋଧୀ setup ପ୍ରଣାଳୀ](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **ଖାରଜ କରିବା ଅପରେଟର୍ଙ୍କ ନିଷ୍ପତ୍ତି (କଠୋର ନିୟମ #14)** — ଖାରଜ ମନ୍ତବ୍ୟରେ ପ୍ରାଯୁକ୍ତିକ
 ଯଥାର୍ଥତା ରେକର୍ଡ ନକରି କେବେବି କୌଣସି CodeQL ଆଲର୍ଟ ଖାରଜ କରନ୍ତୁ ନାହିଁ: ଅପ୍ଷ୍ଟ୍ରିମ୍-ପ୍ରୋଟୋକଲ୍
@@ -641,11 +651,7 @@ CI ଗେଟ୍ଗୁଡ଼ିକ ବ୍ୟତୀତ, OmniRoute ଏକ **ଇଚ�
 ପରିବର୍ତ୍ତନ; ଫ୍ଲିପ୍/ଡ୍ରପ୍ଗୁଡ଼ିକ ଅପରେଟରଙ୍କ ପାଇଁ ସଂରକ୍ଷିତ ନୀତିଗତ ନିଷ୍ପତ୍ତି।** ନିମ୍ନୋକ୍ତ କୌଣସିଟି
 ଏପର୍ଯ୍ୟନ୍ତ ପ୍ରୟୋଗ କରାଯାଇନାହିଁ।
 
-**ଉପରେ ଏହା ମଧ୍ୟ ଦଲିଲଭୁକ୍ତ ହୋଇନାହିଁ** (ପରାମର୍ଶମୂଳକ, ଦୁର୍ବଳ ସଙ୍କେତ): `docs-lint` ଜବ୍
-(markdownlint + Vale, ସମଗ୍ର ଜବ୍ `continue-on-error`) ଏବଂ ସ୍ୱତନ୍ତ୍ର ସ୍କାନର୍ ୱର୍କଫ୍ଲୋଗୁଡ଼ିକ
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`। `semgrepFindings: 0`
-`quality-baseline.json` ରେ ଅଛି, କିନ୍ତୁ `ci.yml` ରେ କୌଣସି ବ୍ଲକିଂ ରାଚେଟ୍ ସହିତ ସଂଯୁକ୍ତ ନୁହେଁ — ଏହି ମେଟ୍ରିକ୍
-ବର୍ତ୍ତମାନ ଅନାଥ ଅବସ୍ଥାରେ ଅଛି।
+**ଉପରେ ଲେଖା ହୋଇନଥିବା ଅନ୍ୟ ବିଷୟ** (ପରାମର୍ଶମୂଳକ, କମ୍ ଉପଯୋଗୀ ସଙ୍କେତ): `docs-lint` job (markdownlint + Vale, ସମଗ୍ର job ପାଇଁ `continue-on-error`) ଏବଂ ସ୍ୱତନ୍ତ୍ର scanner workflow `semgrep.yml` / `scorecard.yml`। ଉପରେ ବର୍ଣ୍ଣିତ activation ଆବଶ୍ୟକତା ଅନୁସାରେ CodeQL ର ଏବେ `Gate / CI` ଅଧୀନରେ ବାଧ୍ୟତାମୂଳକ producer ଓ admission job ଅଛି। `quality-baseline.json` ରେ `semgrepFindings: 0` ଅଛି, କିନ୍ତୁ ଏହା `ci.yml` ର ଅବରୋଧକ ratchet ସହ ସଂଯୁକ୍ତ ନୁହେଁ — ଏହି metric ବର୍ତ୍ତମାନ ସଂଯୋଗବିହୀନ।
 
 ### ମର୍ଜ / ଡିଡ୍ୟୁପ୍ (ଯାନ୍ତ୍ରିକ, କମ୍ ବିପଦ)
 

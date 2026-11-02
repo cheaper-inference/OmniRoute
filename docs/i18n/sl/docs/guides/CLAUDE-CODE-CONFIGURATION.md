@@ -42,6 +42,10 @@ usmerjen s spremenljivkami okolja (nima zastavice `--base-url`):
 
 > Spremenljivke okolja se preberejo **samo enkrat ob zagonu** — po njihovi spremembi znova zaženite Claude Code.
 
+Za poverilnico, ki se obnavlja namesto nespremenljivega niza, nastavite `apiKeyHelper` v `~/.claude/settings.json` na ukaz, ki trenutno poverilnico izpiše na stdout. Claude Code izhod privzeto shrani v predpomnilnik za pet minut (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` preglasi ta čas) ter vrednost pošlje v `Authorization: Bearer` in `x-api-key`. Skript mora izpisati samo poverilnico — dodaten uvodni napis povzroči odpoved pomožnega programa v v2.1.227+.
+
+Tako deluje Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` izpiše kratkotrajni dostopni žeton Entra, ki ga OmniRoute preveri namesto ključa API. Glejte [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` vse te spremenljivke nastavi namesto vas: osnovni URL in žeton
 razreši iz aktivnega konteksta (zato po `omniroute connect <vps>` ukaz
 `omniroute launch` preprosto deluje), preveri stanje strežnika in izvede `claude`.

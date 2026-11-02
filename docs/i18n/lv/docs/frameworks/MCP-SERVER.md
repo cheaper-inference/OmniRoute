@@ -307,12 +307,12 @@ piekļuves pilnvaru pārvaldības maršrutam, kas veic izmaiņas, saņem HTTP 40
 Šo rangu pārbauda `scopeSatisfies`. Tā neizmanto MCP tabulu, un MCP
 atbilstības pārbaudītājs neizmanto šo rangu.
 
-| Nosaukumtelpa              | Akreditācijas dati                                                 | Pārbaudītājs            | Sekmīga pārbaude ļauj                                                      |
-| :------------------------- | :----------------------------------------------------------------- | :---------------------- | :------------------------------------------------------------------------- |
-| API atslēgas pārvaldība    | `api_keys.scopes`                                                  | `hasManageScope`        | Pārvaldības REST darbības šai Bearer atslēgai                              |
-| API atslēgas papildtvērumi | tas pats masīvs, viena precīza virkne                              | tālāk norādītais palīgs | Tikai šo vienu iespēju                                                     |
-| MCP rīku tvērumi           | tas pats masīvs, citādi MCP `_meta`, citādi `OMNIROUTE_MCP_SCOPES` | `scopeMatches`          | Šī rīka izmantošanu, kad tvērumu kontrole ir ieslēgta                      |
-| Piekļuves pilnvara         | `oma_live_…`                                                       | `scopeSatisfies`        | Pārvaldības maršrutu, kura metodei un ceļam nepieciešams attiecīgais rangs |
+| Nosaukumtelpa              | Akreditācijas dati                                                                  | Pārbaudītājs            | Sekmīga pārbaude ļauj                                                      |
+| :------------------------- | :---------------------------------------------------------------------------------- | :---------------------- | :------------------------------------------------------------------------- |
+| API atslēgas pārvaldība    | `api_keys.scopes`                                                                   | `hasManageScope`        | Pārvaldības REST darbības šai Bearer atslēgai                              |
+| API atslēgas papildtvērumi | tas pats masīvs, viena precīza virkne                                               | tālāk norādītais palīgs | Tikai šo vienu iespēju                                                     |
+| MCP rīku tvērumi           | tas pats masīvs, citādi MCP `_meta` (tikai HTTP/SSE), citādi `OMNIROUTE_MCP_SCOPES` | `scopeMatches`          | Šī rīka izmantošanu, kad tvērumu kontrole ir ieslēgta                      |
+| Piekļuves pilnvara         | `oma_live_…`                                                                        | `scopeSatisfies`        | Pārvaldības maršrutu, kura metodei un ceļam nepieciešams attiecīgais rangs |
 
 Katru akreditācijas datu veidu var izveidot, kā aprakstīts sadaļā
 [Pārvaldības autentifikācija](../guides/MANAGEMENT-AUTH.md).
@@ -361,8 +361,7 @@ Tvērumu kontrole ir izslēgta, ja vien `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (nok
 ir `false`). Kamēr tā ir izslēgta, `evaluateToolScopes` atļauj izsaukumu un izlaiž
 katalogu. Kad tā ir ieslēgta, HTTP izmanto Bearer atslēgas `api_keys.scopes` kā
 `authInfo` (skatiet [HTTP tvērumu piesaiste katrai atslēgai](#per-key-http-scope-binding-7895)).
-Ja atslēgai neizdodas noteikt nevienu tvērumu, piešķirto tvērumu kopa secīgi izmanto MCP `_meta` un pēc tam
-`OMNIROUTE_MCP_SCOPES`.
+Ja atslēgai neizdodas noteikt nevienu tvērumu, piešķirto tvērumu kopa pāriet uz MCP `_meta` (to ņem vērā tikai HTTP/SSE izsaucējiem HTTP autentifikācijas kontekstā; stdio izsaucēja `_meta` tiek ignorēts, jo to kontrolē klients un tas nesatur katram izsaucējam atsevišķu identitāti), pēc tam uz `OMNIROUTE_MCP_SCOPES`.
 
 #### Piekļuves pilnvaru tvērumi
 
@@ -460,8 +459,7 @@ un nodod tos MCP SDK metodē `transport.handleRequest(req, { authInfo })`, lai
 `_meta` un `OMNIROUTE_MCP_SCOPES` vides mainīgā atkāpšanās mehānismu — šīs izmaiņas tikai aizpilda šo pirmo,
 augstākās prioritātes avotu, kas iepriekš HTTP gadījumā netika aizpildīts. Ja nevienu API atslēgu neizdodas noteikt
 (nav galvenes vai atslēga nav derīga), `authInfo` paliek `undefined`, un noteikšana nemainīgi pāriet uz
-esošo `meta`/vides mainīgo ķēdi. stdio nav katram izsaucējam atsevišķas identitātes (skatiet
-`mcpCallerIdentity.ts`), un tas netiek ietekmēts — tas turpina izmantot `_meta`/vides mainīgo atkāpšanās ķēdi.
+esošo `meta`/vides mainīgo ķēdi. stdio nav katram izsaucējam atsevišķas identitātes (skatiet `mcpCallerIdentity.ts`), un piesaiste katrai atslēgai to neietekmē — tas izlaiž `_meta` soli (`_meta` ņem vērā tikai HTTP autentifikācijas kontekstā, #15159) un nosaka tvērumus tikai no vides mainīgā `OMNIROUTE_MCP_SCOPES`.
 
 **Tvērumu piemērošana šauri tvērtiem HTTP/SSE izsaucējiem tiek piespiedu kārtā ieslēgta neatkarīgi no
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` noklusējuma vērtība `false` ir droša tikai

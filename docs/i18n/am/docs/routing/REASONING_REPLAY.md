@@ -161,6 +161,22 @@ cache-ው በ`src/app/api/cache/reasoning/route.ts` ስር ሁለት endpoints �
 - **Write-ም እንዲሁ የተገደበ ነው:** በ`chatCore.ts` ውስጥ ያሉት ሁለቱ call sites (non-streaming እና streaming) `cacheReasoningFromAssistantMessage()`ን የሚጠሩት `requiresReasoningReplay(provider, model)` `true` ሲሆን ብቻ ነው — ይህም read side-ው የሚፈትሸው ተመሳሳይ predicate ነው። የreplay providerን ፈጽሞ የማይጠቀሙ installs ለwrite፣ ለindex update እና reasoning ባለው በእያንዳንዱ ምላሽ ላይ ለሚኖረው try/catch ወጪ መክፈላቸውን ያቆማሉ።
 - **ጥብቅ ያልሆኑ አቅራቢዎች:** `requiresReasoningReplay` `false` ሲሆን እና የዒላማው format OpenAI ከሆነ፣ translator-ው ከወጪ መልዕክቶች ማንኛውንም `reasoning_content` field **ያስወግዳል** — OpenAI Chat Completions ይህን አይቀበልም።
 
+## የMuse ግልጽ ያልሆነ reasoning ባለቤትነት
+
+Muse (`muse-code`) ከጠሪው ጋር የተሳሰረ ግልጽ ያልሆነ reasoning (`encrypted_content`) ይመልሳል። በሌላ መለያ ወይም እንደገና በተሰጠ የመግቢያ ማረጋገጫ መድገሙ upstream ላይ ይወድቃል፣ ስለዚህ ተወላጅ የOAuth ጥያቄዎች በእያንዳንዱ ጥያቄ ማሽከርከር ፋንታ በsession ደረጃ ባለቤትነት ይጠቀማሉ (`src/sse/services/museSessionOwnership.ts`፣ በ`src/sse/handlers/chat.ts` የሚተገበር)። በግልጽ የተመረጡ የAPI-key ግንኙነቶችና API-key ብቻ ያላቸው ውቅሮች ያለዚህ የባለቤትነት ሁኔታ ነባር routing-አቸውን ይይዛሉ።
+
+- በእያንዳንዱ turn የተረጋጋ session ID ያቅርቡ፦ `x-omniroute-session-id`፣ `x-omniroute-session`፣ `x-session-id` ወይም `x-codex-session-id`፤ በምትኩ በbody ውስጥ `prompt_cache_key`፣ `session_id`፣ `conversation_id` ወይም `metadata.session_id` ይጠቀሙ (በዚህ የቅድሚያ ቅደም ተከተል)። ሁለት ወይም ከዚያ በላይ ተወላጅ የOAuth መለያዎች ንቁ ሲሆኑ የጎደሉ ወይም ባዶ ID-ዎች 400 ይመልሳሉ፤ አንድ የOAuth መለያ ብቻ ካለ ለመሽከርከር ሌላ መለያ ስለሌለ ጥያቄው pin ያልተደረገ routing ይይዛል። scope-ው የጠሪውን OmniRoute API-key ID ያካትታል።
+- አዲስ ገለልተኛ session-ዎች በAPI-key የግንኙነት ፖሊሲ ከተፈቀዱ ንቁ ተወላጅ OAuth መለያዎች መካከል፣ በግንኙነት ID ተደርድረው፣ round-robin ይጠቀማሉ። round-robin በግንኙነት cooldown ውስጥ ያሉ፣ የመጨረሻ ሁኔታ (`banned`, `expired`, `credits_exhausted`) ያላቸው ወይም ለተጠየቀው model የተቆለፉ መለያዎችን ያልፋል፤ የMuse upstream ውድቀቶች እንደሌሎች provider-ዎች cooldown እና breaker ሁኔታን ይመዘግባሉ። በግልጽ የተገደደ ግንኙነት ለአዲስ session round-robin-ን ያልፋል፣ ግን ባለቤቱ የተሳካ መልስ ከሰጠ በኋላ ሊተካው አይችልም።
+- ባለቤቱ የተሳካ መልስ እስኪሰጥ ድረስ፣ ባለቤቱ የማይገኝ የሆነ session ወደ ጤናማ መለያ ዳግም ይመደባል። ከመጀመሪያው የተሳካ መልስ በኋላ፣ session-ው ለ30 ቀናት ያለ እንቅስቃሴ እስኪቆይ ድረስ ከዚያ ባለቤት ጋር ይያያዛል (`MUSE_SESSION_IDLE_TTL_MS`)።
+- እያንዳንዱ ቀጣይ እርምጃና የtool ውጤት turn ከsession ባለቤት ጋር ይቆያል፤ ግንኙነት፣ የመለያ ማንነትና የinference ማረጋገጫ ትውልድ ከupstream ሙከራዎች በፊት፣ የማረጋገጫ ማደስ ድጋሚ ሙከራዎችን ጨምሮ፣ እንደገና ይመረመራሉ። የResponses call ID-ዎች/item ማጣቀሻዎችና የChat Completions tool-call ID-ዎች ለዚያ session እና ትውልድ ቀድሞ ተመዝግበው መሆን አለባቸው።
+- በ`muse_session_ownership` namespace ያሉ የSQLite `key_value` መዝገቦች (`src/lib/db/museSessionOwnership.ts`) ባለቤትነትንና የማሽከርከር ጠቋሚን በዳግም ማስጀመሮች መካከል ያቆያሉ። እያንዳንዱ claim እና የተሰጠ መልስ የsession እንቅስቃሴ ማህተምን ያድሳል፤ ከ`MUSE_SESSION_IDLE_TTL_MS` በላይ ያለ እንቅስቃሴ የቆየ session ይጸዳል (የባለቤት pin፣ መልስ የተሰጠበት flag እና የተመዘገቡ ግልጽ ያልሆኑ ይዘት/ማጣቀሻ hash-ዎች)፣ በየ10 ደቂቃው ቢበዛ አንድ ጊዜና በተገደቡ ቡድኖች። በዚህም በኋላ ታሪኩን መድገም ባለቤቱ ያልታወቀ በመሆኑ ለደህንነት ይከለከላል። መዝገቦቹ የግንኙነት ID-ዎችንና የመለያ ማንነት፣ የማረጋገጫዎች፣ ግልጽ ያልሆነ ይዘትና ቀጣይ ማጣቀሻዎች hash-ዎችን ይይዛሉ፣ ሚስጥሮችን ወይም የውይይት ታሪክን አይደለም። ደንበኞች ሙሉ ታሪካቸውንና ግልጽ ያልሆነ reasoning-አቸውን ማቆየትና መላክ አለባቸው።
+- ያልታወቀ ወይም የሌላ ግልጽ ያልሆነ reasoning፣ የጎደለ ባለቤት፣ የማይገኝ የባለቤት መለያ ወይም የተመዘገበ ታሪክ ሳለ የትውልድ ለውጥ በግልጽ 4xx/503 ለደህንነት ይከለከላል፤ በዝምታ ወደ ሌላ መለያ መሻገር ወይም reasoning መጣል ፈጽሞ አይደረግም።
+- ለተመሳሳይ መለያ ዳግም የተሰጠ ቁልፍ የሚቀበለው session-ው ሊደገም የሚችል ታሪክ ካልመዘገበ ብቻ ነው፤ መዝገብ ያላቸው session-ዎች እንደ አዲስ እስኪጀመሩ ድረስ ለደህንነት መከልከላቸው ይቀጥላል።
+- ባዶ የupstream መልስ (`upstream_empty_response` / `empty_response`፣ ለጠሪው ምንም አልተላከም) በተመሳሳይ ባለቤት ቢበዛ ሁለት ጊዜ ዳግም ይሞከራል፣ ከ0.5 s በኋላ ከዚያም ከ1.5 s በኋላ (`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`)። ሁሉም ሙከራዎች ባዶ ከሆኑ፣ መጀመሪያው 502 ያለ cooldown ወይም breaker ምልክት ይመለሳል፣ ስለዚህ ያልተረጋጋ መልስ ባለቤቱን ፈጽሞ አይቆልፍም።
+- ሁሉም የ`muse-code` ጥያቄዎች የsemantic-cache ንባብና ጽሁፍን፣ የstreaming ጽሁፎችንም ጨምሮ፣ ያልፋሉ፣ በcache ያለ ግልጽ ያልሆነ ውጤት ሌላ session ባለቤት እንዳያገኝ።
+
+የregression ጥበቃዎች፦ `tests/unit/muse-session-ownership.test.ts`፣ `tests/unit/muse-session-ownership-retention.test.ts`፣ `tests/unit/muse-empty-response-retry.test.ts` እና `tests/unit/chatcore-semantic-cache.test.ts`።
+
 ## በተጨማሪ ይመልከቱ
 
 - [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — የወረዳ መቋረጫዎች፣ የማቀዝቀዣ ጊዜያት፣ የሞዴል መቆለፊያዎች

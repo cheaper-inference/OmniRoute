@@ -163,7 +163,7 @@ OmniRoute espone 6 skill A2A collegate in `src/lib/a2a/taskExecution.ts::A2A_SKI
 | Rapporto sullo stato        | `health-report`      | Aggrega lo stato di circuit breaker, cooldown e blocco per ciascun provider                                                                                                  | health, resilience         | "Mostra lo stato di tutti i provider"                |
 | Elenco delle funzionalità   | `list-capabilities`  | Restituisce il catalogo completo di 45 Agent Skills (23 API + 21 CLI + 1 configurazione) come tabella markdown con URL SKILL.md non elaborati per l'inserimento del contesto | catalog, discovery, skills | "Elenca tutte le funzionalità di OmniRoute"          |
 
-> La Agent Card deve essere mantenuta allineata al catalogo attivo di 377 provider; il numero di provider e i metadati relativi all'accesso gratuito/senza autenticazione provengono dal registro di runtime.
+> La Agent Card deve essere mantenuta allineata al catalogo attivo di 380 provider; il numero di provider e i metadati relativi all'accesso gratuito/senza autenticazione provengono dal registro di runtime.
 
 ### Dettagli della skill `list-capabilities`
 
@@ -215,7 +215,7 @@ L'endpoint JSON-RPC `/a2a` è il punto di ingresso A2A canonico. Gli endpoint RE
    };
    ```
 
-3. **Esponi nell'Agent Card:** in `src/app/.well-known/agent.json/route.ts`, aggiungi all'array `skills`:
+3. **Esponila nella Agent Card:** in `src/lib/a2a/agentCardMetadata.ts` (condiviso da `/.well-known/agent.json` e `/.well-known/agent-card.json`), aggiungila all'array `skills`:
 
    ```json
    {

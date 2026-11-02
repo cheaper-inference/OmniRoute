@@ -156,9 +156,10 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 - **`publicPolicy`** (`policies/public.ts`) — תמיד מחזירה `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — מחלצת Bearer ומאמתת אותו באמצעות `validateApiKey()`. עוברת לגישה אנונימית רק כאשר דגל היכולת האפקטיבי `REQUIRE_API_KEY` מושבת. הדגל האפקטיבי נקבע באמצעות `isRequireApiKeyEnabled()` (`עקיפת דגל יכולת במסד הנתונים > process.env.REQUIRE_API_KEY > ברירת מחדל`), כך שדגלי היכולת בלוח הבקרה ומשתני הסביבה שולטים באופן עקבי ב-`/api/v1/*`, ב-`/api/v1beta/*` ובכינויים; כשל בפותר מוביל לדחייה. מאפשרת בקשות עם הפעלת לוח בקרה בנתיבי API של לקוח (כולל `/api/v1/models`, המשמש את קטלוג המודלים של לוח הבקרה).
+  כאשר Entra ID SSO מופעל, Bearer שהמבנה שלו תואם אסימון Entra (שלושה מקטעי base64url, אלגוריתם `RS*`, ‏`kid`) מטופל בענף SSO **לפני** `validateApiKey()`, וההחלטה שלו סופית. הוא לעולם אינו ממשיך למסלול מפתח API או לענף שמוריד את האימות לגישה אנונימית, ולכן תקלה אצל ספק הזהות אינה יכולה לפתוח גישה חופשית. מפתחות API קבועים אינם מושפעים. ראו [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — מקבלת הפעלת לוח בקרה, בקשות פנימיות לסנכרון מודלים (המותאמות מול `/api/providers/[name]/(sync-models|models)`), או מדלגת לחלוטין אם `isAuthRequired()` מחזירה false. מחזירה 403 (`AUTH_001`) כאשר קיים אסימון Bearer אך הוא אינו תקין, ו-401 בכל מקרה אחר. בנוסף, היא אוכפת את רמות ההגנה על נתיבים (LOCAL_ONLY / ALWAYS_PROTECTED) לפני כל ענף אימות — ראו [רמות הגנה על נתיבים](../security/ROUTE_GUARD_TIERS.md). ניתן לגשת לנתיבי LOCAL_ONLY תחת `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (כיום: `/api/mcp/`) מכתובת שאינה loopback כאשר מפתח ה-Bearer כולל את תחום ההרשאה `manage`; כל שאר נתיבי LOCAL_ONLY נותרים מוגבלים בקפדנות ל-loopback, ללא תלות בתחום ההרשאה.
 
-מדיניות שהצליחה מחזירה `AuthSubject` עם `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. מטפלים בהמשך השרשרת יכולים לקרוא אותו באמצעות `assertAuth(request, "CLIENT_API")` מתוך `src/server/authz/assertAuth.ts`, במקום להריץ מחדש את לוגיקת האימות.
+מדיניות שהצליחה מחזירה `AuthSubject` עם `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. מטפלים בהמשך השרשרת יכולים לקרוא אותו באמצעות `assertAuth(request, "CLIENT_API")` מתוך `src/server/authz/assertAuth.ts`, במקום להריץ מחדש את לוגיקת האימות.
 
 ## רשימת נתיבים ציבוריים
 
@@ -316,8 +317,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 עבור בקשות מאומתות, כותרות הבקשה המועברות לשירות שבמעלה הזרם (בצד המטפל) כוללות גם:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<4 הספרות האחרונות> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<4 הספרות האחרונות> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (אופציונלי)
 x-omniroute-auth-scopes:    רשימה מופרדת בפסיקים
 ```

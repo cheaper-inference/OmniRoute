@@ -10,7 +10,7 @@ OmniRoute మూడు ప్రత్యేక డ్యాష్బోర్�
 
 | పేజీ           | రూట్                    | భావన                                                                                  | సంఖ్య               |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------- | ------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | మీరు OmniRoute వైపు మళ్లించే కోడింగ్ సాధనాలు (క్లయింట్ → CLI → OmniRoute → ప్రొవైడర్) | 27                  |
+| **CLI Code's** | `/dashboard/cli-code`   | మీరు OmniRoute వైపు మళ్లించే కోడింగ్ సాధనాలు (క్లయింట్ → CLI → OmniRoute → ప్రొవైడర్) | 28                  |
 | **CLI Agents** | `/dashboard/cli-agents` | మీరు OmniRoute వైపు మళ్లించే స్వయంప్రతిపత్తి గల ఏజెంట్లు (అదే ప్రవాహం, విస్తృత పరిధి) | 11                  |
 | **ACP Agents** | `/dashboard/acp-agents` | stdio/ACP ద్వారా OmniRoute బ్యాకెండ్గా ప్రారంభించే CLIలు (రివర్స్ ప్రవాహం)            | రిజిస్ట్రీని చూడండి |
 
@@ -149,7 +149,7 @@ opencode, cline, kilo, continue), బదులుగా హోస్ట్లో
 
 ---
 
-## 1. CLI Code సాధనాల కేటలాగ్ (27 సాధనాలు)
+## 1. CLI Code సాధనాల కేటలాగ్ (28 సాధనాలు)
 
 `/dashboard/cli-code`లో కనిపించే అన్ని సాధనాలు. `baseUrlSupport: none` ఉన్నవి అనుకూల base URLకు బదులుగా MITM లేదా మాన్యువల్ గైడ్ ద్వారా అనుసంధానించబడ్డాయి:
 
@@ -176,6 +176,7 @@ opencode, cline, kilo, continue), బదులుగా హోస్ట్లో
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -272,7 +273,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, పాత విధానం)                           |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ప్రాథమికం + పాత `~/.deepseek` సమకాలీకరణ) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                |
-| `POST /api/cli-tools/pi-settings`           | Pi కోడింగ్ ఏజెంట్                                                    |
+| `POST /api/cli-tools/pi-settings`           | Pi కోడింగ్ ఏజెంట్ (`~/.pi/agent/models.json`, `providers.omniroute`) |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + ప్రత్యేక `.env` కీ)             |
 
@@ -378,7 +379,7 @@ pip install aider-chat
 cargo install smelt  # Rust-ఆధారితం
 
 # Pi కోడింగ్ ఏజెంట్
-# ఇన్స్టాలేషన్ కోసం https://github.com/zechnerj/pi-coding-agent చూడండి
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # ఇన్స్టాలేషన్ కోసం https://github.com/1jehuang/jcode చూడండి
@@ -491,6 +492,38 @@ EOF
 
 > థింకింగ్ వేరియంట్లను పంపడానికి `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > ఉపయోగించండి.
+
+---
+
+#### Pi Coding Agent
+
+అధికారిక Pi Coding Agent package ను `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` తో install చేయండి. Pi custom provider లను `~/.pi/agent/models.json` నుంచి చదువుతుంది; మొత్తం agent directory మార్చడానికి `PI_CODING_AGENT_DIR` ను absolute path కు (లేదా `~` తో ప్రారంభమయ్యే path కు) సెట్ చేయండి. Dashboard ఆ override ను అనుసరిస్తుంది. Pi custom endpoint ల నుంచి model లను కనుగొనదు; అందువల్ల Pi యొక్క `openai-completions` API, OmniRoute యొక్క OpenAI-compatible `/v1` endpoint ఉపయోగించి ఎంచుకున్న model ను OmniRoute `models[]` లో రాస్తుంది.
+
+**CLI Tools → Pi** లో endpoint, API key, model ఎంచుకుని provider preview ను పరిశీలించి, తరువాత వర్తింపజేయండి. Preview ఒక provider fragment: Pi ని చేతితో configure చేసేటప్పుడు ఇతర provider లు, సెట్టింగ్‌లు అలాగే ఉండేందుకు `providers.omniroute` ను మీ ప్రస్తుత `models.json` లో merge చేయండి.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+మీరు `/model` తెరిచినప్పుడు Pi `models.json` ను మళ్లీ load చేస్తుంది. మీరు ఎంచుకున్న provider ID, model ID తో configure చేసిన route ను పరీక్షించండి:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+సూచనలు: [Pi model లు, custom provider లు](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi environment variable లు](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi installation సూచనలు](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

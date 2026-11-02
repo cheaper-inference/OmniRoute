@@ -35,7 +35,8 @@ CLI 會拒絕簽出 SHA 與事件 SHA 不相符的情況。工作流程測試會
 綁定至判定作業的 `needs` 清單，因此新增或移除的執行通道無法悄然消失。
 收據涵蓋的是其本身的工作流程，而非發布、部署或現有建議性掃描器的內部機制。將適用的檢查設為分支規則中的必要條件，是另一項獨立的管理變更；僅定義其工作並不會保護分支。
 
-`API Route Typecheck` 是一項獨立的工作流程檢查，不包含在兩個彙總判定或本機完整觀察器的靜態設定檔中。請針對確切的候選項目個別檢查其結果。`.github/workflows/api-route-typecheck.yml` 會在以 `main` 或 `release/**` 為目標的 PR、推送至任一分支系列，以及手動分派時執行。它沒有路徑篩選器。重新設定 PR 基底分支會要求執行新的檢查；本文或標題的編輯會使用僅供觀察的名稱 `Admission not requested / API Route Typecheck`，且無法取代准入檢查。此工作流程未宣告合併群組觸發條件。任何要求此檢查的合併佇列推出作業，都必須先確保它會針對該事件執行。
+`API Route Typecheck` 是獨立的工作流程檢查，不屬於兩個彙總判定，也不在本機完整觀察器的靜態設定範圍內。請針對確切的候選版本單獨檢查結果。`.github/workflows/api-route-typecheck.yml` 會在目標為 `main` 或 `release/**` 的 PR、推送至這兩類分支、手動觸發，以及類型為 `checks_requested` 的 `merge_group` 事件上執行。它沒有路徑篩選器。合併群組簽出 `merge_group.head_sha`；其他事件簽出 `github.sha`。所有事件都使用相同的 API 診斷關卡和關卡單元測試。
+PR 變更目標基準分支會要求新的檢查；編輯內文或標題時使用僅供觀察的名稱 `Admission not requested / API Route Typecheck`，不能取代准入檢查。
 
 ### 驗收歸納器中保留的證據
 
@@ -51,6 +52,14 @@ CLI 要求使用 `--evidence-root` 來驗證保留的證據。檔案會解析為
 都會阻止驗證。遺失檔案不等同於空白但成功的日誌。現有的
 SHA/執行/嘗試次數檢查仍彼此獨立：位元組相符也無法挽救過期的收據。
 檔案完整性並不能證明執行真實性或成品推進。
+
+### DAST 使用已驗證的 CI 建置
+
+必要的 CI 作業 `dast-smoke` 在 `build` 之後呼叫 `.github/workflows/dast-smoke.yml`。它遵循與建置相同的程式碼變更及草稿篩選規則，包括受支援的 fork PR、以 release 為目標的 PR 和合併群組。DAST 作業缺漏、失敗、遭取消或非預期地略過，都會阻擋 `Gate / CI`。這個可重複使用的工作流程沒有獨立的 PR 或手動觸發入口；手動驗證透過 CI 的手動觸發入口執行，讓建置與使用建置產物的作業留在同一次執行中。
+
+`scripts/ci/next-build-provenance.mjs` 將完整的 Next 產物與其 tar 摘要、儲存庫/事件/執行、產生作業的嘗試次數、head/base/checkout/tree、工作流程身分、鎖定檔、確切的 Node 版本/ABI、平台及打包器一併封存。DAST 從 `needs.build.outputs` 選取不可變的產物 ID，要求驗證下載摘要，並在透過 `scripts/ci/unpack-ci-build.py` 擷取允許清單中的兩個成員之前，獨立計算 ZIP 的雜湊並與產生端摘要比對。在擷取 Next 檔案樹之前，清單與 tar 封存檔也必須符合獨立的產生端輸出。它絕不搜尋分支上最近一次成功的建置。部分重跑可重用同一次產生作業嘗試，但前提是其 ID 與所有輸入仍然相符；收據會記錄兩次嘗試。
+
+使用產物的作業仍在託管的 Linux 執行器上執行，僅有儲存庫唯讀權限，且不含儲存庫機密。它安裝產生端的確切 Node 版本，再以 `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` 組裝 CLI。`scripts/build/standaloneInput.mjs` 會在任何後備建置開始前，拒絕缺少獨立伺服器的輸入；一般本機 CLI 建置保留既有的後備行為。伺服器就緒檢查、Schemathesis 和 promptfoo 都必須在維持不變的 25 分鐘作業時限內成功。來源收據證明的是輸入身分與位元組內容，並不證明 DAST 掃描成功。產物到期、執行器中斷或掃描器失敗，仍屬於不完整或失敗的證據；不能透過建議性的包裝層將其變成 PASS。
 
 ### UI 執行容量
 
@@ -198,7 +207,14 @@ CI 的單一真實來源為 `.github/workflows/ci.yml`。
 | `check:dead-code`            | 未使用的匯出／檔案棘輪檢查 (knip) 相較於基準未退步                                                                              | 是                   |
 | `check:compression-budget`   | 壓縮基準測試預算 — 各引擎的權杖節省量下限不得退步                                                                               | 是                   |
 | `check:type-coverage`        | 類型化百分比棘輪檢查 (`type-coverage`) 未退步；大致涵蓋 `typecheck:noimplicit:core`                                             | 是                   |
-| `check:codeql-ratchet`       | 未結案的 CodeQL 警示數量未增加（透過 `gh api` 讀取；無權杖時妥善略過）— 更新頻率與手動觸發方式：請參閱下方的「CodeQL 棘輪檢查」 | 是                   |
+
+### 作業：`codeql-scan` 和 `codeql-admission`
+
+`codeql-scan` 產生所有已設定的分析類別。該作業成功之後，`codeql-admission` 驗證其確切的上傳及候選版本警示棘輪。兩者都是 `Gate / CI` 的必要相依項目，包括僅修改文件的候選版本。管理啟用及金絲雀驗證的要求見下方「CodeQL 棘輪」。
+
+| 指令碼                 | 驗證內容                                                                                                                               | 阻擋 |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| `check:codeql-ratchet` | 在評估警示棘輪之前，候選版本的 ref/SHA 和所有已設定的分析類別必須是目前有效的；缺少證據即阻擋。全域清單仍然獨立——見下方「CodeQL 棘輪」 | 是   |
 
 ### 工作：`quality-extended`
 
@@ -449,30 +465,23 @@ git add quality-baseline.json
 指標卻未更新基準線，`--require-tighten` 將會偵測到此情況（階段 6A.5，
 尚待實作）。
 
-### CodeQL 棘輪：重新整理頻率與手動觸發
+### CodeQL 棘輪：候選版本准入與儲存庫清單
 
-`check:codeql-ratchet` 讀取的是**依排程重新整理的儲存庫狀態，而非每個 PR 的狀態。**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` 會回報
-`state: configured`、`schedule: weekly`：這是 GitHub 的預設設定掃描，而非每次推送時
-執行的分析。其後果是：當修正警示的 PR 合併後，棘輪仍會繼續讀取
-舊的較高數量，直到下一次排程掃描執行為止——因此，在掃描結果更新之前，
-每個開啟中的 PR 都會被回報為退步，包括修正該問題之 PR 自身的後續變更。
+CI 透過明確的相依鏈負責候選版本的 CodeQL 准入：`codeql-scan` 呼叫 `codeql.yml` 中的四語言矩陣，接著 `codeql-admission` 執行 `node scripts/check/check-codeql-ratchet.mjs --candidate`。`Gate / CI` 要求兩者的結果。Quality 保留自身的數值檢查，但不會在產生作業完成前查詢掃描器；單獨的 `Gate / Quality` 不構成完整的候選版本准入。僅修改文件的候選版本仍然必須執行 CodeQL。
 
-**手動重新整理**：`gh workflow run codeql.yml --ref release/vX.Y.Z` 會重新執行
-分析，並在幾分鐘內重新發布警示。請先閱讀 `.github/workflows/codeql.yml`
-——其標頭說明它僅支援 `workflow_dispatch`，**因為它會與
-GitHub 的「預設設定」衝突**（`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`）。若要還原 `push`/`pull_request`/
-`schedule` 觸發條件，**擁有者必須先執行一項操作**：Settings → Code security →
-CodeQL: Default → Advanced。在完成該切換之前，請勿新增 `schedule:` 觸發條件——它
-只會產生失敗的執行結果。
+`config/quality/codeql-admission-policy.json` 中的政策選擇 Actions、C/C++、JavaScript/TypeScript 和 Python，使用 default 查詢套件、remote 威脅模型及 none 建置模式。產生端預檢會拒絕待啟用記錄，以及明確目標清單之外的分支。初始目標是 main 和 release/v3.8.53；下一條 release 分支需要經過審查的納入程序。CI 既有、範圍較廣的 release PR 觸發規則維持不變，但尚未納入的目標會在擷取前回報 HOLD，而不會取得未經量測的 PASS。
 
-**在數量下降後收緊基準線**——`node scripts/check/check-codeql-ratchet.mjs
---update` 會將新測得的數量寫入 `quality-baseline.json` →
-`metrics.codeqlAlerts.value`，如此一來，棘輪便不會悄悄允許數量回升至
-舊的上限。實際範例（2026-09-02/03）：PR #12502 修正了 7 個真實警示
-（測得的開啟中警示由 13 降至 6）；PR #12530 將凍結的基準線從 11 收緊至 6，使其相符；
-接著，剩餘的 6 個警示均附上個別理由予以駁回，使開啟中的警示數降至 0。
+每個矩陣作業都記錄實際的 SARIF 上傳 ID、語言、類別、執行及嘗試次數、呼叫端工作流程身分、事件的 ref/head/base/merge SHA，以及政策雜湊。相依作業只下載本次執行的收據並驗證產物摘要。它要求全部四個類別、成功的產生作業，以及每個確切上傳皆已完成處理。它使用 API 的 sarif_id 篩選器，而不是分支上找到的最新分析。部分重跑可重用同一次執行、同一候選版本中較早嘗試的成功類別，並保留產生嘗試記錄；目前的產生作業失敗時，不得重用先前的綠色證據。
+
+CodeQL action 會等待處理完成，但其固定版本的實作可能在狀態讀取失敗或等待次數耗盡後發出警告並繼續。因此，准入步驟會再次驗證處理狀態。類別缺漏、處理尚未完成、作業失敗或取消、身分過時、分頁不完整或 API 無法使用，都會產生 HOLD 並以 2 結束。不再為獨立掃描器工作流程設定固定等待時間。未掃描的 PR 不能因為警示查詢回傳 0 就通過。量測數量超過 `metrics.codeqlAlerts.value` 時以 1 結束；不會提高基線來吸收其他分支的警示。[上傳狀態與分析查詢](https://docs.github.com/en/rest/code-scanning/code-scanning)。
+
+收據記錄上傳與分析 ID、類別、工具版本、ref/SHA、基線及警示數量。SARIF 身分/結果數量、最低規則數量及確切的警示實例仍是必要項目。接受之前會重新檢查 PR/分析身分。這些檢查證明的是已設定類別的涵蓋範圍，而不是每個已擷取原始檔的清單。C/C++ 的免建置擷取不包含專案建置期間產生的程式碼。原始檔排除項目仍須審查，貢獻者歸因仍須具有可比較、綁定確切基準版本的證據。
+
+`codeql-maintenance.yml` 提供目前 release 分支的推送掃描及每週排程，不重複 PR/main 的產生作業。`nightly-codeql-inventory.yml` 獨立維護整個儲存庫的基線，使用 `--strict-measurement`，並在無法量測時失敗。本機舊版收集器的寬容略過不構成候選版本准入。只有確認全域數量降低後，才能透過明確的 `--update` 收緊基線。
+
+設定了 Default Setup 時，不得發布 Advanced 工作流程：GitHub 會拒絕這種組合。在經過審查的管理切換取得回讀確認前，版本化政策仍維持待處理狀態。發布前，操作員固定儲存庫、head/base/tree、政策/修補程式/回復雜湊及觀察到的設定狀態；`node scripts/quality/codeql-producer.mjs verify-admin-readback` 檢查提供的預期與實際 JSON 記錄。這是技術性保護，不是操作員核准，也不能取代取得最新回讀結果。PR 權杖絕不要求 Administration 存取權。推出及任何掃描器變更，都需要這份獨立回讀證據，以及真實 PR、fork 和合併群組的相容性證據。
+
+Fork 使用託管執行器，簽出時不保留憑證，產生作業不安裝或建置專案，也不繼承儲存庫機密。GitHub 支援在 pull_request 事件中，使用權限受限的 fork 權杖上傳 SARIF；首次貢獻的執行核准仍由 GitHub 政策決定。絕不可使用 pull_request_target 執行不受信任的程式碼。在認定遷移完成之前，必須在受控金絲雀驗證中確認實際權杖權限、analysis_key 及所有類別環境。[Fork 上傳規則](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible)、[互相衝突的設定模式](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows)。
 
 **是否駁回由操作者決定（硬性規則 #14）**——絕不可在未於駁回註解中
 記錄技術理由的情況下駁回 CodeQL 警示：若是上游通訊協定要求，使用 `won't fix`；
@@ -616,11 +625,7 @@ JSON，十秒即可完成，也是解除紅燈 PR 阻塞最快的方法。
 變更；切換／移除則是保留給操作者決定的政策事項。** 以下任何項目
 目前皆尚未套用。
 
-**上方亦未記載**（建議性、低訊號）：`docs-lint` 工作
-（markdownlint + Vale，整個工作使用 `continue-on-error`），以及獨立掃描器工作流程
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`。`semgrepFindings: 0` 位於
-`quality-baseline.json` 中，但未連接至 `ci.yml` 內具阻擋作用的棘輪機制——此指標
-目前處於孤立狀態。
+**上文同樣未記載的項目**（建議性、訊號較弱）：`docs-lint` 作業（markdownlint + Vale，整個作業設定 `continue-on-error`）及獨立掃描器工作流程 `semgrep.yml` / `scorecard.yml`。CodeQL 現在於 `Gate / CI` 下具有必要的產生與准入作業，並受上述啟用要求約束。`quality-baseline.json` 中有 `semgrepFindings: 0`，但 `ci.yml` 尚未將其接入阻擋性棘輪——這項指標目前沒有對應的執行檢查。
 
 ### 合併／去重（機械式、風險較低）
 

@@ -29,6 +29,7 @@
 - [የWebSocket ዥረት](#websocket-streaming)
 - [ኮታዎች እና የችግር ሪፖርት ማድረግ](#quotas--issues-reporting)
 - [የትርጉም መሸጎጫ](#semantic-cache)
+- [የCLIProxyAPI አስተዳደር ተኳኋኝነት](#cliproxyapi-management-compatibility)
 - [ዳሽቦርድ እና አስተዳደር](#dashboard--management)
 - [የጥምረት አስተዳደር](#combo-management)
 - [Webhooks](#webhooks)
@@ -990,6 +991,18 @@ CLIው `base_url + /responses`ን ወደ WebSocket ያሻሽላል፣ እና Omn
 
 **ማረጋገጫ፦** Bearer API ቁልፍ (`isAuthenticated`)።
 
+### የquota session መልሶ ማግኛ (በምርጫ የሚነቃ)
+
+ያለ streaming የሆነ `POST /v1/chat/completions` ወይም `POST /v1/responses` በመጨረሻ የquota ስህተት ከወደቀ (`402`/`429`/`503` ሲሆን body-ው quota ወይም credit አልቋል ሲል)፣ ስህተቱን ከመመለስ ይልቅ ሊቆይና በኋላ ዳግም ሊላክ ይችላል። ጠሪው በእያንዳንዱ ጥያቄ በሶስት header-ዎች ይህን ይመርጣል፦
+
+| Header                       | እሴት                                    |
+| ---------------------------- | -------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                 |
+| `x-omniroute-session`        | የsession id፣ `[A-Za-z0-9._:-]{1,128}`  |
+| `x-omniroute-recovery-turn`  | በsession ውስጥ ልዩ የሆነ turn id (ተመሳሳይ ህግ) |
+
+tools፣ የtool ታሪክ ወይም `previous_response_id` የሌላቸው፣ እንዲሁም `x-omniroute-connection` pin የሌላቸው `stream: false` turn-ዎች ብቻ ብቁ ናቸው፣ `STORAGE_ENCRYPTION_KEY` መዘጋጀትም አለበት (ጥያቄው እስከ24 ሰዓት ተመስጥሮ ይቀመጣል)። መልሱ `202` እና `recovery.poll` ይሆናል፤ `GET /v1/quota-recoveries/{id}` በየጊዜው ይጠይቁ (`202` ሲጠብቅ፣ `200` ከተመለሰው body ጋር ሲጠናቀቅ)፣ ወይም በ`DELETE` ይሰርዙ። ቲኬቶች የሚታዩት ለፈጠራቸው API key ብቻ ነው። ውጤቱ ያልተረጋገጠ replay ሁለት ጊዜ ከመላክ ይልቅ በ`needs_confirmation` ያበቃል። ምንጭ፦ `src/lib/quota/quotaSessionRecovery.ts`።
+
 ---
 
 ## የራስ-አገልግሎት አጠቃቀም (`/api/usage/om-usage`)
@@ -1157,6 +1170,28 @@ DELETE /api/cache/stats
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## የCLIProxyAPI አስተዳደር ተኳኋኝነት
+
+OmniRoute የClaude እና Codex የደንበኝነት ገደቦችን ለማንበብ የአጠቃቀም dashboard-ዎች የሚጠሯቸውን ሶስት የ[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) አስተዳደር endpoint-ዎች ይመልሳል (ለምሳሌ የT3 Code `cliproxy` የአጠቃቀም ገደብ ምንጭ)። የደንበኛውን base URL ወደ OmniRoute ያመልክቱ፣ `manage` scope ያለውን API key ደግሞ እንደ አስተዳደር ቁልፍ ይጠቀሙ። መንገዶቹ በ`/v0/management/*` እና `/api/v0/management/*` ይገኛሉ።
+
+| ዘዴ   | መንገድ                         | መግለጫ                                                                                                                    |
+| ---- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v0/management/auth-files`  | የClaude እና Codex OAuth ግንኙነቶች በ`{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` ቅርጽ። token-ዎች የሉም |
+| POST | `/v0/management/api-call`    | body `{ auth_index, method, url, header?, data? }`። በፈቃድ ዝርዝሩ ያለ ጥያቄን በመለያው token ይልካል፣ `{ status_code, body }` ይመልሳል   |
+| POST | `/v0/management/reset-quota` | body `{ auth_index }`። የአንድ መለያ የግንኙነት cooldown፣ የmodel lockout እና የCodex በscope የተለዩ cooldown-ዎችን ያጸዳል                 |
+
+- `auth_index` የOmniRoute ግንኙነት id ነው። `provider` `claude` ወይም `codex` ነው (የOAuth ግንኙነቶች ብቻ፤ የ`anthropic` API-key provider አይዘረዘርም)። ለCodex፣ `id_token.chatgpt_account_id` የተቀመጠው workspace id ሲሆን `plan_type` የተቀመጠው እቅድ ነው።
+- `api-call` አጠቃላይ proxy አይደለም። የClaude `GET
+https://api.anthropic.com/api/oauth/usage` እና የCodex `GET
+https://chatgpt.com/backend-api/wham/usage`፣ `GET .../wham/rate-limit-reset-credits` እና `POST .../wham/rate-limit-reset-credits/consume` ብቻ ይቀበላል፣ እያንዳንዱም ለሚዛመደው provider መለያ ብቻ ነው። ሌላ ማንኛውም ጥያቄ upstream-ን ሳያገናኝ `403` ይመልሳል። የጠሪው `Authorization` header (የ`$TOKEN$` መተኪያን ጨምሮ) ችላ ይባላል፤ OmniRoute የግንኙነቱን access token ያስገባል፣ ሊያበቃ ሲቃረብ አስቀድሞ ያድሰዋል፣ በፈቃድ ዝርዝር ያሉ header-ዎችን ብቻ ያስተላልፋል (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)። `Chatgpt-Account-Id` ከጎደለ ነባሪው የተቀመጠው workspace id ነው። የመጀመሪያው upstream መልስ `401` ከሆነ አንድ ጊዜ ያድሳል፣ access token ከተለወጠ ብቻ ዳግም ይሞክራል። እያንዳንዱ upstream ሙከራ ከ15 ሰከንድ በኋላ ጊዜው ያበቃል፣ የግንኙነቱን proxy ይጠቀማል።
+- `reset-quota` የመጨረሻ ሁኔታዎችን (banned, expired, credits_exhausted) አይቀይርም። ያልታወቀ `auth_index` `404` ይመልሳል።
+
+**ማረጋገጫ፦** የdashboard session ወይም `manage` scope ያለው API key ያስፈልጋል፣ መግባት ቢሰናከልም እንኳ (መንገዶቹ በ`ALWAYS_PROTECTED_API_PATHS` ውስጥ ናቸው)። inference ብቻ የሚፈቅዱ ቁልፎች `403` ያገኛሉ። ምንጭ፦ `src/lib/cliproxyCompat/managementApi.ts`።
 
 ---
 

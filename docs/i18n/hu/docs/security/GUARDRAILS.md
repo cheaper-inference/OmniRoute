@@ -637,8 +637,9 @@ feladata, és mindkettő alapértelmezetten ki van kapcsolva.
   `src/shared/constants/piiTypes.ts` fájlban találhatók (`PII_BUILTIN_TYPES`). Ha nincs
   beállítva, az minden típust jelent (a beállítás megjelenése előtti viselkedés). A
   kéréskezelő motor `ssn_us` mintája az `ssn` típusra képeződik le. A sablonok
-  (Minimal, Standard, Financial, Brazilian, USA, Full) csak a felhasználói felület
+  (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) csak a felhasználói felület
   jelölőnégyzeteit töltik ki.
+- **GDPR- és POPIA-azonosítók** — tizenkét beépített azonosító az EU és Dél-Afrika személyes azonosítóihoz (az alábbi táblázatban). Reguláris kifejezéseik, validátoraik és joghatósági címkéik egyetlen táblázatban, a `src/shared/utils/piiPatterns.ts` fájlban találhatók, amelyet a választisztító (`src/lib/piiSanitizer.ts`) és a kérésmaszkoló (`src/shared/utils/inputSanitizer.ts`) egyaránt használ. Találat csak akkor kerül kitakarásra, ha a validátora elfogadja; egy puszta számsor soha nem elég. Az az üzemeltető, aki ezen azonosítók megjelenése előtt szűkített választást mentett, megtartja a korábbi működést, amíg az új azonosítókat be nem jelöli.
 - **Egyéni minták** — legfeljebb 20 reguláris kifejezés vagy wildcard-minta
   (`*` = legfeljebb 64 nem-szóköz karakter, `?` = egy karakter). A találatok
   `[CUSTOM_REDACTED]` értékre cserélődnek. Minden minta átmegy a
@@ -664,6 +665,25 @@ A beállítások a `key_value` táblában élnek (`pii_settings` névtér,
 
 Mindháromhoz felügyeleti (management) hitelesítés szükséges, és a törzset Zoddal
 validálja (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR- (EU) és POPIA-azonosítók (Dél-Afrika)
+
+| ID                  | Azonosító                         | Ellenőrzés                                                                                  |
+| ------------------- | --------------------------------- | ------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                              | Ismert ország, az országra előírt pontos hossz, ISO 13616 MOD-97-10                         |
+| `eu_vat`            | EU-s adószám                      | Ismert tagállami előtag és az adott állam számformátuma (VIES-lekérdezés nélkül)            |
+| `es_dni_nie`        | Spanyol DNI / NIE                 | Ellenőrző betű (érték mod 23); a NIE: `X/Y/Z` + 7 számjegy                                  |
+| `it_codice_fiscale` | Olasz Codice Fiscale              | Ellenőrző betű a páratlan/páros pozíciók táblázataiból                                      |
+| `pl_pesel`          | Lengyel PESEL                     | Súlyozott ellenőrzőösszeg és a kódolt születési hónap/nap hihető tartományai                |
+| `nl_bsn`            | Holland BSN                       | 11-es ellenőrzés (súlyok: 9..2, -1)                                                         |
+| `de_steuer_id`      | Német Steuer-ID                   | ISO 7064 Mod 11,10 és a számjegyszerkezet szabályai (kezdő 0 nélkül)                        |
+| `se_personnummer`   | Svéd personnummer                 | Luhn az utolsó tíz számjegyen és hihető születési dátum (10 vagy 12 számjegy)               |
+| `za_id`             | Dél-afrikai személyazonosító szám | Luhn mind a 13 számjegyen, érvényes születési hónap/nap, állampolgársági számjegy: 0 vagy 1 |
+| `za_phone`          | Dél-afrikai telefonszám           | `+27` / `27` előtag, vagy szóközzel vagy kötőjellel írt belföldi `0..` alak                 |
+| `za_vat`            | Dél-afrikai áfaazonosító          | 10 számjegy `4` kezdettel, **és** „VAT” / „BTW” az előző 48 karakterben                     |
+| `za_tax_ref`        | Dél-afrikai adóazonosító          | 10 számjegy `0`-`3` kezdettel, Luhn, **és** „tax” / „SARS” az előző 48 karakterben          |
+
+Mivel a csak számjegyekből álló formátumok ütköznek rendelési számokkal, buildszámokkal és időbélyegekkel, a leggyengébbek (`za_vat`, `za_tax_ref`) kulcsszavas jelzést igényelnek, és egy puszta tízjegyű `0..` szám nem számít dél-afrikai telefonszámnak. A szóközös IBAN-ok (`GB29 NWBK ...`) nem adnak találatot. A streamelt útvonalon a jelzést csak az aktuális darabon belül keresi a rendszer. Az azonosítók az általános telefonminták előtt állnak, így az ellenőrzött azonosító megtartja saját helyőrzőjét (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). A `gdpr` és `popia` sablon az EU-s, illetve dél-afrikai azonosítókat választja ki. Maga a maszkolás továbbra is külön bekapcsolandó (Hard Rule #20): itt semmi nem módosítja valamely funkciókapcsoló alapértékét.
 
 ### Prompt-injektálás (`promptInjection.ts`)
 

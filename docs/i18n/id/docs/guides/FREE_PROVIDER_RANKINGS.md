@@ -13,7 +13,7 @@
 
 ## Apa Itu
 
-OmniRoute mendaftarkan 377 provider, termasuk 155 entri katalog yang ditandai **gratis/tanpa-auth**
+OmniRoute mendaftarkan 380 provider, termasuk 155 entri katalog yang ditandai **gratis/tanpa-auth**
 (tanpa-auth,
 OAuth tingkat gratis, atau API key tingkat gratis — lihat
 [Panduan Tingkat Gratis](../getting-started/FREE-TIERS-GUIDE.md) dan direktori

@@ -163,7 +163,7 @@ OmniRoute は、`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` に接続さ�
 | ヘルスレポート       | `health-report`      | プロバイダーごとのサーキットブレーカー、クールダウン、ロックアウトの状態を集約します                                                                                 | ヘルス、耐障害性           | 「すべてのプロバイダーのヘルス状態を表示して」     |
 | 機能一覧             | `list-capabilities`  | 45 エントリからなる Agent Skills カタログ全体（API 23 件 + CLI 21 件 + 設定 1 件）を、コンテキスト注入用の未加工 SKILL.md URL を含む Markdown テーブルとして返します | カタログ、検出、スキル     | 「OmniRoute のすべての機能を一覧表示して」         |
 
-> Agent Card は、稼働中の 377 プロバイダーのカタログと一致するように維持する必要があります。プロバイダー数と無料／認証不要のメタデータは、ランタイムレジストリから取得されます。
+> Agent Card は、稼働中の 380 プロバイダーのカタログと一致するように維持する必要があります。プロバイダー数と無料／認証不要のメタデータは、ランタイムレジストリから取得されます。
 
 ### `list-capabilities` スキルの詳細
 
@@ -215,7 +215,7 @@ JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイ�
    };
    ```
 
-3. **Agent Card で公開:** `src/app/.well-known/agent.json/route.ts` で、`skills` 配列に追加します。
+3. **Agent Card で公開:** `src/lib/a2a/agentCardMetadata.ts`（`/.well-known/agent.json` と `/.well-known/agent-card.json` で共有）で、`skills` 配列に以下を追加します。
 
    ```json
    {

@@ -305,8 +305,9 @@ kapalıdır.
   `src/shared/constants/piiTypes.ts` dosyasında listelenir (`PII_BUILTIN_TYPES`).
   Ayarlanmamış olması tüm türler anlamına gelir (bu ayar eklenmeden önceki
   davranış). İstek motorundaki `ssn_us` deseni `ssn` ile eşleşir. Şablonlar
-  (Minimal, Standart, Finansal, Brezilya, ABD, Tam) yalnızca arayüzdeki onay
+  (Minimal, Standart, Finansal, Brezilya, ABD, GDPR, POPIA, Tam) yalnızca arayüzdeki onay
   kutularını doldurur.
+- **GDPR ve POPIA tanımlayıcıları** — AB ve Güney Afrika kişisel tanımlayıcılarını kapsayan on iki yerleşik kimlik (aşağıdaki tablo). Düzenli ifadeleri, doğrulayıcıları ve yargı alanı etiketleri tek tabloda, `src/shared/utils/piiPatterns.ts` içinde bulunur; hem yanıt temizleyicisi (`src/lib/piiSanitizer.ts`) hem istek maskeleyicisi (`src/shared/utils/inputSanitizer.ts`) bunu kullanır. Bir eşleşme yalnızca doğrulayıcısı kabul ettiğinde gizlenir; tek başına rakam dizisi asla yeterli değildir. Bu kimlikler var olmadan önce daraltılmış bir seçim kaydetmiş operatör, yeni kimlikleri işaretleyene kadar eski davranışını korur.
 - **Özel desenler** — en fazla 20 regex veya joker karakter deseni (`*` = en
   fazla 64 boşluk içermeyen karakter, `?` = tek karakter). Eşleşmeler
   `[CUSTOM_REDACTED]` olur. Her desen `compilePiiCustomPattern()`
@@ -332,6 +333,25 @@ Ayarlar `key_value` tablosunda tutulur (`pii_settings` ad alanı,
 
 Üçü de yönetim kimlik doğrulaması gerektirir ve gövdeyi Zod ile doğrular
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR (AB) ve POPIA (Güney Afrika) tanımlayıcıları
+
+| Kimlik              | Tanımlayıcı                  | Doğrulama                                                                      |
+| ------------------- | ---------------------------- | ------------------------------------------------------------------------------ |
+| `iban`              | IBAN                         | Bilinen ülke, o ülke için tam uzunluk, ISO 13616 MOD-97-10                     |
+| `eu_vat`            | AB KDV numarası              | Bilinen üye devlet öneki ve o devletin numara biçimi (VIES sorgusu yok)        |
+| `es_dni_nie`        | İspanya DNI / NIE            | Kontrol harfi (değer mod 23); NIE, `X/Y/Z` + 7 rakamdır                        |
+| `it_codice_fiscale` | İtalya Codice Fiscale        | Tek/çift konum tablolarından kontrol harfi                                     |
+| `pl_pesel`          | Polonya PESEL                | Ağırlıklı sağlama toplamı ve kodlanmış doğum ayı/günü için makul aralıklar     |
+| `nl_bsn`            | Hollanda BSN                 | 11 kontrolü (ağırlıklar 9..2, -1)                                              |
+| `de_steuer_id`      | Almanya Steuer-ID            | ISO 7064 Mod 11,10 ve rakam yapısı kuralları (başta 0 yok)                     |
+| `se_personnummer`   | İsveç personnummer           | Son on rakama Luhn ve makul doğum tarihi (10 veya 12 rakam)                    |
+| `za_id`             | Güney Afrika kimlik numarası | 13 rakamın tümüne Luhn, geçerli doğum ayı/günü, vatandaşlık rakamı 0 veya 1    |
+| `za_phone`          | Güney Afrika telefonu        | `+27` / `27` öneki veya boşluk ya da tireyle yazılmış ulusal `0..` biçimi      |
+| `za_vat`            | Güney Afrika KDV numarası    | `4` ile başlayan 10 rakam **ve** önceki 48 karakterde "VAT" / "BTW"            |
+| `za_tax_ref`        | Güney Afrika vergi referansı | `0`-`3` ile başlayan 10 rakam, Luhn **ve** önceki 48 karakterde "tax" / "SARS" |
+
+Yalnızca rakam içeren biçimler sipariş numaraları, derleme numaraları ve zaman damgalarıyla çakıştığından en zayıfları (`za_vat`, `za_tax_ref`) anahtar sözcük ipucuna ihtiyaç duyar; tek başına on rakamlı `0..` numarası Güney Afrika telefon numarası sayılmaz. Boşluklu IBAN'lar (`GB29 NWBK ...`) eşleştirilmez. Akış yolunda ipucu yalnızca mevcut parça içinde aranır. Kimlikler genel telefon kalıplarından önce gelir; böylece doğrulanmış tanımlayıcı kendi yer tutucusunu korur (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` ve `popia` şablonları sırasıyla AB ve Güney Afrika kimliklerini seçer. Maskelemenin kendisi isteğe bağlı kalır (Hard Rule #20): buradaki hiçbir şey özellik bayrağının varsayılanını değiştirmez.
 
 ### Prompt Injection (`promptInjection.ts`)
 

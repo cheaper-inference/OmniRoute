@@ -40,6 +40,10 @@ Claude Code는 **Anthropic Messages API**를 사용하며 환경 변수를 통�
 
 > 환경 변수는 **시작 시 한 번만** 읽힙니다. 변경한 후 Claude Code를 다시 시작하세요.
 
+고정 문자열 대신 주기적으로 교체되는 자격 증명을 사용하려면 `~/.claude/settings.json`의 `apiKeyHelper`를 현재 자격 증명을 stdout으로 출력하는 명령으로 설정하세요. Claude Code는 기본적으로 출력을 오 분 동안 캐시하고(`CLAUDE_CODE_API_KEY_HELPER_TTL_MS`로 변경 가능), 값을 `Authorization: Bearer`와 `x-api-key` 양쪽에 보냅니다. 스크립트는 자격 증명만 출력해야 합니다. 배너를 함께 출력하면 v2.1.227+에서 도우미가 실패합니다.
+
+Entra ID SSO는 이 방식으로 작동합니다. `scripts/cli/omniroute-sso.mjs token`이 수명이 짧은 Entra 액세스 토큰을 출력하면 OmniRoute가 API 키 대신 이 토큰을 검증합니다. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md)를 참고하세요.
+
 `omniroute launch`는 이러한 변수를 모두 자동으로 설정합니다. 활성 컨텍스트에서 기본 URL과 토큰을 확인하므로 `omniroute connect <vps>` 후 `omniroute launch`를 실행하면 바로 작동하며, 서버 상태를 확인한 다음 `claude`를 실행합니다.
 
 ---

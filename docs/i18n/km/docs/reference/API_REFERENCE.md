@@ -29,6 +29,7 @@
 - [ការស្ទ្រីមតាម WebSocket](#websocket-streaming)
 - [ការរាយការណ៍អំពីកូតា និងបញ្ហា](#quotas--issues-reporting)
 - [ឃ្លាំងសម្ងាត់សេម៉ង់ទិក](#semantic-cache)
+- [ភាពត្រូវគ្នានៃការគ្រប់គ្រង CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [ផ្ទាំងគ្រប់គ្រង និងការគ្រប់គ្រង](#dashboard--management)
 - [ការគ្រប់គ្រង Combo](#combo-management)
 - [Webhooks](#webhooks)
@@ -1011,6 +1012,18 @@ CLI ដំឡើងកំណែ `base_url + /responses` ទៅជា WebSocket �
 
 **ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ:** សោ Bearer API (`isAuthenticated`)។
 
+### ការស្ដារសម័យកូតា (ត្រូវជ្រើសបើក)
+
+`POST /v1/chat/completions` ឬ `POST /v1/responses` ដែលមិនស្ទ្រីម និងបរាជ័យដោយកំហុសកូតាបញ្ចប់ (`402`/`429`/`503` ដែល body បញ្ជាក់ថាកូតា ឬក្រេឌីតអស់) អាចទុករង់ចាំ ហើយចាក់ឡើងវិញពេលក្រោយ ជំនួសឱ្យការត្រឡប់កំហុស។ អ្នកហៅជ្រើសបើកសម្រាប់សំណើនីមួយៗតាមបឋមកថាបី៖
+
+| បឋមកថា                       | តម្លៃ                                      |
+| ---------------------------- | ------------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                                     |
+| `x-omniroute-session`        | id សម័យ, `[A-Za-z0-9._:-]{1,128}`          |
+| `x-omniroute-recovery-turn`  | id វេនដែលតែមួយគត់ក្នុងសម័យ (ច្បាប់ដូចគ្នា) |
+
+មានតែវេន `stream: false` ដែលគ្មានឧបករណ៍ ប្រវត្តិឧបករណ៍ ឬ `previous_response_id` និងគ្មាន pin `x-omniroute-connection` ប៉ុណ្ណោះដែលមានសិទ្ធិ ហើយត្រូវកំណត់ `STORAGE_ENCRYPTION_KEY` (សំណើត្រូវបានរក្សាទុកដោយអ៊ិនគ្រីបរហូតដល់ 24 ម៉ោង)។ ចម្លើយគឺ `202` ជាមួយ `recovery.poll`; ស្ទង់ `GET /v1/quota-recoveries/{id}` (`202` ពេលរង់ចាំ, `200` ជាមួយ body ដែលបានស្ដារពេលបញ្ចប់) ឬបោះបង់ដោយ `DELETE`។ សំបុត្រមើលឃើញបានតែសម្រាប់សោ API ដែលបានបង្កើតវា។ ការចាក់ឡើងវិញដែលលទ្ធផលមិនប្រាកដបញ្ចប់ជា `needs_confirmation` ជំនួសឱ្យការផ្ញើពីរដង។ ប្រភព៖ `src/lib/quota/quotaSessionRecovery.ts`។
+
 ---
 
 ## ការប្រើប្រាស់ដោយខ្លួនឯង (`/api/usage/om-usage`)
@@ -1179,6 +1192,28 @@ DELETE /api/cache/stats
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## ភាពត្រូវគ្នានៃការគ្រប់គ្រង CLIProxyAPI
+
+OmniRoute ឆ្លើយតប endpoint គ្រប់គ្រងបីរបស់ [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) ដែលផ្ទាំងការប្រើប្រាស់ហៅ ដើម្បីអានដែនកំណត់ជាវ Claude និង Codex (ឧទាហរណ៍ ប្រភពដែនកំណត់ការប្រើប្រាស់ `cliproxy` របស់ T3 Code)។ ចង្អុល URL មូលដ្ឋានរបស់កម្មវិធីភ្ញៀវទៅ OmniRoute ហើយប្រើសោ API ដែលមានវិសាលភាព `manage` ជាសោគ្រប់គ្រង។ ផ្លូវទាំងនេះមាននៅ `/v0/management/*` និង `/api/v0/management/*`។
+
+| វិធីសាស្ត្រ | ផ្លូវ                        | ការពិពណ៌នា                                                                                                                               |
+| ----------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| GET         | `/v0/management/auth-files`  | ការតភ្ជាប់ OAuth Claude និង Codex ជា `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`។ គ្មាន token                 |
+| POST        | `/v0/management/api-call`    | body `{ auth_index, method, url, header?, data? }`។ ផ្ញើសំណើដែលមានក្នុងបញ្ជីអនុញ្ញាតដោយ token របស់គណនី ហើយត្រឡប់ `{ status_code, body }` |
+| POST        | `/v0/management/reset-quota` | body `{ auth_index }`។ សម្អាតរយៈពេលផ្អាកការតភ្ជាប់ ការចាក់សោម៉ូដែល និងរយៈពេលផ្អាកតាមវិសាលភាព Codex របស់គណនីមួយ                           |
+
+- `auth_index` គឺជា id ការតភ្ជាប់ OmniRoute។ `provider` គឺ `claude` ឬ `codex` (តែការតភ្ជាប់ OAuth; អ្នកផ្ដល់សេវាសោ API `anthropic` មិនត្រូវបានរាយទេ)។ សម្រាប់ Codex, `id_token.chatgpt_account_id` គឺ id workspace ដែលរក្សាទុក ហើយ `plan_type` គឺគម្រោងដែលរក្សាទុក។
+- `api-call` មិនមែនជាប្រូកស៊ីទូទៅទេ។ វាទទួលតែ Claude `GET
+https://api.anthropic.com/api/oauth/usage` និង Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` និង `POST .../wham/rate-limit-reset-credits/consume` ដែលនីមួយៗសម្រាប់តែគណនីរបស់អ្នកផ្ដល់សេវាដែលត្រូវគ្នា។ អ្វីផ្សេងទៀតត្រឡប់ `403` ដោយមិនទាក់ទង upstream។ បឋមកថា `Authorization` របស់អ្នកហៅ (រួមទាំងសញ្ញាជំនួស `$TOKEN$`) មិនត្រូវបានយកមកប្រើទេ៖ OmniRoute បញ្ចូល access token របស់ការតភ្ជាប់ ធ្វើឱ្យវាថ្មីឡើងវិញជាមុនពេលជិតផុតកំណត់ ហើយបញ្ជូនបន្តតែបឋមកថាដែលមានក្នុងបញ្ជីអនុញ្ញាត (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)។ បើគ្មាន `Chatgpt-Account-Id` វាប្រើ id workspace ដែលរក្សាទុកជាលំនាំដើម។ បើចម្លើយ upstream ដំបូងគឺ `401` វាធ្វើឱ្យ token ថ្មីឡើងវិញមួយដង ហើយព្យាយាមម្ដងទៀតតែនៅពេល access token ប្រែប្រួល។ ការសាកល្បង upstream នីមួយៗអស់ពេលក្រោយ 15 វិនាទី ហើយប្រើប្រូកស៊ីរបស់ការតភ្ជាប់។
+- `reset-quota` ទុកស្ថានភាពបញ្ចប់ (banned, expired, credits_exhausted) ដដែល។ `auth_index` ដែលមិនស្គាល់ត្រឡប់ `404`។
+
+**ការផ្ទៀងផ្ទាត់៖** តម្រូវឱ្យមានសម័យផ្ទាំងគ្រប់គ្រង ឬសោ API វិសាលភាព `manage` ទោះបីបិទការចូលក៏ដោយ (ផ្លូវមានក្នុង `ALWAYS_PROTECTED_API_PATHS`)។ សោសម្រាប់តែ inference ទទួល `403`។ ប្រភព៖ `src/lib/cliproxyCompat/managementApi.ts`។
 
 ---
 

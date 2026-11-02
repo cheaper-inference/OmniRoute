@@ -488,7 +488,7 @@ Wannan yana sarrafa:
 
 | Fayil                              | Manufa                                              |
 | ---------------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`              | Rijistar samfurin-taɗi bisa kundin masu samarwa 377 |
+| `providerRegistry.ts`              | Rijistar samfurin-taɗi bisa kundin masu samarwa 380 |
 | `providerModels.ts`                | Laƙaban samfura, daidaita tsari                     |
 | `constants.ts`                     | Lokutan ƙarewa, iyakoki, lambobin matsayi           |
 | `defaultThinkingSignature.ts`      | Tsohuwar sa hannun tunani ta Claude                 |

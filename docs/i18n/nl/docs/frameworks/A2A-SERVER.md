@@ -163,7 +163,7 @@ OmniRoute biedt 6 A2A-skills die zijn gekoppeld in `src/lib/a2a/taskExecution.ts
 | Statusrapport           | `health-report`      | Aggregeert de status van stroomonderbrekers, afkoelperiodes en blokkeringen per provider                                                                                  | status, veerkracht          | "Toon de status van alle providers"       |
 | Mogelijkheden weergeven | `list-capabilities`  | Retourneert de volledige Agent Skills-catalogus met 45 items (23 API + 21 CLI + 1 configuratie) als een markdown-tabel met onbewerkte SKILL.md-URL's voor contextinjectie | catalogus, detectie, skills | "Geef alle OmniRoute-mogelijkheden weer"  |
 
-> De Agent Card moet synchroon worden gehouden met de actuele catalogus van 377 providers; aantallen providers en metadata over gratis/zonder authenticatie worden opgehaald uit het runtimeregister.
+> De Agent Card moet synchroon worden gehouden met de actuele catalogus van 380 providers; aantallen providers en metadata over gratis/zonder authenticatie worden opgehaald uit het runtimeregister.
 
 ### Details van de skill `list-capabilities`
 
@@ -215,7 +215,7 @@ Het JSON-RPC-eindpunt `/a2a` is het canonieke A2A-toegangspunt. De onderstaande 
    };
    ```
 
-3. **Maak beschikbaar in de Agent Card:** voeg in `src/app/.well-known/agent.json/route.ts` het volgende toe aan de array `skills`:
+3. **Maak deze beschikbaar in de Agent Card:** voeg in `src/lib/a2a/agentCardMetadata.ts` (gedeeld door `/.well-known/agent.json` en `/.well-known/agent-card.json`) het volgende toe aan de array `skills`:
 
    ```json
    {

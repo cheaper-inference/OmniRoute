@@ -315,12 +315,12 @@ toegangstoken naar een muterende beheerroute sturen, krijgen HTTP 403:
 Die rangorde wordt bepaald door `scopeSatisfies`. Deze raadpleegt de MCP-tabel niet, en de MCP-
 matcher raadpleegt deze rangorde evenmin.
 
-| Naamruimte          | Referentie                                                        | Controle                     | Goedkeuring staat het volgende toe                              |
-| :------------------ | :---------------------------------------------------------------- | :--------------------------- | :-------------------------------------------------------------- |
-| API-sleutelbeheer   | `api_keys.scopes`                                                 | `hasManageScope`             | Management-REST voor die Bearer-sleutel                         |
-| API-sleuteladditief | dezelfde array, één exacte tekenreeks                             | de hieronder genoemde helper | Alleen die ene mogelijkheid                                     |
-| MCP-toolscopes      | dezelfde array, anders MCP `_meta`, anders `OMNIROUTE_MCP_SCOPES` | `scopeMatches`               | Die tool, zodra handhaving is ingeschakeld                      |
-| Toegangstoken       | `oma_live_…`                                                      | `scopeSatisfies`             | De beheerroute waarvoor de methode en het pad die rang vereisen |
+| Naamruimte          | Referentie                                                                          | Controle                     | Goedkeuring staat het volgende toe                              |
+| :------------------ | :---------------------------------------------------------------------------------- | :--------------------------- | :-------------------------------------------------------------- |
+| API-sleutelbeheer   | `api_keys.scopes`                                                                   | `hasManageScope`             | Management-REST voor die Bearer-sleutel                         |
+| API-sleuteladditief | dezelfde array, één exacte tekenreeks                                               | de hieronder genoemde helper | Alleen die ene mogelijkheid                                     |
+| MCP-toolscopes      | dezelfde array, anders MCP `_meta` (alleen HTTP/SSE), anders `OMNIROUTE_MCP_SCOPES` | `scopeMatches`               | Die tool, zodra handhaving is ingeschakeld                      |
+| Toegangstoken       | `oma_live_…`                                                                        | `scopeSatisfies`             | De beheerroute waarvoor de methode en het pad die rang vereisen |
 
 Het aanmaken van elke referentie wordt behandeld in
 [Beheerauthenticatie](../guides/MANAGEMENT-AUTH.md).
@@ -369,7 +369,9 @@ Handhaving is uitgeschakeld, tenzij `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (standaa
 `false`). Zolang handhaving is uitgeschakeld, staat `evaluateToolScopes` de aanroep toe en slaat deze de
 catalogus over. Zolang handhaving is ingeschakeld, gebruikt HTTP de `api_keys.scopes` van de Bearer-sleutel als
 `authInfo` (zie [HTTP-scopebinding per sleutel](#per-key-http-scope-binding-7895)).
-Wanneer er geen sleutelscopes kunnen worden bepaald, valt de toegekende set terug op MCP `_meta` en vervolgens op
+Wanneer er geen sleutelscopes worden opgelost, valt de toegekende verzameling terug op MCP `_meta` (alleen gehonoreerd
+voor HTTP/SSE-aanroepers, binnen een HTTP-authenticatiecontext; de `_meta` van een stdio-aanroeper wordt genegeerd
+omdat de client die beheert en er geen identiteit per aanroeper in zit), en vervolgens op
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Toegangstokenscopes
@@ -468,8 +470,7 @@ en geeft deze door aan `transport.handleRequest(req, { authInfo })` van de MCP S
 de terugvalopties `_meta` en de omgevingsvariabele `OMNIROUTE_MCP_SCOPES` — hiermee wordt alleen die eerste bron
 met de hoogste prioriteit gevuld, die voorheen via HTTP niet werd aangeleverd. Wanneer geen API-sleutel kan worden
 bepaald (geen header, ongeldige sleutel), blijft `authInfo` `undefined` en valt de resolutie ongewijzigd terug op de
-bestaande meta-/omgevingsketen. stdio heeft geen identiteit per aanroeper (zie
-`mcpCallerIdentity.ts`) en wordt niet beïnvloed — het blijft de terugvalketen `_meta`/omgeving gebruiken.
+bestaande meta-/omgevingsketen. stdio heeft geen identiteit per aanroeper (zie `mcpCallerIdentity.ts`) en wordt niet beïnvloed door binding per sleutel — het slaat de `_meta`-stap over (`_meta` wordt alleen binnen een HTTP-auth-context gerespecteerd, #15159) en resolveert uitsluitend uit de env-sleutel `OMNIROUTE_MCP_SCOPES`.
 
 **Handhaving wordt voor HTTP/SSE-aanroepers met beperkte scopes afgedwongen, ongeacht
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Dat `OMNIROUTE_MCP_ENFORCE_SCOPES` standaard `false` is, is alleen

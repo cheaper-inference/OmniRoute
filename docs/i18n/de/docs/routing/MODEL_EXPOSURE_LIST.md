@@ -62,3 +62,15 @@ Der Einstellungsexport (`GET /api/settings/export-json`) enthält beide Arrays u
 Einstellungsfeld — anders als beim Combo-Schritt-Exportfilter von `hidePaidModels` besteht hier kein Risiko einer
 erneuten Übernahme: Eine abgelehnte ID, die in einen exportierten Combo-Schritt eingebettet ist, stellt die explizite Routing-
 Entscheidung des Betreibers dar und ist nichts, was an der Exportgrenze entfernt werden muss.
+
+## Ausschließliche Auflistung von Combos (`exposeCombosOnly`)
+
+Ein separater boolescher Wert, ebenfalls nur auf ausdrückliche Aktivierung und standardmäßig `false`, für Bereitstellungen, bei denen Combos die öffentliche Modellschnittstelle bilden und Anbieter nur Backends sind. Bei `true` behält die öffentliche Auflistung (`GET /v1/models`, `GET /v1` und die übrigen auf `getUnifiedModelsResponse()` aufbauenden `/v1`-Erkennungsrouten) ausschließlich Zeilen mit `owned_by: "combo"`: Benutzer-Combos sowie die integrierten `auto/*`-Combos (sofern `hideAutoCombos` sie nicht ausblendet). Sie verwendet dieselbe Zeilenprüfung wie `catalogScope: "combos"` pro Schlüssel; die eigenen Zulassungs-, Ausschluss- und Bereichsfilter eines Schlüssels gelten zusätzlich weiterhin.
+
+Schalten Sie dies unter **Einstellungen → Routing → Models-API-Auflistung** oder mit `PATCH /api/settings {"exposeCombosOnly": true}` um.
+
+Wie die obigen Listen ändert dies nur die Bekanntgabe:
+
+- Eine explizite `provider/model`-ID wird weiterhin weitergeleitet und durch `GET /v1/models/{id}` weiterhin aufgelöst;
+- der Dashboard-Katalog (`GET /api/models/catalog`, von der Modellauswahl verwendet) wird nicht eingeschränkt;
+- die Einstellung wird nicht in die Kandidatenpools von `auto/*` gespiegelt, sodass `auto/*`-Combos ihren vollständigen Pool behalten.

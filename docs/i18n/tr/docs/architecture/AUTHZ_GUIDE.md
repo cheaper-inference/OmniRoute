@@ -167,9 +167,10 @@ Her rota sınıfının `src/server/authz/policies/` içinde bir ilkesi vardır:
 
 - **`publicPolicy`** (`policies/public.ts`) — her zaman `allow({ kind: "anonymous", id: "anonymous" })` döndürür.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer bilgisini çıkarır ve `validateApiKey()` aracılığıyla doğrular. Yalnızca etkin `REQUIRE_API_KEY` özellik bayrağı devre dışı olduğunda anonim erişime geri döner. Etkin bayrak, `isRequireApiKeyEnabled()` (`DB özellik bayrağı geçersiz kılması > process.env.REQUIRE_API_KEY > varsayılan`) aracılığıyla çözümlenir; böylece Pano Özellik Bayrakları ile ortam değişkenleri `/api/v1/*`, `/api/v1beta/*` ve takma adları tutarlı şekilde yönetir. Çözümleyici hatalarında erişim reddedilir. İstemci API rotalarında, pano model kataloğunun kullandığı `/api/v1/models` dâhil olmak üzere, pano oturumuna sahip isteklere izin verir.
+  Entra ID SSO etkin olduğunda, yapısal olarak Entra belirteci olan bir Bearer (üç base64url parçası, `RS*` algoritması, `kid`) `validateApiKey()` çağrısından **önce** SSO dalında işlenir ve bu dalın kararı kesindir — hiçbir zaman API anahtarı yoluna veya anonim erişime düşüren dala geçmez. Böylece kimlik sağlayıcısındaki kesinti erişimi herkese açamaz. Statik API anahtarları etkilenmez. Bkz. [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — pano oturumunu ve dahili model eşitleme isteklerini (`/api/providers/[name]/(sync-models|models)` ile eşleştirilir) kabul eder veya `isAuthRequired()` false döndürürse denetimi tamamen atlar. Bearer belirteci mevcut ancak geçersiz olduğunda 403 (`AUTH_001`), aksi takdirde 401 döndürür. Ayrıca herhangi bir kimlik doğrulama dalından önce rota koruması katmanlarını (LOCAL_ONLY / ALWAYS_PROTECTED) uygular — bkz. [Rota Koruması Katmanları](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` içindeki LOCAL_ONLY yollarına (şu anda: `/api/mcp/`), Bearer anahtarı `manage` kapsamını taşıyorsa geri döngü dışındaki adreslerden erişilebilir; diğer tüm LOCAL_ONLY yolları, kapsamdan bağımsız olarak yalnızca geri döngü erişimine açık kalır.
 
-Başarılı bir ilke, `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` değerine sahip bir `AuthSubject` döndürür. Alt akış işleyicileri, kimlik doğrulama mantığını yeniden çalıştırmak yerine `src/server/authz/assertAuth.ts` içindeki `assertAuth(request, "CLIENT_API")` aracılığıyla bu özneyi okuyabilir.
+Başarılı bir ilke, `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` değerine sahip bir `AuthSubject` döndürür. Alt akış işleyicileri, kimlik doğrulama mantığını yeniden çalıştırmak yerine `src/server/authz/assertAuth.ts` içindeki `assertAuth(request, "CLIENT_API")` aracılığıyla bu özneyi okuyabilir.
 
 ## Herkese Açık Rotalar Listesi
 
@@ -316,8 +317,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Kimliği doğrulanmış isteklerde yukarı akış (işleyici tarafındaki) istek başlıkları ayrıca şunları içerir:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<son-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<son-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (isteğe bağlı)
 x-omniroute-auth-scopes:    virgülle ayrılmış liste
 ```

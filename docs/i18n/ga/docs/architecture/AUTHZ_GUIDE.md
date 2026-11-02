@@ -164,9 +164,10 @@ Tá polasaí ag gach aicme bealaigh in `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — tugann sé `allow({ kind: "anonymous", id: "anonymous" })` ar ais i gcónaí.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — baineann sé Bearer amach agus bailíochtaíonn sé é trí `validateApiKey()`. Ní théann sé ar aghaidh chuig rochtain anaithnid ach amháin nuair atá an bhratach ghné éifeachtach `REQUIRE_API_KEY` díchumasaithe. Réitítear an bhratach éifeachtach trí `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ionas go rialaíonn Bratacha Gné na Deaise agus athróga timpeallachta `/api/v1/*`, `/api/v1beta/*`, agus na hailiasanna ar bhealach comhsheasmhach; má theipeann ar an réiteoir, diúltaítear don rochtain. Ceadaíonn sé iarratais ó sheisiún deais ar bhealaí API cliaint (lena n-áirítear `/api/v1/models`, a úsáideann catalóg samhlacha na deaise).
+  Nuair atá Entra ID SSO cumasaithe, próiseálann an brainse SSO Bearer a bhfuil struchtúr comhartha Entra aige (trí mhír base64url, algartam `RS*`, `kid`) **roimh** `validateApiKey()`, agus tá a chinneadh críochnaitheach. Ní théann sé ar aghaidh riamh chuig cosán na heochrach API ná chuig an mbrainse a íslíonn an rochtain go rochtain anaithnid, mar sin ní féidir le briseadh seirbhíse ag an soláthraí aitheantais rochtain oscailte a chruthú. Ní dhéantar difear d’eochracha API statacha. Féach [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — glacann sé le seisiún deais, iarratais inmheánacha sioncronaithe samhlacha (a mheaitseáiltear le `/api/providers/[name]/(sync-models|models)`), nó scipeálann sé go hiomlán má thugann `isAuthRequired()` false ar ais. Tugann sé 403 (`AUTH_001`) ar ais nuair atá comhartha Bearer i láthair ach neamhbhailí, agus 401 i ngach cás eile. Cuireann sé cisil chosanta na mbealaí (LOCAL_ONLY / ALWAYS_PROTECTED) i bhfeidhm freisin roimh aon bhrainse fíordheimhnithe — féach [Cisil Chosanta na mBealaí](../security/ROUTE_GUARD_TIERS.md). Is féidir rochtain a fháil ar chosáin LOCAL_ONLY in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (faoi láthair: `/api/mcp/`) ó sheoladh nach seoladh lúb-ais é nuair atá an scóip `manage` ag an eochair Bearer; fanann gach cosán LOCAL_ONLY eile teoranta go docht do sheoltaí lúb-ais, beag beann ar an scóip.
 
-Tugann polasaí rathúil `AuthSubject` ar ais le `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Is féidir le láimhseálaithe iartheachtacha é a léamh trí `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` seachas an loighic fíordheimhnithe a rith arís.
+Tugann polasaí rathúil `AuthSubject` ar ais le `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Is féidir le láimhseálaithe iartheachtacha é a léamh trí `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` seachas an loighic fíordheimhnithe a rith arís.
 
 ## Liosta Bealaí Poiblí
 
@@ -326,8 +327,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 I gcás iarrataí fíordheimhnithe, áirítear na ceanntásca iarratais réamhtheachtacha (ar thaobh an láimhseálaí) seo freisin:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```

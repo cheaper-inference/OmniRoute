@@ -156,7 +156,7 @@ OmniRoute በ`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ውስጥ የተ
 | የጤና ሪፖርት     | `health-report`      | የእያንዳንዱን አቅራቢ የወረዳ ቆራጭ፣ የማቀዝቀዣ ጊዜ እና የመቆለፍ ሁኔታ አጠቃልሎ ያቀርባል                                                                | ጤና፣ የመቋቋም ችሎታ     | "የሁሉንም አቅራቢዎች የጤና ሁኔታ አሳይ"   |
 | ችሎታዎችን መዘርዘር | `list-capabilities`  | ሙሉውን 45-ግቤት ያለውን የAgent Skills ካታሎግ (23 API + 21 CLI + 1 config) ለዐውድ ማስገባት ከጥሬ SKILL.md URLs ጋር እንደ markdown ሰንጠረዥ ይመልሳል | ካታሎግ፣ ማግኘት፣ ክህሎቶች | "ሁሉንም የOmniRoute ችሎታዎች ዘርዝር" |
 
-> Agent Card ከቀጥታው የ377 አቅራቢዎች ካታሎግ ጋር የተጣጣመ ሆኖ መቆየት አለበት፤ የአቅራቢዎች ብዛት እና የነፃ/ማረጋገጫ-የማያስፈልግ ሜታዳታ ከruntime registry ይመነጫሉ።
+> Agent Card ከቀጥታው የ380 አቅራቢዎች ካታሎግ ጋር የተጣጣመ ሆኖ መቆየት አለበት፤ የአቅራቢዎች ብዛት እና የነፃ/ማረጋገጫ-የማያስፈልግ ሜታዳታ ከruntime registry ይመነጫሉ።
 
 ### የ`list-capabilities` ክህሎት ዝርዝር
 
@@ -208,7 +208,7 @@ OmniRoute በ`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ውስጥ የተ
    };
    ```
 
-3. **በወኪል ካርድ ላይ ያጋልጡ፦** በ`src/app/.well-known/agent.json/route.ts` ውስጥ ወደ `skills` ድርድር ያክሉ፦
+3. **በወኪል ካርድ ላይ ያጋልጡ፦** በ`src/lib/a2a/agentCardMetadata.ts` (በ`/.well-known/agent.json` እና `/.well-known/agent-card.json` በጋራ የሚጠቀሙበት) ውስጥ ወደ `skills` ድርድር ያክሉ፦
 
    ```json
    {

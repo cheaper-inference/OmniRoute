@@ -154,9 +154,10 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 - **`publicPolicy`** (`policies/public.ts`) — সর্বদা `allow({ kind: "anonymous", id: "anonymous" })` রিটার্ন করে।
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer এক্সট্র্যাক্ট করে এবং `validateApiKey()` দিয়ে যাচাই করে। কেবল কার্যকর `REQUIRE_API_KEY` ফিচার ফ্ল্যাগ নিষ্ক্রিয় থাকলেই অ্যানোনিমাসে ফল-থ্রু করে। কার্যকর ফ্ল্যাগটি `isRequireApiKeyEnabled()` (`DB ফিচার ফ্ল্যাগ ওভাররাইড > process.env.REQUIRE_API_KEY > ডিফল্ট`) দিয়ে নির্ধারিত হয়, ফলে Dashboard Feature Flags এবং এনভায়রনমেন্ট ভেরিয়েবলগুলো `/api/v1/*`, `/api/v1beta/*` ও অ্যালিয়াসগুলোকে সামঞ্জস্যপূর্ণভাবে নিয়ন্ত্রণ করে; রিজলভার ব্যর্থ হলে প্রবেশাধিকার বন্ধ থাকে। ক্লায়েন্ট API রুটগুলোতে ড্যাশবোর্ড-সেশন রিকোয়েস্ট অনুমোদন করে (`/api/v1/models`-সহ, যা ড্যাশবোর্ড মডেল ক্যাটালগ ব্যবহার করে)।
+  Entra ID SSO চালু থাকলে, গঠনগতভাবে Entra টোকেনের মতো Bearer (তিনটি base64url অংশ, `RS*` অ্যালগরিদম, `kid`) `validateApiKey()`-এর **আগে** SSO শাখায় প্রক্রিয়াকৃত হয় এবং সেই শাখার সিদ্ধান্তই চূড়ান্ত। এটি কখনো API কী যাচাইয়ের পথে বা পরিচয়হীন প্রবেশে নামিয়ে দেওয়ার শাখায় যায় না; ফলে পরিচয় প্রদানকারী বন্ধ হয়ে গেলেও উন্মুক্ত প্রবেশাধিকার তৈরি হয় না। স্থির API কীগুলো এতে প্রভাবিত হয় না। [Entra ID SSO](../security/ENTRA_SSO.md) দেখুন।
 - **`managementPolicy`** (`policies/management.ts`) — ড্যাশবোর্ড সেশন, অভ্যন্তরীণ মডেল-সিঙ্ক রিকোয়েস্ট (`/api/providers/[name]/(sync-models|models)`-এর সঙ্গে মিলিয়ে দেখা হয়) গ্রহণ করে, অথবা `isAuthRequired()` false রিটার্ন করলে সম্পূর্ণভাবে এড়িয়ে যায়। Bearer টোকেন উপস্থিত কিন্তু অবৈধ হলে 403 (`AUTH_001`) রিটার্ন করে, অন্যথায় 401। এটি যেকোনো অথেন্টিকেশন শাখার আগেই রুট-গার্ড স্তরগুলোও (LOCAL_ONLY / ALWAYS_PROTECTED) প্রয়োগ করে — [রুট গার্ড স্তরসমূহ](../security/ROUTE_GUARD_TIERS.md) দেখুন। `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-এ থাকা LOCAL_ONLY পাথগুলো (বর্তমানে: `/api/mcp/`) নন-লুপব্যাক থেকে অ্যাক্সেস করা যেতে পারে যদি Bearer কী-তে `manage` স্কোপ থাকে; অন্য সব LOCAL_ONLY পাথ স্কোপ নির্বিশেষে কঠোরভাবে লুপব্যাকেই সীমাবদ্ধ থাকে।
 
-একটি সফল পলিসি `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`-সহ `AuthSubject` রিটার্ন করে। ডাউনস্ট্রিম হ্যান্ডলারগুলো অথেন্টিকেশন লজিক পুনরায় চালানোর পরিবর্তে `src/server/authz/assertAuth.ts`-এ থাকা `assertAuth(request, "CLIENT_API")` দিয়ে এটি পড়তে পারে।
+একটি সফল পলিসি `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`-সহ `AuthSubject` রিটার্ন করে। ডাউনস্ট্রিম হ্যান্ডলারগুলো অথেন্টিকেশন লজিক পুনরায় চালানোর পরিবর্তে `src/server/authz/assertAuth.ts`-এ থাকা `assertAuth(request, "CLIENT_API")` দিয়ে এটি পড়তে পারে।
 
 ## পাবলিক রুটের তালিকা
 
@@ -314,8 +315,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 প্রমাণীকৃত রিকোয়েস্টের ক্ষেত্রে আপস্ট্রিম (হ্যান্ডলার-পক্ষের) রিকোয়েস্ট হেডারগুলোতে আরও থাকে:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<শেষ-৪> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<শেষ-৪> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (ঐচ্ছিক)
 x-omniroute-auth-scopes:    কমা দিয়ে পৃথক করা তালিকা
 ```

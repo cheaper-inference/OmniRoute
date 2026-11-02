@@ -777,6 +777,16 @@
       "name": "i18n:check-keys:cli",
       "command": "node scripts/i18n/check-key-completeness.mjs --catalog=cli",
       "disposition": "separately-invoked"
+    },
+    {
+      "name": "test:opencode:smoke",
+      "command": "node scripts/test/opencode-chatgpt-web-smoke.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:ui-kit-upstream",
+      "command": "node scripts/check/check-ui-kit-upstream.mjs",
+      "disposition": "separately-invoked"
     }
   ],
   "profiles": {

@@ -32,7 +32,8 @@ CLI 会拒绝检出 SHA 与事件 SHA 不匹配的情况。工作流测试会将
 判定作业的 `needs` 列表，因此新增或移除的通道不会悄然消失。
 这些回执涵盖的是其自身的工作流，而不是发布、部署或现有建议性扫描器的内部实现。将适用的检查设置为分支规则中的必需检查，是一项单独的管理变更；仅定义这些作业本身并不能保护分支。
 
-`API Route Typecheck` 是一项独立的工作流检查，不属于任何聚合裁决，也不属于本地完整观察器的静态配置。请针对确切的候选版本单独检查其结果。`.github/workflows/api-route-typecheck.yml` 会在以 `main` 或 `release/**` 为目标分支的 PR、推送到上述任一分支系列以及手动调度时运行。它没有路径过滤器。重新指定 PR 的基础分支会请求一项新检查；编辑正文/标题时使用仅观察名称 `Admission not requested / API Route Typecheck`，且无法替代准入检查。该工作流未声明合并组触发器。任何要求此检查的合并队列推广，都必须先确保该检查会针对该事件执行。
+`API Route Typecheck` 是一项独立的工作流检查，不属于两个汇总判定，也不在本地完整观察器的静态配置范围内。请针对确切的候选版本单独检查其结果。`.github/workflows/api-route-typecheck.yml` 会在目标为 `main` 或 `release/**` 的 PR、向这两类分支的推送、手动触发以及类型为 `checks_requested` 的 `merge_group` 事件上运行。它没有路径过滤器。合并组检出 `merge_group.head_sha`；其他事件检出 `github.sha`。所有事件都使用相同的 API 诊断门禁和门禁单元测试。
+PR 更改目标基准分支会请求新的检查；编辑正文或标题时使用仅供观察的名称 `Admission not requested / API Route Typecheck`，不能替代准入检查。
 
 ### 验收归并器中保留的证据
 
@@ -47,6 +48,14 @@ CLI 要求使用 `--evidence-root` 来验证保留的证据。文件按
 没有证据的 PASS 记录、缺失或已更改的文件、不安全路径或符号链接都会阻止
 验证。缺失文件不等同于空的成功日志。现有的 SHA/运行/尝试检查仍彼此独立：
 字节匹配无法挽救过期的收据。文件完整性不能证明执行真实性或制品晋级。
+
+### DAST 使用已验证的 CI 构建
+
+必需的 CI 作业 `dast-smoke` 在 `build` 之后调用 `.github/workflows/dast-smoke.yml`。它遵循与构建相同的代码变更及草稿筛选规则，包括受支持的 fork PR、以 release 为目标的 PR 和合并组。DAST 作业缺失、失败、被取消或意外跳过都会阻止 `Gate / CI`。此可复用工作流没有独立的 PR 或手动触发入口；手动验证通过 CI 的手动触发入口进行，使构建与使用构建产物的作业保持在同一次运行中。
+
+`scripts/ci/next-build-provenance.mjs` 将完整的 Next 产物与其 tar 摘要、仓库/事件/运行、生产作业尝试次数、head/base/checkout/tree、工作流身份、锁文件、确切的 Node 版本/ABI、平台和打包器一起封存。DAST 从 `needs.build.outputs` 选择不可变的产物 ID，要求验证下载摘要，并在通过 `scripts/ci/unpack-ci-build.py` 提取允许列表中的两个成员之前，独立计算 ZIP 的哈希并与生产方摘要比对。在提取 Next 文件树之前，清单和 tar 归档也必须与独立的生产方输出一致。它绝不会查找分支上最近一次成功的构建。部分重跑可以复用同一次生产作业尝试，但前提是其 ID 及所有输入仍然匹配；回执会记录两次尝试。
+
+消费作业仍在托管的 Linux 运行器上执行，只有仓库只读权限，且没有仓库机密。它安装生产方使用的确切 Node 版本，然后以 `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` 组装 CLI。`scripts/build/standaloneInput.mjs` 会在任何回退构建开始前拒绝缺少独立服务器的输入；普通本地 CLI 构建保留现有回退行为。服务器就绪检查、Schemathesis 和 promptfoo 都必须在保持不变的 25 分钟作业时限内成功。来源回执证明的是输入身份和字节内容，而不是 DAST 扫描成功。产物过期、运行器中断或扫描器失败仍然属于不完整或失败的证据；不能借助建议性包装将其变成 PASS。
 
 ### UI 执行容量
 
@@ -183,17 +192,24 @@ CI 的事实来源是 `.github/workflows/ci.yml`。
 
 在 `test-coverage` 之后运行。失败时阻止合并。
 
-| 脚本                         | 验证内容                                                                                                                      | 阻断性                   |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `quality:collect`            | 生成 `quality-metrics.json`（ESLint 警告数、来自合并分片报告的覆盖率）                                                        | 是（棘轮检查的上游步骤） |
-| `quality:ratchet`            | `quality-baseline.json` 中的每项指标均未回退（ESLint 警告数 ≤ 基线；覆盖率 ≥ 基线）                                           | 是                       |
-| `check:duplication`          | 代码重复度 (jscpd@4) 不超过 `quality-baseline.json` 中的基线                                                                  | 是                       |
-| `check:complexity`           | 文件级圈复杂度不超过上限（核心 ESLint `complexity` + `max-lines-per-function`）                                               | 是                       |
-| `check:cognitive-complexity` | 认知复杂度棘轮检查 (`eslint-plugin-sonarjs`) — 单独执行 ESLint 检查；CI 将两者合并为单个 `check:complexity-ratchets` 步骤     | 是                       |
-| `check:dead-code`            | 未使用的导出/文件棘轮检查 (knip) 相较基线未发生回退                                                                           | 是                       |
-| `check:compression-budget`   | 压缩基准预算 — 各引擎的令牌节省下限不得回退                                                                                   | 是                       |
-| `check:type-coverage`        | 类型标注百分比棘轮检查 (`type-coverage`) 未发生回退；基本涵盖 `typecheck:noimplicit:core`                                     | 是                       |
-| `check:codeql-ratchet`       | 未解决的 CodeQL 警报数量未增加（通过 `gh api` 读取；无令牌时正常跳过）— 刷新频率和手动触发方式：请参阅下方的“CodeQL 棘轮检查” | 是                       |
+| 脚本                         | 验证内容                                                                                                                  | 阻断性                   |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `quality:collect`            | 生成 `quality-metrics.json`（ESLint 警告数、来自合并分片报告的覆盖率）                                                    | 是（棘轮检查的上游步骤） |
+| `quality:ratchet`            | `quality-baseline.json` 中的每项指标均未回退（ESLint 警告数 ≤ 基线；覆盖率 ≥ 基线）                                       | 是                       |
+| `check:duplication`          | 代码重复度 (jscpd@4) 不超过 `quality-baseline.json` 中的基线                                                              | 是                       |
+| `check:complexity`           | 文件级圈复杂度不超过上限（核心 ESLint `complexity` + `max-lines-per-function`）                                           | 是                       |
+| `check:cognitive-complexity` | 认知复杂度棘轮检查 (`eslint-plugin-sonarjs`) — 单独执行 ESLint 检查；CI 将两者合并为单个 `check:complexity-ratchets` 步骤 | 是                       |
+| `check:dead-code`            | 未使用的导出/文件棘轮检查 (knip) 相较基线未发生回退                                                                       | 是                       |
+| `check:compression-budget`   | 压缩基准预算 — 各引擎的令牌节省下限不得回退                                                                               | 是                       |
+| `check:type-coverage`        | 类型标注百分比棘轮检查 (`type-coverage`) 未发生回退；基本涵盖 `typecheck:noimplicit:core`                                 | 是                       |
+
+### 作业：`codeql-scan` 和 `codeql-admission`
+
+`codeql-scan` 生成所有已配置的分析类别。该作业成功之后，`codeql-admission` 验证其确切的上传及候选版本告警棘轮。两者都是 `Gate / CI` 的必需依赖，包括仅修改文档的候选版本。管理激活及金丝雀验证的要求见下文“CodeQL 棘轮”。
+
+| 脚本                   | 验证内容                                                                                                                             | 阻塞 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---- |
+| `check:codeql-ratchet` | 在评估告警棘轮之前，候选版本的 ref/SHA 和所有已配置分析类别必须是当前有效的；缺少证据就会阻塞。全局清单仍然独立——见下文“CodeQL 棘轮” | 是   |
 
 ### 作业：`quality-extended`
 
@@ -423,29 +439,23 @@ git add quality-baseline.json
 请将此文件与改进该指标的变更一同提交。若 PR 改进了某项指标却未更新基线，
 `--require-tighten` 将检测到这一情况（Fase 6A.5，尚待实现）。
 
-### CodeQL 棘轮：刷新频率和手动触发
+### CodeQL 棘轮：候选版本准入与仓库清单
 
-`check:codeql-ratchet` 读取的是**按计划刷新，而非每个 PR 都刷新的仓库状态。**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` 报告
-`state: configured`、`schedule: weekly`：这是 GitHub 的默认设置扫描，而非每次推送时
-都执行的分析。因此，在修复警报的 PR 合并后，棘轮会继续读取旧的、更高的数量，
-直到下一次计划扫描运行——在扫描结果更新前，它会在每个打开的 PR 上报告退化，
-包括修复该问题的 PR 自身的后续 PR。
+CI 通过明确的依赖链负责候选版本的 CodeQL 准入：`codeql-scan` 调用 `codeql.yml` 中的四语言矩阵，然后 `codeql-admission` 运行 `node scripts/check/check-codeql-ratchet.mjs --candidate`。`Gate / CI` 要求两者的结果。Quality 保留自身的数值检查，但不会在生产作业完成前查询扫描器；单独的 `Gate / Quality` 不构成完整的候选版本准入。仅修改文档的候选版本仍然必须执行 CodeQL。
 
-**手动刷新**：`gh workflow run codeql.yml --ref release/vX.Y.Z` 会重新运行
-分析，并在几分钟内重新发布警报。请先阅读 `.github/workflows/codeql.yml`——
-其文件头说明，该工作流仅支持 `workflow_dispatch`，**因为它与 GitHub 的“默认设置”冲突**
-（`CodeQL analyses from advanced configurations cannot be processed when the default setup is enabled`）。
-恢复 `push`/`pull_request`/`schedule` 触发器前，**仓库所有者必须先执行一项操作**：
-Settings → Code security → CodeQL: Default → Advanced。在完成此切换之前，不要添加
-`schedule:` 触发器——否则只会产生失败的运行。
+`config/quality/codeql-admission-policy.json` 中的策略选择 Actions、C/C++、JavaScript/TypeScript 和 Python，使用 default 查询套件、remote 威胁模型和 none 构建模式。生产方预检拒绝待激活记录以及明确目标列表之外的分支。初始目标为 main 和 release/v3.8.53；下一条 release 分支需要经过审核的接入。CI 现有的、更广泛的 release PR 触发规则保持不变，但未接入的目标会在提取前报告 HOLD，而不会获得未经测量的 PASS。
 
-**数量下降后收紧基线**——`node scripts/check/check-codeql-ratchet.mjs
---update` 会将新的测量数量写入 `quality-baseline.json` →
-`metrics.codeqlAlerts.value`，这样棘轮就不会悄然允许警报数量回升到旧的上限。
-实际示例（2026-09-02/03）：PR #12502 修复了 7 个真实警报
-（测得的未关闭警报从 13 降至 6）；PR #12530 将冻结的基线从 11 收紧至 6，以与之匹配；
-随后为剩余 6 个警报逐一提供理由并将其驳回，使未关闭警报数量降至 0。
+每个矩阵作业都记录实际的 SARIF 上传 ID、语言、类别、运行和尝试次数、调用方工作流身份、事件的 ref/head/base/merge SHA 及策略哈希。依赖作业只下载本次运行的回执并验证产物摘要。它要求全部四个类别齐备、生产作业成功，以及每个确切上传的处理已完成。它使用 API 的 sarif_id 过滤器，而不是分支上找到的最新分析。部分重跑可以复用同一次运行、同一候选版本中较早尝试的成功类别，并保留生产尝试记录；当前生产作业失败时不得复用先前的绿色证据。
+
+CodeQL action 会等待处理完成，但其固定版本的实现可能在读取状态失败或等待次数耗尽后发出警告并继续。因此准入步骤会再次验证处理状态。类别缺失、处理待完成、作业失败或取消、身份过时、分页不完整或 API 不可用，都会产生 HOLD 并以 2 退出。不再为独立扫描器工作流设置固定等待时间。未扫描的 PR 不能因为告警查询返回 0 就通过。测得的数量超过 `metrics.codeqlAlerts.value` 时以 1 退出；不会提高基线来吸收其他分支的告警。[上传状态与分析查询](https://docs.github.com/en/rest/code-scanning/code-scanning)。
+
+回执记录上传和分析 ID、类别、工具版本、ref/SHA、基线及告警数量。SARIF 身份/结果数量、最小规则数量及确切的告警实例仍为必需项。接受之前会重新检查 PR/分析身份。这些检查证明的是已配置类别的覆盖情况，而不是每个已提取源文件的清单。C/C++ 的免构建提取不包含项目构建期间生成的代码。源文件排除项仍需审核，贡献者归因仍需可比较的、绑定确切基准版本的证据。
+
+`codeql-maintenance.yml` 提供当前 release 分支的推送扫描和每周计划，不重复 PR/main 的生产作业。`nightly-codeql-inventory.yml` 单独维护仓库范围的基线，使用 `--strict-measurement`，并在无法测量时失败。本地旧版收集器的宽容跳过不构成候选版本准入。只有验证全局数量下降后，才可通过明确的 `--update` 收紧基线。
+
+配置了 Default Setup 时不得发布 Advanced 工作流：GitHub 会拒绝这种组合。在已审核的管理切换得到回读确认之前，版本化策略仍处于待处理状态。发布前，操作员固定仓库、head/base/tree、策略/补丁/回滚哈希及观察到的配置状态；`node scripts/quality/codeql-producer.mjs verify-admin-readback` 检查提供的预期与实际 JSON 记录。这是技术性保护，不是操作员批准，也不能替代获取最新回读结果。PR 令牌绝不请求 Administration 权限。推出及任何扫描器变更都要求这份独立回读证据，以及真实 PR、fork 和合并组的兼容性证据。
+
+Fork 使用托管运行器，检出时不保留凭据，生产作业不安装或构建项目，也不继承仓库机密。GitHub 支持在 pull_request 事件中使用权限受限的 fork 令牌上传 SARIF；首次贡献的执行批准仍由 GitHub 策略决定。绝不能使用 pull_request_target 执行不可信代码。在认为迁移完成之前，必须在受控金丝雀验证中确认实际令牌权限、analysis_key 及所有类别环境。[Fork 上传规则](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible)，[冲突的配置模式](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows)。
 
 **驳回警报由操作人员决定（硬性规则 #14）**——若未在驳回评论中记录技术理由，
 绝不可驳回 CodeQL 警报：上游协议要求使用 `won't fix`，测试夹具使用 `used in tests`，
@@ -591,11 +601,7 @@ JSON，十秒钟即可完成，也是解除红色 PR 阻塞的最快方式。**�
 识别出了以下合理化候选项。**合并属于机械性的 CI 变更；切换/移除属于
 保留给操作人员的策略决策。**以下内容均尚未应用。
 
-**上文同样未记录的内容**（建议性、低信号）：`docs-lint` 作业
-（markdownlint + Vale，整个作业启用 `continue-on-error`），以及独立的扫描器工作流
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`。`semgrepFindings: 0` 位于
-`quality-baseline.json` 中，但未连接至 `ci.yml` 中的阻断式棘轮机制——该指标
-目前处于孤立状态。
+**上文同样未记录的项目**（建议性、信号较弱）：`docs-lint` 作业（markdownlint + Vale，整个作业设置 `continue-on-error`）以及独立扫描器工作流 `semgrep.yml` / `scorecard.yml`。CodeQL 现在在 `Gate / CI` 下包含必需的生产与准入作业，并受上述激活要求约束。`quality-baseline.json` 中有 `semgrepFindings: 0`，但 `ci.yml` 没有将其接入阻塞性棘轮——该指标目前没有对应的执行检查。
 
 ### 合并 / 去重（机械性操作，风险较低）
 

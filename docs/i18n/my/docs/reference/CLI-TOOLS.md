@@ -10,7 +10,7 @@ OmniRoute သည် သီးခြား dashboard စာမျက်နှာ 
 
 | စာမျက်နှာ      | Route                   | သဘောတရား                                                                                                    | အရေအတွက်             |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute သို့ ညွှန်ထားသော coding ကိရိယာများ (Client → CLI → OmniRoute → Provider)                          | 27                   |
+| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute သို့ ညွှန်ထားသော coding ကိရိယာများ (Client → CLI → OmniRoute → Provider)                          | 28                   |
 | **CLI Agents** | `/dashboard/cli-agents` | OmniRoute သို့ ညွှန်ထားသော အလိုအလျောက် agent များ (စီးဆင်းပုံတူညီပြီး လုပ်ဆောင်နိုင်သည့် နယ်ပယ် ပိုကျယ်သည်) | 11                   |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute က stdio/ACP မှတစ်ဆင့် backend အဖြစ် စတင်ပေးသော CLI များ (ပြောင်းပြန်စီးဆင်းမှု)                   | registry ကို ကြည့်ပါ |
 
@@ -110,7 +110,7 @@ catalog၊ UI catalog နှင့် consumer မျက်နှာပြင်
 
 ---
 
-## 1. CLI Code ကိရိယာစာရင်း (ကိရိယာ 27 ခု)
+## 1. CLI Code ကိရိယာစာရင်း (ကိရိယာ 28 ခု)
 
 `/dashboard/cli-code` တွင် ပေါ်လာသော ကိရိယာအားလုံး။ `baseUrlSupport: none` ဖြစ်သော ကိရိယာများကို စိတ်ကြိုက် base URL အစား MITM သို့မဟုတ် လက်စွဲလမ်းညွှန်မှတစ်ဆင့် ချိတ်ဆက်ထားသည်-
 
@@ -137,6 +137,7 @@ catalog၊ UI catalog နှင့် consumer မျက်နှာပြင်
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -233,7 +234,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL၊ အဟောင်းပုံစံ)                                   |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL၊ အဓိက + အဟောင်းပုံစံ `~/.deepseek` ချိန်ကိုက်ခြင်း) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                          |
-| `POST /api/cli-tools/pi-settings`           | Pi coding agent                                                                |
+| `POST /api/cli-tools/pi-settings`           | Pi coding agent (`~/.pi/agent/models.json`, `providers.omniroute`)             |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml၊ `[model.omniroute]`)                          |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + သီးသန့် `.env` key)                       |
 
@@ -339,7 +340,7 @@ pip install aider-chat
 cargo install smelt  # Rust အခြေပြု
 
 # Pi coding agent
-# ထည့်သွင်းရန် https://github.com/zechnerj/pi-coding-agent ကို ကြည့်ပါ
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # ထည့်သွင်းရန် https://github.com/1jehuang/jcode ကို ကြည့်ပါ
@@ -452,6 +453,38 @@ EOF
 
 > thinking variant များကို ပေးပို့ရန်
 > `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` ကို အသုံးပြုပါ။
+
+---
+
+#### Pi Coding Agent
+
+တရားဝင် Pi Coding Agent package ကို `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` ဖြင့် တပ်ဆင်ပါ။ Pi သည် custom provider များကို `~/.pi/agent/models.json` မှ ဖတ်သည်။ agent directory တစ်ခုလုံးကို ရွှေ့ရန် `PI_CODING_AGENT_DIR` ကို absolute path (သို့မဟုတ် `~` ဖြင့်စသော path) အဖြစ် သတ်မှတ်ပါ။ dashboard သည် ထိုပြောင်းလဲသတ်မှတ်ချက်ကို လိုက်နာသည်။ Pi သည် custom endpoint များမှ model များကို အလိုအလျောက်မရှာဖွေသောကြောင့် OmniRoute က ရွေးထားသော model ကို `models[]` ထဲသို့ Pi ၏ `openai-completions` API နှင့် OmniRoute ၏ OpenAI-compatible `/v1` endpoint သုံး၍ ရေးသည်။
+
+**CLI Tools → Pi** တွင် endpoint၊ API key နှင့် model ကို ရွေးပြီး provider preview ကို စစ်ဆေးကာ apply လုပ်ပါ။ preview သည် provider အစိတ်အပိုင်းတစ်ခုသာဖြစ်သည်။ Pi ကို ကိုယ်တိုင် configure လုပ်လျှင် `providers.omniroute` ကို ရှိပြီးသား `models.json` ထဲသို့ ပေါင်းထည့်၍ အခြား provider နှင့် setting များကို မပျက်စီးစေပါနှင့်။
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+`/model` ကို ဖွင့်သည့်အခါ Pi သည် `models.json` ကို ပြန်တင်သည်။ configure လုပ်ထားသော route ကို မိမိရွေးထားသည့် provider id နှင့် model id ဖြင့် စမ်းပါ။
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+ရည်ညွှန်းချက်များမှာ [Pi model နှင့် custom provider များ](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)၊ [Pi environment variable များ](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)၊ [Pi တပ်ဆင်ရန်ညွှန်ကြားချက်များ](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md) ဖြစ်သည်။
 
 ---
 

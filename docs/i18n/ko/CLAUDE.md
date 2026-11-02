@@ -12,7 +12,7 @@
 
 전체 필수 worktree 프로토콜(베이스 브랜치 확인, `.claude/worktrees/` 정규 경로,
 `cp -al` node_modules, 해체 규칙)은
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)에 있습니다 (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md)에 있습니다 (`AGENTS.md` →
 Git 워크플로 → "Worktree 격리"에 요약됨). Claude Code 고유 사항:
 
 - 운영자가 이미 알려주지 않은 한 `AskUserQuestion`(하드 규칙 #19)을 통해 운영자에게

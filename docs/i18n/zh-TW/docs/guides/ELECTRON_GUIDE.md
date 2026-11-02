@@ -61,6 +61,19 @@ OmniRoute 提供以 **Electron 41** + **electron-builder 26.10** 建構的跨平
 - `npm run build:mac-x64` / `build:mac-arm64` — 單一架構的 macOS 建置
 - `npm run pack` — 僅產生目錄的建置，用於本機測試（不含安裝程式）
 
+## 選用執行階段套件
+
+桌面建置可在安裝程式旁發布選用執行階段封存檔。安裝後的伺服器內容包含 `optional-packs.index.json`（Windows 和 Linux 上位於 `resources/app`）。對於 `browser-runtime` 項目，讀取 `packs[].tarball`，並下載**同一發布版本中該名稱完全一致的檔案**。封存檔名稱包含 SHA-256 摘要；不同建置可能需要不同封存檔。請保持下載檔案名稱不變。
+
+將已安裝應用程式的索引和選定封存檔複製到同一目錄，然後使用同一發布版本的 CLI：
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` 顯示安裝和驗證狀態，不顯示封存檔名稱。隨附索引負責選擇封存檔。安裝程序在解壓縮前驗證封存檔總和檢查碼，在取代已安裝套件之前驗證各套件的總和檢查碼。它讀取本機檔案，不會下載缺失的封存檔。安裝後請重新啟動應用程式。如果該發布版本沒有相符的資源檔案，就無法透過該版本的發布資源取得此選用套件。
+
 ## 目錄結構
 
 ```

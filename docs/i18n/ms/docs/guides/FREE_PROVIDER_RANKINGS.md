@@ -13,7 +13,7 @@
 
 ## Apa Itu
 
-OmniRoute mendaftarkan 377 penyedia, termasuk 155 entri katalog bertanda **free/no-auth**
+OmniRoute mendaftarkan 380 penyedia, termasuk 155 entri katalog bertanda **free/no-auth**
 (no-auth,
 OAuth peringkat percuma, atau kunci API peringkat percuma — lihat
 [Panduan Peringkat Percuma](../getting-started/FREE-TIERS-GUIDE.md) dan

@@ -62,6 +62,8 @@ const IGNORE_FROM_CODE = new Set([
   // Quality-gate harness knobs (optional cache/report paths for CI scripts — not product config).
   "ESLINT_RESULTS_JSON",
   "COMPLEXITY_ESLINT_REPORT",
+  // #18345: CI build-provenance guard; never a server/user configuration option.
+  "OMNIROUTE_REQUIRE_PREBUILT_NEXT",
   // Agent environment / system execution paths.
   "PROJECT_ROOT",
   "ARTIFACTS_DIR",

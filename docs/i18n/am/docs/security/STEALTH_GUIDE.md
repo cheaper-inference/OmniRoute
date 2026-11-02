@@ -245,15 +245,14 @@ interface CliFingerprint {
 
 ## User-Agent መሻሪያዎች — env vars (`.env.example` ክፍል 12)
 
-| ተለዋዋጭ                    | ነባሪ                                                             |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| ተለዋዋጭ               | ነባሪ                                           |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
 በ`open-sse/executors/base.ts::buildHeaders()` በተለዋዋጭ ፍለጋ በኩል ጥቅም ላይ ይውላሉ። **አቅራቢዎች አዲስ የCLI ስሪቶችን ሲለቁ እነዚህን ያዘምኑ** — ጊዜ ያለፈባቸው የUA ሕብረቁምፊዎች እንደ ጊዜ ያለፈባቸው ደንበኞች ውድቅ መደረግ ይጀምራሉ።
 

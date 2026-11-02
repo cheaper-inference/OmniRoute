@@ -10,7 +10,7 @@ OmniRoute se integra con tres categorías de herramientas CLI distribuidas en tr
 
 | Página          | Ruta                    | Concepto                                                                                     | Cantidad             |
 | --------------- | ----------------------- | -------------------------------------------------------------------------------------------- | -------------------- |
-| **Códigos CLI** | `/dashboard/cli-code`   | Herramientas de programación que diriges a OmniRoute (Cliente → CLI → OmniRoute → Proveedor) | 27                   |
+| **Códigos CLI** | `/dashboard/cli-code`   | Herramientas de programación que diriges a OmniRoute (Cliente → CLI → OmniRoute → Proveedor) | 28                   |
 | **Agentes CLI** | `/dashboard/cli-agents` | Agentes autónomos que diriges a OmniRoute (mismo flujo, alcance más amplio)                  | 11                   |
 | **Agentes ACP** | `/dashboard/acp-agents` | CLI que OmniRoute inicia como backend mediante stdio/ACP (flujo inverso)                     | consulta el registro |
 
@@ -146,7 +146,7 @@ una interfaz sin añadirlo a las demás, el conjunto de pruebas falla en lugar d
 
 ---
 
-## 1. Catálogo de CLI Code (27 herramientas)
+## 1. Catálogo de CLI Code (28 herramientas)
 
 Todas las herramientas que aparecen en `/dashboard/cli-code`. Las que tienen `baseUrlSupport: none` se conectan mediante MITM o una guía manual en lugar de una URL base personalizada:
 
@@ -173,6 +173,7 @@ Todas las herramientas que aparecen en `/dashboard/cli-code`. Las que tienen `ba
 | grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)          | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries         | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
@@ -269,7 +270,7 @@ Las nuevas herramientas con `configType: "custom"` tienen rutas de API de config
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, heredado)                                           |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, sincronización principal + heredada con `~/.deepseek`) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                              |
-| `POST /api/cli-tools/pi-settings`           | Agente de programación Pi                                                          |
+| `POST /api/cli-tools/pi-settings`           | Agente de programación Pi (`~/.pi/agent/models.json`, `providers.omniroute`)       |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                              |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + clave `.env` específica)                      |
 
@@ -375,7 +376,7 @@ pip install aider-chat
 cargo install smelt  # Basado en Rust
 
 # Agente de programación Pi
-# Consulta https://github.com/zechnerj/pi-coding-agent para instalarlo
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # Consulta https://github.com/1jehuang/jcode para instalarlo
@@ -488,6 +489,38 @@ EOF
 
 > Usa `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > para enviar variantes de razonamiento.
+
+---
+
+#### Pi Coding Agent
+
+Instale el paquete oficial Pi Coding Agent con `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi lee los proveedores personalizados de `~/.pi/agent/models.json`; establezca `PI_CODING_AGENT_DIR` en una ruta absoluta (o con prefijo `~`) para mover todo el directorio del agente. El panel respeta esa sobrescritura. Pi no descubre modelos desde endpoints personalizados, así que OmniRoute escribe el modelo seleccionado en `models[]` usando la API `openai-completions` de Pi y el endpoint `/v1` de OmniRoute compatible con OpenAI.
+
+En **Herramientas CLI → Pi**, elija un endpoint, una clave de API y un modelo, revise la vista previa del proveedor y aplique. La vista previa es un fragmento de proveedor: combine `providers.omniroute` con su `models.json` existente al configurar Pi manualmente para conservar los demás proveedores y ajustes.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi vuelve a cargar `models.json` cuando abre `/model`. Pruebe la ruta configurada con el ID de proveedor y el ID de modelo que eligió:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Referencias: [Modelos y proveedores personalizados de Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Variables de entorno de Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Instrucciones de instalación de Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

@@ -162,9 +162,10 @@ JWTهای دیگری نیز وجود دارند که با `JWT_SECRET` امضا 
 
 - **`publicPolicy`** (`policies/public.ts`) — همیشه `allow({ kind: "anonymous", id: "anonymous" })` را برمیگرداند.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer را استخراج کرده و از طریق `validateApiKey()` اعتبارسنجی میکند. تنها زمانی به حالت ناشناس بازمیگردد که پرچم قابلیت مؤثر `REQUIRE_API_KEY` غیرفعال باشد. پرچم مؤثر از طریق `isRequireApiKeyEnabled()` (`بازنویسی پرچم قابلیت پایگاه داده > process.env.REQUIRE_API_KEY > مقدار پیشفرض`) تعیین میشود تا پرچمهای قابلیت داشبورد و متغیرهای محیطی، `/api/v1/*`، `/api/v1beta/*` و نامهای مستعار را بهطور یکسان کنترل کنند؛ خطاهای تعیین مقدار باعث رد بسته درخواست میشوند. درخواستهای دارای نشست داشبورد را در مسیرهای API کلاینت مجاز میداند (از جمله `/api/v1/models` که کاتالوگ مدل داشبورد از آن استفاده میکند).
+  وقتی Entra ID SSO فعال باشد، Bearerی که از نظر ساختار یک توکن Entra است (سه بخش base64url، الگوریتم `RS*` و `kid`) در شاخهٔ SSO **پیش از** `validateApiKey()` پردازش می‌شود و تصمیم آن نهایی است. این مسیر هرگز به بررسی کلید API یا شاخهٔ تنزل به دسترسی ناشناس منتقل نمی‌شود؛ بنابراین قطع سرویس ارائه‌دهندهٔ هویت نمی‌تواند دسترسی آزاد ایجاد کند. کلیدهای API ثابت تغییری نمی‌کنند. به [Entra ID SSO](../security/ENTRA_SSO.md) مراجعه کنید.
 - **`managementPolicy`** (`policies/management.ts`) — نشست داشبورد یا درخواستهای داخلی همگامسازی مدل را میپذیرد (که با `/api/providers/[name]/(sync-models|models)` تطبیق داده میشوند)، یا اگر `isAuthRequired()` مقدار false برگرداند، بهطور کامل از بررسی صرفنظر میکند. اگر توکن Bearer وجود داشته باشد اما نامعتبر باشد، 403 (`AUTH_001`) و در غیر این صورت 401 برمیگرداند. همچنین پیش از هر شاخه احراز هویت، سطوح محافظ مسیر (LOCAL_ONLY / ALWAYS_PROTECTED) را اعمال میکند — به [سطوح محافظ مسیر](../security/ROUTE_GUARD_TIERS.md) مراجعه کنید. مسیرهای LOCAL_ONLY در `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (در حال حاضر: `/api/mcp/`) زمانی از نشانی غیر loopback قابلدسترسی هستند که کلید Bearer دارای حوزه دسترسی `manage` باشد؛ سایر مسیرهای LOCAL_ONLY، صرفنظر از حوزه دسترسی، همچنان بهطور سختگیرانه به loopback محدود میمانند.
 
-یک سیاست موفق، `AuthSubject` را با `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` برمیگرداند. کنترلکنندههای پاییندستی میتوانند بهجای اجرای مجدد منطق احراز هویت، آن را از طریق `assertAuth(request, "CLIENT_API")` در `src/server/authz/assertAuth.ts` بخوانند.
+یک سیاست موفق، `AuthSubject` را با `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` برمیگرداند. کنترلکنندههای پاییندستی میتوانند بهجای اجرای مجدد منطق احراز هویت، آن را از طریق `assertAuth(request, "CLIENT_API")` در `src/server/authz/assertAuth.ts` بخوانند.
 
 ## فهرست مسیرهای عمومی
 
@@ -309,8 +310,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 برای درخواستهای احراز هویتشده، هدرهای درخواست بالادستی (سمت هندلر) نیز شامل موارد زیر هستند:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<چهار نویسه آخر> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<چهار نویسه آخر> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (اختیاری)
 x-omniroute-auth-scopes:    فهرست جداشده با ویرگول
 ```

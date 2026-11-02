@@ -314,12 +314,12 @@ lejn rotta ta’ ġestjoni li timmodifika jirċievi HTTP 403
 Dak il-grad huwa `scopeSatisfies`. Dan ma jikkonsultax it-tabella MCP, u l-mekkaniżmu ta’
 tqabbil MCP ma jikkonsultahx.
 
-| Spazju tal-ismijiet      | Kredenzjali                                                             | Kontrollur                                | Approvazzjoni tippermetti                                                  |
-| :----------------------- | :---------------------------------------------------------------------- | :---------------------------------------- | :------------------------------------------------------------------------- |
-| Ġestjoni taċ-ċavetta API | `api_keys.scopes`                                                       | `hasManageScope`                          | REST tal-ġestjoni għal dik iċ-ċavetta Bearer                               |
-| Żieda għaċ-ċavetta API   | l-istess array, sekwenza eżatta waħda                                   | il-funzjoni awżiljarja msemmija hawn taħt | Dik il-kapaċità biss                                                       |
-| Ambiti tal-għodod MCP    | l-istess array, inkella `_meta` ta’ MCP, inkella `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                            | Dik l-għodda, ladarba l-infurzar ikun mixgħul                              |
-| Token tal-aċċess         | `oma_live_…`                                                            | `scopeSatisfies`                          | Ir-rotta ta’ ġestjoni li l-metodu u l-mogħdija tagħha jeħtieġu dak il-grad |
+| Spazju tal-ismijiet      | Kredenzjali                                                                     | Kontrollur                                | Approvazzjoni tippermetti                                                  |
+| :----------------------- | :------------------------------------------------------------------------------ | :---------------------------------------- | :------------------------------------------------------------------------- |
+| Ġestjoni taċ-ċavetta API | `api_keys.scopes`                                                               | `hasManageScope`                          | REST tal-ġestjoni għal dik iċ-ċavetta Bearer                               |
+| Żieda għaċ-ċavetta API   | l-istess array, sekwenza eżatta waħda                                           | il-funzjoni awżiljarja msemmija hawn taħt | Dik il-kapaċità biss                                                       |
+| Ambiti tal-għodod MCP    | l-istess array, jew `_meta` tal-MCP (HTTP/SSE biss), jew `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                            | Dik l-għodda, ladarba l-infurzar ikun mixgħul                              |
+| Token tal-aċċess         | `oma_live_…`                                                                    | `scopeSatisfies`                          | Ir-rotta ta’ ġestjoni li l-metodu u l-mogħdija tagħha jeħtieġu dak il-grad |
 
 Il-ħruġ ta’ kull kredenzjali huwa kopert f’
 [Awtentikazzjoni tal-Ġestjoni](../guides/MANAGEMENT-AUTH.md).
@@ -368,8 +368,7 @@ L-infurzar ikun mitfi sakemm `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (valur predefin
 `false`). Waqt li jkun mitfi, `evaluateToolScopes` jippermetti s-sejħa u jaqbeż il-
 katalgu. Waqt li jkun mixgħul, HTTP juża `api_keys.scopes` taċ-ċavetta Bearer bħala
 `authInfo` (ara [Rabta tal-ambitu HTTP għal kull ċavetta](#per-key-http-scope-binding-7895)).
-Meta ma jiġux solvuti ambiti taċ-ċavetta, is-sett mogħti jgħaddi għal `_meta` ta’ MCP, imbagħad għal
-`OMNIROUTE_MCP_SCOPES`.
+Meta ma jinstab l-ebda scope taċ-ċavetta, is-sett ta' scopes mogħtija jgħaddi għal `_meta` tal-MCP (jitqies biss għal min jagħmel sejħiet HTTP/SSE, f'kuntest ta' awtentikazzjoni HTTP; `_meta` ta' min jagħmel sejħa stdio jiġi injorat għax il-klijent jikkontrollah u ma fihx l-identità ta' kull min jagħmel is-sejħa), imbagħad għal `OMNIROUTE_MCP_SCOPES`.
 
 #### Ambiti tat-tokens tal-aċċess
 
@@ -468,8 +467,7 @@ u jgħaddihom lill-`transport.handleRequest(req, { authInfo })` tal-MCP SDK, sab
 il-fallback ta’ `_meta` u l-varjabbli tal-ambjent `OMNIROUTE_MCP_SCOPES` — dan sempliċement jimla dak l-ewwel
 sors bl-ogħla prijorità, li qabel ma kienx jiġi pprovdut permezz ta’ HTTP. Meta ma tiġi riżolta l-ebda ċavetta API
 (l-ebda header, ċavetta invalida), `authInfo` jibqa’ `undefined` u r-riżoluzzjoni tkompli bil-katina
-eżistenti ta’ `meta`/varjabbli tal-ambjent mingħajr tibdil. stdio m’għandux identità għal kull klijent (ara
-`mcpCallerIdentity.ts`) u mhuwiex affettwat — jibqa’ juża l-katina ta’ fallback ta’ `_meta`/varjabbli tal-ambjent.
+eżistenti ta’ `meta`/varjabbli tal-ambjent mingħajr tibdil. stdio m'għandux identità għal kull min jagħmel sejħa (ara `mcpCallerIdentity.ts`) u ma jiġix affettwat mill-irbit għal kull ċavetta — jaqbeż il-pass `_meta` (`_meta` jitqies biss f'kuntest ta' awtentikazzjoni HTTP, #15159) u jiddetermina l-iscopes biss miċ-ċavetta tal-ambjent `OMNIROUTE_MCP_SCOPES`.
 
 **L-infurzar jiġi attivat bilfors għal klijenti HTTP/SSE b’ambitu ristrett irrispettivament minn
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Il-fatt li `OMNIROUTE_MCP_ENFORCE_SCOPES` għandu valur predefinit ta’ `false` huwa sikur biss

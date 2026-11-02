@@ -168,9 +168,10 @@ Igal marsruudiklassil on kataloogis `src/server/authz/policies/` oma reeglistik:
 
 - **`publicPolicy`** (`policies/public.ts`) — tagastab alati `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — eraldab Bearer-väärtuse ja valideerib selle funktsiooniga `validateApiKey()`. Lubab anonüümse juurdepääsu ainult siis, kui kehtiv funktsioonilipp `REQUIRE_API_KEY` on keelatud. Kehtiv lipp tuvastatakse funktsiooniga `isRequireApiKeyEnabled()` (`andmebaasi funktsioonilipu ülekirjutus > process.env.REQUIRE_API_KEY > vaikeväärtus`), et töölaua funktsioonilipud ja keskkonnamuutujad haldaksid marsruute `/api/v1/*`, `/api/v1beta/*` ning aliaseid ühetaoliselt; lahendaja tõrgete korral juurdepääs keelatakse. Lubab kliendi API marsruutidel töölaua seansiga päringuid (sealhulgas `/api/v1/models`, mida kasutab töölaua mudelikataloog).
+  Kui Entra ID SSO on sisse lülitatud, käsitleb SSO haru Entra loa struktuuriga Bearerit (kolm base64url-segmenti, `RS*` algoritm, `kid`) **enne** `validateApiKey()` käivitamist ning selle otsus on lõplik. See ei liigu kunagi edasi API võtme teele ega anonüümsele ligipääsule taandamise harusse, mistõttu identiteedipakkuja katkestus ei saa avada vaba ligipääsu. Staatilisi API võtmeid see ei mõjuta. Vt [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — aktsepteerib töölaua seanssi ja sisemisi mudelite sünkroonimise päringuid (mida võrreldakse mustriga `/api/providers/[name]/(sync-models|models)`) või jätab kontrolli täielikult vahele, kui `isAuthRequired()` tagastab väärväärtuse. Kui Bearer-tõend on olemas, kuid kehtetu, tagastab 403 (`AUTH_001`), muul juhul 401. Samuti jõustab enne mis tahes autentimisharu marsruudikaitse tasemed (LOCAL_ONLY / ALWAYS_PROTECTED) — vt [Marsruudikaitse tasemed](../security/ROUTE_GUARD_TIERS.md). Loendis `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` olevatele LOCAL_ONLY teedele (praegu `/api/mcp/`) pääseb juurde ka väljastpoolt loopback-liidest, kui Bearer-võtmel on `manage`-ulatus; kõik muud LOCAL_ONLY teed jäävad olenemata ulatusest rangelt loopback-liidesega piiratuks.
 
-Edukas reeglistik tagastab `AuthSubject`-objekti väärtusega `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Allavoo töötlejad saavad seda lugeda failis `src/server/authz/assertAuth.ts` oleva funktsiooni `assertAuth(request, "CLIENT_API")` kaudu, selle asemel et autentimisloogikat uuesti käivitada.
+Edukas reeglistik tagastab `AuthSubject`-objekti väärtusega `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Allavoo töötlejad saavad seda lugeda failis `src/server/authz/assertAuth.ts` oleva funktsiooni `assertAuth(request, "CLIENT_API")` kaudu, selle asemel et autentimisloogikat uuesti käivitada.
 
 ## Avalike marsruutide loend
 
@@ -329,8 +330,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Autenditud päringute puhul sisaldavad ülesvoolu (töötleja poolel olevad) päringupäised ka järgmist:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<viimased 4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<viimased 4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (valikuline)
 x-omniroute-auth-scopes:    komadega eraldatud loend
 ```

@@ -29,6 +29,7 @@
 - [การสตรีมผ่าน WebSocket](#websocket-streaming)
 - [โควตาและการรายงานปัญหา](#quotas--issues-reporting)
 - [แคชเชิงความหมาย](#semantic-cache)
+- [ความเข้ากันได้กับ API จัดการของ CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [แดชบอร์ดและการจัดการ](#dashboard--management)
 - [การจัดการคอมโบ](#combo-management)
 - [เว็บฮุก](#webhooks)
@@ -1010,6 +1011,18 @@ ChatGPT ส่งคืน `codex.rate_limits` + `response.created` และส
 
 **การยืนยันตัวตน:** คีย์ API แบบ Bearer (`isAuthenticated`)
 
+### การกู้คืนเซสชันเมื่อโควตาหมด (ต้องเลือกเปิดใช้)
+
+`POST /v1/chat/completions` หรือ `POST /v1/responses` แบบไม่สตรีมที่ล้มเหลวด้วยข้อผิดพลาดโควตาสิ้นสุด (รหัส `402`/`429`/`503` ซึ่งเนื้อหาระบุว่าโควตาหรือเครดิตหมดแล้ว) สามารถถูกพักไว้และเล่นซ้ำภายหลัง แทนการคืนข้อผิดพลาดได้ ผู้เรียกต้องเลือกเปิดใช้แยกตามคำขอด้วยเฮดเดอร์สามตัว:
+
+| เฮดเดอร์                     | ค่า                                        |
+| ---------------------------- | ------------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                                     |
+| `x-omniroute-session`        | ID เซสชัน, `[A-Za-z0-9._:-]{1,128}`        |
+| `x-omniroute-recovery-turn`  | ID เทิร์นที่ไม่ซ้ำในเซสชัน (ใช้กฎเดียวกัน) |
+
+เข้าเกณฑ์เฉพาะเทิร์น `stream: false` ที่ไม่มีเครื่องมือ ประวัติเครื่องมือ หรือ `previous_response_id` และไม่มีการปักหมุด `x-omniroute-connection` อีกทั้งต้องตั้งค่า `STORAGE_ENCRYPTION_KEY` ด้วย (คำขอถูกเก็บแบบเข้ารหัสนานสูงสุด 24 ชั่วโมง) จากนั้นการตอบกลับจะเป็น `202` พร้อม `recovery.poll` ให้โพล `GET /v1/quota-recoveries/{id}` (ได้ `202` ขณะรอ และ `200` พร้อมเนื้อหาที่กู้คืนเมื่อเสร็จ) หรือยกเลิกด้วย `DELETE` เฉพาะ API key ที่สร้างตั๋วเท่านั้นที่มองเห็นตั๋วนั้น หากผลลัพธ์ของการเล่นซ้ำไม่แน่นอน ระบบจะจบด้วย `needs_confirmation` แทนการส่งซ้ำสองครั้ง ซอร์ส: `src/lib/quota/quotaSessionRecovery.ts`
+
 ---
 
 ## การใช้งานแบบบริการตนเอง (`/api/usage/om-usage`)
@@ -1178,6 +1191,28 @@ DELETE /api/cache/stats
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## ความเข้ากันได้กับ API จัดการของ CLIProxyAPI
+
+OmniRoute ตอบสนองเอนด์พอยต์จัดการสามรายการของ [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) ที่แดชบอร์ดการใช้งานเรียกเพื่ออ่านขีดจำกัดการสมัครสมาชิก Claude และ Codex เช่น แหล่งข้อมูลขีดจำกัดการใช้งาน `cliproxy` ของ T3 Code ให้ชี้ URL ฐานของไคลเอนต์ไปที่ OmniRoute และใช้ API key ที่มีขอบเขต `manage` เป็นคีย์จัดการ เส้นทางให้บริการที่ `/v0/management/*` และ `/api/v0/management/*`
+
+| เมธอด | พาธ                          | คำอธิบาย                                                                                                                             |
+| ----- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| GET   | `/v0/management/auth-files`  | การเชื่อมต่อ OAuth ของ Claude และ Codex ในรูป `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` ไม่มีโทเค็น     |
+| POST  | `/v0/management/api-call`    | เนื้อหา `{ auth_index, method, url, header?, data? }` ส่งคำขอที่อยู่ในรายการอนุญาตด้วยโทเค็นของบัญชี แล้วคืน `{ status_code, body }` |
+| POST  | `/v0/management/reset-quota` | เนื้อหา `{ auth_index }` ล้างช่วงพักของการเชื่อมต่อ การล็อกโมเดล และช่วงพักแยกตามขอบเขตของ Codex สำหรับหนึ่งบัญชี                    |
+
+- `auth_index` คือ ID การเชื่อมต่อของ OmniRoute ส่วน `provider` คือ `claude` หรือ `codex` (เฉพาะการเชื่อมต่อ OAuth โดยไม่นับผู้ให้บริการแบบ API key `anthropic`) สำหรับ Codex ค่า `id_token.chatgpt_account_id` คือ ID เวิร์กสเปซที่เก็บไว้ และ `plan_type` คือแผนที่เก็บไว้
+- `api-call` ไม่ใช่พร็อกซีทั่วไป ยอมรับเฉพาะ `GET
+https://api.anthropic.com/api/oauth/usage` ของ Claude และ `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume` ของ Codex โดยแต่ละรายการใช้ได้เฉพาะกับบัญชีของผู้ให้บริการที่ตรงกัน สิ่งอื่นจะคืน `403` โดยไม่ติดต่อระบบต้นทาง เฮดเดอร์ `Authorization` ของผู้เรียก รวมถึงตัวแทนค่า `$TOKEN$` จะถูกละเลย OmniRoute ใส่โทเค็นการเข้าถึงของการเชื่อมต่อให้ โดยรีเฟรชก่อนหากใกล้หมดอายุ และส่งต่อเฉพาะเฮดเดอร์ที่อยู่ในรายการอนุญาต (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`) หากไม่มี `Chatgpt-Account-Id` จะใช้ ID เวิร์กสเปซที่เก็บไว้เป็นค่าเริ่มต้น หากคำตอบแรกจากต้นทางคือ `401` ระบบจะรีเฟรชหนึ่งครั้งและลองใหม่เฉพาะเมื่อโทเค็นการเข้าถึงเปลี่ยนไป แต่ละครั้งที่เรียกต้นทางจะหมดเวลาหลัง 15 วินาทีและใช้พร็อกซีของการเชื่อมต่อ
+- `reset-quota` ไม่เปลี่ยนสถานะสิ้นสุด (banned, expired, credits_exhausted) หากไม่รู้จัก `auth_index` จะคืน `404`
+
+**การยืนยันตัวตน:** ต้องใช้เซสชันแดชบอร์ดหรือ API key ที่มีขอบเขต `manage` แม้จะปิดการเข้าสู่ระบบก็ตาม (พาธเหล่านี้อยู่ใน `ALWAYS_PROTECTED_API_PATHS`) คีย์สำหรับอนุมานเท่านั้นจะได้ `403` ซอร์ส: `src/lib/cliproxyCompat/managementApi.ts`
 
 ---
 

@@ -7,8 +7,10 @@
  * `strictZeroCostFilter` already reads it. These guards pin the same rule into
  * the predicate that `hidePaidModels` and `/v1/models` go through.
  */
-import { test } from "vitest";
+import "../../_helpers/pinnedProviderClientVersions";
+import { afterAll, test } from "vitest";
 import assert from "node:assert/strict";
+import { closeSharedLoggerResource } from "../../../src/shared/utils/loggerResource.ts";
 
 import {
   FREE_MODEL_BUDGETS,
@@ -21,6 +23,9 @@ import {
   evaluateCandidateConnections,
   findBudgetEntry,
 } from "../../../open-sse/services/autoCombo/strictZeroCostFilter.ts";
+
+// The strict filter imports the shared console logger; finish its worker before teardown.
+afterAll(closeSharedLoggerResource);
 
 /** Catalogued under `pollinations` as `discontinued`: the provider moved them
  * behind an API key, and their `displayName` says so. */
@@ -81,18 +86,17 @@ test("hidePaidModels drops them from the auto/* candidate pool", () => {
   );
 });
 
-test("no provider loses its free status", () => {
-  const withFreeRegime = new Set(
-    FREE_MODEL_BUDGETS.filter((m) => grantsFreeAccess(m.freeType)).map((m) => m.provider)
+test("catalogued providers retain active catalog or documented live free access", () => {
+  for (const provider of new Set(FREE_MODEL_BUDGETS.map((m) => m.provider))) {
+    assert.equal(providerHasFreeModels(provider), true, `${provider} lost documented free access`);
+  }
+  // Token Harbor's only static entry was a limited-time campaign. Its current
+  // offers are still discoverable, without misrepresenting their rolling quota.
+  assert.equal(
+    FREE_MODEL_BUDGETS.some((m) => m.provider === "tokenharbor" && grantsFreeAccess(m.freeType)),
+    false
   );
-  const lost = [...new Set(FREE_MODEL_BUDGETS.map((m) => m.provider))].filter(
-    (p) => !withFreeRegime.has(p)
-  );
-  assert.deepEqual(
-    lost,
-    [],
-    "no catalogued provider is discontinued across the board today; if one ever is, decide deliberately"
-  );
+  assert.equal(providerHasFreeModels("tokenharbor"), true);
 });
 
 test("every regime is classified, with the expected verdict", () => {

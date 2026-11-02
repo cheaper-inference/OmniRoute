@@ -156,7 +156,7 @@ Az OmniRoute 6 A2A-készséget tesz elérhetővé, amelyek a `src/lib/a2a/taskEx
 | Állapotjelentés          | `health-report`      | Szolgáltatónként összesíti a megszakító, a várakozási idő és a kizárás állapotát                                                                                        | állapot, ellenálló képesség      | "Mutasd az összes szolgáltató állapotát"         |
 | Képességek listázása     | `list-capabilities`  | Egy markdown-táblázatként visszaadja a teljes, 45 elemű Agent Skills-katalógust (23 API + 21 CLI + 1 konfiguráció), nyers SKILL.md URL-ekkel a kontextusba illesztéshez | katalógus, felderítés, készségek | "Sorold fel az OmniRoute összes képességét"      |
 
-> Az ügynökkártyát összhangban kell tartani az aktuális, 377 szolgáltatót tartalmazó katalógussal; a szolgáltatók száma, valamint az ingyenességre és a hitelesítés nélküli használatra vonatkozó metaadatok a futásidejű nyilvántartásból származnak.
+> Az ügynökkártyát összhangban kell tartani az aktuális, 380 szolgáltatót tartalmazó katalógussal; a szolgáltatók száma, valamint az ingyenességre és a hitelesítés nélküli használatra vonatkozó metaadatok a futásidejű nyilvántartásból származnak.
 
 ### A `list-capabilities` készség részletei
 
@@ -208,7 +208,7 @@ A JSON-RPC `/a2a` végpont a kanonikus A2A belépési pont. Az alábbi REST-vég
    };
    ```
 
-3. **Közzététel az Ügynökkártyán:** a `src/app/.well-known/agent.json/route.ts` fájlban fűzze hozzá a következőt a `skills` tömbhöz:
+3. **Közzététel az Agent Cardban:** a `src/lib/a2a/agentCardMetadata.ts` fájlban (amelyet a `/.well-known/agent.json` és a `/.well-known/agent-card.json` közösen használ) fűzze hozzá a következőt a `skills` tömbhöz:
 
    ```json
    {

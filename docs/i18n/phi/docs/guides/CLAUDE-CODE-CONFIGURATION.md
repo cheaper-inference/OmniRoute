@@ -42,6 +42,10 @@ endpoint gamit ang mga environment variable (wala itong `--base-url` flag):
 
 > Binabasa ang mga env var nang **isang beses lamang sa pagsisimula** — i-restart ang Claude Code pagkatapos baguhin ang mga ito.
 
+Para sa kredensiyal na regular na pinapalitan sa halip na nakapirming string, itakda ang `apiKeyHelper` sa `~/.claude/settings.json` bilang command na naglalabas ng kasalukuyang kredensiyal sa stdout. Bilang default, iniimbak ng Claude Code ang output sa cache sa loob ng limang minuto (maaaring baguhin ito ng `CLAUDE_CODE_API_KEY_HELPER_TTL_MS`) at ipinapadala ang halaga sa parehong `Authorization: Bearer` at `x-api-key`. Kredensiyal lamang ang dapat ilabas ng script: kapag may kasamang banner, pumapalya ang helper sa v2.1.227+.
+
+Ganito gumagana ang Entra ID SSO: naglalabas ang `scripts/cli/omniroute-sso.mjs token` ng Entra access token na maikli ang bisa, na sinusuri ng OmniRoute sa halip na API key. Tingnan ang [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 Itinatakda ng `omniroute launch` ang lahat ng ito para sa iyo: tinutukoy nito ang base URL + token
 mula sa aktibong context (kaya gumagana agad ang `omniroute connect <vps>` at pagkatapos ay `omniroute launch`),
 sinusuri ang kalagayan ng server, at ine-exec ang `claude`.

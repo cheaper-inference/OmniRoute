@@ -596,7 +596,8 @@ adaba.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Ọ bụrụ na a hazịghị
   ihe ọ bụla, ọ pụtara ụdị niile (omume ahụ dị ka ọ dị tupu ntọala a dịrị).
   Ụkpụrụ `ssn_us` nke engine arịrị na-ejikọta na `ssn`. Templates (Minimal,
-  Standard, Financial, Brazilian, USA, Full) na-ejupụta naanị checkboxes na UI.
+  Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) na-ejupụta naanị checkboxes na UI.
+- **Ihe njirimara GDPR na POPIA** — built-in id iri na abụọ maka njirimara onwe onye EU na South Africa (tebụl dị n'okpuru). Regex, validator na jurisdiction tag ha dị n'otu tebụl, `src/shared/utils/piiPatterns.ts`, nke response sanitizer (`src/lib/piiSanitizer.ts`) na request masker (`src/shared/utils/inputSanitizer.ts`) abụọ na-eji. A na-ekpuchi match naanị mgbe validator ya nabatara ya; usoro digit naanị ezughị mgbe ọ bụla. Operator chekwara nhọrọ pere mpe tupu id ndị a adị na-edobe omume ọ nwere ruo mgbe a họọrọ id ọhụrụ.
 - **Ụkpụrụ omenala** — rụọ ụkpụrụ regex ma ọ bụ wildcard ruru 20 (`*` =
   mkpụrụedemede ndị na-abụghị whitespace ruru 64, `?` = otu). Ihe kwekọrọ
   na-aghọ `[CUSTOM_REDACTED]`. Ụkpụrụ ọ bụla na-agafe
@@ -623,6 +624,25 @@ Ntọala ndị ahụ bi na tebulu `key_value` (namespace `pii_settings`,
 
 Ha atọ chọrọ nkwenye njikwa ma na-enyocha ahụ arịrị ahụ site na Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Ihe njirimara GDPR (EU) na POPIA (South Africa)
+
+| Id                  | Ihe njirimara           | Nkwenye                                                                                   |
+| ------------------- | ----------------------- | ----------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                    | Mba a maara, ogologo kpọmkwem maka mba ahụ, ISO 13616 MOD-97-10                           |
+| `eu_vat`            | Nọmba VAT EU            | Prefix mba so na EU a maara na usoro nọmba mba ahụ (enweghị VIES lookup)                  |
+| `es_dni_nie`        | DNI / NIE Spain         | Mkpụrụedemede njikwa (uru mod 23); NIE bụ `X/Y/Z` + digit 7                               |
+| `it_codice_fiscale` | Codice Fiscale Italy    | Mkpụrụedemede njikwa sitere na tebụl ọnọdụ odd/even                                       |
+| `pl_pesel`          | PESEL Poland            | Weighted checksum na oke ọnwa/ụbọchị ọmụmụ e encode nwere ezi uche                        |
+| `nl_bsn`            | BSN Netherlands         | Nyocha 11 (weights 9..2, -1)                                                              |
+| `de_steuer_id`      | Steuer-ID Germany       | ISO 7064 Mod 11,10 na iwu nhazi digit (enweghị 0 n'isi)                                   |
+| `se_personnummer`   | personnummer Sweden     | Luhn n'elu digit iri ikpeazụ na ụbọchị ọmụmụ nwere ike ịdị (digit 10 ma ọ bụ 12)          |
+| `za_id`             | Nọmba ID South Africa   | Luhn n'elu digit 13 niile, ọnwa/ụbọchị ọmụmụ ziri ezi, digit ịbụ nwa amaala 0 ma ọ bụ 1   |
+| `za_phone`          | Ekwentị South Africa    | Prefix `+27` / `27`, ma ọ bụ usoro mba `0..` e dere na oghere ma ọ bụ akara njikọ         |
+| `za_vat`            | Nọmba VAT South Africa  | Digit 10 malitere na `4` **na** "VAT" / "BTW" n'ime mkpụrụedemede 48 dị n'ihu ya          |
+| `za_tax_ref`        | Ntụaka ụtụ South Africa | Digit 10 malitere `0`-`3`, Luhn, **na** "tax" / "SARS" n'ime mkpụrụedemede 48 dị n'ihu ya |
+
+N'ihi na usoro nwere digit naanị na-adaba na order number, build number na timestamp, ndị kacha adịghị ike (`za_vat`, `za_tax_ref`) chọrọ akara keyword, a naghịkwa ewere nọmba `0..` nwere digit iri naanị dịka nọmba ekwentị South Africa. IBAN nwere oghere (`GB29 NWBK ...`) anaghị match. N'ụzọ streaming, a na-achọ akara ahụ naanị n'ime chunk ugbu a. Id ndị a na-ebute generic phone pattern ụzọ, ya mere identifier a kwadoro na-edobe placeholder nke ya (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Template `gdpr` na `popia` na-ahọrọ id EU na South Africa n'otu usoro ahụ. Masking n'onwe ya ka chọrọ ịhọrọ ịgbanye (Hard Rule #20): ọ dịghị ihe ebe a na-agbanwe ndabara feature flag.
 
 ### Prompt Injection (`promptInjection.ts`)
 

@@ -40,14 +40,8 @@ aby nová alebo odstránená vetva nemohla nepozorovane zmiznúť. Potvrdenia po
 existujúceho poradného skenera. Nastavenie príslušných kontrol ako povinných v pravidlách vetvy
 je samostatná administratívna zmena; samotné definovanie ich úloh vetvu nechráni.
 
-`API Route Typecheck` je nezávislá kontrola pracovného postupu mimo oboch súhrnných verdiktov
-aj statického profilu lokálneho úplného pozorovateľa. Jej výsledok pre konkrétneho
-kandidáta skontrolujte samostatne. `.github/workflows/api-route-typecheck.yml` sa spúšťa pri PR do `main` alebo
-`release/**`, pri pushnutí do ktorejkoľvek z týchto skupín vetiev a pri manuálnom spustení. Nemá žiadny filter ciest.
-Zmeny cieľovej vetvy PR vyžiadajú novú kontrolu; úpravy tela/názvu používajú názov určený iba na pozorovanie
-`Admission not requested / API Route Typecheck` a nemôžu nahradiť prijímaciu kontrolu.
-Pracovný postup nedeklaruje spúšťač pre skupinu zlučovania. Každé zavedenie frontu zlučovania, ktoré vyžaduje
-túto kontrolu, musí najprv zabezpečiť jej spustenie pre danú udalosť.
+`API Route Typecheck` je nezávislá kontrola workflow mimo oboch súhrnných verdiktov aj statického profilu lokálneho úplného pozorovateľa. Jej výsledok kontrolujte samostatne pre presného kandidáta. `.github/workflows/api-route-typecheck.yml` sa spúšťa pri PR do `main` alebo `release/**`, pri push do oboch skupín vetiev, pri manuálnom spustení a pri udalostiach `merge_group` typu `checks_requested`. Nemá filter ciest. Skupiny zlúčenia používajú pri checkout `merge_group.head_sha`; ostatné udalosti používajú `github.sha`. Všetky udalosti používajú tú istú diagnostickú bránu API a jednotkové testy brány.
+Zmena cieľovej základnej vetvy PR vyžiada novú kontrolu; úpravy tela/názvu používajú názov určený iba na pozorovanie `Admission not requested / API Route Typecheck` a nemôžu nahradiť kontrolu prijatia.
 
 ### Uchovávané dôkazy v reduktore prijatia
 
@@ -64,6 +58,14 @@ zabraňujú overeniu. Chýbajúce súbory nie sú ekvivalentom prázdnych úspe�
 Existujúce kontroly SHA/spustenia/pokusu zostávajú nezávislé: zhodné bajty nemôžu
 zachrániť zastarané potvrdenie. Integrita súboru nie je dôkazom autenticity vykonania
 ani propagácie artefaktu.
+
+### DAST používa overený build CI
+
+Povinná úloha CI `dast-smoke` volá `.github/workflows/dast-smoke.yml` po `build`. Uplatňuje rovnaký výber podľa zmien kódu a stavu draft ako build vrátane podporovaných PR z forkov, PR do release vetiev a skupín zlúčenia. Chýbajúca, neúspešná, zrušená alebo neočakávane preskočená úloha DAST blokuje `Gate / CI`. Opakovane použiteľné workflow nemá samostatný spúšťač PR/manuálneho spustenia; manuálne overenie používa spustenie CI, aby build a spotrebiteľ zostali v jednom behu.
+
+`scripts/ci/next-build-provenance.mjs` zapečatí úplný artefakt Next spolu s digestom tar, repozitárom/udalosťou/behom, pokusom producenta, head/base/checkout/tree, identitami workflow, lockfile, presnou verziou/ABI Node, platformou a bundlerom. DAST vyberá nemenné ID artefaktu z `needs.build.outputs`, vyžaduje overenie digestu pri stiahnutí a pred extrahovaním dvoch povolených položiek pomocou `scripts/ci/unpack-ci-build.py` nezávisle porovná hash ZIP s digestom producenta. Pred extrahovaním stromu Next sa aj manifest a archív tar musia zhodovať s nezávislými výstupmi producenta. Nikdy nehľadá posledný úspešný build vetvy. Čiastočné opakovanie môže znova použiť ten istý pokus producenta, ak sa stále zhodujú jeho ID a všetky vstupy; potvrdenie zaznamenáva oba pokusy.
+
+Spotrebiteľ zostáva na hostovanom Linux runneri s oprávnením na repozitár iba na čítanie a bez tajomstiev repozitára. Nainštaluje presnú verziu Node použitú producentom a potom zostaví CLI s `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` odmietne chýbajúci samostatný server ešte pred akýmkoľvek záložným buildom; bežné lokálne buildy CLI si zachovávajú existujúci záložný postup. Pripravenosť servera, Schemathesis aj promptfoo musia všetky uspieť v nezmenenom limite úlohy 25 minút. Potvrdenie pôvodu dokazuje identitu a bajty vstupov, nie úspešné skenovanie DAST. Exspirácia artefaktu, prerušenie runnera alebo zlyhanie skenera zostávajú neúplným alebo neúspešným dôkazom; poradný wrapper ich nemôže zmeniť na PASS.
 
 ### Kapacita vykonávania používateľského rozhrania
 
@@ -231,17 +233,24 @@ Spúšťa sa pri každom PR do `main`. Pri zlyhaní blokuje zlúčenie.
 
 Spúšťa sa po `test-coverage`. Pri zlyhaní blokuje zlúčenie.
 
-| Skript                       | Overuje                                                                                                                                                                                                          | Blokujúce                                           |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `quality:collect`            | Vytvorí `quality-metrics.json` (počet upozornení ESLint, pokrytie zo zlúčenej správy segmentov)                                                                                                                  | Áno (predchádza mechanizmu postupného sprísňovania) |
-| `quality:ratchet`            | Žiadna metrika v `quality-baseline.json` sa nezhoršila (upozornenia ESLint ≤ východisková hodnota; pokrytie ≥ východisková hodnota)                                                                              | Áno                                                 |
-| `check:duplication`          | Duplikácia kódu (jscpd@4) neprekračuje východiskovú hodnotu v `quality-baseline.json`                                                                                                                            | Áno                                                 |
-| `check:complexity`           | Cyklická zložitosť na úrovni súborov neprekračuje limit (základné pravidlá ESLint `complexity` + `max-lines-per-function`)                                                                                       | Áno                                                 |
-| `check:cognitive-complexity` | Postupné sprísňovanie kognitívnej zložitosti (`eslint-plugin-sonarjs`) — samostatný priechod ESLint; CI spúšťa obe kontroly zlúčené do jediného kroku `check:complexity-ratchets`                                | Áno                                                 |
-| `check:dead-code`            | Postupné sprísňovanie nepoužitých exportov/súborov (knip) sa oproti východiskovej hodnote nezhoršuje                                                                                                             | Áno                                                 |
-| `check:compression-budget`   | Rozpočet benchmarku kompresie — minimálne úspory tokenov pre jednotlivé enginy sa nesmú zhoršiť                                                                                                                  | Áno                                                 |
-| `check:type-coverage`        | Percentuálne typové pokrytie (`type-coverage`) sa nezhoršuje; do veľkej miery nahrádza `typecheck:noimplicit:core`                                                                                               | Áno                                                 |
-| `check:codeql-ratchet`       | Počet otvorených upozornení CodeQL sa nezhoršuje (načítava sa cez `gh api`; bez tokenu sa kontrola korektne preskočí) — interval obnovovania a manuálne spustenie: pozrite „Postupné sprísňovanie CodeQL“ nižšie | Áno                                                 |
+| Skript                       | Overuje                                                                                                                                                                           | Blokujúce                                           |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `quality:collect`            | Vytvorí `quality-metrics.json` (počet upozornení ESLint, pokrytie zo zlúčenej správy segmentov)                                                                                   | Áno (predchádza mechanizmu postupného sprísňovania) |
+| `quality:ratchet`            | Žiadna metrika v `quality-baseline.json` sa nezhoršila (upozornenia ESLint ≤ východisková hodnota; pokrytie ≥ východisková hodnota)                                               | Áno                                                 |
+| `check:duplication`          | Duplikácia kódu (jscpd@4) neprekračuje východiskovú hodnotu v `quality-baseline.json`                                                                                             | Áno                                                 |
+| `check:complexity`           | Cyklická zložitosť na úrovni súborov neprekračuje limit (základné pravidlá ESLint `complexity` + `max-lines-per-function`)                                                        | Áno                                                 |
+| `check:cognitive-complexity` | Postupné sprísňovanie kognitívnej zložitosti (`eslint-plugin-sonarjs`) — samostatný priechod ESLint; CI spúšťa obe kontroly zlúčené do jediného kroku `check:complexity-ratchets` | Áno                                                 |
+| `check:dead-code`            | Postupné sprísňovanie nepoužitých exportov/súborov (knip) sa oproti východiskovej hodnote nezhoršuje                                                                              | Áno                                                 |
+| `check:compression-budget`   | Rozpočet benchmarku kompresie — minimálne úspory tokenov pre jednotlivé enginy sa nesmú zhoršiť                                                                                   | Áno                                                 |
+| `check:type-coverage`        | Percentuálne typové pokrytie (`type-coverage`) sa nezhoršuje; do veľkej miery nahrádza `typecheck:noimplicit:core`                                                                | Áno                                                 |
+
+### Úlohy: `codeql-scan` a `codeql-admission`
+
+`codeql-scan` vytvára všetky nakonfigurované kategórie analýzy. Po úspešnom dokončení tejto úlohy `codeql-admission` overuje jej presné uploady a ratchet upozornení kandidáta. Obe sú povinnými závislosťami `Gate / CI`, aj pre kandidátov meniace iba dokumentáciu. Požiadavky na administratívnu aktiváciu a canary sú opísané nižšie v časti „Ratchet CodeQL“.
+
+| Skript                 | Overuje                                                                                                                                                                                                | Blokujúci |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| `check:codeql-ratchet` | Ref/SHA kandidáta a všetky nakonfigurované kategórie analýzy musia byť aktuálne pred ratchetom upozornení; chýbajúci dôkaz blokuje. Globálny inventár zostáva oddelený — pozri „Ratchet CodeQL“ nižšie | Áno       |
 
 ### Úloha: `quality-extended`
 
@@ -510,30 +519,23 @@ Tento súbor potvrďte spolu so zmenou, ktorá metriku zlepšila. PR, ktorý zle
 metriku bez aktualizácie základnej línie, zachytí `--require-tighten` (Fáza 6A.5,
 implementácia sa pripravuje).
 
-### Ratchet CodeQL: frekvencia obnovenia a manuálne spustenie
+### Ratchet CodeQL: prijatie kandidáta a inventár repozitára
 
-`check:codeql-ratchet` načítava **stav repozitára, obnovovaný podľa plánu — nie pri každom PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` hlási
-`state: configured`, `schedule: weekly`: ide o kontrolu prostredníctvom predvoleného nastavenia GitHubu, nie o analýzu
-pri každom odoslaní zmien. Dôsledok: po zlúčení PR, ktorý OPRAVUJE upozornenia, ratchet naďalej načítava
-starý, vyšší počet až do spustenia ďalšej naplánovanej kontroly — preto hlási regresiu
-pri každom otvorenom PR vrátane nadväzujúcich PR k opravnému PR, až kým sa kontrola neaktualizuje.
+CI riadi prijatie kandidáta cez CodeQL pomocou explicitného reťazca závislostí: `codeql-scan` volá maticu štyroch jazykov v `codeql.yml`, potom `codeql-admission` spúšťa `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` vyžaduje oba výsledky. Quality si ponecháva vlastné číselné kontroly, ale nedopytuje skener pred dokončením producenta; samotný `Gate / Quality` nie je úplným prijatím kandidáta. CodeQL zostáva povinný aj pre kandidátov meniace iba dokumentáciu.
 
-**Manuálne obnovenie**: `gh workflow run codeql.yml --ref release/vX.Y.Z` znova spustí
-analýzu a v priebehu niekoľkých minút opätovne zverejní upozornenia. Najprv si prečítajte `.github/workflows/codeql.yml`
-— jeho hlavička vysvetľuje, že je určený **iba pre `workflow_dispatch`**, **pretože je v konflikte s
-„predvoleným nastavením“ GitHubu** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Obnovenie spúšťačov `push`/`pull_request`/
-`schedule` najskôr vyžaduje **zásah vlastníka**: Nastavenia → Zabezpečenie kódu →
-CodeQL: Predvolené → Rozšírené. Bez tohto prepnutia nepridávajte spúšťač `schedule:` — spôsobí
-iba neúspešné spustenia.
+Politika v `config/quality/codeql-admission-policy.json` vyberá Actions, C/C++, JavaScript/TypeScript a Python, sadu dotazov default, model hrozieb remote a režim buildu none. Predbežná kontrola producenta odmieta záznam aktivácie v stave pending aj vetvy mimo explicitného zoznamu cieľov. Počiatočné ciele sú main a release/v3.8.53; ďalšia release vetva potrebuje skontrolované zaradenie. Existujúci širší spúšťač CI pre PR do release vetiev zostáva zachovaný, ale nezaradený cieľ oznámi HOLD pred extrakciou namiesto získania nezmeraného PASS.
 
-**Po poklese počtu sprísnite základnú líniu** — `node scripts/check/check-codeql-ratchet.mjs
---update` zapíše nový nameraný počet do `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, takže ratchet nebude potichu povoľovať regresiu späť
-k pôvodnému limitu. Praktický príklad (2026-09-02/03): PR #12502 opravil 7 skutočných upozornení
-(13 → 6 nameraných otvorených); PR #12530 sprísnil zmrazenú základnú líniu z 11 → 6, aby sa zhodovala; zostávajúcich
-6 upozornení bolo následne zamietnutých s individuálnym odôvodnením pre každé upozornenie, čím sa počet otvorených upozornení znížil na 0.
+Každá úloha matice zaznamenáva svoje skutočné ID uploadu SARIF, jazyk, kategóriu, beh a pokus, identitu volajúceho workflow, ref/head/base/merge SHA udalosti a hash politiky. Závislá úloha sťahuje iba potvrdenia z tohto behu a overuje digesty artefaktov. Vyžaduje všetky štyri kategórie, úspešného producenta a dokončené spracovanie každého presného uploadu. Používa filter API sarif_id, nie najnovšiu analýzu nájdenú na vetve. Čiastočné opakovania môžu opätovne použiť úspešné kategórie zo skoršieho pokusu toho istého behu a kandidáta, pričom zachovávajú pokus, ktorý ich vytvoril; neúspešný aktuálny producent nemôže znova použiť predchádzajúce zelené dôkazy.
+
+Akcia CodeQL čaká na spracovanie, no jej pripnutá implementácia môže po zlyhaní čítania stavu alebo vyčerpaní čakania upozorniť a pokračovať. Prijatie preto spracovanie overuje znova. Chýbajúce kategórie, nedokončené spracovanie, neúspešné alebo zrušené úlohy, zastaraná identita, neúplné stránkovanie alebo nedostupné API vedú k HOLD a ukončeniu s kódom 2. Pevné čakanie na nezávislé workflow skenera už neexistuje. Neskenovaný PR nemôže prejsť preto, že dotaz na upozornenia vrátil 0. Nameraný počet nad `metrics.codeqlAlerts.value` ukončí kontrolu s kódom 1; baseline sa nezvyšuje, aby pohltil upozornenia inej vetvy. [Stav uploadu a vyhľadanie analýzy](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Potvrdenie zaznamenáva ID uploadov a analýz, kategórie, verzie nástrojov, ref/SHA, baseline a počty upozornení. Identita/počet výsledkov SARIF, minimálne počty pravidiel a presné inštancie upozornení zostávajú povinné. Identity PR/analýzy sa pred prijatím znova kontrolujú. Tieto kontroly preukazujú pokrytie nakonfigurovaných kategórií, nie inventár každého extrahovaného zdrojového súboru. Extrakcia C/C++ bez buildu nezahŕňa kód vygenerovaný počas buildu projektu. Vylúčenia zdrojov naďalej vyžadujú kontrolu a pripísanie zodpovednosti prispievateľovi potrebuje porovnateľné dôkazy z presnej základnej revízie.
+
+`codeql-maintenance.yml` zabezpečuje skenovanie pri push do aktívnej release vetvy a týždenný harmonogram bez duplikovania producentov pre PR/main. `nightly-codeql-inventory.yml` udržiava baseline celého repozitára oddelene, s `--strict-measurement` a zlyhaním pri nedostupnom meraní. Tolerantné preskočenie starého lokálneho zberača nie je prijatím kandidáta. Sprísnenie zostáva explicitným `--update` po overení nižšieho globálneho počtu.
+
+Workflow Advanced sa nesmie publikovať, kým je nakonfigurovaný Default Setup: GitHub túto kombináciu odmieta. Jeho verzovaná politika zostáva pending, kým sa skontrolovaný administratívny prechod neoverí spätným načítaním. Pred publikovaním operátor pripne repozitár, head/base/tree, hashe politiky/patchu/rollbacku a pozorovaný stav nastavenia; `node scripts/quality/codeql-producer.mjs verify-admin-readback` kontroluje dodané očakávané a skutočné záznamy JSON. Ide o technickú ochranu, nie súhlas operátora ani náhradu za získanie čerstvých spätných načítaní. Token PR nikdy nežiada prístup Administration. Nasadenie aj každá zmena skenera vyžadujú toto samostatné spätné načítanie a skutočné dôkazy kompatibility pre PR, fork a skupinu zlúčenia.
+
+Forky používajú hostované runnery, checkout bez uložených prihlasovacích údajov, žiadnu inštaláciu/build projektu v producentovi a žiadne zdedené tajomstvá repozitára. GitHub podporuje upload SARIF pre udalosť pull_request s obmedzeným tokenom forku; schválenie vykonania prvého príspevku zostáva politikou GitHub. Nikdy nepoužívajte pull_request_target na vykonávanie nedôveryhodného kódu. Pred vyhlásením migrácie za dokončenú potvrďte skutočné oprávnenia tokenu, analysis_key a všetky prostredia kategórií v kontrolovanom canary. [Pravidlá uploadu z forkov](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [konfliktné režimy nastavenia](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **O zamietnutiach rozhoduje operátor (Prísne pravidlo č. 14)** — nikdy nezamietajte upozornenie CodeQL
 bez zaznamenania technického odôvodnenia v komentári k zamietnutiu: `won't fix` pre
@@ -690,11 +692,7 @@ identifikovala nasledujúcich kandidátov na racionalizáciu. **Zlúčenia sú m
 prepnutia a odstránenia sú politické rozhodnutia vyhradené pre operátora.** Nič z nižšie
 uvedeného zatiaľ nebolo aplikované.
 
-**Vyššie takisto nezdokumentované** (informatívne, slabý signál): úloha `docs-lint`
-(markdownlint + Vale, celá úloha s `continue-on-error`) a samostatné pracovné postupy skenerov
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. Hodnota `semgrepFindings: 0` sa nachádza v
-`quality-baseline.json`, ale v `ci.yml` nie je napojená na blokujúcu západku — metrika je
-momentálne osirelá.
+**Vyššie tiež nezdokumentované** (poradné, s nízkou výpovednou hodnotou): úloha `docs-lint` (markdownlint + Vale, celá úloha `continue-on-error`) a samostatné workflow skenerov `semgrep.yml` / `scorecard.yml`. CodeQL má teraz povinné úlohy producenta a prijatia pod `Gate / CI`, podliehajúce vyššie uvedeným požiadavkám na aktiváciu. `semgrepFindings: 0` je v `quality-baseline.json`, ale nie je zapojené do blokujúceho ratchetu v `ci.yml` — metrika momentálne nemá napojenie.
 
 ### Zlúčenie / deduplikácia (mechanické, nižšie riziko)
 

@@ -156,9 +156,10 @@ Kowane rukunin hanya yana da manufa a cikin `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — koyaushe yana mayar da `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — yana cire Bearer, sannan ya inganta shi ta hanyar `validateApiKey()`. Yana komawa ga mara suna ne kawai idan an kashe tutar fasalin `REQUIRE_API_KEY` mai aiki. Ana tantance tutar mai aiki ta hanyar `isRequireApiKeyEnabled()` (`Maye gurbin tutar fasalin DB > process.env.REQUIRE_API_KEY > tsohon ƙima`) domin Tutocin Fasali na Dashboard da sauye-sauyen muhalli su sarrafa `/api/v1/*`, `/api/v1beta/*`, da laƙabbai iri ɗaya; gazawar mai tantancewa tana hana shiga. Yana ba da izini ga buƙatun zaman dashboard a hanyoyin client API (ciki har da `/api/v1/models`, wanda kundin samfuran dashboard ke amfani da shi).
+  Idan an kunna Entra ID SSO, reshen SSO yana sarrafa Bearer mai tsarin token na Entra (sassa uku na base64url, algoritim `RS*`, `kid`) **kafin** `validateApiKey()`, kuma hukuncinsa shi ne na ƙarshe. Ba ya taɓa wucewa zuwa hanyar maɓallin API ko reshen da ke saukar da tantancewa zuwa shiga ba tare da suna ba; saboda haka katsewar mai ba da sabis na shaida ba za ta buɗe damar shiga ga kowa ba. Maɓallan API na dindindin ba sa canzawa. Duba [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — yana karɓar zaman dashboard, buƙatun daidaita samfuri na ciki (waɗanda aka dace da `/api/providers/[name]/(sync-models|models)`), ko kuma ya tsallake gaba ɗaya idan `isAuthRequired()` ya mayar da false. Yana mayar da 403 (`AUTH_001`) idan akwai alamar Bearer amma ba ta da inganci, in ba haka ba 401. Haka kuma yana tilasta matakan kariyar hanya (LOCAL_ONLY / ALWAYS_PROTECTED) kafin kowane reshen tantancewa — duba [Matakan Kariyar Hanya](../security/ROUTE_GUARD_TIERS.md). Ana iya samun damar hanyoyin LOCAL_ONLY da ke cikin `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (a yau: `/api/mcp/`) daga wurin da ba loopback ba idan maɓallin Bearer yana ɗauke da iyakar izinin `manage`; duk sauran hanyoyin LOCAL_ONLY suna ci gaba da buƙatar strict-loopback ba tare da la'akari da iyakar izini ba.
 
-Manufa mai nasara tana mayar da `AuthSubject` tare da `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Masu sarrafa buƙatu na gaba za su iya karanta shi ta hanyar `assertAuth(request, "CLIENT_API")` a cikin `src/server/authz/assertAuth.ts` maimakon sake gudanar da dabarun tantancewa.
+Manufa mai nasara tana mayar da `AuthSubject` tare da `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Masu sarrafa buƙatu na gaba za su iya karanta shi ta hanyar `assertAuth(request, "CLIENT_API")` a cikin `src/server/authz/assertAuth.ts` maimakon sake gudanar da dabarun tantancewa.
 
 ## Jerin Hanyoyin Jama'a
 
@@ -311,8 +312,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Ga buƙatun da aka tantance, headers na buƙatar upstream (a ɓangaren handler) su ma sun haɗa da:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<lambobi-4-na-ƙarshe> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<lambobi-4-na-ƙarshe> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (na zaɓi)
 x-omniroute-auth-scopes:    jeri da aka raba da waƙafi
 ```

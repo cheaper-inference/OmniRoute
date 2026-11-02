@@ -488,7 +488,7 @@ Dette håndterer:
 
 | Fil                           | Formål                                           |
 | ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Chatmodelregister for kataloget med 377 udbydere |
+| `providerRegistry.ts`         | Chatmodelregister for kataloget med 380 udbydere |
 | `providerModels.ts`           | Modelaliasser, formattilknytning                 |
 | `constants.ts`                | Timeouts, grænser, statuskoder                   |
 | `defaultThinkingSignature.ts` | Standardsignatur for Claude-tænkning             |

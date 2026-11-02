@@ -10,7 +10,7 @@ OmniRoute yana haɗuwa da rukuni uku na kayan aikin CLI waɗanda aka rarraba a s
 
 | Shafi          | Route                   | Ma’ana                                                                                    | Adadi         |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------- | ------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Kayan aikin coding da kake haɗawa da OmniRoute (Client → CLI → OmniRoute → Provider)      | 27            |
+| **CLI Code's** | `/dashboard/cli-code`   | Kayan aikin coding da kake haɗawa da OmniRoute (Client → CLI → OmniRoute → Provider)      | 28            |
 | **CLI Agents** | `/dashboard/cli-agents` | Wakilai masu cin gashin kansu da kake haɗawa da OmniRoute (tsari iri ɗaya, faɗaɗɗen aiki) | 11            |
 | **ACP Agents** | `/dashboard/acp-agents` | CLIs da OmniRoute ke ƙaddamarwa a matsayin backend ta stdio/ACP (tsarin baya)             | duba registry |
 
@@ -146,7 +146,7 @@ hanya guda ba tare da sauran ba zai sa test suite ɗin ya gaza maimakon ya karka
 
 ---
 
-## 1. Kundin CLI Code (kayan aiki 27)
+## 1. Kundin CLI Code (kayan aiki 28)
 
 Dukkan kayan aikin da suke bayyana a cikin `/dashboard/cli-code`. Waɗanda ke da `baseUrlSupport: none` ana haɗa su ta hanyar MITM ko jagorar saitawa da hannu maimakon URL na tushe na musamman:
 
@@ -173,6 +173,7 @@ Dukkan kayan aikin da suke bayyana a cikin `/dashboard/cli-code`. Waɗanda ke da
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -262,16 +263,16 @@ interface ToolBatchStatus {
 
 Sabbin kayan aiki masu `configType: "custom"` suna da keɓaɓɓun hanyoyin API na saituna:
 
-| Hanya                                       | Kayan Aiki                                                               |
-| ------------------------------------------- | ------------------------------------------------------------------------ |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                  |
-| `POST /api/cli-tools/jcode-settings`        | jcode (alamar --base-url)                                                |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, tsohon tsari)                             |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, na farko + daidaitawar tsohon `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                    |
-| `POST /api/cli-tools/pi-settings`           | Wakilin rubuta lamba na Pi                                               |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                    |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + keɓaɓɓen maɓallin `.env`)           |
+| Hanya                                       | Kayan Aiki                                                                    |
+| ------------------------------------------- | ----------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                       |
+| `POST /api/cli-tools/jcode-settings`        | jcode (alamar --base-url)                                                     |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, tsohon tsari)                                  |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, na farko + daidaitawar tsohon `~/.deepseek`)      |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                         |
+| `POST /api/cli-tools/pi-settings`           | Wakilin rubuta lamba na Pi (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                         |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + keɓaɓɓen maɓallin `.env`)                |
 
 Duk hanyoyin suna amfani da `sanitizeErrorMessage()` don martanin kurakurai (Doka Mai Tsauri #12).
 
@@ -375,7 +376,7 @@ pip install aider-chat
 cargo install smelt  # Wanda aka gina da Rust
 
 # Wakilin coding na Pi
-# duba https://github.com/zechnerj/pi-coding-agent don yadda ake shigarwa
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # duba https://github.com/1jehuang/jcode don yadda ake shigarwa
@@ -488,6 +489,38 @@ EOF
 
 > Yi amfani da `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > don aika thinking variants.
+
+---
+
+#### Pi Coding Agent
+
+Girka package na hukuma na Pi Coding Agent da `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi yana karanta custom provider daga `~/.pi/agent/models.json`; saita `PI_CODING_AGENT_DIR` zuwa absolute path (ko path da ya fara da `~`) don matsar da duk directory na agent. Dashboard yana bin wannan sauyin. Pi ba ya gano model daga custom endpoint, don haka OmniRoute yana rubuta model da aka zaɓa a `models[]` ta API `openai-completions` na Pi da endpoint `/v1` na OmniRoute mai dacewa da OpenAI.
+
+A **CLI Tools → Pi**, zaɓi endpoint, API key da model, duba preview na provider, sannan aiwatar. Preview ɗin wani ɓangaren provider ne: haɗa `providers.omniroute` cikin `models.json` da kake da shi idan kana saita Pi da hannu, domin sauran provider da settings su zauna lafiya.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi yana sake lodin `models.json` idan ka buɗe `/model`. Gwada route da aka saita da provider id da model id da ka zaɓa:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Manazarta: [model da custom provider na Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [environment variable na Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [umarnin girka Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

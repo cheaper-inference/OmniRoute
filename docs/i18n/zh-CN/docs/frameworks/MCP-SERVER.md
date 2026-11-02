@@ -289,12 +289,12 @@ API 密钥上的 `manage`、MCP 工具上的 `read:compression`，以及 `oma_li
 `Access token scope 'read' is insufficient; 'write' required.`
 该等级由 `scopeSatisfies` 检查。它不会查询 MCP 表，而 MCP 匹配器也不会查询它。
 
-| 命名空间           | 凭据                                                              | 检查器             | 通过后允许的操作                     |
-| :----------------- | :---------------------------------------------------------------- | :----------------- | :----------------------------------- |
-| API 密钥管理       | `api_keys.scopes`                                                 | `hasManageScope`   | 使用该 Bearer 密钥访问管理 REST 接口 |
-| API 密钥附加作用域 | 同一数组中的一个完全匹配字符串                                    | 下文所述的辅助函数 | 仅限该项能力                         |
-| MCP 工具作用域     | 同一数组，否则使用 MCP `_meta`，再否则使用 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 启用强制执行后，允许使用该工具       |
-| 访问令牌           | `oma_live_…`                                                      | `scopeSatisfies`   | 访问其方法和路径要求该等级的管理路由 |
+| 命名空间           | 凭据                                                                         | 检查器             | 通过后允许的操作                     |
+| :----------------- | :--------------------------------------------------------------------------- | :----------------- | :----------------------------------- |
+| API 密钥管理       | `api_keys.scopes`                                                            | `hasManageScope`   | 使用该 Bearer 密钥访问管理 REST 接口 |
+| API 密钥附加作用域 | 同一数组中的一个完全匹配字符串                                               | 下文所述的辅助函数 | 仅限该项能力                         |
+| MCP 工具作用域     | 同一数组，否则用 MCP `_meta`（仅 HTTP/SSE），再否则用 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 启用强制执行后，允许使用该工具       |
+| 访问令牌           | `oma_live_…`                                                                 | `scopeSatisfies`   | 访问其方法和路径要求该等级的管理路由 |
 
 每种凭据的签发方式请参阅
 [管理身份验证](../guides/MANAGEMENT-AUTH.md)。
@@ -328,7 +328,7 @@ API 密钥上的 `manage`、MCP 工具上的 `read:compression`，以及 `oma_li
 
 作用域为 `["manage"]` 的密钥无法通过 `read:compression` 的 `scopeMatches` 检查。当 `admin`、`mcp:connect`、`read` 或 `write` 是唯一获授予的字符串时，同一调用也会失败。除末尾的 `*` 外，MCP 工具作用域之间不存在层级关系。
 
-除非设置 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`，否则不会强制执行作用域检查（默认值为 `false`）。关闭时，`evaluateToolScopes` 会允许调用并跳过目录。开启时，HTTP 使用 Bearer 密钥的 `api_keys.scopes` 作为 `authInfo`（请参阅[按密钥绑定 HTTP 作用域](#per-key-http-scope-binding-7895)）。如果无法解析到任何密钥作用域，已授予作用域集将依次回退到 MCP `_meta`，然后是 `OMNIROUTE_MCP_SCOPES`。
+除非设置 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`，否则不会强制执行作用域检查（默认值为 `false`）。关闭时，`evaluateToolScopes` 会允许调用并跳过目录。开启时，HTTP 使用 Bearer 密钥的 `api_keys.scopes` 作为 `authInfo`（请参阅[按密钥绑定 HTTP 作用域](#per-key-http-scope-binding-7895)）。当未能从密钥解析出作用域时，已授予集合会回退到 MCP `_meta`（仅对 HTTP/SSE 调用方有效，且必须处于 HTTP 认证上下文之中；stdio 调用方的 `_meta` 会被忽略，因为该元数据由客户端掌控，且不携带调用方身份），然后是 `OMNIROUTE_MCP_SCOPES`。
 
 #### 访问令牌作用域
 
@@ -419,8 +419,7 @@ API 密钥上的 `manage`、MCP 工具上的 `read:compression`，以及 `oma_li
 而不是 `_meta` 和 `OMNIROUTE_MCP_SCOPES` 环境变量回退值——此更改只是填充了这个优先级最高、
 但此前在 HTTP 上从未被提供的数据源。如果无法解析出 API 密钥
 （无请求头或密钥无效），`authInfo` 将保持为 `undefined`，解析过程会继续回退到
-现有的 `meta`/环境变量链，行为不变。stdio 没有调用方级别的身份信息（参见
-`mcpCallerIdentity.ts`），因此不受影响——它仍使用 `_meta`/环境变量回退链。
+现有的 `meta`/环境变量链，行为不变。stdio 没有按调用方区分的身份（参见 `mcpCallerIdentity.ts`），不受按密钥绑定的影响——它会跳过 `_meta` 步骤（`_meta` 仅在 HTTP 认证上下文中被采纳，#15159），仅依据 `OMNIROUTE_MCP_SCOPES` 环境变量进行解析。
 
 **对于使用窄范围作用域的 HTTP/SSE 调用方，无论
 `OMNIROUTE_MCP_ENFORCE_SCOPES` 的值为何，都会强制启用作用域检查。** `OMNIROUTE_MCP_ENFORCE_SCOPES`

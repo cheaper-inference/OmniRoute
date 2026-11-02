@@ -65,6 +65,19 @@ Bekræftet fra `electron/package.json`:
 - `npm run build:mac-x64` / `build:mac-arm64` — macOS-builds til én arkitektur
 - `npm run pack` — build kun som mappe til lokal test (intet installationsprogram)
 
+## Valgfrie runtimepakker
+
+Skrivebordsbuilds kan udgive valgfrie runtimearkiver sammen med installationsprogrammerne. Det installerede serverindhold indeholder `optional-packs.index.json` (under `resources/app` på Windows og Linux). For posten `browser-runtime` skal du læse `packs[].tarball` og hente **præcis det filnavn fra samme udgivelse**. Arkivnavne indeholder en SHA-256-digest; forskellige builds kan kræve forskellige arkiver. Bevar det hentede filnavn uændret.
+
+Kopiér den installerede apps indeks og det valgte arkiv til én mappe, og brug derefter CLI'en fra samme udgivelse:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` viser installations- og verifikationstilstand, ikke arkivnavnet. Det medfølgende indeks vælger arkivet. Installationen verificerer arkivets checksum før udpakning og pakkernes checksums, før en installeret pakke erstattes. Den læser lokale filer; den henter ikke manglende arkiver. Genstart programmet efter installation. Hvis udgivelsen ikke har en matchende fil, er den valgfrie pakke ikke tilgængelig gennem denne udgivelses filer.
+
 ## Mappestruktur
 
 ```

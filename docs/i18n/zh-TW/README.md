@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — 免費 AI 閘道
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停歇地編寫程式碼。每個 AI 工具 → 377 個提供者 — 150+ 個免費方案 — 全都透過單一端點。將 Claude Code、Codex、Cursor、Cline、Copilot 與 Antigravity 連接至免費的 Claude / GPT / Gemini，並支援自動容錯移轉。RTK + Caveman 堆疊式壓縮可節省 15–95% 的 token（平均約 89%）— 永不觸及限制。377 個 AI 提供者 · 150+ 個免費方案 · 每月約 16.2 億個免費 token · 20 種路由策略 · $0 即可開始。"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停歇地編寫程式碼。每個 AI 工具 → 380 個提供者 — 150+ 個免費方案 — 全都透過單一端點。將 Claude Code、Codex、Cursor、Cline、Copilot 與 Antigravity 連接至免費的 Claude / GPT / Gemini，並支援自動容錯移轉。RTK + Caveman 堆疊式壓縮可節省 15–95% 的 token（平均約 89%）— 永不觸及限制。380 個 AI 提供者 · 150+ 個免費方案 · 每月約 16.2 億個免費 token · 20 種路由策略 · $0 即可開始。"/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **使用您自己的提供者帳戶。** 這是將您個別符合資格的第三方免費方案彙總後得出的估算值，並非 OmniRoute 提供的 Token 額度。請註冊、在必要時取得憑證，並連接您可使用的提供者；各提供者均自行管理其限制、可用性與條款。
 >
-> 手動疊加免費方案非常麻煩——數十個 SDK、數十種速率限制，而且完全不知道自己實際擁有多少額度。OmniRoute 收錄了分布於 **34 個週期性配額池鍵的 484 個免費方案項目**，並根據 **17 個已公布正數月度預算的配額池，以及五個 Groq 單模型上限**計算標題中的 Token 數量，同時依共用配額池去除重複計算。只有在通過區域身分驗證後才開放的配額（目前為：ModelScope）會分開顯示，即區域身分驗證後可額外獲得約 6M，且絕不計入標題數字。結果會持續顯示於儀表板（`/dashboard/free-tiers`）。
+> 手動疊加免費方案非常麻煩——數十個 SDK、數十種速率限制，而且完全不知道自己實際擁有多少額度。OmniRoute 收錄了分布於 **34 個週期性配額池鍵的 485 個免費方案項目**，並根據 **17 個已公布正數月度預算的配額池，以及五個 Groq 單模型上限**計算標題中的 Token 數量，同時依共用配額池去除重複計算。只有在通過區域身分驗證後才開放的配額（目前為：ModelScope）會分開顯示，即區域身分驗證後可額外獲得約 6M，且絕不計入標題數字。結果會持續顯示於儀表板（`/dashboard/free-tiers`）。
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：穩定狀態下每月約 1.62B 免費 Token，首月加上註冊贈送額度後最高約 2.22B；單一端點背後包含 34 個已記錄的週期性配額池鍵，涵蓋 484 個已收錄的免費方案項目。誠實採用配額池去重計算——每個共用配額池僅計算一次，其中包括 17 個已公布正數月度 Token 預算的週期性配額池，以及五個 Groq 單模型上限；條款風險目錄中有 12 家提供者被標記為避免使用，讓您自行決定。預算長條圖包含 Mistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（五個單模型上限）及較小的配額池，另將首月註冊贈送額度與永久免費且無 Token 上限的提供者分開呈現，確保它們不會灌高標題數字。可於 /dashboard/free-tiers 即時查看已使用量／剩餘量。"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：穩定狀態下每月約 1.62B 免費 Token，首月加上註冊贈送額度後最高約 2.22B；單一端點背後包含 34 個已記錄的週期性配額池鍵，涵蓋 485 個已收錄的免費方案項目。誠實採用配額池去重計算——每個共用配額池僅計算一次，其中包括 17 個已公布正數月度 Token 預算的週期性配額池，以及五個 Groq 單模型上限；條款風險目錄中有 12 家提供者被標記為避免使用，讓您自行決定。預算長條圖包含 Mistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（五個單模型上限）及較小的配額池，另將首月註冊贈送額度與永久免費且無 Token 上限的提供者分開呈現，確保它們不會灌高標題數字。可於 /dashboard/free-tiers 即時查看已使用量／剩餘量。"/>
 
 > 即時 `/dashboard/free-tiers` 頁面的動畫摘要。完整方法（配額池去重、額度級別、提供者條款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
 >
@@ -71,7 +71,7 @@
 
 |                        |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
 | ---------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 提供者              |          352          |   **358**   |          377          |
+| 🌐 提供者              |          352          |   **358**   |          380          |
 | 🧠 不重複的聊天模型 ID |         1320          |  **1374**   |         1475          |
 | 🖼️ 模態橋接            | 🆕 視覺 + 音訊 + 視訊 |      ✓      |           ✓           |
 | 📡 Radar 免費目錄      |      🆕 選擇加入      |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ 功能</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 組合</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 提供者</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 提供者</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI 與 MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="我們的承諾 — 單一端點與 377 個提供者。只要仍有其他健康的目標可用，自動容錯移轉就能維持路由。六大支柱：跨 377 個提供者的彈性容錯移轉 · 在符合資格的工作負載上最多節省 95% 的權杖 · 以 $0 起步，提供 150+ 個免費方案，以及 52 個週期性／無金鑰的永久免費提供者 · 透過單一設定整合 37 種 CLI／代理程式 · 在 /v1 相容 OpenAI、Claude、Gemini 與 Responses API · 生產環境控制功能，包括斷路器、TLS 隱匿、具備 110 項工具的 MCP、A2A、記憶體、防護機制、評估，以及分布於 7,800+ 個追蹤測試檔案中的 56,000+ 項靜態測試宣告。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="我們的承諾 — 單一端點與 380 個提供者。只要仍有其他健康的目標可用，自動容錯移轉就能維持路由。六大支柱：跨 380 個提供者的彈性容錯移轉 · 在符合資格的工作負載上最多節省 95% 的權杖 · 以 $0 起步，提供 150+ 個免費方案，以及 52 個週期性／無金鑰的永久免費提供者 · 透過單一設定整合 39 種 CLI／代理程式 · 在 /v1 相容 OpenAI、Claude、Gemini 與 Responses API · 生產環境控制功能，包括斷路器、TLS 隱匿、具備 110 項工具的 MCP、A2A、記憶體、防護機制、評估，以及分布於 7,800+ 個追蹤測試檔案中的 56,000+ 項靜態測試宣告。"/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的獨特之處——針對 9router、OpenRouter、CLIProxyAPI 與 LiteLLM，在 13 項功能上的特定時間點比較。OmniRoute：377 個提供者、內建 150 多個免費方案、20 種路由策略、12 引擎 token 壓縮、內建具備 110 項工具的 MCP 伺服器、A2A 代理協定、持久化記憶、護欄機制、雲端代理、TLS 指紋隱匿，以及 Desktop/Termux/PWA 與支援 67 種國際化 UI 語系。OmniRoute 採用 MIT 授權，並支援自行託管。競爭對手的功能與數量可能有所變動；請參閱連結中的方法說明。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的獨特之處——針對 9router、OpenRouter、CLIProxyAPI 與 LiteLLM，在 13 項功能上的特定時間點比較。OmniRoute：380 個提供者、內建 150 多個免費方案、20 種路由策略、12 引擎 token 壓縮、內建具備 110 項工具的 MCP 伺服器、A2A 代理協定、持久化記憶、護欄機制、雲端代理、TLS 指紋隱匿，以及 Desktop/Termux/PWA 與支援 67 種國際化 UI 語系。OmniRoute 採用 MIT 授權，並支援自行託管。競爭對手的功能與數量可能有所變動；請參閱連結中的方法說明。"/>
 
 <sub>📊 完整方法說明及與 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 的逐項功能比較詳情 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar 採選擇加入制，且僅使用 GET。OmniRoute 用戶端不會上傳提
 - **🖼️ 新端點** — `/v1/ocr`（Mistral OCR）與 `/v1/audio/translations`（Whisper 風格）完善了媒體功能。→ [API 參考文件](docs/reference/API_REFERENCE.md)
 - **🎨 影像／影片／音訊生成** — 以單一 API 處理媒體：xAI Grok Imagine 與 Novita AI 影片、ComfyUI、Magnific、Adobe Firefly、Segmind，以及 ElevenLabs 等語音提供者。→ [API 參考文件](docs/reference/API_REFERENCE.md)
 - **🌍 部署與維運** — 反向代理 `basePath`、自動偵測瀏覽器語言、個別金鑰裝置追蹤、無需 root 的 MITM 信任設定，以及 zh-TW 本地化。→ [環境](docs/reference/ENVIRONMENT.md)
-- **🤝 更多提供者與代理程式** — 雲端代理程式（Codex Cloud、Cursor、Devin、Jules）、具備瀏覽器＋OAuth 登入的 Grok Build（xAI）、第一級 Ollama 卡片、Claude Opus 5 與 Sonnet 5、Kimi 官方合作（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及全面更新的 **377 個提供者目錄**。→ [提供者](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 更多提供者與代理程式** — 雲端代理程式（Codex Cloud、Cursor、Devin、Jules）、具備瀏覽器＋OAuth 登入的 Grok Build（xAI）、第一級 Ollama 卡片、Claude Opus 5 與 Sonnet 5、Kimi 官方合作（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及全面更新的 **380 個提供者目錄**。→ [提供者](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 路由透明度** — 每個回應都會攜帶 `X-OmniRoute-Decision` 標頭，標示處理該回應的策略／提供者／延遲；全新的 `cache-optimized` 組合策略＋Auto-Combo `cacheAffinity` 因子，會將重複請求路由回持有快取前綴的連線；唯讀的 `/v1/auto-combo/{channel}/candidates` 端點則會公開 `auto/*` 通道的即時候選集區。→ [自動組合](docs/routing/AUTO-COMBO.md)
 - **⚡ 本機效能與基礎架構** — 一鍵啟用本機 Redis、Cloudflare Workers / Deno Deploy 中繼部署器，以及作為受監管嵌入式服務的 Bifrost 與 Mux。→ [嵌入式服務](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 盒裝即備的其他功能** — 外掛程式框架與市集、Omni/Agent/GitHub 技能框架、Obsidian 儲存庫整合（22 個 MCP 工具）、OpenAI 相容的 Batch 與 Files API、語意回應快取、含排行榜的遊戲化功能、ACP 代理程式探索（15 個內建代理程式）、排程將日誌匯出至 BigQuery、`auto/chaos` 平行多模型扇出、Telegram 機器人橋接、應用程式內版本管理器，以及 LMArena-ELO 免費提供者排名。→ [文件](docs/README.md)
@@ -657,7 +657,7 @@ Radar 採選擇加入制，且僅使用 GET。OmniRoute 用戶端不會上傳提
 <b>＋ 同樣支援</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>任何與 OpenAI 相容的工具</b>
 </div>
 
-<sub>📖 全部 38 個工具（27 個 CLI Code + 11 個 CLI Agents）的各工具設定方式 → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode 外掛程式 → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 全部 39 個工具（28 個 CLI Code + 11 個 CLI Agents）的各工具設定方式 → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode 外掛程式 → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ omniroute configure codex          # 亦支援：claude opencode qwen aider goos
 
 <div align="center">
 
-## 🌐 377 個 AI 提供者 — 其中 153 個標記為免費
+## 🌐 380 個 AI 提供者 — 其中 156 個標記為免費
 
 </div>
 
-> 在標準聊天、媒體、搜尋、本機、雲端代理與系統集合中，共有 **377 個已註冊的提供者**，其中 **153 個帶有 `hasFree: true` 探索中繼資料**。聊天模型登錄檔涵蓋 **239 個提供者 / 3,059 組不同的提供者－模型配對 / 1,475 個原始模型 ID**；獨立的免費額度目錄則包含 **484 筆個別模型資料列**、**34 個週期性資源池**，以及 **52 個提供週期性／免金鑰永久免費方案的提供者**。這些分母依設計本來就不同；相關定義與資源池去重後的計算方式，請參閱[提供者參考資料](docs/reference/PROVIDER_REFERENCE.md)與[免費方案](docs/reference/FREE_TIERS.md)。
+> 在標準聊天、媒體、搜尋、本機、雲端代理與系統集合中，共有 **380 個已註冊的提供者**，其中 **156 個帶有 `hasFree: true` 探索中繼資料**。聊天模型登錄檔涵蓋 **239 個提供者 / 3,059 組不同的提供者－模型配對 / 1,475 個原始模型 ID**；獨立的免費額度目錄則包含 **485 筆個別模型資料列**、**34 個週期性資源池**，以及 **52 個提供週期性／免金鑰永久免費方案的提供者**。這些分母依設計本來就不同；相關定義與資源池去重後的計算方式，請參閱[提供者參考資料](docs/reference/PROVIDER_REFERENCE.md)與[免費方案](docs/reference/FREE_TIERS.md)。
 
 <div align="center">
 
@@ -1299,7 +1299,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過此�
   <tr><td nowrap><b>執行環境</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — <code>src/</code> 與 <code>open-sse/</code> 全面採用 <b>100% TypeScript</b>（自 v2.0 起，核心中完全沒有 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 日誌模式）+ LowDB（舊版 JSON）— 147 個領域模組、213 次遷移</td></tr>
+  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 日誌模式）+ LowDB（舊版 JSON）— 147 個領域模組、219 次遷移</td></tr>
   <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文搜尋 + int8 量化向量嵌入、類型化衰減</td></tr>
   <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具輸入／輸出驗證 + API 合約</td></tr>
   <tr><td nowrap><b>協定</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
@@ -1362,7 +1362,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過此�
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">韌性指南</a></b></td><td>斷路器、冷卻期、佇列、防止驚群效應、TLS 偽裝</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">自動組合引擎</a></b></td><td>16 項因素評分、模式套件、自我修復</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy 指南</a></b></td><td>3 層 Proxy 系統、1proxy 市集、登錄檔 CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免費方案</a></b></td><td>彙整目錄：34 個已記錄的週期性資源池／484 個已收錄的免費方案項目</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免費方案</a></b></td><td>彙整目錄：34 個已記錄的週期性資源池／485 個已收錄的免費方案項目</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">功能展示</a></b></td><td>附有螢幕截圖的視覺化儀表板導覽</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">程式碼庫文件</a></b></td><td>適合初學者的程式碼庫導覽</td></tr>
 </table>

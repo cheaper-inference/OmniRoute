@@ -10,7 +10,7 @@ OmniRoute ત્રણ સમર્પિત ડેશબોર્ડ પેજ�
 
 | પેજ            | રૂટ                     | પરિકલ્પના                                                                                       | સંખ્યા        |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | કોડિંગ ટૂલ્સ જેને તમે OmniRoute તરફ નિર્દેશિત કરો છો (ક્લાયન્ટ → CLI → OmniRoute → પ્રદાતા)     | 27            |
+| **CLI Code's** | `/dashboard/cli-code`   | કોડિંગ ટૂલ્સ જેને તમે OmniRoute તરફ નિર્દેશિત કરો છો (ક્લાયન્ટ → CLI → OmniRoute → પ્રદાતા)     | 28            |
 | **CLI Agents** | `/dashboard/cli-agents` | સ્વાયત્ત એજન્ટ્સ જેને તમે OmniRoute તરફ નિર્દેશિત કરો છો (સમાન પ્રવાહ, વધુ વ્યાપક કાર્યક્ષેત્ર) | 11            |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI જેને OmniRoute stdio/ACP મારફતે બેકએન્ડ તરીકે શરૂ કરે છે (વિપરીત પ્રવાહ)                    | રજિસ્ટ્રી જુઓ |
 
@@ -111,7 +111,7 @@ OmniRoute કન્ટેનરની અંદર એક્ઝિક્યુ�
 
 ---
 
-## 1. CLI Codeની સૂચિ (27 ટૂલ્સ)
+## 1. CLI Codeની સૂચિ (28 ટૂલ્સ)
 
 `/dashboard/cli-code`માં દેખાતા તમામ ટૂલ્સ. `baseUrlSupport: none` ધરાવતા ટૂલ્સ કસ્ટમ બેઝ URLને બદલે MITM અથવા મેન્યુઅલ માર્ગદર્શિકા દ્વારા જોડાયેલા છે:
 
@@ -138,6 +138,7 @@ OmniRoute કન્ટેનરની અંદર એક્ઝિક્યુ�
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -227,16 +228,16 @@ interface ToolBatchStatus {
 
 `configType: "custom"` ધરાવતા નવા ટૂલ્સ માટે સમર્પિત સેટિંગ્સ API રૂટ્સ છે:
 
-| રૂટ                                         | ટૂલ                                                              |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                          |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url ફ્લૅગ)                                         |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, લેગસી)                            |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, પ્રાથમિક + લેગસી `~/.deepseek` સિંક) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                            |
-| `POST /api/cli-tools/pi-settings`           | Pi કોડિંગ એજન્ટ                                                  |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)            |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + સમર્પિત `.env` કી)          |
+| રૂટ                                         | ટૂલ                                                                |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                            |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url ફ્લૅગ)                                           |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, લેગસી)                              |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, પ્રાથમિક + લેગસી `~/.deepseek` સિંક)   |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                              |
+| `POST /api/cli-tools/pi-settings`           | Pi કોડિંગ એજન્ટ (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)              |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + સમર્પિત `.env` કી)            |
 
 બધા રૂટ્સ ભૂલ પ્રતિસાદો માટે `sanitizeErrorMessage()` નો ઉપયોગ કરે છે (સખત નિયમ #12).
 
@@ -340,7 +341,7 @@ pip install aider-chat
 cargo install smelt  # Rust-આધારિત
 
 # Pi કોડિંગ એજન્ટ
-# ઇન્સ્ટોલેશન માટે https://github.com/zechnerj/pi-coding-agent જુઓ
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # ઇન્સ્ટોલેશન માટે https://github.com/1jehuang/jcode જુઓ
@@ -453,6 +454,38 @@ EOF
 
 > થિંકિંગ વેરિઅન્ટ્સ મોકલવા માટે
 > `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`નો ઉપયોગ કરો.
+
+---
+
+#### Pi Coding Agent
+
+સત્તાવાર Pi Coding Agent પૅકેજ `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` વડે ઇન્સ્ટૉલ કરો. Pi custom provider ને `~/.pi/agent/models.json` માંથી વાંચે છે; agent ની આખી ડિરેક્ટરી ખસેડવા `PI_CODING_AGENT_DIR` ને absolute path (અથવા `~` થી શરૂ થતા path) પર સેટ કરો. ડૅશબોર્ડ આ override અનુસરે છે. Pi custom endpoint માંથી મોડલ શોધતું નથી, તેથી OmniRoute પસંદ કરેલું મોડલ `models[]` માં લખે છે, Pi ની `openai-completions` API અને OmniRoute નું OpenAI-સુસંગત `/v1` endpoint વાપરીને.
+
+**CLI Tools → Pi** માં endpoint, API key અને મોડલ પસંદ કરો, provider preview તપાસો અને પછી લાગુ કરો. preview એ provider નો fragment છે: Pi ને મેન્યુઅલી ગોઠવતાં `providers.omniroute` ને તમારા હાલના `models.json` માં ભેળવો, જેથી બીજા provider અને સેટિંગ અકબંધ રહે.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+તમે `/model` ખોલો ત્યારે Pi `models.json` ફરી લોડ કરે છે. પસંદ કરેલા provider ID અને model ID વડે ગોઠવેલા route ની ચકાસણી કરો:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+સંદર્ભો: [Pi મોડલ અને custom provider](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi પર્યાવરણ ચલ](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi ઇન્સ્ટૉલ કરવાની સૂચનાઓ](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

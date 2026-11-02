@@ -61,3 +61,15 @@ Mbupụ ntọala (`GET /api/settings/export-json`) na-agụnye arrays abụọ a
 ọ bụla ọzọ — n’adịghị ka filter mbupụ combo-step nke `hidePaidModels`, enweghị ihe egwu
 ịbughachite data ebe a: id a jụrụ nke dị n’ime combo step e bupụrụ bụ nhọrọ routing onye na-ahụ maka sistemụ
 mere n’onwe ya, ọ bụghị ihe ókè mbupụ kwesịrị iwepụ.
+
+## Ndepụta combo naanị (`exposeCombosOnly`)
+
+Boolean dị iche, nke a ga-ahọrọ ịgbanye kwa ma bụrụ `false` na ndabara, maka deployment ebe combo bụ model ọha na provider bụ naanị backend. Mgbe ọ bụ `true`, ndepụta ọha (`GET /v1/models`, `GET /v1`, na route nchọpụta `/v1` ndị ọzọ e wuru na `getUnifiedModelsResponse()`) na-edobe naanị row nwere `owned_by: "combo"`: combo onye ọrụ na built-in combo `auto/*` (ọ gwụla ma `hideAutoCombos` zoro ha). Ọ na-eji otu nyocha row dịka `catalogScope: "combos"` nke key ọ bụla, filter allow/deny/scope nke key n'onwe ya ka na-arụkwa ọrụ n'elu ya.
+
+Gbanwee ya na **Settings → Routing → Models API listing**, ma ọ bụ site na `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Dịka ndepụta ndị dị n'elu, ọ na-agbanwe naanị ihe a na-akpọsa:
+
+- id `provider/model` e kwuru kpọmkwem ka na-eziga arịrịọ, `GET /v1/models/{id}` ka na-achọtakwa ya;
+- a naghị ebelata dashboard catalog (`GET /api/models/catalog`, nke model picker na-eji);
+- a naghị edepụta ya na candidate pool `auto/*`, ya mere combo `auto/*` na-edobe pool ha dum.

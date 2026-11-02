@@ -13,7 +13,7 @@
 
 ## De quoi il s'agit
 
-OmniRoute enregistre 377 fournisseurs, dont 155 entrées de catalogue marquées **gratuit/sans authentification**
+OmniRoute enregistre 380 fournisseurs, dont 155 entrées de catalogue marquées **gratuit/sans authentification**
 (sans authentification,
 OAuth à niveau gratuit, ou clé API à niveau gratuit — voir le
 [Guide des niveaux gratuits](../getting-started/FREE-TIERS-GUIDE.md) et le

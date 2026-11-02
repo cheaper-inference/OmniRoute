@@ -5,8 +5,8 @@
 ---
 
 > **Versie:** v3.8.44
-> **Laatst bijgewerkt:** 2026-09-16
-> **Doelgroep:** Engineers die ingebedde services toevoegen, onderhouden of debuggen (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Laatst bijgewerkt:** 2026-10-28
+> **Doelgroep:** Engineers die ingebedde services toevoegen, onderhouden of debuggen (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Ingebedde services zijn lokaal geïnstalleerde sidecar-proceshulpmiddelen die door OmniRoute worden geïnstalleerd, bewaakt en
 beschikbaar gesteld als volwaardige routeringsdoelen. In tegenstelling tot externe providers (die via internet
@@ -31,19 +31,20 @@ met API-sleutels worden benaderd), draaien ingebedde services op dezelfde machin
 
 ### Waarom ingebedde services?
 
-Er zijn zeven services ingebed:
+Er zijn acht ingebedde services:
 
-| Service         | npm-pakket                        | Standaardpoort | Doel                                                                                                                                                                                                                                                                                                                                                                             |
-| --------------- | --------------------------------- | :------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                         |     20130      | AI-router die OmniRoute als subprovider kan gebruiken. Modellen worden beschikbaar gesteld als `9router/{sub}/{model}`                                                                                                                                                                                                                                                           |
-| **CLIProxyAPI** | GitHub-releasebinary (`cliproxy`) |      8317      | Lokale proxyadapter voor Anthropic CLI-authenticatiestromen. Biedt fallbackroutering wanneer OAuth-tokens verlopen                                                                                                                                                                                                                                                               |
-| **Mux**         | `mux` (headless `mux server`)     |      8322      | Lokale daemon voor agentorkestratie (coder/mux). Alleen levenscyclusbeheer — geen routeringsdoel (geen LLM-proxying).                                                                                                                                                                                                                                                            |
-| **Bifrost**     | `@maximhq/bifrost`                |      8080      | Go AI-gateway-relaybackend. Wanneer deze actief is, wordt deze automatisch geselecteerd door de relayroute (`/v1/relay/`)                                                                                                                                                                                                                                                        |
-| **Dario**       | `@askalf/dario`                   |      3456      | Claude-abonnementsproxy — alternatief/failover voor CLIProxyAPI voor Claude-Code-vormig verkeer; de geïnjecteerde sleutel wordt `DARIO_ADMIN_TOKEN`, die de toegang tot het `/admin/*` OAuth-configuratiescherm beheert                                                                                                                                                          |
-| **open-wa**     | `@open-wa/wa-automate`            |      8323      | WhatsApp Web-automatisering (headless Chromium via Puppeteer). Alleen levenscyclusbeheer — geen routeringsdoel.                                                                                                                                                                                                                                                                  |
-| **LLMLingua**   | `@atjsh/llmlingua-2`              |     20135      | Sidecar voor promptcompressie — echt LLMLingua-2 ONNX-model (JS/TS-port van het algoritme van Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` stuurt `/compress` via HTTP door naar deze sidecar en valt terug op de backend met workerthreads binnen het proces wanneer de sidecar niet beschikbaar is. Alleen levenscyclusbeheer — geen routeringsdoel. |
+| Service         | npm-pakket                           | Standaardpoort | Doel                                                                                                                                                                                                                                                                                                                                                                             |
+| --------------- | ------------------------------------ | :------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                            |     20130      | AI-router die OmniRoute als subprovider kan gebruiken. Modellen worden beschikbaar gesteld als `9router/{sub}/{model}`                                                                                                                                                                                                                                                           |
+| **CLIProxyAPI** | GitHub-releasebinary (`cliproxy`)    |      8317      | Lokale proxyadapter voor Anthropic CLI-authenticatiestromen. Biedt fallbackroutering wanneer OAuth-tokens verlopen                                                                                                                                                                                                                                                               |
+| **Mux**         | `mux` (headless `mux server`)        |      8322      | Lokale daemon voor agentorkestratie (coder/mux). Alleen levenscyclusbeheer — geen routeringsdoel (geen LLM-proxying).                                                                                                                                                                                                                                                            |
+| **Bifrost**     | `@maximhq/bifrost`                   |      8080      | Go AI-gateway-relaybackend. Wanneer deze actief is, wordt deze automatisch geselecteerd door de relayroute (`/v1/relay/`)                                                                                                                                                                                                                                                        |
+| **Dario**       | `@askalf/dario`                      |      3456      | Claude-abonnementsproxy — alternatief/failover voor CLIProxyAPI voor Claude-Code-vormig verkeer; de geïnjecteerde sleutel wordt `DARIO_ADMIN_TOKEN`, die de toegang tot het `/admin/*` OAuth-configuratiescherm beheert                                                                                                                                                          |
+| **open-wa**     | `@open-wa/wa-automate`               |      8323      | WhatsApp Web-automatisering (headless Chromium via Puppeteer). Alleen levenscyclusbeheer — geen routeringsdoel.                                                                                                                                                                                                                                                                  |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                 |     20135      | Sidecar voor promptcompressie — echt LLMLingua-2 ONNX-model (JS/TS-port van het algoritme van Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` stuurt `/compress` via HTTP door naar deze sidecar en valt terug op de backend met workerthreads binnen het proces wanneer de sidecar niet beschikbaar is. Alleen levenscyclusbeheer — geen routeringsdoel. |
+| **sing-box**    | Releasebinary van GitHub (`singbox`) |     20140      | TPROXY-sidecar die de onderschepping via een transparante proxy door `applyTproxy()` ondersteunt (`src/mitm/tproxy/setup.ts`). Het installatieprogramma downloadt de vastgezette release en controleert de checksum. Alleen de levenscyclus wordt beheerd: geen routeringsdoel en geen proxy voor LLM-verkeer.                                                                   |
 
-Alle zeven volgen hetzelfde supervisiemodel:
+Alle acht volgen hetzelfde supervisiemodel:
 
 - OmniRoute installeert ze onder `DATA_DIR/services/{name}/` (geïsoleerd van OmniRoutes eigen `package.json`)
 - OmniRoute start en bewaakt ze als childprocessen
@@ -584,7 +585,27 @@ zonder effect) wordt teruggevallen op de in-process worker-threadbackend (`./wor
 
 ---
 
-### 4.8 Reverse proxy (ingesloten 9Router-dashboard)
+### 4.8 sing-box-eindpunten (8 routes)
+
+sing-box heeft dezelfde eindpuntstructuur als Mux: geen `rotate-key`-route en geen injectie van API-sleutels (`needsApiKey: false` in `bootstrap.ts`). Alleen de levenscyclus wordt beheerd; het is nooit een routerings- of LLM-provider. `install()` downloadt de officiële GitHub-releasebinary (`SagerNet/sing-box`) voor de vastgezette versie (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) en controleert de SHA256 met een checksum die in hetzelfde bestand is opgenomen, voordat de binary naar schijf wordt geschreven. Elke andere aangevraagde versie wordt geweigerd.
+
+| Methode | Pad                                          | Beschrijving                                                                        |
+| ------- | -------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `POST`  | `/api/services/singbox/install`              | De vastgezette sing-box-release downloaden en controleren                           |
+| `POST`  | `/api/services/singbox/start`                | sing-box starten (`sing-box run -c config.json`)                                    |
+| `POST`  | `/api/services/singbox/stop`                 | sing-box stoppen                                                                    |
+| `POST`  | `/api/services/singbox/restart`              | sing-box opnieuw starten                                                            |
+| `POST`  | `/api/services/singbox/update`               | De vastgezette release opnieuw controleren of installeren                           |
+| `GET`   | `/api/services/singbox/status`               | Actuele status en DB-status                                                         |
+| `POST`  | `/api/services/singbox/auto-start`           | Automatisch starten in- of uitschakelen                                             |
+| `POST`  | `/api/services/singbox/auto-restart-adopted` | Automatisch herstarten in- of uitschakelen voor een overgenomen, al bestaand proces |
+| `GET`   | `/api/services/singbox/logs`                 | De log volgen via SSE, met de gedeelde dynamische route `[name]/logs`               |
+
+**TPROXY-koppeling:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) schrijft `config.json` en start de supervisor voordat `applyTproxy()` de TPROXY-firewallregels installeert. Als de supervisor ontbreekt of de status `running` niet bereikt, wordt dit nu als fout gelogd in plaats van stilzwijgend genegeerd. Zo kan de beheerder zien dat de TPROXY-regels zijn toegepast zonder een werkende listener erachter.
+
+---
+
+### 4.9 Reverse proxy (ingesloten 9Router-dashboard)
 
 Het dashboard sluit de webinterface van 9Router in een iframe in via een interne reverse
 proxy op:

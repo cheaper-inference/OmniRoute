@@ -564,7 +564,8 @@ Suojaus ei koskaan estä; se ainoastaan merkitsee (`meta.detections`, `meta.reda
 
 **Dashboard → Settings → Security → PII masking** valitsee _mitä_ peitetään. Se ei kytke peittoa päälle: se tapahtuu edelleen asetuksilla `PII_REDACTION_ENABLED` (pyyntö) ja `PII_RESPONSE_SANITIZATION` (vastaus + SSE), jotka molemmat ovat oletuksena pois päältä.
 
-- **Tyypikohtainen valinta** — sisäänrakennetut tunnisteet on lueteltu tiedostossa `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Asettamaton arvo tarkoittaa kaikkia tyyppejä (käyttäytyminen ennen tämän asetuksen olemassaoloa). Pyyntömoottorin `ssn_us`-kaava vastaa tyyppiä `ssn`. Mallipohjat (Minimal, Standard, Financial, Brazilian, USA, Full) vain täyttävät valintaruudut käyttöliittymässä.
+- **Tyypikohtainen valinta** — sisäänrakennetut tunnisteet on lueteltu tiedostossa `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Asettamaton arvo tarkoittaa kaikkia tyyppejä (käyttäytyminen ennen tämän asetuksen olemassaoloa). Pyyntömoottorin `ssn_us`-kaava vastaa tyyppiä `ssn`. Mallipohjat (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) vain täyttävät valintaruudut käyttöliittymässä.
+- **GDPR- ja POPIA-tunnisteet** — kaksitoista sisäänrakennettua tunnistetta EU:n ja Etelä-Afrikan henkilötunnisteille (taulukko alla). Niiden säännölliset lausekkeet, validaattorit ja lainkäyttöaluetunnisteet ovat yhdessä taulukossa, `src/shared/utils/piiPatterns.ts`, jota sekä vastausten puhdistin (`src/lib/piiSanitizer.ts`) että pyyntöjen peittäjä (`src/shared/utils/inputSanitizer.ts`) käyttävät. Osuma peitetään vain, kun validaattori hyväksyy sen; pelkkä numerosarja ei koskaan riitä. Ennen näiden tunnisteiden olemassaoloa rajatun valinnan tallentaneen ylläpitäjän aiempi toiminta säilyy, kunnes uudet tunnisteet valitaan.
 - **Mukautetut kaavat** — enintään 20 säännöllisen lausekkeen tai jokerimerkin kaavaa (`*` = enintään 64 muuta kuin tyhjämerkkiä, `?` = yksi). Osumista tulee `[CUSTOM_REDACTED]`. Jokainen kaava käy läpi `compilePiiCustomPattern()`-funktion (`src/shared/utils/piiCustomPatterns.ts`): enintään 500 merkkiä, liput rajoitettu arvoihin `g i m s u`, täytyy kääntyä, täytyy läpäistä `safe-regex`-tarkistus (katastrofaalinen takaisinperäytyminen) eikä se saa täsmätä tyhjään merkkijonoon tai peittämismerkkiin. Epäonnistuva kaava hylätään tallennettaessa ja testattaessa, ja tallennettu rivi, joka epäonnistuu, ohitetaan ajonaikaisesti sen sijaan että se käännettäisiin. Mukautetut kaavat suoritetaan vain peiton ollessa päällä.
 - **Havaintolaskurit** — tyypikohtaiset lukumäärät (ei koskaan täsmänneitä arvoja), pidetään muistissa ja nollataan uudelleenkäynnistyksessä (`src/lib/pii/piiDetectionStats.ts`). Ne kasvavat vain peiton ollessa päällä.
 
@@ -577,6 +578,25 @@ Asetukset sijaitsevat `key_value`-taulussa (nimiavaruus `pii_settings`, `src/lib
 | `POST` | `/api/settings/pii/test` | Kuivaharjoittelu yhdelle kaavalle enintään 8 Kt:n näytteellä; mitään ei tallenneta |
 
 Kaikki kolme vaativat hallintatodennuksen ja validoivat rungon Zod:lla (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR- (EU) ja POPIA-tunnisteet (Etelä-Afrikka)
+
+| Tunnus              | Tunniste                    | Validointi                                                                                      |
+| ------------------- | --------------------------- | ----------------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                        | Tunnettu maa, täsmällinen maakohtainen pituus, ISO 13616 MOD-97-10                              |
+| `eu_vat`            | EU:n ALV-numero             | Tunnettu jäsenvaltion etuliite ja kyseisen valtion numeromuoto (ei VIES-hakua)                  |
+| `es_dni_nie`        | Espanjan DNI / NIE          | Tarkistuskirjain (arvo mod 23); NIE on `X/Y/Z` + 7 numeroa                                      |
+| `it_codice_fiscale` | Italian Codice Fiscale      | Tarkistuskirjain parittomien/parillisten sijaintien taulukoista                                 |
+| `pl_pesel`          | Puolan PESEL                | Painotettu tarkistussumma ja koodatun syntymäkuukauden/-päivän mahdolliset arvoalueet           |
+| `nl_bsn`            | Alankomaiden BSN            | 11-tarkistus (painot 9..2, -1)                                                                  |
+| `de_steuer_id`      | Saksan Steuer-ID            | ISO 7064 Mod 11,10 sekä numerorakenteen säännöt (ei alkunollaa 0)                               |
+| `se_personnummer`   | Ruotsin personnummer        | Luhn viimeisille kymmenelle numerolle ja mahdollinen syntymäpäivä (10 tai 12 numeroa)           |
+| `za_id`             | Etelä-Afrikan henkilötunnus | Luhn kaikille 13 numerolle, kelvollinen syntymäkuukausi/päivä, kansalaisuusnumero 0 tai 1       |
+| `za_phone`          | Etelä-Afrikan puhelinnumero | Etuliite `+27` / `27` tai kansallinen `0..`-muoto välilyönnillä tai yhdysmerkillä kirjoitettuna |
+| `za_vat`            | Etelä-Afrikan ALV-numero    | 10 numeroa, joiden alussa on `4`, **ja** "VAT" / "BTW" edeltävissä 48 merkissä                  |
+| `za_tax_ref`        | Etelä-Afrikan veroviite     | 10 numeroa, joiden alussa on `0`-`3`, Luhn **ja** "tax" / "SARS" edeltävissä 48 merkissä        |
+
+Koska pelkistä numeroista koostuvat muodot osuvat myös tilausnumeroihin, koostenumeroihin ja aikaleimoihin, heikoimmat (`za_vat`, `za_tax_ref`) tarvitsevat avainsanavihjeen, eikä pelkkää kymmenen numeron `0..`-lukua käsitellä Etelä-Afrikan puhelinnumerona. Välilyönneillä erotettuja IBANeja (`GB29 NWBK ...`) ei tunnisteta. Suoratoistopolulla vihjettä etsitään vain nykyisestä lohkosta. Tunnisteet ovat ennen yleisiä puhelinmalleja, joten validoitu tunniste säilyttää oman paikkamerkkinsä (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Mallipohjat `gdpr` ja `popia` valitsevat vastaavasti EU:n ja Etelä-Afrikan tunnisteet. Peittäminen pysyy erikseen käyttöön otettavana (Hard Rule #20): mikään tässä ei muuta ominaisuuslipun oletusarvoa.
 
 ### Kehoteinjektio (`promptInjection.ts`)
 

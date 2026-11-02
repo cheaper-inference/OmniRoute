@@ -310,12 +310,12 @@ Le catalogue des outils est disponible dans [Portées des outils MCP](#mcp-tool-
 `Access token scope 'read' is insufficient; 'write' required.`
 Ce classement est géré par `scopeSatisfies`. Il ne consulte pas la table MCP, et le mécanisme de correspondance MCP ne le consulte pas non plus.
 
-| Espace de noms             | Identifiant d’authentification                                | Vérificateur                                 | Une réussite autorise                                              |
-| :------------------------- | :------------------------------------------------------------ | :------------------------------------------- | :----------------------------------------------------------------- |
-| Gestion par clé API        | `api_keys.scopes`                                             | `hasManageScope`                             | L’API REST de gestion pour cette clé Bearer                        |
-| Portée additive de clé API | même tableau, une chaîne exacte                               | la fonction d’assistance indiquée ci-dessous | Uniquement cette capacité                                          |
-| Portées des outils MCP     | même tableau, sinon `_meta` MCP, sinon `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                               | Cet outil, une fois l’application des règles activée               |
-| Jeton d’accès              | `oma_live_…`                                                  | `scopeSatisfies`                             | La route de gestion dont la méthode et le chemin exigent ce niveau |
+| Espace de noms             | Identifiant d’authentification                                                            | Vérificateur                                 | Une réussite autorise                                              |
+| :------------------------- | :---------------------------------------------------------------------------------------- | :------------------------------------------- | :----------------------------------------------------------------- |
+| Gestion par clé API        | `api_keys.scopes`                                                                         | `hasManageScope`                             | L’API REST de gestion pour cette clé Bearer                        |
+| Portée additive de clé API | même tableau, une chaîne exacte                                                           | la fonction d’assistance indiquée ci-dessous | Uniquement cette capacité                                          |
+| Portées des outils MCP     | le même tableau, sinon le `_meta` MCP (HTTP/SSE uniquement), sinon `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                               | Cet outil, une fois l’application des règles activée               |
+| Jeton d’accès              | `oma_live_…`                                                                              | `scopeSatisfies`                             | La route de gestion dont la méthode et le chemin exigent ce niveau |
 
 La création de chaque identifiant d’authentification est abordée dans
 [Authentification de gestion](../guides/MANAGEMENT-AUTH.md).
@@ -352,7 +352,10 @@ Le même appel échoue avec `admin`, `mcp:connect`, `read` et `write` lorsque ce
 
 L’application des règles est désactivée sauf si `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (valeur par défaut :
 `false`). Lorsqu’elle est désactivée, `evaluateToolScopes` autorise l’appel et ignore le catalogue. Lorsqu’elle est activée, HTTP utilise les `api_keys.scopes` de la clé Bearer comme `authInfo` (voir [Liaison HTTP des portées par clé](#per-key-http-scope-binding-7895)).
-Lorsqu’aucune portée de clé n’est résolue, l’ensemble des portées accordées se rabat sur `_meta` MCP, puis sur `OMNIROUTE_MCP_SCOPES`.
+Lorsque aucune portée de clé n'est résolue, l'ensemble accordé passe à `_meta` MCP (honoré uniquement
+pour les appelants HTTP/SSE, dans un contexte d'authentification HTTP ; le `_meta` d'un appelant stdio est ignoré
+car le client le contrôle et qu'il ne porte aucune identité par appelant), puis
+`OMNIROUTE_MCP_SCOPES`.
 
 #### Portées des jetons d’accès
 
@@ -422,7 +425,10 @@ L’accès au transport HTTP/SSE MCP (`/api/mcp/*`) depuis une adresse autre que
 
 ### Liaison des portées HTTP par clé (#7895)
 
-Sur HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` résout désormais les véritables `api_keys.scopes` de l’appelant via `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) et les transmet au SDK MCP dans `transport.handleRequest(req, { authInfo })`, afin que `extra.authInfo.scopes`, reçu par chaque appel d’outil, reflète les propres portées de la clé Bearer. La fonction `resolveCallerScopeContext()` de `scopeEnforcement.ts` donnait déjà la priorité à `authInfo` par rapport à `_meta` et au recours à la variable d’environnement `OMNIROUTE_MCP_SCOPES` — cette modification alimente simplement cette première source, qui est la plus prioritaire et qui ne l’était auparavant pas sur HTTP. Lorsqu’aucune clé API n’est résolue (aucun en-tête, clé non valide), `authInfo` reste `undefined` et la résolution se poursuit sans changement avec la chaîne `meta`/environnement existante. stdio ne possède aucune identité par appelant (voir `mcpCallerIdentity.ts`) et n’est pas affecté — il continue d’utiliser la chaîne de recours `_meta`/environnement.
+Sur HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` résout désormais les véritables `api_keys.scopes` de l’appelant via `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) et les transmet au SDK MCP dans `transport.handleRequest(req, { authInfo })`, afin que `extra.authInfo.scopes`, reçu par chaque appel d’outil, reflète les propres portées de la clé Bearer. La fonction `resolveCallerScopeContext()` de `scopeEnforcement.ts` donnait déjà la priorité à `authInfo` par rapport à `_meta` et au recours à la variable d’environnement `OMNIROUTE_MCP_SCOPES` — cette modification alimente simplement cette première source, qui est la plus prioritaire et qui ne l’était auparavant pas sur HTTP. Lorsqu’aucune clé API n’est résolue (aucun en-tête, clé non valide), `authInfo` reste `undefined` et la résolution se poursuit sans changement avec la chaîne `meta`/environnement existante. stdio n'a pas d'identité par appelant (voir
+`mcpCallerIdentity.ts`) et n'est pas affecté par la liaison par clé — il ignore l'étape `_meta`
+(`_meta` n'est honoré qu'au sein d'un contexte d'authentification HTTP, #15159) et se résout à partir de
+la seule variable d'environnement `OMNIROUTE_MCP_SCOPES`.
 
 **L’application des portées est forcée pour les appelants HTTP/SSE à portée restreinte, indépendamment de `OMNIROUTE_MCP_ENFORCE_SCOPES`.** La valeur par défaut `false` de `OMNIROUTE_MCP_ENFORCE_SCOPES` n’est sûre que pour le flux local/stdio à opérateur unique, dans lequel aucune identité par appelant n’est disponible pour définir les portées. `open-sse/mcp-server/server.ts::withScopeEnforcement()` active systématiquement l’application des portées par outil (`shouldForceScopeEnforcement()` dans `scopeEnforcement.ts`) lorsque `resolveCallerScopeContext()` a résolu `source === "authInfo"` (c’est-à-dire un véritable en-tête HTTP Authorization propre à chaque clé, uniquement pour HTTP/SSE) ET que cette clé ne dispose pas d’une portée complète `manage`/`admin`. Cela comble la faille qui permettrait autrement à une clé disposant UNIQUEMENT de la portée de contournement restreinte `mcp:connect` — décrite ci-dessus comme n’autorisant rien d’autre que l’exception LOCAL_ONLY `/api/mcp/` — d’invoquer tous les outils MCP dès qu’un opérateur active l’accès MCP distant/non limité à l’adresse de bouclage, simplement parce que `OMNIROUTE_MCP_ENFORCE_SCOPES` est fourni avec la valeur `false` par défaut. Une clé disposant d’une portée complète `manage`/`admin` sur HTTP, ainsi que tous les appelants stdio/locaux, conservent sans changement le comportement existant conditionné par `OMNIROUTE_MCP_ENFORCE_SCOPES`.
 

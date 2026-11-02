@@ -84,3 +84,14 @@ test("Optional fields absent from entry still parse successfully", () => {
   const result = CliCatalogEntrySchema.safeParse(CLI_TOOLS["codex"]);
   assert.equal(result.success, true);
 });
+
+test("CLI guide code blocks round-trip through the schema without discarded fields", () => {
+  let checked = 0;
+  for (const [key, tool] of Object.entries(CLI_TOOLS)) {
+    if (!tool.codeBlock) continue;
+    const parsed = CliCatalogEntrySchema.parse(tool);
+    assert.deepEqual(parsed.codeBlock, tool.codeBlock, `Entry '${key}' loses code block fields`);
+    checked += 1;
+  }
+  assert.ok(checked > 0, "the contract must exercise at least one real code block");
+});

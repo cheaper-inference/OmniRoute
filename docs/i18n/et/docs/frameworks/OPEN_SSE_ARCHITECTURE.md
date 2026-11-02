@@ -488,7 +488,7 @@ See käsitleb järgmist:
 
 | Fail                          | Otstarve                                             |
 | ----------------------------- | ---------------------------------------------------- |
-| `providerRegistry.ts`         | Vestlusmudelite register 377 pakkuja kataloogi jaoks |
+| `providerRegistry.ts`         | Vestlusmudelite register 380 pakkuja kataloogi jaoks |
 | `providerModels.ts`           | Mudelite aliased, vormingute vastendus               |
 | `constants.ts`                | Ajalõpud, piirangud, olekukoodid                     |
 | `defaultThinkingSignature.ts` | Claude'i vaikimisi mõtlemissignatuur                 |

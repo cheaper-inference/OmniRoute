@@ -163,7 +163,7 @@ OmniRoute expune 6 competențe A2A conectate în `src/lib/a2a/taskExecution.ts::
 | Raport de sănătate        | `health-report`      | Agregă starea mecanismului de întrerupere a circuitului, a perioadei de așteptare și a blocării pentru fiecare furnizor                                                             | sănătate, reziliență             | „Afișează starea de sănătate a tuturor furnizorilor” |
 | Listarea capabilităților  | `list-capabilities`  | Returnează catalogul complet cu 45 de intrări Agent Skills (23 API + 21 CLI + 1 configurare) sub forma unui tabel markdown, cu URL-uri SKILL.md brute pentru injectarea contextului | catalog, descoperire, competențe | „Listează toate capabilitățile OmniRoute”            |
 
-> Agent Card trebuie menținut aliniat cu catalogul activ de 377 de furnizori; numărul furnizorilor și metadatele privind accesul gratuit/fără autentificare provin din registrul de execuție.
+> Agent Card trebuie menținut aliniat cu catalogul activ de 380 de furnizori; numărul furnizorilor și metadatele privind accesul gratuit/fără autentificare provin din registrul de execuție.
 
 ### Detalii despre competența `list-capabilities`
 
@@ -215,7 +215,7 @@ Punctul final JSON-RPC `/a2a` este punctul de intrare A2A canonic. Punctele fina
    };
    ```
 
-3. **Expuneți în cardul agentului:** în `src/app/.well-known/agent.json/route.ts`, adăugați la matricea `skills`:
+3. **Expuneți abilitatea în fișa agentului:** în `src/lib/a2a/agentCardMetadata.ts` (partajat de `/.well-known/agent.json` și `/.well-known/agent-card.json`), adăugați următorul obiect în matricea `skills`:
 
    ```json
    {

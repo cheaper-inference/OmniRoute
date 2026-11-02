@@ -64,6 +64,19 @@ Arbetsytan `electron/` tillhandahåller även:
 - `npm run build:mac-x64` / `build:mac-arm64` — macOS-byggen för en enskild arkitektur
 - `npm run pack` — bygger endast en katalog för lokal testning (inget installationsprogram)
 
+## Valfria körmiljöpaket
+
+Skrivbordsbyggen kan publicera valfria körmiljöarkiv tillsammans med installationsprogrammen. Det installerade serverinnehållet innehåller `optional-packs.index.json` (under `resources/app` på Windows och Linux). För posten `browser-runtime`, läs `packs[].tarball` och hämta **exakt det filnamnet från samma utgåva**. Arkivnamn innehåller en SHA-256-digest; olika byggen kan kräva olika arkiv. Behåll det hämtade filnamnet oförändrat.
+
+Kopiera den installerade appens index och det valda arkivet till en katalog och använd sedan CLI:n från samma utgåva:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` visar installations- och verifieringstillstånd, inte arkivnamnet. Det medföljande indexet väljer arkivet. Installationen verifierar arkivets kontrollsumma före uppackning och paketens kontrollsummor innan ett installerat paket ersätts. Den läser lokala filer; den hämtar inte saknade arkiv. Starta om programmet efter installationen. Om utgåvan inte har någon matchande fil är det valfria paketet inte tillgängligt bland den utgåvans filer.
+
 ## Katalogstruktur
 
 ```

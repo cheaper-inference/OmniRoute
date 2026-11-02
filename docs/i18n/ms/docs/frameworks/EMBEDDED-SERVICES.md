@@ -5,8 +5,8 @@
 ---
 
 > **Versi:** v3.8.44
-> **Kemas kini terakhir:** 2026-09-16
-> **Sasaran pembaca:** Jurutera yang menambah, menyelenggara atau menyahpepijat perkhidmatan terbenam (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Kemas kini terakhir:** 2026-10-28
+> **Sasaran pembaca:** Jurutera yang menambah, menyelenggara atau menyahpepijat perkhidmatan terbenam (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Perkhidmatan terbenam ialah alat proses sampingan yang dipasang secara setempat, yang dipasang, diselia dan
 didedahkan oleh OmniRoute sebagai sasaran penghalaan kelas pertama. Tidak seperti penyedia luaran (yang dicapai melalui internet
@@ -31,7 +31,7 @@ menggunakan kunci API), perkhidmatan terbenam berjalan pada mesin yang sama deng
 
 ### Mengapa perkhidmatan terbenam?
 
-Tujuh perkhidmatan disertakan:
+Lapan perkhidmatan diterapkan:
 
 | Perkhidmatan    | Pakej npm                           | Port lalai | Tujuan                                                                                                                                                                                                                                                                                                                                                                |
 | --------------- | ----------------------------------- | :--------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,8 +42,9 @@ Tujuh perkhidmatan disertakan:
 | **Dario**       | `@askalf/dario`                     |    3456    | Proksi langganan Claude — alternatif/pengambilalihan untuk CLIProxyAPI bagi trafik berbentuk Claude-Code; kunci yang disuntik menjadi `DARIO_ADMIN_TOKEN` yang mengehadkan satah kawalan OAuth `/admin/*`                                                                                                                                                             |
 | **open-wa**     | `@open-wa/wa-automate`              |    8323    | Automasi WhatsApp Web (Chromium tanpa paparan melalui Puppeteer). Diurus kitar hayat sahaja — bukan sasaran penghalaan.                                                                                                                                                                                                                                               |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                |   20135    | Sidecar pemampatan gesaan — model ONNX LLMLingua-2 sebenar (port JS/TS bagi algoritma Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` menghantar `/compress` kepadanya melalui HTTP, dengan beralih kepada bahagian belakang jalur pekerja dalam proses apabila sidecar tidak berfungsi. Diurus kitar hayat sahaja — bukan sasaran penghalaan. |
+| **sing-box**    | Binari keluaran GitHub (`singbox`)  |   20140    | Sidecar TPROXY yang menyokong pemintasan proksi telus oleh `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Pemasang memuat turun keluaran yang versinya ditetapkan dan checksum-nya disahkan. Hanya kitar hayat diuruskan; bukan sasaran penghalaan dan tidak memproksikan LLM.                                                                                         |
 
-Kesemua tujuh perkhidmatan mengikuti model penyeliaan yang sama:
+Kesemua lapan perkhidmatan mengikut model penyeliaan yang sama:
 
 - OmniRoute memasangnya di bawah `DATA_DIR/services/{name}/` (diasingkan daripada `package.json` milik OmniRoute)
 - OmniRoute memulakan dan memantaunya sebagai proses anak
@@ -581,7 +582,27 @@ akan kembali menggunakan bahagian belakang bebenang pekerja dalam proses
 
 ---
 
-### 4.8 Proksi songsang (benaman papan pemuka 9Router)
+### 4.8 Titik akhir sing-box (8 laluan)
+
+sing-box mempunyai struktur titik akhir yang sama seperti Mux: tiada laluan `rotate-key` dan tiada suntikan kunci API (`needsApiKey: false` dalam `bootstrap.ts`). Hanya kitar hayatnya diuruskan; ia tidak pernah menjadi penyedia penghalaan/LLM. `install()` memuat turun binari keluaran rasmi GitHub (`SagerNet/sing-box`) bagi versi yang ditetapkan (`SINGBOX_PINNED_VERSION` dalam `src/lib/services/installers/singbox.ts`) dan mengesahkan SHA256 terhadap checksum yang dibenamkan dalam fail yang sama sebelum menulisnya ke cakera. Sebarang permintaan untuk versi lain ditolak.
+
+| Kaedah | Laluan                                       | Keterangan                                                                                        |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Muat turun dan sahkan keluaran sing-box yang ditetapkan                                           |
+| `POST` | `/api/services/singbox/start`                | Mulakan sing-box (`sing-box run -c config.json`)                                                  |
+| `POST` | `/api/services/singbox/stop`                 | Hentikan sing-box                                                                                 |
+| `POST` | `/api/services/singbox/restart`              | Mulakan semula sing-box                                                                           |
+| `POST` | `/api/services/singbox/update`               | Sahkan semula atau pasang semula keluaran yang ditetapkan                                         |
+| `GET`  | `/api/services/singbox/status`               | Status semasa dan status DB                                                                       |
+| `POST` | `/api/services/singbox/auto-start`           | Hidupkan atau matikan permulaan automatik                                                         |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Hidupkan atau matikan mula semula automatik bagi proses yang diambil alih, iaitu proses sedia ada |
+| `GET`  | `/api/services/singbox/logs`                 | Ikuti log melalui SSE menggunakan laluan dinamik dikongsi `[name]/logs`                           |
+
+**Sambungan TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) menulis `config.json` dan memulakan penyelia sebelum `applyTproxy()` memasang peraturan tembok api TPROXY. Jika penyelia tiada atau gagal mencapai keadaan `running`, sistem kini merekodkannya pada aras ralat dan tidak lagi mengabaikan kegagalan itu secara senyap. Pengendali dapat mengenal pasti bahawa peraturan TPROXY telah digunakan tanpa listener yang berfungsi di belakangnya.
+
+---
+
+### 4.9 Proksi songsang (benaman papan pemuka 9Router)
 
 Papan pemuka membenamkan UI web 9Router di dalam iframe melalui proksi songsang
 dalaman di:

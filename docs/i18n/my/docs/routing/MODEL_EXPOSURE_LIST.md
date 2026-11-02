@@ -63,3 +63,15 @@ Setting export (`GET /api/settings/export-json`) တွင် အခြား se
 ပြန်လည်ဖြည့်သွင်းခြင်းဆိုင်ရာ အန္တရာယ် မရှိပါ။ Export လုပ်ထားသော combo step တစ်ခုတွင် ထည့်သွင်းထားသည့်
 ပိတ်ပင်ထားသော id သည် operator ကိုယ်တိုင် အတိအလင်း ရွေးချယ်ထားသော routing ဖြစ်ပြီး export boundary က
 ဖယ်ရှားပစ်ရန် လိုအပ်သည့်အရာ မဟုတ်ပါ။
+
+## Combo များကိုသာ စာရင်းပြခြင်း (`exposeCombosOnly`)
+
+combo များကို အများမြင် model အဖြစ်ထားပြီး provider များကို backend အဖြစ်သာ သုံးသော deployment များအတွက် သီးခြား boolean ဖြစ်သည်။ ၎င်းကိုလည်း ရွေးချယ်ဖွင့်ရပြီး မူလတန်ဖိုးမှာ `false` ဖြစ်သည်။ `true` ဖြစ်လျှင် public listing (`GET /v1/models`၊ `GET /v1` နှင့် `getUnifiedModelsResponse()` ကို သုံးထားသော အခြား `/v1` discovery route များ) သည် `owned_by: "combo"` ပါသော row များကိုသာ ထားသည်။ ယင်းတို့မှာ user combo များနှင့် built-in `auto/*` combo များဖြစ်သည် (`hideAutoCombos` ဖြင့် ဖျောက်မထားလျှင်)။ key တစ်ခုချင်းစီ၏ `catalogScope: "combos"` နှင့် တူညီသော row စစ်ဆေးမှုကို သုံးပြီး key ကိုယ်တိုင်၏ allow/deny/scope filter များလည်း ထပ်အကျုံးဝင်နေဆဲဖြစ်သည်။
+
+**Settings → Routing → Models API listing** တွင် သို့မဟုတ် `PATCH /api/settings {"exposeCombosOnly": true}` ဖြင့် ဖွင့်ပိတ်ပါ။
+
+အထက်ပါစာရင်းများကဲ့သို့ ကြေညာပြသမှုကိုသာ ပြောင်းသည်။
+
+- အတိအကျသတ်မှတ်သော `provider/model` id သည် request ပို့နိုင်နေဆဲဖြစ်ပြီး `GET /v1/models/{id}` ကလည်း ၎င်းကို ရှာဖွေရရှိနေဆဲဖြစ်သည်။
+- dashboard catalog (`GET /api/models/catalog`၊ model picker များသုံးသောစာရင်း) ကို မကျဉ်းစေပါ။
+- ၎င်းကို `auto/*` candidate pool များသို့ မကူးထားသဖြင့် `auto/*` combo များသည် မိမိတို့၏ pool အပြည့်ကို ထိန်းထားသည်။

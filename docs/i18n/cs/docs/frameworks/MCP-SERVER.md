@@ -314,12 +314,12 @@ token s rozsahem `read` na měnící trasu správy, obdrží HTTP 403
 Toto pořadí vyhodnocuje `scopeSatisfies`. Nekonzultuje tabulku MCP a nástroj pro porovnávání
 MCP zase nekonzultuje toto pořadí.
 
-| Jmenný prostor             | Přihlašovací údaj                                            | Kontrola                    | Úspěšné ověření umožňuje                                 |
-| :------------------------- | :----------------------------------------------------------- | :-------------------------- | :------------------------------------------------------- |
-| Správa API klíče           | `api_keys.scopes`                                            | `hasManageScope`            | Správu přes REST pro daný Bearer klíč                    |
-| Doplňkový rozsah API klíče | stejné pole, jeden přesně odpovídající řetězec               | pomocná funkce uvedená níže | Pouze tuto jednu schopnost                               |
-| Rozsahy nástrojů MCP       | stejné pole, jinak `_meta` MCP, jinak `OMNIROUTE_MCP_SCOPES` | `scopeMatches`              | Daný nástroj, jakmile je vynucování zapnuto              |
-| Přístupový token           | `oma_live_…`                                                 | `scopeSatisfies`            | Trasu správy, jejíž metoda a cesta vyžadují danou úroveň |
+| Jmenný prostor             | Přihlašovací údaj                                                             | Kontrola                    | Úspěšné ověření umožňuje                                 |
+| :------------------------- | :---------------------------------------------------------------------------- | :-------------------------- | :------------------------------------------------------- |
+| Správa API klíče           | `api_keys.scopes`                                                             | `hasManageScope`            | Správu přes REST pro daný Bearer klíč                    |
+| Doplňkový rozsah API klíče | stejné pole, jeden přesně odpovídající řetězec                                | pomocná funkce uvedená níže | Pouze tuto jednu schopnost                               |
+| Rozsahy nástrojů MCP       | stejné pole, jinak MCP `_meta` (pouze HTTP/SSE), jinak `OMNIROUTE_MCP_SCOPES` | `scopeMatches`              | Daný nástroj, jakmile je vynucování zapnuto              |
+| Přístupový token           | `oma_live_…`                                                                  | `scopeSatisfies`            | Trasu správy, jejíž metoda a cesta vyžadují danou úroveň |
 
 Vytváření jednotlivých přihlašovacích údajů je popsáno v části
 [Ověřování pro správu](../guides/MANAGEMENT-AUTH.md).
@@ -368,8 +368,7 @@ Vynucování je vypnuté, pokud není nastaveno `OMNIROUTE_MCP_ENFORCE_SCOPES=tr
 `false`). Když je vypnuté, `evaluateToolScopes` volání povolí a katalog přeskočí.
 Když je zapnuté, HTTP používá `api_keys.scopes` Bearer klíče jako
 `authInfo` (viz [Vazba rozsahů HTTP na jednotlivé klíče](#per-key-http-scope-binding-7895)).
-Pokud se nepodaří získat žádné rozsahy klíče, sada udělených rozsahů přejde na `_meta` MCP a poté
-na `OMNIROUTE_MCP_SCOPES`.
+Když se nepodaří určit žádné scopes klíče, udělená sada propadne na MCP `_meta` (respektováno pouze pro HTTP/SSE volající, uvnitř HTTP auth kontextu; `_meta` stdio volajícího se ignoruje, protože jej klient kontroluje a nenese žádnou identitu volajícího), a poté na `OMNIROUTE_MCP_SCOPES`.
 
 #### Rozsahy přístupových tokenů
 
@@ -467,8 +466,7 @@ a předává je do `transport.handleRequest(req, { authInfo })` sady MCP SDK, ta
 `_meta` a záložní hodnotou z proměnné prostředí `OMNIROUTE_MCP_SCOPES` — tato změna pouze naplňuje tento první
 zdroj s nejvyšší prioritou, který dříve přes HTTP nebyl poskytován. Pokud se nepodaří získat žádný klíč API
 (chybějící hlavička, neplatný klíč), `authInfo` zůstane `undefined` a vyhodnocování pokračuje beze změny
-stávajícím řetězcem `meta`/proměnná prostředí. stdio nemá identitu jednotlivých volajících (viz
-`mcpCallerIdentity.ts`) a tato změna se jej netýká — nadále používá záložní řetězec `_meta`/proměnná prostředí.
+stávajícím řetězcem `meta`/proměnná prostředí. stdio nemá identitu per volající (viz `mcpCallerIdentity.ts`) a není vazbou na jednotlivé klíče ovlivněno — přeskočí krok `_meta` (`_meta` se respektuje pouze v rámci HTTP auth kontextu, #15159) a řeší se pouze z proměnné prostředí `OMNIROUTE_MCP_SCOPES`.
 
 **Vynucování je pro volající HTTP/SSE s úzce vymezenými rozsahy zapnuto bez ohledu na
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Výchozí hodnota `false` pro `OMNIROUTE_MCP_ENFORCE_SCOPES` je bezpečná pouze

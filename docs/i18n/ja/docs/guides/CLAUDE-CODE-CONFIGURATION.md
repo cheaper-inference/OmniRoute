@@ -42,6 +42,10 @@ Claude Code は **Anthropic Messages API** と通信し、環境変数を使用�
 
 > 環境変数は**起動時に一度だけ**読み込まれます。変更後は Claude Code を再起動してください。
 
+固定文字列ではなく定期的に更新される認証情報を使う場合は、`~/.claude/settings.json` の `apiKeyHelper` に、現在の認証情報を stdout に出力するコマンドを設定します。Claude Code は既定で出力を五分間キャッシュし（`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` で変更可能）、その値を `Authorization: Bearer` と `x-api-key` の両方で送信します。スクリプトが出力してよいのは認証情報だけです。バナーなどを一緒に出力すると、v2.1.227+ ではヘルパーが失敗します。
+
+Entra ID SSO もこの仕組みを使います。`scripts/cli/omniroute-sso.mjs token` が有効期間の短い Entra アクセストークンを出力し、OmniRoute は API キーの代わりにそのトークンを検証します。[`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) を参照してください。
+
 `omniroute launch` は、これらをすべて自動的に設定します。アクティブなコンテキストから
 ベース URL とトークンを解決するため、`omniroute connect <vps>` の後に
 `omniroute launch` を実行するだけで動作します。さらに、サーバーのヘルスチェックを行い、

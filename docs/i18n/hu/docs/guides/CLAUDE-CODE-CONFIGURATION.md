@@ -42,6 +42,10 @@ irányítható egy egyéni végpontra (nincs `--base-url` kapcsolója):
 
 > A környezeti változók beolvasása **egyszer, az indításkor** történik — módosításuk után indítsa újra a Claude Code-ot.
 
+Rögzített karakterlánc helyett cserélődő hitelesítő adat használatához állítsa a `~/.claude/settings.json` fájl `apiKeyHelper` beállítását olyan parancsra, amely az aktuális hitelesítő adatot a stdout-ra írja. A Claude Code alapértelmezetten öt percig gyorsítótárazza a kimenetét (ezt a `CLAUDE_CODE_API_KEY_HELPER_TTL_MS` felülírja), és az értéket az `Authorization: Bearer` és az `x-api-key` mezőben is elküldi. A szkript kizárólag a hitelesítő adatot írhatja ki; egy mellé írt tájékoztató szöveg a v2.1.227+ verziókban a segéd hibáját okozza.
+
+Az Entra ID SSO így működik: a `scripts/cli/omniroute-sso.mjs token` rövid élettartamú Entra-hozzáférési tokent ír ki, amelyet az OmniRoute API-kulcs helyett ellenőriz. Lásd: [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 Az `omniroute launch` mindezeket beállítja: feloldja az alap-URL-t és a tokent
 az aktív kontextusból (így az `omniroute connect <vps>`, majd az `omniroute launch`
 egyszerűen működik), ellenőrzi a kiszolgáló állapotát, majd elindítja a `claude` folyamatot.

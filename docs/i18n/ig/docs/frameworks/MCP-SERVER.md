@@ -310,12 +310,12 @@ Katalọgụ ngwaọrụ dị na [Oke ikike ngwaọrụ MCP](#mcp-tool-scopes).
 `Access token scope 'read' is insufficient; 'write' required.`
 Ọkwa ahụ bụ `scopeSatisfies`. Ọ naghị enyocha tebụl MCP, onye na-eme ndakọrịta MCP anaghịkwa enyocha ya.
 
-| Ngalaba aha           | Ihe njirimara                                                                  | Onye nyocha                  | Ihe ngafe na-enye ohere                         |
-| :-------------------- | :----------------------------------------------------------------------------- | :--------------------------- | :---------------------------------------------- |
-| Njikwa igodo API      | `api_keys.scopes`                                                              | `hasManageScope`             | REST njikwa maka igodo Bearer ahụ               |
-| Mgbakwunye igodo API  | otu array ahụ, otu eriri dabara kpọmkwem                                       | enyemaka akpọrọ aha n'okpuru | Naanị otu ikike ahụ                             |
-| Oke ikike ngwaọrụ MCP | otu array ahụ, ma ọ bụghị ya MCP `_meta`, ma ọ bụghị ya `OMNIROUTE_MCP_SCOPES` | `scopeMatches`               | Ngwaọrụ ahụ, ozugbo agbanyere mmanye            |
-| Token nnweta          | `oma_live_…`                                                                   | `scopeSatisfies`             | Ụzọ njikwa nke method na path ya chọrọ ọkwa ahụ |
+| Ngalaba aha           | Ihe njirimara                                                                                   | Onye nyocha                  | Ihe ngafe na-enye ohere                         |
+| :-------------------- | :---------------------------------------------------------------------------------------------- | :--------------------------- | :---------------------------------------------- |
+| Njikwa igodo API      | `api_keys.scopes`                                                                               | `hasManageScope`             | REST njikwa maka igodo Bearer ahụ               |
+| Mgbakwunye igodo API  | otu array ahụ, otu eriri dabara kpọmkwem                                                        | enyemaka akpọrọ aha n'okpuru | Naanị otu ikike ahụ                             |
+| Oke ikike ngwaọrụ MCP | otu array ahụ, ma ọ bụghị ya MCP `_meta` (naanị HTTP/SSE), ma ọ bụghị ya `OMNIROUTE_MCP_SCOPES` | `scopeMatches`               | Ngwaọrụ ahụ, ozugbo agbanyere mmanye            |
+| Token nnweta          | `oma_live_…`                                                                                    | `scopeSatisfies`             | Ụzọ njikwa nke method na path ya chọrọ ọkwa ahụ |
 
 A kọwara otu esi emepụta ihe njirimara nke ọ bụla na
 [Nyocha njirimara njikwa](../guides/MANAGEMENT-AUTH.md).
@@ -364,8 +364,7 @@ A naghị agbanye mmanye ma ọ bụrụ na `OMNIROUTE_MCP_ENFORCE_SCOPES=true` 
 bụ `false`). Mgbe agbanyụghị ya, `evaluateToolScopes` na-enye ohere oku ahụ ma na-amafere
 katalọgụ ahụ. Mgbe agbanyere ya, HTTP na-eji `api_keys.scopes` nke igodo Bearer dị ka
 `authInfo` (lee [Ijikọ oke ikike HTTP n'otu igodo](#per-key-http-scope-binding-7895)).
-Mgbe enweghị oke ikike igodo a chọtara, set nke ikike enyere na-aga n'ihu gaa na MCP `_meta`, emesịa
-`OMNIROUTE_MCP_SCOPES`.
+Mgbe enweghị oke ikike igodo a chọtara, set nke ikike enyere na-aga n’ihu gaa na MCP `_meta` (a na-eji ya naanị maka ndị na-akpọ oku site na HTTP/SSE, n’ime ọnọdụ nyocha njirimara HTTP; a na-eleghara `_meta` nke onye na-akpọ oku site na stdio anya n’ihi na klayent na-achịkwa ya, ọ naghịkwa ebu njirimara onye ọ bụla na-akpọ oku), emesịa `OMNIROUTE_MCP_SCOPES`.
 
 #### Oke ikike token nnweta
 
@@ -462,8 +461,7 @@ ma nyefee ya na `transport.handleRequest(req, { authInfo })` nke MCP SDK, ka
 `_meta` na ndabere env `OMNIROUTE_MCP_SCOPES` — nke a na-ejupụta naanị isi mmalite mbụ ahụ,
 nke nwere mkpa kachasị elu, nke a na-enyeghị ozi mbụ site na HTTP. Mgbe enweghị API key a chọpụtara
 (enweghị header, key na-adịghị irè), `authInfo` na-anọgide `undefined`, nchọpụta ahụ wee daba na
-usoro `meta`/env dịbu adị na-enweghị mgbanwe. stdio enweghị njirimara onye na-akpọ oku n’otu n’otu (lee
-`mcpCallerIdentity.ts`) ma nke a anaghị emetụta ya — ọ ka na-eji usoro ndabere `_meta`/env.
+usoro `meta`/env dịbu adị na-enweghị mgbanwe. stdio enweghị njirimara onye ọ bụla na-akpọ oku (lee `mcpCallerIdentity.ts`), njikọ nke igodo ọ bụla anaghịkwa emetụta ya — ọ na-amafe nzọụkwụ `_meta` (a na-eji `_meta` naanị n’ime ọnọdụ nyocha njirimara HTTP, #15159) ma na-achọpụta oke ikike naanị site na igodo gburugburu `OMNIROUTE_MCP_SCOPES`.
 
 **A na-amanye mmejuputa iwu maka ndị na-akpọ oku HTTP/SSE nwere oke dị warara n’agbanyeghị
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Ndabara `OMNIROUTE_MCP_ENFORCE_SCOPES` ịbụ `false` dị nchebe naanị

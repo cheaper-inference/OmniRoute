@@ -159,3 +159,31 @@ test("publishes the surviving platform when other platform files are absent", (t
   assert.ok(calls[2].includes(join(directory, "app.dmg")));
   assert.ok(calls[2].includes(join(directory, "latest-mac.yml")));
 });
+
+test("publishes content-addressed optional packs without admitting arbitrary archives", (t) => {
+  const directory = fixture(t);
+  const pack = `optional-pack-ml-runtime-${"a".repeat(64)}.tar.gz`;
+  for (const name of [
+    pack,
+    "optional-pack-ml-runtime.tar.gz",
+    "private.tar.gz",
+    "optional-pack-ml-runtime-short.tar.gz",
+  ])
+    writeFileSync(join(directory, name), "fixture");
+  const calls = [];
+  const result = uploadDesktopAssets({
+    version: "v3.8.53",
+    repository: "owner/repo",
+    directory,
+    run: (args) => {
+      calls.push(args);
+      return { status: 0, stdout: "{}" };
+    },
+  });
+  assert.equal(result.uploaded, 11);
+  assert.ok(calls[2].includes(join(directory, pack)));
+  assert.equal(calls[2].includes(join(directory, "optional-pack-ml-runtime.tar.gz")), false);
+  assert.equal(calls[2].includes(join(directory, "private.tar.gz")), false);
+  assert.equal(calls[2].includes(join(directory, "optional-pack-ml-runtime-short.tar.gz")), false);
+  assert.ok(calls.every((args) => !args.some((arg) => /--(?:notes|generate-notes)/.test(arg))));
+});

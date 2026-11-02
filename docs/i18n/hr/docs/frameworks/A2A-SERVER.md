@@ -163,7 +163,7 @@ OmniRoute izlaže 6 A2A vještina povezanih u `src/lib/a2a/taskExecution.ts::A2A
 | Izvješće o stanju     | `health-report`      | Objedinjuje stanje prekidača strujnog kruga, razdoblja čekanja i zaključavanja za svakog pružatelja                                                            | stanje, otpornost             | "Prikaži stanje svih pružatelja"           |
 | Popis mogućnosti      | `list-capabilities`  | Vraća potpuni katalog od 45 Agent Skills stavki (23 API + 21 CLI + 1 konfiguracijska) kao markdown tablicu s izvornim SKILL.md URL-ovima za umetanje konteksta | katalog, otkrivanje, vještine | "Navedi sve mogućnosti sustava OmniRoute"  |
 
-> Karticu agenta treba održavati usklađenom s aktualnim katalogom od 377 pružatelja; broj pružatelja i metapodaci o besplatnom pristupu bez autentifikacije preuzimaju se iz registra tijekom izvođenja.
+> Karticu agenta treba održavati usklađenom s aktualnim katalogom od 380 pružatelja; broj pružatelja i metapodaci o besplatnom pristupu bez autentifikacije preuzimaju se iz registra tijekom izvođenja.
 
 ### Pojedinosti o vještini `list-capabilities`
 
@@ -215,7 +215,7 @@ JSON-RPC krajnja točka `/a2a` je kanonična A2A ulazna točka. Dolje navedene R
    };
    ```
 
-3. **Objavite u kartici agenta:** u datoteci `src/app/.well-known/agent.json/route.ts` dodajte stavku u polje `skills`:
+3. **Izložite u kartici agenta:** u datoteci `src/lib/a2a/agentCardMetadata.ts` (koju zajednički koriste `/.well-known/agent.json` i `/.well-known/agent-card.json`) dodajte sljedeće u polje `skills`:
 
    ```json
    {

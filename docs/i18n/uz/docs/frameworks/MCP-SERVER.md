@@ -314,12 +314,12 @@ kirish tokenini yuborgan chaqiruvchilar HTTP 403
 xatosini oladi. Bu daraja `scopeSatisfies` orqali tekshiriladi. U MCP jadvaliga murojaat qilmaydi, MCP
 moslashtiruvchisi ham unga murojaat qilmaydi.
 
-| Nomlar fazosi                     | Hisob ma’lumoti                                                       | Tekshiruvchi                        | Tekshiruvdan o‘tish nimaga ruxsat beradi                         |
-| :-------------------------------- | :-------------------------------------------------------------------- | :---------------------------------- | :--------------------------------------------------------------- |
-| API kalitini boshqarish           | `api_keys.scopes`                                                     | `hasManageScope`                    | Shu Bearer kaliti uchun boshqaruv REST interfeysi                |
-| API kalitining qo‘shimcha ruxsati | o‘sha massiv, bitta aniq satr                                         | quyida nomlangan yordamchi funksiya | Faqat o‘sha imkoniyat                                            |
-| MCP vositasi ruxsat doiralari     | o‘sha massiv, aks holda MCP `_meta`, aks holda `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                      | Majburiy tekshiruv yoqilgach, o‘sha vosita                       |
-| Kirish tokeni                     | `oma_live_…`                                                          | `scopeSatisfies`                    | Metodi va yo‘li shu darajani talab qiladigan boshqaruv marshruti |
+| Nomlar fazosi                     | Hisob ma’lumoti                                                                            | Tekshiruvchi                        | Tekshiruvdan o‘tish nimaga ruxsat beradi                         |
+| :-------------------------------- | :----------------------------------------------------------------------------------------- | :---------------------------------- | :--------------------------------------------------------------- |
+| API kalitini boshqarish           | `api_keys.scopes`                                                                          | `hasManageScope`                    | Shu Bearer kaliti uchun boshqaruv REST interfeysi                |
+| API kalitining qo‘shimcha ruxsati | o‘sha massiv, bitta aniq satr                                                              | quyida nomlangan yordamchi funksiya | Faqat o‘sha imkoniyat                                            |
+| MCP vositasi ruxsat doiralari     | Xuddi shu massiv, aks holda MCP `_meta` (faqat HTTP/SSE), aks holda `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                      | Majburiy tekshiruv yoqilgach, o‘sha vosita                       |
+| Kirish tokeni                     | `oma_live_…`                                                                               | `scopeSatisfies`                    | Metodi va yo‘li shu darajani talab qiladigan boshqaruv marshruti |
 
 Har bir hisob ma’lumotini yaratish
 [Boshqaruv autentifikatsiyasi](../guides/MANAGEMENT-AUTH.md) bo‘limida yoritilgan.
@@ -366,9 +366,7 @@ oxiridagi `*`dan tashqari hech qanday ierarxiya yo‘q.
 `OMNIROUTE_MCP_ENFORCE_SCOPES=true` bo‘lmasa, majburiy tekshiruv o‘chiq bo‘ladi (standart qiymat
 `false`). U o‘chiq bo‘lganida, `evaluateToolScopes` chaqiruvga ruxsat beradi va
 katalogni tekshirmaydi. U yoqilganida, HTTP Bearer kalitining `api_keys.scopes` qiymatidan
-`authInfo` sifatida foydalanadi ([Har bir kalit uchun HTTP ruxsat doirasini bog‘lash](#per-key-http-scope-binding-7895) bo‘limiga qarang).
-Hech qanday kalit ruxsat doirasi aniqlanmasa, berilgan ruxsatlar to‘plami avval MCP `_meta`ga, keyin
-`OMNIROUTE_MCP_SCOPES`ga o‘tadi.
+`authInfo` sifatida foydalanadi ([Har bir kalit uchun HTTP ruxsat doirasini bog‘lash](#per-key-http-scope-binding-7895) boʻlimini koʻring). Hech qanday kalit ruqsati aniqlanmasa, berilgan toʻplam MCP `_meta` ga (faqat HTTP/SSE chaqiruvchilari uchun, HTTP autentifikatsiya konteksti ichida qabul qilinadi; stdio chaqiruvchining `_meta` si eʼtibordan chetda qoldiriladi, chunki uni mijoz boshqaradi va u har bir chaqiruvchiga xos identifikator olib yurmaydi), soʻng `OMNIROUTE_MCP_SCOPES` ga oʻtadi.
 
 #### Kirish tokeni ruxsat doiralari
 
@@ -469,9 +467,7 @@ aks ettiradi. `scopeEnforcement.ts` ichidagi `resolveCallerScopeContext()` allaq
 ustun qoʻyardi — bu oʻzgarish faqat HTTP orqali avval toʻldirilmagan birinchi, eng yuqori
 ustuvorlikdagi manbani toʻldiradi. Hech qanday API kaliti aniqlanmasa
 (sarlavha yoʻq yoki kalit yaroqsiz boʻlsa), `authInfo` `undefined` holida qoladi va aniqlash jarayoni
-avvalgidek mavjud `meta`/muhit zanjiriga oʻtadi. stdio har bir chaqiruvchi uchun alohida identifikatsiyaga
-ega emas (`mcpCallerIdentity.ts` fayliga qarang) va bundan taʼsirlanmaydi — u `_meta`/muhit zaxira
-zanjirida qoladi.
+avvalgidek mavjud `meta`/muhit zanjiriga oʻtadi. stdio da har bir chaqiruvchi identifikatsiyasi yoʻq (qarang: `mcpCallerIdentity.ts`) va kalit darajasidagi bogʻlanishdan taʼsirlanmaydi — u `_meta` qadamini oʻtkazib yuboradi (`_meta` faqat HTTP autentifikatsiya konteksti ichida hurmat qilinadi, #15159) va faqat `OMNIROUTE_MCP_SCOPES` muhit kalitidan aniqlanadi.
 
 **Tor doirali HTTP/SSE chaqiruvchilari uchun `OMNIROUTE_MCP_ENFORCE_SCOPES` qiymatidan qatʼi nazar,
 majburiy nazorat yoqiladi.** `OMNIROUTE_MCP_ENFORCE_SCOPES` ning standart qiymati `false` boʻlishi

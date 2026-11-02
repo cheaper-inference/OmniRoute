@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — De gratis AI-gateway
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Stop nooit met coderen. Elke AI-tool → 377 providers — meer dan 150 gratis — via één endpoint. Claude Code, Codex, Cursor, Cline, Copilot en Antigravity naar GRATIS Claude / GPT / Gemini met automatische fallback. Gecombineerde RTK- en Caveman-compressie bespaart 15–95% tokens (gemiddeld circa 89%) — bereik nooit meer limieten. 377 AI-providers · meer dan 150 gratis niveaus · circa 1,62 miljard gratis tokens per maand · 20 routeringsstrategieën · begin voor $ 0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Stop nooit met coderen. Elke AI-tool → 380 providers — meer dan 150 gratis — via één endpoint. Claude Code, Codex, Cursor, Cline, Copilot en Antigravity naar GRATIS Claude / GPT / Gemini met automatische fallback. Gecombineerde RTK- en Caveman-compressie bespaart 15–95% tokens (gemiddeld circa 89%) — bereik nooit meer limieten. 380 AI-providers · meer dan 150 gratis niveaus · circa 1,62 miljard gratis tokens per maand · 20 routeringsstrategieën · begin voor $ 0."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Gebruik je eigen provideraccounts.** Dit is een geschat totaal van afzonderlijk beschikbare gratis niveaus van derden, geen tokentoekenning van OmniRoute. Meld je aan, verkrijg waar nodig inloggegevens en koppel de providers die je kunt gebruiken; elke provider bepaalt zijn eigen limieten, beschikbaarheid en voorwaarden.
 >
-> Gratis niveaus handmatig combineren is omslachtig — tientallen SDK's, tientallen snelheidslimieten en geen idee hoeveel je daadwerkelijk hebt. OmniRoute catalogiseert **484 vermeldingen van gratis niveaus verdeeld over 34 terugkerende poolsleutels** en berekent het weergegeven tokenaantal op basis van de **17 pools met een gepubliceerd positief maandbudget plus vijf Groq-limieten per model**, waarbij gedeelde pools worden gededupliceerd. Quota die pas beschikbaar worden na een regionale identiteitscontrole (momenteel: ModelScope), worden afzonderlijk weergegeven als +~6M achter regionale identiteitsverificatie en worden nooit bij het weergegeven totaal opgeteld. Het resultaat blijft zichtbaar op het dashboard (`/dashboard/free-tiers`).
+> Gratis niveaus handmatig combineren is omslachtig — tientallen SDK's, tientallen snelheidslimieten en geen idee hoeveel je daadwerkelijk hebt. OmniRoute catalogiseert **485 vermeldingen van gratis niveaus verdeeld over 34 terugkerende poolsleutels** en berekent het weergegeven tokenaantal op basis van de **17 pools met een gepubliceerd positief maandbudget plus vijf Groq-limieten per model**, waarbij gedeelde pools worden gededupliceerd. Quota die pas beschikbaar worden na een regionale identiteitscontrole (momenteel: ModelScope), worden afzonderlijk weergegeven als +~6M achter regionale identiteitsverificatie en worden nooit bij het weergegeven totaal opgeteld. Het resultaat blijft zichtbaar op het dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute-budgetkaart voor gratis niveaus: permanent ~1.62B gratis tokens per maand, tot ~2.22B in de eerste maand met aanmeldtegoeden, afkomstig uit 34 gedocumenteerde terugkerende poolsleutels die 484 gecatalogiseerde vermeldingen van gratis niveaus achter één endpoint omvatten. Eerlijke, per pool gededupliceerde berekening — elke gedeelde pool wordt één keer meegeteld, waaronder 17 terugkerende pools met een gepubliceerd positief maandelijks tokenbudget plus vijf Groq-limieten per model; 12 providers zijn in de catalogus voor voorwaardenrisico's gemarkeerd als te vermijden, zodat je zelf kunt beslissen. De budgetbalk bevat Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (vijf limieten per model) en kleinere pools, plus aanmeldtegoeden voor de eerste maand en permanent gratis providers zonder tokenlimiet die afzonderlijk worden weergegeven, zodat ze het weergegeven totaal nooit kunstmatig verhogen. Live verbruik/resterend op /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute-budgetkaart voor gratis niveaus: permanent ~1.62B gratis tokens per maand, tot ~2.22B in de eerste maand met aanmeldtegoeden, afkomstig uit 34 gedocumenteerde terugkerende poolsleutels die 485 gecatalogiseerde vermeldingen van gratis niveaus achter één endpoint omvatten. Eerlijke, per pool gededupliceerde berekening — elke gedeelde pool wordt één keer meegeteld, waaronder 17 terugkerende pools met een gepubliceerd positief maandelijks tokenbudget plus vijf Groq-limieten per model; 12 providers zijn in de catalogus voor voorwaardenrisico's gemarkeerd als te vermijden, zodat je zelf kunt beslissen. De budgetbalk bevat Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (vijf limieten per model) en kleinere pools, plus aanmeldtegoeden voor de eerste maand en permanent gratis providers zonder tokenlimiet die afzonderlijk worden weergegeven, zodat ze het weergegeven totaal nooit kunstmatig verhogen. Live verbruik/resterend op /dashboard/free-tiers."/>
 
 > Geanimeerde samenvatting van de livepagina `/dashboard/free-tiers`. Volledige methodologie (pooldeduplicatie, tegoedniveaus, providervoorwaarden): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -71,7 +71,7 @@
 
 |                           |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Providers              |           352            |   **358**   |          377          |
+| 🌐 Providers              |           352            |   **358**   |          380          |
 | 🧠 Unieke chatmodel-ID's  |           1320           |  **1374**   |         1475          |
 | 🖼️ Modaliteitsbrug        | 🆕 visie + audio + video |      ✓      |           ✓           |
 | 📡 Gratis Radar-catalogus |       🆕 optioneel       |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Functies</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combo's</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="De belofte — Eén endpoint en 377 providers. Automatische fallback houdt de routering actief zolang er een ander gezond doel beschikbaar is. Zes pijlers: robuuste fallback voor 377 providers · tot 95% tokenbesparing bij geschikte workloads · $0 om te beginnen met meer dan 150 gratis abonnementen en 52 terugkerende/sleutelloze providers die permanent gratis zijn · 37 CLI-/agentintegraties via één configuratie · compatibiliteit met OpenAI, Claude, Gemini en Responses API op /v1 · productiecontroles, waaronder circuitbreakers, TLS-stealth, MCP met 110 tools, A2A, geheugen, guardrails, evaluaties en meer dan 56.000 statische testdeclaraties in meer dan 7.800 gevolgde testbestanden."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="De belofte — Eén endpoint en 380 providers. Automatische fallback houdt de routering actief zolang er een ander gezond doel beschikbaar is. Zes pijlers: robuuste fallback voor 380 providers · tot 95% tokenbesparing bij geschikte workloads · $0 om te beginnen met meer dan 150 gratis abonnementen en 52 terugkerende/sleutelloze providers die permanent gratis zijn · 39 CLI-/agentintegraties via één configuratie · compatibiliteit met OpenAI, Claude, Gemini en Responses API op /v1 · productiecontroles, waaronder circuitbreakers, TLS-stealth, MCP met 110 tools, A2A, geheugen, guardrails, evaluaties en meer dan 56.000 statische testdeclaraties in meer dan 7.800 gevolgde testbestanden."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Alle **20** strategieën — naar wens te combineren per combostap:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Wat OmniRoute onderscheidt — een momentopname van functies op een bepaalde datum ten opzichte van 9router, OpenRouter, CLIProxyAPI en LiteLLM voor 13 mogelijkheden. OmniRoute: 377 providers, meer dan 150 ingebouwde gratis niveaus, 20 routeringsstrategieën, tokencompressie met 12 engines, een ingebouwde MCP-server met 110 tools, het A2A-agentprotocol, persistent geheugen, guardrails, cloudagents, stealth via TLS-fingerprinting, Desktop/Termux/PWA en 67 i18n-UI-landinstellingen. OmniRoute heeft een MIT-licentie en kan zelf worden gehost. De mogelijkheden en aantallen van concurrenten kunnen veranderen; raadpleeg de gekoppelde methodologie."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Wat OmniRoute onderscheidt — een momentopname van functies op een bepaalde datum ten opzichte van 9router, OpenRouter, CLIProxyAPI en LiteLLM voor 13 mogelijkheden. OmniRoute: 380 providers, meer dan 150 ingebouwde gratis niveaus, 20 routeringsstrategieën, tokencompressie met 12 engines, een ingebouwde MCP-server met 110 tools, het A2A-agentprotocol, persistent geheugen, guardrails, cloudagents, stealth via TLS-fingerprinting, Desktop/Termux/PWA en 67 i18n-UI-landinstellingen. OmniRoute heeft een MIT-licentie en kan zelf worden gehost. De mogelijkheden en aantallen van concurrenten kunnen veranderen; raadpleeg de gekoppelde methodologie."/>
 
 <sub>📊 Volledige methodologie &amp; details per functie ten opzichte van 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar is opt-in en gebruikt alleen GET. De OmniRoute-client uploadt geen prompts
 - **🖼️ Nieuwe endpoints** — `/v1/ocr` (Mistral OCR) en `/v1/audio/translations` (in Whisper-stijl) vervolledigen het media-aanbod. → [API-referentie](docs/reference/API_REFERENCE.md)
 - **🎨 Generatie van afbeeldingen / video / audio** — één API voor media: xAI Grok Imagine en Novita AI-video, ComfyUI, Magnific, Adobe Firefly, Segmind en spraakproviders zoals ElevenLabs. → [API-referentie](docs/reference/API_REFERENCE.md)
 - **🌍 Implementatie en beheer** — reverse-proxy-`basePath`, automatische detectie van de browsertaal, apparaatregistratie per sleutel, MITM-vertrouwen zonder root en zh-TW-lokalisatie. → [Omgeving](docs/reference/ENVIRONMENT.md)
-- **🤝 Meer providers en agenten** — cloudagenten (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) met browser- en OAuth-aanmelding, een volwaardige Ollama-kaart, Claude Opus 5 en Sonnet 5, officieel partnerschap met Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… en een vernieuwde **catalogus met 377 providers**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Meer providers en agenten** — cloudagenten (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) met browser- en OAuth-aanmelding, een volwaardige Ollama-kaart, Claude Opus 5 en Sonnet 5, officieel partnerschap met Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… en een vernieuwde **catalogus met 380 providers**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparante routering** — elk antwoord bevat een `X-OmniRoute-Decision`-header die de gebruikte strategie/provider/latentie vermeldt, een nieuwe `cache-optimized`-combostrategie + de Auto-Combo-factor `cacheAffinity` leiden herhaalde verzoeken terug naar de verbinding die het gecachte voorvoegsel bevat, en een alleen-lezen endpoint `/v1/auto-combo/{channel}/candidates` maakt de actuele kandidatenpool van een `auto/*`-kanaal zichtbaar. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokale prestaties & infrastructuur** — lokale Redis met één klik, relay-deployers voor Cloudflare Workers / Deno Deploy, Bifrost & Mux als bewaakte ingebedde services. → [Ingebedde services](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Ook inbegrepen** — pluginframework + marktplaats, frameworks voor Omni/Agent/GitHub-skills, integratie met Obsidian-kluizen (22 MCP-tools), OpenAI-compatibele Batch- & Files-API's, semantische responscache, gamificatie met klassementen, ACP-agentdetectie (15 ingebouwde agents), geplande logexport naar BigQuery, parallelle multi-model-fan-out met `auto/chaos`, een Telegram-botbridge, een versiebeheerder in de app en LMArena-ELO-ranglijsten voor gratis providers. → [Documentatie](docs/README.md)
@@ -657,7 +657,7 @@ Radar is opt-in en gebruikt alleen GET. De OmniRoute-client uploadt geen prompts
 <b>＋ werkt ook met</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>elke OpenAI-compatibele tool</b>
 </div>
 
-<sub>📖 Configuratie per tool voor alle 38 tools (27 CLI Code-tools + 11 CLI-agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode-plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Configuratie per tool voor alle 39 tools (28 CLI Code-tools + 11 CLI-agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode-plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ de geschiedenis van je shell. → [CLI-integraties](docs/guides/CLI-INTEGRATIONS
 
 <div align="center">
 
-## 🌐 377 AI-providers — 153 in de catalogus gemarkeerd als gratis
+## 🌐 380 AI-providers — 156 in de catalogus gemarkeerd als gratis
 
 </div>
 
-> **377 geregistreerde providers** verdeeld over de canonieke collecties voor chat, media, zoeken, lokaal, cloudagents en systemen, waaronder **153 met de detectiemetadata `hasFree: true`**. Het register met chatmodellen omvat **239 providers / 3.059 unieke provider-modelparen / 1.475 onbewerkte model-ID's**; de afzonderlijke catalogus met gratis budgetten bevat **484 regels per model**, **34 terugkerende pools** en **52 terugkerende/sleutelloze providers die blijvend gratis zijn**. Deze noemers verschillen bewust; definities en berekeningen met ontdubbelde pools zijn te vinden in de [Providerreferentie](docs/reference/PROVIDER_REFERENCE.md) en [Gratis niveaus](docs/reference/FREE_TIERS.md).
+> **380 geregistreerde providers** verdeeld over de canonieke collecties voor chat, media, zoeken, lokaal, cloudagents en systemen, waaronder **156 met de detectiemetadata `hasFree: true`**. Het register met chatmodellen omvat **239 providers / 3.059 unieke provider-modelparen / 1.475 onbewerkte model-ID's**; de afzonderlijke catalogus met gratis budgetten bevat **485 regels per model**, **34 terugkerende pools** en **52 terugkerende/sleutelloze providers die blijvend gratis zijn**. Deze noemers verschillen bewust; definities en berekeningen met ontdubbelde pools zijn te vinden in de [Providerreferentie](docs/reference/PROVIDER_REFERENCE.md) en [Gratis niveaus](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1307,7 +1307,7 @@ Canonieke statistieken op 2026-10-18: **1.976 unieke video's** · **20.220.289 b
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Taal</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> in <code>src/</code> en <code>open-sse/</code> (geen enkele <code>any</code> in de kern sinds v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journaling) + LowDB (verouderde JSON-opslag) — 147 domeinmodules, 213 migraties</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journaling) + LowDB (verouderde JSON-opslag) — 147 domeinmodules, 219 migraties</td></tr>
   <tr><td nowrap><b>Geheugen</b></td><td>SQLite FTS5-volledige-tekstzoekfunctie + int8-gekwantiseerde vectorembeddings, getypeerd verval</td></tr>
   <tr><td nowrap><b>Schema's</b></td><td>Zod 4 — validatie van invoer en uitvoer van MCP-tools + API-contracten</td></tr>
   <tr><td nowrap><b>Protocollen</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1370,7 +1370,7 @@ Canonieke statistieken op 2026-10-18: **1.976 unieke video's** · **20.220.289 b
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Handleiding voor veerkracht</a></b></td><td>Stroomonderbrekers, afkoelperiodes, wachtrij, preventie van gelijktijdige aanvragen, TLS-spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo-engine</a></b></td><td>Scoring met 16 factoren, moduspakketten, zelfherstel</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxyhandleiding</a></b></td><td>Proxysysteem met 3 niveaus, 1proxy-marktplaats, CRUD voor registers</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratis niveaus</a></b></td><td>Geconsolideerd overzicht: 34 gedocumenteerde terugkerende pools / 484 gecatalogiseerde gratis items</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratis niveaus</a></b></td><td>Geconsolideerd overzicht: 34 gedocumenteerde terugkerende pools / 485 gecatalogiseerde gratis items</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Functiegalerij</a></b></td><td>Visuele rondleiding door het dashboard met schermafbeeldingen</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Documentatie van de codebase</a></b></td><td>Beginnersvriendelijke rondleiding door de codebase</td></tr>
 </table>

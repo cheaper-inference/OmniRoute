@@ -42,6 +42,10 @@ orqali maxsus endpoint’ga yo‘naltiriladi (unda `--base-url` bayrog‘i mavju
 
 > Muhit o‘zgaruvchilari **ishga tushirish vaqtida faqat bir marta** o‘qiladi — ularni o‘zgartirgandan so‘ng Claude Code’ni qayta ishga tushiring.
 
+O‘zgarmas satr o‘rniga davriy almashtiriladigan autentifikatsiya ma’lumoti uchun `~/.claude/settings.json` ichidagi `apiKeyHelper` ni joriy ma’lumotni stdout ga chiqaradigan buyruqqa sozlang. Claude Code natijani odatda besh daqiqaga keshlaydi (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` bu muddatni o‘zgartiradi) va qiymatni `Authorization: Bearer` hamda `x-api-key` ning ikkalasida ham yuboradi. Skript faqat autentifikatsiya ma’lumotini chiqarishi kerak — qo‘shimcha kirish matni v2.1.227+ da yordamchining ishlamay qolishiga sabab bo‘ladi.
+
+Entra ID SSO shunday ishlaydi: `scripts/cli/omniroute-sso.mjs token` qisqa muddatli Entra kirish tokenini chiqaradi; OmniRoute uni API kaliti o‘rniga tekshiradi. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) ga qarang.
+
 `omniroute launch` bularning barchasini siz uchun sozlaydi: u asosiy URL + tokenni
 faol kontekstdan aniqlaydi (shuning uchun `omniroute connect <vps>`, undan so‘ng
 `omniroute launch` darhol ishlaydi), server holatini tekshiradi va `claude`ni ishga tushiradi.

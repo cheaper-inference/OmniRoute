@@ -42,6 +42,10 @@ endpoint તરફ નિર્દેશિત થાય છે (તેમાં
 
 > Env vars **સ્ટાર્ટઅપ વખતે માત્ર એક જ વાર** વાંચવામાં આવે છે — તેમને બદલ્યા પછી Claude Code ફરી શરૂ કરો.
 
+સ્થિર સ્ટ્રિંગને બદલે બદલાતું ઓળખપ્રમાણ વાપરવા માટે, `~/.claude/settings.json`માં `apiKeyHelper`ને એવો આદેશ આપો જે વર્તમાન ઓળખપ્રમાણ stdout પર છાપે. Claude Code મૂળભૂત રીતે તેના આઉટપુટને પાંચ મિનિટ કૅશમાં રાખે છે (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` આ સમય બદલે છે) અને મૂલ્યને `Authorization: Bearer` તથા `x-api-key` બંનેમાં મોકલે છે. સ્ક્રિપ્ટે માત્ર ઓળખપ્રમાણ જ છાપવું જોઈએ; તેની સાથે વધારાનું બૅનર લખાણ હોય તો v2.1.227+માં સહાયક નિષ્ફળ થાય છે.
+
+Entra ID SSO આ રીતે કામ કરે છે: `scripts/cli/omniroute-sso.mjs token` ટૂંકી મુદતનું Entra ઍક્સેસ ટોકન છાપે છે, જેને OmniRoute API કીને બદલે ચકાસે છે. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) જુઓ.
+
 `omniroute launch` તમારા માટે આ બધું સેટ કરે છે: તે સક્રિય context માંથી base URL + token
 મેળવે છે (એટલે `omniroute connect <vps>` પછી `omniroute launch`
 સીધું કામ કરે છે), server નું health-check કરે છે અને `claude` ને exec કરે છે.

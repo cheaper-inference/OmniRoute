@@ -488,7 +488,7 @@ U quyidagilarni boshqaradi:
 
 | Fayl                          | Maqsadi                                                  |
 | ----------------------------- | -------------------------------------------------------- |
-| `providerRegistry.ts`         | 377 ta provayder katalogi asosidagi chat modeli reyestri |
+| `providerRegistry.ts`         | 380 ta provayder katalogi asosidagi chat modeli reyestri |
 | `providerModels.ts`           | Model taxalluslari, formatlarni moslashtirish            |
 | `constants.ts`                | Taym-autlar, cheklovlar, holat kodlari                   |
 | `defaultThinkingSignature.ts` | Standart Claude fikrlash imzosi                          |

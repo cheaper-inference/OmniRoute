@@ -10,7 +10,7 @@ OmniRoute तीनवटा समर्पित ड्यासबोर्�
 
 | पृष्ठ          | रुट                     | अवधारणा                                                                                        | सङ्ख्या              |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------------------- | -------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | तपाईंले OmniRoute तर्फ निर्देशित गर्ने कोडिङ उपकरणहरू (क्लाइन्ट → CLI → OmniRoute → प्रदायक)   | 27                   |
+| **CLI Code's** | `/dashboard/cli-code`   | तपाईंले OmniRoute तर्फ निर्देशित गर्ने कोडिङ उपकरणहरू (क्लाइन्ट → CLI → OmniRoute → प्रदायक)   | 28                   |
 | **CLI Agents** | `/dashboard/cli-agents` | तपाईंले OmniRoute तर्फ निर्देशित गर्ने स्वायत्त एजेन्टहरू (उही प्रवाह, अझ व्यापक कार्यक्षेत्र) | 11                   |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute ले stdio/ACP मार्फत ब्याकएन्डका रूपमा सुरु गर्ने CLI हरू (उल्टो प्रवाह)              | रजिस्ट्री हेर्नुहोस् |
 
@@ -143,7 +143,7 @@ guard हटाएर `422` लाई कहिल्यै "ठीक" नग�
 
 ---
 
-## 1. CLI Code को सूची (27 उपकरण)
+## 1. CLI Code को सूची (28 उपकरण)
 
 `/dashboard/cli-code` मा देखा पर्ने सबै उपकरणहरू। `baseUrlSupport: none` भएका उपकरणहरूलाई अनुकूलन base URL को सट्टा MITM वा म्यानुअल मार्गदर्शिकामार्फत जडान गरिएको छ:
 
@@ -170,6 +170,7 @@ guard हटाएर `422` लाई कहिल्यै "ठीक" नग�
 | grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)          | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries         | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
@@ -266,7 +267,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, पुरानो)                             |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, प्राथमिक + पुरानो `~/.deepseek` सिङ्क) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                              |
-| `POST /api/cli-tools/pi-settings`           | Pi कोडिङ एजेन्ट                                                    |
+| `POST /api/cli-tools/pi-settings`           | Pi कोडिङ एजेन्ट (`~/.pi/agent/models.json`, `providers.omniroute`) |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)              |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + समर्पित `.env` कुञ्जी)        |
 
@@ -372,7 +373,7 @@ pip install aider-chat
 cargo install smelt  # Rust-आधारित
 
 # Pi कोडिङ एजेन्ट
-# स्थापनाका लागि https://github.com/zechnerj/pi-coding-agent हेर्नुहोस्
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # स्थापनाका लागि https://github.com/1jehuang/jcode हेर्नुहोस्
@@ -485,6 +486,38 @@ EOF
 
 > थिङ्किङ भेरियन्टहरू पठाउन `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > प्रयोग गर्नुहोस्।
+
+---
+
+#### Pi Coding Agent
+
+आधिकारिक Pi Coding Agent प्याकेज `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` बाट स्थापना गर्नुहोस्। Pi ले अनुकूलित प्रदायक `~/.pi/agent/models.json` बाट पढ्छ; पूरै एजेन्ट डाइरेक्टरी सार्न `PI_CODING_AGENT_DIR` लाई निरपेक्ष मार्ग (वा `~` बाट सुरु हुने मार्ग) मा सेट गर्नुहोस्। ड्यासबोर्डले त्यो ओभरराइड मान्छ। Pi ले अनुकूलित एन्डपोइन्टबाट मोडेल पत्ता लगाउँदैन, त्यसैले OmniRoute ले छानिएको मोडेल `models[]` मा Pi को `openai-completions` API र OmniRoute को OpenAI-अनुकूल `/v1` एन्डपोइन्ट प्रयोग गरी लेख्छ।
+
+**CLI Tools → Pi** मा एन्डपोइन्ट, API कुञ्जी र मोडेल छान्नुहोस्, प्रदायक पूर्वावलोकन समीक्षा गर्नुहोस् र लागू गर्नुहोस्। पूर्वावलोकन प्रदायकको अंश हो: Pi हातैले कन्फिगर गर्दा `providers.omniroute` लाई विद्यमान `models.json` मा मिलाउनुहोस् ताकि अन्य प्रदायक र सेटिङ यथावत् रहून्।
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+तपाईंले `/model` खोल्दा Pi ले `models.json` फेरि लोड गर्छ। छान्नुभएको प्रदायक ID र मोडेल ID ले कन्फिगर गरिएको मार्ग परीक्षण गर्नुहोस्:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+सन्दर्भ: [Pi मोडेल र अनुकूलित प्रदायक](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi वातावरण चर](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi स्थापना निर्देशन](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

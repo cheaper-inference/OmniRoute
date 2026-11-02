@@ -42,6 +42,10 @@ Claude Code **Anthropic Messages API** ਨਾਲ ਸੰਚਾਰ ਕਰਦਾ �
 
 > Env vars ਨੂੰ **startup ਵੇਲੇ ਸਿਰਫ਼ ਇੱਕ ਵਾਰ** ਪੜ੍ਹਿਆ ਜਾਂਦਾ ਹੈ — ਉਨ੍ਹਾਂ ਨੂੰ ਬਦਲਣ ਤੋਂ ਬਾਅਦ Claude Code ਮੁੜ ਚਲਾਓ।
 
+ਸਥਿਰ ਸਟ੍ਰਿੰਗ ਦੀ ਥਾਂ ਨਿਯਮਿਤ ਤੌਰ ਉੱਤੇ ਬਦਲਦੇ ਪ੍ਰਮਾਣੀਕਰਨ ਵੇਰਵੇ ਲਈ, `~/.claude/settings.json` ਵਿੱਚ `apiKeyHelper` ਨੂੰ ਉਸ ਕਮਾਂਡ ਵਜੋਂ ਸੈੱਟ ਕਰੋ ਜੋ ਮੌਜੂਦਾ ਪ੍ਰਮਾਣੀਕਰਨ ਵੇਰਵਾ stdout ਉੱਤੇ ਛਾਪਦੀ ਹੈ। Claude Code ਮੂਲ ਰੂਪ ਵਿੱਚ ਇਸ ਦੀ ਆਉਟਪੁੱਟ ਪੰਜ ਮਿੰਟ ਲਈ ਕੈਸ਼ ਕਰਦਾ ਹੈ (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ਇਹ ਮਿਆਦ ਬਦਲਦਾ ਹੈ) ਅਤੇ ਮੁੱਲ ਨੂੰ `Authorization: Bearer` ਅਤੇ `x-api-key` ਦੋਵਾਂ ਵਿੱਚ ਭੇਜਦਾ ਹੈ। ਸਕ੍ਰਿਪਟ ਸਿਰਫ਼ ਪ੍ਰਮਾਣੀਕਰਨ ਵੇਰਵਾ ਛਾਪੇ: ਨਾਲ ਬੈਨਰ ਛਾਪਣ ਨਾਲ v2.1.227+ ਵਿੱਚ helper ਅਸਫਲ ਹੋ ਜਾਂਦਾ ਹੈ।
+
+Entra ID SSO ਇਸੇ ਤਰ੍ਹਾਂ ਕੰਮ ਕਰਦਾ ਹੈ: `scripts/cli/omniroute-sso.mjs token` ਥੋੜ੍ਹੇ ਸਮੇਂ ਲਈ ਵੈਧ Entra ਐਕਸੈੱਸ ਟੋਕਨ ਛਾਪਦਾ ਹੈ, ਜਿਸ ਨੂੰ OmniRoute API ਕੁੰਜੀ ਦੀ ਥਾਂ ਤਸਦੀਕ ਕਰਦਾ ਹੈ। [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) ਵੇਖੋ।
+
 `omniroute launch` ਇਹ ਸਾਰੇ ਤੁਹਾਡੇ ਲਈ ਸੈੱਟ ਕਰਦਾ ਹੈ: ਇਹ ਸਰਗਰਮ context ਤੋਂ base URL + token
 resolve ਕਰਦਾ ਹੈ (ਇਸ ਲਈ `omniroute connect <vps>` ਤੋਂ ਬਾਅਦ `omniroute launch`
 ਸਿੱਧਾ ਕੰਮ ਕਰਦਾ ਹੈ), server ਦੀ health-check ਕਰਦਾ ਹੈ ਅਤੇ `claude` ਨੂੰ exec ਕਰਦਾ ਹੈ।

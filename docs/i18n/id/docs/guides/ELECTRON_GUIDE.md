@@ -64,6 +64,19 @@ Workspace `electron/` juga menyediakan:
 - `npm run build:mac-x64` / `build:mac-arm64` — build macOS untuk satu arsitektur
 - `npm run pack` — build khusus direktori untuk pengujian lokal (tanpa penginstal)
 
+## Paket runtime opsional
+
+Build desktop dapat menerbitkan arsip runtime opsional bersama installer-nya. Payload server yang terpasang memuat `optional-packs.index.json` (di bawah `resources/app` pada Windows dan Linux). Untuk entri `browser-runtime`, baca `packs[].tarball` dan unduh **nama berkas yang persis itu dari rilis yang sama**. Nama arsip memuat digest SHA-256; build berbeda dapat memerlukan arsip berbeda. Jangan ubah nama berkas yang diunduh.
+
+Salin indeks aplikasi yang terpasang dan arsip yang dipilih ke satu direktori, lalu gunakan CLI dari rilis yang sama:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` menampilkan status pemasangan dan verifikasi, bukan nama berkas arsip. Indeks bawaan memilih arsipnya. Pemasangan memverifikasi checksum arsip sebelum ekstraksi dan checksum paket sebelum mengganti paket yang terpasang. Proses ini membaca berkas lokal; tidak mengunduh arsip yang hilang. Mulai ulang aplikasi setelah pemasangan. Jika rilis tidak memiliki aset yang cocok, paket opsional tersebut tidak tersedia melalui aset rilis itu.
+
 ## Tata Letak Direktori
 
 ```

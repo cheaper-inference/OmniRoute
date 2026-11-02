@@ -184,9 +184,10 @@ API ключовете с всякакъв обхват и токените за
 
 - **`publicPolicy`** (`policies/public.ts`) — винаги връща `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — извлича Bearer и го валидира чрез `validateApiKey()`. Преминава към анонимен достъп само когато ефективният флаг за функционалност `REQUIRE_API_KEY` е деактивиран. Ефективният флаг се определя чрез `isRequireApiKeyEnabled()` (`замяна от флаг за функционалност в БД > process.env.REQUIRE_API_KEY > стойност по подразбиране`), така че флаговете за функционалност в таблото и променливите на средата да управляват последователно `/api/v1/*`, `/api/v1beta/*` и псевдонимите; при грешка в определянето достъпът се отказва. Разрешава заявки със сесия на таблото към клиентски API маршрути (включително `/api/v1/models`, използван от каталога с модели на таблото).
+  Когато Entra ID SSO е включено, Bearer, който има структура на Entra токен (три base64url сегмента, алгоритъм `RS*`, `kid`), се обработва от SSO клона **преди** `validateApiKey()`, а решението му е окончателно. Той никога не преминава към проверката на API ключ или към клона за понижаване до анонимен достъп, така че прекъсване при доставчика на самоличност не може да отвори свободен достъп. Статичните API ключове не се засягат. Вижте [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — приема сесия на таблото, вътрешни заявки за синхронизиране на модели (съпоставяни с `/api/providers/[name]/(sync-models|models)`) или пропуска изцяло проверката, ако `isAuthRequired()` върне false. Връща 403 (`AUTH_001`), когато е предоставен Bearer токен, но той е невалиден, и 401 във всички останали случаи. Освен това прилага нивата за защита на маршрутите (LOCAL_ONLY / ALWAYS_PROTECTED) преди който и да е клон за автентикация — вижте [Нива за защита на маршрутите](../security/ROUTE_GUARD_TIERS.md). Пътищата LOCAL_ONLY в `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (понастоящем: `/api/mcp/`) могат да бъдат достъпвани извън loopback интерфейса, когато Bearer ключът има обхват `manage`; всички останали пътища LOCAL_ONLY остават строго ограничени до loopback независимо от обхвата.
 
-Успешната политика връща `AuthSubject` с `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Обработчиците надолу по веригата могат да го прочетат чрез `assertAuth(request, "CLIENT_API")` в `src/server/authz/assertAuth.ts`, вместо да изпълняват повторно логиката за автентикация.
+Успешната политика връща `AuthSubject` с `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Обработчиците надолу по веригата могат да го прочетат чрез `assertAuth(request, "CLIENT_API")` в `src/server/authz/assertAuth.ts`, вместо да изпълняват повторно логиката за автентикация.
 
 ## Списък с публични маршрути
 
@@ -356,8 +357,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 При удостоверени заявки заглавките на заявката към upstream (от страната на обработчика) включват също:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<последните-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<последните-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (незадължително)
 x-omniroute-auth-scopes:    списък, разделен със запетаи
 ```

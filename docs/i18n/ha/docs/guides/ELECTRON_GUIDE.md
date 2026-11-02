@@ -64,6 +64,19 @@ Filin aiki na `electron/` kuma yana samar da:
 - `npm run build:mac-x64` / `build:mac-arm64` — ginin macOS na tsari guda
 - `npm run pack` — ginin kundin adireshi kawai don gwaji na cikin gida (babu mai shigarwa)
 
+## Runtime pack na zaɓi
+
+Desktop build na iya wallafa runtime archive na zaɓi tare da installer ɗinsu. Server payload da aka girka yana ɗauke da `optional-packs.index.json` (ƙarƙashin `resources/app` a Windows da Linux). Ga entry na `browser-runtime`, karanta `packs[].tarball` ka sauke **wannan ainihin sunan fayil daga release ɗaya**. Sunayen archive suna ɗauke da SHA-256 digest; build dabam na iya buƙatar archive dabam. Kada a sauya sunan fayil ɗin da aka sauke.
+
+Kwafi index na app da aka girka da archive da aka zaɓa zuwa directory guda, sannan amfani da CLI na release ɗaya:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` yana nuna yanayin girkawa da tabbatarwa, ba sunan fayil na archive ba. Index da aka haɗa shi ne ke zaɓar archive. Girkawa tana tabbatar da checksum na archive kafin cire kayansa, da checksum na package kafin maye gurbin pack da aka girka. Tana karanta fayilolin gida; ba ta sauke archive da suka ɓace. Sake kunna application bayan girkawa. Idan release ba shi da asset da ya dace, ba a samun pack na zaɓi ta assets na wannan release.
+
 ## Tsarin Kundin Fayiloli
 
 ```

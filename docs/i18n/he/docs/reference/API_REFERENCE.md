@@ -29,6 +29,7 @@
 - [הזרמה באמצעות WebSocket](#websocket-streaming)
 - [דיווח על מכסות ובעיות](#quotas--issues-reporting)
 - [מטמון סמנטי](#semantic-cache)
+- [תאימות ניהול CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [לוח בקרה וניהול](#dashboard--management)
 - [ניהול שילובים](#combo-management)
 - [Webhooks](#webhooks)
@@ -1011,6 +1012,18 @@ ChatGPT מחזיר `codex.rate_limits` + `response.created` ומזרים את
 
 **אימות:** מפתח API מסוג Bearer‏ (`isAuthenticated`).
 
+### שחזור הפעלת מכסה (הפעלה יזומה)
+
+בקשת `POST /v1/chat/completions` או `POST /v1/responses` שאינה זורמת ונכשלת בשגיאת מכסה סופית (`402`/`429`/`503` שגופה מציין שהמכסה או הזיכויים אזלו) יכולה להישמר להמתנה ולהישלח שוב בהמשך במקום להחזיר את השגיאה. הקורא מפעיל זאת לכל בקשה באמצעות שלוש כותרות:
+
+| כותרת                        | ערך                                    |
+| ---------------------------- | -------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                 |
+| `x-omniroute-session`        | מזהה הפעלה, `[A-Za-z0-9._:-]{1,128}`   |
+| `x-omniroute-recovery-turn`  | מזהה תור ייחודי בתוך ההפעלה (אותו כלל) |
+
+רק תורים עם `stream: false`, ללא כלים, היסטוריית כלים או `previous_response_id` וללא קיבוע `x-omniroute-connection`, כשירים; יש גם להגדיר `STORAGE_ENCRYPTION_KEY` (הבקשה נשמרת מוצפנת עד 24 h). התשובה אז היא `202` עם `recovery.poll`; בצעו תשאול של `GET /v1/quota-recoveries/{id}` (`202` בהמתנה, `200` עם הגוף ששוחזר לאחר השלמה) או בטלו באמצעות `DELETE`. הכרטיסים גלויים רק למפתח ה־API שיצר אותם. שליחה חוזרת שתוצאתה אינה ודאית מסתיימת ב־`needs_confirmation` במקום להישלח פעמיים. מקור: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## שימוש בשירות עצמי (`/api/usage/om-usage`)
@@ -1179,6 +1192,28 @@ DELETE /api/cache/stats
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## תאימות ניהול CLIProxyAPI
+
+OmniRoute עונה לשלוש נקודות קצה הניהול של [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) שלוחות שימוש קוראים כדי לקרוא מגבלות מנויים של Claude ו־Codex (למשל מקור מגבלות השימוש `cliproxy` ב־T3 Code). כוונו את כתובת הבסיס של הלקוח ל־OmniRoute והשתמשו במפתח API עם תחום `manage` כמפתח הניהול. המסלולים מוגשים ב־`/v0/management/*` וב־`/api/v0/management/*`.
+
+| שיטה | נתיב                         | תיאור                                                                                                                     |
+| ---- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v0/management/auth-files`  | חיבורי OAuth של Claude ו־Codex במבנה `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. ללא אסימונים |
+| POST | `/v0/management/api-call`    | גוף `{ auth_index, method, url, header?, data? }`. שולח בקשה מורשית עם אסימון החשבון ומחזיר `{ status_code, body }`       |
+| POST | `/v0/management/reset-quota` | גוף `{ auth_index }`. מנקה את השהיית החיבור, נעילות המודלים והשהיות Codex לפי תחום של חשבון אחד                           |
+
+- `auth_index` הוא מזהה החיבור ב־OmniRoute. `provider` הוא `claude` או `codex` (חיבורי OAuth בלבד; ספק מפתח ה־API ‏`anthropic` אינו נכלל). ב־Codex, ‏`id_token.chatgpt_account_id` הוא מזהה סביבת העבודה השמור ו־`plan_type` הוא המסלול השמור.
+- `api-call` אינו פרוקסי כללי. הוא מקבל רק Claude `GET
+https://api.anthropic.com/api/oauth/usage` ו־Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, ‏`GET .../wham/rate-limit-reset-credits` ו־`POST .../wham/rate-limit-reset-credits/consume`, כל אחד רק עבור חשבון של הספק המתאים. כל דבר אחר מחזיר `403` בלי לפנות למעלה הזרם. מתעלמים מכותרת `Authorization` של הקורא (לרבות מציין המקום `$TOKEN$`): OmniRoute מזריק את אסימון הגישה של החיבור, מרענן אותו תחילה אם תפוגתו קרובה ומעביר רק כותרות מורשות (`anthropic-beta`; ‏`OpenAI-Beta`, ‏`Originator`, ‏`Chatgpt-Account-Id`; ‏`Accept`, ‏`Content-Type`). אם `Chatgpt-Account-Id` חסרה, ברירת המחדל היא מזהה סביבת העבודה השמור. אם התשובה הראשונה ממעלה הזרם היא `401`, מתבצע רענון אחד וניסיון חוזר רק אם אסימון הגישה השתנה. כל ניסיון במעלה הזרם מוגבל ל־15 שניות ומשתמש בפרוקסי של החיבור.
+- `reset-quota` אינו משנה מצבים סופיים (banned, expired, credits_exhausted). ‏`auth_index` לא מוכר מחזיר `404`.
+
+**אימות:** הפעלת לוח בקרה או מפתח API בעל תחום `manage`, נדרשים גם כשהכניסה מושבתת (הנתיבים ב־`ALWAYS_PROTECTED_API_PATHS`). מפתחות להסקה בלבד מקבלים `403`. מקור: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

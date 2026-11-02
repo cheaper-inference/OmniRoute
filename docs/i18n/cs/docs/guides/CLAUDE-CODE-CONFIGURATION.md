@@ -42,6 +42,10 @@ koncový bod se směruje pomocí proměnných prostředí (nemá příznak `--ba
 
 > Proměnné prostředí se načítají **pouze jednou při spuštění** — po jejich změně Claude Code restartujte.
 
+Pro průběžně obměňované přihlašovací údaje namísto pevného řetězce nastavte `apiKeyHelper` v `~/.claude/settings.json` na příkaz, který vypíše aktuální přihlašovací údaj na stdout. Claude Code jeho výstup standardně ukládá do mezipaměti na pět minut (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` tuto dobu přepíše) a hodnotu posílá v `Authorization: Bearer` i `x-api-key`. Skript musí vypsat pouze přihlašovací údaj; přidaný informační banner způsobí ve v2.1.227+ selhání pomocného mechanismu.
+
+Takto funguje Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` vypíše krátkodobý přístupový token Entra, který OmniRoute ověří místo API klíče. Viz [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` nastaví všechny tyto proměnné za vás: zjistí základní URL a token
 z aktivního kontextu (takže po `omniroute connect <vps>` stačí spustit
 `omniroute launch`), zkontroluje stav serveru a spustí `claude`.

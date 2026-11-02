@@ -587,7 +587,8 @@ không bật tính năng che: việc đó vẫn do `PII_REDACTION_ENABLED` (requ
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Chưa thiết lập nghĩa là
   áp dụng mọi loại (hành vi như trước khi cài đặt này tồn tại). Mẫu `ssn_us` của
   engine xử lý request được ánh xạ sang `ssn`. Các template (Minimal, Standard,
-  Financial, Brazilian, USA, Full) chỉ điền sẵn các hộp kiểm trong giao diện.
+  Financial, Brazilian, USA, GDPR, POPIA, Full) chỉ điền sẵn các hộp kiểm trong giao diện.
+- **Định danh GDPR và POPIA** — mười hai ID tích hợp bao phủ định danh cá nhân của EU và Nam Phi, xem bảng bên dưới. Biểu thức chính quy, bộ xác thực và thẻ khu vực tài phán của chúng nằm trong một bảng `src/shared/utils/piiPatterns.ts`, được cả bộ làm sạch phản hồi (`src/lib/piiSanitizer.ts`) và bộ che yêu cầu (`src/shared/utils/inputSanitizer.ts`) sử dụng. Kết quả khớp chỉ bị che khi bộ xác thực chấp nhận; một dãy chữ số đơn thuần không bao giờ đủ. Người vận hành đã lưu tập lựa chọn thu hẹp trước khi có các ID này sẽ giữ hành vi cũ cho đến khi chọn các ID mới.
 - **Mẫu tùy chỉnh** — tối đa 20 mẫu regex hoặc wildcard (`*` = tối đa 64
   ký tự không phải khoảng trắng, `?` = một ký tự). Các đoạn khớp trở thành
   `[CUSTOM_REDACTED]`. Mọi mẫu đều đi qua `compilePiiCustomPattern()`
@@ -612,6 +613,25 @@ Các cài đặt nằm trong bảng `key_value` (namespace `pii_settings`,
 
 Cả ba đều yêu cầu xác thực quản trị (management auth) và kiểm tra body bằng Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Định danh GDPR (EU) và POPIA (Nam Phi)
+
+| ID                  | Định danh                  | Xác thực                                                                                 |
+| ------------------- | -------------------------- | ---------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                       | Quốc gia đã biết, độ dài chính xác của quốc gia đó, ISO 13616 MOD-97-10                  |
+| `eu_vat`            | Mã số VAT của EU           | Tiền tố quốc gia thành viên đã biết và định dạng số của quốc gia đó (không tra cứu VIES) |
+| `es_dni_nie`        | DNI / NIE Tây Ban Nha      | Chữ cái kiểm tra (giá trị mod 23); NIE là `X/Y/Z` + 7 chữ số                             |
+| `it_codice_fiscale` | Codice Fiscale Ý           | Chữ cái kiểm tra từ các bảng vị trí lẻ/chẵn                                              |
+| `pl_pesel`          | PESEL Ba Lan               | Checksum có trọng số và khoảng tháng/ngày sinh được mã hóa hợp lý                        |
+| `nl_bsn`            | BSN Hà Lan                 | 11-proof (trọng số 9..2, -1)                                                             |
+| `de_steuer_id`      | Steuer-ID Đức              | ISO 7064 Mod 11,10 cùng quy tắc cấu trúc chữ số (không bắt đầu bằng 0)                   |
+| `se_personnummer`   | personnummer Thụy Điển     | Luhn trên mười chữ số cuối và ngày sinh hợp lý (10 hoặc 12 chữ số)                       |
+| `za_id`             | Số định danh Nam Phi       | Luhn trên toàn bộ 13 chữ số, tháng/ngày sinh hợp lệ, chữ số quốc tịch 0 hoặc 1           |
+| `za_phone`          | Số điện thoại Nam Phi      | Tiền tố `+27` / `27`, hoặc dạng nội địa `0..` có dấu cách hay gạch nối                   |
+| `za_vat`            | Mã số VAT Nam Phi          | 10 chữ số bắt đầu bằng `4` **và** "VAT" / "BTW" trong 48 ký tự đứng trước                |
+| `za_tax_ref`        | Mã tham chiếu thuế Nam Phi | 10 chữ số bắt đầu bằng `0`-`3`, Luhn, **và** "tax" / "SARS" trong 48 ký tự đứng trước    |
+
+Vì các định dạng chỉ có chữ số trùng với số đơn hàng, số bản dựng và dấu thời gian, những định dạng yếu nhất (`za_vat`, `za_tax_ref`) cần dấu hiệu từ khóa; một số `0..` gồm mười chữ số không có dấu phân cách không được coi là số điện thoại Nam Phi. IBAN có dấu cách (`GB29 NWBK ...`) không được khớp. Trên đường truyền luồng, dấu hiệu chỉ được tra trong khối hiện tại. Các ID được đặt trước những mẫu điện thoại tổng quát, nên định danh đã xác thực giữ nguyên ký hiệu thay thế riêng của nó (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Mẫu `gdpr` và `popia` lần lượt chọn ID EU và Nam Phi. Bản thân việc che vẫn phải chủ động bật (Hard Rule #20): không có nội dung nào ở đây thay đổi giá trị mặc định của cờ tính năng.
 
 ### Prompt Injection (`promptInjection.ts`)
 

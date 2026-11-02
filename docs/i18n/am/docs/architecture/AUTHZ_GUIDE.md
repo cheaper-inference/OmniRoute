@@ -164,9 +164,10 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 - **`publicPolicy`** (`policies/public.ts`) — ሁልጊዜ `allow({ kind: "anonymous", id: "anonymous" })` ይመልሳል።
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearerን አውጥቶ በ`validateApiKey()` ያረጋግጣል። ወደ anonymous የሚያልፈው ውጤታማው `REQUIRE_API_KEY` feature flag ሲሰናከል ብቻ ነው። ውጤታማው flag በ`isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) በኩል ይወሰናል፤ በዚህም የDashboard Feature Flags እና environment variables `/api/v1/*`፣ `/api/v1beta/*` እና aliasesን በወጥነት ይቆጣጠራሉ፤ የresolver ውድቀቶች መዳረሻን ይዘጋሉ። በclient API routes ላይ የDashboard-session requestsን ይፈቅዳል (በdashboard model catalog የሚጠቀሙበትን `/api/v1/models` ጨምሮ)።
+  Entra ID SSO ሲነቃ፣ በመዋቅሩ የEntra ቶከን የሆነ Bearer (ሦስት base64url ክፍሎች፣ `RS*` አልጎሪዝም፣ `kid`) ከ`validateApiKey()` **በፊት** በSSO ቅርንጫፍ ይስተናገዳል፣ ውሳኔውም የመጨረሻ ነው። ወደ API ቁልፍ መንገድ ወይም ወደ ማንነት አልባ መዳረሻ ቅርንጫፍ ፈጽሞ አያልፍም፤ ስለዚህ የማንነት አቅራቢው መቋረጥ ክፍት መዳረሻ ሊፈጥር አይችልም። ቋሚ የAPI ቁልፎች አይነኩም። [Entra ID SSO](../security/ENTRA_SSO.md)ን ይመልከቱ።
 - **`managementPolicy`** (`policies/management.ts`) — የDashboard session፣ internal model-sync requests (`/api/providers/[name]/(sync-models|models)` ጋር የሚዛመዱ) ይቀበላል፣ ወይም `isAuthRequired()` false ከመለሰ ሙሉ በሙሉ ይዘለዋል። Bearer token ካለ ነገር ግን invalid ከሆነ 403 (`AUTH_001`)፣ አለበለዚያ 401 ይመልሳል። ከማንኛውም auth branch በፊት የroute-guard tiersን (LOCAL_ONLY / ALWAYS_PROTECTED) ያስገድዳል — [የRoute Guard Tiers](../security/ROUTE_GUARD_TIERS.md)ን ይመልከቱ። በ`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ውስጥ ያሉ LOCAL_ONLY paths (በአሁኑ ጊዜ፦ `/api/mcp/`) Bearer keyው `manage` scopeን ከያዘ ከnon-loopback ላይ ሊደረስባቸው ይችላል፤ ሌሎች ሁሉም LOCAL_ONLY paths scope ምንም ይሁን ምን strict-loopback ሆነው ይቆያሉ።
 
-የተሳካ policy `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` ያለውን `AuthSubject` ይመልሳል። Downstream handlers የauth logicን እንደገና ከማስኬድ ይልቅ በ`src/server/authz/assertAuth.ts` ውስጥ ባለው `assertAuth(request, "CLIENT_API")` በኩል ሊያነቡት ይችላሉ።
+የተሳካ policy `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ያለውን `AuthSubject` ይመልሳል። Downstream handlers የauth logicን እንደገና ከማስኬድ ይልቅ በ`src/server/authz/assertAuth.ts` ውስጥ ባለው `assertAuth(request, "CLIENT_API")` በኩል ሊያነቡት ይችላሉ።
 
 ## የይፋዊ መስመሮች ዝርዝር
 
@@ -322,8 +323,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ማንነት ለተረጋገጠባቸው ጥያቄዎች፣ ወደላይኛው አገልግሎት የሚላኩት (በhandler በኩል ያሉ) የጥያቄ ራስጌዎች የሚከተሉትንም ያካትታሉ፦
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```

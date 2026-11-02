@@ -314,12 +314,12 @@ API 키의 `manage`, MCP 도구의 `read:compression`, `oma_live_…` 액세스 
 오류가 발생합니다. 이 순위는 `scopeSatisfies`에 해당합니다. 이 함수는 MCP 테이블을
 참조하지 않으며, MCP 매처도 이 순위를 참조하지 않습니다.
 
-| 네임스페이스     | 자격 증명                                                      | 검사기             | 통과 시 허용되는 작업                            |
-| :--------------- | :------------------------------------------------------------- | :----------------- | :----------------------------------------------- |
-| API 키 관리      | `api_keys.scopes`                                              | `hasManageScope`   | 해당 Bearer 키를 사용한 관리 REST                |
-| API 키 추가 범위 | 동일한 배열의 정확히 일치하는 문자열 하나                      | 아래에 명시된 헬퍼 | 해당 기능 하나만                                 |
-| MCP 도구 범위    | 동일한 배열, 없으면 MCP `_meta`, 없으면 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 범위 적용이 활성화된 경우 해당 도구              |
-| 액세스 토큰      | `oma_live_…`                                                   | `scopeSatisfies`   | 메서드와 경로에서 해당 순위를 요구하는 관리 경로 |
+| 네임스페이스     | 자격 증명                                                                   | 검사기             | 통과 시 허용되는 작업                            |
+| :--------------- | :-------------------------------------------------------------------------- | :----------------- | :----------------------------------------------- |
+| API 키 관리      | `api_keys.scopes`                                                           | `hasManageScope`   | 해당 Bearer 키를 사용한 관리 REST                |
+| API 키 추가 범위 | 동일한 배열의 정확히 일치하는 문자열 하나                                   | 아래에 명시된 헬퍼 | 해당 기능 하나만                                 |
+| MCP 도구 범위    | 동일 배열, 없으면 MCP `_meta`(HTTP/SSE 전용), 없으면 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 범위 적용이 활성화된 경우 해당 도구              |
+| 액세스 토큰      | `oma_live_…`                                                                | `scopeSatisfies`   | 메서드와 경로에서 해당 순위를 요구하는 관리 경로 |
 
 각 자격 증명을 발급하는 방법은
 [관리 인증](../guides/MANAGEMENT-AUTH.md)에서 다룹니다.
@@ -368,9 +368,7 @@ API 키의 `manage`, MCP 도구의 `read:compression`, `oma_live_…` 액세스 
 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`로 설정하지 않으면 범위 적용은 비활성화됩니다
 (기본값은 `false`). 비활성화된 동안에는 `evaluateToolScopes`가 호출을 허용하고
 카탈로그를 건너뜁니다. 활성화된 동안에는 HTTP가 Bearer 키의 `api_keys.scopes`를
-`authInfo`로 사용합니다([키별 HTTP 범위 바인딩](#per-key-http-scope-binding-7895) 참조).
-키 범위를 확인할 수 없으면 부여된 범위 집합은 MCP `_meta`, 그다음
-`OMNIROUTE_MCP_SCOPES`로 대체됩니다.
+`authInfo`로 사용합니다([키별 HTTP 범위 바인딩](#per-key-http-scope-binding-7895) 참조). 키 스코프가 하나도 해석되지 않으면 부여 집합은 MCP `_meta`로 폴스루하고(HTTP/SSE 호출자에 대해서만, HTTP 인증 컨텍스트 안에서만 존중된다. stdio 호출자의 `_meta`는 클라이언트가 제어하며 호출자별 신원 정보를 담지 않으므로 무시된다), 그다음 `OMNIROUTE_MCP_SCOPES`로 넘어간다.
 
 #### 액세스 토큰 범위
 
@@ -468,8 +466,7 @@ HTTP/SSE에서 `open-sse/mcp-server/httpTransport.ts`는 이제
 `OMNIROUTE_MCP_SCOPES` 환경 변수 폴백보다 `authInfo`를 우선시했습니다. 이번 변경은 이전에는 HTTP를 통해
 제공되지 않았던 최우선 소스를 채우기만 합니다. API 키를 확인할 수 없는 경우
 (헤더 없음, 유효하지 않은 키) `authInfo`는 `undefined`로 유지되고, 범위 확인은 변경 없이
-기존 `meta`/환경 변수 체인으로 폴백합니다. stdio에는 호출자별 ID가 없으므로
-(`mcpCallerIdentity.ts` 참조) 영향을 받지 않으며, 계속 `_meta`/환경 변수 폴백 체인을 사용합니다.
+기존 `meta`/환경 변수 체인으로 폴백합니다. stdio에는 호출자별 신원이 없으므로(참조: `mcpCallerIdentity.ts`) 키별 바인딩의 영향을 받지 않으며, `_meta` 단계를 건너뛰고(`_meta`는 HTTP 인증 컨텍스트 내부에서만 적용됩니다, #15159) `OMNIROUTE_MCP_SCOPES` 환경 변수 키만을 기준으로 해석합니다.
 
 **범위가 제한된 HTTP/SSE 호출자에게는 `OMNIROUTE_MCP_ENFORCE_SCOPES`와 관계없이
 범위 적용이 강제로 활성화됩니다.** `OMNIROUTE_MCP_ENFORCE_SCOPES`의 기본값이 `false`인 것은

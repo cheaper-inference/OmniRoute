@@ -85,11 +85,9 @@
 
 ## 5. Aġġornar tal-kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` jikkopja s-`src/` upstream f'dak il-commit ġo
-`packages/ui-kit/src` u japplika l-unika trasformazzjoni permessa (ineħħi s-suffiss `.js`
-mill-imports relattivi). Imbagħad: irrevedi `git diff packages/ui-kit`, għamel pass viżwali fuq providers, settings, combos,
-usage u endpoint fiż-żewġ temi, mexxi `npm run check:ui-kit-snapshot` u `npm run test:vitest:ui`, u
-iftaħ il-PR bil-changelog upstream.
+`npm run check:ui-kit-upstream` tqabbel il-verżjoni ffissata f’`packages/ui-kit/UPSTREAM.md` mal-aktar tag `v*` ġdid tar-repo upstream u tipprintja l-kmand tas-sinkronizzazzjoni meta rilaxx ikun barra. Il-fluss tax-xogħol `UI Kit upstream watch` ta 'kull ġimgħa (`.github/workflows/ui-kit-upstream-watch.yml`) imexxi l-istess kontroll u jżomm kwistjoni ta' traċċar waħda miftuħa waqt li l-pin ikun lura; ir-repo upstream huwa privat, għalhekk il-fluss tax-xogħol jeħtieġ token li jinqara biss fis-sigriet `UI_KIT_READ_TOKEN` u jibqa 'inert mingħajru.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` tikkopja `src/` upstream f'dak il-commit (`latest` = l-aktar tikketta `v*` ġdida) `packages/ui-kit/src`, tapplika t-trasformazzjoni permessa waħda (tneħħi s-suffiss `.js` minn importazzjonijiet relattivi), u tistabbilixxi l-verżjoni tal-ispazju tax-xogħol `packages/ui-kit/package.json` u `package-lock.json` għal dik upstream. Imbagħad: irrevedi `git diff packages/ui-kit`, agħmel pass viżwali fuq il-fornituri, is-settings, il-combos, l-użu u l-endpoint fiż-żewġ temi, mexxi `npm run check:ui-kit-snapshot` u `npm run test:vitest:ui`, u tiftaħ il- PR bil-changelog upstream.
 
 ## 6. Dijagrammi README
 

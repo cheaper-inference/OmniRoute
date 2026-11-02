@@ -488,7 +488,7 @@ Coinníonn `open-sse/config/` an tsraith chumraíochta:
 
 | Comhad                        | Cuspóir                                               |
 | ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Clárlann samhlacha comhrá thar chatalóg 377 soláthraí |
+| `providerRegistry.ts`         | Clárlann samhlacha comhrá thar chatalóg 380 soláthraí |
 | `providerModels.ts`           | Ailiasanna samhlacha, mapáil formáide                 |
 | `constants.ts`                | Teorainneacha ama, teorainneacha, cóid stádais        |
 | `defaultThinkingSignature.ts` | Síniú réamhshocraithe smaointeoireachta Claude        |

@@ -310,12 +310,12 @@ API 金鑰上的 `manage`、MCP 工具上的 `read:compression`，以及
 該層級由 `scopeSatisfies` 判定。它不會查閱 MCP 表格，而 MCP
 比對器也不會查閱它。
 
-| 命名空間         | 憑證                                                          | 檢查器             | 通過後允許的操作                     |
-| :--------------- | :------------------------------------------------------------ | :----------------- | :----------------------------------- |
-| API 金鑰管理     | `api_keys.scopes`                                             | `hasManageScope`   | 使用該 Bearer 金鑰存取管理 REST      |
-| API 金鑰附加範圍 | 相同陣列中的一個完全相符字串                                  | 下方指定的輔助函式 | 僅限該項能力                         |
-| MCP 工具範圍     | 相同陣列，否則為 MCP `_meta`，再否則為 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 啟用強制執行後，可使用該工具         |
-| 存取權杖         | `oma_live_…`                                                  | `scopeSatisfies`   | 使用需要該層級之方法與路徑的管理路由 |
+| 命名空間         | 憑證                                                                           | 檢查器             | 通過後允許的操作                     |
+| :--------------- | :----------------------------------------------------------------------------- | :----------------- | :----------------------------------- |
+| API 金鑰管理     | `api_keys.scopes`                                                              | `hasManageScope`   | 使用該 Bearer 金鑰存取管理 REST      |
+| API 金鑰附加範圍 | 相同陣列中的一個完全相符字串                                                   | 下方指定的輔助函式 | 僅限該項能力                         |
+| MCP 工具範圍     | 同一個陣列，其次是 MCP `_meta`（僅限 HTTP/SSE），最後是 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 啟用強制執行後，可使用該工具         |
+| 存取權杖         | `oma_live_…`                                                                   | `scopeSatisfies`   | 使用需要該層級之方法與路徑的管理路由 |
 
 各種憑證的簽發方式請參閱
 [管理驗證](../guides/MANAGEMENT-AUTH.md)。
@@ -364,7 +364,8 @@ MCP 工具範圍。
 `false`）。停用時，`evaluateToolScopes` 會允許呼叫並略過目錄。啟用時，
 HTTP 會使用 Bearer 金鑰的 `api_keys.scopes` 作為 `authInfo`
 （請參閱[每個金鑰的 HTTP 範圍繫結](#per-key-http-scope-binding-7895)）。
-如果無法解析出任何金鑰範圍，已授予集合會依序改用 MCP `_meta`，再改用
+當沒有任何金鑰範圍能被解析時，已授予集合會依序回退到 MCP `_meta`（僅對 HTTP/SSE 呼叫端生效，且須位於 HTTP 認證脈絡之內；stdio 呼叫端的 `_meta` 會被忽略，
+因為該中繼資料由客戶端控制，且不帶任何逐呼叫端的身分資訊），然後是
 `OMNIROUTE_MCP_SCOPES`。
 
 #### 存取權杖範圍
@@ -460,8 +461,7 @@ HTTP 會使用 Bearer 金鑰的 `api_keys.scopes` 作為 `authInfo`
 而非 `_meta` 與 `OMNIROUTE_MCP_SCOPES` 環境變數備援——此變更只是填入第一個、
 優先順序最高的來源，而先前透過 HTTP 時並未提供此來源。若無法解析 API 金鑰
 （沒有標頭、金鑰無效），`authInfo` 會維持 `undefined`，而解析流程則會照常
-退回至現有的 `meta`/環境變數鏈。stdio 沒有個別呼叫者身分（請參閱
-`mcpCallerIdentity.ts`），因此不受影響——它會繼續使用 `_meta`/環境變數備援鏈。
+退回至現有的 `meta`/環境變數鏈。stdio 沒有逐呼叫端的身分（見 `mcpCallerIdentity.ts`），因此不受逐金鑰綁定影響 — 它略過 `_meta` 步驟（`_meta` 僅在 HTTP 認證情境中生效，#15159），且只從 `OMNIROUTE_MCP_SCOPES` 環境變數鍵解析。
 
 **對於窄作用域的 HTTP/SSE 呼叫者，無論
 `OMNIROUTE_MCP_ENFORCE_SCOPES` 為何，都會強制啟用執行限制。** `OMNIROUTE_MCP_ENFORCE_SCOPES`

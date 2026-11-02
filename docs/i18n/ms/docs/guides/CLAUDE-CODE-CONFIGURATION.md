@@ -42,6 +42,10 @@ tersuai menggunakan pemboleh ubah persekitaran (ia tidak mempunyai bendera `--ba
 
 > Pemboleh ubah persekitaran dibaca **sekali sahaja semasa permulaan** — mulakan semula Claude Code selepas mengubahnya.
 
+Untuk kelayakan akses yang bertukar secara berkala dan bukannya rentetan tetap, tetapkan `apiKeyHelper` dalam `~/.claude/settings.json` kepada perintah yang mencetak kelayakan semasa ke stdout. Secara lalai, Claude Code menyimpan outputnya dalam cache selama lima minit (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` menggantikan tempoh itu) dan menghantar nilainya dalam kedua-dua `Authorization: Bearer` dan `x-api-key`. Skrip mesti mencetak kelayakan itu sahaja: banner tambahan menyebabkan helper gagal pada v2.1.227+.
+
+Begitulah Entra ID SSO berfungsi: `scripts/cli/omniroute-sso.mjs token` mencetak token akses Entra yang singkat tempoh sahnya, lalu OmniRoute mengesahkannya sebagai ganti kunci API. Lihat [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` menetapkan kesemuanya untuk anda: ia menentukan URL asas + token
 daripada konteks aktif (jadi `omniroute connect <vps>` kemudian `omniroute launch`
 terus berfungsi), menjalankan pemeriksaan kesihatan pelayan, dan melaksanakan `claude`.

@@ -29,6 +29,7 @@ Untuk protokol serasi OpenAI yang khusus dan matriks keupayaan penyedia, lihat
 - [Penstriman WebSocket](#websocket-streaming)
 - [Pelaporan Kuota & Isu](#quotas--issues-reporting)
 - [Cache Semantik](#semantic-cache)
+- [Keserasian pengurusan CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [Papan Pemuka & Pengurusan](#dashboard--management)
 - [Pengurusan Kombo](#combo-management)
 - [Webhook](#webhooks)
@@ -1011,6 +1012,18 @@ pelengkapan.
 
 **Pengesahan:** Kunci API Bearer (`isAuthenticated`).
 
+### Pemulihan sesi kuota (ikut serta)
+
+`POST /v1/chat/completions` atau `POST /v1/responses` tanpa penstriman yang gagal dengan ralat kuota terminal (`402`/`429`/`503` dengan badan yang menyatakan kuota atau kredit habis) boleh ditangguhkan dan dimainkan semula kemudian, bukannya mengembalikan ralat. Pemanggil memilih untuk mengaktifkannya bagi setiap permintaan dengan tiga pengepala:
+
+| Pengepala                    | Nilai                                                 |
+| ---------------------------- | ----------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                                |
+| `x-omniroute-session`        | id sesi, `[A-Za-z0-9._:-]{1,128}`                     |
+| `x-omniroute-recovery-turn`  | id giliran yang unik dalam sesi (peraturan yang sama) |
+
+Hanya giliran `stream: false` tanpa alat, sejarah alat atau `previous_response_id`, serta tanpa pin `x-omniroute-connection`, layak; `STORAGE_ENCRYPTION_KEY` juga mesti ditetapkan (permintaan disimpan dalam bentuk tersulit sehingga 24 jam). Respons kemudiannya ialah `202` dengan `recovery.poll`; buat tinjauan `GET /v1/quota-recoveries/{id}` (`202` semasa tertangguh, `200` dengan badan yang dipulihkan apabila selesai), atau batalkan dengan `DELETE`. Tiket hanya boleh dilihat oleh kunci API yang menciptanya. Main semula yang hasilnya tidak pasti berakhir dalam `needs_confirmation`, bukannya dihantar dua kali. Sumber: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Penggunaan layan diri (`/api/usage/om-usage`)
@@ -1179,6 +1192,28 @@ Sebarang permintaan boleh memintas cache tanpa mengira tetapan kunci:
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Keserasian pengurusan CLIProxyAPI
+
+OmniRoute menjawab tiga endpoint pengurusan [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) yang dipanggil oleh papan pemuka penggunaan untuk membaca had langganan Claude dan Codex (contohnya sumber had penggunaan `cliproxy` T3 Code). Halakan URL asas klien kepada OmniRoute dan gunakan kunci API berskop `manage` sebagai kunci pengurusannya. Laluan disediakan pada `/v0/management/*` dan `/api/v0/management/*`.
+
+| Kaedah | Laluan                       | Huraian                                                                                                                                                                      |
+| ------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Sambungan OAuth Claude dan Codex sebagai `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Tiada token                                                 |
+| POST   | `/v0/management/api-call`    | Badan `{ auth_index, method, url, header?, data? }`. Menghantar permintaan yang disenaraikan sebagai dibenarkan dengan token akaun dan mengembalikan `{ status_code, body }` |
+| POST   | `/v0/management/reset-quota` | Badan `{ auth_index }`. Membersihkan tempoh bertenang sambungan, sekatan model dan tempoh bertenang setiap skop Codex bagi satu akaun                                        |
+
+- `auth_index` ialah id sambungan OmniRoute. `provider` ialah `claude` atau `codex` (sambungan OAuth sahaja; penyedia kunci API `anthropic` tidak disenaraikan). Bagi Codex, `id_token.chatgpt_account_id` ialah id ruang kerja tersimpan dan `plan_type` ialah pelan tersimpan.
+- `api-call` bukan proksi umum. Ia hanya menerima Claude `GET
+https://api.anthropic.com/api/oauth/usage` dan Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` dan `POST .../wham/rate-limit-reset-credits/consume`, setiap satunya hanya untuk akaun penyedia yang sepadan. Selain itu, semuanya mengembalikan `403` tanpa menghubungi upstream. Pengepala `Authorization` pemanggil (termasuk pemegang tempat `$TOKEN$`) diabaikan: OmniRoute menyuntik token akses sambungan, menyegarkannya terlebih dahulu apabila hampir luput, dan hanya memajukan pengepala yang dibenarkan (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` yang tiada menggunakan id ruang kerja tersimpan secara lalai. Jika respons upstream pertama ialah `401`, ia menyegar sekali dan mencuba semula hanya apabila token akses berubah. Setiap percubaan upstream tamat masa selepas 15 saat dan menggunakan proksi sambungan.
+- `reset-quota` tidak mengubah keadaan terminal (banned, expired, credits_exhausted). `auth_index` yang tidak diketahui mengembalikan `404`.
+
+**Pengesahan:** sesi papan pemuka atau kunci API berskop `manage`, wajib walaupun log masuk dilumpuhkan (laluan berada dalam `ALWAYS_PROTECTED_API_PATHS`). Kunci inferens sahaja menerima `403`. Sumber: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

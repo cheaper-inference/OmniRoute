@@ -159,9 +159,10 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 - **`publicPolicy`** (`policies/public.ts`) — ہمیشہ `allow({ kind: "anonymous", id: "anonymous" })` واپس کرتی ہے۔
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer اخذ کرتی ہے اور `validateApiKey()` کے ذریعے اس کی توثیق کرتی ہے۔ صرف اس صورت میں anonymous پر واپس آتی ہے جب مؤثر `REQUIRE_API_KEY` فیچر فلیگ غیر فعال ہو۔ مؤثر فلیگ کا تعین `isRequireApiKeyEnabled()` (`DB فیچر فلیگ اوور رائیڈ > process.env.REQUIRE_API_KEY > طے شدہ قدر`) کے ذریعے کیا جاتا ہے، تاکہ ڈیش بورڈ فیچر فلیگز اور ماحولیاتی متغیرات `/api/v1/*`، `/api/v1beta/*` اور عرف پر یکساں طور پر لاگو ہوں؛ ریزولوَر کی ناکامیاں رسائی بند کر دیتی ہیں۔ کلائنٹ API روٹس پر ڈیش بورڈ سیشن کی درخواستوں کی اجازت دیتی ہے (بشمول `/api/v1/models`، جسے ڈیش بورڈ ماڈل کیٹلاگ استعمال کرتا ہے)۔
+  جب Entra ID SSO فعال ہو تو Entra ٹوکن کی ساخت رکھنے والا Bearer (base64url کے تین حصے، `RS*` الگورتھم، `kid`) `validateApiKey()` سے **پہلے** SSO شاخ میں سنبھالا جاتا ہے، اور اس کا فیصلہ حتمی ہوتا ہے۔ یہ کبھی API کلید والے راستے یا رسائی کو گمنام درجے پر لے جانے والی شاخ میں نہیں جاتا۔ اس لیے شناخت فراہم کنندہ کی بندش رسائی کو سب کے لیے کھلا نہیں کر سکتی۔ مستقل API کلیدیں متاثر نہیں ہوتیں۔ [Entra ID SSO](../security/ENTRA_SSO.md) دیکھیں۔
 - **`managementPolicy`** (`policies/management.ts`) — ڈیش بورڈ سیشن، داخلی ماڈل سنک درخواستیں (`/api/providers/[name]/(sync-models|models)` کے ساتھ مماثل)، قبول کرتی ہے، یا اگر `isAuthRequired()` false واپس کرے تو مکمل طور پر نظر انداز کر دیتی ہے۔ Bearer ٹوکن موجود مگر غیر معتبر ہونے پر 403 (`AUTH_001`) واپس کرتی ہے، بصورتِ دیگر 401۔ یہ کسی بھی توثیقی شاخ سے پہلے روٹ گارڈ کے درجات (LOCAL_ONLY / ALWAYS_PROTECTED) بھی نافذ کرتی ہے — [روٹ گارڈ کے درجات](../security/ROUTE_GUARD_TIERS.md) دیکھیں۔ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` میں موجود LOCAL_ONLY راستوں (فی الحال: `/api/mcp/`) تک non-loopback سے اس وقت رسائی حاصل کی جا سکتی ہے جب Bearer کلید کے پاس `manage` اسکوپ ہو؛ دیگر تمام LOCAL_ONLY راستے اسکوپ سے قطع نظر strict-loopback رہتے ہیں۔
 
-ایک کامیاب پالیسی `AuthSubject` واپس کرتی ہے، جس میں `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` ہوتا ہے۔ زیریں سطح کے ہینڈلرز توثیقی منطق دوبارہ چلانے کے بجائے اسے `src/server/authz/assertAuth.ts` میں موجود `assertAuth(request, "CLIENT_API")` کے ذریعے پڑھ سکتے ہیں۔
+ایک کامیاب پالیسی `AuthSubject` واپس کرتی ہے، جس میں `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ہوتا ہے۔ زیریں سطح کے ہینڈلرز توثیقی منطق دوبارہ چلانے کے بجائے اسے `src/server/authz/assertAuth.ts` میں موجود `assertAuth(request, "CLIENT_API")` کے ذریعے پڑھ سکتے ہیں۔
 
 ## عوامی روٹس کی فہرست
 
@@ -308,8 +309,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 توثیق شدہ درخواستوں کے لیے upstream (ہینڈلر کی جانب) درخواست کے ہیڈرز میں یہ بھی شامل ہوتے ہیں:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (اختیاری)
 x-omniroute-auth-scopes:    کوما سے جدا کردہ فہرست
 ```

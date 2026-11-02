@@ -156,9 +156,10 @@ Hver ruteklasse har en policy i `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — returnerer alltid `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — trekker ut Bearer og validerer via `validateApiKey()`. Faller bare tilbake til anonym tilgang når det effektive funksjonsflagget `REQUIRE_API_KEY` er deaktivert. Det effektive flagget fastsettes gjennom `isRequireApiKeyEnabled()` (`overstyring med funksjonsflagg i DB > process.env.REQUIRE_API_KEY > standardverdi`), slik at funksjonsflagg i dashbordet og miljøvariabler styrer `/api/v1/*`, `/api/v1beta/*` og aliasene konsekvent. Feil i fastsettingen fører til avvisning. Tillater forespørsler med dashbordøkt på klient-API-ruter (inkludert `/api/v1/models`, som brukes av dashbordets modellkatalog).
+  Når Entra ID SSO er aktivert, håndterer SSO-grenen en Bearer som har strukturen til et Entra-token (tre base64url-segmenter, algoritmen `RS*`, `kid`) **før** `validateApiKey()`, og avgjørelsen er endelig. Tokenet går aldri videre til API-nøkkelstien eller grenen som faller tilbake til anonym tilgang. Dermed kan en driftsstans hos identitetsleverandøren ikke føre til åpen tilgang. Statiske API-nøkler påvirkes ikke. Se [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — godtar dashbordøkt og interne forespørsler om modellsynkronisering (samsvart mot `/api/providers/[name]/(sync-models|models)`), eller hopper over alt hvis `isAuthRequired()` returnerer false. Returnerer 403 (`AUTH_001`) når et Bearer-token finnes, men er ugyldig, ellers 401. Håndhever også nivåene for rutebeskyttelse (LOCAL_ONLY / ALWAYS_PROTECTED) før enhver autentiseringsgren — se [Nivåer for rutebeskyttelse](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY-baner i `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (for øyeblikket: `/api/mcp/`) kan nås fra adresser utenfor loopback når Bearer-nøkkelen har `manage`-omfanget. Alle andre LOCAL_ONLY-baner forblir strengt begrenset til loopback uavhengig av omfang.
 
-En vellykket policy returnerer `AuthSubject` med `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Nedstrøms behandlere kan lese det via `assertAuth(request, "CLIENT_API")` i `src/server/authz/assertAuth.ts` i stedet for å kjøre autentiseringslogikken på nytt.
+En vellykket policy returnerer `AuthSubject` med `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Nedstrøms behandlere kan lese det via `assertAuth(request, "CLIENT_API")` i `src/server/authz/assertAuth.ts` i stedet for å kjøre autentiseringslogikken på nytt.
 
 ## Liste over offentlige ruter
 
@@ -319,8 +320,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 For autentiserte forespørsler inkluderer forespørselshodene oppstrøms (på handlersiden) også:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (valgfri)
 x-omniroute-auth-scopes:    kommadelt liste
 ```

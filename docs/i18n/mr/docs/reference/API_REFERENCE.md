@@ -29,6 +29,7 @@ OpenAI-सुसंगत प्रोटोकॉल आणि प्रदा�
 - [WebSocket स्ट्रीमिंग](#websocket-streaming)
 - [कोटा आणि समस्या अहवाल](#quotas--issues-reporting)
 - [सिमॅंटिक कॅशे](#semantic-cache)
+- [CLIProxyAPI व्यवस्थापन सुसंगतता](#cliproxyapi-management-compatibility)
 - [डॅशबोर्ड आणि व्यवस्थापन](#dashboard--management)
 - [कॉम्बो व्यवस्थापन](#combo-management)
 - [वेबहुक्स](#webhooks)
@@ -960,6 +961,18 @@ CLI `base_url + /responses` ला WebSocket मध्ये अपग्रे�
 
 **प्रमाणीकरण:** Bearer API की (`isAuthenticated`).
 
+### कोटा सत्र पुनर्प्राप्ती (स्पष्टपणे सक्षम करावी)
+
+अंतिम कोटा त्रुटीने अयशस्वी झालेला नॉन-स्ट्रीमिंग `POST /v1/chat/completions` किंवा `POST /v1/responses` (ज्याच्या बॉडीत कोटा किंवा क्रेडिट संपल्याचे म्हटले आहे असा `402`/`429`/`503`) त्रुटी परत करण्याऐवजी थांबवून नंतर पुन्हा चालवता येतो. कॉलर प्रत्येक विनंतीसाठी तीन हेडरने हे सक्षम करतो:
+
+| हेडर                         | मूल्य                              |
+| ---------------------------- | ---------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                             |
+| `x-omniroute-session`        | सत्र ID, `[A-Za-z0-9._:-]{1,128}`  |
+| `x-omniroute-recovery-turn`  | सत्रात अद्वितीय टर्न ID (तोच नियम) |
+
+फक्त साधने, साधन-इतिहास किंवा `previous_response_id` नसलेले आणि `x-omniroute-connection` पिन नसलेले `stream: false` टर्न पात्र आहेत; `STORAGE_ENCRYPTION_KEY` सेट असणे आवश्यक आहे (विनंती 24 h पर्यंत एन्क्रिप्ट करून साठवली जाते). मग उत्तर `recovery.poll` सह `202` असते; `GET /v1/quota-recoveries/{id}` पोल करा (प्रलंबित असताना `202`, पूर्ण झाल्यावर पुनर्प्राप्त बॉडीसह `200`) किंवा `DELETE` ने रद्द करा. तिकिटे फक्त ती तयार करणाऱ्या API कीला दिसतात. अनिश्चित परिणाम असलेला रीप्ले दोनदा पाठवण्याऐवजी `needs_confirmation` मध्ये संपतो. स्रोत: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## स्वयं-सेवा वापर (`/api/usage/om-usage`)
@@ -1128,6 +1141,28 @@ API की `cacheDefaultMode` द्वारे सिमॅंटिक कॅ
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI व्यवस्थापन सुसंगतता
+
+Claude आणि Codex सदस्यता मर्यादा वाचण्यासाठी वापर डॅशबोर्ड ज्या तीन [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) व्यवस्थापन एंडपॉइंटना कॉल करतात, त्यांना OmniRoute उत्तर देतो (उदाहरणार्थ T3 Code चा `cliproxy` वापर-मर्यादा स्रोत). क्लायंटचा बेस URL OmniRoute कडे वळवा आणि व्यवस्थापन की म्हणून `manage` स्कोप असलेली API की वापरा. मार्ग `/v0/management/*` आणि `/api/v0/management/*` येथे उपलब्ध आहेत.
+
+| पद्धत | मार्ग                        | वर्णन                                                                                                                                  |
+| ----- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/v0/management/auth-files`  | Claude आणि Codex OAuth कनेक्शन `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` स्वरूपात. टोकन नाहीत             |
+| POST  | `/v0/management/api-call`    | बॉडी `{ auth_index, method, url, header?, data? }`. खात्याच्या टोकनने अनुमत यादीतील विनंती पाठवतो आणि `{ status_code, body }` परत करतो |
+| POST  | `/v0/management/reset-quota` | बॉडी `{ auth_index }`. एका खात्याचा कनेक्शन कूलडाउन, मॉडेल लॉकआउट आणि Codex चे स्कोपनिहाय कूलडाउन साफ करतो                             |
+
+- `auth_index` हा OmniRoute कनेक्शन ID आहे. `provider` हे `claude` किंवा `codex` असते (फक्त OAuth कनेक्शन; `anthropic` API-की प्रदाता यादीत नसतो). Codex साठी `id_token.chatgpt_account_id` हा साठवलेला वर्कस्पेस ID आणि `plan_type` ही साठवलेली योजना असते.
+- `api-call` हा सर्वसाधारण प्रॉक्सी नाही. तो फक्त Claude `GET
+https://api.anthropic.com/api/oauth/usage` आणि Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` आणि `POST .../wham/rate-limit-reset-credits/consume` स्वीकारतो; प्रत्येक फक्त जुळणाऱ्या प्रदात्याच्या खात्यासाठी. इतर सर्व विनंत्या अपस्ट्रीमशी संपर्क न करता `403` परत करतात. कॉलरचा `Authorization` हेडर (`$TOKEN$` प्लेसहोल्डरसह) दुर्लक्षित होतो: OmniRoute कनेक्शनचे अॅक्सेस टोकन घालतो, मुदत जवळ असल्यास आधी रीफ्रेश करतो आणि फक्त अनुमत हेडर पुढे पाठवतो (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` नसल्यास साठवलेला वर्कस्पेस ID डीफॉल्ट असतो. पहिले अपस्ट्रीम उत्तर `401` असल्यास तो एकदा रीफ्रेश करतो आणि अॅक्सेस टोकन बदलल्यावरच पुन्हा प्रयत्न करतो. प्रत्येक अपस्ट्रीम प्रयत्नाचा टाइमआउट 15 सेकंद असतो आणि तो कनेक्शनचा प्रॉक्सी वापरतो.
+- `reset-quota` अंतिम स्थिती (banned, expired, credits_exhausted) बदलत नाही. अज्ञात `auth_index` साठी `404` मिळतो.
+
+**प्रमाणीकरण:** डॅशबोर्ड सत्र किंवा `manage` स्कोप असलेली API की; लॉगिन बंद असतानाही आवश्यक (मार्ग `ALWAYS_PROTECTED_API_PATHS` मध्ये आहेत). फक्त इन्फरन्स कींना `403` मिळतो. स्रोत: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

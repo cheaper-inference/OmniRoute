@@ -62,3 +62,15 @@ Settings export (`GET /api/settings/export-json`), மற்ற எந்த set
 மாற்றமின்றி உள்ளடக்கும் — `hidePaidModels`-இன் combo-step export filter போலல்லாமல், இங்கு re-hydration
 ஆபத்து இல்லை: export செய்யப்பட்ட combo step-இல் உட்பொதிக்கப்பட்ட மறுக்கப்பட்ட id என்பது operator-இன் சொந்த
 வெளிப்படையான routing தேர்வு; export boundary நீக்க வேண்டிய ஒன்றல்ல.
+
+## Combo களை மட்டும் பட்டியலிடுதல் (`exposeCombosOnly`)
+
+Combo கள் பொதுவான model முகமாகவும் provider கள் backend களாக மட்டுமே இருக்கும் deployment களுக்கான தனி boolean விருப்பம்; இதையும் விரும்பி இயக்க வேண்டும், இயல்புநிலை `false`. இது `true` எனில் பொதுப் பட்டியல் (`GET /v1/models`, `GET /v1` மற்றும் `getUnifiedModelsResponse()` அடிப்படையிலான மற்ற `/v1` discovery route கள்) `owned_by: "combo"` கொண்ட வரிகளை மட்டுமே வைத்திருக்கும்: user combo களும் built-in `auto/*` combo களும் (`hideAutoCombos` அவற்றை மறைக்காதவரை). இது ஒவ்வொரு key யின் `catalogScope: "combos"` பயன்படுத்தும் அதே row சோதனையைப் பயன்படுத்தும்; key யின் சொந்த allow/deny/scope filter களும் மேலாகத் தொடர்ந்து பொருந்தும்.
+
+**Settings → Routing → Models API listing** இல் அல்லது `PATCH /api/settings {"exposeCombosOnly": true}` வழியாக மாற்றவும்.
+
+மேலுள்ள பட்டியல்களைப் போல இது கிடைப்பதை அறிவிப்பதை மட்டுமே மாற்றும்:
+
+- வெளிப்படையான `provider/model` ID தொடர்ந்து dispatch ஆகும்; `GET /v1/models/{id}` தொடர்ந்து அதை resolve செய்யும்;
+- dashboard catalog (`GET /api/models/catalog`, model picker கள் பயன்படுத்துவது) குறுக்கப்படாது;
+- இது `auto/*` candidate pool களில் பிரதிபலிக்காது; ஆகவே `auto/*` combo கள் தங்கள் முழு pool ஐத் தக்கவைக்கும்.

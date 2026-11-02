@@ -61,3 +61,15 @@ Inställningsexporten (`GET /api/settings/export-json`) inkluderar båda listorn
 inställningsfält — till skillnad från `hidePaidModels`:s exportfilter för kombinationssteg finns det ingen risk för
 återinförande här: ett spärrat id som är inbäddat i ett exporterat kombinationssteg är operatörens eget explicita dirigeringsval,
 inte något som behöver tas bort vid exportgränsen.
+
+## Listning av enbart comboer (`exposeCombosOnly`)
+
+En separat boolesk inställning, även den uttryckligen aktiverad och `false` som standard, för installationer där comboer utgör det offentliga modellutbudet och leverantörer bara är backender. När den är `true` behåller den offentliga listan (`GET /v1/models`, `GET /v1` och övriga `/v1`-upptäcktsrutter byggda på `getUnifiedModelsResponse()`) endast rader med `owned_by: "combo"`: användarcomboer plus de inbyggda `auto/*`-comboerna (om inte `hideAutoCombos` döljer dem). Den använder samma radtest som `catalogScope: "combos"` per nyckel, och nyckelns egna tillåt-/neka-/scope-filter gäller fortfarande utöver detta.
+
+Växla inställningen i **Settings → Routing → Models API listing**, eller med `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Liksom listorna ovan ändrar detta endast vad som annonseras:
+
+- ett uttryckligt `provider/model`-ID skickas fortfarande vidare, och `GET /v1/models/{id}` hittar det fortfarande;
+- instrumentpanelens katalog (`GET /api/models/catalog`, som modellväljarna använder) begränsas inte;
+- detta speglas inte till kandidatpoolerna för `auto/*`, så `auto/*`-comboer behåller hela sin pool.

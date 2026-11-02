@@ -155,9 +155,10 @@ JWT の検証に成功し、**かつ** `authenticated: true` が含まれてい�
 
 - **`publicPolicy`**（`policies/public.ts`）— 常に `allow({ kind: "anonymous", id: "anonymous" })` を返します。
 - **`clientApiPolicy`**（`policies/clientApi.ts`）— Bearerを抽出し、`validateApiKey()` で検証します。有効な `REQUIRE_API_KEY` 機能フラグが無効な場合に限り、匿名アクセスへフォールスルーします。有効なフラグは `isRequireApiKeyEnabled()`（`DB feature flag override > process.env.REQUIRE_API_KEY > default`）によって解決されるため、ダッシュボードの機能フラグと環境変数が `/api/v1/*`、`/api/v1beta/*`、およびエイリアスを一貫して制御します。リゾルバーで障害が発生した場合は、フェイルクローズします。クライアントAPIルートでのダッシュボードセッションリクエストを許可します（ダッシュボードのモデルカタログで使用される `/api/v1/models` を含む）。
+  Entra ID SSO が有効な場合、構造上 Entra トークンに該当する Bearer（base64url の三つのセグメント、`RS*` アルゴリズム、`kid`）は、`validateApiKey()` より**前に** SSO 分岐で処理され、その判定が最終結果になります。API キーの処理経路や匿名アクセスに切り替える分岐へ移ることはありません。このため、ID プロバイダーの停止によってアクセスが無制限に開放されることはありません。静的な API キーには影響しません。[Entra ID SSO](../security/ENTRA_SSO.md) を参照してください。
 - **`managementPolicy`**（`policies/management.ts`）— ダッシュボードセッション、内部モデル同期リクエスト（`/api/providers/[name]/(sync-models|models)` に対して照合）、または `isAuthRequired()` がfalseを返した場合は認証を完全にスキップします。Bearerトークンが存在するものの無効な場合は403（`AUTH_001`）を返し、それ以外の場合は401を返します。また、すべての認証分岐の前にルートガード階層（LOCAL_ONLY / ALWAYS_PROTECTED）も適用します。[ルートガード階層](../security/ROUTE_GUARD_TIERS.md)を参照してください。`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` 内のLOCAL_ONLYパス（現時点では `/api/mcp/`）は、Bearerキーが `manage` スコープを持つ場合、非ループバックからアクセスできます。それ以外のすべてのLOCAL_ONLYパスは、スコープに関係なく厳密にループバック限定のままです。
 
-ポリシーが成功すると、`kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` を持つ `AuthSubject` が返されます。後続のハンドラーは認証ロジックを再実行する代わりに、`src/server/authz/assertAuth.ts` の `assertAuth(request, "CLIENT_API")` を介してこれを読み取れます。
+ポリシーが成功すると、`kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` を持つ `AuthSubject` が返されます。後続のハンドラーは認証ロジックを再実行する代わりに、`src/server/authz/assertAuth.ts` の `assertAuth(request, "CLIENT_API")` を介してこれを読み取れます。
 
 ## 公開ルート一覧
 
@@ -304,8 +305,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 認証済みリクエストの場合、アップストリーム（ハンドラー側）のリクエストヘッダーには以下も含まれます。
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<末尾 4 文字> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<末尾 4 文字> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     （任意）
 x-omniroute-auth-scopes:    カンマ区切りのリスト
 ```

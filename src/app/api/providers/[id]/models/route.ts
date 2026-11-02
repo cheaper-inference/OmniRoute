@@ -10,7 +10,10 @@ import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts
 import { getModelsByProviderId } from "@/shared/constants/models";
 import { resolveAlibabaProviderModelsUrl } from "@/shared/constants/alibabaProviderRegions";
 import { getStaticModelsForProvider } from "@/lib/providers/staticModels";
-import { providerUsesCuratedModelsOnly } from "@/lib/providers/modelListingCapability";
+import {
+  isDiscoveryImportedCustomSource,
+  providerUsesCuratedModelsOnly,
+} from "@/lib/providers/modelListingCapability";
 import { mergeModelsWithCustomPrecedence } from "@/lib/providers/modelMetadataPrecedence";
 import { addModelsSuffix } from "@/lib/providers/validation/urlHelpers";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
@@ -238,8 +241,15 @@ export async function GET(
       try {
         const custom = await getCustomModels(provider);
         if (Array.isArray(custom)) {
+          // #18018 keeps operator rows on curated providers; rows a discovery sync
+          // imported are stale there and stay out (#8451).
           customModelsForProvider = custom.flatMap((model) =>
-            model && typeof model === "object" && typeof model.id === "string" ? [model] : []
+            model &&
+            typeof model === "object" &&
+            typeof model.id === "string" &&
+            !(usesCuratedModelsOnly && isDiscoveryImportedCustomSource(model.source))
+              ? [model]
+              : []
           );
         }
       } catch {

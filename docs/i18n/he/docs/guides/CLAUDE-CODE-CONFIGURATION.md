@@ -42,6 +42,10 @@ Claude Code מתקשר באמצעות **Anthropic Messages API** ומופנה א
 
 > משתני הסביבה נקראים **פעם אחת בעת ההפעלה** — הפעילו מחדש את Claude Code לאחר שינויים בהם.
 
+כדי להשתמש בפרטי הזדהות מתחלפים במקום במחרוזת קבועה, הגדירו את `apiKeyHelper` בתוך `~/.claude/settings.json` כפקודה שמדפיסה את פרטי ההזדהות הנוכחיים ל-stdout. ‏Claude Code שומר את הפלט במטמון לחמש דקות כברירת מחדל (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` משנה את משך הזמן הזה), ושולח את הערך גם ב-`Authorization: Bearer` וגם ב-`x-api-key`. הסקריפט חייב להדפיס רק את פרטי ההזדהות; הודעת פתיחה נוספת לצדם גורמת לכשל של כלי העזר ב-v2.1.227+.
+
+כך פועל Entra ID SSO: ‏`scripts/cli/omniroute-sso.mjs token` מדפיס אסימון גישה קצר מועד של Entra, ש-OmniRoute מאמת במקום מפתח API. ראו [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` מגדיר את כולם עבורכם: הוא מאתר את כתובת ה־URL הבסיסית ואת האסימון
 מתוך ההקשר הפעיל (כך שלאחר `omniroute connect <vps>`, הפעלת `omniroute launch`
 פשוט עובדת), מבצע בדיקת תקינות לשרת ומריץ את `claude`.

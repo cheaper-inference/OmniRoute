@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Den kostnadsfria AI-gatewayen
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Sluta aldrig koda. Alla AI-verktyg → 377 leverantörer — över 150 kostnadsfria — via en enda slutpunkt. Claude Code, Codex, Cursor, Cline, Copilot och Antigravity till KOSTNADSFRIA Claude / GPT / Gemini med automatisk reservväxling. Staplad komprimering med RTK + Caveman sparar 15–95 % tokens (i genomsnitt cirka 89 %) — nå aldrig gränserna. 377 AI-leverantörer · över 150 kostnadsfria nivåer · cirka 1,62 md kostnadsfria tokens/mån · 20 routningsstrategier · 0 USD för att komma igång."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Sluta aldrig koda. Alla AI-verktyg → 380 leverantörer — över 150 kostnadsfria — via en enda slutpunkt. Claude Code, Codex, Cursor, Cline, Copilot och Antigravity till KOSTNADSFRIA Claude / GPT / Gemini med automatisk reservväxling. Staplad komprimering med RTK + Caveman sparar 15–95 % tokens (i genomsnitt cirka 89 %) — nå aldrig gränserna. 380 AI-leverantörer · över 150 kostnadsfria nivåer · cirka 1,62 md kostnadsfria tokens/mån · 20 routningsstrategier · 0 USD för att komma igång."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Använd dina egna leverantörskonton.** Detta är en uppskattad totalsumma för kostnadsfria nivåer hos tredje part som du är separat berättigad till, inte en tokentilldelning från OmniRoute. Registrera dig, skaffa autentiseringsuppgifter där det krävs och anslut de leverantörer du kan använda. Varje leverantör bestämmer sina egna gränser, sin tillgänglighet och sina villkor.
 >
-> Att kombinera kostnadsfria nivåer manuellt är besvärligt – dussintals SDK:er, dussintals hastighetsgränser och ingen aning om hur mycket du faktiskt har. OmniRoute katalogiserar **484 poster för kostnadsfria nivåer fördelade över 34 återkommande poolnycklar** och beräknar den angivna tokensiffran utifrån de **17 poolerna med en publicerad positiv månadsbudget plus fem Groq-gränser per modell**, deduplicerade efter delad pool. Kvoter som blir tillgängliga först efter en regional identitetskontroll (i dag: ModelScope) visas separat, +~6 miljoner bakom regional identitetsverifiering, och räknas aldrig in i huvudvärdet. Resultatet visas kontinuerligt på instrumentpanelen (`/dashboard/free-tiers`).
+> Att kombinera kostnadsfria nivåer manuellt är besvärligt – dussintals SDK:er, dussintals hastighetsgränser och ingen aning om hur mycket du faktiskt har. OmniRoute katalogiserar **485 poster för kostnadsfria nivåer fördelade över 34 återkommande poolnycklar** och beräknar den angivna tokensiffran utifrån de **17 poolerna med en publicerad positiv månadsbudget plus fem Groq-gränser per modell**, deduplicerade efter delad pool. Kvoter som blir tillgängliga först efter en regional identitetskontroll (i dag: ModelScope) visas separat, +~6 miljoner bakom regional identitetsverifiering, och räknas aldrig in i huvudvärdet. Resultatet visas kontinuerligt på instrumentpanelen (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes budgetkort för kostnadsfria nivåer: stabilt ~1,62 miljarder kostnadsfria tokens per månad, upp till ~2,22 miljarder under den första månaden med registreringskrediter, från 34 dokumenterade återkommande poolnycklar som omfattar 484 katalogiserade poster för kostnadsfria nivåer bakom en enda slutpunkt. Transparent matematik med deduplicering per pool – varje delad pool räknas en gång, inklusive 17 återkommande pooler med en publicerad positiv månatlig tokenbudget plus fem Groq-gränser per modell. 12 leverantörer är markerade som sådana som bör undvikas i katalogen över villkorsrisker, så att du själv kan avgöra. Budgetstapeln omfattar Mistral 1 miljard, Nara 210 miljoner, LLM7 150 miljoner, xKiro 150 miljoner, Groq 30 miljoner (fem gränser per modell) och mindre pooler, plus registreringskrediter för den första månaden och permanent kostnadsfria leverantörer utan tokengräns som visas separat så att de aldrig blåser upp huvudvärdet. Aktuell förbrukning/återstående mängd på /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes budgetkort för kostnadsfria nivåer: stabilt ~1,62 miljarder kostnadsfria tokens per månad, upp till ~2,22 miljarder under den första månaden med registreringskrediter, från 34 dokumenterade återkommande poolnycklar som omfattar 485 katalogiserade poster för kostnadsfria nivåer bakom en enda slutpunkt. Transparent matematik med deduplicering per pool – varje delad pool räknas en gång, inklusive 17 återkommande pooler med en publicerad positiv månatlig tokenbudget plus fem Groq-gränser per modell. 12 leverantörer är markerade som sådana som bör undvikas i katalogen över villkorsrisker, så att du själv kan avgöra. Budgetstapeln omfattar Mistral 1 miljard, Nara 210 miljoner, LLM7 150 miljoner, xKiro 150 miljoner, Groq 30 miljoner (fem gränser per modell) och mindre pooler, plus registreringskrediter för den första månaden och permanent kostnadsfria leverantörer utan tokengräns som visas separat så att de aldrig blåser upp huvudvärdet. Aktuell förbrukning/återstående mängd på /dashboard/free-tiers."/>
 
 > Animerad sammanfattning av den aktuella sidan `/dashboard/free-tiers`. Fullständig metodik (pooldeduplicering, kreditnivåer, leverantörsvillkor): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -71,7 +71,7 @@
 
 |                                |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------ | :--------------------: | :---------: | :-------------------: |
-| 🌐 Leverantörer                |          352           |   **358**   |          377          |
+| 🌐 Leverantörer                |          352           |   **358**   |          380          |
 | 🧠 Unika chattmodell-ID:n      |          1320          |  **1374**   |         1475          |
 | 🖼️ Modalitetsbrygga            | 🆕 bild + ljud + video |      ✓      |           ✓           |
 | 📡 Radars gratiskatalog        |  🆕 valfri aktivering  |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Funktioner</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinationer</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Leverantörer</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Leverantörer</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI och MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Löftet — en slutpunkt och 377 leverantörer. Automatisk reservväxling upprätthåller dirigeringen så länge ett annat fungerande mål är tillgängligt. Sex grundpelare: robust reservväxling mellan 377 leverantörer · upp till 95 % lägre tokenförbrukning för kvalificerade arbetsbelastningar · börja för 0 USD med över 150 kostnadsfria nivåer och 52 återkommande/nyckelfria leverantörer som förblir kostnadsfria · 37 CLI-/agentintegrationer via en enda konfiguration · kompatibilitet med OpenAI, Claude, Gemini och Responses API på /v1 · produktionskontroller, inklusive kretsbrytare, TLS-maskering, MCP med 110 verktyg, A2A, minne, skyddsräcken, utvärderingar och över 56 000 statiska testdeklarationer i över 7 800 spårade testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Löftet — en slutpunkt och 380 leverantörer. Automatisk reservväxling upprätthåller dirigeringen så länge ett annat fungerande mål är tillgängligt. Sex grundpelare: robust reservväxling mellan 380 leverantörer · upp till 95 % lägre tokenförbrukning för kvalificerade arbetsbelastningar · börja för 0 USD med över 150 kostnadsfria nivåer och 52 återkommande/nyckelfria leverantörer som förblir kostnadsfria · 39 CLI-/agentintegrationer via en enda konfiguration · kompatibilitet med OpenAI, Claude, Gemini och Responses API på /v1 · produktionskontroller, inklusive kretsbrytare, TLS-maskering, MCP med 110 verktyg, A2A, minne, skyddsräcken, utvärderingar och över 56 000 statiska testdeklarationer i över 7 800 spårade testfiler."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Alla **20** strategier — blanda fritt per steg i kombinationen:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Det som skiljer OmniRoute från mängden — en daterad ögonblicksbild av funktioner jämfört med 9router, OpenRouter, CLIProxyAPI och LiteLLM inom 13 områden. OmniRoute: 377 leverantörer, över 150 inbyggda kostnadsfria nivåer, 20 routningsstrategier, tokenkomprimering med 12 motorer, inbyggd MCP-server med 110 verktyg, A2A-agentprotokoll, beständigt minne, skyddsräcken, molnagenter, smygteknik för TLS-fingeravtryck, Desktop/Termux/PWA och ett användargränssnitt med stöd för 67 språkversioner. OmniRoute är MIT-licensierat och kan driftas på egen server. Konkurrenternas funktioner och antal kan ändras; se den länkade metodiken."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Det som skiljer OmniRoute från mängden — en daterad ögonblicksbild av funktioner jämfört med 9router, OpenRouter, CLIProxyAPI och LiteLLM inom 13 områden. OmniRoute: 380 leverantörer, över 150 inbyggda kostnadsfria nivåer, 20 routningsstrategier, tokenkomprimering med 12 motorer, inbyggd MCP-server med 110 verktyg, A2A-agentprotokoll, beständigt minne, skyddsräcken, molnagenter, smygteknik för TLS-fingeravtryck, Desktop/Termux/PWA och ett användargränssnitt med stöd för 67 språkversioner. OmniRoute är MIT-licensierat och kan driftas på egen server. Konkurrenternas funktioner och antal kan ändras; se den länkade metodiken."/>
 
 <sub>📊 Fullständig metodik och information om varje funktion jämfört med 9router, OpenRouter, CLIProxyAPI och LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -611,7 +611,7 @@ den aktuella katalogen på **[radar.omniroute.online/planos](https://radar.omnir
 - **🖼️ Nya slutpunkter** — `/v1/ocr` (Mistral OCR) och `/v1/audio/translations` (i Whisper-stil) kompletterar mediefunktionerna. → [API-referens](docs/reference/API_REFERENCE.md)
 - **🎨 Bild-, video- och ljudgenerering** — ett API för medier: xAI Grok Imagine och Novita AI-video, ComfyUI, Magnific, Adobe Firefly, Segmind samt talleverantörer som ElevenLabs. → [API-referens](docs/reference/API_REFERENCE.md)
 - **🌍 Driftsättning och drift** — `basePath` för omvänd proxy, automatisk identifiering av webbläsarspråk, enhetsspårning per nyckel, rotlös MITM-tillit och zh-TW-lokalisering. → [Miljö](docs/reference/ENVIRONMENT.md)
-- **🤝 Fler leverantörer och agenter** — molnagenter (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) med webbläsare + OAuth-inloggning, förstklassigt kort för Ollama, Claude Opus 5 och Sonnet 5, officiellt partnerskap med Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI … samt en uppdaterad **katalog med 377 leverantörer**. → [Leverantörer](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Fler leverantörer och agenter** — molnagenter (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) med webbläsare + OAuth-inloggning, förstklassigt kort för Ollama, Claude Opus 5 och Sonnet 5, officiellt partnerskap med Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI … samt en uppdaterad **katalog med 380 leverantörer**. → [Leverantörer](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparent routning** — varje svar innehåller ett `X-OmniRoute-Decision`-huvud som anger den strategi/leverantör/latens som hanterade det, en ny kombinationsstrategi med `cache-optimized` + Auto-Combo-faktorn `cacheAffinity` som leder upprepade förfrågningar tillbaka till anslutningen som innehåller det cachade prefixet, och en skrivskyddad slutpunkt `/v1/auto-combo/{channel}/candidates` som visar den aktuella kandidatpoolen för en `auto/*`-kanal. → [Automatisk kombination](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokal prestanda och infrastruktur** — lokal Redis med ett klick, driftsättare för reläer på Cloudflare Workers / Deno Deploy samt Bifrost och Mux som övervakade inbäddade tjänster. → [Inbäddade tjänster](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Ingår också** — ramverk och marknadsplats för insticksprogram, ramverk för Omni-/Agent-/GitHub-färdigheter, integrering med Obsidian-valv (22 MCP-verktyg), OpenAI-kompatibla API:er för Batch och Files, semantisk svarscache, spelifiering med topplistor, ACP-agentidentifiering (15 inbyggda agenter), schemalagd loggexport till BigQuery, parallell flermodellsdistribution med `auto/chaos`, en brygga för Telegram-botar, en versionshanterare i appen samt LMArena-ELO-rankningar av kostnadsfria leverantörer. → [Dokumentation](docs/README.md)
@@ -665,7 +665,7 @@ den aktuella katalogen på **[radar.omniroute.online/planos](https://radar.omnir
 <b>＋ fungerar även med</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>alla OpenAI-kompatibla verktyg</b>
 </div>
 
-<sub>📖 Verktygsspecifik konfiguration för alla 38 verktyg (27 CLI-kodverktyg + 11 CLI-agenter) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode-plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Verktygsspecifik konfiguration för alla 39 verktyg (28 CLI-kodverktyg + 11 CLI-agenter) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode-plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -695,11 +695,11 @@ från din skalhistorik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🌐 377 AI-leverantörer — 153 katalogmärkta som kostnadsfria
+## 🌐 380 AI-leverantörer — 156 katalogmärkta som kostnadsfria
 
 </div>
 
-> **377 registrerade leverantörer** i de kanoniska samlingarna för chatt, media, sökning, lokala tjänster, molnagenter och system, inklusive **153 med identifieringsmetadata `hasFree: true`**. Chattmodellregistret omfattar **239 leverantörer / 3 059 unika par av leverantör och modell / 1 475 råa modell-ID:n**. Den separata katalogen över kostnadsfria budgetar har **484 rader per modell**, **34 återkommande pooler** och **52 återkommande/nyckellösa leverantörer som är kostnadsfria för alltid**. Dessa nämnare skiljer sig avsiktligt åt; definitioner och pooldeduplicerade beräkningar finns i [Leverantörsreferensen](docs/reference/PROVIDER_REFERENCE.md) och [Kostnadsfria nivåer](docs/reference/FREE_TIERS.md).
+> **380 registrerade leverantörer** i de kanoniska samlingarna för chatt, media, sökning, lokala tjänster, molnagenter och system, inklusive **156 med identifieringsmetadata `hasFree: true`**. Chattmodellregistret omfattar **239 leverantörer / 3 059 unika par av leverantör och modell / 1 475 råa modell-ID:n**. Den separata katalogen över kostnadsfria budgetar har **485 rader per modell**, **34 återkommande pooler** och **52 återkommande/nyckellösa leverantörer som är kostnadsfria för alltid**. Dessa nämnare skiljer sig avsiktligt åt; definitioner och pooldeduplicerade beräkningar finns i [Leverantörsreferensen](docs/reference/PROVIDER_REFERENCE.md) och [Kostnadsfria nivåer](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1316,7 +1316,7 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
   <tr><td nowrap><b>Körmiljö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Språk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> i <code>src/</code> och <code>open-sse/</code> (noll förekomster av <code>any</code> i kärnan sedan v2.0)</td></tr>
   <tr><td nowrap><b>Ramverk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (äldre JSON-format) — 147 domänmoduler, 213 migreringar</td></tr>
+  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (äldre JSON-format) — 147 domänmoduler, 219 migreringar</td></tr>
   <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5-fulltextsökning + int8-kvantiserade vektorinbäddningar, typad avklingning</td></tr>
   <tr><td nowrap><b>Scheman</b></td><td>Zod 4 — validering av I/O för MCP-verktyg + API-kontrakt</td></tr>
   <tr><td nowrap><b>Protokoll</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1379,7 +1379,7 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Resiliensguide</a></b></td><td>Kretsbrytare, nedkylningsperioder, kö, skydd mot samtidiga belastningstoppar, TLS-förfalskning</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo-motor</a></b></td><td>Poängsättning med 16 faktorer, lägespaket, självläkning</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxyguide</a></b></td><td>Proxysystem med 3 nivåer, 1proxy-marknadsplats, CRUD för register</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratisnivåer</a></b></td><td>Samlad katalog: 34 dokumenterade återkommande pooler / 484 katalogiserade poster på gratisnivå</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratisnivåer</a></b></td><td>Samlad katalog: 34 dokumenterade återkommande pooler / 485 katalogiserade poster på gratisnivå</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funktionsgalleri</a></b></td><td>Visuell genomgång av instrumentpanelen med skärmbilder</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentation av kodbasen</a></b></td><td>Nybörjarvänlig genomgång av kodbasen</td></tr>
 </table>

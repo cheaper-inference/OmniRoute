@@ -64,6 +64,19 @@ Inilalantad din ng `electron/` workspace ang:
 - `npm run build:mac-x64` / `build:mac-arm64` — mga single-arch na build para sa macOS
 - `npm run pack` — directory-only na build para sa lokal na pagsubok (walang installer)
 
+## Mga opsyonal na runtime pack
+
+Maaaring maglabas ang mga desktop build ng opsyonal na runtime archive kasabay ng kanilang installer. Nasa naka-install na server payload ang `optional-packs.index.json` (sa ilalim ng `resources/app` sa Windows at Linux). Para sa entry na `browser-runtime`, basahin ang `packs[].tarball` at i-download **ang eksaktong filename na iyon mula sa parehong release**. May SHA-256 digest ang mga pangalan ng archive; maaaring mangailangan ng ibang archive ang ibang build. Panatilihin ang filename na na-download.
+
+Kopyahin ang index ng naka-install na app at ang napiling archive sa iisang directory, pagkatapos gamitin ang CLI mula sa parehong release:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+Ipinapakita ng `packs list` ang estado ng installation at verification, hindi ang filename ng archive. Ang kasamang index ang pumipili ng archive. Bine-verify ng installation ang archive checksum bago i-extract at ang mga package checksum bago palitan ang naka-install na pack. Nagbabasa ito ng mga lokal na file; hindi nito dina-download ang mga nawawalang archive. I-restart ang application pagkatapos ng installation. Kung walang katugmang asset sa release, hindi available ang opsyonal na pack sa mga asset ng release na iyon.
+
 ## Layout ng Direktoryo
 
 ```

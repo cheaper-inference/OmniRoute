@@ -29,6 +29,7 @@ OpenAI-সামঞ্জস্যপূর্ণ প্রোটোকল এ�
 - [WebSocket স্ট্রিমিং](#websocket-streaming)
 - [কোটা ও সমস্যা রিপোর্টিং](#quotas--issues-reporting)
 - [সেমান্টিক ক্যাশ](#semantic-cache)
+- [CLIProxyAPI ব্যবস্থাপনার সামঞ্জস্য](#cliproxyapi-management-compatibility)
 - [ড্যাশবোর্ড ও ব্যবস্থাপনা](#dashboard--management)
 - [কম্বো ব্যবস্থাপনা](#combo-management)
 - [ওয়েবহুক](#webhooks)
@@ -1007,6 +1008,18 @@ completion stream করে।
 
 **প্রমাণীকরণ:** Bearer API কী (`isAuthenticated`)।
 
+### কোটা ফুরিয়ে গেলে সেশন পুনরুদ্ধার (স্পষ্টভাবে চালু করতে হবে)
+
+স্ট্রিমিংবিহীন `POST /v1/chat/completions` বা `POST /v1/responses` চূড়ান্ত কোটা ত্রুটিতে ব্যর্থ হলে (`402`/`429`/`503`, যার body-তে কোটা বা ক্রেডিট শেষ হওয়ার কথা থাকে), ত্রুটি ফেরত না দিয়ে সেটি রেখে পরে আবার চালানো যায়। কলার প্রতিটি অনুরোধে তিনটি header দিয়ে এটি চালু করে:
+
+| Header                       | মান                                    |
+| ---------------------------- | -------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                 |
+| `x-omniroute-session`        | সেশন ID, `[A-Za-z0-9._:-]{1,128}`      |
+| `x-omniroute-recovery-turn`  | সেশনের মধ্যে অনন্য turn ID (একই নিয়ম) |
+
+শুধু `stream: false` turn যোগ্য, যেখানে tools, tool history বা `previous_response_id` নেই এবং `x-omniroute-connection` pin-ও নেই; `STORAGE_ENCRYPTION_KEY` সেট থাকাও জরুরি (অনুরোধ সর্বোচ্চ 24 h encrypted অবস্থায় রাখা হয়)। তখন উত্তর হয় `202`, সঙ্গে `recovery.poll`; `GET /v1/quota-recoveries/{id}` poll করুন (অপেক্ষমাণ থাকলে `202`, শেষ হলে পুনরুদ্ধার করা body-সহ `200`) অথবা `DELETE` দিয়ে বাতিল করুন। ticket কেবল যে API key তৈরি করেছে তার কাছেই দৃশ্যমান। ফল অনিশ্চিত এমন replay দুবার পাঠানোর বদলে `needs_confirmation`-এ শেষ হয়। উৎস: `src/lib/quota/quotaSessionRecovery.ts`।
+
 ---
 
 ## স্ব-পরিষেবা ব্যবহার (`/api/usage/om-usage`)
@@ -1175,6 +1188,28 @@ API কীগুলো `cacheDefaultMode`-এর মাধ্যমে সেম
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI ব্যবস্থাপনার সামঞ্জস্য
+
+OmniRoute [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)-এর তিনটি ব্যবস্থাপনা endpoint-এর উত্তর দেয়, যেগুলো ব্যবহার ড্যাশবোর্ড Claude ও Codex সাবস্ক্রিপশনের সীমা পড়তে কল করে (যেমন T3 Code-এর `cliproxy` ব্যবহার-সীমার উৎস)। ক্লায়েন্টের base URL OmniRoute-এ নির্দেশ করুন এবং ব্যবস্থাপনার key হিসেবে `manage` scope-সহ API key ব্যবহার করুন। route-গুলো `/v0/management/*` এবং `/api/v0/management/*`-এ পরিবেশিত হয়।
+
+| পদ্ধতি | পথ                           | বিবরণ                                                                                                                                             |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude ও Codex OAuth সংযোগ `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` হিসেবে। কোনো টোকেন নয়                          |
+| POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`। অ্যাকাউন্টের টোকেন দিয়ে অনুমোদিত তালিকার অনুরোধ পাঠায় এবং `{ status_code, body }` ফেরত দেয় |
+| POST   | `/v0/management/reset-quota` | Body `{ auth_index }`। একটি অ্যাকাউন্টের connection cooldown, model lockout এবং Codex-এর scope-ভিত্তিক cooldown পরিষ্কার করে                      |
+
+- `auth_index` হলো OmniRoute সংযোগ ID। `provider` হলো `claude` বা `codex` (শুধু OAuth সংযোগ; API-key provider `anthropic` তালিকায় নেই)। Codex-এর ক্ষেত্রে `id_token.chatgpt_account_id` হলো সংরক্ষিত workspace ID এবং `plan_type` হলো সংরক্ষিত plan।
+- `api-call` সাধারণ proxy নয়। এটি শুধু Claude `GET
+https://api.anthropic.com/api/oauth/usage` এবং Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ও `POST .../wham/rate-limit-reset-credits/consume` গ্রহণ করে, প্রতিটি শুধু সংশ্লিষ্ট provider-এর অ্যাকাউন্টের জন্য। অন্য সবকিছু upstream-এর সঙ্গে যোগাযোগ না করেই `403` ফেরত দেয়। কলারের `Authorization` header (`$TOKEN$` placeholder-সহ) উপেক্ষা করা হয়: OmniRoute সংযোগের access token বসায়, মেয়াদ শেষ হওয়ার কাছাকাছি হলে আগে রিফ্রেশ করে এবং শুধু অনুমোদিত header পাঠায় (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)। `Chatgpt-Account-Id` না থাকলে সংরক্ষিত workspace ID ব্যবহৃত হয়। প্রথম upstream উত্তর `401` হলে একবার রিফ্রেশ হয় এবং access token বদলালেই শুধু আবার চেষ্টা করা হয়। প্রতিটি upstream চেষ্টার timeout 15 সেকেন্ড এবং সেটি সংযোগের proxy ব্যবহার করে।
+- `reset-quota` চূড়ান্ত অবস্থা (banned, expired, credits_exhausted) অপরিবর্তিত রাখে। অজানা `auth_index`-এ `404` ফেরত আসে।
+
+**প্রমাণীকরণ:** ড্যাশবোর্ড সেশন বা `manage` scope-এর API key, লগইন বন্ধ থাকলেও বাধ্যতামূলক (পথগুলো `ALWAYS_PROTECTED_API_PATHS`-এ আছে)। শুধু inference-এর key `403` পায়। উৎস: `src/lib/cliproxyCompat/managementApi.ts`।
 
 ---
 

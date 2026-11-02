@@ -35,8 +35,7 @@ test("a native proc stat descriptor whose process exited is missing, not unknown
       const owner = captureOwner(child.pid);
       const path = "/proc/" + child.pid + "/stat";
       const statBeforeExit = originalRead(path, "utf8");
-      const entries = originalList("/proc", { withFileTypes: true })
-        .filter((entry) => entry.name === String(child.pid));
+      const entries = originalList("/proc").filter((name) => name === String(child.pid));
       assert.equal(entries.length, 1);
       fd = fs.openSync(path, "r");
       const exited = once(child, "exit");
@@ -44,7 +43,11 @@ test("a native proc stat descriptor whose process exited is missing, not unknown
       await exited;
       assert.throws(() => originalRead(fd, "utf8"), { code: "ESRCH" });
       fs.readdirSync = (path, ...args) =>
-        String(path) === "/proc" ? entries : originalList(path, ...args);
+        String(path) === "/proc"
+          ? args[0]?.withFileTypes
+            ? entries.map((name) => ({ name, isDirectory: () => true }))
+            : entries
+          : originalList(path, ...args);
       fs.readFileSync = (value, ...args) =>
         String(value) === path ? originalRead(fd, ...args) : originalRead(value, ...args);
       syncBuiltinESMExports();
@@ -96,7 +99,9 @@ for (const failure of ["EACCES", "EPERM", "EIO", "malformed"]) {
       const path = "/proc/" + process.pid + "/stat";
       const originalRead = fs.readFileSync;
       const failure = ${JSON.stringify(failure)};
-      fs.readdirSync = () => [{ name: String(process.pid), isDirectory: () => true }];
+      fs.readdirSync = (_path, options) => options?.withFileTypes
+        ? [{ name: String(process.pid), isDirectory: () => true }]
+        : [String(process.pid)];
       fs.readFileSync = (value, ...args) => {
         if (String(value) !== path) return originalRead(value, ...args);
         if (failure === "malformed") return "invalid proc stat";

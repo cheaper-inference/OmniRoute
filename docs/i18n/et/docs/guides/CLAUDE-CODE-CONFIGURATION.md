@@ -42,6 +42,10 @@ lõpp-punktile keskkonnamuutujate abil (sellel pole lippu `--base-url`):
 
 > Keskkonnamuutujaid loetakse **ainult üks kord käivitamisel** — pärast nende muutmist taaskäivita Claude Code.
 
+Fikseeritud stringi asemel vahetuva mandaadi kasutamiseks määra `~/.claude/settings.json` failis `apiKeyHelper` käsuks, mis väljastab praeguse mandaadi stdouti. Claude Code hoiab selle väljundit vaikimisi viis minutit vahemälus (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` muudab seda aega) ning saadab väärtuse nii `Authorization: Bearer` kui ka `x-api-key` päises. Skript peab väljastama ainult mandaadi; sellele lisatud teavitusbanner põhjustab abilise tõrke versioonis v2.1.227+.
+
+Nii töötab Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` väljastab lühikese kehtivusajaga Entra pääsutõendi, mida OmniRoute kontrollib API võtme asemel. Vt [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` määrab kõik need sinu eest: see tuvastab aktiivse konteksti
 põhjal baas-URL-i ja tõendi (seega pärast `omniroute connect <vps>` käsku
 `omniroute launch` lihtsalt töötab), kontrollib serveri seisundit ning käivitab käsu `claude`.

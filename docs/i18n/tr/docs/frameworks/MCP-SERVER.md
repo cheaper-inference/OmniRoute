@@ -304,12 +304,12 @@ bir yönetim rotasına `read` erişim belirteci gönderen çağrıcılar HTTP 40
 hatasını alır. Bu sıralama `scopeSatisfies` tarafından gerçekleştirilir. MCP
 tablosuna başvurmaz ve MCP eşleştiricisi de bu sıralamaya başvurmaz.
 
-| Ad alanı                   | Kimlik bilgisi                                                  | Denetleyici                  | Başarılı denetimin izin verdiği işlemler              |
-| :------------------------- | :-------------------------------------------------------------- | :--------------------------- | :---------------------------------------------------- |
-| API anahtarı yönetimi      | `api_keys.scopes`                                               | `hasManageScope`             | İlgili Bearer anahtarı için yönetim REST işlemleri    |
-| API anahtarı ek kapsamları | aynı dizi, tam olarak eşleşen tek bir dize                      | aşağıda adı verilen yardımcı | Yalnızca ilgili tek yetenek                           |
-| MCP araç kapsamları        | aynı dizi; yoksa MCP `_meta`; o da yoksa `OMNIROUTE_MCP_SCOPES` | `scopeMatches`               | Yaptırım etkinleştirildikten sonra ilgili araç        |
-| Erişim belirteci           | `oma_live_…`                                                    | `scopeSatisfies`             | Yöntemi ve yolu bu seviyeyi gerektiren yönetim rotası |
+| Ad alanı                   | Kimlik bilgisi                                                                           | Denetleyici                  | Başarılı denetimin izin verdiği işlemler              |
+| :------------------------- | :--------------------------------------------------------------------------------------- | :--------------------------- | :---------------------------------------------------- |
+| API anahtarı yönetimi      | `api_keys.scopes`                                                                        | `hasManageScope`             | İlgili Bearer anahtarı için yönetim REST işlemleri    |
+| API anahtarı ek kapsamları | aynı dizi, tam olarak eşleşen tek bir dize                                               | aşağıda adı verilen yardımcı | Yalnızca ilgili tek yetenek                           |
+| MCP araç kapsamları        | aynı dizi, aksi hâlde MCP `_meta` (yalnızca HTTP/SSE), aksi hâlde `OMNIROUTE_MCP_SCOPES` | `scopeMatches`               | Yaptırım etkinleştirildikten sonra ilgili araç        |
+| Erişim belirteci           | `oma_live_…`                                                                             | `scopeSatisfies`             | Yöntemi ve yolu bu seviyeyi gerektiren yönetim rotası |
 
 Her kimlik bilgisinin oluşturulması
 [Yönetim Kimlik Doğrulaması](../guides/MANAGEMENT-AUTH.md) bölümünde ele alınmıştır.
@@ -361,8 +361,7 @@ kapsamları arasında, sondaki `*` dışında herhangi bir hiyerarşi yoktur.
 izin verir ve kataloğu atlar. Yaptırım açıkken HTTP, Bearer anahtarının
 `api_keys.scopes` değerini `authInfo` olarak kullanır (bkz.
 [Anahtar başına HTTP kapsam bağlama](#per-key-http-scope-binding-7895)).
-Hiçbir anahtar kapsamı çözümlenmezse verilmiş kapsam kümesi önce MCP `_meta`
-değerine, ardından `OMNIROUTE_MCP_SCOPES` değerine geçer.
+Hiçbir anahtar kapsamı çözümlenemediğinde, verilmiş küme MCP `_meta` alanına düşer (yalnızca HTTP kimlik doğrulama bağlamı içinde, HTTP/SSE çağıranları için dikkate alınır; stdio çağıranının `_meta` alanı yok sayılır, çünkü istemci onu kontrol eder ve çağıran kimliği taşımaz), ardından `OMNIROUTE_MCP_SCOPES` alanına düşer.
 
 #### Erişim belirteci kapsamları
 
@@ -466,9 +465,7 @@ ve `OMNIROUTE_MCP_SCOPES` ortam değişkeni geri dönüşünden önce zaten `aut
 öncelik veriyordu; bu değişiklik yalnızca HTTP üzerinden daha önce beslenmeyen bu ilk ve en
 yüksek öncelikli kaynağı doldurur. Hiçbir API anahtarı çözümlenmediğinde (başlık yoksa veya
 anahtar geçersizse) `authInfo`, `undefined` olarak kalır ve çözümleme, mevcut `meta`/ortam
-zincirine değişiklik olmadan geri döner. stdio'nun çağıran başına kimliği yoktur (bkz.
-`mcpCallerIdentity.ts`) ve bundan etkilenmez; `_meta`/ortam geri dönüş zincirini kullanmaya
-devam eder.
+zincirine değişiklik olmadan geri döner. stdio'nun çağıran başına kimliği yoktur (bkz. `mcpCallerIdentity.ts`) ve anahtar başına bağlamadan etkilenmez — `_meta` adımını atlar (`_meta` yalnızca bir HTTP kimlik doğrulama bağlamı içinde dikkate alınır, #15159) ve yalnızca `OMNIROUTE_MCP_SCOPES` ortam anahtarından çözümler.
 
 **Dar kapsamlı HTTP/SSE çağıranları için `OMNIROUTE_MCP_ENFORCE_SCOPES` değerinden bağımsız
 olarak zorunlu kılınır.** `OMNIROUTE_MCP_ENFORCE_SCOPES` değerinin varsayılan olarak `false`

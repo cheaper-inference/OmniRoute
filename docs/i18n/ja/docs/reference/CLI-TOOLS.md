@@ -10,7 +10,7 @@ OmniRoute は、3 つの専用ダッシュボードページに分かれた 3 �
 
 | ページ         | ルート                  | 概念                                                                                                | 数               |
 | -------------- | ----------------------- | --------------------------------------------------------------------------------------------------- | ---------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute を接続先として使用するコーディングツール（クライアント → CLI → OmniRoute → プロバイダー） | 27               |
+| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute を接続先として使用するコーディングツール（クライアント → CLI → OmniRoute → プロバイダー） | 28               |
 | **CLI Agents** | `/dashboard/cli-agents` | OmniRoute を接続先として使用する自律型エージェント（同じフロー、より広いスコープ）                  | 11               |
 | **ACP Agents** | `/dashboard/acp-agents` | OmniRoute が stdio/ACP 経由でバックエンドとして起動する CLI（逆方向のフロー）                       | レジストリを参照 |
 
@@ -103,7 +103,7 @@ OmniRoute コンテナ内で実行された `setup-*` コマンドは、コン�
 
 ---
 
-## 1. CLI Code のカタログ（27 ツール）
+## 1. CLI Code のカタログ（28 ツール）
 
 `/dashboard/cli-code` に表示されるすべてのツール。`baseUrlSupport: none` のツールは、カスタムベース URL の代わりに MITM または手動ガイドを介して接続されます。
 
@@ -130,6 +130,7 @@ OmniRoute コンテナ内で実行された `setup-*` コマンドは、コン�
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -219,16 +220,16 @@ interface ToolBatchStatus {
 
 `configType: "custom"` を持つ新しいツールには、専用の設定 API ルートがあります。
 
-| ルート                                      | ツール                                                                 |
-| ------------------------------------------- | ---------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode（.forge.toml）                                               |
-| `POST /api/cli-tools/jcode-settings`        | jcode（--base-url フラグ）                                             |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI（OPENAI_BASE_URL、レガシー）                              |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale（OPENAI_BASE_URL、プライマリ + レガシー `~/.deepseek` 同期） |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                  |
-| `POST /api/cli-tools/pi-settings`           | Pi コーディングエージェント                                            |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build（~/.grok/config.toml、`[model.omniroute]`）                 |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code（`~/.qwen/settings.json` + 専用の `.env` キー）              |
+| ルート                                      | ツール                                                                         |
+| ------------------------------------------- | ------------------------------------------------------------------------------ |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode（.forge.toml）                                                       |
+| `POST /api/cli-tools/jcode-settings`        | jcode（--base-url フラグ）                                                     |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI（OPENAI_BASE_URL、レガシー）                                      |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale（OPENAI_BASE_URL、プライマリ + レガシー `~/.deepseek` 同期）         |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                          |
+| `POST /api/cli-tools/pi-settings`           | Pi コーディングエージェント (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build（~/.grok/config.toml、`[model.omniroute]`）                         |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code（`~/.qwen/settings.json` + 専用の `.env` キー）                      |
 
 すべてのルートは、エラーレスポンスに `sanitizeErrorMessage()` を使用します（厳格ルール #12）。
 
@@ -330,7 +331,7 @@ pip install aider-chat
 cargo install smelt  # Rust ベース
 
 # Pi coding agent
-# インストール方法については https://github.com/zechnerj/pi-coding-agent を参照
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # インストール方法については https://github.com/1jehuang/jcode を参照
@@ -442,6 +443,40 @@ EOF
 
 > thinking バリアントを送信するには、`opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > を使用してください。
+
+---
+
+#### Pi Coding Agent
+
+`npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` で公式の Pi Coding Agent パッケージをインストールします。Pi は `~/.pi/agent/models.json` からカスタムプロバイダーを読み取ります。エージェントのディレクトリ全体を移動する場合は、`PI_CODING_AGENT_DIR` を絶対パス（または `~` で始まるパス）に設定してください。ダッシュボードもこの上書き設定に従います。Pi はカスタムエンドポイントからモデルを検出しないため、OmniRoute は Pi の `openai-completions` API と、OmniRoute の OpenAI 互換 `/v1` エンドポイントを使い、選択したモデルを `models[]` に書き込みます。
+
+**CLI ツール → Pi** でエンドポイント、API キー、モデルを選び、プロバイダーのプレビューを確認してから適用します。プレビューはプロバイダーの設定断片です。Pi を手動で設定する場合は、`providers.omniroute` を既存の `models.json` にマージし、他のプロバイダーや設定を残してください。
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi は `/model` を開くと `models.json` を再読み込みします。選択したプロバイダー ID とモデル ID を使って、設定したルートをテストします。
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+参考: [Pi のモデルとカスタムプロバイダー](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)、
+[Pi の環境変数](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)、
+[Pi のインストール手順](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md)。
 
 ---
 

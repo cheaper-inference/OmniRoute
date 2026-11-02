@@ -42,6 +42,10 @@ krajnju točku pomoću varijabli okruženja (nema zastavicu `--base-url`):
 
 > Varijable okruženja čitaju se **jednom pri pokretanju** — ponovno pokrenite Claude Code nakon što ih promijenite.
 
+Za vjerodajnicu koja se rotira umjesto fiksnog niza, postavite `apiKeyHelper` u `~/.claude/settings.json` na naredbu koja ispisuje trenutačnu vjerodajnicu na stdout. Claude Code zadano predmemorira njezin izlaz pet minuta (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` mijenja to trajanje) i šalje vrijednost i u `Authorization: Bearer` i u `x-api-key`. Skripta mora ispisati samo vjerodajnicu; dodatni natpis uz nju uzrokuje neuspjeh pomoćnog programa u v2.1.227+.
+
+Tako radi Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` ispisuje kratkotrajni Entra pristupni token koji OmniRoute provjerava umjesto API ključa. Pogledajte [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` postavlja sve navedeno umjesto vas: određuje osnovni URL i token
 iz aktivnog konteksta (tako da nakon `omniroute connect <vps>` naredba `omniroute launch`
 jednostavno radi), provjerava stanje poslužitelja i izvršava `claude`.

@@ -616,7 +616,8 @@ Haiziwashi ufichaji: hilo bado ni `PII_REDACTION_ENABLED` (ombi) na
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Kutowekwa kunamaanisha
   kila aina (tabia kabla ya mpangilio huu kuwepo). Ruwaza `ssn_us` ya injini ya
   ombi huwekwa kwenye `ssn`. Violezo (Minimal, Standard, Financial, Brazilian,
-  USA, Full) hujaza tu visanduku vya kuteua katika UI.
+  USA, GDPR, POPIA, Full) hujaza tu visanduku vya kuteua katika UI.
+- **Vitambulisho vya GDPR na POPIA** — id kumi na mbili zilizojengewa kwa vitambulisho binafsi vya EU na Afrika Kusini (jedwali hapa chini). Regex, validator na alama za mamlaka ya kisheria zake ziko katika jedwali moja, `src/shared/utils/piiPatterns.ts`, linalotumiwa na response sanitizer (`src/lib/piiSanitizer.ts`) na request masker (`src/shared/utils/inputSanitizer.ts`). Ulinganifu hufichwa tu validator yake ikiukubali; mfululizo wa tarakimu peke yake hautoshi kamwe. Opereta aliyehifadhi uteuzi mdogo kabla ya id hizi kuwepo huhifadhi tabia aliyokuwa nayo hadi id mpya zichaguliwe.
 - **Ruwaza maalum** — hadi ruwaza 20 za regex au wildcard (`*` = hadi herufi 64
   zisizo nafasi, `?` = moja). Mechi hubadilishwa kuwa `[CUSTOM_REDACTED]`. Kila
   ruwaza hupitia `compilePiiCustomPattern()`
@@ -643,6 +644,25 @@ Mipangilio inahifadhiwa katika jedwali la `key_value` (namespace `pii_settings`,
 
 Zote tatu zinahitaji uthibitishaji wa usimamizi na kuthibitisha mwili kwa Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Vitambulisho vya GDPR (EU) na POPIA (Afrika Kusini)
+
+| Id                  | Kitambulisho                   | Uthibitishaji                                                                                    |
+| ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                           | Nchi inayojulikana, urefu kamili wa nchi hiyo, ISO 13616 MOD-97-10                               |
+| `eu_vat`            | Namba ya VAT ya EU             | Kiambishi cha nchi mwanachama kinachojulikana na muundo wa namba wa nchi hiyo (bila VIES lookup) |
+| `es_dni_nie`        | DNI / NIE ya Hispania          | Herufi ya ukaguzi (thamani mod 23); NIE ni `X/Y/Z` + tarakimu 7                                  |
+| `it_codice_fiscale` | Codice Fiscale ya Italia       | Herufi ya ukaguzi kutoka jedwali la nafasi witiri/shufwa                                         |
+| `pl_pesel`          | PESEL ya Poland                | Checksum yenye uzito na masafa yanayowezekana ya mwezi/siku ya kuzaliwa yaliyosimbwa             |
+| `nl_bsn`            | BSN ya Uholanzi                | Jaribio la 11 (uzito 9..2, -1)                                                                   |
+| `de_steuer_id`      | Steuer-ID ya Ujerumani         | ISO 7064 Mod 11,10 na kanuni za muundo wa tarakimu (bila 0 mwanzoni)                             |
+| `se_personnummer`   | personnummer ya Uswidi         | Luhn kwenye tarakimu kumi za mwisho na tarehe ya kuzaliwa inayowezekana (tarakimu 10 au 12)      |
+| `za_id`             | Namba ya ID ya Afrika Kusini   | Luhn kwenye tarakimu zote 13, mwezi/siku ya kuzaliwa halali, tarakimu ya uraia 0 au 1            |
+| `za_phone`          | Simu ya Afrika Kusini          | Kiambishi `+27` / `27`, au umbo la kitaifa `0..` lililoandikwa kwa nafasi au kistari             |
+| `za_vat`            | Namba ya VAT ya Afrika Kusini  | Tarakimu 10 zinazoanza na `4` **na** "VAT" / "BTW" katika herufi 48 zilizotangulia               |
+| `za_tax_ref`        | Rejeo la kodi la Afrika Kusini | Tarakimu 10 zinazoanza `0`-`3`, Luhn, **na** "tax" / "SARS" katika herufi 48 zilizotangulia      |
+
+Kwa sababu miundo yenye tarakimu pekee hugongana na namba za oda, namba za build na timestamp, iliyo dhaifu zaidi (`za_vat`, `za_tax_ref`) inahitaji kidokezo cha neno muhimu, na namba ya `0..` yenye tarakimu kumi peke yake haichukuliwi kuwa namba ya simu ya Afrika Kusini. IBAN zenye nafasi (`GB29 NWBK ...`) hazilinganishwi. Kwenye njia ya streaming, kidokezo hutafutwa ndani ya chunk ya sasa pekee. Id hizi hutangulia pattern za jumla za simu, hivyo kitambulisho kilichothibitishwa huhifadhi placeholder yake (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Template za `gdpr` na `popia` huchagua id za EU na Afrika Kusini kwa mpangilio huo. Masking yenyewe hubaki ya kuwasha kwa hiari (Hard Rule #20): hakuna kitu hapa kinachobadilisha chaguo-msingi la feature flag.
 
 ### Uingizaji wa Prompt (`promptInjection.ts`)
 

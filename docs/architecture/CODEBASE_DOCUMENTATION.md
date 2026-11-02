@@ -501,7 +501,7 @@ helpers (tool schemas, fetch/TTS adapters, quirk handlers). Executors include:
 (shared identity helper) and `index.ts` (registry).
 
 > Note: providers not listed here are served by `default.ts` using the generic
-> OpenAI-compatible executor. The full provider catalog (377 providers) lives in
+> OpenAI-compatible executor. The full provider catalog (380 providers) lives in
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

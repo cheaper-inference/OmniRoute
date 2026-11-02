@@ -576,8 +576,9 @@ nagpapagana nito, parehong naka-off bilang default.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Ang unset ay
   nangangahulugang lahat ng uri (ang pag-uugali bago pa nagkaroon ng setting
   na ito). Ang `ssn_us` pattern ng request engine ay nagma-map sa `ssn`. Ang
-  mga template (Minimal, Standard, Financial, Brazilian, USA, Full) ay
+  mga template (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) ay
   pumupuno lang sa mga checkbox sa UI.
+- **Mga identifier ng GDPR at POPIA** — labindalawang built-in na id para sa mga personal na identifier ng EU at South Africa (talahanayan sa ibaba). Nasa iisang talahanayan, `src/shared/utils/piiPatterns.ts`, ang kanilang mga regex, validator, at jurisdiction tag; ginagamit ito ng response sanitizer (`src/lib/piiSanitizer.ts`) at request masker (`src/shared/utils/inputSanitizer.ts`). Tinatakpan lamang ang match kapag tinanggap ito ng validator nito; hindi sapat ang isang sunod-sunod na digit lamang. Pinananatili ng operator na nag-save ng mas makitid na pagpili bago umiral ang mga id na ito ang dating asal hanggang lagyan ng tsek ang mga bagong id.
 - **Mga custom pattern** — hanggang 20 regex o wildcard pattern (`*` =
   hanggang 64 na non-whitespace na character, `?` = isa). Ang mga match ay
   nagiging `[CUSTOM_REDACTED]`. Bawat pattern ay dumadaan sa
@@ -605,6 +606,25 @@ Naka-store ang mga setting sa `key_value` table (namespace `pii_settings`,
 
 Ang tatlo ay nangangailangan ng management auth at nagva-validate ng body
 gamit ang Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Mga identifier ng GDPR (EU) at POPIA (South Africa)
+
+| Id                  | Identifier                  | Pag-validate                                                                              |
+| ------------------- | --------------------------- | ----------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                        | Kilalang bansa, eksaktong haba para sa bansang iyon, ISO 13616 MOD-97-10                  |
+| `eu_vat`            | EU VAT number               | Kilalang prefix ng kasaping bansa at number format nito (walang VIES lookup)              |
+| `es_dni_nie`        | Spanish DNI / NIE           | Control letter (halaga mod 23); ang NIE ay `X/Y/Z` + 7 digit                              |
+| `it_codice_fiscale` | Italian Codice Fiscale      | Control letter mula sa mga talahanayan ng odd/even na posisyon                            |
+| `pl_pesel`          | Polish PESEL                | Weighted checksum at makatwirang saklaw ng naka-encode na buwan/araw ng kapanganakan      |
+| `nl_bsn`            | Dutch BSN                   | Pagsubok na 11 (mga timbang na 9..2, -1)                                                  |
+| `de_steuer_id`      | German Steuer-ID            | ISO 7064 Mod 11,10 at mga tuntunin sa digit structure (walang 0 sa simula)                |
+| `se_personnummer`   | Swedish personnummer        | Luhn sa huling sampung digit at makatwirang petsa ng kapanganakan (10 o 12 digit)         |
+| `za_id`             | South African ID number     | Luhn sa lahat ng 13 digit, wastong buwan/araw ng kapanganakan, citizenship digit na 0 o 1 |
+| `za_phone`          | Telepono sa South Africa    | Prefix na `+27` / `27`, o pambansang anyong `0..` na isinulat na may espasyo o gitling    |
+| `za_vat`            | South African VAT number    | 10 digit na nagsisimula sa `4` **at** "VAT" / "BTW" sa 48 character bago nito             |
+| `za_tax_ref`        | South African tax reference | 10 digit na nagsisimula sa `0`-`3`, Luhn, **at** "tax" / "SARS" sa 48 character bago nito |
+
+Dahil maaaring mapagkamalan ang mga format na digit lamang bilang order number, build number, o timestamp, kailangan ng keyword cue ang pinakamahihinang format (`za_vat`, `za_tax_ref`), at hindi itinuturing na South African phone number ang sampung digit na `0..` na walang separator. Hindi minamatch ang mga IBAN na may espasyo (`GB29 NWBK ...`). Sa streaming path, hinahanap lamang ang cue sa kasalukuyang chunk. Nauuna ang mga id sa mga generic phone pattern, kaya pinananatili ng validated identifier ang sarili nitong placeholder (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Pinipili ng mga template na `gdpr` at `popia` ang EU at South African id, ayon sa pagkakasunod. Kailangan pa ring kusang paganahin ang masking (Hard Rule #20): walang binabago rito sa default ng feature flag.
 
 ### Prompt Injection (`promptInjection.ts`)
 

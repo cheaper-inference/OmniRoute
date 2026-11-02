@@ -311,12 +311,12 @@ access token ပေးပို့သည့် ခေါ်ဆိုသူမျ
 ကို ရရှိမည်။ ထိုအဆင့်သတ်မှတ်ချက်ကို `scopeSatisfies` ဟုခေါ်သည်။ ၎င်းသည် MCP ဇယားကို မစစ်ဆေးသကဲ့သို့ MCP
 matcher ကလည်း ၎င်းကို မစစ်ဆေးပါ။
 
-| Namespace          | အထောက်အထား                                                                    | Checker                       | အောင်မြင်ပါက ခွင့်ပြုသည့်အရာ                             |
-| :----------------- | :---------------------------------------------------------------------------- | :---------------------------- | :------------------------------------------------------- |
-| API-key management | `api_keys.scopes`                                                             | `hasManageScope`              | ထို Bearer key အတွက် Management REST                     |
-| API-key additive   | တူညီသော array အတွင်းရှိ အတိအကျတူညီသည့် string တစ်ခု                           | အောက်တွင် ဖော်ပြထားသော helper | ထိုစွမ်းရည်တစ်ခုတည်း                                     |
-| MCP tool scopes    | တူညီသော array၊ မရှိပါက MCP `_meta`၊ ထိုသို့လည်းမရှိပါက `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | Enforcement ဖွင့်ထားသည့်အခါ ထို tool ကို အသုံးပြုခြင်း   |
-| Access token       | `oma_live_…`                                                                  | `scopeSatisfies`              | Method နှင့် path အရ ထိုအဆင့်လိုအပ်သည့် management route |
+| Namespace          | အထောက်အထား                                                                           | Checker                       | အောင်မြင်ပါက ခွင့်ပြုသည့်အရာ                             |
+| :----------------- | :----------------------------------------------------------------------------------- | :---------------------------- | :------------------------------------------------------- |
+| API-key management | `api_keys.scopes`                                                                    | `hasManageScope`              | ထို Bearer key အတွက် Management REST                     |
+| API-key additive   | တူညီသော array အတွင်းရှိ အတိအကျတူညီသည့် string တစ်ခု                                  | အောက်တွင် ဖော်ပြထားသော helper | ထိုစွမ်းရည်တစ်ခုတည်း                                     |
+| MCP tool scopes    | တူညီသော array၊ မရှိလျှင် MCP `_meta` (HTTP/SSE သာ)၊ မရှိလျှင် `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | Enforcement ဖွင့်ထားသည့်အခါ ထို tool ကို အသုံးပြုခြင်း   |
+| Access token       | `oma_live_…`                                                                         | `scopeSatisfies`              | Method နှင့် path အရ ထိုအဆင့်လိုအပ်သည့် management route |
 
 Credential တစ်ခုစီ ထုတ်ပေးပုံကို
 [Management အထောက်အထားစိစစ်ခြင်း](../guides/MANAGEMENT-AUTH.md) တွင် ဖော်ပြထားသည်။
@@ -363,8 +363,7 @@ Scope များအဖြစ် `["manage"]` ပါရှိသော key တ�
 `false`)။ ပိတ်ထားစဉ် `evaluateToolScopes` သည် ခေါ်ဆိုမှုကို ခွင့်ပြုပြီး
 catalog ကို ကျော်သွားသည်။ ဖွင့်ထားစဉ် HTTP သည် Bearer key ၏ `api_keys.scopes` ကို
 `authInfo` အဖြစ် အသုံးပြုသည် ([Key တစ်ခုချင်းအလိုက် HTTP scope ချိတ်ဆက်ခြင်း](#per-key-http-scope-binding-7895) ကို ကြည့်ပါ)။
-မည်သည့် key scope ကိုမျှ မသတ်မှတ်နိုင်ပါက ခွင့်ပြုထားသော set သည် MCP `_meta` သို့ ဆက်လက်စစ်ဆေးပြီးနောက်
-`OMNIROUTE_MCP_SCOPES` သို့ ဆက်လက်စစ်ဆေးသည်။
+ကီး၏ scope များကို သတ်မှတ်မရသောအခါ ခွင့်ပြုထားသော scope အစုသည် MCP `_meta` သို့ ဆက်သွားသည် (HTTP/SSE ခေါ်ဆိုသူများအတွက် HTTP အထောက်အထားစစ်ဆေးခြင်း context အတွင်း၌သာ ထည့်သွင်းစဉ်းစားသည်; stdio ခေါ်ဆိုသူ၏ `_meta` ကို လျစ်လျူရှုသည်၊ အကြောင်းမှာ client က ၎င်းကို ထိန်းချုပ်ပြီး ခေါ်ဆိုသူတစ်ဦးချင်းစီ၏ အထောက်အထားကို မသယ်ဆောင်သောကြောင့် ဖြစ်သည်)၊ ထို့နောက် `OMNIROUTE_MCP_SCOPES` သို့ ဆက်သွားသည်။
 
 #### Access-token scope များ
 
@@ -464,8 +463,7 @@ tool call တစ်ခုစီထံ ရောက်ရှိသော `extra.a
 HTTP ပေါ်တွင် ယခင်က မဖြည့်သွင်းခဲ့သော ပထမဆုံးနှင့် ဦးစားပေးအမြင့်ဆုံး source ကိုသာ ဖြည့်သွင်းပေးခြင်းဖြစ်သည်။
 API key တစ်ခုမျှ ရှာဖွေမရသည့်အခါ (header မရှိခြင်း၊ key မမှန်ကန်ခြင်း) `authInfo` သည် `undefined`
 အဖြစ် ဆက်ရှိနေပြီး resolution သည် ရှိပြီးသား `meta`/env chain သို့ ယခင်အတိုင်း ဆက်လက် fallback လုပ်သည်။
-stdio တွင် caller တစ်ဦးချင်းစီအလိုက် identity မရှိပါ (`mcpCallerIdentity.ts` ကို ကြည့်ပါ)၊ ထို့ကြောင့်
-သက်ရောက်မှုမရှိဘဲ `_meta`/env fallback chain ကို ဆက်လက်အသုံးပြုသည်။
+stdio တွင် ခေါ်ဆိုသူတစ်ဦးချင်းစီ၏ အထောက်အထား မရှိပါ (`mcpCallerIdentity.ts` ကို ကြည့်ပါ)၊ ကီးတစ်ခုချင်းစီအလိုက် ချိတ်ဆက်ခြင်းကလည်း ၎င်းကို မသက်ရောက်ပါ — ၎င်းသည် `_meta` အဆင့်ကို ကျော်သွားသည် (`_meta` ကို HTTP အထောက်အထားစစ်ဆေးခြင်း context အတွင်း၌သာ ထည့်သွင်းစဉ်းစားသည်၊ #15159)၊ scope များကို `OMNIROUTE_MCP_SCOPES` env ကီးမှသာ သတ်မှတ်သည်။
 
 **ကန့်သတ် scope ပါသော HTTP/SSE caller များအတွက် `OMNIROUTE_MCP_ENFORCE_SCOPES` မည်သို့ပင်ဖြစ်စေ
 enforcement ကို အတင်းဖွင့်ထားသည်။** `OMNIROUTE_MCP_ENFORCE_SCOPES` ၏ default တန်ဖိုး `false` သည်

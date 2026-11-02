@@ -10,7 +10,7 @@
 
 | Σελίδα         | Διαδρομή                | Έννοια                                                                                       | Πλήθος     |
 | -------------- | ----------------------- | -------------------------------------------------------------------------------------------- | ---------- |
-| **CLI Κώδικα** | `/dashboard/cli-code`   | Εργαλεία προγραμματισμού που κατευθύνετε στο OmniRoute (Πελάτης → CLI → OmniRoute → Πάροχος) | 27         |
+| **CLI Κώδικα** | `/dashboard/cli-code`   | Εργαλεία προγραμματισμού που κατευθύνετε στο OmniRoute (Πελάτης → CLI → OmniRoute → Πάροχος) | 28         |
 | **CLI Agents** | `/dashboard/cli-agents` | Αυτόνομοι agents που κατευθύνετε στο OmniRoute (ίδια ροή, ευρύτερο πεδίο εφαρμογής)          | 11         |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI που εκκινεί το OmniRoute ως backend μέσω stdio/ACP (αντίστροφη ροή)                      | βλ. μητρώο |
 
@@ -146,7 +146,7 @@ runtime, ο κατάλογος UI και κάθε επιφάνεια καταν�
 
 ---
 
-## 1. Κατάλογος του CLI Code (27 εργαλεία)
+## 1. Κατάλογος του CLI Code (28 εργαλεία)
 
 Όλα τα εργαλεία που εμφανίζονται στο `/dashboard/cli-code`. Όσα έχουν `baseUrlSupport: none` συνδέονται μέσω MITM ή μέσω μη αυτόματου οδηγού, αντί για προσαρμοσμένο βασικό URL:
 
@@ -173,6 +173,7 @@ runtime, ο κατάλογος UI και κάθε επιφάνεια καταν�
 | grok-build   | Grok Build              | xAI                    | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)            | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba                | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)          | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries         | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere              | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                 | none           | mitm           | false        |
@@ -262,16 +263,16 @@ interface ToolBatchStatus {
 
 Τα νέα εργαλεία με `configType: "custom"` διαθέτουν αποκλειστικές διαδρομές API ρυθμίσεων:
 
-| Διαδρομή                                    | Εργαλείο                                                                       |
-| ------------------------------------------- | ------------------------------------------------------------------------------ |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                        |
-| `POST /api/cli-tools/jcode-settings`        | jcode (σημαία --base-url)                                                      |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, παλαιού τύπου)                                  |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, κύριος + συγχρονισμός παλαιού τύπου `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                          |
-| `POST /api/cli-tools/pi-settings`           | Πράκτορας προγραμματισμού Pi                                                   |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + αποκλειστικό κλειδί `.env`)               |
+| Διαδρομή                                    | Εργαλείο                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                         |
+| `POST /api/cli-tools/jcode-settings`        | jcode (σημαία --base-url)                                                       |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, παλαιού τύπου)                                   |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, κύριος + συγχρονισμός παλαιού τύπου `~/.deepseek`)  |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                           |
+| `POST /api/cli-tools/pi-settings`           | Πράκτορας προγραμματισμού Pi (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                           |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + αποκλειστικό κλειδί `.env`)                |
 
 Όλες οι διαδρομές χρησιμοποιούν τη `sanitizeErrorMessage()` για αποκρίσεις σφαλμάτων (Αυστηρός Κανόνας #12).
 
@@ -375,7 +376,7 @@ pip install aider-chat
 cargo install smelt  # Βασίζεται στη Rust
 
 # Πράκτορας προγραμματισμού Pi
-# δείτε το https://github.com/zechnerj/pi-coding-agent για την εγκατάσταση
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # δείτε το https://github.com/1jehuang/jcode για την εγκατάσταση
@@ -488,6 +489,38 @@ EOF
 
 > Χρησιμοποιήστε το `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > για να στείλετε παραλλαγές συλλογισμού.
+
+---
+
+#### Pi Coding Agent
+
+Εγκαταστήστε το επίσημο πακέτο Pi Coding Agent με `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Το Pi διαβάζει προσαρμοσμένους παρόχους από το `~/.pi/agent/models.json`· ορίστε το `PI_CODING_AGENT_DIR` σε απόλυτη διαδρομή (ή διαδρομή με πρόθεμα `~`) για να μεταφέρετε ολόκληρο τον κατάλογο του agent. Ο πίνακας ελέγχου ακολουθεί αυτή την αντικατάσταση. Το Pi δεν ανακαλύπτει μοντέλα από προσαρμοσμένα endpoints, επομένως το OmniRoute γράφει το επιλεγμένο μοντέλο στο `models[]`, χρησιμοποιώντας το API `openai-completions` του Pi και το συμβατό με OpenAI endpoint `/v1` του OmniRoute.
+
+Στο **CLI Tools → Pi**, επιλέξτε endpoint, κλειδί API και μοντέλο, ελέγξτε την προεπισκόπηση παρόχου και εφαρμόστε. Η προεπισκόπηση είναι τμήμα παρόχου: κατά τη χειροκίνητη διαμόρφωση του Pi, συγχωνεύστε το `providers.omniroute` στο υπάρχον `models.json` ώστε οι άλλοι πάροχοι και οι ρυθμίσεις να παραμείνουν άθικτοι.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Το Pi επαναφορτώνει το `models.json` όταν ανοίγετε το `/model`. Δοκιμάστε τη διαμορφωμένη διαδρομή με το ID παρόχου και μοντέλου που επιλέξατε:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Αναφορές: [Μοντέλα και προσαρμοσμένοι πάροχοι Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Μεταβλητές περιβάλλοντος Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Οδηγίες εγκατάστασης Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

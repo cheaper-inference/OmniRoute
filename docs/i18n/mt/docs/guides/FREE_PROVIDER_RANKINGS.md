@@ -13,7 +13,7 @@
 
 ## X'Inhu
 
-OmniRoute tirreġistra 377 fornitur, inklużi 155 entrata fil-katalgu mmarkata **free/no-auth**
+OmniRoute tirreġistra 380 fornitur, inklużi 155 entrata fil-katalgu mmarkata **free/no-auth**
 (no-auth,
 OAuth b'livell b'xejn, jew API key b'livell b'xejn — ara l-
 [Gwida dwar il-Livelli B'xejn](../getting-started/FREE-TIERS-GUIDE.md) u d-

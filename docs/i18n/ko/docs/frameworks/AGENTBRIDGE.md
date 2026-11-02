@@ -20,7 +20,7 @@ IDE 에이전트(예: GitHub Copilot, Cursor, Claude Code)가 API를 호출하�
 
 이를 통해 다음을 수행할 수 있습니다.
 
-- **모든 에이전트를 모든 제공자로 재라우팅**: Copilot이 OpenAI와 통신하고 있나요? Anthropic Claude, Gemini 또는 OmniRoute가 지원하는 377개 제공자 중 하나로 리디렉션할 수 있습니다.
+- **모든 에이전트를 모든 제공자로 재라우팅**: Copilot이 OpenAI와 통신하고 있나요? Anthropic Claude, Gemini 또는 OmniRoute가 지원하는 380개 제공자 중 하나로 리디렉션할 수 있습니다.
 - **모델 매핑 적용**: 핸들러 수준에서 `gemini-3-flash` → `claude-sonnet-4.7` 매핑을 투명하게 적용할 수 있습니다.
 - **모든 에이전트 트래픽 관찰**: 가로챈 모든 요청이 [트래픽 검사기](./TRAFFIC_INSPECTOR.md)에 게시됩니다.
 - **OmniRoute 복원력 기능 적용**: 콤보 라우팅, 회로 차단기, 폴백, 비용 추적 기능을 IDE 에이전트 트래픽에도 사용할 수 있습니다.

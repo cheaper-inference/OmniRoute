@@ -29,6 +29,7 @@ OpenAI سے ہم آہنگ مخصوص پروٹوکول اور فراہم کنند
 - [WebSocket اسٹریمنگ](#websocket-streaming)
 - [کوٹاز اور مسائل کی رپورٹنگ](#quotas--issues-reporting)
 - [سیمنٹک کیش](#semantic-cache)
+- [CLIProxyAPI انتظامی مطابقت](#cliproxyapi-management-compatibility)
 - [ڈیش بورڈ اور انتظام](#dashboard--management)
 - [کومبو کا انتظام](#combo-management)
 - [ویب ہُکس](#webhooks)
@@ -1006,6 +1007,18 @@ CLI، `base_url + /responses` کو WebSocket میں اپ گریڈ کرتا ہے 
 
 **توثیق:** بیئرر API کلید (`isAuthenticated`)۔
 
+### کوٹا سیشن کی بحالی (اختیاری)
+
+غیر اسٹریمنگ `POST /v1/chat/completions` یا `POST /v1/responses` جو حتمی کوٹا خرابی کے ساتھ ناکام ہو (`402`/`429`/`503` جس کا متن کوٹا یا کریڈٹ ختم ہونے کی خبر دے)، خرابی واپس کرنے کے بجائے روک کر بعد میں دوبارہ چلایا جا سکتا ہے۔ کال کرنے والا ہر درخواست کے لیے تین ہیڈرز سے اسے فعال کرتا ہے:
+
+| ہیڈر                         | قدر                                   |
+| ---------------------------- | ------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                |
+| `x-omniroute-session`        | سیشن ID، `[A-Za-z0-9._:-]{1,128}`     |
+| `x-omniroute-recovery-turn`  | سیشن کے اندر منفرد ٹرن ID (وہی قاعدہ) |
+
+صرف `stream: false` ٹرن اہل ہیں جن میں ٹولز، ٹول ہسٹری یا `previous_response_id` نہ ہوں اور `x-omniroute-connection` پن نہ ہو؛ `STORAGE_ENCRYPTION_KEY` بھی مقرر ہونا چاہیے (درخواست 24 h تک رمز شدہ محفوظ رہتی ہے)۔ جواب پھر `202` اور `recovery.poll` ہوتا ہے؛ `GET /v1/quota-recoveries/{id}` پول کریں (زیر التوا ہونے پر `202`، مکمل ہونے پر بحال شدہ متن کے ساتھ `200`)، یا `DELETE` سے منسوخ کریں۔ ٹکٹ صرف اس API کلید کو نظر آتے ہیں جس نے انہیں بنایا۔ جس دوبارہ چلانے کا نتیجہ غیر یقینی ہو، وہ دوبارہ دو بار بھیجے جانے کے بجائے `needs_confirmation` میں ختم ہوتا ہے۔ ماخذ: `src/lib/quota/quotaSessionRecovery.ts`۔
+
 ---
 
 ## ذاتی استعمال (`/api/usage/om-usage`)
@@ -1174,6 +1187,28 @@ API کلیدیں `cacheDefaultMode` کے ذریعے سیمنٹک کیش ریڈز
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI انتظامی مطابقت
+
+OmniRoute، [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) کے ان تین انتظامی اینڈپوائنٹس کا جواب دیتا ہے جنہیں استعمال والے ڈیش بورڈ Claude اور Codex سبسکرپشن کی حدود پڑھنے کے لیے بلاتے ہیں (مثلاً T3 Code کا `cliproxy` استعمالی حد کا ماخذ)۔ کلائنٹ کا بنیادی URL، OmniRoute کی طرف رکھیں اور `manage` دائرے والی API کلید کو انتظامی کلید بنائیں۔ راستے `/v0/management/*` اور `/api/v0/management/*` پر فراہم ہوتے ہیں۔
+
+| طریقہ | راستہ                        | وضاحت                                                                                                                                    |
+| ----- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/v0/management/auth-files`  | Claude اور Codex OAuth کنکشن `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` کی شکل میں۔ کوئی ٹوکن نہیں           |
+| POST  | `/v0/management/api-call`    | متن `{ auth_index, method, url, header?, data? }`۔ اکاؤنٹ کے ٹوکن کے ساتھ منظور شدہ درخواست بھیجتا اور `{ status_code, body }` لوٹاتا ہے |
+| POST  | `/v0/management/reset-quota` | متن `{ auth_index }`۔ ایک اکاؤنٹ کا کنکشن وقفہ، ماڈل لاک آؤٹ اور Codex کے فی دائرہ وقفے صاف کرتا ہے                                      |
+
+- `auth_index`، OmniRoute کنکشن کی ID ہے۔ `provider`، `claude` یا `codex` ہے (صرف OAuth کنکشن؛ API کلید والا فراہم کنندہ `anthropic` فہرست میں نہیں)۔ Codex کے لیے `id_token.chatgpt_account_id` محفوظ ورک اسپیس ID اور `plan_type` محفوظ منصوبہ ہے۔
+- `api-call` عمومی پراکسی نہیں۔ یہ صرف Claude `GET
+https://api.anthropic.com/api/oauth/usage` اور Codex `GET
+https://chatgpt.com/backend-api/wham/usage`، `GET .../wham/rate-limit-reset-credits` اور `POST .../wham/rate-limit-reset-credits/consume` قبول کرتا ہے، ہر ایک صرف متعلقہ فراہم کنندہ کے اکاؤنٹ کے لیے۔ باقی سب اپ اسٹریم سے رابطہ کیے بغیر `403` لوٹاتے ہیں۔ کال کرنے والے کا `Authorization` ہیڈر (بشمول `$TOKEN$` پلیس ہولڈر) نظر انداز ہوتا ہے: OmniRoute کنکشن کا ایکسیس ٹوکن شامل کرتا ہے، میعاد قریب ہو تو پہلے اسے تازہ کرتا ہے، اور صرف منظور شدہ ہیڈرز آگے بھیجتا ہے (`anthropic-beta`؛ `OpenAI-Beta`، `Originator`، `Chatgpt-Account-Id`؛ `Accept`، `Content-Type`)۔ `Chatgpt-Account-Id` نہ ہو تو محفوظ ورک اسپیس ID استعمال ہوتی ہے۔ اگر پہلا اپ اسٹریم جواب `401` ہو تو ایک بار ریفریش ہوتا ہے، اور صرف ایکسیس ٹوکن بدلنے پر دوبارہ کوشش ہوتی ہے۔ ہر اپ اسٹریم کوشش 15 سیکنڈ بعد ٹائم آؤٹ ہوتی ہے اور کنکشن کی پراکسی استعمال کرتی ہے۔
+- `reset-quota` حتمی حالتوں (banned, expired, credits_exhausted) کو نہیں بدلتا۔ نامعلوم `auth_index`، `404` لوٹاتا ہے۔
+
+**تصدیق:** ڈیش بورڈ سیشن یا `manage` دائرے کی API کلید، لاگ ان بند ہونے پر بھی لازم ہے (راستے `ALWAYS_PROTECTED_API_PATHS` میں ہیں)۔ صرف استدلال والی کلیدوں کو `403` ملتا ہے۔ ماخذ: `src/lib/cliproxyCompat/managementApi.ts`۔
 
 ---
 

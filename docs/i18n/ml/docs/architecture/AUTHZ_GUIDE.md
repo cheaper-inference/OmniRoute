@@ -157,9 +157,10 @@ JWT സാധുതാ പരിശോധന വിജയിക്കുകയ�
 
 - **`publicPolicy`** (`policies/public.ts`) — എല്ലായ്പ്പോഴും `allow({ kind: "anonymous", id: "anonymous" })` മടക്കിനൽകുന്നു.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — ബെയറർ എക്സ്ട്രാക്റ്റ് ചെയ്ത് `validateApiKey()` വഴി സാധൂകരിക്കുന്നു. പ്രാബല്യത്തിലുള്ള `REQUIRE_API_KEY` ഫീച്ചർ ഫ്ലാഗ് പ്രവർത്തനരഹിതമായിരിക്കുമ്പോൾ മാത്രമേ അനോണിമസ് ആക്സസിലേക്ക് ഫാൾ ത്രൂ ചെയ്യൂ. ഡാഷ്ബോർഡ് ഫീച്ചർ ഫ്ലാഗുകളും എൻവയോൺമെന്റ് വേരിയബിളുകളും `/api/v1/*`, `/api/v1beta/*`, അവയുടെ അപരനാമങ്ങൾ എന്നിവയെ ഒരേ രീതിയിൽ നിയന്ത്രിക്കുന്നതിനായി, പ്രാബല്യത്തിലുള്ള ഫ്ലാഗ് `isRequireApiKeyEnabled()` (`DB ഫീച്ചർ ഫ്ലാഗ് ഓവർറൈഡ് > process.env.REQUIRE_API_KEY > ഡിഫോൾട്ട്`) വഴിയാണ് പരിഹരിക്കുന്നത്; റിസോൾവർ പരാജയങ്ങൾ ആക്സസ് നിഷേധിക്കും. ക്ലയന്റ് API റൂട്ടുകളിൽ ഡാഷ്ബോർഡ്-സെഷൻ അഭ്യർത്ഥനകൾ അനുവദിക്കുന്നു (ഡാഷ്ബോർഡ് മോഡൽ കാറ്റലോഗ് ഉപയോഗിക്കുന്ന `/api/v1/models` ഉൾപ്പെടെ).
+  Entra ID SSO പ്രവർത്തനക്ഷമമായിരിക്കുമ്പോൾ, Entra ടോക്കണിന്റെ ഘടനയുള്ള Bearer നെ (മൂന്ന് base64url ഭാഗങ്ങൾ, `RS*` അൽഗോരിതം, `kid`) SSO ശാഖ `validateApiKey()` ന് **മുമ്പ്** കൈകാര്യം ചെയ്യുന്നു. അതിന്റെ തീരുമാനം അന്തിമമാണ്: അത് ഒരിക്കലും API-key പാതയിലേക്കോ അജ്ഞാത ഉപയോക്താവിന്റെ പ്രവേശനത്തിലേക്ക് താഴ്ത്തുന്ന ശാഖയിലേക്കോ പോകില്ല. അതിനാൽ ഐഡന്റിറ്റി പ്രൊവൈഡറിന്റെ സേവനം നിലച്ചാൽ എല്ലാവർക്കും പ്രവേശനം തുറന്നുകിട്ടില്ല. സ്ഥിരമായ API കീകളെ ഇത് ബാധിക്കില്ല. [Entra ID SSO](../security/ENTRA_SSO.md) കാണുക.
 - **`managementPolicy`** (`policies/management.ts`) — ഡാഷ്ബോർഡ് സെഷൻ, ആന്തരിക മോഡൽ-സിങ്ക് അഭ്യർത്ഥനകൾ (`/api/providers/[name]/(sync-models|models)`-മായി പൊരുത്തപ്പെടുത്തുന്നവ) എന്നിവ സ്വീകരിക്കുന്നു; അല്ലെങ്കിൽ `isAuthRequired()` false മടക്കിനൽകുകയാണെങ്കിൽ പൂർണ്ണമായും ഒഴിവാക്കുന്നു. ബെയറർ ടോക്കൺ നൽകിയിട്ടുണ്ടെങ്കിലും അസാധുവാണെങ്കിൽ 403 (`AUTH_001`) മടക്കിനൽകുന്നു; അല്ലെങ്കിൽ 401. ഏതെങ്കിലും ഓത്ത് ബ്രാഞ്ചിനു മുമ്പായി റൂട്ട്-ഗാർഡ് ടയറുകളും (LOCAL_ONLY / ALWAYS_PROTECTED) നിർബന്ധമാക്കുന്നു — [റൂട്ട് ഗാർഡ് ടയറുകൾ](../security/ROUTE_GUARD_TIERS.md) കാണുക. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-ലെ LOCAL_ONLY പാതകൾ (നിലവിൽ: `/api/mcp/`) ബെയറർ കീയിൽ `manage` സ്കോപ്പ് ഉണ്ടെങ്കിൽ നോൺ-ലൂപ്പ്ബാക്കിൽനിന്നും ആക്സസ് ചെയ്യാം; മറ്റ് എല്ലാ LOCAL_ONLY പാതകളും സ്കോപ്പ് പരിഗണിക്കാതെ സ്ട്രിക്റ്റ്-ലൂപ്പ്ബാക്കായി തുടരും.
 
-വിജയകരമായ ഒരു പോളിസി `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` ഉള്ള `AuthSubject` മടക്കിനൽകുന്നു. ഡൗൺസ്ട്രീം ഹാൻഡ്ലറുകൾക്ക് ഓത്ത് ലോജിക് വീണ്ടും പ്രവർത്തിപ്പിക്കുന്നതിനുപകരം `src/server/authz/assertAuth.ts`-ലെ `assertAuth(request, "CLIENT_API")` വഴി അത് വായിക്കാം.
+വിജയകരമായ ഒരു പോളിസി `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ഉള്ള `AuthSubject` മടക്കിനൽകുന്നു. ഡൗൺസ്ട്രീം ഹാൻഡ്ലറുകൾക്ക് ഓത്ത് ലോജിക് വീണ്ടും പ്രവർത്തിപ്പിക്കുന്നതിനുപകരം `src/server/authz/assertAuth.ts`-ലെ `assertAuth(request, "CLIENT_API")` വഴി അത് വായിക്കാം.
 
 ## പൊതു റൂട്ടുകളുടെ പട്ടിക
 
@@ -306,8 +307,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ഓതന്റിക്കേറ്റ് ചെയ്ത അഭ്യർത്ഥനകൾക്കായി, അപ്സ്ട്രീം (ഹാൻഡ്ലർ-സൈഡ്) അഭ്യർത്ഥനാ ഹെഡറുകളിൽ ഇനിപ്പറയുന്നവയും ഉൾപ്പെടുന്നു:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<അവസാന-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<അവസാന-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (ഐച്ഛികം)
 x-omniroute-auth-scopes:    കോമ ഉപയോഗിച്ച് വേർതിരിച്ച പട്ടിക
 ```

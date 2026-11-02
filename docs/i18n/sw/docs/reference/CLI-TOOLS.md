@@ -10,7 +10,7 @@ OmniRoute huunganishwa na makundi matatu ya zana za CLI yaliyosambazwa katika ku
 
 | Ukurasa             | Njia                    | Dhana                                                                                           | Idadi          |
 | ------------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | -------------- |
-| **Misimbo ya CLI**  | `/dashboard/cli-code`   | Zana za uandishi wa msimbo unazozielekeza kwa OmniRoute (Mteja → CLI → OmniRoute → Mtoa huduma) | 27             |
+| **Misimbo ya CLI**  | `/dashboard/cli-code`   | Zana za uandishi wa msimbo unazozielekeza kwa OmniRoute (Mteja → CLI → OmniRoute → Mtoa huduma) | 28             |
 | **Mawakala wa CLI** | `/dashboard/cli-agents` | Mawakala wanaojiendesha unaowaelekeza kwa OmniRoute (mtiririko uleule, wigo mpana zaidi)        | 11             |
 | **Mawakala wa ACP** | `/dashboard/acp-agents` | CLI ambazo OmniRoute huanzisha kama backend kupitia stdio/ACP (mtiririko wa kinyume)            | angalia sajili |
 
@@ -146,7 +146,7 @@ sehemu moja bila nyingine husababisha mkusanyiko wa majaribio kushindwa badala y
 
 ---
 
-## 1. Katalogi ya Msimbo wa CLI (zana 27)
+## 1. Katalogi ya Msimbo wa CLI (zana 28)
 
 Zana zote zinazoonekana katika `/dashboard/cli-code`. Zile zenye `baseUrlSupport: none` zimeunganishwa kupitia MITM au mwongozo wa usanidi wa mikono badala ya URL maalum ya msingi:
 
@@ -173,6 +173,7 @@ Zana zote zinazoonekana katika `/dashboard/cli-code`. Zile zenye `baseUrlSupport
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -262,16 +263,16 @@ interface ToolBatchStatus {
 
 Zana mpya zenye `configType: "custom"` zina njia mahususi za API ya mipangilio:
 
-| Njia                                        | Zana                                                                          |
-| ------------------------------------------- | ----------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                       |
-| `POST /api/cli-tools/jcode-settings`        | jcode (alama ya --base-url)                                                   |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, ya zamani)                                     |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ya msingi + usawazishaji wa zamani `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                         |
-| `POST /api/cli-tools/pi-settings`           | Ajenti wa uandishi wa msimbo wa Pi                                            |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                         |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + ufunguo mahususi wa `.env`)              |
+| Njia                                        | Zana                                                                                  |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                               |
+| `POST /api/cli-tools/jcode-settings`        | jcode (alama ya --base-url)                                                           |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, ya zamani)                                             |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ya msingi + usawazishaji wa zamani `~/.deepseek`)         |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                                 |
+| `POST /api/cli-tools/pi-settings`           | Ajenti wa uandishi wa msimbo wa Pi (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                                 |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + ufunguo mahususi wa `.env`)                      |
 
 Njia zote hutumia `sanitizeErrorMessage()` kwa majibu ya hitilafu (Kanuni Isiyobadilika #12).
 
@@ -375,7 +376,7 @@ pip install aider-chat
 cargo install smelt  # Inategemea Rust
 
 # Ajenti wa uwekaji msimbo wa Pi
-# tazama https://github.com/zechnerj/pi-coding-agent kwa maelekezo ya usakinishaji
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # tazama https://github.com/1jehuang/jcode kwa maelekezo ya usakinishaji
@@ -488,6 +489,38 @@ EOF
 
 > Tumia `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > kutuma vibadala vya kufikiri.
+
+---
+
+#### Pi Coding Agent
+
+Sakinisha package rasmi ya Pi Coding Agent kwa `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi husoma provider maalumu kutoka `~/.pi/agent/models.json`; weka `PI_CODING_AGENT_DIR` kuwa path kamili (au path inayoanza na `~`) ili kuhamisha saraka yote ya agent. Dashboard hufuata mpangilio huo mbadala. Pi haigundui model kutoka endpoint maalumu, kwa hiyo OmniRoute huandika model iliyochaguliwa katika `models[]` ikitumia API `openai-completions` ya Pi na endpoint `/v1` ya OmniRoute inayotangamana na OpenAI.
+
+Katika **CLI Tools → Pi**, chagua endpoint, API key na model, kagua mwonekano wa awali wa provider, kisha tumia. Mwonekano huo ni kipande cha provider: unganisha `providers.omniroute` katika `models.json` yako iliyopo unapoweka Pi kwa mkono ili provider na mipangilio mingine ibaki bila kuharibika.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi hupakia `models.json` tena unapofungua `/model`. Jaribu route iliyowekwa kwa provider id na model id ulizochagua:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Marejeo: [model na provider maalumu za Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [environment variable za Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [maelekezo ya kusakinisha Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

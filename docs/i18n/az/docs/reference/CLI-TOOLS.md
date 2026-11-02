@@ -10,7 +10,7 @@ OmniRoute üç xüsusi idarəetmə paneli səhifəsində yerləşən üç kateqo
 
 | Səhifə            | Marşrut                 | Konsepsiya                                                                                | Say            |
 | ----------------- | ----------------------- | ----------------------------------------------------------------------------------------- | -------------- |
-| **CLI Kodları**   | `/dashboard/cli-code`   | OmniRoute-a yönləndirdiyiniz kodlaşdırma alətləri (Müştəri → CLI → OmniRoute → Provayder) | 27             |
+| **CLI Kodları**   | `/dashboard/cli-code`   | OmniRoute-a yönləndirdiyiniz kodlaşdırma alətləri (Müştəri → CLI → OmniRoute → Provayder) | 28             |
 | **CLI Agentləri** | `/dashboard/cli-agents` | OmniRoute-a yönləndirdiyiniz avtonom agentlər (eyni axın, daha geniş əhatə dairəsi)       | 11             |
 | **ACP Agentləri** | `/dashboard/acp-agents` | OmniRoute-un stdio/ACP vasitəsilə arxa xidmət kimi işə saldığı CLI-lər (əks axın)         | reyestrə baxın |
 
@@ -113,7 +113,7 @@ bir səthə əlavə edilən hədəf səssizcə uyğunsuzlaşmaq əvəzinə test 
 
 ---
 
-## 1. CLI Code kataloqu (27 alət)
+## 1. CLI Code kataloqu (28 alət)
 
 `/dashboard/cli-code` bölməsində görünən bütün alətlər. `baseUrlSupport: none` olanlar fərdi baza URL-i əvəzinə MITM və ya manual təlimat vasitəsilə qoşulur:
 
@@ -140,6 +140,7 @@ bir səthə əlavə edilən hədəf səssizcə uyğunsuzlaşmaq əvəzinə test 
 | grok-build   | Grok Build              | xAI                     | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)             | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba                 | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)           | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries          | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere               | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                  | none           | mitm           | false        |
@@ -236,7 +237,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, köhnə)                                    |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, əsas + köhnə `~/.deepseek` sinxronizasiyası) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                    |
-| `POST /api/cli-tools/pi-settings`           | Pi kodlaşdırma agenti                                                    |
+| `POST /api/cli-tools/pi-settings`           | Pi kodlaşdırma agenti (`~/.pi/agent/models.json`, `providers.omniroute`) |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                    |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + xüsusi `.env` açarı)                |
 
@@ -342,7 +343,7 @@ pip install aider-chat
 cargo install smelt  # Rust əsaslıdır
 
 # Pi kodlaşdırma agenti
-# quraşdırma üçün https://github.com/zechnerj/pi-coding-agent ünvanına baxın
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # quraşdırma üçün https://github.com/1jehuang/jcode ünvanına baxın
@@ -455,6 +456,40 @@ EOF
 
 > Düşünmə variantlarını göndərmək üçün `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > əmrindən istifadə edin.
+
+---
+
+#### Pi Coding Agent
+
+Rəsmi Pi Coding Agent paketini `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` ilə quraşdırın. Pi xüsusi provayderləri `~/.pi/agent/models.json` yolundan oxuyur; agent qovluğunu bütövlükdə köçürmək üçün `PI_CODING_AGENT_DIR` dəyərini mütləq yol (və ya `~` prefiksli yol) edin. Panel bu əvəzləyici ayara əməl edir. Pi xüsusi son nöqtələrdən model kəşf etmir, buna görə OmniRoute seçilmiş modeli Pi-nin `openai-completions` API-si və OmniRoute-un OpenAI-uyğun `/v1` son nöqtəsi ilə `models[]` daxilinə yazır.
+
+**CLI Alətləri → Pi** bölməsində son nöqtə, API açarı və model seçin, provayder önbaxışını nəzərdən keçirin, sonra tətbiq edin. Önbaxış provayder fraqmentidir: Pi-ni əl ilə qurarkən `providers.omniroute` hissəsini mövcud `models.json` faylına birləşdirin ki, digər provayderlər və ayarlar qorunsun.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+`/model` açıldıqda Pi `models.json` faylını yenidən yükləyir. Seçdiyiniz provayder və model ID-ləri ilə qurulmuş marşrutu sınayın:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+İstinadlar: [Pi modelləri və xüsusi provayderlər](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md),
+[Pi mühit dəyişənləri](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md),
+[Pi quraşdırma təlimatları](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

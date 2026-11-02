@@ -10,7 +10,7 @@ OmniRoute jintegra ma’ tliet kategoriji ta’ għodod CLI mifruxa fuq tliet pa
 
 | Paġna          | Rotta                   | Kunċett                                                                                   | Għadd          |
 | -------------- | ----------------------- | ----------------------------------------------------------------------------------------- | -------------- |
-| **Kodiċi CLI** | `/dashboard/cli-code`   | Għodod tal-ipprogrammar li tipponta lejn OmniRoute (Klijent → CLI → OmniRoute → Fornitur) | 27             |
+| **Kodiċi CLI** | `/dashboard/cli-code`   | Għodod tal-ipprogrammar li tipponta lejn OmniRoute (Klijent → CLI → OmniRoute → Fornitur) | 28             |
 | **Aġenti CLI** | `/dashboard/cli-agents` | Aġenti awtonomi li tipponta lejn OmniRoute (l-istess fluss, ambitu usa’)                  | 11             |
 | **Aġenti ACP** | `/dashboard/acp-agents` | CLIs li OmniRoute iniedi bħala backend permezz ta’ stdio/ACP (fluss bil-maqlub)           | ara r-reġistru |
 
@@ -146,7 +146,7 @@ wiċċ wieħed mingħajr l-oħrajn twassal biex is-sett tat-testijiet ifalli min
 
 ---
 
-## 1. Il-Katalgu tal-Kodiċi CLI (27 għodda)
+## 1. Il-Katalgu tal-Kodiċi CLI (28 għodda)
 
 L-għodod kollha li jidhru f’`/dashboard/cli-code`. Dawk b’`baseUrlSupport: none` huma kkonfigurati permezz ta’ MITM jew gwida manwali minflok URL bażi personalizzat:
 
@@ -173,6 +173,7 @@ L-għodod kollha li jidhru f’`/dashboard/cli-code`. Dawk b’`baseUrlSupport: 
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -269,7 +270,7 @@ Għodod ġodda b’`configType: "custom"` għandhom rotot dedikati tal-API għas
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legat)                                             |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primarju + sinkronizzazzjoni mal-legat `~/.deepseek`) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                             |
-| `POST /api/cli-tools/pi-settings`           | Aġent tal-ipprogrammar Pi                                                         |
+| `POST /api/cli-tools/pi-settings`           | Aġent tal-ipprogrammar Pi (`~/.pi/agent/models.json`, `providers.omniroute`)      |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                             |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + key dedikata f’`.env`)                       |
 
@@ -375,7 +376,7 @@ pip install aider-chat
 cargo install smelt  # Ibbażat fuq Rust
 
 # Aġent tal-ipprogrammar Pi
-# ara https://github.com/zechnerj/pi-coding-agent għall-installazzjoni
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # ara https://github.com/1jehuang/jcode għall-installazzjoni
@@ -488,6 +489,38 @@ EOF
 
 > Uża `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > biex tibgħat varjanti tal-ħsieb.
+
+---
+
+#### Pi Coding Agent
+
+Installa l-pakkett uffiċjali Pi Coding Agent b'`npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi jaqra fornituri personalizzati minn `~/.pi/agent/models.json`; issettja `PI_CODING_AGENT_DIR` għal mogħdija assoluta (jew mogħdija bil-prefiss `~`) biex tmexxi d-direttorju kollu tal-aġent. Id-dashboard isegwi dik il-bidla. Pi ma jiskoprix mudelli minn endpoints personalizzati, għalhekk OmniRoute jikteb il-mudell magħżul f'`models[]` bl-API `openai-completions` ta' Pi u l-endpoint `/v1` ta' OmniRoute kompatibbli ma' OpenAI.
+
+F'**CLI Tools → Pi**, agħżel endpoint, ċavetta API u mudell, irrevedi l-preview tal-fornitur, imbagħad applika. Il-preview huwa framment ta' fornitur: għaqqad `providers.omniroute` fil-`models.json` eżistenti tiegħek meta tikkonfigura Pi manwalment sabiex fornituri u settings oħra jibqgħu intatti.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi jerġa' jgħabbi `models.json` meta tiftaħ `/model`. Ittestja r-route konfigurata bl-ID tal-fornitur u l-ID tal-mudell li għażilt:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Referenzi: [Mudelli Pi u fornituri personalizzati](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Varjabbli tal-ambjent Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Struzzjonijiet tal-installazzjoni Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

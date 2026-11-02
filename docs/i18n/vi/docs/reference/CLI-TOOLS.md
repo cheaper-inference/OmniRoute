@@ -10,7 +10,7 @@ OmniRoute tích hợp với ba loại công cụ CLI, được phân bổ trên 
 
 | Trang          | Tuyến                   | Khái niệm                                                                                | Số lượng     |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------------- | ------------ |
-| **CLI Code's** | `/dashboard/cli-code`   | Các công cụ lập trình mà bạn trỏ đến OmniRoute (Client → CLI → OmniRoute → Nhà cung cấp) | 27           |
+| **CLI Code's** | `/dashboard/cli-code`   | Các công cụ lập trình mà bạn trỏ đến OmniRoute (Client → CLI → OmniRoute → Nhà cung cấp) | 28           |
 | **CLI Agents** | `/dashboard/cli-agents` | Các tác nhân tự động mà bạn trỏ đến OmniRoute (cùng luồng, phạm vi rộng hơn)             | 11           |
 | **ACP Agents** | `/dashboard/acp-agents` | Các CLI được OmniRoute khởi chạy làm backend qua stdio/ACP (luồng ngược)                 | xem registry |
 
@@ -146,7 +146,7 @@ một bề mặt mà không được thêm vào các bề mặt khác sẽ khi�
 
 ---
 
-## 1. Danh mục CLI Code (27 công cụ)
+## 1. Danh mục CLI Code (28 công cụ)
 
 Tất cả các công cụ xuất hiện trong `/dashboard/cli-code`. Những công cụ có `baseUrlSupport: none` được kết nối thông qua MITM hoặc hướng dẫn thủ công thay vì URL cơ sở tùy chỉnh:
 
@@ -173,6 +173,7 @@ Tất cả các công cụ xuất hiện trong `/dashboard/cli-code`. Những c�
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -262,16 +263,16 @@ interface ToolBatchStatus {
 
 Các công cụ mới có `configType: "custom"` sử dụng các route API cài đặt chuyên biệt:
 
-| Route                                       | Công cụ                                                       |
-| ------------------------------------------- | ------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                       |
-| `POST /api/cli-tools/jcode-settings`        | jcode (cờ --base-url)                                         |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, cũ)                            |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, chính + đồng bộ `~/.deepseek` cũ) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                         |
-| `POST /api/cli-tools/pi-settings`           | Tác nhân lập trình Pi                                         |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)         |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + khóa `.env` chuyên biệt) |
+| Route                                       | Công cụ                                                                  |
+| ------------------------------------------- | ------------------------------------------------------------------------ |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                  |
+| `POST /api/cli-tools/jcode-settings`        | jcode (cờ --base-url)                                                    |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, cũ)                                       |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, chính + đồng bộ `~/.deepseek` cũ)            |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                    |
+| `POST /api/cli-tools/pi-settings`           | Tác nhân lập trình Pi (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                    |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + khóa `.env` chuyên biệt)            |
 
 Tất cả các route sử dụng `sanitizeErrorMessage()` cho phản hồi lỗi (Quy tắc cứng #12).
 
@@ -375,7 +376,7 @@ pip install aider-chat
 cargo install smelt  # Dựa trên Rust
 
 # Tác nhân lập trình Pi
-# xem https://github.com/zechnerj/pi-coding-agent để biết cách cài đặt
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # xem https://github.com/1jehuang/jcode để biết cách cài đặt
@@ -488,6 +489,40 @@ EOF
 
 > Sử dụng `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > để gửi các biến thể suy luận.
+
+---
+
+#### Pi Coding Agent
+
+Cài gói Pi Coding Agent chính thức bằng `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi đọc các nhà cung cấp tùy chỉnh từ `~/.pi/agent/models.json`; đặt `PI_CODING_AGENT_DIR` thành một đường dẫn tuyệt đối hoặc đường dẫn bắt đầu bằng `~` để chuyển toàn bộ thư mục agent. Bảng điều khiển cũng tuân theo giá trị ghi đè này. Pi không khám phá mô hình từ điểm cuối tùy chỉnh, nên OmniRoute ghi mô hình đã chọn vào `models[]` bằng API `openai-completions` của Pi và điểm cuối `/v1` tương thích OpenAI của OmniRoute.
+
+Trong **Công cụ CLI → Pi**, chọn điểm cuối, API key và mô hình, xem bản xem trước nhà cung cấp rồi áp dụng. Bản xem trước là một mảnh cấu hình nhà cung cấp: khi cấu hình Pi thủ công, hợp nhất `providers.omniroute` vào `models.json` hiện có để giữ nguyên các nhà cung cấp và thiết lập khác.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi nạp lại `models.json` khi bạn mở `/model`. Kiểm tra tuyến đã cấu hình bằng ID nhà cung cấp và ID mô hình bạn đã chọn:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Tham khảo: [Mô hình và nhà cung cấp tùy chỉnh của Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md),
+[Biến môi trường của Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md),
+[Hướng dẫn cài Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

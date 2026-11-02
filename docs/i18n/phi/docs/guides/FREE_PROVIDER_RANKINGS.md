@@ -13,7 +13,7 @@
 
 ## Ano Ito
 
-Ang OmniRoute ay nagre-rehistro ng 377 provider, kabilang ang 155 catalog entry na minarkahang **libre/walang-auth**
+Ang OmniRoute ay nagre-rehistro ng 380 provider, kabilang ang 155 catalog entry na minarkahang **libre/walang-auth**
 (walang-auth,
 free-tier OAuth, o free-tier API key — tingnan ang
 [Gabay sa Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) at ang buong

@@ -42,6 +42,10 @@ päätepisteeseen ympäristömuuttujilla (sillä ei ole `--base-url`-valitsinta)
 
 > Ympäristömuuttujat luetaan **vain kerran käynnistyksen yhteydessä** — käynnistä Claude Code uudelleen niiden muuttamisen jälkeen.
 
+Jos haluat käyttää vaihtuvaa tunnistetta kiinteän merkkijonon sijaan, määritä `~/.claude/settings.json`-tiedoston `apiKeyHelper` komennoksi, joka tulostaa nykyisen tunnisteen stdoutiin. Claude Code säilyttää sen tulosteen välimuistissa oletusarvoisesti viisi minuuttia (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ohittaa tämän ajan) ja lähettää arvon sekä `Authorization: Bearer`- että `x-api-key`-otsakkeessa. Skripti saa tulostaa vain tunnisteen; ylimääräinen esittelyteksti aiheuttaa apuohjelman epäonnistumisen versiossa v2.1.227+.
+
+Entra ID SSO toimii näin: `scripts/cli/omniroute-sso.mjs token` tulostaa lyhytikäisen Entra-käyttöoikeustunnuksen, jonka OmniRoute tarkistaa API-avaimen sijaan. Katso [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` asettaa nämä kaikki puolestasi: se selvittää perus-URL-osoitteen ja tunnuksen
 aktiivisesta kontekstista (joten `omniroute connect <vps>` ja sen jälkeen `omniroute launch`
 toimii suoraan), tarkistaa palvelimen kunnon ja suorittaa `claude`-komennon.

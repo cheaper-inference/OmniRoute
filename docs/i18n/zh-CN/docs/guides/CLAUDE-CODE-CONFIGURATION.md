@@ -42,6 +42,10 @@ Claude Code 使用 **Anthropic Messages API**，并通过环境变量指向自�
 
 > 环境变量仅在启动时读取**一次**——更改后请重启 Claude Code。
 
+若凭据会定期轮换，而不是固定字符串，请将 `~/.claude/settings.json` 中的 `apiKeyHelper` 设为向 stdout 输出当前凭据的命令。Claude Code 默认缓存其输出五分钟（可通过 `CLAUDE_CODE_API_KEY_HELPER_TTL_MS` 覆盖），并同时在 `Authorization: Bearer` 和 `x-api-key` 中发送该值。脚本只能输出凭据，不能附带其他内容；在 v2.1.227+ 中，额外的欢迎信息会导致辅助程序失败。
+
+Entra ID SSO 正是这样工作的：`scripts/cli/omniroute-sso.mjs token` 输出短期有效的 Entra 访问令牌，OmniRoute 验证该令牌而非 API 密钥。参见 [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md)。
+
 `omniroute launch` 会为你设置所有这些变量：它会从活动上下文解析基础 URL 和令牌
 （因此先执行 `omniroute connect <vps>`，再执行 `omniroute launch`
 即可直接使用），对服务器执行健康检查，然后执行 `claude`。

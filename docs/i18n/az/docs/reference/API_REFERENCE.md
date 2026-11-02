@@ -29,6 +29,7 @@ OpenAI ilə uyğun protokol və provayder imkanları matrisi haqqında ətraflı
 - [WebSocket axını](#websocket-streaming)
 - [Kvotalar və problemlərin bildirilməsi](#quotas--issues-reporting)
 - [Semantik keş](#semantic-cache)
+- [CLIProxyAPI idarəetmə uyğunluğu](#cliproxyapi-management-compatibility)
 - [İdarəetmə paneli və idarəetmə](#dashboard--management)
 - [Kombinasiyaların idarə edilməsi](#combo-management)
 - [Vebhuklar](#webhooks)
@@ -933,6 +934,18 @@ ChatGPT `codex.rate_limits` + `response.created` qaytarır və tamamlamanı axı
 
 **Autentifikasiya:** Bearer API açarı (`isAuthenticated`).
 
+### Kvota sessiyasının bərpası (ixtiyari)
+
+Son kvota xətası ilə uğursuz olan axınsız `POST /v1/chat/completions` və ya `POST /v1/responses` sorğusu (gövdəsi kvotanın və ya kreditin tükəndiyini bildirən `402`/`429`/`503`) xəta qaytarmaq əvəzinə saxlanıb sonradan təkrarlana bilər. Çağıran bunu hər sorğu üçün üç başlıqla aktiv edir:
+
+| Başlıq                       | Dəyər                                     |
+| ---------------------------- | ----------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                    |
+| `x-omniroute-session`        | sessiya ID-si, `[A-Za-z0-9._:-]{1,128}`   |
+| `x-omniroute-recovery-turn`  | sessiyada unikal gediş ID-si (eyni qayda) |
+
+Yalnız alətsiz, alət tarixçəsiz, `previous_response_id` və `x-omniroute-connection` sabitləməsi olmayan `stream: false` gedişləri uyğundur; `STORAGE_ENCRYPTION_KEY` də təyin edilməlidir (sorğu ən çox 24 h şifrəli saxlanılır). Cavab `recovery.poll` ilə `202` olur; `GET /v1/quota-recoveries/{id}` ilə yoxlayın (gözləyərkən `202`, tamamlananda bərpa edilmiş gövdə ilə `200`) və ya `DELETE` ilə ləğv edin. Biletlər yalnız onları yaradan API açarına görünür. Nəticəsi qeyri-müəyyən təkrar göndərilmə iki dəfə göndərilmək əvəzinə `needs_confirmation` ilə bitir. Mənbə: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Özünəxidmət istifadəsi (`/api/usage/om-usage`)
@@ -1101,6 +1114,28 @@ Açar yaradılarkən (`POST /api/keys`) təyin edin və ya yeniləyin (`PATCH /a
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI idarəetmə uyğunluğu
+
+OmniRoute istifadə panellərinin Claude və Codex abunə hədlərini oxumaq üçün çağırdığı üç [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) idarəetmə son nöqtəsinə cavab verir (məsələn, T3 Code-un `cliproxy` istifadə həddi mənbəyi). Müştərinin baza URL-ini OmniRoute-a yönəldin və `manage` səlahiyyətli API açarını idarəetmə açarı kimi istifadə edin. Marşrutlar `/v0/management/*` və `/api/v0/management/*` ünvanlarında təqdim olunur.
+
+| Metod | Yol                          | Təsvir                                                                                                                                         |
+| ----- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/v0/management/auth-files`  | Claude və Codex OAuth bağlantıları `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` formasında. Token yoxdur             |
+| POST  | `/v0/management/api-call`    | Gövdə `{ auth_index, method, url, header?, data? }`. Hesab tokeni ilə icazə siyahısındakı sorğunu göndərir və `{ status_code, body }` qaytarır |
+| POST  | `/v0/management/reset-quota` | Gövdə `{ auth_index }`. Bir hesabın bağlantı gözləməsini, model bloklamalarını və Codex-in sahə üzrə gözləmələrini silir                       |
+
+- `auth_index` OmniRoute bağlantı ID-sidir. `provider`, `claude` və ya `codex` olur (yalnız OAuth bağlantıları; `anthropic` API-açarı provayderi göstərilmir). Codex üçün `id_token.chatgpt_account_id` saxlanmış iş sahəsi ID-si, `plan_type` isə saxlanmış plandır.
+- `api-call` ümumi proksi deyil. Yalnız Claude `GET
+https://api.anthropic.com/api/oauth/usage` və Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` və `POST .../wham/rate-limit-reset-credits/consume` qəbul edir; hər biri yalnız uyğun provayderin hesabına aiddir. Digər hər şey yuxarı axına müraciət etmədən `403` qaytarır. Çağıranın `Authorization` başlığı (`$TOKEN$` yer tutucusu daxil) nəzərə alınmır: OmniRoute bağlantının giriş tokenini əlavə edir, müddəti bitməyə yaxındırsa əvvəl yeniləyir və yalnız icazəli başlıqları ötürür (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` yoxdursa, saxlanmış iş sahəsi ID-si standartdır. İlk yuxarı axın cavabı `401` olarsa, bir dəfə yeniləyir və yalnız giriş tokeni dəyişəndə təkrar edir. Hər yuxarı axın cəhdi 15 saniyədən sonra vaxtı bitir və bağlantının proksisini istifadə edir.
+- `reset-quota` son vəziyyətlərə (banned, expired, credits_exhausted) toxunmur. Naməlum `auth_index`, `404` qaytarır.
+
+**Autentifikasiya:** panel sessiyası və ya `manage` səlahiyyətli API açarı, giriş söndürülsə də tələb olunur (yollar `ALWAYS_PROTECTED_API_PATHS` daxilindədir). Yalnız nəticə çıxarma açarları `403` alır. Mənbə: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

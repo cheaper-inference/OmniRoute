@@ -315,12 +315,12 @@ muutvale haldusmarsruudile `read`-juurdepääsutõendi, saavad HTTP 403 vastuse
 Seda õigustaset kontrollib `scopeSatisfies`. See ei kasuta MCP tabelit ning MCP
 sobitaja ei kasuta seda kontrolli.
 
-| Nimeruum                | Mandaat                                                               | Kontrollija                     | Edukas kontroll lubab                                                   |
-| :---------------------- | :-------------------------------------------------------------------- | :------------------------------ | :---------------------------------------------------------------------- |
-| API-võtme haldus        | `api_keys.scopes`                                                     | `hasManageScope`                | Selle Bearer-võtme halduse REST-liidese kasutamise                      |
-| API-võtme lisaõigus     | sama massiiv, üks täpselt kattuv string                               | allpool nimetatud abifunktsioon | Ainult selle ühe funktsiooni kasutamise                                 |
-| MCP tööriistade õigused | sama massiiv, muul juhul MCP `_meta`, seejärel `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                  | Selle tööriista kasutamise, kui jõustamine on sisse lülitatud           |
-| Juurdepääsutõend        | `oma_live_…`                                                          | `scopeSatisfies`                | Haldusmarsruudi kasutamise, mille meetod ja tee nõuavad seda õigustaset |
+| Nimeruum                | Mandaat                                                                         | Kontrollija                     | Edukas kontroll lubab                                                   |
+| :---------------------- | :------------------------------------------------------------------------------ | :------------------------------ | :---------------------------------------------------------------------- |
+| API-võtme haldus        | `api_keys.scopes`                                                               | `hasManageScope`                | Selle Bearer-võtme halduse REST-liidese kasutamise                      |
+| API-võtme lisaõigus     | sama massiiv, üks täpselt kattuv string                                         | allpool nimetatud abifunktsioon | Ainult selle ühe funktsiooni kasutamise                                 |
+| MCP tööriistade õigused | sama massiiv, muidu MCP `_meta` (ainult HTTP/SSE), muidu `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                  | Selle tööriista kasutamise, kui jõustamine on sisse lülitatud           |
+| Juurdepääsutõend        | `oma_live_…`                                                                    | `scopeSatisfies`                | Haldusmarsruudi kasutamise, mille meetod ja tee nõuavad seda õigustaset |
 
 Iga mandaadi väljastamist käsitletakse jaotises
 [Halduse autentimine](../guides/MANAGEMENT-AUTH.md).
@@ -368,8 +368,7 @@ Jõustamine on välja lülitatud, kui `OMNIROUTE_MCP_ENFORCE_SCOPES=true` pole m
 on `false`). Kui see on välja lülitatud, lubab `evaluateToolScopes` kutse ja jätab
 kataloogi kontrollimata. Kui see on sisse lülitatud, kasutab HTTP Bearer-võtme
 `api_keys.scopes` väärtust atribuudina `authInfo` (vt [HTTP õiguste sidumine võtme kaupa](#per-key-http-scope-binding-7895)).
-Kui võtme õigusi ei õnnestu tuvastada, kasutatakse antud õiguste hulgana esmalt MCP `_meta` väärtust ja seejärel
-`OMNIROUTE_MCP_SCOPES` väärtust.
+Kui ühegi võtme ulatused ei lahendu, kandub antud ulatuste komplekt edasi MCP `_meta`-le (arvestatakse ainult HTTP/SSE kutsumistele HTTP autentimiskontekstis; stdio kutsumise `_meta` jäetakse arvestamata, sest selle kontrollib klient ja see ei kanna kutsumisega seotud identiteeti), seejärel `OMNIROUTE_MCP_SCOPES`-le.
 
 #### Juurdepääsutõendi õigused
 
@@ -469,9 +468,7 @@ olev `resolveCallerScopeContext()` eelistas juba `authInfo` väärtust `_meta` j
 `OMNIROUTE_MCP_SCOPES` keskkonnamuutuja varuvariandile — see muudatus täidab üksnes esimese,
 kõrgeima prioriteediga allika, mis varem jäi HTTP kaudu täitmata. Kui ühtegi API-võtit ei
 lahendata (päis puudub või võti on kehtetu), jääb `authInfo` väärtuseks `undefined` ning
-lahendamine jätkub olemasoleva `meta`/keskkonnamuutuja ahela kaudu muutmata kujul. stdio-l
-puudub kutsujapõhine identiteet (vt `mcpCallerIdentity.ts`) ja muudatus seda ei mõjuta — see
-jääb kasutama `_meta`/keskkonnamuutuja varuahelat.
+lahendamine jätkub olemasoleva `meta`/keskkonnamuutuja ahela kaudu muutmata kujul. stdio-l pole kutsujapõhist identiteeti (vt `mcpCallerIdentity.ts`) ja see ei ole võtmepõhise sidumise mõjul — see jätab `_meta` etapi vahele (`_meta`-d arvestatakse ainult HTTP autentimiskontekstis, #15159) ja lahendab scope ainult `OMNIROUTE_MCP_SCOPES` keskkonnavõtme alusel.
 
 **Kitsaste skoopidega HTTP/SSE-kutsujatele jõustatakse kontroll olenemata
 `OMNIROUTE_MCP_ENFORCE_SCOPES` väärtusest.** See, et `OMNIROUTE_MCP_ENFORCE_SCOPES`

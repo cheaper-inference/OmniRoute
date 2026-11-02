@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Bezplatná brána AI
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikdy nepřestávejte programovat. Každý nástroj AI → 377 poskytovatelů — více než 150 zdarma — prostřednictvím jediného koncového bodu. Claude Code, Codex, Cursor, Cline, Copilot a Antigravity s přístupem ke Claude / GPT / Gemini ZDARMA a automatickým záložním přepínáním. Kombinovaná komprese RTK + Caveman ušetří 15–95 % tokenů (v průměru ~89 %) — nikdy nenarazíte na limity. 377 poskytovatelů AI · více než 150 bezplatných tarifů · ~1,62 mld. tokenů zdarma měsíčně · 20 strategií směrování · začněte za 0 $."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikdy nepřestávejte programovat. Každý nástroj AI → 380 poskytovatelů — více než 150 zdarma — prostřednictvím jediného koncového bodu. Claude Code, Codex, Cursor, Cline, Copilot a Antigravity s přístupem ke Claude / GPT / Gemini ZDARMA a automatickým záložním přepínáním. Kombinovaná komprese RTK + Caveman ušetří 15–95 % tokenů (v průměru ~89 %) — nikdy nenarazíte na limity. 380 poskytovatelů AI · více než 150 bezplatných tarifů · ~1,62 mld. tokenů zdarma měsíčně · 20 strategií směrování · začněte za 0 $."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Použijte vlastní účty u poskytovatelů.** Jde o odhadovaný souhrn samostatně dostupných bezplatných úrovní třetích stran, nikoli o příděl tokenů od OmniRoute. Zaregistrujte se, v případě potřeby získejte přihlašovací údaje a připojte poskytovatele, které můžete používat; každý poskytovatel určuje vlastní limity, dostupnost a podmínky.
 >
-> Ruční kombinování bezplatných úrovní je obtížné — desítky SDK, desítky limitů požadavků a žádný přehled o tom, kolik skutečně máte k dispozici. OmniRoute katalogizuje **484 položek bezplatných úrovní napříč 34 klíči opakovaných fondů** a vypočítává uváděný počet tokenů ze **17 fondů se zveřejněným kladným měsíčním rozpočtem a pěti limitů Groq pro jednotlivé modely**, přičemž odstraňuje duplicity podle sdíleného fondu. Kvóty, které se zpřístupní až po regionálním ověření identity (aktuálně: ModelScope), jsou uvedeny samostatně jako +~6 mil. za regionálním ověřením identity a nikdy se nezapočítávají do hlavního údaje. Výsledek zůstává viditelný na řídicím panelu (`/dashboard/free-tiers`).
+> Ruční kombinování bezplatných úrovní je obtížné — desítky SDK, desítky limitů požadavků a žádný přehled o tom, kolik skutečně máte k dispozici. OmniRoute katalogizuje **485 položek bezplatných úrovní napříč 34 klíči opakovaných fondů** a vypočítává uváděný počet tokenů ze **17 fondů se zveřejněným kladným měsíčním rozpočtem a pěti limitů Groq pro jednotlivé modely**, přičemž odstraňuje duplicity podle sdíleného fondu. Kvóty, které se zpřístupní až po regionálním ověření identity (aktuálně: ModelScope), jsou uvedeny samostatně jako +~6 mil. za regionálním ověřením identity a nikdy se nezapočítávají do hlavního údaje. Výsledek zůstává viditelný na řídicím panelu (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Karta rozpočtu bezplatných úrovní OmniRoute: stabilně ~1,62 mld. bezplatných tokenů měsíčně, až ~2,22 mld. v prvním měsíci díky registračním kreditům, z 34 zdokumentovaných klíčů opakovaných fondů pokrývajících 484 katalogizovaných položek bezplatných úrovní za jedním koncovým bodem. Poctivý výpočet s odstraněním duplicit fondů — každý sdílený fond je započítán pouze jednou, včetně 17 opakovaných fondů se zveřejněným kladným měsíčním rozpočtem tokenů a pěti limitů Groq pro jednotlivé modely; 12 poskytovatelů je v katalogu rizik smluvních podmínek označeno jako nevhodných, abyste se mohli sami rozhodnout. Lišta rozpočtu zahrnuje Mistral 1 mld., Nara 210 mil., LLM7 150 mil., xKiro 150 mil., Groq 30 mil. (pět limitů pro jednotlivé modely) a menší fondy, dále registrační kredity pro první měsíc a trvale bezplatné poskytovatele bez limitu tokenů, kteří jsou uvedeni samostatně, aby nikdy nenavyšovali hlavní údaj. Aktuální využití a zbývající množství na /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Karta rozpočtu bezplatných úrovní OmniRoute: stabilně ~1,62 mld. bezplatných tokenů měsíčně, až ~2,22 mld. v prvním měsíci díky registračním kreditům, z 34 zdokumentovaných klíčů opakovaných fondů pokrývajících 485 katalogizovaných položek bezplatných úrovní za jedním koncovým bodem. Poctivý výpočet s odstraněním duplicit fondů — každý sdílený fond je započítán pouze jednou, včetně 17 opakovaných fondů se zveřejněným kladným měsíčním rozpočtem tokenů a pěti limitů Groq pro jednotlivé modely; 12 poskytovatelů je v katalogu rizik smluvních podmínek označeno jako nevhodných, abyste se mohli sami rozhodnout. Lišta rozpočtu zahrnuje Mistral 1 mld., Nara 210 mil., LLM7 150 mil., xKiro 150 mil., Groq 30 mil. (pět limitů pro jednotlivé modely) a menší fondy, dále registrační kredity pro první měsíc a trvale bezplatné poskytovatele bez limitu tokenů, kteří jsou uvedeni samostatně, aby nikdy nenavyšovali hlavní údaj. Aktuální využití a zbývající množství na /dashboard/free-tiers."/>
 
 > Animovaný souhrn živé stránky `/dashboard/free-tiers`. Úplná metodika (odstranění duplicit fondů, úrovně kreditů, podmínky poskytovatelů): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -71,7 +71,7 @@
 
 |                                   |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Poskytovatelé                  |           352           |   **358**   |          377          |
+| 🌐 Poskytovatelé                  |           352           |   **358**   |          380          |
 | 🧠 Unikátní ID chatovacích modelů |          1320           |  **1374**   |         1475          |
 | 🖼️ Přemostění modalit             | 🆕 obraz + zvuk + video |      ✓      |           ✓           |
 | 📡 Bezplatný katalog Radar        |  🆕 volitelné zapnutí   |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Funkce</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinace</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Poskytovatelé</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Poskytovatelé</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI a MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Příslib — jeden koncový bod a 377 poskytovatelů. Automatické přepnutí při selhání zachovává směrování, dokud je k dispozici jiný funkční cíl. Šest pilířů: odolné přepínání při selhání napříč 377 poskytovateli · až 95% úspora tokenů u vhodných pracovních zátěží · počáteční náklady 0 $ díky více než 150 bezplatným úrovním a 52 opakovaně dostupným poskytovatelům či poskytovatelům bez klíče, kteří jsou trvale zdarma · 37 integrací CLI/agentů prostřednictvím jediné konfigurace · kompatibilita s API OpenAI, Claude, Gemini a Responses na /v1 · produkční řízení včetně jističů, maskování TLS, MCP se 110 nástroji, A2A, paměti, ochranných mechanismů, vyhodnocování a více než 56 000 deklarací statických testů ve více než 7 800 sledovaných testovacích souborech."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Příslib — jeden koncový bod a 380 poskytovatelů. Automatické přepnutí při selhání zachovává směrování, dokud je k dispozici jiný funkční cíl. Šest pilířů: odolné přepínání při selhání napříč 380 poskytovateli · až 95% úspora tokenů u vhodných pracovních zátěží · počáteční náklady 0 $ díky více než 150 bezplatným úrovním a 52 opakovaně dostupným poskytovatelům či poskytovatelům bez klíče, kteří jsou trvale zdarma · 39 integrací CLI/agentů prostřednictvím jediné konfigurace · kompatibilita s API OpenAI, Claude, Gemini a Responses na /v1 · produkční řízení včetně jističů, maskování TLS, MCP se 110 nástroji, A2A, paměti, ochranných mechanismů, vyhodnocování a více než 56 000 deklarací statických testů ve více než 7 800 sledovaných testovacích souborech."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Všech **20** strategií — libovolně je kombinujte v jednotlivých krocích k
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Čím OmniRoute vyniká — časově zařazený přehled funkcí ve srovnání s 9router, OpenRouter, CLIProxyAPI a LiteLLM napříč 13 možnostmi. OmniRoute: 377 poskytovatelů, více než 150 integrovaných bezplatných úrovní, 20 strategií směrování, komprese tokenů s 12 enginy, integrovaný server MCP se 110 nástroji, protokol agentů A2A, trvalá paměť, ochranné mechanismy, cloudoví agenti, skrytí otisku TLS, Desktop/Termux/PWA a uživatelské rozhraní v 67 lokalizacích. OmniRoute je licencován pod licencí MIT a lze jej hostovat svépomocí. Možnosti a počty konkurentů se mohou měnit; viz odkazovaná metodika."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Čím OmniRoute vyniká — časově zařazený přehled funkcí ve srovnání s 9router, OpenRouter, CLIProxyAPI a LiteLLM napříč 13 možnostmi. OmniRoute: 380 poskytovatelů, více než 150 integrovaných bezplatných úrovní, 20 strategií směrování, komprese tokenů s 12 enginy, integrovaný server MCP se 110 nástroji, protokol agentů A2A, trvalá paměť, ochranné mechanismy, cloudoví agenti, skrytí otisku TLS, Desktop/Termux/PWA a uživatelské rozhraní v 67 lokalizacích. OmniRoute je licencován pod licencí MIT a lze jej hostovat svépomocí. Možnosti a počty konkurentů se mohou měnit; viz odkazovaná metodika."/>
 
 <sub>📊 Kompletní metodika a podrobnosti jednotlivých funkcí ve srovnání s 9router, OpenRouter, CLIProxyAPI a LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -611,7 +611,7 @@ aktuálním katalogu najdete na **[radar.omniroute.online/planos](https://radar.
 - **🖼️ Nové endpointy** — `/v1/ocr` (Mistral OCR) a `/v1/audio/translations` (ve stylu Whisper) doplňují nabídku multimédií. → [Referenční příručka API](docs/reference/API_REFERENCE.md)
 - **🎨 Generování obrázků / videa / zvuku** — jedno API pro média: xAI Grok Imagine a video Novita AI, ComfyUI, Magnific, Adobe Firefly, Segmind a poskytovatelé syntézy řeči, jako je ElevenLabs. → [Referenční příručka API](docs/reference/API_REFERENCE.md)
 - **🌍 Nasazení a provoz** — `basePath` reverzní proxy, automatická detekce jazyka prohlížeče, sledování zařízení podle klíče, důvěryhodnost MITM bez oprávnění root, lokalizace zh-TW. → [Prostředí](docs/reference/ENVIRONMENT.md)
-- **🤝 Další poskytovatelé a agenti** — cloudoví agenti (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s prohlížečem + přihlášením OAuth, plnohodnotná karta Ollama, Claude Opus 5 a Sonnet 5, oficiální partnerství s Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… a aktualizovaný **katalog 377 poskytovatelů**. → [Poskytovatelé](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Další poskytovatelé a agenti** — cloudoví agenti (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s prohlížečem + přihlášením OAuth, plnohodnotná karta Ollama, Claude Opus 5 a Sonnet 5, oficiální partnerství s Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… a aktualizovaný **katalog 380 poskytovatelů**. → [Poskytovatelé](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparentnost směrování** — každá odpověď obsahuje hlavičku `X-OmniRoute-Decision` uvádějící strategii/poskytovatele/latenci, která ji obsloužila; nová kombinovaná strategie `cache-optimized` a faktor Auto-Combo `cacheAffinity` směrují opakované požadavky zpět na připojení, které uchovává prefix v mezipaměti, a endpoint `/v1/auto-combo/{channel}/candidates` pouze pro čtení zpřístupňuje aktuální fond kandidátů kanálu `auto/*`. → [Automatické kombinace](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokální výkon a infrastruktura** — lokální Redis na jedno kliknutí, nástroje pro nasazení relay na Cloudflare Workers / Deno Deploy, Bifrost a Mux jako spravované vestavěné služby. → [Vestavěné služby](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Součástí balení je také** — framework pro pluginy + tržiště, frameworky dovedností Omni/Agent/GitHub, integrace trezoru Obsidian (22 nástrojů MCP), rozhraní API Batch a Files kompatibilní s OpenAI, sémantická mezipaměť odpovědí, gamifikace s žebříčky, vyhledávání agentů ACP (15 vestavěných agentů), plánovaný export protokolů do BigQuery, paralelní distribuce do více modelů `auto/chaos`, propojení s botem Telegram, správce verzí přímo v aplikaci a žebříčky bezplatných poskytovatelů LMArena-ELO. → [Dokumentace](docs/README.md)
@@ -665,7 +665,7 @@ aktuálním katalogu najdete na **[radar.omniroute.online/planos](https://radar.
 <b>＋ funguje také s</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>jakýmkoli nástrojem kompatibilním s OpenAI</b>
 </div>
 
-<sub>📖 Nastavení pro každý z 38 nástrojů (27 nástrojů CLI Code + 11 agentů CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin pro OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Nastavení pro každý z 39 nástrojů (28 nástrojů CLI Code + 11 agentů CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin pro OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -695,11 +695,11 @@ uložení tajných údajů do historie shellu. → [Integrace CLI](docs/guides/C
 
 <div align="center">
 
-## 🌐 377 poskytovatelů AI — 153 označených v katalogu jako bezplatní
+## 🌐 380 poskytovatelů AI — 156 označených v katalogu jako bezplatní
 
 </div>
 
-> **377 registrovaných poskytovatelů** napříč kanonickými kolekcemi pro chat, média, vyhledávání, místní použití, cloudové agenty a systémy, včetně **153 poskytovatelů s metadaty pro vyhledávání `hasFree: true`**. Registr chatovacích modelů zahrnuje **239 poskytovatelů / 3 059 jedinečných dvojic poskytovatel–model / 1 475 nezpracovaných ID modelů**; samostatný katalog bezplatných limitů obsahuje **484 řádků pro jednotlivé modely**, **34 opakujících se sdílených limitů** a **52 poskytovatelů s opakovaně obnovovaným nebo bezklíčovým bezplatným přístupem bez časového omezení**. Tyto jmenovatele se záměrně liší; definice a výpočty s deduplikovanými sdílenými limity naleznete v dokumentech [Referenční příručka poskytovatelů](docs/reference/PROVIDER_REFERENCE.md) a [Bezplatné úrovně](docs/reference/FREE_TIERS.md).
+> **380 registrovaných poskytovatelů** napříč kanonickými kolekcemi pro chat, média, vyhledávání, místní použití, cloudové agenty a systémy, včetně **156 poskytovatelů s metadaty pro vyhledávání `hasFree: true`**. Registr chatovacích modelů zahrnuje **239 poskytovatelů / 3 059 jedinečných dvojic poskytovatel–model / 1 475 nezpracovaných ID modelů**; samostatný katalog bezplatných limitů obsahuje **485 řádků pro jednotlivé modely**, **34 opakujících se sdílených limitů** a **52 poskytovatelů s opakovaně obnovovaným nebo bezklíčovým bezplatným přístupem bez časového omezení**. Tyto jmenovatele se záměrně liší; definice a výpočty s deduplikovanými sdílenými limity naleznete v dokumentech [Referenční příručka poskytovatelů](docs/reference/PROVIDER_REFERENCE.md) a [Bezplatné úrovně](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1316,7 +1316,7 @@ Kanonické metriky k 2026-10-18: **1.976 unikátních videí** · **20.220.289 z
   <tr><td nowrap><b>Běhové prostředí</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> napříč <code>src/</code> a <code>open-sse/</code> (od v2.0 žádné <code>any</code> v jádře)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databáze</b></td><td>better-sqlite3 (SQLite, žurnálování WAL) + LowDB (starší formát JSON) — 147 doménových modulů, 213 migrací</td></tr>
+  <tr><td nowrap><b>Databáze</b></td><td>better-sqlite3 (SQLite, žurnálování WAL) + LowDB (starší formát JSON) — 147 doménových modulů, 219 migrací</td></tr>
   <tr><td nowrap><b>Paměť</b></td><td>Fulltextové vyhledávání SQLite FTS5 + vektorová vnoření kvantizovaná na int8, typovaný útlum</td></tr>
   <tr><td nowrap><b>Schémata</b></td><td>Zod 4 — validace vstupů a výstupů nástrojů MCP + kontrakty API</td></tr>
   <tr><td nowrap><b>Protokoly</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1379,7 +1379,7 @@ Kanonické metriky k 2026-10-18: **1.976 unikátních videí** · **20.220.289 z
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Průvodce odolností</a></b></td><td>Jističe, intervaly zklidnění, fronta, ochrana proti nárazovému souběhu požadavků, falšování TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Engine automatických kombinací</a></b></td><td>Hodnocení podle 16 faktorů, balíčky režimů, automatické zotavení</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Průvodce proxy</a></b></td><td>Tříúrovňový systém proxy, tržiště 1proxy, operace CRUD nad registrem</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Bezplatné úrovně</a></b></td><td>Konsolidovaný adresář: 34 zdokumentovaných opakujících se fondů / 484 katalogizovaných položek bezplatné úrovně</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Bezplatné úrovně</a></b></td><td>Konsolidovaný adresář: 34 zdokumentovaných opakujících se fondů / 485 katalogizovaných položek bezplatné úrovně</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galerie funkcí</a></b></td><td>Vizuální prohlídka dashboardu se snímky obrazovky</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentace zdrojového kódu</a></b></td><td>Průvodce zdrojovým kódem vhodný pro začátečníky</td></tr>
 </table>

@@ -149,9 +149,10 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 - **`publicPolicy`**（`policies/public.ts`）——一律回傳 `allow({ kind: "anonymous", id: "anonymous" })`。
 - **`clientApiPolicy`**（`policies/clientApi.ts`）——擷取 Bearer，並透過 `validateApiKey()` 驗證。只有在有效的 `REQUIRE_API_KEY` 功能旗標停用時，才會回退至匿名存取。有效旗標透過 `isRequireApiKeyEnabled()`（`DB 功能旗標覆寫 > process.env.REQUIRE_API_KEY > 預設值`）解析，因此儀表板功能旗標和環境變數會一致地管理 `/api/v1/*`、`/api/v1beta/*` 及其別名；解析器失敗時會採取拒絕存取的安全預設。允許具有儀表板工作階段的請求存取用戶端 API 路由（包括儀表板模型目錄所使用的 `/api/v1/models`）。
+  啟用 Entra ID SSO 後，結構符合 Entra 權杖特徵的 Bearer（三段 base64url、`RS*` 演算法、`kid`）會在 `validateApiKey()` **之前**由 SSO 分支處理，而該分支的判定即為最終結果，絕不會繼續進入 API 金鑰路徑或降級為匿名存取的分支。因此，身分識別提供者故障不會導致存取權限開放。靜態 API 金鑰不受影響。請參閱 [Entra ID SSO](../security/ENTRA_SSO.md)。
 - **`managementPolicy`**（`policies/management.ts`）——接受儀表板工作階段、內部模型同步請求（比對 `/api/providers/[name]/(sync-models|models)`），或在 `isAuthRequired()` 回傳 false 時完全略過驗證。當存在 Bearer 權杖但無效時回傳 403（`AUTH_001`），否則回傳 401。此原則也會在任何驗證分支之前強制執行路由防護層級（LOCAL_ONLY / ALWAYS_PROTECTED）——請參閱[路由防護層級](../security/ROUTE_GUARD_TIERS.md)。`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` 中的 LOCAL_ONLY 路徑（目前為 `/api/mcp/`），可在 Bearer 金鑰具有 `manage` 範圍時從非迴路位址存取；無論範圍為何，所有其他 LOCAL_ONLY 路徑仍嚴格限制為僅能從迴路位址存取。
 
-成功的原則會回傳 `AuthSubject`，其 `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`。下游處理常式可透過 `src/server/authz/assertAuth.ts` 中的 `assertAuth(request, "CLIENT_API")` 讀取該主體，而無須重新執行驗證邏輯。
+成功的原則會回傳 `AuthSubject`，其 `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`。下游處理常式可透過 `src/server/authz/assertAuth.ts` 中的 `assertAuth(request, "CLIENT_API")` 讀取該主體，而無須重新執行驗證邏輯。
 
 ## 公開路由清單
 
@@ -307,8 +308,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 對於已驗證的請求，上游（處理常式端）的請求標頭還會包含：
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<末 4 碼> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<末 4 碼> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     （選用）
 x-omniroute-auth-scopes:    以逗號分隔的清單
 ```

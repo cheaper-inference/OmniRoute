@@ -165,9 +165,10 @@ Setiap kelas laluan mempunyai dasar dalam `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — sentiasa mengembalikan `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — mengekstrak Bearer dan mengesahkannya melalui `validateApiKey()`. Hanya beralih kepada akses tanpa nama apabila bendera ciri `REQUIRE_API_KEY` yang berkuat kuasa dinyahdayakan. Bendera yang berkuat kuasa ditentukan melalui `isRequireApiKeyEnabled()` (`penggantian bendera ciri DB > process.env.REQUIRE_API_KEY > lalai`) supaya Bendera Ciri Papan Pemuka dan pemboleh ubah persekitaran mengawal `/api/v1/*`, `/api/v1beta/*`, serta alias secara konsisten; kegagalan penentu akan ditutup secara selamat. Membenarkan permintaan sesi papan pemuka pada laluan API klien (termasuk `/api/v1/models`, yang digunakan oleh katalog model papan pemuka).
+  Apabila Entra ID SSO diaktifkan, Bearer yang mempunyai struktur token Entra (tiga segmen base64url, algoritma `RS*`, `kid`) dikendalikan oleh cabang SSO **sebelum** `validateApiKey()`, dan keputusannya adalah muktamad. Token itu tidak sekali-kali diteruskan ke laluan kunci API atau cabang penurunan kepada tanpa nama, supaya gangguan penyedia identiti tidak boleh bertukar menjadi akses terbuka. Kunci API statik tidak terjejas. Lihat [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — menerima sesi papan pemuka, permintaan penyegerakan model dalaman (dipadankan dengan `/api/providers/[name]/(sync-models|models)`), atau dilangkau sepenuhnya jika `isAuthRequired()` mengembalikan false. Mengembalikan 403 (`AUTH_001`) apabila token Bearer disertakan tetapi tidak sah, dan 401 jika tidak. Ia juga menguatkuasakan peringkat pengadang laluan (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum mana-mana cabang pengesahan — lihat [Peringkat Pengadang Laluan](../security/ROUTE_GUARD_TIERS.md). Laluan LOCAL_ONLY dalam `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (pada masa ini: `/api/mcp/`) boleh dicapai dari bukan gelung balik apabila kunci Bearer mempunyai skop `manage`; semua laluan LOCAL_ONLY yang lain kekal terhad kepada gelung balik tanpa mengira skop.
 
-Dasar yang berjaya mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Pengendali hiliran boleh membacanya melalui `assertAuth(request, "CLIENT_API")` dalam `src/server/authz/assertAuth.ts` dan bukannya menjalankan semula logik pengesahan.
+Dasar yang berjaya mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Pengendali hiliran boleh membacanya melalui `assertAuth(request, "CLIENT_API")` dalam `src/server/authz/assertAuth.ts` dan bukannya menjalankan semula logik pengesahan.
 
 ## Senarai Laluan Awam
 
@@ -325,8 +326,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Untuk permintaan yang disahkan, pengepala permintaan huluan (pada bahagian pengendali) turut merangkumi:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<4-aksara-terakhir> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<4-aksara-terakhir> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (pilihan)
 x-omniroute-auth-scopes:    senarai dipisahkan koma
 ```

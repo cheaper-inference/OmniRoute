@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Bezpłatna brama AI
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Koduj bez przerw. Każde narzędzie AI → 377 dostawców — ponad 150 bezpłatnych — za pośrednictwem jednego punktu końcowego. Claude Code, Codex, Cursor, Cline, Copilot i Antigravity z BEZPŁATNYM dostępem do Claude / GPT / Gemini oraz automatycznym przełączaniem awaryjnym. Łączona kompresja RTK + Caveman oszczędza 15–95% tokenów (średnio ~89%) — koniec z przekraczaniem limitów. 377 dostawców AI · ponad 150 bezpłatnych planów · ~1,62 mld bezpłatnych tokenów/mies. · 20 strategii routingu · koszt początkowy: 0 USD."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Koduj bez przerw. Każde narzędzie AI → 380 dostawców — ponad 150 bezpłatnych — za pośrednictwem jednego punktu końcowego. Claude Code, Codex, Cursor, Cline, Copilot i Antigravity z BEZPŁATNYM dostępem do Claude / GPT / Gemini oraz automatycznym przełączaniem awaryjnym. Łączona kompresja RTK + Caveman oszczędza 15–95% tokenów (średnio ~89%) — koniec z przekraczaniem limitów. 380 dostawców AI · ponad 150 bezpłatnych planów · ~1,62 mld bezpłatnych tokenów/mies. · 20 strategii routingu · koszt początkowy: 0 USD."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Korzystaj z własnych kont u dostawców.** Jest to szacunkowa łączna wartość osobno dostępnych bezpłatnych planów zewnętrznych dostawców, a nie pula tokenów przyznawana przez OmniRoute. Zarejestruj się, uzyskaj dane uwierzytelniające tam, gdzie są wymagane, i połącz dostawców, z których możesz korzystać; każdy dostawca samodzielnie określa swoje limity, dostępność i warunki.
 >
-> Ręczne łączenie bezpłatnych planów jest uciążliwe — dziesiątki zestawów SDK, dziesiątki limitów szybkości i brak wiedzy o tym, ile faktycznie masz do dyspozycji. OmniRoute kataloguje **484 pozycje bezpłatnych planów w 34 cyklicznych kluczach pul** i oblicza podaną liczbę tokenów na podstawie **17 pul z opublikowanym dodatnim budżetem miesięcznym oraz pięciu limitów Groq dla poszczególnych modeli**, eliminując duplikaty wynikające ze współdzielonych pul. Limity dostępne dopiero po regionalnej weryfikacji tożsamości (obecnie: ModelScope) są prezentowane osobno jako +~6 mln za regionalną weryfikacją tożsamości i nigdy nie są wliczane do wartości nagłówkowej. Wynik pozostaje widoczny w panelu (`/dashboard/free-tiers`).
+> Ręczne łączenie bezpłatnych planów jest uciążliwe — dziesiątki zestawów SDK, dziesiątki limitów szybkości i brak wiedzy o tym, ile faktycznie masz do dyspozycji. OmniRoute kataloguje **485 pozycje bezpłatnych planów w 34 cyklicznych kluczach pul** i oblicza podaną liczbę tokenów na podstawie **17 pul z opublikowanym dodatnim budżetem miesięcznym oraz pięciu limitów Groq dla poszczególnych modeli**, eliminując duplikaty wynikające ze współdzielonych pul. Limity dostępne dopiero po regionalnej weryfikacji tożsamości (obecnie: ModelScope) są prezentowane osobno jako +~6 mln za regionalną weryfikacją tożsamości i nigdy nie są wliczane do wartości nagłówkowej. Wynik pozostaje widoczny w panelu (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Karta budżetu bezpłatnych planów OmniRoute: stale ~1,62 mld bezpłatnych tokenów miesięcznie, do ~2,22 mld w pierwszym miesiącu dzięki środkom za rejestrację, pochodzących z 34 udokumentowanych cyklicznych kluczy pul obejmujących 484 skatalogowane pozycje bezpłatnych planów dostępne za pośrednictwem jednego punktu końcowego. Rzetelne obliczenia z deduplikacją pul — każda współdzielona pula liczona jest tylko raz, w tym 17 cyklicznych pul z opublikowanym dodatnim miesięcznym budżetem tokenów oraz pięć limitów Groq dla poszczególnych modeli; 12 dostawców oznaczono w katalogu ryzyka warunków jako takich, których należy unikać, aby decyzja należała do Ciebie. Pasek budżetu obejmuje Mistral 1 mld, Nara 210 mln, LLM7 150 mln, xKiro 150 mln, Groq 30 mln (pięć limitów dla poszczególnych modeli) oraz mniejsze pule, a także środki za rejestrację dostępne w pierwszym miesiącu i trwale bezpłatnych dostawców bez limitu tokenów, prezentowanych osobno, aby nigdy nie zawyżali wartości nagłówkowej. Bieżące wykorzystanie i pozostały limit na /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Karta budżetu bezpłatnych planów OmniRoute: stale ~1,62 mld bezpłatnych tokenów miesięcznie, do ~2,22 mld w pierwszym miesiącu dzięki środkom za rejestrację, pochodzących z 34 udokumentowanych cyklicznych kluczy pul obejmujących 485 skatalogowane pozycje bezpłatnych planów dostępne za pośrednictwem jednego punktu końcowego. Rzetelne obliczenia z deduplikacją pul — każda współdzielona pula liczona jest tylko raz, w tym 17 cyklicznych pul z opublikowanym dodatnim miesięcznym budżetem tokenów oraz pięć limitów Groq dla poszczególnych modeli; 12 dostawców oznaczono w katalogu ryzyka warunków jako takich, których należy unikać, aby decyzja należała do Ciebie. Pasek budżetu obejmuje Mistral 1 mld, Nara 210 mln, LLM7 150 mln, xKiro 150 mln, Groq 30 mln (pięć limitów dla poszczególnych modeli) oraz mniejsze pule, a także środki za rejestrację dostępne w pierwszym miesiącu i trwale bezpłatnych dostawców bez limitu tokenów, prezentowanych osobno, aby nigdy nie zawyżali wartości nagłówkowej. Bieżące wykorzystanie i pozostały limit na /dashboard/free-tiers."/>
 
 > Animowane podsumowanie aktywnej strony `/dashboard/free-tiers`. Pełna metodologia (deduplikacja pul, poziomy środków, warunki dostawców): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -71,7 +71,7 @@
 
 |                                         |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | --------------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Dostawcy                             |            352            |   **358**   |          377          |
+| 🌐 Dostawcy                             |            352            |   **358**   |          380          |
 | 🧠 Unikalne identyfikatory modeli czatu |           1320            |  **1374**   |         1475          |
 | 🖼️ Most modalności                      | 🆕 obraz + dźwięk + wideo |      ✓      |           ✓           |
 | 📡 Bezpłatny katalog Radar              |       🆕 opcjonalny       |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Funkcje</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinacje</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Dostawcy</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Dostawcy</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obietnica — jeden punkt końcowy i 377 dostawców. Automatyczny mechanizm awaryjny utrzymuje trasowanie, dopóki dostępne jest inne prawidłowo działające miejsce docelowe. Sześć filarów: odporne przełączanie awaryjne między 377 dostawcami · do 95% oszczędności tokenów w kwalifikujących się obciążeniach · start za $0 dzięki ponad 150 bezpłatnym planom oraz 52 cyklicznym lub niewymagającym klucza dostawcom bezpłatnym na zawsze · 37 integracji CLI/agentów za pomocą jednej konfiguracji · zgodność z OpenAI, Claude, Gemini i Responses API pod adresem /v1 · mechanizmy produkcyjne, w tym wyłączniki automatyczne, maskowanie TLS, 110 narzędzi MCP, A2A, pamięć, zabezpieczenia, ewaluacje oraz ponad 56 000 statycznych deklaracji testów w ponad 7 800 śledzonych plikach testowych."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obietnica — jeden punkt końcowy i 380 dostawców. Automatyczny mechanizm awaryjny utrzymuje trasowanie, dopóki dostępne jest inne prawidłowo działające miejsce docelowe. Sześć filarów: odporne przełączanie awaryjne między 380 dostawcami · do 95% oszczędności tokenów w kwalifikujących się obciążeniach · start za $0 dzięki ponad 150 bezpłatnym planom oraz 52 cyklicznym lub niewymagającym klucza dostawcom bezpłatnym na zawsze · 39 integracji CLI/agentów za pomocą jednej konfiguracji · zgodność z OpenAI, Claude, Gemini i Responses API pod adresem /v1 · mechanizmy produkcyjne, w tym wyłączniki automatyczne, maskowanie TLS, 110 narzędzi MCP, A2A, pamięć, zabezpieczenia, ewaluacje oraz ponad 56 000 statycznych deklaracji testów w ponad 7 800 śledzonych plikach testowych."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Wszystkie **20** strategii — łącz je dowolnie na poszczególnych etapach kom
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Co wyróżnia OmniRoute — datowany przegląd funkcji w porównaniu z 9router, OpenRouter, CLIProxyAPI i LiteLLM w zakresie 13 możliwości. OmniRoute: 377 dostawców, ponad 150 wbudowanych darmowych planów, 20 strategii routingu, 12-silnikowa kompresja tokenów, wbudowany serwer MCP ze 110 narzędziami, protokół agentów A2A, trwała pamięć, zabezpieczenia, agenci chmurowi, maskowanie odcisku palca TLS, Desktop/Termux/PWA oraz 67 lokalizacji interfejsu użytkownika. OmniRoute jest udostępniany na licencji MIT i może być hostowany samodzielnie. Możliwości i dane liczbowe konkurencyjnych rozwiązań mogą ulec zmianie; zobacz podlinkowaną metodologię."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Co wyróżnia OmniRoute — datowany przegląd funkcji w porównaniu z 9router, OpenRouter, CLIProxyAPI i LiteLLM w zakresie 13 możliwości. OmniRoute: 380 dostawców, ponad 150 wbudowanych darmowych planów, 20 strategii routingu, 12-silnikowa kompresja tokenów, wbudowany serwer MCP ze 110 narzędziami, protokół agentów A2A, trwała pamięć, zabezpieczenia, agenci chmurowi, maskowanie odcisku palca TLS, Desktop/Termux/PWA oraz 67 lokalizacji interfejsu użytkownika. OmniRoute jest udostępniany na licencji MIT i może być hostowany samodzielnie. Możliwości i dane liczbowe konkurencyjnych rozwiązań mogą ulec zmianie; zobacz podlinkowaną metodologię."/>
 
 <sub>📊 Pełna metodologia i szczegóły poszczególnych funkcji w porównaniu z 9router, OpenRouter, CLIProxyAPI i LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -612,7 +612,7 @@ aktualnym katalogu znajdziesz na stronie **[radar.omniroute.online/planos](https
 - **🖼️ Nowe punkty końcowe** — `/v1/ocr` (Mistral OCR) i `/v1/audio/translations` (w stylu Whisper) uzupełniają obsługę multimediów. → [Dokumentacja API](docs/reference/API_REFERENCE.md)
 - **🎨 Generowanie obrazów, wideo i dźwięku** — jedno API do multimediów: xAI Grok Imagine i Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind oraz dostawcy syntezy mowy, tacy jak ElevenLabs. → [Dokumentacja API](docs/reference/API_REFERENCE.md)
 - **🌍 Wdrażanie i eksploatacja** — `basePath` dla odwrotnego proxy, automatyczne wykrywanie języka przeglądarki, śledzenie urządzeń dla poszczególnych kluczy, zaufanie MITM bez uprawnień roota i lokalizacja zh-TW. → [Środowisko](docs/reference/ENVIRONMENT.md)
-- **🤝 Więcej dostawców i agentów** — agenci chmurowi (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) z przeglądarką i logowaniem OAuth, pełnoprawna karta Ollama, Claude Opus 5 i Sonnet 5, oficjalne partnerstwo z Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… oraz odświeżony **katalog 377 dostawców**. → [Dostawcy](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Więcej dostawców i agentów** — agenci chmurowi (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) z przeglądarką i logowaniem OAuth, pełnoprawna karta Ollama, Claude Opus 5 i Sonnet 5, oficjalne partnerstwo z Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… oraz odświeżony **katalog 380 dostawców**. → [Dostawcy](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Przejrzystość routingu** — każda odpowiedź zawiera nagłówek `X-OmniRoute-Decision` wskazujący strategię, dostawcę i opóźnienie obsługującego ją połączenia; nowa strategia combo `cache-optimized` wraz ze współczynnikiem Auto-Combo `cacheAffinity` kieruje powtarzające się żądania z powrotem do połączenia przechowującego prefiks w pamięci podręcznej, a punkt końcowy tylko do odczytu `/v1/auto-combo/{channel}/candidates` udostępnia aktywną pulę kandydatów kanału `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokalna wydajność i infrastruktura** — lokalny Redis uruchamiany jednym kliknięciem, narzędzia wdrożeniowe przekaźników Cloudflare Workers / Deno Deploy oraz Bifrost i Mux jako nadzorowane usługi wbudowane. → [Usługi wbudowane](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Ponadto w zestawie** — framework wtyczek i marketplace, frameworki umiejętności Omni/Agent/GitHub, integracja z repozytorium Obsidian (22 narzędzia MCP), zgodne z OpenAI interfejsy API Batch i Files, semantyczna pamięć podręczna odpowiedzi, grywalizacja z rankingami, wykrywanie agentów ACP (15 wbudowanych agentów), zaplanowany eksport logów do BigQuery, równoległe rozsyłanie zapytań do wielu modeli `auto/chaos`, mostek do bota Telegram, wbudowany w aplikację menedżer wersji oraz rankingi bezpłatnych dostawców LMArena-ELO. → [Dokumentacja](docs/README.md)
@@ -666,7 +666,7 @@ aktualnym katalogu znajdziesz na stronie **[radar.omniroute.online/planos](https
 <b>＋ działa również z</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>dowolnym narzędziem zgodnym z OpenAI</b>
 </div>
 
-<sub>📖 Konfiguracja każdego z 38 narzędzi (27 narzędzi CLI do kodowania + 11 agentów CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Wtyczka OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Konfiguracja każdego z 39 narzędzi (28 narzędzi CLI do kodowania + 11 agentów CLI) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Wtyczka OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -696,11 +696,11 @@ zapisywaniu sekretów w historii powłoki. → [Integracje CLI](docs/guides/CLI-
 
 <div align="center">
 
-## 🌐 377 dostawców AI — 153 oznaczonych w katalogu jako bezpłatni
+## 🌐 380 dostawców AI — 156 oznaczonych w katalogu jako bezpłatni
 
 </div>
 
-> **377 zarejestrowanych dostawców** w kanonicznych kolekcjach czatu, multimediów, wyszukiwania, usług lokalnych, agentów chmurowych i systemowych, w tym **153 z metadanymi wykrywania `hasFree: true`**. Rejestr modeli czatu obejmuje **239 dostawców / 3 059 unikatowych par dostawca-model / 1 475 nieprzetworzonych identyfikatorów modeli**; osobny katalog bezpłatnych limitów zawiera **484 wpisów dla poszczególnych modeli**, **34 pule odnawialne** oraz **52 dostawców oferujących odnawialny lub niewymagający klucza bezpłatny dostęp bezterminowy**. Są to celowo różne mianowniki; definicje i obliczenia z deduplikacją pul znajdują się w dokumentach [Informacje o dostawcach](docs/reference/PROVIDER_REFERENCE.md) oraz [Bezpłatne poziomy](docs/reference/FREE_TIERS.md).
+> **380 zarejestrowanych dostawców** w kanonicznych kolekcjach czatu, multimediów, wyszukiwania, usług lokalnych, agentów chmurowych i systemowych, w tym **156 z metadanymi wykrywania `hasFree: true`**. Rejestr modeli czatu obejmuje **239 dostawców / 3 059 unikatowych par dostawca-model / 1 475 nieprzetworzonych identyfikatorów modeli**; osobny katalog bezpłatnych limitów zawiera **485 wpisów dla poszczególnych modeli**, **34 pule odnawialne** oraz **52 dostawców oferujących odnawialny lub niewymagający klucza bezpłatny dostęp bezterminowy**. Są to celowo różne mianowniki; definicje i obliczenia z deduplikacją pul znajdują się w dokumentach [Informacje o dostawcach](docs/reference/PROVIDER_REFERENCE.md) oraz [Bezpłatne poziomy](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1316,7 +1316,7 @@ Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znan
   <tr><td nowrap><b>Środowisko uruchomieniowe</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Język</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> w <code>src/</code> i <code>open-sse/</code> (zero <code>any</code> w rdzeniu od wersji v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Baza danych</b></td><td>better-sqlite3 (SQLite, rejestrowanie WAL) + LowDB (starszy format JSON) — 147 modułów domenowych, 213 migracji</td></tr>
+  <tr><td nowrap><b>Baza danych</b></td><td>better-sqlite3 (SQLite, rejestrowanie WAL) + LowDB (starszy format JSON) — 147 modułów domenowych, 219 migracji</td></tr>
   <tr><td nowrap><b>Pamięć</b></td><td>Wyszukiwanie pełnotekstowe SQLite FTS5 + osadzenia wektorowe kwantyzowane do int8, typowany zanik</td></tr>
   <tr><td nowrap><b>Schematy</b></td><td>Zod 4 — walidacja wejścia/wyjścia narzędzi MCP + kontrakty API</td></tr>
   <tr><td nowrap><b>Protokoły</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1379,7 +1379,7 @@ Dane kanoniczne na 2026-10-18: **1.976 unikalnych filmów** · **20.220.289 znan
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Przewodnik po odporności</a></b></td><td>Wyłączniki obwodów, okresy karencji, kolejka, zapobieganie efektowi „thundering herd”, podszywanie się pod TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Mechanizm Auto-Combo</a></b></td><td>Ocena oparta na 16 czynnikach, pakiety trybów, samonaprawianie</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Przewodnik po proxy</a></b></td><td>3-poziomowy system proxy, platforma 1proxy, operacje CRUD rejestru</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Darmowe poziomy usług</a></b></td><td>Skonsolidowany katalog: 34 udokumentowane cykliczne pule / 484 skatalogowane pozycje darmowych poziomów</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Darmowe poziomy usług</a></b></td><td>Skonsolidowany katalog: 34 udokumentowane cykliczne pule / 485 skatalogowane pozycje darmowych poziomów</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeria funkcji</a></b></td><td>Wizualna prezentacja panelu ze zrzutami ekranu</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentacja bazy kodu</a></b></td><td>Przystępny dla początkujących przewodnik po bazie kodu</td></tr>
 </table>

@@ -29,6 +29,7 @@ Tài liệu tham khảo cốt lõi cho API OmniRoute. Tài liệu này trình b�
 - [Truyền phát qua WebSocket](#websocket-streaming)
 - [Hạn ngạch & báo cáo sự cố](#quotas--issues-reporting)
 - [Bộ nhớ đệm ngữ nghĩa](#semantic-cache)
+- [Tương thích API quản lý CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [Bảng điều khiển & quản lý](#dashboard--management)
 - [Quản lý tổ hợp](#combo-management)
 - [Webhook](#webhooks)
@@ -988,6 +989,18 @@ phần hoàn thành.
 
 **Xác thực:** Khóa API Bearer (`isAuthenticated`).
 
+### Khôi phục phiên do hết hạn mức (phải chủ động bật)
+
+Một yêu cầu `POST /v1/chat/completions` hoặc `POST /v1/responses` không truyền luồng, thất bại với lỗi hạn mức kết thúc (`402`/`429`/`503` có nội dung cho biết hạn mức hoặc tín dụng đã cạn), có thể được tạm giữ và phát lại sau thay vì trả lỗi. Bên gọi chủ động bật cho từng yêu cầu bằng ba header:
+
+| Header                       | Giá trị                                     |
+| ---------------------------- | ------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                      |
+| `x-omniroute-session`        | ID phiên, `[A-Za-z0-9._:-]{1,128}`          |
+| `x-omniroute-recovery-turn`  | ID lượt duy nhất trong phiên (cùng quy tắc) |
+
+Chỉ các lượt `stream: false` không có công cụ, lịch sử công cụ hoặc `previous_response_id`, và không có ghim `x-omniroute-connection`, mới đủ điều kiện; đồng thời phải đặt `STORAGE_ENCRYPTION_KEY` (yêu cầu được lưu mã hóa tối đa 24 giờ). Khi đó phản hồi là `202` kèm `recovery.poll`; thăm dò `GET /v1/quota-recoveries/{id}` (`202` khi còn chờ, `200` kèm nội dung đã khôi phục khi hoàn tất) hoặc hủy bằng `DELETE`. Chỉ API key đã tạo vé mới nhìn thấy vé đó. Một lần phát lại có kết quả không chắc chắn kết thúc ở `needs_confirmation` thay vì gửi hai lần. Nguồn: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Sử dụng tự phục vụ (`/api/usage/om-usage`)
@@ -1156,6 +1169,28 @@ Bất kỳ yêu cầu nào cũng có thể bỏ qua bộ nhớ đệm, bất k�
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Tương thích API quản lý CLIProxyAPI
+
+OmniRoute đáp ứng ba điểm cuối quản lý [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) mà bảng điều khiển sử dụng gọi để đọc giới hạn đăng ký Claude và Codex, ví dụ nguồn hạn mức sử dụng `cliproxy` của T3 Code. Trỏ URL cơ sở của máy khách đến OmniRoute và dùng API key có phạm vi `manage` làm khóa quản lý. Các tuyến được cung cấp tại `/v0/management/*` và `/api/v0/management/*`.
+
+| Phương thức | Đường dẫn                    | Mô tả                                                                                                                                                           |
+| ----------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET         | `/v0/management/auth-files`  | Các kết nối OAuth Claude và Codex dưới dạng `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Không chứa token                            |
+| POST        | `/v0/management/api-call`    | Nội dung `{ auth_index, method, url, header?, data? }`. Gửi một yêu cầu nằm trong danh sách cho phép bằng token của tài khoản và trả về `{ status_code, body }` |
+| POST        | `/v0/management/reset-quota` | Nội dung `{ auth_index }`. Xóa thời gian chờ của kết nối, khóa mô hình và thời gian chờ theo từng phạm vi của Codex cho một tài khoản                           |
+
+- `auth_index` là ID kết nối OmniRoute. `provider` là `claude` hoặc `codex` (chỉ các kết nối OAuth; nhà cung cấp dùng API key `anthropic` không được liệt kê). Với Codex, `id_token.chatgpt_account_id` là ID không gian làm việc đã lưu và `plan_type` là gói đã lưu.
+- `api-call` không phải proxy tổng quát. Nó chỉ chấp nhận `GET
+https://api.anthropic.com/api/oauth/usage` của Claude và `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits`, `POST .../wham/rate-limit-reset-credits/consume` của Codex, mỗi loại chỉ dùng với tài khoản của nhà cung cấp tương ứng. Mọi trường hợp khác trả về `403` mà không liên hệ thượng nguồn. Header `Authorization` của bên gọi, kể cả ký hiệu thay thế `$TOKEN$`, bị bỏ qua: OmniRoute chèn token truy cập của kết nối, làm mới trước nếu sắp hết hạn và chỉ chuyển tiếp các header trong danh sách cho phép (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Nếu thiếu `Chatgpt-Account-Id`, mặc định dùng ID không gian làm việc đã lưu. Nếu phản hồi thượng nguồn đầu tiên là `401`, hệ thống làm mới một lần và chỉ thử lại khi token truy cập thay đổi. Mỗi lần thử thượng nguồn hết thời gian chờ sau 15 giây và dùng proxy của kết nối.
+- `reset-quota` giữ nguyên các trạng thái kết thúc (banned, expired, credits_exhausted). Một `auth_index` không xác định trả về `404`.
+
+**Xác thực:** bắt buộc có phiên bảng điều khiển hoặc API key mang phạm vi `manage`, ngay cả khi đăng nhập bị tắt (các đường dẫn nằm trong `ALWAYS_PROTECTED_API_PATHS`). Khóa chỉ dành cho suy luận nhận `403`. Nguồn: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

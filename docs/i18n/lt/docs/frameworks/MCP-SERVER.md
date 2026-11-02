@@ -315,12 +315,12 @@ prieigos raktą į būseną keičiančią valdymo galinę prieigą, gauna HTTP 4
 Šis rangas yra `scopeSatisfies`. Jis netikrina MCP lentelės, o MCP
 atitikties tikrintuvas netikrina jo.
 
-| Vardų sritis         | Kredencialas                                                                  | Tikrintuvas                             | Patvirtinimas leidžia                                            |
-| :------------------- | :---------------------------------------------------------------------------- | :-------------------------------------- | :--------------------------------------------------------------- |
-| API rakto valdymas   | `api_keys.scopes`                                                             | `hasManageScope`                        | Valdymo REST operacijas su tuo Bearer raktu                      |
-| API rakto priedas    | tas pats masyvas, viena tiksliai sutampanti eilutė                            | toliau nurodytas pagalbinis komponentas | Tik tą vieną galimybę                                            |
-| MCP įrankių aprėptys | tas pats masyvas, kitu atveju MCP `_meta`, kitu atveju `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                          | Tą įrankį, kai vykdymo užtikrinimas įjungtas                     |
-| Prieigos raktas      | `oma_live_…`                                                                  | `scopeSatisfies`                        | Valdymo galinę prieigą, kurios metodui ir keliui reikia to rango |
+| Vardų sritis         | Kredencialas                                                                                 | Tikrintuvas                             | Patvirtinimas leidžia                                            |
+| :------------------- | :------------------------------------------------------------------------------------------- | :-------------------------------------- | :--------------------------------------------------------------- |
+| API rakto valdymas   | `api_keys.scopes`                                                                            | `hasManageScope`                        | Valdymo REST operacijas su tuo Bearer raktu                      |
+| API rakto priedas    | tas pats masyvas, viena tiksliai sutampanti eilutė                                           | toliau nurodytas pagalbinis komponentas | Tik tą vieną galimybę                                            |
+| MCP įrankių aprėptys | tas pats masyvas, kitu atveju MCP `_meta` (tik HTTP/SSE), kitu atveju `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                          | Tą įrankį, kai vykdymo užtikrinimas įjungtas                     |
+| Prieigos raktas      | `oma_live_…`                                                                                 | `scopeSatisfies`                        | Valdymo galinę prieigą, kurios metodui ir keliui reikia to rango |
 
 Kiekvieno kredencialo išdavimas aprašytas skyriuje
 [Valdymo autentifikavimas](../guides/MANAGEMENT-AUTH.md).
@@ -369,8 +369,10 @@ Vykdymo užtikrinimas išjungtas, nebent `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (nu
 `false`). Kol jis išjungtas, `evaluateToolScopes` leidžia iškvietimą ir praleidžia
 katalogą. Kai jis įjungtas, HTTP kaip `authInfo` naudoja Bearer rakto `api_keys.scopes`
 (žr. [HTTP aprėpčių susiejimas pagal raktą](#per-key-http-scope-binding-7895)).
-Kai nepavyksta nustatyti rakto aprėpčių, suteiktas rinkinys pirmiausia perimamas iš MCP `_meta`, o tada iš
-`OMNIROUTE_MCP_SCOPES`.
+Kai jokių raktų leidimai neišsprendžiami, suteiktų leidimų aibinys pereina prie MCP `_meta`
+(priimamas tik HTTP/SSE kvietėjams, HTTP autentifikavimo kontekste; stdio kvietėjo `_meta` yra
+ignoruojamas, nes jį valdo klientas ir jame nėra per kvietėją identifikuojančių duomenų), tada
+prie `OMNIROUTE_MCP_SCOPES`.
 
 #### Prieigos rakto aprėptys
 
@@ -468,8 +470,7 @@ kiekvieną įrankio iškvietimą pasiekiančios `extra.authInfo.scopes` atspindi
 `_meta` ir `OMNIROUTE_MCP_SCOPES` aplinkos kintamojo atsarginiam variantui — šiuo pakeitimu tik užpildomas šis pirmasis,
 aukščiausio prioriteto šaltinis, kuris anksčiau per HTTP nebuvo užpildomas. Kai nepavyksta nustatyti jokio API rakto
 (nėra antraštės, raktas netinkamas), `authInfo` lieka `undefined`, o nustatymas be pakeitimų pereina prie
-esamos `meta`/aplinkos kintamojo grandinės. stdio neturi kiekvienam iškvietėjui atskiros tapatybės (žr.
-`mcpCallerIdentity.ts`) ir šis pakeitimas jo neveikia — jis toliau naudoja `_meta`/aplinkos kintamojo atsarginę grandinę.
+esamos `meta`/aplinkos kintamojo grandinės. stdio neturi per-kalbintojo tapatybės (žr. `mcpCallerIdentity.ts`) ir nėra veikiamas kiekvieno rakto susiejimo — jis praleidžia `_meta` žingsnį (`_meta` yra paisoma tik HTTP autentifikacijos kontekste, #15159) ir nustato tik iš `OMNIROUTE_MCP_SCOPES` aplinkos rakto.
 
 **Siauros aprėpties HTTP/SSE iškvietėjams vykdymo užtikrinimas priverstinai įjungiamas,
 nepaisant `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Numatytoji `OMNIROUTE_MCP_ENFORCE_SCOPES` reikšmė `false` yra

@@ -163,7 +163,7 @@ OmniRoute expone 6 habilidades A2A conectadas en `src/lib/a2a/taskExecution.ts::
 | Informe de estado             | `health-report`      | Agrega el estado del disyuntor, el tiempo de espera y el bloqueo por proveedor                                                                                                                    | estado, resiliencia                   | "Muestra el estado de todos los proveedores"  |
 | Enumerar capacidades          | `list-capabilities`  | Devuelve el catálogo completo de 45 entradas de Agent Skills (23 de API + 21 de CLI + 1 de configuración) como una tabla markdown con URLs sin procesar de SKILL.md para la inyección de contexto | catálogo, descubrimiento, habilidades | "Enumera todas las capacidades de OmniRoute"  |
 
-> La tarjeta del agente debe mantenerse alineada con el catálogo activo de 377 proveedores; los recuentos de proveedores y los metadatos de acceso gratuito o sin autenticación proceden del registro en tiempo de ejecución.
+> La tarjeta del agente debe mantenerse alineada con el catálogo activo de 380 proveedores; los recuentos de proveedores y los metadatos de acceso gratuito o sin autenticación proceden del registro en tiempo de ejecución.
 
 ### Detalles de la habilidad `list-capabilities`
 
@@ -215,7 +215,7 @@ El endpoint JSON-RPC `/a2a` es el punto de entrada canónico de A2A. Los siguien
    };
    ```
 
-3. **Expóngala en la tarjeta del agente:** en `src/app/.well-known/agent.json/route.ts`, añádala al array `skills`:
+3. **Exponga la habilidad en la tarjeta del agente:** en `src/lib/a2a/agentCardMetadata.ts` (compartido por `/.well-known/agent.json` y `/.well-known/agent-card.json`), añádala al array `skills`:
 
    ```json
    {

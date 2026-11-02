@@ -42,6 +42,10 @@ personalizat prin variabile de mediu (nu are opțiunea `--base-url`):
 
 > Variabilele de mediu sunt citite **o singură dată la pornire** — reporniți Claude Code după modificarea lor.
 
+Pentru o credențială care se rotește în locul unui șir fix, setați `apiKeyHelper` în `~/.claude/settings.json` la o comandă care afișează credențiala curentă pe stdout. Claude Code memorează implicit rezultatul în cache timp de cinci minute (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` modifică acest interval) și trimite valoarea atât în `Authorization: Bearer`, cât și în `x-api-key`. Scriptul trebuie să afișeze numai credențiala — un mesaj introductiv suplimentar provoacă eșecul mecanismului auxiliar în v2.1.227+.
+
+Așa funcționează Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` afișează un token de acces Entra de scurtă durată, pe care OmniRoute îl verifică în locul unei chei API. Consultați [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` le setează pe toate pentru dvs.: determină URL-ul de bază + tokenul
 din contextul activ (astfel încât `omniroute connect <vps>`, urmat de `omniroute launch`,
 să funcționeze direct), verifică starea serverului și execută `claude`.

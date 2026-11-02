@@ -303,12 +303,12 @@ hallinnan muuttavalle reitille, saavat HTTP 403 -vastauksen
 Kyseinen järjestys on `scopeSatisfies`. Se ei käytä MCP-taulukkoa, eikä MCP:n
 täsmäytin käytä sitä.
 
-| Nimiavaruus            | Tunnistetieto                                                      | Tarkistin               | Hyväksyntä sallii                                                 |
-| :--------------------- | :----------------------------------------------------------------- | :---------------------- | :---------------------------------------------------------------- |
-| API-avainten hallinta  | `api_keys.scopes`                                                  | `hasManageScope`        | Hallinnan REST-rajapinnan kyseiselle Bearer-avaimelle             |
-| API-avaimen lisäoikeus | sama taulukko, yksi täsmällinen merkkijono                         | alla nimetty apufunktio | Vain kyseisen yksittäisen toiminnon                               |
-| MCP-työkalujen alueet  | sama taulukko, muutoin MCP `_meta`, muutoin `OMNIROUTE_MCP_SCOPES` | `scopeMatches`          | Kyseisen työkalun, kun valvonta on käytössä                       |
-| Käyttöoikeustunnus     | `oma_live_…`                                                       | `scopeSatisfies`        | Hallintareitin, jonka metodi ja polku edellyttävät kyseistä tasoa |
+| Nimiavaruus            | Tunnistetieto                                                                    | Tarkistin               | Hyväksyntä sallii                                                 |
+| :--------------------- | :------------------------------------------------------------------------------- | :---------------------- | :---------------------------------------------------------------- |
+| API-avainten hallinta  | `api_keys.scopes`                                                                | `hasManageScope`        | Hallinnan REST-rajapinnan kyseiselle Bearer-avaimelle             |
+| API-avaimen lisäoikeus | sama taulukko, yksi täsmällinen merkkijono                                       | alla nimetty apufunktio | Vain kyseisen yksittäisen toiminnon                               |
+| MCP-työkalujen alueet  | sama taulukko, muuten MCP `_meta` (vain HTTP/SSE), muuten `OMNIROUTE_MCP_SCOPES` | `scopeMatches`          | Kyseisen työkalun, kun valvonta on käytössä                       |
+| Käyttöoikeustunnus     | `oma_live_…`                                                                     | `scopeSatisfies`        | Hallintareitin, jonka metodi ja polku edellyttävät kyseistä tasoa |
 
 Kunkin tunnistetiedon luominen käsitellään kohdassa
 [Hallinnan todentaminen](../guides/MANAGEMENT-AUTH.md).
@@ -357,8 +357,11 @@ Valvonta ei ole käytössä, ellei `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (oletus
 `false`). Kun se ei ole käytössä, `evaluateToolScopes` sallii kutsun ja ohittaa
 luettelon. Kun se on käytössä, HTTP käyttää Bearer-avaimen `api_keys.scopes`-taulukkoa
 `authInfo`-arvona (katso [Avainkohtainen HTTP-käyttöoikeusalueiden sidonta](#per-key-http-scope-binding-7895)).
-Jos avaimelle ei löydy käyttöoikeusalueita, myönnetty joukko haetaan seuraavaksi MCP:n `_meta`-kentästä ja sitten
-`OMNIROUTE_MCP_SCOPES`-muuttujasta.
+Kun avainten scopeja
+ei ratkea, annettujen scopejen joukko putoaa MCP `_meta`-tietoon (huomioidaan vain
+HTTP/SSE-kutsujille HTTP-tunnistautumiskontekstissa; stdio-kutsujan `_meta` jätetään
+huomiotta, koska asiakas hallitsee sitä eikä se sisällä kutsujakohtaista identiteettiä),
+sitten `OMNIROUTE_MCP_SCOPES`-ympäristömuuttujaan.
 
 #### Käyttöoikeustunnusten käyttöoikeusalueet
 
@@ -455,8 +458,11 @@ jokaiseen työkalukutsuun päätyvä `extra.authInfo.scopes` kuvastaa Bearer-ava
 `_meta`-tietojen ja `OMNIROUTE_MCP_SCOPES`-ympäristömuuttujan varatavan edelle — tämä muutos vain täyttää ensimmäisen,
 korkeimman prioriteetin lähteen, jota ei aiemmin syötetty HTTP:n kautta. Kun mitään API-avainta ei pystytä selvittämään
 (otsake puuttuu tai avain on virheellinen), `authInfo` pysyy arvossa `undefined`, ja selvitys jatkuu
-olemassa olevaan `meta`-/ympäristömuuttujaketjuun ennallaan. stdio ei sisällä kutsujakohtaista identiteettiä (katso
-`mcpCallerIdentity.ts`), eikä muutos vaikuta siihen — se käyttää edelleen `_meta`-/ympäristömuuttujan varaketjua.
+olemassa olevaan `meta`-/ympäristömuuttujaketjuun ennallaan. stdio:lla ei ole
+kutsujakohtaista identiteettiä (katso `mcpCallerIdentity.ts`) eikä avainkohtainen sidonta vaikuta
+siihen — se ohittaa `_meta`-vaiheen
+(`_meta` huomioidaan vain HTTP-tunnistautumiskontekstissa, #15159) ja ratkaisee yksin
+`OMNIROUTE_MCP_SCOPES`-ympäristöavaimesta.
 
 **Valvonta pakotetaan käyttöön rajatuilla käyttöoikeusalueilla varustetuille HTTP/SSE-kutsujille
 `OMNIROUTE_MCP_ENFORCE_SCOPES`-arvosta riippumatta.** `OMNIROUTE_MCP_ENFORCE_SCOPES`-muuttujan oletusarvo `false` on turvallinen vain

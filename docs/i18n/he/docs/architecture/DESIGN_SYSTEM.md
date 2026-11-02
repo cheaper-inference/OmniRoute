@@ -68,8 +68,9 @@
 
 ## 5. עדכון ה-kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` מעתיק את ה-`src/` של ה-upstream באותו commit אל
-`packages/ui-kit/src` ומפעיל את הטרנספורמציה היחידה המותרת (הסרת הסיומת `.js` מייבואים יחסיים). לאחר מכן: סקרו את `git diff packages/ui-kit`, בצעו מעבר חזותי על מסכי הספקים, ההגדרות, ה-combos, השימוש ונקודת הקצה בשתי ערכות הנושא, הריצו `npm run check:ui-kit-snapshot` ו-`npm run test:vitest:ui`, ופתחו את ה-PR עם ה-changelog של ה-upstream.
+`npm run check:ui-kit-upstream` משווה את הגרסה המוצמדת ב- `packages/ui-kit/UPSTREAM.md` עם תג `v*` החדש ביותר של הריפו במעלה הזרם ומדפיס את פקודת הסינכרון כשיוצא מהדורה. זרימת העבודה השבועית `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) מפעילה את אותה בדיקה ושומרת בעיית מעקב אחת פתוחה בזמן שהסיכה מאחור; הריפו במעלה הזרם הוא פרטי, כך שזרימת העבודה צריכה אסימון לקריאה בלבד בסוד `UI_KIT_READ_TOKEN` ונשאר לא פעיל בלעדיו.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` מעתיק את ה- `src/` במעלה הזרם באותו commit (`latest` = התג `v*` החדש ביותר) ל- `packages/ui-kit/src`, מחיל את הטרנספורמציה הבודדת המותרת (הוא מוריד את סיומת `.js` מייבוא יחסי), ומגדיר את גרסת סביבת העבודה ב- `packages/ui-kit/package.json` ו- `package-lock.json` ל-upstream. לאחר מכן: בדוק את `git diff packages/ui-kit`, בצע בדיקה חזותית על ספקים, הגדרות, שילובים, שימוש ונקודת קצה בשתי ערכות הנושא, הפעל `npm run check:ui-kit-snapshot` ו- `npm run test:vitest:ui` ופתח את PR עם יומן השינויים במעלה הזרם.
 
 ## 6. תרשימי README
 

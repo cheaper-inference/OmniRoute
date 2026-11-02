@@ -66,6 +66,19 @@ Nochtann an spás oibre `electron/` na nithe seo freisin:
 - `npm run build:mac-x64` / `build:mac-arm64` — tógálacha macOS d'ailtireacht aonair
 - `npm run pack` — tógáil eolaire amháin le haghaidh tástála áitiúla (gan suiteálaí)
 
+## Pacáistí ama rite roghnacha
+
+Féadfaidh tógálacha deisce cartlanna ama rite roghnacha a fhoilsiú taobh lena suiteálaithe. Tá `optional-packs.index.json` san inneachar freastalaí suiteáilte (faoi `resources/app` ar Windows agus Linux). Don iontráil `browser-runtime`, léigh `packs[].tarball` agus íoslódáil **an t-ainm comhaid cruinn sin ón eisiúint chéanna**. Tá díolaim SHA-256 in ainmneacha na gcartlann; d'fhéadfadh cartlanna éagsúla a bheith de dhíth ar thógálacha éagsúla. Ná hathraigh ainm an chomhaid íoslódáilte.
+
+Cóipeáil innéacs na haipe suiteáilte agus an chartlann roghnaithe isteach in aon eolaire amháin, ansin úsáid CLI ón eisiúint chéanna:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+Taispeánann `packs list` staid suiteála agus fíoraithe, ní ainm comhaid na cartlainne. Roghnaíonn an t-innéacs cuachta an chartlann. Fíoraíonn an tsuiteáil suim sheiceála na cartlainne roimh eastóscadh agus suimeanna seiceála na bpacáistí sula n-athsholáthraítear pacáiste suiteáilte. Léann sí comhaid áitiúla; ní íoslódálann sí cartlanna atá ar iarraidh. Atosaigh an feidhmchlár tar éis suiteála. Mura bhfuil sócmhainn mheaitseála san eisiúint, níl an pacáiste roghnach ar fáil trí shócmhainní na heisiúna sin.
+
 ## Leagan Amach na nEolairí
 
 ```

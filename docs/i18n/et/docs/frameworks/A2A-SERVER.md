@@ -163,7 +163,7 @@ OmniRoute pakub 6 A2A-oskust, mis on ühendatud failis `src/lib/a2a/taskExecutio
 | Seisundiaruanne             | `health-report`      | Koondab iga teenusepakkuja kaitselüliti, ooteaja ja lukustusoleku                                                                                                    | seisund, töökindlus            | "Kuva kõigi teenusepakkujate seisund"    |
 | Võimekuste loetelu          | `list-capabilities`  | Tagastab täieliku 45 kirjega Agent Skillsi kataloogi (23 API + 21 CLI + 1 konfiguratsioon) markdown-tabelina koos töötlemata SKILL.md URL-idega konteksti lisamiseks | kataloog, avastamine, oskused  | "Loetle kõik OmniRoute'i võimekused"     |
 
-> Agent Cardi tuleb hoida kooskõlas jooksva 377 teenusepakkujaga kataloogiga; teenusepakkujate arv ning tasuta ja autentimist mittevajavad metaandmed pärinevad käitusaegsest registrist.
+> Agent Cardi tuleb hoida kooskõlas jooksva 380 teenusepakkujaga kataloogiga; teenusepakkujate arv ning tasuta ja autentimist mittevajavad metaandmed pärinevad käitusaegsest registrist.
 
 ### Oskuse `list-capabilities` üksikasjad
 
@@ -215,7 +215,7 @@ JSON-RPC-i lõpp-punkt `/a2a` on kanoniline A2A sisenemispunkt. Allpool toodud R
    };
    ```
 
-3. **Avaldage agendikaardil:** lisage failis `src/app/.well-known/agent.json/route.ts` massiivi `skills` järgmine objekt:
+3. **Avalda agendikaardil:** lisa failis `src/lib/a2a/agentCardMetadata.ts` (mida kasutavad nii `/.well-known/agent.json` kui ka `/.well-known/agent-card.json`) massiivi `skills` järgmine kirje:
 
    ```json
    {

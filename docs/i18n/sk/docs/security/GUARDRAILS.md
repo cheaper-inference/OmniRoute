@@ -517,7 +517,8 @@ Nezapína maskovanie: to naďalej zabezpečujú `PII_REDACTION_ENABLED` (požiad
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Nenastavené znamená
   všetky typy (správanie spred zavedenia tohto nastavenia). Vzor `ssn_us` z
   enginu požiadaviek sa mapuje na `ssn`. Šablóny (Minimal, Standard, Financial,
-  Brazilian, USA, Full) len vypĺňajú začiarkavacie políčka v UI.
+  Brazilian, USA, GDPR, POPIA, Full) len vypĺňajú začiarkavacie políčka v UI.
+- **Identifikátory GDPR a POPIA** — dvanásť vstavaných ID pokrývajúcich osobné identifikátory EÚ a Južnej Afriky (tabuľka nižšie). Ich regulárne výrazy, validátory a jurisdikčné značky sú v jednej tabuľke, `src/shared/utils/piiPatterns.ts`, ktorú používa sanitizér odpovedí (`src/lib/piiSanitizer.ts`) aj maskovač požiadaviek (`src/shared/utils/inputSanitizer.ts`). Zhoda sa zamaskuje iba po prijatí validátorom; samotný sled číslic nikdy nestačí. Operátor, ktorý uložil zúžený výber ešte pred vznikom týchto ID, si zachová pôvodné správanie, kým nové ID nezaškrtne.
 - **Vlastné vzory** — až 20 regex alebo wildcard vzorov (`*` = až 64
   nebielych znakov, `?` = jeden). Zhody sa nahradia za `[CUSTOM_REDACTED]`.
   Každý vzor prechádza cez `compilePiiCustomPattern()`
@@ -542,6 +543,25 @@ Nastavenia sú uložené v tabuľke `key_value` (namespace `pii_settings`,
 
 Všetky tri vyžadujú autentifikáciu správy (management auth) a validujú telo
 pomocou Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Identifikátory GDPR (EÚ) a POPIA (Južná Afrika)
+
+| ID                  | Identifikátor                       | Overenie                                                                                   |
+| ------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                                | Známa krajina, presná dĺžka pre túto krajinu, ISO 13616 MOD-97-10                          |
+| `eu_vat`            | Číslo DPH v EÚ                      | Známa predpona členského štátu a formát čísla daného štátu (bez vyhľadávania vo VIES)      |
+| `es_dni_nie`        | Španielske DNI / NIE                | Kontrolné písmeno (hodnota mod 23); NIE je `X/Y/Z` + 7 číslic                              |
+| `it_codice_fiscale` | Taliansky Codice Fiscale            | Kontrolné písmeno z tabuliek nepárnych/párnych pozícií                                     |
+| `pl_pesel`          | Poľský PESEL                        | Vážený kontrolný súčet a vierohodné rozsahy zakódovaného mesiaca/dňa narodenia             |
+| `nl_bsn`            | Holandské BSN                       | Skúška 11 (váhy 9..2, -1)                                                                  |
+| `de_steuer_id`      | Nemecké Steuer-ID                   | ISO 7064 Mod 11,10 a pravidlá štruktúry číslic (bez úvodnej 0)                             |
+| `se_personnummer`   | Švédske personnummer                | Luhn nad poslednými desiatimi číslicami a vierohodný dátum narodenia (10 alebo 12 číslic)  |
+| `za_id`             | Juhoafrické identifikačné číslo     | Luhn nad všetkými 13 číslicami, platný mesiac/deň narodenia, číslica občianstva 0 alebo 1  |
+| `za_phone`          | Juhoafrický telefón                 | Predpona `+27` / `27` alebo národný tvar `0..` zapísaný s medzerou či spojovníkom          |
+| `za_vat`            | Juhoafrické číslo DPH               | 10 číslic začínajúcich na `4` **a** "VAT" / "BTW" v predchádzajúcich 48 znakoch            |
+| `za_tax_ref`        | Juhoafrické daňové referenčné číslo | 10 číslic začínajúcich na `0`-`3`, Luhn **a** "tax" / "SARS" v predchádzajúcich 48 znakoch |
+
+Keďže čisto číselné formáty kolidujú s číslami objednávok, zostáv a časovými značkami, najslabšie (`za_vat`, `za_tax_ref`) potrebujú vodidlo kľúčového slova a samotné desaťmiestne číslo `0..` sa nepovažuje za juhoafrický telefón. IBAN s medzerami (`GB29 NWBK ...`) sa nezachytia. Pri streamovaní sa vodidlo hľadá iba v aktuálnom bloku. ID sa vyhodnocujú pred všeobecnými telefónnymi vzormi, takže overený identifikátor si zachová vlastný zástupný text (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Šablóny `gdpr` a `popia` vyberajú identifikátory EÚ, respektíve Južnej Afriky. Samotné maskovanie zostáva voliteľne zapínané (Hard Rule #20): nič tu nemení predvolenú hodnotu feature flagu.
 
 ### Prompt Injection (`promptInjection.ts`)
 

@@ -183,9 +183,10 @@ JWT ची पडताळणी **आणि** त्यामध्ये `auth
 
 - **`publicPolicy`** (`policies/public.ts`) — नेहमी `allow({ kind: "anonymous", id: "anonymous" })` परत करते.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer काढते आणि `validateApiKey()` द्वारे त्याची पडताळणी करते. प्रभावी `REQUIRE_API_KEY` फीचर फ्लॅग अक्षम असतानाच निनावी प्रवेशाची अनुमती देते. प्रभावी फ्लॅग `isRequireApiKeyEnabled()` (`DB फीचर फ्लॅग ओव्हरराइड > process.env.REQUIRE_API_KEY > डीफॉल्ट`) द्वारे निर्धारित केला जातो, त्यामुळे डॅशबोर्ड फीचर फ्लॅग आणि पर्यावरणीय चल `/api/v1/*`, `/api/v1beta/*` आणि त्यांच्या उपनावांवर सुसंगतपणे नियंत्रण ठेवतात; रिझॉल्वर अयशस्वी झाल्यास प्रवेश नाकारला जातो. क्लायंट API मार्गांवर डॅशबोर्ड-सत्र विनंत्यांना अनुमती देते (डॅशबोर्ड मॉडेल कॅटलॉगद्वारे वापरल्या जाणाऱ्या `/api/v1/models` सह).
+  Entra ID SSO सक्षम असताना, Entra token ची रचना असलेला Bearer (तीन base64url भाग, `RS*` अल्गोरिदम, `kid`) SSO शाखेत `validateApiKey()` च्या **आधी** हाताळला जातो आणि तिचा निर्णय अंतिम असतो. तो API-key मार्गावर किंवा अनामिक प्रवेशावर उतरवणाऱ्या शाखेत कधीच जात नाही. त्यामुळे identity provider बंद पडल्यास प्रवेश सर्वांसाठी खुला होऊ शकत नाही. स्थिर API keys वर याचा परिणाम होत नाही. [Entra ID SSO](../security/ENTRA_SSO.md) पहा.
 - **`managementPolicy`** (`policies/management.ts`) — डॅशबोर्ड सत्र, अंतर्गत मॉडेल-सिंक विनंत्या (`/api/providers/[name]/(sync-models|models)` शी जुळणाऱ्या) स्वीकारते किंवा `isAuthRequired()` ने false परत केल्यास पूर्णपणे वगळते. Bearer टोकन उपस्थित पण अवैध असल्यास 403 (`AUTH_001`), अन्यथा 401 परत करते. कोणत्याही प्रमाणीकरण शाखेपूर्वी route-guard स्तरही (LOCAL_ONLY / ALWAYS_PROTECTED) लागू करते — [मार्ग गार्ड स्तर](../security/ROUTE_GUARD_TIERS.md) पहा. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` मधील LOCAL_ONLY पथ (सध्या: `/api/mcp/`) Bearer कीमध्ये `manage` स्कोप असल्यास non-loopback वरून वापरता येतात; स्कोप कोणताही असला तरी इतर सर्व LOCAL_ONLY पथांसाठी strict-loopback बंधन कायम राहते.
 
-यशस्वी पॉलिसी `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` असलेला `AuthSubject` परत करते. प्रमाणीकरण लॉजिक पुन्हा चालवण्याऐवजी डाउनस्ट्रीम हँडलर `src/server/authz/assertAuth.ts` मधील `assertAuth(request, "CLIENT_API")` द्वारे तो वाचू शकतात.
+यशस्वी पॉलिसी `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` असलेला `AuthSubject` परत करते. प्रमाणीकरण लॉजिक पुन्हा चालवण्याऐवजी डाउनस्ट्रीम हँडलर `src/server/authz/assertAuth.ts` मधील `assertAuth(request, "CLIENT_API")` द्वारे तो वाचू शकतात.
 
 ## सार्वजनिक रूट्सची सूची
 
@@ -343,8 +344,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 प्रमाणीकृत विनंत्यांसाठी, अपस्ट्रीम (हँडलर-बाजूच्या) विनंती हेडर्समध्ये पुढील गोष्टीदेखील समाविष्ट असतात:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<शेवटचे-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<शेवटचे-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (पर्यायी)
 x-omniroute-auth-scopes:    स्वल्पविरामाने विभक्त केलेली सूची
 ```

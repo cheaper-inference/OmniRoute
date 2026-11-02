@@ -62,3 +62,15 @@ Nustatymų eksportas (`GET /api/settings/export-json`) įtraukia abu masyvus nep
 nustatymų lauką — skirtingai nuo `hidePaidModels` derinio žingsnių eksporto filtro, čia nėra pakartotinio įkėlimo
 rizikos: eksportuotame derinio žingsnyje įrašytas uždraustas ID yra paties operatoriaus aiškiai pasirinktas maršrutas,
 o ne tai, ką eksporto riba turėtų pašalinti.
+
+## Tik kombinacijų sąrašas (`exposeCombosOnly`)
+
+Atskira loginė reikšmė, taip pat įjungiama pasirinktinai ir pagal nutylėjimą `false`, diegimams, kuriuose kombinacijos yra vieša modelių sąsaja, o teikėjai tik užnugario sistemos. Kai ji `true`, viešas sąrašas (`GET /v1/models`, `GET /v1` ir kiti `/v1` aptikimo maršrutai, pagrįsti `getUnifiedModelsResponse()`) palieka tik eilutes su `owned_by: "combo"`: naudotojų kombinacijas ir įtaisytas `auto/*` kombinacijas (nebent jas paslepia `hideAutoCombos`). Naudojama ta pati eilučių patikra kaip rakto `catalogScope: "combos"`, o paties rakto leidimo/draudimo/apimties filtrai vis tiek taikomi papildomai.
+
+Perjunkite skiltyje **Settings → Routing → Models API listing** arba su `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Kaip ir ankstesni sąrašai, tai keičia tik viešą paskelbimą:
+
+- tiesioginis `provider/model` ID vis tiek nukreipiamas, o `GET /v1/models/{id}` jį vis tiek nustato;
+- skydelio katalogas (`GET /api/models/catalog`, naudojamas modelių parinkikliuose) nesusiaurinamas;
+- tai neperkeliama į `auto/*` kandidatų rinkinius, todėl `auto/*` kombinacijos išlaiko visą savo rinkinį.

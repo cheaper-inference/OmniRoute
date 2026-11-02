@@ -309,12 +309,12 @@ tới một route quản lý có thao tác thay đổi sẽ nhận HTTP 403
 Thứ bậc đó là `scopeSatisfies`. Nó không tham chiếu bảng MCP, và trình so khớp MCP
 cũng không tham chiếu thứ bậc này.
 
-| Không gian tên               | Thông tin xác thực                                                             | Trình kiểm tra                 | Việc vượt qua cho phép                                       |
-| :--------------------------- | :----------------------------------------------------------------------------- | :----------------------------- | :----------------------------------------------------------- |
-| Quản lý khóa API             | `api_keys.scopes`                                                              | `hasManageScope`               | REST quản lý cho khóa Bearer đó                              |
-| Phạm vi bổ sung của khóa API | cùng mảng, một chuỗi khớp chính xác                                            | hàm trợ giúp được nêu bên dưới | Chỉ riêng khả năng đó                                        |
-| Phạm vi công cụ MCP          | cùng mảng, nếu không thì MCP `_meta`, nếu không nữa thì `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | Công cụ đó, sau khi thực thi kiểm soát được bật              |
-| Access token                 | `oma_live_…`                                                                   | `scopeSatisfies`               | Route quản lý mà phương thức và đường dẫn yêu cầu thứ bậc đó |
+| Không gian tên               | Thông tin xác thực                                                                        | Trình kiểm tra                 | Việc vượt qua cho phép                                       |
+| :--------------------------- | :---------------------------------------------------------------------------------------- | :----------------------------- | :----------------------------------------------------------- |
+| Quản lý khóa API             | `api_keys.scopes`                                                                         | `hasManageScope`               | REST quản lý cho khóa Bearer đó                              |
+| Phạm vi bổ sung của khóa API | cùng mảng, một chuỗi khớp chính xác                                                       | hàm trợ giúp được nêu bên dưới | Chỉ riêng khả năng đó                                        |
+| Phạm vi công cụ MCP          | cùng mảng, nếu không thì MCP `_meta` (chỉ HTTP/SSE), nếu không thì `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                 | Công cụ đó, sau khi thực thi kiểm soát được bật              |
+| Access token                 | `oma_live_…`                                                                              | `scopeSatisfies`               | Route quản lý mà phương thức và đường dẫn yêu cầu thứ bậc đó |
 
 Việc cấp từng loại thông tin xác thực được trình bày trong
 [Xác thực quản lý](../guides/MANAGEMENT-AUTH.md).
@@ -363,7 +363,9 @@ Việc thực thi kiểm soát bị tắt trừ khi `OMNIROUTE_MCP_ENFORCE_SCOPE
 `false`). Khi tính năng này bị tắt, `evaluateToolScopes` cho phép lệnh gọi và bỏ qua
 danh mục. Khi được bật, HTTP sử dụng `api_keys.scopes` của khóa Bearer làm
 `authInfo` (xem [Liên kết phạm vi HTTP theo từng khóa](#per-key-http-scope-binding-7895)).
-Khi không phân giải được phạm vi nào của khóa, tập phạm vi được cấp sẽ chuyển sang MCP `_meta`, rồi đến
+Khi không có phạm vi khóa nào được phân giải, tập phạm vi được cấp chuyển sang MCP `_meta` (chỉ được tính đến
+với bên gọi HTTP/SSE, bên trong ngữ cảnh xác thực HTTP; `_meta` của bên gọi stdio bị bỏ qua
+vì client kiểm soát nó và nó không mang danh tính riêng của bên gọi), rồi đến
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Phạm vi access token
@@ -456,8 +458,7 @@ và truyền kết quả đó đến `transport.handleRequest(req, { authInfo })
 `_meta` và phương án dự phòng từ biến môi trường `OMNIROUTE_MCP_SCOPES` — thay đổi này chỉ điền dữ liệu cho nguồn đầu tiên,
 có mức ưu tiên cao nhất đó, vốn trước đây chưa được cung cấp qua HTTP. Khi không phân giải được khóa API nào
 (không có header hoặc khóa không hợp lệ), `authInfo` vẫn là `undefined` và quá trình phân giải sẽ chuyển xuống
-chuỗi dự phòng `meta`/biến môi trường hiện có mà không thay đổi. stdio không có danh tính riêng cho từng bên gọi (xem
-`mcpCallerIdentity.ts`) và không bị ảnh hưởng — nó vẫn sử dụng chuỗi dự phòng `_meta`/biến môi trường.
+chuỗi dự phòng `meta`/biến môi trường hiện có mà không thay đổi. stdio không có danh tính theo từng caller (xem `mcpCallerIdentity.ts`) và không bị ảnh hưởng bởi ràng buộc theo từng key — nó bỏ qua bước `_meta` (`_meta` chỉ được tôn trọng bên trong auth context HTTP, #15159) và phân giải chỉ từ env key `OMNIROUTE_MCP_SCOPES`.
 
 **Việc thực thi được bắt buộc bật đối với các bên gọi HTTP/SSE có phạm vi giới hạn, bất kể
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Việc `OMNIROUTE_MCP_ENFORCE_SCOPES` mặc định là `false` chỉ

@@ -66,6 +66,19 @@ Der `electron/`-Workspace stellt außerdem Folgendes bereit:
 - `npm run build:mac-x64` / `build:mac-arm64` — macOS-Builds für eine einzelne Architektur
 - `npm run pack` — erstellt für lokale Tests ausschließlich ein Verzeichnis (kein Installer)
 
+## Optionale Laufzeitpakete
+
+Desktop-Builds können neben ihren Installationsprogrammen optionale Laufzeitarchive veröffentlichen. Die installierten Serverdateien enthalten `optional-packs.index.json` (unter `resources/app` auf Windows und Linux). Lesen Sie für den Eintrag `browser-runtime` den Wert `packs[].tarball` und laden Sie **genau diese Datei aus derselben Veröffentlichung** herunter. Archivnamen enthalten einen SHA-256-Hash; verschiedene Builds können unterschiedliche Archive benötigen. Ändern Sie den Namen der heruntergeladenen Datei nicht.
+
+Kopieren Sie den Index der installierten Anwendung und das gewählte Archiv in dasselbe Verzeichnis und verwenden Sie dann die CLI derselben Veröffentlichung:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` zeigt den Installations- und Prüfstatus an, nicht den Archivnamen. Der mitgelieferte Index wählt das Archiv aus. Die Installation prüft vor dem Entpacken die Archivprüfsumme und vor dem Ersetzen eines installierten Pakets dessen Paketprüfsummen. Sie liest lokale Dateien; fehlende Archive werden nicht heruntergeladen. Starten Sie die Anwendung nach der Installation neu. Wenn die Veröffentlichung keine passende Datei enthält, ist das optionale Paket über deren Veröffentlichungsdateien nicht verfügbar.
+
 ## Verzeichnisstruktur
 
 ```

@@ -42,6 +42,10 @@ endepunkt ved hjelp av miljøvariabler (det har ikke noe `--base-url`-flagg):
 
 > Miljøvariabler leses **kun én gang ved oppstart** — start Claude Code på nytt etter at du har endret dem.
 
+For en legitimasjonsverdi som roteres i stedet for en fast streng, sett `apiKeyHelper` i `~/.claude/settings.json` til en kommando som skriver den gjeldende verdien til stdout. Claude Code mellomlagrer utdataene i fem minutter som standard (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` overstyrer dette) og sender verdien både i `Authorization: Bearer` og `x-api-key`. Skriptet må skrive ut bare legitimasjonsverdien: et ekstra banner får hjelperen til å feile i v2.1.227+.
+
+Slik fungerer Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` skriver ut et kortlivet Entra-tilgangstoken som OmniRoute verifiserer i stedet for en API-nøkkel. Se [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` angir alle disse for deg: Kommandoen finner basis-URL-en og tokenet
 fra den aktive konteksten (slik at `omniroute connect <vps>` etterfulgt av `omniroute launch`
 bare fungerer), helsesjekker serveren og kjører `claude`.

@@ -73,3 +73,15 @@ esportazione dei passaggi delle combinazioni di `hidePaidModels`, qui non vi è 
 ri-idratazione: un id negato incorporato in un passaggio di una combinazione esportata
 rappresenta una scelta esplicita di instradamento dell'operatore, non qualcosa che il confine di
 esportazione debba rimuovere.
+
+## Elenco dei soli combo (`exposeCombosOnly`)
+
+Un booleano separato, anch'esso ad attivazione esplicita e `false` per impostazione predefinita, per installazioni in cui i combo sono l'interfaccia pubblica dei modelli e i provider sono soltanto backend. Quando è `true`, l'elenco pubblico (`GET /v1/models`, `GET /v1` e le altre route di individuazione `/v1` costruite su `getUnifiedModelsResponse()`) conserva solo le righe con `owned_by: "combo"`: i combo dell'utente e i combo integrati `auto/*` (salvo che `hideAutoCombos` li nasconda). Usa lo stesso controllo di riga di `catalogScope: "combos"` per chiave, e i filtri di autorizzazione/negazione/ambito della chiave continuano ad applicarsi in aggiunta.
+
+Attivarlo o disattivarlo in **Impostazioni → Routing → Elenco API dei modelli**, oppure con `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Come gli elenchi precedenti, modifica solo ciò che viene annunciato:
+
+- un ID esplicito `provider/model` continua a essere inviato, e `GET /v1/models/{id}` continua a risolverlo;
+- il catalogo della dashboard (`GET /api/models/catalog`, usato dai selettori di modelli) non viene ristretto;
+- non viene rispecchiato nei pool di candidati `auto/*`, quindi i combo `auto/*` mantengono il pool completo.

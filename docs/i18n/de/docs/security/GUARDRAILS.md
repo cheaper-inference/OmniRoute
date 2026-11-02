@@ -624,8 +624,9 @@ SSE), beide standardmäßig deaktiviert.
   `src/shared/constants/piiTypes.ts` aufgeführt (`PII_BUILTIN_TYPES`). Nicht
   gesetzt bedeutet alle Typen (das Verhalten, bevor diese Einstellung
   existierte). Das Muster `ssn_us` der Anfrage-Engine wird auf `ssn`
-  abgebildet. Vorlagen (Minimal, Standard, Financial, Brazilian, USA, Full)
+  abgebildet. Vorlagen (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full)
   füllen lediglich die Kontrollkästchen in der Benutzeroberfläche.
+- **GDPR- und POPIA-Kennungen** — zwölf integrierte IDs für personenbezogene Kennungen aus der EU und Südafrika (Tabelle unten). Ihre regulären Ausdrücke, Validatoren und Rechtsraum-Tags stehen in einer gemeinsamen Tabelle, `src/shared/utils/piiPatterns.ts`, die sowohl die Antwortbereinigung (`src/lib/piiSanitizer.ts`) als auch die Anfragemaskierung (`src/shared/utils/inputSanitizer.ts`) verwenden. Ein Treffer wird nur dann geschwärzt, wenn sein Validator ihn akzeptiert; eine bloße Ziffernfolge reicht niemals aus. Betreiber, die vor Einführung dieser IDs eine eingeschränkte Auswahl gespeichert haben, behalten deren bisheriges Verhalten, bis die neuen IDs angekreuzt werden.
 - **Benutzerdefinierte Muster** — bis zu 20 Regex- oder Platzhaltermuster
   (`*` = bis zu 64 Nicht-Leerzeichen, `?` = eines). Treffer werden zu
   `[CUSTOM_REDACTED]`. Jedes Muster durchläuft `compilePiiCustomPattern()`
@@ -652,6 +653,25 @@ Die Einstellungen liegen in der Tabelle `key_value` (Namespace `pii_settings`,
 
 Alle drei erfordern eine Management-Authentifizierung und validieren den Body
 mit Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR- (EU) und POPIA-Kennungen (Südafrika)
+
+| ID                  | Kennung                         | Validierung                                                                                |
+| ------------------- | ------------------------------- | ------------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                            | Bekanntes Land, exakte Länge für dieses Land, ISO 13616 MOD-97-10                          |
+| `eu_vat`            | EU-Umsatzsteuer-ID              | Bekanntes Mitgliedstaatspräfix und Zahlenformat dieses Staats (keine VIES-Abfrage)         |
+| `es_dni_nie`        | Spanische DNI / NIE             | Kontrollbuchstabe (Wert mod 23); NIE ist `X/Y/Z` + 7 Ziffern                               |
+| `it_codice_fiscale` | Italienischer Codice Fiscale    | Kontrollbuchstabe aus Tabellen für ungerade/gerade Positionen                              |
+| `pl_pesel`          | Polnische PESEL                 | Gewichtete Prüfsumme und plausible Bereiche für codierten Geburtsmonat/-tag                |
+| `nl_bsn`            | Niederländische BSN             | 11-Probe (Gewichte 9..2, -1)                                                               |
+| `de_steuer_id`      | Deutsche Steuer-ID              | ISO 7064 Mod 11,10 sowie Regeln zur Ziffernstruktur (keine führende 0)                     |
+| `se_personnummer`   | Schwedische Personnummer        | Luhn über die letzten zehn Ziffern und plausibles Geburtsdatum (10 oder 12 Ziffern)        |
+| `za_id`             | Südafrikanische ID-Nummer       | Luhn über alle 13 Ziffern, gültiger Geburtsmonat/-tag, Staatsangehörigkeitsziffer 0 oder 1 |
+| `za_phone`          | Südafrikanische Telefonnummer   | Präfix `+27` / `27` oder nationale Form `0..` mit Leerzeichen oder Bindestrich             |
+| `za_vat`            | Südafrikanische Umsatzsteuer-ID | 10 Ziffern beginnend mit `4` **und** „VAT“ / „BTW“ in den 48 Zeichen davor                 |
+| `za_tax_ref`        | Südafrikanische Steuerreferenz  | 10 Ziffern beginnend mit `0`-`3`, Luhn **und** „tax“ / „SARS“ in den 48 Zeichen davor      |
+
+Da reine Ziffernformate mit Bestellnummern, Buildnummern und Zeitstempeln kollidieren, benötigen die schwächsten (`za_vat`, `za_tax_ref`) den Schlüsselworthinweis; eine bloße zehnstellige `0..`-Nummer gilt nicht als südafrikanische Telefonnummer. IBANs mit Leerzeichen (`GB29 NWBK ...`) werden nicht erkannt. Im Streaming-Pfad wird der Hinweis nur im aktuellen Chunk gesucht. Die IDs stehen vor den allgemeinen Telefonmustern, sodass eine validierte Kennung ihren eigenen Platzhalter behält (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Die Vorlagen `gdpr` und `popia` wählen jeweils EU- bzw. südafrikanische IDs. Die Maskierung selbst bleibt ausdrücklich zu aktivieren (Hard Rule #20): Hierdurch ändert sich kein Standardwert eines Feature-Flags.
 
 ### Prompt-Injection (`promptInjection.ts`)
 

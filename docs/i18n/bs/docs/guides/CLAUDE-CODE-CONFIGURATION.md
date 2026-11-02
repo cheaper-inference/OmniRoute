@@ -40,6 +40,10 @@ Claude Code komunicira putem **Anthropic Messages API**-ja i usmjeren je na pril
 
 > Varijable okruženja se čitaju **jednom pri pokretanju** — ponovo pokrenite Claude Code nakon što ih promijenite.
 
+Za pristupni podatak koji se rotira umjesto fiksnog niza, postavite `apiKeyHelper` u `~/.claude/settings.json` na naredbu koja ispisuje trenutni pristupni podatak na stdout. Claude Code podrazumijevano kešira njen izlaz pet minuta (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` mijenja taj rok) i šalje vrijednost i u `Authorization: Bearer` i u `x-api-key`. Skripta mora ispisati samo pristupni podatak; dodatni natpis uz njega uzrokuje neuspjeh pomoćnog programa u v2.1.227+.
+
+Tako radi Entra ID SSO: `scripts/cli/omniroute-sso.mjs token` ispisuje kratkotrajni Entra pristupni token koji OmniRoute provjerava umjesto API ključa. Pogledajte [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` postavlja sve ovo za vas: razrješava base URL + token iz aktivnog konteksta (tako da `omniroute connect <vps>` pa `omniroute launch` jednostavno radi), provjerava zdravlje servera i izvršava `claude`.
 
 ---

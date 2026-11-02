@@ -65,3 +65,15 @@ Fitar da saituna (`GET /api/settings/export-json`) tana haɗa arrays ɗin biyu y
 field na saituna — saɓanin tacewar export ta matakan combo ta `hidePaidModels`, babu haɗarin sake cika
 bayani a nan: id da aka hana wanda yake cikin combo step da aka fitar zaɓin routing ne da mai gudanarwar
 da kansa ya yi kai tsaye, ba wani abu da ake buƙatar iyakar export ta cire ba.
+
+## Jerin combo kawai (`exposeCombosOnly`)
+
+Wani boolean dabam, shi ma sai an zaɓi kunnawa kuma `false` ne a asali, domin deployment inda combo su ne model na jama'a, provider kuma backend kawai. Idan shi `true` ne, jerin jama'a (`GET /v1/models`, `GET /v1` da sauran discovery route na `/v1` da aka gina kan `getUnifiedModelsResponse()`) yana riƙe row masu `owned_by: "combo"` kawai: combo na mai amfani da built-in combo na `auto/*` (sai dai idan `hideAutoCombos` ya ɓoye su). Yana amfani da gwajin row iri ɗaya da `catalogScope: "combos"` na kowace key, kuma allow/deny/scope filter na key ɗin suna aiki a samansa.
+
+Kunna ko kashe shi a **Settings → Routing → Models API listing**, ko da `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Kamar jerin da ke sama, abin da ake sanarwa kawai yake canzawa:
+
+- id `provider/model` da aka bayyana har yanzu yana aika request, kuma `GET /v1/models/{id}` har yanzu yana gano shi;
+- dashboard catalog (`GET /api/models/catalog`, wanda model picker ke amfani da shi) ba a rage shi;
+- ba a kwafe shi cikin candidate pool na `auto/*`, don haka combo na `auto/*` suna riƙe cikakken pool ɗinsu.

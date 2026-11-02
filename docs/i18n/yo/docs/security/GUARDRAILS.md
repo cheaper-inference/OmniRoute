@@ -453,7 +453,8 @@ Guardrail kò ní dìí rárá; ó máa fi àlàyé kún un (`meta.detections`, 
 
 **Dashboard → Settings → Security → PII masking** ni ó ń yan _ohun_ tí a ó paarẹ́. Kò tan ìpaarẹ́ sílẹ̀: èyí ṣì jẹ́ iṣẹ́ `PII_REDACTION_ENABLED` (ìbéèrè) àti `PII_RESPONSE_SANITIZATION` (èsì + SSE), tí àwọn méjèèjì wà nípa ní àtọ́kànwá.
 
-- **Ìyàn irúfẹ́-kọ̀ọ̀kan** — àwọn id tí a kọ́ sínú wà nínú `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Tí a kò bá ṣètò ọ́, ó túmọ̀ sí gbogbo irúfẹ́ (ìwà tí ó wà kí ètò yìí tó dé). Àpẹẹrẹ `ssn_us` ti ẹ̀rọ ìbéèrè máa kan `ssn`. Àwọn àpẹẹrẹ tẹ́múlétì (Minimal, Standard, Financial, Brazilian, USA, Full) máa kún àwọn checkbox nínú UI nìkan.
+- **Ìyàn irúfẹ́-kọ̀ọ̀kan** — àwọn id tí a kọ́ sínú wà nínú `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Tí a kò bá ṣètò ọ́, ó túmọ̀ sí gbogbo irúfẹ́ (ìwà tí ó wà kí ètò yìí tó dé). Àpẹẹrẹ `ssn_us` ti ẹ̀rọ ìbéèrè máa kan `ssn`. Àwọn àpẹẹrẹ tẹ́múlétì (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) máa kún àwọn checkbox nínú UI nìkan.
+- **Àwọn àmì ìdánimọ̀ GDPR àti POPIA** — built-in id méjìlá tí ó bo àwọn àmì ìdánimọ̀ ara ẹni EU àti South Africa (tábìlì nísàlẹ̀). Regex, validator àti jurisdiction tag wọn wà nínú tábìlì kan, `src/shared/utils/piiPatterns.ts`, tí response sanitizer (`src/lib/piiSanitizer.ts`) àti request masker (`src/shared/utils/inputSanitizer.ts`) jọ ń lò. Match ni a ń fi pamọ́ kìkì bí validator rẹ̀ bá gba á; ọ̀wọ́ digit nìkan kò tó rárá. Operator tó ti tọ́jú àṣàyàn tó dín kù kí àwọn id wọ̀nyí tó wà ń pa ìhùwàsí àtijọ́ rẹ̀ mọ́ títí a ó fi yan id tuntun.
 - **Àwọn àpẹẹrẹ àdáni** — títí dé 20 àpẹẹrẹ regex tàbí wildcard (`*` = títí dé àwọn lẹ́tà 64 tí kì í ṣe whitespace, `?` = ọ̀kan). Àwọn ìbáramu máa di `[CUSTOM_REDACTED]`. Gbogbo àpẹẹrẹ máa lọ nípasẹ̀ `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): ó gbọdọ̀ má ká àwọn lẹ́tà 500, àwọn flag gbọdọ̀ wà nínú `g i m s u` nìkan, ó gbọdọ̀ ṣe é compile, ó gbọdọ̀ kọjá ìdánwò `safe-regex` (ìtúnpadàbọ̀ burúkú — catastrophic backtracking), kó sì gbọdọ̀ má bàa string òfo tàbí àfihàn ìpaarẹ́ (placeholder) mu. Àpẹẹrẹ tí ó bá kùnà ni a ó kọ̀ nígbà ìfipamọ́ àti nígbà ìdánwò, ilá tí a fipamọ́ tí ó bá kùnà sì ni a ó fo kọjá nígbà ìlàsìṣe (runtime) dípù ṣíṣe é compile. Àwọn àpẹẹrẹ àdáni máa ṣiṣẹ́ nígbà tí ìpaarẹ́ bá wà lásìṣe nìkan.
 - **Àwọn iṣirò ìṣàwárí** — àwọn iṣirò irúfẹ́-kọ̀ọ̀kan (kì í ṣe àwọn iye tí ó ba mu rárá), tí wọ́n fi pamọ́ sínú memory tí wọ́n sì máa tún ṣètò nígbà ìtúnbẹ̀rù (`src/lib/pii/piiDetectionStats.ts`). Wọ́n máa pọ̀ sí i nígbà tí ìpaarẹ́ bá wà lásìṣe nìkan.
 
@@ -466,6 +467,25 @@ Guardrail kò ní dìí rárá; ó máa fi àlàyé kún un (`meta.detections`, 
 | `POST` | `/api/settings/pii/test` | Ṣe ìdánwò àpẹẹrẹ kan lórí àpẹẹrẹ ayẹwo tó ká 8 KB jù lọ; kò sí ohun tí a fipamọ́ |
 
 Àwọn mẹ́tẹ̀ẹ̀ta nílò ìfàṣẹsìlẹ̀ ìṣàkóso, wọ́n sì máa ṣe ìfọwọ́sí body pẹ̀lú Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### Àwọn àmì ìdánimọ̀ GDPR (EU) àti POPIA (South Africa)
+
+| Id                  | Àmì ìdánimọ̀                  | Ìfìdímúlẹ̀                                                                                |
+| ------------------- | ---------------------------- | ---------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                         | Orílẹ̀-èdè tí a mọ̀, gígùn gangan fún orílẹ̀-èdè yẹn, ISO 13616 MOD-97-10                   |
+| `eu_vat`            | Nọ́mbà VAT EU                 | Prefix orílẹ̀-èdè ọmọ ẹgbẹ́ tí a mọ̀ àti ọ̀nà nọ́mbà orílẹ̀-èdè yẹn (láì sí VIES lookup)       |
+| `es_dni_nie`        | DNI / NIE Spain              | Lẹ́tà ìṣàyẹ̀wò (iye mod 23); NIE jẹ́ `X/Y/Z` + digit 7                                      |
+| `it_codice_fiscale` | Codice Fiscale Italy         | Lẹ́tà ìṣàyẹ̀wò láti tábìlì ipò odd/even                                                    |
+| `pl_pesel`          | PESEL Poland                 | Weighted checksum àti ààlà oṣù/ọjọ́ ìbí tí a encode tó bójú mu                            |
+| `nl_bsn`            | BSN Netherlands              | Ìdánwò 11 (weights 9..2, -1)                                                             |
+| `de_steuer_id`      | Steuer-ID Germany            | ISO 7064 Mod 11,10 àti òfin ìṣètò digit (kò ní 0 ní ìbẹ̀rẹ̀)                               |
+| `se_personnummer`   | personnummer Sweden          | Luhn lórí digit mẹ́wàá tó gbẹ̀yìn àti ọjọ́ ìbí tó ṣeé ṣe (digit 10 tàbí 12)                 |
+| `za_id`             | Nọ́mbà ID South Africa        | Luhn lórí gbogbo digit 13, oṣù/ọjọ́ ìbí tó tọ́, digit jíjẹ́ ọmọ orílẹ̀-èdè 0 tàbí 1          |
+| `za_phone`          | Tẹlifóònù South Africa       | Prefix `+27` / `27`, tàbí ọ̀nà orílẹ̀-èdè `0..` tí a kọ pẹ̀lú àlàfo tàbí àmì àsopọ̀          |
+| `za_vat`            | Nọ́mbà VAT South Africa       | Digit 10 tó bẹ̀rẹ̀ pẹ̀lú `4` **àti** "VAT" / "BTW" nínú character 48 tó wà níwájú rẹ̀        |
+| `za_tax_ref`        | Ìtọ́kasí owó-orí South Africa | Digit 10 tó bẹ̀rẹ̀ `0`-`3`, Luhn, **àti** "tax" / "SARS" nínú character 48 tó wà níwájú rẹ̀ |
+
+Nítorí ọ̀nà digit nìkan lè dà bí order number, build number àti timestamp, àwọn tó rọrùn jù láti ṣàṣìṣe (`za_vat`, `za_tax_ref`) nílò àmì keyword, a kò sì ka nọ́mbà `0..` digit mẹ́wàá nìkan sí nọ́mbà tẹlifóònù South Africa. IBAN tí ó ní àlàfo (`GB29 NWBK ...`) kì í match. Ní ọ̀nà streaming, a ń wá àmì náà nínú chunk tó ń lọ lọ́wọ́ nìkan. Àwọn id wà ṣáájú generic phone pattern, kí identifier tí a fìdí múlẹ̀ lè pa placeholder tirẹ̀ mọ́ (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Template `gdpr` àti `popia` ń yan id EU àti South Africa ní ìtòlẹ́sẹẹsẹ yẹn. Masking fúnra rẹ̀ ṣì nílò kí ẹni náà yàn láti mú un ṣiṣẹ́ (Hard Rule #20): kò sí ohun níbí tó yí ìṣètò àkọ́kọ́ feature flag padà.
 
 ### Ìtàniji Ìsọfúnni (Prompt Injection) (`promptInjection.ts`)
 

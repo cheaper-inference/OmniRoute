@@ -10,7 +10,7 @@ OmniRoute, üç özel pano sayfasına dağıtılmış üç CLI aracı kategorisi
 
 | Sayfa             | Rota                    | Kavram                                                                                | Sayı                  |
 | ----------------- | ----------------------- | ------------------------------------------------------------------------------------- | --------------------- |
-| **CLI Kodları**   | `/dashboard/cli-code`   | OmniRoute'a yönlendirdiğiniz kodlama araçları (İstemci → CLI → OmniRoute → Sağlayıcı) | 27                    |
+| **CLI Kodları**   | `/dashboard/cli-code`   | OmniRoute'a yönlendirdiğiniz kodlama araçları (İstemci → CLI → OmniRoute → Sağlayıcı) | 28                    |
 | **CLI Aracıları** | `/dashboard/cli-agents` | OmniRoute'a yönlendirdiğiniz otonom aracılar (aynı akış, daha geniş kapsam)           | 11                    |
 | **ACP Aracıları** | `/dashboard/acp-agents` | OmniRoute'un stdio/ACP aracılığıyla arka uç olarak başlattığı CLI'lar (ters akış)     | kayıt defterine bakın |
 
@@ -110,7 +110,7 @@ yüzeye eklenip diğerlerine eklenmeyen bir hedef, sessizce sapmaya yol açmak y
 
 ---
 
-## 1. CLI Code Kataloğu (27 araç)
+## 1. CLI Code Kataloğu (28 araç)
 
 `/dashboard/cli-code` içinde görünen tüm araçlar. `baseUrlSupport: none` olanlar, özel bir temel URL yerine MITM veya manuel bir rehber aracılığıyla yapılandırılır:
 
@@ -137,6 +137,7 @@ yüzeye eklenip diğerlerine eklenmeyen bir hedef, sessizce sapmaya yol açmak y
 | grok-build   | Grok Build              | xAI                   | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)           | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba               | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)         | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries        | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere             | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                | none           | mitm           | false        |
@@ -233,7 +234,7 @@ interface ToolBatchStatus {
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, eski)                                  |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, birincil + eski `~/.deepseek` eşitlemesi) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                 |
-| `POST /api/cli-tools/pi-settings`           | Pi kodlama aracısı                                                    |
+| `POST /api/cli-tools/pi-settings`           | Pi kodlama aracısı (`~/.pi/agent/models.json`, `providers.omniroute`) |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                 |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + özel `.env` anahtarı)            |
 
@@ -339,7 +340,7 @@ pip install aider-chat
 cargo install smelt  # Rust tabanlı
 
 # Pi kodlama aracısı
-# kurulum için https://github.com/zechnerj/pi-coding-agent adresine bakın
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # kurulum için https://github.com/1jehuang/jcode adresine bakın
@@ -452,6 +453,38 @@ EOF
 
 > Düşünme varyantlarını göndermek için
 > `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` kullanın.
+
+---
+
+#### Pi Coding Agent
+
+Resmî Pi Coding Agent paketini `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent` ile kurun. Pi, özel sağlayıcıları `~/.pi/agent/models.json` dosyasından okur; tüm ajan dizinini taşımak için `PI_CODING_AGENT_DIR` değerini mutlak bir yola (veya `~` önekli bir yola) ayarlayın. Pano bu geçersiz kılmayı izler. Pi, özel uç noktalardaki modelleri keşfetmez; bu nedenle OmniRoute, Pi'nin `openai-completions` API'sini ve OmniRoute'un OpenAI uyumlu `/v1` uç noktasını kullanarak seçilen modeli `models[]` içine yazar.
+
+**CLI Tools → Pi** bölümünde uç noktayı, API anahtarını ve modeli seçin, sağlayıcı önizlemesini inceleyin ve uygulayın. Önizleme bir sağlayıcı parçasıdır: Pi'yi elle yapılandırırken diğer sağlayıcı ve ayarların korunması için `providers.omniroute` bölümünü mevcut `models.json` dosyanızla birleştirin.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi, `/model` açıldığında `models.json` dosyasını yeniden yükler. Yapılandırılan yolu seçtiğiniz sağlayıcı ve model kimliğiyle sınayın:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Başvurular: [Pi modelleri ve özel sağlayıcılar](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi ortam değişkenleri](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi kurulum yönergeleri](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

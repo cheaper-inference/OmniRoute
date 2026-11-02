@@ -14,7 +14,7 @@ sa Claude Code — mga operasyonal na pagpipino ng mga tuntuning tinukoy na sa `
 ## Paghihiwalay ng worktree — mga detalyeng partikular sa Claude Code
 
 Ang buong sapilitang protocol ng worktree (pagkumpirma ng base branch, ang kanonikal na path na `.claude/worktrees/`, `cp -al` node_modules, mga tuntunin sa teardown) ay nasa
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (may buod sa `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (may buod sa `AGENTS.md` →
 Git Workflow → "Worktree isolation"). Mga puntong partikular sa Claude Code:
 
 - Kumpirmahin ang base branch sa operator gamit ang `AskUserQuestion` (Hard Rule #19) maliban kung

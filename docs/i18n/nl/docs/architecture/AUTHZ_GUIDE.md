@@ -155,9 +155,10 @@ Elke routeklasse heeft een policy in `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — retourneert altijd `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extraheert Bearer en valideert deze via `validateApiKey()`. Valt alleen terug op anonieme toegang wanneer de effectieve featureflag `REQUIRE_API_KEY` is uitgeschakeld. De effectieve vlag wordt bepaald via `isRequireApiKeyEnabled()` (`overschrijving door DB-featureflag > process.env.REQUIRE_API_KEY > standaardwaarde`), zodat Dashboard-featureflags en omgevingsvariabelen `/api/v1/*`, `/api/v1beta/*` en aliassen consistent beheren; fouten in de resolver leiden tot weigering. Staat verzoeken met een dashboardsessie toe op client-API-routes (waaronder `/api/v1/models`, gebruikt door de modelcatalogus van het dashboard).
+  Wanneer Entra ID SSO is ingeschakeld, behandelt de SSO-tak een Bearer die qua structuur een Entra-token is (drie base64url-segmenten, algoritme `RS*`, `kid`) **vóór** `validateApiKey()`. Het oordeel is definitief: het token komt nooit alsnog in het API-sleutelpad of de terugval naar anonieme toegang terecht. Een storing bij de identiteitsprovider kan daardoor geen vrije toegang opleveren. Statische API-sleutels blijven ongewijzigd werken. Zie [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — accepteert een dashboardsessie en interne modelsynchronisatieverzoeken (gematcht met `/api/providers/[name]/(sync-models|models)`), of slaat alles over als `isAuthRequired()` false retourneert. Retourneert 403 (`AUTH_001`) wanneer een Bearer-token aanwezig maar ongeldig is, anders 401. Dwingt ook de routebeveiligingsniveaus (LOCAL_ONLY / ALWAYS_PROTECTED) af vóór elke authenticatievertakking — zie [Routebeveiligingsniveaus](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY-paden in `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (momenteel: `/api/mcp/`) zijn toegankelijk vanaf niet-loopbackadressen wanneer de Bearer-sleutel het bereik `manage` bevat; alle andere LOCAL_ONLY-paden blijven strikt beperkt tot loopback, ongeacht het bereik.
 
-Een geslaagde policy retourneert `AuthSubject` met `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Downstream-handlers kunnen dit lezen via `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` in plaats van de authenticatielogica opnieuw uit te voeren.
+Een geslaagde policy retourneert `AuthSubject` met `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Downstream-handlers kunnen dit lezen via `assertAuth(request, "CLIENT_API")` in `src/server/authz/assertAuth.ts` in plaats van de authenticatielogica opnieuw uit te voeren.
 
 ## Lijst met openbare routes
 
@@ -316,8 +317,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Voor geauthenticeerde verzoeken bevatten de upstream verzoekheaders (aan de handlerzijde) ook:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<laatste-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<laatste-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optioneel)
 x-omniroute-auth-scopes:    door komma's gescheiden lijst
 ```

@@ -5,8 +5,8 @@
 ---
 
 > **Versiya:** v3.8.44
-> **Oxirgi yangilanish:** 2026-09-16
-> **Auditoriya:** Oʻrnatilgan xizmatlarni (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua) qoʻshuvchi, ularga texnik xizmat koʻrsatuvchi yoki ularni nosozliklardan xalos qiluvchi muhandislar.
+> **Oxirgi yangilanish:** 2026-10-28
+> **Kimlar uchun:** Ichki xizmatlarni qo‘shuvchi, saqlab turuvchi yoki ulardagi xatolarni tuzatuvchi muhandislar (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Oʻrnatilgan xizmatlar — OmniRoute tomonidan oʻrnatiladigan, nazorat qilinadigan va toʻlaqonli marshrutlash maqsadlari sifatida taqdim etiladigan, lokal oʻrnatilgan yordamchi jarayon vositalaridir. Tashqi provayderlardan (ularga internet orqali API kalitlari yordamida ulaniladi) farqli ravishda, oʻrnatilgan xizmatlar OmniRoute bilan bir xil qurilmada ishlaydi va loopback interfeysi orqali aloqa qiladi.
 
@@ -29,19 +29,20 @@ Oʻrnatilgan xizmatlar — OmniRoute tomonidan oʻrnatiladigan, nazorat qilinadi
 
 ### Nima uchun ichki xizmatlar?
 
-Yettita xizmat ichki tarzda o‘rnatilgan:
+Sakkizta xizmat ichki o‘rnatilgan:
 
-| Xizmat          | npm paketi                            | Standart port | Maqsad                                                                                                                                                                                                                                                                                                                                                                          |
-| --------------- | ------------------------------------- | :-----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                             |     20130     | OmniRoute quyi provayder sifatida foydalanishi mumkin bo‘lgan AI routeri. Modellar `9router/{sub}/{model}` ko‘rinishida taqdim etiladi                                                                                                                                                                                                                                          |
-| **CLIProxyAPI** | GitHub reliz binar fayli (`cliproxy`) |     8317      | Anthropic CLI autentifikatsiya oqimlari uchun mahalliy proksi adapteri. OAuth tokenlarining muddati tugaganda zaxira marshrutlashni ta’minlaydi                                                                                                                                                                                                                                 |
-| **Mux**         | `mux` (interfeyssiz `mux server`)     |     8322      | Mahalliy agentlarni muvofiqlashtirish demoni (coder/mux). Faqat hayotiy sikli boshqariladi — marshrutlash nishoni emas (LLM proksilash mavjud emas).                                                                                                                                                                                                                            |
-| **Bifrost**     | `@maximhq/bifrost`                    |     8080      | Go asosidagi AI-shlyuz retranslyatsiya bekendi. Ishlayotganda retranslyatsiya marshruti (`/v1/relay/`) tomonidan avtomatik tanlanadi                                                                                                                                                                                                                                            |
-| **Dario**       | `@askalf/dario`                       |     3456      | Claude obunasi proksisi — Claude-Code formatidagi trafik uchun CLIProxyAPI’ga muqobil/zaxira variant; kiritilgan kalit uning `/admin/*` OAuth boshqaruv qatlamini himoyalovchi `DARIO_ADMIN_TOKEN`ga aylanadi                                                                                                                                                                   |
-| **open-wa**     | `@open-wa/wa-automate`                |     8323      | WhatsApp Web avtomatlashtirish vositasi (Puppeteer orqali interfeyssiz Chromium). Faqat hayotiy sikli boshqariladi — marshrutlash nishoni emas.                                                                                                                                                                                                                                 |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                  |     20135     | Promptni siqish uchun yordamchi xizmat — haqiqiy LLMLingua-2 ONNX modeli (Microsoft algoritmining JS/TS porti). `open-sse/services/compression/engines/llmlingua/index.ts` `/compress` so‘rovini HTTP orqali unga yo‘naltiradi; yordamchi xizmat ishlamayotganda jarayon ichidagi worker-thread bekendiga o‘tadi. Faqat hayotiy sikli boshqariladi — marshrutlash nishoni emas. |
+| Xizmat          | npm paketi                                             | Standart port | Maqsad                                                                                                                                                                                                                                                                                                                                                                          |
+| --------------- | ------------------------------------------------------ | :-----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                                              |     20130     | OmniRoute quyi provayder sifatida foydalanishi mumkin bo‘lgan AI routeri. Modellar `9router/{sub}/{model}` ko‘rinishida taqdim etiladi                                                                                                                                                                                                                                          |
+| **CLIProxyAPI** | GitHub reliz binar fayli (`cliproxy`)                  |     8317      | Anthropic CLI autentifikatsiya oqimlari uchun mahalliy proksi adapteri. OAuth tokenlarining muddati tugaganda zaxira marshrutlashni ta’minlaydi                                                                                                                                                                                                                                 |
+| **Mux**         | `mux` (interfeyssiz `mux server`)                      |     8322      | Mahalliy agentlarni muvofiqlashtirish demoni (coder/mux). Faqat hayotiy sikli boshqariladi — marshrutlash nishoni emas (LLM proksilash mavjud emas).                                                                                                                                                                                                                            |
+| **Bifrost**     | `@maximhq/bifrost`                                     |     8080      | Go asosidagi AI-shlyuz retranslyatsiya bekendi. Ishlayotganda retranslyatsiya marshruti (`/v1/relay/`) tomonidan avtomatik tanlanadi                                                                                                                                                                                                                                            |
+| **Dario**       | `@askalf/dario`                                        |     3456      | Claude obunasi proksisi — Claude-Code formatidagi trafik uchun CLIProxyAPI’ga muqobil/zaxira variant; kiritilgan kalit uning `/admin/*` OAuth boshqaruv qatlamini himoyalovchi `DARIO_ADMIN_TOKEN`ga aylanadi                                                                                                                                                                   |
+| **open-wa**     | `@open-wa/wa-automate`                                 |     8323      | WhatsApp Web avtomatlashtirish vositasi (Puppeteer orqali interfeyssiz Chromium). Faqat hayotiy sikli boshqariladi — marshrutlash nishoni emas.                                                                                                                                                                                                                                 |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                                   |     20135     | Promptni siqish uchun yordamchi xizmat — haqiqiy LLMLingua-2 ONNX modeli (Microsoft algoritmining JS/TS porti). `open-sse/services/compression/engines/llmlingua/index.ts` `/compress` so‘rovini HTTP orqali unga yo‘naltiradi; yordamchi xizmat ishlamayotganda jarayon ichidagi worker-thread bekendiga o‘tadi. Faqat hayotiy sikli boshqariladi — marshrutlash nishoni emas. |
+| **sing-box**    | GitHub relizining bajariluvchi binar fayli (`singbox`) |     20140     | `applyTproxy()` dagi shaffof proksi orqali trafikni tutib olishni ta’minlovchi TPROXY yordamchi jarayoni (`src/mitm/tproxy/setup.ts`). O‘rnatuvchi versiyasi qat’iy belgilangan, nazorat summasi tekshirilgan relizni yuklab oladi. Faqat hayot sikli boshqariladi — u marshrutlash nishoni emas va LLM proksisi vazifasini bajarmaydi.                                         |
 
-Barcha yettita xizmat bir xil nazorat modeliga amal qiladi:
+Sakkizalasida ham bir xil nazorat modeli ishlatiladi:
 
 - OmniRoute ularni `DATA_DIR/services/{name}/` ichiga o‘rnatadi (OmniRoute’ning o‘z `package.json` faylidan ajratilgan)
 - OmniRoute ularni quyi jarayonlar sifatida ishga tushiradi va kuzatadi
@@ -587,7 +588,27 @@ jarayon ichidagi worker-thread backendiga (`./worker.ts`) qaytiladi.
 
 ---
 
-### 4.8 Teskari proksi (9Router boshqaruv panelini ichki joylashtirish)
+### 4.8 sing-box endpointlari (8 ta marshrut)
+
+sing-box endpointlari Mux bilan bir xil tuzilishga ega — `rotate-key` marshruti ham, API kalitini kiritish ham yo‘q (`bootstrap.ts` da `needsApiKey: false`). Faqat uning hayot sikli boshqariladi; u hech qachon marshrutlash yoki LLM provayderi bo‘lmaydi. `install()` qat’iy belgilangan versiya (`src/lib/services/installers/singbox.ts` dagi `SINGBOX_PINNED_VERSION`) uchun GitHub relizining rasmiy binar faylini (`SagerNet/sing-box`) yuklab oladi va diskka yozishdan oldin uning SHA256 qiymatini o‘sha fayl ichiga kiritilgan nazorat summasiga solishtiradi. Boshqa har qanday so‘ralgan versiya rad etiladi.
+
+| Usul   | Yo‘l                                         | Tavsif                                                                                                     |
+| ------ | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | sing-box ning qat’iy belgilangan relizini yuklab olish va tekshirish                                       |
+| `POST` | `/api/services/singbox/start`                | sing-box ni ishga tushirish (`sing-box run -c config.json`)                                                |
+| `POST` | `/api/services/singbox/stop`                 | sing-box ni to‘xtatish                                                                                     |
+| `POST` | `/api/services/singbox/restart`              | sing-box ni qayta ishga tushirish                                                                          |
+| `POST` | `/api/services/singbox/update`               | Qat’iy belgilangan relizni qayta tekshirish yoki qayta o‘rnatish                                           |
+| `GET`  | `/api/services/singbox/status`               | Joriy holat va ma’lumotlar bazasidagi holat                                                                |
+| `POST` | `/api/services/singbox/auto-start`           | Avtomatik ishga tushirishni yoqish yoki o‘chirish                                                          |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Boshqaruvga olingan, avvaldan mavjud jarayon uchun avtomatik qayta ishga tushirishni yoqish yoki o‘chirish |
+| `GET`  | `/api/services/singbox/logs`                 | SSE orqali yangi jurnal yozuvlarini kuzatish (umumiy dinamik `[name]/logs` marshruti orqali)               |
+
+**TPROXY ulanishi:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) `config.json` ni yozadi va `applyTproxy()` TPROXY xavfsizlik devori qoidalarini o‘rnatishidan oldin nazoratchini ishga tushiradi. Nazoratchi mavjud bo‘lmasa yoki `running` holatiga o‘ta olmasa, nosozlikni indamay yutish o‘rniga endi xato darajasida jurnalga yoziladi. Shu orqali operator TPROXY qoidalari qo‘llangan bo‘lsa-da, ularning ortida ishlaydigan tinglovchi yo‘qligini ajrata oladi.
+
+---
+
+### 4.9 Teskari proksi (9Router boshqaruv panelini ichki joylashtirish)
 
 Boshqaruv paneli 9Router veb-interfeysini iframe ichiga quyidagi manzildagi ichki
 teskari proksi orqali joylashtiradi:

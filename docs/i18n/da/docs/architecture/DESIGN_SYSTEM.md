@@ -157,11 +157,9 @@
 
 ## 5. Opdatering af kittet
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopierer upstream-`src/` ved det pågældende commit ind i
-`packages/ui-kit/src` og anvender den eneste tilladte transformation (den fjerner `.js`-endelsen fra
-relative imports). Derefter: gennemgå `git diff packages/ui-kit`, lav et visuelt gennemsyn af udbydere,
-indstillinger, kombinationer, forbrug og endpoint i begge temaer, kør `npm run check:ui-kit-snapshot` og
-`npm run test:vitest:ui`, og åbn PR'en med upstream-ændringsloggen.
+`npm run check:ui-kit-upstream` sammenligner den version, der er fastgjort i `packages/ui-kit/UPSTREAM.md` med det nyeste `v*` tag i upstream-repoen og udskriver synkroniseringskommandoen, når en udgivelse er ude. Den ugentlige `UI Kit upstream watch` -arbejdsgang (`.github/workflows/ui-kit-upstream-watch.yml`) kører det samme tjek og holder ét sporingsproblem åbent, mens stiften er bagved; upstream-repoen er privat, så arbejdsgangen har brug for et skrivebeskyttet token i `UI_KIT_READ_TOKEN` hemmeligheden og forbliver inaktiv uden det.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopierer upstream `src/` ved den commit (`latest` = det nyeste `v*` tag) ind i `packages/ui-kit/src`, anvender den enkelte tilladte transformation (den dropper `.js` suffikset fra relativ import) og indstiller workspace versionen i `packages/ui-kit/package.json` og `package-lock.json` til upstream. Derefter: gennemgå `git diff packages/ui-kit`, lav en visuel pass på udbydere, indstillinger, kombinationer, brug og slutpunkt i begge temaer, kør `npm run check:ui-kit-snapshot` og `npm run test:vitest:ui`, og åbn PR med upstream changelog.
 
 ## 6. README-diagrammer
 

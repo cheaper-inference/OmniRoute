@@ -29,6 +29,7 @@ Podrobnosti o protokolu kompatibilním s OpenAI a matici funkcí poskytovatelů 
 - [Streamování přes WebSocket](#websocket-streaming)
 - [Kvóty a hlášení problémů](#quotas--issues-reporting)
 - [Sémantická mezipaměť](#semantic-cache)
+- [Kompatibilita se správou CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [Řídicí panel a správa](#dashboard--management)
 - [Správa kombinací](#combo-management)
 - [Webhooky](#webhooks)
@@ -993,6 +994,18 @@ výsledek.
 
 **Ověření:** API klíč typu Bearer (`isAuthenticated`).
 
+### Obnovení relace po vyčerpání kvóty (volitelné)
+
+Nestreamovaný `POST /v1/chat/completions` nebo `POST /v1/responses`, který selže s konečnou chybou kvóty (`402`/`429`/`503`, jejíž tělo uvádí vyčerpání kvóty nebo kreditů), lze odložit a přehrát později místo vrácení chyby. Volající to pro každý požadavek zapíná třemi hlavičkami:
+
+| Hlavička                     | Hodnota                                            |
+| ---------------------------- | -------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                             |
+| `x-omniroute-session`        | ID relace, `[A-Za-z0-9._:-]{1,128}`                |
+| `x-omniroute-recovery-turn`  | ID tahu jedinečné v rámci relace (stejné pravidlo) |
+
+Způsobilé jsou pouze tahy `stream: false` bez nástrojů, historie nástrojů nebo `previous_response_id` a bez připnutí `x-omniroute-connection`; musí být nastavena `STORAGE_ENCRYPTION_KEY` (požadavek se ukládá zašifrovaný až na 24 h). Odpověď je pak `202` s `recovery.poll`; stav zjišťujte přes `GET /v1/quota-recoveries/{id}` (`202` při čekání, `200` s obnoveným tělem po dokončení) nebo zrušte pomocí `DELETE`. Tikety vidí pouze API klíč, který je vytvořil. Přehrání s nejistým výsledkem skončí ve stavu `needs_confirmation` místo dvojího odeslání. Zdroj: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Samoobslužné využití (`/api/usage/om-usage`)
@@ -1161,6 +1174,28 @@ Libovolný požadavek může obejít mezipaměť bez ohledu na nastavení klíč
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Kompatibilita se správou CLIProxyAPI
+
+OmniRoute obsluhuje tři správní endpointy [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI), které dashboardy využití volají pro čtení limitů předplatného Claude a Codex (například zdroj limitů využití `cliproxy` v T3 Code). Nasměrujte základní URL klienta na OmniRoute a jako správní klíč použijte API klíč s rozsahem `manage`. Trasy jsou dostupné na `/v0/management/*` i `/api/v0/management/*`.
+
+| Metoda | Cesta                        | Popis                                                                                                                         |
+| ------ | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | OAuth připojení Claude a Codex jako `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Bez tokenů        |
+| POST   | `/v0/management/api-call`    | Tělo `{ auth_index, method, url, header?, data? }`. Odesílá povolený požadavek s tokenem účtu a vrací `{ status_code, body }` |
+| POST   | `/v0/management/reset-quota` | Tělo `{ auth_index }`. Vymaže čekací dobu připojení, blokace modelů a čekací doby Codex podle rozsahu u jednoho účtu          |
+
+- `auth_index` je ID připojení OmniRoute. `provider` je `claude` nebo `codex` (pouze OAuth připojení; poskytovatel s API klíčem `anthropic` se neuvádí). U Codex je `id_token.chatgpt_account_id` uložené ID pracovního prostoru a `plan_type` uložený tarif.
+- `api-call` není obecná proxy. Přijímá pouze Claude `GET
+https://api.anthropic.com/api/oauth/usage` a Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` a `POST .../wham/rate-limit-reset-credits/consume`, vždy pouze pro účet odpovídajícího poskytovatele. Cokoli jiného vrací `403` bez kontaktování upstreamu. Hlavička `Authorization` volajícího (včetně zástupného symbolu `$TOKEN$`) se ignoruje: OmniRoute vloží přístupový token připojení, nejprve jej obnoví, pokud se blíží vypršení, a předá pouze povolené hlavičky (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Chybějící `Chatgpt-Account-Id` má jako výchozí hodnotu uložené ID pracovního prostoru. Je-li první odpověď upstreamu `401`, provede se jedno obnovení a opakování pouze tehdy, pokud se přístupový token změní. Každý pokus k upstreamu má časový limit 15 sekund a používá proxy připojení.
+- `reset-quota` nemění koncové stavy (banned, expired, credits_exhausted). Neznámý `auth_index` vrací `404`.
+
+**Ověření:** relace dashboardu nebo API klíč s rozsahem `manage`, povinné i při vypnutém přihlašování (cesty jsou v `ALWAYS_PROTECTED_API_PATHS`). Klíče pouze pro inferenci dostanou `403`. Zdroj: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

@@ -13,7 +13,7 @@
 
 ## តើវាជាអ្វី
 
-OmniRoute បានចុះបញ្ជី providers ចំនួន 377 រួមទាំង catalog entries ចំនួន 155 ដែលបានសម្គាល់ជា **ឥតគិតថ្លៃ/no-auth**
+OmniRoute បានចុះបញ្ជី providers ចំនួន 380 រួមទាំង catalog entries ចំនួន 155 ដែលបានសម្គាល់ជា **ឥតគិតថ្លៃ/no-auth**
 (no-auth,
 OAuth កម្រិតឥតគិតថ្លៃ ឬ API key កម្រិតឥតគិតថ្លៃ — សូមមើល
 [មគ្គុត្តេសក៍ Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) និង

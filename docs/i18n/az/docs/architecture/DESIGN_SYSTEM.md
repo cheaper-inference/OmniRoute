@@ -92,7 +92,9 @@
 
 ## 5. Kit-in yenilənməsi
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` həmin commit-dəki upstream `src/` qovluğunu `packages/ui-kit/src` qovluğuna köçürür və icazə verilən yeganə transformasiyanı tətbiq edir (relative import-lardan `.js` sonluğunu atır). Sonra: `git diff packages/ui-kit` əmrini nəzərdən keçirin, hər iki temada provayderlər, tənzimləmələr, kombolar, istifadə və endpoint üzərində vizual yoxlama aparın, `npm run check:ui-kit-snapshot` və `npm run test:vitest:ui` əmrlərini işə salın və PR-ı upstream changelog ilə birlikdə açın.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` də bərkidilmiş versiyanı yuxarı repo-nun ən yeni `v*` teqi ilə müqayisə edir və yeni buraxılış çıxdıqda sinxronizasiya əmrini çap edir. Həftəlik `UI Kit upstream watch` iş axını (`.github/workflows/ui-kit-upstream-watch.yml`) eyni yoxlamanı həyata keçirir və pin arxada olarkən bir izləmə məsələsini açıq saxlayır; yuxarı repo özəldir, ona görə də iş axını `UI_KIT_READ_TOKEN` sirrində yalnız oxumaq üçün işarəyə ehtiyac duyur və onsuz inert qalır.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` həmin öhdəçilikdə yuxarı axın `src/` (`latest` = ən yeni `v*` teq) `packages/ui-kit/src` ə kopyalayır, tək icazə verilən transformasiyanı tətbiq edir (nisbi idxaldan `.js` şəkilçisini çıxarır) və iş sahəsinin `packages/ui-kit/package.json` və `package-lock.json` versiyasını yuxarı axına təyin edir. Sonra: `git diff packages/ui-kit` nəzərdən keçirin, hər iki mövzuda provayderlər, parametrlər, kombinasiyalar, istifadə və son nöqtə haqqında vizual keçid edin, `npm run check:ui-kit-snapshot` və `npm run test:vitest:ui` işə salın və yuxarı axın dəyişiklik jurnalı ilə PR açın.
 
 ## 6. README diaqramları
 

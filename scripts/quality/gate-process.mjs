@@ -38,6 +38,7 @@ export async function runGateProcess(command, args, options) {
   let exitCode = null;
   let exitSignal = null;
   let cleanupError = null;
+  let processGroupObservation = null;
   let resolveDone;
   const done = new Promise((resolve) => {
     resolveDone = resolve;
@@ -120,7 +121,8 @@ export async function runGateProcess(command, args, options) {
             if (process.platform === "linux") {
               // kill(pgid, 0) also finds exited zombies awaiting the OS parent or
               // subreaper. Inspect executable members; incomplete scans stay red.
-              const group = listProcessGroupMembers(child.pid);
+              const group = listProcessGroupMembers(child.pid, { includeDiagnostics: true });
+              processGroupObservation = group.diagnostics;
               if (group.unknown) terminate("CLEANUP_ERROR");
               else if (group.members.length > 0) terminate("ORPHANED_DESCENDANTS");
             } else {
@@ -128,7 +130,10 @@ export async function runGateProcess(command, args, options) {
               terminate("ORPHANED_DESCENDANTS");
             }
           } catch (error) {
-            if (error.code !== "ESRCH") terminate("CLEANUP_ERROR");
+            if (error.code !== "ESRCH") {
+              processGroupObservation = { status: "UNKNOWN", reasonCode: "PROCESS_SCAN_EXCEPTION" };
+              terminate("CLEANUP_ERROR");
+            }
           }
         }
       });
@@ -178,6 +183,7 @@ export async function runGateProcess(command, args, options) {
     signal: exitSignal,
     spawnError,
     cleanupError,
+    processGroupObservation,
     logPath,
   };
   const receiptPath = `${logPath}.json`;

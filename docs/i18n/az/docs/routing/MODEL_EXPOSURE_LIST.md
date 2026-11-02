@@ -65,3 +65,15 @@ iki massivi dəyişdirilmədən ehtiva edir — `hidePaidModels`-in kombinasiya 
 filtrindən fərqli olaraq, burada yenidən hidratasiya riski yoxdur: ixrac edilmiş kombinasiya
 addımına daxil edilmiş qadağan olunmuş id operatorun öz açıq yönləndirmə seçimidir və ixrac
 sərhədində silinməli olan bir şey deyil.
+
+## Yalnız kombinasiyaların siyahısı (`exposeCombosOnly`)
+
+Kombinasiyaların ictimai model interfeysi, provayderlərin isə yalnız arxa tərəf olduğu yerləşdirmələr üçün ayrıca boolean dəyərdir; bu da ixtiyaridir və standart olaraq `false` olur. `true` olduqda ictimai siyahı (`GET /v1/models`, `GET /v1` və `getUnifiedModelsResponse()` üzərində qurulan digər `/v1` kəşf marşrutları) yalnız `owned_by: "combo"` olan sətirləri saxlayır: istifadəçi kombinasiyaları və daxili `auto/*` kombinasiyaları (`hideAutoCombos` gizlətmirsə). Açar üzrə `catalogScope: "combos"` ilə eyni sətir yoxlamasını istifadə edir və açarın öz icazə/qadağa/səlahiyyət filtrləri əlavə olaraq qüvvədə qalır.
+
+Bunu **Ayarlar → Marşrutlaşdırma → Models API siyahısı** bölməsində və ya `PATCH /api/settings {"exposeCombosOnly": true}` ilə dəyişin.
+
+Yuxarıdakı siyahılar kimi, yalnız elan edilənləri dəyişir:
+
+- açıq `provider/model` ID-si yenə göndərilir və `GET /v1/models/{id}` onu yenə həll edir;
+- panel kataloqu (`GET /api/models/catalog`, model seçicilərinin istifadə etdiyi) daralmır;
+- `auto/*` namizəd hovuzlarına köçürülmür, buna görə `auto/*` kombinasiyaları tam hovuzunu saxlayır.

@@ -29,6 +29,7 @@ Katso OpenAI-yhteensopivaa protokollaa ja palveluntarjoajien ominaisuusmatriisia
 - [WebSocket-suoratoisto](#websocket-streaming)
 - [Kiintiöt ja ongelmien raportointi](#quotas--issues-reporting)
 - [Semanttinen välimuisti](#semantic-cache)
+- [CLIProxyAPI-hallinnan yhteensopivuus](#cliproxyapi-management-compatibility)
 - [Koontinäyttö ja hallinta](#dashboard--management)
 - [Yhdistelmien hallinta](#combo-management)
 - [Webhookit](#webhooks)
@@ -1013,6 +1014,18 @@ valmistuneen vastauksen.
 
 **Todennus:** Bearer-API-avain (`isAuthenticated`).
 
+### Kiintiöistunnon palautus (erikseen käyttöön otettava)
+
+Ei-suoratoistava `POST /v1/chat/completions`- tai `POST /v1/responses`-pyyntö, joka epäonnistuu lopulliseen kiintiövirheeseen (`402`/`429`/`503`, jonka sisältö ilmoittaa kiintiön tai saldojen loppuneen), voidaan pysäköidä ja toistaa myöhemmin virheen palauttamisen sijaan. Kutsuja ottaa toiminnon käyttöön pyyntökohtaisesti kolmella otsakkeella:
+
+| Otsake                       | Arvo                                                    |
+| ---------------------------- | ------------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                                  |
+| `x-omniroute-session`        | istuntotunnus, `[A-Za-z0-9._:-]{1,128}`                 |
+| `x-omniroute-recovery-turn`  | istunnon sisällä yksilöllinen vuorotunnus (sama sääntö) |
+
+Vain `stream: false`-vuorot ilman työkaluja, työkaluhistoriaa tai `previous_response_id`-arvoa ja ilman `x-omniroute-connection`-kiinnitystä kelpaavat, ja `STORAGE_ENCRYPTION_KEY` on asetettava (pyyntö tallennetaan salattuna enintään 24 h ajaksi). Vastaus on tällöin `202` ja sisältää `recovery.poll`-arvon; tarkista tila kutsulla `GET /v1/quota-recoveries/{id}` (`202` odotettaessa, `200` ja palautettu sisältö valmistuttua) tai peruuta kutsulla `DELETE`. Tiketit näkyvät vain ne luoneelle API-avaimelle. Toisto, jonka lopputulos on epävarma, päätyy tilaan `needs_confirmation` sen sijaan, että se lähetettäisiin kahdesti. Lähde: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Itsepalvelukäyttö (`/api/usage/om-usage`)
@@ -1181,6 +1194,28 @@ Mikä tahansa pyyntö voi ohittaa välimuistin avaimen asetuksista riippumatta:
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI-hallinnan yhteensopivuus
+
+OmniRoute vastaa kolmeen [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)-hallintapäätepisteeseen, joita käyttöpaneelit kutsuvat Claude- ja Codex-tilausten rajojen lukemiseen (esimerkiksi T3 Coden käyttörajalähde `cliproxy`). Osoita asiakkaan perus-URL OmniRouteen ja käytä hallinta-avaimena API-avainta, jonka laajuus on `manage`. Reitit tarjotaan osoitteissa `/v0/management/*` ja `/api/v0/management/*`.
+
+| Menetelmä | Polku                        | Kuvaus                                                                                                                                                 |
+| --------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET       | `/v0/management/auth-files`  | Claude- ja Codex-OAuth-yhteydet muodossa `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Ei tokeneita                          |
+| POST      | `/v0/management/api-call`    | Runko `{ auth_index, method, url, header?, data? }`. Lähettää sallittujen listalla olevan pyynnön tilin tokenilla ja palauttaa `{ status_code, body }` |
+| POST      | `/v0/management/reset-quota` | Runko `{ auth_index }`. Tyhjentää yhden tilin yhteyden jäähyajan, malliestot ja Codexin laajuuskohtaiset jäähyajat                                     |
+
+- `auth_index` on OmniRoute-yhteyden tunnus. `provider` on `claude` tai `codex` (vain OAuth-yhteydet; API-avainpalveluntarjoajaa `anthropic` ei luetella). Codexissa `id_token.chatgpt_account_id` on tallennettu työtilatunnus ja `plan_type` tallennettu tilaustaso.
+- `api-call` ei ole yleinen välityspalvelin. Se hyväksyy vain Clauden `GET
+https://api.anthropic.com/api/oauth/usage`-kutsun ja Codexin `GET
+https://chatgpt.com/backend-api/wham/usage`-, `GET .../wham/rate-limit-reset-credits`- ja `POST .../wham/rate-limit-reset-credits/consume`-kutsut, jokaisen vain vastaavan palveluntarjoajan tilille. Kaikki muu palauttaa `403` ottamatta yhteyttä upstream-palveluun. Kutsujan `Authorization`-otsake (myös paikkamerkki `$TOKEN$`) ohitetaan: OmniRoute lisää yhteyden käyttötokenin, päivittää sen ensin vanhenemisen lähestyessä ja välittää vain sallitut otsakkeet (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Puuttuvan `Chatgpt-Account-Id`-arvon oletuksena käytetään tallennettua työtilatunnusta. Jos ensimmäinen upstream-vastaus on `401`, päivitys tehdään kerran ja pyyntöä yritetään uudelleen vain käyttötokenin muuttuessa. Jokainen upstream-yritys aikakatkaistaan 15 sekunnin kuluttua ja käyttää yhteyden välityspalvelinta.
+- `reset-quota` jättää lopulliset tilat (banned, expired, credits_exhausted) ennalleen. Tuntematon `auth_index` palauttaa `404`.
+
+**Todennus:** hallintapaneelin istunto tai API-avain, jonka laajuus on `manage`; vaaditaan myös kirjautumisen ollessa poistettu käytöstä (polut ovat joukossa `ALWAYS_PROTECTED_API_PATHS`). Vain päättelyyn tarkoitetut avaimet saavat vastauksen `403`. Lähde: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

@@ -42,6 +42,10 @@ Claude Code **Anthropic Messages API** සමඟ සන්නිවේදනය 
 
 > පරිසර විචල්ය කියවනු ලබන්නේ **ආරම්භයේදී එක් වරක් පමණි** — ඒවා වෙනස් කිරීමෙන් පසු Claude Code නැවත ආරම්භ කරන්න.
 
+ස්ථාවර පෙළක් වෙනුවට වරින් වර මාරු වන සත්‍යාපන අක්තපත්‍රයක් සඳහා, `~/.claude/settings.json` හි `apiKeyHelper` වත්මන් අක්තපත්‍රය stdout වෙත මුද්‍රණය කරන විධානයකට සකසන්න. Claude Code පෙරනිමියෙන් එහි ප්‍රතිදානය මිනිත්තු පහක් හැඹිලිගත කරයි (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` මඟින් එම කාලය වෙනස් කළ හැක) සහ අගය `Authorization: Bearer` හා `x-api-key` දෙකෙහිම යවයි. ස්ක්‍රිප්ටය අක්තපත්‍රය පමණක් මුද්‍රණය කළ යුතුය — අමතර හඳුන්වාදීමේ පණිවිඩයක් v2.1.227+ හි සහායකය අසමත් කරයි.
+
+Entra ID SSO ක්‍රියා කරන්නේ මේ ආකාරයටය: `scripts/cli/omniroute-sso.mjs token` කෙටි ආයු කාලයක් ඇති Entra ප්‍රවේශ ටෝකනයක් මුද්‍රණය කරයි. OmniRoute API යතුරක් වෙනුවට එය තහවුරු කරයි. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) බලන්න.
+
 `omniroute launch` මේ සියල්ල ඔබ වෙනුවෙන් සකසයි: එය සක්රිය සන්දර්භයෙන් මූල URL එක + ටෝකනය
 විසඳා ගනී (එබැවින් `omniroute connect <vps>` පසු `omniroute launch`
 සෘජුවම ක්රියා කරයි), සේවාදායකයේ සෞඛ්ය පරීක්ෂා කර, `claude` ක්රියාත්මක කරයි.

@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — 免费 AI 网关
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 编程永不中断。每款 AI 工具 → 377 个提供者，其中 150+ 个免费，仅需一个端点。将 Claude Code、Codex、Cursor、Cline、Copilot 和 Antigravity 接入免费的 Claude / GPT / Gemini，并支持自动故障转移。RTK + Caveman 叠加压缩可节省 15–95% 的 token（平均约 89%），再也不会触及限额。377 个 AI 提供者 · 150+ 个免费套餐 · 每月约 16.2 亿免费 token · 20 种路由策略 · $0 即可开始使用。"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 编程永不中断。每款 AI 工具 → 380 个提供者，其中 150+ 个免费，仅需一个端点。将 Claude Code、Codex、Cursor、Cline、Copilot 和 Antigravity 接入免费的 Claude / GPT / Gemini，并支持自动故障转移。RTK + Caveman 叠加压缩可节省 15–95% 的 token（平均约 89%），再也不会触及限额。380 个 AI 提供者 · 150+ 个免费套餐 · 每月约 16.2 亿免费 token · 20 种路由策略 · $0 即可开始使用。"/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **使用你自己的提供者账户。** 这是根据你分别符合资格的第三方免费套餐汇总得出的估算值，并非 OmniRoute 提供的 Token 赠额。请注册账户，在需要时获取凭据，并连接你可以使用的提供者；每家提供者均自行控制其限额、可用性和条款。
 >
-> 手动叠加免费套餐非常痛苦——数十个 SDK、数十种速率限制，而且你根本不知道自己实际拥有多少额度。OmniRoute 收录了**分布在 34 个周期性额度池键中的 484 个免费套餐条目**，并根据**具有已公布月度正额度的 17 个额度池，以及 Groq 按模型计算的五项上限**计算 Token 总量，同时按共享额度池去重。只有通过地区身份验证后才开放的额度（目前为 ModelScope）会单独显示，即地区身份验证后可额外获得约 600 万 Token，且绝不会计入标题中的总量。结果会持续显示在控制面板上（`/dashboard/free-tiers`）。
+> 手动叠加免费套餐非常痛苦——数十个 SDK、数十种速率限制，而且你根本不知道自己实际拥有多少额度。OmniRoute 收录了**分布在 34 个周期性额度池键中的 485 个免费套餐条目**，并根据**具有已公布月度正额度的 17 个额度池，以及 Groq 按模型计算的五项上限**计算 Token 总量，同时按共享额度池去重。只有通过地区身份验证后才开放的额度（目前为 ModelScope）会单独显示，即地区身份验证后可额外获得约 600 万 Token，且绝不会计入标题中的总量。结果会持续显示在控制面板上（`/dashboard/free-tiers`）。
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免费套餐额度卡片：每月稳定提供约 16.2 亿个免费 Token，首月加上注册赠送额度后最高约为 22.2 亿；一个端点背后包含 34 个已有文档记录的周期性额度池键，覆盖 484 个已收录的免费套餐条目。真实的额度池去重计算——每个共享额度池仅计算一次，包括 17 个具有已公布月度正 Token 额度的周期性额度池，以及 Groq 按模型计算的五项上限；条款风险目录中有 12 家提供者被标记为 avoid，由你自行决定是否使用。额度条包含 Mistral 10 亿、Nara 2.1 亿、LLM7 1.5 亿、xKiro 1.5 亿、Groq 3000 万（按模型计算的五项上限）以及其他较小的额度池；首月注册赠送额度和永久免费的无 Token 上限提供者会单独展示，因此绝不会虚增标题中的总量。可在 /dashboard/free-tiers 查看实时已用量和剩余额度。"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免费套餐额度卡片：每月稳定提供约 16.2 亿个免费 Token，首月加上注册赠送额度后最高约为 22.2 亿；一个端点背后包含 34 个已有文档记录的周期性额度池键，覆盖 485 个已收录的免费套餐条目。真实的额度池去重计算——每个共享额度池仅计算一次，包括 17 个具有已公布月度正 Token 额度的周期性额度池，以及 Groq 按模型计算的五项上限；条款风险目录中有 12 家提供者被标记为 avoid，由你自行决定是否使用。额度条包含 Mistral 10 亿、Nara 2.1 亿、LLM7 1.5 亿、xKiro 1.5 亿、Groq 3000 万（按模型计算的五项上限）以及其他较小的额度池；首月注册赠送额度和永久免费的无 Token 上限提供者会单独展示，因此绝不会虚增标题中的总量。可在 /dashboard/free-tiers 查看实时已用量和剩余额度。"/>
 
 > 实时 `/dashboard/free-tiers` 页面的动画摘要。完整方法说明（额度池去重、赠送额度层级、提供者条款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
 >
@@ -71,7 +71,7 @@
 
 |                     |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
 | ------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 提供者           |          352          |   **358**   |          377          |
+| 🌐 提供者           |          352          |   **358**   |          380          |
 | 🧠 唯一聊天模型 ID  |         1320          |  **1374**   |         1475          |
 | 🖼️ 模态桥接         | 🆕 视觉 + 音频 + 视频 |      ✓      |           ✓           |
 | 📡 Radar 免费目录   |      🆕 选择加入      |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ 功能</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 组合</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 提供者</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 提供者</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI 与 MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="我们的承诺——一个端点和 377 个提供者。只要还有其他健康目标可用，自动回退就能保持路由正常运行。六大支柱：跨 377 个提供者的弹性回退 · 对符合条件的工作负载最多节省 95% 的 token · 以 $0 起步，提供 150+ 个免费套餐和 52 个持续提供或无密钥的永久免费提供者 · 通过一项配置集成 37 个 CLI/智能体 · 在 /v1 提供 OpenAI、Claude、Gemini 和 Responses API 兼容性 · 生产级控制，包括断路器、TLS 隐匿、包含 110 个工具的 MCP、A2A、记忆、护栏、评估，以及分布在 7,800+ 个受跟踪测试文件中的 56,000+ 条静态测试声明。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="我们的承诺——一个端点和 380 个提供者。只要还有其他健康目标可用，自动回退就能保持路由正常运行。六大支柱：跨 380 个提供者的弹性回退 · 对符合条件的工作负载最多节省 95% 的 token · 以 $0 起步，提供 150+ 个免费套餐和 52 个持续提供或无密钥的永久免费提供者 · 通过一项配置集成 39 个 CLI/智能体 · 在 /v1 提供 OpenAI、Claude、Gemini 和 Responses API 兼容性 · 生产级控制，包括断路器、TLS 隐匿、包含 110 个工具的 MCP、A2A、记忆、护栏、评估，以及分布在 7,800+ 个受跟踪测试文件中的 56,000+ 条静态测试声明。"/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的独特之处——与 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 项能力上的阶段性功能对比。OmniRoute：377 个提供者、内置 150+ 个免费套餐、20 种路由策略、12 引擎令牌压缩、内置包含 110 个工具的 MCP 服务器、A2A 智能体协议、持久化记忆、安全护栏、云端智能体、TLS 指纹隐匿、Desktop/Termux/PWA，以及支持 67 种国际化 UI 语言区域。OmniRoute 采用 MIT 许可证，并支持自托管。竞品的功能和数量可能发生变化；请参阅所链接的方法说明。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的独特之处——与 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 项能力上的阶段性功能对比。OmniRoute：380 个提供者、内置 150+ 个免费套餐、20 种路由策略、12 引擎令牌压缩、内置包含 110 个工具的 MCP 服务器、A2A 智能体协议、持久化记忆、安全护栏、云端智能体、TLS 指纹隐匿、Desktop/Termux/PWA，以及支持 67 种国际化 UI 语言区域。OmniRoute 采用 MIT 许可证，并支持自托管。竞品的功能和数量可能发生变化；请参阅所链接的方法说明。"/>
 
 <sub>📊 与 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 对比的完整方法说明及各项功能详情 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar 需主动选择启用，且仅使用 GET 请求。OmniRoute 客户端不�
 - **🖼️ 新端点** — `/v1/ocr`（Mistral OCR）和 `/v1/audio/translations`（Whisper 风格）进一步完善媒体功能。→ [API 参考](docs/reference/API_REFERENCE.md)
 - **🎨 图像／视频／音频生成** — 使用一个 API 处理媒体：xAI Grok Imagine 和 Novita AI 视频、ComfyUI、Magnific、Adobe Firefly、Segmind，以及 ElevenLabs 等语音提供者。→ [API 参考](docs/reference/API_REFERENCE.md)
 - **🌍 部署与运维** — 反向代理 `basePath`、浏览器语言自动检测、按密钥的设备跟踪、无需 root 的 MITM 信任配置，以及 zh-TW 本地化。→ [环境](docs/reference/ENVIRONMENT.md)
-- **🤝 更多提供者与智能体** — 云端智能体（Codex Cloud、Cursor、Devin、Jules）、支持浏览器＋OAuth 登录的 Grok Build（xAI）、一流支持的 Ollama 卡片、Claude Opus 5 和 Sonnet 5、Kimi 官方合作（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及焕然一新的 **377 个提供者目录**。→ [提供者](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 更多提供者与智能体** — 云端智能体（Codex Cloud、Cursor、Devin、Jules）、支持浏览器＋OAuth 登录的 Grok Build（xAI）、一流支持的 Ollama 卡片、Claude Opus 5 和 Sonnet 5、Kimi 官方合作（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及焕然一新的 **380 个提供者目录**。→ [提供者](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 路由透明度** — 每个响应都会携带 `X-OmniRoute-Decision` 标头，指明处理该响应的策略／提供者／延迟；新增的 `cache-optimized` 组合策略及 Auto-Combo `cacheAffinity` 因子会将重复请求路由回持有缓存前缀的连接；只读端点 `/v1/auto-combo/{channel}/candidates` 会公开 `auto/*` 通道的实时候选池。→ [自动组合](docs/routing/AUTO-COMBO.md)
 - **⚡ 本地性能与基础设施** — 一键启用本地 Redis、Cloudflare Workers / Deno Deploy 中继部署器，以及作为受监管嵌入式服务运行的 Bifrost 与 Mux。→ [嵌入式服务](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 开箱即用的其他功能** — 插件框架与市场、Omni/Agent/GitHub 技能框架、Obsidian 仓库集成（22 个 MCP 工具）、OpenAI 兼容的 Batch 与 Files API、语义响应缓存、带排行榜的游戏化机制、ACP 智能体发现（15 个内置智能体）、定时将日志导出至 BigQuery、`auto/chaos` 并行多模型扇出、Telegram 机器人桥接、应用内版本管理器，以及 LMArena-ELO 免费提供者排名。→ [文档](docs/README.md)
@@ -657,7 +657,7 @@ Radar 需主动选择启用，且仅使用 GET 请求。OmniRoute 客户端不�
 <b>＋ 还支持</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>任何兼容 OpenAI 的工具</b>
 </div>
 
-<sub>📖 全部 38 个工具（27 个 CLI Code + 11 个 CLI Agent）的逐工具设置指南 → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode 插件 → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 全部 39 个工具（28 个 CLI Code + 11 个 CLI Agent）的逐工具设置指南 → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode 插件 → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ omniroute configure codex          # 还支持：claude opencode qwen aider goos
 
 <div align="center">
 
-## 🌐 377 家 AI 提供者 — 153 家被目录标记为免费
+## 🌐 380 家 AI 提供者 — 156 家被目录标记为免费
 
 </div>
 
-> 在规范的聊天、媒体、搜索、本地、云代理和系统集合中，共有 **377 家已注册提供者**，其中 **153 家带有 `hasFree: true` 发现元数据**。聊天模型注册表涵盖 **239 家提供者 / 3,059 个不同的提供者-模型组合 / 1,475 个原始模型 ID**；独立的免费额度目录包含 **484 条按模型统计的记录**、**34 个周期性额度池**和 **52 家提供周期性/无密钥永久免费服务的提供者**。这些统计口径按设计有所不同；相关定义以及按额度池去重后的计算方式，请参阅[提供者参考](docs/reference/PROVIDER_REFERENCE.md)和[免费层级](docs/reference/FREE_TIERS.md)。
+> 在规范的聊天、媒体、搜索、本地、云代理和系统集合中，共有 **380 家已注册提供者**，其中 **156 家带有 `hasFree: true` 发现元数据**。聊天模型注册表涵盖 **239 家提供者 / 3,059 个不同的提供者-模型组合 / 1,475 个原始模型 ID**；独立的免费额度目录包含 **485 条按模型统计的记录**、**34 个周期性额度池**和 **52 家提供周期性/无密钥永久免费服务的提供者**。这些统计口径按设计有所不同；相关定义以及按额度池去重后的计算方式，请参阅[提供者参考](docs/reference/PROVIDER_REFERENCE.md)和[免费层级](docs/reference/FREE_TIERS.md)。
 
 <div align="center">
 
@@ -1304,7 +1304,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过该�
   <tr><td nowrap><b>运行时</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>语言</b></td><td>TypeScript 6.0 — <code>src/</code> 和 <code>open-sse/</code> 中均为 <b>100% TypeScript</b>（自 v2.0 起核心代码中零 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>数据库</b></td><td>better-sqlite3（SQLite、WAL 日志模式）+ LowDB（旧版 JSON）— 147 个领域模块，213 个迁移</td></tr>
+  <tr><td nowrap><b>数据库</b></td><td>better-sqlite3（SQLite、WAL 日志模式）+ LowDB（旧版 JSON）— 147 个领域模块，219 个迁移</td></tr>
   <tr><td nowrap><b>记忆</b></td><td>SQLite FTS5 全文检索 + int8 量化向量嵌入、类型化衰减</td></tr>
   <tr><td nowrap><b>模式</b></td><td>Zod 4 — MCP 工具输入/输出验证 + API 契约</td></tr>
   <tr><td nowrap><b>协议</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
@@ -1367,7 +1367,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也会跳过该�
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">弹性指南</a></b></td><td>断路器、冷却时间、队列、防惊群、TLS 欺骗</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">自动组合引擎</a></b></td><td>16 因素评分、模式包、自愈</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">代理指南</a></b></td><td>三级代理系统、1proxy 市场、注册表 CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免费套餐</a></b></td><td>汇总目录：34 个已记录的周期性资源池 / 484 个已编入目录的免费套餐条目</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免费套餐</a></b></td><td>汇总目录：34 个已记录的周期性资源池 / 485 个已编入目录的免费套餐条目</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">功能展示</a></b></td><td>带截图的可视化仪表板导览</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">代码库文档</a></b></td><td>适合初学者的代码库导览</td></tr>
 </table>

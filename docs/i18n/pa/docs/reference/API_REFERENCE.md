@@ -29,6 +29,7 @@ OmniRoute API ਲਈ ਮੁੱਖ ਹਵਾਲਾ। ਇਹ ਜਨਤਕ `/v1` �
 - [WebSocket ਸਟ੍ਰੀਮਿੰਗ](#websocket-streaming)
 - [ਕੋਟੇ ਅਤੇ ਸਮੱਸਿਆਵਾਂ ਦੀ ਰਿਪੋਰਟਿੰਗ](#quotas--issues-reporting)
 - [ਸਿਮੈਂਟਿਕ ਕੈਸ਼](#semantic-cache)
+- [CLIProxyAPI ਪ੍ਰਬੰਧਨ ਅਨੁਕੂਲਤਾ](#cliproxyapi-management-compatibility)
 - [ਡੈਸ਼ਬੋਰਡ ਅਤੇ ਪ੍ਰਬੰਧਨ](#dashboard--management)
 - [ਕੌਂਬੋ ਪ੍ਰਬੰਧਨ](#combo-management)
 - [ਵੈੱਬਹੁੱਕ](#webhooks)
@@ -1007,6 +1008,18 @@ CLI `base_url + /responses` ਨੂੰ WebSocket ਵਿੱਚ ਅੱਪਗ੍ਰ�
 
 **ਪ੍ਰਮਾਣੀਕਰਨ:** Bearer API ਕੁੰਜੀ (`isAuthenticated`)।
 
+### ਕੋਟਾ ਸੈਸ਼ਨ ਮੁੜ-ਪ੍ਰਾਪਤੀ (ਸਪਸ਼ਟ ਤੌਰ 'ਤੇ ਚਾਲੂ ਕਰੋ)
+
+ਅੰਤਿਮ ਕੋਟਾ ਗਲਤੀ ਨਾਲ ਨਾਕਾਮ ਹੋਇਆ ਬਿਨਾਂ ਸਟ੍ਰੀਮਿੰਗ `POST /v1/chat/completions` ਜਾਂ `POST /v1/responses` (ਜਿਸਦੀ ਬਾਡੀ ਕੋਟਾ ਜਾਂ ਕ੍ਰੈਡਿਟ ਮੁੱਕਣ ਬਾਰੇ ਕਹਿੰਦੀ ਹੈ ਅਜਿਹਾ `402`/`429`/`503`) ਗਲਤੀ ਵਾਪਸ ਕਰਨ ਦੀ ਬਜਾਏ ਰੋਕ ਕੇ ਬਾਅਦ ਵਿੱਚ ਮੁੜ ਚਲਾਇਆ ਜਾ ਸਕਦਾ ਹੈ। ਕਾਲਰ ਹਰ ਬੇਨਤੀ ਲਈ ਤਿੰਨ ਹੈਡਰਾਂ ਨਾਲ ਇਹ ਚਾਲੂ ਕਰਦਾ ਹੈ:
+
+| ਹੈਡਰ                         | ਮੁੱਲ                                |
+| ---------------------------- | ----------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                              |
+| `x-omniroute-session`        | ਸੈਸ਼ਨ ID, `[A-Za-z0-9._:-]{1,128}`  |
+| `x-omniroute-recovery-turn`  | ਸੈਸ਼ਨ ਅੰਦਰ ਵਿਲੱਖਣ ਟਰਨ ID (ਉਹੀ ਨਿਯਮ) |
+
+ਸਿਰਫ਼ ਟੂਲਾਂ, ਟੂਲ ਇਤਿਹਾਸ ਜਾਂ `previous_response_id` ਤੋਂ ਬਿਨਾਂ ਅਤੇ `x-omniroute-connection` ਪਿੰਨ ਤੋਂ ਬਿਨਾਂ `stream: false` ਟਰਨ ਯੋਗ ਹਨ; `STORAGE_ENCRYPTION_KEY` ਸੈੱਟ ਹੋਣੀ ਲਾਜ਼ਮੀ ਹੈ (ਬੇਨਤੀ 24 h ਤੱਕ ਇਨਕ੍ਰਿਪਟ ਕਰਕੇ ਰੱਖੀ ਜਾਂਦੀ ਹੈ)। ਫਿਰ ਜਵਾਬ `recovery.poll` ਨਾਲ `202` ਹੁੰਦਾ ਹੈ; `GET /v1/quota-recoveries/{id}` ਪੋਲ ਕਰੋ (ਬਕਾਇਆ ਹੋਣ 'ਤੇ `202`, ਮੁੱਕਣ 'ਤੇ ਮੁੜ-ਪ੍ਰਾਪਤ ਬਾਡੀ ਨਾਲ `200`) ਜਾਂ `DELETE` ਨਾਲ ਰੱਦ ਕਰੋ। ਟਿਕਟ ਸਿਰਫ਼ ਉਹਨਾਂ ਨੂੰ ਬਣਾਉਣ ਵਾਲੀ API ਕੁੰਜੀ ਨੂੰ ਦਿਸਦੇ ਹਨ। ਅਨਿਸ਼ਚਿਤ ਨਤੀਜੇ ਵਾਲਾ ਰੀਪਲੇ ਦੋ ਵਾਰ ਭੇਜਣ ਦੀ ਬਜਾਏ `needs_confirmation` ਵਿੱਚ ਮੁੱਕਦਾ ਹੈ। ਸਰੋਤ: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## ਸਵੈ-ਸੇਵਾ ਵਰਤੋਂ (`/api/usage/om-usage`)
@@ -1175,6 +1188,28 @@ API ਕੁੰਜੀਆਂ `cacheDefaultMode` ਰਾਹੀਂ ਸਿਮੈਂਟ�
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI ਪ੍ਰਬੰਧਨ ਅਨੁਕੂਲਤਾ
+
+OmniRoute ਉਹਨਾਂ ਤਿੰਨ [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) ਪ੍ਰਬੰਧਨ ਐਂਡਪੁਆਇੰਟਾਂ ਨੂੰ ਜਵਾਬ ਦਿੰਦਾ ਹੈ ਜਿਨ੍ਹਾਂ ਨੂੰ ਵਰਤੋਂ ਡੈਸ਼ਬੋਰਡ Claude ਅਤੇ Codex ਸਬਸਕ੍ਰਿਪਸ਼ਨ ਸੀਮਾਵਾਂ ਪੜ੍ਹਨ ਲਈ ਕਾਲ ਕਰਦੇ ਹਨ (ਜਿਵੇਂ T3 Code ਦਾ `cliproxy` ਵਰਤੋਂ-ਸੀਮਾ ਸਰੋਤ)। ਕਲਾਇੰਟ ਦਾ ਬੇਸ URL OmniRoute ਵੱਲ ਕਰੋ ਅਤੇ ਪ੍ਰਬੰਧਨ ਕੁੰਜੀ ਵਜੋਂ `manage` ਸਕੋਪ ਵਾਲੀ API ਕੁੰਜੀ ਵਰਤੋ। ਰੂਟ `/v0/management/*` ਅਤੇ `/api/v0/management/*` 'ਤੇ ਦਿੱਤੇ ਜਾਂਦੇ ਹਨ।
+
+| ਢੰਗ  | ਮਾਰਗ                         | ਵੇਰਵਾ                                                                                                                                         |
+| ---- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v0/management/auth-files`  | Claude ਅਤੇ Codex OAuth ਕਨੈਕਸ਼ਨ `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }` ਵਜੋਂ। ਟੋਕਨ ਨਹੀਂ                         |
+| POST | `/v0/management/api-call`    | ਬਾਡੀ `{ auth_index, method, url, header?, data? }`। ਖਾਤੇ ਦੇ ਟੋਕਨ ਨਾਲ ਮਨਜ਼ੂਰ ਸੂਚੀ ਵਾਲੀ ਬੇਨਤੀ ਭੇਜਦਾ ਹੈ ਅਤੇ `{ status_code, body }` ਵਾਪਸ ਕਰਦਾ ਹੈ |
+| POST | `/v0/management/reset-quota` | ਬਾਡੀ `{ auth_index }`। ਇੱਕ ਖਾਤੇ ਦਾ ਕਨੈਕਸ਼ਨ ਕੂਲਡਾਊਨ, ਮਾਡਲ ਲੌਕਆਉਟ ਅਤੇ Codex ਦੇ ਸਕੋਪ-ਅਨੁਸਾਰ ਕੂਲਡਾਊਨ ਸਾਫ਼ ਕਰਦਾ ਹੈ                                 |
+
+- `auth_index` OmniRoute ਕਨੈਕਸ਼ਨ ID ਹੈ। `provider` `claude` ਜਾਂ `codex` ਹੁੰਦਾ ਹੈ (ਸਿਰਫ਼ OAuth ਕਨੈਕਸ਼ਨ; `anthropic` API-ਕੁੰਜੀ ਪ੍ਰਦਾਤਾ ਸੂਚੀ ਵਿੱਚ ਨਹੀਂ ਹੁੰਦਾ)। Codex ਲਈ `id_token.chatgpt_account_id` ਸੰਭਾਲਿਆ ਵਰਕਸਪੇਸ ID ਅਤੇ `plan_type` ਸੰਭਾਲਿਆ ਪਲਾਨ ਹੈ।
+- `api-call` ਆਮ ਪ੍ਰੌਕਸੀ ਨਹੀਂ ਹੈ। ਇਹ ਸਿਰਫ਼ Claude `GET
+https://api.anthropic.com/api/oauth/usage` ਅਤੇ Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` ਅਤੇ `POST .../wham/rate-limit-reset-credits/consume` ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ, ਹਰ ਇੱਕ ਸਿਰਫ਼ ਸੰਬੰਧਤ ਪ੍ਰਦਾਤਾ ਦੇ ਖਾਤੇ ਲਈ। ਹੋਰ ਸਭ ਕੁਝ ਅੱਪਸਟ੍ਰੀਮ ਨਾਲ ਸੰਪਰਕ ਕੀਤੇ ਬਿਨਾਂ `403` ਵਾਪਸ ਕਰਦਾ ਹੈ। ਕਾਲਰ ਦਾ `Authorization` ਹੈਡਰ (`$TOKEN$` ਪਲੇਸਹੋਲਡਰ ਸਮੇਤ) ਅਣਡਿੱਠਾ ਹੁੰਦਾ ਹੈ: OmniRoute ਕਨੈਕਸ਼ਨ ਦਾ ਐਕਸੈੱਸ ਟੋਕਨ ਜੋੜਦਾ ਹੈ, ਮਿਆਦ ਨੇੜੇ ਹੋਣ 'ਤੇ ਪਹਿਲਾਂ ਰੀਫ੍ਰੈਸ਼ ਕਰਦਾ ਹੈ ਅਤੇ ਸਿਰਫ਼ ਮਨਜ਼ੂਰ ਹੈਡਰ ਅੱਗੇ ਭੇਜਦਾ ਹੈ (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`)। ਗੁੰਮ `Chatgpt-Account-Id` ਲਈ ਸੰਭਾਲਿਆ ਵਰਕਸਪੇਸ ID ਮੂਲ ਹੁੰਦਾ ਹੈ। ਜੇ ਪਹਿਲਾ ਅੱਪਸਟ੍ਰੀਮ ਜਵਾਬ `401` ਹੋਵੇ, ਇਹ ਇੱਕ ਵਾਰ ਰੀਫ੍ਰੈਸ਼ ਕਰਦਾ ਹੈ ਅਤੇ ਐਕਸੈੱਸ ਟੋਕਨ ਬਦਲਣ 'ਤੇ ਹੀ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰਦਾ ਹੈ। ਹਰ ਅੱਪਸਟ੍ਰੀਮ ਕੋਸ਼ਿਸ਼ 15 ਸਕਿੰਟਾਂ ਬਾਅਦ ਟਾਈਮਆਉਟ ਹੁੰਦੀ ਹੈ ਅਤੇ ਕਨੈਕਸ਼ਨ ਦੀ ਪ੍ਰੌਕਸੀ ਵਰਤਦੀ ਹੈ।
+- `reset-quota` ਅੰਤਿਮ ਸਥਿਤੀਆਂ (banned, expired, credits_exhausted) ਨਹੀਂ ਬਦਲਦਾ। ਅਣਜਾਣ `auth_index` ਲਈ `404` ਵਾਪਸ ਆਉਂਦਾ ਹੈ।
+
+**ਪ੍ਰਮਾਣੀਕਰਨ:** ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਜਾਂ `manage` ਸਕੋਪ ਵਾਲੀ API ਕੁੰਜੀ, ਲਾਗਇਨ ਬੰਦ ਹੋਣ 'ਤੇ ਵੀ ਲਾਜ਼ਮੀ (ਮਾਰਗ `ALWAYS_PROTECTED_API_PATHS` ਵਿੱਚ ਹਨ)। ਸਿਰਫ਼ ਇਨਫਰੈਂਸ ਕੁੰਜੀਆਂ ਨੂੰ `403` ਮਿਲਦਾ ਹੈ। ਸਰੋਤ: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

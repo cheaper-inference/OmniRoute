@@ -10,7 +10,7 @@ Paskutinį kartą atnaujinta: 2026-08-23
 
 | Puslapis        | Maršrutas               | Koncepcija                                                                                 | Skaičius     |
 | --------------- | ----------------------- | ------------------------------------------------------------------------------------------ | ------------ |
-| **CLI kodai**   | `/dashboard/cli-code`   | Programavimo įrankiai, nukreipiami į „OmniRoute“ (klientas → CLI → „OmniRoute“ → teikėjas) | 27           |
+| **CLI kodai**   | `/dashboard/cli-code`   | Programavimo įrankiai, nukreipiami į „OmniRoute“ (klientas → CLI → „OmniRoute“ → teikėjas) | 28           |
 | **CLI agentai** | `/dashboard/cli-agents` | Autonominiai agentai, nukreipiami į „OmniRoute“ (tokia pati eiga, platesnė aprėptis)       | 11           |
 | **ACP agentai** | `/dashboard/acp-agents` | CLI, kuriuos „OmniRoute“ paleidžia kaip vidinę sistemą per stdio/ACP (atvirkštinė eiga)    | žr. registrą |
 
@@ -145,7 +145,7 @@ vienos sąsajos, bet nepridėjus prie kitų, testų rinkinys nepavyksta, užuot 
 
 ---
 
-## 1. CLI Code katalogas (27 įrankiai)
+## 1. CLI Code katalogas (28 įrankiai)
 
 Visi įrankiai, rodomi `/dashboard/cli-code`. Įrankiai, kurių `baseUrlSupport: none`, prijungiami per MITM arba naudojant rankinį vadovą, o ne pasirinktinį bazinį URL:
 
@@ -172,6 +172,7 @@ Visi įrankiai, rodomi `/dashboard/cli-code`. Įrankiai, kurių `baseUrlSupport:
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -268,7 +269,7 @@ Nauji įrankiai su `configType: "custom"` turi specialius nustatymų API maršru
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, senasis)                                          |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, pagrindinis + senojo `~/.deepseek` sinchronizavimas) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                            |
-| `POST /api/cli-tools/pi-settings`           | Pi programavimo agentas                                                          |
+| `POST /api/cli-tools/pi-settings`           | Pi programavimo agentas (`~/.pi/agent/models.json`, `providers.omniroute`)       |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                            |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + specialus `.env` raktas)                    |
 
@@ -374,7 +375,7 @@ pip install aider-chat
 cargo install smelt  # Pagrįsta Rust
 
 # Pi programavimo agentas
-# diegimo instrukcijas žr. https://github.com/zechnerj/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # diegimo instrukcijas žr. https://github.com/1jehuang/jcode
@@ -487,6 +488,38 @@ EOF
 
 > Norėdami siųsti mąstymo variantus, naudokite
 > `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`.
+
+---
+
+#### Pi Coding Agent
+
+Įdiekite oficialų Pi Coding Agent paketą su `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi skaito pasirinktinius teikėjus iš `~/.pi/agent/models.json`; norėdami perkelti visą agento katalogą, nustatykite `PI_CODING_AGENT_DIR` kaip absoliutų kelią (arba kelią su `~` pradžioje). Skydelis laikosi šio pakeitimo. Pi neaptinka modelių pasirinktiniuose galiniuose taškuose, todėl OmniRoute įrašo pasirinktą modelį į `models[]`, naudodamas Pi `openai-completions` API ir su OpenAI suderinamą OmniRoute `/v1` galinį tašką.
+
+Skiltyje **CLI Tools → Pi** pasirinkite galinį tašką, API raktą ir modelį, peržiūrėkite teikėjo peržiūrą ir pritaikykite. Peržiūra yra teikėjo fragmentas: konfigūruodami Pi rankiniu būdu, sujunkite `providers.omniroute` su esamu `models.json`, kad kiti teikėjai ir nustatymai liktų nepaliesti.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi iš naujo įkelia `models.json`, kai atidarote `/model`. Išbandykite sukonfigūruotą maršrutą su pasirinktu teikėjo ID ir modelio ID:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Nuorodos: [Pi modeliai ir pasirinktiniai teikėjai](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi aplinkos kintamieji](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi diegimo instrukcijos](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

@@ -29,6 +29,7 @@ Kwa itifaki mahususi inayooana na OpenAI na jedwali la uwezo wa watoa huduma, an
 - [Utiririshaji wa WebSocket](#websocket-streaming)
 - [Kota na Kuripoti Matatizo](#quotas--issues-reporting)
 - [Akiba ya Kisemantiki](#semantic-cache)
+- [Utangamano wa usimamizi wa CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [Dashibodi na Usimamizi](#dashboard--management)
 - [Usimamizi wa Mchanganyiko](#combo-management)
 - [Webhooks](#webhooks)
@@ -1008,6 +1009,18 @@ ukamilishaji.
 
 **Uthibitishaji:** Ufunguo wa API wa Bearer (`isAuthenticated`).
 
+### Urejeshaji wa quota session (kuwasha kwa hiari)
+
+`POST /v1/chat/completions` au `POST /v1/responses` isiyo ya streaming inayoshindwa kwa terminal quota error (`402`/`429`/`503` yenye body inayosema quota au credit zimekwisha) inaweza kuwekwa kusubiri na kutekelezwa tena baadaye badala ya kurudisha hitilafu. Anayepiga mwito huchagua kuwasha kwa kila request kupitia header tatu:
+
+| Header                       | Thamani                                             |
+| ---------------------------- | --------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                              |
+| `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`                |
+| `x-omniroute-recovery-turn`  | turn id ya kipekee ndani ya session (kanuni ileile) |
+
+Turn za `stream: false` pekee zisizo na tools, historia ya tools au `previous_response_id`, na zisizo na `x-omniroute-connection` pin, ndizo zinazostahili; pia `STORAGE_ENCRYPTION_KEY` lazima iwekwe (request huhifadhiwa ikiwa imesimbwa kwa hadi saa 24). Jibu huwa `202` lenye `recovery.poll`; uliza `GET /v1/quota-recoveries/{id}` mara kwa mara (`202` ikiwa inasubiri, `200` yenye body iliyorejeshwa ikikamilika), au ghairi kwa `DELETE`. Ticket zinaonekana tu kwa API key iliyoziumba. Replay ambayo matokeo yake hayana uhakika huisha katika `needs_confirmation` badala ya kutumwa mara mbili. Chanzo: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Matumizi ya huduma binafsi (`/api/usage/om-usage`)
@@ -1175,6 +1188,28 @@ Ombi lolote linaweza kupita kashe bila kujali mipangilio ya ufunguo:
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Utangamano wa usimamizi wa CLIProxyAPI
+
+OmniRoute hujibu management endpoint tatu za [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) ambazo usage dashboard huita kusoma vikomo vya usajili wa Claude na Codex (kwa mfano chanzo cha usage-limit `cliproxy` cha T3 Code). Elekeza base URL ya client kwenye OmniRoute na utumie API key yenye scope `manage` kuwa management key. Route hutolewa kwenye `/v0/management/*` na `/api/v0/management/*`.
+
+| Mbinu | Path                         | Maelezo                                                                                                                                                        |
+| ----- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET   | `/v0/management/auth-files`  | OAuth connection za Claude na Codex kama `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Bila token                                    |
+| POST  | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Hutuma request iliyo kwenye orodha ya kuruhusiwa kwa token ya akaunti na kurudisha `{ status_code, body }` |
+| POST  | `/v0/management/reset-quota` | Body `{ auth_index }`. Husafisha connection cooldown, model lockout na Codex per-scope cooldown za akaunti moja                                                |
+
+- `auth_index` ni connection id ya OmniRoute. `provider` ni `claude` au `codex` (OAuth connection pekee; API-key provider `anthropic` haijaorodheshwa). Kwa Codex, `id_token.chatgpt_account_id` ni workspace id iliyohifadhiwa na `plan_type` ni plan iliyohifadhiwa.
+- `api-call` si proxy ya jumla. Inakubali tu Claude `GET
+https://api.anthropic.com/api/oauth/usage` na Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` na `POST .../wham/rate-limit-reset-credits/consume`, kila moja kwa akaunti ya provider inayolingana pekee. Kitu kingine chochote hurudisha `403` bila kuwasiliana na upstream. Header `Authorization` ya anayepiga mwito (ikiwemo placeholder `$TOKEN$`) hupuuzwa: OmniRoute huingiza access token ya connection, ikii-refresh kwanza ikiwa karibu kuisha muda, na kupitisha header zilizoruhusiwa pekee (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` ikikosekana hutumia workspace id iliyohifadhiwa kama chaguo-msingi. Jibu la kwanza la upstream likiwa `401`, hufanya refresh mara moja na kujaribu tena tu ikiwa access token imebadilika. Kila upstream attempt huisha muda baada ya sekunde 15 na hutumia proxy ya connection.
+- `reset-quota` huacha terminal state (banned, expired, credits_exhausted) bila kubadilika. `auth_index` isiyojulikana hurudisha `404`.
+
+**Uthibitishaji:** dashboard session au API key yenye scope `manage` inahitajika hata login ikiwa imezimwa (path ziko katika `ALWAYS_PROTECTED_API_PATHS`). Key za inference pekee hupata `403`. Chanzo: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

@@ -4,9 +4,18 @@ import { DEFAULT_OMNIROUTE_BASE_URL } from "@/shared/utils/resolveOmniRouteBaseU
 interface Operation {
   path: string;
   method: string;
+  requestBodyExample?: unknown;
 }
 
-function dashboardExample({ path, method }: Operation, baseUrl: string): string[] {
+function jsonBodyArgument(example: unknown): string {
+  const json = JSON.stringify(example === undefined ? {} : example);
+  return `  -d '${json.replaceAll("'", "'\\''")}'`;
+}
+
+function dashboardExample(
+  { path, method, requestBodyExample }: Operation,
+  baseUrl: string
+): string[] {
   if (path === "/api/auth/login" && method === "POST") {
     return [
       `curl -X POST ${baseUrl}${path} \\`,
@@ -24,17 +33,21 @@ function dashboardExample({ path, method }: Operation, baseUrl: string): string[
     `curl -X ${method} ${baseUrl}${path} \\`,
     "  -b cookie.jar \\",
     `  -H "x-omniroute-csrf: $CSRF_TOKEN"${hasJsonBody ? " \\" : ""}`,
-    ...(hasJsonBody ? ['  -H "Content-Type: application/json" \\', "  -d '{}'"] : []),
+    ...(hasJsonBody
+      ? ['  -H "Content-Type: application/json" \\', jsonBodyArgument(requestBodyExample)]
+      : []),
   ];
 }
 
-function bearerExample({ path, method }: Operation, baseUrl: string): string[] {
+function bearerExample({ path, method, requestBodyExample }: Operation, baseUrl: string): string[] {
   const curlMethod = method === "GET" ? "" : `-X ${method} `;
   const hasJsonBody = ["POST", "PUT", "PATCH"].includes(method);
   return [
     `curl ${curlMethod}${baseUrl}${path} \\`,
     `  -H "Authorization: Bearer $OMNIROUTE_TOKEN"${hasJsonBody ? " \\" : ""}`,
-    ...(hasJsonBody ? ['  -H "Content-Type: application/json" \\', "  -d '{}'"] : []),
+    ...(hasJsonBody
+      ? ['  -H "Content-Type: application/json" \\', jsonBodyArgument(requestBodyExample)]
+      : []),
   ];
 }
 

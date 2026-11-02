@@ -155,9 +155,10 @@ Ang bawat klase ng route ay may policy sa `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — palaging nagbabalik ng `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — kinukuha ang Bearer at bine-validate ito sa pamamagitan ng `validateApiKey()`. Nagpapatuloy lamang sa anonymous kapag naka-disable ang epektibong `REQUIRE_API_KEY` feature flag. Nireresolba ang epektibong flag sa pamamagitan ng `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) upang pare-parehong pamahalaan ng mga Dashboard Feature Flag at environment variable ang `/api/v1/*`, `/api/v1beta/*`, at mga alias; kapag nabigo ang resolver, isinasara ang access. Pinapayagan ang mga dashboard-session request sa mga client API route (kabilang ang `/api/v1/models`, na ginagamit ng dashboard model catalog).
+  Kapag naka-enable ang Entra ID SSO, ang Bearer na may estruktura ng Entra token (tatlong base64url segment, algorithm na `RS*`, `kid`) ay pinoproseso ng SSO branch **bago** ang `validateApiKey()`, at pinal ang pasya nito. Hindi ito kailanman lumilipat sa API-key path o sa branch na nagpapahintulot ng anonymous access, kaya hindi maaaring maging bukas na access ang pagkawala ng serbisyo ng identity provider. Hindi naaapektuhan ang mga static API key. Tingnan ang [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — tumatanggap ng dashboard session, mga internal model-sync request (itinutugma sa `/api/providers/[name]/(sync-models|models)`), o ganap na nilalaktawan kung nagbabalik ng false ang `isAuthRequired()`. Nagbabalik ng 403 (`AUTH_001`) kapag may Bearer token ngunit hindi ito valid, at 401 naman kung wala. Ipinapatupad din nito ang mga tier ng route guard (LOCAL_ONLY / ALWAYS_PROTECTED) bago ang anumang auth branch — tingnan ang [Mga Tier ng Route Guard](../security/ROUTE_GUARD_TIERS.md). Maaaring i-access mula sa non-loopback ang mga LOCAL_ONLY path sa `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (sa kasalukuyan: `/api/mcp/`) kapag taglay ng Bearer key ang `manage` scope; nananatiling mahigpit na loopback-only ang lahat ng iba pang LOCAL_ONLY path anuman ang scope.
 
-Ang matagumpay na policy ay nagbabalik ng `AuthSubject` na may `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Mababasa ito ng mga downstream handler sa pamamagitan ng `assertAuth(request, "CLIENT_API")` sa `src/server/authz/assertAuth.ts` sa halip na muling patakbuhin ang auth logic.
+Ang matagumpay na policy ay nagbabalik ng `AuthSubject` na may `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Mababasa ito ng mga downstream handler sa pamamagitan ng `assertAuth(request, "CLIENT_API")` sa `src/server/authz/assertAuth.ts` sa halip na muling patakbuhin ang auth logic.
 
 ## Listahan ng mga Pampublikong Route
 
@@ -302,8 +303,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Para sa mga napatotohanang kahilingan, kasama rin sa mga upstream (panig ng handler) na header ng kahilingan ang:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (opsyonal)
 x-omniroute-auth-scopes:    listahang pinaghihiwalay ng kuwit
 ```

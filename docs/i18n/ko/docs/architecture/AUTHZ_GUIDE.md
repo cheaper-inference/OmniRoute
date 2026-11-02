@@ -159,9 +159,10 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 - **`publicPolicy`** (`policies/public.ts`) — 항상 `allow({ kind: "anonymous", id: "anonymous" })`를 반환합니다.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer를 추출하고 `validateApiKey()`를 통해 검증합니다. 유효한 `REQUIRE_API_KEY` 기능 플래그가 비활성화된 경우에만 익명으로 폴스루합니다. 유효한 플래그는 `isRequireApiKeyEnabled()`(`DB 기능 플래그 재정의 > process.env.REQUIRE_API_KEY > 기본값`)를 통해 결정되므로 대시보드 기능 플래그와 환경 변수가 `/api/v1/*`, `/api/v1beta/*` 및 별칭에 일관되게 적용됩니다. 리졸버 오류가 발생하면 폐쇄형으로 실패합니다. 클라이언트 API 라우트에서 대시보드 세션 요청을 허용합니다(대시보드 모델 카탈로그에서 사용하는 `/api/v1/models` 포함).
+  Entra ID SSO가 활성화되어 있으면 Entra 토큰의 구조를 갖춘 Bearer(base64url 세 구간, `RS*` 알고리즘, `kid`)는 `validateApiKey()`보다 **먼저** SSO 분기에서 처리되며, 그 판정이 최종 결과입니다. API 키 경로나 익명 접근으로 낮추는 분기로 넘어가지 않으므로 ID 공급자 장애가 공개 접근으로 이어질 수 없습니다. 정적 API 키에는 영향이 없습니다. [Entra ID SSO](../security/ENTRA_SSO.md)를 참고하세요.
 - **`managementPolicy`** (`policies/management.ts`) — 대시보드 세션, 내부 모델 동기화 요청(`/api/providers/[name]/(sync-models|models)`와 일치) 또는 `isAuthRequired()`가 false를 반환하는 경우의 완전한 건너뛰기를 허용합니다. Bearer 토큰이 있지만 유효하지 않은 경우 403(`AUTH_001`)을 반환하고, 그 외에는 401을 반환합니다. 또한 모든 인증 분기 전에 라우트 가드 티어(LOCAL_ONLY / ALWAYS_PROTECTED)를 적용합니다. 자세한 내용은 [라우트 가드 티어](../security/ROUTE_GUARD_TIERS.md)를 참조하세요. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`에 속하는 LOCAL_ONLY 경로(현재: `/api/mcp/`)는 Bearer 키에 `manage` 범위가 있는 경우 루프백이 아닌 위치에서도 접근할 수 있습니다. 그 외의 모든 LOCAL_ONLY 경로는 범위와 관계없이 엄격하게 루프백으로 제한됩니다.
 
-정책이 성공하면 `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`인 `AuthSubject`를 반환합니다. 다운스트림 핸들러는 인증 로직을 다시 실행하는 대신 `src/server/authz/assertAuth.ts`의 `assertAuth(request, "CLIENT_API")`를 통해 이를 읽을 수 있습니다.
+정책이 성공하면 `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`인 `AuthSubject`를 반환합니다. 다운스트림 핸들러는 인증 로직을 다시 실행하는 대신 `src/server/authz/assertAuth.ts`의 `assertAuth(request, "CLIENT_API")`를 통해 이를 읽을 수 있습니다.
 
 ## 공개 라우트 목록
 
@@ -306,8 +307,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 인증된 요청의 경우 업스트림(핸들러 측) 요청 헤더에 다음 항목도 포함됩니다.
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<마지막 4자리> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<마지막 4자리> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (선택 사항)
 x-omniroute-auth-scopes:    쉼표로 구분된 목록
 ```

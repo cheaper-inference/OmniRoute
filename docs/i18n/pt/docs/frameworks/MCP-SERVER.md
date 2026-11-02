@@ -315,12 +315,12 @@ token de acesso `oma_live_…` são três concessões diferentes. Os autores de 
 Essa hierarquia é `scopeSatisfies`. Não consulta a tabela MCP, e o mecanismo de
 correspondência MCP também não a consulta.
 
-| Espaço de nomes            | Credencial                                                                          | Verificador                | Uma aprovação permite                                         |
-| :------------------------- | :---------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------------------------ |
-| Gestão por chave de API    | `api_keys.scopes`                                                                   | `hasManageScope`           | REST de gestão para essa chave Bearer                         |
-| Aditivo de chave de API    | o mesmo array, uma cadeia exata                                                     | o auxiliar indicado abaixo | Apenas essa capacidade específica                             |
-| Âmbitos de ferramentas MCP | o mesmo array, caso contrário `_meta` do MCP, caso contrário `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | Essa ferramenta, depois de a aplicação das regras estar ativa |
-| Token de acesso            | `oma_live_…`                                                                        | `scopeSatisfies`           | A rota de gestão cujo método e caminho exigem essa hierarquia |
+| Espaço de nomes            | Credencial                                                                            | Verificador                | Uma aprovação permite                                         |
+| :------------------------- | :------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------------------------------ |
+| Gestão por chave de API    | `api_keys.scopes`                                                                     | `hasManageScope`           | REST de gestão para essa chave Bearer                         |
+| Aditivo de chave de API    | o mesmo array, uma cadeia exata                                                       | o auxiliar indicado abaixo | Apenas essa capacidade específica                             |
+| Âmbitos de ferramentas MCP | o mesmo array, senão o `_meta` do MCP (apenas HTTP/SSE), senão `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | Essa ferramenta, depois de a aplicação das regras estar ativa |
+| Token de acesso            | `oma_live_…`                                                                          | `scopeSatisfies`           | A rota de gestão cujo método e caminho exigem essa hierarquia |
 
 A emissão de cada credencial é abordada em
 [Autenticação de gestão](../guides/MANAGEMENT-AUTH.md).
@@ -369,8 +369,11 @@ A aplicação das regras está desativada, exceto se `OMNIROUTE_MCP_ENFORCE_SCOP
 `false`). Enquanto estiver desativada, `evaluateToolScopes` permite a chamada e ignora o
 catálogo. Enquanto estiver ativada, HTTP utiliza `api_keys.scopes` da chave Bearer como
 `authInfo` (consulte [Associação de âmbitos HTTP por chave](#per-key-http-scope-binding-7895)).
-Quando não são resolvidos âmbitos da chave, o conjunto concedido recorre a `_meta` do MCP e, em seguida,
-a `OMNIROUTE_MCP_SCOPES`.
+Quando nenhum âmbito de chave é
+resolvido, o conjunto concedido passa para o `_meta` do MCP (honrado apenas para
+quem chama via HTTP/SSE, dentro de um contexto de autenticação HTTP; o `_meta` de
+quem chama via stdio é ignorado porque é controlado pelo cliente e não
+transporta identidade por chamador), e depois `OMNIROUTE_MCP_SCOPES`.
 
 #### Âmbitos de tokens de acesso
 
@@ -468,8 +471,7 @@ O `resolveCallerScopeContext()` de `scopeEnforcement.ts` já dava prioridade a `
 `_meta` e à alternativa da variável de ambiente `OMNIROUTE_MCP_SCOPES` — esta alteração apenas preenche essa primeira
 fonte, de prioridade máxima, que anteriormente não era fornecida através de HTTP. Quando nenhuma chave de API é determinada
 (sem cabeçalho ou com uma chave inválida), `authInfo` permanece `undefined` e a resolução recorre à
-cadeia existente de metadados/variável de ambiente sem alterações. O stdio não tem uma identidade por chamador (consulte
-`mcpCallerIdentity.ts`) e não é afetado — continua a utilizar a cadeia alternativa de `_meta`/variável de ambiente.
+cadeia existente de metadados/variável de ambiente sem alterações. O stdio não tem identidade por chamador (ver `mcpCallerIdentity.ts`) e não é afetado pela vinculação por chave — salta o passo do `_meta` (o `_meta` só é considerado dentro de um contexto de autenticação HTTP, #15159) e resolve apenas a partir da chave de ambiente `OMNIROUTE_MCP_SCOPES`.
 
 **A aplicação é imposta para chamadores HTTP/SSE com âmbito restrito, independentemente de
 `OMNIROUTE_MCP_ENFORCE_SCOPES`.** O valor predefinido `false` de `OMNIROUTE_MCP_ENFORCE_SCOPES` só é

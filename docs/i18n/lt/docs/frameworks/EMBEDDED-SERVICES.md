@@ -5,8 +5,8 @@
 ---
 
 > **Versija:** v3.8.44
-> **Paskutinį kartą atnaujinta:** 2026-09-16
-> **Auditorija:** Inžinieriai, pridedantys, prižiūrintys arba derinantys įtaisytąsias paslaugas (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Paskutinį kartą atnaujinta:** 2026-10-28
+> **Kam skirta:** Inžinieriams, kurie prideda, prižiūri arba derina įterptąsias paslaugas (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Įtaisytosios paslaugos yra vietoje įdiegiami pagalbinių procesų įrankiai, kuriuos OmniRoute įdiegia, prižiūri ir
 pateikia kaip visaverčius maršruto parinkimo tikslus. Kitaip nei išoriniai teikėjai (kurie internetu pasiekiami
@@ -31,7 +31,7 @@ naudojant API raktus), įtaisytosios paslaugos veikia tame pačiame kompiuteryje
 
 ### Kodėl integruotosios paslaugos?
 
-Integruotos septynios paslaugos:
+Įterptos aštuonios paslaugos:
 
 | Paslauga        | npm paketas                                    | Numatytasis prievadas | Paskirtis                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | --------------- | ---------------------------------------------- | :-------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,8 +42,9 @@ Integruotos septynios paslaugos:
 | **Dario**       | `@askalf/dario`                                |         3456          | „Claude“ prenumeratos tarpinis serveris — „CLIProxyAPI“ alternatyva / atsarginė parinktis „Claude-Code“ formato srautui; įterptas raktas tampa `DARIO_ADMIN_TOKEN`, ribojančiu jo `/admin/*` OAuth valdymo plokštumą                                                                                                                                                                                                         |
 | **open-wa**     | `@open-wa/wa-automate`                         |         8323          | „WhatsApp Web“ automatizavimas (begalvis „Chromium“ per „Puppeteer“). Valdomas tik gyvavimo ciklas — tai nėra maršruto parinkimo paskirties vieta.                                                                                                                                                                                                                                                                           |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                           |         20135         | Užklausų glaudinimo pagalbinė paslauga — tikras LLMLingua-2 ONNX modelis („Microsoft“ algoritmo JS/TS prievadas). `open-sse/services/compression/engines/llmlingua/index.ts` persiunčia `/compress` užklausas į ją per HTTP, o kai pagalbinė paslauga neveikia, grįžta prie tame pačiame procese veikiančios darbuotojo gijos vidinės sistemos. Valdomas tik gyvavimo ciklas — tai nėra maršruto parinkimo paskirties vieta. |
+| **sing-box**    | GitHub leidimo dvejetainis failas (`singbox`)  |         20140         | TPROXY pagalbinis procesas, palaikantis skaidriojo tarpinio serverio perėmimą per `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Diegimo programa atsisiunčia fiksuotą leidimą, patikrintą pagal kontrolinę sumą. Valdomas tik jo gyvavimo ciklas: tai nėra maršrutizavimo tikslas ir jis neperduoda LLM užklausų.                                                                                                            |
 
-Visoms septynioms taikomas tas pats priežiūros modelis:
+Visoms aštuonioms taikomas tas pats priežiūros modelis:
 
 - „OmniRoute“ įdiegia jas kataloge `DATA_DIR/services/{name}/` (atskirai nuo pačios „OmniRoute“ `package.json`)
 - „OmniRoute“ paleidžia ir stebi jas kaip antrinius procesus
@@ -581,7 +582,27 @@ atsakymas be pakeitimų) grįžtama prie procesui priklausančios darbuotojo gij
 
 ---
 
-### 4.8 Atvirkštinis įgaliotasis serveris (įterptasis 9Router valdymo skydelis)
+### 4.8 sing-box galiniai taškai (8 maršrutai)
+
+sing-box galinių taškų struktūra tokia pati kaip Mux: nėra maršruto `rotate-key` ar API rakto įterpimo (`needsApiKey: false` faile `bootstrap.ts`). Valdomas tik gyvavimo ciklas; tai niekada nėra maršrutizavimo ar LLM teikėjas. `install()` atsisiunčia oficialaus GitHub leidimo dvejetainį failą (`SagerNet/sing-box`), kurio versija fiksuota (`SINGBOX_PINNED_VERSION` faile `src/lib/services/installers/singbox.ts`), ir prieš įrašydama jį į diską patikrina SHA256 pagal tame pačiame faile įrašytą kontrolinę sumą. Bet kurios kitos versijos užklausa atmetama.
+
+| Metodas | Kelias                                       | Aprašymas                                                                               |
+| ------- | -------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `POST`  | `/api/services/singbox/install`              | Atsisiųsti ir patikrinti fiksuotą sing-box leidimą                                      |
+| `POST`  | `/api/services/singbox/start`                | Paleisti sing-box (`sing-box run -c config.json`)                                       |
+| `POST`  | `/api/services/singbox/stop`                 | Sustabdyti sing-box                                                                     |
+| `POST`  | `/api/services/singbox/restart`              | Paleisti sing-box iš naujo                                                              |
+| `POST`  | `/api/services/singbox/update`               | Pakartotinai patikrinti arba įdiegti fiksuotą leidimą                                   |
+| `GET`   | `/api/services/singbox/status`               | Dabartinė būsena ir DB būsena                                                           |
+| `POST`  | `/api/services/singbox/auto-start`           | Įjungti arba išjungti automatinį paleidimą                                              |
+| `POST`  | `/api/services/singbox/auto-restart-adopted` | Įjungti arba išjungti perimto, jau egzistuojančio proceso automatinį paleidimą iš naujo |
+| `GET`   | `/api/services/singbox/logs`                 | Stebėti žurnalo pabaigą per SSE, naudojant bendrą dinaminį maršrutą `[name]/logs`       |
+
+**TPROXY sujungimas:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) įrašo `config.json` ir paleidžia prižiūrėtoją prieš tai, kai `applyTproxy()` įdiegia TPROXY užkardos taisykles. Jei prižiūrėtojo nėra arba jis nepasiekia būsenos `running`, dabar apie tai rašoma klaidos lygio žurnalo įraše, užuot tyliai nutylėjus nesėkmę. Taip operatorius gali pastebėti, kad TPROXY taisyklės pritaikytos, nors už jų nėra veikiančio klausymo proceso.
+
+---
+
+### 4.9 Atvirkštinis įgaliotasis serveris (įterptasis 9Router valdymo skydelis)
 
 Valdymo skydelis įterpia 9Router žiniatinklio sąsają į iframe per vidinį atvirkštinį
 įgaliotąjį serverį adresu:

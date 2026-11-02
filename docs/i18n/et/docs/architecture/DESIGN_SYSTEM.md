@@ -94,7 +94,9 @@
 
 ## 5. Kit'i uuendamine
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopeerib selle commit'i juures ülemvoo `src/` kausta `packages/ui-kit/src` ja rakendab ainsat lubatud teisendust (see eemaldab suhtelistelt importidelt `.js`-lõpu). Seejärel: vaata üle `git diff packages/ui-kit`, tee visuaalne läbivaatus lehtedel providers, settings, combos, usage ja endpoint mõlemas teemas, käivita `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ning ava PR koos ülemvoo muudatuste logiga.
+`npm run check:ui-kit-upstream` võrdleb `packages/ui-kit/UPSTREAM.md` kinnitatud versiooni ülesvoolu repo uusima `v*` sildiga ja prindib sünkroonimiskäsu, kui väljalase on välja antud. Iganädalane `UI Kit upstream watch` töövoog (`.github/workflows/ui-kit-upstream-watch.yml`) teostab sama kontrolli ja hoiab ühe jälgimisprobleemi avatuna, kui nööpnõel on taga; ülesvoolu repo on privaatne, seega vajab töövoog `UI_KIT_READ_TOKEN` saladuses kirjutuskaitstud luba ja jääb ilma selleta inertseks.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopeerib ülesvoolu `src/` sellel kinnitusel (`latest` = uusim `v*` silt) `packages/ui-kit/src`, rakendab ühe lubatud teisenduse (see jätab suhtelisest impordist välja `.js` järelliide) ja seab tööruumi versiooni `packages/ui-kit/package.json` ja `package-lock.json` ülesvoolu versiooniks. Seejärel vaadake üle `git diff packages/ui-kit`, tehke visuaalne kontroll mõlema teema pakkujate, sätete, kombinatsioonide, kasutuse ja lõpp-punkti kohta, käivitage `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ning avage PR ülesvoolu muudatuste logiga.
 
 ## 6. README diagrammid
 

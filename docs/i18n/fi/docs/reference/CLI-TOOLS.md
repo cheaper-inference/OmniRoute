@@ -10,7 +10,7 @@ OmniRoute integroituu kolmeen CLI-työkaluluokkaan, jotka on jaettu kolmelle eri
 
 | Sivu            | Reitti                  | Konsepti                                                                                     | Määrä           |
 | --------------- | ----------------------- | -------------------------------------------------------------------------------------------- | --------------- |
-| **CLI-koodit**  | `/dashboard/cli-code`   | Koodaustyökalut, jotka osoitat OmniRouteen (asiakas → CLI → OmniRoute → palveluntarjoaja)    | 27              |
+| **CLI-koodit**  | `/dashboard/cli-code`   | Koodaustyökalut, jotka osoitat OmniRouteen (asiakas → CLI → OmniRoute → palveluntarjoaja)    | 28              |
 | **CLI-agentit** | `/dashboard/cli-agents` | Autonomiset agentit, jotka osoitat OmniRouteen (sama kulku, laajempi käyttöalue)             | 11              |
 | **ACP-agentit** | `/dashboard/acp-agents` | CLI:t, jotka OmniRoute käynnistää taustajärjestelmäksi stdio/ACP:n kautta (käänteinen kulku) | katso rekisteri |
 
@@ -110,7 +110,7 @@ rajapinnalle ilman muita lisätty kohde aiheuttaa testikokonaisuuden epäonnistu
 
 ---
 
-## 1. CLI Coden työkaluluettelo (27 työkalua)
+## 1. CLI Coden työkaluluettelo (28 työkalua)
 
 Kaikki työkalut, jotka näkyvät näkymässä `/dashboard/cli-code`. Työkalut, joiden `baseUrlSupport`-arvo on `none`, yhdistetään MITM:n tai manuaalisen oppaan kautta mukautetun perus-URL:n sijaan:
 
@@ -137,6 +137,7 @@ Kaikki työkalut, jotka näkyvät näkymässä `/dashboard/cli-code`. Työkalut,
 | grok-build   | Grok Build              | xAI                   | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)           | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba               | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)         | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries        | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere             | none           | guide          | false        |
 | antigravity  | Antigravity             | Google                | none           | mitm           | false        |
@@ -233,7 +234,7 @@ Uusilla työkaluilla, joiden `configType: "custom"`, on omat asetusten API-reiti
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, vanha)                                                    |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ensisijainen + vanhan `~/.deepseek`-hakemiston synkronointi) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                                    |
-| `POST /api/cli-tools/pi-settings`           | Pi-koodausagentti                                                                        |
+| `POST /api/cli-tools/pi-settings`           | Pi-koodausagentti (`~/.pi/agent/models.json`, `providers.omniroute`)                     |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                                    |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + erillinen `.env`-avain)                             |
 
@@ -339,7 +340,7 @@ pip install aider-chat
 cargo install smelt  # Rust-pohjainen
 
 # Pi-koodausagentti
-# katso asennusohjeet osoitteesta https://github.com/zechnerj/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # katso asennusohjeet osoitteesta https://github.com/1jehuang/jcode
@@ -451,6 +452,38 @@ EOF
 **Testi:** `opencode`
 
 > Lähetä päättelyvariantteja komennolla `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`.
+
+---
+
+#### Pi Coding Agent
+
+Asenna virallinen Pi Coding Agent -paketti komennolla `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi lukee mukautetut palveluntarjoajat tiedostosta `~/.pi/agent/models.json`; aseta `PI_CODING_AGENT_DIR` absoluuttiseksi poluksi (tai `~`-alkuiseksi poluksi) siirtääksesi koko agenttihakemiston. Hallintapaneeli noudattaa tätä ohitusta. Pi ei löydä malleja mukautetuista päätepisteistä, joten OmniRoute kirjoittaa valitun mallin kenttään `models[]` käyttäen Pin `openai-completions`-API:a ja OmniRouten OpenAI-yhteensopivaa `/v1`-päätepistettä.
+
+Valitse kohdassa **CLI Tools → Pi** päätepiste, API-avain ja malli, tarkista palveluntarjoajan esikatselu ja ota asetukset käyttöön. Esikatselu on palveluntarjoajan fragmentti: yhdistä `providers.omniroute` nykyiseen `models.json`-tiedostoosi määrittäessäsi Pin käsin, jotta muut palveluntarjoajat ja asetukset säilyvät ennallaan.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi lataa `models.json`-tiedoston uudelleen, kun avaat `/model`-näkymän. Testaa määritetty reitti valitsemallasi palveluntarjoajan ja mallin tunnuksella:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Viitteet: [Pin mallit ja mukautetut palveluntarjoajat](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pin ympäristömuuttujat](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pin asennusohjeet](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

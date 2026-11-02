@@ -170,9 +170,10 @@ Chaque classe de route possède une politique dans `src/server/authz/policies/` 
 
 - **`publicPolicy`** (`policies/public.ts`) — renvoie toujours `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — extrait le jeton Bearer et le valide via `validateApiKey()`. N’autorise l’accès anonyme que lorsque l’indicateur de fonctionnalité effectif `REQUIRE_API_KEY` est désactivé. L’indicateur effectif est résolu par `isRequireApiKeyEnabled()` (`remplacement par l’indicateur de fonctionnalité de la base de données > process.env.REQUIRE_API_KEY > valeur par défaut`), afin que les indicateurs de fonctionnalité du tableau de bord et les variables d’environnement régissent de manière cohérente `/api/v1/*`, `/api/v1beta/*` et leurs alias ; les échecs du résolveur entraînent un refus par défaut. Autorise les requêtes disposant d’une session du tableau de bord sur les routes de l’API cliente (y compris `/api/v1/models`, utilisée par le catalogue de modèles du tableau de bord).
+  Lorsque Entra ID SSO est activé, un Bearer ayant la structure d’un jeton Entra (trois segments base64url, algorithme `RS*`, `kid`) est traité par la branche SSO **avant** `validateApiKey()`, et sa décision est définitive. Il ne passe jamais à la vérification d’une clé API ni à la branche de repli vers un accès anonyme ; une panne du fournisseur d’identité ne peut donc pas ouvrir l’accès. Les clés API statiques ne sont pas affectées. Voir [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — accepte une session du tableau de bord, les requêtes internes de synchronisation des modèles (correspondant à `/api/providers/[name]/(sync-models|models)`), ou ignore entièrement l’authentification si `isAuthRequired()` renvoie false. Renvoie 403 (`AUTH_001`) lorsqu’un jeton Bearer est présent mais invalide, et 401 dans les autres cas. Applique également les niveaux de protection des routes (LOCAL_ONLY / ALWAYS_PROTECTED) avant toute branche d’authentification — consultez [Niveaux de protection des routes](../security/ROUTE_GUARD_TIERS.md). Les chemins LOCAL_ONLY figurant dans `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (actuellement : `/api/mcp/`) peuvent être accessibles depuis une adresse hors boucle locale lorsque la clé Bearer possède la portée `manage` ; tous les autres chemins LOCAL_ONLY restent strictement limités à la boucle locale, quelle que soit la portée.
 
-Une politique réussie renvoie `AuthSubject` avec `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Les gestionnaires en aval peuvent le lire via `assertAuth(request, "CLIENT_API")` dans `src/server/authz/assertAuth.ts` au lieu de réexécuter la logique d’authentification.
+Une politique réussie renvoie `AuthSubject` avec `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Les gestionnaires en aval peuvent le lire via `assertAuth(request, "CLIENT_API")` dans `src/server/authz/assertAuth.ts` au lieu de réexécuter la logique d’authentification.
 
 ## Liste des routes publiques
 
@@ -328,8 +329,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Pour les requêtes authentifiées, les en-têtes de requête en amont (côté gestionnaire) incluent également :
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<4 derniers caractères> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<4 derniers caractères> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (facultatif)
 x-omniroute-auth-scopes:    liste séparée par des virgules
 ```

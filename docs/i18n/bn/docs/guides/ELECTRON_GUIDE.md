@@ -64,6 +64,19 @@ OmniRoute একটি ক্রস-প্ল্যাটফর্ম ডেস�
 - `npm run build:mac-x64` / `build:mac-arm64` — একক-আর্কিটেকচারের macOS বিল্ড
 - `npm run pack` — স্থানীয় পরীক্ষার জন্য শুধুমাত্র-ডিরেক্টরি বিল্ড (কোনো ইনস্টলার নয়)
 
+## ঐচ্ছিক রানটাইম প্যাক
+
+ডেস্কটপ build তাদের installer-এর সঙ্গে ঐচ্ছিক রানটাইম archive প্রকাশ করতে পারে। ইনস্টল করা সার্ভারের ফাইলে `optional-packs.index.json` থাকে (Windows ও Linux-এ `resources/app`-এর অধীনে)। `browser-runtime` এন্ট্রির জন্য `packs[].tarball` পড়ুন এবং **একই রিলিজ থেকে ঠিক সেই নামের ফাইল ডাউনলোড করুন**। archive-এর নামে SHA-256 digest থাকে; ভিন্ন build-এর জন্য ভিন্ন archive লাগতে পারে। ডাউনলোড করা ফাইলের নাম অপরিবর্তিত রাখুন।
+
+ইনস্টল করা অ্যাপের index এবং নির্বাচিত archive একই ডিরেক্টরিতে কপি করুন, তারপর একই রিলিজের CLI ব্যবহার করুন:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` ইনস্টলেশন ও যাচাইয়ের অবস্থা দেখায়, archive-এর ফাইলনাম নয়। সঙ্গে থাকা index archive নির্বাচন করে। ইনস্টলেশন extraction-এর আগে archive checksum এবং ইনস্টল করা প্যাক প্রতিস্থাপনের আগে package checksum যাচাই করে। এটি স্থানীয় ফাইল পড়ে; অনুপস্থিত archive ডাউনলোড করে না। ইনস্টলেশনের পরে অ্যাপ্লিকেশন পুনরায় চালু করুন। রিলিজে মিল থাকা ফাইল না থাকলে ঐচ্ছিক প্যাকটি ওই রিলিজের ফাইলগুলোর মাধ্যমে পাওয়া যায় না।
+
 ## ডিরেক্টরি বিন্যাস
 
 ```

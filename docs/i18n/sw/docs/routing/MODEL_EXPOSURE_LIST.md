@@ -61,3 +61,15 @@ Uhamishaji wa mipangilio (`GET /api/settings/export-json`) hujumuisha safu zote 
 ya mipangilio — tofauti na kichujio cha uhamishaji cha hatua za mchanganyiko cha `hidePaidModels`, hakuna hatari ya kujazwa upya
 hapa: kitambulisho kilichokataliwa kilichopachikwa katika hatua ya mchanganyiko iliyohamishwa ni chaguo la mwendeshaji mwenyewe la uelekezaji wa wazi,
 si kitu ambacho mpaka wa uhamishaji unahitaji kuondoa.
+
+## Orodha ya combo pekee (`exposeCombosOnly`)
+
+Boolean tofauti, ambayo pia lazima iwashwe kwa hiari na ina `false` kama chaguo-msingi, kwa deployment ambako combo ndizo model za umma na provider ni backend pekee. Ikiwa `true`, orodha ya umma (`GET /v1/models`, `GET /v1`, na discovery route nyingine za `/v1` zilizojengwa juu ya `getUnifiedModelsResponse()`) huhifadhi row zenye `owned_by: "combo"` pekee: combo za mtumiaji na combo zilizojengewa za `auto/*` (isipokuwa `hideAutoCombos` zizifiche). Hutumia jaribio lilelile la row kama `catalogScope: "combos"` ya kila key, na filter za allow/deny/scope za key yenyewe bado hutumika juu yake.
+
+Iwashe au izime katika **Settings → Routing → Models API listing**, au kwa `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Kama orodha zilizo juu, hubadilisha tu kinachotangazwa:
+
+- id ya wazi ya `provider/model` bado hutuma request, na `GET /v1/models/{id}` bado huitambua;
+- dashboard catalog (`GET /api/models/catalog`, inayotumiwa na model picker) haipunguzwi;
+- haiakisiwi katika candidate pool za `auto/*`, hivyo combo za `auto/*` huhifadhi pool zao kamili.

@@ -559,8 +559,9 @@ og `PII_RESPONSE_SANITIZATION` (respons + SSE), begge av som standard.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Ikke satt betyr alle
   typer (oppførselen slik den var før denne innstillingen fantes).
   Forespørselsmotorens `ssn_us`-mønster mapper til `ssn`. Maler (Minimal,
-  Standard, Financial, Brazilian, USA, Full) fyller bare ut avkrysningsboksene
+  Standard, Financial, Brazilian, USA, GDPR, POPIA, Full) fyller bare ut avkrysningsboksene
   i brukergrensesnittet.
+- **GDPR- og POPIA-identifikatorer** — tolv innebygde ID-er som dekker personidentifikatorer fra EU og Sør-Afrika (tabellen nedenfor). De regulære uttrykkene, validatorene og jurisdiksjonsetikettene deres ligger i én tabell, `src/shared/utils/piiPatterns.ts`, som både responssanitizeren (`src/lib/piiSanitizer.ts`) og forespørselsmaskeringen (`src/shared/utils/inputSanitizer.ts`) bruker. Et treff sladdes bare når validatoren godtar det; en naken tallrekke er aldri nok. En operatør som lagret et innsnevret utvalg før disse ID-ene fantes, beholder tidligere oppførsel til de nye ID-ene blir krysset av.
 - **Egendefinerte mønstre** — opptil 20 regex- eller jokertegnmønstre (`*` =
   opptil 64 tegn som ikke er whitespace, `?` = ett). Treff blir
   `[CUSTOM_REDACTED]`. Hvert mønster går gjennom `compilePiiCustomPattern()`
@@ -585,6 +586,25 @@ Innstillingene ligger i `key_value`-tabellen (navnerom `pii_settings`,
 
 Alle tre krever administrasjonsautentisering og validerer forespørselskroppen
 med Zod (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR-identifikatorer (EU) og POPIA-identifikatorer (Sør-Afrika)
+
+| ID                  | Identifikator                | Validering                                                                                |
+| ------------------- | ---------------------------- | ----------------------------------------------------------------------------------------- |
+| `iban`              | IBAN                         | Kjent land, nøyaktig lengde for landet, ISO 13616 MOD-97-10                               |
+| `eu_vat`            | EU-mva-nummer                | Kjent medlemsstatprefiks og statens nummerformat (ingen VIES-oppslag)                     |
+| `es_dni_nie`        | Spansk DNI / NIE             | Kontrollbokstav (verdi modulo 23); NIE er `X/Y/Z` + 7 sifre                               |
+| `it_codice_fiscale` | Italiensk Codice Fiscale     | Kontrollbokstav fra tabellene for oddetalls-/partallsposisjoner                           |
+| `pl_pesel`          | Polsk PESEL                  | Vektet kontrollsum og plausible intervaller for kodet fødselsmåned/-dag                   |
+| `nl_bsn`            | Nederlandsk BSN              | 11-test (vekter 9..2, -1)                                                                 |
+| `de_steuer_id`      | Tysk Steuer-ID               | ISO 7064 Mod 11,10 pluss reglene for sifferstruktur (ingen innledende 0)                  |
+| `se_personnummer`   | Svensk personnummer          | Luhn over de siste ti sifrene og en plausibel fødselsdato (10 eller 12 sifre)             |
+| `za_id`             | Sørafrikansk ID-nummer       | Luhn over alle 13 sifre, gyldig fødselsmåned/-dag, statsborgerskapssiffer 0 eller 1       |
+| `za_phone`          | Sørafrikansk telefonnummer   | Prefiks `+27` / `27`, eller nasjonal form `0..` skrevet med mellomrom eller bindestrek    |
+| `za_vat`            | Sørafrikansk mva-nummer      | 10 sifre som begynner med `4` **og** "VAT" / "BTW" i de 48 foregående tegnene             |
+| `za_tax_ref`        | Sørafrikansk skattereferanse | 10 sifre som begynner med `0`-`3`, Luhn, **og** "tax" / "SARS" i de 48 foregående tegnene |
+
+Fordi formatene med bare sifre overlapper ordrenumre, byggnumre og tidsstempler, krever de svakeste (`za_vat`, `za_tax_ref`) nøkkelordet som signal, og et rent tisifret `0..`-nummer regnes ikke som et sørafrikansk telefonnummer. IBAN-er med mellomrom (`GB29 NWBK ...`) matches ikke. Under strømming søkes signalet bare i gjeldende del. ID-ene kommer før de generiske telefonmønstrene, slik at en validert identifikator beholder sin egen plassholder (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Malene `gdpr` og `popia` velger henholdsvis EU-ID-ene og de sørafrikanske ID-ene. Selve maskeringen krever fortsatt uttrykkelig aktivering (Hard Rule #20): ingenting her endrer en standardverdi for funksjonsflagg.
 
 ### Prompt-injeksjon (`promptInjection.ts`)
 

@@ -3,6 +3,7 @@
  * on the connection row, without cooling the whole account.
  */
 import { lockModel } from "./accountFallback.ts";
+import type { AntigravityQuotaFamily } from "./antigravityQuotaFamily.ts";
 import { getAntigravityQuotaFamily, isAntigravityQuotaProvider } from "./antigravityQuotaFamily.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -106,7 +107,7 @@ export async function persistAntigravityPreflightFamilyLock(params: {
 /** Read the saved deadline without installing any process-local model locks. */
 export function getAntigravityFamilyCooldownUntil(
   providerSpecificData: unknown,
-  family: "gemini" | "claude" | "other",
+  family: AntigravityQuotaFamily,
   now = Date.now()
 ): number | null {
   const untils = asRecord(asRecord(providerSpecificData)[FAMILY_PSD_KEY]);

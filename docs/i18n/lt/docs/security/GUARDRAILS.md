@@ -561,7 +561,8 @@ išjungtos.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Jei nenustatyta, taikomi
   visi tipai (toks elgesys buvo iki atsirandant šiam nustatymui). Užklausų variklio
   `ssn_us` šablonas atitinka `ssn`. Šablonai (Minimal, Standard, Financial,
-  Brazilian, USA, Full) tik pažymi varneles sąsajoje.
+  Brazilian, USA, GDPR, POPIA, Full) tik pažymi varneles sąsajoje.
+- **GDPR ir POPIA identifikatoriai** — dvylika įtaisytų ID, apimančių ES ir Pietų Afrikos asmens identifikatorius (lentelė žemiau). Jų reguliariosios išraiškos, tikrintuvai ir jurisdikcijų žymos yra vienoje lentelėje `src/shared/utils/piiPatterns.ts`, kurią naudoja tiek atsakymų valytuvas (`src/lib/piiSanitizer.ts`), tiek užklausų maskuotojas (`src/shared/utils/inputSanitizer.ts`). Atitiktis užmaskuojama tik tikrintuvui ją priėmus; vien skaitmenų eilutės niekada nepakanka. Operatorius, išsaugojęs susiaurintą pasirinkimą prieš atsirandant šiems ID, išlaiko ankstesnį veikimą, kol pažymi naujus ID.
 - **Pasirinktiniai šablonai** — iki 20 reguliariųjų išraiškų arba pakaitos simbolių
   šablonų (`*` = iki 64 simbolių, ne tarpų, `?` = vienas). Atitikmenys tampa
   `[CUSTOM_REDACTED]`. Kiekvienas šablonas praeina per `compilePiiCustomPattern()`
@@ -587,6 +588,25 @@ Nustatymai saugomi `key_value` lentelėje (vardų erdvė `pii_settings`,
 
 Visi trys reikalauja valdymo autentifikacijos ir tikrina užklausos turinį su Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR (ES) ir POPIA (Pietų Afrika) identifikatoriai
+
+| ID                  | Identifikatorius               | Tikrinimas                                                                                 |
+| ------------------- | ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                           | Žinoma šalis, tikslus tos šalies ilgis, ISO 13616 MOD-97-10                                |
+| `eu_vat`            | ES PVM numeris                 | Žinomas valstybės narės prefiksas ir jos numerio formatas (be VIES užklausos)              |
+| `es_dni_nie`        | Ispanijos DNI / NIE            | Kontrolinė raidė (reikšmė mod 23); NIE yra `X/Y/Z` + 7 skaitmenys                          |
+| `it_codice_fiscale` | Italijos Codice Fiscale        | Kontrolinė raidė iš nelyginių/lyginių pozicijų lentelių                                    |
+| `pl_pesel`          | Lenkijos PESEL                 | Svertinė kontrolinė suma ir tikėtini užkoduoto gimimo mėnesio/dienos intervalai            |
+| `nl_bsn`            | Nyderlandų BSN                 | 11 patikra (svoriai 9..2, -1)                                                              |
+| `de_steuer_id`      | Vokietijos Steuer-ID           | ISO 7064 Mod 11,10 ir skaitmenų struktūros taisyklės (be pradinio 0)                       |
+| `se_personnummer`   | Švedijos personnummer          | Luhn paskutiniams dešimčiai skaitmenų ir tikėtina gimimo data (10 arba 12 skaitmenų)       |
+| `za_id`             | Pietų Afrikos ID numeris       | Luhn visiems 13 skaitmenų, galiojantis gimimo mėnuo/diena, pilietybės skaitmuo 0 arba 1    |
+| `za_phone`          | Pietų Afrikos telefonas        | Prefiksas `+27` / `27` arba nacionalinė `0..` forma su tarpu ar brūkšneliu                 |
+| `za_vat`            | Pietų Afrikos PVM numeris      | 10 skaitmenų, prasidedančių `4`, **ir** "VAT" / "BTW" ankstesniuose 48 ženkluose           |
+| `za_tax_ref`        | Pietų Afrikos mokesčių nuoroda | 10 skaitmenų, prasidedančių `0`-`3`, Luhn **ir** "tax" / "SARS" ankstesniuose 48 ženkluose |
+
+Kadangi vien skaitmenų formatai sutampa su užsakymų, komponavimų numeriais ir laiko žymomis, silpniausiems (`za_vat`, `za_tax_ref`) reikia raktažodžio užuominos, o vien dešimties skaitmenų `0..` numeris nelaikomas Pietų Afrikos telefono numeriu. IBAN su tarpais (`GB29 NWBK ...`) neatpažįstami. Srautiniame kelyje užuominos ieškoma tik dabartiniame fragmente. ID yra prieš bendruosius telefonų šablonus, todėl patikrintas identifikatorius išlaiko savo vietaženklį (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Šablonai `gdpr` ir `popia` pasirenka atitinkamai ES ir Pietų Afrikos ID. Pats maskavimas lieka pasirenkamas (Hard Rule #20): čia niekas nekeičia funkcijos vėliavos numatytosios reikšmės.
 
 ### Raginimų injekcija (`promptInjection.ts`)
 

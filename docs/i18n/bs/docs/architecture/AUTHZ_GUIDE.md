@@ -167,9 +167,10 @@ Svaka klasa rute ima politiku u `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — uvijek vraća `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — izvlači Bearer, validira putem `validateApiKey()`. Prelazi na anonymous samo kada je onemogućena efektivna feature zastavica `REQUIRE_API_KEY`. Efektivna zastavica se razrješava kroz `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) tako da Dashboard Feature Flags i varijable okruženja konzistentno upravljaju sa `/api/v1/*`, `/api/v1beta/*` i aliasima; neuspjesi razrješivača rezultiraju blokiranjem. Dozvoljava zahtjeve sesije kontrolne table na klijentskim API rutama (uključujući `/api/v1/models`, koje koristi katalog modela kontrolne table).
+  Kada je Entra ID SSO uključen, Bearer koji strukturno odgovara Entra tokenu (tri base64url segmenta, algoritam `RS*`, `kid`) obrađuje SSO grana **prije** `validateApiKey()`, a njena odluka je konačna. Nikada ne prelazi na putanju API ključa niti na granu koja spušta pristup na anonimni, pa prekid rada pružaoca identiteta ne može otvoriti slobodan pristup. Statički API ključevi ostaju nepromijenjeni. Pogledajte [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — prihvata sesiju kontrolne table, interne zahtjeve za sinhronizaciju modela (podudaranje sa `/api/providers/[name]/(sync-models|models)`), ili u potpunosti preskače ako `isAuthRequired()` vrati false. Vraća 403 (`AUTH_001`) kada je Bearer token prisutan, ali nevažeći, u suprotnom 401. Takođe sprovodi nivoe zaštite ruta (`LOCAL_ONLY` / `ALWAYS_PROTECTED`) prije bilo koje grane autorizacije — pogledajte [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY` putanjama u `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (danas: `/api/mcp/`) se može pristupiti sa ne-loopback adresa kada Bearer ključ nosi `manage` opseg; sve ostale `LOCAL_ONLY` putanje ostaju strogo loopback bez obzira na opseg.
 
-Uspješna politika vraća `AuthSubject` sa `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Handleri nizvodno ga mogu pročitati putem `assertAuth(request, "CLIENT_API")` u `src/server/authz/assertAuth.ts` umjesto ponovnog pokretanja logike autorizacije.
+Uspješna politika vraća `AuthSubject` sa `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Handleri nizvodno ga mogu pročitati putem `assertAuth(request, "CLIENT_API")` u `src/server/authz/assertAuth.ts` umjesto ponovnog pokretanja logike autorizacije.
 
 ## Lista javnih ruta
 
@@ -328,8 +329,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Za autentifikovane zahtjeve, zaglavlja zahtjeva na strani upstream-a (strana handlera) takođe uključuju:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (opciono)
 x-omniroute-auth-scopes:    lista razdvojena zarezima
 ```

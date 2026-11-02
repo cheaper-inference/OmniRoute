@@ -159,9 +159,10 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 - **`publicPolicy`** (`policies/public.ts`) — επιστρέφει πάντα `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — εξάγει το Bearer και το επικυρώνει μέσω `validateApiKey()`. Μεταπίπτει σε ανώνυμη πρόσβαση μόνο όταν η ισχύουσα σημαία λειτουργίας `REQUIRE_API_KEY` είναι απενεργοποιημένη. Η ισχύουσα σημαία επιλύεται μέσω `isRequireApiKeyEnabled()` (`παράκαμψη σημαίας λειτουργίας DB > process.env.REQUIRE_API_KEY > προεπιλογή`), ώστε οι Σημαίες Λειτουργιών του Πίνακα Ελέγχου και οι μεταβλητές περιβάλλοντος να διέπουν με συνέπεια τα `/api/v1/*`, `/api/v1beta/*` και τα ψευδώνυμα· οι αποτυχίες του επιλυτή οδηγούν σε ασφαλή απόρριψη. Επιτρέπει αιτήματα με συνεδρία πίνακα ελέγχου στις διαδρομές API πελάτη (συμπεριλαμβανομένης της `/api/v1/models`, η οποία χρησιμοποιείται από τον κατάλογο μοντέλων του πίνακα ελέγχου).
+  Όταν είναι ενεργό το Entra ID SSO, ένα Bearer που έχει τη δομή token Entra (τρία τμήματα base64url, αλγόριθμο `RS*`, `kid`) υποβάλλεται σε επεξεργασία από τον κλάδο SSO **πριν** από το `validateApiKey()` και η απόφασή του είναι οριστική. Δεν μεταβαίνει ποτέ στη διαδρομή κλειδιού API ή στον κλάδο υποβάθμισης σε ανώνυμη πρόσβαση, ώστε μια διακοπή του παρόχου ταυτότητας να μην μπορεί να επιτρέψει ελεύθερη πρόσβαση. Τα στατικά κλειδιά API δεν επηρεάζονται. Δείτε το [Entra ID SSO](../security/ENTRA_SSO.md).
 - **`managementPolicy`** (`policies/management.ts`) — αποδέχεται συνεδρία πίνακα ελέγχου, εσωτερικά αιτήματα συγχρονισμού μοντέλων (αντιστοιχισμένα με το `/api/providers/[name]/(sync-models|models)`) ή παρακάμπτεται πλήρως αν το `isAuthRequired()` επιστρέψει false. Επιστρέφει 403 (`AUTH_001`) όταν υπάρχει διακριτικό Bearer αλλά είναι μη έγκυρο, διαφορετικά 401. Επιβάλλει επίσης τις βαθμίδες προστασίας διαδρομών (LOCAL_ONLY / ALWAYS_PROTECTED) πριν από οποιονδήποτε κλάδο ελέγχου ταυτότητας — ανατρέξτε στο [Βαθμίδες Προστασίας Διαδρομών](../security/ROUTE_GUARD_TIERS.md). Οι διαδρομές LOCAL_ONLY στο `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (σήμερα: `/api/mcp/`) μπορούν να προσπελαστούν εκτός loopback όταν το κλειδί Bearer διαθέτει την εμβέλεια `manage`· όλες οι άλλες διαδρομές LOCAL_ONLY παραμένουν αυστηρά προσβάσιμες μόνο μέσω loopback, ανεξαρτήτως εμβέλειας.
 
-Μια επιτυχημένη πολιτική επιστρέφει `AuthSubject` με `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Οι μεταγενέστεροι χειριστές μπορούν να το διαβάσουν μέσω `assertAuth(request, "CLIENT_API")` στο `src/server/authz/assertAuth.ts`, αντί να εκτελέσουν ξανά τη λογική ελέγχου ταυτότητας.
+Μια επιτυχημένη πολιτική επιστρέφει `AuthSubject` με `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Οι μεταγενέστεροι χειριστές μπορούν να το διαβάσουν μέσω `assertAuth(request, "CLIENT_API")` στο `src/server/authz/assertAuth.ts`, αντί να εκτελέσουν ξανά τη λογική ελέγχου ταυτότητας.
 
 ## Λίστα δημόσιων διαδρομών
 
@@ -320,8 +321,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 Για πιστοποιημένα αιτήματα, οι κεφαλίδες αιτήματος προς το ανάντη σύστημα (στην πλευρά του χειριστή) περιλαμβάνουν επίσης:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<τελευταία-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<τελευταία-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (προαιρετικό)
 x-omniroute-auth-scopes:    λίστα διαχωρισμένη με κόμματα
 ```

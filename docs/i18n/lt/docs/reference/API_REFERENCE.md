@@ -29,6 +29,7 @@ Išsamiau apie konkretų su „OpenAI“ suderinamą protokolą ir teikėjų gal
 - [Srautinis perdavimas per WebSocket](#websocket-streaming)
 - [Kvietos ir pranešimas apie problemas](#quotas--issues-reporting)
 - [Semantinė podėlio atmintinė](#semantic-cache)
+- [Suderinamumas su CLIProxyAPI valdymu](#cliproxyapi-management-compatibility)
 - [Valdymo skydelis ir administravimas](#dashboard--management)
 - [Derinių valdymas](#combo-management)
 - [Žiniatinklio atgaliniai iškvietimai](#webhooks)
@@ -1013,6 +1014,18 @@ užbaigimą.
 
 **Autentifikavimas:** „Bearer“ API raktas (`isAuthenticated`).
 
+### Kvotos sesijos atkūrimas (įjungiamas pasirinktinai)
+
+Nesrautinis `POST /v1/chat/completions` arba `POST /v1/responses`, pasibaigęs galutine kvotos klaida (`402`/`429`/`503`, kurios turinys nurodo, kad kvota arba kreditai išnaudoti), gali būti atidėtas ir pakartotas vėliau, užuot grąžinus klaidą. Kvietėjas tai įjungia kiekvienai užklausai trimis antraštėmis:
+
+| Antraštė                     | Reikšmė                                       |
+| ---------------------------- | --------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                        |
+| `x-omniroute-session`        | sesijos ID, `[A-Za-z0-9._:-]{1,128}`          |
+| `x-omniroute-recovery-turn`  | sesijoje unikalus ėjimo ID (ta pati taisyklė) |
+
+Tinka tik `stream: false` ėjimai be įrankių, įrankių istorijos ar `previous_response_id` ir be `x-omniroute-connection` prisegimo; turi būti nustatytas `STORAGE_ENCRYPTION_KEY` (užklausa saugoma užšifruota iki 24 h). Tada atsakymas yra `202` su `recovery.poll`; tikrinkite `GET /v1/quota-recoveries/{id}` (`202` laukiant, `200` su atkurtu turiniu baigus) arba atšaukite su `DELETE`. Bilietai matomi tik juos sukūrusiam API raktui. Pakartojimas, kurio rezultatas neaiškus, baigiasi būsena `needs_confirmation`, o ne siunčiamas du kartus. Šaltinis: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Savitarnos naudojimo duomenys (`/api/usage/om-usage`)
@@ -1179,6 +1192,28 @@ Bet kuri užklausa gali apeiti talpyklą neatsižvelgiant į rakto nustatymus:
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Suderinamumas su CLIProxyAPI valdymu
+
+OmniRoute atsako į tris [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) valdymo galinius taškus, kuriuos naudojimo skydeliai kviečia Claude ir Codex prenumeratų limitams nuskaityti (pavyzdžiui, T3 Code naudojimo limitų šaltinis `cliproxy`). Nukreipkite kliento bazinį URL į OmniRoute ir valdymo raktu naudokite API raktą su `manage` apimtimi. Maršrutai teikiami adresais `/v0/management/*` ir `/api/v0/management/*`.
+
+| Metodas | Kelias                       | Aprašas                                                                                                                                 |
+| ------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/v0/management/auth-files`  | Claude ir Codex OAuth ryšiai kaip `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Be žetonų                     |
+| POST    | `/v0/management/api-call`    | Turinys `{ auth_index, method, url, header?, data? }`. Siunčia leidžiamą užklausą su paskyros žetonu ir grąžina `{ status_code, body }` |
+| POST    | `/v0/management/reset-quota` | Turinys `{ auth_index }`. Išvalo vienos paskyros ryšio laukimo laiką, modelių blokavimus ir Codex laukimo laikus pagal apimtį           |
+
+- `auth_index` yra OmniRoute ryšio ID. `provider` yra `claude` arba `codex` (tik OAuth ryšiai; API rakto teikėjas `anthropic` neįtraukiamas). Codex atveju `id_token.chatgpt_account_id` yra saugomas darbo srities ID, o `plan_type` — saugomas planas.
+- `api-call` nėra bendros paskirties tarpinis serveris. Jis priima tik Claude `GET
+https://api.anthropic.com/api/oauth/usage` ir Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` bei `POST .../wham/rate-limit-reset-credits/consume`, kiekvieną tik atitinkamo teikėjo paskyrai. Visa kita grąžina `403` nesusisiekiant su aukštesne grandimi. Kvietėjo `Authorization` antraštė (įskaitant vietaženklį `$TOKEN$`) ignoruojama: OmniRoute įterpia ryšio prieigos žetoną, pirmiausia jį atnaujindamas, jei artėja galiojimo pabaiga, ir persiunčia tik leidžiamas antraštes (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Trūkstamo `Chatgpt-Account-Id` numatytoji reikšmė yra saugomas darbo srities ID. Jei pirmas aukštesnės grandies atsakymas yra `401`, atnaujinama vieną kartą ir bandoma iš naujo tik pasikeitus prieigos žetonui. Kiekvieno aukštesnės grandies bandymo laiko limitas yra 15 sekundžių, ir naudojamas ryšio tarpinis serveris.
+- `reset-quota` nekeičia galutinių būsenų (banned, expired, credits_exhausted). Nežinomas `auth_index` grąžina `404`.
+
+**Autentifikavimas:** valdymo skydelio sesija arba API raktas su `manage` apimtimi, būtinas net išjungus prisijungimą (keliai yra `ALWAYS_PROTECTED_API_PATHS`). Tik inferencijai skirti raktai gauna `403`. Šaltinis: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

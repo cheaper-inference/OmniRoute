@@ -29,6 +29,7 @@ OpenAI-თან თავსებადი პროტოკოლისა �
 - [WebSocket სტრიმინგი](#websocket-streaming)
 - [კვოტებისა და პრობლემების შეტყობინება](#quotas--issues-reporting)
 - [სემანტიკური კეში](#semantic-cache)
+- [CLIProxyAPI-ის მართვასთან თავსებადობა](#cliproxyapi-management-compatibility)
 - [სამართავი პანელი და მართვა](#dashboard--management)
 - [კომბინაციების მართვა](#combo-management)
 - [ვებჰუკები](#webhooks)
@@ -1011,6 +1012,18 @@ CLI `base_url + /responses` მისამართს WebSocket კავშ�
 
 **ავთენტიფიკაცია:** Bearer API-გასაღები (`isAuthenticated`).
 
+### კვოტის სესიის აღდგენა (არჩევითი ჩართვა)
+
+არასტრიმული `POST /v1/chat/completions` ან `POST /v1/responses`, რომელიც ტერმინალური კვოტის შეცდომით ჩავარდა (`402`/`429`/`503`, რომლის სხეულიც კვოტის ან კრედიტების ამოწურვას მიუთითებს), შეიძლება შეჩერდეს და მოგვიანებით განმეორდეს შეცდომის დაბრუნების ნაცვლად. გამომძახებელი ამას თითო მოთხოვნისთვის სამი სათაურით რთავს:
+
+| სათაური                      | მნიშვნელობა                            |
+| ---------------------------- | -------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                 |
+| `x-omniroute-session`        | სესიის id, `[A-Za-z0-9._:-]{1,128}`    |
+| `x-omniroute-recovery-turn`  | სესიაში უნიკალური turn id (იგივე წესი) |
+
+დასაშვებია მხოლოდ `stream: false` turn-ები ხელსაწყოების, მათი ისტორიისა და `previous_response_id`-ის გარეშე, ასევე `x-omniroute-connection` მიმაგრების გარეშე; `STORAGE_ENCRYPTION_KEY` მითითებული უნდა იყოს (მოთხოვნა დაშიფრულად ინახება მაქსიმუმ 24 საათით). პასუხი იქნება `202`, `recovery.poll`-ით; გამოკითხეთ `GET /v1/quota-recoveries/{id}` (`202` მოლოდინში, `200` აღდგენილი სხეულით დასრულებისას), ან გააუქმეთ `DELETE`-ით. ბილეთები მხოლოდ მათ შემქმნელ API გასაღებს უჩანს. განმეორება, რომლის შედეგიც გაურკვეველია, მთავრდება `needs_confirmation`-ით და ორჯერ არ იგზავნება. წყარო: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## თვითმომსახურების გამოყენება (`/api/usage/om-usage`)
@@ -1179,6 +1192,28 @@ API გასაღებებს შეუძლიათ უარი თქ�
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## CLIProxyAPI-ის მართვასთან თავსებადობა
+
+OmniRoute პასუხობს [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)-ის მართვის სამ endpoint-ს, რომლებსაც გამოყენების პანელები Claude-ისა და Codex-ის გამოწერის ლიმიტების წასაკითხად იძახებს (მაგალითად, T3 Code-ის გამოყენების ლიმიტების წყარო `cliproxy`). კლიენტის საბაზისო URL OmniRoute-ზე მიმართეთ და მართვის გასაღებად `manage` უფლებამოსილების მქონე API გასაღები გამოიყენეთ. მარშრუტები ხელმისაწვდომია `/v0/management/*`-სა და `/api/v0/management/*`-ზე.
+
+| მეთოდი | გზა                          | აღწერა                                                                                                                                            |
+| ------ | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude-ისა და Codex-ის OAuth კავშირები ფორმით `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. ტოკენების გარეშე            |
+| POST   | `/v0/management/api-call`    | სხეული `{ auth_index, method, url, header?, data? }`. ანგარიშის ტოკენით აგზავნის დაშვებული სიიდან მოთხოვნას და აბრუნებს `{ status_code, body }`-ს |
+| POST   | `/v0/management/reset-quota` | სხეული `{ auth_index }`. ასუფთავებს ერთი ანგარიშის კავშირის მოცდის პერიოდს, მოდელების დაბლოკვებსა და Codex-ის თითო scope-ის მოცდის პერიოდებს      |
+
+- `auth_index` არის OmniRoute-ის კავშირის id. `provider` არის `claude` ან `codex` (მხოლოდ OAuth კავშირები; API გასაღების პროვაიდერი `anthropic` სიაში არ არის). Codex-ისთვის `id_token.chatgpt_account_id` არის შენახული workspace id, ხოლო `plan_type` — შენახული გეგმა.
+- `api-call` საერთო დანიშნულების პროქსი არ არის. იგი იღებს მხოლოდ Claude-ის `GET
+https://api.anthropic.com/api/oauth/usage`-ს და Codex-ის `GET
+https://chatgpt.com/backend-api/wham/usage`-ს, `GET .../wham/rate-limit-reset-credits`-სა და `POST .../wham/rate-limit-reset-credits/consume`-ს, თითოეულს მხოლოდ შესაბამისი პროვაიდერის ანგარიშისთვის. სხვა ყველაფერი აბრუნებს `403`-ს upstream-თან დაკავშირების გარეშე. გამომძახებლის `Authorization` სათაური (მათ შორის `$TOKEN$` ჩანაცვლების მარკერი) უგულებელყოფილია: OmniRoute ამატებს კავშირის access token-ს, ვადის მოახლოებისას ჯერ აახლებს მას და გადასცემს მხოლოდ დაშვებულ სათაურებს (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). გამოტოვებული `Chatgpt-Account-Id` ნაგულისხმევად იღებს შენახულ workspace id-ს. თუ upstream-ის პირველი პასუხია `401`, იგი ერთხელ აახლებს ტოკენს და მხოლოდ access token-ის შეცვლისას იმეორებს მოთხოვნას. თითო upstream მცდელობას აქვს 15-წამიანი ვადა და იყენებს კავშირის პროქსის.
+- `reset-quota` ტერმინალურ მდგომარეობებს (banned, expired, credits_exhausted) უცვლელს ტოვებს. უცნობი `auth_index` აბრუნებს `404`-ს.
+
+**ავთენტიკაცია:** მართვის პანელის სესია ან `manage` უფლებამოსილების API გასაღები აუცილებელია მაშინაც, როცა შესვლა გამორთულია (გზები შედის `ALWAYS_PROTECTED_API_PATHS`-ში). მხოლოდ inference-ის გასაღებები იღებს `403`-ს. წყარო: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

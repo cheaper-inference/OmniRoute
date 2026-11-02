@@ -62,3 +62,15 @@
 ଅନ୍ତର୍ଭୁକ୍ତ କରେ — `hidePaidModels`ର କମ୍ବୋ-ଷ୍ଟେପ୍ ରପ୍ତାନି ଫିଲ୍ଟର୍ ପରି ନୁହେଁ, ଏଠାରେ ପୁନଃ-ହାଇଡ୍ରେସନ୍
 ବିପଦ ନାହିଁ: ରପ୍ତାନି କରାଯାଇଥିବା କମ୍ବୋ ଷ୍ଟେପ୍ରେ ଏମ୍ବେଡ୍ ହୋଇଥିବା ଏକ ପ୍ରତ୍ୟାଖ୍ୟାତ id ହେଉଛି
 ଅପରେଟର୍ଙ୍କ ନିଜସ୍ୱ ସ୍ପଷ୍ଟ ରାଉଟିଂ ପସନ୍ଦ, ରପ୍ତାନି ସୀମାରେ ହଟାଇବାକୁ ପଡ଼ୁଥିବା କିଛି ନୁହେଁ।
+
+## କେବଳ combo ତାଲିକା (`exposeCombosOnly`)
+
+Combo ସାର୍ବଜନିକ model ମୁଖ ଏବଂ provider କେବଳ backend ହୋଇଥିବା deployment ପାଇଁ ଅଲଗା boolean ବିକଳ୍ପ; ଏହାକୁ ମଧ୍ୟ ନିଜେ ବାଛି ସକ୍ରିୟ କରିବାକୁ ହୁଏ ଏବଂ ଡିଫଲ୍ଟ `false`। ଏହା `true` ହେଲେ public listing (`GET /v1/models`, `GET /v1` ଏବଂ `getUnifiedModelsResponse()` ଉପରେ ତିଆରି ଅନ୍ୟ `/v1` discovery route) କେବଳ `owned_by: "combo"` ଥିବା ଧାଡ଼ି ରଖେ: user combo ସହ built-in `auto/*` combo (`hideAutoCombos` ଲୁଚାଇନଥିଲେ)। ଏହା ପ୍ରତି-key `catalogScope: "combos"` ପରି ସେହି row test ବ୍ୟବହାର କରେ; key ର ନିଜ allow/deny/scope filter ମଧ୍ୟ ଏହା ଉପରେ ଲାଗୁ ରହେ।
+
+**Settings → Routing → Models API listing** ରେ କିମ୍ବା `PATCH /api/settings {"exposeCombosOnly": true}` ଦ୍ୱାରା ଏହା ବଦଳାନ୍ତୁ।
+
+ଉପର ତାଲିକା ପରି ଏହା କେବଳ ଉପଲବ୍ଧତା ପ୍ରକାଶକୁ ବଦଳାଏ:
+
+- ସ୍ପଷ୍ଟ `provider/model` ID ଏବେବି dispatch ହୁଏ ଏବଂ `GET /v1/models/{id}` ଏହାକୁ resolve କରେ;
+- dashboard catalog (`GET /api/models/catalog`, model picker ବ୍ୟବହାର କରନ୍ତି) ସଙ୍କୁଚିତ ହୁଏ ନାହିଁ;
+- ଏହା `auto/*` candidate pool ରେ ପ୍ରତିଫଳିତ ହୁଏ ନାହିଁ, ତେଣୁ `auto/*` combo ନିଜର ପୂର୍ଣ୍ଣ pool ରଖେ।

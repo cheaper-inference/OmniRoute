@@ -10,7 +10,7 @@ OmniRoute sa integruje s tromi kategóriami nástrojov CLI, ktoré sú rozdelen�
 
 | Stránka        | Trasa                   | Koncept                                                                                 | Počet          |
 | -------------- | ----------------------- | --------------------------------------------------------------------------------------- | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Programovacie nástroje smerované na OmniRoute (Klient → CLI → OmniRoute → Poskytovateľ) | 27             |
+| **CLI Code's** | `/dashboard/cli-code`   | Programovacie nástroje smerované na OmniRoute (Klient → CLI → OmniRoute → Poskytovateľ) | 28             |
 | **CLI Agents** | `/dashboard/cli-agents` | Autonómni agenti smerovaní na OmniRoute (rovnaký tok, širší rozsah)                     | 11             |
 | **ACP Agents** | `/dashboard/acp-agents` | Nástroje CLI, ktoré OmniRoute spúšťa ako backend cez stdio/ACP (opačný tok)             | pozri register |
 
@@ -146,7 +146,7 @@ jedného rozhrania bez ostatných spôsobí zlyhanie testovacej sady namiesto vz
 
 ---
 
-## 1. Katalóg CLI Code (27 nástrojov)
+## 1. Katalóg CLI Code (28 nástrojov)
 
 Všetky nástroje, ktoré sa zobrazujú v `/dashboard/cli-code`. Nástroje s hodnotou `baseUrlSupport: none` sú namiesto vlastnej základnej URL prepojené prostredníctvom MITM alebo manuálneho návodu:
 
@@ -173,6 +173,7 @@ Všetky nástroje, ktoré sa zobrazujú v `/dashboard/cli-code`. Nástroje s hod
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -269,7 +270,7 @@ Nové nástroje s `configType: "custom"` majú vyhradené trasy API pre nastaven
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, zastarané)                                      |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primárna + zastaraná synchronizácia `~/.deepseek`) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                          |
-| `POST /api/cli-tools/pi-settings`           | Programovací agent Pi                                                          |
+| `POST /api/cli-tools/pi-settings`           | Programovací agent Pi (`~/.pi/agent/models.json`, `providers.omniroute`)       |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + vyhradený kľúč `.env`)                    |
 
@@ -375,7 +376,7 @@ pip install aider-chat
 cargo install smelt  # Založený na jazyku Rust
 
 # Programovací agent Pi
-# Pokyny na inštaláciu nájdete na https://github.com/zechnerj/pi-coding-agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # Pokyny na inštaláciu nájdete na https://github.com/1jehuang/jcode
@@ -488,6 +489,38 @@ EOF
 
 > Použite `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > na odosielanie variantov s uvažovaním.
+
+---
+
+#### Pi Coding Agent
+
+Nainštalujte oficiálny balík Pi Coding Agent pomocou `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi číta vlastných poskytovateľov z `~/.pi/agent/models.json`; nastavte `PI_CODING_AGENT_DIR` na absolútnu cestu (alebo cestu s predponou `~`), čím presuniete celý adresár agenta. Dashboard rešpektuje toto prepísanie. Pi nevyhľadáva modely na vlastných endpointoch, preto OmniRoute zapíše vybraný model do `models[]` pomocou API Pi `openai-completions` a endpointu OmniRoute `/v1` kompatibilného s OpenAI.
+
+V **CLI Tools → Pi** vyberte endpoint, API kľúč a model, skontrolujte náhľad poskytovateľa a použite ho. Náhľad je fragment poskytovateľa: pri ručnej konfigurácii Pi zlúčte `providers.omniroute` do existujúceho `models.json`, aby ostatní poskytovatelia a nastavenia zostali nedotknuté.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi znovu načíta `models.json`, keď otvoríte `/model`. Otestujte nakonfigurovanú trasu s vybraným ID poskytovateľa a modelu:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Referencie: [Modely Pi a vlastní poskytovatelia](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Premenné prostredia Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pokyny na inštaláciu Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

@@ -1,5 +1,5 @@
 import "./setupPolyfill.ts";
-import { Agent, ProxyAgent, type Dispatcher } from "undici";
+import { Agent, Pool, ProxyAgent, type Dispatcher, type buildConnector } from "undici";
 import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { getUpstreamTimeoutConfig } from "@/shared/utils/runtimeTimeouts";
 import { stripIpv6Brackets, detectIpLiteralFamily, parseProxyFamily } from "./proxyFamily.ts";
@@ -582,6 +582,21 @@ function buildProxyDispatcher(
     // undici <8.6 → silently ignored (that version already tunneled by default).
     proxyTunnel: true,
     ...options,
+    ...(detectIpLiteralFamily(parsed.hostname) !== null
+      ? {
+          // ProxyAgent supplies the proxy hostname as SNI even for IP literals.
+          // Keep TLS identity verification against the connector's host, while
+          // omitting the invalid SNI extension (rejected by Node 25 and newer).
+          clientFactory: (origin, factoryOptions) => {
+            const connect = (factoryOptions as { connect: buildConnector.connector }).connect;
+            return new Pool(origin, {
+              ...factoryOptions,
+              connect: (connectOptions, callback) =>
+                connect({ ...connectOptions, servername: undefined }, callback),
+            });
+          },
+        }
+      : {}),
     ...(proxyAuthorization ? { token: proxyAuthorization } : {}),
     ...(family !== null
       ? {

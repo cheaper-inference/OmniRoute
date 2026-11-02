@@ -40,6 +40,10 @@ Claude Code **Anthropic Messages API** ilə əlaqə qurur və mühit dəyişənl
 
 > Mühit dəyişənləri **işə salınarkən yalnız bir dəfə** oxunur — onları dəyişdirdikdən sonra Claude Code-u yenidən başladın.
 
+Sabit sətir əvəzinə yenilənən giriş məlumatından istifadə etmək üçün `~/.claude/settings.json` daxilində `apiKeyHelper` parametrini cari giriş məlumatını stdout-a çıxaran əmrlə təyin edin. Claude Code onun çıxışını standart olaraq beş dəqiqə keşdə saxlayır (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` bunu dəyişir) və dəyəri həm `Authorization: Bearer`, həm də `x-api-key` ilə göndərir. Skript yalnız giriş məlumatını çap etməlidir; yanında əlavə bildiriş mətninin olması v2.1.227+ versiyalarında köməkçinin uğursuz işləməsinə səbəb olur.
+
+Entra ID SSO belə işləyir: `scripts/cli/omniroute-sso.mjs token` qısaömürlü Entra giriş tokenini çap edir və OmniRoute API açarı əvəzinə onu yoxlayır. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) sənədinə baxın.
+
 `omniroute launch` bunların hamısını sizin üçün təyin edir: əsas URL-i və tokeni aktiv kontekstdən müəyyənləşdirir (beləliklə, `omniroute connect <vps>` və ardınca `omniroute launch` dərhal işləyir), serverin sağlamlıq yoxlamasını aparır və `claude` proqramını işə salır.
 
 ---

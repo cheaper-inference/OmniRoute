@@ -29,6 +29,7 @@ Għall-protokoll iffukat kompatibbli ma’ OpenAI u l-matriċi tal-kapaċitajiet
 - [Streaming permezz ta’ WebSocket](#websocket-streaming)
 - [Kwoti u Rappurtar ta’ Problemi](#quotas--issues-reporting)
 - [Cache Semantiku](#semantic-cache)
+- [Kompatibbiltà mal-ġestjoni CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [Dashboard u Ġestjoni](#dashboard--management)
 - [Ġestjoni tal-Kombinazzjonijiet](#combo-management)
 - [Webhooks](#webhooks)
@@ -991,6 +992,18 @@ kompletament bħala stream.
 
 **Awtentikazzjoni:** Ċavetta API Bearer (`isAuthenticated`).
 
+### Irkupru tas-sessjoni tal-kwota (b'attivazzjoni espliċita)
+
+`POST /v1/chat/completions` jew `POST /v1/responses` mingħajr streaming li jfalli bi żball terminali tal-kwota (`402`/`429`/`503` li l-body tiegħu jgħid li l-kwota jew il-krediti ġew eżawriti) jista' jitqiegħed jistenna u jiġi ripetut aktar tard minflok jirritorna l-iżball. Min isejjaħ jattivah għal kull talba bi tliet headers:
+
+| Header                       | Valur                                            |
+| ---------------------------- | ------------------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                                           |
+| `x-omniroute-session`        | ID tas-sessjoni, `[A-Za-z0-9._:-]{1,128}`        |
+| `x-omniroute-recovery-turn`  | ID tat-turn uniku fis-sessjoni (l-istess regola) |
+
+Turns `stream: false` biss, mingħajr għodod, storja ta' għodod jew `previous_response_id`, u mingħajr pin `x-omniroute-connection`, huma eliġibbli, u jrid ikun issettjat `STORAGE_ENCRYPTION_KEY` (it-talba tinħażen kriptata sa 24 h). Imbagħad it-tweġiba tkun `202` b'`recovery.poll`; iċċekkja `GET /v1/quota-recoveries/{id}` (`202` waqt li tkun pendenti, `200` bil-body irkuprat meta titlesta) jew ikkanċella b'`DELETE`. Tickets jidhru biss għaċ-ċavetta API li ħolqithom. Ripetizzjoni b'riżultat inċert tispiċċa f'`needs_confirmation` minflok tintbagħat darbtejn. Sors: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Użu b'awtoservizz (`/api/usage/om-usage`)
@@ -1159,6 +1172,28 @@ Kwalunkwe talba tista’ taqbeż il-cache irrispettivament mis-settings taċ-ċa
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Kompatibbiltà mal-ġestjoni CLIProxyAPI
+
+OmniRoute jwieġeb għat-tliet endpoints tal-ġestjoni [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) li dashboards tal-użu jsejħu biex jaqraw il-limiti tal-abbonamenti Claude u Codex (pereżempju s-sors `cliproxy` tal-limiti tal-użu ta' T3 Code). Ipponta l-base URL tal-klijent lejn OmniRoute u uża ċavetta API bl-iskop `manage` bħala ċ-ċavetta tal-ġestjoni. Ir-routes jiġu offruti f'`/v0/management/*` u f'`/api/v0/management/*`.
+
+| Metodu | Mogħdija                     | Deskrizzjoni                                                                                                                                 |
+| ------ | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Konnessjonijiet OAuth Claude u Codex bħala `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Mingħajr tokens           |
+| POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Jibgħat talba mil-lista permessa bit-token tal-kont u jirritorna `{ status_code, body }` |
+| POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. Iħassar il-cooldown tal-konnessjoni, lockouts tal-mudelli u cooldowns Codex għal kull skop ta' kont wieħed            |
+
+- `auth_index` huwa l-ID tal-konnessjoni OmniRoute. `provider` huwa `claude` jew `codex` (konnessjonijiet OAuth biss; il-fornitur taċ-ċavetta API `anthropic` mhuwiex elenkat). Għal Codex, `id_token.chatgpt_account_id` huwa l-ID tal-workspace maħżun u `plan_type` huwa l-pjan maħżun.
+- `api-call` mhuwiex proxy ġeneriku. Jaċċetta biss Claude `GET
+https://api.anthropic.com/api/oauth/usage` u Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` u `POST .../wham/rate-limit-reset-credits/consume`, kull wieħed biss għal kont tal-fornitur korrispondenti. Kull ħaġa oħra tirritorna `403` mingħajr ma tikkuntattja l-upstream. Il-header `Authorization` ta' min isejjaħ (inkluż il-placeholder `$TOKEN$`) jiġi injorat: OmniRoute jdaħħal it-token ta' aċċess tal-konnessjoni, iġeddu l-ewwel meta jkun qrib l-iskadenza, u jgħaddi biss headers permessi (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). `Chatgpt-Account-Id` nieqes juża l-ID tal-workspace maħżun bħala default. Jekk l-ewwel tweġiba upstream tkun `401`, iġedded darba u jerġa' jipprova biss meta t-token ta' aċċess jinbidel. Kull tentattiv upstream jiskadi wara 15-il sekonda u juża l-proxy tal-konnessjoni.
+- `reset-quota` ma jbiddilx stati terminali (banned, expired, credits_exhausted). `auth_index` mhux magħruf jirritorna `404`.
+
+**Awtentikazzjoni:** sessjoni tad-dashboard jew ċavetta API bl-iskop `manage`, meħtieġa anke meta l-login ikun diżattivat (il-mogħdijiet jinsabu f'`ALWAYS_PROTECTED_API_PATHS`). Ċwievet għall-inferenza biss jirċievu `403`. Sors: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

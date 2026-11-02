@@ -156,9 +156,10 @@ JWTର ବୈଧତା ଯାଞ୍ଚ **ଏବଂ** ଏଥିରେ `authentica
 
 - **`publicPolicy`** (`policies/public.ts`) — ସର୍ବଦା `allow({ kind: "anonymous", id: "anonymous" })` ଫେରାଏ।
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer ବାହାର କରେ, `validateApiKey()` ମାଧ୍ୟମରେ ବୈଧତା ଯାଞ୍ଚ କରେ। ପ୍ରଭାବୀ `REQUIRE_API_KEY` ଫିଚର୍ ଫ୍ଲାଗ୍ ଅକ୍ଷମ ଥିଲେ ମାତ୍ର ଅଜ୍ଞାତ ଉପଯୋଗକର୍ତ୍ତାକୁ ଫଲ୍-ଥ୍ରୁ କରେ। ପ୍ରଭାବୀ ଫ୍ଲାଗ୍ଟି `isRequireApiKeyEnabled()` (`DB ଫିଚର୍ ଫ୍ଲାଗ୍ ଓଭର୍ରାଇଡ୍ > process.env.REQUIRE_API_KEY > ଡିଫଲ୍ଟ`) ମାଧ୍ୟମରେ ସମାଧାନ କରାଯାଏ, ଯାହାଦ୍ୱାରା ଡ୍ୟାସ୍ବୋର୍ଡ ଫିଚର୍ ଫ୍ଲାଗ୍ ଏବଂ ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ `/api/v1/*`, `/api/v1beta/*` ଓ ଉପନାମଗୁଡ଼ିକୁ ସୁସଙ୍ଗତ ଭାବେ ନିୟନ୍ତ୍ରଣ କରନ୍ତି; ରିଜଲ୍ଭର୍ ବିଫଳତାଗୁଡ଼ିକ ଆକ୍ସେସ୍ ବନ୍ଦ ରଖେ। କ୍ଲାଏଣ୍ଟ API ରୁଟ୍ଗୁଡ଼ିକରେ ଡ୍ୟାସ୍ବୋର୍ଡ-ସେସନ୍ ଅନୁରୋଧଗୁଡ଼ିକୁ ଅନୁମତି ଦିଏ (`/api/v1/models` ସମେତ, ଯାହା ଡ୍ୟାସ୍ବୋର୍ଡ ମଡେଲ୍ କ୍ୟାଟାଲଗ୍ ଦ୍ୱାରା ବ୍ୟବହୃତ)।
+  Entra ID SSO ସକ୍ଷମ ଥିଲେ, Entra ଟୋକେନ୍‌ର ଗଠନ ଥିବା Bearer କୁ (ତିନୋଟି base64url ଅଂଶ, `RS*` ଆଲଗୋରିଦମ୍, `kid`) SSO ଶାଖା `validateApiKey()` ର **ପୂର୍ବରୁ** ପରିଚାଳନା କରେ ଏବଂ ଏହାର ନିଷ୍ପତ୍ତି ଚୂଡ଼ାନ୍ତ ହୁଏ। ଏହା କେବେବି API-key ପଥକୁ କିମ୍ବା ଅଜ୍ଞାତ ବ୍ୟବହାରକାରୀ ଭାବେ ପ୍ରବେଶ ଦେଉଥିବା ଶାଖାକୁ ଯାଏ ନାହିଁ। ତେଣୁ ପରିଚୟ ସେବା ପ୍ରଦାନକାରୀଙ୍କ ସେବା ବନ୍ଦ ହେଲେ ପ୍ରବେଶ ସମସ୍ତଙ୍କ ପାଇଁ ଖୋଲା ହୋଇଯାଏ ନାହିଁ। ସ୍ଥିର API କୀଗୁଡ଼ିକ ପ୍ରଭାବିତ ହୁଏ ନାହିଁ। [Entra ID SSO](../security/ENTRA_SSO.md) ଦେଖନ୍ତୁ।
 - **`managementPolicy`** (`policies/management.ts`) — ଡ୍ୟାସ୍ବୋର୍ଡ ସେସନ୍, ଆଭ୍ୟନ୍ତରୀଣ ମଡେଲ୍-ସିଙ୍କ୍ ଅନୁରୋଧଗୁଡ଼ିକ (`/api/providers/[name]/(sync-models|models)` ସହିତ ମେଳ କରାଯାଇଥିବା) ଗ୍ରହଣ କରେ, କିମ୍ବା `isAuthRequired()` false ଫେରାଇଲେ ସମ୍ପୂର୍ଣ୍ଣ ଭାବେ ଏଡ଼ାଇଯାଏ। ଏକ Bearer ଟୋକେନ୍ ଉପସ୍ଥିତ କିନ୍ତୁ ଅବୈଧ ହେଲେ 403 (`AUTH_001`), ଅନ୍ୟଥା 401 ଫେରାଏ। କୌଣସି ପ୍ରମାଣୀକରଣ ଶାଖା ପୂର୍ବରୁ ରୁଟ୍-ଗାର୍ଡ ସ୍ତରଗୁଡ଼ିକ (LOCAL_ONLY / ALWAYS_PROTECTED) ମଧ୍ୟ ପ୍ରୟୋଗ କରେ — [ରୁଟ୍ ଗାର୍ଡ ସ୍ତରଗୁଡ଼ିକ](../security/ROUTE_GUARD_TIERS.md) ଦେଖନ୍ତୁ। `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`ରେ ଥିବା LOCAL_ONLY ପଥଗୁଡ଼ିକ (ବର୍ତ୍ତମାନ: `/api/mcp/`)ରେ Bearer କୀ `manage` ସ୍କୋପ୍ ବହନ କଲେ non-loopbackରୁ ପ୍ରବେଶ କରାଯାଇପାରେ; ଅନ୍ୟ ସମସ୍ତ LOCAL_ONLY ପଥ ସ୍କୋପ୍କୁ ଖାତିର ନକରି strict-loopback ହୋଇ ରହେ।
 
-ଏକ ସଫଳ ପଲିସି `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` ସହିତ `AuthSubject` ଫେରାଏ। ଡାଉନ୍ଷ୍ଟ୍ରିମ୍ ହ୍ୟାଣ୍ଡଲର୍ଗୁଡ଼ିକ ପ୍ରମାଣୀକରଣ ତର୍କକୁ ପୁନଃ ଚଳାଇବା ପରିବର୍ତ୍ତେ `src/server/authz/assertAuth.ts`ରେ ଥିବା `assertAuth(request, "CLIENT_API")` ମାଧ୍ୟମରେ ଏହାକୁ ପଢ଼ିପାରିବେ।
+ଏକ ସଫଳ ପଲିସି `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ସହିତ `AuthSubject` ଫେରାଏ। ଡାଉନ୍ଷ୍ଟ୍ରିମ୍ ହ୍ୟାଣ୍ଡଲର୍ଗୁଡ଼ିକ ପ୍ରମାଣୀକରଣ ତର୍କକୁ ପୁନଃ ଚଳାଇବା ପରିବର୍ତ୍ତେ `src/server/authz/assertAuth.ts`ରେ ଥିବା `assertAuth(request, "CLIENT_API")` ମାଧ୍ୟମରେ ଏହାକୁ ପଢ଼ିପାରିବେ।
 
 ## ସାର୍ବଜନୀନ ରୁଟ୍ଗୁଡ଼ିକର ତାଲିକା
 
@@ -316,8 +317,8 @@ x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ପ୍ରମାଣିତ ଅନୁରୋଧଗୁଡ଼ିକ ପାଇଁ ଅପ୍ଷ୍ଟ୍ରିମ୍ (ହ୍ୟାଣ୍ଡଲର୍-ପାର୍ଶ୍ୱ) ଅନୁରୋଧ ହେଡର୍ଗୁଡ଼ିକରେ ଏଗୁଡ଼ିକ ମଧ୍ୟ ଅନ୍ତର୍ଭୁକ୍ତ ଥାଏ:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```

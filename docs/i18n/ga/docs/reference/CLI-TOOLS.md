@@ -10,7 +10,7 @@ Comhtháthaíonn OmniRoute le trí chatagóir d’uirlisí CLI atá scaipthe tha
 
 | Leathanach     | Bealach                 | Coincheap                                                                                   | Líon               |
 | -------------- | ----------------------- | ------------------------------------------------------------------------------------------- | ------------------ |
-| **CLI Code's** | `/dashboard/cli-code`   | Uirlisí códaithe a dhíríonn tú ar OmniRoute (Cliant → CLI → OmniRoute → Soláthraí)          | 27                 |
+| **CLI Code's** | `/dashboard/cli-code`   | Uirlisí códaithe a dhíríonn tú ar OmniRoute (Cliant → CLI → OmniRoute → Soláthraí)          | 28                 |
 | **CLI Agents** | `/dashboard/cli-agents` | Gníomhairí uathrialacha a dhíríonn tú ar OmniRoute (an sreabhadh céanna, raon níos leithne) | 11                 |
 | **ACP Agents** | `/dashboard/acp-agents` | CLIanna a sheolann OmniRoute mar inneall cúil trí stdio/ACP (sreabhadh droim ar ais)        | féach an chlárlann |
 
@@ -149,7 +149,7 @@ Is é `bin/cli/cli-manifest.mjs` an léiriúchán inrite canónach do dhromchla�
 
 ---
 
-## 1. Catalóg Chód CLI (27 uirlis)
+## 1. Catalóg Chód CLI (28 uirlis)
 
 Na huirlisí go léir atá le feiceáil in `/dashboard/cli-code`. Déantar iad siúd a bhfuil `baseUrlSupport: none` acu a nascadh trí MITM nó trí threoir láimhe in ionad URL bonn saincheaptha:
 
@@ -176,6 +176,7 @@ Na huirlisí go léir atá le feiceáil in `/dashboard/cli-code`. Déantar iad s
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | full           | guide          | false        |
 | zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
@@ -272,7 +273,7 @@ Tá bealaí tiomnaithe API socruithe ag uirlisí nua a bhfuil `configType: "cust
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, leagáid)                                   |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, príomhúil + sioncronú leagáide `~/.deepseek`) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                     |
-| `POST /api/cli-tools/pi-settings`           | Gníomhaire códaithe Pi                                                    |
+| `POST /api/cli-tools/pi-settings`           | Gníomhaire códaithe Pi (`~/.pi/agent/models.json`, `providers.omniroute`) |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                     |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + eochair thiomnaithe `.env`)          |
 
@@ -378,7 +379,7 @@ pip install aider-chat
 cargo install smelt  # Bunaithe ar Rust
 
 # Gníomhaire códaithe Pi
-# féach https://github.com/zechnerj/pi-coding-agent le haghaidh suiteála
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # féach https://github.com/1jehuang/jcode le haghaidh suiteála
@@ -488,6 +489,38 @@ EOF
 
 > Úsáid `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > chun malairtí smaointeoireachta a sheoladh.
+
+---
+
+#### Pi Coding Agent
+
+Suiteáil an pacáiste oifigiúil Pi Coding Agent le `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Léann Pi soláthraithe saincheaptha ó `~/.pi/agent/models.json`; socraigh `PI_CODING_AGENT_DIR` go cosán absalóideach (nó cosán le réimír `~`) chun eolaire iomlán an ghníomhaire a bhogadh. Leanann an deais an sárú sin. Ní aimsíonn Pi samhlacha ó chríochphointí saincheaptha, mar sin scríobhann OmniRoute an tsamhail roghnaithe in `models[]` le API `openai-completions` Pi agus críochphointe `/v1` OmniRoute atá comhoiriúnach le OpenAI.
+
+In **CLI Tools → Pi**, roghnaigh críochphointe, eochair API agus samhail, athbhreithnigh réamhamharc an tsoláthraí, ansin cuir i bhfeidhm é. Is blúire soláthraí é an réamhamharc: cumaisc `providers.omniroute` isteach sa `models.json` atá agat cheana agus Pi á chumrú de láimh, ionas go bhfanfaidh soláthraithe agus socruithe eile slán.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Athlódálann Pi `models.json` nuair a osclaíonn tú `/model`. Tástáil an bealach cumraithe leis an ID soláthraí agus an ID samhla a roghnaigh tú:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Tagairtí: [Samhlacha Pi agus soláthraithe saincheaptha](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Athróga timpeallachta Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Treoracha suiteála Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

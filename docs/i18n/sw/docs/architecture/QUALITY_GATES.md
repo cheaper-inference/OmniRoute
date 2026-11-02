@@ -38,14 +38,8 @@ Stakabadhi zinahusu mtiririko wao wenyewe wa kazi, si uchapishaji, upelekaji, au
 wa kichanganuzi kilichopo kinachotoa ushauri. Kufanya ukaguzi unaotumika kuwa wa lazima katika sheria za tawi
 ni mabadiliko tofauti ya kiutawala; kufafanua kazi zake pekee hakulindi tawi.
 
-`API Route Typecheck` ni ukaguzi huru wa mtiririko wa kazi, ulio nje ya maamuzi yote mawili ya jumla
-na wasifu tuli wa mwangalizi kamili wa ndani. Kagua matokeo yake kando kwa kandidati husika.
-`.github/workflows/api-route-typecheck.yml` huendeshwa kwenye PR zinazoelekezwa kwa `main` au
-`release/**`, misukumo kwenda kwa mojawapo ya familia hizo za matawi, na uanzishaji wa mwenyewe. Haina kichujio cha njia.
-Kubadilisha tawi lengwa la msingi la PR huomba ukaguzi mpya; uhariri wa maudhui/kichwa hutumia jina la uchunguzi pekee
-`Admission not requested / API Route Typecheck` na hauwezi kuchukua nafasi ya ukaguzi wa uidhinishaji.
-Mtiririko wa kazi hautangazi kichochezi cha kikundi cha uunganishaji. Uanzishaji wowote wa foleni ya uunganishaji unaohitaji
-ukaguzi huu lazima kwanza uthibitishe utekelezaji wake kwa tukio hilo.
+`API Route Typecheck` ni ukaguzi huru wa mtiririko wa kazi, nje ya maamuzi yote mawili ya jumla na profaili tuli ya mwangalizi kamili wa ndani. Kagua matokeo yake kando kwa mgombea husika hasa. `.github/workflows/api-route-typecheck.yml` huendeshwa kwa PR zinazolenga `main` au `release/**`, push kwa familia zote mbili za matawi, uanzishaji wa mkono, na matukio ya `merge_group` ya aina `checks_requested`. Haina kichujio cha njia. Vikundi vya kuunganisha huchukua `merge_group.head_sha`; matukio mengine huchukua `github.sha`. Matukio yote hutumia lango lilelile la uchunguzi wa API na majaribio yake ya vipimo.
+Kubadili tawi la msingi linalolengwa na PR huomba ukaguzi mpya; mabadiliko ya maelezo/kichwa hutumia jina la uangalizi tu `Admission not requested / API Route Typecheck` na hayawezi kuchukua nafasi ya ukaguzi wa kukubaliwa.
 
 ### Ushahidi uliohifadhiwa katika kipunguzaji cha ukubalifu
 
@@ -61,6 +55,14 @@ isiyo na ushahidi, faili inayokosekana au iliyobadilishwa, njia isiyo salama au 
 uthibitishaji. Faili zinazokosekana si sawa na logi tupu zilizofanikiwa. Ukaguzi uliopo
 wa SHA/run/attempt hubaki huru: byte zinazolingana haziwezi kuokoa risiti iliyopitwa na wakati.
 Uadilifu wa faili si uthibitisho wa uhalisi wa utekelezaji au promotion ya artifact.
+
+### DAST hutumia build ya CI iliyothibitishwa
+
+Kazi ya lazima ya CI `dast-smoke` huita `.github/workflows/dast-smoke.yml` baada ya `build`. Hufuata uteuzi uleule wa msimbo/rasimu kama build, pamoja na PR za fork zinazoungwa mkono, PR zinazolenga release na vikundi vya kuunganisha. Kazi ya DAST inayokosekana, kushindwa, kufutwa au kurukwa bila kutarajiwa huzuia `Gate / CI`. Mtiririko unaotumika tena hauna kichochezi huru cha PR/dispatch; uthibitishaji wa mkono hutumia dispatch ya CI ili build na mtumiaji wake zibaki katika utekelezaji mmoja.
+
+`scripts/ci/next-build-provenance.mjs` hufunga artefakti kamili ya Next kwa hashi yake ya tar, hazina/tukio/utekelezaji, jaribio la mzalishaji, head/base/checkout/tree, vitambulisho vya mitiririko, lockfile, toleo sahihi la Node/ABI, jukwaa na bundler. DAST huchagua ID ya artefakti isiyobadilika kutoka `needs.build.outputs`, huhitaji uthibitishaji wa hashi ya upakuaji, na huhesabu hashi ya ZIP yenyewe kuilinganisha na hashi ya mzalishaji kabla ya kutoa vipengele viwili vilivyoruhusiwa kupitia `scripts/ci/unpack-ci-build.py`. Manifesti na kumbukumbu ya tar lazima pia zilingane na matokeo huru ya mzalishaji kabla ya kutoa mti wa Next. Haitafuti kamwe build ya mwisho iliyofaulu kwenye tawi. Utekelezaji wa kurudia sehemu unaweza kutumia jaribio lilelile la mzalishaji ikiwa ID na ingizo lote bado vinalingana; rekodi ya ushahidi huhifadhi majaribio yote mawili.
+
+Mtumiaji hubaki kwenye runner ya Linux inayohostiwa, yenye ruhusa ya kusoma hazina tu na bila siri za hazina. Husakinisha toleo sahihi la Node la mzalishaji, kisha huunda CLI kwa `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` hukataa seva ya standalone inayokosekana kabla ya build yoyote ya akiba; build za kawaida za CLI za ndani huhifadhi njia yao ya akiba. Utayari wa seva, Schemathesis na promptfoo vyote lazima vifaulu ndani ya kikomo kisichobadilishwa cha dakika 25 cha kazi. Rekodi ya asili huthibitisha utambulisho na baiti za ingizo, si mafanikio ya uchanganuzi wa DAST. Kuisha kwa muda wa artefakti, kukatizwa kwa runner au kushindwa kwa skana hubaki ushahidi usiokamilika au ulioshindwa; kifungashio cha ushauri hakiwezi kuugeuza kuwa PASS.
 
 ### Uwezo wa utekelezaji wa UI
 
@@ -223,17 +225,24 @@ Huendeshwa kwenye kila PR kwenda `main`. Huzuia uunganishaji inaposhindwa.
 
 Huendeshwa baada ya `test-coverage`. Huzuia uunganishaji ikishindwa.
 
-| Skripti                      | Huthibitisha                                                                                                                                                                                                 | Inazuia                  |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------ |
-| `quality:collect`            | Hutoa `quality-metrics.json` (idadi ya maonyo ya ESLint, ufunikaji kutoka kwenye ripoti iliyounganishwa ya sehemu)                                                                                           | Ndiyo (kabla ya ratchet) |
-| `quality:ratchet`            | Kila kipimo katika `quality-baseline.json` hakijarudi nyuma (maonyo ya ESLint ≤ msingi; ufunikaji ≥ msingi)                                                                                                  | Ndiyo                    |
-| `check:duplication`          | Urudiaji wa msimbo (jscpd@4) hauzidi msingi katika `quality-baseline.json`                                                                                                                                   | Ndiyo                    |
-| `check:complexity`           | Utata wa kisiklomati katika kiwango cha faili hauzidi kikomo (`complexity` ya msingi ya ESLint + `max-lines-per-function`)                                                                                   | Ndiyo                    |
-| `check:cognitive-complexity` | Ratchet ya utata wa kiutambuzi (`eslint-plugin-sonarjs`) — utekelezaji tofauti wa ESLint; CI huendesha zote zikiwa zimeunganishwa kama hatua moja ya `check:complexity-ratchets`                             | Ndiyo                    |
-| `check:dead-code`            | Ratchet ya faili / uhamishaji usiotumika (knip) hairudi nyuma ikilinganishwa na msingi                                                                                                                       | Ndiyo                    |
-| `check:compression-budget`   | Bajeti ya kipimo cha utendaji wa ubanaji — viwango vya chini vya uokoaji wa tokeni kwa kila injini havipaswi kurudi nyuma                                                                                    | Ndiyo                    |
-| `check:type-coverage`        | Ratchet ya asilimia ya msimbo wenye aina (`type-coverage`) hairudi nyuma; kwa kiasi kikubwa hujumuisha `typecheck:noimplicit:core`                                                                           | Ndiyo                    |
-| `check:codeql-ratchet`       | Idadi ya arifa zilizo wazi za CodeQL hairudi nyuma (husoma kupitia `gh api`; huruka kwa usalama bila tokeni) — kwa ratiba ya kuonyesha upya na uanzishaji wa mwenyewe: tazama "Ratchet ya CodeQL" hapa chini | Ndiyo                    |
+| Skripti                      | Huthibitisha                                                                                                                                                                     | Inazuia                  |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `quality:collect`            | Hutoa `quality-metrics.json` (idadi ya maonyo ya ESLint, ufunikaji kutoka kwenye ripoti iliyounganishwa ya sehemu)                                                               | Ndiyo (kabla ya ratchet) |
+| `quality:ratchet`            | Kila kipimo katika `quality-baseline.json` hakijarudi nyuma (maonyo ya ESLint ≤ msingi; ufunikaji ≥ msingi)                                                                      | Ndiyo                    |
+| `check:duplication`          | Urudiaji wa msimbo (jscpd@4) hauzidi msingi katika `quality-baseline.json`                                                                                                       | Ndiyo                    |
+| `check:complexity`           | Utata wa kisiklomati katika kiwango cha faili hauzidi kikomo (`complexity` ya msingi ya ESLint + `max-lines-per-function`)                                                       | Ndiyo                    |
+| `check:cognitive-complexity` | Ratchet ya utata wa kiutambuzi (`eslint-plugin-sonarjs`) — utekelezaji tofauti wa ESLint; CI huendesha zote zikiwa zimeunganishwa kama hatua moja ya `check:complexity-ratchets` | Ndiyo                    |
+| `check:dead-code`            | Ratchet ya faili / uhamishaji usiotumika (knip) hairudi nyuma ikilinganishwa na msingi                                                                                           | Ndiyo                    |
+| `check:compression-budget`   | Bajeti ya kipimo cha utendaji wa ubanaji — viwango vya chini vya uokoaji wa tokeni kwa kila injini havipaswi kurudi nyuma                                                        | Ndiyo                    |
+| `check:type-coverage`        | Ratchet ya asilimia ya msimbo wenye aina (`type-coverage`) hairudi nyuma; kwa kiasi kikubwa hujumuisha `typecheck:noimplicit:core`                                               | Ndiyo                    |
+
+### Kazi: `codeql-scan` na `codeql-admission`
+
+`codeql-scan` hutoa kategoria zote za uchanganuzi zilizosanidiwa. Kazi hiyo ikifaulu, `codeql-admission` huthibitisha upakiaji wake halisi na kikomo kisichoruhusu ongezeko la tahadhari za mgombea. Zote ni vitegemezi vya lazima vya `Gate / CI`, hata kwa wagombea wanaobadili nyaraka pekee. Masharti ya uanzishaji wa kiutawala na canary yameelezwa chini ya "Kikomo cha CodeQL" hapa chini.
+
+| Skripti                | Inathibitisha                                                                                                                                                                                                 | Inazuia |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `check:codeql-ratchet` | Ref/SHA ya mgombea na kategoria zote zilizosanidiwa lazima ziwe za sasa kabla ya kupima kikomo cha tahadhari; ukosefu wa ushahidi huzuia. Orodha ya jumla hubaki tofauti — ona "Kikomo cha CodeQL" hapa chini | Ndiyo   |
 
 ### Kazi: `quality-extended`
 
@@ -499,30 +508,23 @@ Commit faili hii pamoja na badiliko lililoboresha kipimo. PR inayoboresha
 kipimo bila kusasisha kiwango cha msingi itagunduliwa na `--require-tighten` (Awamu ya 6A.5,
 utekelezaji bado unasubiri).
 
-### Ratchet ya CodeQL: marudio ya kuonyesha upya na kichochezi cha mikono
+### Kikomo cha CodeQL: kukubali mgombea na orodha ya hazina
 
-`check:codeql-ratchet` husoma **hali ya hazina, ambayo huonyeshwa upya kwa ratiba — si kwa kila PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` huripoti
-`state: configured`, `schedule: weekly`: uchanganuzi wa default-setup wa GitHub, si uchanganuzi
-wa kila push. Matokeo yake: baada ya PR INAYOREKEBISHA arifa kuunganishwa, ratchet huendelea kusoma
-idadi ya zamani, iliyo juu zaidi hadi uchanganuzi unaofuata ulioratibiwa utekelezwe — kwa hivyo huripoti kurudi nyuma
-kwenye kila PR iliyo wazi, ikiwemo PR za ufuatiliaji za PR yenye marekebisho, hadi uchanganuzi ufikie hali ya sasa.
+CI inasimamia kukubaliwa kwa mgombea na CodeQL kupitia mnyororo wa utegemezi ulio wazi: `codeql-scan` huita matriksi ya lugha nne katika `codeql.yml`, kisha `codeql-admission` huendesha `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` huhitaji matokeo yote mawili. Quality huhifadhi vipimo vyake vya namba lakini haiulizi skana kabla ya mzalishaji kumaliza; `Gate / Quality` peke yake si kukubaliwa kamili kwa mgombea. CodeQL bado ni lazima kwa wagombea wa nyaraka pekee.
 
-**Kuonyesha upya kwa mikono**: `gh workflow run codeql.yml --ref release/vX.Y.Z` huendesha upya
-uchanganuzi na kuchapisha tena arifa ndani ya dakika chache. Soma `.github/workflows/codeql.yml`
-kwanza — kichwa chake kinaeleza kuwa ni ya `workflow_dispatch` pekee **kwa sababu inakinzana na
-"default setup" ya GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Kurejesha vichochezi vya `push`/`pull_request`/
-`schedule` kunahitaji **hatua ya mmiliki kwanza**: Settings → Code security →
-CodeQL: Default → Advanced. Usiongeze kichochezi cha `schedule:` bila kubadilisha mpangilio huo — kitaishia
-tu kuzalisha utekelezaji unaoshindwa.
+Sera katika `config/quality/codeql-admission-policy.json` huchagua Actions, C/C++, JavaScript/TypeScript na Python, seti ya maswali default, modeli ya vitisho remote na hali ya build none. Ukaguzi wa awali wa mzalishaji hukataa rekodi ya uanzishaji inayosubiri na matawi yaliyo nje ya orodha ya wazi ya malengo. Malengo ya kwanza ni main na release/v3.8.53; release inayofuata inahitaji kuongezwa baada ya mapitio. Kichochezi kipana cha PR za release cha CI kinahifadhiwa, lakini lengo ambalo halijaongezwa huripoti HOLD kabla ya uchimbaji badala ya kupata PASS bila kipimo.
 
-**Kaza kiwango cha msingi baada ya idadi kupungua** — `node scripts/check/check-codeql-ratchet.mjs
---update` huandika idadi mpya iliyopimwa kwenye `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, ili ratchet isiruhusu kimyakimya kurudi nyuma hadi
-kikomo cha zamani. Mfano uliotekelezwa (2026-09-02/03): PR #12502 ilirekebisha arifa 7 halisi
-(13 → 6 zilipimwa kuwa wazi); PR #12530 ilikaza kiwango cha msingi kilichogandishwa kutoka 11 → 6 ili kilingane; arifa
-6 zilizosalia zilikataliwa kwa uhalalishaji wa kila arifa hadi zikafikia 0 zilizo wazi.
+Kila kazi ya matriksi hurekodi ID halisi ya upakiaji wa SARIF, lugha, kategoria, utekelezaji na jaribio, utambulisho wa mtiririko unaoita, ref/head/base/merge SHA ya tukio na hashi ya sera. Kazi tegemezi hupakua rekodi za utekelezaji huu tu na kuthibitisha hashi za artefakti. Inahitaji kategoria zote nne, mzalishaji aliyefaulu na uchakataji uliokamilika wa kila upakiaji halisi. Hutumia kichujio cha API sarif_id, si uchanganuzi wa karibuni zaidi unaopatikana kwenye tawi. Kurudia sehemu kunaweza kutumia kategoria zilizofaulu katika jaribio la awali la utekelezaji na mgombea walewale, huku jaribio lililozalisha likihifadhiwa; mzalishaji wa sasa aliyeshindwa hawezi kutumia ushahidi wa zamani wa kijani.
+
+CodeQL action husubiri uchakataji, lakini utekelezaji wake uliopiniwa unaweza kuonya na kuendelea baada ya kushindwa kusoma hali au kuishiwa muda wa kusubiri. Kwa hiyo kukubaliwa huthibitisha uchakataji tena. Kategoria zinazokosekana, uchakataji unaosubiri, kazi zilizoshindwa au kufutwa, utambulisho wa zamani, upitiaji wa kurasa usiokamilika au API zisizopatikana husababisha HOLD na exit 2. Hakuna tena kusubiri kwa muda maalumu mtiririko huru wa skana. PR ambayo haijachanganuliwa haiwezi kupita kwa sababu swali la tahadhari limerudisha 0. Idadi iliyopimwa inayozidi `metrics.codeqlAlerts.value` hutoa exit 1; kiwango cha msingi hakiongezwi ili kufunika tahadhari za tawi jingine. [Hali ya upakiaji na utafutaji wa uchanganuzi](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Rekodi huhifadhi ID za upakiaji na uchanganuzi, kategoria, matoleo ya zana, ref/SHA, kiwango cha msingi na idadi za tahadhari. Utambulisho/idadi ya matokeo ya SARIF, idadi za chini za sheria na matukio halisi ya tahadhari hubaki lazima. Vitambulisho vya PR/uchanganuzi hukaguliwa tena kabla ya kukubali. Vipimo hivi vinathibitisha ufunikaji wa kategoria zilizosanidiwa, si orodha ya kila faili ya msimbo iliyochimbwa. Uchimbaji wa C/C++ bila build haujumuishi msimbo unaozalishwa wakati wa build ya mradi. Uondoaji wa vyanzo bado unahitaji mapitio, na kumhusisha mchangiaji na hitilafu kunahitaji ushahidi unaolinganishika wa msingi halisi.
+
+`codeql-maintenance.yml` hutoa uchanganuzi wa push za release hai na ratiba ya kila wiki bila kurudia wazalishaji wa PR/main. `nightly-codeql-inventory.yml` hutenga kiwango cha msingi cha hazina nzima, ikiwa na `--strict-measurement` na kushindwa wakati kipimo hakipatikani. Kuruka kwa upole kwa mkusanyaji wa zamani wa ndani si kukubaliwa kwa mgombea. Kuimarisha kikomo hubaki hatua ya wazi ya `--update` baada ya kuthibitisha idadi ya jumla iliyopungua.
+
+Mtiririko wa Advanced haupaswi kuchapishwa wakati Default Setup imesanidiwa: GitHub hukataa mchanganyiko huo. Sera yake inayohifadhiwa kwa matoleo hubaki inasubiri hadi hali ya mpito wa kiutawala uliopitiwa isomwe tena. Kabla ya kuchapisha, mwendeshaji hupini hazina, head/base/tree, hashi za sera/patch/kurudisha nyuma na hali ya usanidi iliyoonekana; `node scripts/quality/codeql-producer.mjs verify-admin-readback` hukagua rekodi za JSON zilizotolewa za hali iliyotarajiwa na halisi. Hii ni kinga ya kiufundi, si idhini ya mwendeshaji wala mbadala wa kupata hali mpya. Tokeni ya PR haiombi kamwe ruhusa ya Administration. Uanzishaji na mabadiliko yoyote ya skana huhitaji usomaji huo tofauti pamoja na ushahidi halisi wa ulinganifu wa PR, fork na merge-group.
+
+Fork hutumia runner zinazohostiwa, checkout bila kuhifadhi vitambulisho, bila kusakinisha/kujenga mradi katika mzalishaji na bila kurithi siri za hazina. GitHub huunga mkono upakiaji wa SARIF kwa tukio la pull_request kwa tokeni ya fork iliyopunguziwa ruhusa; idhini ya kuendesha mchango wa kwanza hubaki sera ya GitHub. Kamwe usitumie pull_request_target kuendesha msimbo usioaminika. Thibitisha ruhusa halisi za tokeni, analysis_key na mazingira ya kategoria zote katika canary inayodhibitiwa kabla ya kuhesabu uhamishaji umekamilika. [Kanuni za upakiaji wa fork](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [hali za usanidi zinazokinzana](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Kukataliwa kwa arifa ni uamuzi wa mwendeshaji (Kanuni Ngumu #14)** — usiwahi kukataa arifa ya CodeQL
 bila kurekodi uhalalishaji wa kiufundi katika maoni ya kukataa: `won't fix` kwa
@@ -679,11 +681,7 @@ yalibainisha wagombea wafuatao wa marekebisho. **Miunganisho ni mabadiliko ya CI
 ya kiufundi; ugeuzaji/uondoaji ni maamuzi ya sera yaliyohifadhiwa kwa mwendeshaji.** Hakuna chochote hapa chini
 ambacho kimetekelezwa bado.
 
-**Pia haijaandikwa hapo juu** (ya ushauri, ishara hafifu): job ya `docs-lint`
-(markdownlint + Vale, job nzima ikiwa na `continue-on-error`) na mtiririko huru ya kazi ya vikagua
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` imo katika
-`quality-baseline.json` lakini haijaunganishwa na ratchet inayozuia katika `ci.yml` — kipimo hiki
-kwa sasa hakina muunganisho.
+**Pia hazijaandikwa hapo juu** (za ushauri, zenye ishara dhaifu): kazi ya `docs-lint` (markdownlint + Vale, kazi nzima ni `continue-on-error`) na mitiririko huru ya skana `semgrep.yml` / `scorecard.yml`. CodeQL sasa ina kazi za lazima za mzalishaji na kukubali chini ya `Gate / CI`, kulingana na masharti ya uanzishaji yaliyoelezwa juu. `semgrepFindings: 0` ipo katika `quality-baseline.json` lakini haijaunganishwa na kikomo cha kuzuia katika `ci.yml` — kipimo hicho kwa sasa hakijaunganishwa.
 
 ### Unganisha / ondoa urudufu (kiufundi, hatari ndogo)
 

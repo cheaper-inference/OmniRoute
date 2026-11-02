@@ -601,8 +601,9 @@ fra som standard.
   `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Hvis indstillingen
   ikke er angivet, betyder det alle typer (adfærden før denne indstilling
   fandtes). Forespørgselsmotorens `ssn_us`-mønster mapper til `ssn`.
-  Skabelonerne (Minimal, Standard, Finansiel, Brasiliansk, USA, Fuld) udfylder
+  Skabelonerne (Minimal, Standard, Finansiel, Brasiliansk, USA, GDPR, POPIA, Fuld) udfylder
   kun afkrydsningsfelterne i brugergrænsefladen.
+- **GDPR- og POPIA-identifikatorer** — tolv indbyggede ID'er, der dækker personidentifikatorer fra EU og Sydafrika (tabellen nedenfor). Deres regulære udtryk, validatorer og jurisdiktionsmærker ligger i én tabel, `src/shared/utils/piiPatterns.ts`, som både responssaniteringen (`src/lib/piiSanitizer.ts`) og anmodningsmaskeringen (`src/shared/utils/inputSanitizer.ts`) bruger. Et match sløres kun, når validatoren accepterer det; en ren talrække er aldrig nok. En operatør, der gemte et indsnævret udvalg, før disse ID'er fandtes, beholder den tidligere adfærd, indtil de nye ID'er markeres.
 - **Brugerdefinerede mønstre** — op til 20 regex- eller jokertegnmønstre (`*` =
   op til 64 tegn, der ikke er mellemrum, `?` = ét). Match bliver til
   `[CUSTOM_REDACTED]`. Hvert mønster går gennem `compilePiiCustomPattern()`
@@ -628,6 +629,25 @@ Indstillingerne ligger i tabellen `key_value` (namespace `pii_settings`,
 
 Alle tre kræver administrationsgodkendelse og validerer body'en med Zod
 (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR-identifikatorer (EU) og POPIA-identifikatorer (Sydafrika)
+
+| ID                  | Identifikator                | Validering                                                                                 |
+| ------------------- | ---------------------------- | ------------------------------------------------------------------------------------------ |
+| `iban`              | IBAN                         | Kendt land, præcis længde for landet, ISO 13616 MOD-97-10                                  |
+| `eu_vat`            | EU-momsnummer                | Kendt medlemsstatspræfiks og statens nummerformat (intet VIES-opslag)                      |
+| `es_dni_nie`        | Spansk DNI / NIE             | Kontrolbogstav (værdi modulo 23); NIE er `X/Y/Z` + 7 cifre                                 |
+| `it_codice_fiscale` | Italiensk Codice Fiscale     | Kontrolbogstav fra tabellerne for ulige/lige positioner                                    |
+| `pl_pesel`          | Polsk PESEL                  | Vægtet kontrolsum og plausible intervaller for kodet fødselsmåned/-dag                     |
+| `nl_bsn`            | Nederlandsk BSN              | 11-test (vægte 9..2, -1)                                                                   |
+| `de_steuer_id`      | Tysk Steuer-ID               | ISO 7064 Mod 11,10 plus reglerne for cifferstruktur (ingen indledende 0)                   |
+| `se_personnummer`   | Svensk personnummer          | Luhn over de sidste ti cifre og en plausibel fødselsdato (10 eller 12 cifre)               |
+| `za_id`             | Sydafrikansk ID-nummer       | Luhn over alle 13 cifre, gyldig fødselsmåned/-dag, statsborgerskabsciffer 0 eller 1        |
+| `za_phone`          | Sydafrikansk telefonnummer   | Præfiks `+27` / `27` eller den nationale form `0..` skrevet med mellemrum eller bindestreg |
+| `za_vat`            | Sydafrikansk momsnummer      | 10 cifre, der starter med `4` **og** "VAT" / "BTW" i de 48 foregående tegn                 |
+| `za_tax_ref`        | Sydafrikansk skattereference | 10 cifre, der starter med `0`-`3`, Luhn, **og** "tax" / "SARS" i de 48 foregående tegn     |
+
+Fordi formaterne med kun cifre overlapper ordrenumre, buildnumre og tidsstempler, kræver de svageste (`za_vat`, `za_tax_ref`) nøgleordet som signal, og et rent ticifret `0..`-nummer behandles ikke som et sydafrikansk telefonnummer. IBAN'er med mellemrum (`GB29 NWBK ...`) matches ikke. Ved streaming søges signalet kun i den aktuelle del. ID'erne står foran de generiske telefonmønstre, så en valideret identifikator beholder sin egen pladsholder (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Skabelonerne `gdpr` og `popia` vælger henholdsvis EU-ID'erne og de sydafrikanske ID'er. Selve maskeringen kræver stadig udtrykkelig aktivering (Hard Rule #20): intet her ændrer en standardværdi for funktionsflag.
 
 ### Prompt-injektion (`promptInjection.ts`)
 

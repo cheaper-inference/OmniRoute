@@ -38,14 +38,8 @@ Các biên nhận chỉ bao quát quy trình làm việc của chính chúng, kh
 của một trình quét mang tính khuyến nghị hiện có. Việc đặt các bước kiểm tra áp dụng thành bắt buộc trong các quy tắc nhánh
 là một thay đổi quản trị riêng biệt; chỉ định nghĩa các tác vụ của chúng không đồng nghĩa với việc bảo vệ một nhánh.
 
-`API Route Typecheck` là một bước kiểm tra quy trình làm việc độc lập, nằm ngoài cả hai kết luận tổng hợp
-và hồ sơ tĩnh của trình quan sát cục bộ đầy đủ. Hãy kiểm tra riêng kết quả của bước này cho đúng
-ứng viên. `.github/workflows/api-route-typecheck.yml` chạy trên các PR vào `main` hoặc
-`release/**`, các lần đẩy lên một trong hai nhóm nhánh và thao tác kích hoạt thủ công. Quy trình này không có bộ lọc đường dẫn.
-Việc thay đổi nhánh cơ sở đích của PR sẽ yêu cầu một bước kiểm tra mới; các chỉnh sửa nội dung/tiêu đề sử dụng tên chỉ dành cho việc quan sát
-`Admission not requested / API Route Typecheck` và không thể thay thế bước kiểm tra chấp thuận.
-Quy trình làm việc này không khai báo trình kích hoạt nhóm hợp nhất. Bất kỳ đợt triển khai hàng đợi hợp nhất nào yêu cầu
-bước kiểm tra này trước tiên đều phải thiết lập để bước kiểm tra được thực thi cho sự kiện đó.
+`API Route Typecheck` là kiểm tra quy trình độc lập, nằm ngoài cả hai kết luận tổng hợp và cấu hình tĩnh của bộ quan sát đầy đủ tại máy cục bộ. Hãy kiểm tra riêng kết quả cho đúng ứng viên. `.github/workflows/api-route-typecheck.yml` chạy với PR nhắm vào `main` hoặc `release/**`, các lần đẩy vào hai họ nhánh này, kích hoạt thủ công và sự kiện `merge_group` loại `checks_requested`. Không có bộ lọc đường dẫn. Nhóm hợp nhất checkout `merge_group.head_sha`; các sự kiện khác checkout `github.sha`. Mọi sự kiện dùng cùng cổng chẩn đoán API và bộ kiểm thử đơn vị của cổng.
+Việc đổi nhánh đích cơ sở của PR yêu cầu một lượt kiểm tra mới; chỉnh sửa nội dung hoặc tiêu đề dùng tên chỉ để quan sát `Admission not requested / API Route Typecheck` và không thể thay thế kiểm tra tiếp nhận.
 
 ### Bằng chứng được lưu giữ trong bộ rút gọn chấp nhận
 
@@ -61,6 +55,14 @@ không có bằng chứng, tệp bị thiếu hoặc bị thay đổi, đường
 việc xác minh. Tệp bị thiếu không tương đương với nhật ký thành công rỗng. Các bước kiểm tra
 SHA/lượt chạy/lần thử hiện có vẫn độc lập: byte khớp không thể cứu một biên nhận lỗi thời.
 Tính toàn vẹn của tệp không phải là bằng chứng về tính xác thực của quá trình thực thi hoặc việc thăng cấp artifact.
+
+### DAST sử dụng bản dựng CI đã được xác minh
+
+Tác vụ CI bắt buộc `dast-smoke` gọi `.github/workflows/dast-smoke.yml` sau `build`. Nó áp dụng cùng cách chọn thay đổi mã và trạng thái bản nháp như bản dựng, bao gồm PR từ fork được hỗ trợ, PR nhắm vào release và nhóm hợp nhất. Tác vụ DAST thiếu, thất bại, bị hủy hoặc bị bỏ qua ngoài dự kiến sẽ chặn `Gate / CI`. Quy trình tái sử dụng không có trình kích hoạt PR hay thủ công độc lập; xác minh thủ công dùng chức năng kích hoạt của CI để bản dựng và bên tiêu thụ ở cùng một lần chạy.
+
+`scripts/ci/next-build-provenance.mjs` niêm phong toàn bộ tạo tác Next cùng giá trị băm tar, kho mã/sự kiện/lần chạy, lần thử của bên tạo, head/base/checkout/tree, định danh quy trình, tệp khóa, phiên bản/ABI Node chính xác, nền tảng và công cụ đóng gói. DAST chọn ID tạo tác bất biến từ `needs.build.outputs`, yêu cầu xác minh giá trị băm tải xuống, rồi tự tính băm ZIP để so với giá trị của bên tạo trước khi giải nén hai thành viên trong danh sách cho phép bằng `scripts/ci/unpack-ci-build.py`. Bản kê và tệp tar cũng phải khớp với các đầu ra độc lập của bên tạo trước khi giải nén cây Next. Nó không bao giờ tìm bản dựng thành công mới nhất của nhánh. Chạy lại một phần có thể dùng lại đúng lần thử của bên tạo khi ID và mọi đầu vào vẫn khớp; biên nhận ghi cả hai lần thử.
+
+Bên tiêu thụ tiếp tục chạy trên runner Linux được lưu trữ, chỉ có quyền đọc kho mã và không có bí mật của kho mã. Nó cài đúng phiên bản Node của bên tạo, rồi lắp ráp CLI với `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` từ chối đầu vào thiếu máy chủ standalone trước khi thực hiện bất kỳ bản dựng dự phòng nào; các bản dựng CLI cục bộ thông thường giữ nguyên cơ chế dự phòng. Kiểm tra máy chủ sẵn sàng, Schemathesis và promptfoo đều phải thành công trong giới hạn tác vụ 25 phút không đổi. Biên nhận nguồn gốc chứng minh định danh và byte đầu vào, không chứng minh quét DAST thành công. Tạo tác hết hạn, runner bị gián đoạn hoặc máy quét thất bại vẫn là bằng chứng chưa đầy đủ hoặc thất bại; không thể biến thành PASS thông qua lớp bọc chỉ mang tính khuyến nghị.
 
 ### Năng lực thực thi UI
 
@@ -223,17 +225,24 @@ Chạy trên mọi PR vào `main`. Chặn hợp nhất khi thất bại.
 
 Chạy sau `test-coverage`. Chặn hợp nhất khi thất bại.
 
-| Tập lệnh                     | Nội dung xác thực                                                                                                                                                                               | Chặn                                        |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `quality:collect`            | Xuất `quality-metrics.json` (số lượng cảnh báo ESLint, độ bao phủ từ báo cáo phân đoạn đã hợp nhất)                                                                                             | Có (đầu vào của cơ chế điều chỉnh tăng dần) |
-| `quality:ratchet`            | Mỗi chỉ số trong `quality-baseline.json` không bị suy giảm (cảnh báo ESLint ≤ đường cơ sở; độ bao phủ ≥ đường cơ sở)                                                                            | Có                                          |
-| `check:duplication`          | Mức độ trùng lặp mã (jscpd@4) không vượt quá đường cơ sở trong `quality-baseline.json`                                                                                                          | Có                                          |
-| `check:complexity`           | Độ phức tạp cyclomatic ở cấp tệp không vượt quá giới hạn (các quy tắc ESLint cốt lõi `complexity` + `max-lines-per-function`)                                                                   | Có                                          |
-| `check:cognitive-complexity` | Cơ chế điều chỉnh tăng dần độ phức tạp nhận thức (`eslint-plugin-sonarjs`) — một lượt ESLint riêng; CI chạy cả hai, được hợp nhất thành một bước `check:complexity-ratchets` duy nhất           | Có                                          |
-| `check:dead-code`            | Cơ chế điều chỉnh tăng dần đối với tệp / mục xuất không được sử dụng (knip) không bị suy giảm so với đường cơ sở                                                                                | Có                                          |
-| `check:compression-budget`   | Ngân sách điểm chuẩn nén — mức tiết kiệm token tối thiểu của từng công cụ không được suy giảm                                                                                                   | Có                                          |
-| `check:type-coverage`        | Cơ chế điều chỉnh tăng dần tỷ lệ phần trăm được định kiểu (`type-coverage`) không bị suy giảm; phần lớn bao hàm `typecheck:noimplicit:core`                                                     | Có                                          |
-| `check:codeql-ratchet`       | Số lượng cảnh báo CodeQL đang mở không tăng (đọc qua `gh api`; bỏ qua an toàn khi không có token) — về tần suất làm mới và kích hoạt thủ công: xem "Cơ chế điều chỉnh tăng dần CodeQL" bên dưới | Có                                          |
+| Tập lệnh                     | Nội dung xác thực                                                                                                                                                                     | Chặn                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| `quality:collect`            | Xuất `quality-metrics.json` (số lượng cảnh báo ESLint, độ bao phủ từ báo cáo phân đoạn đã hợp nhất)                                                                                   | Có (đầu vào của cơ chế điều chỉnh tăng dần) |
+| `quality:ratchet`            | Mỗi chỉ số trong `quality-baseline.json` không bị suy giảm (cảnh báo ESLint ≤ đường cơ sở; độ bao phủ ≥ đường cơ sở)                                                                  | Có                                          |
+| `check:duplication`          | Mức độ trùng lặp mã (jscpd@4) không vượt quá đường cơ sở trong `quality-baseline.json`                                                                                                | Có                                          |
+| `check:complexity`           | Độ phức tạp cyclomatic ở cấp tệp không vượt quá giới hạn (các quy tắc ESLint cốt lõi `complexity` + `max-lines-per-function`)                                                         | Có                                          |
+| `check:cognitive-complexity` | Cơ chế điều chỉnh tăng dần độ phức tạp nhận thức (`eslint-plugin-sonarjs`) — một lượt ESLint riêng; CI chạy cả hai, được hợp nhất thành một bước `check:complexity-ratchets` duy nhất | Có                                          |
+| `check:dead-code`            | Cơ chế điều chỉnh tăng dần đối với tệp / mục xuất không được sử dụng (knip) không bị suy giảm so với đường cơ sở                                                                      | Có                                          |
+| `check:compression-budget`   | Ngân sách điểm chuẩn nén — mức tiết kiệm token tối thiểu của từng công cụ không được suy giảm                                                                                         | Có                                          |
+| `check:type-coverage`        | Cơ chế điều chỉnh tăng dần tỷ lệ phần trăm được định kiểu (`type-coverage`) không bị suy giảm; phần lớn bao hàm `typecheck:noimplicit:core`                                           | Có                                          |
+
+### Tác vụ: `codeql-scan` và `codeql-admission`
+
+`codeql-scan` tạo tất cả các loại phân tích đã cấu hình. Sau khi tác vụ đó thành công, `codeql-admission` xác minh đúng các lượt tải lên của nó và cơ chế siết ngưỡng cảnh báo của ứng viên. Cả hai đều là phụ thuộc bắt buộc của `Gate / CI`, kể cả với ứng viên chỉ sửa tài liệu. Các yêu cầu kích hoạt quản trị và thử nghiệm canary được mô tả ở mục “Siết ngưỡng CodeQL” bên dưới.
+
+| Tập lệnh               | Nội dung xác minh                                                                                                                                                                                             | Chặn |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| `check:codeql-ratchet` | ref/SHA của ứng viên và tất cả các loại phân tích đã cấu hình phải hiện hành trước khi kiểm tra ngưỡng cảnh báo; thiếu bằng chứng sẽ chặn. Kiểm kê toàn cục vẫn tách biệt — xem “Siết ngưỡng CodeQL” bên dưới | Có   |
 
 ### Tác vụ: `quality-extended`
 
@@ -506,30 +515,23 @@ Hãy commit tệp này cùng với thay đổi đã cải thiện chỉ số. M�
 chỉ số mà không cập nhật đường cơ sở sẽ bị `--require-tighten` phát hiện (Giai đoạn 6A.5,
 đang chờ triển khai).
 
-### Ratchet CodeQL: tần suất làm mới và kích hoạt thủ công
+### Siết ngưỡng CodeQL: tiếp nhận ứng viên và kiểm kê kho mã
 
-`check:codeql-ratchet` đọc **trạng thái repo, được làm mới theo lịch — không phải theo từng PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` báo cáo
-`state: configured`, `schedule: weekly`: đây là lượt quét theo cấu hình mặc định của GitHub, không phải
-phân tích sau mỗi lần push. Hệ quả: sau khi một PR SỬA các cảnh báo được merge, ratchet vẫn tiếp tục đọc
-số lượng cũ, cao hơn cho đến khi lượt quét theo lịch tiếp theo chạy — vì vậy, nó báo cáo một sự suy giảm
-trên mọi PR đang mở, bao gồm cả các PR tiếp nối của chính PR sửa lỗi, cho đến khi lượt quét cập nhật kịp.
+CI quản lý việc tiếp nhận ứng viên về CodeQL qua một chuỗi phụ thuộc rõ ràng: `codeql-scan` gọi ma trận bốn ngôn ngữ trong `codeql.yml`, rồi `codeql-admission` chạy `node scripts/check/check-codeql-ratchet.mjs --candidate`. `Gate / CI` yêu cầu cả hai kết quả. Quality giữ các kiểm tra số liệu riêng nhưng không truy vấn máy quét trước khi bên tạo hoàn tất; chỉ có `Gate / Quality` chưa đủ để tiếp nhận ứng viên hoàn chỉnh. CodeQL vẫn bắt buộc với ứng viên chỉ sửa tài liệu.
 
-**Làm mới thủ công**: `gh workflow run codeql.yml --ref release/vX.Y.Z` chạy lại
-phân tích và công bố lại các cảnh báo trong vòng vài phút. Hãy đọc `.github/workflows/codeql.yml`
-trước — phần đầu tệp giải thích rằng nó chỉ dùng `workflow_dispatch` **vì xung đột với
-"cấu hình mặc định" của GitHub** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Việc khôi phục các trigger `push`/`pull_request`/
-`schedule` trước tiên yêu cầu **chủ sở hữu thực hiện một thao tác**: Settings → Code security →
-CodeQL: Default → Advanced. Không thêm trigger `schedule:` nếu chưa chuyển đổi như trên — việc đó
-sẽ chỉ tạo ra các lượt chạy thất bại.
+Chính sách trong `config/quality/codeql-admission-policy.json` chọn Actions, C/C++, JavaScript/TypeScript và Python, bộ truy vấn default, mô hình đe dọa remote và chế độ dựng none. Kiểm tra trước của bên tạo từ chối bản ghi đang chờ kích hoạt và các nhánh ngoài danh sách đích tường minh. Các đích ban đầu là main và release/v3.8.53; release tiếp theo cần quy trình đưa vào đã được duyệt. Trình kích hoạt PR release hiện có của CI với phạm vi rộng hơn vẫn được giữ lại, nhưng đích chưa được đưa vào báo HOLD trước khi trích xuất thay vì đạt PASS mà chưa đo lường.
 
-**Siết chặt đường cơ sở sau khi số lượng giảm** — `node scripts/check/check-codeql-ratchet.mjs
---update` ghi số lượng mới đo được vào `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, để ratchet không âm thầm cho phép chỉ số suy giảm trở lại
-mức trần cũ. Ví dụ thực tế (2026-09-02/03): PR #12502 đã sửa 7 cảnh báo thực sự
-(13 → 6 cảnh báo đang mở được đo); PR #12530 đã siết chặt đường cơ sở cố định từ 11 → 6 cho khớp; sau đó,
-6 cảnh báo còn lại đã được loại bỏ kèm phần giải trình riêng cho từng cảnh báo, đưa số cảnh báo đang mở xuống 0.
+Mỗi tác vụ ma trận ghi ID tải lên SARIF thực tế, ngôn ngữ, loại, lần chạy và lần thử, định danh quy trình gọi, ref/head/base/merge SHA của sự kiện và băm chính sách. Tác vụ phụ thuộc chỉ tải biên nhận của lần chạy này và xác minh giá trị băm tạo tác. Nó yêu cầu đủ bốn loại, bên tạo thành công và xử lý hoàn tất từng lượt tải lên chính xác. Nó dùng bộ lọc sarif_id của API, không dùng phân tích mới nhất tìm được trên một nhánh. Chạy lại một phần có thể dùng lại các loại thành công từ lần thử trước của cùng lần chạy và ứng viên, giữ nguyên thông tin lần thử đã tạo chúng; bên tạo hiện tại thất bại không thể dùng lại bằng chứng xanh trước đó.
+
+CodeQL action chờ xử lý, nhưng bản triển khai đã ghim có thể cảnh báo rồi tiếp tục khi đọc trạng thái thất bại hoặc hết lượt chờ. Vì vậy bước tiếp nhận xác minh xử lý thêm lần nữa. Thiếu loại, xử lý còn chờ, tác vụ thất bại hoặc bị hủy, định danh cũ, phân trang không đầy đủ hay API không khả dụng đều dẫn đến HOLD và mã thoát 2. Không còn khoảng chờ cố định cho quy trình máy quét độc lập. PR chưa quét không thể vượt qua chỉ vì truy vấn cảnh báo trả về 0. Số lượng đo được vượt `metrics.codeqlAlerts.value` trả mã thoát 1; không nâng đường cơ sở để hấp thụ cảnh báo của nhánh khác. [Trạng thái tải lên và tra cứu phân tích](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Biên nhận ghi ID tải lên và phân tích, loại, phiên bản công cụ, ref/SHA, đường cơ sở và số cảnh báo. Định danh/số kết quả SARIF, số quy tắc tối thiểu và các trường hợp cảnh báo chính xác vẫn bắt buộc. Định danh PR/phân tích được kiểm tra lại trước khi chấp nhận. Các kiểm tra này xác lập độ bao phủ của các loại đã cấu hình, không phải danh mục mọi tệp nguồn đã trích xuất. Trích xuất C/C++ không cần dựng không bao gồm mã được tạo trong quá trình dựng dự án. Các mục loại trừ nguồn vẫn cần duyệt, và việc quy kết cho người đóng góp cần bằng chứng có thể so sánh trên đúng phiên bản cơ sở.
+
+`codeql-maintenance.yml` cung cấp quét khi đẩy vào release đang hoạt động và lịch hằng tuần mà không lặp lại các bên tạo PR/main. `nightly-codeql-inventory.yml` giữ đường cơ sở toàn kho mã riêng biệt, dùng `--strict-measurement` và thất bại khi không thể đo lường. Việc bỏ qua nhẹ nhàng của bộ thu thập cục bộ cũ không phải là tiếp nhận ứng viên. Siết ngưỡng vẫn cần `--update` tường minh sau khi xác minh số lượng toàn cục thấp hơn.
+
+Không được công bố quy trình Advanced khi Default Setup còn được cấu hình: GitHub từ chối tổ hợp này. Chính sách có quản lý phiên bản vẫn ở trạng thái chờ cho đến khi thay đổi quản trị đã được duyệt được đọc lại để xác nhận. Trước khi công bố, người vận hành ghim kho mã, head/base/tree, băm chính sách/bản vá/hoàn tác và trạng thái thiết lập đã quan sát; `node scripts/quality/codeql-producer.mjs verify-admin-readback` kiểm tra các bản ghi JSON dự kiến và thực tế được cung cấp. Đây là chốt bảo vệ kỹ thuật, không phải phê duyệt của người vận hành hoặc thay thế cho việc lấy bản đọc lại mới. Token PR không bao giờ yêu cầu quyền Administration. Triển khai và mọi thay đổi máy quét đòi hỏi bản đọc lại riêng đó cùng bằng chứng tương thích PR, fork và nhóm hợp nhất thực tế.
+
+Fork dùng runner được lưu trữ, checkout không giữ thông tin xác thực, không cài đặt/dựng dự án trong bên tạo và không kế thừa bí mật kho mã. GitHub hỗ trợ tải SARIF cho sự kiện pull_request bằng token fork có quyền hạn giảm; phê duyệt thực thi đóng góp lần đầu vẫn theo chính sách GitHub. Không bao giờ dùng pull_request_target để thực thi mã không đáng tin. Xác nhận quyền token thực tế, analysis_key và môi trường của tất cả các loại trong canary được kiểm soát trước khi xem việc chuyển đổi là hoàn tất. [Quy tắc tải lên từ fork](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible), [các chế độ thiết lập xung đột](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Việc loại bỏ cảnh báo do người vận hành quyết định (Quy tắc cứng #14)** — không bao giờ loại bỏ một cảnh báo CodeQL
 mà không ghi lại lý do kỹ thuật trong nhận xét loại bỏ: `won't fix` cho
@@ -685,11 +687,7 @@ Danh mục này đã được đối soát với `ci.yml` vào ngày 2026-06-17 
 mang tính cơ học; việc chuyển trạng thái/loại bỏ là các quyết định chính sách dành cho người vận hành.** Chưa có nội dung nào
 bên dưới được áp dụng.
 
-**Ngoài ra chưa được ghi lại ở trên** (mang tính tham khảo, tín hiệu thấp): job `docs-lint`
-(markdownlint + Vale, toàn bộ job dùng `continue-on-error`) và các workflow quét độc lập
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` có trong
-`quality-baseline.json` nhưng chưa được kết nối với một ratchet chặn lỗi trong `ci.yml` — chỉ số này
-hiện đang bị tách rời.
+**Các mục cũng chưa được ghi ở trên** (khuyến nghị, tín hiệu thấp): tác vụ `docs-lint` (markdownlint + Vale, toàn tác vụ dùng `continue-on-error`) và các quy trình máy quét độc lập `semgrep.yml` / `scorecard.yml`. CodeQL hiện có các tác vụ tạo và tiếp nhận bắt buộc dưới `Gate / CI`, chịu các yêu cầu kích hoạt đã nêu. `semgrepFindings: 0` có trong `quality-baseline.json` nhưng chưa nối vào cơ chế siết ngưỡng chặn trong `ci.yml` — chỉ số này hiện chưa có kiểm tra thực thi tương ứng.
 
 ### Hợp nhất / loại bỏ trùng lặp (mang tính cơ học, rủi ro thấp hơn)
 

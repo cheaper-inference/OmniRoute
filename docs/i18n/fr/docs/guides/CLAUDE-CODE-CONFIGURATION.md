@@ -42,6 +42,10 @@ terminaison personnalisé au moyen de variables d’environnement (il ne possèd
 
 > Les variables d’environnement ne sont lues **qu’une seule fois au démarrage** — redémarrez Claude Code après les avoir modifiées.
 
+Pour utiliser un identifiant d’authentification renouvelé plutôt qu’une chaîne fixe, définissez `apiKeyHelper` dans `~/.claude/settings.json` comme une commande qui affiche l’identifiant actuel sur stdout. Claude Code met sa sortie en cache pendant cinq minutes par défaut (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` remplace cette durée) et transmet la valeur à la fois dans `Authorization: Bearer` et dans `x-api-key`. Le script doit afficher uniquement l’identifiant ; une bannière supplémentaire fait échouer l’assistant à partir de v2.1.227+.
+
+C’est ainsi que fonctionne Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` affiche un jeton d’accès Entra de courte durée qu’OmniRoute vérifie à la place d’une clé API. Voir [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
 `omniroute launch` définit toutes ces variables pour vous : la commande détermine l’URL de base et le jeton
 à partir du contexte actif (`omniroute connect <vps>` suivi de `omniroute launch`
 fonctionne donc directement), vérifie l’état du serveur, puis exécute `claude`.

@@ -772,7 +772,7 @@ async function getComboByClientNamespacedName(modelStr: unknown) {
     if (await isKnownProviderSegment(segment)) return null;
   }
 
-  let combo = await getComboByName(baseName);
+  let combo = await getCachedComboByName(baseName);
   if (!combo || !Array.isArray(combo.models) || combo.models.length === 0) {
     combo = await getComboByNameInsensitive(baseName);
   }

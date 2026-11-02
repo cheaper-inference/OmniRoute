@@ -161,6 +161,22 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 - **写入也受条件限制：** `chatCore.ts` 中的两个调用点（非流式和流式）仅在 `requiresReasoningReplay(provider, model)` 为 `true` 时调用 `cacheReasoningFromAssistantMessage()`——这与读取端检查的谓词相同。对于从不使用重放提供者的安装实例，无需再为每个包含推理内容的响应承担写入、索引更新以及 try/catch 的开销。
 - **非严格模式提供者：** 当 `requiresReasoningReplay` 为 `false` 且目标格式为 OpenAI 时，转换器会从传出消息中**移除**所有 `reasoning_content` 字段——OpenAI Chat Completions 不接受该字段。
 
+## Muse 不透明推理的所有权
+
+Muse（`muse-code`）返回与调用方绑定的不透明推理（`encrypted_content`）。使用其他账户或重新签发的凭据重放它会在上游失败，因此原生 OAuth 请求采用会话级所有权，而非逐请求轮换（`src/sse/services/museSessionOwnership.ts`，在 `src/sse/handlers/chat.ts` 中强制执行）。显式选中的 API 密钥连接及仅使用 API 密钥的配置保留现有路由，不使用这种所有权模式。
+
+- 每个轮次都应提供稳定的会话 ID：`x-omniroute-session-id`、`x-omniroute-session`、`x-session-id` 或 `x-codex-session-id`；也可在请求体中使用 `prompt_cache_key`、`session_id`、`conversation_id` 或 `metadata.session_id`（按此优先级）。当有两个或更多活跃的原生 OAuth 账户时，缺失或空白 ID 会返回 400；只有一个 OAuth 账户时没有其他轮换目标，因此此类请求保持未固定路由。作用域包含调用方的 OmniRoute API 密钥 ID。
+- 新的独立会话会在 API 密钥连接策略允许的活跃原生 OAuth 账户间轮询，按连接 ID 排序。轮询会跳过处于连接冷却、终止状态（`banned`、`expired`、`credits_exhausted`）或对请求模型已锁定的账户；Muse 上游失败与其他提供者一样记录冷却和熔断状态。显式强制连接会在新会话中绕过轮询，但不能替换已经提供过成功响应的所有者。
+- 在所有者提供成功响应之前，若其不可用，会将会话重新分配给健康账户。首次成功响应之后，会话固定到该所有者，直到闲置满 30 天（`MUSE_SESSION_IDLE_TTL_MS`）。
+- 每次续接和工具结果轮次都固定到会话所有者：连接、账户身份和推理凭据代次；在上游尝试之前会再次检查，包括凭据刷新后的重试。Responses 调用 ID/项目引用和 Chat Completions 工具调用 ID 必须已针对该会话和代次记录。
+- SQLite `key_value` 记录位于 `muse_session_ownership` 命名空间（`src/lib/db/museSessionOwnership.ts`），可在重启之间保留所有权和轮换游标。每次认领和提供响应都会刷新会话活动时间戳；闲置超过 `MUSE_SESSION_IDLE_TTL_MS` 的会话会被清理（所有者固定、已响应标志，以及记录的不透明内容/引用哈希），最多每 10 分钟一次且分批限量执行，因此之后重放其历史时会因所有者未知而安全拒绝。记录包含连接 ID，以及账户身份、凭据、不透明内容和续接引用的哈希，不包含秘密或对话历史。客户端必须保留并发送完整历史和不透明推理。
+- 对未知或外来的不透明推理、缺失的所有者、不可用的所有者账户，或已有历史记录时发生的代次变更，系统会以明确的 4xx/503 安全拒绝；绝不会静默跨账户故障转移，也绝不会丢弃推理。
+- 同一账户重新签发的密钥，只有在会话未记录可重放历史时才会被采用；已有记录的会话会继续安全拒绝，直到重新开始。
+- 空的上游响应（`upstream_empty_response` / `empty_response`，未向调用方输出任何内容）最多在同一所有者上重试两次，分别等待 0.5 s 和 1.5 s（`MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS`）。如果所有尝试均为空，则返回原始 502，不标记冷却或熔断，因此偶发空响应不会锁定所有者。
+- 所有 `muse-code` 请求都绕过语义缓存读取和写入，包括流式写入，避免缓存的不透明输出被分配给其他会话所有者。
+
+回归保护：`tests/unit/muse-session-ownership.test.ts`、`tests/unit/muse-session-ownership-retention.test.ts`、`tests/unit/muse-empty-response-retry.test.ts` 和 `tests/unit/chatcore-semantic-cache.test.ts`。
+
 ## 另请参阅
 
 - [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — 熔断器、冷却期、模型锁定

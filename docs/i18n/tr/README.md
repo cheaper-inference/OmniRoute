@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Ücretsiz Yapay Zekâ Ağ Geçidi
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kodlamaya hiç ara vermeyin. Her yapay zekâ aracı → 377 sağlayıcı — 150'den fazlası ücretsiz — tek bir uç nokta üzerinden. Claude Code, Codex, Cursor, Cline, Copilot ve Antigravity'yi otomatik yedeklemeyle ÜCRETSİZ Claude / GPT / Gemini'ye bağlayın. RTK + Caveman birleşik sıkıştırması token kullanımında %15–95 (~ortalama %89) tasarruf sağlar — limitlere asla takılmayın. 377 yapay zekâ sağlayıcısı · 150'den fazla ücretsiz katman · ayda yaklaşık 1,62 milyar ücretsiz token · 20 yönlendirme stratejisi · başlangıç maliyeti $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kodlamaya hiç ara vermeyin. Her yapay zekâ aracı → 380 sağlayıcı — 150'den fazlası ücretsiz — tek bir uç nokta üzerinden. Claude Code, Codex, Cursor, Cline, Copilot ve Antigravity'yi otomatik yedeklemeyle ÜCRETSİZ Claude / GPT / Gemini'ye bağlayın. RTK + Caveman birleşik sıkıştırması token kullanımında %15–95 (~ortalama %89) tasarruf sağlar — limitlere asla takılmayın. 380 yapay zekâ sağlayıcısı · 150'den fazla ücretsiz katman · ayda yaklaşık 1,62 milyar ücretsiz token · 20 yönlendirme stratejisi · başlangıç maliyeti $0."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Kendi sağlayıcı hesaplarınızı kullanın.** Bu, OmniRoute tarafından sağlanan bir token hibesi değil, ayrı ayrı uygun olduğunuz üçüncü taraf ücretsiz katmanlarının tahmini toplamıdır. Kaydolun, gerektiğinde kimlik bilgilerinizi edinin ve kullanabildiğiniz sağlayıcıları bağlayın; her sağlayıcı kendi limitlerini, kullanılabilirliğini ve koşullarını belirler.
 >
-> Ücretsiz katmanları elle birleştirmek zahmetlidir — onlarca SDK, onlarca hız sınırı ve gerçekte ne kadar kotanız olduğuna dair hiçbir fikriniz yoktur. OmniRoute, **34 yinelenen havuz anahtarında 484 ücretsiz katman girdisini** kataloglar ve token başlığındaki değeri, paylaşılan havuza göre tekilleştirerek **yayınlanmış pozitif aylık bütçeye sahip 17 havuz ile model başına beş Groq sınırından** hesaplar. Yalnızca bölgesel kimlik kontrolünden sonra açılan kotalar (şu anda: ModelScope) ayrı olarak, bölgesel kimlik doğrulamasının ardında +~6M şeklinde gösterilir ve hiçbir zaman başlıktaki toplama dahil edilmez. Sonuç, kontrol panelinde (`/dashboard/free-tiers`) görünür kalır.
+> Ücretsiz katmanları elle birleştirmek zahmetlidir — onlarca SDK, onlarca hız sınırı ve gerçekte ne kadar kotanız olduğuna dair hiçbir fikriniz yoktur. OmniRoute, **34 yinelenen havuz anahtarında 485 ücretsiz katman girdisini** kataloglar ve token başlığındaki değeri, paylaşılan havuza göre tekilleştirerek **yayınlanmış pozitif aylık bütçeye sahip 17 havuz ile model başına beş Groq sınırından** hesaplar. Yalnızca bölgesel kimlik kontrolünden sonra açılan kotalar (şu anda: ModelScope) ayrı olarak, bölgesel kimlik doğrulamasının ardında +~6M şeklinde gösterilir ve hiçbir zaman başlıktaki toplama dahil edilmez. Sonuç, kontrol panelinde (`/dashboard/free-tiers`) görünür kalır.
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute ücretsiz katman bütçe kartı: Sürekli olarak ayda ~1,62 milyar ücretsiz token; kayıt kredileriyle ilk ayda ~2,22 milyara kadar. Tek bir uç noktanın arkasında, kataloglanmış 484 ücretsiz katman girdisini kapsayan, belgelenmiş 34 yinelenen havuz anahtarından sağlanır. Dürüst, havuz bazında tekilleştirilmiş hesaplama — yayınlanmış pozitif aylık token bütçesine sahip 17 yinelenen havuz ile model başına beş Groq sınırı dahil olmak üzere her paylaşılan havuz yalnızca bir kez sayılır; karar verebilmeniz için 12 sağlayıcı, koşul riski kataloğunda kaçınılması gereken olarak işaretlenmiştir. Bütçe çubuğu Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (model başına beş sınır) ve daha küçük havuzların yanı sıra ilk ay kayıt kredilerini içerir; kalıcı olarak ücretsiz ve token sınırı olmayan sağlayıcılar ise başlıktaki değeri hiçbir zaman yapay biçimde artırmamaları için ayrı gösterilir. Canlı kullanılan/kalan değerleri /dashboard/free-tiers sayfasındadır."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute ücretsiz katman bütçe kartı: Sürekli olarak ayda ~1,62 milyar ücretsiz token; kayıt kredileriyle ilk ayda ~2,22 milyara kadar. Tek bir uç noktanın arkasında, kataloglanmış 485 ücretsiz katman girdisini kapsayan, belgelenmiş 34 yinelenen havuz anahtarından sağlanır. Dürüst, havuz bazında tekilleştirilmiş hesaplama — yayınlanmış pozitif aylık token bütçesine sahip 17 yinelenen havuz ile model başına beş Groq sınırı dahil olmak üzere her paylaşılan havuz yalnızca bir kez sayılır; karar verebilmeniz için 12 sağlayıcı, koşul riski kataloğunda kaçınılması gereken olarak işaretlenmiştir. Bütçe çubuğu Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (model başına beş sınır) ve daha küçük havuzların yanı sıra ilk ay kayıt kredilerini içerir; kalıcı olarak ücretsiz ve token sınırı olmayan sağlayıcılar ise başlıktaki değeri hiçbir zaman yapay biçimde artırmamaları için ayrı gösterilir. Canlı kullanılan/kalan değerleri /dashboard/free-tiers sayfasındadır."/>
 
 > Canlı `/dashboard/free-tiers` sayfasının animasyonlu özeti. Tam metodoloji (havuz tekilleştirme, kredi katmanları, sağlayıcı koşulları): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -71,7 +71,7 @@
 
 |                                       |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Sağlayıcılar                       |           352            |   **358**   |          377          |
+| 🌐 Sağlayıcılar                       |           352            |   **358**   |          380          |
 | 🧠 Benzersiz sohbet modeli kimlikleri |           1320           |  **1374**   |         1475          |
 | 🖼️ Modalite Köprüsü                   | 🆕 görüntü + ses + video |      ✓      |           ✓           |
 | 📡 Radar ücretsiz kataloğu            |     🆕 isteğe bağlı      |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Özellikler</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombolar</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Sağlayıcılar</a></td>
+    <td align="center"><a href="#-380-ai-providers--156-catalog-marked-free">🌐 Sağlayıcılar</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaat — Tek uç nokta ve 377 sağlayıcı. Başka bir sağlıklı hedef mevcut olduğu sürece otomatik yedekleme yönlendirmeyi sürdürür. Altı temel sütun: 377 sağlayıcı arasında dayanıklı yedekleme · uygun iş yüklerinde %95'e varan token tasarrufu · 150'den fazla ücretsiz katman ve yinelenen/anahtarsız, sonsuza kadar ücretsiz 52 sağlayıcıyla başlangıç maliyeti $0 · tek yapılandırma üzerinden 37 CLI/agent entegrasyonu · /v1 üzerinde OpenAI, Claude, Gemini ve Responses API uyumluluğu · devre kesiciler, TLS gizleme, 110 araçlı MCP, A2A, bellek, güvenlik önlemleri, değerlendirmeler ve takip edilen 7.800'den fazla test dosyasında 56.000'den fazla statik test bildirimi dâhil üretim denetimleri."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vaat — Tek uç nokta ve 380 sağlayıcı. Başka bir sağlıklı hedef mevcut olduğu sürece otomatik yedekleme yönlendirmeyi sürdürür. Altı temel sütun: 380 sağlayıcı arasında dayanıklı yedekleme · uygun iş yüklerinde %95'e varan token tasarrufu · 150'den fazla ücretsiz katman ve yinelenen/anahtarsız, sonsuza kadar ücretsiz 52 sağlayıcıyla başlangıç maliyeti $0 · tek yapılandırma üzerinden 39 CLI/agent entegrasyonu · /v1 üzerinde OpenAI, Claude, Gemini ve Responses API uyumluluğu · devre kesiciler, TLS gizleme, 110 araçlı MCP, A2A, bellek, güvenlik önlemleri, değerlendirmeler ve takip edilen 7.800'den fazla test dosyasında 56.000'den fazla statik test bildirimi dâhil üretim denetimleri."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Kombo oluşturmanız gerekmez. Modelinizi `auto` (veya bir varyantı) olarak aya
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute'u farklı kılan özellikler — 13 yetenek açısından 9router, OpenRouter, CLIProxyAPI ve LiteLLM ile tarih belirtilmiş bir özellik karşılaştırması. OmniRoute: 377 sağlayıcı, yerleşik 150'den fazla ücretsiz katman, 20 yönlendirme stratejisi, 12 motorlu token sıkıştırma, 110 araç içeren yerleşik MCP sunucusu, A2A ajan protokolü, kalıcı bellek, koruma mekanizmaları, bulut ajanları, TLS parmak izi gizleme, Desktop/Termux/PWA ve 67 uluslararasılaştırılmış kullanıcı arayüzü yerel ayarı. OmniRoute, MIT lisanslıdır ve kendi sunucunuzda barındırılabilir. Rakiplerin yetenekleri ve sayıları değişebilir; bağlantılı metodolojiye bakın."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute'u farklı kılan özellikler — 13 yetenek açısından 9router, OpenRouter, CLIProxyAPI ve LiteLLM ile tarih belirtilmiş bir özellik karşılaştırması. OmniRoute: 380 sağlayıcı, yerleşik 150'den fazla ücretsiz katman, 20 yönlendirme stratejisi, 12 motorlu token sıkıştırma, 110 araç içeren yerleşik MCP sunucusu, A2A ajan protokolü, kalıcı bellek, koruma mekanizmaları, bulut ajanları, TLS parmak izi gizleme, Desktop/Termux/PWA ve 67 uluslararasılaştırılmış kullanıcı arayüzü yerel ayarı. OmniRoute, MIT lisanslıdır ve kendi sunucunuzda barındırılabilir. Rakiplerin yetenekleri ve sayıları değişebilir; bağlantılı metodolojiye bakın."/>
 
 <sub>📊 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM ile karşılaştırmalı tam metodoloji ve özellik bazında ayrıntılar → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar isteğe bağlıdır ve yalnızca GET kullanır. OmniRoute istemcisi isteml
 - **🖼️ Yeni uç noktalar** — `/v1/ocr` (Mistral OCR) ve `/v1/audio/translations` (Whisper tarzı), medya yüzeyini tamamlar. → [API Referansı](docs/reference/API_REFERENCE.md)
 - **🎨 Görüntü / video / ses üretimi** — medya için tek API: xAI Grok Imagine ve Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind ve ElevenLabs gibi konuşma sağlayıcıları. → [API Referansı](docs/reference/API_REFERENCE.md)
 - **🌍 Dağıtım ve operasyonlar** — ters proxy `basePath`, tarayıcı dilini otomatik algılama, anahtar başına cihaz takibi, root gerektirmeyen MITM güveni, zh-TW yerelleştirmesi. → [Ortam](docs/reference/ENVIRONMENT.md)
-- **🤝 Daha fazla sağlayıcı ve aracı** — bulut aracıları (Codex Cloud, Cursor, Devin, Jules), tarayıcı + OAuth oturum açma özellikli Grok Build (xAI), birinci sınıf Ollama kartı, Claude Opus 5 ve Sonnet 5, Kimi resmi ortaklığı (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ve yenilenmiş **377 sağlayıcılı katalog**. → [Sağlayıcılar](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Daha fazla sağlayıcı ve aracı** — bulut aracıları (Codex Cloud, Cursor, Devin, Jules), tarayıcı + OAuth oturum açma özellikli Grok Build (xAI), birinci sınıf Ollama kartı, Claude Opus 5 ve Sonnet 5, Kimi resmi ortaklığı (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ve yenilenmiş **380 sağlayıcılı katalog**. → [Sağlayıcılar](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Yönlendirme şeffaflığı** — her yanıt, isteği sunan stratejiyi/sağlayıcıyı/gecikmeyi belirten bir `X-OmniRoute-Decision` başlığı taşır; yeni `cache-optimized` birleşim stratejisi + Auto-Combo `cacheAffinity` faktörü, tekrarlanan istekleri önbelleğe alınmış öneki tutan bağlantıya geri yönlendirir ve salt okunur `/v1/auto-combo/{channel}/candidates` uç noktası, bir `auto/*` kanalının canlı aday havuzunu gösterir. → [Otomatik Birleşim](docs/routing/AUTO-COMBO.md)
 - **⚡ Yerel performans ve altyapı** — tek tıklamayla yerel Redis; Cloudflare Workers / Deno Deploy aktarma dağıtıcıları; denetimli gömülü hizmetler olarak Bifrost ve Mux. → [Gömülü Hizmetler](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Kutudan çıkan diğer özellikler** — eklenti çerçevesi + pazar yeri, Omni/Agent/GitHub beceri çerçeveleri, Obsidian kasa entegrasyonu (22 MCP aracı), OpenAI uyumlu Batch ve Files API'leri, anlamsal yanıt önbelleği, liderlik tablolarıyla oyunlaştırma, ACP ajan keşfi (15 yerleşik ajan), BigQuery'ye zamanlanmış günlük aktarımı, `auto/chaos` paralel çok modelli dağıtım, Telegram bot köprüsü, uygulama içi sürüm yöneticisi ve LMArena-ELO ücretsiz sağlayıcı sıralamaları. → [Belgeler](docs/README.md)
@@ -657,7 +657,7 @@ Radar isteğe bağlıdır ve yalnızca GET kullanır. OmniRoute istemcisi isteml
 <b>＋ ayrıca şunlarla da çalışır</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>OpenAI uyumlu tüm araçlar</b>
 </div>
 
-<sub>📖 38 aracın tamamı için araç başına kurulum (27 CLI Code + 11 CLI Agent) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode eklentisi → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 39 aracın tamamı için araç başına kurulum (28 CLI Code + 11 CLI Agent) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode eklentisi → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
@@ -687,11 +687,11 @@ kabuk geçmişinizin dışında tutar. → [CLI Entegrasyonları](docs/guides/CL
 
 <div align="center">
 
-## 🌐 377 AI Sağlayıcısı — 153'ü Katalogda Ücretsiz Olarak İşaretli
+## 🌐 380 AI Sağlayıcısı — 156'ü Katalogda Ücretsiz Olarak İşaretli
 
 </div>
 
-> Standart sohbet, medya, arama, yerel, bulut aracısı ve sistem koleksiyonlarında **377 kayıtlı sağlayıcı** bulunur; bunların **153'ü `hasFree: true` keşif meta verisini taşır**. Sohbet modeli kayıt defteri **239 sağlayıcıyı / 3.059 farklı sağlayıcı-model çiftini / 1.475 ham model kimliğini** kapsar; ayrı ücretsiz bütçe kataloğunda ise **model başına 484 satır**, **34 yinelenen havuz** ve **52 yinelenen/anahtarsız, sonsuza kadar ücretsiz sağlayıcı** bulunur. Bunlar tasarım gereği farklı paydalardır; tanımlar ve havuz tekilleştirmeli hesaplamalar [Sağlayıcı Referansı](docs/reference/PROVIDER_REFERENCE.md) ve [Ücretsiz Katmanlar](docs/reference/FREE_TIERS.md) içinde yer alır.
+> Standart sohbet, medya, arama, yerel, bulut aracısı ve sistem koleksiyonlarında **380 kayıtlı sağlayıcı** bulunur; bunların **156'ü `hasFree: true` keşif meta verisini taşır**. Sohbet modeli kayıt defteri **239 sağlayıcıyı / 3.059 farklı sağlayıcı-model çiftini / 1.475 ham model kimliğini** kapsar; ayrı ücretsiz bütçe kataloğunda ise **model başına 485 satır**, **34 yinelenen havuz** ve **52 yinelenen/anahtarsız, sonsuza kadar ücretsiz sağlayıcı** bulunur. Bunlar tasarım gereği farklı paydalardır; tanımlar ve havuz tekilleştirmeli hesaplamalar [Sağlayıcı Referansı](docs/reference/PROVIDER_REFERENCE.md) ve [Ücretsiz Katmanlar](docs/reference/FREE_TIERS.md) içinde yer alır.
 
 <div align="center">
 
@@ -1308,7 +1308,7 @@ port üzerinden sunulur; dolayısıyla günümüzde yalnızca CLI içeren ayrı 
   <tr><td nowrap><b>Çalışma Zamanı</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Dil</b></td><td>TypeScript 6.0 — <code>src/</code> ve <code>open-sse/</code> genelinde <b>%100 TypeScript</b> (v2.0'dan bu yana çekirdekte sıfır <code>any</code>)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Veritabanı</b></td><td>better-sqlite3 (SQLite, WAL günlükleme) + LowDB (eski JSON) — 147 etki alanı modülü, 213 migrasyon</td></tr>
+  <tr><td nowrap><b>Veritabanı</b></td><td>better-sqlite3 (SQLite, WAL günlükleme) + LowDB (eski JSON) — 147 etki alanı modülü, 219 migrasyon</td></tr>
   <tr><td nowrap><b>Bellek</b></td><td>SQLite FTS5 tam metin + int8 ile nicemlenmiş vektör gömmeleri, tür güvenli azalma</td></tr>
   <tr><td nowrap><b>Şemalar</b></td><td>Zod 4 — MCP aracı G/Ç doğrulaması + API sözleşmeleri</td></tr>
   <tr><td nowrap><b>Protokoller</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1371,7 +1371,7 @@ port üzerinden sunulur; dolayısıyla günümüzde yalnızca CLI içeren ayrı 
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Dayanıklılık Kılavuzu</a></b></td><td>Devre kesiciler, bekleme süreleri, kuyruk, istek yığılması önleme, TLS sahteciliği</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Otomatik Kombinasyon Motoru</a></b></td><td>16 faktörlü puanlama, mod paketleri, kendi kendini iyileştirme</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy Kılavuzu</a></b></td><td>3 seviyeli proxy sistemi, 1proxy pazarı, kayıt CRUD işlemleri</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Ücretsiz Katmanlar</a></b></td><td>Birleştirilmiş dizin: belgelenmiş 34 yinelenen havuz / kataloglanmış 484 ücretsiz katman girdisi</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Ücretsiz Katmanlar</a></b></td><td>Birleştirilmiş dizin: belgelenmiş 34 yinelenen havuz / kataloglanmış 485 ücretsiz katman girdisi</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Özellikler Galerisi</a></b></td><td>Ekran görüntüleriyle görsel pano turu</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Kod Tabanı Dokümantasyonu</a></b></td><td>Yeni başlayanlara uygun kod tabanı incelemesi</td></tr>
 </table>

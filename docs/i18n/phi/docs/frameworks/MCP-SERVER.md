@@ -309,12 +309,12 @@ access token sa isang management route na nagsasagawa ng pagbabago ay makakatang
 Ang ranggong iyon ay `scopeSatisfies`. Hindi nito kinokonsulta ang MCP table, at hindi rin ito
 kinokonsulta ng MCP matcher.
 
-| Namespace              | Kredensyal                                                                       | Checker                             | Ang pinahihintulutan ng pagpasa                                                  |
-| :--------------------- | :------------------------------------------------------------------------------- | :---------------------------------- | :------------------------------------------------------------------------------- |
-| Pamamahala ng API key  | `api_keys.scopes`                                                                | `hasManageScope`                    | Management REST para sa Bearer key na iyon                                       |
-| Additive ng API key    | parehong array, isang eksaktong string                                           | ang helper na pinangalanan sa ibaba | Ang iisang kakayahan lamang na iyon                                              |
-| Mga saklaw ng MCP tool | parehong array, kung wala ay MCP `_meta`, kung wala pa ay `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                      | Ang tool na iyon, kapag naka-on na ang pagpapatupad                              |
-| Access token           | `oma_live_…`                                                                     | `scopeSatisfies`                    | Ang management route na nangangailangan ng ranggong iyon batay sa method at path |
+| Namespace              | Kredensyal                                                                                           | Checker                             | Ang pinahihintulutan ng pagpasa                                                  |
+| :--------------------- | :--------------------------------------------------------------------------------------------------- | :---------------------------------- | :------------------------------------------------------------------------------- |
+| Pamamahala ng API key  | `api_keys.scopes`                                                                                    | `hasManageScope`                    | Management REST para sa Bearer key na iyon                                       |
+| Additive ng API key    | parehong array, isang eksaktong string                                                               | ang helper na pinangalanan sa ibaba | Ang iisang kakayahan lamang na iyon                                              |
+| Mga saklaw ng MCP tool | parehong array, kung wala ay MCP `_meta` (HTTP/SSE lang), kung wala pa rin ay `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                      | Ang tool na iyon, kapag naka-on na ang pagpapatupad                              |
+| Access token           | `oma_live_…`                                                                                         | `scopeSatisfies`                    | Ang management route na nangangailangan ng ranggong iyon batay sa method at path |
 
 Ang pag-isyu sa bawat kredensyal ay tinatalakay sa
 [Pagpapatotoo sa Pamamahala](../guides/MANAGEMENT-AUTH.md).
@@ -363,8 +363,7 @@ Naka-off ang pagpapatupad maliban kung `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (defa
 `false`). Habang naka-off ito, pinahihintulutan ng `evaluateToolScopes` ang call at nilalaktawan ang
 catalog. Habang naka-on ito, ginagamit ng HTTP ang `api_keys.scopes` ng Bearer key bilang
 `authInfo` (tingnan ang [Pag-bind ng HTTP scope ayon sa key](#per-key-http-scope-binding-7895)).
-Kapag walang malutas na mga saklaw ng key, lilipat ang ipinagkaloob na set sa MCP `_meta`, pagkatapos ay
-sa `OMNIROUTE_MCP_SCOPES`.
+Kapag walang naresolven na key scopes, dumadaan ang granted set sa MCP `_meta` (iginalang lamang para sa mga tumatawag na HTTP/SSE, sa loob ng HTTP auth context; ang `_meta` ng stdio caller ay hindi pinapansin dahil kontrolado ito ng client at wala itong dalang per-caller identity), pagkatapos ay `OMNIROUTE_MCP_SCOPES`.
 
 #### Mga saklaw ng access token
 
@@ -466,8 +465,10 @@ sa fallback na `_meta` at `OMNIROUTE_MCP_SCOPES` env—pinupunan lamang nito ang
 pinakamataas na priyoridad na source, na dati ay walang ibinibigay na data sa HTTP. Kapag
 walang nakuhang API key (walang header o invalid ang key), mananatiling `undefined` ang
 `authInfo` at magpapatuloy ang resolution sa kasalukuyang `meta`/env chain nang walang
-pagbabago. Walang per-caller identity ang stdio (tingnan ang `mcpCallerIdentity.ts`) at hindi
-ito naaapektuhan—mananatili ito sa `_meta`/env fallback chain.
+pagbabago. Walang per-caller identity ang stdio (tingnan
+`mcpCallerIdentity.ts`) at hindi ito naaapektuhan ng per-key binding — nilalaktawan nito ang `_meta` step
+(honored lang ang `_meta` sa loob ng HTTP auth context, #15159) at naresolve mula sa
+`OMNIROUTE_MCP_SCOPES` env key lamang.
 
 **Sapilitang ino-on ang enforcement para sa mga HTTP/SSE caller na may limitadong scope
 anuman ang `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Ang pag-default ng

@@ -12,7 +12,7 @@ PII сазнања). Прочитајте га у потпуности; немо
 ## Izolacija worktree-a — specifičnosti za Claude Code
 
 Kompletan obavezni worktree protokol (potvrda osnovne grane, kanonska putanja `.claude/worktrees/`, `cp -al` node_modules, pravila za uklanjanje) nalazi se u
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (sažeto u `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (sažeto u `AGENTS.md` →
 Git radni tok → „Izolacija worktree-a"). Tačke specifične za Claude Code:
 
 - Potvrdite osnovnu granu sa operatorom putem `AskUserQuestion` (Strogo pravilo br. 19), osim ako vam

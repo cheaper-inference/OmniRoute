@@ -39,7 +39,8 @@ CLI, checkout/olay SHA uyuşmazlığını reddeder. İş akışı testleri, poli
 karar işinin `needs` listesine bağlar; böylece yeni veya kaldırılmış bir hat sessizce
 kaybolamaz. Makbuzlar; yayımlama, dağıtım veya mevcut bir tavsiye niteliğindeki tarayıcının iç işleyişini değil, kendi iş akışlarını kapsar. Geçerli kontrolleri dal kurallarında zorunlu kılmak ayrı bir idari değişikliktir; işlerini tanımlamak tek başına bir dalı korumaz.
 
-`API Route Typecheck`, her iki toplu hükmün ve yerel tam gözlemcinin statik profilinin dışında kalan bağımsız bir iş akışı kontrolüdür. Tam aday için sonucunu ayrı olarak inceleyin. `.github/workflows/api-route-typecheck.yml`; `main` veya `release/**` dallarını hedefleyen PR'larda, bu iki dal ailesinden birine yapılan push'larda ve manuel tetiklemede çalışır. Herhangi bir yol filtresi yoktur. PR hedef dalı değişiklikleri yeni bir kontrol talep eder; gövde/başlık düzenlemeleri yalnızca gözlem amaçlı `Admission not requested / API Route Typecheck` adını kullanır ve kabul kontrolünün yerini alamaz. İş akışı bir merge-group tetikleyicisi tanımlamaz. Bu kontrolü zorunlu kılan herhangi bir merge-queue kullanıma alımı, önce söz konusu olay için kontrolün yürütülmesini sağlamalıdır.
+`API Route Typecheck`, her iki toplu kararın ve tam yerel gözlemcinin statik profilinin dışında kalan bağımsız bir iş akışı kontrolüdür. Tam olarak ilgili aday için sonucunu ayrı inceleyin. `.github/workflows/api-route-typecheck.yml`, `main` veya `release/**` hedefli PR'larda, her iki dal ailesine yapılan gönderimlerde, elle başlatıldığında ve `checks_requested` türündeki `merge_group` olaylarında çalışır. Yol filtresi yoktur. Birleştirme grupları `merge_group.head_sha` sürümünü; diğer olaylar `github.sha` sürümünü alır. Tüm olaylar aynı API tanılama kapısını ve kapının birim testlerini kullanır.
+PR tabanının yeniden hedeflenmesi yeni bir kontrol ister; gövde veya başlık düzenlemeleri yalnızca gözlem amaçlı `Admission not requested / API Route Typecheck` adını kullanır ve kabul kontrolünün yerini alamaz.
 
 ### Kabul indirgeyicisinde saklanan kanıtlar
 
@@ -56,6 +57,14 @@ ya da sembolik bağlantı doğrulamayı engeller. Eksik dosyalar, boş ve başar
 eşdeğer değildir. Mevcut SHA/çalıştırma/deneme kontrolleri birbirinden bağımsız kalır:
 eşleşen baytlar güncelliğini yitirmiş bir makbuzu kurtaramaz. Dosya bütünlüğü, yürütme
 özgünlüğünün veya yapıt yükseltmesinin kanıtı değildir.
+
+### DAST, doğrulanmış CI derlemesini kullanır
+
+Zorunlu CI işi `dast-smoke`, `build` sonrasında `.github/workflows/dast-smoke.yml` iş akışını çağırır. Desteklenen fork PR'ları, sürüm dalını hedefleyen PR'lar ve birleştirme grupları dahil olmak üzere derlemeyle aynı kod ve taslak seçimini izler. Eksik, başarısız, iptal edilmiş veya beklenmedik biçimde atlanmış bir DAST işi `Gate / CI` kapısını engeller. Yeniden kullanılabilir iş akışının bağımsız PR veya elle başlatma tetikleyicisi yoktur; elle doğrulama, derleme ve tüketiciyi aynı çalıştırmada tutmak için CI'ın başlatılmasını kullanır.
+
+`scripts/ci/next-build-provenance.mjs`, Next çıktısının tamamını tar özeti, depo/olay/çalıştırma, üretici denemesi, head/base/checkout/tree, iş akışı kimlikleri, kilit dosyası, tam Node sürümü ve ABI, platform ve paketleyiciyle mühürler. DAST, değişmez çıktı kimliğini `needs.build.outputs` içinden seçer, indirme özeti doğrulaması ister ve izin verilen iki üyeyi `scripts/ci/unpack-ci-build.py` ile çıkarmadan önce ZIP karmasını bağımsız olarak hesaplayıp üreticinin özetiyle karşılaştırır. Next ağacı çıkarılmadan önce manifest ve tar arşivi de bağımsız üretici çıktılarıyla eşleşmelidir. Hiçbir zaman dalın en son başarılı derlemesini aramaz. Kısmi yeniden çalıştırma, kimliği ve tüm girdiler hâlâ eşleşiyorsa aynı üretici denemesini yeniden kullanabilir; kanıt kaydı her iki denemeyi kaydeder.
+
+Tüketici, yalnızca depo okuma iznine sahip ve depo sırları bulunmayan barındırılan bir Linux çalıştırıcısında kalır. Üreticinin tam Node sürümünü kurar, ardından CLI'ı `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1` ile oluşturur. `scripts/build/standaloneInput.mjs`, herhangi bir yedek derlemeden önce eksik bağımsız sunucuyu reddeder; normal yerel CLI derlemeleri mevcut yedek yöntemlerini korur. Sunucunun hazır olması, Schemathesis ve promptfoo kontrollerinin tümü, işin değişmeyen 25 dakikalık sınırı içinde başarılı olmalıdır. Köken kanıt kaydı, girdilerin kimliğini ve baytlarını kanıtlar; DAST taramasının başarılı olduğunu kanıtlamaz. Çıktının süresinin dolması, çalıştırıcının kesintiye uğraması veya tarayıcının başarısız olması, eksik ya da başarısız kanıt olarak kalır; tavsiye niteliğindeki bir sarmalayıcı bunu PASS sonucuna dönüştüremez.
 
 ### UI yürütme kapasitesi
 
@@ -212,17 +221,24 @@ bastıramaz; assertion zayıflatma ve diğer maskeleme işlemleri, bağımsız o
 
 `test-coverage` sonrasında çalışır. Başarısızlık durumunda birleştirmeyi engeller.
 
-| Betik                        | Doğruladığı                                                                                                                                                                                 | Engelleyici                 |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| `quality:collect`            | `quality-metrics.json` dosyasını üretir (ESLint uyarı sayısı, birleştirilmiş parça raporundan kapsam)                                                                                       | Evet (mandalın yukarısında) |
-| `quality:ratchet`            | `quality-baseline.json` içindeki her metrik gerilememiştir (ESLint uyarıları ≤ temel çizgi; kapsam ≥ temel çizgi)                                                                           | Evet                        |
-| `check:duplication`          | Kod yinelemesi (jscpd@4), `quality-baseline.json` içindeki temel çizgiyi aşmaz                                                                                                              | Evet                        |
-| `check:complexity`           | Dosya düzeyindeki döngüsel karmaşıklık üst sınırı aşmaz (temel ESLint `complexity` + `max-lines-per-function`)                                                                              | Evet                        |
-| `check:cognitive-complexity` | Bilişsel karmaşıklık mandalı (`eslint-plugin-sonarjs`) — ayrı ESLint geçişi; CI, ikisini tek bir `check:complexity-ratchets` adımı olarak birleştirilmiş biçimde çalıştırır                 | Evet                        |
-| `check:dead-code`            | Kullanılmayan dışa aktarımlar / dosyalar mandalı (knip), temel çizgiye kıyasla gerilemez                                                                                                    | Evet                        |
-| `check:compression-budget`   | Sıkıştırma karşılaştırması bütçesi — motor başına token tasarrufu alt sınırları gerilememelidir                                                                                             | Evet                        |
-| `check:type-coverage`        | Türlendirilmiş yüzde mandalı (`type-coverage`) gerilemez; büyük ölçüde `typecheck:noimplicit:core` kapsamını içerir                                                                         | Evet                        |
-| `check:codeql-ratchet`       | Açık CodeQL uyarılarının sayısı gerilemez (`gh api` üzerinden okur; token olmadan sorunsuzca atlar) — yenileme sıklığı ve manuel tetikleyici için aşağıdaki "CodeQL mandalı" bölümüne bakın | Evet                        |
+| Betik                        | Doğruladığı                                                                                                                                                                 | Engelleyici                 |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
+| `quality:collect`            | `quality-metrics.json` dosyasını üretir (ESLint uyarı sayısı, birleştirilmiş parça raporundan kapsam)                                                                       | Evet (mandalın yukarısında) |
+| `quality:ratchet`            | `quality-baseline.json` içindeki her metrik gerilememiştir (ESLint uyarıları ≤ temel çizgi; kapsam ≥ temel çizgi)                                                           | Evet                        |
+| `check:duplication`          | Kod yinelemesi (jscpd@4), `quality-baseline.json` içindeki temel çizgiyi aşmaz                                                                                              | Evet                        |
+| `check:complexity`           | Dosya düzeyindeki döngüsel karmaşıklık üst sınırı aşmaz (temel ESLint `complexity` + `max-lines-per-function`)                                                              | Evet                        |
+| `check:cognitive-complexity` | Bilişsel karmaşıklık mandalı (`eslint-plugin-sonarjs`) — ayrı ESLint geçişi; CI, ikisini tek bir `check:complexity-ratchets` adımı olarak birleştirilmiş biçimde çalıştırır | Evet                        |
+| `check:dead-code`            | Kullanılmayan dışa aktarımlar / dosyalar mandalı (knip), temel çizgiye kıyasla gerilemez                                                                                    | Evet                        |
+| `check:compression-budget`   | Sıkıştırma karşılaştırması bütçesi — motor başına token tasarrufu alt sınırları gerilememelidir                                                                             | Evet                        |
+| `check:type-coverage`        | Türlendirilmiş yüzde mandalı (`type-coverage`) gerilemez; büyük ölçüde `typecheck:noimplicit:core` kapsamını içerir                                                         | Evet                        |
+
+### İşler: `codeql-scan` ve `codeql-admission`
+
+`codeql-scan`, yapılandırılmış tüm analiz kategorilerini üretir. Bu iş başarıyla tamamlandıktan sonra `codeql-admission`, onun tam yüklemelerini ve adayın uyarı ratchet sınırını doğrular. Her ikisi de yalnızca belge değiştiren adaylar dahil olmak üzere `Gate / CI` kapısının zorunlu bağımlılıklarıdır. Yönetimsel etkinleştirme ve canary denemesi gereksinimleri aşağıdaki “CodeQL ratchet” bölümünde açıklanmıştır.
+
+| Betik                  | Doğruladığı                                                                                                                                                                                                  | Engelleyici |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| `check:codeql-ratchet` | Uyarı ratchet kontrolünden önce aday ref/SHA değeri ve yapılandırılmış tüm analiz kategorileri güncel olmalıdır; eksik kanıt engeller. Genel envanter ayrı kalır — aşağıdaki “CodeQL ratchet” bölümüne bakın | Evet        |
 
 ### İş: `quality-extended`
 
@@ -490,31 +506,24 @@ Bu dosyayı metriği iyileştiren değişiklikle birlikte commit edin. Temel de�
 bir metriği iyileştiren PR, `--require-tighten` tarafından yakalanacaktır (Aşama 6A.5,
 uygulama bekleniyor).
 
-### CodeQL ratchet: yenileme sıklığı ve manuel tetikleme
+### CodeQL ratchet: aday kabulü ve depo envanteri
 
-`check:codeql-ratchet`, **her PR için değil, bir zamanlamaya göre yenilenen depo durumunu okur.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup`, `state: configured`,
-`schedule: weekly` bildirir: bu, gönderim başına analiz değil, GitHub'ın varsayılan kurulum
-taramasıdır. Sonuç olarak: uyarıları DÜZELTEN bir PR birleştirildikten sonra ratchet, bir sonraki
-zamanlanmış tarama çalışana kadar eski ve daha yüksek sayıyı okumaya devam eder; dolayısıyla tarama
-güncel durumu yakalayana kadar, düzeltme PR'ının kendi devam PR'ları da dahil olmak üzere her açık
-PR'da gerileme bildirir.
+CI, açık bir bağımlılık zinciri üzerinden adayın CodeQL kabulünü yönetir: `codeql-scan`, `codeql.yml` içindeki dört dilli matrisi çağırır; ardından `codeql-admission`, `node scripts/check/check-codeql-ratchet.mjs --candidate` komutunu çalıştırır. `Gate / CI` her iki sonucu da gerektirir. Quality kendi sayısal kontrollerini korur ancak üretici bitmeden tarayıcıyı sorgulamaz; tek başına `Gate / Quality`, tam aday kabulü değildir. CodeQL, yalnızca belge değiştiren adaylarda da zorunlu kalır.
 
-**Manuel yenileme**: `gh workflow run codeql.yml --ref release/vX.Y.Z`, analizi yeniden çalıştırır
-ve uyarıları dakikalar içinde yeniden yayımlar. Önce `.github/workflows/codeql.yml` dosyasını okuyun;
-başlığı, bunun yalnızca `workflow_dispatch` olmasının nedenini **GitHub'ın "default setup" özelliğiyle
-çakışması** olarak açıklar (`CodeQL analyses from advanced configurations cannot be processed when
-the default setup is enabled`). `push`/`pull_request`/`schedule` tetikleyicilerini geri yüklemek,
-öncelikle bir **sahip eylemi** gerektirir: Settings → Code security → CodeQL: Default → Advanced.
-Bu geçişi yapmadan bir `schedule:` tetikleyicisi eklemeyin; yalnızca başarısız çalıştırmalara neden
-olur.
+`config/quality/codeql-admission-policy.json` içindeki politika; Actions, C/C++, JavaScript/TypeScript ve Python dillerini, default sorgu paketini, remote tehdit modelini ve none derleme modunu seçer. Üreticinin ön kontrolü, bekleyen etkinleştirme kaydını ve açık hedef listesinin dışındaki dalları reddeder. İlk hedefler main ve release/v3.8.53'tür; sonraki sürümün katılımı incelemeden geçirilmelidir. CI'ın mevcut daha geniş sürüm PR tetikleyicisi korunur; ancak henüz dahil edilmemiş bir hedef, ölçülmemiş PASS almak yerine çıkarma işleminden önce HOLD bildirir.
 
-**Sayı düştükten sonra temel değeri sıkılaştırın** — `node scripts/check/check-codeql-ratchet.mjs
---update`, yeni ölçülen sayıyı `quality-baseline.json` → `metrics.codeqlAlerts.value` konumuna
-yazar; böylece ratchet, eski üst sınıra geri dönüşü sessizce kabul etmez. Uygulamalı örnek
-(2026-09-02/03): PR #12502, 7 gerçek uyarıyı düzeltti (ölçülen açık uyarı sayısı 13 → 6);
-PR #12530, eşleşmesi için sabitlenmiş temel değeri 11 → 6 olarak sıkılaştırdı; kalan 6 uyarı
-daha sonra uyarı başına gerekçe belirtilerek kapatıldı ve açık uyarı sayısı 0'a indirildi.
+Her matris işi; gerçek SARIF yükleme kimliğini, dili, kategoriyi, çalıştırmayı ve denemeyi, çağıran iş akışının kimliğini, olay ref/head/base/merge SHA değerini ve politika karmasını kaydeder. Bağımlı iş yalnızca bu çalıştırmanın kanıt kayıtlarını indirir ve çıktı özetlerini doğrular. Dört kategorinin tamamını, başarılı bir üreticiyi ve her bir tam yüklemenin işlemesinin tamamlanmasını gerektirir. Bir dalda bulunan en son analiz yerine API'ın sarif_id filtresini kullanır. Kısmi yeniden çalıştırmalar, üretimin yapıldığı denemeyi koruyarak aynı çalıştırma ve adayın önceki bir denemesindeki başarılı kategorileri yeniden kullanabilir; mevcut başarısız bir üretici, önceki yeşil kanıtları yeniden kullanamaz.
+
+CodeQL eylemi işlemeyi bekler; ancak sabitlenmiş uygulaması, durum okuma hatasından veya bekleme süresinin tükenmesinden sonra uyarı verip devam edebilir. Bu nedenle kabul aşaması işlemeyi yeniden doğrular. Eksik kategoriler, bekleyen işleme, başarısız veya iptal edilmiş işler, güncelliğini yitirmiş kimlik, eksik sayfalama veya kullanılamayan API'lar HOLD ve 2 çıkış kodu üretir. Bağımsız bir tarayıcı iş akışı için sabit bekleme süresi artık yoktur. Taranmamış bir PR, uyarı sorgusu 0 döndürdü diye geçemez. `metrics.codeqlAlerts.value` üzerindeki ölçülmüş sayı 1 ile çıkar; başka bir dalın uyarılarını karşılamak için taban sınırı yükseltilmez. [Yükleme durumu ve analiz arama](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+Kanıt kaydı; yükleme ve analiz kimliklerini, kategorileri, araç sürümlerini, ref/SHA değerini, taban sınırını ve uyarı sayılarını kaydeder. SARIF kimliği ve sonuç sayısı, asgari kural sayıları ve tam uyarı örnekleri zorunlu kalır. PR ve analiz kimlikleri kabulden önce yeniden kontrol edilir. Bu kontroller, çıkarılan her kaynak dosyanın envanterini değil, yapılandırılmış kategorilerin kapsamını ortaya koyar. Derlemesiz C/C++ çıkarımı, proje derlemesi sırasında üretilen kodu içermez. Kaynak dışlamaları hâlâ inceleme gerektirir; katkıda bulunana atfetmek için de tam tabana ait karşılaştırılabilir kanıt gerekir.
+
+`codeql-maintenance.yml`, PR/main üreticilerini çoğaltmadan etkin sürüme yapılan gönderimlerin taramalarını ve haftalık zamanlamayı sağlar. `nightly-codeql-inventory.yml`, `--strict-measurement` ile ve ölçüm yapılamadığında başarısız olarak depo genelindeki taban sınırını ayrı tutar. Eski yerel toplayıcının hataya düşmeden atlaması, aday kabulü değildir. Sıkılaştırma, doğrulanmış daha düşük genel sayıdan sonra açık bir `--update` işlemi olarak kalır.
+
+Default Setup yapılandırılmışken Advanced iş akışı yayımlanmamalıdır: GitHub bu birleşimi reddeder. İncelenen yönetimsel geçiş yeniden okunana kadar sürümlenmiş politikası beklemede kalır. Yayımlamadan önce bir operatör depoyu, head/base/tree değerlerini, politika/yama/geri alma karmalarını ve gözlenen kurulum durumunu sabitler; `node scripts/quality/codeql-producer.mjs verify-admin-readback`, sağlanan beklenen ve gerçek JSON kayıtlarını kontrol eder. Bu teknik bir korumadır; operatör onayı veya yeni durum okumaları almanın yerine geçmez. PR belirteci hiçbir zaman Administration erişimi istemez. Devreye alma ve her tarayıcı değişikliği, bu ayrı durum okumasını ve gerçek PR, fork ve birleştirme grubu uyumluluk kanıtlarını gerektirir.
+
+Fork'lar barındırılan çalıştırıcılar kullanır; checkout sırasında kimlik bilgileri kalıcı saklanmaz, üreticide proje kurulumu veya derlemesi yapılmaz ve depo sırları miras alınmaz. GitHub, sınırlı fork belirteciyle pull_request olayı için SARIF yüklemesini destekler; ilk katkının çalıştırılması için gereken onay GitHub politikası olarak kalır. Güvenilmeyen kodu çalıştırmak için asla pull_request_target kullanmayın. Geçişi tamamlanmış saymadan önce kontrollü canary denemesinde gerçek belirteç izinlerini, analysis_key değerini ve tüm kategori ortamlarını doğrulayın. [Fork yükleme kuralları](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[çakışan kurulum modları](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Kapatma kararları operatöre aittir (Kesin Kural #14)** — kapatma yorumuna teknik gerekçeyi
 kaydetmeden asla bir CodeQL uyarısını kapatmayın: üst sistem protokolü gereksinimi için `won't fix`,
@@ -671,11 +680,7 @@ aşağıdaki rasyonalizasyon adaylarını belirledi. **Birleştirmeler mekanik C
 değişiklikleridir; etkinleştirme/kaldırma işlemleri ise operatöre bırakılmış politika kararlarıdır.** Aşağıdakilerin
 hiçbiri henüz uygulanmamıştır.
 
-**Yukarıda ayrıca belgelenmemiş olanlar** (tavsiye niteliğinde, düşük sinyalli): `docs-lint` işi
-(markdownlint + Vale, işin tamamında `continue-on-error`) ve bağımsız tarayıcı iş akışları
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0`,
-`quality-baseline.json` içinde yer alıyor ancak `ci.yml` dosyasındaki engelleyici bir mandala bağlı değil — bu metrik
-şu anda sahipsizdir.
+**Yukarıda ayrıca belgelenmemiş olanlar** (tavsiye niteliğinde, düşük sinyalli): `docs-lint` işi (markdownlint + Vale, tüm işte `continue-on-error`) ve bağımsız tarayıcı iş akışları `semgrep.yml` / `scorecard.yml`. CodeQL artık yukarıda açıklanan etkinleştirme gereksinimlerine tabi olarak `Gate / CI` altında zorunlu üretici ve kabul işlerine sahiptir. `semgrepFindings: 0`, `quality-baseline.json` içindedir ancak `ci.yml` içinde engelleyici bir ratchet'e bağlanmamıştır — metrik şu anda bağlantısızdır.
 
 ### Birleştirme / yinelenenleri kaldırma (mekanik, daha düşük risk)
 

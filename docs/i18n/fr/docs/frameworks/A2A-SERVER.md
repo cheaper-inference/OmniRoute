@@ -163,7 +163,7 @@ OmniRoute expose 6 compétences A2A reliées dans `src/lib/a2a/taskExecution.ts:
 | Rapport d’intégrité         | `health-report`      | Agrège l’état du disjoncteur, du délai de récupération et du verrouillage pour chaque fournisseur                                                                                     | intégrité, résilience              | « Afficher l’état d’intégrité de tous les fournisseurs » |
 | Répertorier les capacités   | `list-capabilities`  | Renvoie le catalogue complet des 45 compétences d’agent (23 API + 21 CLI + 1 configuration) sous forme de tableau markdown, avec les URL SKILL.md brutes pour l’injection de contexte | catalogue, découverte, compétences | « Répertorier toutes les capacités d’OmniRoute »         |
 
-> La carte d’agent doit rester alignée sur le catalogue actif de 377 fournisseurs ; le nombre de fournisseurs et les métadonnées relatives à la gratuité et à l’absence d’authentification proviennent du registre d’exécution.
+> La carte d’agent doit rester alignée sur le catalogue actif de 380 fournisseurs ; le nombre de fournisseurs et les métadonnées relatives à la gratuité et à l’absence d’authentification proviennent du registre d’exécution.
 
 ### Détails de la compétence `list-capabilities`
 
@@ -215,7 +215,7 @@ Le point de terminaison JSON-RPC `/a2a` est le point d’entrée A2A canonique. 
    };
    ```
 
-3. **Exposez-la dans la carte d’agent :** dans `src/app/.well-known/agent.json/route.ts`, ajoutez-la au tableau `skills` :
+3. **L’exposer dans la carte de l’agent :** dans `src/lib/a2a/agentCardMetadata.ts` (partagé par `/.well-known/agent.json` et `/.well-known/agent-card.json`), ajoutez l’objet suivant au tableau `skills` :
 
    ```json
    {

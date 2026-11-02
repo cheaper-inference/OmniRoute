@@ -5,8 +5,8 @@
 ---
 
 > **Versão:** v3.8.44
-> **Última atualização:** 2026-09-16
-> **Público-alvo:** Engenheiros que adicionam, mantêm ou depuram serviços integrados (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Última atualização:** 2026-10-28
+> **Público:** Engenheiros que adicionam, mantêm ou depuram serviços embarcados (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Serviços integrados são ferramentas auxiliares de processo instaladas localmente que o OmniRoute instala, supervisiona e
 disponibiliza como destinos de roteamento de primeira classe. Diferentemente dos provedores externos (que são acessados pela internet
@@ -31,19 +31,20 @@ por meio de chaves de API), os serviços integrados são executados na mesma má
 
 ### Por que serviços incorporados?
 
-Sete serviços são incorporados:
+Há oito serviços embarcados:
 
-| Serviço         | Pacote npm                                 | Porta padrão | Finalidade                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------- | ------------------------------------------ | :----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **9Router**     | `9router`                                  |    20130     | Roteador de IA que o OmniRoute pode usar como subprovedor. Modelos expostos como `9router/{sub}/{model}`                                                                                                                                                                                                                                                                                                     |
-| **CLIProxyAPI** | Binário de release do GitHub (`cliproxy`)  |     8317     | Adaptador de proxy local para fluxos de autenticação da CLI da Anthropic. Fornece roteamento de contingência quando os tokens OAuth expiram                                                                                                                                                                                                                                                                  |
-| **Mux**         | `mux` (`mux server` sem interface gráfica) |     8322     | Daemon local de orquestração de agentes (coder/mux). Apenas com ciclo de vida gerenciado — não é um destino de roteamento (sem proxy de LLM).                                                                                                                                                                                                                                                                |
-| **Bifrost**     | `@maximhq/bifrost`                         |     8080     | Backend de retransmissão do gateway de IA em Go. Quando está em execução, é selecionado automaticamente pela rota de retransmissão (`/v1/relay/`)                                                                                                                                                                                                                                                            |
-| **Dario**       | `@askalf/dario`                            |     3456     | Proxy de assinatura do Claude — alternativa/contingência ao CLIProxyAPI para tráfego no formato do Claude Code; a chave injetada torna-se `DARIO_ADMIN_TOKEN`, que protege seu plano de controle OAuth em `/admin/*`                                                                                                                                                                                         |
-| **open-wa**     | `@open-wa/wa-automate`                     |     8323     | Automação do WhatsApp Web (Chromium sem interface gráfica via Puppeteer). Apenas com ciclo de vida gerenciado — não é um destino de roteamento.                                                                                                                                                                                                                                                              |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                       |    20135     | Serviço auxiliar de compactação de prompts — modelo ONNX LLMLingua-2 real (portabilidade em JS/TS do algoritmo da Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` encaminha `/compress` para ele por HTTP, recorrendo ao backend de thread de trabalho no processo quando o serviço auxiliar está indisponível. Apenas com ciclo de vida gerenciado — não é um destino de roteamento. |
+| Serviço         | Pacote npm                                            | Porta padrão | Finalidade                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------- | ----------------------------------------------------- | :----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **9Router**     | `9router`                                             |    20130     | Roteador de IA que o OmniRoute pode usar como subprovedor. Modelos expostos como `9router/{sub}/{model}`                                                                                                                                                                                                                                                                                                     |
+| **CLIProxyAPI** | Binário de release do GitHub (`cliproxy`)             |     8317     | Adaptador de proxy local para fluxos de autenticação da CLI da Anthropic. Fornece roteamento de contingência quando os tokens OAuth expiram                                                                                                                                                                                                                                                                  |
+| **Mux**         | `mux` (`mux server` sem interface gráfica)            |     8322     | Daemon local de orquestração de agentes (coder/mux). Apenas com ciclo de vida gerenciado — não é um destino de roteamento (sem proxy de LLM).                                                                                                                                                                                                                                                                |
+| **Bifrost**     | `@maximhq/bifrost`                                    |     8080     | Backend de retransmissão do gateway de IA em Go. Quando está em execução, é selecionado automaticamente pela rota de retransmissão (`/v1/relay/`)                                                                                                                                                                                                                                                            |
+| **Dario**       | `@askalf/dario`                                       |     3456     | Proxy de assinatura do Claude — alternativa/contingência ao CLIProxyAPI para tráfego no formato do Claude Code; a chave injetada torna-se `DARIO_ADMIN_TOKEN`, que protege seu plano de controle OAuth em `/admin/*`                                                                                                                                                                                         |
+| **open-wa**     | `@open-wa/wa-automate`                                |     8323     | Automação do WhatsApp Web (Chromium sem interface gráfica via Puppeteer). Apenas com ciclo de vida gerenciado — não é um destino de roteamento.                                                                                                                                                                                                                                                              |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                                  |    20135     | Serviço auxiliar de compactação de prompts — modelo ONNX LLMLingua-2 real (portabilidade em JS/TS do algoritmo da Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` encaminha `/compress` para ele por HTTP, recorrendo ao backend de thread de trabalho no processo quando o serviço auxiliar está indisponível. Apenas com ciclo de vida gerenciado — não é um destino de roteamento. |
+| **sing-box**    | Binário de uma versão publicada no GitHub (`singbox`) |    20140     | Processo auxiliar TPROXY que dá suporte à interceptação de proxy transparente de `applyTproxy()` (`src/mitm/tproxy/setup.ts`). O instalador baixa a versão fixada e verificada por checksum. Apenas o ciclo de vida é gerenciado — não é um destino de roteamento nem faz proxy de LLM.                                                                                                                      |
 
-Todos os sete seguem o mesmo modelo de supervisão:
+Os oito seguem o mesmo modelo de supervisão:
 
 - O OmniRoute os instala em `DATA_DIR/services/{name}/` (isolados do próprio `package.json` do OmniRoute)
 - O OmniRoute os inicia e monitora como processos filhos
@@ -584,7 +585,27 @@ backend em uma thread de worker no próprio processo (`./worker.ts`).
 
 ---
 
-### 4.8 Proxy reverso (incorporação do painel do 9Router)
+### 4.8 Endpoints do sing-box (8 rotas)
+
+O sing-box tem a mesma estrutura de endpoints do Mux — sem rota `rotate-key` e sem injeção de chave de API (`needsApiKey: false` em `bootstrap.ts`). Apenas seu ciclo de vida é gerenciado: ele nunca é um provedor de roteamento ou LLM. `install()` baixa o binário oficial publicado no GitHub (`SagerNet/sing-box`) para a versão fixada (`SINGBOX_PINNED_VERSION` em `src/lib/services/installers/singbox.ts`) e verifica seu SHA256 com o checksum incorporado nesse mesmo arquivo antes de gravá-lo em disco. Qualquer outra versão solicitada é rejeitada.
+
+| Método | Caminho                                      | Descrição                                                                      |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------ |
+| `POST` | `/api/services/singbox/install`              | Baixar e verificar a versão fixada do sing-box                                 |
+| `POST` | `/api/services/singbox/start`                | Iniciar o sing-box (`sing-box run -c config.json`)                             |
+| `POST` | `/api/services/singbox/stop`                 | Parar o sing-box                                                               |
+| `POST` | `/api/services/singbox/restart`              | Reiniciar o sing-box                                                           |
+| `POST` | `/api/services/singbox/update`               | Verificar novamente ou reinstalar a versão fixada                              |
+| `GET`  | `/api/services/singbox/status`               | Estado atual e estado no banco de dados                                        |
+| `POST` | `/api/services/singbox/auto-start`           | Ativar ou desativar a inicialização automática                                 |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Ativar ou desativar o reinício automático de um processo adotado, já existente |
+| `GET`  | `/api/services/singbox/logs`                 | Acompanhar os logs por SSE (pela rota dinâmica compartilhada `[name]/logs`)    |
+
+**Integração TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) grava `config.json` e inicia o supervisor antes de `applyTproxy()` instalar as regras TPROXY no firewall. Se o supervisor estiver ausente ou não atingir o estado `running`, a situação agora é registrada no nível de erro, em vez de a falha ser ignorada silenciosamente. Assim, o operador consegue identificar que as regras TPROXY foram aplicadas sem um processo de escuta funcionando por trás delas.
+
+---
+
+### 4.9 Proxy reverso (incorporação do painel do 9Router)
 
 O painel incorpora a interface web do 9Router em um iframe por meio de um proxy
 reverso interno em:

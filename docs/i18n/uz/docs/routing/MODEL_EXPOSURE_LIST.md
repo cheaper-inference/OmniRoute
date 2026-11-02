@@ -68,3 +68,15 @@ ikkala massivni ham aynan o‘z holicha o‘z ichiga oladi — `hidePaidModels` 
 eksport qilish filtridan farqli ravishda, bu yerda qayta tiklash xavfi yo‘q: eksport qilingan
 kombinatsiya bosqichiga kiritilgan taqiqlangan identifikator operatorning o‘ziga tegishli aniq
 yo‘naltirish tanlovidir, eksport chegarasi olib tashlashi kerak bo‘lgan narsa emas.
+
+## Faqat kombinatsiyalar ro‘yxati (`exposeCombosOnly`)
+
+Kombinatsiyalar ommaviy model interfeysi, provayderlar esa faqat ichki xizmat bo‘lgan joylashtirishlar uchun alohida mantiqiy parametr; bu ham ixtiyoriy va standarti `false`. U `true` bo‘lsa, ommaviy ro‘yxat (`GET /v1/models`, `GET /v1` va `getUnifiedModelsResponse()` asosidagi boshqa `/v1` aniqlash yo‘llari) faqat `owned_by: "combo"` qatorlarini saqlaydi: foydalanuvchi kombinatsiyalari hamda ichki `auto/*` kombinatsiyalari (`hideAutoCombos` yashirmasa). Har kalit uchun `catalogScope: "combos"` bilan bir xil qator tekshiruvidan foydalanadi, kalitning o‘z ruxsat/taqiq/huquq filtrlari ham ustidan qo‘llanadi.
+
+Uni **Sozlamalar → Yo‘naltirish → Models API ro‘yxati** da yoki `PATCH /api/settings {"exposeCombosOnly": true}` orqali almashtiring.
+
+Yuqoridagi ro‘yxatlar kabi, u faqat e’lon qilinadiganlarni o‘zgartiradi:
+
+- aniq `provider/model` ID’si hali ham yuboriladi va `GET /v1/models/{id}` uni hali ham topadi;
+- panel katalogi (model tanlagichlar ishlatadigan `GET /api/models/catalog`) toraytirilmaydi;
+- u `auto/*` nomzod havzalariga ko‘chirilmaydi, shuning uchun `auto/*` kombinatsiyalari to‘liq havzasini saqlaydi.

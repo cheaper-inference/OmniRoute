@@ -163,7 +163,7 @@ OmniRoute menyediakan 6 skill A2A yang dihubungkan dalam `src/lib/a2a/taskExecut
 | Laporan Kesehatan | `health-report`      | Mengagregasi status circuit breaker, cooldown, dan lockout per penyedia                                                                                              | kesehatan, ketahanan     | "Tampilkan status kesehatan semua penyedia" |
 | Daftar Kemampuan  | `list-capabilities`  | Mengembalikan katalog lengkap Agent Skills berisi 45 entri (23 API + 21 CLI + 1 konfigurasi) sebagai tabel markdown dengan URL mentah SKILL.md untuk injeksi konteks | katalog, penemuan, skill | "Tampilkan semua kemampuan OmniRoute"       |
 
-> Agent Card harus tetap diselaraskan dengan katalog aktif yang berisi 377 penyedia; jumlah penyedia serta metadata gratis/tanpa autentikasi bersumber dari registry runtime.
+> Agent Card harus tetap diselaraskan dengan katalog aktif yang berisi 380 penyedia; jumlah penyedia serta metadata gratis/tanpa autentikasi bersumber dari registry runtime.
 
 ### Detail Skill `list-capabilities`
 
@@ -215,7 +215,7 @@ Endpoint JSON-RPC `/a2a` adalah titik masuk A2A kanonis. Endpoint REST di bawah 
    };
    ```
 
-3. **Ekspos dalam Agent Card:** dalam `src/app/.well-known/agent.json/route.ts`, tambahkan ke array `skills`:
+3. **Tampilkan di Agent Card:** di `src/lib/a2a/agentCardMetadata.ts` (digunakan bersama oleh `/.well-known/agent.json` dan `/.well-known/agent-card.json`), tambahkan ke array `skills`:
 
    ```json
    {

@@ -15,7 +15,7 @@
 
 Пълният задължителен протокол за worktree (потвърждение на базовия клон, каноничният път
 `.claude/worktrees/`, `cp -al` node_modules, правилата за премахване) се намира в
-[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (обобщен в `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (обобщен в `AGENTS.md` →
 Git работен процес → „Изолация на worktree"). Специфичните за Claude Code моменти:
 
 - Потвърдете базовия клон с оператора чрез `AskUserQuestion` (Строго правило #19), освен ако

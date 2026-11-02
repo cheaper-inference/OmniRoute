@@ -41,11 +41,12 @@ is a separate administrative change; defining their jobs does not itself protect
 `API Route Typecheck` is an independent workflow check, outside both aggregate verdicts
 and the local full observer's static profile. Inspect its result separately for the exact
 candidate. `.github/workflows/api-route-typecheck.yml` runs on PRs into `main` or
-`release/**`, pushes to either branch family, and manual dispatch. It has no path filter.
+`release/**`, pushes to either branch family, manual dispatch, and `merge_group` events
+of type `checks_requested`. It has no path filter. Merge groups check out
+`merge_group.head_sha`; other events check out `github.sha`. All events use the same
+API diagnostic gate and gate unit tests.
 PR base retargets request a new check; body/title edits use the observation-only name
 `Admission not requested / API Route Typecheck` and cannot replace the admission check.
-The workflow does not declare a merge-group trigger. Any merge-queue rollout that requires
-this check must first establish its execution for that event.
 
 ### Retained evidence in the acceptance reducer
 
@@ -61,6 +62,33 @@ without evidence, a missing or changed file, an unsafe path or a symlink prevent
 verification. Missing files are not equivalent to empty successful logs. Existing
 SHA/run/attempt checks remain independent: matching bytes cannot rescue a stale
 receipt. File integrity is not proof of execution authenticity or artifact promotion.
+
+### DAST consumes the verified CI build
+
+The required `dast-smoke` CI job calls `.github/workflows/dast-smoke.yml` after `build`.
+It follows the same code/draft selection as the build, including supported fork PRs,
+release-target PRs and merge groups. A missing, failed, cancelled or unexpectedly skipped
+DAST job blocks `Gate / CI`. The reusable workflow has no independent PR/dispatch trigger;
+manual validation uses CI's dispatch so the build and consumer remain in one run.
+
+`scripts/ci/next-build-provenance.mjs` seals the full Next artifact with its tar digest,
+repository/event/run, producer attempt, head/base/checkout/tree, workflow identities,
+lockfile, exact Node version/ABI, platform and bundler. DAST selects the immutable artifact
+ID from `needs.build.outputs`, requires download digest verification, and independently hashes
+the ZIP against the producer digest before extracting its two allowlisted members through
+`scripts/ci/unpack-ci-build.py`. The manifest and tar archive must also match independent
+producer outputs before the Next tree is extracted. It never
+searches for the latest successful branch build. A partial rerun may reuse that same
+producer attempt when its ID and all inputs still match; the receipt records both attempts.
+
+The consumer stays on a hosted Linux runner with read-only repository permission and no
+repository secrets. It installs the producer's exact Node version, then assembles the CLI
+with `OMNIROUTE_REQUIRE_PREBUILT_NEXT=1`. `scripts/build/standaloneInput.mjs` rejects a missing
+standalone server before any fallback build; normal local CLI builds retain their existing
+fallback. Server readiness, Schemathesis and promptfoo must all succeed within the unchanged
+25-minute job limit. A provenance receipt proves input identity and bytes, not a successful
+DAST scan. Artifact expiry, runner interruption or a failed scanner remains incomplete or
+failed evidence; it cannot become PASS through an advisory wrapper.
 
 ### UI execution capacity
 
@@ -221,17 +249,28 @@ Runs on every PR to `main`. Blocks merge on failure.
 
 Runs after `test-coverage`. Blocks merge on failure.
 
-| Script                       | Validates                                                                                                                                                   | Blocking                  |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `quality:collect`            | Emits `quality-metrics.json` (ESLint warning count, coverage from merged shard report)                                                                      | Yes (upstream of ratchet) |
-| `quality:ratchet`            | Each metric in `quality-baseline.json` has not regressed (ESLint warnings ≤ baseline; coverage ≥ baseline)                                                  | Yes                       |
-| `check:duplication`          | Code duplication (jscpd@4) does not exceed baseline in `quality-baseline.json`                                                                              | Yes                       |
-| `check:complexity`           | File-level cyclomatic complexity does not exceed the cap (core ESLint `complexity` + `max-lines-per-function`)                                              | Yes                       |
-| `check:cognitive-complexity` | Cognitive complexity ratchet (`eslint-plugin-sonarjs`) — separate ESLint pass; CI runs both merged as the single `check:complexity-ratchets` step           | Yes                       |
-| `check:dead-code`            | Unused exports / files ratchet (knip) does not regress vs baseline                                                                                          | Yes                       |
-| `check:compression-budget`   | Compression benchmark budget — per-engine token-savings floors must not regress                                                                             | Yes                       |
-| `check:type-coverage`        | Percent-typed ratchet (`type-coverage`) does not regress; largely subsumes `typecheck:noimplicit:core`                                                      | Yes                       |
-| `check:codeql-ratchet`       | Open CodeQL alert count does not regress (reads via `gh api`; graceful-skip without token) — refresh cadence and manual trigger: see "CodeQL ratchet" below | Yes                       |
+| Script                       | Validates                                                                                                                                         | Blocking                  |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| `quality:collect`            | Emits `quality-metrics.json` (ESLint warning count, coverage from merged shard report)                                                            | Yes (upstream of ratchet) |
+| `quality:ratchet`            | Each metric in `quality-baseline.json` has not regressed (ESLint warnings ≤ baseline; coverage ≥ baseline)                                        | Yes                       |
+| `check:duplication`          | Code duplication (jscpd@4) does not exceed baseline in `quality-baseline.json`                                                                    | Yes                       |
+| `check:complexity`           | File-level cyclomatic complexity does not exceed the cap (core ESLint `complexity` + `max-lines-per-function`)                                    | Yes                       |
+| `check:cognitive-complexity` | Cognitive complexity ratchet (`eslint-plugin-sonarjs`) — separate ESLint pass; CI runs both merged as the single `check:complexity-ratchets` step | Yes                       |
+| `check:dead-code`            | Unused exports / files ratchet (knip) does not regress vs baseline                                                                                | Yes                       |
+| `check:compression-budget`   | Compression benchmark budget — per-engine token-savings floors must not regress                                                                   | Yes                       |
+| `check:type-coverage`        | Percent-typed ratchet (`type-coverage`) does not regress; largely subsumes `typecheck:noimplicit:core`                                            | Yes                       |
+
+### Jobs: `codeql-scan` and `codeql-admission`
+
+`codeql-scan` produces all configured analysis categories. After that job succeeds,
+`codeql-admission` validates its exact uploads and the candidate alert ratchet.
+Both are required dependencies of `Gate / CI`, including docs-only candidates.
+The administrative activation and canary requirements are described under
+"CodeQL ratchet" below.
+
+| Script                 | Validates                                                                                                                                                                                  | Blocking |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| `check:codeql-ratchet` | Candidate ref/SHA and all configured analysis categories must be current before the alert ratchet; missing evidence blocks. Global inventory remains separate — see "CodeQL ratchet" below | Yes      |
 
 ### Job: `quality-extended`
 
@@ -506,30 +545,74 @@ Commit this file alongside the change that improved the metric. A PR that improv
 metric without updating the baseline will be caught by `--require-tighten` (Fase 6A.5,
 pending implementation).
 
-### CodeQL ratchet: refresh cadence and manual trigger
+### CodeQL ratchet: candidate admission and repository inventory
 
-`check:codeql-ratchet` reads **repo state, refreshed on a schedule — not per PR.**
-`gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` reports
-`state: configured`, `schedule: weekly`: GitHub's default-setup scan, not a per-push
-analysis. Consequence: after a PR that FIXES alerts merges, the ratchet keeps reading
-the old, higher count until the next scheduled scan runs — so it reports a regression
-on every open PR, including the fixing PR's own follow-ups, until the scan catches up.
+CI owns candidate CodeQL admission through an explicit dependency chain:
+`codeql-scan` calls the four-language matrix in `codeql.yml`, then
+`codeql-admission` runs `node scripts/check/check-codeql-ratchet.mjs --candidate`.
+`Gate / CI` requires both results. Quality retains its own numeric checks but does
+not query the scanner before the producer finishes; `Gate / Quality` alone is not
+complete candidate admission. CodeQL remains required on docs-only candidates.
 
-**Manual refresh**: `gh workflow run codeql.yml --ref release/vX.Y.Z` re-runs the
-analysis and republishes alerts within minutes. Read `.github/workflows/codeql.yml`
-first — its header explains it is `workflow_dispatch`-only **because it conflicts with
-GitHub's "default setup"** (`CodeQL analyses from advanced configurations cannot be
-processed when the default setup is enabled`). Restoring `push`/`pull_request`/
-`schedule` triggers requires an **owner action first**: Settings → Code security →
-CodeQL: Default → Advanced. Do not add a `schedule:` trigger without that switch — it
-will only produce failing runs.
+The policy in `config/quality/codeql-admission-policy.json` selects Actions,
+C/C++, JavaScript/TypeScript and Python, query suite default, remote threat model
+and build mode none. Producer preflight rejects a pending activation record and
+branches outside the explicit target list. The initial targets are main and
+release/v3.8.53; the next release needs reviewed onboarding. CI's existing broader
+release PR trigger is retained, but an unonboarded target reports HOLD before
+extraction rather than obtaining an unmeasured PASS.
 
-**Tighten the baseline after the count drops** — `node scripts/check/check-codeql-ratchet.mjs
---update` writes the new measured count into `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, so the ratchet does not silently permit a regression back
-up to the old ceiling. Worked example (2026-09-02/03): PR #12502 fixed 7 real alerts
-(13 → 6 measured open); PR #12530 tightened the frozen baseline 11 → 6 to match; the
-remaining 6 were then dismissed with per-alert justification down to 0 open.
+Each matrix job records its actual SARIF upload ID, language, category, run and
+attempt, caller workflow identity, event ref/head/base/merge SHA and policy hash.
+The dependent job downloads only this run's receipts and validates artifact
+digests. It requires all four categories, a successful producer and completed
+processing of each exact upload. It uses the API's sarif_id filter, not the latest
+analysis found on a branch. Partial reruns may reuse successful categories from
+an earlier attempt of the same run and candidate, preserving the producing
+attempt; a failed current producer cannot reuse previous green evidence.
+
+The CodeQL action waits for processing, but its pinned implementation can warn
+and continue after a status-read failure or exhausted wait. Admission therefore
+verifies processing again. Missing categories, pending processing, failed or
+cancelled jobs, stale identity, incomplete pagination or unavailable APIs produce
+HOLD and exit 2. No fixed wait for an independent scanner workflow remains. An
+unscanned PR cannot pass because an alert query returned 0. A measured count above
+`metrics.codeqlAlerts.value` exits 1; the baseline is not raised to absorb another
+branch's alerts. [Upload status and analysis lookup](https://docs.github.com/en/rest/code-scanning/code-scanning).
+
+The receipt records upload and analysis IDs, categories, tool versions, ref/SHA,
+baseline and alert numbers. SARIF identity/result count, minimum rule counts and
+exact alert instances remain mandatory. PR/analysis identities are rechecked
+before accepting. These checks establish configured category coverage, not an
+inventory of every extracted source file. C/C++ no-build extraction does not
+include code generated during a project build. Source exclusions still need
+review, and contributor attribution needs comparable exact-base evidence.
+
+`codeql-maintenance.yml` supplies active-release push scans and the weekly
+schedule without duplicating PR/main producers. `nightly-codeql-inventory.yml`
+keeps the repository-wide baseline separate, with `--strict-measurement` and a
+failure when measurement is unavailable. The local legacy collector's graceful
+skip is not candidate admission. Tightening remains an explicit `--update` after
+a verified lower global count.
+
+The Advanced workflow must not be published while Default Setup is configured:
+GitHub rejects that combination. Its versioned policy remains pending until the
+reviewed administrative transition is read back. Before publication, an operator
+pins repository, head/base/tree, policy/patch/rollback hashes and observed setup
+state; `node scripts/quality/codeql-producer.mjs verify-admin-readback` checks the
+supplied expected and actual JSON records. This is a technical guard, not operator
+approval or a replacement for fetching fresh readbacks. The PR token never
+requests Administration access. Rollout and any scanner change require that
+separate readback plus real PR, fork and merge-group compatibility evidence.
+
+Forks use hosted runners, checkout without persisted credentials, no project
+install/build in the producer, and no inherited repository secrets. GitHub
+supports SARIF upload for the pull_request event with its reduced fork token;
+first-time contribution execution approval remains GitHub policy. Never use
+pull_request_target to execute untrusted code. Confirm actual token permissions,
+analysis_key and all category environments in the controlled canary before
+considering the migration complete. [Fork upload rules](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/resource-not-accessible),
+[conflicting setup modes](https://docs.github.com/en/code-security/reference/code-scanning/troubleshoot-analysis-errors/two-codeql-workflows).
 
 **Dismissals are the operator's call (Hard Rule #14)** — never dismiss a CodeQL alert
 without recording the technical justification in the dismissal comment: `won't fix` for
@@ -688,7 +771,9 @@ is applied yet.
 
 **Also undocumented above** (advisory, low signal): the `docs-lint` job
 (markdownlint + Vale, whole job `continue-on-error`) and the standalone scanner workflows
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` is in
+`semgrep.yml` / `scorecard.yml`. CodeQL now has required producer and admission
+jobs under `Gate / CI`, subject to the activation requirements described above.
+`semgrepFindings: 0` is in
 `quality-baseline.json` but is not wired to a blocking ratchet in `ci.yml` — the metric is
 currently orphaned.
 

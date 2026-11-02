@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | Файл                          | Призначення                                       |
 | ----------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`         | Реєстр чат-моделей для каталогу з 377 провайдерів |
+| `providerRegistry.ts`         | Реєстр чат-моделей для каталогу з 380 провайдерів |
 | `providerModels.ts`           | Псевдоніми моделей, зіставлення форматів          |
 | `constants.ts`                | Тайм-аути, обмеження, коди стану                  |
 | `defaultThinkingSignature.ts` | Стандартна сигнатура міркування Claude            |

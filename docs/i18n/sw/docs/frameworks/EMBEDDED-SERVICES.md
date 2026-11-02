@@ -5,8 +5,8 @@
 ---
 
 > **Toleo:** v3.8.44
-> **Ilisasishwa mwisho:** 2026-09-16
-> **Hadhira:** Wahandisi wanaoongeza, wanaodumisha, au wanaotatua hitilafu za huduma zilizopachikwa (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
+> **Ilisasishwa mwisho:** 2026-10-28
+> **Walengwa:** Wahandisi wanaoongeza, kutunza au kutatua hitilafu za huduma zilizopachikwa (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
 Huduma zilizopachikwa ni zana za michakato saidizi zinazosakinishwa ndani ya mashine ambazo OmniRoute husakinisha, husimamia na
 huziweka wazi kama malengo kamili ya uelekezaji. Tofauti na watoa huduma wa nje (ambao hufikiwa kupitia intaneti
@@ -31,7 +31,7 @@ kwa kutumia funguo za API), huduma zilizopachikwa huendeshwa kwenye mashine ilei
 
 ### Kwa nini huduma zilizopachikwa?
 
-Huduma saba zimepachikwa:
+Huduma nane zimepachikwa:
 
 | Huduma          | Kifurushi cha npm                              | Mlango chaguo-msingi | Kusudi                                                                                                                                                                                                                                                                                                                                                                                                    |
 | --------------- | ---------------------------------------------- | :------------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -42,8 +42,9 @@ Huduma saba zimepachikwa:
 | **Dario**       | `@askalf/dario`                                |         3456         | Proksi ya usajili wa Claude — mbadala/huduma ya akiba ya CLIProxyAPI kwa trafiki yenye muundo wa Claude Code; ufunguo uliowekwa huwa `DARIO_ADMIN_TOKEN` unaodhibiti safu yake ya udhibiti ya OAuth ya `/admin/*`                                                                                                                                                                                         |
 | **open-wa**     | `@open-wa/wa-automate`                         |         8323         | Uendeshaji otomatiki wa WhatsApp Web (Chromium isiyo na kiolesura kupitia Puppeteer). Inadhibitiwa tu katika mzunguko wa uhai — si lengo la upangaji njia.                                                                                                                                                                                                                                                |
 | **LLMLingua**   | `@atjsh/llmlingua-2`                           |        20135         | Huduma saidizi ya ubanaji wa maelekezo — modeli halisi ya LLMLingua-2 ONNX (toleo la JS/TS la algoriti ya Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` hutuma `/compress` kwake kupitia HTTP, huku ikirejea kwenye mfumo wa nyuma wa uzi mfanyakazi wa ndani ya mchakato ikiwa huduma saidizi haipatikani. Inadhibitiwa tu katika mzunguko wa uhai — si lengo la upangaji njia. |
+| **sing-box**    | Faili tekelezi ya toleo la GitHub (`singbox`)  |        20140         | Mchakato msaidizi wa TPROXY unaowezesha kunasa trafiki kupitia proksi ya uwazi kwa `applyTproxy()` (`src/mitm/tproxy/setup.ts`). Kisakinishi hupakua toleo lililofungwa na kuthibitishwa kwa jumla ya ukaguzi. Mzunguko wa maisha pekee ndio husimamiwa — si lengo la uelekezaji wala proksi ya LLM.                                                                                                      |
 
-Zote saba hufuata modeli sawa ya usimamizi:
+Zote nane zinafuata mfumo uleule wa usimamizi:
 
 - OmniRoute huzisakinisha chini ya `DATA_DIR/services/{name}/` (zikiwa zimetengwa na `package.json` ya OmniRoute yenyewe)
 - OmniRoute huzianzisha na kuzifuatilia kama michakato-toto
@@ -577,7 +578,27 @@ lisilobadilisha chochote) hurudi kutumia backend ya ndani ya mchakato ya worker-
 
 ---
 
-### 4.8 Proksi geuzi (upachikaji wa dashibodi ya 9Router)
+### 4.8 Vituo vya mwisho vya sing-box (njia 8)
+
+sing-box ina muundo wa vituo vya mwisho sawa na Mux — haina njia ya `rotate-key` wala uingizaji wa ufunguo wa API (`needsApiKey: false` katika `bootstrap.ts`). Mzunguko wake wa maisha pekee ndio husimamiwa; kamwe si mtoa huduma wa uelekezaji au LLM. `install()` hupakua faili tekelezi rasmi ya toleo la GitHub (`SagerNet/sing-box`) kwa toleo lililofungwa (`SINGBOX_PINNED_VERSION` katika `src/lib/services/installers/singbox.ts`) na kuthibitisha SHA256 yake dhidi ya jumla ya ukaguzi iliyojumuishwa kwenye faili hiyo hiyo kabla ya kuiandika kwenye diski. Ombi la toleo jingine lolote hukataliwa.
+
+| Mbinu  | Njia                                         | Maelezo                                                                                                |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `POST` | `/api/services/singbox/install`              | Pakua na uthibitishe toleo lililofungwa la sing-box                                                    |
+| `POST` | `/api/services/singbox/start`                | Anzisha sing-box (`sing-box run -c config.json`)                                                       |
+| `POST` | `/api/services/singbox/stop`                 | Simamisha sing-box                                                                                     |
+| `POST` | `/api/services/singbox/restart`              | Anzisha upya sing-box                                                                                  |
+| `POST` | `/api/services/singbox/update`               | Thibitisha tena au sakinisha upya toleo lililofungwa                                                   |
+| `GET`  | `/api/services/singbox/status`               | Hali ya sasa na hali katika hifadhidata                                                                |
+| `POST` | `/api/services/singbox/auto-start`           | Washa au zima uanzishaji wa moja kwa moja                                                              |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Washa au zima uanzishaji upya wa moja kwa moja kwa mchakato uliokuwepo tayari na kukabidhiwa usimamizi |
+| `GET`  | `/api/services/singbox/logs`                 | Fuatilia rekodi mpya kupitia SSE (kwa njia badilifu inayoshirikiwa ya `[name]/logs`)                   |
+
+**Muunganisho wa TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) huandika `config.json` na kuanzisha msimamizi kabla ya `applyTproxy()` kusakinisha sheria za ngome za TPROXY. Msimamizi akikosekana au akishindwa kufikia hali ya `running`, sasa tukio hurekodiwa katika kiwango cha kosa badala ya hitilafu kupuuzwa kimya. Hivyo mwendeshaji anaweza kutambua kuwa sheria za TPROXY zimetumika bila mchakato wa kusikiliza unaofanya kazi nyuma yake.
+
+---
+
+### 4.9 Proksi geuzi (upachikaji wa dashibodi ya 9Router)
 
 Dashibodi hupachika UI ya wavuti ya 9Router ndani ya iframe kupitia proksi geuzi ya ndani
 kwenye:

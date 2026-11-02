@@ -61,3 +61,15 @@ Asetusten vienti (`GET /api/settings/export-json`) sisältää molemmat taulukot
 asetuskentät — toisin kuin `hidePaidModels`-asetuksen yhdistelmävaiheiden vientisuodattimessa, tässä ei ole uudelleenkäyttöönoton
 riskiä: vietyyn yhdistelmävaiheeseen upotettu estetty tunniste on ylläpitäjän oma eksplisiittinen reititysvalinta,
 eikä vientirajan tarvitse poistaa sitä.
+
+## Vain yhdistelmät sisältävä luettelo (`exposeCombosOnly`)
+
+Erillinen totuusarvo, joka otetaan myös erikseen käyttöön ja jonka oletusarvo on `false`, ympäristöihin, joissa yhdistelmät ovat julkinen mallirajapinta ja palveluntarjoajat vain taustapalveluita. Kun arvo on `true`, julkinen luettelo (`GET /v1/models`, `GET /v1` ja muut `getUnifiedModelsResponse()`-funktioon perustuvat `/v1`-löytöreitit) säilyttää vain rivit, joilla on `owned_by: "combo"`: käyttäjien yhdistelmät sekä sisäänrakennetut `auto/*`-yhdistelmät (ellei `hideAutoCombos` piilota niitä). Se käyttää samaa rivitarkistusta kuin avainkohtainen `catalogScope: "combos"`, ja avaimen omat sallimis-, esto- ja laajuussuodattimet pätevät edelleen sen lisäksi.
+
+Vaihda asetus kohdassa **Settings → Routing → Models API listing** tai kutsulla `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Kuten yllä olevat luettelot, se muuttaa vain näkyvyyttä:
+
+- eksplisiittinen `provider/model`-tunnus välitetään edelleen, ja `GET /v1/models/{id}` selvittää sen edelleen;
+- hallintapaneelin luetteloa (`GET /api/models/catalog`, jota mallivalitsimet käyttävät) ei rajata;
+- sitä ei peilata `auto/*`-ehdokasjoukkoihin, joten `auto/*`-yhdistelmät säilyttävät koko joukkonsa.

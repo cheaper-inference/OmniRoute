@@ -5,8 +5,8 @@
 ---
 
 > **ဗားရှင်း:** v3.8.44
-> **နောက်ဆုံး အပ်ဒိတ်လုပ်ထားသည့်ရက်:** 2026-09-16
-> **ရည်ရွယ်ထားသော ပရိသတ်:** ထည့်သွင်းထားသည့် ဝန်ဆောင်မှုများ (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua) ကို ပေါင်းထည့်ခြင်း၊ ထိန်းသိမ်းခြင်း သို့မဟုတ် အမှားရှာဖွေခြင်း ပြုလုပ်သည့် အင်ဂျင်နီယာများ။
+> **နောက်ဆုံး အပ်ဒိတ်လုပ်ထားသည့်ရက်:** 2026-10-28
+> **ရည်ရွယ်ထားသော စာဖတ်သူများ:** ထည့်သွင်းပါရှိသော ဝန်ဆောင်မှုများကို ထပ်ထည့်ခြင်း၊ ထိန်းသိမ်းခြင်း သို့မဟုတ် အမှားရှာခြင်း လုပ်ဆောင်သည့် အင်ဂျင်နီယာများ (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box)။
 
 ထည့်သွင်းထားသည့် ဝန်ဆောင်မှုများသည် OmniRoute က စက်တွင်းတွင် ထည့်သွင်းပေးခြင်း၊ ကြီးကြပ်ပေးခြင်းနှင့်
 ပထမတန်းစား လမ်းကြောင်းပို့မှတ်များအဖြစ် အသုံးပြုနိုင်စေခြင်းတို့ ပြုလုပ်သည့် process sidecar ကိရိယာများ ဖြစ်သည်။ ပြင်ပဝန်ဆောင်မှုပေးသူများ (အင်တာနက်မှတစ်ဆင့်
@@ -31,19 +31,20 @@ API key များကို အသုံးပြု၍ ဆက်သွယ်�
 
 ### ထည့်သွင်းထားသော ဝန်ဆောင်မှုများကို အဘယ်ကြောင့် အသုံးပြုသနည်း?
 
-ဝန်ဆောင်မှု ခုနစ်ခုကို ထည့်သွင်းထားသည်-
+ဝန်ဆောင်မှု ရှစ်ခုကို ထည့်သွင်းထားသည်။
 
-| ဝန်ဆောင်မှု     | npm ပက်ကေ့ချ်                      | မူလ port | ရည်ရွယ်ချက်                                                                                                                                                                                                                                                                                                                                                                                                  |
-| --------------- | ---------------------------------- | :------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **9Router**     | `9router`                          |  20130   | OmniRoute က လက်အောက်ခံ provider တစ်ခုအဖြစ် အသုံးပြုနိုင်သည့် AI router ဖြစ်သည်။ Model များကို `9router/{sub}/{model}` အဖြစ် ဖော်ထုတ်ပေးသည်                                                                                                                                                                                                                                                                   |
-| **CLIProxyAPI** | GitHub release binary (`cliproxy`) |   8317   | Anthropic CLI auth flow များအတွက် local proxy adapter ဖြစ်သည်။ OAuth token များ သက်တမ်းကုန်ဆုံးသည့်အခါ အရန် routing ကို ပံ့ပိုးပေးသည်                                                                                                                                                                                                                                                                        |
-| **Mux**         | `mux` (headless `mux server`)      |   8322   | Local agent orchestration daemon (coder/mux) ဖြစ်သည်။ Lifecycle ကိုသာ စီမံခန့်ခွဲပြီး routing target မဟုတ်ပါ (LLM proxying မပြုလုပ်ပါ)။                                                                                                                                                                                                                                                                      |
-| **Bifrost**     | `@maximhq/bifrost`                 |   8080   | Go AI-gateway relay backend ဖြစ်သည်။ လည်ပတ်နေချိန်တွင် relay route (`/v1/relay/`) က အလိုအလျောက် ရွေးချယ်အသုံးပြုသည်                                                                                                                                                                                                                                                                                          |
-| **Dario**       | `@askalf/dario`                    |   3456   | Claude subscription proxy ဖြစ်ပြီး Claude-Code ပုံစံ traffic အတွက် CLIProxyAPI ၏ အစားထိုး/အရန်စနစ် ဖြစ်သည်။ ထည့်သွင်းပေးထားသော key သည် `/admin/*` OAuth control plane သို့ ဝင်ရောက်မှုကို ထိန်းချုပ်သည့် `DARIO_ADMIN_TOKEN` ဖြစ်လာသည်                                                                                                                                                                       |
-| **open-wa**     | `@open-wa/wa-automate`             |   8323   | WhatsApp Web automation (Puppeteer မှတစ်ဆင့် headless Chromium) ဖြစ်သည်။ Lifecycle ကိုသာ စီမံခန့်ခွဲပြီး routing target မဟုတ်ပါ။                                                                                                                                                                                                                                                                             |
-| **LLMLingua**   | `@atjsh/llmlingua-2`               |  20135   | Prompt compression sidecar ဖြစ်ပြီး စစ်မှန်သော LLMLingua-2 ONNX model (Microsoft ၏ algorithm ကို JS/TS သို့ port ပြုလုပ်ထားခြင်း) ကို အသုံးပြုသည်။ `open-sse/services/compression/engines/llmlingua/index.ts` သည် `/compress` ကို HTTP မှတစ်ဆင့် ၎င်းထံ ပေးပို့ပြီး sidecar ရပ်တန့်နေပါက in-process worker-thread backend ကို အရန်အဖြစ် အသုံးပြုသည်။ Lifecycle ကိုသာ စီမံခန့်ခွဲပြီး routing target မဟုတ်ပါ။ |
+| ဝန်ဆောင်မှု     | npm ပက်ကေ့ချ်                               | မူလ port | ရည်ရွယ်ချက်                                                                                                                                                                                                                                                                                                                                                                                                  |
+| --------------- | ------------------------------------------- | :------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **9Router**     | `9router`                                   |  20130   | OmniRoute က လက်အောက်ခံ provider တစ်ခုအဖြစ် အသုံးပြုနိုင်သည့် AI router ဖြစ်သည်။ Model များကို `9router/{sub}/{model}` အဖြစ် ဖော်ထုတ်ပေးသည်                                                                                                                                                                                                                                                                   |
+| **CLIProxyAPI** | GitHub release binary (`cliproxy`)          |   8317   | Anthropic CLI auth flow များအတွက် local proxy adapter ဖြစ်သည်။ OAuth token များ သက်တမ်းကုန်ဆုံးသည့်အခါ အရန် routing ကို ပံ့ပိုးပေးသည်                                                                                                                                                                                                                                                                        |
+| **Mux**         | `mux` (headless `mux server`)               |   8322   | Local agent orchestration daemon (coder/mux) ဖြစ်သည်။ Lifecycle ကိုသာ စီမံခန့်ခွဲပြီး routing target မဟုတ်ပါ (LLM proxying မပြုလုပ်ပါ)။                                                                                                                                                                                                                                                                      |
+| **Bifrost**     | `@maximhq/bifrost`                          |   8080   | Go AI-gateway relay backend ဖြစ်သည်။ လည်ပတ်နေချိန်တွင် relay route (`/v1/relay/`) က အလိုအလျောက် ရွေးချယ်အသုံးပြုသည်                                                                                                                                                                                                                                                                                          |
+| **Dario**       | `@askalf/dario`                             |   3456   | Claude subscription proxy ဖြစ်ပြီး Claude-Code ပုံစံ traffic အတွက် CLIProxyAPI ၏ အစားထိုး/အရန်စနစ် ဖြစ်သည်။ ထည့်သွင်းပေးထားသော key သည် `/admin/*` OAuth control plane သို့ ဝင်ရောက်မှုကို ထိန်းချုပ်သည့် `DARIO_ADMIN_TOKEN` ဖြစ်လာသည်                                                                                                                                                                       |
+| **open-wa**     | `@open-wa/wa-automate`                      |   8323   | WhatsApp Web automation (Puppeteer မှတစ်ဆင့် headless Chromium) ဖြစ်သည်။ Lifecycle ကိုသာ စီမံခန့်ခွဲပြီး routing target မဟုတ်ပါ။                                                                                                                                                                                                                                                                             |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                        |  20135   | Prompt compression sidecar ဖြစ်ပြီး စစ်မှန်သော LLMLingua-2 ONNX model (Microsoft ၏ algorithm ကို JS/TS သို့ port ပြုလုပ်ထားခြင်း) ကို အသုံးပြုသည်။ `open-sse/services/compression/engines/llmlingua/index.ts` သည် `/compress` ကို HTTP မှတစ်ဆင့် ၎င်းထံ ပေးပို့ပြီး sidecar ရပ်တန့်နေပါက in-process worker-thread backend ကို အရန်အဖြစ် အသုံးပြုသည်။ Lifecycle ကိုသာ စီမံခန့်ခွဲပြီး routing target မဟုတ်ပါ။ |
+| **sing-box**    | GitHub ထုတ်ဝေမှု၏ ဘိုင်နရီဖိုင် (`singbox`) |  20140   | `applyTproxy()` ၏ transparent-proxy ကြားဖြတ်ဖမ်းယူမှုကို ပံ့ပိုးပေးသည့် TPROXY အကူဖြစ်စဉ် (`src/mitm/tproxy/setup.ts`)။ ထည့်သွင်းကိရိယာသည် ကြိုတင်သတ်မှတ်ထားသော ဗားရှင်း၏ ထုတ်ဝေမှုကို ဒေါင်းလုဒ်လုပ်ပြီး checksum ကို စစ်ဆေးသည်။ လုပ်ငန်းသက်တမ်းကိုသာ စီမံခန့်ခွဲသည်။ လမ်းကြောင်းပို့ရမည့် ပစ်မှတ်မဟုတ်သကဲ့သို့ LLM အတွက် proxy အဖြစ်လည်း မဆောင်ရွက်ပါ။                                                     |
 
-ဝန်ဆောင်မှု ခုနစ်ခုစလုံးသည် တူညီသော ကြီးကြပ်စီမံမှုပုံစံကို လိုက်နာသည်-
+ဝန်ဆောင်မှု ရှစ်ခုလုံးသည် တူညီသော ကြီးကြပ်မှုစနစ်ကို လိုက်နာသည်။
 
 - OmniRoute သည် ၎င်းတို့ကို `DATA_DIR/services/{name}/` အောက်တွင် ထည့်သွင်းသည် (OmniRoute ၏ ကိုယ်ပိုင် `package.json` နှင့် သီးခြားခွဲထားသည်)
 - OmniRoute သည် ၎င်းတို့ကို child process များအဖြစ် စတင်ပြီး စောင့်ကြည့်သည်
@@ -585,7 +586,27 @@ response) ဖြစ်ပါက in-process worker-thread backend (`./worker.ts`)
 
 ---
 
-### 4.8 Reverse proxy (9Router dashboard ထည့်သွင်းပြသမှု)
+### 4.8 sing-box အဆုံးမှတ်များ (8 လမ်းကြောင်း)
+
+sing-box ၏ အဆုံးမှတ်ဖွဲ့စည်းပုံသည် Mux နှင့် တူညီသည်။ `rotate-key` လမ်းကြောင်းမရှိသကဲ့သို့ API ကီးကို ထည့်ပေးခြင်းလည်း မရှိပါ (`bootstrap.ts` တွင် `needsApiKey: false`)။ လုပ်ငန်းသက်တမ်းကိုသာ စီမံခန့်ခွဲပြီး လမ်းကြောင်းပို့ခြင်း သို့မဟုတ် LLM ဝန်ဆောင်မှုပေးသူအဖြစ် မည်သည့်အခါမျှ မဆောင်ရွက်ပါ။ `install()` သည် ကြိုတင်သတ်မှတ်ထားသော ဗားရှင်းအတွက် (`src/lib/services/installers/singbox.ts` ရှိ `SINGBOX_PINNED_VERSION`) တရားဝင် GitHub ထုတ်ဝေမှု ဘိုင်နရီဖိုင် (`SagerNet/sing-box`) ကို ဒေါင်းလုဒ်လုပ်သည်။ ဒစ်ခ်ပေါ်သို့ မရေးသားမီ ၎င်း၏ SHA256 ကို တူညီသောဖိုင်ထဲတွင် ထည့်သွင်းထားသည့် checksum နှင့် တိုက်ဆိုင်စစ်ဆေးသည်။ အခြားမည်သည့်ဗားရှင်းကို တောင်းဆိုသော်လည်း ငြင်းပယ်သည်။
+
+| နည်းလမ်း | လမ်းကြောင်း                                  | ဖော်ပြချက်                                                                                                                   |
+| -------- | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `POST`   | `/api/services/singbox/install`              | သတ်မှတ်ထားသော sing-box ထုတ်ဝေမှုကို ဒေါင်းလုဒ်လုပ်ပြီး စစ်ဆေးပါ                                                              |
+| `POST`   | `/api/services/singbox/start`                | sing-box ကို စတင်ပါ (`sing-box run -c config.json`)                                                                          |
+| `POST`   | `/api/services/singbox/stop`                 | sing-box ကို ရပ်တန့်ပါ                                                                                                       |
+| `POST`   | `/api/services/singbox/restart`              | sing-box ကို ပြန်လည်စတင်ပါ                                                                                                   |
+| `POST`   | `/api/services/singbox/update`               | သတ်မှတ်ထားသော ထုတ်ဝေမှုကို ပြန်လည်စစ်ဆေးပါ သို့မဟုတ် ပြန်လည်ထည့်သွင်းပါ                                                      |
+| `GET`    | `/api/services/singbox/status`               | လက်ရှိအခြေအနေနှင့် DB ထဲရှိ အခြေအနေ                                                                                          |
+| `POST`   | `/api/services/singbox/auto-start`           | အလိုအလျောက် စတင်ခြင်းကို ဖွင့်ပါ သို့မဟုတ် ပိတ်ပါ                                                                            |
+| `POST`   | `/api/services/singbox/auto-restart-adopted` | ရှိနှင့်ပြီးဖြစ်၍ စီမံခန့်ခွဲမှုအောက်သို့ လွှဲယူထားသော ဖြစ်စဉ်အတွက် အလိုအလျောက် ပြန်လည်စတင်ခြင်းကို ဖွင့်ပါ သို့မဟုတ် ပိတ်ပါ |
+| `GET`    | `/api/services/singbox/logs`                 | မျှဝေသုံးစွဲသော `[name]/logs` ဒိုင်နမစ်လမ်းကြောင်းမှတစ်ဆင့် SSE ဖြင့် နောက်ဆုံးထပ်တိုးလာသော မှတ်တမ်းများကို ကြည့်ပါ          |
+
+**TPROXY ချိတ်ဆက်မှု:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) သည် `config.json` ကို ရေးသားပြီး `applyTproxy()` က TPROXY firewall စည်းမျဉ်းများ မတပ်ဆင်မီ ကြီးကြပ်ကိရိယာကို စတင်သည်။ ကြီးကြပ်ကိရိယာ မရှိလျှင် သို့မဟုတ် `running` အခြေအနေသို့ မရောက်နိုင်လျှင် ယခုအခါ ပျက်ကွက်မှုကို တိတ်တဆိတ် လျစ်လျူရှုမည့်အစား error အဆင့်ဖြင့် မှတ်တမ်းတင်သည်။ ထို့ကြောင့် လုပ်ဆောင်နေသော listener မရှိဘဲ TPROXY စည်းမျဉ်းများကိုသာ အသုံးချထားကြောင်း စီမံသူက သိရှိနိုင်သည်။
+
+---
+
+### 4.9 Reverse proxy (9Router dashboard ထည့်သွင်းပြသမှု)
 
 dashboard သည် အောက်ပါ internal reverse
 proxy မှတစ်ဆင့် iframe တစ်ခုအတွင်း 9Router web UI ကို ထည့်သွင်းပြသသည်-

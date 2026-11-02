@@ -98,7 +98,10 @@ test("countLocales reads a real, positive locale count from config/i18n.json", (
 
 test("the gate exits 0 against the current (synced) repo state", () => {
   // Throws if exit code is non-zero; current docs are synced so this must pass.
-  assert.doesNotThrow(() => execFileSync("node", [GATE], { encoding: "utf8", stdio: "pipe" }));
+  // Keep the collector on the runtime under test, independent of the caller's PATH.
+  assert.doesNotThrow(() =>
+    execFileSync(process.execPath, [GATE], { encoding: "utf8", stdio: "pipe" })
+  );
 });
 
 // --- Free-tier headline gate ------------------------------------------------

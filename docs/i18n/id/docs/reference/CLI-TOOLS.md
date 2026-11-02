@@ -10,7 +10,7 @@ OmniRoute terintegrasi dengan tiga kategori alat CLI yang tersebar di tiga halam
 
 | Halaman        | Rute                    | Konsep                                                                             | Jumlah         |
 | -------------- | ----------------------- | ---------------------------------------------------------------------------------- | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Alat pengodean yang Anda arahkan ke OmniRoute (Klien → CLI → OmniRoute → Penyedia) | 27             |
+| **CLI Code's** | `/dashboard/cli-code`   | Alat pengodean yang Anda arahkan ke OmniRoute (Klien → CLI → OmniRoute → Penyedia) | 28             |
 | **CLI Agents** | `/dashboard/cli-agents` | Agen otonom yang Anda arahkan ke OmniRoute (alur sama, cakupan lebih luas)         | 11             |
 | **ACP Agents** | `/dashboard/acp-agents` | CLI yang dijalankan OmniRoute sebagai backend melalui stdio/ACP (alur terbalik)    | lihat registri |
 
@@ -146,7 +146,7 @@ satu antarmuka tanpa ditambahkan ke yang lain akan membuat rangkaian pengujian g
 
 ---
 
-## 1. Katalog Kode CLI (27 alat)
+## 1. Katalog Kode CLI (28 alat)
 
 Semua alat yang muncul di `/dashboard/cli-code`. Alat dengan `baseUrlSupport: none` dihubungkan melalui MITM atau panduan manual, bukan melalui URL dasar khusus:
 
@@ -173,6 +173,7 @@ Semua alat yang muncul di `/dashboard/cli-code`. Alat dengan `baseUrlSupport: no
 | grok-build   | Grok Build              | xAI                  | full               | custom            | false                |
 | crush        | Crush                   | OSS (Charm)          | full               | custom            | false                |
 | qwen         | Qwen Code               | Alibaba              | full               | guide             | true                 |
+| openclaude   | OpenClaude              | Gitlawb (OSS)        | full               | guide             | false                |
 | zed          | Zed                     | Zed Industries       | full               | guide             | false                |
 | cursor       | Cursor                  | Anysphere            | none               | guide             | false                |
 | antigravity  | Antigravity             | Google               | none               | mitm              | false                |
@@ -269,7 +270,7 @@ Alat baru dengan `configType: "custom"` memiliki route API pengaturan khusus:
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, lama)                                 |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, utama + sinkronisasi lama `~/.deepseek`) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                |
-| `POST /api/cli-tools/pi-settings`           | Agen pengodean Pi                                                    |
+| `POST /api/cli-tools/pi-settings`           | Agen pengodean Pi (`~/.pi/agent/models.json`, `providers.omniroute`) |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + kunci `.env` khusus)            |
 
@@ -375,7 +376,7 @@ pip install aider-chat
 cargo install smelt  # Berbasis Rust
 
 # Agen pengodean Pi
-# lihat https://github.com/zechnerj/pi-coding-agent untuk instalasi
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
 # lihat https://github.com/1jehuang/jcode untuk instalasi
@@ -488,6 +489,38 @@ EOF
 
 > Gunakan `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
 > untuk mengirim varian pemikiran.
+
+---
+
+#### Pi Coding Agent
+
+Pasang paket resmi Pi Coding Agent dengan `npm install -g --ignore-scripts
+@earendil-works/pi-coding-agent`. Pi membaca provider kustom dari `~/.pi/agent/models.json`; tetapkan `PI_CODING_AGENT_DIR` ke jalur absolut (atau jalur berawalan `~`) untuk memindahkan seluruh direktori agen. Dashboard mengikuti pengaturan pengganti itu. Pi tidak menemukan model dari endpoint kustom, sehingga OmniRoute menulis model terpilih di `models[]` memakai API `openai-completions` Pi dan endpoint `/v1` OmniRoute yang kompatibel dengan OpenAI.
+
+Di **CLI Tools → Pi**, pilih endpoint, kunci API, dan model, tinjau pratinjau provider, lalu terapkan. Pratinjau adalah fragmen provider: gabungkan `providers.omniroute` ke `models.json` yang sudah ada saat mengonfigurasi Pi secara manual, agar provider dan pengaturan lain tetap utuh.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi memuat ulang `models.json` ketika Anda membuka `/model`. Uji rute yang dikonfigurasi dengan id provider dan id model yang Anda pilih:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Referensi: [model dan provider kustom Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [variabel environment Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [petunjuk pemasangan Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 

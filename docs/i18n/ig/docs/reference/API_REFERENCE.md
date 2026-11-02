@@ -29,6 +29,7 @@ Maka protocol dakọtara na OpenAI a gbadoro anya na matriks ikike onye na-eweta
 - [Mgbasa WebSocket](#websocket-streaming)
 - [Oke Ojiji & Nkwupụta Nsogbu](#quotas--issues-reporting)
 - [Cache Semantic](#semantic-cache)
+- [Ndakọrịta njikwa CLIProxyAPI](#cliproxyapi-management-compatibility)
 - [Dashboard & Nchịkwa](#dashboard--management)
 - [Nchịkwa Ngwakọta](#combo-management)
 - [Webhooks](#webhooks)
@@ -1012,6 +1013,18 @@ mmecha ahụ.
 
 **Nkwenye:** Igodo API Bearer (`isAuthenticated`).
 
+### Iweghachi quota session (nhọrọ ịgbanye)
+
+Non-streaming `POST /v1/chat/completions` ma ọ bụ `POST /v1/responses` dara na terminal quota error (`402`/`429`/`503` nke body na-ekwu na quota ma ọ bụ credit agwụla) nwere ike ịnọ na nche ma mee replay e mesịrị kama iweghachi mperi. Onye na-akpọ na-ahọrọ ịgbanye ya n'arịrịọ ọ bụla site na header atọ:
+
+| Header                       | Uru                                           |
+| ---------------------------- | --------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                        |
+| `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`          |
+| `x-omniroute-recovery-turn`  | turn id pụrụ iche n'ime session (otu iwu ahụ) |
+
+Naanị turn `stream: false` na-enweghị tools, akụkọ tools ma ọ bụ `previous_response_id`, na-enweghịkwa `x-omniroute-connection` pin, tozuru oke; a ga-edozikwa `STORAGE_ENCRYPTION_KEY` (a na-echekwa arịrịọ ahụ n'ụdị ezoro ezo ruo 24 h). Azịza ahụ bụzi `202` nwere `recovery.poll`; jụọ `GET /v1/quota-recoveries/{id}` ugboro ugboro (`202` ka ọ na-eche, `200` nwere body e weghachiri mgbe ọ gwụchara), ma ọ bụ kagbuo ya na `DELETE`. Naanị API key kere ticket nwere ike ịhụ ya. Replay nke nsonaazụ ya adịghị n'aka na-akwụsị na `needs_confirmation` kama iziga ya ugboro abụọ. Isi iyi: `src/lib/quota/quotaSessionRecovery.ts`.
+
 ---
 
 ## Ojiji nke onye nwe ya na-ejikwa n'onwe ya (`/api/usage/om-usage`)
@@ -1180,6 +1193,28 @@ Request ọ bụla nwere ike ịgafe cache n'agbanyeghị ntọala key:
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+<a id="cliproxyapi-management-compatibility"></a>
+
+## Ndakọrịta njikwa CLIProxyAPI
+
+OmniRoute na-aza management endpoint atọ nke [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) ndị usage dashboard na-akpọ iji gụọ oke ndenye Claude na Codex (dịka isi iyi usage-limit `cliproxy` nke T3 Code). Tụọ base URL client na OmniRoute ma jiri API key nwere scope `manage` dịka management key ya. Route ndị ahụ dị na `/v0/management/*` na `/api/v0/management/*`.
+
+| Ụzọ  | Path                         | Nkọwa                                                                                                                                          |
+| ---- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v0/management/auth-files`  | Njikọ OAuth Claude na Codex dịka `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. Enweghị token                         |
+| POST | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Na-eziga arịrịọ dị na ndepụta ikike na token akaụntụ, wee weghachi `{ status_code, body }` |
+| POST | `/v0/management/reset-quota` | Body `{ auth_index }`. Na-ehichapụ connection cooldown, model lockout na Codex per-scope cooldown nke otu akaụntụ                              |
+
+- `auth_index` bụ connection id OmniRoute. `provider` bụ `claude` ma ọ bụ `codex` (naanị njikọ OAuth; API-key provider `anthropic` adịghị na ndepụta). Maka Codex, `id_token.chatgpt_account_id` bụ workspace id echekwara, `plan_type` bụkwa plan echekwara.
+- `api-call` abụghị proxy izugbe. Ọ na-anabata naanị Claude `GET
+https://api.anthropic.com/api/oauth/usage` na Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` na `POST .../wham/rate-limit-reset-credits/consume`, nke ọ bụla naanị maka akaụntụ provider dabara. Ihe ọzọ ọ bụla na-eweghachi `403` n'emetụghị upstream. A na-eleghara header `Authorization` nke onye na-akpọ anya (gụnyere placeholder `$TOKEN$`): OmniRoute na-etinye access token njikọ, buru ụzọ mee refresh ma ọ bụrụ na oge ya na-achọ ịgwụ, ma zipụ naanị header e kwere (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`; `Accept`, `Content-Type`). Ọ bụrụ na `Chatgpt-Account-Id` adịghị, workspace id echekwara bụ ndabara. Ọ bụrụ na azịza upstream mbụ bụ `401`, ọ na-eme refresh otu ugboro, na-anwa ọzọ naanị mgbe access token gbanwere. Upstream attempt ọ bụla na-akwụsị n'oge mgbe sekọnd 15 gasịrị ma na-eji proxy njikọ ahụ.
+- `reset-quota` na-ahapụ terminal state (banned, expired, credits_exhausted) dịka ha dị. `auth_index` a na-amaghị na-eweghachi `404`.
+
+**Nkwenye nbanye:** dashboard session ma ọ bụ API key nwere scope `manage` dị mkpa ọbụna mgbe login gbanyụrụ (path ndị ahụ dị na `ALWAYS_PROTECTED_API_PATHS`). Key maka inference naanị na-enweta `403`. Isi iyi: `src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

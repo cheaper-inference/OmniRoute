@@ -487,8 +487,9 @@ Guardrail එක කවදාවත් block නොකරයි; එය annotate
 - **වර්ගය අනුව තේරීම** — built-in ids `src/shared/constants/piiTypes.ts`
   (`PII_BUILTIN_TYPES`) හි ලැයිස්තුගත කර ඇත. Unset යනු සෑම වර්ගයක්ම (මෙම
   setting පැවතීමට පෙර හැසිරීම). Request engine එකේ `ssn_us` pattern එක `ssn`
-  වෙත map වේ. Templates (Minimal, Standard, Financial, Brazilian, USA, Full)
+  වෙත map වේ. Templates (Minimal, Standard, Financial, Brazilian, USA, GDPR, POPIA, Full)
   UI හි checkboxes පුරවනු පමණක් ලබයි.
+- **GDPR සහ POPIA හඳුනාගැනීම්** — EU සහ දකුණු අප්‍රිකානු පෞද්ගලික හඳුනාගැනීම් ආවරණය කරන built-in ID දොළහකි (පහත වගුව). ඒවායේ regex, validator සහ jurisdiction tag එකම වගුවක, `src/shared/utils/piiPatterns.ts`, පවතින අතර response sanitizer (`src/lib/piiSanitizer.ts`) සහ request masker (`src/shared/utils/inputSanitizer.ts`) දෙකම එය භාවිත කරයි. Validator පිළිගත් විට පමණක් match සඟවයි; ඉලක්කම් පෙළක් පමණක් කිසිවිටෙක ප්‍රමාණවත් නැත. මෙම ID ඇතිවීමට පෙර සීමිත තේරීමක් ගබඩා කළ operator, නව ID සලකුණු කරන තුරු පැරණි හැසිරීම රඳවාගනී.
 - **Custom patterns** — regex හෝ wildcard patterns 20ක් දක්වා (`*` =
   non-whitespace අක්ෂර 64ක් දක්වා, `?` = එකක්). Matches `[CUSTOM_REDACTED]`
   බවට පත්වේ. සෑම pattern එකක්ම `compilePiiCustomPattern()`
@@ -514,6 +515,25 @@ Settings `key_value` table එකේ (namespace `pii_settings`,
 
 තුනටම management auth අවශ්ය වන අතර body එක Zod
 (`src/shared/validation/schemas/piiSettings.ts`) සමඟ validate කරයි.
+
+#### GDPR (EU) සහ POPIA (දකුණු අප්‍රිකාව) හඳුනාගැනීම්
+
+| ID                  | හඳුනාගැනීම                     | වලංගුකරණය                                                                          |
+| ------------------- | ------------------------------ | ---------------------------------------------------------------------------------- |
+| `iban`              | IBAN                           | දන්නා රට, එම රට සඳහා නිශ්චිත දිග, ISO 13616 MOD-97-10                              |
+| `eu_vat`            | EU VAT අංකය                    | දන්නා සාමාජික රටේ prefix සහ එම රටේ අංක ආකෘතිය (VIES lookup නැත)                    |
+| `es_dni_nie`        | ස්පාඤ්ඤ DNI / NIE              | පරීක්ෂක අකුර (අගය mod 23); NIE යනු `X/Y/Z` + ඉලක්කම් 7 කි                          |
+| `it_codice_fiscale` | ඉතාලි Codice Fiscale           | ඔත්තේ/ඉරට්ටේ ස්ථාන වගුවලින් පරීක්ෂක අකුර                                           |
+| `pl_pesel`          | පෝලන්ත PESEL                   | බර යෙදූ checksum සහ encode කළ උපන් මාසය/දිනයේ සාධාරණ පරාස                          |
+| `nl_bsn`            | ලන්දේසි BSN                    | 11 පරීක්ෂාව (බර 9..2, -1)                                                          |
+| `de_steuer_id`      | ජර්මානු Steuer-ID              | ISO 7064 Mod 11,10 සහ ඉලක්කම් ව්‍යුහ නීති (මුලට 0 නැත)                             |
+| `se_personnummer`   | ස්වීඩන් personnummer           | අවසන් ඉලක්කම් දහය සඳහා Luhn සහ සාධාරණ උපන් දිනයක් (ඉලක්කම් 10 හෝ 12)               |
+| `za_id`             | දකුණු අප්‍රිකානු ID අංකය       | සියලු ඉලක්කම් 13 සඳහා Luhn, වලංගු උපන් මාසය/දිනය, පුරවැසි ඉලක්කම 0 හෝ 1            |
+| `za_phone`          | දකුණු අප්‍රිකානු දුරකථනය       | `+27` / `27` prefix, හෝ space/hyphen සහිත ජාතික `0..` ආකෘතිය                       |
+| `za_vat`            | දකුණු අප්‍රිකානු VAT අංකය      | `4` න් ආරම්භ වන ඉලක්කම් 10 ක් **සහ** ඊට පෙර අකුරු 48 තුළ "VAT" / "BTW"             |
+| `za_tax_ref`        | දකුණු අප්‍රිකානු tax reference | `0`-`3` න් ආරම්භ වන ඉලක්කම් 10 ක්, Luhn, **සහ** ඊට පෙර අකුරු 48 තුළ "tax" / "SARS" |
+
+ඉලක්කම් පමණක් ඇති ආකෘති order number, build number සහ timestamp සමඟ ගැටෙන බැවින් දුර්වලම ඒවාට (`za_vat`, `za_tax_ref`) keyword ඉඟිය අවශ්‍යය; ඉලක්කම් දහයක `0..` අංකයක් පමණක් දකුණු අප්‍රිකානු phone number ලෙස නොසලකයි. Space සහිත IBAN (`GB29 NWBK ...`) match නොවේ. Streaming මාර්ගයේ ඉඟිය සොයන්නේ වත්මන් chunk ඇතුළත පමණි. ID පිහිටන්නේ generic phone pattern වලට පෙර බැවින් වලංගු කළ හඳුනාගැනීම තමන්ගේ placeholder රඳවාගනී (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). `gdpr` සහ `popia` template පිළිවෙළින් EU සහ දකුණු අප්‍රිකානු ID තෝරයි. Masking තවමත් කැමැත්තෙන් සක්‍රිය කළ යුතුය (Hard Rule #20): මෙහි කිසිවක් feature-flag පෙරනිමිය වෙනස් නොකරයි.
 
 ### Prompt Injection (`promptInjection.ts`)
 

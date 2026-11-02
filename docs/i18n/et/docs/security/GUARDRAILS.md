@@ -525,7 +525,8 @@ Kaitseraud ei blokeeri kunagi; see ainult annoteerib (`meta.detections`, `meta.r
 
 **Armatuurlaud → Seaded → Turvalisus → PII maskeerimine** valib, _mida_ maskeeritakse. See ei lülita maskeerimist sisse: selleks on endiselt `PII_REDACTION_ENABLED` (päring) ja `PII_RESPONSE_SANITIZATION` (vastus + SSE), mis mõlemad on vaikimisi välja lülitatud.
 
-- **Tüübipõhine valik** — sisseehitatud id-d on loetletud failis `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Määramata jätmine tähendab kõiki tüüpe (käitumine enne selle seade lisandumist). Päringumootori muster `ssn_us` vastendatakse tüübile `ssn`. Mallid (Minimaalne, Standardne, Finants, Brasiilia, USA, Täielik) täidavad kasutajaliideses ainult märkeruudud.
+- **Tüübipõhine valik** — sisseehitatud id-d on loetletud failis `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Määramata jätmine tähendab kõiki tüüpe (käitumine enne selle seade lisandumist). Päringumootori muster `ssn_us` vastendatakse tüübile `ssn`. Mallid (Minimaalne, Standardne, Finants, Brasiilia, USA, GDPR, POPIA, Täielik) täidavad kasutajaliideses ainult märkeruudud.
+- **GDPR-i ja POPIA identifikaatorid** — kaksteist sisseehitatud ID-d EL-i ja Lõuna-Aafrika isikuidentifikaatorite jaoks (tabel allpool). Nende regulaaravaldised, validaatorid ja jurisdiktsioonisildid asuvad ühes tabelis `src/shared/utils/piiPatterns.ts`, mida kasutavad nii vastusepuhastaja (`src/lib/piiSanitizer.ts`) kui päringumaskija (`src/shared/utils/inputSanitizer.ts`). Vaste varjatakse ainult siis, kui validaator selle heaks kiidab; paljas numbrijada ei piisa kunagi. Operaator, kes salvestas kitsendatud valiku enne nende ID-de olemasolu, säilitab senise käitumise kuni uute ID-de märkimiseni.
 - **Kohandatud mustrid** — kuni 20 regulaaravaldise või metamärgimustri (`*` = kuni 64 mittetühikumärki, `?` = üks). Vasted asendatakse väärtusega `[CUSTOM_REDACTED]`. Iga muster läbib `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): kuni 500 tähemärki, lipud on piiratud väärtustega `g i m s u`, muster peab kompileeruma, läbima `safe-regex` kontrolli (katastroofiline tagasiminek) ning ei tohi anda vastet tühjale sõnele ega varjamise kohatäitele. Muster, mis kontrolli ei läbi, lükatakse tagasi salvestamisel ja testimisel ning talletatud rida, mis ei läbi, jäetakse käitusajal kompileerimise asemel vahele. Kohandatud mustreid käivitatakse ainult siis, kui maskeerimine on sisse lülitatud.
 - **Tuvastuste loendurid** — tüübipõhised arvud (mitte kunagi vastetud väärtused), mida hoitakse mälus ja mis lähtestatakse taaskäivitusel (`src/lib/pii/piiDetectionStats.ts`). Need suurenevad ainult siis, kui maskeerimine on sisse lülitatud.
 
@@ -538,6 +539,25 @@ Seaded asuvad tabelis `key_value` (nimeruum `pii_settings`, `src/lib/db/piiSetti
 | `POST` | `/api/settings/pii/test` | Proovib ühte mustrit kuni 8 KB suurusel valimil; midagi ei salvestata |
 
 Kõik kolm nõuavad haldusautentimist ja valideerivad päringu keha Zodiga (`src/shared/validation/schemas/piiSettings.ts`).
+
+#### GDPR-i (EL) ja POPIA (Lõuna-Aafrika) identifikaatorid
+
+| ID                  | Identifikaator                 | Valideerimine                                                                 |
+| ------------------- | ------------------------------ | ----------------------------------------------------------------------------- |
+| `iban`              | IBAN                           | Tuntud riik, selle riigi täpne pikkus, ISO 13616 MOD-97-10                    |
+| `eu_vat`            | EL-i käibemaksunumber          | Tuntud liikmesriigi prefiks ja selle riigi numbrivorming (VIES-päringuta)     |
+| `es_dni_nie`        | Hispaania DNI / NIE            | Kontrolltäht (väärtus mod 23); NIE on `X/Y/Z` + 7 numbrit                     |
+| `it_codice_fiscale` | Itaalia Codice Fiscale         | Kontrolltäht paaritute/paaris positsioonide tabelitest                        |
+| `pl_pesel`          | Poola PESEL                    | Kaalutud kontrollsumma ning kodeeritud sünnikuu/-päeva usutavad vahemikud     |
+| `nl_bsn`            | Hollandi BSN                   | 11-kontroll (kaalud 9..2, -1)                                                 |
+| `de_steuer_id`      | Saksamaa Steuer-ID             | ISO 7064 Mod 11,10 koos numbristruktuuri reeglitega (alguses pole 0)          |
+| `se_personnummer`   | Rootsi personnummer            | Luhn viimase kümne numbri üle ja usutav sünnikuupäev (10 või 12 numbrit)      |
+| `za_id`             | Lõuna-Aafrika isikukood        | Luhn kõigi 13 numbri üle, kehtiv sünnikuu/-päev, kodakondsusnumber 0 või 1    |
+| `za_phone`          | Lõuna-Aafrika telefon          | Prefiks `+27` / `27` või riigisisene kuju `0..` tühiku või sidekriipsuga      |
+| `za_vat`            | Lõuna-Aafrika käibemaksunumber | 10 numbrit algusega `4` **ja** "VAT" / "BTW" eelneva 48 märgi seas            |
+| `za_tax_ref`        | Lõuna-Aafrika maksuviide       | 10 numbrit algusega `0`-`3`, Luhn **ja** "tax" / "SARS" eelneva 48 märgi seas |
+
+Kuna ainult numbritest koosnevad vormingud kattuvad tellimusnumbrite, järgunumbrite ja ajatemplitega, vajavad nõrgimad (`za_vat`, `za_tax_ref`) märksõnavihjet ning paljast kümnekohalist `0..` numbrit ei käsitleta Lõuna-Aafrika telefoninumbrina. Tühikutega IBAN-e (`GB29 NWBK ...`) ei sobitata. Voogteekonnal otsitakse vihjet ainult käesolevast tükist. ID-d paiknevad üldistest telefonimustritest eespool, nii et valideeritud identifikaator säilitab oma kohatäitja (`[IBAN_REDACTED]`, `[NL_BSN_REDACTED]`, ...). Mallid `gdpr` ja `popia` valivad vastavalt EL-i ja Lõuna-Aafrika ID-d. Maskimine ise jääb eraldi lubatavaks (Hard Rule #20): miski siin ei muuda funktsioonilipu vaikeväärtust.
 
 ### Prompt-injektsioon (`promptInjection.ts`)
 
