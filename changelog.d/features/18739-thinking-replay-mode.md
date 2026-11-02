@@ -1,0 +1,1 @@
+- **feat(translator):** per-node `thinkingReplay` capability declaration (`redacted`/`text`/`none`) in `modelCompatOverrides` overrides the provider-prefix assumption about replayed thinking shape — upstreams that reject synthesized `redacted_thinking` blobs can declare their actual contract ([#18739](https://github.com/cheaper-inference/OmniRoute/pull/18739)) — thanks @jjxyxsjr
