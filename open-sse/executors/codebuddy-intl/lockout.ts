@@ -110,46 +110,34 @@ function findResetInBody(body: unknown): number | null {
   return null;
 }
 
+/** `Retry-After`, as delta seconds or an HTTP date. */
+function resetFromRetryAfter(retryAfter: string, now: number): number | null {
+  if (!retryAfter) return null;
+  if (/^\d+$/.test(retryAfter)) return now + Number(retryAfter) * 1000;
+  const parsed = Date.parse(retryAfter);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+/** The structured provider envelope (absolute date, seconds or ms). */
+function resetFromBody(body: string | null | undefined): number | null {
+  if (!body) return null;
+  try {
+    return findResetInBody(JSON.parse(body));
+  } catch {
+    // Not JSON: no structured date available.
+    return null;
+  }
+}
+
 export function parseCodeBuddyRateLimit(input: ParseRateLimitInput): ParsedRateLimit {
   const now = input.now ?? Date.now();
-  const status = input.status;
-
-  let resetAtMs: number | null = null;
-  let source: LockoutSource = "none";
-
-  // 1. `Retry-After` (delta seconds or HTTP date).
-  const retryAfter = headerValue(input.headers, "retry-after");
-  if (retryAfter) {
-    if (/^\d+$/.test(retryAfter)) {
-      resetAtMs = now + Number(retryAfter) * 1000;
-      source = "retry-after";
-    } else {
-      const parsed = Date.parse(retryAfter);
-      if (Number.isFinite(parsed)) {
-        resetAtMs = parsed;
-        source = "retry-after";
-      }
-    }
-  }
-
-  // 2. Structured provider envelope (absolute date, seconds or ms).
-  if (resetAtMs === null && input.body) {
-    try {
-      const parsedBody: unknown = JSON.parse(input.body);
-      const bodyReset = findResetInBody(parsedBody);
-      if (bodyReset !== null) {
-        resetAtMs = bodyReset;
-        source = "body-date";
-      }
-    } catch {
-      // Not JSON: no structured date available.
-    }
-  }
-
+  const headerReset = resetFromRetryAfter(headerValue(input.headers, "retry-after"), now);
+  const resetAtMs = headerReset ?? resetFromBody(input.body);
+  const source: LockoutSource = headerReset !== null ? "retry-after" : "body-date";
   const authoritative = resetAtMs !== null && Number.isFinite(resetAtMs) && resetAtMs > now;
 
   return {
-    status,
+    status: input.status,
     scope: "account",
     resetAtMs: authoritative ? resetAtMs : null,
     source: authoritative ? source : "none",
