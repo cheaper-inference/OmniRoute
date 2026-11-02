@@ -157,6 +157,8 @@ jobs:
           NAME: ${{ matrix.name }}
           SUITE: ${{ matrix.script }}
           TEST_SHARD: ${{ matrix.shard }}
+          OMNIROUTE_UNIT_CHECKOUT_SHA: ${{ needs.resolve-target.outputs.sha }}
+          OMNIROUTE_UNIT_INVOCATION_ID: ${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.name }}
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
           set +e
@@ -187,6 +189,17 @@ jobs:
           path: suite-results/
           if-no-files-found: ignore
           retention-days: 7
+
+      - name: Upload hosted unit diagnostics
+        if: ${{ always() && startsWith(matrix.name, 'unit-') }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: unit-progress-hosted-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.name }}
+          path: .artifacts/unit-progress/*.jsonl
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
 
   release-green:
     permissions:
@@ -472,6 +485,17 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Upload observer unit diagnostics
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: unit-progress-observer-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .artifacts/unit-progress/*.jsonl
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Enforce validation verdict
         if: always()
         env:
@@ -672,6 +696,17 @@ jobs:
             main-green.log
             _artifacts/release-green/
           if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload observer unit diagnostics
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: unit-progress-observer-${{ github.job }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .artifacts/unit-progress/*.jsonl
+          include-hidden-files: true
+          if-no-files-found: warn
           retention-days: 14
 
       - name: Enforce validation verdict

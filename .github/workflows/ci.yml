@@ -1080,6 +1080,8 @@ jobs:
       - name: Unit tests (shard ${{ matrix.shard }}/12) with V8 coverage
         env:
           TEST_SHARD: ${{ matrix.shard }}/12
+          OMNIROUTE_UNIT_CHECKOUT_SHA: ${{ github.sha }}
+          OMNIROUTE_UNIT_INVOCATION_ID: ${{ github.run_id }}-${{ github.run_attempt }}-unit-${{ matrix.shard }}
           NODE_V8_COVERAGE: ${{ github.workspace }}/coverage-shard
           NODE_OPTIONS: --max-old-space-size=8192
         run: |

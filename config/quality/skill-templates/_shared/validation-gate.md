@@ -57,9 +57,9 @@ Use this order to avoid requiring the new installed contract before it can exist
    paths, original modes and exact preimages; apply only the reviewed installation
    payload. Unexpected drift requires reconciliation, never an overwrite. Preserve
    other sessions' ownership and do not execute an automatic install from this gate.
-3. Run the candidate's checker against the actual shared installation and retain all
-   17 MATCH entries, installed path, candidate SHA and reviewed payload hashes. A new
-   candidate or installed change invalidates that receipt.
+3. Run the candidate's checker against the actual shared installation and retain every
+   MATCH entry declared by that checker, the installed path, candidate SHA and reviewed
+   payload hashes. A new candidate or installed change invalidates that receipt.
 4. Complete every other applicable acceptance requirement. Public admission follows
    the specific protected-surface approval in `protected-surfaces.md` and
    `merge-gates.md`; local activation and fixture PASS do not authorize a public merge.

@@ -501,6 +501,8 @@ jobs:
       - run: npm run test:unit:ci:shard
         env:
           TEST_SHARD: ${{ matrix.shard }}/4
+          OMNIROUTE_UNIT_CHECKOUT_SHA: ${{ github.sha }}
+          OMNIROUTE_UNIT_INVOCATION_ID: ${{ github.run_id }}-${{ github.run_attempt }}-unit-${{ matrix.shard }}
       - name: Upload unit progress receipt
         if: ${{ always() }}
         continue-on-error: true

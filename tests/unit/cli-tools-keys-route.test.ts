@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { SignJWT } from "jose";
+import { closeSharedLoggerResource } from "../../src/shared/utils/loggerResource.ts";
 
 const keysRoute = await import("../../src/app/api/keys/route.ts");
 const cliToolsKeysRoute = await import("../../src/app/api/cli-tools/keys/route.ts");
@@ -26,6 +27,10 @@ test.afterEach(() => {
   else process.env.JWT_SECRET = originalJwtSecret;
   if (originalApiKeySecret === undefined) delete process.env.API_KEY_SECRET;
   else process.env.API_KEY_SECRET = originalApiKeySecret;
+});
+
+test.after(async () => {
+  await closeSharedLoggerResource();
 });
 
 test("CLI tools key list can return unmasked keys for authenticated internal consumers", async () => {

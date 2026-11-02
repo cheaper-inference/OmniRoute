@@ -45,6 +45,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load as parseYaml } from "js-yaml";
 import { runGateProcess } from "./gate-process.mjs";
+import { unitDiagnosticReference } from "../ci/unit-diagnostics.mjs";
 import { eslintMeasurementCounts } from "./eslint-measurement.mjs";
 import {
   loadFullCiProfile,
@@ -747,10 +748,33 @@ const cancellation = new AbortController();
 
 async function run(cmd, cmdArgs, opts = {}) {
   const label = opts.label || `${cmd} ${cmdArgs.join(" ")}`;
-  const logPath = join(LOG_DIR, "commands", `${randomUUID()}.log`);
+  const invocationId = randomUUID();
+  const logPath = join(LOG_DIR, "commands", `${invocationId}.log`);
+  let unitDiagnostics = unitDiagnosticReference(cmdArgs, invocationId, null);
+  if (unitDiagnostics) {
+    let checkoutSha = null;
+    try {
+      checkoutSha = execFileSync("git", ["rev-parse", "HEAD"], {
+        cwd: ROOT,
+        encoding: "utf8",
+        timeout: 5000,
+      }).trim();
+    } catch {
+      // A missing binding remains explicit diagnostic uncertainty; retain the command's outcome.
+    }
+    unitDiagnostics = unitDiagnosticReference(cmdArgs, invocationId, checkoutSha);
+  }
   const result = await runGateProcess(cmd, cmdArgs, {
     cwd: ROOT,
-    env: buildGateEnv(opts.env),
+    env: buildGateEnv({
+      ...opts.env,
+      ...(unitDiagnostics
+        ? {
+            OMNIROUTE_UNIT_INVOCATION_ID: unitDiagnostics.invocationId || "",
+            OMNIROUTE_UNIT_CHECKOUT_SHA: unitDiagnostics.checkoutSha || "",
+          }
+        : {}),
+    }),
     logPath,
     timeout: opts.timeout || 30 * 60 * 1000,
     signal: cancellation.signal,
@@ -759,7 +783,12 @@ async function run(cmd, cmdArgs, opts = {}) {
         `… ${label}: ${Math.round(elapsedMs / 1000)}s, ${bytes} bytes, last output ${lastOutputAt}\n`
       ),
   });
-  commandReceipts.push({ command: label, receiptPath: result.receiptPath, ...result.receipt });
+  commandReceipts.push({
+    command: label,
+    receiptPath: result.receiptPath,
+    ...result.receipt,
+    ...(unitDiagnostics ? { unitDiagnostics } : {}),
+  });
   return result;
 }
 
