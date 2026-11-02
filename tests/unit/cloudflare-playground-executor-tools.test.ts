@@ -687,11 +687,15 @@ const READ_TOOLS = [
 /** Transport that yields a different reply per attempt, recording each room id. */
 function makeSequencedExecutor(replies: Array<(chatId: string) => string[]>) {
   const rooms: string[] = [];
-  const executor = new CloudflarePlaygroundExecutor((chatId) => {
-    rooms.push(chatId);
-    const build = replies[Math.min(rooms.length - 1, replies.length - 1)];
-    return new FakeTransport(build(chatId));
-  });
+  const executor = new CloudflarePlaygroundExecutor(
+    (chatId) => {
+      rooms.push(chatId);
+      const build = replies[Math.min(rooms.length - 1, replies.length - 1)];
+      return new FakeTransport(build(chatId));
+    },
+    undefined,
+    1 // keep the repair-retry delay out of the suite's wall clock
+  );
   return { executor, rooms };
 }
 
@@ -729,7 +733,7 @@ test("executor retries once in a fresh room when a tool-intent reply is unreadab
   assert.notEqual(rooms[0], rooms[1], "the retry must open a fresh room");
 });
 
-test("executor gives up after one repair retry instead of looping", async () => {
+test("executor gives up after three repair retries instead of looping", async () => {
   const broken = "<read><path>a.py";
   const { executor, rooms } = makeSequencedExecutor([
     (chatId) => buildSuccessFrames(chatId, broken),
@@ -750,6 +754,89 @@ test("executor gives up after one repair retry instead of looping", async () => 
   assert.equal(parsed.choices[0].message.content, broken);
   assert.ok(!parsed.choices[0].message.tool_calls);
   assert.equal(rooms.length, 4); // initial + 3 retries
+});
+
+// ── Repair retry: a client disconnect stops the retries ──────────────────────
+
+/** The real 5 s delay on purpose: only an abort-aware wait can beat these budgets. */
+function makeRetryingExecutorWithRealDelay(rooms: string[]) {
+  return new CloudflarePlaygroundExecutor((chatId) => {
+    rooms.push(chatId);
+    return new FakeTransport(buildSuccessFrames(chatId, "<read><path>a.py"));
+  });
+}
+
+test("a client disconnect during the retry delay opens no further session", async () => {
+  const rooms: string[] = [];
+  const controller = new AbortController();
+  const startedAt = Date.now();
+  setTimeout(() => controller.abort(), 20);
+
+  const result = await makeRetryingExecutorWithRealDelay(rooms).execute({
+    ...readArgs({}),
+    signal: controller.signal,
+  });
+  await result.response.body?.cancel();
+
+  assert.equal(rooms.length, 1, "no retry session may open after the abort");
+  assert.ok(Date.now() - startedAt < 2000, "the 5 s delay must end with the abort");
+});
+
+test("a request already aborted skips the retry delay and every retry", async () => {
+  const rooms: string[] = [];
+  const controller = new AbortController();
+  controller.abort();
+  const startedAt = Date.now();
+
+  const result = await makeRetryingExecutorWithRealDelay(rooms).execute({
+    ...readArgs({}),
+    signal: controller.signal,
+  });
+  await result.response.body?.cancel();
+
+  assert.equal(rooms.length, 1);
+  assert.ok(Date.now() - startedAt < 2000);
+});
+
+test("an aborted request does not take the colon retry either", async () => {
+  const rooms: string[] = [];
+  const controller = new AbortController();
+  controller.abort();
+  const executor = new CloudflarePlaygroundExecutor((chatId) => {
+    rooms.push(chatId);
+    return new FakeTransport(buildSuccessFrames(chatId, "Let me look at the file:"));
+  });
+
+  const result = await executor.execute({ ...readArgs({}), signal: controller.signal });
+  await result.response.body?.cancel();
+
+  assert.equal(rooms.length, 1);
+});
+
+test("the retry delay still applies when the request is not aborted", async () => {
+  const rooms: string[] = [];
+  const executor = new CloudflarePlaygroundExecutor(
+    (chatId) => {
+      rooms.push(chatId);
+      return new FakeTransport(
+        rooms.length === 1
+          ? buildSuccessFrames(chatId, "<read><path>a.py")
+          : buildSuccessFrames(chatId, '<read>{"path": "a.py"}</read>')
+      );
+    },
+    undefined,
+    60
+  );
+  const startedAt = Date.now();
+
+  const result = await executor.execute({
+    ...readArgs({}),
+    signal: new AbortController().signal,
+  });
+  await result.response.body?.cancel();
+
+  assert.equal(rooms.length, 2);
+  assert.ok(Date.now() - startedAt >= 50, "the delay must run before the retry session");
 });
 
 test("executor retries a cut-off multi-call reply instead of executing a prefix", async () => {

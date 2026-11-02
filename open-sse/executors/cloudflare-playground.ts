@@ -94,9 +94,32 @@ const MAX_TOOL_RETRIES = 3;
 const RETRY_DELAY_MS = 5000;
 
 /**
+ * Wait out a retry delay, returning as soon as the request is aborted so a
+ * client disconnect does not keep the delay running. The caller re-checks the
+ * signal before opening another playground session.
+ */
+function waitForRetryDelay(ms: number, signal?: AbortSignal | null): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal?.aborted) {
+      resolve();
+      return;
+    }
+    const onAbort = () => {
+      clearTimeout(timer);
+      resolve();
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+/**
  * Build a targeted corrective reminder based on the specific validation failure.
  */
-function buildToolRetryReminder(
+export function buildToolRetryReminder(
   failure:
     | "invalid_json"
     | "missing_type"
@@ -733,7 +756,9 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       new PlaywrightCfTransport(chatId),
     // Injectable so tests can force the timeout branch without waiting
     // CHAT_TIMEOUT_MS (120s) for a real timer to fire.
-    private chatTimeoutMs: number = CHAT_TIMEOUT_MS
+    private chatTimeoutMs: number = CHAT_TIMEOUT_MS,
+    // Injectable for the same reason: every repair retry waits this long.
+    private retryDelayMs: number = RETRY_DELAY_MS
   ) {
     super("cloudflare-playground", { id: "cloudflare-playground", baseUrl: PLAYGROUND_URL });
   }
@@ -839,11 +864,6 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     };
 
     /**
-     * Sleep helper for retry delays.
-     */
-    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    /**
      * Declared tool names in the fuzzy resolver's shape — the same list
      * finalize resolves against, so the gate and the executor can never
      * disagree about whether a name is one of the declared tools.
@@ -916,7 +936,7 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     // Retry loop: any failed gate re-asks the model (up to MAX_TOOL_RETRIES
     // times, one fresh room each) with a reminder naming the exact failure.
     let retryCount = 0;
-    while (gate.retry && retryCount < MAX_TOOL_RETRIES) {
+    while (gate.retry && retryCount < MAX_TOOL_RETRIES && !signal?.aborted) {
       retryCount++;
 
       const reminder = buildToolRetryReminder(
@@ -926,7 +946,8 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       );
       const retrySuffix = `-retry-${retryCount}`;
 
-      await sleep(RETRY_DELAY_MS);
+      await waitForRetryDelay(this.retryDelayMs, signal);
+      if (signal?.aborted) break;
 
       const retry = await runAttempt(attemptMessages(reminder), retrySuffix);
       if (retry.ok === true) {
@@ -944,7 +965,7 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     // Retry if the current response ends with a colon (mid-sentence stop) and
     // no tool call was produced — the model stopped before finishing its answer.
     const responseEndsWithColon = parser.text.trim().endsWith(":");
-    if (responseEndsWithColon && toolCalls.length === 0 && !timedOut) {
+    if (responseEndsWithColon && toolCalls.length === 0 && !timedOut && !signal?.aborted) {
       const colonRetry = await runAttempt(attemptMessages(), "-colon-retry");
       if (colonRetry.ok === true) {
         parser = colonRetry.parser;

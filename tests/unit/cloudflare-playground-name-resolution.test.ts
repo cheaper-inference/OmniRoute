@@ -33,9 +33,9 @@ import {
   hasMalformedCfToolIntent,
   stripCfToolMarkup,
   serializeCfToolPrompt,
-  buildCfToolReminder,
   type CfToolDef,
 } from "../../open-sse/translator/cloudflarePlaygroundTools.ts";
+import { buildToolRetryReminder } from "../../open-sse/executors/cloudflare-playground.ts";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const fixtureDir = join(here, "..", "fixtures", "cloudflare-playground");
@@ -544,8 +544,20 @@ test("D8: the contract shows complete worked examples, not a bare envelope", () 
   assert.ok(!prompt.includes("<edit>"), "the contract must not show the first tool as a tag");
 });
 
-test("D8: the reminder repeats the placeholder, not the caller's first tool", () => {
-  const reminder = buildCfToolReminder(OPENCODE_OPENAI);
-  assert.doesNotMatch(reminder, new RegExp(`"name": "${OPENCODE_TOOLS[0].name}"`));
-  assert.match(reminder, /"name": "<tool>"/);
+test("D8: every retry reminder repeats the placeholder, not the caller's first tool", () => {
+  const failures = [
+    "invalid_json",
+    "missing_type",
+    "wrong_type",
+    "missing_name",
+    "invalid_name",
+    "missing_arguments",
+    "malformed_intent",
+  ] as const;
+  for (const failure of failures) {
+    const reminder = buildToolRetryReminder(failure, OPENCODE_TOOLS, "abcd1234");
+    assert.doesNotMatch(reminder, new RegExp(`"name": "${OPENCODE_TOOLS[0].name}"`), failure);
+    assert.match(reminder, /"name": "<tool>"/, failure);
+    assert.match(reminder, /"_nonce": "abcd1234"/, failure);
+  }
 });
