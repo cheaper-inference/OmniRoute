@@ -170,7 +170,7 @@ const LONG_TOOL_RESULT = Array.from({ length: 160 }, (_, i) => `row ${i}: value-
   "\n"
 );
 
-async function sendPastToolResult(compressionHeader?: string) {
+async function sendPastToolResult(compressionHeader?: string, toolResult = LONG_TOOL_RESULT) {
   const connection = await providersDb.createProviderConnection({
     provider: "openai",
     apiKey: "sk-test-not-real",
@@ -200,7 +200,7 @@ async function sendPastToolResult(compressionHeader?: string) {
             { id: "call_1", type: "function", function: { name: "read", arguments: "{}" } },
           ],
         },
-        { role: "tool", tool_call_id: "call_1", content: LONG_TOOL_RESULT },
+        { role: "tool", tool_call_id: "call_1", content: toolResult },
         { role: "assistant", content: "read it" },
         { role: "user", content: "what is in row 150?" },
       ],
@@ -237,3 +237,57 @@ test("allow-lossy still lets lite truncate past tool results", async () => {
   assert.match(toolContent, /\.\.\.\[truncated\]$/);
   assert.ok(toolContent.length < LONG_TOOL_RESULT.length);
 });
+
+// openai/gpt-4 resolves to a 128,000-token window: the reserve-output target is 122,880.
+// ~640k unique characters (~160k estimated tokens) is over it; LONG_TOOL_RESULT is far under.
+const OVER_WINDOW_TOOL_RESULT = Array.from(
+  { length: 24_000 },
+  (_, i) => `row ${i}: value-${(i * 7919) % 104729}`
+).join("\n");
+const PRODUCTION_CONTEXT_BUDGET = {
+  mode: "replace-autotrigger",
+  policy: "reserve-output",
+  outputReserve: 4096,
+  safetyMargin: 1024,
+  pct: 0.85,
+  absoluteBudget: 0,
+} as const;
+
+async function storeEnginesMapSettings() {
+  await compressionDb.updateCompressionSettings({
+    enabled: true,
+    defaultMode: "stacked",
+    autoTriggerTokens: 0,
+    enginesExplicit: true,
+    engines: {
+      "session-dedup": { enabled: true },
+      lite: { enabled: true },
+      rtk: { enabled: true, level: "aggressive" },
+    },
+    lite: { compressToolResults: true },
+    contextBudget: PRODUCTION_CONTEXT_BUDGET,
+  });
+}
+
+for (const [label, store] of [
+  [
+    "legacy default combo",
+    async () => {
+      await storeLegacyStackedSettings();
+      await compressionDb.updateCompressionSettings({ contextBudget: PRODUCTION_CONTEXT_BUDGET });
+    },
+  ],
+  ["panel engines map", storeEnginesMapSettings],
+] as const) {
+  test(`${label}: a request that fits the window keeps its past tool results intact`, async () => {
+    await store();
+    assert.equal(await sendPastToolResult(), LONG_TOOL_RESULT);
+  });
+
+  test(`${label}: a request over the window still gets its past tool results truncated to fit`, async () => {
+    await store();
+    const toolContent = await sendPastToolResult(undefined, OVER_WINDOW_TOOL_RESULT);
+    assert.match(toolContent, /\.\.\.\[truncated\]$/);
+    assert.ok(toolContent.length < OVER_WINDOW_TOOL_RESULT.length / 10);
+  });
+}

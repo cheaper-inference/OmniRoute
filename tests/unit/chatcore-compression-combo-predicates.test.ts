@@ -3,8 +3,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-const { defaultComboForRequest, isBuiltinStackedPipeline, isStackedCompressionCombo } =
-  await import("../../open-sse/handlers/chatCore/compressionComboPredicates.ts");
+const {
+  defaultComboForRequest,
+  isBuiltinStackedPipeline,
+  isStackedCompressionCombo,
+  shouldRunResolvedPipeline,
+} = await import("../../open-sse/handlers/chatCore/compressionComboPredicates.ts");
 const { DEFAULT_COMPRESSION_CONFIG } = await import("../../open-sse/services/compression/types.ts");
 
 test("isBuiltinStackedPipeline true only for the rtk(standard)→caveman(full) shape", () => {
@@ -168,5 +172,44 @@ test("isStackedCompressionCombo true when the combo has >= 1 pipeline layer", ()
       outputModeIntensity: "full",
     } as never),
     true
+  );
+});
+
+test("shouldRunResolvedPipeline: without a combo the resolved plan always runs", () => {
+  assert.equal(
+    shouldRunResolvedPipeline({
+      comboApplied: false,
+      comboIsDefault: false,
+      comboIdConfigured: false,
+      adaptiveStagesApplied: 0,
+    }),
+    true
+  );
+});
+
+test("shouldRunResolvedPipeline: the default combo yields only when the budget dial escalated", () => {
+  const base = { comboApplied: true, comboIsDefault: true, comboIdConfigured: true };
+  assert.equal(shouldRunResolvedPipeline({ ...base, adaptiveStagesApplied: 0 }), false);
+  assert.equal(shouldRunResolvedPipeline({ ...base, adaptiveStagesApplied: 2 }), true);
+});
+
+test("shouldRunResolvedPipeline: an assigned or named combo is never replaced", () => {
+  assert.equal(
+    shouldRunResolvedPipeline({
+      comboApplied: true,
+      comboIsDefault: false,
+      comboIdConfigured: true,
+      adaptiveStagesApplied: 3,
+    }),
+    false
+  );
+  assert.equal(
+    shouldRunResolvedPipeline({
+      comboApplied: false,
+      comboIsDefault: false,
+      comboIdConfigured: true,
+      adaptiveStagesApplied: 3,
+    }),
+    false
   );
 });

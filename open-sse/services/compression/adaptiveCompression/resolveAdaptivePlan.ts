@@ -2,6 +2,7 @@ import type { DerivedPlan } from "../deriveDefaultPlan.ts";
 import type { AdaptiveTelemetry, ContextBudgetConfig, LadderStage } from "./types.ts";
 import { DEFAULT_LADDER, aggressivenessOf, expectedReductionFactor } from "./ladder.ts";
 import { computeTarget } from "./computeTarget.ts";
+import { isSafeDefault } from "../engineCatalog.ts";
 
 export interface ResolveAdaptiveInput {
   basePlan: DerivedPlan;
@@ -46,11 +47,17 @@ export function resolveAdaptivePlan(input: ResolveAdaptiveInput): ResolveAdaptiv
   const headroomBefore = target - estimatedTokens;
 
   // replace-autotrigger only acts on a bare Default/off base plan; an explicit choice wins.
-  const baseRank = aggressivenessOf(basePlan.mode);
-  if (config.mode === "replace-autotrigger" && baseRank > aggressivenessOf("off")) {
+  if (defersToBasePlan(config, basePlan)) {
     return {
       plan: basePlan,
-      telemetry: { policy: config.policy, target, headroomBefore, stagesApplied: [], headroomAfter: headroomBefore, fit: headroomBefore >= 0 },
+      telemetry: {
+        policy: config.policy,
+        target,
+        headroomBefore,
+        stagesApplied: [],
+        headroomAfter: headroomBefore,
+        fit: headroomBefore >= 0,
+      },
     };
   }
 
@@ -58,14 +65,18 @@ export function resolveAdaptivePlan(input: ResolveAdaptiveInput): ResolveAdaptiv
   if (headroomBefore >= 0) {
     return {
       plan: basePlan,
-      telemetry: { policy: config.policy, target, headroomBefore, stagesApplied: [], headroomAfter: headroomBefore, fit: true },
+      telemetry: {
+        policy: config.policy,
+        target,
+        headroomBefore,
+        stagesApplied: [],
+        headroomAfter: headroomBefore,
+        fit: true,
+      },
     };
   }
 
-  // Escalation: start just ABOVE the base plan's aggressiveness (floor escalates beyond it).
-  const ladder = config.ladderOverride && config.ladderOverride.length > 0 ? config.ladderOverride : DEFAULT_LADDER;
-  const startTier = config.mode === "floor" ? baseRank : aggressivenessOf("off");
-  const stages = ladder.filter((s) => aggressivenessOf(s.engine) > startTier);
+  const stages = escalationStages(config, basePlan);
 
   let current = estimatedTokens;
   const applied: LadderStage[] = [];
@@ -90,15 +101,94 @@ export function resolveAdaptivePlan(input: ResolveAdaptiveInput): ResolveAdaptiv
   };
 }
 
+function defersToBasePlan(config: ContextBudgetConfig, basePlan: DerivedPlan): boolean {
+  return (
+    config.mode === "replace-autotrigger" &&
+    aggressivenessOf(basePlan.mode) > aggressivenessOf("off") &&
+    !isLosslessDefault(basePlan)
+  );
+}
+
+/** Escalation: start just ABOVE the base plan's aggressiveness (floor escalates beyond it). */
+function escalationStages(config: ContextBudgetConfig, basePlan: DerivedPlan): LadderStage[] {
+  const ladder =
+    config.ladderOverride && config.ladderOverride.length > 0
+      ? config.ladderOverride
+      : DEFAULT_LADDER;
+  if (config.mode === "replace-autotrigger" && isLosslessDefault(basePlan)) {
+    return losslessDefaultStages(basePlan, ladder);
+  }
+  const startTier =
+    config.mode === "floor" ? aggressivenessOf(basePlan.mode) : aggressivenessOf("off");
+  return ladder.filter((s) => aggressivenessOf(s.engine) > startTier);
+}
+
+type PlanStep = DerivedPlan["stackedPipeline"][number];
+
+function isLosslessStep(step: PlanStep): boolean {
+  let safe = false;
+  try {
+    safe = isSafeDefault(step.engine);
+  } catch {
+    return false;
+  }
+  // lite is lossless only with tool-result truncation explicitly off (lossy request policy).
+  return safe && (step.engine !== "lite" || step.config?.compressToolResults === false);
+}
+
+/**
+ * The panel Default after the lossy request policy: dedup and whitespace folding only.
+ * It is not an operator choice to keep at any cost, so an over-window request escalates it.
+ */
+function isLosslessDefault(plan: DerivedPlan): boolean {
+  return (
+    plan.source === "default" &&
+    plan.mode === "stacked" &&
+    plan.stackedPipeline.length > 0 &&
+    plan.stackedPipeline.every(isLosslessStep)
+  );
+}
+
+/**
+ * Escalation order for the lossless safe Default: first re-enable its own lite tool-result
+ * truncation (the step every request ran before the lossy request policy made it opt-in,
+ * and the one measured to fit long sessions), then the ladder engines the base does not
+ * already run, only while the estimate is still over target.
+ */
+function losslessDefaultStages(basePlan: DerivedPlan, ladder: LadderStage[]): LadderStage[] {
+  const baseEngines = new Set(basePlan.stackedPipeline.map((step) => step.engine));
+  return [
+    { engine: "lite" },
+    ...ladder.filter((s) => !baseEngines.has(s.engine) && aggressivenessOf(s.engine) > 0),
+  ];
+}
+
 /**
  * Turn the applied ladder stages into a DerivedPlan. A single applied stage that is a
  * single-mode engine collapses to that engine's mode; otherwise a stacked pipeline.
  * The base plan's own pipeline is preserved as the prefix (floor escalates AFTER the base).
+ * A stage whose engine already runs in the base is not repeated; an applied `lite` stage
+ * re-enables the base lite step's tool-result truncation in place.
  */
 function planFromStages(basePlan: DerivedPlan, applied: LadderStage[]): DerivedPlan {
   if (applied.length === 0) return basePlan;
-  const basePipeline =
-    basePlan.mode === "stacked" ? basePlan.stackedPipeline : [];
-  const stackedPipeline = [...basePipeline, ...applied];
+  const basePipeline = basePlan.mode === "stacked" ? basePlan.stackedPipeline : [];
+  const appliedEngines = new Set(applied.map((stage) => stage.engine));
+  const baseEngines = new Set(basePipeline.map((step) => step.engine));
+  const upgradedBase = basePipeline.map((step) =>
+    step.engine === "lite" && appliedEngines.has("lite") ? withToolResultTruncation(step) : step
+  );
+  const stackedPipeline = [
+    ...upgradedBase,
+    ...applied.filter((stage) => !baseEngines.has(stage.engine)),
+  ];
   return { mode: "stacked", stackedPipeline };
+}
+
+function withToolResultTruncation(step: PlanStep): PlanStep {
+  if (step.config?.compressToolResults !== false) return step;
+  const { compressToolResults: _lossless, ...rest } = step.config;
+  return Object.keys(rest).length > 0
+    ? { ...step, config: rest }
+    : { engine: step.engine, ...(step.intensity ? { intensity: step.intensity } : {}) };
 }
