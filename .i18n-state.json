@@ -51204,337 +51204,931 @@
       }
     },
     "docs/guides/COST_TRACKING.md": {
-      "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
+      "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
       "locales": {
         "pl": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "b30bbc34a3b766bd75a9dcf601fa8d8be7f8ebcf16bf901933f23d6e48aee97c",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "2d52c0199fe8321cae27968d767b84d7b802743a4177da40042be1bdf0021915",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:04.423Z"
         },
         "ar": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "0af0ba0dd018a4bffd82c1c651d7bbe96c99f864a2142abd98c4a93919dba94e",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "4098e44bda4ecceb74698626360c95108853661bda8738334019cafd5ef78098",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:11.600Z"
         },
         "cs": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "743a6f6998d0101aa103112a1b9a5e13792ade887d9df8154b0e96e08c2875d0",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "d0be8aed8e9a4da774241f913118ddac7e4874f31a9b929fce52d474ab39f58a",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:14.417Z"
         },
         "bg": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "3b2baa8cb7cea9235af90a02243c4d2d883b0d1ba4d1ce9ef0c0cba066069903",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "5301d247dca0c1da745cd6624b824da763a4228c2e2c41bee91f03aa3a1ad952",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:13.112Z"
         },
         "bn": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "6f05b9a0247faad394d8b6bf4c9c0a4c756084fd6bfba02a751bf91997e172ae",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "f3424ab302130ef61de3831ca8e237cdf759e6860185d7b6537f7f32cd69d08f",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:10.806Z"
         },
         "az": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "21c1e6812bcb96402d35ebe4b3191564379fe48141d0460efc16fd83fc2d89d7",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "342f4677816e827bfd3d512c9caf5943b0bcd89fedef819ea07054af00413761",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:14.944Z"
         },
         "da": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "4063ca2fc74ac0e959aefb7a71ed2384ee92fe135f45cb6914bc001935f4c2fc",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "355c0b8bb5564eb002edc0eedae268b0e75526f981ae47ccdb6c681d1694bd75",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:17.046Z"
         },
         "de": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "be6878152a83adb84366f3671a01d43643647ffbfbdbfb5bf4574b481888ab23",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "fd068b4583401f9fdeb0efd6db72beb1eb222343d7d40e22a72667be4f42a785",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:18.406Z"
         },
         "es": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "b70da24105af1849f895567bd0b6b0514d090db36c3d6f3d5a8d7b37a4d0bbe0",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "533c8a0b2c20fbb537713465c9ca4f3f62a7550a04c37b212f3446f5634aca2d",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:20.008Z"
         },
         "et": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "297b4723a13e74b303bf6149a22baf3dad69240c81af69f3158208ccd99321f0",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "4da9827fdffbaab96f21550dd828ff21bfeeac0197ba13dedaeed20db0a6bbb3",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:22.422Z"
         },
         "el": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "aafa7dc499bebe32439bdf09462657ddc0076238d5f3be97c60b115b947d36f4",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "212b2c3b017f9940b305e0bdc88acda7cf29ec0457e7859fda866432944aa6fd",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:16.042Z"
         },
         "am": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "be8efff085c9abb0b48bd7b5b76101bd6a97b8a9d8b92fefe0817fc3f6836f70",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "26e021cb11956788a5dc6d592a97d790a2d796ff33349de1ad7b2430646b0d91",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:17.746Z"
         },
         "fr": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "76dbcef50d9734b0bc2809518b79f86d554a528061d95cfd73e299dcf62152f1",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "7168f9fc277df1c4a82986623d55a0bfa1bc7b1129499921c68d03f4b85bc320",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:23.498Z"
         },
         "fa": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "834fe922b20733fab632122fba9b3b518e2739f988289590a0277d01e2827421",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "1fd784350e35d5a700d45a9af6b043028569ad448fa99be581f8cd70792181bb",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:21.346Z"
         },
         "fi": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "41c70f8801953703cf0e0bb9b0da800fc212ef6a0e2c72401d34c7d74f6223fe",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "faf5eae3dab559fab11fc3784e7375c6428f636cf9f91734a082f7092c916c97",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:29.619Z"
         },
         "ga": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "f90f0334c58b31e839421c01b6c35c0cfdf6500116f76420f0005eba33af4e89",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "fdc392e324ed1301738d680fa5d68d6c22e4119e7ef5be297aa0d638d0b12593",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:25.647Z"
         },
         "gu": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "3e96dca3208cc84975ef7f0dc6abed13792ae7d70b8470c008578972ea267f75",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "1533bc17a3b40fc9729898a319e6d442a4636f72299c752ef7c9ebe64d879423",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:28.800Z"
         },
         "ha": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "ed7568065be53ede0178a0c8a84e3eac7f857f3813cd174863c34afb44fbbf32",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "3531f6d47ded82f30e2ea2ad5c7faf4a7dfe207d84c407d390554b6998b8331d",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:24.386Z"
         },
         "he": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "f7ff56272609cd7ba5af599c9e7c0cabc6b428529ef0458dc72d7bdb6377a87c",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "cd2e24baad6ab0dcb21ab023416b596cf66e23d35d7c18fbcbc140d88c32c273",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:28.271Z"
         },
         "hi": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "a51def535c44d8df69379cc5fa814479e636cfe6ecf3f43444c6d94336458763",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "5718d47d82655d627f76b8a3e95f036f0cb6c317c9867929b96ad4363ec42b76",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:26.834Z"
         },
         "hr": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "43f4ac9c2441b3ddb25e91ba66f4ed8f8fd33a8c1d5511e92f10d1dedc861ecf",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "4aa7ba490dde36ddc651016832fb315e52eed6ca640049e11efa8f9516e1b922",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:33.367Z"
         },
         "hu": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "7aaf35223382998720d121455878d053674c3524628f3923f8db46d1f62aba30",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "a0faec3fef239a30d0977129d3b6ff377358f47ed45ac389660963733e3ad592",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:32.349Z"
         },
         "hy": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "7752d69bd0c74320ada7bb6f9a8d801c69bff751e0f1bfd9335b4fd07c50d262",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "69bc6414894dd1ab587c3391be82a76220cc0ccea5f4508f7fdd4ab84bebb237",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:31.224Z"
         },
         "id": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "13bbd9800f8134b8a65f55aada83593523425ee45369e9a3ef8e952607724433",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "739a8c66a05e9f13b2e7f2eaee5046a58038349276f6a6771a628d5788afd54d",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:36.036Z"
         },
         "it": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "cb171eeab96c2a537a26744eb106721ba92318698e261d73b43b750036040038",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "f1ab17ecc295a269e4040a45c85d03bff8f234b213f1ce590e7663a30bb67990",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:43.107Z"
         },
         "ig": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "6516eda5d8313c381f0c494eb2498145eb651d1a58f04186ae2d482f083177b6",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "42da9d0df8faf323500301a5c09fd2793bd86dc3d19d7493ad498c4fdf637230",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:34.796Z"
         },
         "ja": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "1738a6257417763b662468c50d62e947917a065366318d30f36f87caec9c303f",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "fb9fcbda2849ed82e983061caecad61bfe102ca7a849789c2e508d0acdb6a56a",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:37.351Z"
         },
         "ka": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "4b07c16202eb1b4cd5ec033eea25dee59451a023e1a5ffc5d14ff7e40417feba",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "23fc3ae8ea44bc3315dca0bcd3ff20bcbf987d8e1a4fc1176128ec8767de05af",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:38.517Z"
         },
         "ko": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "7ee5f5207798b075908d95f8d5dc291359b1d3f6918011054ee07127c9314791",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "e8fc905f69a263369c030bf2a21bcd49130c9631f55be8bc26896acf8879d520",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:45.074Z"
         },
         "kn": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "52d18396dc346da5cdc2541e76d133a76a0a520c2e6101c19ce81f1c0e36d53d",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "875a1b5c589e066913b2f7d8f4b0ac4f1420986f20dba1fc5a38379e2b301043",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:41.006Z"
         },
         "km": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "e708a7d3d363d51ef0f7ad93735f91172d36c61f9e7066c49c4feb826256ec7e",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "f656b43eacdb3f95b44c1b9250bcaf32daa7ca7c0254a5c419648e9f1019e849",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:42.246Z"
         },
         "lt": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "8fb488983cafaaf6b232ee7181aaeaa3a1d71413b1f4366608ef58e79dbd20a8",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "9e84e69bd5a470a3386850e3a5659b13f61c78305af2b64f284caef934782971",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:40.109Z"
         },
         "lv": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "3c3a6d70af7c8c0b1d5158d10e09a1fe85508847b57bfa703bb667180003f38e",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "5e9af5ffc5942f8ac02efbbf6197d5d3fa9cd58f50f94d112005cf9138ecd1b2",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:44.175Z"
         },
         "ml": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "49683e5c63ce8302ad701327b2cac04928e4ac75b76a6b0c51a1353494da4367",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "798a9fc366d355fcf0d78c07f13b3768ef6c51171817db7bbada9a2bb40bcb81",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:48.039Z"
         },
         "ms": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "a9127790ea0e5975065d6856743002213c3f0d5a0650a16d71023d6ccfe5c062",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "6c2314ce38be64ef902e121e7a57a1414d907b2ac39398d2c7cca67175ae9f5d",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:49.134Z"
         },
         "mr": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "2157fec8ce6dced57818216ea499a35493889679b4fcdc121ae772557f42ae49",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "295a100ab58b95f848f7ba5127f1dfc8d6a7d74925438574573c7405c475f2d2",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:46.175Z"
         },
         "mt": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "5022a0c27cb6b12f62bed999d708b87b2782431e6fa802533c5feb477afccc6c",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "654545efcf39c2b39542be319f0bc83b7fd4cc0b63008b305fd80118d18b4a21",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:49.879Z"
         },
         "ne": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "065ca0598cd4f39c11b29053e305a183d793ec93eddba29140da26aba6ed7786",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "76011434028758bdee4321a12776cb025f02c7b469414ba809fe2a9d8efea573",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:53.081Z"
         },
         "my": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "4e5a9e1fd0d2332cee58ed1676ffa69c4bbccf5b299cb92bfa0e140dc999e1e9",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "2c0ba9688b38dbffad3ff45f3266a33209d13885c1571af691c251e1fe84535e",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:51.902Z"
         },
         "nl": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "40428c543f727d924df73a2f63edb3de0d295ed21f12ee19ff629660d91bc7a9",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "e08f90be828c6e469c1b2ff6a411b8950a13aeb8e8d3d7cf0758cbe4c044dcc0",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:51.048Z"
         },
         "no": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "0a5ea3a4bbec7ccd0a867a5f7755845d99e54188b3f219b6263c873ed061aa42",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "1840aa7246c684f10104d7862bdca16aefe5956842a8c0b38e6b8d74212da1b5",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:55.582Z"
         },
         "phi": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "21f8ff2fa74377c570ac3e1f909c0ea664d9a64da1496618169b76d684446e51",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "33265ad1833f5f54814fbb947e3a07fc6be551b4d9d266fb25efbf0e827a7f3a",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:58.005Z"
         },
         "pt-BR": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "58f7a2e7505cdb2eea825affbec65eb69a3dd1986a3628824a1b3c881a0cc10b",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "9ce33832ce5c4974db3c66cbfb65f74d0a59346ecfc427df4cbcb548e841595a",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:59.261Z"
         },
         "pt": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "0d4e395fac5f71704e7e9fda7f5e2618d0a74b60bf3087475b83caf8e7e6d16b",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "15016ac0cf70ac44a14673f0b30386c5228726819193a70afdb2bf0c44291b2c",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:01.166Z"
         },
         "pa": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "d10a3e40074f920a6f05490ee8d1653f1987a5a3877c9518af12471e23b478f9",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "37f5184b65289c707fa504245e0aa243b0d0c4ee3a50de74e705baaea1785f5d",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:56.766Z"
         },
         "ro": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "718468a26de51b542811dbc88a07d8f9de305d46aaa106f6aea1855cea4c3a35",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "006b5f4b18103ab5314b3907f8e500c6798abff9cea40a74da5b8f9d2668adcf",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:00.483Z"
         },
         "or": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "3dd80e2983182d0dc4f19edcdac70f286fba8d22766b0ddb3c39fdd9f92a08c6",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "110e6726b3cca8b24d7e74334a85a0ebbcf602a961c2bff5d88ac1b0aafadf6f",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:54.700Z"
         },
         "ru": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "4250a22d880a5cd81a5bef75491c32aba5935cb624b9cd5b8ef2f43802ce3ce2",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "fdff324348540115943457999a9f8b9e7ee5f2276fbe8ced189c3edf7e6ac639",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:01.630Z"
         },
         "sk": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "d8006c937ce825dedede8eb11c4f874db57718bf03d429e48f4114ab565358d0",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "99c788ba72cbf9a822a809bcabb63217af085c69cf9efd81fa0ebbc6e4579140",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:02.660Z"
         },
         "si": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "f07d578628f01d2497ebce771a26f99761e986f2874bc8e990a95e2b01ded16f",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "e08646372955d2130c3d18582e5f27c7a0161334515656925a78a2e9f9a157ed",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:02.278Z"
         },
         "sl": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "8a90d189b0b0794720411c5843823b3d6fc374ec652c49c80d7fa02a3e292126",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "0e6f8a69245d97e46cda7bea13c836c07c234634527beff0ab374c47e12ea791",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:03.333Z"
         },
         "sv": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "5f5f69cebdd79fd507a798bdacace8a07eef4fc5e6f3a9421d29fd2789095cd1",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "d62ab81de88b629bd04d4239b5be27ae9dc2c6e285c45c949c193d33257ff329",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:03.610Z"
         },
         "sr": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "30f631ad5dd656499c36ac5c22e4a4de0401166a20ae5aec5c15867170d4686f",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "af9e4f8a46d5dd484e93f5a1d31a707c0fe9a4051c5be412088fb32b3bb9f589",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:03.336Z"
         },
         "sw": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "b9f2ac49e3d380e87debcdfafd10f90c91f16f898a0133d9f8ddae72a66b2750",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "5f0d65f436f9a9c7e6d8eb8286890d5402679b91c6ee4b63947d34fd5443781e",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:04.241Z"
         },
         "ta": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "b9f9d7122180ed7a6662ab577c26babd96846f38b0e9587ea1d16a52f84bf688",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "d1e4a27b7f0dd33794037e91f6918bb6019e59b6a690bc9f3b524c989cbbaf92",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:04.581Z"
         },
         "te": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "1348e9546b17f140b3f595162cd6d7244a1974fb02198d924730857873e38cf0",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "d19063f94e8702de8807366b76eb0346d6fa3f6fd7f9a671d5836c0ec364dcdc",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:05.227Z"
         },
         "th": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "5642f9585eff48c866952bae6e7ce512757c1eb5b202b9a3479168a47a0093c9",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "8abbebe22423b00ad265b88af34c8bc0574e1fb57970f8370207844869ff37d8",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:05.177Z"
         },
         "tr": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "78c9dad1b4be4ed2598806290f646ba348aac16b63737aee3c3f51c0adbc5651",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "e80ba9dd84a76ee6b79161bc2f98263b034e0927c51b424f62b63a791ed7f43d",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:05.595Z"
         },
         "uk-UA": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "450a5d4617594476604e4ac68baa1454a80c0650825ebbdd81296c99f4b6667e",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "58ed6f10fcfe45e5c8fcb463a6f7a04ef1dbb4d0b1668a7a4ffba3358b807e11",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:06.262Z"
         },
         "ur": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "823c40425829ec4a89e7dd7270903c32bbe4dabdfd6b49e58e176ecbd3f36bf4",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "4a016730e36fa6e5a21238037fa976501db395e10b2264a106b5383707669c17",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:07.312Z"
         },
         "vi": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "16771b9fbb7527b5b5381768d0ccf5e8833d5bb93f09ea9d50dd1fdcc54ad3bb",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "d2373353ef1274773177776dceca7c68f2c6a976664e22aa98f94a4287ed8054",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:07.317Z"
         },
         "zh-CN": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "df4c1c60e593ff229f8a4118fda3a649ae3d9585f3af0f027bf8b17796fbefe4",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "c6fe45fdd60791d40f2d7fdb351c2fec2c9d86b2029c25fb50fdb110d4394aa0",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:07.314Z"
         },
         "uz": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "a7bff55bb9bfdc24017720243fdf81a0b1e1f50613f620a42310bdf0db9e325f",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "1569adf528fe177e4a91956f0ff3b0edda6f5d91ffcbb27cfce84a191f110eb0",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:06.033Z"
         },
         "zh-TW": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "2f9b63cd1e16234abc809bdc357703a1ed12753cb9058cb3feac393dd9477690",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "54c4f128e8127e9aa12158996cc07c18b1e07b867a6f84d2cdbd804a15e5273f",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:07.717Z"
         },
         "yo": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "fdb43c6103e9a8203d458b12222e8ea0f62a73118d19bc512ee3801ab98b7f3d",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "a63c91331832436da7f89479e44221f57c39d9a38797ae25b686142f9b0ddf95",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:30:06.265Z"
         },
         "bs": {
-          "source_hash": "d30f989533ba92322ee859bc5dfa4eaaa05972b24297cf7936da493f3f2f60bd",
-          "target_hash": "4e263cdf7c39660a0ab268e28b0321a11032d5afea995e8685692e1e825986f4",
-          "updated_at": "2026-10-17T14:56:46.694Z"
+          "source_hash": "5cd2e96fc4238912e4b9ac79cf353d55500655c5e14bfbc13987c525865d4b6d",
+          "target_hash": "c8673e9a5426245cfe96cd0f8db9d6fccda0f101d8c2490b94ec907c6f872a67",
+          "section_hashes": [
+            "03f3d1038cb6",
+            "4845e6674be0",
+            "bc44a6361b01",
+            "02f67492f0f1",
+            "71b4ac1b25c9",
+            "c30face701df",
+            "b619d9ca2672"
+          ],
+          "updated_at": "2026-11-02T18:29:12.270Z"
         }
       }
     },
