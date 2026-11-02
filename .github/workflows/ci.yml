@@ -1044,11 +1044,9 @@ jobs:
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
-      - uses: ./.github/actions/npm-ci-retry
+      - uses: ./.github/actions/prepare-unit-storage
         with:
-          # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
-      - run: npm run check:node-runtime
       # QW-d (plano mestre): fonte única — o MESMO npm script dos runs locais (adiciona o
       # setupPolyfill que o comando inline omitia; o glob canônico vive só no package.json).
       # D3 (plano mestre): a coverage é coletada NESTE mesmo run (c8/NODE_V8_COVERAGE propaga
@@ -1072,6 +1070,7 @@ jobs:
           # pelo job de merge de cobertura mais abaixo.
           NODE_OPTIONS: --max-old-space-size=8192
         run: |
+          trap 'status=$?; { df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP"; du -sh coverage-shard; } || :; exit "$status"' EXIT
           rm -rf coverage-shard coverage-shard-report
           npx c8 --merge-async \
             --temp-directory=coverage-shard \
