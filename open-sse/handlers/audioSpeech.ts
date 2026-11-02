@@ -23,6 +23,7 @@ import { kieExecutor } from "../executors/kie.ts";
 import { vertexGenerateSpeech } from "../executors/vertexMedia.ts";
 import { handleGeminiTtsSpeech } from "../executors/geminiTts.ts";
 import { handleAwsPollySpeech } from "../executors/awsPollyTts.ts";
+import { handleAzureSpeechTts } from "../executors/azureSpeechTts.ts";
 import { GttsUpstreamError, normalizeGttsLang, synthesizeGtts } from "../executors/gtts.ts";
 import { handleFishAudioSpeech } from "../executors/fishAudioTts.ts";
 import { handleDashscopeTtsSpeech } from "../executors/dashscopeTts.ts";
@@ -908,7 +909,7 @@ export async function handleAudioSpeech({
   if (!providerConfig) {
     return errorResponse(
       400,
-      `No speech provider found for model "${body.model}". Use format provider/model. Available: openai, hyperbolic, deepgram, nvidia, elevenlabs, huggingface, inworld, cartesia, fishaudio, playht, kie, aws-polly, xiaomi-mimo, gtts, coqui, tortoise, qwen`
+      `No speech provider found for model "${body.model}". Use format provider/model. Available: azure-speech, openai, hyperbolic, deepgram, nvidia, elevenlabs, huggingface, inworld, cartesia, fishaudio, playht, kie, aws-polly, xiaomi-mimo, gtts, coqui, tortoise, qwen`
     );
   }
 
@@ -924,6 +925,10 @@ export async function handleAudioSpeech({
     // Route to provider-specific handler
     if (providerConfig.format === "grok-tts") {
       return handleGrokSpeech(providerConfig, body, credentials);
+    }
+
+    if (providerConfig.format === "azure-speech-tts") {
+      return handleAzureSpeechTts(body, token, credentials);
     }
 
     if (providerConfig.format === "uc-tts") {
