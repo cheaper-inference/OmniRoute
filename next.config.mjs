@@ -3,6 +3,7 @@ import { createMDX } from "fumadocs-mdx/next";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { betterSqlite3AliasFor } from "./scripts/build/better-sqlite3-stub-flag.mjs";
+import { getFumadocsWatcherOptions } from "./scripts/build/fumadocs-watcher-options.mjs";
 import { mitmManagerAliasFor } from "./scripts/build/mitm-stub-flag.mjs";
 import { normalizeBasePath } from "./scripts/build/normalizeBasePath.mjs";
 import { macosDevExperimentalOverrides } from "./scripts/build/macosDevWorkaround.mjs";
@@ -807,6 +808,8 @@ const nextConfig = {
   },
 };
 
-const withMDX = createMDX();
+const withMDX = createMDX({
+  watcher: getFumadocsWatcherOptions(projectRoot),
+});
 
 export default withMDX(withNextIntl(nextConfig));
