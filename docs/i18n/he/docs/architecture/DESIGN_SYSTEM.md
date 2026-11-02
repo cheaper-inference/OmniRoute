@@ -4,13 +4,7 @@
 
 ---
 
-> **סטטוס:** לוח הבקרה בנוי על **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), המוטמע (vendored)
-> כ-workspace בשם `packages/ui-kit` (`@omniroute/ui-kit`; ה-snapshot של ה-upstream מוצמד ב-
-> `packages/ui-kit/UPSTREAM.md` ומוגן באמצעות `npm run check:ui-kit-snapshot`). ערכת הנושא הקנונית
-> היא בהירה (Light); ברירת המחדל של ההעדפה היא `system`. צבע ההדגשה הוא Keak lime (`--ci-color-accent`).
-> הגופן Inter (ריווח אותיות 0, `--ci-letter-spacing-ui`) הוא גופן ממשק המשתמש, Instrument Serif משמש רק
-> לטקסט תצוגה גדול ודליל (`.ci-dashboard-display`), ו-IBM Plex Mono משמש לקוד — כולם מתארחים עצמאית
-> (self-hosted) דרך הייבואים של `@fontsource/*` בראש הקובץ `src/app/globals.css`. כל אייקון הוא גליף של Lucide.
+> **סטָטוּס:** לוח המחוונים בנוי על** ערכת Keak CI UI** (`@keak/cheaper-inference-ui-kit`), מסופק כמרחב העבודה `packages/ui-kit` (`@omniroute/ui-kit`; תמונת המצב במעלה הזרם מוצמדת ב- `packages/ui-kit/UPSTREAM.md` ומוגנת על ידי `npm run check:ui-kit-snapshot`). האור הוא הנושא הקנוני; העדפת ברירת המחדל היא `system`. המבטא הוא קיאק ליים (`--ci-color-accent`). Switzer היא המשפחה היחידה עבור UI, תצוגה וטקסט קוד (`--ci-font-ui`; `--ci-font-display` ו- `--ci-font-mono` פותרים את זה), מתארחת בעצמה על ידי הערכה עצמה (`packages/ui-kit/src/ci-fonts.css`, מיובא על ידי `ci-tokens.css`). כל אייקון הוא גליף Lucide.
 
 ## 1. איפה דברים נמצאים
 
@@ -24,13 +18,13 @@
 
 ## 2. כללים
 
-1. טוקנים, לעולם לא ערכים מילוליים (literals). חריגים שנשמרו בכוונה: טרמינל הקונסולה שתמיד כהה ו-`STATUS_HEX` (`src/shared/constants/statusColors.ts`), מראת ה-hex המומר של פלטת הסטטוסים של הקיט עבור קוראים שצריכים hex מילולי. הפלטות הקטגוריות אינן עוד חריג: הן רוכבות על חמשת טוקני התרשימים של הקיט (`--color-chart-1..5`) דרך `src/shared/utils/categoricalPalette.ts`, ועבור אסטרטגיות ניתוב, דרך `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; הקצוות (edges) של ReactFlow וקנבס התזמור קוראים את משתני `--orch-status-*` המודעים לערכת הנושא (`src/shared/components/flow/edgeStyles.ts`).
-2. לעולם אל תתקנו את `packages/ui-kit/src` ידנית: סנכרנו עם `scripts/dev/sync-ui-kit.sh <commit>`; שער ה-pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) נכשל על כל בייט השונה מה-commit המוצמד של ה-upstream (הוא מדלג עם אזהרה כאשר השיבוט של ה-upstream, `UI_KIT_CLONE` או `_references/cheaper-inference-ui-kit`, נעדר). כאשר הקיט חסר משהו, עקפו זאת במתאם (adapter) או במסך ובקשו זאת מה-upstream.
-3. ברירות המחדל של טקסט בקיט הן באנגלית (`label = "Loading"`, `loadingLabel = "Loading table"`…) — העבירו מחרוזות מתורגמות מ-`useTranslations(...)` בכל פעם שרכיב קיט מציג טקסט.
-4. כלי העזר (utilities) של Tailwind גוברים על מחלקות רכיבי הקיט (הקיט מכריז על `@layer theme, base, components, utilities` והכללים שלו חיים ב-`components`) — השתמשו ב-utilities עבור מרווחים ופריסה, לא כדי לצבוע מחדש רכיבי קיט.
-5. כותרות: `.ci-heading` (Inter, ללא ריווח אותיות) לכותרות עמוד ומקטעים; `.ci-dashboard-display` (Instrument Serif) רק לטקסט תצוגה גדול ודליל כגון קוד הסטטוס של עמוד השגיאה.
-6. `tests/unit/dashboard-kit-sweep.test.ts` שומר על אימוץ הקיט: אין span של ליגטורת Material תחת `src/app` או `src/shared/components`; בעץ הדשבורד (`src/app/(dashboard)` ו-`src/shared/components`) אין `<select>`, `<textarea>` או `<table>` גולמיים ואין `role="dialog"` בעבודת יד מחוץ לחריגים הרשומים (הענף הטבעי של מתאם ה-`Select`, `RequestLoggerDetail`); כל `<button>` או `<input>` גולמי שם צריך הערה המכילה `kit-exception:` (עם הסיבה) המסתיימת לכל היותר 3 שורות מעליו; גווני פלטה ווריאנטים של `dark:` רק בקבצים שהבדיקה מפרטת.
-7. אמתו את שתי ערכות הנושא ואת חלון התצוגה של 390 px לפני PR (צילומי מסך); `tests/e2e/a11y.spec.ts` מריץ את axe.
+1. אסימונים, אף פעם לא מילוליים. חריגים שנשמרו בכוונה: מסוף הקונסולה החשוך תמיד ו- `STATUS_HEX` (`src/shared/constants/statusColors.ts`), מראה המשקסים הפתורים של פלטת סטטוס הערכה למתקשרים הזקוקים ל-hex מילולי. הפלטות הקטגוריות אינן יוצאות דופן יותר: הן רוכבות על חמשת אסימוני התרשים של הערכה (`--color-chart-1..5`) דרך `src/shared/utils/categoricalPalette.ts`, ועבור אסטרטגיות ניתוב, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges וקנבס התזמור קוראים את משתני `--orch-status-*` המודעים לנושא (`src/shared/components/flow/edgeStyles.ts`).
+2. לעולם אל תתקן `packages/ui-kit/src` ביד: סנכרן עם `scripts/dev/sync-ui-kit.sh <commit>`; שער ה-pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) נכשל בכל בייט השונה מה-Commit המוצמד במעלה הזרם (הוא מדלג עם אזהרה כאשר השיבוט במעלה הזרם, `UI_KIT_CLONE` או `_references/cheaper-inference-ui-kit`, נעדר). כאשר הערכה חסרה משהו, עבדו סביבו במתאם או במסך ובקשו זאת במעלה הזרם.
+3. ברירת המחדל של טקסט ערכה היא אנגלית (`label = "Loading"`, `loadingLabel = "Loading table"`...) - העבר מחרוזות מתורגמות מ- `useTranslations(...)` בכל פעם שרכיב ערכה מעבד טקסט.
+4. כלי עזר של Tailwind מנצחים על מחלקות רכיבי ערכה (הערכה מצהירה על `@layer theme, base, components, utilities` והכללים שלה חיים ב- `components`) - השתמש בכלי עזר למרווחים ופריסה, לא כדי לצבוע מחדש את רכיבי ערכה.
+5. כותרות: `.ci-heading` לכותרות עמודים ומדורים; `.ci-dashboard-display` רק עבור טקסט תצוגה גדול ודליל כגון קוד המצב של דף השגיאה. שניהם משתמשים ב-Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` שומר על אימוץ הערכה: אין טווח קשירה חומרי תחת `src/app` או `src/shared/components`; בעץ לוח המחוונים (`src/app/(dashboard)` ו- `src/shared/components`) לא `<select>`, `<textarea>` או `<table>` גולמי ולא `role="dialog"` מגולגל ביד מחוץ לחריגים המפורטים (הענף המקורי של מתאם `Select`, `RequestLoggerDetail`); כל `<button>` או `<input>` גולמיים שם צריכים הערה המכילה `kit-exception:` (עם הסיבה) המסתיימת לכל היותר 3 שורות מעליו; גוונים של פלטה וגרסאות `dark:` רק בקבצים שהבדיקה מפרטת.
+7. אמת את שני הנושאים ואת נקודת התצוגה של 390 פיקסלים לפני PR (צילומי מסך); `tests/e2e/a11y.spec.ts` רץ axe.
 
 ## 3. הוספת מסך
 
@@ -49,43 +43,22 @@
 3. פתרונות עקיפה לפערים ב-kit חיים במתאם (או ב-`globals.css` תחת `@layer components` כשהתיקון הוא סגנון), לעולם לא ב-`packages/ui-kit/src`.
 4. הוסיפו או עדכנו את `tests/unit/ui/adapters/<name>.test.tsx`. עבור מתאם עם קוראים רבים, השוו את ה-markup המרונדר לפני ואחרי השינוי — שינויים ב-padding או ב-wrapper מתפשטים לכל מסך.
 
-## 5. עדכון ה-kit
+## 5. עדכון הערכה
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` מעתיק את ה-`src/` של ה-upstream באותו commit אל
-`packages/ui-kit/src` ומפעיל את הטרנספורמציה היחידה המותרת (הסרת הסיומת `.js` מייבואים יחסיים). לאחר מכן: סקרו את `git diff packages/ui-kit`, בצעו מעבר חזותי על מסכי הספקים, ההגדרות, ה-combos, השימוש ונקודת הקצה בשתי ערכות הנושא, הריצו `npm run check:ui-kit-snapshot` ו-`npm run test:vitest:ui`, ופתחו את ה-PR עם ה-changelog של ה-upstream.
+`npm run check:ui-kit-upstream` משווה את הגרסה המוצמדת ב- `packages/ui-kit/UPSTREAM.md` עם תג `v*` החדש ביותר של הריפו במעלה הזרם ומדפיס את פקודת הסינכרון כשיוצא מהדורה. זרימת העבודה השבועית `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) מפעילה את אותה בדיקה ושומרת בעיית מעקב אחת פתוחה בזמן שהסיכה מאחור; הריפו במעלה הזרם הוא פרטי, כך שזרימת העבודה צריכה אסימון לקריאה בלבד בסוד `UI_KIT_READ_TOKEN` ונשאר אדיש בלעדיו.
 
-## 6. דיאגרמות ה-README
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` מעתיק את ה- `src/` במעלה הזרם באותו commit (`latest` = התג `v*` החדש ביותר) ל- `packages/ui-kit/src`, מחיל את הטרנספורמציה הבודדת המותרת (הוא מוריד את סיומת `.js` מייבוא יחסי), ומגדיר את גרסת סביבת העבודה ב- `packages/ui-kit/package.json` ו- `package-lock.json` ל-upstream. לאחר מכן: בדוק את `git diff packages/ui-kit`, בצע העברת מידע חזותית על ספקים, הגדרות, שילובים, שימוש ונקודת קצה בשני הנושאים, הפעל `npm run check:ui-kit-snapshot` ו- `npm run test:vitest:ui` ופתח את PR עם יומן השינויים במעלה הזרם.
 
-שתים-עשרה הדיאגרמות ש-`README.md` של השורש מטמיע (`docs/diagrams/*.svg`) הן ה-kit מופעל על תמונה סטטית, והן נוצרות — לא מצוירות ביד: 13 קבצי גנרטורים ב-`scripts/docs/gen-readme-*.mjs`
-(שתים-עשרה דיאגרמות בתוספת ה-driver‏ `gen-readme-diagrams.mjs`) ו-12 בדיקות staleness ב-`tests/unit/docs/readme-*-svg.test.ts`, אחת לכל דיאגרמה, שכל אחת משווה בית-מול-בית את הקובץ ה-committed עם פלט הגנרטור שלו (ה-job‏ `test-unit`).
+## 6. דיאגרמות README
 
-- **טוקנים.** `scripts/docs/readme-diagram-theme.mjs` מעתיק את הפלטה מ-`packages/ui-kit/src/ci-tokens.css`
-  (מוצמד לאותו קובץ על ידי `tests/unit/docs/readme-diagram-theme.test.ts`) ומגדיר את תפקידי הטקסט על גופני
-  ה-kit — Instrument Serif לטקסט תצוגה, Inter לטקסט ממשק, IBM Plex Mono לספרות ולקוד,
-  אותן חבילות `@fontsource` ש-`src/app/globals.css` טוען עבור הדשבורד. ערכי הבהיר יושבים על `:root`,
-  ערכי הכהה מאחורי `prefers-color-scheme: dark`, בתוך הקובץ, כך שכל תמונה עוקבת אחרי ערכת-הנושא של הצופה
-  ב-GitHub.
-- **גופנים.** `scripts/docs/readme-fonts.mjs` יוצר תת-קבוצות (subsets) מקבצי ה-woff2 האלה לפי הגליפים שכל
-  דיאגרמה מציירת ומטמיע אותם כ-`@font-face` `data:` URIs — הדרך היחידה שבה הטיפוגרפיה של ה-kit מגיעה
-  לתמונת README, מכיוון ש-GitHub Markdown לא נושא CSS ושרת ה-proxy של camo חוסם כל שליפה חיצונית.
-  תת-הקבוצות הן לטיניות בלבד; גליפי הסמלים שנופלים חזרה למחסנית גופני המערכת מותרים אחד-אחד ב-`SYMBOL_FALLBACKS`, וכל
-  גליף אחר לא מכוסה זורק שגיאה.
-- **יצירה מחדש.** `npm run docs:readme-diagrams` כותב מחדש את כל שתים-עשרה לפי סדר ה-README ומדפיס
-  שורה אחת לכל קובץ עם גודלו. גנרטור בודד רץ גם בפני עצמו (`node scripts/docs/gen-readme-<name>.mjs`;
-  ל-`free-tier-budget` נדרש `node --import tsx/esm` כי הנתונים שלו מגיעים מטוען הקטלוג החי ב-
-  `open-sse/config/freeModelCatalog.ts`; ההשלכה ב-CI של שינוי בקטלוג מתועדת ב-
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). בצעו commit לגנרטור ול-SVG יחד.
-- **אימות.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` מרנדר קובץ באופן שבו GitHub מגיש
-  אותו (תג `<img>`, ה-`Content-Security-Policy` של camo, `image/svg+xml`), לוכד פריים בהיר ופריים כהה
-  ומדווח על בקשות הגופנים החיצוניות שהדף ביצע (חייב להיות 0).
-- **תקציב.** פחות מ-200 KB לקובץ (כל בדיקת staleness בודקת זאת); 500 KB היא התקרה הקשיחה לכל תמונת
-  README (הכלל של ה-validator של סטודיו ה-SVG).
-- **הטקסט ללא שינוי, המספרים מה-gate.** המיתוג מחדש שינה גופנים ופלטה, לא מילים: כל גנרטור
-  נושא את הטקסט של הדיאגרמה שלו בקבוע `*_COPY` (או בונה אותו מהקטלוג החי) שהוא גם
-  הטקסט המצויר וגם הקלט לתת-קבוצת הגופנים. המספרים הקנוניים נשארים בצמתי `<text>`, הנקראים על ידי
-  `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); בדיקות ה-staleness של הדיאגרמות
-  שה-gate קורא מריצות גם את ה-validators שלו על הקובץ שנוצר, כך שמספר שסוטה מהקוד מכשיל את
-  הבדיקה — תקנו את המקור שה-gate קורא, לעולם לא את המספר בגנרטור.
+12 הדיאגרמות שהשורש `README.md` מטמיע (`docs/diagrams/*.svg`) הם הערכה המיושמת על תמונה סטטית, והם נוצרים, לא מצוירים ביד: 13 קבצי מחולל ב- `scripts/docs/gen-readme-*.mjs` (שנים-עשר דיאגרמות פלוס מנהל ההתקן `gen-readme-diagrams.mjs` ) ו-12 מבחני עיקשות ב- `tests/unit/docs/readme-*-svg.test.ts`, אחד לכל דיאגרמה, כל בייט-משווה את קובץ הפלט שלו עם המחולל `test-unit` שלו (job).
+
+- **אסימונים.** `scripts/docs/readme-diagram-theme.mjs` מעתיקה את הפלטה מ- `packages/ui-kit/src/ci-tokens.css` (מוצמדת לקובץ על-ידי `tests/unit/docs/readme-diagram-theme.test.ts`) ומגדירה את תפקידי הטקסט על הפנים המוקדמות של הערכה - Instrument Serif לתצוגה, Inter לטקסט UI, IBM Plex Mono לדמויות וקוד - מחבילות `@fontsource` (לוח המחוונים עצמו משתמש ב-Switzer של הערכה מאז ערכה 0.0.66). ערכי אור יושבים על `:root`, ערכים כהים מאחורי `prefers-color-scheme: dark`, בתוך הקובץ, כך שכל תמונה עוקבת אחר סכימת הצופה ב- GitHub.
+- **גופנים.** `scripts/docs/readme-fonts.mjs` מגדיר משנה של קבצי woff2 לגליפים שכל דיאגרמה מצייר ומטמיע אותם כ- `@font-face` `data:` URIs - הדרך היחידה שבה טיפוגרפיה של ערכת מגיעה לתמונת README, מכיוון ש- GitHub Markdown אינו נושא CSS והפרוקסי של camo חוסם כל אחזור חיצוני. קבוצות המשנה הן בלטינית בלבד; גליפים של הסמלים הנופלים חזרה לערימת המערכת מותרים בזה אחר זה ב- `SYMBOL_FALLBACKS`, וכל זריקת גליפים אחרת שלא מכוסה.
+- **לְהִתְחַדֵשׁ.** `npm run docs:readme-diagrams` משכתב את כל השנים עשר בסדר README ומדפיס שורה אחת לכל קובץ עם הגודל שלו. גנרטור בודד פועל גם בעצמו (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` צריך `node --import tsx/esm` כי הנתונים שלו מגיעים ממטען הקטלוגים החי ב- `open-sse/config/freeModelCatalog.ts`; התוצאה של CI של שינוי קטלוג היא ב- `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). בצע את המחולל וה- SVG ביחד.
+- **הוֹכָחָה.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` מעבד קובץ כמו ש- GitHub משרת אותו (תג `<img>`, `Content-Security-Policy` של camo, `image/svg+xml`), לוכד מסגרת בהירה וחשוכה ומדווח על בקשות הגופן החיצוניות שהדף ביצע (חייב להיות 0).
+- **תַקצִיב.** מתחת ל-200 KB לקובץ (כל מבחן עיפון קובע זאת); 500 KB הוא הכובע הקשיח עבור כל תמונת README (כלל ה- SVG studio validator).
+- **העתק ללא שינוי, סופר מהשער.** המותג מחדש שינה את הסוג והפלטה, לא מילים: כל מחולל נושא את העותק של הדיאגרמה שלו בקבוע `*_COPY` (או בונה אותו מהקטלוג החי) שהוא גם הטקסט המצויר וגם קלט המשנה של גופן. דמויות קנוניות נשארות בצמתי `<text>`, נקראות על ידי `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); מבחני העיפון של הדיאגרמות שקורא השער מריצים גם את המאמתים שלו על הקובץ שנוצר, אז נתון שנסחף מהקוד נכשל בבדיקה - תקן את המקור שהשער קורא, לעולם לא את המספר במחולל.
 
 ## 7. אינדקס עיון
 

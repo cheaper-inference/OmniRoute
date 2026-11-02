@@ -1,0 +1,1 @@
+- **feat(i18n):** hardcoded English strings on the Conversations page, Log export, the CLIProxyAPI account health card, the Dario (Claude accounts) panel, the Telegram miniapp and eight other dashboard components now go through the message catalogs, with new keys translated for all 66 locales ([#17987](https://github.com/diegosouzapw/OmniRoute/pull/17987)) — thanks @HouMinXi

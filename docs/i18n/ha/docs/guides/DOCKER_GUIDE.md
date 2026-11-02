@@ -645,27 +645,29 @@ sudo systemctl enable --now omniroute-update.path
 Service ɗin yana cire buƙatar kafin yin pulling domin aikin da ya gaza kada ya shiga maimaitawa. Idan babu
 `DOCKER_UPDATE_TRIGGER_FILE`, dashboard zai ci gaba da tsarin umarnin hannu.
 
-## Samuwa: SQLite na asali replica guda ɗaya ne
+## Samun: tsoho SQLite kwafi ɗaya ne
 
-Docker / Kubernetes OmniRoute na yau da kullum yana da **Node process guda ɗaya + SQLite writer guda ɗaya**. **Ba a goyon bayan** high availability a wannan topology.
+Stock Docker / Kubernetes OmniRoute ne** Node tsari guda ɗaya + ɗaya SQLite marubuci** . Babban samuwa shine** ba a tallafawa** a kan wannan topology.
 
-| Ƙuntatawa                                   | Sakamako                                                                                                                                                                                                                                                                                                                                              |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Writer guda ɗaya                            | **Kada** a gudanar da replicas da yawa a kan fayil ɗin SQLite guda ɗaya. Hakan yana lalata DB.                                                                                                                                                                                                                                                        |
-| Recreate / restart / kashewa ta HEALTHCHECK | **Cikakken katsewar aiki** ga SSE da ke gudana, sessions na dashboard, da state da ke cikin memory. Kowane client da aka haɗa zai katse. Sabbin buƙatu a lokacin da babu endpoint za su sami **`502 Bad Gateway: Unknown error`** daga reverse-proxy, ba JSON na OmniRoute ba — clients ba za su iya bambance wannan da gazawar provider ba (#11015). |
-| Event loop ɗaya da `/healthz`               | Aikin catalog ko compression tick mai nauyi zai iya jinkirta probes; daga nan ɗan gajeren timeout ya sake kunna replica **ɗaya tilo**.                                                                                                                                                                                                                |
+| Takura                                     | Sakamakon                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Marubuci guda daya                         | Yi** ba** gudanar da kwafi da yawa akan fayil ɗin SQLite iri ɗaya. Wannan yana lalata DB.                                                                                                                                                                                                                                                 |
+| Sake ƙirƙira/sake farawa/ HEALTHCHECK kisa | **Cikakken fita** na SSE in-jir, zaman dashboard, da yanayin ƙwaƙwalwar ajiya. Kowane abokin ciniki da aka haɗa yana raguwa. Sabbin buƙatun yayin taga fanko-ƙarshen ƙarshen samin wakili na baya**`502 Bad Gateway: Unknown error`** , ba OmniRoute JSON — abokan ciniki ba za su iya bambanta wannan daga gazawar mai bayarwa (#11015). |
+| Madauki guda ɗaya da `/healthz`            | Katalogi mai aiki ko alamar matsawa na iya jinkirta bincike; wani ɗan gajeren lokaci sannan ya sake farawa da** kawai** kwafi.                                                                                                                                                                                                            |
 
-**Jadawalin probes** (duba kuma [shawarwarin probes na Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Binciken matrix** (Dubi kuma [shawarwarin binciken Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Probe         | Manufa                                                    | Kada a yi amfani da                                                  |
-| ------------- | --------------------------------------------------------- | -------------------------------------------------------------------- |
-| Liveness      | TCP a kan `PORT` (tsoho `20128`), ko soft HTTP `/healthz` | `/api/monitoring/health`                                             |
-| Readiness     | HTTP `GET /healthz`                                       | Ƙananan timeouts da ke ɗaukar event-loop mai aiki a matsayin matacce |
-| Deep / mutane | `/api/monitoring/health`                                  | Automated kubelet liveness                                           |
+| Bincike       | manufa                                                  | Kada ku yi amfani                                                            |
+| ------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Rayuwa        | TCP akan `PORT` (tsoho `20128`), ko zqd HTTP `/healthz` | `/api/monitoring/health`                                                     |
+| Shiri         | HTTP `GET /healthz`                                     | Matsakaicin lokacin ƙarewa waɗanda ke ɗaukar madaidaicin taron kamar matattu |
+| Deep / mutane | `/api/monitoring/health`                                | Kubelet rayuwa mai sarrafa kansa                                             |
 
-**Upgrades:** sa ran kowane session zai katse. Ka fitar da clients a hankali idan za ka iya; babu rolling update a kan SQLite na asali. Compose `restart: unless-stopped` tare da Docker `HEALTHCHECK` su ma za su maye gurbin process ɗaya tilo idan container ya zama Unhealthy — tasirin lalacewa iri ɗaya ne.
+**Haɓakawa:** sa ran kowane zaman ya ragu. Zuba abokan ciniki idan za ku iya; babu sabuntawa akan tsoho SQLite. Ƙirƙirar `restart: unless-stopped` da Docker `HEALTHCHECK` kuma za su maye gurbin tsarin kawai lokacin da akwati ba shi da lafiya - radius iri ɗaya.
 
-Snippet na Kubernetes don **replica guda ɗaya** (ana buƙatar Recreate; kada a ƙara `replicas` a kan fayil ɗin SQLite guda ɗaya):
+Shirye-shiryen da aka shirya da taswirar Helm suna rayuwa a cikin `deploy/kubernetes/` da `deploy/helm/omniroute/` - duba [jagorar tura Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes snippet don a** kwafi guda ɗaya** (ana buƙatar sake ƙirƙira; kar a ɗaga `replicas` akan fayil ɗin SQLite ɗaya):
 
 ```yaml
 spec:
@@ -692,9 +694,9 @@ spec:
             periodSeconds: 20
 ```
 
-Jinkirin `preStop` na ba kube damar cire Service endpoints kafin SIGTERM, don haka zirga-zirgar **sabuwa** ta daina isa ga aikin da ke mutuwa. Ana ba SSE na `/v1/responses` da ke gudana damar kammalawa har zuwa `SHUTDOWN_TIMEOUT_MS` (tsoho 30s) ta hanyar heavyweight admission leases (#11015). Sabbin buƙatun da har yanzu suka isa ga aikin za su samu `503` + `Retry-After: 5`. Gibin rashin endpoint na Recreate har sai madadin ya zama Ready zai ci gaba da zama cikakken katsewar aiki — wannan shi ne tsarin SQLite, ba kuskuren daidaita probe ba.
+barci `preStop` yana barin kube sauke wuraren ƙarshen sabis kafin SIGTERM haka** sabo** zirga-zirga yana tsayawa yana bugun tsarin mutuwa. A cikin jirgin `/v1/responses` SSE ana zubar da shi har zuwa `SHUTDOWN_TIMEOUT_MS` (tsohon 30s) ta hanyar hayar shigar da nauyi (#11015). Sabbin buƙatun da har yanzu suka kai ga tsari suna samun `503` + `Retry-After: 5`. Sake ƙirƙira tazarar fanko-ƙarshen ƙarshen har sai an shirya wanda zai maye gurbin ya kasance mai wahala - wato SQLite topology, ba kuskuren bincike ba.
 
-External Postgres / multi-writer HA **ba** ingantacciyar hanyar da aka rubuta a takardun aikin ba ce. Idan kana buƙatar HA, ka ci gaba da amfani da replica guda ɗaya ko kuma ka gudanar da tsarin da aikin ya gwada kuma ya rubuta takardunsa daban. Aikin Postgres/MySQL yana cikin [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Har sai an fitar da wannan, hanya ɗaya tilo da ake tallafawa don ninka ƙarfin `/v1/responses` masu **girma** ita ce amfani da ayyuka masu zaman kansu guda N (sashe na gaba), ba `replicas > 1` a kan volume guda ɗaya ba.
+Postgres na waje/marubuci da yawa HA shine** ba** hanyar haja da aka rubuta. Idan kuna buƙatar HA, adana kwafi ɗaya ko gudanar da topology aikin ya gwada kuma an rubuta shi daban. Aikin Postgres/MySQL yana rayuwa a [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Har sai wannan jirgi, hanya ɗaya da aka goyan baya don haɓaka** babba** Ƙarfin `/v1/responses` shine N matakai masu zaman kansu (sashe na gaba), ba `replicas > 1` akan juzu'i ɗaya ba.
 
 ## Faɗaɗa a kwance: matakai masu zaman kansu guda N
 

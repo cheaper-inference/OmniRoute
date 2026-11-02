@@ -13,32 +13,17 @@
 
 ## Cos'è
 
-OmniRoute registra 376 provider, incluse 155 voci di catalogo contrassegnate come **free/no-auth**
-(no-auth,
-OAuth con piano gratuito, o API key con piano gratuito — vedi la
-[Guida ai Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) e la
-[directory completa dei Free Tiers](../reference/FREE_TIERS.md)). Il problema: i provider
-gratuiti variano enormemente nella qualità dei modelli. Un provider no-auth che offre un
-modello all'avanguardia è molto più utile di uno che offre un piccolo modello legacy.
+OmniRoute registra 377 fornitori, incluse 155 voci di catalogo contrassegnate**free/no-auth** (no-auth, chiave OAuth del livello gratuito o API del livello gratuito: consulta la [guida ai livelli gratuiti](../getting-started/FREE-TIERS-GUIDE.md) e la [directory completa dei livelli gratuiti](../reference/FREE_TIERS.md) ). Il problema: i fornitori gratuiti variano notevolmente nella qualità del modello. Un provider senza autenticazione che serve un modello di frontiera è molto più utile di uno che serve un piccolo modello legacy.
 
-**Free Provider Rankings** risponde alla domanda "**quale provider gratuito mi offre il modello migliore?**"
-incrociando il catalogo di ogni provider gratuito con **punteggi di qualità crowdsourced** provenienti dalla
-**classifica Arena AI** (ELO basato sulle preferenze umane, la stessa idea alla base della
-chatbot arena LMArena). I provider vengono quindi classificati in base alla potenza del loro
-**miglior modello gratuito**.
+**Classifiche gratuite dei fornitori** risposte"** quale fornitore gratuito mi offre il modello migliore?** " unendosi al catalogo di ciascun fornitore gratuito con** punteggi di qualità provenienti dal crowdsourcing** dal** Classifica Arena AI** ( ELO a preferenza umana, la stessa idea alla base dell'arena chatbot LMArena). I fornitori vengono quindi classificati in base alla loro forza** miglior modello gratuito** .
 
-La classifica è calcolata a partire da tre fonti reali:
+La classifica è calcolata da tre fonti reali:
 
-1. Le liste dei provider gratuiti — `NOAUTH_PROVIDERS`, più le voci di `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` contrassegnate con `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Il catalogo dei modelli di ciascun provider, dal registro dei provider
-   (`open-sse/config/providerRegistry.ts`).
-3. I punteggi di adeguatezza ai task derivati dall'ELO, memorizzati nella tabella DB
-   `model_intelligence` dal motore di sincronizzazione Arena ELO
-   (`src/lib/arenaEloSync.ts`).
+1. Gli elenchi dei provider gratuiti: `NOAUTH_PROVIDERS`, oltre alle voci `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` contrassegnate come `hasFree` (`src/shared/constants/providers.ts`).
+2. Il catalogo dei modelli di ciascun fornitore dal registro del fornitore (`open-sse/config/providerRegistry.ts`).
+3. Punteggi di adattamento alle attività derivati da ELO memorizzati nella tabella `model_intelligence` DB dal motore di sincronizzazione Arena ELO (`src/lib/arenaEloSync.ts`).
 
-La logica di join si trova in `src/lib/freeProviderRankings.ts`.
+La logica di join risiede in `src/lib/freeProviderRankings.ts`.
 
 ---
 

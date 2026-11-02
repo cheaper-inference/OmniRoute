@@ -4,13 +4,7 @@
 
 ---
 
-> **상태:** 대시보드는 **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)을 기반으로 구축되었으며,
-> 워크스페이스 `packages/ui-kit` (`@omniroute/ui-kit`)로 벤더링되어 있습니다 (업스트림 스냅샷은
-> `packages/ui-kit/UPSTREAM.md`에 고정되어 있으며 `npm run check:ui-kit-snapshot`으로 검증됩니다). Light가 표준
-> 테마이며, 기본 설정은 `system`입니다. 강조색은 Keak lime (`--ci-color-accent`)입니다. Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`)가 UI 패밀리이고, Instrument Serif는 크고 드물게 사용되는
-> 디스플레이 텍스트 (`.ci-dashboard-display`)에만 사용되며, IBM Plex Mono는 코드용입니다 — 모두
-> `src/app/globals.css` 상단의 `@fontsource/*` 임포트를 통해 셀프 호스팅됩니다. 모든 아이콘은 Lucide 글리프입니다.
+> **상태:** 대시보드는** Keak CI UI 키트** (`@keak/cheaper-inference-ui-kit`), 작업 공간 `packages/ui-kit` (`@omniroute/ui-kit`; 업스트림 스냅샷은 `packages/ui-kit/UPSTREAM.md` 에 고정되고 `npm run check:ui-kit-snapshot` 에 의해 보호됨)로 판매됩니다. 빛은 표준적인 주제입니다. 기본 설정은 `system` 입니다. 악센트는 Keak 라임(`--ci-color-accent`)입니다. Switzer는 UI, 디스플레이 및 코드 텍스트(`--ci-font-ui`, `--ci-font-display` 및 `--ci-font-mono` 이를 해결함)에 대한 단일 제품군이며 키트 자체(`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` 에서 가져옴)에 의해 자체 호스팅됩니다. 모든 아이콘은 Lucide 문자 모양입니다.
 
 ## 1. 각 요소의 위치
 
@@ -24,32 +18,13 @@
 
 ## 2. 규칙
 
-1. 리터럴이 아닌 토큰을 사용합니다. 의도적으로 유지하는 예외: 항상 다크 모드인 콘솔 터미널과
-   `STATUS_HEX`(`src/shared/constants/statusColors.ts`) — 리터럴 hex 값이 필요한 호출자를 위한 kit 상태
-   팔레트의 해석된 hex 미러입니다. 카테고리 팔레트는 더 이상 예외가 아닙니다:
-   `src/shared/utils/categoricalPalette.ts`를 통해 kit의 다섯 개 차트 토큰(`--color-chart-1..5`)을 사용하며,
-   라우팅 전략의 경우 `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`를 사용합니다.
-   ReactFlow 엣지와 오케스트레이션 캔버스는 테마 인식 `--orch-status-*` 변수
-   (`src/shared/components/flow/edgeStyles.ts`)를 읽습니다.
-2. `packages/ui-kit/src`를 직접 수정하지 마세요. `scripts/dev/sync-ui-kit.sh <commit>`으로 동기화합니다.
-   pre-commit 게이트 `npm run check:ui-kit-snapshot`(`.husky/pre-commit`)은 고정된 업스트림 커밋과
-   한 바이트라도 다르면 실패합니다(업스트림 클론인 `UI_KIT_CLONE` 또는 `_references/cheaper-inference-ui-kit`이
-   없으면 경고와 함께 건너뜁니다). kit에 없는 기능이 필요하면 어댑터나 화면에서 우회 처리하고
-   업스트림에 요청하세요.
-3. kit 텍스트 기본값은 영어입니다(`label = "Loading"`, `loadingLabel = "Loading table"`…). kit 컴포넌트가
-   텍스트를 렌더링할 때마다 `useTranslations(...)`에서 번역된 문자열을 전달하세요.
-4. Tailwind 유틸리티가 kit 컴포넌트 클래스보다 우선합니다(kit은
-   `@layer theme, base, components, utilities`를 선언하며 규칙은 `components`에 있습니다). 간격과
-   레이아웃에는 유틸리티를 사용하되, kit 컴포넌트의 색상을 바꾸는 데는 사용하지 마세요.
-5. 제목: 페이지 및 섹션 제목에는 `.ci-heading`(Inter, 트래킹 없음)을 사용하고, `.ci-dashboard-display`
-   (Instrument Serif)는 오류 페이지 상태 코드처럼 크고 여백이 많은 디스플레이 텍스트에만 사용합니다.
-6. `tests/unit/dashboard-kit-sweep.test.ts`가 kit 도입을 감시합니다: `src/app` 또는 `src/shared/components`
-   아래에 Material 리거처 span 금지; 대시보드 트리(`src/app/(dashboard)` 및 `src/shared/components`)에서는
-   나열된 예외(`Select` 어댑터의 네이티브 분기, `RequestLoggerDetail`) 외에 raw `<select>`, `<textarea>`,
-   `<table>` 및 수작업 `role="dialog"` 금지; 해당 위치의 모든 raw `<button>` 또는 `<input>`에는
-   `kit-exception:`(사유 포함)이 들어간 주석이 최대 3줄 위에서 끝나야 합니다. 팔레트 색조와 `dark:`
-   변형은 테스트에 나열된 파일에서만 허용됩니다.
-7. PR 전에 두 테마와 390 px 뷰포트를 확인하세요(스크린샷). `tests/e2e/a11y.spec.ts`가 axe를 실행합니다.
+1. 토큰은 리터럴이 아닙니다. 의도적으로 유지되는 예외: 항상 어두운 콘솔 터미널과 문자 그대로의 16진수가 필요한 호출자를 위한 키트 상태 팔레트의 확인된 16진수 미러 `STATUS_HEX` (`src/shared/constants/statusColors.ts`). 범주형 팔레트는 더 이상 예외가 아닙니다. 이는 키트의 5개 차트 토큰(`--color-chart-1..5`)을 통해 `src/shared/utils/categoricalPalette.ts` 및 라우팅 전략의 경우 `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` 사용합니다. ReactFlow edge 및 오케스트레이션 캔버스는 테마 인식 `--orch-status-*` 변수(`src/shared/components/flow/edgeStyles.ts`)를 읽습니다.
+2. `packages/ui-kit/src` 직접 패치하지 마세요. `scripts/dev/sync-ui-kit.sh <commit>` 와 동기화하세요. 사전 커밋 게이트 `npm run check:ui-kit-snapshot` (`.husky/pre-commit`)는 고정된 업스트림 커밋과 다른 바이트에서 실패합니다(업스트림 클론 `UI_KIT_CLONE` 또는 `_references/cheaper-inference-ui-kit` 없으면 경고와 함께 건너뜁니다). 키트에 부족한 부분이 있으면 어댑터나 화면에서 문제를 해결하고 업스트림에 요청하세요.
+3. 키트 텍스트 기본값은 영어(`label = "Loading"`, `loadingLabel = "Loading table"`…)입니다. 키트 구성 요소가 텍스트를 렌더링할 때마다 `useTranslations(...)` 에서 번역된 문자열을 전달합니다.
+4. Tailwind 유틸리티는 키트 구성 요소 클래스를 압도합니다(키트는 `@layer theme, base, components, utilities` 및 해당 규칙을 `components` 에 선언함). 키트 구성 요소의 색상을 다시 지정하는 것이 아니라 간격 및 레이아웃을 위해 유틸리티를 사용합니다.
+5. 제목: 페이지 및 섹션 제목의 경우 `.ci-heading` ; 오류 페이지 상태 코드와 같은 크고 희박한 표시 텍스트에만 `.ci-dashboard-display` 사용합니다. 둘 다 Switzer를 사용합니다.
+6. `tests/unit/dashboard-kit-sweep.test.ts` 키트 채택을 보호합니다. `src/app` 또는 `src/shared/components` 아래에 자료 합자 범위가 없습니다. 대시보드 트리(`src/app/(dashboard)` 및 `src/shared/components`)에는 원시 `<select>`, `<textarea>` 또는 `<table>` 없고 나열된 예외( `Select` 어댑터의 기본 분기, `RequestLoggerDetail`) 외부에 직접 롤링된 `role="dialog"` 없습니다. 모든 원시 `<button>` 또는 `<input>` 에는 최대 3줄 위로 끝나는 `kit-exception:` (이유 포함)을 포함하는 주석이 필요합니다. 팔레트 색상과 `dark:` 변형은 테스트 목록에 있는 파일에만 있습니다.
+7. PR (스크린샷) 전에 테마와 390px 뷰포트를 모두 확인하세요. `tests/e2e/a11y.spec.ts` 도끼를 실행합니다.
 
 ## 3. 화면 추가하기
 
@@ -82,52 +57,22 @@
 4. `tests/unit/ui/adapters/<name>.test.tsx`를 추가하거나 업데이트합니다. 호출자가 많은 어댑터의 경우,
    변경 전후의 렌더링된 마크업을 비교하세요 — 패딩이나 래퍼 변경이 모든 화면으로 퍼져나갑니다.
 
-## 5. kit 업데이트
+## 5. 키트 업데이트
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]`은 해당 커밋의 업스트림 `src/`를
-`packages/ui-kit/src`로 복사하고 허용된 단일 변환을 적용합니다 (상대 import에서 `.js` 접미사를
-제거). 그 다음: `git diff packages/ui-kit`를 검토하고, 두 테마 모두에서 providers, settings, combos,
-usage 및 endpoint를 시각적으로 점검하고, `npm run check:ui-kit-snapshot`과 `npm run test:vitest:ui`를
-실행한 후, 업스트림 변경 로그와 함께 PR을 엽니다.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` 에 고정된 버전을 업스트림 저장소의 최신 `v*` 태그와 비교하고 릴리스가 출시되면 sync 명령을 인쇄합니다. 주간 `UI Kit upstream watch` 작업 흐름(`.github/workflows/ui-kit-upstream-watch.yml`)은 동일한 검사를 실행하고 핀이 뒤에 있는 동안 하나의 추적 문제를 열어 둡니다. 업스트림 저장소는 비공개이므로 워크플로는 `UI_KIT_READ_TOKEN` 비밀에 읽기 전용 토큰이 필요하며 토큰 없이는 비활성 상태를 유지합니다.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` 해당 커밋(최신 `v*` 태그 `latest` = )에서 업스트림 `src/` `packages/ui-kit/src` 로 복사하고, 허용되는 단일 변환을 적용하고(상대 가져오기에서 `.js` 접미사를 삭제함), `packages/ui-kit/package.json` 및 `package-lock.json` 의 작업 공간 버전을 업스트림 버전으로 설정합니다. 그런 다음 `git diff packages/ui-kit` 검토하고, 두 테마 모두에서 공급자, 설정, 콤보, 사용법 및 끝점에 대한 시각적 전달을 수행하고, `npm run check:ui-kit-snapshot` 및 `npm run test:vitest:ui` 실행하고, 업스트림 변경 로그가 있는 PR 엽니다.
 
 ## 6. README 다이어그램
 
-루트 `README.md`에 삽입된 12개의 다이어그램 (`docs/diagrams/*.svg`)은 kit을 정적 이미지에 적용한
-것으로, 손으로 그린 것이 아니라 생성된 것입니다: `scripts/docs/gen-readme-*.mjs`에 있는 13개의
-생성기 파일 (12개의 다이어그램과 `gen-readme-diagrams.mjs` 드라이버)과
-`tests/unit/docs/readme-*-svg.test.ts`에 있는 12개의 staleness 테스트(다이어그램당 하나씩)이며,
-각 테스트는 커밋된 파일을 해당 생성기의 출력과 바이트 단위로 비교합니다 (잡 `test-unit`).
+루트 `README.md` 가 포함하는 12개의 다이어그램(`docs/diagrams/*.svg`)은 정적 이미지에 적용되는 키트이며 손으로 그리는 것이 아니라 생성됩니다. `scripts/docs/gen-readme-*.mjs` 의 13개 생성기 파일(12개 다이어그램과 `gen-readme-diagrams.mjs` 드라이버) 및 `tests/unit/docs/readme-*-svg.test.ts` 의 12개 비활성 테스트(다이어그램당 하나씩), 각 바이트는 커밋된 파일을 생성기의 출력(작업 `test-unit`)과 비교합니다.
 
-- **토큰.** `scripts/docs/readme-diagram-theme.mjs`는 `packages/ui-kit/src/ci-tokens.css`에서
-  팔레트를 복사하며 (`tests/unit/docs/readme-diagram-theme.test.ts`가 해당 파일에 대해 고정 여부를
-  검증), kit 서체의 텍스트 역할을 정의합니다 — 디스플레이용 Instrument Serif, UI 텍스트용 Inter,
-  수치와 코드용 IBM Plex Mono로, `src/app/globals.css`가 대시보드용으로 로드하는 것과 동일한
-  `@fontsource` 패키지입니다. 라이트 값은 `:root`에, 다크 값은 파일 내부의
-  `prefers-color-scheme: dark` 뒤에 있으므로, 각 이미지가 GitHub에서 뷰어의 스킴을 따릅니다.
-- **폰트.** `scripts/docs/readme-fonts.mjs`는 해당 woff2 파일을 각 다이어그램이 그리는 글리프로
-  서브셋팅하고 이를 `@font-face` `data:` URI로 임베드합니다 — GitHub Markdown은 CSS를 전달하지
-  않고 camo 프록시가 모든 외부 fetch를 차단하기 때문에, kit 타이포그래피가 README 이미지에 도달하는
-  유일한 방법입니다. 서브셋은 라틴 문자 전용이며, 시스템 스택으로 폴백하는 심볼 글리프는
-  `SYMBOL_FALLBACKS`에서 하나씩 허용되고, 그 외 커버되지 않는 글리프는 예외를 발생시킵니다.
-- **재생성.** `npm run docs:readme-diagrams`은 12개 전부를 README 순서대로 다시 작성하고 파일당
-  크기와 함께 한 줄씩 출력합니다. 단일 생성기도 단독으로 실행할 수 있습니다
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget`은 수치를
-  `open-sse/config/freeModelCatalog.ts`의 라이브 카탈로그 로더에서 가져오기 때문에
-  `node --import tsx/esm`이 필요합니다; 카탈로그 변경의 CI 결과는
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`에 있습니다). 생성기와 SVG를 함께
-  커밋하세요.
-- **검증.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`은 GitHub이 서빙하는 방식대로
-  파일을 렌더링하고 (`<img>` 태그, camo의 `Content-Security-Policy`, `image/svg+xml`), 라이트와
-  다크 프레임을 캡처하며 페이지가 만든 외부 폰트 요청을 보고합니다 (0이어야 함).
-- **예산.** 파일당 200 KB 미만 (각 staleness 테스트가 이를 단언함); 500 KB는 모든 README 이미지의
-  하드 캡입니다 (SVG 스튜디오 밸리데이터의 규칙).
-- **문구는 변경 없이, 수치는 게이트에서.** 리브랜딩은 서체와 팔레트를 바꿨지만 문구는 바꾸지
-  않았습니다: 각 생성기는 다이어그램의 문구를 `*_COPY` 상수에 담고 있거나 (라이브 카탈로그에서
-  빌드) 이는 그려지는 텍스트이자 폰트 서브셋 입력입니다. 정규 수치는 `<text>` 노드에 남아
-  `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`)가 읽습니다; 게이트가 읽는
-  다이어그램의 staleness 테스트도 생성된 파일에 대해 해당 밸리데이터를 실행하므로, 코드에서
-  벗어난 수치는 테스트를 실패시킵니다 — 게이트가 읽는 소스를 수정하세요, 절대 생성기의 숫자를
-  고치지 마세요.
+- **토큰.** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` 에서 팔레트를 복사하고( `tests/unit/docs/readme-diagram-theme.test.ts` 에 의해 해당 파일에 고정됨) `@fontsource` 패키지에서 키트의 이전 표면(디스플레이용 Instrument Serif, UI 텍스트용 Inter, 그림 및 코드용 IBM Plex Mono)에 대한 텍스트 역할을 정의합니다(대시보드 자체는 키트 0.0.66부터 키트의 Switzer를 사용합니다). 파일 내에서 밝은 값은 `:root` 에 있고 어두운 값은 `prefers-color-scheme: dark` 뒤에 있으므로 각 이미지는 GitHub 에서 보는 사람의 구성표를 따릅니다.
+- **글꼴.** `scripts/docs/readme-fonts.mjs` 해당 woff2 파일을 각 다이어그램이 그리는 문자 모양으로 하위 집합하고 이를 `@font-face` `data:` URIs 로 포함합니다. 이는 키트 타이포그래피가 README 이미지에 도달하는 유일한 방법입니다. GitHub Markdown은 CSS 전달하지 않고 camo 프록시는 모든 외부 가져오기를 차단하기 때문입니다. 하위 집합은 라틴어로만 구성됩니다. 시스템 스택으로 돌아가는 기호 글리프는 `SYMBOL_FALLBACKS` 에서 하나씩 허용되며, 다른 발견되지 않은 글리프는 발생합니다.
+- **재생성.** `npm run docs:readme-diagrams` 12개 모두를 README 순서로 다시 작성하고 해당 크기와 함께 파일당 한 줄씩 인쇄합니다. 단일 생성기도 자체적으로 실행됩니다(`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` 에는 해당 수치가 `open-sse/config/freeModelCatalog.ts` 의 라이브 카탈로그 로더에서 나오므로 `node --import tsx/esm` 필요합니다. 카탈로그 변경의 CI 결과는 `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` 에 있습니다). 생성기와 SVG 함께 커밋합니다.
+- **증거.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` GitHub 제공하는 방식( `<img>` 태그, camo의 `Content-Security-Policy`, `image/svg+xml`)으로 파일을 렌더링하고, 밝은 프레임과 어두운 프레임을 캡처하고, 페이지에서 요청한 외부 글꼴을 보고합니다(0이어야 함).
+- **예산.** 파일당 200 KB 미만(각 비활성 테스트에서 이를 확인함) 500 KB 는 모든 README 이미지의 하드 캡입니다( SVG 스튜디오 유효성 검사기 규칙).
+- **변경 없이 복사하고 게이트부터 계산합니다.** 브랜드 변경은 단어가 아닌 유형과 팔레트를 변경했습니다. 각 생성기는 그려진 텍스트와 글꼴 하위 집합 입력인 `*_COPY` 상수로 다이어그램의 복사본을 전달합니다(또는 라이브 카탈로그에서 빌드합니다). 표준 수치는 `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`)가 읽는 `<text>` 노드에 유지됩니다. 게이트가 읽는 다이어그램의 부실 테스트도 생성된 파일에 대해 유효성 검사기를 실행하므로 코드에서 표류하는 그림은 테스트에 실패합니다. 게이트가 읽는 소스를 수정하고 생성기의 숫자는 수정하지 마세요.
 
 ## 7. 참조 인덱스
 
