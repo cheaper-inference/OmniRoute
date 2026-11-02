@@ -1,0 +1,1 @@
+- **fix(usage):** include the shared Kimi Coding monthly allowance in quota results while preserving existing weekly and five-hour windows.

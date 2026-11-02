@@ -120,7 +120,12 @@ import {
   resolveComboRuntimeUnits,
   resolveComboTargets,
 } from "./combo/comboStructure.ts";
-import { createInvocationId, getComboTrace, startComboTrace } from "./combo/decisionTrace.ts";
+import {
+  createInvocationId,
+  finishComboTrace,
+  getComboTrace,
+  startComboTrace,
+} from "./combo/decisionTrace.ts";
 import {
   QUOTA_SOFT_DEPRIORITIZE_FACTOR,
   setCandidateQuotaSoftPenalty,
@@ -147,6 +152,10 @@ import {
 } from "./combo/autoConnectionScope.ts";
 import { resolveComboTargetPipeline } from "./combo/targetResolution.ts";
 import { dispatchWithCooldownRetry } from "./combo/comboAttemptLoop.ts";
+import {
+  resolveHeldTruncatedResponse,
+  type HeldTruncatedState,
+} from "./combo/truncatedStreamFailover.ts";
 import { evaluateExecuteTargetGates } from "./combo/executeTargetGates.ts";
 import { executeTargetAttempt } from "./combo/executeTargetAttempt.ts";
 import type { AttemptLoopDeps, AttemptLoopState } from "./combo/attemptLoopTypes.ts";
@@ -771,6 +780,11 @@ export async function handleComboChat(options: HandleComboChatOptions): Promise<
     : await handleComboChatInner({ ...options, invocationId: traceInvocationId });
   response.headers.set("X-OmniRoute-Combo-Trace", traceInvocationId);
   const trace = getComboTrace(traceInvocationId);
+  // A failed set can still retry; only the final response determines terminal status.
+  finishComboTrace(traceInvocationId, {
+    status: response.status,
+    errorClass: trace?.terminal?.errorClass,
+  });
   options.log.info(
     "COMBO",
     `combo trace ${traceInvocationId} terminal=${JSON.stringify(trace?.terminal ?? null)} decisions=${trace?.decisions.length ?? 0}`
@@ -961,7 +975,8 @@ async function handleComboChatInner({
   // target pipeline below so it cannot rotate between tool rounds.
   if (getStrategyTraits(strategy).usesRoundRobinLoop && !activeNativeTurnPin) {
     const { handleRoundRobinCombo } = await import("./combo/roundRobinCombo.ts");
-    return handleRoundRobinCombo({
+    const heldAttempt: HeldTruncatedState = {};
+    const roundRobinResponse = await handleRoundRobinCombo({
       body,
       combo,
       handleSingleModel: handleSingleModelWithTimeout,
@@ -980,7 +995,9 @@ async function handleComboChatInner({
       requestHeaders,
       relayOptions,
       perTargetAdmission,
+      heldAttempt,
     });
+    return resolveHeldTruncatedResponse(heldAttempt, roundRobinResponse);
   }
 
   // Native Codex turns must stay on their pinned target, but a pre-content
@@ -1304,7 +1321,10 @@ async function handleComboChatInner({
   }
 
   try {
-    return await dispatchWithCooldownRetry({ state, deps, extra });
+    return resolveHeldTruncatedResponse(
+      state,
+      await dispatchWithCooldownRetry({ state, deps, extra })
+    );
   } finally {
     quotaShareConcurrencyRelease?.();
     // #11371: release the in-flight slot quota-share ordering reserved for its

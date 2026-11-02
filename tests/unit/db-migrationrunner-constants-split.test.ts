@@ -70,8 +70,8 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 33 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 33);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 39 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 39);
     for (const e of RENAMED_MIGRATION_COMPATIBILITY) {
       assert.equal(typeof e.fromVersion, "string");
       assert.equal(typeof e.fromName, "string");
@@ -174,6 +174,18 @@ describe("migrationRunner/constants — large-table integrity", () => {
       toVersion: "101",
       toName: "api_key_usage_limits",
     });
+  });
+
+  it("name-locks every published Team draft slot to canonical migration 215", () => {
+    assert.deepEqual(
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.toName === "team_cost_centers"),
+      ["153", "154", "155", "161", "163", "164"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "team_cost_centers",
+        toVersion: "215",
+        toName: "team_cost_centers",
+      }))
+    );
   });
 
   it("PHYSICAL_SCHEMA_SENTINELS has 15 well-formed entries incl. the newest 064", () => {

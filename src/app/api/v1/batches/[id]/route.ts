@@ -1,4 +1,4 @@
-import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
+import { CORS_HEADERS, credentialRejectionHeaders, handleCorsOptions } from "@/shared/utils/cors";
 import { getBatch, deleteBatch } from "@/lib/db/batches";
 import { NextResponse } from "next/server";
 import {
@@ -25,7 +25,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   if (scope.apiKey && !scope.apiKeyId) {
     return NextResponse.json(buildErrorBody(401, "Invalid API key"), {
       status: 401,
-      headers: CORS_HEADERS,
+      headers: credentialRejectionHeaders(request),
     });
   }
 
@@ -76,7 +76,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   if (scope.apiKey && !scope.apiKeyId) {
     return NextResponse.json(buildErrorBody(401, "Invalid API key"), {
       status: 401,
-      headers: CORS_HEADERS,
+      headers: credentialRejectionHeaders(request),
     });
   }
 

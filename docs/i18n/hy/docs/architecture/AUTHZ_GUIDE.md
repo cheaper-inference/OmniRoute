@@ -133,31 +133,31 @@ Cookie-ն աշխատաշրջան է միայն այն դեպքում, երբ JWT
 ## Խողովակաշար
 
 ```
-Մուտքային հարցում → src/proxy.ts
-  → runAuthzPipeline() src/server/authz/pipeline.ts ֆայլում
-    1. Հեռացնել վստահելի ներքին վերնագրերը (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Ստեղծել հարցման ID, դասակարգել երթուղին classifyRoute() ֆունկցիայի միջոցով
-    3. Եթե pathname == "/" → վերահղում /dashboard
-    4. Եթե ցամաքեցում (կարճատև անջատում) և /api/* → 503
-    5. Եթե ոչ-GET /api/* → checkBodySize() պաշտպանություն
-    6. Եթե OPTIONS → CORS նախնական ստուգում 204
-    7. Եթե options.enforce == false → անցում երթուղու դասի վերնագրերով
-    8. Հակառակ դեպքում՝ POLICIES[routeClass].evaluate(ctx)
-       - թույլատրել → դրոշմել x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - մերժել → JSON սխալ՝ correlation_id-ով (կառավարման վահանակի էջեր → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Վստահելի ներքին վերնագրերը (սահմանված `src/server/authz/headers.ts`-ում) **հեռացվում են մուտքային հարցումներից** մինչև դասակարգումը. հաճախորդները չեն կարող նախապես լրացնել `x-omniroute-auth-*`՝ սուբյեկտին ներկայացնելու համար:
+Վստահելի ներքին վերնագրերը (սահմանված են `src/server/authz/headers.ts` ում):** զրկված է մուտքային հարցումներից** Նախքան դասակարգումը — հաճախորդները չեն կարող նախապես լրացնել `x-omniroute-auth-*` սուբյեկտի նմանակման համար:
 
-### Քաղաքականության պայմանագրեր
+### Քաղաքական պայմանագրեր
 
-Յուրաքանչյուր երթուղու դաս ունի քաղաքականություն `src/server/authz/policies/` ֆայլում:
+Յուրաքանչյուր երթուղու դաս ունի `src/server/authz/policies/` ի քաղաքականություն.
 
 - **`publicPolicy`** (`policies/public.ts`) — միշտ վերադարձնում է `allow({ kind: "anonymous", id: "anonymous" })`:
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — արդյունահանում է Bearer-ը, վավերացնում է `validateApiKey()`-ի միջոցով: Անցնում է անանունի միայն այն դեպքում, երբ `REQUIRE_API_KEY` ֆունկցիոնալ դրոշը անջատված է: Արդյունավետ դրոշը լուծվում է `isRequireApiKeyEnabled()`-ի միջոցով (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), այնպես որ Dashboard Feature Flags-ը և միջավայրի փոփոխականները հետևողականորեն կառավարում են `/api/v1/*`, `/api/v1beta/*` և կեղծանունները. լուծիչի ձախողումները ձախողվում են փակ: Թույլատրում է կառավարման վահանակի նիստի հարցումները հաճախորդի API երթուղիներում (ներառյալ `/api/v1/models`, որն օգտագործվում է կառավարման վահանակի մոդելների կատալոգի կողմից):
-- **`managementPolicy`** (`policies/management.ts`) — ընդունում է կառավարման վահանակի նիստը, ներքին մոդելների համաժամացման հարցումները (համապատասխանեցված `/api/providers/[name]/(sync-models|models)`-ին), կամ ամբողջությամբ բաց է թողնում, եթե `isAuthRequired()`-ը վերադարձնում է false: Վերադարձնում է 403 (`AUTH_001`), երբ Bearer թոքենը առկա է, բայց անվավեր է, հակառակ դեպքում՝ 401: Նաև կիրառում է երթուղու պաշտպանության մակարդակները (LOCAL_ONLY / ALWAYS_PROTECTED) մինչև ցանկացած վավերացման ճյուղ՝ տե՛ս [Երթուղու պաշտպանության մակարդակներ](../security/ROUTE_GUARD_TIERS.md): `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-ում (այսօր՝ `/api/mcp/`) LOCAL_ONLY ուղիները կարող են մուտք գործել ոչ-loopback-ից, երբ Bearer բանալին կրում է `manage` տիրույթը. բոլոր մյուս LOCAL_ONLY ուղիները մնում են խիստ-loopback՝ անկախ տիրույթից:
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — քաղվածքները կրող, վավերացվում է `validateApiKey()` միջոցով: Անանուն է դառնում միայն այն դեպքում, երբ արդյունավետ `REQUIRE_API_KEY` հատկանիշի դրոշակն անջատված է: Արդյունավետ դրոշը լուծվում է `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) միջոցով, այնպես որ վահանակի առանձնահատկությունների դրոշները և շրջակա միջավայրի փոփոխականները հետևողականորեն կառավարում են `/api/v1/*`, `/api/v1beta/*` և կեղծանունները. լուծիչի ձախողումները փակ են: Թույլ է տալիս dashboard-sesion հարցումներ կատարել հաճախորդի API երթուղիներում (ներառյալ `/api/v1/models`, որն օգտագործվում է վահանակի մոդելների կատալոգում): Երբ Entra ID SSO միացված է, կրողը, որը կառուցվածքային առումով Entra նշան է (երեք base64url հատվածներ, `RS*` alg, `kid`) մշակվում է SSO մասնաճյուղի կողմից:** առաջ** `validateApiKey()` և դրա վճիռը վերջնական է — այն երբեք չի անցնում API-բանալու ուղին կամ դեգրադացիայից մինչև անանուն ճյուղը, ուստի նույնականացման մատակարարի խափանումը չի կարող դառնալ բաց մուտք: Ստատիկ API ստեղները չեն ազդում: Տես [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — ընդունում է վահանակի նիստը, մոդելի համաժամացման ներքին հարցումները (համընկնում է `/api/providers/[name]/(sync-models|models)` հետ) կամ ամբողջությամբ բաց է թողնում, եթե `isAuthRequired()` վերադարձնում է false: Վերադարձնում է 403 (`AUTH_001`), երբ կրող նշանն առկա է, բայց անվավեր, հակառակ դեպքում՝ 401: Նաև պարտադրում է երթուղու պահպանության մակարդակները (LOCAL_ONLY / ALWAYS_PROTECTED) նախքան որևէ auth մասնաճյուղ — տես [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) : LOCAL_ONLY ուղիները `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ում (այսօր՝ `/api/mcp/`) կարող են մուտք գործել ոչ հանգույցից, երբ կրող ստեղնը կրում է `manage` շրջանակը; բոլոր մյուս LOCAL_ONLY ուղիները մնում են խիստ-loopback՝ անկախ շրջանակից:
 
-Հաջող քաղաքականությունը վերադարձնում է `AuthSubject`՝ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`: Հետագա մշակողները կարող են այն կարդալ `assertAuth(request, "CLIENT_API")`-ի միջոցով `src/server/authz/assertAuth.ts`-ում՝ վավերացման տրամաբանությունը նորից գործարկելու փոխարեն:
+Հաջող քաղաքականությունը `AuthSubject` ին վերադարձնում է `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ով: Ներքևում գտնվող կառավարիչները կարող են այն կարդալ `assertAuth(request, "CLIENT_API")` միջոցով `src/server/authz/assertAuth.ts` ում՝ վավերացման տրամաբանությունը նորից գործարկելու փոխարեն:
 
 ## Հանրային երթուղիների ցուցակ
 
@@ -305,23 +305,23 @@ Client API բանալու պարտադրումն օգտագործում է `src/
 
 ## Վրիպազերծում
 
-Խողովակաշարը միշտ պատասխանները նշում է հետևյալով.
+Խողովակաշարը միշտ նշում է պատասխանները հետևյալով.
 
 ```
 x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Նույնականացված հարցումների համար վերին հոսանքի (մշակողի կողմից) հարցման վերնագրերը ներառում են նաև.
+Հավաստագրված հարցումների համար վերին հոսանքով (կառավարողի կողմից) հարցումների վերնագրերը ներառում են նաև.
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Օգտագործեք `assertAuth(req, expectedClass)` մշակողների ներսում — այն նետում է `AuthzAssertionError` `AUTHZ_NOT_INITIALIZED` կոդով, եթե միջանկյալ ծրագիրը շրջանցվել է (օգտակար է թեստերում կոնֆիգուրացիայի ռեգրեսիաները բռնելու համար):
+Օգտագործեք `assertAuth(req, expectedClass)` կարգավորիչների ներսում — այն նետում է `AuthzAssertionError` `AUTHZ_NOT_INITIALIZED` կոդով, եթե միջնակարգ ծրագիրը շրջանցված է (օգտակար է թեստերում կազմաձևման ռեգրեսիաները որսալու համար):
 
 ## Տես նաև
 

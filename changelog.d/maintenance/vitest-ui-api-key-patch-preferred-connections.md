@@ -1,0 +1,1 @@
+- **test(ui):** repair the `test:vitest:ui` base-red: align the API-key access editor "Save sends the full PATCH body" test with the `preferredConnections: []` payload added by #13102, and register a no-op `ResizeObserver` stub in the shared vitest UI setup so tests rendering the kit `Table` (KEA-7886) stop crashing under jsdom (base-red)
