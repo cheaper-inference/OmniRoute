@@ -8,7 +8,7 @@
 
 ## Kini idi ti eyi wa
 
-`hidePaidModels` idahun "Ṣe awoṣe yi free?" ati awọn idahun `hideAutoCombos` "Ṣe o yẹ ki a polowo awọn ids foju `auto/*` rara?" — bẹni ko jẹ ki oniṣẹ kan ṣatunto ipin ti awọn awoṣe lainidii (fun apẹẹrẹ fifihan deede awọn awoṣe ti a fun ni koodu Claude / alabara OpenCode yẹ ki o rii, ni ominira ti idiyele). # 11481 ṣe afikun pe bi ominira meji, ijade ni awọn eto opo-okun.
+`hidePaidModels` idahun "Ṣe awoṣe yi free?" ati awọn idahun `hideAutoCombos` "Ṣe o yẹ ki a polowo awọn ids foju `auto/*` rara?" — bẹni ko jẹ ki oniṣẹ kan ṣatunto ipin ti awọn awoṣe lainidii (fun apẹẹrẹ fifihan deede awọn awoṣe ti a fun ni koodu Claude / alabara OpenCode yẹ ki o rii, ni ominira ti idiyele). # #11481 ṣe afikun pe bi ominira meji, ijade ni awọn eto opo-okun.
 
 ## Eto
 
@@ -26,7 +26,7 @@ Iṣaaju: a ti ṣayẹwo iwe-ikọsilẹ ni akọkọ (titẹsi ti a sẹ jẹ 
 
 ## Meji chokepoints, ko ọkan
 
-Ẹkọ lati # 6512 (àlẹmọ katalogi `hidePaidModels` -only ṣi jẹ ki ọna `auto/*` si awoṣe isanwo, nitori adagun oludije konbo ti a kọ ni ominira) kan ni aami nibi. `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) ti o baamu ni a pe lati BOTH:
+Ẹkọ lati # #6512 (àlẹmọ katalogi `hidePaidModels` -only ṣi jẹ ki ọna `auto/*` si awoṣe isanwo, nitori adagun oludije konbo ti a kọ ni ominira) kan ni aami nibi. `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) ti o baamu ni a pe lati BOTH:
 
 - `src/app/api/v1/models/catalog.ts` — awọn `/v1/models` kikojọ funrararẹ, ni kanna 5 fun-orisun chokepoints `shouldHidePaid()` tẹlẹ ibode (aimi `PROVIDER_MODELS`, amuṣiṣẹpọ olupese awọn ori ila, aṣa awọn ori ila, inagijẹ-lona awọn ori ila, isakoso-fallback awọn ori ila).
 - `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — ti a npe ni lati `virtualFactory.ts::buildPreparedPool`, lẹsẹkẹsẹ lẹhin ipe `filterPaidOnlyCandidates()` deede, nitorinaa awoṣe ti a kọ ko le yan sinu adagun oludije `auto/*` boya.

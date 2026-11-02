@@ -16,7 +16,7 @@ Vários provedores de modo de pensamento rejeitam uma mudança de acompanhamento
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-Mas os clientes típicos (Cursor, Cline, Roo Code, OpenAI SDK) retiram `reasoning_content` do histórico que reproduzem. OmniRoute o restaura a partir de um cache do lado do servidor para que a solicitação que o upstream vê seja consistente. O problema nº 1628 introduziu a persistência memory/SQLite híbrida para que o cache sobreviva às reinicializações do processo.
+Mas os clientes típicos (Cursor, Cline, Roo Code, OpenAI SDK) retiram `reasoning_content` do histórico que reproduzem. OmniRoute o restaura a partir de um cache do lado do servidor para que a solicitação que o upstream vê seja consistente. O problema nº #1628 introduziu a persistência memory/SQLite híbrida para que o cache sobreviva às reinicializações do processo.
 
 ## Arquitetura
 

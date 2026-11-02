@@ -16,7 +16,7 @@ Useat ajattelutavan tarjoajat hylkäävät seurantakäännöksen, ellei** edelli
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-Mutta tyypilliset asiakkaat (Cursor, Cline, Roo Code , OpenAI SDK) poistavat `reasoning_content` historiasta, jonka he toistavat. OmniRoute palauttaa sen palvelinpuolen välimuistista, joten ylävirran näkemä pyyntö on johdonmukainen. Numero 1628 esitteli hybridi- memory/SQLite -pysyvyyden, jotta välimuisti kestää prosessin uudelleenkäynnistyksen.
+Mutta tyypilliset asiakkaat (Cursor, Cline, Roo Code , OpenAI SDK) poistavat `reasoning_content` historiasta, jonka he toistavat. OmniRoute palauttaa sen palvelinpuolen välimuistista, joten ylävirran näkemä pyyntö on johdonmukainen. Numero #1628 esitteli hybridi- memory/SQLite -pysyvyyden, jotta välimuisti kestää prosessin uudelleenkäynnistyksen.
 
 ## Arkkitehtuuri
 

@@ -183,4 +183,4 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 - ምንጭ `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
 - ስደት `src/lib/db/migrations/033_create_reasoning_cache.sql`
 - API መንገድ `src/app/api/cache/reasoning/route.ts`
-- ዋናው እትም፡ # 1628
+- ዋናው እትም፡ # #1628

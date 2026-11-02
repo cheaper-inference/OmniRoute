@@ -16,7 +16,7 @@ Bir neçə düşünmə rejimi təminatçıları təqib növbəsini rədd edirlə
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-Lakin tipik müştərilər (Cursor, Cline, Roo Code, OpenAI SDK) `reasoning_content` təkrar oynatdıqları tarixdən silirlər. OmniRoute onu server tərəfindəki keşdən bərpa edir ki, yuxarı axının gördüyü sorğu ardıcıl olsun. 1628-ci buraxılış hibrid memory/SQLite əzmkarlığını təqdim etdi, beləliklə keş prosesin yenidən başlaması zamanı sağ qalsın.
+Lakin tipik müştərilər (Cursor, Cline, Roo Code, OpenAI SDK) `reasoning_content` təkrar oynatdıqları tarixdən silirlər. OmniRoute onu server tərəfindəki keşdən bərpa edir ki, yuxarı axının gördüyü sorğu ardıcıl olsun. #1628-ci buraxılış hibrid memory/SQLite əzmkarlığını təqdim etdi, beləliklə keş prosesin yenidən başlaması zamanı sağ qalsın.
 
 ## Memarlıq
 
@@ -183,4 +183,4 @@ Reqressiya qoruyucuları: `tests/unit/muse-session-ownership.test.ts`, `tests/un
 - Mənbə: `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
 - Miqrasiya: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 - API marşrutu: `src/app/api/cache/reasoning/route.ts`
-- Orijinal buraxılış: №1628
+- Orijinal buraxılış: #1628

@@ -16,7 +16,7 @@ Več ponudnikov načina razmišljanja zavrne nadaljnji obrat, razen če** prejš
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-Toda tipični odjemalci (Cursor, Cline, Roo Code, OpenAI SDK) odstranijo `reasoning_content` iz zgodovine, ki jo predvajajo. OmniRoute ga obnovi iz predpomnilnika na strani strežnika, tako da je zahteva, ki jo vidi navzgor, dosledna. Izdaja št. 1628 je predstavila hibridno obstojnost memory/SQLite, tako da predpomnilnik preživi ponovne zagone procesa.
+Toda tipični odjemalci (Cursor, Cline, Roo Code, OpenAI SDK) odstranijo `reasoning_content` iz zgodovine, ki jo predvajajo. OmniRoute ga obnovi iz predpomnilnika na strani strežnika, tako da je zahteva, ki jo vidi navzgor, dosledna. Izdaja št. #1628 je predstavila hibridno obstojnost memory/SQLite, tako da predpomnilnik preživi ponovne zagone procesa.
 
 ## Arhitektura
 

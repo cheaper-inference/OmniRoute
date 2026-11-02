@@ -163,7 +163,7 @@ Strażnicy regresji: `tests/unit/claude-low-priority-mode.test.ts`, `tests/unit/
 - Utrwalony stół z pinami: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
 - Ustawienie: `sessionAffinityTtlMs` (globalne TTL w ms, `0` wyłączone) — `src/lib/db/settings.ts`. Zmieniono nazwę z `codexSessionAffinityTtlMs` dostępnego tylko w Kodeksie przez migrację `124_generic_session_affinity_ttl.sql`, która przenosi wszelkie wcześniej skonfigurowane Codex TTL jako nowe domyślne.
 
-Przed numerem 7274 `resolveSessionAffinityTtlMs()` przesiadało się na `0` dla każdego dostawcy z wyjątkiem `codex`, więc ustawienie TTL (i nagłówki sesji) nie miało żadnego wpływu nigdzie indziej, mimo że mechanizm przypinania i wyodrębnianie nagłówków były już niezależne od dostawcy. Poprawka usunęła ten wcześniejszy powrót; TTL ma teraz jednolite zastosowanie do każdego dostawcy po ustawieniu globalnym powyżej `0`.
+Przed numerem #7274 `resolveSessionAffinityTtlMs()` przesiadało się na `0` dla każdego dostawcy z wyjątkiem `codex`, więc ustawienie TTL (i nagłówki sesji) nie miało żadnego wpływu nigdzie indziej, mimo że mechanizm przypinania i wyodrębnianie nagłówków były już niezależne od dostawcy. Poprawka usunęła ten wcześniejszy powrót; TTL ma teraz jednolite zastosowanie do każdego dostawcy po ustawieniu globalnym powyżej `0`.
 
 Trzy nagłówki powinowactwa sesji nigdy nie są przesyłane dalej. Wykonawcy — budują od zera własne nagłówki nadrzędne, zamiast przekazywać przez nie nagłówki klientów, więc pozostaje to jedynie wewnętrznym identyfikatorem korelacji.
 

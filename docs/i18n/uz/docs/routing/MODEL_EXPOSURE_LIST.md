@@ -8,7 +8,7 @@
 
 ## Nima uchun bu mavjud
 
-`hidePaidModels` javob beradi "bu model bepulmi?" va `hideAutoCombos` javob beradi " `auto/*` virtual identifikatorlari umuman reklama qilinishi kerakmi?" — ham operatorga modellarning ixtiyoriy kichik to‘plamini tanlashga ruxsat bermaydi (masalan, narxlashdan qat’iy nazar, ma’lum Claude Code/ OpenCode mijozi ko‘rishi kerak bo‘lgan aniq modellarni taqdim etish). # 11481 buni ikkita mustaqil, qo'shiladigan qatorli qator sozlamalari sifatida qo'shadi.
+`hidePaidModels` javob beradi "bu model bepulmi?" va `hideAutoCombos` javob beradi " `auto/*` virtual identifikatorlari umuman reklama qilinishi kerakmi?" — ham operatorga modellarning ixtiyoriy kichik to‘plamini tanlashga ruxsat bermaydi (masalan, narxlashdan qat’iy nazar, ma’lum Claude Code/ OpenCode mijozi ko‘rishi kerak bo‘lgan aniq modellarni taqdim etish). # #11481 buni ikkita mustaqil, qo'shiladigan qatorli qator sozlamalari sifatida qo'shadi.
 
 ## Sozlamalar
 
@@ -26,7 +26,7 @@ Ustunlik: birinchi navbatda rad etilgan ro'yxat tekshiriladi (rad etilgan yozuv 
 
 ## Bir emas, ikkita tiqilish nuqtasi
 
-6512-sonli dars ( `hidePaidModels` -only katalog filtri hali ham `auto/*` pullik modelga yo'naltirishga imkon beradi, chunki birlashgan nomzodlar puli mustaqil ravishda qurilgan) bu erda xuddi shunday qo'llaniladi. Mos keluvchi `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) predikati BOTH dan chaqiriladi:
+#6512-sonli dars ( `hidePaidModels` -only katalog filtri hali ham `auto/*` pullik modelga yo'naltirishga imkon beradi, chunki birlashgan nomzodlar puli mustaqil ravishda qurilgan) bu erda xuddi shunday qo'llaniladi. Mos keluvchi `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) predikati BOTH dan chaqiriladi:
 
 - `src/app/api/v1/models/catalog.ts` — `/v1/models` roʻyxatining oʻzi, har bir manba uchun bir xil 5 ta chokepoints `shouldHidePaid()` allaqachon darvozalar (statik `PROVIDER_MODELS`, sinxronlangan provayder qatorlari, moslashtirilgan satrlar, taxallus bilan qoʻllab-quvvatlanadigan satrlar, boshqariladigan-qayta satrlar).
 - `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — `virtualFactory.ts::buildPreparedPool` dan chaqiriladi, ekvivalent `filterPaidOnlyCandidates()` chaqiruvidan so'ng darhol chaqiriladi, shuning uchun rad etilgan modelni hech qachon `auto/*` nomzodlar hovuziga tanlab bo'lmaydi.

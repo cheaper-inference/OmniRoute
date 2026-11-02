@@ -16,7 +16,7 @@ Számos gondolkodásmód-szolgáltató elutasítja a nyomon követést, kivéve,
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-De a tipikus kliensek (Cursor, Cline, Roo Code, OpenAI SDK) kivonják `reasoning_content` az újrajátszott előzményekből. OmniRoute a szerveroldali gyorsítótárból állítja vissza, így az upstream által látott kérés konzisztens. A 1628-as számú probléma bevezette a hibrid memory/SQLite perzisztenciát, így a gyorsítótár túléli a folyamat újraindítását.
+De a tipikus kliensek (Cursor, Cline, Roo Code, OpenAI SDK) kivonják `reasoning_content` az újrajátszott előzményekből. OmniRoute a szerveroldali gyorsítótárból állítja vissza, így az upstream által látott kérés konzisztens. A #1628-as számú probléma bevezette a hibrid memory/SQLite perzisztenciát, így a gyorsítótár túléli a folyamat újraindítását.
 
 ## Építészet
 

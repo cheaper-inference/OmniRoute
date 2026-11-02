@@ -155,7 +155,7 @@ Reqressiya qoruyucuları: `tests/unit/claude-low-priority-mode.test.ts`, `tests/
 - Davamlı pin cədvəli: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
 - Parametr: `sessionAffinityTtlMs` (ms-də qlobal TTL, `0` söndürür) — `src/lib/db/settings.ts`. Yeni defolt olaraq əvvəllər konfiqurasiya edilmiş hər hansı Codex TTL daşıyan `124_generic_session_affinity_ttl.sql` miqrasiya yolu ilə yalnız Codex-dən `codexSessionAffinityTtlMs` -dən adlandırıldı.
 
-№7274-dən əvvəl `resolveSessionAffinityTtlMs()`, `codex` istisna olmaqla, hər bir provayder üçün `0` -ə bərkidilmişdi, buna görə də TTL parametrinin (və sessiya başlıqlarının) heç bir yerdə təsiri yox idi, baxmayaraq ki, bağlama mexanizmi və başlığın çıxarılması artıq provayder-aqnostik idi. Düzəltmə erkən geri dönüşü aradan qaldırdı; TTL indi qlobal miqyasda `0` dən yuxarı təyin edilmiş hər bir provayderə eyni şəkildə tətbiq edilir.
+#7274-dən əvvəl `resolveSessionAffinityTtlMs()`, `codex` istisna olmaqla, hər bir provayder üçün `0` -ə bərkidilmişdi, buna görə də TTL parametrinin (və sessiya başlıqlarının) heç bir yerdə təsiri yox idi, baxmayaraq ki, bağlama mexanizmi və başlığın çıxarılması artıq provayder-aqnostik idi. Düzəltmə erkən geri dönüşü aradan qaldırdı; TTL indi qlobal miqyasda `0` dən yuxarı təyin edilmiş hər bir provayderə eyni şəkildə tətbiq edilir.
 
 Üç sessiyaya yaxınlıq başlığı heç vaxt ötürülmür, — icraçıları müştəri başlıqlarını ötürməkdənsə, öz yuxarı başlıqlarını sıfırdan qurur, buna görə də bu, yalnız daxili korrelyasiya id olaraq qalır.
 

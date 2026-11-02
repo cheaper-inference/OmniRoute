@@ -154,7 +154,7 @@ Guardias de regresión: `tests/unit/claude-low-priority-mode.test.ts`, `tests/un
 - Tabla de pines persistentes: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
 - Configuración: `sessionAffinityTtlMs` ( TTL global en ms, `0` deshabilitado) — `src/lib/db/settings.ts`. Se cambió el nombre del `codexSessionAffinityTtlMs` exclusivo del Codex por la migración `124_generic_session_affinity_ttl.sql`, que transfiere cualquier Codex TTL configurado previamente como el nuevo valor predeterminado.
 
-Antes del número 7274, `resolveSessionAffinityTtlMs()` se rescató a `0` para todos los proveedores excepto `codex`, por lo que la configuración TTL (y los encabezados de sesión) no tuvo efecto en ningún otro lugar, aunque el mecanismo de fijación y la extracción de encabezados ya eran independientes del proveedor. La solución eliminó ese retorno anticipado; TTL ahora se aplica uniformemente a todos los proveedores una vez configurados globalmente por encima de `0`.
+Antes del número #7274, `resolveSessionAffinityTtlMs()` se rescató a `0` para todos los proveedores excepto `codex`, por lo que la configuración TTL (y los encabezados de sesión) no tuvo efecto en ningún otro lugar, aunque el mecanismo de fijación y la extracción de encabezados ya eran independientes del proveedor. La solución eliminó ese retorno anticipado; TTL ahora se aplica uniformemente a todos los proveedores una vez configurados globalmente por encima de `0`.
 
 Los tres encabezados de afinidad de sesión nunca se reenvían ascendentes. Los ejecutores — crean sus propios encabezados ascendentes desde cero en lugar de pasar los encabezados del cliente, por lo que esto sigue siendo solo una identificación de correlación interna.
 

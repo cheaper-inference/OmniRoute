@@ -26,7 +26,7 @@ Tähelepanu: esmalt kontrollitakse keelamisloendit (keelatud kirje on alati peid
 
 ## Kaks chokepointi, mitte üks
 
-Õppetund numbrist 6512 ( `hidePaidModels` -only kataloogifilter võimaldab `auto/*` siiski suunata tasulisele mudelile, kuna kombineeritud kandidaatide kogum ehitati iseseisvalt) kehtib ka siin. Sobiv predikaat `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) kutsutakse BOTH:
+Õppetund numbrist #6512 ( `hidePaidModels` -only kataloogifilter võimaldab `auto/*` siiski suunata tasulisele mudelile, kuna kombineeritud kandidaatide kogum ehitati iseseisvalt) kehtib ka siin. Sobiv predikaat `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) kutsutakse BOTH:
 
 - `src/app/api/v1/models/catalog.ts` — `/v1/models` loend ise, samal 5-l allika kohta `shouldHidePaid()` juba väravad (staatiline `PROVIDER_MODELS`, sünkroonitud pakkuja read, kohandatud read, pseudonüümiga tagatud read, hallatud varuread).
 - `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — kutsus `virtualFactory.ts::buildPreparedPool` kohe pärast samaväärset `filterPaidOnlyCandidates()` -kutset, nii et keelatud mudelit ei saa kunagi valida ka `auto/*` kandidaatide kogumisse.

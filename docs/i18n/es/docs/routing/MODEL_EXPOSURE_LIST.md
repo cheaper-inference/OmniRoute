@@ -26,7 +26,7 @@ Prioridad: la lista de rechazados se verifica primero (una entrada denegada siem
 
 ## Dos cuellos de botella, no uno
 
-La lección del n.º 6512 (un filtro de catálogo `hidePaidModels` -only aún permite que `auto/*` se enrute a un modelo pago, ya que el grupo de candidatos combinados se creó de forma independiente) se aplica de manera idéntica aquí. El predicado coincidente `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) se llama desde BOTH:
+La lección del n.º #6512 (un filtro de catálogo `hidePaidModels` -only aún permite que `auto/*` se enrute a un modelo pago, ya que el grupo de candidatos combinados se creó de forma independiente) se aplica de manera idéntica aquí. El predicado coincidente `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) se llama desde BOTH:
 
 - `src/app/api/v1/models/catalog.ts` — el listado de `/v1/models` en sí, en los mismos 5 puntos de estrangulamiento por fuente `shouldHidePaid()` ya controla ( `PROVIDER_MODELS` estático, filas de proveedores sincronizadas, filas personalizadas, filas respaldadas por alias, filas de respaldo administrado).
 - `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — llamó desde `virtualFactory.ts::buildPreparedPool`, inmediatamente después de la llamada `filterPaidOnlyCandidates()` equivalente, por lo que un modelo denegado nunca podrá seleccionarse en un grupo de candidatos `auto/*` tampoco.

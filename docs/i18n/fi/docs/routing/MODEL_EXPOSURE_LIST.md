@@ -26,7 +26,7 @@ Ensisijaisuus: estolista tarkistetaan ensin (kielletty merkintä on aina piilote
 
 ## Kaksi rikastuspistettä, ei yksi
 
-Oppitunti numerosta 6512 ( `hidePaidModels` -only -luettelosuodatin antoi silti `auto/*` reitittää maksettuun malliin, koska yhdistelmäehdokkaiden joukko rakennettiin itsenäisesti) pätee tässä samalla tavalla. Vastaava predikaatti `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) kutsutaan BOTH: stä :
+Oppitunti numerosta #6512 ( `hidePaidModels` -only -luettelosuodatin antoi silti `auto/*` reitittää maksettuun malliin, koska yhdistelmäehdokkaiden joukko rakennettiin itsenäisesti) pätee tässä samalla tavalla. Vastaava predikaatti `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) kutsutaan BOTH: stä :
 
 - `src/app/api/v1/models/catalog.ts` — itse `/v1/models` listaus, samoilla viidellä lähdekohtaisessa kuristuspisteessä `shouldHidePaid()` jo portteja (staattinen `PROVIDER_MODELS`, synkronoidut palveluntarjoajan rivit, mukautetut rivit, alias-tuetut rivit, hallitut vararivit).
 - `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — kutsui `virtualFactory.ts::buildPreparedPool` välittömästi vastaavan `filterPaidOnlyCandidates()` -kutsun jälkeen, joten estettyä mallia ei myöskään voida koskaan valita `auto/*` ehdokaspooliin.

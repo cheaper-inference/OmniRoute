@@ -163,7 +163,7 @@ Guardas de regressão: `tests/unit/claude-low-priority-mode.test.ts`, `tests/uni
 - Tabela de pinos persistentes: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
 - Configuração: `sessionAffinityTtlMs` ( TTL global em ms, `0` desabilita) — `src/lib/db/settings.ts`. Renomeado do `codexSessionAffinityTtlMs` somente do Codex pela migração `124_generic_session_affinity_ttl.sql`, que transporta qualquer Codex TTL configurado anteriormente como o novo padrão.
 
-Antes de # 7274, `resolveSessionAffinityTtlMs()` era hard-bailed para `0` para todos os provedores, exceto `codex`, portanto, a configuração TTL (e os cabeçalhos de sessão) não tinha efeito em nenhum outro lugar, embora o mecanismo de fixação e a extração de cabeçalho já fossem independentes do provedor. A correção removeu esse retorno antecipado; o TTL agora se aplica uniformemente a todos os provedores, uma vez definidos globalmente acima de `0`.
+Antes de # #7274, `resolveSessionAffinityTtlMs()` era hard-bailed para `0` para todos os provedores, exceto `codex`, portanto, a configuração TTL (e os cabeçalhos de sessão) não tinha efeito em nenhum outro lugar, embora o mecanismo de fixação e a extração de cabeçalho já fossem independentes do provedor. A correção removeu esse retorno antecipado; o TTL agora se aplica uniformemente a todos os provedores, uma vez definidos globalmente acima de `0`.
 
 Os três cabeçalhos de afinidade de sessão nunca são encaminhados upstream. Os executores — constroem seus próprios cabeçalhos upstream do zero, em vez de passar os cabeçalhos do cliente, portanto, isso permanece apenas um ID de correlação interna.
 

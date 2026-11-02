@@ -16,7 +16,7 @@ OmniRoute ଚିନ୍ତା-ମୋଡ୍ ମଡେଲ ଦ୍ୱାରା ଉତ
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-କିନ୍ତୁ ସାଧାରଣ ଗ୍ରାହକ (Cursor, Cline, Roo Code, OpenAI SDK) ଷ୍ଟ୍ରିପ୍ `reasoning_content` ସେମାନେ ରିପ୍ଲେ କରୁଥିବା ଇତିହାସରୁ \| OmniRoute ଏହାକୁ ଏକ ସର୍ଭର-ସାଇଡ୍ କ୍ୟାଶେରୁ ପୁନ ores ସ୍ଥାପନ କରେ ତେଣୁ ଅପଷ୍ଟ୍ରିମ୍ ଦେଖୁଥିବା ଅନୁରୋଧ ସ୍ଥିର ଅଟେ \| ଇସୁ # 1628 ହାଇବ୍ରିଡ୍ memory/SQLite ସ୍ଥିରତାକୁ ପ୍ରବର୍ତ୍ତାଇଲା ତେଣୁ କ୍ୟାଚ୍ ବଞ୍ଚିଥାଏ ପ୍ରକ୍ରିୟା ପୁନ art ଆରମ୍ଭ ହୁଏ \|
+କିନ୍ତୁ ସାଧାରଣ ଗ୍ରାହକ (Cursor, Cline, Roo Code, OpenAI SDK) ଷ୍ଟ୍ରିପ୍ `reasoning_content` ସେମାନେ ରିପ୍ଲେ କରୁଥିବା ଇତିହାସରୁ \| OmniRoute ଏହାକୁ ଏକ ସର୍ଭର-ସାଇଡ୍ କ୍ୟାଶେରୁ ପୁନ ores ସ୍ଥାପନ କରେ ତେଣୁ ଅପଷ୍ଟ୍ରିମ୍ ଦେଖୁଥିବା ଅନୁରୋଧ ସ୍ଥିର ଅଟେ \| ଇସୁ # #1628 ହାଇବ୍ରିଡ୍ memory/SQLite ସ୍ଥିରତାକୁ ପ୍ରବର୍ତ୍ତାଇଲା ତେଣୁ କ୍ୟାଚ୍ ବଞ୍ଚିଥାଏ ପ୍ରକ୍ରିୟା ପୁନ art ଆରମ୍ଭ ହୁଏ \|
 
 ## ସ୍ଥାପତ୍ୟ
 
@@ -183,4 +183,4 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 - ଉତ୍ସ: `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
 - ସ୍ଥାନାନ୍ତରଣ: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 - API ମାର୍ଗ: `src/app/api/cache/reasoning/route.ts`
-- ମୂଳ ସମସ୍ୟା: # 1628
+- ମୂଳ ସମସ୍ୟା: # #1628

@@ -16,7 +16,7 @@ OmniRoute تھنک موڈ ماڈل کے ذریعہ تیار کردہ اسسٹن�
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-لیکن عام کلائنٹس (Cursor, Cline, Roo Code , OpenAI SDK) اس تاریخ سے `reasoning_content` چھین لیتے ہیں جسے وہ دوبارہ چلاتے ہیں۔ OmniRoute اسے سرور سائیڈ کیشے سے بحال کرتا ہے تاکہ اپ اسٹریم کی دیکھی جانے والی درخواست مستقل ہو۔ شمارہ نمبر 1628 نے ہائبرڈ memory/SQLite استقامت کو متعارف کرایا تاکہ کیش زندہ رہنے کا عمل دوبارہ شروع ہو جائے۔
+لیکن عام کلائنٹس (Cursor, Cline, Roo Code , OpenAI SDK) اس تاریخ سے `reasoning_content` چھین لیتے ہیں جسے وہ دوبارہ چلاتے ہیں۔ OmniRoute اسے سرور سائیڈ کیشے سے بحال کرتا ہے تاکہ اپ اسٹریم کی دیکھی جانے والی درخواست مستقل ہو۔ شمارہ نمبر #1628 نے ہائبرڈ memory/SQLite استقامت کو متعارف کرایا تاکہ کیش زندہ رہنے کا عمل دوبارہ شروع ہو جائے۔
 
 ## فن تعمیر
 

@@ -16,7 +16,7 @@ OmniRoute دستیار `reasoning_content` تولید شده توسط مدلها
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-اما مشتریان معمولی (Cursor، Cline، رو کد، OpenAI SDK) `reasoning_content` از تاریخچه ای که دوباره پخش می کنند، حذف می کنند. OmniRoute آن را از یک کش سمت سرور بازیابی می کند تا درخواستی که بالادست می بیند سازگار باشد. شماره 1628 پایداری ترکیبی memory/SQLite را معرفی کرد تا حافظه پنهان از راهاندازی مجدد فرآیند زنده بماند.
+اما مشتریان معمولی (Cursor، Cline، رو کد، OpenAI SDK) `reasoning_content` از تاریخچه ای که دوباره پخش می کنند، حذف می کنند. OmniRoute آن را از یک کش سمت سرور بازیابی می کند تا درخواستی که بالادست می بیند سازگار باشد. شماره #1628 پایداری ترکیبی memory/SQLite را معرفی کرد تا حافظه پنهان از راهاندازی مجدد فرآیند زنده بماند.
 
 ## معماری
 

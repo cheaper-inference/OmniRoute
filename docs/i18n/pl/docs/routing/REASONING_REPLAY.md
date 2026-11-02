@@ -16,7 +16,7 @@ Kilku dostawców trybu myślenia odrzuca kolejną turę, chyba że** poprzednia 
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-Ale typowi klienci (Cursor, Cline, Roo Code, OpenAI SDK) usuwają `reasoning_content` z odtwarzanej historii. OmniRoute przywraca go z pamięci podręcznej po stronie serwera, więc żądanie, które widzi serwer nadrzędny, jest spójne. W numerze 1628 wprowadzono hybrydową trwałość memory/SQLite, dzięki czemu pamięć podręczna przetrwa ponowne uruchomienie procesu.
+Ale typowi klienci (Cursor, Cline, Roo Code, OpenAI SDK) usuwają `reasoning_content` z odtwarzanej historii. OmniRoute przywraca go z pamięci podręcznej po stronie serwera, więc żądanie, które widzi serwer nadrzędny, jest spójne. W numerze #1628 wprowadzono hybrydową trwałość memory/SQLite, dzięki czemu pamięć podręczna przetrwa ponowne uruchomienie procesu.
 
 ## Architektura
 

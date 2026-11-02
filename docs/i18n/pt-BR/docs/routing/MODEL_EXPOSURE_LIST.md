@@ -8,7 +8,7 @@
 
 ## Por que isso existe
 
-`hidePaidModels` responde "este modelo é gratuito?" e `hideAutoCombos` responde "os IDs virtuais `auto/*` devem ser anunciados?" — também não permite que um operador selecione um subconjunto arbitrário de modelos (por exemplo, apresentando exatamente os modelos que um determinado cliente Claude Code/ OpenCode deve ver, independentemente do preço). # 11481 adiciona isso como duas configurações de matriz de strings independentes e opcionais.
+`hidePaidModels` responde "este modelo é gratuito?" e `hideAutoCombos` responde "os IDs virtuais `auto/*` devem ser anunciados?" — também não permite que um operador selecione um subconjunto arbitrário de modelos (por exemplo, apresentando exatamente os modelos que um determinado cliente Claude Code/ OpenCode deve ver, independentemente do preço). # #11481 adiciona isso como duas configurações de matriz de strings independentes e opcionais.
 
 ## Configurações
 
@@ -26,7 +26,7 @@ Precedência: a lista de bloqueios é verificada primeiro (uma entrada negada fi
 
 ## Dois pontos de estrangulamento, não um
 
-A lição de # 6512 (um filtro de catálogo `hidePaidModels` -only ainda permite que `auto/*` seja roteado para um modelo pago, já que o pool de candidatos combo foi construído de forma independente) se aplica de forma idêntica aqui. O predicado correspondente `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) é chamado de BOTH:
+A lição de # #6512 (um filtro de catálogo `hidePaidModels` -only ainda permite que `auto/*` seja roteado para um modelo pago, já que o pool de candidatos combo foi construído de forma independente) se aplica de forma idêntica aqui. O predicado correspondente `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) é chamado de BOTH:
 
 - `src/app/api/v1/models/catalog.ts` — a própria listagem `/v1/models`, nos mesmos 5 pontos de estrangulamento por origem `shouldHidePaid()` já bloqueia ( `PROVIDER_MODELS` estático, linhas de provedor sincronizadas, linhas personalizadas, linhas apoiadas por alias, linhas de fallback gerenciadas).
 - `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — chamado de `virtualFactory.ts::buildPreparedPool`, imediatamente após a chamada `filterPaidOnlyCandidates()` equivalente, portanto, um modelo negado também nunca pode ser selecionado em um pool de candidatos `auto/*`.

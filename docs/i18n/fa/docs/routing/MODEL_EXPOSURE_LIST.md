@@ -26,7 +26,7 @@
 
 ## دو نقطه خفه کردن، نه یک
 
-درس شماره 6512 (فیلتر کاتالوگ `hidePaidModels` -only همچنان به `auto/*` اجازه می دهد تا به یک مدل پولی راه پیدا کند، زیرا مخزن نامزد ترکیبی مستقل ساخته شده است) در اینجا به طور یکسان اعمال می شود. محمول منطبق `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) از BOTH نامیده می شود:
+درس شماره #6512 (فیلتر کاتالوگ `hidePaidModels` -only همچنان به `auto/*` اجازه می دهد تا به یک مدل پولی راه پیدا کند، زیرا مخزن نامزد ترکیبی مستقل ساخته شده است) در اینجا به طور یکسان اعمال می شود. محمول منطبق `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) از BOTH نامیده می شود:
 
 - `src/app/api/v1/models/catalog.ts` — خود فهرست `/v1/models` ، در همان 5 نقطه chokepoint در هر منبع `shouldHidePaid()` در حال حاضر دروازهها ( `PROVIDER_MODELS` ثابت، ردیفهای ارائهدهنده همگامسازیشده، ردیفهای سفارشی، ردیفهای پشتیبان نام مستعار، ردیفهای بازگشتی مدیریتشده).
 - `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — از `virtualFactory.ts::buildPreparedPool`، بلافاصله پس از فراخوانی معادل `filterPaidOnlyCandidates()` فراخوانی میشود، بنابراین یک مدل رد شده نیز هرگز نمیتواند در یک مجموعه کاندید `auto/*` انتخاب شود.

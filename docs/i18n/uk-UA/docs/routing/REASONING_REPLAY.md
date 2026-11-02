@@ -16,7 +16,7 @@ OmniRoute фіксує допоміжний `reasoning_content` створени
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-Але типові клієнти (Cursor, Cline, Roo Code, OpenAI SDK) видаляють `reasoning_content` з історії, яку вони відтворюють. OmniRoute відновлює його з кешу на стороні сервера, щоб запит, який бачить висхідний канал, був послідовним. Випуск №1628 представив гібридну постійність memory/SQLite, щоб кеш витримував перезапуски процесу.
+Але типові клієнти (Cursor, Cline, Roo Code, OpenAI SDK) видаляють `reasoning_content` з історії, яку вони відтворюють. OmniRoute відновлює його з кешу на стороні сервера, щоб запит, який бачить висхідний канал, був послідовним. Випуск #1628 представив гібридну постійність memory/SQLite, щоб кеш витримував перезапуски процесу.
 
 ## Архітектура
 

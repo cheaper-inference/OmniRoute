@@ -16,7 +16,7 @@ Mehrere Denkmodus-Anbieter lehnen einen Folgezug ab, es sei denn, der** Die vorh
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-Aber typische Clients (Cursor, Cline, Roo Code, OpenAI SDK) entfernen `reasoning_content` aus dem Verlauf, den sie wiedergeben. OmniRoute stellt es aus einem serverseitigen Cache wieder her, sodass die Anfrage, die der Upstream sieht, konsistent ist. Problem Nr. 1628 führte die Hybrid memory/SQLite -Persistenz ein, sodass der Cache Prozessneustarts überlebt.
+Aber typische Clients (Cursor, Cline, Roo Code, OpenAI SDK) entfernen `reasoning_content` aus dem Verlauf, den sie wiedergeben. OmniRoute stellt es aus einem serverseitigen Cache wieder her, sodass die Anfrage, die der Upstream sieht, konsistent ist. Problem Nr. #1628 führte die Hybrid memory/SQLite -Persistenz ein, sodass der Cache Prozessneustarts überlebt.
 
 ## Architektur
 
@@ -183,4 +183,4 @@ Regressionswächter: `tests/unit/muse-session-ownership.test.ts`, `tests/unit/mu
 - Quelle: `src/lib/db/reasoningCache.ts`, `open-sse/services/reasoningCache.ts`, `open-sse/translator/index.ts`
 - Migration: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 - API Route: `src/app/api/cache/reasoning/route.ts`
-- Originalausgabe: Nr. 1628
+- Originalausgabe: Nr. #1628

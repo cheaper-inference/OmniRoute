@@ -8,7 +8,7 @@
 
 ## Bu niyə mövcuddur
 
-`hidePaidModels` cavab verir ki, "bu model pulsuzdur?" və `hideAutoCombos` cavab verir ki, " `auto/*` virtual idləri ümumiyyətlə reklam edilməlidirmi?" — nə də operatora modellərin ixtiyari alt dəstini kurasiya etməyə imkan vermir (məsələn, qiymətdən asılı olmayaraq verilmiş Claude Kodu / OpenCode müştərisinin görməli olduğu modelləri tam olaraq təqdim etmək). # 11481 əlavə edir ki, iki müstəqil, qoşulmuş simli massiv parametrləri kimi.
+`hidePaidModels` cavab verir ki, "bu model pulsuzdur?" və `hideAutoCombos` cavab verir ki, " `auto/*` virtual idləri ümumiyyətlə reklam edilməlidirmi?" — nə də operatora modellərin ixtiyari alt dəstini kurasiya etməyə imkan vermir (məsələn, qiymətdən asılı olmayaraq verilmiş Claude Kodu / OpenCode müştərisinin görməli olduğu modelləri tam olaraq təqdim etmək). # #11481 əlavə edir ki, iki müstəqil, qoşulmuş simli massiv parametrləri kimi.
 
 ## Parametrlər
 
@@ -26,7 +26,7 @@ Hər ikisi hər biri 200 simvoldan ibarət 500-ə qədər girişi qəbul edir ( 
 
 ## İki boğulma nöqtəsi, bir deyil
 
-6512-ci dərsdən ( `hidePaidModels` -only kataloq filtri hələ də `auto/*` pullu modelə marşruta keçməyə imkan verir, çünki birləşmiş namizəd hovuzu müstəqil şəkildə qurulub) burada eyni şəkildə tətbiq olunur. Uyğun olan `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) predikatı BOTH dən çağırılır:
+#6512-ci dərsdən ( `hidePaidModels` -only kataloq filtri hələ də `auto/*` pullu modelə marşruta keçməyə imkan verir, çünki birləşmiş namizəd hovuzu müstəqil şəkildə qurulub) burada eyni şəkildə tətbiq olunur. Uyğun olan `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) predikatı BOTH dən çağırılır:
 
 - `src/app/api/v1/models/catalog.ts` — `/v1/models` siyahısının özü, eyni mənbə başına 5 boğulma nöqtəsi `shouldHidePaid()` artıq qapıları (statik `PROVIDER_MODELS`, sinxronlaşdırılmış provayder sıraları, fərdi sətirlər, ləqəblə dəstəklənən sıralar, idarə olunan geri dönmə sətirləri).
 - `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — ekvivalent `filterPaidOnlyCandidates()` çağırışından dərhal sonra `virtualFactory.ts::buildPreparedPool`-dən çağırılır, buna görə də rədd edilmiş model heç vaxt `auto/*` namizəd hovuzuna seçilə bilməz.

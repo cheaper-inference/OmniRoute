@@ -16,7 +16,7 @@ Birçok düşünme modu sağlayıcısı, eğer** önceki asistan mesajı orijina
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-Ancak tipik istemciler (Cursor, Cline, Roo Code, OpenAI SDK) `reasoning_content` yeniden oynattıkları geçmişten çıkarırlar. OmniRoute bunu sunucu tarafı önbellekten geri yükler, böylece yukarı akışın gördüğü istek tutarlı olur. Sayı # 1628, önbelleğin işlem yeniden başlatıldığında hayatta kalması için hibrit memory/SQLite kalıcılığını tanıttı.
+Ancak tipik istemciler (Cursor, Cline, Roo Code, OpenAI SDK) `reasoning_content` yeniden oynattıkları geçmişten çıkarırlar. OmniRoute bunu sunucu tarafı önbellekten geri yükler, böylece yukarı akışın gördüğü istek tutarlı olur. Sayı # #1628, önbelleğin işlem yeniden başlatıldığında hayatta kalması için hibrit memory/SQLite kalıcılığını tanıttı.
 
 ## Mimarlık
 

@@ -156,7 +156,7 @@ Regressiya himoyachilari: `tests/unit/claude-low-priority-mode.test.ts`, `tests/
 - Doimiy pin jadvali: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
 - Sozlama: `sessionAffinityTtlMs` (global TTL ms, `0` o'chiradi) — `src/lib/db/settings.ts`. Oldin sozlangan har qanday Codex TTL yangi standart sifatida olib yuruvchi `124_generic_session_affinity_ttl.sql` migratsiyasi orqali faqat Kodeks `codexSessionAffinityTtlMs` nomidan qayta nomlandi.
 
-№7274 dan oldin `resolveSessionAffinityTtlMs()` `codex` tashqari har bir provayder uchun `0` ga qattiq kafolatlangan edi, shuning uchun TTL sozlamasi (va sessiya sarlavhalari) boshqa joyda hech qanday ta'sir ko'rsatmadi, garchi mahkamlash mexanizmi va sarlavhani chiqarish allaqachon provayder-agnostik bo'lsa ham. Tuzatish erta qaytishni olib tashladi; TTL endi global miqyosda `0` dan yuqori o'rnatilgan har bir provayder uchun bir xilda qo'llaniladi.
+#7274 dan oldin `resolveSessionAffinityTtlMs()` `codex` tashqari har bir provayder uchun `0` ga qattiq kafolatlangan edi, shuning uchun TTL sozlamasi (va sessiya sarlavhalari) boshqa joyda hech qanday ta'sir ko'rsatmadi, garchi mahkamlash mexanizmi va sarlavhani chiqarish allaqachon provayder-agnostik bo'lsa ham. Tuzatish erta qaytishni olib tashladi; TTL endi global miqyosda `0` dan yuqori o'rnatilgan har bir provayder uchun bir xilda qo'llaniladi.
 
 Uchta seansga yaqinlik sarlavhalari hech qachon yuqoriga yo'naltirilmaydi — ijrochilari mijoz sarlavhalarini o'tkazish o'rniga noldan o'zlarining yuqori oqim sarlavhalarini yaratadilar, shuning uchun bu faqat ichki korrelyatsiya identifikatori bo'lib qoladi.
 

@@ -26,7 +26,7 @@ Her ikisi de her biri en fazla 200 karakterden oluşan 500'e kadar girişi kabul
 
 ## Bir değil iki dar geçit
 
-# 6512'den alınan ders (bir `hidePaidModels` -only katalog filtresi, birleşik aday havuzu bağımsız olarak oluşturulduğundan `auto/*` ücretli bir modele yönlendirilmesine hâlâ izin veriyor) burada da aynı şekilde geçerlidir. Eşleşen yüklem `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`), BOTH çağrılır:
+# #6512'den alınan ders (bir `hidePaidModels` -only katalog filtresi, birleşik aday havuzu bağımsız olarak oluşturulduğundan `auto/*` ücretli bir modele yönlendirilmesine hâlâ izin veriyor) burada da aynı şekilde geçerlidir. Eşleşen yüklem `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`), BOTH çağrılır:
 
 - `src/app/api/v1/models/catalog.ts` — `/v1/models` kendisi, kaynak başına aynı 5 geçiş noktasında listeleniyor `shouldHidePaid()` zaten kapılar (statik `PROVIDER_MODELS`, senkronize sağlayıcı satırları, özel satırlar, takma ad destekli satırlar, yönetilen geri dönüş satırları).
 - `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` —, eşdeğer `filterPaidOnlyCandidates()` çağrısından hemen sonra `virtualFactory.ts::buildPreparedPool` çağrılır, dolayısıyla reddedilen bir model hiçbir zaman `auto/*` aday havuzuna seçilemez.

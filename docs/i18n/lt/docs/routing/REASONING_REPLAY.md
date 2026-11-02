@@ -16,7 +16,7 @@ Keletas mąstymo režimo paslaugų teikėjų atmeta tolesnius veiksmus, nebent**
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-Tačiau tipiški klientai (Cursor, Cline, Roo Code, OpenAI SDK) pašalina `reasoning_content` iš istorijos, kurią jie atkuria. OmniRoute atkuria jį iš serverio talpyklos, todėl užklausa, kurią mato prieš srovę, yra nuosekli. 1628 leidimas pristatė hibridinį memory/SQLite patvarumą, kad talpykla išliktų paleidus procesą iš naujo.
+Tačiau tipiški klientai (Cursor, Cline, Roo Code, OpenAI SDK) pašalina `reasoning_content` iš istorijos, kurią jie atkuria. OmniRoute atkuria jį iš serverio talpyklos, todėl užklausa, kurią mato prieš srovę, yra nuosekli. #1628 leidimas pristatė hibridinį memory/SQLite patvarumą, kad talpykla išliktų paleidus procesą iš naujo.
 
 ## Architektūra
 

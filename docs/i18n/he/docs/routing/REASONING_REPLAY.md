@@ -16,7 +16,7 @@ OmniRoute לוכד את עוזר `reasoning_content` המיוצר על ידי מ
 Param Incorrect: The reasoning_content in the thinking mode must be passed back to the API.
 ```
 
-אבל לקוחות טיפוסיים (Cursor, Cline, Roo Code, OpenAI SDK) מוציאים את `reasoning_content` מההיסטוריה שהם משחזרים. OmniRoute משחזר אותו ממטמון בצד השרת כך שהבקשה שמעלה הזרם רואה עקבית. גיליון מס' 1628 הציג את ההתמדה memory/SQLite ההיברידית כך שהמטמון שורד תהליך הפעלה מחדש.
+אבל לקוחות טיפוסיים (Cursor, Cline, Roo Code, OpenAI SDK) מוציאים את `reasoning_content` מההיסטוריה שהם משחזרים. OmniRoute משחזר אותו ממטמון בצד השרת כך שהבקשה שמעלה הזרם רואה עקבית. גיליון מס' #1628 הציג את ההתמדה memory/SQLite ההיברידית כך שהמטמון שורד תהליך הפעלה מחדש.
 
 ## אַדְרִיכָלוּת
 
