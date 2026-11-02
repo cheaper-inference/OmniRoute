@@ -107,7 +107,7 @@ test("#5945: reasoning_content + tool_use, but thinking NOT enabled on the outbo
   );
 });
 
-test("#5312: reasoning_content + tool_use + thinking ENABLED still gets a signature-less redacted_thinking precursor (the legitimate #5312 400-fix case)", () => {
+test("#5312: reasoning_content + tool_use + thinking ENABLED no longer gets a fabricated redacted_thinking precursor", () => {
   const result = openaiToClaudeRequest(
     "claude-opus-4-8",
     {
@@ -139,15 +139,14 @@ test("#5312: reasoning_content + tool_use + thinking ENABLED still gets a signat
   );
   assert.equal(fake, undefined, "must NOT emit a `thinking` block with the fabricated signature");
 
-  // It becomes a redacted_thinking placeholder (Anthropic accepts without sig check),
-  // and it must precede the tool_use block.
-  assert.equal(assistant.content[0].type, "redacted_thinking", "must be the precursor block");
-  assert.equal(assistant.content[0].data, DEFAULT_THINKING_CLAUDE_SIGNATURE);
+  // The DEFAULT blob is a real encrypted thought from an unrelated session: never inject it.
   assert.equal(
-    assistant.content[0].signature,
+    assistant.content.find((b) => b && b.type === "redacted_thinking"),
     undefined,
-    "redacted_thinking must not carry a signature"
+    "must NOT inject a redacted_thinking placeholder"
   );
+  assert.equal(assistant.content[0].type, "tool_use");
+  assert.equal(JSON.stringify(result).includes(DEFAULT_THINKING_CLAUDE_SIGNATURE), false);
   assert.ok(
     assistant.content.some((b) => b.type === "tool_use"),
     "tool_use block must still be present"
@@ -191,7 +190,7 @@ test("#17324: reasoning_content + tool_use + ADAPTIVE thinking (reasoning_effort
   );
 });
 
-test("#17324: reasoning_content + tool_use + MANUAL thinking (type:enabled, budget_tokens) KEEPS the #5312 placeholder", () => {
+test("#18036: reasoning_content + tool_use + MANUAL thinking (type:enabled, budget_tokens) injects no placeholder", () => {
   const result = openaiToClaudeRequest(
     "claude-sonnet-4-5",
     {
@@ -217,10 +216,14 @@ test("#17324: reasoning_content + tool_use + MANUAL thinking (type:enabled, budg
   const assistant = result.messages.find((m) => m.role === "assistant");
   assert.ok(assistant, "expected assistant message");
   // claude-sonnet-4-5 is a manual-budget model: reasoning_effort maps to
-  // thinking:{type:"enabled", budget_tokens}. The #5312 placeholder was
-  // VPS-validated on this shape and stays.
-  assert.equal(assistant.content[0].type, "redacted_thinking");
-  assert.equal(assistant.content[0].data, DEFAULT_THINKING_CLAUDE_SIGNATURE);
+  // thinking:{type:"enabled", budget_tokens}. #18036 removed the #5312 placeholder from this
+  // shape too, because it is a foreign encrypted thought; prepareClaudeRequest disables manual
+  // thinking when the final tool turn has no genuine block.
+  assert.deepEqual(
+    assistant.content.map((b) => b.type),
+    ["tool_use"]
+  );
+  assert.equal(JSON.stringify(result).includes(DEFAULT_THINKING_CLAUDE_SIGNATURE), false);
 });
 
 test("#5312 RC-D: a REAL thinking signature is preserved verbatim", () => {
