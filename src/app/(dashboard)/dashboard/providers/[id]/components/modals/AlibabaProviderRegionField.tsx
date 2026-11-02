@@ -20,6 +20,7 @@ export function getProviderRegionConfig(provider?: string) {
   const isAlibabaRegional = isAlibabaRegionalProvider(provider);
   const isXiaomiTokenPlan = isXiaomiTokenPlanProvider(provider);
   const isBedrock = provider === "bedrock";
+  const isAzureSpeech = provider === "azure-speech";
   return {
     defaultRegion: isAlibabaRegional
       ? getDefaultAlibabaProviderRegion(provider)
@@ -27,13 +28,16 @@ export function getProviderRegionConfig(provider?: string) {
         ? "sgp"
         : isBedrock
           ? "eu-west-2"
-          : "us-central1",
+          : isAzureSpeech
+            ? "westeurope"
+            : "us-central1",
     isAlibabaRegional,
     isXiaomiTokenPlan,
     showsRegion:
       isAlibabaRegional ||
       isXiaomiTokenPlan ||
       isBedrock ||
+      isAzureSpeech ||
       provider === "vertex" ||
       provider === "vertex-partner",
   };
