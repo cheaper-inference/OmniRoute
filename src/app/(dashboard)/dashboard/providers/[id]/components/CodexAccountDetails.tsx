@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 export interface CodexAccountDetailsProps {
   pool: CodexAccountPoolProjection;
+  hideQuota?: boolean;
 }
 
 function formatQuota(
@@ -20,7 +21,7 @@ function formatQuota(
   return "—";
 }
 
-export default function CodexAccountDetails({ pool }: CodexAccountDetailsProps) {
+export default function CodexAccountDetails({ pool, hideQuota = false }: CodexAccountDetailsProps) {
   const t = useTranslations("providers");
   const locale = useLocale();
   const [releasedState, setReleasedState] = useState<string | null>(null);
@@ -78,10 +79,12 @@ export default function CodexAccountDetails({ pool }: CodexAccountDetailsProps) 
                       : t("codexPoolAvailable")}
                 </span>
               </div>
-              <div className="mt-1 grid grid-cols-2 gap-2 text-text-muted">
-                <span>5h: {formatQuota(child.quota.windows["5h"], t("codexPoolUsed"))}</span>
-                <span>7d: {formatQuota(child.quota.windows["7d"], t("codexPoolUsed"))}</span>
-              </div>
+              {!hideQuota && (
+                <div className="mt-1 grid grid-cols-2 gap-2 text-text-muted">
+                  <span>5h: {formatQuota(child.quota.windows["5h"], t("codexPoolUsed"))}</span>
+                  <span>7d: {formatQuota(child.quota.windows["7d"], t("codexPoolUsed"))}</span>
+                </div>
+              )}
               {limited && child.cooldown.rateLimitedUntil ? (
                 <div className="mt-1 text-[11px] text-warning">
                   {t("codexPoolUntil", {

@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Input, Select } from "@/shared/components";
+import { Input } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import { SearchableSelect } from "@omniroute/ui-kit/searchable-select";
 import { ACCOUNT_FALLBACK_STRATEGY_VALUES } from "@/shared/constants/routingStrategies";
 
 type ProviderStrategyOverride = {
@@ -122,25 +123,34 @@ export default function ProviderAccountRoutingCard({ providerKey, connectionCoun
   if (connectionCount < 2) return null;
 
   return (
-    <div className="mb-4 rounded-lg border border-border bg-bg-subtle p-3">
-      <p className="text-sm font-medium">{t("providerAccountRoutingTitle")}</p>
-      <p className="text-xs text-text-muted mb-3">{t("providerAccountRoutingDesc")}</p>
+    <details className="mb-4 rounded-xl border border-border bg-surface p-4">
+      <summary className="cursor-pointer text-sm font-medium">
+        <span>{t("providerAccountRoutingTitle")}</span>
+        <span className="ml-3 font-normal text-text-muted">
+          {strategy || t("providerRoutingInheritGlobal")}
+          {strategy === "round-robin" ? ` · ${t("stickyLimit")}: ${stickyLimit || "3"}` : ""}
+        </span>
+      </summary>
+      <p className="mt-3 text-xs text-text-muted mb-3">{t("providerAccountRoutingDesc")}</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Select
-          compact
-          label={t("providerRoutingStrategy")}
-          disabled={busy}
-          value={strategy}
-          onChange={(e) => {
-            const v = e.target.value;
-            setStrategy(v);
-            save(v, stickyLimit).catch(console.error);
-          }}
-          options={[
-            { value: "", label: t("providerRoutingInheritGlobal") },
-            ...STRATEGY_OPTIONS.map((opt) => ({ value: opt, label: opt })),
-          ]}
-        />
+        <div className="min-w-0">
+          <p className="mb-2 text-sm font-medium">{t("providerRoutingStrategy")}</p>
+          <SearchableSelect
+            variant="field"
+            label={t("providerRoutingStrategy")}
+            disabled={busy}
+            value={strategy}
+            searchPlaceholder={t("providerRoutingStrategy")}
+            onValueChange={(v) => {
+              setStrategy(v);
+              save(v, stickyLimit).catch(console.error);
+            }}
+            options={[
+              { value: "", label: t("providerRoutingInheritGlobal") },
+              ...STRATEGY_OPTIONS.map((opt) => ({ value: opt, label: opt })),
+            ]}
+          />
+        </div>
         {strategy === "round-robin" && (
           <Input
             label={t("stickyLimit")}
@@ -154,6 +164,6 @@ export default function ProviderAccountRoutingCard({ providerKey, connectionCoun
           />
         )}
       </div>
-    </div>
+    </details>
   );
 }

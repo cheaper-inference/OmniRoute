@@ -111,7 +111,7 @@ describe("ConnectionRow connection-id chip", () => {
 describe("ConnectionPinTip", () => {
   it("documents the x-omniroute-connection header and the copy chip", () => {
     const el = render(<ConnectionPinTip />);
-    const text = el.textContent || "";
+    const text = el.querySelector("button")?.getAttribute("aria-label") || "";
     expect(text).toContain("x-omniroute-connection");
     expect(text).not.toContain("x-connection-id");
   });
