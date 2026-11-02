@@ -53,25 +53,23 @@ export const mistralProvider: RegistryEntry = {
       contextLength: 131072,
       toolCalling: true,
     },
+    // No static vision flag on these rows: it would beat a synced row's verdict for the id.
     {
       id: "ministral-14b-latest",
       name: "Ministral 3 14B",
       contextLength: 262144,
-      supportsVision: true,
       toolCalling: true,
     },
     {
       id: "ministral-8b-latest",
       name: "Ministral 3 8B",
       contextLength: 262144,
-      supportsVision: true,
       toolCalling: true,
     },
     {
       id: "ministral-3b-latest",
       name: "Ministral 3 3B",
       contextLength: 262144,
-      supportsVision: true,
       toolCalling: true,
     },
     {
