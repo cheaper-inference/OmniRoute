@@ -37,6 +37,14 @@ test("NVIDIA static catalog metadata excludes superseded model ids", () => {
 
 test("NVIDIA reviewed snapshot matches the registry and trial entries remain valid", () => {
   assert.deepEqual([...reviewedIds], [...registryIds]);
+  assert.ok(
+    registryIds.has("openai/gpt-oss-20b"),
+    "GPT OSS 20B must be discoverable in /v1/models"
+  );
+  assert.ok(
+    documentedFreeIds.has("openai/gpt-oss-20b"),
+    "GPT OSS 20B must retain its documented free tier"
+  );
   for (const modelId of documentedFreeIds) {
     assert.ok(registryIds.has(modelId), `${modelId} must exist in the NVIDIA hosted catalog`);
   }
