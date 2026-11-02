@@ -325,9 +325,7 @@
     "check:ui-kit-snapshot": "node scripts/check/check-ui-kit-snapshot.mjs",
     "gen:icon-map": "node scripts/dev/gen-icon-map.mjs",
     "docs:readme-hero": "node scripts/docs/gen-readme-hero.mjs",
-    "docs:readme-diagrams": "node --import tsx/esm scripts/docs/gen-readme-diagrams.mjs",
-    "build:api-only": "cross-env OMNIROUTE_BUILD_BACKEND_ONLY=1 node scripts/build/build-next-isolated.mjs",
-    "start:api-only": "OMNIROUTE_HEADLESS=1 node scripts/dev/run-next.mjs start"
+    "docs:readme-diagrams": "node --import tsx/esm scripts/docs/gen-readme-diagrams.mjs"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "1.4.0",
