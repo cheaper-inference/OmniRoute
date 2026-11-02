@@ -1,0 +1,1 @@
+- **test(rate-limit):** `rate-limit-learned-cap-13594.test.ts` closes the SQLite handle before removing its temp dir, which Windows refused with `EPERM` ([#18647](https://github.com/diegosouzapw/OmniRoute/pull/18647)) — thanks @AndresDiagoM

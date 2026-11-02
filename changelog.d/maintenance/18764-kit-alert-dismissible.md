@@ -1,0 +1,1 @@
+- **refactor(dashboard):** permanent notices use the kit `Alert` `dismissible={false}` prop instead of a CSS hack that hid the button, `/login` and `/status` build their notices from the kit `Alert`, and the combo builder's 1/2/3 stage icons come from one icon family ([#18764](https://github.com/cheaper-inference/OmniRoute/pull/18764))
