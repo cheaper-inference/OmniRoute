@@ -1,6 +1,7 @@
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
 import { getCodexClientSessionId } from "../../config/codexIdentity.ts";
 import { modelAfterFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
+import { resolveConnectionCostModel } from "../../services/connectionModelMap.ts";
 import {
   noteCodexTurnStateProvenance,
   readCodexTurnStateHeader,
@@ -568,7 +569,11 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       reasoningMeta: streamReasoningMeta ?? null,
     });
 
-    const costModel = currentModel || effectiveModel || model;
+    const costModel = resolveConnectionCostModel(
+      model,
+      currentModel || effectiveModel,
+      credentials
+    );
     recordStreamingCost({
       apiKeyId: apiKeyInfo?.id,
       provider,

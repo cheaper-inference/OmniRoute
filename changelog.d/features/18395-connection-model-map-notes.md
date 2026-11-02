@@ -1,0 +1,1 @@
+- **feat(providers):** per-connection model mapping and operator notes, with requested and actual models recorded on usage and call logs. A connection without a map dispatches, logs and bills exactly as before. ([#18395](https://github.com/cheaper-inference/OmniRoute/pull/18395)) — thanks @Junior-HJ

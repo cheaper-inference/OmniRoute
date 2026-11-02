@@ -18,6 +18,10 @@ import {
   getNextEligibleFamilyFallback,
   isFamilyFallbackEligible,
 } from "../../services/modelFamilyFallback.ts";
+import {
+  resolveConnectionMappedModel,
+  type ConnectionModelMap,
+} from "../../services/connectionModelMap.ts";
 import { COOLDOWN_MS } from "../../config/errorConfig.ts";
 import { normalizeHeaders } from "../../utils/headers.ts";
 import { shouldSkipCredentialRefresh } from "./skipCredentialRefresh.ts";
@@ -63,6 +67,8 @@ export type ProviderExecutionOutcome =
 export interface PipelineTargetContext {
   provider: string;
   requestedModel: string;
+  /** Model the client asked for when a connection model map rewrote it for the first account. */
+  connectionModelSource?: string;
   sourceFormat: string;
   targetFormat: string;
   stream: boolean;
@@ -382,6 +388,24 @@ export async function runProviderExecutionPipeline(
     }
   };
 
+  // The map belongs to the account that serves the attempt, so a swap always resolves from the
+  // unmapped model, including back to it when the next account has no map. Without a map on either
+  // side the wire stays untouched.
+  const unmappedModel = target.connectionModelSource ?? wire.currentModel;
+  const rotateToConnection = (next: Record<string, unknown>) => {
+    const previousMap = connection.getCredentials()?.modelMap;
+    connection.replaceCredentials(next);
+    if (!previousMap && !next.modelMap) return;
+    const remapped = resolveConnectionMappedModel(
+      unmappedModel,
+      next.modelMap as ConnectionModelMap
+    );
+    if (remapped === wire.currentModel) return;
+    wire.body = { ...wire.body, model: remapped };
+    wire.currentModel = remapped;
+    wire.setBodyAndModel(wire.body, remapped);
+  };
+
   while (
     attempts < maxAttempts ||
     antigravityByopRotationPending ||
@@ -459,18 +483,7 @@ export async function runProviderExecutionPipeline(
           attempt: attempts + 1,
           retryAfterMs,
         });
-        connection.replaceCredentials(nextCreds as Record<string, unknown>);
-        if (nextCreds.modelMap) {
-          const { resolveConnectionMappedModel } =
-            await import("../../services/connectionModelMap.ts");
-          const remapped = resolveConnectionMappedModel(
-            target.requestedModel || wire.currentModel,
-            nextCreds.modelMap as Record<string, string>
-          );
-          if (remapped !== wire.currentModel) {
-            wire.setBodyAndModel({ ...wire.body, model: remapped }, remapped);
-          }
-        }
+        rotateToConnection(nextCreds as Record<string, unknown>);
         attempts += 1;
         continue;
       }
@@ -498,18 +511,7 @@ export async function runProviderExecutionPipeline(
           })
           .catch(() => null);
         if (nextCreds && !nextCreds.allRateLimited && nextCreds.connectionId) {
-          connection.replaceCredentials(nextCreds as Record<string, unknown>);
-          if (nextCreds.modelMap) {
-            const { resolveConnectionMappedModel } =
-              await import("../../services/connectionModelMap.ts");
-            const remapped = resolveConnectionMappedModel(
-              target.requestedModel || wire.currentModel,
-              nextCreds.modelMap as Record<string, string>
-            );
-            if (remapped !== wire.currentModel) {
-              wire.setBodyAndModel({ ...wire.body, model: remapped }, remapped);
-            }
-          }
+          rotateToConnection(nextCreds as Record<string, unknown>);
           antigravityByopRotationPending = true;
           continue;
         }

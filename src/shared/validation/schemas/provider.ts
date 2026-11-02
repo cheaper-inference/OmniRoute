@@ -587,6 +587,11 @@ function rateLimitOverridePositiveInt(max: number) {
   }, z.coerce.number().int().min(1).max(max));
 }
 
+// Mirrors sanitizeConnectionModelMap, so a body that passes here can always be persisted.
+const connectionModelMapSchema = z
+  .record(z.string().trim().min(1).max(200), z.string().trim().min(1).max(200))
+  .nullable();
+
 export const updateProviderConnectionSchema = z
   .object({
     name: z.string().max(200).optional(),
@@ -662,18 +667,8 @@ export const updateProviderConnectionSchema = z
     perKeyProxyEnabled: z.boolean().optional(),
     quotaVisible: z.boolean().optional(),
     notes: z.union([z.string().max(10_000), z.null()]).optional(),
-    modelMap: z
-      .union([
-        z.null(),
-        z.record(z.string().min(1).max(200), z.union([z.null(), z.string().min(1).max(200)])),
-      ])
-      .optional(),
-    model_map: z
-      .union([
-        z.null(),
-        z.record(z.string().min(1).max(200), z.union([z.null(), z.string().min(1).max(200)])),
-      ])
-      .optional(),
+    modelMap: connectionModelMapSchema.optional(),
+    model_map: connectionModelMapSchema.optional(),
     // Partial patch of per-connection provider-specific settings (e.g. quota toggles)
     providerSpecificData: z
       .record(z.string(), z.unknown())

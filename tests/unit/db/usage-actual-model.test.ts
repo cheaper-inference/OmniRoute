@@ -75,3 +75,19 @@ test("call_logs stores both requested_model and actual_model", async () => {
   assert.equal(row.requested_model, "claude-3-7-sonnet");
   assert.equal(row.actual_model, "claude-3-5-haiku");
 });
+
+test("a fresh install ends up with the actual/requested model indexes", () => {
+  const db = core.getDbInstance();
+  const indexes = (table: string) =>
+    (db.prepare(`PRAGMA index_list(${table})`).all() as { name: string }[]).map((row) => row.name);
+  assert.ok(indexes("usage_history").includes("idx_uh_actual_model"));
+  assert.ok(indexes("usage_history").includes("idx_uh_requested_model"));
+  assert.ok(indexes("call_logs").includes("idx_cl_actual_model"));
+  const applied = db
+    .prepare("SELECT version FROM _omniroute_migrations WHERE name IN (?, ?) ORDER BY version")
+    .all("connection_notes_model_map", "usage_actual_model") as { version: string }[];
+  assert.deepEqual(
+    applied.map((row) => row.version),
+    ["227", "228"]
+  );
+});

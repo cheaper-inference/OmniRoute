@@ -838,7 +838,6 @@ async function materializeConnection(
     rateLimitedUntil: connection.rateLimitedUntil,
     ...buildConnectionConcurrencyFields(connection),
     quotaWindowThresholds: connection.quotaWindowThresholds ?? null,
-    notes: connection.notes ?? null,
     modelMap: connection.modelMap ?? null,
     ...(releaseOAuthSession ? { releaseOAuthSession } : {}),
     ...buildAntigravityRoutingFields(extra.routingLease, connection.id, extra.requestedModel),

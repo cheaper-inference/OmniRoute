@@ -67,30 +67,17 @@ export function resolveConnectionMappedModel(
 }
 
 /**
- * Applies connection-level model mapping to an execution input object.
- * Returns a new object with updated `model` and `body.model` if mapping took effect.
+ * Model a request is billed against. Only a map that rewrote the model moves the bill to the model
+ * the account actually served; everything else keeps pricing the routed `model`.
  */
-export function applyConnectionModelMap<T extends { model?: string; body?: unknown }>(
-  input: T,
-  modelMap?: ConnectionModelMap
-): T {
-  if (!input.model || !modelMap || typeof modelMap !== "object" || Array.isArray(modelMap)) {
-    return input;
-  }
-
-  const mappedModel = resolveConnectionMappedModel(input.model, modelMap);
-  if (mappedModel === input.model) {
-    return input;
-  }
-
-  const result: T = { ...input, model: mappedModel };
-
-  if (input.body && typeof input.body === "object" && !Array.isArray(input.body)) {
-    result.body = {
-      ...(input.body as Record<string, unknown>),
-      model: mappedModel,
-    };
-  }
-
-  return result;
+export function resolveConnectionCostModel<T extends string | null | undefined>(
+  model: T,
+  actualModel: string | null | undefined,
+  credentials: { modelMap?: unknown } | null | undefined
+): T | string {
+  if (!model || !actualModel) return model;
+  const modelMap = credentials?.modelMap as ConnectionModelMap;
+  return resolveConnectionMappedModel(model, modelMap) === actualModel && model !== actualModel
+    ? actualModel
+    : model;
 }

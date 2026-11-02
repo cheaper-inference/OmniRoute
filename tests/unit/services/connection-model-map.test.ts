@@ -1,9 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  resolveConnectionMappedModel,
-  applyConnectionModelMap,
-} from "../../../open-sse/services/connectionModelMap.ts";
+import { resolveConnectionMappedModel } from "../../../open-sse/services/connectionModelMap.ts";
 
 test("returns original model when no modelMap is provided", () => {
   assert.equal(resolveConnectionMappedModel("gpt-4o", null), "gpt-4o");
@@ -46,22 +43,4 @@ test("case-insensitive fallback mapping", () => {
     "GPT-4O": "gpt-4o-2024-11-20",
   };
   assert.equal(resolveConnectionMappedModel("gpt-4o", map), "gpt-4o-2024-11-20");
-});
-
-test("applyConnectionModelMap updates both input.model and input.body.model", () => {
-  const map = {
-    "gpt-4o": "gpt-4o-mini",
-  };
-  const input = {
-    model: "gpt-4o",
-    body: {
-      model: "gpt-4o",
-      messages: [{ role: "user", content: "hi" }],
-    },
-  };
-  const result = applyConnectionModelMap(input, map);
-  assert.equal(result.model, "gpt-4o-mini");
-  assert.equal((result.body as Record<string, unknown>).model, "gpt-4o-mini");
-  // Original is not mutated
-  assert.equal(input.model, "gpt-4o");
 });

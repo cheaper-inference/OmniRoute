@@ -180,7 +180,6 @@ export const PROVIDER_CONNECTIONS_COLUMNS = new Set([
   "rate_limit_overrides_json",
   "notes",
   "model_map",
-  "modelMap",
   "created_at",
   "updated_at",
   "synced_models_at",
@@ -956,8 +955,7 @@ function _buildUpdateConnectionRowParams(id: string, data: JsonRecord, now: unkn
     perKeyProxyEnabled: normalizeBooleanColumn(data.perKeyProxyEnabled, false) ? 1 : 0,
     quotaVisible: normalizeBooleanColumn(data.quotaVisible, true) ? 1 : 0,
     rateLimitOverridesJson: serializeJsonField(data.rateLimitOverrides),
-    notes:
-      typeof data.notes === "string" ? data.notes : data.notes === null ? null : data.notes || null,
+    notes: typeof data.notes === "string" ? data.notes : null,
     modelMap: serializeJsonField(data.modelMap),
     lastPingAt: data.lastPingAt || null,
     lastPingedResetKey: data.lastPingedResetKey || null,

@@ -6,6 +6,7 @@
 
 import { isUnpricedMeteredCost, meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
 import { readCpaAuthIndex } from "../chatCore/failureUsage.ts";
+import { resolveConnectionCostModel } from "../../services/connectionModelMap.ts";
 
 import { createRoutingEvent, emitRoutingEvent } from "../../services/routing/index.ts";
 
@@ -246,6 +247,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         target: {
           provider,
           requestedModel: pipelineModel,
+          connectionModelSource: deps.connectionModelSource,
           sourceFormat,
           targetFormat,
           stream: false,
@@ -799,7 +801,11 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         ? translatedResponse.usage
         : null;
     const costUsage = normalizeUsage(responseUsage);
-    const costModel = currentModel || effectiveModel || model;
+    const costModel = resolveConnectionCostModel(
+      model,
+      currentModel || effectiveModel,
+      credentials
+    );
     const costResult = costUsage
       ? await calculateCostDetailed(provider, costModel, costUsage, {
           serviceTier: effectiveServiceTier,
