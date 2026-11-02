@@ -38,5 +38,6 @@ test("latest promotion preserves every published image flavor", () => {
   assert.match(promotion[0], /for suffix in "" -web -bun -web-bun/);
   assert.match(promotion[0], /promote_tag "\$suffix"/);
   assert.match(promotion[0], /docker-image-complete\.mjs/);
+  assert.doesNotMatch(promotion[0], /if docker.*imagetools inspect/);
   assert.match(workflow, /Promote GHCR latest tags/);
 });
