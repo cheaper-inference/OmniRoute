@@ -1,0 +1,1 @@
+- **perf(quota):** Scope availability read views to single accounts and prioritize in-memory usage over repeated SQLite snapshot queries to eliminate 14-21s event loop stalls on instances with many connections ([#18741](https://github.com/cheaper-inference/OmniRoute/pull/18741)) — thanks @bufftop25
