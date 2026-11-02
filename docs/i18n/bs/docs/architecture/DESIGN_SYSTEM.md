@@ -4,13 +4,7 @@
 
 ---
 
-> **Status:** kontrolna ploča je izgrađena na **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), uključenom (vendored)
-> kao workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snapshot je fiksiran u
-> `packages/ui-kit/UPSTREAM.md` i zaštićen sa `npm run check:ui-kit-snapshot`). Svijetla je kanonska
-> tema; zadana postavka je `system`. Akcentna boja je Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) je UI porodica fontova, Instrument Serif samo za velike,
-> rijetke prikazne tekstove (`.ci-dashboard-display`), IBM Plex Mono za kod — svi su self-hosted putem
-> `@fontsource/*` importa na vrhu `src/app/globals.css`. Svaka ikona je Lucide glif.
+> **Status:** kontrolna tabla je izgrađena na** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), isporučeno kao radni prostor `packages/ui-kit` (`@omniroute/ui-kit`; gornji snimak je zakačen u `packages/ui-kit/UPSTREAM.md` i čuva ga `npm run check:ui-kit-snapshot`). Svetlost je kanonska tema; zadana postavka je `system`. Naglasak je Keak lime (`--ci-color-accent`). Switzer je jedinstvena porodica za UI, prikaz i tekst koda (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` rješavaju ga), koji sam hostuje sam komplet (`packages/ui-kit/src/ci-fonts.css`, uvezen od `ci-tokens.css`). Svaka ikona je Lucide glif.
 
 ## 1. Gdje se stvari nalaze
 
@@ -81,35 +75,13 @@
 
 ## 2. Pravila
 
-1. Tokeni, nikada literali. Izuzeci su zadržani namjerno: konzolni terminal koji je uvijek taman i
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), razriješena hex kopija statusne palete
-   kita za pozivače kojima je potreban literalni hex. Kategoričke palete više nisu izuzetak:
-   oslanjaju se na pet tokena grafikona kita (`--color-chart-1..5`) kroz
-   `src/shared/utils/categoricalPalette.ts` i, za strategije rutiranja,
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow ivice i platno orkestracije
-   čitaju varijable prilagođene temi `--orch-status-*` (`src/shared/components/flow/edgeStyles.ts`).
-2. Nikada ručno ne zakrpite `packages/ui-kit/src`: sinhronizujte pomoću
-   `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit provjera `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) pada na bilo kojem bajtu koji se razlikuje od prikvačenog upstream commita
-   (preskače uz upozorenje kada upstream klon, `UI_KIT_CLONE` ili
-   `_references/cheaper-inference-ui-kit`, nedostaje). Kada kitu nešto nedostaje, zaobiđite to u
-   adapteru ili na ekranu i zatražite to od upstreama.
-3. Zadani tekstovi kita su na engleskom (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   proslijedite prevedene stringove iz `useTranslations(...)` kad god komponenta kita prikazuje tekst.
-4. Tailwind uslužne klase imaju prednost nad klasama komponenti kita (kit deklariše
-   `@layer theme, base, components, utilities` i njegova pravila se nalaze u `components`) —
-   koristite uslužne klase za razmake i raspored, a ne za prebojavanje komponenti kita.
-5. Naslovi: `.ci-heading` (Inter, bez proreda) za naslove stranica i sekcija; `.ci-dashboard-display`
-   (Instrument Serif) samo za veliki, rijedak prikazni tekst poput statusnog koda stranice s greškom.
-6. `tests/unit/dashboard-kit-sweep.test.ts` čuva usvajanje kita: nijedan span s Material ligaturom
-   pod `src/app` ili `src/shared/components`; u stablu nadzorne ploče (`src/app/(dashboard)` i
-   `src/shared/components`) nema sirovih `<select>`, `<textarea>` ili `<table>` i nema ručno
-   izrađenih `role="dialog"` izvan navedenih izuzetaka (nativna grana adaptera `Select`,
-   `RequestLoggerDetail`); svaki sirovi `<button>` ili `<input>` tamo treba komentar koji sadrži
-   `kit-exception:` (s razlogom), a koji završava najviše 3 reda iznad njega; nijanse palete i
-   `dark:` varijante samo u datotekama koje test navodi.
-7. Provjerite obje teme i viewport od 390 px prije PR-a (snimci ekrana); `tests/e2e/a11y.spec.ts`
-   pokreće axe.
+1. Tokeni, nikad literali. Namjerno se čuvaju izuzeci: uvijek taman terminal konzole i `STATUS_HEX` (`src/shared/constants/statusColors.ts`), riješeno heksadecimalno ogledalo statusne palete kompleta za pozivaoce kojima je potreban doslovni heksadecimalni. Palete kategorija više nisu izuzetak: one se koriste na pet tokena grafikona (`--color-chart-1..5`) kompleta kroz `src/shared/utils/categoricalPalette.ts` i, za strategije rutiranja, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow ivice i platno orkestracije čitaju `--orch-status-*` varijable koje su svjesne teme (`src/shared/components/flow/edgeStyles.ts`).
+2. Nikada nemojte krpiti `packages/ui-kit/src` ručno: sinhronizirajte sa `scripts/dev/sync-ui-kit.sh <commit>`; kapija pre urezivanja `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ne uspijeva na bilo kojem bajtu koji se razlikuje od zakačenog uzvodnog urezivanja (preskače uz upozorenje kada je uzvodni klon, `UI_KIT_CLONE` ili `_references/cheaper-inference-ui-kit`, odsutan). Kada kompletu nešto nedostaje, zaobiđite to u adapteru ili ekranu i zatražite to uzvodno.
+3. Zadane postavke teksta kompleta su engleski (`label = "Loading"`, `loadingLabel = "Loading table"`…) — proslijedite prevedene stringove iz `useTranslations(...)` kad god komponenta kompleta prikaže tekst.
+4. Tailwind uslužni programi pobjeđuju nad klasama komponenti kompleta (komplet deklarira `@layer theme, base, components, utilities` i njegova pravila žive u `components`) — koristite pomoćne programe za razmak i raspored, a ne za ponovno bojenje komponenti kompleta.
+5. Naslovi: `.ci-heading` za naslove stranica i odjeljaka; `.ci-dashboard-display` samo za veliki, rijetki tekst na ekranu kao što je statusni kod stranice greške. Obojica koriste Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` čuva usvajanje kompleta: nema raspona materijalne ligature ispod `src/app` ili `src/shared/components`; u stablu kontrolne table (`src/app/(dashboard)` i `src/shared/components`) nema sirovog `<select>`, `<textarea>` ili `<table>` i nema ručno umotanog `role="dialog"` izvan navedenih izuzetaka (prirodna grana `Select` adaptera, `RequestLoggerDetail`); svaki sirovi `<button>` ili `<input>` tamo treba komentar koji sadrži `kit-exception:` (sa razlogom) koji završava najviše 3 reda iznad njega; palete nijansi i `dark:` varijanti samo u fajlovima koje test navodi.
+7. Provjerite obje teme i okvir za prikaz od 390 px prije PR (snimke ekrana); `tests/e2e/a11y.spec.ts` pokreće axe.
 
 ## 3. Dodavanje ekrana
 
@@ -143,49 +115,22 @@
 4. Dodajte ili ažurirajte `tests/unit/ui/adapters/<name>.test.tsx`. Za adapter s mnogo pozivalaca, uporedite
    renderirani markup prije i poslije promjene — promjene paddinga ili wrappera šire se na svaki ekran.
 
-## 5. Ažuriranje kita
+## 5. Ažuriranje kompleta
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopira upstream `src/` s tog commita u
-`packages/ui-kit/src` i primjenjuje jedinu dozvoljenu transformaciju (uklanja `.js` sufiks s
-relativnih importa). Zatim: pregledajte `git diff packages/ui-kit`, napravite vizuelni prolaz kroz dobavljače,
-postavke, kombinacije, potrošnju i endpoint u obje teme, pokrenite `npm run check:ui-kit-snapshot` i
-`npm run test:vitest:ui`, i otvorite PR s upstream changelogom.
+`npm run check:ui-kit-upstream` upoređuje verziju zakačenu u `packages/ui-kit/UPSTREAM.md` s najnovijom `v*` oznakom uzvodnog repo-a i ispisuje naredbu za sinhronizaciju kada izdanje izađe. Sedmični `UI Kit upstream watch` radni tok (`.github/workflows/ui-kit-upstream-watch.yml`) pokreće istu provjeru i drži jedan problem praćenja otvorenim dok je pin iza; upstream repo je privatan, tako da je toku rada potreban token samo za čitanje u `UI_KIT_READ_TOKEN` tajni i ostaje inertan bez njega.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopira uzvodni `src/` kod tog urezivanja (`latest` = najnoviji `v*` tag) u `packages/ui-kit/src`, primjenjuje jednu dozvoljenu transformaciju (ispušta `.js` sufiks iz relativnog uvoza) i postavlja verziju radnog prostora u `packages/ui-kit/package.json` i `package-lock.json` na onu uzvodnu. Zatim: pregledajte `git diff packages/ui-kit`, izvršite vizualni pregled dobavljača, postavki, kombinacija, upotrebe i krajnje točke u obje teme, pokrenite `npm run check:ui-kit-snapshot` i `npm run test:vitest:ui` i otvorite PR sa upstream dnevnikom promjena.
 
 ## 6. README dijagrami
 
-Dvanaest dijagrama koje korijenski `README.md` ugrađuje (`docs/diagrams/*.svg`) jesu kit primijenjen na statičku
-sliku, i oni su generisani, a ne crtani ručno: 13 datoteka generatora u `scripts/docs/gen-readme-*.mjs`
-(dvanaest dijagrama plus `gen-readme-diagrams.mjs` drajver) i 12 testova zastarjelosti u
-`tests/unit/docs/readme-*-svg.test.ts`, jedan po dijagramu, od kojih svaki bajt po bajt uspoređuje commitovanu
-datoteku s izlazom njenog generatora (job `test-unit`).
+Dvanaest dijagrama koje root `README.md` ugrađuje (`docs/diagrams/*.svg`) su komplet primijenjen na statičku sliku, i oni se generiraju, a ne crtaju ručno: 13 datoteka generatora na `scripts/docs/gen-readme-*.mjs` (dvanaest dijagrama plus `gen-readme-diagrams.mjs` drajver) i 12 testova zastarjelosti na `tests/unit/docs/readme-*-svg.test.ts`, jedan po dijagramu, svaki bajt-mit upoređivan sa svojim zjo-generatorom' ( `test-unit`-mit-fajl).
 
-- **Tokeni.** `scripts/docs/readme-diagram-theme.mjs` kopira paletu iz `packages/ui-kit/src/ci-tokens.css`
-  (vezano uz tu datoteku testom `tests/unit/docs/readme-diagram-theme.test.ts`) i definiše tekstualne uloge na
-  fontovima kita — Instrument Serif za naslove, Inter za UI tekst, IBM Plex Mono za brojke i kod, isti
-  `@fontsource` paketi koje `src/app/globals.css` učitava za dashboard. Svijetle vrijednosti stoje na `:root`,
-  tamne vrijednosti iza `prefers-color-scheme: dark`, unutar datoteke, pa svaka slika prati shemu posmatrača na
-  GitHubu.
-- **Fontovi.** `scripts/docs/readme-fonts.mjs` sužava te woff2 datoteke na glifove koje svaki dijagram crta i
-  ugrađuje ih kao `@font-face` `data:` URI-je — jedini način da tipografija kita dođe do README slike, budući da
-  GitHub Markdown ne nosi CSS i camo proxy blokira svako vanjsko dohvaćanje. Podskupovi su samo latinični;
-  glifovi simbola koji se kao rezerva koriste iz sistemskog stacka dozvoljeni su jedan po jedan u
-  `SYMBOL_FALLBACKS`, a svaki drugi nepokriveni glif baca grešku.
-- **Ponovno generisanje.** `npm run docs:readme-diagrams` ponovo piše svih dvanaest redoslijedom iz README-ja i
-  ispisuje jednu liniju po datoteci s njenom veličinom. Pojedinačni generator se također pokreće samostalno
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` treba `node --import tsx/esm` jer njegove
-  brojke dolaze iz aktivnog učitavača kataloga u `open-sse/config/freeModelCatalog.ts`; CI posljedica promjene
-  kataloga je u `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commitujte generator i SVG zajedno.
-- **Dokaz.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderira datoteku onako kako je GitHub
-  servira (`<img>` tag, camo-ov `Content-Security-Policy`, `image/svg+xml`), snima svijetli i tamni okvir i
-  prijavljuje vanjske zahtjeve za fontovima koje je stranica uputila (mora biti 0).
-- **Budžet.** Ispod 200 KB po datoteci (svaki test zastarjelosti to potvrđuje); 500 KB je čvrsto ograničenje za
-  svaku README sliku (pravilo validatora SVG studija).
-- **Tekst nepromijenjen, brojke iz gatea.** Rebrendiranje je promijenilo tipografiju i paletu, ne riječi: svaki
-  generator nosi tekst svog dijagrama u `*_COPY` konstanti (ili ga gradi iz aktivnog kataloga) koji je
-  istovremeno i nacrtani tekst i ulaz za podskup fontova. Kanonske brojke ostaju u `<text>` čvorovima, koje čita
-  `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); testovi zastarjelosti dijagrama koje gate
-  čita također pokreću njegove validatore na generisanoj datoteci, pa brojka koja odstupa od koda pada na testu —
-  ispravite izvor koji gate čita, nikad broj u generatoru.
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopira paletu iz `packages/ui-kit/src/ci-tokens.css` (koju je zakačio `tests/unit/docs/readme-diagram-theme.test.ts` na tu datoteku) i definiše uloge teksta na ranijim stranama kompleta — Instrument Serif za prikaz, Inter za UI tekst, IBM Plex Mono za figure i kod — iz `@fontsource` paketa (sama kontrolna tabla koristi komplet Switzer 0.6 od.6). Svetle vrednosti se nalaze na `:root`, tamne vrednosti iza `prefers-color-scheme: dark`, unutar datoteke, tako da svaka slika prati šemu gledaoca na GitHub.
+- **Fontovi.** `scripts/docs/readme-fonts.mjs` podskupljuje te woff2 datoteke na glifove koje crta svaki dijagram i ugrađuje ih kao `@font-face` `data:` URIs — jedini način na koji tipografija kita dođe do README slike, pošto GitHub Markdown ne nosi CSS i camo proxy blokira svako vanjsko preuzimanje. Podskupovi su samo latinski; glifovi simbola koji se vraćaju na sistemski stog su dozvoljeni jedan po jedan u `SYMBOL_FALLBACKS`, a bilo koji drugi otkriveni glif baca.
+- **Regeneracija.** `npm run docs:readme-diagrams` prepisuje svih dvanaest u README redoslijedu i ispisuje jedan red po datoteci s njegovom veličinom. Pojedinačni generator također radi samostalno (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` treba `node --import tsx/esm` jer njegove brojke potiču iz živog učitavača kataloga u `open-sse/config/freeModelCatalog.ts`; CI posljedica promjene kataloga je u `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Urežite generator i SVG zajedno.
+- **Dokaz.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` prikazuje fajl na način na koji ga GitHub opslužuje ( `<img>` tag, camo `Content-Security-Policy`, `image/svg+xml`), snima svijetli i tamni okvir i izvještava da vanjski font zahtijeva stranicu (mora biti 0).
+- **Budžet.** Ispod 200 KB po fajlu (svaki test zastarelosti to potvrđuje); 500 KB je tvrda granica za bilo koju README sliku (pravilo SVG studio validatora).
+- **Kopija nepromijenjena, broji se od kapije.** Rebrand je promijenio tip i paletu, a ne riječi: svaki generator nosi kopiju svog dijagrama u `*_COPY` konstanti (ili je gradi iz živog kataloga) koja je i nacrtani tekst i unos podskupa fonta. Kanonske figure ostaju u `<text>` čvorovima, čita ih `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); testovi zastarelosti dijagrama koje čita kapija takođe pokreću svoje validatore na generisanoj datoteci, tako da figura koja odstupa od koda pada na testu — popravite izvor koji kapija čita, a ne broj u generatoru.
 
 ## 7. Indeks referenci
 

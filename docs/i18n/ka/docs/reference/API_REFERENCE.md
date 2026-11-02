@@ -848,47 +848,40 @@ OpenAI-თან თავსებადი პაკეტური დამ�
 
 ---
 
-## ძიების API
+## ძებნა API
 
-ვებ/ძიების პროვაიდერების აბსტრაქცია (Tavily, Brave, Exa, Serper და სხვ.).
+Web/search პროვაიდერის აბსტრაქცია (Tavily, Brave, Exa, Serper და ა.შ.).
 
-| მეთოდი | გზა                    | აღწერა                                                                                             |
-| ------ | ---------------------- | -------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | კონფიგურირებული ძიების პროვაიდერებისა და მათი შესაძლებლობების ჩამონათვალი                          |
-| POST   | `/v1/search`           | ძიების მოთხოვნის შესრულება — body მოწმდება `v1SearchSchema`-ით; მხარდაჭერილია ქეშირება/გაერთიანება |
-| GET    | `/v1/search/analytics` | თითოეული პროვაიდერის შედეგების/დაყოვნების/ქეშის სტატისტიკა                                         |
+| მეთოდი | ბილიკი                 | აღწერა                                                                                            |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | ჩამოთვალეთ კონფიგურირებული საძიებო პროვაიდერების + შესაძლებლობები                                 |
+| POST   | `/v1/search`           | გაუშვით საძიებო მოთხოვნა — ორგანო დამოწმებული `v1SearchSchema` ით, მხარს უჭერს caching/coalescing |
+| GET    | `/v1/search/analytics` | თითო პროვაიდერის hit/latency/cache სტატისტიკა                                                     |
 
-**ავტორიზაცია:** Bearer API-გასაღები (`extractApiKey` + `isValidApiKey`). ძიების პოლიტიკა აღსრულდება `enforceApiKeyPolicy`-ის მეშვეობით.
+**ავტორიზაცია:** მატარებელი API გასაღები (`extractApiKey` + `isValidApiKey`). ძიების პოლიტიკა განხორციელდა `enforceApiKeyPolicy` მეშვეობით.
 
-### Exa-სა და Tavily-ის `provider_options`
+### ეგზა და ტავილი `provider_options`
 
-Exa და Tavily პროვაიდერისთვის სპეციფიკურ ველებს სახელთა სივრცით გამოყოფილი ნაკრებიდან კითხულობენ:
-`provider_options.exa` (ან `provider_options["exa-search"]`) და `provider_options.tavily`
-(ან `provider_options["tavily-search"]`). გადაიცემა მხოლოდ ქვემოთ ჩამოთვლილი გასაღებები. თითოეული მათგანი
-მოწმდება საკუთარი Zod-სქემის მიხედვით `open-sse/handlers/search/providerOptionsPassthrough.ts`-ში,
-ხოლო არასწორი ტიპის მქონე გასაღები გამოირიცხება. ნებისმიერი სხვა გასაღები იგნორირდება, მათ შორის ავტორიზაცია, საბაზისო URL,
-`stream` და `outputSchema`. სხვა პროვაიდერების მიერ გამოყენებული ბრტყელი გასაღებები (`cx`, `depth`, ...) მუშაობას
-კვლავინდებურად განაგრძობს.
+Exa და Tavily კითხულობენ პროვაიდერის სპეციფიკურ ველებს სახელების სივრცის ჩანთიდან: `provider_options.exa` (ან `provider_options["exa-search"]`) და `provider_options.tavily` (ან `provider_options["tavily-search"]`). გადამისამართებულია მხოლოდ ქვემოთ მოცემული გასაღებები. თითოეული მოწმდება `open-sse/handlers/search/providerOptionsPassthrough.ts` ში საკუთარი Zod სქემის მიხედვით და არასწორი ტიპის გასაღები ამოვარდნილია. ნებისმიერი სხვა გასაღები იგნორირებულია, მათ შორის auth, base URL, `stream` და `outputSchema`. სხვა პროვაიდერების მიერ გამოყენებული ბრტყელი კლავიშები (`cx`, `depth`, ...) მუშაობს როგორც ადრე.
 
-| პროვაიდერი | ზედა დონის ველები                                                                                                                                                                                                                                                                                                                                                         | ჩადგმული                                                                                                                                                                 |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ბრტყელი პრიმიტივები), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` გაერთიანებულია ნაგულისხმევ `{ text: true, highlights: true }`-თან |
-| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                        |
+| პროვაიდერი | უმაღლესი დონის ველები                                                                                                                                                                                                                                                                                                                                                     | დაბუდებული                                                                                                                                 |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ბრტყელი პრიმიტივები), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` გაერთიანდა ნაგულისხმევ `{ text: true, highlights: true }` ზე |
+| ტავილი     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                          |
 
-ზოგად ველებს ყოველთვის უპირატესობა ენიჭება: `query`, `max_results`, `filters` (დომენები), `country` და
-`search_type`-დან მიღებული თემა. Exa-ში `search_type: "news"` ინარჩუნებს `category: "news"`-ს.
-Tavily ასევე იღებს `search_type: "finance"`-ს (`topic: "finance"`).
+ყოველთვის იმარჯვებს ზოგადი ველები: `query`, `max_results`, `filters` (დომენები), `country` და `search_type` დან მიღებული თემა. Exa-ზე, `search_type: "news"` ინახავს `category: "news"`. ტავილი ასევე იღებს `search_type: "finance"` (`topic: "finance"`).
 
-ზოგადი `time_range` ახლა ორივე პროვაიდერამდე აღწევს: Exa იღებს `startPublishedDate`-ს (ISO
-დროის ნიშნული), ხოლო Tavily — `start_date`-ს (`YYYY-MM-DD`). `provider_options`-ში ცხადად მითითებული თარიღი
-ანაცვლებს გარდაქმნის შედეგად მიღებულ თარიღს.
+Firecrawl ძიების ღირებულება აღირიცხება 10 დაბრუნებული შედეგის დაწყებულ ბლოკზე, 0,002$ (2 კრედიტი) ბლოკი და მინიმუმ ერთი ბლოკი თითო ზარზე ( [Firecrawl ბილინგი](https://docs.firecrawl.dev/billing) ): 11 შედეგი ღირს 0,004$.
 
-Exa-ს შედეგები `provider_raw`-ში ინარჩუნებს `id`, `highlight_scores`, `summary`, `subpages`, `entities` და `extras` ველებს.
-Tavily-ის შედეგები ინარჩუნებს `images` და `favicon` ველებს.
+ზოგადი `time_range` ახლა აღწევს ორივე პროვაიდერს: Exa იღებს `startPublishedDate` (ISO დროის ნიშანს) და Tavily იღებს `start_date` (`YYYY-MM-DD`). აშკარა თარიღი `provider_options` ში აჭარბებს შედგენილ თარიღს.
 
-ხარჯების აღრიცხვა კვლავ ბრტყელი რეესტრის, `costPerQuery`-ის, მეშვეობით ხდება. Tavily
-`search_depth: "advanced"`-ისთვის თითოეულ გამოძახებაზე მეტ კრედიტს არიცხავს და ეს განსხვავება
-`usage.search_cost_usd`-ში არ აისახება.
+Exa შედეგები ინახავს `id`, `highlight_scores`, `summary`, `subpages`, `entities` და `extras` `provider_raw` ში. შედეგების შენარჩუნება `images` და `favicon`.
+
+Linkup-ის ძიების ღირებულება აღირიცხება $0,005 `depth` `fast` სთვის და `standard` სთვის და $0,05-ად `deep` სთვის ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), მიუხედავად იმისა, `depth` მოდის `provider_options` დან თუ კავშირის პარამეტრებიდან.
+
+Exa `type: "lite"` (Exa 3.0) იღებს ველების უფრო მცირე კომპლექტს და უარყოფს მთელ მოთხოვნას, როდესაც დაყენებულია ნებისმიერი სხვა ველი. Lite-ისთვის, `additionalQueries`, `systemPrompt` და ყველა `contents` კლავიატურა `text` და `highlights` გარდა იშლება ზარის წინ. მოძველებული `subpages`, `subpageTarget`, `highlights.numSentences` და `highlights.highlightsPerUrl` აღარ არის გადაგზავნილი.
+
+ხარჯების აღრიცხვა არის ბინა რეესტრი `costPerQuery`, გარდა Exa-ისა, რომელიც მიჰყვება Exa-ს საკუთარ ფასებს: $0,007 თითო ზარზე `auto` (და მემკვიდრეობითი `fast`) ან $0,004 `lite` (და მემკვიდრე `instant`), რომელიც მოიცავს 10 შედეგს; $0,001 ყოველი შემდგომი შედეგისთვის; და $0,001 თითო დაბრუნებულ შედეგზე, როდესაც `contents.summary` დაყენებულია. Tavily აღირიცხება 1 კრედიტით (0,008$) `search_depth` `basic`, `fast` და `ultra-fast`, და 2 კრედიტით (0,016$) `advanced` ( [Tavily API კრედიტები](https://docs.tavily.com/documentation/api-credits) ). ზარი `auto_parameters: true` ით, რომელსაც Tavily განაახლებს გაფართოებულზე, კვლავ ჩაწერილია 1 კრედიტით.
 
 ---
 

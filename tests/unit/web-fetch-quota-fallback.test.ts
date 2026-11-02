@@ -272,3 +272,88 @@ test("auto-select returns 400 when no web-fetch provider is configured", async (
   assert.equal(response.status, 400);
   assert.ok((body.error?.message ?? "").includes("No credentials configured"));
 });
+
+test("auto-select continues past Jina insufficient balance after Firecrawl rejects a site", async () => {
+  await seedConnection("firecrawl");
+  await seedConnection("jina-reader");
+  await seedConnection("tavily-search");
+  const calls: string[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    const host = new URL(String(url)).hostname;
+    calls.push(host);
+    if (host === "api.firecrawl.dev") {
+      return Response.json({ error: "we do not support this site" }, { status: 403 });
+    }
+    if (host === "r.jina.ai") {
+      return Response.json({ name: "InsufficientBalanceError", status: 40203 }, { status: 402 });
+    }
+    if (host === "api.tavily.com") {
+      return Response.json({ results: [{ raw_content: "complete extracted content" }] });
+    }
+    throw new Error(`Unexpected upstream: ${host}`);
+  };
+  try {
+    const response = await postWebFetch({});
+    const body = await readJson(response);
+    assert.equal(response.status, 200);
+    assert.equal(body.provider, "tavily-search");
+    assert.equal(body.content, "complete extracted content");
+    assert.deepEqual(calls, ["api.firecrawl.dev", "r.jina.ai", "api.tavily.com"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+for (const status of [401, 403]) {
+  test(`auto-select preserves Jina ${status} authorization failures`, async () => {
+    await seedConnection("jina-reader");
+    await seedConnection("tavily-search");
+    const calls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = async (url) => {
+      const host = new URL(String(url)).hostname;
+      calls.push(host);
+      return Response.json({ error: "Access denied" }, { status });
+    };
+    try {
+      const response = await postWebFetch({});
+      assert.equal(response.status, status);
+      assert.deepEqual(calls, ["r.jina.ai"]);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+}
+
+test("explicit Jina insufficient balance does not silently choose another provider", async () => {
+  await seedConnection("jina-reader");
+  await seedConnection("tavily-search");
+  const calls: string[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    calls.push(new URL(String(url)).hostname);
+    return Response.json({ name: "InsufficientBalanceError", status: 40203 }, { status: 402 });
+  };
+  try {
+    const response = await postWebFetch({ provider: "jina-reader" });
+    assert.equal(response.status, 402);
+    assert.deepEqual(calls, ["r.jina.ai"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("auto-select reports exhausted pool after Jina insufficient balance with no fallback", async () => {
+  await seedConnection("jina-reader");
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () =>
+    Response.json({ name: "InsufficientBalanceError", status: 40203 }, { status: 402 });
+  try {
+    const response = await postWebFetch({});
+    assert.equal(response.status, 429);
+    assert.ok(response.headers.get("Retry-After"));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

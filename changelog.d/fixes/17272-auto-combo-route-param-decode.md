@@ -1,0 +1,1 @@
+- **fix(dashboard):** Decode percent-encoded combo route params (`auto%2Ffast`) so the `auto/*` Control Center page renders instead of showing `COMBO_007`, and the breadcrumb reads the decoded name (#17271, #17272 — thanks @afonsoft)

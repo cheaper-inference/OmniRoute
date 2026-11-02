@@ -186,12 +186,14 @@ export function CheckboxGroup({
 }: CheckboxGroupProps) {
   const reactId = useId();
   const labelId = label != null ? `${reactId}-label` : undefined;
+  const descriptionId = description != null ? `${reactId}-description` : undefined;
   const hasError = error != null && error !== false;
 
   return (
     <div
       role="group"
       aria-labelledby={labelId}
+      aria-describedby={descriptionId}
       data-slot="checkbox-group"
       data-error={hasError || undefined}
       className={cn("ci-checkbox-group", className)}
@@ -205,7 +207,7 @@ export function CheckboxGroup({
             </span>
           )}
           {description != null && (
-            <span className="ci-checkbox-group__description">
+            <span id={descriptionId} className="ci-checkbox-group__description">
               {description}
             </span>
           )}
