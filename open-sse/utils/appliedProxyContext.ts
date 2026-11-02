@@ -27,6 +27,8 @@ export type AppliedProxySink = {
    * pool has nothing else to offer — the executor keeps its behavior then.
    */
   reselectPoolMember?: () => Promise<unknown>;
+  /** First upstream dispatch time; retries keep the original timestamp. */
+  upstreamDispatchedAt?: number | null;
 };
 const APPLIED_PROXY_CONTEXT_KEY = Symbol.for("omniroute.proxyFetch.applied-context");
 type AppliedProxyStore = typeof globalThis & {
@@ -111,4 +113,32 @@ export function readAddedWait(): { ms: number | null; cause: string | null } | n
   } catch {
     return null;
   }
+}
+
+/** First-writer dispatch timestamp; retries must not reset the queue wait. */
+export function noteUpstreamDispatch(): void {
+  try {
+    const sink = getAppliedProxyContext().getStore();
+    if (sink && sink.upstreamDispatchedAt == null) sink.upstreamDispatchedAt = Date.now();
+  } catch {
+    /* queue-wait is best-effort; never break the request path */
+  }
+}
+
+export function readUpstreamDispatchedAt(): number | null {
+  try {
+    const sink = getAppliedProxyContext().getStore();
+    return sink && typeof sink.upstreamDispatchedAt === "number" ? sink.upstreamDispatchedAt : null;
+  } catch {
+    return null;
+  }
+}
+
+export function queueWaitMsFromDispatch(
+  upstreamDispatchedAt: number | null,
+  startTime: number
+): number | null {
+  if (upstreamDispatchedAt === null || !Number.isFinite(upstreamDispatchedAt)) return null;
+  if (!Number.isFinite(startTime)) return null;
+  return Math.max(0, Math.round(upstreamDispatchedAt - startTime));
 }

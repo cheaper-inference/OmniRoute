@@ -28,6 +28,9 @@ export {
   noteRotationAccount,
   noteAddedWait,
   readAddedWait,
+  noteUpstreamDispatch,
+  readUpstreamDispatchedAt,
+  queueWaitMsFromDispatch,
 } from "./appliedProxyContext.ts";
 export type { AppliedProxySink, AddedWaitCause } from "./appliedProxyContext.ts";
 export { setTlsClientForTest, describeFetchCause } from "./proxyFetchTransportSupport.ts";
