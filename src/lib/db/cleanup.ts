@@ -1000,6 +1000,28 @@ export class UsageResetBoundaryError extends Error {
   }
 }
 
+/** Preflight and fence a reset inside its caller's deletion transaction. */
+function prepareUsageResetBoundary(db: ReturnType<typeof getDbInstance>, period: string) {
+  const cutoffIso =
+    period === "all"
+      ? null
+      : new Date(Date.now() - RESET_USAGE_HISTORY_PERIOD_MS[period]).toISOString();
+  const partialDay =
+    cutoffIso && !cutoffIso.endsWith("T00:00:00.000Z") ? cutoffIso.slice(0, 10) : null;
+  if (
+    partialDay &&
+    db
+      .prepare("SELECT 1 FROM usage_daily_summary WHERE date = ? AND raw_rebuild_safe = 0 LIMIT 1")
+      .get(partialDay)
+  ) {
+    throw new UsageResetBoundaryError();
+  }
+  db.prepare(
+    "UPDATE rollup_revision_counter SET reset_generation = reset_generation + 1 WHERE singleton = 1"
+  ).run();
+  return { cutoffIso, partialDay };
+}
+
 export async function resetUsageHistory(period: string): Promise<ResetUsageHistoryResult> {
   if (!isResetUsageHistoryPeriod(period)) {
     throw new Error(`Invalid reset period: ${period}`);
@@ -1034,25 +1056,7 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     let artifactsToDelete: string[] = [];
 
     const runReset = db.transaction(() => {
-      const cutoffIso =
-        period === "all"
-          ? null
-          : new Date(Date.now() - RESET_USAGE_HISTORY_PERIOD_MS[period]).toISOString();
-      const partialDay =
-        cutoffIso && !cutoffIso.endsWith("T00:00:00.000Z") ? cutoffIso.slice(0, 10) : null;
-      if (
-        partialDay &&
-        db
-          .prepare(
-            "SELECT 1 FROM usage_daily_summary WHERE date = ? AND raw_rebuild_safe = 0 LIMIT 1"
-          )
-          .get(partialDay)
-      ) {
-        throw new UsageResetBoundaryError();
-      }
-      db.prepare(
-        "UPDATE rollup_revision_counter SET reset_generation = reset_generation + 1 WHERE singleton = 1"
-      ).run();
+      const { cutoffIso, partialDay } = prepareUsageResetBoundary(db, period);
       if (period === "all") {
         for (const target of RESET_TARGETS) {
           (result[target.resultKey] as number) += deleteAllFromTable(target.table);
@@ -1076,12 +1080,10 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     runReset();
     clearAnalyticsResponseCache();
 
-    let artifactResult: { deletedArtifacts: number; errors: number };
-    if (period === "all") {
-      artifactResult = purgeCallLogArtifactDirectory();
-    } else {
-      artifactResult = deleteCallLogArtifacts(artifactsToDelete);
-    }
+    const artifactResult =
+      period === "all"
+        ? purgeCallLogArtifactDirectory()
+        : deleteCallLogArtifacts(artifactsToDelete);
     result.deletedCallLogArtifacts = artifactResult.deletedArtifacts;
     result.deletedArtifacts = artifactResult.deletedArtifacts;
     result.errors += artifactResult.errors;
