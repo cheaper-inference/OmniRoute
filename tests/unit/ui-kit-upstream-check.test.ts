@@ -207,8 +207,9 @@ test("workflow: unknown with no issue open warns and opens one, titled for the r
   assert.ok(writes(run)[0].startsWith("issue create"));
   assert.ok(writes(run)[0].includes(`--title ${EXACT_TITLE} `), writes(run)[0]);
   assert.ok(run.bodies[0].includes(NO_TOKEN.detail));
-  assert.ok(
-    run.bodies[0].includes("https://github.com/cheaper-inference/OmniRoute/actions/runs/123")
+  assert.match(
+    run.bodies[0],
+    /^Run: https:\/\/github\.com\/cheaper-inference\/OmniRoute\/actions\/runs\/123$/m
   );
 });
 
