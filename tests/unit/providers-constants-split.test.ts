@@ -63,7 +63,9 @@ const P = await import("../../src/shared/constants/providers.ts");
 // Token Harbor (#16315) adds one apikey/gateways entry — 253.
 // Runcrate (#18061) adds one apikey/inference-hosts entry — 254.
 // Gisoo (#18112) adds one apikey/gateways entry — 255.
-const APIKEY_PROVIDER_COUNT = 255;
+// AtmoRouter extracts one aggregator gateway into apikey/atmorouter.ts (same pattern as
+// beatapi) and spreads it from the barrel — 256.
+const APIKEY_PROVIDER_COUNT = 256;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
@@ -88,17 +90,18 @@ test("barrel still exports every catalog + key helpers", () => {
   }
 });
 
-test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi extract into ${APIKEY_PROVIDER_COUNT} entries (no loss / no dup)`, async () => {
+test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi and atmorouter extracts into ${APIKEY_PROVIDER_COUNT} entries (no loss / no dup)`, async () => {
   const keys = Object.keys((P as Record<string, object>).APIKEY_PROVIDERS);
   assert.equal(keys.length, APIKEY_PROVIDER_COUNT);
   assert.equal(new Set(keys).size, APIKEY_PROVIDER_COUNT, "duplicate keys after spread-merge");
   assert.ok(keys.includes("ainetcafe"), "ainetcafe must be in APIKEY_PROVIDERS");
   // the merged object's entry-count equals the sum of the 6 semantic family files plus the
-  // beatapi overflow extract; they are a strict partition (every provider in exactly one),
+  // beatapi and atmorouter overflow extracts; they are a strict partition (every provider in exactly one),
   // so the sum must be exactly APIKEY_PROVIDER_COUNT.
   const families: [string, string][] = [
     ["gateways", "APIKEY_PROVIDERS_GATEWAYS"],
     ["beatapi", "APIKEY_PROVIDERS_BEATAPI"],
+    ["atmorouter", "APIKEY_PROVIDERS_ATMOROUTER"],
     ["frontier-labs", "APIKEY_PROVIDERS_FRONTIER"],
     ["inference-hosts", "APIKEY_PROVIDERS_INFERENCE"],
     ["enterprise-cloud", "APIKEY_PROVIDERS_ENTERPRISE"],
