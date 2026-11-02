@@ -8,6 +8,7 @@ import { load as parseYaml } from "js-yaml";
 const read = (path: string) => readFileSync(new URL(`../../../${path}`, import.meta.url), "utf8");
 const { shardCountFromCi } = await import("../../../scripts/quality/validate-release-green.mjs");
 const { suiteResult } = await import("../../../scripts/ci/release-green-suite.mjs");
+const { hostedMatrixFromCi } = await import("../../../scripts/ci/release-green-matrix.mjs");
 
 type Job = {
   needs?: string | string[];
@@ -15,7 +16,7 @@ type Job = {
   "runs-on"?: string;
   "timeout-minutes"?: number;
   outputs?: Record<string, string>;
-  strategy?: { matrix?: { include?: { name: string; script: string; shard: string }[] } };
+  strategy?: { matrix?: { include?: { name: string; script: string; shard: string }[] } | string };
   steps?: {
     uses?: string;
     run?: string;
@@ -29,7 +30,8 @@ const workflow = parseYaml(read(".github/workflows/nightly-release-green.yml")) 
 const ci = read(".github/workflows/ci.yml");
 
 test("the hosted suite matrix has exactly ci.yml's unit and integration shards plus vitest", () => {
-  const include = workflow.jobs.suites.strategy?.matrix?.include ?? [];
+  const matrix = workflow.jobs.suites.strategy?.matrix;
+  const include = typeof matrix === "object" ? (matrix.include ?? []) : [];
   const units = shardCountFromCi(ci, "test-unit");
   const integrations = shardCountFromCi(ci, "test-integration");
   const vitest = shardCountFromCi(ci, "test-vitest");
@@ -115,11 +117,83 @@ test("the slot validation waits for the suites, reads their results and still ru
   assert.equal(checkout?.env?.SWEEP_SHA, "${{ needs.resolve-target.outputs.sha }}");
 });
 
-test("main-green keeps its own local sweep (main runs main's copy of the validator)", () => {
+test("main-green consumes hosted suites run on main's resolved commit", () => {
   const job = workflow.jobs["main-green"];
-  assert.equal(job.needs, undefined);
+  assert.deepEqual(job.needs, ["resolve-main", "main-suites"]);
+  assert.match(job.if ?? "", /^\$\{\{ !cancelled\(\) && /);
   const validate = (job.steps ?? []).find((s) => s.run?.includes("validate-release-green.mjs"));
-  assert.doesNotMatch(validate?.run ?? "", /--suites-from/);
+  assert.match(validate?.run ?? "", /MODE="--with-build --full-ci --suites-from suite-results"/);
+  assert.match(validate?.run ?? "", /MODE="--quick"/);
+  assert.match(validate?.run ?? "", /--suites-workflow-sha "\$GITHUB_WORKFLOW_SHA"/);
+  const download = (job.steps ?? []).find((s) => s.uses?.startsWith("actions/download-artifact@"));
+  assert.equal(download?.with?.pattern, "main-green-suite-${{ github.run_attempt }}-*");
+
+  const suites = workflow.jobs["main-suites"];
+  assert.equal(suites["runs-on"], "ubuntu-latest");
+  assert.equal(suites.needs, "resolve-main");
+  assert.equal(suites.strategy?.matrix, "${{ fromJSON(needs.resolve-main.outputs.matrix) }}");
+  const releaseMatrix = workflow.jobs.suites.strategy?.matrix;
+  assert.deepEqual(hostedMatrixFromCi(ci), releaseMatrix);
+  const checkout = suites.steps?.find((s) => s.uses?.startsWith("actions/checkout@"));
+  assert.equal(checkout?.with?.ref, "${{ needs.resolve-main.outputs.sha }}");
+  const runtime = suites.steps?.find((s) => s.uses?.startsWith("actions/setup-node@"));
+  assert.equal(runtime?.with?.["node-version"], "${{ needs.resolve-main.outputs.node-version }}");
+  const mainRuntime = (job.steps ?? []).find((s) => s.uses?.startsWith("actions/setup-node@"));
+  assert.equal(
+    mainRuntime?.with?.["node-version"],
+    "${{ needs.resolve-main.outputs.node-version || '24' }}"
+  );
+});
+
+test("main hosted matrix follows the resolved target instead of fixed workflow shards", () => {
+  assert.equal(
+    workflow.jobs["main-suites"].strategy?.matrix,
+    "${{ fromJSON(needs.resolve-main.outputs.matrix) }}"
+  );
+});
+
+test("main resolver reads CI from the resolved SHA using the workflow's parser", () => {
+  const job = workflow.jobs["resolve-main"];
+  assert.deepEqual(Object.keys(job.outputs ?? {}).sort(), ["matrix", "node-version", "sha"]);
+  const checkout = job.steps?.find((step) => step.uses?.startsWith("actions/checkout@"));
+  assert.equal(checkout?.with?.ref, "${{ github.workflow_sha }}");
+  const resolve = job.steps?.find((step) => step.run?.includes("branches/main"));
+  assert.ok(resolve?.run?.includes("contents/.github/workflows/ci.yml?ref=$SHA"));
+  assert.ok(
+    resolve?.run?.includes(
+      'MATRIX=$(node scripts/ci/release-green-matrix.mjs "$RUNNER_TEMP/main-ci.yml")'
+    )
+  );
+  assert.match(resolve?.run ?? "", /set -euo pipefail/);
+});
+
+test("hosted main retains suite identity, diagnostics and both Vitest layouts", () => {
+  const job = workflow.jobs["main-suites"];
+  const run = job.steps?.find((step) => step.run?.includes("release-green-suite.mjs"));
+  assert.equal(run?.env?.OMNIROUTE_UNIT_CHECKOUT_SHA, "${{ needs.resolve-main.outputs.sha }}");
+  assert.ok(run?.env?.OMNIROUTE_UNIT_INVOCATION_ID);
+  assert.ok(run?.run?.includes('if [ "$NAME" = "vitest" ]'));
+  assert.ok(run?.run?.includes('elif [[ "$NAME" == vitest-* ]]'));
+  assert.ok(run?.run?.includes('if [ "$NAME" = "vitest-1" ]'));
+  assert.ok(run?.run?.includes('codes=("${PIPESTATUS[@]}")'));
+  assert.ok(run?.run?.includes("code=${codes[1]}"));
+  const diagnostics = job.steps?.find(
+    (step) =>
+      step.with?.["name"] ===
+      "unit-progress-main-hosted-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.name }}"
+  );
+  assert.equal(diagnostics?.with?.["include-hidden-files"], true);
+  assert.equal(diagnostics?.with?.path, ".artifacts/unit-progress/*.jsonl");
+});
+
+test("main-green stays on main when resolve-main produced no commit", () => {
+  const steps = workflow.jobs["main-green"].steps ?? [];
+  const checkout = steps.find((s) => s.uses?.startsWith("actions/checkout@"));
+  // An empty ref makes actions/checkout use the workflow's own ref, i.e. the release tip.
+  assert.equal(
+    checkout?.with?.ref,
+    "${{ github.event_name == 'push' && github.sha || needs.resolve-main.outputs.sha || 'main' }}"
+  );
 });
 
 test("a suite job reports its name, exit code and first failure line", () => {

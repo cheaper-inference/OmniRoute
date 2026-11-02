@@ -751,8 +751,8 @@ async function run(cmd, cmdArgs, opts = {}) {
   const invocationId = randomUUID();
   const logPath = join(LOG_DIR, "commands", `${invocationId}.log`);
   let unitDiagnostics = unitDiagnosticReference(cmdArgs, invocationId, null);
-  if (unitDiagnostics) {
-    let checkoutSha = null;
+  let checkoutSha = null;
+  if (unitDiagnostics || opts.packPhase) {
     try {
       checkoutSha = execFileSync("git", ["rev-parse", "HEAD"], {
         cwd: ROOT,
@@ -760,11 +760,25 @@ async function run(cmd, cmdArgs, opts = {}) {
         timeout: 5000,
       }).trim();
     } catch {
-      // A missing binding remains explicit diagnostic uncertainty; retain the command's outcome.
+      // Unit diagnostics retain uncertainty; package phases reject missing checkout identity.
     }
-    unitDiagnostics = unitDiagnosticReference(cmdArgs, invocationId, checkoutSha);
+    if (unitDiagnostics)
+      unitDiagnostics = unitDiagnosticReference(cmdArgs, invocationId, checkoutSha);
   }
+  const packPhase = opts.packPhase
+    ? makePackPhaseReference(opts.packPhase, invocationId, checkoutSha, {
+        runId: process.env.GITHUB_RUN_ID,
+        runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+        workflowSha: process.env.GITHUB_WORKFLOW_SHA,
+      })
+    : null;
+  const receiptIdentity = {
+    invocationId,
+    ...(packPhase ? { packPhase } : {}),
+    ...(unitDiagnostics ? { unitDiagnostics } : {}),
+  };
   const result = await runGateProcess(cmd, cmdArgs, {
+    receiptIdentity,
     cwd: ROOT,
     env: buildGateEnv({
       ...opts.env,
@@ -787,9 +801,8 @@ async function run(cmd, cmdArgs, opts = {}) {
     command: label,
     receiptPath: result.receiptPath,
     ...result.receipt,
-    ...(unitDiagnostics ? { unitDiagnostics } : {}),
   });
-  return result;
+  return { ...result, invocationId, ...(packPhase ? { packPhase } : {}) };
 }
 
 const runAsync = run;
@@ -803,24 +816,133 @@ const runAsync = run;
  * missing". ci.yml builds, stamps, then validates; mirror that order here. The guard is not
  * relaxed: an unstamped dist/ or one built from another commit still fails.
  */
-async function runPackArtifactGate(timeoutMs) {
-  const deadline = Date.now() + timeoutMs;
+export const PACK_POLICY_TIMEOUT_MS = 3 * 60 * 1000;
+
+export function makePackPhaseReference(phase, invocationId, candidateSha, context = {}) {
+  const phases = ["build-cli", "stamp-build-sha", "validate-pack-artifact"];
+  if (
+    !phases.includes(phase?.phaseId) ||
+    !["shared", "independent-policy"].includes(phase.mode) ||
+    !Number.isSafeInteger(phase.budgetMs) ||
+    phase.budgetMs <= 0 ||
+    !Number.isSafeInteger(phase.preparationBudgetMs) ||
+    phase.preparationBudgetMs <= 0 ||
+    phase.preparationBudgetMs > 40 * 60 * 1000 ||
+    phase.budgetMs >
+      (phase.phaseId === "validate-pack-artifact" && phase.mode === "independent-policy"
+        ? PACK_POLICY_TIMEOUT_MS
+        : phase.preparationBudgetMs) ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(invocationId || "") ||
+    !/^[0-9a-f]{40}$/.test(candidateSha || "")
+  )
+    throw new Error("Invalid package phase identity or budget");
+  const github = [context.runId, context.runAttempt, context.workflowSha].some(
+    (value) => value !== undefined && value !== ""
+  );
+  if (
+    github &&
+    (!/^[1-9][0-9]*$/.test(context.runId || "") ||
+      !/^[1-9][0-9]*$/.test(context.runAttempt || "") ||
+      !/^[0-9a-f]{40}$/.test(context.workflowSha || ""))
+  ) {
+    throw new Error("Incomplete package workflow identity");
+  }
+  return {
+    schemaVersion: 1,
+    laneId: "pack-artifact",
+    phaseId: phase.phaseId,
+    mode: phase.mode,
+    budgetMs: phase.budgetMs,
+    preparationBudgetMs: phase.preparationBudgetMs,
+    invocationId,
+    candidateSha,
+    runId: github ? context.runId : null,
+    runAttempt: github ? context.runAttempt : null,
+    workflowSha: github ? context.workflowSha : null,
+  };
+}
+
+export function summarizeExecutionIncidents(checks) {
+  const incidents = new Map();
+  const blockedDependencies = [];
+  for (const check of checks) {
+    if (check.kind !== "hard" || check.ok) continue;
+    if (check.dependencyOf) {
+      blockedDependencies.push({ checkId: check.id, dependencyOf: check.dependencyOf });
+      continue;
+    }
+    const bound = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+      check.causeId || ""
+    );
+    const key = bound ? `command:${check.causeId}` : `check:${check.id}`;
+    if (!incidents.has(key))
+      incidents.set(key, { causeId: bound ? check.causeId : null, checkIds: [] });
+    incidents.get(key).checkIds.push(check.id);
+  }
+  return { incidentCount: incidents.size, incidents: [...incidents.values()], blockedDependencies };
+}
+
+export async function runPackArtifactGate(
+  timeoutMs,
+  { independentPolicy = false, runCommand = runAsync, now = Date.now } = {}
+) {
+  if (
+    !Number.isSafeInteger(timeoutMs) ||
+    timeoutMs <= 0 ||
+    timeoutMs > 40 * 60 * 1000 ||
+    typeof independentPolicy !== "boolean" ||
+    (independentPolicy && timeoutMs !== 40 * 60 * 1000)
+  ) {
+    throw new Error("Invalid package preparation budget");
+  }
+  const deadline = now() + timeoutMs;
   const steps = [
-    { cmd: npmCmd, args: ["run", "build:cli"], env: BUILD_GATE_ENV },
-    { cmd: process.execPath, args: ["scripts/build/write-build-sha.mjs"] },
+    { phaseId: "build-cli", cmd: npmCmd, args: ["run", "build:cli"], env: BUILD_GATE_ENV },
     {
+      phaseId: "stamp-build-sha",
+      cmd: process.execPath,
+      args: ["scripts/build/write-build-sha.mjs"],
+    },
+    {
+      phaseId: "validate-pack-artifact",
       cmd: npmCmd,
-      args: ["run", "check:pack-artifact"],
+      args: [
+        "run",
+        "check:pack-artifact",
+        ...(independentPolicy ? ["--", "--require-staging"] : []),
+      ],
       env: PACK_GATE_ENV,
     },
   ];
   let out = "";
   for (const step of steps) {
-    const remaining = deadline - Date.now();
-    if (remaining <= 0) return classifyRunError({ killed: true, signal: "SIGTERM" }, timeoutMs);
-    const result = await runAsync(step.cmd, step.args, { env: step.env, timeout: remaining });
+    const remaining =
+      independentPolicy && step.phaseId === "validate-pack-artifact"
+        ? PACK_POLICY_TIMEOUT_MS
+        : deadline - now();
+    if (remaining <= 0)
+      return {
+        ...classifyRunError({ killed: true, signal: "SIGTERM" }, timeoutMs),
+        phaseId: step.phaseId,
+      };
+    const result = await runCommand(step.cmd, step.args, {
+      env: step.env,
+      timeout: remaining,
+      packPhase: {
+        phaseId: step.phaseId,
+        mode: independentPolicy ? "independent-policy" : "shared",
+        budgetMs: remaining,
+        preparationBudgetMs: timeoutMs,
+      },
+    });
     out += result.out;
-    if (result.code !== 0) return { code: result.code, out };
+    if (result.code !== 0 || result.receipt?.outcome !== "PASS")
+      return {
+        code: result.code || 1,
+        out,
+        phaseId: step.phaseId,
+        causeId: result.invocationId || null,
+      };
   }
   return { code: 0, out };
 }
@@ -1223,7 +1345,10 @@ async function main() {
       slow.push({
         id: "pack-artifact",
         label: "Package artifact (npm pack policy)",
-        run: runPackArtifactGate,
+        run: (timeout) => runPackArtifactGate(timeout, { independentPolicy: FULL_CI }),
+        // Build + stamp retain 40 minutes. Only --full-ci gives the policy checker
+        // its own 3 minutes: observed complete checks took 113s / 157s (#18791).
+        // That mode requires prepared staging and cannot start another build.
         timeout: 40 * 60 * 1000,
       });
     }
@@ -1243,6 +1368,8 @@ async function main() {
         kind: "hard",
         ok: result.code === 0,
         detail: result.code === 0 ? "pass" : result.detail || firstFailureLine(result.out),
+        ...(result.causeId ? { causeId: result.causeId } : {}),
+        ...(result.phaseId ? { phaseId: result.phaseId } : {}),
       });
     }
 
@@ -1256,7 +1383,8 @@ async function main() {
       const bootLabel = "Tarball boot-smoke (installed CLI serves /health)";
 
       if (!packArtifactResult || packArtifactResult.code !== 0) {
-        const out = "skipped because package-artifact did not produce a valid dist/ build";
+        const out =
+          "skipped because package-artifact did not complete successfully; package remains unvalidated";
         saveGateLog("pack-boot", out);
         record({
           id: "pack-boot",
@@ -1264,6 +1392,7 @@ async function main() {
           kind: "hard",
           ok: false,
           detail: out,
+          dependencyOf: "pack-artifact",
         });
       } else {
         announce(bootLabel);
@@ -1372,14 +1501,19 @@ async function main() {
         kind: "hard",
         ok: false,
         detail: `${receipt.outcome}: ${receipt.receiptPath}`,
+        causeId: receipt.invocationId,
       });
     }
   });
   const { releaseGreen, hardFailures, drift } = computeVerdict(results);
+  const executionIncidents = summarizeExecutionIncidents(results);
 
   process.stderr.write("\n──────── verdict ────────\n");
   process.stderr.write(
     `HARD failures (blocking requirements or incomplete evidence): ${hardFailures.length}\n`
+  );
+  process.stderr.write(
+    `Command incidents: ${executionIncidents.incidentCount}; blocked dependencies: ${executionIncidents.blockedDependencies.length}\n`
   );
   hardFailures.forEach((r) => process.stderr.write(`  ❌ ${r.label}: ${r.detail}\n`));
   process.stderr.write(`Advisory drift in this profile: ${drift.length}\n`);
@@ -1411,8 +1545,12 @@ async function main() {
           ok: r.ok,
           detail: r.detail,
           ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
+          ...(r.causeId ? { causeId: r.causeId } : {}),
+          ...(r.phaseId ? { phaseId: r.phaseId } : {}),
+          ...(r.dependencyOf ? { dependencyOf: r.dependencyOf } : {}),
         })),
         commandReceipts,
+        executionIncidents,
       });
     } catch {
       process.stderr.write("Observer JSON output failed; evidence is incomplete.\n");

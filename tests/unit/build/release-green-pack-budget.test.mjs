@@ -8,21 +8,29 @@ const source = readFileSync(
 );
 
 // Wiring regressions, not evidence that a real build finishes within this budget.
-test("the full package lane receives the 40 minute shared deadline", () => {
+test("the full package lane keeps forty-minute preparation and a bounded policy budget", () => {
   const lane = source.slice(source.indexOf('id: "pack-artifact"'));
   const laneEnd = lane.indexOf("\n      });");
   assert.ok(laneEnd > 0, "the package lane must have a bounded declaration");
-  assert.match(lane.slice(0, laneEnd), /run: runPackArtifactGate,[\s\S]*timeout: 40 \* 60 \* 1000/);
+  assert.match(
+    lane.slice(0, laneEnd),
+    /runPackArtifactGate\(timeout, \{ independentPolicy: FULL_CI \}\)[\s\S]*timeout: 40 \* 60 \* 1000/
+  );
   assert.match(source, /g\.run\(g\.timeout\)/);
+  assert.match(source, /PACK_POLICY_TIMEOUT_MS = 3 \* 60 \* 1000/);
   const runner = source.slice(
     source.indexOf("async function runPackArtifactGate"),
     source.indexOf("async function runUnitShards")
   );
-  assert.match(runner, /const deadline = Date\.now\(\) \+ timeoutMs/);
-  assert.match(runner, /const remaining = deadline - Date\.now\(\)/);
-  assert.match(runner, /if \(remaining <= 0\) return classifyRunError/);
+  assert.match(runner, /const deadline = now\(\) \+ timeoutMs/);
+  assert.match(
+    runner,
+    /independentPolicy && step\.phaseId === "validate-pack-artifact"\s*\? PACK_POLICY_TIMEOUT_MS\s*: deadline - now\(\)/
+  );
+  assert.match(runner, /if \(remaining <= 0\)/);
+  assert.match(runner, /classifyRunError\(\{ killed: true, signal: "SIGTERM" \}, timeoutMs\)/);
   assert.match(runner, /timeout: remaining/);
-  assert.match(runner, /if \(result\.code !== 0\) return/);
+  assert.match(runner, /result\.code !== 0 \|\| result\.receipt\?\.outcome !== "PASS"/);
 });
 
 test("the nightly full sweep selects the full package lane, not the quick path", () => {
@@ -31,7 +39,8 @@ test("the nightly full sweep selects the full package lane, not the quick path",
     "utf8"
   );
   assert.match(workflow, /MODE="--with-build --full-ci --suites-from suite-results"/);
-  assert.match(workflow, /MODE="--with-build --full-ci"/);
+  const mainJob = workflow.slice(workflow.indexOf("  main-green:"));
+  assert.match(mainJob, /MODE="--with-build --full-ci --suites-from suite-results"/);
   assert.match(
     source,
     /const lanes = SUITES_FROM \? slow\.filter\(\(g\) => g\.id === "pack-artifact"\) : slow/
