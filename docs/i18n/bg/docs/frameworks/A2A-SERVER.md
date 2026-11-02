@@ -199,11 +199,11 @@ JSON-RPC крайната точка `/a2a` е каноничната входн
 
 ## Добавяне на ново умение
 
-1. **Създайте файл за умението:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Създайте файл на умението:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Експортирайте асинхронна функция `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Следвайте структурата на съществуващи умения, като например `smartRouting.ts`.
+   Експортирайте асинхронна функция `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Следвайте структурата на съществуващите умения, като например `smartRouting.ts`.
 
-2. **Регистрирайте манипулатора:** в `src/lib/a2a/taskExecution.ts` добавете запис към `A2A_SKILL_HANDLERS`:
+2. **Регистрирайте обработчика:** в `src/lib/a2a/taskExecution.ts` добавете запис към `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,15 +215,15 @@ JSON-RPC крайната точка `/a2a` е каноничната входн
    };
    ```
 
-3. **Представете го в Картата на агента:** в `src/app/.well-known/agent.json/route.ts` го добавете към масива `skills`:
+3. **Добавете го в картата на агента:** в `src/lib/a2a/agentCardMetadata.ts` (използван съвместно от `/.well-known/agent.json` и `/.well-known/agent-card.json`) го добавете към масива `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Вашето умение",
-     "description": "Кратко описание, фокусирано върху намерението",
-     "tags": ["маршрутизиране", "квота"],
-     "examples": ["Примерно извикване на естествен език"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 

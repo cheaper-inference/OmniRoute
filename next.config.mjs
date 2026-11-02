@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { betterSqlite3AliasFor } from "./scripts/build/better-sqlite3-stub-flag.mjs";
 import { mitmManagerAliasFor } from "./scripts/build/mitm-stub-flag.mjs";
 import { normalizeBasePath } from "./scripts/build/normalizeBasePath.mjs";
+import { macosDevExperimentalOverrides } from "./scripts/build/macosDevWorkaround.mjs";
 import {
   buildSecurityHeaderRules,
   nonPageRoutePrefixes,
@@ -201,6 +202,9 @@ const nextConfig = {
   // accept for image-bearing requests; tune via env if a deployment needs
   // more.
   experimental: {
+    // macOS development only: avoid the EBADF spawn failures of Next's TypeScript
+    // CLI and static-path worker (see scripts/build/macosDevWorkaround.mjs).
+    ...macosDevExperimentalOverrides(),
     serverActions: {
       bodySizeLimit: process.env.OMNIROUTE_SERVER_ACTIONS_BODY_LIMIT || "50mb",
     },
@@ -757,6 +761,12 @@ const nextConfig = {
       {
         source: "/v1",
         destination: "/api/v1",
+      },
+      // CLIProxyAPI management compatibility (T3 Code `cliproxy` usage source and other
+      // CLIProxyAPI management clients). Authz: src/proxy.ts matcher + classify.ts alias.
+      {
+        source: "/v0/management/:path*",
+        destination: "/api/v0/management/:path*",
       },
       {
         source: "/v1beta/:path*",

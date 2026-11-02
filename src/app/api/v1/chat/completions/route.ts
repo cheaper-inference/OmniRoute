@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
-import { callCloudWithMachineId } from "@/shared/utils/cloud";
 import { handleChat } from "@/sse/handlers/chat";
 import { logAdmissionRejection } from "@/sse/handlers/admissionRejectionLog";
 import { generateRequestId } from "@/shared/utils/requestId";
@@ -45,6 +44,7 @@ import {
   isCommonChatGptWebRetirementError,
 } from "@/shared/constants/chatgptWebRetirement";
 import { ensureSemanticCacheDbBridge } from "@/lib/cache/semanticCacheDbBridge";
+import { maybeQueueQuotaSessionRecovery } from "@/lib/quota/quotaSessionRecovery";
 import {
   getBifrostRoutingConfig,
   resolveRelayRoutingBackend,
@@ -422,11 +422,15 @@ export async function POST(request) {
       );
     }
 
+    const handlerResponse = await handleChat(request, null, parsedBody, reqId);
+    const recoveryResponse = await maybeQueueQuotaSessionRecovery({
+      request,
+      body: parsedBody,
+      response: handlerResponse,
+      endpoint: "chat/completions",
+    });
     return finishAdmission(
-      withCompressionHeaderEcho(
-        applyFallbackHeaders(await handleChat(request, null, parsedBody, reqId)),
-        compressionRequestHeader
-      )
+      withCompressionHeaderEcho(applyFallbackHeaders(recoveryResponse), compressionRequestHeader)
     );
   } catch (error) {
     admission.lease?.release();
