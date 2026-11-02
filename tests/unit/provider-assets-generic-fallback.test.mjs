@@ -202,7 +202,9 @@ test("provider bundle retires exactly the 78 unresolved assets and keeps the gen
   // status, non-blocking) ships in the bundle — 141 → 142.
   // runcrate (#18061): contributor-supplied logomark with a provenance record
   // (unresolved status, non-blocking) ships in the bundle — 142 → 143.
-  assert.equal(distributedAssets.length, 143, "all 143 non-target assets must remain");
+  // gisoo (#18112): contributor-supplied logomark with a provenance record
+  // (unresolved status, non-blocking) ships in the bundle — 143 → 144.
+  assert.equal(distributedAssets.length, 144, "all 144 non-target assets must remain");
   assert.ok(distributedAssets.includes("cli-generic.svg"));
 });
 

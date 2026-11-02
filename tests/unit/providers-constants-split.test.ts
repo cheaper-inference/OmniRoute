@@ -62,7 +62,8 @@ const P = await import("../../src/shared/constants/providers.ts");
 // OAUTH_PROVIDERS (same pattern as codebuddy-cn/muse-code) — 252.
 // Token Harbor (#16315) adds one apikey/gateways entry — 253.
 // Runcrate (#18061) adds one apikey/inference-hosts entry — 254.
-const APIKEY_PROVIDER_COUNT = 254;
+// Gisoo (#18112) adds one apikey/gateways entry — 255.
+const APIKEY_PROVIDER_COUNT = 255;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [

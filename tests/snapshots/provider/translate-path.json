@@ -2777,6 +2777,29 @@
       "stream": "https://gigachat.devices.sberbank.ru/api/v1"
     }
   },
+  "gisoo": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://gisoo.pro/api/v1/chat/completions",
+      "stream": "https://gisoo.pro/api/v1/chat/completions"
+    }
+  },
   "github": {
     "format": "openai",
     "headers": {

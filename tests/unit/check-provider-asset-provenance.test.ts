@@ -541,7 +541,7 @@ test("provider asset provenance gate binds auditedCommit to the physical provide
   }
 });
 
-test("repository provider asset manifest covers the audited 143-file snapshot", (t) => {
+test("repository provider asset manifest covers the audited 144-file snapshot", (t) => {
   const manifestPath = join(REPO_ROOT, "config/quality/provider-assets-provenance.jsonl");
   const { auditedCommit } = JSON.parse(readFileSync(manifestPath, "utf8").split("\n")[0]);
   if (!gitHasCommit(auditedCommit) && isShallowRepository()) {
@@ -557,7 +557,8 @@ test("repository provider asset manifest covers the audited 143-file snapshot", 
   assert.match(
     result.stdout,
     // runcrate (#18061) adds one unresolved contributor-supplied logomark: 142 → 143.
-    /143\/143 registered; proven=72 probable=69 unresolved=2; duplicate-groups=1/
+    // gisoo (#18112) adds one unresolved contributor-supplied logomark: 143 → 144.
+    /144\/144 registered; proven=72 probable=69 unresolved=3; duplicate-groups=1/
   );
 });
 

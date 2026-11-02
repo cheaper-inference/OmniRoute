@@ -591,7 +591,7 @@ export class DevinCliAgenticExecutor extends BaseExecutor {
     } catch (error) {
       const bridge = error instanceof DevinAgenticBridgeError ? error : null;
       const status = bridge?.status || 500;
-      if (drainAwareFailureStatus(status) === 499) {
+      if (drainAwareFailureStatus(status) !== status) {
         // The Devin CLI is a LOCAL child process: our own shutdown kills it while
         // requests are still in flight, so the spawn/ACP failure that follows is
         // evidence about OUR shutdown, not about the provider's health. The account

@@ -13,7 +13,7 @@ const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(va
 
 test("request preparation keeps restored signed blocks throughout the active tool cycle", () => {
   clearClaudeThinkingStore();
-  const model = "claude-opus-5-5";
+  const model = "claude-sonnet-4-5";
   const first = { type: "thinking", thinking: "SYNTHETIC_A", signature: "SYNTHETIC_SIG_A" };
   const second = { type: "redacted_thinking", data: "SYNTHETIC_OPAQUE_B" };
   for (const [block, id] of [
@@ -23,7 +23,7 @@ test("request preparation keeps restored signed blocks throughout the active too
     assert.equal(
       storeClaudeThinkingFromResponse(
         { model, content: [block, { type: "tool_use", id, name: "read", input: {} }] },
-        { provider: "claude", model }
+        { provider: "claude", model, connectionId: "conn-layout" }
       ),
       true
     );
@@ -33,7 +33,7 @@ test("request preparation keeps restored signed blocks throughout the active too
     FORMATS.CLAUDE,
     model,
     {
-      reasoning_effort: "xhigh",
+      reasoning_effort: "high",
       messages: [
         { role: "user", content: "Synthetic task" },
         {
@@ -65,7 +65,9 @@ test("request preparation keeps restored signed blocks throughout the active too
     },
     false,
     {},
-    "claude"
+    "claude",
+    null,
+    { signatureNamespace: "conn-layout" }
   ) as { messages: Array<{ role: string; content: Array<Record<string, unknown>> }> };
   const turns = result.messages.filter((m) => m.role === "assistant");
   assert.equal(turns.length, 2);
@@ -106,12 +108,13 @@ for (const completed of [false, true]) {
     };
     storeClaudeThinkingFromResponse(
       { model, content: [block, { type: "tool_use", id: "toolu_scope", name: "read", input: {} }] },
-      { provider: "claude", model }
+      { provider: "claude", model, connectionId: "conn-scope" }
     );
     const restored = restoreClaudeThinkingBlocks({
       toolUseIds: ["toolu_scope"],
       provider: "claude",
       model,
+      connectionId: "conn-scope",
     })!;
     assert.equal(isRestoredClaudeThinkingBlock(restored[0]), true);
     assert.equal(
