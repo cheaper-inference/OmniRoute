@@ -611,6 +611,8 @@ function getCleanupIntervalMs(): number {
   return Number.isFinite(parsed) && parsed >= 60_000 ? parsed : DEFAULT_CLEANUP_INTERVAL_MS;
 }
 
+let _autoCleanupTimer: ReturnType<typeof setInterval> | null = null;
+
 function startAutoCleanup(): void {
   // Run once immediately on boot
   try {
@@ -635,6 +637,15 @@ function startAutoCleanup(): void {
   }, getCleanupIntervalMs());
 
   timer.unref?.();
+  _autoCleanupTimer = timer;
+}
+
+/** Stops the reasoning cache auto-cleanup timer. Useful for testing and graceful shutdown. */
+export function stopReasoningCacheCleanupTimer(): void {
+  if (_autoCleanupTimer) {
+    clearInterval(_autoCleanupTimer);
+    _autoCleanupTimer = null;
+  }
 }
 
 // Start on module load — every consumer of reasoning cache benefits.

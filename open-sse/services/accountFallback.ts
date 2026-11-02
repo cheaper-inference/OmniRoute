@@ -214,6 +214,13 @@ if (typeof _connectionFailureSweep === "object" && "unref" in _connectionFailure
   (_connectionFailureSweep as { unref?: () => void }).unref?.();
 }
 
+/** Stops the connection failure sweep timer. Useful for testing and graceful shutdown. */
+export function stopConnectionFailureSweep(): void {
+  if (_connectionFailureSweep) {
+    clearInterval(_connectionFailureSweep);
+  }
+}
+
 // T06 (sub2api PR #1037): Signals that indicate permanent account deactivation.
 // When a 401 body contains these strings, the account is permanently dead
 // and should NOT be retried after token refresh.
@@ -728,6 +735,14 @@ function ensureCleanupTimer() {
     }
   } catch {
     // Cloudflare Workers may not support setInterval outside handlers — skip cleanup timer
+  }
+}
+
+/** Stops the model lockout cleanup timer. Useful for testing and graceful shutdown. */
+export function stopModelLockoutCleanupTimer(): void {
+  if (_cleanupTimer) {
+    clearInterval(_cleanupTimer);
+    _cleanupTimer = null;
   }
 }
 

@@ -198,6 +198,8 @@ export async function executeProviderRequest(
     userAgent: _userAgent,
   } = deps;
   const body = rawBody;
+  const clientSignal = streamController?.signal;
+
   const execute = async () => {
     // Upstream body preparation extracted to chatCore/upstreamBody.ts (#3501 — first internal
     // sub-slice of executeProviderRequest); produces the body sent upstream (payload rules +
@@ -242,408 +244,463 @@ export async function executeProviderRequest(
         const isModelScopeForRequest = isModelScope();
         const maxAttempts = isModelScopeForRequest ? 3 : provider === "codex" ? 3 : 1;
 
-        while (attempts < maxAttempts) {
-          trace("pre_executor", { attempt: attempts });
-          updatePendingScope(pendingScope, {
-            stage: "sending_to_provider",
-          });
-          const execCreds = getExecutionCredentials();
-          const executionConnectionId = getExecutionConnectionId(execCreds);
-          const attemptConnectionId = executionConnectionId || connectionId;
-          const accountSemaphoreMaxConcurrency = resolveAccountSemaphoreMaxConcurrency(
-            execCreds,
-            typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId)
-          );
-          const accountSemaphoreKey = resolveAccountSemaphoreKey({
-            provider,
-            model: modelToCall,
-            connectionId: attemptConnectionId,
-            credentials: execCreds,
-          });
-          // Opt-in per-model ceiling; joins the composite gate below.
-          const modelGate = resolveModelSemaphore({
-            provider,
-            model: modelToCall,
-            connectionId: attemptConnectionId,
-            credentials: execCreds,
-          });
-          const canonicalProviderKey = resolveProviderId(String(provider).trim().toLowerCase());
-          const providerConcurrency =
-            resilienceSettings.providerQuotaOverrides[canonicalProviderKey]?.providerConcurrency ??
-            0;
+        // P0 FIX: Create a linked AbortController that combines client abort + internal timeouts
+        // This ensures upstream executor is cancelled when client disconnects
+        const linkedAbortController = new AbortController();
+        const forwardClientAbort = () => linkedAbortController.abort();
+        clientSignal?.addEventListener("abort", forwardClientAbort, { once: true });
 
-          trace("pre_semaphore", {
-            semaphoreKey: accountSemaphoreKey,
-            max: accountSemaphoreMaxConcurrency,
-            modelSemaphoreKey: modelGate.key,
-            modelMax: modelGate.maxConcurrency,
-          });
-          if (accountSemaphoreKey && accountSemaphoreMaxConcurrency != null) {
+        try {
+          while (attempts < maxAttempts) {
+            trace("pre_executor", { attempt: attempts });
             updatePendingScope(pendingScope, {
-              stage: "waiting_account_slot",
+              stage: "sending_to_provider",
             });
-          }
-          const maxWaitMs = resolveRequestQueueMaxWaitMs(
-            provider,
-            undefined,
-            attemptConnectionId ?? undefined
-          );
-          const gateStartedAt = Date.now();
-          const releaseAccountSemaphore = await acquireConcurrencyGates(
-            [
-              {
-                key: "global",
-                maxConcurrency: resilienceSettings.requestQueue.globalConcurrentRequests,
-              },
-              {
-                key: `provider:${canonicalProviderKey}`,
-                maxConcurrency: providerConcurrency,
-              },
-              {
-                key: accountSemaphoreKey || "",
-                maxConcurrency: accountSemaphoreKey ? accountSemaphoreMaxConcurrency : null,
-              },
-              {
-                key: modelGate.key || "",
-                maxConcurrency: modelGate.key ? modelGate.maxConcurrency : null,
-              },
-            ],
-            {
-              timeoutMs: maxWaitMs,
-              maxQueueSize: resilienceSettings.requestQueue.maxQueueDepth,
-              signal: streamController.signal,
-            }
-          ).catch(rethrowAdmissionError);
-          const remainingAfterGate = remainingQueueBudgetMs(maxWaitMs, gateStartedAt);
-          trace("post_semaphore", { maxWaitMs, remainingAfterGate });
-          updatePendingScope(pendingScope, {
-            stage: "waiting_rate_limit",
-          });
-
-          try {
-            trace("pre_rate_limit", { connectionId: attemptConnectionId });
-            const rawExecutorResult = await withRateLimit(
-              provider,
-              attemptConnectionId,
-              modelToCall,
-              async () => {
-                trace("inside_rate_limit", { connectionId: attemptConnectionId });
-                updatePendingScope(pendingScope, {
-                  stage: "rate_limit_slot_acquired",
-                });
-                assertManagedLeaseFence(attemptConnectionId);
-                return executeWithUpstreamStartTimeout({
-                  executor,
-                  provider,
-                  model: modelToCall,
-                  connectionTimeoutMs: resolveConnectionTimeoutMs(execCreds?.providerSpecificData),
-                  signal: streamController.signal,
-                  log,
-                  execute: (signal) =>
-                    runWithCapture(providerRequestCapture, () =>
-                      executor.execute({
-                        model: modelToCall,
-                        body: bodyToSend,
-                        stream: upstreamStream,
-                        credentials: execCreds,
-                        signal,
-                        log,
-                        extendedContext,
-                        upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
-                        clientHeaders: getExecutorClientHeaders(),
-                        clientResponseFormat,
-                        onCredentialsRefreshed,
-                        skipUpstreamRetry,
-                        contextEditing: { enabled: contextEditingEnabled },
-                        correlationId,
-                      })
-                    ),
-                });
-              },
-              streamController.signal,
-              remainingAfterGate,
-              correlationId ?? undefined,
-              {
-                executor: executor as unknown as { getTimeoutMs?: () => unknown },
-                providerSpecificData: execCreds?.providerSpecificData,
-              }
+            const execCreds = getExecutionCredentials();
+            const executionConnectionId = getExecutionConnectionId(execCreds);
+            const attemptConnectionId = executionConnectionId || connectionId;
+            const accountSemaphoreMaxConcurrency = resolveAccountSemaphoreMaxConcurrency(
+              execCreds,
+              typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId)
             );
-            const res = normalizeExecutorResult(rawExecutorResult);
-            res.response = markEmptyTurnExecution(res.response, res.url, execCreds);
-            trace("post_executor", { status: res?.response?.status });
+            const accountSemaphoreKey = resolveAccountSemaphoreKey({
+              provider,
+              model: modelToCall,
+              connectionId: attemptConnectionId,
+              credentials: execCreds,
+            });
+            // Opt-in per-model ceiling; joins the composite gate below.
+            const modelGate = resolveModelSemaphore({
+              provider,
+              model: modelToCall,
+              connectionId: attemptConnectionId,
+              credentials: execCreds,
+            });
+            const canonicalProviderKey = resolveProviderId(String(provider).trim().toLowerCase());
+            const providerConcurrency =
+              resilienceSettings.providerQuotaOverrides[canonicalProviderKey]
+                ?.providerConcurrency ?? 0;
 
-            // When a payload override rewrote body.model (custom-model alias →
-            // real upstream id, e.g. `gemini-3.7-flash-high` → `gemini-3.7-flash`),
-            // log and track the WIRE model so dashboards/telemetry reflect what
-            // actually shipped and Gemini rate-limit accounting uses the real id
-            // (the executor already built its URL from the same rewritten model).
-            const wireModel = typeof res.model === "string" && res.model ? res.model : modelToCall;
-            if (wireModel !== modelToCall) {
-              log?.debug?.(
-                "PAYLOAD_RULES",
-                `Payload rules rewrote model for URL: requested=${modelToCall} wire=${wireModel}`
-              );
-            }
-
-            if (
-              provider === "codex" &&
-              attemptConnectionId &&
-              !(await shouldIsolateProbeFailures())
-            ) {
-              try {
-                const persistedQuota = await persistCodexChildQuotaResponse({
-                  connectionId: String(attemptConnectionId),
-                  model: modelToCall || model || requestedModel || "",
-                  headers: normalizeHeaders(res.response.headers),
-                  status: res.response.status,
-                });
-                if (persistedQuota) {
-                  execCreds.providerSpecificData = persistedQuota.providerSpecificData;
-                  if (persistedQuota.exhaustionLog) {
-                    log?.debug?.("CODEX", persistedQuota.exhaustionLog);
-                  }
-                }
-              } catch (err) {
-                const errMessage = err instanceof Error ? err.message : String(err);
-                log?.debug?.("CODEX", `Failed to persist codex quota state: ${errMessage}`);
-              }
-            }
-            if (attemptConnectionId && res.response.status === 429) {
-              // Dropped generic quota cache after 429 — bespoke fetchers drop their
-              // own cache through the registry; the generic wrapper is the fallback.
-              invalidateQuotaCacheOnStatus({
-                provider,
-                connectionId: String(attemptConnectionId),
-                status: res.response.status,
-                isolateProbe: await shouldIsolateProbeFailures(),
+            trace("pre_semaphore", {
+              semaphoreKey: accountSemaphoreKey,
+              max: accountSemaphoreMaxConcurrency,
+              modelSemaphoreKey: modelGate.key,
+              modelMax: modelGate.maxConcurrency,
+            });
+            if (accountSemaphoreKey && accountSemaphoreMaxConcurrency != null) {
+              updatePendingScope(pendingScope, {
+                stage: "waiting_account_slot",
               });
             }
+            const maxWaitMs = resolveRequestQueueMaxWaitMs(
+              provider,
+              undefined,
+              attemptConnectionId ?? undefined
+            );
+            const gateStartedAt = Date.now();
 
-            // Track Gemini RPM + RPD request counts for 429 classification
-            if (provider === "gemini") {
-              incrementRequestCount(wireModel);
+            // Request-scoped semaphore release token (idempotent, single-release)
+            let releaseSemaphore: (() => void) | null = null;
+            const safeReleaseOnce = () => {
+              if (typeof releaseSemaphore === "function") {
+                const fn = releaseSemaphore;
+                releaseSemaphore = null;
+                try {
+                  fn();
+                } catch (err) {
+                  log?.error?.("SEMAPHORE", "Error releasing semaphore:", err);
+                }
+              }
+            };
+            const releaseAccountSemaphore = safeReleaseOnce;
+
+            try {
+              releaseSemaphore = await acquireConcurrencyGates(
+                [
+                  {
+                    key: "global",
+                    maxConcurrency: resilienceSettings.requestQueue.globalConcurrentRequests,
+                  },
+                  {
+                    key: `provider:${canonicalProviderKey}`,
+                    maxConcurrency: providerConcurrency,
+                  },
+                  {
+                    key: accountSemaphoreKey || "",
+                    maxConcurrency: accountSemaphoreKey ? accountSemaphoreMaxConcurrency : null,
+                  },
+                  {
+                    key: modelGate.key || "",
+                    maxConcurrency: modelGate.key ? modelGate.maxConcurrency : null,
+                  },
+                ],
+                {
+                  timeoutMs: maxWaitMs,
+                  maxQueueSize: resilienceSettings.requestQueue.maxQueueDepth,
+                  // Use linked abort signal so client abort releases semaphore immediately
+                  signal: linkedAbortController.signal,
+                }
+              ).catch(rethrowAdmissionError);
+            } catch (gateError) {
+              // If gate acquisition fails (timeout/abort), ensure no semaphore leak
+              safeReleaseOnce();
+              throw gateError;
             }
-
+            const remainingAfterGate = remainingQueueBudgetMs(maxWaitMs, gateStartedAt);
+            trace("post_semaphore", { maxWaitMs, remainingAfterGate });
             updatePendingScope(pendingScope, {
-              stage: "provider_response_started",
+              stage: "waiting_rate_limit",
             });
 
-            if (
-              stream &&
-              (res.response.ok ||
-                res.response.status === HTTP_STATUS.UNAUTHORIZED ||
-                res.response.status === HTTP_STATUS.FORBIDDEN ||
-                res.response.status === HTTP_STATUS.RATE_LIMITED) &&
-              executionConnectionId &&
-              !(await shouldIsolateProbeFailures())
-            ) {
-              const failureDetail = res.response.ok
-                ? ""
-                : await res.response
-                    .clone()
-                    .text()
-                    .catch(() => "");
-              recordKeyHealthStatus(
-                res.response.status,
-                execCreds,
-                res.transport,
-                failureDetail,
-                res.response.status === HTTP_STATUS.RATE_LIMITED
-                  ? parseRetryAfterMs(res.response.headers.get("retry-after"))
-                  : null
+            try {
+              trace("pre_rate_limit", { connectionId: attemptConnectionId });
+              const rawExecutorResult = await withRateLimit(
+                provider,
+                attemptConnectionId,
+                modelToCall,
+                async () => {
+                  trace("inside_rate_limit", { connectionId: attemptConnectionId });
+                  updatePendingScope(pendingScope, {
+                    stage: "rate_limit_slot_acquired",
+                  });
+                  assertManagedLeaseFence(attemptConnectionId);
+                  return executeWithUpstreamStartTimeout({
+                    executor,
+                    provider,
+                    model: modelToCall,
+                    connectionTimeoutMs: resolveConnectionTimeoutMs(
+                      execCreds?.providerSpecificData
+                    ),
+                    // Pass linked signal so upstream can be aborted by client
+                    signal: linkedAbortController.signal,
+                    log,
+                    execute: (signal) =>
+                      runWithCapture(providerRequestCapture, () =>
+                        executor.execute({
+                          model: modelToCall,
+                          body: bodyToSend,
+                          stream: upstreamStream,
+                          credentials: execCreds,
+                          signal, // This is the linked signal now
+                          log,
+                          extendedContext,
+                          upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
+                          clientHeaders: getExecutorClientHeaders(),
+                          clientResponseFormat,
+                          onCredentialsRefreshed,
+                          skipUpstreamRetry,
+                          contextEditing: { enabled: contextEditingEnabled },
+                          correlationId,
+                        })
+                      ),
+                  });
+                },
+                // Use linked signal for rate limiter too
+                linkedAbortController.signal,
+                remainingAfterGate,
+                correlationId ?? undefined,
+                {
+                  executor: executor as unknown as { getTimeoutMs?: () => unknown },
+                  providerSpecificData: execCreds?.providerSpecificData,
+                }
               );
-            }
+              const res = normalizeExecutorResult(rawExecutorResult);
+              res.response = markEmptyTurnExecution(res.response, res.url, execCreds);
+              trace("post_executor", { status: res?.response?.status });
 
-            if (isModelScope() && res.response.status === 429 && attempts < maxAttempts - 1) {
-              const bodyPeek = await res.response
-                .clone()
-                .text()
-                .catch(() => "");
-              const normalizedHeaders = normalizeHeaders(res.response.headers);
-              const decision = classifyModelScope429(bodyPeek, normalizedHeaders);
-              if (decision.retryable) {
-                const delay = getModelScopeRetryDelayMs(normalizedHeaders, attempts);
-                log?.warn?.(
-                  "MODELSCOPE_RETRY",
-                  `429 ${decision.kind}; retrying in ${delay}ms (model remaining: ${decision.snapshot.modelRemaining ?? "unknown"})`
+              // When a payload override rewrote body.model (custom-model alias →
+              // real upstream id, e.g. `gemini-3.7-flash-high` → `gemini-3.7-flash`),
+              // log and track the WIRE model so dashboards/telemetry reflect what
+              // actually shipped and Gemini rate-limit accounting uses the real id
+              // (the executor already built its URL from the same rewritten model).
+              const wireModel =
+                typeof res.model === "string" && res.model ? res.model : modelToCall;
+              if (wireModel !== modelToCall) {
+                log?.debug?.(
+                  "PAYLOAD_RULES",
+                  `Payload rules rewrote model for URL: requested=${modelToCall} wire=${wireModel}`
                 );
-                releaseAccountSemaphore();
-                await new Promise((r) => setTimeout(r, delay));
-                attempts++;
-                continue;
               }
-            }
 
-            // For streaming: release the semaphore when the client drains or cancels the stream.
-            // Non-2xx streams must drop the slot before returning so the pipeline can rotate
-            // accounts without holding the failed connection's concurrency gate. Do NOT
-            // cancel() the body here — the pipeline clones it (BYOP 422 / toOutcome).
-            if (stream) {
-              const originalBody = res.response.body;
-              const okStatus = res.response.status >= 200 && res.response.status < 300;
-              if (!originalBody || !okStatus) {
-                releaseAccountSemaphore();
+              if (
+                provider === "codex" &&
+                attemptConnectionId &&
+                !(await shouldIsolateProbeFailures())
+              ) {
+                try {
+                  const persistedQuota = await persistCodexChildQuotaResponse({
+                    connectionId: String(attemptConnectionId),
+                    model: modelToCall || model || requestedModel || "",
+                    headers: normalizeHeaders(res.response.headers),
+                    status: res.response.status,
+                  });
+                  if (persistedQuota) {
+                    execCreds.providerSpecificData = persistedQuota.providerSpecificData;
+                    if (persistedQuota.exhaustionLog) {
+                      log?.debug?.("CODEX", persistedQuota.exhaustionLog);
+                    }
+                  }
+                } catch (err) {
+                  const errMessage = err instanceof Error ? err.message : String(err);
+                  log?.debug?.("CODEX", `Failed to persist codex quota state: ${errMessage}`);
+                }
+              }
+              if (attemptConnectionId && res.response.status === 429) {
+                // Dropped generic quota cache after 429 — bespoke fetchers drop their
+                // own cache through the registry; the generic wrapper is the fallback.
+                invalidateQuotaCacheOnStatus({
+                  provider,
+                  connectionId: String(attemptConnectionId),
+                  status: res.response.status,
+                  isolateProbe: await shouldIsolateProbeFailures(),
+                });
+              }
+
+              // Track Gemini RPM + RPD request counts for 429 classification
+              if (provider === "gemini") {
+                incrementRequestCount(wireModel);
+              }
+
+              updatePendingScope(pendingScope, {
+                stage: "provider_response_started",
+              });
+
+              if (
+                stream &&
+                (res.response.ok ||
+                  res.response.status === HTTP_STATUS.UNAUTHORIZED ||
+                  res.response.status === HTTP_STATUS.FORBIDDEN ||
+                  res.response.status === HTTP_STATUS.RATE_LIMITED) &&
+                executionConnectionId &&
+                !(await shouldIsolateProbeFailures())
+              ) {
+                const failureDetail = res.response.ok
+                  ? ""
+                  : await res.response
+                      .clone()
+                      .text()
+                      .catch(() => "");
+                recordKeyHealthStatus(
+                  res.response.status,
+                  execCreds,
+                  res.transport,
+                  failureDetail,
+                  res.response.status === HTTP_STATUS.RATE_LIMITED
+                    ? parseRetryAfterMs(res.response.headers.get("retry-after"))
+                    : null
+                );
+              }
+
+              if (isModelScope() && res.response.status === 429 && attempts < maxAttempts - 1) {
+                const bodyPeek = await res.response
+                  .clone()
+                  .text()
+                  .catch(() => "");
+                const normalizedHeaders = normalizeHeaders(res.response.headers);
+                const decision = classifyModelScope429(bodyPeek, normalizedHeaders);
+                if (decision.retryable) {
+                  const delay = getModelScopeRetryDelayMs(normalizedHeaders, attempts);
+                  log?.warn?.(
+                    "MODELSCOPE_RETRY",
+                    `429 ${decision.kind}; retrying in ${delay}ms (model remaining: ${decision.snapshot.modelRemaining ?? "unknown"})`
+                  );
+                  releaseAccountSemaphore();
+                  await new Promise((r) => setTimeout(r, delay));
+                  attempts++;
+                  continue;
+                }
+              }
+
+              // For streaming: release the semaphore when the client drains or cancels the stream.
+              // Non-2xx streams must drop the slot before returning so the pipeline can rotate
+              // accounts without holding the failed connection's concurrency gate. Do NOT
+              // cancel() the body here — the pipeline clones it (BYOP 422 / toOutcome).
+              if (stream) {
+                const originalBody = res.response.body;
+                const okStatus = res.response.status >= 200 && res.response.status < 300;
+                if (!originalBody || !okStatus) {
+                  releaseAccountSemaphore();
+                  return {
+                    ...res,
+                    _executionCredentials: execCreds,
+                  };
+                }
+
+                // Opt-in transparent stream recovery (free-claude-code port, default OFF).
+                // Only engages for a successful (2xx) stream — an error body must never be
+                // held or replayed. Setting is read once here from the cached resolved
+                // resilience settings; the default path is byte-for-byte unchanged.
+                let streamRecoveryEnabled = false;
+                let continueMidStreamEnabled = false;
+                let throughputWatchdog =
+                  resolveResilienceSettings(null).streamRecovery.throughputWatchdog;
+                if (okStatus) {
+                  try {
+                    // Reuse the request-consolidated settings read (see line ~2076) — no
+                    // second DB/cache hit. Default OFF when the setting is absent.
+                    const sr = resolveResilienceSettings(settings).streamRecovery;
+                    // Fail-closed: the agent-goal-policy heuristic may only ADD recovery
+                    // when the operator has no explicit configuration. If the operator
+                    // explicitly configured stream recovery (env var or DB/settings
+                    // override), that value always wins — the goal policy must never
+                    // re-enable recovery the operator explicitly turned off.
+                    const operatorExplicit = isStreamRecoveryExplicitlyConfigured(settings);
+                    const goalOverride = !operatorExplicit && agentGoalPolicy.streamRecoveryEnabled;
+                    streamRecoveryEnabled = sr.enabled || goalOverride;
+                    continueMidStreamEnabled = sr.continueMidStream === true;
+                    throughputWatchdog = sr.throughputWatchdog;
+                    if (goalOverride && !sr.enabled) {
+                      log?.info?.(
+                        "AGENT_GOAL",
+                        `agentGoalPolicy override: stream recovery enabled for goal request requestId=${traceId} model=${modelToCall || model || requestedModel || "unknown"}`
+                      );
+                    }
+                  } catch {
+                    streamRecoveryEnabled = false;
+                    continueMidStreamEnabled = false;
+                    throughputWatchdog =
+                      resolveResilienceSettings(null).streamRecovery.throughputWatchdog;
+                  }
+                }
+
+                let clientBody: ReadableStream<Uint8Array>;
+                if (streamRecoveryEnabled || throughputWatchdog.enabled) {
+                  // Run the SAME upstream (same account/creds) with a given body and return
+                  // its 2xx stream, or null. Used both by the early-retry re-open (same body)
+                  // and the mid-stream continuation (assistant-prefilled body).
+                  const runUpstreamStream = async (
+                    body: unknown
+                  ): Promise<ReadableStream<Uint8Array> | null> => {
+                    try {
+                      assertManagedLeaseFence(attemptConnectionId);
+                      const retryRaw = await executeWithUpstreamStartTimeout({
+                        executor,
+                        provider,
+                        model: modelToCall,
+                        connectionTimeoutMs: resolveConnectionTimeoutMs(
+                          execCreds?.providerSpecificData
+                        ),
+                        signal: linkedAbortController.signal,
+                        log,
+                        execute: (signal) =>
+                          runWithCapture(providerRequestCapture, () =>
+                            executor.execute({
+                              model: modelToCall,
+                              body,
+                              stream: upstreamStream,
+                              credentials: execCreds,
+                              signal,
+                              log,
+                              extendedContext,
+                              upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
+                              clientHeaders: getExecutorClientHeaders(),
+                              clientResponseFormat,
+                              onCredentialsRefreshed,
+                              skipUpstreamRetry,
+                              contextEditing: { enabled: contextEditingEnabled },
+                              correlationId,
+                            })
+                          ),
+                      });
+                      const retryRes = normalizeExecutorResult(retryRaw);
+                      const retryOk =
+                        retryRes.response.status >= 200 && retryRes.response.status < 300;
+                      if (retryOk && retryRes.response.body) {
+                        return retryRes.response.body as ReadableStream<Uint8Array>;
+                      }
+                      await retryRes.response.body?.cancel().catch(() => {});
+                      return null;
+                    } catch {
+                      return null;
+                    }
+                  };
+
+                  // Mid-stream continuation (Fase 4.4): re-request with the partial text as an
+                  // assistant prefill. Gated by its own setting and only for OpenAI-compatible
+                  // bodies (makeContinuationBody returns null otherwise).
+                  const continueStream = continueMidStreamEnabled
+                    ? (assistantSoFar: string) => {
+                        const continuationBody = makeContinuationBody(
+                          bodyToSend as Record<string, unknown>,
+                          assistantSoFar
+                        );
+                        return continuationBody
+                          ? runUpstreamStream(continuationBody)
+                          : Promise.resolve(null);
+                      }
+                    : undefined;
+
+                  clientBody = createRecoverableStream(
+                    originalBody as ReadableStream<Uint8Array>,
+                    () => runUpstreamStream(bodyToSend),
+                    {
+                      finalize: releaseAccountSemaphore,
+                      onRetry: (attempt, err) =>
+                        log?.warn?.(
+                          "STREAM_RECOVERY",
+                          formatStreamRecoveryRetryWarning(
+                            attempt,
+                            STREAM_RECOVERY.EARLY_RETRY_MAX,
+                            err
+                          )
+                        ),
+                      continueStream,
+                      ...buildContinuationLogHooks(log, correlationId),
+                      throughputWatchdog,
+                      onWatchdogAbort: () =>
+                        log?.warn?.(
+                          "STREAM_WATCHDOG",
+                          "active upstream stream stayed below the configured useful-output rate"
+                        ),
+                    }
+                  );
+                } else {
+                  // Wrap with both finalize callback AND client abort listener
+                  // to ensure semaphore is released on client disconnect
+                  clientBody = wrapReadableStreamWithFinalize(
+                    originalBody,
+                    releaseAccountSemaphore
+                  );
+
+                  // Additional safety: listen for client abort directly
+                  if (clientSignal) {
+                    const onClientAbort = () => {
+                      releaseAccountSemaphore();
+                      try {
+                        originalBody.cancel();
+                      } catch {}
+                    };
+                    clientSignal.addEventListener("abort", onClientAbort, { once: true });
+                  }
+                }
+
                 return {
                   ...res,
                   _executionCredentials: execCreds,
+                  response: inheritEmptyTurnPolicy(
+                    res.response,
+                    new Response(clientBody, {
+                      status: res.response.status,
+                      statusText: res.response.statusText,
+                      headers: new Headers(normalizeHeaders(res.response.headers)),
+                    })
+                  ),
                 };
-              }
-
-              // Opt-in transparent stream recovery (free-claude-code port, default OFF).
-              // Only engages for a successful (2xx) stream — an error body must never be
-              // held or replayed. Setting is read once here from the cached resolved
-              // resilience settings; the default path is byte-for-byte unchanged.
-              let streamRecoveryEnabled = false;
-              let continueMidStreamEnabled = false;
-              let throughputWatchdog =
-                resolveResilienceSettings(null).streamRecovery.throughputWatchdog;
-              if (okStatus) {
-                try {
-                  // Reuse the request-consolidated settings read (see line ~2076) — no
-                  // second DB/cache hit. Default OFF when the setting is absent.
-                  const sr = resolveResilienceSettings(settings).streamRecovery;
-                  // Fail-closed: the agent-goal-policy heuristic may only ADD recovery
-                  // when the operator has no explicit configuration. If the operator
-                  // explicitly configured stream recovery (env var or DB/settings
-                  // override), that value always wins — the goal policy must never
-                  // re-enable recovery the operator explicitly turned off.
-                  const operatorExplicit = isStreamRecoveryExplicitlyConfigured(settings);
-                  const goalOverride = !operatorExplicit && agentGoalPolicy.streamRecoveryEnabled;
-                  streamRecoveryEnabled = sr.enabled || goalOverride;
-                  continueMidStreamEnabled = sr.continueMidStream === true;
-                  throughputWatchdog = sr.throughputWatchdog;
-                  if (goalOverride && !sr.enabled) {
-                    log?.info?.(
-                      "AGENT_GOAL",
-                      `agentGoalPolicy override: stream recovery enabled for goal request requestId=${traceId} model=${modelToCall || model || requestedModel || "unknown"}`
-                    );
-                  }
-                } catch {
-                  streamRecoveryEnabled = false;
-                  continueMidStreamEnabled = false;
-                  throughputWatchdog =
-                    resolveResilienceSettings(null).streamRecovery.throughputWatchdog;
-                }
-              }
-
-              let clientBody: ReadableStream<Uint8Array>;
-              if (streamRecoveryEnabled || throughputWatchdog.enabled) {
-                // Run the SAME upstream (same account/creds) with a given body and return
-                // its 2xx stream, or null. Used both by the early-retry re-open (same body)
-                // and the mid-stream continuation (assistant-prefilled body).
-                const runUpstreamStream = async (
-                  body: unknown
-                ): Promise<ReadableStream<Uint8Array> | null> => {
-                  try {
-                    assertManagedLeaseFence(attemptConnectionId);
-                    const retryRaw = await executeWithUpstreamStartTimeout({
-                      executor,
-                      provider,
-                      model: modelToCall,
-                      connectionTimeoutMs: resolveConnectionTimeoutMs(
-                        execCreds?.providerSpecificData
-                      ),
-                      signal: streamController.signal,
-                      log,
-                      execute: (signal) =>
-                        runWithCapture(providerRequestCapture, () =>
-                          executor.execute({
-                            model: modelToCall,
-                            body,
-                            stream: upstreamStream,
-                            credentials: execCreds,
-                            signal,
-                            log,
-                            extendedContext,
-                            upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
-                            clientHeaders: getExecutorClientHeaders(),
-                            clientResponseFormat,
-                            onCredentialsRefreshed,
-                            skipUpstreamRetry,
-                            contextEditing: { enabled: contextEditingEnabled },
-                            correlationId,
-                          })
-                        ),
-                    });
-                    const retryRes = normalizeExecutorResult(retryRaw);
-                    const retryOk =
-                      retryRes.response.status >= 200 && retryRes.response.status < 300;
-                    if (retryOk && retryRes.response.body) {
-                      return retryRes.response.body as ReadableStream<Uint8Array>;
-                    }
-                    await retryRes.response.body?.cancel().catch(() => {});
-                    return null;
-                  } catch {
-                    return null;
-                  }
-                };
-
-                // Mid-stream continuation (Fase 4.4): re-request with the partial text as an
-                // assistant prefill. Gated by its own setting and only for OpenAI-compatible
-                // bodies (makeContinuationBody returns null otherwise).
-                const continueStream = continueMidStreamEnabled
-                  ? (assistantSoFar: string) => {
-                      const continuationBody = makeContinuationBody(
-                        bodyToSend as Record<string, unknown>,
-                        assistantSoFar
-                      );
-                      return continuationBody
-                        ? runUpstreamStream(continuationBody)
-                        : Promise.resolve(null);
-                    }
-                  : undefined;
-
-                clientBody = createRecoverableStream(
-                  originalBody as ReadableStream<Uint8Array>,
-                  () => runUpstreamStream(bodyToSend),
-                  {
-                    finalize: releaseAccountSemaphore,
-                    onRetry: (attempt, err) =>
-                      log?.warn?.(
-                        "STREAM_RECOVERY",
-                        formatStreamRecoveryRetryWarning(
-                          attempt,
-                          STREAM_RECOVERY.EARLY_RETRY_MAX,
-                          err
-                        )
-                      ),
-                    continueStream,
-                    ...buildContinuationLogHooks(log, correlationId),
-                    throughputWatchdog,
-                    onWatchdogAbort: () =>
-                      log?.warn?.(
-                        "STREAM_WATCHDOG",
-                        "active upstream stream stayed below the configured useful-output rate"
-                      ),
-                  }
-                );
-              } else {
-                clientBody = wrapReadableStreamWithFinalize(originalBody, releaseAccountSemaphore);
               }
 
               return {
                 ...res,
                 _executionCredentials: execCreds,
-                response: inheritEmptyTurnPolicy(
-                  res.response,
-                  new Response(clientBody, {
-                    status: res.response.status,
-                    statusText: res.response.statusText,
-                    headers: new Headers(normalizeHeaders(res.response.headers)),
-                  })
-                ),
+                _accountSemaphoreRelease: releaseAccountSemaphore,
               };
+            } catch (error) {
+              releaseAccountSemaphore();
+              throw error;
             }
-
-            return {
-              ...res,
-              _executionCredentials: execCreds,
-              _accountSemaphoreRelease: releaseAccountSemaphore,
-            };
-          } catch (error) {
-            releaseAccountSemaphore();
-            throw error;
           }
+        } finally {
+          // Clean up abort listener
+          clientSignal?.removeEventListener("abort", forwardClientAbort);
         }
       })();
 
