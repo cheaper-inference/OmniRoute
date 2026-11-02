@@ -175,18 +175,18 @@ Scóip (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 ## Tástálacha a Rith
 
 ```bash
-# Gach tástáil (aonad + vitest + éiceachóras + e2e)
+# Gach tástáil (aonaid + vitest + éiceachóras + e2e)
 npm run test:all
 
-# Comhad tástála amháin (riteoir tástálacha dúchasach Node.js — úsáideann formhór na dtástálacha é seo)
+# Comhad tástála aonair (reathaí tástála dúchasach Node.js — úsáideann formhór na dtástálacha é seo)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Na tástálacha aonaid amháin a ndeachaigh d'athrú i bhfeidhm orthu (an roghnóir TIA céanna le geata CI, #8084)
-npm run test:scoped            # athruithe sa tiomnúchán deireanach (nó sa chrann oibre)
-npm run test:scoped:staged     # athruithe céimnithe amháin — oibríonn sé go maith le rith réamh-thiomnúcháin
-npm run test:scoped:full       # atóg léarscáil na graife iompórtála ar dtús (tar éis comhaid a chur leis/a bhogadh)
-# Ciallaíonn imeacht 1 + "run the full suite" gur athraíodh comhad lárnach (tsconfig, package.json, …) nó
-# foinse neamh-mhapáilte — teipeann an roghnóir go sábháilte, ní scipeálann sé rud ar bith go ciúin riamh.
+# Na tástálacha aonaid amháin a bhfuil tionchar ag d’athrú orthu (an roghnóir TIA céanna le geata CI, #8084)
+npm run test:scoped            # athruithe sa tiomantas is déanaí (nó sa chrann oibre)
+npm run test:scoped:staged     # athruithe céimnithe amháin — oibríonn go maith le rith réamhthiomantais
+npm run test:scoped:full       # atóg an léarscáil ghraif iompórtála ar dtús (tar éis comhaid a chur leis/a bhogadh)
+# Ciallaíonn scor 1 + "rith an tsraith iomlán" gur athraíodh comhad moil (tsconfig, package.json, …) nó foinse
+# neamh-mhapáilte — teipeann an roghnóir go sábháilte, ní scipeálann sé aon rud go ciúin riamh.
 
 # Vitest (freastalaí MCP, autoCombo, taisce)
 npm run test:vitest
@@ -194,13 +194,13 @@ npm run test:vitest
 # Tástálacha E2E (Playwright de dhíth)
 npm run test:e2e
 
-# E2E do chliaint prótacail (iompar MCP, A2A)
+# E2E do chliaint phrótacail (iompar MCP, A2A)
 npm run test:protocols:e2e
 
 # Tástálacha comhoiriúnachta éiceachórais
 npm run test:ecosystem
 
-# Geata cumhdaigh: 60% ráiteas/línte/feidhmeanna/brainsí
+# Geata cumhdaigh: 60% de ráitis/línte/feidhmeanna/brainsí
 npm run test:coverage
 npm run coverage:report
 
@@ -208,48 +208,47 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Tástáil deataigh teaglaim gheataithe le fíorchóras réamhtheachtach (rochtain VPS + creidmheasanna fíorsholáthraí de dhíth)
-# Buaileann sí FÍORSHOLÁTHRAITHE — cosnaíonn sí beagán. NÍ ritheann sí i CI RIAMH. Scipeálann sí go glan gan an geata.
-# De dhíth: rochtain ssh root@192.168.0.15 (faigheann sí gabháil DB inléite amháin ón VPS).
+# Tástáil thobdheataigh teaglama le fíorfhoinsí réamhtheachtacha faoi gheata (rochtain VPS + creidmheasanna fíorsholáthraí de dhíth)
+# Déanann sé teagmháil le FÍORSHOLÁTHRAITHE — cosnaíonn sé beagán. Ní ritheann sé i CI RIAMH. Scipeálann sé go glan gan an geata.
+# De dhíth: rochtain ssh root@192.168.0.15 (faightear seat DB inléite amháin ón VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Tástáil deataigh bheo VPS chéim 3 — gnáthscripteanna Node ESM, a bhuaileann freastalaí beo .15 go díreach.
+# Tástáil thobdheataigh bheo VPS chéim 3 — scripteanna simplí Node ESM, a dhéanann teagmháil dhíreach le freastalaí beo .15.
 # De dhíth: rochtain ssh root@192.168.0.15 (cruthaítear/díchóimeáiltear teaglamaí trí SSH sqlite).
-# Buaileann sí FÍORSHOLÁTHRAITHE (costas beag). Ní chruthaíonn/scriosann sí ach teaglamaí __live_test__*. NÍ ritheann sí i CI RIAMH.
-# Tá REQUIRE_API_KEY=false ar .15, mar sin níl eochair API de dhíth, ach urramaíonn sí COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY má tá siad socraithe.
-npm run test:combo:live:vps              # 7 gcás HTTP (tosaíocht/babhta-roibeaird/ualaithe/costas/comhleá/uathoibríoch + sláinte)
-npm run test:combo:live:vps:failover     # cuireann sé cás fíor-teipaistrithe tras-soláthraí leis (8 san iomlán)
+# Déanann sé teagmháil le FÍORSHOLÁTHRAITHE (costas beag). Ní chruthaíonn/scriosann sé ach teaglamaí __live_test__*. Ní ritheann sé i CI RIAMH.
+# Tá REQUIRE_API_KEY=false ar .15 agus mar sin níl eochair API de dhíth, ach urramaíonn sé COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY má tá siad socraithe.
+npm run test:combo:live:vps              # 7 gcás HTTP (tosaíocht/babhta-i-ndiaidh-babhta/ualaithe/costas/comhleá/uathoibríoch + sláinte)
+npm run test:combo:live:vps:failover     # cuireann sé cás fíor-theipaistrithe tras-soláthraí leis (8 san iomlán)
 ```
 
 Nótaí cumhdaigh:
 
-- Tomhaiseann `npm run test:coverage` cumhdach foinse don phríomhshraith tástálacha aonaid, fágann sé `tests/**` as an áireamh, agus cuireann sé `open-sse/**` san áireamh
-- Ní mór d'iarratais tarraingthe an geata cumhdaigh a choinneáil ag **60%+** do ráitis/línte/feidhmeanna/brainsí
+- Tomhaiseann `npm run test:coverage` cumhdach foinseach don phríomhshraith tástálacha aonaid, fágann sé `tests/**` as an áireamh, agus cuireann sé `open-sse/**` san áireamh
+- Ní mór d’iarratais tarraingthe an geata cumhdaigh a choinneáil ag **60%+** de ráitis/línte/feidhmeanna/brainsí
 - Má athraíonn PR cód táirgthe in `src/`, `open-sse/`, `electron/`, nó `bin/`, ní mór dó tástálacha uathoibrithe a chur leis nó a nuashonrú sa PR céanna
-- Priontálann `npm run coverage:report` an tuairisc mhionsonraithe comhad ar chomhad ón rith cumhdaigh is déanaí
+- Priontálann `npm run coverage:report` an tuairisc mhionsonraithe de réir comhaid ón rith cumhdaigh is déanaí
 - Caomhnaíonn `npm run test:coverage:legacy` an mhéadracht níos sine le haghaidh comparáid stairiúil
-- Féach `docs/ops/COVERAGE_PLAN.md` don treochlár céimnithe chun cumhdach a fheabhsú
+- Féach `docs/ops/COVERAGE_PLAN.md` don treochlár céimnithe um fheabhsú cumhdaigh
 
-### Riachtanais Iarratais Tarraingthe
+### Ceanglais maidir le hIarratas Tarraingthe
 
-Sula n-osclaíonn tú PR, úsáid an
-[Bealach Órga Rannchuidithe](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) chun an lúb spriocdhírithe a rith don
-mhéid a d'athraigh tú. Tá an tsraith iomlán tástálacha aonaid (4 shlat CI), Vitest, an geata
-cumhdaigh **60%+**, agus an tógáil táirgthe faoi chúram CI — ní chuireann a rith go háitiúil aon
-chomhartha leis nach dtabharfaidh seiceálacha an PR duit cheana féin, agus ar mheaisíní níos lú
-d'fhéadfadh sé an t-óstach a sháithiú (#8084):
+Sula n-osclaíonn tú PR, úsáid
+[Bealach Órga na Rannpháirtíochta](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) chun an lúb spriocdhírithe a rith le haghaidh
+an mhéid a d’athraigh tú. Is faoi CI atá an tsraith iomlán tástálacha aonaid (4 sharda CI), Vitest, an geata cumhdaigh **60%+**, agus
+an tógáil táirgthe — ní sholáthraíonn a rith go háitiúil aon fhaisnéis nach dtabharfaidh na seiceálacha PR duit cheana féin, agus ar ríomhairí níos lú féadfaidh sé an t-óstach a sháithiú (#8084):
 
-- Rith na comhaid tástála a chlúdaíonn d'athrú: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Rith na comhaid tástála a chumhdaíonn d’athrú: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Rith `npm run lint`
-- Cuir tástálacha uathoibrithe leis nó nuashonraigh iad sa PR céanna aon uair a athraíonn cód táirgthe
+- Cuir tástálacha uathoibrithe san áireamh nó nuashonraigh iad sa PR céanna aon uair a athraítear cód táirgthe
+- I gcomhaid `node:test`, cuir gach `await` barrleibhéil (amhail `await import(...)`) roimh an gcéad `test()` / `describe()`: faoi `--test-force-exit`, d’fhéadfadh sé nach rithfí go ciúin riamh tástálacha a chláraítear ina dhiaidh (#18045; forfheidhmítear é le `npm run check:test-tla-order`)
 - Cuir na comhaid tástála a athraíodh nó a cuireadh leis i dtuairisc an PR nuair a athraíodh cód táirgthe
 - Seiceáil toradh SonarQube ar an PR nuair atá rúin an tionscadail cumraithe in CI
 
-Stádas reatha na dtástálacha: **122 comhad tástála aonaid** a chlúdaíonn:
+Stádas reatha na dtástálacha: **122 comhad tástála aonaid** a chumhdaíonn:
 
 - Aistritheoirí soláthraithe agus tiontú formáide
 - Teorannú ráta, scoradán ciorcaid, agus athléimneacht
-- Taisce shéimeantach, idéimpitéinseacht, rianú dul chun cinn
+- Taisce shéimeantach, iolrachas sábháilte, rianú dul chun cinn
 - Oibríochtaí bunachair sonraí agus scéimre (21 modúl DB)
 - Sreafaí OAuth agus fíordheimhniú
 - Bailíochtú críochphointí API (Zod v4)

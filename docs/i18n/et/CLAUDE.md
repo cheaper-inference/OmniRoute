@@ -12,17 +12,18 @@ reeglit, isikuandmetega seotud õppetunnid). Loe see täielikult läbi; ära lis
 uuesti. Kõik alljärgnev kehtib AINULT Claude Code'i kohta — need on failis `AGENTS.md` juba
 määratletud reeglite praktilised täpsustused.
 
-## Tööpuu isoleerimine — Claude Code'i eripärad
+## Worktree'i isoleerimine — Claude Code'i eripärad
 
-Täielik kohustuslik tööpuuprotokoll (baasharu kinnitamine, `.claude/worktrees/` kui kanooniline
-asukoht, `cp -al` node_modules, eemaldamisreeglid) asub jaotises `AGENTS.md` → Giti töövoog →
-„Tööpuu isoleerimine“. Claude Code'i spetsiifilised punktid:
+Täielik kohustuslik worktree'i protokoll (baasharu kinnitamine, `.claude/worktrees/` kui
+kanooniline tee, `cp -al` node_modules'i jaoks, eemaldamisreeglid) on failis
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (kokkuvõtlikult `AGENTS.md`-is →
+Git'i töövoog → "Worktree'i isoleerimine"). Claude Code'i-spetsiifilised punktid:
 
-- Kinnita baasharu operaatoriga tööriista `AskUserQuestion` kaudu (range reegel nr 19), kui ta
+- Kinnita baasharu operaatoriga tööriista `AskUserQuestion` kaudu (Range reegel #19), kui ta
   pole seda juba öelnud.
-- Eelista sisseehitatud tööriista `EnterWorktree` — see loob tööpuud juba kataloogi
-  `.claude/worktrees/` (kanooniline asukoht). Loo tööpuu dokumenteeritud käsuga `git
-worktree add` ja kutsu seejärel välja `EnterWorktree`, edastades selle `path`.
+- Eelista sisseehitatud `EnterWorktree`-tööriista — see loob worktree'd juba
+  `.claude/worktrees/` alla (kanooniline tee). Loo worktree dokumenteeritud käsuga `git
+worktree add`, seejärel kutsu `EnterWorktree` koos selle `path`-iga.
 
 ## Seanssidevaheline ohutus — Claude Code'i eripärad
 

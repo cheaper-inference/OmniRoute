@@ -1,0 +1,1 @@
+- **fix(providers):** register `deepseek-v4.1-flash` and `deepseek-4.1-flash` as aliases for `deepseek-flash` so combo targets and direct requests resolve vision capabilities ([#17243](https://github.com/diegosouzapw/OmniRoute/pull/17243)) — thanks @PrinceThummar011; fixes #17180

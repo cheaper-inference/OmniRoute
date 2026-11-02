@@ -11,32 +11,19 @@
 
 ---
 
-## Ohun Tí Ó Jẹ́
+## Kini O Jẹ
 
-OmniRoute forúkọsílẹ̀ àwọn olùpèsè 374, pẹ̀lú àwọn àkọsílẹ̀ katalọ́ọ̀gù 155 tí a sàmì sí **ọ̀fẹ́/kò nílò ìfàṣẹsí**
-(kò nílò ìfàṣẹsí,
-OAuth ipele-ọ̀fẹ́, tàbí kọ́kọ́rọ́ API ipele-ọ̀fẹ́ — wo
-[Ìtọ́sọ́nà Àwọn Ipele Ọ̀fẹ́](../getting-started/FREE-TIERS-GUIDE.md) àti
-[Àkójọ Àwọn Ipele Ọ̀fẹ́](../reference/FREE_TIERS.md) ní ẹ̀kúnrẹ́rẹ́). Ohun tó yẹ ká kíyè sí ni pé: àwọn olùpèsè ọ̀fẹ́ yàtọ̀
-gidigidi ní ti dídára àwòṣe. Olùpèsè tí kò nílò ìfàṣẹsí tó ń pèsè àwòṣe aṣáájú-ọ̀nà wúlò púpọ̀
-ju èyí tó ń pèsè àwòṣe kékeré àtijọ́ lọ.
+OmniRoute forukọsilẹ awọn olupese 377, pẹlu awọn titẹ sii katalogi 155 ti samisi**free/no-auth** (ko si-auth, OAuth-ọfẹ, tabi bọtini API ipele-ọfẹ — wo [Itọsọna Tiers Ọfẹ](../getting-started/FREE-TIERS-GUIDE.md) ati [itọsọna Awọn ipele Ọfẹ](../reference/FREE_TIERS.md) ni kikun). Awọn apeja: awọn olupese ọfẹ yatọ pupọ ni didara awoṣe. Olupese ti kii ṣe iwe-aṣẹ ti n ṣiṣẹ awoṣe aala jẹ iwulo pupọ diẹ sii ju ọkan ti n ṣiṣẹ awoṣe injogun kekere kan.
 
-**Àwọn Ìpele Olùpèsè Ọ̀fẹ́** dáhùn ìbéèrè "**olùpèsè ọ̀fẹ́ wo ló fún mi ní àwòṣe tó dára jù?**" nípa
-sísopọ̀ katalọ́ọ̀gù olùpèsè ọ̀fẹ́ kọ̀ọ̀kan pẹ̀lú **àwọn àmì dídára tí ọ̀pọ̀ ènìyàn kó jọ** láti
-**àtẹ ìdíje Arena AI** (ELO àyànfẹ́ ènìyàn, èrò kan náà tó wà lẹ́yìn pápá ìdíje chatbot
-LMArena). Lẹ́yìn náà, a máa ṣe ìpele àwọn olùpèsè gẹ́gẹ́ bí agbára **àwòṣe ọ̀fẹ́ tó dára jù** wọn.
+**Awọn ipo Olupese Ọfẹ** idahun"** eyi ti free olupese yoo fun mi ti o dara ju awoṣe?** "nipa didapọ mọ katalogi olupese ọfẹ kọọkan pẹlu** enia-orisun didara ikun** lati awọn** Arena AI olori** (eniyan-ààyò ELO, kanna agutan sile LMArena chatbot arena). Awọn olupese lẹhinna wa ni ipo nipasẹ agbara ti wọn** ti o dara ju free awoṣe** .
 
-A ṣe ìṣírò ìpele náà láti inú àwọn orísun gidi mẹ́ta:
+A ṣe iṣiro ipo naa lati awọn orisun gidi mẹta:
 
-1. Àwọn àkójọ olùpèsè ọ̀fẹ́ — `NOAUTH_PROVIDERS`, pẹ̀lú àwọn àkọsílẹ̀ `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` tí a sàmì sí `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Katalọ́ọ̀gù àwòṣe olùpèsè kọ̀ọ̀kan láti inú àkọsílẹ̀ àwọn olùpèsè
-   (`open-sse/config/providerRegistry.ts`).
-3. Àwọn àmì ìbámu iṣẹ́ tí a yọ láti ELO, tí ẹ̀rọ ìmúdójúìwọ̀n Arena ELO fi pamọ́ sínú tábìlì DB
-   `model_intelligence` (`src/lib/arenaEloSync.ts`).
+1. Awọn atokọ Olupese ọfẹ - `NOAUTH_PROVIDERS`, pẹlu awọn titẹ sii `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ti asia ti `hasFree` (`src/shared/constants/providers.ts`).
+2. Katalogi awoṣe olupese kọọkan lati iforukọsilẹ olupese (`open-sse/config/providerRegistry.ts`).
+3. Awọn ikun ibamu-ṣiṣe-ṣiṣe ti ELO ti a fipamọ sinu tabili `model_intelligence` DB nipasẹ ẹrọ amuṣiṣẹpọ Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Ọgbọ́n ìsopọ̀ náà wà nínú `src/lib/freeProviderRankings.ts`.
+Imọye idapọmọra n gbe ni `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -120,102 +107,114 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ---
 
-## Bí Àwọn Ìwọ̀n Ṣe N Ṣiṣẹ́
+## Bí Àwọn Àkànkò Ṣe Ń Ṣiṣẹ́
 
-### Orísun: Àtẹ Ìṣàkóso Arena AI
+### Orísun: Arena AI leaderboard
 
-Ẹ̀rọ ìmúdójúìwọ̀n Arena ELO (`src/lib/arenaEloSync.ts`) máa ń gba àtẹ ìṣàkóso méjì — `text`
-àti `code` — láti API àtẹ ìṣàkóso Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Gbogbo àkọsílẹ̀ inú àtẹ ìṣàkóso
-ní orúkọ àwòṣe, olùpèsè, `score` ELO, àárín ìgbẹ́kẹ̀lé, àti iye ìbò.
+Ẹ̀rọ ìṣàmuṣiṣe Arena ELO (`src/lib/arenaEloSync.ts`) ń gba àwọn leaderboard méjì — `text`
+àti `code` — láti inu API Arena AI leaderboard
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Tí API náà bá kò padà
+sèrí board tó ṣe é lọ́nà tó dára, ẹ̀rọ náà á padà sí `lmarena-ai/leaderboard-dataset`
+onígòwò lórí Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0;
+`overall` → `text`, `coding` → `code`); `GET /api/intelligence/sync` ń jàbò nípa
+`activeSource`, `lastError` àti `lastFailedAt`. Lílẹ́sẹ̀ leaderboard kọ̀ọ̀kan gbé orúkọ
+àwoṣe, oníta, ELO `score`, ààyè ìgbẹ́kẹ́lé, àti iye ìdìbò.
 
-Àwọn ẹ̀ka àtẹ ìṣàkóso bá àwọn ẹ̀ka iṣẹ́ OmniRoute mu báyìí:
+Àwọn ẹ̀yà leaderboard ṣe àfara-ìbáṣepọ̀ sí àwọn ẹ̀yà iṣẹ́ OmniRoute:
 
-| Àtẹ ìṣàkóso Arena | Àwọn ẹ̀ka iṣẹ́ OmniRoute                            |
+| Arena leaderboard | Àwọn ẹ̀yà iṣẹ́ OmniRoute                            |
 | ----------------- | ------------------------------------------------- |
 | `text`            | `default`, `review`, `documentation`, `debugging` |
 | `code`            | `coding`                                          |
 
-### Ìṣètò sí òṣùwọ̀n kan náà (ìwọ̀n ìbámu pẹ̀lú iṣẹ́)
+### Ìdéédéé (àkànkò ìbáramù-iṣẹ́)
 
-Àwọn ìwọ̀n ELO àìṣàtúnṣe ni a máa ń ṣètò sí òṣùwọ̀n kan náà fún àtẹ ìṣàkóso kọ̀ọ̀kan sí **iye ìbámu pẹ̀lú iṣẹ́ nínú `[0.4, 0.98]`**:
+Àwọn àkànkò ELO àtijọ́ ni a ń ṣe déédéé fún leaderboard kọ̀ọ̀kan sínú **iye ìbáramù-iṣẹ́ nínú `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Ìwọ̀n náà kì í dé `0` tàbí `1`, èyí sì ń fi àyè sílẹ̀ fún àtúnṣe àwọn aṣàmúlò. Èyí ni
-ààyè `score` tí o rí nínú èsì API àti àmì tí a fi hàn lórí pánẹ́ẹ̀lì ìṣàkóso.
+Àkànkò náà kò ní dé `0` tàbí `1` rárá, èyí sì ń fi ààyè sílẹ̀ fún àwọn ìtẹ̀yípadà
+olùlò. Èyí ni aaye `score` tí o ń rí nínú ìdáhùn API àti àmì-ọ̀rọ̀ tí wọ́n fi ń hàn
+lórí dashboard.
 
-### Ìgbẹ́kẹ̀lé
+### Ìgbẹ́kẹ́lé
 
-Àkọsílẹ̀ kọ̀ọ̀kan máa ń gba ìpele ìgbẹ́kẹ̀lé gẹ́gẹ́ bí iye ìbò Arena:
+Lílẹ́sẹ̀ kọ̀ọ̀kan ń gba ipele ìgbẹ́kẹ́lé tó dá lórí iye ìdìbò Arena:
 
-| Ìgbẹ́kẹ̀lé | Ìbò     |
-| -------- | ------- |
-| `high`   | ≥ 5,000 |
-| `medium` | ≥ 1,000 |
-| `low`    | < 1,000 |
+| Ìgbẹ́kẹ́lé | Àwọn ìdìbò |
+| -------- | ---------- |
+| `high`   | ≥ 5,000    |
+| `medium` | ≥ 1,000    |
+| `low`    | < 1,000    |
 
-### Ìpamọ́ àti bí dátà ṣe jẹ́ tuntun
+### Ìpamọ́ àti ìtuntun
 
-Àwọn àkọsílẹ̀ tí a ṣètò sí òṣùwọ̀n kan náà ni a máa ń kọ sínú tábìlì DB `model_intelligence` pẹ̀lú
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Àwọn àkọsílẹ̀ **máa ń parí lẹ́yìn
-ọjọ́ 7**, nítorí náà, olùpèsè tí ó dá ìmúdójúìwọ̀n dúró yóò yọ kúrò nígbẹ̀yìn dípò kí ó máa pèsè
-dátà àtijọ́.
+Àwọn lílẹ́sẹ̀ tí a ti ṣe déédéé ni wọ́n ń kọ̀wé sí tábìlì DB `model_intelligence` pẹ̀lú
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Àwọn lílẹ́sẹ̀ **ń parí
+lẹ́yìn ọjọ́ méje**, nítorí náà olùpèsè tí ó bá dáwọ̀ ìṣàmuṣiṣe dúró á jábò kúrò lẹ́yìn
+ìgbà dípò kó máa ń pèsè dátà àtijọ́.
 
-Ìmúdójúìwọ̀n náà **wà ní ṣíṣiṣẹ́ láti ìbẹ̀rẹ̀**:
+Ìṣàmuṣiṣe ń ṣiṣẹ́ **ní àtẹ̀ṣetìbàn**:
 
-- Ó máa ń ṣiṣẹ́ lẹ́ẹ̀kan nígbà tí olupin bá bẹ̀rẹ̀, lẹ́yìn náà yóò máa ṣiṣẹ́ lórí aago àsìkò déédéé
-  (`src/lib/arenaEloSync.ts`, tí a so pọ̀ láti `src/instrumentation-node.ts`).
-- Ó **kì í dá iṣẹ́ dúró, bẹ́ẹ̀ ni kì í fa ìkùnà pátápátá** — bí gbígba dátà láti orísun òkè bá kùnà, OmniRoute yóò tẹ̀síwájú
-  láti ṣiṣẹ́, àwọn ìtòlẹ́sẹẹsẹ yóò sì kàn fi dátà tó dára jù lọ tí ó gbẹ̀yìn hàn (tàbí ipò òfo).
+- Ó ń ṣiṣẹ́ ẹ̀kan ní ìbẹ̀rẹ̀ server, lẹ́yìn náà ó sì máa ṣiṣẹ́ lórí àkókò àyípadà
+  (`src/lib/arenaEloSync.ts`, tí wọ́n so pọ̀ láti `src/instrumentation-node.ts`).
+- Ó jẹ́ **non-blocking tí kò sì jẹ́ ewu ìparẹ́ rárá** — tí ìgba-data upstream bá
+  kùnà, OmniRoute á tẹ̀síwájú lílọ, àwọn ipò sì á fi dátà tó dára gbẹ̀yìn hàn nìkan
+  (tàbí ipò òfo).
 
-Àwọn àyípadà àyíká méjì ló ń ṣàkóso rẹ̀ (tí a ṣàkọsílẹ̀ nínú
+Àwọn variable ayíká méjì ni ń darí í (wọ́n ṣàlàyé rẹ̀ nínú
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Àyípadà                   | Àìyípadà      | Ète                                           |
-| ------------------------- | ------------- | --------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Ṣètò sí `false` láti kọ ìmúdójúìwọ̀n jáde náà. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Àárín àsìkò ìmúdójúìwọ̀n, ní ìṣẹ́jú-ààyá.       |
+| Variable                  | Àtẹ̀ṣetìbàn    | Ète                                                        |
+| ------------------------- | ------------- | ---------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Ṣètò sí `false` láti yọ ara ẹ̀nyin kúrò nínú ìṣàmuṣiṣe òde. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Ààyè ìṣàmuṣiṣe, ní ìṣẹ́jú-àáyá.                             |
 
-### Ìmúdójúìwọ̀n afọwọ́ṣe / ipò / ìparẹ́
+### Ìṣàmuṣiṣe afọwọ́ṣe / ipò / ìparẹ́
 
-Fún àwọn olùdarí ètò, endpoint ìṣàkóso tí ó nílò ìfàṣẹsí ń pèsè àṣẹ afọwọ́ṣe
-(`src/app/api/intelligence/sync/route.ts` — ó nílò ìfàṣẹsí ìṣàkóso):
+Fún àwọn agbógunró, endpoint ìṣàkóso tí wọ́n fàmọ̀rà ń ṣí àkóso afọwọ́ṣe sílẹ̀
+(`src/app/api/intelligence/sync/route.ts` — ó nílò ìfàmọ̀rà ìṣàkóso):
 
 ```
-GET    /api/intelligence/sync          # ipò ìmúdójúìwọ̀n lọ́wọ́lọ́wọ́ (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # bẹ̀rẹ̀ ìmúdójúìwọ̀n afọwọ́ṣe; ara: { "dryRun": true } láti ṣáájúwo láì kọ nǹkan
-DELETE /api/intelligence/sync          # pa gbogbo àwọn àkọsílẹ̀ ìmọ̀ arena_elo tí a ti mú dójú ìwọ̀n rẹ́
+GET    /api/intelligence/sync          # ipò ìṣàmuṣiṣe lọ́wọ́lọ́wọ́ (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # bẹ̀rẹ̀ ìṣàmuṣiṣe afọwọ́ṣe; body: { "dryRun": true } láti ṣe àkíyèsí láìkọ̀wé rárá
+DELETE /api/intelligence/sync          # pa gbogbo àwọn lílẹ́sẹ̀ intelligence arena_elo tí a ti ṣàmuṣiṣe rẹ́
 ```
 
-Bí ojú ìwé ìtòlẹ́sẹẹsẹ bá ṣófo, `POST /api/intelligence/sync` afọwọ́ṣe kan (tàbí kí o kàn
-tun olupin bẹ̀rẹ̀) yóò tún fi dátà kún un.
+Tí ojú-ìwé àwọn ipò bá jẹ́ òfo, `POST /api/intelligence/sync` afọwọ́ṣe kan (tàbí kí o
+tún bẹ̀rẹ̀ server lẹ́ẹ̀kejì) á tún kún án.
 
-### Bíbá àwọn àwòṣe mu pẹ̀lú àtẹ ìṣàkóso
+### Ìbá àwọn àwoṣe mọ́ leaderboard mu
 
-Àwọn ID àwòṣe inú àkọsílẹ̀ àti àwọn orúkọ àwòṣe Arena kì í sábà bá ara wọn mu pátápátá. Ìtòlẹ́sẹẹsẹ náà ń lo
-ìbámu tó rọ̀ (`findMatchingIntelligence` nínú `src/lib/freeProviderRankings.ts`):
+Àwọn ID àwoṣe registry àti orúkọ àwoṣe Arena kò ní bá ara wọn mu gan-an nígbà gbogbo.
+Ìpòlòrọ̀ ń lo ìbáramu tó rọ̀rùn (`findMatchingIntelligence` nínú
+`src/lib/freeProviderRankings.ts`):
 
-1. Ìbámu pípé lórí ID àwòṣe tí a ṣètò sí òṣùwọ̀n kan náà.
-2. Ìbámu lẹ́yìn yíyọ àmì ẹ̀yà tí ó wà ní ìparí kúrò (f.à. `kimi-k2.6` → `kimi-k2`).
-3. Ìbámu ìbẹ̀rẹ̀-orúkọ (orúkọ àwòṣe inú àtẹ ìṣàkóso jẹ́ ìbẹ̀rẹ̀ ID inú àkọsílẹ̀).
+1. Ìbáramu gan-an lórí ID àwoṣe tí a ṣe déédéé.
+2. Ìbáramu lẹ́yìn tí a ti yọ àfikún version ẹ̀hìn kúrò (f.a. `kimi-k2.6` → `kimi-k2`).
+3. Ìbáramu ìbẹ̀rẹ̀-ọ̀rọ̀ (prefix) (orúkọ àwoṣe leaderboard kan jẹ́ ìbẹ̀rẹ̀-ọ̀rọ̀ ti ID
+   registry náà).
 
-Ní ẹ̀gbẹ́ ìmúdójúìwọ̀n, a máa ń yọ àwọn ìbẹ̀rẹ̀-orúkọ olùpèsè tí a mọ̀ (`anthropic/`, `openai/`, `google/`, …)
-kúrò, àwòrán alias kékeré kan sì máa ń fẹ àwọn orúkọ àgbà kalẹ̀ sí àwọn ìyàtọ̀ tí OmniRoute ń lò
-ní inú, kí àwọn àwòṣe lè máa ṣeé rí lábẹ́ orúkọ èyíkéyìí.
+Ní ẹ̀gbẹ́ ìṣàmuṣiṣe, àwọn ìbẹ̀rẹ̀-ọ̀rọ̀ oníta tí a mọ̀ dájú (`anthropic/`, `openai/`,
+`google/`, …) ni wọ́n yọ kúrò, àti àtòpilẹ̀ṣẹ̀ alias kékeré kan ń fẹ̀ àwọn orúkò
+àṣàkànṣò sí àwọn ìyàtọ̀ tí OmniRoute ń lo ní inú rẹ̀, nítorí náà àwọn àwoṣe máa rí
+wọ́ lábẹ́ orúkọ èyíkéyìí.
 
-### Bí a ṣe ń to olùpèsè sí ipò
+### Bí wọ́n ṣe ń ṣe ipò olùpèsè kan
 
-Fún olùpèsè ọ̀fẹ́ kọ̀ọ̀kan, ẹ̀rọ náà máa ń fún gbogbo àwòṣe inú àkójọ rẹ̀ ní ìwọ̀n, lẹ́yìn náà:
+Fún olùpèsè ọ̀fẹ́ kọ̀ọ̀kan, ẹ̀rọ náà ń fún gbogbo àwoṣe nínú àkàtálóògù rẹ̀ lákànkò,
+lẹ́yìn náà:
 
-- **Àwòṣe Tó Ga Jù** = àwòṣe olùpèsè náà tí ó ní ìwọ̀n tó ga jù.
-- **Ìwọ̀n Àpapọ̀** = ìpíndọ́gba ìwọ̀n gbogbo àwọn àwòṣe olùpèsè náà tí a fún ní ìwọ̀n.
-- **Àwọn Àwòṣe** = iye àwọn àwòṣe olùpèsè náà tí ó ní ìwọ̀n Arena.
+- **Àwoṣe Gíga Jùlọ (Top Model)** = àwoṣe olùpèsè náà tó ní àkànkò gíga jùlọ.
+- **Àkànkò Àárín (Avg Score)** = àárín àkànkò lórí gbogbo àwoṣe olùpèsè náà tí a fún
+  lákànkò.
+- **Àwọn Àwoṣe (Models)** = iye àwoṣe olùpèsè náà tó ní àkànkò Arena.
 
-A máa ń to àwọn olùpèsè nípasẹ̀ **ìwọ̀n àwòṣe tó ga jù** lákọ̀ọ́kọ́, lẹ́yìn náà nípasẹ̀ ìwọ̀n àpapọ̀. Èyí ń san
-ẹ̀san fún olùpèsè tí ó pèsè ó kéré tán àwòṣe ọ̀fẹ́ alágbára kan.
+Wọ́n ń ṣètò àwọn olùpèsè nípasẹ̀ **àkànkò àwoṣe gíga jùlọ** kọ́kọ́, lẹ́yìn náà nípasẹ̀
+àkànkò àárín. Èyí ń san ẹ̀bùn fún olùpèsè tí ó ṣe o kéré jù àwoṣe ọ̀fẹ́ alágbára kan
+sílẹ̀.
 
 ---
 

@@ -25,8 +25,10 @@
     "confirm": "Weet je het zeker?",
     "refresh": "Vernieuwen",
     "close": "Sluiten",
+    "dialogTitleFallback": "Dialoogvenster",
     "previousPage": "Vorige pagina",
     "nextPage": "Volgende pagina",
+    "pagination": "Paginering",
     "capsLockOn": "Caps Lock staat aan",
     "dismissNotification": "Melding negeren",
     "toggleColumns": "Kolommen in-/uitschakelen",
@@ -182,6 +184,7 @@
     "combos": "Combinaties",
     "noModelsFound": "Geen modellen gevonden",
     "clear": "Wissen",
+    "clearFilters": "Filters wissen",
     "done": "Gereed",
     "selectAll": "Alles selecteren",
     "unselectAll": "Selectie opheffen",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Gebruikt door {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Voorbeeld",
     "batchFilePreviewTruncated": "Eerste {shown} regels weergeven ({total} totaal regels)",
-    "batchFileDownloadFull": "Download Volledig Bestand"
+    "batchFileDownloadFull": "Download Volledig Bestand",
+    "tokensPageTitle": "Tokens",
+    "tokensPageDescription": "Stuur tokens tussen API-sleutels, deel uitnodigingscodes en verbind communityservers.",
+    "tokensServerUrlLabel": "Server-URL"
   },
   "disabled": "Uitgeschakeld",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Routeer verzoeken met uitgeput budget naar de gratis nood-fallbackprovider/-model.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "De proxyserver is gestopt of wordt opnieuw opgestart.",
     "expandSidebar": "Vouw zijbalk uit",
     "collapseSidebar": "Zijbalk samenvouwen",
-    "themes": "Thema's",
-    "presetColors": "Populaire kleuren",
     "createTheme": "Thema maken",
     "chooseColor": "Kies één kleur",
-    "themeCoral": "Koraal",
-    "themeBlue": "Blauw",
-    "themeRed": "Rood",
-    "themeGreen": "Groen",
-    "themeViolet": "Violet",
-    "themeOrange": "Oranje",
-    "themeCyan": "Cyaan",
     "cliToolsShort": "Gereedschap",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Themasysteem",
     "whitelabelingDesc": "Beschrijving van whitelabeling",
     "switchThemes": "Tussen thema's wisselen",
-    "themeAccentDesc": "Beschrijving van thema-accentkleur",
     "uploadFavicon": "Favicon uploaden",
     "themeDark": "Donker thema",
     "customLogoDesc": "Beschrijving van aangepast logo",
     "sidebarVisibilityToggle": "Schakelaar voor zichtbaarheid van zijbalk",
-    "themeAccent": "Thema-accentkleur",
     "resetFavicon": "Favicon herstellen",
     "whitelabeling": "Whitelabeling",
     "darkMode": "Donkere modus",
@@ -1122,10 +1117,8 @@
     "customLogo": "Aangepast logo",
     "appearance": "Weergave",
     "themeSelectionAria": "ARIA voor themaselectie",
-    "themeCreate": "Thema maken",
     "customFaviconDesc": "Beschrijving van aangepaste favicon",
     "logoPreview": "Logovoorbeeld",
-    "themeCustom": "Aangepast thema",
     "hideHealthLogsDesc": "Beschrijving voor het verbergen van statuslogs",
     "faviconPreview": "Faviconvoorbeeld",
     "changelog": "Wijzigingslogboek",
@@ -1352,7 +1345,9 @@
       "open": "open",
       "close": "sluiten"
     },
-    "noResults": "Geen resultaten"
+    "noResults": "Geen resultaten",
+    "costsTeams": "Teams",
+    "costsTeamsSubtitle": "Kostenplaatsen van teams"
   },
   "webhooks": {
     "title": "Webhaken",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 of @channelname",
       "chatIdHint": "De unieke numerieke identificatie of openbare gebruikersnaam van de chat/het kanaal.",
       "tutorial": "Hoe configureer je een Telegram-webhook:"
-    }
+    },
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd!",
+    "expandDetails": "Details tonen",
+    "collapseDetails": "Details verbergen"
   },
   "compliance": {
     "auditTitle": "Controle",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Oproepen (24u)",
     "mcpMetricSuccessRate": "Succespercentage",
     "mcpMetricAvgDuration": "Gem. duur",
-    "mcpMetricTopTool": "Meestgebruikte tool"
-  },
-  "themesPage": {
-    "title": "Thema's",
-    "description": "Kies een vooraf ingesteld thema of maak je eigen thema met één kleur",
-    "presetColors": "Populaire kleuren",
-    "customTheme": "Aangepast thema",
-    "customThemeDesc": "Klik op Thema maken en kies één kleur",
-    "createTheme": "Thema maken",
-    "activePreset": "Actief thema"
+    "mcpMetricTopTool": "Meestgebruikte tool",
+    "dismissError": "Foutmelding sluiten"
   },
   "header": {
     "logout": "Uitloggen",
     "quickNavigation": "Snelle navigatie",
     "quickNavigationTitle": "Snelle navigatie (⌘K / Ctrl+K)",
     "openQuickNavigation": "Snelle navigatie openen",
+    "openMenu": "Menu openen",
+    "products": "Keak-producten",
     "switchToLightMode": "Overschakelen naar lichte modus",
     "switchToDarkMode": "Overschakelen naar donkere modus",
     "language": "Taal",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Antropisch compatibel",
     "media": "Media",
     "mediaDescription": "Genereer afbeeldingen, video's en muziek",
-    "themes": "Thema's",
-    "themesDescription": "Kies een kleurthema voor het volledige dashboardpaneel",
     "costsDescription": "Houd uitgaven bij, analyseer trends en beheer je AI-budget voor alle providers",
     "cacheDescription": "Bewaak de efficiëntie van de promptcache van providers en het lokaal semantisch hergebruiken van antwoorden.",
     "limitsDescription": "Configureer snelheidslimieten en quota per API-sleutel en provider",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Geavanceerde payloadregels, aanvraaglimieten en proxy-API-instellingen",
     "mitmProxyDescription": "Configureer MITM-proxy-instellingen voor verkeersinspectie en foutopsporing",
     "oneProxyDescription": "Configureer 1Proxy-instellingen voor geavanceerde proxyketens",
-    "omniSkillsDescription": "Installeer en beheer sandbox-skills voor geautomatiseerde prompt- en tooluitvoering"
+    "omniSkillsDescription": "Installeer en beheer sandbox-skills voor geautomatiseerde prompt- en tooluitvoering",
+    "teamsDescription": "Teamkostenramingen en gedeelde zachte budgetten"
   },
   "cloudSyncStatus": {
     "synced": "Gesynchroniseerd",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "Kopieer je eindpunt",
     "readinessStep4": "Verstuur een testverzoek",
     "readinessContinue": "Doorgaan met configureren",
-    "readinessDismiss": "Voorlopig sluiten"
+    "readinessDismiss": "Voorlopig sluiten",
+    "unpricedUsageTitle": "{count, plural, one {# model} other {# modellen}} met recent gebruik maar geen geconfigureerde prijs",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-sleutel met een gebruikslimiet heeft deze modellen in de afgelopen 8 dagen gebruikt. Terwijl dat gebruik binnen het dagelijkse of wekelijkse venster van de sleutel valt, wordt de sleutel als over quota behandeld en worden de verzoeken geblokkeerd (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).} other {# API-sleutels met een gebruikslimiet hebben deze modellen in de afgelopen 8 dagen gebruikt. Terwijl dat gebruik binnen het dagelijkse of wekelijkse venster van de sleutels valt, worden de sleutels als over quota behandeld en worden de verzoeken geblokkeerd (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).}}",
+    "unpricedUsageCountAsZero": "Dit gebruik telt als $0 mee voor de per-sleutel gebruikslimieten (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# verzoek} other {# verzoeken}}, {keys, plural, one {# beperkte API-sleutel} other {# beperkte API-sleutels}}",
+    "unpricedUsageMore": "…en nog {count} meer",
+    "unpricedUsageConfigure": "Prijzen configureren",
+    "unpricedUsageDismiss": "Sluiten"
   },
   "analytics": {
     "title": "Analyses",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "Alleen geselecteerde verbindingen",
     "selectAtLeastOneConnection": "Selecteer ten minste één verbinding of kies Alle verbindingen.",
     "allConnectionsDesc": "Deze sleutel kan elke actieve verbinding gebruiken.",
-    "restrictedToConnections": "Beperkt tot {count, plural, one {# verbinding} other {# verbindingen}}."
+    "restrictedToConnections": "Beperkt tot {count, plural, one {# verbinding} other {# verbindingen}}.",
+    "preferredConnections": "Voorkeursverbindingen",
+    "preferredConnectionsDesc": "Prioriteitsvolgorde per sleutel. Als een voorkeursverbinding niet beschikbaar is, valt de routering terug op de volgende geschikte.",
+    "preferredConnectionsNone": "Geen voorkeur ingesteld — de standaard routeringsstrategie wordt gebruikt.",
+    "preferredConnectionsClear": "Wissen",
+    "removeSelection": "{name} verwijderen"
   },
   "auditLog": {
     "title": "Auditlogboek",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Configureer de Image→Text-brug in de Modality Bridge-instellingen",
     "sttBridgeCta": "Configureer de Spraak→Tekst brug in de Modality Bridge-instellingen",
     "existingConnection": "Bestaande verbinding",
-    "openrouterSttDescription": "OpenRouter spraak-naar-tekstmodellen gebruiken uw geconfigureerde OpenRouter-verbinding. Er zijn geen aparte inloggegevens vereist."
+    "openrouterSttDescription": "OpenRouter spraak-naar-tekstmodellen gebruiken uw geconfigureerde OpenRouter-verbinding. Er zijn geen aparte inloggegevens vereist.",
+    "modalityTabsAria": "Mediatype",
+    "serviceKindsAria": "Servicetype"
   },
   "search": {
     "searchQuery": "Zoekopdracht",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Handmatige configuratie",
     "clineManualConfiguration": "Cline handmatige configuratie",
     "kiloManualConfiguration": "Kilocode handmatige configuratie",
+    "piManualConfiguration": "Pi - Handmatige configuratie",
+    "piConfigInvalidTitle": "Pi models.json is onleesbaar",
+    "piOmnirouteConfigured": "OmniRoute is geconfigureerd als een aangepaste Pi-provider",
+    "piModelHelp": "Pi ontdekt niet automatisch modellen voor aangepaste eindpunten. — Het model dat u kiest, wordt expliciet in models.json geschreven.",
+    "piManualConfigTitle": "Of bewerk ~/.pi/agent/models.json handmatig",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Start vervolgens Pi en selecteer de omniroute-provider. Stel PI_CODING_AGENT_DIR om de hele agentmap te verplaatsen.",
+    "piUnownedNote": "Deze invoer is buiten OmniRoute toegevoegd (bijvoorbeeld de aangepaste eindpunten van pi-gui). Door te solliciteren wordt het overgenomen; Reset verwijdert alleen de vermeldingen OmniRoute heeft geschreven.",
     "whenToUseLabel": "Wanneer te gebruiken",
     "openToolDocs": "Gereedschapsdocumentatie openen",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Gebruik deze wanneer u een lichtgewicht terminal-native AI-assistent nodig heeft voor snelle taken.",
       "hermes-agent": "Gebruik dit wanneer u Hermes Agent (van Nousresearch) nodig hebt met standaard-, delegatie-, visie- en hulpmodellen gerouteerd via OmniRoute.",
+      "whycodes": "Gebruik dit wanneer u WhyCodes wilt inzetten als veelzijdige autonome CLI-agent (TUI, benoemde agents, geheugen, swarm) die naar OmniRoute wijst.",
       "custom": "Gebruik voor aangepaste toolimplementaties of generieke OpenAI-compatibele configuraties."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI-codeeragent met ondersteuning voor aangepaste providers",
       "droid": "Factory Droid AI-assistent",
       "openclaw": "Open Claw AI-assistent",
+      "openclaude": "OpenClaude codeeragent-CLI met ondersteuning voor OpenAI-compatibele providers",
       "cline": "Cline AI Coderingsassistent CLI",
       "kilo": "Kilocode AI Assistent CLI",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "Warp AI-terminal met ondersteuning voor aangepaste providers",
       "agent-deck": "Agent Deck multi-agent-orchestrator",
       "5dive": "5dive — zelf gehoste vloot van codeeragents; één auth-profiel wijst ze allemaal naar OmniRoute",
+      "whycodes": "WhyCodes autonome CLI-agent met OpenAI-compatibele basis-URL",
       "zed": "Zed-code-editor — ingebouwde agent via een OpenAI-compatibele provider"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "Onbekend",
     "cliproxyapiUpdate": "Bijwerken",
     "cliproxyapiUpdateAvailable": "Update beschikbaar: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versie"
+    "cliproxyapiVersion": "Versie",
+    "piInstallTitle": "Installeer Pi-coderingsagent",
+    "piInstallInstructions": "Installeer de Pi CLI en keer dan hier terug om hem aan te sluiten op OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Gebruik de URL die bereikbaar is vanaf de machine waarop Pi draait. Het OpenAI-compatibele /v1-eindpunt wordt automatisch toegevoegd.",
+    "piManualMergeHint": "Alleen voorbeeld. Voeg deze providers.omniroute-vermelding samen in models.json, zodat uw andere providers en instellingen intact blijven.",
+    "removeMapping": "Toewijzing verwijderen",
+    "customUrl": "Aangepaste URL",
+    "customEndpointAria": "Aangepast eindpunt",
+    "useDefaultKey": "Gebruik de standaardkey van OmniRoute",
+    "mainModelAria": "Hoofdmodel",
+    "manualConfigTitle": "Handmatige configuratie voor Grok Build"
   },
   "modelCatalog": {
     "title": "Modellen & combo's",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "bijv. 10",
     "testSelected": "Geselecteerde testen ({count})",
     "testAllFiltered": "Alle gefilterde testen ({count})",
+    "visibility": "Zichtbaarheid",
+    "allVisibility": "Zichtbaar en verborgen",
+    "visibleOnly": "Zichtbaar",
+    "hiddenOnly": "Verborgen",
+    "visibleColumn": "Zichtbaar",
+    "hideModel": "{name} verbergen in /v1/models",
+    "showModel": "{name} tonen in /v1/models",
+    "hiddenBadge": "Verborgen",
+    "hideFiltered": "Gefilterde verbergen ({count})",
+    "showFiltered": "Gefilterde tonen ({count})",
+    "visibilityCounts": "{visible} zichtbaar · {hidden} verborgen · {total} totaal",
+    "visibilityUpdateFailed": "Zichtbaarheid van het model bijwerken mislukt",
     "cancel": "Annuleren",
     "clearResults": "Resultaten wissen",
     "testing": "Testen...",
@@ -3397,16 +3438,53 @@
     "httpError": "Verzoek mislukt met HTTP {status}",
     "testFailedNoDetail": "Test mislukt zonder foutmelding",
     "additionalCapabilities": "Aanvullende mogelijkheden: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "API-sleuteltoegang",
+    "allowedInKeys": "Toegestaan in: {count, plural, one {# sleutel} other {# sleutels}}",
+    "keysLoading": "API-sleutels laden…",
+    "keysRetry": "Sleutels laden opnieuw proberen",
+    "accessViaPattern": "via {pattern}",
+    "accessBlocked": "Geblokkeerd door {pattern}",
+    "editKeyAccess": "Sleuteltoegang bewerken",
+    "toggleKeyAccess": "{item} toestaan op {name}",
+    "resultNetworkError": "Toewijzing mislukt",
+    "resultWouldEmptyModels": "Zou deze sleutel zonder toegestane modellen achterlaten — bewerk in plaats daarvan sleuteltoegang",
+    "resultWouldEmptyCombos": "Zou deze sleutel zonder toegestane combo's achterlaten — bewerk in plaats daarvan sleuteltoegang",
+    "keyUpdatePending": "{name} wordt nog bijgewerkt. Probeer het over een ogenblik opnieuw.",
+    "assignToKeys": "Toewijzen aan API-sleutels…",
+    "assignApply": "Wijzigingen toepassen",
+    "assignComplete": "API-sleuteltoegang bijgewerkt",
+    "assignFailed": "Bijwerken van sommige API-sleutels is mislukt",
+    "assignNoChanges": "Geen API-sleuteltoegang gewijzigd",
+    "selectedAccessItems": "Geselecteerde items: {count}",
+    "assignExcludedCombos": "{count, plural, one {# geselecteerde combo-rij is geen model en wordt hier overgeslagen} other {# geselecteerde combo-rijen zijn geen modellen en worden hier overgeslagen}}. Wijs combo's toe via het tabblad Combos.",
+    "assignActionAdd": "Toevoegen",
+    "assignActionRemove": "Verwijderen",
+    "searchKeys": "API-sleutels zoeken",
+    "selectApiKey": "API-sleutel {name} selecteren",
+    "allModelsAccess": "Alle modellen",
+    "allCombosAccess": "Alle combo's",
+    "modelAccessCount": "Modellen: {count}",
+    "comboAccessCount": "Combo's: {count}",
+    "keyInactive": "Inactief",
+    "keyBanned": "Geblokkeerd",
+    "keyRevoked": "Ingetrokken",
+    "switchRestrictedConfirm": "Schakel deze sleutel over naar beperkte toegang: alleen de geselecteerde items worden toegestaan",
+    "removeNoChangeHint": "Deze sleutel staat alles toe; het verwijderen van geselecteerde items brengt geen wijziging teweeg",
+    "removeStaysAllowedHint": "Nog steeds toegestaan op deze sleutel via {patterns}",
+    "resultChanged": "Gewijzigd",
+    "resultUnchanged": "Geen wijziging",
+    "resultSkipped": "Overgeslagen",
+    "resultNeedsSwitch": "Overschakeling naar beperkt vereist"
   },
   "combos": {
+    "title": "Combo's",
+    "description": "Creëer modelcombinaties met gewogen routing en fallback-ondersteuning",
+    "autoCatalogTitle": "Catalogus voor automatische routering",
     "autoTosLoadError": "Het ToS-beleid kon niet worden geladen. Probeer het opnieuw voordat je het wijzigt.",
     "autoTosSaveError": "Het ToS-beleid kon niet worden opgeslagen. De vorige instelling wordt nog getoond. Probeer het opnieuw.",
     "autoTosIncludeLabel": "Providers met ToS: avoid opnemen in auto",
     "autoTosDescription": "Standaard uitgeschakeld. Geldt voor alle auto-combo’s, niet alleen voor één account. Het verbinden van een provider schakelt deze optie niet in.",
-    "title": "Combo's",
-    "description": "Creëer modelcombinaties met gewogen routing en fallback-ondersteuning",
-    "autoCatalogTitle": "Catalogus voor automatische routering",
     "autoCatalogTemplateCount": "{count} sjablonen",
     "autoCatalogDescription": "Ingebouwde auto/*-combinaties die dynamisch worden opgelost door aangesloten providers. Gebruik een van deze ID's als modelveld; er is geen configuratie nodig.",
     "autoCatalogExpand": "Vouw de autoroutingcatalogus uit",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "Fout bij updaten van combo",
     "errorDeleting": "Fout bij verwijderen van combo",
     "testFailed": "Testverzoek is mislukt",
+    "removeErrorModels": "{count} mislukte model(len) verwijderen",
+    "removingErrorModels": "Bezig met verwijderen…",
+    "errorModelsRemoved": "{count} mislukte model(len) uit de combo verwijderd",
+    "noErrorModelsFound": "Geen mislukte modellen gevonden tussen de eigen stappen van deze combo",
+    "cannotRemoveAllModels": "Kan niet alle modellen uit de combo verwijderen",
+    "removeErrorModelsConfirm": "{count} mislukte model(len) uit „{name}” verwijderen? Time-outs en snelheidslimieten tellen niet mee.",
     "failedToggle": "Kan combo niet schakelen",
     "testResults": "Testresultaten — {name}",
     "resolvedBy": "Opgelost door:",
@@ -3518,6 +3602,9 @@
     "moveUp": "Ga omhoog",
     "moveDown": "Ga naar beneden",
     "removeModel": "Verwijderen",
+    "testStep": "Dit model testen",
+    "testStepRunning": "Bezig met testen…",
+    "testStepNotTestable": "Alleen stappen met één model kunnen worden getest",
     "saving": "Opslaan...",
     "liveNoProviders": "Nog geen providers waargenomen.",
     "liveFleetDataHint": "Fleet-gegevens komen binnen via live combo-events.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "Nog geen combo's geconfigureerd.",
     "playgroundCreateFirst": "Maak er eerst een aan",
     "weighted": "Gewogen",
+    "weightPercent": "Gewicht (%)",
     "leastUsed": "Minst gebruikt",
     "costOpt": "Kosten-opt",
     "strategyGuideTitle": "Hoe deze strategie te gebruiken",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# account} other {# accounts}}",
     "builderGlobalAdded": "Toegevoegd",
     "builderGlobalAdd": "Toevoegen",
+    "clearSearch": "Zoekopdracht wissen",
     "manualModel": "Handmatig model",
     "manualModelInvalid": "Voer een model in als provider/model.",
     "manualModelUnknownProvider": "Onbekend provider-voorvoegsel.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "Comboreferentie toevoegen",
     "builderPinnedAccount": "Vastgezet account",
     "builderLegacyEntry": "Verouderde invoer",
+    "builderStaleModel": "Niet in de live-catalogus",
     "reviewName": "Naam",
     "reviewStrategy": "Strategie",
     "reviewSteps": "Stappen",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "Minimale inhoudslengte (tekens)",
     "responseValidationJsonPaths": "JSON-path-controles",
     "responseValidationAddCheck": "+ Controle toevoegen",
+    "responseValidationRemoveCheck": "Controle verwijderen",
+    "responseValidationPath": "JSON-pad",
+    "responseValidationCondition": "Voorwaarde",
+    "responseValidationValue": "Verwachte waarde",
     "agentFeaturesSystemMessageOverride": "Systeembericht negeren",
     "agentFeaturesSystemMessagePlaceholder": "Jij bent een deskundige assistent...",
     "agentFeaturesSystemMessageHint": "Systeembericht negeren voor agenten",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "Totaal aantal items",
     "type": "Type",
-    "memoryEnabled": "Geheugen ingeschakeld"
+    "memoryEnabled": "Geheugen ingeschakeld",
+    "qdrantTutorialTitle": "Snelle tutorial: geheugen met Qdrant",
+    "qdrantTutorialIntro": "Qdrant bewaart de vectoren en metadata van herinneringen, zodat relevante context kan worden opgeroepen. Het comprimeert tokens niet rechtstreeks; de besparing is indirect, door context die niet gerelateerd is aan de aanvraag te negeren.",
+    "qdrantTutorialStep1": "Beveilig de server met HTTPS en een API-sleutel voordat deze in productie wordt gebruikt.",
+    "qdrantTutorialStep2": "Voer host, poort, collectie en een model in provider/model-indeling met een geconfigureerde credentie in.",
+    "qdrantTutorialStep3": "De dimensie van de collectie moet overeenkomen met de dimensie die door het model wordt gegenereerd. Een bestaande collectie met 2048 dimensies accepteert geen inbeddingen met 1536 dimensies.",
+    "qdrantTutorialStep4": "Sla de verbinding op, voer de test uit en run de zoektochttest. Schakel Qdrant pas in wanneer dit is gelukt.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Credits: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Vaardigheden",
@@ -5288,7 +5390,8 @@
         "skipped": "al reeds geconfigureerd",
         "failed": "mislukt"
       }
-    }
+    },
+    "stepProgress": "Voortgang van de configuratie"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Deze provider is standaard uitgesloten van auto",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "CSV-sjabloon downloaden",
     "importFromFileMoreErrors": "+{count} meer",
     "importFromFileSchemaHint": "CSV-kolommen zijn positioneel: provider, name, apiKey, baseUrl (optioneel), priority (optioneel). De kolom provider moet een bestaande beheerde provider-id of een reeds geregistreerde OpenAI/Anthropic-compatibele node-id bevatten — met deze import worden geen nieuwe endpointnodes aangemaakt.",
+    "importOAuthExport": "OAuth-export importeren",
+    "oauthExportTitle": "Export van accountbeheerder importeren",
+    "oauthExportDescription": "Upload een export in platte tekst van een accountbeheerder (bijv. de cloud-accounts-export van Antigravity Manager). Tokens worden op de server vernieuwd en elk account wordt een OAuth-verbinding — duplicaten worden ter plekke vernieuwd.",
+    "oauthExportProviderLabel": "Aanbieder",
+    "oauthExportChoose": "Bestand kiezen",
+    "oauthExportFileAria": "JSON-bestand met accountexport",
+    "oauthExportSchemaHint": "Geaccepteerd: een document met een \"accounts\"-array, een losse array of één record. Tokens kunnen in een genest token-object staan of direct op het record.",
+    "oauthExportDetected": "{count} account(s) gevonden",
+    "oauthExportSelectAll": "Alle accounts selecteren",
+    "oauthExportSelectAccount": "Account {index} selecteren",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Aanbieder",
+    "oauthExportColRefresh": "Vernieuwingstoken",
+    "oauthExportNoEmail": "(geen e-mail)",
+    "oauthExportYes": "ja",
+    "oauthExportNo": "nee",
+    "oauthExportImporting": "Importeren…",
+    "oauthExportImport": "{count} account(s) importeren",
+    "oauthExportResult": "{imported}/{total} geïmporteerd — {failed} mislukt",
+    "oauthExportParseError": "Er konden geen accounts uit dit bestand worden gelezen.",
+    "oauthExportUnknownError": "onbekende fout",
     "adaptaTutorial": {
       "title": "Hoe Adapta Web te verbinden",
       "introPrefix": "Adapta authenticeert via Clerk. Het token",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "Alle modellen zijn al geïmporteerd",
     "noNewModelsToImport": "Geen nieuwe modellen om te importeren — alle modellen staan al in het register of de lijst met aangepaste modellen",
     "localCatalogFallbackStatus": "De modellijst van de provider is niet bereikbaar — de ingebouwde catalogus wordt getoond",
+    "discoveryDegradedStatus": "Modeldetectie mislukt {time}",
     "skippingExistingModels": "{count} bestaande modellen overgeslagen",
     "autoSync": "Automatische synchronisatie",
     "autoSyncShort": "Synchroniseren",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "bijv. 131072",
     "contextWindowOverrideHint": "Stel handmatig het werkelijke contextvenster (tokens) van dit model in wanneer de provider dit onjuist rapporteert. Dit heeft voorrang op automatisch gedetecteerde/cataloguswaarden en voorkomt dat combo-routering het model laat vallen.",
     "contextWindowOverrideInvalid": "Overschrijving van het contextvenster moet een positief geheel getal aan tokens zijn",
+    "maxOutputTokenOverrideInvalid": "Overschrijving van de maximale uitvoertokens moet een positief geheel getal aan tokens zijn",
     "visionCapableLabel": "Geschikt voor vision",
     "visionCapableHint": "Markeer dit model handmatig als geschikt voor vision wanneer de ontdekkingsmetadata van de provider geen invoermodaliteit voor afbeeldingen rapporteert (gebruikelijk voor zelf-gehoste/lokale backends).",
     "compatParamFiltersLabel": "Parameterfilters",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "Overschrijving toevoegen",
     "ccAliasLoadError": "Kan instellingen voor detectiealiassen niet laden: {error}",
     "ccAliasSaveError": "Kan instelling voor detectiealias niet opslaan: {error}",
+    "cliVersionSectionTitle": "Geadverteerde CLI -clientversie",
+    "cliVersionEffectiveLabel": "Momenteel geadverteerd",
+    "cliVersionSourceLabel": "Opgelost door: {source}",
+    "cliVersionPinnedLabel": "Standaard vastgelegd: {pinned}",
+    "cliVersionSourceSettings": "dashboard overschrijven",
+    "cliVersionSourceEnv": "omgevingsvariabele",
+    "cliVersionSourceDiscovered": "automatisch ontdekte nieuwste release",
+    "cliVersionSourceDefault": "standaard vastgelegd",
+    "cliVersionInputLabel": "Versie overschrijven",
+    "cliVersionInputPlaceholder": "Versie overschrijven; blanco wist",
+    "cliVersionSaveButton": "Redden",
+    "cliVersionResetButton": "Resetten naar standaard",
+    "cliVersionLoadError": "Kan CLI versie-instellingen niet laden: {error}",
+    "cliVersionSaveError": "Kan CLI versie niet opslaan: {error}",
+    "cliVersionLoadFailed": "Kan de huidige CLI versie-instellingen niet laden.",
+    "cliVersionHintClaude": "Anthropic poort nieuwere Claude-modellen op de Claude Code-clientversie die het ziet. Dit is de versie OmniRoute adverteert bij elk Anthropic-gebonden verzoek.",
+    "cliVersionCaveatClaude": "Waarschuwing voor facturering: de factureringsversie is '<version>'.'<build-revision>', en de build-revisie is een afzonderlijke vastgelegde constante. Advertising 2.1.260 rapporteert 2.1.260.1e2, wat niet is wat een echt 2.1.260 binair bestand verzendt.",
+    "cliVersionHintCodex": "OpenAI poort nieuwere modellen op de Codex clientversie die het ziet, bijvoorbeeld de fout: Het 'gpt-6-astra-model vereist een nieuwere versie van Codex.",
+    "cliVersionCaveatCodex": "Voorbehoud bij gevolgtrekking: een versie die uw eigen beller rapporteert, verslaat nog steeds de CODEX_CLIENT_VERSION env var, maar deze overschrijving overtreft beide, omdat het de expliciete bedoeling van de operator is.",
     "compatUpstreamHeadersLabel": "Extra upstream-headers",
     "compatUpstreamHeadersHint": "Instelling met hoge bevoegdheden — hetzelfde vertrouwensniveau als het bewerken van API-inloggegevens van de provider; alleen vertrouwde beheerders mogen deze gebruiken. Wordt samengevoegd nadat OmniRoute authenticatie via de API-sleutel van de provider heeft toegevoegd. Als een aangepaste header dezelfde naam gebruikt als een bestaande header (bijv. Authorization), vervangt uw waarde de automatisch gegenereerde header volledig (inclusief het Bearer-token) — de upstream ziet alleen wat u hebt ingevoerd, niet de sleutel uit de instellingen. Een verkeerde configuratie kan een 401-fout of defecte upstream-authenticatie veroorzaken. Eén rij per header (bijv. extra Authentication voor sommige gateways). Plaats de muisaanwijzer op de waarde of geef deze focus om een voorbeeld te bekijken. Wordt opgeslagen bij verlies van focus, klikken buiten dit paneel of het sluiten ervan.",
     "compatUpstreamHeaderName": "Headernaam",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "Label voor API-indeling",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "API-regio China",
-    "apiRegionHint": "Hint voor API-regio",
-    "apiRegionInternational": "Internationale API-regio",
-    "apiRegionLabel": "Label voor API-regio",
+    "apiRegionChina": "Vasteland van China",
+    "apiRegionHint": "Selecteer de endpointregio die wordt gebruikt voor API-toegang en het bijhouden van quota's.",
+    "apiRegionInternational": "Internationaal",
+    "apiRegionLabel": "API-regio",
     "apikey": "API-sleutel",
     "audio": "Audio",
     "audioProvidersHeading": "Koptekst voor audioproviders",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "Wanneer dit account de gebruikslimiet van 5 uur bereikt en Anthropic verwerking met lagere prioriteit aanbiedt, accepteert OmniRoute deze en blijft het verzoeken verzenden met anthropic-usage-limit: slow totdat het tijdvenster wordt gereset, in plaats van de verbinding tijdelijk te vertragen. De wekelijkse limiet blijft van toepassing en reacties moeten mogelijk wachten op beschikbare capaciteit.",
     "claudeAutoLimitResetLabel": "De sessielimiet automatisch resetten (eenmaal per week)",
     "claudeAutoLimitResetDescription": "Wanneer dit account de gebruikslimiet van 5 uur bereikt en er een reset van de sessielimiet beschikbaar is, past OmniRoute deze automatisch toe en probeert het opnieuw op volle snelheid. Dit gebruikt de wekelijkse reset van het account en telt nog steeds mee voor de wekelijkse limiet.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Betaalde Codex-credits toestaan nadat het abonnementsquotum op is (extra kosten kunnen van toepassing zijn)",
+    "codexPaidCreditsEnabled": "Betaalde Codex-credits ingeschakeld (extra kosten kunnen van toepassing zijn)",
+    "codexPaidCreditsDisabled": "Betaalde Codex-credits uitgeschakeld",
+    "failedUpdateCodexPaidCredits": "Het beleid voor betaalde Codex-credits bijwerken is mislukt",
+    "allowCodexPaidCreditsLabel": "Betaalde Codex-credits toestaan",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Sla de tijdelijke afkoelperiode over, zodat deze verbinding in aanmerking blijft komen, zelfs na herstelbare fouten (definitieve statussen zoals verbannen/verlopen zijn nog steeds van toepassing).",
     "disableCoolingLabel": "Afkoelperiode uitschakelen voor deze verbinding",
     "bulkPasteAdded": "{count, plural, one {1 sleutel toegevoegd} other {# sleutels toegevoegd}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "Verkrijg een API-sleutel op monsterapi.ai",
       "moonshot": "Verbind Moonshot AI met een API-sleutel.",
       "morph": "Gratis niveau: 250K credits/maand, $0",
+      "apmix": "Verbind Apmix met een API-sleutel van apmix.ai/dashboard — één abonnement, veel modellen.",
       "nanogpt": "Verbind NanoGPT met een API-sleutel.",
       "nebius": "~$1 proeftegoed bij registratie voor API-testen",
       "nlpcloud": "NLP Cloud gebruikt een eigen chatbot-API in plaats van OpenAI chat/completions. OmniRoute past OpenAI-berichten aan naar invoer/context/geschiedenis en stelt een lokale catalogus van ondersteunde chatbotmodellen beschikbaar.",
@@ -6620,7 +6773,7 @@
       "claude": "Verbind Claude Code met de bestaande OAuth-flow.",
       "cline": "Verbind Cline met de bestaande OAuth-flow.",
       "cursor": "Verbind Cursor IDE met de bestaande OAuth-flow.",
-      "cursor-api": "Verbind Cursor met een gebruikers-API-sleutel (crsr_...) van cursor.com/dashboard/api; geen IDE-sessie nodig.",
+      "cursor-api": "Verbind Cursor met een gebruikers-API-sleutel (crsr_... of grok_...) van cursor.com/dashboard/api; geen IDE-sessie nodig.",
       "github": "Verbind GitHub Copilot met de bestaande OAuth-flow.",
       "gitlab-duo": "OAuth-applicatie met ai_features + read_user scopes. Configureer GITLAB_DUO_OAUTH_CLIENT_ID en optioneel GITLAB_DUO_OAUTH_CLIENT_SECRET op deze OmniRoute-instantie.",
       "kilocode": "Verbind Kilo Code met de bestaande OAuth-flow.",
@@ -6628,8 +6781,7 @@
       "kiro": "Gratis tier: 50 credits/maand (~25K–100K tokens). ⚠️ Kiro ToS verbiedt het gebruik van externe proxy/harness.",
       "codex": "Verbind OpenAI Codex met de bestaande OAuth-flow.",
       "qwen": "Verbind Qwen Code met de bestaande OAuth-flow.",
-      "github-models": "Maak een GitHub PAT aan met de scope 'models: read' op github.com/settings/tokens",
-      "apmix": "Verbind Apmix met een API-sleutel van apmix.ai/dashboard — één abonnement, veel modellen."
+      "github-models": "Maak een GitHub PAT aan met de scope 'models: read' op github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} accepteert provider-native model-ID's. Importeer uit /models of voeg aangepaste ID's toe voor routering.",
     "bedrockModelsDescription": "Amazon Bedrock-modellen zijn afgestemd op de AWS-regio. Importeer uit /models of voeg Bedrock-model-ID's toe die zijn ingeschakeld in de geselecteerde regio.",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optioneel: één model=cap per regel, vergeleken met de exacte upstream-model-id. Extra verzoeken wachten lokaal in de wachtrij; leeg betekent geen limiet per model.",
     "rateLimitOverridesModelConcurrencyInvalid": "Ongeldige gelijktijdigheidsinvoer per model \"{entry}\" — gebruik model=cap met een geheel getal van 1 tot {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Betaalde Codex-credits toestaan nadat het abonnementsquotum op is (extra kosten kunnen van toepassing zijn)",
-    "codexPaidCreditsEnabled": "Betaalde Codex-credits ingeschakeld (extra kosten kunnen van toepassing zijn)",
-    "codexPaidCreditsDisabled": "Betaalde Codex-credits uitgeschakeld",
-    "failedUpdateCodexPaidCredits": "Het beleid voor betaalde Codex-credits bijwerken is mislukt",
-    "allowCodexPaidCreditsLabel": "Betaalde Codex-credits toestaan",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "Gebruikt in {count} combo('s): {combos}",
+    "openComboTooltip": "Combo's openen — gebruikt door {combo}",
+    "claudeCodeRoutingTitle": "Upstream proxy routing voor Claude Code-verkeer",
+    "routingNative": "Native",
+    "routingFallback": "Fallback",
+    "rerank": "Rerank",
+    "video": "Video",
+    "markFreeTierTitle": "Markeer als gratis-tier (getoond ook wanneer betaalde modellen verborgen zijn)",
+    "codexTunnelTitle": "Codex tool-verbinding",
+    "codexTunnelDescription": "De tunnel blijft strikt uitgaand. Lokale tools worden nog steeds alleen door Codex uitgevoerd, onder zijn sandbox- en goedkeuringsbeleid.",
+    "tunnelIdLabel": "Tunnel-ID",
+    "tunnelRuntimeKeyLabel": "Tunnel runtime sleutel",
+    "tunnelRuntimeKeyPlaceholder": "Runtime sleutel",
+    "tunnelRuntimeKeyHint": "Versleuteld opgeslagen samen met de cookie en nooit in logboeken geschreven.",
+    "tunnelRuntimeKeyNewLabel": "Nieuwe tunnel runtime sleutel",
+    "tunnelRuntimeKeyNewHint": "Vul alleen in samen met een nieuwe cookie. De waarde wordt versleuteld opgeslagen.",
+    "chatgptConnectorLabel": "ChatGPT aangepaste connector",
+    "doctorChecking": "Status wordt gecontroleerd…",
+    "doctorCheck": "Doctor-status controleren",
+    "fallbackRetryBackendTitle": "Fallback-back-end voor opnieuw proberen"
   },
   "settings": {
     "title": "Instellingen",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "Kies welke zijbalkitems worden weergegeven. Met Essentieel blijven Geavanceerde tools vindbaar via zoeken.",
     "hideHealthLogs": "Statuschecklogboeken verbergen",
     "hideHealthLogsDesc": "Indien AAN: onderdruk [HealthCheck]-berichten in de serverconsole",
-    "themeAccent": "Themakleur",
-    "themeAccentDesc": "Kies een vooraf ingestelde kleur of maak je eigen thema met één kleur",
-    "themeCreate": "Thema maken",
-    "themeCustom": "Aangepast thema",
-    "themeBlue": "Blauw",
-    "themeRed": "Rood",
-    "themeGreen": "Groen",
-    "themeViolet": "Paars",
-    "themeOrange": "Oranje",
-    "themeCyan": "Cyaan",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Pas de naam en het logo van de toepassing aan",
     "appName": "Naam van de toepassing",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "Nu",
       "coreConfigPath": "Core-configuratiebestand",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absoluut .json-pad (extensie in kleine letters). Leeg = niet genereren. Elke synchronisatie schrijft '<path>'.generated naast het overgenomen bestand, nooit erin.",
+      "coreConfigPathDesc": "Absoluut .json/.yaml/.yml-pad (extensie in kleine letters). Leeg = niet genereren. Elke synchronisatie schrijft '<path>'.generated naast het overgenomen bestand, nooit erin.",
       "lastSwitchKind": "Reden van wisseling",
       "switchKind": {
         "ip_quota_429": "quotum",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Toegepast door: {mode}",
       "coreBinaryPath": "Pad van kernbinaire bestand",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Optioneel: verifieert het gegenereerde bestand met het kernbinaire bestand voordat het overgenomen bestand wordt vervangen. Leeg laten om ernaast te blijven schrijven. De map wordt aangemaakt als deze ontbreekt."
+      "coreBinaryPathHelp": "Optioneel: verifieert het gegenereerde bestand met het kernbinaire bestand voordat het overgenomen bestand wordt vervangen. Leeg laten om ernaast te blijven schrijven. De map wordt aangemaakt als deze ontbreekt.",
+      "urlFeedlessHint": "Leeg laten voor een abonnement met alleen een selector: stel hieronder een besturings-URL in; er wordt geen feed opgehaald, vernieuwd of gekoppeld."
     },
     "bulkHealthcheck": "Bulkstatuscontrole",
     "bulkHealthcheckDesc": "Test alle geconfigureerde proxy's met een doel-URL om te bepalen welke werken.",
@@ -7706,6 +7862,7 @@
     "configured": "geconfigureerd",
     "none": "Geen",
     "modelOverrideValuePlaceholder": "Numerieke waarde",
+    "modelOverrideKey": "Overschrijvingssleutel",
     "modelOverrideReasoningEffortsPlaceholder": "Engelse kommagescheiden waarden, bijv. low, medium, high",
     "addKeyValue": "Sleutelwaarde toevoegen",
     "noModelOverrides": "Geen overschrijvingen geconfigureerd voor dit model.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "U kunt de standaardprijzen voor specifieke modellen overschrijven. Aangepaste overschrijvingen hebben voorrang op automatisch gedetecteerde prijzen.",
     "editPricing": "Prijzen bewerken",
     "viewFullDetails": "Bekijk volledige details",
-    "themeCoral": "Koraal",
     "adaptiveVolumeRouting": "Adaptieve volumeroutering",
     "adaptiveVolumeRoutingDesc": "Schaal verbindingen dynamisch op basis van het payloadvolume en de doorvoerbelasting.",
     "lkgpToggleTitle": "Laatst bekende werkende provider (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "Verminder het tokengebruik door prompts te comprimeren voordat ze naar providers worden verzonden",
     "autoCombosTitle": "Automatische combo's",
     "autoCombosDesc": "Sta toe dat deze sleutel de ingebouwde auto/*-combo's gebruikt, die automatisch een model kiezen uit elke geconfigureerde provider",
+    "ccDiscoveryAliasesTitle": "Claude Code-detectiealiassen",
+    "ccDiscoveryAliasesDesc": "Adverteer claude/...-compatibiliteitsmirrors voor modellen en combo's waartoe deze sleutel al toegang heeft",
     "compressionGuidanceFullGuideLink": "Volledige compressiegids",
     "compressionGuidanceShow": "Details",
     "compressionGuidanceHide": "Details verbergen",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Percentage van het venster",
     "compressionAdaptivePolicyAbsolute": "Absoluut tokenbudget",
     "compressionOutputStylesDescription": "Injecteer instructies voor responsvormgeving zonder de uitvoer van de provider te herschrijven. Vrij te combineren.",
+    "compressionOutputStylesPreviewNote": "Een verzoek injecteert slechts één taal: de gedetecteerde taal, anders het eerste pakket. De bovenstaande blokken zijn de varianten per verpakking, niet een gecombineerde injectie.",
     "mcpAccessibilityDescription": "Beperkt de scope van MCP-tooluitvoer (afzonderlijke opslag).",
     "compressionStylesTileSummary": "{tokens, number} tokens bespaard · {runs, plural, one {# run gestyled} other {# runs gestyled}}",
     "compressionStylesTileEmpty": "Nog geen gestylede runs.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "Host",
     "qdrantCollection": "Verzameling",
     "catalogVisibilityHint": "Verborgen model-ID’s kunnen nog steeds worden aangeroepen met dezelfde toegangsrechten.",
+    "exposeCombosOnly": "Alleen combo's tonen in /v1/models",
+    "exposeCombosOnlyDesc": "Clients die modellen automatisch ontdekken zien je combo's (en auto/*, tenzij verborgen) in plaats van de ruwe providermodellen. Expliciete provider/model-id's worden nog steeds gerouteerd.",
     "catalogScopeTitle": "Vermelding in Models API",
     "catalogScopeDesc": "Wat GET /v1/models voor deze sleutel weergeeft. Het beperken van de lijst verandert nooit welke modellen met de sleutel kunnen worden aangeroepen.",
     "catalogScopeAll": "Beide",
@@ -8918,7 +9079,9 @@
         "financial": "Financieel",
         "brazilian": "Braziliaans",
         "usa": "VS",
-        "full": "Volledig"
+        "full": "Volledig",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Zuid-Afrika)"
       },
       "builtinTypes": "Ingebouwde typen",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "IPv4-adressen",
         "ipv6_address": "IPv6-adressen",
         "aws_key": "AWS-toegangssleutels",
-        "api_key_generic": "API-sleutels en tokens"
+        "api_key_generic": "API-sleutels en tokens",
+        "iban": "IBAN -bankrekeningnummers",
+        "eu_vat": "EU VAT -nummers",
+        "es_dni_nie": "Spaanse DNI / NIE",
+        "it_codice_fiscale": "Italiaanse Codice Fiscale",
+        "pl_pesel": "Poolse PESEL",
+        "nl_bsn": "Nederlandse BSN",
+        "de_steuer_id": "Duitse Steuer-ID",
+        "se_personnummer": "Zweeds persoonsnummer",
+        "za_id": "Zuid-Afrikaanse ID nummers",
+        "za_phone": "Zuid-Afrikaanse telefoonnummers",
+        "za_vat": "Zuid-Afrikaanse VAT nummers",
+        "za_tax_ref": "Zuid-Afrikaanse belastingreferenties"
       },
       "customPatterns": "Aangepaste patronen",
       "customPatternsDesc": "Overeenkomsten worden vervangen door [CUSTOM_REDACTED]. Maximaal {max} patronen. Patronen met risico op catastrofale backtracking worden geweigerd.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "Geslaagd",
     "tomlTestFailed": "Mislukt",
     "tomlImportError": "Kon het RTK TOML-bestand niet verwerken.",
-    "tomlFileReadError": "Kon het geselecteerde TOML-bestand niet lezen."
+    "tomlFileReadError": "Kon het geselecteerde TOML-bestand niet lezen.",
+    "viewMode": "Weergavemodus"
   },
   "compressionEngineConfig": {
     "loading": "Laden…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "Taalpakketten: {packs}",
     "dragToReorder": "Sleep om stap opnieuw te ordenen",
     "engine": "Engine",
-    "intensity": "Intensiteit"
+    "intensity": "Intensiteit",
+    "compressionOverride": "Compressie overschrijven"
   },
   "compressionStudio": {
     "noRun": "Geen compressierun beschikbaar.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "winnaar: {winner}",
     "encoder": "encoder",
     "bytes": "bytes",
-    "tokensCl100k": "tokens (cl100k)"
+    "tokensCl100k": "tokens (cl100k)",
+    "studioViews": "Studio-weergaven"
   },
   "omniglyph": {
     "preview": "Voorbeeld",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "Berichten die korter zijn dan dit, worden niet gecomprimeerd. Lager = meer compressie.",
     "tooltipMinSavings": "Alleen comprimeren als het minstens zoveel tokens bespaart.",
     "ultraSettings": "Ultra-instellingen",
-    "ultraSettingsDesc": "SLM-aangedreven semantische compressie"
+    "ultraSettingsDesc": "SLM-aangedreven semantische compressie",
+    "defaultLanguage": "Standaardtaal",
+    "viewMode": "Weergavemodus"
   },
   "translator": {
     "title": "Vertaler",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "Transformeren van stream mislukt"
   },
   "usage": {
+    "healthExtraUsageBypass": "Quotum verbruikt; extra gebruik is toegestaan, dus de dienst gaat door.",
+    "healthPaidCreditsBypass": "Quotum verbruikt; beschikbare betaalde credits maken voortzetting van de dienst mogelijk.",
+    "healthFilteringBypass": "Quotum verbruikt; lokale quotumfiltering is uitgeschakeld, dus de dienst gaat door.",
     "title": "Gebruik",
     "grokExtraUsageCredits": "Extra Gebruikskredieten",
     "grokAutoTopUp": "Automatische Opwaardering",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limieten van aanbieders",
     "noProviders": "Geen providers aangesloten",
+    "quotaAuthRequired": "Authenticatie vereist - meld u aan bij het dashboard",
+    "quotaAuthRequiredHint": "Providerverbindingen konden niet worden geladen omdat de dashboardsessie ontbreekt of is verlopen. Meld u aan en vernieuw de pagina om uw quotumlimieten te bekijken.",
     "connectProvidersForQuota": "Maak verbinding met providers met OAuth om uw API-quotumlimieten en -gebruik bij te houden.",
     "accountsCount": "{count, plural, one {# account} other {# accounts}}",
     "filteredFromCount": "(gefilterd van {count})",
@@ -10046,9 +10231,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Onbekend",
     "statTotal": "Totaal",
-    "statCritical": "Kritiek",
-    "statAlert": "Waarschuwing",
-    "statHealthy": "Gezond",
     "filterPurchaseTypeLabel": "Type",
     "filterTierLabel": "Niveau",
     "purchaseAll": "Alle",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "Laatst vernieuwd",
     "providerQuota": "Providerquota",
     "providerQuotaHomeHint": "Live status over verbonden accounts",
+    "claudeResetCreditDefaultTitle": "Claude-limietreset",
+    "confirmRedeemClaudeResetCredit": "Inwisselen reset direct de in aanmerking komende Claude-gebruikslimieten en verbruikt dit tegoed definitief.",
+    "claudeResetCreditsModalTitle": "Claude-resetcredits",
+    "claudeResetCreditsModalExplainer": "Beschikbare Claude-resetcredits en wekelijkse sessieresets voor dit account.",
     "codexPaidCreditsLabel": "Betaalde Codex-credits",
     "codexPaidCreditsAvailable": "Beschikbaar (saldo niet gemeld)",
     "codexPaidCreditsUnavailable": "Niet beschikbaar of bestedingslimiet bereikt",
-    "codexPaidCreditsUnlimited": "Onbeperkt"
+    "codexPaidCreditsUnlimited": "Onbeperkt",
+    "healthAccountHint": "Gebaseerd op recente waarnemingen, geen live test. Selecteer een account voor details.",
+    "healthRecovery": "Verwacht herstel",
+    "healthAvailable": "Beschikbaar",
+    "healthRestricted": "Gedeeltelijk beperkt",
+    "healthUnavailable": "Niet beschikbaar",
+    "healthPeakHourProtection": "Bescherming tijdens piekuren",
+    "healthCooldown": "Wachttijd",
+    "healthQuotaExhausted": "Quota opgebruikt",
+    "healthOverview": "Overzicht",
+    "layoutFull": "Volledig",
+    "layoutCompact": "Compact",
+    "healthQuotaError": "Quota lezen mislukt",
+    "healthNoRuntime": "Bedrijfsstatus niet beschikbaar",
+    "healthPreviousSnapshot": "Laatste verversing mislukt; vorig resultaat wordt getoond",
+    "healthPreviousFailure": "Laatste verzoek mislukt; wachttijd verstreken",
+    "healthAwaitingSync": "Resettijd verstreken; wachten op synchronisatie",
+    "healthVerdictUnavailable": "Beschikbaarheidscontrole niet beschikbaar; alleen quotaniveaus worden getoond",
+    "healthSummaryFailed": "Statusoverzicht lezen mislukt; modelvergrendelingen ontbreken mogelijk",
+    "healthRuntimeObserved": "Status bijgewerkt {time}",
+    "healthQuotaObserved": "Quota waargenomen {time}",
+    "healthOldestQuota": "Oudste quotaopname: {time}",
+    "healthRecoveryUnknown": "Hersteltijd onbekend",
+    "healthDetailsHint": "Klik voor details en acties",
+    "healthFiveHour": "5 uur",
+    "healthOverall": "Totaal",
+    "healthAction": "Actie vereist",
+    "healthTitle": "Accountbeschikbaarheid",
+    "healthDrag": "Sleep om providers te ordenen",
+    "healthDragPosition": "{provider}, {count, plural, one {positie {position, number} van #} other {positie {position, number} van #}}",
+    "healthResetOrder": "Standaardvolgorde herstellen",
+    "healthPool": "{name}-pool",
+    "healthOtherPool": "Zelfde account · {pool}: {status} ({remaining} over)",
+    "healthIncluded": "{count, plural, one {Waarvan # gedeeltelijk beperkt account} other {Waarvan # gedeeltelijk beperkte accounts}}",
+    "healthBannerUnavailable": "{count, plural, one {# account tijdelijk niet beschikbaar} other {# accounts tijdelijk niet beschikbaar}}",
+    "healthBannerAvailable": "{count, plural, one {# account beschikbaar} other {Alle # accounts beschikbaar}}",
+    "healthLegendHide": "Legenda verbergen",
+    "healthLegendShow": "Legenda tonen",
+    "healthLegendOk": "Vol = resterend quotum; doorschijnend = verbruikt.",
+    "healthLegendCooldown": "Quotum voor {window} verbruikt. Vol = verstreken wachttijd; doorschijnend = resterende wachttijd.",
+    "healthLegendAction": "Autorisatie verlopen of account geblokkeerd; wachten helpt niet.",
+    "healthLegendPartial": "Nog bruikbaar. Gele bovenkant = model of pool beperkt.",
+    "healthWaited": "Wachttijd verstreken: {percent}",
+    "healthWait": "Nog {duration} (herstel om {time})",
+    "healthFastest": "Eerste herstel over {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} beschikbaar} other {# / {active, number} beschikbaar}}",
+    "healthCd5": "5 uur · Wachttijd",
+    "healthCdw": "Wekelijks · Wachttijd",
+    "healthRecentSuccessBypass": "De routering staat dit account toe omdat een verzoek onlangs is geslaagd.",
+    "healthPurchasedBalanceBypass": "Met gekocht tegoed kunt u doorgaan nadat het inbegrepen quotum is verbruikt.",
+    "healthCutoffAtRequest": "Realtime quotumdrempels worden gecontroleerd bij het routeren van een verzoek."
   },
   "modals": {
     "waitingAuth": "Wachten op toestemming",
@@ -11077,7 +11313,8 @@
       "message": "Bericht",
       "error": "Fout",
       "completion": "Voltooiing"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Eenvoudig chatten",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes}m geleden",
     "hoursAgo": "{hours}u geleden",
     "daysAgo": "{days}d geleden",
-    "entries": "Items"
+    "entries": "Items",
+    "viewSwitcherAria": "Cacheweergave"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globaal",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth is niet geconfigureerd. Registreer een OAuth-toepassing op {applicationsUrl} met omleidings-URI {redirectUri} en scopes \"{scopes}\", stel vervolgens {clientIdEnv} in (en optioneel {clientSecretEnv}) en herstart.",
     "gitlabDuoSetupDescription": "Nadat de applicatie is geregistreerd en de omgevingsvariabelen zijn ingesteld op deze OmniRoute-instantie, klik op Doorgaan om de OAuth-login te starten.",
     "continue": "Doorgaan",
+    "copilotPolicyTitle": "Experimentele aanbieder: de beleidsstatus is dubbelzinnig",
+    "copilotPolicyLine1": "OmniRoute maakt verbinding via api.githubcopilot.com, die GitHub niet heeft gepubliceerd als algemene gevolgtrekking van derden API. Deze integratie is experimenteel en kan zonder voorafgaande kennisgeving worden gewijzigd.",
+    "copilotPolicyLine2": "Alleen uw eigen GitHub account mag worden gekoppeld. Deel nooit inloggegevens, pool accounts en probeer nooit uw abonnementslimieten te overschrijden.",
+    "copilotPolicyLine3": "Gebruikers van het gratis abonnement en het studentenabonnement ontvangen alleen automatische modelselectie. De voorwaarden van uw Copilot -abonnement en eventuele gebruikslimieten blijven uw verantwoordelijkheid.",
+    "copilotPolicyAcknowledge": "Ik begrijp het, maak verbinding",
     "tabPasteSetupToken": "Setup-token",
     "claudeSetupTokenDescription": "Voer `claude setup-token` uit in een terminal en plak het token dat wordt getoond. Het is een jaar geldig en heeft geen vernieuwingstoken. OmniRoute stuurt één testverzoek naar Anthropic voordat het wordt opgeslagen.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Meer acties",
     "test": "Testen",
     "edit": "Bewerken",
     "delete": "Verwijderen",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "Geen geldige vermeldingen gevonden. Controleer het formaat en probeer het opnieuw.",
     "bulkImportSuccess": "Import voltooid: {created} gemaakt, {updated} bijgewerkt, {failed} mislukt",
     "bulkImportErrorLine": "Regel {line}: {reason}",
-    "bulkImportMaxExceeded": "Maximaal 100 proxy's per import",
+    "bulkImportMaxExceeded": "Maximaal {max} proxy's per import",
     "bulkImportPreview": "Voorbeeld",
     "clearAssignment": "(duidelijke opdracht)",
     "bulkProxyAssignment": "Bulkproxytoewijzing",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "IP-snelheidslimiet (429)",
     "poolSetAsideKindSlow": "trage reacties",
     "poolSetAsideKindGeoBlocked": "regio geblokkeerd (403/451)",
+    "poolSetAsideKindOperatorReported": "storing gemeld door operator",
     "poolSetAsideUntil": "Terug in rotatie {endsAt}",
     "poolSetAsideRepeat": "Terzijde gesteld {count, plural, one {# keer} other {# keer}}",
     "poolUnknownAddress": "Onbekend adres",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "Code exporteren",
     "exportShort": "Exporteren",
     "noStateToExport": "Geen playgroundstatus beschikbaar om te exporteren.",
-    "closeExportModal": "Exportvenster sluiten",
     "close": "Sluiten",
     "exportRealKeyWarning": "Beveiligingswaarschuwing: export geblokkeerd — er is een echte API-sleutel gedetecteerd in de uitvoer. Reset uw API-sleutel en probeer het opnieuw.",
     "placeholderHintPrefix": "Vervang",
@@ -11808,7 +12052,8 @@
       "nextButton": "Volgende",
       "runButton": "Uitvoeren",
       "promptPlaceholder": "Voer je bericht in… (Enter om te verzenden, Shift+Enter voor nieuwe regel)"
-    }
+    },
+    "playgroundTabs": "Playground-modi"
   },
   "miniPlayground": {
     "endpoint": "Eindpunt",
@@ -11879,7 +12124,8 @@
     "assistant": "Assistent",
     "errorLabel": "Fout",
     "requestFailed": "Verzoek mislukt",
-    "stop": "Stoppen"
+    "stop": "Stoppen",
+    "messageInputAria": "Bericht"
   },
   "requestLogger": {
     "recording": "Bezig met opnemen",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} accountrotaties",
       "resilienceRetried": "Lege beurt opnieuw geprobeerd",
       "resilienceContinued": "Midden in stream hervat",
-      "resilienceRecovered": "Hersteld door een veerkrachtactie"
-    }
+      "resilienceRecovered": "Hersteld door een veerkrachtactie",
+      "conversationContext": "Gesprekscontext",
+      "goToBottom": "Naar beneden gaan",
+      "liveRefreshOn": "Live vernieuwen: aan",
+      "liveRefreshOff": "Live vernieuwen: uit",
+      "liveRefresh": "Live vernieuwen",
+      "continuesFromParent": "gaat verder vanaf bovenliggend item",
+      "continuesFrom": "Gaat verder vanaf {id}",
+      "viewConversation": "gesprek bekijken",
+      "openConversation": "Gesprek {id} openen"
+    },
+    "tableLabel": "Aanvraaglogboeken",
+    "throughputPostFirstToken": "Na eerste token",
+    "throughputEndToEnd": "End-to-end",
+    "throughputRate": "{value} tokens/sec",
+    "throughputExplanation": "Beide snelheden gebruiken het hoogste van de output- en reasoning-tokentellingen. Na eerste token sluit een geldige TTFT uit; anders wordt de volledige duur gebruikt. End-to-end gebruikt altijd de volledige duur. Een gebufferde respons kan een hoge piekleveringssnelheid hebben zonder dat het model sneller genereert."
   },
   "proxyLogger": {
     "filterAll": "Alles",
@@ -12112,7 +12372,9 @@
     "colServedBy": "Gediend door",
     "filterTraffic": "Verkeer",
     "filterTests": "Tests",
-    "filterSource": "Bron"
+    "filterSource": "Bron",
+    "tableLabel": "Proxylogboeken",
+    "sortLogs": "Logboeken sorteren"
   },
   "endpointOptions": {
     "speech": "Spraak",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "UITGEPUT",
     "statusAlerting": "WAARSCHUWING",
     "statusError": "FOUT",
-    "moreSuffix": "+{count} meer"
+    "moreSuffix": "+{count} meer",
+    "feedFilterLabel": "Gebeurtenissen filteren"
   },
   "quotaShare": {
     "weightPercent": "Gewicht %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "Niet gegroepeerd",
     "ungroupedHint": "Deze pools zijn niet toegewezen aan een bekende groep. Bewerk een pool om deze naar een echte groep te verplaatsen.",
     "removeFailed": "Deze pool kon niet worden verwijderd.",
-    "dismiss": "Sluiten"
+    "dismiss": "Sluiten",
+    "allocationsHeading": "Toewijzingen",
+    "wizardRemoveDimension": "Dimensie verwijderen",
+    "wizardRemoveKey": "Sleutel verwijderen"
   },
   "plugins": {
     "title": "Plug-ins",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "Bijwerken van instellingen mislukt",
       "serviceRevealApiKey": "{actor} heeft API-sleutel voor {target} onthuld",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Foutmelding sluiten"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "Ga nu",
       "message": "De MITM-proxy bevindt zich nu onder AgentBridge.",
       "title": "Deze pagina is verplaatst"
-    }
+    },
+    "dnsOn": "DNS aan",
+    "dnsOff": "DNS uit",
+    "showServerSettings": "Serverinstellingen tonen",
+    "hideServerSettings": "Serverinstellingen verbergen",
+    "upstreamCaTesting": "Testen…",
+    "removeMapping": "Toewijzing verwijderen",
+    "mappingSourcePlaceholder": "bijv. gemini-3.6-flash-medium, of * voor alle niet-toegewezen modellen",
+    "mappingWildcardHint": "Gebruik * als bron om elk model zonder expliciete toewijzing via OmniRoute naar het geselecteerde doel te routeren. Exacte bronovereenkomsten hebben altijd voorrang op *.",
+    "wizardDetectingModels": "Modellen detecteren in onderschept verkeer...",
+    "wizardDetectedModels": "{count, plural, one {# model} other {# modellen}} gevonden in onderschept verkeer. Selecteer de modellen die je wilt toevoegen:",
+    "wizardSelectedModels": "{count, plural, one {# model} other {# modellen}} geselecteerd. In het volgende scherm wijs je ze toe aan OmniRoute-modellen.",
+    "wizardAddModels": "{count, plural, one {# model} other {# modellen}} toevoegen",
+    "wizardNoModelsDetected": "Er zijn nog geen modellen gedetecteerd. Gebruik {agent} om een aanvraag te doen en voer deze wizard daarna opnieuw uit om modellen automatisch in het verkeer te detecteren.",
+    "wizardNoModelsHint": "Of sluit deze wizard en voeg handmatig toewijzingen toe in de agentkaart."
   },
   "providerStats": {
     "unknownError": "Onbekende fout",
@@ -12685,7 +12966,12 @@
     "avgTtft": "Gem. TTFT",
     "avgTotal": "Gem. totaal",
     "requestTelemetry": "Verzoektelemetrie",
-    "requestTelemetryDescription": "Uitsplitsing van 7-fasenpipeline (laatste 5 minuten)"
+    "requestTelemetryDescription": "Uitsplitsing van 7-fasenpipeline (laatste 5 minuten)",
+    "title": "Providerstatistieken",
+    "description": "Verkeer, latentie en succespercentages per provider en per model",
+    "combo": "Combinatie",
+    "toggleModels": "Modellen voor {provider} tonen",
+    "windowSince": "Sinds {date}"
   },
   "relay": {
     "title": "Serverless relay-proxy's",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "Geen request-body.",
     "noResponseBody": "Geen response-body.",
     "formatted": "Geformatteerd",
-    "raw": "Ruw"
+    "raw": "Ruw",
+    "requestCount": "{count, plural, one {# aanvraag} other {# aanvragen}}",
+    "expandList": "Lijst uitvouwen",
+    "collapseList": "Lijst samenvouwen",
+    "snippetLanguage": "Taal van codefragment",
+    "headersTable": "Headers",
+    "showSecrets": "Geheime waarden tonen",
+    "maskSecrets": "Geheime waarden maskeren",
+    "llmNotAvailable": "LLM-metadata is niet beschikbaar voor deze aanvraag.",
+    "llmStreamYes": "ja (SSE)",
+    "llmStreamNo": "nee",
+    "llmTotalTokens": "Totaal: {count} tokens"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI-codes",
     "pageSubtitle": "Codetools die naar OmniRoute verwijzen",
     "searchPlaceholder": "CLI zoeken…",
     "filterDetectionLabel": "Detectie",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "Niet gevonden",
     "baseUrlAll": "Alle",
     "baseUrlFull": "Volledig",
-    "baseUrlPartial": "Gedeeltelijk"
+    "baseUrlPartial": "Gedeeltelijk",
+    "title": "CLI-code"
   },
   "cliAgents": {
     "pageTitle": "CLI-agents",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "Het aandeel aanroepen dat deze provider de afgelopen 24 uur daadwerkelijk heeft beantwoord. Een streepje betekent dat de provider te weinig verkeer heeft verwerkt om een percentage te kunnen geven.",
     "reliabilitySample": "{successes} van {requests} aanroepen zijn in de afgelopen {hours}u geslaagd",
     "reliabilityTooFew": "Slechts {requests} aanroepen in de afgelopen {hours}u — te weinig om een percentage te kunnen geven",
-    "reliabilityNoTraffic": "Geen aanroepen geregistreerd in de afgelopen 24u"
+    "reliabilityNoTraffic": "Geen aanroepen geregistreerd in de afgelopen 24u",
+    "categoryFilter": "Taakcategorie"
   },
   "discovery": {
     "title": "Provider-ontdekking",
@@ -13330,7 +13628,11 @@
     "method": "Methode",
     "auth": "Authenticatie",
     "feasibility": "Haalbaarheid",
-    "models": "Modellen"
+    "models": "Modellen",
+    "provider": "Aanbieder",
+    "status": "Status",
+    "endpoint": "Endpoint",
+    "actions": "Acties"
   },
   "noAuthProvider": {
     "title": "Geen authenticatie vereist",
@@ -13379,7 +13681,8 @@
     "ownProxy": "Eigen proxy",
     "freeTierPause": "Model {model} gepauzeerd (429), terug om {time}",
     "freeTierPauseProvider": "Gepauzeerd (429), terug om {time}",
-    "freeTierPauseNote": "Pauze in proces op deze instantie"
+    "freeTierPauseNote": "Pauze in proces op deze instantie",
+    "proxyType": "Proxytype"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "Een verborgen prestatie wacht...",
         "criteria": "Voltooi de verborgen prestatie om deze badge te onthullen."
       }
-    }
+    },
+    "leaderboardTitle": "Ranglijst",
+    "leaderboardDescription": "Ranglijsten en prestaties voor al je API-sleutels",
+    "badgeLocked": "Vergrendeld"
   },
   "featureFlags": {
     "title": "Featureflags",
@@ -13610,7 +13916,9 @@
       "disabled": "Uitgeschakeld",
       "dual": "Dubbel",
       "alias": "Alias",
-      "canonical": "Canoniek"
+      "canonical": "Canoniek",
+      "fail_closed": "Blokkeren (fail_closed)",
+      "count_as_zero": "Tel als $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Infrastructuurstops met beschermde prioriteit als 502",
         "description": "Antwoord met 502 in plaats van 503 wanneer een prioriteitsdoel met uitsluitend quota als fallback de combo stopt vanwege een oorzaak waarvan aantoonbaar is dat die niet quotagerelateerd is: een open circuitbreaker van een provider of het overslaan vanwege voorspelde latentie."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Account-ids registreren",
+        "description": "Accountprefix in AUTH-logregels opnemen (bv. \"Account '<provider>' in gebruik: abc12345...\"). Standaard uitgeschakeld, zodat accountidentifiers uit gedeelde/multi-tenant proceslogs worden geredacted. Onafhankelijk van Debug Mode; het inschakelen van Debug Mode onthult dit niet."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Inloggen met wachtwoord uitschakelen bij OIDC",
+        "description": "Schakel inloggen met wachtwoord uit wanneer OIDC is ingeschakeld, zodat gebruikers zich alleen kunnen authenticeren via OIDC Single Sign-On. Wanneer uitgeschakeld (standaard), zijn zowel inloggen met wachtwoord als OIDC beschikbaar."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Externe audioprovider-nodes",
+        "description": "Sta toe dat de /v1/audio/*-routes OpenAI-compatibele providernodes gebruiken die buiten localhost worden gehost. Standaard uitgeschakeld — het routeren van audio naar een externe host verandert de egress-identiteit en moet een expliciete beslissing van de beheerder zijn. Loopback-nodes zijn altijd toegestaan en worden niet beïnvloed."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Externe rerank-providernodes",
+        "description": "Sta POST /v1/rerank (en de rerank-stap van de memory engine, die deze via loopback aanroept) toe om OpenAI-compatibele providernodes te gebruiken die buiten localhost worden gehost — een LAN-apparaat of Tailscale-peer met TEI, Infinity, vLLM, enz. Standaard uitgeschakeld — het routeren naar een externe host verandert de egress-identiteit en moet een expliciete beslissing van de beheerder zijn. Loopback-nodes zijn altijd toegestaan en worden niet beïnvloed. Externe nodes moeten ook voldoen aan het beleid voor uitgaande URL's van de provider."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Shared-egress-beveiliging bij netwerkrotatie",
+        "description": "Bij een netwerkexceptie (time-out, verbinding geweigerd/gereset) voor een multi-account-rotatie-executor: wanneer het falende account geen dedicated proxy heeft, pas dan een korte cooldown toe en sla andere proxyloze accounts over voor de rest van het verzoek in plaats van ze stuk voor stuk opnieuw te proberen. Standaard ingeschakeld (veilig: geen wijziging van egress-IP, vermindert alleen het risico op latentie/cooldown bij accounts met gedeelde egress). Schakel uit om onmiddellijke doorgifte bij de eerste proxyloze exceptie te herstellen."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Recent mislukte proxy's overslaan",
+        "description": "Proxypools en de rotatie per account van opencode bieden een proxy die zojuist is mislukt (geweigerde TCP-probe of een daardoor ontvangen 429) tijdelijk niet opnieuw aan gedurende een periode per proces die bij elke herhaling verdubbelt, tot een maximum. Er wordt geen proxystatus weggeschreven; als elke kandidaat terzijde is geschoven, blijft de keuze ongewijzigd. Standaard ingeschakeld: de selectievolgorde is alleen met PROXY_SKIP_RECENTLY_FAILED=false exact gelijk aan de standaardrotatie."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Volgorde voor gedeelde egress-pools",
+        "description": "Voor providers waarvan het quotum is gegroepeerd op egress-adres: rangschik een pool-lid dat het waargenomen egress-adres deelt met een recent geweigerd lid net onder gezonde leden. Alleen volgorde, nooit uitgesloten. Vereist PROXY_SKIP_RECENTLY_FAILED, dat het weigeringssignaal genereert dat het uitleest. Standaard uitgeschakeld: selectievolgorde is exact de standaardrotatie."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Rotatie-attributielogging",
+        "description": "Opencode-rotatie registreert welk account heeft gediend of is overgeslagen (alleen gemaskeerde id's, nooit volledige account-id's) en koppelt proxylogregels aan hun verzoek, zodat de beheerder overgeslagen accounts kan onderscheiden van ongebruikte accounts. Standaard uitgeschakeld: er worden geen extra logregels of kolommen weggeschreven."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Egress-observatie van proxypool",
+        "description": "Toon, onder een proxypool in het dashboard, hoeveel waargenomen egress-IP's de leden ervan de afgelopen 24 h hebben bediend, hoeveel verbindingen deze hebben gebruikt en het hoogste aantal gezien achter één IP. Alleen-lezen, berekend op basis van het proxylogboek, nooit gebruikt voor routering. Standaard uitgeschakeld: de pooleditor is ongewijzigd en de observatieroute retourneert null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Egress van proxybeheerder",
+        "description": "Accepteer door de beheerder gepushte gedateerde waargenomen adressen per pool-lid en voeg deze samen met de journaaluitlezing voor weergave en poolvolgorde. Standaard uitgeschakeld: de push-route antwoordt met 404 en pool-uitlezingen gedragen zich exact zoals voorheen."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses stall-rotatie",
+        "description": "Houd voor de OpenCode-executor de eerste body-byte van een gestreamde Responses-respons in de gaten (venster: RESPONSES_FIRST_BYTE_TIMEOUT_MS, standaard 15000). Een 2xx Responses-stream die na het venster stil blijft, wordt als gestagneerd beschouwd: het account krijgt een cooldown en het verzoek roteert eenmalig naar het volgende account; een tweede stagnatie faalt direct. Standaard uitgeschakeld: gestagneerde streams behouden de huidige wachttijd tot de time-out voor stream-gereedheid."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked-rotatie",
+        "description": "Wanneer een upstream voor de OpenCode-executor antwoordt met 403 of 451 met een user_blocked-weigering (geen geoblokkade, geen Cloudflare-fingerprint-afwijzing), plaats het geweigerde account dan in cooldown en roteer maximaal één keer per verzoek naar het volgende account; een tweede weigering wordt ongewijzigd geretourneerd zonder succesmarkering. Standaard uitgeschakeld: het omzeilen van een upstream-gebruikersblokkade kan lijken op ontduiking en de markering verspreiden over het hele accountbestand, dus de weigering wordt ongewijzigd geretourneerd tenzij de beheerder hiervoor kiest."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode tijdelijke failover-back-off",
+        "description": "Pauzeer bij de OpenCode multi-account-rotatie voordat wordt doorgestuurd naar het volgende account zodra twee opeenvolgende pogingen zijn mislukt met een tijdelijke upstream-fout (5xx of een lege 400-afwijzing). De pauze begint bij 1,5 s, verdubbelt bij elke volgende opeenvolgende mislukking, is gemaximeerd op 6 s per pauze en 10 s per verzoek, wordt overgeslagen wanneer de client de verbinding verbreekt, en de mislukte respons-body wordt vrijgegeven alvorens te wachten. Standaard uitgeschakeld: failover blijft direct."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Herpoging bij lege turn na flush",
+        "description": "Voer bij vertaalde streaming-turns, wanneer de upstream-turn geen bruikbare inhoud bevat (alleen redenering als voltooiing of nul waardevolle chunks), begrensde herpogingen uit via het normale credential-pad (tot `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) voordat er iets aan de client wordt getoond. Standaard uitgeschakeld: lege turns behouden het huidige gedrag (lege 200 of 502 met lege inhoud)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Sibling-herstel bij lege stream",
+        "description": "Claude/Codex-streaming: controleer na de eerste lifecycle-gebeurtenis kort (tot 1 s / 64 KiB) op bruikbare uitvoer; een stream die eindigt zonder inhoud wordt een empty_content-fout die de bestaande begrensde herpoging inzet op een andere in aanmerking komende verbinding (geen cooldown, geen modelblokkade), en round-robin-combinaties stoppen met opnieuw proberen zodra de client de verbinding verbreekt. Behandelt binnen de controle refusal, pause_turn en model_context_window_exceeded ook als legitieme lege eindpunten. Standaard uitgeschakeld: gereedheid, afhandeling van lege inhoud en combo-herpogingen blijven exact zoals voorheen."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Stream late-uitvoerprobe",
+        "description": "Streaminguitvoer-probe: blijf na de eerste 64 doorgestuurde chunks steekproefsgewijs één op de 16 chunks controleren op de eerste zichtbare uitvoer, zodat uitvoer die laat begint de stream toch markeert als dat deze uitvoer heeft gegenereerd. Een losse 5xx na dat punt blijft dan request-scoped in plaats van een model-only uitsluiting te registreren, en firstOutputMs wordt met terugwerkende kracht ingevuld op de eerste uitvoer-chunk van het huidige steekproefinterval. Standaard uitgeschakeld: alleen de eerste 64 doorgestuurde chunks worden gecontroleerd, precies zoals voorheen."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode vroegtijdige stop bij rate-limited 429",
+        "description": "Voor de OpenCode multi-account-rotatie: stop de accountgolf bij de eerste 429 die is geclassificeerd als een echte rate-limit (een parseerbare Retry-After-header of een body waarin een rate- of gebruikslimiet wordt genoemd) en retourneer die upstream-429 ongewijzigd (status, body, Retry-After- en quota-headers), in plaats van elk resterend account te proberen. Niet-geclassificeerde 429's blijven roteren. Standaard uitgeschakeld: de gratis laag is beperkt per uitgaand IP-adres (#9611), waardoor elke 429 naar het volgende account roteert en een uitgeputte golf de laatste upstream-429 retourneert."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 parkeren en hervatten",
+        "description": "Voor de OpenCode multi-account-rotatie: parkeer het verzoek na herhaalde tijdelijke 429's (of een recente pool-belastingsmarkering) met een heartbeat en probeer vervolgens één begrensde ronde van maximaal 3 opeenvolgende accounts opnieuw in plaats van uit te waaieren naar de hele vloot. Standaard uitgeschakeld: elke 429 roteert precies zoals voorheen naar het volgende account."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Opnieuw proberen bij vastgelopen stream-gereedheid",
+        "description": "Bij streaming-chatverzoeken: wanneer de eerste upstream-body vastloopt voordat er een bruikbaar event wordt geproduceerd, voer dan één begrensde tweede poging uit via hetzelfde routeringspad met hetzelfde gereedheidsbudget en zonder accountstraf. Standaard uitgeschakeld: bij een vastgelopen eerste body mislukt het verzoek zonder nieuwe poging."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 pool-herselectie",
+        "description": "Voor de OpenCode multi-account-rotatie: vraag na een 429 van een provider met egress-bucketing op een proxy-loos account binnen een ambient pool-context de verbindingspool om een ander lid voor de volgende poging, in plaats van hetzelfde egress-adres opnieuw te proberen. Rangschikt, sluit nooit uit: een uitgeputte pool behoudt het huidige gedrag. Standaard uitgeschakeld: elke 429 roteert precies zoals voorheen naar het volgende account."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2-clientfingerprint",
+        "description": "Verstuur de OpenCode v2 CLI-clientfingerprint bij OpenCode Zen/Go-verzoeken (#16571): User-Agent opencode/latest/<2.x>/cli en x-opencode-client cli, een client User-Agent die alleen behouden blijft wanneer het een 2.x OpenCode-client is, en bij gated free-tier-verzoeken geen x-opencode-request, de sessie gespiegeld naar x-opencode-session-id/x-session-affinity/x-session-id, de v2 CLI-read/shell-schema's op geïnjecteerde placeholder-tools en een tool_choice van \"none\" weggelaten. Standaard uitgeschakeld: elk OpenCode-verzoek behoudt de huidige identiteit, headers en body byte voor byte."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen egress-IP-lockout",
+        "description": "Voeg OpenCode Zen (opencode-zen) toe aan de standaard egress-IP-lockout-familie, zodat een 429 op één Zen-verbinding ook elke gelieerde Zen-verbinding laat afkoelen die hetzelfde egress-IP deelt. Standaard uitgeschakeld: Zen is gekeyed en elke verbinding koelt zelfstandig af, precies zoals voorheen. Een expliciete OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS-waarde heeft altijd voorrang op deze flag."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode full-text-foutregels",
+        "description": "Laat de ingebouwde OpenCode-foutregels (opencode-zen, opencode-go, opencode-cli) matchen op de volledige upstream-fouttekst, zodat body-markeringen zoals organization_quota_exceeded of \"monthly usage limit reached\" een 429 classificeren als quotum uitgeput met een vergrendeling op verbindingsniveau. Standaard uitgeschakeld: die regels zien alleen de gestructureerde foutcode en een dergelijke 429 blijft een korte rate-limit, precies zoals voorheen."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI full-text-foutregels",
+        "description": "Laat de ingebouwde Cloudflare Workers AI-foutregel matchen op de volledige upstream-fouttekst, zodat de 429 \"daily free allocation\"-body wordt geclassificeerd als quotum uitgeput in plaats van een korte rate-limit. Standaard uitgeschakeld: de regel ziet alleen de gestructureerde foutcode, precies zoals voorheen."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Capability-filter",
+        "description": "Wijs verzoeken vóór verzending af wanneer het doelmodel de vereiste functionaliteiten mist (vision, tools, structured output, context window). Beschermt directe single-provider-verzoeken die het compatibiliteitsfilter van de combo-laag omzeilen."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Onbeprijsd verbruik negeren in USD-quota",
+        "description": "Tel het verbruik van modellen zonder prijs als $0 in USD-verbruiksquota per sleutel in plaats van het quotum als overschreden te beschouwen. Standaard uitgeschakeld: een onbeprijsd model of routing-alias kan werkelijke uitgaven verbergen, waardoor het quotum voor de veiligheid blokkeert (fail-closed)."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Schakel de OmniRoute Radar-module in (catalogusfeed-schermen en synchronisatie). Standaard uitgeschakeld; inschakelen ontgrendelt alleen de UI — gegevenssynchronisatie blijft een afzonderlijke opt-in."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Model-endpoint capability-gate",
+        "description": "Handhaaf vertrouwde model-endpointtags (gedeclareerd door de providercatalogus, afgeleid van een gespecialiseerd model-id of ingesteld door de beheerder): wijs een verzoek verzonden naar een endpoint dat het model niet ondersteunt af met HTTP 400 vóór verzending naar /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations en /v1/audio/*; verberg modellen waarvan de getagde endpoints geen OmniRoute-adapter hebben in /v1/models; en beantwoord de dashboardmodeltest met 422 voor dergelijke modellen. Standaard uitgeschakeld: endpointtags blijven informatief en verzoeken worden exact zoals voorheen verzonden."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Universele contexthandoff",
+        "description": "Genereer en injecteer gesprekssamenvattingen wanneer combo-routing van model wisselt. Schakel uit om modelwisselingen onafhankelijk te behandelen en handoff-verzoeken op de achtergrond voor alle bestaande en toekomstige combo's te voorkomen."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Reasoning-replay",
+        "description": "Cache en speel modelredeneringen opnieuw af bij multi-turn-gesprekken. Schakel uit om het opslaan en opnieuw injecteren van redeneringen te stoppen."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server-transport",
+        "description": "Sta Codex toe het lokale app-server WebSocket JSON-RPC-transport te gebruiken (codexTransport=app-server). Wanneer uitgeschakeld, vallen verbindingen die voor app-server hebben gekozen terug op de andere transporten van Codex."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code Discovery Aliassen",
+        "description": "Adverteer claude/'<provider>'/'<model>' mirror-ids op /v1/models, zodat modeldetectie van de Claude Code gateway niet-Claude-modellen opnoemt. Waarschuwing: verdobbelt catalogusinvoeren voor alle clients wanneer globaal ingeschakeld."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "No-Thinking Model Aliassen",
+        "description": "Hoofdschakelaar voor de no-think/'<provider>'/'<model>' gatewayaliassen. Aan (standaard): /v1/models adverteert een no-thinking variant voor alle geschikte thinkende Claude-modellen, en een no-think/-id die bij een verzoek wordt verzonden, wordt teruggeresolveerd naar het echte model met onderdrukt redeneren. Uit: er worden geen varianten geadverteerd en een no-think/-id wordt behandeld als een andere onbekende model-id. Het per-model ModelSpec.noThinkingAlias opt-in/opt-out blijft van toepassing terwijl dit aan staat."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Thinking Level-varianten uitschakelen",
+        "description": "Schakel het genereren van thinking level-varianten (bijv. -low, -medium, -high) in de /v1/models-catalogus uit."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptieve virtuele toelatingslanes",
+        "description": "Schakel adaptieve virtuele toelatingslanes per tenant in voor provider dispatch (#9654): een burst van de ene tenant veroorzaakt niet langer 503's voor een andere. De omgevingsvariabele OMNIROUTE_CHAT_VIRTUAL_LANES heeft voorrang op deze dashboard-override; wijzigingen worden van kracht na het herstarten van de server."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Functionele Gateway Mirrors",
+        "description": "Adverteer '<gateway-alias>'/'<model>' mirror-ids op /v1/models voor modellen waarvan de canonieke eigenaar geen actieve credential heeft, maar wel een passthrough gateway met een actieve credential die ze routeert. Waarschuwing: voegt catalogusinvoeren toe voor alle clients wanneer globaal ingeschakeld."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API-aggregatorsaldo",
+        "description": "Schakel saldodetectie in voor nodes die compatibel zijn met New-API / One-API / Sub2API-aggregators. Wanneer ingeschakeld, rapporteren compatibele nodes met de aggregator-vlag ingesteld hun saldo in het dashboard en bij quota-preflight-routing."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Verwijderde zoekverbindingen verbergen",
+        "description": "Zoekstatistieken en recente zoekopdrachten tellen alleen providers die nog een liveverbinding hebben (sleutelloze providers zoals duckduckgo-free tellen altijd mee). Uitgeschakeld behoudt elke bewaarde zoekrij met een provider-id."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Strikte Free-badge",
+        "description": "Dashboard-providerpagina's: toon de Free-badge alleen bij signalen die de provider respecteert — negeert de weergavenaam-heuristiek, niet-booleaanse free-velden en :free-achtervoegsels bij geregistreerde providers zonder een gedocumenteerde gratis tier. Uitgeschakeld behoudt de historische badgeregel."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: Lege pool retourneert 503",
+        "description": "Wanneer de kandidatenpool van een auto-combo al leeg is voordat het tool-calling-voorfilter wordt uitgevoerd (elk doel overgeslagen vanwege cooldowns, lock-outs of uitputting), antwoord dan met 503 no_eligible_targets in plaats van de verouderde 400 \"No target supports tool calling\" capability_mismatch. Standaard uitgeschakeld: de lege pool behoudt de verouderde 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral Ambigue 401 Soft Lockout",
+        "description": "Een 'lege Mistral 401 ('{\"detail\":\"Unauthorized\"}', geen expliciet auth-signaal) is byte-identiek voor een ingetrokken sleutel en voor opgebruikte quota. Wanneer ingeschakeld, koelt zon 401 de connectie af in plaats van deze als verlopen te parkeren, tot 3 keer binnen een uur; de volgende parkeert deze nog steeds als verlopen, zodat een ingetrokken sleutel convergeert. Standaard uit: elke lege Mistral 401 parkeert de connectie als verlopen, zoals ervoor."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Automatische batch- en bestandsopschoning",
+        "description": "Laat de automatische opschoonronde terminale (completed/failed/cancelled/expired) Batch API-taken verwijderen die ouder zijn dan OMNIROUTE_BATCH_RETENTION_DAYS, samen met hun checkpoints per regel, en wis de BLOB-inhoud van geüploade bestanden na hun eigen expires_at. Standaard uitgeschakeld: elke bestaande installatie behoudt deze gegevens precies zoals voorheen totdat een operator dit inschakelt. De door de operator geactiveerde DELETE /api/v1/batches/delete-completed-route blijft in beide gevallen onaangetast -- dit is een afzonderlijk, onvoorwaardelijk openbaar API-contract."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity-accountlease",
+        "description": "Reserveer het geselecteerde Antigravity-account voor de streaming-levenscyclus van het verzoek dat het heeft gekozen, zodat een gelijktijdige retry of de overdracht van inloggegevens niet opnieuw een account kan kiezen dat al is toegewezen aan een actieve stream. De reservering is beperkt tot (connection, callable upstream model), waardoor één account nog steeds twee verschillende modellen tegelijkertijd kan bedienen. Wanneer elk in aanmerking komend account al is geleased voor dat model, retourneert het verzoek een gestructureerde 503 POOL_BUSY met een begrensde Retry-After in plaats van zich op te stapelen op een bezet account. Standaard uitgeschakeld: accountselectie blijft precies zoals voorheen en er wordt geen reservering gemaakt."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Verouderde combo-stappen automatisch opschonen",
+        "description": "Verwijder na een succesvolle modelsynchronisatie met een gezaghebbende live-catalogus combo-stappen die zijn vastgepind op modellen die niet meer in de catalogus voorkomen, met één audit-item per verwijderde stap. Schoont nooit op bij een mislukte, gedegradeerde of free-only synchronisatie en maakt een combo nooit leeg. Standaard uitgeschakeld: verouderde stappen worden alleen gemarkeerd."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth samengevat denken",
+        "description": "Laat een Claude OAuth-verzoek dat vraagt om leesbaar denken (thinking.display \"summarized\") de redact-thinking-2026-02-12 Anthropic-bèta weglaten, waardoor Anthropic anders lege thinking-blokken met alleen een handtekening retourneert. Standaard uitgeschakeld: die bèta maakt deel uit van de Claude Code OAuth-wire-fingerprint, dus OAuth-verzoeken laten deze ongewijzigd. Claude-verzoeken via een API-sleutel ondersteunen samengevat denken al zonder deze vlag; OMNIROUTE_REDACT_THINKING=false bereikt OAuth ook alleen wanneer deze vlag is ingeschakeld."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro Tool Call-herstel",
+        "description": "Wanneer een streaming Kiro-respons een misvormde tool_call-wrapper uitzendt (ontbrekende input.name of input.arguments) vóór enige zichtbare uitvoer, onderdruk deze dan en verzend het verzoek eenmalig opnieuw met een corrigerende instructie in plaats van de beurt te beëindigen met invalid_kiro_tool_call. De nieuwe poging kost één extra Kiro-verzoek; een tweede mislukking beëindigt de beurt met kiro_tool_call_repair_retry_failed. Standaard ingeschakeld. Stel in op false om de beurt te laten mislukken bij de eerste misvormde wrapper."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev-inspanningsniveaus",
+        "description": "Gebruik de reasoning-inspanningsniveaus die models.dev publiceert (beperkt tot het bekende inspanningsvocabulair) wanneer noch een operator-override noch het providerregister er een declareert, en behandel een gedeclareerde lege lijst met niveaus als \"geen niveaus\" in /v1/models effort_tiers en doorsneden van combinatieniveaus. Standaard uitgeschakeld: effort_tiers en opgeloste supportedThinkingEfforts blijven exact zoals voorheen."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Gesynthetiseerde cx-telemetrie van Arena",
+        "description": "Voeg een gesynthetiseerde programmatische cx-clientinteractieblob (de waarde die arena.ai zelf verzendt voor een pagina zonder geregistreerde interactie) toe aan elk create-evaluation-verzoek van Arena (lmarena) dat geen door de operator verstrekte providerSpecificData.cx bevat. Standaard uitgeschakeld: het cx-veld is een anti-automatiseringssignaal van Arena, waardoor OmniRoute alleen een waarde doorstuurt die de operator uit een echte browsersessie heeft vastgelegd (providerSpecificData.cx) en anders helemaal geen cx verzendt. Onbewezen upstream-voordeel; schakel dit alleen in als Arena verzoeken zonder cx begint te weigeren."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Reactieve compactie voor native Codex",
+        "description": "Laat de reactieve (drempelwaarde) en laatste-redmiddel-contextcompactierondes ook native Codex-passthrough-geschiedenissen (POST /v1/responses naar de codex-provider) herschrijven wanneer ze het contextbudget overschrijden, met behulp van de Responses input[]-adapter. Standaard uitgeschakeld: native Codex-geschiedenissen zijn eigendom van de Codex-client en worden nooit herschreven door compactie; te grote verzoeken blijven falen op de contextbudgetcontrole, precies zoals voorheen. Vereist dat globale compressie is ingeschakeld en het model niet is uitgesloten."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Quotavenster: begrensde parkering respecteren",
+        "description": "Laat het quotabeleid per venster (sessie-/wekelijkse drempelwaarden die worden gebruikt voor accountselectie) de begrensde uitputtingsparkering respecteren: zodra de gemaximaliseerde parkeerdeadline is verstreken of de gecachete quota-observatie ouder is dan de parkeerlimiet, stopt het venster met het uitsluiten van het account tot het quota opnieuw wordt opgehaald. Standaard uitgeschakeld: een gecachet venster blijft blokkeren op zijn laatst gerapporteerde percentage tot zijn eigen resettijd."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Afbeeldingsgeneratie: lange taken",
+        "description": "Voor OpenAI-compatibele afbeeldingsgeneratie: gebruik de time-out van de verbinding (providerSpecificData.timeoutMs), anders de centrale upstream fetch-time-out (FETCH_TIMEOUT_MS, daarna REQUEST_TIMEOUT_MS, standaard 600 s) in plaats van het vaste afbeeldingsbudget van 120 s; beëindig een door de aanroeper geannuleerd verzoek met 499; en laat de Playground lange afbeeldingstaken ontvangen als een SSE-stream met keepalive-heartbeats. Standaard uitgeschakeld: het vaste budget is van toepassing en annulering door de aanroeper wordt niet doorgegeven. De deadline voor het lezen van de response-body is altijd actief."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Catalogus-mirror-verfijningen",
+        "description": "Verfijn de claude/-discovery- en functionele-gateway-mirrors op /v1/models. Standaard uitgeschakeld: beide mirror-doorlopen gedragen zich precies zoals voorheen. Ingeschakeld: claude/-discovery-mirrors dekken ook vermelde reasoning-effort-varianten (-low/-medium/-high/-xhigh), slaan ingebouwde auto/*-id's over die het verzoekpad niet kan materialiseren en slaan een al vermelde alias over; functionele-gateway-mirrors slaan combo's en door OmniRoute gesynthetiseerde id's (claude/, no-think/) over, halen de eigenaar uit owned_by, gebruiken de eigenaar nooit als diens eigen gateway en slaan gateways over die zijn uitgeschakeld in blockedProviders evenals modellen buiten de gezaghebbende live-catalogus van een gateway."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Proxy-gezondheid: weigering reset foutenreeks",
+        "description": "Laat bij de proxy-healthsweep een probe die door het doel is geweigerd (401/403/429: de proxy heeft doorgestuurd, de bestemming heeft dit egress-IP geweigerd) de reeks opeenvolgende fouten van de proxy resetten, net als een afgehandelde probe. Standaard uitgeschakeld: een weigering blijft neutraal en behoudt de reeks (#10654). Een 5xx blijft in beide gevallen niet-doorslaggevend, en een weigering zal een proxy nooit verwijderen, uitschakelen of opnieuw activeren."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok-abonnementsafbeeldingen",
+        "description": "Registreer xai-oauth- (xao) en grok-cli-afbeeldingsroutes en koppel OpenAI-kwaliteit high/hd aan xAI medium. Standaard uitgeschakeld: het xAI-afbeeldingspad met API-sleutel blijft op het bestaande OpenAI-compatibele verzoek en de abonnementsroutes worden niet geregistreerd."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "Live model-discovery via xAI OAuth",
+        "description": "Haal de live xAI-modelcatalogus voor xai-oauth-verbindingen op van https://api.x.ai/v1/models met behulp van het OAuth-bearer-token, in plaats van de bevroren statische seed. Standaard ingeschakeld. Stel de flag in op false om de statische seed te blijven leveren. HTTP-fouten vallen terug op de seed in de discovery-route; de flag-getter zelf voert geen HTTP uit."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-compatibele systeembeurten halverwege het gesprek",
+        "description": "Houd bij standaard anthropic-compatible-*-relays (claude → claude passthrough) role:system-beurten halverwege het gesprek binnen messages[] in plaats van ze te hoisten naar de system-parameter op het hoogste niveau, zodat het gecachte prompt-prefix stabiel blijft over beurten heen. Alleen van toepassing wanneer de client zelf de mid-conversation-system-2026-04-07 anthropic-beta heeft verzonden (ongewijzigd doorgestuurd naar upstream). Standaard uit: elke systeembeurt wordt exact zoals voorheen gehoist, omdat relays die de bèta niet ondersteunen role:system-berichten weigeren met 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB-statuscontrole: opstartscan uitstellen",
+        "description": "Voer de integriteits-/statuscontrole van de database bij het opstarten uit nadat de server verzoeken begint te accepteren (via setImmediate) in plaats van het opstarten te blokkeren totdat deze is voltooid. Standaard uit: het opstarten blokkeert op de controle exact zoals vóór #13717, zodat een beschadigde database nog steeds wordt opgemerkt voordat het eerste verzoek wordt afgehandeld. Aan: het opstarten keert direct terug en de controle (nu begrensd/gepagineerd en, voor een echte bestandsgebaseerde database, geïsoleerd in een annuleerbaar onderliggend proces) wordt direct daarna uitgevoerd."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode-routing via gepubliceerde catalogus",
+        "description": "Laat OpenCode Zen- en OpenCode Go-modellen zonder expliciet registry-eindpunt hun verzoekinterface (Responses voor @ai-sdk/openai, Messages voor @ai-sdk/anthropic) overnemen uit de gepubliceerde models.opencode.ai-catalogus, die elke 6 uur op de achtergrond wordt uitgelezen. Standaard uit: het eindpunt is afkomstig uit de registry-heuristieken exact zoals voorheen en de catalogus wordt nooit opgehaald."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Auto-verzoeken: gewichten van vastgestelde capaciteiten",
+        "description": "Laat auto/*-verzoeken (resolveModelOrError en de auto-routing-wrapper) de kandidatenpool opbouwen met vastgestelde modelcapaciteiten (vision, reasoning, thinking) en waargenomen kwaliteitsscores, uitgelezen in één bulkdoorgang net als de /v1/models-catalogus. Standaard uit: de snapshotgewichten op aanvraagtijd blijven exact zoals voorheen (capaciteiten worden op aanvraag vastgesteld en voeden de gewichten niet). Aan: die signalen voeden de snapshotgewichten, zodat kandidaatgewichten, en daarmee de selectie, kunnen veranderen."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Keyless Transport Gate",
+        "description": "Houd leveranciers met keyless (no-auth) transport die een lokale browser (browserBacked) of een lokaal geïnstalleerde CLI (isLocalCli) nodig houden buiten de auto/*-kandidaatpool, zodat een vastlopend lid een automatisch verzoek niet kan blokkeren tot de time-out per doel bereikt is (#17036). Standaard uitgeschakeld: elke no-auth-leverancier met geëmulatieerde tool calling blijft exact zoals voorheen in de pool. Directe ‘'<alias>'/'<model>'’-aanroepen werken in beide gevallen."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Inline Reasoning Replay",
+        "description": "Voor codebuddy-cn-denkmodellen (de DeepSeek-V4 / Kimi-K2-families die reasoning replay nodig hebben), elke herhaalde assistant reasoning_content als een zichtbare ‘'<thought>'’-blok aan het begin van de berichtinhoud, zodat deze overleeft in een gateway die het reasoning_content-veld verwijdert (#13632). Standaard uitgeschakeld: codebuddy-cn-verzoeken worden ongewijzigd verzonden; het reasoning_content-veld zelf wordt altijd behouden."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Provider-veiligheidsstops: terminaal",
+        "description": "Behoud een expliciete provider-veiligheidsstop (misalignment_policy_violation, content_policy_violation of de exacte verouderde weigering 'blocked by our safety systems' met het label provider_safety_rejection) als een terminale, request-scoped weigering: de code blijft behouden bij HTTP-, Responses-, WebSocket- en completed-stream-fouten, en een combo stopt hierbij in plaats van andere doelen opnieuw te proberen, waarbij toegelaten siblings worden geannuleerd (#17049). Standaard uitgeschakeld: deze fouten behouden hun bestaande afhandeling en combo-routering blijft ongewijzigd."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Credential-status: automatisch uitgeschakelde verbindingen opnieuw testen",
+        "description": "Laat de credential health-sweep verbindingen opnieuw testen die de gateway zelf heeft uitgeschakeld (gemarkeerd met autoDisabledAt; elk maximaal één keer per 6 uur en 5 per sweep) en schakel een verbinding weer in wanneer de hertest slaagt (#16190). Standaard uitgeschakeld: uitgeschakelde verbindingen blijven uitgeschakeld totdat een operator ze weer inschakelt of opnieuw test, precies zoals voorheen. Door operators uitgeschakelde verbindingen en verbindingen die na een permanente ban zijn uitgeschakeld, worden nooit opnieuw getest."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Credential-gate: alleen auth-diagnoses",
+        "description": "Beperk de combo-credential-gate zodat een gecachte mislukte credential-probe een verbinding alleen blokkeert wanneer de diagnose ongeldige inloggegevens aantoont (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Niet-doorslaggevende fouten (time-outs, rate limits, storingen, niet-ondersteunde probes en niet-getypeerde scheduler-fouten) worden dan behandeld als onbekend en de verbinding blijft verkeer ontvangen. Standaard uitgeschakeld: elke gecachte probe-fout blokkeert de verbinding voor de cache-TTL (5 minuten)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: stoppen bij content-policy-weigering",
+        "description": "Wanneer een combo-doel antwoordt met een exacte content-policy-weigering (code of type cyber_policy / content_policy_violation), stop dan de combo en retourneer die weigering zelfs wanneer de resterende doelen andere modellen zijn, in plaats van door te gaan naar het volgende doel. Standaard uitgeschakeld: de weigering plaatst het account nooit in een cooldown en activeert de provider-breaker niet, en de combo gaat precies zoals voorheen door naar het volgende doel."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Cooldown-retry: 403/410-weigeringen overslaan",
+        "description": "Wanneer elk account in een afkoelperiode zit en de afkoelperiode die het eerst afloopt werd veroorzaakt door een 403 (toegang geweigerd) of een 410 (verdwenen), retourneer die weigering dan direct in plaats van de afkoelperiode af te wachten en het verzoek opnieuw te verzenden; een vernieuwende agentrouter connection-scoped quota-403 wordt dan opgeslagen met errorCode 429, zodat een nieuwe poging mogelijk blijft. Standaard uitgeschakeld: alleen een 401 slaat de wachttijd over en elke weigering wordt opgeslagen met de status waarmee deze is ontvangen."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Budgetbeleid voor ongeprijsd gebruik",
+        "description": "Hoe per-sleutel dagelijkse/wekelijkse USD-limieten succesvol gebruik behandelen waarvan de provider of het model geen prijsregel heeft. fail_closed (standaard) markeert het venster als overschreden, zodat een onbekende kost nooit langs een harde limiet kan glippen. count_as_zero telt dat gebruik als $0 en blijft de geprijsde uitgaven afdwingen. Ongeprijsde modellen worden in beide gevallen op de startpagina van het dashboard vermeld."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "Latentie",
     "quota": "Quotum",
     "rangeWindow": "{range}-venster",
+    "timeRange": "Tijdsbereik",
     "runtimeHealthBlend": "runtime/health-mix",
     "averageResponseTime": "gemiddelde responstijd",
     "worstQuota": "Slechtste quota",
@@ -13923,7 +14500,11 @@
       "ok": "Algemeen permissief"
     },
     "allProviders": "Alle aanbieders",
-    "noApiKeyRequired": "Geen API-sleutel vereist"
+    "noApiKeyRequired": "Geen API-sleutel vereist",
+    "searchPlaceholder": "Zoek model, provider…",
+    "searchAria": "Zoek gratis modellen",
+    "filterProviderAria": "Filteren op provider",
+    "keylessOnly": "Alleen zonder sleutel"
   },
   "providerHealthAutopilot": {
     "title": "Autopilot providerstatus",
@@ -13994,7 +14575,11 @@
     "learnMore": "Meer informatie",
     "changelogLoadFailed": "Kan de changelog niet laden. Probeer het later opnieuw.",
     "retry": "Opnieuw proberen",
-    "viewFullHistory": "Bekijk de volledige geschiedenis op GitHub"
+    "viewFullHistory": "Bekijk de volledige geschiedenis op GitHub",
+    "title": "Nieuws en changelog",
+    "description": "Aankondigingen van het OmniRoute-team en de nieuwste releaseopmerkingen",
+    "viewLabel": "Bekijken",
+    "loadingNews": "Aankondigingen laden..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "Provider Circuit Breaker Status",
       "lastUpdate": "Laatste update: {timestamp}",
       "uptimeMinutes": "{minutes} min.",
-      "uptimeHoursMinutes": "{hours}u {minutes}m"
+      "uptimeHoursMinutes": "{hours}u {minutes}m",
+      "breakerClosed": "Gesloten",
+      "breakerNotClosed": "Open of halfopen"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "Onderhoudsdetails",
         "secondaryAction": "Systeemstatus"
       }
+    },
+    "miniapp": {
+      "askAnything": "Vraag wat je wilt…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP-tool",
     "scope": "Reikwijdte",
-    "apiKey": "API-sleutel"
+    "apiKey": "API-sleutel",
+    "visibleCount": "{visible} zichtbaar / {total} totaal",
+    "modeLabel": "Weergavemodus",
+    "jumpToNow": "Naar de huidige tijd springen; de NU-lijn wordt teruggezet naar positie {position}%",
+    "laneReuse": "Rijhergebruik",
+    "laneReuseLabel": "Tijdsvenster voor rijhergebruik (minuten)",
+    "laneReuseHint": "Verzoeken met dezelfde gespreks-ID blijven op dezelfde tijdlijnrij zolang de tijd ertussen minder dan dit aantal minuten bedraagt.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automatisch vernieuwen",
+    "autoRefreshLabel": "Interval voor automatisch vernieuwen (seconden)",
+    "autoRefreshHint": "Hoe vaak de tijdlijn de verzoekenlijst opnieuw van de server ophaalt.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Uitzoomen",
+    "zoomIn": "Inzoomen"
   },
   "metadata": {
     "compressionTitle": "Compressie",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "Sluiten"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Schakel het genereren van varianten op denkniveau (bijv. -low, -medium, -high) in de catalogus /v1/models uit.",
+  "teamCosts": {
+    "title": "Teamkosten",
+    "subtitle": "Beheer gedeelde zachte budgetten en catalogus-kostenramingen.",
+    "refresh": "Vernieuwen",
+    "create": "Team maken",
+    "edit": "Team bewerken",
+    "archive": "Archiveren",
+    "selectTeam": "Teams",
+    "searchTeams": "Teams zoeken",
+    "statusFilter": "Teamstatus",
+    "active": "Actief",
+    "archived": "Gearchiveerd · alleen-lezen",
+    "allTeams": "Alle teams",
+    "noTeams": "Geen overeenkomende teams.",
+    "selectHint": "Maak of selecteer een team om kosten te bekijken.",
+    "loading": "Teamkosten laden…",
+    "budgetTitle": "Huidig zacht budget",
+    "budgetSubtitle": "Geslaagd vastgelegd gebruik · voortschrijdend venster · onafhankelijk van rapportdata",
+    "archivedBudget": "Gearchiveerd: budgethandhaving is inactief. Historische rapporten blijven beschikbaar.",
+    "unlimited": "Onbeperkt — geen gedeeld zacht budget ingesteld.",
+    "budgetUnavailable": "De budgetstatus is niet beschikbaar. Vernieuw om het opnieuw te proberen.",
+    "used": "Geslaagd gebruik",
+    "maximum": "Budgetmaximum",
+    "remaining": "Bekende rest",
+    "resets": "Wordt gereset",
+    "unpricedBudget": "Voor een deel van het geslaagde gebruik is de prijs onbekend. De bekende som is onvolledig; budgethandhaving beschouwt dit venster als overschreden.",
+    "overBudget": "Budget bereikt of overschreden · {amount} te veel",
+    "reportTitle": "Gebruiksrapport",
+    "reportSubtitle": "Alle pogingen · catalogusraming in USD, geen factuur · hele UTC-dagen",
+    "reportPeriod": "Rapportperiode",
+    "day1": "1 dag",
+    "day7": "7 dagen",
+    "day30": "30 dagen",
+    "allTime": "Alle tijd",
+    "reportSpend": "Geschatte rapportuitgaven",
+    "requests": "Verzoeken",
+    "assignedKeys": "Toegewezen sleutels",
+    "unpricedReport": "Dit rapport bevat onbekende prijzen. De geschatte uitgaven zijn onvolledig.",
+    "breakdown": "Kosten per API-sleutel",
+    "noUsage": "Geen gebruik in deze rapportperiode.",
+    "keyName": "Naam van API-sleutel",
+    "tokens": "Invoer- + uitvoertokens",
+    "unnamedKey": "Sleutel zonder naam of verwijderd",
+    "unpriced": "Onbekende prijs",
+    "members": "Lidmaatschap",
+    "memberSubtitle": "Een wijziging van het lidmaatschap houdt historische uitgaven bij het oorspronkelijke team.",
+    "searchKeys": "Zoek sleutels of huidige eigenaren",
+    "chooseKey": "Kies een API-sleutel",
+    "unassigned": "Niet toegewezen",
+    "ownership": "Huidig factuurteam: {team}",
+    "assign": "Toewijzen",
+    "remove": "Verwijderen",
+    "noMembers": "Geen huidige leden. Historisch gebruik kan nog meetellen voor het budget.",
+    "assignedAt": "Toegewezen {date} (UTC)",
+    "name": "Teamnaam",
+    "description": "Beschrijving",
+    "enableBudget": "Gedeeld zacht budget inschakelen",
+    "amount": "Budgetbedrag (USD)",
+    "duration": "Voortschrijdend budgetvenster",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "confirm": "Bevestigen",
+    "transferTitle": "Sleuteloverdracht bevestigen",
+    "transferMessage": "Deze sleutel verplaatsen van “{source}” naar “{destination}”? Historische uitgaven blijven bij het oorspronkelijke team.",
+    "removeTitle": "Sleuteltoewijzing verwijderen",
+    "removeMessage": "Deze sleutel uit “{team}” verwijderen? Historische uitgaven blijven in dit team.",
+    "archiveTitle": "Team archiveren",
+    "archiveMessage": "“{team}” archiveren? Alle huidige koppelingen worden gesloten en budgethandhaving stopt. Historische rapporten blijven beschikbaar.",
+    "invalidName": "Voer een naam (1–200 tekens) en een beschrijving van maximaal 2.000 tekens in.",
+    "invalidAmount": "Voer een eindig budgetbedrag groter dan nul in.",
+    "unauthorized": "Meld u aan bij het beheerdashboard om door te gaan.",
+    "forbidden": "U heeft geen toestemming om teams te beheren. Uw invoer blijft behouden.",
+    "notFound": "Dit team of deze toewijzing bestaat niet meer.",
+    "conflict": "De toewijzing of het team is gewijzigd. Vernieuw en bevestig het huidige eigenaarschap voordat u het opnieuw probeert.",
+    "failed": "Het verzoek is mislukt. Uw invoer blijft behouden; probeer het opnieuw.",
+    "partialBudget": "Sommige bewaarde dagelijkse buckets overlappen de venstergrens en kunnen niet exact worden verdeeld. De getoonde uitgaven zijn onvolledig; de resterende ruimte is niet beschikbaar. Het bestaande zachte-budgetbeleid blijft ongewijzigd."
+  },
   "connectionTest": {
     "title": "Testbericht",
     "description": "Stuur één echt verzoek via dit account. Dit gebruikt een kleine hoeveelheid quotum en kan, afhankelijk van de provider, een gebruiksperiode starten.",
@@ -15073,5 +15753,118 @@
     "importButton": "Importeren",
     "importFailed": "Importeren mislukt.",
     "importSuccess": "{connections} accounts en {nodes} providernodes geïmporteerd; {skipped} overgeslagen."
+  },
+  "conversations": {
+    "title": "Gesprekken",
+    "countSummary": "{total, plural, one {# gesprek} other {# gesprekken}} met 2 of meer beurtwisselingen",
+    "autoRefreshTitle": "Hoe vaak deze lijst opnieuw wordt opgehaald van de server.",
+    "autoRefresh": "Automatisch vernieuwen",
+    "loading": "Gesprekken laden...",
+    "colConversation": "Gesprek",
+    "colTurns": "Beurten",
+    "colContinuation": "Vervolg",
+    "colLastModel": "Laatste model",
+    "colProvider": "Aanbieder",
+    "colStatus": "Status",
+    "colLastSeen": "Laatst gezien",
+    "drawerTitle": "Gesprek",
+    "prevConversation": "Vorig gesprek",
+    "nextConversation": "Volgend gesprek",
+    "gotoLatestRequest": "Ga naar meest recente verzoek",
+    "goToBottom": "Ga naar onderkant",
+    "statusInProgress": "Bezig",
+    "continuationGenuineTitle": "Meest recente draai gebruikte previous_response_id en het werd op serverkant opgelost",
+    "continuationBadge": "vervolging",
+    "stalledTitle": "Meest recente draai eindigde niet met stop en er is al meer dan 5 minuten niets vervolgd",
+    "stalledBadge": "vastgelopen",
+    "noTurns": "Geen draden geregistreerd voor dit gesprek."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Begin vanaf de huidige positie (bestaande logboeken overslaan)",
+    "pageTitle": "Logexport",
+    "pageSubtitle": "Stuur voortdurend de oproeplogs van het tabblad Logs naar een externe analytics-opslag.",
+    "addDestination": "Bestemming toevoegen",
+    "scheduleTitle": "Rooster",
+    "cronLabel": "Cron",
+    "notScheduled": "niet gepland",
+    "lastScheduledRun": "Laatste geplande uitvoering",
+    "lastRunSummary": "{startedAt} — {status}, {rows} rijen",
+    "never": "nooit",
+    "highWaterMark": "Hogewaterniveau oproeplogs",
+    "rowPrefix": "rij {id}",
+    "noDestinations": "Geen exportbestemmingen",
+    "noDestinationsHint": "Voeg een bestemming toe om het verzenden van call logs op het stuurderschema te starten.",
+    "errLoadStatus": "Status van export laden mislukt",
+    "errSaveDestination": "Bestemming opslaan mislukt",
+    "msgDestinationSaved": "Bestemming opgeslagen.",
+    "errConnectionTest": "Verbindingstest mislukt",
+    "msgRunInFlight": "Er is al een uitvoer voor deze bestemming gaande; er is niets dubbel verzonden.",
+    "errExportRun": "Exportuitvoering mislukt",
+    "errUpdateDestination": "Bestemming bijwerken mislukt",
+    "errDeleteDestination": "Bestemming verwijderen mislukt",
+    "deleteTitle": "Bestemming verwijderen",
+    "deleteConfirm": "\"{name}\" verwijderen? De exportcursor wordt ook verwijderd, zodat het opnieuw toevoegen begint vanaf het oudste bewaarde oproeplogboek.",
+    "statusDisabled": "Geviardeeld",
+    "statusFailing": "Mislukken",
+    "statusHealthy": "Gezond",
+    "statusNotRunYet": "Nog niet uitgevoerd",
+    "typeNotInstalled": "Type niet geïnstalleerd",
+    "metaLine": "Laatste uitvoering {lastRun} · {exported} rijen geëxporteerd · {pending} in afwachting · cursor {cursor}",
+    "btnTest": "Test",
+    "btnRunNow": "Nu uitvoeren",
+    "btnDisable": "Uitschakelen",
+    "btnEnable": "Inschakelen",
+    "btnEdit": "Bewerken",
+    "btnDelete": "Verwijderen"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI-accounten",
+    "cardSubtitle": "Alleen-lezen-status van de geauthenticeerde beheers-API",
+    "btnRefresh": "Vernieuwen",
+    "listAria": "Gezondheidsstatus van CLIProxyAPI-account",
+    "noAccounts": "Geen CLIProxyAPI-accounten gevonden.",
+    "loading": "Accountgezondheid wordt geladen…",
+    "stateReady": "Accountstatus",
+    "stateDisabled": "CLIProxyAPI is niet geïnstalleerd",
+    "stateMissingKey": "Beheersleutel is niet geconfigureerd",
+    "stateUnreachable": "Beheer-API is niet bereikbaar",
+    "stateUnauthorized": "Beheersleutel werd afgewezen",
+    "stateUnsupported": "Deze versie van CLIProxyAPI biedt geen accountstatus aan",
+    "stateInvalidResponse": "Beheer-API gaf een niet-ondersteund antwoord terug"
+  },
+  "darioPanel": {
+    "title": "Claude-accounts",
+    "description": "Authenticeer Dario met je Claude Pro/Max-abonnement. Verkeer wordt afgeschreven op je abonnement. Minstens één account is vereist voordat Dario verzoeken kan routeren (tot die tijd rapporteert /health dat de status verlaagd is).",
+    "noAccounts": "Nog geen accounts geconfigureerd.",
+    "importTitle": "Importeren vanuit OmniRoute",
+    "importDescription": "Gebruik de OAuth-tokens van een bestaande OmniRoute-Claude-verbinding in plaats van opnieuw in te loggen — de browsergoedkeuringsstap wordt volledig overgeslagen.",
+    "importPendingTooltip": "Is actief zodra er een Claude-verbinding in OmniRoute bestaat.",
+    "btnImport": "Importeren",
+    "btnImporting": "Importeren…",
+    "aliasPlaceholder": "alias (optioneel)",
+    "btnStartLogin": "Aanmelding starten",
+    "btnStarting": "Bezig met starten…",
+    "btnCompleteLogin": "Aanmelding voltooien",
+    "btnCompleting": "Bezig met voltooien…",
+    "codePlaceholder": "code#state of alleen code",
+    "noticeImported": "Geïmporteerd als account \"{alias}\" — Dario opnieuw gestart om het op te halen.",
+    "noticeAdded": "Account \"{alias}\" toegevoegd.",
+    "expiresInHours": "verloopt over ~{hours}u",
+    "expiresInMinutes": "verloopt over ~{minutes}m",
+    "expiresAt": "verloopt {date}",
+    "scopes": "{count, plural, one {# bereik} other {# bereiken}}",
+    "btnRemove": "Verwijderen",
+    "btnRefresh": "Vernieuwen",
+    "loginStep1": "1. Open deze URL in je browser en geef toestemming voor account <mono>{alias}</mono>:",
+    "pendingExpires": "Verlopende aanmelding na {time}",
+    "loginStep2": "2. Plak de code die Anthropic weergeeft:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini-app",
+    "errTelegramOnly": "Deze pagina moet binnen de Telegram Mini-app worden geopend.",
+    "greeting": "👋 Hallo {name}! Stuur een bericht via je OmniRoute-gateway.",
+    "greetingFallbackName": "daar",
+    "errNoReply": "⚠️ Geen antwoord van de gateway.",
+    "btnSend": "Verzenden"
   }
 }

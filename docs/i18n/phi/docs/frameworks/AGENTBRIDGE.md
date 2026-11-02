@@ -16,34 +16,34 @@ Ang AgentBridge ay ang MITM (Man-in-the-Middle) proxy ng OmniRoute na humaharang
 
 ### Ano ang AgentBridge?
 
-Kapag nagsagawa ng API call ang isang IDE agent (hal., GitHub Copilot, Cursor, Claude Code), direkta itong kumokonekta sa upstream AI provider (OpenAI, Anthropic, atbp.). Transparent na hinaharang ng AgentBridge ang koneksiyong iyon sa antas ng TLS — nang hindi nangangailangan ng anumang pagbabago sa configuration ng agent — at muling isinusulat ang request sa pamamagitan ng OmniRoute.
+Kapag ang isang IDE agent (hal., GitHub Copilot, Cursor, Claude Code) ay tumawag ng API, direktang kumokonekta ito sa upstream AI provider (OpenAI, Anthropic, atbp.). Hinaharang AgentBridge ang koneksyon na iyon nang malinaw sa antas TLS — nang hindi nangangailangan ng anumang pagbabago sa configuration ng ahente — at muling isinusulat ang kahilingan sa pamamagitan ng OmniRoute.
 
-Nangangahulugan itong maaari mong:
+Nangangahulugan ito na maaari mong:
 
-- **Muling iruta ang anumang agent sa anumang provider**: Nakikipag-ugnayan ba ang Copilot sa OpenAI? I-redirect ito sa Anthropic Claude, Gemini, o alinman sa 374 na provider ng OmniRoute.
-- **Maglapat ng mga model mapping**: `gemini-3-flash` → `claude-sonnet-4.7` nang transparent sa antas ng handler.
-- **Subaybayan ang lahat ng traffic ng agent**: inilalathala ang bawat naharang na request sa [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Ilapat ang resilience ng OmniRoute**: gumagana rin para sa traffic ng IDE agent ang combo routing, mga circuit breaker, fallback, at pagsubaybay sa gastos.
+- **I-rerouting ang sinumang ahente sa alinmang provider** : kinakausap ni Copilot si OpenAI? I-redirect ito sa Anthropic Claude, Gemini, o alinman sa 377 provider ng OmniRoute.
+- **Ilapat ang mga pagmamapa ng modelo** : `gemini-3-flash` → `claude-sonnet-4.7` nang malinaw sa antas ng handler.
+- **Obserbahan ang lahat ng trapiko ng ahente** : bawat naharang na kahilingan ay nai-publish sa [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
+- **Ilapat ang OmniRoute resilience** : combo routing, circuit breaker, fallbacks, at cost tracking work para din sa trapiko IDE agent.
 
-### Posisyon kumpara sa merkado
+### Pagpoposisyon kumpara sa merkado
 
-| Feature           | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ----------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity       |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot    |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)        |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex      |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE        |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries    |    —    |    ✓     |        —        |             ✓             |
-| Claude Code       |    —    |    —     |        ✓        |             ✓             |
-| Open Code         |    —    |    —     |        ✓        |             ✓             |
-| Trae              |    —    |    —     |        —        |      🔍 Sinisiyasat       |
-| Dashboard UI      |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute routing |    ✗    |    ✗     |        ✗        |             ✓             |
-| Model mapping UI  |    ✗    |    ✗     |        ✗        |             ✓             |
-| Bypass list       |    ✗    |    ✗     |        ✓        |             ✓             |
-| Upstream CA cert  |    ✗    |    ✗     |        ✓        |             ✓             |
+| Tampok               | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| -------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity          |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot       |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)           |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex         |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE           |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industriya       |    —    |    ✓     |        —        |             ✓             |
+| Claude Code          |    —    |    —     |        ✓        |             ✓             |
+| Buksan ang Code      |    —    |    —     |        ✓        |             ✓             |
+| Trae                 |    —    |    —     |        —        |     🔍 Nag-iimbestiga     |
+| Dashboard UI         |    ✓    |    ✗     |        ✗        |             ✓             |
+| Inspektor ng Trapiko |    ✗    |    ✗     |        ✓        |             ✓             |
+| OmniRoute pagruruta  |    ✗    |    ✗     |        ✗        |             ✓             |
+| Model mapping UI     |    ✗    |    ✗     |        ✗        |             ✓             |
+| Listahan ng bypass   |    ✗    |    ✗     |        ✓        |             ✓             |
+| Upstream CA cert     |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

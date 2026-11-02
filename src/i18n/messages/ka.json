@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "გუნდის ხარჯები",
+    "subtitle": "მართეთ გაზიარებული რბილი ბიუჯეტები და კატალოგის ხარჯების შეფასებები.",
+    "refresh": "განახლება",
+    "create": "გუნდის შექმნა",
+    "edit": "გუნდის რედაქტირება",
+    "archive": "დაარქივება",
+    "selectTeam": "გუნდები",
+    "searchTeams": "გუნდების ძიება",
+    "statusFilter": "გუნდის სტატუსი",
+    "active": "აქტიური",
+    "archived": "დაარქივებული · მხოლოდ წასაკითხი",
+    "allTeams": "ყველა გუნდი",
+    "noTeams": "შესაბამისი გუნდები არ არის.",
+    "selectHint": "ხარჯების სანახავად შექმენით ან აირჩიეთ გუნდი.",
+    "loading": "იტვირთება გუნდის ხარჯები…",
+    "budgetTitle": "მიმდინარე რბილი ბიუჯეტი",
+    "budgetSubtitle": "წარმატებული დაფიქსირებული გამოყენება · მოძრავი ფანჯარა · არ არის დამოკიდებული ანგარიშის თარიღებზე",
+    "archivedBudget": "დაარქივებულია: ბიუჯეტის აღსრულება გამორთულია. ისტორიული ანგარიშები ხელმისაწვდომი რჩება.",
+    "unlimited": "შეუზღუდავი — გაზიარებული რბილი ბიუჯეტი არ არის კონფიგურირებული.",
+    "budgetUnavailable": "ბიუჯეტის სტატუსი მიუწვდომელია. განაახლეთ და სცადეთ ხელახლა.",
+    "used": "წარმატებული გამოყენება",
+    "maximum": "ბიუჯეტის მაქსიმუმი",
+    "remaining": "ცნობილი ნაშთი",
+    "resets": "განულდება",
+    "unpricedBudget": "წარმატებული გამოყენების ნაწილის ფასი უცნობია. ცნობილი ჯამი არასრულია; ბიუჯეტის აღსრულება ამ ფანჯარას გადაჭარბებულად თვლის.",
+    "overBudget": "ბიუჯეტი მიღწეულია ან გადაჭარბებულია · {amount} ზედმეტი",
+    "reportTitle": "გამოყენების ანგარიში",
+    "reportSubtitle": "ყველა მცდელობა · კატალოგის შეფასება USD-ში, არა ინვოისი · სრული UTC თარიღები",
+    "reportPeriod": "ანგარიშის პერიოდი",
+    "day1": "1 დღე",
+    "day7": "7 დღე",
+    "day30": "30 დღე",
+    "allTime": "მთელი დრო",
+    "reportSpend": "ანგარიშის სავარაუდო ხარჯი",
+    "requests": "მოთხოვნები",
+    "assignedKeys": "მინიჭებული გასაღებები",
+    "unpricedReport": "ამ ანგარიშში უცნობი ფასებია. სავარაუდო ხარჯი არასრულია.",
+    "breakdown": "ხარჯი API გასაღების მიხედვით",
+    "noUsage": "ამ ანგარიშის პერიოდში გამოყენება არ არის.",
+    "keyName": "API გასაღების სახელი",
+    "tokens": "შეყვანის + გამოყვანის ტოკენები",
+    "unnamedKey": "უსახელო ან წაშლილი გასაღები",
+    "unpriced": "უცნობი ფასი",
+    "members": "წევრობა",
+    "memberSubtitle": "წევრობის შეცვლა ისტორიულ ხარჯს ორიგინალ გუნდში ტოვებს.",
+    "searchKeys": "მოძებნეთ გასაღებები ან მიმდინარე მფლობელები",
+    "chooseKey": "აირჩიეთ API გასაღები",
+    "unassigned": "მიუნიჭებელი",
+    "ownership": "მიმდინარე ბილინგის გუნდი: {team}",
+    "assign": "მინიჭება",
+    "remove": "ამოღება",
+    "noMembers": "მიმდინარე წევრები არ არის. ისტორიული გამოყენება მაინც შეიძლება ჩაითვალოს ბიუჯეტში.",
+    "assignedAt": "მიენიჭა {date} (UTC)",
+    "name": "გუნდის სახელი",
+    "description": "აღწერა",
+    "enableBudget": "გაზიარებული რბილი ბიუჯეტის ჩართვა",
+    "amount": "ბიუჯეტის თანხა (USD)",
+    "duration": "მოძრავი ბიუჯეტის ფანჯარა",
+    "cancel": "გაუქმება",
+    "save": "შენახვა",
+    "confirm": "დადასტურება",
+    "transferTitle": "დაადასტურეთ გასაღების გადატანა",
+    "transferMessage": "გადავიტანოთ ეს გასაღები „{source}“-დან „{destination}“-ში? ისტორიული ხარჯი ორიგინალ გუნდში რჩება.",
+    "removeTitle": "გასაღების მინიჭების ამოღება",
+    "removeMessage": "ამოვიღოთ ეს გასაღები „{team}“-დან? ისტორიული ხარჯი ამ გუნდში რჩება.",
+    "archiveTitle": "გუნდის დაარქივება",
+    "archiveMessage": "დავაარქივოთ „{team}“? ყველა მიმდინარე კავშირი იხურება და ბიუჯეტის აღსრულება ჩერდება. ისტორიული ანგარიშები ხელმისაწვდომი რჩება.",
+    "invalidName": "შეიყვანეთ სახელი (1–200 სიმბოლო) და არაუმეტეს 2000 სიმბოლოს აღწერა.",
+    "invalidAmount": "შეიყვანეთ ნულზე დიდი სასრული ბიუჯეტის თანხა.",
+    "unauthorized": "გასაგრძელებლად შედით მართვის დაფაზე.",
+    "forbidden": "გუნდების მართვის უფლება არ გაქვთ. თქვენი შეყვანილი შენახულია.",
+    "notFound": "ეს გუნდი ან მინიჭება აღარ არსებობს.",
+    "conflict": "მინიჭება ან გუნდი შეიცვალა. განაახლეთ და ხელახლა ცდამდე დაადასტურეთ მიმდინარე საკუთრება.",
+    "failed": "მოთხოვნა ვერ შესრულდა. თქვენი შეყვანილი შენახულია; სცადეთ ხელახლა.",
+    "partialBudget": "შენახული დღიური ბუკეტების ნაწილი ფანჯრის საზღვარს გადაფარავს და ზუსტად ვერ გადანაწილდება. ნაჩვენები ხარჯი არასრულია; დარჩენილი ლიმიტი მიუწვდომელია. არსებული რბილი ბიუჯეტის პოლიტიკა არ იცვლება."
+  },
   "codexKeyServiceMode": {
     "title": "Codex სერვისის რეჟიმი ამ API გასაღებისთვის",
     "description": "ვრცელდება Codex მოთხოვნებზე, მათ შორის კომბინაციებში შემავალ Codex მოდელებზე. იძულებით განსაზღვრული რეჟიმები უპირატესია კლიენტის, გლობალურ პარამეტრებსა და კავშირის ნაგულისხმევ პარამეტრებზე. სხვა პროვაიდერები უცვლელი რჩება.",
@@ -25,8 +102,10 @@
     "confirm": "დარწმუნებული ხართ?",
     "refresh": "განახლება",
     "close": "დახურვა",
+    "dialogTitleFallback": "დიალოგი",
     "previousPage": "წინა გვერდი",
     "nextPage": "შემდეგი გვერდი",
+    "pagination": "გვერდებად დაყოფა",
     "capsLockOn": "Caps Lock ჩართულია",
     "dismissNotification": "შეტყობინების დახურვა",
     "toggleColumns": "სვეტების ჩართვა/გამორთვა",
@@ -182,6 +261,7 @@
     "combos": "კომბოები",
     "noModelsFound": "მოდელები ვერ მოიძებნა",
     "clear": "გასუფთავება",
+    "clearFilters": "ფილტრების გასუფთავება",
     "done": "მზადაა",
     "selectAll": "ყველას მონიშვნა",
     "unselectAll": "ყველა მონიშვნის გაუქმება",
@@ -998,7 +1078,10 @@
     "batchFileUsedByCount": "გამოიყენება {count, plural, one {# პაკეტში} other {# პაკეტში}}",
     "batchFilePreview": "წინასწარი ნახვა",
     "batchFilePreviewTruncated": "ნაჩვენებია პირველი {shown} ხაზი (სულ {total} ხაზი)",
-    "batchFileDownloadFull": "სრული ფაილის ჩამოტვირთვა"
+    "batchFileDownloadFull": "სრული ფაილის ჩამოტვირთვა",
+    "tokensPageTitle": "ტოკენები",
+    "tokensPageDescription": "გაგზავნეთ ტოკენები API გასაღებებს შორის, გააზიარეთ მოწვევის კოდები და დააკავშირეთ საზოგადოების სერვერები.",
+    "tokensServerUrlLabel": "სერვერის URL"
   },
   "disabled": "გამორთულია",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ბიუჯეტის ამოწურვის გამო დაუმუშავებელი მოთხოვნები გადაამისამართეთ საგანგებო უფასო სარეზერვო პროვაიდერთან/მოდელთან.",
@@ -1085,17 +1168,8 @@
     "serverDisconnectedMsg": "პროქსი-სერვერი გაჩერებულია ან ხელახლა იტვირთება.",
     "expandSidebar": "გვერდითი პანელის გაშლა",
     "collapseSidebar": "გვერდითი პანელის ჩაკეცვა",
-    "themes": "თემები",
-    "presetColors": "პოპულარული ფერები",
     "createTheme": "თემის შექმნა",
     "chooseColor": "აირჩიეთ ერთი ფერი",
-    "themeCoral": "მარჯნისფერი",
-    "themeBlue": "ლურჯი",
-    "themeRed": "წითელი",
-    "themeGreen": "მწვანე",
-    "themeViolet": "იისფერი",
-    "themeOrange": "ნარინჯისფერი",
-    "themeCyan": "ცისფერი",
     "cliToolsShort": "ხელსაწყოები",
     "cache": "ქეში",
     "cacheShort": "ქეში",
@@ -1103,12 +1177,10 @@
     "themeSystem": "თემების სისტემა",
     "whitelabelingDesc": "საკუთარი ბრენდირების აღწერა",
     "switchThemes": "თემების გადართვა",
-    "themeAccentDesc": "თემის აქცენტის აღწერა",
     "uploadFavicon": "ფავიკონის ატვირთვა",
     "themeDark": "მუქი თემა",
     "customLogoDesc": "მორგებული ლოგოს აღწერა",
     "sidebarVisibilityToggle": "გვერდითი პანელის ხილვადობის გადამრთველი",
-    "themeAccent": "თემის აქცენტი",
     "resetFavicon": "ფავიკონის საწყის მდგომარეობაში დაბრუნება",
     "whitelabeling": "საკუთარი ბრენდირება",
     "darkMode": "მუქი რეჟიმი",
@@ -1122,10 +1194,8 @@
     "customLogo": "მორგებული ლოგო",
     "appearance": "გარეგნობა",
     "themeSelectionAria": "თემის არჩევის ARIA",
-    "themeCreate": "თემის შექმნა",
     "customFaviconDesc": "მორგებული ფავიკონის აღწერა",
     "logoPreview": "ლოგოს წინასწარი ნახვა",
-    "themeCustom": "მორგებული თემა",
     "hideHealthLogsDesc": "მდგომარეობის ჟურნალების დამალვის აღწერა",
     "faviconPreview": "ფავიკონის წინასწარი ნახვა",
     "changelog": "ცვლილებების ჟურნალი",
@@ -1352,7 +1422,9 @@
       "open": "გახსნა",
       "close": "დახურვა"
     },
-    "noResults": "შედეგები ვერ მოიძებნა"
+    "noResults": "შედეგები ვერ მოიძებნა",
+    "costsTeams": "გუნდები",
+    "costsTeamsSubtitle": "გუნდის ხარჯის ცენტრები"
   },
   "webhooks": {
     "title": "ვებჰუკები",
@@ -1485,7 +1557,11 @@
       "chatIdPlaceholder": "-100123456789 ან @channelname",
       "chatIdHint": "ჩატის/არხის უნიკალური რიცხვითი იდენტიფიკატორი ან საჯარო მომხმარებლის სახელი.",
       "tutorial": "როგორ დავაკონფიგურიროთ Telegram webhook:"
-    }
+    },
+    "copy": "კოპირება",
+    "copied": "დაკოპირდა!",
+    "expandDetails": "დეტალების ჩვენება",
+    "collapseDetails": "დეტალების დამალვა"
   },
   "compliance": {
     "auditTitle": "აუდიტი",
@@ -1597,22 +1673,17 @@
     "mcpMetricCalls24h": "გამოძახებები (24 სთ)",
     "mcpMetricSuccessRate": "წარმატების მაჩვენებელი",
     "mcpMetricAvgDuration": "საშ. ხანგრძლივობა",
-    "mcpMetricTopTool": "ყველაზე ხშირად გამოყენებული ინსტრუმენტი"
-  },
-  "themesPage": {
-    "title": "თემები",
-    "description": "აირჩიეთ მზა თემა ან შექმენით საკუთარი ერთი ფერის გამოყენებით",
-    "presetColors": "პოპულარული ფერები",
-    "customTheme": "მორგებული თემა",
-    "customThemeDesc": "დააწკაპუნეთ „თემის შექმნაზე“ და აირჩიეთ ერთი ფერი",
-    "createTheme": "თემის შექმნა",
-    "activePreset": "აქტიური თემა"
+    "mcpMetricTopTool": "ყველაზე ხშირად გამოყენებული ინსტრუმენტი",
+    "dismissError": "შეცდომის დახურვა"
   },
   "header": {
+    "teamsDescription": "გუნდის ხარჯების შეფასებები და გაზიარებული რბილი ბიუჯეტები",
     "logout": "გასვლა",
     "quickNavigation": "სწრაფი ნავიგაცია",
     "quickNavigationTitle": "სწრაფი ნავიგაცია (⌘K / Ctrl+K)",
     "openQuickNavigation": "სწრაფი ნავიგაციის გახსნა",
+    "openMenu": "მენიუს გახსნა",
+    "products": "Keak-ის პროდუქტები",
     "switchToLightMode": "ღია რეჟიმზე გადართვა",
     "switchToDarkMode": "მუქ რეჟიმზე გადართვა",
     "language": "ენა",
@@ -1640,8 +1711,6 @@
     "anthropicCompatible": "Anthropic-თან თავსებადი",
     "media": "მედია",
     "mediaDescription": "სურათების, ვიდეოებისა და მუსიკის გენერირება",
-    "themes": "თემები",
-    "themesDescription": "აირჩიეთ ფერთა თემა მთელი საინფორმაციო პანელისთვის",
     "costsDescription": "აკონტროლეთ ხარჯები, გააანალიზეთ ტენდენციები და მართეთ თქვენი AI ბიუჯეტი ყველა პროვაიდერის მასშტაბით",
     "cacheDescription": "აკონტროლეთ პროვაიდერის მოთხოვნების ქეშის ეფექტიანობა და ლოკალური სემანტიკური პასუხების ხელახალი გამოყენება.",
     "limitsDescription": "დააკონფიგურირეთ სიხშირის ლიმიტები და კვოტები თითოეული API გასაღებისა და პროვაიდერისთვის",
@@ -1933,7 +2002,14 @@
     "readinessStep3": "დააკოპირეთ თქვენი ენდპოინტი",
     "readinessStep4": "გაგზავნეთ სატესტო მოთხოვნა",
     "readinessContinue": "განაგრძეთ კონფიგურაცია",
-    "readinessDismiss": "ჯერჯერობით დახურვა"
+    "readinessDismiss": "ჯერჯერობით დახურვა",
+    "unpricedUsageTitle": "{count, plural, one {# მოდელი ახლახან გამოყენებულია და ფასის კონფიგურაცია არ აქვს} other {# მოდელები ახლახან გამოყენებულია და ფასის კონფიგურაცია არ აქვთ}}",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API კლავი, რომელსაც აქვს გამოყენების ლიმიტი} other {# API კლავები, რომლებსაც აქვთ გამოყენების ლიმიტი}} ბოლო 8 დღის განმავლობაში გამოიყენეს ეს მოდელები. როცა ეს გამოყენება ვარდება კლავის დღიურ ან კვირეულურ ფანჯარაში, კლავი ჩაითვლება კვოტის გადაჭარბებულად და მისი მოთხოვნები დაბლოკილია (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "ეს გამოყენება ითვლება $0-ად თითო კლავის გამოყენების ლიმიტების მიმართ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# მოთხოვნა} other {# მოთხოვნები}}, {keys, plural, one {# შეზღუდული კლავი} other {# შეზღუდული კლავები}}",
+    "unpricedUsageMore": "…და კიდევ {count}",
+    "unpricedUsageConfigure": "ფასის კონფიგურაცია",
+    "unpricedUsageDismiss": "დახურვა"
   },
   "analytics": {
     "title": "ანალიტიკა",
@@ -2495,7 +2571,12 @@
     "onlySelectedConnections": "მხოლოდ არჩეული კავშირები",
     "selectAtLeastOneConnection": "აირჩიეთ მინიმუმ ერთი კავშირი ან მონიშნეთ „ყველა კავშირი“.",
     "allConnectionsDesc": "ამ გასაღებს შეუძლია ნებისმიერი აქტიური კავშირის გამოყენება.",
-    "restrictedToConnections": "შეზღუდულია {count, plural, one {# კავშირით} other {# კავშირით}}."
+    "restrictedToConnections": "შეზღუდულია {count, plural, one {# კავშირით} other {# კავშირით}}.",
+    "preferredConnections": "სასურველი კავშირები",
+    "preferredConnectionsDesc": "პრიორიტეტის რიგი თითოეული გასაღებისთვის. თუ სასურველი კავშირი მიუწვდომელია, მარშრუტიზაცია გადადის შემდეგ შესაბამის კავშირზე.",
+    "preferredConnectionsNone": "უპირატესობა არ არის დაყენებული — გამოიყენება ნაგულისხმევი მარშრუტიზაციის სტრატეგია.",
+    "preferredConnectionsClear": "გასუფთავება",
+    "removeSelection": "წაშლა: {name}"
   },
   "auditLog": {
     "title": "აუდიტის ჟურნალი",
@@ -2607,7 +2688,9 @@
     "imageToTextBridgeCta": "Image→Text ხიდის კონფიგურაცია Modality Bridge-ის პარამეტრებში",
     "sttBridgeCta": "დააკონფიგურირეთ Speech→Text ხიდი Modality Bridge-ის პარამეტრებში",
     "existingConnection": "არსებული კავშირი",
-    "openrouterSttDescription": "OpenRouter-ის მეტყველებიდან ტექსტად გარდაქმნის მოდელები იყენებენ თქვენს კონფიგურირებულ OpenRouter კავშირს. ცალკე ავტორიზაციის მონაცემები საჭირო არ არის."
+    "openrouterSttDescription": "OpenRouter-ის მეტყველებიდან ტექსტად გარდაქმნის მოდელები იყენებენ თქვენს კონფიგურირებულ OpenRouter კავშირს. ცალკე ავტორიზაციის მონაცემები საჭირო არ არის.",
+    "modalityTabsAria": "მედიის ტიპი",
+    "serviceKindsAria": "სერვისის ტიპი"
   },
   "search": {
     "searchQuery": "საძიებო მოთხოვნა",
@@ -2963,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw — ხელით კონფიგურაცია",
     "clineManualConfiguration": "Cline-ის ხელით კონფიგურაცია",
     "kiloManualConfiguration": "Kilo Code-ის ხელით კონფიგურაცია",
+    "piManualConfiguration": "Pi - მექანიკური კონფიგურაცია",
+    "piConfigInvalidTitle": "Pi models.json წაუკითხავია",
+    "piOmnirouteConfigured": "OmniRoute კონფიგურირებულია, როგორც Pi საბაჟო პროვაიდერი",
+    "piModelHelp": "Pi არ აღმოაჩენს მოდელებს — ბოლო models.json.",
+    "piManualConfigTitle": "ან დაარედაქტირე ~/.pi/agent/models.json ხელით",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "შემდეგ გაუშვით Pi და აირჩიეთ omniroute პროვაიდერი. დააყენეთ PI_CODING_AGENT_DIR აგენტის მთელი კატალოგის გადასატანად.",
+    "piUnownedNote": "ეს ჩანაწერი დაემატა OmniRoute გარეთ (მაგ. pi-gui-ის მორგებული ბოლო წერტილები). განაცხადი მიიღებს მას; გადატვირთვა შლის მხოლოდ OmniRoute დაწერილ ჩანაწერებს.",
     "whenToUseLabel": "როდის გამოვიყენოთ",
     "openToolDocs": "ინსტრუმენტის დოკუმენტაციის გახსნა",
     "toolUseCases": {
@@ -2982,6 +3073,7 @@
       "amp": "გამოიყენეთ, როცა გსურთ Amp-ის შემოკლებული სამუშაო პროცესები, თუმცა კვლავ გჭირდებათ OmniRoute-ის ფსევდონიმებისა და მარშრუტიზაციის წესების სავალდებულო დაცვა.",
       "hermes": "გამოიყენეთ, როცა სწრაფი ამოცანებისთვის მსუბუქი, უშუალოდ ტერმინალში მომუშავე AI-ასისტენტი გჭირდებათ.",
       "hermes-agent": "გამოიყენეთ, როცა გჭირდებათ Hermes Agent (Nousresearch-ისგან), რომლის ნაგულისხმევი, დელეგირების, ხედვისა და დამხმარე მოდელები OmniRoute-ის მეშვეობით მარშრუტდება.",
+      "whycodes": "გამოიყენეთ, როცა გსურთ WhyCodes, როგორც ზოგადი დანიშნულების ავტონომიური CLI აგენტი (TUI, სახელდებული აგენტები, მეხსიერება, swarm), მიმართული OmniRoute-ზე.",
       "custom": "გამოიყენეთ ხელსაწყოების ინდივიდუალური რეალიზაციებისთვის ან ზოგადი OpenAI-თან თავსებადი კონფიგურაციებისთვის."
     },
     "toolDescriptions": {
@@ -2991,6 +3083,7 @@
       "grok-build": "xAI Grok Build TUI კოდირების აგენტი ინდივიდუალური პროვაიდერების მხარდაჭერით",
       "droid": "Factory Droid AI ასისტენტი",
       "openclaw": "Open Claw AI ასისტენტი",
+      "openclaude": "OpenClaude კოდირების აგენტის CLI OpenAI-თან თავსებადი პროვაიდერის მხარდაჭერით",
       "cline": "Cline AI კოდირების ასისტენტის CLI",
       "kilo": "Kilo Code AI ასისტენტის CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3022,6 +3115,7 @@
       "warp": "Warp AI ტერმინალი მორგებული პროვაიდერების მხარდაჭერით",
       "agent-deck": "Agent Deck მრავალაგენტიანი ორკესტრატორი",
       "5dive": "5dive — კოდირების აგენტების თვითჰოსტირებადი ფლოტი; ავთენტიფიკაციის ერთი პროფილი ყველა მათგანს OmniRoute-თან აკავშირებს",
+      "whycodes": "WhyCodes ავტონომიური CLI აგენტი OpenAI-თან თავსებადი საბაზისო URL-ით",
       "zed": "Zed კოდის რედაქტორი — ჩაშენებული აგენტი OpenAI-თან თავსებადი პროვაიდერის მეშვეობით"
     },
     "guides": {
@@ -3278,7 +3372,19 @@
     "cliproxyapiUnknown": "უცნობი",
     "cliproxyapiUpdate": "განახლება",
     "cliproxyapiUpdateAvailable": "ხელმისაწვდომია განახლება: v{current} → v{latest}",
-    "cliproxyapiVersion": "ვერსია"
+    "cliproxyapiVersion": "ვერსია",
+    "piInstallTitle": "დააინსტალირეთ Pi კოდირების აგენტი",
+    "piInstallInstructions": "დააინსტალირეთ Pi CLI, შემდეგ დაბრუნდით აქ, რომ დააკავშიროთ იგი OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "გამოიყენეთ URL, რომელიც ხელმისაწვდომია Pi მანქანიდან. OpenAI-თან თავსებადი /v1 საბოლოო წერტილი ავტომატურად ემატება.",
+    "piManualMergeHint": "მხოლოდ წინასწარი გადახედვა. შეაერთეთ ეს providers.omniroute ჩანაწერი models.json ში, რათა თქვენი სხვა პროვაიდერები და პარამეტრები ხელუხლებელი დარჩეს.",
+    "removeMapping": "მაპინგის წაშლა",
+    "customUrl": "მორგებული URL",
+    "customEndpointAria": "მორწუფული დაბოლო წერტილი",
+    "useDefaultKey": "გადაამხსიარეთ OmniRoute-ის ნაგულისხმობი კლავში",
+    "mainModelAria": "მთავარი მოდელი",
+    "manualConfigTitle": "Grok Build მანუალური კონფიგურაცია"
   },
   "modelCatalog": {
     "title": "Models & Combos",
@@ -3342,6 +3448,18 @@
     "maxMembersPlaceholder": "მაგ. 10",
     "testSelected": "მონიშნულის ტესტირება ({count})",
     "testAllFiltered": "ყველა გაფილტრულის ტესტირება ({count})",
+    "visibility": "ხილვადობა",
+    "allVisibility": "ხილული და დამალული",
+    "visibleOnly": "ხილული",
+    "hiddenOnly": "დამალული",
+    "visibleColumn": "ხილული",
+    "hideModel": "{name}-ის დამალვა /v1/models-დან",
+    "showModel": "{name}-ის ჩვენება /v1/models-ში",
+    "hiddenBadge": "დამალული",
+    "hideFiltered": "გაფილტრულის დამალვა ({count})",
+    "showFiltered": "გაფილტრულის ჩვენება ({count})",
+    "visibilityCounts": "{visible} ხილული · {hidden} დამალული · სულ {total}",
+    "visibilityUpdateFailed": "მოდელის ხილვადობის განახლება ვერ მოხერხდა",
     "cancel": "გაუქმება",
     "clearResults": "შედეგების გასუფთავება",
     "testing": "იტესტება...",
@@ -3397,16 +3515,53 @@
     "httpError": "მოთხოვნა ვერ შესრულდა HTTP {status} სტატუსით",
     "testFailedNoDetail": "ტესტი ჩაიშალა შეცდომის შეტყობინების გარეშე",
     "additionalCapabilities": "დამატებითი შესაძლებლობები: {list}",
-    "comboRefMember": "კომბინაცია → {name}"
+    "comboRefMember": "კომბინაცია → {name}",
+    "keyAccessButton": "API გასაღების წვდომა",
+    "allowedInKeys": "დაშვებულია: {count, plural, one {# გასაღებში} other {# გასაღებში}}",
+    "keysLoading": "API გასაღებები იტვირთება…",
+    "keysRetry": "გასაღებების ჩატვირთვის გამეორება",
+    "accessViaPattern": "{pattern}-ის მეშვეობით",
+    "accessBlocked": "დაბლოკილია {pattern}-ის მიერ",
+    "editKeyAccess": "გასაღების წვდომის რედაქტირება",
+    "toggleKeyAccess": "{item}-ის დაშვება {name}-ზე",
+    "resultNetworkError": "მინიჭება ვერ მოხერხდა",
+    "resultWouldEmptyModels": "ეს ამ გასაღებს დაშვებული მოდელების გარეშე დატოვებს — ამის ნაცვლად შეცვალეთ გასაღების წვდომა",
+    "resultWouldEmptyCombos": "ეს ამ გასაღებს დაშვებული კომბოების გარეშე დატოვებს — ამის ნაცვლად შეცვალეთ გასაღების წვდომა",
+    "keyUpdatePending": "{name} ჯერ კიდევ ახლდება. სცადეთ ხელახლა ცოტა ხანში.",
+    "assignToKeys": "API გასაღებებზე მინიჭება…",
+    "assignApply": "ცვლილებების გამოყენება",
+    "assignComplete": "API გასაღების წვდომა განახლდა",
+    "assignFailed": "ზოგიერთი API გასაღების განახლება ვერ მოხერხდა",
+    "assignNoChanges": "API გასაღების წვდომა არ შეცვლილა",
+    "selectedAccessItems": "არჩეული ელემენტები: {count}",
+    "assignExcludedCombos": "{count, plural, one {# არჩეული კომბოს სტრიქონი არ არის მოდელი და აქ გამოიტოვება} other {# არჩეული კომბოს სტრიქონი არ არის მოდელი და აქ გამოიტოვება}}. მიანიჭეთ კომბოები ჩანართიდან Combos.",
+    "assignActionAdd": "დამატება",
+    "assignActionRemove": "ამოშლა",
+    "searchKeys": "API გასაღებების ძიება",
+    "selectApiKey": "აირჩიეთ API გასაღები {name}",
+    "allModelsAccess": "ყველა მოდელი",
+    "allCombosAccess": "ყველა კომბინაცია",
+    "modelAccessCount": "მოდელები: {count}",
+    "comboAccessCount": "კომბინაციები: {count}",
+    "keyInactive": "არააქტიური",
+    "keyBanned": "დაბლოკილი",
+    "keyRevoked": "გაუქმებულია",
+    "switchRestrictedConfirm": "ამ გასაღების შეზღუდულ წვდომაზე გადაყვანა: მხოლოდ არჩეული ელემენტები იქნება დაშვებული",
+    "removeNoChangeHint": "ეს გასაღები ყველაფერს უშვებს; არჩეული ელემენტების ამოშლა არაფერს შეცვლის",
+    "removeStaysAllowedHint": "ამ გასაღებზე კვლავ დაშვებულია {patterns}-ის მეშვეობით",
+    "resultChanged": "შეცვლილია",
+    "resultUnchanged": "უცვლელია",
+    "resultSkipped": "გამოტოვებულია",
+    "resultNeedsSwitch": "საჭიროებს შეზღუდულ რეჟიმზე გადაყვანას"
   },
   "combos": {
+    "title": "კომბინაციები",
+    "description": "შექმენით მოდელების კომბინაციები შეწონილი მარშრუტიზაციითა და სარეზერვო ვარიანტის მხარდაჭერით",
+    "autoCatalogTitle": "ავტომარშრუტიზაციის კატალოგი",
     "autoTosLoadError": "მომსახურების პირობების პოლიტიკის ჩატვირთვა ვერ მოხერხდა. შეცვლამდე ხელახლა სცადეთ.",
     "autoTosSaveError": "მომსახურების პირობების პოლიტიკის შენახვა ვერ მოხერხდა. კვლავ წინა პარამეტრი ჩანს. ხელახლა სცადეთ.",
     "autoTosIncludeLabel": "auto-ში ToS: avoid ნიშნით მონიშნული პროვაიდერების ჩართვა",
     "autoTosDescription": "ნაგულისხმევად გამორთულია. ვრცელდება ყველა auto კომბინაციაზე და არა მხოლოდ ერთ ანგარიშზე. პროვაიდერის დაკავშირება ამ პარამეტრს არ რთავს.",
-    "title": "კომბინაციები",
-    "description": "შექმენით მოდელების კომბინაციები შეწონილი მარშრუტიზაციითა და სარეზერვო ვარიანტის მხარდაჭერით",
-    "autoCatalogTitle": "ავტომარშრუტიზაციის კატალოგი",
     "autoCatalogTemplateCount": "{count} შაბლონი",
     "autoCatalogDescription": "ჩაშენებული auto/* კომბინაციები დინამიკურად განისაზღვრება დაკავშირებული პროვაიდერების მიხედვით. გამოიყენეთ ამ ID-თაგან ნებისმიერი მოდელის ველში — კონფიგურაცია საჭირო არ არის.",
     "autoCatalogExpand": "ავტომარშრუტიზაციის კატალოგის გაშლა",
@@ -3451,6 +3606,12 @@
     "errorUpdating": "შეცდომა კომბოს განახლებისას",
     "errorDeleting": "შეცდომა კომბოს წაშლისას",
     "testFailed": "სატესტო მოთხოვნა ვერ შესრულდა",
+    "removeErrorModels": "{count} წარუმატებელი მოდელის წაშლა",
+    "removingErrorModels": "იშლება…",
+    "errorModelsRemoved": "კომბოდან წაიშალა {count} წარუმატებელი მოდელი",
+    "noErrorModelsFound": "ამ კომბოს საკუთარ ნაბიჯებში წარუმატებელი მოდელი ვერ მოიძებნა",
+    "cannotRemoveAllModels": "კომბოდან ყველა მოდელის წაშლა შეუძლებელია",
+    "removeErrorModelsConfirm": "წავშალოთ {count} წარუმატებელი მოდელი „{name}“-დან? დროის ამოწურვა და სიჩქარის ლიმიტები არ ითვლება.",
     "failedToggle": "კომბოს გადართვა ვერ მოხერხდა",
     "testResults": "ტესტის შედეგები — {name}",
     "resolvedBy": "დაამუშავა:",
@@ -3518,6 +3679,9 @@
     "moveUp": "ზემოთ ატანა",
     "moveDown": "ქვემოთ ჩამოტანა",
     "removeModel": "ამოშლა",
+    "testStep": "ამ მოდელის ტესტირება",
+    "testStepRunning": "მიმდინარეობს ტესტირება…",
+    "testStepNotTestable": "ტესტირება შესაძლებელია მხოლოდ ერთმოდელიანი ნაბიჯებისთვის",
     "saving": "ინახება...",
     "liveNoProviders": "პროვაიდერები ჯერ არ დაფიქსირებულა.",
     "liveFleetDataHint": "ფლოტის მონაცემები რეალურ დროში კომბინაციის მოვლენების მეშვეობით შემოდის.",
@@ -3559,6 +3723,7 @@
     "playgroundNoCombosYet": "კომბოები ჯერ არ არის კონფიგურირებული.",
     "playgroundCreateFirst": "ჯერ შექმენით ერთი",
     "weighted": "შეწონილი",
+    "weightPercent": "წონა (%)",
     "leastUsed": "ყველაზე ნაკლებად გამოყენებული",
     "costOpt": "ღირებულებით ოპტიმიზებული",
     "strategyGuideTitle": "როგორ გამოიყენოთ ეს სტრატეგია",
@@ -3720,6 +3885,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# ანგარიში} other {# ანგარიში}}",
     "builderGlobalAdded": "დამატებულია",
     "builderGlobalAdd": "დამატება",
+    "clearSearch": "ძიების გასუფთავება",
     "manualModel": "მოდელის ხელით დამატება",
     "manualModelInvalid": "შეიყვანეთ მოდელი ფორმატით provider/model.",
     "manualModelUnknownProvider": "პროვაიდერის უცნობი პრეფიქსი.",
@@ -3936,6 +4102,7 @@
     "builderComboRefStep": "კომბოს მითითების დამატება",
     "builderPinnedAccount": "მიმაგრებული ანგარიში",
     "builderLegacyEntry": "მოძველებული ჩანაწერი",
+    "builderStaleModel": "არ არის ცოცხალ კატალოგში",
     "reviewName": "სახელი",
     "reviewStrategy": "სტრატეგია",
     "reviewSteps": "ეტაპები",
@@ -3973,6 +4140,10 @@
     "responseValidationMinLength": "კონტენტის მინიმალური სიგრძე (სიმბოლოები)",
     "responseValidationJsonPaths": "JSON-path-ის შემოწმებები",
     "responseValidationAddCheck": "+ შემოწმების დამატება",
+    "responseValidationRemoveCheck": "შემოწმების წაშლა",
+    "responseValidationPath": "JSON-ის გზა",
+    "responseValidationCondition": "პირობა",
+    "responseValidationValue": "მოსალოდნელი მნიშვნელობა",
     "agentFeaturesSystemMessageOverride": "სისტემური შეტყობინების ჩანაცვლება",
     "agentFeaturesSystemMessagePlaceholder": "თქვენ ხართ ექსპერტი ასისტენტი...",
     "agentFeaturesSystemMessageHint": "აგენტებისთვის სისტემური შეტყობინების ჩანაცვლება",
@@ -4792,7 +4963,15 @@
     },
     "totalEntries": "ჩანაწერების საერთო რაოდენობა",
     "type": "ტიპი",
-    "memoryEnabled": "მეხსიერება ჩართულია"
+    "memoryEnabled": "მეხსიერება ჩართულია",
+    "qdrantTutorialTitle": "სწრაფი სასწავლო გზამკვლევი: მეხსიერება Qdrant-თან",
+    "qdrantTutorialIntro": "Qdrant ინახავს მეხსიერების ვექტორებსა და მეტა მონაცემებს, რათა შესაბამისი კონტექსტი ამოიტანოთ. ის ტოკენებს პირდაპირ არ სწყვეტს; დაზოგვა არაპირდაპირია, რადგან ის თავიდან იცილებს მოთხოვნასთან არაქცრიულ კონტექსტს.",
+    "qdrantTutorialStep1": "სერვერი მცვლადი HTTPS-ითა და API კლავშით, დეველოპმენტის წინაგული.",
+    "qdrantTutorialStep2": "გადასცადეთ მასპინძელი, პორტი, კოლექცია და მოდელი მოწოდებელი/მოდელი ფორმატში, მოწოდებული მოწმადებებით.",
+    "qdrantTutorialStep3": "კოლექციის გამომავლობა მოდელის მიერ გამოშვებული გამომავლობას უნდა ემთხვევა. არსებული 2048-გამომავლობიანი კოლექცია არ მიიღებს 1536-გამომავლობიან ემბედაინგებს.",
+    "qdrantTutorialStep4": "შენახეთ, ამოწმეთ კავშირი და გაქვით ძიების ტესტი. მხოლოდ შემდეგ ჩართეთ Qdrant.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "კრედიტები: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "უნარები",
@@ -5288,7 +5467,8 @@
         "skipped": "უკვე კონფიგურირებულია",
         "failed": "ვერ მოხერხდა"
       }
-    }
+    },
+    "stepProgress": "დაყენების მიმდინარეობა"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ეს პროვაიდერი ნაგულისხმევად გამორიცხულია auto-დან",
@@ -5329,6 +5509,27 @@
     "importFromFileDownloadTemplate": "CSV შაბლონის ჩამოტვირთვა",
     "importFromFileMoreErrors": "+კიდევ {count}",
     "importFromFileSchemaHint": "CSV სვეტები პოზიციურია: provider, name, apiKey, baseUrl (არასავალდებულო), priority (არასავალდებულო). provider სვეტი უნდა შეიცავდეს არსებული მართული პროვაიდერის id-ს ან უკვე რეგისტრირებული OpenAI/Anthropic-თან თავსებადი კვანძის id-ს — ეს იმპორტი ახალ endpoint კვანძებს არ ქმნის.",
+    "importOAuthExport": "OAuth ექსპორტის იმპორტი",
+    "oauthExportTitle": "ანგარიშების მენეჯერის ექსპორტის იმპორტი",
+    "oauthExportDescription": "ატვირთეთ ანგარიშების მენეჯერის უბრალო ტექსტის ექსპორტი (მაგ. Antigravity Manager-ის cloud-accounts ექსპორტი). ტოკენები განახლდება სერვერზე და თითოეული ანგარიში ხდება OAuth კავშირი — დუბლიკატები ადგილზევე განახლდება.",
+    "oauthExportProviderLabel": "პროვაიდერი",
+    "oauthExportChoose": "ფაილის არჩევა",
+    "oauthExportFileAria": "ანგარიშების ექსპორტის JSON ფაილი",
+    "oauthExportSchemaHint": "მისაღებია: დოკუმენტი \"accounts\" მასივით, უბრალო მასივი ან ერთი ჩანაწერი. ტოკენები შეიძლება იყოს ჩადგმულ token ობიექტში ან პირდაპირ ჩანაწერში.",
+    "oauthExportDetected": "აღმოჩენილია {count} ანგარიში",
+    "oauthExportSelectAll": "ყველა ანგარიშის მონიშვნა",
+    "oauthExportSelectAccount": "ანგარიშის {index} მონიშვნა",
+    "oauthExportColEmail": "ელფოსტა",
+    "oauthExportColProvider": "პროვაიდერი",
+    "oauthExportColRefresh": "განახლების ტოკენი",
+    "oauthExportNoEmail": "(ელფოსტა არ არის)",
+    "oauthExportYes": "დიახ",
+    "oauthExportNo": "არა",
+    "oauthExportImporting": "მიმდინარეობს იმპორტი…",
+    "oauthExportImport": "{count} ანგარიშის იმპორტი",
+    "oauthExportResult": "იმპორტირებულია {imported}/{total} — {failed} ვერ შესრულდა",
+    "oauthExportParseError": "ამ ფაილიდან ანგარიშების წაკითხვა ვერ მოხერხდა.",
+    "oauthExportUnknownError": "უცნობი შეცდომა",
     "adaptaTutorial": {
       "title": "როგორ დავაკავშიროთ Adapta Web",
       "introPrefix": "Adapta ავთენტიფიკაციისთვის Clerk-ს იყენებს. ტოკენი",
@@ -5579,6 +5780,7 @@
     "allModelsAlreadyImported": "ყველა მოდელი უკვე იმპორტირებულია",
     "noNewModelsToImport": "იმპორტირებისთვის ახალი მოდელები არ არის — ყველა მოდელი უკვე რეესტრში ან მორგებული მოდელების სიაშია",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "მოდელის აღმოჩენა ვერ მოხერხდა {time}",
     "skippingExistingModels": "გამოტოვებულია {count} არსებული მოდელი",
     "autoSync": "ავტომატური სინქრონიზაცია",
     "autoSyncShort": "სინქრონიზაცია",
@@ -5797,6 +5999,7 @@
     "contextWindowOverridePlaceholder": "მაგ. 131072",
     "contextWindowOverrideHint": "ხელით მიუთითეთ ამ მოდელის რეალური კონტექსტის ფანჯარა (ტოკენებში), თუ პროვაიდერი მას არასწორად აცხადებს. ეს მნიშვნელობა უპირატესია ავტომატურად აღმოჩენილ/კატალოგის მნიშვნელობებთან შედარებით და ხელს უშლის კომბინირებული მარშრუტიზაციისას მოდელის გამოტოვებას.",
     "contextWindowOverrideInvalid": "კონტექსტის ფანჯრის ხელით განსაზღვრული მნიშვნელობა უნდა იყოს ტოკენების დადებითი მთელი რიცხვი",
+    "maxOutputTokenOverrideInvalid": "გამოტანის ტოკენების მაქსიმუმის ხელით განსაზღვრული მნიშვნელობა უნდა იყოს ტოკენების დადებითი მთელი რიცხვი",
     "visionCapableLabel": "ხედვის მხარდაჭერა",
     "visionCapableHint": "ხელით მონიშნეთ ეს მოდელი ხედვის მხარდაჭერის მქონედ, თუ პროვაიდერის აღმოჩენის მეტამონაცემებში გამოსახულების შეყვანის მოდალობა მითითებული არ არის (ხშირია თვითჰოსტირებული/ლოკალური ბექენდების შემთხვევაში).",
     "compatParamFiltersLabel": "პარამეტრების ფილტრები",
@@ -5838,6 +6041,25 @@
     "ccAliasAddModelButton": "გადაფარვის დამატება",
     "ccAliasLoadError": "აღმოჩენის ფსევდონიმის პარამეტრების ჩატვირთვა ვერ მოხერხდა: {error}",
     "ccAliasSaveError": "აღმოჩენის ფსევდონიმის პარამეტრის შენახვა ვერ მოხერხდა: {error}",
+    "cliVersionSectionTitle": "რეკლამირებული CLI კლიენტის ვერსია",
+    "cliVersionEffectiveLabel": "ამჟამად რეკლამირებულია",
+    "cliVersionSourceLabel": "ამოხსნილია: {source}",
+    "cliVersionPinnedLabel": "დაფიქსირებული ნაგულისხმევი: {pinned}",
+    "cliVersionSourceSettings": "დაფის გადაფარვა",
+    "cliVersionSourceEnv": "გარემოს ცვლადი",
+    "cliVersionSourceDiscovered": "ავტომატურად აღმოჩენილი უახლესი გამოცემა",
+    "cliVersionSourceDefault": "გადაღებული ნაგულისხმევი",
+    "cliVersionInputLabel": "ვერსიის გადაფარვა",
+    "cliVersionInputPlaceholder": "Override ვერსია; ცარიელი ასუფთავებს",
+    "cliVersionSaveButton": "შენახვა",
+    "cliVersionResetButton": "ნაგულისხმევად გადატვირთვა",
+    "cliVersionLoadError": "CLI ვერსიის პარამეტრების ჩატვირთვა ვერ მოხერხდა: {error}",
+    "cliVersionSaveError": "CLI ვერსიის შენახვა ვერ მოხერხდა: {error}",
+    "cliVersionLoadFailed": "მიმდინარე CLI ვერსიის პარამეტრების ჩატვირთვა ვერ მოხერხდა.",
+    "cliVersionHintClaude": "ანთროპიული კარიბჭეები კლოდის უახლესი მოდელები კლოდ კოდის კლიენტის ვერსიაზე ხედავს. ეს არის ვერსია, OmniRoute აქვეყნებს რეკლამას ყველა Anthropic-ის მოთხოვნაზე.",
+    "cliVersionCaveatClaude": "ბილინგის გაფრთხილება: ბილინგის ვერსია არის '<version>'.'<build-revision>' და build-ის რევიზია არის ცალკე აღებული მუდმივი. Advertising 2.1.260 იუწყება 2.1.260.1e2, რაც არ არის ის, რასაც რეალური 2.1.260 ორობითი აგზავნის.",
+    "cliVersionHintCodex": "OpenAI აწარმოებს ახალ მოდელებს Codex კლიენტის ვერსიაზე, რომელიც ხედავს, მაგალითად, შეცდომა: 'gpt-6-astra' მოდელი მოითხოვს Codex ის უფრო ახალ ვერსიას.",
+    "cliVersionCaveatCodex": "დასკვნის გაფრთხილება: ვერსია, რომელიც თქვენს აბონენტს იტყობინება, კვლავ აჭარბებს CODEX_CLIENT_VERSION env var-ს, მაგრამ ეს უგულებელყოფს ორივეს, რადგან ეს არის აშკარა ოპერატორის განზრახვა.",
     "compatUpstreamHeadersLabel": "დამატებითი upstream სათაურები",
     "compatUpstreamHeadersHint": "მაღალი პრივილეგიის პარამეტრი — სანდოობის იგივე დონე აქვს, რაც პროვაიდერის API-ის ავტორიზაციის მონაცემების რედაქტირებას; ის მხოლოდ სანდო ადმინისტრატორებმა უნდა გამოიყენონ. გაერთიანება ხდება მას შემდეგ, რაც OmniRoute პროვაიდერის API გასაღებიდან ავტორიზაციას დაამატებს. თუ მორგებული სათაურის სახელი ემთხვევა არსებულის სახელს (მაგ., Authorization), თქვენი მნიშვნელობა სრულად ჩაანაცვლებს ავტომატურად გენერირებულ სათაურს (Bearer ტოკენის ჩათვლით) — upstream სერვერი დაინახავს მხოლოდ იმას, რაც თქვენ შეიყვანეთ და არა პარამეტრებში მითითებულ გასაღებს. არასწორმა კონფიგურაციამ შეიძლება გამოიწვიოს 401 შეცდომა ან upstream ავტორიზაციის გაუმართაობა. თითო სათაური თითო სტრიქონზე (მაგ., დამატებითი Authentication ზოგიერთი კარიბჭისთვის). წინასწარ სანახავად მაჩვენებელი მნიშვნელობაზე გადაიტანეთ ან მასზე ფოკუსირდით. ინახება ფოკუსის დაკარგვისას, გარეთ დაწკაპუნებისას ან ამ პანელის დახურვისას.",
     "compatUpstreamHeaderName": "სათაურის სახელი",
@@ -6055,10 +6277,10 @@
     "apiFormatLabel": "API ფორმატის ეტიკეტი",
     "apiKeyOptionalHint": "დატოვეთ ცარიელი, თუ თქვენი ლოკალური კონფიგურაცია ან პროვაიდერი ავთენტიფიკაციას არ მოითხოვს.",
     "apiKeyOptionalLabel": "API გასაღები (არასავალდებულო)",
-    "apiRegionChina": "API რეგიონი: ჩინეთი",
-    "apiRegionHint": "API რეგიონის მინიშნება",
-    "apiRegionInternational": "API რეგიონი: საერთაშორისო",
-    "apiRegionLabel": "API რეგიონის ეტიკეტი",
+    "apiRegionChina": "კონტინენტური ჩინეთი",
+    "apiRegionHint": "აირჩიეთ endpoint-ის რეგიონი, რომელიც გამოიყენება API წვდომისა და კვოტის თვალყურის დევნებისთვის.",
+    "apiRegionInternational": "საერთაშორისო",
+    "apiRegionLabel": "API რეგიონი",
     "apikey": "API გასაღები",
     "audio": "აუდიო",
     "audioProvidersHeading": "აუდიო პროვაიდერების სათაური",
@@ -6539,6 +6761,7 @@
       "monsterapi": "მიიღეთ API გასაღები მისამართზე monsterapi.ai",
       "moonshot": "დააკავშირეთ Kimi API გასაღებით.",
       "morph": "უფასო დონე: 250K კრედიტი თვეში, $0",
+      "apmix": "დააკავშირეთ Apmix API გასაღებით apmix.ai/dashboard-დან — ერთი გამოწერა, მრავალი მოდელი.",
       "nanogpt": "დააკავშირეთ NanoGPT API გასაღებით.",
       "nebius": "რეგისტრაციისას დაახლოებით $1-ის საცდელი კრედიტი API-ის ტესტირებისთვის",
       "nlpcloud": "NLP Cloud OpenAI-ის chat/completions-ის ნაცვლად ჩატბოტის საკუთარ API-ს იყენებს. OmniRoute OpenAI-ის შეტყობინებებს input/context/history ფორმატზე ადაპტირებს და მხარდაჭერილი ჩატბოტის მოდელების ლოკალურ კატალოგს გვთავაზობს.",
@@ -6635,8 +6858,7 @@
       "kiro": "უფასო ტარიფი: 50 კრედიტი/თვე (~25K–100K ტოკენი). ⚠️ Kiro-ს მომსახურების პირობები კრძალავს მესამე მხარის პროქსის/ჰარნესის გამოყენებას.",
       "codex": "დააკავშირეთ OpenAI Codex არსებული OAuth პროცესით.",
       "qwen": "დააკავშირეთ Qwen Code არსებული OAuth პროცესით.",
-      "github-models": "შექმენით GitHub PAT 'models: read' წვდომის სფეროთი მისამართზე github.com/settings/tokens",
-      "apmix": "დააკავშირეთ Apmix API გასაღებით apmix.ai/dashboard-დან — ერთი გამოწერა, მრავალი მოდელი."
+      "github-models": "შექმენით GitHub PAT 'models: read' წვდომის სფეროთი მისამართზე github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} იღებს პროვაიდერის ნატიურ მოდელის ID-ებს. შემოიტანეთ ისინი /models განყოფილებიდან ან მარშრუტიზაციისთვის დაამატეთ მორგებული ID-ები.",
     "bedrockModelsDescription": "Amazon Bedrock-ის მოდელები შეზღუდულია AWS-ის რეგიონის მიხედვით. შემოიტანეთ ისინი /models განყოფილებიდან ან დაამატეთ არჩეულ რეგიონში ჩართული Bedrock მოდელების ID-ები.",
@@ -6808,7 +7030,27 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "გამოიყენება {count} კომბინაციაში: {combos}",
+    "openComboTooltip": "კომბინაციების გახსნა — იყენებს {combo}",
+    "claudeCodeRoutingTitle": "აწილის ქორების მარშრუტიზაცია Claude Code მომხმარებლებისთვის",
+    "routingNative": "ნატივობა",
+    "routingFallback": "განაცხადი",
+    "rerank": "გადაკალათება",
+    "video": "ვიდეო",
+    "markFreeTierTitle": "ნიშნული მუხტურები (ჩანს, მინდა პაიაპლას მიტყუნება ჯავშნი შეფუთვის)",
+    "codexTunnelTitle": "Codex ხელს უდის",
+    "codexTunnelDescription": "ტუნელი არის მხოლოდ გაშვებური. ლოკალური ინსტრუმენტები კვლავ მხოლოდ Codex-ს სკანდაბოქსში და მისი სათანადო პოლიტიკის ქვეშ შესრულდება.",
+    "tunnelIdLabel": "ტუნელის ID",
+    "tunnelRuntimeKeyLabel": "ტუნელის რუნტაიმის გასაღები",
+    "tunnelRuntimeKeyPlaceholder": "რუნტაიმის გასაღები",
+    "tunnelRuntimeKeyHint": "შენახულია კერძო გაშიფრული მდგომარეობაში კუკისთან ერთად და მინიატურული ჟურნალებში nie წერება.",
+    "tunnelRuntimeKeyNewLabel": "ახალი ტუნელის რუნტაიმის გასაღები",
+    "tunnelRuntimeKeyNewHint": "შეიყვანეთ მხოლოდ ახალი კუკისთან ერთად. მნიშვნელობა შენახულია კერძო გაშიფრული მდგომარეობაში.",
+    "chatgptConnectorLabel": "ChatGPT-ის თვითონ შესქმნელი კონექტორი",
+    "doctorChecking": "სტატუსის შემოწმება…",
+    "doctorCheck": "დოქტორის სტატუსის შემოწმება",
+    "fallbackRetryBackendTitle": "სარეზერვო ხელახალი ცდის backend"
   },
   "settings": {
     "title": "პარამეტრები",
@@ -7104,16 +7346,6 @@
     "settingsSidebarDesc": "აირჩიეთ, გვერდითი ზოლის რომელი ელემენტები გამოჩნდეს. „ძირითადი“ რეჟიმის შემთხვევაში გაფართოებული ხელსაწყოები ძიებით კვლავ ხელმისაწვდომია.",
     "hideHealthLogs": "მდგომარეობის შემოწმების ჟურნალების დამალვა",
     "hideHealthLogsDesc": "ჩართვისას სერვერის კონსოლში [HealthCheck] შეტყობინებები აღარ გამოჩნდება",
-    "themeAccent": "თემის ფერი",
-    "themeAccentDesc": "აირჩიეთ მზა ფერი ან შექმენით საკუთარი თემა ერთი ფერის გამოყენებით",
-    "themeCreate": "თემის შექმნა",
-    "themeCustom": "მორგებული თემა",
-    "themeBlue": "ლურჯი",
-    "themeRed": "წითელი",
-    "themeGreen": "მწვანე",
-    "themeViolet": "იისფერი",
-    "themeOrange": "ნარინჯისფერი",
-    "themeCyan": "ცისფერი",
     "whitelabeling": "ბრენდინგი",
     "whitelabelingDesc": "მოარგეთ აპლიკაციის სახელი და ლოგო",
     "appName": "აპლიკაციის სახელი",
@@ -7254,7 +7486,7 @@
       "nextSwitchNow": "ახლა",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7265,7 +7497,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "ბირთვის ბინარული ფაილის გზა",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "სურვილისამებრ: მიღებული ფაილის შეცვლამდე ამოწმებს გენერირებულ ფაილს ბირთვის ბინარული ფაილით. გვერდით ჩაწერის გასაგრძელებლად დატოვეთ ცარიელი. საქაღალდე არ არსებობს, თუ შეიქმნება."
+      "coreBinaryPathHelp": "სურვილისამებრ: მიღებული ფაილის შეცვლამდე ამოწმებს გენერირებულ ფაილს ბირთვის ბინარული ფაილით. გვერდით ჩაწერის გასაგრძელებლად დატოვეთ ცარიელი. საქაღალდე არ არსებობს, თუ შეიქმნება.",
+      "urlFeedlessHint": "არაფერი ჩაწერეთ მხოლოდ სელექტორის გამომწერებისთვის: ქვემოთ მიუთითეთ საკონტროლო URL, ვერც ერთი ვერსია არ ჩამოიტვირთება, განახლდება ან მიებმება."
     },
     "bulkHealthcheck": "ხელმისაწვდომობის მასობრივი შემოწმება",
     "bulkHealthcheckDesc": "შეამოწმეთ ყველა კონფიგურირებული პროქსი სამიზნე URL-თან მიმართებით, რათა დაადგინოთ, რომელი მუშაობს.",
@@ -7706,6 +7939,7 @@
     "configured": "კონფიგურირებულია",
     "none": "არცერთი",
     "modelOverrideValuePlaceholder": "რიცხვითი მნიშვნელობა",
+    "modelOverrideKey": "გადაფარვის გასაღები",
     "modelOverrideReasoningEffortsPlaceholder": "ინგლისურად, მძიმით გამოყოფილი, მაგ. low, medium, high",
     "addKeyValue": "გასაღები-მნიშვნელობის დამატება",
     "noModelOverrides": "ამ მოდელისთვის გადაფარვები კონფიგურირებული არ არის.",
@@ -7754,7 +7988,6 @@
     "customPricingNote": "შეგიძლიათ კონკრეტული მოდელებისთვის ნაგულისხმევი ფასები ჩაანაცვლოთ. მორგებულ ფასებს ავტომატურად გამოვლენილ ფასებთან შედარებით უპირატესობა ენიჭება.",
     "editPricing": "ფასების რედაქტირება",
     "viewFullDetails": "სრული დეტალების ნახვა",
-    "themeCoral": "მარჯნისფერი",
     "adaptiveVolumeRouting": "მოცულობაზე ადაპტირებული მარშრუტიზაცია",
     "adaptiveVolumeRoutingDesc": "კავშირების მასშტაბს დინამიკურად ცვლის სასარგებლო დატვირთვის მოცულობისა და გამტარუნარიანობაზე ზეწოლის მიხედვით.",
     "lkgpToggleTitle": "ბოლო ცნობილი გამართული პროვაიდერი (LKGP)",
@@ -7849,6 +8082,8 @@
     "compressionDesc": "შეამცირეთ ტოკენების გამოყენება პროვაიდერებთან გაგზავნამდე პრომპტების შეკუმშვით",
     "autoCombosTitle": "ავტოკომბოები",
     "autoCombosDesc": "მიეცით ამ გასაღებს ჩაშენებული auto/* კომბოების გამოყენების უფლება, რომლებიც მოდელს ავტომატურად ირჩევენ ყველა კონფიგურირებული პროვაიდერიდან",
+    "ccDiscoveryAliasesTitle": "Claude Code-ის აღმოჩენის ფსევდონიმები",
+    "ccDiscoveryAliasesDesc": "აცხადებს claude/... თავსებადობის სარკეებს მოდელებისა და კომბინაციებისთვის, რომლებზეც ამ გასაღებს უკვე აქვს წვდომა",
     "compressionGuidanceFullGuideLink": "შეკუმშვის სრული გზამკვლევი",
     "compressionGuidanceShow": "დეტალები",
     "compressionGuidanceHide": "დეტალების დამალვა",
@@ -8222,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "ფანჯრის პროცენტული წილი",
     "compressionAdaptivePolicyAbsolute": "ტოკენების აბსოლუტური ბიუჯეტი",
     "compressionOutputStylesDescription": "ამატებს პასუხის ფორმირების ინსტრუქციებს პროვაიდერის გამოტანილი შედეგის გადაწერის გარეშე. შეგიძლიათ, თავისუფლად შეუთავსოთ ერთმანეთს.",
+    "compressionOutputStylesPreviewNote": "მოთხოვნა აწვდის მხოლოდ ერთ ენას: აღმოჩენილ ენას, სხვა შემთხვევაში პირველ პაკეტს. ზემოთ მოყვანილი ბლოკები არის თითო პაკეტის ვარიანტები და არა კომბინირებული ინექცია.",
     "mcpAccessibilityDescription": "განსაზღვრავს MCP ხელსაწყოების შედეგების მოქმედების სფეროს (ცალკე საცავი).",
     "compressionStylesTileSummary": "დაზოგილია {tokens, number} ტოკენი · {runs, plural, one {# სტილიზებული გაშვება} other {# სტილიზებული გაშვება}}",
     "compressionStylesTileEmpty": "სტილიზებული გაშვებები ჯერ არ არის.",
@@ -8799,6 +9035,8 @@
     "qdrantHost": "ჰოსტი",
     "qdrantCollection": "კოლექცია",
     "catalogVisibilityHint": "დამალული მოდელების იდენტიფიკატორების გამოძახება კვლავ შესაძლებელია წვდომის იმავე ნებართვებით.",
+    "exposeCombosOnly": "/v1/models-ში მხოლოდ კომბოების ჩამოთვლა",
+    "exposeCombosOnlyDesc": "კლიენტები, რომლებიც მოდელებს ავტომატურად აღმოაჩენენ, პროვაიდერების დაუმუშავებელი მოდელების ნაცვლად თქვენს კომბოებს (და auto/*-ს, თუ დამალული არ არის) დაინახავენ. აშკარა provider/model იდენტიფიკატორები კვლავ მარშრუტიზდება.",
     "catalogScopeTitle": "Models API-ის სია",
     "catalogScopeDesc": "რას აჩვენებს GET /v1/models ამ გასაღებისთვის. სიის შევიწროება არასოდეს ცვლის იმას, თუ რისი გამოძახება შეუძლია გასაღებს.",
     "catalogScopeAll": "ორივე",
@@ -8918,7 +9156,9 @@
         "financial": "ფინანსური",
         "brazilian": "ბრაზილიური",
         "usa": "აშშ",
-        "full": "სრული"
+        "full": "სრული",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (სამხრეთ აფრიკა)"
       },
       "builtinTypes": "ჩაშენებული ტიპები",
       "types": {
@@ -8932,7 +9172,19 @@
         "ip_address": "IPv4 მისამართები",
         "ipv6_address": "IPv6 მისამართები",
         "aws_key": "AWS წვდომის გასაღებები",
-        "api_key_generic": "API გასაღებები და ტოკენები"
+        "api_key_generic": "API გასაღებები და ტოკენები",
+        "iban": "IBAN საბანკო ანგარიშის ნომრები",
+        "eu_vat": "EU VAT ნომრები",
+        "es_dni_nie": "ესპანური DNI / NIE",
+        "it_codice_fiscale": "იტალიური კოდექსი Fiscale",
+        "pl_pesel": "პოლონური PESEL",
+        "nl_bsn": "ჰოლანდიური BSN",
+        "de_steuer_id": "გერმანული Steuer-ID",
+        "se_personnummer": "შვედური პერსონალის ნომერი",
+        "za_id": "სამხრეთ აფრიკის ID ნომრები",
+        "za_phone": "სამხრეთ აფრიკის ტელეფონის ნომრები",
+        "za_vat": "სამხრეთ აფრიკის VAT ნომრები",
+        "za_tax_ref": "სამხრეთ აფრიკის საგადასახადო მითითებები"
       },
       "customPatterns": "მორგებული შაბლონები",
       "customPatternsDesc": "დამთხვევები იცვლება [CUSTOM_REDACTED]-ით. მაქსიმუმ {max} შაბლონი. კატასტროფული უკუსვლის რისკის მქონე შაბლონები უარყოფილია.",
@@ -9034,7 +9286,8 @@
     "tomlTestPassed": "წარმატებული",
     "tomlTestFailed": "წარუმატებელი",
     "tomlImportError": "RTK TOML ფაილის დამუშავება ვერ მოხერხდა.",
-    "tomlFileReadError": "არჩეული TOML ფაილის წაკითხვა ვერ მოხერხდა."
+    "tomlFileReadError": "არჩეული TOML ფაილის წაკითხვა ვერ მოხერხდა.",
+    "viewMode": "ხედვის რეჟიმი"
   },
   "compressionEngineConfig": {
     "loading": "იტვირთება…",
@@ -9256,7 +9509,8 @@
     "languagePacksList": "ენობრივი პაკეტები: {packs}",
     "dragToReorder": "გადაათრიეთ ნაბიჯი რიგის შესაცვლელად",
     "engine": "ძრავა",
-    "intensity": "ინტენსივობა"
+    "intensity": "ინტენსივობა",
+    "compressionOverride": "შეკუმშვის გადაფარვა"
   },
   "compressionStudio": {
     "noRun": "შეკუმშვის არცერთი გაშვება არ არის ხელმისაწვდომი.",
@@ -9316,7 +9570,8 @@
     "encoderWinner": "გამარჯვებული: {winner}",
     "encoder": "კოდირებელი",
     "bytes": "ბაიტები",
-    "tokensCl100k": "ტოკენები (cl100k)"
+    "tokensCl100k": "ტოკენები (cl100k)",
+    "studioViews": "Studio-ს ხედები"
   },
   "omniglyph": {
     "preview": "წინასწარი დათვალიერება",
@@ -9522,7 +9777,9 @@
     "tooltipMinLength": "ამაზე მოკლე შეტყობინებები არ იკუმშება. ნაკლები = მეტი შეკუმშვა.",
     "tooltipMinSavings": "შეკუმშვა მხოლოდ იმ შემთხვევაში, თუ მინიმუმ ამდენ ტოკენს დაზოგავს.",
     "ultraSettings": "ულტრა პარამეტრები",
-    "ultraSettingsDesc": "SLM-ზე დაფუძნებული სემანტიკური შეკუმშვა"
+    "ultraSettingsDesc": "SLM-ზე დაფუძნებული სემანტიკური შეკუმშვა",
+    "defaultLanguage": "ნაგულისხმევი ენა",
+    "viewMode": "ხედვის რეჟიმი"
   },
   "translator": {
     "title": "მთარგმნელი",
@@ -9834,6 +10091,9 @@
     "streamTransformFailed": "ნაკადის გარდაქმნა ვერ მოხერხდა"
   },
   "usage": {
+    "healthExtraUsageBypass": "კვოტა ამოწურულია; დამატებითი გამოყენება ნებადართულია, ამიტომ მომსახურება გრძელდება.",
+    "healthPaidCreditsBypass": "კვოტა ამოწურულია; ხელმისაწვდომი ფასიანი კრედიტები მომსახურების გაგრძელების საშუალებას იძლევა.",
+    "healthFilteringBypass": "კვოტა ამოწურულია; ლოკალური კვოტის ფილტრაცია გამორთულია, ამიტომ მომსახურება გრძელდება.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
@@ -10001,6 +10261,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "პროვაიდერების ლიმიტები",
     "noProviders": "არცერთი პროვაიდერი არ არის დაკავშირებული",
+    "quotaAuthRequired": "საჭიროა ავთენტიფიკაცია — შედით მართვის პანელში",
+    "quotaAuthRequiredHint": "პროვაიდერებთან კავშირების ჩატვირთვა ვერ მოხერხდა, რადგან მართვის პანელის სესია არ არსებობს ან ვადაგასულია. კვოტის ლიმიტების სანახავად შედით სისტემაში და განაახლეთ გვერდი.",
     "connectProvidersForQuota": "API-ის კვოტის ლიმიტებისა და გამოყენების თვალყურის სადევნებლად პროვაიდერებს OAuth-ის მეშვეობით დაუკავშირდით.",
     "accountsCount": "{count, plural, one {# ანგარიში} other {# ანგარიში}}",
     "filteredFromCount": "(გაფილტრულია {count}-დან)",
@@ -10050,9 +10312,6 @@
     "tierLite": "ლაითი",
     "tierUnknown": "უცნობი",
     "statTotal": "სულ",
-    "statCritical": "კრიტიკული",
-    "statAlert": "გაფრთხილება",
-    "statHealthy": "გამართული",
     "filterPurchaseTypeLabel": "ტიპი",
     "filterTierLabel": "დონე",
     "purchaseAll": "ყველა",
@@ -10290,7 +10549,61 @@
     "updatedShort": "განახლებულია",
     "lastRefreshed": "ბოლო განახლება",
     "providerQuota": "პროვაიდერის კვოტა",
-    "providerQuotaHomeHint": "დაკავშირებული ანგარიშების მიმდინარე სტატუსი"
+    "providerQuotaHomeHint": "დაკავშირებული ანგარიშების მიმდინარე სტატუსი",
+    "claudeResetCreditDefaultTitle": "Claude-ის ლიმიტის განულება",
+    "confirmRedeemClaudeResetCredit": "გააქტიურება დაუყოვნებლივ ანულებს Claude-ის გამოყენების შესაბამის ლიმიტებს და სამუდამოდ ხარჯავს ამ კრედიტს.",
+    "claudeResetCreditsModalTitle": "Claude-ის განულების კრედიტები",
+    "claudeResetCreditsModalExplainer": "Claude-ის განულების ხელმისაწვდომი კრედიტები და სესიის ყოველკვირეული განულებები ამ ანგარიშისთვის.",
+    "healthAccountHint": "ბოლო დაკვირვებების მიხედვით, არა პირდაპირი შემოწმება. დეტალებისთვის აირჩიეთ ანგარიში.",
+    "healthRecovery": "აღდგენის სავარაუდო დრო",
+    "healthAvailable": "ხელმისაწვდომია",
+    "healthRestricted": "ნაწილობრივ შეზღუდული",
+    "healthUnavailable": "მიუწვდომელია",
+    "healthPeakHourProtection": "პიკის საათების დაცვა",
+    "healthCooldown": "ლოდინის პერიოდი",
+    "healthQuotaExhausted": "კვოტა ამოწურულია",
+    "healthOverview": "მიმოხილვა",
+    "layoutFull": "სრული",
+    "layoutCompact": "კომპაქტური",
+    "healthQuotaError": "კვოტის წაკითხვა ვერ მოხერხდა",
+    "healthNoRuntime": "მუშაობის მდგომარეობა მიუწვდომელია",
+    "healthPreviousSnapshot": "ბოლო განახლება ვერ შესრულდა; ნაჩვენებია წინა შედეგი",
+    "healthPreviousFailure": "ბოლო მოთხოვნა ვერ შესრულდა; ლოდინი დასრულდა",
+    "healthAwaitingSync": "განულების დრო გავიდა; სინქრონიზაციის მოლოდინშია",
+    "healthVerdictUnavailable": "ხელმისაწვდომობის შემოწმების შედეგი მიუწვდომელია; ნაჩვენებია მხოლოდ კვოტის დონეები",
+    "healthSummaryFailed": "მდგომარეობის შეჯამება ვერ წაიკითხა; მოდელების ბლოკირების ინფორმაცია შეიძლება აკლდეს",
+    "healthRuntimeObserved": "მდგომარეობა განახლდა {time}",
+    "healthQuotaObserved": "კვოტა დაფიქსირდა {time}",
+    "healthOldestQuota": "კვოტის უძველესი ჩანაწერი: {time}",
+    "healthRecoveryUnknown": "აღდგენის დრო უცნობია",
+    "healthDetailsHint": "დეტალებისა და მოქმედებებისთვის დააწკაპუნეთ",
+    "healthFiveHour": "5 საათი",
+    "healthOverall": "საერთო",
+    "healthAction": "საჭიროა მოქმედება",
+    "healthTitle": "ანგარიშების ხელმისაწვდომობა",
+    "healthDrag": "გადაათრიეთ მომწოდებლების გადასალაგებლად",
+    "healthDragPosition": "{provider}, {count, plural, one {პოზიცია {position, number} / #} other {პოზიცია {position, number} / #}}",
+    "healthResetOrder": "ნაგულისხმევი რიგის აღდგენა",
+    "healthPool": "{name} ჯგუფი",
+    "healthOtherPool": "იგივე ანგარიში · {pool}: {status} (დარჩა {remaining})",
+    "healthIncluded": "{count, plural, one {მოიცავს # ნაწილობრივ შეზღუდულ ანგარიშს} other {მოიცავს # ნაწილობრივ შეზღუდულ ანგარიშს}}",
+    "healthBannerUnavailable": "{count, plural, one {# ანგარიში დროებით მიუწვდომელია} other {# ანგარიში დროებით მიუწვდომელია}}",
+    "healthBannerAvailable": "{count, plural, one {# ანგარიში ხელმისაწვდომია} other {ყველა # ანგარიში ხელმისაწვდომია}}",
+    "healthLegendHide": "პირობითი ნიშნების დამალვა",
+    "healthLegendShow": "პირობითი ნიშნების ჩვენება",
+    "healthLegendOk": "მთლიანი = დარჩენილი კვოტა; ნახევრადგამჭვირვალე = გამოყენებული.",
+    "healthLegendCooldown": "{window} კვოტა ამოიწურა. მთლიანი = გასული ლოდინი; ნახევრადგამჭვირვალე = დარჩენილი ლოდინი.",
+    "healthLegendAction": "ავტორიზაცია ვადაგასულია ან ანგარიში დაბლოკილია; ლოდინი ვერ უშველის.",
+    "healthLegendPartial": "ჯერ კიდევ გამოიყენება. ყვითელი ზედა ნაწილი = მოდელის ან ჯგუფის შეზღუდვა.",
+    "healthWaited": "გასული ლოდინი: {percent}",
+    "healthWait": "კიდევ {duration} (აღდგენა: {time})",
+    "healthFastest": "უახლოესი აღდგენა {duration} შემდეგ",
+    "healthRatio": "{available, plural, one {ხელმისაწვდომია # / {active, number}} other {ხელმისაწვდომია # / {active, number}}}",
+    "healthCd5": "5 საათი · ლოდინის პერიოდი",
+    "healthCdw": "ყოველკვირეული · ლოდინის პერიოდი",
+    "healthRecentSuccessBypass": "მარშრუტიზაცია ამ ანგარიშს უშვებს, რადგან ახლახან მოთხოვნა წარმატებით შესრულდა.",
+    "healthPurchasedBalanceBypass": "შეძენილი ბალანსი გამოყენების გაგრძელებას იძლევა ჩართული კვოტის ამოწურვის შემდეგ.",
+    "healthCutoffAtRequest": "რეალურ დროში კვოტის ზღვრები მოთხოვნის მარშრუტიზაციისას მოწმდება."
   },
   "modals": {
     "waitingAuth": "ავტორიზაციის მოლოდინი",
@@ -11077,7 +11390,8 @@
       "message": "შეტყობინება",
       "error": "შეცდომა",
       "completion": "დასრულება"
-    }
+    },
+    "statusFilter": "სტატუსი"
   },
   "templateNames": {
     "simple-chat": "მარტივი ჩატი",
@@ -11258,7 +11572,8 @@
     "minutesAgo": "{minutes} წთ-ის წინ",
     "hoursAgo": "{hours} სთ-ის წინ",
     "daysAgo": "{days} დღის წინ",
-    "entries": "ჩანაწერები"
+    "entries": "ჩანაწერები",
+    "viewSwitcherAria": "ქეშის ხედი"
   },
   "proxyConfigModal": {
     "levelGlobal": "გლობალური",
@@ -11371,6 +11686,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth კონფიგურირებული არ არის. დაარეგისტრირეთ OAuth აპლიკაცია მისამართზე {applicationsUrl}, უკუგადამისამართების URI-ით {redirectUri} და წვდომის სფეროებით „{scopes}“, შემდეგ დააყენეთ {clientIdEnv} (და სურვილისამებრ {clientSecretEnv}) და გადატვირთეთ.",
     "gitlabDuoSetupDescription": "აპლიკაციის რეგისტრაციისა და ამ OmniRoute ინსტანციაში გარემოს ცვლადების დაყენების შემდეგ OAuth-ით შესვლის დასაწყებად დააწკაპუნეთ „გაგრძელება“-ზე.",
     "continue": "გაგრძელება",
+    "copilotPolicyTitle": "ექსპერიმენტული პროვაიდერი: პოლიტიკის სტატუსი ბუნდოვანია",
+    "copilotPolicyLine1": "OmniRoute აკავშირებს api.githubcopilot.com-ის საშუალებით, რომელიც GitHub არ გამოუქვეყნებია, როგორც მესამე მხარის ზოგადი დასკვნა API. ეს ინტეგრაცია ექსპერიმენტულია და შეიძლება შეიცვალოს გაფრთხილების გარეშე.",
+    "copilotPolicyLine2": "მხოლოდ თქვენი საკუთარი GitHub ანგარიში შეიძლება იყოს დაკავშირებული. არასოდეს გააზიაროთ რწმუნებათა სიგელები, აუზის ანგარიშები და ნუ ეცდებით თქვენი გეგმის ლიმიტების გადაჭარბებას.",
+    "copilotPolicyLine3": "უფასო და სტუდენტური გეგმის მომხმარებლები იღებენ მხოლოდ ავტომატურ მოდელის შერჩევას. თქვენი Copilot გეგმის პირობები და გამოყენების ნებისმიერი შეზღუდვა რჩება თქვენს პასუხისმგებლობაში.",
+    "copilotPolicyAcknowledge": "მესმის, დაკავშირება",
     "tabPasteSetupToken": "დაყენების ტოკენი",
     "claudeSetupTokenDescription": "გაუშვით `claude setup-token` ტერმინალში და ჩასვით ტოკენი, რომელსაც ის ბეჭდავს. ის მოქმედებს ერთი წლის განმავლობაში და არ აქვს განახლების ტოკენი. შენახვამდე OmniRoute Anthropic-ს ერთ სატესტო მოთხოვნას უგზავნის.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11766,7 @@
     "tableHealth": "მდგომარეობა (24 სთ)",
     "tableUsage": "გამოყენება",
     "tableActions": "მოქმედებები",
+    "moreActions": "მეტი მოქმედება",
     "test": "ტესტირება",
     "edit": "რედაქტირება",
     "delete": "წაშლა",
@@ -11525,8 +11846,8 @@
     "bulkImportNoValidEntries": "ვალიდური ჩანაწერები ვერ მოიძებნა. შეამოწმეთ ფორმატი და ხელახლა სცადეთ.",
     "bulkImportSuccess": "იმპორტი დასრულებულია: შეიქმნა {created}, განახლდა {updated}, ვერ დამუშავდა {failed}",
     "bulkImportErrorLine": "ხაზი {line}: {reason}",
-    "bulkImportMaxExceeded": "თითოეული იმპორტისას მაქსიმუმ 100 პროქსი",
-    "bulkImportPreview": "წინასწარი ნახვა",
+    "bulkImportMaxExceeded": "თითოეული იმპორტისას მაქსიმუმ {max} პროქსი",
+    "bulkImportPreview": "გადახედვა",
     "clearAssignment": "(მინიჭების გაუქმება)",
     "bulkProxyAssignment": "პროქსების მასობრივი მინიჭება",
     "testAll": "ყველას ტესტირება",
@@ -11586,6 +11907,7 @@
     "poolSetAsideKindIpQuota429": "IP სიჩქარის ლიმიტი (429)",
     "poolSetAsideKindSlow": "ნელი პასუხები",
     "poolSetAsideKindGeoBlocked": "რეგიონი დაბლოკილია (403/451)",
+    "poolSetAsideKindOperatorReported": "ოპერატორის მიერ გამოცხადებული გათიშვა",
     "poolSetAsideUntil": "როტაციაში დაბრუნება {endsAt}",
     "poolSetAsideRepeat": "გვერდზე გადადებული {count, plural, one {# ჯერ} other {# ჯერ}}",
     "poolUnknownAddress": "უცნობი მისამართი",
@@ -11695,7 +12017,6 @@
     "exportCodeTitle": "კოდის ექსპორტი",
     "exportShort": "ექსპორტი",
     "noStateToExport": "ექსპორტისთვის ხელმისაწვდომი playground-ის მდგომარეობა არ არის.",
-    "closeExportModal": "ექსპორტის მოდალური ფანჯრის დახურვა",
     "close": "დახურვა",
     "exportRealKeyWarning": "უსაფრთხოების გაფრთხილება: ექსპორტი დაიბლოკა — შედეგში აღმოჩენილია რეალური API გასაღები. გთხოვთ, შეცვალოთ თქვენი API გასაღები და ხელახლა სცადოთ.",
     "placeholderHintPrefix": "ჩაანაცვლეთ",
@@ -11808,7 +12129,8 @@
       "nextButton": "შემდეგი",
       "runButton": "გაშვება",
       "promptPlaceholder": "შეიყვანეთ თქვენი შეტყობინება… (გასაგზავნად დააჭირეთ Enter-ს, ახალ ხაზზე გადასასვლელად — Shift+Enter-ს)"
-    }
+    },
+    "playgroundTabs": "Playground-ის რეჟიმები"
   },
   "miniPlayground": {
     "endpoint": "ენდპოინტი",
@@ -11879,7 +12201,8 @@
     "assistant": "ასისტენტი",
     "errorLabel": "შეცდომა",
     "requestFailed": "მოთხოვნა ვერ შესრულდა",
-    "stop": "შეჩერება"
+    "stop": "შეჩერება",
+    "messageInputAria": "შეტყობინება"
   },
   "requestLogger": {
     "recording": "მიმდინარეობს ჩაწერა",
@@ -12066,8 +12389,22 @@
       "resilienceRotations": "ანგარიშის {count} როტაცია",
       "resilienceRetried": "ცარიელი სვლა ხელახლა ცადა",
       "resilienceContinued": "განახლდა ნაკადის შუაში",
-      "resilienceRecovered": "აღდგენილია მდგრადობის მოქმედებით"
-    }
+      "resilienceRecovered": "აღდგენილია მდგრადობის მოქმედებით",
+      "conversationContext": "საუბრის კონტექსტი",
+      "goToBottom": "ბოლოში გადასვლა",
+      "liveRefreshOn": "რეალურ დროში განახლება: ჩართულია",
+      "liveRefreshOff": "რეალურ დროში განახლება: გამორთულია",
+      "liveRefresh": "რეალურ დროში განახლება",
+      "continuesFromParent": "გრძელდება მშობელი მოთხოვნიდან",
+      "continuesFrom": "გრძელდება {id}-დან",
+      "viewConversation": "საუბრის ნახვა",
+      "openConversation": "საუბრის გახსნა: {id}"
+    },
+    "tableLabel": "მოთხოვნების ჟურნალები",
+    "throughputPostFirstToken": "პირველი ტოკენის შემდგომი",
+    "throughputEndToEnd": "ბოლოდან ბოლომდე",
+    "throughputRate": "{value} ტოკენი/წმ",
+    "throughputExplanation": "ორივე სიჩქარე იყენებს გამომავალი და მსჯელობის ტოკენების უფრო დიდ რაოდენობას. პირველი ტოკენის შემდგომი არ ითვალისწინებს ვალიდურ TTFT-ს; წინააღმდეგ შემთხვევაში ის იყენებს სრულ ხანგრძლივობას. ბოლოდან ბოლომდე ყოველთვის იყენებს სრულ ხანგრძლივობას. ბუფერიზებულ პასუხს შეიძლება ჰქონდეს მიწოდების მაღალი აფეთქებითი სიჩქარე მოდელის უფრო სწრაფი გენერაციის გარეშე."
   },
   "proxyLogger": {
     "filterAll": "ყველა",
@@ -12112,7 +12449,9 @@
     "colServedBy": "მომსახურებულია",
     "filterTraffic": "ტრაფიკი",
     "filterTests": "ტესტები",
-    "filterSource": "წყარო"
+    "filterSource": "წყარო",
+    "tableLabel": "პროქსის ჟურნალები",
+    "sortLogs": "ჟურნალების დალაგება"
   },
   "endpointOptions": {
     "speech": "მეტყველება",
@@ -12197,7 +12536,8 @@
     "statusExhausted": "ამოწურულია",
     "statusAlerting": "გაფრთხილება",
     "statusError": "შეცდომა",
-    "moreSuffix": "+კიდევ {count}"
+    "moreSuffix": "+კიდევ {count}",
+    "feedFilterLabel": "მოვლენების გაფილტვრა"
   },
   "quotaShare": {
     "weightPercent": "წონა, %",
@@ -12364,7 +12704,10 @@
     "ungroupedTitle": "დაუჯგუფებელი",
     "ungroupedHint": "ეს პულები არცერთ ცნობილ ჯგუფს არ არის მიკუთვნებული. რეალურ ჯგუფში გადასატანად დაარედაქტირეთ პული.",
     "removeFailed": "ამ პულის წაშლა ვერ მოხერხდა.",
-    "dismiss": "დახურვა"
+    "dismiss": "დახურვა",
+    "allocationsHeading": "განაწილებები",
+    "wizardRemoveDimension": "განზომილების წაშლა",
+    "wizardRemoveKey": "გასაღების წაშლა"
   },
   "plugins": {
     "title": "პლაგინები",
@@ -12522,7 +12865,8 @@
       "settingsUpdateFailed": "პარამეტრების განახლება ვერ მოხერხდა",
       "serviceRevealApiKey": "{actor}-მა {target}-ის API გასაღები გამოაჩინა",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "შეცდომის დახურვა"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12999,21 @@
       "goNow": "ახლავე გადასვლა",
       "message": "MITM Proxy ახლა AgentBridge-ის განყოფილებაშია.",
       "title": "ეს გვერდი გადატანილია"
-    }
+    },
+    "dnsOn": "DNS ჩართულია",
+    "dnsOff": "DNS გამორთულია",
+    "showServerSettings": "სერვერის პარამეტრების ჩვენება",
+    "hideServerSettings": "სერვერის პარამეტრების დამალვა",
+    "upstreamCaTesting": "მიმდინარეობს ტესტირება…",
+    "removeMapping": "შესაბამისობის წაშლა",
+    "mappingSourcePlaceholder": "მაგ., gemini-3.6-flash-medium, ან * ყველა შეუსაბამებელი მოდელისთვის",
+    "mappingWildcardHint": "გამოიყენეთ * წყაროდ, რათა ყველა მოდელი, რომელსაც ცხადი შესაბამისობა არ აქვს, OmniRoute-ის გავლით არჩეულ სამიზნეზე გადამისამართდეს. წყაროს ზუსტი დამთხვევა ყოველთვის უპირატესია *-ზე.",
+    "wizardDetectingModels": "გადაჭერილი ტრაფიკიდან მოდელების აღმოჩენა...",
+    "wizardDetectedModels": "გადაჭერილ ტრაფიკში ნაპოვნია {count, plural, one {# მოდელი} other {# მოდელი}}. აირჩიეთ მოდელები, რომელთა დამატებაც გსურთ:",
+    "wizardSelectedModels": "არჩეულია {count, plural, one {# მოდელი} other {# მოდელი}}. შემდეგ ეკრანზე მათ OmniRoute-ის მოდელებთან დააკავშირებთ.",
+    "wizardAddModels": "{count, plural, one {# მოდელის} other {# მოდელის}} დამატება",
+    "wizardNoModelsDetected": "მოდელები ჯერ არ არის აღმოჩენილი. მოთხოვნის გასაგზავნად გამოიყენეთ {agent}, შემდეგ კი ტრაფიკიდან მოდელების ავტომატურად აღმოსაჩენად ეს ოსტატი ხელახლა გაუშვით.",
+    "wizardNoModelsHint": "ან დახურეთ ეს ოსტატი და შესაბამისობები აგენტის ბარათში ხელით დაამატეთ."
   },
   "providerStats": {
     "unknownError": "უცნობი შეცდომა",
@@ -12685,7 +13043,12 @@
     "avgTtft": "საშ. TTFT",
     "avgTotal": "საშ. ჯამური დრო",
     "requestTelemetry": "მოთხოვნების ტელემეტრია",
-    "requestTelemetryDescription": "7-ფაზიანი პროცესის დეტალიზაცია (ბოლო 5 წუთი)"
+    "requestTelemetryDescription": "7-ფაზიანი პროცესის დეტალიზაცია (ბოლო 5 წუთი)",
+    "title": "პროვაიდერის სტატისტიკა",
+    "description": "ტრაფიკი, დაყოვნება და წარმატების მაჩვენებლები თითოეული პროვაიდერისა და მოდელისთვის",
+    "combo": "კომბო",
+    "toggleModels": "{provider}-ის მოდელების ჩვენება",
+    "windowSince": "{date}-დან"
   },
   "relay": {
     "title": "უსერვერო რელე-პროქსიები",
@@ -12846,7 +13209,18 @@
     "noRequestBody": "მოთხოვნის სხეული არ არის.",
     "noResponseBody": "პასუხის სხეული არ არის.",
     "formatted": "ფორმატირებული",
-    "raw": "დაუმუშავებელი"
+    "raw": "დაუმუშავებელი",
+    "requestCount": "{count, plural, one {# მოთხოვნა} other {# მოთხოვნა}}",
+    "expandList": "სიის გაშლა",
+    "collapseList": "სიის აკეცვა",
+    "snippetLanguage": "ფრაგმენტის ენა",
+    "headersTable": "სათაურები",
+    "showSecrets": "საიდუმლო მონაცემების ჩვენება",
+    "maskSecrets": "საიდუმლო მონაცემების შენიღბვა",
+    "llmNotAvailable": "ამ მოთხოვნისთვის LLM-ის მეტამონაცემები მიუწვდომელია.",
+    "llmStreamYes": "დიახ (SSE)",
+    "llmStreamNo": "არა",
+    "llmTotalTokens": "სულ: {count} ტოკენი"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13325,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI კოდები",
     "pageSubtitle": "OmniRoute-ზე მიმართული კოდირების ინსტრუმენტები",
     "searchPlaceholder": "CLI-ის ძიება…",
     "filterDetectionLabel": "აღმოჩენა",
@@ -12961,7 +13334,8 @@
     "detectionNotFound": "ვერ მოიძებნა",
     "baseUrlAll": "ყველა",
     "baseUrlFull": "სრული",
-    "baseUrlPartial": "ნაწილობრივი"
+    "baseUrlPartial": "ნაწილობრივი",
+    "title": "CLI კოდი"
   },
   "cliAgents": {
     "pageTitle": "CLI აგენტები",
@@ -13305,7 +13679,8 @@
     "colReliabilityHelp": "ბოლო 24 საათში იმ გამოძახებების წილი, რომლებსაც ამ პროვაიდერმა რეალურად უპასუხა. ტირე ნიშნავს, რომ მაჩვენებლის დასადგენად მან არასაკმარისი ტრაფიკი დაამუშავა.",
     "reliabilitySample": "ბოლო {hours} სთ-ში {requests} გამოძახებიდან {successes} წარმატებით დასრულდა",
     "reliabilityTooFew": "ბოლო {hours} სთ-ში მხოლოდ {requests} გამოძახება — მაჩვენებლის დასადგენად არასაკმარისია",
-    "reliabilityNoTraffic": "ბოლო 24 სთ-ში გამოძახებები არ დაფიქსირებულა"
+    "reliabilityNoTraffic": "ბოლო 24 სთ-ში გამოძახებები არ დაფიქსირებულა",
+    "categoryFilter": "დავალების კატეგორია"
   },
   "discovery": {
     "title": "პროვაიდერების აღმოჩენა",
@@ -13330,7 +13705,11 @@
     "method": "მეთოდი",
     "auth": "ავთენტიფიკაცია",
     "feasibility": "განხორციელებადობა",
-    "models": "მოდელები"
+    "models": "მოდელები",
+    "provider": "პროვაიდერი",
+    "status": "სტატუსი",
+    "endpoint": "ენდპოინტი",
+    "actions": "მოქმედებები"
   },
   "noAuthProvider": {
     "title": "ავთენტიფიკაცია საჭირო არ არის",
@@ -13379,7 +13758,8 @@
     "ownProxy": "საკუთარი პროქსი",
     "freeTierPause": "მოდელი {model} შეჩერებულია (429), დაბრუნდება {time}-ზე",
     "freeTierPauseProvider": "შეჩერებულია (429), დაბრუნდება {time}-ზე",
-    "freeTierPauseNote": "პროცესში შეჩერება ამ ინსტანციაზე"
+    "freeTierPauseNote": "პროცესში შეჩერება ამ ინსტანციაზე",
+    "proxyType": "პროქსის ტიპი"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13932,10 @@
         "description": "ფარული მიღწევა გელოდებათ...",
         "criteria": "შეასრულეთ ფარული მიღწევა ამ სამკერდე ნიშნის გამოსავლენად."
       }
-    }
+    },
+    "leaderboardTitle": "ლიდერბორდი",
+    "leaderboardDescription": "თქვენი API გასაღებების რეიტინგები და მიღწევები",
+    "badgeLocked": "დაბლოკილია"
   },
   "featureFlags": {
     "title": "ფუნქციების ალმები",
@@ -13610,7 +13993,9 @@
       "disabled": "გათიშული",
       "dual": "ორმაგი",
       "alias": "ფსევდონიმი",
-      "canonical": "კანონიკური"
+      "canonical": "კანონიკური",
+      "fail_closed": "დაბლოკვა (fail_closed)",
+      "count_as_zero": "თვლის როგორც $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14142,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "დაცული პრიორიტეტის ინფრასტრუქტურული შეჩერებები — 502",
         "description": "უპასუხეთ 502-ით 503-ის ნაცვლად, როდესაც პრიორიტეტული სამიზნე, რომელიც სარეზერვო ვარიანტზე მხოლოდ კვოტის ამოწურვისას გადადის, combo-ს აჩერებს მიზეზით, რომელიც დადასტურებულად არ უკავშირდება კვოტას: პროვაიდერის ღია circuit breaker ან პროგნოზული დაყოვნების გამო გამოტოვება."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "ანგარიშების ID-ების ჟურნალში ჩაწერა",
+        "description": "შაომავლე ანგარიშის პრეფიქსი AUTH ჟურნალის სტრიქონებში (მაგ. \"მისაბეურთებად გამოიყენება '<provider>' ანგარიში: abc12345...\"). ნაგულისხმევი პარამეტრით გამორთულია, რათა ანგარიშის იდენტიფიკატორები გადამალული იყოს გაზიარებულ/მრავალპროცესიან ჟურნალებში. დამოუკიდებელია Debug რეჟიმისგან; Debug რეჟიმის ჩართვამაც არ გამოავლენს ამ პარამეტრს."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "პაროლით შესვლის გათიშვა OIDC-ის დროს",
+        "description": "როდესაც OIDC ჩართულია, პაროლით შესვლა ითიშება, რათა მომხმარებლებმა ავთენტიფიკაცია მხოლოდ OIDC Single Sign-On-ით შეძლონ. როდესაც გათიშულია (ნაგულისხმევი), ხელმისაწვდომია როგორც პაროლით შესვლა, ისე OIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "აუდიო პროვაიდერის დისტანციური კვანძები",
+        "description": "ნება დართეთ /v1/audio/* მარშრუტებს, გამოიყენონ OpenAI-თავსებადი პროვაიდერის კვანძები, რომლებიც განთავსებულია localhost-ის გარეთ. ნაგულისხმევად გამორთულია — აუდიოს დისტანციურ ჰოსტზე გადამისამართება ცვლის egress-ის იდენტობას და უნდა წარმოადგენდეს ოპერატორის მკაფიო გადაწყვეტილებას. Loopback კვანძები ყოველთვის დაშვებულია და მათზე ეს არ მოქმედებს."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Rerank პროვაიდერის დისტანციური კვანძები",
+        "description": "ნება დართეთ POST /v1/rerank-ს (და memory engine-ის rerank ეტაპს, რომელიც მას loopback-ის საშუალებით იძახებს) გამოიყენოს OpenAI-თავსებადი პროვაიდერის კვანძები, რომლებიც localhost-ის გარეთ არის განთავსებული — LAN მოწყობილობა ან Tailscale peer, სადაც გაშვებულია TEI, Infinity, vLLM და ა.შ. ნაგულისხმევად გამორთულია — დისტანციურ ჰოსტზე მარშრუტიზაცია ცვლის egress-ის იდენტობას და უნდა წარმოადგენდეს ოპერატორის მკაფიო გადაწყვეტილებას. Loopback კვანძები ყოველთვის დაშვებულია და მათზე ეს არ მოქმედებს. დისტანციურმა კვანძებმა ასევე უნდა დააკმაყოფილონ პროვაიდერის outbound URL პოლიტიკა."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "ქსელური როტაციის Shared-Egress დამცავი",
+        "description": "ქსელური შეცდომისას (timeout, connection refused/reset) მრავალანგარიშიანი როტაციის ექსეკუტორისთვის, როდესაც ხარვეზიან ანგარიშს არ გააჩნია გამოყოფილი პროქსი, გამოიყენება ხანმოკლე cooldown და მოთხოვნის დარჩენილი ნაწილისთვის გამოიტოვება სხვა უპროქსო ანგარიშები, თითოეულის თავიდან ცდის ნაცვლად. ნაგულისხმევად ჩართულია (უსაფრთხოა: egress IP არ იცვლება, მხოლოდ ამცირებს დაყოვნების/cooldown-ის რისკს shared-egress ანგარიშებზე). გამორთეთ პირველივე უპროქსო შეცდომის (throw) დაუყოვნებლივი გავრცელების აღსადგენად."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "ახლახან შეფერხებული პროქსების გამოტოვება",
+        "description": "პროქსი-პულები და opencode-ის თითო ანგარიშზე როტაცია წყვეტს იმ პროქსის ხელახლა მიწოდებას, რომელზეც შეცდომა ახლახან დაფიქსირდა (უარყოფილი TCP probe ან მისი მეშვეობით მიღებული 429), პროცესზე გათვლილი ვადით, რომელიც ყოველ განმეორებაზე ორმაგდება ზღვრამდე. პროქსის სტატუსი არ იწერება; ყოველი გვერდზე გადადებული კანდიდატის მიუხედავად, არჩევანი უცვლელია. ჩართულია ნაგულისხმევად: შერჩევის თანმიმდევრობა ჩვეულებრივი როტაციის იდენტურია მხოლოდ მაშინ, როდესაც PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "საერთო გამავალი პულის თანმიმდევრობა",
+        "description": "იმ პროვაიდერებისთვის, რომელთა კვოტაც დაჯგუფებულია გამავალი მისამართის მიხედვით, პულის იმ წევრს, რომელიც იზიარებს ახლახან უარყოფილი წევრის დაფიქსირებულ გამავალ მისამართს, ანიჭებს რიგითობას უშუალოდ გამართული წევრების ქვემოთ. იცვლება მხოლოდ თანმიმდევრობა, არასოდეს გამოირიცხება. საჭიროებს PROXY_SKIP_RECENTLY_FAILED-ს, რომელიც აგენერირებს უარყოფის სიგნალს, რომელსაც ის კითხულობს. გამორთულია ნაგულისხმევად: შერჩევის თანმიმდევრობა ჩვეულებრივი როტაციის იდენტურია."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "როტაციის ატრიბუციის ლოგირება",
+        "description": "Opencode-ის როტაცია იწერს, თუ რომელმა ანგარიშმა მოემსახურა მოთხოვნას ან რომელი გამოიტოვა (მხოლოდ მასკირებული ID-ები, არასდროს ანგარიშის სრული ID-ები) და აკავშირებს პროქსის ლოგის ჩანაწერებს მათ შესაბამის მოთხოვნასთან, რათა ოპერატორმა შეძლოს გამოტოვებული ანგარიშების გამოუყენებლებისგან გარჩევა. გამორთულია ნაგულისხმევად: არ იწერება დამატებითი ლოგის სტრიქონები და დამატებითი სვეტები."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "პროქსი-პულის გამავალ მისამართებზე დაკვირვება",
+        "description": "მართვის პანელში (dashboard) პროქსი-პულის ქვეშ აჩვენებს, თუ რამდენმა დაფიქსირებულმა გამავალმა IP-მ მოემსახურა მის წევრებს ბოლო 24 საათის განმავლობაში, რამდენმა კავშირმა გამოიყენა ისინი და მაქსიმალურ რაოდენობას ერთ IP-ზე. მხოლოდ წაკითხვადი, გამოითვლება პროქსის ლოგიდან, არასოდეს გამოიყენება მარშრუტიზაციისთვის. გამორთულია ნაგულისხმევად: პულის რედაქტორი უცვლელია და დაკვირვების მარშრუტი (route) პასუხობს null-ით."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "პროქსის ოპერატორის გამავალი მისამართები",
+        "description": "იღებს ოპერატორის მიერ გამოგზავნილ დათარიღებულ დაფიქსირებულ მისამართებს პულის თითოეულ წევრზე და აერთიანებს მათ ჟურნალის ჩანაწერებთან ჩვენებისა და პულის თანმიმდევრობისთვის. გამორთულია ნაგულისხმევად: push route პასუხობს 404-ით და პულის წაკითხვა მუშაობს ზუსტად ისე, როგორც ადრე."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses-ის შეფერხების როტაცია",
+        "description": "OpenCode executor-ისთვის აკვირდება სტრიმირებული Responses პასუხის body-ს პირველ ბაიტს (ფანჯარა: RESPONSES_FIRST_BYTE_TIMEOUT_MS, ნაგულისხმევი 15000). 2xx Responses ნაკადი, რომელიც ფანჯრის ამოწურვის შემდეგაც უპასუხოდ რჩება, შეფერხებულად ჩაითვლება: ანგარიშს მიენიჭება cooldown და მოთხოვნა ერთხელ გადაერთვება შემდეგ ანგარიშზე; განმეორებითი შეფერხება კი სწრაფად მარცხდება. ნაგულისხმევად გამორთულია: შეფერხებული ნაკადები ინარჩუნებს ამჟამინდელ მოლოდინს ნაკადის მზადყოფნის (readiness) ტაიმაუტამდე."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked-ის როტაცია",
+        "description": "OpenCode executor-ისთვის, როდესაც upstream პასუხობს 403 ან 451 სტატუსით და user_blocked უარყოფით (და არა გეობლოკით ან Cloudflare-ის fingerprint უარყოფით), გადაიყვანეთ უარყოფილი ანგარიში cooldown-ში და მოახდინეთ როტაცია შემდეგ ანგარიშზე მაქსიმუმ ერთხელ მოთხოვნაზე; მეორე უარყოფა ბრუნდება ისე, როგორც არის, წარმატების აღნიშვნის გარეშე. ნაგულისხმევად გამორთულია: upstream მომხმარებლის ბლოკის გვერდის ავლა შეიძლება აღქმული იყოს თავის არიდებად და გავრცელდეს ანგარიშების მთელ ფლოტზე, ამიტომ უარყოფა ბრუნდება უცვლელად, თუ ოპერატორი თავად არ ჩართავს მას."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode-ის დროებითი Failover Backoff",
+        "description": "OpenCode-ის მრავალანგარიშიანი როტაციისთვის, შეაჩერეთ პროცესი შემდეგ ანგარიშზე გაგზავნამდე, თუ ორი თანმიმდევრული მცდელობა დასრულდა upstream-ის გარდამავალი შეცდომით (5xx ან ცარიელი 400 უარყოფა). პაუზა იწყება 1.5 წამიდან, ორმაგდება ყოველ შემდგომ თანმიმდევრულ შეცდომაზე, იზღუდება 6 წამამდე თითო პაუზაზე და 10 წამამდე თითო მოთხოვნაზე, იგნორირდება კლიენტის გათიშვისას, ხოლო შეცდომის მქონე პასუხის body თავისუფლდება დალოდებამდე. ნაგულისხმევად გამორთულია: failover რჩება მყისიერი."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "ცარიელი Turn-ის განმეორების Flush",
+        "description": "თარგმნილ სტრიმინგის turn-ებზე, როდესაც upstream turn არ შეიცავს გამოსადეგ კონტენტს (მხოლოდ მსჯელობის შემცველი (reasoning-only) დასრულება ან ნულოვანი სასარგებლო ფრაგმენტი), განახორციელეთ შეზღუდული ხელახალი მცდელობები ჩვეულებრივი credential-ების გზით (`STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`-მდე), სანამ რაიმე გამოჩნდება კლიენტთან. ნაგულისხმევად გამორთულია: ცარიელი turn-ები ინარჩუნებს მიმდინარე ქცევას (ცარიელი 200 ან ცარიელ-კონტენტიანი 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "ცარიელი ნაკადის Sibling-ის აღდგენა",
+        "description": "Claude/Codex-ის სტრიმინგი: სასიცოცხლო ციკლის პირველი მოვლენის შემდეგ, მოკლედ შეამოწმეთ (1 წმ-მდე / 64 KiB) გამოსადეგი გამონატანის არსებობა; ნაკადი, რომელიც კონტენტის გარეშე სრულდება, ხდება empty_content შეცდომა, რომელიც ხარჯავს არსებულ შეზღუდულ განმეორებას სხვა შესაფერის კავშირზე (cooldown-ისა და მოდელის დაბლოკვის გარეშე), ხოლო round-robin კომბინაციები წყვეტს განმეორებით მცდელობებს კლიენტის გათიშვისთანავე. ასევე განიხილავს refusal, pause_turn და model_context_window_exceeded სტატუსებს ლეგიტიმურ ცარიელ ტერმინალებად შემოწმების ფარგლებში. ნაგულისხმევად გამორთულია: მზადყოფნა, ცარიელი კონტენტის დამუშავება და კომბინაციის განმეორებები რჩება ზუსტად ისე, როგორც ადრე."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "სტრიმის დაგვიანებული გამონატანის ზონდი",
+        "description": "სტრიმინგის გამონატანის ზონდი: პირველი 64 გადაგზავნილი ჩანკის შემდეგ გააგრძელეთ 16-დან ერთი ჩანკის შერჩევა პირველი ხილული გამონატანის დასაფიქსირებლად, რათა დაგვიანებით დაწყებულმა გამონატანმაც მონიშნოს სტრიმი, როგორც მონაცემების გამომცემი. ამ მომენტის შემდეგ ცალკეული 5xx შეცდომა დარჩება მხოლოდ მოთხოვნის ფარგლებში (request-scoped) და არ ჩაითვლება მხოლოდ მოდელის დაბლოკვად, ხოლო firstOutputMs შეივსება მიმდინარე შერჩევის ინტერვალის პირველი გამომავალი ჩანკით. ნაგულისხმევად გამორთულია: მოწმდება მხოლოდ პირველი 64 გადაგზავნილი ჩანკი, ზუსტად ისე, როგორც ადრე."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode Rate-Limited 429-ის ადრეული შეჩერება",
+        "description": "OpenCode-ის მრავალანგარიშიანი როტაციისთვის, შეაჩერეთ ანგარიშების ტალღა პირველივე 429-ზე, რომელიც კლასიფიცირებულია, როგორც რეალური rate limit (დამუშავებადი Retry-After ჰედერი ან ტანი, სადაც მითითებულია სიხშირის/გამოყენების ლიმიტი) და დააბრუნეთ ეს upstream 429 უცვლელად (სტატუსი, body, Retry-After და კვოტის ჰედერები), დარჩენილი ყველა ანგარიშის გამოცდის ნაცვლად. არაკლასიფიცირებული 429-ები განაგრძობენ როტაციას. ნაგულისხმევად გამორთულია: უფასო ტარიფი შეზღუდულია გამავალი IP-ით (#9611), ამიტომ ყოველი 429 გადადის შემდეგ ანგარიშზე, ხოლო ამოწურული ტალღა აბრუნებს ბოლო upstream 429-ს."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429-ის შეჩერება და განახლება",
+        "description": "OpenCode-ის მრავალანგარიშიანი როტაციისთვის, განმეორებითი დროებითი 429-ების (ან პულის გადატვირთვის ახალი მარკერის) შემდეგ დააპარკირეთ მოთხოვნა heartbeat-ით, შემდეგ კი ხელახლა გაუშვით 3-მდე თანმიმდევრული ანგარიშის ერთი შეზღუდული ეტაპი (leg) მთელ ფლოტზე გაშლის ნაცვლად. ნაგულისხმევად გამორთულია: ყოველი 429 გადადის შემდეგ ანგარიშზე ზუსტად ისე, როგორც ადრე."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "სტრიმის მზადყოფნის შეფერხების ხელახალი მცდელობა",
+        "description": "სტრიმინგ ჩატის მოთხოვნებისთვის, როდესაც პირველი upstream body შეფერხდება გამოსადეგი მოვლენის შექმნამდე, განახორციელეთ ერთი შეზღუდული მეორე მცდელობა იმავე მარშრუტით, მზადყოფნის იმავე ბიუჯეტით და ანგარიშის დაჯარიმების გარეშე. ნაგულისხმევად გამორთულია: შეფერხებული პირველი body იწვევს მოთხოვნის ჩაშლას ხელახალი მცდელობის გარეშე."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429-ის პულის ხელახალი შერჩევა",
+        "description": "OpenCode-ის მრავალანგარიშიანი როტაციისთვის, ambient pool-ის კონტექსტში უპროქსო ანგარიშზე egress-bucketed პროვაიდერისგან 429-ის მიღების შემდეგ, შემდეგი მცდელობისთვის მოითხოვეთ connection pool-იდან სხვა წევრი იმავე egress მისამართზე ხელახლა ცდის ნაცვლად. ალაგებს, არასდროს გამორიცხავს: ამოწურული პული ინარჩუნებს მიმდინარე ქცევას. ნაგულისხმევად გამორთულია: ყოველი 429 გადადის შემდეგ ანგარიშზე ზუსტად ისე, როგორც ადრე."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 კლიენტის ანაბეჭდი",
+        "description": "გააგზავნეთ OpenCode v2 CLI კლიენტის ანაბეჭდი OpenCode Zen/Go მოთხოვნებზე (#16571): User-Agent opencode/latest/<2.x>/cli და x-opencode-client cli, კლიენტის User-Agent შენარჩუნდება მხოლოდ მაშინ, როდესაც ის არის 2.x OpenCode კლიენტი, შეზღუდულ უფასო დონის მოთხოვნებზე x-opencode-request-ის გარეშე, სესია ასახულია x-opencode-session-id/x-session-affinity/x-session-id-ზე, v2 CLI-ის read/shell სქემები ჩაშენებულ placeholder ხელსაწყოებზე და tool_choice მნიშვნელობით \"none\" ამოღებულია. ნაგულისხმევად გამორთულია: OpenCode-ის ყოველი მოთხოვნა ბაიტ-ბაიტ ინარჩუნებს მიმდინარე იდენტობას, თავსართებსა და ტანს."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen-ის Egress-IP-ის დაბლოკვა",
+        "description": "დაამატეთ OpenCode Zen (opencode-zen) ნაგულისხმევ egress-IP-ის დაბლოკვის ოჯახში, რათა 429-მ ერთ Zen კავშირზე ასევე გააგრილოს ყველა მონათესავე Zen კავშირი, რომელიც იზიარებს მის egress IP-ს. ნაგულისხმევად გამორთულია: Zen-ს მინიჭებული აქვს გასაღები და თითოეული კავშირი ცალ-ცალკე გრილდება, ზუსტად ისე, როგორც ადრე. OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS-ის მკაფიო მნიშვნელობა ყოველთვის უპირატესია ამ ალამზე."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode-ის სრული ტექსტის შეცდომის წესები",
+        "description": "მიეცით საშუალება OpenCode-ის ჩაშენებულ შეცდომის წესებს (opencode-zen, opencode-go, opencode-cli) დაემთხვეს upstream შეცდომის სრულ ტექსტს, რათა ტანის მარკერებმა, როგორებიცაა organization_quota_exceeded ან \"monthly usage limit reached\", მოახდინოს 429-ის კლასიფიცირება როგორც კვოტის ამოწურვა კავშირის ფარგლებში არსებული დაბლოკვით. ნაგულისხმევად გამორთულია: ეს წესები მხოლოდ სტრუქტურირებულ შეცდომის კოდს ხედავენ და ასეთი 429 რჩება მოკლე rate limit-ად, ზუსტად ისე, როგორც ადრე."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI-ის სრული ტექსტის შეცდომის წესები",
+        "description": "მიეცით საშუალება Cloudflare Workers AI-ის ჩაშენებულ შეცდომის წესს დაემთხვეს upstream შეცდომის სრულ ტექსტს, რათა 429-ის \"daily free allocation\" ტანი დაკლასიფიცირდეს როგორც კვოტის ამოწურვა, ნაცვლად მოკლე rate limit-ისა. ნაგულისხმევად გამორთულია: წესი მხოლოდ სტრუქტურირებულ შეცდომის კოდს ხედავს, ზუსტად ისე, როგორც ადრე."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "შესაძლებლობების ფილტრი",
+        "description": "უარყავით მოთხოვნები გაგზავნამდე, როდესაც სამიზნე მოდელს აკლია საჭირო შესაძლებლობები (vision, tools, structured output, context window). იცავს პირდაპირ single-provider მოთხოვნებს, რომლებიც გვერდს უვლიან combo-layer-ის თავსებადობის ფილტრს."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "არაფასდადებული მოხმარების იგნორირება USD კვოტებში",
+        "description": "ფასის არმქონე მოდელების მოხმარების $0-ად დათვლა თითოეული გასაღების USD მოხმარების კვოტებში, კვოტის გადაჭარბებულად მიჩნევის ნაცვლად. ნაგულისხმევად გამორთულია: ფასის არმქონე მოდელმა ან მარშრუტიზაციის ალიასმა შესაძლოა დამალოს რეალური ხარჯი, ამიტომ კვოტა უსაფრთხოდ იბლოკება (fails closed)."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "OmniRoute Radar მოდულის ჩართვა (კატალოგის ფიდის ეკრანები და სინქრონიზაცია). ნაგულისხმევად გამორთულია; ჩართვა მხოლოდ ინტერფეისს ხსნის — მონაცემთა სინქრონიზაცია რჩება ცალკე გასააქტიურებელ პარამეტრად."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "მოდელის ენდპოინტის შესაძლებლობების კარიბჭე",
+        "description": "სანდო მოდელის ენდპოინტის ტეგების აღსრულება (დეკლარირებული პროვაიდერის კატალოგის მიერ, ნაწარმოები სპეციალიზებული მოდელის id-დან, ან დაყენებული ოპერატორის მიერ): იმ ენდპოინტზე გაგზავნილი მოთხოვნის უარყოფა HTTP 400-ით /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations და /v1/audio/*-ზე გაგზავნამდე, რომელსაც მოდელი არ ემსახურება; იმ მოდელების დამალვა /v1/models-დან, რომელთა მონიშნულ ენდპოინტებს არ აქვთ OmniRoute ადაპტერი; და ასეთი მოდელებისთვის დეშბორდის მოდელის ტესტზე 422-ით პასუხის გაცემა. ნაგულისხმევად გამორთულია: ენდპოინტის ტეგები რჩება საინფორმაციო და მოთხოვნები იგზავნება ზუსტად ისე, როგორც ადრე."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "კონტექსტის უნივერსალური გადაცემა",
+        "description": "საუბრის შეჯამების გენერირება და ჩასმა, როდესაც combo მარშრუტიზაცია ცვლის მოდელებს. გამორთეთ, რათა მოდელების შეცვლა დამოუკიდებლად დამუშავდეს და აღიკვეთოს ფონური გადაცემის მოთხოვნები ყველა არსებული და მომავალი combo-სთვის."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "მსჯელობის გამეორება",
+        "description": "მოდელის მსჯელობის დაქეშვა და გამეორება მრავალეტაპიან საუბრებში. გამორთეთ, რათა შეწყდეს მსჯელობის შენახვა და ხელახალი ჩასმა."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server ტრანსპორტი",
+        "description": "მიეცით Codex-ს ლოკალური app-server WebSocket JSON-RPC ტრანსპორტის გამოყენების ნებართვა (codexTransport=app-server). როდესაც გამორთულია, app-server-ზე მომართული კავშირები გადაერთვება Codex-ის სხვა ტრანსპორტებზე."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code აღმოჩენის პსევდონიმები (Aliases)",
+        "description": "ასწავლება claude/'<provider>'/'<model>' სარკეული აიდების /v1/models-ზე, რათა Claude Code gateway მოდელის აღმოჩენა გამოიტანს არა-Claude მოდელებსაც. გაფრთხილება: გლობალურად ჩართვის შემთხვევაში, კატალოგის ჩანაწერები ორჯერ გამოსდის ყველა კლიენტისთვის."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "ხვაფიქრობი (No-Thinking) მოდელების პსევდონიმები",
+        "description": "მთავარი გადართმული no-think/'<provider>'/'<model>' gateway პსევდონიმებისთვის. ჩართული (ნაგულისხმევი): /v1/models ასწავლის ვარიანტს ყველა ღირსადმი განათლებული ღვაფიქრობა-უნარიანი Claude მოდელისთვის, ხოლო მოთხოვნაში გაგზავნილი no-think/ აიდეს რეალურ მოდელს უკეთ მიუხრწუნებს, თეორიული მუშაობის ჩახშობით. გამორთული: ვარიანტები არ ასწავლება და no-think/ აიდეს იტვირთება როგორც ნებისმიერი სხვა უცნობი მოდელის აიდეს. ამ პარამეტრის ჩართულ მდგომარეობაშიც კი, მოდელის დონეზე ModelSpec.noThinkingAlias არჩევანი კვლავ მოქმედებს."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "აზროვნების დონის ვარიანტების გათიშვა",
+        "description": "აზროვნების დონის ვარიანტების (მაგ. -low, -medium, -high) გენერირების გათიშვა /v1/models კატალოგში."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "ადაპტაციური ვირტუალური დაშვების ზოლები",
+        "description": "ჩართეთ თითოეულ ტენანტზე ადაპტაციური ვირტუალური დაშვების ზოლები პროვაიდერის დისპეტჩერიზაციისთვის (#9654): ერთი ტენანტის პიკური დატვირთვა აღარ გამოიწვევს სხვისთვის 503 შეცდომას. OMNIROUTE_CHAT_VIRTUAL_LANES გარემოს ცვლადს აქვს პრიორიტეტი მართვის პანელის ამ პარამეტრზე; ცვლილებები ძალაში შევა სერვერის გადატვირთვისას."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "ფუნქციური Gateway სარკეულები (Mirrors)",
+        "description": "ასწავლება '<gateway-alias>'/'<model>' სარკეული აიდების /v1/models-ზე, იმ მოდელებისთვის, რომელთა კანონიკური მფლობელი აქტიური რწმუნება არ აქვს, მაგრამ transgateway აქტიური რწმუნებით იღებს მათ. გაფრთხილება: გლობალურად ჩართვის შემთხვევაში, კატალოგის ჩანაწერები დამატებული ხდება ყველა კლიენტისთვის."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API აგრეგატორის ბალანსი",
+        "description": "ჩართეთ ბალანსის განსაზღვრა New-API / One-API / Sub2API აგრეგატორთან თავსებადი კვანძებისთვის. ჩართვის შემთხვევაში, თავსებადი კვანძები, რომლებსაც მითითებული აქვთ aggregator ალამი, ასახავენ საკუთარ ბალანსს მართვის პანელსა და quota-preflight მარშრუტიზაციაში."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "წაშლილი ძიების კავშირების დამალვა",
+        "description": "ძიების სტატისტიკა და ბოლო ძიებები ითვალისწინებს მხოლოდ იმ პროვაიდერებს, რომლებსაც ჯერ კიდევ აქვთ აქტიური კავშირი (უგასაღებო პროვაიდერები, როგორიცაა duckduckgo-free, ყოველთვის ითვლება). გამორთვისას ნარჩუნდება პროვაიდერის ID-ის მქონე ძიების ყველა შენახული სტრიქონი."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "მკაცრი Free ბეჯი",
+        "description": "მართვის პანელის პროვაიდერების გვერდები: აჩვენებს Free ბეჯს მხოლოდ იმ სიგნალებზე, რომლებსაც პროვაიდერი ითვალისწინებს — გამორიცხავს display-name-ის ევრისტიკას, არაბულეანურ free ველებს და :free სუფიქსებს რეგისტრირებული პროვაიდერებისთვის დოკუმენტირებული უფასო დონის (free tier) გარეშე. გამორთვისას ნარჩუნდება ბეჯის ისტორიული წესი."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: ცარიელი პული პასუხობს 503-ით",
+        "description": "როდესაც auto combo-ს კანდიდატთა პული უკვე ცარიელია tool-calling-ის წინასწარი ფილტრის გაშვებამდე (ყველა სამიზნე გამოტოვებულია cooldown-ების, lockout-ების ან ამოწურვის გამო), უპასუხეთ 503 no_eligible_targets-ით მოძველებული 400 \"No target supports tool calling\" capability_mismatch-ის ნაცვლად. ნაგულისხმევად გამორთულია: ცარიელი პული ინარჩუნებს მოძველებულ 400-ს."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral გაურკვევლობადი 401 შენაშნობი დამოუკიდებლობა",
+        "description": "მარგალიტური Mistral 401 ('{\"detail\":\"Unauthorized\"}', ნიშნული აუთანსილურ სიგნალის გარეშე) ბაიტობრივად იგივეა გაუქმებული ღილისთვისა და ამოწურული ლიმიტისთვისაც. ჩართვის შემთხვევაში, ასეთი 401 კავშირს შენაშნობით კუმშავს ამოწურულს, საათში 3-ჯერ; შემდეგი კვლავ ამოწურულს კავშირს პარკს, ასად გამორთულია ნაგულისხმევად: ყოველი მარგალიტური Mistral 401 კავშირს ამოწურულს პარკს, როგორც ახლა."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Batch-ისა და ფაილების ავტომატური გასუფთავება",
+        "description": "ავტომატურ გასუფთავებას საშუალებას აძლევს წაშალოს ტერმინალურ (completed/failed/cancelled/expired) სტატუსში მყოფი Batch API დავალებები, რომლებიც OMNIROUTE_BATCH_RETENTION_DAYS-ზე ძველია, მათ თითოეული ხაზის საკონტროლო წერტილებთან (checkpoints) ერთად, და გაასუფთაოს ატვირთული ფაილების BLOB შიგთავსი, რომელთაც საკუთარი expires_at ვადა გაუვიდათ. ნაგულისხმევად გამორთულია: ყველა არსებული ინსტალაცია ამ მონაცემებს უცვლელად ინახავს, სანამ ოპერატორი არ გააქტიურებს ფუნქციას. ოპერატორის მიერ ინიციირებულ DELETE /api/v1/batches/delete-completed მარშრუტზე ეს არანაირ გავლენას არ ახდენს — ეს ცალკე, უპირობო საჯარო API კონტრაქტია."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity ანგარიშის იჯარა",
+        "description": "დაარეზერვეთ შერჩეული Antigravity ანგარიში იმ მოთხოვნის სტრიმინგის სასიცოცხლო ციკლისთვის, რომელმაც ის აირჩია, რათა პარალელურმა განმეორებითმა მცდელობამ (retry) ან მონაცემთა გადაცემამ (credential handoff) თავიდან არ აირჩიოს ანგარიში, რომელიც უკვე დაკავებულია მიმდინარე სტრიმით. რეზერვაციის მოქმედების არეალი განსაზღვრულია როგორც (connection, callable upstream model), ასე რომ ერთ ანგარიშს კვლავ შეუძლია ერთდროულად მოემსახუროს ორ სხვადასხვა მოდელს. როდესაც მოცემული მოდელისთვის ყველა შესაფერისი ანგარიში უკვე იჯარითაა გაცემული, მოთხოვნა დაკავებულ ანგარიშზე დამატების ნაცვლად აბრუნებს სტრუქტურირებულ 503 POOL_BUSY შეცდომას შეზღუდული Retry-After მნიშვნელობით. ნაგულისხმევად გამორთულია: ანგარიშის შერჩევა რჩება ზუსტად ისევე, როგორც ადრე, და რეზერვაცია არ ხდება."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "მოძველებული Combo-ნაბიჯების ავტომატური მოცილება",
+        "description": "ავტორიტეტულ რეალურ კატალოგთან მოდელების წარმატებული სინქრონიზაციის შემდეგ, წაშლის combo-ს იმ ნაბიჯებს, რომლებიც მიბმულია კატალოგში აღარ არსებულ მოდელებზე, თითოეულ წაშლილ ნაბიჯზე ერთი აუდიტის ჩანაწერით. არასდროს ასუფთავებს წარუმატებელი, დეგრადირებული ან მხოლოდ უფასო (free-only) სინქრონიზაციის დროს და არასდროს აცარიელებს combo-ს. ნაგულისხმევად გამორთულია: მოძველებული ნაბიჯები მხოლოდ მოინიშნება."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth-ის შეჯამებული აზროვნება",
+        "description": "Claude OAuth მოთხოვნას, რომელიც ითხოვს წაკითხვად აზროვნებას (thinking.display \"summarized\"), აძლევს საშუალებას მოხსნას redact-thinking-2026-02-12 Anthropic-ის ბეტა, რომელიც სხვა შემთხვევაში აიძულებს Anthropic-ს დააბრუნოს ცარიელი, მხოლოდ ხელმოწერის მქონე thinking ბლოკები. ნაგულისხმევად გამორთულია: ეს ბეტა წარმოადგენს Claude Code OAuth-ის ქსელური ანაბეჭდის (wire fingerprint) ნაწილს, ამიტომ OAuth მოთხოვნები მას უცვლელად ინარჩუნებს. Claude-ის API-key მოთხოვნები ამ დროშის გარეშეც ითვალისწინებს შეჯამებულ აზროვნებას; OMNIROUTE_REDACT_THINKING=false ასევე მხოლოდ მაშინ მოქმედებს OAuth-ზე, როდესაც ეს დროშა ჩართულია."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro Tool Call-ის შეკეთება",
+        "description": "როდესაც Kiro-ს სტრიმინგ პასუხი ნებისმიერ ხილულ გამოტანამდე უშვებს არასწორად ფორმირებულ tool_call გარსს (აკლია input.name ან input.arguments), ჩაახშეთ ის და ერთხელ ხელახლა გაგზავნეთ მოთხოვნა მაკორექტირებელი ინსტრუქციით, რაუნდის invalid_kiro_tool_call-ით დასრულების ნაცვლად. ხელახალი მცდელობა მოითხოვს ერთ დამატებით Kiro მოთხოვნას; მეორე წარუმატებლობა ასრულებს რაუნდს შეცდომით kiro_tool_call_repair_retry_failed. ნაგულისხმევად ჩართულია. დააყენეთ false-ზე, რათა რაუნდი პირველივე არასწორად ფორმირებულ გარსზე შეწყდეს."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev Effort დონეები",
+        "description": "გამოიყენეთ models.dev-ის მიერ გამოქვეყნებული reasoning effort-ის დონეები (შეზღუდული ცნობილი effort ლექსიკით), როდესაც არც ოპერატორის გადაწერა (override) და არც პროვაიდერის რეესტრი არაფერს უთითებს, და გამოცხადებული ცარიელი დონეების სია მიიჩნიეთ როგორც \"no tiers\" /v1/models effort_tiers-სა და კომბინირებული დონეების გადაკვეთებში. ნაგულისხმევად გამორთულია: effort_tiers და დაზუსტებული supportedThinkingEfforts რჩება ზუსტად ისე, როგორც ადრე."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena-ს სინთეზირებული cx ტელემეტრია",
+        "description": "დაურთეთ სინთეზირებული პროგრამული cx კლიენტის ინტერაქციის blob (მნიშვნელობა, რომელსაც თავად arena.ai აგზავნის ჩაწერილი ინტერაქციის არმქონე გვერდისთვის) Arena-ს (lmarena) ყველა create-evaluation მოთხოვნას, რომელსაც არ გააჩნია ოპერატორის მიერ მოწოდებული providerSpecificData.cx. ნაგულისხმევად გამორთულია: cx ველი წარმოადგენს Arena-ს ანტიავტომატიზაციის სიგნალს, ამიტომ OmniRoute გადასცემს მხოლოდ ოპერატორის მიერ რეალური ბრაუზერის სესიიდან ჩაწერილ მნიშვნელობას (providerSpecificData.cx), სხვა შემთხვევაში კი cx-ს საერთოდ არ აგზავნის. upstream-ის დაუდასტურებელი სარგებელი; ჩართეთ მხოლოდ იმ შემთხვევაში, თუ Arena დაიწყებს მოთხოვნების უარყოფას cx-ის გარეშე."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Native Codex-ის რეაქტიული კომპაქტაცია",
+        "description": "მიეცით საშუალება რეაქტიულ (ზღვრულ) და უკიდურესი ზომის კონტექსტის კომპაქტაციის ეტაპებს, ასევე გადაწერონ native Codex-ის passthrough ისტორიები (POST /v1/responses codex პროვაიდერთან), როდესაც ისინი აჭარბებენ კონტექსტის ბიუჯეტს, Responses input[] ადაპტერის გამოყენებით. ნაგულისხმევად გამორთულია: native Codex-ის ისტორიებს ფლობს Codex კლიენტი და ისინი კომპაქტაციით არასოდეს გადაიწერება; გადაჭარბებული მოთხოვნები კვლავ ჩაიჭრება კონტექსტის ბიუჯეტის შემოწმებისას ზუსტად ისე, როგორც ადრე. მოითხოვს გლობალური შეკუმშვის ჩართვას და იმას, რომ მოდელი არ იყოს გამორიცხული."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "კვოტის ფანჯარა: Bounded Park-ის გათვალისწინება",
+        "description": "მიეცით საშუალება თითოეული ფანჯრის კვოტის პოლიტიკას (სესიის/ყოველკვირეული ზღვრები, რომლებიც გამოიყენება ანგარიშის შერჩევისთვის) გაითვალისწინოს ამოწურვის შეზღუდული პარკირება (bounded exhaustion park): როგორც კი პარკირების დაწესებული ვადა ამოიწურება, ან ქეშირებული კვოტის დაკვირვება პარკირების ლიმიტზე უფრო ძველია, ფანჯარა წყვეტს ანგარიშის გამორიცხვას კვოტის ხელახალ ამოღებამდე. ნაგულისხმევად გამორთულია: ქეშირებული ფანჯარა აგრძელებს ბლოკირებას ბოლოს დაფიქსირებულ პროცენტზე საკუთარი განულების დრომდე."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "სურათის გენერაცია: ხანგრძლივი დავალებები",
+        "description": "OpenAI-თავსებადი სურათის გენერაციისთვის: გამოიყენეთ კავშირის ტაიმაუტი (providerSpecificData.timeoutMs), სხვა შემთხვევაში ცენტრალური upstream fetch ტაიმაუტი (FETCH_TIMEOUT_MS, შემდეგ REQUEST_TIMEOUT_MS, ნაგულისხმევი 600 წმ) ფიქსირებული 120 წმ-იანი სურათის ბიუჯეტის ნაცვლად; დაასრულეთ გამომძახებლის მიერ გაუქმებული მოთხოვნა 499 კოდით; და Playground-ს მიეცით საშუალება, მიიღოს სურათის ხანგრძლივი დავალებები SSE ნაკადის სახით keepalive heartbeats-ით. ნაგულისხმევად გამორთულია: მოქმედებს ფიქსირებული ბიუჯეტი და გამომძახებლის გაუქმება არ გადაიცემა. პასუხის სხეულის წაკითხვის დედლაინი ყოველთვის ჩართულია."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "კატალოგის სარკის დახვეწა",
+        "description": "დახვეწეთ claude/ discovery და functional-gateway სარკეები /v1/models-ზე. ნაგულისხმევად გამორთულია: ორივე სარკისებური გატარება იქცევა ზუსტად ისე, როგორც ადრე. ჩართულია: claude/ discovery სარკეები ასევე ფარავს ჩამოთვლილ reasoning-effort ვარიანტებს (-low/-medium/-high/-xhigh), გამოტოვებს ჩაშენებულ auto/* id-ებს, რომელთა მატერიალიზებაც მოთხოვნის გზას არ შეუძლია, და გამოტოვებს უკვე ჩამოთვლილ ფსევდონიმს; functional-gateway სარკეები გამოტოვებს კომბინაციებს და OmniRoute-ის მიერ სინთეზირებულ id-ებს (claude/, no-think/), იღებს მფლობელს owned_by-დან, არასოდეს იყენებს მფლობელს საკუთარ gateway-დ, გამოტოვებს blockedProviders-ში გამორთულ gateway-ებს და gateway-ს ავტორიტეტული live კატალოგის მიღმა არსებულ მოდელებს."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "პროქსის მდგომარეობა: უარყოფა ანულებს წარუმატებლობათა სერიას",
+        "description": "პროქსის მდგომარეობის შემოწმებისას (proxy health sweep), სამიზნის მიერ უარყოფილმა შემოწმებამ (probe) (401/403/429: პროქსიმ გაატარა, დანიშნულების წერტილმა უარყო ეს egress IP) გაანულოს პროქსის თანმიმდევრული წარუმატებლობების სერია, წარმატებით დამუშავებული შემოწმების მსგავსად. ნაგულისხმევად გამორთულია: უარყოფა რჩება ნეიტრალური და ინარჩუნებს სერიას (#10654). 5xx ნებისმიერ შემთხვევაში რჩება დაუზუსტებელი, ხოლო უარყოფა არასოდეს შლის, თიშავს ან ხელახლა ააქტიურებს პროქსის."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok-ის გამოწერის სურათები",
+        "description": "დაარეგისტრირეთ xai-oauth (xao) და grok-cli სურათის მარშრუტები და ასახეთ OpenAI ხარისხი high/hd xAI medium-ზე. ნაგულისხმევად გამორთულია: API-key xAI სურათის გზა რჩება არსებულ OpenAI-თავსებად მოთხოვნაზე და გამოწერის მარშრუტები არ რეგისტრირდება."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth მოდელების Live აღმოჩენა",
+        "description": "ჩამოტვირთეთ xAI მოდელების live კატალოგი xai-oauth კავშირებისთვის https://api.x.ai/v1/models-დან OAuth bearer ტოკენის გამოყენებით, გაყინული სტატიკური seed-ის ნაცვლად. ნაგულისხმევად ჩართულია. დააყენეთ flag მნიშვნელობაზე false სტატიკური seed-ის მიწოდების გასაგრძელებლად. HTTP შეცდომების შემთხვევაში discovery მარშრუტი უბრუნდება seed-ს; თავად flag getter-ი არ აგზავნის HTTP მოთხოვნას."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-თან თავსებადი სისტემური რეპლიკები საუბრის შუაში",
+        "description": "ჩვეულებრივ anthropic-compatible-* რელეებზე (claude → claude passthrough), შეინახეთ საუბრის შუაში არსებული role:system რეპლიკები messages[]-ის შიგნით, მათი ზედა დონის system პარამეტრში ატანის ნაცვლად, რათა ქეშირებული prompt-ის პრეფიქსი სტაბილური დარჩეს რეპლიკებს შორის. ვრცელდება მხოლოდ მაშინ, როდესაც თავად კლიენტმა გამოაგზავნა mid-conversation-system-2026-04-07 anthropic-beta (რომელიც upstream-ს გადაეცემა უცვლელად). ნაგულისხმევად გამორთულია: ყოველი სისტემური რეპლიკა აიტანება ზუსტად ისე, როგორც ადრე, რადგან რელეები, რომლებსაც არ აქვთ ამ ბეტას მხარდაჭერა, უარყოფენ role:system შეტყობინებებს 400 შეცდომით."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB-ის მდგომარეობის შემოწმება: გაშვებისას სკანირების გადადება",
+        "description": "გაუშვით გაშვებისას DB-ის მთლიანობის/მდგომარეობის შემოწმება მას შემდეგ, რაც სერვერი დაიწყებს მოთხოვნების მიღებას (setImmediate-ის მეშვეობით), გაშვების პროცესის მის დასრულებამდე დაბლოკვის ნაცვლად. ნაგულისხმევად გამორთულია: გაშვება იბლოკება შემოწმებაზე ზუსტად ისე, როგორც #13717-მდე, რათა დაზიანებული მონაცემთა ბაზა გამოვლინდეს პირველი მოთხოვნის მომსახურებამდე. ჩართულია: გაშვება სრულდება დაუყოვნებლივ და შემოწმება (რომელიც ახლა შეზღუდულია/დაყოფილია გვერდებად და რეალური ფაილზე დაფუძნებული DB-სთვის იზოლირებულია გაუქმებად შვილობილ პროცესში) ეშვება უშუალოდ შემდეგ."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode-ის გამოქვეყნებული კატალოგის მარშრუტიზაცია",
+        "description": "მიეცით OpenCode Zen და OpenCode Go მოდელებს მკაფიო registry endpoint-ის გარეშე საშუალება, აიღონ თავიანთი მოთხოვნის ზედაპირი (Responses @ai-sdk/openai-სთვის, Messages @ai-sdk/anthropic-ისთვის) გამოქვეყნებული models.opencode.ai კატალოგიდან, რომელიც ფონურ რეჟიმში იკითხება ყოველ 6 საათში. ნაგულისხმევად გამორთულია: endpoint-ი მიიღება registry-ის ევრისტიკიდან ზუსტად ისე, როგორც ადრე, და კატალოგი არასდროს იტვირთება."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Auto მოთხოვნები: განსაზღვრული შესაძლებლობების წონები",
+        "description": "მიეცით auto/* მოთხოვნებს (resolveModelOrError და auto-routing wrapper-ი) საშუალება, შექმნან კანდიდატთა პული მოდელის განსაზღვრული შესაძლებლობებით (vision, reasoning, thinking) და დაფიქსირებული ხარისხის ქულებით, რომლებიც წაიკითხება ერთიან პაკეტად, /v1/models კატალოგის მსგავსად. ნაგულისხმევად გამორთულია: მოთხოვნის დროინდელი snapshot-ის წონები რჩება ზუსტად ისე, როგორც ადრე (შესაძლებლობები განისაზღვრება მოთხოვნისამებრ და არ გადაეცემა წონებს). ჩართულია: ეს სიგნალები გადაეცემა snapshot-ის წონებს, რის გამოც კანდიდატთა წონები და, შესაბამისად, შერჩევა შეიძლება შეიცვალოს."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "ავტო-კომბო: გასასვლელი კარი კარით",
+        "description": "აგდეთ კლუფიდან (no-auth) პროვაიდერები, რომელთა ტრანსპორტსაც ადგილობრივი ბრაუზერი (browserBacked) ან ადგილზე დაყენებული CLI (isLocalCli) სჭირდება, ავტო/ კანდიდატური ქულისგან, რათა შეკვეცული მონაწილე ვერ შეაფერხოს ავტო მოთხოვნა თითოეული მიზნის ვადმდევის დრომდე (#17036). ნაგულისხმევად გამორთულია: ყველა no-auth პროვაიდერი ემიულირებული ინსტრუმენტის გამძლეობით ზუსტად ისევე რჩება ქულში, როგორც ადრე. '<alias>'/'<model>'-ის პირდაპირი რეკომები ნებისმიერ შემთხვევაში იმუშავებს."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: ინლაინ ლოგიკური განმარტების ხელახლა ჩვენება",
+        "description": "კოდბაიდი-CN-ის სუფთავი მოდელებისთვის (DeepSeek-V4 / Kimi-K2 ოჯახები, რომლებიც საჭიროებს გამოთვლითი პროცესის რეპლი), ჩართეთ ყოველი რეპლი შესრულებული ასისტენტის reasoning_content ხილვად '<thought>' ბლოკად შეტყობინების შემცველობის თავში, რომ ის გადარჩეს ბურთზე, რომელიც ღალავს reasoning_content ველს (#13632). ნაგულისხმევად გამორთულია: codebuddy-cn მოთხოვნები გაიგზავნება უცვლელად; reasoning_content ველი ყოველთვის ინახება."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "პროვაიდერის უსაფრთხოების შეჩერებები: ტერმინალური",
+        "description": "შეინარჩუნეთ პროვაიდერის უსაფრთხოების მკაფიო შეჩერება (misalignment_policy_violation, content_policy_violation, ან მოძველებული ზუსტი უარყოფა 'blocked by our safety systems', მონიშნული როგორც provider_safety_rejection), როგორც ტერმინალური, მოთხოვნის მასშტაბის (request-scoped) უარი: მისი კოდი შენარჩუნებულია HTTP-ის, Responses-ის, WebSocket-ისა და დასრულებული ნაკადის შეცდომების გავლისას, ხოლო combo ჩერდება მასზე სხვა სამიზნეების ხელახლა ცდის ნაცვლად, რითაც აუქმებს დაშვებულ sibling-ებს (#17049). ნაგულისხმევად გამორთულია: ეს შეცდომები ინარჩუნებს არსებულ დამუშავებას და combo მარშრუტიზაცია უცვლელი რჩება."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "ავტორიზაციის მონაცემების მდგომარეობა: ავტომატურად გამორთული კავშირების ხელახალი ტესტირება",
+        "description": "მიეცით საშუალება ავტორიზაციის მონაცემების მდგომარეობის შემოწმებას (credential health sweep), ხელახლა გატესტოს ის კავშირები, რომლებიც თავად gateway-მ გამორთო (მონიშნულია autoDisabledAt; მაქსიმუმ 6 სთ-ში ერთხელ თითოეულისთვის და 5 შემოწმებაზე) და ხელახლა ჩართოს კავშირი, როდესაც მისი ტესტი წარმატებით დასრულდება (#16190). ნაგულისხმევად გამორთულია: გამორთული კავშირები რჩება გამორთული მანამ, სანამ ოპერატორი ხელახლა არ ჩართავს ან შეამოწმებს მათ, ზუსტად ისე, როგორც ადრე. ოპერატორის მიერ გამორთული კავშირები და მუდმივი დაბლოკვის შემდეგ გათიშული კავშირები არასოდეს მოწმდება ხელახლა."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Credential Gate: მხოლოდ Auth დიაგნოზები",
+        "description": "შეავიწროეთ combo-ს credential gate ისე, რომ ქეშირებულმა წარუმატებელმა credential probe-მა დაბლოკოს კავშირი მხოლოდ მაშინ, როდესაც მისი დიაგნოზი ადასტურებს არასწორ მონაცემებს (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). არაერთმნიშვნელოვანი შეცდომები (ტაიმ-აუტები, rate limit-ები, შეფერხებები, მხარდაუჭერელი probe-ები და დაუტიპავი scheduler-ის შეცდომები) ამ შემთხვევაში განიხილება როგორც უცნობი და კავშირი აგრძელებს ტრაფიკის მიღებას. ნაგულისხმევად გამორთულია: probe-ის ნებისმიერი ქეშირებული შეცდომა ბლოკავს კავშირს ქეშის TTL-ის განმავლობაში (5 წუთი)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: შეჩერება Content-Policy-ის უარზე",
+        "description": "როდესაც combo სამიზნე პასუხობს ზუსტი content-policy უარით (კოდი ან ტიპი cyber_policy / content_policy_violation), შეაჩერეთ combo და დააბრუნეთ ეს უარი მაშინაც კი, როდესაც დარჩენილი სამიზნეები სხვა მოდელებია, შემდეგ სამიზნეზე გადასვლის ნაცვლად. ნაგულისხმევად გამორთულია: უარი არასოდეს გადაიყვანს ანგარიშს cooldown-ში და არ ააქტიურებს provider breaker-ს, ხოლო combo გადადის მის შემდეგ სამიზნეზე ზუსტად ისე, როგორც ადრე."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Cooldown-ის განმეორებითი ცდა: 403/410 უარყოფების გამოტოვება",
+        "description": "როდესაც ყველა ანგარიში cooldown-ის რეჟიმშია და cooldown, რომელიც პირველი სრულდება, გამოწვეული იყო 403 (წვდომა უარყოფილია) ან 410 (აღარ არსებობს) სტატუსით, დააბრუნეთ ეს უარყოფა დაუყოვნებლივ, cooldown-ის დასრულებამდე ლოდინისა და მოთხოვნის ხელახლა გაგზავნის ნაცვლად; განახლებადი agentrouter-ის connection-scoped კვოტის 403 ამის შემდეგ ინახება errorCode 429-ით, რათა დარჩეს ხელახლა ცდადი. ნაგულისხმევად გამორთულია: ლოდინს მხოლოდ 401 გამოტოვებს და თითოეული უარყოფა ინახება იმ სტატუსით, რომლითაც მოვიდა."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "ფასგარეშე გამოყენების ბიუჯეტის პოლიტიკა",
+        "description": "როგორ ექცევიან თითო-კლავის დღიური/კვირეული USD ლიმიტები წარმატებულ გამოყენებას, რომლის პროვაიდერს ან მოდელს არ აქვს ფასის ჩანაწერი. fail_closed (ნაგულისხმევი) ნიშნავს, რომ ფანჯარა ჩაითვლება გადაჭარბებულად — უცნობი ხარჯი არასოდეს გაივლის მკაცრ ზღვარს. count_as_zero ითვლის ასეთ გამოყენებას როგორც $0 და აგრძელებს ფასიან ხარჯებზე კონტროლის განხორციელებას. ფასგარეშე მოდელები ნებისმიერ შემთხვევაში ნაჩვენებია დეშბორდის მთავარ გვერდზე."
       }
     }
   },
@@ -13793,6 +14446,7 @@
     "latency": "დაყოვნება",
     "quota": "კვოტა",
     "rangeWindow": "{range} პერიოდი",
+    "timeRange": "დროის დიაპაზონი",
     "runtimeHealthBlend": "გაშვებისა და მდგომარეობის კომბინაცია",
     "averageResponseTime": "პასუხის საშუალო დრო",
     "worstQuota": "ყველაზე ცუდი კვოტა",
@@ -13923,7 +14577,11 @@
       "ok": "ზოგადად ნებადართული"
     },
     "allProviders": "ყველა პროვაიდერი",
-    "noApiKeyRequired": "API გასაღები არ არის საჭირო"
+    "noApiKeyRequired": "API გასაღები არ არის საჭირო",
+    "searchPlaceholder": "მოძიარ მოდელის, პროვაიდერის…",
+    "searchAria": "მოძიარ უფასო მოდელების",
+    "filterProviderAria": "გამოყვანა პროვაიდერის მიხედვით",
+    "keylessOnly": "მხოლოდ სიბლანტის"
   },
   "providerHealthAutopilot": {
     "title": "პროვაიდერის გამართულობის ავტოპილოტი",
@@ -13994,7 +14652,11 @@
     "learnMore": "გაიგეთ მეტი",
     "changelogLoadFailed": "ცვლილებების ჟურნალის ჩატვირთვა ვერ მოხერხდა. გთხოვთ, მოგვიანებით სცადოთ.",
     "retry": "ხელახლა ცდა",
-    "viewFullHistory": "სრული ისტორიის ნახვა GitHub-ზე"
+    "viewFullHistory": "სრული ისტორიის ნახვა GitHub-ზე",
+    "title": "სიახლეები და ცვლილებების ჟურნალი",
+    "description": "OmniRoute-ის გუნდის განცხადებები და უახლესი გამოშვების შენიშვნები",
+    "viewLabel": "ნახვა",
+    "loadingNews": "განცხადებები იტვირთება..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15207,9 @@
       "circuitBreakerState": "პროვაიდერის Circuit Breaker-ის მდგომარეობა",
       "lastUpdate": "ბოლო განახლება: {timestamp}",
       "uptimeMinutes": "{minutes} წთ",
-      "uptimeHoursMinutes": "{hours} სთ {minutes} წთ"
+      "uptimeHoursMinutes": "{hours} სთ {minutes} წთ",
+      "breakerClosed": "დახურული",
+      "breakerNotClosed": "ღია ან ნახევრად ღია"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15284,9 @@
         "primaryAction": "ტექნიკური მომსახურების დეტალები",
         "secondaryAction": "სისტემის სტატუსი"
       }
+    },
+    "miniapp": {
+      "askAnything": "დასვით ნებისმიერი კითხვა…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15477,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} ხილული / სულ {total}",
+    "modeLabel": "ხედვის რეჟიმი",
+    "jumpToNow": "მიმდინარე დროზე გადასვლა — „ახლა“ ხაზი დაბრუნდება {position}% პოზიციაზე",
+    "laneReuse": "ზოლის ხელახლა გამოყენება",
+    "laneReuseLabel": "ზოლის ხელახლა გამოყენების პერიოდი (წუთები)",
+    "laneReuseHint": "ერთი და იმავე საუბრის ID-ის მქონე მოთხოვნები დროის სკალის ერთსა და იმავე მწკრივში დარჩება, თუ მათ შორის ინტერვალი ამ რაოდენობის წუთზე ნაკლებია.",
+    "laneReuseUnit": "წთ",
+    "autoRefresh": "ავტომატური განახლება",
+    "autoRefreshLabel": "ავტომატური განახლების ინტერვალი (წამები)",
+    "autoRefreshHint": "რამდენად ხშირად გამოითხოვს დროის სკალა სერვერიდან მოთხოვნების სიას ხელახლა.",
+    "autoRefreshUnit": "წმ",
+    "zoomOut": "მასშტაბის შემცირება",
+    "zoomIn": "მასშტაბის გაზრდა"
   },
   "metadata": {
     "compressionTitle": "შეკუმშვა",
@@ -15073,5 +15753,118 @@
     "importButton": "იმპორტი",
     "importFailed": "იმპორტი ვერ მოხერხდა.",
     "importSuccess": "იმპორტირებულია {connections} ანგარიში და {nodes} პროვაიდერის კვანძი; გამოტოვებულია {skipped}."
+  },
+  "conversations": {
+    "title": "საუბრები",
+    "countSummary": "{total, plural, one {# საუბარი} other {# საუბრები}} 2-ზე მეტი ბრუნვის",
+    "autoRefreshTitle": "რა ხშირად განახლდება ეს სია სერვერიდან.",
+    "autoRefresh": "ავტომატური განახლება",
+    "loading": "საუბრების დატვირთვა...",
+    "colConversation": "განხილვა",
+    "colTurns": "წარდგენები",
+    "colContinuation": "განგრძელება",
+    "colLastModel": "ბოლო მოდელი",
+    "colProvider": "პროვაიდერი",
+    "colStatus": "სტატუსი",
+    "colLastSeen": "ბოლო წარმოჩენა",
+    "drawerTitle": "განხილვა",
+    "prevConversation": "წინა განხილვა",
+    "nextConversation": "შემდეგი განხილვა",
+    "gotoLatestRequest": "ბოლო მოთხოვნაზე გადასვლა",
+    "goToBottom": "ბოლოში გადასვლა",
+    "statusInProgress": "მიმდინარეობს",
+    "continuationGenuineTitle": "ბოლო სვლამ გამოიყენა previous_response_id და ის სერვერის მხარეს დამუშავდა",
+    "continuationBadge": "გაგრძელება",
+    "stalledTitle": "ბოლო სვლა stop-ით არ დასრულებულა და 5+ წუთის განმავლობაში არაფერი გაგრძელებულა",
+    "stalledBadge": "შეჩერებული",
+    "noTurns": "ამ საუბრისთვის სვლები არ არის ჩაწერილი."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "დაწყება მიმდინარე პოზიციიდან (არსებული ჟურნალების გამოტოვება)",
+    "pageTitle": "ჟურნალის ექსპორტი",
+    "pageSubtitle": "კვარძით გადააგზავნეთ ჟურნალის ფანერის მოულოდნელეშეგნებები გარე ანალიტიკურ სასრულში.",
+    "addDestination": "გამოყვანილის დამატება",
+    "scheduleTitle": "გრაფიკი",
+    "cronLabel": "Cron",
+    "notScheduled": "გრაფიკით არ არის განსაზღვრული",
+    "lastScheduledRun": "ბოლო გრაფიკით ჩართული",
+    "lastRunSummary": "{startedAt} — {status}, {rows} სტრიქონი",
+    "never": "სოდმად",
+    "highWaterMark": "მოულოდნელეშეგნებების მაღალი დონე",
+    "rowPrefix": "სტრიქონი {id}",
+    "noDestinations": "ექსპორტის მიმართულებები არ არის",
+    "noDestinationsHint": "დაამატეთ მიმართულება, რომ აკვიატების ჟურნალების გაგზავნა საათობრივი გრაფიკით დაიწყება.",
+    "errLoadStatus": "ექსპორტის სტატუსის ჩატვირთვა ვერ მოხერხდა",
+    "errSaveDestination": "მიმართულების შენახვა წარუმატებლად დამთავრდა",
+    "msgDestinationSaved": "მიმართულება შენახულია.",
+    "errConnectionTest": "კავშირის ტესტი წარუმატებლად დამთავრდა",
+    "msgRunInFlight": "ამ მიმართულებისთვის შესრულება უკვე მიმდინარეობს; არაფერი გაუგზავნია ორჯერ.",
+    "errExportRun": "ექსპორტის შესრულება წარუმატებლად დამთავრდა",
+    "errUpdateDestination": "მიმართულების განახლება წარუმატებლად დამთავრდა",
+    "errDeleteDestination": "მიმართულის წაშლა წარუმატებლად დამთავრდა",
+    "deleteTitle": "წაშლა ობიექტის",
+    "deleteConfirm": "წავშალოთ \"{name}\"? მისი ექსპორტის კურსორიც წაიშლება, ამიტომ ხელმოციმ გასამბარებლად ყველაზე ძველი დაინახულით ღონისძიებით დაიწყება.",
+    "statusDisabled": "გამორთულია",
+    "statusFailing": "შეცდომიანი",
+    "statusHealthy": "საშუალო",
+    "statusNotRunYet": "ჯერ არ გაუშვეს",
+    "typeNotInstalled": "ტიპი არ არის დაყენებული",
+    "metaLine": "ბოლო შესრულება {lastRun} · ექსპორტი {exported} მრიხვ · {pending} მოლოდინში · კურსორი {cursor}",
+    "btnTest": "ტესტი",
+    "btnRunNow": "გაშვება ახლავე",
+    "btnDisable": "გამორთვა",
+    "btnEnable": "ჩართვა",
+    "btnEdit": "რედაქტირება",
+    "btnDelete": "საშლა"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI აქუენტები",
+    "cardSubtitle": "მხოლო-კითხვადი სტატუსი ავტორიზებული მენეჯმენტის API-დან",
+    "btnRefresh": "განახლება",
+    "listAria": "CLIProxyAPI აქუენტის მდგომარეობა",
+    "noAccounts": "CLIProxyAPI აქუენტები ვერ მოიძებნა.",
+    "loading": "აქუენტის მდგომარეობის ივსება…",
+    "stateReady": "უკუსკვლენის სტატუსი",
+    "stateDisabled": "CLIProxyAPI ინსტალირებული არ არის",
+    "stateMissingKey": "მართვის საკი არ არის კონფიგურირებული",
+    "stateUnreachable": "მართვის API-ს ვერ მივხელმძღვანელებთ",
+    "stateUnauthorized": "მართვის საკი განაცხადდა",
+    "stateUnsupported": "CLIProxyAPI-ის ეს ვერსია უკუსკვლენის სტატუსს არ ავლენს",
+    "stateInvalidResponse": "მართვის API-მ უჭირს მხარდაჭერადი პასუხი"
+  },
+  "darioPanel": {
+    "title": "Claude ანგარიშები",
+    "description": "Dario-ს ავტენტიფიკაცია Claude Pro/Max აბონემენტით. მონაცემები თქვენი აბონემენტის პულში ჩაიწერება. მინიმუმ ერთი ანგარიშის კონფიგურაცია აუცილებელია იმისთვის, რომ Dario-მ მოთხოვნები გაგზავნის (ამასობაში /health მონიტორებას აჩვენებს).",
+    "noAccounts": "ჯერ არცერთი ანგარიში არ არის კონფიგურირებული.",
+    "importTitle": "დამტვირთე OmniRoute-დან",
+    "importDescription": "გამოიყენეთ უკვე არსებული OmniRoute Claude კავშირის OAuth ტოკენები, ისტექლოგინის გამორიცხვით — ავტომატურად გამოიტოვებს ბრაუზერის გადასამტკიცებლად ნაბიჯს.",
+    "importPendingTooltip": "მოიმუშავებს, როგორც კი Claude კავშირი შეიქმნება OmniRoute-ში.",
+    "btnImport": "იმპორტი",
+    "btnImporting": "იმპორტდება…",
+    "aliasPlaceholder": "ალიასი (არააუცილებელი)",
+    "btnStartLogin": "შესვლის დაწყება",
+    "btnStarting": "იწყება…",
+    "btnCompleteLogin": "შესვლის დასრულება",
+    "btnCompleting": "დასრულება…",
+    "codePlaceholder": "code#state ან მხოლოდ code",
+    "noticeImported": "შემოტანილია ანგარიშად „{alias}“ — Dario-მ სასაზღვრო უფლებები ამოირჩია.",
+    "noticeAdded": "ანგარიში „{alias}“ დაემატა.",
+    "expiresInHours": "ვადას ვადა ~{hours} საათში",
+    "expiresInMinutes": "ვადას ვადა ~{minutes} წუთში",
+    "expiresAt": "ვადას ვადა {date}-ზე",
+    "scopes": "{count, plural, one {# სკოპი} other {# სკოპები}}",
+    "btnRemove": "მოხსნა",
+    "btnRefresh": "განახლება",
+    "loginStep1": "1. გახსენით ეს URL ბრაუზერში და დადასტურეთ წვდომა ანგარიშისთვის <mono>{alias}</mono>:",
+    "pendingExpires": "ლოგინის მოლოდინი ექსპირდება {time}",
+    "loginStep2": "2. ჩასვით კოდი, რომელიც Anthropic აჩვენებს:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "ეს გვერდი უნდა გაიხსნას Telegram Mini App-ის შიგნით.",
+    "greeting": "👋 გამარჯობა {name}! გაგზავნეთ შეტყობინება ჩატისთვის თქვენი OmniRoute Gateway-ის გავლით.",
+    "greetingFallbackName": "მეგობარო",
+    "errNoReply": "⚠️ Gateway-დან პასუხი არ მოვიდა.",
+    "btnSend": "გაგზავნა"
   }
 }

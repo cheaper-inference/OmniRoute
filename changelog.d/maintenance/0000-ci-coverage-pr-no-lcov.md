@@ -1,0 +1,1 @@
+- **ci:** on pull requests the Coverage job no longer writes `lcov.info` or uploads to Codecov (informational, kept on push and the merge queue); the 60% coverage gate and the PR coverage summary are unchanged.

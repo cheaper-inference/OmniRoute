@@ -38,6 +38,12 @@
 - [`GET /api/v1/voices`](#get-apiv1voices)
 - [`POST /api/v1/speech-to-text`](#post-apiv1speech-to-text)
 - [`POST /api/v1/text-to-speech/{voiceId}`](#post-apiv1text-to-speechvoiceid)
+- [`POST /api/v1/sound-generation`](#post-apiv1sound-generation)
+- [`POST /api/v1/music`](#post-apiv1music)
+- [`POST /api/v1/music/stream`](#post-apiv1musicstream)
+- [`POST /api/v1/music/detailed`](#post-apiv1musicdetailed)
+- [`POST /api/v1/music/detailed/stream`](#post-apiv1musicdetailedstream)
+- [`POST /api/v1/music/plan`](#post-apiv1musicplan)
 - [`GET /api/v1/explain/routing`](#get-apiv1explainrouting)
 - [`GET /api/v1/providers/suggested-models`](#get-apiv1providerssuggested-models)
 - [`GET /api/v1/provider-plugin-manifest`](#get-apiv1provider-plugin-manifest)
@@ -543,6 +549,84 @@ Streams the request body to `POST https://api.elevenlabs.io/v1/text-to-speech/{v
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/text-to-speech/{voiceId} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/v1/sound-generation
+
+Create an ElevenLabs sound effect
+
+Proxies POST /v1/sound-generation using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/sound-generation \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/v1/music
+
+Compose ElevenLabs music
+
+Proxies POST /v1/music using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/music \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/v1/music/stream
+
+Stream ElevenLabs music
+
+Proxies POST /v1/music/stream using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/music/stream \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/v1/music/detailed
+
+Compose ElevenLabs music with its composition plan
+
+Proxies POST /v1/music/detailed using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/music/detailed \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/v1/music/detailed/stream
+
+Stream ElevenLabs music and metadata as SSE
+
+Proxies POST /v1/music/detailed/stream using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/music/detailed/stream \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/v1/music/plan
+
+Create an ElevenLabs music composition plan
+
+Proxies POST /v1/music/plan using the stored ElevenLabs connection selected within the caller key's scope. Native response bytes and Content-Type are preserved without buffering, including multipart boundaries. Query parameters are forwarded unchanged. Endpoint, model, budget and connection restrictions apply. Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/music/plan \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'

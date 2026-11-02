@@ -16,40 +16,52 @@
 
 ---
 
-## TLS Fingerprinting ස්තරය
+## TLS ඇඟිලි සලකුණු ස්තරය
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-ස්ථිර `wreq-js` sessions, එක් එක් ගිණුම් scope එක සහ resolve කළ proxy එක අනුව අවශ්ය වූ විට නිර්මාණය කෙරේ. process පුරා පවතින `TlsClient`, Cloudflare පිටුපස ඇති upstreams සඳහා **macOS මත Chrome 124** ලෙස පෙනී සිටින sessions උපරිම 128ක් pool කරයි. native runtime එක නොමැති විට `TlsClient.fetch()` ආරක්ෂිතව අසාර්ථක වේ; caller කෙනෙකුට මෙම wrapper එකෙන් පිටත fallback එකක් පැහැදිලිව තෝරාගත හැක.
+ස්ථාවර `wreq-js` සැසි, එක් එක් ගිණුම් විෂය පථය සහ නිරාකරණය කළ ප්රොක්සිය අනුව අවශ්ය වූ විට පමණක් සාදනු ලැබේ. ක්රියාවලි-ව්යාප්ත `TlsClient` එක, Cloudflare පිටුපස ඇති upstream සඳහා **macOS මත Chrome 124** ලෙස පෙනී සිටින සැසි උපරිම වශයෙන් 128ක් pool කරයි. ස්වදේශීය runtime එක නොමැති විට `TlsClient.fetch()` ආරක්ෂිතව අසාර්ථක වේ; මෙම wrapper එකෙන් පිටත fallback එකක් caller කෙනෙකුට පැහැදිලිව තෝරාගත හැක.
 
-- Session profile එක: `browser: "chrome_124", os: "macos"`
-- Proxy resolution (ප්රමුඛතාව): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (කුඩා අකුරු ප්රභේද ද ඇතුළුව)
-- Timeout එක: `TLS_CLIENT_TIMEOUT_MS` (`FETCH_TIMEOUT_MS` වෙතින් උරුම වේ, පෙරනිමිය 600000)
-- `wreq-js` Response එක fetch සමඟ ගැළපේ (`headers`, `text()`, `json()`, `clone()`, `body`).
-- පළමු-byte watchdog එක (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): upstream headers පැමිණි විගස `TlsClient.fetch()` resolve වන බැවින්, කිසිදා පළමු byte එකක් ලබා නොදෙන body එකක් `TLS_CLIENT_TIMEOUT_MS` මඟින් පමණක් සීමා කළ නොහැක. `guardTlsFirstByte()` විසින් body එකේ පළමු `read()` එක `TLS_FIRST_BYTE_WATCHDOG_MS` සමඟ race කරයි (පෙරනිමිය `10000`, `0` මඟින් එය අක්රිය කරයි); සෞඛ්ය සම්පන්න body එකකට බලපෑමක් නොවන අතර, stalled body එකක් wreq reader එක අවලංගු කර `proxyFetch` හි පවතින TLS-fallback logic එකට direct/proxy dispatcher එක වෙත ඉදිරියට යාමට ඉඩ දෙයි (body එකක් සහිත POST එකක් වැනි replay කිරීමට අනාරක්ෂිත request එකක්, නිහඬව නැවත උත්සාහ කිරීම වෙනුවට තවමත් throw කරයි).
+- සැසි profile එක: `browser: "chrome_124", os: "macos"`
+- ප්රොක්සි නිරාකරණය (ප්රමුඛතාව): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (කුඩා අකුරු ප්රභේද ද ඇතුළුව)
+- කල් ඉකුත්වීම: `TLS_CLIENT_TIMEOUT_MS` (`FETCH_TIMEOUT_MS` වෙතින් උරුම වේ, පෙරනිමිය 600000)
+- `wreq-js` Response එක fetch සමඟ අනුකූල වේ (`headers`, `text()`, `json()`, `clone()`, `body`).
+- පළමු-byte watchdog එක (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): upstream headers පැමිණි වහාම `TlsClient.fetch()`
+  නිරාකරණය වන බැවින්, කිසිදා පළමු byte එක ලබා නොදෙන body එකක් `TLS_CLIENT_TIMEOUT_MS` මඟින් පමණක් සීමා කළ නොහැක.
+  `guardTlsFirstByte()` මඟින් body එකේ පළමු `read()` එක `TLS_FIRST_BYTE_WATCHDOG_MS` (පෙරනිමිය `10000`, `0` එය අක්රිය කරයි) සමඟ
+  තරග කරවයි; සෞඛ්ය සම්පන්න body එකකට බලපෑමක් නොවන අතර, ඇණහිටි body එකක් wreq reader එක අවලංගු කර
+  `proxyFetch` හි පවතින TLS-fallback තර්කනයට සෘජු/ප්රොක්සි dispatcher එක වෙත ඉදිරියට යාමට ඉඩ සලසයි
+  (නැවත ධාවනයට ආරක්ෂිත නොවන request එකක්, උදා. body එකක් සහිත POST එකක්, නිහඬව නැවත උත්සාහ කිරීම වෙනුවට තවමත් exception එකක් නිකුත් කරයි).
 
-### Web-cookie සැපයුම්කරු transport එක — wreq-js 3.2.0
+### Web-cookie සපයන්නාගේ ප්රවාහනය — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` යනු පහත දැක්වෙන විශේෂිත web-cookie transports පහ සඳහා වන හවුල් adapter එකයි. සෑම සැහැල්ලු සැපයුම්කරු wrapper එකක්ම browser/OS profile එකක් තෝරයි. adapter එක, profile + OS + resolve කළ proxy අනුව key කර ඇති `open-sse/utils/tlsClient.ts` හි තනි wreq runtime loader එක සහ transport pool එක භාවිත කරයි; ඒ අතරතුර සෑම request එකක්ම `cookieMode: "ephemeral"` භාවිත කරයි. එබැවින් ගිණුම් සහ requests transport-මට්ටමේ connections බෙදාගන්නා නමුත්, කිසිවිටෙක wreq session එකක් හෝ cookie jar එකක් බෙදා නොගනී.
+`open-sse/services/tlsClientBase.ts` යනු පහත විශේෂිත web-cookie ප්රවාහන පහ සඳහා පොදු adapter එකයි. සෑම සරල provider wrapper එකක්ම browser/OS profile එකක් තෝරයි. Adapter එක, profile + OS + නිරාකරණය කළ ප්රොක්සිය අනුව key කර ඇති `open-sse/utils/tlsClient.ts` තුළ ඇති තනි wreq runtime loader එක සහ transport pool එක භාවිත කරයි; ඒ අතර සෑම request එකක්ම `cookieMode: "ephemeral"` භාවිත කරයි. එබැවින් ගිණුම් සහ requests ප්රවාහන-මට්ටමේ connections බෙදාගන්නා නමුත්, කිසිවිටෙකත් wreq session එකක් හෝ cookie jar එකක් බෙදා නොගනී.
 
-| සැපයුම්කරු | Profile එක    | අනුකරණය කළ OS | Stream EOF ප්රතිපත්තිය                 |
+| සපයන්නා    | Profile       | අනුකරණය කළ OS | Stream EOF ප්රතිපත්තිය                 |
 | ---------- | ------------- | ------------- | -------------------------------------- |
 | Claude     | `chrome_146`  | Linux         | `[DONE]` ඇතුළත් කරන්න                  |
-| Perplexity | `firefox_148` | macOS         | `event: end_of_stream` ඇතුළත් කරන්න    |
-| Grok       | `chrome_146`  | Linux         | `[DONE]` ඉවත් කරන්න                    |
+| Perplexity | `firefox_151` | macOS         | `event: end_of_stream` ඇතුළත් කරන්න    |
+| Grok       | `chrome_146`  | Linux         | `[DONE]` බැහැර කරන්න                   |
 | Notion     | `chrome_146`  | Windows       | `[DONE]` ඇතුළත් කරන්න                  |
 | LMArena    | `chrome_146`  | Windows       | sentinel එකක් නැත; native EOF හි වසන්න |
 
-- Streaming කිරීම native response `ReadableStream` එක සෘජුවම පරිභෝජනය කරයි; temp file එකක් හෝ sidecar එකක් නිර්මාණය නොකෙරේ.
-- stream එකක් නිරාවරණය කිරීමට පෙර ආරම්භක bytes 256ක් දක්වා පරීක්ෂා කෙරේ. SSE සැපයුම්කරුවෝ SSE නොවන errors buffer කරති; Grok/LMArena විසින් Cloudflare challenges `403` වෙතත් HTML interstitials `502` වෙතත් map කරයි.
-- native request timeout එක තවමත් නිරපේක්ෂ JS hard deadline එකකින් wrap කර ඇත. hang වීමකදී, ඊළඟ request එක එය නැවත නිර්මාණය කිරීමට පෙර බලපෑමට ලක් වූ profile/OS/proxy transport එක පමණක් invalidate කර වසා දමයි.
-- Proxy resolution ප්රමුඛතාව වන්නේ එක් එක් call එකේ `proxyUrl` → request-scope කළ account/dashboard context එක → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (කුඩා අකුරු ප්රභේද ඇතුළුව) යන්නයි. direct connection එකක් leak කිරීම වෙනුවට resolution errors ආරක්ෂිතව අසාර්ථක වේ. LMArena හිතාමතාම `arena.ai` සම්බන්ධයෙන් resolve කරයි.
-- `byteResponse`, UTF-8 දූෂණයකින් තොර content-typed `data:` URL එකක් ලබා දෙයි.
-- සියලුම සීමා කළ profile/OS/proxy slots 128 සක්රියව හෝ වැසෙමින් පවතින විට errors ලෙස `TlsClientUnavailableError` (package/addon එක නොමැත), `TlsClientHangError` (deadline එක ඉක්මවා ඇත), සහ `WreqTransportCapacityError` (හවුල් session-capacity error code එක) ලැබේ.
+- Streaming ක්රියාවලිය native response `ReadableStream` එක සෘජුවම පරිභෝජනය කරයි; තාවකාලික file එකක් හෝ sidecar එකක්
+  සාදනු නොලැබේ.
+- Stream එකක් නිරාවරණය කිරීමට පෙර ආරම්භක bytes 256ක් දක්වා පරීක්ෂා කරනු ලැබේ. SSE providers, SSE නොවන
+  errors buffer කරයි; Grok/LMArena මඟින් Cloudflare challenges `403` වෙතත් HTML interstitials `502` වෙතත් සිතියම්ගත කරයි.
+- Native request timeout එක තවමත් නිරපේක්ෂ JS hard deadline එකකින් ආවරණය කර ඇත. Hang එකක් සිදු වූ විට,
+  ඊළඟ request එක එය නැවත සෑදීමට පෙර බලපෑමට ලක් වූ profile/OS/proxy transport එක පමණක් අවලංගු කර වසා දමයි.
+- ප්රොක්සි නිරාකරණ ප්රමුඛතාව එක් එක් call එක සඳහා `proxyUrl` → request-විෂය පථ ගිණුම්/dashboard context එක →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (කුඩා අකුරු ප්රභේද ඇතුළුව) වේ. සෘජු connection එකක් කාන්දු කිරීම වෙනුවට නිරාකරණ errors
+  ආරක්ෂිතව අසාර්ථක වේ. LMArena හිතාමතාම `arena.ai` ට එරෙහිව නිරාකරණය කරයි.
+- `byteResponse` UTF-8 දූෂණයකින් තොරව content type එක සඳහන් කළ `data:` URL එකක් ආපසු ලබා දෙයි.
+- Errors ලෙස `TlsClientUnavailableError` (package/addon එක නොමැති වීම), `TlsClientHangError`
+  (deadline ඉක්මවා යාම), සහ සීමා කළ profile/OS/proxy slots 128ම සක්රියව හෝ වැසෙමින් පවතින විට
+  `WreqTransportCapacityError` (හවුල් session-capacity error code එක) ලැබේ.
 
-ඉහත generic `TlsClient` session එක ස්ථිර browser-backed cookie state සඳහා විශේෂීකරණය වී පවතී. මාර්ග දෙකම cache කළ එකම wreq module loader එක සහ process lifecycle hook එක නැවත භාවිත කරයි; ඒවායේ cookie ජීවිතකාල හිතාමතාම වෙනස් බැවින් ඒවායේ pools වෙන වෙනම පවතී.
+ඉහත generic `TlsClient` session එක ස්ථාවර browser-backed cookie තත්ත්වය සඳහා විශේෂිතව පවතී. මාර්ග දෙකම cache කළ එක් wreq module loader එකක් සහ process lifecycle hook එකක් නැවත භාවිත කරයි; ඒවායේ cookie ආයුකාල හිතාමතාම වෙනස් බැවින් ඒවායේ pools වෙන වෙනම පවතී.
 
-profiles pinned package එක මඟින් සහාය දක්වනු ලබන නමුත්, සැබෑ WAF පිළිගැනීම දේශීය contract tests වලින් ස්වාධීනව වෙනස් විය හැක. upstream browser එකක් සමඟ parity ඇති බව ප්රකාශ කිරීමට පෙර, පැහැදිලිව අවසර ලත් සජීවී ගිණුමකට එරෙහිව fingerprint වෙනස්කම් වලංගු කරන්න.
+Profiles, pin කළ package එක මඟින් සහාය දක්වන නමුත්, සැබෑ WAF පිළිගැනීම දේශීය contract tests වලින් ස්වාධීනව වෙනස් විය හැක. Upstream browser එකක් සමඟ සමානත්වය ඇති බව ප්රකාශ කිරීමට පෙර, පැහැදිලිව අවසර දී ඇති live account එකකට එරෙහිව fingerprint වෙනස්කම් වලංගු කරන්න.
 
 ---
 

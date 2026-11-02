@@ -1,0 +1,1 @@
+- **fix(cache):** Version exact-cache identities and canonicalize response controls so changed token caps, reasoning settings, or tool policy cannot reuse an incompatible response ([#17161](https://github.com/diegosouzapw/OmniRoute/pull/17161)).

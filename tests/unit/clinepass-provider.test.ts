@@ -135,6 +135,36 @@ test("unwrapClinepassEnvelope: nested error.message extracted", () => {
   assert.equal(error?.message, "quota exceeded");
 });
 
+test("unwrapClinepassEnvelope: preserves error-message precedence and status types", () => {
+  for (const [rawError, expected] of [
+    ["", ""],
+    ["direct", "direct"],
+    [{ message: "nested" }, "nested"],
+    [{ message: "" }, "fallback"],
+    [null, "fallback"],
+  ]) {
+    assert.deepEqual(
+      unwrapClinepassEnvelope(
+        {
+          success: false,
+          error: rawError,
+          message: "fallback",
+          statusCode: "502",
+        },
+        "clinepass"
+      ),
+      { body: null, error: { message: expected, status: null } }
+    );
+  }
+  assert.deepEqual(
+    unwrapClinepassEnvelope({ success: false, message: "", statusCode: 0 }, "clinepass"),
+    {
+      body: null,
+      error: { message: "Upstream error", status: 0 },
+    }
+  );
+});
+
 test("unwrapClinepassEnvelope: non-clinepass provider passes through untouched", () => {
   const payload = { success: false, error: "boom" };
   const { body, error } = unwrapClinepassEnvelope(payload, "openai");

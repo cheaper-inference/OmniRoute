@@ -25,8 +25,10 @@
     "confirm": "Apakah kamu yakin?",
     "refresh": "Segarkan",
     "close": "Tutup",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Halaman sebelumnya",
     "nextPage": "Halaman berikutnya",
+    "pagination": "Paginasi",
     "capsLockOn": "Caps Lock aktif",
     "dismissNotification": "Tutup notifikasi",
     "toggleColumns": "Alihkan kolom",
@@ -182,6 +184,7 @@
     "combos": "Kombinasi",
     "noModelsFound": "Tidak ada model yang ditemukan",
     "clear": "Hapus",
+    "clearFilters": "Hapus filter",
     "done": "Selesai",
     "selectAll": "Pilih semua",
     "unselectAll": "Batalkan semua pilihan",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Digunakan oleh {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Prabaca",
     "batchFilePreviewTruncated": "Menampilkan {shown} baris pertama ({total} total baris)",
-    "batchFileDownloadFull": "Unduh File Lengkap"
+    "batchFileDownloadFull": "Unduh File Lengkap",
+    "tokensPageTitle": "Token",
+    "tokensPageDescription": "Kirim token antar-kunci API, bagikan kode undangan, dan hubungkan server komunitas.",
+    "tokensServerUrlLabel": "URL server"
   },
   "disabled": "Dinonaktifkan",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Arahkan permintaan yang kehabisan anggaran ke penyedia/model fallback gratis darurat.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Server proxy telah dihentikan atau dimulai ulang.",
     "expandSidebar": "Luaskan bilah sisi",
     "collapseSidebar": "Ciutkan bilah sisi",
-    "themes": "Tema",
-    "presetColors": "Warna populer",
     "createTheme": "Buat tema",
     "chooseColor": "Pilih satu warna",
-    "themeCoral": "Koral",
-    "themeBlue": "Biru",
-    "themeRed": "Merah",
-    "themeGreen": "Hijau",
-    "themeViolet": "Ungu",
-    "themeOrange": "Oranye",
-    "themeCyan": "Sian",
     "cliToolsShort": "Alat",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Sistem Tema",
     "whitelabelingDesc": "Deskripsi White-label",
     "switchThemes": "Ganti Tema",
-    "themeAccentDesc": "Deskripsi Aksen Tema",
     "uploadFavicon": "Unggah Favicon",
     "themeDark": "Tema Gelap",
     "customLogoDesc": "Deskripsi Logo Kustom",
     "sidebarVisibilityToggle": "Tombol Visibilitas Bilah Samping",
-    "themeAccent": "Aksen Tema",
     "resetFavicon": "Atur Ulang Favicon",
     "whitelabeling": "Pelabelan Merek Kustom",
     "darkMode": "Mode Gelap",
@@ -1122,10 +1117,8 @@
     "customLogo": "Logo Kustom",
     "appearance": "Tampilan",
     "themeSelectionAria": "ARIA Pemilihan Tema",
-    "themeCreate": "Buat Tema",
     "customFaviconDesc": "Deskripsi Favicon Kustom",
     "logoPreview": "Pratinjau Logo",
-    "themeCustom": "Tema Kustom",
     "hideHealthLogsDesc": "Deskripsi Sembunyikan Log Kesehatan",
     "faviconPreview": "Pratinjau Favicon",
     "changelog": "Catatan Perubahan",
@@ -1352,7 +1345,9 @@
       "open": "buka",
       "close": "tutup"
     },
-    "noResults": "Tidak ada hasil"
+    "noResults": "Tidak ada hasil",
+    "costsTeams": "Tim",
+    "costsTeamsSubtitle": "Pusat biaya tim"
   },
   "webhooks": {
     "title": "Webhook",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 atau @channelname",
       "chatIdHint": "Pengidentifikasi numerik unik atau nama pengguna publik dari chat/saluran.",
       "tutorial": "Cara mengonfigurasi webhook Telegram:"
-    }
+    },
+    "copy": "Salin",
+    "copied": "Disalin!",
+    "expandDetails": "Tampilkan detail",
+    "collapseDetails": "Sembunyikan detail"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Panggilan (24j)",
     "mcpMetricSuccessRate": "Tingkat keberhasilan",
     "mcpMetricAvgDuration": "Durasi rata-rata",
-    "mcpMetricTopTool": "Alat Terbaik"
-  },
-  "themesPage": {
-    "title": "Tema",
-    "description": "Pilih tema prasetel atau buat tema sendiri dengan satu warna",
-    "presetColors": "Warna populer",
-    "customTheme": "Tema khusus",
-    "customThemeDesc": "Klik buat tema dan pilih satu warna",
-    "createTheme": "Buat tema",
-    "activePreset": "Tema aktif"
+    "mcpMetricTopTool": "Alat Terbaik",
+    "dismissError": "Tutup pesan kesalahan"
   },
   "header": {
     "logout": "Keluar",
     "quickNavigation": "Navigasi cepat",
     "quickNavigationTitle": "Navigasi cepat (⌘K / Ctrl+K)",
     "openQuickNavigation": "Buka navigasi cepat",
+    "openMenu": "Buka menu",
+    "products": "Produk Keak",
     "switchToLightMode": "Beralih ke mode terang",
     "switchToDarkMode": "Beralih ke mode gelap",
     "language": "Bahasa",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Kompatibel Antropis",
     "media": "Media",
     "mediaDescription": "Hasilkan gambar, video, dan musik",
-    "themes": "Tema",
-    "themesDescription": "Pilih tema warna untuk seluruh panel dasbor",
     "costsDescription": "Lacak pengeluaran, analisis tren, dan kelola anggaran AI Anda di semua penyedia",
     "cacheDescription": "Pantau efisiensi cache prompt penyedia dan penggunaan ulang respons semantik lokal.",
     "limitsDescription": "Konfigurasikan batas laju dan kuota per kunci API dan penyedia",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Aturan payload lanjutan, batas permintaan, dan pengaturan API proxy",
     "mitmProxyDescription": "Konfigurasikan pengaturan proxy MITM untuk pemeriksaan lalu lintas dan debugging",
     "oneProxyDescription": "Konfigurasikan pengaturan 1Proxy untuk perangkaian proxy lanjutan",
-    "omniSkillsDescription": "Instal dan kelola kemampuan sandbox untuk eksekusi prompt dan alat otomatis"
+    "omniSkillsDescription": "Instal dan kelola kemampuan sandbox untuk eksekusi prompt dan alat otomatis",
+    "teamsDescription": "Perkiraan biaya tim dan anggaran lunak bersama"
   },
   "cloudSyncStatus": {
     "synced": "Disinkronkan",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "Salin endpoint Anda",
     "readinessStep4": "Kirim permintaan uji",
     "readinessContinue": "Lanjutkan penyiapan",
-    "readinessDismiss": "Tutup untuk sekarang"
+    "readinessDismiss": "Tutup untuk sekarang",
+    "unpricedUsageTitle": "{count, plural, one {# model} other {# model}} dengan penggunaan baru-baru ini tetapi tanpa harga yang dikonfigurasikan",
+    "unpricedUsageFailClosed": "{keys, plural, one {# kunci API dengan batas penggunaan} other {# kunci API dengan batas penggunaan}} menggunakan model ini dalam 8 hari terakhir. Selama penggunaan itu berada dalam jendela harian atau mingguan kunci, kunci tersebut dianggap melebihi kuota dan permintaannya diblokir (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Penggunaan ini dihitung sebagai $0 terhadap batas penggunaan per kunci (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# permintaan} other {# permintaan}}, {keys, plural, one {# kunci terbatas} other {# kunci terbatas}}",
+    "unpricedUsageMore": "…dan {count} lagi",
+    "unpricedUsageConfigure": "Konfigurasikan harga",
+    "unpricedUsageDismiss": "Tutup"
   },
   "analytics": {
     "title": "Analisis",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "Hanya koneksi yang dipilih",
     "selectAtLeastOneConnection": "Pilih setidaknya satu koneksi atau pilih Semua koneksi.",
     "allConnectionsDesc": "Kunci ini dapat menggunakan koneksi aktif apa pun.",
-    "restrictedToConnections": "Dibatasi untuk {count, plural, one {# koneksi} other {# koneksi}}."
+    "restrictedToConnections": "Dibatasi untuk {count, plural, one {# koneksi} other {# koneksi}}.",
+    "preferredConnections": "Koneksi pilihan",
+    "preferredConnectionsDesc": "Urutan prioritas per kunci. Jika koneksi pilihan tidak tersedia, perutean beralih ke koneksi memenuhi syarat berikutnya.",
+    "preferredConnectionsNone": "Tidak ada preferensi — strategi perutean bawaan digunakan.",
+    "preferredConnectionsClear": "Hapus",
+    "removeSelection": "Hapus {name}"
   },
   "auditLog": {
     "title": "Catatan Audit",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Konfigurasikan jembatan Gambar→Teks di pengaturan Jembatan Modality",
     "sttBridgeCta": "Konfigurasikan jembatan Ucapan→Teks di pengaturan Jembatan Modality",
     "existingConnection": "Koneksi yang ada",
-    "openrouterSttDescription": "Model speech-to-text OpenRouter menggunakan koneksi OpenRouter yang telah Anda konfigurasikan. Tidak diperlukan kredensial terpisah."
+    "openrouterSttDescription": "Model speech-to-text OpenRouter menggunakan koneksi OpenRouter yang telah Anda konfigurasikan. Tidak diperlukan kredensial terpisah.",
+    "modalityTabsAria": "Jenis media",
+    "serviceKindsAria": "Jenis layanan"
   },
   "search": {
     "searchQuery": "Kueri Pencarian",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Buka Claw - Konfigurasi Manual",
     "clineManualConfiguration": "Konfigurasi Manual Cline",
     "kiloManualConfiguration": "Konfigurasi Manual Kode Kilo",
+    "piManualConfiguration": "Pi - Konfigurasi Manual",
+    "piConfigInvalidTitle": "Pi models.json tidak dapat dibaca",
+    "piOmnirouteConfigured": "OmniRoute dikonfigurasi sebagai penyedia khusus Pi",
+    "piModelHelp": "Pi tidak menemukan model secara otomatis untuk titik akhir khusus — model yang Anda pilih ditulis ke dalam models.json secara eksplisit.",
+    "piManualConfigTitle": "Atau edit ~/.pi/agent/models.json secara manual",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Kemudian mulai Pi dan pilih penyedia omniroute. Atur PI_CODING_AGENT_DIR untuk memindahkan seluruh direktori agen.",
+    "piUnownedNote": "Entri ini ditambahkan di luar OmniRoute (misalnya titik akhir Kustom pi-gui). Menerapkan akan mengadopsinya; Reset hanya menghapus entri yang ditulis OmniRoute.",
     "whenToUseLabel": "Kapan harus digunakan",
     "openToolDocs": "Buka dokumen alat",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Gunakan saat Anda memerlukan asisten AI asli terminal yang ringan untuk tugas cepat.",
       "hermes-agent": "Gunakan saat Anda memerlukan Hermes Agent (oleh Nousresearch) dengan model bawaan, delegasi, visi, dan tambahan yang diarahkan melalui OmniRoute.",
+      "whycodes": "Gunakan saat Anda menginginkan WhyCodes sebagai agen CLI otonom serbaguna (TUI, agen bernama, memori, swarm) yang diarahkan ke OmniRoute.",
       "custom": "Gunakan untuk implementasi alat khusus atau konfigurasi umum yang kompatibel dengan OpenAI."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "Agen pengodean TUI xAI Grok Build dengan dukungan penyedia kustom",
       "droid": "Asisten AI Droid Pabrik",
       "openclaw": "Buka Asisten AI Claw",
+      "openclaude": "CLI agen pengodean OpenClaude dengan dukungan penyedia yang kompatibel dengan OpenAI",
       "cline": "CLI Asisten Pengkodean AI Cline",
       "kilo": "CLI Asisten AI Kode Kilo",
       "qwen": "CLI Qwen Code",
@@ -3022,6 +3038,7 @@
       "warp": "Terminal AI Warp dengan dukungan penyedia kustom",
       "agent-deck": "Orkestrator multi-agen Agent Deck",
       "5dive": "5dive — armada agen coding yang di-host sendiri; satu profil auth mengarahkan semuanya ke OmniRoute",
+      "whycodes": "Agen CLI otonom WhyCodes dengan base URL yang kompatibel dengan OpenAI",
       "zed": "Editor kode Zed — agen bawaan melalui penyedia yang kompatibel dengan OpenAI"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "Tidak Dikenal",
     "cliproxyapiUpdate": "Perbarui",
     "cliproxyapiUpdateAvailable": "Pembaruan tersedia: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versi"
+    "cliproxyapiVersion": "Versi",
+    "piInstallTitle": "Instal Agen Pengkodean Pi",
+    "piInstallInstructions": "Instal Pi CLI, lalu kembali ke sini untuk menghubungkannya ke OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Gunakan URL yang dapat dijangkau dari mesin yang menjalankan Pi. Titik akhir /v1 yang kompatibel dengan OpenAI ditambahkan secara otomatis.",
+    "piManualMergeHint": "Hanya pratinjau. Gabungkan entri providers.omniroute ini ke models.json sehingga penyedia dan pengaturan Anda yang lain tetap utuh.",
+    "removeMapping": "Hapus pemetaan",
+    "customUrl": "URL Kustom",
+    "customEndpointAria": "Endpoint Kustom",
+    "useDefaultKey": "Gunakan kunci default OmniRoute",
+    "mainModelAria": "Model utama",
+    "manualConfigTitle": "Konfigurasi manual Grok Build"
   },
   "modelCatalog": {
     "title": "Model & Kombo",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "mis. 10",
     "testSelected": "Uji yang dipilih ({count})",
     "testAllFiltered": "Uji semua yang difilter ({count})",
+    "visibility": "Visibilitas",
+    "allVisibility": "Terlihat dan tersembunyi",
+    "visibleOnly": "Terlihat",
+    "hiddenOnly": "Tersembunyi",
+    "visibleColumn": "Terlihat",
+    "hideModel": "Sembunyikan {name} dari /v1/models",
+    "showModel": "Tampilkan {name} di /v1/models",
+    "hiddenBadge": "Tersembunyi",
+    "hideFiltered": "Sembunyikan yang difilter ({count})",
+    "showFiltered": "Tampilkan yang difilter ({count})",
+    "visibilityCounts": "{visible} terlihat · {hidden} tersembunyi · {total} total",
+    "visibilityUpdateFailed": "Gagal memperbarui visibilitas model",
     "cancel": "Batal",
     "clearResults": "Hapus hasil",
     "testing": "Menguji...",
@@ -3397,16 +3438,53 @@
     "httpError": "Permintaan gagal dengan HTTP {status}",
     "testFailedNoDetail": "Pengujian gagal tanpa pesan kesalahan",
     "additionalCapabilities": "Kemampuan tambahan: {list}",
-    "comboRefMember": "Kombo → {name}"
+    "comboRefMember": "Kombo → {name}",
+    "keyAccessButton": "Akses kunci API",
+    "allowedInKeys": "Diizinkan di: {count, plural, one {# kunci} other {# kunci}}",
+    "keysLoading": "Memuat kunci API…",
+    "keysRetry": "Coba lagi memuat kunci",
+    "accessViaPattern": "melalui {pattern}",
+    "accessBlocked": "Diblokir oleh {pattern}",
+    "editKeyAccess": "Edit akses kunci",
+    "toggleKeyAccess": "Izinkan {item} pada {name}",
+    "resultNetworkError": "Penetapan gagal",
+    "resultWouldEmptyModels": "Akan membuat kunci ini tidak memiliki model yang diizinkan — edit akses kunci sebagai gantinya",
+    "resultWouldEmptyCombos": "Akan membuat kunci ini tidak memiliki kombo yang diizinkan — edit akses kunci sebagai gantinya",
+    "keyUpdatePending": "{name} masih diperbarui. Coba lagi sebentar lagi.",
+    "assignToKeys": "Tetapkan ke kunci API…",
+    "assignApply": "Terapkan perubahan",
+    "assignComplete": "Akses kunci API diperbarui",
+    "assignFailed": "Beberapa pembaruan kunci API gagal",
+    "assignNoChanges": "Tidak ada akses kunci API yang diubah",
+    "selectedAccessItems": "Item yang dipilih: {count}",
+    "assignExcludedCombos": "{count, plural, one {# baris kombo yang dipilih bukan model dan akan dilewati di sini} other {# baris kombo yang dipilih bukan model dan akan dilewati di sini}}. Tetapkan kombo dari tab Combos.",
+    "assignActionAdd": "Tambah",
+    "assignActionRemove": "Hapus",
+    "searchKeys": "Cari kunci API",
+    "selectApiKey": "Pilih kunci API {name}",
+    "allModelsAccess": "Semua model",
+    "allCombosAccess": "Semua kombo",
+    "modelAccessCount": "Model: {count}",
+    "comboAccessCount": "Kombo: {count}",
+    "keyInactive": "Tidak aktif",
+    "keyBanned": "Diblokir",
+    "keyRevoked": "Dicabut",
+    "switchRestrictedConfirm": "Ubah kunci ini ke akses terbatas: hanya item yang dipilih yang akan diizinkan",
+    "removeNoChangeHint": "Kunci ini mengizinkan semuanya; menghapus item yang dipilih tidak akan membuat perubahan apa pun",
+    "removeStaysAllowedHint": "Masih diizinkan pada kunci ini melalui {patterns}",
+    "resultChanged": "Diubah",
+    "resultUnchanged": "Tidak ada perubahan",
+    "resultSkipped": "Dilewati",
+    "resultNeedsSwitch": "Perlu diubah ke terbatas"
   },
   "combos": {
+    "title": "kombo",
+    "description": "Buat kombo model dengan perutean berbobot dan dukungan fallback",
+    "autoCatalogTitle": "Katalog perutean otomatis",
     "autoTosLoadError": "Kebijakan ketentuan layanan tidak dapat dimuat. Coba lagi sebelum mengubahnya.",
     "autoTosSaveError": "Kebijakan ketentuan layanan tidak dapat disimpan. Pengaturan sebelumnya masih ditampilkan. Coba lagi.",
     "autoTosIncludeLabel": "Sertakan penyedia bertanda ToS: avoid dalam auto",
     "autoTosDescription": "Nonaktif secara bawaan. Berlaku untuk semua kombinasi auto, bukan hanya satu akun. Menghubungkan penyedia tidak mengaktifkan opsi ini.",
-    "title": "kombo",
-    "description": "Buat kombo model dengan perutean berbobot dan dukungan fallback",
-    "autoCatalogTitle": "Katalog perutean otomatis",
     "autoCatalogTemplateCount": "{count} templat",
     "autoCatalogDescription": "Kombo otomatis/* bawaan diselesaikan secara dinamis dari penyedia yang terhubung. Gunakan salah satu ID ini sebagai bidang model — tidak perlu penyiapan.",
     "autoCatalogExpand": "Perluas katalog perutean otomatis",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "Terjadi kesalahan saat memperbarui kombo",
     "errorDeleting": "Terjadi kesalahan saat menghapus kombo",
     "testFailed": "Permintaan pengujian gagal",
+    "removeErrorModels": "Hapus {count} model yang gagal",
+    "removingErrorModels": "Menghapus…",
+    "errorModelsRemoved": "{count} model yang gagal dihapus dari kombo",
+    "noErrorModelsFound": "Tidak ada model gagal di antara langkah kombo ini sendiri",
+    "cannotRemoveAllModels": "Tidak dapat menghapus semua model dari kombo",
+    "removeErrorModelsConfirm": "Hapus {count} model yang gagal dari “{name}”? Batas waktu habis dan batas laju tidak dihitung.",
     "failedToggle": "Gagal mengganti kombo",
     "testResults": "Hasil Tes — {name}",
     "resolvedBy": "Diselesaikan oleh:",
@@ -3518,6 +3602,9 @@
     "moveUp": "Naik",
     "moveDown": "Pindah ke bawah",
     "removeModel": "Hapus",
+    "testStep": "Uji model ini",
+    "testStepRunning": "Menguji…",
+    "testStepNotTestable": "Hanya langkah dengan satu model yang dapat diuji",
     "saving": "Menyimpan...",
     "liveNoProviders": "Belum ada penyedia yang terpantau.",
     "liveFleetDataHint": "Data armada tiba melalui peristiwa kombo langsung.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "Belum ada kombo yang dikonfigurasi.",
     "playgroundCreateFirst": "Buat satu terlebih dahulu",
     "weighted": "Tertimbang",
+    "weightPercent": "Bobot (%)",
     "leastUsed": "Paling Sedikit Digunakan",
     "costOpt": "Pilihan Biaya",
     "strategyGuideTitle": "Cara menggunakan strategi ini",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# akun} other {# akun}}",
     "builderGlobalAdded": "Ditambahkan",
     "builderGlobalAdd": "Tambahkan",
+    "clearSearch": "Hapus pencarian",
     "manualModel": "Model manual",
     "manualModelInvalid": "Masukkan model sebagai penyedia/model.",
     "manualModelUnknownProvider": "Prefiks penyedia tidak dikenal.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "Tambahkan referensi combo",
     "builderPinnedAccount": "Akun yang Disematkan",
     "builderLegacyEntry": "Entri lama",
+    "builderStaleModel": "Tidak ada di katalog langsung",
     "reviewName": "Nama",
     "reviewStrategy": "Strategi",
     "reviewSteps": "Langkah",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "Panjang konten minimum (karakter)",
     "responseValidationJsonPaths": "Pemeriksaan JSON-path",
     "responseValidationAddCheck": "+ Tambah pemeriksaan",
+    "responseValidationRemoveCheck": "Hapus pemeriksaan",
+    "responseValidationPath": "Jalur JSON",
+    "responseValidationCondition": "Kondisi",
+    "responseValidationValue": "Nilai yang diharapkan",
     "agentFeaturesSystemMessageOverride": "Ganti pesan sistem",
     "agentFeaturesSystemMessagePlaceholder": "Anda adalah asisten ahli...",
     "agentFeaturesSystemMessageHint": "Penggantian pesan sistem untuk agen",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "Total Entri",
     "type": "Jenis",
-    "memoryEnabled": "Memori diaktifkan"
+    "memoryEnabled": "Memori diaktifkan",
+    "qdrantTutorialTitle": "Tutorial singkat: memori dengan Qdrant",
+    "qdrantTutorialIntro": "Qdrant menyimpan vektor dan metadata memori sehingga konteks yang relevan dapat diambil. Qdrant tidak melakukan kompresi token secara langsung; penghematannya tidak langsung, yaitu dengan menghindari konteks yang tidak terkait dengan permintaan.",
+    "qdrantTutorialStep1": "Amankan server dengan HTTPS dan API key sebelum penggunaan produksi.",
+    "qdrantTutorialStep2": "Masukkan host, port, collection, dan model dalam format provider/model dengan kredensial yang telah dikonfigurasi.",
+    "qdrantTutorialStep3": "Dimensi collection harus sesuai dengan dimensi yang dihasilkan oleh model. Collection berdimensi 2048 yang sudah ada tidak akan menerima embedding berdimensi 1536.",
+    "qdrantTutorialStep4": "Simpan, uji koneksi, dan jalankan pengujian pencarian. Baru setelah itu aktifkan Qdrant.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Kredit: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Keterampilan",
@@ -5288,7 +5390,8 @@
         "skipped": "sudah dikonfigurasi",
         "failed": "gagal"
       }
-    }
+    },
+    "stepProgress": "Progres penyiapan"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Penyedia ini dikecualikan dari auto secara bawaan",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "Unduh templat CSV",
     "importFromFileMoreErrors": "+{count} lainnya",
     "importFromFileSchemaHint": "Kolom CSV bersifat posisional: provider, name, apiKey, baseUrl (opsional), priority (opsional). Kolom provider harus berupa id penyedia terkelola yang sudah ada atau id node kompatibel OpenAI/Anthropic yang sudah terdaftar — impor ini tidak membuat node endpoint baru.",
+    "importOAuthExport": "Impor ekspor OAuth",
+    "oauthExportTitle": "Impor ekspor pengelola akun",
+    "oauthExportDescription": "Unggah ekspor teks biasa dari pengelola akun (mis. ekspor cloud-accounts dari Antigravity Manager). Token diperbarui di sisi server dan setiap akun menjadi koneksi OAuth — duplikat diperbarui di tempat.",
+    "oauthExportProviderLabel": "Penyedia",
+    "oauthExportChoose": "Pilih file",
+    "oauthExportFileAria": "File JSON ekspor akun",
+    "oauthExportSchemaHint": "Diterima: dokumen dengan array \"accounts\", array biasa, atau satu rekaman. Token dapat berada di objek token bersarang atau langsung pada rekaman.",
+    "oauthExportDetected": "{count} akun terdeteksi",
+    "oauthExportSelectAll": "Pilih semua akun",
+    "oauthExportSelectAccount": "Pilih akun {index}",
+    "oauthExportColEmail": "Surel",
+    "oauthExportColProvider": "Penyedia",
+    "oauthExportColRefresh": "Token penyegaran",
+    "oauthExportNoEmail": "(tanpa surel)",
+    "oauthExportYes": "ya",
+    "oauthExportNo": "tidak",
+    "oauthExportImporting": "Mengimpor…",
+    "oauthExportImport": "Impor {count} akun",
+    "oauthExportResult": "Diimpor {imported}/{total} — {failed} gagal",
+    "oauthExportParseError": "Tidak dapat membaca akun apa pun dari file ini.",
+    "oauthExportUnknownError": "kesalahan tidak dikenal",
     "adaptaTutorial": {
       "title": "Cara menghubungkan Adapta Web",
       "introPrefix": "Adapta mengautentikasi melalui Clerk. Token",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "Semua model sudah diimpor",
     "noNewModelsToImport": "Tidak ada model baru untuk diimpor — semua model sudah ada di registri atau daftar model kustom",
     "localCatalogFallbackStatus": "Tidak dapat menjangkau daftar model penyedia — menampilkan katalog bawaan",
+    "discoveryDegradedStatus": "Penemuan model gagal {time}",
     "skippingExistingModels": "Melewatkan {count} model yang sudah ada",
     "autoSync": "Sinkronisasi Otomatis",
     "autoSyncShort": "Sinkronkan",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "mis. 131072",
     "contextWindowOverrideHint": "Atur secara manual jendela konteks riil model ini (token) ketika penyedia salah melaporkannya. Mengalahkan nilai yang terdeteksi otomatis/katalog dan mencegah perutean kombo menjatuhkan model.",
     "contextWindowOverrideInvalid": "Penggantian jendela konteks harus berupa bilangan bulat positif token",
+    "maxOutputTokenOverrideInvalid": "Penggantian token output maksimum harus berupa bilangan bulat positif token",
     "visionCapableLabel": "Mendukung visi",
     "visionCapableHint": "Tandai model ini secara manual sebagai mendukung visi ketika metadata penemuan penyedia tidak melaporkan modalitas input gambar (umum untuk backend yang di-host sendiri/lokal).",
     "compatParamFiltersLabel": "Filter Parameter",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "Tambahkan penimpaan",
     "ccAliasLoadError": "Gagal memuat pengaturan alias penemuan: {error}",
     "ccAliasSaveError": "Gagal menyimpan pengaturan alias penemuan: {error}",
+    "cliVersionSectionTitle": "Versi klien CLI yang diiklankan",
+    "cliVersionEffectiveLabel": "Saat ini diiklankan",
+    "cliVersionSourceLabel": "Diselesaikan dari: {source}",
+    "cliVersionPinnedLabel": "Default yang diambil: {pinned}",
+    "cliVersionSourceSettings": "penggantian dasbor",
+    "cliVersionSourceEnv": "variabel lingkungan",
+    "cliVersionSourceDiscovered": "rilis terbaru yang ditemukan secara otomatis",
+    "cliVersionSourceDefault": "ditangkap secara default",
+    "cliVersionInputLabel": "Ganti versi",
+    "cliVersionInputPlaceholder": "Ganti versi; kosong dibersihkan",
+    "cliVersionSaveButton": "Menyimpan",
+    "cliVersionResetButton": "Atur ulang ke default",
+    "cliVersionLoadError": "Gagal memuat pengaturan versi CLI : {error}",
+    "cliVersionSaveError": "Gagal menyimpan versi CLI : {error}",
+    "cliVersionLoadFailed": "Tidak dapat memuat pengaturan versi CLI saat ini.",
+    "cliVersionHintClaude": "Gerbang antropik model Claude yang lebih baru pada versi klien Kode Claude yang dilihatnya. Ini adalah versi yang diiklankan OmniRoute pada setiap permintaan yang terikat Antropis.",
+    "cliVersionCaveatClaude": "Peringatan penagihan: versi penagihannya adalah '<version>'.'<build-revision>', dan revisi build adalah konstanta yang diambil secara terpisah. Iklan 2.1.260 melaporkan 2.1.260.1e2, yang bukan merupakan biner 2.1.260 yang sebenarnya.",
+    "cliVersionHintCodex": "OpenAI membuka model yang lebih baru pada versi klien Codex yang dilihatnya, misalnya kesalahan: The 'gpt-6-astra' model require a newer version of Codex.",
+    "cliVersionCaveatCodex": "Peringatan inferensi: versi yang dilaporkan oleh penelepon Anda masih mengalahkan CODEX_CLIENT_VERSION env var, tetapi penggantian ini mengalahkan keduanya, karena ini merupakan maksud operator yang eksplisit.",
     "compatUpstreamHeadersLabel": "Header upstream tambahan",
     "compatUpstreamHeadersHint": "Pengaturan dengan hak istimewa tinggi — memiliki tingkat kepercayaan yang sama seperti mengedit kredensial API penyedia; hanya admin tepercaya yang boleh menggunakannya. Digabungkan setelah OmniRoute menambahkan autentikasi dari kunci API penyedia. Jika header kustom menggunakan nama yang sama dengan header yang sudah ada (mis. Authorization), nilai Anda akan sepenuhnya menggantikan header yang dibuat secara otomatis (termasuk token Bearer) — upstream hanya melihat apa yang Anda masukkan, bukan kunci dari pengaturan. Kesalahan konfigurasi dapat menyebabkan 401 atau autentikasi upstream gagal. Satu baris per header (mis. Authentication tambahan untuk beberapa gateway). Arahkan kursor ke nilai atau fokuskan nilai untuk melihat pratinjau. Disimpan saat fokus berpindah, mengeklik di luar, atau menutup panel ini.",
     "compatUpstreamHeaderName": "Nama header",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "Label Format API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Wilayah API Tiongkok",
-    "apiRegionHint": "Petunjuk Wilayah API",
-    "apiRegionInternational": "Wilayah API Internasional",
-    "apiRegionLabel": "Label Wilayah API",
+    "apiRegionChina": "Tiongkok Daratan",
+    "apiRegionHint": "Pilih wilayah endpoint yang digunakan untuk akses API dan pelacakan kuota.",
+    "apiRegionInternational": "Internasional",
+    "apiRegionLabel": "Wilayah API",
     "apikey": "Kunci API",
     "audio": "Audio",
     "audioProvidersHeading": "Penyedia Audio",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "Saat akun ini mencapai batas penggunaan 5 jam dan Anthropic menawarkan jalur berprioritas lebih rendah, OmniRoute menerimanya dan terus mengirim permintaan dengan anthropic-usage-limit: slow hingga jendela diatur ulang, alih-alih mendinginkan koneksi. Batas mingguan tetap berlaku dan respons mungkin menunggu kapasitas yang tersedia.",
     "claudeAutoLimitResetLabel": "Atur ulang batas sesi secara otomatis (seminggu sekali)",
     "claudeAutoLimitResetDescription": "Saat akun ini mencapai batas penggunaan 5 jam dan pengaturan ulang batas sesi tersedia, OmniRoute mengklaimnya secara otomatis dan mencoba kembali dengan kecepatan penuh. Tindakan ini menggunakan pengaturan ulang akun yang tersedia seminggu sekali dan tetap dihitung terhadap batas mingguan.",
+    "codexPaidCreditsShort": "Kredit tambahan",
+    "codexPaidCreditsToggleTitle": "Izinkan kredit Codex berbayar setelah kuota langganan habis (dapat dikenakan biaya tambahan)",
+    "codexPaidCreditsEnabled": "Kredit Codex berbayar diaktifkan (dapat dikenakan biaya tambahan)",
+    "codexPaidCreditsDisabled": "Kredit Codex berbayar dinonaktifkan",
+    "failedUpdateCodexPaidCredits": "Gagal memperbarui kebijakan kredit Codex berbayar",
+    "allowCodexPaidCreditsLabel": "Izinkan kredit Codex berbayar",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Lewati cooldown transien agar koneksi ini tetap memenuhi syarat bahkan setelah kesalahan yang dapat dipulihkan (status terminal seperti diblokir/kedaluwarsa tetap berlaku).",
     "disableCoolingLabel": "Nonaktifkan cooldown untuk koneksi ini",
     "bulkPasteAdded": "{count, plural, one {1 kunci ditambahkan} other {# kunci ditambahkan}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "Dapatkan kunci API di monsterapi.ai",
       "moonshot": "Hubungkan Moonshot AI dengan kunci API.",
       "morph": "Tingkat gratis: 250 ribu kredit/bulan, $0",
+      "apmix": "Hubungkan Apmix dengan kunci API dari apmix.ai/dashboard — satu langganan, banyak model.",
       "nanogpt": "Hubungkan NanoGPT dengan kunci API.",
       "nebius": "Kredit uji coba ~$1 saat pendaftaran untuk pengujian API",
       "nlpcloud": "NLP Cloud menggunakan API chatbot berpemilik alih-alih chat/completions OpenAI. OmniRoute menyesuaikan pesan OpenAI ke input/konteks/riwayat dan mengekspos katalog lokal model chatbot yang didukung.",
@@ -6620,7 +6773,7 @@
       "claude": "Hubungkan Claude Code dengan alur OAuth yang ada.",
       "cline": "Hubungkan Cline dengan alur OAuth yang ada.",
       "cursor": "Hubungkan Cursor IDE dengan alur OAuth yang ada.",
-      "cursor-api": "Hubungkan Cursor dengan kunci API pengguna (crsr_...) dari cursor.com/dashboard/api; sesi IDE tidak diperlukan.",
+      "cursor-api": "Hubungkan Cursor dengan kunci API pengguna (crsr_... atau grok_...) dari cursor.com/dashboard/api; tidak memerlukan sesi IDE.",
       "github": "Hubungkan GitHub Copilot dengan alur OAuth yang ada.",
       "gitlab-duo": "Aplikasi OAuth dengan cakupan ai_features + read_user. Konfigurasikan GITLAB_DUO_OAUTH_CLIENT_ID dan secara opsional GITLAB_DUO_OAUTH_CLIENT_SECRET pada instans OmniRoute ini.",
       "kilocode": "Hubungkan Kilo Code dengan alur OAuth yang ada.",
@@ -6628,8 +6781,7 @@
       "kiro": "Tingkat gratis: 50 kredit/bulan (~25K–100K token). ⚠️ ToS Kiro melarang penggunaan proksi/harness pihak ketiga.",
       "codex": "Hubungkan OpenAI Codex dengan alur OAuth yang ada.",
       "qwen": "Hubungkan Qwen Code dengan alur OAuth yang ada.",
-      "github-models": "Buat GitHub PAT dengan cakupan 'models: read' di github.com/settings/tokens",
-      "apmix": "Hubungkan Apmix dengan kunci API dari apmix.ai/dashboard — satu langganan, banyak model."
+      "github-models": "Buat GitHub PAT dengan cakupan 'models: read' di github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} menerima ID model asli penyedia. Impor dari /models atau tambahkan ID khusus untuk perutean.",
     "bedrockModelsDescription": "Model Amazon Bedrock dicakup berdasarkan wilayah AWS. Impor dari /models atau tambahkan ID model Batuan Dasar yang diaktifkan di wilayah yang dipilih.",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Opsional: satu model=cap per baris, dicocokkan dengan ID model upstream yang persis sama. Permintaan berlebih diantrekan secara lokal; kosong berarti tanpa batas per model.",
     "rateLimitOverridesModelConcurrencyInvalid": "Entri konkurensi per model \"{entry}\" tidak valid — gunakan model=cap dengan cap berupa bilangan bulat dari 1 sampai {max}.",
-    "codexPaidCreditsShort": "Kredit tambahan",
-    "codexPaidCreditsToggleTitle": "Izinkan kredit Codex berbayar setelah kuota langganan habis (dapat dikenakan biaya tambahan)",
-    "codexPaidCreditsEnabled": "Kredit Codex berbayar diaktifkan (dapat dikenakan biaya tambahan)",
-    "codexPaidCreditsDisabled": "Kredit Codex berbayar dinonaktifkan",
-    "failedUpdateCodexPaidCredits": "Gagal memperbarui kebijakan kredit Codex berbayar",
-    "allowCodexPaidCreditsLabel": "Izinkan kredit Codex berbayar",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "Digunakan di {count} kombo: {combos}",
+    "openComboTooltip": "Buka Kombo — digunakan oleh {combo}",
+    "claudeCodeRoutingTitle": "Perutean proxy upstream untuk lalu lintas Claude Code",
+    "routingNative": "Natif",
+    "routingFallback": "Penggantian",
+    "rerank": "Peringkat ulang",
+    "video": "Video",
+    "markFreeTierTitle": "Tandai sebagai tingkat gratis (ditampilkan bahkan saat model berbayar disembunyikan)",
+    "codexTunnelTitle": "Koneksi alat Codex",
+    "codexTunnelDescription": "Terowongan tetap ketat keluar. Alat lokal masih hanya dieksekusi oleh Codex, di bawah sandbox dan kebijakan persetujuannya.",
+    "tunnelIdLabel": "ID Terowongan",
+    "tunnelRuntimeKeyLabel": "Kunci runtime terowongan",
+    "tunnelRuntimeKeyPlaceholder": "Kunci runtime",
+    "tunnelRuntimeKeyHint": "Disimpan terenkripsi bersama cookie dan tidak pernah ditulis ke log.",
+    "tunnelRuntimeKeyNewLabel": "Kunci runtime terowongan baru",
+    "tunnelRuntimeKeyNewHint": "Masukkan hanya bersama cookie baru. Nilai disimpan terenkripsi.",
+    "chatgptConnectorLabel": "Konektor kustom ChatGPT",
+    "doctorChecking": "Memeriksa status…",
+    "doctorCheck": "Periksa status doctor",
+    "fallbackRetryBackendTitle": "Backend percobaan ulang fallback"
   },
   "settings": {
     "title": "Pengaturan",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "Pilih item bilah sisi yang akan ditampilkan. Mode Esensial membuat alat Lanjutan tetap dapat dicari.",
     "hideHealthLogs": "Sembunyikan Log Pemeriksaan Kesehatan",
     "hideHealthLogsDesc": "Saat AKTIF, sembunyikan pesan [HealthCheck] di konsol server",
-    "themeAccent": "Warna tema",
-    "themeAccentDesc": "Pilih warna preset atau buat tema Anda sendiri dengan satu warna",
-    "themeCreate": "Buat tema",
-    "themeCustom": "Tema kustom",
-    "themeBlue": "Biru",
-    "themeRed": "Merah",
-    "themeGreen": "Hijau",
-    "themeViolet": "Ungu",
-    "themeOrange": "Oranye",
-    "themeCyan": "Sian",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Sesuaikan nama dan logo aplikasi",
     "appName": "Nama Aplikasi",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "Sekarang",
       "coreConfigPath": "Berkas konfigurasi inti",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Jalur absolut .json (ekstensi huruf kecil). Kosong = tidak dibuat. Setiap sinkronisasi menulis '<path>'.generated di samping file yang diadopsi, tidak pernah ke dalamnya.",
+      "coreConfigPathDesc": "Jalur absolut .json/.yaml/.yml (ekstensi huruf kecil). Kosong = tidak dibuat. Setiap sinkronisasi menulis '<path>'.generated di samping file yang diadopsi, tidak pernah ke dalamnya.",
       "lastSwitchKind": "Alasan peralihan",
       "switchKind": {
         "ip_quota_429": "kuota",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Diterapkan oleh: {mode}",
       "coreBinaryPath": "Jalur binari inti",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Opsional: memverifikasi file yang dihasilkan dengan binari inti sebelum mengganti file yang diadopsi. Biarkan kosong untuk terus menulis di sebelahnya. Direktori dibuat jika tidak ada."
+      "coreBinaryPathHelp": "Opsional: memverifikasi file yang dihasilkan dengan binari inti sebelum mengganti file yang diadopsi. Biarkan kosong untuk terus menulis di sebelahnya. Direktori dibuat jika tidak ada.",
+      "urlFeedlessHint": "Biarkan kosong untuk langganan selector saja: tetapkan URL kontrol di bawah, tidak ada umpan yang diambil, disegarkan, atau ditautkan."
     },
     "bulkHealthcheck": "Pemeriksaan Kesehatan Massal",
     "bulkHealthcheckDesc": "Uji semua proksi yang dikonfigurasi terhadap URL target untuk mengetahui mana yang berfungsi.",
@@ -7706,6 +7862,7 @@
     "configured": "dikonfigurasi",
     "none": "Tidak ada",
     "modelOverrideValuePlaceholder": "Nilai numerik",
+    "modelOverrideKey": "Kunci penggantian",
     "modelOverrideReasoningEffortsPlaceholder": "Dipisahkan dengan koma dalam bahasa Inggris, misalnya low, medium, high",
     "addKeyValue": "Tambahkan nilai kunci",
     "noModelOverrides": "Tidak ada override yang dikonfigurasi untuk model ini.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "Anda dapat mengganti harga default untuk model tertentu. Penggantian khusus lebih diprioritaskan dibandingkan harga yang terdeteksi otomatis.",
     "editPricing": "Sunting Harga",
     "viewFullDetails": "Lihat Detail Lengkap",
-    "themeCoral": "Koral",
     "adaptiveVolumeRouting": "Perutean Volume Adaptif",
     "adaptiveVolumeRoutingDesc": "Skalakan koneksi secara dinamis berdasarkan volume payload dan tekanan throughput.",
     "lkgpToggleTitle": "Penyedia Terakhir yang Diketahui Baik (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "Kurangi penggunaan token dengan mengompresi prompt sebelum mengirimkannya ke penyedia",
     "autoCombosTitle": "Kombinasi Otomatis",
     "autoCombosDesc": "Izinkan kunci ini menggunakan kombinasi auto/* bawaan, yang secara otomatis memilih model dari setiap penyedia yang dikonfigurasi",
+    "ccDiscoveryAliasesTitle": "Alias discovery Claude Code",
+    "ccDiscoveryAliasesDesc": "Umumkan mirror kompatibilitas claude/... untuk model dan kombo yang sudah dapat diakses kunci ini",
     "compressionGuidanceFullGuideLink": "Panduan kompresi lengkap",
     "compressionGuidanceShow": "Detail",
     "compressionGuidanceHide": "Sembunyikan detail",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Persentase jendela",
     "compressionAdaptivePolicyAbsolute": "Anggaran token absolut",
     "compressionOutputStylesDescription": "Suntikkan instruksi pembentukan respons tanpa menulis ulang output penyedia. Kombinasikan secara bebas.",
+    "compressionOutputStylesPreviewNote": "Permintaan memasukkan satu bahasa saja: bahasa yang terdeteksi, jika tidak, paket pertama. Blok di atas adalah varian per bungkus, bukan suntikan gabungan.",
     "mcpAccessibilityDescription": "Membatasi cakupan output alat MCP (penyimpanan terpisah).",
     "compressionStylesTileSummary": "{tokens, number} token disimpan · {runs, plural, one {# eksekusi digayakan} other {# eksekusi digayakan}}",
     "compressionStylesTileEmpty": "Belum ada eksekusi yang digayakan.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "Host",
     "qdrantCollection": "Koleksi",
     "catalogVisibilityHint": "ID model yang disembunyikan tetap dapat dipanggil dengan izin akses yang sama.",
+    "exposeCombosOnly": "Tampilkan hanya kombinasi di /v1/models",
+    "exposeCombosOnlyDesc": "Klien yang menemukan model secara otomatis akan melihat kombinasi Anda (dan auto/* kecuali disembunyikan) alih-alih model mentah penyedia. ID provider/model eksplisit tetap dirutekan.",
     "catalogScopeTitle": "Daftar Models API",
     "catalogScopeDesc": "Yang ditampilkan oleh GET /v1/models untuk kunci ini. Mempersempit daftar tidak akan mengubah model yang dapat dipanggil oleh kunci tersebut.",
     "catalogScopeAll": "Keduanya",
@@ -8918,7 +9079,9 @@
         "financial": "Keuangan",
         "brazilian": "Brasil",
         "usa": "AS",
-        "full": "Lengkap"
+        "full": "Lengkap",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Afrika Selatan)"
       },
       "builtinTypes": "Jenis bawaan",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "Alamat IPv4",
         "ipv6_address": "Alamat IPv6",
         "aws_key": "Kunci akses AWS",
-        "api_key_generic": "Kunci API dan token"
+        "api_key_generic": "Kunci API dan token",
+        "iban": "nomor rekening bank IBAN",
+        "eu_vat": "nomor EU VAT",
+        "es_dni_nie": "DNI Spanyol / NIE",
+        "it_codice_fiscale": "Skala Fiskal Kodeks Italia",
+        "pl_pesel": "PESEL Polandia",
+        "nl_bsn": "BSN belanda",
+        "de_steuer_id": "Steuer-ID Jerman",
+        "se_personnummer": "Nomor orang Swedia",
+        "za_id": "Nomor ID Afrika Selatan",
+        "za_phone": "Nomor telepon Afrika Selatan",
+        "za_vat": "Nomor VAT Afrika Selatan",
+        "za_tax_ref": "Referensi pajak Afrika Selatan"
       },
       "customPatterns": "Pola kustom",
       "customPatternsDesc": "Kecocokan diganti dengan [CUSTOM_REDACTED]. Hingga {max} pola. Pola yang berisiko backtracking katastrofik akan ditolak.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "Lolos",
     "tomlTestFailed": "Gagal",
     "tomlImportError": "Tidak dapat memproses file TOML RTK.",
-    "tomlFileReadError": "Tidak dapat membaca file TOML yang dipilih."
+    "tomlFileReadError": "Tidak dapat membaca file TOML yang dipilih.",
+    "viewMode": "Mode tampilan"
   },
   "compressionEngineConfig": {
     "loading": "Memuat…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "Paket bahasa: {packs}",
     "dragToReorder": "Seret untuk menyusun ulang langkah",
     "engine": "Mesin",
-    "intensity": "Intensitas"
+    "intensity": "Intensitas",
+    "compressionOverride": "Penggantian kompresi"
   },
   "compressionStudio": {
     "noRun": "Tidak ada proses kompresi yang tersedia.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "pemenang: {winner}",
     "encoder": "enkoder",
     "bytes": "byte",
-    "tokensCl100k": "token (cl100k)"
+    "tokensCl100k": "token (cl100k)",
+    "studioViews": "Tampilan Studio"
   },
   "omniglyph": {
     "preview": "Pratinjau",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "Pesan yang lebih pendek dari ini tidak dikompresi. Lebih rendah = lebih banyak kompresi.",
     "tooltipMinSavings": "Hanya kompres jika menyimpan setidaknya token sebanyak ini.",
     "ultraSettings": "Pengaturan Ultra",
-    "ultraSettingsDesc": "Kompresi semantik bertenaga SLM"
+    "ultraSettingsDesc": "Kompresi semantik bertenaga SLM",
+    "defaultLanguage": "Bahasa default",
+    "viewMode": "Mode tampilan"
   },
   "translator": {
     "title": "Penerjemah",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "Gagal mentransformasi stream"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kuota habis; penggunaan tambahan diizinkan, sehingga layanan berlanjut.",
+    "healthPaidCreditsBypass": "Kuota habis; kredit berbayar yang tersedia memungkinkan layanan berlanjut.",
+    "healthFilteringBypass": "Kuota habis; penyaringan kuota lokal dinonaktifkan, sehingga layanan berlanjut.",
     "title": "Penggunaan",
     "grokExtraUsageCredits": "Kredit Penggunaan Ekstra",
     "grokAutoTopUp": "Isi Ulang Otomatis",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Batasan Penyedia",
     "noProviders": "Tidak Ada Penyedia yang Terhubung",
+    "quotaAuthRequired": "Autentikasi diperlukan - masuk ke dasbor",
+    "quotaAuthRequiredHint": "Koneksi penyedia tidak dapat dimuat karena sesi dasbor tidak tersedia atau telah kedaluwarsa. Masuk dan muat ulang untuk melihat batas kuota Anda.",
     "connectProvidersForQuota": "Hubungkan ke penyedia dengan OAuth untuk melacak batas dan penggunaan kuota API Anda.",
     "accountsCount": "{count, plural, one {# akun} other {# akun}}",
     "filteredFromCount": "(difilter dari {count})",
@@ -10046,9 +10231,6 @@
     "tierLite": "Ringan",
     "tierUnknown": "Tidak diketahui",
     "statTotal": "Total",
-    "statCritical": "Kritis",
-    "statAlert": "Peringatan",
-    "statHealthy": "Sehat",
     "filterPurchaseTypeLabel": "Tipe",
     "filterTierLabel": "Tingkat",
     "purchaseAll": "Semua",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "Terakhir disegarkan",
     "providerQuota": "Kuota Penyedia",
     "providerQuotaHomeHint": "Status langsung di seluruh akun yang terhubung",
+    "claudeResetCreditDefaultTitle": "Reset batas Claude",
+    "confirmRedeemClaudeResetCredit": "Menukarkan akan langsung mereset batas penggunaan Claude yang memenuhi syarat dan menghabiskan kredit ini secara permanen.",
+    "claudeResetCreditsModalTitle": "Kredit reset Claude",
+    "claudeResetCreditsModalExplainer": "Kredit reset Claude dan reset sesi mingguan yang tersedia untuk akun ini.",
     "codexPaidCreditsLabel": "Kredit Codex berbayar",
     "codexPaidCreditsAvailable": "Tersedia (saldo tidak dilaporkan)",
     "codexPaidCreditsUnavailable": "Tidak tersedia atau batas pengeluaran tercapai",
-    "codexPaidCreditsUnlimited": "Tak terbatas"
+    "codexPaidCreditsUnlimited": "Tak terbatas",
+    "healthAccountHint": "Berdasarkan pengamatan terbaru, bukan pengujian langsung. Pilih akun untuk melihat detail.",
+    "healthRecovery": "Perkiraan pemulihan",
+    "healthAvailable": "Tersedia",
+    "healthRestricted": "Dibatasi sebagian",
+    "healthUnavailable": "Tidak tersedia",
+    "healthPeakHourProtection": "Perlindungan jam sibuk",
+    "healthCooldown": "Waktu tunggu",
+    "healthQuotaExhausted": "Kuota habis",
+    "healthOverview": "Ringkasan",
+    "layoutFull": "Lengkap",
+    "layoutCompact": "Ringkas",
+    "healthQuotaError": "Gagal membaca kuota",
+    "healthNoRuntime": "Status operasi tidak tersedia",
+    "healthPreviousSnapshot": "Penyegaran terakhir gagal; menampilkan hasil sebelumnya",
+    "healthPreviousFailure": "Permintaan terakhir gagal; masa tunggu berakhir",
+    "healthAwaitingSync": "Waktu reset telah lewat; menunggu sinkronisasi",
+    "healthVerdictUnavailable": "Hasil pemeriksaan ketersediaan tidak dapat diperoleh; hanya tingkat kuota yang ditampilkan",
+    "healthSummaryFailed": "Gagal membaca ringkasan operasi; informasi kunci model mungkin tidak lengkap",
+    "healthRuntimeObserved": "Status diperbarui {time}",
+    "healthQuotaObserved": "Kuota diamati {time}",
+    "healthOldestQuota": "Rekaman kuota tertua: {time}",
+    "healthRecoveryUnknown": "Waktu pemulihan tidak diketahui",
+    "healthDetailsHint": "Klik untuk detail dan tindakan",
+    "healthFiveHour": "5 jam",
+    "healthOverall": "Keseluruhan",
+    "healthAction": "Perlu tindakan",
+    "healthTitle": "Ketersediaan akun",
+    "healthDrag": "Seret untuk mengurutkan penyedia",
+    "healthDragPosition": "{provider}, {count, plural, other {posisi {position, number} dari #}}",
+    "healthResetOrder": "Pulihkan urutan bawaan",
+    "healthPool": "Kumpulan {name}",
+    "healthOtherPool": "Akun yang sama · {pool}: {status} (tersisa {remaining})",
+    "healthIncluded": "Termasuk {count, number} yang dibatasi sebagian",
+    "healthBannerUnavailable": "Akun sementara tidak tersedia: {count, number}",
+    "healthBannerAvailable": "Semua {count, number} akun tersedia",
+    "healthLegendHide": "Sembunyikan legenda",
+    "healthLegendShow": "Tampilkan legenda",
+    "healthLegendOk": "Padat = sisa kuota; tembus pandang = terpakai.",
+    "healthLegendCooldown": "Kuota {window} habis. Padat = waktu tunggu berlalu; tembus pandang = sisa waktu tunggu.",
+    "healthLegendAction": "Otorisasi kedaluwarsa atau akun diblokir; menunggu tidak menyelesaikannya.",
+    "healthLegendPartial": "Masih dapat digunakan. Ujung kuning = model atau kumpulan dibatasi.",
+    "healthWaited": "Sudah menunggu {percent}",
+    "healthWait": "Tunggu {duration} lagi (pulih pukul {time})",
+    "healthFastest": "Pemulihan tercepat dalam {duration}",
+    "healthRatio": "{available, number} / {active, number} tersedia",
+    "healthCd5": "5 jam · Waktu tunggu",
+    "healthCdw": "Mingguan · Waktu tunggu",
+    "healthRecentSuccessBypass": "Perutean mengizinkan akun ini karena ada permintaan yang berhasil baru-baru ini.",
+    "healthPurchasedBalanceBypass": "Saldo yang dibeli memungkinkan penggunaan berlanjut setelah kuota bawaan habis.",
+    "healthCutoffAtRequest": "Ambang kuota langsung diperiksa saat merutekan permintaan."
   },
   "modals": {
     "waitingAuth": "Menunggu Otorisasi",
@@ -11077,7 +11313,8 @@
       "message": "Pesan",
       "error": "Kesalahan",
       "completion": "Penyelesaian"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Obrolan Sederhana",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes}m yang lalu",
     "hoursAgo": "{hours}j yang lalu",
     "daysAgo": "{days}h yang lalu",
-    "entries": "Entri"
+    "entries": "Entri",
+    "viewSwitcherAria": "Tampilan cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Global",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth belum dikonfigurasi. Daftarkan aplikasi OAuth di {applicationsUrl} dengan URI pengalihan {redirectUri} dan cakupan \"{scopes}\", lalu atur {clientIdEnv} (dan opsional {clientSecretEnv}) dan mulai ulang.",
     "gitlabDuoSetupDescription": "Setelah aplikasi terdaftar dan variabel lingkungan diatur pada instance OmniRoute ini, klik Lanjutkan untuk memulai login OAuth.",
     "continue": "Lanjutkan",
+    "copilotPolicyTitle": "Penyedia eksperimental: status kebijakannya ambigu",
+    "copilotPolicyLine1": "OmniRoute terhubung melalui api.githubcopilot.com, yang GitHub belum dipublikasikan sebagai inferensi pihak ketiga umum API. Integrasi ini bersifat eksperimental dan dapat berubah tanpa pemberitahuan.",
+    "copilotPolicyLine2": "Hanya akun GitHub Anda sendiri yang dapat terhubung. Jangan pernah membagikan kredensial, mengumpulkan akun, atau mencoba melampaui batas paket Anda.",
+    "copilotPolicyLine3": "Pengguna paket Gratis dan Pelajar hanya menerima pemilihan model otomatis. Ketentuan paket Copilot Anda dan batasan penggunaan apa pun tetap menjadi tanggung jawab Anda.",
+    "copilotPolicyAcknowledge": "Saya mengerti, sambungkan",
     "tabPasteSetupToken": "Token penyiapan",
     "claudeSetupTokenDescription": "Jalankan `claude setup-token` di terminal lalu tempel token yang dicetaknya. Token berlaku satu tahun dan tidak memiliki token penyegaran. OmniRoute mengirim satu permintaan uji ke Anthropic sebelum menyimpannya.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Tindakan lainnya",
     "test": "Uji",
     "edit": "Ubah",
     "delete": "Hapus",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "Tidak ada entri yang valid ditemukan. Periksa formatnya dan coba lagi.",
     "bulkImportSuccess": "Impor selesai: {created} dibuat, {updated} diperbarui, {failed} gagal",
     "bulkImportErrorLine": "Baris {line}: {reason}",
-    "bulkImportMaxExceeded": "Maksimum 100 proxy per impor",
+    "bulkImportMaxExceeded": "Maksimum {max} proxy per impor",
     "bulkImportPreview": "Pratinjau",
     "clearAssignment": "(tugas yang jelas)",
     "bulkProxyAssignment": "Penugasan Proksi Massal",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "batas laju IP (429)",
     "poolSetAsideKindSlow": "respon lambat",
     "poolSetAsideKindGeoBlocked": "wilayah diblokir (403/451)",
+    "poolSetAsideKindOperatorReported": "gangguan dilaporkan oleh operator",
     "poolSetAsideUntil": "Kembali ke rotasi {endsAt}",
     "poolSetAsideRepeat": "Disisihkan {count, plural, one {# kali} other {# kali}}",
     "poolUnknownAddress": "Alamat tidak dikenal",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "Ekspor kode",
     "exportShort": "Ekspor",
     "noStateToExport": "Tidak ada data playground yang tersedia untuk diekspor.",
-    "closeExportModal": "Tutup modal ekspor",
     "close": "Tutup",
     "exportRealKeyWarning": "Peringatan keamanan: ekspor diblokir — kunci API asli terdeteksi dalam output. Harap reset kunci API Anda dan coba lagi.",
     "placeholderHintPrefix": "Ganti",
@@ -11808,7 +12052,8 @@
       "nextButton": "Berikutnya",
       "runButton": "Jalankan",
       "promptPlaceholder": "Masukkan pesan Anda… (Enter untuk mengirim, Shift+Enter untuk baris baru)"
-    }
+    },
+    "playgroundTabs": "Mode Playground"
   },
   "miniPlayground": {
     "endpoint": "Titik Akhir",
@@ -11879,7 +12124,8 @@
     "assistant": "Asisten",
     "errorLabel": "Kesalahan",
     "requestFailed": "Permintaan gagal",
-    "stop": "Berhenti"
+    "stop": "Berhenti",
+    "messageInputAria": "Pesan"
   },
   "requestLogger": {
     "recording": "Merekam",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} rotasi akun",
       "resilienceRetried": "Giliran kosong dicoba ulang",
       "resilienceContinued": "Dilanjutkan di tengah stream",
-      "resilienceRecovered": "Dipulihkan oleh tindakan ketahanan"
-    }
+      "resilienceRecovered": "Dipulihkan oleh tindakan ketahanan",
+      "conversationContext": "Konteks Percakapan",
+      "goToBottom": "Ke bagian bawah",
+      "liveRefreshOn": "Penyegaran langsung: aktif",
+      "liveRefreshOff": "Penyegaran langsung: nonaktif",
+      "liveRefresh": "Penyegaran langsung",
+      "continuesFromParent": "berlanjut dari induk",
+      "continuesFrom": "Berlanjut dari {id}",
+      "viewConversation": "lihat percakapan",
+      "openConversation": "Buka percakapan {id}"
+    },
+    "tableLabel": "Log permintaan",
+    "throughputPostFirstToken": "Setelah token pertama",
+    "throughputEndToEnd": "Ujung-ke-ujung",
+    "throughputRate": "{value} token/detik",
+    "throughputExplanation": "Kedua laju menggunakan jumlah token output dan reasoning yang lebih besar. Laju setelah token pertama tidak menyertakan TTFT yang valid; jika tidak, laju tersebut menggunakan durasi penuh. Laju ujung-ke-ujung selalu menggunakan durasi penuh. Respons yang di-buffer dapat memiliki laju pengiriman burst yang tinggi tanpa pembuatan model yang lebih cepat."
   },
   "proxyLogger": {
     "filterAll": "Semua",
@@ -12112,7 +12372,9 @@
     "colServedBy": "Dilayani oleh",
     "filterTraffic": "Lalu lintas",
     "filterTests": "Uji coba",
-    "filterSource": "Sumber"
+    "filterSource": "Sumber",
+    "tableLabel": "Log proksi",
+    "sortLogs": "Urutkan log"
   },
   "endpointOptions": {
     "speech": "Ucapan",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "HABIS",
     "statusAlerting": "PERINGATAN",
     "statusError": "KESALAHAN",
-    "moreSuffix": "+{count} lainnya"
+    "moreSuffix": "+{count} lainnya",
+    "feedFilterLabel": "Filter peristiwa"
   },
   "quotaShare": {
     "weightPercent": "Bobot %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "Tanpa Grup",
     "ungroupedHint": "Pool ini tidak ditetapkan ke grup yang dikenal. Edit pool untuk memindahkannya ke grup yang sebenarnya.",
     "removeFailed": "Tidak dapat menghapus kumpulan ini.",
-    "dismiss": "Tutup"
+    "dismiss": "Tutup",
+    "allocationsHeading": "Alokasi",
+    "wizardRemoveDimension": "Hapus dimensi",
+    "wizardRemoveKey": "Hapus kunci"
   },
   "plugins": {
     "title": "Plugin",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "Pembaruan pengaturan gagal",
       "serviceRevealApiKey": "{actor} menampilkan kunci API untuk {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Tutup pesan kesalahan"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "Buka sekarang",
       "message": "MITM Proxy sekarang berada di bawah AgentBridge.",
       "title": "Halaman ini telah berpindah"
-    }
+    },
+    "dnsOn": "DNS aktif",
+    "dnsOff": "DNS nonaktif",
+    "showServerSettings": "Tampilkan pengaturan server",
+    "hideServerSettings": "Sembunyikan pengaturan server",
+    "upstreamCaTesting": "Menguji…",
+    "removeMapping": "Hapus pemetaan",
+    "mappingSourcePlaceholder": "misalnya, gemini-3.6-flash-medium, atau * untuk semua yang belum dipetakan",
+    "mappingWildcardHint": "Gunakan * sebagai sumber untuk merutekan setiap model tanpa pemetaan eksplisit melalui OmniRoute ke target yang dipilih. Kecocokan sumber yang persis selalu diprioritaskan daripada *.",
+    "wizardDetectingModels": "Mendeteksi model dari lalu lintas yang dicegat...",
+    "wizardDetectedModels": "Menemukan {count, plural, one {# model} other {# model}} dalam lalu lintas yang dicegat. Pilih model yang ingin Anda tambahkan:",
+    "wizardSelectedModels": "{count, plural, one {# model} other {# model}} dipilih. Anda akan memetakannya ke model OmniRoute di layar berikutnya.",
+    "wizardAddModels": "Tambahkan {count, plural, one {# model} other {# model}}",
+    "wizardNoModelsDetected": "Belum ada model yang terdeteksi. Gunakan {agent} untuk membuat permintaan, lalu jalankan wizard ini lagi untuk mendeteksi model secara otomatis dari lalu lintas.",
+    "wizardNoModelsHint": "Atau tutup wizard ini dan tambahkan pemetaan secara manual di kartu agen."
   },
   "providerStats": {
     "unknownError": "Kesalahan tidak dikenal",
@@ -12685,7 +12966,12 @@
     "avgTtft": "TTFT Rata-rata",
     "avgTotal": "Total Rata-rata",
     "requestTelemetry": "Telemetri Permintaan",
-    "requestTelemetryDescription": "Rincian pipeline 7 fase (5 menit terakhir)"
+    "requestTelemetryDescription": "Rincian pipeline 7 fase (5 menit terakhir)",
+    "title": "Statistik penyedia",
+    "description": "Lalu lintas, latensi, dan tingkat keberhasilan per penyedia dan per model",
+    "combo": "Kombinasi",
+    "toggleModels": "Tampilkan model untuk {provider}",
+    "windowSince": "Sejak {date}"
   },
   "relay": {
     "title": "Proksi Relai Serverless",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "Tidak ada body permintaan.",
     "noResponseBody": "Tidak ada body respons.",
     "formatted": "Diformat",
-    "raw": "Mentah"
+    "raw": "Mentah",
+    "requestCount": "{count, plural, one {# permintaan} other {# permintaan}}",
+    "expandList": "Perluas daftar",
+    "collapseList": "Ciutkan daftar",
+    "snippetLanguage": "Bahasa cuplikan kode",
+    "headersTable": "Header",
+    "showSecrets": "Tampilkan rahasia",
+    "maskSecrets": "Samarkan rahasia",
+    "llmNotAvailable": "Metadata LLM tidak tersedia untuk permintaan ini.",
+    "llmStreamYes": "ya (SSE)",
+    "llmStreamNo": "tidak",
+    "llmTotalTokens": "Total: {count} token"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI Code",
     "pageSubtitle": "Alat kode yang mengarah ke OmniRoute",
     "searchPlaceholder": "Cari CLI…",
     "filterDetectionLabel": "Deteksi",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "Tidak ditemukan",
     "baseUrlAll": "Semua",
     "baseUrlFull": "Penuh",
-    "baseUrlPartial": "Sebagian"
+    "baseUrlPartial": "Sebagian",
+    "title": "Kode CLI"
   },
   "cliAgents": {
     "pageTitle": "Agen CLI",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "Proporsi panggilan yang benar-benar dijawab oleh penyedia ini selama 24 jam terakhir. Tanda hubung berarti penyedia menerima terlalu sedikit lalu lintas untuk menentukan tingkat keberhasilan.",
     "reliabilitySample": "{successes} dari {requests} panggilan berhasil dalam {hours} jam terakhir",
     "reliabilityTooFew": "Hanya {requests} panggilan dalam {hours} jam terakhir — terlalu sedikit untuk menentukan tingkat keberhasilan",
-    "reliabilityNoTraffic": "Tidak ada panggilan yang tercatat dalam 24 jam terakhir"
+    "reliabilityNoTraffic": "Tidak ada panggilan yang tercatat dalam 24 jam terakhir",
+    "categoryFilter": "Kategori tugas"
   },
   "discovery": {
     "title": "Penemuan Penyedia",
@@ -13330,7 +13628,11 @@
     "method": "Metode",
     "auth": "Autentikasi",
     "feasibility": "Kelayakan",
-    "models": "Model"
+    "models": "Model",
+    "provider": "Penyedia",
+    "status": "Status",
+    "endpoint": "Endpoint",
+    "actions": "Tindakan"
   },
   "noAuthProvider": {
     "title": "Tidak memerlukan autentikasi",
@@ -13379,7 +13681,8 @@
     "ownProxy": "Proxy sendiri",
     "freeTierPause": "Model {model} dijeda (429), kembali pada {time}",
     "freeTierPauseProvider": "Dijeda (429), kembali pada {time}",
-    "freeTierPauseNote": "Jeda dalam proses pada instan ini"
+    "freeTierPauseNote": "Jeda dalam proses pada instan ini",
+    "proxyType": "Jenis proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "Pencapaian tersembunyi menanti...",
         "criteria": "Selesaikan pencapaian tersembunyi untuk mengungkap lencana ini."
       }
-    }
+    },
+    "leaderboardTitle": "Papan peringkat",
+    "leaderboardDescription": "Peringkat dan pencapaian di seluruh kunci API Anda",
+    "badgeLocked": "Terkunci"
   },
   "featureFlags": {
     "title": "Flag Fitur",
@@ -13610,7 +13916,9 @@
       "disabled": "Dinonaktifkan",
       "dual": "Ganda",
       "alias": "Alias",
-      "canonical": "Kanonis"
+      "canonical": "Kanonis",
+      "fail_closed": "Blokir (fail_closed)",
+      "count_as_zero": "Hitung sebagai $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Penghentian Infrastruktur Prioritas Terlindungi sebagai 502",
         "description": "Berikan respons 502 alih-alih 503 ketika target prioritas dengan fallback khusus kuota menghentikan combo karena penyebab yang terbukti bukan kuota: circuit breaker penyedia yang terbuka atau pelompatan berdasarkan prediksi latensi."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "ID Akun Log",
+        "description": "Sertakan prefiks akun di baris log AUTH (mis. \"Menggunakan akun '<provider>': abc12345...\"). Nonaktif secara default sehingga identifikasi akun disamarkan dari log proses bersama/multi-tenant. Independen dari Mode Debug; mengubah Mode Debug tidak akan mengungkap ini."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Nonaktifkan Login Kata Sandi dengan OIDC",
+        "description": "Saat OIDC diaktifkan, nonaktifkan login kata sandi sehingga pengguna hanya dapat mengautentikasi melalui OIDC Single Sign-On. Saat dinonaktifkan (default), login kata sandi dan OIDC keduanya tersedia."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Node Penyedia Audio Jarak Jauh",
+        "description": "Izinkan rute /v1/audio/* untuk menggunakan node penyedia yang kompatibel dengan OpenAI yang di-host di luar localhost. Nonaktif secara default — merutekan audio ke host jarak jauh mengubah identitas egress dan harus merupakan keputusan operator yang eksplisit. Node loopback selalu diizinkan dan tidak terpengaruh."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Node Penyedia Rerank Jarak Jauh",
+        "description": "Izinkan POST /v1/rerank (dan langkah rerank memory engine, yang memanggilnya melalui loopback) untuk menggunakan node penyedia yang kompatibel dengan OpenAI yang di-host di luar localhost — perangkat LAN atau peer Tailscale yang menjalankan TEI, Infinity, vLLM, dll. Nonaktif secara default — merutekan ke host jarak jauh mengubah identitas egress dan harus merupakan keputusan operator yang eksplisit. Node loopback selalu diizinkan dan tidak terpengaruh. Node jarak jauh juga harus lolos kebijakan URL outbound penyedia."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Pengaman Shared-Egress Rotasi Jaringan",
+        "description": "Saat terjadi pengecualian jaringan (waktu habis, koneksi ditolak/direset) untuk eksekutor rotasi multi-akun, ketika akun yang mengalami kegagalan tidak memiliki proksi khusus, terapkan cooldown singkat dan lewati akun tanpa proksi lainnya untuk sisa permintaan alih-alih mencoba ulang masing-masing akun. Aktif secara default (aman: tidak ada perubahan IP egress, hanya mengurangi risiko latensi/cooldown pada akun shared-egress). Nonaktifkan untuk memulihkan propagasi langsung pada throw tanpa proksi yang pertama."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Lewati Proksi yang Baru Saja Gagal",
+        "description": "Pool proksi dan rotasi per-akun opencode berhenti menyajikan kembali proksi yang baru saja gagal (probe TCP ditolak, atau respons 429 diterima melaluinya) selama periode per-proses yang berlipat ganda pada setiap pengulangan, hingga batas tertentu. Tidak ada status proksi yang ditulis; dengan setiap kandidat disisihkan, pilihan tetap tidak berubah. Aktif secara default: urutan pemilihan sama persis dengan rotasi biasa hanya jika PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Urutan Pool Egress Bersama",
+        "description": "Untuk penyedia yang kuotanya dikelompokkan berdasarkan alamat egress, urutkan anggota pool yang berbagi alamat egress teramati dari anggota yang baru saja ditolak tepat di bawah anggota yang sehat. Hanya urutan, tidak pernah dikecualikan. Memerlukan PROXY_SKIP_RECENTLY_FAILED, yang menghasilkan sinyal penolakan yang dibacanya. Nonaktif secara default: urutan pemilihan sama persis dengan rotasi biasa."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Pencatatan Log Atribusi Rotasi",
+        "description": "Rotasi opencode mencatat akun mana yang melayani atau dilewati (hanya ID tersamar, tidak pernah ID akun lengkap) dan menautkan entri log proksi ke permintaannya, sehingga operator dapat membedakan akun yang dilewati dari yang tidak digunakan. Nonaktif secara default: tidak ada baris log tambahan, tidak ada kolom tambahan yang ditulis."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Observasi Egress Pool Proksi",
+        "description": "Tampilkan, di bawah pool proksi di dasbor, berapa banyak IP egress teramati yang melayani anggotanya selama 24 jam terakhir, berapa banyak koneksi yang menggunakannya, dan jumlah terbanyak yang terlihat di balik satu IP. Hanya-baca, dihitung dari log proksi, tidak pernah digunakan untuk perutean. Nonaktif secara default: editor pool tidak berubah dan rute observasi menghasilkan null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Egress Operator Proksi",
+        "description": "Menerima alamat teramati bertanggal yang dikirimkan operator per anggota pool dan menggabungkannya dengan pembacaan jurnal untuk tampilan dan urutan pool. Nonaktif secara default: rute push merespons 404 dan pembacaan pool berfungsi persis seperti sebelumnya."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "Rotasi Stall Responses OpenCode",
+        "description": "Untuk eksekutor OpenCode, pantau byte body pertama dari balasan Responses yang di-stream (jendela: RESPONSES_FIRST_BYTE_TIMEOUT_MS, default 15000). Stream Responses 2xx yang tetap hening melebihi jendela waktu tersebut dianggap macet (stalled): akun dikenai jeda (cooldown) dan permintaan dirotasikan ke akun berikutnya satu kali; kemacetan kedua akan langsung gagal (fail fast). Nonaktif secara default: stream yang macet tetap menunggu seperti saat ini hingga batas waktu kesiapan stream (readiness timeout)."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "Rotasi user_blocked OpenCode",
+        "description": "Untuk eksekutor OpenCode, saat upstream merespons 403 atau 451 yang membawa penolakan user_blocked (bukan pemblokiran geo, bukan penolakan sidik jari Cloudflare), beri jeda (cooldown) pada akun yang ditolak dan rotasikan ke akun berikutnya paling banyak satu kali per permintaan; penolakan kedua dikembalikan apa adanya tanpa tanda sukses. Nonaktif secara default: merutekan di luar blokir pengguna upstream dapat terlihat seperti penghindaran dan menyebarkan tanda tersebut ke seluruh armada akun, sehingga penolakan dikembalikan tanpa perubahan kecuali operator memilih untuk mengaktifkannya."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "Backoff Failover Transien OpenCode",
+        "description": "Untuk rotasi multi-akun OpenCode, beri jeda sebelum mengirimkan ke akun berikutnya setelah dua percobaan berturut-turut gagal akibat error upstream transien (5xx atau penolakan 400 kosong). Jeda dimulai dari 1,5 detik, berlipat ganda untuk setiap kegagalan berturut-turut berikutnya, dibatasi maksimal 6 detik per jeda dan 10 detik per permintaan, dilewati jika klien terputus, dan body respons yang gagal dilepaskan sebelum menunggu. Nonaktif secara default: failover tetap langsung dijalankan."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Coba Ulang Flush Turn Kosong",
+        "description": "Pada turn streaming yang diterjemahkan, saat turn upstream tidak membawa konten yang dapat digunakan (completion khusus penalaran atau nol chunk bernilai), lakukan percobaan ulang terbatas melalui jalur kredensial normal (hingga `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) sebelum apa pun diekspos ke klien. Nonaktif secara default: turn kosong mempertahankan perilaku saat ini (200 kosong atau 502 empty-content)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Pemulihan Sibling Stream Kosong",
+        "description": "Streaming Claude/Codex: setelah peristiwa lifecycle pertama, periksa sejenak (hingga 1 detik / 64 KiB) untuk mencari output yang dapat digunakan; stream yang berakhir tanpa konten akan menjadi kegagalan empty_content yang menggunakan jatah percobaan ulang terbatas yang ada pada koneksi lain yang memenuhi syarat (tanpa cooldown, tanpa lockout model), dan kombo round-robin berhenti mencoba ulang setelah klien terputus. Juga memperlakukan refusal, pause_turn, dan model_context_window_exceeded sebagai terminal kosong yang sah di dalam probe. Nonaktif secara default: kesiapan (readiness), penanganan empty-content, dan percobaan ulang kombo tetap persis seperti sebelumnya."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Probe Output Stream Terlambat",
+        "description": "Probe output streaming: setelah 64 chunk pertama yang diteruskan, tetap ambil sampel satu dari setiap 16 chunk untuk output terlihat yang pertama, sehingga output yang dimulai terlambat tetap menandai stream telah memancarkan output. Respons 5xx tunggal setelah titik tersebut akan tetap berlingkup request alih-alih mencatat penguncian khusus model, dan firstOutputMs akan diisi mundur ke chunk output pertama dari celah sampling saat ini. Nonaktif secara default: hanya 64 chunk pertama yang diteruskan yang akan diperiksa, persis seperti sebelumnya."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "Penghentian Dini 429 Pembatasan Laju OpenCode",
+        "description": "Untuk rotasi multi-akun OpenCode, hentikan gelombang akun pada 429 pertama yang diklasifikasikan sebagai pembatasan laju sebenarnya (header Retry-After yang dapat diurai, atau isi body yang menyebutkan batas laju/penggunaan) dan kembalikan 429 upstream tersebut tanpa perubahan (status, body, header Retry-After, dan kuota), alih-alih mencoba setiap akun yang tersisa. 429 yang tidak terklasifikasi akan terus berotasi. Nonaktif secara default: paket gratis dibatasi per IP egress (#9611), sehingga setiap 429 berotasi ke akun berikutnya, dan gelombang yang habis akan mengembalikan 429 upstream terakhir."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "Parkir dan Lanjutkan 429 OpenCode",
+        "description": "Untuk rotasi multi-akun OpenCode, parkir permintaan setelah 429 transien berulang (atau penanda beban pool baru) dengan heartbeat, lalu putar ulang satu tahap terbatas hingga 3 akun berurutan alih-alih menyebarkannya ke seluruh armada. Nonaktif secara default: setiap 429 berotasi ke akun berikutnya persis seperti sebelumnya."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Coba Ulang Kemacetan Kesiapan Stream",
+        "description": "Untuk permintaan chat streaming, ketika body upstream pertama terhenti sebelum menghasilkan event yang dapat digunakan, jalankan satu upaya kedua yang terbatas melalui jalur perutean yang sama dengan anggaran kesiapan yang sama dan tanpa penalti akun. Nonaktif secara default: body pertama yang terhenti akan menggagalkan permintaan tanpa percobaan ulang."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "Pemilihan Ulang Pool 429 OpenCode",
+        "description": "Untuk rotasi multi-akun OpenCode, setelah menerima 429 dari penyedia dengan bucket per egress pada akun tanpa proksi di bawah konteks pool ambien, minta anggota lain dari connection pool untuk percobaan berikutnya alih-alih mencoba kembali alamat egress yang sama. Mengurutkan, tidak pernah mengecualikan: pool yang habis tetap mempertahankan perilaku saat ini. Nonaktif secara default: setiap 429 berotasi ke akun berikutnya persis seperti sebelumnya."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "Sidik Jari Klien OpenCode v2",
+        "description": "Kirim sidik jari klien CLI OpenCode v2 pada permintaan OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli dan x-opencode-client cli, User-Agent klien hanya dipertahankan jika merupakan klien OpenCode 2.x, dan pada permintaan gated free-tier tanpa x-opencode-request, sesi dicerminkan ke x-opencode-session-id/x-session-affinity/x-session-id, skema read/shell CLI v2 pada placeholder tools yang disuntikkan dan tool_choice \"none\" dihapus. Nonaktif secara default: setiap permintaan OpenCode mempertahankan identitas, header, dan body saat ini byte demi byte."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "Penguncian IP Egress OpenCode Zen",
+        "description": "Tambahkan OpenCode Zen (opencode-zen) ke kelompok penguncian IP egress default, sehingga 429 pada satu koneksi Zen juga menenangkan setiap koneksi Zen terkait yang berbagi IP egress yang sama. Nonaktif secara default: Zen diberi kunci tersendiri dan setiap koneksi mengalami masa jeda secara mandiri, persis seperti sebelumnya. Nilai OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS yang eksplisit selalu diprioritaskan di atas flag ini."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Aturan Error Teks Lengkap OpenCode",
+        "description": "Izinkan aturan error bawaan OpenCode (opencode-zen, opencode-go, opencode-cli) mencocokkan seluruh teks error upstream, sehingga penanda body seperti organization_quota_exceeded atau \"monthly usage limit reached\" mengklasifikasikan 429 sebagai kuota habis dengan penguncian berlingkup koneksi. Nonaktif secara default: aturan-aturan tersebut hanya melihat kode error terstruktur dan 429 tersebut tetap diperlakukan sebagai batas laju singkat, persis seperti sebelumnya."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Aturan Error Teks Lengkap Cloudflare Workers AI",
+        "description": "Izinkan aturan error bawaan Cloudflare Workers AI mencocokkan seluruh teks error upstream, sehingga body 429 \"daily free allocation\" diklasifikasikan sebagai kuota habis dan bukan sebagai batas laju singkat. Nonaktif secara default: aturan tersebut hanya melihat kode error terstruktur, persis seperti sebelumnya."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Filter Kemampuan",
+        "description": "Tolak permintaan sebelum dikirimkan jika model target tidak memiliki kemampuan yang diperlukan (vision, tools, structured output, context window). Melindungi permintaan penyedia tunggal langsung yang melewati filter kompatibilitas combo-layer."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Abaikan Penggunaan Tanpa Harga dalam Kuota USD",
+        "description": "Hitung penggunaan model yang tidak memiliki harga sebagai $0 dalam kuota penggunaan USD per kunci alih-alih menganggap kuota telah terlampaui. Nonaktif secara default: model tanpa harga atau alias perutean dapat menyembunyikan pengeluaran riil, sehingga kuota memblokir secara default (fail-closed)."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Aktifkan modul OmniRoute Radar (layar feed katalog dan sinkronisasi). Nonaktif secara default; mengaktifkannya hanya membuka UI — sinkronisasi data tetap menjadi opt-in terpisah."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Gerbang Kapabilitas Endpoint Model",
+        "description": "Terapkan tag endpoint model tepercaya (dinyatakan oleh katalog penyedia, disimpulkan dari id model khusus, atau disetel oleh operator): tolak permintaan yang dikirim ke endpoint yang tidak dilayani oleh model dengan HTTP 400 sebelum dikirim ke /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations dan /v1/audio/*; sembunyikan model yang endpoint bertag-nya tidak memiliki adaptor OmniRoute dari /v1/models; dan tanggapi pengujian model dasbor dengan 422 untuk model tersebut. Nonaktif secara default: tag endpoint tetap bersifat informasional dan permintaan dikirim persis seperti sebelumnya."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Handoff Konteks Universal",
+        "description": "Buat dan sisipkan ringkasan percakapan saat perutean kombo beralih model. Nonaktifkan untuk memperlakukan peralihan model secara mandiri dan mencegah permintaan handoff di latar belakang untuk semua kombo saat ini dan di masa mendatang."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Pemutaran Ulang Penalaran",
+        "description": "Simpan di cache dan putar ulang penalaran model di seluruh percakapan multi-turn. Nonaktifkan untuk berhenti menyimpan dan menyisipkan kembali penalaran."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Transport App-Server Codex",
+        "description": "Izinkan Codex menggunakan transport WebSocket JSON-RPC app-server lokal (codexTransport=app-server). Saat nonaktif, koneksi yang memilih app-server akan dialihkan kembali ke transport Codex lainnya."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Alias Penemuan Claude Code",
+        "description": "Iklankan ID cermin claude/'<provider>'/'<model>' di /v1/models agar penemuan model gerbang Claude Code mendaftar model non-Claude. Peringatan: menggandakan entri katalog untuk semua klien saat diaktifkan secara global."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Alias Model Tanpa-Pemikiran",
+        "description": "Saklar master untuk alias gerbang no-think/'<provider>'/'<model>'. Aktif (default): /v1/models mengiklankan varian tanpa-pemikiran untuk setiap model Claude yang mendukung kemampuan berpikir dan memenuhi syarat, dan ID no-think/ yang dikirim dalam permintaan akan diselesaikan kembali ke model asli dengan penalaran yang diredam. Nonaktif: tidak ada varian yang diiklankan dan ID no-think/ diperlakukan seperti ID model tidak dikenal lainnya. Opt-in/opt-out ModelSpec.noThinkingAlias per model tetap berlaku selama ini aktif."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Nonaktifkan Varian Thinking Level",
+        "description": "Nonaktifkan pembuatan varian thinking level (misalnya -low, -medium, -high) di katalog /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Jalur Penerimaan Virtual Adaptif",
+        "description": "Aktifkan jalur penerimaan virtual adaptif per-tenant untuk dispatch provider (#9654): lonjakan satu tenant tidak lagi menyebabkan galat 503 pada tenant lainnya. Variabel lingkungan OMNIROUTE_CHAT_VIRTUAL_LANES lebih diprioritaskan daripada pengaturan dasbor ini; perubahan berlaku setelah server dimulai ulang."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Cermin Gerbang Fungsional",
+        "description": "Iklankan ID cermin '<gateway-alias>'/'<model>' di /v1/models untuk model yang pemilik kanonikalnya tidak memiliki kredensial aktif tetapi gerbang passthrough dengan kredensial aktif yang mengatur rute mereka. Peringatan: menambahkan entri katalog untuk semua klien saat diaktifkan secara global."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "Saldo Agregator New-API",
+        "description": "Aktifkan deteksi saldo untuk node yang kompatibel dengan agregator New-API / One-API / Sub2API. Saat diaktifkan, node kompatibel dengan flag agregator yang disetel akan melaporkan saldonya di dasbor dan perutean quota-preflight."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Sembunyikan Koneksi Pencarian yang Dihapus",
+        "description": "Statistik pencarian dan pencarian terkini hanya menghitung penyedia yang masih memiliki koneksi aktif (penyedia tanpa kunci seperti duckduckgo-free selalu dihitung). Nonaktif mempertahankan setiap baris pencarian yang tersimpan dengan id penyedia."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Lencana Free Ketat",
+        "description": "Halaman penyedia dasbor: tampilkan lencana Free hanya pada sinyal yang dipatuhi penyedia — mengabaikan heuristik display-name, kolom free non-boolean, dan sufiks :free pada penyedia terdaftar tanpa free tier yang terdokumentasi. Nonaktif mempertahankan aturan lencana terdahulu."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: Pool Kosong Menjawab 503",
+        "description": "Saat pool kandidat auto combo sudah kosong sebelum pra-filter tool-calling berjalan (setiap target dilewati karena cooldown, lockout, atau kehabisan kuota), berikan jawaban 503 no_eligible_targets alih-alih 400 lama \"No target supports tool calling\" capability_mismatch. Nonaktif secara default: pool kosong mempertahankan 400 lama."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Pemblokiran Lunak 401 Mistral Ambigu",
+        "description": "Mistral 401 polos ('{\"detail\":\"Unauthorized\"}', tanpa sinyal autentikasi eksplisit) identik secara byte untuk kunci yang dicabut dan untuk kuota yang habis. Saat diaktifkan, 401 seperti itu akan mendinginkan koneksi alih-alih memarkirnya sebagai kedaluwarsa, hingga 3 kali dalam satu jam; yang berikutnya masih akan memarkirnya sebagai kedaluwarsa, sehingga kunci yang dicabut akan konvergen. Nonaktif secara default: setiap Mistral 401 polos akan memarkir koneksi sebagai kedaluwarsa, seperti sebelumnya."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Pembersihan Otomatis Batch & File",
+        "description": "Izinkan proses pembersihan otomatis menghapus tugas Batch API berstatus terminal (completed/failed/cancelled/expired) yang lebih lama dari OMNIROUTE_BATCH_RETENTION_DAYS, beserta checkpoint per barisnya, dan membersihkan konten BLOB dari file terunggah yang telah melewati expires_at masing-masing. Nonaktif secara default: setiap instalasi yang ada mempertahankan data ini persis seperti sebelumnya hingga operator memilih untuk mengaktifkannya. Rute DELETE /api/v1/batches/delete-completed yang dipicu operator tidak terpengaruh dalam hal apa pun -- ini merupakan kontrak API publik terpisah yang bersifat tanpa syarat."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Lease Akun Antigravity",
+        "description": "Reservasikan akun Antigravity yang dipilih selama siklus hidup streaming dari permintaan yang memilihnya, sehingga percobaan ulang bersamaan (concurrent retry) atau serah terima kredensial tidak dapat memilih ulang akun yang sudah terikat pada stream yang sedang berjalan. Cakupan reservasi dibatasi pada (connection, callable upstream model), sehingga satu akun tetap dapat melayani dua model berbeda sekaligus. Ketika setiap akun yang memenuhi syarat sudah di-lease untuk model tersebut, permintaan akan mengembalikan 503 POOL_BUSY terstruktur dengan Retry-After terbatas alih-alih menumpuk pada akun yang sedang sibuk. Nonaktif secara default: pemilihan akun tetap persis seperti sebelumnya, dan tidak ada reservasi yang dilakukan."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Pangkas Otomatis Langkah Combo Usang",
+        "description": "Setelah sinkronisasi model yang berhasil terhadap katalog langsung yang otoritatif, hapus langkah combo yang disematkan ke model yang tidak lagi terdaftar di katalog, dengan satu entri audit per langkah yang dihapus. Tidak pernah memangkas pada sinkronisasi yang gagal, mengalami penurunan performa (degraded), atau free-only, dan tidak pernah mengosongkan combo. Nonaktif secara default: langkah usang hanya akan ditandai."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Ringkasan Pemikiran OAuth Claude",
+        "description": "Izinkan permintaan OAuth Claude yang meminta pemikiran yang dapat dibaca (thinking.display \"summarized\") untuk menghapus beta Anthropic redact-thinking-2026-02-12, yang jika tidak akan membuat Anthropic mengembalikan blok pemikiran kosong yang hanya berisi tanda tangan. Nonaktif secara default: beta tersebut merupakan bagian dari wire fingerprint OAuth Claude Code, sehingga permintaan OAuth membiarkannya tidak berubah. Permintaan Claude berbasis API-key sudah mendukung ringkasan pemikiran tanpa flag ini; OMNIROUTE_REDACT_THINKING=false juga hanya diterapkan ke OAuth saat flag ini aktif."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Perbaikan Tool Call Kiro",
+        "description": "Ketika respons streaming Kiro memunculkan pembungkus tool_call yang salah format (input.name atau input.arguments tidak ada) sebelum adanya output yang terlihat, redam respons tersebut dan kirim ulang permintaan satu kali dengan instruksi perbaikan alih-alih mengakhiri giliran dengan invalid_kiro_tool_call. Percobaan ulang ini memerlukan satu permintaan Kiro tambahan; kegagalan kedua akan mengakhiri giliran dengan kiro_tool_call_repair_retry_failed. Aktif secara default. Setel ke false untuk menggagalkan giliran pada pembungkus salah format yang pertama."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "Tier Upaya models.dev",
+        "description": "Gunakan tier upaya penalaran yang dipublikasikan models.dev (dipersempit ke kosakata upaya yang dikenal) ketika penggantian operator maupun registri penyedia tidak menyatakannya, dan perlakukan daftar tier kosong yang dinyatakan sebagai \"tanpa tier\" pada effort_tiers /v1/models dan persilangan tier kombo. Nonaktif secara default: effort_tiers dan supportedThinkingEfforts yang diselesaikan tetap persis seperti sebelumnya."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Telemetri cx Sintetis Arena",
+        "description": "Lampirkan blob interaksi klien cx terprogram yang disintesis (nilai yang dikirimkan arena.ai sendiri untuk halaman tanpa interaksi yang tercatat) ke setiap permintaan create-evaluation Arena (lmarena) yang tidak memiliki providerSpecificData.cx dari operator. Nonaktif secara default: kolom cx adalah sinyal anti-otomatisasi Arena, sehingga OmniRoute hanya meneruskan nilai yang diambil operator dari sesi peramban nyata (providerSpecificData.cx) dan jika tidak ada, tidak akan mengirim cx sama sekali. Manfaat upstream belum terbukti; aktifkan hanya jika Arena mulai menolak permintaan tanpa cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Kompaksi Reaktif Native Codex",
+        "description": "Izinkan tahap kompaksi konteks reaktif (ambang batas) dan upaya terakhir juga menulis ulang riwayat passthrough Native Codex (POST /v1/responses ke penyedia codex) saat melebihi anggaran konteks, menggunakan adaptor input[] Responses. Nonaktif secara default: riwayat Native Codex dimiliki oleh klien Codex dan tidak pernah ditulis ulang oleh kompaksi; permintaan yang terlalu besar akan terus gagal dalam pemeriksaan anggaran konteks persis seperti sebelumnya. Memerlukan kompresi global yang aktif dan model tidak dikecualikan."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Jendela Kuota: Patuhi Bounded Park",
+        "description": "Izinkan kebijakan kuota per-jendela (ambang batas sesi/mingguan yang digunakan oleh pemilihan akun) mematuhi bounded exhaustion park: setelah tenggat park berbatas terlampaui, atau hasil pengamatan kuota yang di-cache lebih lama dari batas park, jendela akan berhenti mengecualikan akun hingga pengambilan kuota yang baru. Nonaktif secara default: jendela yang di-cache akan terus memblokir berdasarkan persentase terakhir yang dilaporkan hingga waktu resetnya sendiri."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Generasi Gambar: Job Berdurasi Panjang",
+        "description": "Untuk generasi gambar yang kompatibel dengan OpenAI: gunakan batas waktu koneksi (providerSpecificData.timeoutMs), jika tidak gunakan batas waktu pengambilan upstream pusat (FETCH_TIMEOUT_MS, lalu REQUEST_TIMEOUT_MS, default 600 detik) alih-alih anggaran gambar tetap sebesar 120 detik; akhiri permintaan yang dibatalkan pemanggil dengan 499; dan izinkan Playground menerima job gambar berdurasi panjang sebagai stream SSE dengan heartbeat keepalive. Nonaktif secara default: anggaran tetap berlaku dan pembatalan pemanggil tidak diteruskan. Batas waktu untuk pembacaan body respons selalu aktif."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Penyempurnaan Mirror Katalog",
+        "description": "Sempurnakan mirror discovery claude/ dan functional-gateway pada /v1/models. Nonaktif secara default: kedua pass mirror berperilaku persis seperti sebelumnya. Aktif: mirror discovery claude/ juga mencakup varian reasoning-effort yang terdaftar (-low/-medium/-high/-xhigh), melewati id auto/* bawaan yang tidak dapat diwujudkan oleh jalur permintaan, dan melewati alias yang sudah terdaftar; mirror functional-gateway melewati kombo dan id yang disintesis OmniRoute (claude/, no-think/), mengambil pemilik dari owned_by, tidak pernah menggunakan pemilik sebagai gateway-nya sendiri, melewati gateway yang dinonaktifkan di blockedProviders, serta model di luar katalog live otoritatif milik gateway."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Kesehatan Proxy: Penolakan Mereset Rentetan Kegagalan",
+        "description": "Dalam pemeriksaan kesehatan proxy, izinkan probe yang ditolak target (401/403/429: proxy meneruskan, tujuan menolak IP egress ini) mereset rentetan kegagalan beruntun proxy, seperti probe yang berhasil dilayani. Nonaktif secara default: penolakan tetap netral dan mempertahankan rentetan (#10654). Respons 5xx tetap tidak meyakinkan dalam kedua kondisi, dan penolakan tidak pernah menghapus, menonaktifkan, atau mengaktifkan kembali proxy."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Gambar Langganan Grok",
+        "description": "Daftarkan rute gambar xai-oauth (xao) dan grok-cli serta petakan kualitas OpenAI high/hd ke xAI medium. Nonaktif secara default: jalur gambar xAI API-key tetap menggunakan permintaan kompatibel OpenAI yang ada dan rute langganan tidak didaftarkan."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "Discovery Model Live xAI OAuth",
+        "description": "Ambil katalog model xAI live untuk koneksi xai-oauth dari https://api.x.ai/v1/models menggunakan token bearer OAuth, alih-alih seed statis yang dibekukan. Aktif secara default. Atur flag ke false untuk tetap menyajikan seed statis. Kegagalan HTTP akan beralih kembali ke seed di rute discovery; pengambil (getter) flag itu sendiri tidak melakukan permintaan HTTP."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Giliran Sistem di Tengah Percakapan yang Kompatibel dengan Anthropic",
+        "description": "Pada relay anthropic-compatible-* polos (passthrough claude → claude), pertahankan giliran role:system di tengah percakapan di dalam messages[] alih-alih menaikkannya ke parameter system tingkat atas, sehingga prefiks prompt yang di-cache tetap stabil di seluruh giliran. Hanya berlaku jika klien itu sendiri yang mengirimkan anthropic-beta mid-conversation-system-2026-04-07 (diteruskan ke upstream apa adanya). Nonaktif secara default: setiap giliran sistem dinaikkan persis seperti sebelumnya, karena relay yang tidak mendukung beta akan menolak pesan role:system dengan 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "Pemeriksaan Kesehatan DB: Tunda Pemindaian Startup",
+        "description": "Jalankan pemeriksaan integritas/kesehatan DB startup setelah server mulai menerima permintaan (melalui setImmediate) alih-alih memblokir startup hingga selesai. Nonaktif secara default: startup memblokir pada pemeriksaan persis seperti sebelum #13717, sehingga database yang rusak tetap terdeteksi sebelum permintaan pertama dilayani. Aktif: startup langsung selesai dan pemeriksaan (sekarang dibatasi/dipaginasi dan, untuk DB berbasis file riil, diisolasi dalam child process yang dapat dibatalkan) berjalan tepat setelahnya."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "Perutean Katalog Terbitan OpenCode",
+        "description": "Biarkan model OpenCode Zen dan OpenCode Go tanpa endpoint registri eksplisit mengambil request surface-nya (Responses untuk @ai-sdk/openai, Messages untuk @ai-sdk/anthropic) dari katalog models.opencode.ai yang dipublikasikan, yang dibaca di latar belakang setiap 6 jam. Nonaktif secara default: endpoint berasal dari heuristik registri persis seperti sebelumnya dan katalog tidak pernah diambil."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Permintaan Otomatis: Bobot Kapabilitas yang Diselesaikan",
+        "description": "Biarkan permintaan auto/* (resolveModelOrError dan wrapper perutean otomatis) membangun pool kandidat dengan kapabilitas model yang telah diselesaikan (vision, reasoning, thinking) serta skor kualitas teramati, yang dibaca dalam satu proses massal seperti katalog /v1/models. Nonaktif secara default: bobot snapshot waktu-permintaan tetap persis seperti sebelumnya (kapabilitas diselesaikan sesuai permintaan dan tidak memengaruhi bobot). Aktif: sinyal-sinyal tersebut memengaruhi bobot snapshot, sehingga bobot kandidat, dan dengan demikian pemilihannya, dapat berubah."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Gerbang Transport Tanpa Kunci",
+        "description": "Tahan provider tanpa kunci (tanpa autentikasi) yang transportnya membutuhkan browser lokal (browserBacked) atau CLI terinstal secara lokal (isLocalCli) keluar dari pool kandidat auto/*, sehingga anggota yang macet tidak dapat membekukan permintaan auto hingga timeout per-target (#17036). Nonaktif secara default: setiap provider tanpa autentikasi dengan pemanggilan alat yang disimulasikan tetap berada di pool persis seperti sebelumnya. Panggilan langsung '<alias>'/'<model>' berfungsi dalam kedua kasus."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Ulangi Penalaran Inline",
+        "description": "Untuk model berpikir codebuddy-cn (keluarga DeepSeek-V4 / Kimi-K2 yang membutuhkan pengulangan penalaran), sisipkan setiap reasoning_content asisten yang diulang sebagai blok '<thought>' yang terlihat di depan konten pesan, sehingga bertahan melintasi gateway yang membuang field reasoning_content (#13632). Nonaktif secara default: permintaan codebuddy-cn dikirim tanpa perubahan; field reasoning_content itu sendiri selalu dipertahankan."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Penghentian Keamanan Penyedia: Terminal",
+        "description": "Pertahankan penghentian keamanan penyedia yang eksplisit (misalignment_policy_violation, content_policy_violation, atau penolakan lawas persis 'blocked by our safety systems' yang berlabel provider_safety_rejection) sebagai penolakan terminal berlingkup permintaan: kodenya dipertahankan melalui error HTTP, Responses, WebSocket, dan completed-stream, serta combo akan berhenti di situ alih-alih mencoba target lain, membatalkan sibling yang telah diterima (#17049). Nonaktif secara default: penanganan error ini tetap seperti yang ada dan perutean combo tidak berubah."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Kesehatan Kredensial: Uji Ulang Koneksi yang Dinonaktifkan Otomatis",
+        "description": "Izinkan pemindaian kesehatan kredensial menguji ulang koneksi yang dinonaktifkan sendiri oleh gateway (ditandai autoDisabledAt; paling banyak sekali per 6 jam untuk tiap koneksi dan 5 per pemindaian) dan mengaktifkan kembali koneksi ketika uji ulangnya lolos (#16190). Nonaktif secara default: koneksi yang dinonaktifkan tetap mati hingga operator mengaktifkan kembali atau menguji ulangnya, persis seperti sebelumnya. Koneksi yang dinonaktifkan oleh operator dan koneksi yang dimatikan setelah pemblokiran permanen tidak akan pernah diuji ulang."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Gerbang Kredensial: Hanya Diagnosis Autentikasi",
+        "description": "Persempit gerbang kredensial combo sehingga probe kredensial gagal yang tersimpan di cache hanya memblokir koneksi apabila diagnosisnya membuktikan kredensial tidak valid (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Kegagalan yang tidak konklusif (timeout, rate limit, pemadaman layanan, probe yang tidak didukung, dan error scheduler tanpa tipe) kemudian dianggap sebagai tidak diketahui dan koneksi tetap menerima lalu lintas. Nonaktif secara default: setiap error probe yang tersimpan di cache memblokir koneksi selama TTL cache (5 menit)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: Berhenti saat Penolakan Kebijakan Konten",
+        "description": "Ketika target combo merespons dengan penolakan kebijakan konten yang persis (kode atau jenis cyber_policy / content_policy_violation), hentikan combo dan kembalikan penolakan tersebut meskipun target yang tersisa adalah model yang berbeda, alih-alih beralih ke target berikutnya. Nonaktif secara default: penolakan tersebut tidak pernah menerapkan cooldown pada akun atau memicu breaker penyedia, dan combo beralih ke target berikutnya persis seperti sebelumnya."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Coba Ulang Cooldown: Lewati Penolakan 403/410",
+        "description": "Ketika semua akun sedang dalam masa cooldown dan cooldown yang selesai lebih awal disebabkan oleh 403 (akses ditolak) atau 410 (hilang), segera kembalikan penolakan tersebut alih-alih menunggu masa cooldown selesai dan mengirim ulang permintaan; kuota 403 connection-scoped agentrouter yang diperbarui kemudian disimpan dengan errorCode 429 agar tetap dapat dicoba ulang. Nonaktif secara default: hanya 401 yang melewati waktu tunggu, dan setiap penolakan disimpan dengan status saat diterima."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Kebijakan Anggaran Penggunaan Tanpa Harga",
+        "description": "Bagaimana batas USD harian/mingguan per-kunci memperlakukan penggunaan yang berhasil apabila penyedia/modelnya tidak memiliki baris harga. fail_closed (bawaan) menandai jendela sebagai terlampaui, sehingga biaya yang tidak diketahui tidak pernah bisa melewati batas keras. count_as_zero menghitung penggunaan itu sebagai $0 dan terus menegakkan pengeluaran yang diberi harga. Model tanpa harga tetap ditampilkan di halaman utama dasbor dalam kedua kasus."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "Latensi",
     "quota": "Kuota",
     "rangeWindow": "Jendela {range}",
+    "timeRange": "Rentang waktu",
     "runtimeHealthBlend": "kombinasi runtime/kesehatan",
     "averageResponseTime": "waktu respons rata-rata",
     "worstQuota": "Kuota terburuk",
@@ -13923,7 +14500,11 @@
       "ok": "Umumnya permisif"
     },
     "allProviders": "Semua penyedia",
-    "noApiKeyRequired": "Tidak diperlukan kunci API"
+    "noApiKeyRequired": "Tidak diperlukan kunci API",
+    "searchPlaceholder": "Cari model, provider…",
+    "searchAria": "Cari model gratis",
+    "filterProviderAria": "Filter berdasarkan provider",
+    "keylessOnly": "Hanya tanpa kunci"
   },
   "providerHealthAutopilot": {
     "title": "Autopilot Kesehatan Penyedia",
@@ -13994,7 +14575,11 @@
     "learnMore": "Pelajari lebih lanjut",
     "changelogLoadFailed": "Tidak dapat memuat log perubahan. Silakan coba lagi nanti.",
     "retry": "Coba lagi",
-    "viewFullHistory": "Lihat riwayat lengkap di GitHub"
+    "viewFullHistory": "Lihat riwayat lengkap di GitHub",
+    "title": "Berita & log perubahan",
+    "description": "Pengumuman dari tim OmniRoute dan catatan rilis terbaru",
+    "viewLabel": "Lihat",
+    "loadingNews": "Memuat pengumuman..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "Status Pemutus Sirkuit Penyedia",
       "lastUpdate": "Pembaruan terakhir: {timestamp}",
       "uptimeMinutes": "{minutes} mnt",
-      "uptimeHoursMinutes": "{hours}j {minutes}m"
+      "uptimeHoursMinutes": "{hours}j {minutes}m",
+      "breakerClosed": "Tertutup",
+      "breakerNotClosed": "Terbuka atau setengah terbuka"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "Detail Pemeliharaan",
         "secondaryAction": "Status Sistem"
       }
+    },
+    "miniapp": {
+      "askAnything": "Tanyakan apa saja…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "Alat MCP",
     "scope": "Cakupan",
-    "apiKey": "Kunci API"
+    "apiKey": "Kunci API",
+    "visibleCount": "{visible} terlihat / total {total}",
+    "modeLabel": "Mode tampilan",
+    "jumpToNow": "Lompat ke waktu saat ini, garis NOW diatur ulang ke posisi {position}%",
+    "laneReuse": "Penggunaan ulang jalur",
+    "laneReuseLabel": "Jendela penggunaan ulang jalur (menit)",
+    "laneReuseHint": "Permintaan yang memiliki ID percakapan yang sama tetap berada di baris linimasa yang sama selama jeda di antaranya kurang dari jumlah menit ini.",
+    "laneReuseUnit": "mnt",
+    "autoRefresh": "Penyegaran otomatis",
+    "autoRefreshLabel": "Interval penyegaran otomatis (detik)",
+    "autoRefreshHint": "Seberapa sering linimasa mengambil ulang daftar permintaan dari server.",
+    "autoRefreshUnit": "dtk",
+    "zoomOut": "Perkecil",
+    "zoomIn": "Perbesar"
   },
   "metadata": {
     "compressionTitle": "Kompresi",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "Tutup"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Nonaktifkan pembuatan varian tingkat pemikiran (misalnya -low, -medium, -high) dalam katalog /v1/models.",
+  "teamCosts": {
+    "title": "Biaya tim",
+    "subtitle": "Kelola anggaran lunak bersama dan perkiraan biaya katalog.",
+    "refresh": "Segarkan",
+    "create": "Buat tim",
+    "edit": "Edit tim",
+    "archive": "Arsipkan",
+    "selectTeam": "Tim",
+    "searchTeams": "Cari tim",
+    "statusFilter": "Status tim",
+    "active": "Aktif",
+    "archived": "Diarsipkan · hanya baca",
+    "allTeams": "Semua tim",
+    "noTeams": "Tidak ada tim yang cocok.",
+    "selectHint": "Buat atau pilih tim untuk melihat biaya.",
+    "loading": "Memuat biaya tim…",
+    "budgetTitle": "Anggaran lunak saat ini",
+    "budgetSubtitle": "Penggunaan berhasil yang tercatat · jendela bergulir · tidak bergantung pada tanggal laporan",
+    "archivedBudget": "Diarsipkan: penerapan anggaran tidak aktif. Laporan historis tetap tersedia.",
+    "unlimited": "Tanpa batas — belum ada anggaran lunak bersama yang dikonfigurasi.",
+    "budgetUnavailable": "Status anggaran tidak tersedia. Segarkan untuk mencoba lagi.",
+    "used": "Penggunaan berhasil",
+    "maximum": "Maksimum anggaran",
+    "remaining": "Sisa yang diketahui",
+    "resets": "Diatur ulang",
+    "unpricedBudget": "Sebagian penggunaan berhasil memiliki harga yang tidak diketahui. Jumlah yang diketahui tidak lengkap; penerapan anggaran menganggap jendela ini terlampaui.",
+    "overBudget": "Anggaran tercapai atau terlampaui · {amount} lebih",
+    "reportTitle": "Laporan penggunaan",
+    "reportSubtitle": "Semua percobaan · perkiraan katalog dalam USD, bukan faktur · tanggal UTC penuh",
+    "reportPeriod": "Periode laporan",
+    "day1": "1 hari",
+    "day7": "7 hari",
+    "day30": "30 hari",
+    "allTime": "Semua waktu",
+    "reportSpend": "Perkiraan pengeluaran laporan",
+    "requests": "Permintaan",
+    "assignedKeys": "Kunci yang ditetapkan",
+    "unpricedReport": "Laporan ini berisi harga yang tidak diketahui. Perkiraan pengeluaran tidak lengkap.",
+    "breakdown": "Biaya per kunci API",
+    "noUsage": "Tidak ada penggunaan pada periode laporan ini.",
+    "keyName": "Nama kunci API",
+    "tokens": "Token input + output",
+    "unnamedKey": "Kunci tanpa nama atau terhapus",
+    "unpriced": "Harga tidak diketahui",
+    "members": "Keanggotaan",
+    "memberSubtitle": "Mengubah keanggotaan menjaga pengeluaran historis tetap pada tim asalnya.",
+    "searchKeys": "Cari kunci atau pemilik saat ini",
+    "chooseKey": "Pilih kunci API",
+    "unassigned": "Belum ditetapkan",
+    "ownership": "Tim penagihan saat ini: {team}",
+    "assign": "Tetapkan",
+    "remove": "Hapus",
+    "noMembers": "Tidak ada anggota saat ini. Penggunaan historis masih dapat dihitung ke anggaran.",
+    "assignedAt": "Ditetapkan {date} (UTC)",
+    "name": "Nama tim",
+    "description": "Deskripsi",
+    "enableBudget": "Aktifkan anggaran lunak bersama",
+    "amount": "Jumlah anggaran (USD)",
+    "duration": "Jendela anggaran bergulir",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "confirm": "Konfirmasi",
+    "transferTitle": "Konfirmasi pemindahan kunci",
+    "transferMessage": "Pindahkan kunci ini dari “{source}” ke “{destination}”? Pengeluaran historis tetap pada tim asal.",
+    "removeTitle": "Hapus penetapan kunci",
+    "removeMessage": "Hapus kunci ini dari “{team}”? Pengeluaran historis tetap berada di tim ini.",
+    "archiveTitle": "Arsipkan tim",
+    "archiveMessage": "Arsipkan “{team}”? Semua pengikatan saat ini ditutup dan penerapan anggaran berhenti. Laporan historis tetap tersedia.",
+    "invalidName": "Masukkan nama (1–200 karakter) dan deskripsi maksimal 2.000 karakter.",
+    "invalidAmount": "Masukkan jumlah anggaran terbatas yang lebih besar dari nol.",
+    "unauthorized": "Masuk ke dasbor manajemen untuk melanjutkan.",
+    "forbidden": "Anda tidak memiliki izin untuk mengelola tim. Masukan Anda dipertahankan.",
+    "notFound": "Tim atau penetapan ini sudah tidak ada.",
+    "conflict": "Penetapan atau tim telah berubah. Segarkan dan konfirmasi kepemilikan saat ini sebelum mencoba lagi.",
+    "failed": "Permintaan gagal. Masukan Anda dipertahankan; silakan coba lagi.",
+    "partialBudget": "Beberapa bucket harian yang disimpan tumpang tindih dengan batas jendela dan tidak dapat dibagi secara tepat. Pengeluaran yang ditampilkan tidak lengkap; sisa jatah tidak tersedia. Kebijakan anggaran lunak yang ada tidak berubah."
+  },
   "connectionTest": {
     "title": "Pesan uji",
     "description": "Kirim satu permintaan nyata melalui akun ini. Tindakan ini menggunakan sedikit kuota dan dapat memulai periode penggunaan, tergantung pada penyedia.",
@@ -15073,5 +15753,118 @@
     "importButton": "Impor",
     "importFailed": "Impor gagal.",
     "importSuccess": "{connections} akun dan {nodes} node penyedia diimpor; {skipped} dilewati."
+  },
+  "conversations": {
+    "title": "Percakapan",
+    "countSummary": "{total, plural, one {# percakapan} other {# percakapan}} dengan 2+ giliran",
+    "autoRefreshTitle": "Seberapa sering daftar ini mengambil ulang data dari server.",
+    "autoRefresh": "Muat ulang otomatis",
+    "loading": "Memuat percakapan...",
+    "colConversation": "Percakapan",
+    "colTurns": "Giliran",
+    "colContinuation": "Lanjutan",
+    "colLastModel": "Model Terakhir",
+    "colProvider": "Provider",
+    "colStatus": "Status",
+    "colLastSeen": "Terakhir Dilihat",
+    "drawerTitle": "Percakapan",
+    "prevConversation": "Percakapan sebelumnya",
+    "nextConversation": "Percakapan berikutnya",
+    "gotoLatestRequest": "Ke permintaan terbaru",
+    "goToBottom": "Ke bawah",
+    "statusInProgress": "Sedang berlangsung",
+    "continuationGenuineTitle": "Giliran terbaru menggunakan previous_response_id dan telah teresolusi di sisi server",
+    "continuationBadge": "lanjutan",
+    "stalledTitle": "Giliran terbaru tidak berakhir dengan stop dan tidak ada yang dilanjutkan selama 5+ menit",
+    "stalledBadge": "macet",
+    "noTurns": "Tidak ada giliran yang tercatat untuk percakapan ini."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Mulai dari posisi saat ini (lewati log yang ada)",
+    "pageTitle": "Ekspor log",
+    "pageSubtitle": "Kirimkan terus catatan panggilan dari tab Log ke penyimpanan analitik eksternal.",
+    "addDestination": "Tambahkan tujuan",
+    "scheduleTitle": "Jadwal",
+    "cronLabel": "Cron",
+    "notScheduled": "tidak dijadwalkan",
+    "lastScheduledRun": "Eksekusi terakhir yang dijadwalkan",
+    "lastRunSummary": "{startedAt} — {status}, {rows} baris",
+    "never": "tidak pernah",
+    "highWaterMark": "Tanda batas tertinggi log panggilan",
+    "rowPrefix": "baris {id}",
+    "noDestinations": "Tidak ada tujuan ekspor",
+    "noDestinationsHint": "Tambahkan tujuan untuk mulai mengirim log panggilan sesuai jadwal jam per jam.",
+    "errLoadStatus": "Gagal memuat status ekspor",
+    "errSaveDestination": "Gagal menyimpan tujuan",
+    "msgDestinationSaved": "Tujuan disimpan.",
+    "errConnectionTest": "Tes koneksi gagal",
+    "msgRunInFlight": "Esekusi untuk tujuan ini sedang berlangsung; tidak ada yang dikirim dua kali.",
+    "errExportRun": "Esekusi ekspor gagal",
+    "errUpdateDestination": "Gagal memperbarui tujuan",
+    "errDeleteDestination": "Gagal menghapus tujuan",
+    "deleteTitle": "Hapus tujuan",
+    "deleteConfirm": "Hapus \"{name}\"? Kursor ekspornya juga dihapus, jadi jika menambahkan ulang akan dimulai dari log pemanggilan yang paling lama yang disimpan.",
+    "statusDisabled": "Nonaktif",
+    "statusFailing": "Gagal",
+    "statusHealthy": "Sehat",
+    "statusNotRunYet": "Belum dijalankan",
+    "typeNotInstalled": "Tipe tidak terpasang",
+    "metaLine": "Jalankan terakhir {lastRun} · diekspor {exported} baris · {pending} tertunda · kursor {cursor}",
+    "btnTest": "Uji",
+    "btnRunNow": "Jalankan sekarang",
+    "btnDisable": "Nonaktifkan",
+    "btnEnable": "Aktifkan",
+    "btnEdit": "Edit",
+    "btnDelete": "Hapus"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "Akun CLIProxyAPI",
+    "cardSubtitle": "Status read-only dari API manajemen terautentikasi",
+    "btnRefresh": "Muat ulang",
+    "listAria": "Kesehatan akun CLIProxyAPI",
+    "noAccounts": "Tidak ditemukan akun CLIProxyAPI.",
+    "loading": "Memuat kesehatan akun…",
+    "stateReady": "Kesehatan akun",
+    "stateDisabled": "CLIProxyAPI belum diinstal",
+    "stateMissingKey": "Kunci manajemen belum dikonfigurasikan",
+    "stateUnreachable": "API manajemen tidak dapat dihubungi",
+    "stateUnauthorized": "Kunci manajemen ditolak",
+    "stateUnsupported": "Versi CLIProxyAPI ini tidak mengekspos kesehatan akun",
+    "stateInvalidResponse": "API manajemen mengembalikan respons yang tidak didukung"
+  },
+  "darioPanel": {
+    "title": "Akun Claude",
+    "description": "Autentikasi Dario dengan langganan Claude Pro/Max Anda. Lalu lintas akan ditagihkan ke pool langganan Anda. Minimal satu akun diperlukan sebelum Dario dapat merutekan permintaan (sebelumnya /health melapor degraded).",
+    "noAccounts": "Belum ada akun yang dikonfigurasi.",
+    "importTitle": "Impor dari OmniRoute",
+    "importDescription": "Gunakan ulang token OAuth dari koneksi Claude OmniRoute yang ada alih-alih masuk ulang — langkah persetujuan di browser sepenuhnya diabaikan.",
+    "importPendingTooltip": "Akan aktif setelah koneksi Claude ada di OmniRoute.",
+    "btnImport": "Impor",
+    "btnImporting": "Mengimpor…",
+    "aliasPlaceholder": "alias (opsional)",
+    "btnStartLogin": "Mulai Masuk",
+    "btnStarting": "Memulai…",
+    "btnCompleteLogin": "Selesaikan Masuk",
+    "btnCompleting": "Menyelesaikan…",
+    "codePlaceholder": "code#state atau code saja",
+    "noticeImported": "Diimpor sebagai akun \"{alias}\" — Dario di-restart untuk mengambilnya.",
+    "noticeAdded": "Akun \"{alias}\" ditambahkan.",
+    "expiresInHours": "berlaku hingga ±{hours}j",
+    "expiresInMinutes": "berlaku hingga ±{minutes}m",
+    "expiresAt": "berlaku {date}",
+    "scopes": "{count, plural, one {# cakupan} other {# cakupan}}",
+    "btnRemove": "Hapus",
+    "btnRefresh": "Segarkan",
+    "loginStep1": "1. Buka URL ini di browser Anda dan setujui akses untuk akun <mono>{alias}</mono>:",
+    "pendingExpires": "Masa berlaku login tersisa {time}",
+    "loginStep2": "2. Tempelkan kode yang ditampilkan oleh Anthropic:"
+  },
+  "miniapp": {
+    "title": "Aplikasi Mini OmniRoute",
+    "errTelegramOnly": "Halaman ini harus dibuka di dalam Aplikasi Mini Telegram.",
+    "greeting": "👋 Halo {name}! Kirim pesan untuk mengobrol melalui gerbang OmniRoute Anda.",
+    "greetingFallbackName": "di sana",
+    "errNoReply": "⚠️ Tidak ada respons dari gerbang.",
+    "btnSend": "Kirim"
   }
 }

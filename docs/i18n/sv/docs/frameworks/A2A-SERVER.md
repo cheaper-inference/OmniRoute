@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+För `smart-routing` är `metadata.combo` en uttrycklig åsidosättning av
+`metadata.model` för gateway-begäran. Den skickas som den faktiska `model`,
+inte som ett ignorerat `x-combo`-JSON-fält. Gatewayens normala API-nyckel och
+behörighetskontroll per mål gäller fortfarande. En ogiltig eller tom kombination avvisas.
+
+Resultatet visar `requested_combo` (anroparens avsikt), `dispatched_model`
+(den faktiska gateway-begäran), `response_model` (gateway-svaret) och
+`confirmed_combo`. Det sista fältet är `null` om inte gatewayen uttryckligen
+identifierar en kombination. A2A-beslutsloggar tillskriver endast körningen till en
+bekräftad kombination och behåller en obekräftad begäran som `requestedCombo`.
+
 **Svar:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Hämta uppgiftsstatus
+### `tasks/get` — Fråga efter uppgiftsstatus
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Tillgängliga färdigheter
 
-OmniRoute exponerar 6 A2A-färdigheter som är kopplade i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Varje färdighetsmodul finns i `src/lib/a2a/skills/`.
+OmniRoute avslöjar 6 A2A färdigheter kopplade i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Varje färdighetsmodul finns i `src/lib/a2a/skills/`.
 
-| Färdighet          | ID                   | Beskrivning                                                                                                                                               | Taggar                        | Exempel                                        |
-| :----------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :--------------------------------------------- |
-| Smart routning     | `smart-routing`      | Dirigerar en prompt via den optimala leverantören/kombinationen med hjälp av OmniRoutes kombinationsmotor och poängsättning                               | routning, leverantörer        | "Dirigera denna prompt via den bästa modellen" |
-| Kvothantering      | `quota-management`   | Rapporterar kvotstatus per leverantör och hjälper anropare att avgöra när de ska begränsa eller byta                                                      | kvot, leverantörer            | "Kontrollera kvoten för anthropic"             |
-| Leverantörssökning | `provider-discovery` | Listar installerade leverantörer med funktioner, kostnadsfria nivåer och OAuth-status                                                                     | leverantörer, sökning         | "Vilka leverantörer är tillgängliga?"          |
-| Kostnadsanalys     | `cost-analysis`      | Uppskattar kostnaden för en begäran/konversation utifrån katalogen och den senaste användningen                                                           | kostnad, användning           | "Uppskatta kostnaden för denna konversation"   |
-| Hälsorapport       | `health-report`      | Sammanställer status för kretsbrytare, nedkylningsperioder och spärrar per leverantör                                                                     | hälsa, motståndskraft         | "Visa hälsostatus för alla leverantörer"       |
-| Lista funktioner   | `list-capabilities`  | Returnerar hela katalogen med 45 agentfärdigheter (23 API + 21 CLI + 1 konfiguration) som en markdown-tabell med råa SKILL.md-URL:er för kontextinjektion | katalog, sökning, färdigheter | "Lista alla funktioner i OmniRoute"            |
+| Skicklighet        | ID                   | Beskrivning                                                                                                                                          | Taggar                         | Exempel                                          |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :----------------------------------------------- |
+| Smart routing      | `smart-routing`      | Leder en prompt genom den optimala provider/combo med hjälp av OmniRoute kombinationsmotor + poäng                                                   | routing, leverantörer          | "Dirigera denna prompt via den bästa modellen"   |
+| Kvothantering      | `quota-management`   | Rapporterar kvotstatus per leverantör, hjälper uppringare att bestämma när de ska throttle/switch                                                    | kvot, leverantörer             | "Kontrollera kvoten för antropisk"               |
+| Provider Discovery | `provider-discovery` | Listar installerade leverantörer med funktioner, fria flaggor, OAuth status                                                                          | leverantörer, upptäckt         | "Vilka leverantörer är tillgängliga?"            |
+| Kostnadsanalys     | `cost-analysis`      | Uppskattar kostnaden för en request/conversation givet katalogen + senaste användning                                                                | kostnad, användning            | "Uppskatta kostnaden för den här konversationen" |
+| Hälsorapport       | `health-report`      | Aggregerat strömbrytare, nedkylning, låsningstillstånd per leverantör                                                                                | hälsa, motståndskraft          | "Visa hälsostatus för alla leverantörer"         |
+| Lista funktioner   | `list-capabilities`  | Returnerar hela Agent Skills-katalogen med 45 poster (23 API + 21 CLI + 1 config) som en nedräkningstabell med rå SKILL.md URLs för kontextinjektion | katalog, upptäckt, färdigheter | "Lista alla OmniRoute -funktioner"               |
 
-> Agentkortet bör hållas synkroniserat med den aktuella katalogen med 374 leverantörer. Antalet leverantörer och metadata om kostnadsfri användning/ingen autentisering hämtas från körningsregistret.
+> Agentkortet ska hållas i linje med 377-leverantörskatalogen. leverantörsantal och free/no-auth metadata hämtas från runtime-registret.
 
-### Detaljer om färdigheten `list-capabilities`
+### `list-capabilities` Skicklighetsdetalj
 
-Färdigheten `list-capabilities` är särskilt användbar för externa agenter som behöver upptäcka vad OmniRoute exponerar innan de skickar API-anrop. Den returnerar en strukturerad markdown-tabellartefakt:
+`list-capabilities` färdigheten är särskilt användbar för externa agenter som behöver upptäcka vad OmniRoute avslöjar innan de skickar API -anrop. Det returnerar en strukturerad markdown-tabellartefakt:
 
 ```
-| ID | Namn | Kategori | Område | Slutpunkter/kommandon | Rå URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentisering och sessioner | api | autentisering | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Varje rad innehåller kolumnen `rawUrl` så att agenter omedelbart kan hämta hela SKILL.md-filen. Fältet `metadata.totalSkills` återspeglar katalogens storlek (45 i dag). Implementering: `src/lib/a2a/skills/listCapabilities.ts`. Se även [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Varje rad inkluderar `rawUrl` kolumnen så att agenter omedelbart kan hämta hela SKILL.md. `metadata.totalSkills` -fältet speglar katalogstorleken (45 idag). Implementering: `src/lib/a2a/skills/listCapabilities.ts`. Se även [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -195,9 +199,9 @@ JSON-RPC-slutpunkten `/a2a` är den kanoniska startpunkten för A2A. REST-slutpu
 
 ## Lägga till en ny färdighet
 
-1. **Skapa färdighetsfilen:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Skapa en färdighetsfil:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportera en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Följ strukturen för befintliga färdigheter såsom `smartRouting.ts`.
+   Exportera en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Följ strukturen för befintliga färdigheter, såsom `smartRouting.ts`.
 
 2. **Registrera hanteraren:** lägg till en post i `A2A_SKILL_HANDLERS` i `src/lib/a2a/taskExecution.ts`:
 
@@ -211,15 +215,15 @@ JSON-RPC-slutpunkten `/a2a` är den kanoniska startpunkten för A2A. REST-slutpu
    };
    ```
 
-3. **Exponera i agentkortet:** lägg till följande i arrayen `skills` i `src/app/.well-known/agent.json/route.ts`:
+3. **Exponera i agentkortet:** lägg till följande i arrayen `skills` i `src/lib/a2a/agentCardMetadata.ts` (som delas av `/.well-known/agent.json` och `/.well-known/agent-card.json`):
 
    ```json
    {
      "id": "your-skill",
-     "name": "Din färdighet",
-     "description": "Kortfattad, avsiktsfokuserad beskrivning",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Exempel på anrop med naturligt språk"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
@@ -264,7 +268,7 @@ inskickad → pågående → slutförd
 
 ## Integrationsexempel
 
-### Python (requests)
+### Python (förfrågningar)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (hämta)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

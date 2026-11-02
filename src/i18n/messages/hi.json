@@ -25,8 +25,10 @@
     "confirm": "क्या आप निश्चित हैं?",
     "refresh": "ताज़ा करें",
     "close": "बंद करें",
+    "dialogTitleFallback": "संवाद",
     "previousPage": "पिछला पृष्ठ",
     "nextPage": "अगला पृष्ठ",
+    "pagination": "पृष्ठांकन",
     "capsLockOn": "Caps Lock चालू है",
     "dismissNotification": "सूचना खारिज करें",
     "toggleColumns": "कॉलम टॉगल करें",
@@ -182,6 +184,7 @@
     "combos": "कॉम्बो",
     "noModelsFound": "कोई मॉडल नहीं मिला",
     "clear": "साफ़ करें",
+    "clearFilters": "फ़िल्टर साफ़ करें",
     "done": "हो गया",
     "selectAll": "सभी चुनें",
     "unselectAll": "चयन हटाएँ",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {# बैच} other {# बैचों}}",
     "batchFilePreview": "पूर्वावलोकन",
     "batchFilePreviewTruncated": "पहले {shown} पंक्तियाँ दिखा रहे हैं ({total} कुल पंक्तियाँ)",
-    "batchFileDownloadFull": "पूर्ण फ़ाइल डाउनलोड करें"
+    "batchFileDownloadFull": "पूर्ण फ़ाइल डाउनलोड करें",
+    "tokensPageTitle": "टोकन",
+    "tokensPageDescription": "API कुंजियों के बीच टोकन भेजें, आमंत्रण कोड साझा करें और समुदाय सर्वर कनेक्ट करें।",
+    "tokensServerUrlLabel": "सर्वर URL"
   },
   "disabled": "अक्षम",
   "featureFlagOmnirouteEmergencyFallbackDescription": "बजट समाप्त हो चुके अनुरोधों को आपातकालीन निःशुल्क फ़ॉलबैक प्रदाता/मॉडल पर रूट करें।",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "प्रॉक्सी सर्वर बंद कर दिया गया है या पुनः प्रारंभ हो रहा है।",
     "expandSidebar": "साइडबार का विस्तार करें",
     "collapseSidebar": "साइडबार को संक्षिप्त करें",
-    "themes": "थीम",
-    "presetColors": "लोकप्रिय रंग",
     "createTheme": "थीम बनाएँ",
     "chooseColor": "एक रंग चुनें",
-    "themeCoral": "कोरल",
-    "themeBlue": "नीला",
-    "themeRed": "लाल",
-    "themeGreen": "हरा",
-    "themeViolet": "बैंगनी",
-    "themeOrange": "नारंगी",
-    "themeCyan": "सियान",
     "cliToolsShort": "उपकरण",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "थीम सिस्टम",
     "whitelabelingDesc": "व्हाइटलेबलिंग का विवरण",
     "switchThemes": "थीम बदलें",
-    "themeAccentDesc": "थीम एक्सेंट का विवरण",
     "uploadFavicon": "फ़ेविकॉन अपलोड करें",
     "themeDark": "डार्क थीम",
     "customLogoDesc": "कस्टम लोगो का विवरण",
     "sidebarVisibilityToggle": "साइडबार दृश्यता टॉगल",
-    "themeAccent": "थीम एक्सेंट",
     "resetFavicon": "फ़ेविकॉन रीसेट करें",
     "whitelabeling": "व्हाइटलेबलिंग",
     "darkMode": "डार्क मोड",
@@ -1122,10 +1117,8 @@
     "customLogo": "कस्टम लोगो",
     "appearance": "दिखावट",
     "themeSelectionAria": "थीम चयन Aria",
-    "themeCreate": "थीम बनाएँ",
     "customFaviconDesc": "कस्टम फ़ेविकॉन का विवरण",
     "logoPreview": "लोगो पूर्वावलोकन",
-    "themeCustom": "कस्टम थीम",
     "hideHealthLogsDesc": "हेल्थ लॉग छिपाने का विवरण",
     "faviconPreview": "फ़ेविकॉन पूर्वावलोकन",
     "changelog": "परिवर्तन-सूची",
@@ -1352,7 +1345,9 @@
       "open": "खोलें",
       "close": "बंद करें"
     },
-    "noResults": "कोई परिणाम नहीं"
+    "noResults": "कोई परिणाम नहीं",
+    "costsTeams": "टीमें",
+    "costsTeamsSubtitle": "टीम लागत केंद्र"
   },
   "webhooks": {
     "title": "वेबहुक",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 या @channelname",
       "chatIdHint": "चैट/चैनल का यूनीक संख्यात्मक पहचानकर्ता या सार्वजनिक यूज़रनेम।",
       "tutorial": "Telegram वेबहुक कैसे कॉन्फ़िगर करें:"
-    }
+    },
+    "copy": "कॉपी करें",
+    "copied": "कॉपी हो गया!",
+    "expandDetails": "विवरण दिखाएँ",
+    "collapseDetails": "विवरण छिपाएँ"
   },
   "compliance": {
     "auditTitle": "लेखापरीक्षा",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "कॉल (24घंटे)",
     "mcpMetricSuccessRate": "सफलता दर",
     "mcpMetricAvgDuration": "औसत अवधि",
-    "mcpMetricTopTool": "शीर्ष उपकरण"
-  },
-  "themesPage": {
-    "title": "थीम",
-    "description": "कोई पूर्वनिर्धारित थीम चुनें या एक रंग से अपनी थीम बनाएँ",
-    "presetColors": "लोकप्रिय रंग",
-    "customTheme": "कस्टम थीम",
-    "customThemeDesc": "थीम बनाएँ पर क्लिक करें और एक रंग चुनें",
-    "createTheme": "थीम बनाएँ",
-    "activePreset": "सक्रिय थीम"
+    "mcpMetricTopTool": "शीर्ष उपकरण",
+    "dismissError": "त्रुटि हटाएँ"
   },
   "header": {
     "logout": "लॉगआउट करें",
     "quickNavigation": "त्वरित नेविगेशन",
     "quickNavigationTitle": "त्वरित नेविगेशन (⌘K / Ctrl+K)",
     "openQuickNavigation": "त्वरित नेविगेशन खोलें",
+    "openMenu": "मेनू खोलें",
+    "products": "Keak उत्पाद",
     "switchToLightMode": "लाइट मोड पर स्विच करें",
     "switchToDarkMode": "डार्क मोड पर स्विच करें",
     "language": "भाषा",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "एंथ्रोपिक संगत",
     "media": "मीडिया",
     "mediaDescription": "इमेज, वीडियो और संगीत जनरेट करें",
-    "themes": "थीम",
-    "themesDescription": "पूरे डैशबोर्ड पैनल के लिए एक रंग थीम चुनें",
     "costsDescription": "सभी प्रदाताओं के लिए खर्च ट्रैक करें, रुझानों का विश्लेषण करें और अपना AI बजट प्रबंधित करें",
     "cacheDescription": "प्रदाता के प्रॉम्प्ट कैश की दक्षता और स्थानीय सिमेंटिक प्रतिक्रिया के पुनः उपयोग की निगरानी करें।",
     "limitsDescription": "प्रत्येक API कुंजी और प्रदाता के लिए दर सीमाएँ और कोटा कॉन्फ़िगर करें",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "उन्नत पेलोड नियम, अनुरोध सीमाएँ और प्रॉक्सी API सेटिंग्स",
     "mitmProxyDescription": "ट्रैफ़िक निरीक्षण और डीबगिंग के लिए MITM प्रॉक्सी सेटिंग्स कॉन्फ़िगर करें",
     "oneProxyDescription": "उन्नत प्रॉक्सी चेनिंग के लिए 1Proxy सेटिंग्स कॉन्फ़िगर करें",
-    "omniSkillsDescription": "स्वचालित प्रॉम्प्ट और टूल निष्पादन के लिए सैंडबॉक्स स्किल्स इंस्टॉल और प्रबंधित करें"
+    "omniSkillsDescription": "स्वचालित प्रॉम्प्ट और टूल निष्पादन के लिए सैंडबॉक्स स्किल्स इंस्टॉल और प्रबंधित करें",
+    "teamsDescription": "टीम लागत अनुमान और साझा सॉफ्ट बजट"
   },
   "cloudSyncStatus": {
     "synced": "सिंक किया गया",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "अपना एंडपॉइंट कॉपी करें",
     "readinessStep4": "एक परीक्षण अनुरोध भेजें",
     "readinessContinue": "सेटअप जारी रखें",
-    "readinessDismiss": "अभी के लिए बंद करें"
+    "readinessDismiss": "अभी के लिए बंद करें",
+    "unpricedUsageTitle": "{count, plural, one {# मॉडल} other {# मॉडल}} जिनका हाल ही में उपयोग हुआ लेकिन कोई निर्धारित कीमत कॉन्फ़िगर नहीं है",
+    "unpricedUsageFailClosed": "{keys, plural, one {# उपयोग सीमा वाली API कुंजी} other {# उपयोग सीमा वाली API कुंजियाँ}} ने पिछले 8 दिनों में इन मॉडलों का उपयोग किया। जब यह उपयोग किसी कुंजी की दैनिक या साप्ताहिक विंडो में आता है, तो कुंजी को कोटा से बाहर माना जाता है और उसके अनुरोध ब्लॉक कर दिए जाते हैं (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "यह उपयोग प्रति-कुंजी उपयोग सीमाओं के लिए $0 माना जाता है (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# अनुरोध} other {# अनुरोध}}, {keys, plural, one {# सीमित कुंजी} other {# सीमित कुंजियाँ}}",
+    "unpricedUsageMore": "…और {count} और",
+    "unpricedUsageConfigure": "मूल्य निर्धारण कॉन्फ़िगर करें",
+    "unpricedUsageDismiss": "खारिज करें"
   },
   "analytics": {
     "title": "विश्लेषिकी",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "केवल चयनित कनेक्शन",
     "selectAtLeastOneConnection": "कम-से-कम एक कनेक्शन चुनें या सभी कनेक्शन चुनें।",
     "allConnectionsDesc": "यह कुंजी किसी भी सक्रिय कनेक्शन का उपयोग कर सकती है।",
-    "restrictedToConnections": "{count, plural, one {# कनेक्शन} other {# कनेक्शनों}} तक सीमित।"
+    "restrictedToConnections": "{count, plural, one {# कनेक्शन} other {# कनेक्शनों}} तक सीमित।",
+    "preferredConnections": "पसंदीदा कनेक्शन",
+    "preferredConnectionsDesc": "प्रत्येक कुंजी के लिए प्राथमिकता क्रम। यदि कोई पसंदीदा कनेक्शन उपलब्ध नहीं है, तो रूटिंग अगले योग्य कनेक्शन पर चली जाती है।",
+    "preferredConnectionsNone": "कोई प्राथमिकता सेट नहीं है — डिफ़ॉल्ट रूटिंग रणनीति का उपयोग किया जाता है।",
+    "preferredConnectionsClear": "साफ़ करें",
+    "removeSelection": "{name} हटाएँ"
   },
   "auditLog": {
     "title": "ऑडिट लॉग",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Modality Bridge सेटिंग्स में Image→Text ब्रिज़ कॉन्फ़िगर करें",
     "sttBridgeCta": "Modality Bridge सेटिंग्स में Speech→Text ब्रिज कॉन्फ़िगर करें",
     "existingConnection": "मौजूदा कनेक्शन",
-    "openrouterSttDescription": "OpenRouter स्पीच-टू-टेक्स्ट मॉडल आपके कॉन्फ़िगर किए गए OpenRouter कनेक्शन का उपयोग करते हैं। कोई अलग क्रेडेंशियल की आवश्यकता नहीं है।"
+    "openrouterSttDescription": "OpenRouter स्पीच-टू-टेक्स्ट मॉडल आपके कॉन्फ़िगर किए गए OpenRouter कनेक्शन का उपयोग करते हैं। कोई अलग क्रेडेंशियल की आवश्यकता नहीं है।",
+    "modalityTabsAria": "मीडिया प्रकार",
+    "serviceKindsAria": "सेवा प्रकार"
   },
   "search": {
     "searchQuery": "खोज क्वेरी",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "खुला पंजा - मैनुअल कॉन्फ़िगरेशन",
     "clineManualConfiguration": "क्लाइन मैनुअल कॉन्फ़िगरेशन",
     "kiloManualConfiguration": "किलो कोड मैनुअल कॉन्फ़िगरेशन",
+    "piManualConfiguration": "पाई - मैनुअल कॉन्फ़िगरेशन",
+    "piConfigInvalidTitle": "Pi models.json अपठनीय है",
+    "piOmnirouteConfigured": "OmniRoute Pi कस्टम प्रदाता के रूप में कॉन्फ़िगर किया गया है",
+    "piModelHelp": "Pi कस्टम एंडपॉइंट्स — के लिए मॉडलों की स्वतः खोज नहीं करता है, आपके द्वारा चुना गया मॉडल स्पष्ट रूप से models.json में लिखा गया है।",
+    "piManualConfigTitle": "या ~/.pi/agent/models.json मैन्युअल रूप से संपादित करें",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "फिर Pi प्रारंभ करें और omniroute प्रदाता चुनें। संपूर्ण एजेंट निर्देशिका को स्थानांतरित करने के लिए PI_CODING_AGENT_DIR सेट करें।",
+    "piUnownedNote": "यह प्रविष्टि OmniRoute के बाहर जोड़ी गई थी (उदाहरण के लिए pi-gui के कस्टम एंडपॉइंट)। लगाओगे तो अपनाओगे; रीसेट केवल OmniRoute द्वारा लिखी गई प्रविष्टियों को हटाता है।",
     "whenToUseLabel": "कब उपयोग करें",
     "openToolDocs": "टूल दस्तावेज़ खोलें",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "जब आपको त्वरित कार्यों के लिए हल्के टर्मिनल-नेटिव एआई सहायक की आवश्यकता हो तो इसका उपयोग करें।",
       "hermes-agent": "इसका उपयोग तब करें जब आपको OmniRoute के माध्यम से रूट किए गए डिफ़ॉल्ट, डेलिगेशन, विज़न और सहायक मॉडल के साथ Hermes Agent (Nousresearch द्वारा) की आवश्यकता हो।",
+      "whycodes": "इसका उपयोग तब करें जब आप WhyCodes को OmniRoute की ओर निर्देशित एक बहुउद्देश्यीय स्वायत्त CLI एजेंट (TUI, नामित एजेंट, मेमोरी, swarm) के रूप में चाहते हों।",
       "custom": "कस्टम टूल कार्यान्वयन या सामान्य OpenAI-संगत कॉन्फ़िगरेशन के लिए उपयोग करें।"
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "कस्टम प्रदाता समर्थन के साथ xAI Grok Build TUI कोडिंग एजेंट",
       "droid": "फ़ैक्टरी Droid AI सहायक",
       "openclaw": "क्लॉ एआई असिस्टेंट खोलें",
+      "openclaude": "OpenAI-संगत प्रदाता समर्थन के साथ OpenClaude कोडिंग एजेंट CLI",
       "cline": "क्लाइन एआई कोडिंग सहायक सीएलआई",
       "kilo": "किलो कोड एआई असिस्टेंट सीएलआई",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "कस्टम प्रदाता समर्थन के साथ Warp AI टर्मिनल",
       "agent-deck": "Agent Deck मल्टी-एजेंट ऑर्केस्ट्रेटर",
       "5dive": "5dive — स्व-होस्टेड कोडिंग एजेंट्स का बेड़ा; एक auth प्रोफ़ाइल सभी को OmniRoute की ओर इंगित करती है",
+      "whycodes": "OpenAI-संगत base URL के साथ WhyCodes स्वायत्त CLI एजेंट",
       "zed": "Zed कोड एडिटर — OpenAI-संगत प्रदाता के माध्यम से बिल्ट-इन एजेंट"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "अज्ञात",
     "cliproxyapiUpdate": "अपडेट करें",
     "cliproxyapiUpdateAvailable": "अपडेट उपलब्ध: v{current} → v{latest}",
-    "cliproxyapiVersion": "संस्करण"
+    "cliproxyapiVersion": "संस्करण",
+    "piInstallTitle": "पाई कोडिंग एजेंट स्थापित करें",
+    "piInstallInstructions": "Pi CLI इंस्टॉल करें, फिर इसे OmniRoute से कनेक्ट करने के लिए यहां लौटें।",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "पाई चलाने वाली मशीन से पहुंच योग्य URL उपयोग करें। OpenAI-संगत /v1 समापन बिंदु स्वचालित रूप से जोड़ा जाता है।",
+    "piManualMergeHint": "केवल पूर्वावलोकन करें. इस providers.omniroute प्रविष्टि को models.json में मर्ज करें ताकि आपके अन्य प्रदाता और सेटिंग्स बरकरार रहें।",
+    "removeMapping": "मैपिंग हटाएँ",
+    "customUrl": "कस्टम URL",
+    "customEndpointAria": "कस्टम एंडपॉइंट",
+    "useDefaultKey": "OmniRoute की डिफ़ॉल्ट कुंजी का उपयोग करें",
+    "mainModelAria": "मुख्य मॉडल",
+    "manualConfigTitle": "ग्राक बिल्ड मैन्युअल कॉन्फ़िग"
   },
   "modelCatalog": {
     "title": "मॉडल और कॉम्बो",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "उदा. 10",
     "testSelected": "चयनित का परीक्षण करें ({count})",
     "testAllFiltered": "सभी फ़िल्टर किए गए का परीक्षण करें ({count})",
+    "visibility": "दृश्यता",
+    "allVisibility": "दृश्य और छिपे हुए",
+    "visibleOnly": "दृश्य",
+    "hiddenOnly": "छिपे हुए",
+    "visibleColumn": "दृश्य",
+    "hideModel": "/v1/models से {name} छिपाएं",
+    "showModel": "/v1/models में {name} दिखाएं",
+    "hiddenBadge": "छिपा हुआ",
+    "hideFiltered": "फ़िल्टर किए गए छिपाएं ({count})",
+    "showFiltered": "फ़िल्टर किए गए दिखाएं ({count})",
+    "visibilityCounts": "{visible} दृश्य · {hidden} छिपे हुए · कुल {total}",
+    "visibilityUpdateFailed": "मॉडल की दृश्यता अपडेट करने में विफल",
     "cancel": "रद्द करें",
     "clearResults": "परिणाम साफ़ करें",
     "testing": "परीक्षण जारी है...",
@@ -3397,16 +3438,53 @@
     "httpError": "अनुरोध HTTP {status} के साथ विफल रहा",
     "testFailedNoDetail": "बिना किसी त्रुटि संदेश के परीक्षण विफल रहा",
     "additionalCapabilities": "अतिरिक्त क्षमताएं: {list}",
-    "comboRefMember": "कॉम्बो → {name}"
+    "comboRefMember": "कॉम्बो → {name}",
+    "keyAccessButton": "API कुंजी एक्सेस",
+    "allowedInKeys": "इनमें अनुमत: {count, plural, one {# कुंजी} other {# कुंजियाँ}}",
+    "keysLoading": "API कुंजियाँ लोड हो रही हैं…",
+    "keysRetry": "कुंजियों को लोड करने का पुनः प्रयास करें",
+    "accessViaPattern": "{pattern} के माध्यम से",
+    "accessBlocked": "{pattern} द्वारा अवरोधित",
+    "editKeyAccess": "कुंजी एक्सेस संपादित करें",
+    "toggleKeyAccess": "{name} पर {item} की अनुमति दें",
+    "resultNetworkError": "असाइनमेंट विफल रहा",
+    "resultWouldEmptyModels": "इससे इस कुंजी के पास कोई अनुमत मॉडल नहीं बचेगा — इसके बजाय कुंजी एक्सेस को संपादित करें",
+    "resultWouldEmptyCombos": "इससे इस कुंजी के पास कोई अनुमत कॉम्बो नहीं बचेगा — इसके बजाय कुंजी एक्सेस को संपादित करें",
+    "keyUpdatePending": "{name} को अभी भी अपडेट किया जा रहा है। कुछ क्षणों में पुनः प्रयास करें।",
+    "assignToKeys": "API कुंजियों को असाइन करें…",
+    "assignApply": "परिवर्तन लागू करें",
+    "assignComplete": "API कुंजी एक्सेस अपडेट किया गया",
+    "assignFailed": "कुछ API कुंजी अपडेट विफल रहे",
+    "assignNoChanges": "किसी भी API कुंजी का एक्सेस नहीं बदला गया",
+    "selectedAccessItems": "चयनित आइटम: {count}",
+    "assignExcludedCombos": "{count, plural, one {# चयनित कॉम्बो पंक्ति एक मॉडल नहीं है और इसे यहाँ छोड़ दिया जाएगा} other {# चयनित कॉम्बो पंक्तियाँ मॉडल नहीं हैं और उन्हें यहाँ छोड़ दिया जाएगा}}। Combos टैब से कॉम्बो असाइन करें।",
+    "assignActionAdd": "जोड़ें",
+    "assignActionRemove": "हटाएं",
+    "searchKeys": "API कुंजियाँ खोजें",
+    "selectApiKey": "API कुंजी {name} चुनें",
+    "allModelsAccess": "सभी मॉडल",
+    "allCombosAccess": "सभी कॉम्बो",
+    "modelAccessCount": "मॉडल: {count}",
+    "comboAccessCount": "कॉम्बो: {count}",
+    "keyInactive": "निष्क्रिय",
+    "keyBanned": "प्रतिबंधित",
+    "keyRevoked": "निरस्त",
+    "switchRestrictedConfirm": "इस कुंजी को प्रतिबंधित एक्सेस पर स्विच करें: केवल चयनित आइटमों की अनुमति होगी",
+    "removeNoChangeHint": "यह कुंजी सभी चीज़ों की अनुमति देती है; चयनित आइटमों को हटाने से कोई बदलाव नहीं होगा",
+    "removeStaysAllowedHint": "{patterns} के माध्यम से इस कुंजी पर अभी भी अनुमत है",
+    "resultChanged": "परिवर्तित",
+    "resultUnchanged": "कोई बदलाव नहीं",
+    "resultSkipped": "छोड़ा गया",
+    "resultNeedsSwitch": "प्रतिबंधित पर स्विच करने की आवश्यकता है"
   },
   "combos": {
+    "title": "संयोजन",
+    "description": "भारित रूटिंग और फ़ॉलबैक समर्थन के साथ मॉडल कॉम्बो बनाएं",
+    "autoCatalogTitle": "ऑटो-रूटिंग कैटलॉग",
     "autoTosLoadError": "सेवा की शर्तों की नीति लोड नहीं हो सकी। इसे बदलने से पहले फिर कोशिश करें।",
     "autoTosSaveError": "सेवा की शर्तों की नीति सहेजी नहीं जा सकी। पिछली सेटिंग अभी भी दिखाई जा रही है। फिर कोशिश करें।",
     "autoTosIncludeLabel": "ToS: avoid चिह्नित प्रदाताओं को auto में शामिल करें",
     "autoTosDescription": "डिफ़ॉल्ट रूप से बंद है। सभी auto कॉम्बो पर लागू होता है, केवल एक खाते पर नहीं। प्रदाता जोड़ने से यह विकल्प चालू नहीं होता।",
-    "title": "संयोजन",
-    "description": "भारित रूटिंग और फ़ॉलबैक समर्थन के साथ मॉडल कॉम्बो बनाएं",
-    "autoCatalogTitle": "ऑटो-रूटिंग कैटलॉग",
     "autoCatalogTemplateCount": "{count} टेम्प्लेट",
     "autoCatalogDescription": "अंतर्निहित ऑटो/* कॉम्बो को कनेक्टेड प्रदाताओं से गतिशील रूप से हल किया गया। इनमें से किसी भी आईडी को मॉडल फ़ील्ड के रूप में उपयोग करें - किसी सेटअप की आवश्यकता नहीं है।",
     "autoCatalogExpand": "ऑटो-रूटिंग कैटलॉग का विस्तार करें",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "कॉम्बो अपडेट करने में त्रुटि",
     "errorDeleting": "कॉम्बो हटाने में त्रुटि",
     "testFailed": "परीक्षण अनुरोध विफल रहा",
+    "removeErrorModels": "{count} विफल मॉडल हटाएं",
+    "removingErrorModels": "हटाया जा रहा है…",
+    "errorModelsRemoved": "कॉम्बो से {count} विफल मॉडल हटाए गए",
+    "noErrorModelsFound": "इस कॉम्बो के अपने चरणों में कोई विफल मॉडल नहीं मिला",
+    "cannotRemoveAllModels": "कॉम्बो से सभी मॉडल नहीं हटाए जा सकते",
+    "removeErrorModelsConfirm": "“{name}” से {count} विफल मॉडल हटाएं? टाइमआउट और रेट लिमिट गिने नहीं जाते।",
     "failedToggle": "कॉम्बो टॉगल करने में विफल",
     "testResults": "परीक्षा परिणाम — {name}",
     "resolvedBy": "द्वारा हल किया गया:",
@@ -3518,6 +3602,9 @@
     "moveUp": "ऊपर बढ़ो",
     "moveDown": "नीचे जाएँ",
     "removeModel": "हटाओ",
+    "testStep": "इस मॉडल का परीक्षण करें",
+    "testStepRunning": "परीक्षण हो रहा है…",
+    "testStepNotTestable": "केवल एकल-मॉडल चरणों का ही परीक्षण किया जा सकता है",
     "saving": "सहेजा जा रहा है...",
     "liveNoProviders": "अभी तक कोई प्रदाता नहीं देखा गया।",
     "liveFleetDataHint": "फ़्लीट डेटा लाइव कॉम्बो इवेंट्स के माध्यम से आता है।",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "अभी तक कोई कॉम्बो कॉन्फ़िगर नहीं किया गया है।",
     "playgroundCreateFirst": "पहले एक बनाएं",
     "weighted": "भारित",
+    "weightPercent": "भार (%)",
     "leastUsed": "सबसे कम इस्तेमाल किया गया",
     "costOpt": "लागत-विकल्प",
     "strategyGuideTitle": "इस रणनीति का उपयोग कैसे करें",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# खाता} other {# खाते}}",
     "builderGlobalAdded": "जोड़ा गया",
     "builderGlobalAdd": "जोड़ें",
+    "clearSearch": "खोज साफ़ करें",
     "manualModel": "मैनुअल मॉडल",
     "manualModelInvalid": "मॉडल को provider/model के रूप में दर्ज करें।",
     "manualModelUnknownProvider": "अज्ञात प्रदाता प्रीफिक्स।",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "कॉम्बो संदर्भ जोड़ें",
     "builderPinnedAccount": "पिन किया गया खाता",
     "builderLegacyEntry": "लेगेसी प्रविष्टि",
+    "builderStaleModel": "लाइव कैटलॉग में नहीं है",
     "reviewName": "नाम",
     "reviewStrategy": "रणनीति",
     "reviewSteps": "चरण",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "न्यूनतम सामग्री लंबाई (वर्ण)",
     "responseValidationJsonPaths": "JSON-path जांच",
     "responseValidationAddCheck": "+ जांच जोड़ें",
+    "responseValidationRemoveCheck": "जाँच हटाएँ",
+    "responseValidationPath": "JSON पथ",
+    "responseValidationCondition": "शर्त",
+    "responseValidationValue": "अपेक्षित मान",
     "agentFeaturesSystemMessageOverride": "सिस्टम संदेश को ओवरराइड करें",
     "agentFeaturesSystemMessagePlaceholder": "आप एक विशेषज्ञ सहायक हैं...",
     "agentFeaturesSystemMessageHint": "एजेंटों के लिए सिस्टम संदेश ओवरराइड",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "कुल प्रविष्टियाँ",
     "type": "प्रकार",
-    "memoryEnabled": "मेमोरी सक्षम है"
+    "memoryEnabled": "मेमोरी सक्षम है",
+    "qdrantTutorialTitle": "त्वरित ट्यूटोरियल: Qdrant के साथ मेमोरी",
+    "qdrantTutorialIntro": "Qdrant मेमोरी के वेक्टर और मेटाडेटा को संग्रहीत करता है ताकि संबंधित संदर्भ प्राप्त किया जा सके। यह टोकन को सीधे संपीड़ित नहीं करता है; बचत अप्रत्यक्ष रूप से होती है, इस तथ्य के कारण कि अनुरोध से संबंधित नहीं होने वाले संदर्भ को टाला जाता है।",
+    "qdrantTutorialStep1": "उत्पादन उपयोग से पहले सर्वर को HTTPS और एक API कुंजी के साथ सुरक्षित करें।",
+    "qdrantTutorialStep2": "होस्ट, पोर्ट, कलेक्शन और प्रोवाइडर/मॉडल प्रारूप में एक मॉडल दर्ज करें जिसकी क्रेडेंशियल कॉन्फ़िगर की गई हो।",
+    "qdrantTutorialStep3": "कलेक्शन का आयाम मॉडल द्वारा उत्पन्न आयाम से मेल खाना चाहिए। एक मौजूदा 2048-आयाम कलेक्शन 1536-आयाम इनबेडिंग्स को स्वीकार नहीं करता।",
+    "qdrantTutorialStep4": "सहेजें, कनेक्शन की जाँच करें और खोज परीक्षण चलाएँ। केवल तभी Qdrant सक्षम करें।",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "क्रेडिट्स: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "कौशल",
@@ -5288,7 +5390,8 @@
         "skipped": "पहले से कॉन्फ़िगर किया गया",
         "failed": "असफल"
       }
-    }
+    },
+    "stepProgress": "सेटअप की प्रगति"
   },
   "providers": {
     "tosAvoidNoticeTitle": "यह प्रदाता डिफ़ॉल्ट रूप से auto से बाहर है",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "CSV टेम्पलेट डाउनलोड करें",
     "importFromFileMoreErrors": "+{count} और",
     "importFromFileSchemaHint": "CSV कॉलम का क्रम निश्चित है: provider, name, apiKey, baseUrl (वैकल्पिक), priority (वैकल्पिक)। provider कॉलम में किसी मौजूदा प्रबंधित प्रदाता की id या पहले से पंजीकृत OpenAI/Anthropic-संगत नोड की id होनी चाहिए — यह आयात नए एंडपॉइंट नोड नहीं बनाता।",
+    "importOAuthExport": "OAuth एक्सपोर्ट आयात करें",
+    "oauthExportTitle": "अकाउंट-मैनेजर एक्सपोर्ट आयात करें",
+    "oauthExportDescription": "किसी अकाउंट मैनेजर से प्लेनटेक्स्ट एक्सपोर्ट अपलोड करें (जैसे Antigravity Manager का cloud-accounts एक्सपोर्ट)। टोकन सर्वर पर रीफ़्रेश किए जाते हैं और हर अकाउंट एक OAuth कनेक्शन बन जाता है — डुप्लिकेट अपनी जगह पर ही रीफ़्रेश होते हैं।",
+    "oauthExportProviderLabel": "प्रदाता",
+    "oauthExportChoose": "फ़ाइल चुनें",
+    "oauthExportFileAria": "अकाउंट एक्सपोर्ट JSON फ़ाइल",
+    "oauthExportSchemaHint": "स्वीकार्य: \"accounts\" ऐरे वाला दस्तावेज़, एक साधारण ऐरे, या एक अकेला रिकॉर्ड। टोकन किसी नेस्टेड token ऑब्जेक्ट में या सीधे रिकॉर्ड पर हो सकते हैं।",
+    "oauthExportDetected": "{count} अकाउंट मिले",
+    "oauthExportSelectAll": "सभी अकाउंट चुनें",
+    "oauthExportSelectAccount": "अकाउंट {index} चुनें",
+    "oauthExportColEmail": "ईमेल",
+    "oauthExportColProvider": "प्रदाता",
+    "oauthExportColRefresh": "रीफ़्रेश टोकन",
+    "oauthExportNoEmail": "(कोई ईमेल नहीं)",
+    "oauthExportYes": "हाँ",
+    "oauthExportNo": "नहीं",
+    "oauthExportImporting": "आयात किया जा रहा है…",
+    "oauthExportImport": "{count} अकाउंट आयात करें",
+    "oauthExportResult": "{imported}/{total} आयात हुए — {failed} विफल",
+    "oauthExportParseError": "इस फ़ाइल से कोई अकाउंट नहीं पढ़ा जा सका।",
+    "oauthExportUnknownError": "अज्ञात त्रुटि",
     "adaptaTutorial": {
       "title": "Adapta Web को कैसे कनेक्ट करें",
       "introPrefix": "Adapta, Clerk के माध्यम से प्रमाणीकरण करता है। टोकन",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "सभी मॉडल पहले से ही आयातित हैं",
     "noNewModelsToImport": "आयात करने के लिए कोई नए मॉडल नहीं — सभी मॉडल पहले से ही रजिस्ट्री या कस्टम मॉडल सूची में हैं",
     "localCatalogFallbackStatus": "प्रदाता की मॉडल सूची तक नहीं पहुँचा जा सका — अंतर्निहित कैटलॉग दिखाया जा रहा है",
+    "discoveryDegradedStatus": "मॉडल खोज विफल {time}",
     "skippingExistingModels": "{count} मौजूदा मॉडल छोड़े जा रहे हैं",
     "autoSync": "स्वतः-सिंक",
     "autoSyncShort": "सिंक करें",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "उदा. 131072",
     "contextWindowOverrideHint": "जब प्रदाता गलत रिपोर्ट करता है, तो इस मॉडल की वास्तविक कॉन्टेक्स्ट विंडो (टोकन) मैन्युअल रूप से सेट करें। यह स्वतः-पहचाने गए/कैटलॉग मानों पर प्राथमिकता लेता है और कॉम्बो रूटिंग को मॉडल हटाने से रोकता है।",
     "contextWindowOverrideInvalid": "कॉन्टेक्स्ट विंडो ओवरराइड टोकन की एक धनात्मक पूर्ण संख्या होनी चाहिए",
+    "maxOutputTokenOverrideInvalid": "अधिकतम आउटपुट टोकन ओवरराइड टोकन की एक धनात्मक पूर्ण संख्या होनी चाहिए",
     "visionCapableLabel": "विज़न सक्षम",
     "visionCapableHint": "जब प्रदाता का डिस्कवरी मेटाडेटा इमेज इनपुट मोडैलिटी की रिपोर्ट नहीं करता है (सेल्फ-होस्टेड/लोकल बैकएंड के लिए सामान्य), तो इस मॉडल को मैन्युअल रूप से विज़न-सक्षम के रूप में चिह्नित करें।",
     "compatParamFiltersLabel": "पैरामीटर फ़िल्टर",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "ओवरराइड जोड़ें",
     "ccAliasLoadError": "discovery-alias सेटिंग्स लोड नहीं हो सकीं: {error}",
     "ccAliasSaveError": "discovery-alias सेटिंग सहेजी नहीं जा सकी: {error}",
+    "cliVersionSectionTitle": "विज्ञापित CLI क्लाइंट संस्करण",
+    "cliVersionEffectiveLabel": "वर्तमान में विज्ञापित",
+    "cliVersionSourceLabel": "से हल किया गया: {source}",
+    "cliVersionPinnedLabel": "कैप्चर किया गया डिफ़ॉल्ट: {pinned}",
+    "cliVersionSourceSettings": "डैशबोर्ड ओवरराइड",
+    "cliVersionSourceEnv": "पर्यावरणपरिवर्ती तारक",
+    "cliVersionSourceDiscovered": "स्वतः खोजी गई नवीनतम रिलीज़",
+    "cliVersionSourceDefault": "डिफ़ॉल्ट पर कब्जा कर लिया",
+    "cliVersionInputLabel": "ओवरराइड संस्करण",
+    "cliVersionInputPlaceholder": "ओवरराइड संस्करण; रिक्त साफ़",
+    "cliVersionSaveButton": "बचाना",
+    "cliVersionResetButton": "वितथ पर ले जाएं",
+    "cliVersionLoadError": "CLI संस्करण सेटिंग्स लोड करने में विफल: {error}",
+    "cliVersionSaveError": "CLI संस्करण सहेजने में विफल: {error}",
+    "cliVersionLoadFailed": "वर्तमान CLI संस्करण सेटिंग्स लोड नहीं हो सकीं।",
+    "cliVersionHintClaude": "एंथ्रोपिक अपने द्वारा देखे जाने वाले क्लाउड कोड क्लाइंट संस्करण पर नए क्लाउड मॉडल पेश करता है। यह वह संस्करण है OmniRoute प्रत्येक एंथ्रोपिक-बाउंड अनुरोध पर विज्ञापित करता है।",
+    "cliVersionCaveatClaude": "बिलिंग चेतावनी: बिलिंग संस्करण '<version>' है।'<build-revision>', और बिल्ड रिवीजन एक अलग कैप्चर किया गया स्थिरांक है। विज्ञापन 2.1.260 रिपोर्ट 2.1.260.1ई2, जो वास्तविक 2.1.260 बाइनरी नहीं भेजता है।",
+    "cliVersionHintCodex": "OpenAI Codex क्लाइंट संस्करण पर नए मॉडलों को गेट करता है, उदाहरण के लिए त्रुटि: 'gpt-6-astra' मॉडल को Codex के एक नए संस्करण की आवश्यकता होती है।",
+    "cliVersionCaveatCodex": "अनुमान संबंधी चेतावनी: आपकी स्वयं की कॉलर रिपोर्ट वाला संस्करण अभी भी CODEX_CLIENT_VERSION env var को मात देता है, लेकिन यह ओवरराइड दोनों को मात देता है, क्योंकि यह स्पष्ट ऑपरेटर का इरादा है।",
     "compatUpstreamHeadersLabel": "अतिरिक्त अपस्ट्रीम हेडर",
     "compatUpstreamHeadersHint": "उच्च-विशेषाधिकार सेटिंग — इसका विश्वास स्तर प्रदाता API क्रेडेंशियल संपादित करने के समान है; केवल विश्वसनीय एडमिन को इसका उपयोग करना चाहिए। OmniRoute द्वारा प्रदाता API कुंजी से प्रमाणीकरण जोड़ने के बाद इन्हें मर्ज किया जाता है। यदि कोई कस्टम हेडर किसी मौजूदा हेडर के समान नाम का उपयोग करता है (जैसे Authorization), तो आपका मान स्वतः जनरेट किए गए हेडर (Bearer टोकन सहित) को पूरी तरह बदल देता है — अपस्ट्रीम को केवल वही दिखाई देता है जो आपने टाइप किया है, सेटिंग्स वाली कुंजी नहीं। गलत कॉन्फ़िगरेशन से 401 त्रुटि या अपस्ट्रीम प्रमाणीकरण विफल हो सकता है। प्रत्येक हेडर के लिए एक पंक्ति (जैसे कुछ गेटवे के लिए अतिरिक्त Authentication)। पूर्वावलोकन के लिए मान पर होवर या फ़ोकस करें। ब्लर होने, बाहर क्लिक करने या यह पैनल बंद करने पर सहेजा जाता है।",
     "compatUpstreamHeaderName": "हेडर का नाम",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "API प्रारूप लेबल",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "API क्षेत्र: चीन",
-    "apiRegionHint": "API क्षेत्र संकेत",
-    "apiRegionInternational": "API क्षेत्र: अंतरराष्ट्रीय",
-    "apiRegionLabel": "API क्षेत्र लेबल",
+    "apiRegionChina": "मुख्यभूमि चीन",
+    "apiRegionHint": "API एक्सेस और कोटा ट्रैकिंग के लिए उपयोग किया जाने वाला एंडपॉइंट क्षेत्र चुनें।",
+    "apiRegionInternational": "अंतरराष्ट्रीय",
+    "apiRegionLabel": "API क्षेत्र",
     "apikey": "API कुंजी",
     "audio": "ऑडियो",
     "audioProvidersHeading": "ऑडियो प्रदाता शीर्षक",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "जब यह खाता अपनी 5 घंटे की उपयोग सीमा तक पहुँच जाता है और Anthropic कम-प्राथमिकता वाली लेन उपलब्ध कराता है, तो OmniRoute उसे स्वीकार कर लेता है और कनेक्शन को ठंडा करने के बजाय, विंडो रीसेट होने तक anthropic-usage-limit: slow के साथ अनुरोध भेजता रहता है। साप्ताहिक सीमा फिर भी लागू रहती है और प्रतिक्रियाओं को खाली क्षमता उपलब्ध होने तक प्रतीक्षा करनी पड़ सकती है।",
     "claudeAutoLimitResetLabel": "सत्र सीमा को स्वतः रीसेट करें (सप्ताह में एक बार)",
     "claudeAutoLimitResetDescription": "जब यह खाता अपनी 5 घंटे की उपयोग सीमा तक पहुँच जाता है और सत्र-सीमा रीसेट उपलब्ध होता है, तो OmniRoute उसे स्वचालित रूप से प्राप्त करके पूरी गति से फिर से प्रयास करता है। यह खाते के सप्ताह में एक बार मिलने वाले रीसेट का उपयोग करता है और फिर भी साप्ताहिक सीमा में गिना जाता है।",
+    "codexPaidCreditsShort": "अतिरिक्त क्रेडिट",
+    "codexPaidCreditsToggleTitle": "सदस्यता कोटा समाप्त होने के बाद सशुल्क Codex क्रेडिट की अनुमति दें (अतिरिक्त शुल्क लग सकते हैं)",
+    "codexPaidCreditsEnabled": "सशुल्क Codex क्रेडिट सक्षम हैं (अतिरिक्त शुल्क लग सकते हैं)",
+    "codexPaidCreditsDisabled": "सशुल्क Codex क्रेडिट अक्षम हैं",
+    "failedUpdateCodexPaidCredits": "सशुल्क Codex क्रेडिट नीति अपडेट नहीं हो सकी",
+    "allowCodexPaidCreditsLabel": "सशुल्क Codex क्रेडिट की अनुमति दें",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "अस्थायी कूलडाउन को छोड़ें ताकि पुनर्प्राप्ति योग्य त्रुटियों के बाद भी यह कनेक्शन योग्य बना रहे (प्रतिबंधित/समाप्त जैसी अंतिम स्थितियां अभी भी लागू होती हैं)।",
     "disableCoolingLabel": "इस कनेक्शन के लिए कूलडाउन अक्षम करें",
     "bulkPasteAdded": "{count, plural, one {1 कुंजी जोड़ी गई} other {# कुंजियाँ जोड़ी गईं}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "monsterapi.ai पर API कुंजी प्राप्त करें",
       "moonshot": "Moonshot AI को एक API कुंजी से कनेक्ट करें।",
       "morph": "निःशुल्क टियर: 250K क्रेडिट/माह, $0",
+      "apmix": "apmix.ai/dashboard से API की के साथ Apmix कनेक्ट करें — एक सब्सक्रिप्शन, कई मॉडल।",
       "nanogpt": "NanoGPT को एक API कुंजी से कनेक्ट करें।",
       "nebius": "API परीक्षण के लिए साइनअप पर ~$1 ट्रायल क्रेडिट",
       "nlpcloud": "NLP Cloud, OpenAI chat/completions के बजाय एक मालिकाना चैटबॉट API का उपयोग करता है। OmniRoute OpenAI संदेशों को इनपुट/संदर्भ/इतिहास के अनुकूल बनाता है और समर्थित चैटबॉट मॉडलों का एक स्थानीय कैटलॉग प्रदर्शित करता है।",
@@ -6628,8 +6781,7 @@
       "kiro": "फ्री टियर: 50 क्रेडिट/महीना (~25K–100K टोकन)। ⚠️ Kiro ToS तृतीय-पक्ष प्रॉक्सी/हार्नेस के उपयोग को प्रतिबंधित करता है।",
       "codex": "OpenAI Codex को मौजूदा OAuth फ़्लो से कनेक्ट करें।",
       "qwen": "Qwen Code को मौजूदा OAuth फ़्लो से कनेक्ट करें।",
-      "github-models": "github.com/settings/tokens पर 'models: read' स्कोप के साथ एक GitHub PAT बनाएं",
-      "apmix": "apmix.ai/dashboard से API की के साथ Apmix कनेक्ट करें — एक सब्सक्रिप्शन, कई मॉडल।"
+      "github-models": "github.com/settings/tokens पर 'models: read' स्कोप के साथ एक GitHub PAT बनाएं"
     },
     "passthroughModelsDescription": "{provider} प्रदाता-मूल मॉडल आईडी स्वीकार करता है। /मॉडल से आयात करें या रूटिंग के लिए कस्टम आईडी जोड़ें।",
     "bedrockModelsDescription": "अमेज़ॅन बेडरॉक मॉडल का दायरा AWS क्षेत्र द्वारा तय किया गया है। /मॉडल से आयात करें या चयनित क्षेत्र में सक्षम बेडरॉक मॉडल आईडी जोड़ें।",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "वैकल्पिक: प्रति पंक्ति एक model=cap, अपस्ट्रीम मॉडल आईडी से ठीक-ठीक मिलाया जाता है। अतिरिक्त अनुरोध स्थानीय रूप से कतार में रहते हैं; खाली का अर्थ है कोई प्रति-मॉडल सीमा नहीं।",
     "rateLimitOverridesModelConcurrencyInvalid": "अमान्य प्रति-मॉडल समवर्तीता प्रविष्टि \"{entry}\" — model=cap का उपयोग करें, जहाँ cap 1 से {max} के बीच की पूर्ण संख्या हो।",
-    "codexPaidCreditsShort": "अतिरिक्त क्रेडिट",
-    "codexPaidCreditsToggleTitle": "सदस्यता कोटा समाप्त होने के बाद सशुल्क Codex क्रेडिट की अनुमति दें (अतिरिक्त शुल्क लग सकते हैं)",
-    "codexPaidCreditsEnabled": "सशुल्क Codex क्रेडिट सक्षम हैं (अतिरिक्त शुल्क लग सकते हैं)",
-    "codexPaidCreditsDisabled": "सशुल्क Codex क्रेडिट अक्षम हैं",
-    "failedUpdateCodexPaidCredits": "सशुल्क Codex क्रेडिट नीति अपडेट नहीं हो सकी",
-    "allowCodexPaidCreditsLabel": "सशुल्क Codex क्रेडिट की अनुमति दें",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "{count} संयोजन(नों) में उपयोग किया गया: {combos}",
+    "openComboTooltip": "संयोजन खोलें — {combo} द्वारा उपयोग किया गया",
+    "claudeCodeRoutingTitle": "Claude Code ट्रैफिक के लिए अपस्ट्रीम प्रॉक्सी राउटिंग",
+    "routingNative": "नेटिव",
+    "routingFallback": "फॉलबैक",
+    "rerank": "रीरैंक",
+    "video": "वीडियो",
+    "markFreeTierTitle": "मुफ़्त-सूतक के रूप में चिह्नित करें (भुगतान वाले मॉडल छिपाने पर भी दिखाया जाता है)",
+    "codexTunnelTitle": "Codex टूल कनेक्शन",
+    "codexTunnelDescription": "टनल कठोर रूप से आउटबाउंड रहता है। लोकल टूल्स अभी भी केवल Codex द्वारा ही चलाए जाते हैं, उसके सैंडबॉक्स और स्वीकृति नीति के तहत।",
+    "tunnelIdLabel": "टनल आईडी",
+    "tunnelRuntimeKeyLabel": "टनल रनटाइम की",
+    "tunnelRuntimeKeyPlaceholder": "रनटाइम की",
+    "tunnelRuntimeKeyHint": "कुकी के साथ संयुक्त रूप से एनक्रिप्ट किया गया स्टोर्ड और कभी भी लॉग में लिखा नहीं जाता है।",
+    "tunnelRuntimeKeyNewLabel": "नया टनल रनटाइम की",
+    "tunnelRuntimeKeyNewHint": "केवल एक नई कुकी के साथ दर्ज करें। मान एनक्रिप्ट किया गया स्टोर्ड किया जाता है।",
+    "chatgptConnectorLabel": "ChatGPT कस्टम कनेक्टर",
+    "doctorChecking": "स्टेटस जांचा जा रहा है…",
+    "doctorCheck": "डॉक्टर स्टेटस जांचें",
+    "fallbackRetryBackendTitle": "फ़ॉलबैक रीट्राई बैकएंड"
   },
   "settings": {
     "title": "सेटिंग्स",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "चुनें कि कौन-से साइडबार आइटम दिखाए जाएँ। आवश्यक विकल्प में उन्नत टूल खोजने योग्य बने रहते हैं।",
     "hideHealthLogs": "स्वास्थ्य जांच लॉग छुपाएं",
     "hideHealthLogsDesc": "चालू होने पर, सर्वर कंसोल में [हेल्थचेक] संदेशों को दबाएँ",
-    "themeAccent": "थीम का रंग",
-    "themeAccentDesc": "एक प्रीसेट रंग चुनें या एक ही रंग से अपनी थीम बनाएं",
-    "themeCreate": "थीम बनाएं",
-    "themeCustom": "कस्टम थीम",
-    "themeBlue": "नीला",
-    "themeRed": "लाल",
-    "themeGreen": "हरा",
-    "themeViolet": "बैंगनी",
-    "themeOrange": "नारंगी",
-    "themeCyan": "सियान",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "एप्लिकेशन का नाम और लोगो अनुकूलित करें",
     "appName": "एप्लिकेशन का नाम",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "अभी",
       "coreConfigPath": "कोर कॉन्फ़िगरेशन फ़ाइल",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "निरपेक्ष .json पथ (छोटे अक्षरों में एक्सटेंशन)। खाली = न बनाएँ। हर सिंक अपनाई गई फ़ाइल के बगल में '<path>'.generated लिखता है, उस फ़ाइल में कभी नहीं।",
+      "coreConfigPathDesc": "निरपेक्ष .json/.yaml/.yml पथ (छोटे अक्षरों में एक्सटेंशन)। खाली = न बनाएँ। हर सिंक अपनाई गई फ़ाइल के बगल में '<path>'.generated लिखता है, उस फ़ाइल में कभी नहीं।",
       "lastSwitchKind": "स्विच का कारण",
       "switchKind": {
         "ip_quota_429": "कोटा",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "लागू करने वाला: {mode}",
       "coreBinaryPath": "कोर बाइनरी पथ",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "वैकल्पिक: अपनाई गई फ़ाइल को प्रतिस्थापित करने से पहले कोर बाइनरी के साथ उत्पन्न फ़ाइल को सत्यापित करता है। इसके बगल में लिखते रहने के लिए खाली छोड़ें। न होने पर निर्देशिका बना दी जाती है।"
+      "coreBinaryPathHelp": "वैकल्पिक: अपनाई गई फ़ाइल को प्रतिस्थापित करने से पहले कोर बाइनरी के साथ उत्पन्न फ़ाइल को सत्यापित करता है। इसके बगल में लिखते रहने के लिए खाली छोड़ें। न होने पर निर्देशिका बना दी जाती है।",
+      "urlFeedlessHint": "केवल सिलेक्टर सदस्यता के लिए खाली छोड़ें: नीचे एक नियंत्रण URL सेट करें, कोई फ़ीड प्राप्त, रीफ़्रेश या बाइंड नहीं किया जाता।"
     },
     "bulkHealthcheck": "सामूहिक स्वास्थ्य जाँच",
     "bulkHealthcheckDesc": "यह पता लगाने के लिए कि कौन-से प्रॉक्सी काम करते हैं, सभी कॉन्फ़िगर किए गए प्रॉक्सी का लक्ष्य URL के विरुद्ध परीक्षण करें।",
@@ -7706,6 +7862,7 @@
     "configured": "कॉन्फ़िगर किया गया",
     "none": "कोई नहीं",
     "modelOverrideValuePlaceholder": "संख्यात्मक मान",
+    "modelOverrideKey": "ओवरराइड कुंजी",
     "modelOverrideReasoningEffortsPlaceholder": "अंग्रेज़ी में अल्पविराम से अलग किए गए मान, जैसे low, medium, high",
     "addKeyValue": "कुंजी मान जोड़ें",
     "noModelOverrides": "इस मॉडल के लिए कोई ओवरराइड कॉन्फ़िगर नहीं किया गया है।",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "आप विशिष्ट मॉडलों के लिए डिफ़ॉल्ट मूल्य निर्धारण को ओवरराइड कर सकते हैं। कस्टम ओवरराइड्स को स्वतः-पता लगाए गए मूल्य-निर्धारण पर प्राथमिकता दी जाती है।",
     "editPricing": "मूल्य निर्धारण संपादित करें",
     "viewFullDetails": "पूर्ण विवरण देखें",
-    "themeCoral": "कोरल",
     "adaptiveVolumeRouting": "अनुकूली वॉल्यूम रूटिंग",
     "adaptiveVolumeRoutingDesc": "पेलोड वॉल्यूम और थ्रूपुट दबाव के आधार पर कनेक्शन को गतिशील रूप से स्केल करें।",
     "lkgpToggleTitle": "अंतिम ज्ञात कार्यशील प्रदाता (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "प्रदाताओं को भेजने से पहले प्रॉम्प्ट संपीड़ित करके टोकन उपयोग कम करें",
     "autoCombosTitle": "ऑटो कॉम्बो",
     "autoCombosDesc": "इस कुंजी को बिल्ट-इन auto/* कॉम्बो इस्तेमाल करने दें, जो प्रत्येक कॉन्फ़िगर किए गए प्रदाता से स्वचालित रूप से एक मॉडल चुनते हैं",
+    "ccDiscoveryAliasesTitle": "Claude Code खोज उपनाम",
+    "ccDiscoveryAliasesDesc": "उन मॉडलों और कॉम्बो के लिए claude/... संगतता मिरर विज्ञापित करें जिन तक यह कुंजी पहले से ही पहुँच सकती है",
     "compressionGuidanceFullGuideLink": "पूर्ण कम्प्रेशन गाइड",
     "compressionGuidanceShow": "विवरण",
     "compressionGuidanceHide": "विवरण छिपाएं",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "विंडो का प्रतिशत",
     "compressionAdaptivePolicyAbsolute": "निरपेक्ष टोकन बजट",
     "compressionOutputStylesDescription": "प्रदाता आउटपुट को फिर से लिखे बिना प्रतिक्रिया-आकार देने वाले निर्देश इंजेक्ट करें। स्वतंत्र रूप से संयोजित करें।",
+    "compressionOutputStylesPreviewNote": "एक अनुरोध केवल एक भाषा को इंजेक्ट करता है: पता लगाई गई भाषा, अन्यथा पहला पैक। उपरोक्त ब्लॉक प्रति-पैक वेरिएंट हैं, संयुक्त इंजेक्शन नहीं।",
     "mcpAccessibilityDescription": "MCP टूल आउटपुट को स्कोप करता है (अलग स्टोर)।",
     "compressionStylesTileSummary": "{tokens, number} टोकन बचाए गए · {runs, plural, one {# रन स्टाइल किया गया} other {# रन स्टाइल किए गए}}",
     "compressionStylesTileEmpty": "अभी तक कोई स्टाइल किए गए रन नहीं हैं।",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "होस्ट",
     "qdrantCollection": "संग्रह",
     "catalogVisibilityHint": "छिपे हुए मॉडल ID को उन्हीं पहुँच अनुमतियों के साथ अब भी कॉल किया जा सकता है।",
+    "exposeCombosOnly": "/v1/models में केवल कॉम्बो सूचीबद्ध करें",
+    "exposeCombosOnlyDesc": "जो क्लाइंट मॉडल अपने-आप खोजते हैं, वे कच्चे प्रोवाइडर मॉडल के बजाय आपके कॉम्बो (और छिपाए न गए हों तो auto/*) देखेंगे। स्पष्ट provider/model ID रूट होते रहेंगे।",
     "catalogScopeTitle": "Models API सूचीकरण",
     "catalogScopeDesc": "यह कुंजी GET /v1/models में क्या दिखाती है। सूची को सीमित करने से यह कभी नहीं बदलता कि कुंजी किन्हें कॉल कर सकती है।",
     "catalogScopeAll": "दोनों",
@@ -8918,7 +9079,9 @@
         "financial": "वित्तीय",
         "brazilian": "ब्राज़ीलियाई",
         "usa": "अमेरिका",
-        "full": "पूर्ण"
+        "full": "पूर्ण",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (दक्षिण अफ़्रीका)"
       },
       "builtinTypes": "अंतर्निहित प्रकार",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "IPv4 पते",
         "ipv6_address": "IPv6 पते",
         "aws_key": "AWS एक्सेस कुंजियाँ",
-        "api_key_generic": "API कुंजियाँ और टोकन"
+        "api_key_generic": "API कुंजियाँ और टोकन",
+        "iban": "IBAN बैंक खाता संख्या",
+        "eu_vat": "EU VAT संख्याएँ",
+        "es_dni_nie": "स्पैनिश DNI / NIE",
+        "it_codice_fiscale": "इटालियन कोडिस फिस्केल",
+        "pl_pesel": "पोलिश PESEL",
+        "nl_bsn": "डच BSN",
+        "de_steuer_id": "जर्मन स्टुअर-आईडी",
+        "se_personnummer": "स्वीडिश व्यक्तिसंख्या",
+        "za_id": "दक्षिण अफ़्रीकी ID संख्याएँ",
+        "za_phone": "दक्षिण अफ़्रीकी फ़ोन नंबर",
+        "za_vat": "दक्षिण अफ़्रीकी VAT संख्याएँ",
+        "za_tax_ref": "दक्षिण अफ़्रीकी कर संदर्भ"
       },
       "customPatterns": "कस्टम पैटर्न",
       "customPatternsDesc": "मिलान [CUSTOM_REDACTED] से बदल दिए जाते हैं। अधिकतम {max} पैटर्न। विनाशकारी बैकट्रैकिंग के जोखिम वाले पैटर्न अस्वीकार किए जाते हैं।",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "सफल",
     "tomlTestFailed": "असफल",
     "tomlImportError": "RTK TOML फ़ाइल को प्रोसेस नहीं किया जा सका।",
-    "tomlFileReadError": "चयनित TOML फ़ाइल को पढ़ा नहीं जा सका।"
+    "tomlFileReadError": "चयनित TOML फ़ाइल को पढ़ा नहीं जा सका।",
+    "viewMode": "दृश्य मोड"
   },
   "compressionEngineConfig": {
     "loading": "लोड हो रहा है…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "भाषा पैक: {packs}",
     "dragToReorder": "चरण का क्रम बदलने के लिए खींचें",
     "engine": "इंजन",
-    "intensity": "तीव्रता"
+    "intensity": "तीव्रता",
+    "compressionOverride": "संपीड़न ओवरराइड"
   },
   "compressionStudio": {
     "noRun": "कोई कंप्रेशन रन उपलब्ध नहीं है।",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "विजेता: {winner}",
     "encoder": "एन्कोडर",
     "bytes": "बाइट्स",
-    "tokensCl100k": "टोकन (cl100k)"
+    "tokensCl100k": "टोकन (cl100k)",
+    "studioViews": "Studio दृश्य"
   },
   "omniglyph": {
     "preview": "पूर्वावलोकन",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "इससे छोटे संदेश संपीड़ित नहीं होते. कम = अधिक संपीड़न।",
     "tooltipMinSavings": "केवल तभी संपीड़ित करें यदि यह कम से कम इतने टोकन बचाता है।",
     "ultraSettings": "अल्ट्रा सेटिंग्स",
-    "ultraSettingsDesc": "एसएलएम-संचालित सिमेंटिक संपीड़न"
+    "ultraSettingsDesc": "एसएलएम-संचालित सिमेंटिक संपीड़न",
+    "defaultLanguage": "डिफ़ॉल्ट भाषा",
+    "viewMode": "दृश्य मोड"
   },
   "translator": {
     "title": "अनुवादक",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "स्ट्रीम को रूपांतरित करने में विफल"
   },
   "usage": {
+    "healthExtraUsageBypass": "कोटा समाप्त हो गया है; अतिरिक्त उपयोग की अनुमति है, इसलिए सेवा जारी है।",
+    "healthPaidCreditsBypass": "कोटा समाप्त हो गया है; उपलब्ध सशुल्क क्रेडिट से सेवा जारी रह सकती है।",
+    "healthFilteringBypass": "कोटा समाप्त हो गया है; स्थानीय कोटा फ़िल्टर बंद है, इसलिए सेवा जारी है।",
     "title": "उपयोग",
     "grokExtraUsageCredits": "अतिरिक्त उपयोग क्रेडिट्स",
     "grokAutoTopUp": "स्वचालित टॉप-अप",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "प्रदाता सीमाएँ",
     "noProviders": "कोई प्रदाता कनेक्ट नहीं है",
+    "quotaAuthRequired": "प्रमाणीकरण आवश्यक है - डैशबोर्ड में साइन इन करें",
+    "quotaAuthRequiredHint": "डैशबोर्ड सत्र अनुपलब्ध होने या समाप्त हो जाने के कारण प्रदाता कनेक्शन लोड नहीं किए जा सके। अपनी कोटा सीमाएँ देखने के लिए साइन इन करें और रीफ़्रेश करें।",
     "connectProvidersForQuota": "अपनी एपीआई कोटा सीमा और उपयोग को ट्रैक करने के लिए OAuth वाले प्रदाताओं से जुड़ें।",
     "accountsCount": "{count, plural, one {# खाता} other {# खाते}}",
     "filteredFromCount": "({count} से फ़िल्टर किया गया)",
@@ -10046,9 +10231,6 @@
     "tierLite": "लाइट",
     "tierUnknown": "अज्ञात",
     "statTotal": "कुल",
-    "statCritical": "गंभीर",
-    "statAlert": "अलर्ट",
-    "statHealthy": "स्वस्थ",
     "filterPurchaseTypeLabel": "प्रकार",
     "filterTierLabel": "टियर",
     "purchaseAll": "सभी",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "अंतिम बार रीफ़्रेश किया गया",
     "providerQuota": "प्रदाता कोटा",
     "providerQuotaHomeHint": "कनेक्टेड खातों में लाइव स्थिति",
+    "claudeResetCreditDefaultTitle": "Claude सीमा रीसेट",
+    "confirmRedeemClaudeResetCredit": "रिडीम करने पर पात्र Claude उपयोग सीमाएं तुरंत रीसेट हो जाती हैं और यह क्रेडिट स्थायी रूप से खर्च हो जाता है।",
+    "claudeResetCreditsModalTitle": "Claude रीसेट क्रेडिट",
+    "claudeResetCreditsModalExplainer": "इस खाते के लिए उपलब्ध Claude रीसेट क्रेडिट और साप्ताहिक सत्र रीसेट।",
     "codexPaidCreditsLabel": "सशुल्क Codex क्रेडिट",
     "codexPaidCreditsAvailable": "उपलब्ध (शेष राशि की रिपोर्ट नहीं)",
     "codexPaidCreditsUnavailable": "अनुपलब्ध या खर्च सीमा पूरी हो गई",
-    "codexPaidCreditsUnlimited": "असीमित"
+    "codexPaidCreditsUnlimited": "असीमित",
+    "healthAccountHint": "हाल के अवलोकनों पर आधारित, लाइव जाँच नहीं। विवरण के लिए खाता चुनें।",
+    "healthRecovery": "बहाली का अनुमानित समय",
+    "healthAvailable": "उपलब्ध",
+    "healthRestricted": "आंशिक रूप से सीमित",
+    "healthUnavailable": "अनुपलब्ध",
+    "healthPeakHourProtection": "व्यस्त समय की सुरक्षा",
+    "healthCooldown": "प्रतीक्षा अवधि",
+    "healthQuotaExhausted": "कोटा समाप्त",
+    "healthOverview": "अवलोकन",
+    "layoutFull": "पूर्ण",
+    "layoutCompact": "संक्षिप्त",
+    "healthQuotaError": "कोटा पढ़ने में विफल",
+    "healthNoRuntime": "संचालन स्थिति उपलब्ध नहीं",
+    "healthPreviousSnapshot": "पिछला रीफ़्रेश विफल; पुराना परिणाम दिखाया जा रहा है",
+    "healthPreviousFailure": "पिछला अनुरोध विफल; प्रतीक्षा अवधि समाप्त",
+    "healthAwaitingSync": "रीसेट का समय बीत गया; समन्वयन की प्रतीक्षा",
+    "healthVerdictUnavailable": "उपलब्धता जाँच का परिणाम नहीं मिल रहा; केवल कोटा स्तर दिखाए जा रहे हैं",
+    "healthSummaryFailed": "संचालन सारांश पढ़ने में विफल; मॉडल लॉक की जानकारी गायब हो सकती है",
+    "healthRuntimeObserved": "संचालन स्थिति अपडेट हुई {time}",
+    "healthQuotaObserved": "कोटा देखा गया {time}",
+    "healthOldestQuota": "सबसे पुराना कोटा स्नैपशॉट: {time}",
+    "healthRecoveryUnknown": "बहाली का समय अज्ञात",
+    "healthDetailsHint": "विवरण और कार्रवाइयों के लिए क्लिक करें",
+    "healthFiveHour": "5 घंटे",
+    "healthOverall": "कुल",
+    "healthAction": "कार्रवाई आवश्यक",
+    "healthTitle": "खातों की उपलब्धता",
+    "healthDrag": "प्रदाताओं का क्रम बदलने के लिए खींचें",
+    "healthDragPosition": "{provider}, {count, plural, one {# में से स्थान {position, number}} other {# में से स्थान {position, number}}}",
+    "healthResetOrder": "डिफ़ॉल्ट क्रम बहाल करें",
+    "healthPool": "{name} पूल",
+    "healthOtherPool": "उसी खाते का {pool}: {status} ({remaining} शेष)",
+    "healthIncluded": "{count, plural, one {आंशिक रूप से सीमित # खाता शामिल है} other {आंशिक रूप से सीमित # खाते शामिल हैं}}",
+    "healthBannerUnavailable": "{count, plural, one {# खाता अस्थायी रूप से अनुपलब्ध है} other {# खाते अस्थायी रूप से अनुपलब्ध हैं}}",
+    "healthBannerAvailable": "{count, plural, one {# खाता उपलब्ध है} other {सभी # खाते उपलब्ध हैं}}",
+    "healthLegendHide": "संकेतों की व्याख्या छिपाएँ",
+    "healthLegendShow": "संकेतों की व्याख्या दिखाएँ",
+    "healthLegendOk": "ठोस = शेष कोटा; अर्धपारदर्शी = उपयोग किया गया।",
+    "healthLegendCooldown": "{window} का कोटा समाप्त। ठोस = बीता प्रतीक्षा समय; अर्धपारदर्शी = बचा प्रतीक्षा समय।",
+    "healthLegendAction": "प्राधिकरण समाप्त या खाता प्रतिबंधित; प्रतीक्षा से ठीक नहीं होगा।",
+    "healthLegendPartial": "अभी भी उपयोग योग्य। पीला सिरा = किसी मॉडल या पूल पर सीमा।",
+    "healthWaited": "प्रतीक्षा पूरी: {percent}",
+    "healthWait": "अभी {duration} और ({time} पर बहाली)",
+    "healthFastest": "सबसे जल्दी {duration} बाद बहाली",
+    "healthRatio": "{available, plural, one {# / {active, number} उपलब्ध} other {# / {active, number} उपलब्ध}}",
+    "healthCd5": "5 घंटे · प्रतीक्षा अवधि",
+    "healthCdw": "साप्ताहिक · प्रतीक्षा अवधि",
+    "healthRecentSuccessBypass": "हाल ही में अनुरोध सफल होने के कारण राउटिंग इस खाते को अनुमति देती है।",
+    "healthPurchasedBalanceBypass": "शामिल कोटा खत्म होने के बाद खरीदी गई शेष राशि से उपयोग जारी रह सकता है।",
+    "healthCutoffAtRequest": "लाइव कोटा की सीमाएँ अनुरोध राउट करते समय जाँची जाती हैं।"
   },
   "modals": {
     "waitingAuth": "प्राधिकरण की प्रतीक्षा की जा रही है",
@@ -11077,7 +11313,8 @@
       "message": "संदेश",
       "error": "त्रुटि",
       "completion": "पूर्णता"
-    }
+    },
+    "statusFilter": "स्थिति"
   },
   "templateNames": {
     "simple-chat": "सरल चैट",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes}m पहले",
     "hoursAgo": "{hours}h पहले",
     "daysAgo": "{days}d पहले",
-    "entries": "प्रविष्टियाँ"
+    "entries": "प्रविष्टियाँ",
+    "viewSwitcherAria": "कैश दृश्य"
   },
   "proxyConfigModal": {
     "levelGlobal": "वैश्विक",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth कॉन्फ़िगर नहीं किया गया है। {applicationsUrl} पर एक OAuth एप्लिकेशन रजिस्टर करें जिसमें रीडायरेक्ट URI {redirectUri} और स्कोप्स \"{scopes}\" हों, फिर {clientIdEnv} (और वैकल्पिक रूप से {clientSecretEnv}) सेट करें और पुनः प्रारंभ करें।",
     "gitlabDuoSetupDescription": "आवेदन पंजीकृत होने के बाद और इस OmniRoute उदाहरण पर env vars सेट होने के बाद, OAuth लॉगिन शुरू करने के लिए जारी रखें पर क्लिक करें।",
     "continue": "जारी रखें",
+    "copilotPolicyTitle": "प्रायोगिक प्रदाता: पॉलिसी की स्थिति अस्पष्ट है",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com के माध्यम से जुड़ता है, जिसे GitHub ने सामान्य तृतीय-पक्ष अनुमान API के रूप में प्रकाशित नहीं किया है। यह एकीकरण प्रायोगिक है और बिना सूचना के बदला जा सकता है।",
+    "copilotPolicyLine2": "केवल आपका अपना GitHub खाता ही कनेक्ट किया जा सकता है। कभी भी क्रेडेंशियल, पूल खाते साझा न करें, या अपनी योजना सीमा को पार करने का प्रयास न करें।",
+    "copilotPolicyLine3": "निःशुल्क और छात्र योजना उपयोगकर्ताओं को केवल स्वचालित मॉडल चयन प्राप्त होता है। आपकी Copilot योजना की शर्तें और कोई भी उपयोग सीमा आपकी ज़िम्मेदारी बनी रहेगी।",
+    "copilotPolicyAcknowledge": "मैं समझता हूं, कनेक्ट करें",
     "tabPasteSetupToken": "सेटअप टोकन",
     "claudeSetupTokenDescription": "टर्मिनल में `claude setup-token` चलाएँ और वह जो टोकन प्रिंट करता है उसे पेस्ट करें। यह एक वर्ष के लिए मान्य है और इसमें कोई रिफ़्रेश टोकन नहीं है। सहेजने से पहले OmniRoute Anthropic को एक परीक्षण अनुरोध भेजता है।",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "और कार्रवाइयाँ",
     "test": "परीक्षण करें",
     "edit": "संपादित करें",
     "delete": "हटाएँ",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "कोई वैध प्रविष्टियाँ नहीं मिलीं. प्रारूप की जाँच करें और पुनः प्रयास करें।",
     "bulkImportSuccess": "आयात पूर्ण: {created} बनाया गया, {updated} अपडेट किया गया, {failed} विफल रहा",
     "bulkImportErrorLine": "लाइन {line}: {reason}",
-    "bulkImportMaxExceeded": "प्रति आयात अधिकतम 100 प्रॉक्सी",
+    "bulkImportMaxExceeded": "प्रति आयात अधिकतम {max} प्रॉक्सी",
     "bulkImportPreview": "पूर्वावलोकन",
     "clearAssignment": "(स्पष्ट असाइनमेंट)",
     "bulkProxyAssignment": "थोक प्रॉक्सी असाइनमेंट",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "IP दर सीमा (429)",
     "poolSetAsideKindSlow": "धीमी प्रतिक्रियाएँ",
     "poolSetAsideKindGeoBlocked": "क्षेत्र अवरुद्ध (403/451)",
+    "poolSetAsideKindOperatorReported": "ऑपरेटर द्वारा रिपोर्ट की गई सेवा बाधा",
     "poolSetAsideUntil": "रोटेशन में वापस {endsAt}",
     "poolSetAsideRepeat": "अलग रखा गया {count, plural, one {# बार} other {# बार}}",
     "poolUnknownAddress": "अज्ञात पता",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "कोड निर्यात करें",
     "exportShort": "निर्यात",
     "noStateToExport": "निर्यात करने के लिए कोई प्लेग्राउंड स्थिति उपलब्ध नहीं है।",
-    "closeExportModal": "निर्यात मोडल बंद करें",
     "close": "बंद करें",
     "exportRealKeyWarning": "सुरक्षा चेतावनी: निर्यात अवरुद्ध — आउटपुट में एक वास्तविक API कुंजी का पता चला था। कृपया अपनी API कुंजी रीसेट करें और पुनः प्रयास करें।",
     "placeholderHintPrefix": "बदलें",
@@ -11808,7 +12052,8 @@
       "nextButton": "आगे",
       "runButton": "चलाएं",
       "promptPlaceholder": "अपना संदेश दर्ज करें… (भेजने के लिए Enter, नई पंक्ति के लिए Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground मोड"
   },
   "miniPlayground": {
     "endpoint": "एंडपॉइंट",
@@ -11879,7 +12124,8 @@
     "assistant": "सहायक",
     "errorLabel": "त्रुटि",
     "requestFailed": "अनुरोध विफल रहा",
-    "stop": "रोकें"
+    "stop": "रोकें",
+    "messageInputAria": "संदेश"
   },
   "requestLogger": {
     "recording": "रिकॉर्डिंग जारी है",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} खाता रोटेशन",
       "resilienceRetried": "खाली बारी पुनः प्रयास",
       "resilienceContinued": "स्ट्रीम के बीच में जारी",
-      "resilienceRecovered": "लचीलापन कार्रवाई द्वारा पुनर्प्राप्त"
-    }
+      "resilienceRecovered": "लचीलापन कार्रवाई द्वारा पुनर्प्राप्त",
+      "conversationContext": "वार्तालाप संदर्भ",
+      "goToBottom": "नीचे जाएँ",
+      "liveRefreshOn": "लाइव रीफ़्रेश: चालू",
+      "liveRefreshOff": "लाइव रीफ़्रेश: बंद",
+      "liveRefresh": "लाइव रीफ़्रेश",
+      "continuesFromParent": "पैरेंट से जारी है",
+      "continuesFrom": "{id} से जारी है",
+      "viewConversation": "बातचीत देखें",
+      "openConversation": "बातचीत {id} खोलें"
+    },
+    "tableLabel": "अनुरोध लॉग",
+    "throughputPostFirstToken": "पहले टोकन के बाद",
+    "throughputEndToEnd": "एंड-टू-एंड",
+    "throughputRate": "{value} टोकन/सेकंड",
+    "throughputExplanation": "दोनों दरें आउटपुट और रीज़निंग टोकन गणनाओं में से बड़ी का उपयोग करती हैं। पहले टोकन के बाद की दर किसी वैध TTFT को शामिल नहीं करती; अन्यथा यह पूरी अवधि का उपयोग करती है। एंड-टू-एंड हमेशा पूरी अवधि का उपयोग करता है। बफ़र की गई प्रतिक्रिया की बर्स्ट डिलीवरी दर ऊँची हो सकती है, भले ही मॉडल जनरेशन तेज़ न हो।"
   },
   "proxyLogger": {
     "filterAll": "सभी",
@@ -12112,7 +12372,9 @@
     "colServedBy": "द्वारा सेवा की गई",
     "filterTraffic": "ट्रैफ़िक",
     "filterTests": "परीक्षण",
-    "filterSource": "स्रोत"
+    "filterSource": "स्रोत",
+    "tableLabel": "प्रॉक्सी लॉग",
+    "sortLogs": "लॉग क्रमबद्ध करें"
   },
   "endpointOptions": {
     "speech": "वाक्",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "समाप्त",
     "statusAlerting": "चेतावनी जारी",
     "statusError": "त्रुटि",
-    "moreSuffix": "और {count}"
+    "moreSuffix": "और {count}",
+    "feedFilterLabel": "इवेंट फ़िल्टर करें"
   },
   "quotaShare": {
     "weightPercent": "भार %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "बिना समूह वाले",
     "ungroupedHint": "ये पूल किसी ज्ञात समूह को असाइन नहीं किए गए हैं। किसी पूल को वास्तविक समूह में ले जाने के लिए उसे संपादित करें।",
     "removeFailed": "इस पूल को हटाया नहीं जा सका।",
-    "dismiss": "खारिज करें"
+    "dismiss": "खारिज करें",
+    "allocationsHeading": "आवंटन",
+    "wizardRemoveDimension": "आयाम हटाएँ",
+    "wizardRemoveKey": "कुंजी हटाएँ"
   },
   "plugins": {
     "title": "प्लगइन",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "सेटिंग्स अपडेट विफल रहा",
       "serviceRevealApiKey": "{actor} ने {target} के लिए API कुंजी दिखाई",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "त्रुटि खारिज करें"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "अभी जाएं",
       "message": "MITM Proxy अब AgentBridge के अंतर्गत है।",
       "title": "यह पृष्ठ स्थानांतरित हो गया है"
-    }
+    },
+    "dnsOn": "DNS चालू",
+    "dnsOff": "DNS बंद",
+    "showServerSettings": "सर्वर सेटिंग दिखाएँ",
+    "hideServerSettings": "सर्वर सेटिंग छिपाएँ",
+    "upstreamCaTesting": "परीक्षण जारी है…",
+    "removeMapping": "मैपिंग हटाएँ",
+    "mappingSourcePlaceholder": "जैसे, gemini-3.6-flash-medium, या सभी बिना मैप किए गए मॉडल के लिए *",
+    "mappingWildcardHint": "बिना स्पष्ट मैपिंग वाले प्रत्येक मॉडल को OmniRoute के माध्यम से चयनित लक्ष्य तक रूट करने के लिए स्रोत के रूप में * का उपयोग करें। स्रोत का सटीक मिलान हमेशा * से अधिक प्राथमिकता पाता है।",
+    "wizardDetectingModels": "इंटरसेप्ट किए गए ट्रैफ़िक से मॉडल का पता लगाया जा रहा है...",
+    "wizardDetectedModels": "इंटरसेप्ट किए गए ट्रैफ़िक में {count, plural, one {# मॉडल मिला} other {# मॉडल मिले}}। जिन्हें आप जोड़ना चाहते हैं, उन्हें चुनें:",
+    "wizardSelectedModels": "{count, plural, one {# मॉडल चुना गया है} other {# मॉडल चुने गए हैं}}। अगली स्क्रीन पर आप उन्हें OmniRoute मॉडल से मैप करेंगे।",
+    "wizardAddModels": "{count, plural, one {# मॉडल} other {# मॉडल}} जोड़ें",
+    "wizardNoModelsDetected": "अभी तक किसी मॉडल का पता नहीं चला है। अनुरोध करने के लिए {agent} का उपयोग करें, फिर ट्रैफ़िक से मॉडल का स्वतः पता लगाने हेतु इस विज़ार्ड को दोबारा चलाएँ।",
+    "wizardNoModelsHint": "या इस विज़ार्ड को बंद करें और एजेंट कार्ड में मैन्युअल रूप से मैपिंग जोड़ें।"
   },
   "providerStats": {
     "unknownError": "अज्ञात त्रुटि",
@@ -12685,7 +12966,12 @@
     "avgTtft": "औसत TTFT",
     "avgTotal": "औसत कुल",
     "requestTelemetry": "अनुरोध टेलीमेट्री",
-    "requestTelemetryDescription": "7-चरण पाइपलाइन ब्रेकडाउन (पिछले 5 मिनट)"
+    "requestTelemetryDescription": "7-चरण पाइपलाइन ब्रेकडाउन (पिछले 5 मिनट)",
+    "title": "प्रदाता के आँकड़े",
+    "description": "प्रत्येक प्रदाता और प्रत्येक मॉडल का ट्रैफ़िक, विलंबता और सफलता दर",
+    "combo": "संयोजन",
+    "toggleModels": "{provider} के मॉडल दिखाएँ",
+    "windowSince": "{date} से"
   },
   "relay": {
     "title": "सर्वरलेस रिले प्रॉक्सी",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "कोई अनुरोध बॉडी नहीं।",
     "noResponseBody": "कोई प्रतिक्रिया बॉडी नहीं।",
     "formatted": "फ़ॉर्मैट किया गया",
-    "raw": "रॉ"
+    "raw": "रॉ",
+    "requestCount": "{count, plural, one {# अनुरोध} other {# अनुरोध}}",
+    "expandList": "सूची विस्तृत करें",
+    "collapseList": "सूची संक्षिप्त करें",
+    "snippetLanguage": "स्निपेट की भाषा",
+    "headersTable": "हेडर",
+    "showSecrets": "गोपनीय मान दिखाएँ",
+    "maskSecrets": "गोपनीय मान मास्क करें",
+    "llmNotAvailable": "इस अनुरोध के लिए LLM मेटाडेटा उपलब्ध नहीं है।",
+    "llmStreamYes": "हाँ (SSE)",
+    "llmStreamNo": "नहीं",
+    "llmTotalTokens": "कुल: {count} टोकन"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI कोड्स",
     "pageSubtitle": "OmniRoute की ओर पॉइंट करने वाले कोड टूल्स",
     "searchPlaceholder": "CLI खोजें…",
     "filterDetectionLabel": "डिटेक्शन",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "नहीं मिला",
     "baseUrlAll": "सभी",
     "baseUrlFull": "पूर्ण",
-    "baseUrlPartial": "आंशिक"
+    "baseUrlPartial": "आंशिक",
+    "title": "CLI कोड"
   },
   "cliAgents": {
     "pageTitle": "CLI एजेंट्स",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "पिछले 24 घंटों में इस प्रदाता द्वारा वास्तव में उत्तर दी गई कॉल का अनुपात। डैश का अर्थ है कि दर बताने के लिए इसने बहुत कम ट्रैफ़िक संभाला।",
     "reliabilitySample": "पिछले {hours}h में {requests} में से {successes} कॉल सफल रहीं",
     "reliabilityTooFew": "पिछले {hours}h में केवल {requests} कॉल — दर बताने के लिए बहुत कम",
-    "reliabilityNoTraffic": "पिछले 24h में कोई कॉल दर्ज नहीं हुई"
+    "reliabilityNoTraffic": "पिछले 24h में कोई कॉल दर्ज नहीं हुई",
+    "categoryFilter": "कार्य श्रेणी"
   },
   "discovery": {
     "title": "प्रदाता खोज",
@@ -13330,7 +13628,11 @@
     "method": "विधि",
     "auth": "प्रमाणीकरण",
     "feasibility": "व्यवहार्यता",
-    "models": "मॉडल"
+    "models": "मॉडल",
+    "provider": "प्रदाता",
+    "status": "स्थिति",
+    "endpoint": "एंडपॉइंट",
+    "actions": "कार्रवाइयाँ"
   },
   "noAuthProvider": {
     "title": "किसी प्रमाणीकरण की आवश्यकता नहीं है",
@@ -13379,7 +13681,8 @@
     "ownProxy": "अपना प्रॉक्सी",
     "freeTierPause": "मॉडल {model} रोका गया (429), {time} पर वापस",
     "freeTierPauseProvider": "रोका गया (429), {time} पर वापस",
-    "freeTierPauseNote": "इस इंस्टेंस पर इन-प्रोसेस पॉज़"
+    "freeTierPauseNote": "इस इंस्टेंस पर इन-प्रोसेस पॉज़",
+    "proxyType": "प्रॉक्सी प्रकार"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "एक छिपी हुई उपलब्धि आपका इंतज़ार कर रही है...",
         "criteria": "इस बैज को प्रकट करने के लिए छिपी हुई उपलब्धि को पूरा करें।"
       }
-    }
+    },
+    "leaderboardTitle": "लीडरबोर्ड",
+    "leaderboardDescription": "आपकी API कुंजियों की रैंकिंग और उपलब्धियाँ",
+    "badgeLocked": "लॉक किया गया"
   },
   "featureFlags": {
     "title": "फ़ीचर फ़्लैग",
@@ -13610,7 +13916,9 @@
       "disabled": "अक्षम",
       "dual": "दोहरा",
       "alias": "उपनाम",
-      "canonical": "कैनोनिकल"
+      "canonical": "कैनोनिकल",
+      "fail_closed": "ब्लॉक (fail_closed)",
+      "count_as_zero": "$0 के रूप में गिनें (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "संरक्षित-प्राथमिकता वाले इंफ्रा स्टॉप को 502 के रूप में दिखाएँ",
         "description": "जब केवल-कोटा-फ़ॉलबैक वाला प्राथमिकता लक्ष्य किसी ऐसे कारण से कॉम्बो को रोकता है जो प्रमाणित रूप से कोटा से संबंधित नहीं है—जैसे खुला प्रोवाइडर सर्किट ब्रेकर या पूर्वानुमानित विलंबता के कारण स्किप—तो 503 के बजाय 502 उत्तर दें।"
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "खाता आईडी रिकॉर्ड करें",
+        "description": "AUTH लॉग लाइनों में खाता प्रिफ़िक्स शामिल करें (उदा. \"'<provider>' खाता उपयोग करना: abc12345...\")। साझा/मल्टी-टेनेंट प्रोसेस लॉग्स से खाते पहचानकर्ता को छुपाए जाने के लिए डिफ़ॉल्ट रूप से अक्षम है। डीबग मोड से स्वतंत्र है; डीबग मोड को चालू/बंद करने से यह नहीं प्रकट होता।"
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "OIDC के साथ पासवर्ड लॉगिन अक्षम करें",
+        "description": "जब OIDC सक्षम हो, तो पासवर्ड लॉगिन अक्षम करें ताकि उपयोगकर्ता केवल OIDC Single Sign-On के माध्यम से प्रमाणित हो सकें। अक्षम होने पर (डिफ़ॉल्ट), पासवर्ड लॉगिन और OIDC दोनों उपलब्ध होते हैं।"
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "रिमोट ऑडियो प्रोवाइडर नोड्स",
+        "description": "/v1/audio/* रूट्स को localhost के बाहर होस्ट किए गए OpenAI-संगत प्रोवाइडर नोड्स का उपयोग करने की अनुमति दें। डिफ़ॉल्ट रूप से बंद — रिमोट होस्ट पर ऑडियो रूट करने से इग्रेस पहचान बदल जाती है और यह ऑपरेटर का एक स्पष्ट निर्णय होना चाहिए। लूपबैक नोड्स हमेशा अनुमत होते हैं और अप्रभावित रहते हैं।"
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "रिमोट रीरैंक प्रोवाइडर नोड्स",
+        "description": "POST /v1/rerank (और मेमोरी इंजन के rerank चरण, जो इसे लूपबैक पर कॉल करता है) को localhost के बाहर होस्ट किए गए OpenAI-संगत प्रोवाइडर नोड्स — TEI, Infinity, vLLM आदि चलाने वाले LAN बॉक्स या Tailscale पीयर का उपयोग करने की अनुमति दें। डिफ़ॉल्ट रूप से बंद — रिमोट होस्ट पर रूट करने से इग्रेस पहचान बदल जाती है और यह ऑपरेटर का एक स्पष्ट निर्णय होना चाहिए। लूपबैक नोड्स हमेशा अनुमत होते हैं और अप्रभावित रहते हैं। रिमोट नोड्स को प्रोवाइडर आउटबाउंड URL नीति को भी पास करना होगा।"
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "नेटवर्क रोटेशन शेयर्ड-इग्रेस गार्ड",
+        "description": "मल्टी-अकाउंट रोटेशन एक्ज़ीक्यूटर के लिए नेटवर्क एक्सेप्शन (टाइमआउट, कनेक्शन अस्वीकृत/रीसेट) पर, जब विफल होने वाले अकाउंट में कोई समर्पित प्रॉक्सी न हो, तो प्रत्येक पर पुनः प्रयास करने के बजाय एक छोटा कूलडाउन लागू करें और अनुरोध के शेष भाग के लिए अन्य बिना-प्रॉक्सी वाले अकाउंट्स को छोड़ दें। डिफ़ॉल्ट रूप से चालू (सुरक्षित: कोई इग्रेस IP परिवर्तन नहीं, केवल शेयर्ड-इग्रेस अकाउंट्स पर लेटेंसी/कूलडाउन जोखिम को कम करता है)। पहले बिना-प्रॉक्सी थ्रो पर तत्काल प्रोपेगेशन को पुनर्स्थापित करने के लिए अक्षम करें।"
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "हाल ही में विफल प्रॉक्सी छोड़ें",
+        "description": "प्रॉक्सी पूल और opencode का प्रति-खाता रोटेशन ऐसे प्रॉक्सी को फिर से सर्व करना बंद कर देता है जो अभी विफल हुआ हो (अस्वीकृत TCP प्रोब, या इसके माध्यम से प्राप्त 429) एक प्रति-प्रक्रिया अवधि के लिए जो प्रत्येक दोहराव पर एक सीमा तक दोगुनी हो जाती है। कोई प्रॉक्सी स्थिति नहीं लिखी जाती है; प्रत्येक उम्मीदवार को अलग रखे जाने पर भी विकल्प अपरिवर्तित रहता है। डिफ़ॉल्ट रूप से चालू: केवल PROXY_SKIP_RECENTLY_FAILED=false के साथ चयन क्रम बिल्कुल सामान्य रोटेशन जैसा होता है।"
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "साझा इग्रेस पूल क्रम",
+        "description": "उन प्रदाताओं के लिए जिनका कोटा इग्रेस पते के अनुसार विभाजित है, हाल ही में अस्वीकृत सदस्य के देखे गए इग्रेस पते को साझा करने वाले पूल सदस्य को स्वस्थ सदस्यों के ठीक नीचे रैंक करें। केवल क्रमबद्ध किया जाता है, कभी बाहर नहीं किया जाता। PROXY_SKIP_RECENTLY_FAILED की आवश्यकता होती है, जो इसके द्वारा पढ़े जाने वाले अस्वीकृति सिग्नल को उत्पन्न करता है। डिफ़ॉल्ट रूप से बंद: चयन क्रम बिल्कुल सामान्य रोटेशन जैसा होता है।"
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "रोटेशन एट्रिब्यूशन लॉगिंग",
+        "description": "Opencode रोटेशन यह रिकॉर्ड करता है कि किस खाते ने सर्व किया या किसे छोड़ दिया गया (केवल मास्क्ड आईडी, कभी भी पूर्ण खाता आईडी नहीं) और प्रॉक्सी लॉग प्रविष्टियों को उनके अनुरोध से लिंक करता है, ताकि ऑपरेटर छोड़े गए खातों और अप्रयुक्त खातों में अंतर कर सके। डिफ़ॉल्ट रूप से बंद: कोई अतिरिक्त लॉग पंक्तियाँ नहीं, कोई अतिरिक्त कॉलम नहीं लिखे जाते।"
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "प्रॉक्सी पूल इग्रेस अवलोकन",
+        "description": "डैशबोर्ड में प्रॉक्सी पूल के अंतर्गत दिखाएं कि पिछले 24 घंटों में कितने देखे गए इग्रेस IP ने इसके सदस्यों को सर्व किया, कितने कनेक्शनों ने उनका उपयोग किया और एक ही IP के पीछे अधिकतम कितने देखे गए। केवल-पठनीय, प्रॉक्सी लॉग से परिकलित, रूटिंग के लिए कभी उपयोग नहीं किया जाता। डिफ़ॉल्ट रूप से बंद: पूल एडिटर अपरिवर्तित रहता है और ऑब्जर्वेशन रूट null उत्तर देता है।"
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "प्रॉक्सी ऑपरेटर इग्रेस",
+        "description": "प्रति पूल सदस्य ऑपरेटर द्वारा पुश किए गए दिनांकित देखे गए पतों को स्वीकार करें और प्रदर्शन व पूल क्रम के लिए उन्हें जर्नल रीड के साथ मर्ज करें। डिफ़ॉल्ट रूप से बंद: पुश रूट 404 उत्तर देता है और पूल रीड बिल्कुल पहले की तरह व्यवहार करते हैं।"
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses स्टॉल रोटेशन",
+        "description": "OpenCode एक्ज़ीक्यूटर के लिए, स्ट्रीम किए गए Responses उत्तर के पहले बॉडी बाइट की निगरानी करें (विंडो: RESPONSES_FIRST_BYTE_TIMEOUT_MS, डिफ़ॉल्ट 15000)। एक 2xx Responses स्ट्रीम जो विंडो समाप्त होने के बाद भी मौन रहती है, उसे स्टॉल माना जाता है: अकाउंट को कूल डाउन किया जाता है और अनुरोध एक बार अगले अकाउंट पर रोटेट होता है; दूसरा स्टॉल होने पर तुरंत विफलता (fail fast) होती है। डिफ़ॉल्ट रूप से बंद: स्टॉल की गई स्ट्रीम्स स्ट्रीम रेडीनेस टाइमआउट तक अपनी वर्तमान प्रतीक्षा बनाए रखती हैं।"
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked रोटेशन",
+        "description": "OpenCode एक्ज़ीक्यूटर के लिए, जब कोई अपस्ट्रीम user_blocked अस्वीकृति (जियो ब्लॉक नहीं, Cloudflare फ़िंगरप्रिंट अस्वीकृति नहीं) के साथ 403 या 451 का उत्तर देता है, तो अस्वीकृत अकाउंट को कूल डाउन करें और प्रति अनुरोध अधिकतम एक बार अगले अकाउंट पर रोटेट करें; दूसरी अस्वीकृति को बिना किसी सफलता चिह्न के जैसा है वैसा ही लौटा दिया जाता है। डिफ़ॉल्ट रूप से बंद: अपस्ट्रीम यूज़र ब्लॉक के आसपास रूट करना बचाव (evasion) जैसा लग सकता है और अकाउंट फ़्लीट में फ़्लैग फैल सकता है, इसलिए जब तक ऑपरेटर ऑप्ट-इन नहीं करता, अस्वीकृति को बिना किसी बदलाव के लौटाया जाता है।"
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode ट्रांज़िएंट फ़ेलओवर बैकऑफ़",
+        "description": "OpenCode मल्टी-अकाउंट रोटेशन के लिए, किसी ट्रांज़िएंट अपस्ट्रीम त्रुटि (5xx या खाली 400 अस्वीकृति) के साथ लगातार दो प्रयास विफल होने पर अगले अकाउंट पर भेजने से पहले कुछ देर रुकें। यह विराम 1.5s से शुरू होता है, प्रत्येक अगली लगातार विफलता पर दोगुना हो जाता है, प्रति विराम अधिकतम 6s और प्रति अनुरोध 10s तक सीमित है, क्लाइंट के डिस्कनेक्ट होने पर इसे छोड़ दिया जाता है, और प्रतीक्षा करने से पहले विफल रिस्पॉन्स बॉडी को रिलीज़ कर दिया जाता है। डिफ़ॉल्ट रूप से बंद: फ़ेलओवर तत्काल बना रहता है।"
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Flush Empty Turn रीट्राय",
+        "description": "अनुवादित स्ट्रीमिंग टर्न्स पर, जब अपस्ट्रीम टर्न में कोई उपयोगी सामग्री नहीं होती है (केवल-रीज़निंग समापन या शून्य उपयोगी चंक्स), तो क्लाइंट के सामने कुछ भी प्रदर्शित होने से पहले सामान्य क्रेडेंशियल पाथ के माध्यम से सीमित रीट्राय (`STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` तक) जारी करें। डिफ़ॉल्ट रूप से बंद: खाली टर्न्स वर्तमान व्यवहार (खाली 200 या empty-content 502) को बनाए रखते हैं।"
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Empty Stream सिबलिंग रिकवरी",
+        "description": "Claude/Codex स्ट्रीमिंग: पहले लाइफ़साइकिल इवेंट के बाद, उपयोगी आउटपुट के लिए संक्षेप में जांच (probe) करें (अधिकतम 1s / 64 KiB तक); बिना किसी सामग्री के समाप्त होने वाली स्ट्रीम एक empty_content विफलता बन जाती है जो किसी अन्य पात्र कनेक्शन पर मौजूदा सीमित रीट्राय का उपयोग करती है (कोई कूलडाउन नहीं, कोई मॉडल लॉकआउट नहीं), और क्लाइंट के डिस्कनेक्ट होने पर राउंड-रॉबिन कॉम्बो पुनः प्रयास करना बंद कर देते हैं। साथ ही यह जांच के भीतर refusal, pause_turn और model_context_window_exceeded को भी वैध खाली टर्मिनल्स मानता है। डिफ़ॉल्ट रूप से बंद: रेडीनेस, empty-content हैंडलिंग और कॉम्बो रीट्राय बिल्कुल पहले की तरह रहते हैं।"
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "स्ट्रीम लेट आउटपुट प्रोब",
+        "description": "स्ट्रीमिंग आउटपुट प्रोब: पहले 64 फ़ॉरवर्ड किए गए चंक्स के बाद पहले विज़िबल आउटपुट के लिए हर 16 में से एक चंक का सैंपल लेते रहें, ताकि देर से शुरू होने वाला आउटपुट भी स्ट्रीम को आउटपुट उत्सर्जित करने के रूप में चिह्नित करे। उस बिंदु के बाद एक अकेला 5xx मॉडल-ओनली लॉकआउट दर्ज करने के बजाय रिक्वेस्ट-स्कोप्ड रहता है, और firstOutputMs को वर्तमान सैंपलिंग गैप के पहले आउटपुट चंक पर बैक-फिल किया जाता है। डिफ़ॉल्ट रूप से बंद: बिल्कुल पहले की तरह केवल पहले 64 फ़ॉरवर्ड किए गए चंक्स की ही जांच की जाती है।"
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode रेट-लिमिटेड 429 अर्ली स्टॉप",
+        "description": "OpenCode मल्टी-अकाउंट रोटेशन के लिए, वास्तविक रेट लिमिट के रूप में वर्गीकृत पहले 429 (एक पार्स करने योग्य Retry-After हेडर, या रेट/उपयोग सीमा का उल्लेख करने वाली बॉडी) पर अकाउंट वेव को रोकें और बाकी सभी खातों को आजमाने के बजाय उस अपस्ट्रीम 429 को बिना किसी बदलाव के (status, body, Retry-After और quota हेडर) लौटाएं। अवर्गीकृत 429 रोटेट होते रहते हैं। डिफ़ॉल्ट रूप से बंद: मुफ़्त टियर प्रति इग्रेस IP सीमित है (#9611), इसलिए प्रत्येक 429 अगले खाते पर रोटेट होता है, और समाप्त हो चुकी वेव अंतिम अपस्ट्रीम 429 लौटाती है।"
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 पार्क और रिज़्यूम",
+        "description": "OpenCode मल्टी-अकाउंट रोटेशन के लिए, बार-बार होने वाले क्षणिक 429 (या एक नए पूल-स्ट्रेन मार्कर) के बाद हार्टबीट के साथ अनुरोध को पार्क करें, फिर पूरे फ़्लीट में फ़ैन आउट करने के बजाय 3 क्रमिक खातों तक के एक सीमित लेग को फिर से चलाएं। डिफ़ॉल्ट रूप से बंद: बिल्कुल पहले की तरह प्रत्येक 429 अगले खाते पर रोटेट होता है।"
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "स्ट्रीम रेडीनेस स्टॉल पुनः प्रयास",
+        "description": "स्ट्रीमिंग चैट अनुरोधों के लिए, जब पहली अपस्ट्रीम बॉडी कोई उपयोगी इवेंट जनरेट करने से पहले स्टॉल हो जाती है, तो उसी रूटिंग पाथ के माध्यम से समान रेडीनेस बजट और बिना किसी खाता पेनल्टी के एक सीमित दूसरा प्रयास करें। डिफ़ॉल्ट रूप से बंद: स्टॉल हुई पहली बॉडी बिना किसी पुनः प्रयास के अनुरोध को विफल कर देती है।"
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 पूल पुनः चयन",
+        "description": "OpenCode मल्टी-अकाउंट रोटेशन के लिए, एम्बिएंट पूल संदर्भ के तहत प्रॉक्सी-रहित खाते पर इग्रेस-बकेटेड प्रदाता से 429 मिलने के बाद, उसी इग्रेस पते पर पुनः प्रयास करने के बजाय अगले प्रयास के लिए कनेक्शन पूल से किसी अन्य सदस्य का अनुरोध करें। क्रमबद्ध करता है, कभी बाहर नहीं करता: समाप्त हो चुका पूल वर्तमान व्यवहार को बनाए रखता है। डिफ़ॉल्ट रूप से बंद: बिल्कुल पहले की तरह प्रत्येक 429 अगले खाते पर रोटेट होता है।"
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 क्लाइंट फ़िंगरप्रिंट",
+        "description": "OpenCode Zen/Go अनुरोधों (#16571) पर OpenCode v2 CLI क्लाइंट फ़िंगरप्रिंट भेजें: User-Agent opencode/latest/<2.x>/cli और x-opencode-client cli, क्लाइंट User-Agent केवल तभी रखा जाता है जब यह एक 2.x OpenCode क्लाइंट हो, और गेटेड फ्री-टियर अनुरोधों पर कोई x-opencode-request नहीं, सत्र x-opencode-session-id/x-session-affinity/x-session-id पर मिरर किया गया, इंजेक्ट किए गए प्लेसहोल्डर टूल्स पर v2 CLI read/shell स्कीमा और \"none\" का tool_choice हटा दिया गया। डिफ़ॉल्ट रूप से बंद: प्रत्येक OpenCode अनुरोध वर्तमान पहचान, हेडर और बॉडी को बाइट-दर-बाइट बनाए रखता है।"
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen Egress-IP लॉकआउट",
+        "description": "OpenCode Zen (opencode-zen) को डिफ़ॉल्ट egress-IP लॉकआउट फ़ैमिली में जोड़ें, ताकि एक Zen कनेक्शन पर 429 आने पर वह अपने egress IP को साझा करने वाले प्रत्येक सिबलिंग Zen कनेक्शन को भी कूल डाउन करे। डिफ़ॉल्ट रूप से बंद: Zen कीड है और प्रत्येक कनेक्शन बिल्कुल पहले की तरह अपने आप कूल डाउन होता है। एक स्पष्ट OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS मान हमेशा इस फ़्लैग पर प्राथमिकता लेता है।"
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode फ़ुल-टेक्स्ट एरर नियम",
+        "description": "अंतर्निहित OpenCode एरर नियमों (opencode-zen, opencode-go, opencode-cli) को पूर्ण अपस्ट्रीम एरर टेक्स्ट से मेल खाने दें, ताकि organization_quota_exceeded या \"monthly usage limit reached\" जैसे बॉडी मार्कर्स 429 को कनेक्शन-स्कोप वाले लॉक के साथ कोटा समाप्त होने के रूप में वर्गीकृत करें। डिफ़ॉल्ट रूप से बंद: वे नियम केवल संरचित एरर कोड देखते हैं और ऐसा 429 बिल्कुल पहले की तरह एक संक्षिप्त दर सीमा बना रहता है।"
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI फ़ुल-टेक्स्ट एरर नियम",
+        "description": "अंतर्निहित Cloudflare Workers AI एरर नियम को पूर्ण अपस्ट्रीम एरर टेक्स्ट से मेल खाने दें, ताकि 429 \"daily free allocation\" बॉडी को एक संक्षिप्त दर सीमा के बजाय कोटा समाप्त होने के रूप में वर्गीकृत किया जाए। डिफ़ॉल्ट रूप से बंद: यह नियम केवल संरचित एरर कोड देखता है, बिल्कुल पहले की तरह।"
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "क्षमता फ़िल्टर",
+        "description": "जब लक्षित मॉडल में आवश्यक क्षमताओं (vision, tools, structured output, context window) की कमी हो, तो डिस्पैच से पहले अनुरोधों को अस्वीकार करें। यह उन प्रत्यक्ष एकल-प्रदाता अनुरोधों की सुरक्षा करता है जो कॉम्बो-लेयर संगतता फ़िल्टर को बायपास करते हैं।"
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "USD कोटा में बिना मूल्य वाले उपयोग को अनदेखा करें",
+        "description": "प्रति-कुंजी USD उपयोग कोटा में उन मॉडलों के उपयोग को $0 के रूप में गिनें जिनकी कोई कीमत नहीं है, बजाय इसके कि कोटा समाप्त मान लिया जाए। डिफ़ॉल्ट रूप से बंद: बिना कीमत वाला कोई मॉडल या रूटिंग एलियास वास्तविक खर्च को छिपा सकता है, इसलिए कोटा फ़ेल-क्लोज़ हो जाता है।"
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "OmniRoute Radar मॉड्यूल (कैटलॉग फ़ीड स्क्रीन और सिंक) सक्षम करें। डिफ़ॉल्ट रूप से बंद; सक्षम करने पर केवल UI अनलॉक होता है — डेटा सिंक एक अलग ऑप्ट-इन बना रहता है।"
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "मॉडल एंडपॉइंट कैपेबिलिटी गेट",
+        "description": "विश्वसनीय मॉडल एंडपॉइंट टैग लागू करें (प्रदाता कैटलॉग द्वारा घोषित, किसी विशिष्ट मॉडल आईडी से अनुमानित, या ऑपरेटर द्वारा निर्धारित): /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations और /v1/audio/* पर डिस्पैच करने से पहले ऐसे एंडपॉइंट पर भेजे गए अनुरोध को HTTP 400 के साथ अस्वीकार करें जिसे मॉडल सर्व नहीं करता है; /v1/models से उन मॉडलों को छिपाएं जिनके टैग किए गए एंडपॉइंट्स में कोई OmniRoute एडेप्टर नहीं है; और ऐसे मॉडलों के लिए डैशबोर्ड मॉडल टेस्ट का उत्तर 422 के साथ दें। डिफ़ॉल्ट रूप से बंद: एंडपॉइंट टैग केवल जानकारी के लिए रहते हैं और अनुरोध ठीक पहले की तरह डिस्पैच किए जाते हैं।"
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "यूनिवर्सल कॉन्टेक्स्ट हैंडऑफ़",
+        "description": "जब कॉम्बो रूटिंग मॉडल बदलती है, तो बातचीत का सारांश जनरेट करें और इंजेक्ट करें। मॉडल बदलावों को स्वतंत्र रूप से संभालने और सभी मौजूदा व भविष्य के कॉम्बो के लिए बैकग्राउंड हैंडऑफ़ अनुरोधों को रोकने के लिए अक्षम करें।"
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "रीज़निंग रीप्ले",
+        "description": "मल्टी-टर्न बातचीत में मॉडल रीज़निंग को कैश करें और रीप्ले करें। रीज़निंग को स्टोर करना और दोबारा इंजेक्ट करना बंद करने के लिए अक्षम करें।"
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server ट्रांसपोर्ट",
+        "description": "Codex को स्थानीय app-server WebSocket JSON-RPC ट्रांसपोर्ट (codexTransport=app-server) का उपयोग करने की अनुमति दें। बंद होने पर, app-server का विकल्प चुनने वाले कनेक्शन Codex के अन्य ट्रांसपोर्ट्स पर फ़ालबैक हो जाते हैं।"
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "क्लॉड कोड डिस्कवरी एलियास",
+        "description": "'/v1/models' पर claude/'<provider>'/'<model>' मिरर आईडी का विज्ञापन ताकि क्लॉड कोड गेटवे मॉडल डिस्कवरी नॉन-क्लॉड मॉडल सूचीबद्ध कर सके। चेतावनी: वैश्विक रूप से सक्षम होने पर सभी क्लाइंट्स के लिए कैटलॉग प्रविष्टि दोगुनी हो जाती है।"
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "नॉ-थिंकिंग मॉडल एलियास",
+        "description": "no-think/'<provider>'/'<model>' गेटवे एलियास के लिए मास्टर स्विच। चालू (डिफ़ॉल्ट): /v1/models हर योग्य थिंकिंग-क्षम क्लॉड मॉडल के लिए एक नॉ-थिंकिंग वेरिएंट का विज्ञापन करता है, और अनुरोध पर भेजा गया नॉ-थिंक/ आईडी वास्तविक मॉडल पर वापस संकल्पित होता है जहाँ तर्क को दमित कर दिया जाता है। बंद: कोई वेरिएंट विज्ञापित नहीं किया जाता और नॉ-थिंक/ आईडी किसी अन्य अज्ञात मॉडल आईड की तरह व्यवहार करता है। जब यह चालू होता है, मॉडल-अधिन ModelSpec.noThinkingAlias ऑप्ट-इन/ऑप्ट-आउट अभी भी लागू होता है।"
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "थिंकिंग लेवल वैरिएंट्स अक्षम करें",
+        "description": "/v1/models कैटलॉग में थिंकिंग लेवल वैरिएंट्स (जैसे -low, -medium, -high) का जनरेशन अक्षम करें।"
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "एडेप्टिव वर्चुअल एडमिशन लेन",
+        "description": "प्रोवाइडर डिस्पैच (#9654) के लिए प्रति-टेनेंट एडेप्टिव वर्चुअल एडमिशन लेन सक्षम करें: एक टेनेंट का बर्स्ट अब दूसरे के लिए 503 का कारण नहीं बनेगा। OMNIROUTE_CHAT_VIRTUAL_LANES env var इस डैशबोर्ड ओवरराइड पर प्राथमिकता रखता है; परिवर्तन सर्वर रीस्टार्ट पर प्रभावी होते हैं।"
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "एफ़ेक्टिव गेटवे मिरर",
+        "description": "मॉडलों के लिए '/v1/models' पर '<gateway-alias>'/'<model>' मिरर आईडी का विज्ञापन जिनके कैनोनिकल मालिक के पास सक्रिय क्रेडेंशियल नहीं है लेकिन एक पासथ्रू गेटवे सक्रिय क्रेडेंशियल के साथ उन्हें रूट करती है। चेतावनी: वैश्विक रूप से सक्षम होने पर सभी क्लाइंट्स के लिए कैटलॉग प्रविष्टि जोड़ी जाती है।"
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API एग्रीगेटर बैलेंस",
+        "description": "New-API / One-API / Sub2API एग्रीगेटर-संगत नोड्स के लिए बैलेंस डिटेक्शन सक्षम करें। सक्षम होने पर, एग्रीगेटर फ़्लैग सेट वाले संगत नोड्स डैशबोर्ड और quota-preflight रूटिंग में अपने बैलेंस की रिपोर्ट करेंगे।"
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "हटाए गए सर्च कनेक्शन्स छिपाएं",
+        "description": "सर्च स्टैट्स और हाल की खोजों में केवल उन्हीं प्रोवाइडर्स को गिना जाता है जिनका अभी भी लाइव कनेक्शन है (duckduckgo-free जैसे बिना की वाले प्रोवाइडर्स को हमेशा गिना जाता है)। Off रखने पर प्रोवाइडर आईडी वाली प्रत्येक सुरक्षित सर्च पंक्ति बनी रहती है।"
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "स्ट्रिक्ट फ़्री बैज",
+        "description": "डैशबोर्ड प्रोवाइडर पेज: Free बैज केवल उन्हीं सिग्नल्स पर दिखाएं जिनका प्रोवाइडर सम्मान करता है — यह बिना किसी दस्तावेज़ीकृत फ़्री टियर वाले रजिस्टर्ड प्रोवाइडर्स पर डिस्प्ले-नेम हेयूरिस्टिक, गैर-बूलियन फ़्री फ़ील्ड और :free सफ़िक्स को हटा देता है। Off ऐतिहासिक बैज नियम को बनाए रखता है।"
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: खाली पूल 503 रिस्पॉन्स देता है",
+        "description": "जब टूल-कॉलिंग प्री-फ़िल्टर चलने से पहले ही किसी auto combo का कैंडिडेट पूल खाली हो जाता है (कूलडाउन, लॉकआउट या समाप्त होने के कारण प्रत्येक टारगेट छूट जाता है), तो लेगेसी 400 \"No target supports tool calling\" capability_mismatch के बजाय 503 no_eligible_targets उत्तर दें। डिफ़ॉल्ट रूप से Off: खाली पूल लेगेसी 400 को बनाए रखता है।"
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "मिस्ट्राल द्विर्थ 401 सॉफ़्ट लॉकआउट",
+        "description": "एक बल्हा मिस्ट्राल 401 ('{\"detail\":\"Unauthorized\"}', स्पष्ट ऑथ सिग्नल के बिना) रद्द किए गए की के लिए और समाप्त कोटा के लिए बाइट-समान है। चालू होने पर, ऐसा 401 कनेक्शन को अनुचित के रूप में पार्क करने के बजाय ठंडा करता है, एक घंटे में 3 बार तक; अगला उसे फिर भी अनुचित के रूप में पार्क करता है, इसलिए रद्द किया गया की अभिसरण करता है। डिफ़ॉल्ट रूप से बंद: हर बल्हा मिस्ट्राल 401 कनेक्शन को अनुचित के रूप में पार्क करता है, जैसे पहले था।"
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "बैच और फ़ाइल ऑटो-क्लीनअप",
+        "description": "स्वचालित क्लीनअप स्वीप को OMNIROUTE_BATCH_RETENTION_DAYS से पुराने टर्मिनल (completed/failed/cancelled/expired) Batch API जॉब्स को उनके प्रति-लाइन चेकपॉइंट्स के साथ हटाने दें, और अपनी expires_at पार कर चुकी अपलोड की गई फ़ाइलों की BLOB सामग्री को साफ़ करने दें। डिफ़ॉल्ट रूप से बंद: जब तक कोई ऑपरेटर ऑप्ट इन नहीं करता, प्रत्येक मौजूदा इंस्टॉल इस डेटा को पहले की तरह ही सुरक्षित रखता है। ऑपरेटर द्वारा ट्रिगर किया गया DELETE /api/v1/batches/delete-completed रूट किसी भी स्थिति में अप्रभावित रहता है -- यह एक अलग, बिना शर्त वाला सार्वजनिक API अनुबंध है।"
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity अकाउंट लीज़",
+        "description": "चुने गए Antigravity अकाउंट को उस अनुरोध के स्ट्रीमिंग लाइफ़साइकिल के लिए आरक्षित करें जिसने इसे चुना था, ताकि कोई समवर्ती पुनः प्रयास (concurrent retry) या क्रेडेंशियल हैंडऑफ़ पहले से ही किसी इन-फ़्लाइट स्ट्रीम के लिए प्रतिबद्ध अकाउंट को दोबारा न चुन सके। यह आरक्षण (connection, callable upstream model) तक सीमित है, इसलिए एक अकाउंट अभी भी एक साथ दो अलग-अलग मॉडलों को सेवा दे सकता है। जब उस मॉडल के लिए प्रत्येक पात्र अकाउंट पहले से ही लीज़ पर हो, तो अनुरोध किसी व्यस्त अकाउंट पर दबाव डालने के बजाय एक सीमित Retry-After के साथ संरचित 503 POOL_BUSY लौटाता है। डिफ़ॉल्ट रूप से बंद: अकाउंट चयन पहले की तरह ही रहता है, और कोई आरक्षण नहीं किया जाता है।"
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "पुराने कॉम्बो स्टेप्स को ऑटो-प्रून करें",
+        "description": "एक आधिकारिक लाइव कैटलॉग के विरुद्ध सफल मॉडल सिंक के बाद, उन मॉडलों पर पिन किए गए कॉम्बो स्टेप्स को हटा दें जिन्हें कैटलॉग अब सूचीबद्ध नहीं करता है, जिसमें प्रत्येक हटाए गए स्टेप के लिए एक ऑडिट प्रविष्टि होगी। किसी विफल, डिग्रेडेड या केवल-मुफ़्त सिंक पर कभी भी प्रून नहीं करता है, और कॉम्बो को कभी खाली नहीं करता है। डिफ़ॉल्ट रूप से बंद: पुराने स्टेप्स को केवल फ़्लैग किया जाता है।"
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth समराइज़्ड थिंकिंग",
+        "description": "पठनीय थिंकिंग (thinking.display \"summarized\") का अनुरोध करने वाले Claude OAuth अनुरोध को redact-thinking-2026-02-12 Anthropic बीटा को छोड़ने दें, जो अन्यथा Anthropic को खाली, केवल-हस्ताक्षर वाले थिंकिंग ब्लॉक लौटाने के लिए बाध्य करता है। डिफ़ॉल्ट रूप से बंद: वह बीटा Claude Code OAuth वायर फ़िंगरप्रिंट का हिस्सा है, इसलिए OAuth अनुरोध इसे अपरिवर्तित रखते हैं। API-key Claude अनुरोध इस फ़्लैग के बिना भी पहले से ही समराइज़्ड थिंकिंग का सम्मान करते हैं; OMNIROUTE_REDACT_THINKING=false भी OAuth तक केवल तभी पहुँचता है जब यह फ़्लैग चालू हो।"
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro टूल कॉल रिपेयर",
+        "description": "जब कोई स्ट्रीमिंग Kiro रिस्पॉन्स किसी भी दृश्यमान आउटपुट से पहले कोई विकृत tool_call रैपर (input.name या input.arguments अनुपलब्ध) उत्सर्जित करता है, तो इसे सप्रेस करें और टर्न को invalid_kiro_tool_call के साथ समाप्त करने के बजाय एक सुधारात्मक निर्देश के साथ अनुरोध को एक बार फिर से भेजें। इस रीट्राई में एक अतिरिक्त Kiro अनुरोध लगता है; दूसरी विफलता टर्न को kiro_tool_call_repair_retry_failed के साथ समाप्त कर देती है। डिफ़ॉल्ट रूप से चालू। पहले विकृत रैपर पर ही टर्न को विफल करने के लिए false पर सेट करें।"
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev एफर्ट टियर्स",
+        "description": "जब न तो कोई ऑपरेटर ओवरराइड और न ही प्रोवाइडर रजिस्ट्री किसी का उल्लेख करती है, तब models.dev द्वारा प्रकाशित रीज़निंग एफर्ट टियर्स (ज्ञात एफर्ट शब्दावली तक सीमित) का उपयोग करें, और /v1/models effort_tiers तथा कॉम्बो टियर इंटरसेक्शन में घोषित रिक्त टियर सूची को \"no tiers\" के रूप में मानें। डिफ़ॉल्ट रूप से बंद: effort_tiers और रिज़ॉल्व किए गए supportedThinkingEfforts बिल्कुल पहले की तरह बने रहते हैं।"
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena सिंथेसाइज्ड cx टेलीमेट्री",
+        "description": "प्रत्येक Arena (lmarena) create-evaluation अनुरोध, जिसमें ऑपरेटर द्वारा प्रदान किया गया providerSpecificData.cx नहीं है, उसके साथ एक सिंथेसाइज्ड प्रोग्रामेटिक cx क्लाइंट-इंटरैक्शन ब्लॉब (वह मान जो arena.ai स्वयं बिना किसी रिकॉर्ड किए गए इंटरैक्शन वाले पेज के लिए भेजता है) संलग्न करें। डिफ़ॉल्ट रूप से बंद: cx फ़ील्ड एक Arena एंटी-ऑटोमेशन सिग्नल है, इसलिए OmniRoute केवल उसी मान को अग्रेषित करता है जिसे ऑपरेटर ने वास्तविक ब्राउज़र सत्र (providerSpecificData.cx) से कैप्चर किया है और अन्यथा कोई cx नहीं भेजता है। अपुष्ट अपस्ट्रीम लाभ; इसे केवल तभी सक्षम करें यदि Arena बिना cx वाले अनुरोधों को अस्वीकार करना शुरू कर दे।"
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "नेटिव Codex रिएक्टिव कॉम्पैक्शन",
+        "description": "Responses input[] अडैप्टर का उपयोग करके, संदर्भ बजट (context budget) से अधिक होने पर रिएक्टिव (थ्रेशोल्ड) और अंतिम-विकल्प संदर्भ कॉम्पैक्शन पास को नेटिव Codex पासथ्रू हिस्ट्रीज़ (codex प्रोवाइडर को POST /v1/responses) को भी फिर से लिखने दें। डिफ़ॉल्ट रूप से बंद: नेटिव Codex हिस्ट्रीज़ Codex क्लाइंट के स्वामित्व में होती हैं और कॉम्पैक्शन द्वारा उन्हें कभी दोबारा नहीं लिखा जाता है; अत्यधिक बड़े अनुरोध ठीक पहले की तरह संदर्भ बजट जाँच में विफल होते रहेंगे। इसके लिए ग्लोबल कम्प्रेशन का चालू होना और मॉडल का बाहर न रखा जाना आवश्यक है।"
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "कोटा विंडो: बाउंडेड पार्क का पालन करें",
+        "description": "प्रति-विंडो कोटा नीति (अकाउंट चयन द्वारा उपयोग की जाने वाली सत्र/साप्ताहिक सीमाएँ) को बाउंडेड एग्जॉशन पार्क का पालन करने दें: एक बार जब कैप्ड पार्क की समय-सीमा समाप्त हो जाती है, या कैश्ड कोटा अवलोकन पार्क कैप से पुराना हो जाता है, तो विंडो नया कोटा प्राप्त होने तक अकाउंट को बाहर करना बंद कर देती है। डिफ़ॉल्ट रूप से बंद: एक कैश्ड विंडो अपने स्वयं के रीसेट समय तक अपने अंतिम रिपोर्ट किए गए प्रतिशत पर ब्लॉक करना जारी रखती है।"
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "इमेज जनरेशन: लंबे जॉब्स",
+        "description": "OpenAI-कम्पैटिबल इमेज जनरेशन के लिए: निश्चित 120 s इमेज बजट के बजाय कनेक्शन के टाइमआउट (providerSpecificData.timeoutMs), अन्यथा सेंट्रल अपस्ट्रीम फ़ेच टाइमआउट (FETCH_TIMEOUT_MS, फिर REQUEST_TIMEOUT_MS, डिफ़ॉल्ट 600 s) का उपयोग करें; कॉलर द्वारा रद्द किए गए अनुरोध को 499 के साथ समाप्त करें; और Playground को keepalive हार्टबीट्स के साथ एक SSE स्ट्रीम के रूप में लंबे इमेज जॉब्स प्राप्त करने दें। डिफ़ॉल्ट रूप से बंद: निश्चित बजट लागू होता है और कॉलर कैंसलेशन प्रोपेगेट नहीं होता है। रिस्पॉन्स बॉडी रीड को कवर करने वाली डेडलाइन हमेशा चालू रहती है।"
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "कैटलॉग मिरर सुधार",
+        "description": "/v1/models पर claude/ डिस्कवरी और functional-gateway मिरर्स को परिष्कृत करें। डिफ़ॉल्ट रूप से बंद: दोनों मिरर पास बिल्कुल पहले की तरह व्यवहार करते हैं। चालू: claude/ डिस्कवरी मिरर्स सूचीबद्ध reasoning-effort वेरिएंट्स (-low/-medium/-high/-xhigh) को भी कवर करते हैं, ऐसे बिल्ट-इन auto/* ids को छोड़ देते हैं जिन्हें रिक्वेस्ट पाथ मटेरियलाइज़ नहीं कर सकता और पहले से सूचीबद्ध उपनाम को छोड़ देते हैं; functional-gateway मिरर्स कॉम्बोज़ और OmniRoute-सिंथेसाइज़्ड ids (claude/, no-think/) को छोड़ देते हैं, owned_by से ओनर लेते हैं, कभी भी ओनर को उसके अपने गेटवे के रूप में उपयोग नहीं करते हैं, blockedProviders में अक्षम किए गए गेटवे और किसी गेटवे के आधिकारिक लाइव कैटलॉग से बाहर के मॉडल्स को छोड़ देते हैं।"
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "प्रॉक्सी हेल्थ: अस्वीकृति विफलता स्ट्रीक को रीसेट करती है",
+        "description": "प्रॉक्सी हेल्थ स्वीप में, लक्ष्य द्वारा अस्वीकार किए गए प्रोब (401/403/429: प्रॉक्सी ने रिले किया, गंतव्य ने इस इग्रेस IP को अस्वीकार कर दिया) को सर्व किए गए प्रोब की तरह प्रॉक्सी की लगातार विफलता स्ट्रीक को रीसेट करने दें। डिफ़ॉल्ट रूप से बंद: अस्वीकृति तटस्थ रहती है और स्ट्रीक को बनाए रखती है (#10654)। 5xx दोनों ही तरह से अनिर्णायक रहता है, और अस्वीकृति कभी भी किसी प्रॉक्सी को हटाती, अक्षम या फिर से सक्रिय नहीं करती है।"
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok सब्सक्रिप्शन इमेजेस",
+        "description": "xai-oauth (xao) और grok-cli इमेज रूट्स को रजिस्टर करें और OpenAI क्वालिटी high/hd को xAI medium में मैप करें। डिफ़ॉल्ट रूप से बंद: API-key xAI इमेज पाथ मौजूदा OpenAI-कम्पैटिबल रिक्वेस्ट पर बना रहता है और सब्सक्रिप्शन रूट्स रजिस्टर नहीं होते हैं।"
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth लाइव मॉडल डिस्कवरी",
+        "description": "फ़्रोज़न स्टैटिक सीड के बजाय OAuth बियरर टोकन का उपयोग करके https://api.x.ai/v1/models से xai-oauth कनेक्शन के लिए लाइव xAI मॉडल कैटलॉग प्राप्त करें। डिफ़ॉल्ट रूप से चालू। स्टैटिक सीड को सर्व करते रहने के लिए फ़्लैग को false पर सेट करें। डिस्कवरी रूट में HTTP विफलताएं सीड पर फ़ॉलबैक करती हैं; फ़्लैग गेटर स्वयं HTTP जारी नहीं करता है।"
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-कंपैटिबल मिड-कन्वर्सेशन सिस्टम टर्न्स",
+        "description": "सादे anthropic-compatible-* रिले (claude → claude passthrough) पर, मिड-कन्वर्सेशन role:system टर्न्स को टॉप-लेवल system पैरामीटर में होइस्ट करने के बजाय messages[] के अंदर रखें, ताकि कैश्ड प्रॉम्प्ट प्रीफ़िक्स सभी टर्न्स में स्थिर रहे। केवल तभी लागू होता है जब क्लाइंट ने स्वयं mid-conversation-system-2026-04-07 anthropic-beta भेजा हो (अपस्ट्रीम में यथावत फ़ॉरवर्ड किया गया)। डिफ़ॉल्ट रूप से बंद: प्रत्येक सिस्टम टर्न को बिल्कुल पहले की तरह होइस्ट किया जाता है, क्योंकि जो रिले बीटा का समर्थन नहीं करते हैं वे 400 के साथ role:system संदेशों को अस्वीकार कर देते हैं।"
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB हेल्थ चेक: स्टार्टअप स्कैन को स्थगित करें",
+        "description": "स्टार्टअप के पूरा होने तक उसे ब्लॉक करने के बजाय, सर्वर द्वारा अनुरोधों को स्वीकार करना शुरू करने के बाद (setImmediate के माध्यम से) स्टार्टअप DB इंटीग्रिटी/हेल्थ चेक चलाएं। डिफ़ॉल्ट रूप से बंद: #13717 से पहले की तरह ही स्टार्टअप इस चेक पर ब्लॉक रहता है, ताकि पहला अनुरोध प्रोसेस करने से पहले ही दूषित डेटाबेस को पकड़ा जा सके। चालू: स्टार्टअप तुरंत वापस लौटता है और चेक (अब बाउंडेड/पेज्ड और वास्तविक फ़ाइल-समर्थित DB के लिए, एक कैंसिलेबल चाइल्ड प्रोसेस में पृथक) ठीक इसके बाद चलता है।"
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode पब्लिश्ड कैटलॉग रूटिंग",
+        "description": "स्पष्ट रजिस्ट्री एंडपॉइंट के बिना OpenCode Zen और OpenCode Go मॉडल्स को अपना अनुरोध सरफ़ेस (@ai-sdk/openai के लिए Responses, @ai-sdk/anthropic के लिए Messages) प्रकाशित models.opencode.ai कैटलॉग से लेने दें, जिसे हर 6 घंटे में बैकग्राउंड में पढ़ा जाता है। डिफ़ॉल्ट रूप से बंद: एंडपॉइंट बिल्कुल पहले की तरह रजिस्ट्री ह्यूरिस्टिक्स से आता है और कैटलॉग को कभी फ़ेच नहीं किया जाता है।"
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Auto अनुरोध: रिज़ॉल्व्ड कैपेबिलिटी वेट्स",
+        "description": "auto/* अनुरोधों (resolveModelOrError और ऑटो-रूटिंग रैपर) को रिज़ॉल्व्ड मॉडल क्षमताओं (vision, reasoning, thinking) और देखे गए गुणवत्ता स्कोर के साथ कैंडिडेट पूल बनाने दें, जिसे /v1/models कैटलॉग की तरह एक ही बल्क पास में पढ़ा जाता है। डिफ़ॉल्ट रूप से बंद: अनुरोध-समय के स्नैपशॉट वेट्स बिल्कुल पहले जैसे रहते हैं (क्षमताएं मांग पर रिज़ॉल्व होती हैं और वेट्स में योगदान नहीं देती हैं)। चालू: वे सिग्नल स्नैपशॉट वेट्स को फ़ीड करते हैं, इसलिए कैंडिडेट वेट्स और इस प्रकार चयन बदल सकता है।"
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "ऑटो-कॉम्बो: कीलेस ट्रांसपोर्ट गेट",
+        "description": "ऐसी कीलेस (नॉ-ऑथ) प्रोवाइडर्स को ऑटो/* कैंडिडेट पूल से बाहर रखें जिनके ट्रांसपोर्ट को स्थानीय ब्राउज़र (browserBacked) या स्थानीय रूप से इंस्टॉल किए गए CLI (isLocalCli) की आवश्यकता होती है, ताकि एक अटक रहा मम्बर प्रति-टारगेट टाइमआउट तक (#17036) ऑटो अनुरोध को रुकने न दे सके। डिफ़ॉल्ट रूप से बंद: हर नॉ-ऑथ प्रोवाइडर जिसमें इम्युलेटेड टूल कॉलिंग होती है, पूल में पहले की तरह ही रहता है। सीधे '<alias>'/'<model>' कॉल दोनों ही तरीकों से काम करते हैं।"
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "कोडबडी सीएन: इनलाइन रीज़निंग रिप्ले",
+        "description": "कोडबडी-सीएन थिंकिंग मॉडल्स (DeepSeek-V4 / Kimi-K2 परिवार जो रीज़निंग रिप्ले की ज़रूरत रखते हैं) के लिए, हर रिप्लेड असिस्टेंट reasoning_content को संदेश के कंटेंट के आगे एक दृश्य '<thought>' ब्लॉक के रूप में इनलाइन करें, ताकि यह एक ऐसे गेटवे से बच सके जो reasoning_content फ़ील्ड को ड्रॉप कर दे (#13632)। डिफ़ॉल्ट रूप से बंद: कोडबडी-सीएन अनुरोधों को बिना किसी बदलाव के भेजा जाता है; reasoning_content फ़ील्ड खुद को हमेशा रखा जाता है।"
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "प्रोवाइडर सेफ़्टी स्टॉप्स: टर्मिनल",
+        "description": "किसी स्पष्ट प्रोवाइडर सेफ़्टी स्टॉप (misalignment_policy_violation, content_policy_violation, या provider_safety_rejection लेबल वाले सटीक लीगेसी 'blocked by our safety systems' रिजेक्शन) को एक टर्मिनल, रिक्वेस्ट-स्कोप रिफ़्यूज़ल के रूप में रखें: इसका कोड HTTP, Responses, WebSocket और completed-stream त्रुटियों में सुरक्षित रहता है, और कॉम्बो अन्य टार्गेट्स पर पुनः प्रयास करने के बजाय यहीं रुक जाता है, जिससे एडमिटेड सिबलिंग्स रद्द हो जाते हैं (#17049)। डिफ़ॉल्ट रूप से बंद: ये त्रुटियां अपनी मौजूदा हैंडलिंग बनाए रखती हैं और कॉम्बो रूटिंग अपरिवर्तित रहती है।"
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "क्रेडेंशियल हेल्थ: ऑटो-डिसएबल्ड कनेक्शन्स का पुनः परीक्षण करें",
+        "description": "क्रेडेंशियल हेल्थ स्वीप को उन कनेक्शन्स का पुनः परीक्षण करने दें जिन्हें गेटवे ने स्वयं बंद कर दिया था (autoDisabledAt के रूप में चिह्नित; प्रत्येक के लिए 6 घंटे में अधिकतम एक बार और प्रति स्वीप 5) और पुनः परीक्षण पास होने पर कनेक्शन को वापस चालू करने दें (#16190)। डिफ़ॉल्ट रूप से बंद: बंद किए गए कनेक्शन्स तब तक बंद रहते हैं जब तक कि कोई ऑपरेटर उन्हें फिर से सक्षम या पुनः टेस्ट न करे, बिल्कुल पहले की तरह। ऑपरेटर द्वारा अक्षम किए गए कनेक्शन्स और स्थायी बैन के बाद बंद किए गए कनेक्शन्स का कभी भी पुनः परीक्षण नहीं किया जाता है।"
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "क्रेडेंशियल गेट: केवल ऑथ डायग्नोसिस",
+        "description": "कॉम्बो क्रेडेंशियल गेट को सीमित करें ताकि कैश्ड विफल क्रेडेंशियल प्रोब केवल तभी किसी कनेक्शन को ब्लॉक करे जब उसका डायग्नोसिस खराब क्रेडेंशियल्स (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required) साबित करता हो। अनिर्णायक विफलताओं (टाइमआउट, रेट लिमिट्स, आउटेज, असमर्थित प्रोब्स और अनटाइप्ड शेड्यूलर त्रुटियों) को तब अज्ञात माना जाता है और कनेक्शन को ट्रैफ़िक मिलना जारी रहता है। डिफ़ॉल्ट रूप से बंद: कोई भी कैश्ड प्रोब त्रुटि कनेक्शन को कैश TTL (5 मिनट) के लिए ब्लॉक कर देती है।"
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "कॉम्बो: कंटेंट-पॉलिसी रिफ़्यूज़ल पर रोकें",
+        "description": "जब कोई कॉम्बो टार्गेट किसी सटीक कंटेंट-पॉलिसी रिफ़्यूज़ल (कोड या प्रकार cyber_policy / content_policy_violation) के साथ उत्तर देता है, तो अगले टार्गेट पर आगे बढ़ने के बजाय कॉम्बो को रोकें और वह रिफ़्यूज़ल लौटाएं, भले ही शेष टार्गेट्स अलग मॉडल हों। डिफ़ॉल्ट रूप से बंद: यह रिफ़्यूज़ल कभी भी अकाउंट को कूल नहीं करता है या प्रोवाइडर ब्रेकर को ट्रिप नहीं करता है, और कॉम्बो बिल्कुल पहले की तरह अपने अगले टार्गेट पर आगे बढ़ता है।"
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "कूलडाउन पुनः प्रयास: 403/410 अस्वीकृतियों को छोड़ें",
+        "description": "जब प्रत्येक खाता कूलडाउन में हो और सबसे पहले समाप्त होने वाला कूलडाउन 403 (एक्सेस अस्वीकृत) या 410 (gone) के कारण हुआ हो, तो कूलडाउन समाप्त होने की प्रतीक्षा करने और अनुरोध को पुनः भेजने के बजाय उस अस्वीकृति को तुरंत लौटाएं; फिर एक नवीनीकृत होने वाला agentrouter कनेक्शन-स्कोप्ड कोटा 403 errorCode 429 के साथ सहेजा जाता है ताकि यह पुनः प्रयास योग्य बना रहे। डिफ़ॉल्ट रूप से बंद: केवल 401 प्रतीक्षा को छोड़ता है, और प्रत्येक अस्वीकृति को उसी स्टेटस के साथ सहेजा जाता है जिसके साथ वह प्राप्त हुई थी।"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "बिना कीमत के उपयोग के लिए बजट नीति",
+        "description": "कैसे प्रति-कुंजी दैनिक/साप्ताहिक USD सीमाएँ उस सफल उपयोग को संभालती हैं जिसके प्रदाता/मॉडल के पास कोई मूल्य निर्धारण पंक्ति नहीं है। fail_closed (डिफ़ॉल्ट) विंडो को कोटा से अधिक माना जाता है, इसलिए अज्ञात लागत कभी भी हार्ड कैप पार नहीं कर सकती। count_as_zero उस उपयोग को $0 मानता है और मूल्य-निर्धारित खर्च को लागू रखना जारी रखता है। बिना कीमत वाले मॉडल किसी भी अवस्था में डैशबोर्ड होम पेज पर सूचीबद्ध होते हैं।"
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "विलंबता",
     "quota": "कोटा",
     "rangeWindow": "{range} विंडो",
+    "timeRange": "समय-सीमा",
     "runtimeHealthBlend": "रनटाइम/स्वास्थ्य मिश्रण",
     "averageResponseTime": "औसत प्रतिक्रिया समय",
     "worstQuota": "सबसे खराब कोटा",
@@ -13923,7 +14500,11 @@
       "ok": "आम तौर पर अनुमेय"
     },
     "allProviders": "सभी प्रदाता",
-    "noApiKeyRequired": "कोई API कुंजी आवश्यक नहीं है"
+    "noApiKeyRequired": "कोई API कुंजी आवश्यक नहीं है",
+    "searchPlaceholder": "मॉडल, प्रोवाइडर खोजें…",
+    "searchAria": "मुफ्त मॉडल खोजें",
+    "filterProviderAria": "प्रोवाइडर द्वारा फ़िल्टर करें",
+    "keylessOnly": "केवल की-लेस"
   },
   "providerHealthAutopilot": {
     "title": "प्रदाता स्वास्थ्य ऑटोपायलट",
@@ -13994,7 +14575,11 @@
     "learnMore": "और जानें",
     "changelogLoadFailed": "चेंजलॉग लोड नहीं किया जा सका। कृपया बाद में पुनः प्रयास करें।",
     "retry": "पुनः प्रयास करें",
-    "viewFullHistory": "GitHub पर पूरा इतिहास देखें"
+    "viewFullHistory": "GitHub पर पूरा इतिहास देखें",
+    "title": "समाचार और बदलावों का विवरण",
+    "description": "OmniRoute टीम की घोषणाएँ और नवीनतम रिलीज़ नोट्स",
+    "viewLabel": "देखें",
+    "loadingNews": "घोषणाएँ लोड हो रही हैं..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "प्रदाता सर्किट ब्रेकर स्थिति",
       "lastUpdate": "अंतिम अपडेट: {timestamp}",
       "uptimeMinutes": "{minutes}म",
-      "uptimeHoursMinutes": "{hours}घंटे {minutes}मिनट"
+      "uptimeHoursMinutes": "{hours}घंटे {minutes}मिनट",
+      "breakerClosed": "बंद",
+      "breakerNotClosed": "खुला या आधा खुला"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "रखरखाव विवरण",
         "secondaryAction": "सिस्टम स्थिति"
       }
+    },
+    "miniapp": {
+      "askAnything": "कुछ भी पूछें…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP टूल",
     "scope": "दायरा",
-    "apiKey": "API कुंजी"
+    "apiKey": "API कुंजी",
+    "visibleCount": "{visible} दृश्यमान / कुल {total}",
+    "modeLabel": "दृश्य मोड",
+    "jumpToNow": "वर्तमान समय पर जाएँ, NOW रेखा {position}% स्थिति पर रीसेट हो जाती है",
+    "laneReuse": "लेन का पुनः उपयोग",
+    "laneReuseLabel": "लेन पुनः उपयोग अवधि (मिनट)",
+    "laneReuseHint": "एक ही वार्तालाप ID साझा करने वाले अनुरोध तब तक उसी टाइमलाइन पंक्ति में रहते हैं, जब तक उनके बीच का अंतर इतने मिनटों से कम हो।",
+    "laneReuseUnit": "मिनट",
+    "autoRefresh": "स्वतः रीफ़्रेश",
+    "autoRefreshLabel": "स्वतः रीफ़्रेश अंतराल (सेकंड)",
+    "autoRefreshHint": "टाइमलाइन सर्वर से अनुरोध सूची कितनी बार फिर से प्राप्त करती है।",
+    "autoRefreshUnit": "से.",
+    "zoomOut": "ज़ूम आउट",
+    "zoomIn": "ज़ूम इन"
   },
   "metadata": {
     "compressionTitle": "संपीड़न",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "बंद करें"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "/v1/models कैटलॉग में थिंकिंग लेवल वेरिएंट (जैसे -low, -medium, -high) के निर्माण को अक्षम करें।",
+  "teamCosts": {
+    "title": "टीम लागत",
+    "subtitle": "साझा सॉफ्ट बजट और कैटलॉग लागत अनुमान प्रबंधित करें।",
+    "refresh": "रीफ़्रेश करें",
+    "create": "टीम बनाएँ",
+    "edit": "टीम संपादित करें",
+    "archive": "संग्रहित करें",
+    "selectTeam": "टीमें",
+    "searchTeams": "टीमें खोजें",
+    "statusFilter": "टीम की स्थिति",
+    "active": "सक्रिय",
+    "archived": "संग्रहित · केवल पढ़ने योग्य",
+    "allTeams": "सभी टीमें",
+    "noTeams": "कोई मेल खाती टीम नहीं।",
+    "selectHint": "लागत देखने के लिए टीम बनाएँ या चुनें।",
+    "loading": "टीम लागत लोड हो रही है…",
+    "budgetTitle": "वर्तमान सॉफ्ट बजट",
+    "budgetSubtitle": "सफल दर्ज उपयोग · रोलिंग विंडो · रिपोर्ट की तारीखों से स्वतंत्र",
+    "archivedBudget": "संग्रहित: बजट प्रवर्तन निष्क्रिय है। ऐतिहासिक रिपोर्ट उपलब्ध रहती हैं।",
+    "unlimited": "असीमित — कोई साझा सॉफ्ट बजट कॉन्फ़िगर नहीं है।",
+    "budgetUnavailable": "बजट की स्थिति उपलब्ध नहीं है। पुनः प्रयास के लिए रीफ़्रेश करें।",
+    "used": "सफल उपयोग",
+    "maximum": "बजट अधिकतम",
+    "remaining": "ज्ञात शेष",
+    "resets": "रीसेट होगा",
+    "unpricedBudget": "सफल उपयोग के कुछ हिस्से की कीमत अज्ञात है। ज्ञात योग अधूरा है; बजट प्रवर्तन इस विंडो को पार माना जाता है।",
+    "overBudget": "बजट पहुँचा या पार हुआ · {amount} अधिक",
+    "reportTitle": "उपयोग रिपोर्ट",
+    "reportSubtitle": "सभी प्रयास · USD में कैटलॉग अनुमान, चालान नहीं · पूरी UTC तिथियाँ",
+    "reportPeriod": "रिपोर्ट अवधि",
+    "day1": "1 दिन",
+    "day7": "7 दिन",
+    "day30": "30 दिन",
+    "allTime": "सभी समय",
+    "reportSpend": "अनुमानित रिपोर्ट व्यय",
+    "requests": "अनुरोध",
+    "assignedKeys": "असाइन की गई कुंजियाँ",
+    "unpricedReport": "इस रिपोर्ट में अज्ञात कीमतें हैं। अनुमानित व्यय अधूरा है।",
+    "breakdown": "API कुंजी के अनुसार लागत",
+    "noUsage": "इस रिपोर्ट अवधि में कोई उपयोग नहीं।",
+    "keyName": "API कुंजी का नाम",
+    "tokens": "इनपुट + आउटपुट टोकन",
+    "unnamedKey": "बिना नाम या हटाई गई कुंजी",
+    "unpriced": "अज्ञात कीमत",
+    "members": "सदस्यता",
+    "memberSubtitle": "सदस्यता बदलने पर ऐतिहासिक व्यय मूल टीम के पास ही रहता है।",
+    "searchKeys": "कुंजियाँ या वर्तमान स्वामी खोजें",
+    "chooseKey": "API कुंजी चुनें",
+    "unassigned": "असाइन नहीं",
+    "ownership": "वर्तमान बिलिंग टीम: {team}",
+    "assign": "असाइन करें",
+    "remove": "हटाएँ",
+    "noMembers": "कोई वर्तमान सदस्य नहीं। ऐतिहासिक उपयोग अब भी बजट में गिना जा सकता है।",
+    "assignedAt": "{date} को असाइन किया गया (UTC)",
+    "name": "टीम का नाम",
+    "description": "विवरण",
+    "enableBudget": "साझा सॉफ्ट बजट सक्षम करें",
+    "amount": "बजट राशि (USD)",
+    "duration": "रोलिंग बजट विंडो",
+    "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "confirm": "पुष्टि करें",
+    "transferTitle": "कुंजी स्थानांतरण की पुष्टि करें",
+    "transferMessage": "इस कुंजी को “{source}” से “{destination}” में ले जाएँ? ऐतिहासिक व्यय मूल टीम के पास रहता है।",
+    "removeTitle": "कुंजी असाइनमेंट हटाएँ",
+    "removeMessage": "इस कुंजी को “{team}” से हटाएँ? ऐतिहासिक व्यय इसी टीम में रहता है।",
+    "archiveTitle": "टीम संग्रहित करें",
+    "archiveMessage": "“{team}” को संग्रहित करें? सभी वर्तमान बंधन बंद हो जाते हैं और बजट प्रवर्तन रुक जाता है। ऐतिहासिक रिपोर्ट उपलब्ध रहती हैं।",
+    "invalidName": "नाम (1–200 अक्षर) और अधिकतम 2,000 अक्षरों का विवरण दर्ज करें।",
+    "invalidAmount": "शून्य से बड़ी एक सीमित बजट राशि दर्ज करें।",
+    "unauthorized": "जारी रखने के लिए प्रबंधन डैशबोर्ड में साइन इन करें।",
+    "forbidden": "आपको टीमें प्रबंधित करने की अनुमति नहीं है। आपका इनपुट सुरक्षित है।",
+    "notFound": "यह टीम या असाइनमेंट अब मौजूद नहीं है।",
+    "conflict": "असाइनमेंट या टीम बदल गई है। पुनः प्रयास से पहले रीफ़्रेश करें और वर्तमान स्वामित्व की पुष्टि करें।",
+    "failed": "अनुरोध विफल रहा। आपका इनपुट सुरक्षित है; कृपया पुनः प्रयास करें।",
+    "partialBudget": "कुछ रखे गए दैनिक बकेट विंडो की सीमा से ओवरलैप करते हैं और सटीक रूप से बाँटे नहीं जा सकते। दिखाया गया व्यय अधूरा है; शेष सीमा उपलब्ध नहीं है। मौजूदा सॉफ्ट बजट नीति अपरिवर्तित है।"
+  },
   "connectionTest": {
     "title": "परीक्षण संदेश",
     "description": "इस खाते के माध्यम से एक वास्तविक अनुरोध भेजें। इसमें कोटा की थोड़ी मात्रा उपयोग होती है और प्रदाता के आधार पर उपयोग अवधि शुरू हो सकती है।",
@@ -15073,5 +15753,118 @@
     "importButton": "आयात करें",
     "importFailed": "आयात विफल रहा।",
     "importSuccess": "{connections} खाते और {nodes} प्रदाता नोड आयात किए गए; {skipped} छोड़े गए।"
+  },
+  "conversations": {
+    "title": "कॉन्वर्सेशन",
+    "countSummary": "{total, plural, one {# संवाद} other {# संवाद}} 2+ मोड़ों के साथ",
+    "autoRefreshTitle": "यह सूची कितनी बार सर्वर से पुनर्प्राप्त की जाती है।",
+    "autoRefresh": "ऑटो-रिफ्रेश",
+    "loading": "कॉन्वर्सेशन लोड हो रहे हैं...",
+    "colConversation": "बाधा",
+    "colTurns": "टर्न",
+    "colContinuation": "अनंत",
+    "colLastModel": "आखिरी मॉडल",
+    "colProvider": "प्रदाता",
+    "colStatus": "स्थिति",
+    "colLastSeen": "आखिरी बार देखा गया",
+    "drawerTitle": "बाधा",
+    "prevConversation": "पिछली बाधा",
+    "nextConversation": "अगली बाधा",
+    "gotoLatestRequest": "नवीनतम अनुरोध पर जाएँ",
+    "goToBottom": "नीचे जाएँ",
+    "statusInProgress": "प्रगति पर है",
+    "continuationGenuineTitle": "नवीनतम टर्न ने previous_response_id का उपयोग किया और इसे सर्वर-साइड पर रिजॉल्व कर दिया गया",
+    "continuationBadge": "अनुवर्ती",
+    "stalledTitle": "नवीनतम टर्न stop पर समाप्त नहीं हुआ और 5+ मिनट से कुछ जारी नहीं हो रहा",
+    "stalledBadge": "रुका हुआ",
+    "noTurns": "इस संवाद के लिए कोई टर्न दर्ज नहीं किया गया।"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "वर्तमान स्थिति से शुरू करें (मौजूदा लॉग छोड़ें)",
+    "pageTitle": "लॉग निर्यात",
+    "pageSubtitle": "लॉग्स टैब से कॉल लॉग को निरंतर रूप से एक बाहरी एनालिटिक्स स्टोर में भेजें।",
+    "addDestination": "गंतव्य जोड़ें",
+    "scheduleTitle": "समय-सारणी",
+    "cronLabel": "Cron",
+    "notScheduled": "नियोजित नहीं",
+    "lastScheduledRun": "अंतिम नियोजित चालू",
+    "lastRunSummary": "{startedAt} — {status}, {rows} पंक्तियाँ",
+    "never": "कभी नहीं",
+    "highWaterMark": "कॉल लॉग्स हाई-वाटर मार्क",
+    "rowPrefix": "पंक्ति {id}",
+    "noDestinations": "कोई निर्यात स्थान नहीं",
+    "noDestinationsHint": "प्रति घंटे समय-सीमा पर कॉल लॉग शिपिंग शुरू करने के लिए एक स्थान जोड़ें।",
+    "errLoadStatus": "निर्यात स्थिति लोड करना विफल रहा",
+    "errSaveDestination": "स्थान सहेजना विफल रहा",
+    "msgDestinationSaved": "स्थान सहेजा गया।",
+    "errConnectionTest": "संबंधी परीक्षण विफल रहा",
+    "msgRunInFlight": "इस स्थान के लिए एक चालू पहली चालू है; कुछ दो बार नहीं भेजा गया।",
+    "errExportRun": "निर्यात चाल विफल रही",
+    "errUpdateDestination": "स्थान अपडेट करना विफल रहा",
+    "errDeleteDestination": "स्थान हटाना विफल रहा",
+    "deleteTitle": "गंतव्य हटाएं",
+    "deleteConfirm": "\"{name}\" हटाएं? इसका एक्सपोर्ट कर्सर भी हटा दिया जाएगा, इसलिए इसे फिर से जोड़ने पर सबसे पुरानी सहेजी गई कॉल लॉग से शुरुआत होगी।",
+    "statusDisabled": "निष्क्रिय",
+    "statusFailing": "विफल",
+    "statusHealthy": "स्वस्थ",
+    "statusNotRunYet": "अभी तक चलाया नहीं गया",
+    "typeNotInstalled": "टाइप इंस्टॉल नहीं किया गया",
+    "metaLine": "अंतिम चालू {lastRun} · {exported} पंक्तियाँ निरक्षित · {pending} बाकी · कर्सर {cursor}",
+    "btnTest": "परीक्षण",
+    "btnRunNow": "अभी चलाएं",
+    "btnDisable": "निष्क्रिय करें",
+    "btnEnable": "सक्रिय करें",
+    "btnEdit": "संपादित करें",
+    "btnDelete": "हटाएं"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI खाते",
+    "cardSubtitle": "प्रमाणीकृत प्रबंधन API से केवल-पठन स्थिति",
+    "btnRefresh": "रीफ्रेश करें",
+    "listAria": "CLIProxyAPI खाते का स्वास्थ्य",
+    "noAccounts": "कोई CLIProxyAPI खाता नहीं मिला।",
+    "loading": "खाते का स्वास्थ्य लोड हो रहा है…",
+    "stateReady": "खाता स्वास्थ्य",
+    "stateDisabled": "CLIProxyAPI इंस्टॉल नहीं है",
+    "stateMissingKey": "प्रबंधन कुंजी कॉन्फ़िगर नहीं है",
+    "stateUnreachable": "प्रबंधन API अप्रत्यक्ष है",
+    "stateUnauthorized": "प्रबंधन कुंजी अस्वीकार कर दी गई",
+    "stateUnsupported": "यह CLIProxyAPI संस्करण खाता स्वास्थ्य प्रकट नहीं करता",
+    "stateInvalidResponse": "प्रबंधन API ने एक असमर्थित प्रतिक्रिया लौटाई"
+  },
+  "darioPanel": {
+    "title": "क्लॉड खाते",
+    "description": "दारीओ को अपने Claude Pro/Max सब्सक्रिप्शन के साथ प्रमाणित करें। ट्रैफिक आपके सब्सक्रिप्शन पूल से बिल होता है। दारीओ के अनुरोधों की रूटिंग से पहले कम से कम एक खाता आवश्यक है (तब तक /health डीग्रेडेड रिपोर्ट करता है)।",
+    "noAccounts": "अभी तक कोई खाता कॉन्फ़िगर नहीं किया गया।",
+    "importTitle": "OmniRoute से आयात करें",
+    "importDescription": "पुनः उपयोग करें मौजूदा OmniRoute क्लॉड कनेक्शन के OAuth टोकन बिना दोबारा लॉगिन किए — ब्राउज़र अनुमोदन चरण को पूरी तरह छोड़ता है।",
+    "importPendingTooltip": "जब OmniRoute में क्लॉड कनेक्शन मौजूद होगा, तभी सक्रिय होगा।",
+    "btnImport": "आयात करें",
+    "btnImporting": "आयात हो रहा है…",
+    "aliasPlaceholder": "एलियास (वैकल्पिक)",
+    "btnStartLogin": "लॉगिन शुरू करें",
+    "btnStarting": "शुरू हो रहा है…",
+    "btnCompleteLogin": "लॉगिन पूरा करें",
+    "btnCompleting": "पूरा हो रहा है…",
+    "codePlaceholder": "code#state या बंद code",
+    "noticeImported": "खाते के रूप में आया है \"{alias}\" — इसे एकाग्र करने के लिए Dario को फिर से आरंभ किया गया।",
+    "noticeAdded": "खाता \"{alias}\" जोड़ा गया।",
+    "expiresInHours": "~{hours}h में समाप्त हो रहा है",
+    "expiresInMinutes": "~{minutes}m में समाप्त हो रहा है",
+    "expiresAt": "{date} को समाप्त",
+    "scopes": "{count, plural, one {# स्कोप} other {# स्कोप}}",
+    "btnRemove": "हटाएँ",
+    "btnRefresh": "रिफ़्रेश करें",
+    "loginStep1": "1. अपने ब्राउज़र में यह URL खोलें और खाते <mono>{alias}</mono> के लिए एक्सेस की अनुमति दें:",
+    "pendingExpires": "लॉगिन {time} में समाप्त होगा",
+    "loginStep2": "2. Anthropic द्वारा प्रदर्शित कोड चिपकाएं:"
+  },
+  "miniapp": {
+    "title": "OmniRoute मिनी ऐप",
+    "errTelegramOnly": "यह पेज Telegram Mini App के अंदर खुला जाना चाहिए।",
+    "greeting": "👋 नमस्ते {name}! अपने OmniRoute गेटवे के माध्यम से चैट करने के लिए एक संदेश भेजें।",
+    "greetingFallbackName": "वहाँ",
+    "errNoReply": "⚠️ गेटवे से कोई उत्तर नहीं मिला।",
+    "btnSend": "भेजें"
   }
 }

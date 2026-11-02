@@ -6,9 +6,9 @@
 
 🌐 **Bahasa:** 🇺🇸 [Bahasa Inggeris](./API_REFERENCE.md) | 🇪🇹 [አማርኛ](../i18n/am/docs/reference/API_REFERENCE.md) | 🇸🇦 [العربية](../i18n/ar/docs/reference/API_REFERENCE.md) | 🇦🇿 [Azərbaycan dili](../i18n/az/docs/reference/API_REFERENCE.md) | 🇧🇬 [Български](../i18n/bg/docs/reference/API_REFERENCE.md) | 🇧🇩 [বাংলা](../i18n/bn/docs/reference/API_REFERENCE.md) | 🇧🇦 [Bosanski](../i18n/bs/docs/reference/API_REFERENCE.md) | 🇨🇿 [Čeština](../i18n/cs/docs/reference/API_REFERENCE.md) | 🇩🇰 [Dansk](../i18n/da/docs/reference/API_REFERENCE.md) | 🇩🇪 [Deutsch](../i18n/de/docs/reference/API_REFERENCE.md) | 🇬🇷 [Ελληνικά](../i18n/el/docs/reference/API_REFERENCE.md) | 🇪🇸 [Español](../i18n/es/docs/reference/API_REFERENCE.md) | 🇪🇪 [Eesti](../i18n/et/docs/reference/API_REFERENCE.md) | 🇮🇷 [فارسی](../i18n/fa/docs/reference/API_REFERENCE.md) | 🇫🇮 [Suomi](../i18n/fi/docs/reference/API_REFERENCE.md) | 🇫🇷 [Français](../i18n/fr/docs/reference/API_REFERENCE.md) | 🇮🇪 [Gaeilge](../i18n/ga/docs/reference/API_REFERENCE.md) | 🇮🇳 [ગુજરાતી](../i18n/gu/docs/reference/API_REFERENCE.md) | 🇳🇬 [Hausa](../i18n/ha/docs/reference/API_REFERENCE.md) | 🇮🇱 [עברית](../i18n/he/docs/reference/API_REFERENCE.md) | 🇮🇳 [हिन्दी](../i18n/hi/docs/reference/API_REFERENCE.md) | 🇭🇷 [Hrvatski](../i18n/hr/docs/reference/API_REFERENCE.md) | 🇭🇺 [Magyar](../i18n/hu/docs/reference/API_REFERENCE.md) | 🇦🇲 [Հայերեն](../i18n/hy/docs/reference/API_REFERENCE.md) | 🇮🇩 [Bahasa Indonesia](../i18n/id/docs/reference/API_REFERENCE.md) | 🇳🇬 [Igbo](../i18n/ig/docs/reference/API_REFERENCE.md) | 🇮🇹 [Italiano](../i18n/it/docs/reference/API_REFERENCE.md) | 🇯🇵 [日本語](../i18n/ja/docs/reference/API_REFERENCE.md) | 🇬🇪 [ქართული](../i18n/ka/docs/reference/API_REFERENCE.md) | 🇰🇭 [ខ្មែរ](../i18n/km/docs/reference/API_REFERENCE.md) | 🇮🇳 [ಕನ್ನಡ](../i18n/kn/docs/reference/API_REFERENCE.md) | 🇰🇷 [한국어](../i18n/ko/docs/reference/API_REFERENCE.md) | 🇱🇹 [Lietuvių](../i18n/lt/docs/reference/API_REFERENCE.md) | 🇱🇻 [Latviešu](../i18n/lv/docs/reference/API_REFERENCE.md) | 🇮🇳 [മലയാളം](../i18n/ml/docs/reference/API_REFERENCE.md) | 🇮🇳 [मराठी](../i18n/mr/docs/reference/API_REFERENCE.md) | 🇲🇾 [Bahasa Melayu](../i18n/ms/docs/reference/API_REFERENCE.md) | 🇲🇹 [Malti](../i18n/mt/docs/reference/API_REFERENCE.md) | 🇲🇲 [မြန်မာ](../i18n/my/docs/reference/API_REFERENCE.md) | 🇳🇵 [नेपाली](../i18n/ne/docs/reference/API_REFERENCE.md) | 🇳🇱 [Nederlands](../i18n/nl/docs/reference/API_REFERENCE.md) | 🇳🇴 [Norsk](../i18n/no/docs/reference/API_REFERENCE.md) | 🇮🇳 [ଓଡ଼ିଆ](../i18n/or/docs/reference/API_REFERENCE.md) | 🇮🇳 [ਪੰਜਾਬੀ](../i18n/pa/docs/reference/API_REFERENCE.md) | 🇵🇭 [Filipino](../i18n/phi/docs/reference/API_REFERENCE.md) | 🇵🇱 [Polski](../i18n/pl/docs/reference/API_REFERENCE.md) | 🇵🇹 [Português (Portugal)](../i18n/pt/docs/reference/API_REFERENCE.md) | 🇧🇷 [Português (Brasil)](../i18n/pt-BR/docs/reference/API_REFERENCE.md) | 🇷🇴 [Română](../i18n/ro/docs/reference/API_REFERENCE.md) | 🇷🇺 [Русский](../i18n/ru/docs/reference/API_REFERENCE.md) | 🇱🇰 [සිංහල](../i18n/si/docs/reference/API_REFERENCE.md) | 🇸🇰 [Slovenčina](../i18n/sk/docs/reference/API_REFERENCE.md) | 🇸🇮 [Slovenščina](../i18n/sl/docs/reference/API_REFERENCE.md) | 🇷🇸 [Српски](../i18n/sr/docs/reference/API_REFERENCE.md) | 🇸🇪 [Svenska](../i18n/sv/docs/reference/API_REFERENCE.md) | 🇰🇪 [Kiswahili](../i18n/sw/docs/reference/API_REFERENCE.md) | 🇮🇳 [தமிழ்](../i18n/ta/docs/reference/API_REFERENCE.md) | 🇮🇳 [తెలుగు](../i18n/te/docs/reference/API_REFERENCE.md) | 🇹🇭 [ไทย](../i18n/th/docs/reference/API_REFERENCE.md) | 🇹🇷 [Türkçe](../i18n/tr/docs/reference/API_REFERENCE.md) | 🇺🇦 [Українська](../i18n/uk-UA/docs/reference/API_REFERENCE.md) | 🇵🇰 [اردو](../i18n/ur/docs/reference/API_REFERENCE.md) | 🇺🇿 [Oʻzbekcha](../i18n/uz/docs/reference/API_REFERENCE.md) | 🇻🇳 [Tiếng Việt](../i18n/vi/docs/reference/API_REFERENCE.md) | 🇳🇬 [Yorùbá](../i18n/yo/docs/reference/API_REFERENCE.md) | 🇨🇳 [中文 (简体)](../i18n/zh-CN/docs/reference/API_REFERENCE.md) | 🇹🇼 [中文 (繁體)](../i18n/zh-TW/docs/reference/API_REFERENCE.md)
 
-Rujukan teras untuk API OmniRoute. Ia merangkumi antara muka awam `/v1` dan titik akhir pengurusan yang paling kerap digunakan; [`docs/openapi.yaml`](../openapi.yaml) yang boleh dibaca mesin dan pepohon laluan di bawah `src/app/api/` merupakan sumber yang lengkap.
+Rujukan teras untuk OmniRoute API. Ia merangkumi permukaan awam `/v1` dan titik akhir pengurusan yang paling kerap digunakan; [`docs/openapi.yaml`](../openapi.yaml) yang boleh dibaca mesin dan pepohon laluan di bawah `src/app/api/` ialah sumber yang menyeluruh.
 
-Untuk protokol khusus yang serasi dengan OpenAI dan matriks keupayaan penyedia, lihat
+Untuk protokol serasi OpenAI yang khusus dan matriks keupayaan penyedia, lihat
 [`OPENAI_COMPATIBILITY.md`](./OPENAI_COMPATIBILITY.md).
 
 ---
@@ -20,7 +20,7 @@ Untuk protokol khusus yang serasi dengan OpenAI dan matriks keupayaan penyedia, 
 - [Pembenaman](#embeddings)
 - [Penjanaan Imej](#image-generation)
 - [OCR Dokumen](#document-ocr)
-- [Senarai Model](#list-models)
+- [Senaraikan Model](#list-models)
 - [Manifes Pemalam Penyedia](#provider-plugin-manifest)
 - [Titik Akhir Keserasian](#compatibility-endpoints)
 - [API Fail](#files-api)
@@ -64,27 +64,27 @@ Content-Type: application/json
 
 ### Pengepala Tersuai
 
-| Pengepala                | Arah       | Penerangan                                                                                                                                                                                                                         |
-| ------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `X-OmniRoute-No-Cache`   | Permintaan | Tetapkan kepada `true` untuk memintas cache                                                                                                                                                                                        |
-| `x-omniroute-no-memory`  | Permintaan | Tetapkan kepada `true` untuk melangkau penyuntikan memori + kemahiran bagi permintaan ini (mencerminkan no-cache; mengelakkan overhed token/kos bagi setiap panggilan)                                                             |
-| `X-OmniRoute-Progress`   | Permintaan | Tetapkan kepada `true` untuk peristiwa kemajuan                                                                                                                                                                                    |
-| `X-Session-Id`           | Permintaan | Kunci sesi lekat untuk afiniti sesi luaran                                                                                                                                                                                         |
-| `x_session_id`           | Permintaan | Varian garis bawah turut diterima (HTTP langsung)                                                                                                                                                                                  |
-| `X-OmniRoute-Session-Id` | Permintaan | Tag sesi/perbualan yang dibekalkan pemanggil (turut disalurkan kepada memori). Apabila hadir, dikekalkan kata demi kata dalam `call_logs.session_tag` untuk pengagihan kos setiap sesi (#8249) — tidak pernah dijana apabila tiada |
-| `Idempotency-Key`        | Permintaan | Kunci penyahduplikasian (tetingkap 5 saat)                                                                                                                                                                                         |
-| `X-Request-Id`           | Permintaan | Kunci penyahduplikasian alternatif                                                                                                                                                                                                 |
-| `x-omniroute-connection` | Permintaan | Sematkan permintaan model tunggal kepada satu sambungan penyedia (akaun) berdasarkan idnya — lihat [Penyematan akaun bagi setiap permintaan](#account-pinning-per-request)                                                         |
-| `X-OmniRoute-Cache`      | Respons    | `HIT` atau `MISS` (tanpa penstriman)                                                                                                                                                                                               |
-| `X-OmniRoute-Idempotent` | Respons    | `true` jika dinyahduplikasi                                                                                                                                                                                                        |
-| `X-OmniRoute-Progress`   | Respons    | `enabled` jika penjejakan kemajuan diaktifkan                                                                                                                                                                                      |
-| `X-OmniRoute-Session-Id` | Respons    | ID sesi berkesan yang digunakan oleh OmniRoute                                                                                                                                                                                     |
-| `X-OmniRoute-Request-Id` | Respons    | Id korelasi permintaan (apabila diketahui)                                                                                                                                                                                         |
-| `X-OmniRoute-Version`    | Respons    | Versi binaan OmniRoute (sentiasa hadir)                                                                                                                                                                                            |
-| `X-OmniRoute-Cost-Saved` | Respons    | USD yang dijimatkan oleh cache apabila berlaku HIT (cache hit sahaja)                                                                                                                                                              |
-| `X-OmniRoute-Decision`   | Respons    | Jejak penghalaan: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` ialah strategi gabungan, atau `single` untuk permintaan bukan gabungan) — sentiasa hadir dalam respons pelengkapan                                 |
+| Pengepala                | Arah       | Penerangan                                                                                                                                                                                                                                     |
+| ------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `X-OmniRoute-No-Cache`   | Permintaan | Tetapkan kepada `true` untuk memintas cache                                                                                                                                                                                                    |
+| `x-omniroute-no-memory`  | Permintaan | Tetapkan kepada `true` untuk melangkau suntikan memori + kemahiran bagi permintaan ini (menyerupai tanpa cache; mengelakkan overhed token/kos bagi setiap panggilan)                                                                           |
+| `X-OmniRoute-Progress`   | Permintaan | Tetapkan kepada `true` untuk peristiwa kemajuan                                                                                                                                                                                                |
+| `X-Session-Id`           | Permintaan | Kunci sesi lekat untuk pertalian sesi luaran                                                                                                                                                                                                   |
+| `x_session_id`           | Permintaan | Varian garis bawah turut diterima (HTTP langsung)                                                                                                                                                                                              |
+| `X-OmniRoute-Session-Id` | Permintaan | Tag sesi/perbualan yang dibekalkan oleh pemanggil (turut menyalurkan data kepada memori). Apabila hadir, tag disimpan kata demi kata ke `call_logs.session_tag` untuk atribusi kos setiap sesi (#8249) — tidak pernah disintesis apabila tiada |
+| `Idempotency-Key`        | Permintaan | Kunci penyahduplikasian (tetingkap 5s)                                                                                                                                                                                                         |
+| `X-Request-Id`           | Permintaan | Kunci penyahduplikasian alternatif                                                                                                                                                                                                             |
+| `x-omniroute-connection` | Permintaan | Ikat permintaan model tunggal kepada satu sambungan penyedia (akaun) berdasarkan ID-nya — lihat [Pengikatan akaun bagi setiap permintaan](#account-pinning-per-request)                                                                        |
+| `X-OmniRoute-Cache`      | Respons    | `HIT` atau `MISS` (tanpa penstriman)                                                                                                                                                                                                           |
+| `X-OmniRoute-Idempotent` | Respons    | `true` jika dinyahduplikasi                                                                                                                                                                                                                    |
+| `X-OmniRoute-Progress`   | Respons    | `enabled` jika penjejakan kemajuan dihidupkan                                                                                                                                                                                                  |
+| `X-OmniRoute-Session-Id` | Respons    | ID sesi berkuat kuasa yang digunakan oleh OmniRoute                                                                                                                                                                                            |
+| `X-OmniRoute-Request-Id` | Respons    | ID korelasi permintaan (apabila diketahui)                                                                                                                                                                                                     |
+| `X-OmniRoute-Version`    | Respons    | Versi binaan OmniRoute (sentiasa hadir)                                                                                                                                                                                                        |
+| `X-OmniRoute-Cost-Saved` | Respons    | Jumlah USD yang dijimatkan oleh cache pada `HIT` (untuk capaian cache sahaja)                                                                                                                                                                  |
+| `X-OmniRoute-Decision`   | Respons    | Jejak penghalaan: `strategy=<name>; provider=<alias>; latency_ms=<n>` (`<name>` ialah strategi kombo, atau `single` bagi permintaan bukan kombo) — sentiasa hadir dalam respons penyelesaian                                                   |
 
-> Nota Nginx: jika anda bergantung pada pengepala garis bawah (contohnya `x_session_id`), dayakan `underscores_in_headers on;`.
+> Nota Nginx: jika anda bergantung pada pengepala bergaris bawah (contohnya `x_session_id`), dayakan `underscores_in_headers on;`.
 
 #### Penyematan akaun bagi setiap permintaan
 
@@ -100,21 +100,21 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model": "codex/gpt-5.5", "messages": [{"role": "user", "content": "hi"}]}'
 ```
 
-- **Tempat untuk mencari id.** Buka halaman penyedia dalam papan pemuka
-  (**Papan Pemuka → Penyedia → <provider>**) dan klik cip id `xxxxxxxx…` pada baris
-  sambungan — tindakan ini menyalin id sambungan penuh.
+- **Tempat untuk mendapatkan ID.** Buka halaman penyedia dalam papan pemuka
+  (**Papan Pemuka → Penyedia → <penyedia>**) dan klik cip ID `xxxxxxxx…` pada baris sambungan
+  — tindakan ini menyalin ID sambungan penuh.
 - **Permintaan yang mematuhinya.** Permintaan model tunggal (`provider/model`) pada
-  `/v1/chat/completions`, `/v1/messages` dan `/v1/responses`. Kombo mengabaikan pengepala tersebut: sematkan
-  akaun bagi setiap langkah kombo melalui sambungan langkah itu sendiri.
-- **Sematan adalah ketat, bukan keutamaan.** Sambungan yang disematkan digunakan secara eksklusif. Kegagalan
+  `/v1/chat/completions`, `/v1/messages` dan `/v1/responses`. Gabungan mengabaikan pengepala tersebut: sematkan
+  akaun bagi setiap langkah gabungan melalui sambungan langkah itu sendiri.
+- **Penyematan ini tegas, bukan sekadar keutamaan.** Sambungan yang disematkan digunakan secara eksklusif. Kegagalan
   dalam permintaan merekodkan tempoh bertenang akaun tetapi **tidak** beralih kepada
-  akaun setara daripada penyedia yang sama.
-- **Tempoh bertenang dan kuota melepaskan sematan.** Semasa sambungan yang disematkan sedang dalam tempoh bertenang,
-  kehabisan kuota atau disekat oleh dasar kuota, permintaan seterusnya akan menggunakan sambungan lain
-  penyedia sebagai sandaran, sama seperti trafik yang tidak disematkan.
-- **Id yang tidak diketahui atau dinyahdayakan akan gagal.** Id yang tiada dalam kumpulan aktif penyedia (dipadamkan,
+  akaun lain bagi penyedia yang sama.
+- **Tempoh bertenang dan kuota melepaskan penyematan.** Semasa sambungan yang disematkan berada dalam tempoh bertenang,
+  telah kehabisan kuota atau disekat oleh dasar kuota, permintaan seterusnya akan beralih kepada sambungan
+  lain penyedia, sama seperti trafik tanpa penyematan.
+- **ID yang tidak diketahui atau dinyahdayakan akan gagal.** ID yang tiada dalam kumpulan aktif penyedia (dipadamkan,
   dinyahaktifkan atau milik penyedia lain) menyebabkan tiada akaun yang layak, maka permintaan
-  gagal dan bukannya dihalakan secara senyap ke tempat lain.
+  gagal dan bukannya dihalakan ke tempat lain secara senyap.
 
 Claude Code menghantar pengepala tersuai melalui `ANTHROPIC_CUSTOM_HEADERS`. Letakkannya dalam blok `env`
 bagi `~/.claude/settings.json`, atau dalam `.claude/settings.json` pada peringkat projek untuk menyematkan akaun yang berbeza
@@ -131,17 +131,21 @@ bagi setiap projek:
 ```
 
 Sumber: `src/sse/handlers/chat.ts` (pembacaan pengepala), `src/sse/services/auth.ts` dan
-`src/sse/services/sessionAffinityPin.ts` (pelepasan sematan dan semakan ketiadaan dalam kumpulan).
+`src/sse/services/sessionAffinityPin.ts` (pelepasan penyematan dan semakan ketiadaan dalam kumpulan).
 
-> **Pengepala telemetri kos:** respons berjaya tanpa penstriman turut membawa set telemetri kos `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, tetap 10 tempat perpuluhan; `0.0000000000` untuk yang percuma/tanpa harga), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, dan `X-OmniRoute-Fallback-Attempts` (hanya apabila > 0), serta `X-OmniRoute-Request-Id` dan `X-OmniRoute-Version`. Ini dikeluarkan oleh pelengkapan sembang, `/v1/responses`, `/v1/messages`, **dan titik akhir media** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, dan `/v1/moderations` (kos sentiasa `0`). Kos media dikira mengikut setiap modaliti (bagi setiap imej, saat, aksara atau unit carian) apabila harga tersedia, jika tidak `0` (terus beroperasi sekiranya gagal).
+> **Pengepala telemetri kos:** respons berjaya tanpa penstriman turut membawa set telemetri kos `X-OmniRoute-*` — `X-OmniRoute-Response-Cost` (USD, tetap 10 tempat perpuluhan; `0.0000000000` bagi yang percuma/tanpa harga), `X-OmniRoute-Tokens-In` / `X-OmniRoute-Tokens-Out`, `X-OmniRoute-Model`, `X-OmniRoute-Provider`, `X-OmniRoute-Latency-Ms`, `X-OmniRoute-Cache-Hit`, dan `X-OmniRoute-Fallback-Attempts` (hanya apabila > 0), serta `X-OmniRoute-Request-Id` dan `X-OmniRoute-Version`. Pengepala ini dikeluarkan oleh pelengkapan sembang, `/v1/responses`, `/v1/messages`, **dan titik akhir media** — `/v1/embeddings`, `/v1/images/generations`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/rerank`, `/v1/videos/generations`, `/v1/music/generations`, dan `/v1/moderations` (kos sentiasa `0`). Kos media dikira mengikut modaliti (bagi setiap imej, setiap saat, setiap aksara, setiap unit carian) apabila harga tersedia, jika tidak `0` (gagal-terbuka).
 
-> **Semantik kos cache-hit:** bagi HIT cache semantik (`X-OmniRoute-Cache-Hit: true`), tiada panggilan huluan dibuat, maka `X-OmniRoute-Response-Cost` ialah `0.0000000000` (kos **tambahan** untuk menyampaikan hit tersebut). Kos asal/kos yang sepatutnya dikenakan dilaporkan secara berasingan dalam `X-OmniRoute-Cost-Saved`. Pengguna data pengebilan hendaklah menjumlahkan `X-OmniRoute-Response-Cost` (hit tidak menelan kos); analitik cache boleh mengagregatkan `X-OmniRoute-Cost-Saved`.
+> **Semantik kos padanan cache:** apabila terdapat padanan cache semantik (`X-OmniRoute-Cache-Hit: true`), tiada panggilan huluan dibuat, maka `X-OmniRoute-Response-Cost` ialah `0.0000000000` (kos **tambahan** untuk menyediakan padanan tersebut). Kos asal/kos yang sepatutnya dikenakan dilaporkan secara berasingan dalam `X-OmniRoute-Cost-Saved`. Pengguna data pengebilan hendaklah menjumlahkan `X-OmniRoute-Response-Cost` (padanan tidak menelan kos); analitis cache boleh mengagregatkan `X-OmniRoute-Cost-Saved`.
 
 ## Pajakan Sesi Terurus Eksklusif
 
-Pajakan sesi terurus eksklusif ialah kontrak penghalaan opt-in, neutral-klien: satu pemilik aktif memegang satu sambungan OmniRoute yang layak. Ia tidak memajak model, memerlukan OAuth, mengenal pasti klien tertentu, atau memerlukan penyedia tertentu.
+Pajakan sesi terurus eksklusif ialah kontrak penghalaan ikut serta yang neutral klien: satu pemilik aktif
+memegang satu sambungan OmniRoute yang layak. Ia tidak memajak model, memerlukan OAuth, mengenal pasti
+klien tertentu atau memerlukan penyedia tertentu.
 
-Kunci API pengesahan mesti mempunyai skop `lease:exclusive` dan senarai `allowedConnections` yang eksplisit dan tidak kosong. Sempadan mutasi pangkalan data menguatkuasakan kedua-dua medan bersama-sama pada penciptaan kunci dan kemas kini separa.
+Kunci API yang membuat pengesahan mesti mempunyai skop `lease:exclusive` dan senarai
+`allowedConnections` yang dinyatakan secara jelas serta tidak kosong. Sempadan mutasi pangkalan data menguatkuasakan kedua-dua medan secara serentak semasa
+penciptaan kunci dan kemas kini separa.
 
 ```http
 POST /api/v1/session-leases
@@ -152,7 +156,9 @@ X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 {"action":"acquire","model":"glm/glm-4.6"}
 ```
 
-Respons pemerolehan, pembaharuan, dan pelepasan yang berjaya mendedahkan cap masa, `state`, dan `generation` positif yang tepat, tetapi tidak pernah sambungan atau kelayakan yang dipilih. Pembaharuan dan pelepasan membekalkan generasi dalam badan JSON:
+Respons pemerolehan, pembaharuan dan pelepasan yang berjaya mendedahkan cap masa, `state` serta
+`generation` positif yang tepat, tetapi tidak sekali-kali mendedahkan sambungan atau bukti kelayakan yang dipilih. Pembaharuan dan pelepasan membekalkan
+generasi dalam isi JSON:
 
 ```json
 { "action": "renew", "generation": 1 }
@@ -162,7 +168,7 @@ Respons pemerolehan, pembaharuan, dan pelepasan yang berjaya mendedahkan cap mas
 { "action": "release", "generation": 1, "reason": "OWNER_EXIT" }
 ```
 
-Pemilik pajakan aktif boleh secara eksplisit meminta metadata paparan selamat privasi untuk pengikatan semasanya:
+Pemilik pajakan aktif boleh meminta metadata paparan yang selamat dari segi privasi secara jelas untuk ikatan semasanya:
 
 ```json
 { "action": "status", "generation": 1 }
@@ -182,22 +188,37 @@ Pemilik pajakan aktif boleh secara eksplisit meminta metadata paparan selamat pr
 }
 ```
 
-Tindakan status opt-in ini dipagari oleh pemilik legap, kunci API terurus yang disahkan, dan generasi aktif yang tepat dalam satu transaksi pangkalan data. `displayName` hanyalah nama sambungan yang dikonfigurasi yang dipangkas; ia adalah `null` apabila tiada nama yang dikonfigurasi yang selamat wujud. OmniRoute tidak pernah menggantikan e-mel atau identiti akaun yang dijana. Nilai penyedia adalah label paparan yang tidak sensitif dan tidak pernah menjadi pengecam penyedia serasi yang dijana. Kelayakan, token, kuki, id sambungan mentah atau kunci API, hash pemilik, rahsia pagar, dan data penghalaan dalaman dikecualikan.
+Tindakan status ikut serta ini dipagari oleh pemilik legap, kunci API terurus yang disahkan dan
+generasi aktif yang tepat dalam satu transaksi pangkalan data. `displayName` hanyalah nama
+sambungan dikonfigurasikan yang telah dirapikan; nilainya ialah `null` apabila tiada nama dikonfigurasikan yang selamat. OmniRoute tidak sekali-kali menggantikannya dengan
+e-mel atau identiti akaun yang dijana. Nilai penyedia ialah label paparan tidak sensitif dan tidak sekali-kali merupakan
+pengecam penyedia serasi yang dijana. Bukti kelayakan, token, kuki, ID mentah sambungan atau kunci
+API, cincangan pemilik, rahsia pemagaran dan data penghalaan dalaman tidak disertakan.
 
-Carian kunci salah, pemilik salah, generasi lapuk, hilang, tamat tempoh, dilepaskan, dan tidak sah semuanya mengembalikan ralat `409 LEASE_FENCE_STALE` yang sama tanpa metadata sambungan. Klien yang menerima respons menunggu kapasiti tidak mempunyai pengikatan aktif untuk diperiksa. Apabila penghalaan mengubah pajakan aktif, generasi yang sama kekal sah dan status secara atomik mengembalikan pengikatan baharu, tidak pernah yang lama. Klien sedia ada kekal tidak berubah kerana respons pemerolehan, pembaharuan, pelepasan, dan menunggu mengekalkan bentuk sebelumnya.
+Carian dengan kunci yang salah, pemilik yang salah, generasi lapuk, tiada pajakan, pajakan tamat tempoh, dilepaskan atau dibatalkan, semuanya
+mengembalikan ralat `409 LEASE_FENCE_STALE` yang sama tanpa metadata sambungan. Klien yang menerima respons menunggu kapasiti tidak mempunyai ikatan aktif untuk diperiksa. Apabila penghalaan mengalihkan pajakan aktif,
+generasi yang sama kekal sah dan status mengembalikan ikatan baharu secara atom, bukan ikatan lama.
+Klien sedia ada kekal tidak berubah kerana respons pemerolehan, pembaharuan, pelepasan dan menunggu mengekalkan
+bentuk terdahulunya.
 
-Kontrak pelayan ini tidak mengubah stok OpenAI Codex `/status`. Stok Codex pada masa ini melaporkan penyedia modelnya dan keadaan pengesahan/akaun terbina dalam tetapi tidak memaparkan metadata akaun penyedia tersuai sewenang-wenangnya; integrasi klien kemudian mesti memanggil tindakan ini dan memutuskan cara memaparkan `connection.displayName`.
+Kontrak pelayan ini tidak mengubah `/status` OpenAI Codex asal. Pada masa ini, Codex asal melaporkan
+penyedia modelnya serta keadaan pengesahan/akaun terbina dalam, tetapi tidak memaparkan metadata akaun
+penyedia tersuai yang sewenang-wenangnya; penyepaduan klien pada masa hadapan mesti memanggil tindakan ini dan menentukan cara untuk
+memaparkan `connection.displayName`.
 
-Setiap permintaan inferens terurus kemudian membekalkan kedua-dua pengepala kawalan:
+Setiap permintaan inferens terurus kemudiannya membekalkan kedua-dua pengepala kawalan:
 
 ```http
 X-OmniRoute-Lease-Owner: vlo_<43-base64url-characters>
 X-OmniRoute-Lease-Generation: 1
 ```
 
-Pemilik, generasi, sambungan aktif, dan kunci API yang disahkan yang tepat dipagari serta-merta sebelum setiap percubaan hulu yang disokong. Mengulang pemilik dan generasi dengan kunci lain gagal walaupun kunci tersebut membenarkan sambungan yang sama. Pemilik mentah tidak dikekalkan, dicatat, disimpan dalam tangkapan permintaan, atau diteruskan ke hulu.
+Pemilik yang tepat, generasi, sambungan aktif dan kunci API yang disahkan dipagari serta-merta
+sebelum setiap percubaan huluan yang disokong. Memainkan semula pemilik dan generasi dengan kunci lain gagal walaupun
+kunci tersebut membenarkan sambungan yang sama. Pemilik mentah tidak disimpan secara kekal, dicatat dalam log, dikekalkan dalam
+petikan permintaan atau dimajukan ke huluan.
 
-Pertikaian sementara mengembalikan HTTP `429` dengan `Retry-After` dan:
+Perebutan sementara mengembalikan HTTP `429` dengan `Retry-After` dan:
 
 ```json
 {
@@ -208,35 +229,38 @@ Pertikaian sementara mengembalikan HTTP `429` dengan `Retry-After` dan:
 }
 ```
 
-Respons ini hanya bermaksud bahawa set layak biasa tidak kosong dan setiap calon bebas dipegang oleh pajakan aktif asing. Model/penyedia yang tidak disokong, ketidakpadanan polisi, tempoh bertenang, kuota, kesihatan, dan kegagalan kelayakan biasa yang lain mengekalkan respons OmniRoute sedia ada mereka.
+Respons ini hanya bermaksud bahawa set layak biasa tidak kosong dan setiap calon yang bebas sedang
+dipegang oleh pajakan aktif asing. Model/penyedia yang tidak disokong, ketidakpadanan dasar, tempoh bertenang, kuota,
+kesihatan dan kegagalan kelayakan biasa lain mengekalkan respons OmniRoute sedia ada.
 
 ### `x-omniroute-compression`
 
-Penggantian setiap permintaan bagi pelan pemampatan. Keutamaan tertinggi — mengatasi penggantian gabungan penghalaan, profil aktif, pencetus automatik, dan panel Lalai. Nilai:
+Penggantian pelan pemampatan bagi setiap permintaan. Keutamaan tertinggi — mengatasi penggantian kombo
+penghalaan, profil aktif, pencetus automatik dan Lalai panel. Nilai:
 
-| Nilai         | Kesan                                                                                                   |
-| ------------- | ------------------------------------------------------------------------------------------------------- |
-| `off`         | Tiada pemampatan untuk permintaan ini.                                                                  |
-| `default`     | Profil Lalai terbitan panel (mengabaikan profil aktif). Enjin lossy dibiarkan mati.                     |
-| `safe`        | Dedup dan lipatan ruang putih sahaja.                                                                   |
-| `allow-lossy` | Kekalkan pelan operator untuk permintaan ini, termasuk ringkasan dan penulisan semula gaya.             |
-| `engine:<id>` | Satu enjin apabila diaktifkan, cth. `engine:rtk`. Opt-in setiap permintaan untuk enjin tersebut.        |
-| `<combo>`     | Gabungan bernama, dipadankan mengikut nama (tidak peka huruf besar/kecil) dahulu, kemudian mengikut id. |
+| Nilai         | Kesan                                                                                                                 |
+| ------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `off`         | Tiada pemampatan untuk permintaan ini.                                                                                |
+| `default`     | Profil Lalai yang diperoleh daripada panel (mengabaikan profil aktif). Enjin lossy dibiarkan tidak aktif.             |
+| `safe`        | Penyahduplikasian dan pelipatan ruang putih sahaja.                                                                   |
+| `allow-lossy` | Kekalkan pelan pengendali untuk permintaan ini, termasuk ringkasan dan penulisan semula gaya.                         |
+| `engine:<id>` | Satu enjin apabila didayakan, contohnya `engine:rtk`. Pilihan ikut serta bagi setiap permintaan untuk enjin tersebut. |
+| `<combo>`     | Kombo bernama, dipadankan mengikut nama (tidak sensitif huruf besar/kecil) terlebih dahulu, kemudian mengikut ID.     |
 
 Nota:
 
-- Nilai yang tidak diketahui diabaikan (permintaan tidak pernah ditolak); penyelesaian jatuh kepada keutamaan operator biasa.
-- Jika berbilang gabungan berkongsi nama, hantar **id** gabungan untuk padanan yang ditentukan.
-- Gabungan yang namanya `off` atau `default` tidak boleh dipilih mengikut nama (kata kunci tersebut ditafsirkan dahulu); rujuk gabungan tersebut mengikut idnya.
-- Suis pemampatan utama adalah pintu keras: apabila pemampatan dilumpuhkan secara global, pengepala ini tidak boleh mengaktifkannya.
+- Nilai yang tidak diketahui diabaikan (permintaan tidak sekali-kali ditolak); penyelesaian diteruskan mengikut turutan keutamaan pengendali biasa.
+- Jika berbilang kombo berkongsi nama, berikan **ID** kombo untuk padanan yang tentu.
+- Kombo yang namanya ialah `off` atau `default` tidak boleh dipilih mengikut nama (kata kunci tersebut ditafsirkan terlebih dahulu); rujuk kombo sedemikian menggunakan ID-nya.
+- Suis pemampatan induk ialah sekatan mutlak: apabila pemampatan dilumpuhkan secara global, pengepala ini tidak boleh mendayakannya.
 
-Pelan yang digunakan digemakan kembali dalam pengepala respons:
+Pelan yang digunakan digemakan semula dalam pengepala respons:
 
 ```
 X-OmniRoute-Compression: <mode>; source=<source>
 ```
 
-di mana `<source>` adalah salah satu daripada `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default`, atau `off`.
+dengan `<source>` ialah salah satu daripada `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` atau `off`.
 
 ---
 
@@ -255,11 +279,11 @@ Content-Type: application/json
 
 Penyedia yang tersedia: Nebius, OpenAI, Mistral, Together AI, Fireworks, NVIDIA, **OpenRouter**, Jina AI.
 
-ID katalog menggunakan format `provider/model` (contoh: `jina-ai/jina-embeddings-v5-omni-small`). ID model Jina tanpa nama penyedia yang terdapat dalam daftar model (contohnya `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) juga boleh digunakan. Operasi pembenaman/penyusunan semula/pengelasan/segmentasi Jina menggunakan kelayakan `jina-ai` daripada papan pemuka terlebih dahulu; `JINA_AI_API_KEY` hanya digunakan sebagai sandaran apabila tiada kunci papan pemuka tersedia. Kad `jina-reader` hanya untuk Reader / `r.jina.ai` (`POST /v1/web/fetch`) dan tidak pernah menyediakan pembenaman atau penyusunan semula.
+ID katalog menggunakan format `provider/model` (contoh: `jina-ai/jina-embeddings-v5-omni-small`). ID model Jina tanpa awalan yang terdapat dalam daftar model (contohnya `jina-embeddings-v5-text-small`, `jina-reranker-v3.5`) juga boleh digunakan. Operasi pembenaman/penyusunan semula/pengelasan/segmentasi Jina menggunakan kelayakan `jina-ai` daripada papan pemuka terlebih dahulu; `JINA_AI_API_KEY` hanya digunakan sebagai sandaran apabila tiada kunci papan pemuka. Kad `jina-reader` hanya untuk Reader / `r.jina.ai` (`POST /v1/web/fetch`) dan tidak pernah menyediakan pembenaman atau penyusunan semula.
 
-Model dalam daftar yang menyatakan sokongan multimodal juga menerima sehingga 32 item berstruktur yang
-neutral penyedia. Jenis item media ialah `text`, `image`, `audio`, `video`, dan `document`. `source`
-media tersebut sama ada `{"type":"url","url":"https://..."}` atau
+Model dalam daftar yang mengisytiharkan sokongan multimodal turut menerima sehingga 32 item berstruktur
+yang tidak terikat kepada penyedia. Jenis item media ialah `text`, `image`, `audio`, `video`, dan `document`. `source`
+medianya sama ada `{"type":"url","url":"https://..."}` atau
 `{"type":"base64","data":"...","media_type":"..."}`.
 
 Jina v5 Omni (`jina-ai/jina-embeddings-v5-omni-small`, `jina-ai/jina-embeddings-v5-omni-nano`,
@@ -274,16 +298,14 @@ EmbeddingsV5Request asli Jina dan **memajukannya tanpa perubahan** kepada `https
   "input": [
     { "text": "a red bicycle" },
     { "image": "https://example.com/bike.png" },
-    {
-      "content": [{ "text": "caption" }, { "image": "data:image/png;base64,..." }]
-    }
+    { "content": [{ "text": "caption" }, { "image": "data:image/png;base64,..." }] }
   ]
 }
 ```
 
 Nilai asli `{ image | audio | video | pdf }` boleh berupa URL HTTPS awam, URI `data:`, atau base64
 mentah. OmniRoute tidak menukarkan objek tersebut kepada rentetan atau mengambil URL imej asli — Jina mendapatkan
-media awam itu sendiri. Medan Jina tambahan (`task`, `normalized`, `truncate`, `embedding_type`)
+media awam itu sendiri. Medan Jina tambahan (`task`, `normalized`, `truncate`, `embedding_type`) akan
 dimajukan. SKU Jina teks sahaja masih menolak dokumen bukan teks.
 
 Had keselamatan dan pengangkutan:
@@ -294,7 +316,7 @@ Had keselamatan dan pengangkutan:
   selepas semakan HTTPS awam yang sama; Jina mengambil URL tersebut.
 - Media base64 sebaris dihadkan kepada 8 MiB selepas dinyahkod bagi setiap item dan 16 MiB selepas dinyahkod bagi keseluruhan permintaan.
 
-Penterjemahan penyedia (item kanonik tidak pernah dimajukan tanpa perubahan):
+Penukaran format penyedia (item kanonik tidak pernah dimajukan tanpa perubahan):
 
 - Model multimodal Jina: setiap item peringkat teratas menjadi satu objek dengan kunci modaliti
   (`text` / `image` / `audio` / `video` / `pdf`) yang menggunakan URI data untuk media sebaris; satu vektor bagi setiap
@@ -302,12 +324,12 @@ Penterjemahan penyedia (item kanonik tidak pernah dimajukan tanpa perubahan):
 - Keluarga Gemini Embedding 2: satu tatasusunan peringkat teratas menjadi satu permintaan asli
   `models/{model}:embedContent` dengan `content.parts` (`text` atau `inline_data`).
 - llama.cpp (`llama-cpp/<model>`, mana-mana model yang dimuatkan oleh pelayan setempat): item `text` kanonik
-  menjadi rentetan biasa, manakala `image` / `audio` / `video` masing-masing menjadi satu objek
-  `{"content": [part]}`, menggunakan bahagian kandungan sembang llama-server (`image_url`,
+  menjadi rentetan biasa, manakala `image` / `audio` / `video` masing-masing menjadi satu
+  objek `{"content": [part]}`, menggunakan bahagian kandungan sembang llama-server (`image_url`,
   `input_audio` dengan format `wav` / `mp3` / `flac`, `input_video`) bersama data sebaris; satu vektor
-  bagi setiap item peringkat teratas. Pelayan mesti dijalankan dengan `--embedding --mmproj …`; tanpa projektor, pelayan itu
-  sendiri akan menolak media. `document` tidak disokong.
-- Model tidak diketahui/dinamik tanpa metadata modaliti yang jelas menolak input berstruktur dengan HTTP 400.
+  bagi setiap item peringkat teratas. Pelayan mesti dijalankan dengan `--embedding --mmproj …`; tanpa projektor, pelayan
+  itu sendiri akan menolak media. `document` tidak disokong.
+- Model tidak diketahui/dinamik tanpa metadata modaliti yang jelas akan menolak input berstruktur dengan HTTP 400.
 
 ```json
 {
@@ -325,7 +347,7 @@ Penterjemahan penyedia (item kanonik tidak pernah dimajukan tanpa perubahan):
 ```
 
 Gabungan model/modaliti yang tidak disokong mengembalikan HTTP 400 dan bukannya menukar item secara paksa. Medan sambungan
-bukan input pada permintaan rentetan/token legasi terus diteruskan tanpa perubahan.
+selain input bagi permintaan rentetan/token legasi terus diteruskan tanpa perubahan.
 
 ```bash
 # Senaraikan semua model pembenaman
@@ -343,7 +365,7 @@ Content-Type: application/json
 
 {
   "model": "openai/gpt-image-2",
-  "prompt": "Pemandangan matahari terbenam yang indah di atas pergunungan",
+  "prompt": "A beautiful sunset over mountains",
   "size": "1024x1024"
 }
 ```
@@ -352,10 +374,10 @@ Penyedia yang tersedia termasuk OpenAI (GPT Image 2), xAI (Grok Image), Together
 
 `n` mengembalikan `n` imej dalam `data[]`. Bagi penyedia yang API huluannya mengembalikan satu imej bagi setiap panggilan
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
-NVIDIA NIM, Cloudflare Workers AI), `n` panggilan huluan berasingan akan dibuat, dengan paling banyak 4 panggilan berjalan serentak. Nilai
-`seed` tetap dianjak berdasarkan indeks panggilan (`seed`, `seed + 1`, …), supaya imej yang dihasilkan berbeza tetapi kekal
-boleh dihasilkan semula. `n` dihadkan kepada 10. Keseluruhan permintaan gagal jika mana-mana panggilan gagal. Senarai
-format pengembangan panggilan ialah `SINGLE_IMAGE_FANOUT_FORMATS` dalam
+NVIDIA NIM, Cloudflare Workers AI), `n` panggilan huluan yang berasingan akan dibuat, dengan paling banyak 4 panggilan serentak. Nilai
+`seed` tetap dianjak mengikut indeks panggilan (`seed`, `seed + 1`, …), supaya imej yang terhasil berbeza tetapi kekal
+boleh dihasilkan semula. `n` dihadkan kepada 10. Permintaan tersebut gagal secara keseluruhan jika mana-mana panggilan gagal. Senarai
+format kipas keluar ialah `SINGLE_IMAGE_FANOUT_FORMATS` dalam
 `open-sse/handlers/imageGeneration/fanOut.ts`.
 
 ZenMux menggunakan semula sambungan kunci API sedia ada dan menerima awalan `zenmux/` atau `zm/`:
@@ -364,17 +386,17 @@ ZenMux menggunakan semula sambungan kunci API sedia ada dan menerima awalan `zen
   `quality`, `n`, `output_format`, `output_compression`, `background`, dan `response_format`.
 - Penerbit lain, seperti `zm/meta/muse-image-1.0`, menggunakan titik akhir Vertex AI `:predict`
   ZenMux. `n` dipetakan kepada `sampleCount`, `aspect_ratio` kepada `aspectRatio`, dan `image_size`
-  (`1K`, `2K`, `4K`) kepada `sampleImageSize`. `size` dalam piksel hanya membekalkan nisbah bidang,
-  bukan dimensi piksel yang dijamin. Nisbah, resolusi dan bilangan yang disokong berbeza mengikut model.
-- `zm/inclusionai/ming-image-0.1-design` menentukan dimensinya sendiri. Abaikan `size`,
-  `aspect_ratio`, dan `image_size`; nilai eksplisit akan mengembalikan HTTP 400. PNG, JPEG dan WebP
-  boleh diminta melalui `output_format`.
+  (`1K`, `2K`, `4K`) kepada `sampleImageSize`. `size` dalam piksel hanya membekalkan nisbah aspek,
+  bukan dimensi piksel yang dijamin. Nisbah, resolusi, dan bilangan yang disokong berbeza mengikut model.
+- `zm/inclusionai/ming-image-0.1-design` memilih dimensinya sendiri. Abaikan `size`,
+  `aspect_ratio`, dan `image_size`; nilai yang dinyatakan secara eksplisit mengembalikan HTTP 400. PNG, JPEG, dan WebP
+  boleh diminta dengan `output_format`.
 
 Penyepaduan ini menyokong penjanaan teks kepada imej, bukan penyuntingan imej rujukan. Output Vertex
 dinormalkan kepada `data[].b64_json`; `response_format: "url"` mengembalikan URL HTTPS huluan
 atau URL data base64 apabila hanya bait imej tersedia. Output kosong/ditapis
 mengembalikan ralat dan bukannya kejayaan kosong. Akses model bergantung pada akaun ZenMux.
-Lihat [API Vertex ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) dan
+Lihat [Vertex API ZenMux](https://docs.zenmux.ai/api/vertexai/generate-images) dan
 [OpenAI Images API](https://docs.zenmux.ai/api/openai/generate-an-image).
 
 ```bash
@@ -400,46 +422,46 @@ Content-Type: application/json
 }
 ```
 
-`model` memilih penyedia OCR melalui awalan `provider/model`; id model tanpa awalan (cth.
-`mistral-ocr-latest`) dipadankan dengan penyedia berdaftarnya, manakala jika `model` tidak dinyatakan, nilai lalainya ialah
-Mistral (`mistral-ocr-latest`). Penyedia berdaftar (`open-sse/config/ocrRegistry.ts`):
+`model` memilih penyedia OCR melalui awalan `provider/model`; id model tanpa awalan (contohnya
+`mistral-ocr-latest`) diselesaikan kepada penyedia berdaftarnya, dan jika `model` tidak dinyatakan, ia menggunakan
+Mistral (`mistral-ocr-latest`) secara lalai. Penyedia berdaftar (`open-sse/config/ocrRegistry.ts`):
 
 | Id penyedia                   | Id model             | Nilai `model`                                                         | Catatan                                                                                                               |
 | ----------------------------- | -------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `mistral`                     | `mistral-ocr-latest` | `mistral/mistral-ocr-latest` (atau `mistral-ocr-latest` tanpa awalan) | Segerak — respons dikembalikan terus daripada satu panggilan huluan.                                                  |
-| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                           | Huluan tak segerak (`analyze` + peninjauan) — lihat di bawah.                                                         |
+| `azure-document-intelligence` | `prebuilt-read`      | `azure-document-intelligence/prebuilt-read`                           | Huluan tak segerak (`analyze` + tinjauan) — lihat di bawah.                                                           |
 | `vertex-deepseek-ocr`         | `deepseek-ocr-maas`  | `vertex-deepseek-ocr/deepseek-ocr-maas`                               | Segerak, melalui titik akhir rakan kongsi `openapi/chat/completions` Vertex AI — lihat di bawah untuk pengesahan/URL. |
 
-Ketiga-tiga penyedia memberikan respons dalam kandungan berbentuk Mistral yang sama:
+Ketiga-tiga penyedia memberikan respons dalam badan berbentuk Mistral yang sama:
 
 ```json
 {
-  "pages": [{ "index": 0, "markdown": "# Teks yang diekstrak..." }],
+  "pages": [{ "index": 0, "markdown": "# Extracted text..." }],
   "model": "mistral-ocr-latest",
   "usage_info": { "pages_processed": 1 }
 }
 ```
 
-### Aliran peninjauan Azure Document Intelligence
+### Aliran tinjauan Azure Document Intelligence
 
 API `analyze` Azure Document Intelligence adalah tak segerak: permintaan awal mengembalikan pengepala
-`Operation-Location` dan bukannya kandungan, dan hasilnya mesti ditinjau. Pengendali
+`Operation-Location` dan bukannya badan, dan hasilnya perlu ditinjau. Pengendali
 (`open-sse/handlers/ocr.ts`) meninjau URL tersebut setiap saat sehingga 30 percubaan, gagal serta-merta (tidak
-meneruskan peninjauan) apabila menerima respons peninjauan bukan `ok` atau status `"failed"`, dan mengembalikan `504` jika
+meneruskan tinjauan) apabila respons tinjauan bukan `ok` atau berstatus `"failed"`, dan mengembalikan `504` jika
 operasi masih berjalan selepas had percubaan habis. Respons akhir Azure
 dinormalkan kepada bentuk `pages`/`markdown` yang sama seperti yang digunakan oleh Mistral sebelum dikembalikan kepada
-pemanggil, jadi kod klien tidak perlu mengendalikan penyedia secara khusus.
+pemanggil, supaya kod klien tidak perlu mengendalikan penyedia secara khusus.
 
-### Pengesahan dan peleraian titik akhir OCR DeepSeek Vertex AI
+### Pengesahan dan penyelesaian titik akhir OCR DeepSeek Vertex AI
 
-`vertex-deepseek-ocr` menggunakan semula pengesahan Vertex AI yang sama yang sudah disokong oleh OmniRoute untuk
+`vertex-deepseek-ocr` menggunakan semula pengesahan Vertex AI yang sama, yang telah disokong oleh OmniRoute untuk
 trafik sembang/imej (`open-sse/executors/vertex.ts`): kunci API sambungan sama ada merupakan
-kelayakan JSON Service Account (ditukar dengan token akses OAuth jangka pendek melalui aliran JWT-bearer)
-atau token akses OAuth sedia ada yang digunakan tanpa perubahan. URL titik akhir huluan ialah titik akhir rakan kongsi
-`openapi/chat/completions` generik Vertex, yang dibina daripada projek dan
-rantau sambungan — `providerSpecificData.project`/`providerSpecificData.region` yang dinyatakan secara jelas sentiasa diutamakan;
-jika tidak, projek diperoleh daripada `project_id` JSON Service Account dan rantau
-ditetapkan secara lalai kepada `us-central1`. Kedua-dua peleraian dilakukan dalam `open-sse/handlers/ocr.ts`
+kelayakan JSON Akaun Perkhidmatan (ditukar dengan token akses OAuth jangka pendek melalui aliran JWT-bearer)
+atau token akses OAuth yang telah dikeluarkan dan digunakan seadanya. URL titik akhir huluan ialah titik akhir rakan kongsi
+`openapi/chat/completions` generik Vertex, yang dibina daripada projek dan rantau sambungan
+— `providerSpecificData.project`/`providerSpecificData.region` yang dinyatakan secara eksplisit sentiasa diutamakan;
+jika tidak, projek diperoleh daripada `project_id` dalam JSON Akaun Perkhidmatan dan rantau
+ditetapkan secara lalai kepada `us-central1`. Kedua-dua penyelesaian berlaku dalam `open-sse/handlers/ocr.ts`
 (`resolveVertexOcrAccessToken`, `resolveVertexOcrBaseUrl`), yang digunakan oleh
 `src/app/api/v1/ocr/route.ts` sebelum dihantar kepada `handleOcr`.
 
@@ -451,48 +473,90 @@ ditetapkan secara lalai kepada `us-central1`. Kedua-dua peleraian dilakukan dala
 GET /v1/models
 Authorization: Bearer your-api-key
 
-→ Mengembalikan semua model sembang, pembenaman dan imej + kombo dalam format OpenAI
+→ Mengembalikan semua model sembang, pembenaman dan imej + gabungan dalam format OpenAI
 ```
+
+### Harga model (`pricing`)
+
+Entri mengandungi objek `pricing` apabila OmniRoute mengetahui harga model tersebut. Harga ini
+berasal daripada jadual harga yang digunakan oleh perakaunan kos: nilai lalai terbina dalam, harga yang disegerakkan dan
+penggantian yang ditetapkan melalui `/api/pricing`. Ini ialah harga senarai, jadi penyedia langganan turut
+memaparkan harga bagi setiap token.
+
+```json
+"pricing": {
+  "prompt": "0.000005",
+  "completion": "0.000025",
+  "input_cache_read": "0.0000005",
+  "input_cache_write": "0.00000625",
+  "input": 5,
+  "output": 25,
+  "cached": 0.5,
+  "cache_creation": 6.25
+}
+```
+
+| Medan                                                           | Unit                                       | Catatan                                                                                                                                                |
+| --------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `prompt`, `completion`, `input_cache_read`, `input_cache_write` | USD bagi setiap token, rentetan perpuluhan | Serasi dengan OpenRouter, tidak pernah dalam tatatanda eksponen. Kedua-dua medan cache hanya muncul apabila terdapat harga cache.                      |
+| `input`, `output`, `cached`, `cache_creation`                   | USD bagi setiap 1J token, nombor           | Medan daripada versi katalog terdahulu, dikekalkan untuk klien sedia ada. `reasoning` dan `long_context` turut muncul apabila baris harga memilikinya. |
+
+- **Gabungan** membawa harga sasaran pertama yang kelihatan. Gabungan `auto/*` terbina dalam memilih
+  sasaran pada waktu permintaan, jadi gabungan tersebut tidak mempunyai `pricing`.
+- **Model percuma** memaparkan `"0"` (dan `0`) apabila harganya sifar. Model tanpa baris harga
+  turut memaparkan `"0"` apabila katalog menandakannya sebagai percuma (`free: true`) atau katalog model percuma
+  terbina dalam menyenaraikannya.
+- **Harga tidak diketahui:** entri tersebut tidak mempunyai kunci `pricing`.
+- **Penyedia bermeter kredit** (seperti Kiro) mengenakan bil bagi setiap permintaan dan bukannya bagi setiap token. Entri
+  mereka mengekalkan medan angka bagi setiap 1J yang dimiliki sebelum ini dan tidak mengandungi medan rentetan bagi setiap token.
+- **Varian** (id usaha penaakulan, alias tanpa pemikiran, cerminan penemuan dan get laluan)
+  menyalin harga model yang menjadi destinasi penghalaannya.
+- Medan tersebut hanya mengandungi kadar asas. Peringkat konteks panjang (medan angka `long_context`) dan
+  pengganda peringkat perkhidmatan (contohnya Codex pantas atau fleksibel) tidak mengubah `prompt` atau
+  `completion`.
+- Objek tersebut adalah sama bagi setiap gaya pengesahan, termasuk permintaan gaya Anthropic
+  dengan `x-api-key` dan `anthropic-version` (respons kekal `{ "object": "list",
+"data": [...] }`). Pelaksanaan: `src/app/api/v1/models/catalogPricing.ts`.
 
 ### Awalan id model (`?prefix=`)
 
-Kebanyakan model dipaparkan di bawah **awalan penyedia**. Awalan yang anda peroleh dikawal oleh
-bendera ciri `MODELS_CATALOG_PREFIX_MODE` dan boleh diatasi **bagi setiap permintaan** dengan
-parameter pertanyaan — berguna untuk klien yang mahukan senarai ringkas tanpa mengubah tetapan
+Kebanyakan model diiklankan di bawah **awalan penyedia**. Awalan yang anda terima dikawal oleh
+bendera ciri `MODELS_CATALOG_PREFIX_MODE` dan boleh digantikan **bagi setiap permintaan** menggunakan
+parameter pertanyaan — berguna untuk klien yang mahukan senarai bersih tanpa mengubah tetapan
 seluruh pelayan untuk pengguna lain:
 
 ```bash
-GET /v1/models?prefix=alias        # satu id bagi setiap model — awalan alias ringkas
+GET /v1/models?prefix=alias        # satu id bagi setiap model — awalan alias pendek
 GET /v1/models?prefix=dual         # kedua-dua bentuk (lalai pelayan)
 GET /v1/models?prefix=canonical    # hanya awalan id penyedia penuh
 ```
 
-| Mod         | Menghasilkan                                              | Nota                                                                                                                                                                                                          |
-| ----------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dual`      | `cc/claude-sonnet-4-6` **dan** `claude/claude-sonnet-4-6` | **Lalai.** Kedua-dua id menghala ke model yang sama; dikekalkan supaya konfigurasi klien yang mengekod keras mana-mana bentuk terus berfungsi. Lebih kurang menggandakan katalog.                             |
-| `alias`     | `cc/claude-sonnet-4-6`                                    | Satu entri bagi setiap model. Penyedia tanpa alias tersendiri masih menghasilkan entri mereka, jadi tiada apa-apa yang hilang.                                                                                |
-| `canonical` | `claude/claude-sonnet-4-6`                                | Satu entri bagi setiap model di bawah awalan id penyedia penuh. Penyedia tanpa alias tersendiri (cth. `antigravity/…`, `agy/…`) turut menghasilkan id tunggal mereka di sini, jadi tiada apa-apa yang hilang. |
+| Mod         | Mengeluarkan                                              | Catatan                                                                                                                                                                                                              |
+| ----------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dual`      | `cc/claude-sonnet-4-6` **dan** `claude/claude-sonnet-4-6` | **Lalai.** Kedua-dua id menghala ke model yang sama; dikekalkan supaya konfigurasi klien yang mengekod keras salah satu bentuk terus berfungsi. Menggandakan saiz katalog secara kasar.                              |
+| `alias`     | `cc/claude-sonnet-4-6`                                    | Satu entri bagi setiap model. Penyedia tanpa alias yang berbeza masih mengeluarkan entrinya, jadi tiada apa-apa yang hilang.                                                                                         |
+| `canonical` | `claude/claude-sonnet-4-6`                                | Satu entri bagi setiap model di bawah awalan id penyedia penuh. Penyedia tanpa alias yang berbeza (contohnya `antigravity/…`, `agy/…`) turut mengeluarkan id tunggal mereka di sini, jadi tiada apa-apa yang hilang. |
 
-Cerminan mod `dual` juga boleh dikenal pasti tanpa parameter pertanyaan: ia mempunyai medan `parent`
+Cerminan mod `dual` juga boleh dikenal pasti tanpa parameter pertanyaan: ia mengandungi medan `parent`
 yang menunjuk kepada id utama.
 
-Klien yang memaparkan pemilih model hendaklah meminta `?prefix=alias` — inilah yang dilakukan oleh
+Klien yang memaparkan pemilih model harus meminta `?prefix=alias` — inilah yang dilakukan oleh
 [sambungan OmniCopilot VS Code](../guides/VSCODE-COPILOT.md).
 
 ### Penapis penemuan (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
 
-`GET /v1/models` menerima penapis penemuan yang perlu dipilih secara khusus. Tanpa mana-mana penapis tersebut, respons
-tidak berubah. Penapis ini mengecilkan katalog yang sudah dapat dilihat oleh pemanggil (kebenaran kunci API digunakan terlebih dahulu),
-dan dilaksanakan sebelum penomboran halaman `limit` / `after` gaya OpenAI:
+`GET /v1/models` menerima penapis penemuan pilihan. Tanpa sebarang penapis ini, respons tidak
+berubah. Penapis tersebut mengecilkan katalog yang sudah boleh dilihat oleh pemanggil (keizinan kunci API digunakan terlebih dahulu),
+dan dijalankan sebelum penomboran halaman `limit` / `after` gaya OpenAI:
 
 ```bash
 GET /v1/models?capability=vision&capability=tool_calling   # setiap keupayaan yang disenaraikan mestilah benar
 GET /v1/models?capability=vision,reasoning&min_context=200000
 GET /v1/models?kind=embedding                              # `type` katalog; baris tanpanya ialah `chat`
-GET /v1/models?q=sonnet&limit=10                           # padanan tanpa mengira huruf besar atau kecil pada id atau nama
+GET /v1/models?q=sonnet&limit=10                           # padanan tidak sensitif huruf besar-kecil pada id atau nama
 ```
 
-| Parameter     | Nilai                                                                                               |
+| Param         | Nilai                                                                                               |
 | ------------- | --------------------------------------------------------------------------------------------------- |
 | `capability`  | `attachment`, `reasoning`, `structured_output`, `temperature`, `thinking`, `tool_calling`, `vision` |
 | `min_context` | integer bukan negatif, dibandingkan dengan `context_length`                                         |
@@ -500,13 +564,13 @@ GET /v1/models?q=sonnet&limit=10                           # padanan tanpa mengi
 | `q`           | 1–200 aksara                                                                                        |
 
 Nilai yang tidak diketahui, atau `min_context` yang bukan integer bukan negatif (contohnya `1.5`),
-mengembalikan HTTP `400` dan mesej tersebut menyenaraikan nilai yang sah. Pelaksanaan:
+akan mengembalikan HTTP `400` dan mesej tersebut menyenaraikan nilai yang sah. Pelaksanaan:
 `src/app/api/v1/models/catalogFilters.ts`.
 
 ### Senarai pendek model (`POST /v1/models/query`)
 
-`POST /v1/models/query` mengembalikan senarai ringkas dan deterministik daripada katalog yang sama, dengan pengesahan
-dan keterlihatan bagi setiap kunci yang sama seperti `GET /v1/models`:
+`POST /v1/models/query` mengembalikan senarai pendek yang deterministik daripada katalog yang sama, dengan
+pengesahan dan keterlihatan mengikut kunci yang sama seperti `GET /v1/models`:
 
 ```bash
 POST /v1/models/query
@@ -519,34 +583,34 @@ Content-Type: application/json
 → { "object": "list", "data": [ ...models ] }
 ```
 
-Setiap medan adalah pilihan. `capabilities` dan `exclude` menerima tatasusunan atau rentetan yang dipisahkan dengan koma;
+Setiap medan adalah pilihan. `capabilities` dan `exclude` menerima tatasusunan atau rentetan dipisahkan koma;
 `max_output` dibandingkan dengan `max_output_tokens`. Hasil diisih mengikut `owned_by`, kemudian `id`.
-`limit` ditetapkan secara lalai kepada `20` dan nilai melebihi `100` dihadkan kepada `100`. JSON yang tidak sah, medan
-yang tidak diketahui atau nilai yang tidak sah mengembalikan HTTP `400`.
+Nilai lalai `limit` ialah `20` dan nilai melebihi `100` dihadkan kepada `100`. JSON yang tidak sah, medan
+yang tidak diketahui atau nilai yang tidak sah akan mengembalikan HTTP `400`.
 
 ### Model sembang yang disembunyikan secara individu
 
 Model yang ditandai sebagai **Tersembunyi** pada halaman penyedianya dikecualikan daripada katalog dan ditolak
-dengan HTTP `404` / `model_not_found` apabila diminta secara eksplisit. Semakan menggunakan penyedia dan model
-yang telah diselesaikan, termasuk alias penyedia, awalan nod penyedia serasi dan lalai sambungan. Kombo melangkau
-sasaran tersembunyi dan boleh menggunakan model sekeluarga yang kelihatan; apabila tiada sasaran boleh laksana yang
-tinggal, ia mengembalikan kod ralat yang sama. Menyahsembunyikan berkuat kuasa pada permintaan seterusnya.
-Pengatasan keterlihatan khusus imej tidak menyembunyikan model sembang dengan ID yang sama.
+dengan HTTP `404` / `model_not_found` apabila diminta secara eksplisit. Semakan menggunakan penyedia dan
+model yang telah ditentukan, termasuk alias penyedia, awalan nod penyedia serasi dan nilai lalai
+sambungan. Gabungan akan melangkau sasaran tersembunyi dan boleh menggunakan model setara yang kelihatan; apabila tiada
+sasaran boleh laksana yang tinggal, ia mengembalikan kod ralat yang sama. Tindakan menyahsembunyikan berkuat kuasa pada permintaan
+seterusnya. Penggantian keterlihatan imej sahaja tidak menyembunyikan model sembang dengan ID yang sama.
 
 Tetapan model individu ini berasingan daripada
-[senarai izin/nafi pendedahan model](../routing/MODEL_EXPOSURE_LIST.md), yang menapis pengiklanan katalog
-dan calon penghalaan automatik sambil mengekalkan penghantaran eksplisit. Kebenaran model kunci API
-terus digunakan secara bebas. Mod awalan katalog lalai kekal sebagai `dual`.
+[senarai benarkan/tolak pendedahan model](../routing/MODEL_EXPOSURE_LIST.md), yang menapis pengiklanan katalog
+dan calon penghalaan automatik sambil mengekalkan penghantaran eksplisit. Kebenaran model bagi kunci API
+terus diguna pakai secara berasingan. Mod awalan katalog lalai kekal `dual`.
 
 ### Varian model tanpa pemikiran
 
-Bagi model Claude yang menyokong pemikiran, `/v1/models` turut mengiklankan varian **tanpa pemikiran** yang id-nya diawali dengan `claude-3-omniroute-no-thinking/`:
+Bagi model Claude yang menyokong pemikiran, `/v1/models` turut mengiklankan varian **tanpa pemikiran** yang ID-nya diawali dengan `claude-3-omniroute-no-thinking/`:
 
 ```
 claude-3-omniroute-no-thinking/<provider>/<model>
 ```
 
-Memilih ID ini (cth. dalam konfigurasi Claude Code yang sentiasa melampirkan blok `thinking`) akan memetakan kembali kepada `<provider>/<model>` sebenar dengan penaakulan disekat — `thinking:{type:"disabled"}` pada laluan `/v1/messages`, atau medan `reasoning`/`reasoning_effort` digugurkan pada laluan `/v1/chat/completions`. Varian ini hanya disenaraikan untuk model keluarga Claude yang menyokong pemikiran **dan** mematuhi `disabled` (jadi, sebagai contoh, model adaptive-only yang menolak `disabled` dikecualikan). Pengendali boleh memaksa varian ini dihidupkan atau dimatikan bagi setiap model melalui `ModelSpec.noThinkingAlias`.
+Pemilihan ID ini (contohnya dalam konfigurasi Claude Code yang sentiasa melampirkan blok `thinking`) akan ditentukan semula kepada `<provider>/<model>` sebenar dengan penaakulan disekat — `thinking:{type:"disabled"}` pada laluan `/v1/messages`, atau medan `reasoning`/`reasoning_effort` digugurkan pada laluan `/v1/chat/completions`. Varian ini hanya disenaraikan untuk model keluarga Claude yang menyokong pemikiran **dan** mematuhi `disabled` (maka, sebagai contoh, model adaptif sahaja yang menolak `disabled` akan dikecualikan). Pengendali boleh mengaktifkan atau menyahaktifkan varian secara paksa bagi setiap model melalui `ModelSpec.noThinkingAlias`.
 
 ---
 
@@ -556,13 +620,89 @@ Memilih ID ini (cth. dalam konfigurasi Claude Code yang sentiasa melampirkan blo
 GET /api/v1/provider-plugin-manifest
 ```
 
-Mengembalikan manifes pemalam penyedia selamat JSON yang digunakan oleh Bifrost, CLIProxyAPI dan
-penghala sidecar akan datang. Respons dijana daripada daftar penyedia TypeScript
-dan dengan sengaja mengecualikan rahsia klien OAuth, resolusi persekitaran masa jalan,
+Mengembalikan manifes pemalam penyedia yang selamat untuk JSON dan digunakan oleh Bifrost, CLIProxyAPI serta
+penghala sidecar pada masa hadapan. Respons dijana daripada daftaran penyedia TypeScript
+dan sengaja mengecualikan rahsia klien OAuth, resolusi persekitaran masa jalan,
 fungsi pelaksana, pengepala permintaan dan data akaun.
 
-Gunakan titik akhir ini apabila sidecar berjalan di luar proses dan tidak dapat mengimport
+Gunakan endpoint ini apabila sidecar berjalan di luar proses dan tidak boleh mengimport
 `open-sse/config/providerPluginManifestRegistry.ts` secara langsung.
+
+---
+
+## Penjanaan audio ElevenLabs
+
+Konfigurasikan sambungan penyedia `elevenlabs` dalam OmniRoute dengan kunci API ElevenLabs anda.
+Klien mengesahkan identiti menggunakan kunci **OmniRoute** mereka (`Authorization: Bearer $OMNIROUTE_API_KEY`);
+get laluan membekalkan kunci penyedia yang disimpan sebagai `xi-api-key`. Jangan sekali-kali menghantar kunci ElevenLabs
+sebagai token pembawa get laluan.
+
+| Kaedah | Laluan                      | Respons                                          | Kategori endpoint kunci API |
+| ------ | --------------------------- | ------------------------------------------------ | --------------------------- |
+| POST   | `/v1/sound-generation`      | Bait audio natif                                 | `elevenlabs`                |
+| POST   | `/v1/music`                 | Bait audio natif                                 | `music`                     |
+| POST   | `/v1/music/stream`          | Bait audio penstriman                            | `music`                     |
+| POST   | `/v1/music/detailed`        | Audio berbilang bahagian dan pelan gubahan natif | `music`                     |
+| POST   | `/v1/music/detailed/stream` | Metadata SSE dan cebisan audio natif             | `music`                     |
+| POST   | `/v1/music/plan`            | Pelan gubahan JSON                               | `music`                     |
+
+Endpoint ini melengkapkan laluan `/v1/audio/speech`, `/v1/audio/transcriptions`,
+`/v1/voices`, `/v1/text-to-speech/{voiceId}` dan `/v1/speech-to-text` yang sedia ada. Medan JSON natif
+dan parameter pertanyaan seperti `output_format` dan `enable_logging` dikekalkan.
+Respons `/v1/music/detailed` mengekalkan sempadan berbilang bahagiannya; huraikannya sebagai berbilang bahagian.
+`/v1/music/detailed/stream` mengembalikan `text/event-stream` dengan metadata gubahan dan
+cebisan audio base64 dalam peristiwa SSE. Keenam-enam laluan menyokong prapenerbangan CORS.
+
+```bash
+export OMNIROUTE_BASE_URL="http://localhost:20128"
+export OMNIROUTE_API_KEY="your-omniroute-api-key"
+
+# Kesan bunyi pendek. Tempoh: 0.5 hingga 30 saat.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/sound-generation?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"A single soft bell chime","duration_seconds":1,"model_id":"eleven_text_to_sound_v2"}' \
+  --output effect.mp3
+
+# Tempoh muzik dinyatakan dalam milisaat: 3000 hingga 600000.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Gentle instrumental piano","music_length_ms":10000,"force_instrumental":true,"model_id":"music_v1"}' \
+  --output music.mp3
+```
+
+Gunakan `/v1/music/stream` dengan isi JSON yang sama untuk penghantaran audio berperingkat. Gubahan
+menerima tepat satu daripada `prompt` atau `composition_plan`; `/v1/music/plan` memerlukan `prompt`
+dan secara pilihan menerima `source_composition_plan`. Skema natif mengekalkan medan penyedia
+tambahan supaya versi pelan gubahan dan pilihan penalaan halus sampai kepada ElevenLabs.
+
+Endpoint bersepadu `/v1/music/generations` turut menerima `elevenlabs/music_v1`,
+`elevenlabs/music_v2` dan `elevenlabs/music_v2_5`. Dengan sambungan ElevenLabs yang aktif,
+model ini didedahkan oleh katalog muzik. Endpoint ini mengembalikan
+`{"created":...,"data":[{"b64_json":"...","format":"mp3"}]}`. Medan `duration` adalah dalam
+saat dan dipetakan kepada `music_length_ms`; `music_length_ms` yang dinyatakan secara jelas diberi keutamaan.
+`instrumental` dipetakan kepada `force_instrumental`, dengan medan natif diberi keutamaan.
+Gunakan endpoint penstriman natif untuk penstriman dan endpoint gubahan natif
+untuk permintaan yang hanya didorong oleh pelan gubahan.
+
+```bash
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"elevenlabs/music_v1","prompt":"Gentle instrumental piano","duration":10,"instrumental":true}'
+```
+
+Sekatan endpoint, model, belanjawan dan sambungan dikenakan sebelum panggilan huluan dibuat. Laluan
+natif mengembalikan kod status dan isi ralat huluan tanpa perubahan, termasuk `402` untuk sekatan
+pelan dan `429` untuk had kuota. Pengepala `character-cost`, `song-id`, `request-id` dan `retry-after`
+dikekalkan apabila tersedia. Baki kredit percuma tidak menjamin akses kepada setiap
+model muzik, format output atau ciri API: ElevenLabs menentukan kelayakan bagi setiap permintaan.
+Endpoint bersepadu mengekalkan kod status ralat dalam sampul ralat ternormal OmniRoute.
+
+Kontrak huluan: [kesan bunyi](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
+[gubahan muzik](https://elevenlabs.io/docs/api-reference/music/compose) dan
+[butiran muzik penstriman](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
 
 ---
 
@@ -575,7 +715,7 @@ Gunakan titik akhir ini apabila sidecar berjalan di luar proses dan tidak dapat 
 | POST   | `/v1/responses`                           | OpenAI Responses                     |
 | POST   | `/v1/embeddings`                          | OpenAI                               |
 | POST   | `/v1/images/generations`                  | OpenAI Images                        |
-| POST   | `/v1/images/edits`                        | OpenAI Images (edit/inpaint)         |
+| POST   | `/v1/images/edits`                        | OpenAI Images (sunting/inpaint)      |
 | POST   | `/v1/videos/generations`                  | Penjanaan video gaya OpenAI          |
 | POST   | `/v1/music/generations`                   | Penjanaan muzik gaya OpenAI          |
 | POST   | `/v1/audio/transcriptions`                | OpenAI Audio (STT)                   |
@@ -592,20 +732,20 @@ Gunakan titik akhir ini apabila sidecar berjalan di luar proses dan tidak dapat 
 | POST   | `/v1/api/chat`                            | Ollama                               |
 | GET    | `/api/v1/vscode/{token}/`                 | Alias katalog OpenAI                 |
 | GET    | `/api/v1/vscode/{token}/models`           | Alias model OpenAI                   |
-| POST   | `/api/v1/vscode/{token}/chat/completions` | Alias OpenAI bertoken                |
-| POST   | `/api/v1/vscode/{token}/responses`        | Alias OpenAI Responses bertoken      |
-| POST   | `/api/v1/vscode/{token}/api/chat`         | Alias Ollama bertoken                |
-| GET    | `/api/v1/vscode/{token}/api/tags`         | Alias tag Ollama bertoken            |
+| POST   | `/api/v1/vscode/{token}/chat/completions` | Alias bertoken OpenAI                |
+| POST   | `/api/v1/vscode/{token}/responses`        | Alias bertoken OpenAI Responses      |
+| POST   | `/api/v1/vscode/{token}/api/chat`         | Alias bertoken Ollama                |
+| GET    | `/api/v1/vscode/{token}/api/tags`         | Alias tag bertoken Ollama            |
 
-Semua laluan POST mengikut bentuk yang sama: `Bearer your-api-key` + isi JSON yang disahkan oleh Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, dan sebagainya, lihat `src/shared/validation/schemas.ts`). 4xx dikembalikan jika pengesahan skema gagal.
+Semua laluan POST mengikut bentuk yang sama: `Bearer your-api-key` + isi JSON yang disahkan oleh Zod (`v1RerankSchema`, `v1ModerationSchema`, `v1AudioSpeechSchema`, dan sebagainya, lihat `src/shared/validation/schemas.ts`). 4xx dikembalikan apabila pengesahan skema gagal.
 
-Untuk klien yang tidak dapat melampirkan `Authorization: Bearer ...`, OmniRoute turut menerima kunci API dalam URL sama ada melalui keserasian rentetan pertanyaan (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) atau titik akhir khusus `/api/v1/vscode/{token}/...` yang didokumenkan di bawah.
+Bagi klien yang tidak dapat menyertakan `Authorization: Bearer ...`, OmniRoute juga menerima kunci API dalam URL melalui sama ada keserasian rentetan pertanyaan (`?token=...`, `?apiKey=...`, `?api_key=...`, `?key=...`) atau titik akhir khusus `/api/v1/vscode/{token}/...` yang didokumenkan di bawah.
 
 ```bash
-# Susun semula (penyedia pendaftaran awan atau nod penyedia serasi OpenAI sebagai "<prefix>/<model>")
+# Susun semula (penyedia daftar awan, atau nod penyedia serasi OpenAI sebagai "<prefix>/<model>")
 POST /v1/rerank      { "model": "jina-ai/jina-reranker-v3.5", "query": "...", "documents": ["..."] }
 
-# Pengelasan Jina (kelayakan Foundation API)
+# Pengelasan Jina (kelayakan API Foundation)
 POST /v1/classify    { "model": "jina-embeddings-v5-text-small", "input": ["..."], "labels": ["a", "b"] }
 
 # Pensegmen Jina
@@ -620,11 +760,11 @@ POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
 # TTS — mengembalikan isi audio/mpeg (atau format yang diminta)
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
 
-# TTS Soniox memerlukan bahasa dan suara: `language` menggunakan "en" secara lalai; suara
-# yang tiada atau nama suara stok OpenAI (alloy, nova, …) akan menjadi "Adrian"
+# Soniox TTS memerlukan bahasa dan suara: `language` lalai kepada "en"; jika
+# suara tiada atau menggunakan nama suara standard OpenAI (alloy, nova, …), nilainya menjadi "Adrian"
 POST /v1/audio/speech { "model": "soniox/tts-rt-v1", "input": "Xin chào", "voice": "Adrian", "language": "vi" }
 
-# Pengeditan imej (multipart)
+# Suntingan imej (multipart)
 POST /v1/images/edits  -F image=@input.png -F prompt="..." -F mask=@mask.png
 
 # Penjanaan video / muzik (ID model berawalan penyedia)
@@ -632,30 +772,30 @@ POST /v1/videos/generations { "model": "runway/gen-3", "prompt": "..." }
 POST /v1/music/generations  { "model": "kie/suno-v4.0",   "prompt": "..." }
 ```
 
-> **Nod penyedia penyusunan semula:** `POST /v1/rerank` turut menghalakan permintaan ke nod penyedia yang serasi dengan OpenAI
+> **Nod penyedia penyusunan semula:** `POST /v1/rerank` turut menghalakan permintaan kepada nod penyedia yang serasi dengan OpenAI
 > (oMLX, vLLM, Infinity, TEI di belakang get laluan, …) yang dialamatkan sebagai `<node-prefix>/<model>`. Nod
 > gelung balik (`localhost`, `127.0.0.1`, `172.16.0.0/12`) sentiasa layak, begitu juga nama hos yang
 > disenaraikan oleh pengendali dalam `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (contohnya nama perkhidmatan Docker/Compose seperti
-> `http://reranker:8080/v1`; nod ini dipanggil secara terus, tanpa melalui `HTTP(S)_PROXY` atau proksi
-> tersemat sambungan). Nod pada mana-mana hos lain
-> — mesin LAN atau rakan setara Tailscale — hanya layak apabila pengendali mendayakan
-> bendera ciri `RERANK_REMOTE_PROVIDER_NODES` **dan** URL asas nod tersebut melepasi dasar URL
-> keluar penyedia (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
+> `http://reranker:8080/v1`; nod ini dipanggil secara langsung, tidak sekali-kali melalui `HTTP(S)_PROXY` atau
+> proksi tersemat sambungan). Nod pada mana-mana hos lain
+> — mesin LAN atau rakan Tailscale — hanya layak apabila pengendali mendayakan
+> bendera ciri `RERANK_REMOTE_PROVIDER_NODES` **dan** URL asas nod tersebut melepasi dasar URL keluar
+> penyedia (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS` / `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS`).
 > Langkah penyusunan semula enjin memori memanggil laluan ini melalui
-> gelung balik, maka peraturan yang sama mengawal `rerankProviderModel` dalam tetapan Memory.
+> gelung balik, maka peraturan yang sama mengawal `rerankProviderModel` dalam tetapan Memori.
 >
-> **Bentuk pelayan setempat:** nod dipanggil pada `<base>/v1/rerank` dan, apabila menerima 404, pada `<base>/rerank`
-> (Infinity, TEI). Badan huluan membawa kedua-dua ejaan Cohere/OpenAI (`documents`,
+> **Bentuk pelayan setempat:** nod dipanggil pada `<base>/v1/rerank` dan, jika menerima 404, pada `<base>/rerank`
+> (Infinity, TEI). Isi permintaan huluan membawa kedua-dua ejaan Cohere/OpenAI (`documents`,
 > `return_documents`) dan ejaan TEI (`texts`, `return_text`), manakala respons huluan
-> dinormalkan kepada sampul Cohere: bentuk langsung TEI `[{index, score, text}]`, `{results: [{index, score}]}`
-> daripada get laluan ringkas, dan `{data: [...]}` gaya Voyage semuanya dikembalikan kepada klien sebagai
+> dinormalkan kepada sampul Cohere: respons kosong TEI `[{index, score, text}]`, `{results: [{index, score}]}`
+> daripada get laluan ringkas dan respons gaya Voyage `{data: [...]}` semuanya dikembalikan kepada klien sebagai
 > `{results: [{index, relevance_score, document?}]}`, diisih mengikut skor dan dihadkan kepada `top_n`.
 
 > **Penemuan nod penyedia:** model pada nod penyedia yang serasi dengan OpenAI muncul dalam `GET /v1/models`
-> di bawah awalan nod. Baris yang tidak membawa metadata titik akhir (kebiasaannya bagi penyenaraian `/v1/models` setempat)
-> mewarisi `apiType` nod tersebut, maka model bagi nod `embeddings` ialah `type: "embedding"` dan model bagi
-> nod `rerank` ialah `type: "rerank"` dan bukannya menggunakan sembang sebagai lalai; `supportedEndpoints` yang dinyatakan secara eksplisit
-> pada baris yang disegerakkan atau ditambahkan secara manual tetap diberi keutamaan.
+> di bawah awalan nod. Baris tanpa metadata titik akhir (lazim bagi penyenaraian `/v1/models` setempat)
+> mewarisi `apiType` nod, maka model nod `embeddings` ialah `type: "embedding"` dan model
+> nod `rerank` ialah `type: "rerank"` dan bukannya menggunakan sembang sebagai lalai; nilai
+> `supportedEndpoints` yang dinyatakan secara eksplisit pada baris yang disegerakkan atau ditambahkan secara manual tetap diutamakan.
 
 ### Laluan Penyedia Khusus
 
@@ -669,32 +809,32 @@ Awalan penyedia ditambahkan secara automatik jika tiada. Model yang tidak sepada
 
 ---
 
-## API Fail
+## Files API
 
-Titik akhir fail yang serasi dengan OpenAI untuk input/output kelompok dan muat naik berdasarkan tujuan fail.
+Titik akhir fail serasi OpenAI untuk input/output kelompok dan muat naik berdasarkan tujuan fail.
 
-| Kaedah | Laluan                   | Penerangan                                                                                                                   |
+| Kaedah | Laluan                   | Perihalan                                                                                                                    |
 | ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | POST   | `/v1/files`              | Muat naik fail (berbilang bahagian: `file`, `purpose`, `expires_after[anchor]`, `expires_after[seconds]`) — maksimum 512 MiB |
 | GET    | `/v1/files`              | Senaraikan fail untuk kunci API yang disahkan                                                                                |
 | GET    | `/v1/files/[id]`         | Dapatkan metadata fail                                                                                                       |
 | DELETE | `/v1/files/[id]`         | Padam fail                                                                                                                   |
-| GET    | `/v1/files/[id]/content` | Strim kembali kandungan mentah fail                                                                                          |
+| GET    | `/v1/files/[id]/content` | Strimkan semula kandungan mentah fail                                                                                        |
 
-**Pengesahan:** Kunci API Bearer — fail diskopkan mengikut kunci API melalui `getApiKeyRequestScope`. Sesuatu kunci
-hanya boleh melihat, memuat turun dan memadam fail miliknya sendiri; sesi papan pemuka tanpa kunci boleh membaca
-keseluruhan tika; fail tanpa pemilik (muat naik tanpa nama atau melalui sesi papan pemuka) tidak boleh diakses oleh setiap
-pemanggil tanpa sesi. `GET /v1/files` menolak pemanggil tanpa nama — dan kunci yang dikemukakan tetapi
+**Pengesahan:** Kunci API Bearer — fail diasingkan mengikut kunci API melalui `getApiKeyRequestScope`. Sesuatu kunci
+hanya dapat melihat, memuat turun dan memadam failnya sendiri; sesi papan pemuka tanpa kunci membaca
+keseluruhan tika; fail tanpa pemilik (muat naik tanpa nama atau melalui sesi papan pemuka) dinafikan kepada setiap
+pemanggil bukan sesi. `GET /v1/files` menolak pemanggil tanpa nama — serta kunci yang diberikan tetapi
 tidak dapat dikenal pasti — dengan `401` walaupun `REQUIRE_API_KEY=false`, dan bukannya menyenaraikan fail
 setiap penyewa (GHSA-m3hp-hq9g-fpmv, GHSA-2jm2-mpx8-6523).
 
 ---
 
-## API Kelompok
+## Batches API
 
-Pemprosesan kelompok yang serasi dengan OpenAI.
+Pemprosesan kelompok serasi OpenAI.
 
-| Kaedah | Laluan                    | Penerangan                                                                                                  |
+| Kaedah | Laluan                    | Perihalan                                                                                                   |
 | ------ | ------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | POST   | `/v1/batches`             | Cipta kelompok — isi disahkan oleh `v1BatchCreateSchema` (`input_file_id`, `endpoint`, `completion_window`) |
 | GET    | `/v1/batches`             | Senaraikan kelompok                                                                                         |
@@ -702,87 +842,80 @@ Pemprosesan kelompok yang serasi dengan OpenAI.
 | DELETE | `/v1/batches/[id]`        | Padam kelompok yang telah selesai/gagal                                                                     |
 | POST   | `/v1/batches/[id]/cancel` | Batalkan kelompok yang sedang diproses                                                                      |
 
-**Pengesahan:** Kunci API Bearer. Kelompok diskopkan mengikut kunci API berdasarkan peraturan tiga hala yang sama seperti
-fail: kunci sendiri sahaja, sesi papan pemuka merangkumi seluruh tika, rekod tanpa pemilik tidak boleh diakses oleh setiap
-pemanggil tanpa sesi (dapatkan, padam, batalkan dan semakan `input_file_id` semasa penciptaan).
+**Pengesahan:** Kunci API Bearer. Kelompok diasingkan mengikut kunci API berdasarkan peraturan tiga hala yang sama seperti
+fail: kunci sendiri sahaja, sesi papan pemuka untuk seluruh tika, rekod tanpa pemilik dinafikan kepada setiap
+pemanggil bukan sesi (dapatkan, padam, batal dan semakan `input_file_id` semasa penciptaan).
 `GET /v1/batches` menolak pemanggil tanpa nama dengan `401` walaupun `REQUIRE_API_KEY=false`.
 
 ---
 
-## API Carian
+## Cari API
 
-Abstraksi penyedia web/carian (Tavily, Brave, Exa, Serper, dll.).
+abstraksi penyedia Web/search (Tavily, Brave, Exa, Serper, dll.).
 
-| Kaedah | Laluan                 | Penerangan                                                                                    |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Senaraikan penyedia carian yang dikonfigurasikan + keupayaan                                  |
-| POST   | `/v1/search`           | Jalankan pertanyaan carian — isi disahkan oleh `v1SearchSchema`, menyokong cache/penggabungan |
-| GET    | `/v1/search/analytics` | Statistik hit/kependaman/cache bagi setiap penyedia                                           |
+| Kaedah | Laluan                 | Penerangan                                                                                          |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Senaraikan keupayaan + pembekal carian yang dikonfigurasikan                                        |
+| POST   | `/v1/search`           | Jalankan pertanyaan carian — body yang disahkan oleh `v1SearchSchema`, menyokong caching/coalescing |
+| GET    | `/v1/search/analytics` | Statistik hit/latency/cache setiap pembekal                                                         |
 
-**Pengesahan:** Kunci API Bearer (`extractApiKey` + `isValidApiKey`). Dasar carian dikuatkuasakan melalui `enforceApiKeyPolicy`.
+**Pengesahan:** Kunci API pembawa (`extractApiKey` + `isValidApiKey`). Dasar carian dikuatkuasakan melalui `enforceApiKeyPolicy`.
 
-### `provider_options` Exa dan Tavily
+### Exa dan Tavily `provider_options`
 
-Exa dan Tavily membaca medan khusus penyedia daripada bekas bernamespace:
-`provider_options.exa` (atau `provider_options["exa-search"]`) dan `provider_options.tavily`
-(atau `provider_options["tavily-search"]`). Hanya kunci di bawah dimajukan. Setiap kunci
-disemak berdasarkan skema Zod masing-masing dalam `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-dan kunci dengan jenis yang salah akan digugurkan. Sebarang kunci lain diabaikan, termasuk pengesahan, URL asas,
-`stream` dan `outputSchema`. Kunci rata yang digunakan oleh penyedia lain (`cx`, `depth`, ...) berfungsi
-seperti sebelumnya.
+Exa dan Tavily membaca medan khusus pembekal daripada beg ruang nama: `provider_options.exa` (atau `provider_options["exa-search"]`) dan `provider_options.tavily` (atau `provider_options["tavily-search"]`). Hanya kekunci di bawah dimajukan. Setiap satu disemak terhadap skema Zod sendiri dalam `open-sse/handlers/search/providerOptionsPassthrough.ts`, dan kunci dengan jenis yang salah digugurkan. Sebarang kunci lain diabaikan, termasuk auth, base URL, `stream` dan `outputSchema`. Kekunci rata yang digunakan oleh pembekal lain (`cx`, `depth`, ...) berfungsi seperti sebelum ini.
 
-| Penyedia | Medan peringkat atas                                                                                                                                                                                                                                                                                                                                                      | Bersarang                                                                                                                                                           |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitif rata), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` digabungkan di atas lalai `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                   |
+| Pembekal | Medan peringkat atasan                                                                                                                                                                                                                                                                                                                                                    | Bersarang                                                                                                                                  |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitif rata), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` digabungkan ke atas `{ text: true, highlights: true }` lalai |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                          |
 
-Medan generik sentiasa diutamakan: `query`, `max_results`, `filters` (domain), `country` dan
-topik yang diperoleh daripada `search_type`. Pada Exa, `search_type: "news"` mengekalkan `category: "news"`.
-Tavily juga menerima `search_type: "finance"` (`topic: "finance"`).
+Medan generik sentiasa menang: `query`, `max_results`, `filters` (domain), `country` dan topik yang diperoleh daripada `search_type`. Pada Exa, `search_type: "news"` mengekalkan `category: "news"`. Tavily juga menerima `search_type: "finance"` (`topic: "finance"`).
 
-`time_range` generik kini dihantar kepada kedua-dua penyedia: Exa menerima `startPublishedDate` (cap masa
-ISO) dan Tavily menerima `start_date` (`YYYY-MM-DD`). Tarikh eksplisit dalam `provider_options`
-mengatasi tarikh yang dipetakan.
+Kos carian Firecrawl direkodkan setiap blok permulaan bagi 10 hasil yang dikembalikan, pada $0.002 (2 kredit) satu blok dan sekurang-kurangnya satu blok setiap panggilan ( [Pengebilan Firecrawl](https://docs.firecrawl.dev/billing) ): 11 hasil kos $0.004.
 
-Hasil Exa mengekalkan `id`, `highlight_scores`, `summary`, `subpages`, `entities` dan `extras` dalam
-`provider_raw`. Hasil Tavily mengekalkan `images` dan `favicon`.
+`time_range` generik kini mencapai kedua-dua penyedia: Exa mendapat `startPublishedDate` ( cap waktu ISO ) dan Tavily mendapat `start_date` (`YYYY-MM-DD`). Tarikh eksplisit dalam `provider_options` mengatasi tarikh yang dipetakan.
 
-Pengiraan kos masih menggunakan daftar rata `costPerQuery`. Tavily mengenakan lebih banyak
-kredit bagi setiap panggilan untuk `search_depth: "advanced"`, dan perbezaan itu tidak ditunjukkan dalam
-`usage.search_cost_usd`.
+Keputusan Exa mengekalkan `id`, `highlight_scores`, `summary`, `subpages`, `entities` dan `extras` dalam `provider_raw`. Hasil tavily kekalkan `images` dan `favicon`.
+
+Kos carian pautan direkodkan pada $0.005 untuk `depth` `fast` dan `standard` dan $0.05 untuk `deep` ( [Harga pautan](https://docs.linkup.so/pages/documentation/development/pricing) ), sama ada `depth` datang daripada `provider_options` atau tetapan sambungan.
+
+Exa `type: "lite"` (Exa 3.0) menerima set medan yang lebih kecil dan menolak keseluruhan permintaan apabila mana-mana medan lain ditetapkan. Untuk lite, `additionalQueries`, `systemPrompt` dan setiap kekunci `contents` kecuali `text` dan `highlights` digugurkan sebelum panggilan. `subpages`, `subpageTarget`, `highlights.numSentences` dan `highlights.highlightsPerUrl` yang ditamatkan tidak dimajukan lagi.
+
+Perakaunan kos ialah `costPerQuery` pendaftaran rata , kecuali untuk Exa, yang mengikut harga Exa sendiri: $0.007 setiap panggilan untuk `auto` (dan `fast` legasi ) atau $0.004 untuk `lite` (dan `instant` warisan ), meliputi 10 keputusan; $0.001 untuk setiap keputusan selanjutnya; dan $0.001 setiap hasil yang dikembalikan apabila `contents.summary` ditetapkan. Tavily direkodkan pada 1 kredit ($0.008) untuk `search_depth` `basic`, `fast` dan `ultra-fast`, dan 2 kredit ($0.016) untuk `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Panggilan dengan `auto_parameters: true` yang Tavily naik taraf kepada lanjutan masih direkodkan pada 1 kredit.
 
 ---
 
-## API Web Fetch
+## API Pengambilan Web
 
-Ekstrak kandungan daripada URL melalui penyedia web-fetch yang dikonfigurasikan (Firecrawl, Jina
+Ekstrak kandungan daripada URL melalui penyedia pengambilan web yang dikonfigurasikan (Firecrawl, Jina
 Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
 
 Parallel Extract (`parallel-search`, kunci API yang sama seperti Parallel Search) hanya mengembalikan Markdown
-— sebarang `format` lain akan menghasilkan `400` — dan mengehadkan kandungan kepada 100,000 aksara. Apabila
-halaman sasaran itu sendiri tidak dapat diekstrak, sistem huluan melaporkannya dalam HTTP 200;
+— sebarang `format` lain menghasilkan `400` — dan mengehadkan kandungan kepada 100,000 aksara. Apabila
+halaman sasaran itu sendiri tidak dapat diekstrak, perkhidmatan huluan melaporkannya dalam HTTP 200;
 OmniRoute mendedahkannya sebagai `422` dengan mesej tetap.
 
-| Kaedah | Laluan          | Penerangan                                                          |
-| ------ | --------------- | ------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Dapatkan/kikis URL — isi kandungan disahkan oleh `v1WebFetchSchema` |
+| Kaedah | Laluan          | Penerangan                                             |
+| ------ | --------------- | ------------------------------------------------------ |
+| POST   | `/v1/web/fetch` | Ambil/kikis URL — isi disahkan oleh `v1WebFetchSchema` |
 
 **Pengesahan:** Kunci API Bearer (`extractApiKey` + `isValidApiKey`). Dasar dikuatkuasakan melalui `enforceApiKeyPolicy`.
 
-**Sandaran peka kuota (#8297):** apabila tiada `provider` yang dinyatakan secara eksplisit, kumpulan
+**Sandaran peka kuota (#8297):** apabila tiada `provider` dinyatakan secara eksplisit, kumpulan
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) akan
-dilalui mengikut susunan
-keutamaan tetap (isi dahulu) — penyedia yang dikonfigurasikan tetapi dikenakan had kadar akan dilangkau
-dan bukannya menamatkan permintaan lebih awal, manakala kegagalan sistem huluan yang boleh dicuba semula/berkaitan kuota
-(HTTP 429 sentiasa; 402/403 untuk peringkat percuma berasaskan kuota Firecrawl/Tavily/TinyFish —
-bukan untuk Jina Reader, dan tidak sekali-kali untuk permintaan tidak sah 400 biasa) akan beralih kepada
-penyedia berkelayakan dengan bukti kelayakan seterusnya yang belum dicuba semasa permintaan. Apabila setiap penyedia dalam
-kumpulan telah habis digunakan, titik akhir mengembalikan satu `429` (dengan pengepala `Retry-After`)
-dan bukannya `400` generik seperti sebelumnya. Apabila `provider` tertentu
-diminta secara eksplisit, **tiada** sandaran senyap — penyedia eksplisit yang dikenakan had kadar atau gagal
-akan mendedahkan ralatnya sendiri (`429` jika dikenakan had kadar, jika tidak status
-sistem huluan).
+`parallel-search`) dilalui mengikut
+susunan keutamaan tetap
+(isi dahulu) — penyedia yang dikonfigurasikan tetapi dikenakan had kadar akan dilangkau
+dan bukannya menamatkan permintaan serta-merta, manakala kegagalan huluan yang boleh dicuba semula/berkaitan kuota
+(HTTP 429 sentiasa; 402/403 untuk peringkat percuma gaya kuota Firecrawl/Tavily/TinyFish —
+bukan untuk Jina Reader, dan tidak sekali-kali untuk permintaan buruk 400 biasa) akan beralih kepada
+penyedia seterusnya yang belum dicuba dan mempunyai bukti kelayakan pada masa permintaan. Apabila setiap penyedia dalam
+kumpulan telah kehabisan, titik akhir mengembalikan satu `429` (dengan pengepala `Retry-After`)
+dan bukannya `400` generik sebelumnya. Apabila `provider` diminta
+secara eksplisit, **tiada** sandaran senyap — penyedia eksplisit yang dikenakan had kadar atau gagal
+akan mendedahkan ralatnya sendiri (`429` jika dikenakan had kadar, jika tidak, status
+huluan).
 
 ---
 
@@ -792,14 +925,14 @@ sistem huluan).
 GET /v1/ws?handshake=1
 ```
 
-Mengesahkan jabat tangan peningkatan WebSocket dan mengembalikan mesej contoh protokol wayar (`request`, `cancel`). Bingkai WS sebenar dikendalikan oleh pelayan WS terbina di luar jadual laluan Next.js.
+Mengesahkan jabat tangan naik taraf WebSocket dan mengembalikan mesej contoh protokol wayar (`request`, `cancel`). Bingkai WS sebenar dikendalikan oleh pelayan WS yang disertakan di luar jadual laluan Next.js.
 
 **Pengesahan:** Kunci API Bearer semasa jabat tangan.
 
-### Responses API melalui WebSocket (codex sahaja)
+### API Responses melalui WebSocket (codex sahaja)
 
 ```bash
-# Hos:port yang sama dengan API HTTP (lalai 20128); tingkatkan sambungan:
+# Hos:port yang sama seperti API HTTP (lalai 20128); naik taraf sambungan:
 wscat -c "ws://localhost:20128/v1/responses?api_key=<OMNIROUTE_API_KEY>"
 # (atau: -H "Authorization: Bearer <OMNIROUTE_API_KEY>")
 
@@ -807,41 +940,40 @@ wscat -c "ws://localhost:20128/v1/responses?api_key=<OMNIROUTE_API_KEY>"
 { "type": "response.create", "model": "gpt-5.5", "input": [ { "role": "user", "content": "hi" } ] }
 ```
 
-Proksi Responses-API-melalui-WebSocket disambungkan **secara eksklusif kepada `codex`** (bahagian belakang ChatGPT). Ia
-mendengar pada port yang sama seperti API/papan pemuka di laluan `/v1/responses`,
+Proksi Responses-API-melalui-WebSocket disambungkan **secara eksklusif kepada `codex`** (bahagian belakang ChatGPT). Ia mendengar pada port yang sama seperti API/papan pemuka di laluan `/v1/responses`,
 `/responses`, dan `/api/v1/responses`. Pada bingkai `response.create` pertama, ia
 mengesahkan + menyediakan melalui jambatan dalaman `codex-responses-ws`, memilih
-sambungan OAuth codex, dan membuat terowong ke `wss://chatgpt.com/backend-api/codex/responses`
+sambungan OAuth codex dan membuat terowong ke `wss://chatgpt.com/backend-api/codex/responses`
 melalui pengangkutan `wreq-js`. **Model bukan codex ditolak** (`codex_ws_provider_required`).
 Untuk penghalaan perkongsian kuota, gunakan `model: "qtSd/<group>/codex/<model>"`. Dilaksanakan dalam
 `app/server-ws.mjs` + `scripts/dev/responses-ws-proxy.mjs` + `src/app/api/internal/codex-responses-ws/route.ts`.
 
-**Pengesahan:** Kunci API Bearer semasa jabat tangan. Pelayan HTTP terbina (`server-ws.mjs`)
-mestilah titik masuk yang aktif (dan sememangnya begitu secara lalai apabila `app/server-ws.mjs` wujud).
+**Pengesahan:** Kunci API Bearer semasa jabat tangan. Pelayan HTTP yang disertakan (`server-ws.mjs`)
+mestilah titik masuk aktif (sememangnya demikian secara lalai apabila `app/server-ws.mjs` wujud).
 
-#### ID model: gunakan ID ChatGPT biasa (tanpa awalan `codex/`)
+#### ID model: gunakan ID ChatGPT asas (tanpa awalan `codex/`)
 
-**Codex CLI** OpenAI mengesahkan nama model pada bahagian klien apabila
+**Codex CLI** OpenAI mengesahkan nama model pada sisi klien apabila
 `supports_websockets = true` dan **menolak ID berawalan penyedia** seperti
 `codex/gpt-5.5` (`The 'codex/gpt-5.5' model is not supported when using Codex with
-a ChatGPT account`). Hantar ID **biasa** (cth. `gpt-5.5`). Jambatan OmniRoute
-adalah untuk codex sahaja, jadi ia menyelesaikan semula ID biasa sebagai model codex
+a ChatGPT account`). Hantar ID **asas** (contohnya `gpt-5.5`). Jambatan OmniRoute
+adalah untuk codex sahaja, maka ia menyelesaikan semula ID asas sebagai model codex
 (`resolveCodexWsModelInfo`) sebelum membuat terowong ke huluan — walaupun
-`gpt-5.5` biasa sebaliknya akan dihalakan kepada penyedia lain melalui HTTP.
+`gpt-5.5` asas sebaliknya akan dihalakan kepada penyedia lain melalui HTTP.
 
 #### Mengkonfigurasikan OpenAI Codex CLI
 
-Halakan Codex CLI kepada OmniRoute dengan menambahkan penyedia tersuai yang mempunyai sokongan
-WebSocket ke `~/.codex/config.toml` (gunakan `CODEX_HOME` yang berasingan untuk mengelakkan
-perubahan pada konfigurasi sedia ada):
+Halakan Codex CLI kepada OmniRoute dengan menambahkan penyedia tersuai yang mempunyai sokongan WebSocket
+pada `~/.codex/config.toml` (gunakan `CODEX_HOME` berasingan untuk mengelakkan perubahan
+pada konfigurasi sedia ada):
 
 ```toml
-model = "gpt-5.5"                 # ID biasa — BUKAN "codex/gpt-5.5"
+model = "gpt-5.5"                 # ID asas — BUKAN "codex/gpt-5.5"
 model_provider = "omniroute"
 
 [model_providers.omniroute]
 name = "OmniRoute (WS)"
-base_url = "http://localhost:20128/v1"   # tanpa garis miring penutup; URL WS diterbitkan daripadanya (gunakan https/wss dalam pengeluaran)
+base_url = "http://localhost:20128/v1"   # tanpa garis miring di hujung; URL WS diterbitkan daripadanya (gunakan https/wss dalam pengeluaran)
 wire_api = "responses"                    # satu-satunya nilai yang disokong sejak Feb 2026
 supports_websockets = true                # mendayakan pengangkutan Responses-melalui-WS
 env_key = "OMNIROUTE_API_KEY"             # menyimpan kunci API OmniRoute (Bearer)
@@ -852,8 +984,8 @@ export OMNIROUTE_API_KEY=sk-...           # kunci API OmniRoute (sebarang kunci 
 codex exec "Responda apenas: PONG"
 ```
 
-CLI menaik taraf `base_url + /responses` kepada WebSocket dan OmniRoute membuat terowongnya
-ke sambungan OAuth codex yang dipilih. Disahkan dari hujung ke hujung terhadap pelayan
+CLI menaik taraf `base_url + /responses` kepada WebSocket dan OmniRoute membuat terowong baginya
+ke sambungan OAuth codex yang dipilih. Disahkan secara hujung ke hujung terhadap pelayan
 setempat: ChatGPT mengembalikan `codex.rate_limits` + `response.created` dan menstrim
 pelengkapan.
 
@@ -864,7 +996,7 @@ pelengkapan.
 | Kaedah | Laluan              | Penerangan                                                                                         |
 | ------ | ------------------- | -------------------------------------------------------------------------------------------------- |
 | GET    | `/v1/quotas/check`  | Prapengesahan kuota untuk `provider` + `accountId` sebelum mengeluarkan kunci berdaftar            |
-| POST   | `/v1/issues/report` | Laporkan kegagalan kuota/pengeluaran kunci kepada GitHub (memerlukan `GITHUB_ISSUES_REPO` + token) |
+| POST   | `/v1/issues/report` | Laporkan kegagalan pengeluaran kuota/kunci kepada GitHub (memerlukan `GITHUB_ISSUES_REPO` + token) |
 
 **Pengesahan:** Kunci API Bearer (`isAuthenticated`).
 
@@ -872,8 +1004,8 @@ pelengkapan.
 
 ## Penggunaan layan diri (`/api/usage/om-usage`)
 
-Mana-mana kunci API boleh membaca penggunaan dan kuota **miliknya sendiri** — tanpa pengesahan pengurusan. Ini ialah titik akhir yang digunakan oleh
-klien (CLI, panel OmniCopilot) untuk menunjukkan perbelanjaan kepada pemegang kunci.
+Mana-mana kunci API boleh membaca penggunaan dan kuota **miliknya sendiri** — tanpa pengesahan pengurusan. Ini ialah titik akhir yang
+digunakan oleh klien (CLI, panel OmniCopilot) untuk menunjukkan perbelanjaan kepada pemegang kunci.
 
 ```bash
 # Bentuk teks (kontrak terdahulu — teks biasa untuk terminal)
@@ -885,16 +1017,16 @@ curl -H "Authorization: Bearer <your-api-key>" \
   "http://localhost:20128/api/usage/om-usage?format=json"
 ```
 
-Kunci tersebut mesti mendayakan **`allowUsageCommand`** (dimatikan secara lalai — pengurus kunci API papan pemuka
-menogolnya bagi setiap kunci). Tanpanya, titik akhir akan memberikan respons `403`.
+Kunci tersebut mesti mengaktifkan **`allowUsageCommand`** (dimatikan secara lalai — pengurus kunci API
+papan pemuka menogolnya bagi setiap kunci). Tanpanya, titik akhir memberikan respons `403`.
 
-`?format=json` mengembalikan bentuk terdiskriminasi supaya pemanggil tidak sekali-kali membaca medan data daripada
+`?format=json` mengembalikan bentuk terbeza supaya pemanggil tidak akan membaca medan data daripada
 respons penolakan. Apabila berjaya:
 
 ```jsonc
 {
   "allowed": true,
-  // hadir hanya apabila kunci memilih had penggunaan bagi setiap kunci (USD harian/mingguan):
+  // hanya tersedia apabila kunci memilih untuk menggunakan had penggunaan setiap kunci (USD harian/mingguan):
   "personal": {
     "dailySpentUsd": 1.25,
     "dailyLimitUsd": 5,
@@ -904,12 +1036,7 @@ respons penolakan. Apabila berjaya:
     "weeklyResetAtIso": "…" /* … */,
   },
   // petikan kuota penyedia yang dipilih, atau null apabila belum ada apa-apa yang dicache:
-  "provider": {
-    "connectionId": "…",
-    "provider": "claude",
-    "plan": "…",
-    "quotas": {/* … */},
-  },
+  "provider": { "connectionId": "…", "provider": "claude", "plan": "…", "quotas": {/* … */} },
   // petikan bagi setiap sambungan, supaya UI boleh memaparkan beberapa penyedia secara bersebelahan:
   "providers": [
     { "connectionId": "…", "provider": "claude" /* … */ },
@@ -919,63 +1046,63 @@ respons penolakan. Apabila berjaya:
 ```
 
 Apabila ditolak (`401` kunci tidak sah / `403` tidak dibenarkan), laluan yang sama mengembalikan
-`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` yang hadir tetapi kosong
-(kunci dibenarkan, tetapi belum ada apa-apa yang diketahui) ialah keadaan yang berbeza daripada penolakan, dan hanya bentuk JSON
-yang membezakannya.
+`{ "allowed": false, "error": { "message": "…" } }` — `personal`/`provider` yang wujud tetapi kosong
+(kunci dibenarkan, tetapi belum ada maklumat diperoleh) merupakan keadaan yang berbeza daripada penolakan, dan hanya bentuk JSON
+membezakan keadaan tersebut.
 
 **Pengesahan:** kunci API Bearer milik pemanggil sendiri, disahkan dengan `isValidApiKey` — ini _bukan_
 permukaan pengurusan (`/api/keys/…`), yang kekal dilindungi oleh `requireManagementAuth`.
 
-### Peratusan Kuota Mentah berbanding yang Dilaraskan Mengikut Ambang
+### Peratusan Kuota Mentah berbanding yang Dilaraskan Mengikut Ambang Henti
 
 Apabila menggunakan `/api/usage/om-usage`, pemanggil perlu mengambil perhatian tentang perbezaan antara
 peratusan yang dipaparkan oleh **output teks biasa** dengan **output JSON** berstruktur:
 
-| Aspek                 | Format teks biasa (`/api/usage/om-usage` / `@@om-usage`)                                          | Format JSON (`?format=json`)                                                      |
-| :-------------------- | :------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------- |
-| **Medan output**      | `NN% left` (cth., `20% left`)                                                                     | `provider.quotas` / `providers[].quotas`                                          |
-| **Pengukuran**        | **Elaun boleh guna yang dilaraskan mengikut ambang**: kapasiti berbaki melebihi ambang had        | **Kuota huluan mentah**: pengukuran penyedia yang tidak dilaraskan                |
-| **Penskalaan ambang** | Diskalakan melalui `effectiveRemainingPercent()` supaya rizab terlindung dibaca sebagai `0% left` | Tiada (nilai petikan mentah seperti yang dilaporkan oleh penyedia)                |
-| **Data ambang**       | Digabungkan ke dalam peratusan yang dipaparkan                                                    | Disimpan dalam `quotaWindowThresholds` bagi setiap sambungan (atau lalai pelayan) |
-| **Pengguna utama**    | CLI interaktif, gesaan terminal, pengendali manusia                                               | Penyepaduan berprogram, papan pemuka, analitis, penjejak pengebilan               |
+| Aspek                       | Format teks biasa (`/api/usage/om-usage` / `@@om-usage`)                                           | Format JSON (`?format=json`)                                                      |
+| :-------------------------- | :------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| **Medan output**            | `NN% left` (cth., `20% left`)                                                                      | `provider.quotas` / `providers[].quotas`                                          |
+| **Pengukuran**              | **Elaun boleh guna yang dilaraskan mengikut ambang henti**: kapasiti berbaki melebihi ambang henti | **Kuota huluan mentah**: pengukuran penyedia yang tidak dilaraskan                |
+| **Penskalaan ambang henti** | Diskalakan melalui `effectiveRemainingPercent()` supaya rizab terlindung dibaca sebagai `0% left`  | Tiada (nilai petikan mentah seperti yang dilaporkan oleh penyedia)                |
+| **Data ambang**             | Diambil kira dalam peratusan yang dipaparkan                                                       | Disimpan dalam `quotaWindowThresholds` bagi setiap sambungan (atau lalai pelayan) |
+| **Pengguna utama**          | CLI interaktif, gesaan terminal, pengendali manusia                                                | Penyepaduan berprogram, papan pemuka, analitik, penjejak pengebilan               |
 
-#### Formula Pelarasan Ambang
+#### Formula Pelarasan Ambang Henti
 
-OmniRoute menyokong ambang kuota proaktif untuk mencegah kehabisan sumber huluan (dikonfigurasikan melalui
-`quotaWindowThresholds` sambungan, lalai penyedia atau tetapan ketahanan global). Apabila ambang had
+OmniRoute menyokong ambang henti kuota proaktif untuk mengelakkan kehabisan sumber huluan (dikonfigurasikan melalui
+`quotaWindowThresholds` sambungan, tetapan lalai penyedia, atau tetapan ketahanan global). Apabila ambang henti
 (cth., `cutoff = 25%`) aktif pada tetingkap kuota, pemapar teks mengira elaun berbaki seperti berikut:
 
 - Jika `remaining <= cutoff`: mengembalikan `0%`.
 - Jika `remaining > cutoff`: mengembalikan `((remaining - cutoff) / (100 - cutoff)) * 100`.
 
-Output teks berformat membundarkan nilai ini kepada integer terdekat (`Math.round(...)`).
+Output teks yang diformat membundarkan nilai ini kepada integer terdekat (`Math.round(...)`).
 
 #### Contoh Ilustrasi
 
-Pertimbangkan tetingkap penyedia dengan **60% penggunaan mentah** (maka **40% kuota mentah berbaki**) dan ambang
-**25% had kuota berbaki** yang dikonfigurasikan:
+Pertimbangkan tetingkap penyedia dengan **60% penggunaan mentah** (maka **40% kuota mentah berbaki**) dan
+ambang **25% kuota berbaki** yang dikonfigurasikan:
 
-| Perwakilan                       | Pengiraan                                          | Berbaki |           Penggunaan Tersirat            |
+| Perwakilan                       | Pengiraan                                          |  Baki   |           Penggunaan Tersirat            |
 | :------------------------------- | :------------------------------------------------- | :-----: | :--------------------------------------: |
 | **JSON mentah (`?format=json`)** | Petikan huluan (`quotas[window]`)                  | **40%** |                 **60%**                  |
 | **Format teks (`NN% left`)**     | `((40 - 25) / (100 - 25)) * 100 = (15 / 75) * 100` | **20%** | **80%** (jika mengira `100 - remaining`) |
 
-- **Mengapa teks menunjukkan 20% berbaki:** Daripada 40% kuota fizikal yang berbaki pada akaun, 25% dirizabkan oleh
-  dasar ambang. Pemanggil hanya mempunyai 15% daripada 75% ruang boleh guna yang berbaki sebelum penghala berhenti
-  menghalakan ke sambungan ini. Penskalaan memastikan sambungan mengisyaratkan kehabisan (`0% left`) tepat ketika
+- **Mengapa teks menunjukkan baki 20%:** Daripada 40% kuota fizikal yang masih berbaki pada akaun, 25% dirizabkan oleh
+  dasar ambang henti. Pemanggil hanya mempunyai 15% daripada 75% ruang boleh guna yang masih berbaki sebelum penghala berhenti
+  menghalakan trafik ke sambungan ini. Penskalaan memastikan sambungan menandakan kehabisan (`0% left`) tepat ketika
   penghalaan akan dihentikan.
 - **Mengapa JSON mengekalkan nilai mentah:** Muatan JSON mengembalikan petikan penyedia yang tepat (`UsageSnapshot`)
   supaya alat luaran mempunyai akses kepada penggunaan huluan sebenar dan
-  `quotaWindowThresholds` peringkat sambungan tanpa penskalaan lossy pada pihak pelayan.
+  `quotaWindowThresholds` peringkat sambungan tanpa penskalaan lossy pada bahagian pelayan.
 
 #### Panduan Migrasi Pengguna
 
-Jika penyepaduan luaran (seperti pemalam editor atau sambungan ejen) sebelum ini mengekstrak data daripada titik akhir teks
-(`NN% left`) dan mengira peratusan yang digunakan sebagai `100 - NN`, migrasi kepada `?format=json` bermaksud:
+Jika integrasi luaran (seperti pemalam editor atau sambungan ejen) sebelum ini mengekstrak titik akhir
+teks (`NN% left`) dan mengira peratusan yang digunakan sebagai `100 - NN`, peralihan kepada `?format=json` bermaksud:
 
 - Pembacaan nilai JSON mentah akan mencerminkan **penggunaan huluan sebenar** (60% digunakan dalam contoh di atas).
-- Jika penyepaduan mahu mengekalkan semantik elaun boleh guna titik akhir teks, ia boleh menilai
-  formula baki efektif pada pihak klien menggunakan `quotaWindowThresholds` untuk penggantian peringkat sambungan.
+- Jika integrasi tersebut mahu mengekalkan semantik peruntukan boleh guna bagi titik akhir teks, ia boleh menilai
+  formula baki berkesan pada bahagian klien menggunakan `quotaWindowThresholds` untuk penggantian peringkat sambungan.
 
 ---
 
@@ -1006,12 +1133,12 @@ Contoh respons:
 }
 ```
 
-### Kesan kependaman
+### Kesan terhadap kependaman
 
-HIT cache semantik menyampaikan respons daripada cache **tanpa panggilan huluan**,
-maka `X-OmniRoute-Response-Latency` yang dilaporkan menghampiri sifar
+HIT cache semantik menyampaikan respons daripada cache **tanpa panggilan
+huluan**, maka `X-OmniRoute-Response-Latency` yang dilaporkan adalah hampir sifar
 (tanpa mengira kependaman huluan asal). Klien yang sensitif terhadap kependaman
-(penanda aras, pemantauan p50/p99) hendaklah memeriksa pengepala respons
+(penanda aras, pemantauan p50/p99) harus menyemak pengepala respons
 `X-OmniRoute-Cache-Latency`:
 
 | Nilai       | Maksud                                                                   |
@@ -1019,22 +1146,22 @@ maka `X-OmniRoute-Response-Latency` yang dilaporkan menghampiri sifar
 | `synthetic` | Respons disampaikan daripada cache; kependaman bukan masa huluan sebenar |
 | _(tiada)_   | Respons daripada panggilan huluan sebenar                                |
 
-### Pintasan cache setiap kunci
+### Pintasan cache bagi setiap kunci
 
 Kunci API boleh memilih untuk tidak menggunakan bacaan cache semantik melalui `cacheDefaultMode`:
 
-| Nilai    | Tingkah laku                                             |
-| -------- | -------------------------------------------------------- |
-| `legacy` | Tingkah laku cache biasa (lalai)                         |
-| `bypass` | Langkau carian cache sepenuhnya; sentiasa gunakan huluan |
+| Nilai    | Tingkah laku                                           |
+| -------- | ------------------------------------------------------ |
+| `legacy` | Tingkah laku cache biasa (lalai)                       |
+| `bypass` | Langkau carian cache sepenuhnya; sentiasa akses huluan |
 
-Tetapkan ketika penciptaan kunci (`POST /api/keys`) atau kemas kini (`PATCH /api/keys/[id]`):
+Tetapkan semasa penciptaan kunci (`POST /api/keys`) atau kemas kini (`PATCH /api/keys/[id]`):
 
 ```json
 { "cacheDefaultMode": "bypass" }
 ```
 
-### Pintasan setiap permintaan
+### Pintasan bagi setiap permintaan
 
 Sebarang permintaan boleh memintas cache tanpa mengira tetapan kunci:
 
@@ -1047,46 +1174,46 @@ X-OmniRoute-No-Cache: true
 ## Papan Pemuka & Pengurusan
 
 Laluan pengurusan (`/api/*` kecuali pengesahan/log masuk awam) **tidak** dibenarkan oleh
-kunci API inferens biasa. Keluarga kelayakan, skop dan contoh curl:
+kunci API inferens biasa. Kumpulan bukti kelayakan, skop dan contoh curl:
 [Pengesahan Pengurusan](../guides/MANAGEMENT-AUTH.md).
 
 ### Pengesahan
 
-| Titik Akhir                   | Kaedah   | Penerangan                                                                                                                                                                                                                                                                                                          |
-| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/auth/login`             | POST     | Log masuk                                                                                                                                                                                                                                                                                                           |
-| `/api/auth/logout`            | POST     | Log keluar                                                                                                                                                                                                                                                                                                          |
-| `/api/settings/require-login` | GET/POST | Status log masuk (GET, awam). POST menetapkan kata laluan / menogol log masuk: hanya pengendali selepas kata laluan wujud (sesi papan pemuka, CLI setempat atau log masuk dinyahdayakan — kunci API dan token `oma_` menerima `403`); sesi papan pemuka menghantar `currentPassword` untuk menggantikan kata laluan |
+| Titik akhir                   | Kaedah   | Penerangan                                                                                                                                                                                                                                                                                                             |
+| ----------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | Log masuk                                                                                                                                                                                                                                                                                                              |
+| `/api/auth/logout`            | POST     | Log keluar                                                                                                                                                                                                                                                                                                             |
+| `/api/settings/require-login` | GET/POST | Status log masuk (GET, awam). POST menetapkan kata laluan / menogol log masuk: operator sahaja sebaik sahaja kata laluan wujud (sesi papan pemuka, CLI setempat atau log masuk dilumpuhkan — kunci API dan token `oma_` menerima `403`); sesi papan pemuka menghantar `currentPassword` untuk menggantikan kata laluan |
 
 ### Pengurusan Penyedia
 
-| Titik Akhir                             | Kaedah                    | Penerangan                                                                                                                                                                                              |
-| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | Senaraikan / cipta penyedia                                                                                                                                                                             |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | Urus penyedia                                                                                                                                                                                           |
-| `/api/providers/[id]/test`              | POST                      | Uji sambungan penyedia                                                                                                                                                                                  |
-| `/api/providers/[id]/models`            | GET                       | Senaraikan model penyedia                                                                                                                                                                               |
-| `/api/providers/validate`               | POST                      | Sahkan konfigurasi penyedia                                                                                                                                                                             |
-| `/api/providers/bulk`                   | POST                      | Tambah secara pukal kunci API untuk SATU penyedia                                                                                                                                                       |
-| `/api/providers/import`                 | POST                      | Import SENARAI penyedia heterogen daripada fail CSV/JSON yang telah dihuraikan (#6836); hasil kegagalan separa bagi setiap baris                                                                        |
-| `/api/provider-nodes*`                  | Pelbagai                  | Pengurusan nod penyedia                                                                                                                                                                                 |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Model tersuai dan penggantian bagi setiap model (tambah, kemas kini, sembunyikan/tunjukkan, padam)                                                                                                      |
-| `/api/provider-models/validate-and-add` | POST                      | Pengesahan sambungan ketat yang disahkan melalui pengurusan dan perlu disertai secara eksplisit, serta pendaftaran model tersuai secara atomik; lihat [Pengesahan model](../guides/MODEL-VALIDATION.md) |
+| Titik akhir                             | Kaedah                    | Penerangan                                                                                                                                                                                 |
+| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/providers`                        | GET/POST                  | Senaraikan / cipta penyedia                                                                                                                                                                |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | Urus penyedia                                                                                                                                                                              |
+| `/api/providers/[id]/test`              | POST                      | Uji sambungan penyedia                                                                                                                                                                     |
+| `/api/providers/[id]/models`            | GET                       | Senaraikan model penyedia                                                                                                                                                                  |
+| `/api/providers/validate`               | POST                      | Sahkan konfigurasi penyedia                                                                                                                                                                |
+| `/api/providers/bulk`                   | POST                      | Tambah secara pukal kunci API untuk SATU penyedia                                                                                                                                          |
+| `/api/providers/import`                 | POST                      | Import SENARAI penyedia heterogen daripada fail CSV/JSON yang telah dihuraikan (#6836); hasil kegagalan separa bagi setiap baris                                                           |
+| `/api/provider-nodes*`                  | Pelbagai                  | Pengurusan nod penyedia                                                                                                                                                                    |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | Model tersuai dan penggantian tetapan bagi setiap model (tambah, kemas kini, sembunyikan/tunjukkan, padam)                                                                                 |
+| `/api/provider-models/validate-and-add` | POST                      | Pengesahan sambungan ketat yang disahkan oleh pengurusan dan memerlukan penyertaan, serta pendaftaran model tersuai secara atomik; lihat [Pengesahan model](../guides/MODEL-VALIDATION.md) |
 
-Untuk model yang disegerakkan/diimport, `PUT /api/provider-models` menerima `provider`, `modelId` dan
-`maxOutputTokenOverride`: integer positif menetapkan had token output manual, manakala `null`
+Untuk model yang disegerakkan/diimport, `PUT /api/provider-models` menerima `provider`, `modelId`, dan
+`maxOutputTokenOverride`: integer positif menetapkan had token output secara manual, manakala `null`
 mengosongkannya untuk memulihkan nilai lalai. `GET /api/provider-models?provider=<provider>` mengembalikan
-nilai ini dalam `modelOutputOverrides`, termasuk model tanpa baris model tersuai. Penggantian tersebut
-menggunakan keupayaan masa jalan `max_output_tokens` dan kekal selepas penyegerakan semula model. Halaman
-penyedia serasi OpenAI menawarkan kawalan edit/kosongkan yang sama dan menandakan model dengan sokongan penglihatan yang dinyatakan secara eksplisit.
+nilai ini dalam `modelOutputOverrides`, termasuk model tanpa baris model tersuai. Penggantian tetapan
+menggunakan keupayaan masa jalan `max_output_tokens` dan dikekalkan selepas model disegerakkan semula. Halaman
+penyedia yang serasi dengan OpenAI menawarkan kawalan edit/kosongkan yang sama dan menandai model dengan sokongan visi secara eksplisit.
 
-Nod Chat Completions tersuai menyesuaikan pilihan untuk tidak menggunakan penaakulan secara eksplisit kepada bahagian huluan. Ujian
-sambungan yang berjaya memilih kawalan templat sembang secara automatik untuk setiap ID model tepat
-yang entri `/models`-nya membuktikan nilai `owned_by` yang dikenali: `vllm`, `sglang` atau `llamacpp`.
-Pembalut serasi OpenAI yang telus mungkin mengekalkan entri model asal di dalam objek
-`openai` tersarang; pengesanan mengikuti sehingga tiga sampul sedemikian. Model dengan pemilikan yang tiada, tidak diketahui atau
-bercanggah mengekalkan tingkah laku OpenAI biasa. Pengesanan menggunakan semula permintaan katalog sedia ada,
-tidak menjana token pelengkapan dan dibatalkan apabila titik akhir sambungan berubah.
+Nod Pelengkapan Sembang Tersuai menyesuaikan pilihan untuk tidak menggunakan penaakulan secara eksplisit dengan bahagian belakang huluan. Ujian
+sambungan yang berjaya akan memilih kawalan templat sembang secara automatik bagi setiap ID model tepat
+yang entri `/models`-nya membuktikan nilai `owned_by` yang dikenali: `vllm`, `sglang`, atau `llamacpp`.
+Pembalut telus yang serasi dengan OpenAI mungkin mengekalkan entri model asal di dalam objek
+`openai` tersarang; pengesanan mengikuti sehingga tiga lapisan sedemikian. Model dengan pemilikan yang tiada, tidak diketahui atau
+berkonflik mengekalkan tingkah laku OpenAI biasa. Pengesanan menggunakan semula permintaan katalog sedia ada,
+tidak menjana token pelengkapan dan akan dibatalkan apabila titik akhir sambungan berubah.
 
 Untuk menetapkan tingkah laku bagi bahagian belakang yang tidak mendedahkan metadata tersebut, gunakan API kemas kini
 separa penyedia yang sedia ada:
@@ -1099,20 +1226,20 @@ separa penyedia yang sedia ada:
 }
 ```
 
-Hantar badan tersebut dengan `PUT /api/providers/<connection-id>`. Pada sambungan itu, usaha penaakulan eksplisit
-sebanyak `none` dihantar sebagai `chat_template_kwargs.thinking=false` dan
-`chat_template_kwargs.enable_thinking=false`. Nilai templat asli yang eksplisit kekal berkuasa
-melainkan peraturan penaakulan sebelah pelayan memaksa suatu usaha. Tetapan ini hanya terpakai apabila sambungan
-serasi OpenAI tersuai menghantar badan Chat Completions; permintaan Responses dan penyedia biasa
-mengekalkan bentuk permintaan asli masing-masing. Tetapkan `reasoningControl` kepada `openai` untuk memaksa laluan terus
-`reasoning_effort` OpenAI biasa, atau abaikannya/tetapkannya kepada `null` untuk menggunakan pengesanan automatik.
+Hantar kandungan tersebut dengan `PUT /api/providers/<connection-id>`. Pada sambungan itu, usaha
+penaakulan eksplisit `none` dihantar sebagai `chat_template_kwargs.thinking=false` dan
+`chat_template_kwargs.enable_thinking=false`. Nilai templat natif yang eksplisit kekal berkuat kuasa
+melainkan peraturan penaakulan sebelah pelayan memaksa suatu usaha. Tetapan ini hanya digunakan apabila sambungan
+tersuai yang serasi dengan OpenAI menghantar kandungan Pelengkapan Sembang; permintaan Responses dan penyedia
+biasa mengekalkan bentuk permintaan natif masing-masing. Tetapkan `reasoningControl` kepada `openai` untuk memaksa
+penghantaran terus `reasoning_effort` OpenAI biasa, atau abaikannya/tetapkannya kepada `null` untuk menggunakan pengesanan automatik.
 
-Permintaan pengelas mod automatik Claude Code secara lalai menyahdayakan pemikiran asli apabila permintaan tersebut
-tidak mengandungi kawalan penaakulan eksplisit. Pengesanan menggunakan penanda sistem pengelas dalam permintaan
-berformat Claude, bukannya nama model atau had pelengkapan. Kawalan badan eksplisit, pengepala usaha/pemikiran
-yang disokong, peraturan penghalaan dan usaha model yang diselesaikan mengekalkan keutamaan sedia ada. Kedua-dua peringkat
-pengelas mengekalkan prom, had pelengkapan, jujukan henti dan keputusan kebenaran huluan sebenar
-masing-masing; peringkat kedua masih boleh menghasilkan penaakulan kelihatan yang diminta sebagai teks biasa.
+Permintaan pengelas mod automatik Claude Code menetapkan pemikiran natif kepada dilumpuhkan secara lalai apabila permintaan tersebut
+tidak mengandungi kawalan penaakulan eksplisit. Pengesanan menggunakan penanda sistem pengelas dalam permintaan berformat Claude,
+bukan nama model atau had pelengkapan. Kawalan kandungan eksplisit, pengepala usaha/pemikiran yang disokong,
+peraturan penghalaan dan usaha model yang telah ditentukan mengekalkan keutamaan sedia ada. Kedua-dua peringkat pengelas
+mengekalkan gesaan, had pelengkapan, jujukan henti dan keputusan kebenaran huluan sebenar masing-masing;
+peringkat kedua masih boleh menghasilkan penaakulan kelihatan yang diminta sebagai teks biasa.
 
 ### Aliran OAuth
 
@@ -1130,52 +1257,52 @@ masing-masing; peringkat kedua masih boleh menghasilkan penaakulan kelihatan yan
 | `/api/keys*`          | Pelbagai | Pengurusan kunci API                  |
 | `/api/pricing`        | GET      | Harga model                           |
 
-### Penggunaan & Analitis
+### Penggunaan & Analitik
 
-| Titik akhir                      | Kaedah          | Penerangan                                                                                                                                                                                                                                                                                                     |
-| -------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | Sejarah penggunaan                                                                                                                                                                                                                                                                                             |
-| `/api/usage/logs`                | GET             | Log penggunaan                                                                                                                                                                                                                                                                                                 |
-| `/api/usage/request-logs`        | GET             | Log peringkat permintaan                                                                                                                                                                                                                                                                                       |
-| `/api/usage/[connectionId]`      | GET             | Penggunaan setiap sambungan                                                                                                                                                                                                                                                                                    |
-| `/api/usage/token-limits`        | GET/POST/DELETE | Belanjawan had token bagi setiap kunci API                                                                                                                                                                                                                                                                     |
-| `/api/usage/model-latency-stats` | GET             | Agregat kependaman bergerak bagi setiap penyedia/model (purata/p50/p95/p99, kadar kejayaan); penapis: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                          |
-| `/api/usage/cache-health`        | GET             | Ringkasan kesihatan cache prom bagi `call_logs` — nisbah tulis/baca, taburan saiz tulis p50/p90/p99, kepekatan penulisan berat, pecahan setiap model dan keputusan `healthy`/`degraded`/`thrash`/`no-data`; parameter pertanyaan `range` (`1h`\|`24h`\|`7d`\|`30d`, lalai `24h`) serta `model` pilihan (#8827) |
+| Titik akhir                      | Kaedah          | Penerangan                                                                                                                                                                                                                                                                                                              |
+| -------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | Sejarah penggunaan                                                                                                                                                                                                                                                                                                      |
+| `/api/usage/logs`                | GET             | Log penggunaan                                                                                                                                                                                                                                                                                                          |
+| `/api/usage/request-logs`        | GET             | Log peringkat permintaan                                                                                                                                                                                                                                                                                                |
+| `/api/usage/[connectionId]`      | GET             | Penggunaan bagi setiap sambungan                                                                                                                                                                                                                                                                                        |
+| `/api/usage/token-limits`        | GET/POST/DELETE | Belanjawan had token bagi setiap kunci API                                                                                                                                                                                                                                                                              |
+| `/api/usage/model-latency-stats` | GET             | Agregat kependaman berterusan bagi setiap penyedia/model (purata/p50/p95/p99, kadar kejayaan); penapis: `windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                                                 |
+| `/api/usage/cache-health`        | GET             | Ringkasan kesihatan cache prom daripada `call_logs` — nisbah tulis/baca, taburan saiz tulis p50/p90/p99, kepekatan penulisan berat, pecahan bagi setiap model dan keputusan `healthy`/`degraded`/`thrash`/`no-data`; parameter pertanyaan `range` (`1h`\|`24h`\|`7d`\|`30d`, lalai `24h`) serta `model` pilihan (#8827) |
 
 ### Kebenaran kunci API
 
-`PATCH /api/keys/{id}` mengemas kini kebenaran kunci sedia ada. Seperti setiap laluan `/api/keys*`, ia memerlukan keizinan pengurusan (lihat [Pengesahan Pengurusan](../guides/MANAGEMENT-AUTH.md)), bukannya kunci inferens. Hantar hanya medan yang ingin anda ubah; permintaan tanpa sebarang medan tersebut ditolak dengan `No valid fields to update`. Medan yang diterima ditakrifkan oleh `updateKeyPermissionsSchema` dalam `src/shared/validation/schemas/keys.ts`.
+`PATCH /api/keys/{id}` mengemas kini kebenaran bagi kunci sedia ada. Seperti setiap laluan `/api/keys*`, ia memerlukan kebenaran pengurusan (lihat [Pengesahan Pengurusan](../guides/MANAGEMENT-AUTH.md)), bukannya kunci inferens. Hantar hanya medan yang ingin anda ubah; permintaan tanpa sebarang medan tersebut akan ditolak dengan `No valid fields to update`. Medan yang diterima ditakrifkan oleh `updateKeyPermissionsSchema` dalam `src/shared/validation/schemas/keys.ts`.
 
-| Medan                                       | Jenis                                                                      | Catatan                                                                                                                                                                    |
-| ------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`                                      | rentetan, 1-200 aksara                                                     |                                                                                                                                                                            |
-| `isActive`                                  | boolean                                                                    |                                                                                                                                                                            |
-| `isBanned`                                  | boolean                                                                    |                                                                                                                                                                            |
-| `expiresAt`                                 | tarikh dan masa ISO 8601 atau `null`                                       | `null` mengosongkan tarikh luput                                                                                                                                           |
-| `modelAccessMode`                           | `all` \| `restricted`                                                      | `allowedModels` mestilah kosong apabila mod ialah `all`                                                                                                                    |
-| `allowedModels`, `blockedModels`            | tatasusunan rentetan, sehingga 1000                                        |                                                                                                                                                                            |
-| `allowedCombos`                             | tatasusunan rentetan, sehingga 500                                         | Mengehadkan kombo yang boleh dipanggil oleh kunci; model langsung dikawal oleh `modelAccessMode` / `allowedModels`                                                         |
-| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `allowedConnections` mestilah tidak kosong apabila `restricted` dan kosong apabila `all`                                                                                   |
-| `allowedConnections`                        | tatasusunan UUID, sehingga 100                                             |                                                                                                                                                                            |
-| `allowAutoCombos`                           | boolean                                                                    | `false` menolak permintaan untuk model `auto/*` dengan kunci ini; kunci yang tidak pernah menetapkannya dibenarkan                                                         |
-| `catalogScope`                              | `all` \| `combos` \| `models`                                              | Perkara yang disenaraikan oleh `GET /v1/models` untuk kunci ini (kombo sahaja, model sahaja atau kedua-duanya); ini tidak mengubah perkara yang boleh dipanggil oleh kunci |
-| `forcedModel`                               | rentetan sehingga 300 aksara, atau `null`                                  | Menghalakan permintaan sembang kepada model/kombo ini, mengatasi `X-Route-Model` dan `body.model`; had kunci masih terpakai                                                |
-| `noLog`, `autoResolve`                      | boolean                                                                    |                                                                                                                                                                            |
-| `throttleDelayMs`                           | integer, 0-300000                                                          |                                                                                                                                                                            |
-| `maxSessions`                               | integer, 0-10000                                                           |                                                                                                                                                                            |
-| `rateLimits`                                | tatasusunan `{ limit, window }` (integer positif, sehingga 50) atau `null` | `null` mengosongkan had                                                                                                                                                    |
-| `accessSchedule`                            | objek jadual atau `null`                                                   | `null` mengosongkan jadual                                                                                                                                                 |
-| `scopes`                                    | tatasusunan rentetan, sehingga 32                                          |                                                                                                                                                                            |
-| `allowedEndpoints`                          | tatasusunan rentetan, sehingga 20                                          |                                                                                                                                                                            |
-| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                            |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | Lihat [Pintasan cache bagi setiap kunci](#per-key-cache-bypass)                                                                                                            |
-| `compressionEnabled`                        | boolean                                                                    |                                                                                                                                                                            |
-| `codexServiceMode`                          | salah satu mod perkhidmatan Codex                                          |                                                                                                                                                                            |
-| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                            |
-| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                            |
-| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                            |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 atau `null`                                                    |                                                                                                                                                                            |
-| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                            |
+| Medan                                       | Jenis                                                                      | Catatan                                                                                                                                                                      |
+| ------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                                      | rentetan, 1-200 aksara                                                     |                                                                                                                                                                              |
+| `isActive`                                  | boolean                                                                    |                                                                                                                                                                              |
+| `isBanned`                                  | boolean                                                                    |                                                                                                                                                                              |
+| `expiresAt`                                 | tarikh dan masa ISO 8601 atau `null`                                       | `null` mengosongkan tarikh luput                                                                                                                                             |
+| `modelAccessMode`                           | `all` \| `restricted`                                                      | `allowedModels` mestilah kosong apabila mod ialah `all`                                                                                                                      |
+| `allowedModels`, `blockedModels`            | tatasusunan rentetan, sehingga 1000                                        |                                                                                                                                                                              |
+| `allowedCombos`                             | tatasusunan rentetan, sehingga 500                                         | Mengawal kombo yang boleh dipanggil oleh kunci; model langsung dikawal oleh `modelAccessMode` / `allowedModels`                                                              |
+| `connectionAccessMode`                      | `all` \| `restricted`                                                      | `allowedConnections` mestilah tidak kosong apabila `restricted` dan kosong apabila `all`                                                                                     |
+| `allowedConnections`                        | tatasusunan UUID, sehingga 100                                             |                                                                                                                                                                              |
+| `allowAutoCombos`                           | boolean                                                                    | `false` menolak permintaan untuk model `auto/*` dengan kunci ini; kunci yang tidak pernah menetapkannya dibenarkan                                                           |
+| `catalogScope`                              | `all` \| `combos` \| `models`                                              | Kandungan yang disenaraikan oleh `GET /v1/models` untuk kunci ini (kombo sahaja, model sahaja atau kedua-duanya); ini tidak mengubah perkara yang boleh dipanggil oleh kunci |
+| `forcedModel`                               | rentetan sehingga 300 aksara, atau `null`                                  | Menghalakan permintaan sembang ke model/kombo ini, mengatasi `X-Route-Model` dan `body.model`; had kunci masih terpakai                                                      |
+| `noLog`, `autoResolve`                      | boolean                                                                    |                                                                                                                                                                              |
+| `throttleDelayMs`                           | integer, 0-300000                                                          |                                                                                                                                                                              |
+| `maxSessions`                               | integer, 0-10000                                                           |                                                                                                                                                                              |
+| `rateLimits`                                | tatasusunan `{ limit, window }` (integer positif, sehingga 50) atau `null` | `null` mengosongkan had                                                                                                                                                      |
+| `accessSchedule`                            | objek jadual atau `null`                                                   | `null` mengosongkan jadual                                                                                                                                                   |
+| `scopes`                                    | tatasusunan rentetan, sehingga 32                                          |                                                                                                                                                                              |
+| `allowedEndpoints`                          | tatasusunan rentetan, sehingga 20                                          |                                                                                                                                                                              |
+| `streamDefaultMode`                         | `legacy` \| `json`                                                         |                                                                                                                                                                              |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                                       | Lihat [Pintasan cache mengikut kunci](#per-key-cache-bypass)                                                                                                                 |
+| `compressionEnabled`                        | boolean                                                                    |                                                                                                                                                                              |
+| `codexServiceMode`                          | salah satu mod perkhidmatan Codex                                          |                                                                                                                                                                              |
+| `disableNonPublicModels`                    | boolean                                                                    |                                                                                                                                                                              |
+| `allowUsageCommand`                         | boolean                                                                    |                                                                                                                                                                              |
+| `usageLimitEnabled`                         | boolean                                                                    |                                                                                                                                                                              |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | nombor >= 0 atau `null`                                                    |                                                                                                                                                                              |
+| `chaosModeEnabled`                          | boolean                                                                    |                                                                                                                                                                              |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1186,20 +1313,20 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### Tetapan
 
-| Titik akhir                           | Kaedah        | Penerangan                                                                                                                                                                                                                                                                                   |
-| ------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | Tetapan umum. Kekunci dasar keselamatan (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) memerlukan `currentPassword` dan bukti kelayakan pengendali — kekunci API dan token `oma_` akan menerima `403`; setiap perubahan memerlukan skop token akses `admin` |
-| `/api/settings/proxy`                 | GET/PUT       | Konfigurasi proksi rangkaian                                                                                                                                                                                                                                                                 |
-| `/api/settings/proxy/test`            | POST          | Uji sambungan proksi                                                                                                                                                                                                                                                                         |
-| `/api/settings/ip-filter`             | GET/PUT       | Senarai dibenarkan/senarai disekat IP                                                                                                                                                                                                                                                        |
-| `/api/settings/thinking-budget`       | GET/PUT       | Mod penulisan semula **permintaan** pemikiran/penaakulan (laluan terus / buang automatik / tersuai / adaptif). Tidak bergantung pada pemampatan. Lihat [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                                   |
-| `/api/settings/system-prompt`         | GET/PUT       | Prom sistem global                                                                                                                                                                                                                                                                           |
-| `/api/settings/compression`           | GET/PUT       | Konfigurasi pemampatan global                                                                                                                                                                                                                                                                |
-| `/api/settings/purge-request-history` | POST          | Kosongkan baris log permintaan dan artifak log panggilan setempat                                                                                                                                                                                                                            |
+| Titik akhir                           | Kaedah        | Penerangan                                                                                                                                                                                                                                                                        |
+| ------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | Tetapan umum. Kekunci dasar keselamatan (`requireLogin`, `newPassword`, `oidc*`, `corsOrigins`, `bruteForceProtection`) memerlukan `currentPassword` dan kelayakan pengendali — kekunci API dan token `oma_` menerima `403`; setiap perubahan memerlukan skop token akses `admin` |
+| `/api/settings/proxy`                 | GET/PUT       | Konfigurasi proksi rangkaian                                                                                                                                                                                                                                                      |
+| `/api/settings/proxy/test`            | POST          | Uji sambungan proksi                                                                                                                                                                                                                                                              |
+| `/api/settings/ip-filter`             | GET/PUT       | Senarai dibenarkan/senarai disekat IP                                                                                                                                                                                                                                             |
+| `/api/settings/thinking-budget`       | GET/PUT       | Mod penulisan semula **permintaan** pemikiran/penaakulan (laluan terus / penyingkiran automatik / tersuai / adaptif). Tidak bergantung pada pemampatan. Lihat [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md).                                                                 |
+| `/api/settings/system-prompt`         | GET/PUT       | Prom sistem global                                                                                                                                                                                                                                                                |
+| `/api/settings/compression`           | GET/PUT       | Konfigurasi pemampatan global                                                                                                                                                                                                                                                     |
+| `/api/settings/purge-request-history` | POST          | Kosongkan baris log permintaan dan artifak log panggilan setempat                                                                                                                                                                                                                 |
 
 ### Konteks & Pemampatan
 
-| Titik akhir                            | Kaedah         | Penerangan                                                                |
+| Endpoint                               | Kaedah         | Penerangan                                                                |
 | -------------------------------------- | -------------- | ------------------------------------------------------------------------- |
 | `/api/compression/preview`             | POST           | Pratonton pemampatan off/lite/standard/aggressive/ultra/RTK/stacked       |
 | `/api/compression/language-packs`      | GET            | Senaraikan pek bahasa Caveman yang tersedia                               |
@@ -1208,27 +1335,27 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/context/rtk/config`              | GET/PUT        | Tetapan khusus RTK, termasuk penapis tersuai dan pengekalan output mentah |
 | `/api/context/rtk/filters`             | GET            | Katalog penapis RTK dan diagnostik penapis tersuai                        |
 | `/api/context/rtk/test`                | POST           | Jalankan pratonton/ujian RTK terhadap muatan teks                         |
-| `/api/context/rtk/raw-output/[id]`     | GET            | Baca output mentah tersunting yang dikekalkan melalui id penuding         |
-| `/api/context/combos`                  | GET/POST       | Senarai/cipta kombo pemampatan                                            |
+| `/api/context/rtk/raw-output/[id]`     | GET            | Baca output mentah tersunting yang dikekalkan mengikut id penuding        |
+| `/api/context/combos`                  | GET/POST       | Senaraikan/cipta kombo pemampatan                                         |
 | `/api/context/combos/[id]`             | GET/PUT/DELETE | Butiran/kemas kini/padam kombo pemampatan                                 |
 | `/api/context/combos/[id]/assignments` | GET/PUT        | Tetapkan kombo pemampatan kepada kombo penghalaan                         |
-| `/api/context/analytics`               | GET            | Alias analitik pemampatan                                                 |
+| `/api/context/analytics`               | GET            | Alias analitis pemampatan                                                 |
 
 ### Pemantauan
 
-| Titik akhir                          | Kaedah     | Penerangan                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/sessions`                      | GET        | Penjejakan sesi aktif                                                                                                                                                                                                                                                                                                                                                                                              |
-| `/api/rate-limits`                   | GET        | Had kadar bagi setiap akaun                                                                                                                                                                                                                                                                                                                                                                                        |
-| `/api/monitoring/health`             | GET        | Pemeriksaan kesihatan + ringkasan penyedia (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Paparan pengurusan termasuk `credentialHealth`: nilai skalar cache prob, `failedConnections` apabila `failed>0`, dan `staleDbNonOkCount` (`test_status` melekit SQLite, bukan tolok). Lihat [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
-| `/api/cache/stats`                   | GET/DELETE | Statistik cache / kosongkan                                                                                                                                                                                                                                                                                                                                                                                        |
-| `/api/modality-bridge/stats`         | GET        | `attempts` dalam memori, kejayaan/`bridged`, kegagalan, padanan cache, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` berasaskan denominasi sampel, dan masa penggunaan terakhir (ditetapkan semula semasa mula semula; pengesahan pengurusan)                                                                                                                                                             |
-| `/api/modality-bridge/video/runtime` | GET        | Pemeriksaan gelung balik dipercayai yang ketat sebelum pengesahan/prob pengurusan; ketersediaan dan versi FFmpeg/ffprobe yang disanitasi (no-store)                                                                                                                                                                                                                                                                |
-| `/api/modality-bridge/video/extract` | POST       | Broker bait gelung balik dipercayai dalaman yang disahkan; input 50 MiB, baris gilir terhad/output 32 MiB, kapasiti `503`, pemutusan sambungan `499`, tarikh akhir `504`; bukan API muat naik awam                                                                                                                                                                                                                 |
+| Endpoint                             | Kaedah     | Penerangan                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/sessions`                      | GET        | Penjejakan sesi aktif                                                                                                                                                                                                                                                                                                                                                                                          |
+| `/api/rate-limits`                   | GET        | Had kadar bagi setiap akaun                                                                                                                                                                                                                                                                                                                                                                                    |
+| `/api/monitoring/health`             | GET        | Semakan kesihatan + ringkasan penyedia (`catalogCount`, `configuredCount`, `activeCount`, `monitoredCount`). Paparan pengurusan merangkumi `credentialHealth`: nilai skalar cache prob, `failedConnections` apabila `failed>0`, dan `staleDbNonOkCount` (`test_status` lekat SQLite, bukan tolok). Lihat [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status). |
+| `/api/cache/stats`                   | GET/DELETE | Statistik cache / kosongkan                                                                                                                                                                                                                                                                                                                                                                                    |
+| `/api/modality-bridge/stats`         | GET        | `attempts` dalam memori, kejayaan/`bridged`, kegagalan, pencapaian cache, `totalLatencyMs`, `latencySamples`, `averageLatencyMs` berasaskan bilangan sampel, dan masa penggunaan terakhir (ditetapkan semula semasa mula semula; pengesahan pengurusan)                                                                                                                                                        |
+| `/api/modality-bridge/video/runtime` | GET        | Semakan gelung balik dipercayai yang ketat sebelum pengesahan/prob pengurusan; ketersediaan dan versi FFmpeg/ffprobe yang disanitasi (tiada penyimpanan)                                                                                                                                                                                                                                                       |
+| `/api/modality-bridge/video/extract` | POST       | Broker bait gelung balik dipercayai dalaman yang disahkan; input 50 MiB, baris gilir terhad/output 32 MiB, `503` kapasiti, `499` terputus, `504` tarikh akhir; bukan API muat naik awam                                                                                                                                                                                                                        |
 
 ### Sandaran & Eksport/Import
 
-| Endpoint                    | Kaedah | Penerangan                                                                                  |
+| Titik Akhir                 | Kaedah | Penerangan                                                                                  |
 | --------------------------- | ------ | ------------------------------------------------------------------------------------------- |
 | `/api/db-backups`           | GET    | Senaraikan sandaran yang tersedia                                                           |
 | `/api/db-backups`           | PUT    | Cipta sandaran manual                                                                       |
@@ -1240,18 +1367,18 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/db-backups/exportAll` | GET    | Muat turun sandaran penuh sebagai arkib .tar.gz                                             |
 
 `/api/db-backups/export`, `/api/db-backups/exportAll` dan `/api/settings/export-json` memberikan
-setiap bukti kelayakan yang disimpan, maka semuanya memerlukan sesi papan pemuka atau CLI setempat (atau log masuk
-dinyahdayakan). Kunci API bagi sebarang skop dan token akses `oma_` akan menerima `403`. Operasi pemulihan mempunyai
+setiap bukti kelayakan yang disimpan, jadi semuanya memerlukan sesi papan pemuka atau CLI setempat (atau log masuk
+dilumpuhkan). Kunci API bagi sebarang skop dan token akses `oma_` menerima `403`. Operasi pemulihan mempunyai
 sempadan yang sama: `POST /api/db-backups/import` (termasuk `dryRun=true`), `POST /api/db-backups` (pulihkan
-mengikut id) dan `POST /api/settings/import-json` menggantikan pangkalan data atau tetapan aktif, maka bukti kelayakan
-mesin juga akan menerima `403` di situ; `omniroute sync import` menghantar bukti kelayakan CLI setempat. Begitu juga
+mengikut id) dan `POST /api/settings/import-json` menggantikan pangkalan data atau tetapan aktif, jadi bukti kelayakan
+mesin turut menerima `403` untuk operasi tersebut; `omniroute sync import` menghantar bukti kelayakan CLI setempat. Begitu juga
 `DELETE /api/db-backups` (pangkas sandaran tersimpan) dan `PATCH /api/db-backups` (tetapan pengekalan:
 nilai yang disimpan mengawal pemangkasan automatik selepas setiap sandaran). Penyenaraian (`GET`) dan penciptaan
-sandaran manual (`PUT`) kekal menggunakan pengesahan pengurusan biasa.
+sandaran manual (`PUT`) mengekalkan pengesahan pengurusan biasa.
 
 ### Penyegerakan Awan
 
-| Endpoint               | Kaedah   | Penerangan                |
+| Titik Akhir            | Kaedah   | Penerangan                |
 | ---------------------- | -------- | ------------------------- |
 | `/api/sync/cloud`      | Pelbagai | Operasi penyegerakan awan |
 | `/api/sync/initialize` | POST     | Mulakan penyegerakan      |
@@ -1259,53 +1386,53 @@ sandaran manual (`PUT`) kekal menggunakan pengesahan pengurusan biasa.
 
 ### Terowong
 
-| Endpoint                   | Kaedah | Penerangan                                                                   |
+| Titik Akhir                | Kaedah | Penerangan                                                                   |
 | -------------------------- | ------ | ---------------------------------------------------------------------------- |
 | `/api/tunnels/cloudflared` | GET    | Baca status pemasangan/masa jalan Cloudflare Quick Tunnel untuk papan pemuka |
-| `/api/tunnels/cloudflared` | POST   | Dayakan atau nyahdayakan Cloudflare Quick Tunnel (`action=enable/disable`)   |
+| `/api/tunnels/cloudflared` | POST   | Dayakan atau lumpuhkan Cloudflare Quick Tunnel (`action=enable/disable`)     |
 | `/api/tunnels/ngrok`       | GET    | Baca status masa jalan ngrok Tunnel untuk papan pemuka                       |
-| `/api/tunnels/ngrok`       | POST   | Dayakan atau nyahdayakan ngrok Tunnel (`action=enable/disable`)              |
+| `/api/tunnels/ngrok`       | POST   | Dayakan atau lumpuhkan ngrok Tunnel (`action=enable/disable`)                |
 
 ### Alat CLI
 
-| Endpoint                           | Kaedah | Penerangan          |
-| ---------------------------------- | ------ | ------------------- |
-| `/api/cli-tools/claude-settings`   | GET    | Status Claude CLI   |
-| `/api/cli-tools/codex-settings`    | GET    | Status Codex CLI    |
-| `/api/cli-tools/droid-settings`    | GET    | Status Droid CLI    |
-| `/api/cli-tools/openclaw-settings` | GET    | Status OpenClaw CLI |
-| `/api/cli-tools/runtime/[toolId]`  | GET    | Masa jalan CLI umum |
+| Titik Akhir                        | Kaedah | Penerangan             |
+| ---------------------------------- | ------ | ---------------------- |
+| `/api/cli-tools/claude-settings`   | GET    | Status CLI Claude      |
+| `/api/cli-tools/codex-settings`    | GET    | Status CLI Codex       |
+| `/api/cli-tools/droid-settings`    | GET    | Status CLI Droid       |
+| `/api/cli-tools/openclaw-settings` | GET    | Status CLI OpenClaw    |
+| `/api/cli-tools/runtime/[toolId]`  | GET    | Masa jalan CLI generik |
 
 Respons CLI merangkumi: `installed`, `runnable`, `command`, `commandPath`, `runtimeMode`, `reason`.
 
 ### Ejen ACP
 
-| Endpoint          | Kaedah | Penerangan                                                                   |
+| Titik Akhir       | Kaedah | Penerangan                                                                   |
 | ----------------- | ------ | ---------------------------------------------------------------------------- |
 | `/api/acp/agents` | GET    | Senaraikan semua ejen yang dikesan (terbina dalam + tersuai) berserta status |
 | `/api/acp/agents` | POST   | Tambah ejen tersuai atau segarkan semula cache pengesanan                    |
-| `/api/acp/agents` | DELETE | Alih keluar ejen tersuai melalui parameter pertanyaan `id`                   |
+| `/api/acp/agents` | DELETE | Alih keluar ejen tersuai mengikut parameter pertanyaan `id`                  |
 
 Respons GET merangkumi `agents[]` (id, name, binary, version, installed, protocol, isCustom) dan `summary` (total, installed, notFound, builtIn, custom).
 
 ### Daya Tahan & Had Kadar
 
-| Endpoint                          | Kaedah    | Penerangan                                                                                                    |
-| --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | Dapatkan/kemas kini baris gilir permintaan, tempoh bertenang sambungan, pemutus penyedia dan tetapan menunggu |
-| `/api/resilience/reset`           | POST      | Tetapkan semula pemutus litar penyedia                                                                        |
-| `/api/resilience/model-cooldowns` | GET       | Senaraikan sekatan aktif bagi setiap (penyedia, sambungan, model), diisih mengikut baki masa                  |
-| `/api/resilience/model-cooldowns` | DELETE    | Kosongkan sekatan model — badan `{provider, model}` atau `{all: true}` untuk memadam semuanya                 |
-| `/api/rate-limits`                | GET       | Status had kadar bagi setiap akaun                                                                            |
-| `/api/rate-limit`                 | GET       | Konfigurasi had kadar global                                                                                  |
+| Endpoint                          | Kaedah    | Penerangan                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | Dapatkan/kemas kini baris gilir permintaan, tempoh bertenang sambungan, pemutus penyedia dan tetapan menunggu                                                                                                                                                                                                                                                                                                                                                  |
+| `/api/resilience/reset`           | POST      | Tetapkan semula pemutus litar penyedia                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `/api/resilience/model-cooldowns` | GET       | Senaraikan sekatan aktif bagi setiap (penyedia, sambungan, model), diisih mengikut baki masa                                                                                                                                                                                                                                                                                                                                                                   |
+| `/api/resilience/model-cooldowns` | DELETE    | Kosongkan sekatan model — badan `{provider, model}` atau `{all: true}` untuk mengosongkan semuanya                                                                                                                                                                                                                                                                                                                                                             |
+| `/api/rate-limits`                | GET/POST  | Status had kadar bagi setiap akaun (GET) atau togol perlindungan had kadar untuk sesuatu sambungan (POST `{connectionId, enabled}`). Laluan tulis yang disokong untuk `rateLimitProtection` (tidak pernah diubah melalui `PUT /api/providers/[id]`). Nota: `enabled: false` menyahdayakan perlindungan nyata tetapi tidak mengecualikan sambungan kunci API yang aktif daripada jaringan keselamatan pendayaan automatik global (`autoEnableApiKeyProviders`). |
+| `/api/rate-limit`                 | GET       | Konfigurasi had kadar global (sudah lapuk; alias kepada `/api/rate-limits`)                                                                                                                                                                                                                                                                                                                                                                                    |
 
-> Keempat-empat laluan `/api/resilience/*` memerlukan **pengesahan pengurusan** (`requireManagementAuth`). Lihat [Daya Tahan (lanjutan)](#resilience-extended) untuk pecahan penuh pemutus penyedia berbanding tempoh bertenang sambungan berbanding sekatan model.
+> Keempat-empat laluan `/api/resilience/*` memerlukan **pengesahan pengurusan** (`requireManagementAuth`). Lihat [Ketahanan (lanjutan)](#resilience-extended) untuk pecahan penuh tentang pemutus penyedia berbanding tempoh bertenang sambungan berbanding sekatan model.
 
 ### Penilaian
 
-| Endpoint     | Kaedah   | Penerangan                                     |
-| ------------ | -------- | ---------------------------------------------- |
-| `/api/evals` | GET/POST | Senaraikan suit penilaian / jalankan penilaian |
+| Endpoint     | Kaedah   | Penerangan                                    |
+| ------------ | -------- | --------------------------------------------- |
+| `/api/evals` | GET/POST | Senaraikan sut penilaian / jalankan penilaian |
 
 ### Dasar
 
@@ -1315,32 +1442,32 @@ Respons GET merangkumi `agents[]` (id, name, binary, version, installed, protoco
 
 ### Pematuhan
 
-| Titik Akhir                 | Kaedah | Penerangan                            |
-| --------------------------- | ------ | ------------------------------------- |
-| `/api/compliance/audit-log` | GET    | Log audit pematuhan (N yang terakhir) |
+| Endpoint                    | Kaedah | Penerangan                       |
+| --------------------------- | ------ | -------------------------------- |
+| `/api/compliance/audit-log` | GET    | Log audit pematuhan (N terakhir) |
 
 ### v1beta (Serasi dengan Gemini)
 
-| Titik Akhir                | Kaedah | Penerangan                           |
+| Endpoint                   | Kaedah | Penerangan                           |
 | -------------------------- | ------ | ------------------------------------ |
 | `/v1beta/models`           | GET    | Senaraikan model dalam format Gemini |
-| `/v1beta/models/{...path}` | POST   | Titik akhir `generateContent` Gemini |
+| `/v1beta/models/{...path}` | POST   | Endpoint `generateContent` Gemini    |
 
-Titik akhir ini mencerminkan format API Gemini untuk klien yang memerlukan keserasian SDK Gemini natif.
+Endpoint ini mencerminkan format API Gemini untuk klien yang memerlukan keserasian SDK Gemini natif.
 
 ### API Dalaman / Sistem
 
-| Titik Akhir              | Kaedah | Penerangan                                                       |
-| ------------------------ | ------ | ---------------------------------------------------------------- |
-| `/api/init`              | GET    | Semakan pengawalan aplikasi (digunakan pada pelaksanaan pertama) |
-| `/api/tags`              | GET    | Tag model yang serasi dengan Ollama (untuk klien Ollama)         |
-| `/api/restart`           | POST   | Cetuskan mula semula pelayan secara teratur                      |
-| `/api/shutdown`          | POST   | Cetuskan penutupan pelayan secara teratur                        |
-| `/api/system/env/repair` | POST   | Baiki pemboleh ubah persekitaran penyedia OAuth                  |
-| `/api/system/version`    | GET    | Versi semasa/terkini, status kemas kini, saluran keluaran        |
-| `/api/system/version`    | POST   | Mulakan kemas kini terkini yang peka terhadap pengerahan         |
+| Endpoint                 | Kaedah | Penerangan                                                             |
+| ------------------------ | ------ | ---------------------------------------------------------------------- |
+| `/api/init`              | GET    | Semakan pemulaan aplikasi (digunakan pada pelaksanaan pertama)         |
+| `/api/tags`              | GET    | Tag model serasi Ollama (untuk klien Ollama)                           |
+| `/api/restart`           | POST   | Cetuskan mula semula pelayan secara terkawal                           |
+| `/api/shutdown`          | POST   | Cetuskan penutupan pelayan secara terkawal                             |
+| `/api/system/env/repair` | POST   | Baiki pemboleh ubah persekitaran penyedia OAuth                        |
+| `/api/system/version`    | GET    | Versi semasa/terkini, status kemas kini, saluran keluaran              |
+| `/api/system/version`    | POST   | Mulakan kemas kini yang mengambil kira penggunaan kepada versi terkini |
 
-> **Nota:** Titik akhir ini digunakan secara dalaman oleh sistem atau untuk keserasian klien Ollama. Titik akhir ini biasanya tidak dipanggil oleh pengguna akhir.
+> **Nota:** Endpoint ini digunakan secara dalaman oleh sistem atau untuk keserasian klien Ollama. Endpoint ini biasanya tidak dipanggil oleh pengguna akhir.
 
 ### Pembaikan Persekitaran OAuth _(v3.6.1+)_
 
@@ -1369,7 +1496,7 @@ Membaiki pemboleh ubah persekitaran OAuth yang hilang atau rosak untuk penyedia 
 GET /api/system/version
 ```
 
-Laluan pengurusan gelung balik sahaja (pengesahan pentadbir). Mengembalikan versi yang sedang berjalan, versi terkini yang diterbitkan dan status kemas kini automatik. `releaseChannel` dan `channels` ialah medan tambahan (rel 3.8.54); `channel` mengekalkan maksudnya — mod pengerahan yang digunakan oleh pengemas kini papan pemuka (`npm`, `source` atau `docker-compose`).
+Laluan pengurusan gelung balik sahaja (pengesahan pentadbir). Mengembalikan versi yang sedang dijalankan, versi terkini yang diterbitkan dan status kemas kini automatik. `releaseChannel` dan `channels` ialah medan tambahan (landasan 3.8.54); `channel` mengekalkan maksudnya — mod penggunaan yang digunakan oleh pengemas kini papan pemuka (`npm`, `source` atau `docker-compose`).
 
 ```json
 {
@@ -1385,9 +1512,9 @@ Laluan pengurusan gelung balik sahaja (pengesahan pentadbir). Mengembalikan vers
 }
 ```
 
-- `releaseChannel` — saluran npm bagi binaan yang sedang berjalan: `nightly` untuk versi `-nightly.*`,
-  `next` untuk prakeluaran lain (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` untuk versi stabil bagi
-  versi utama yang lebih lama daripada `channels.latest`, selainnya `latest`. Peraturan yang sama seperti
+- `releaseChannel` — saluran npm bagi binaan yang sedang dijalankan: `nightly` untuk versi `-nightly.*`,
+  `next` untuk prakeluaran lain (`-rc.*`, `-beta.*`, `-alpha.*`), `lts` untuk versi stabil bagi versi
+  utama yang lebih lama daripada `channels.latest`, selainnya `latest`. Peraturan yang sama seperti
   `scripts/release/dist-tag.mjs`, yang memilih dist-tag npm semasa penerbitan.
 - `channels` — versi teratas yang diterbitkan bagi setiap dist-tag, daripada `npm view omniroute dist-tags` (sandaran
   HTTP pendaftaran), dicache dengan TTL 10 minit yang sama seperti `latest`. `latest` sentiasa tersedia
@@ -1407,7 +1534,7 @@ Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 ```
 
-Transkripsikan fail audio menggunakan mana-mana penyedia STT yang dikonfigurasikan. Segmen laluan pertama memilih penyedia natif (`openai/…`, `deepgram/…`). Gerbang yang mengeksport semula model vendor lain menggunakan id berkelayakan
+Transkripsikan fail audio menggunakan mana-mana penyedia STT yang dikonfigurasikan. Segmen laluan pertama memilih penyedia asli (`openai/…`, `deepgram/…`). Gerbang yang mengeksport semula model vendor lain menggunakan ID berkelayakan
 (`openrouter/deepgram/nova-3`).
 
 **Permintaan:**
@@ -1423,17 +1550,17 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 ```json
 {
-  "text": "Helo, ini ialah kandungan audio yang telah ditranskripsikan.",
+  "text": "Hello, this is the transcribed audio content.",
   "task": "transcribe",
   "language": "en",
   "duration": 12.5
 }
 ```
 
-**Contoh id model:** `openai/whisper-1` (memerlukan kunci OpenAI),
+**Contoh ID model:** `openai/whisper-1` (memerlukan kunci OpenAI),
 `openrouter/deepgram/nova-3` (memerlukan kunci OpenRouter),
-`deepgram/nova-3` (memerlukan kunci Deepgram natif). Permintaan
-`deepgram/nova-3` biasa **tidak** menggunakan OpenRouter.
+`deepgram/nova-3` (memerlukan kunci Deepgram asli). Permintaan terus
+`deepgram/nova-3` **tidak** menggunakan OpenRouter.
 
 **Format yang disokong:** `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`.
 
@@ -1455,7 +1582,7 @@ Permintaan diterjemahkan secara automatik antara format Ollama dengan format dal
 
 ## Alias VS Code Bertoken / Tanpa Pengepala
 
-Gunakan alias ini apabila sesuatu integrasi tidak dapat menyuntik pengepala `Authorization` dan memerlukan kunci API dibenamkan dalam URL asas.
+Gunakan alias ini apabila sesuatu penyepaduan tidak dapat menyuntik pengepala `Authorization` dan memerlukan kunci API dibenamkan dalam URL asas.
 
 ```bash
 # Alias katalog gaya OpenAI
@@ -1480,11 +1607,11 @@ curl -X POST https://your-host.example/api/v1/vscode/YOUR_API_KEY/chat/completio
   -d '{"model":"auto","messages":[{"role":"user","content":"hello"}]}'
 ```
 
-Catatan:
+Nota:
 
 - Alias bertoken menggunakan semula pengendali yang sama seperti `/v1/*` dan `/api/tags`; bentuk respons kekal sama.
 - Utamakan `Authorization: Bearer ...` apabila klien menyokong pengepala tersuai.
-- Token berasaskan URL mungkin muncul dalam log proksi songsang, sejarah pelayar dan telemetri di luar OmniRoute. Anggap token tersebut sebagai pilihan keserasian, bukan mod pengesahan lalai.
+- Token berasaskan URL mungkin muncul dalam log proksi songsang, sejarah pelayar dan telemetri di luar OmniRoute. Anggap token ini sebagai pilihan keserasian, bukan mod pengesahan lalai.
 
 ---
 
@@ -1508,13 +1635,13 @@ GET /api/telemetry/summary
 
 ---
 
-## Bajet
+## Belanjawan
 
 ```bash
-# Dapatkan status bajet untuk semua kunci API
+# Dapatkan status belanjawan untuk semua kunci API
 GET /api/usage/budget
 
-# Tetapkan atau kemas kini bajet
+# Tetapkan atau kemas kini belanjawan
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1528,14 +1655,14 @@ Content-Type: application/json
 }
 ```
 
-> **Catatan skema** (`setBudgetSchema`): `apiKeyId` diperlukan; sekurang-kurangnya satu daripada `dailyLimitUsd`, `weeklyLimitUsd` atau `monthlyLimitUsd` mestilah lebih besar daripada sifar. Medan pilihan: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Bentuk legasi `{keyId, limit, period}` mengembalikan `400 Bad Request`.
+> **Nota skema** (`setBudgetSchema`): `apiKeyId` diperlukan; sekurang-kurangnya satu daripada `dailyLimitUsd`, `weeklyLimitUsd` atau `monthlyLimitUsd` mestilah lebih besar daripada sifar. Medan pilihan: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). Bentuk legasi `{keyId, limit, period}` mengembalikan `400 Bad Request`.
 
 ## Had Token
 
-Bajet **token** bagi setiap kunci API (berbeza daripada Bajet berasaskan USD di atas). Dikuatkuasakan secara terus pada laluan permintaan: apabila penggunaan tetingkap semasa sesuatu kunci mencapai hadnya, permintaan ditolak dengan `429 Too Many Requests`. Had boleh dikhususkan kepada `model` tertentu, `provider`, atau digunakan secara `global` merentas kunci tersebut; apabila beberapa had sepadan dengan sesuatu permintaan, had yang paling ketat akan digunakan.
+Bajet **token** bagi setiap kunci API (berbeza daripada Bajet berasaskan USD di atas). Dikuatkuasakan secara langsung pada laluan permintaan: apabila penggunaan tetingkap semasa sesuatu kunci mencapai hadnya, permintaan akan ditolak dengan `429 Too Many Requests`. Had boleh dikhususkan kepada `model` tertentu, `provider`, atau digunakan secara `global` merentas kunci tersebut; apabila beberapa had sepadan dengan sesuatu permintaan, had yang paling ketat akan diguna pakai.
 
 ```bash
-# Senaraikan had token sesuatu kunci (termasuk penggunaan tetingkap semasa)
+# Senaraikan had token sesuatu kunci (termasuk penggunaan tetingkap masa nyata)
 GET /api/usage/token-limits?apiKeyId=key-123
 
 # Cipta atau kemas kini had token
@@ -1555,7 +1682,7 @@ Content-Type: application/json
 DELETE /api/usage/token-limits?id=tl-abc
 ```
 
-> **Nota skema** (`setTokenLimitSchema`): `apiKeyId` dan `scopeType` (`model` | `provider` | `global`) diperlukan. `scopeValue` diperlukan melainkan `scopeType` ialah `global` (contohnya id model untuk skop `model`, id penyedia untuk skop `provider`). `tokenLimit` mestilah integer positif (ditukar secara paksa daripada rentetan). Pilihan: `id` (abaikan untuk mencipta, sertakan untuk mengemas kini), `resetInterval` (`daily` | `weekly` | `monthly`, lalai `monthly`), `resetTime` (`HH:MM`), `enabled` (lalai `true`). Respons `GET` memperkaya setiap had dengan `tokensUsed`, `remaining`, `windowStart`, `periodStartAt`, dan `nextResetAt`. Ini ialah titik akhir kelas pengurusan (pengesahan dikuatkuasakan secara berpusat oleh talian paip authz).
+> **Nota skema** (`setTokenLimitSchema`): `apiKeyId` dan `scopeType` (`model` | `provider` | `global`) diperlukan. `scopeValue` diperlukan melainkan `scopeType` ialah `global` (contohnya id model untuk skop `model`, id penyedia untuk skop `provider`). `tokenLimit` mestilah integer positif (ditukar daripada rentetan). Pilihan: `id` (abaikan untuk mencipta, sertakan untuk mengemas kini), `resetInterval` (`daily` | `weekly` | `monthly`, lalai `monthly`), `resetTime` (`HH:MM`), `enabled` (lalai `true`). Respons `GET` memperkaya setiap had dengan `tokensUsed`, `remaining`, `windowStart`, `periodStartAt`, dan `nextResetAt`. Ini ialah titik akhir kelas pengurusan (pengesahan dikuatkuasakan secara berpusat oleh saluran authz).
 
 ## Pemprosesan Permintaan
 
@@ -1566,7 +1693,7 @@ DELETE /api/usage/token-limits?id=tl-abc
 5. Untuk sembang: `handleChatCore` menyemak cache semantik/tandatangan dan menentukan tetapan pemampatan kombo
 6. Pemampatan proaktif dijalankan sebelum penterjemahan penyedia apabila didayakan (`lite`, Caveman, RTK, atau bertindan)
 7. Pelaksana penyedia menghantar permintaan ke huluan
-8. Respons diterjemahkan kembali kepada format klien (sembang) atau dikembalikan seadanya (pembenaman/imej/audio)
+8. Respons diterjemahkan kembali kepada format klien (sembang) atau dikembalikan tanpa perubahan (pembenaman/imej/audio)
 9. Penggunaan, analitik pemampatan, dan log permintaan direkodkan
 10. Sandaran digunakan apabila berlaku ralat mengikut peraturan kombo
 
@@ -1578,28 +1705,28 @@ Rujukan seni bina penuh: [`ARCHITECTURE.md`](../architecture/ARCHITECTURE.md)
 
 Kombo penghalaan aras lebih tinggi (yang telah diringkaskan di bawah `/api/combos*`) juga boleh dipetakan 1:1 daripada corak id model, membolehkan pengalihan telus bagi id model gaya OpenAI kepada kombo.
 
-| Kaedah | Laluan                           | Penerangan                                                                          |
-| ------ | -------------------------------- | ----------------------------------------------------------------------------------- |
-| GET    | `/api/model-combo-mappings`      | Senaraikan semua pemetaan model→kombo                                               |
-| POST   | `/api/model-combo-mappings`      | Cipta pemetaan — kandungan: `{pattern, comboId, priority?, enabled?, description?}` |
-| GET    | `/api/model-combo-mappings/[id]` | Dapatkan satu pemetaan                                                              |
-| PUT    | `/api/model-combo-mappings/[id]` | Kemas kini medan bagi pemetaan sedia ada                                            |
-| DELETE | `/api/model-combo-mappings/[id]` | Alih keluar pemetaan                                                                |
+| Kaedah | Laluan                           | Penerangan                                                                    |
+| ------ | -------------------------------- | ----------------------------------------------------------------------------- |
+| GET    | `/api/model-combo-mappings`      | Senaraikan semua pemetaan model→kombo                                         |
+| POST   | `/api/model-combo-mappings`      | Cipta pemetaan — isi: `{pattern, comboId, priority?, enabled?, description?}` |
+| GET    | `/api/model-combo-mappings/[id]` | Dapatkan satu pemetaan                                                        |
+| PUT    | `/api/model-combo-mappings/[id]` | Kemas kini medan bagi pemetaan sedia ada                                      |
+| DELETE | `/api/model-combo-mappings/[id]` | Alih keluar pemetaan                                                          |
 
-**Pengesahan:** sesi/kunci API pengurusan (`requireManagementAuth`).
+**Pengesahan:** sesi pengurusan/kunci API (`requireManagementAuth`).
 
 ---
 
 ## Webhook
 
-Langganan webhook keluar untuk acara OmniRoute (penyelesaian permintaan, kehabisan kuota, penggiliran kunci, dan sebagainya).
+Langganan webhook keluar untuk peristiwa OmniRoute (penyelesaian permintaan, kehabisan kuota, penggiliran kunci dan sebagainya).
 
 | Kaedah | Laluan                    | Penerangan                                                            |
 | ------ | ------------------------- | --------------------------------------------------------------------- |
-| GET    | `/api/webhooks`           | Senaraikan webhook (rahsia disamarkan sebagai `<prefix>...`)          |
-| POST   | `/api/webhooks`           | Cipta webhook — badan: `{url, events?: ["*"], secret?, description?}` |
+| GET    | `/api/webhooks`           | Senaraikan webhook (rahsia disamarkan kepada `<prefix>...`)           |
+| POST   | `/api/webhooks`           | Cipta webhook — isi: `{url, events?: ["*"], secret?, description?}`   |
 | GET    | `/api/webhooks/[id]`      | Dapatkan webhook                                                      |
-| PUT    | `/api/webhooks/[id]`      | Kemas kini url/events/secret/description                              |
+| PUT    | `/api/webhooks/[id]`      | Kemas kini URL/peristiwa/rahsia/penerangan                            |
 | DELETE | `/api/webhooks/[id]`      | Alih keluar webhook                                                   |
 | POST   | `/api/webhooks/[id]/test` | Hantar muatan ujian ke URL webhook dan kembalikan status penghantaran |
 
@@ -1611,15 +1738,15 @@ Langganan webhook keluar untuk acara OmniRoute (penyelesaian permintaan, kehabis
 
 Digunakan oleh subsistem pengurusan kunci automatik untuk mengeluarkan dan menggilirkan kunci API melalui penyedia/akaun sokongan, dengan kuota harian/setiap jam.
 
-| Kaedah | Laluan                                | Penerangan                                                                                                                                                                                                                    |
-| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Senaraikan kunci berdaftar (awalan bertopeng sahaja)                                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys`             | Keluarkan kunci berdaftar baharu — badan: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Mengembalikan kunci mentah **sekali sahaja**. Mengembalikan `429` apabila kuota ditolak. |
-| GET    | `/api/v1/registered-keys/[id]`        | Dapatkan metadata kunci berdaftar (tanpa bahan mentah)                                                                                                                                                                        |
-| DELETE | `/api/v1/registered-keys/[id]`        | Batalkan kunci berdaftar                                                                                                                                                                                                      |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Titik akhir pembatalan eksplisit (kesan yang sama seperti DELETE)                                                                                                                                                             |
+| Kaedah | Laluan                                | Penerangan                                                                                                                                                                                                                        |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Senaraikan kunci berdaftar (awalan disamarkan sahaja)                                                                                                                                                                             |
+| POST   | `/api/v1/registered-keys`             | Keluarkan kunci berdaftar baharu — isi: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Mengembalikan kunci mentah **sekali sahaja**. Mengembalikan `429` jika kuota tidak diluluskan. |
+| GET    | `/api/v1/registered-keys/[id]`        | Dapatkan metadata kunci berdaftar (tanpa bahan mentah)                                                                                                                                                                            |
+| DELETE | `/api/v1/registered-keys/[id]`        | Batalkan kunci berdaftar                                                                                                                                                                                                          |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Titik akhir pembatalan eksplisit (kesan yang sama seperti DELETE)                                                                                                                                                                 |
 
-**Pengesahan:** sesi pengurusan/kunci API (`requireManagementAuth`) — pelindung yang sama seperti `/api/keys`: sesi papan pemuka, token CLI setempat, atau kunci API dengan skop `manage`/`admin`; kunci API untuk inferens sahaja menerima `403`. Lihat juga `/v1/quotas/check` dan `/v1/issues/report`.
+**Pengesahan:** sesi pengurusan/kunci API (`requireManagementAuth`) — kawalan yang sama seperti `/api/keys`: sesi papan pemuka, token CLI setempat atau kunci API dengan skop `manage`/`admin`; kunci API inferens sahaja menerima `403`. Lihat juga `/v1/quotas/check` dan `/v1/issues/report`.
 
 ---
 
@@ -1627,14 +1754,14 @@ Digunakan oleh subsistem pengurusan kunci automatik untuk mengeluarkan dan mengg
 
 Tugas ejen awan (Claude Code, Codex Cloud, OpenHands, dll.) yang dilaksanakan dari jauh bagi pihak pengguna OmniRoute.
 
-| Kaedah | Laluan                        | Penerangan                                                                                                                                           |
-| ------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/agents/tasks`        | Senaraikan tugas — `?provider=`, `?status=`, `?limit=` adalah pilihan (1–500, lalai 50)                                                              |
-| POST   | `/api/v1/agents/tasks`        | Cipta tugas — isi disahkan oleh `CreateCloudAgentTaskSchema` (`providerId`, `prompt`, `source`, `options?`). Mengembalikan `201` dengan sampul tugas |
-| DELETE | `/api/v1/agents/tasks?id=...` | Padam tugas                                                                                                                                          |
-| GET    | `/api/v1/agents/tasks/[id]`   | Baca tugas — menyegarkan status secara segerak daripada ejen awan huluan apabila `external_id` ditetapkan                                            |
-| POST   | `/api/v1/agents/tasks/[id]`   | Tindakan berpilih: `{action: "approve"}`, `{action: "message", message}`, atau `{action: "cancel"}`                                                  |
-| DELETE | `/api/v1/agents/tasks/[id]`   | Padam tugas tertentu mengikut id                                                                                                                     |
+| Kaedah | Laluan                        | Penerangan                                                                                                                                                 |
+| ------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/agents/tasks`        | Senaraikan tugas — pilihan `?provider=`, `?status=`, `?limit=` (1–500, lalai 50)                                                                           |
+| POST   | `/api/v1/agents/tasks`        | Cipta tugas — kandungan disahkan oleh `CreateCloudAgentTaskSchema` (`providerId`, `prompt`, `source`, `options?`). Mengembalikan `201` dengan sampul tugas |
+| DELETE | `/api/v1/agents/tasks?id=...` | Padam tugas                                                                                                                                                |
+| GET    | `/api/v1/agents/tasks/[id]`   | Baca tugas — menyegarkan status secara segerak daripada ejen awan huluan apabila `external_id` ditetapkan                                                  |
+| POST   | `/api/v1/agents/tasks/[id]`   | Tindakan terdiskriminasi: `{action: "approve"}`, `{action: "message", message}`, atau `{action: "cancel"}`                                                 |
+| DELETE | `/api/v1/agents/tasks/[id]`   | Padam tugas tertentu mengikut id                                                                                                                           |
 
 > **Pengesahan:** pengesahan pengurusan diperlukan untuk setiap kaedah (`requireCloudAgentManagementAuth`). Sebelum v3.8.0, kaedah ini tidak memerlukan pengesahan — lihat komit `588a0333` untuk perubahan yang memecahkan keserasian.
 
@@ -1650,70 +1777,76 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks \
 
 ## Proksi Pengurusan
 
-Proksi HTTP(S)/SOCKS keluar yang boleh diperuntukkan kepada penyedia, akaun atau secara global.
+Proksi HTTP(S)/SOCKS keluar yang boleh diberikan kepada penyedia, akaun atau secara global.
 
-| Kaedah | Laluan                                       | Penerangan                                                                                                                                                        |
-| ------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/management/proxies`                 | Senaraikan proksi (dengan `?id=` mengembalikan satu; dengan `?id=&where_used=1` mengembalikan graf peruntukan)                                                    |
-| POST   | `/api/v1/management/proxies`                 | Cipta proksi — isi disahkan oleh `createProxyRegistrySchema`                                                                                                      |
-| PATCH  | `/api/v1/management/proxies`                 | Kemas kini proksi — isi disahkan oleh `updateProxyRegistrySchema` (memerlukan `id`)                                                                               |
-| DELETE | `/api/v1/management/proxies?id=...&force=1`  | Padam proksi (gunakan `force=1` untuk menanggalkan peruntukan)                                                                                                    |
-| GET    | `/api/v1/management/proxies/assignments`     | Senaraikan peruntukan — boleh ditapis mengikut `proxy_id`, `scope`, `scope_id`; berikan `resolve_connection_id=<id>` untuk menentukan proksi aktif bagi sambungan |
-| PUT    | `/api/v1/management/proxies/assignments`     | Peruntukkan — isi disahkan oleh `proxyAssignmentSchema` (`{scope, scopeId?, proxyId?}`). Mengosongkan cache penghantar                                            |
-| PUT    | `/api/v1/management/proxies/bulk-assign`     | Peruntukkan secara pukal — isi disahkan oleh `bulkProxyAssignmentSchema` (`{scope, scopeIds[], proxyId?}`)                                                        |
-| GET    | `/api/v1/management/proxies/health?hours=24` | Agregat kesihatan proksi (bilangan berjaya/gagal, kependaman) sepanjang suatu tempoh                                                                              |
+| Kaedah | Laluan                                       | Penerangan                                                                                                                                                               |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/v1/management/proxies`                 | Senaraikan proksi (dengan `?id=` mengembalikan satu; dengan `?id=&where_used=1` mengembalikan graf penetapan)                                                            |
+| POST   | `/api/v1/management/proxies`                 | Cipta proksi — kandungan disahkan oleh `createProxyRegistrySchema`                                                                                                       |
+| PATCH  | `/api/v1/management/proxies`                 | Kemas kini proksi — kandungan disahkan oleh `updateProxyRegistrySchema` (memerlukan `id`)                                                                                |
+| DELETE | `/api/v1/management/proxies?id=...&force=1`  | Padam proksi (gunakan `force=1` untuk menanggalkan penetapan)                                                                                                            |
+| GET    | `/api/v1/management/proxies/assignments`     | Senaraikan penetapan — boleh ditapis mengikut `proxy_id`, `scope`, `scope_id`; gunakan `resolve_connection_id=<id>` untuk menentukan proksi aktif bagi sesuatu sambungan |
+| PUT    | `/api/v1/management/proxies/assignments`     | Tetapkan — kandungan disahkan oleh `proxyAssignmentSchema` (`{scope, scopeId?, proxyId?}`). Mengosongkan cache penghantar                                                |
+| PUT    | `/api/v1/management/proxies/bulk-assign`     | Tetapkan secara pukal — kandungan disahkan oleh `bulkProxyAssignmentSchema` (`{scope, scopeIds[], proxyId?}`)                                                            |
+| GET    | `/api/v1/management/proxies/health?hours=24` | Agregat kesihatan proksi (bilangan berjaya/gagal, kependaman) sepanjang suatu tetingkap                                                                                  |
 
 **Pengesahan:** sesi pengurusan/kunci API diperlukan pada setiap laluan (`requireManagementAuth`).
 
-> `POST /api/v1/management/proxies/[id]/assignments` dan `POST /api/v1/management/proxies/[id]/health` dalam penerangan tugas disediakan oleh laluan rata `/assignments` dan `/health` yang ditunjukkan di atas — tiada sublaluan khusus bagi setiap id dalam pangkalan kod.
+> `POST /api/v1/management/proxies/[id]/assignments` dan `POST /api/v1/management/proxies/[id]/health` dalam penerangan tugas disediakan oleh laluan rata `/assignments` dan `/health` yang ditunjukkan di atas — tiada sublaluan khusus mengikut id dalam pangkalan kod.
 
 ---
 
-## Ketahanan (lanjutan)
+## Daya Tahan (lanjutan)
 
-OmniRoute menyediakan tiga mekanisme kegagalan sementara yang bebas antara satu sama lain; titik akhir pengurusan di bawah membolehkan pengendali membaca dan mengatasinya:
+OmniRoute menyediakan tiga mekanisme kegagalan sementara yang bebas; titik akhir pengurusan di bawah membolehkan pengendali membaca dan menggantikan tetapannya:
 
-| Skop                       | Storan keadaan                             | Baca                                      | Tetapkan semula / kosongkan                                     |
-| -------------------------- | ------------------------------------------ | ----------------------------------------- | --------------------------------------------------------------- |
-| Pemutus penyedia           | `domain_circuit_breakers` + dalam memori   | `/api/monitoring/health`                  | `POST /api/resilience/reset`                                    |
-| Tempoh bertenang sambungan | `rateLimitedUntil` pada sambungan penyedia | `/api/rate-limits`, `/api/providers/[id]` | (didayakan semula secara malas; kosongkan melalui PUT penyedia) |
-| Sekatan model              | Pendaftar ketersediaan model dalam memori  | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`                        |
+| Skop                       | Storan keadaan                              | Baca                                      | Tetapkan semula / kosongkan                                            |
+| -------------------------- | ------------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------- |
+| Pemutus penyedia           | `domain_circuit_breakers` + dalam memori    | `/api/monitoring/health`                  | `POST /api/resilience/reset`                                           |
+| Tempoh bertenang sambungan | `rateLimitedUntil` pada sambungan penyedia  | `/api/rate-limits`, `/api/providers/[id]` | (diaktifkan semula apabila diperlukan; kosongkan melalui PUT penyedia) |
+| Sekatan model              | Pendaftaran ketersediaan model dalam memori | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns`                               |
 
-`PATCH /api/resilience` menerima penggantian pemutus penyedia di bawah `providerBreaker.oauth` dan `providerBreaker.apikey`. Setiap profil menyokong `degradationThreshold`, `failureThreshold`, dan `resetTimeoutMs`; medan yang sama tersedia dalam Papan Pemuka → Tetapan → Ketahanan.
+`PATCH /api/resilience` menerima penggantian pemutus penyedia di bawah `providerBreaker.oauth` dan `providerBreaker.apikey`. Setiap profil menyokong `degradationThreshold`, `failureThreshold`, dan `resetTimeoutMs`; medan yang sama tersedia dalam Papan Pemuka → Tetapan → Daya Tahan.
 
 ```bash
-# Kosongkan sekatan untuk satu model
+# Kosongkan satu sekatan model
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -H "Content-Type: application/json" \
   -d '{"provider":"openai","model":"gpt-4o-mini"}'
 
-# Kosongkan semua sekatan
+# Padam semua sekatan
 curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -H "Cookie: auth_token=..." \
   -d '{"all":true}'
 ```
 
-Untuk rujukan konseptual penuh dan nilai lalai pemutus, lihat [`CLAUDE.md`](../../CLAUDE.md) → "Keadaan Masa Jalan Ketahanan".
+Untuk rujukan konsep penuh dan nilai lalai pemutus, lihat [`CLAUDE.md`](../../CLAUDE.md) → "Keadaan Masa Jalan Daya Tahan" dan [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md).
+
+### Baris Gilir Had Kadar & Jaringan Keselamatan Auto-Daya
+
+- **Laluan tulis yang disokong**: `POST /api/rate-limits` dengan badan `{"connectionId": "<id>", "enabled": true|false}` ialah titik akhir pengurusan yang disokong untuk menghidupkan atau mematikan perlindungan had kadar bagi sesuatu sambungan. `PUT /api/providers/[id]` sengaja tidak mengubah atau menukar `rateLimitProtection` (#11278).
+- **Semantik `enabled: false`**: Menetapkan `enabled: false` akan mengalih keluar perlindungan nyata bagi sambungan tersebut, tetapi **tidak** mengecualikan sambungan kunci API yang aktif daripada jaringan keselamatan auto-daya global (`autoEnableApiKeyProviders = true`). Dalam `reconcileEnabledConnections` (`open-sse/services/rateLimitManager.ts`), `false` dan `undefined` adalah setara; sambungan kunci API aktif tanpa perlindungan nyata kekal dilindungi di bawah jaringan keselamatan auto-daya.
+- **Nyahdaya global**: Untuk menjalankan sambungan kunci API tanpa baris gilir had kadar, nyahdayakan jaringan keselamatan secara global melalui `RATE_LIMIT_AUTO_ENABLE=false` (persekitaran) atau `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false` (Tetapan → Daya Tahan / `PATCH /api/resilience`).
 
 ---
 
 ## Kemahiran
 
-Rangka kerja kemahiran untuk memperluas OmniRoute dengan pengendali boleh laksana tersuai, serta integrasi pasaran.
+Rangka kerja kemahiran untuk memperluas OmniRoute dengan pengendali boleh laku tersuai, serta penyepaduan pasaran.
 
-| Kaedah | Laluan                            | Penerangan                                                                                                                                               |
+| Kaedah | Laluan                            | Perihalan                                                                                                                                                |
 | ------ | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/api/skills`                     | Senaraikan kemahiran yang dipasang — boleh ditapis mengikut `?q=`, `?mode=on\|off\|auto`, `?source=skillsmp\|skillssh\|local`, dengan penomboran halaman |
 | GET    | `/api/skills/[id]`                | Dapatkan satu kemahiran                                                                                                                                  |
-| PUT    | `/api/skills/[id]`                | Kemas kini kemahiran (nama, penerangan, mod, skema, pengendali, tag)                                                                                     |
+| PUT    | `/api/skills/[id]`                | Kemas kini kemahiran (nama, perihalan, mod, skema, pengendali, tag)                                                                                      |
 | DELETE | `/api/skills/[id]`                | Nyahpasang kemahiran                                                                                                                                     |
-| POST   | `/api/skills/install`             | Pasang kemahiran daripada manifes mentah — isi: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}`                           |
+| POST   | `/api/skills/install`             | Pasang kemahiran daripada manifes mentah — badan: `{name, version, description, schema:{input, output}, handlerCode, apiKeyId?}`                         |
 | GET    | `/api/skills/executions`          | Senaraikan pelaksanaan kemahiran terkini (jejak audit dengan input/output/tempoh)                                                                        |
-| GET    | `/api/skills/marketplace?q=...`   | Carian/senarai popular daripada pasaran SkillsMP (memerlukan tetapan `skillsmpApiKey`)                                                                   |
-| POST   | `/api/skills/marketplace/install` | Pasang kemahiran mengikut id daripada SkillsMP                                                                                                           |
-| GET    | `/api/skills/skillssh?q=&limit=`  | Cari dalam pendaftar skills.sh                                                                                                                           |
-| POST   | `/api/skills/skillssh/install`    | Pasang kemahiran mengikut id daripada skills.sh                                                                                                          |
+| GET    | `/api/skills/marketplace?q=...`   | Cari/senaraikan yang popular daripada pasaran SkillsMP (memerlukan tetapan `skillsmpApiKey`)                                                             |
+| POST   | `/api/skills/marketplace/install` | Pasang kemahiran mengikut ID daripada SkillsMP                                                                                                           |
+| GET    | `/api/skills/skillssh?q=&limit=`  | Cari dalam pendaftaran skills.sh                                                                                                                         |
+| POST   | `/api/skills/skillssh/install`    | Pasang kemahiran mengikut ID daripada skills.sh                                                                                                          |
 
 **Pengesahan:** sesi pengurusan/kunci API. Laluan carian pasaran menerima sama ada pengesahan pengurusan atau kunci API Bearer (`isAuthenticated`).
 
@@ -1721,14 +1854,14 @@ Rangka kerja kemahiran untuk memperluas OmniRoute dengan pengendali boleh laksan
 
 ## Memori
 
-Storan memori perbualan/fakta yang berterusan, dengan skop bagi setiap kunci API / sesi.
+Storan memori perbualan/fakta yang berterusan, dengan skop mengikut kunci API / sesi.
 
 | Kaedah | Laluan               | Penerangan                                                                                                                   |
 | ------ | -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/api/memory`        | Senaraikan memori — `?apiKeyId=`, `?type=`, `?sessionId=`, `?q=`, dengan penomboran halaman `offset/limit` atau `page/limit` |
-| POST   | `/api/memory`        | Cipta memori — kandungan permintaan disahkan oleh Zod: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}` |
+| POST   | `/api/memory`        | Cipta memori — isi divalidasi oleh Zod: `{content, key, type?, sessionId?, apiKeyId?, metadata?, expiresAt?}`                |
 | GET    | `/api/memory/[id]`   | Dapatkan satu memori                                                                                                         |
-| DELETE | `/api/memory/[id]`   | Padam memori                                                                                                                 |
+| DELETE | `/api/memory/[id]`   | Padamkan memori                                                                                                              |
 | GET    | `/api/memory/health` | Kesihatan subsistem memori (kesambungan DB, bahagian belakang pembenaman, status indeks vektor)                              |
 
 **Pengesahan:** sesi pengurusan/kunci API (`requireManagementAuth`). Enum `type`: `FACTUAL`, `EPISODIC`, `SEMANTIC`, `PROCEDURAL` (lihat `MemoryType` dalam `src/lib/memory/types.ts`).
@@ -1737,29 +1870,29 @@ Storan memori perbualan/fakta yang berterusan, dengan skop bagi setiap kunci API
 
 ## Pelayan MCP
 
-OmniRoute disertakan dengan pelayan Model Context Protocol terbenam yang mempunyai 3 pengangkutan (stdio, SSE, streamable-http) dan alat dengan skop tertentu. Titik akhir papan pemuka di bawah membaca data status/audit dan memproksikan pengangkutan HTTP.
+OmniRoute disertakan dengan pelayan Model Context Protocol terbina dalam yang mempunyai 3 pengangkutan (stdio, SSE, streamable-http) dan alat berskop. Titik akhir papan pemuka di bawah membaca data status/audit dan memproksikan pengangkutan HTTP.
 
 | Kaedah | Laluan | Penerangan |
 | ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
-| GET | `/api/mcp/status` | Denyutan, pengangkutan, keadaan dalam talian, panggilan terakhir, alat teratas, kadar kejayaan 24 jam |
+| GET | `/api/mcp/status` | Denyutan jantung, pengangkutan, keadaan dalam talian, panggilan terakhir, alat utama, kadar kejayaan 24 jam |
 | GET | `/api/mcp/tools` | Senarai alat MCP dengan `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
-| GET | `/api/mcp/sse` | Buka strim SSE untuk pengangkutan SSE (mengembalikan `503` jika MCP dilumpuhkan atau pengangkutan tidak sepadan) |
+| GET | `/api/mcp/sse` | Buka strim SSE untuk pengangkutan SSE (mengembalikan `503` jika MCP dinyahdayakan atau pengangkutan tidak sepadan) |
 | POST | `/api/mcp/sse` | Hantar bingkai JSON-RPC melalui pengangkutan SSE |
-| GET | `/api/mcp/stream` | Buka bahagian SSE bagi pengangkutan HTTP Boleh Distrim (mesej yang dimulakan oleh pelayan) |
-| POST | `/api/mcp/stream` | Hantar bingkai JSON-RPC melalui pengangkutan HTTP Boleh Distrim |
-| DELETE | `/api/mcp/stream` | Tamatkan sesi HTTP Boleh Distrim |
+| GET | `/api/mcp/stream` | Buka bahagian SSE bagi pengangkutan Streamable HTTP (mesej yang dimulakan oleh pelayan) |
+| POST | `/api/mcp/stream` | Hantar bingkai JSON-RPC melalui pengangkutan Streamable HTTP |
+| DELETE | `/api/mcp/stream` | Tamatkan sesi Streamable HTTP |
 | GET | `/api/mcp/audit` | Kueri log audit — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
-| GET | `/api/mcp/audit/stats` | Statistik audit agregat (jumlah, kadar kejayaan, purata tempoh, alat teratas) |
+| GET | `/api/mcp/audit/stats` | Statistik audit agregat (jumlah, kadar kejayaan, purata tempoh, alat utama) |
 
-**Pengesahan:** pengangkutan `sse`/`stream` mematuhi permukaan pengesahan khusus MCP (kunci API Bearer dengan skop `mcp`); laluan `status`/`tools`/`audit*` boleh dibaca daripada papan pemuka (tiada pengesahan tambahan diperlukan selain daripada dapat mencapai hos papan pemuka).
+**Pengesahan:** pengangkutan `sse`/`stream` mematuhi permukaan pengesahan khusus MCP (kunci API Bearer dengan skop `mcp`); laluan `status`/`tools`/`audit*` boleh dibaca daripada papan pemuka (tiada pengesahan tambahan diperlukan selain dapat mencapai hos papan pemuka).
 
-> Kedua-dua pengangkutan HTTP dikawal oleh `settings.mcpEnabled` dan `settings.mcpTransport` — ketidakpadanan pengangkutan mengembalikan `400`, manakala keadaan MCP yang dilumpuhkan mengembalikan `503`.
+> Kedua-dua pengangkutan HTTP dikawal oleh `settings.mcpEnabled` dan `settings.mcpTransport` — ketidakpadanan pengangkutan mengembalikan `400`, manakala keadaan MCP yang dinyahdayakan mengembalikan `503`.
 
 ---
 
 ## Pelayan A2A
 
-OmniRoute menyediakan titik akhir A2A (Ejen-ke-Ejen) JSON-RPC 2.0 serta pembalut REST untuk tujuan pemeriksaan/papan pemuka.
+OmniRoute menyediakan titik akhir JSON-RPC 2.0 A2A (Ejen-ke-Ejen) serta pembalut REST untuk kegunaan pemeriksaan/papan pemuka.
 
 ### JSON-RPC
 
@@ -1785,8 +1918,8 @@ Kaedah yang disokong (semuanya bergantung pada `settings.a2aEnabled`):
 | ---------------- | -------------------------------------------------------------------------- |
 | `message/send`   | Pelaksanaan kemahiran segerak; mengembalikan `{task, artifacts, metadata}` |
 | `message/stream` | Pelaksanaan penstriman SSE bagi set kemahiran yang sama                    |
-| `tasks/get`      | Dapatkan tugas berdasarkan `taskId`                                        |
-| `tasks/cancel`   | Batalkan tugas berdasarkan `taskId`                                        |
+| `tasks/get`      | Dapatkan tugas mengikut `taskId`                                           |
+| `tasks/cancel`   | Batalkan tugas mengikut `taskId`                                           |
 
 Kemahiran terbina dalam: `smart-routing`, `quota-management`, `provider-discovery`, `cost-analysis`, `health-report`.
 
@@ -1796,49 +1929,49 @@ Kemahiran terbina dalam: `smart-routing`, `quota-management`, `provider-discover
 GET /.well-known/agent.json
 ```
 
-Mengembalikan kad ejen A2A awam (nama, penerangan, keupayaan, katalog kemahiran, skema pengesahan) — dicache secara awam selama 1j. Pengesahan tidak diperlukan.
+Mengembalikan kad ejen A2A awam (nama, penerangan, keupayaan, katalog kemahiran, skim pengesahan) — dicache secara awam selama 1h. Pengesahan tidak diperlukan.
 
 ### Pembantu REST
 
 | Kaedah | Laluan                       | Penerangan                                                                                                            |
 | ------ | ---------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/a2a/status`            | Status A2A didayakan + statistik tugas + ringkasan kad ejen yang dicache                                              |
+| GET    | `/api/a2a/status`            | A2A didayakan + statistik tugas + ringkasan kad ejen yang dicache                                                     |
 | GET    | `/api/a2a/tasks`             | Senaraikan tugas — `?state=submitted\|working\|completed\|failed\|cancelled`, `?skill=`, `?limit=` (≤200), `?offset=` |
 | POST   | `/api/a2a/tasks`             | (Tidak dilaksanakan sebagai pembantu REST — cipta melalui JSON-RPC `message/send`)                                    |
 | GET    | `/api/a2a/tasks/[id]`        | Dapatkan satu tugas                                                                                                   |
 | POST   | `/api/a2a/tasks/[id]/cancel` | Batalkan tugas                                                                                                        |
 
-**Pengesahan:** pembantu REST berjalan tanpa pengesahan pengurusan (boleh dibaca oleh papan pemuka); laluan JSON-RPC `/a2a` menggunakan Bearer `OMNIROUTE_API_KEY` jika dikonfigurasikan.
+**Pengesahan:** pembantu REST dijalankan tanpa pengesahan pengurusan (boleh dibaca oleh papan pemuka); laluan JSON-RPC `/a2a` menggunakan Bearer `OMNIROUTE_API_KEY` jika dikonfigurasikan.
 
 ---
 
-## Awan, Eval & Penilaian
+## Awan, Penilaian & Pentaksiran
 
 | Kaedah | Laluan | Penerangan |
 | ------ | ------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------------------- | ----------------------------------- |
 | POST | `/api/cloud/auth` | Sahkan kunci Bearer dan kembalikan sambungan penyedia yang disamarkan + alias model untuk klien penyegerakan awan |
 | POST | `/api/cloud/credentials/update` | Kemas kini kelayakan yang disulitkan untuk penyedia yang disegerakkan dengan awan |
-| POST | `/api/cloud/model/resolve` | Petakan id model logik kepada penyedia/model tertentu menggunakan jadual penghalaan setempat |
+| POST | `/api/cloud/model/resolve` | Tentukan ID model logik kepada penyedia/model konkrit menggunakan jadual penghalaan setempat |
 | GET | `/api/cloud/models/alias` | Senaraikan alias model seperti yang didedahkan kepada penyegerakan awan |
-| GET | `/api/assess` | Baca pengkategorian penilaian terkini (bagi setiap penyedia/model) |
-| POST | `/api/assess` | Jalankan penilaian — badan: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
-| GET | `/api/evals` | Senaraikan suit eval terbina dalam + pelaksanaan terkini |
-| POST | `/api/evals` | Cetuskan pelaksanaan eval |
-| POST | `/api/evals/suites` | Cipta suit eval tersuai — badan disahkan oleh `evalSuiteSaveSchema` |
-| GET | `/api/evals/suites/[id]` | Dapatkan suit eval tersuai |
+| GET | `/api/assess` | Baca pengkategorian pentaksiran terkini (bagi setiap penyedia/model) |
+| POST | `/api/assess` | Jalankan pentaksiran — isi: `{scope: {type:"all"}                                                   | {type:"provider", providerId} | {type:"model", modelId}, trigger?}` |
+| GET | `/api/evals` | Senaraikan suit penilaian terbina dalam + pelaksanaan terkini |
+| POST | `/api/evals` | Cetuskan pelaksanaan penilaian |
+| POST | `/api/evals/suites` | Cipta suit penilaian tersuai — isi disahkan oleh `evalSuiteSaveSchema` |
+| GET | `/api/evals/suites/[id]` | Dapatkan suit penilaian tersuai |
 
-**Pengesahan:** `/api/cloud/auth` mengesahkan kunci Bearer secara langsung dan mengembalikan kunci yang disamarkan serta `projectId` bagi setiap sambungan hanya untuk kunci dengan skop `manage` / `admin`; laluan `/api/cloud/*`, `/api/evals/*` dan `/api/assess` yang lain memerlukan sesi pengurusan/kunci API. POST `/api/assess` menggunakan `validateBody` dengan skema skop kesatuan berpenghurai.
+**Pengesahan:** `/api/cloud/auth` mengesahkan kunci Bearer secara langsung dan mengembalikan kunci yang disamarkan serta `projectId` bagi setiap sambungan hanya untuk kunci dengan skop `manage` / `admin`; laluan `/api/cloud/*`, `/api/evals/*`, dan `/api/assess` yang lain memerlukan sesi/kunci API pengurusan. POST `/api/assess` menggunakan `validateBody` dengan skema skop kesatuan berpenghurai.
 
 ---
 
 ## Pengurusan ACP (Agent Client Protocol)
 
-sebagai proses anak. Titik akhir ini mengurus pengesanan ejen ACP dan pendaftaran ejen
-tersuai.
+sebagai proses anak. Titik akhir ini mengurus pengesanan ejen ACP dan pendaftaran
+ejen tersuai.
 
 | Kaedah | Laluan            | Penerangan                                                                                                                                                       |
 | ------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/acp/agents` | Senaraikan semua ejen CLI yang diketahui (terbina dalam + tersuai) berserta status pemasangan, versi dan perduaan                                                |
+| GET    | `/api/acp/agents` | Senaraikan semua ejen CLI yang diketahui (terbina dalam + tersuai) berserta status pemasangan, versi dan binari                                                  |
 | POST   | `/api/acp/agents` | Daftarkan ejen ACP tersuai atau segarkan semula cache — isi: `{id, name, binary, versionCommand, providerAlias, spawnArgs, protocol}` atau `{action: "refresh"}` |
 | DELETE | `/api/acp/agents` | Alih keluar ejen ACP tersuai — parameter pertanyaan: `?id=<agentId>`                                                                                             |
 
@@ -1872,23 +2005,23 @@ tersuai.
 ```
 
 **Pengesahan:** Memerlukan sesi pengurusan (kuki `auth_token` papan pemuka) atau
-kunci API dengan skop pengurusan.
+kunci API berskop pengurusan.
 
-Lihat [Rangka Kerja ACP](../frameworks/ACP.md) untuk butiran lengkap.
+Lihat [Rangka Kerja ACP](../frameworks/ACP.md) untuk butiran penuh.
 
 ---
 
 ## Analitik & Kebolehcerapan
 
 Titik akhir analitik masa nyata untuk memantau penghalaan, pemampatan dan kepelbagaian
-penyedia. Titik akhir ini menguasakan halaman `/dashboard/analytics/*`.
+penyedia. Titik akhir ini menyokong halaman `/dashboard/analytics/*`.
 
 ### Analitik penghalaan automatik
 
-| Kaedah | Laluan                               | Penerangan                                                                                                      |
-| ------ | ------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/analytics/auto-routing`        | Statistik penghalaan automatik agregat: jumlah panggilan, taburan strategi, taburan peringkat, penyedia teratas |
-| GET    | `/api/analytics/auto-routing?days=7` | Statistik mengikut tetingkap masa (lalai 24j)                                                                   |
+| Kaedah | Laluan                               | Penerangan                                                                                                     |
+| ------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/analytics/auto-routing`        | Statistik penghalaan automatik teragregat: jumlah panggilan, taburan strategi, taburan tahap, penyedia teratas |
+| GET    | `/api/analytics/auto-routing?days=7` | Statistik berdasarkan tetingkap masa (lalai 24j)                                                               |
 
 **Contoh respons**:
 
@@ -1918,9 +2051,9 @@ penyedia. Titik akhir ini menguasakan halaman `/dashboard/analytics/*`.
 
 ### Analitik pemampatan
 
-| Kaedah | Laluan                       | Penerangan                                                                                  |
-| ------ | ---------------------------- | ------------------------------------------------------------------------------------------- |
-| GET    | `/api/analytics/compression` | Statistik pemampatan agregat: token dijimatkan, % penjimatan, taburan mod, penggunaan enjin |
+| Kaedah | Laluan                       | Penerangan                                                                                     |
+| ------ | ---------------------------- | ---------------------------------------------------------------------------------------------- |
+| GET    | `/api/analytics/compression` | Statistik pemampatan teragregat: token dijimatkan, % penjimatan, taburan mod, penggunaan enjin |
 
 **Contoh respons**:
 
@@ -1947,9 +2080,9 @@ penyedia. Titik akhir ini menguasakan halaman `/dashboard/analytics/*`.
 
 ### Penjejakan kepelbagaian penyedia
 
-| Kaedah | Laluan                     | Penerangan                                                                                                                       |
-| ------ | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/analytics/diversity` | Penjejakan kepelbagaian berasaskan entropi Shannon: mencegah titik kegagalan tunggal dengan mengukur taburan penggunaan penyedia |
+| Kaedah | Laluan                     | Penerangan                                                                                                             |
+| ------ | -------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/analytics/diversity` | Penjejakan kepelbagaian berdasarkan entropi Shannon: mencegah titik kegagalan tunggal dengan mengukur taburan penyedia |
 
 **Contoh respons**:
 
@@ -1969,7 +2102,7 @@ penyedia. Titik akhir ini menguasakan halaman `/dashboard/analytics/*`.
 }
 ```
 
-**Pengesahan:** Memerlukan sesi pengurusan atau kunci API dengan skop pengurusan.
+**Pengesahan:** Memerlukan sesi pengurusan atau kunci API berskop pengurusan.
 
 ---
 
@@ -1979,7 +2112,7 @@ Titik akhir khusus pentadbir untuk pengurusan operasi.
 
 | Kaedah | Laluan                   | Penerangan                                                                                   |
 | ------ | ------------------------ | -------------------------------------------------------------------------------------------- |
-| GET    | `/api/admin/concurrency` | Baca had konkurensi semasa (global + mengikut penyedia)                                      |
+| GET    | `/api/admin/concurrency` | Baca had konkurensi semasa (global + bagi setiap penyedia)                                   |
 | POST   | `/api/admin/concurrency` | Kemas kini had konkurensi — badan: `{global?: number, perProvider?: Record<string, number>}` |
 
 **Pengesahan:** Memerlukan sesi pengurusan dengan skop pentadbir.
@@ -1988,19 +2121,19 @@ Titik akhir khusus pentadbir untuk pengurusan operasi.
 
 ## Pengurusan Alat CLI
 
-Urus alat CLI yang berintegrasi dengan OmniRoute (antigravity, commandCode,
-devin-cli, dan sebagainya). Lihat [Rujukan Penyedia](./PROVIDER_REFERENCE.md) untuk senarai penuh.
+Urus alat CLI yang disepadukan dengan OmniRoute (antigravity, commandCode,
+devin-cli dan sebagainya). Lihat [Rujukan Penyedia](./PROVIDER_REFERENCE.md) untuk senarai penuh.
 
-| Kaedah | Laluan                                  | Penerangan                                                                                                                                                        |
-| ------ | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/cli-tools/all-statuses`           | Status semua alat CLI (dipasang, versi, kali terakhir dikesan)                                                                                                    |
-| GET    | `/api/cli-tools/status`                 | Butiran status bagi satu alat CLI (pertanyaan `?tool=`)                                                                                                           |
-| POST   | `/api/cli-tools/apply`                  | Tulis konfigurasi alat yang dijana (`dryRun` menyediakan pratonton; `422` + `containerEphemeralTarget` apabila dikontena; `migration` mencatat YAML Codex legasi) |
-| GET    | `/api/cli-tools/backups`                | Senaraikan sandaran konfigurasi alat CLI                                                                                                                          |
-| POST   | `/api/cli-tools/backups`                | Cipta sandaran bagi semua konfigurasi alat CLI                                                                                                                    |
-| POST   | `/api/cli-tools/backups`                | Pulihkan: titik akhir yang sama dengan `{tool, backupId}` dalam isi permintaan akan memulihkan sandaran tersebut                                                  |
-| GET    | `/api/cli-tools/antigravity-mitm`       | Status proksi MITM Antigravity (alat CLI "antigravity-mitm")                                                                                                      |
-| POST   | `/api/cli-tools/antigravity-mitm/alias` | Konfigurasikan alias antigravity-mitm                                                                                                                             |
+| Kaedah | Laluan                                  | Penerangan                                                                                                                                                                  |
+| ------ | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/cli-tools/all-statuses`           | Status semua alat CLI (dipasang, versi, kali terakhir dilihat)                                                                                                              |
+| GET    | `/api/cli-tools/status`                 | Butiran status untuk satu alat CLI (pertanyaan `?tool=`)                                                                                                                    |
+| POST   | `/api/cli-tools/apply`                  | Tulis konfigurasi yang dijana bagi sesuatu alat (`dryRun` memberikan pratonton; `422` + `containerEphemeralTarget` apabila dikontena; `migration` mencatat YAML Codex lama) |
+| GET    | `/api/cli-tools/backups`                | Senaraikan sandaran konfigurasi alat CLI                                                                                                                                    |
+| POST   | `/api/cli-tools/backups`                | Cipta sandaran bagi semua konfigurasi alat CLI                                                                                                                              |
+| POST   | `/api/cli-tools/backups`                | Pulihkan: titik akhir yang sama dengan `{tool, backupId}` dalam badan akan memulihkan sandaran tersebut                                                                     |
+| GET    | `/api/cli-tools/antigravity-mitm`       | Status proksi MITM Antigravity (alat CLI "antigravity-mitm")                                                                                                                |
+| POST   | `/api/cli-tools/antigravity-mitm/alias` | Konfigurasikan alias antigravity-mitm                                                                                                                                       |
 
 **Pengesahan:** Memerlukan sesi pengurusan.
 
@@ -2030,12 +2163,12 @@ Urus cache semantik dan cache penaakulan.
 
 | Kaedah | Laluan                 | Penerangan                                                                                                                        |
 | ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/cache`           | Gambaran keseluruhan cache: jumlah entri, kadar padanan, saiz pada cakera                                                         |
+| GET    | `/api/cache`           | Gambaran keseluruhan cache: jumlah entri, kadar capaian, saiz pada cakera                                                         |
 | GET    | `/api/cache/entries`   | Senaraikan entri yang dicache (dengan penomboran halaman)                                                                         |
 | DELETE | `/api/cache/entries`   | Padam entri cache (tapis mengikut parameter pertanyaan)                                                                           |
 | GET    | `/api/cache/stats`     | Statistik cache terperinci (mengikut penyedia, mengikut model)                                                                    |
 | GET    | `/api/cache/reasoning` | Status cache penaakulan (untuk main semula penaakulan)                                                                            |
-| DELETE | `/api/cache/reasoning` | Kosongkan cache penaakulan — parameter pertanyaan: `?toolCallId=<id>` (tunggal) atau `?provider=<p>` atau tanpa parameter (semua) |
+| DELETE | `/api/cache/reasoning` | Kosongkan cache penaakulan — parameter pertanyaan: `?toolCallId=<id>` (tunggal) atau `?provider=<p>` atau tiada parameter (semua) |
 
 **Pengesahan:** Memerlukan sesi pengurusan.
 
@@ -2048,7 +2181,7 @@ Urus memori berterusan (FTS5 + pembenaman vektor).
 | Kaedah | Laluan             | Penerangan                                                                 |
 | ------ | ------------------ | -------------------------------------------------------------------------- |
 | GET    | `/api/memory`      | Senaraikan entri memori (tapis mengikut skop, jenis, pertanyaan carian)    |
-| POST   | `/api/memory`      | Cipta entri memori baharu — isi: `{scope, type, content, metadata?}`       |
+| POST   | `/api/memory`      | Cipta entri memori baharu — kandungan: `{scope, type, content, metadata?}` |
 | GET    | `/api/memory/[id]` | Dapatkan entri memori tertentu                                             |
 | PUT    | `/api/memory/[id]` | Kemas kini entri memori                                                    |
 | DELETE | `/api/memory/[id]` | Padam entri memori                                                         |
@@ -2062,15 +2195,15 @@ Urus memori berterusan (FTS5 + pembenaman vektor).
 
 Urus langganan webhook untuk acara.
 
-| Kaedah | Laluan                          | Penerangan                                                             |
-| ------ | ------------------------------- | ---------------------------------------------------------------------- |
-| GET    | `/api/webhooks`                 | Senaraikan semua langganan webhook                                     |
-| POST   | `/api/webhooks`                 | Cipta langganan webhook — isi: `{url, events[], secret?, active?}`     |
-| GET    | `/api/webhooks/[id]`            | Dapatkan langganan webhook tertentu                                    |
-| PUT    | `/api/webhooks/[id]`            | Kemas kini langganan webhook                                           |
-| DELETE | `/api/webhooks/[id]`            | Padam langganan webhook                                                |
-| GET    | `/api/webhooks/[id]/deliveries` | Senaraikan sejarah penghantaran untuk webhook (log kejayaan/kegagalan) |
-| POST   | `/api/webhooks/[id]/test`       | Hantar acara ujian kepada webhook                                      |
+| Kaedah | Laluan                          | Penerangan                                                               |
+| ------ | ------------------------------- | ------------------------------------------------------------------------ |
+| GET    | `/api/webhooks`                 | Senaraikan semua langganan webhook                                       |
+| POST   | `/api/webhooks`                 | Cipta langganan webhook — kandungan: `{url, events[], secret?, active?}` |
+| GET    | `/api/webhooks/[id]`            | Dapatkan langganan webhook tertentu                                      |
+| PUT    | `/api/webhooks/[id]`            | Kemas kini langganan webhook                                             |
+| DELETE | `/api/webhooks/[id]`            | Padam langganan webhook                                                  |
+| GET    | `/api/webhooks/[id]/deliveries` | Senaraikan sejarah penghantaran untuk webhook (log kejayaan/kegagalan)   |
+| POST   | `/api/webhooks/[id]/test`       | Hantar acara ujian kepada webhook                                        |
 
 **Pengesahan:** Memerlukan sesi pengurusan.
 
@@ -2078,63 +2211,63 @@ Lihat [Rangka Kerja Webhook](../frameworks/WEBHOOKS.md) untuk jenis acara yang l
 
 ---
 
-## Rangka Kerja Skills
+## Rangka Kerja Kemahiran
 
-Urus Skills (rangka kerja sambungan berasaskan ejen).
+Urus Kemahiran (rangka kerja sambungan berasaskan ejen).
 
-| Kaedah | Laluan                   | Penerangan                                                                                  |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------- |
-| GET    | `/api/skills`            | Senaraikan semua skill yang dipasang (terbina dalam + tersuai)                              |
-| POST   | `/api/skills/install`    | Pasang skill daripada laluan setempat atau URL                                              |
-| DELETE | `/api/skills/[id]`       | Nyahpasang skill                                                                            |
-| PUT    | `/api/skills/[id]`       | Dayakan atau nyahdayakan skill — isi: `{enabled?: boolean, mode?: "on" \| "off" \| "auto"}` |
-| POST   | `/api/skills/executions` | Laksanakan skill — isi: `{skillName, apiKeyId, input?, sessionId?}`                         |
-| GET    | `/api/skills/executions` | Senaraikan sejarah pelaksanaan untuk semua skill (tapis mengikut `?apiKeyId=`)              |
+| Kaedah | Laluan                   | Penerangan                                                                                      |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------- |
+| GET    | `/api/skills`            | Senaraikan semua kemahiran yang dipasang (terbina dalam + tersuai)                              |
+| POST   | `/api/skills/install`    | Pasang kemahiran daripada laluan setempat atau URL                                              |
+| DELETE | `/api/skills/[id]`       | Nyahpasang kemahiran                                                                            |
+| PUT    | `/api/skills/[id]`       | Dayakan atau nyahdayakan kemahiran — isi: `{enabled?: boolean, mode?: "on" \| "off" \| "auto"}` |
+| POST   | `/api/skills/executions` | Laksanakan kemahiran — isi: `{skillName, apiKeyId, input?, sessionId?}`                         |
+| GET    | `/api/skills/executions` | Senaraikan sejarah pelaksanaan bagi semua kemahiran (tapis mengikut `?apiKeyId=`)               |
 
-**Pengesahan:** Memerlukan sesi pengurusan atau kunci API dengan skop pengurusan.
+**Pengesahan:** Memerlukan sesi pengurusan atau kunci API berskop pengurusan.
 
-Lihat [Rangka Kerja Skills](../frameworks/SKILLS.md) untuk butiran lengkap.
+Lihat [Rangka Kerja Kemahiran](../frameworks/SKILLS.md) untuk butiran lengkap.
 
 ---
 
-## Plugin
+## Pemalam
 
-Urus plugin OmniRoute (sambungan pihak ketiga).
+Urus pemalam OmniRoute (sambungan pihak ketiga).
 
-| Kaedah | Laluan                             | Penerangan                         |
-| ------ | ---------------------------------- | ---------------------------------- |
-| GET    | `/api/plugins`                     | Senaraikan plugin yang dipasang    |
-| POST   | `/api/plugins/marketplace/install` | Pasang plugin daripada marketplace |
-| DELETE | `/api/plugins/[name]`              | Nyahpasang plugin                  |
-| POST   | `/api/plugins/[name]/activate`     | Aktifkan plugin                    |
-| POST   | `/api/plugins/[name]/deactivate`   | Nyahaktifkan plugin                |
-| GET    | `/api/plugins/[name]/config`       | Dapatkan konfigurasi plugin        |
-| PUT    | `/api/plugins/[name]/config`       | Kemas kini konfigurasi plugin      |
+| Kaedah | Laluan                             | Penerangan                       |
+| ------ | ---------------------------------- | -------------------------------- |
+| GET    | `/api/plugins`                     | Senaraikan pemalam yang dipasang |
+| POST   | `/api/plugins/marketplace/install` | Pasang pemalam daripada pasaran  |
+| DELETE | `/api/plugins/[name]`              | Nyahpasang pemalam               |
+| POST   | `/api/plugins/[name]/activate`     | Aktifkan pemalam                 |
+| POST   | `/api/plugins/[name]/deactivate`   | Nyahaktifkan pemalam             |
+| GET    | `/api/plugins/[name]/config`       | Dapatkan konfigurasi pemalam     |
+| PUT    | `/api/plugins/[name]/config`       | Kemas kini konfigurasi pemalam   |
 
 **Pengesahan:** Memerlukan sesi pengurusan.
 
-Lihat [Rangka Kerja Plugin](../frameworks/PLUGIN_SDK.md) untuk butiran lengkap.
+Lihat [Rangka Kerja Pemalam](../frameworks/PLUGIN_SDK.md) untuk butiran lengkap.
 
 ---
 
 ## Penghalaan Bayangan
 
-Perbandingan bayangan / A-B bagi penyedia **bukan permukaan REST kendiri** — ia dikonfigurasikan melalui penghalaan kombo (lihat [Auto-Combo](../routing/AUTO-COMBO.md)). Metrik perbandingan bagi setiap kombo disediakan oleh `GET /api/combos/metrics`.
+Perbandingan bayangan / A-B bagi penyedia **bukan antara muka REST kendiri** — ia dikonfigurasikan melalui penghalaan kombo (lihat [Kombo Automatik](../routing/AUTO-COMBO.md)). Metrik perbandingan bagi setiap kombo disediakan oleh `GET /api/combos/metrics`.
 
 ---
 
-## Kawalan Keselamatan
+## Kekangan Keselamatan
 
-Periksa kawalan keselamatan masa jalan (pengesanan PII, pengesanan suntikan gesaan, perantaraan visi). Kawalan keselamatan dijalankan pada setiap permintaan; pengecualian bagi setiap panggilan dilakukan melalui pengepala permintaan `x-omniroute-disabled-guardrails` — tiada permukaan daya/nyahdaya yang disimpan.
+Periksa kekangan keselamatan masa jalan (pengesanan PII, pengesanan suntikan gesaan, perantaraan penglihatan). Kekangan keselamatan dijalankan pada setiap permintaan; pengecualian bagi setiap panggilan dilakukan melalui pengepala permintaan `x-omniroute-disabled-guardrails` — tiada antara muka daya/nyahdaya yang disimpan.
 
-| Kaedah | Laluan                 | Penerangan                                                                                                       |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/guardrails`      | Senaraikan kawalan keselamatan yang didaftarkan dan statusnya (nama / didayakan / keutamaan)                     |
-| POST   | `/api/guardrails/test` | Jalankan percubaan kering bagi saluran paip prapanggilan pada input sampel — isi: `{input, disabledGuardrails?}` |
+| Kaedah | Laluan                 | Penerangan                                                                                                      |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/guardrails`      | Senaraikan kekangan keselamatan yang didaftarkan dan statusnya (nama / didayakan / keutamaan)                   |
+| POST   | `/api/guardrails/test` | Jalankan percubaan kering bagi talian paip prapanggilan pada input sampel — isi: `{input, disabledGuardrails?}` |
 
 **Pengesahan:** Memerlukan sesi pengurusan.
 
-Lihat [Keselamatan > Kawalan Keselamatan](../security/GUARDRAILS.md) untuk butiran lengkap.
+Lihat [Keselamatan > Kekangan Keselamatan](../security/GUARDRAILS.md) untuk butiran lengkap.
 
 ---
 
@@ -2143,13 +2276,13 @@ Lihat [Keselamatan > Kawalan Keselamatan](../security/GUARDRAILS.md) untuk butir
 ## Pengesahan
 
 Lihat [Pengesahan Pengurusan](../guides/MANAGEMENT-AUTH.md) untuk empat
-keluarga bukti kelayakan (sesi papan pemuka, token CLI setempat, Token Akses
+keluarga kelayakan (sesi papan pemuka, token CLI setempat, Token Akses
 `oma_live_…`, kunci API berskop pengurusan) dan perbezaannya daripada kunci inferens.
 
 - Laluan papan pemuka (`/dashboard/*`) menggunakan kuki `auth_token`
-- Log masuk menggunakan cincangan kata laluan yang disimpan; sandaran kepada `INITIAL_PASSWORD`
+- Log masuk menggunakan cincangan kata laluan yang disimpan; kembali menggunakan `INITIAL_PASSWORD` sebagai pilihan sandaran
 - `requireLogin` boleh ditogol melalui `/api/settings/require-login`
 - Laluan `/v1/*` secara pilihan memerlukan kunci API Bearer apabila `REQUIRE_API_KEY=true`
 - "token pengurusan" / "kunci API berskop pengurusan" dalam rujukan ini bermaksud salah satu keluarga dalam panduan tersebut — bukan jenis rahsia tambahan yang tidak ditakrifkan
 
-> **Perubahan yang memecahkan keserasian (v3.8.0)** — `/api/v1/agents/tasks/*` dan titik akhir pengurusan tempoh bertenang kini memerlukan **pengesahan pengurusan** (kuki `auth_token` papan pemuka atau kunci API berskop pengurusan). Klien yang sebelum ini memanggil laluan ini tanpa pengesahan akan menerima `401 Unauthorized`. Lihat komit `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`).
+> **Perubahan pecah keserasian (v3.8.0)** — `/api/v1/agents/tasks/*` dan titik akhir pengurusan tempoh bertenang kini memerlukan **pengesahan pengurusan** (kuki `auth_token` papan pemuka atau kunci API berskop pengurusan). Klien yang sebelum ini memanggil laluan ini tanpa pengesahan akan menerima `401 Unauthorized`. Lihat komit `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`).

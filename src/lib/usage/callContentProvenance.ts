@@ -213,10 +213,30 @@ function hasDroppedMediaOnly(summary: Record<string, unknown>): boolean {
   });
 }
 
-// A streamed envelope wraps the client-visible reply under `summary`; the
-// truncation flag is a sibling of `summary`, never inside it.
+// The client-visible body of a streamed reply comes in two shapes: the
+// envelope `{ _streamed, _format, _eventCount, summary }`, which carries the
+// aggregated reply under `summary`, and the aggregated reply itself, which the
+// stream producer stamps with the same `_streamed` marker. Only the envelope
+// holds a `summary` object.
+function isStreamEnvelope(body: Record<string, unknown>): boolean {
+  return body._streamed === true && asRecord(body.summary) !== null;
+}
+
+// Rendered content of a response body: true or false when measurable, null
+// when the shape says nothing.
+function bodyContent(body: Record<string, unknown>): boolean | null {
+  if (Array.isArray(body.choices)) return choicesContent(body.choices);
+  if ([body.content, body.text, body.output_text].some(hasNonBlankText)) return true;
+  const claude = claudeBlocksContent(body.content);
+  if (claude === true) return true;
+  if (hasToolCalls(body.tool_calls) || (body.function_call ?? null) !== null) return true;
+  const responses = responsesOutputContent(body.output);
+  if (responses !== null) return responses;
+  return claude;
+}
+
+// A streamed envelope wraps the client-visible reply under `summary`.
 function streamedSummaryContent(body: Record<string, unknown>): boolean | null {
-  if (body._truncated === true) return null;
   const summary = body.summary;
   if (summary === body) return null;
   const summaryRecord = asRecord(summary);
@@ -238,13 +258,10 @@ function streamedSummaryContent(body: Record<string, unknown>): boolean | null {
 export function hasRenderedContent(clientBody: unknown): boolean | null {
   const body = asRecord(clientBody);
   if (!body) return null;
-  if (body._streamed === true) return streamedSummaryContent(body);
-  if (Array.isArray(body.choices)) return choicesContent(body.choices);
-  if ([body.content, body.text, body.output_text].some(hasNonBlankText)) return true;
-  const claude = claudeBlocksContent(body.content);
-  if (claude === true) return true;
-  if (hasToolCalls(body.tool_calls) || (body.function_call ?? null) !== null) return true;
-  const responses = responsesOutputContent(body.output);
-  if (responses !== null) return responses;
-  return claude;
+  if (body._streamed !== true) return bodyContent(body);
+  // A truncated stream says nothing certain about what it rendered.
+  if (body._truncated === true) return null;
+  // The envelope wraps the aggregated reply under `summary`; the aggregated
+  // reply carries the same marker and is measured like any other body.
+  return isStreamEnvelope(body) ? streamedSummaryContent(body) : bodyContent(body);
 }

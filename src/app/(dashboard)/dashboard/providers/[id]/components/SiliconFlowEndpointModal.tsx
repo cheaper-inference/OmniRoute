@@ -1,10 +1,12 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 // Phase 1d extraction — Issue #3501
 // SiliconFlowEndpointModal moved out of ProviderDetailPageClient.tsx.
 
 import { useTranslations } from "next-intl";
-import { Modal } from "@/shared/components";
+import { Button, Modal } from "@/shared/components";
 import { providerText, SILICONFLOW_ENDPOINTS } from "../providerPageHelpers";
 
 interface SiliconFlowEndpointModalProps {
@@ -32,14 +34,14 @@ export default function SiliconFlowEndpointModal({
           {providerText(t, "chooseSiliconFlowEndpoint", "Choose your SiliconFlow endpoint:")}
         </p>
         {SILICONFLOW_ENDPOINTS.map((endpoint) => (
-          <button
+          <Button
             key={endpoint.id}
-            type="button"
+            variant="outline"
             onClick={() => onSelect(endpoint.baseUrl)}
-            className="w-full p-4 text-left border border-border rounded-lg hover:bg-sidebar transition-colors"
+            className="h-auto w-full justify-start whitespace-normal p-4 text-left font-normal"
           >
             <div className="flex items-start gap-3">
-              <span className="material-symbols-outlined text-primary mt-0.5">public</span>
+              <Icon name="public" className="text-primary mt-0.5" />
               <div className="flex-1">
                 <h3 className="font-semibold mb-1">
                   {providerText(
@@ -51,7 +53,7 @@ export default function SiliconFlowEndpointModal({
                 <p className="text-sm text-text-muted font-mono">{endpoint.baseUrl}</p>
               </div>
             </div>
-          </button>
+          </Button>
         ))}
       </div>
     </Modal>

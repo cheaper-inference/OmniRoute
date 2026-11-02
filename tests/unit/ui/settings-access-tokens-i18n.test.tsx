@@ -1,9 +1,12 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import AccessTokensTab from "@/app/(dashboard)/dashboard/settings/components/AccessTokensTab";
 import zh from "@/i18n/messages/zh-CN.json";
+// The shared Select renders the kit (Radix) Select for `options` since KEA-7886: no DOM
+// <select>/<option>; the helpers read the menu items (data-value) and the controlled value.
+import { chooseKitSelectValue } from "../../helpers/kitSelect";
 
 const token = {
   id: "demo/read",
@@ -17,6 +20,15 @@ const token = {
 };
 // Exercise the real catalog and formatter, not the global key-only test mock.
 vi.unmock("next-intl");
+
+// The kit Table measures itself with ResizeObserver (persistent scrollbar); jsdom lacks it.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 const reply = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status });
 const fetchMock = vi.fn<typeof fetch>();
@@ -100,7 +112,7 @@ describe("access-token settings with real Chinese catalogs", () => {
     fireEvent.change(screen.getByPlaceholderText("名称（例如：笔记本电脑）"), {
       target: { value: "  Remote laptop  " },
     });
-    fireEvent.change(screen.getByRole("combobox"), { target: { value: "admin" } });
+    chooseKitSelectValue(screen.getByRole("combobox"), "admin");
     fireEvent.change(screen.getByPlaceholderText("有效期（天，可选）"), { target: { value: "7" } });
     let resolve!: (value: Response) => void;
     fetchMock.mockImplementationOnce(
@@ -126,6 +138,11 @@ describe("access-token settings with real Chinese catalogs", () => {
     expect(copy).toHaveBeenCalledWith("omni_disposable_test_secret");
     fireEvent.click(screen.getByRole("button", { name: "关闭" }));
     expect(screen.queryByText("omni_disposable_test_secret")).toBeNull();
+    // The opener ("Create") is disabled again after the name is cleared, so focus goes back
+    // to the name field rather than falling to <body>.
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByPlaceholderText("名称（例如：笔记本电脑）"))
+    );
   });
 
   it("uses a localized create failure instead of surfacing English transport errors", async () => {

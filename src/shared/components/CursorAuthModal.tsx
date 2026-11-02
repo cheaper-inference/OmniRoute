@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useId, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import Icon from "./Icon";
 import Modal from "./Modal";
 import Button from "./Button";
 import Input from "./Input";
+import Textarea from "./Textarea";
 import { errorMessageFromBody } from "@/shared/utils/fetchError";
 
 type CursorAuthModalProps = {
@@ -30,6 +33,8 @@ export default function CursorAuthModal({
   const t = useTranslations("cursorAuthModal");
   const [tab, setTab] = useState<AuthTab>("login");
   const [accessToken, setAccessToken] = useState("");
+  const accessTokenId = useId();
+  const refreshTokenId = useId();
   const [refreshToken, setRefreshToken] = useState("");
   const [machineId, setMachineId] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -254,9 +259,7 @@ export default function CursorAuthModal({
             {loginPolling && (
               <div className="text-center py-4">
                 <div className="size-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="material-symbols-outlined text-2xl text-primary animate-spin">
-                    progress_activity
-                  </span>
+                  <Icon name="progress_activity" size={24} className="text-primary animate-spin" />
                 </div>
                 <p className="text-sm font-medium">{t("waitingApproval")}</p>
                 {loginUrl && (
@@ -276,8 +279,8 @@ export default function CursorAuthModal({
             )}
 
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <div className="bg-error/10 p-3 rounded-lg border border-error/30">
+                <p className="text-sm text-error">{error}</p>
               </div>
             )}
 
@@ -307,62 +310,71 @@ export default function CursorAuthModal({
             )}
 
             {!autoDetecting && autoDetected && (
-              <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg border border-green-200 dark:border-green-800">
-                <p className="text-sm text-green-800 dark:text-green-200">
-                  {t("tokensAutoDetected")}
-                </p>
+              <div className="bg-success/10 p-3 rounded-lg border border-success/30">
+                <p className="text-sm text-success">{t("tokensAutoDetected")}</p>
               </div>
             )}
 
             {!autoDetecting && !autoDetected && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
-                <p className="text-sm text-blue-800 dark:text-blue-200">
+              <div className="bg-info/10 p-3 rounded-lg border border-info/30">
+                <p className="text-sm text-info">
                   {dockerHint ? t("dockerImportHint") : t("cursorNotDetected")}
                 </p>
               </div>
             )}
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                {t("accessToken")} <span className="text-red-500">{t("required")}</span>
-              </label>
-              <textarea
+            <Field
+              htmlFor={accessTokenId}
+              label={
+                <>
+                  {t("accessToken")} <span className="text-error">{t("required")}</span>
+                </>
+              }
+            >
+              <Textarea
+                id={accessTokenId}
                 value={accessToken}
                 onChange={(e) => setAccessToken(e.target.value)}
                 placeholder={t("accessTokenPlaceholder")}
                 rows={3}
-                className="w-full px-3 py-2 text-sm font-mono border border-border rounded-lg bg-background focus:outline-none focus:border-primary resize-none"
+                className="resize-none font-mono text-sm"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                {t("refreshToken")} <span className="text-text-muted text-xs">{t("optional")}</span>
-              </label>
-              <textarea
+            <Field
+              htmlFor={refreshTokenId}
+              label={
+                <>
+                  {t("refreshToken")}{" "}
+                  <span className="text-text-muted text-xs">{t("optional")}</span>
+                </>
+              }
+            >
+              <Textarea
+                id={refreshTokenId}
                 value={refreshToken}
                 onChange={(e) => setRefreshToken(e.target.value)}
                 placeholder={t("refreshTokenPlaceholder")}
                 rows={2}
-                className="w-full px-3 py-2 text-sm font-mono border border-border rounded-lg bg-background focus:outline-none focus:border-primary resize-none"
+                className="resize-none font-mono text-sm"
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                {t("machineId")} <span className="text-text-muted text-xs">{t("optional")}</span>
-              </label>
-              <Input
-                value={machineId}
-                onChange={(e) => setMachineId(e.target.value)}
-                placeholder={t("machineIdPlaceholder")}
-                className="font-mono text-sm"
-              />
-            </div>
+            <Input
+              label={
+                <>
+                  {t("machineId")} <span className="text-text-muted text-xs">{t("optional")}</span>
+                </>
+              }
+              value={machineId}
+              onChange={(e) => setMachineId(e.target.value)}
+              placeholder={t("machineIdPlaceholder")}
+              inputClassName="font-mono text-sm"
+            />
 
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-200 dark:border-red-800">
-                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              <div className="bg-error/10 p-3 rounded-lg border border-error/30">
+                <p className="text-sm text-error">{error}</p>
               </div>
             )}
 

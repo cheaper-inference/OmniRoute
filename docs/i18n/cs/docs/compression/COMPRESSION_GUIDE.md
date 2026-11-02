@@ -34,77 +34,77 @@ Požadavek klienta
 
 ### Vypnuto
 
-Není použita žádná komprese. Všechny zprávy procházejí beze změny.
+Komprese není použita. Všechny zprávy procházejí beze změny.
 
-### Lehký režim (~15% úspora, latence <1 ms)
+### Režim Lite (~15 % úspora, latence <1 ms)
 
 Nejbezpečnější režim — nulová sémantická změna, pouze vyčištění formátování:
 
-| Technika                 | Popis                                                       |
-| ------------------------ | ----------------------------------------------------------- |
-| `collapseWhitespace`     | Sloučí po sobě jdoucí prázdné řádky a mezery na konci řádků |
-| `dedupSystemPrompt`      | Odstraní duplicitní systémové zprávy                        |
-| `compressToolResults`    | Komprimuje podrobné výstupy nástrojů/funkcí                 |
-| `removeRedundantContent` | Odstraní opakované pokyny                                   |
-| `replaceImageUrls`       | Zkrátí datové URI obrázků ve formátu base64                 |
+| Technika                 | Popis                                                |
+| ------------------------ | ---------------------------------------------------- |
+| `collapseWhitespace`     | Sloučí po sobě jdoucí prázdné řádky a koncové mezery |
+| `dedupSystemPrompt`      | Odstraní duplicitní systémové zprávy                 |
+| `compressToolResults`    | Zkomprimuje ukecané výstupy nástrojů/funkcí          |
+| `removeRedundantContent` | Odstraní opakující se instrukce                      |
+| `replaceImageUrls`       | Zkrátí base64 data URI obrázků                       |
 
-**Nejvhodnější pro:** Trvale zapnuté používání a pracovní postupy s kritickými požadavky na bezpečnost.
+**Nejlepší pro:** Trvalé používání, bezpečnostně kritické pracovní postupy.
 
-### Standardní režim (~30% úspora)
+### Standardní režim (~30 % úspora)
 
-Inspirováno nástrojem [Caveman](https://github.com/JuliusBrussee/caveman) — odstraňuje výplňová slova a rozvláčné formulace, přičemž zachovává význam:
+Inspirováno projektem [Caveman](https://github.com/JuliusBrussee/caveman) — odstraňuje výplňová slova a rozvláčné formulace při zachování významu:
 
-- Odstraňuje výplňová slova („prosím“, „myslím si“, „v podstatě“, „vlastně“)
-- Zkracuje rozvláčné fráze („za účelem“ → „pro“, „v důsledku“ → „protože“)
-- Odstraňuje zdvořilé zmírňující formulace („Nevadilo by vám...“, „Pokud byste případně mohli...“)
-- Více než 30 pravidel regulárních výrazů vyladěných pro programovací prompty
+- Odstraňuje výplňová slova („please", „I think", „basically", „actually")
+- Zkracuje rozvláčné fráze („in order to" → „to", „as a result of" → „because")
+- Odstraňuje zdvořilostní obmlouvání („Would you mind...", „If you could possibly...")
+- Více než 30 pravidel regex vyladěných pro programátorské prompty
 
-**Nejvhodnější pro:** Každodenní programovací pracovní postupy a týmy dbající na náklady.
+**Nejlepší pro:** Každodenní programátorské pracovní postupy, týmy dbající na náklady.
 
-### Agresivní režim (~50% úspora)
+### Agresivní režim (~50 % úspora)
 
-Inteligentní správa historie pro dlouhé relace:
+Chytrá správa historie pro dlouhé relace:
 
-- **Stárnutí zpráv** — starší zprávy jsou postupně více komprimovány
+- **Stárnutí zpráv** — starší zprávy jsou postupně komprimovány
 - **Komprese výsledků nástrojů** — dlouhé výstupy nástrojů jsou zkráceny nebo vynechány (první/poslední řádky,
-  filtrování odpovídajících řádků, kompakce klíčů JSON)
-- **Ochrany strukturální integrity** — zajišťují, aby dvojice `tool_use` + `tool_result` zůstaly konzistentní
-- **Zohlednění kontextového okna** — respektuje limity tokenů jednotlivých modelů
+  filtrování řádků podle shody, kompaktace klíčů JSON)
+- **Ochrana strukturální integrity** — zajišťuje, že páry `tool_use` + `tool_result` zůstávají konzistentní
+- **Povědomí o kontextovém okně** — respektuje tokenové limity jednotlivých modelů
 
-**Nejvhodnější pro:** Dlouhé ladicí relace a rozsáhlé zdrojové kódy.
+**Nejlepší pro:** Dlouhé ladící relace, rozsáhlé kódové báze.
 
-### Režim Ultra (~75% úspora)
+### Režim Ultra (~75 % úspora)
 
-Maximální komprese pro scénáře s kritickými nároky na tokeny:
+Maximální komprese pro scénáře kritické na tokeny:
 
-- **Heuristické prořezávání** — prořezávání tokenů prózy na základě bodového hodnocení
-- **Zachování struktury** — ohraničené bloky kódu, vložený kód, URL a identifikátory jsou
-  nahrazeny zástupnými symboly a následně beze změny znovu vloženy; nikdy se neprořezávají
-- **Volitelná úroveň SLM** — je-li nakonfigurována, může prořezávání zpřesnit malý lokální model
-- Nezávislé na agresivním režimu: nespouští stárnutí zpráv, kompresi výsledků nástrojů
-  ani záložní sumarizátor (pouze selhání úrovně SLM může přesměrovat záložní průchod přes
+- **Heuristické prořezávání** — prořezávání tokenů prózy na základě skóre
+- **Zachování struktury** — oplocené bloky kódu, inline kód, URL a identifikátory jsou
+  označeny zástupnými značkami (tombstone) a po skončení doslova sešity zpět, nikdy nejsou prořezány
+- **Volitelná vrstva SLM** — malý lokální model může po nakonfigurování prořezávání zpřesnit
+- Nezávislý na agresivním režimu: nespouští stárnutí zpráv, kompresi výsledků nástrojů
+  ani záložní sumarizátor (pouze selhání vrstvy SLM může směrovat záložní průchod přes
   agresivní režim)
 
-**Nejvhodnější pro:** Situace, kdy opakovaně narážíte na limity kontextu.
+**Nejlepší pro:** Když opakovaně narážíte na limity kontextu.
 
-### Režim RTK (upstream rozsah 60–90 %)
+### Režim RTK (rozsah 60–90 % upstream)
 
-Režim RTK je optimalizován pro podrobné výstupy nástrojů, které se objevují v relacích programovacích agentů:
+Režim RTK je optimalizován pro ukecané výstupy nástrojů, které se objevují v relacích kódovacích agentů:
 
-- Detekuje třídy příkazů/výstupů, jako jsou `git status`, `git diff`, `git log`, nástroje pro spouštění testů,
-  sestavení TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audity/instalace npm, protokoly Dockeru, výstupy infrastruktury
-  a obecné výstupy shellu
-- Používá balíčky filtrů JSON z `open-sse/services/compression/engines/rtk/filters/`
-- Importuje filtry schématu RTK TOML v1 z projektových nebo globálních souborů `filters.toml`, včetně validace
-  vložených testů a řízení důvěryhodnosti projektových souborů
-- Obsahuje 55 vestavěných filtrů s vloženými ověřovacími vzorky
-- Odstraňuje řídicí sekvence ANSI, ukazatele průběhu, opakované řádky a nerelevantní šum
+- Detekuje třídy příkazů/výstupů, jako jsou `git status`, `git diff`, `git log`, testovací běžce,
+  buildy TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/instalace, logy Dockeru, výstupy
+  infrastruktury a obecný výstup shellu
+- Aplikuje sady JSON filtrů z `open-sse/services/compression/engines/rtk/filters/`
+- Importuje filtry schématu RTK TOML v1 z projektových nebo globálních souborů `filters.toml`, s validací
+  inline testy a řízením důvěry (trust-gating) projektových souborů
+- Dodává se s 56 vestavěnými filtry s inline ověřovacími vzorky
+- Odstraňuje řídicí sekvence ANSI, ukazatele průběhu, opakující se řádky a nevyužitelný šum
 - Zachovává selhání, chyby, varování, změněné soubory, souhrny a konec dlouhého výstupu
-- Podporuje projektové filtry řízené důvěryhodností, globální filtry a volitelnou obnovu redigovaného nezpracovaného výstupu
+- Podporuje projektové filtry s řízením důvěry, globální filtry a volitelnou obnovu redigovaného surového výstupu
 
-**Nejvhodnější pro:** Relace agentů obsahující přepisy shellu, sestavení, testů, příkazů git a grep a výstupů souborů.
+**Nejlepší pro:** Relace agentů s přepisy shellu, buildů, testů, gitu, grepu a výstupů souborů.
 
-### Skládaný režim (rozsah 78–95 % u vhodného obsahu)
+### Skládaný režim (způsobilý rozsah 78–95 %)
 
 Skládaný režim spouští více kompresních enginů v deterministickém pořadí. Výchozí pipeline je:
 
@@ -112,11 +112,11 @@ Skládaný režim spouští více kompresních enginů v deterministickém pořa
 RTK -> Caveman
 ```
 
-Toto pořadí nejprve zkompaktňuje výstup terminálu/nástrojů a poté na
-zbývající prompt v přirozeném jazyce aplikuje sémantické zhuštění Caveman. Skládané pipeline lze konfigurovat globálně nebo prostřednictvím
-kombinací komprese přiřazených ke kombinacím směrování.
+Toto pořadí nejprve udržuje výstup terminálu/nástrojů kompaktní a poté aplikuje sémantické zahuštění
+Caveman na zbývající prompt v přirozeném jazyce. Skládané pipeline lze konfigurovat globálně nebo
+prostřednictvím kompresních kombinací přiřazených ke směrovacím kombinacím.
 
-**Nejvhodnější pro:** Smíšený kontext s rozsáhlými protokoly nástrojů spolu s lidskými pokyny nebo souhrny asistenta.
+**Nejlepší pro:** Smíšený kontext s velkými logy nástrojů spolu s lidskými instrukcemi nebo souhrny asistenta.
 
 ---
 

@@ -1,3 +1,4 @@
+import Icon from "@/shared/components/Icon";
 import Link from "next/link";
 import { Metadata } from "next";
 import { source } from "@/lib/source";
@@ -77,7 +78,7 @@ export default async function DocsHomePage() {
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
       <div className="text-center mb-16 mt-8">
-        <h1 className="text-4xl font-bold text-fd-foreground mb-5">{t("homeTitle")}</h1>
+        <h1 className="ci-heading text-4xl text-fd-foreground mb-5">{t("homeTitle")}</h1>
         <p className="text-lg text-fd-muted-foreground mb-6">{t("homeDescription")}</p>
         <p className="text-sm text-fd-muted-foreground">
           {t.rich("homeSearchHint", {
@@ -98,10 +99,8 @@ export default async function DocsHomePage() {
             className="flex flex-col items-center text-center p-6 bg-fd-card border border-fd-border rounded-xl
               hover:border-fd-primary hover:bg-fd-accent transition-all group"
           >
-            <span className="material-symbols-outlined text-3xl text-fd-primary mb-3">
-              {link.icon}
-            </span>
-            <span className="font-semibold text-fd-foreground group-hover:text-fd-primary transition-colors">
+            <Icon name={link.icon} size={30} className="text-primary mb-3" />
+            <span className="font-semibold text-fd-foreground group-hover:text-primary transition-colors">
               {t(link.titleKey)}
             </span>
             <span className="text-sm text-fd-muted-foreground mt-2">{t(link.descriptionKey)}</span>
@@ -120,13 +119,9 @@ export default async function DocsHomePage() {
               className="border border-fd-border rounded-xl p-6 hover:border-fd-primary/30 transition-colors bg-fd-card/50"
             >
               <div className="flex items-center gap-3 mb-4">
-                <span className="material-symbols-outlined text-2xl text-fd-primary">
-                  {section.icon}
-                </span>
+                <Icon name={section.icon} size={24} className="text-primary" />
                 <div>
-                  <h2 className="text-base font-semibold text-fd-foreground">
-                    {t(section.titleKey)}
-                  </h2>
+                  <h2 className="ci-heading text-base text-fd-foreground">{t(section.titleKey)}</h2>
                   <p className="text-sm text-fd-muted-foreground">{t(section.subtitleKey)}</p>
                 </div>
               </div>
@@ -135,7 +130,7 @@ export default async function DocsHomePage() {
                   <li key={page.url}>
                     <Link
                       href={page.url}
-                      className="text-sm text-fd-muted-foreground hover:text-fd-primary transition-colors"
+                      className="text-sm text-fd-muted-foreground hover:text-primary transition-colors"
                     >
                       {page.data.title}
                     </Link>

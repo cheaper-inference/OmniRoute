@@ -2,7 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { SegmentedControl, Collapsible } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
+import { Collapsible, SegmentedControl } from "@/shared/components";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Checkbox from "@/shared/components/Checkbox";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
+import Textarea from "@/shared/components/Textarea";
+import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import { rtkConfigSchema } from "@/shared/validation/compressionConfigSchemas";
 import RtkLearnDiscoverCard from "./RtkLearnDiscoverCard";
@@ -172,24 +181,21 @@ function NumberSetting({
     return () => onDraftChange(false);
   }, [open, onDraftChange]);
   return (
-    <label className="flex flex-col gap-1 text-sm text-text-main">
-      {label}
-      <input
-        type="number"
-        min={min}
-        max={max}
-        value={draft ?? value}
-        onChange={(event) => {
-          draftRef.current = event.target.value;
-          setDraft(event.target.value);
-        }}
-        onBlur={commit}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") commit();
-        }}
-        className="rounded border border-border bg-bg px-2 py-1 text-sm"
-      />
-    </label>
+    <Input
+      label={label}
+      type="number"
+      min={min}
+      max={max}
+      value={draft ?? value}
+      onChange={(event) => {
+        draftRef.current = event.target.value;
+        setDraft(event.target.value);
+      }}
+      onBlur={commit}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") commit();
+      }}
+    />
   );
 }
 
@@ -406,34 +412,37 @@ export default function RtkContextPageClient() {
   if (loadFailed) {
     return (
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface p-4">
-          <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <Card padding="sm" className="flex items-center justify-between gap-4">
+          <p role="alert" className="text-sm text-error">
             {tSettings("compressionTitle")}: {tCommon("failedToLoad")}
           </p>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setLoadAttempt((attempt) => attempt + 1)}
-            className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs text-text-main hover:bg-bg"
+            className="shrink-0"
           >
             {tSettings("retry")}
-          </button>
-        </div>
+          </Button>
+        </Card>
       </div>
     );
   }
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-[30px] text-primary">filter_alt</span>
-            <div>
-              <h1 className="text-2xl font-bold text-text-main">{t("title")}</h1>
-              <p className="text-sm text-text-muted">{t("description")}</p>
-            </div>
-          </div>
+      <PageHeader
+        compact
+        title={
+          <span className="flex items-center gap-3">
+            <Icon name="filter_alt" size={30} className="text-primary" />
+            {t("title")}
+          </span>
+        }
+        description={t("description")}
+        actions={
           <SegmentedControl
+            aria-label={t("viewMode")}
             value={viewMode}
             onChange={(v) => setViewMode(v as "simple" | "advanced")}
             options={[
@@ -441,49 +450,41 @@ export default function RtkContextPageClient() {
               { value: "advanced", label: t("advancedMode") || "Advanced" },
             ]}
           />
-        </div>
-      </header>
+        }
+      />
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {statCards.map(([label, value]) => (
-          <div key={label} className="rounded-lg border border-border bg-surface p-4">
+          <Card key={label} padding="sm">
             <p className="text-xs uppercase text-text-muted">{label}</p>
             <p className="mt-1 text-xl font-semibold text-text-main">{value}</p>
-          </div>
+          </Card>
         ))}
       </section>
 
       {masterEnabled === false && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300 flex items-start gap-2">
-          <span className="material-symbols-outlined text-[18px]">info</span>
-          <p>{t("masterSwitchOffAlert")}</p>
-        </div>
+        <Alert
+          variant="warning"
+          icon={<Icon name="info" size={18} />}
+          className="[&>.ci-alert__dismiss]:hidden"
+          description={t("masterSwitchOffAlert")}
+        />
       )}
 
       {loadError !== null && (
-        <p
-          role="alert"
-          className="flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400"
-        >
-          <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-            error
-          </span>
+        <p role="alert" className="flex items-center gap-1 text-xs font-medium text-error">
+          <Icon name="error" size={14} />
           {tSettings("failedLoadWithStatus", { status: loadError || tSettings("unknownError") })}
         </p>
       )}
 
       {config && (
-        <section className="rounded-lg border border-border bg-surface p-4">
+        <Card padding="sm">
           {/* On/off + intensity now live in the panel (/dashboard/context/settings). This
               page edits RTK's detailed configuration only. */}
           {saveFailed && (
-            <p
-              role="alert"
-              className="mb-3 flex items-center gap-1 text-xs font-medium text-red-500"
-            >
-              <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                error
-              </span>
+            <p role="alert" className="mb-3 flex items-center gap-1 text-xs font-medium text-error">
+              <Icon name="error" size={14} />
               {tSettings("saveFailed")}
             </p>
           )}
@@ -514,60 +515,56 @@ export default function RtkContextPageClient() {
               ["customFiltersEnabled", t("customFilters")],
               ["trustProjectFilters", t("trustProjectFilters")],
             ].map(([key, label]) => (
-              <label key={key} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={Boolean(config[key as keyof RtkConfig])}
-                  onChange={(event) =>
-                    saveConfig({ [key]: event.target.checked } as Partial<RtkConfig>)
-                  }
-                />
-                {label}
-              </label>
+              <Checkbox
+                key={key}
+                label={label}
+                checked={Boolean(config[key as keyof RtkConfig])}
+                onChange={(event) =>
+                  saveConfig({ [key]: event.target.checked } as Partial<RtkConfig>)
+                }
+              />
             ))}
           </div>
           <div className="mt-4 max-w-sm text-sm text-text-main">
-            <label className="flex flex-col gap-1">
-              {t("rawOutputRetention")}
-              <select
-                value={config.rawOutputRetention}
-                onChange={(event) =>
-                  saveConfig({
-                    rawOutputRetention: event.target.value as RtkConfig["rawOutputRetention"],
-                  })
-                }
-                className="rounded border border-border bg-bg px-2 py-1 text-sm"
-              >
-                <option value="never">{t("rawOutputNever")}</option>
-                <option value="failures">{t("rawOutputFailures")}</option>
-                <option value="always">{t("rawOutputAlways")}</option>
-              </select>
-            </label>
+            <Select
+              label={t("rawOutputRetention")}
+              value={config.rawOutputRetention}
+              onChange={(event) =>
+                saveConfig({
+                  rawOutputRetention: event.target.value as RtkConfig["rawOutputRetention"],
+                })
+              }
+            >
+              <option value="never">{t("rawOutputNever")}</option>
+              <option value="failures">{t("rawOutputFailures")}</option>
+              <option value="always">{t("rawOutputAlways")}</option>
+            </Select>
           </div>
-        </section>
+        </Card>
       )}
 
       {viewMode === "advanced" && (
         <section className="grid grid-cols-1 gap-4 xl:grid-cols-[1fr_1fr]">
-          <div className="rounded-lg border border-border bg-surface p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-text-main">{t("filterTesting")}</h2>
-              <button
-                onClick={runPreview}
-                className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white"
-              >
-                {t("run")}
-              </button>
-            </div>
-            <textarea
+          <Card padding="sm">
+            <SectionHeader
+              className="mb-3"
+              title={t("filterTesting")}
+              actions={
+                <Button size="sm" icon="play_arrow" onClick={runPreview}>
+                  {t("run")}
+                </Button>
+              }
+            />
+            <Textarea
               value={sample}
               onChange={(event) => setSample(event.target.value)}
               placeholder={t("pasteOutput")}
-              className="h-72 w-full rounded-lg border border-border bg-bg p-3 font-mono text-xs text-text-main"
+              aria-label={t("filterTesting")}
+              className="h-72 w-full font-mono text-xs"
             />
-          </div>
-          <div className="rounded-lg border border-border bg-surface p-4">
-            <h2 className="mb-3 text-sm font-semibold text-text-main">{t("result")}</h2>
+          </Card>
+          <Card padding="sm">
+            <SectionHeader className="mb-3" title={t("result")} />
             {preview?.detection && (
               <p className="mb-2 text-xs text-text-muted">
                 {t("detected")}: {preview.detection.type} (
@@ -577,7 +574,7 @@ export default function RtkContextPageClient() {
             <pre className="h-72 overflow-auto rounded-lg border border-border bg-bg p-3 text-xs text-text-main">
               {preview ? JSON.stringify(preview, null, 2) : t("previewEmpty")}
             </pre>
-          </div>
+          </Card>
         </section>
       )}
 
@@ -609,8 +606,8 @@ export default function RtkContextPageClient() {
                           <p className="text-xs font-medium text-text-main">{filter.name}</p>
                           <p className="mt-0.5 text-[11px] text-text-muted">{filter.description}</p>
                         </div>
-                        <input
-                          type="checkbox"
+                        <Checkbox
+                          aria-label={filter.name}
                           checked={enabled}
                           disabled={!config}
                           onChange={(event) => toggleFilter(filter.id, event.target.checked)}

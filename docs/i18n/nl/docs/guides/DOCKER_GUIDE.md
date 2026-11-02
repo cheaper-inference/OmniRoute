@@ -644,27 +644,29 @@ sudo systemctl enable --now omniroute-update.path
 De service verwijdert het verzoek vóór het ophalen, zodat een mislukte uitvoering niet in een lus terechtkomt. Zonder
 `DOCKER_UPDATE_TRIGGER_FILE` behoudt het dashboard de handmatige opdrachtprocedure.
 
-## Beschikbaarheid: standaard-SQLite ondersteunt één replica
+## Beschikbaarheid: standaard SQLite is een enkele replica
 
-De standaard Docker-/Kubernetes-configuratie van OmniRoute bestaat uit **één Node-proces + één SQLite-writer**. Hoge beschikbaarheid wordt **niet ondersteund** met deze topologie.
+Voorraad Docker / Kubernetes OmniRoute is** één knooppuntproces + één SQLite -schrijver** . Hoge beschikbaarheid wel** niet ondersteund** op die topologie.
 
-| Beperking                                                    | Gevolg                                                                                                                                                                                                                                                                                                                                                                           |
-| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Eén writer                                                   | Voer **niet** meerdere replica's uit met hetzelfde SQLite-bestand. Hierdoor raakt de database beschadigd.                                                                                                                                                                                                                                                                        |
-| Opnieuw aanmaken / herstarten / beëindiging door HEALTHCHECK | **Volledige uitval** van actieve SSE-verbindingen, dashboardsessies en status in het geheugen. De verbinding van elke verbonden client wordt verbroken. Nieuwe verzoeken tijdens de periode zonder endpoint krijgen van de reverse proxy een **`502 Bad Gateway: Unknown error`**, geen OmniRoute-JSON — clients kunnen dit niet onderscheiden van een providerstoring (#11015). |
-| Dezelfde eventloop als `/healthz`                            | Een drukke catalogus- of compressiecyclus kan probes vertragen; een korte time-out herstart vervolgens de **enige** replica.                                                                                                                                                                                                                                                     |
+| Beperking                                             | Gevolg                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Enkele schrijver                                      | Doen** niet** voer meerdere replica's uit tegen hetzelfde SQLite bestand. Dat corrumpeert de DB.                                                                                                                                                                                                                                             |
+| Opnieuw maken / opnieuw opstarten / HEALTHCHECK doden | **Volledige storing** van SSE tijdens de vlucht, dashboardsessies en status in het geheugen. Elke verbonden client valt weg. Nieuwe aanvragen tijdens het lege eindpuntvenster krijgen een omgekeerde proxy**`502 Bad Gateway: Unknown error`** , niet OmniRoute JSON — clients kunnen dit niet onderscheiden van een providerfout (#11015). |
+| Dezelfde gebeurtenislus als `/healthz`                | Een drukke catalogus of compressietik kan sondes vertragen; een korte time-out start vervolgens het programma opnieuw** alleen** replica.                                                                                                                                                                                                    |
 
-**Probematrix** (zie ook [Aanbevelingen voor Kubernetes-probes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Sondematrix** (zie ook [Kubernetes-sondeaanbevelingen](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Probe              | Doel                                                                  | Niet gebruiken                                               |
-| ------------------ | --------------------------------------------------------------------- | ------------------------------------------------------------ |
-| Liveness           | TCP op `PORT` (standaard `20128`), of zachte HTTP-probe op `/healthz` | `/api/monitoring/health`                                     |
-| Readiness          | HTTP `GET /healthz`                                                   | Korte time-outs die een drukke eventloop als dood beschouwen |
-| Diepgaand / mensen | `/api/monitoring/health`                                              | Geautomatiseerde kubelet-liveness                            |
+| Doorvragen    | Doel                                                         | Niet gebruiken                                            |
+| ------------- | ------------------------------------------------------------ | --------------------------------------------------------- |
+| Levendigheid  | TCP op `PORT` (standaard `20128`), of zachte HTTP `/healthz` | `/api/monitoring/health`                                  |
+| Bereidheid    | HTTP `GET /healthz`                                          | Strakke time-outs die event-loop busy als dood beschouwen |
+| Diep / mensen | `/api/monitoring/health`                                     | Geautomatiseerde kubelet-levendigheid                     |
 
-**Upgrades:** verwacht dat elke sessie wordt verbroken. Laat clients indien mogelijk hun verbindingen afbouwen; met standaard-SQLite is er geen rolling update mogelijk. Compose `restart: unless-stopped` in combinatie met Docker `HEALTHCHECK` vervangt ook het enige proces wanneer de container Unhealthy is — met dezelfde impact.
+**Upgrades:** verwacht dat elke sessie afneemt. Laat klanten leeglopen als je kunt; er is geen rollende update voor standaard SQLite. Samenstellen van `restart: unless-stopped` plus Docker `HEALTHCHECK` vervangt ook het enige proces wanneer de container ongezond is: dezelfde ontploffingsradius.
 
-Kubernetes-fragment voor **één replica** (Recreate is vereist; verhoog `replicas` niet bij gebruik van één SQLite-bestand):
+Kant-en-klare manifesten en een Helm-diagram live in `deploy/kubernetes/` en `deploy/helm/omniroute/` : zie de [Kubernetes-implementatiehandleiding](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes-fragment voor a** enkele replica** (Opnieuw maken is vereist; verhoog `replicas` niet tegen één SQLite bestand):
 
 ```yaml
 spec:
@@ -691,9 +693,9 @@ spec:
             periodSeconds: 20
 ```
 
-De `preStop`-wachttijd stelt kube in staat om Service-endpoints te verwijderen vóór SIGTERM, zodat **nieuw** verkeer niet meer bij het proces terechtkomt dat wordt beëindigd. Actieve `/v1/responses`-SSE-verbindingen krijgen maximaal `SHUTDOWN_TIMEOUT_MS` (standaard 30 s) de tijd om te worden afgehandeld via zwaargewicht toelatingsleases (#11015). Nieuwe verzoeken die het proces toch nog bereiken, krijgen `503` + `Retry-After: 5`. Het Recreate-gat zonder endpoints totdat de vervanging Ready is, blijft een volledige uitval — dat is inherent aan de SQLite-topologie en geen verkeerde probeconfiguratie.
+`preStop` sleep kan Kube service-eindpunten laten vallen vóór SIGTERM so** nieuw** het verkeer stopt met het stervensproces. `/v1/responses` SSE tijdens de vlucht wordt leeggemaakt tot `SHUTDOWN_TIMEOUT_MS` (standaard 30s) via zwaargewicht toegangsleases (#11015). Nieuwe verzoeken die het proces nog steeds bereiken, krijgen `503` + `Retry-After: 5`. Het gat tussen het lege eindpunt opnieuw maken totdat de vervanging gereed is, blijft een harde storing: dat is de SQLite topologie, en niet een foutieve configuratie van de probe.
 
-Externe Postgres / HA met meerdere schrijvers is **geen** gedocumenteerde standaardroute. Als je HA nodig hebt, houd dan één replica aan of gebruik een topologie die het project afzonderlijk heeft getest en gedocumenteerd. Het werk aan Postgres/MySQL is te vinden in [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Totdat dat beschikbaar is, bestaat de enige ondersteunde manier om de capaciteit voor **grote** `/v1/responses` te vermenigvuldigen uit N onafhankelijke processen (volgende sectie), niet uit `replicas > 1` op één volume.
+Externe Postgres / multi-writer HA is** niet** een gedocumenteerd voorraadpad. Als je HA nodig hebt, bewaar dan een enkele replica of voer een topologie uit die het project afzonderlijk heeft getest en gedocumenteerd. Het Postgres/MySQL werk staat in [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Totdat dit wordt verzonden, is dit de enige ondersteunde manier om te vermenigvuldigen** groot** `/v1/responses` capaciteit is N onafhankelijke processen (volgende sectie), niet `replicas > 1` op één volume.
 
 ## Horizontaal schalen: N onafhankelijke processen
 

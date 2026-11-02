@@ -48,15 +48,16 @@ jednostavno radi), provjerava stanje poslužitelja i izvršava `claude`.
 
 ---
 
-## Alias-i za otkrivanje — prikažite modele koji nisu Claude u biraču `/model`
+## Aliasi za otkrivanje — prikaz modela koji nisu Claude u izborniku `/model`
 
-Otkrivanje modela pristupnika u Claude Codeu navodi samo ID-ove koji počinju s `claude`
-ili `anthropic`, pa uz `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` izvorni
-birač `/model` uobičajeno prikazuje **samo** Claude/Anthropic modele OmniRoutea — modeli
-`kimi/kimi-k2.6` ili `glm/glm-5.2` nikad se ne pojavljuju, iako se ispravno usmjeravaju.
+Otkrivanje modela na pristupniku (gateway) u Claude Codeu navodi samo ID-ove koji
+počinju s `claude` ili `anthropic`, pa s `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
+ugrađeni izbornik `/model` obično prikazuje **samo** OmniRouteove Claude/Anthropic
+modele — `kimi/kimi-k2.6` ili `glm/glm-5.2` se nikad ne pojavljuje, iako se bez
+problema usmjerava.
 
-OmniRoute može zrcaliti bilo koji omogućeni model (i kombinaciju) pod ID-om `claude/…` kako bi
-prošao taj filtar i pojavio se u biraču:
+OmniRoute može zrcaliti svaki omogućeni model (i kombinaciju) pod ID-om `claude/…`
+kako bi prošao taj filtar i pojavio se u izborniku:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,32 +65,41 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kada odaberete jedan od njih u Claude Codeu, OmniRoute uklanja omotač `claude/`
-i vraća stvarni ID prije usmjeravanja — izvorni ID `claude/<real-claude-model>`
-(stvarni pružatelj usluge Claude OAuth) uvijek ostaje nepromijenjen.
+Kada jedan od njih odaberete u Claude Codeu, OmniRoute prije usmjeravanja uklanja
+omotač `claude/` i vraća stvarni ID — pravi `claude/<real-claude-model>` ID
+(stvarni Claude OAuth pružatelj) uvijek ostaje netaknut.
 
-**Ovo je prema zadanim postavkama isključeno** i kontrolira se pomoću trostupanjske kontrole (najspecifičnija
-postavka ima prednost), tako da obična instanca OmniRoutea nikad ne udvostručuje svoj katalog za klijente koji ne upotrebljavaju
-Claude Code:
+Prema zadanim postavkama zrcale se samo osnovni ID-ovi. S uključenom opcijskom
+zastavicom značajke `CATALOG_MIRROR_REFINEMENTS_ENABLED` zrcale se i varijante
+razine napora rasuđivanja koje katalog već navodi (npr. `codex/gpt-6-sol-high`),
+kao i svaki drugi ID, pa Claude Code može odabrati eksplicitnu razinu napora, dok
+se ugrađeni ID-ovi `auto/*` koje put obrade zahtjeva ne može ostvariti ne zrcale.
+Hoće li se varijante napora uopće navoditi i dalje određuje
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — zrcalo nikad ne dodaje varijantu
+koju osnovni katalog nema.
 
-| Razina    | Gdje                                                                                                |
-| --------- | --------------------------------------------------------------------------------------------------- |
-| Model     | Stranica s pojedinostima pružatelja → prekidač "Prikaži u Claude Codeu" za svaki model              |
-| Pružatelj | Stranica s pojedinostima pružatelja → prekidač na razini pružatelja (obuhvaća sve njegove modele)   |
-| Globalno  | Postavke → Zastavice značajki → `EXPOSE_CC_DISCOVERY_ALIASES` (prema zadanim postavkama isključeno) |
+**Ovo je prema zadanim postavkama isključeno** i kontrolira se trorazinskom
+kontrolom (pobjeđuje najspecifičnija), pa obični OmniRoute nikad ne udvostručuje
+svoj katalog za klijente koji ne koriste Claude Code:
 
-Varijabla okruženja `EXPOSE_CC_DISCOVERY_ALIASES` prisilno uključuje globalnu razinu
-i ima prednost pred postavkom na nadzornoj ploči (zaslon Zastavice značajki prikazuje
-napomenu "aktivno putem varijable okruženja" kada je to slučaj). Prekidači za pojedine pružatelje i
-pojedine modele dodatno preciziraju postavku — npr. ako je globalna postavka isključena, a pružatelj Kimi uključen,
-prikazuju se samo Kimijevi modeli.
+| Razina    | Gdje                                                                                         |
+| --------- | -------------------------------------------------------------------------------------------- |
+| Model     | Stranica s detaljima pružatelja → prekidač "Prikaži u Claude Codeu" po modelu                |
+| Pružatelj | Stranica s detaljima pružatelja → prekidač na razini pružatelja (pokriva sve njegove modele) |
+| Globalno  | Postavke → Zastavice značajki → `EXPOSE_CC_DISCOVERY_ALIASES` (zadano isključeno)            |
 
-> ⚠️ **Nepodudaranje veličine prozora kod modela koji nisu Claude.** Claude Code pretpostavlja kontekstni
-> prozor od 200K za svaki ID koji ne prepoznaje (ne može očitati stvarnu veličinu prozora iz
-> `/v1/models`). Za model s većim prozorom (npr. Kimi K2 s 256K) postavite
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na vrijednost manju od stvarne veličine prozora modela kako se
-> automatsko sažimanje ne bi prerano pokrenulo. Prethodno generirani profili to već
-> postavljaju zasebno za svaki model.
+Varijabla okruženja `EXPOSE_CC_DISCOVERY_ALIASES` prisilno uključuje globalnu
+razinu i ima prednost nad nadjačavanjem na nadzornoj ploči (zaslon Zastavice
+značajki tada prikazuje napomenu "aktivno putem varijable okruženja"). Prekidači
+po pružatelju i po modelu dalje to preciziraju — npr. globalno isključeno +
+pružatelj Kimi uključen izlaže samo Kimijeve modele.
+
+> ⚠️ **Nepodudarnost prozora na modelima koji nisu Claude.** Claude Code
+> pretpostavlja kontekstni prozor od 200K za svaki ID koji ne prepoznaje (ne može
+> pročitati stvarni prozor s `/v1/models`). Za model s većim prozorom (npr. Kimi
+> K2 s 256K) postavite `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na vrijednost ispod
+> stvarnog prozora modela kako se automatska kompaktacija ne bi pokrenula prerano.
+> Gore navedeni generirani profili to već rade za svaki model.
 
 ---
 

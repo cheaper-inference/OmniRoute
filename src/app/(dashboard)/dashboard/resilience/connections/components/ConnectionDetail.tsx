@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import type { ConnectionState } from "@/types/resilience";
 import { formatRemaining } from "@/shared/utils/formatRemaining";
 
@@ -10,6 +12,16 @@ interface ConnectionDetailProps {
   connection: ConnectionState | undefined; // undefined when connection deleted
   receivedAt: number; // client fetch receive time (immune to clock skew)
   onClose: () => void;
+}
+
+/** One label/value row of the detail panel. */
+function DetailRow({ label, children }: { label: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="flex flex-wrap gap-x-2 text-sm">
+      <dt className="text-text-muted">{label}:</dt>
+      <dd className="min-w-0 break-all text-text-main">{children}</dd>
+    </div>
+  );
 }
 
 /** "<ISO time> · <from> (<reason>)" for the breaker's last close, like lastErrorAt's ISO time. */
@@ -41,80 +53,84 @@ export default function ConnectionDetail({
   if (!connection) return null; // Guard: connection deleted while panel open
   const elapsedMs = tick * 1000;
   const adjustedCooldown = Math.max(0, connection.cooldownRemainingMs - elapsedMs);
+  const breakerVariant = (state: string) =>
+    state === "OPEN"
+      ? "error"
+      : state === "HALF_OPEN" || state === "DEGRADED"
+        ? "warning"
+        : "success";
   return (
-    <div style={{ padding: "16px", borderRadius: "8px", border: "1px solid var(--color-border)" }}>
-      <h2>{t("detail.title")}</h2>
-      <div>
-        {t("detail.provider")}: {connection.provider}
-      </div>
-      <div>
-        {t("detail.id")}: {connection.id}
-      </div>
-      <div>
-        {t("detail.authType")}: {connection.authType}
-      </div>
-      <div>
-        {t("detail.priority")}: {connection.priority}
-      </div>
-      <div>
-        {t("detail.isActive")}: {connection.isActive ? t("detail.yes") : t("detail.no")}
-      </div>
-      <div>
-        {t("detail.errorCode")}: {connection.errorCode ?? t("detail.never")}
-      </div>
-      <div>
-        {t("detail.lastErrorAt")}: {connection.lastErrorAt ?? t("detail.never")}
-      </div>
-      <hr />
-      <h3>{t("detail.cooldown")}</h3>
-      <div>
-        {t("detail.rateLimitedUntil")}: {connection.rateLimitedUntil ?? t("detail.never")}
-      </div>
-      <div>
-        {t("detail.backoffLevel")}: {connection.backoffLevel}
-      </div>
-      <div>
-        {t("detail.remaining")}:{" "}
-        {connection.isCoolingDown ? formatRemaining(adjustedCooldown) : t("detail.never")}
-      </div>
-      <hr />
-      <h3>{t("detail.breaker")}</h3>
+    <Card
+      title={t("detail.title")}
+      action={
+        <Button variant="outline" size="sm" icon="close" onClick={onClose}>
+          {t("detail.close")}
+        </Button>
+      }
+    >
+      <dl className="flex flex-col gap-1">
+        <DetailRow label={t("detail.provider")}>{connection.provider}</DetailRow>
+        <DetailRow label={t("detail.id")}>{connection.id}</DetailRow>
+        <DetailRow label={t("detail.authType")}>{connection.authType}</DetailRow>
+        <DetailRow label={t("detail.priority")}>{connection.priority}</DetailRow>
+        <DetailRow label={t("detail.isActive")}>
+          {connection.isActive ? t("detail.yes") : t("detail.no")}
+        </DetailRow>
+        <DetailRow label={t("detail.errorCode")}>
+          {connection.errorCode ?? t("detail.never")}
+        </DetailRow>
+        <DetailRow label={t("detail.lastErrorAt")}>
+          {connection.lastErrorAt ?? t("detail.never")}
+        </DetailRow>
+      </dl>
+
+      <h3 className="ci-heading mt-4 mb-2 border-t border-border pt-4 text-sm">
+        {t("detail.cooldown")}
+      </h3>
+      <dl className="flex flex-col gap-1">
+        <DetailRow label={t("detail.rateLimitedUntil")}>
+          {connection.rateLimitedUntil ?? t("detail.never")}
+        </DetailRow>
+        <DetailRow label={t("detail.backoffLevel")}>{connection.backoffLevel}</DetailRow>
+        <DetailRow label={t("detail.remaining")}>
+          {connection.isCoolingDown ? formatRemaining(adjustedCooldown) : t("detail.never")}
+        </DetailRow>
+      </dl>
+
+      <h3 className="ci-heading mt-4 mb-2 border-t border-border pt-4 text-sm">
+        {t("detail.breaker")}
+      </h3>
       {connection.breaker ? (
-        <div>
-          <Badge
-            variant={
-              connection.breaker.state === "OPEN"
-                ? "error"
-                : connection.breaker.state === "HALF_OPEN"
-                  ? "warning"
-                  : connection.breaker.state === "DEGRADED"
-                    ? "warning"
-                    : "success"
-            }
-            size="sm"
-          >
-            {connection.breaker.state}
-          </Badge>
+        <div className="flex flex-col gap-2">
           <div>
-            {t("detail.failureCount")}: {connection.breaker.failureCount}
+            <Badge variant={breakerVariant(connection.breaker.state)} size="sm">
+              {connection.breaker.state}
+            </Badge>
           </div>
-          <div>
-            {t("detail.retryAfterMs")}: {connection.breaker.retryAfterMs}
-          </div>
-          <div>
-            {t("detail.lastFailureKind")}: {connection.breaker.lastFailureKind ?? t("detail.never")}
-          </div>
-          <div>
-            {t("detail.lastClose")}: {formatLastClose(connection.breaker, t("detail.never"))}
-          </div>
+          <dl className="flex flex-col gap-1">
+            <DetailRow label={t("detail.failureCount")}>
+              {connection.breaker.failureCount}
+            </DetailRow>
+            <DetailRow label={t("detail.retryAfterMs")}>
+              {connection.breaker.retryAfterMs}
+            </DetailRow>
+            <DetailRow label={t("detail.lastFailureKind")}>
+              {connection.breaker.lastFailureKind ?? t("detail.never")}
+            </DetailRow>
+            <DetailRow label={t("detail.lastClose")}>
+              {formatLastClose(connection.breaker, t("detail.never"))}
+            </DetailRow>
+          </dl>
         </div>
       ) : (
-        <div>{t("detail.never")}</div>
+        <p className="text-sm text-text-muted">{t("detail.never")}</p>
       )}
-      <hr />
-      <h3>{t("detail.lockouts")}</h3>
+
+      <h3 className="ci-heading mt-4 mb-2 border-t border-border pt-4 text-sm">
+        {t("detail.lockouts")}
+      </h3>
       {connection.lockouts.length > 0 ? (
-        <ul>
+        <ul className="list-disc space-y-1 pl-5 text-sm">
           {connection.lockouts.map((l, i) => (
             <li key={i}>
               {l.model}: {l.reason} ({formatRemaining(Math.max(0, l.remainingMs - elapsedMs))})
@@ -122,11 +138,8 @@ export default function ConnectionDetail({
           ))}
         </ul>
       ) : (
-        <div>{t("detail.noLockouts")}</div>
+        <p className="text-sm text-text-muted">{t("detail.noLockouts")}</p>
       )}
-      <button type="button" onClick={onClose}>
-        {t("detail.close")}
-      </button>
-    </div>
+    </Card>
   );
 }

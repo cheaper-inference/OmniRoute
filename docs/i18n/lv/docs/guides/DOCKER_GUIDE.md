@@ -646,27 +646,29 @@ sudo systemctl enable --now omniroute-update.path
 Pakalpojums pirms attēla lejupielādes dzēš pieprasījumu, lai neveiksmīga izpilde neradītu ciklu. Ja
 `DOCKER_UPDATE_TRIGGER_FILE` nav iestatīts, informācijas panelī tiek saglabāta manuālo komandu darbplūsma.
 
-## Pieejamība: noklusējuma SQLite ir paredzēts vienai replikai
+## Pieejamība: noklusējuma SQLite ir viena kopija
 
-Standarta Docker/Kubernetes OmniRoute konfigurācija ir **viens Node process + viens SQLite rakstītājs**. Šajā topoloģijā augsta pieejamība **netiek atbalstīta**.
+Stock Docker / Kubernetes OmniRoute ir** viens mezgls process + viens SQLite rakstītājs** . Augsta pieejamība ir** nav atbalstīts** par šo topoloģiju.
 
-| Ierobežojums                                          | Sekas                                                                                                                                                                                                                                                                                                                                                                                              |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Viens rakstītājs                                      | **Nedarbiniet** vairākas replikas ar vienu un to pašu SQLite failu. Tas sabojā datubāzi.                                                                                                                                                                                                                                                                                                           |
-| Atkārtota izveide/restartēšana/HEALTHCHECK apturēšana | **Pilnīgs darbības pārtraukums**, kas skar notiekošos SSE savienojumus, informācijas paneļa sesijas un atmiņā glabāto stāvokli. Katrs pievienotais klients tiek atvienots. Jauni pieprasījumi laikā, kad nav neviena galapunkta, no reversā starpniekservera saņem **`502 Bad Gateway: Unknown error`**, nevis OmniRoute JSON — klienti to nevar atšķirt no pakalpojuma sniedzēja kļūmes (#11015). |
-| Tā pati notikumu cilpa kā `/healthz`                  | Noslogota kataloga vai saspiešanas cikla darbība var aizkavēt pārbaudes; īss taimauts tad restartē **vienīgo** repliku.                                                                                                                                                                                                                                                                            |
+| Ierobežojums                                      | Sekas                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Vientuļš rakstnieks                               | Dariet** nē** palaist vairākas kopijas pret vienu un to pašu SQLite failu. Tas sabojā DB.                                                                                                                                                                                                                                               |
+| Atkārtoti izveidot / restartēt / HEALTHCHECK kill | **Pilns pārtraukums** SSE lidojuma laikā, informācijas paneļa sesijām un atmiņas stāvokli. Katrs savienotais klients pazūd. Jauni pieprasījumi tukšā beigu punkta logā saņem apgriezto starpniekserveri**`502 Bad Gateway: Unknown error`** , nevis OmniRoute JSON — klienti to nevar atšķirt no pakalpojumu sniedzēja kļūmes (#11015). |
+| Tāda pati notikumu cilpa kā `/healthz`            | Aizņemts katalogs vai saspiešanas ķeksītis var aizkavēt zondes; īss taimauts, pēc tam restartējas** tikai** replika.                                                                                                                                                                                                                    |
 
-**Pārbaužu matrica** (skatiet arī [Kubernetes pārbaužu ieteikumus](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Zondes matrica** (skatiet arī [Kubernetes zondes ieteikumus](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Pārbaude              | Mērķis                                                                       | Neizmantojiet                                                         |
-| --------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Dzīvīgums             | TCP portā `PORT` (noklusējums `20128`) vai saudzīga HTTP pārbaude `/healthz` | `/api/monitoring/health`                                              |
-| Gatavība              | HTTP `GET /healthz`                                                          | Īsus taimautus, kas noslogotu notikumu cilpu uzskata par nedarbojošos |
-| Padziļināta/cilvēkiem | `/api/monitoring/health`                                                     | Automatizētu kubelet dzīvīguma pārbaudi                               |
+| Zonde           | Mērķis                                                           | Nelietot                                                       |
+| --------------- | ---------------------------------------------------------------- | -------------------------------------------------------------- |
+| Dzīvīgums       | TCP uz `PORT` (noklusējuma `20128`) vai mīkstais HTTP `/healthz` | `/api/monitoring/health`                                       |
+| Gatavība        | HTTP `GET /healthz`                                              | Īsi noildzes, kas uzskata, ka notikumu cikls aizņemts kā miris |
+| Dziļi / cilvēki | `/api/monitoring/health`                                         | Automatizēts kubelet dzīvīgums                                 |
 
-**Jaunināšana:** sagaidiet, ka katra sesija tiks pārtraukta. Ja iespējams, pakāpeniski atvienojiet klientus; ar noklusējuma SQLite nav pieejama nepārtraukta atjaunināšana. Compose `restart: unless-stopped` kopā ar Docker `HEALTHCHECK` aizstās arī vienīgo procesu, kad konteinera statuss būs Unhealthy — ar tikpat plašām sekām.
+**Jauninājumi:** sagaidiet, ka katra sesija samazināsies. Ja iespējams, iztukšojiet klientus; noklusējuma SQLite nav mainīga atjauninājuma. Rakstīšana `restart: unless-stopped` plus Docker `HEALTHCHECK` aizstās arī vienīgo procesu, ja konteiners ir neveselīgs — tāds pats sprādziena rādiuss.
 
-Kubernetes fragments **vienai replikai** (nepieciešama Recreate stratēģija; nepalieliniet `replicas`, ja tiek izmantots viens SQLite fails):
+Gatavi manifesti un Helm diagramma ir pieejami `deploy/kubernetes/` un `deploy/helm/omniroute/` — skatiet [Kubernetes izvietošanas rokasgrāmatu](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes fragments a** viena kopija** (Nepieciešama atkārtota izveide; nepalieliniet `replicas` pret vienu SQLite failu):
 
 ```yaml
 spec:
@@ -693,9 +695,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` aizture ļauj kube noņemt Service galapunktus pirms SIGTERM, lai **jauna** datplūsma vairs nenonāktu procesā, kas tiek apturēts. Aktīvie `/v1/responses` SSE savienojumi tiek pabeigti ne ilgāk kā `SHUTDOWN_TIMEOUT_MS` laikā (pēc noklusējuma 30 s), izmantojot smagsvara uzņemšanas nomas (#11015). Jauni pieprasījumi, kas tomēr sasniedz procesu, saņem `503` + `Retry-After: 5`. Recreate radītais periods bez galapunktiem, līdz aizstājējinstance ir gatava, joprojām izraisa pilnīgu pakalpojuma pārtraukumu — tā ir SQLite topoloģijas, nevis nepareizas zondes konfigurācijas sekas.
+`preStop` sleep ļauj kube nomest pakalpojuma galapunktus pirms SIGTERM so** jauns** satiksme pārstāj ietekmēt mirstošo procesu. Lidojuma laikā `/v1/responses` SSE tiek iztukšots līdz `SHUTDOWN_TIMEOUT_MS` (noklusējums 30 s), izmantojot smagsvara ieejas nomas līgumus (#11015). Jauni pieprasījumi, kas joprojām sasniedz procesu, saņem `503` + `Retry-After: 5`. Atkārtoti izveidot tukšā galapunkta atstarpi, līdz nomaiņa ir gatava, joprojām ir smags pārtraukums — tā ir SQLite topoloģija, nevis zondes nepareiza konfigurācija.
 
-Ārējs Postgres / vairāku rakstītāju HA **nav** dokumentēts standarta risinājums. Ja jums nepieciešams HA, izmantojiet vienu repliku vai topoloģiju, ko projekts ir pārbaudījis un atsevišķi dokumentējis. Darbs pie Postgres/MySQL ir aprakstīts [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Līdz tā izlaišanai vienīgais atbalstītais veids, kā palielināt **lielu** `/v1/responses` pieprasījumu apstrādes jaudu, ir N neatkarīgi procesi (nākamā sadaļa), nevis `replicas > 1` vienā sējumā.
+Ārējais Postgres / vairāku rakstītāju HA ir** nē** dokumentēts akciju ceļš. Ja jums ir nepieciešams HA, saglabājiet vienu kopiju vai palaidiet topoloģiju, ko projekts ir pārbaudījis un dokumentējis atsevišķi. Postgres/MySQL darbs atrodas [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Līdz brīdim, kad tas tiek piegādāts, vienīgais atbalstītais veids, kā pavairot** liels** `/v1/responses` jauda ir N neatkarīgi procesi (nākamā sadaļa), nevis `replicas > 1` vienā sējumā.
 
 ## Horizontālā mērogošana: N neatkarīgi procesi
 

@@ -4,6 +4,14 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof ResizeObserver;
+
 // The Cooldown Manager page: lists connections out of routing (healthy ones hidden by
 // default), clears one row through POST /api/resilience/cooldowns, and saves the cooldown
 // rules through PATCH /api/resilience.

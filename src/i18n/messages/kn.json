@@ -25,8 +25,10 @@
     "confirm": "ನಿಮಗೆ ಖಚಿತವೇ?",
     "refresh": "ರಿಫ್ರೆಶ್ ಮಾಡಿ",
     "close": "ಮುಚ್ಚಿ",
+    "dialogTitleFallback": "ಸಂವಾದ ಪೆಟ್ಟಿಗೆ",
     "previousPage": "ಹಿಂದಿನ ಪುಟ",
     "nextPage": "ಮುಂದಿನ ಪುಟ",
+    "pagination": "ಪುಟ ವಿನ್ಯಾಸ",
     "capsLockOn": "Caps Lock ಆನ್ ಆಗಿದೆ",
     "dismissNotification": "ಅಧಿಸೂಚನೆಯನ್ನು ವಜಾಗೊಳಿಸಿ",
     "toggleColumns": "ಕಾಲಮ್ಗಳನ್ನು ಟಾಗಲ್ ಮಾಡಿ",
@@ -182,6 +184,7 @@
     "combos": "ಸಂಯೋಜನೆಗಳು",
     "noModelsFound": "ಯಾವುದೇ ಮಾದರಿಗಳು ಕಂಡುಬಂದಿಲ್ಲ",
     "clear": "ತೆರವುಗೊಳಿಸಿ",
+    "clearFilters": "ಫಿಲ್ಟರ್ಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ",
     "done": "ಮುಗಿದಿದೆ",
     "selectAll": "ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ",
     "unselectAll": "ಎಲ್ಲದರ ಆಯ್ಕೆಯನ್ನು ರದ್ದುಮಾಡಿ",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {# ಬ್ಯಾಚ್ನಲ್ಲಿ ಬಳಸಲಾಗಿದೆ} other {# ಬ್ಯಾಚ್ಗಳಲ್ಲಿ ಬಳಸಲಾಗಿದೆ}}",
     "batchFilePreview": "ಮುನ್ನೋಟ",
     "batchFilePreviewTruncated": "ಮೊದಲ {shown} ಸಾಲುಗಳನ್ನು ತೋರಿಸುತ್ತಿದೆ ({total} ಒಟ್ಟು ಸಾಲುಗಳು)",
-    "batchFileDownloadFull": "ಸಂಪೂರ್ಣ ಫೈಲ್ ಡೌನ್ಲೋಡ್ ಮಾಡಿ"
+    "batchFileDownloadFull": "ಸಂಪೂರ್ಣ ಫೈಲ್ ಡೌನ್ಲೋಡ್ ಮಾಡಿ",
+    "tokensPageTitle": "ಟೋಕನ್ಗಳು",
+    "tokensPageDescription": "API ಕೀಗಳ ನಡುವೆ ಟೋಕನ್ಗಳನ್ನು ಕಳುಹಿಸಿ, ಆಹ್ವಾನ ಕೋಡ್ಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಿ ಮತ್ತು ಸಮುದಾಯ ಸರ್ವರ್ಗಳನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+    "tokensServerUrlLabel": "ಸರ್ವರ್ URL"
   },
   "disabled": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ಬಜೆಟ್ ಖಾಲಿಯಾದ ವಿನಂತಿಗಳನ್ನು ತುರ್ತು ಉಚಿತ ಫಾಲ್ಬ್ಯಾಕ್ ಪ್ರೊವೈಡರ್/ಮಾಡೆಲ್ಗೆ ರೂಟ್ ಮಾಡಿ.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "ಪ್ರಾಕ್ಸಿ ಸರ್ವರ್ ಅನ್ನು ನಿಲ್ಲಿಸಲಾಗಿದೆ ಅಥವಾ ಅದು ಮರುಪ್ರಾರಂಭಗೊಳ್ಳುತ್ತಿದೆ.",
     "expandSidebar": "ಸೈಡ್ಬಾರ್ ವಿಸ್ತರಿಸಿ",
     "collapseSidebar": "ಸೈಡ್ಬಾರ್ ಕುಗ್ಗಿಸಿ",
-    "themes": "ಥೀಮ್ಗಳು",
-    "presetColors": "ಜನಪ್ರಿಯ ಬಣ್ಣಗಳು",
     "createTheme": "ಥೀಮ್ ರಚಿಸಿ",
     "chooseColor": "ಒಂದು ಬಣ್ಣ ಆಯ್ಕೆಮಾಡಿ",
-    "themeCoral": "ಕೋರಲ್",
-    "themeBlue": "ನೀಲಿ",
-    "themeRed": "ಕೆಂಪು",
-    "themeGreen": "ಹಸಿರು",
-    "themeViolet": "ವಯಲೆಟ್",
-    "themeOrange": "ಕಿತ್ತಳೆ",
-    "themeCyan": "ಸಯಾನ್",
     "cliToolsShort": "ಉಪಕರಣಗಳು",
     "cache": "ಕ್ಯಾಶ್",
     "cacheShort": "ಕ್ಯಾಶ್",
@@ -1103,12 +1100,10 @@
     "themeSystem": "ಥೀಮ್ ಸಿಸ್ಟಮ್",
     "whitelabelingDesc": "ವೈಟ್ ಲೇಬಲಿಂಗ್ ವಿವರಣೆ",
     "switchThemes": "ಥೀಮ್ಗಳನ್ನು ಬದಲಾಯಿಸಿ",
-    "themeAccentDesc": "ಥೀಮ್ ಆಕ್ಸೆಂಟ್ ವಿವರಣೆ",
     "uploadFavicon": "ಫೇವಿಕಾನ್ ಅಪ್ಲೋಡ್ ಮಾಡಿ",
     "themeDark": "ಡಾರ್ಕ್ ಥೀಮ್",
     "customLogoDesc": "ಕಸ್ಟಮ್ ಲೋಗೋ ವಿವರಣೆ",
     "sidebarVisibilityToggle": "ಸೈಡ್ಬಾರ್ ಗೋಚರತೆ ಟಾಗಲ್",
-    "themeAccent": "ಥೀಮ್ ಆಕ್ಸೆಂಟ್",
     "resetFavicon": "ಫೇವಿಕಾನ್ ಮರುಹೊಂದಿಸಿ",
     "whitelabeling": "ವೈಟ್ ಲೇಬಲಿಂಗ್",
     "darkMode": "ಡಾರ್ಕ್ ಮೋಡ್",
@@ -1122,10 +1117,8 @@
     "customLogo": "ಕಸ್ಟಮ್ ಲೋಗೋ",
     "appearance": "ಗೋಚರತೆ",
     "themeSelectionAria": "ಥೀಮ್ ಆಯ್ಕೆಯ Aria",
-    "themeCreate": "ಥೀಮ್ ರಚಿಸಿ",
     "customFaviconDesc": "ಕಸ್ಟಮ್ ಫೇವಿಕಾನ್ನ ವಿವರಣೆ",
     "logoPreview": "ಲೋಗೋ ಮುನ್ನೋಟ",
-    "themeCustom": "ಕಸ್ಟಮ್ ಥೀಮ್",
     "hideHealthLogsDesc": "ಆರೋಗ್ಯ ಲಾಗ್ಗಳನ್ನು ಮರೆಮಾಡುವಿಕೆಯ ವಿವರಣೆ",
     "faviconPreview": "ಫೇವಿಕಾನ್ ಮುನ್ನೋಟ",
     "changelog": "ಚೇಂಜ್ಲಾಗ್",
@@ -1352,7 +1345,9 @@
       "open": "ತೆರೆಯಿರಿ",
       "close": "ಮುಚ್ಚಿರಿ"
     },
-    "noResults": "ಯಾವುದೇ ಫಲಿತಾಂಶಗಳಿಲ್ಲ"
+    "noResults": "ಯಾವುದೇ ಫಲಿತಾಂಶಗಳಿಲ್ಲ",
+    "costsTeams": "ತಂಡಗಳು",
+    "costsTeamsSubtitle": "ತಂಡದ ವೆಚ್ಚ ಕೇಂದ್ರಗಳು"
   },
   "webhooks": {
     "title": "ವೆಬ್ಹುಕ್ಗಳು",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 ಅಥವಾ @channelname",
       "chatIdHint": "ಚಾಟ್/ಚಾನಲ್ನ ಅನನ್ಯ ಸಂಖ್ಯಾತ್ಮಕ ಗುರುತು ಅಥವಾ ಸಾರ್ವಜನಿಕ ಬಳಕೆದಾರಹೆಸರು.",
       "tutorial": "Telegram ವೆಬ್ಹುಕ್ ಅನ್ನು ಹೇಗೆ ಕಾನ್ಫಿಗರ್ ಮಾಡುವುದು:"
-    }
+    },
+    "copy": "ನಕಲಿಸಿ",
+    "copied": "ನಕಲಿಸಲಾಗಿದೆ!",
+    "expandDetails": "ವಿವರಗಳನ್ನು ತೋರಿಸಿ",
+    "collapseDetails": "ವಿವರಗಳನ್ನು ಮರೆಮಾಡಿ"
   },
   "compliance": {
     "auditTitle": "ತಪಾಸಣೆ",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "ಕರೆಗಳು (24 ಗಂ.)",
     "mcpMetricSuccessRate": "ಯಶಸ್ಸಿನ ದರ",
     "mcpMetricAvgDuration": "ಸರಾಸರಿ ಅವಧಿ",
-    "mcpMetricTopTool": "ಅಗ್ರ ಸಾಧನ"
-  },
-  "themesPage": {
-    "title": "ಥೀಮ್ಗಳು",
-    "description": "ಪೂರ್ವನಿರ್ಧರಿತ ಥೀಮ್ ಆಯ್ಕೆಮಾಡಿ ಅಥವಾ ಒಂದೇ ಬಣ್ಣದಿಂದ ನಿಮ್ಮದೇ ಥೀಮ್ ರಚಿಸಿ",
-    "presetColors": "ಜನಪ್ರಿಯ ಬಣ್ಣಗಳು",
-    "customTheme": "ಕಸ್ಟಮ್ ಥೀಮ್",
-    "customThemeDesc": "‘ಥೀಮ್ ರಚಿಸಿ’ ಕ್ಲಿಕ್ ಮಾಡಿ ಮತ್ತು ಒಂದು ಬಣ್ಣವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
-    "createTheme": "ಥೀಮ್ ರಚಿಸಿ",
-    "activePreset": "ಸಕ್ರಿಯ ಥೀಮ್"
+    "mcpMetricTopTool": "ಅಗ್ರ ಸಾಧನ",
+    "dismissError": "ದೋಷವನ್ನು ವಜಾಗೊಳಿಸಿ"
   },
   "header": {
     "logout": "ಲಾಗ್ ಔಟ್ ಮಾಡಿ",
     "quickNavigation": "ತ್ವರಿತ ನ್ಯಾವಿಗೇಶನ್",
     "quickNavigationTitle": "ತ್ವರಿತ ನ್ಯಾವಿಗೇಶನ್ (⌘K / Ctrl+K)",
     "openQuickNavigation": "ತ್ವರಿತ ನ್ಯಾವಿಗೇಶನ್ ತೆರೆಯಿರಿ",
+    "openMenu": "ಮೆನು ತೆರೆಯಿರಿ",
+    "products": "Keak ಉತ್ಪನ್ನಗಳು",
     "switchToLightMode": "ಲೈಟ್ ಮೋಡ್ಗೆ ಬದಲಾಯಿಸಿ",
     "switchToDarkMode": "ಡಾರ್ಕ್ ಮೋಡ್ಗೆ ಬದಲಾಯಿಸಿ",
     "language": "ಭಾಷೆ",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Anthropic-ಗೆ ಹೊಂದಾಣಿಕೆಯಾಗಿರುವುದು",
     "media": "ಮಾಧ್ಯಮ",
     "mediaDescription": "ಚಿತ್ರಗಳು, ವೀಡಿಯೊಗಳು ಮತ್ತು ಸಂಗೀತವನ್ನು ರಚಿಸಿ",
-    "themes": "ಥೀಮ್ಗಳು",
-    "themesDescription": "ಇಡೀ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪ್ಯಾನೆಲ್ಗೆ ಬಣ್ಣದ ಥೀಮ್ ಆಯ್ಕೆಮಾಡಿ",
     "costsDescription": "ಖರ್ಚುಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ, ಪ್ರವೃತ್ತಿಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಿ ಮತ್ತು ಎಲ್ಲಾ ಪ್ರೊವೈಡರ್ಗಳಾದ್ಯಂತ ನಿಮ್ಮ AI ಬಜೆಟ್ ಅನ್ನು ನಿರ್ವಹಿಸಿ",
     "cacheDescription": "ಪ್ರೊವೈಡರ್ ಪ್ರಾಂಪ್ಟ್ ಕ್ಯಾಶ್ ದಕ್ಷತೆ ಮತ್ತು ಸ್ಥಳೀಯ ಅರ್ಥಸಂಬಂಧಿತ ಪ್ರತಿಕ್ರಿಯೆಗಳ ಮರುಬಳಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ.",
     "limitsDescription": "ಪ್ರತಿ API ಕೀ ಮತ್ತು ಪ್ರೊವೈಡರ್ಗೆ ರೇಟ್ ಲಿಮಿಟ್ಗಳು ಮತ್ತು ಕೋಟಾಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "ಸುಧಾರಿತ ಪೇಲೋಡ್ ನಿಯಮಗಳು, ವಿನಂತಿ ಮಿತಿಗಳು, ಮತ್ತು ಪ್ರಾಕ್ಸಿ API ಸೆಟ್ಟಿಂಗ್ಗಳು",
     "mitmProxyDescription": "ಟ್ರಾಫಿಕ್ ಪರಿಶೀಲನೆ ಮತ್ತು ಡೀಬಗ್ಗಿಂಗ್ಗಾಗಿ MITM ಪ್ರಾಕ್ಸಿ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
     "oneProxyDescription": "ಸುಧಾರಿತ ಪ್ರಾಕ್ಸಿ ಚೈನಿಂಗ್ಗಾಗಿ 1Proxy ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
-    "omniSkillsDescription": "ಸ್ವಯಂಚಾಲಿತ ಪ್ರಾಂಪ್ಟ್ ಮತ್ತು ಟೂಲ್ ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆಗಾಗಿ ಸ್ಯಾಂಡ್ಬಾಕ್ಸ್ ಕೌಶಲ್ಯಗಳನ್ನು ಸ್ಥಾಪಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"
+    "omniSkillsDescription": "ಸ್ವಯಂಚಾಲಿತ ಪ್ರಾಂಪ್ಟ್ ಮತ್ತು ಟೂಲ್ ಕಾರ್ಯಗತಗೊಳಿಸುವಿಕೆಗಾಗಿ ಸ್ಯಾಂಡ್ಬಾಕ್ಸ್ ಕೌಶಲ್ಯಗಳನ್ನು ಸ್ಥಾಪಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ",
+    "teamsDescription": "ತಂಡದ ವೆಚ್ಚ ಅಂದಾಜುಗಳು ಮತ್ತು ಹಂಚಿಕೆಯ ಸಾಫ್ಟ್ ಬಜೆಟ್‌ಗಳು"
   },
   "cloudSyncStatus": {
     "synced": "ಸಿಂಕ್ ಆಗಿದೆ",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "ನಿಮ್ಮ ಎಂಡ್ಪಾಯಿಂಟ್ ಅನ್ನು ನಕಲಿಸಿ",
     "readinessStep4": "ಪರೀಕ್ಷಾ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸಿ",
     "readinessContinue": "ಸೆಟಪ್ ಅನ್ನು ಮುಂದುವರಿಸಿ",
-    "readinessDismiss": "ಸದ್ಯಕ್ಕೆ ಮುಚ್ಚಿ"
+    "readinessDismiss": "ಸದ್ಯಕ್ಕೆ ಮುಚ್ಚಿ",
+    "unpricedUsageTitle": "{count, plural, one {# ಮಾದರಿ} other {# ಮಾದರಿಗಳು}} ಇತ್ತೀಚಿನ ಬಳಕೆ ಹೊಂದಿದ್ದು, ಬೆಲೆ ಸಂರಚನೆ ಇಲ್ಲ",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API ಕೀ ಬಳಕಾ ಮಿತಿ ಹೊಂದಿದೆ} other {# API ಕೀಗಳಿಗೆ ಬಳಕಾ ಮಿತಿ ಇದೆ}} ಕಳೆದ 8 ದಿನಗಳಲ್ಲಿ ಈ ಮಾದರಿಗಳನ್ನು ಬಳಸಲಾಗಿದೆ. ಆ ಬಳಕೆ ಆ ಕೀಗೆ ಸಂಬಂಧಿಸಿದ ದೈನಂದಿನ ಅಥವಾ ವಾರದ ಕಾಲಾವಧಿಯೊಳಗಿದ್ದಾಗ, ಆ ಕೀ ಅನ್ನು ಕೋಟಾ ಮೀರಿದಂತೆ ಪರಿಗಣಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಅದರ ವಿನಂತಿಗಳು ತಡೆಯಲಾಗುತ್ತವೆ (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "ಈ ಬಳಕೆ ಪ್ರತಿ ಕೀ ಬಳಕೆ ಮಿತಿಗಳ ಕಡೆಗೆ $0 ಎಂದು ಗಣನೆ ಮಾಡಲಾಗುತ್ತದೆ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# ವಿನಂತಿ} other {# ವಿನಂತಿಗಳು}}, {keys, plural, one {# ಮಿತಿ ಇರುವ API ಕೀ} other {# ಮಿತಿ ಇರುವ API ಕೀಗಳು}}",
+    "unpricedUsageMore": "…ಮತ್ತು {count} ಇನ್ನಷ್ಟು",
+    "unpricedUsageConfigure": "ಬೆಲೆ ಸಂರಚಿಸಿ",
+    "unpricedUsageDismiss": "ರದ್ದು ಮಾಡಿ"
   },
   "analytics": {
     "title": "ವಿಶ್ಲೇಷಣೆ",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "ಆಯ್ಕೆಮಾಡಿದ ಸಂಪರ್ಕಗಳು ಮಾತ್ರ",
     "selectAtLeastOneConnection": "ಕನಿಷ್ಠ ಒಂದು ಸಂಪರ್ಕವನ್ನು ಆಯ್ಕೆಮಾಡಿ ಅಥವಾ ಎಲ್ಲಾ ಸಂಪರ್ಕಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
     "allConnectionsDesc": "ಈ ಕೀ ಯಾವುದೇ ಸಕ್ರಿಯ ಸಂಪರ್ಕವನ್ನು ಬಳಸಬಹುದು.",
-    "restrictedToConnections": "{count, plural, one {# ಸಂಪರ್ಕಕ್ಕೆ} other {# ಸಂಪರ್ಕಗಳಿಗೆ}} ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."
+    "restrictedToConnections": "{count, plural, one {# ಸಂಪರ್ಕಕ್ಕೆ} other {# ಸಂಪರ್ಕಗಳಿಗೆ}} ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ.",
+    "preferredConnections": "ಆದ್ಯತೆಯ ಸಂಪರ್ಕಗಳು",
+    "preferredConnectionsDesc": "ಪ್ರತಿ ಕೀಗೆ ಆದ್ಯತೆಯ ಕ್ರಮ. ಆದ್ಯತೆಯ ಸಂಪರ್ಕ ಲಭ್ಯವಿಲ್ಲದಿದ್ದರೆ, ರೂಟಿಂಗ್ ಮುಂದಿನ ಅರ್ಹ ಸಂಪರ್ಕಕ್ಕೆ ಹೋಗುತ್ತದೆ.",
+    "preferredConnectionsNone": "ಯಾವುದೇ ಆದ್ಯತೆ ಹೊಂದಿಸಲಾಗಿಲ್ಲ — ಡೀಫಾಲ್ಟ್ ರೂಟಿಂಗ್ ತಂತ್ರವನ್ನು ಬಳಸಲಾಗುತ್ತದೆ.",
+    "preferredConnectionsClear": "ತೆರವುಗೊಳಿಸಿ",
+    "removeSelection": "{name} ಅನ್ನು ತೆಗೆದುಹಾಕಿ"
   },
   "auditLog": {
     "title": "ಆಡಿಟ್ ಲಾಗ್",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Modality Bridge ಸೆಟ್ಟಿಂಗ್ಗಳಲ್ಲಿ Image→Text ಬ್ರಿಡ್ಜ್ ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
     "sttBridgeCta": "Modality Bridge ಸೆಟ್ಟಿಂಗ್ಗಳಲ್ಲಿ Speech→Text ಬ್ರಿಡ್ಜ್ ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ",
     "existingConnection": "ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸಂಪರ್ಕ",
-    "openrouterSttDescription": "OpenRouter ಸ್ಪೀಚ್-ಟು-ಟೆಕ್ಸ್ಟ್ ಮಾದರಿಗಳು ನಿಮ್ಮ ಕಾನ್ಫಿಗರ್ ಮಾಡಿದ OpenRouter ಸಂಪರ್ಕವನ್ನು ಬಳಸುತ್ತವೆ. ಪ್ರತ್ಯೇಕ ರುಜುವಾತು ಅಗತ್ಯವಿಲ್ಲ."
+    "openrouterSttDescription": "OpenRouter ಸ್ಪೀಚ್-ಟು-ಟೆಕ್ಸ್ಟ್ ಮಾದರಿಗಳು ನಿಮ್ಮ ಕಾನ್ಫಿಗರ್ ಮಾಡಿದ OpenRouter ಸಂಪರ್ಕವನ್ನು ಬಳಸುತ್ತವೆ. ಪ್ರತ್ಯೇಕ ರುಜುವಾತು ಅಗತ್ಯವಿಲ್ಲ.",
+    "modalityTabsAria": "ಮಾಧ್ಯಮ ಪ್ರಕಾರ",
+    "serviceKindsAria": "ಸೇವೆಯ ಪ್ರಕಾರ"
   },
   "search": {
     "searchQuery": "ಹುಡುಕಾಟ ಪ್ರಶ್ನೆ",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - ಹಸ್ತಚಾಲಿತ ಸಂರಚನೆ",
     "clineManualConfiguration": "Cline ಹಸ್ತಚಾಲಿತ ಸಂರಚನೆ",
     "kiloManualConfiguration": "Kilo Code ಹಸ್ತಚಾಲಿತ ಸಂರಚನೆ",
+    "piManualConfiguration": "ಪೈ - ಹಸ್ತಚಾಲಿತ ಸಂರಚನೆ",
+    "piConfigInvalidTitle": "Pi models.json ಓದಲಾಗುವುದಿಲ್ಲ",
+    "piOmnirouteConfigured": "OmniRoute ಅನ್ನು ಪೈ ಕಸ್ಟಮ್ ಪೂರೈಕೆದಾರರಾಗಿ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ",
+    "piModelHelp": "ಕಸ್ಟಮ್ ಎಂಡ್ಪಾಯಿಂಟ್ಗಳಿಗಾಗಿ — ಮಾದರಿಗಳನ್ನು ಪೈ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಅನ್ವೇಷಿಸುವುದಿಲ್ಲ, ನೀವು ಆಯ್ಕೆಮಾಡಿದ ಮಾದರಿಯನ್ನು models.json ಗೆ ಸ್ಪಷ್ಟವಾಗಿ ಬರೆಯಲಾಗಿದೆ.",
+    "piManualConfigTitle": "ಅಥವಾ ~/.pi/agent/models.json ಹಸ್ತಚಾಲಿತವಾಗಿ ಸಂಪಾದಿಸಿ",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "ನಂತರ Pi ಅನ್ನು ಪ್ರಾರಂಭಿಸಿ ಮತ್ತು omniroute ಪೂರೈಕೆದಾರರನ್ನು ಆಯ್ಕೆಮಾಡಿ. ಸಂಪೂರ್ಣ ಏಜೆಂಟ್ ಡೈರೆಕ್ಟರಿಯನ್ನು ಸರಿಸಲು PI_CODING_AGENT_DIR ಹೊಂದಿಸಿ.",
+    "piUnownedNote": "ಈ ನಮೂದನ್ನು OmniRoute ಹೊರಗೆ ಸೇರಿಸಲಾಗಿದೆ (ಉದಾ pi-gui ನ ಕಸ್ಟಮ್ ಅಂತ್ಯಬಿಂದುಗಳು). ಅನ್ವಯಿಸುವುದರಿಂದ ಅದನ್ನು ಅಳವಡಿಸಿಕೊಳ್ಳುತ್ತದೆ; ಮರುಹೊಂದಿಸುವಿಕೆಯು OmniRoute ಬರೆದ ನಮೂದುಗಳನ್ನು ಮಾತ್ರ ತೆಗೆದುಹಾಕುತ್ತದೆ.",
     "whenToUseLabel": "ಯಾವಾಗ ಬಳಸಬೇಕು",
     "openToolDocs": "ಟೂಲ್ ಡಾಕ್ಸ್ ತೆರೆಯಿರಿ",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Amp ಶಾರ್ಟ್ಹ್ಯಾಂಡ್ ವರ್ಕ್ಫ್ಲೋಗಳನ್ನು ಬಯಸಿದಾಗ ಆದರೆ ಇನ್ನೂ OmniRoute ಅಲಿಯಾಸ್ ಮತ್ತು ರೂಟಿಂಗ್ ನಿಯಮಗಳ ಜಾರಿ ಅಗತ್ಯವಿದ್ದಾಗ ಬಳಸಿ.",
       "hermes": "ತ್ವರಿತ ಕಾರ್ಯಗಳಿಗಾಗಿ ಹಗುರವಾದ ಟರ್ಮಿನಲ್-ನೇಟಿವ್ AI ಸಹಾಯಕ ಅಗತ್ಯವಿದ್ದಾಗ ಬಳಸಿ.",
       "hermes-agent": "ಡೀಫಾಲ್ಟ್, ಡೆಲಿಗೇಶನ್, ವಿಷನ್ ಮತ್ತು ಸಹಾಯಕ ಮಾದರಿಗಳನ್ನು OmniRoute ಮೂಲಕ ರೂಟ್ ಮಾಡಲಾದ Hermes Agent (Nousresearch ನಿಂದ) ಅಗತ್ಯವಿದ್ದಾಗ ಬಳಸಿ.",
+      "whycodes": "WhyCodes ಅನ್ನು OmniRoute ಕಡೆಗೆ ನಿರ್ದೇಶಿಸಲಾದ ಬಹುಉದ್ದೇಶಿತ ಸ್ವಾಯತ್ತ CLI ಏಜೆಂಟ್ (TUI, ಹೆಸರಿಸಲಾದ ಏಜೆಂಟ್‌ಗಳು, ಮೆಮೊರಿ, swarm) ಆಗಿ ಬಯಸಿದಾಗ ಬಳಸಿ.",
       "custom": "ಕಸ್ಟಮ್ ಟೂಲ್ ಅನುಷ್ಠಾನಗಳಿಗೆ ಅಥವಾ ಸಾಮಾನ್ಯ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಸಂರಚನೆಗಳಿಗೆ ಬಳಸಿ."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "ಕಸ್ಟಮ್ ಪ್ರೊವೈಡರ್ ಬೆಂಬಲದೊಂದಿಗೆ xAI Grok Build TUI ಕೋಡಿಂಗ್ ಏಜೆಂಟ್",
       "droid": "Factory Droid AI ಸಹಾಯಕ",
       "openclaw": "Open Claw AI ಸಹಾಯಕ",
+      "openclaude": "OpenAI-ಹೊಂದಾಣಿಕೆಯ ಪೂರೈಕೆದಾರ ಬೆಂಬಲದೊಂದಿಗೆ OpenClaude ಕೋಡಿಂಗ್ ಏಜೆಂಟ್ CLI",
       "cline": "Cline AI ಕೋಡಿಂಗ್ ಸಹಾಯಕ CLI",
       "kilo": "Kilo Code AI ಸಹಾಯಕ CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "ಕಸ್ಟಮ್ ಪ್ರೊವೈಡರ್ ಬೆಂಬಲವನ್ನು ಹೊಂದಿರುವ Warp AI ಟರ್ಮಿನಲ್",
       "agent-deck": "Agent Deck ಮಲ್ಟಿ-ಏಜೆಂಟ್ ಆರ್ಕೆಸ್ಟ್ರೇಟರ್",
       "5dive": "5dive — ಸ್ವಯಂ-ಹೋಸ್ಟ್ ಮಾಡಲಾದ ಕೋಡಿಂಗ್ ಏಜೆಂಟ್ಗಳ ಫ್ಲೀಟ್; ಒಂದೇ ಆಥ್ ಪ್ರೊಫೈಲ್ ಅವೆಲ್ಲವನ್ನೂ OmniRoute ಕಡೆಗೆ ನಿರ್ದೇಶಿಸುತ್ತದೆ",
+      "whycodes": "OpenAI-ಹೊಂದಾಣಿಕೆಯ base URL ಹೊಂದಿರುವ WhyCodes ಸ್ವಾಯತ್ತ CLI ಏಜೆಂಟ್",
       "zed": "Zed ಕೋಡ್ ಎಡಿಟರ್ — OpenAI-ಹೊಂದಾಣಿಕೆಯ ಪೂರೈಕೆದಾರರ ಮೂಲಕ ಅಂತರ್ನಿರ್ಮಿತ ಏಜೆಂಟ್"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "ಅಜ್ಞಾತ",
     "cliproxyapiUpdate": "ನವೀಕರಿಸಿ",
     "cliproxyapiUpdateAvailable": "ನವೀಕರಣ ಲಭ್ಯವಿದೆ: v{current} → v{latest}",
-    "cliproxyapiVersion": "ಆವೃತ್ತಿ"
+    "cliproxyapiVersion": "ಆವೃತ್ತಿ",
+    "piInstallTitle": "ಪೈ ಕೋಡಿಂಗ್ ಏಜೆಂಟ್ ಅನ್ನು ಸ್ಥಾಪಿಸಿ",
+    "piInstallInstructions": "Pi CLI ಅನ್ನು ಸ್ಥಾಪಿಸಿ, ನಂತರ ಅದನ್ನು OmniRoute ಗೆ ಸಂಪರ್ಕಿಸಲು ಇಲ್ಲಿಗೆ ಹಿಂತಿರುಗಿ.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "ಪೈ ಚಾಲನೆಯಲ್ಲಿರುವ ಯಂತ್ರದಿಂದ ತಲುಪಬಹುದಾದ URL ಬಳಸಿ. OpenAI-ಹೊಂದಾಣಿಕೆಯ /v1 ಅಂತ್ಯಬಿಂದುವನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಸೇರಿಸಲಾಗುತ್ತದೆ.",
+    "piManualMergeHint": "ಪೂರ್ವವೀಕ್ಷಣೆ ಮಾತ್ರ. ಈ providers.omniroute ಪ್ರವೇಶವನ್ನು models.json ಗೆ ವಿಲೀನಗೊಳಿಸಿ ಇದರಿಂದ ನಿಮ್ಮ ಇತರ ಪೂರೈಕೆದಾರರು ಮತ್ತು ಸೆಟ್ಟಿಂಗ್ಗಳು ಹಾಗೇ ಇರುತ್ತವೆ.",
+    "removeMapping": "ಮ್ಯಾಪಿಂಗ್ ತೆಗೆದುಹಾಕಿ",
+    "customUrl": "ಕಸ್ಟಮ್ URL",
+    "customEndpointAria": "ಕಸ್ಟಮ್ ಎಂಡ್‌ಪಾಯಿಂಟ್",
+    "useDefaultKey": "OmniRoute ಅನ್ನು ಡಿಫಾಲ್ಟ್ ಕೀಯನ್ನು ಬಳಸಿ",
+    "mainModelAria": "ಪ್ರಧಾನ ಮಾಡೆಲ್",
+    "manualConfigTitle": "ಗ್ರೋಕ್ ಬಿಲ್ಡ್ ಮ್ಯಾನ್ಯುಯಲ್ ಕಾನ್ಫಿಗ್"
   },
   "modelCatalog": {
     "title": "ಮಾದರಿಗಳು ಮತ್ತು ಕಾಂಬೊಗಳು",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "ಉದಾ. 10",
     "testSelected": "ಆಯ್ಕೆಮಾಡಿದ್ದನ್ನು ಪರೀಕ್ಷಿಸಿ ({count})",
     "testAllFiltered": "ಫಿಲ್ಟರ್ ಮಾಡಿದ ಎಲ್ಲವನ್ನೂ ಪರೀಕ್ಷಿಸಿ ({count})",
+    "visibility": "ಗೋಚರತೆ",
+    "allVisibility": "ಗೋಚರ ಮತ್ತು ಮರೆಮಾಡಿದ",
+    "visibleOnly": "ಗೋಚರ",
+    "hiddenOnly": "ಮರೆಮಾಡಿದ",
+    "visibleColumn": "ಗೋಚರ",
+    "hideModel": "/v1/models ನಿಂದ {name} ಮರೆಮಾಡಿ",
+    "showModel": "/v1/models ನಲ್ಲಿ {name} ತೋರಿಸಿ",
+    "hiddenBadge": "ಮರೆಮಾಡಲಾಗಿದೆ",
+    "hideFiltered": "ಫಿಲ್ಟರ್ ಮಾಡಿದವನ್ನು ಮರೆಮಾಡಿ ({count})",
+    "showFiltered": "ಫಿಲ್ಟರ್ ಮಾಡಿದವನ್ನು ತೋರಿಸಿ ({count})",
+    "visibilityCounts": "{visible} ಗೋಚರ · {hidden} ಮರೆಮಾಡಿದ · ಒಟ್ಟು {total}",
+    "visibilityUpdateFailed": "ಮಾದರಿಯ ಗೋಚರತೆಯನ್ನು ನವೀಕರಿಸಲು ವಿಫಲವಾಗಿದೆ",
     "cancel": "ರದ್ದುಮಾಡಿ",
     "clearResults": "ಫಲಿತಾಂಶಗಳನ್ನು ತೆರವುಗೊಳಿಸಿ",
     "testing": "ಪರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ...",
@@ -3397,16 +3438,53 @@
     "httpError": "ವಿನಂತಿಯು HTTP {status} ನೊಂದಿಗೆ ವಿಫಲವಾಗಿದೆ",
     "testFailedNoDetail": "ಯಾವುದೇ ದೋಷ ಸಂದೇಶವಿಲ್ಲದೆ ಪರೀಕ್ಷೆ ವಿಫಲವಾಗಿದೆ",
     "additionalCapabilities": "ಹೆಚ್ಚುವರಿ ಸಾಮರ್ಥ್ಯಗಳು: {list}",
-    "comboRefMember": "ಕಾಂಬೊ → {name}"
+    "comboRefMember": "ಕಾಂಬೊ → {name}",
+    "keyAccessButton": "API ಕೀ ಪ್ರವೇಶ",
+    "allowedInKeys": "{count, plural, one {# ಕೀಯಲ್ಲಿ} other {# ಕೀಗಳಲ್ಲಿ}} ಅನುಮತಿಸಲಾಗಿದೆ",
+    "keysLoading": "API ಕೀಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "keysRetry": "ಕೀಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಮರುಪ್ರಯತ್ನಿಸಿ",
+    "accessViaPattern": "{pattern} ಮೂಲಕ",
+    "accessBlocked": "{pattern} ನಿಂದ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ",
+    "editKeyAccess": "ಕೀ ಪ್ರವೇಶವನ್ನು ಸಂಪಾದಿಸಿ",
+    "toggleKeyAccess": "{name} ನಲ್ಲಿ {item} ಅನ್ನು ಅನುಮತಿಸಿ",
+    "resultNetworkError": "ನಿಯೋಜನೆ ವಿಫಲವಾಗಿದೆ",
+    "resultWouldEmptyModels": "ಇದು ಈ ಕೀಯನ್ನು ಯಾವುದೇ ಅನುಮತಿಸಲಾದ ಮಾದರಿಗಳಿಲ್ಲದಂತೆ ಮಾಡುತ್ತದೆ — ಬದಲಿಗೆ ಕೀ ಪ್ರವೇಶವನ್ನು ಸಂಪಾದಿಸಿ",
+    "resultWouldEmptyCombos": "ಇದು ಈ ಕೀಯನ್ನು ಯಾವುದೇ ಅನುಮತಿಸಲಾದ ಕಾಂಬೋಗಳಿಲ್ಲದಂತೆ ಮಾಡುತ್ತದೆ — ಬದಲಿಗೆ ಕೀ ಪ್ರವೇಶವನ್ನು ಸಂಪಾದಿಸಿ",
+    "keyUpdatePending": "{name} ಅನ್ನು ಇನ್ನೂ ನವೀಕರಿಸಲಾಗುತ್ತಿದೆ. ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "assignToKeys": "API ಕೀಗಳಿಗೆ ನಿಯೋಜಿಸಿ…",
+    "assignApply": "ಬದಲಾವಣೆಗಳನ್ನು ಅನ್ವಯಿಸಿ",
+    "assignComplete": "API ಕೀ ಪ್ರವೇಶವನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ",
+    "assignFailed": "ಕೆಲವು API ಕೀ ಅಪ್‌ಡೇಟ್‌ಗಳು ವಿಫಲವಾಗಿವೆ",
+    "assignNoChanges": "ಯಾವುದೇ API ಕೀ ಪ್ರವೇಶವನ್ನು ಬದಲಾಯಿಸಲಾಗಿಲ್ಲ",
+    "selectedAccessItems": "ಆಯ್ಕೆಮಾಡಲಾದ ಐಟಂಗಳು: {count}",
+    "assignExcludedCombos": "{count, plural, one {ಆಯ್ಕೆಮಾಡಲಾದ # ಕಾಂಬೋ ಸಾಲು ಮಾದರಿಯಾಗಿಲ್ಲ ಮತ್ತು ಅದನ್ನು ಇಲ್ಲಿ ಬಿಟ್ಟುಬಿಡಲಾಗುತ್ತದೆ} other {ಆಯ್ಕೆಮಾಡಲಾದ # ಕಾಂಬೋ ಸಾಲುಗಳು ಮಾದರಿಗಳಾಗಿಲ್ಲ ಮತ್ತು ಅವುಗಳನ್ನು ಇಲ್ಲಿ ಬಿಟ್ಟುಬಿಡಲಾಗುತ್ತದೆ}}. Combos ಟ್ಯಾಬ್‌ನಿಂದ ಕಾಂಬೋಗಳನ್ನು ನಿಯೋಜಿಸಿ.",
+    "assignActionAdd": "ಸೇರಿಸಿ",
+    "assignActionRemove": "ತೆಗೆದುಹಾಕಿ",
+    "searchKeys": "API ಕೀಗಳನ್ನು ಹುಡುಕಿ",
+    "selectApiKey": "API ಕೀ {name} ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "allModelsAccess": "ಎಲ್ಲ ಮಾದರಿಗಳು",
+    "allCombosAccess": "ಎಲ್ಲ ಕಾಂಬೋಗಳು",
+    "modelAccessCount": "ಮಾದರಿಗಳು: {count}",
+    "comboAccessCount": "ಕಾಂಬೋಗಳು: {count}",
+    "keyInactive": "ನಿಷ್ಕ್ರಿಯ",
+    "keyBanned": "ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ",
+    "keyRevoked": "ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ",
+    "switchRestrictedConfirm": "ಈ ಕೀಯನ್ನು ನಿರ್ಬಂಧಿತ ಪ್ರವೇಶಕ್ಕೆ ಬದಲಾಯಿಸಿ: ಆಯ್ಕೆಮಾಡಿದ ಐಟಂಗಳಿಗೆ ಮಾತ್ರ ಅನುಮತಿಸಲಾಗುತ್ತದೆ",
+    "removeNoChangeHint": "ಈ ಕೀ ಎಲ್ಲವನ್ನೂ ಅನುಮತಿಸುತ್ತದೆ; ಆಯ್ಕೆಮಾಡಿದ ಐಟಂಗಳನ್ನು ತೆಗೆದುಹಾಕುವುದರಿಂದ ಯಾವುದೇ ಬದಲಾವಣೆಯಾಗುವುದಿಲ್ಲ",
+    "removeStaysAllowedHint": "{patterns} ಮೂಲಕ ಈ ಕೀಯಲ್ಲಿ ಇನ್ನೂ ಅನುಮತಿಸಲಾಗಿದೆ",
+    "resultChanged": "ಬದಲಾಯಿಸಲಾಗಿದೆ",
+    "resultUnchanged": "ಯಾವುದೇ ಬದಲಾವಣೆ ಇಲ್ಲ",
+    "resultSkipped": "ಬಿಟ್ಟುಬಿಡಲಾಗಿದೆ",
+    "resultNeedsSwitch": "ನಿರ್ಬಂಧಿತ ಸ್ಥಿತಿಗೆ ಬದಲಾಯಿಸುವ ಅಗತ್ಯವಿದೆ"
   },
   "combos": {
+    "title": "ಸಂಯೋಜನೆಗಳು",
+    "description": "ತೂಕಾಧಾರಿತ ರೌಟಿಂಗ್ ಮತ್ತು ಫಾಲ್ಬ್ಯಾಕ್ ಬೆಂಬಲದೊಂದಿಗೆ ಮಾದರಿ ಸಂಯೋಜನೆಗಳನ್ನು ರಚಿಸಿ",
+    "autoCatalogTitle": "ಸ್ವಯಂಚಾಲಿತ ರೌಟಿಂಗ್ ಕ್ಯಾಟಲಾಗ್",
     "autoTosLoadError": "ಸೇವಾ ನಿಯಮಗಳ ನೀತಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಬದಲಾಯಿಸುವ ಮೊದಲು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "autoTosSaveError": "ಸೇವಾ ನಿಯಮಗಳ ನೀತಿಯನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಹಿಂದಿನ ಸೆಟ್ಟಿಂಗ್ ಇನ್ನೂ ತೋರಿಸಲಾಗುತ್ತಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "autoTosIncludeLabel": "ToS: avoid ಎಂದು ಗುರುತಿಸಲಾದ ಪೂರೈಕೆದಾರರನ್ನು auto ದಲ್ಲಿ ಸೇರಿಸಿ",
     "autoTosDescription": "ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ. ಇದು ಒಂದು ಖಾತೆಗೆ ಮಾತ್ರವಲ್ಲ, ಎಲ್ಲಾ auto ಸಂಯೋಜನೆಗಳಿಗೂ ಅನ್ವಯಿಸುತ್ತದೆ. ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸುವುದರಿಂದ ಈ ಆಯ್ಕೆ ಆನ್ ಆಗುವುದಿಲ್ಲ.",
-    "title": "ಸಂಯೋಜನೆಗಳು",
-    "description": "ತೂಕಾಧಾರಿತ ರೌಟಿಂಗ್ ಮತ್ತು ಫಾಲ್ಬ್ಯಾಕ್ ಬೆಂಬಲದೊಂದಿಗೆ ಮಾದರಿ ಸಂಯೋಜನೆಗಳನ್ನು ರಚಿಸಿ",
-    "autoCatalogTitle": "ಸ್ವಯಂಚಾಲಿತ ರೌಟಿಂಗ್ ಕ್ಯಾಟಲಾಗ್",
     "autoCatalogTemplateCount": "{count} ಟೆಂಪ್ಲೇಟ್ಗಳು",
     "autoCatalogDescription": "ಸಂಪರ್ಕಿತ ಪ್ರೊವೈಡರ್ಗಳಿಂದ ಡೈನಾಮಿಕ್ ಆಗಿ ನಿರ್ಧರಿಸಲಾಗುವ ಬಿಲ್ಟ್-ಇನ್ auto/* ಸಂಯೋಜನೆಗಳು. ಈ IDs ಗಳಲ್ಲಿ ಯಾವುದನ್ನಾದರೂ ಮಾದರಿ ಕ್ಷೇತ್ರವಾಗಿ ಬಳಸಿ — ಸೆಟಪ್ ಅಗತ್ಯವಿಲ್ಲ.",
     "autoCatalogExpand": "ಸ್ವಯಂಚಾಲಿತ ರೌಟಿಂಗ್ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ವಿಸ್ತರಿಸಿ",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "ಸಂಯೋಜನೆಯನ್ನು ನವೀಕರಿಸುವಲ್ಲಿ ದೋಷ",
     "errorDeleting": "ಸಂಯೋಜನೆಯನ್ನು ಅಳಿಸುವಲ್ಲಿ ದೋಷ",
     "testFailed": "ಪರೀಕ್ಷಾ ವಿನಂತಿ ವಿಫಲವಾಗಿದೆ",
+    "removeErrorModels": "{count} ವಿಫಲ ಮಾದರಿಗಳನ್ನು ಅಳಿಸಿ",
+    "removingErrorModels": "ತೆಗೆದುಹಾಕಲಾಗುತ್ತಿದೆ…",
+    "errorModelsRemoved": "ಸಂಯೋಜನೆಯಿಂದ {count} ವಿಫಲ ಮಾದರಿಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ",
+    "noErrorModelsFound": "ಈ ಸಂಯೋಜನೆಯ ಸ್ವಂತ ಹಂತಗಳಲ್ಲಿ ಯಾವುದೇ ವಿಫಲ ಮಾದರಿ ಕಂಡುಬಂದಿಲ್ಲ",
+    "cannotRemoveAllModels": "ಸಂಯೋಜನೆಯಿಂದ ಎಲ್ಲಾ ಮಾದರಿಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಸಾಧ್ಯವಿಲ್ಲ",
+    "removeErrorModelsConfirm": "“{name}” ನಿಂದ {count} ವಿಫಲ ಮಾದರಿಗಳನ್ನು ತೆಗೆದುಹಾಕಬೇಕೇ? ಸಮಯ ಮೀರುವಿಕೆ ಮತ್ತು ದರ ಮಿತಿಗಳನ್ನು ಎಣಿಸಲಾಗುವುದಿಲ್ಲ.",
     "failedToggle": "ಸಂಯೋಜನೆಯ ಸ್ಥಿತಿಯನ್ನು ಬದಲಾಯಿಸಲು ವಿಫಲವಾಗಿದೆ",
     "testResults": "ಪರೀಕ್ಷಾ ಫಲಿತಾಂಶಗಳು — {name}",
     "resolvedBy": "ಪರಿಹರಿಸಿದ್ದು:",
@@ -3518,6 +3602,9 @@
     "moveUp": "ಮೇಲಕ್ಕೆ ಸರಿಸಿ",
     "moveDown": "ಕೆಳಕ್ಕೆ ಸರಿಸಿ",
     "removeModel": "ತೆಗೆದುಹಾಕಿ",
+    "testStep": "ಈ ಮಾದರಿಯನ್ನು ಪರೀಕ್ಷಿಸಿ",
+    "testStepRunning": "ಪರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ…",
+    "testStepNotTestable": "ಏಕ-ಮಾದರಿ ಹಂತಗಳನ್ನು ಮಾತ್ರ ಪರೀಕ್ಷಿಸಬಹುದು",
     "saving": "ಉಳಿಸಲಾಗುತ್ತಿದೆ...",
     "liveNoProviders": "ಇನ್ನೂ ಯಾವುದೇ ಪ್ರೊವೈಡರ್ಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
     "liveFleetDataHint": "ಫ್ಲೀಟ್ ಡೇಟಾ ಲೈವ್ ಕಾಂಬೋ ಈವೆಂಟ್ಗಳ ಮೂಲಕ ಬರುತ್ತದೆ.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "ಇನ್ನೂ ಯಾವುದೇ ಕಾಂಬೊಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿಲ್ಲ.",
     "playgroundCreateFirst": "ಮೊದಲು ಒಂದನ್ನು ರಚಿಸಿ",
     "weighted": "ತೂಕದ",
+    "weightPercent": "ತೂಕ (%)",
     "leastUsed": "ಕನಿಷ್ಠ-ಬಳಕೆಯ",
     "costOpt": "ವೆಚ್ಚ-ಆಪ್ಟಿಮೈಸ್ಡ್",
     "strategyGuideTitle": "ಈ ತಂತ್ರವನ್ನು ಹೇಗೆ ಬಳಸುವುದು",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# ಖಾತೆ} other {# ಖಾತೆಗಳು}}",
     "builderGlobalAdded": "ಸೇರಿಸಲಾಗಿದೆ",
     "builderGlobalAdd": "ಸೇರಿಸಿ",
+    "clearSearch": "ಹುಡುಕಾಟವನ್ನು ತೆರವುಗೊಳಿಸಿ",
     "manualModel": "ಹಸ್ತಚಾಲಿತ ಮಾದರಿ",
     "manualModelInvalid": "ಮಾದರಿಯನ್ನು provider/model ಸ್ವರೂಪದಲ್ಲಿ ನಮೂದಿಸಿ.",
     "manualModelUnknownProvider": "ಅಜ್ಞಾತ ಪೂರೈಕೆದಾರ ಪೂರ್ವಪ್ರತ್ಯಯ.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "ಕಾಂಬೊ ಉಲ್ಲೇಖವನ್ನು ಸೇರಿಸಿ",
     "builderPinnedAccount": "ಪಿನ್ ಮಾಡಿದ ಖಾತೆ",
     "builderLegacyEntry": "ಹಳೆಯ ನಮೂದು",
+    "builderStaleModel": "ಲೈವ್ ಕ್ಯಾಟಲಾಗ್‌ನಲ್ಲಿ ಇಲ್ಲ",
     "reviewName": "ಹೆಸರು",
     "reviewStrategy": "ಕಾರ್ಯತಂತ್ರ",
     "reviewSteps": "ಹಂತಗಳು",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "ಕನಿಷ್ಠ ವಿಷಯದ ಉದ್ದ (ಅಕ್ಷರಗಳು)",
     "responseValidationJsonPaths": "JSON-path ಪರಿಶೀಲನೆಗಳು",
     "responseValidationAddCheck": "+ ಪರಿಶೀಲನೆಯನ್ನು ಸೇರಿಸಿ",
+    "responseValidationRemoveCheck": "ಪರಿಶೀಲನೆಯನ್ನು ತೆಗೆದುಹಾಕಿ",
+    "responseValidationPath": "JSON ಪಥ",
+    "responseValidationCondition": "ಷರತ್ತು",
+    "responseValidationValue": "ನಿರೀಕ್ಷಿತ ಮೌಲ್ಯ",
     "agentFeaturesSystemMessageOverride": "ಸಿಸ್ಟಂ ಸಂದೇಶವನ್ನು ಅತಿಕ್ರಮಿಸಿ",
     "agentFeaturesSystemMessagePlaceholder": "ನೀವು ಪರಿಣತ ಸಹಾಯಕರಾಗಿದ್ದೀರಿ...",
     "agentFeaturesSystemMessageHint": "ಏಜೆಂಟ್ಗಳಿಗಾಗಿ ಸಿಸ್ಟಂ ಸಂದೇಶದ ಅತಿಕ್ರಮಣ",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "ಒಟ್ಟು ನಮೂದುಗಳು",
     "type": "ಪ್ರಕಾರ",
-    "memoryEnabled": "ಮೆಮೊರಿ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"
+    "memoryEnabled": "ಮೆಮೊರಿ ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
+    "qdrantTutorialTitle": "ತ್ವರಿತ ಟ್ಯುಟೋರಿಯಲ್: Qdrant ನೊಂದಿಗೆ ಸ್ಮರಣೆ",
+    "qdrantTutorialIntro": "Qdrant ಸ್ಮರಣೆಗಳ ವೆಕ್ಟರ್‌ಗಳು ಮತ್ತು ಮೆಟಾಡೇಟಾಗಳನ್ನು ಸಂಗ್ರಹಿಸುತ್ತದೆ, ಇದರಿಂದ ಸಂಬಂಧಿತ ಸಂದರ್ಭವನ್ನು ಪರಿಶೀಲಿಸಬಹುದು. ಇದು ಟೋಕನ್‌ಗಳನ್ನು ನೇರವಾಗಿ ಸಂಕೋಚಿಸುವುದಿಲ್ಲ; ಲಾಭವು ಅನೇಕಾನೇ, ಅರ್ಜಿಗೆ ಸಂಬಂಧಿಸದ ಸಂದರ್ಭವನ್ನು ತಪ್ಪಿಸುವ ಮೂಲಕ ಕಂಡುಬರುತ್ತದೆ.",
+    "qdrantTutorialStep1": "ಉತ್ಪಾದನಾ ಬಳಕೆಯ ಮೊದಲು HTTPS ಮತ್ತು API ಕೀಯಿಂದ ಸರ್ವರ್‌ವನ್ನು ಸುರಕ್ಷಿತಗೊಳಿಸಿ.",
+    "qdrantTutorialStep2": "ಹೋಸ್ಟ್, ಪೋರ್ಟ್, ಕಲೆಕ್ಷನ್, ಮತ್ತು provider/model ವಿನ್ಯಾಸದಲ್ಲಿ ಮಾದರಿಯನ್ನು ರೂಪಿಸಲಾದ ಸಿಕ್ಯುರೆಡ್ ಕ್ರೆಡೆನ್ಷಿಯಲ್‌ನೊಂದಿಗೆ ನಮೂದಿಸಿ.",
+    "qdrantTutorialStep3": "ಕಲೆಕ್ಷನ್ ಆಯಾಮ ಮಾದರಿಯಿಂದ ಉತ್ಪತ್ತಿಯಾಗುವ ಆಯಾಮಕ್ಕೆ ಸಾಮ್ಯವಾಗಿರಬೇಕು. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ 2048-ಆಯಾಮದ ಕಲೆಕ್ಷನ್ 1536-ಆಯಾಮದ ಎಂಬೆಡಿಂಗ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸುವುದಿಲ್ಲ.",
+    "qdrantTutorialStep4": "ಸಂರಕ್ಷಿಸಿ, ಸಂಪರ್ಕವನ್ನು ಪರೀಕ್ಷಿಸಿ ಮತ್ತು ಹುಡುಕಾಟ ಪರೀಕ್ಷೆಯನ್ನು ಚಲಾಯಿಸಿ. ಆಗದರೊಂದಿಗೆ ಮಾತ್ರ Qdrant ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "ಕ್ರೆಡಿಟ್ಸ್: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "ಕೌಶಲ್ಯಗಳು",
@@ -5288,7 +5390,8 @@
         "skipped": "ಈಗಾಗಲೇ ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ",
         "failed": "ವಿಫಲವಾಗಿದೆ"
       }
-    }
+    },
+    "stepProgress": "ಸೆಟಪ್ ಪ್ರಗತಿ"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ಈ ಪೂರೈಕೆದಾರರನ್ನು ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ auto ದಿಂದ ಹೊರಗಿಡಲಾಗಿದೆ",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "CSV ಟೆಂಪ್ಲೇಟ್ ಡೌನ್ಲೋಡ್ ಮಾಡಿ",
     "importFromFileMoreErrors": "+{count} ಇನ್ನಷ್ಟು",
     "importFromFileSchemaHint": "CSV ಕಾಲಮ್ಗಳ ಸ್ಥಾನಕ್ರಮ: provider, name, apiKey, baseUrl (ಐಚ್ಛಿಕ), priority (ಐಚ್ಛಿಕ). provider ಕಾಲಮ್ನಲ್ಲಿ ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ನಿರ್ವಹಿತ ಪೂರೈಕೆದಾರ id ಅಥವಾ ಈಗಾಗಲೇ ನೋಂದಾಯಿಸಲಾದ OpenAI/Anthropic-ಹೊಂದಾಣಿಕೆಯ ನೋಡ್ id ಇರಬೇಕು — ಈ ಆಮದು ಹೊಸ ಎಂಡ್ಪಾಯಿಂಟ್ ನೋಡ್ಗಳನ್ನು ರಚಿಸುವುದಿಲ್ಲ.",
+    "importOAuthExport": "OAuth ರಫ್ತು ಆಮದು ಮಾಡಿ",
+    "oauthExportTitle": "ಖಾತೆ-ವ್ಯವಸ್ಥಾಪಕ ರಫ್ತು ಆಮದು ಮಾಡಿ",
+    "oauthExportDescription": "ಖಾತೆ ವ್ಯವಸ್ಥಾಪಕದಿಂದ ಸರಳ ಪಠ್ಯ ರಫ್ತನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ (ಉದಾ. Antigravity Manager ನ cloud-accounts ರಫ್ತು). ಟೋಕನ್‌ಗಳನ್ನು ಸರ್ವರ್‌ನಲ್ಲಿ ರಿಫ್ರೆಶ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ಪ್ರತಿಯೊಂದು ಖಾತೆಯೂ OAuth ಸಂಪರ್ಕವಾಗುತ್ತದೆ — ನಕಲುಗಳು ಅದೇ ಸ್ಥಳದಲ್ಲಿ ರಿಫ್ರೆಶ್ ಆಗುತ್ತವೆ.",
+    "oauthExportProviderLabel": "ಪೂರೈಕೆದಾರ",
+    "oauthExportChoose": "ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ",
+    "oauthExportFileAria": "ಖಾತೆ ರಫ್ತಿನ JSON ಫೈಲ್",
+    "oauthExportSchemaHint": "ಸ್ವೀಕರಿಸಲಾಗುವುದು: \"accounts\" ಅರೇ ಹೊಂದಿರುವ ದಾಖಲೆ, ಸರಳ ಅರೇ ಅಥವಾ ಒಂದೇ ನಮೂದು. ಟೋಕನ್‌ಗಳು ನೆಸ್ಟೆಡ್ token ಆಬ್ಜೆಕ್ಟ್‌ನಲ್ಲಿ ಅಥವಾ ನೇರವಾಗಿ ನಮೂದಿನಲ್ಲಿ ಇರಬಹುದು.",
+    "oauthExportDetected": "{count} ಖಾತೆ(ಗಳು) ಪತ್ತೆಯಾಗಿವೆ",
+    "oauthExportSelectAll": "ಎಲ್ಲಾ ಖಾತೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+    "oauthExportSelectAccount": "ಖಾತೆ {index} ಆಯ್ಕೆಮಾಡಿ",
+    "oauthExportColEmail": "ಇಮೇಲ್",
+    "oauthExportColProvider": "ಪೂರೈಕೆದಾರ",
+    "oauthExportColRefresh": "ರಿಫ್ರೆಶ್ ಟೋಕನ್",
+    "oauthExportNoEmail": "(ಇಮೇಲ್ ಇಲ್ಲ)",
+    "oauthExportYes": "ಹೌದು",
+    "oauthExportNo": "ಇಲ್ಲ",
+    "oauthExportImporting": "ಆಮದು ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "oauthExportImport": "{count} ಖಾತೆ(ಗಳನ್ನು) ಆಮದು ಮಾಡಿ",
+    "oauthExportResult": "{imported}/{total} ಆಮದು ಆಗಿದೆ — {failed} ವಿಫಲ",
+    "oauthExportParseError": "ಈ ಫೈಲ್‌ನಿಂದ ಯಾವುದೇ ಖಾತೆಯನ್ನು ಓದಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
+    "oauthExportUnknownError": "ಅಜ್ಞಾತ ದೋಷ",
     "adaptaTutorial": {
       "title": "Adapta Web ಅನ್ನು ಸಂಪರ್ಕಿಸುವ ವಿಧಾನ",
       "introPrefix": "Adapta, Clerk ಮೂಲಕ ದೃಢೀಕರಣಗೊಳ್ಳುತ್ತದೆ. ಈ ಟೋಕನ್",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "ಎಲ್ಲಾ ಮಾದರಿಗಳನ್ನು ಈಗಾಗಲೇ ಆಮದು ಮಾಡಲಾಗಿದೆ",
     "noNewModelsToImport": "ಆಮದು ಮಾಡಲು ಯಾವುದೇ ಹೊಸ ಮಾದರಿಗಳಿಲ್ಲ — ಎಲ್ಲಾ ಮಾದರಿಗಳು ಈಗಾಗಲೇ ನೋಂದಾವಣೆಯಲ್ಲಿ ಅಥವಾ ಕಸ್ಟಮ್ ಮಾದರಿಗಳ ಪಟ್ಟಿಯಲ್ಲಿವೆ",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "ಮಾಡೆಲ್ ಡಿಸ್ಕವರಿ ವಿಫಲವಾಗಿದೆ {time}",
     "skippingExistingModels": "ಈಗಾಗಲೇ ಇರುವ {count} ಮಾದರಿಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಲಾಗುತ್ತಿದೆ",
     "autoSync": "ಸ್ವಯಂ-ಸಿಂಕ್",
     "autoSyncShort": "ಸಿಂಕ್",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "ಉದಾ. 131072",
     "contextWindowOverrideHint": "ಪೂರೈಕೆದಾರರು ಈ ಮಾದರಿಯ ನೈಜ ಕಾಂಟೆಕ್ಸ್ಟ್ ವಿಂಡೋವನ್ನು ತಪ್ಪಾಗಿ ವರದಿ ಮಾಡಿದಾಗ, ಅದನ್ನು (ಟೋಕನ್ಗಳಲ್ಲಿ) ಹಸ್ತಚಾಲಿತವಾಗಿ ಹೊಂದಿಸಿ. ಇದು ಸ್ವಯಂ-ಪತ್ತೆಮಾಡಿದ/ಕ್ಯಾಟಲಾಗ್ ಮೌಲ್ಯಗಳಿಗಿಂತ ಆದ್ಯತೆ ಪಡೆಯುತ್ತದೆ ಮತ್ತು ಕಾಂಬೊ ರೂಟಿಂಗ್ನಿಂದ ಮಾದರಿಯನ್ನು ಕೈಬಿಡುವುದನ್ನು ತಡೆಯುತ್ತದೆ.",
     "contextWindowOverrideInvalid": "ಕಾಂಟೆಕ್ಸ್ಟ್ ವಿಂಡೋ ಅತಿಕ್ರಮಣವು ಟೋಕನ್ಗಳ ಧನಾತ್ಮಕ ಪೂರ್ಣ ಸಂಖ್ಯೆಯಾಗಿರಬೇಕು",
+    "maxOutputTokenOverrideInvalid": "ಗರಿಷ್ಠ ಔಟ್ಪುಟ್ ಟೋಕನ್ ಅತಿಕ್ರಮಣವು ಟೋಕನ್ಗಳ ಧನಾತ್ಮಕ ಪೂರ್ಣ ಸಂಖ್ಯೆಯಾಗಿರಬೇಕು",
     "visionCapableLabel": "ದೃಶ್ಯ ಸಾಮರ್ಥ್ಯವುಳ್ಳದು",
     "visionCapableHint": "ಪೂರೈಕೆದಾರರ ಡಿಸ್ಕವರಿ ಮೆಟಾಡೇಟಾ ಚಿತ್ರ ಇನ್ಪುಟ್ ವಿಧಾನವನ್ನು ವರದಿ ಮಾಡದಿದ್ದಾಗ, ಈ ಮಾದರಿಯನ್ನು ದೃಶ್ಯ ಸಾಮರ್ಥ್ಯವುಳ್ಳದ್ದೆಂದು ಹಸ್ತಚಾಲಿತವಾಗಿ ಗುರುತಿಸಿ (ಸ್ವಯಂ-ಹೋಸ್ಟ್ ಮಾಡಿದ/ಸ್ಥಳೀಯ ಬ್ಯಾಕೆಂಡ್ಗಳಲ್ಲಿ ಇದು ಸಾಮಾನ್ಯ).",
     "compatParamFiltersLabel": "ಪ್ಯಾರಾಮೀಟರ್ ಫಿಲ್ಟರ್ಗಳು",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "ಓವರ್ರೈಡ್ ಸೇರಿಸಿ",
     "ccAliasLoadError": "ಡಿಸ್ಕವರಿ-ಅಲಿಯಾಸ್ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ: {error}",
     "ccAliasSaveError": "ಡಿಸ್ಕವರಿ-ಅಲಿಯಾಸ್ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ: {error}",
+    "cliVersionSectionTitle": "ಜಾಹೀರಾತು CLI ಕ್ಲೈಂಟ್ ಆವೃತ್ತಿ",
+    "cliVersionEffectiveLabel": "ಪ್ರಸ್ತುತ ಪ್ರಚಾರ ಮಾಡಲಾಗಿದೆ",
+    "cliVersionSourceLabel": "ಇದರಿಂದ ಪರಿಹರಿಸಲಾಗಿದೆ: {source}",
+    "cliVersionPinnedLabel": "ಡೀಫಾಲ್ಟ್ ಅನ್ನು ಸೆರೆಹಿಡಿಯಲಾಗಿದೆ: {pinned}",
+    "cliVersionSourceSettings": "ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಅತಿಕ್ರಮಣ",
+    "cliVersionSourceEnv": "ಪರಿಸರ ವೇರಿಯಬಲ್",
+    "cliVersionSourceDiscovered": "ಸ್ವಯಂ-ಶೋಧಿಸಿದ ಇತ್ತೀಚಿನ ಬಿಡುಗಡೆ",
+    "cliVersionSourceDefault": "ಡೀಫಾಲ್ಟ್ ಅನ್ನು ಸೆರೆಹಿಡಿಯಲಾಗಿದೆ",
+    "cliVersionInputLabel": "ಆವೃತ್ತಿಯನ್ನು ಅತಿಕ್ರಮಿಸಿ",
+    "cliVersionInputPlaceholder": "ಆವೃತ್ತಿಯನ್ನು ಅತಿಕ್ರಮಿಸಿ; ಖಾಲಿ ತೆರವುಗೊಳಿಸುತ್ತದೆ",
+    "cliVersionSaveButton": "ಉಳಿಸಿ",
+    "cliVersionResetButton": "ಡೀಫಾಲ್ಟ್ಗೆ ಮರುಹೊಂದಿಸಿ",
+    "cliVersionLoadError": "CLI ಆವೃತ್ತಿ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ವಿಫಲವಾಗಿದೆ: {error}",
+    "cliVersionSaveError": "CLI ಆವೃತ್ತಿಯನ್ನು ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ: {error}",
+    "cliVersionLoadFailed": "ಪ್ರಸ್ತುತ CLI ಆವೃತ್ತಿಯ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
+    "cliVersionHintClaude": "ಅದು ನೋಡುವ ಕ್ಲೌಡ್ ಕೋಡ್ ಕ್ಲೈಂಟ್ ಆವೃತ್ತಿಯಲ್ಲಿ ಆಂಥ್ರೊಪಿಕ್ ಗೇಟ್ಗಳು ಹೊಸ ಕ್ಲೌಡ್ ಮಾದರಿಗಳು. ಇದು OmniRoute ಪ್ರತಿ ಆಂಥ್ರೊಪಿಕ್-ಬೌಂಡ್ ವಿನಂತಿಯ ಮೇಲೆ ಜಾಹೀರಾತು ಮಾಡುವ ಆವೃತ್ತಿಯಾಗಿದೆ.",
+    "cliVersionCaveatClaude": "ಬಿಲ್ಲಿಂಗ್ ಎಚ್ಚರಿಕೆ: ಬಿಲ್ಲಿಂಗ್ ಆವೃತ್ತಿಯು '<version>' ಆಗಿದೆ.'<build-revision>', ಮತ್ತು ನಿರ್ಮಾಣ ಪರಿಷ್ಕರಣೆಯು ಪ್ರತ್ಯೇಕ ಸೆರೆಹಿಡಿಯಲಾದ ಸ್ಥಿರವಾಗಿರುತ್ತದೆ. ಜಾಹೀರಾತು 2.1.260 2.1.260.1e2 ಅನ್ನು ವರದಿ ಮಾಡುತ್ತದೆ, ಇದು ನಿಜವಾದ 2.1.260 ಬೈನರಿ ಕಳುಹಿಸುವುದಿಲ್ಲ.",
+    "cliVersionHintCodex": "OpenAI ತಾನು ನೋಡುವ Codex ಕ್ಲೈಂಟ್ ಆವೃತ್ತಿಯಲ್ಲಿ ಹೊಸ ಮಾದರಿಗಳನ್ನು ಗೇಟ್ ಮಾಡುತ್ತದೆ, ಉದಾಹರಣೆಗೆ ದೋಷ: 'gpt-6-astra' ಮಾದರಿಗೆ Codex ನ ಹೊಸ ಆವೃತ್ತಿಯ ಅಗತ್ಯವಿದೆ.",
+    "cliVersionCaveatCodex": "ಅನುಮಾನದ ಎಚ್ಚರಿಕೆ: ನಿಮ್ಮ ಸ್ವಂತ ಕಾಲರ್ ವರದಿ ಮಾಡುವ ಆವೃತ್ತಿಯು ಇನ್ನೂ CODEX_CLIENT_VERSION env var ಅನ್ನು ಸೋಲಿಸುತ್ತದೆ, ಆದರೆ ಈ ಅತಿಕ್ರಮಣವು ಎರಡನ್ನೂ ಮೀರಿಸುತ್ತದೆ, ಏಕೆಂದರೆ ಇದು ಸ್ಪಷ್ಟ ಆಪರೇಟರ್ ಉದ್ದೇಶವಾಗಿದೆ.",
     "compatUpstreamHeadersLabel": "ಹೆಚ್ಚುವರಿ ಅಪ್ಸ್ಟ್ರೀಮ್ ಹೆಡರ್ಗಳು",
     "compatUpstreamHeadersHint": "ಹೆಚ್ಚಿನ ಸವಲತ್ತು ಹೊಂದಿರುವ ಸೆಟ್ಟಿಂಗ್ — ಇದು ಪೂರೈಕೆದಾರರ API ರುಜುವಾತುಗಳನ್ನು ಸಂಪಾದಿಸುವಷ್ಟೇ ವಿಶ್ವಾಸದ ಮಟ್ಟವನ್ನು ಹೊಂದಿದೆ; ವಿಶ್ವಾಸಾರ್ಹ ನಿರ್ವಾಹಕರು ಮಾತ್ರ ಇದನ್ನು ಬಳಸಬೇಕು. ಪೂರೈಕೆದಾರರ API ಕೀಯಿಂದ OmniRoute ದೃಢೀಕರಣವನ್ನು ಸೇರಿಸಿದ ನಂತರ ಇದನ್ನು ವಿಲೀನಗೊಳಿಸಲಾಗುತ್ತದೆ. ಕಸ್ಟಮ್ ಹೆಡರ್ ಈಗಾಗಲೇ ಇರುವ ಹೆಡರ್ನ ಹೆಸರನ್ನೇ ಬಳಸಿದರೆ (ಉದಾ. Authorization), ನಿಮ್ಮ ಮೌಲ್ಯವು ಸ್ವಯಂ-ರಚಿಸಲಾದ ಹೆಡರ್ ಅನ್ನು (Bearer token ಸೇರಿದಂತೆ) ಸಂಪೂರ್ಣವಾಗಿ ಬದಲಿಸುತ್ತದೆ — ಅಪ್ಸ್ಟ್ರೀಮ್ಗೆ ನೀವು ಟೈಪ್ ಮಾಡಿದ್ದಷ್ಟೇ ಕಾಣಿಸುತ್ತದೆ, ಸೆಟ್ಟಿಂಗ್ಗಳಲ್ಲಿರುವ ಕೀ ಕಾಣಿಸುವುದಿಲ್ಲ. ತಪ್ಪಾದ ಸಂರಚನೆಯು 401 ದೋಷಕ್ಕೆ ಅಥವಾ ಅಪ್ಸ್ಟ್ರೀಮ್ ದೃಢೀಕರಣ ವಿಫಲವಾಗಲು ಕಾರಣವಾಗಬಹುದು. ಪ್ರತಿ ಹೆಡರ್ಗೆ ಒಂದು ಸಾಲು (ಉದಾ. ಕೆಲವು ಗೇಟ್ವೇಗಳಿಗಾಗಿ ಹೆಚ್ಚುವರಿ Authentication). ಮುನ್ನೋಟ ನೋಡಲು ಮೌಲ್ಯದ ಮೇಲೆ ಮೌಸ್ ಇರಿಸಿ ಅಥವಾ ಅದಕ್ಕೆ ಫೋಕಸ್ ನೀಡಿ. ಫೋಕಸ್ ತೆಗೆದಾಗ, ಹೊರಗೆ ಕ್ಲಿಕ್ ಮಾಡಿದಾಗ ಅಥವಾ ಈ ಫಲಕವನ್ನು ಮುಚ್ಚಿದಾಗ ಉಳಿಸಲಾಗುತ್ತದೆ.",
     "compatUpstreamHeaderName": "ಹೆಡರ್ ಹೆಸರು",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "API ಸ್ವರೂಪದ ಲೇಬಲ್",
     "apiKeyOptionalHint": "ನಿಮ್ಮ ಸ್ಥಳೀಯ ಸೆಟಪ್ ಅಥವಾ ಪೂರೈಕೆದಾರರಿಗೆ ದೃಢೀಕರಣದ ಅಗತ್ಯವಿಲ್ಲದಿದ್ದರೆ ಖಾಲಿ ಬಿಡಿ.",
     "apiKeyOptionalLabel": "API ಕೀ (ಐಚ್ಛಿಕ)",
-    "apiRegionChina": "API ಪ್ರದೇಶ: ಚೀನಾ",
-    "apiRegionHint": "API ಪ್ರದೇಶದ ಸುಳಿವು",
-    "apiRegionInternational": "API ಪ್ರದೇಶ: ಅಂತಾರಾಷ್ಟ್ರೀಯ",
-    "apiRegionLabel": "API ಪ್ರದೇಶದ ಲೇಬಲ್",
+    "apiRegionChina": "ಚೀನಾದ ಮುಖ್ಯ ಭೂಭಾಗ",
+    "apiRegionHint": "API ಪ್ರವೇಶ ಮತ್ತು ಕೋಟಾ ಟ್ರ್ಯಾಕಿಂಗ್ಗಾಗಿ ಬಳಸಲಾಗುವ ಎಂಡ್ಪಾಯಿಂಟ್ ಪ್ರದೇಶವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+    "apiRegionInternational": "ಅಂತರರಾಷ್ಟ್ರೀಯ",
+    "apiRegionLabel": "API ಪ್ರದೇಶ",
     "apikey": "API ಕೀ",
     "audio": "ಆಡಿಯೊ",
     "audioProvidersHeading": "ಆಡಿಯೊ ಪೂರೈಕೆದಾರರ ಶೀರ್ಷಿಕೆ",
@@ -6539,6 +6684,7 @@
       "monsterapi": "monsterapi.ai ನಲ್ಲಿ API ಕೀ ಪಡೆಯಿರಿ.",
       "moonshot": "API ಕೀ ಬಳಸಿ Kimi ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
       "morph": "ಉಚಿತ ಹಂತ: ತಿಂಗಳಿಗೆ 250K ಕ್ರೆಡಿಟ್ಗಳು, $0",
+      "apmix": "apmix.ai/dashboard ನಿಂದ API ಕೀ ಮೂಲಕ Apmix ಅನ್ನು ಸಂಪರ್ಕಿಸಿ — ಒಂದು ಚಂದಾದಾರಿಕೆ, ಹಲವು ಮಾದರಿಗಳು.",
       "nanogpt": "API ಕೀ ಬಳಸಿ NanoGPT ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
       "nebius": "API ಪರೀಕ್ಷೆಗಾಗಿ ಸೈನ್ ಅಪ್ ಮಾಡಿದಾಗ ಸುಮಾರು $1 ಮೌಲ್ಯದ ಪ್ರಾಯೋಗಿಕ ಕ್ರೆಡಿಟ್ಗಳು",
       "nlpcloud": "NLP Cloud, OpenAI chat/completions ಬದಲಿಗೆ ಸ್ವಾಮ್ಯದ ಚಾಟ್ಬಾಟ್ API ಅನ್ನು ಬಳಸುತ್ತದೆ. OmniRoute, OpenAI ಸಂದೇಶಗಳನ್ನು ಇನ್ಪುಟ್/ಸಂದರ್ಭ/ಇತಿಹಾಸಕ್ಕೆ ಹೊಂದಿಸುತ್ತದೆ ಮತ್ತು ಬೆಂಬಲಿತ ಚಾಟ್ಬಾಟ್ ಮಾದರಿಗಳ ಸ್ಥಳೀಯ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಒದಗಿಸುತ್ತದೆ.",
@@ -6635,8 +6781,7 @@
       "kiro": "ಉಚಿತ ಹಂತ: ತಿಂಗಳಿಗೆ 50 ಕ್ರೆಡಿಟ್ಗಳು (~25K–100K ಟೋಕನ್ಗಳು). ⚠️ Kiro ToS ಮೂರನೇ-ಪಕ್ಷದ proxy/harness ಬಳಕೆಯನ್ನು ನಿಷೇಧಿಸುತ್ತದೆ.",
       "codex": "ಈಗಿರುವ OAuth ಹರಿವಿನ ಮೂಲಕ OpenAI Codex ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
       "qwen": "ಈಗಿರುವ OAuth ಹರಿವಿನ ಮೂಲಕ Qwen Code ಅನ್ನು ಸಂಪರ್ಕಿಸಿ.",
-      "github-models": "github.com/settings/tokens ನಲ್ಲಿ 'models: read' ಸ್ಕೋಪ್ನೊಂದಿಗೆ GitHub PAT ರಚಿಸಿ",
-      "apmix": "apmix.ai/dashboard ನಿಂದ API ಕೀ ಮೂಲಕ Apmix ಅನ್ನು ಸಂಪರ್ಕಿಸಿ — ಒಂದು ಚಂದಾದಾರಿಕೆ, ಹಲವು ಮಾದರಿಗಳು."
+      "github-models": "github.com/settings/tokens ನಲ್ಲಿ 'models: read' ಸ್ಕೋಪ್ನೊಂದಿಗೆ GitHub PAT ರಚಿಸಿ"
     },
     "passthroughModelsDescription": "{provider} ಪೂರೈಕೆದಾರ-ಸ್ಥಳೀಯ ಮಾಡೆಲ್ IDಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. /models ನಿಂದ ಆಮದು ಮಾಡಿ ಅಥವಾ ರೂಟಿಂಗ್ಗಾಗಿ ಕಸ್ಟಮ್ IDಗಳನ್ನು ಸೇರಿಸಿ.",
     "bedrockModelsDescription": "Amazon Bedrock ಮಾಡೆಲ್ಗಳು AWS ಪ್ರದೇಶದ ವ್ಯಾಪ್ತಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತವೆ. /models ನಿಂದ ಆಮದು ಮಾಡಿ ಅಥವಾ ಆಯ್ಕೆಮಾಡಿದ ಪ್ರದೇಶದಲ್ಲಿ ಸಕ್ರಿಯಗೊಳಿಸಲಾದ Bedrock ಮಾಡೆಲ್ IDಗಳನ್ನು ಸೇರಿಸಿ.",
@@ -6808,7 +6953,27 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} ಕಾಂಬೋಗಳಲ್ಲಿ ಬಳಸಲಾಗಿದೆ: {combos}",
+    "openComboTooltip": "ಕಾಂಬೋಗಳನ್ನು ತೆರೆಯಿರಿ — {combo} ಬಳಸುತ್ತಿದೆ",
+    "claudeCodeRoutingTitle": "Claude Code ದಾಟಿಗೆ ಅಪಸ್ಟ್ರೀಮ್ ಪ್ರಾಕ್ಸಿ ರೌಟಿಂಗ್",
+    "routingNative": "ನೈಜ",
+    "routingFallback": "ಫಾಲ್‌ಬ್ಯಾಕ್",
+    "rerank": "ಮರುನಿಯೋಜನೆ",
+    "video": "ವೀಡಿಯೊ",
+    "markFreeTierTitle": "ಉಚಿತ ತರಗತಿಯಾಗಿ ಗುರುತಿಸಿ (ಪಾವತಿ ಮಾಡಿದ ಮಾದರಿಗಳನ್ನು ಮರೆಮಾಡುವುದು ಪ್ರತ್ಯಾಮ್ಲವಾಗಿದ್ದರೂ ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತದೆ)",
+    "codexTunnelTitle": "Codex ಟೂಲ್ ಸಂಪರ್ಕ",
+    "codexTunnelDescription": "ಟನಲ್ ಕಟ್ಟುನಿಟ್ಟಾಗಿ ಒಬ್ಫ್ಫೈಂಡ್‌ಯೂಟ್‌ನಲ್ಲೇ ಇರುತ್ತದೆ. ಸ್ಥಳೀಯ ಟೂಲ್‌ಗಳು ಒಂದು ವೇಳೆ ಕೋಡೆಕ್ಸ್‌ನ ಸ್ಯಾಂಡ್‌ಬಾಕ್ಸ್ ಮತ್ತು ಅನುಮೋದನಾ ನೀತಿ ಅಡಿಯಲ್ಲಿ ಮಾತ್ರ ನಿರ್ವಹಿಸಲ್ಪಡುತ್ತವೆ.",
+    "tunnelIdLabel": "ಟನಲ್ ಐಡಿ",
+    "tunnelRuntimeKeyLabel": "ಟನಲ್ ರನ್‌ಟೈಮ್ ಕೀ",
+    "tunnelRuntimeKeyPlaceholder": "ರನ್‌ಟೈಮ್ ಕೀ",
+    "tunnelRuntimeKeyHint": "ಕೂಕಿಯು ಜೊತೆಗೆ ಸಮಯಕ್ಕೆ ಸಮಯಕ್ಕೆ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಿ ಒಳಗೊಂಡಿರುತ್ತದೆ ಮತ್ತು ಅದನ್ನು ಎಂದಿಗೂ ಲಾಗ್‌ಗಳಿಗೆ ಬರೆಯುವುದಿಲ್ಲ.",
+    "tunnelRuntimeKeyNewLabel": "ಹೊಸ ಟನಲ್ ರನ್‌ಟೈಮ್ ಕೀ",
+    "tunnelRuntimeKeyNewHint": "ಹೊಸ ಕೂಕಿಯು ಜೊತೆಗೆ ಮಾತ್ರ ನಮೂದಿಸಿ. ಮೌಲ್ಯವನ್ನು ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಿ ಸಂಗ್ರಹಿಸಲಾಗುತ್ತದೆ.",
+    "chatgptConnectorLabel": "ಚಾಟ್‌ಜಿಪಿಟಿ ಕಸ್ಟಮ್ ಕನೆಕ್ಟರ್",
+    "doctorChecking": "ಸ್ಟೇಟಸ್ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…",
+    "doctorCheck": "ಡಾಕ್ಟರ್ ಸ್ಟೇಟಸ್ ಪರಿಶೀಲಿಸಿ",
+    "fallbackRetryBackendTitle": "ಬ್ಯಾಕ್‌ಅಪ್ ರಿಟ್ರೈ ಬ್ಯಾಕೆಂಡ್"
   },
   "settings": {
     "title": "ಸೆಟ್ಟಿಂಗ್ಗಳು",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "ಯಾವ ಸೈಡ್ಬಾರ್ ಐಟಂಗಳನ್ನು ತೋರಿಸಬೇಕೆಂದು ಆಯ್ಕೆಮಾಡಿ. ಅಗತ್ಯವಾದವು ಆಯ್ಕೆಯು ಸುಧಾರಿತ ಪರಿಕರಗಳನ್ನು ಹುಡುಕಬಹುದಾಗಿಯೇ ಇರಿಸುತ್ತದೆ.",
     "hideHealthLogs": "ಸ್ಥಿತಿ ಪರಿಶೀಲನೆ ಲಾಗ್ಗಳನ್ನು ಮರೆಮಾಡಿ",
     "hideHealthLogsDesc": "ON ಆಗಿರುವಾಗ, ಸರ್ವರ್ ಕನ್ಸೋಲ್ನಲ್ಲಿ [HealthCheck] ಸಂದೇಶಗಳನ್ನು ತೋರಿಸಬೇಡಿ",
-    "themeAccent": "ಥೀಮ್ ಬಣ್ಣ",
-    "themeAccentDesc": "ಪೂರ್ವನಿಗದಿತ ಬಣ್ಣವನ್ನು ಆಯ್ಕೆಮಾಡಿ ಅಥವಾ ಒಂದು ಬಣ್ಣದಿಂದ ನಿಮ್ಮದೇ ಥೀಮ್ ರಚಿಸಿ",
-    "themeCreate": "ಥೀಮ್ ರಚಿಸಿ",
-    "themeCustom": "ಕಸ್ಟಮ್ ಥೀಮ್",
-    "themeBlue": "ನೀಲಿ",
-    "themeRed": "ಕೆಂಪು",
-    "themeGreen": "ಹಸಿರು",
-    "themeViolet": "ನೇರಳೆ",
-    "themeOrange": "ಕಿತ್ತಳೆ",
-    "themeCyan": "ಸಯಾನ್",
     "whitelabeling": "ಬ್ರ್ಯಾಂಡಿಂಗ್",
     "whitelabelingDesc": "ಅಪ್ಲಿಕೇಶನ್ನ ಹೆಸರು ಮತ್ತು ಲೋಗೋವನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ",
     "appName": "ಅಪ್ಲಿಕೇಶನ್ ಹೆಸರು",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "ಈಗ",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "ಕೋರ್ ಬೈನರಿ ಮಾರ್ಗ",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "ಐಚ್ಛಿಕ: ಅಳವಡಿಸಲಾದ ಫೈಲ್ ಅನ್ನು ಬದಲಾಯಿಸುವ ಮೊದಲು ಕೋರ್ ಬೈನರಿಯೊಂದಿಗೆ ಉತ್ಪಾದಿಸಲಾದ ಫೈಲ್ ಅನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ. ಪಕ್ಕದಲ್ಲೇ ಬರೆಯುವುದನ್ನು ಮುಂದುವರಿಸಲು ಖಾಲಿ ಬಿಡಿ. ಕಾಣೆದಾಗ ಕೋಶವನ್ನು ರಚಿಸಲಾಗುತ್ತದೆ."
+      "coreBinaryPathHelp": "ಐಚ್ಛಿಕ: ಅಳವಡಿಸಲಾದ ಫೈಲ್ ಅನ್ನು ಬದಲಾಯಿಸುವ ಮೊದಲು ಕೋರ್ ಬೈನರಿಯೊಂದಿಗೆ ಉತ್ಪಾದಿಸಲಾದ ಫೈಲ್ ಅನ್ನು ಪರಿಶೀಲಿಸುತ್ತದೆ. ಪಕ್ಕದಲ್ಲೇ ಬರೆಯುವುದನ್ನು ಮುಂದುವರಿಸಲು ಖಾಲಿ ಬಿಡಿ. ಕಾಣೆದಾಗ ಕೋಶವನ್ನು ರಚಿಸಲಾಗುತ್ತದೆ.",
+      "urlFeedlessHint": "ಆಯ್ಕೆದಾರ-ಮಾತ್ರ ಚಂದಾದಾರಿಕೆಗಾಗಿ ಖಾಲಿ ಬಿಡಿ: ಕೆಳಗೆ ನಿಯಂತ್ರಣ URL ಅನ್ನು ಹೊಂದಿಸಿ, ಯಾವುದೇ ಫೀಡ್ ಪಡೆಯಲಾಗುವುದಿಲ್ಲ, ರಿಫ್ರೆಶ್ ಮಾಡಲಾಗುವುದಿಲ್ಲ ಅಥವಾ ಬೈಂಡ್ ಮಾಡಲಾಗುವುದিলlg."
     },
     "bulkHealthcheck": "ಸಾಮೂಹಿಕ ಆರೋಗ್ಯ ಪರಿಶೀಲನೆ",
     "bulkHealthcheckDesc": "ಯಾವವು ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ ಎಂಬುದನ್ನು ಕಂಡುಹಿಡಿಯಲು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ ಎಲ್ಲಾ ಪ್ರಾಕ್ಸಿಗಳನ್ನು ಗುರಿ URL ವಿರುದ್ಧ ಪರೀಕ್ಷಿಸಿ.",
@@ -7706,6 +7862,7 @@
     "configured": "ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿದೆ",
     "none": "ಯಾವುದೂ ಇಲ್ಲ",
     "modelOverrideValuePlaceholder": "ಸಂಖ್ಯಾತ್ಮಕ ಮೌಲ್ಯ",
+    "modelOverrideKey": "ಓವರ್ರೈಡ್ ಕೀ",
     "modelOverrideReasoningEffortsPlaceholder": "ಇಂಗ್ಲಿಷ್ನಲ್ಲಿ ಅಲ್ಪವಿರಾಮದಿಂದ ಬೇರ್ಪಡಿಸಿದ ಮೌಲ್ಯಗಳು, ಉದಾ. low, medium, high",
     "addKeyValue": "ಕೀ-ಮೌಲ್ಯವನ್ನು ಸೇರಿಸಿ",
     "noModelOverrides": "ಈ ಮಾದರಿಗೆ ಯಾವುದೇ ಓವರ್ರೈಡ್ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿಲ್ಲ.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "ನಿರ್ದಿಷ್ಟ ಮಾದರಿಗಳಿಗೆ ಡೀಫಾಲ್ಟ್ ಬೆಲೆ ನಿಗದಿಯನ್ನು ನೀವು ಅತಿಕ್ರಮಿಸಬಹುದು. ಸ್ವಯಂ ಪತ್ತೆಹಚ್ಚಿದ ಬೆಲೆ ನಿಗದಿಗಿಂತ ಕಸ್ಟಮ್ ಅತಿಕ್ರಮಣಗಳಿಗೆ ಆದ್ಯತೆ ಇರುತ್ತದೆ.",
     "editPricing": "ಬೆಲೆ ನಿಗದಿಯನ್ನು ಸಂಪಾದಿಸಿ",
     "viewFullDetails": "ಪೂರ್ಣ ವಿವರಗಳನ್ನು ವೀಕ್ಷಿಸಿ",
-    "themeCoral": "ಹವಳ",
     "adaptiveVolumeRouting": "ಹೊಂದಿಕೊಳ್ಳುವ ವಾಲ್ಯೂಮ್ ರೂಟಿಂಗ್",
     "adaptiveVolumeRoutingDesc": "ಪೇಲೋಡ್ ಪ್ರಮಾಣ ಮತ್ತು ಥ್ರೂಪುಟ್ ಒತ್ತಡದ ಆಧಾರದ ಮೇಲೆ ಸಂಪರ್ಕಗಳನ್ನು ಕ್ರಿಯಾತ್ಮಕವಾಗಿ ಸ್ಕೇಲ್ ಮಾಡಿ.",
     "lkgpToggleTitle": "ಕೊನೆಯದಾಗಿ ಸಮರ್ಪಕವಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸಿದ ಪೂರೈಕೆದಾರ (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "ಪೂರೈಕೆದಾರರಿಗೆ ಕಳುಹಿಸುವ ಮೊದಲು ಪ್ರಾಂಪ್ಟ್ಗಳನ್ನು ಸಂಕುಚಿತಗೊಳಿಸುವ ಮೂಲಕ ಟೋಕನ್ ಬಳಕೆಯನ್ನು ಕಡಿಮೆ ಮಾಡಿ",
     "autoCombosTitle": "ಸ್ವಯಂ ಕಾಂಬೊಗಳು",
     "autoCombosDesc": "ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾದ ಪ್ರತಿಯೊಂದು ಪೂರೈಕೆದಾರರಿಂದ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಒಂದು ಮಾದರಿಯನ್ನು ಆಯ್ಕೆಮಾಡುವ ಅಂತರ್ನಿರ್ಮಿತ auto/* ಕಾಂಬೊಗಳನ್ನು ಬಳಸಲು ಈ ಕೀಲಿಗೆ ಅನುಮತಿಸಿ",
+    "ccDiscoveryAliasesTitle": "Claude Code ಅನ್ವೇಷಣೆ ಅಲಿಯಾಸ್ಗಳು",
+    "ccDiscoveryAliasesDesc": "ಈ ಕೀಲಿಯು ಈಗಾಗಲೇ ಪ್ರವೇಶಿಸಬಹುದಾದ ಮಾಡೆಲ್ಗಳು ಮತ್ತು ಕಾಂಬೊಗಳಿಗಾಗಿ claude/... ಹೊಂದಾಣಿಕೆ ಮಿರರ್ಗಳನ್ನು ಜಾಹೀರಾತು ಮಾಡಿ",
     "compressionGuidanceFullGuideLink": "ಸಂಪೂರ್ಣ ಸಂಕೋಚನ ಮಾರ್ಗದರ್ಶಿ",
     "compressionGuidanceShow": "ವಿವರಗಳು",
     "compressionGuidanceHide": "ವಿವರಗಳನ್ನು ಮರೆಮಾಡಿ",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "ವಿಂಡೋದ ಶೇಕಡಾವಾರು",
     "compressionAdaptivePolicyAbsolute": "ನಿರಪೇಕ್ಷ ಟೋಕನ್ ಬಜೆಟ್",
     "compressionOutputStylesDescription": "ಪೂರೈಕೆದಾರರ ಔಟ್ಪುಟ್ ಅನ್ನು ಮರುಬರೆಯದೆ ಪ್ರತಿಕ್ರಿಯೆಯ ಸ್ವರೂಪವನ್ನು ರೂಪಿಸುವ ಸೂಚನೆಗಳನ್ನು ಸೇರಿಸಿ. ಮುಕ್ತವಾಗಿ ಸಂಯೋಜಿಸಿ.",
+    "compressionOutputStylesPreviewNote": "ವಿನಂತಿಯು ಒಂದು ಭಾಷೆಯನ್ನು ಮಾತ್ರ ಚುಚ್ಚುತ್ತದೆ: ಪತ್ತೆಯಾದ ಭಾಷೆ, ಇಲ್ಲದಿದ್ದರೆ ಮೊದಲ ಪ್ಯಾಕ್. ಮೇಲಿನ ಬ್ಲಾಕ್ಗಳು ಪ್ರತಿ-ಪ್ಯಾಕ್ ರೂಪಾಂತರಗಳಾಗಿವೆ, ಸಂಯೋಜಿತ ಇಂಜೆಕ್ಷನ್ ಅಲ್ಲ.",
     "mcpAccessibilityDescription": "MCP ಉಪಕರಣದ ಔಟ್ಪುಟ್ಗಳಿಗೆ ವ್ಯಾಪ್ತಿಯನ್ನು ನಿಗದಿಪಡಿಸುತ್ತದೆ (ಪ್ರತ್ಯೇಕ ಸಂಗ್ರಹ).",
     "compressionStylesTileSummary": "{tokens, number} ಟೋಕನ್ಗಳನ್ನು ಉಳಿಸಲಾಗಿದೆ · {runs, plural, one {# ಶೈಲೀಕೃತ ರನ್} other {# ಶೈಲೀಕೃತ ರನ್ಗಳು}}",
     "compressionStylesTileEmpty": "ಇನ್ನೂ ಯಾವುದೇ ಶೈಲೀಕೃತ ರನ್ಗಳಿಲ್ಲ.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "ಹೋಸ್ಟ್",
     "qdrantCollection": "ಸಂಗ್ರಹ",
     "catalogVisibilityHint": "ಮರೆಮಾಡಿದ ಮಾದರಿ ID ಗಳನ್ನು ಅದೇ ಪ್ರವೇಶ ಅನುಮತಿಗಳೊಂದಿಗೆ ಇನ್ನೂ ಕರೆಯಬಹುದು.",
+    "exposeCombosOnly": "/v1/models ನಲ್ಲಿ ಕಾಂಬೊಗಳನ್ನು ಮಾತ್ರ ಪಟ್ಟಿ ಮಾಡಿ",
+    "exposeCombosOnlyDesc": "ಮಾದರಿಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪತ್ತೆಹಚ್ಚುವ ಕ್ಲೈಂಟ್‌ಗಳು ಕಚ್ಚಾ ಪೂರೈಕೆದಾರ ಮಾದರಿಗಳ ಬದಲಿಗೆ ನಿಮ್ಮ ಕಾಂಬೊಗಳನ್ನು (ಮತ್ತು ಮರೆಮಾಡದಿದ್ದರೆ auto/*) ನೋಡುತ್ತಾರೆ. ಸ್ಪಷ್ಟ provider/model ID ಗಳು ರೂಟ್ ಆಗುತ್ತಲೇ ಇರುತ್ತವೆ.",
     "catalogScopeTitle": "Models API ಪಟ್ಟಿ",
     "catalogScopeDesc": "ಈ ಕೀಲಿಗಾಗಿ GET /v1/models ಏನನ್ನು ಪ್ರದರ್ಶಿಸುತ್ತದೆ. ಪಟ್ಟಿಯನ್ನು ಸೀಮಿತಗೊಳಿಸುವುದರಿಂದ ಕೀಲಿಯು ಯಾವುದನ್ನು ಕರೆ ಮಾಡಬಹುದು ಎಂಬುದು ಎಂದಿಗೂ ಬದಲಾಗುವುದಿಲ್ಲ.",
     "catalogScopeAll": "ಎರಡೂ",
@@ -8918,7 +9079,9 @@
         "financial": "ಹಣಕಾಸು",
         "brazilian": "ಬ್ರೆಜಿಲಿಯನ್",
         "usa": "ಅಮೆರಿಕ",
-        "full": "ಪೂರ್ಣ"
+        "full": "ಪೂರ್ಣ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (ದಕ್ಷಿಣ ಆಫ್ರಿಕಾ)"
       },
       "builtinTypes": "ಅಂತರ್ನಿರ್ಮಿತ ಪ್ರಕಾರಗಳು",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "IPv4 ವಿಳಾಸಗಳು",
         "ipv6_address": "IPv6 ವಿಳಾಸಗಳು",
         "aws_key": "AWS ಪ್ರವೇಶ ಕೀಗಳು",
-        "api_key_generic": "API ಕೀಗಳು ಮತ್ತು ಟೋಕನ್‌ಗಳು"
+        "api_key_generic": "API ಕೀಗಳು ಮತ್ತು ಟೋಕನ್‌ಗಳು",
+        "iban": "IBAN ಬ್ಯಾಂಕ್ ಖಾತೆ ಸಂಖ್ಯೆಗಳು",
+        "eu_vat": "EU VAT ಸಂಖ್ಯೆಗಳು",
+        "es_dni_nie": "ಸ್ಪ್ಯಾನಿಷ್ DNI / NIE",
+        "it_codice_fiscale": "ಇಟಾಲಿಯನ್ ಕೋಡಿಸ್ ಫಿಸ್ಕೇಲ್",
+        "pl_pesel": "ಪೋಲಿಷ್ PESEL",
+        "nl_bsn": "ಡಚ್ BSN",
+        "de_steuer_id": "ಜರ್ಮನ್ ಸ್ಟೀಯರ್-ID",
+        "se_personnummer": "ಸ್ವೀಡಿಷ್ ವ್ಯಕ್ತಿ",
+        "za_id": "ದಕ್ಷಿಣ ಆಫ್ರಿಕಾದ ID ಸಂಖ್ಯೆಗಳು",
+        "za_phone": "ದಕ್ಷಿಣ ಆಫ್ರಿಕಾದ ಫೋನ್ ಸಂಖ್ಯೆಗಳು",
+        "za_vat": "ದಕ್ಷಿಣ ಆಫ್ರಿಕಾದ VAT ಸಂಖ್ಯೆಗಳು",
+        "za_tax_ref": "ದಕ್ಷಿಣ ಆಫ್ರಿಕಾದ ತೆರಿಗೆ ಉಲ್ಲೇಖಗಳು"
       },
       "customPatterns": "ಕಸ್ಟಮ್ ಮಾದರಿಗಳು",
       "customPatternsDesc": "ಹೊಂದಾಣಿಕೆಗಳನ್ನು [CUSTOM_REDACTED] ನಿಂದ ಬದಲಾಯಿಸಲಾಗುತ್ತದೆ. ಗರಿಷ್ಠ {max} ಮಾದರಿಗಳು. ವಿನಾಶಕಾರಿ ಬ್ಯಾಕ್‌ಟ್ರ್ಯಾಕಿಂಗ್ ಅಪಾಯವಿರುವ ಮಾದರಿಗಳನ್ನು ತಿರಸ್ಕರಿಸಲಾಗುತ್ತದೆ.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "ಯಶಸ್ವಿಯಾಗಿದೆ",
     "tomlTestFailed": "ವಿಫಲವಾಗಿದೆ",
     "tomlImportError": "RTK TOML ಫೈಲ್ ಅನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
-    "tomlFileReadError": "ಆಯ್ಕೆಮಾಡಿದ TOML ಫೈಲ್ ಅನ್ನು ಓದಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."
+    "tomlFileReadError": "ಆಯ್ಕೆಮಾಡಿದ TOML ಫೈಲ್ ಅನ್ನು ಓದಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
+    "viewMode": "ವೀಕ್ಷಣಾ ಮೋಡ್"
   },
   "compressionEngineConfig": {
     "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "ಭಾಷಾ ಪ್ಯಾಕ್ಗಳು: {packs}",
     "dragToReorder": "ಹಂತದ ಕ್ರಮವನ್ನು ಬದಲಾಯಿಸಲು ಎಳೆಯಿರಿ",
     "engine": "ಎಂಜಿನ್",
-    "intensity": "ತೀವ್ರತೆ"
+    "intensity": "ತೀವ್ರತೆ",
+    "compressionOverride": "ಸಂಕೋಚನ ಓವರ್ರೈಡ್"
   },
   "compressionStudio": {
     "noRun": "ಯಾವುದೇ ಸಂಕುಚನ ರನ್ ಲಭ್ಯವಿಲ್ಲ.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "ವಿಜೇತ: {winner}",
     "encoder": "ಎನ್ಕೋಡರ್",
     "bytes": "ಬೈಟ್ಗಳು",
-    "tokensCl100k": "ಟೋಕನ್ಗಳು (cl100k)"
+    "tokensCl100k": "ಟೋಕನ್ಗಳು (cl100k)",
+    "studioViews": "Studio ವೀಕ್ಷಣೆಗಳು"
   },
   "omniglyph": {
     "preview": "ಮುನ್ನೋಟ",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "ಇದಕ್ಕಿಂತ ಚಿಕ್ಕ ಸಂದೇಶಗಳನ್ನು ಸಂಕುಚಿಸಲಾಗುವುದಿಲ್ಲ. ಕಡಿಮೆ = ಹೆಚ್ಚು ಸಂಕುಚನ.",
     "tooltipMinSavings": "ಕನಿಷ್ಠ ಇಷ್ಟು ಟೋಕನ್ಗಳನ್ನು ಉಳಿಸಿದರೆ ಮಾತ್ರ ಸಂಕುಚಿಸಿ.",
     "ultraSettings": "ಅಲ್ಟ್ರಾ ಸೆಟ್ಟಿಂಗ್ಗಳು",
-    "ultraSettingsDesc": "SLM-ಚಾಲಿತ ಅರ್ಥಾಧಾರಿತ ಸಂಕುಚನ"
+    "ultraSettingsDesc": "SLM-ಚಾಲಿತ ಅರ್ಥಾಧಾರಿತ ಸಂಕುಚನ",
+    "defaultLanguage": "ಡೀಫಾಲ್ಟ್ ಭಾಷೆ",
+    "viewMode": "ವೀಕ್ಷಣಾ ಮೋಡ್"
   },
   "translator": {
     "title": "ಅನುವಾದಕ",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "ಸ್ಟ್ರೀಮ್ ಅನ್ನು ಪರಿವರ್ತಿಸಲು ವಿಫಲವಾಗಿದೆ"
   },
   "usage": {
+    "healthExtraUsageBypass": "ಕೋಟಾ ಮುಗಿದಿದೆ; ಹೆಚ್ಚುವರಿ ಬಳಕೆಗೆ ಅನುಮತಿ ಇರುವುದರಿಂದ ಸೇವೆ ಮುಂದುವರಿಯುತ್ತದೆ.",
+    "healthPaidCreditsBypass": "ಕೋಟಾ ಮುಗಿದಿದೆ; ಲಭ್ಯವಿರುವ ಪಾವತಿಸಿದ ಕ್ರೆಡಿಟ್‌ಗಳಿಂದ ಸೇವೆ ಮುಂದುವರಿಯಬಹುದು.",
+    "healthFilteringBypass": "ಕೋಟಾ ಮುಗಿದಿದೆ; ಸ್ಥಳೀಯ ಕೋಟಾ ಫಿಲ್ಟರಿಂಗ್ ನಿಷ್ಕ್ರಿಯವಾಗಿರುವುದರಿಂದ ಸೇವೆ ಮುಂದುವರಿಯುತ್ತದೆ.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
@@ -10001,6 +10184,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "ಪೂರೈಕೆದಾರರ ಮಿತಿಗಳು",
     "noProviders": "ಯಾವುದೇ ಪೂರೈಕೆದಾರರು ಸಂಪರ್ಕಗೊಂಡಿಲ್ಲ",
+    "quotaAuthRequired": "ದೃಢೀಕರಣ ಅಗತ್ಯವಿದೆ - ಡ್ಯಾಶ್ಬೋರ್ಡ್ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ",
+    "quotaAuthRequiredHint": "ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಸೆಷನ್ ಲಭ್ಯವಿಲ್ಲದಿರುವುದರಿಂದ ಅಥವಾ ಅವಧಿ ಮೀರಿರುವುದರಿಂದ ಪೂರೈಕೆದಾರರ ಸಂಪರ್ಕಗಳನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ನಿಮ್ಮ ಕೋಟಾ ಮಿತಿಗಳನ್ನು ನೋಡಲು ಸೈನ್ ಇನ್ ಮಾಡಿ ಮತ್ತು ರಿಫ್ರೆಶ್ ಮಾಡಿ.",
     "connectProvidersForQuota": "ನಿಮ್ಮ API ಕೋಟಾ ಮಿತಿಗಳು ಮತ್ತು ಬಳಕೆಯನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು OAuth ಮೂಲಕ ಪೂರೈಕೆದಾರರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿ.",
     "accountsCount": "{count, plural, one {# ಖಾತೆ} other {# ಖಾತೆಗಳು}}",
     "filteredFromCount": "({count} ರಿಂದ ಫಿಲ್ಟರ್ ಮಾಡಲಾಗಿದೆ)",
@@ -10050,9 +10235,6 @@
     "tierLite": "ಲೈಟ್",
     "tierUnknown": "ಅಜ್ಞಾತ",
     "statTotal": "ಒಟ್ಟು",
-    "statCritical": "ಗಂಭೀರ",
-    "statAlert": "ಎಚ್ಚರಿಕೆ",
-    "statHealthy": "ಸುಸ್ಥಿತಿಯಲ್ಲಿ",
     "filterPurchaseTypeLabel": "ಪ್ರಕಾರ",
     "filterTierLabel": "ಟಿಯರ್",
     "purchaseAll": "ಎಲ್ಲಾ",
@@ -10290,7 +10472,61 @@
     "updatedShort": "ನವೀಕರಿಸಲಾಗಿದೆ",
     "lastRefreshed": "ಕೊನೆಯದಾಗಿ ರಿಫ್ರೆಶ್ ಮಾಡಲಾಗಿದೆ",
     "providerQuota": "ಪೂರೈಕೆದಾರರ ಕೋಟಾ",
-    "providerQuotaHomeHint": "ಸಂಪರ್ಕಿತ ಖಾತೆಗಳಾದ್ಯಂತ ಲೈವ್ ಸ್ಥಿತಿ"
+    "providerQuotaHomeHint": "ಸಂಪರ್ಕಿತ ಖಾತೆಗಳಾದ್ಯಂತ ಲೈವ್ ಸ್ಥಿತಿ",
+    "claudeResetCreditDefaultTitle": "Claude ಮಿತಿ ಮರುಹೊಂದಿಕೆ",
+    "confirmRedeemClaudeResetCredit": "ರಿಡೀಮ್ ಮಾಡುವುದು ಅರ್ಹ Claude ಬಳಕೆಯ ಮಿತಿಗಳನ್ನು ತಕ್ಷಣವೇ ಮರುಹೊಂದಿಸುತ್ತದೆ ಮತ್ತು ಈ ಕ್ರೆಡಿಟ್ ಅನ್ನು ಶಾಶ್ವತವಾಗಿ ಬಳಸಿಕೊಳ್ಳುತ್ತದೆ.",
+    "claudeResetCreditsModalTitle": "Claude ಮರುಹೊಂದಿಕೆ ಕ್ರೆಡಿಟ್‌ಗಳು",
+    "claudeResetCreditsModalExplainer": "ಈ ಖಾತೆಗೆ ಲಭ್ಯವಿರುವ Claude ಮರುಹೊಂದಿಕೆ ಕ್ರೆಡಿಟ್‌ಗಳು ಮತ್ತು ಸಾಪ್ತಾಹಿಕ ಸೆಶನ್ ಮರುಹೊಂದಿಕೆಗಳು.",
+    "healthAccountHint": "ಇತ್ತೀಚಿನ ಅವಲೋಕನಗಳ ಆಧಾರಿತ, ನೇರ ಪರೀಕ್ಷೆಯಲ್ಲ. ವಿವರಗಳಿಗಾಗಿ ಖಾತೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+    "healthRecovery": "ನಿರೀಕ್ಷಿತ ಮರುಸ್ಥಾಪನೆ ಸಮಯ",
+    "healthAvailable": "ಲಭ್ಯವಿದೆ",
+    "healthRestricted": "ಭಾಗಶಃ ನಿರ್ಬಂಧಿತ",
+    "healthUnavailable": "ಲಭ್ಯವಿಲ್ಲ",
+    "healthPeakHourProtection": "ಗರಿಷ್ಠ ದಟ್ಟಣೆಯ ಸಮಯದ ರಕ್ಷಣೆ",
+    "healthCooldown": "ಕಾಯುವ ಅವಧಿ",
+    "healthQuotaExhausted": "ಕೋಟಾ ಮುಗಿದಿದೆ",
+    "healthOverview": "ಅವಲೋಕನ",
+    "layoutFull": "ಪೂರ್ಣ",
+    "layoutCompact": "ಸಂಕ್ಷಿಪ್ತ",
+    "healthQuotaError": "ಕೋಟಾ ಓದಲು ವಿಫಲವಾಗಿದೆ",
+    "healthNoRuntime": "ಕಾರ್ಯಾಚರಣೆಯ ಸ್ಥಿತಿ ಲಭ್ಯವಿಲ್ಲ",
+    "healthPreviousSnapshot": "ಕೊನೆಯ ನವೀಕರಣ ವಿಫಲವಾಗಿದೆ; ಹಿಂದಿನ ಫಲಿತಾಂಶ ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+    "healthPreviousFailure": "ಕೊನೆಯ ವಿನಂತಿ ವಿಫಲವಾಗಿದೆ; ಕಾಯುವ ಅವಧಿ ಮುಗಿದಿದೆ",
+    "healthAwaitingSync": "ಮರುಹೊಂದಿಸುವ ಸಮಯ ಮೀರಿದೆ; ಸಿಂಕ್‌ಗಾಗಿ ಕಾಯುತ್ತಿದೆ",
+    "healthVerdictUnavailable": "ಉಪಲಭ್ಯತೆ ಪರಿಶೀಲನೆಯ ಫಲಿತಾಂಶ ಸಿಗುತ್ತಿಲ್ಲ; ಕೋಟಾ ಮಟ್ಟಗಳನ್ನು ಮಾತ್ರ ತೋರಿಸಲಾಗುತ್ತಿದೆ",
+    "healthSummaryFailed": "ಸ್ಥಿತಿಯ ಸಾರಾಂಶ ಓದಲು ವಿಫಲವಾಗಿದೆ; ಮಾದರಿ ಲಾಕ್ ಮಾಹಿತಿ ಕಾಣೆಯಾಗಿರಬಹುದು",
+    "healthRuntimeObserved": "ಸ್ಥಿತಿ ನವೀಕರಿಸಲಾಗಿದೆ {time}",
+    "healthQuotaObserved": "ಕೋಟಾ ಗಮನಿಸಲಾಗಿದೆ {time}",
+    "healthOldestQuota": "ಅತ್ಯಂತ ಹಳೆಯ ಕೋಟಾ ಚಿತ್ರ: {time}",
+    "healthRecoveryUnknown": "ಚೇತರಿಕೆಯ ಸಮಯ ತಿಳಿದಿಲ್ಲ",
+    "healthDetailsHint": "ವಿವರಗಳು ಮತ್ತು ಕ್ರಿಯೆಗಳಿಗಾಗಿ ಕ್ಲಿಕ್ ಮಾಡಿ",
+    "healthFiveHour": "5 ಗಂಟೆಗಳು",
+    "healthOverall": "ಒಟ್ಟಾರೆ",
+    "healthAction": "ಕ್ರಮ ಅಗತ್ಯ",
+    "healthTitle": "ಖಾತೆಗಳ ಲಭ್ಯತೆ",
+    "healthDrag": "ಪೂರೈಕೆದಾರರ ಕ್ರಮ ಬದಲಿಸಲು ಎಳೆಯಿರಿ",
+    "healthDragPosition": "{provider}, {count, plural, one {# ರಲ್ಲಿ {position, number} ನೇ ಸ್ಥಾನ} other {# ರಲ್ಲಿ {position, number} ನೇ ಸ್ಥಾನ}}",
+    "healthResetOrder": "ಪೂರ್ವನಿಯೋಜಿತ ಕ್ರಮ ಮರುಸ್ಥಾಪಿಸಿ",
+    "healthPool": "{name} ಪೂಲ್",
+    "healthOtherPool": "ಅದೇ ಖಾತೆಯ {pool}: {status} ({remaining} ಉಳಿದಿದೆ)",
+    "healthIncluded": "{count, plural, one {ಭಾಗಶಃ ನಿರ್ಬಂಧಿತ # ಖಾತೆಯನ್ನು ಒಳಗೊಂಡಿದೆ} other {ಭಾಗಶಃ ನಿರ್ಬಂಧಿತ # ಖಾತೆಗಳನ್ನು ಒಳಗೊಂಡಿದೆ}}",
+    "healthBannerUnavailable": "{count, plural, one {# ಖಾತೆ ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ} other {# ಖಾತೆಗಳು ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ}}",
+    "healthBannerAvailable": "{count, plural, one {# ಖಾತೆ ಲಭ್ಯವಿದೆ} other {ಎಲ್ಲಾ # ಖಾತೆಗಳು ಲಭ್ಯವಿವೆ}}",
+    "healthLegendHide": "ಸಂಕೇತಗಳ ವಿವರಣೆಯನ್ನು ಮರೆಮಾಡಿ",
+    "healthLegendShow": "ಸಂಕೇತಗಳ ವಿವರಣೆಯನ್ನು ತೋರಿಸಿ",
+    "healthLegendOk": "ಘನ = ಉಳಿದ ಕೋಟಾ; ಅರೆಪಾರದರ್ಶಕ = ಬಳಸಿದ ಕೋಟಾ.",
+    "healthLegendCooldown": "{window} ಕೋಟಾ ಮುಗಿದಿದೆ. ಘನ = ಕಳೆದ ಕಾಯುವಿಕೆ; ಅರೆಪಾರದರ್ಶಕ = ಉಳಿದ ಕಾಯುವಿಕೆ.",
+    "healthLegendAction": "ಅನುಮತಿ ಅವಧಿ ಮುಗಿದಿದೆ ಅಥವಾ ಖಾತೆ ನಿಷೇಧಿತ; ಕಾಯುವುದರಿಂದ ಸರಿಯಾಗುವುದಿಲ್ಲ.",
+    "healthLegendPartial": "ಇನ್ನೂ ಬಳಸಬಹುದು. ಹಳದಿ ತುದಿ = ಮಾದರಿ ಅಥವಾ ಪೂಲ್ ನಿರ್ಬಂಧಿತ.",
+    "healthWaited": "ಕಾದಿದ್ದು {percent}",
+    "healthWait": "ಇನ್ನೂ {duration} ({time}ಕ್ಕೆ ಮರುಲಭ್ಯ)",
+    "healthFastest": "ಮೊದಲ ಮರುಲಭ್ಯತೆ {duration} ನಂತರ",
+    "healthRatio": "{available, plural, one {# / {active, number} ಲಭ್ಯ} other {# / {active, number} ಲಭ್ಯ}}",
+    "healthCd5": "5 ಗಂಟೆಗಳು · ಕಾಯುವ ಅವಧಿ",
+    "healthCdw": "ವಾರದ · ಕಾಯುವ ಅವಧಿ",
+    "healthRecentSuccessBypass": "ಇತ್ತೀಚೆಗೆ ವಿನಂತಿ ಯಶಸ್ವಿಯಾದ ಕಾರಣ ರೌಟಿಂಗ್ ಈ ಖಾತೆಯನ್ನು ಅನುಮತಿಸುತ್ತದೆ.",
+    "healthPurchasedBalanceBypass": "ಒಳಗೊಂಡ ಕೋಟಾ ಮುಗಿದ ನಂತರ ಖರೀದಿಸಿದ ಉಳಿಕೆಯೊಂದಿಗೆ ಬಳಕೆ ಮುಂದುವರಿಸಬಹುದು.",
+    "healthCutoffAtRequest": "ವಿನಂತಿಯನ್ನು ರೌಟ್ ಮಾಡುವಾಗ ನೇರ ಕೋಟಾ ಮಿತಿಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ."
   },
   "modals": {
     "waitingAuth": "ದೃಢೀಕರಣಕ್ಕಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ",
@@ -11077,7 +11313,8 @@
       "message": "ಸಂದೇಶ",
       "error": "ದೋಷ",
       "completion": "ಪೂರ್ಣಗೊಳಿಸುವಿಕೆ"
-    }
+    },
+    "statusFilter": "ಸ್ಥಿತಿ"
   },
   "templateNames": {
     "simple-chat": "ಸರಳ ಚಾಟ್",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes} ನಿಮಿಷಗಳ ಹಿಂದೆ",
     "hoursAgo": "{hours} ಗಂಟೆಗಳ ಹಿಂದೆ",
     "daysAgo": "{days} ದಿನಗಳ ಹಿಂದೆ",
-    "entries": "ನಮೂದುಗಳು"
+    "entries": "ನಮೂದುಗಳು",
+    "viewSwitcherAria": "ಕ್ಯಾಶ್ ವೀಕ್ಷಣೆ"
   },
   "proxyConfigModal": {
     "levelGlobal": "ಜಾಗತಿಕ",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗಿಲ್ಲ. ಮರುನಿರ್ದೇಶನ URI {redirectUri} ಮತ್ತು \"{scopes}\" ಸ್ಕೋಪ್ಗಳೊಂದಿಗೆ {applicationsUrl} ನಲ್ಲಿ OAuth ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ನೋಂದಾಯಿಸಿ, ನಂತರ {clientIdEnv} ಅನ್ನು (ಮತ್ತು ಐಚ್ಛಿಕವಾಗಿ {clientSecretEnv} ಅನ್ನು) ಹೊಂದಿಸಿ ಮತ್ತು ಮರುಪ್ರಾರಂಭಿಸಿ.",
     "gitlabDuoSetupDescription": "ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ನೋಂದಾಯಿಸಿ ಮತ್ತು ಈ OmniRoute ಇನ್ಸ್ಟನ್ಸ್ನಲ್ಲಿ ಪರಿಸರ ವೇರಿಯೇಬಲ್ಗಳನ್ನು ಹೊಂದಿಸಿದ ನಂತರ, OAuth ಲಾಗಿನ್ ಪ್ರಾರಂಭಿಸಲು ಮುಂದುವರಿಸಿ ಕ್ಲಿಕ್ ಮಾಡಿ.",
     "continue": "ಮುಂದುವರಿಸಿ",
+    "copilotPolicyTitle": "ಪ್ರಾಯೋಗಿಕ ಪೂರೈಕೆದಾರ: ನೀತಿಯ ಸ್ಥಿತಿ ಅಸ್ಪಷ್ಟವಾಗಿದೆ",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com ಮೂಲಕ ಸಂಪರ್ಕಿಸುತ್ತದೆ, ಇದನ್ನು GitHub ಸಾಮಾನ್ಯ ಮೂರನೇ ವ್ಯಕ್ತಿಯ ತೀರ್ಮಾನವಾಗಿ ಪ್ರಕಟಿಸಿಲ್ಲ API. ಈ ಏಕೀಕರಣವು ಪ್ರಾಯೋಗಿಕವಾಗಿದೆ ಮತ್ತು ಸೂಚನೆಯಿಲ್ಲದೆ ಬದಲಾಗಬಹುದು.",
+    "copilotPolicyLine2": "ನಿಮ್ಮ ಸ್ವಂತ GitHub ಖಾತೆಯನ್ನು ಮಾತ್ರ ಸಂಪರ್ಕಿಸಬಹುದು. ಎಂದಿಗೂ ರುಜುವಾತುಗಳನ್ನು ಹಂಚಿಕೊಳ್ಳಬೇಡಿ, ಖಾತೆಗಳನ್ನು ಪೂಲ್ ಮಾಡಬೇಡಿ ಅಥವಾ ನಿಮ್ಮ ಯೋಜನೆ ಮಿತಿಗಳನ್ನು ಮೀರಲು ಪ್ರಯತ್ನಿಸಬೇಡಿ.",
+    "copilotPolicyLine3": "ಉಚಿತ ಮತ್ತು ವಿದ್ಯಾರ್ಥಿ ಯೋಜನೆ ಬಳಕೆದಾರರು ಸ್ವಯಂಚಾಲಿತ ಮಾದರಿ ಆಯ್ಕೆಯನ್ನು ಮಾತ್ರ ಸ್ವೀಕರಿಸುತ್ತಾರೆ. ನಿಮ್ಮ Copilot ಯೋಜನೆ ನಿಯಮಗಳು ಮತ್ತು ಯಾವುದೇ ಬಳಕೆಯ ಮಿತಿಗಳು ನಿಮ್ಮ ಜವಾಬ್ದಾರಿಯಾಗಿವೆ.",
+    "copilotPolicyAcknowledge": "ನಾನು ಅರ್ಥಮಾಡಿಕೊಂಡಿದ್ದೇನೆ, ಸಂಪರ್ಕಿಸಿ",
     "tabPasteSetupToken": "ಸೆಟಪ್ ಟೋಕನ್",
     "claudeSetupTokenDescription": "ಟರ್ಮಿನಲ್‌ನಲ್ಲಿ `claude setup-token` ಅನ್ನು ಚಲಾಯಿಸಿ ಮತ್ತು ಅದು ಮುದ್ರಿಸುವ ಟೋಕನ್ ಅನ್ನು ಅಂಟಿಸಿ. ಇದು ಒಂದು ವರ್ಷ ಮಾನ್ಯವಾಗಿರುತ್ತದೆ ಮತ್ತು ರಿಫ್ರೆಶ್ ಟೋಕನ್ ಹೊಂದಿಲ್ಲ. ಉಳಿಸುವ ಮೊದಲು OmniRoute Anthropic ಗೆ ಒಂದು ಪರೀಕ್ಷಾ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸುತ್ತದೆ.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "ಆರೋಗ್ಯ ಸ್ಥಿತಿ (24h)",
     "tableUsage": "ಬಳಕೆ",
     "tableActions": "ಕ್ರಿಯೆಗಳು",
+    "moreActions": "ಹೆಚ್ಚಿನ ಕ್ರಿಯೆಗಳು",
     "test": "ಪರೀಕ್ಷಿಸಿ",
     "edit": "ತಿದ್ದಿ",
     "delete": "ಅಳಿಸಿ",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "ಯಾವುದೇ ಮಾನ್ಯ ನಮೂದುಗಳು ಕಂಡುಬಂದಿಲ್ಲ. ಸ್ವರೂಪವನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "bulkImportSuccess": "ಆಮದು ಪೂರ್ಣಗೊಂಡಿದೆ: {created} ರಚಿಸಲಾಗಿದೆ, {updated} ನವೀಕರಿಸಲಾಗಿದೆ, {failed} ವಿಫಲವಾಗಿದೆ",
     "bulkImportErrorLine": "ಸಾಲು {line}: {reason}",
-    "bulkImportMaxExceeded": "ಪ್ರತಿ ಆಮದಿಗೆ ಗರಿಷ್ಠ 100 ಪ್ರಾಕ್ಸಿಗಳು",
+    "bulkImportMaxExceeded": "ಪ್ರತಿ ಆಮದಿಗೆ ಗರಿಷ್ಠ {max} ಪ್ರಾಕ್ಸಿಗಳು",
     "bulkImportPreview": "ಪೂರ್ವವೀಕ್ಷಣೆ",
     "clearAssignment": "(ನಿಯೋಜನೆಯನ್ನು ತೆರವುಗೊಳಿಸಿ)",
     "bulkProxyAssignment": "ಸಾಮೂಹಿಕ ಪ್ರಾಕ್ಸಿ ನಿಯೋಜನೆ",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "IP ದರ ಮಿತಿ (429)",
     "poolSetAsideKindSlow": "ಮಂದ ಪ್ರತಿಕ್ರಿಯೆಗಳು",
     "poolSetAsideKindGeoBlocked": "ಪ್ರದೇಶ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ (403/451)",
+    "poolSetAsideKindOperatorReported": "ನಿರ್ವಾಹಕರಿಂದ ವರದಿಯಾದ ವ್ಯತ್ಯಯ",
     "poolSetAsideUntil": "ತಿರುಗುವಿಕೆಗೆ ಹಿಂತಿರುಗಿ {endsAt}",
     "poolSetAsideRepeat": "ಪಕ್ಕಕ್ಕೆ ಇರಿಸಲಾಗಿದೆ {count, plural, one {# ಬಾರಿ} other {# ಬಾರಿ}}",
     "poolUnknownAddress": "ಅಜ್ಞಾತ ವಿಳಾಸ",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "ಕೋಡ್ ಅನ್ನು ರಫ್ತು ಮಾಡಿ",
     "exportShort": "ರಫ್ತು ಮಾಡಿ",
     "noStateToExport": "ರಫ್ತು ಮಾಡಲು ಯಾವುದೇ ಪ್ಲೇಗ್ರೌಂಡ್ ಸ್ಥಿತಿ ಲಭ್ಯವಿಲ್ಲ.",
-    "closeExportModal": "ರಫ್ತು ಮೋಡಲ್ ಮುಚ್ಚಿ",
     "close": "ಮುಚ್ಚಿ",
     "exportRealKeyWarning": "ಭದ್ರತಾ ಎಚ್ಚರಿಕೆ: ರಫ್ತು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ — ಔಟ್ಪುಟ್ನಲ್ಲಿ ನೈಜ API key ಪತ್ತೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ನಿಮ್ಮ API key ಅನ್ನು ಮರುಹೊಂದಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "placeholderHintPrefix": "ಈ",
@@ -11808,7 +12052,8 @@
       "nextButton": "ಮುಂದೆ",
       "runButton": "ಚಾಲನೆ ಮಾಡಿ",
       "promptPlaceholder": "ನಿಮ್ಮ ಸಂದೇಶವನ್ನು ನಮೂದಿಸಿ… (ಕಳುಹಿಸಲು Enter, ಹೊಸ ಸಾಲಿಗಾಗಿ Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground ಮೋಡ್ಗಳು"
   },
   "miniPlayground": {
     "endpoint": "ಎಂಡ್ಪಾಯಿಂಟ್",
@@ -11879,7 +12124,8 @@
     "assistant": "ಸಹಾಯಕ",
     "errorLabel": "ದೋಷ",
     "requestFailed": "ವಿನಂತಿ ವಿಫಲವಾಗಿದೆ",
-    "stop": "ನಿಲ್ಲಿಸಿ"
+    "stop": "ನಿಲ್ಲಿಸಿ",
+    "messageInputAria": "ಸಂದೇಶ"
   },
   "requestLogger": {
     "recording": "ರೆಕಾರ್ಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} ಖಾತೆ ಬದಲಾವಣೆಗಳು",
       "resilienceRetried": "ಖಾಲಿ ಸರದಿಯನ್ನು ಮರುಪ್ರಯತ್ನಿಸಲಾಗಿದೆ",
       "resilienceContinued": "ಸ್ಟ್ರೀಮ್ ಮಧ್ಯದಿಂದ ಮುಂದುವರಿಸಲಾಗಿದೆ",
-      "resilienceRecovered": "ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ ಕ್ರಿಯೆಯಿಂದ ಮರುಪಡೆಯಲಾಗಿದೆ"
-    }
+      "resilienceRecovered": "ಸ್ಥಿತಿಸ್ಥಾಪಕತ್ವ ಕ್ರಿಯೆಯಿಂದ ಮರುಪಡೆಯಲಾಗಿದೆ",
+      "conversationContext": "ಸಂಭಾಷಣೆಯ ಸಂದರ್ಭ",
+      "goToBottom": "ಕೆಳಕ್ಕೆ ಹೋಗಿ",
+      "liveRefreshOn": "ನೇರ ರಿಫ್ರೆಶ್: ಆನ್",
+      "liveRefreshOff": "ನೇರ ರಿಫ್ರೆಶ್: ಆಫ್",
+      "liveRefresh": "ನೇರ ರಿಫ್ರೆಶ್",
+      "continuesFromParent": "ಪೇರೆಂಟ್ನಿಂದ ಮುಂದುವರಿಯುತ್ತದೆ",
+      "continuesFrom": "{id} ರಿಂದ ಮುಂದುವರಿಯುತ್ತದೆ",
+      "viewConversation": "ಸಂಭಾಷಣೆಯನ್ನು ವೀಕ್ಷಿಸಿ",
+      "openConversation": "ಸಂಭಾಷಣೆ {id} ತೆರೆಯಿರಿ"
+    },
+    "tableLabel": "ವಿನಂತಿ ಲಾಗ್ಗಳು",
+    "throughputPostFirstToken": "ಮೊದಲ ಟೋಕನ್ ನಂತರ",
+    "throughputEndToEnd": "ಆರಂಭದಿಂದ ಅಂತ್ಯದವರೆಗೆ",
+    "throughputRate": "{value} ಟೋಕನ್/ಸೆಕೆಂಡ್",
+    "throughputExplanation": "ಎರಡೂ ದರಗಳು ಔಟ್ಪುಟ್ ಮತ್ತು ತಾರ್ಕಿಕ ಟೋಕನ್ ಎಣಿಕೆಗಳಲ್ಲಿ ದೊಡ್ಡದನ್ನು ಬಳಸುತ್ತವೆ. ಮೊದಲ ಟೋಕನ್ ನಂತರದ ದರವು ಮಾನ್ಯವಾದ TTFT ಅನ್ನು ಹೊರಗಿಡುತ್ತದೆ; ಇಲ್ಲದಿದ್ದರೆ ಅದು ಪೂರ್ಣ ಅವಧಿಯನ್ನು ಬಳಸುತ್ತದೆ. ಆರಂಭದಿಂದ ಅಂತ್ಯದವರೆಗಿನ ದರವು ಯಾವಾಗಲೂ ಪೂರ್ಣ ಅವಧಿಯನ್ನು ಬಳಸುತ್ತದೆ. ಬಫರ್ ಮಾಡಿದ ಪ್ರತಿಕ್ರಿಯೆಯು ವೇಗವಾದ ಮಾದರಿ ರಚನೆಯಿಲ್ಲದೆಯೇ ಹೆಚ್ಚಿನ ಬರ್ಸ್ಟ್ ವಿತರಣಾ ದರವನ್ನು ಹೊಂದಿರಬಹುದು."
   },
   "proxyLogger": {
     "filterAll": "ಎಲ್ಲಾ",
@@ -12112,7 +12372,9 @@
     "colServedBy": "ಸೇವಿತ بواسطة",
     "filterTraffic": "ಟ್ರಾಫಿಕ್",
     "filterTests": "ಪರೀಕ್ಷೆಗಳು",
-    "filterSource": "ಮೂಲ"
+    "filterSource": "ಮೂಲ",
+    "tableLabel": "ಪ್ರಾಕ್ಸಿ ಲಾಗ್ಗಳು",
+    "sortLogs": "ಲಾಗ್ಗಳನ್ನು ವಿಂಗಡಿಸಿ"
   },
   "endpointOptions": {
     "speech": "ಧ್ವನಿ",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "ಖಾಲಿಯಾಗಿದೆ",
     "statusAlerting": "ಎಚ್ಚರಿಕೆ ನೀಡಲಾಗುತ್ತಿದೆ",
     "statusError": "ದೋಷ",
-    "moreSuffix": "+{count} ಇನ್ನಷ್ಟು"
+    "moreSuffix": "+{count} ಇನ್ನಷ್ಟು",
+    "feedFilterLabel": "ಈವೆಂಟ್ಗಳನ್ನು ಫಿಲ್ಟರ್ ಮಾಡಿ"
   },
   "quotaShare": {
     "weightPercent": "ತೂಕ %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "ಗುಂಪಿಗೆ ಸೇರಿಸದವು",
     "ungroupedHint": "ಈ ಪೂಲ್ಗಳನ್ನು ತಿಳಿದಿರುವ ಯಾವುದೇ ಗುಂಪಿಗೆ ನಿಯೋಜಿಸಲಾಗಿಲ್ಲ. ಅವುಗಳನ್ನು ಮಾನ್ಯ ಗುಂಪಿಗೆ ಸರಿಸಲು ಪೂಲ್ ಅನ್ನು ಸಂಪಾದಿಸಿ.",
     "removeFailed": "ಈ ಪೂಲ್ ಅನ್ನು ತೆಗೆದುಹಾಕಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ.",
-    "dismiss": "ಮುಚ್ಚಿ"
+    "dismiss": "ಮುಚ್ಚಿ",
+    "allocationsHeading": "ಹಂಚಿಕೆಗಳು",
+    "wizardRemoveDimension": "ಆಯಾಮವನ್ನು ತೆಗೆದುಹಾಕಿ",
+    "wizardRemoveKey": "ಕೀಲಿಯನ್ನು ತೆಗೆದುಹಾಕಿ"
   },
   "plugins": {
     "title": "ಪ್ಲಗಿನ್ಗಳು",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "ಸೆಟ್ಟಿಂಗ್ಗಳ ನವೀಕರಣ ವಿಫಲವಾಗಿದೆ",
       "serviceRevealApiKey": "{actor} ಅವರು {target} ಗಾಗಿ API ಕೀಲಿಯನ್ನು ಬಹಿರಂಗಪಡಿಸಿದ್ದಾರೆ",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "ದೋಷವನ್ನು ಮುಚ್ಚಿ"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "ಈಗಲೇ ಹೋಗಿ",
       "message": "MITM Proxy ಈಗ AgentBridge ಅಡಿಯಲ್ಲಿ ಲಭ್ಯವಿದೆ.",
       "title": "ಈ ಪುಟವನ್ನು ಸ್ಥಳಾಂತರಿಸಲಾಗಿದೆ"
-    }
+    },
+    "dnsOn": "DNS ಆನ್",
+    "dnsOff": "DNS ಆಫ್",
+    "showServerSettings": "ಸರ್ವರ್ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ತೋರಿಸಿ",
+    "hideServerSettings": "ಸರ್ವರ್ ಸೆಟ್ಟಿಂಗ್ಗಳನ್ನು ಮರೆಮಾಡಿ",
+    "upstreamCaTesting": "ಪರೀಕ್ಷಿಸಲಾಗುತ್ತಿದೆ…",
+    "removeMapping": "ಮ್ಯಾಪಿಂಗ್ ತೆಗೆದುಹಾಕಿ",
+    "mappingSourcePlaceholder": "ಉದಾ., gemini-3.6-flash-medium, ಅಥವಾ ಮ್ಯಾಪ್ ಮಾಡದ ಎಲ್ಲದಕ್ಕೂ *",
+    "mappingWildcardHint": "ಸ್ಪಷ್ಟ ಮ್ಯಾಪಿಂಗ್ ಇಲ್ಲದ ಪ್ರತಿಯೊಂದು ಮಾಡೆಲ್ ಅನ್ನು OmniRoute ಮೂಲಕ ಆಯ್ಕೆಮಾಡಿದ ಗುರಿಗೆ ರೂಟ್ ಮಾಡಲು ಮೂಲವಾಗಿ * ಬಳಸಿ. ನಿಖರವಾದ ಮೂಲ ಹೊಂದಾಣಿಕೆಗಳು ಯಾವಾಗಲೂ * ಗಿಂತ ಆದ್ಯತೆ ಪಡೆಯುತ್ತವೆ.",
+    "wizardDetectingModels": "ಇಂಟರ್ಸೆಪ್ಟ್ ಮಾಡಿದ ಟ್ರಾಫಿಕ್ನಿಂದ ಮಾಡೆಲ್ಗಳನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗುತ್ತಿದೆ...",
+    "wizardDetectedModels": "ಇಂಟರ್ಸೆಪ್ಟ್ ಮಾಡಿದ ಟ್ರಾಫಿಕ್ನಲ್ಲಿ {count, plural, one {# ಮಾಡೆಲ್} other {# ಮಾಡೆಲ್ಗಳು}} ಕಂಡುಬಂದಿವೆ. ನೀವು ಸೇರಿಸಲು ಬಯಸುವವುಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ:",
+    "wizardSelectedModels": "{count, plural, one {# ಮಾಡೆಲ್} other {# ಮಾಡೆಲ್ಗಳು}} ಆಯ್ಕೆಮಾಡಲಾಗಿದೆ. ಮುಂದಿನ ಪರದೆಯಲ್ಲಿ ಅವುಗಳನ್ನು OmniRoute ಮಾಡೆಲ್ಗಳಿಗೆ ಮ್ಯಾಪ್ ಮಾಡುವಿರಿ.",
+    "wizardAddModels": "{count, plural, one {# ಮಾಡೆಲ್} other {# ಮಾಡೆಲ್ಗಳು}} ಸೇರಿಸಿ",
+    "wizardNoModelsDetected": "ಇನ್ನೂ ಯಾವುದೇ ಮಾಡೆಲ್ಗಳು ಪತ್ತೆಯಾಗಿಲ್ಲ. ವಿನಂತಿಯನ್ನು ಮಾಡಲು {agent} ಬಳಸಿ, ನಂತರ ಟ್ರಾಫಿಕ್ನಿಂದ ಮಾಡೆಲ್ಗಳನ್ನು ಸ್ವಯಂ ಪತ್ತೆಹಚ್ಚಲು ಈ ವಿಝಾರ್ಡ್ ಅನ್ನು ಮತ್ತೆ ಚಲಾಯಿಸಿ.",
+    "wizardNoModelsHint": "ಅಥವಾ ಈ ವಿಝಾರ್ಡ್ ಅನ್ನು ಮುಚ್ಚಿ ಮತ್ತು ಏಜೆಂಟ್ ಕಾರ್ಡ್ನಲ್ಲಿ ಮ್ಯಾಪಿಂಗ್ಗಳನ್ನು ಹಸ್ತಚಾಲಿತವಾಗಿ ಸೇರಿಸಿ."
   },
   "providerStats": {
     "unknownError": "ಅಜ್ಞಾತ ದೋಷ",
@@ -12685,7 +12966,12 @@
     "avgTtft": "ಸರಾಸರಿ TTFT",
     "avgTotal": "ಸರಾಸರಿ ಒಟ್ಟು",
     "requestTelemetry": "ವಿನಂತಿ ಟೆಲಿಮೆಟ್ರಿ",
-    "requestTelemetryDescription": "7-ಹಂತದ ಪೈಪ್ಲೈನ್ ವಿವರ (ಕಳೆದ 5 ನಿಮಿಷಗಳು)"
+    "requestTelemetryDescription": "7-ಹಂತದ ಪೈಪ್ಲೈನ್ ವಿವರ (ಕಳೆದ 5 ನಿಮಿಷಗಳು)",
+    "title": "ಪ್ರೊವೈಡರ್ ಅಂಕಿಅಂಶಗಳು",
+    "description": "ಪ್ರತಿ ಪ್ರೊವೈಡರ್ ಮತ್ತು ಪ್ರತಿ ಮಾಡೆಲ್ನ ಟ್ರಾಫಿಕ್, ಲೇಟೆನ್ಸಿ ಮತ್ತು ಯಶಸ್ಸಿನ ದರಗಳು",
+    "combo": "ಸಂಯೋಜನೆ",
+    "toggleModels": "{provider} ಗಾಗಿ ಮಾಡೆಲ್ಗಳನ್ನು ತೋರಿಸಿ",
+    "windowSince": "{date} ಇಂದ"
   },
   "relay": {
     "title": "ಸರ್ವರ್ಲೆಸ್ ರಿಲೇ ಪ್ರಾಕ್ಸಿಗಳು",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "ವಿನಂತಿಯ ಬಾಡಿ ಇಲ್ಲ.",
     "noResponseBody": "ಪ್ರತಿಕ್ರಿಯೆಯ ಬಾಡಿ ಇಲ್ಲ.",
     "formatted": "ಸ್ವರೂಪಗೊಳಿಸಲಾಗಿದೆ",
-    "raw": "ಕಚ್ಚಾ"
+    "raw": "ಕಚ್ಚಾ",
+    "requestCount": "{count, plural, one {# ವಿನಂತಿ} other {# ವಿನಂತಿಗಳು}}",
+    "expandList": "ಪಟ್ಟಿಯನ್ನು ವಿಸ್ತರಿಸಿ",
+    "collapseList": "ಪಟ್ಟಿಯನ್ನು ಕುಗ್ಗಿಸಿ",
+    "snippetLanguage": "ಕೋಡ್ ತುಣುಕಿನ ಭಾಷೆ",
+    "headersTable": "ಹೆಡರ್ಗಳು",
+    "showSecrets": "ರಹಸ್ಯಗಳನ್ನು ತೋರಿಸಿ",
+    "maskSecrets": "ರಹಸ್ಯಗಳನ್ನು ಮರೆಮಾಚಿ",
+    "llmNotAvailable": "ಈ ವಿನಂತಿಗೆ LLM ಮೆಟಾಡೇಟಾ ಲಭ್ಯವಿಲ್ಲ.",
+    "llmStreamYes": "ಹೌದು (SSE)",
+    "llmStreamNo": "ಇಲ್ಲ",
+    "llmTotalTokens": "ಒಟ್ಟು: {count} ಟೋಕನ್ಗಳು"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI ಕೋಡ್ಗಳು",
     "pageSubtitle": "OmniRoute ಅನ್ನು ಬಳಸುವಂತೆ ಸಂರಚಿಸಲಾದ ಕೋಡ್ ಪರಿಕರಗಳು",
     "searchPlaceholder": "CLI ಹುಡುಕಿ…",
     "filterDetectionLabel": "ಪತ್ತೆಹಚ್ಚುವಿಕೆ",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "ಕಂಡುಬಂದಿಲ್ಲ",
     "baseUrlAll": "ಎಲ್ಲಾ",
     "baseUrlFull": "ಪೂರ್ಣ",
-    "baseUrlPartial": "ಭಾಗಶಃ"
+    "baseUrlPartial": "ಭಾಗಶಃ",
+    "title": "CLI ಕೋಡ್"
   },
   "cliAgents": {
     "pageTitle": "CLI ಏಜೆಂಟ್ಗಳು",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "ಕಳೆದ 24 ಗಂಟೆಗಳಲ್ಲಿ ಈ ಪೂರೈಕೆದಾರರು ನಿಜವಾಗಿ ಉತ್ತರಿಸಿದ ಕರೆಗಳ ಪ್ರಮಾಣ. ಡ್ಯಾಶ್ ಗುರುತು ಎಂದರೆ ಪ್ರಮಾಣವನ್ನು ನಿರ್ಧರಿಸಲು ಇದು ಸಾಕಷ್ಟು ಟ್ರಾಫಿಕ್ ಅನ್ನು ನಿರ್ವಹಿಸಿಲ್ಲ ಎಂದರ್ಥ.",
     "reliabilitySample": "ಕಳೆದ {hours} ಗಂಟೆಗಳಲ್ಲಿ {requests} ಕರೆಗಳಲ್ಲಿ {successes} ಯಶಸ್ವಿಯಾಗಿವೆ",
     "reliabilityTooFew": "ಕಳೆದ {hours} ಗಂಟೆಗಳಲ್ಲಿ ಕೇವಲ {requests} ಕರೆಗಳು — ಪ್ರಮಾಣವನ್ನು ನಿರ್ಧರಿಸಲು ತುಂಬಾ ಕಡಿಮೆ",
-    "reliabilityNoTraffic": "ಕಳೆದ 24 ಗಂಟೆಗಳಲ್ಲಿ ಯಾವುದೇ ಕರೆಗಳು ದಾಖಲಾಗಿಲ್ಲ"
+    "reliabilityNoTraffic": "ಕಳೆದ 24 ಗಂಟೆಗಳಲ್ಲಿ ಯಾವುದೇ ಕರೆಗಳು ದಾಖಲಾಗಿಲ್ಲ",
+    "categoryFilter": "ಕಾರ್ಯ ವರ್ಗ"
   },
   "discovery": {
     "title": "ಪೂರೈಕೆದಾರರ ಅನ್ವೇಷಣೆ",
@@ -13330,7 +13628,11 @@
     "method": "ವಿಧಾನ",
     "auth": "ದೃಢೀಕರಣ",
     "feasibility": "ಕಾರ್ಯಸಾಧ್ಯತೆ",
-    "models": "ಮಾದರಿಗಳು"
+    "models": "ಮಾದರಿಗಳು",
+    "provider": "ಪೂರೈಕೆದಾರ",
+    "status": "ಸ್ಥಿತಿ",
+    "endpoint": "ಎಂಡ್ಪಾಯಿಂಟ್",
+    "actions": "ಕ್ರಿಯೆಗಳು"
   },
   "noAuthProvider": {
     "title": "ಯಾವುದೇ ದೃಢೀಕರಣದ ಅಗತ್ಯವಿಲ್ಲ",
@@ -13379,7 +13681,8 @@
     "ownProxy": "ಸ್ವಂತ ಪ್ರಾಕ್ಸಿ",
     "freeTierPause": "ಮಾಡೆಲ್ {model} ವಿರಾಮಗೊಂಡಿದೆ (429), {time} ಗೆ ಮರಳುತ್ತದೆ",
     "freeTierPauseProvider": "ವಿರಾಮಗೊಂಡಿದೆ (429), {time} ಗೆ ಮರಳುತ್ತದೆ",
-    "freeTierPauseNote": "ಈ ಇನ್‌ಸ್ಟೆನ್ಸ್‌ನಲ್ಲಿ ಪ್ರಕ್ರಿಯೆಯೊಳಗಿನ ವಿರಾಮ"
+    "freeTierPauseNote": "ಈ ಇನ್‌ಸ್ಟೆನ್ಸ್‌ನಲ್ಲಿ ಪ್ರಕ್ರಿಯೆಯೊಳಗಿನ ವಿರಾಮ",
+    "proxyType": "ಪ್ರಾಕ್ಸಿ ಪ್ರಕಾರ"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "ಗುಪ್ತ ಸಾಧನೆಯೊಂದು ಕಾಯುತ್ತಿದೆ...",
         "criteria": "ಈ ಬ್ಯಾಡ್ಜ್ ಅನ್ನು ಬಹಿರಂಗಪಡಿಸಲು ಗುಪ್ತ ಸಾಧನೆಯನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ."
       }
-    }
+    },
+    "leaderboardTitle": "ಲೀಡರ್ಬೋರ್ಡ್",
+    "leaderboardDescription": "ನಿಮ್ಮ API ಕೀಗಳಾದ್ಯಂತದ ಶ್ರೇಯಾಂಕಗಳು ಮತ್ತು ಸಾಧನೆಗಳು",
+    "badgeLocked": "ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"
   },
   "featureFlags": {
     "title": "ವೈಶಿಷ್ಟ್ಯ ಫ್ಲ್ಯಾಗ್ಗಳು",
@@ -13610,7 +13916,9 @@
       "disabled": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
       "dual": "ದ್ವಂದ್ವ",
       "alias": "ಅಲಿಯಾಸ್",
-      "canonical": "ಕ್ಯಾನಾನಿಕಲ್"
+      "canonical": "ಕ್ಯಾನಾನಿಕಲ್",
+      "fail_closed": "ತಡೆ (fail_closed)",
+      "count_as_zero": "$0 ಎಂದು ಎಣಿಸಿ (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "ರಕ್ಷಿತ-ಆದ್ಯತೆಯ ಮೂಲಸೌಕರ್ಯ ನಿಲುಗಡೆಗಳು 502 ಆಗಿ",
         "description": "ಕೇವಲ ಕೋಟಾ-ಫಾಲ್ಬ್ಯಾಕ್ ಆದ್ಯತಾ ಗುರಿಯು ಕಾಂಬೊವನ್ನು ಕೋಟಾದ ಕಾರಣವಲ್ಲ ಎಂದು ಖಚಿತವಾಗಿ ಸಾಬೀತುಪಡಿಸಬಹುದಾದ ಕಾರಣಕ್ಕಾಗಿ ನಿಲ್ಲಿಸಿದಾಗ 503 ಬದಲು 502 ಉತ್ತರಿಸಿ: ತೆರೆದ ಪೂರೈಕೆದಾರ ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ ಅಥವಾ ಮುನ್ಸೂಚಕ ಲೇಟೆನ್ಸಿ ಸ್ಕಿಪ್."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "ಖಾತೆ I.D.ಗಳು ದಾಖಲಿಸಿ",
+        "description": "AUTH ದಾಖಲೆ ಲೈನ್‌ಗಳಲ್ಲಿ ಖಾತೆ ಪ್ರಿಫಿಕ್ಸ್ ಹೊಂದಿಡಿ (ಉದಾ. \"'<provider>' ಖಾತೆಯನ್ನು ಬಳಸುತ್ತಿದೆ: abc12345...\"). ಹಂಚಿಕೆಯಾದ/ಬಹು-ಟೆನಂಟ್ ಪ್ರಕ್ರಿಯೆ ದಾಖಲೆಗಳಿಂದ ಖಾತೆ ಗುರುತುಗಳನ್ನು ಅಮುಚ್ಚಲು ಮೂಲ ಮೌಲ್ಯವಾಗಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ. ಡೀಬಾಗ್ ಮೋಡ್‌ನಿಂದ ಸ್ವತಂತ್ರ; ಡೀಬಾಗ್ ಮೋಡ್ ಬದಲಿಸುವುದರಿಂದ ಇದು ಬಯಸದು."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "OIDC ಯೊಂದಿಗೆ ಪಾಸ್‌ವರ್ಡ್ ಲಾಗಿನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
+        "description": "OIDC ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, ಪಾಸ್‌ವರ್ಡ್ ಲಾಗಿನ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ ಇದರಿಂದ ಬಳಕೆದಾರರು OIDC Single Sign-On ಮೂಲಕ ಮಾತ್ರ ದೃಢೀಕರಿಸಬಹುದು. ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿದಾಗ (ಪೂರ್ವನಿಯೋಜಿತ), ಪಾಸ್‌ವರ್ಡ್ ಲಾಗಿನ್ ಮತ್ತು OIDC ಎರಡೂ ಲಭ್ಯವಿರುತ್ತವೆ."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "ರಿಮೋಟ್ ಆಡಿಯೋ ಪ್ರೊವೈಡರ್ ನೋಡ್‌ಗಳು",
+        "description": "/v1/audio/* ರೂಟ್‌ಗಳು localhost ನ ಹೊರಗೆ ಹೋಸ್ಟ್ ಮಾಡಲಾದ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಪ್ರೊವೈಡರ್ ನೋಡ್‌ಗಳನ್ನು ಬಳಸಲು ಅನುಮತಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ — ಆಡಿಯೋವನ್ನು ರಿಮೋಟ್ ಹೋಸ್ಟ್‌ಗೆ ರೂಟ್ ಮಾಡುವುದರಿಂದ egress ಗುರುತು ಬದಲಾಗುತ್ತದೆ ಮತ್ತು ಇದು ಆಪರೇಟರ್‌ನ ಸ್ಪಷ್ಟ ನಿರ್ಧಾರವಾಗಿರಬೇಕು. Loopback ನೋಡ್‌ಗಳನ್ನು ಯಾವಾಗಲೂ ಅನುಮತಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಅವು ಯಾವುದೇ ಪರಿಣಾಮಕ್ಕೊಳಗಾಗುವುದಿಲ್ಲ."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "ರಿಮೋಟ್ Rerank ಪ್ರೊವೈಡರ್ ನೋಡ್‌ಗಳು",
+        "description": "POST /v1/rerank (ಮತ್ತು ಮೆಮೊರಿ ಎಂಜಿನ್‌ನ rerank ಹಂತ, ಇದು loopback ಮೂಲಕ ಕರೆ ಮಾಡುತ್ತದೆ) localhost ನ ಹೊರಗೆ ಹೋಸ್ಟ್ ಮಾಡಲಾದ OpenAI-ಹೊಂದಾಣಿಕೆಯ ಪ್ರೊವೈಡರ್ ನೋಡ್‌ಗಳನ್ನು — TEI, Infinity, vLLM ಇತ್ಯಾದಿಗಳನ್ನು ರನ್ ಮಾಡುವ LAN ಬಾಕ್ಸ್ ಅಥವಾ Tailscale ಪೀರ್ ಅನ್ನು ಬಳಸಲು ಅನುಮತಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ — ರಿಮೋಟ್ ಹೋಸ್ಟ್‌ಗೆ ರೂಟ್ ಮಾಡುವುದರಿಂದ egress ಗುರುತು ಬದಲಾಗುತ್ತದೆ ಮತ್ತು ಇದು ಆಪರೇಟರ್‌ನ ಸ್ಪಷ್ಟ ನಿರ್ಧಾರವಾಗಿರಬೇಕು. Loopback ನೋಡ್‌ಗಳನ್ನು ಯಾವಾಗಲೂ ಅನುಮತಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಯಾವುದೇ ಪರಿಣಾಮಕ್ಕೊಳಗಾಗುವುದಿಲ್ಲ. ರಿಮೋಟ್ ನೋಡ್‌ಗಳು ಪ್ರೊವೈಡರ್‌ನ ಹೊರಹೋಗುವ URL ನೀತಿಯನ್ನು ಸಹ ಪಾಸ್ ಮಾಡಬೇಕು."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "ನೆಟ್‌ವರ್ಕ್ ರೊಟೇಷನ್ Shared-Egress ಗಾರ್ಡ್",
+        "description": "ಮಲ್ಟಿ-ಅಕೌಂಟ್ ರೊಟೇಷನ್ ಎಕ್ಸಿಕ್ಯೂಟರ್‌ನಲ್ಲಿ ನೆಟ್‌ವರ್ಕ್ ದೋಷ (ಟೈಮ್‌ಔಟ್, ಕನೆಕ್ಷನ್ ನಿರಾಕರಣೆ/ರೀಸೆಟ್) ಸಂಭವಿಸಿದಾಗ, ವಿಫಲವಾದ ಖಾತೆಯು ಯಾವುದೇ ಡೆಡಿಕೇಟೆಡ್ ಪ್ರಾಕ್ಸಿ ಹೊಂದಿಲ್ಲದಿದ್ದರೆ, ಪ್ರತಿಯೊಂದನ್ನು ಮರುಪ್ರಯತ್ನಿಸುವ ಬದಲು ಸಣ್ಣ ಕೂಲ್‌ಡೌನ್ ಅನ್ನು ಅನ್ವಯಿಸಿ ಮತ್ತು ವಿನಂತಿಯ ಉಳಿದ ಭಾಗಕ್ಕೆ ಇತರ ಪ್ರಾಕ್ಸಿ-ರಹಿತ ಖಾತೆಗಳನ್ನು ಸ್ಕಿಪ್ ಮಾಡಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆನ್ ಆಗಿದೆ (ಸುರಕ್ಷಿತ: ಯಾವುದೇ egress IP ಬದಲಾವಣೆ ಇಲ್ಲ, shared-egress ಖಾತೆಗಳಲ್ಲಿ ಲ್ಯಾಟೆನ್ಸಿ/ಕೂಲ್‌ಡೌನ್ ಅಪಾಯವನ್ನು ಮಾತ್ರ ಕಡಿಮೆ ಮಾಡುತ್ತದೆ). ಮೊದಲ ಪ್ರಾಕ್ಸಿ-ರಹಿತ throw ನಲ್ಲಿ ತಕ್ಷಣದ ಪ್ರಸರಣವನ್ನು ಮರುಸ್ಥಾಪಿಸಲು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "ಇತ್ತೀಚೆಗೆ ವಿಫಲವಾದ ಪ್ರಾಕ್ಸಿಗಳನ್ನು ಸ್ಕಿಪ್ ಮಾಡಿ",
+        "description": "ಪ್ರಾಕ್ಸಿ ಪೂಲ್‌ಗಳು ಮತ್ತು opencode ನ ಪ್ರತಿ-ಖಾತೆ ರೊಟೇಶನ್, ಗರಿಷ್ಠ ಮಿತಿಯವರೆಗೆ ಪ್ರತಿ ಪುನರಾವರ್ತನೆಯಲ್ಲಿ ದ್ವಿಗುಣಗೊಳ್ಳುವ ಪ್ರತಿ-ಪ್ರಕ್ರಿಯೆಯ ಅವಧಿಗೆ, ಈಗಷ್ಟೇ ವಿಫಲವಾದ (TCP ಪ್ರೋಬ್ ನಿರಾಕರಿಸಲ್ಪಟ್ಟ, ಅಥವಾ ಅದರ ಮೂಲಕ 429 ಸ್ವೀಕರಿಸಲಾದ) ಪ್ರಾಕ್ಸಿಗೆ ಮರು-ಸೇವೆ ನೀಡುವುದನ್ನು ನಿಲ್ಲಿಸುತ್ತವೆ. ಯಾವುದೇ ಪ್ರಾಕ್ಸಿ ಸ್ಥಿತಿಯನ್ನು ಬರೆಯಲಾಗುವುದಿಲ್ಲ; ಪ್ರತಿಯೊಂದು ಅಭ್ಯರ್ಥಿಯನ್ನು ಬದಿಗಿರಿಸಿದಾಗಲೂ ಆಯ್ಕೆಯು ಬದಲಾಗದೆ ಉಳಿಯುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆನ್ ಆಗಿದೆ: PROXY_SKIP_RECENTLY_FAILED=false ಇದ್ದಾಗ ಮಾತ್ರ ಆಯ್ಕೆಯ ಕ್ರಮವು ಕೇವಲ ಸಾಮಾನ್ಯ ರೊಟೇಶನ್ ಆಗಿರುತ್ತದೆ."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "ಹಂಚಿಕೆಯಾದ ಎಗ್ರೆಸ್ ಪೂಲ್ ಕ್ರಮ",
+        "description": "ಎಗ್ರೆಸ್ ವಿಳಾಸದ ಆಧಾರದಲ್ಲಿ ಕೋಟಾವನ್ನು ವಿಂಗಡಿಸಲಾದ ಪ್ರೊವೈಡರ್‌ಗಳಿಗಾಗಿ, ಇತ್ತೀಚೆಗೆ ನಿರಾಕರಿಸಲಾದ ಸದಸ್ಯರ ವೀಕ್ಷಿಸಲಾದ ಎಗ್ರೆಸ್ ವಿಳಾಸವನ್ನು ಹಂಚಿಕೊಳ್ಳುವ ಪೂಲ್ ಸದಸ್ಯರಿಗೆ ಆರೋಗ್ಯಕರ ಸದಸ್ಯರ ನೇರವಾಗಿ ಕೆಳಗೆ ಶ್ರೇಯಾಂಕ ನೀಡಿ. ಕೇವಲ ಕ್ರಮ ಮಾತ್ರ, ಎಂದಿಗೂ ಹೊರಗಿಡಲಾಗುವುದಿಲ್ಲ. ಇದಕ್ಕೆ PROXY_SKIP_RECENTLY_FAILED ಅಗತ್ಯವಿದೆ, ಇದು ತಾನು ಓದುವ ನಿರಾಕರಣೆ ಸಿಗ್ನಲ್ ಅನ್ನು ಉತ್ಪಾದಿಸುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಆಯ್ಕೆಯ ಕ್ರಮವು ನಿಖರವಾಗಿ ಸಾಮಾನ್ಯ ರೊಟೇಶನ್ ಆಗಿದೆ."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "ರೊಟೇಶನ್ ಅಟ್ರಿಬ್ಯೂಷನ್ ಲಾಗಿಂಗ್",
+        "description": "Opencode ರೊಟೇಶನ್ ಯಾವ ಖಾತೆಯು ಸೇವೆ ಸಲ್ಲಿಸಿದೆ ಅಥವಾ ಸ್ಕಿಪ್ ಮಾಡಲಾಗಿದೆ ಎಂಬುದನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡುತ್ತದೆ (ಮರೆಮಾಡಲಾದ id ಗಳು ಮಾತ್ರ, ಎಂದಿಗೂ ಪೂರ್ಣ ಖಾತೆ id ಗಳಲ್ಲ) ಮತ್ತು ಪ್ರಾಕ್ಸಿ ಲಾಗ್ ನಮೂದುಗಳನ್ನು ಅವುಗಳ ವಿನಂತಿಗೆ ಲಿಂಕ್ ಮಾಡುತ್ತದೆ, ಇದರಿಂದ ಆಪರೇಟರ್ ಸ್ಕಿಪ್ ಮಾಡಲಾದ ಖಾತೆಗಳನ್ನು ಬಳಸದ ಖಾತೆಗಳಿಂದ ಪ್ರತ್ಯೇಕಿಸಿ ತಿಳಿಯಬಹುದು. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಯಾವುದೇ ಹೆಚ್ಚುವರಿ ಲಾಗ್ ಸಾಲುಗಳಿಲ್ಲ, ಯಾವುದೇ ಹೆಚ್ಚುವರಿ ಕಾಲಮ್‌ಗಳನ್ನು ಬರೆಯಲಾಗುವುದಿಲ್ಲ."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "ಪ್ರಾಕ್ಸಿ ಪೂಲ್ ಎಗ್ರೆಸ್ ವೀಕ್ಷಣೆ",
+        "description": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿರುವ ಪ್ರಾಕ್ಸಿ ಪೂಲ್ ಅಡಿಯಲ್ಲಿ, ಕಳೆದ 24 h ನಲ್ಲಿ ಎಷ್ಟು ವೀಕ್ಷಿಸಲಾದ ಎಗ್ರೆಸ್ IP ಗಳು ಅದರ ಸದಸ್ಯರಿಗೆ ಸೇವೆ ಸಲ್ಲಿಸಿವೆ, ಎಷ್ಟು ಸಂಪರ್ಕಗಳು ಅವುಗಳನ್ನು ಬಳಸಿಕೊಂಡಿವೆ ಮತ್ತು ಒಂದು IP ಯ ಹಿಂದೆ ಅತಿ ಹೆಚ್ಚು ಕಂಡುಬಂದವುಗಳನ್ನು ತೋರಿಸಿ. ಓದಲು ಮಾತ್ರ, ಪ್ರಾಕ್ಸಿ ಲಾಗ್‌ನಿಂದ ಲೆಕ್ಕಹಾಕಲಾಗುತ್ತದೆ, ರೂಟಿಂಗ್‌ಗಾಗಿ ಎಂದಿಗೂ ಬಳಸಲಾಗುವುದಿಲ್ಲ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಪೂಲ್ ಎಡಿಟರ್ ಬದಲಾಗದೆ ಉಳಿಯುತ್ತದೆ ಮತ್ತು ವೀಕ್ಷಣಾ ರೂಟ್ null ಎಂದು ಉತ್ತರಿಸುತ್ತದೆ."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "ಪ್ರಾಕ್ಸಿ ಆಪರೇಟರ್ ಎಗ್ರೆಸ್",
+        "description": "ಪ್ರತಿ ಪೂಲ್ ಸದಸ್ಯರಿಗೆ ಆಪರೇಟರ್-ಪುಶ್ ಮಾಡಿದ ದಿನಾಂಕದ ವೀಕ್ಷಿಸಲಾದ ವಿಳಾಸಗಳನ್ನು ಸ್ವೀಕರಿಸಿ ಮತ್ತು ಪ್ರದರ್ಶನ ಹಾಗೂ ಪೂಲ್ ಕ್ರಮಕ್ಕಾಗಿ ಜರ್ನಲ್ ರೀಡ್ ಜೊತೆಗೆ ಅವುಗಳನ್ನು ವಿಲೀನಗೊಳಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಪುಶ್ ರೂಟ್ 404 ಎಂದು ಉತ್ತರಿಸುತ್ತದೆ ಮತ್ತು ಪೂಲ್ ರೀಡ್‌ಗಳು ಮೊದಲಿನಂತೆಯೇ ವರ್ತಿಸುತ್ತವೆ."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses ಸ್ಥಗಿತ ರೊಟೇಶನ್",
+        "description": "OpenCode ಎಕ್ಸಿಕ್ಯೂಟರ್‌ಗಾಗಿ, ಸ್ಟ್ರೀಮ್ ಮಾಡಲಾದ Responses ಪ್ರತ್ಯುತ್ತರದ ಮೊದಲ ಬಾಡಿ ಬೈಟ್ ಅನ್ನು ಗಮನಿಸಿ (ವಿಂಡೋ: RESPONSES_FIRST_BYTE_TIMEOUT_MS, ಡೀಫಾಲ್ಟ್ 15000). ವಿಂಡೋ ಮೀರಿದ ನಂತರವೂ ನಿಶ್ಶಬ್ದವಾಗಿರುವ 2xx Responses ಸ್ಟ್ರೀಮ್ ಅನ್ನು ಸ್ಥಗಿತಗೊಂಡಿದೆ ಎಂದು ಪರಿಗಣಿಸಲಾಗುತ್ತದೆ: ಖಾತೆಯನ್ನು ಕೂಲ್‌ಡೌನ್ ಮಾಡಲಾಗುತ್ತದೆ ಮತ್ತು ವಿನಂತಿಯು ಮುಂದಿನ ಖಾತೆಗೆ ಒಮ್ಮೆ ರೊಟೇಟ್ ಆಗುತ್ತದೆ; ಎರಡನೇ ಬಾರಿಯ ಸ್ಥಗಿತವು ತಕ್ಷಣವೇ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಸ್ಥಗಿತಗೊಂಡ ಸ್ಟ್ರೀಮ್‌ಗಳು ಸ್ಟ್ರೀಮ್ ಸನ್ನದ್ಧತೆಯ ಟೈಮ್‌ಔಟ್ ಮುಗಿಯುವವರೆಗೆ ಇಂದಿನ ಕಾಯುವಿಕೆಯನ್ನು ಮುಂದುವರಿಸುತ್ತವೆ."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked ರೊಟೇಶನ್",
+        "description": "OpenCode ಎಕ್ಸಿಕ್ಯೂಟರ್‌ಗಾಗಿ, ಅಪ್‌ಸ್ಟ್ರೀಮ್ user_blocked ತಿರಸ್ಕಾರವನ್ನು ಹೊಂದಿರುವ 403 ಅಥವಾ 451 ನೊಂದಿಗೆ ಪ್ರತಿಕ್ರಿಯಿಸಿದಾಗ (ಜಿಯೋ ಬ್ಲಾಕ್ ಅಲ್ಲ, Cloudflare ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ತಿರಸ್ಕಾರವೂ ಅಲ್ಲ), ತಿರಸ್ಕರಿಸಲಾದ ಖಾತೆಯನ್ನು ಕೂಲ್‌ಡೌನ್ ಮಾಡಿ ಮತ್ತು ಪ್ರತಿ ವಿನಂತಿಗೆ ಗರಿಷ್ಠ ಒಂದು ಬಾರಿ ಮುಂದಿನ ಖಾತೆಗೆ ರೊಟೇಟ್ ಮಾಡಿ; ಎರಡನೇ ತಿರಸ್ಕಾರವನ್ನು ಯಾವುದೇ ಯಶಸ್ಸಿನ ಗುರುತಿಲ್ಲದೆ ಹಾಗೆಯೇ ಹಿಂತಿರುಗಿಸಲಾಗುತ್ತದೆ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಅಪ್‌ಸ್ಟ್ರೀಮ್ ಬಳಕೆದಾರ ಬ್ಲಾಕ್ ಅನ್ನು ಬೈಪಾಸ್ ಮಾಡುವುದು ತಪ್ಪಿಸಿಕೊಳ್ಳುವ ಪ್ರಯತ್ನದಂತೆ ಕಾಣಿಸಬಹುದು ಮತ್ತು ಖಾತೆಗಳ ಸಮೂಹಕ್ಕೆಲ್ಲಾ ಫ್ಲ್ಯಾಗ್ ಹರಡಬಹುದು, ಆದ್ದರಿಂದ ಆಪರೇಟರ್ ಸಮ್ಮತಿಸದ ಹೊರತು ತಿರಸ್ಕಾರವನ್ನು ಬದಲಾಯಿಸದೆ ಹಾಗೆಯೇ ಹಿಂತಿರುಗಿಸಲಾಗುತ್ತದೆ."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode ತಾತ್ಕಾಲಿಕ ಫೇಲ್‌ಓವರ್ ಬ್ಯಾಕ್‌ಆಫ್",
+        "description": "OpenCode ಬಹು-ಖಾತೆ ರೊಟೇಶನ್‌ಗಾಗಿ, ಸತತ ಎರಡು ಪ್ರಯತ್ನಗಳು ತಾತ್ಕಾಲಿಕ ಅಪ್‌ಸ್ಟ್ರೀಮ್ ದೋಷದೊಂದಿಗೆ (5xx ಅಥವಾ ಖಾಲಿ 400 ತಿರಸ್ಕಾರ) ವಿಫಲವಾದಾಗ, ಮುಂದಿನ ಖಾತೆಗೆ ಕಳುಹಿಸುವ ಮೊದಲು ವಿರಾಮಗೊಳಿಸಿ. ವಿರಾಮವು 1.5s ನಿಂದ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ, ನಂತರದ ಪ್ರತಿ ಸತತ ವೈಫಲ್ಯಕ್ಕೆ ದ್ವಿಗುಣಗೊಳ್ಳುತ್ತದೆ, ಪ್ರತಿ ವಿರಾಮಕ್ಕೆ ಗರಿಷ್ಠ 6s ಮತ್ತು ಪ್ರತಿ ವಿನಂತಿಗೆ ಗರಿಷ್ಠ 10s ನ ಮಿತಿಯನ್ನು ಹೊಂದಿರುತ್ತದೆ, ಕ್ಲೈಂಟ್ ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಾಗ ಇದನ್ನು ಸ್ಕಿಪ್ ಮಾಡಲಾಗುತ್ತದೆ, ಮತ್ತು ಕಾಯುವ ಮೊದಲು ವಿಫಲವಾದ ಪ್ರತಿಕ್ರಿಯೆ ಬಾಡಿಯನ್ನು ಬಿಡುಗಡೆ ಮಾಡಲಾಗುತ್ತದೆ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಫೇಲ್‌ಓವರ್ ತಕ್ಷಣವೇ ಆಗಿರುತ್ತದೆ."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "ಖಾಲಿ ಟರ್ನ್ ಮರುಪ್ರಯತ್ನ ಫ್ಲಶ್",
+        "description": "ಅನುವಾದಿಸಲಾದ ಸ್ಟ್ರೀಮಿಂಗ್ ಟರ್ನ್‌ಗಳಲ್ಲಿ, ಅಪ್‌ಸ್ಟ್ರೀಮ್ ಟರ್ನ್ ಯಾವುದೇ ಬಳಸಬಹುದಾದ ವಿಷಯವನ್ನು ಹೊಂದಿಲ್ಲದಿದ್ದಾಗ (reasoning-only ಪೂರ್ಣಗೊಳಿಸುವಿಕೆ ಅಥವಾ ಯಾವುದೇ ಮೌಲ್ಯಯುತ ಚಂಕ್‌ಗಳಿಲ್ಲದಿರುವುದು), ಕ್ಲೈಂಟ್‌ಗೆ ಏನನ್ನೂ ಬಹಿರಂಗಪಡಿಸುವ ಮೊದಲು ಸಾಮಾನ್ಯ ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಪಾತ್ ಮೂಲಕ ಸೀಮಿತ ಮರುಪ್ರಯತ್ನಗಳನ್ನು (`STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` ವರೆಗೆ) ನಡೆಸಿ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಖಾಲಿ ಟರ್ನ್‌ಗಳು ಪ್ರಸ್ತುತ ನಡವಳಿಕೆಯನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ (ಖಾಲಿ 200 ಅಥವಾ empty-content 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "ಖಾಲಿ ಸ್ಟ್ರೀಮ್ ಸಿಬ್ಲಿಂಗ್ ಮರುಪಡೆಯುವಿಕೆ",
+        "description": "Claude/Codex ಸ್ಟ್ರೀಮಿಂಗ್: ಮೊದಲ ಲೈಫ್‌ಸೈಕಲ್ ಈವೆಂಟ್ ನಂತರ, ಬಳಸಬಹುದಾದ ಔಟ್‌ಪುಟ್‌ಗಾಗಿ ಸಂಕ್ಷಿಪ್ತವಾಗಿ ಪರಿಶೀಲಿಸಿ (ಗರಿಷ್ಠ 1s / 64 KiB ವರೆಗೆ); ಯಾವುದೇ ವಿಷಯವಿಲ್ಲದೆ ಕೊನೆಗೊಳ್ಳುವ ಸ್ಟ್ರೀಮ್ empty_content ವೈಫಲ್ಯವಾಗುತ್ತದೆ ಮತ್ತು ಇದು ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸೀಮಿತ ಮರುಪ್ರಯತ್ನವನ್ನು ಮತ್ತೊಂದು ಅರ್ಹ ಸಂಪರ್ಕದಲ್ಲಿ ಬಳಸುತ್ತದೆ (ಯಾವುದೇ ಕೂಲ್‌ಡೌನ್ ಇಲ್ಲ, ಯಾವುದೇ ಮಾಡೆಲ್ ಲಾಕ್‌ಔಟ್ ಇಲ್ಲ), ಹಾಗೂ ಕ್ಲೈಂಟ್ ಸಂಪರ್ಕ ಕಡಿತಗೊಂಡಾಗ ರೌಂಡ್-ರಾಬಿನ್ ಕಾಂಬೋಗಳು ಮರುಪ್ರಯತ್ನಿಸುವುದನ್ನು ನಿಲ್ಲಿಸುತ್ತವೆ. ಪರಿಶೀಲನೆಯ ಒಳಗೆ refusal, pause_turn ಮತ್ತು model_context_window_exceeded ಗಳನ್ನು ಸಹ ಮಾನ್ಯವಾದ ಖಾಲಿ ಟರ್ಮಿನಲ್‌ಗಳಾಗಿ ಪರಿಗಣಿಸುತ್ತದೆ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಸನ್ನದ್ಧತೆ, empty-content ನಿರ್ವಹಣೆ ಮತ್ತು ಕಾಂಬೋ ಮರುಪ್ರಯತ್ನಗಳು ಮೊದಲಿನಂತೆಯೇ ಇರುತ್ತವೆ."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "ಸ್ಟ್ರೀಮ್ ಲೇಟ್ ಔಟ್‌ಪುಟ್ ಪ್ರೋಬ್",
+        "description": "ಸ್ಟ್ರೀಮಿಂಗ್ ಔಟ್‌ಪುಟ್ ಪ್ರೋಬ್: ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾದ ಮೊದಲ 64 ಚಂಕ್‌ಗಳ ನಂತರ ಮೊದಲ ಗೋಚರ ಔಟ್‌ಪುಟ್‌ಗಾಗಿ ಪ್ರತಿ 16 ರಲ್ಲಿ ಒಂದು ಚಂಕ್ ಅನ್ನು ಸ್ಯಾಂಪಲ್ ಮಾಡುವುದನ್ನು ಮುಂದುವರಿಸಿ, ಇದರಿಂದ ತಡವಾಗಿ ಪ್ರಾರಂಭವಾಗುವ ಔಟ್‌ಪುಟ್ ಕೂಡ ಸ್ಟ್ರೀಮ್ ಔಟ್‌ಪುಟ್ ಹೊರಸೂಸಿದೆ ಎಂದು ಗುರುತಿಸುತ್ತದೆ. ಆ ಹಂತದ ನಂತರ ಬರುವ ಪ್ರತ್ಯೇಕ 5xx ಕೇವಲ-ಮಾದರಿ ಲಾಕ್‌ಔಟ್ ದಾಖಲಿಸುವ ಬದಲು ರಿಕ್ವೆಸ್ಟ್-ವ್ಯಾಪ್ತಿಯಲ್ಲೇ ಉಳಿಯುತ್ತದೆ, ಮತ್ತು ಪ್ರಸ್ತುತ ಸ್ಯಾಂಪ್ಲಿಂಗ್ ಅಂತರದ ಮೊದಲ ಔಟ್‌ಪುಟ್ ಚಂಕ್‌ಗೆ firstOutputMs ಅನ್ನು ಬ್ಯಾಕ್-ಫಿಲ್ ಮಾಡಲಾಗುತ್ತದೆ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಮೊದಲಿನಂತೆಯೇ ಕೇವಲ ಮೊದಲ 64 ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾದ ಚಂಕ್‌ಗಳನ್ನು ಮಾತ್ರ ಪ್ರೋಬ್ ಮಾಡಲಾಗುತ್ತದೆ."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode ರೇಟ್-ಲಿಮಿಟೆಡ್ 429 ಅರ್ಲಿ ಸ್ಟಾಪ್",
+        "description": "OpenCode ಮಲ್ಟಿ-ಅಕೌಂಟ್ ರೊಟೇಶನ್‌ಗಾಗಿ, ಉಳಿದ ಪ್ರತಿಯೊಂದು ಖಾತೆಯನ್ನು ಪ್ರಯತ್ನಿಸುವ ಬದಲು ನೈಜ ರೇಟ್ ಮಿತಿ ಎಂದು ವರ್ಗೀಕರಿಸಲಾದ ಮೊದಲ 429 ನಲ್ಲೇ (ಪಾರ್ಸ್ ಮಾಡಬಹುದಾದ Retry-After ಹೆಡರ್ ಅಥವಾ ದರ/ಬಳಕೆಯ ಮಿತಿಯನ್ನು ಹೆಸರಿಸುವ ಬಾಡಿ) ಅಕೌಂಟ್ ವೇವ್ ಅನ್ನು ನಿಲ್ಲಿಸಿ ಮತ್ತು ಆ ಅಪ್‌ಸ್ಟ್ರೀಮ್ 429 ಅನ್ನು ಯಾವುದೇ ಬದಲಾವಣೆಯಿಲ್ಲದೆ (ಸ್ಟೇಟಸ್, ಬಾಡಿ, Retry-After ಮತ್ತು ಕೋಟಾ ಹೆಡರ್‌ಗಳು) ಹಿಂತಿರುಗಿಸಿ. ವರ್ಗೀಕರಿಸದ 429 ಗಳು ರೊಟೇಟ್ ಆಗುವುದನ್ನು ಮುಂದುವರಿಸುತ್ತವೆ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಉಚಿತ ಶ್ರೇಣಿಯು ಪ್ರತಿ ಇಗ್ರೆಸ್ IP ಗೆ ಸೀಮಿತವಾಗಿದೆ (#9611), ಆದ್ದರಿಂದ ಪ್ರತಿಯೊಂದು 429 ಮುಂದಿನ ಖಾತೆಗೆ ರೊಟೇಟ್ ಆಗುತ್ತದೆ ಮತ್ತು ಮುಗಿದುಹೋದ ವೇವ್ ಕೊನೆಯ ಅಪ್‌ಸ್ಟ್ರೀಮ್ 429 ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 ಪಾರ್ಕ್ ಮತ್ತು ರೆಸ್ಯೂಮ್",
+        "description": "OpenCode ಮಲ್ಟಿ-ಅಕೌಂಟ್ ರೊಟೇಶನ್‌ಗಾಗಿ, ಪುನರಾವರ್ತಿತ ತಾತ್ಕಾಲಿಕ 429 ಗಳ (ಅಥವಾ ಹೊಸ ಪೂಲ್-ಸ್ಟ್ರೈನ್ ಮಾರ್ಕರ್) ನಂತರ ರಿಕ್ವೆಸ್ಟ್ ಅನ್ನು ಹಾರ್ಟ್‌ಬೀಟ್‌ನೊಂದಿಗೆ ಪಾರ್ಕ್ ಮಾಡಿ, ನಂತರ ಸಂಪೂರ್ಣ ಫ್ಲೀಟ್‌ಗೆ ವಿಸ್ತರಿಸುವ ಬದಲು ಗರಿಷ್ಠ 3 ಅನುಕ್ರಮ ಖಾತೆಗಳ ಒಂದು ಸೀಮಿತ ಲೆಗ್ ಅನ್ನು ಮರುಪ್ಲೇ ಮಾಡಿ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಮೊದಲಿನಂತೆಯೇ ಪ್ರತಿಯೊಂದು 429 ಮುಂದಿನ ಖಾತೆಗೆ ರೊಟೇಟ್ ಆಗುತ್ತದೆ."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "ಸ್ಟ್ರೀಮ್ ರೆಡಿನೆಸ್ ಸ್ಟಾಲ್ ಮರುಪ್ರಯತ್ನ",
+        "description": "ಸ್ಟ್ರೀಮಿಂಗ್ ಚಾಟ್ ರಿಕ್ವೆಸ್ಟ್‌ಗಳಿಗಾಗಿ, ಬಳಸಬಹುದಾದ ಈವೆಂಟ್ ಅನ್ನು ಉತ್ಪಾದಿಸುವ ಮೊದಲೇ ಮೊದಲ ಅಪ್‌ಸ್ಟ್ರೀಮ್ ಬಾಡಿ ಸ್ಥಗಿತಗೊಂಡಾಗ, ಅದೇ ಸನ್ನದ್ಧತೆಯ ಬಜೆಟ್ ಮತ್ತು ಯಾವುದೇ ಖಾತೆ ಪೆನಾಲ್ಟಿ ಇಲ್ಲದೆ ಅದೇ ರೂಟಿಂಗ್ ಮಾರ್ಗದ ಮೂಲಕ ಒಂದು ಸೀಮಿತ ಎರಡನೇ ಪ್ರಯತ್ನವನ್ನು ಮಾಡಿ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಸ್ಥಗಿತಗೊಂಡ ಮೊದಲ ಬಾಡಿಯು ಯಾವುದೇ ಮರುಪ್ರಯತ್ನವಿಲ್ಲದೆ ರಿಕ್ವೆಸ್ಟ್ ಅನ್ನು ವಿಫಲಗೊಳಿಸುತ್ತದೆ."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 ಪೂಲ್ ಮರುಆಯ್ಕೆ",
+        "description": "OpenCode ಮಲ್ಟಿ-ಅಕೌಂಟ್ ರೊಟೇಶನ್‌ಗಾಗಿ, ಆಂಬಿಯೆಂಟ್ ಪೂಲ್ ಸಂದರ್ಭದಲ್ಲಿ ಪ್ರಾಕ್ಸಿ-ರಹಿತ ಖಾತೆಯಲ್ಲಿ ಇಗ್ರೆಸ್-ಬಕೆಟೆಡ್ ಪ್ರೊವೈಡರ್‌ನಿಂದ 429 ಬಂದ ನಂತರ, ಅದೇ ಇಗ್ರೆಸ್ ವಿಳಾಸವನ್ನು ಮರುಪ್ರಯತ್ನಿಸುವ ಬದಲು ಮುಂದಿನ ಪ್ರಯತ್ನಕ್ಕಾಗಿ ಕನೆಕ್ಷನ್ ಪೂಲ್‌ನಿಂದ ಮತ್ತೊಂದು ಸದಸ್ಯನನ್ನು ಕೇಳಿ. ಕ್ರಮಗೊಳಿಸುತ್ತದೆ, ಎಂದಿಗೂ ಹೊರಗಿಡುವುದಿಲ್ಲ: ಖಾಲಿಯಾದ ಪೂಲ್ ಪ್ರಸ್ತುತ ನಡವಳಿಕೆಯನ್ನು ಕಾಯ್ದುಕೊಳ್ಳುತ್ತದೆ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಮೊದಲಿನಂತೆಯೇ ಪ್ರತಿಯೊಂದು 429 ಮುಂದಿನ ಖಾತೆಗೆ ರೊಟೇಟ್ ಆಗುತ್ತದೆ."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 ಕ್ಲೈಂಟ್ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್",
+        "description": "OpenCode Zen/Go ವಿನಂತಿಗಳಲ್ಲಿ OpenCode v2 CLI ಕ್ಲೈಂಟ್ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಕಳುಹಿಸಿ (#16571): User-Agent opencode/latest/<2.x>/cli ಮತ್ತು x-opencode-client cli, ಕ್ಲೈಂಟ್ User-Agent ಅನ್ನು ಅದು 2.x OpenCode ಕ್ಲೈಂಟ್ ಆಗಿದ್ದಾಗ ಮಾತ್ರ ಉಳಿಸಿಕೊಳ್ಳಲಾಗುತ್ತದೆ, ಮತ್ತು ಗೇಟೆಡ್ ಉಚಿತ-ಶ್ರೇಣಿ ವಿನಂತಿಗಳಲ್ಲಿ ಯಾವುದೇ x-opencode-request ಇರುವುದಿಲ್ಲ, ಸೆಶನ್ ಅನ್ನು x-opencode-session-id/x-session-affinity/x-session-id ಗೆ ಮಿರರ್ ಮಾಡಲಾಗುತ್ತದೆ, ಇಂಜೆಕ್ಟ್ ಮಾಡಲಾದ ಪ್ಲೇಸ್‌ಹೋಲ್ಡರ್ ಟೂಲ್‌ಗಳ ಮೇಲಿನ v2 CLI read/shell ಸ್ಕೀಮಾಗಳು ಮತ್ತು \"none\" ನ tool_choice ಅನ್ನು ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಪ್ರತಿ OpenCode ವಿನಂತಿಯು ಪ್ರಸ್ತುತ ಗುರುತು, ಹೆಡರ್‌ಗಳು ಮತ್ತು ಬಾಡಿಯನ್ನು ಬೈಟ್‌ಗೆ ಬೈಟ್‌ನಂತೆ ಹಾಗೆಯೇ ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen Egress-IP ಲಾಕ್‌ಔಟ್",
+        "description": "ಡೀಫಾಲ್ಟ್ egress-IP ಲಾಕ್‌ಔಟ್ ಫ್ಯಾಮಿಲಿಗೆ OpenCode Zen (opencode-zen) ಅನ್ನು ಸೇರಿಸಿ, ಇದರಿಂದ ಒಂದು Zen ಸಂಪರ್ಕದಲ್ಲಿನ 429 ದೋಷವು ಅದರ egress IP ಅನ್ನು ಹಂಚಿಕೊಳ್ಳುವ ಪ್ರತಿಯೊಂದು ಸಿಬ್ಲಿಂಗ್ Zen ಸಂಪರ್ಕವನ್ನೂ ಕೂಲ್ ಡೌನ್ ಮಾಡುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: Zen ಕೀಡ್ ಆಗಿರುತ್ತದೆ ಮತ್ತು ಪ್ರತಿಯೊಂದು ಸಂಪರ್ಕವು ಮೊದಲಿನಂತೆಯೇ ತನ್ನಷ್ಟಕ್ಕೆ ತಾನೇ ಕೂಲ್ ಡೌನ್ ಆಗುತ್ತದೆ. ಸ್ಪಷ್ಟವಾದ OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS ಮೌಲ್ಯವು ಯಾವಾಗಲೂ ಈ ಫ್ಲ್ಯಾಗ್‌ಗಿಂತ ಆದ್ಯತೆ ಪಡೆಯುತ್ತದೆ."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode ಪೂರ್ಣ-ಪಠ್ಯ ದೋಷ ನಿಯಮಗಳು",
+        "description": "ಅಂತರ್ನಿರ್ಮಿತ OpenCode ದೋಷ ನಿಯಮಗಳು (opencode-zen, opencode-go, opencode-cli) ಸಂಪೂರ್ಣ ಅಪ್‌ಸ್ಟ್ರೀಮ್ ದೋಷ ಪಠ್ಯದೊಂದಿಗೆ ಹೊಂದಿಕೆಯಾಗಲು ಅನುಮತಿಸಿ, ಇದರಿಂದ organization_quota_exceeded ಅಥವಾ \"monthly usage limit reached\" ನಂತಹ ಬಾಡಿ ಮಾರ್ಕರ್‌ಗಳು 429 ಅನ್ನು connection-scoped ಲಾಕ್‌ನೊಂದಿಗೆ ಕೋಟಾ ಮುಗಿದಿದೆ ಎಂದು ವರ್ಗೀಕರಿಸುತ್ತವೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಆ ನಿಯಮಗಳು ಕೇವಲ ರಚನಾತ್ಮಕ ದೋಷ ಕೋಡ್ ಅನ್ನು ಮಾತ್ರ ನೋಡುತ್ತವೆ ಮತ್ತು ಅಂತಹ 429 ಮೊದಲಿನಂತೆಯೇ ಅಲ್ಪಾವಧಿಯ ರೇಟ್ ಮಿತಿಯಾಗಿ ಉಳಿಯುತ್ತದೆ."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI ಪೂರ್ಣ-ಪಠ್ಯ ದೋಷ ನಿಯಮಗಳು",
+        "description": "ಅಂತರ್ನಿರ್ಮಿತ Cloudflare Workers AI ದೋಷ ನಿಯಮವು ಸಂಪೂರ್ಣ ಅಪ್‌ಸ್ಟ್ರೀಮ್ ದೋಷ ಪಠ್ಯದೊಂದಿಗೆ ಹೊಂದಿಕೆಯಾಗಲು ಅನುಮತಿಸಿ, ಇದರಿಂದ 429 \"daily free allocation\" ಬಾಡಿಯನ್ನು ಅಲ್ಪಾವಧಿಯ ರೇಟ್ ಮಿತಿಯ ಬದಲಿಗೆ ಕೋಟಾ ಮುಗಿದಿದೆ ಎಂದು ವರ್ಗೀಕರಿಸಲಾಗುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ನಿಯಮವು ಮೊದಲಿನಂತೆಯೇ ರಚನಾತ್ಮಕ ದೋಷ ಕೋಡ್ ಅನ್ನು ಮಾತ್ರ ನೋಡುತ್ತದೆ."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "ಸಾಮರ್ಥ್ಯ ಫಿಲ್ಟರ್",
+        "description": "ಟಾರ್ಗೆಟ್ ಮಾದರಿಯು ಅಗತ್ಯ ಸಾಮರ್ಥ್ಯಗಳನ್ನು (vision, tools, structured output, context window) ಹೊಂದಿಲ್ಲದಿದ್ದಾಗ ರವಾನಿಸುವ ಮುನ್ನವೇ ವಿನಂತಿಗಳನ್ನು ತಿರಸ್ಕರಿಸಿ. ಕಾಂಬೊ-ಲೇಯರ್ ಹೊಂದಾಣಿಕೆ ಫಿಲ್ಟರ್ ಅನ್ನು ಬೈಪಾಸ್ ಮಾಡುವ ನೇರ single-provider ವಿನಂತಿಗಳನ್ನು ಇದು ರಕ್ಷಿಸುತ್ತದೆ."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "USD ಕೋಟಾಗಳಲ್ಲಿ ಬೆಲೆ ನಿಗದಿಪಡಿಸದ ಬಳಕೆಯನ್ನು ನಿರ್ಲಕ್ಷಿಸಿ",
+        "description": "ಕೋಟಾ ಮೀರಿದೆ ಎಂದು ಪರಿಗಣಿಸುವ ಬದಲು, ಪ್ರತಿ-ಕೀ USD ಬಳಕೆಯ ಕೋಟಾಗಳಲ್ಲಿ ಯಾವುದೇ ಬೆಲೆಯಿಲ್ಲದ ಮಾಡೆಲ್‌ಗಳ ಬಳಕೆಯನ್ನು $0 ಎಂದು ಲೆಕ್ಕಹಾಕಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಬೆಲೆ ನಿಗದಿಪಡಿಸದ ಮಾಡೆಲ್ ಅಥವಾ ರೂಟಿಂಗ್ ಅಲಿಯಾಸ್ ನೈಜ ವೆಚ್ಚವನ್ನು ಮರೆಮಾಡಬಹುದು, ಆದ್ದರಿಂದ ಕೋಟಾ ಮುಚ್ಚಿದ ಸ್ಥಿತಿಯಲ್ಲಿ ವಿಫಲಗೊಳ್ಳುತ್ತದೆ."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "OmniRoute Radar ಮಾಡ್ಯೂಲ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ (ಕ್ಯಾಟಲಾಗ್ ಫೀಡ್ ಸ್ಕ್ರೀನ್‌ಗಳು ಮತ್ತು ಸಿಂಕ್). ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ; ಸಕ್ರಿಯಗೊಳಿಸುವುದರಿಂದ UI ಮಾತ್ರ ಅನ್‌ಲಾಕ್ ಆಗುತ್ತದೆ — ಡೇಟಾ ಸಿಂಕ್ ಪ್ರತ್ಯೇಕ ಆಯ್ಕೆಯಾಗಿ ಉಳಿಯುತ್ತದೆ."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "ಮಾಡೆಲ್ ಎಂಡ್‌ಪಾಯಿಂಟ್ ಸಾಮರ್ಥ್ಯ ಗೇಟ್",
+        "description": "ವಿಶ್ವಾಸಾರ್ಹ ಮಾಡೆಲ್ ಎಂಡ್‌ಪಾಯಿಂಟ್ ಟ್ಯಾಗ್‌ಗಳನ್ನು ಜಾರಿಗೊಳಿಸಿ (ಪ್ರೊವೈಡರ್ ಕ್ಯಾಟಲಾಗ್‌ನಿಂದ ಘೋಷಿಸಲಾದ, ವಿಶೇಷ ಮಾಡೆಲ್ id ಯಿಂದ ಊಹಿಸಲಾದ, ಅಥವಾ ಆಪರೇಟರ್‌ನಿಂದ ಹೊಂದಿಸಲಾದ): /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ಮತ್ತು /v1/audio/* ನಲ್ಲಿ ರವಾನಿಸುವ ಮೊದಲು, ಮಾಡೆಲ್ ಸೇವೆ ನೀಡದ ಎಂಡ್‌ಪಾಯಿಂಟ್‌ಗೆ ಕಳುಹಿಸಲಾದ ವಿನಂತಿಯನ್ನು HTTP 400 ನೊಂದಿಗೆ ತಿರಸ್ಕರಿಸಿ; ಟ್ಯಾಗ್ ಮಾಡಲಾದ ಎಂಡ್‌ಪಾಯಿಂಟ್‌ಗಳಿಗೆ ಯಾವುದೇ OmniRoute ಅಡಾಪ್ಟರ್ ಇಲ್ಲದ ಮಾಡೆಲ್‌ಗಳನ್ನು /v1/models ನಿಂದ ಮರೆಮಾಡಿ; ಮತ್ತು ಅಂತಹ ಮಾಡೆಲ್‌ಗಳಿಗಾಗಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಮಾಡೆಲ್ ಪರೀಕ್ಷೆಗೆ 422 ನೊಂದಿಗೆ ಉತ್ತರಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಎಂಡ್‌ಪಾಯಿಂಟ್ ಟ್ಯಾಗ್‌ಗಳು ಕೇವಲ ಮಾಹಿತಿಗಾಗಿ ಉಳಿಯುತ್ತವೆ ಮತ್ತು ವಿನಂತಿಗಳನ್ನು ಮೊದಲಿನಂತೆಯೇ ರವಾನಿಸಲಾಗುತ್ತದೆ."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "ಸಾರ್ವತ್ರಿಕ ಸಂದರ್ಭ ಹಸ್ತಾಂತರ",
+        "description": "ಕಾಂಬೋ ರೂಟಿಂಗ್ ಮಾಡೆಲ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿದಾಗ ಸಂಭಾಷಣೆಯ ಸಾರಾಂಶಗಳನ್ನು ರಚಿಸಿ ಮತ್ತು ಸೇರಿಸಿ. ಮಾಡೆಲ್ ಬದಲಾವಣೆಗಳನ್ನು ಪ್ರತ್ಯೇಕವಾಗಿ ಪರಿಗಣಿಸಲು ಮತ್ತು ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಹಾಗೂ ಭವಿಷ್ಯದ ಎಲ್ಲಾ ಕಾಂಬೋಗಳಿಗಾಗಿ ಹಿನ್ನೆಲೆ ಹಸ್ತಾಂತರ ವಿನಂತಿಗಳನ್ನು ತಡೆಯಲು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "ತಾರ್ಕಿಕತೆ ರಿಪ್ಲೇ",
+        "description": "ಬಹು-ಸರತಿಯ ಸಂಭಾಷಣೆಗಳಲ್ಲಿ ಮಾಡೆಲ್‌ನ ತಾರ್ಕಿಕತೆಯನ್ನು ಕ್ಯಾಶ್ ಮಾಡಿ ಮತ್ತು ರಿಪ್ಲೇ ಮಾಡಿ. ತಾರ್ಕಿಕತೆಯನ್ನು ಸಂಗ್ರಹಿಸುವುದು ಮತ್ತು ಮರು-ಸೇರಿಸುವುದನ್ನು ನಿಲ್ಲಿಸಲು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server ಟ್ರಾನ್ಸ್‌ಪೋರ್ಟ್",
+        "description": "ಸ್ಥಳೀಯ app-server WebSocket JSON-RPC ಟ್ರಾನ್ಸ್‌ಪೋರ್ಟ್ (codexTransport=app-server) ಬಳಸಲು Codex ಗೆ ಅನುಮತಿಸಿ. ಆಫ್ ಮಾಡಿದಾಗ, app-server ಆಯ್ಕೆಮಾಡಿದ ಕನೆಕ್ಷನ್‌ಗಳು Codex ನ ಇತರ ಟ್ರಾನ್ಸ್‌ಪೋರ್ಟ್‌ಗಳಿಗೆ ಹಿಂತಿರುಗುತ್ತವೆ."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code Discovery Aliases",
+        "description": "Claude Code gateway ಮಾದರಿ ಅನ್ವೇಷಣೆಯಲ್ಲಿ Claude ಅಲ್ಲದ ಮಾದರಿಗಳೂ ಪಟ್ಟಿಯಾಗುವಂತೆ /v1/models ನಲ್ಲಿ claude/'<provider>'/'<model>' ಮಿರರ್ id ಗಳನ್ನು ಪ್ರಕಟಿಸಿ. ಎಚ್ಚರಿಕೆ: ಜಾಗತಿಕವಾಗಿ ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ ಎಲ್ಲ ಕ್ಲೈಂಟ್‌ಗಳಿಗೆ ಕ್ಯಾಟಲಾಗ್ ನಮೂದುಗಳು ದ್ವಿಗುಣಗೊಳ್ಳುತ್ತವೆ."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "ನೋ-ಥಿಂಕ್ ಮಾದರಿ ಏಲಿಯಾಸ್‌ಗಳು",
+        "description": "no-think/'<provider>'/'<model>' ಗೇಟ್‌ವೆ ಏಲಿಯಾಸ್‌ಗಳಿಗೆ ಮುಖ್ಯ ಸ್ವಿಚ್. ಆನ್ (ಮೂಲ): /v1/models ಎಲ್ಲಾ ಉಳ್ಳವರಾದ ಥಿಂಕ್-ಸಕ್ಷಮ ಕ್ಲಾಡ್ ಮಾದರಿಗಳಿಗೆ ನೋ-ಥಿಂಕ್ ವೇರಿಯಂಟ್‌ನಲ್ಲಿ ಪ್ರಕಟಿಸುತ್ತದೆ, ಮತ್ತು ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಕಳುಹಿಸಿದ no-think/ I.D. ಸಂಕಲನವು ತಾರ್ಕಿಕತೆಯನ್ನು ದಮನಗೊಳಿಸಿದ ಅಸಲಿ ಮಾದರಿಗೆ ಮರುಪೂರಣಗೊಳ್ಳುತ್ತದೆ. ಆಫ್: ಯಾವುದೇ ವೇರಿಯಂಟ್‌ಗಳನ್ನು ಪ್ರಕಟಿಸಲಾಗುವುದಿಲ್ಲ ಮತ್ತು no-think/ I.D. ಇತರ ಅಜ್ಞಾತ ಮಾದರಿ I.D.ನಂತೆ ಪರಿಹರಿಸಲ್ಪಡುತ್ತದೆ. ಇದು ಆನ್ ಇರುವಾಗ ಪ್ರತಿ-ಮಾದರಿ ModelSpec.noThinkingAlias ಆಪ್ಟ್-ಇನ್/ಆಪ್ಟ್-ಔಟ್ ಇನ್ನೂ ಜಾರಿಗೊಳ್ಳುತ್ತದೆ."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Thinking ಲೆವೆಲ್ ರೂಪಾಂತರಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
+        "description": "/v1/models ಕ್ಯಾಟಲಾಗ್‌ನಲ್ಲಿ thinking ಲೆವೆಲ್ ರೂಪಾಂತರಗಳನ್ನು (ಉದಾ. -low, -medium, -high) ರಚಿಸುವುದನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "ಅಡಾಪ್ಟಿವ್ ವರ್ಚುವಲ್ ಅಡ್ಮಿಷನ್ ಲೇನ್‌ಗಳು",
+        "description": "provider dispatch ಗಾಗಿ ಪ್ರತಿ-ಟೆನೆಂಟ್ ಅಡಾಪ್ಟಿವ್ ವರ್ಚುವಲ್ ಅಡ್ಮಿಷನ್ ಲೇನ್‌ಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ (#9654): ಒಂದು ಟೆನೆಂಟ್‌ನ ಬರ್ಸ್ಟ್ ಇನ್ನೊಂದಕ್ಕೆ 503s ಉಂಟುಮಾಡುವುದಿಲ್ಲ. ಈ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಓವರ್‌ರೈಡ್‌ಗಿಂತ OMNIROUTE_CHAT_VIRTUAL_LANES env var ಆದ್ಯತೆ ಪಡೆಯುತ್ತದೆ; ಬದಲಾವಣೆಗಳು ಸರ್ವರ್ ಮರುಪ್ರಾರಂಭದಲ್ಲಿ ಜಾರಿಗೆ ಬರುತ್ತವೆ."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "ವಿವರಣೆ ಗೇಟ್‌ವೆ ಮಿರರ್‌ಗಳು",
+        "description": "ಪಾಸ್‌ಥ್ರೂ ಗೇಟ್‌ವೆ ಸಕ್ರಿಯ ಸಬಲಾಂಕೆಯೊಂದಿಗೆ ಅವುಗಳನ್ನು ಮಾರ್ಗಸೂಚಿಸುವ ಮಾದರಿಗಳಿಗೆ, ಅವುಗಳ ನಿರ್ಮಾಣಕಾರ ಸಕ್ರಿಯ ಸಬಲಾಂಕೆ ಇಲ್ಲದಿದ್ದರೆ, '<gateway-alias>'/'<model>' ಮಿರರ್ I.D.ಗಳನ್ನು /v1/models ಮೇಲೆ ಪ್ರಕಟಿಸಿ. ಎಚ್ಚರಿಕೆ: ಗ್ಲೋಬಲ್‌ವಾಗಿ ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ ಎಲ್ಲಾ ಕ್ಲೈಂಟ್‌ಗಳಿಗೆ ಕ್ಯಾಟಲಾಗ್ ಪ್ರವೇಶಗಳನ್ನು ಸೇರಿಸುತ್ತದೆ."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API ಅಗ್ರಿಗೇಟರ್ ಬ್ಯಾಲೆನ್ಸ್",
+        "description": "New-API / One-API / Sub2API ಅಗ್ರಿಗೇಟರ್ ಹೊಂದಾಣಿಕೆಯ ನೋಡ್‌ಗಳಿಗಾಗಿ ಬ್ಯಾಲೆನ್ಸ್ ಪತ್ತೆಹಚ್ಚುವಿಕೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ. ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, ಅಗ್ರಿಗೇಟರ್ ಫ್ಲ್ಯಾಗ್ ಹೊಂದಿಸಲಾದ ಹೊಂದಾಣಿಕೆಯ ನೋಡ್‌ಗಳು ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಮತ್ತು quota-preflight ರೂಟಿಂಗ್‌ನಲ್ಲಿ ತಮ್ಮ ಬ್ಯಾಲೆನ್ಸ್ ಅನ್ನು ವರದಿ ಮಾಡುತ್ತವೆ."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "ಅಳಿಸಲಾದ ಹುಡುಕಾಟ ಸಂಪರ್ಕಗಳನ್ನು ಮರೆಮಾಡಿ",
+        "description": "ಹುಡುಕಾಟ ಅಂಕಿಅಂಶಗಳು ಮತ್ತು ಇತ್ತೀಚಿನ ಹುಡುಕಾಟಗಳು ಇನ್ನೂ ಲೈವ್ ಸಂಪರ್ಕವನ್ನು ಹೊಂದಿರುವ ಪೂರೈಕೆದಾರರನ್ನು ಮಾತ್ರ ಲೆಕ್ಕಕ್ಕೆ ತೆಗೆದುಕೊಳ್ಳುತ್ತವೆ (duckduckgo-free ನಂತಹ ಕೀ-ರಹಿತ ಪೂರೈಕೆದಾರರನ್ನು ಯಾವಾಗಲೂ ಲೆಕ್ಕಿಸಲಾಗುತ್ತದೆ). Off ಸ್ಥಿತಿಯು provider id ಹೊಂದಿರುವ ಉಳಿಸಿಕೊಂಡ ಪ್ರತಿಯೊಂದು ಹುಡುಕಾಟ ಸಾಲನ್ನು ಹಾಗೆಯೇ ಇರಿಸುತ್ತದೆ."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "ಕಟ್ಟುನಿಟ್ಟಾದ Free ಬ್ಯಾಡ್ಜ್",
+        "description": "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಪೂರೈಕೆದಾರರ ಪುಟಗಳು: ಪೂರೈಕೆದಾರರು ಮಾನ್ಯ ಮಾಡುವ ಸಿಗ್ನಲ್‌ಗಳಲ್ಲಿ ಮಾತ್ರ Free ಬ್ಯಾಡ್ಜ್ ತೋರಿಸಿ — ಡಾಕ್ಯುಮೆಂಟ್ ಮಾಡಲಾದ ಉಚಿತ ಶ್ರೇಣಿ ಇಲ್ಲದ ನೋಂದಾಯಿತ ಪೂರೈಕೆದಾರರಲ್ಲಿ display-name ಹ್ಯೂರಿಸ್ಟಿಕ್, ಬೂಲಿಯನ್ ಅಲ್ಲದ ಉಚಿತ ಕ್ಷೇತ್ರಗಳು ಮತ್ತು :free ಪ್ರತ್ಯಯಗಳನ್ನು ಇದು ಬಿಟ್ಟುಬಿಡುತ್ತದೆ. Off ಸ್ಥಿತಿಯು ಹಳೆಯ ಬ್ಯಾಡ್ಜ್ ನಿಯಮವನ್ನು ಹಾಗೆಯೇ ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "ಆಟೋ ಕಾಂಬೊ: ಖಾಲಿ ಪೂಲ್ 503 ಉತ್ತರ ನೀಡುತ್ತದೆ",
+        "description": "ಟೂಲ್-ಕಾಲಿಂಗ್ ಪ್ರಿ-ಫಿಲ್ಟರ್ ಚಾಲನೆಯಾಗುವ ಮೊದಲು ಆಟೋ ಕಾಂಬೊದ ಅಭ್ಯರ್ಥಿ ಪೂಲ್ ಈಗಾಗಲೇ ಖಾಲಿಯಾಗಿದ್ದರೆ (ಕೂಲ್‌ಡೌನ್‌ಗಳು, ಲಾಕ್‌ಔಟ್‌ಗಳು ಅಥವಾ ಖಾಲಿಯಾಗುವಿಕೆಯಿಂದಾಗಿ ಪ್ರತಿಯೊಂದು ಗುರಿಯನ್ನು ಬಿಟ್ಟುಬಿಡಲಾಗಿದ್ದರೆ), ಹಳೆಯ 400 \"No target supports tool calling\" capability_mismatch ಬದಲಿಗೆ 503 no_eligible_targets ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಿ. ಡೀಫಾಲ್ಟ್ ಆಗಿ Off ಆಗಿರುತ್ತದೆ: ಖಾಲಿ ಪೂಲ್ ಹಳೆಯ 400 ಅನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "ಮಿಸ್ಟ್ರಾಲ್ ಅಂಭಿಗ್ಯಸ್ 401 ಸಾಫ್ಟ್ ಲಾಕೌಟ್",
+        "description": "ಒಂದು ನಿರಾಕರಿಸಲ್ಪಟ್ಟ ಕೀ ಮತ್ತು ಖಾಲಿಯಾದ ಕ್ವೋಟಾ ಎರಡಕ್ಕೂ ಬೈಟ್-ಐಡೆಂಟಿಕಲ್ ಆಗಿರುವ ಸರಳ ಮಿಸ್ಟ್ರಾಲ್ 401 ('{\"detail\":\"Unauthorized\"}', ಸ್ಪಷ್ಟದ ಲೇಬಲ್‌ಗಳು ಇಲ್ಲ). ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ, ಸದರೂಂ ಒಂದು 401 ಸಂಬಂಧಿತ ಸಮಯದೊಳಗೆ 3 ಬಾರಿ ತನಕ ಸಂಬಂಧವನ್ನು ತಂಪಾಗಿಸುತ್ತದೆ, ಅದು ನಿರಾಕರಿಸಲ್ಪಟ್ಟಿದೆ ಎಂದು ಪಾರ್ಕ್ ಮಾಡುವ ಬದಲು; ಮುಂದಿನ ಒಂದು ಇನ್ನೂ ನಿರಾಕರಿಸಲ್ಪಟ್ಟಿದೆ ಎಂದು ಪಾರ್ಕ್ ಮಾಡುತ್ತದೆ, ಆದ್ದರಿಂದ ನಿರಾಕರಿಸಲ್ಪಟ್ಟ ಕೀ ಅಭಿವೃದ್ಧಿಗೊಳ್ಳುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್: ಪ್ರತಿ ಸರಳ ಮಿಸ್ಟ್ರಾಲ್ 401 ಸಂಬಂಧವನ್ನು ನಿರಾಕರಿಸಲ್ಪಟ್ಟಿದೆ ಎಂದು ಪಾರ್ಕ್ ಮಾಡುತ್ತದೆ, ಹಿಂದಿನಂತೆ."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "ಬ್ಯಾಚ್ ಮತ್ತು ಫೈಲ್ ಸ್ವಯಂಚಾಲಿತ ಕ್ಲೀನಪ್",
+        "description": "ಸ್ವಯಂಚಾಲಿತ ಕ್ಲೀನಪ್ ಪ್ರಕ್ರಿಯೆಯು OMNIROUTE_BATCH_RETENTION_DAYS ಗಿಂತ ಹಳೆಯದಾದ ಅಂತಿಮ (completed/failed/cancelled/expired) Batch API ಜಾಬ್‌ಗಳನ್ನು ಅವುಗಳ ಪ್ರತಿ-ಸಾಲಿನ ಚೆಕ್‌ಪಾಯಿಂಟ್‌ಗಳೊಂದಿಗೆ ಅಳಿಸಲು ಮತ್ತು ತಮ್ಮದೇ expires_at ಮೀರಿದ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾದ ಫೈಲ್‌ಗಳ BLOB ವಿಷಯವನ್ನು ತೆರವುಗೊಳಿಸಲು ಅನುಮತಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಆಪರೇಟರ್ ಸಮ್ಮತಿಸುವವರೆಗೆ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಪ್ರತಿಯೊಂದು ಇನ್‌ಸ್ಟಾಲ್ ಈ ಡೇಟಾವನ್ನು ಮೊದಲಿನಂತೆಯೇ ಇರಿಸುತ್ತದೆ. ಆಪರೇಟರ್-ಪ್ರೇರಿತ DELETE /api/v1/batches/delete-completed ರೂಟ್ ಯಾವುದೇ ರೀತಿಯಲ್ಲೂ ಪ್ರಭಾವಿತವಾಗುವುದಿಲ್ಲ -- ಇದು ಪ್ರತ್ಯೇಕವಾದ, ಬೇಷರತ್ತಾದ ಸಾರ್ವಜನಿಕ API ಒಪ್ಪಂದವಾಗಿದೆ."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity ಖಾತೆ ಲೀಸ್",
+        "description": "ಆಯ್ಕೆಮಾಡಿದ Antigravity ಖಾತೆಯನ್ನು ಅದನ್ನು ಆಯ್ಕೆಮಾಡಿದ ವಿನಂತಿಯ ಸ್ಟ್ರೀಮಿಂಗ್ ಜೀವಿತಾವಧಿಯವರೆಗೆ ಕಾಯ್ದಿರಿಸಿ, ಇದರಿಂದ ಸಮಕಾಲೀನ ಮರುಪ್ರಯತ್ನ ಅಥವಾ ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಹಸ್ತಾಂತರವು ಈಗಾಗಲೇ ಚಾಲನೆಯಲ್ಲಿರುವ ಸ್ಟ್ರೀಮ್‌ಗೆ ಬದ್ಧವಾಗಿರುವ ಖಾತೆಯನ್ನು ಮರು-ಆಯ್ಕೆ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಈ ಕಾಯ್ದಿರಿಸುವಿಕೆಯು (connection, callable upstream model) ವ್ಯಾಪ್ತಿಗೆ ಒಳಪಟ್ಟಿರುತ್ತದೆ, ಆದ್ದರಿಂದ ಒಂದು ಖಾತೆಯು ಏಕಕಾಲದಲ್ಲಿ ಎರಡು ವಿಭಿನ್ನ ಮಾದರಿಗಳಿಗೆ ಸೇವೆ ನೀಡಬಹುದು. ಆ ಮಾದರಿಗಾಗಿ ಎಲ್ಲಾ ಅರ್ಹ ಖಾತೆಗಳು ಈಗಾಗಲೇ ಲೀಸ್ ಆಗಿದ್ದರೆ, ವಿನಂತಿಯು ಬಿಡುವಿಲ್ಲದ ಖಾತೆಯ ಮೇಲೆ ಮತ್ತಷ್ಟು ಹೊರೆ ಹಾಕುವ ಬದಲು ಸೀಮಿತ Retry-After ಹೊಂದಿರುವ ರಚನಾತ್ಮಕ 503 POOL_BUSY ಅನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಖಾತೆ ಆಯ್ಕೆಯು ಮೊದಲಿನಂತೆಯೇ ಇರುತ್ತದೆ ಮತ್ತು ಯಾವುದೇ ಕಾಯ್ದಿರಿಸುವಿಕೆಯನ್ನು ಮಾಡಲಾಗುವುದಿಲ್ಲ."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "ಹಳೆಯ ಕಾಂಬೋ ಹಂತಗಳ ಸ್ವಯಂ-ಪ್ರೂನ್",
+        "description": "ಅಧಿಕೃತ ಲೈವ್ ಕ್ಯಾಟಲಾಗ್ ವಿರುದ್ಧ ಯಶಸ್ವಿ ಮಾಡೆಲ್ ಸಿಂಕ್ ಆದ ನಂತರ, ಕ್ಯಾಟಲಾಗ್ ಇನ್ನು ಮುಂದೆ ಪಟ್ಟಿ ಮಾಡದ ಮಾದರಿಗಳಿಗೆ ಪಿನ್ ಮಾಡಲಾದ combo ಹಂತಗಳನ್ನು ತೆಗೆದುಹಾಕಿ, ತೆಗೆದುಹಾಕಲಾದ ಪ್ರತಿ ಹಂತಕ್ಕೆ ಒಂದು ಆಡಿಟ್ ನಮೂದನ್ನು ನೀಡಲಾಗುತ್ತದೆ. ವಿಫಲವಾದ, ಕ್ಷೀಣಿಸಿದ (degraded) ಅಥವಾ ಉಚಿತ-ಮಾತ್ರದ ಸಿಂಕ್‌ನಲ್ಲಿ ಎಂದಿಗೂ ಪ್ರೂನ್ ಮಾಡುವುದಿಲ್ಲ ಮತ್ತು combo ಅನ್ನು ಎಂದಿಗೂ ಖಾಲಿ ಮಾಡುವುದಿಲ್ಲ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಹಳೆಯ ಹಂತಗಳನ್ನು ಕೇವಲ ಫ್ಲ್ಯಾಗ್ ಮಾಡಲಾಗುತ್ತದೆ."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth ಸಂಕ್ಷಿಪ್ತ ಥಿಂಕಿಂಗ್",
+        "description": "ಓದಬಹುದಾದ ಥಿಂಕಿಂಗ್ (thinking.display \"summarized\") ಅನ್ನು ಕೇಳುವ Claude OAuth ವಿನಂತಿಯು redact-thinking-2026-02-12 Anthropic ಬೀಟಾವನ್ನು ಕೈಬಿಡಲು ಅನುಮತಿಸಿ, ಇಲ್ಲದಿದ್ದರೆ ಅದು Anthropic ಖಾಲಿ, ಸಹಿ-ಮಾತ್ರದ ಥಿಂಕಿಂಗ್ ಬ್ಲಾಕ್‌ಗಳನ್ನು ಹಿಂತಿರುಗಿಸುವಂತೆ ಮಾಡುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಆ ಬೀಟಾ Claude Code OAuth ವೈರ್ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ನ ಭಾಗವಾಗಿದೆ, ಆದ್ದರಿಂದ OAuth ವಿನಂತಿಗಳು ಅದನ್ನು ಬದಲಾಗದೆ ಇರಿಸಿಕೊಳ್ಳುತ್ತವೆ. API-key Claude ವಿನಂತಿಗಳು ಈ ಫ್ಲ್ಯಾಗ್ ಇಲ್ಲದೆಯೇ ಈಗಾಗಲೇ ಸಂಕ್ಷಿಪ್ತ ಥಿಂಕಿಂಗ್ ಅನ್ನು ಗೌರವಿಸುತ್ತವೆ; ಈ ಫ್ಲ್ಯಾಗ್ ಆನ್ ಆಗಿದ್ದಾಗ ಮಾತ್ರ OMNIROUTE_REDACT_THINKING=false ಕೂಡ OAuth ಅನ್ನು ತಲುಪುತ್ತದೆ."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro ಟೂಲ್ ಕಾಲ್ ರಿಪೇರಿ",
+        "description": "ಯಾವುದೇ ಗೋಚರಿಸುವ ಔಟ್‌ಪುಟ್‌ಗಿಂತ ಮೊದಲು ಸ್ಟ್ರೀಮಿಂಗ್ Kiro ಪ್ರತಿಕ್ರಿಯೆಯು ದೋಷಪೂರಿತ tool_call ವ್ರ್ಯಾಪರ್ ಅನ್ನು (ಕಾಣೆಯಾದ input.name ಅಥವಾ input.arguments) ಹೊರಸೂಸಿದಾಗ, invalid_kiro_tool_call ನೊಂದಿಗೆ ಸರದಿಯನ್ನು ಕೊನೆಗೊಳಿಸುವ ಬದಲು ಅದನ್ನು ತಡೆಹಿಡಿದು ತಿದ್ದುಪಡಿ ಸೂಚನೆಯೊಂದಿಗೆ ವಿನಂತಿಯನ್ನು ಒಮ್ಮೆ ಮರುಕಳುಹಿಸಿ. ಮರುಪ್ರಯತ್ನಕ್ಕೆ ಒಂದು ಹೆಚ್ಚುವರಿ Kiro ವಿನಂತಿಯ ವೆಚ್ಚವಾಗುತ್ತದೆ; ಎರಡನೇ ವೈಫಲ್ಯವು ಸರದಿಯನ್ನು kiro_tool_call_repair_retry_failed ನೊಂದಿಗೆ ಕೊನೆಗೊಳಿಸುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆನ್ ಆಗಿದೆ. ಮೊದಲ ದೋಷಪೂರಿತ ವ್ರ್ಯಾಪರ್‌ನಲ್ಲೇ ಸರದಿಯನ್ನು ವಿಫಲಗೊಳಿಸಲು false ಗೆ ಹೊಂದಿಸಿ."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev ಎಫರ್ಟ್ ಶ್ರೇಣಿಗಳು",
+        "description": "ಆಪರೇಟರ್ ಓವರ್‌ರೈಡ್ ಅಥವಾ ಪ್ರೊವೈಡರ್ ರಿಜಿಸ್ಟ್ರಿ ಯಾವುದನ್ನೂ ಘೋಷಿಸದಿದ್ದಾಗ models.dev ಪ್ರಕಟಿಸುವ ರೀಸನಿಂಗ್ ಎಫರ್ಟ್ ಶ್ರೇಣಿಗಳನ್ನು (ತಿಳಿದಿರುವ ಎಫರ್ಟ್ ಶಬ್ದಕೋಶಕ್ಕೆ ಮಿತಿಗೊಳಿಸಲಾದ) ಬಳಸಿ, ಮತ್ತು /v1/models effort_tiers ಹಾಗೂ ಕಾಂಬೊ ಶ್ರೇಣಿ ಇಂಟರ್‌ಸೆಕ್ಷನ್‌ಗಳಲ್ಲಿ ಘೋಷಿಸಲಾದ ಖಾಲಿ ಶ್ರೇಣಿಯ ಪಟ್ಟಿಯನ್ನು \"ಶ್ರೇಣಿಗಳಿಲ್ಲ\" ಎಂದು ಪರಿಗಣಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: effort_tiers ಮತ್ತು ಪರಿಹರಿಸಲಾದ supportedThinkingEfforts ಮೊದಲಿನಂತೆಯೇ ಇರುತ್ತವೆ."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena ಸಂಶ್ಲೇಷಿತ cx ಟೆಲಿಮೆಟ್ರಿ",
+        "description": "ಆಪರೇಟರ್ ಒದಗಿಸಿದ providerSpecificData.cx ಹೊಂದಿರದ ಪ್ರತಿಯೊಂದು Arena (lmarena) create-evaluation ವಿನಂತಿಗೆ ಸಂಶ್ಲೇಷಿತ ಪ್ರೋಗ್ರ್ಯಾಮ್ಯಾಟಿಕ್ cx ಕ್ಲೈಂಟ್-ಇಂಟರ್ಯಾಕ್ಷನ್ ಬ್ಲಾಬ್ ಅನ್ನು (ಯಾವುದೇ ರೆಕಾರ್ಡ್ ಮಾಡಲಾದ ಇಂಟರ್ಯಾಕ್ಷನ್ ಇಲ್ಲದ ಪುಟಕ್ಕಾಗಿ arena.ai ಸ್ವತಃ ಕಳುಹಿಸುವ ಮೌಲ್ಯ) ಲಗತ್ತಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: cx ಕ್ಷೇತ್ರವು Arena ದ ಆಟೊಮೇಷನ್-ವಿರೋಧಿ ಸಂಕೇತವಾಗಿದೆ, ಆದ್ದರಿಂದ OmniRoute ಆಪರೇಟರ್ ನೈಜ ಬ್ರೌಸರ್ ಸೆಷನ್‌ನಿಂದ ಸೆರೆಹಿಡಿದ ಮೌಲ್ಯವನ್ನು (providerSpecificData.cx) ಮಾತ್ರ ಫಾರ್ವರ್ಡ್ ಮಾಡುತ್ತದೆ ಮತ್ತು ಇತರ ಸಂದರ್ಭಗಳಲ್ಲಿ ಯಾವುದೇ cx ಅನ್ನು ಕಳುಹಿಸುವುದಿಲ್ಲ. ಸಾಬೀತಾಗದ ಅಪ್‌ಸ್ಟ್ರೀಮ್ ಪ್ರಯೋಜನ; Arena cx ಇಲ್ಲದ ವಿನಂತಿಗಳನ್ನು ತಿರಸ್ಕರಿಸಲು ಪ್ರಾರಂಭಿಸಿದರೆ ಮಾತ್ರ ಸಕ್ರಿಯಗೊಳಿಸಿ."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Native Codex ರಿಯಾಕ್ಟಿವ್ ಕಾಂಪ್ಯಾಕ್ಷನ್",
+        "description": "Responses input[] ಅಡಾಪ್ಟರ್ ಬಳಸಿ, ಸ್ಥಳೀಯ Codex ಪಾಸ್‌ಥ್ರೂ ಹಿಸ್ಟರಿಗಳು (codex ಪ್ರೊವೈಡರ್‌ಗೆ POST /v1/responses) ಕಾಂಟೆಕ್ಸ್ಟ್ ಬಜೆಟ್ ಅನ್ನು ಮೀರಿದಾಗ ಅವುಗಳನ್ನು ಸಹ ಮರುಬರೆಯಲು ರಿಯಾಕ್ಟಿವ್ (ಮಿತಿ) ಮತ್ತು ಅಂತಿಮ ಆಯ್ಕೆಯ ಕಾಂಟೆಕ್ಸ್ಟ್ ಕಾಂಪ್ಯಾಕ್ಷನ್ ಪಾಸ್‌ಗಳಿಗೆ ಅನುಮತಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಸ್ಥಳೀಯ Codex ಹಿಸ್ಟರಿಗಳು Codex ಕ್ಲೈಂಟ್‌ನ ಒಡೆತನದಲ್ಲಿದ್ದು, ಅವುಗಳನ್ನು ಕಾಂಪ್ಯಾಕ್ಷನ್ ಎಂದಿಗೂ ಮರುಬರೆಯುವುದಿಲ್ಲ; ಮಿತಿಮೀರಿದ ಗಾತ್ರದ ವಿನಂತಿಗಳು ಮೊದಲಿನಂತೆಯೇ ಕಾಂಟೆಕ್ಸ್ಟ್ ಬಜೆಟ್ ಪರಿಶೀಲನೆಯಲ್ಲಿ ವಿಫಲಗೊಳ್ಳುತ್ತಲೇ ಇರುತ್ತವೆ. ಇದಕ್ಕೆ ಗ್ಲೋಬಲ್ ಕಂಪ್ರೆಷನ್ ಆನ್ ಆಗಿರಬೇಕು ಮತ್ತು ಮಾಡೆಲ್ ಅನ್ನು ಹೊರತುಪಡಿಸಿರಬಾರದು."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "ಕೋಟಾ ವಿಂಡೋ: ಬೌಂಡೆಡ್ ಪಾರ್ಕ್ ಅನ್ನು ಗೌರವಿಸಿ",
+        "description": "ಪ್ರತಿ-ವಿಂಡೋ ಕೋಟಾ ನೀತಿಯು (ಖಾತೆ ಆಯ್ಕೆಯ ಮೂಲಕ ಬಳಸಲಾಗುವ ಸೆಷನ್/ಸಾಪ್ತಾಹಿಕ ಮಿತಿಗಳು) ಬೌಂಡೆಡ್ ಎಕ್ಸಾಸ್ಷನ್ ಪಾರ್ಕ್ ಅನ್ನು ಗೌರವಿಸಲು ಅನುಮತಿಸಿ: ಮಿತಿಗೊಳಿಸಲಾದ ಪಾರ್ಕ್ ಗಡುವು ಮುಗಿದ ನಂತರ, ಅಥವಾ ಕ್ಯಾಶ್ ಮಾಡಲಾದ ಕೋಟಾ ವೀಕ್ಷಣೆಯು ಪಾರ್ಕ್ ಕ್ಯಾಪ್‌ಗಿಂತ ಹಳೆಯದಾಗಿದ್ದರೆ, ಹೊಸ ಕೋಟಾವನ್ನು ತರುವವರೆಗೆ ಆ ವಿಂಡೋ ಖಾತೆಯನ್ನು ಹೊರಗಿಡುವುದನ್ನು ನಿಲ್ಲಿಸುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿದೆ: ಕ್ಯಾಶ್ ಮಾಡಲಾದ ವಿಂಡೋ ತನ್ನದೇ ಆದ ಮರುಹೊಂದಿಸುವ ಸಮಯದವರೆಗೆ ಕೊನೆಯದಾಗಿ ವರದಿಯಾದ ಶೇಕಡಾವಾರು ಆಧಾರದ ಮೇಲೆ ನಿರ್ಬಂಧಿಸುವುದನ್ನು ಮುಂದುವರಿಸುತ್ತದೆ."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "ಚಿತ್ರ ರಚನೆ: ದೀರ್ಘ ಜಾಬ್‌ಗಳು",
+        "description": "OpenAI-ಹೊಂದಾಣಿಕೆಯ ಚಿತ್ರ ರಚನೆಗಾಗಿ: ನಿಗದಿತ 120 s ಚಿತ್ರ ಬಜೆಟ್ ಬದಲಿಗೆ ಸಂಪರ್ಕದ ಕಾಲಾವಧಿ (providerSpecificData.timeoutMs), ಇಲ್ಲದಿದ್ದರೆ ಕೇಂದ್ರೀಯ ಅಪ್‌ಸ್ಟ್ರೀಮ್ ಫೆಚ್ ಕಾಲಾವಧಿ (FETCH_TIMEOUT_MS, ನಂತರ REQUEST_TIMEOUT_MS, ಡೀಫಾಲ್ಟ್ 600 s) ಬಳಸಿ; ಕರೆದಾರರು ರದ್ದುಗೊಳಿಸಿದ ವಿನಂತಿಯನ್ನು 499 ರೊಂದಿಗೆ ಕೊನೆಗೊಳಿಸಿ; ಮತ್ತು Playground ದೀರ್ಘ ಚಿತ್ರ ಜಾಬ್‌ಗಳನ್ನು keepalive ಹಾರ್ಟ್‌ಬೀಟ್‌ಗಳೊಂದಿಗೆ SSE ಸ್ಟ್ರೀಮ್ ಆಗಿ ಸ್ವೀಕರಿಸಲು ಅನುಮತಿಸಿ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿದೆ: ನಿಗದಿತ ಬಜೆಟ್ ಅನ್ವಯಿಸುತ್ತದೆ ಮತ್ತು ಕರೆದಾರರ ರದ್ದತಿಯನ್ನು ಪ್ರಸಾರ ಮಾಡಲಾಗುವುದಿಲ್ಲ. ಪ್ರತಿಕ್ರಿಯೆ ಬಾಡಿ ಓದುವಿಕೆಯನ್ನು ಒಳಗೊಂಡಿರುವ ಗಡುವು ಯಾವಾಗಲೂ ಆನ್ ಆಗಿರುತ್ತದೆ."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "ಕ್ಯಾಟಲಾಗ್ ಮಿರರ್ ಪರಿಷ್ಕರಣೆಗಳು",
+        "description": "/v1/models ನಲ್ಲಿ claude/ ಅನ್ವೇಷಣೆ ಮತ್ತು functional-gateway ಮಿರರ್‌ಗಳನ್ನು ಪರಿಷ್ಕರಿಸಿ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿದೆ: ಎರಡೂ ಮಿರರ್ ಪಾಸ್‌ಗಳು ಮೊದಲಿನಂತೆಯೇ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ. ಆನ್: claude/ ಅನ್ವೇಷಣೆ ಮಿರರ್‌ಗಳು ಪಟ್ಟಿ ಮಾಡಲಾದ reasoning-effort ರೂಪಾಂತರಗಳನ್ನು (-low/-medium/-high/-xhigh) ಸಹ ಒಳಗೊಳ್ಳುತ್ತವೆ, ವಿನಂತಿ ಮಾರ್ಗವು ಕಾರ್ಯರೂಪಕ್ಕೆ ತರಲು ಸಾಧ್ಯವಾಗದ ಅಂತರ್ನಿರ್ಮಿತ auto/* id ಗಳನ್ನು ಬಿಟ್ಟುಬಿಡುತ್ತವೆ ಮತ್ತು ಈಗಾಗಲೇ ಪಟ್ಟಿ ಮಾಡಲಾದ ಅಲಿಯಾಸ್ ಅನ್ನು ಬಿಟ್ಟುಬಿಡುತ್ತವೆ; functional-gateway ಮಿರರ್‌ಗಳು ಕಾಂಬೊಗಳನ್ನು ಮತ್ತು OmniRoute-ಸಂಶ್ಲೇಷಿತ id ಗಳನ್ನು (claude/, no-think/) ಬಿಟ್ಟುಬಿಡುತ್ತವೆ, ಮಾಲೀಕರನ್ನು owned_by ನಿಂದ ತೆಗೆದುಕೊಳ್ಳುತ್ತವೆ, ಮಾಲೀಕರನ್ನು ಎಂದಿಗೂ ಅವರ ಸ್ವಂತ ಗೇಟ್‌ವೇ ಆಗಿ ಬಳಸುವುದಿಲ್ಲ, blockedProviders ನಲ್ಲಿ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾದ ಗೇಟ್‌ವೇಗಳನ್ನು ಮತ್ತು ಗೇಟ್‌ವೇಯ ಅಧಿಕೃತ ಲೈವ್ ಕ್ಯಾಟಲಾಗ್‌ನ ಹೊರಗಿನ ಮಾಡೆಲ್‌ಗಳನ್ನು ಬಿಟ್ಟುಬಿಡುತ್ತವೆ."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "ಪ್ರಾಕ್ಸಿ ಆರೋಗ್ಯ: ನಿರಾಕರಣೆಯು ವೈಫಲ್ಯದ ಸರಣಿಯನ್ನು ರೀಸೆಟ್ ಮಾಡುತ್ತದೆ",
+        "description": "ಪ್ರಾಕ್ಸಿ ಹೆಲ್ತ್ ಸ್ವೀಪ್‌ನಲ್ಲಿ, ಗುರಿಯು ನಿರಾಕರಿಸಿದ ಪ್ರೋಬ್ (401/403/429: ಪ್ರಾಕ್ಸಿ ರಿಲೇ ಮಾಡಿದೆ, ಗಮ್ಯಸ್ಥಾನವು ಈ egress IP ಅನ್ನು ನಿರಾಕರಿಸಿದೆ), ಸೇವೆ ಸಲ್ಲಿಸಿದ ಪ್ರೋಬ್‌ನಂತೆಯೇ ಪ್ರಾಕ್ಸಿಯ ಸತತ-ವೈಫಲ್ಯದ ಸರಣಿಯನ್ನು ರೀಸೆಟ್ ಮಾಡಲು ಅನುಮತಿಸಿ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿದೆ: ನಿರಾಕರಣೆಯು ತಟಸ್ಥವಾಗಿರುತ್ತದೆ ಮತ್ತು ಸರಣಿಯನ್ನು ಹಾಗೆಯೇ ಇರಿಸುತ್ತದೆ (#10654). 5xx ಎರಡೂ ರೀತಿಯಲ್ಲೂ ಅನಿರ್ದಿಷ್ಟವಾಗಿರುತ್ತದೆ, ಮತ್ತು ನಿರಾಕರಣೆಯು ಪ್ರಾಕ್ಸಿಯನ್ನು ಎಂದಿಗೂ ತೆಗೆದುಹಾಕುವುದಿಲ್ಲ, ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುವುದಿಲ್ಲ ಅಥವಾ ಮರುಸಕ್ರಿಯಗೊಳಿಸುವುದಿಲ್ಲ."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok ಚಂದಾದಾರಿಕೆ ಚಿತ್ರಗಳು",
+        "description": "xai-oauth (xao) ಮತ್ತು grok-cli ಇಮೇಜ್ ರೂಟ್‌ಗಳನ್ನು ನೋಂದಾಯಿಸಿ ಹಾಗೂ OpenAI ಗುಣಮಟ್ಟ high/hd ಅನ್ನು xAI medium ಗೆ ಮ್ಯಾಪ್ ಮಾಡಿ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿದೆ: API-key xAI ಚಿತ್ರ ಮಾರ್ಗವು ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ OpenAI-ಹೊಂದಾಣಿಕೆಯ ವಿನಂತಿಯಲ್ಲೇ ಇರುತ್ತದೆ ಮತ್ತು ಚಂದಾದಾರಿಕೆ ರೂಟ್‌ಗಳು ನೋಂದಾಯಿಸಲ್ಪಡುವುದಿಲ್ಲ."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth ಲೈವ್ ಮಾಡೆಲ್ ಅನ್ವೇಷಣೆ",
+        "description": "ಫ್ರೀಜ್ ಮಾಡಲಾದ ಸ್ಥಿರ ಸೀಡ್ ಬದಲಿಗೆ OAuth ಬೇರರ್ ಟೋಕನ್ ಬಳಸಿ https://api.x.ai/v1/models ನಿಂದ xai-oauth ಸಂಪರ್ಕಗಳಿಗಾಗಿ ಲೈವ್ xAI ಮಾಡೆಲ್ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಪಡೆದುಕೊಳ್ಳಿ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆನ್ ಆಗಿದೆ. ಸ್ಥಿರ ಸೀಡ್ ಅನ್ನು ನೀಡುವುದನ್ನು ಮುಂದುವರಿಸಲು ಫ್ಲ್ಯಾಗ್ ಅನ್ನು false ಗೆ ಹೊಂದಿಸಿ. ಡಿಸ್ಕವರಿ ರೂಟ್‌ನಲ್ಲಿ HTTP ವೈಫಲ್ಯಗಳು ಸೀಡ್‌ಗೆ ಫಾಲ್‌ಬ್ಯಾಕ್ ಆಗುತ್ತವೆ; ಫ್ಲ್ಯಾಗ್ ಗೆಟರ್ ಸ್ವತಃ HTTP ಅನ್ನು ನೀಡುವುದಿಲ್ಲ."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-ಹೊಂದಾಣಿಕೆಯ ಸಂಭಾಷಣೆಯ ಮಧ್ಯದ System Turns",
+        "description": "ಸರಳ anthropic-compatible-* ರಿಲೇಗಳಲ್ಲಿ (claude → claude passthrough), ಸಂಭಾಷಣೆಯ ಮಧ್ಯದ role:system ಟರ್ನ್‌ಗಳನ್ನು ಟಾಪ್-ಲೆವೆಲ್ system ಪ್ಯಾರಾಮೀಟರ್‌ಗೆ ಹೋಯಿಸ್ಟ್ ಮಾಡುವ ಬದಲು messages[] ಒಳಗೆ ಇರಿಸಿ, ಇದರಿಂದಾಗಿ ಕ್ಯಾಶ್ ಮಾಡಲಾದ ಪ್ರಾಂಪ್ಟ್ ಪ್ರಿಫಿಕ್ಸ್ ಟರ್ನ್‌ಗಳಾದ್ಯಂತ ಸ್ಥಿರವಾಗಿರುತ್ತದೆ. ಕ್ಲೈಂಟ್ ಸ್ವತಃ mid-conversation-system-2026-04-07 anthropic-beta ಅನ್ನು ಕಳುಹಿಸಿದಾಗ ಮಾತ್ರ ಅನ್ವಯಿಸುತ್ತದೆ (ಅಪ್‌ಸ್ಟ್ರೀಮ್‌ಗೆ ಹಾಗೆಯೇ ಫಾರ್ವರ್ಡ್ ಮಾಡಲಾಗುತ್ತದೆ). ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಪ್ರತಿಯೊಂದು ಸಿಸ್ಟಮ್ ಟರ್ನ್ ಅನ್ನು ಮೊದಲಿನಂತೆಯೇ ಹೋಯಿಸ್ಟ್ ಮಾಡಲಾಗುತ್ತದೆ, ಏಕೆಂದರೆ ಬೀಟಾವನ್ನು ಬೆಂಬಲಿಸದ ರಿಲೇಗಳು role:system ಸಂದೇಶಗಳನ್ನು 400 ನೊಂದಿಗೆ ತಿರಸ್ಕರಿಸುತ್ತವೆ."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB ಹೆಲ್ತ್ ಚೆಕ್: ಸ್ಟಾರ್ಟ್‌ಅಪ್ ಸ್ಕ್ಯಾನ್ ಮುಂದೂಡಿ",
+        "description": "ಸ್ಟಾರ್ಟ್‌ಅಪ್ ಪೂರ್ಣಗೊಳ್ಳುವವರೆಗೆ ಅದನ್ನು ನಿರ್ಬಂಧಿಸುವ ಬದಲು ಸರ್ವರ್ ವಿನಂತಿಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಪ್ರಾರಂಭಿಸಿದ ನಂತರ (setImmediate ಮೂಲಕ) ಸ್ಟಾರ್ಟ್‌ಅಪ್ DB ಸಮಗ್ರತೆ/ಹೆಲ್ತ್ ಚೆಕ್ ಅನ್ನು ಚಲಾಯಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: #13717 ಕ್ಕಿಂತ ಮುಂಚಿನಂತೆಯೇ ಸ್ಟಾರ್ಟ್‌ಅಪ್ ಈ ತಪಾಸಣೆಯ ಮೇಲೆ ನಿರ್ಬಂಧಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ಮೊದಲ ವಿನಂತಿಯನ್ನು ಪೂರೈಸುವ ಮೊದಲು ದೋಷಪೂರಿತ ಡೇಟಾಬೇಸ್ ಅನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗುತ್ತದೆ. ಆನ್ ಮಾಡಿದಾಗ: ಸ್ಟಾರ್ಟ್‌ಅಪ್ ತಕ್ಷಣವೇ ರಿಟರ್ನ್ ಆಗುತ್ತದೆ ಮತ್ತು ತಪಾಸಣೆಯು (ಈಗ ಬೌಂಡೆಡ್/ಪೇಜ್ಡ್ ಮತ್ತು ನೈಜ ಫೈಲ್-ಬ್ಯಾಕ್ಡ್ DB ಗಾಗಿ, ರದ್ದುಗೊಳಿಸಬಹುದಾದ ಚೈಲ್ಡ್ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿ ಪ್ರತ್ಯೇಕಿಸಲಾಗಿದೆ) ನಂತರವೇ ಚಲಿಸುತ್ತದೆ."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode ಪ್ರಕಟಿತ ಕ್ಯಾಟಲಾಗ್ ರೂಟಿಂಗ್",
+        "description": "ಸ್ಪಷ್ಟ ರಿಜಿಸ್ಟ್ರಿ ಎಂಡ್‌ಪಾಯಿಂಟ್ ಇಲ್ಲದ OpenCode Zen ಮತ್ತು OpenCode Go ಮಾಡೆಲ್‌ಗಳು ತಮ್ಮ ವಿನಂತಿ ಮೇಲ್ಮೈಯನ್ನು (@ai-sdk/openai ಗಾಗಿ Responses, @ai-sdk/anthropic ಗಾಗಿ Messages) ಪ್ರತಿ 6 ಗಂಟೆಗಳಿಗೊಮ್ಮೆ ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಓದಲಾಗುವ ಪ್ರಕಟಿತ models.opencode.ai ಕ್ಯಾಟಲಾಗ್‌ನಿಂದ ಪಡೆಯಲು ಅನುಮತಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಎಂಡ್‌ಪಾಯಿಂಟ್ ಮೊದಲಿನಂತೆಯೇ ರಿಜಿಸ್ಟ್ರಿ ಹ್ಯೂರಿಸ್ಟಿಕ್ಸ್‌ನಿಂದ ಬರುತ್ತದೆ ಮತ್ತು ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಎಂದಿಗೂ ಪಡೆಯಲಾಗುವುದಿಲ್ಲ."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Auto ವಿನಂತಿಗಳು: ಪರಿಹರಿಸಲಾದ ಸಾಮರ್ಥ್ಯದ ತೂಕಗಳು",
+        "description": "auto/* ವಿನಂತಿಗಳು (resolveModelOrError ಮತ್ತು ಆಟೋ-ರೂಟಿಂಗ್ ರಾಪರ್) ಪರಿಹರಿಸಲಾದ ಮಾಡೆಲ್ ಸಾಮರ್ಥ್ಯಗಳು (vision, reasoning, thinking) ಮತ್ತು ಗಮನಿಸಿದ ಗುಣಮಟ್ಟದ ಸ್ಕೋರ್‌ಗಳೊಂದಿಗೆ ಕ್ಯಾಂಡಿಡೇಟ್ ಪೂಲ್ ಅನ್ನು ನಿರ್ಮಿಸಲು ಅನುಮತಿಸಿ, ಇವುಗಳನ್ನು /v1/models ಕ್ಯಾಟಲಾಗ್‌ನಂತೆ ಒಂದೇ ಬಲ್ಕ್ ಪಾಸ್‌ನಲ್ಲಿ ಓದಲಾಗುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ವಿನಂತಿ-ಸಮಯದ ಸ್ನ್ಯಾಪ್‌ಶಾಟ್ ತೂಕಗಳು ಮೊದಲಿನಂತೆಯೇ ಇರುತ್ತವೆ (ಸಾಮರ್ಥ್ಯಗಳು ಬೇಡಿಕೆಯ ಮೇರೆಗೆ ರಿಸಾಲ್ವ್ ಆಗುತ್ತವೆ ಮತ್ತು ತೂಕಗಳಿಗೆ ಫೀಡ್ ಆಗುವುದಿಲ್ಲ). ಆನ್ ಮಾಡಿದಾಗ: ಆ ಸಿಗ್ನಲ್‌ಗಳು ಸ್ನ್ಯಾಪ್‌ಶಾಟ್ ತೂಕಗಳಿಗೆ ಫೀಡ್ ಆಗುತ್ತವೆ, ಆದ್ದರಿಂದ ಅಭ್ಯರ್ಥಿಯ ತೂಕಗಳು ಮತ್ತು ಆ ಮೂಲಕ ಆಯ್ಕೆಯು ಬದಲಾಗಬಹುದು."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "ಅವ್ಠೋ-ಕೊಂಬೋ: ಕೀಲಿಗಳಿಲ್ಲದ ರವಾನಾ ಟೋವ್",
+        "description": "ಟ್ರಾನ್ಸ್‌ಪೋರ್ಟ್‌ಗೆ ಲೋಕಲ್ ಬ್ರೌಸರ್ (browserBacked) ಅಥವಾ ಲೋಕಲ್‌ನಲ್ಲಿ ಸ್ಥಾಪಿಸಲಾದ CLI (isLocalCli) ಅಗತ್ಯವಿರುವ keyless (no-auth) ಪ್ರೊವೈಡರ್‌ಗಳನ್ನು auto/* ಕ್ಯಾಂಡಿಡೇಟ್ ಪೂಲ್‌ನಿಂದ ಹೊರಗಿಡುತ್ತದೆ, ಇದರಿಂದಾಗಿ ಹಂಗ್ ಆಗಿರುವ ಸದಸ್ಯವು ಪ್ರತಿ-ಟಾರ್ಗೆಟ್ ಟೈಮ್‌ಔಟ್‌ವರಗಂತೆ (#17036) auto ರಿಯುಯೆಸ್ಟ್ ಅನ್ನು ಸ್ಥಗಿತಗೊಳಿಸದಂತೆ ತಡೆಯುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್: ಎಮ್ಯುಲೇಟೆಡ್ ಟೂಲ್ ಕಾಲಿಂಗ್‌ನೊಂದಿಗೆ ಪ್ರತಿ no-auth ಪ್ರೊವೈಡರ್‌ವೂ ಸದ್ಯಕ್ಕೆ ಕೊಂಕು ಪೂಲ್‌ನಲ್ಲಿಯೇ ಉಳಿಯುತ್ತದೆ. ನೇರ '<alias>'/'<model>' ಕರೆಗಳು ಯಾವುದೇ ಸಂದರ್ಭದಲ್ಲೂ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತವೆ."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: ಒಳಸೇರಿಸಲಾದ ತರ್ಕ ಪುನರ್ಪ್ರತಿರೂಪ",
+        "description": "codebuddy-cn ಸಂಚಲನ ಮಾದರಿಗಳಿಗೆ (DeepSeek-V4 / Kimi-K2 ಕುಲಗಳು, ಅವುಗಳಿಗೆ ಕಾರಣಾತ್ಮಕ ಪುನಃಪಡೆಯುವಿಕೆ ಬೇಕಾಗುತ್ತದೆ), ಪ್ರತಿ ಪುನಃಪಡೆಯಲ್ಪಟ್ಟ ಸಹಾಯಕ reasoning_content ಅನ್ನು ಸಂದೇಶ ಅಂಶದ ಮುಂದೆ ಗೋಚರಿಸುವ '<thought>' ಕ್ಲಾಕ್ ಆಗಿ ಸೇರಿಸಿ, ಇದರಿಂದ reasoning_content ಅಂಶವನ್ನು ಎಸೆಯುವ ಗೇಟ್‌ವೇವನ್ನು ಹೊಂದಿರುವಾಗಲೂ ಇದು ಉಳಿಯುತ್ತದೆ (#13632). ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್: codebuddy-cn ವಿನಂತಿಗಳು ಬದಲಿಸದೆ ಕಳುಹಿಸಲಾಗುತ್ತವೆ; reasoning_content ಅಂಶವನ್ನು ಯಾವಾಗಲೂ ಕಾಪಡಿಸಲಾಗುತ್ತದೆ."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "ಪ್ರೊವೈಡರ್ ಸುರಕ್ಷತಾ ಸ್ಟಾಪ್‌ಗಳು: ಟರ್ಮಿನಲ್",
+        "description": "ಸ್ಪಷ್ಟವಾದ ಪ್ರೊವೈಡರ್ ಸುರಕ್ಷತಾ ನಿಲುಗಡೆಯನ್ನು (misalignment_policy_violation, content_policy_violation, ಅಥವಾ provider_safety_rejection ಎಂದು ಲೇಬಲ್ ಮಾಡಲಾದ ನಿಖರವಾದ ಲೆಗಸಿ 'blocked by our safety systems' ತಿರಸ್ಕಾರ) ಟರ್ಮಿನಲ್, ವಿನಂತಿ-ವ್ಯಾಪ್ತಿಯ ತಿರಸ್ಕಾರವಾಗಿ ಇರಿಸಿಕೊಳ್ಳಿ: ಇದರ ಕೋಡ್ HTTP, Responses, WebSocket ಮತ್ತು completed-stream ದೋಷಗಳಲ್ಲೂ ಸಂರಕ್ಷಿಸಲ್ಪಡುತ್ತದೆ ಮತ್ತು ಕಾಂಬೋ ಇತರ ಗುರಿಗಳನ್ನು ಮರುಪ್ರಯತ್ನಿಸುವ ಬದಲು ಇಲ್ಲೇ ನಿಲ್ಲುತ್ತದೆ ಹಾಗೂ ಅನುಮತಿಸಲಾದ ಒಡಹುಟ್ಟಿದವುಗಳನ್ನು ರದ್ದುಗೊಳಿಸುತ್ತದೆ (#17049). ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಈ ದೋಷಗಳು ತಮ್ಮ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ನಿರ್ವಹಣೆಯನ್ನು ಉಳಿಸಿಕೊಳ್ಳುತ್ತವೆ ಮತ್ತು ಕಾಂಬೋ ರೂಟಿಂಗ್ ಬದಲಾಗದೆ ಉಳಿಯುತ್ತದೆ."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಹೆಲ್ತ್: ಸ್ವಯಂ-ನಿಷ್ಕ್ರಿಯಗೊಂಡ ಸಂಪರ್ಕಗಳನ್ನು ಮರುಪರೀಕ್ಷಿಸಿ",
+        "description": "ಗೇಟ್‌ವೇ ತಾನಾಗಿಯೇ ಸ್ವಿಚ್ ಆಫ್ ಮಾಡಿದ ಸಂಪರ್ಕಗಳನ್ನು (autoDisabledAt ಎಂದು ಗುರುತಿಸಲಾದ; ಪ್ರತಿಯೊಂದನ್ನು ಗರಿಷ್ಠ 6 ಗಂಟೆಗಳಿಗೆ ಒಮ್ಮೆ ಮತ್ತು ಪ್ರತಿ ಸ್ವೀಪ್‌ಗೆ 5) ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಹೆಲ್ತ್ ಸ್ವೀಪ್ ಮರುಪರೀಕ್ಷಿಸಲು ಅನುಮತಿಸಿ ಮತ್ತು ಮರುಪರೀಕ್ಷೆಯಲ್ಲಿ ಉತ್ತೀರ್ಣವಾದಾಗ ಸಂಪರ್ಕವನ್ನು ಮತ್ತೆ ಆನ್ ಮಾಡಿ (#16190). ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ನಿರ್ವಾಹಕರು ಅವುಗಳನ್ನು ಮರು-ಸಕ್ರಿಯಗೊಳಿಸುವವರೆಗೆ ಅಥವಾ ಮರುಪರೀಕ್ಷಿಸುವವರೆಗೆ, ಸ್ವಿಚ್ ಆಫ್ ಮಾಡಲಾದ ಸಂಪರ್ಕಗಳು ಮೊದಲಿನಂತೆಯೇ ಆಫ್ ಆಗಿರುತ್ತವೆ. ನಿರ್ವಾಹಕರಿಂದ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾದ ಸಂಪರ್ಕಗಳನ್ನು ಮತ್ತು ಶಾಶ್ವತ ನಿಷೇಧದ ನಂತರ ಸ್ವಿಚ್ ಆಫ್ ಮಾಡಲಾದ ಸಂಪರ್ಕಗಳನ್ನು ಎಂದಿಗೂ ಮರುಪರೀಕ್ಷಿಸಲಾಗುವುದಿಲ್ಲ."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಗೇಟ್: Auth ಡಯಾಗ್ನೋಸಿಸ್‌ಗಳು ಮಾತ್ರ",
+        "description": "ಕಾಂಬೋ ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಗೇಟ್ ಅನ್ನು ಕಿರಿದಾಗಿಸಿ, ಇದರಿಂದಾಗಿ ಕ್ಯಾಶ್ ಮಾಡಲಾದ ವಿಫಲ ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಪ್ರೋಬ್ ತನ್ನ ರೋಗನಿರ್ಣಯವು ದೋಷಯುಕ್ತ ಕ್ರೆಡೆನ್ಶಿಯಲ್‌ಗಳನ್ನು (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required) ಸಾಬೀತುಪಡಿಸಿದಾಗ ಮಾತ್ರ ಸಂಪರ್ಕವನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ. ಅನಿರ್ದಿಷ್ಟ ವೈಫಲ್ಯಗಳನ್ನು (ಟೈಮ್‌ಔಟ್‌ಗಳು, ದರ ಮಿತಿಗಳು, ಸ್ಥಗಿತಗಳು, ಬೆಂಬಲವಿಲ್ಲದ ಪ್ರೋಬ್‌ಗಳು ಮತ್ತು ಅನ್‌ಟೈಪ್ಡ್ ಶೆಡ್ಯೂಲರ್ ದೋಷಗಳು) ನಂತರ ಅಜ್ಞಾತವೆಂದು ಪರಿಗಣಿಸಲಾಗುತ್ತದೆ ಮತ್ತು ಸಂಪರ್ಕವು ಟ್ರಾಫಿಕ್ ಪಡೆಯುವುದನ್ನು ಮುಂದುವರಿಸುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಯಾವುದೇ ಕ್ಯಾಶ್ ಮಾಡಲಾದ ಪ್ರೋಬ್ ದೋಷವು ಕ್ಯಾಶ್ TTL (5 ನಿಮಿಷಗಳು) ವರೆಗೆ ಸಂಪರ್ಕವನ್ನು ನಿರ್ಬಂಧಿಸುತ್ತದೆ."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "ಕಾಂಬೋ: ಕಂಟೆಂಟ್-ಪಾಲಿಸಿ ತಿರಸ್ಕಾರದಲ್ಲಿ ನಿಲ್ಲಿಸಿ",
+        "description": "ಕಾಂಬೋ ಗುರಿಯು ನಿಖರವಾದ ಕಂಟೆಂಟ್-ಪಾಲಿಸಿ ತಿರಸ್ಕಾರದೊಂದಿಗೆ (ಕೋಡ್ ಅಥವಾ ಪ್ರಕಾರ cyber_policy / content_policy_violation) ಉತ್ತರಿಸಿದಾಗ, ಮುಂದಿನ ಗುರಿಗೆ ಮುನ್ನಡೆಯುವ ಬದಲು, ಉಳಿದ ಗುರಿಗಳು ವಿಭಿನ್ನ ಮಾಡೆಲ್‌ಗಳಾಗಿದ್ದರೂ ಸಹ ಕಾಂಬೋವನ್ನು ನಿಲ್ಲಿಸಿ ಮತ್ತು ಆ ತಿರಸ್ಕಾರವನ್ನು ಹಿಂತಿರುಗಿಸಿ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ತಿರಸ್ಕಾರವು ಎಂದಿಗೂ ಖಾತೆಯನ್ನು ಕೂಲ್ ಮಾಡುವುದಿಲ್ಲ ಅಥವಾ ಪ್ರೊವೈಡರ್ ಬ್ರೇಕರ್ ಅನ್ನು ಟ್ರಿಪ್ ಮಾಡುವುದಿಲ್ಲ, ಮತ್ತು ಕಾಂಬೋ ಮೊದಲಿನಂತೆಯೇ ತನ್ನ ಮುಂದಿನ ಗುರಿಗೆ ಮುನ್ನಡೆಯುತ್ತದೆ."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "ಕೂಲ್‌ಡೌನ್ ಮರುಪ್ರಯತ್ನ: 403/410 ನಿರಾಕರಣೆಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಿ",
+        "description": "ಪ್ರತಿಯೊಂದು ಖಾತೆಯು ಕೂಲ್‌ಡೌನ್‌ನಲ್ಲಿದ್ದಾಗ ಮತ್ತು ಮೊದಲು ಮುಕ್ತಾಯಗೊಳ್ಳುವ ಕೂಲ್‌ಡೌನ್ 403 (access refused) ಅಥವಾ 410 (gone) ನಿಂದ ಉಂಟಾಗಿದ್ದರೆ, ಕೂಲ್‌ಡೌನ್ ಮುಗಿಯುವವರೆಗೆ ಕಾಯ್ದು ವಿನಂತಿಯನ್ನು ಮರುಕಳುಹಿಸುವ ಬದಲು ಆ ನಿರಾಕರಣೆಯನ್ನು ತಕ್ಷಣವೇ ಹಿಂತಿರುಗಿಸಿ; ನವೀಕರಣಗೊಳ್ಳುತ್ತಿರುವ agentrouter connection-scoped quota 403 ಅನ್ನು ನಂತರ errorCode 429 ನೊಂದಿಗೆ ಉಳಿಸಲಾಗುತ್ತದೆ, ಇದರಿಂದಾಗಿ ಅದು ಮರುಪ್ರಯತ್ನಿಸಬಹುದಾದ ಸ್ಥಿತಿಯಲ್ಲೇ ಉಳಿಯುತ್ತದೆ. ಡೀಫಾಲ್ಟ್ ಆಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ: ಕೇವಲ 401 ಮಾತ್ರ ಕಾಯುವಿಕೆಯನ್ನು ಬಿಟ್ಟುಬಿಡುತ್ತದೆ, ಮತ್ತು ಪ್ರತಿಯೊಂದು ನಿರಾಕರಣೆಯನ್ನು ಅದು ಬಂದ ಸ್ಥಿತಿಯೊಂದಿಗೆ ಉಳಿಸಲಾಗುತ್ತದೆ."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "ಬೆಲೆರಹಿತ ಬಳಕೆ ಬಜೆಟ್ ನೀತಿ",
+        "description": "ಬೆಲೆ ಸಾಲು ಇಲ್ಲದ ಸೇವಾಪೂರೈಕೆದಾರ/ಮಾದರಿ ಇರುವ ಯಶಸ್ವಿ ಬಳಕೆಯನ್ನು ಪ್ರತಿ ಕೀಲಿಗೆ ದಿನ/ವಾರದ USD ಮಿತಿಗಳು ಹೇಗೆ ನಿರ್ವಹಿಸುತ್ತವೆ. fail_closed (ಪೂರ್ವನಿರ್ಧಾರ) ಕಿಟಕಿಯನ್ನು ಮೀರಿದಂತೆ ಗುರುತಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ತಿಳಿಯದ ವೆಚ್ಚವು ಕಠಿಣ ಮಿತಿಯನ್ನು ತಪ್ಪಿಸಿಕೊಂಡು ಹೊರಹೋಗುವುದಿಲ್ಲ. count_as_zero ಆ ಬಳಕೆಯನ್ನು $0 ಎಂದು ಪರಿಗಣಿಸಿ, ಬೆಲೆಯಿರುವ ಖರ್ಚಿನ ಅನ್ವಯಣೆಯನ್ನು ಮುಂದುವರಿಸುತ್ತದೆ. ಎರಡೂ ಸಂದರ್ಭಗಳಲ್ಲೂ ಬೆಲೆ ಇಲ್ಲದ ಮಾದರಿಗಳು ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಮುಖಪುಟದಲ್ಲಿ ಪಟ್ಟಿಯಾಗುತ್ತವೆ."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "ಸುಪ್ತತೆ",
     "quota": "ಕೋಟಾ",
     "rangeWindow": "{range} ಅವಧಿ",
+    "timeRange": "ಸಮಯದ ವ್ಯಾಪ್ತಿ",
     "runtimeHealthBlend": "ರನ್ಟೈಮ್/ಆರೋಗ್ಯ ಸ್ಥಿತಿಯ ಸಂಯೋಜನೆ",
     "averageResponseTime": "ಸರಾಸರಿ ಪ್ರತಿಕ್ರಿಯೆ ಸಮಯ",
     "worstQuota": "ಅತ್ಯಂತ ಕಡಿಮೆ ಕೋಟಾ",
@@ -13923,7 +14500,11 @@
       "ok": "ಸಾಮಾನ್ಯವಾಗಿ ಅನುಮತಿದಾಯಕ"
     },
     "allProviders": "ಎಲ್ಲ ಪೂರೈಕೆದಾರರು",
-    "noApiKeyRequired": "API ಕೀ ಅಗತ್ಯವಿಲ್ಲ"
+    "noApiKeyRequired": "API ಕೀ ಅಗತ್ಯವಿಲ್ಲ",
+    "searchPlaceholder": "ಮಾಡೆಲ್, ಪ್ರೊವೈಡರ್ ಹುಡುಕಿ...",
+    "searchAria": "ಉಚಿತ ಮಾಡೆಲ್‌ಗಳನ್ನು ಹುಡುಕಿ",
+    "filterProviderAria": "ಪ್ರೊವೈಡರ್‌ನಿಂದ ಫಿಲ್ಟರ್ ಮಾಡಿ",
+    "keylessOnly": "ಕೀ-ಲೆಸ್ ಮಾತ್ರ"
   },
   "providerHealthAutopilot": {
     "title": "ಪೂರೈಕೆದಾರ ಆರೋಗ್ಯ ಆಟೋಪೈಲಟ್",
@@ -13994,7 +14575,11 @@
     "learnMore": "ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ",
     "changelogLoadFailed": "ಬದಲಾವಣೆಗಳ ದಾಖಲೆಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
     "retry": "ಮರುಪ್ರಯತ್ನಿಸಿ",
-    "viewFullHistory": "GitHub ನಲ್ಲಿ ಸಂಪೂರ್ಣ ಇತಿಹಾಸವನ್ನು ವೀಕ್ಷಿಸಿ"
+    "viewFullHistory": "GitHub ನಲ್ಲಿ ಸಂಪೂರ್ಣ ಇತಿಹಾಸವನ್ನು ವೀಕ್ಷಿಸಿ",
+    "title": "ಸುದ್ದಿ ಮತ್ತು ಬದಲಾವಣೆಗಳ ದಾಖಲೆ",
+    "description": "OmniRoute ತಂಡದ ಪ್ರಕಟಣೆಗಳು ಮತ್ತು ಇತ್ತೀಚಿನ ಬಿಡುಗಡೆ ಟಿಪ್ಪಣಿಗಳು",
+    "viewLabel": "ವೀಕ್ಷಿಸಿ",
+    "loadingNews": "ಪ್ರಕಟಣೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "ಪೂರೈಕೆದಾರರ ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ ಸ್ಥಿತಿ",
       "lastUpdate": "ಕೊನೆಯ ನವೀಕರಣ: {timestamp}",
       "uptimeMinutes": "{minutes}ನಿ",
-      "uptimeHoursMinutes": "{hours}ಗಂ {minutes}ನಿ"
+      "uptimeHoursMinutes": "{hours}ಗಂ {minutes}ನಿ",
+      "breakerClosed": "ಮುಚ್ಚಲಾಗಿದೆ",
+      "breakerNotClosed": "ತೆರೆದಿದೆ ಅಥವಾ ಅರ್ಧ-ತೆರೆದಿದೆ"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "ನಿರ್ವಹಣೆಯ ವಿವರಗಳು",
         "secondaryAction": "ಸಿಸ್ಟಮ್ ಸ್ಥಿತಿ"
       }
+    },
+    "miniapp": {
+      "askAnything": "ಏನನ್ನಾದರೂ ಕೇಳಿ…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} ಗೋಚರಿಸುತ್ತಿವೆ / ಒಟ್ಟು {total}",
+    "modeLabel": "ವೀಕ್ಷಣಾ ಮೋಡ್",
+    "jumpToNow": "ಪ್ರಸ್ತುತ ಸಮಯಕ್ಕೆ ಹೋಗಿ, ಈಗಿನ ರೇಖೆಯು {position}% ಸ್ಥಾನಕ್ಕೆ ಮರುಹೊಂದಿಸಲ್ಪಡುತ್ತದೆ",
+    "laneReuse": "ಲೇನ್ ಮರುಬಳಕೆ",
+    "laneReuseLabel": "ಲೇನ್ ಮರುಬಳಕೆ ಅವಧಿ (ನಿಮಿಷಗಳು)",
+    "laneReuseHint": "ಒಂದೇ ಸಂಭಾಷಣೆ ಐಡಿಯನ್ನು ಹಂಚಿಕೊಳ್ಳುವ ವಿನಂತಿಗಳ ನಡುವಿನ ಅಂತರವು ಇಷ್ಟು ನಿಮಿಷಗಳಿಗಿಂತ ಕಡಿಮೆ ಇರುವವರೆಗೆ ಅವು ಅದೇ ಕಾಲರೇಖೆಯ ಸಾಲಿನಲ್ಲಿ ಉಳಿಯುತ್ತವೆ.",
+    "laneReuseUnit": "ನಿಮಿ",
+    "autoRefresh": "ಸ್ವಯಂ-ರಿಫ್ರೆಶ್",
+    "autoRefreshLabel": "ಸ್ವಯಂ-ರಿಫ್ರೆಶ್ ಮಧ್ಯಂತರ (ಸೆಕೆಂಡುಗಳು)",
+    "autoRefreshHint": "ಕಾಲರೇಖೆಯು ಸರ್ವರ್ನಿಂದ ವಿನಂತಿಗಳ ಪಟ್ಟಿಯನ್ನು ಎಷ್ಟು ಬಾರಿ ಮರುಪಡೆಯುತ್ತದೆ.",
+    "autoRefreshUnit": "ಸೆ",
+    "zoomOut": "ಝೂಮ್ ಔಟ್",
+    "zoomIn": "ಝೂಮ್ ಇನ್"
   },
   "metadata": {
     "compressionTitle": "ಸಂಕುಚನ",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "ವಜಾಗೊಳಿಸಿ"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "/v1/models ಕ್ಯಾಟಲಾಗ್ನಲ್ಲಿ ಚಿಂತನಾ ಮಟ್ಟದ ರೂಪಾಂತರಗಳ (ಉದಾ. -low, -medium, -high) ರಚನೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ.",
+  "teamCosts": {
+    "title": "ತಂಡದ ವೆಚ್ಚಗಳು",
+    "subtitle": "ಹಂಚಿಕೆಯ ಸಾಫ್ಟ್ ಬಜೆಟ್‌ಗಳು ಮತ್ತು ಕ್ಯಾಟಲಾಗ್ ವೆಚ್ಚ ಅಂದಾಜುಗಳನ್ನು ನಿರ್ವಹಿಸಿ.",
+    "refresh": "ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+    "create": "ತಂಡವನ್ನು ರಚಿಸಿ",
+    "edit": "ತಂಡವನ್ನು ಸಂಪಾದಿಸಿ",
+    "archive": "ಆರ್ಕೈವ್ ಮಾಡಿ",
+    "selectTeam": "ತಂಡಗಳು",
+    "searchTeams": "ತಂಡಗಳನ್ನು ಹುಡುಕಿ",
+    "statusFilter": "ತಂಡದ ಸ್ಥಿತಿ",
+    "active": "ಸಕ್ರಿಯ",
+    "archived": "ಆರ್ಕೈವ್ ಮಾಡಲಾಗಿದೆ · ಓದಲು ಮಾತ್ರ",
+    "allTeams": "ಎಲ್ಲಾ ತಂಡಗಳು",
+    "noTeams": "ಹೊಂದಾಣಿಕೆಯ ತಂಡಗಳಿಲ್ಲ.",
+    "selectHint": "ವೆಚ್ಚಗಳನ್ನು ನೋಡಲು ತಂಡವನ್ನು ರಚಿಸಿ ಅಥವಾ ಆಯ್ಕೆಮಾಡಿ.",
+    "loading": "ತಂಡದ ವೆಚ್ಚಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+    "budgetTitle": "ಪ್ರಸ್ತುತ ಸಾಫ್ಟ್ ಬಜೆಟ್",
+    "budgetSubtitle": "ಯಶಸ್ವಿಯಾಗಿ ದಾಖಲಾದ ಬಳಕೆ · ರೋಲಿಂಗ್ ವಿಂಡೋ · ವರದಿ ದಿನಾಂಕಗಳಿಂದ ಸ್ವತಂತ್ರ",
+    "archivedBudget": "ಆರ್ಕೈವ್ ಮಾಡಲಾಗಿದೆ: ಬಜೆಟ್ ಜಾರಿ ನಿಷ್ಕ್ರಿಯವಾಗಿದೆ. ಐತಿಹಾಸಿಕ ವರದಿಗಳು ಲಭ್ಯವಿರುತ್ತವೆ.",
+    "unlimited": "ಅಪರಿಮಿತ — ಹಂಚಿಕೆಯ ಸಾಫ್ಟ್ ಬಜೆಟ್ ಕಾನ್ಫಿಗರ್ ಆಗಿಲ್ಲ.",
+    "budgetUnavailable": "ಬಜೆಟ್ ಸ್ಥಿತಿ ಲಭ್ಯವಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಲು ರಿಫ್ರೆಶ್ ಮಾಡಿ.",
+    "used": "ಯಶಸ್ವಿ ಬಳಕೆ",
+    "maximum": "ಬಜೆಟ್ ಗರಿಷ್ಠ",
+    "remaining": "ತಿಳಿದಿರುವ ಉಳಿದ ಮೊತ್ತ",
+    "resets": "ಮರುಹೊಂದಿಕೆ",
+    "unpricedBudget": "ಯಶಸ್ವಿ ಬಳಕೆಯ ಒಂದು ಭಾಗದ ಬೆಲೆ ತಿಳಿದಿಲ್ಲ. ತಿಳಿದಿರುವ ಮೊತ್ತ ಅಪೂರ್ಣ; ಬಜೆಟ್ ಜಾರಿ ಈ ವಿಂಡೋವನ್ನು ಮೀರಿದೆ ಎಂದು ಪರಿಗಣಿಸುತ್ತದೆ.",
+    "overBudget": "ಬಜೆಟ್ ತಲುಪಿದೆ ಅಥವಾ ಮೀರಿದೆ · {amount} ಹೆಚ್ಚು",
+    "reportTitle": "ಬಳಕೆ ವರದಿ",
+    "reportSubtitle": "ಎಲ್ಲಾ ಪ್ರಯತ್ನಗಳು · USD ನಲ್ಲಿ ಕ್ಯಾಟಲಾಗ್ ಅಂದಾಜು, ಇನ್‌ವಾಯ್ಸ್ ಅಲ್ಲ · ಪೂರ್ಣ UTC ದಿನಾಂಕಗಳು",
+    "reportPeriod": "ವರದಿ ಅವಧಿ",
+    "day1": "1 ದಿನ",
+    "day7": "7 ದಿನಗಳು",
+    "day30": "30 ದಿನಗಳು",
+    "allTime": "ಎಲ್ಲಾ ಸಮಯ",
+    "reportSpend": "ಅಂದಾಜು ವರದಿ ಖರ್ಚು",
+    "requests": "ವಿನಂತಿಗಳು",
+    "assignedKeys": "ನಿಯೋಜಿಸಿದ ಕೀಗಳು",
+    "unpricedReport": "ಈ ವರದಿಯಲ್ಲಿ ತಿಳಿಯದ ಬೆಲೆಗಳಿವೆ. ಅಂದಾಜು ಖರ್ಚು ಅಪೂರ್ಣ.",
+    "breakdown": "API ಕೀ ಪ್ರಕಾರ ವೆಚ್ಚ",
+    "noUsage": "ಈ ವರದಿ ಅವಧಿಯಲ್ಲಿ ಬಳಕೆ ಇಲ್ಲ.",
+    "keyName": "API ಕೀ ಹೆಸರು",
+    "tokens": "ಇನ್‌ಪುಟ್ + ಔಟ್‌ಪುಟ್ ಟೋಕನ್‌ಗಳು",
+    "unnamedKey": "ಹೆಸರಿಲ್ಲದ ಅಥವಾ ಅಳಿಸಿದ ಕೀ",
+    "unpriced": "ತಿಳಿಯದ ಬೆಲೆ",
+    "members": "ಸದಸ್ಯತ್ವ",
+    "memberSubtitle": "ಸದಸ್ಯತ್ವ ಬದಲಾದರೂ ಐತಿಹಾಸಿಕ ಖರ್ಚು ಮೂಲ ತಂಡದಲ್ಲೇ ಉಳಿಯುತ್ತದೆ.",
+    "searchKeys": "ಕೀಗಳು ಅಥವಾ ಪ್ರಸ್ತುತ ಮಾಲೀಕರನ್ನು ಹುಡುಕಿ",
+    "chooseKey": "API ಕೀ ಆಯ್ಕೆಮಾಡಿ",
+    "unassigned": "ನಿಯೋಜಿಸಿಲ್ಲ",
+    "ownership": "ಪ್ರಸ್ತುತ ಬಿಲ್ಲಿಂಗ್ ತಂಡ: {team}",
+    "assign": "ನಿಯೋಜಿಸಿ",
+    "remove": "ತೆಗೆದುಹಾಕಿ",
+    "noMembers": "ಪ್ರಸ್ತುತ ಸದಸ್ಯರಿಲ್ಲ. ಐತಿಹಾಸಿಕ ಬಳಕೆ ಇನ್ನೂ ಬಜೆಟ್‌ಗೆ ಎಣಿಕೆಯಾಗಬಹುದು.",
+    "assignedAt": "{date} ರಂದು ನಿಯೋಜಿಸಲಾಗಿದೆ (UTC)",
+    "name": "ತಂಡದ ಹೆಸರು",
+    "description": "ವಿವರಣೆ",
+    "enableBudget": "ಹಂಚಿಕೆಯ ಸಾಫ್ಟ್ ಬಜೆಟ್ ಸಕ್ರಿಯಗೊಳಿಸಿ",
+    "amount": "ಬಜೆಟ್ ಮೊತ್ತ (USD)",
+    "duration": "ರೋಲಿಂಗ್ ಬಜೆಟ್ ವಿಂಡೋ",
+    "cancel": "ರದ್ದುಮಾಡಿ",
+    "save": "ಉಳಿಸಿ",
+    "confirm": "ದೃಢೀಕರಿಸಿ",
+    "transferTitle": "ಕೀ ವರ್ಗಾವಣೆಯನ್ನು ದೃಢೀಕರಿಸಿ",
+    "transferMessage": "ಈ ಕೀಯನ್ನು “{source}” ನಿಂದ “{destination}” ಗೆ ಸರಿಸಬೇಕೆ? ಐತಿಹಾಸಿಕ ಖರ್ಚು ಮೂಲ ತಂಡದಲ್ಲೇ ಉಳಿಯುತ್ತದೆ.",
+    "removeTitle": "ಕೀ ನಿಯೋಜನೆಯನ್ನು ತೆಗೆದುಹಾಕಿ",
+    "removeMessage": "ಈ ಕೀಯನ್ನು “{team}” ನಿಂದ ತೆಗೆದುಹಾಕಬೇಕೆ? ಐತಿಹಾಸಿಕ ಖರ್ಚು ಈ ತಂಡದಲ್ಲೇ ಉಳಿಯುತ್ತದೆ.",
+    "archiveTitle": "ತಂಡವನ್ನು ಆರ್ಕೈವ್ ಮಾಡಿ",
+    "archiveMessage": "“{team}” ಅನ್ನು ಆರ್ಕೈವ್ ಮಾಡಬೇಕೆ? ಎಲ್ಲಾ ಪ್ರಸ್ತುತ ಬಂಧನಗಳು ಮುಚ್ಚುತ್ತವೆ ಮತ್ತು ಬಜೆಟ್ ಜಾರಿ ನಿಲ್ಲುತ್ತದೆ. ಐತಿಹಾಸಿಕ ವರದಿಗಳು ಲಭ್ಯವಿರುತ್ತವೆ.",
+    "invalidName": "ಹೆಸರು (1–200 ಅಕ್ಷರಗಳು) ಮತ್ತು ಗರಿಷ್ಠ 2,000 ಅಕ್ಷರಗಳ ವಿವರಣೆಯನ್ನು ನಮೂದಿಸಿ.",
+    "invalidAmount": "ಶೂನ್ಯಕ್ಕಿಂತ ಹೆಚ್ಚಿನ ಸೀಮಿತ ಬಜೆಟ್ ಮೊತ್ತವನ್ನು ನಮೂದಿಸಿ.",
+    "unauthorized": "ಮುಂದುವರಿಯಲು ನಿರ್ವಹಣಾ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.",
+    "forbidden": "ತಂಡಗಳನ್ನು ನಿರ್ವಹಿಸಲು ನಿಮಗೆ ಅನುಮತಿ ಇಲ್ಲ. ನಿಮ್ಮ ಇನ್‌ಪುಟ್ ಉಳಿಸಲಾಗಿದೆ.",
+    "notFound": "ಈ ತಂಡ ಅಥವಾ ನಿಯೋಜನೆ ಇನ್ನಿಲ್ಲ.",
+    "conflict": "ನಿಯೋಜನೆ ಅಥವಾ ತಂಡ ಬದಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸುವ ಮೊದಲು ರಿಫ್ರೆಶ್ ಮಾಡಿ ಪ್ರಸ್ತುತ ಮಾಲೀಕತ್ವವನ್ನು ದೃಢೀಕರಿಸಿ.",
+    "failed": "ವಿನಂತಿ ವಿಫಲವಾಯಿತು. ನಿಮ್ಮ ಇನ್‌ಪುಟ್ ಉಳಿಸಲಾಗಿದೆ; ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "partialBudget": "ಉಳಿಸಿದ ಕೆಲವು ದೈನಂದಿನ ಬಕೆಟ್‌ಗಳು ವಿಂಡೋ ಗಡಿಯೊಂದಿಗೆ ಅತಿಕ್ರಮಿಸುತ್ತವೆ ಮತ್ತು ನಿಖರವಾಗಿ ಹಂಚಲು ಸಾಧ್ಯವಿಲ್ಲ. ತೋರಿಸಿದ ಖರ್ಚು ಅಪೂರ್ಣ; ಉಳಿದ ಮಿತಿ ಲಭ್ಯವಿಲ್ಲ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಸಾಫ್ಟ್ ಬಜೆಟ್ ನೀತಿ ಬದಲಾಗಿಲ್ಲ."
+  },
   "connectionTest": {
     "title": "ಪರೀಕ್ಷಾ ಸಂದೇಶ",
     "description": "ಈ ಖಾತೆಯ ಮೂಲಕ ಒಂದು ನೈಜ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸಿ. ಇದು ಸ್ವಲ್ಪ ಪ್ರಮಾಣದ ಕೋಟಾವನ್ನು ಬಳಸುತ್ತದೆ ಮತ್ತು ಪೂರೈಕೆದಾರರನ್ನು ಅವಲಂಬಿಸಿ ಬಳಕೆಯ ಅವಧಿಯನ್ನು ಪ್ರಾರಂಭಿಸಬಹುದು.",
@@ -15073,5 +15753,118 @@
     "importButton": "ಆಮದು ಮಾಡಿ",
     "importFailed": "ಆಮದು ವಿಫಲವಾಗಿದೆ.",
     "importSuccess": "{connections} ಖಾತೆಗಳು ಮತ್ತು {nodes} ಪೂರೈಕೆದಾರ ನೋಡ್‌ಗಳನ್ನು ಆಮದು ಮಾಡಲಾಗಿದೆ; {skipped} ಬಿಟ್ಟುಬಿಡಲಾಗಿದೆ."
+  },
+  "conversations": {
+    "title": "ಸಂಭಾಷಣೆಗಳು",
+    "countSummary": "2+ ಪರಿವರ್ತನೆಗಳಿರುವ {total, plural, one {# ಸಂಭಾಷಣೆ} other {# ಸಂಭಾಷಣೆಗಳು}}",
+    "autoRefreshTitle": "ಈ ಪಟ್ಟಿಯನ್ನು ಸರ್ವರ್‌ನಿಂದ ಎಷ್ಟು ಬಾರಿ ಮರುಪಡೆಯಲಾಗುತ್ತದೆ.",
+    "autoRefresh": "ಸ್ವಯಂ-ರಿಫ್ರೆಶ್",
+    "loading": "ಸಂಭಾಷಣೆಗಳನ್ನು ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
+    "colConversation": "ವಾಹ",
+    "colTurns": "ಪರಿವರ್ತನೆಗಳು",
+    "colContinuation": "ಮುಂದುವರಿಸುವಿಕೆ",
+    "colLastModel": "ಬದಲಾಯಿಸಲು ಕೆಳಗೆ ಒತ್ತಿ",
+    "colProvider": "ಪುರವಂತೆ",
+    "colStatus": "ಸ್ಥಿತಿ",
+    "colLastSeen": "ಕೊನೆಯ ಬಾರಿ ವೀಕ್ಷಿಸಲಾಗಿದೆ",
+    "drawerTitle": "ವಾಹ",
+    "prevConversation": "ಹಿಂದಿನ ವಾಹ",
+    "nextConversation": "ಮುಂದಿನ ವಾಹ",
+    "gotoLatestRequest": "ತಾಜಾ ಸ್ವೀಕರಣಕ್ಕೆ ಹೋಗಿ",
+    "goToBottom": "ಕೆಳಭಾಗಕ್ಕೆ ಹೋಗಿ",
+    "statusInProgress": "ಸಾಗಿಸಲಾಗುತ್ತಿದೆ",
+    "continuationGenuineTitle": "ತಾಜಾ ಪರ್ಯಾಯವು previous_response_id ಬಳಸಿತು ಮತ್ತು ಅದು ಸರ್ವರ್‌‌ಪಥದಲ್ಲಿ ಪರಿಹರಿಸಲ್ಪಟ್ಟಿದೆ",
+    "continuationBadge": "ಸರಣಿ",
+    "stalledTitle": "ತಾಜಾ ಪರ್ಯಾಯವು ನಿಲ್ಲಿಸಲಾಗಿಲ್ಲ ಮತ್ತು 5+ ನಿಮಿಷಗಳಿಂದ ಏನೂ ಮುಂದುವರಿಯಲಿಲ್ಲ",
+    "stalledBadge": "ಉಪಟಳ",
+    "noTurns": "ಈ ಸಂಭಾಷಣೆಯ ಬಗ್ಗೆ ಯಾವ ಪರ್ಯಾಯಗಳೂ ದಾಖಲಿಸಲ್ಪಟ್ಟಿಲ್ಲ."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "ಪ್ರಸ್ತುತ ಸ್ಥಾನದಿಂದ ಪ್ರಾರಂಭಿಸಿ (ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಲಾಗ್‌ಗಳನ್ನು ಬಿಟ್ಟುಬಿಡಿ)",
+    "pageTitle": "ಲಾಗ್ ಎಕ್ಸ್‌ಪೋರ್ಟ್",
+    "pageSubtitle": "ಲಾಗ್ಸ್ ಟ್ಯಾಬ್‌ನಿಂದ ಕಾಲ್ ಲಾಗ್‌ಗಳನ್ನು ನಾವೈಕತಿಕವಾಗಿ ಹೊರಗಿನ ವಿಶ್ಲೇಷಣೆ ಸಂಗ್ರಹಕ್ಕೆ ಡಿಸ್ಪಾಚ್ ಮಾಡಿ.",
+    "addDestination": "ಗುರಿ ಸೇರಿಸಿ",
+    "scheduleTitle": "ಅಜಾಂತೆಸರಣೆ",
+    "cronLabel": "ಕ್ರಾನ್",
+    "notScheduled": "ಅಜಾಂತೆಸರಿಸಲಾಗಿಲ್ಲ",
+    "lastScheduledRun": "ಕೊನೆಯ ಅಜಾಂತೆಸರಿಸಲಾದ ಚಾಲನೆ",
+    "lastRunSummary": "{startedAt} — {status}, {rows} ಕಾಲುಗಳು",
+    "never": "ಕೇಂದ್ರದಲ್ಲೂ ಇಲ್ಲ",
+    "highWaterMark": "ಕಾಲ್ ಲಾಗ್‌ಗಳ ಉನ್ನತ ಮಟ್ಟ",
+    "rowPrefix": "ಕಾಲು {id}",
+    "noDestinations": "ಎಕ್ಸ್‌ಪೋರ್ಟ್ ಗುರಿಗಳಿಲ್ಲ",
+    "noDestinationsHint": "ಮೃದಂಗದ ಬಗ್ಗೆ ಕಾಲ್ ಲಾಗ್ಗಳನ್ನು ಮೃದಂಗದ ಖಾತೆಯನ್ನು ಪ್ರಾರಂಭಿಸಲು ಒಂದು ಗಂಟೆ ಸೇರಿಸಿ.",
+    "errLoadStatus": "ಎಕ್ಸ್‌ಪೋರ್ಟ್ ಸ್ಥಿತಿಯು ಲೋಡ್ ಆಗಲು ವಿಫಲವಾಗಿದೆ",
+    "errSaveDestination": "ಗಂಟನ್ನು ಉಳಿಸಲು ವಿಫಲವಾಗಿದೆ",
+    "msgDestinationSaved": "ಗಂಟನ್ನು ಉಳಿಸಲಾಗಿದೆ.",
+    "errConnectionTest": "ಸಂಪರ್ಕ ಪರೀಕ್ಷೆ ವಿಫಲವಾಗಿದೆ",
+    "msgRunInFlight": "ಈ ಗಂಟಿಗೆ ಈಗಾಗಲೇ ಒಂದು ರನ್ ಚಾಲನೆಯಲ್ಲಿದೆ; ಎರಡು ಬಾರಿ ಕಳುಹಿಸಲ್ಪಟ್ಟಿಲ್ಲ.",
+    "errExportRun": "ಎಕ್ಸ್‌ಪೋರ್ಟ್ ರನ್ ವಿಫಲವಾಗಿದೆ",
+    "errUpdateDestination": "ಗಂಟನ್ನು ನವೀಕರಿಸಲು ವಿಫಲವಾಗಿದೆ",
+    "errDeleteDestination": "ಗಂಟನ್ನು ಅಳಿಸಲು ವಿಫಲವಾಗಿದೆ",
+    "deleteTitle": "ನಿರ್ದೇಶನವನ್ನು ಅಳಿಸಿ",
+    "deleteConfirm": "«{name}» ಅನ್ನು ಅಳಿಸಬೇಕೇ? ಅದರ export cursor ದೂರಬಂದಿದೆ, ಆದ್ದರಿಂದ ಮತ್ತೆ ಸೇರಿಸಿದರೆ ಅದು ಹಳೆಯದಾದ call log ಇಂದ ಪ್ರಾರಂಭವಾಗುತ್ತದೆ.",
+    "statusDisabled": "ಅಮಾನ್ಯಗೊಳಿಸಲಾಗಿದೆ",
+    "statusFailing": "ಫೇಲ್ ಆಗುತ್ತಿದೆ",
+    "statusHealthy": "ಆರೋಗ್ಯದ ಪರಿಸ್ಥಿತಿಯಲ್ಲಿದೆ",
+    "statusNotRunYet": "ಇನ್ನೂ ಚಲಿಸಿಲ್ಲ",
+    "typeNotInstalled": "ಐಚ್ಛಿಕ ಸ್ಥಾಪಿಸಲ್ಪಡುತ್ತಿಲ್ಲ",
+    "metaLine": "ಕೊನೆಯ ಚಲನೆ {lastRun} · {exported} ಸಾಲುಗಳನ್ನು import ಮಾಡಲಾಗಿದೆ · {pending} ಒಳಗೊಳ್ಳುತ್ತಿದೆ · cursor {cursor}",
+    "btnTest": "ಪರೀಕ್ಷೆ",
+    "btnRunNow": "ಈಗಲೇ ಚಲಿಸಿ",
+    "btnDisable": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ",
+    "btnEnable": "ಸಕ್ರಿಯಗೊಳಿಸಿ",
+    "btnEdit": "ಸಂಪಾದಿಸಿ",
+    "btnDelete": "ಅಳಿಸಿ"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI ಖಾತೆಗಳು",
+    "cardSubtitle": "ದೃಢೀಕೃತ ನಿರ್ವಹಣಾ API ಯಿಂದ ಓದಲು-ಮಾತ್ರ ಸ್ಥಿತಿ",
+    "btnRefresh": "ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+    "listAria": "CLIProxyAPI ಖಾತೆಯ ಆರೋಗ್ಯ",
+    "noAccounts": "ಯಾವುದೇ CLIProxyAPI ಖಾತೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
+    "loading": "ಖಾತೆಯ ಆರೋಗ್ಯ ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+    "stateReady": "ಅಕೌಂಟ್ ಆರೋಗ್ಯ",
+    "stateDisabled": "CLIProxyAPI ಸ್ಥಾಪಿಸಲಾಗಿಲ್ಲ",
+    "stateMissingKey": "ಬಹುಳ್ಯ ಏಕೀಕೃತ ಆಯ್ಕೆಯು ಬಳಕೆಯಾಗುತ್ತಿಲ್ಲ",
+    "stateUnreachable": "Management API ತಲುಪಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ",
+    "stateUnauthorized": "Management key ಅಸಮರ್ಥಿಸಲಾಗಿದೆ",
+    "stateUnsupported": "ಈ CLIProxyAPI ಆವೃತ್ತಿಯು account health ಅನ್ನು ಕಡತಿಸುವುದಿಲ್ಲ",
+    "stateInvalidResponse": "Management API ಬಹುಳ್ಯ ಏಕೀಕೃತ ಆಯ್ಕೆಯು ಆಜ್ಞೆದಾನಿಯ ಒಬ್ಬರಿಂದ ಒಂದು ಆಳಿಸಿರುವುದಿಲ್ಲ"
+  },
+  "darioPanel": {
+    "title": "Claude ಖಾತೆಗಳು",
+    "description": "ಒಂದು Claude Pro/Max subscrution ಗಳಿಗೊಬ್ಬರಿಂದ Dario ಅನ್ನು ಹೇರಿತಿಸಿ. ಟ್ರಾಫಿಕ್ ನಿಮ್ಮ subscrution ಗೆ ಬಿಲ್ಲಿಸಲ್ಪಡುತ್ತದೆ. Dario ಅನುಮತಿಸುವವರೆಗೆ, ಅನಿವಾರ್ಯ ಟ್ರಾಫಿಕ್ ಒಂದು account ಅಗತ್ಯವಿದೆ (ವರೆಗೆ /health ಅನುಮತಿಸಿರುವ ಅಥವಾ /health ಅನುಮತಿಸಲಾಗಿದೆ).",
+    "noAccounts": "ಯಾವುದೇ accounts ಕಟ್ಟಿಸಿಲ್ಲ.",
+    "importTitle": "OmniRoute ರಿಂದ ಐಂಪೋರ್ಟ್ ಮಾಡಿ",
+    "importDescription": "ಹೊಸದಾಗಿ ಲಾಗಿನ್ ಮಾಡುವ ಬದಲು ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ OmniRoute Claude ಸಂಪರ್ಕದ OAuth ಟೋಕನ್‌ಗಳನ್ನು ಮರುಬಳಕೆ ಮಾಡಿ — ಬ್ರೌಸರ್ ಅನುಮೋದನೆಯ ಹಂತವನ್ನು ಪೂರ್ಣವಾಗಿ ಕಳೆದುಹಾಕುತ್ತದೆ.",
+    "importPendingTooltip": "OmniRoute ನಲ್ಲಿ Claude ಸಂಪರ್ಕವಿರುವಾಗ ಕ್ಷಣದಲ್ಲಿ ಸಕ್ರಿಯವಾಗಿರುತ್ತದೆ.",
+    "btnImport": "ಐಂಪೋರ್ಟ್",
+    "btnImporting": "ಐಂಪೋರ್ಟ್ ಆಗುತ್ತಿದೆ…",
+    "aliasPlaceholder": "ಏಲಿಯಸ್ (ಅನುಚಿತ)",
+    "btnStartLogin": "ಲಾಗಿನ್ ಆರಂಭಿಸಿ",
+    "btnStarting": "ಆರಂಭಿಸುತ್ತಿದೆ…",
+    "btnCompleteLogin": "ಲಾಗಿನ್ ಪೂರ್ಣಗೊಳಿಸಿ",
+    "btnCompleting": "ಪೂರ್ಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ…",
+    "codePlaceholder": "code#state ಅಥವಾ ಬೇರೆ code",
+    "noticeImported": "ಖಾತೆ \"{alias}\" ಆಗಿ ಆಮದು ಮಾಡಲಾಗಿದೆ — ಅದನ್ನು ಬಳಸಲು Dario ಮರುಪ್ರಾರಂಭಗೊಂಡಿದೆ.",
+    "noticeAdded": "ಖಾತೆ \"{alias}\" ಸೇರಿಸಲಾಗಿದೆ.",
+    "expiresInHours": "~{hours} ಗಂಟೆಗಳಲ್ಲಿ ಅವಧಿ ಮುಗಿಯುತ್ತದೆ",
+    "expiresInMinutes": "~{minutes} ನಿಮಿಷಗಳಲ್ಲಿ ಅವಧಿ ಮುಗಿಯುತ್ತದೆ",
+    "expiresAt": "{date} ರಂದು ಅವಧಿ ಮುಗಿಯುತ್ತದೆ",
+    "scopes": "{count, plural, one {# ವ್ಯಾಪ್ತಿ} other {# ವ್ಯಾಪ್ತಿಗಳು}}",
+    "btnRemove": "ತೆಗೆದುಹಾಕಿ",
+    "btnRefresh": "ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+    "loginStep1": "1. ಈ URL ಅನ್ನು ನಿಮ್ಮ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ತೆರೆಯಿರಿ ಮತ್ತು <mono>{alias}</mono> ಖಾತೆಗೆ ಪ್ರವೇಶವನ್ನು ಅನುಮೋದಿಸಿ:",
+    "pendingExpires": "ಲಾಗಿನ್ ನಿರೀಕ್ಷಿತ ಸಮಯ {time} ಕಾಲಾವಧಿಯ ಮುಚ್ಚುತ್ತದೆ",
+    "loginStep2": "2. ಆಂತ್ರ್ೊಪಿಕ್ ಪ್ರದರ್ಶಿಸುವ ಕೋಡ್ ನುಲೆಯಿರಿ:"
+  },
+  "miniapp": {
+    "title": "OmniRoute ಮಿನಿ ಆ್ಯಪ್",
+    "errTelegramOnly": "ಈ ಪುಟವನ್ನು ಟೆಲಿಗ್ರಾಮ್ ಮಿನಿ ಆ್ಯಪ್ ಒಳಗೇ ತೆರೆಯಬೇಕು.",
+    "greeting": "👋 ನಮಸ್ಕಾರ {name}! ನಿಮ್ಮ OmniRoute ಗೇಟ್‌ವೇ ಮೂಲಕ ಸಂವಾದಕ್ಕೆ ಸಂದೇಶವನ್ನು ಕಳುಹಿಸಿ.",
+    "greetingFallbackName": "ಅಲ್ಲಿ",
+    "errNoReply": "⚠️ ಗೇಟ್‌ವೇಯಿಂದ ಯಾವುದೇ ಉತ್ತರ ಇಲ್ಲ.",
+    "btnSend": "ಕಳುಹಿಸಿ"
   }
 }

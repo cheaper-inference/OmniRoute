@@ -25,8 +25,10 @@
     "confirm": "Oletko varma?",
     "refresh": "Päivitä",
     "close": "Sulje",
+    "dialogTitleFallback": "Valintaikkuna",
     "previousPage": "Edellinen sivu",
     "nextPage": "Seuraava sivu",
+    "pagination": "Sivutus",
     "capsLockOn": "Caps Lock on päällä",
     "dismissNotification": "Hylkää ilmoitus",
     "toggleColumns": "Vaihda sarakkeita",
@@ -182,6 +184,7 @@
     "combos": "Yhdistelmät",
     "noModelsFound": "Malleja ei löytynyt",
     "clear": "Tyhjennä",
+    "clearFilters": "Tyhjennä suodattimet",
     "done": "Valmis",
     "selectAll": "Valitse kaikki",
     "unselectAll": "Poista valinnat",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Käytetään {count, plural, one {# erä} other {# erää}}",
     "batchFilePreview": "Esikatselu",
     "batchFilePreviewTruncated": "Näytetään ensimmäiset {shown} riviä ({total} yhteensä riviä)",
-    "batchFileDownloadFull": "Lataa Koko Tiedosto"
+    "batchFileDownloadFull": "Lataa Koko Tiedosto",
+    "tokensPageTitle": "Tokenit",
+    "tokensPageDescription": "Lähetä tokeneita API-avainten välillä, jaa kutsukoodeja ja yhdistä yhteisöpalvelimia.",
+    "tokensServerUrlLabel": "Palvelimen URL-osoite"
   },
   "disabled": "Poistettu käytöstä",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Reititä budjettinsa ylittäneet pyynnöt varalla olevalle ilmaiselle varatarjoajalle/-mallille.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Välityspalvelin on pysäytetty tai käynnistyy uudelleen.",
     "expandSidebar": "Laajenna sivupalkki",
     "collapseSidebar": "Tiivistä sivupalkki",
-    "themes": "Teemat",
-    "presetColors": "Suosittuja värejä",
     "createTheme": "Luo teema",
     "chooseColor": "Valitse yksi väri",
-    "themeCoral": "koralli",
-    "themeBlue": "Sininen",
-    "themeRed": "Punainen",
-    "themeGreen": "Vihreä",
-    "themeViolet": "Violetti",
-    "themeOrange": "Oranssi",
-    "themeCyan": "Syaani",
     "cliToolsShort": "Työkalut",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Teemajärjestelmä",
     "whitelabelingDesc": "White label -ominaisuuksien kuvaus",
     "switchThemes": "Vaihda teemaa",
-    "themeAccentDesc": "Teeman korostusvärin kuvaus",
     "uploadFavicon": "Lataa favicon",
     "themeDark": "Tumma teema",
     "customLogoDesc": "Mukautetun logon kuvaus",
     "sidebarVisibilityToggle": "Sivupalkin näkyvyyden valitsin",
-    "themeAccent": "Teeman korostusväri",
     "resetFavicon": "Palauta favicon",
     "whitelabeling": "Brändin mukauttaminen",
     "darkMode": "Tumma tila",
@@ -1122,10 +1117,8 @@
     "customLogo": "Mukautettu logo",
     "appearance": "Ulkoasu",
     "themeSelectionAria": "Teeman valinnan ARIA-tunniste",
-    "themeCreate": "Luo teema",
     "customFaviconDesc": "Mukautetun faviconin kuvaus",
     "logoPreview": "Logon esikatselu",
-    "themeCustom": "Mukautettu teema",
     "hideHealthLogsDesc": "Terveystarkistuslokien piilottamisen kuvaus",
     "faviconPreview": "Faviconin esikatselu",
     "changelog": "Muutosloki",
@@ -1352,7 +1345,9 @@
       "open": "avaa",
       "close": "sulje"
     },
-    "noResults": "Ei tuloksia"
+    "noResults": "Ei tuloksia",
+    "costsTeams": "Tiimit",
+    "costsTeamsSubtitle": "Tiimien kustannuspaikat"
   },
   "webhooks": {
     "title": "Webhookit",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 tai @kanavannimi",
       "chatIdHint": "Keskustelun/kanavan yksilöllinen numeerinen tunniste tai julkinen käyttäjänimi.",
       "tutorial": "Näin määrität Telegram-webhookin:"
-    }
+    },
+    "copy": "Kopioi",
+    "copied": "Kopioitu!",
+    "expandDetails": "Näytä tiedot",
+    "collapseDetails": "Piilota tiedot"
   },
   "compliance": {
     "auditTitle": "Auditointi",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Puhelut (24h)",
     "mcpMetricSuccessRate": "Onnistumisprosentti",
     "mcpMetricAvgDuration": "Keskimääräinen kesto",
-    "mcpMetricTopTool": "Ykköstyökalu"
-  },
-  "themesPage": {
-    "title": "Teemat",
-    "description": "Valitse esiasetettu teema tai luo oma yhdellä värillä",
-    "presetColors": "Suosittuja värejä",
-    "customTheme": "Mukautettu teema",
-    "customThemeDesc": "Napsauta Luo teema ja valitse yksi väri",
-    "createTheme": "Luo teema",
-    "activePreset": "Aktiivinen teema"
+    "mcpMetricTopTool": "Ykköstyökalu",
+    "dismissError": "Sulje virheilmoitus"
   },
   "header": {
     "logout": "Kirjaudu ulos",
     "quickNavigation": "Pikasiirtyminen",
     "quickNavigationTitle": "Pikasiirtyminen (⌘K / Ctrl+K)",
     "openQuickNavigation": "Avaa pikasiirtyminen",
+    "openMenu": "Avaa valikko",
+    "products": "Keak-tuotteet",
     "switchToLightMode": "Vaihda vaaleaan tilaan",
     "switchToDarkMode": "Vaihda tummaan tilaan",
     "language": "Kieli",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Antrooppinen yhteensopiva",
     "media": "Media",
     "mediaDescription": "Luo kuvia, videoita ja musiikkia",
-    "themes": "Teemat",
-    "themesDescription": "Valitse väriteema koko kojelautapaneelille",
     "costsDescription": "Seuraa kuluja, analysoi trendejä ja hallitse tekoälybudjettiasi kaikkien palveluntarjoajien osalta",
     "cacheDescription": "Valvo palveluntarjoajien kehotteiden välimuistin tehokkuutta ja paikallisten semanttisten vastausten uudelleenkäyttöä.",
     "limitsDescription": "Määritä nopeusrajoitukset ja kiintiöt API-avaimittain ja palveluntarjoajittain",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Edistyneet hyötykuormasäännöt, pyyntörajat ja välityspalvelimen API-asetukset",
     "mitmProxyDescription": "Määritä MITM-välityspalvelimen asetukset liikenteen tarkastusta ja virheenkorjausta varten",
     "oneProxyDescription": "Määritä 1Proxy-asetukset edistyneeseen välityspalvelinten ketjutukseen",
-    "omniSkillsDescription": "Asenna ja hallitse hiekkalaatikkotaitoja automaattista kehotteiden ja työkalujen suorittamista varten"
+    "omniSkillsDescription": "Asenna ja hallitse hiekkalaatikkotaitoja automaattista kehotteiden ja työkalujen suorittamista varten",
+    "teamsDescription": "Tiimin kustannusarviot ja jaetut pehmeät budjetit"
   },
   "cloudSyncStatus": {
     "synced": "Synkronoitu",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "Kopioi päätepisteesi",
     "readinessStep4": "Lähetä testipyyntö",
     "readinessContinue": "Jatka määritystä",
-    "readinessDismiss": "Ohita toistaiseksi"
+    "readinessDismiss": "Ohita toistaiseksi",
+    "unpricedUsageTitle": "{count, plural, one {# malli} other {# mallia}} joilla on viimeaikaista käyttöä mutta ei määritettyä hintaa",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-avain, jolla on käyttöraja} other {# API-avainta, joilla on käyttöraja}} käyttivät näitä malleja viimeisten 8 päivän aikana. Kun kyseinen käyttö on avaimen päivä- tai viikkokohtaisen ikkunan sisällä, avainta pidetään ylittäneenä ja sen pyynnöt estetään (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Tämä käyttö lasketaan $0:ksi avainkohtaisissa käyttörajoissa (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# pyyntö} other {# pyyntöä}}, {keys, plural, one {# rajoitettu API-avain} other {# rajoitettua API-avainta}}",
+    "unpricedUsageMore": "…ja {count} lisää",
+    "unpricedUsageConfigure": "Määritä hinnat",
+    "unpricedUsageDismiss": "Sulje"
   },
   "analytics": {
     "title": "Analytiikka",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "Vain valitut yhteydet",
     "selectAtLeastOneConnection": "Valitse vähintään yksi yhteys tai valitse Kaikki yhteydet.",
     "allConnectionsDesc": "Tämä avain voi käyttää mitä tahansa aktiivista yhteyttä.",
-    "restrictedToConnections": "Rajoitettu {count, plural, one {# yhteyteen} other {# yhteyteen}}."
+    "restrictedToConnections": "Rajoitettu {count, plural, one {# yhteyteen} other {# yhteyteen}}.",
+    "preferredConnections": "Ensisijaiset yhteydet",
+    "preferredConnectionsDesc": "Avainkohtainen prioriteettijärjestys. Jos ensisijainen yhteys ei ole käytettävissä, reititys siirtyy seuraavaan kelpoiseen.",
+    "preferredConnectionsNone": "Ensisijaisuutta ei ole asetettu — käytetään oletusreititysstrategiaa.",
+    "preferredConnectionsClear": "Tyhjennä",
+    "removeSelection": "Poista {name}"
   },
   "auditLog": {
     "title": "Tarkastusloki",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Määritä Image→Text-silta Modality Bridge -asetuksissa",
     "sttBridgeCta": "Määritä Puhe→Teksti-silta Modality Bridge -asetuksissa",
     "existingConnection": "Olemassa oleva yhteys",
-    "openrouterSttDescription": "OpenRouter puheesta tekstiksi -mallit käyttävät määrittämääsi OpenRouter-yhteyttä. Erillistä tunnistetta ei vaadita."
+    "openrouterSttDescription": "OpenRouter puheesta tekstiksi -mallit käyttävät määrittämääsi OpenRouter-yhteyttä. Erillistä tunnistetta ei vaadita.",
+    "modalityTabsAria": "Mediatyyppi",
+    "serviceKindsAria": "Palvelutyyppi"
   },
   "search": {
     "searchQuery": "Hakukysely",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Manuaalinen konfigurointi",
     "clineManualConfiguration": "Cline Manuaalinen konfigurointi",
     "kiloManualConfiguration": "Kilo Code Manuaalinen konfigurointi",
+    "piManualConfiguration": "Pi - Manuaalinen konfigurointi",
+    "piConfigInvalidTitle": "Pi models.json on lukukelvoton",
+    "piOmnirouteConfigured": "OmniRoute on määritetty mukautettuksi Pi-palveluntarjoajaksi",
+    "piModelHelp": "Pi ei löydä automaattisesti mukautettujen päätepisteiden malleja — valitsemasi malli on kirjoitettu models.json hen nimenomaisesti.",
+    "piManualConfigTitle": "Tai muokkaa ~/.pi/agent/models.json manuaalisesti",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Käynnistä sitten Pi ja valitse omniroute palveluntarjoaja. Aseta PI_CODING_AGENT_DIR siirtääksesi koko agenttihakemiston.",
+    "piUnownedNote": "Tämä merkintä lisättiin OmniRoute ulkopuolelle (esim. pi-guin mukautetut päätepisteet). Hakeminen hyväksyy sen; Reset poistaa vain OmniRoute kirjoittamat merkinnät.",
     "whenToUseLabel": "Milloin käyttää",
     "openToolDocs": "Avaa työkaludokumentit",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Käytä, kun tarvitset kevyen pääte-alkuperäisen AI-avustajan nopeisiin tehtäviin.",
       "hermes-agent": "Käytä, kun tarvitset Hermes Agentia (Nousresearch) oletus-, delegointi-, visio- ja apumallien reitittämiseen OmniRouten kautta.",
+      "whycodes": "Käytä, kun haluat WhyCodesin monikäyttöiseksi autonomiseksi CLI-agentiksi (TUI, nimetyt agentit, muisti, swarm), joka on suunnattu OmniRouteen.",
       "custom": "Käytä mukautettuihin työkalutoteutuksiin tai yleisiin OpenAI-yhteensopiviin kokoonpanoihin."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI -koodausagentti mukautetun palveluntarjoajan tuella",
       "droid": "Tehdas Droid AI Assistant",
       "openclaw": "Avaa Claw AI Assistant",
+      "openclaude": "OpenClaude-koodausagentin CLI OpenAI-yhteensopivan palveluntarjoajan tuella",
       "cline": "Cline-tekoälykoodausavustajan CLI",
       "kilo": "Kilo Code -tekoälyavustajan CLI",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "Warp AI -terminaali mukautetun palveluntarjoajan tuella",
       "agent-deck": "Agent Deck -moniagenttiorkestraattori",
       "5dive": "5dive — itse isännöity koodausagenttien laivue; yksi auth-profiili ohjaa ne kaikki OmniRouteen",
+      "whycodes": "Autonominen WhyCodes-CLI-agentti OpenAI-yhteensopivalla perus-URL:lla",
       "zed": "Zed-koodieditori — sisäänrakennettu agentti OpenAI-yhteensopivan palveluntarjoajan kautta"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "Tuntematon",
     "cliproxyapiUpdate": "Päivitä",
     "cliproxyapiUpdateAvailable": "Päivitys saatavilla: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versio"
+    "cliproxyapiVersion": "Versio",
+    "piInstallTitle": "Asenna Pi-koodausagentti",
+    "piInstallInstructions": "Asenna Pi CLI ja palaa sitten tänne yhdistääksesi se OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Käytä URL, joka on tavoitettavissa Pi:tä käyttävästä koneesta. OpenAI-yhteensopiva /v1-päätepiste lisätään automaattisesti.",
+    "piManualMergeHint": "Vain esikatselu. Yhdistä tämä providers.omniroute-merkintä models.json, jotta muut palveluntarjoajasi ja asetuksesi pysyvät ennallaan.",
+    "removeMapping": "Poista määritys",
+    "customUrl": "Oma URL",
+    "customEndpointAria": "Oma loputepiste",
+    "useDefaultKey": "Käytä OmniRoute:n oletusavainta",
+    "mainModelAria": "Päämalli",
+    "manualConfigTitle": "Grok Build -manuaalinen konfiguraatio"
   },
   "modelCatalog": {
     "title": "Mallit ja yhdistelmät",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "esim. 10",
     "testSelected": "Testaa valitut ({count})",
     "testAllFiltered": "Testaa kaikki suodatetut ({count})",
+    "visibility": "Näkyvyys",
+    "allVisibility": "Näkyvät ja piilotetut",
+    "visibleOnly": "Näkyvät",
+    "hiddenOnly": "Piilotetut",
+    "visibleColumn": "Näkyvissä",
+    "hideModel": "Piilota {name} kohteesta /v1/models",
+    "showModel": "Näytä {name} kohteessa /v1/models",
+    "hiddenBadge": "Piilotettu",
+    "hideFiltered": "Piilota suodatetut ({count})",
+    "showFiltered": "Näytä suodatetut ({count})",
+    "visibilityCounts": "{visible} näkyvissä · {hidden} piilotettu · {total} yhteensä",
+    "visibilityUpdateFailed": "Mallin näkyvyyden päivittäminen epäonnistui",
     "cancel": "Peruuta",
     "clearResults": "Tyhjennä tulokset",
     "testing": "Testataan...",
@@ -3397,16 +3438,53 @@
     "httpError": "Pyyntö epäonnistui: HTTP {status}",
     "testFailedNoDetail": "Testi epäonnistui ilman virheilmoitusta",
     "additionalCapabilities": "Lisäominaisuudet: {list}",
-    "comboRefMember": "Yhdistelmä → {name}"
+    "comboRefMember": "Yhdistelmä → {name}",
+    "keyAccessButton": "API-avainten käyttöoikeudet",
+    "allowedInKeys": "Sallittu kohteissa: {count, plural, one {# avain} other {# avainta}}",
+    "keysLoading": "Ladataan API-avaimia…",
+    "keysRetry": "Yritä ladata avaimet uudelleen",
+    "accessViaPattern": "kautta: {pattern}",
+    "accessBlocked": "Estetty kuviolla {pattern}",
+    "editKeyAccess": "Muokkaa avaimen käyttöoikeuksia",
+    "toggleKeyAccess": "Salli {item} kohteessa {name}",
+    "resultNetworkError": "Määritys epäonnistui",
+    "resultWouldEmptyModels": "Jättäisi tämän avaimen ilman sallittuja malleja — muokkaa sen sijaan avaimen käyttöoikeuksia",
+    "resultWouldEmptyCombos": "Jättäisi tämän avaimen ilman sallittuja comboja — muokkaa sen sijaan avaimen käyttöoikeuksia",
+    "keyUpdatePending": "Kohdetta {name} päivitetään vielä. Yritä hetken kuluttua uudelleen.",
+    "assignToKeys": "Määritä API-avaimille…",
+    "assignApply": "Ota muutokset käyttöön",
+    "assignComplete": "API-avaimen käyttöoikeudet päivitetty",
+    "assignFailed": "Joidenkin API-avainten päivitys epäonnistui",
+    "assignNoChanges": "API-avainten käyttöoikeuksia ei muutettu",
+    "selectedAccessItems": "Valitut kohteet: {count}",
+    "assignExcludedCombos": "{count, plural, one {# valittu combo-rivi ei ole malli ja se ohitetaan tässä} other {# valittua combo-riviä eivät ole malleja ja ne ohitetaan tässä}}. Määritä combot Combos-välilehdeltä.",
+    "assignActionAdd": "Lisää",
+    "assignActionRemove": "Poista",
+    "searchKeys": "Hae API-avaimia",
+    "selectApiKey": "Valitse API-avain {name}",
+    "allModelsAccess": "Kaikki mallit",
+    "allCombosAccess": "Kaikki yhdistelmät",
+    "modelAccessCount": "Mallit: {count}",
+    "comboAccessCount": "Yhdistelmät: {count}",
+    "keyInactive": "Ei-aktiivinen",
+    "keyBanned": "Estetty",
+    "keyRevoked": "Kumottu",
+    "switchRestrictedConfirm": "Vaihda tämä avain rajoitettuun pääsyyn: vain valitut kohteet sallitaan",
+    "removeNoChangeHint": "Tämä avain sallii kaiken; valittujen kohteiden poistaminen ei tee muutoksia",
+    "removeStaysAllowedHint": "Sallittu yhä tälle avaimelle kuvioiden {patterns} kautta",
+    "resultChanged": "Muutettu",
+    "resultUnchanged": "Ei muutosta",
+    "resultSkipped": "Ohitettu",
+    "resultNeedsSwitch": "Vaatii vaihtamisen rajoitettuun"
   },
   "combos": {
+    "title": "Yhdistelmät",
+    "description": "Luo mallikomboja painotetulla reitityksellä ja varatuella",
+    "autoCatalogTitle": "Automaattinen reititysluettelo",
     "autoTosLoadError": "Käyttöehtokäytäntöä ei voitu ladata. Yritä uudelleen ennen sen muuttamista.",
     "autoTosSaveError": "Käyttöehtokäytäntöä ei voitu tallentaa. Aiempi asetus näkyy edelleen. Yritä uudelleen.",
     "autoTosIncludeLabel": "Sisällytä ToS: avoid -merkityt palveluntarjoajat auto-valintaan",
     "autoTosDescription": "Oletuksena pois käytöstä. Koskee kaikkia auto-yhdistelmiä, ei vain yhtä tiliä. Palveluntarjoajan yhdistäminen ei ota tätä asetusta käyttöön.",
-    "title": "Yhdistelmät",
-    "description": "Luo mallikomboja painotetulla reitityksellä ja varatuella",
-    "autoCatalogTitle": "Automaattinen reititysluettelo",
     "autoCatalogTemplateCount": "{count} malleja",
     "autoCatalogDescription": "Sisäänrakennetut auto/*-yhdistelmät, jotka on ratkaistu dynaamisesti yhdistettyjen palveluntarjoajien kautta. Käytä mitä tahansa näistä tunnuksista mallikenttänä – asetusta ei tarvita.",
     "autoCatalogExpand": "Laajenna automaattisen reitityksen luettelo",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "Virhe yhdistelmän päivityksessä",
     "errorDeleting": "Virhe yhdistelmän poistamisessa",
     "testFailed": "Testipyyntö epäonnistui",
+    "removeErrorModels": "Poista {count} epäonnistunutta mallia",
+    "removingErrorModels": "Poistetaan…",
+    "errorModelsRemoved": "Yhdistelmästä poistettiin {count} epäonnistunutta mallia",
+    "noErrorModelsFound": "Tämän yhdistelmän omista vaiheista ei löytynyt epäonnistuneita malleja",
+    "cannotRemoveAllModels": "Kaikkia malleja ei voi poistaa yhdistelmästä",
+    "removeErrorModelsConfirm": "Poistetaanko {count} epäonnistunutta mallia yhdistelmästä ”{name}”? Aikakatkaisuja ja nopeusrajoituksia ei lasketa.",
     "failedToggle": "Yhdistelmän vaihto epäonnistui",
     "testResults": "Testitulokset – {name}",
     "resolvedBy": "Ratkaisi:",
@@ -3518,6 +3602,9 @@
     "moveUp": "Siirrä ylös",
     "moveDown": "Siirry alas",
     "removeModel": "Poista",
+    "testStep": "Testaa tämä malli",
+    "testStepRunning": "Testataan…",
+    "testStepNotTestable": "Vain yhden mallin vaiheita voi testata",
     "saving": "Tallennetaan...",
     "liveNoProviders": "Tarjoajia ei ole vielä havaittu.",
     "liveFleetDataHint": "Laivaston tiedot saapuvat reaaliaikaisten combo-tapahtumien kautta.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "Yhdistelmiä ei ole vielä määritetty.",
     "playgroundCreateFirst": "Luo ensin yksi",
     "weighted": "Painotettu",
+    "weightPercent": "Painoarvo (%)",
     "leastUsed": "Vähiten käytetty",
     "costOpt": "Kustannus-opt",
     "strategyGuideTitle": "Kuinka käyttää tätä strategiaa",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# tili} other {# tiliä}}",
     "builderGlobalAdded": "Lisätty",
     "builderGlobalAdd": "Lisää",
+    "clearSearch": "Tyhjennä haku",
     "manualModel": "Manuaalinen malli",
     "manualModelInvalid": "Syötä malli muodossa tarjoaja/malli.",
     "manualModelUnknownProvider": "Tuntematon tarjoajan etuliite.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "Lisää yhdistelmäviite",
     "builderPinnedAccount": "Kiinnitetty tili",
     "builderLegacyEntry": "Vanha merkintä",
+    "builderStaleModel": "Ei live-katalogissa",
     "reviewName": "Nimi",
     "reviewStrategy": "Strategia",
     "reviewSteps": "Vaiheet",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "Sisällön vähimmäispituus (merkkiä)",
     "responseValidationJsonPaths": "JSON-polun tarkistukset",
     "responseValidationAddCheck": "+ Lisää tarkistus",
+    "responseValidationRemoveCheck": "Poista tarkistus",
+    "responseValidationPath": "JSON-polku",
+    "responseValidationCondition": "Ehto",
+    "responseValidationValue": "Odotettu arvo",
     "agentFeaturesSystemMessageOverride": "Ohita järjestelmäviesti",
     "agentFeaturesSystemMessagePlaceholder": "Olet asiantuntija-assistentti...",
     "agentFeaturesSystemMessageHint": "Järjestelmäviestien ohitus agenteille",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "Merkintöjä yhteensä",
     "type": "Tyyppi",
-    "memoryEnabled": "Muisti käytössä"
+    "memoryEnabled": "Muisti käytössä",
+    "qdrantTutorialTitle": "Nopea ohje: muisti Qdrantin kanssa",
+    "qdrantTutorialIntro": "Qdrant säilyttää muistien vektorit ja metatiedot, jotta suvannut konteksti voidaan hakea. Se ei pienennä tokeneja suoraan; säästö on välillinen välttämällä pyynnölle liittyvämättömää kontekstia.",
+    "qdrantTutorialStep1": "Suojaa palvelin HTTPS:llä ja API-avaimella ennen tuotannon käyttöä.",
+    "qdrantTutorialStep2": "Syötä isäntä, portti, kokoelma ja malli muotoa tarjoaja/malli käyttämällä asennetulla todennusavaimella.",
+    "qdrantTutorialStep3": "Kokoelman dimension täytyy vastata mallin tuottamaa dimensiota. Olemassa oleva 2048-dimension kokoelu ei hyväksy 1536-dimension vektoreita.",
+    "qdrantTutorialStep4": "Tallenna, testaa yhteys ja suorita hakutesti. Vasta sitten ota Qdrant käyttöön.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Tekijänoikeudet: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Taidot",
@@ -5288,7 +5390,8 @@
         "skipped": "jo määritetty",
         "failed": "epäonnistui"
       }
-    }
+    },
+    "stepProgress": "Määrityksen edistyminen"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Tämä palveluntarjoaja on oletuksena suljettu pois auto-valinnasta",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "Lataa CSV-malli",
     "importFromFileMoreErrors": "+{count} muuta",
     "importFromFileSchemaHint": "CSV-sarakkeiden järjestys on kiinteä: provider, name, apiKey, baseUrl (valinnainen), priority (valinnainen). provider-sarakkeen arvon on oltava olemassa olevan hallinnoidun palveluntarjoajan tunnus tai jo rekisteröidyn OpenAI/Anthropic-yhteensopivan solmun tunnus — tämä tuonti ei luo uusia päätepistesolmuja.",
+    "importOAuthExport": "Tuo OAuth-vienti",
+    "oauthExportTitle": "Tuo tilienhallinnan vienti",
+    "oauthExportDescription": "Lataa tilienhallintaohjelman selkokielinen vienti (esim. Antigravity Managerin cloud-accounts-vienti). Tunnukset päivitetään palvelimella ja jokaisesta tilistä tulee OAuth-yhteys — kaksoiskappaleet päivitetään paikallaan.",
+    "oauthExportProviderLabel": "Palveluntarjoaja",
+    "oauthExportChoose": "Valitse tiedosto",
+    "oauthExportFileAria": "Tilivienti-JSON-tiedosto",
+    "oauthExportSchemaHint": "Hyväksytään: asiakirja, jossa on \"accounts\"-taulukko, pelkkä taulukko tai yksittäinen tietue. Tunnukset voivat olla sisäkkäisessä token-objektissa tai suoraan tietueessa.",
+    "oauthExportDetected": "Havaittu {count} tiliä",
+    "oauthExportSelectAll": "Valitse kaikki tilit",
+    "oauthExportSelectAccount": "Valitse tili {index}",
+    "oauthExportColEmail": "Sähköposti",
+    "oauthExportColProvider": "Palveluntarjoaja",
+    "oauthExportColRefresh": "Päivitystunnus",
+    "oauthExportNoEmail": "(ei sähköpostia)",
+    "oauthExportYes": "kyllä",
+    "oauthExportNo": "ei",
+    "oauthExportImporting": "Tuodaan…",
+    "oauthExportImport": "Tuo {count} tiliä",
+    "oauthExportResult": "Tuotu {imported}/{total} — {failed} epäonnistui",
+    "oauthExportParseError": "Tästä tiedostosta ei voitu lukea yhtään tiliä.",
+    "oauthExportUnknownError": "tuntematon virhe",
     "adaptaTutorial": {
       "title": "Kuinka yhdistää Adapta Web",
       "introPrefix": "Adapta todennetaan Clerkin kautta. Tokeni",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "Kaikki mallit on jo tuotu",
     "noNewModelsToImport": "Ei uusia malleja tuotavaksi — kaikki mallit ovat jo rekisterissä tai mukautetulla mallilistalla",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Mallin etsintä epäonnistui {time}",
     "skippingExistingModels": "Ohitetaan {count} olemassa olevaa mallia",
     "autoSync": "Automaattinen synkronointi",
     "autoSyncShort": "Synkronointi",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "esim. 131072",
     "contextWindowOverrideHint": "Aseta manuaalisesti tämän mallin todellinen konteksti-ikkuna (tokenit), jos tarjoaja ilmoittaa sen väärin. Ohittaa automaattisesti havaitut/luettelon arvot ja estää yhdistelmäreititystä pudottamasta mallia.",
     "contextWindowOverrideInvalid": "Konteksti-ikkunan ohituksen on oltava positiivinen kokonaisluku tokeneita",
+    "maxOutputTokenOverrideInvalid": "Enimmäistulostustokenien ohituksen on oltava positiivinen kokonaisluku tokeneita",
     "visionCapableLabel": "Kuvantunnistuskykyinen",
     "visionCapableHint": "Merkitse tämä malli manuaalisesti kuvantunnistuskykyiseksi, kun tarjoajan hakumetatiedot eivät ilmoita kuvasyötettä (yleistä itseisännöidyissä/paikallisissa taustajärjestelmissä).",
     "compatParamFiltersLabel": "Parametrisuodattimet",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "Lisää ohitus",
     "ccAliasLoadError": "Mallien hakualiasasetusten lataaminen epäonnistui: {error}",
     "ccAliasSaveError": "Mallien hakualiasasetuksen tallentaminen epäonnistui: {error}",
+    "cliVersionSectionTitle": "Mainostettu CLI -asiakasversio",
+    "cliVersionEffectiveLabel": "Tällä hetkellä mainostettu",
+    "cliVersionSourceLabel": "Ratkaistu: {source}",
+    "cliVersionPinnedLabel": "Kaapattu oletusasetus: {pinned}",
+    "cliVersionSourceSettings": "kojelaudan ohitus",
+    "cliVersionSourceEnv": "ympäristömuuttuja",
+    "cliVersionSourceDiscovered": "automaattisesti löydetty uusin julkaisu",
+    "cliVersionSourceDefault": "siepattu oletusarvo",
+    "cliVersionInputLabel": "Ohita versio",
+    "cliVersionInputPlaceholder": "Ohita versio; tyhjä tyhjentää",
+    "cliVersionSaveButton": "Tallentaa",
+    "cliVersionResetButton": "Palauta oletusarvo",
+    "cliVersionLoadError": "CLI -versioasetusten lataaminen epäonnistui: {error}",
+    "cliVersionSaveError": "CLI version tallentaminen epäonnistui: {error}",
+    "cliVersionLoadFailed": "Nykyisiä CLI -versioasetuksia ei voitu ladata.",
+    "cliVersionHintClaude": "Anthropic tuo uudempia Claude-malleja näkemäänsä Claude Code -asiakasversioon. Tämä on versio, jota OmniRoute mainostaa jokaisessa antrooppiseen pyyntöön.",
+    "cliVersionCaveatClaude": "Laskutusvaroitus: laskutusversio on '<version>'.'<build-revision>', ja koontiversio on erillinen siepattu vakio. Mainonta 2.1.260 raportoi 2.1.260.1e2, jota todellinen 2.1.260 binaari ei lähetä.",
+    "cliVersionHintCodex": "OpenAI gates näkee uudemmat mallit Codex asiakasversiossa, esimerkiksi virheen: 'gpt-6-astra-malli vaatii uudemman version Codex.",
+    "cliVersionCaveatCodex": "Päätelmävaroitus: oman soittajan ilmoittama versio voittaa edelleen CODEX_CLIENT_VERSION env var -arvon, mutta tämä ohitus päihittää molemmat, koska se on operaattorin selkeä tarkoitus.",
     "compatUpstreamHeadersLabel": "Ylimääräiset upstream-otsakkeet",
     "compatUpstreamHeadersHint": "Korkean käyttöoikeustason asetus — sama luottamustaso kuin palveluntarjoajan API-tunnistetietojen muokkaamisessa; vain luotettujen ylläpitäjien tulee käyttää sitä. Yhdistetään sen jälkeen, kun OmniRoute on lisännyt todennuksen palveluntarjoajan API-avaimesta. Jos mukautettu otsake käyttää samaa nimeä kuin olemassa oleva otsake (esim. Authorization), antamasi arvo korvaa automaattisesti luodun otsakkeen kokonaan (mukaan lukien Bearer-tunnuksen) — upstream-palvelu näkee vain kirjoittamasi arvon, ei asetuksissa olevaa avainta. Virheelliset määritykset voivat aiheuttaa 401-virheen tai rikkoa upstream-todennuksen. Yksi otsake riviä kohden (esim. ylimääräinen Authentication joillekin yhdyskäytäville). Esikatsele arvoa viemällä osoitin sen päälle tai kohdistamalla siihen. Tallennetaan kohdistuksen poistuessa, napsautettaessa paneelin ulkopuolelle tai suljettaessa tämä paneeli.",
     "compatUpstreamHeaderName": "Otsakkeen nimi",
@@ -6055,8 +6200,8 @@
     "apiFormatLabel": "API-muodon tunniste",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Kiina",
-    "apiRegionHint": "API-alueen vihje",
+    "apiRegionChina": "Manner-Kiina",
+    "apiRegionHint": "Valitse päätepisteen alue, jota käytetään API-käyttöön ja kiintiön seurantaan.",
     "apiRegionInternational": "Kansainvälinen",
     "apiRegionLabel": "API-alue",
     "apikey": "API-avain",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "Kun tämä tili saavuttaa 5 tunnin käyttörajan ja Anthropic tarjoaa matalamman prioriteetin kaistaa, OmniRoute hyväksyy sen ja jatkaa pyyntöjen lähettämistä anthropic-usage-limit: slow -tilassa, kunnes ikkuna nollautuu, sen sijaan että jäähdyttäisi yhteyden. Viikoittainen raja on edelleen voimassa ja vastaukset saattavat odottaa vapaata kapasiteettia.",
     "claudeAutoLimitResetLabel": "Nollaa istuntoraja automaattisesti (kerran viikossa)",
     "claudeAutoLimitResetDescription": "Kun tämä tili saavuttaa 5 tunnin käyttörajan ja istuntorajan nollaus on saatavilla, OmniRoute käyttää sen automaattisesti ja yrittää uudelleen täydellä nopeudella. Käyttää tilin kerran viikossa tapahtuvaa nollausta ja lasketaan edelleen viikoittaiseen rajaan.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Ohita tilapäinen jäädytysaika, jotta tämä yhteys pysyy käytettävissä myös palautettavien virheiden jälkeen (lopulliset tilat, kuten estetty/vanhentunut, ovat edelleen voimassa).",
     "disableCoolingLabel": "Poista jäädytysaika käytöstä tälle yhteydelle",
     "bulkPasteAdded": "{count, plural, one {1 avain lisätty} other {# avainta lisätty}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "Hanki API-avain osoitteesta monsterapi.ai",
       "moonshot": "Yhdistä Moonshot AI API-avaimella.",
       "morph": "Ilmainen taso: 250K krediittiä/kk, $0",
+      "apmix": "Yhdistä Apmix API-avaimella osoitteesta apmix.ai/dashboard — yksi tilaus, monta mallia.",
       "nanogpt": "Yhdistä NanoGPT API-avaimella.",
       "nebius": "~$1 kokeilusaldoa rekisteröitymisen yhteydessä API-testaukseen",
       "nlpcloud": "NLP Cloud käyttää omaa chatbot-API:aan OpenAI:n chat/completions-rajapinnan sijaan. OmniRoute mukauttaa OpenAI-viestit muotoon input/context/history ja tarjoaa paikallisen luettelon tuetuista chatbot-malleista.",
@@ -6620,7 +6773,7 @@
       "claude": "Yhdistä Claude Code olemassa olevalla OAuth-työnkululla.",
       "cline": "Yhdistä Cline olemassa olevalla OAuth-työnkululla.",
       "cursor": "Yhdistä Cursor IDE olemassa olevalla OAuth-työnkululla.",
-      "cursor-api": "Yhdistä Cursor käyttäjän API-avaimella (crsr_...) osoitteesta cursor.com/dashboard/api; IDE-istuntoa ei tarvita.",
+      "cursor-api": "Yhdistä Cursor käyttäjän API-avaimella (crsr_... tai grok_...) osoitteesta cursor.com/dashboard/api; IDE-istuntoa ei tarvita.",
       "github": "Yhdistä GitHub Copilot olemassa olevalla OAuth-työnkululla.",
       "gitlab-duo": "OAuth-sovellus ai_features + read_user -käyttöoikeuksilla. Määritä GITLAB_DUO_OAUTH_CLIENT_ID ja valinnaisesti GITLAB_DUO_OAUTH_CLIENT_SECRET tälle OmniRoute-instanssille.",
       "kilocode": "Yhdistä Kilo Code olemassa olevalla OAuth-työnkululla.",
@@ -6628,8 +6781,7 @@
       "kiro": "Maksuton taso: 50 krediittiä kuukaudessa (~25K–100K tokenia). ⚠️ Kiro ToS kieltää kolmannen osapuolen välityspalvelujen ja harness-työkalujen käytön.",
       "codex": "Yhdistä OpenAI Codex olemassa olevalla OAuth-työnkululla.",
       "qwen": "Yhdistä Qwen Code olemassa olevalla OAuth-työnkululla.",
-      "github-models": "Luo GitHub PAT -tunniste 'models: read' -käyttöoikeudella osoitteessa github.com/settings/tokens",
-      "apmix": "Yhdistä Apmix API-avaimella osoitteesta apmix.ai/dashboard — yksi tilaus, monta mallia."
+      "github-models": "Luo GitHub PAT -tunniste 'models: read' -käyttöoikeudella osoitteessa github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} hyväksyy palveluntarjoajan alkuperäiset mallitunnukset. Tuo /modelsista tai lisää mukautettuja tunnuksia reititystä varten.",
     "bedrockModelsDescription": "Amazon Bedrock -mallit on luokiteltu AWS-alueen mukaan. Tuo osoitteesta /models tai lisää valitulla alueella käytössä olevat kallioperän mallitunnukset.",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
     "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "Käytössä {count} yhdistelmässä: {combos}",
+    "openComboTooltip": "Avaa Yhdistelmät — käyttää: {combo}",
+    "claudeCodeRoutingTitle": "Claude Code -liikenteen ylävirtausvälimuistin reititys",
+    "routingNative": "Alkuperäinen",
+    "routingFallback": "Vaihtoehto",
+    "rerank": "Uudelleenjärjestäminen",
+    "video": "Video",
+    "markFreeTierTitle": "Merkitse ilmaiseksi tasoksi (näytetään myös, kun maksuttomien piilotus on päällä)",
+    "codexTunnelTitle": "Codex-työkaluyhteys",
+    "codexTunnelDescription": "Tunneli pysyy tiukasti lähtevänä. Paikalliset työkalut suoritetaan edelleen vain Codecin toimesta sen hiekkalaatikon ja hyväksyntäpolitiikan mukaisesti.",
+    "tunnelIdLabel": "Tunnelin ID",
+    "tunnelRuntimeKeyLabel": "Tunnelin ajonaikainen avain",
+    "tunnelRuntimeKeyPlaceholder": "Ajonaikainen avain",
+    "tunnelRuntimeKeyHint": "Tallennetaan salaattuna cookie:n kanssa eikä koskaan kirjoiteta lokiin.",
+    "tunnelRuntimeKeyNewLabel": "Uusi tunnelin ajonaikainen avain",
+    "tunnelRuntimeKeyNewHint": "Syötä vain uuden cookie:n yhteydessä. Arvo tallennetaan salaattuna.",
+    "chatgptConnectorLabel": "ChatGPT-mukautettu liittimen",
+    "doctorChecking": "Tarkistetaan tilaa…",
+    "doctorCheck": "Tarkista doctor-tila",
+    "fallbackRetryBackendTitle": "Vaihtoehtoinen uudelleenyritysbackendi"
   },
   "settings": {
     "title": "Asetukset",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "Valitse sivupalkissa näytettävät kohteet. Olennaiset-valinta pitää edistyneet työkalut löydettävissä haulla.",
     "hideHealthLogs": "Piilota kuntotarkastuslokit",
     "hideHealthLogsDesc": "Kun PÄÄLLÄ, estä [HealthCheck]-viestit palvelinkonsolissa",
-    "themeAccent": "Teeman väri",
-    "themeAccentDesc": "Valitse valmis väri tai luo oma teemasi yhdellä värillä",
-    "themeCreate": "Luo teema",
-    "themeCustom": "Mukautettu teema",
-    "themeBlue": "Sininen",
-    "themeRed": "Punainen",
-    "themeGreen": "Vihreä",
-    "themeViolet": "Violetti",
-    "themeOrange": "Oranssi",
-    "themeCyan": "Syaani",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Mukauta sovelluksen nimeä ja logoa",
     "appName": "Sovelluksen nimi",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "Nyt",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Ydinbinäärin polku",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Valinnainen: tarkistaa generoidun tiedoston ydinbinääriä ennen otetun tiedoston korvaamista. Jätä tyhjäksi, niin kirjoitetaan sen viereen. Puuttuva hakemisto luodaan."
+      "coreBinaryPathHelp": "Valinnainen: tarkistaa generoidun tiedoston ydinbinääriä ennen otetun tiedoston korvaamista. Jätä tyhjäksi, niin kirjoitetaan sen viereen. Puuttuva hakemisto luodaan.",
+      "urlFeedlessHint": "Jätä tyhjä, jos haluat vain valitsimen tilauksen: aseta alla URL-ohjaus, mitään syötettä ei haeta, päivitetä eikä sidota."
     },
     "bulkHealthcheck": "Kuntotarkistus joukkona",
     "bulkHealthcheckDesc": "Testaa kaikki määritetyt välityspalvelimet kohde-URL-osoitetta vasten selvittääksesi, mitkä niistä toimivat.",
@@ -7706,6 +7862,7 @@
     "configured": "määritetty",
     "none": "Ei mitään",
     "modelOverrideValuePlaceholder": "Numeerinen arvo",
+    "modelOverrideKey": "Ohitusavain",
     "modelOverrideReasoningEffortsPlaceholder": "Englanniksi pilkuilla eroteltuna, esim. low, medium, high",
     "addKeyValue": "Lisää avain-arvo",
     "noModelOverrides": "Tälle mallille ei ole määritetty ohituksia.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "Voit ohittaa tiettyjen mallien oletushinnoittelun. Mukautetut ohitukset ovat etusijalla automaattisesti tunnistettuihin hinnoitteluun nähden.",
     "editPricing": "Muokkaa hinnoittelua",
     "viewFullDetails": "Näytä täydelliset tiedot",
-    "themeCoral": "Koralli",
     "adaptiveVolumeRouting": "Liikennemäärään mukautuva reititys",
     "adaptiveVolumeRoutingDesc": "Skaalaa yhteyksiä dynaamisesti hyötykuorman määrän ja läpimenokapasiteettiin kohdistuvan kuormituksen perusteella.",
     "lkgpToggleTitle": "Viimeisin toimivaksi tiedetty palveluntarjoaja (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "Vähennä tokenien käyttöä pakkaamalla kehotteet ennen niiden lähettämistä palveluntarjoajille",
     "autoCombosTitle": "Automaattiset yhdistelmät",
     "autoCombosDesc": "Salli tämän avaimen käyttää sisäänrakennettuja auto/*-yhdistelmiä, jotka valitsevat mallin automaattisesti kaikista määritetyistä palveluntarjoajista",
+    "ccDiscoveryAliasesTitle": "Claude Code -tunnistusaliakset",
+    "ccDiscoveryAliasesDesc": "Mainosta claude/...-yhteensopivuuspeilit malleille ja yhdistelmille, joihin tällä avaimella on jo pääsy",
     "compressionGuidanceFullGuideLink": "Kattava pakkausopas",
     "compressionGuidanceShow": "Tiedot",
     "compressionGuidanceHide": "Piilota tiedot",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Prosenttiosuus ikkunasta",
     "compressionAdaptivePolicyAbsolute": "Absoluuttinen tokenibudjetti",
     "compressionOutputStylesDescription": "Lisää vastauksen muotoiluohjeita kirjoittamatta palveluntarjoajan tulostetta uudelleen. Yhdistele vapaasti.",
+    "compressionOutputStylesPreviewNote": "Pyyntö lisää vain yhden kielen: havaitun kielen, muuten ensimmäisen paketin. Yllä olevat lohkot ovat pakkauskohtaisia variantteja, eivät yhdistettyjä injektioita.",
     "mcpAccessibilityDescription": "Rajaa MCP-työkalujen tulosteet (erillinen tallennustila).",
     "compressionStylesTileSummary": "{tokens, number} tokenia säästetty · {runs, plural, one {# ajo tyylitelty} other {# ajoa tyylitelty}}",
     "compressionStylesTileEmpty": "Ei vielä tyyliteltyjä ajoja.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "Isäntä",
     "qdrantCollection": "Kokoelma",
     "catalogVisibilityHint": "Piilotettuja mallitunnuksia voi edelleen kutsua samoilla käyttöoikeuksilla.",
+    "exposeCombosOnly": "Listaa /v1/models-luettelossa vain yhdistelmät",
+    "exposeCombosOnlyDesc": "Mallit automaattisesti löytävät asiakkaat näkevät yhdistelmäsi (ja auto/*, ellei niitä ole piilotettu) palveluntarjoajien raakamallien sijaan. Eksplisiittiset provider/model-tunnisteet reititetään edelleen.",
     "catalogScopeTitle": "Models API -luettelo",
     "catalogScopeDesc": "Mitä GET /v1/models ilmoittaa tälle avaimelle. Luettelon rajaaminen ei koskaan muuta sitä, mitä avain voi kutsua.",
     "catalogScopeAll": "Molemmat",
@@ -8918,7 +9079,9 @@
         "financial": "Talous",
         "brazilian": "Brasilia",
         "usa": "Yhdysvallat",
-        "full": "Täysi"
+        "full": "Täysi",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Etelä-Afrikka)"
       },
       "builtinTypes": "Sisäänrakennetut tyypit",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "IPv4-osoitteet",
         "ipv6_address": "IPv6-osoitteet",
         "aws_key": "AWS-käyttöavaimet",
-        "api_key_generic": "API-avaimet ja tunnisteet"
+        "api_key_generic": "API-avaimet ja tunnisteet",
+        "iban": "IBAN pankkitilinumerot",
+        "eu_vat": "EU VAT numerot",
+        "es_dni_nie": "espanja DNI / NIE",
+        "it_codice_fiscale": "Italialainen Codice Fiscale",
+        "pl_pesel": "Puolan PESEL",
+        "nl_bsn": "hollantilainen BSN",
+        "de_steuer_id": "Saksalainen Steuer-ID",
+        "se_personnummer": "ruotsalainen henkilömäärä",
+        "za_id": "Etelä-Afrikan ID -numerot",
+        "za_phone": "Etelä-Afrikan puhelinnumerot",
+        "za_vat": "Etelä-Afrikan VAT -numerot",
+        "za_tax_ref": "Etelä-Afrikan veroviitteet"
       },
       "customPatterns": "Omat mallit",
       "customPatternsDesc": "Osumat korvataan merkinnällä [CUSTOM_REDACTED]. Enintään {max} mallia. Mallit, joissa on katastrofaalisen takaisinjäljityksen riski, hylätään.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "Läpäisty",
     "tomlTestFailed": "Epäonnistui",
     "tomlImportError": "RTK TOML -tiedostoa ei voitu käsitellä.",
-    "tomlFileReadError": "Valittua TOML-tiedostoa ei voitu lukea."
+    "tomlFileReadError": "Valittua TOML-tiedostoa ei voitu lukea.",
+    "viewMode": "Näkymätila"
   },
   "compressionEngineConfig": {
     "loading": "Ladataan…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "Kielipaketit: {packs}",
     "dragToReorder": "Vedä järjestääksesi vaiheen uudelleen",
     "engine": "Moottori",
-    "intensity": "Voimakkuus"
+    "intensity": "Voimakkuus",
+    "compressionOverride": "Pakkauksen ohitus"
   },
   "compressionStudio": {
     "noRun": "Pakkausajoa ei ole saatavilla.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "voittaja: {winner}",
     "encoder": "enkooderi",
     "bytes": "tavua",
-    "tokensCl100k": "tokenit (cl100k)"
+    "tokensCl100k": "tokenit (cl100k)",
+    "studioViews": "Studio-näkymät"
   },
   "omniglyph": {
     "preview": "Esikatselu",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "Tätä lyhyempiä viestejä ei pakata. Alempi = enemmän pakkausta.",
     "tooltipMinSavings": "Pakkaa vain, jos se säästää vähintään näin monta merkkiä.",
     "ultraSettings": "Ultra-asetukset",
-    "ultraSettingsDesc": "SLM-käyttöinen semanttinen pakkaus"
+    "ultraSettingsDesc": "SLM-käyttöinen semanttinen pakkaus",
+    "defaultLanguage": "Oletuskieli",
+    "viewMode": "Näkymätila"
   },
   "translator": {
     "title": "Kääntäjä",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "Virran muuntaminen epäonnistui"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kiintiö on käytetty; lisäkäyttö on sallittu, joten palvelu jatkuu.",
+    "healthPaidCreditsBypass": "Kiintiö on käytetty; saatavilla olevat maksulliset krediitit mahdollistavat palvelun jatkumisen.",
+    "healthFilteringBypass": "Kiintiö on käytetty; paikallinen kiintiösuodatus on pois käytöstä, joten palvelu jatkuu.",
     "title": "Käyttö",
     "grokExtraUsageCredits": "Lisäkäyttöluottoja",
     "grokAutoTopUp": "Automaattinen Lataus",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Palveluntarjoajan rajoitukset",
     "noProviders": "Ei yhdistettyjä palveluntarjoajia",
+    "quotaAuthRequired": "Todennus vaaditaan – kirjaudu hallintapaneeliin",
+    "quotaAuthRequiredHint": "Palveluntarjoajayhteyksiä ei voitu ladata, koska hallintapaneelin istunto puuttuu tai on vanhentunut. Kirjaudu sisään ja päivitä sivu nähdäksesi kiintiörajasi.",
     "connectProvidersForQuota": "Muodosta yhteys palveluntarjoajiin OAuthin avulla seurataksesi API-kiintiörajoja ja käyttöä.",
     "accountsCount": "{count, plural, one {# tili} other {# tiliä}}",
     "filteredFromCount": "(suodatettu kohteesta {count})",
@@ -10046,9 +10231,6 @@
     "tierLite": "Kevyt",
     "tierUnknown": "Tuntematon",
     "statTotal": "Yhteensä",
-    "statCritical": "Kriittinen",
-    "statAlert": "Hälytys",
-    "statHealthy": "Kunnossa",
     "filterPurchaseTypeLabel": "Tyyppi",
     "filterTierLabel": "Taso",
     "purchaseAll": "Kaikki",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "Viimeksi päivitetty",
     "providerQuota": "Tarjoajan kiintiö",
     "providerQuotaHomeHint": "Reaaliaikainen tila yhdistetyissä tileissä",
+    "claudeResetCreditDefaultTitle": "Claude-rajojen nollaus",
+    "confirmRedeemClaudeResetCredit": "Lunastaminen nollaa soveltuvat Claude-käyttörajat välittömästi ja kuluttaa tämän krediitin pysyvästi.",
+    "claudeResetCreditsModalTitle": "Claude-nollauskrediitit",
+    "claudeResetCreditsModalExplainer": "Käytettävissä olevat Claude-nollauskrediitit ja viikoittaiset istunnon nollaukset tälle tilille.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Perustuu viimeisimpiin havaintoihin, ei reaaliaikaiseen testiin. Valitse tili nähdäksesi tiedot.",
+    "healthRecovery": "Arvioitu palautuminen",
+    "healthAvailable": "Saatavilla",
+    "healthRestricted": "Osittain rajoitettu",
+    "healthUnavailable": "Ei saatavilla",
+    "healthPeakHourProtection": "Ruuhka-ajan suojaus",
+    "healthCooldown": "Odotusaika",
+    "healthQuotaExhausted": "Kiintiö käytetty loppuun",
+    "healthOverview": "Yleiskatsaus",
+    "layoutFull": "Täysi",
+    "layoutCompact": "Tiivis",
+    "healthQuotaError": "Kiintiön luku epäonnistui",
+    "healthNoRuntime": "Toimintatila ei ole saatavilla",
+    "healthPreviousSnapshot": "Viimeisin päivitys epäonnistui; näytetään edellinen tulos",
+    "healthPreviousFailure": "Viimeisin pyyntö epäonnistui; odotusaika päättyi",
+    "healthAwaitingSync": "Nollausaika ohitettu; odotetaan synkronointia",
+    "healthVerdictUnavailable": "Saatavuustarkistusta ei voida tehdä; näytetään vain kiintiötasot",
+    "healthSummaryFailed": "Tilayhteenvedon luku epäonnistui; mallilukituksia voi puuttua",
+    "healthRuntimeObserved": "Tila päivitetty {time}",
+    "healthQuotaObserved": "Kiintiö havaittu {time}",
+    "healthOldestQuota": "Vanhin kiintiötilannekuva: {time}",
+    "healthRecoveryUnknown": "Palautumisaika tuntematon",
+    "healthDetailsHint": "Napsauta nähdäksesi tiedot ja toiminnot",
+    "healthFiveHour": "5 tuntia",
+    "healthOverall": "Kokonaismäärä",
+    "healthAction": "Toimia tarvitaan",
+    "healthTitle": "Tilien saatavuus",
+    "healthDrag": "Järjestä tarjoajat vetämällä",
+    "healthDragPosition": "{provider}, {count, plural, one {sijainti {position, number} / #} other {sijainti {position, number} / #}}",
+    "healthResetOrder": "Palauta oletusjärjestys",
+    "healthPool": "{name}-pooli",
+    "healthOtherPool": "Sama tili · {pool}: {status} ({remaining} jäljellä)",
+    "healthIncluded": "{count, plural, one {Sisältää # osittain rajoitetun tilin} other {Sisältää # osittain rajoitettua tiliä}}",
+    "healthBannerUnavailable": "{count, plural, one {# tili on tilapäisesti poissa käytöstä} other {# tiliä on tilapäisesti poissa käytöstä}}",
+    "healthBannerAvailable": "{count, plural, one {# tili on käytettävissä} other {Kaikki # tiliä ovat käytettävissä}}",
+    "healthLegendHide": "Piilota selite",
+    "healthLegendShow": "Näytä selite",
+    "healthLegendOk": "Umpinainen = jäljellä oleva kiintiö; läpikuultava = käytetty.",
+    "healthLegendCooldown": "Kiintiö ajalle {window} loppui. Umpinainen = kulunut odotusaika; läpikuultava = jäljellä oleva odotusaika.",
+    "healthLegendAction": "Valtuutus vanhentui tai tili estettiin; odottaminen ei auta.",
+    "healthLegendPartial": "Edelleen käytettävissä. Keltainen yläosa = mallin tai poolin rajoitus.",
+    "healthWaited": "Odotettu: {percent}",
+    "healthWait": "Vielä {duration} (palautuu {time})",
+    "healthFastest": "Aikaisin palautuminen: {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} käytettävissä} other {# / {active, number} käytettävissä}}",
+    "healthCd5": "5 tuntia · Odotusaika",
+    "healthCdw": "Viikoittain · Odotusaika",
+    "healthRecentSuccessBypass": "Reititys sallii tämän tilin, koska pyyntö onnistui äskettäin.",
+    "healthPurchasedBalanceBypass": "Ostettua saldoa voi käyttää sisältyvän kiintiön loputtua.",
+    "healthCutoffAtRequest": "Reaaliaikaiset kiintiörajat tarkistetaan pyyntöä reititettäessä."
   },
   "modals": {
     "waitingAuth": "Odotetaan valtuutusta",
@@ -11077,7 +11313,8 @@
       "message": "Viesti",
       "error": "Virhe",
       "completion": "Valmistuminen"
-    }
+    },
+    "statusFilter": "Tila"
   },
   "templateNames": {
     "simple-chat": "Yksinkertainen chat",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes} min sitten",
     "hoursAgo": "{hours} t sitten",
     "daysAgo": "{days} pv sitten",
-    "entries": "Merkinnät"
+    "entries": "Merkinnät",
+    "viewSwitcherAria": "Välimuistinäkymä"
   },
   "proxyConfigModal": {
     "levelGlobal": "Maailmanlaajuinen",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuthia ei ole määritetty. Rekisteröi OAuth-sovellus osoitteessa {applicationsUrl} uudelleenohjaus-URI:lla {redirectUri} ja käyttöoikeusalueilla \"{scopes}\", sitten aseta {clientIdEnv} (ja valinnaisesti {clientSecretEnv}) ja käynnistä uudelleen.",
     "gitlabDuoSetupDescription": "Kun sovellus on rekisteröity ja ympäristömuuttujat on asetettu tälle OmniRoute-instanssille, napsauta Jatka aloittaaksesi OAuth-kirjautumisen.",
     "continue": "Jatka",
+    "copilotPolicyTitle": "Kokeellinen toimittaja: käytännön tila on epäselvä",
+    "copilotPolicyLine1": "OmniRoute muodostaa yhteyden api.githubcopilot.com-sivuston kautta, jota GitHub ei ole julkaissut yleisenä kolmannen osapuolen päätelmänä API. Tämä integrointi on kokeellinen ja voi muuttua ilman erillistä ilmoitusta.",
+    "copilotPolicyLine2": "Vain oma GitHub tilisi voidaan yhdistää. Älä koskaan jaa valtuustietoja, yhdistä tilejä tai yritä ylittää suunnitelmasi rajoja.",
+    "copilotPolicyLine3": "Ilmaisen ja opiskelijapaketin käyttäjät saavat vain automaattisen mallin valinnan. Copilot -suunnitelmasi ehdot ja mahdolliset käyttörajoitukset ovat sinun vastuullasi.",
+    "copilotPolicyAcknowledge": "Ymmärrän, yhdistä",
     "tabPasteSetupToken": "Asetustunnus",
     "claudeSetupTokenDescription": "Suorita `claude setup-token` päätteessä ja liitä sen tulostama tunnus. Se on voimassa vuoden, eikä sillä ole päivitystunnusta. OmniRoute lähettää Anthropicille yhden testipyynnön ennen tallentamista.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Lisää toimintoja",
     "test": "Testaa",
     "edit": "Muokkaa",
     "delete": "Poista",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "Kelvollisia merkintöjä ei löytynyt. Tarkista muoto ja yritä uudelleen.",
     "bulkImportSuccess": "Tuonti valmis: {created} luotu, {updated} päivitetty, {failed} epäonnistui",
     "bulkImportErrorLine": "Rivi {line}: {reason}",
-    "bulkImportMaxExceeded": "Enintään 100 välityspalvelinta tuontia kohden",
+    "bulkImportMaxExceeded": "Enintään {max} välityspalvelinta tuontia kohden",
     "bulkImportPreview": "Esikatselu",
     "clearAssignment": "(selkeä tehtävä)",
     "bulkProxyAssignment": "Joukkovälityspalvelimen määritys",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "IP-nopeusrajoitus (429)",
     "poolSetAsideKindSlow": "hitaat vastaukset",
     "poolSetAsideKindGeoBlocked": "alue estetty (403/451)",
+    "poolSetAsideKindOperatorReported": "operaattorin ilmoitama häiriö",
     "poolSetAsideUntil": "Takaisin kierrossa {endsAt}",
     "poolSetAsideRepeat": "Syrjään {count, plural, one {# kerran} other {# kertaa}}",
     "poolUnknownAddress": "Tuntematon osoite",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "Vie koodi",
     "exportShort": "Vie",
     "noStateToExport": "Vietävää leikkikentän tilaa ei ole saatavilla.",
-    "closeExportModal": "Sulje vienti-ikkuna",
     "close": "Sulje",
     "exportRealKeyWarning": "Turvallisuusvaroitus: vienti estetty — tulosteesta havaittiin todellinen API-avain. Nollaa API-avaimesi ja yritä uudelleen.",
     "placeholderHintPrefix": "Korvaa",
@@ -11808,7 +12052,8 @@
       "nextButton": "Seuraava",
       "runButton": "Suorita",
       "promptPlaceholder": "Kirjoita viestisi… (Lähetä painamalla Enter, rivinvaihto painamalla Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground-tilat"
   },
   "miniPlayground": {
     "endpoint": "Päätepiste",
@@ -11879,7 +12124,8 @@
     "assistant": "Assistentti",
     "errorLabel": "Virhe",
     "requestFailed": "Pyyntö epäonnistui",
-    "stop": "Pysäytä"
+    "stop": "Pysäytä",
+    "messageInputAria": "Viesti"
   },
   "requestLogger": {
     "recording": "Tallennus käynnissä",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} tilin kierrätystä",
       "resilienceRetried": "Tyhjä vuoro yritettiin uudelleen",
       "resilienceContinued": "Jatkettiin kesken virran",
-      "resilienceRecovered": "Palautettu kestävyystoiminnolla"
-    }
+      "resilienceRecovered": "Palautettu kestävyystoiminnolla",
+      "conversationContext": "Keskustelukonteksti",
+      "goToBottom": "Siirry alas",
+      "liveRefreshOn": "Automaattinen päivitys: käytössä",
+      "liveRefreshOff": "Automaattinen päivitys: pois käytöstä",
+      "liveRefresh": "Automaattinen päivitys",
+      "continuesFromParent": "jatkuu ylätasolta",
+      "continuesFrom": "Jatkuu kohteesta {id}",
+      "viewConversation": "näytä keskustelu",
+      "openConversation": "Avaa keskustelu {id}"
+    },
+    "tableLabel": "Pyyntölokit",
+    "throughputPostFirstToken": "Ensimmäisen tokenin jälkeen",
+    "throughputEndToEnd": "Päästä päähän",
+    "throughputRate": "{value} tokenia/s",
+    "throughputExplanation": "Molemmat nopeudet käyttävät suurempaa tuloste- ja päättelytokenmäärää. Ensimmäisen tokenin jälkeinen nopeus jättää kelvollisen TTFT:n huomiotta; muuten se käyttää koko kestoa. Päästä päähän -nopeus käyttää aina koko kestoa. Puskuroidulla vastauksella voi olla korkea pursketoimitusnopeus ilman, että mallin generointi olisi nopeampaa."
   },
   "proxyLogger": {
     "filterAll": "Kaikki",
@@ -12112,7 +12372,9 @@
     "colServedBy": "Palvelija",
     "filterTraffic": "Liikenne",
     "filterTests": "Testit",
-    "filterSource": "Lähde"
+    "filterSource": "Lähde",
+    "tableLabel": "Välityspalvelimen lokit",
+    "sortLogs": "Lajittele lokit"
   },
   "endpointOptions": {
     "speech": "Puhe",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "LOPPUUN KÄYTETTY",
     "statusAlerting": "HÄLYTYS",
     "statusError": "VIRHE",
-    "moreSuffix": "+{count} muuta"
+    "moreSuffix": "+{count} muuta",
+    "feedFilterLabel": "Suodata tapahtumia"
   },
   "quotaShare": {
     "weightPercent": "Paino %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "Ryhmittelemättömät",
     "ungroupedHint": "Näitä pooleja ei ole määritetty tunnettuun ryhmään. Muokkaa poolia siirtääksesi sen oikeaan ryhmään.",
     "removeFailed": "Tätä poolia ei voitu poistaa.",
-    "dismiss": "Sulje"
+    "dismiss": "Sulje",
+    "allocationsHeading": "Kohdistukset",
+    "wizardRemoveDimension": "Poista ulottuvuus",
+    "wizardRemoveKey": "Poista avain"
   },
   "plugins": {
     "title": "Lisäosat",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "Asetusten päivitys epäonnistui",
       "serviceRevealApiKey": "{actor} paljasti API-avaimen kohteelle {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Ohita virhe"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "Siirry nyt",
       "message": "MITM Proxy sijaitsee nyt AgentBridgen alla.",
       "title": "Tämä sivu on siirretty"
-    }
+    },
+    "dnsOn": "DNS käytössä",
+    "dnsOff": "DNS ei käytössä",
+    "showServerSettings": "Näytä palvelinasetukset",
+    "hideServerSettings": "Piilota palvelinasetukset",
+    "upstreamCaTesting": "Testataan…",
+    "removeMapping": "Poista määritys",
+    "mappingSourcePlaceholder": "esim. gemini-3.6-flash-medium tai * kaikille määrittämättömille",
+    "mappingWildcardHint": "Käytä lähteenä merkkiä *, jos haluat reitittää kaikki mallit, joille ei ole nimenomaista määritystä, OmniRouten kautta valittuun kohteeseen. Tarkat lähdeosumat ovat aina etusijalla merkkiin * nähden.",
+    "wizardDetectingModels": "Tunnistetaan malleja siepatusta liikenteestä...",
+    "wizardDetectedModels": "Siepatusta liikenteestä löytyi {count, plural, one {# malli} other {# mallia}}. Valitse lisättävät mallit:",
+    "wizardSelectedModels": "{count, plural, one {# malli valittu} other {# mallia valittu}}. Yhdistät ne OmniRoute-malleihin seuraavassa näkymässä.",
+    "wizardAddModels": "Lisää {count, plural, one {# malli} other {# mallia}}",
+    "wizardNoModelsDetected": "Malleja ei ole vielä tunnistettu. Tee pyyntö käyttäen agenttia {agent} ja suorita sitten tämä ohjattu toiminto uudelleen, jotta mallit tunnistetaan automaattisesti liikenteestä.",
+    "wizardNoModelsHint": "Voit myös sulkea tämän ohjatun toiminnon ja lisätä määritykset manuaalisesti agenttikortissa."
   },
   "providerStats": {
     "unknownError": "Tuntematon virhe",
@@ -12685,7 +12966,12 @@
     "avgTtft": "Keskim. TTFT",
     "avgTotal": "Keskim. yhteensä",
     "requestTelemetry": "Pyyntötelemetria",
-    "requestTelemetryDescription": "7-vaiheisen putken erittely (viimeiset 5 minuuttia)"
+    "requestTelemetryDescription": "7-vaiheisen putken erittely (viimeiset 5 minuuttia)",
+    "title": "Palveluntarjoajien tilastot",
+    "description": "Palveluntarjoaja- ja mallikohtainen liikenne, viive ja onnistumisasteet",
+    "combo": "Yhdistelmä",
+    "toggleModels": "Näytä palveluntarjoajan {provider} mallit",
+    "windowSince": "{date} lähtien"
   },
   "relay": {
     "title": "Serverless-välityspalvelimet",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "Ei pyynnön runkoa.",
     "noResponseBody": "Ei vastauksen runkoa.",
     "formatted": "Muotoiltu",
-    "raw": "Raaka"
+    "raw": "Raaka",
+    "requestCount": "{count, plural, one {# pyyntö} other {# pyyntöä}}",
+    "expandList": "Laajenna luettelo",
+    "collapseList": "Supista luettelo",
+    "snippetLanguage": "Koodikatkelman kieli",
+    "headersTable": "Otsakkeet",
+    "showSecrets": "Näytä salaisuudet",
+    "maskSecrets": "Peitä salaisuudet",
+    "llmNotAvailable": "LLM-metatietoja ei ole saatavilla tälle pyynnölle.",
+    "llmStreamYes": "kyllä (SSE)",
+    "llmStreamNo": "ei",
+    "llmTotalTokens": "Yhteensä: {count} tokenia"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI-koodit",
     "pageSubtitle": "Koodityökalut, jotka osoittavat OmniRouteen",
     "searchPlaceholder": "Etsi CLI…",
     "filterDetectionLabel": "Tunnistus",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "Ei löytynyt",
     "baseUrlAll": "Kaikki",
     "baseUrlFull": "Täysi",
-    "baseUrlPartial": "Osittainen"
+    "baseUrlPartial": "Osittainen",
+    "title": "CLI-koodi"
   },
   "cliAgents": {
     "pageTitle": "CLI-agentit",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "Niiden kutsujen osuus, joihin tämä palveluntarjoaja todella vastasi viimeisten 24 tunnin aikana. Viiva tarkoittaa, että liikennettä oli liian vähän onnistumisasteen määrittämiseen.",
     "reliabilitySample": "{successes}/{requests} kutsua onnistui viimeisten {hours} tunnin aikana",
     "reliabilityTooFew": "Vain {requests} kutsua viimeisten {hours} tunnin aikana — liian vähän onnistumisasteen määrittämiseen",
-    "reliabilityNoTraffic": "Viimeisten 24 tunnin aikana ei kirjattuja kutsuja"
+    "reliabilityNoTraffic": "Viimeisten 24 tunnin aikana ei kirjattuja kutsuja",
+    "categoryFilter": "Tehtäväluokka"
   },
   "discovery": {
     "title": "Palveluntarjoajien kartoitus",
@@ -13330,7 +13628,11 @@
     "method": "Menetelmä",
     "auth": "Todennus",
     "feasibility": "Toteutettavuus",
-    "models": "Mallit"
+    "models": "Mallit",
+    "provider": "Palveluntarjoaja",
+    "status": "Tila",
+    "endpoint": "Päätepiste",
+    "actions": "Toiminnot"
   },
   "noAuthProvider": {
     "title": "Todennusta ei vaadita",
@@ -13379,7 +13681,8 @@
     "ownProxy": "Oma välityspalvelin",
     "freeTierPause": "Malli {model} keskeytetty (429), palaa {time}",
     "freeTierPauseProvider": "Keskeytetty (429), palaa {time}",
-    "freeTierPauseNote": "Prosessinsisäinen tauko tällä instanssilla"
+    "freeTierPauseNote": "Prosessinsisäinen tauko tällä instanssilla",
+    "proxyType": "Välityspalvelimen tyyppi"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "Salainen saavutus odottaa...",
         "criteria": "Suorita salainen saavutus paljastaaksesi tämän merkin."
       }
-    }
+    },
+    "leaderboardTitle": "Pistetaulukko",
+    "leaderboardDescription": "API-avaintesi sijoitukset ja saavutukset",
+    "badgeLocked": "Lukittu"
   },
   "featureFlags": {
     "title": "Ominaisuusliput",
@@ -13610,7 +13916,9 @@
       "disabled": "Poistettu käytöstä",
       "dual": "Kaksois",
       "alias": "Alias",
-      "canonical": "Kanoninen"
+      "canonical": "Kanoninen",
+      "fail_closed": "Estä (fail_closed)",
+      "count_as_zero": "Laske $0:ksi (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Suojatun prioriteetin infrastruktuurikeskeytykset 502-virheinä",
         "description": "Palauta 502 koodin 503 sijaan, kun prioriteettikohde, jota käytetään varavaihtoehtona vain kiintiötilanteessa, pysäyttää yhdistelmän syystä, jonka voidaan varmasti osoittaa olevan muu kuin kiintiö: palveluntarjoajan avoin katkaisija tai ennakoituun viiveeseen perustuva ohitus."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Kirjaa tilitunnukset",
+        "description": "Sisällytä tilin etuliite AUTH-lokiriveihin (esim. \"Using '<provider>' account: abc12345...\"). Oletuksena pois käytöstä, jotta tilitunnisteet peitetään jaetuista/monivuokraajaympäristön prosessilokeista. Riippumaton virheenkorjaustilasta; virheenkorjaustilan vaihtaminen ei paljasta tätä."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Poista salasanakirjautuminen käytöstä OIDC:n kanssa",
+        "description": "Kun OIDC on käytössä, poista salasanakirjautuminen käytöstä, jotta käyttäjät voivat tunnistautua vain OIDC-kertakirjautumisen (Single Sign-On) kautta. Kun tämä asetus on poissa käytöstä (oletus), sekä salasanakirjautuminen että OIDC ovat käytettävissä."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Äänipalveluntarjoajien etäsolmut",
+        "description": "Salli /v1/audio/* -reittien käyttää OpenAI-yhteensopivia palveluntarjoajasolmuja, joita isännöidään localhostin ulkopuolella. Oletuksena poissa käytöstä – äänen reitittäminen etäisännälle muuttaa lähtevän liikenteen identiteettiä (egress identity) ja sen on oltava operaattorin nimenomainen päätös. Loopback-solmut ovat aina sallittuja, eikä tämä asetus vaikuta niihin."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Rerank-palveluntarjoajien etäsolmut",
+        "description": "Salli POST /v1/rerank -pyynnön (sekä muistimoottorin rerank-vaiheen, joka kutsuu sitä loopbackin kautta) käyttää OpenAI-yhteensopivia palveluntarjoajasolmuja, joita isännöidään localhostin ulkopuolella – esimerkiksi lähiverkon konetta tai Tailscale-vertaislaitetta (peer), jossa ajetaan TEI-, Infinity-, vLLM- tai vastaavia järjestelmiä. Oletuksena poissa käytöstä – reitittäminen etäisännälle muuttaa lähtevän liikenteen identiteettiä ja sen on oltava operaattorin nimenomainen päätös. Loopback-solmut ovat aina sallittuja, eikä tämä asetus vaikuta niihin. Etäsolmujen on lisäksi läpäistävä palveluntarjoajan lähtevien URL-osoitteiden käytäntö (outbound URL policy)."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Verkkorotaation jaetun lähtevän liikenteen suojaus",
+        "description": "Kun usean tilin rotaatiosuorittimessa tapahtuu verkkopoikkeus (aikakatkaisu, yhteyden hylkäys/nollaus) ja epäonnistuneella tilillä ei ole omaa välityspalvelinta, sovella lyhyttä jäähdytysaikaa (cooldown) ja ohita muut välityspalvelimettomat tilit pyynnön loppuajaksi sen sijaan, että jokaista kokeiltaisiin uudelleen. Oletuksena käytössä (turvallinen: ei muuta lähtevää IP-osoitetta, vähentää vain viivettä ja cooldown-riskiä jaettua lähtevää liikennettä käyttävillä tileillä). Poista käytöstä palauttaaksesi välittömän etenemisen ensimmäisen välityspalvelimettoman virheen yhteydessä."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Ohita äskettäin epäonnistuneet välityspalvelimet",
+        "description": "Välityspalvelinpoolit ja opencoden tilikohtainen rotaatio lakkaavat tarjoamasta uudelleen juuri epäonnistunutta välityspalvelinta (hylätty TCP-luotaus tai sen kautta vastaanotettu 429-virhe) prosessikohtaisen ajan verran, joka kaksinkertaistuu jokaisella toistolla tiettyyn enimmäisrajaan asti. Välityspalvelimen tilaa ei tallenneta; vaikka kaikki ehdokkaat siirrettäisiin sivuun, valinta pysyy muuttumattomana. Oletuksena käytössä: valintajärjestys vastaa tavallista rotaatiota vain asetuksella PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Jaetun egress-poolin järjestys",
+        "description": "Palveluntarjoajille, joiden kiintiöt on ryhmitelty egress-osoitteen mukaan, sijoita poolin jäsen, jolla on sama havaittu egress-osoite kuin äskettäin hylätyllä jäsenellä, heti terveiden jäsenten alapuolelle. Vaikuttaa vain järjestykseen, ei koskaan sulje pois. Vaatii asetuksen PROXY_SKIP_RECENTLY_FAILED, joka tuottaa sen lukeman hylkäyssignaalin. Oletuksena poissa käytöstä: valintajärjestys vastaa täysin tavallista rotaatiota."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Rotaation kohdistuslokitus",
+        "description": "Opencoden rotaatio tallentaa, mikä tili palveli tai ohitettiin (vain maskatut tunnisteet, ei koskaan täysiä tilitunnisteita) ja linkittää välityspalvelinlokin merkinnät pyyntöönsä, jotta operaattori voi erottaa ohitetut tilit käyttämättömistä. Oletuksena poissa käytöstä: ylimääräisiä lokirivejä tai sarakkeita ei kirjoiteta."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Välityspalvelinpoolin egress-havainnointi",
+        "description": "Näytä hallintapaneelissa välityspalvelinpoolin alla, kuinka moni havaittu egress-IP-osoite palveli sen jäseniä viimeisen 24 tunnin aikana, kuinka moni yhteys käytti niitä ja suurin yhden IP-osoitteen takana havaittu määrä. Vain luku, lasketaan välityspalvelinlokista, ei koskaan käytetä reititykseen. Oletuksena poissa käytöstä: poolieditori pysyy muuttumattomana ja havainnointireitti palauttaa null-arvon."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Välityspalvelinoperaattorin egress",
+        "description": "Hyväksy operaattorin lähettämät aikaleimatut havaitut osoitteet poolin jäsentä kohden ja yhdistä ne lokiluentaan näyttämistä ja poolijärjestystä varten. Oletuksena poissa käytöstä: push-reitti vastaa 404 ja poolin lukutoiminnot toimivat täsmälleen kuten ennenkin."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses -jumiutumisvuorottelu",
+        "description": "Tarkkaile OpenCode-suorittimessa suoratoistetun Responses-vastauksen rungon ensimmäistä tavua (aikaikkuna: RESPONSES_FIRST_BYTE_TIMEOUT_MS, oletus 15000). 2xx-tilaista Responses-tietovirtaa, joka pysyy hiljaisena aikaikkunan umpeuduttua, käsitellään jumiutuneena: tili asetetaan jäähdytystilaan ja pyyntö siirretään seuraavalle tilille kerran; toinen jumiutuminen epäonnistuu välittömästi. Oletusarvoisesti pois käytöstä: jumiutuneet tietovirrat odottavat nykyiseen tapaan tietovirran valmiusaikakatkaisuun saakka."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked -vuorottelu",
+        "description": "Jos ylävirran palvelu vastaa OpenCode-suorittimelle koodilla 403 tai 451 sisältäen user_blocked-hylkäyksen (ei aluerajaus eikä Cloudflaren sormenjälkihylkäys), aseta hylätty tili jäähdytystilaan ja siirry seuraavaan tiliin enintään kerran pyyntöä kohden; toinen hylkäys palautetaan sellaisenaan ilman onnistumismerkintää. Oletusarvoisesti pois käytöstä: ylävirran käyttäjäeston kiertäminen voi näyttää estojen välttelemiseltä ja levittää merkinnän koko tilikantaan, joten hylkäys palautetaan muuttamattomana, ellei operaattori ota toimintoa erikseen käyttöön."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCoden tilapäisvirheiden vikasietoviive",
+        "description": "OpenCoden usean tilin vuorottelussa pidä tauko ennen pyynnön lähettämistä seuraavalle tilille, kun kaksi peräkkäistä yritystä on epäonnistunut ylävirran tilapäiseen virheeseen (5xx tai tyhjä 400-hylkäys). Tauko alkaa 1,5 sekunnista, kaksinkertaistuu jokaisesta seuraavasta peräkkäisestä epäonnistumisesta, on rajattu 6 sekuntiin taukoa ja 10 sekuntiin pyyntöä kohden, ohitetaan asiakkaan katkaistessa yhteyden, ja epäonnistuneen vastauksen runko vapautetaan ennen odotusta. Oletusarvoisesti pois käytöstä: vikasieto säilyy välittömänä."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Tyhjän vuoron flush-uudelleenyritys",
+        "description": "Kun käännetyssä suoratoistovuorossa ylävirran vuoro ei sisällä käyttökelpoista sisältöä (vain päättelyä sisältävä vastaus tai nolla hyödyllistä lohkoa), suorita rajattu määrä uudelleenyrityksiä normaalia tunnistetietopolkua käyttäen (enintään `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`), ennen kuin asiakkaalle välitetään mitään. Oletusarvoisesti pois käytöstä: tyhjät vuorot säilyttävät nykyisen toimintatavan (tyhjä 200 tai empty-content 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Tyhjän tietovirran sisarustoipuminen",
+        "description": "Claude/Codex-suoratoisto: tutki ensimmäisen elinkaaritapahtuman jälkeen lyhyesti (enintään 1 s / 64 KiB) käyttökelpoisen tulosteen varalta; ilman sisältöä päättyvästä tietovirrasta tulee empty_content-virhe, joka käyttää olemassa olevan rajatun uudelleenyrityksen toiseen kelvolliseen yhteyteen (ei jäähdytysaikaa, ei mallin lukitusta), ja round-robin-yhdistelmät lopettavat uudelleenyritykset asiakkaan katkaistessa yhteyden. Käsittelee luotaimessa myös tiloja refusal, pause_turn ja model_context_window_exceeded laillisina tyhjinä päätöstiloina. Oletusarvoisesti pois käytöstä: valmiustila, tyhjän sisällön käsittely ja yhdistelmäuudelleenyritykset säilyvät täsmälleen ennallaan."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Suoratoiston myöhäisen tulosteen luotain",
+        "description": "Suoratoistotulosteen luotain: jatka ensimmäisten 64 välitetyn lohkon jälkeen otantaa tutkimalla yksi lohko 16:sta ensimmäisen näkyvän tulosteen havaitsemiseksi, jotta myöhässä alkava tuloste merkitsee suoratoiston silti tuottaneen tulostetta. Yksittäinen 5xx-virhe kyseisen kohdan jälkeen pysyy tällöin pyyntökohtaisena sen sijaan, että se kirjaisi vain mallikohtaisen lukituksen, ja firstOutputMs täytetään takautuvasti nykyisen otantavälin ensimmäiseen tulostelohkoon. Oletuksena pois käytöstä: vain ensimmäiset 64 välitettyä lohkoa luodataan, täsmälleen kuten aiemmin."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode: nopeusrajoitetun 429-virheen varhainen pysäytys",
+        "description": "Pysäytä OpenCoden monen tilin rotaatiossa tiliaalto ensimmäiseen 429-virheeseen, joka on luokiteltu todelliseksi nopeusrajoitukseksi (jäsenneltävä Retry-After-otsake tai runko, jossa mainitaan nopeus- tai käyttörajoitus), ja palauta kyseinen upstream-429 muuttamattomana (tila, runko sekä Retry-After- ja kiintiöotsakkeet) sen sijaan, että kokeiltaisiin jokaista jäljellä olevaa tiliä. Luokittelemattomat 429-virheet jatkavat rotaatiota. Oletuksena pois käytöstä: ilmaisversio on rajoitettu lähtevän IP-osoitteen mukaan (#9611), joten jokainen 429 siirtyy seuraavaan tiliin ja aallon ehtyessä palautetaan viimeinen upstream-429."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode: 429-pysäköinti ja -jatkaminen",
+        "description": "Pysäköi pyyntö OpenCoden monen tilin rotaatiossa heartbeat-signaalin kera toistuvien tilapäisten 429-virheiden (tai tuoreen poolin kuormitusmerkinnän) jälkeen, ja toista sitten yksi enintään 3 peräkkäisen tilin rajoitettu vaihe sen sijaan, että pyyntö hajautettaisiin koko kalustolle. Oletuksena pois käytöstä: jokainen 429 siirtyy seuraavaan tiliin täsmälleen kuten aiemmin."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Suoratoiston valmiusjumiutumisen uudelleenyritys",
+        "description": "Kun suoratoistavissa chat-pyynnöissä ensimmäinen upstream-runko jumiutuu ennen käyttökelpoisen tapahtuman tuottamista, tee yksi rajattu toinen yritys samaa reitityspolkua pitkin samalla valmiusbudjetilla ilman tilirangaistusta. Oletuksena pois käytöstä: jumiutunut ensimmäinen runko epäonnistaa pyynnön ilman uudelleenyritystä."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode: 429-poolin uudelleenvalinta",
+        "description": "Kun OpenCoden monen tilin rotaatiossa saadaan 429-virhe lähtevän liikenteen mukaan lohkotulta palveluntarjoajalta välityspalvelimettomalla tilillä vallitsevassa poolikontekstissa, pyydä yhteyspoolilta toista jäsentä seuraavaa yritystä varten sen sijaan, että yritettäisiin uudelleen samaa lähtevää osoitetta. Järjestää, ei koskaan sulje pois: ehtynyt pooli säilyttää nykyisen toimintatavan. Oletuksena pois käytöstä: jokainen 429 siirtyy seuraavaan tiliin täsmälleen kuten aiemmin."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 -asiakassormenjälki",
+        "description": "Lähetä OpenCode v2 CLI -asiakassormenjälki OpenCode Zen/Go -pyynnöissä (#16571): User-Agent opencode/latest/<2.x>/cli ja x-opencode-client cli, asiakkaan User-Agent säilytetään vain, kun kyseessä on 2.x OpenCode -asiakas, rajoitetuissa ilmaiskerroksen pyynnöissä ei x-opencode-request-otsaketta, istunto peilataan otsakkeisiin x-opencode-session-id/x-session-affinity/x-session-id sekä injektoitujen paikkamerkkityökalujen v2 CLI:n read/shell-skeemat ja tool_choice-arvo \"none\" jätetään pois. Oletuksena pois käytöstä: jokainen OpenCode-pyyntö säilyttää nykyisen identiteetin, otsakkeet ja rungon tavulleen sellaisenaan."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen -egress-IP-lukitus",
+        "description": "Lisää OpenCode Zen (opencode-zen) oletusarvoiseen egress-IP-lukitusperheeseen, jotta 429-virhe yhdessä Zen-yhteydessä jäähdyttää myös kaikki saman egress-IP:n jakavat Zen-sisaryhteydet. Oletuksena pois käytöstä: Zen on avainnettu ja kukin yhteys jäähtyy erikseen, täsmälleen kuten ennenkin. Eksplisiittinen OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS -arvo ohittaa aina tämän lipun."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode-kokotekstivirhesäännöt",
+        "description": "Salli sisäänrakennettujen OpenCode-virhesääntöjen (opencode-zen, opencode-go, opencode-cli) kohdistua koko ylävirran virhetekstiin, jotta viestirungon tunnisteet, kuten organization_quota_exceeded tai \"monthly usage limit reached\", luokittelevat 429-virheen kiintiön ehtymiseksi yhteyskohtaisella lukituksella. Oletuksena pois käytöstä: kyseiset säännöt näkevät vain rakenteellisen virhekoodin, ja tällainen 429-virhe pysyy lyhyenä nopeusrajoituksena, täsmälleen kuten ennenkin."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI -kokotekstivirhesäännöt",
+        "description": "Salli sisäänrakennetun Cloudflare Workers AI -virhesäännön kohdistua koko ylävirran virhetekstiin, jotta 429-virheen viestirunko \"daily free allocation\" luokitellaan kiintiön ehtymiseksi lyhyen nopeusrajoituksen sijaan. Oletuksena pois käytöstä: sääntö näkee vain rakenteellisen virhekoodin, täsmälleen kuten ennenkin."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Kyvykkyyssuodatin",
+        "description": "Hylkää pyynnöt ennen välitystä, kun kohdemallilta puuttuu vaadittuja kyvykkyyksiä (kuvatuki, työkalut, rakenteinen tuloste, konteksti-ikkuna). Suojaa suoria yksittäisen palveluntarjoajan pyyntöjä, jotka ohittavat combo-kerroksen yhteensopivuussuodattimen."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Ohita hinnoittelematon käyttö USD-kiintiöissä",
+        "description": "Laske hinnoittelemattomien mallien käyttö arvona $0 avainkohtaisissa USD-käyttökiintiöissä sen sijaan, että kiintiö katsottaisiin ylittyneeksi. Oletuksena poissa käytöstä: hinnoittelematon malli tai reititysalias voi piilottaa todellisia kuluja, joten kiintiö estää pyynnöt virhetilanteessa."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Ota OmniRoute Radar -moduuli käyttöön (katalogisyötenäkymät ja synkronointi). Oletuksena poissa käytöstä; käyttöönotto avaa vain käyttöliittymän – tietojen synkronointi vaatii erillisen käyttöönoton."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Mallipäätepisteiden kyvykkyysportti",
+        "description": "Valvo luotettuja mallin päätepistetunnisteita (palveluntarjoajan katalogissa ilmoitettuja, erikoismallin tunnisteesta pääteltyjä tai operaattorin asettamia): hylkää koodilla HTTP 400 pyynnöt, jotka on lähetetty päätepisteeseen, jota malli ei tue, ennen välitystä osoitteisiin /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ja /v1/audio/*; piilota /v1/models-luettelosta mallit, joiden merkityillä päätepisteillä ei ole OmniRoute-sovitinta; ja vastaa hallintapaneelin mallitestiin koodilla 422 tällaisten mallien kohdalla. Oletuksena poissa käytöstä: päätepisteiden tunnisteet pysyvät vain informatiivisina ja pyynnöt välitetään täsmälleen kuten ennenkin."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Universaali kontekstinsiirto",
+        "description": "Luo ja syötä keskusteluyhteenvetoja, kun yhdistelmäreititys vaihtaa mallia. Poista käytöstä, jos haluat käsitellä mallinvaihdot itsenäisesti ja estää taustalla tapahtuvat siirtopyynnöt kaikissa nykyisissä ja tulevissa yhdistelmissä."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Päättelyn toisto",
+        "description": "Tallenna välimuistiin ja toista mallin päättely monivuoroisissa keskusteluissa. Poista käytöstä lopettaaksesi päättelyn tallentamisen ja uudelleensyöttämisen."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server -siirtotapa",
+        "description": "Salli Codexin käyttää paikallista app-server WebSocket JSON-RPC -siirtotapaa (codexTransport=app-server). Kun asetus on pois päältä, app-server-siirron valinneet yhteydet palaavat käyttämään Codexin muita siirtotapoja."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code -löytämisen aliasit",
+        "description": "Mainostetaan claude/'<provider>'/'<model>'-peilittymätunnisteita /v1/models-päätteessä, jotta Claude Code -verkon mallien löytäminen listaa ei-Claude-malleja. Varoitus: tuplakaikki asiakkaan luettelotapahtumat kun on käytössä globaalisti."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Ei-miettimistä malli-aliasit",
+        "description": "Päätelasko no-think/'<provider>'/'<model>'-verkon aliasseille. Käytössä (oletus): /v1/models mainostaa ei-miettimistä varianttia jokaiselle kyvykkäälle Claude-mallille, ja no-think/-tunniste pyynnössä ratkaisee takaisin todelliseen malliin, jossa päättely on painettu. Poissa: ei varianteja mainosteta ja no-think/-tunniste kohtelletaan kuin mikä tahansa tuntematon mallitunniste. Mallikohtainen ModelSpec.noThinkingAlias opt-in/opt-out pätee silti, kun tämä on käytössä."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Poista ajattelutasomuunnelmat käytöstä",
+        "description": "Poista ajattelutasomuunnelmien (esim. -low, -medium, -high) luominen käytöstä /v1/models-luettelossa."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Mukautuvat virtuaaliset pääsykaistat",
+        "description": "Ota käyttöön vuokralaiskohtaiset mukautuvat virtuaaliset pääsykaistat tarjoajien välitykselle (#9654): yhden vuokralaisen liikennepiikki ei enää aiheuta 503-virheitä toiselle. OMNIROUTE_CHAT_VIRTUAL_LANES-ympäristömuuttuja ohittaa tämän hallintapaneelin asetuksen; muutokset tulevat voimaan palvelimen uudelleenkäynnistyksen yhteydessä."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Toiminnalliset verkon peilit",
+        "description": "Mainostetaan '<gateway-alias>'/'<model>'-peilittymätunnisteita /v1/models-päätteessä malleille, joiden kanoninen omistaja ei ole aktiivisella todisteella, mutta läpäisyverkon aktiivinen todiste ohjaa niitä. Varoitus: lisää luettelokirjauksia kaikille asiakkaille, kun on globaalisti käytössä."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API-aggregaattorin saldo",
+        "description": "Ota saldontunnistus käyttöön New-API- / One-API- / Sub2API-aggregaattorien kanssa yhteensopiville solmuille. Kun asetus on käytössä, yhteensopivat solmut, joille on asetettu aggregaattorilippu, ilmoittavat saldonsa koontinäytössä ja quota-preflight-reitityksessä."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Piilota poistetut hakuyhteydet",
+        "description": "Hakutilastot ja viimeisimmät haut laskevat vain palveluntarjoajat, joilla on edelleen toimiva yhteys (avaimettomat palveluntarjoajat, kuten duckduckgo-free, lasketaan aina). Pois päältä: säilyttää jokaisen tallennetun hakurivin, jolla on palveluntarjoajatunnus."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Tiukka Free-merkki",
+        "description": "Koontinäytön palveluntarjoajasivut: näytä Free-merkki vain signaaleista, joita palveluntarjoaja tukee — jättää pois näyttönimiheuristiikan, ei-boolilaiset free-kentät ja :free-päätteet rekisteröidyiltä palveluntarjoajilta, joilla ei ole dokumentoitua ilmaistasoa. Pois päältä: säilyttää aiemman merkkisäännön."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: Tyhjä pooli vastaa 503",
+        "description": "Kun Auto Combon ehdokaspooli on jo tyhjä ennen työkalukutsujen esisuodatusta (jokainen kohde ohitettu jäähtymisaikojen, lukitusten tai ehtymisen vuoksi), vastaa 503 no_eligible_targets vanhan 400 \"No target supports tool calling\" capability_mismatch -vastauksen sijaan. Oletusarvoisesti pois päältä: tyhjä pooli säilyttää vanhan 400-vastauksen."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral epäselvä 401 pehmeä lukitus",
+        "description": "Pelkkä Mistral 401 ('{\"detail\":\"Unauthorized\"}', ei eksplisiittistä todistussignaalia) on tavutason identtinen kumottuun avaimelle ja ehtyneelle kvootalle. Kun on käytössä, tällainen 401 viilentää yhteyden sijaan pysäyttää sen vanhentuneena, enintään 3 kertaa tunnin sisällä; seuraava pysäyttää silti vanhentuneena, joten kumottu avain konvergoi. Oletuksena poissa: jokainen pelkkä Mistral 401 pysäyttää yhteyden vanhentuneena, kuten ennen."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Eräajojen ja tiedostojen automaattisiivous",
+        "description": "Anna automaattisen siivousajon poistaa OMNIROUTE_BATCH_RETENTION_DAYS-arvoa vanhemmat päättyneet (completed/failed/cancelled/expired) Batch API -työt riveittäisine tarkistuspisteineen ja tyhjentää ladattujen tiedostojen BLOB-sisältö niiden oman expires_at-ajan umpeuduttua. Oletuksena pois käytöstä: jokainen nykyinen asennus säilyttää nämä tiedot täsmälleen kuten ennenkin, kunnes ylläpitäjä ottaa toiminnon käyttöön. Ylläpitäjän käynnistämään reittiin DELETE /api/v1/batches/delete-completed tämä ei vaikuta kummassakaan tapauksessa – se on erillinen, ehdoton julkinen API-sopimus."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity-tilin varaus",
+        "description": "Varaa valittu Antigravity-tili sen poimineen pyynnön suoratoiston elinkaaren ajaksi, jotta samanaikainen uudelleenyritys tai tunnistetietojen siirto ei voi valita uudelleen tiliä, joka on jo varattu käynnissä olevaan suoratoistoon. Varaus rajataan kohteeseen (connection, callable upstream model), joten yksi tili voi yhä palvella kahta eri mallia samanaikaisesti. Kun kaikki kyseiselle mallille soveltuvat tilit on jo varattu, pyyntö palauttaa rakenteellisen vastauksen 503 POOL_BUSY ja rajatun Retry-After-arvon sen sijaan, että se kuormittaisi varattua tiliä. Oletuksena pois käytöstä: tilin valinta säilyy täsmälleen ennallaan, eikä varausta tehdä."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Vanhentuneiden Combo-vaiheiden automaattikarsinta",
+        "description": "Poista autoritatiivista reaaliaikaista luetteloa vasten tehdyn onnistuneen mallisynkronoinnin jälkeen combo-vaiheet, jotka on kiinnitetty malleihin, joita luettelossa ei enää ole, ja luo yksi auditointimerkintä poistettua vaihetta kohden. Ei koskaan karsi epäonnistuneen, heikentyneen (degraded) tai vain ilmaismalleja koskevan synkronoinnin yhteydessä eikä koskaan tyhjennä comboa kokonaan. Oletuksena pois käytöstä: vanhentuneet vaiheet ainoastaan merkitään."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth: tiivistetty ajattelu",
+        "description": "Salli luettavaa ajattelua (thinking.display \"summarized\") pyytävän Claude OAuth -pyynnön jättää pois redact-thinking-2026-02-12 Anthropic -beta, joka muutoin saa Anthropicin palauttamaan tyhjiä, pelkän allekirjoituksen sisältäviä ajattelulohkoja. Oletuksena pois käytöstä: kyseinen beta on osa Claude Code OAuth -verkkoliikenteen sormenjälkeä, joten OAuth-pyynnöt pitävät sen muuttumattomana. API-avaimella tehdyt Claude-pyynnöt noudattavat tiivistettyä ajattelua jo ilman tätä valintaa; OMNIROUTE_REDACT_THINKING=false välittyy OAuth-pyyntöihin vain, kun tämä valinta on päällä."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro-työkalukutsun korjaus",
+        "description": "Kun suoratoistettu Kiro-vastaus tuottaa virheellisen tool_call-kääreen (puuttuva input.name tai input.arguments) ennen mitään näkyvää tulostetta, vaimenna se ja lähetä pyyntö kerran uudelleen korjaavan ohjeen kera sen sijaan, että vuoro päätettäisiin virheeseen invalid_kiro_tool_call. Uudelleenyritys kuluttaa yhden ylimääräisen Kiro-pyynnön; toinen epäonnistuminen päättää vuoron virheeseen kiro_tool_call_repair_retry_failed. Oletuksena käytössä. Aseta arvoksi false hylätäksesi vuoron heti ensimmäisestä virheellisestä kääreestä."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev-vaativuustasot",
+        "description": "Käytä models.devin julkaisemia päättelyn vaativuustasoja (rajattuna tunnettuun vaativuussanastoon), kun operaattorin ohitus tai tarjoajarekisteri ei määrittele niitä, ja käsittele määritelty tyhjä tasoluettelo tilana \"no tiers\" kohteessa /v1/models effort_tiers ja yhdistelmätasojen leikkauksissa. Oletuksena pois käytöstä: effort_tiers ja ratkaistut supportedThinkingEfforts säilyvät täsmälleen ennallaan."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arenan syntetisoitu cx-telemetria",
+        "description": "Liitä syntetisoitu ohjelmallinen cx-asiakasvuorovaikutus-blob (arvo, jonka arena.ai itse lähettää sivulle, jolla ei ole tallennettua vuorovaikutusta) jokaiseen Arenan (lmarena) create-evaluation-pyyntöön, jolle ei ole annettu operaattorin määrittämää arvoa providerSpecificData.cx. Oletuksena pois käytöstä: cx-kenttä on Arenan automaationestosignaali, joten OmniRoute välittää vain arvon, jonka operaattori on tallentanut todellisesta selainistunnosta (providerSpecificData.cx), eikä muuten lähetä cx-arvoa lainkaan. Todentamaton hyöty palvelussa; ota käyttöön vain, jos Arena alkaa hylätä pyyntöjä ilman cx-arvoa."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Natiivin Codexin reaktiivinen tiivistys",
+        "description": "Anna reaktiivisten (kynnysarvo) ja viimesijaisten kontekstintiivistysvaiheiden kirjoittaa uudelleen myös natiivit Codex-läpivientihistoriat (POST /v1/responses codex-tarjoajalle), kun ne ylittävät kontekstibudjetin, käyttäen Responses input[] -sovitinta. Oletuksena pois käytöstä: natiivit Codex-historiat kuuluvat Codex-asiakkaalle eikä niitä koskaan kirjoiteta uudelleen tiivistyksellä; ylisuuret pyynnöt epäonnistuvat edelleen kontekstibudjetin tarkistuksessa täsmälleen kuten ennenkin. Vaatii, että yleinen pakkaus on käytössä ja mallia ei ole suljettu pois."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Kiintiöikkuna: noudata rajattua pysäköintiä",
+        "description": "Anna ikkunakohtaisen kiintiökäytännön (tilin valinnassa käytetyt istunto-/viikkokohtaiset kynnysarvot) noudattaa rajattua ehtymispysäköintiä: kun rajattu pysäköinnin takaraja on umpeutunut tai välimuistissa oleva kiintiöhavainto on vanhempi kuin pysäköintikatto, ikkuna lakkaa sulkemasta tiliä pois uuteen kiintiönhakuun asti. Oletuksena pois käytöstä: välimuistissa oleva ikkuna estää toiminnan edelleen viimeisimmän ilmoitetun prosenttiosuutensa mukaisesti omaan nollautumisaikaansa saakka."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Kuvien luonti: Pitkäkestoiset työt",
+        "description": "OpenAI-yhteensopivassa kuvien luonnissa: käytä yhteyden aikakatkaisua (providerSpecificData.timeoutMs) tai keskitettyä upstream-noutojen aikakatkaisua (FETCH_TIMEOUT_MS, sitten REQUEST_TIMEOUT_MS, oletus 600 s) kiinteän 120 s:n kuvabudjetin sijaan; päätä kutsujan peruuttama pyyntö tilakoodilla 499; ja anna Playgroundin vastaanottaa pitkäkestoiset kuvatyöt SSE-virtana keepalive-sykkeillä. Oletuksena pois käytöstä: kiinteää budjettia sovelletaan, eikä kutsujan peruutusta välitetä eteenpäin. Vastausrungon lukemista koskeva aikaraja on aina käytössä."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Katalogipeilauksen tarkennukset",
+        "description": "Tarkenna reitin /v1/models claude/-löytämis- ja toiminnallisten yhdyskäytävien peilauksia. Oletuksena pois käytöstä: molemmat peilauskerrat toimivat täsmälleen kuten ennenkin. Käytössä: claude/-löytämispeilaukset kattavat myös luetteloidut reasoning-effort-vaihtoehdot (-low/-medium/-high/-xhigh), ohittavat sisäänrakennetut auto/*-tunnisteet, joita pyyntöpolku ei voi muodostaa, sekä ohittavat jo luetteloidun aliaksen; toiminnallisten yhdyskäytävien peilaukset ohittavat yhdistelmät ja OmniRouten syntetisoimat tunnisteet (claude/, no-think/), hakevat omistajan kentästä owned_by, eivät koskaan käytä omistajaa omana yhdyskäytävänään sekä ohittavat kohdassa blockedProviders poistetut yhdyskäytävät ja mallit, jotka ovat yhdyskäytävän auktoritatiivisen live-katalogin ulkopuolella."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Välityspalvelimen kunto: Hylkäys nollaa epäonnistumisputken",
+        "description": "Anna välityspalvelinten kuntotarkistuksessa kohteen hylkäämän tarkistuspyynnön (401/403/429: välityspalvelin välitti, kohde hylkäsi tämän egress-IP:n) nollata välityspalvelimen peräkkäisten epäonnistumisten putki vastatun tarkistuspyynnön tapaan. Oletuksena pois käytöstä: hylkäys pysyy neutraalina ja säilyttää putken (#10654). 5xx-virhe pysyy kummassakin tapauksessa ratkaisemattomana, eikä hylkäys koskaan poista, ota pois käytöstä tai aktivoi välityspalvelinta uudelleen."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok-tilauksen kuvat",
+        "description": "Rekisteröi xai-oauth- (xao) ja grok-cli-kuvareitit ja muunna OpenAI-laatu high/hd muotoon xAI medium. Oletuksena pois käytöstä: API-avaimellinen xAI-kuvapolku pysyy olemassa olevassa OpenAI-yhteensopivassa pyynnössä, eikä tilausreittejä rekisteröidä."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth: Mallien reaaliaikainen haku",
+        "description": "Hae ajantasainen xAI-mallikatalogi xai-oauth-yhteyksille osoitteesta https://api.x.ai/v1/models käyttäen OAuth bearer -tunnistetta lukitun staattisen siemenen sijaan. Oletuksena käytössä. Aseta valitsimen arvoksi false, jos haluat jatkaa staattisen siemenen tarjoamista. HTTP-virhetilanteissa etsintäreitti palaa käyttämään siementä; valitsimen noutotoiminto (flag getter) itsessään ei tee HTTP-pyyntöjä."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-yhteensopivat keskustelunsisäiset system-vuorot",
+        "description": "Tavallisissa anthropic-compatible-*-välityksissä (claude → claude -läpivienti) pidä keskustelunsisäiset role:system-vuorot messages[]-taulukossa sen sijaan, että ne nostettaisiin ylimmän tason system-parametriin, jotta välimuistiin tallennettu kehotteen etuliite pysyy vakaana vuorojen välillä. Koskee vain tilanteita, joissa asiakasohjelma itse lähetti mid-conversation-system-2026-04-07 anthropic-beta -määrityksen (välitetään ylävirtaan sellaisenaan). Oletuksena pois käytöstä: jokainen system-vuoro nostetaan täsmälleen kuten ennenkin, koska välitykset, jotka eivät tue betaa, hylkäävät role:system-viestit virhekoodilla 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "Tietokannan kuntotarkistus: Lykkää käynnistystarkistusta",
+        "description": "Suorita käynnistyksen DB-eheys-/kuntotarkistus vasta sen jälkeen, kun palvelin alkaa vastaanottaa pyyntöjä (setImmediate-kutsulla) sen sijaan, että käynnistys estettäisiin sen valmistumiseen saakka. Oletuksena pois käytöstä: käynnistys pysähtyy tarkistukseen täsmälleen kuten ennen versiota #13717, jotta vioittunut tietokanta havaitaan edelleen ennen ensimmäisen pyynnön käsittelyä. Käytössä: käynnistys valmistuu välittömästi ja tarkistus (joka on nyt rajattu/sivutettu ja todelliselle tiedostopohjaiselle tietokannalle eristetty peruutettavaan aliprosessiin) suoritetaan heti sen jälkeen."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCoden julkaistun luettelon reititys",
+        "description": "Salli sellaisten OpenCode Zen- ja OpenCode Go -mallien, joilla ei ole nimenomaista rekisterin päätepistettä, hakea pyyntöpintansa (Responses kohteelle @ai-sdk/openai, Messages kohteelle @ai-sdk/anthropic) julkaistusta models.opencode.ai-luettelosta, joka luetaan taustalla 6 tunnin välein. Oletuksena pois käytöstä: päätepiste saadaan rekisterin heuristiikoista täsmälleen kuten ennenkin, eikä luetteloa noudeta koskaan."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Auto-pyynnöt: Selvitetyt kykyjen painoarvot",
+        "description": "Salli auto/*-pyyntöjen (resolveModelOrError ja automaattisen reitityksen kääre) muodostaa ehdokasjoukko selvitettyjen mallikykyjen (vision, reasoning, thinking) ja havaittujen laatupisteiden perusteella kertalukuna kuten /v1/models-luettelo. Oletuksena pois käytöstä: pyyntöhetken tilannevedoksen painoarvot pysyvät täsmälleen samoina kuin ennenkin (kyvyt selvitetään tarpeen mukaan eivätkä ne vaikuta painoarvoihin). Käytössä: kyseiset signaalit vaikuttavat tilannevedoksen painoarvoihin, jolloin ehdokkaiden painoarvot ja siten valinta voivat muuttua."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Autokombo: Avainvapaan siirron portti",
+        "description": "Pysäytä avaimettomia (todennuksetta vaaitsemattomia) palveluntarjoajia, joiden siirto vaatii paikallista selainta (browserBacked) tai paikallisesti asennettua komentotulkkipohjaista ohjelmaa (isLocalCli), pois auto/*-valikoimapulasta, jotta jumissa oleva jäsen ei pysäytä automaattipyyntöä kohdekohtaiseen aikakatkaistun saakka (#17036). Oletus pois päältä: jokainen avaimeton palveluntarjoaja, jossa on simuloitu työkalujen kutsu, pysyy pulassa aiempien mukaisesti. Suorat '<alias>'/'<model>'-kutsut toimivat molemmissa tapauksissa."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Syytelyn sisäinen toisto",
+        "description": "codebuddy-cn -ajatteluvalmiille malleille (DeepSeek-V4- / Kimi-K2-suvut, jotka tarvitsevat syytelyn toiston), sisällytä jokainen uudelleentoistettu avustajan reasoning_content näkyväksi '<thought>'-lohkoksi viestin sisällön alkuun, jotta se säilyy myös sellaisella portilla, joka pudottaa reasoning_content-kentän (#13632). Oletus pois päältä: codebuddy-cn -pyynnöt lähetetään muuttumattomina; reasoning_content-kentästä itsestään pidetään aina."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Palveluntarjoajan turvapysäytykset: Lopullinen",
+        "description": "Pidä palveluntarjoajan nimenomainen turvapysäytys (misalignment_policy_violation, content_policy_violation tai tarkka vanha 'blocked by our safety systems' -hylkäys tunnisteella provider_safety_rejection) lopullisena, pyyntökohtaisena kieltäytymisenä: sen koodi säilytetään HTTP-, Responses-, WebSocket- ja completed-stream-virheissä, ja combo pysähtyy siihen muiden kohteiden uudelleenyrittämisen sijaan peruuttaen sallitut sisarpyynnöt (#17049). Oletusarvoisesti poissa käytöstä: nämä virheet käsitellään entiseen tapaan ja combo-reititys säilyy muuttumattomana."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Tunnistetietojen kunto: Testaa automaattisesti käytöstä poistetut yhteydet uudelleen",
+        "description": "Anna tunnistetietojen kuntotarkistuksen testata uudelleen yhteydet, jotka yhdyskäytävä on itse kytkenyt pois päältä (merkitty autoDisabledAt; enintään kerran 6 tunnissa kullekin ja 5 tarkistusta kohden) ja kytke yhteys takaisin päälle, kun sen uudelleentestaus onnistuu (#16190). Oletusarvoisesti poissa käytöstä: pois kytketyt yhteydet pysyvät poissa päältä, kunnes operaattori ottaa ne uudelleen käyttöön tai testaa ne uudelleen, aivan kuten ennenkin. Operaattorin poistamia yhteyksiä tai pysyvän eston jälkeen pois kytkettyjä yhteyksiä ei koskaan testata uudelleen."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Tunnistetietoportti: Vain todennusdiagnoosit",
+        "description": "Kavenna combon tunnistetietoporttia siten, että välimuistiin tallennettu epäonnistunut tunnistetietokoetin estää yhteyden vain silloin, kun sen diagnoosi vahvistaa virheelliset tunnistetiedot (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Ratkaisemattomat virheet (aikakatkaisut, nopeusrajoitukset, käyttökatkot, tukemattomat koettimet ja tyypittämättömät ajoittimen virheet) käsitellään tällöin tuntemattomina, ja yhteys vastaanottaa liikennettä edelleen. Oletusarvoisesti poissa käytöstä: mikä tahansa välimuistiin tallennettu koetinvirhe estää yhteyden välimuistin TTL-ajan (5 minuuttia)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: Pysäytä sisältökäytännön hylkäykseen",
+        "description": "Kun combo-kohde vastaa täsmällisellä sisältökäytännön hylkäyksellä (koodi tai tyyppi cyber_policy / content_policy_violation), pysäytä combo ja palauta kyseinen hylkäys myös silloin, kun jäljellä olevat kohteet ovat eri malleja, sen sijaan että siirryttäisiin seuraavaan kohteeseen. Oletusarvoisesti poissa käytöstä: hylkäys ei koskaan aseta tiliä jäähdytystilaan tai laukaise palveluntarjoajan katkaisinta, ja combo siirtyy seuraavaan kohteeseensa aivan kuten ennenkin."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Jäähtymisajan uudelleenyritys: Ohita 403/410-hylkäykset",
+        "description": "Kun kaikki tilit ovat jäähtymässä ja ensimmäisenä päättyvän jäähtymisajan aiheutti 403 (pääsy evätty) tai 410 (poistunut), palauta kyseinen hylkäys heti sen sijaan, että odotettaisiin jäähtymisajan päättymistä ja lähetettäisiin pyyntö uudelleen; uusiutuva agentrouter-yhteyskohtainen kiintiö-403 tallennetaan tällöin koodilla errorCode 429, jotta se pysyy uudelleen yritettävissä. Oletuksena pois käytöstä: vain 401 ohittaa odotuksen, ja jokainen hylkäys tallennetaan sillä tilalla, jolla se saapui."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Hinnoittelemattoman käytön budjettikäytäntö",
+        "description": "Miten avainkohtaiset päivä- ja viikkokohtaiset USD-rajoitukset käsittelevät onnistunutta käyttöä, jolla tarjoajalla tai mallilla ei ole hintariviä. fail_closed (oletus) merkitsee ikkunan ylittäneeksi, joten tuntematon kustannus ei voi koskaan päästä kiinteän ylärajan ohi. count_as_zero laskee käytön arvoksi $0 ja jatkaa hinnoitellun käytön valvontaa. Hinnoittelemattomat mallit listataan joka tapauksessa kojelaudan etusivulle."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "Viive",
     "quota": "Kiintiö",
     "rangeWindow": "{range} -ikkuna",
+    "timeRange": "Aikaväli",
     "runtimeHealthBlend": "ajonaikainen/terveydentila-yhdistelmä",
     "averageResponseTime": "keskimääräinen vastausaika",
     "worstQuota": "Huonoin kiintiö",
@@ -13923,7 +14500,11 @@
       "ok": "Yleisesti salliva"
     },
     "allProviders": "Kaikki palveluntarjoajat",
-    "noApiKeyRequired": "Ei API-avainta vaadita"
+    "noApiKeyRequired": "Ei API-avainta vaadita",
+    "searchPlaceholder": "Etsi malli, tarjoaja…",
+    "searchAria": "Etsi ilmaisia malleja",
+    "filterProviderAria": "Suodata tarjoajan mukaan",
+    "keylessOnly": "Vain avaimettomat"
   },
   "providerHealthAutopilot": {
     "title": "Palveluntarjoajien kunnon automaattiohjaus",
@@ -13994,7 +14575,11 @@
     "learnMore": "Lue lisää",
     "changelogLoadFailed": "Muutoslokia ei voitu ladata. Yritä uudelleen myöhemmin.",
     "retry": "Yritä uudelleen",
-    "viewFullHistory": "Näytä koko historia GitHubissa"
+    "viewFullHistory": "Näytä koko historia GitHubissa",
+    "title": "Uutiset ja muutosloki",
+    "description": "OmniRoute-tiimin ilmoitukset ja uusimmat julkaisutiedot",
+    "viewLabel": "Näytä",
+    "loadingNews": "Ladataan ilmoituksia..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "Palveluntarjoajan piirikatkaisijan tila",
       "lastUpdate": "Viimeisin päivitys: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours} t {minutes} min"
+      "uptimeHoursMinutes": "{hours} t {minutes} min",
+      "breakerClosed": "Suljettu",
+      "breakerNotClosed": "Avoin tai puoliavoin"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "Ylläpidon tiedot",
         "secondaryAction": "Järjestelmän tila"
       }
+    },
+    "miniapp": {
+      "askAnything": "Kysy mitä tahansa…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} näkyvissä / yhteensä {total}",
+    "modeLabel": "Näkymätila",
+    "jumpToNow": "Siirry nykyhetkeen, NYT-viiva palautuu kohtaan {position} %",
+    "laneReuse": "Kaistan uudelleenkäyttö",
+    "laneReuseLabel": "Kaistan uudelleenkäyttöikkuna (minuutteina)",
+    "laneReuseHint": "Saman keskustelutunnuksen sisältävät pyynnöt pysyvät samalla aikajanan rivillä, kunhan niiden välinen aika on alle tämän minuuttimäärän.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automaattinen päivitys",
+    "autoRefreshLabel": "Automaattisen päivityksen aikaväli (sekunteina)",
+    "autoRefreshHint": "Kuinka usein aikajana noutaa pyyntöluettelon uudelleen palvelimelta.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Loitonna",
+    "zoomIn": "Lähennä"
   },
   "metadata": {
     "compressionTitle": "Pakkaus",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "Sulje"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Poista käytöstä ajattelutason varianttien (esim. -low, -medium, -high) luonti /v1/models-luettelossa.",
+  "teamCosts": {
+    "title": "Tiimin kustannukset",
+    "subtitle": "Hallitse jaettuja pehmeitä budjetteja ja luettelon kustannusarvioita.",
+    "refresh": "Päivitä",
+    "create": "Luo tiimi",
+    "edit": "Muokkaa tiimiä",
+    "archive": "Arkistoi",
+    "selectTeam": "Tiimit",
+    "searchTeams": "Hae tiimejä",
+    "statusFilter": "Tiimin tila",
+    "active": "Aktiivinen",
+    "archived": "Arkistoitu · vain luku",
+    "allTeams": "Kaikki tiimit",
+    "noTeams": "Ei vastaavia tiimejä.",
+    "selectHint": "Luo tai valitse tiimi nähdäksesi kustannukset.",
+    "loading": "Ladataan tiimin kustannuksia…",
+    "budgetTitle": "Nykyinen pehmeä budjetti",
+    "budgetSubtitle": "Onnistunut kirjattu käyttö · liukuva ikkuna · riippumaton raportin päivämääristä",
+    "archivedBudget": "Arkistoitu: budjetin valvonta ei ole käytössä. Aiemmat raportit pysyvät saatavilla.",
+    "unlimited": "Rajaton – jaettua pehmeää budjettia ei ole määritetty.",
+    "budgetUnavailable": "Budjetin tila ei ole saatavilla. Päivitä yrittääksesi uudelleen.",
+    "used": "Onnistunut käyttö",
+    "maximum": "Budjetin enimmäismäärä",
+    "remaining": "Tiedossa oleva jäännös",
+    "resets": "Nollautuu",
+    "unpricedBudget": "Osalla onnistuneesta käytöstä on tuntematon hinta. Tunnettu summa on epätäydellinen; budjetin valvonta katsoo tämän ikkunan ylittyneeksi.",
+    "overBudget": "Budjetti saavutettu tai ylitetty · {amount} yli",
+    "reportTitle": "Käyttöraportti",
+    "reportSubtitle": "Kaikki yritykset · luettelon arvio USD:na, ei lasku · kokonaiset UTC-päivät",
+    "reportPeriod": "Raportin jakso",
+    "day1": "1 päivä",
+    "day7": "7 päivää",
+    "day30": "30 päivää",
+    "allTime": "Koko aika",
+    "reportSpend": "Raportin arvioidut menot",
+    "requests": "Pyynnöt",
+    "assignedKeys": "Määritetyt avaimet",
+    "unpricedReport": "Tämä raportti sisältää tuntemattomia hintoja. Arvioidut menot ovat epätäydelliset.",
+    "breakdown": "Kustannus API-avaimittain",
+    "noUsage": "Ei käyttöä tällä raporttijaksolla.",
+    "keyName": "API-avaimen nimi",
+    "tokens": "Syöte- + tulostetokenit",
+    "unnamedKey": "Nimetön tai poistettu avain",
+    "unpriced": "Tuntematon hinta",
+    "members": "Jäsenyys",
+    "memberSubtitle": "Jäsenyyden muuttaminen pitää aiemmat menot alkuperäisellä tiimillä.",
+    "searchKeys": "Hae avaimia tai nykyisiä omistajia",
+    "chooseKey": "Valitse API-avain",
+    "unassigned": "Ei määritetty",
+    "ownership": "Nykyinen laskutustiimi: {team}",
+    "assign": "Määritä",
+    "remove": "Poista",
+    "noMembers": "Ei nykyisiä jäseniä. Aiempi käyttö voi silti lasketuksi budjettiin.",
+    "assignedAt": "Määritetty {date} (UTC)",
+    "name": "Tiimin nimi",
+    "description": "Kuvaus",
+    "enableBudget": "Ota jaettu pehmeä budjetti käyttöön",
+    "amount": "Budjetin määrä (USD)",
+    "duration": "Liukuva budjetti-ikkuna",
+    "cancel": "Peruuta",
+    "save": "Tallenna",
+    "confirm": "Vahvista",
+    "transferTitle": "Vahvista avaimen siirto",
+    "transferMessage": "Siirretäänkö tämä avain tiimistä ”{source}” tiimiin ”{destination}”? Aiemmat menot jäävät alkuperäiselle tiimille.",
+    "removeTitle": "Poista avaimen määritys",
+    "removeMessage": "Poistetaanko tämä avain tiimistä ”{team}”? Aiemmat menot jäävät tähän tiimiin.",
+    "archiveTitle": "Arkistoi tiimi",
+    "archiveMessage": "Arkistoidaanko ”{team}”? Kaikki nykyiset sidokset päättyvät ja budjetin valvonta lakkaa. Aiemmat raportit pysyvät saatavilla.",
+    "invalidName": "Anna nimi (1–200 merkkiä) ja enintään 2 000 merkin kuvaus.",
+    "invalidAmount": "Anna äärellinen budjettimäärä, joka on suurempi kuin nolla.",
+    "unauthorized": "Kirjaudu hallintapaneeliin jatkaaksesi.",
+    "forbidden": "Sinulla ei ole oikeutta hallita tiimejä. Syöttämäsi tiedot säilytettiin.",
+    "notFound": "Tätä tiimiä tai määritystä ei enää ole.",
+    "conflict": "Määritys tai tiimi muuttui. Päivitä ja vahvista nykyinen omistus ennen uutta yritystä.",
+    "failed": "Pyyntö epäonnistui. Syöttämäsi tiedot säilytettiin; yritä uudelleen.",
+    "partialBudget": "Jotkin säilytetyt päiväkohtaiset ryhmät ylittävät ikkunan rajan, eikä niitä voi jakaa tarkasti. Näytetyt menot ovat epätäydelliset; jäljellä oleva määrä ei ole saatavilla. Nykyinen pehmeän budjetin käytäntö pysyy ennallaan."
+  },
   "connectionTest": {
     "title": "Testiviesti",
     "description": "Lähetä yksi oikea pyyntö tämän tilin kautta. Tämä käyttää pienen määrän kiintiötä ja voi käynnistää käyttöjakson palveluntarjoajasta riippuen.",
@@ -15073,5 +15753,118 @@
     "importButton": "Tuo",
     "importFailed": "Tuonti epäonnistui.",
     "importSuccess": "Tuotiin {connections} tiliä ja {nodes} palveluntarjoajasolmua; {skipped} ohitettiin."
+  },
+  "conversations": {
+    "title": "Keskustelut",
+    "countSummary": "{total, plural, one {# keskustelu} other {# keskustelua}} kahden tai useamman vuoron kanssa",
+    "autoRefreshTitle": "Kuinka usein tämä lista haalitaan uudelleen palvelimelta.",
+    "autoRefresh": "Automaattipäivitys",
+    "loading": "Lataa keskusteluja...",
+    "colConversation": "Keskustelu",
+    "colTurns": "Kierrokset",
+    "colContinuation": "Jatkaminen",
+    "colLastModel": "Viimeisin malli",
+    "colProvider": "Palveluntarjoaja",
+    "colStatus": "Tila",
+    "colLastSeen": "Nähty viimeksi",
+    "drawerTitle": "Keskustelu",
+    "prevConversation": "Edellinen keskustelu",
+    "nextConversation": "Seuraava keskustelu",
+    "gotoLatestRequest": "Siirry viimeisimpään pyyntöön",
+    "goToBottom": "Siirry alareunaan",
+    "statusInProgress": "Käynnissä",
+    "continuationGenuineTitle": "Viimeisellä kierrolla käytettiin previous_response_id, joka ratkaistiin palvelinpuolella",
+    "continuationBadge": "jatko",
+    "stalledTitle": "Viimeinen kierros ei päättyytynyt stopiin ja mikään ei ole jatkunut yli 5 minuuttiin",
+    "stalledBadge": "katkennut",
+    "noTurns": "Tälle keskustelulle ei ole tallennettu kierreitä."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Aloita nykyisestä kohdasta (ohita olemassa olevat lokit)",
+    "pageTitle": "Loki-vienti",
+    "pageSubtitle": "Lähetä kutsulokit jatkuvasti Lokit-välilehdeltä ulkoiseen analytiikkavarastoon.",
+    "addDestination": "Lisää määränpää",
+    "scheduleTitle": "Aikataulu",
+    "cronLabel": "Cron",
+    "notScheduled": "ei aikataulutettu",
+    "lastScheduledRun": "Viimeisin aikataulutettu suoritus",
+    "lastRunSummary": "{startedAt} — {status}, {rows} riviä",
+    "never": "ei koskaan",
+    "highWaterMark": "Kutsulokit korkein vesi-ilmaisu",
+    "rowPrefix": "rivi {id}",
+    "noDestinations": "Ei vienti-kohteita",
+    "noDestinationsHint": "Lisää kohde alkaaksesi lähettää puhelun logit tunnittain.",
+    "errLoadStatus": "Viennin tilan lataus epäonnistui",
+    "errSaveDestination": "Kohteen tallennus epäonnistui",
+    "msgDestinationSaved": "Kohde tallennettu.",
+    "errConnectionTest": "Yhteys-testi epäonnistui",
+    "msgRunInFlight": "Tämä kohde on jo menossa; mitään ei lähetetty kahdesti.",
+    "errExportRun": "Viennin suoritus epäonnistui",
+    "errUpdateDestination": "Kohteen päivitys epäonnistui",
+    "errDeleteDestination": "Kohteen poisto epäonnistui",
+    "deleteTitle": "Poista kohde",
+    "deleteConfirm": "Poistetaanko \"{name}\"? Sen vientikursori poistetaan myös, joten uudelleen lisääminen alkaa vanhimmasta säilytetystä kutsulogista.",
+    "statusDisabled": "Ei käytössä",
+    "statusFailing": "Epäonnistuu",
+    "statusHealthy": "Kelpo",
+    "statusNotRunYet": "Ei vielä ajettu",
+    "typeNotInstalled": "Tyyppiä ei ole asennettu",
+    "metaLine": "Viimeisin ajo {lastRun} · viedy {exported} riviä · {pending} odottaa · kursori {cursor}",
+    "btnTest": "Testaa",
+    "btnRunNow": "Aja nyt",
+    "btnDisable": "Pois käytöstä",
+    "btnEnable": "Käytössä",
+    "btnEdit": "Muokkaa",
+    "btnDelete": "Poista"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI-tilit",
+    "cardSubtitle": "Luettavissa vain -tila todennetulta hallintapalvelulta",
+    "btnRefresh": "Päivitä",
+    "listAria": "CLIProxyAPI-tilien kunto",
+    "noAccounts": "CLIProxyAPI-tiliä ei löytynyt.",
+    "loading": "Ladataan tilien kuntoa…",
+    "stateReady": "Tilin kunto",
+    "stateDisabled": "CLIProxyAPI ei ole asennettu",
+    "stateMissingKey": "Hallintaaavetta ei ole määritetty",
+    "stateUnreachable": "Hallintaaapin ei ole päästettävissä",
+    "stateUnauthorized": "Hallintaaavetta hylättiin",
+    "stateUnsupported": "Tämä CLIProxyAPI-versio ei paljasta tilin kuntoa",
+    "stateInvalidResponse": "Hallintaaapi palautti tuenomatan vastauksen"
+  },
+  "darioPanel": {
+    "title": "Claude-tilit",
+    "description": "Todennista Dario kytkemällä se Claude Pro/Max-tilauksesi. Laskutus tapahtuu tilauksesi kautta. Vaaditaan vähintään yksi tili ennen kuin Dario voi ohjata pyyntöjä (siihen asti /health-raportti näyttää heikentyneen tilan).",
+    "noAccounts": "Tilejä ei ole vielä määritetty.",
+    "importTitle": "Tuo OmniRoutesta",
+    "importDescription": "Käytä olemassa olevan OmniRoute Claude-yhteyksen OAuth-tokensija kirjauduttaisiin uudelleen – ohittaa selainhyväksymisvaiheen kokonaan.",
+    "importPendingTooltip": "Aktivoituu, kun Claude-yhteys on olemassa OmniRoutessa.",
+    "btnImport": "Tuo",
+    "btnImporting": "Tuodaan…",
+    "aliasPlaceholder": "alias (valinnainen)",
+    "btnStartLogin": "Aloita kirjautuminen",
+    "btnStarting": "Aloitetaan…",
+    "btnCompleteLogin": "Täytä kirjautuminen",
+    "btnCompleting": "Täytetään…",
+    "codePlaceholder": "code#state tai pelkkä code",
+    "noticeImported": "Tuohtu tunniksella \"{alias}\" — Dario uudelleenkäynnistetty sen poimimiseksi.",
+    "noticeAdded": "Tili \"{alias}\" lisätty.",
+    "expiresInHours": "vanhentuu ~{hours} h kuluttua",
+    "expiresInMinutes": "vanhentuu ~{minutes} min kuluttua",
+    "expiresAt": "vanhentuu {date}",
+    "scopes": "{count, plural, one {# valta-alue} other {# valta-alueita}}",
+    "btnRemove": "Poista",
+    "btnRefresh": "Päivitä",
+    "loginStep1": "1. Avaa tämä osoite selaimessasi ja myyntä pääsy tunnikkeelle <mono>{alias}</mono>:",
+    "pendingExpires": "Odottaa kirjautumisen vanhentuminen {time}",
+    "loginStep2": "2. Liitä Anthropicin näyttämä koodi:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "Tämä sivu täytyy avata Telegram Mini Appissa.",
+    "greeting": "👋 Moi {name}! Lähetä viestit keskustelunsa kautta OmniRoute-lähettesivusi kautta.",
+    "greetingFallbackName": "siellä",
+    "errNoReply": "⚠️ Ei vastausta lähetysverkkoon.",
+    "btnSend": "Lähetä"
   }
 }

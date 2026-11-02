@@ -16,34 +16,34 @@ AgentBridge ni proksi ya MITM (Mtu-katikati) ya OmniRoute ambayo hunasa trafiki 
 
 ### AgentBridge ni nini?
 
-Wakati ajenti wa IDE (kwa mfano, GitHub Copilot, Cursor, Claude Code) anapopiga simu ya API, huunganisha moja kwa moja na mtoa huduma wa AI wa juu (OpenAI, Anthropic, n.k.). AgentBridge hunasa muunganisho huo kwa uwazi katika kiwango cha TLS — bila kuhitaji mabadiliko yoyote ya usanidi wa ajenti — na huandika upya ombi hilo kupitia OmniRoute.
+Wakati wakala wa IDE (km, GitHub Copilot, Cursor, Claude Code) anapiga simu API, inaunganishwa moja kwa moja na mtoaji wa AI wa juu (OpenAI, Anthropic, nk.). AgentBridge inakata muunganisho huo kwa uwazi katika kiwango cha TLS - bila kuhitaji mabadiliko yoyote ya usanidi wa wakala - na kuandika ombi upya kupitia OmniRoute.
 
-Hii inamaanisha unaweza:
+Hii inamaanisha kuwa unaweza:
 
-- **Kuelekeza upya ajenti yoyote kwa mtoa huduma yeyote**: Copilot inawasiliana na OpenAI? Ielekeze upya kwa Anthropic Claude, Gemini, au yeyote kati ya watoa huduma 374 wa OmniRoute.
-- **Kutumia ulinganishaji wa modeli**: `gemini-3-flash` → `claude-sonnet-4.7` kwa uwazi katika kiwango cha kishughulikiaji.
-- **Kufuatilia trafiki yote ya ajenti**: kila ombi linalonaswa huchapishwa kwenye [Kikaguzi cha Trafiki](./TRAFFIC_INSPECTOR.md).
-- **Kutumia ustahimilivu wa OmniRoute**: uelekezaji wa mchanganyiko, vivunja saketi, njia mbadala, na ufuatiliaji wa gharama hufanya kazi pia kwa trafiki ya ajenti wa IDE.
+- **Rudisha wakala yeyote kwa mtoa huduma yeyote** : Copilot kuzungumza na OpenAI? Ielekeze upya kwa Anthropic Claude, Gemini, au yeyote kati ya watoa huduma 377 wa OmniRoute.
+- **Tumia michoro za kielelezo** : `gemini-3-flash` → `claude-sonnet-4.7` kwa uwazi katika kiwango cha kidhibiti.
+- **Angalia trafiki yote ya wakala** : kila ombi lililoingiliwa huchapishwa kwa [Mkaguzi wa Trafiki](./TRAFFIC_INSPECTOR.md).
+- **Tumia ustahimilivu wa OmniRoute** : uelekezaji wa mseto, vivunja saketi, vikwazo, na kazi ya kufuatilia gharama kwa trafiki ya wakala IDE pia.
 
-### Nafasi ikilinganishwa na soko
+### Nafasi dhidi ya soko
 
-| Kipengele                             | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                           |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                        |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                            |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                          |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                            |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                        |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                           |    —    |    —     |        ✓        |             ✓             |
-| Open Code                             |    —    |    —     |        ✓        |             ✓             |
-| Trae                                  |    —    |    —     |        —        |      🔍 Inachunguzwa      |
-| Kiolesura cha dashibodi               |    ✓    |    ✗     |        ✗        |             ✓             |
-| Kikaguzi cha Trafiki                  |    ✗    |    ✗     |        ✓        |             ✓             |
-| Uelekezaji wa OmniRoute               |    ✗    |    ✗     |        ✗        |             ✓             |
-| Kiolesura cha ulinganishaji wa modeli |    ✗    |    ✗     |        ✗        |             ✓             |
-| Orodha ya kukwepa                     |    ✗    |    ✗     |        ✓        |             ✓             |
-| Cheti cha CA cha juu                  |    ✗    |    ✗     |        ✓        |             ✓             |
+| Kipengele                   | 9 router | anti-api | llm-kiingilia | **OmniRoute AgentBridge** |
+| --------------------------- | :------: | :------: | :-----------: | :-----------------------: |
+| Antigravity                 |    ✓     |    ✓     |       —       |             ✓             |
+| GitHub Copilot              |    ✓     |    ✓     |       —       |             ✓             |
+| Kiro (AWS)                  |    ✓     |    ✓     |       —       |             ✓             |
+| OpenAI Codex                |    —     |    ✓     |       —       |             ✓             |
+| Cursor IDE                  |    ✓     |    ✓     |       —       |             ✓             |
+| Zed Viwanda                 |    —     |    ✓     |       —       |             ✓             |
+| nambari Claude              |    —     |    —     |       ✓       |             ✓             |
+| Fungua Msimbo               |    —     |    —     |       ✓       |             ✓             |
+| Trae                        |    —     |    —     |       —       |       🔍 Uchunguzi        |
+| Dashibodi UI                |    ✓     |    ✗     |       ✗       |             ✓             |
+| Mkaguzi wa Trafiki          |    ✗     |    ✗     |       ✓       |             ✓             |
+| OmniRoute uelekezaji        |    ✗     |    ✗     |       ✗       |             ✓             |
+| Mfano wa uchoraji ramani UI |    ✗     |    ✗     |       ✗       |             ✓             |
+| Orodha ya kupita            |    ✗     |    ✗     |       ✓       |             ✓             |
+| Cheti CA cha juu            |    ✗     |    ✗     |       ✓       |             ✓             |
 
 ---
 

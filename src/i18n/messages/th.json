@@ -25,8 +25,10 @@
     "confirm": "คุณแน่ใจเหรอ?",
     "refresh": "รีเฟรช",
     "close": "ปิด",
+    "dialogTitleFallback": "กล่องโต้ตอบ",
     "previousPage": "หน้าก่อนหน้า",
     "nextPage": "หน้าถัดไป",
+    "pagination": "การแบ่งหน้า",
     "capsLockOn": "Caps Lock เปิดอยู่",
     "dismissNotification": "ปิดการแจ้งเตือน",
     "toggleColumns": "สลับการแสดงคอลัมน์",
@@ -182,6 +184,7 @@
     "combos": "คอมโบ",
     "noModelsFound": "ไม่พบโมเดล",
     "clear": "ล้าง",
+    "clearFilters": "ล้างตัวกรอง",
     "done": "เสร็จสิ้น",
     "selectAll": "เลือกทั้งหมด",
     "unselectAll": "ยกเลิกการเลือกทั้งหมด",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "ใช้โดย {count, plural, one {# ชุด} other {# ชุด}}",
     "batchFilePreview": "ตัวอย่าง",
     "batchFilePreviewTruncated": "แสดง {shown} บรรทัดแรก ({total} บรรทัดรวม)",
-    "batchFileDownloadFull": "ดาวน์โหลดไฟล์ทั้งหมด"
+    "batchFileDownloadFull": "ดาวน์โหลดไฟล์ทั้งหมด",
+    "tokensPageTitle": "โทเค็น",
+    "tokensPageDescription": "ส่งโทเค็นระหว่างคีย์ API แชร์รหัสเชิญ และเชื่อมต่อเซิร์ฟเวอร์ชุมชน",
+    "tokensServerUrlLabel": "URL เซิร์ฟเวอร์"
   },
   "disabled": "ปิดใช้งาน",
   "featureFlagOmnirouteEmergencyFallbackDescription": "กำหนดเส้นทางคำขอที่งบประมาณหมดไปยังผู้ให้บริการ/โมเดลสำรองฟรีในกรณีฉุกเฉิน",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "พร็อกซีเซิร์ฟเวอร์ถูกหยุดหรือกำลังรีสตาร์ท",
     "expandSidebar": "ขยายแถบด้านข้าง",
     "collapseSidebar": "ยุบแถบด้านข้าง",
-    "themes": "ธีมส์",
-    "presetColors": "สียอดนิยม",
     "createTheme": "สร้างธีม",
     "chooseColor": "เลือกหนึ่งสี",
-    "themeCoral": "ปะการัง",
-    "themeBlue": "สีฟ้า",
-    "themeRed": "สีแดง",
-    "themeGreen": "สีเขียว",
-    "themeViolet": "ม่วง",
-    "themeOrange": "ส้ม",
-    "themeCyan": "ฟ้าอมเขียว",
     "cliToolsShort": "เครื่องมือ",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "ระบบธีม",
     "whitelabelingDesc": "คำอธิบายการปรับแบรนด์",
     "switchThemes": "สลับธีม",
-    "themeAccentDesc": "คำอธิบายสีเน้นของธีม",
     "uploadFavicon": "อัปโหลด Favicon",
     "themeDark": "ธีมมืด",
     "customLogoDesc": "คำอธิบายโลโก้แบบกำหนดเอง",
     "sidebarVisibilityToggle": "ปุ่มสลับการแสดงแถบด้านข้าง",
-    "themeAccent": "สีเน้นของธีม",
     "resetFavicon": "รีเซ็ต Favicon",
     "whitelabeling": "การปรับแบรนด์",
     "darkMode": "โหมดมืด",
@@ -1122,10 +1117,8 @@
     "customLogo": "โลโก้แบบกำหนดเอง",
     "appearance": "รูปลักษณ์",
     "themeSelectionAria": "ป้ายกำกับ ARIA สำหรับการเลือกธีม",
-    "themeCreate": "สร้างธีม",
     "customFaviconDesc": "คำอธิบายไอคอนเว็บไซต์แบบกำหนดเอง",
     "logoPreview": "ตัวอย่างโลโก้",
-    "themeCustom": "ธีมแบบกำหนดเอง",
     "hideHealthLogsDesc": "คำอธิบายการซ่อนบันทึกสถานะระบบ",
     "faviconPreview": "ตัวอย่างไอคอนเว็บไซต์",
     "changelog": "บันทึกการเปลี่ยนแปลง",
@@ -1352,7 +1345,9 @@
       "open": "เปิด",
       "close": "ปิด"
     },
-    "noResults": "ไม่มีผลลัพธ์"
+    "noResults": "ไม่มีผลลัพธ์",
+    "costsTeams": "ทีม",
+    "costsTeamsSubtitle": "ศูนย์ต้นทุนของทีม"
   },
   "webhooks": {
     "title": "เว็บฮุค",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 หรือ @channelname",
       "chatIdHint": "ตัวระบุตัวเลขที่ไม่ซ้ำกันหรือชื่อผู้ใช้สาธารณะของแชท/ช่อง",
       "tutorial": "วิธีการกำหนดค่า Telegram webhook:"
-    }
+    },
+    "copy": "คัดลอก",
+    "copied": "คัดลอกแล้ว!",
+    "expandDetails": "แสดงรายละเอียด",
+    "collapseDetails": "ซ่อนรายละเอียด"
   },
   "compliance": {
     "auditTitle": "การตรวจสอบ",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "การโทร (24 ชม.)",
     "mcpMetricSuccessRate": "อัตราความสำเร็จ",
     "mcpMetricAvgDuration": "ระยะเวลาเฉลี่ย",
-    "mcpMetricTopTool": "เครื่องมือชั้นนำ"
-  },
-  "themesPage": {
-    "title": "ธีมส์",
-    "description": "เลือกธีมที่กำหนดไว้ล่วงหน้าหรือสร้างธีมของคุณเองด้วยสีเดียว",
-    "presetColors": "สียอดนิยม",
-    "customTheme": "ธีมที่กำหนดเอง",
-    "customThemeDesc": "คลิกสร้างธีมแล้วเลือกหนึ่งสี",
-    "createTheme": "สร้างธีม",
-    "activePreset": "ธีมที่ใช้งานอยู่"
+    "mcpMetricTopTool": "เครื่องมือชั้นนำ",
+    "dismissError": "ปิดข้อผิดพลาด"
   },
   "header": {
     "logout": "ออกจากระบบ",
     "quickNavigation": "นำทางด่วน",
     "quickNavigationTitle": "การนำทางด่วน (⌘K / Ctrl+K)",
     "openQuickNavigation": "เปิดการนำทางด่วน",
+    "openMenu": "เปิดเมนู",
+    "products": "ผลิตภัณฑ์ Keak",
     "switchToLightMode": "สลับเป็นโหมดสว่าง",
     "switchToDarkMode": "สลับเป็นโหมดมืด",
     "language": "ภาษา",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "เข้ากันได้กับมานุษยวิทยา",
     "media": "สื่อ",
     "mediaDescription": "สร้างรูปภาพ วิดีโอ และเพลง",
-    "themes": "ธีมส์",
-    "themesDescription": "เลือกธีมสีสำหรับแผงแดชบอร์ดทั้งหมด",
     "costsDescription": "ติดตามค่าใช้จ่าย วิเคราะห์แนวโน้ม และจัดการงบประมาณ AI ของคุณสำหรับผู้ให้บริการทุกราย",
     "cacheDescription": "ตรวจสอบประสิทธิภาพแคชพรอมต์ของผู้ให้บริการและการนำการตอบกลับเชิงความหมายภายในระบบกลับมาใช้ซ้ำ",
     "limitsDescription": "กำหนดขีดจำกัดอัตราและโควตาต่อคีย์ API และผู้ให้บริการ",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "กฎเพย์โหลดขั้นสูง ขีดจำกัดคำขอ และการตั้งค่า proxy API",
     "mitmProxyDescription": "กำหนดค่าพร็อกซี MITM สำหรับการตรวจสอบทราฟฟิกและการดีบัก",
     "oneProxyDescription": "กำหนดค่า 1Proxy สำหรับการเชื่อมต่อพร็อกซีแบบลูกโซ่ขั้นสูง",
-    "omniSkillsDescription": "ติดตั้งและจัดการทักษะแซนด์บ็อกซ์สำหรับการดำเนินการพรอมต์และเครื่องมือโดยอัตโนมัติ"
+    "omniSkillsDescription": "ติดตั้งและจัดการทักษะแซนด์บ็อกซ์สำหรับการดำเนินการพรอมต์และเครื่องมือโดยอัตโนมัติ",
+    "teamsDescription": "ประมาณการต้นทุนทีมและงบประมาณแบบยืดหยุ่นที่ใช้ร่วมกัน"
   },
   "cloudSyncStatus": {
     "synced": "ซิงค์แล้ว",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "คัดลอกเอ็นด์พอยต์ของคุณ",
     "readinessStep4": "ส่งคำขอทดสอบ",
     "readinessContinue": "ดำเนินการตั้งค่าต่อ",
-    "readinessDismiss": "ปิดไว้ก่อน"
+    "readinessDismiss": "ปิดไว้ก่อน",
+    "unpricedUsageTitle": "{count, plural, one {# โมเดล} other {# โมเดล}} ที่มีการใช้งานล่าสุดแต่ยังไม่ได้กำหนดราคา",
+    "unpricedUsageFailClosed": "{keys, plural, one {# คีย์ API ที่มีขีดจำกัดการใช้งาน} other {# คีย์ API ที่มีขีดจำกัดการใช้งาน}} ใช้โมเดลเหล่านี้ในช่วง 8 วันที่ผ่านมา ขณะที่การใช้งานนั้นอยู่ในหน้าต่างรายวันหรือรายสัปดาห์ของคีย์ คีย์จะถูกมองว่าเกินโควต้าและคำขอของมันจะถูกบล็อก (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "การใช้งานนี้จะถูกนับเป็น $0 ต่อขีดจำกัดการใช้งานต่อคีย์ (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# คำขอ} other {# คำขอ}}, {keys, plural, one {# คีย์ที่มีขีดจำกัด} other {# คีย์ที่มีขีดจำกัด}}",
+    "unpricedUsageMore": "…และอีก {count} รายการ",
+    "unpricedUsageConfigure": "ตั้งค่าราคา",
+    "unpricedUsageDismiss": "ปิด"
   },
   "analytics": {
     "title": "การวิเคราะห์",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "เฉพาะการเชื่อมต่อที่เลือก",
     "selectAtLeastOneConnection": "เลือกการเชื่อมต่ออย่างน้อยหนึ่งรายการ หรือเลือกการเชื่อมต่อทั้งหมด",
     "allConnectionsDesc": "คีย์นี้สามารถใช้การเชื่อมต่อใดก็ได้ที่เปิดใช้งานอยู่",
-    "restrictedToConnections": "จำกัดไว้ที่ {count, plural, one {# การเชื่อมต่อ} other {# การเชื่อมต่อ}}"
+    "restrictedToConnections": "จำกัดไว้ที่ {count, plural, one {# การเชื่อมต่อ} other {# การเชื่อมต่อ}}",
+    "preferredConnections": "การเชื่อมต่อที่ต้องการ",
+    "preferredConnectionsDesc": "ลำดับความสำคัญสำหรับแต่ละคีย์ หากการเชื่อมต่อที่ต้องการใช้งานไม่ได้ การกำหนดเส้นทางจะเปลี่ยนไปใช้การเชื่อมต่อที่มีสิทธิ์ถัดไป",
+    "preferredConnectionsNone": "ไม่ได้ตั้งค่าการกำหนดลำดับ — ใช้กลยุทธ์การกำหนดเส้นทางเริ่มต้น",
+    "preferredConnectionsClear": "ล้าง",
+    "removeSelection": "นำ {name} ออก"
   },
   "auditLog": {
     "title": "บันทึกการตรวจสอบ",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "กำหนดค่าสะพานภาพ→ข้อความในการตั้งค่าสะพานโมดัลิตี้",
     "sttBridgeCta": "กำหนดค่าสะพาน Speech→Text ในการตั้งค่า Modality Bridge",
     "existingConnection": "การเชื่อมต่อที่มีอยู่",
-    "openrouterSttDescription": "โมเดลแปลงเสียงเป็นข้อความของ OpenRouter ใช้การเชื่อมต่อ OpenRouter ที่คุณกำหนดไว้ ไม่มีการรับรองความถูกต้องแยกต่างหากที่จำเป็น."
+    "openrouterSttDescription": "โมเดลแปลงเสียงเป็นข้อความของ OpenRouter ใช้การเชื่อมต่อ OpenRouter ที่คุณกำหนดไว้ ไม่มีการรับรองความถูกต้องแยกต่างหากที่จำเป็น.",
+    "modalityTabsAria": "ประเภทสื่อ",
+    "serviceKindsAria": "ประเภทบริการ"
   },
   "search": {
     "searchQuery": "คำค้นหา",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - การกำหนดค่าด้วยตนเอง",
     "clineManualConfiguration": "การกำหนดค่าด้วยตนเองของไคลน์",
     "kiloManualConfiguration": "การกำหนดค่าด้วยตนเองของรหัสกิโล",
+    "piManualConfiguration": "Pi - การกำหนดค่าด้วยตนเอง",
+    "piConfigInvalidTitle": "Pi models.json ไม่สามารถอ่านได้",
+    "piOmnirouteConfigured": "OmniRoute ได้รับการกำหนดค่าเป็นผู้ให้บริการแบบกำหนดเองของ Pi",
+    "piModelHelp": "Pi จะไม่ค้นหาโมเดลโดยอัตโนมัติสำหรับจุดสิ้นสุดที่กำหนดเอง — โมเดลที่คุณเลือกจะถูกเขียนลงใน models.json อย่างชัดเจน",
+    "piManualConfigTitle": "หรือแก้ไข ~/.pi/agent/models.json ด้วยตนเอง",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "จากนั้นเริ่ม Pi และเลือกผู้ให้บริการ omniroute ตั้งค่า PI_CODING_AGENT_DIR เพื่อย้ายไดเร็กทอรีตัวแทนทั้งหมด",
+    "piUnownedNote": "รายการนี้ถูกเพิ่มภายนอก OmniRoute (เช่น จุดสิ้นสุดที่กำหนดเองของ pi-gui) การสมัครจะนำมาใช้ รีเซ็ตจะลบเฉพาะรายการ OmniRoute ที่เขียน",
     "whenToUseLabel": "เมื่อจะใช้",
     "openToolDocs": "เปิดเอกสารเครื่องมือ",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "ใช้เมื่อคุณต้องการผู้ช่วย AI แบบเนทิฟเทอร์มินัลน้ำหนักเบาสำหรับงานที่รวดเร็ว",
       "hermes-agent": "ใช้เมื่อคุณต้องการ Hermes Agent (โดย Nousresearch) ที่มีโมเดลเริ่มต้น, โมเดลการมอบหมายงาน, โมเดลการมองเห็น และโมเดลเสริมที่กำหนดเส้นทางผ่าน OmniRoute",
+      "whycodes": "ใช้เมื่อคุณต้องการ WhyCodes เป็นเอเจนต์ CLI อัตโนมัติอเนกประสงค์ (TUI, เอเจนต์แบบตั้งชื่อ, หน่วยความจำ, swarm) ที่ชี้ไปยัง OmniRoute",
       "custom": "ใช้สำหรับการใช้เครื่องมือแบบกำหนดเองหรือการกำหนดค่าทั่วไปที่เข้ากันได้กับ OpenAI"
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "เอเจนต์เขียนโค้ด xAI Grok Build TUI ที่รองรับผู้ให้บริการแบบกำหนดเอง",
       "droid": "ผู้ช่วย AI จากโรงงาน Droid",
       "openclaw": "เปิดผู้ช่วย AI ของ Claw",
+      "openclaude": "CLI เอเจนต์เขียนโค้ด OpenClaude ที่รองรับผู้ให้บริการที่เข้ากันได้กับ OpenAI",
       "cline": "Cline AI ผู้ช่วยเข้ารหัส CLI",
       "kilo": "กิโลโค้ด AI Assistant CLI",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "เทอร์มินัล Warp AI ที่รองรับผู้ให้บริการแบบกำหนดเอง",
       "agent-deck": "ตัวประสานงานหลายเอเจนต์ Agent Deck",
       "5dive": "5dive — ฟลีตเอเจนต์เขียนโค้ดที่โฮสต์เอง; โปรไฟล์ auth เดียวชี้ทั้งหมดไปที่ OmniRoute",
+      "whycodes": "เอเจนต์ CLI อัตโนมัติ WhyCodes พร้อม base URL ที่เข้ากันได้กับ OpenAI",
       "zed": "โปรแกรมแก้ไขโค้ด Zed — เอเจนต์ในตัวผ่านผู้ให้บริการที่เข้ากันได้กับ OpenAI"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "ไม่ทราบ",
     "cliproxyapiUpdate": "อัปเดต",
     "cliproxyapiUpdateAvailable": "มีการอัปเดต: v{current} → v{latest}",
-    "cliproxyapiVersion": "เวอร์ชัน"
+    "cliproxyapiVersion": "เวอร์ชัน",
+    "piInstallTitle": "ติดตั้ง Pi Coding Agent",
+    "piInstallInstructions": "ติดตั้ง Pi CLI จากนั้นกลับมาที่นี่เพื่อเชื่อมต่อกับ OmniRoute",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "ใช้ URL ที่สามารถเข้าถึงได้จากเครื่องที่ใช้ Pi ตำแหน่งข้อมูล /v1 ที่เข้ากันได้กับ OpenAI จะถูกเพิ่มโดยอัตโนมัติ",
+    "piManualMergeHint": "ดูตัวอย่างเท่านั้น รวมรายการ providers.omniroute นี้เข้ากับ models.json เพื่อให้ผู้ให้บริการและการตั้งค่าอื่นๆ ของคุณไม่เสียหาย",
+    "removeMapping": "นำการแมปออก",
+    "customUrl": "URL แบบกำหนดเอง",
+    "customEndpointAria": "เอนด์พอยต์กำหนดเอง",
+    "useDefaultKey": "ใช้คีย์เริ่มต้นของ OmniRoute",
+    "mainModelAria": "โมเดลหลัก",
+    "manualConfigTitle": "การกำหนดค่าเริ่มต้นใช้งาน Grok Build"
   },
   "modelCatalog": {
     "title": "โมเดลและคอมโบ",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "เช่น 10",
     "testSelected": "ทดสอบรายการที่เลือก ({count})",
     "testAllFiltered": "ทดสอบรายการที่กรองทั้งหมด ({count})",
+    "visibility": "การแสดงผล",
+    "allVisibility": "แสดงและซ่อน",
+    "visibleOnly": "แสดงอยู่",
+    "hiddenOnly": "ซ่อนอยู่",
+    "visibleColumn": "แสดง",
+    "hideModel": "ซ่อน {name} จาก /v1/models",
+    "showModel": "แสดง {name} ใน /v1/models",
+    "hiddenBadge": "ซ่อนอยู่",
+    "hideFiltered": "ซ่อนรายการที่กรอง ({count})",
+    "showFiltered": "แสดงรายการที่กรอง ({count})",
+    "visibilityCounts": "แสดง {visible} · ซ่อน {hidden} · ทั้งหมด {total}",
+    "visibilityUpdateFailed": "อัปเดตการแสดงผลของโมเดลไม่สำเร็จ",
     "cancel": "ยกเลิก",
     "clearResults": "ล้างผลลัพธ์",
     "testing": "กำลังทดสอบ...",
@@ -3397,16 +3438,53 @@
     "httpError": "คำขอไม่สำเร็จด้วย HTTP {status}",
     "testFailedNoDetail": "การทดสอบล้มเหลวโดยไม่มีข้อความแสดงข้อผิดพลาด",
     "additionalCapabilities": "ความสามารถเพิ่มเติม: {list}",
-    "comboRefMember": "คอมโบ → {name}"
+    "comboRefMember": "คอมโบ → {name}",
+    "keyAccessButton": "สิทธิ์การเข้าถึงคีย์ API",
+    "allowedInKeys": "อนุญาตใน: {count, plural, one {# คีย์} other {# คีย์}}",
+    "keysLoading": "กำลังโหลดคีย์ API…",
+    "keysRetry": "ลองโหลดคีย์อีกครั้ง",
+    "accessViaPattern": "ผ่าน {pattern}",
+    "accessBlocked": "ถูกบล็อกโดย {pattern}",
+    "editKeyAccess": "แก้ไขสิทธิ์การเข้าถึงคีย์",
+    "toggleKeyAccess": "อนุญาต {item} บน {name}",
+    "resultNetworkError": "การมอบหมายล้มเหลว",
+    "resultWouldEmptyModels": "จะทำให้คีย์นี้ไม่มีโมเดลที่ได้รับอนุญาต — แก้ไขสิทธิ์เข้าถึงของคีย์แทน",
+    "resultWouldEmptyCombos": "จะทำให้คีย์นี้ไม่มีคอมโบที่ได้รับอนุญาต — แก้ไขสิทธิ์เข้าถึงของคีย์แทน",
+    "keyUpdatePending": "กำลังอัปเดต {name} อยู่ โปรดลองอีกครั้งในอีกสักครู่",
+    "assignToKeys": "มอบหมายไปยังคีย์ API…",
+    "assignApply": "นำการเปลี่ยนแปลงไปใช้",
+    "assignComplete": "อัปเดตสิทธิ์การเข้าถึงคีย์ API แล้ว",
+    "assignFailed": "การอัปเดตคีย์ API บางรายการล้มเหลว",
+    "assignNoChanges": "ไม่มีการเปลี่ยนแปลงสิทธิ์การเข้าถึง API key",
+    "selectedAccessItems": "รายการที่เลือก: {count}",
+    "assignExcludedCombos": "{count, plural, one {# แถวคอมโบที่เลือกไม่ใช่โมเดลและจะถูกข้ามไป} other {# แถวคอมโบที่เลือกไม่ใช่โมเดลและจะถูกข้ามไป}} กำหนดคอมโบได้จากแท็บ Combos",
+    "assignActionAdd": "เพิ่ม",
+    "assignActionRemove": "นำออก",
+    "searchKeys": "ค้นหาคีย์ API",
+    "selectApiKey": "เลือกคีย์ API {name}",
+    "allModelsAccess": "โมเดลทั้งหมด",
+    "allCombosAccess": "คอมโบทั้งหมด",
+    "modelAccessCount": "โมเดล: {count}",
+    "comboAccessCount": "คอมโบ: {count}",
+    "keyInactive": "ไม่ได้ใช้งาน",
+    "keyBanned": "ถูกแบน",
+    "keyRevoked": "เพิกถอนแล้ว",
+    "switchRestrictedConfirm": "เปลี่ยนคีย์นี้เป็นแบบจำกัดการเข้าถึง: จะอนุญาตเฉพาะรายการที่เลือกเท่านั้น",
+    "removeNoChangeHint": "คีย์นี้อนุญาตทุกอย่าง การนำรายการที่เลือกออกจะไม่เกิดการเปลี่ยนแปลงใดๆ",
+    "removeStaysAllowedHint": "ยังคงได้รับอนุญาตในคีย์นี้ผ่าน {patterns}",
+    "resultChanged": "เปลี่ยนแปลงแล้ว",
+    "resultUnchanged": "ไม่มีการเปลี่ยนแปลง",
+    "resultSkipped": "ข้ามแล้ว",
+    "resultNeedsSwitch": "ต้องเปลี่ยนเป็นแบบจำกัดสิทธิ์"
   },
   "combos": {
+    "title": "คอมโบ",
+    "description": "สร้างโมเดลคอมโบด้วยการกำหนดเส้นทางแบบถ่วงน้ำหนักและการสนับสนุนทางเลือก",
+    "autoCatalogTitle": "แค็ตตาล็อกการกำหนดเส้นทางอัตโนมัติ",
     "autoTosLoadError": "โหลดนโยบาย ToS ไม่สำเร็จ โปรดลองอีกครั้งก่อนเปลี่ยนแปลง",
     "autoTosSaveError": "บันทึกนโยบาย ToS ไม่สำเร็จ ยังคงแสดงการตั้งค่าเดิม โปรดลองอีกครั้ง",
     "autoTosIncludeLabel": "รวมผู้ให้บริการที่ระบุ ToS: avoid ใน auto",
     "autoTosDescription": "ปิดไว้โดยค่าเริ่มต้น มีผลกับคอมโบ auto ทั้งหมด ไม่ใช่แค่บัญชีเดียว การเชื่อมต่อผู้ให้บริการจะไม่เปิดตัวเลือกนี้",
-    "title": "คอมโบ",
-    "description": "สร้างโมเดลคอมโบด้วยการกำหนดเส้นทางแบบถ่วงน้ำหนักและการสนับสนุนทางเลือก",
-    "autoCatalogTitle": "แค็ตตาล็อกการกำหนดเส้นทางอัตโนมัติ",
     "autoCatalogTemplateCount": "{count} เทมเพลต",
     "autoCatalogDescription": "คอมโบอัตโนมัติ/* ในตัวได้รับการแก้ไขแบบไดนามิกจากผู้ให้บริการที่เชื่อมต่อ ใช้รหัสเหล่านี้เป็นช่องโมเดล โดยไม่จำเป็นต้องตั้งค่าใดๆ",
     "autoCatalogExpand": "ขยายแค็ตตาล็อกการกำหนดเส้นทางอัตโนมัติ",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "เกิดข้อผิดพลาดในการอัปเดตคอมโบ",
     "errorDeleting": "เกิดข้อผิดพลาดในการลบคำสั่งผสม",
     "testFailed": "คำขอทดสอบล้มเหลว",
+    "removeErrorModels": "ลบโมเดลที่ล้มเหลว {count} รายการ",
+    "removingErrorModels": "กำลังนำออก…",
+    "errorModelsRemoved": "นำโมเดลที่ล้มเหลว {count} รายการออกจากคอมโบแล้ว",
+    "noErrorModelsFound": "ไม่พบโมเดลที่ล้มเหลวในขั้นตอนของคอมโบนี้เอง",
+    "cannotRemoveAllModels": "ไม่สามารถนำโมเดลทั้งหมดออกจากคอมโบได้",
+    "removeErrorModelsConfirm": "นำโมเดลที่ล้มเหลว {count} รายการออกจาก “{name}” ใช่ไหม ไม่นับการหมดเวลาและการจำกัดอัตรา",
     "failedToggle": "ไม่สามารถสลับคำสั่งผสมได้",
     "testResults": "ผลการทดสอบ — {name}",
     "resolvedBy": "แก้ไขโดย:",
@@ -3518,6 +3602,9 @@
     "moveUp": "เลื่อนขึ้น",
     "moveDown": "เลื่อนลง",
     "removeModel": "ลบ",
+    "testStep": "ทดสอบโมเดลนี้",
+    "testStepRunning": "กำลังทดสอบ…",
+    "testStepNotTestable": "ทดสอบได้เฉพาะขั้นตอนที่มีโมเดลเดียวเท่านั้น",
     "saving": "กำลังบันทึก...",
     "liveNoProviders": "ยังไม่พบผู้ให้บริการใดๆ",
     "liveFleetDataHint": "ข้อมูลฟลีตจะเข้ามาผ่านเหตุการณ์คอมโบแบบสด",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "ยังไม่มีการกำหนดค่าคอมโบ",
     "playgroundCreateFirst": "สร้างขึ้นมาก่อน",
     "weighted": "ถ่วงน้ำหนัก",
+    "weightPercent": "น้ำหนัก (%)",
     "leastUsed": "ใช้น้อยที่สุด",
     "costOpt": "ต้นทุน-การเลือก",
     "strategyGuideTitle": "วิธีใช้กลยุทธ์นี้",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# บัญชี} other {# บัญชี}}",
     "builderGlobalAdded": "เพิ่มแล้ว",
     "builderGlobalAdd": "เพิ่ม",
+    "clearSearch": "ล้างการค้นหา",
     "manualModel": "โมเดลแบบป้อนเอง",
     "manualModelInvalid": "ป้อนโมเดลในรูปแบบ provider/model",
     "manualModelUnknownProvider": "ไม่รู้จักคำนำหน้าผู้ให้บริการ",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "เพิ่มข้อมูลอ้างอิงคอมโบ",
     "builderPinnedAccount": "บัญชีที่ตรึงไว้",
     "builderLegacyEntry": "รายการแบบเดิม",
+    "builderStaleModel": "ไม่อยู่ในแคตตาล็อกสด",
     "reviewName": "ชื่อ",
     "reviewStrategy": "กลยุทธ์",
     "reviewSteps": "ขั้นตอน",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "ความยาวเนื้อหาขั้นต่ำ (ตัวอักษร)",
     "responseValidationJsonPaths": "การตรวจสอบ JSON-path",
     "responseValidationAddCheck": "+ เพิ่มการตรวจสอบ",
+    "responseValidationRemoveCheck": "นำการตรวจสอบออก",
+    "responseValidationPath": "พาธ JSON",
+    "responseValidationCondition": "เงื่อนไข",
+    "responseValidationValue": "ค่าที่คาดหวัง",
     "agentFeaturesSystemMessageOverride": "แทนที่ข้อความของระบบ",
     "agentFeaturesSystemMessagePlaceholder": "คุณเป็นผู้ช่วยผู้เชี่ยวชาญ...",
     "agentFeaturesSystemMessageHint": "การแทนที่ข้อความของระบบสำหรับตัวแทน",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "รายการทั้งหมด",
     "type": "ประเภท",
-    "memoryEnabled": "เปิดใช้งานความทรงจำแล้ว"
+    "memoryEnabled": "เปิดใช้งานความทรงจำแล้ว",
+    "qdrantTutorialTitle": "บทเรียนด่วน: หน่วยความจำด้วย Qdrant",
+    "qdrantTutorialIntro": "Qdrant จัดเก็บเวกเตอร์และข้อมูลเมตาของหน่วยความจำเพื่อให้สามารถดึงบริบทที่เกี่ยวข้องได้ ไม่มีการบีบอัดโทเคนโดยตรง ประหยัดทรัพยากรโดยอ้อมผ่านการหลีกเลี่ยงบริบทที่ไม่เกี่ยวข้องกับการขอข้อมูล",
+    "qdrantTutorialStep1": "ทำให้เซิร์ฟเวอร์ปลอดภัยด้วย HTTPS และคีย์ API ก่อนใช้งานจริง",
+    "qdrantTutorialStep2": "ระบุโฮสต์ พอร์ต คอลเล็กชัน และโมเดลในรูปแบบ provider/model พร้อมข้อมูลการรับรองความถูกต้องที่คอนฟิกไว้",
+    "qdrantTutorialStep3": "มิติของคอลเล็กชันต้องตรงกับมิติที่โมเดลสร้าง หากมีคอลเล็กชัน 2048 มิติเดิม จะไม่ยอมรับ embeddings 1536 มิติ",
+    "qdrantTutorialStep4": "บันทึก ทดสอบการเชื่อมต่อ และรันการทดสอบการค้นหาเท่านั้น เมื่อทำเสร็จจึงเปิดใช้งาน Qdrant",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "เครดิต: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "ทักษะ",
@@ -5288,7 +5390,8 @@
         "skipped": "กำหนดค่าเรียบร้อยแล้ว",
         "failed": "ล้มเหลว"
       }
-    }
+    },
+    "stepProgress": "ความคืบหน้าของการตั้งค่า"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ผู้ให้บริการนี้ถูกยกเว้นจาก auto โดยค่าเริ่มต้น",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "ดาวน์โหลดเทมเพลต CSV",
     "importFromFileMoreErrors": "+{count} รายการเพิ่มเติม",
     "importFromFileSchemaHint": "คอลัมน์ CSV เรียงตามตำแหน่งดังนี้: provider, name, apiKey, baseUrl (ไม่บังคับ), priority (ไม่บังคับ) คอลัมน์ provider ต้องเป็น ID ของผู้ให้บริการที่มีการจัดการอยู่แล้ว หรือ ID โหนดที่เข้ากันได้กับ OpenAI/Anthropic และลงทะเบียนไว้แล้ว — การนำเข้านี้จะไม่สร้างโหนดปลายทางใหม่",
+    "importOAuthExport": "นำเข้าไฟล์ส่งออก OAuth",
+    "oauthExportTitle": "นำเข้าไฟล์ส่งออกจากตัวจัดการบัญชี",
+    "oauthExportDescription": "อัปโหลดไฟล์ส่งออกแบบข้อความธรรมดาจากตัวจัดการบัญชี (เช่น ไฟล์ส่งออก cloud-accounts ของ Antigravity Manager) โทเค็นจะถูกรีเฟรชฝั่งเซิร์ฟเวอร์ และแต่ละบัญชีจะกลายเป็นการเชื่อมต่อ OAuth — บัญชีที่ซ้ำกันจะถูกรีเฟรชในที่เดิม",
+    "oauthExportProviderLabel": "ผู้ให้บริการ",
+    "oauthExportChoose": "เลือกไฟล์",
+    "oauthExportFileAria": "ไฟล์ JSON ส่งออกบัญชี",
+    "oauthExportSchemaHint": "รองรับ: เอกสารที่มีอาร์เรย์ \"accounts\" อาร์เรย์ล้วน หรือระเบียนเดียว โทเค็นอาจอยู่ในออบเจ็กต์ token ที่ซ้อนอยู่ หรืออยู่บนระเบียนโดยตรง",
+    "oauthExportDetected": "ตรวจพบ {count} บัญชี",
+    "oauthExportSelectAll": "เลือกบัญชีทั้งหมด",
+    "oauthExportSelectAccount": "เลือกบัญชี {index}",
+    "oauthExportColEmail": "อีเมล",
+    "oauthExportColProvider": "ผู้ให้บริการ",
+    "oauthExportColRefresh": "รีเฟรชโทเค็น",
+    "oauthExportNoEmail": "(ไม่มีอีเมล)",
+    "oauthExportYes": "ใช่",
+    "oauthExportNo": "ไม่",
+    "oauthExportImporting": "กำลังนำเข้า…",
+    "oauthExportImport": "นำเข้า {count} บัญชี",
+    "oauthExportResult": "นำเข้าแล้ว {imported}/{total} — ล้มเหลว {failed}",
+    "oauthExportParseError": "ไม่สามารถอ่านบัญชีใดๆ จากไฟล์นี้ได้",
+    "oauthExportUnknownError": "ข้อผิดพลาดที่ไม่ทราบสาเหตุ",
     "adaptaTutorial": {
       "title": "วิธีเชื่อมต่อ Adapta Web",
       "introPrefix": "Adapta ยืนยันตัวตนผ่าน Clerk โทเค็น",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "นำเข้าโมเดลทั้งหมดแล้ว",
     "noNewModelsToImport": "ไม่มีโมเดลใหม่ที่จะนำเข้า — โมเดลทั้งหมดมีอยู่แล้วในรีจิสทรีหรือรายการโมเดลที่กำหนดเอง",
     "localCatalogFallbackStatus": "ไม่สามารถเข้าถึงรายการโมเดลของผู้ให้บริการได้ — กำลังแสดงแค็ตตาล็อกที่มีมาในตัว",
+    "discoveryDegradedStatus": "การค้นพบโมเดลล้มเหลว {time}",
     "skippingExistingModels": "ข้าม {count} โมเดลที่มีอยู่",
     "autoSync": "ซิงค์อัตโนมัติ",
     "autoSyncShort": "ซิงค์",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "เช่น 131072",
     "contextWindowOverrideHint": "ตั้งค่าหน้าต่างบริบทจริง (โทเค็น) ของโมเดลนี้ด้วยตนเองเมื่อผู้ให้บริการรายงานข้อมูลผิดพลาด ค่านี้จะมีความสำคัญเหนือกว่าค่าที่ตรวจพบโดยอัตโนมัติ/ค่าในแค็ตตาล็อก และป้องกันไม่ให้การกำหนดเส้นทางแบบคอมโบตัดโมเดลนี้ออก",
     "contextWindowOverrideInvalid": "การเขียนทับหน้าต่างบริบทต้องเป็นจำนวนเต็มบวกของโทเค็น",
+    "maxOutputTokenOverrideInvalid": "การเขียนทับโทเค็นเอาต์พุตสูงสุดต้องเป็นจำนวนเต็มบวกของโทเค็น",
     "visionCapableLabel": "รองรับการมองเห็น (Vision)",
     "visionCapableHint": "ทำเครื่องหมายโมเดลนี้ด้วยตนเองว่ารองรับการมองเห็น เมื่อข้อมูลเมตาการค้นพบของผู้ให้บริการไม่ได้รายงานรูปแบบการรับข้อมูลรูปภาพ (พบบ่อยในแบ็กเอนด์ที่โฮสต์เอง/ในเครื่อง)",
     "compatParamFiltersLabel": "ตัวกรองพารามิเตอร์",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "เพิ่มการกำหนดค่าแทน",
     "ccAliasLoadError": "โหลดการตั้งค่า discovery-alias ไม่สำเร็จ: {error}",
     "ccAliasSaveError": "บันทึกการตั้งค่า discovery-alias ไม่สำเร็จ: {error}",
+    "cliVersionSectionTitle": "เวอร์ชันไคลเอนต์ CLI ที่โฆษณา",
+    "cliVersionEffectiveLabel": "โฆษณาอยู่ในขณะนี้",
+    "cliVersionSourceLabel": "แก้จาก: {source}",
+    "cliVersionPinnedLabel": "ค่าเริ่มต้นที่บันทึกไว้: {pinned}",
+    "cliVersionSourceSettings": "การแทนที่แดชบอร์ด",
+    "cliVersionSourceEnv": "ตัวแปรสภาพแวดล้อม",
+    "cliVersionSourceDiscovered": "รุ่นล่าสุดที่ค้นพบอัตโนมัติ",
+    "cliVersionSourceDefault": "ค่าเริ่มต้นที่บันทึกไว้",
+    "cliVersionInputLabel": "แทนที่เวอร์ชัน",
+    "cliVersionInputPlaceholder": "แทนที่เวอร์ชัน ว่างเปล่า",
+    "cliVersionSaveButton": "บันทึก",
+    "cliVersionResetButton": "รีเซ็ตเป็นค่าเริ่มต้น",
+    "cliVersionLoadError": "ไม่สามารถโหลดการตั้งค่าเวอร์ชัน CLI : {error}",
+    "cliVersionSaveError": "ไม่สามารถบันทึกเวอร์ชัน CLI : {error}",
+    "cliVersionLoadFailed": "ไม่สามารถโหลดการตั้งค่าเวอร์ชัน CLI ปัจจุบันได้",
+    "cliVersionHintClaude": "Anthropic ประตูโมเดล Claude รุ่นใหม่กว่าในเวอร์ชันไคลเอนต์ Claude Code ที่เห็น นี่คือเวอร์ชัน OmniRoute ที่โฆษณาในทุกคำขอที่เชื่อมโยงกับมานุษยวิทยา",
+    "cliVersionCaveatClaude": "ข้อแม้ในการเรียกเก็บเงิน: เวอร์ชันการเรียกเก็บเงินคือ '<version>''<build-revision>' และการแก้ไข build เป็นค่าคงที่ที่แยกจากกัน การโฆษณา 2.1.260 รายงาน 2.1.260.1e2 ซึ่งไม่ใช่สิ่งที่ไบนารี 2.1.260 ส่งจริง",
+    "cliVersionHintCodex": "OpenAI เกตโมเดลที่ใหม่กว่าบนเวอร์ชันไคลเอ็นต์ Codex ที่เห็น ตัวอย่างข้อผิดพลาด: โมเดล 'gpt-6-astra' ต้องการเวอร์ชันที่ใหม่กว่าของ Codex",
+    "cliVersionCaveatCodex": "ข้อแม้ในการอนุมาน: เวอร์ชันที่ผู้โทรของคุณรายงานยังคงเหนือกว่า CODEX_CLIENT_VERSION env var แต่การแทนที่นี้จะเหนือกว่าทั้งสองอย่าง เนื่องจากเป็นเจตนาของผู้ปฏิบัติงานที่ชัดเจน",
     "compatUpstreamHeadersLabel": "ส่วนหัวต้นทางเพิ่มเติม",
     "compatUpstreamHeadersHint": "การตั้งค่าที่มีสิทธิ์ระดับสูง — มีระดับความน่าเชื่อถือเทียบเท่ากับการแก้ไขข้อมูลรับรอง API ของผู้ให้บริการ จึงควรใช้โดยผู้ดูแลระบบที่เชื่อถือได้เท่านั้น โดยจะผสานหลังจาก OmniRoute เพิ่มข้อมูลยืนยันตัวตนจากคีย์ API ของผู้ให้บริการ หากส่วนหัวที่กำหนดเองใช้ชื่อเดียวกับส่วนหัวที่มีอยู่ (เช่น Authorization) ค่าของคุณจะแทนที่ส่วนหัวที่สร้างโดยอัตโนมัติทั้งหมด (รวมถึงโทเค็น Bearer) — ต้นทางจะเห็นเฉพาะค่าที่คุณป้อน ไม่ใช่คีย์จากการตั้งค่า การกำหนดค่าผิดพลาดอาจทำให้เกิดข้อผิดพลาด 401 หรือทำให้การยืนยันตัวตนกับต้นทางใช้งานไม่ได้ หนึ่งแถวต่อหนึ่งส่วนหัว (เช่น Authentication เพิ่มเติมสำหรับเกตเวย์บางแห่ง) วางเมาส์เหนือหรือโฟกัสที่ค่าเพื่อดูตัวอย่าง ระบบจะบันทึกเมื่อออกจากโฟกัส คลิกภายนอก หรือปิดแผงนี้",
     "compatUpstreamHeaderName": "ชื่อส่วนหัว",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "ป้ายกำกับรูปแบบ API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "ภูมิภาค API จีน",
-    "apiRegionHint": "คำแนะนำเกี่ยวกับภูมิภาค API",
-    "apiRegionInternational": "ภูมิภาค API นานาชาติ",
-    "apiRegionLabel": "ป้ายกำกับภูมิภาค API",
+    "apiRegionChina": "จีนแผ่นดินใหญ่",
+    "apiRegionHint": "เลือกภูมิภาคของเอนด์พอยต์ที่ใช้สำหรับการเข้าถึง API และการติดตามโควตา",
+    "apiRegionInternational": "นานาชาติ",
+    "apiRegionLabel": "ภูมิภาค API",
     "apikey": "คีย์ API",
     "audio": "เสียง",
     "audioProvidersHeading": "หัวข้อผู้ให้บริการเสียง",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "เมื่อบัญชีนี้ถึงขีดจำกัดการใช้งาน 5 ชั่วโมงและ Anthropic เปิดให้ใช้ช่องทางที่มีลำดับความสำคัญต่ำลง OmniRoute จะยอมรับและส่งคำขอต่อไปโดยใช้ anthropic-usage-limit: slow จนกว่ารอบเวลาจะรีเซ็ต แทนที่จะพักการเชื่อมต่อ ขีดจำกัดรายสัปดาห์ยังคงมีผล และการตอบกลับอาจต้องรอความจุที่ว่าง",
     "claudeAutoLimitResetLabel": "รีเซ็ตขีดจำกัดเซสชันโดยอัตโนมัติ (สัปดาห์ละครั้ง)",
     "claudeAutoLimitResetDescription": "เมื่อบัญชีนี้ถึงขีดจำกัดการใช้งาน 5 ชั่วโมงและสามารถรีเซ็ตขีดจำกัดเซสชันได้ OmniRoute จะใช้สิทธิ์รีเซ็ตโดยอัตโนมัติและลองอีกครั้งด้วยความเร็วเต็มที่ โดยใช้สิทธิ์รีเซ็ตของบัญชีที่มีให้สัปดาห์ละครั้ง และยังคงนับรวมในขีดจำกัดรายสัปดาห์",
+    "codexPaidCreditsShort": "เครดิตเพิ่มเติม",
+    "codexPaidCreditsToggleTitle": "อนุญาตเครดิต Codex แบบชำระเงินหลังโควตาการสมัครสมาชิกหมด (อาจมีค่าใช้จ่ายเพิ่มเติม)",
+    "codexPaidCreditsEnabled": "เปิดใช้เครดิต Codex แบบชำระเงินแล้ว (อาจมีค่าใช้จ่ายเพิ่มเติม)",
+    "codexPaidCreditsDisabled": "ปิดใช้เครดิต Codex แบบชำระเงินแล้ว",
+    "failedUpdateCodexPaidCredits": "อัปเดตนโยบายเครดิต Codex แบบชำระเงินไม่สำเร็จ",
+    "allowCodexPaidCreditsLabel": "อนุญาตเครดิต Codex แบบชำระเงิน",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "ข้ามคูลดาวน์ชั่วคราวเพื่อให้การเชื่อมต่อนี้ยังคงมีสิทธิ์ใช้งานได้แม้หลังจากเกิดข้อผิดพลาดที่กู้คืนได้ (สถานะสิ้นสุด เช่น ถูกแบน/หมดอายุ ยังคงมีผลอยู่)",
     "disableCoolingLabel": "ปิดใช้งานคูลดาวน์สำหรับการเชื่อมต่อนี้",
     "bulkPasteAdded": "{count, plural, one {เพิ่มคีย์แล้ว 1 คีย์} other {เพิ่มคีย์แล้ว # คีย์}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "รับ API key ได้ที่ monsterapi.ai",
       "moonshot": "เชื่อมต่อ Moonshot AI ด้วย API key.",
       "morph": "ระดับฟรี: 250K เครดิต/เดือน, $0",
+      "apmix": "เชื่อมต่อ Apmix ด้วยคีย์ API จาก apmix.ai/dashboard — สมาชิกเดียว หลายโมเดล",
       "nanogpt": "เชื่อมต่อ NanoGPT ด้วย API key.",
       "nebius": "เครดิตทดลองใช้ ~$1 เมื่อลงทะเบียนสำหรับการทดสอบ API",
       "nlpcloud": "NLP Cloud ใช้ API แชทบอทที่เป็นกรรมสิทธิ์แทน OpenAI chat/completions โดย OmniRoute จะปรับข้อความ OpenAI ให้เข้ากับ input/context/history และแสดงแคตตาล็อกภายในเครื่องของโมเดลแชทบอทที่รองรับ.",
@@ -6628,8 +6781,7 @@
       "kiro": "ระดับฟรี: 50 เครดิต/เดือน (~25K–100K โทเค็น) ⚠️ ToS ของ Kiro ห้ามใช้พร็อกซี/harness ของบุคคลที่สาม",
       "codex": "เชื่อมต่อ OpenAI Codex ด้วยโฟลว์ OAuth ที่มีอยู่",
       "qwen": "เชื่อมต่อ Qwen Code ด้วยโฟลว์ OAuth ที่มีอยู่",
-      "github-models": "สร้าง GitHub PAT ที่มีขอบเขต 'models: read' ที่ github.com/settings/tokens",
-      "apmix": "เชื่อมต่อ Apmix ด้วยคีย์ API จาก apmix.ai/dashboard — สมาชิกเดียว หลายโมเดล"
+      "github-models": "สร้าง GitHub PAT ที่มีขอบเขต 'models: read' ที่ github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} ยอมรับ ID โมเดลดั้งเดิมของผู้ให้บริการ นำเข้าจาก /models หรือเพิ่ม ID ที่กำหนดเองสำหรับการกำหนดเส้นทาง",
     "bedrockModelsDescription": "โมเดล Amazon Bedrock มีการกำหนดขอบเขตตามภูมิภาค AWS นำเข้าจาก /models หรือเพิ่มรหัสรุ่น Bedrock ที่เปิดใช้งานในภูมิภาคที่เลือก",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "ไม่บังคับ: หนึ่ง model=cap ต่อบรรทัด จับคู่กับ ID โมเดลอัปสตรีมที่ตรงกันทุกตัวอักษร คำขอส่วนเกินจะเข้าคิวในเครื่อง ปล่อยว่างหมายถึงไม่จำกัดต่อโมเดล",
     "rateLimitOverridesModelConcurrencyInvalid": "รายการการทำงานพร้อมกันต่อโมเดล \"{entry}\" ไม่ถูกต้อง — ใช้ model=cap โดย cap เป็นจำนวนเต็มตั้งแต่ 1 ถึง {max}",
-    "codexPaidCreditsShort": "เครดิตเพิ่มเติม",
-    "codexPaidCreditsToggleTitle": "อนุญาตเครดิต Codex แบบชำระเงินหลังโควตาการสมัครสมาชิกหมด (อาจมีค่าใช้จ่ายเพิ่มเติม)",
-    "codexPaidCreditsEnabled": "เปิดใช้เครดิต Codex แบบชำระเงินแล้ว (อาจมีค่าใช้จ่ายเพิ่มเติม)",
-    "codexPaidCreditsDisabled": "ปิดใช้เครดิต Codex แบบชำระเงินแล้ว",
-    "failedUpdateCodexPaidCredits": "อัปเดตนโยบายเครดิต Codex แบบชำระเงินไม่สำเร็จ",
-    "allowCodexPaidCreditsLabel": "อนุญาตเครดิต Codex แบบชำระเงิน",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "ใช้ใน {count} คอมโบ: {combos}",
+    "openComboTooltip": "เปิดคอมโบ — ใช้โดย {combo}",
+    "claudeCodeRoutingTitle": "การกำหนดเส้นทางผ่านพร็อกซี upstream สำหรับทราฟฟิก Claude Code",
+    "routingNative": "Native",
+    "routingFallback": "Fallback",
+    "rerank": "Rerank",
+    "video": "วิดีโอ",
+    "markFreeTierTitle": "ทำเครื่องหมายว่าเป็น tier ฟรี (แสดงแม้เปิดการซ่อนโมเดลเสียค่าใช้จ่าย)",
+    "codexTunnelTitle": "การเชื่อมต่อเครื่องมือ Codex",
+    "codexTunnelDescription": "ทันทะลจะทำงานแบบออก (outbound) เท่านั้น เครื่องมือท้องถิ่นยังคงถูกเรียกใช้โดย Codex เท่านั้น ภายใต้ระบบ sandbox และนโยบายการอนุมัติ",
+    "tunnelIdLabel": "ID ของทันทะล",
+    "tunnelRuntimeKeyLabel": "Runtime key ของทนัททะล",
+    "tunnelRuntimeKeyPlaceholder": "คีย์ runtime",
+    "tunnelRuntimeKeyHint": "จัดเก็บแบบเข้ารหัสพร้อมกับ cookie และไม่มีการเขียนลงสู่ log",
+    "tunnelRuntimeKeyNewLabel": "Runtime key ของทนัททะลตัวใหม่",
+    "tunnelRuntimeKeyNewHint": "กรอกเฉพาะเมื่อใช้ร่วมกับ cookie ใหม่ ค่าจะถูกรักษาแบบเข้ารหัส",
+    "chatgptConnectorLabel": "Custom connector ของ ChatGPT",
+    "doctorChecking": "กำลังตรวจสอบสถานะ…",
+    "doctorCheck": "ตรวจสถานะ doctor",
+    "fallbackRetryBackendTitle": "ระบบสำรองสำหรับทดลองใหม่"
   },
   "settings": {
     "title": "การตั้งค่า",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "เลือกรายการในแถบด้านข้างที่ต้องการแสดง โหมดรายการจำเป็นยังคงให้ค้นหาเครื่องมือขั้นสูงได้",
     "hideHealthLogs": "ซ่อนบันทึกการตรวจสุขภาพ",
     "hideHealthLogsDesc": "เมื่อเปิด ให้ระงับข้อความ [HealthCheck] ในคอนโซลเซิร์ฟเวอร์",
-    "themeAccent": "สีธีม",
-    "themeAccentDesc": "เลือกสีสำเร็จรูปหรือสร้างธีมของคุณเองด้วยสีเดียว",
-    "themeCreate": "สร้างธีม",
-    "themeCustom": "ธีมกำหนดเอง",
-    "themeBlue": "น้ำเงิน",
-    "themeRed": "แดง",
-    "themeGreen": "เขียว",
-    "themeViolet": "ม่วง",
-    "themeOrange": "ส้ม",
-    "themeCyan": "ไซแอน",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "ปรับแต่งชื่อและโลโก้ของแอปพลิเคชัน",
     "appName": "ชื่อแอปพลิเคชัน",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "ตอนนี้",
       "coreConfigPath": "ไฟล์การกำหนดค่าคอร์",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "เส้นทาง .json แบบสัมบูรณ์ (นามสกุลตัวพิมพ์เล็ก) ว่าง = ไม่สร้าง การซิงก์แต่ละครั้งจะเขียน '<path>'.generated ไว้ข้างไฟล์ที่นำมาใช้ และไม่เขียนลงในไฟล์นั้นเอง",
+      "coreConfigPathDesc": "เส้นทาง .json/.yaml/.yml แบบสัมบูรณ์ (นามสกุลตัวพิมพ์เล็ก) ว่าง = ไม่สร้าง การซิงก์แต่ละครั้งจะเขียน '<path>'.generated ไว้ข้างไฟล์ที่นำมาใช้ และไม่เขียนลงในไฟล์นั้นเอง",
       "lastSwitchKind": "เหตุผลของการสลับ",
       "switchKind": {
         "ip_quota_429": "โควตา",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "ใช้โดย: {mode}",
       "coreBinaryPath": "เส้นทางไบนารีหลัก",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "ไม่บังคับ: ตรวจสอบไฟล์ที่สร้างขึ้นด้วยไบนารีหลักก่อนแทนที่ไฟล์ที่ยอมรับ ปล่อยว่างไว้เพื่อเขียนไว้ข้างๆ ต่อไป ไดเรกทอรีจะถูกสร้างขึ้นหากไม่มี"
+      "coreBinaryPathHelp": "ไม่บังคับ: ตรวจสอบไฟล์ที่สร้างขึ้นด้วยไบนารีหลักก่อนแทนที่ไฟล์ที่ยอมรับ ปล่อยว่างไว้เพื่อเขียนไว้ข้างๆ ต่อไป ไดเรกทอรีจะถูกสร้างขึ้นหากไม่มี",
+      "urlFeedlessHint": "เว้นว่างสำหรับการสมัครสมาชิกแบบตัวเลือกเท่านั้น: ตั้งค่า URL การควบคุมด้านล่าง จะไม่มีการดึง รีเฟรช หรือผูกฟีดใด ๆ"
     },
     "bulkHealthcheck": "ตรวจสอบสถานะพร้อมกันทั้งหมด",
     "bulkHealthcheckDesc": "ทดสอบพร็อกซีที่กำหนดค่าทั้งหมดกับ URL เป้าหมาย เพื่อค้นหาพร็อกซีที่ใช้งานได้",
@@ -7706,6 +7862,7 @@
     "configured": "กำหนดค่าแล้ว",
     "none": "ไม่มี",
     "modelOverrideValuePlaceholder": "ค่าตัวเลข",
+    "modelOverrideKey": "คีย์แทนที่",
     "modelOverrideReasoningEffortsPlaceholder": "ค่าที่คั่นด้วยเครื่องหมายจุลภาคภาษาอังกฤษ เช่น low, medium, high",
     "addKeyValue": "เพิ่มคีย์-ค่า",
     "noModelOverrides": "ไม่มีการกำหนดค่าการเขียนทับสำหรับโมเดลนี้",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "คุณสามารถแทนที่ราคาเริ่มต้นสำหรับรุ่นเฉพาะได้ การแทนที่แบบกำหนดเองจะมีลำดับความสำคัญมากกว่าการกำหนดราคาที่ตรวจพบอัตโนมัติ",
     "editPricing": "แก้ไขราคา",
     "viewFullDetails": "ดูรายละเอียดทั้งหมด",
-    "themeCoral": "คอรัล",
     "adaptiveVolumeRouting": "การกำหนดเส้นทางตามปริมาณแบบปรับตัว",
     "adaptiveVolumeRoutingDesc": "ปรับจำนวนการเชื่อมต่อแบบไดนามิกตามปริมาณเพย์โหลดและแรงกดดันด้านอัตราการประมวลผล",
     "lkgpToggleTitle": "ผู้ให้บริการล่าสุดที่ใช้งานได้ดี (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "ลดการใช้โทเค็นด้วยการบีบอัดพรอมต์ก่อนส่งไปยังผู้ให้บริการ",
     "autoCombosTitle": "คอมโบอัตโนมัติ",
     "autoCombosDesc": "อนุญาตให้คีย์นี้ใช้คอมโบ auto/* ที่มีมาให้ ซึ่งจะเลือกโมเดลโดยอัตโนมัติจากผู้ให้บริการทุกรายที่กำหนดค่าไว้",
+    "ccDiscoveryAliasesTitle": "นามแฝงสำหรับการค้นพบของ Claude Code",
+    "ccDiscoveryAliasesDesc": "ประกาศมิร์เรอร์ความเข้ากันได้ claude/... สำหรับโมเดลและคอมโบที่คีย์นี้เข้าถึงได้อยู่แล้ว",
     "compressionGuidanceFullGuideLink": "คู่มือการบีบอัดฉบับเต็ม",
     "compressionGuidanceShow": "รายละเอียด",
     "compressionGuidanceHide": "ซ่อนรายละเอียด",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "เปอร์เซ็นต์ของหน้าต่าง",
     "compressionAdaptivePolicyAbsolute": "งบประมาณโทเค็นแบบค่าสัมบูรณ์",
     "compressionOutputStylesDescription": "แทรกคำสั่งกำหนดรูปแบบการตอบกลับโดยไม่ต้องเขียนผลลัพธ์ของผู้ให้บริการใหม่ สามารถผสมผสานได้อย่างอิสระ",
+    "compressionOutputStylesPreviewNote": "คำขอแทรกภาษาเดียวเท่านั้น: ภาษาที่ตรวจพบ มิฉะนั้นเป็นภาษาแรก บล็อกด้านบนเป็นตัวแปรต่อแพ็ค ไม่ใช่การฉีดแบบรวม",
     "mcpAccessibilityDescription": "กำหนดขอบเขตผลลัพธ์เครื่องมือ MCP (แยกพื้นที่จัดเก็บ)",
     "compressionStylesTileSummary": "{tokens, number} โทเค็นที่ประหยัดได้ · {runs, plural, one {จัดรูปแบบแล้ว # ครั้ง} other {จัดรูปแบบแล้ว # ครั้ง}}",
     "compressionStylesTileEmpty": "ยังไม่มีการรันที่จัดรูปแบบ",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "โฮสต์",
     "qdrantCollection": "การรวบรวม",
     "catalogVisibilityHint": "ยังเรียกใช้รหัสโมเดลที่ซ่อนไว้ได้ด้วยสิทธิ์การเข้าถึงเดิม",
+    "exposeCombosOnly": "แสดงเฉพาะคอมโบใน /v1/models",
+    "exposeCombosOnlyDesc": "ไคลเอนต์ที่ค้นหาโมเดลอัตโนมัติจะเห็นคอมโบของคุณ (และ auto/* หากไม่ได้ซ่อนไว้) แทนโมเดลดิบของผู้ให้บริการ ID แบบ provider/model ที่ระบุชัดเจนยังคงถูกกำหนดเส้นทางตามปกติ",
     "catalogScopeTitle": "รายการ Models API",
     "catalogScopeDesc": "สิ่งที่ GET /v1/models แสดงสำหรับคีย์นี้ การจำกัดรายการให้แคบลงจะไม่เปลี่ยนแปลงสิ่งที่คีย์สามารถเรียกใช้ได้",
     "catalogScopeAll": "ทั้งสองอย่าง",
@@ -8918,7 +9079,9 @@
         "financial": "การเงิน",
         "brazilian": "บราซิล",
         "usa": "สหรัฐฯ",
-        "full": "ทั้งหมด"
+        "full": "ทั้งหมด",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (แอฟริกาใต้)"
       },
       "builtinTypes": "ประเภทในตัว",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "ที่อยู่ IPv4",
         "ipv6_address": "ที่อยู่ IPv6",
         "aws_key": "คีย์การเข้าถึง AWS",
-        "api_key_generic": "คีย์ API และโทเค็น"
+        "api_key_generic": "คีย์ API และโทเค็น",
+        "iban": "หมายเลขบัญชีธนาคาร IBAN",
+        "eu_vat": "ตัวเลข EU VAT",
+        "es_dni_nie": "ภาษาสเปน DNI / NIE",
+        "it_codice_fiscale": "รหัส Fiscale ของอิตาลี",
+        "pl_pesel": "โปแลนด์ PESEL",
+        "nl_bsn": "ภาษาดัตช์ BSN",
+        "de_steuer_id": "เยอรมัน Steuer-ID",
+        "se_personnummer": "บุคคลชาวสวีเดน",
+        "za_id": "หมายเลข ID ของแอฟริกาใต้",
+        "za_phone": "หมายเลขโทรศัพท์ของแอฟริกาใต้",
+        "za_vat": "หมายเลข VAT ของแอฟริกาใต้",
+        "za_tax_ref": "การอ้างอิงภาษีของแอฟริกาใต้"
       },
       "customPatterns": "รูปแบบที่กำหนดเอง",
       "customPatternsDesc": "ส่วนที่ตรงกันจะถูกแทนที่ด้วย [CUSTOM_REDACTED] ได้สูงสุด {max} รูปแบบ รูปแบบที่เสี่ยงต่อการย้อนรอยแบบหายนะจะถูกปฏิเสธ",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "ผ่าน",
     "tomlTestFailed": "ไม่ผ่าน",
     "tomlImportError": "ไม่สามารถประมวลผลไฟล์ RTK TOML ได้",
-    "tomlFileReadError": "ไม่สามารถอ่านไฟล์ TOML ที่เลือกได้"
+    "tomlFileReadError": "ไม่สามารถอ่านไฟล์ TOML ที่เลือกได้",
+    "viewMode": "โหมดมุมมอง"
   },
   "compressionEngineConfig": {
     "loading": "กำลังโหลด…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "แพ็กภาษา: {packs}",
     "dragToReorder": "ลากเพื่อจัดลำดับขั้นตอนใหม่",
     "engine": "เอนจิน",
-    "intensity": "ความเข้ม"
+    "intensity": "ความเข้ม",
+    "compressionOverride": "การแทนที่การบีบอัด"
   },
   "compressionStudio": {
     "noRun": "ไม่มีการรันการบีบอัดที่พร้อมใช้งาน",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "ผู้ชนะ: {winner}",
     "encoder": "ตัวเข้ารหัส",
     "bytes": "ไบต์",
-    "tokensCl100k": "โทเค็น (cl100k)"
+    "tokensCl100k": "โทเค็น (cl100k)",
+    "studioViews": "มุมมอง Studio"
   },
   "omniglyph": {
     "preview": "ตัวอย่าง",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "ข้อความที่สั้นกว่านี้จะไม่ถูกบีบอัด ต่ำ = บีบอัดมากขึ้น",
     "tooltipMinSavings": "บีบอัดเฉพาะในกรณีที่บันทึกโทเค็นได้อย่างน้อยเท่านี้",
     "ultraSettings": "การตั้งค่าอัลตร้า",
-    "ultraSettingsDesc": "การบีบอัดความหมายที่ขับเคลื่อนด้วย SLM"
+    "ultraSettingsDesc": "การบีบอัดความหมายที่ขับเคลื่อนด้วย SLM",
+    "defaultLanguage": "ภาษาเริ่มต้น",
+    "viewMode": "โหมดมุมมอง"
   },
   "translator": {
     "title": "นักแปล",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "แปลงสตรีมล้มเหลว"
   },
   "usage": {
+    "healthExtraUsageBypass": "ใช้โควตาหมดแล้ว แต่อนุญาตให้ใช้งานเพิ่มเติม จึงให้บริการต่อได้",
+    "healthPaidCreditsBypass": "ใช้โควตาหมดแล้ว แต่มีเครดิตแบบชำระเงินที่ใช้ได้ จึงให้บริการต่อได้",
+    "healthFilteringBypass": "ใช้โควตาหมดแล้ว แต่ปิดการกรองโควตาในเครื่อง จึงให้บริการต่อได้",
     "title": "การใช้งาน",
     "grokExtraUsageCredits": "เครดิตการใช้งานเพิ่มเติม",
     "grokAutoTopUp": "เติมเงินอัตโนมัติ",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "ข้อจำกัดของผู้ให้บริการ",
     "noProviders": "ไม่มีผู้ให้บริการที่เชื่อมต่อ",
+    "quotaAuthRequired": "ต้องมีการยืนยันตัวตน - ลงชื่อเข้าใช้แดชบอร์ด",
+    "quotaAuthRequiredHint": "ไม่สามารถโหลดการเชื่อมต่อของผู้ให้บริการได้ เนื่องจากเซสชันของแดชบอร์ดหายไปหรือหมดอายุ โปรดลงชื่อเข้าใช้และรีเฟรชเพื่อดูขีดจำกัดโควตาของคุณ",
     "connectProvidersForQuota": "เชื่อมต่อกับผู้ให้บริการด้วย OAuth เพื่อติดตามขีดจำกัดโควต้า API และการใช้งานของคุณ",
     "accountsCount": "{count, plural, one {# บัญชี} other {# บัญชี}}",
     "filteredFromCount": "(กรองจาก {count})",
@@ -10046,9 +10231,6 @@
     "tierLite": "Lite",
     "tierUnknown": "ไม่ทราบ",
     "statTotal": "ทั้งหมด",
-    "statCritical": "วิกฤต",
-    "statAlert": "แจ้งเตือน",
-    "statHealthy": "ปกติ",
     "filterPurchaseTypeLabel": "ประเภท",
     "filterTierLabel": "ระดับ",
     "purchaseAll": "ทั้งหมด",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "รีเฟรชล่าสุดเมื่อ",
     "providerQuota": "โควตาผู้ให้บริการ",
     "providerQuotaHomeHint": "สถานะแบบเรียลไทม์ของบัญชีที่เชื่อมต่อทั้งหมด",
+    "claudeResetCreditDefaultTitle": "รีเซ็ตขีดจำกัด Claude",
+    "confirmRedeemClaudeResetCredit": "การแลกรับจะรีเซ็ตขีดจำกัดการใช้งาน Claude ที่เข้าเกณฑ์ทันที และจะใช้เครดิตนี้ไปอย่างถาวร",
+    "claudeResetCreditsModalTitle": "เครดิตรีเซ็ต Claude",
+    "claudeResetCreditsModalExplainer": "เครดิตรีเซ็ต Claude ที่มีอยู่และการรีเซ็ตเซสชันรายสัปดาห์สำหรับบัญชีนี้",
     "codexPaidCreditsLabel": "เครดิต Codex แบบชำระเงิน",
     "codexPaidCreditsAvailable": "พร้อมใช้งาน (ไม่รายงานยอดคงเหลือ)",
     "codexPaidCreditsUnavailable": "ไม่พร้อมใช้งานหรือถึงขีดจำกัดการใช้จ่ายแล้ว",
-    "codexPaidCreditsUnlimited": "ไม่จำกัด"
+    "codexPaidCreditsUnlimited": "ไม่จำกัด",
+    "healthAccountHint": "อ้างอิงจากการสังเกตล่าสุด ไม่ใช่การทดสอบสด เลือกบัญชีเพื่อดูรายละเอียด",
+    "healthRecovery": "เวลาที่คาดว่าจะกลับมาใช้งานได้",
+    "healthAvailable": "พร้อมใช้งาน",
+    "healthRestricted": "ถูกจำกัดบางส่วน",
+    "healthUnavailable": "ไม่พร้อมใช้งาน",
+    "healthPeakHourProtection": "การป้องกันช่วงใช้งานสูงสุด",
+    "healthCooldown": "ระยะเวลารอ",
+    "healthQuotaExhausted": "โควตาหมดแล้ว",
+    "healthOverview": "ภาพรวม",
+    "layoutFull": "เต็ม",
+    "layoutCompact": "กะทัดรัด",
+    "healthQuotaError": "อ่านโควตาไม่สำเร็จ",
+    "healthNoRuntime": "ไม่พบสถานะการทำงาน",
+    "healthPreviousSnapshot": "รีเฟรชครั้งล่าสุดไม่สำเร็จ แสดงผลครั้งก่อน",
+    "healthPreviousFailure": "คำขอล่าสุดล้มเหลว สิ้นสุดช่วงพักแล้ว",
+    "healthAwaitingSync": "เลยเวลารีเซ็ตแล้ว รอการซิงค์ครั้งถัดไป",
+    "healthVerdictUnavailable": "อ่านผลตรวจสอบความพร้อมใช้งานไม่ได้ แสดงเฉพาะระดับโควตา",
+    "healthSummaryFailed": "อ่านสรุปสถานะไม่สำเร็จ ข้อมูลการล็อกโมเดลอาจไม่ครบ",
+    "healthRuntimeObserved": "อัปเดตสถานะ {time}",
+    "healthQuotaObserved": "สังเกตโควตา {time}",
+    "healthOldestQuota": "ข้อมูลโควตาที่เก่าที่สุด: {time}",
+    "healthRecoveryUnknown": "ไม่ทราบเวลาที่จะกู้คืน",
+    "healthDetailsHint": "คลิกเพื่อดูรายละเอียดและการดำเนินการ",
+    "healthFiveHour": "5 ชั่วโมง",
+    "healthOverall": "โดยรวม",
+    "healthAction": "ต้องดำเนินการ",
+    "healthTitle": "ความพร้อมใช้งานของบัญชี",
+    "healthDrag": "ลากเพื่อจัดลำดับผู้ให้บริการ",
+    "healthDragPosition": "{provider}, {count, plural, other {ตำแหน่งที่ {position, number} จาก #}}",
+    "healthResetOrder": "คืนค่าลำดับเริ่มต้น",
+    "healthPool": "กลุ่ม {name}",
+    "healthOtherPool": "บัญชีเดียวกัน · {pool}: {status} (เหลือ {remaining})",
+    "healthIncluded": "รวมที่จำกัดบางส่วน {count, number}",
+    "healthBannerUnavailable": "บัญชีที่ใช้ไม่ได้ชั่วคราว: {count, number}",
+    "healthBannerAvailable": "บัญชีทั้ง {count, number} บัญชีใช้งานได้",
+    "healthLegendHide": "ซ่อนคำอธิบายสัญลักษณ์",
+    "healthLegendShow": "แสดงคำอธิบายสัญลักษณ์",
+    "healthLegendOk": "ทึบ = โควตาที่เหลือ โปร่งแสง = ใช้แล้ว",
+    "healthLegendCooldown": "โควตา {window} หมด ทึบ = เวลาที่รอแล้ว โปร่งแสง = เวลาที่ต้องรอต่อ",
+    "healthLegendAction": "สิทธิ์หมดอายุหรือบัญชีถูกระงับ รออย่างเดียวไม่หาย",
+    "healthLegendPartial": "ยังใช้ได้ ยอดสีเหลือง = โมเดลหรือกลุ่มถูกจำกัด",
+    "healthWaited": "รอแล้ว {percent}",
+    "healthWait": "รออีก {duration} (กลับมาใช้ได้ {time})",
+    "healthFastest": "กลับมาใช้ได้เร็วสุดใน {duration}",
+    "healthRatio": "ใช้ได้ {available, number} / {active, number}",
+    "healthCd5": "5 ชั่วโมง · ระยะเวลารอ",
+    "healthCdw": "รายสัปดาห์ · ระยะเวลารอ",
+    "healthRecentSuccessBypass": "ระบบกำหนดเส้นทางอนุญาตให้ใช้บัญชีนี้เพราะมีคำขอสำเร็จเมื่อไม่นานมานี้",
+    "healthPurchasedBalanceBypass": "ยอดคงเหลือที่ซื้อไว้ช่วยให้ใช้งานต่อได้หลังจากโควตาที่รวมไว้หมด",
+    "healthCutoffAtRequest": "ระบบจะตรวจสอบเกณฑ์โควตาปัจจุบันเมื่อกำหนดเส้นทางคำขอ"
   },
   "modals": {
     "waitingAuth": "รอการอนุญาต",
@@ -11077,7 +11313,8 @@
       "message": "ข้อความ",
       "error": "ข้อผิดพลาด",
       "completion": "การเสร็จสิ้น"
-    }
+    },
+    "statusFilter": "สถานะ"
   },
   "templateNames": {
     "simple-chat": "แชทง่ายๆ",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes} นาทีที่แล้ว",
     "hoursAgo": "{hours} ชั่วโมงที่แล้ว",
     "daysAgo": "{days} วันที่แล้ว",
-    "entries": "รายการ"
+    "entries": "รายการ",
+    "viewSwitcherAria": "มุมมองแคช"
   },
   "proxyConfigModal": {
     "levelGlobal": "ทั่วโลก",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth ยังไม่ได้รับการกำหนดค่า ลงทะเบียนแอปพลิเคชัน OAuth ที่ {applicationsUrl} โดยใช้ URI การเปลี่ยนเส้นทาง {redirectUri} และขอบเขต \"{scopes}\" จากนั้นตั้งค่า {clientIdEnv} (และอาจจะ {clientSecretEnv}) และเริ่มต้นใหม่อีกครั้ง.",
     "gitlabDuoSetupDescription": "หลังจากที่แอปพลิเคชันลงทะเบียนและตั้งค่า env vars บนอินสแตนซ์ OmniRoute นี้แล้ว ให้คลิก Continue เพื่อเริ่มการเข้าสู่ระบบ OAuth.",
     "continue": "ดำเนินการต่อ",
+    "copilotPolicyTitle": "ผู้ให้บริการทดลอง: สถานะนโยบายไม่ชัดเจน",
+    "copilotPolicyLine1": "OmniRoute เชื่อมต่อผ่าน api.githubcopilot.com ซึ่ง GitHub ไม่ได้เผยแพร่เป็นการอนุมานของบุคคลที่สามทั่วไป API การผสานรวมนี้เป็นการทดลองและอาจเปลี่ยนแปลงได้โดยไม่ต้องแจ้งให้ทราบ",
+    "copilotPolicyLine2": "เฉพาะบัญชี GitHub ของคุณเองเท่านั้นที่สามารถเชื่อมต่อได้ อย่าเปิดเผยข้อมูลประจำตัว บัญชีรวม หรือพยายามเกินขีดจำกัดแผนของคุณ",
+    "copilotPolicyLine3": "ผู้ใช้แผนฟรีและแผนนักศึกษาจะได้รับการเลือกรุ่นอัตโนมัติเท่านั้น ข้อกำหนดแผน Copilot ของคุณและขีดจำกัดการใช้งานใดๆ ยังคงเป็นความรับผิดชอบของคุณ",
+    "copilotPolicyAcknowledge": "เข้าใจแล้ว เชื่อมต่อเลย",
     "tabPasteSetupToken": "โทเค็นการตั้งค่า",
     "claudeSetupTokenDescription": "เรียกใช้ `claude setup-token` ในเทอร์มินัลแล้ววางโทเค็นที่แสดงออกมา โทเค็นนี้ใช้ได้หนึ่งปีและไม่มีโทเค็นรีเฟรช OmniRoute จะส่งคำขอทดสอบหนึ่งรายการไปยัง Anthropic ก่อนบันทึก",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "การดำเนินการเพิ่มเติม",
     "test": "ทดสอบ",
     "edit": "แก้ไข",
     "delete": "ลบ",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "ไม่พบรายการที่ถูกต้อง ตรวจสอบรูปแบบแล้วลองอีกครั้ง",
     "bulkImportSuccess": "การนำเข้าเสร็จสมบูรณ์: สร้าง {created} แล้ว, อัปเดต {updated}, {failed} ล้มเหลว",
     "bulkImportErrorLine": "บรรทัด {line}: {reason}",
-    "bulkImportMaxExceeded": "พร็อกซีสูงสุด 100 รายการต่อการนำเข้า",
+    "bulkImportMaxExceeded": "พร็อกซีสูงสุด {max} รายการต่อการนำเข้า",
     "bulkImportPreview": "ดูตัวอย่าง",
     "clearAssignment": "(มอบหมายที่ชัดเจน)",
     "bulkProxyAssignment": "การกำหนดพร็อกซีจำนวนมาก",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "จำกัดอัตราตาม IP (429)",
     "poolSetAsideKindSlow": "การตอบสนองช้า",
     "poolSetAsideKindGeoBlocked": "ถูกบล็อกตามภูมิภาค (403/451)",
+    "poolSetAsideKindOperatorReported": "การขัดข้องที่ผู้ให้บริการรายงาน",
     "poolSetAsideUntil": "กลับเข้าหมุนเวียน {endsAt}",
     "poolSetAsideRepeat": "กันไว้ {count, plural, one {# ครั้ง} other {# ครั้ง}}",
     "poolUnknownAddress": "ที่อยู่ไม่ทราบ",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "ส่งออกโค้ด",
     "exportShort": "ส่งออก",
     "noStateToExport": "ไม่มีสถานะของ Playground ที่พร้อมให้ส่งออก",
-    "closeExportModal": "ปิดหน้าต่างส่งออก",
     "close": "ปิด",
     "exportRealKeyWarning": "คำเตือนความปลอดภัย: การส่งออกถูกบล็อก — ตรวจพบคีย์ API จริงในเอาต์พุต โปรดรีเซ็ตคีย์ API ของคุณแล้วลองอีกครั้ง",
     "placeholderHintPrefix": "แทนที่",
@@ -11808,7 +12052,8 @@
       "nextButton": "ถัดไป",
       "runButton": "รัน",
       "promptPlaceholder": "พิมพ์ข้อความของคุณ… (กด Enter เพื่อส่ง, Shift+Enter เพื่อขึ้นบรรทัดใหม่)"
-    }
+    },
+    "playgroundTabs": "โหมด Playground"
   },
   "miniPlayground": {
     "endpoint": "เอนด์พอยต์",
@@ -11879,7 +12124,8 @@
     "assistant": "ผู้ช่วย",
     "errorLabel": "ข้อผิดพลาด",
     "requestFailed": "คำขอล้มเหลว",
-    "stop": "หยุด"
+    "stop": "หยุด",
+    "messageInputAria": "ข้อความ"
   },
   "requestLogger": {
     "recording": "กำลังบันทึก",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "สลับบัญชี {count} ครั้ง",
       "resilienceRetried": "ลองรอบว่างใหม่อีกครั้ง",
       "resilienceContinued": "ทำต่อกลางสตรีม",
-      "resilienceRecovered": "กู้คืนด้วยการดำเนินการด้านความยืดหยุ่น"
-    }
+      "resilienceRecovered": "กู้คืนด้วยการดำเนินการด้านความยืดหยุ่น",
+      "conversationContext": "บริบทการสนทนา",
+      "goToBottom": "ไปด้านล่างสุด",
+      "liveRefreshOn": "รีเฟรชสด: เปิด",
+      "liveRefreshOff": "รีเฟรชสด: ปิด",
+      "liveRefresh": "รีเฟรชสด",
+      "continuesFromParent": "ดำเนินต่อจากรายการหลัก",
+      "continuesFrom": "ดำเนินต่อจาก {id}",
+      "viewConversation": "ดูการสนทนา",
+      "openConversation": "เปิดการสนทนา {id}"
+    },
+    "tableLabel": "บันทึกคำขอ",
+    "throughputPostFirstToken": "หลังโทเคนแรก",
+    "throughputEndToEnd": "ตั้งแต่ต้นจนจบ",
+    "throughputRate": "{value} โทเคน/วินาที",
+    "throughputExplanation": "อัตราทั้งสองใช้จำนวนที่มากกว่าระหว่างจำนวนโทเคนเอาต์พุตและจำนวนโทเคนการให้เหตุผล อัตราหลังโทเคนแรกจะหัก TTFT ที่ถูกต้องออก มิฉะนั้นจะใช้ระยะเวลาทั้งหมด ส่วนอัตราตั้งแต่ต้นจนจบจะใช้ระยะเวลาทั้งหมดเสมอ การตอบกลับแบบบัฟเฟอร์อาจมีอัตราการส่งแบบเบิร์สต์สูงได้โดยที่โมเดลไม่ได้สร้างเร็วขึ้น"
   },
   "proxyLogger": {
     "filterAll": "ทั้งหมด",
@@ -12112,7 +12372,9 @@
     "colServedBy": "ให้บริการโดย",
     "filterTraffic": "การจราจร",
     "filterTests": "การทดสอบ",
-    "filterSource": "แหล่งที่มา"
+    "filterSource": "แหล่งที่มา",
+    "tableLabel": "บันทึกพร็อกซี",
+    "sortLogs": "จัดเรียงบันทึก"
   },
   "endpointOptions": {
     "speech": "เสียงพูด",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "หมดแล้ว",
     "statusAlerting": "กำลังแจ้งเตือน",
     "statusError": "ข้อผิดพลาด",
-    "moreSuffix": "+{count} รายการเพิ่มเติม"
+    "moreSuffix": "+{count} รายการเพิ่มเติม",
+    "feedFilterLabel": "กรองเหตุการณ์"
   },
   "quotaShare": {
     "weightPercent": "น้ำหนัก %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "ไม่ได้จัดกลุ่ม",
     "ungroupedHint": "พูลเหล่านี้ไม่ได้ถูกมอบหมายให้กับกลุ่มที่รู้จัก แก้ไขพูลเพื่อย้ายไปยังกลุ่มจริง",
     "removeFailed": "ไม่สามารถลบพูลนี้ได้",
-    "dismiss": "ปิด"
+    "dismiss": "ปิด",
+    "allocationsHeading": "การจัดสรร",
+    "wizardRemoveDimension": "ลบมิติ",
+    "wizardRemoveKey": "ลบคีย์"
   },
   "plugins": {
     "title": "ปลั๊กอิน",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "การอัปเดตการตั้งค่าล้มเหลว",
       "serviceRevealApiKey": "{actor} แสดงคีย์ API สำหรับ {target} แล้ว",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "ปิดข้อผิดพลาด"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "ไปตอนนี้",
       "message": "ขณะนี้ MITM Proxy ย้ายไปอยู่ภายใต้ AgentBridge แล้ว",
       "title": "หน้านี้ถูกย้ายแล้ว"
-    }
+    },
+    "dnsOn": "เปิด DNS",
+    "dnsOff": "ปิด DNS",
+    "showServerSettings": "แสดงการตั้งค่าเซิร์ฟเวอร์",
+    "hideServerSettings": "ซ่อนการตั้งค่าเซิร์ฟเวอร์",
+    "upstreamCaTesting": "กำลังทดสอบ…",
+    "removeMapping": "ลบการแมป",
+    "mappingSourcePlaceholder": "เช่น gemini-3.6-flash-medium หรือ * สำหรับรายการทั้งหมดที่ยังไม่ได้แมป",
+    "mappingWildcardHint": "ใช้ * เป็นแหล่งที่มาเพื่อกำหนดเส้นทางทุกโมเดลที่ไม่มีการแมปอย่างชัดเจนผ่าน OmniRoute ไปยังเป้าหมายที่เลือก แหล่งที่มาที่ตรงกันทุกประการจะมีลำดับความสำคัญเหนือ * เสมอ",
+    "wizardDetectingModels": "กำลังตรวจหาโมเดลจากทราฟฟิกที่ดักจับ...",
+    "wizardDetectedModels": "พบ {count, plural, one {# โมเดล} other {# โมเดล}} ในทราฟฟิกที่ดักจับ เลือกโมเดลที่คุณต้องการเพิ่ม:",
+    "wizardSelectedModels": "เลือกแล้ว {count, plural, one {# โมเดล} other {# โมเดล}} คุณจะแมปโมเดลเหล่านี้กับโมเดล OmniRoute ในหน้าจอถัดไป",
+    "wizardAddModels": "เพิ่ม {count, plural, one {# โมเดล} other {# โมเดล}}",
+    "wizardNoModelsDetected": "ยังตรวจไม่พบโมเดล ใช้ {agent} เพื่อส่งคำขอ แล้วเรียกใช้วิซาร์ดนี้อีกครั้งเพื่อตรวจหาโมเดลจากทราฟฟิกโดยอัตโนมัติ",
+    "wizardNoModelsHint": "หรือปิดวิซาร์ดนี้แล้วเพิ่มการแมปด้วยตนเองในการ์ดเอเจนต์"
   },
   "providerStats": {
     "unknownError": "ข้อผิดพลาดที่ไม่รู้จัก",
@@ -12685,7 +12966,12 @@
     "avgTtft": "TTFT เฉลี่ย",
     "avgTotal": "รวมเฉลี่ย",
     "requestTelemetry": "เทเลเมทรีของคำขอ",
-    "requestTelemetryDescription": "รายละเอียดไปป์ไลน์ 7 เฟส (5 นาทีล่าสุด)"
+    "requestTelemetryDescription": "รายละเอียดไปป์ไลน์ 7 เฟส (5 นาทีล่าสุด)",
+    "title": "สถิติผู้ให้บริการ",
+    "description": "ทราฟฟิก เวลาแฝง และอัตราความสำเร็จแยกตามผู้ให้บริการและโมเดล",
+    "combo": "แบบรวม",
+    "toggleModels": "แสดงโมเดลสำหรับ {provider}",
+    "windowSince": "ตั้งแต่ {date}"
   },
   "relay": {
     "title": "พร็อกซี Serverless Relay",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "ไม่มีเนื้อหาคำขอ.",
     "noResponseBody": "ไม่มีเนื้อหาการตอบกลับ.",
     "formatted": "จัดรูปแบบแล้ว",
-    "raw": "ข้อมูลดิบ"
+    "raw": "ข้อมูลดิบ",
+    "requestCount": "{count, plural, one {# คำขอ} other {# คำขอ}}",
+    "expandList": "ขยายรายการ",
+    "collapseList": "ยุบรายการ",
+    "snippetLanguage": "ภาษาของข้อมูลโค้ด",
+    "headersTable": "ส่วนหัว",
+    "showSecrets": "แสดงข้อมูลลับ",
+    "maskSecrets": "ซ่อนข้อมูลลับ",
+    "llmNotAvailable": "ไม่มีข้อมูลเมตา LLM สำหรับคำขอนี้",
+    "llmStreamYes": "ใช่ (SSE)",
+    "llmStreamNo": "ไม่",
+    "llmTotalTokens": "รวม: {count} โทเค็น"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "โค้ด CLI",
     "pageSubtitle": "เครื่องมือโค้ดที่ชี้ไปยัง OmniRoute",
     "searchPlaceholder": "ค้นหา CLI…",
     "filterDetectionLabel": "การตรวจหา",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "ไม่พบ",
     "baseUrlAll": "ทั้งหมด",
     "baseUrlFull": "เต็มรูปแบบ",
-    "baseUrlPartial": "บางส่วน"
+    "baseUrlPartial": "บางส่วน",
+    "title": "โค้ด CLI"
   },
   "cliAgents": {
     "pageTitle": "เอเจนต์ CLI",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "สัดส่วนการเรียกที่ผู้ให้บริการรายนี้ตอบกลับจริงในช่วง 24 ชั่วโมงที่ผ่านมา เครื่องหมายขีดหมายถึงมีปริมาณการใช้งานน้อยเกินกว่าจะระบุอัตราได้",
     "reliabilitySample": "การเรียกสำเร็จ {successes} จาก {requests} ครั้งในช่วง {hours} ชั่วโมงที่ผ่านมา",
     "reliabilityTooFew": "มีการเรียกเพียง {requests} ครั้งในช่วง {hours} ชม.ที่ผ่านมา — น้อยเกินกว่าจะระบุอัตราได้",
-    "reliabilityNoTraffic": "ไม่มีการเรียกที่บันทึกไว้ในช่วง 24 ชม.ที่ผ่านมา"
+    "reliabilityNoTraffic": "ไม่มีการเรียกที่บันทึกไว้ในช่วง 24 ชม.ที่ผ่านมา",
+    "categoryFilter": "หมวดหมู่งาน"
   },
   "discovery": {
     "title": "การค้นหาผู้ให้บริการ",
@@ -13330,7 +13628,11 @@
     "method": "วิธีการ",
     "auth": "การยืนยันตัวตน",
     "feasibility": "ความเป็นไปได้",
-    "models": "โมเดล"
+    "models": "โมเดล",
+    "provider": "ผู้ให้บริการ",
+    "status": "สถานะ",
+    "endpoint": "เอ็นด์พอยต์",
+    "actions": "การดำเนินการ"
   },
   "noAuthProvider": {
     "title": "ไม่ต้องยืนยันตัวตน",
@@ -13379,7 +13681,8 @@
     "ownProxy": "พร็อกซีของตัวเอง",
     "freeTierPause": "โมเดล {model} ถูกหยุดชั่วคราว (429) จะกลับมาที่ {time}",
     "freeTierPauseProvider": "หยุดชั่วคราว (429) จะกลับมาที่ {time}",
-    "freeTierPauseNote": "การหยุดชั่วคราวภายในโพรเซสบนอินสแตนซ์นี้"
+    "freeTierPauseNote": "การหยุดชั่วคราวภายในโพรเซสบนอินสแตนซ์นี้",
+    "proxyType": "ประเภทพร็อกซี"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "ความสำเร็จที่ซ่อนอยู่กำลังรออยู่...",
         "criteria": "ทำความสำเร็จที่ซ่อนอยู่ให้สำเร็จเพื่อเปิดเผยตราสัญลักษณ์นี้."
       }
-    }
+    },
+    "leaderboardTitle": "กระดานผู้นำ",
+    "leaderboardDescription": "อันดับและความสำเร็จจากคีย์ API ของคุณ",
+    "badgeLocked": "ล็อกอยู่"
   },
   "featureFlags": {
     "title": "ฟีเจอร์แฟล็ก",
@@ -13610,7 +13916,9 @@
       "disabled": "ปิดใช้งาน",
       "dual": "แบบคู่",
       "alias": "นามแฝง",
-      "canonical": "มาตรฐาน"
+      "canonical": "มาตรฐาน",
+      "fail_closed": "บล็อก (fail_closed)",
+      "count_as_zero": "นับเป็น $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "การหยุดจากโครงสร้างพื้นฐานของลำดับความสำคัญแบบมีการป้องกันเป็น 502",
         "description": "ตอบกลับด้วย 502 แทน 503 เมื่อเป้าหมายแบบมีลำดับความสำคัญซึ่งจะใช้ทางเลือกสำรองเฉพาะเมื่อเกิดปัญหาโควตาหยุดคอมโบด้วยสาเหตุที่พิสูจน์ได้ว่าไม่เกี่ยวกับโควตา ได้แก่ เซอร์กิตเบรกเกอร์ของผู้ให้บริการที่เปิดอยู่ หรือการข้ามตามการคาดการณ์เวลาแฝง"
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "บันทึก ID บัญชี",
+        "description": "รวมคำนำหน้าบัญชีในบรรทัดบันทึกเหตุการณ์ AUTH (เช่น \"กำลังใช้บัญชี '<provider>': abc12345...\") ปิดไว้เป็นค่าเริ่มต้นเพื่อไม่ให้ตัวระบุบัญชีปรากฏในบันทึกการประมวลผลแบบแชร์/มัลติทีนเอ้นต์ ไม่ขึ้นกับโหมดดีบัก; การเปิดหรือปิดโหมดดีบักจะไม่เปิดเผยข้อมูลนี้"
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "ปิดการล็อกอินด้วยรหัสผ่านเมื่อใช้ OIDC",
+        "description": "เมื่อเปิดใช้งาน OIDC ปิดการล็อกอินด้วยรหัสผ่านเพื่อให้ผู้ใช้ยืนยันตัวตนได้เฉพาะผ่าน OIDC Single Sign-On เท่านั้น เมื่อปิด (ค่าเริ่มต้น) ทั้งการล็อกอินด้วยรหัสผ่านและ OIDC จะยังคงใช้งานได้ตามปกติ"
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "โหนดผู้ให้บริการเสียงระยะไกล",
+        "description": "อนุญาตให้เส้นทางการจัดการ /v1/audio/* ใช้โหนดผู้ให้บริการที่เข้ากันได้กับ OpenAI ซึ่งโฮสต์อยู่ภายนอก localhost ปิดไว้เป็นค่าเริ่มต้น — การส่งต่อข้อมูลเสียงไปยังโฮสต์ระยะไกลจะเปลี่ยนอัตลักษณ์การออกของข้อมูล และต้องเป็นการตัดสินใจอย่างชัดเจนของโอเปอเรเตอร์ โหนดลูปแบ็กจะได้รับการอนุญาตเสมอและไม่ได้รับผลกระทบ"
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "โหนดผู้ให้บริการ Rerank ระยะไกล",
+        "description": "อนุญาตให้ POST /v1/rerank (และขั้นตอน rerank ของ memory engine ซึ่งเรียกผ่านลูปแบ็ก) ใช้โหนดผู้ให้บริการที่เข้ากันได้กับ OpenAI ซึ่งโฮสต์อยู่ภายนอก localhost — เช่น กล่องบนเครือข่าย LAN หรือเพื่อนร่วม Tailscale ที่รัน TEI, Infinity, vLLM ฯลฯ ปิดไว้เป็นค่าเริ่มต้น — การส่งต่อไปยังโฮสต์ระยะไกลจะเปลี่ยนอัตลักษณ์การออกของข้อมูล และต้องเป็นการตัดสินใจอย่างชัดเจนของโอเปอเรเตอร์ โหนดลูปแบ็กจะได้รับการอนุญาตเสมอและไม่ได้รับผลกระทบ โหนดระยะไกลจะต้องผ่านนโยบาย URL ออกของผู้ให้บริการด้วย"
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "มาตรการรักษาความปลอดภัยเครือข่ายหมุนเวียนแบบแชร์อีกรีส",
+        "description": "เมื่อเกิดข้อยกเว้นบนเครือข่าย (หมดเวลา, การเชื่อมต่อถูกปฏิเสธ/รีเซ็ต) สำหรับตัวดำเนินการแบบหมุนเวียนหลายบัญชี และบัญชีที่ล้มเหลวไม่มีพร็อกซีเฉพาะ แอปพลิเคชันจะทำการคูลดาวน์สั้น ๆ และข้ามบัญชีที่ไม่มีพร็อกซีอื่น ๆ สำหรับระยะที่เหลือของคำขอนั้น แทนการลองใหม่ทีละบัญชี เปิดใช้งานเป็นค่าเริ่มต้น (ปลอดภัย: ไม่เปลี่ยน IP การออก มีเพียงการลดความเสี่ยงด้านค่าหน่วง/คูลดาวน์สำหรับบัญชีที่ใช้ egress ร่วมกัน) ปิดเพื่อเรียกคืนการแพร่กระจายทันทีเมื่อเกิด throw ครั้งแรกบนบัญชีที่ไม่มีพร็อกซี"
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "ข้ามโพรกซีที่เพิ่งล้มเหลว",
+        "description": "พูลโพรกซีและการหมุนเวียนรายบัญชีของ opencode จะหยุดใช้โพรกซีที่เพิ่งล้มเหลวซ้ำ (การตรวจสอบ TCP ถูกปฏิเสธ หรือได้รับ 429 ผ่านโพรกซีนั้น) เป็นระยะเวลาต่อโปรเซสที่เพิ่มเป็นสองเท่าทุกครั้งที่เกิดซ้ำ จนถึงค่าสูงสุด ไม่มีการบันทึกสถานะโพรกซี และหากพักตัวเลือกทั้งหมดไว้ การเลือกจะไม่เปลี่ยนแปลง เปิดใช้งานโดยค่าเริ่มต้น: ลำดับการเลือกจะเป็นการหมุนเวียนแบบธรรมดาทุกประการก็ต่อเมื่อ PROXY_SKIP_RECENTLY_FAILED=false"
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "ลำดับโพล egress ทั่วไป",
+        "description": "สำหรับผู้ให้บริการที่ปริมาณการใช้งานถูกแบ่งตามที่อยู่ egress ให้จัดอันดับสมาชิกโพลที่แบ่งปันที่อยู่ egress ที่สังเกตได้ของสมาชิกที่ถูกปฏิเสธเมื่อไม่นานมาอยู่ใต้สมาชิกที่มีสุขภาพดีเท่านั้น เป็นการจัดลำดับเท่านั้น ไม่มีการตัดออก จำเป็นต้องใช้ PROXY_SKIP_RECENTLY_FAILED ซึ่งสร้างสัญญาณการปฏิเสธให้มันอ่าน ปิดใช้งานโดยค่าเริ่มต้น: ลำดับการเลือกเป็นการวนเวียนธรรมดาเท่านั้น"
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "บันทึกการระบุที่มาของลำดับการวนเวียน",
+        "description": "การวนเวียนของ Opencode จะบันทึกว่าบัญชีใดให้บริการหรือถูกข้าม (เฉพาะ ID ที่ถูกบดบังเท่านั้น ไม่มีการแสดง ID บัญชีเต็มรูปแบบ) และเชื่อมโยงบันทึกเหตุการณ์โพรกซีกับคำขอ เพื่อให้ผู้ดำเนินการแยกบัญชีที่ถูกข้ามออกจากบัญชีที่ไม่ได้ใช้งานออกได้ ปิดใช้งานโดยค่าเริ่มต้น: ไม่มีบรรทัดบันทึกเพิ่มเติม และไม่มีคอลัมน์ที่เขียนเพิ่ม"
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "การสังเกต Egress ของโพลโพรกซี",
+        "description": "แสดงจำนวน IP ที่สังเกต egress ที่ให้บริการสมาชิกภายใต้โพลโพรกซีในหน้าแดชบอร์ดในช่วง 24 ชั่วโมงที่ผ่านมา จำนวนการเชื่อมต่อที่ใช้ IP เหล่านั้น และจำนวนที่พบมากที่สุดภายใต้ IP เดียว เป็นการอ่านเท่านั้น คำนวณจากบันทึกโพรกซี ไม่เคยใช้สำหรับการกำหนดเส้นทาง ปิดใช้งานโดยค่าเริ่มต้น: ตัวแก้ไขโพลไม่มีการเปลี่ยนแปลง และเส้นทางสังเกตจะตอบกลับ null"
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Egress ของผู้ดำเนินการโพรกซี",
+        "description": "ยอมรับที่อยู่ที่สังเกตได้พร้อมวันที่ที่ผู้ดำเนินการส่งต่อให้สมาชิกโพลแต่ละราย และรวมกับบันทึกการอ่านสำหรับการแสดงและลำดับโพล ปิดใช้งานโดยค่าเริ่มต้น: เส้นทาง push จะตอบกลับ 404 และการอ่านโพลจะทำงานเหมือนเดิมทุกประการ"
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "การหมุนเวียนเมื่อ OpenCode Responses ล่าช้า",
+        "description": "สำหรับตัวประมวลผล OpenCode ให้เฝ้าดูข้อมูล body ไบต์แรกของคำตอบแบบสตรีมของ Responses (ช่วงเวลาที่กำหนด: RESPONSES_FIRST_BYTE_TIMEOUT_MS ค่าเริ่มต้นคือ 15000) ถ้าสตรีมของ Responses ที่ส่งกลับเป็นสถานะ 2xx ไม่ส่งข้อมูลใดๆ ในช่วงเวลาที่กำหนด จะถูกลักระบุว่าล่าช้า: บัญชีดังกล่าวจะถูกลดการทำงานชั่วคราวและคำขอจะหมุนเวียนไปยังบัญชีถัดไปหนึ่งครั้งเท่านั้น; การล่าช้าครั้งที่สองจะล้มเหลวทันที ปิดใช้งานโดยค่าเริ่มต้น: สตรีมที่ล่าช้าจะยังคงรอมจนกว่าจะครบกำหนดเวลาความพร้อมของสตรีม"
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "การหมุนเวียนเมื่อ OpenCode user_blocked",
+        "description": "สำหรับตัวประมวลผล OpenCode เมื่อ upstream ตอบกลับด้วยโค้ด 403 หรือ 451 พร้อมข้อปฏิเสธ user_blocked (ไม่เป็นการบล็อกตามภูมิศาสตร์ และไม่เป็นการปฏิเสธ fingerprint จาก Cloudflare) ให้ลดการทำงานของบัญชีที่ถูกปฏิเสธลงและหมุนเวียนไปยังบัญชีถัดไปมากสุดหนึ่งครั้งต่อคำขอ; การปฏิเสธครั้งที่สองจะถูกส่งกลับตามเดิมโดยไม่ติดสถานะสำเร็จ ปิดใช้งานโดยค่าเริ่มต้น: การหลีกเลี่ยงการบล็อกผู้ใช้จาก upstream อาจดูเหมือนการหลบเลี่ยงและแพร่ขยายการติดธงไปยังบัญชีทั้งหมด ดังนั้นข้อปฏิเสธจะถูกส่งกลับโดยไม่เปลี่ยนแปลงเว้นแต่ผู้ดำเนินการเลือกเปิดใช้งาน"
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "การหน่วงการสลับชั่วคราวของ OpenCode",
+        "description": "สำหรับการหมุนเวียนหลายบัญชีของ OpenCode ให้หยุดรอชั่วคราวก่อนส่งต่อไปยังบัญชีถัดไปเมื่อสองครั้งติดกันล้มเหลวด้วยข้อผิดพลาดแบบชั่วคราวจาก upstream (5xx หรือการปฏิเสธ 400 ที่ว่างเปล่า) การหยุดรอลดลงจะเริ่มต้นที่ 1.5 วินาที คูณสองเท่าสำหรับความล้มเหลวที่ต่อเนื่อง และถูกจำกัดไว้ที่ 6 วินาทีต่อหยุดหนึ่งครั้ง และ 10 วินาทีต่อคำขอหนึ่งครั้ง จะข้ามการหยุดรอเมื่อ client หลุดการเชื่อมต่อ และ body ของการตอบกลับที่ล้มเหลวจะถูกริบออกก่อนหยุดรอ ปิดใช้งานโดยค่าเริ่มต้น: การสลับจะเกิดขึ้นทันที"
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "การลองใหม่เมื่อ Turn ว่างเปล่า",
+        "description": "สำหรับรอบการสตรีมที่แปลภาษาแล้ว เมื่อ upstream turn ไม่มีเนื้อหาที่ใช้ได้ (การเติมเต็มที่มีเพียง reasoning หรือจำนวน chunk ที่มีคุณค่าเป็นศูนย์) ให้ลองใหม่ตามขอบเขตที่จำกัดผ่านเส้นทาง credential ปกติ (มากสุดที่ `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) ก่อนที่จะแสดงอะไรให้ client ปิดใช้งานโดยค่าเริ่มต้น: รอบที่ว่างเปล่ายังคงใช้พฤติกรรมปัจจุบัน (200 ว่างเปล่า หรือ 502 ที่เนื้อหาว่างเปล่า)"
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "การกู้คืนสตรีมว่างจาก sibling",
+        "description": "สตรีม Claude/Codex: หลังเหตุการณ์ lifecycle แรก ให้ตรวจสอบเนื้อหาที่ใช้งานได้ (มากสุด 1 วินาที / 64 KiB) สตรีมที่สิ้นสุดโดยไม่มีเนื้อหากลายเป็นการล้มเหลวแบบ empty_content ที่ใช้การลองใหม่แบบมีขอบเขตเดิมใน eligible connection อื่น (ไม่มี cooldown, ไม่มี model lockout) และการจับคู่แบบ round-robin จะหยุดการลองใหม่เมื่อ client หลุดการเชื่อมต่อ ยังถือว่า refusal, pause_turn และ model_context_window_exceeded เป็นเงื่อนไขสิ้นสุดที่สมเหตุสมผลในขั้นตรวจสอบ ปิดใช้งานโดยค่าเริ่มต้น: ความพร้อม, การจัดการเนื้อหาว่าง และการลองใหม่ของชุดจับคู่ยังคงเหมือนเดิม"
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "เครื่องมือตรวจจับการส่งผลลัพธ์แบบสตรีมที่ล่าช้า",
+        "description": "เครื่องมือตรวจจับผลลัพธ์แบบสตรีม: หลังจากส่งผลลัพธ์ไปแล้ว 64 ชิ้น (chunk) แรก ให้สุ่มตัวอย่าง 1 ใน 16 ชิ้นเพื่อตรวจสอบผลลัพธ์แรกที่จะแสดงผล เพื่อให้การส่งผลลัพธ์ที่เริ่มต้นล่าช้ายังคงแสดงว่าสตรีมได้ส่งผลลัพธ์แล้ว ข้อผิดพลาดระดับ 5xx ที่เกิดขึ้นเพียงรายการเดียวหลังจากจุดนั้นจะไม่ถูกบันทึกเป็นการล็อกโมเดลแบบถาวร แต่จะถูกรวมอยู่ในขอบเขตของคำขอ (request-scoped) และค่า firstOutputMs จะถูกเติมกลับไปที่ชิ้นผลลัพธ์แรกของช่วงสุ่มตัวอย่างปัจจุบัน ปิดการใช้งานโดยค่าเริ่มต้น: จะตรวจสอบเฉพาะ 64 ชิ้นแรกที่ส่งผ่านเท่านั้น ตามรูปแบบเดิม"
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "หยุดทำงานก่อนหน้าด้วยอัตราส่วนถูกจำกัด 429 ของ OpenCode",
+        "description": "สำหรับการเปลี่ยนสลับบัญชีหลายบัญชีของ OpenCode หยุดการเปลี่ยนสลับบัญชีที่ค่าสถานะ 429 แรกที่ถูกจำแนกว่าเป็นข้อจำกัดอัตราส่วนที่แท้จริง (เช่น ลิงก์ Retry-After ที่แก้ไขวิเคราะห์ได้ หรือเนื้อหาที่กำหนดขีดจำกัดการใช้/อัตราส่วน) และส่งค่าสถานะ 429 จากสายข้อมูลเดิมกลับโดยไม่เปลี่ยนแปลง (สถานะ เนื้อหา ลิงก์ Retry-After และหัวข้อมูลโควต้า) แทนที่จะพยายามใช้บัญชีที่เหลือทั้งหมด ค่า 429 ที่ไม่ถูกจำแนกจะยังคงถูกเปลี่ยนสลับบัญชีตามปกติ ปิดการใช้งานโดยค่าเริ่มต้น: แผนฟรีถูกจำกัดตาม IP ออก (egress IP) (#9611) ดังนั้นค่า 429 ทุกตัวจะถูกเปลี่ยนไปบัญชีถัดไป และการเปลี่ยนสลับบัญชีที่หมดแล้วจะส่งค่าสถานะ 429 สุดท้ายจากสายข้อมูลกลับ"
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "พักและเริ่มใหม่เมื่อเจอ 429 ของ OpenCode",
+        "description": "สำหรับการเปลี่ยนสลับบัญชีหลายบัญชีของ OpenCode หยุดพักคำขอชั่วคราวเมื่อเกิดค่า 429 ชั่วคราวซ้ำๆ (หรือมีตัวบ่งชี้ความตึงเครียดของโพลแบบใหม่) พร้อมการส่งสัญญาณใจเต้น (heartbeat) จากนั้นส่งคำขอนั้นใหม่อีกครั้งผ่านลำดับบัญชีไม่เกิน 3 บัญชีแทนที่จะกระจายไปยังกองเรือทั้งหมด ปิดการใช้งานโดยค่าเริ่มต้น: ค่า 429 ทุกตัวจะถูกเปลี่ยนไปบัญชีถัดไปตามรูปแบบเดิม"
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "ลองใหม่อีกครั้งเมื่อการเตรียมพร้อมสตรีมติดขัด",
+        "description": "สำหรับคำขอแชทแบบสตรีม เมื่อสายข้อมูลแรกจากต้นทางติดขัดก่อนจะสร้างเหตุการณ์ที่ใช้ได้ ให้ลองใหม่อีกครั้งผ่านเส้นทางการกำหนดเส้นทางเดิมพร้อมงบประมาณการเตรียมพร้อมเดิมและไม่มีการปรับคะแนนลงโทษบัญชี ปิดการใช้งานโดยค่าเริ่มต้น: สายข้อมูลที่ติดขัดจะส่งผลให้คำขอล้มเหลวโดยไม่มีโอกาสลองใหม่"
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "เลือกสมาชิกใหม่ในโพลเมื่อเจอ 429 ของ OpenCode",
+        "description": "สำหรับการเปลี่ยนสลับบัญชีหลายบัญชีของ OpenCode หากเกิดค่า 429 จากผู้ให้บริการที่ถูกแบ่งตามกล่อง IP ออก (egress-bucketed) บนบัญชีที่ไม่มีพร็อกซีภายใต้บริบทของโพลทั่วไป ให้ขออนุญาตโพลการเชื่อมต่อเลือกสมาชิกใหม่สำหรับคราวถัดไปแทนที่จะลองใช้ที่อยู่ IP ออกเดิมซ้ำใหม่ โพลที่หมดสมาชิกแล้วจะยังคงทำงานตามพฤติกรรมเดิม ปิดการใช้งานโดยค่าเริ่มต้น: ค่า 429 ทุกตัวจะถูกเปลี่ยนไปบัญชีถัดไปตามรูปแบบเดิม"
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "ลายพิมพ์นิ้วมือไคลเอนต์ OpenCode v2",
+        "description": "ส่งลายนิ้วมือไคลเอนต์ CLI ของ OpenCode v2 ในคำขอ OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli และ x-opencode-client cli, คง User-Agent ของไคลเอนต์ไว้เฉพาะเมื่อเป็นไคลเอนต์ OpenCode 2.x และในคำขอระดับฟรีที่มีการจำกัดจะไม่ส่ง x-opencode-request, สะท้อนเซสชันไปยัง x-opencode-session-id/x-session-affinity/x-session-id, ใช้สคีมา read/shell ของ CLI v2 กับเครื่องมือ placeholder ที่แทรกเข้าไป และตัด tool_choice ที่เป็น \"none\" ออก ปิดโดยค่าเริ่มต้น: คำขอ OpenCode ทุกคำขอคงตัวตน เฮดเดอร์ และเนื้อหาเดิมทุกไบต์"
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "การล็อกเอาท์ IP อีกรีซ OpenCode Zen",
+        "description": "เพิ่ม OpenCode Zen (opencode-zen) เข้าในกลุ่มการล็อกเอาต์ egress-IP เริ่มต้น เพื่อให้ 429 บนการเชื่อมต่อ Zen หนึ่งรายการทำให้การเชื่อมต่อ Zen อื่นทั้งหมดที่ใช้ egress IP เดียวกันเข้าสู่คูลดาวน์ด้วย ปิดเป็นค่าเริ่มต้น: Zen ใช้คีย์ และแต่ละการเชื่อมต่อจะคูลดาวน์แยกกันเหมือนเดิมทุกประการ ค่า OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS ที่กำหนดไว้อย่างชัดเจนจะมีผลเหนือแฟล็กนี้เสมอ"
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "กฎข้อผิดพลาดทั้งข้อความของ OpenCode",
+        "description": "ให้กฎข้อผิดพลาด OpenCode ในตัว (opencode-zen, opencode-go, opencode-cli) จับคู่กับข้อความข้อผิดพลาดจากอัปสตรีมแบบเต็ม เพื่อให้เครื่องหมายในเนื้อเรื่อง เช่น organization_quota_exceeded หรือ \"monthly usage limit reached\" จัดประเภท 429 เป็นหมดโควตาพร้อมการล็อกในช่วงเวลาการเชื่อมต่อ ปิดเป็นค่าเริ่มต้น: กฎเหล่านี้จะเห็นเฉพาะโค้ดข้อผิดพลาดแบบโครงสร้าง และ 429 ดังกล่าวจะยังเป็นขีดจำกัดอัตราสั้นๆ ตามเดิม"
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "กฎข้อผิดพลาดทั้งข้อความของ Cloudflare Workers AI",
+        "description": "ให้กฎข้อผิดพลาด Cloudflare Workers AI ในตัวจับคู่กับข้อความข้อผิดพลาดจากอัปสตรีมแบบเต็ม เพื่อให้เนื้อเรื่อง 429 \"daily free allocation\" ถูกจัดประเภทเป็นหมดโควตาแทนที่จะเป็นขีดจำกัดอัตราสั้นๆ ปิดเป็นค่าเริ่มต้น: กฎจะเห็นเฉพาะโค้ดข้อผิดพลาดแบบโครงสร้างตามเดิม"
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "ตัวกรองความสามารถ",
+        "description": "ปฏิเสธคำขอก่อนส่งเมื่อโมเดลเป้าหมายขาดความสามารถที่จำเป็น (การมองเห็น เครื่องมือ การจัดรูปแบบการส่งออก หน้าต่างบริบท) ป้องกันคำขอจากซัพพลายเออร์เดียวโดยตรงที่หลีกเลี่ยงตัวกรองความเข้ากันได้ระดับคอมโบ"
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "ละเลยการใช้งานที่ไม่มีราคาในโควต้า USD",
+        "description": "นับการใช้งานของโมเดลที่ไม่มีราคาเป็น 0 ดอลลาร์สหรัฐในโควต้าการใช้งาน USD ต่อคีย์ แทนที่จะถือว่าเกินโควต้า ปิดการใช้งานเป็นค่าเริ่มต้น: โมเดลหรือไอดีแบบกำหนดเส้นทางที่ไม่มีราคาอาจบดบังการใช้จ่ายจริง จึงปล่อยให้โควต้าล้มเหลวไปทางที่ปลอดภัย"
+      },
+      "RADAR_ENABLED": {
+        "label": "เรดาร์",
+        "description": "เปิดใช้งานโมดูล OmniRoute Radar (หน้าจอ feed แคตตาล็อกและซิงค์) ปิดใช้งานเป็นค่าเริ่มต้น การเปิดใช้งานจะปลดล็อกเฉพาะส่วน UI เท่านั้น การซิงค์ข้อมูลยังคงเป็นทางเลือกแยกส่วนต่างหาก"
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "ประตูความสามารถของปลายทางโมเดล",
+        "description": "บังคับใช้แท็กปลายทางโมเดลที่เชื่อถือได้ (ซึ่งประกาศโดยแคตตาล็อกผู้ให้บริการ ลากิจจากไอดีโมเดลพิเศษ หรือตั้งค่าโดยโอเปอเรเตอร์): ปฏิเสธคำขอที่ส่งไปยังปลายทางที่โมเดลไม่มีบริการด้วย HTTP 400 ก่อนการรับคำสั่งบน /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations และ /v1/audio/*; ซ่อนโมเดลที่แท็กปลายทางไม่มีอะแดปเตอร์ OmniRoute ออกจาก /v1/models; และตอบด้วย 422 สำหรับการทดสอบโมเดลบนแดชบอร์ดกับโมเดลดังกล่าว ปิดใช้งานเป็นค่าเริ่มต้น: แท็กปลายทางยังคงเป็นการข้อมูลและคำขอจะถูกส่งคำสั่งตามที่เดิม"
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "การส่งบริบทสากล",
+        "description": "สร้างและแทรกสรุปการสนทนาเมื่อการรับคำสั่งแบบคอมโบสลับโมเดล ปิดใช้งานเพื่อจัดการการสลับโมเดลโดยอิสระและป้องกันการส่งคำขอส่งบริบทเบื้องหลังสำหรับคอมโบที่มีอยู่และในอนาคตทั้งหมด"
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "การนำเหตุผลมาแสดงใหม่",
+        "description": "เก็บแคชและนำเหตุผลของโมเดลมาแสดงใหม่ระหว่างบทสนทนาหลายเทิร์น ปิดใช้งานเพื่อหยุดการเก็บและแทรกเหตุผลซ้ำ"
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "การรับส่งข้อมูลของเซิร์ฟเวอร์แอป Codex",
+        "description": "อนุญาตให้ Codex ใช้การรับส่งข้อมูล JSON-RPC ผ่าน WebSocket ของเซิร์ฟเวอร์แอปในเครื่อง (codexTransport=app-server) เมื่อปิดไว้ การเชื่อมต่อที่เลือกใช้งาน app-server จะกลับไปใช้การรับส่งข้อมูลอื่นของ Codex"
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "ชื่อ_ALIAS สำหรับค้นหา Claude Code",
+        "description": "ประกาศรหัสกระจก claude/'<provider>'/'<model>' บน /v1/models เพื่อให้การค้นหารุ่นผ่าน gateway ของ Claude Codeแสดงรายชื่อรุ่นที่ไม่ใช่ Claude คำเตือน: เมื่อเปิดใช้งานทั่วโลก รายการใน catalog จะเพิ่มขึ้นเป็นสองเท่าสำหรับไคลเอนต์ทั้งหมด"
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "ชื่อ_ALIAS สำหรับรุ่นที่ไม่รองรับการคิด (No-Thinking)",
+        "description": "สวิตช์หลักสำหรับชื่อ_ALIAS ของ gateway ที่ขึ้นต้นด้วย no-think/'<provider>'/'<model>' เมื่อเปิด (ค่าเริ่มต้น): /v1/models จะประกาศ version ที่ไม่คิด (no-thinking) สำหรับทุก model ของ Claude ที่รองรับการคิด และ ID ที่ขึ้นต้นด้วย no-think/ ในคำขอจะถูกกลับไปแก้ที่ model จริงโดยปิดการให้เหตุผล เมื่อปิด: จะไม่มีการประกาศ version และ ID ที่ขึ้นต้นด้วย no-think/ จะถูกจัดการเหมือนรหัส model ที่ไม่รู้จักอื่น การเลือกใช้หรือหยุดใช้ ModelSpec.noThinkingAlias สำหรับแต่ละ model ยังคงมีผลเมื่อสวิตช์นี้เปิดอยู่"
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "ปิดใช้งาน version ระดับการคิด (Thinking Level)",
+        "description": "ปิดการใช้งานการสร้าง version ระดับการคิด (เช่น -low, -medium, -high) ใน catalog ของ /v1/models"
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "ช่องทางเข้าใช้งานเสมือนแบบปรับค่าอัตโนมัติ (Adaptive Virtual Admission Lanes)",
+        "description": "เปิดใช้งานช่องทางเข้าใช้งานเสมือนแบบปรับค่าอัตโนมัติแยกตามผู้เช่า (per-tenant) สำหรับการส่งต่อถึง provider (#9654): การใช้งานหนักจากผู้ใช้คนหนึ่งจะไม่ทำให้ผู้ใช้คนอื่นได้รับข้อผิดพลาด 503 ส่วนตัวแปรสภาพแวดล้อม OMNIROUTE_CHAT_VIRTUAL_LANES จะเหนือกว่าการตั้งค่าจาก dashboard นี้ การเปลี่ยนแปลงจะเกิดผลเมื่อเริ่มต้นเซิร์ฟเวอร์ใหม่"
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Functional Gateway Mirrors",
+        "description": "เผยแพร่ id การทำ mirror ในรูปแบบ '<gateway-alias>'/'<model>' บน /v1/models สำหรับโมเดลที่เจ้าของหลักไม่มีข้อมูลการตรวจสอบสิทธิ์ที่ทำงานอยู่ แต่ gateway แบบส่งผ่าน (passthrough) ที่มีข้อมูลการตรวจสอบสิทธิ์ทำงานอยู่จะ route โมเดลเหล่านี้ให้ คำเตือน: เมื่อเปิดใช้งานในระดับ global จะเพิ่มรายการลงในแคตตาล็อกสำหรับทุกไคลเอนต์"
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "ยอดคงเหลือ New-API Aggregator",
+        "description": "เปิดใช้การตรวจจับยอดคงเหลือสำหรับโหนดที่เข้ากันได้กับ aggregator New-API / One-API / Sub2API เมื่อเปิดใช้งาน โหนดที่เข้ากันได้ซึ่งตั้งค่า flag aggregator ไว้จะรายงานยอดคงเหลือในแดชบอร์ดและในการกำหนดเส้นทางแบบ quota-preflight"
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "ซ่อนการเชื่อมต่อจากการค้นหาที่ถูกลบ",
+        "description": "สถิติการค้นหาและการค้นหายอดนิยมจะนับเฉพาะผู้ให้บริการที่ยังมีการเชื่อมต่อทำงานอยู่เท่านั้น (ผู้ให้บริการแบบไม่ใช้คีย์ เช่น duckduckgo-free จะถูกนับเสมอ) การปิดจะเก็บแถวการค้นหาที่ถูกรักษาไว้ทุกแถวพร้อม id ผู้ให้บริการ"
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Strict Free Badge",
+        "description": "หน้าผู้ให้บริการใน Dashboard: แสดงป้าย Free เฉพาะเมื่อมีสัญญาณที่ผู้ให้บริการรับรองเท่านั้น — ลดการใช้ Heuristic ของชื่อแสดงผล, ค่าฟิลด์แบบ non-boolean และ suffix :free ในผู้ให้บริการที่ลงทะเบียนโดยไม่มี tier ฟรีที่เป็นเอกสารยืนยัน การปิดจะคงกฎป้ายแบบเดิมไว้"
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: Pool ว่างให้ผลลัพธ์ 503",
+        "description": "เมื่อ candidate pool ของ auto combo ว่างเปล่าก่อนที่ pre-filter สำหรับ tool-calling จะทำงาน (เป้าหมายทั้งหมดถูกข้ามเนื่องจาก cooldown, lockout หรือ exhaustion) ให้ตอบกลับ 503 no_eligible_targets แทนที่จะเป็น legacy 400 \"No target supports tool calling\" capability_mismatch ปิดใช้งานโดยค่าเริ่มต้น: pool ว่างเปล่าจะยังคงใช้ legacy 400"
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral ไม่ชัดเจน 401 Soft Lockout",
+        "description": "Mistral 401 เปล่า ('{\"detail\":\"Unauthorized\"}', ไม่มีสัญญาณรับรองความถูกต้องที่ชัดเจน) มีรูปแบบเหมือนกันทุกประการสำหรับคีย์ที่ถูกเพิกถอนและสำหรับโควตาที่ใช้หมด เมื่อเปิดใช้งานแล้ว 401 แบบนี้จะลดความถี่ในการเชื่อมต่อแทนที่จะกำหนดสถานะเป็นหมดอายุ สูงสุด 3 ครั้งภายในหนึ่งชั่วโมง; ครั้งต่อไปจะยังกำหนดสถานะเป็นหมดอยู่ เพื่อให้ความคีย์ที่ถูกเพิกถอนบรรจบกับสถานะหมดอายุ ปิดไว้โดยค่าเริ่มต้น: Mistral 401 เปล่าทุกตัวจะกำหนดสถานะการเชื่อมต่อเป็นหมดอายุ เหมือนเดิม"
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "การล้างข้อมูลอัตโนมัติแบบ Batch & File",
+        "description": "อนุญาตให้กระบวนการล้างข้อมูลอัตโนมัติลบงาน Batch API ที่สำเร็จ/ล้มเหลว/ถูกยกเลิก/หมดอายุซึ่งมีอายุมากกว่า OMNIROUTE_BATCH_RETENTION_DAYS พร้อมจุดตรวจสอบต่อแถว และล้างเนื้อหา BLOB ของไฟล์ที่อัปโหลดที่ผ่านกำหนดเวลา expires_at ของไฟล์นั้นไปเรียบร้อยแล้ว ปิดไว้โดยค่าเริ่มต้น: การติดตั้งที่มีอยู่ทุกตัวจะรักษาข้อมูลเหล่านี้ไว้ตามเดิมจนกว่าผู้ดูแลระบบจะเลือกใช้งาน เส้นทาง DELETE /api/v1/batches/delete-completed ที่ผู้ใช้กำหนดไม่ได้รับผลกระทบไม่ว่าจะเปิดหรือปิด -- เนื่องจากเป็นสัญญา API สาธารณะที่แยกต่างหากและไม่ขึ้นกับเงื่อนไข"
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "การจำแนกบัญชี Antigravity",
+        "description": "สงวนบัญชี Antigravity ที่เลือกไว้สำหรับการสตรีมมิ่งของคำขอนั้น เพื่อให้การลองใหม่พร้อมกันหรือการส่งต่อข้อมูลประจำตัวไม่สามารถเลือกบัญชีที่ผูกกับสตรีมที่ดำเนินการอยู่แล้วได้ การสงวนนี้มีขอบเขตเป็น (การเชื่อมต่อ, โมเดลต้นทางที่เรียกได้) ทำให้บัญชีเดียวสามารถรองรับโมเดลที่แตกต่างกันสองตัวพร้อมกันได้ เมื่อทุกบัญชีที่มีคุณสมบัติถูกสงวนไว้สำหรับโมเดลนั้น คำขอจะคืนค่า 503 POOL_BUSY เป็นโครงสร้างพร้อม Retry-After ที่จำกัด แทนที่จะแย่งใช้บัญชีที่ไม่ว่างปิดไว้โดยค่าเริ่มต้น: การเลือกบัญชีจะเหมือนเดิม และไม่มีการสงวนสิทธิใด ๆ"
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "ตัดตอน Combo เก่าอัตโนมัติ",
+        "description": "หลังจากซิงค์โมเดลสำเร็จกับแคตาล็อกสดที่เป็นอำนาจ ให้ลบขั้นตอน combo ที่ตรึงไว้กับโมเดลที่แคตาล็อกไม่มีรายชื่ออีกต่อไป พร้อมบันทึกการตรวจสอบหนึ่งรายการต่อขั้นตอนที่ลบ ไม่ตัดขั้นตอนเมื่อซิงค์ล้มเหลว ระดับต่ำ หรือเฉพาะโมเดลฟรี และไม่ล้าง combo ให้ว่างเปล่า ปิดไว้โดยค่าเริ่มต้น: ขั้นตอนเก่าจะถูกติดธงเท่านั้น"
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "สรุปการคิดแบบ Claude OAuth",
+        "description": "อนุญาตให้คำขอ Claude OAuth ที่ต้องการการคิดแบบอ่านได้ (thinking.display \"summarized\") ตัด beta ของ Anthropic ที่เรียกว่า redact-thinking-2026-02-12 ออก ซึ่งในกรณีที่ไม่ตัดจะส่งผลให้ Anthropic คืนค่าบล็อกจากคิดที่ว่างเปล่าและมีเฉพาะลายเซ็น ปิดไว้โดยค่าเริ่มต้น: beta นั้นเป็นส่วนหนึ่งของลายเซ็นการเชื่อมต่อของ Claude Code OAuth ดังนั้นคำขอ OAuth จึงคงไว้ไม่เปลี่ยนแปลง คำขอ Claude ที่ใช้ API-key เคารพการคิดแบบสรุปโดยไม่ต้องใช้ธงนี้; OMNIROUTE_REDACT_THINKING=false จะส่งผลกระทบต่อ OAuth ได้ก็ต่อเมื่อเปิดใช้ธงนี้เท่านั้น"
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "การแก้ไขการเรียกใช้เครื่องมือ Kiro",
+        "description": "เมื่อการตอบสนองแบบสตรีมมิ่งของ Kiro ส่ง wrapper ของ tool_call ที่ผิดรูปแบบ (ไม่มี input.name หรือ input.arguments) ก่อนมีผลลัพธ์ที่มองเห็นได้ใด ๆ ให้ยับยั้งไว้และส่งคำขอซ้ำหนึ่งครั้งพร้อมคำสั่งแก้ไข แทนที่จะจบเทิร์นด้วย invalid_kiro_tool_call การลองใหม่นี้ใช้คำขอ Kiro เพิ่มหนึ่งครั้ง หากล้มเหลวเป็นครั้งที่สอง เทิร์นจะจบด้วย kiro_tool_call_repair_retry_failed เปิดใช้งานโดยค่าเริ่มต้น ตั้งค่าเป็น false เพื่อให้เทิร์นล้มเหลวทันทีเมื่อพบ wrapper ที่ผิดรูปแบบครั้งแรก"
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "ระดับความพยายามจาก models.dev",
+        "description": "ใช้ระดับความพยายามในการให้เหตุผล (effort tiers) ที่ models.dev เผยแพร่ (จำกัดเฉพาะคำศัพท์ระดับความพยายามที่รู้จักกัน) เมื่อไม่ได้มีการตั้งค่าทับซ้อนจากตัวจัดการ และไม่มีการประกาศใด ๆ จากทะเบียน provider และพิจารณาว่ามีรายการระดับความพยายามที่ประกาศว่างเปล่าเป็น \"ไม่มีระดับ\" ใน /v1/models effort_tiers และการตัดกันของระดับ combination ปิดใช้งานโดยค่าเริ่มต้น: effort_tiers และ resolved supportedThinkingEfforts จะคงเดิมอย่างสมบูรณ์"
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "การติดตามผล Arena Synthesized cx",
+        "description": "แนบข้อมูล blob ของการโต้ตอบกับไคลเอนต์โปรแกรมแบบสังเคราะห์ (ค่าที่ arena.ai เองส่งสำหรับหน้าเว็บที่ไม่มีประวัติการโต้ตอบ) กับคำขอ create-evaluation ของ Arena (lmarena) ทุกคำขอที่ไม่ได้มี providerSpecificData.cx จากตัวจัดการ ปิดใช้งานโดยค่าเริ่มต้น: ค่า cx เป็นสัญญาณต่อต้านอัตโนมัติของ Arena ดังนั้น OmniRoute จะส่งต่อเฉพาะค่าที่ตัวจัดการบันทึกมาจากเซสชันเบราว์เซอร์จริง (providerSpecificData.cx) และในกรณีอื่นจะไม่ส่ง cx เลย ผลประโยชน์จาก upstream ยังไม่ได้รับการพิสูจน์; เปิดใช้งานเฉพาะเมื่อ Arena เริ่มปฏิเสธคำขอที่ไม่ได้มี cx"
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "การบีบอัดบริบทแบบ Reactive ของ Codex Native",
+        "description": "ปล่อยให้การผ่านบีบอัดบริบทแบบ reactive (ตามเกณฑ์) และแบบ last-resort เขียนทับประวัติ native Codex passthrough (POST /v1/responses ไปยัง provider codex) เมื่อเกินงบบริบท โดยใช้ตัวปรับขนาด input[] ของ Responses ปิดใช้งานโดยค่าเริ่มต้น: ประวัติของ Codex native เป็นของไคลเอนต์ Codex และจะไม่ถูกเขียนทับโดยกระบวนการบีบอัด; คำขอที่เกินขนาดจะยังคงทำให้การตรวจสอบงบบริบทล้มเหลวตามเดิมเสมอ ต้องเปิดใช้งานการบีบอัดแบบ global และไม่ได้ออกนอกเขตที่โมเดลถูกกีดกัน"
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "หน้าต่างโควตา: เคารพการพักแบบมีขอบเขต",
+        "description": "ให้นโยบายโควตารายหน้าต่าง (เกณฑ์ session/weekly ที่ใช้ในการเลือกบัญชี) เคารพการพักเมื่อโควตาหมดแบบมีขอบเขต (bounded exhaustion park): เมื่อเลยกำหนดเวลาพักที่มีเพดานแล้ว หรือข้อมูลโควตาที่แคชไว้เก่ากว่าเพดานการพัก หน้าต่างจะหยุดกันบัญชีออกจนกว่าจะดึงโควตาใหม่ ปิดเป็นค่าเริ่มต้น: หน้าต่างที่แคชไว้จะยังคงบล็อกตามเปอร์เซ็นต์ที่รายงานล่าสุดจนถึงเวลารีเซ็ตของตัวเอง"
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "การสร้างภาพ: งานนาน",
+        "description": "สำหรับการสร้างภาพที่เข้ากันได้กับ OpenAI: ให้ใช้ timeout ของการเชื่อมต่อ (providerSpecificData.timeoutMs) หรือไม่ก็ใช้ central upstream fetch timeout (FETCH_TIMEOUT_MS, จากนั้น REQUEST_TIMEOUT_MS, ค่าเริ่มต้น 600 วินาที) แทนที่งบภาพคงที่ 120 วินาที; เลขออรรถการที่ผู้โทรเรียกยกเลิกแล้วด้วย 499; และให้ Playground รับงานสร้างภาพนานเป็นสายการส่งข้อมูลแบบ SSE พร้อมสัญญาณชีพเพื่อรักษาการเชื่อมต่อ ปิดใช้งานโดยค่าเริ่มต้น: งบคงที่จะถูกใช้และไม่มีการส่งต่อคำสั่งยกเลิกจากผู้ใช้ ค่าเส้นตายที่กำหนดระยะเวลาอ่านของเนื้อหาการตอบกลับจะเปิดใช้งานเสมอ"
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "การปรับปรุงกระจก Catalog",
+        "description": "ปรับปรุงการค้นพบและกระจก functional-gateway สำหรับ claude/ บน /v1/models ปิดใช้งานโดยค่าเริ่มต้น: ขั้นตอนกระจกทั้งสองจะทำงานเหมือนเดิม ถ้าเปิด: การค้นพบกระจกสำหรับ claude/ จะครอบคลุมตัวเลือกความพยายามในการให้เหตุผลที่กำหนดรายการ (-low/-medium/-high/-xhigh) ข้าม id auto/* ในตัวที่เส้นทางคำขอไม่สามารถสร้างได้ และข้าม alias ที่ถูกรายการไว้แล้ว กระจก functional-gateway จะข้ามการรวมกันและ id ที่สร้างโดย OmniRoute (claude/, no-think/) รับเจ้าของจาก owned_by ห้ามใช้เจ้าของเป็น gateway ของตัวเอง ข้าม gateway ที่ถูกปิดใช้งานใน blockedProviders และโมเดลที่อยู่ภายนอก catalog ที่มีอยู่ของ gateway"
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "สุขภาพพร็อกซี: การปฏิเสธรีเซ็ตสายความล้มเหลว",
+        "description": "ในการตรวจสอบสุขภาพพร็อกซี ให้การตรวจเป้าหมายที่ถูกระบุว่าปฏิเสธ (401/403/429: พร็อกซีส่งต่อแล้ว แต่ปลายทางปฏิเสธ IP ประสานงานนี้ออก) รีเซ็ตสายความล้มเหลวต่อเนื่องของพร็อกซี เหมือนกับการตรวจที่ให้บริการ ปิดใช้งานโดยค่าเริ่มต้น: การปฏิเสธจะเป็นกลางและไม่มีการเปลี่ยนแปลงสายความล้มเหลว (#10654) ค่า 5xx จะยังคงไม่แน่ใจไม่ว่าจะเปิดหรือปิด และการปฏิเสธจะไม่ลบ ปิดใช้งาน หรือเปิดใช้งานพร็อกซีใหม่"
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "ภาพการสมัครสมาชิก Grok",
+        "description": "ลงทะเบียนเส้นทางรูปภาพ xai-oauth (xao) และ grok-cli และแมปคุณภาพ high/hd ของ OpenAI ไปเป็น medium ของ xAI ปิดโดยค่าเริ่มต้น: เส้นทางรูปภาพ xAI แบบ API key ยังคงใช้คำขอที่เข้ากันได้กับ OpenAI แบบเดิม และจะไม่ลงทะเบียนเส้นทางแบบสมัครสมาชิก"
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "การค้นพบโมเดลสด xAI OAuth",
+        "description": "ดึงแคตตาล็อกโมเดลสดของ xAI สำหรับการเชื่อมต่อ xai-oauth จาก https://api.x.ai/v1/models โดยใช้โทเคน OAuth bearer แทนที่จะใช้ seed สแตติกที่ถูกระบุไว้ เปิดใช้งานโดยค่าเริ่มต้น ตั้งค่า flag เป็น false เพื่อคงการให้บริการ seed สแตติก การล้มเหลวของ HTTP จะเปลี่ยนกลับไปใช้ seed ในเส้นทางค้นพบ ตัว getter ของ flag เองไม่มีการส่ง HTTP ออกไป"
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "การเปิดใช้งาน System Turns กลางทางสำหรับ Anthropic-Compatible",
+        "description": "ใน relay แบบ plain anthropic-compatible-* (claude → claude passthrough) ให้คง role:system turns กลางทางไว้ภายใน messages[] แทนที่จะยกไปไว้ในพารามิเตอร์ system ระดับบน เพื่อให้ cached prompt prefix ยังคงเสถียรข้ามรอบสนทนา ใช้ได้เฉพาะเมื่อตัวส่ง (client) ส่ง anthropic-beta mid-conversation-system-2026-04-07 มาด้วยเอง (ส่งต่อขึ้นต้นฉบับเดิม) ปิดไว้ตามค่าเริ่มต้น: ทุก system turn จะถูกยกไปไว้ด้านบนเหมือนเดิม เพราะ relay ที่ไม่รองรับ beta จะปฏิเสธข้อความ role:system ด้วย 400"
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB Health Check: เลื่อนการสแกนเริ่มต้นทำงานออกไป",
+        "description": "เรียกใช้การตรวจสอบความสมบูรณ์/สุขภาพของ DB ตอนเริ่มต้นทำงานหลังจากเซิร์ฟเวอร์เริ่มรับคำขอแล้ว (ผ่าน setImmediate) แทนการบล็อกการเริ่มต้นทำงานจนกว่าจะเสร็จ ปิดไว้ตามค่าเริ่มต้น: การเริ่มต้นทำงานจะบล็อกจนกว่าจะผ่านการตรวจสอบเหมือนก่อนหน้า #13717 ดังนั้นฐานข้อมูลที่เสียหายจะถูกรวบไว้ก่อนให้บริการคำขอแรก เมื่อเปิด: การเริ่มต้นทำงานจะกลับทันที และการตรวจสอบ (ซึ่งตอนนี้มีการจำกัด/แบ่งหน้า และแยกออกเป็น child process ที่ยกเลิกได้สำหรับฐานข้อมูลบนไฟล์จริง) จะทำงานต่อทันที"
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "การกำหนดเส้นทาง OpenCode Published Catalog",
+        "description": "ให้โมเดล OpenCode Zen และ OpenCode Go ที่ไม่มี registry endpoint ชัดเจน ใช้ request surface (Responses สำหรับ @ai-sdk/openai, Messages สำหรับ @ai-sdk/anthropic) จาก catalog ที่เผยแพร่ที่ models.opencode.ai โดยจะอ่านข้อมูลในเบื้องหลังทุก 6 ชั่วโมง ปิดไว้ตามค่าเริ่มต้น: endpoint มาจาก registry heuristics เหมือนเดิมและจะไม่ดึงข้อมูล catalog"
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Auto Requests: น้ำหนักความสามารถที่แก้ไขแล้ว",
+        "description": "ให้คำขอ auto/* (resolveModelOrError และ auto-routing wrapper) สร้าง candidate pool ด้วยความสามารถของโมเดลที่แก้ไขแล้ว (vision, reasoning, thinking) และคะแนนคุณภาพที่สังเกตได้ ซึ่งอ่านครั้งเดียวแบบ bulk เช่นเดียวกับ catalog ของ /v1/models ปิดไว้ตามค่าเริ่มต้น: น้ำหนัก snapshot ตอนคำขอยังคงเหมือนเดิม (ความสามารถจะแก้ไขตามต้องการและไม่ส่งข้อมูลไปให้น้ำหนัก) เมื่อเปิด: สัญญาณเหล่านั้นจะนำไปใช้กับน้ำหนัก snapshot, ดังนั้นน้ำหนัก candidate และการคัดเลือกจึงอาจเปลี่ยนแปลงได้"
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Keyless Transport Gate",
+        "description": "กักกัน provider แบบ keyless (ไม่มี auth) ที่ transport ต้องใช้ browser บนเครื่อง (browserBacked) หรือ CLI ที่ติดตั้งบนเครื่อง (isLocalCli) ออกจาก candidate pool ของ auto/* เพื่อไม่ให้สมาชิกที่ค้างไว้ทำให้คำขอ auto ค้างจนถึง timeout ต่อเป้าหมาย (#17036) ปิดไว้ตามค่าเริ่มต้น: ทุก provider แบบ no-auth ที่มี emulated tool calling จะอยู่ใน pool เหมือนเดิม คำเรียก '<alias>'/'<model>' โดยตรงทำงานได้ไม่ว่าจะเปิดหรือปิด"
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: การแสดงเหตุผลแบบอินไลน์ซ้ำ",
+        "description": "สำหรับโมเดลการคิดของ codebuddy-cn (ตระกูล DeepSeek-V4 / Kimi-K2 ซึ่งต้องการการแสดงผลเหตุผลซ้ำ) ให้แสดง reasoning_content ของผู้ช่วยที่ส่งซ้ำของแต่ละครั้งเป็นบล็อก '<thought>' ที่มองเห็นได้ในส่วนต้นของเนื้อหาข้อความ เพื่อให้การตั้งค่านี้รอดพ้นจากการดำเนินการของ gateway ที่ตัดช่อง reasoning_content ออกไป (#13632) ปิดไว้เป็นค่าเริ่มต้น: การทำงานของ codebuddy-cn จะถูกส่งโดยไม่มีการเปลี่ยนแปลง และจะเก็บรักษาช่อง reasoning_content เอาไว้เสมอ"
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "การหยุดเพื่อความปลอดภัยของผู้ให้บริการ: จุดสิ้นสุด",
+        "description": "เก็บการหยุดเพื่อความปลอดภัยของผู้ให้บริการที่ชัดเจน (misalignment_policy_violation, content_policy_violation, หรือการปฏิเสธแบบเดิมที่ระบุว่า \"ถูกบล็อกโดยระบบความปลอดภัยของเรา\" ซึ่งติดป้ายว่า provider_safety_rejection) ไว้ในฐานะการปฏิเสธแบบจุดสิ้นสุดเฉพาะขอบเขตของคำขอ: โค้ดของมันจะถูกรักษาไว้ผ่าน HTTP, Responses, WebSocket และข้อผิดพลาดของสตรีมที่เสร็จสมบูรณ์ และคอมโบจะหยุดที่จุดนี้แทนที่จะลองใหม่กับเป้าหมายอื่น โดยยกเลิกพี่น้องที่ได้รับอนุญาต (#17049) ปิดไว้เป็นค่าเริ่มต้น: ข้อผิดพลาดเหล่านี้ยังคงได้รับการจัดการแบบเดิม และการจัดเส้นทางคอมโบไม่มีการเปลี่ยนแปลง"
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "สถานะข้อมูลรับรอง: ทดสอบการเชื่อมต่อที่ถูกปิดอัตโนมัติอีกครั้ง",
+        "description": "ให้งานตรวจสอบสถานะข้อมูลรับรองทดสอบการเชื่อมต่อที่ gateway ปิดไปเองอีกครั้ง (มีป้ายกำกับว่า autoDisabledAt; ไม่เกินหนึ่งครั้งทุก 6 ชั่วโมง และไม่เกิน 5 ครั้งต่อการตรวจสอบแต่ละครั้ง) และเปิดการเชื่อมต่อกลับเมื่อการทดสอบผ่าน (#16190) ปิดไว้เป็นค่าเริ่มต้น: การเชื่อมต่อที่ปิดไว้จะยังคงปิดอยู่จนกว่าผู้ดำเนินการจะเปิดใหม่หรือทดสอบใหม่ เหมือนเดิมทุกประการ การเชื่อมต่อที่ผู้ดำเนินการปิด และการเชื่อมต่อที่ปิดไปหลังการแบนถาวร จะไม่ได้รับการทดสอบใหม่"
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "ด่านข้อมูลรับรอง: วินิจฉัยการยืนยันตัวตนเท่านั้น",
+        "description": "จำกัดขอบเขตด่านข้อมูลรับรองของคอมโบให้คำค้นหาข้อมูลรับรองแบบแคชที่ล้มเหลวจะบล็อกการเชื่อมต่อเฉพาะเมื่อการวินิจฉัยพิสูจน์ว่าเป็นข้อมูลรับรองที่ผิดพลาด (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required) การล้มเหลวที่ไม่อาจสรุปได้ (หมดเวลา, จำกัดอัตราการใช้งาน, ระบบล่ม, การทดสอบที่ไม่รองรับ และข้อผิดพลาด scheduler ที่ไม่มีป้ายกำกับ) จะถูกถือเป็นกรณีที่ไม่ทราบ และให้ข้อความยังคงไหลเข้าสู่การเชื่อมต่อ ปิดไว้เป็นค่าเริ่มต้น: ข้อผิดพลาดการค้นหาแบบแคชใด ๆ จะบล็อกการเชื่อมต่อตาม TTL ของแคช (5 นาที)"
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "คอมโบ: หยุดเมื่อถูกปฏิเสธด้วยนโยบายเนื้อหา",
+        "description": "เมื่อเป้าหมายคอมโตอบสนองด้วยการปฏิเสธนโยบายเนื้อหาคงที่ (โค้ดหรือประเภท cyber_policy / content_policy_violation) ให้หยุดคอมโบและส่งการปฏิเสธนั้นกลับแม้ว่าเป้าหมายที่เหลือจะเป็นโมเดลอื่น แทนที่จะดำเนินการต่อเป้าหมายถัดไป ปิดไว้เป็นค่าเริ่มต้น: การปฏิเสธจะไม่ทำให้บัญชีเย็นลงหรือทำให่เบรกก์เกอร์ผู้ให้บริการทำงาน และคอมโบจะดำเนินการต่อเป้าหมายถัดไปตามเดิม"
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Cooldown Retry: ข้ามการปฏิเสธสถานะ 403/410",
+        "description": "เมื่อทุกบัญชีอยู่ในช่วง Cooldown และ Cooldown ที่สิ้นสุดก่อนนั้นเกิดจากการปฏิเสธสถานะ 403 (ถูกปฏิเสธการเข้าถึง) หรือ 410 (ทรัพยากรไม่อยู่) ระบบจะส่งผลการปฏิเสธนั้นกลับทันทีแทนที่จะรอจนกว่า Cooldown จะหมดและส่งคำขอใหม่; การเชื่อมต่อ agentrouter ของ quota ที่มีการต่ออายุและได้รับสถานะ 403 จะถูกบันทึกด้วย errorCode 429 เพื่อให้สามารถเรียกซ้ำได้ ทำงานปิดอยู่โดยค่าเริ่มต้น: เฉพาะสถานะ 401 ที่จะข้ามการรอ และทุกผลการปฏิเสธจะถูกบันทึกด้วยสถานะที่ได้รับมา"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "นโยบายงบประมาณการใช้งานที่ไม่มีราคา",
+        "description": "วิธีที่ขีดจำกัด USD ต่อคีย์รายวัน/รายสัปดาห์จัดการกับการใช้งานที่สำเร็จซึ่งผู้ให้บริการ/โมเดลไม่มีแถวราคากำหนดไว้ โดย fail_closed (ค่าเริ่มต้น) จะทำเครื่องหมายว่าหน้าต่างถูกเกินโควต้า ดังนั้นต้นทุนที่ไม่ทราบจะไม่สามารถหลุดผ่านเพดานแบบแข็งได้ ส่วน count_as_zero จะนับการใช้งานนั้นเป็น $0 และยังคงบังคับใช้การใช้จ่ายที่มีราคา โมเดลที่ไม่มีราคาจะยังคงถูกแสดงในหน้าหลักของแดชบอร์ดทั้งสองกรณี."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "เวลาแฝง",
     "quota": "โควตา",
     "rangeWindow": "ช่วงเวลา {range}",
+    "timeRange": "ช่วงเวลา",
     "runtimeHealthBlend": "การผสมผสานรันไทม์/สถานะความพร้อม",
     "averageResponseTime": "เวลาตอบสนองเฉลี่ย",
     "worstQuota": "โควตาที่แย่ที่สุด",
@@ -13923,7 +14500,11 @@
       "ok": "อนุญาตโดยทั่วไป"
     },
     "allProviders": "ผู้ให้บริการทั้งหมด",
-    "noApiKeyRequired": "ไม่ต้องใช้ API key"
+    "noApiKeyRequired": "ไม่ต้องใช้ API key",
+    "searchPlaceholder": "ค้นหาโมเดล, ผู้ให้บริการ...",
+    "searchAria": "ค้นหาโมเดลฟรี",
+    "filterProviderAria": "กรองตามผู้ให้บริการ",
+    "keylessOnly": "เฉพาะไม่ต้องใช้คีย์"
   },
   "providerHealthAutopilot": {
     "title": "Autopilot ตรวจสอบสถานะผู้ให้บริการ",
@@ -13994,7 +14575,11 @@
     "learnMore": "เรียนรู้เพิ่มเติม",
     "changelogLoadFailed": "ไม่สามารถโหลดบันทึกการเปลี่ยนแปลงได้ โปรดลองอีกครั้งในภายหลัง",
     "retry": "ลองใหม่",
-    "viewFullHistory": "ดูประวัติทั้งหมดบน GitHub"
+    "viewFullHistory": "ดูประวัติทั้งหมดบน GitHub",
+    "title": "ข่าวสารและบันทึกการเปลี่ยนแปลง",
+    "description": "ประกาศจากทีม OmniRoute และบันทึกประจำรุ่นล่าสุด",
+    "viewLabel": "ดู",
+    "loadingNews": "กำลังโหลดประกาศ..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "สถานะวงจรตัดของผู้ให้บริการ",
       "lastUpdate": "อัปเดตล่าสุด: {timestamp}",
       "uptimeMinutes": "{minutes}นาที",
-      "uptimeHoursMinutes": "{hours}ชั่วโมง {minutes}นาที"
+      "uptimeHoursMinutes": "{hours}ชั่วโมง {minutes}นาที",
+      "breakerClosed": "ปิด",
+      "breakerNotClosed": "เปิดหรือเปิดครึ่งหนึ่ง"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "รายละเอียดการบำรุงรักษา",
         "secondaryAction": "สถานะระบบ"
       }
+    },
+    "miniapp": {
+      "askAnything": "ถามอะไรก็ได้…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "เครื่องมือ MCP",
     "scope": "ขอบเขต",
-    "apiKey": "คีย์ API"
+    "apiKey": "คีย์ API",
+    "visibleCount": "แสดง {visible} รายการ / ทั้งหมด {total} รายการ",
+    "modeLabel": "โหมดการแสดงผล",
+    "jumpToNow": "ข้ามไปยังเวลาปัจจุบัน เส้น NOW จะกลับไปยังตำแหน่ง {position}%",
+    "laneReuse": "การใช้เลนซ้ำ",
+    "laneReuseLabel": "ช่วงเวลาสำหรับใช้เลนซ้ำ (นาที)",
+    "laneReuseHint": "คำขอที่ใช้ ID การสนทนาเดียวกันจะอยู่ในแถวเดียวกันบนไทม์ไลน์ ตราบใดที่ช่วงห่างระหว่างคำขอไม่เกินจำนวนนาทีนี้",
+    "laneReuseUnit": "นาที",
+    "autoRefresh": "รีเฟรชอัตโนมัติ",
+    "autoRefreshLabel": "ช่วงเวลาการรีเฟรชอัตโนมัติ (วินาที)",
+    "autoRefreshHint": "ความถี่ที่ไทม์ไลน์ดึงรายการคำขอจากเซิร์ฟเวอร์อีกครั้ง",
+    "autoRefreshUnit": "วินาที",
+    "zoomOut": "ซูมออก",
+    "zoomIn": "ซูมเข้า"
   },
   "metadata": {
     "compressionTitle": "การบีบอัด",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "ปิด"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "ปิดใช้งานการสร้างโมเดลรูปแบบย่อยตามระดับการคิด (เช่น -low, -medium, -high) ในแค็ตตาล็อก /v1/models",
+  "teamCosts": {
+    "title": "ต้นทุนทีม",
+    "subtitle": "จัดการงบประมาณแบบยืดหยุ่นที่ใช้ร่วมกันและประมาณการต้นทุนจากแคตตาล็อก",
+    "refresh": "รีเฟรช",
+    "create": "สร้างทีม",
+    "edit": "แก้ไขทีม",
+    "archive": "เก็บถาวร",
+    "selectTeam": "ทีม",
+    "searchTeams": "ค้นหาทีม",
+    "statusFilter": "สถานะทีม",
+    "active": "ใช้งานอยู่",
+    "archived": "เก็บถาวรแล้ว · อ่านอย่างเดียว",
+    "allTeams": "ทุกทีม",
+    "noTeams": "ไม่พบทีมที่ตรงกัน",
+    "selectHint": "สร้างหรือเลือกทีมเพื่อดูต้นทุน",
+    "loading": "กำลังโหลดต้นทุนทีม…",
+    "budgetTitle": "งบประมาณแบบยืดหยุ่นปัจจุบัน",
+    "budgetSubtitle": "การใช้งานที่สำเร็จและบันทึกแล้ว · หน้าต่างเลื่อน · ไม่ขึ้นกับวันที่ของรายงาน",
+    "archivedBudget": "เก็บถาวรแล้ว: การบังคับใช้งบประมาณไม่ทำงาน รายงานย้อนหลังยังคงใช้งานได้",
+    "unlimited": "ไม่จำกัด — ยังไม่ได้ตั้งค่างบประมาณแบบยืดหยุ่นที่ใช้ร่วมกัน",
+    "budgetUnavailable": "ไม่สามารถดูสถานะงบประมาณได้ รีเฟรชเพื่อลองอีกครั้ง",
+    "used": "การใช้งานที่สำเร็จ",
+    "maximum": "งบประมาณสูงสุด",
+    "remaining": "ยอดคงเหลือที่ทราบ",
+    "resets": "รีเซ็ตเมื่อ",
+    "unpricedBudget": "การใช้งานที่สำเร็จบางส่วนไม่ทราบราคา ผลรวมที่ทราบไม่สมบูรณ์ การบังคับใช้งบประมาณจะถือว่าหน้าต่างนี้เกินแล้ว",
+    "overBudget": "ถึงหรือเกินงบประมาณ · เกิน {amount}",
+    "reportTitle": "รายงานการใช้งาน",
+    "reportSubtitle": "ทุกความพยายาม · ประมาณการจากแคตตาล็อกเป็น USD ไม่ใช่ใบแจ้งหนี้ · วันที่ UTC เต็มวัน",
+    "reportPeriod": "ช่วงเวลารายงาน",
+    "day1": "1 วัน",
+    "day7": "7 วัน",
+    "day30": "30 วัน",
+    "allTime": "ทุกช่วงเวลา",
+    "reportSpend": "ค่าใช้จ่ายโดยประมาณของรายงาน",
+    "requests": "คำขอ",
+    "assignedKeys": "คีย์ที่กำหนดแล้ว",
+    "unpricedReport": "รายงานนี้มีราคาที่ไม่ทราบ ค่าใช้จ่ายโดยประมาณไม่สมบูรณ์",
+    "breakdown": "ต้นทุนตามคีย์ API",
+    "noUsage": "ไม่มีการใช้งานในช่วงเวลารายงานนี้",
+    "keyName": "ชื่อคีย์ API",
+    "tokens": "โทเค็นอินพุต + เอาต์พุต",
+    "unnamedKey": "คีย์ที่ไม่มีชื่อหรือถูกลบ",
+    "unpriced": "ราคาไม่ทราบ",
+    "members": "สมาชิก",
+    "memberSubtitle": "การเปลี่ยนสมาชิกจะคงค่าใช้จ่ายย้อนหลังไว้กับทีมเดิม",
+    "searchKeys": "ค้นหาคีย์หรือเจ้าของปัจจุบัน",
+    "chooseKey": "เลือกคีย์ API",
+    "unassigned": "ยังไม่กำหนด",
+    "ownership": "ทีมเรียกเก็บเงินปัจจุบัน: {team}",
+    "assign": "กำหนด",
+    "remove": "นำออก",
+    "noMembers": "ไม่มีสมาชิกปัจจุบัน การใช้งานย้อนหลังอาจยังนับรวมในงบประมาณ",
+    "assignedAt": "กำหนดเมื่อ {date} (UTC)",
+    "name": "ชื่อทีม",
+    "description": "คำอธิบาย",
+    "enableBudget": "เปิดใช้งบประมาณแบบยืดหยุ่นที่ใช้ร่วมกัน",
+    "amount": "จำนวนงบประมาณ (USD)",
+    "duration": "หน้าต่างงบประมาณแบบเลื่อน",
+    "cancel": "ยกเลิก",
+    "save": "บันทึก",
+    "confirm": "ยืนยัน",
+    "transferTitle": "ยืนยันการโอนคีย์",
+    "transferMessage": "ย้ายคีย์นี้จาก “{source}” ไปยัง “{destination}” หรือไม่ ค่าใช้จ่ายย้อนหลังยังอยู่กับทีมเดิม",
+    "removeTitle": "นำการกำหนดคีย์ออก",
+    "removeMessage": "นำคีย์นี้ออกจาก “{team}” หรือไม่ ค่าใช้จ่ายย้อนหลังยังอยู่ในทีมนี้",
+    "archiveTitle": "เก็บถาวรทีม",
+    "archiveMessage": "เก็บถาวร “{team}” หรือไม่ การผูกปัจจุบันทั้งหมดจะปิดและการบังคับใช้งบประมาณจะหยุด รายงานย้อนหลังยังคงใช้งานได้",
+    "invalidName": "ป้อนชื่อ (1–200 อักขระ) และคำอธิบายไม่เกิน 2,000 อักขระ",
+    "invalidAmount": "ป้อนจำนวนงบประมาณที่จำกัดและมากกว่าศูนย์",
+    "unauthorized": "ลงชื่อเข้าใช้แดชบอร์ดการจัดการเพื่อดำเนินการต่อ",
+    "forbidden": "คุณไม่มีสิทธิ์จัดการทีม ข้อมูลที่ป้อนยังคงอยู่",
+    "notFound": "ทีมหรือการกำหนดนี้ไม่มีอยู่แล้ว",
+    "conflict": "การกำหนดหรือทีมมีการเปลี่ยนแปลง รีเฟรชและยืนยันความเป็นเจ้าของปัจจุบันก่อนลองอีกครั้ง",
+    "failed": "คำขอล้มเหลว ข้อมูลที่ป้อนยังคงอยู่ โปรดลองอีกครั้ง",
+    "partialBudget": "บัคเก็ตรายวันที่เก็บไว้บางส่วนทับซ้อนกับขอบหน้าต่างและแบ่งสัดส่วนได้ไม่แม่นยำ ค่าใช้จ่ายที่แสดงไม่สมบูรณ์ วงเงินคงเหลือไม่พร้อมใช้งาน นโยบายงบประมาณแบบยืดหยุ่นที่มีอยู่ไม่เปลี่ยนแปลง"
+  },
   "connectionTest": {
     "title": "ข้อความทดสอบ",
     "description": "ส่งคำขอจริงหนึ่งรายการผ่านบัญชีนี้ การดำเนินการนี้จะใช้โควตาเล็กน้อยและอาจเริ่มรอบระยะเวลาการใช้งาน ทั้งนี้ขึ้นอยู่กับผู้ให้บริการ",
@@ -15073,5 +15753,118 @@
     "importButton": "นำเข้า",
     "importFailed": "นำเข้าไม่สำเร็จ",
     "importSuccess": "นำเข้า {connections} บัญชีและ {nodes} โหนดผู้ให้บริการแล้ว ข้าม {skipped} รายการ"
+  },
+  "conversations": {
+    "title": "บทสนทนา",
+    "countSummary": "{total, plural, one {บทสนทนา # รายการ} other {บทสนทนา # รายการ}} ที่มี 2+ รอบการสนทนา",
+    "autoRefreshTitle": "ความถี่ที่รายการนี้ดึงข้อมูลใหม่จากเซิร์ฟเวอร์",
+    "autoRefresh": "รีเฟรชอัตโนมัติ",
+    "loading": "กำลังโหลดบทสนทนา...",
+    "colConversation": "การสนทนา",
+    "colTurns": "รอบการสนทนา",
+    "colContinuation": "การสนทนาต่อเนื่อง",
+    "colLastModel": "โมเดลล่าสุด",
+    "colProvider": "ผู้ให้บริการ",
+    "colStatus": "สถานะ",
+    "colLastSeen": "พบครั้งล่าสุด",
+    "drawerTitle": "การสนทนา",
+    "prevConversation": "การสนทนานก่อนหน้า",
+    "nextConversation": "การสนทนาถัดไป",
+    "gotoLatestRequest": "ไปยังคำขอล่าสุด",
+    "goToBottom": "ไปด้านล่าง",
+    "statusInProgress": "กำลังดำเนินการ",
+    "continuationGenuineTitle": "รอบล่าสุดใช้ previous_response_id และถูกรับรองเสร็จสิ้นที่เซิร์ฟเวอร์",
+    "continuationBadge": "การดำเนินการต่อ",
+    "stalledTitle": "รอบล่าสุดไม่ได้จบด้วย stop และไม่ได้มีการดำเนินการต่อยาวเกิน 5 นาทีขึ้นไป",
+    "stalledBadge": "ติดขัด",
+    "noTurns": "ไม่มีรอบใดบันทึกไว้สำหรับบทสนทนานี้"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "เริ่มจากตำแหน่งปัจจุบัน (ข้ามบันทึกที่มีอยู่)",
+    "pageTitle": "การส่งออกบันทึก",
+    "pageSubtitle": "ส่งบันทึกการเรียกใช้งานจากแท็บ Logs ไปยังที่เก็บข้อมูลวิเคราะห์ภายนอกอย่างต่อเนื่อง",
+    "addDestination": "เพิ่มปลายทาง",
+    "scheduleTitle": "กำหนดตารางเวลา",
+    "cronLabel": "Cron",
+    "notScheduled": "ไม่ได้กำหนดตารางเวลา",
+    "lastScheduledRun": "การดำเนินการตามตารางเวลาครั้งล่าสุด",
+    "lastRunSummary": "{startedAt} — {status}, {rows} แถว",
+    "never": "ไม่เคย",
+    "highWaterMark": "จุดสูงสุดของบันทึกการเรียกใช้งาน",
+    "rowPrefix": "แถว {id}",
+    "noDestinations": "ยังไม่มีปลายทางสำหรับการส่งออก",
+    "noDestinationsHint": "เพิ่มปลายทางเพื่อเริ่มส่งบันทึกการโทรตามตารางเวลาทุกชั่วโมง",
+    "errLoadStatus": "การโหลดสถานะการส่งออกล้มเหลว",
+    "errSaveDestination": "การบันทึกปลายทางล้มเหลว",
+    "msgDestinationSaved": "บันทึกปลายทางแล้ว",
+    "errConnectionTest": "การทดสอบการเชื่อมต่อล้มเหลว",
+    "msgRunInFlight": "การส่งไปยังปลายทางนี้กำลังดำเนินการอยู่แล้ว ไม่มีการส่งซ้ำ",
+    "errExportRun": "การดำเนินการส่งออกล้มเหลว",
+    "errUpdateDestination": "การอัปเดตปลายทางล้มเหลว",
+    "errDeleteDestination": "การลบปลายทางล้มเหลว",
+    "deleteTitle": "ลบปลายทาง",
+    "deleteConfirm": "ลบ \"{name}\"? เข็มส่งออกจะถูกลบไปด้วย การเพิ่มใหม่จะเริ่มจากบันทึกการเรียกที่เก่าสุด",
+    "statusDisabled": "ปิดใช้งาน",
+    "statusFailing": "ล้มเหลว",
+    "statusHealthy": "ปกติ",
+    "statusNotRunYet": "ยังไม่เคยเรียกใช้",
+    "typeNotInstalled": "ไม่ได้ติดตั้งประเภทนี้",
+    "metaLine": "เรียกใช้ล่าสุด {lastRun} · ส่งออก {exported} แถว · รอ {pending} · เข็ม {cursor}",
+    "btnTest": "ทดสอบ",
+    "btnRunNow": "เรียกใช้เดี๋ยวนี้",
+    "btnDisable": "ปิดใช้งาน",
+    "btnEnable": "เปิดใช้งาน",
+    "btnEdit": "แก้ไข",
+    "btnDelete": "ลบ"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "บัญชี CLIProxyAPI",
+    "cardSubtitle": "สถานะแบบอ่านอย่างเดียวจาก API จัดการที่ตรวจสอบสิทธิ์แล้ว",
+    "btnRefresh": "รีเฟรช",
+    "listAria": "สถานะการใช้งานของบัญชี CLIProxyAPI",
+    "noAccounts": "ไม่พบบัญชี CLIProxyAPI",
+    "loading": "กำลังโหลดสถานะการใช้งานบัญชี…",
+    "stateReady": "สถานะความสมบูรณ์ของบัญชี",
+    "stateDisabled": "CLIProxyAPI ไม่ได้ติดตั้ง",
+    "stateMissingKey": "ยังไม่มีการกำหนดค่า Management key",
+    "stateUnreachable": "ไม่สามารถเข้าถึง Management API ได้",
+    "stateUnauthorized": "Management key ถูกปฏิเสธ",
+    "stateUnsupported": "เวอร์ชัน CLIProxyAPI นี้อันไม่แสดงสถานะความสมบูรณ์ของบัญชี",
+    "stateInvalidResponse": "Management API คืนค่าคำตอบที่ไม่รองรับ"
+  },
+  "darioPanel": {
+    "title": "บัญชี Claude",
+    "description": "ยืนยันตัวตน Dario ด้วยแผน Claude Pro/Max ของคุณ ค่าใช้จ่ายจากการใช้งานจะหักจากแพ็กเกจของคุณ ต้องมีอย่างน้อย 1 บัญชีก่อนที่ Dario จะสามารถ route คำขอได้ (ระหว่างนี้ /health จะรายงานสถานะ degraded)",
+    "noAccounts": "ยังไม่ได้ตั้งค่าบัญชีใดๆ",
+    "importTitle": "นำเข้าจาก OmniRoute",
+    "importDescription": "ใช้โทเคน OAuth ที่อยู่ในโปรไฟล์ Claude ของ OmniRoute ที่มีอยู่แล้ว เพื่อไม่ให้ต้องเข้าสู่ระบบใหม่ — ข้ามขั้นตอนการอนุมัติผ่านเบราว์เซอร์ทั้งหมด",
+    "importPendingTooltip": "จะพร้อมใช้งานเมื่อมีโปรไฟล์ Claude ใน OmniRoute แล้ว",
+    "btnImport": "นำเข้า",
+    "btnImporting": "กำลังนำเข้า…",
+    "aliasPlaceholder": "ชื่อเรียก (เลือกเติม)",
+    "btnStartLogin": "เริ่มเข้าสู่ระบบ",
+    "btnStarting": "กำลังเริ่ม…",
+    "btnCompleteLogin": "เสร็จสิ้นการเข้าสู่ระบบ",
+    "btnCompleting": "กำลังเสร็จสิ้น…",
+    "codePlaceholder": "code#state หรือ code เปล่า",
+    "noticeImported": "นำเข้าในฐานะบัญชี \"{alias}\" — Dario ได้รีสตาร์ทแล้วเพื่อรับข้อมูล",
+    "noticeAdded": "เพิ่มบัญชี \"{alias}\" แล้ว",
+    "expiresInHours": "หมดอายุใน ~{hours} ชม.",
+    "expiresInMinutes": "หมดอายุใน ~{minutes} นาที",
+    "expiresAt": "หมดอายุวันที่ {date}",
+    "scopes": "{count, plural, one {ขอบเขต #} other {ขอบเขต #}}",
+    "btnRemove": "ลบออก",
+    "btnRefresh": "รีเฟรช",
+    "loginStep1": "1. เปิด URL นี้ในเบราว์เซอร์ของคุณและอนุญาตการเข้าถึงสำหรับบัญชี <mono>{alias}</mono>:",
+    "pendingExpires": "การล็อกอินที่กำลังรอดัวยหมดอายุใน {time}",
+    "loginStep2": "2. วางรหัสที่ Anthropic แสดง:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "ต้องเปิดหน้านี้ภายใน Telegram Mini App.",
+    "greeting": "👋 สวัสดี {name}! ส่งข้อความเพื่อพูดคุยผ่าน OmniRoute gateway ของคุณ",
+    "greetingFallbackName": "ที่นั่น",
+    "errNoReply": "⚠️ ไม่มีการตอบกลับจาก gateway.",
+    "btnSend": "ส่ง"
   }
 }

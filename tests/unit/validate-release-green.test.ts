@@ -20,6 +20,10 @@ const {
   fullCiKindFor,
   ESLINT_TIMEOUT_MS,
   unitShardCountFromCi,
+  shardCountFromCi,
+  hostedSuiteNames,
+  parseHostedSuiteResult,
+  foldHostedSuiteResults,
   unitShardPool,
   runPool,
   mergeUnitShardResults,
@@ -293,10 +297,10 @@ test("pre-flight runs the heavy lanes one at a time, with unit split like ci.yml
   assert.doesNotMatch(src, /Promise\.all\(\s*slow\.map\(/, "no parallel wave of heavy lanes");
   assert.match(
     src,
-    /for \(const g of slow\) \{\s*announce\(g\.label\);\s*const result = await \(/,
+    /for \(const g of lanes\) \{\s*announce\(g\.label\);\s*const result = await \(/,
     "each heavy lane must be awaited before the next one starts"
   );
-  const wave = src.slice(src.indexOf("const slow = ["), src.indexOf("for (const g of slow)"));
+  const wave = src.slice(src.indexOf("const slow = ["), src.indexOf("for (const g of lanes)"));
   const order = ["unit", "integration", "vitest", "pack-artifact"].map((id) =>
     wave.indexOf(`id: "${id}"`)
   );
@@ -426,7 +430,7 @@ test("pre-flight runs tarball boot only after the package artifact builder compl
     new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
     "utf8"
   );
-  const laneLoop = src.indexOf("for (const g of slow)");
+  const laneLoop = src.indexOf("for (const g of lanes)");
   const packBoot = src.indexOf('id: "pack-boot"');
 
   assert.ok(laneLoop >= 0, "the sequential slow-lane loop must exist");
@@ -711,4 +715,95 @@ jobs:
 `;
   const ids = extract(yaml).map((g) => g.id);
   assert.deepEqual(ids, ["check:public-creds", "check:db-rules"]);
+});
+
+// ─── Hosted suites (2026-10-20): unit/integration/vitest run as hosted jobs ──────
+
+test("hosted suites: the REAL ci.yml yields the integration shard count too", async () => {
+  const fs = await import("node:fs");
+  const ci = fs.readFileSync(new URL("../../.github/workflows/ci.yml", import.meta.url), "utf8");
+  const integration = shardCountFromCi(ci, "test-integration");
+  assert.ok(
+    Number.isInteger(integration) && integration >= 2,
+    `integration shards: ${integration}`
+  );
+  assert.equal(shardCountFromCi(ci, "no-such-job"), null);
+});
+
+test("hosted suites: names list unit shards, integration shards, then vitest", () => {
+  assert.deepEqual(hostedSuiteNames(2, 2), [
+    "unit-1",
+    "unit-2",
+    "integration-1",
+    "integration-2",
+    "vitest",
+  ]);
+});
+
+test("hosted suites: a malformed result file is no result", () => {
+  assert.deepEqual(parseHostedSuiteResult('{"name":"unit-1","code":0,"detail":"pass"}'), {
+    name: "unit-1",
+    code: 0,
+    detail: "pass",
+  });
+  assert.equal(parseHostedSuiteResult("not json"), null);
+  assert.equal(parseHostedSuiteResult('{"name":"unit-1","code":"0"}'), null);
+  assert.equal(parseHostedSuiteResult('{"code":0}'), null);
+});
+
+test("hosted suites fold into the unit/integration/vitest gates the verdict already reads", () => {
+  const green = foldHostedSuiteResults(
+    [
+      { name: "unit-1", code: 0, detail: "pass" },
+      { name: "unit-2", code: 0, detail: "pass" },
+      { name: "integration-1", code: 0, detail: "pass" },
+      { name: "vitest", code: 0, detail: "pass" },
+    ],
+    { unitShards: 2, integrationShards: 1 }
+  );
+  assert.deepEqual(
+    green.map((g) => [g.id, g.kind, g.ok, g.detail]),
+    [
+      ["unit", "hard", true, "pass"],
+      ["integration", "hard", true, "pass"],
+      ["vitest", "hard", true, "pass"],
+    ]
+  );
+
+  const red = foldHostedSuiteResults(
+    [
+      { name: "unit-1", code: 124, detail: "Error: fixture noise" },
+      { name: "unit-3", code: 1, detail: "✖ broken test (5ms)" },
+      { name: "integration-1", code: 0, detail: "pass" },
+      null,
+    ],
+    { unitShards: 3, integrationShards: 2 }
+  );
+  const byId = Object.fromEntries(red.map((g) => [g.id, g]));
+  assert.equal(byId.unit.ok, false);
+  assert.equal(
+    byId.unit.detail,
+    "unit-1 TIMEOUT, unit-2 no result, unit-3 exit 1 — ✖ broken test (5ms)"
+  );
+  assert.equal(byId.integration.ok, false, "a shard that never reported fails the lane");
+  assert.equal(byId.integration.detail, "integration-2 no result");
+  assert.equal(byId.vitest.ok, false);
+  assert.equal(byId.vitest.detail, "vitest no result");
+});
+
+test("--suites-from replaces the local suite lanes and keeps only the build on the slot", async () => {
+  const fs = await import("node:fs");
+  const src = fs.readFileSync(
+    new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
+    "utf8"
+  );
+  assert.match(src, /process\.argv\.indexOf\("--suites-from"\)/);
+  assert.match(
+    src,
+    /const lanes = SUITES_FROM \? slow\.filter\(\(g\) => g\.id === "pack-artifact"\) : slow;/
+  );
+  assert.match(src, /foldHostedSuiteResults\(results, \{ unitShards, integrationShards \}\)/);
+  // the webpack build gets the docker-publish heap instead of build-next-isolated's 8192 MB
+  assert.match(src, /const BUILD_GATE_ENV = \{ OMNIROUTE_BUILD_MEMORY_MB: "12288" \};/);
+  assert.match(src, /args: \["run", "build:cli"\], env: BUILD_GATE_ENV/);
 });

@@ -1,0 +1,1 @@
+- **fix(antigravity):** accept the bare `gemini-4-argon` id (defaults to the medium tier) and list Gemini 4 Argon in the Vertex catalog ([#18285](https://github.com/cheaper-inference/OmniRoute/pull/18285)) — thanks @apr3ndi5 @AppleVibe

@@ -45,9 +45,9 @@ Yíyípadà **Endpoints → A2A** ló ń ṣàkóso A2A, a sì pa á ní àìṣ
 
 ## Àwọn Ọ̀nà JSON-RPC 2.0
 
-### `message/send` — Ìṣiṣẹ́ Amuṣiṣẹpọ̀
+### `message/send` — Ìmúṣẹ Amúṣiṣẹ́pọ̀
 
-Ó fi ìfiránṣẹ́ ránṣẹ́ sí ọgbọ́n iṣẹ́ kan, ó sì dúró de ìdáhùn pípé.
+Ó fi ìfiranṣẹ́ ránṣẹ́ sí ọgbọ́n kan, ó sì dúró de èsì tó pé.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,7 +65,18 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Ìdáhùn:**
+Fún `smart-routing`, `metadata.combo` jẹ́ ìṣàkóso-pàtó lórí
+`metadata.model` fún ìbéèrè gateway; a máa ń fi í ránṣẹ́ gẹ́gẹ́ bí `model` gidi,
+kì í ṣe gẹ́gẹ́ bí pápá JSON `x-combo` tí a kò fiyè sí. Ìfàṣẹsí API-key déédéé ti gateway àti
+ìfàṣẹsí fún ibi-ìfojúsùn kọ̀ọ̀kan ṣì wúlò. A ó kọ combo tí kò tọ́ tàbí tí ó ṣófo.
+
+Àbájáde náà ṣàfihàn `requested_combo` (èrò olùpè), `dispatched_model`
+(ìbéèrè gateway gangan), `response_model` (èsì gateway) àti
+`confirmed_combo`. Pápá tó gbẹ̀yìn yìí jẹ́ `null` àyàfi tí gateway bá
+ṣàdámọ̀ combo kan ní kedere. Àwọn àkọọ́lẹ̀ ìpinnu A2A máa ń fi ìmúṣẹ kan mọ́
+combo tí a ti fìdí rẹ̀ múlẹ̀ nìkan, tí wọ́n sì ń pa ìbéèrè tí a kò tíì fìdí rẹ̀ múlẹ̀ mọ́ gẹ́gẹ́ bí `requestedCombo`.
+
+**Èsì:**
 
 ```json
 {
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Ṣíṣàn SSE
 
-Ó rí bí `message/send`, ṣùgbọ́n ó máa ń dá Àwọn Ìṣẹ̀lẹ̀ Tí Olùpèsè Rán padà fún ṣíṣàn ní ojú-ẹsẹ̀.
+Ó jẹ́ bákan náà pẹ̀lú `message/send`, ṣùgbọ́n ó máa ń dá àwọn Server-Sent Events padà fún ṣíṣàn ní àkókò gidi.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Àwọn Ọgbọ́n Tó Wà
+## Awọn ogbon ti o wa
 
-OmniRoute ń ṣàfihàn àwọn ọgbọ́n A2A mẹ́fà tí a so mọ́ `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Mọ́dùlù ọgbọ́n kọ̀ọ̀kan wà nínú `src/lib/a2a/skills/`.
+OmniRoute ṣafihan awọn ọgbọn A2A 6 ti a firanṣẹ ni `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kọọkan olorijori module ngbe ni `src/lib/a2a/skills/`.
 
-| Ọgbọ́n             | ID                   | Àpèjúwe                                                                                                                                                  | Àwọn Àmì                   | Àwọn Àpẹẹrẹ                                   |
-| :---------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :-------------------------------------------- |
-| Ìdarí Ọ̀nà Ọlọ́gbọ́n | `smart-routing`      | Ń darí ìbéèrè kan gba ọ̀dọ̀ olùpèsè/àkópọ̀ tó dára jù lọ nípa lílo ẹ́ńjìnnì àkópọ̀ OmniRoute àti ìṣírò àmì                                                    | routing, providers         | "Darí ìbéèrè yìí nípasẹ̀ módẹ́lì tó dára jù lọ" |
-| Ìṣàkóso Ìwọ̀n Lílo | `quota-management`   | Ń jabo ipò ìwọ̀n lílo fún olùpèsè kọ̀ọ̀kan, ó sì ń ran àwọn olùpè lọ́wọ́ láti pinnu ìgbà tí wọ́n yẹ kí wọ́n dín ìṣàn kù/tàbí yí padà                            | quota, providers           | "Ṣàyẹ̀wò ìwọ̀n lílo fún anthropic"              |
-| Ìṣàwárí Olùpèsè   | `provider-discovery` | Ń ṣe àtòjọ àwọn olùpèsè tí a ti fi sílẹ̀ pẹ̀lú àwọn agbára wọn, àwọn àmì ipele ọ̀fẹ́, àti ipò OAuth                                                          | providers, discovery       | "Àwọn olùpèsè wo ló wà?"                      |
-| Ìtúpalẹ̀ Iye Owó   | `cost-analysis`      | Ń fojú díwọ̀n iye owó ìbéèrè/ìfọ̀rọ̀wérọ̀ kan nípasẹ̀ àkójọpọ̀ àti lílo àìpẹ́                                                                                   | cost, usage                | "Fojú díwọ̀n iye owó fún ìfọ̀rọ̀wérọ̀ yìí"        |
-| Ìròyìn Ìlera      | `health-report`      | Ń ṣàkójọpọ̀ ipò circuit breaker, cooldown, àti lockout fún olùpèsè kọ̀ọ̀kan                                                                                 | health, resilience         | "Ṣàfihàn ipò ìlera gbogbo àwọn olùpèsè"       |
-| Àtòjọ Àwọn Agbára | `list-capabilities`  | Ń dá gbogbo àkójọpọ̀ Agent Skills olóǹkà 45 padà (23 API + 21 CLI + 1 config) gẹ́gẹ́ bí tábìlì markdown pẹ̀lú àwọn URL SKILL.md aise fún fífi àyíká-ọ̀rọ̀ sínú | catalog, discovery, skills | "Ṣe àtòjọ gbogbo àwọn agbára OmniRoute"       |
+| Ogbon             | ID                   | Apejuwe                                                                                                                           | Awọn afi               | Awọn apẹẹrẹ                              |
+| :---------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------- | :--------------------- | :--------------------------------------- |
+| Smart afisona     | `smart-routing`      | Awọn ipa ọna kiakia nipasẹ provider/combo to dara julọ nipa lilo igbelewọn konbo engine OmniRoute+                                | afisona, awọn olupese  | "Pa ọna yii nipasẹ awoṣe ti o dara julọ" |
+| Quota Management  | `quota-management`   | Awọn ijabọ fun ipinlẹ ipin ipin-olupese, ṣe iranlọwọ fun awọn olupe lati pinnu igba lati throttle/switch                          | ipin, awọn olupese     | "Ṣayẹwo ipin fun anthropic"              |
+| Awari Olupese     | `provider-discovery` | Awọn atokọ ti awọn olupese ti fi sori ẹrọ pẹlu awọn agbara, awọn asia ipele-ọfẹ, ipo OAuth                                        | olupese, Awari         | "Awọn olupese wo ni o wa?"               |
+| Iye owo Analysis  | `cost-analysis`      | Iṣiro iye owo ti request/conversation ti a fun ni katalogi + lilo aipẹ                                                            | iye owo, lilo          | "Iro idiyele fun ibaraẹnisọrọ yii"       |
+| Iroyin Ilera      | `health-report`      | Aggregates Circuit fifọ, cooldown, lockout ipinle fun olupese                                                                     | ilera, resilience      | "Fi ipo ilera han gbogbo awọn olupese"   |
+| Awọn agbara Akojọ | `list-capabilities`  | Pada ni kikun 45-iwọle Agent Skills katalogi (23 API + 21 CLI + 1 atunto) bi tabili isamisi pẹlu SKILL.md URLs aise fun abẹrẹ ọrọ | katalogi, Awari, ogbon | "Akojọ gbogbo awọn agbara OmniRoute "    |
 
-> Ó yẹ kí Agent Card máa bá àkójọpọ̀ olùpèsè 374 tó ń ṣiṣẹ́ mu; iye àwọn olùpèsè àti metadata ọ̀fẹ́/tí kò nílò ìfàṣẹsí ni a ń gba láti inú runtime registry.
+> Kaadi Aṣoju yẹ ki o wa ni ibamu pẹlu katalogi Olupese 377 laaye; Awọn iṣiro olupese ati awọn metadata free/no-auth jẹ orisun lati iforukọsilẹ akoko asiko.
 
-### Àlàyé Ọgbọ́n `list-capabilities`
+### `list-capabilities` Skill Apejuwe
 
-Ọgbọ́n `list-capabilities` wúlò gan-an fún àwọn aṣojú òde tí wọ́n nílò láti ṣàwárí ohun tí OmniRoute ń ṣàfihàn kí wọ́n tó fi àwọn ìpè API ránṣẹ́. Ó ń dá artifact tábìlì markdown tó ní ètò padà:
+Imọgbọn `list-capabilities` wulo paapaa fun awọn aṣoju ita ti o nilo lati ṣawari kini OmniRoute ṣafihan ṣaaju fifiranṣẹ awọn ipe API. O da iṣẹ-ọnà tabili isamisi ti eleto pada:
 
 ```
-| ID | Orúkọ | Ẹ̀ka | Agbègbè | Àwọn Endpoint/Àṣẹ | URL Aise |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Ìfàṣẹsí àti Àwọn Àkókò Ìṣiṣẹ́ | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Ìlà kọ̀ọ̀kan ní ọ̀wọ̀n `rawUrl` kí àwọn aṣojú lè gba gbogbo SKILL.md lẹ́sẹ̀kẹsẹ̀. Ààyè `metadata.totalSkills` bá ìwọ̀n àkójọpọ̀ mu (45 lónìí). Ìmúlò: `src/lib/a2a/skills/listCapabilities.ts`. Tún wo [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Lara kọọkan pẹlu iwe `rawUrl` ki awọn aṣoju le mu SKILL.md ni kikun lẹsẹkẹsẹ. Aaye `metadata.totalSkills` ṣe afihan iwọn katalogi (45 loni). imuse: `src/lib/a2a/skills/listCapabilities.ts`. Wo tun [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -193,17 +197,17 @@ Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-
 
 ---
 
-## Fífi Ọgbọ́n Tuntun Kún Un
+## Fí Ìmọ̀ Tuntun Kún Un
 
-1. **Ṣẹ̀dá fáìlì ọgbọ́n:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Ṣẹ̀dá fáìlì ìmọ̀:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Gbé iṣẹ́ async kan jáde `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Tẹ̀lé ìrísí àwọn ọgbọ́n tó ti wà bíi `smartRouting.ts`.
+   Ṣe àgbéjáde iṣẹ́ async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Tẹ̀lé ìṣètò àwọn ìmọ̀ tó ti wà tẹ́lẹ̀ bíi `smartRouting.ts`.
 
-2. **Forúkọsílẹ̀ olùtọ́jú:** nínú `src/lib/a2a/taskExecution.ts`, fi àkọsílẹ̀ kan kún `A2A_SKILL_HANDLERS`:
+2. **Forúkọsílẹ̀ olùṣàkóso:** nínú `src/lib/a2a/taskExecution.ts`, fi àkọsílẹ̀ kan kún `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...àwọn ọgbọ́n tó ti wà
+     // ...àwọn ìmọ̀ tó ti wà tẹ́lẹ̀
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -211,7 +215,7 @@ Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-
    };
    ```
 
-3. **Ṣàfihàn rẹ̀ nínú Káàdì Aṣojú:** nínú `src/app/.well-known/agent.json/route.ts`, fi kún àkójọpọ̀ `skills`:
+3. **Ṣàfihàn rẹ̀ nínú Káàdì Agent:** nínú `src/lib/a2a/agentCardMetadata.ts` (tí `/.well-known/agent.json` àti `/.well-known/agent-card.json` ń lò papọ̀), fi kún àkójọpọ̀ `skills`:
 
    ```json
    {
@@ -223,9 +227,9 @@ Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-
    }
    ```
 
-4. **Kọ àwọn ìdánwò:** `tests/unit/a2a-<your-skill>.test.ts`. Ṣe àyẹ̀wò ipa ọ̀nà àṣeyọrí + ipa ọ̀nà àṣìṣe.
+4. **Kọ àwọn àyẹ̀wò:** `tests/unit/a2a-<your-skill>.test.ts`. Ṣe àyẹ̀wò ọ̀nà àṣeyọrí àti ọ̀nà àṣìṣe.
 
-5. **Ṣàkọsílẹ̀** ọgbọ́n tuntun náà sínú tábìlì `Available Skills` ti fáìlì yìí.
+5. **Ṣàkọsílẹ̀ àlàyé** ìmọ̀ tuntun náà sínú tábìlì `Available Skills` ti fáìlì yìí.
 
 ---
 
@@ -262,9 +266,9 @@ submitted → working → completed
 
 ---
 
-## Àwọn Àpẹẹrẹ Ìṣọ̀kan
+## Awọn apẹẹrẹ Iṣọkan
 
-### Python (requests)
+### Python (awọn ibeere)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (gba)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

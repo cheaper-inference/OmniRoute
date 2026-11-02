@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "团队费用",
+    "subtitle": "管理团队共享软预算，查看按目录价格估算的用量费用。",
+    "refresh": "刷新",
+    "create": "创建团队",
+    "edit": "编辑团队",
+    "archive": "归档",
+    "selectTeam": "团队",
+    "searchTeams": "搜索团队",
+    "statusFilter": "团队状态",
+    "active": "活跃",
+    "archived": "已归档 · 只读",
+    "allTeams": "全部团队",
+    "noTeams": "没有符合条件的团队。",
+    "selectHint": "创建或选择团队以查看费用。",
+    "loading": "正在加载团队费用…",
+    "budgetTitle": "当前软预算",
+    "budgetSubtitle": "已提交的成功用量 · 滚动窗口 · 独立于报告日期",
+    "archivedBudget": "团队已归档，预算限制不再生效。历史报告仍可查看。",
+    "unlimited": "不限额 — 尚未配置共享软预算。",
+    "budgetUnavailable": "预算状态暂不可用，请刷新重试。",
+    "used": "成功用量费用",
+    "maximum": "预算上限",
+    "remaining": "已知剩余额度",
+    "resets": "重置时间",
+    "unpricedBudget": "部分成功用量定价未知，已知金额并不完整；预算限制会将此窗口视为超额。",
+    "overBudget": "已达到或超过预算 · 超出 {amount}",
+    "reportTitle": "用量报告",
+    "reportSubtitle": "包含所有请求尝试 · USD 目录估算，非账单费用 · UTC 完整日期",
+    "reportPeriod": "报告周期",
+    "day1": "1 天",
+    "day7": "7 天",
+    "day30": "30 天",
+    "allTime": "全部时间",
+    "reportSpend": "报告估算费用",
+    "requests": "请求数",
+    "assignedKeys": "已分配密钥",
+    "unpricedReport": "报告含未知定价，估算费用并不完整。",
+    "breakdown": "按 API 密钥的费用明细",
+    "noUsage": "此报告周期内暂无用量。",
+    "keyName": "API 密钥名称",
+    "tokens": "输入与输出令牌",
+    "unnamedKey": "未命名或已删除的密钥",
+    "unpriced": "未知定价",
+    "members": "团队成员",
+    "memberSubtitle": "调整成员关系不会改变历史费用归属。",
+    "searchKeys": "搜索密钥或当前归属团队",
+    "chooseKey": "选择 API 密钥",
+    "unassigned": "未分配",
+    "ownership": "当前计费团队：{team}",
+    "assign": "分配",
+    "remove": "移除",
+    "noMembers": "暂无当前成员，历史用量仍可能计入预算。",
+    "assignedAt": "分配于 {date}（UTC）",
+    "name": "团队名称",
+    "description": "描述",
+    "enableBudget": "启用共享软预算",
+    "amount": "预算金额（USD）",
+    "duration": "滚动预算窗口",
+    "cancel": "取消",
+    "save": "保存",
+    "confirm": "确认",
+    "transferTitle": "确认转移密钥",
+    "transferMessage": "将此密钥从“{source}”移至“{destination}”？历史费用仍归原团队。",
+    "removeTitle": "移除密钥分配",
+    "removeMessage": "从“{team}”移除此密钥？历史费用仍保留在此团队。",
+    "archiveTitle": "归档团队",
+    "archiveMessage": "归档“{team}”？当前密钥绑定将全部关闭，预算限制停止生效，历史报告仍可查看。",
+    "invalidName": "请输入 1–200 字的名称，描述最多 2,000 字。",
+    "invalidAmount": "请输入大于零的有限预算金额。",
+    "unauthorized": "请先登录管理后台。",
+    "forbidden": "你没有团队管理权限。已保留输入内容。",
+    "notFound": "此团队或成员分配已不存在。",
+    "conflict": "成员归属或团队已变更，请刷新并确认当前归属后重试。",
+    "failed": "请求失败，已保留输入内容，请重试。",
+    "partialBudget": "历史日汇总跨越预算窗口边界，无法精确拆分。当前费用并不完整，暂不显示剩余额度；原有软预算策略保持不变。"
+  },
   "codexKeyServiceMode": {
     "title": "此 API 密钥的 Codex 服务模式",
     "description": "适用于 Codex 请求，包括组合中的 Codex 模型。强制模式会覆盖客户端、全局设置和连接默认值。其他提供者不受影响。",
@@ -25,8 +102,10 @@
     "confirm": "你确定吗？",
     "refresh": "刷新",
     "close": "关闭",
+    "dialogTitleFallback": "对话框",
     "previousPage": "上一页",
     "nextPage": "下一页",
+    "pagination": "分页",
     "capsLockOn": "大写锁定已开启",
     "dismissNotification": "忽略通知",
     "toggleColumns": "切换列",
@@ -77,7 +156,7 @@
     "oldest": "最早",
     "all": "全部",
     "none": "无",
-    "yes": "是的",
+    "yes": "是",
     "no": "否",
     "on": "开启",
     "off": "关闭",
@@ -182,6 +261,7 @@
     "combos": "组合",
     "noModelsFound": "未找到 Model",
     "clear": "清除",
+    "clearFilters": "清除筛选条件",
     "done": "完成",
     "selectAll": "全选",
     "unselectAll": "取消全选",
@@ -893,7 +973,7 @@
     "batchActionCancel": "取消",
     "batchActionDownloadOutput": "下载输出",
     "batchActionDownloadErrors": "下载错误",
-    "batchActionRetry": "重试失败的",
+    "batchActionRetry": "重试失败项",
     "batchActionRetryConfirm": "重试 {n} 个失败请求？最终成本取决于实际消耗的令牌。",
     "expirationBadgeCritical": "紧急",
     "expirationBadgeWarning": "即将",
@@ -998,7 +1078,10 @@
     "batchFileUsedByCount": "被 {count, plural, one {# 批次} other {# 批次}} 使用",
     "batchFilePreview": "预览",
     "batchFilePreviewTruncated": "显示前 {shown} 行（共 {total} 行）",
-    "batchFileDownloadFull": "下载完整文件"
+    "batchFileDownloadFull": "下载完整文件",
+    "tokensPageTitle": "令牌",
+    "tokensPageDescription": "在 API 密钥之间发送令牌、共享邀请码并连接社区服务器。",
+    "tokensServerUrlLabel": "服务器 URL"
   },
   "disabled": "已禁用",
   "featureFlagOmnirouteEmergencyFallbackDescription": "将预算耗尽的请求路由到紧急免费备用提供者/模型。",
@@ -1085,17 +1168,8 @@
     "serverDisconnectedMsg": "代理服务器已停止，或正在重启。",
     "expandSidebar": "展开侧边栏",
     "collapseSidebar": "收起侧边栏",
-    "themes": "主题",
-    "presetColors": "热门配色",
     "createTheme": "创建主题",
     "chooseColor": "选择一种颜色",
-    "themeCoral": "珊瑚",
-    "themeBlue": "蓝色",
-    "themeRed": "红色",
-    "themeGreen": "绿色",
-    "themeViolet": "紫罗兰",
-    "themeOrange": "橙色",
-    "themeCyan": "青色",
     "cliToolsShort": "工具",
     "cache": "缓存",
     "cacheShort": "缓存",
@@ -1103,12 +1177,10 @@
     "themeSystem": "主题系统",
     "whitelabelingDesc": "自定义品牌展示与主题外观。",
     "switchThemes": "切换主题",
-    "themeAccentDesc": "选择用于按钮、链接和高亮状态的强调色。",
     "uploadFavicon": "上传 Favicon",
     "themeDark": "深色主题",
     "customLogoDesc": "上传用于侧边栏和登录页的自定义 Logo。",
     "sidebarVisibilityToggle": "侧边栏可见性开关",
-    "themeAccent": "主题强调色",
     "resetFavicon": "重置 Favicon",
     "whitelabeling": "白标",
     "darkMode": "深色模式",
@@ -1122,10 +1194,8 @@
     "customLogo": "自定义 Logo",
     "appearance": "外观",
     "themeSelectionAria": "主题选择",
-    "themeCreate": "创建主题",
     "customFaviconDesc": "上传用于浏览器标签页的自定义 Favicon。",
     "logoPreview": "Logo 预览",
-    "themeCustom": "自定义主题",
     "hideHealthLogsDesc": "隐藏健康检查日志说明",
     "faviconPreview": "图标预览",
     "changelog": "更新日志",
@@ -1312,7 +1382,7 @@
     "trafficInspector": "流量检查器",
     "trafficInspectorSubtitle": "检查来自应用的请求与响应流量",
     "trafficInspectorPurpose": "准确查看您的应用发送给 AI 提供者以及从中接收的内容。适用于任何 OpenAI 兼容客户端。",
-    "cliCode": "CLI 代码的",
+    "cliCode": "CLI 编程工具",
     "cliCodeSubtitle": "指向 OmniRoute 的代码工具",
     "cliAgents": "CLI 代理",
     "cliAgentsSubtitle": "自主 CLI 代理",
@@ -1352,7 +1422,9 @@
       "open": "打开",
       "close": "关闭"
     },
-    "noResults": "没有结果"
+    "noResults": "没有结果",
+    "costsTeams": "团队",
+    "costsTeamsSubtitle": "团队成本中心"
   },
   "webhooks": {
     "title": "Webhook",
@@ -1466,13 +1538,13 @@
       "secretKeyHint": "用于对负载头进行签名以进行身份验证。"
     },
     "discord": {
-      "webhookUrl": "Discord Webhook URL",
+      "webhookUrl": "Discord Webhook 地址",
       "webhookUrlPlaceholder": "https://discord.com/api/webhooks/...",
       "webhookUrlHint": "从 Discord 频道集成设置中复制的 Webhook URL。",
       "tutorial": "如何创建 Discord Webhook："
     },
     "slack": {
-      "webhookUrl": "Slack Webhook URL",
+      "webhookUrl": "Slack Webhook 地址",
       "webhookUrlPlaceholder": "https://hooks.slack.com/services/...",
       "webhookUrlHint": "从 Slack Incoming Webhooks 集成中复制的 Webhook URL。",
       "tutorial": "如何创建 Slack Webhook："
@@ -1485,7 +1557,11 @@
       "chatIdPlaceholder": "-100123456789 或 @channelname",
       "chatIdHint": "聊天/频道的唯一数字标识符或公开用户名。",
       "tutorial": "如何配置 Telegram Webhook："
-    }
+    },
+    "copy": "复制",
+    "copied": "已复制！",
+    "expandDetails": "显示详细信息",
+    "collapseDetails": "隐藏详细信息"
   },
   "compliance": {
     "auditTitle": "审计",
@@ -1597,22 +1673,17 @@
     "mcpMetricCalls24h": "通话 (24小时)",
     "mcpMetricSuccessRate": "成功率",
     "mcpMetricAvgDuration": "平均持续时间",
-    "mcpMetricTopTool": "顶级工具"
-  },
-  "themesPage": {
-    "title": "主题",
-    "description": "选择预设主题，或仅用一种颜色创建自定义主题",
-    "presetColors": "热门配色",
-    "customTheme": "自定义主题",
-    "customThemeDesc": "点击创建主题，然后选择一种颜色",
-    "createTheme": "创建主题",
-    "activePreset": "当前主题"
+    "mcpMetricTopTool": "顶级工具",
+    "dismissError": "关闭错误提示"
   },
   "header": {
+    "teamsDescription": "团队费用估算与共享软预算",
     "logout": "退出登录",
     "quickNavigation": "快速导航",
     "quickNavigationTitle": "快速导航 (⌘K / Ctrl+K)",
     "openQuickNavigation": "打开快速导航",
+    "openMenu": "打开菜单",
+    "products": "Keak 产品",
     "switchToLightMode": "切换到浅色模式",
     "switchToDarkMode": "切换到深色模式",
     "language": "语言",
@@ -1640,8 +1711,6 @@
     "anthropicCompatible": "Anthropic 兼容",
     "media": "媒体",
     "mediaDescription": "生成图像、视频和音乐",
-    "themes": "主题",
-    "themesDescription": "为整个仪表板选择颜色主题",
     "costsDescription": "跟踪支出，分析趋势，管理所有 AI 提供者的预算",
     "cacheDescription": "监控提供者提示缓存效率和本地语义响应复用。",
     "limitsDescription": "为每个 API 密钥和提供者配置速率限制和配额",
@@ -1750,7 +1819,7 @@
     "edit": "编辑",
     "apiKeys": "API 密钥",
     "models": "模型",
-    "cliCode": "CLI 代码",
+    "cliCode": "CLI 编程工具",
     "cliAgents": "CLI 代理",
     "acpAgents": "ACP 代理",
     "endpoint": "端点",
@@ -1933,7 +2002,14 @@
     "readinessStep3": "复制端点",
     "readinessStep4": "发送测试请求",
     "readinessContinue": "继续设置",
-    "readinessDismiss": "暂时忽略"
+    "readinessDismiss": "暂时忽略",
+    "unpricedUsageTitle": "{count, plural, other {# 个模型最近有用量，但未配置价格}}",
+    "unpricedUsageFailClosed": "{keys, plural, other {# 个设置了用量限制的 API 密钥}}在最近 8 天内使用过这些模型。只要这些用量仍在密钥的每日或每周窗口内，该密钥就会被视为超出配额，请求会被拦截（UNPRICED_USAGE_BUDGET_POLICY=fail_closed）。",
+    "unpricedUsageCountAsZero": "这些用量在计算按密钥设置的用量限制时按 $0 计入（UNPRICED_USAGE_BUDGET_POLICY=count_as_zero）。",
+    "unpricedUsageModelStats": "{requests, plural, other {# 次请求}}，{keys, plural, other {# 个受限密钥}}",
+    "unpricedUsageMore": "…另有 {count} 个",
+    "unpricedUsageConfigure": "配置定价",
+    "unpricedUsageDismiss": "关闭"
   },
   "analytics": {
     "title": "分析",
@@ -1968,13 +2044,13 @@
     "chartNoData": "无数据",
     "chartWeekly": "每周",
     "activitySummary": "{active} 天活跃 · {tokens} token · {days} 天",
-    "activityCellTitle": "{date}: {tokens} token",
+    "activityCellTitle": "{date}：{tokens} token",
     "activityLess": "较少",
     "activityMore": "较多",
     "chartApiKeyBreakdown": "API 密钥细分",
     "chartApiKey": "API 密钥",
     "mostActiveDay": "最活跃的一天",
-    "datedTokenCount": "{date} · {tokens} token",
+    "datedTokenCount": "{date}：{tokens} token",
     "noDataLast7Days": "过去 7 天内无数据",
     "requestTokenSummary": "{requests} 次请求 · {tokens} token",
     "chartByAccount": "按账户",
@@ -2495,7 +2571,12 @@
     "onlySelectedConnections": "仅选定的连接",
     "selectAtLeastOneConnection": "请至少选择一个连接，或选择“所有连接”。",
     "allConnectionsDesc": "此密钥可以使用任何活跃连接。",
-    "restrictedToConnections": "仅限用于 {count, plural, one {# 个连接} other {# 个连接}}。"
+    "restrictedToConnections": "仅限用于 {count, plural, one {# 个连接} other {# 个连接}}。",
+    "preferredConnections": "首选连接",
+    "preferredConnectionsDesc": "按密钥设置的优先顺序。如果首选连接不可用，路由会回退到下一个符合条件的连接。",
+    "preferredConnectionsNone": "未设置偏好 — 使用默认路由策略。",
+    "preferredConnectionsClear": "清除",
+    "removeSelection": "移除 {name}"
   },
   "auditLog": {
     "title": "审核日志",
@@ -2607,7 +2688,9 @@
     "imageToTextBridgeCta": "在模态桥设置中配置图像→文本桥接",
     "sttBridgeCta": "在模态桥设置中配置语音→文本桥接器",
     "existingConnection": "现有连接",
-    "openrouterSttDescription": "OpenRouter 语音转文本模型使用您配置的 OpenRouter 连接。无需单独的凭据。"
+    "openrouterSttDescription": "OpenRouter 语音转文本模型使用您配置的 OpenRouter 连接。无需单独的凭据。",
+    "modalityTabsAria": "媒体类型",
+    "serviceKindsAria": "服务类型"
   },
   "search": {
     "searchQuery": "搜索词",
@@ -2963,6 +3046,14 @@
     "openClawManualConfiguration": "OpenClaw - 手动配置",
     "clineManualConfiguration": "Cline - 手动配置",
     "kiloManualConfiguration": "Kilo - 手动配置",
+    "piManualConfiguration": "Pi - 手动配置",
+    "piConfigInvalidTitle": "Pi models.json无法读取",
+    "piOmnirouteConfigured": "OmniRoute配置为 Pi 自定义提供程序",
+    "piModelHelp": "Pi 不会自动发现自定义端点—模型，您选择的模型会显式写入models.json中。",
+    "piManualConfigTitle": "或者手动编辑~/.pi/agent/models.json",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "然后启动 Pi 并选择omniroute提供者。设置PI_CODING_AGENT_DIR以移动整个代理目录。",
+    "piUnownedNote": "该条目是在OmniRoute之外添加的（例如 pi-gui 的自定义端点）。申请就会采纳；重置仅删除OmniRoute写入的条目。",
     "whenToUseLabel": "何时使用",
     "openToolDocs": "打开工具文档",
     "toolUseCases": {
@@ -2982,6 +3073,7 @@
       "amp": "当您想要 Amp 简写工作流，但仍需要 OmniRoute 别名和路由规则支持时使用。",
       "hermes": "当您需要轻量级终端原生 AI 助手来处理快速任务时使用。",
       "hermes-agent": "需要使用 Hermes Agent (by Nousresearch) 时使用,默认、委派、视觉与辅助模型均通过 OmniRoute 路由。",
+      "whycodes": "需要将 WhyCodes 作为通用自主 CLI 智能体(TUI、命名智能体、记忆、swarm)并指向 OmniRoute 时使用。",
       "custom": "用于自定义工具实现或通用 OpenAI 兼容配置。"
     },
     "toolDescriptions": {
@@ -2991,6 +3083,7 @@
       "grok-build": "支持自定义提供者的 xAI Grok Build TUI 编码智能体",
       "droid": "Factory Droid AI 助手",
       "openclaw": "OpenClaw AI 助手",
+      "openclaude": "支持 OpenAI 兼容提供者的 OpenClaude 编程智能体 CLI",
       "cline": "Cline AI 编码助手 CLI",
       "kilo": "Kilo Code AI 助手 CLI",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3115,7 @@
       "warp": "支持自定义提供者的 Warp AI 终端",
       "agent-deck": "Agent Deck 多智能体编排器",
       "5dive": "5dive — 自托管的编码智能体集群；一个认证配置即可将全部指向 OmniRoute",
+      "whycodes": "WhyCodes 自主 CLI 智能体,使用兼容 OpenAI 的 Base URL",
       "zed": "Zed 代码编辑器 — 通过 OpenAI 兼容提供者使用内置智能体"
     },
     "guides": {
@@ -3278,7 +3372,19 @@
     "cliproxyapiUnknown": "未知",
     "cliproxyapiUpdate": "更新",
     "cliproxyapiUpdateAvailable": "可用更新：v{current} → v{latest}",
-    "cliproxyapiVersion": "版本"
+    "cliproxyapiVersion": "版本",
+    "piInstallTitle": "安装 Pi 编码代理",
+    "piInstallInstructions": "安装 Pi CLI，然后返回此处将其连接到OmniRoute。",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "使用可从运行 Pi 的机器访问的URL 。与 OpenAI 兼容的 /v1 端点会自动添加。",
+    "piManualMergeHint": "仅预览。将此providers.omniroute条目合并到models.json中，以便您的其他提供者和设置保持不变。",
+    "removeMapping": "移除映射",
+    "customUrl": "自定义 URL",
+    "customEndpointAria": "自定义端点",
+    "useDefaultKey": "使用 OmniRoute 默认密钥",
+    "mainModelAria": "主模型",
+    "manualConfigTitle": "Grok Build 手动配置"
   },
   "modelCatalog": {
     "title": "模型与组合",
@@ -3342,6 +3448,18 @@
     "maxMembersPlaceholder": "例如 10",
     "testSelected": "测试所选项 ({count})",
     "testAllFiltered": "测试所有筛选项 ({count})",
+    "visibility": "可见性",
+    "allVisibility": "可见和已隐藏",
+    "visibleOnly": "可见",
+    "hiddenOnly": "已隐藏",
+    "visibleColumn": "可见",
+    "hideModel": "从 /v1/models 中隐藏 {name}",
+    "showModel": "在 /v1/models 中显示 {name}",
+    "hiddenBadge": "已隐藏",
+    "hideFiltered": "隐藏筛选结果 ({count})",
+    "showFiltered": "显示筛选结果 ({count})",
+    "visibilityCounts": "{visible} 个可见 · {hidden} 个已隐藏 · 共 {total} 个",
+    "visibilityUpdateFailed": "更新模型可见性失败",
     "cancel": "取消",
     "clearResults": "清除结果",
     "testing": "测试中...",
@@ -3397,16 +3515,53 @@
     "httpError": "请求失败，HTTP {status}",
     "testFailedNoDetail": "测试失败且未提供错误信息",
     "additionalCapabilities": "额外能力：{list}",
-    "comboRefMember": "组合 → {name}"
+    "comboRefMember": "组合 → {name}",
+    "keyAccessButton": "API 密钥访问权限",
+    "allowedInKeys": "允许用于：{count, plural, one {# 个密钥} other {# 个密钥}}",
+    "keysLoading": "正在加载 API 密钥…",
+    "keysRetry": "重试加载密钥",
+    "accessViaPattern": "通过 {pattern}",
+    "accessBlocked": "被 {pattern} 阻止",
+    "editKeyAccess": "编辑密钥访问权限",
+    "toggleKeyAccess": "在 {name} 上允许 {item}",
+    "resultNetworkError": "分配失败",
+    "resultWouldEmptyModels": "这将导致此密钥没有允许的模型 — 请改为编辑密钥访问权限",
+    "resultWouldEmptyCombos": "这将导致此密钥没有允许的组合 — 请改为编辑密钥访问权限",
+    "keyUpdatePending": "{name} 仍在更新中。请稍后重试。",
+    "assignToKeys": "分配给 API 密钥…",
+    "assignApply": "应用更改",
+    "assignComplete": "API 密钥访问权限已更新",
+    "assignFailed": "部分 API 密钥更新失败",
+    "assignNoChanges": "未更改 API 密钥访问权限",
+    "selectedAccessItems": "已选项目：{count}",
+    "assignExcludedCombos": "{count, plural, one {# 个选中的组合行不是模型，将在此跳过} other {# 个选中的组合行不是模型，将在此跳过}}。请从 Combos 选项卡分配组合。",
+    "assignActionAdd": "添加",
+    "assignActionRemove": "移除",
+    "searchKeys": "搜索 API 密钥",
+    "selectApiKey": "选择 API 密钥 {name}",
+    "allModelsAccess": "所有模型",
+    "allCombosAccess": "所有组合",
+    "modelAccessCount": "模型：{count}",
+    "comboAccessCount": "组合：{count}",
+    "keyInactive": "已停用",
+    "keyBanned": "已封禁",
+    "keyRevoked": "已撤销",
+    "switchRestrictedConfirm": "将此密钥切换为受限访问：仅允许所选项目",
+    "removeNoChangeHint": "此密钥允许所有访问；移除所选项目不会产生任何更改",
+    "removeStaysAllowedHint": "仍通过 {patterns} 允许在此密钥上使用",
+    "resultChanged": "已更改",
+    "resultUnchanged": "无更改",
+    "resultSkipped": "已跳过",
+    "resultNeedsSwitch": "需要切换为受限"
   },
   "combos": {
-    "autoTosIncludeLabel": "在 auto 中包含标记为 ToS: avoid 的提供者",
-    "autoTosDescription": "默认关闭。适用于所有 auto 组合，而非单个账户。连接提供者不会启用此选项。",
-    "autoTosSaveError": "无法保存 ToS 策略。仍显示之前的设置，请重试。",
-    "autoTosLoadError": "无法加载 ToS 策略。请重试后再进行更改。",
     "title": "组合",
     "description": "创建支持权重路由与故障回退的模型组合",
     "autoCatalogTitle": "自动路由目录",
+    "autoTosLoadError": "无法加载 ToS 策略。请重试后再进行更改。",
+    "autoTosSaveError": "无法保存 ToS 策略。仍显示之前的设置，请重试。",
+    "autoTosIncludeLabel": "在 auto 中包含标记为 ToS: avoid 的提供者",
+    "autoTosDescription": "默认关闭。适用于所有 auto 组合，而非单个账户。连接提供者不会启用此选项。",
     "autoCatalogTemplateCount": "{count} 个模板",
     "autoCatalogDescription": "内置 auto/* 组合，从已连接的提供者动态解析。直接将这些 ID 作为 model 字段使用——无需设置。",
     "autoCatalogExpand": "展开自动路由目录",
@@ -3451,6 +3606,12 @@
     "errorUpdating": "更新组合时出错",
     "errorDeleting": "删除组合时出错",
     "testFailed": "测试请求失败",
+    "removeErrorModels": "删除 {count} 个失败模型",
+    "removingErrorModels": "正在删除…",
+    "errorModelsRemoved": "已从组合中移除 {count} 个失败模型",
+    "noErrorModelsFound": "在此组合自身的步骤中未找到失败模型",
+    "cannotRemoveAllModels": "无法移除组合中的所有模型",
+    "removeErrorModelsConfirm": "要从“{name}”中移除 {count} 个失败模型吗？超时和速率限制不计入在内。",
     "failedToggle": "切换组合状态失败",
     "testResults": "测试结果 — {name}",
     "resolvedBy": "最终由以下模型处理：",
@@ -3518,6 +3679,9 @@
     "moveUp": "上移",
     "moveDown": "下移",
     "removeModel": "移除",
+    "testStep": "测试此模型",
+    "testStepRunning": "测试中…",
+    "testStepNotTestable": "只能测试单模型步骤",
     "saving": "保存中...",
     "liveNoProviders": "尚未检测到任何提供者。",
     "liveFleetDataHint": "集群数据通过实时组合事件传入。",
@@ -3559,6 +3723,7 @@
     "playgroundNoCombosYet": "尚未配置任何组合。",
     "playgroundCreateFirst": "先创建一个",
     "weighted": "加权",
+    "weightPercent": "权重（%）",
     "leastUsed": "最少使用",
     "costOpt": "成本优化",
     "strategyGuideTitle": "如何使用这种策略",
@@ -3720,6 +3885,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# 个账户} other {# 个账户}}",
     "builderGlobalAdded": "已添加",
     "builderGlobalAdd": "添加",
+    "clearSearch": "清除搜索",
     "manualModel": "手动模型",
     "manualModelInvalid": "请按 provider/model 格式填写。",
     "manualModelUnknownProvider": "未知的提供者前缀。",
@@ -3936,6 +4102,7 @@
     "builderComboRefStep": "添加组合引用步骤",
     "builderPinnedAccount": "固定账户",
     "builderLegacyEntry": "旧版条目",
+    "builderStaleModel": "不在实时目录中",
     "reviewName": "名称",
     "reviewStrategy": "策略",
     "reviewSteps": "步骤",
@@ -3973,6 +4140,10 @@
     "responseValidationMinLength": "最小内容长度（字符数）",
     "responseValidationJsonPaths": "JSON-path 检查",
     "responseValidationAddCheck": "+ 添加检查",
+    "responseValidationRemoveCheck": "移除检查",
+    "responseValidationPath": "JSON 路径",
+    "responseValidationCondition": "条件",
+    "responseValidationValue": "预期值",
     "agentFeaturesSystemMessageOverride": "系统消息覆盖",
     "agentFeaturesSystemMessagePlaceholder": "覆盖通过此组合路由的所有请求的系统提示…",
     "agentFeaturesSystemMessageHint": "替换客户端发送的任何系统消息。留空则透传客户端系统消息。",
@@ -4611,7 +4782,7 @@
     "concept": {
       "title": "对话记忆",
       "description": "OmniRoute 从每次对话中学习，记住事实、事件、程序和语义概念，使响应更加准确和上下文感知。",
-      "howWorksToggle": "它是如何工作的",
+      "howWorksToggle": "工作原理",
       "howWorksContent": "1. 自动提取：在每个响应结束时，事实和事件会被自动检测并保存。\n2. 检索：在每个响应之前，通过FTS5（精确）、向量（语义）或混合RRF搜索最相关的记忆。\n3. 注入：相关记忆被注入到助手上下文中，以提高响应质量。\n4. 管理：使用此页面查看、编辑、导出和压缩旧记忆。"
     },
     "content": "内容",
@@ -4792,7 +4963,15 @@
     },
     "totalEntries": "总条目数",
     "type": "类型",
-    "memoryEnabled": "内存已启用"
+    "memoryEnabled": "内存已启用",
+    "qdrantTutorialTitle": "快速教程：用 Qdrant 做记忆",
+    "qdrantTutorialIntro": "Qdrant 存储记忆的向量与元数据，用于检索相关上下文。它并不直接压缩 Token；节省是间接的——避免带入与当前请求无关的上下文。",
+    "qdrantTutorialStep1": "在生产使用前，为服务器配置 HTTPS 与 API Key。",
+    "qdrantTutorialStep2": "填写主机、端口、集合，以及一个 provider/model 格式且已配置凭据的模型。",
+    "qdrantTutorialStep3": "集合维度必须与模型产出的维度一致。已有的 2048 维集合无法接收 1536 维的向量。",
+    "qdrantTutorialStep4": "先保存、测试连接并运行搜索测试，然后再启用 Qdrant。",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "致谢：Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "技能",
@@ -5288,17 +5467,18 @@
         "skipped": "已配置",
         "failed": "失败"
       }
-    }
+    },
+    "stepProgress": "设置进度"
   },
   "providers": {
     "tosAvoidNoticeTitle": "此提供者默认被排除在 auto 之外",
     "tosAvoidNoticeDescription": "其 ToS 状态标记为 avoid。连接账户不会改变此策略。在为所有 auto 组合启用全局选项之前，请查阅提供者的条款。",
     "tosAvoidNoticeAction": "查看 auto 策略",
-    "codexReleaseCooldown": "Clear local cooldown",
-    "codexReleaseCooldownHint": "Allow this Codex account to be tried again. Does not redeem a reset credit or change upstream limits.",
-    "codexReleasingCooldown": "Clearing…",
-    "codexCooldownReleased": "Local cooldown cleared.",
-    "codexCooldownReleaseFailed": "Could not clear cooldown. Please try again.",
+    "codexReleaseCooldown": "清除本地冷却",
+    "codexReleaseCooldownHint": "允许再次尝试此 Codex 账户。不兑换重置额度，也不改变上游限额。",
+    "codexReleasingCooldown": "正在清除…",
+    "codexCooldownReleased": "本地冷却已清除。",
+    "codexCooldownReleaseFailed": "无法清除冷却，请重试。",
     "title": "提供者",
     "Account Deactivated": "账户已停用",
     "allProviders": "所有提供者",
@@ -5329,6 +5509,27 @@
     "importFromFileDownloadTemplate": "下载 CSV 模板",
     "importFromFileMoreErrors": "+{count} 项",
     "importFromFileSchemaHint": "CSV 列按位置排列：provider、name、apiKey、baseUrl（可选）、priority（可选）。provider 列必须是现有的托管提供者 ID，或已注册的 OpenAI/Anthropic 兼容节点 ID——此导入操作不会创建新的端点节点。",
+    "importOAuthExport": "导入 OAuth 导出文件",
+    "oauthExportTitle": "导入账号管理器导出文件",
+    "oauthExportDescription": "上传来自账号管理器的明文导出文件（例如 Antigravity Manager 的 cloud-accounts 导出）。令牌会在服务器端刷新，每个账号都会成为一个 OAuth 连接 — 重复的账号会原地刷新。",
+    "oauthExportProviderLabel": "提供者",
+    "oauthExportChoose": "选择文件",
+    "oauthExportFileAria": "账号导出 JSON 文件",
+    "oauthExportSchemaHint": "支持：包含 \"accounts\" 数组的文档、纯数组或单条记录。令牌可以位于嵌套的 token 对象中，也可以直接位于记录上。",
+    "oauthExportDetected": "检测到 {count} 个账号",
+    "oauthExportSelectAll": "选择所有账号",
+    "oauthExportSelectAccount": "选择账号 {index}",
+    "oauthExportColEmail": "电子邮件",
+    "oauthExportColProvider": "提供者",
+    "oauthExportColRefresh": "刷新令牌",
+    "oauthExportNoEmail": "（无电子邮件）",
+    "oauthExportYes": "是",
+    "oauthExportNo": "否",
+    "oauthExportImporting": "正在导入…",
+    "oauthExportImport": "导入 {count} 个账号",
+    "oauthExportResult": "已导入 {imported}/{total} — {failed} 个失败",
+    "oauthExportParseError": "无法从此文件中读取任何账号。",
+    "oauthExportUnknownError": "未知错误",
     "adaptaTutorial": {
       "title": "如何连接 Adapta Web",
       "introPrefix": "Adapta 通过 Clerk 进行身份验证。该令牌",
@@ -5502,7 +5703,7 @@
     "failedCount": "{count} 失败",
     "testedCount": "{count} 已测试",
     "millisecondsAbbr": "{value} 毫秒",
-    "okShort": "好的",
+    "okShort": "好",
     "errorShort": "错误",
     "noActiveConnectionsInGroup": "未找到该组的活动连接。",
     "allTestsPassed": "所有 {total} 测试均已通过",
@@ -5578,7 +5779,8 @@
     "modelsImported": "已导入 {count} 个模型",
     "allModelsAlreadyImported": "所有模型已导入",
     "noNewModelsToImport": "没有新模型可导入 — 所有模型已在注册表或自定义模型列表中",
-    "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "localCatalogFallbackStatus": "无法获取提供者的模型列表，正在显示内置目录",
+    "discoveryDegradedStatus": "模型发现失败 {time}",
     "skippingExistingModels": "跳过 {count} 个已有模型",
     "autoSync": "自动同步",
     "autoSyncShort": "同步",
@@ -5797,6 +5999,7 @@
     "contextWindowOverridePlaceholder": "例如 131072",
     "contextWindowOverrideHint": "当提供者误报时，手动设置此模型的实际上下文窗口（token）。此设置优先于自动检测/目录值，并防止组合路由丢弃该模型。",
     "contextWindowOverrideInvalid": "上下文窗口覆盖值必须是正整数 token 数",
+    "maxOutputTokenOverrideInvalid": "最大输出 token 覆盖值必须是正整数 token 数",
     "visionCapableLabel": "支持视觉",
     "visionCapableHint": "当提供者的发现元数据未报告图像输入模态时（常见于自托管/本地后端），手动将此模型标记为支持视觉。",
     "compatParamFiltersLabel": "参数过滤器",
@@ -5838,6 +6041,25 @@
     "ccAliasAddModelButton": "添加覆盖设置",
     "ccAliasLoadError": "无法加载发现别名设置：{error}",
     "ccAliasSaveError": "无法保存发现别名设置：{error}",
+    "cliVersionSectionTitle": "公布的CLI客户端版本",
+    "cliVersionEffectiveLabel": "目前已发布广告",
+    "cliVersionSourceLabel": "解决自： {source}",
+    "cliVersionPinnedLabel": "捕获的默认值： {pinned}",
+    "cliVersionSourceSettings": "仪表板覆盖",
+    "cliVersionSourceEnv": "环境变量",
+    "cliVersionSourceDiscovered": "自动发现最新版本",
+    "cliVersionSourceDefault": "捕获默认值",
+    "cliVersionInputLabel": "覆盖版本",
+    "cliVersionInputPlaceholder": "覆盖版本；空白清除",
+    "cliVersionSaveButton": "节省",
+    "cliVersionResetButton": "重置为默认值",
+    "cliVersionLoadError": "无法加载CLI版本设置： {error}",
+    "cliVersionSaveError": "无法保存CLI版本： {error}",
+    "cliVersionLoadFailed": "无法加载当前CLI版本设置。",
+    "cliVersionHintClaude": "Anthropic 在它看到的 Claude Code 客户端版本上门更新了 Claude 模型。这是OmniRoute在每个 Anthropic 绑定请求上公布的版本。",
+    "cliVersionCaveatClaude": "计费注意事项：计费版本是'<version>'。'<build-revision>'，构建版本是一个单独的捕获常量。广告 2.1.260 报告 2.1.260.1e2，这不是真正的 2.1.260 二进制文件发送的内容。",
+    "cliVersionHintCodex": "OpenAI在它看到的Codex客户端版本上控制较新的模型，例如错误： 'gpt-6-astra' 模型需要更新版本的Codex。",
+    "cliVersionCaveatCodex": "推理警告：您自己的调用者报告的版本仍然击败了CODEX_CLIENT_VERSION env var，但此覆盖击败了两者，因为它是明确的操作员意图。",
     "compatUpstreamHeadersLabel": "上游额外请求头",
     "compatUpstreamHeadersHint": "与修改厂商连接/API 配置同属高权限能力，仅可信管理员应使用。这些头会在 OmniRoute 按厂商 API Key 自动加好鉴权头之后再合并。若「名称」与系统已加的头相同（例如都叫 Authorization），则以你填的值为准，会整段替换自动那条（含 Bearer 令牌），上游请求里不再使用面板里保存的密钥来生成 Authorization。填错可能导致 401，请谨慎。每个请求头单独一行；部分网关需要额外 Authentication 等可在此加。鼠标移入或聚焦「值」可暂时看明文。点空白处、关闭本面板或切走焦点即保存。",
     "compatUpstreamHeaderName": "请求头名称",
@@ -6055,9 +6277,9 @@
     "apiFormatLabel": "API 格式",
     "apiKeyOptionalHint": "如果上游不需要认证，可以留空 API key。",
     "apiKeyOptionalLabel": "API key（可选）",
-    "apiRegionChina": "中国区",
-    "apiRegionHint": "选择此 Provider 的 API 区域。",
-    "apiRegionInternational": "国际区",
+    "apiRegionChina": "中国大陆",
+    "apiRegionHint": "选择用于 API 访问和配额跟踪的端点区域。",
+    "apiRegionInternational": "国际",
     "apiRegionLabel": "API 区域",
     "apikey": "API 密钥",
     "audio": "音频",
@@ -6069,7 +6291,7 @@
     "claudeWebCookieHint": "打开 claude.ai → 开发者工具 → 应用 → Cookie → claude.ai，复制 sessionKey 值。还需要从同一页面复制 cf_clearance 值。",
     "claudeWebCookiePlaceholder": "sessionKey=sk-ant-...",
     "blackboxWebCookieHint": "从 Blackbox Web 会话复制 Cookie。",
-    "blackboxWebCookiePlaceholder": "Blackbox Web Cookie",
+    "blackboxWebCookiePlaceholder": "Blackbox 网页 Cookie",
     "t3ChatWebCookieHint": "打开 t3.chat → 开发工具 → 应用程序 → 本地存储 → https://t3.chat，复制“凸会话 ID”。然后打开 DevTools → Network，从任何聊天请求中复制完整的 Cookie 标头。将这两个值粘贴到下面的字段中。",
     "t3ChatWebCookiePlaceholder": "凸会话 ID=abc123...",
     "grokWebCookieHint": "从 Grok Web 会话复制 Cookie。",
@@ -6079,6 +6301,13 @@
     "claudeLowPriorityModeDescription": "当此账户达到 5 小时使用限额且 Anthropic 提供较低优先级通道时，OmniRoute 会接受该通道，并继续发送带有 anthropic-usage-limit: slow 的请求，直到时间窗口重置，而不是让连接进入冷却状态。每周限额仍然适用，响应可能需要等待空闲容量。",
     "claudeAutoLimitResetLabel": "自动重置会话限额（每周一次）",
     "claudeAutoLimitResetDescription": "当此账户达到 5 小时使用限额且有可用的会话限额重置机会时，OmniRoute 会自动使用该机会，并以全速重试。这会使用账户每周一次的重置机会，且仍会计入每周限额。",
+    "codexPaidCreditsShort": "额外额度",
+    "codexPaidCreditsToggleTitle": "订阅配额用完后允许使用付费 Codex 额度（可能产生额外费用）",
+    "codexPaidCreditsEnabled": "Codex 付费额度已启用（可能产生额外费用）",
+    "codexPaidCreditsDisabled": "Codex 付费额度已禁用",
+    "failedUpdateCodexPaidCredits": "更新 Codex 付费额度策略失败",
+    "allowCodexPaidCreditsLabel": "允许付费 Codex 额度",
+    "allowCodexPaidCreditsDescription": "允许此账户在订阅配额达到上限后使用付费额度。要求 OpenAI 报告有可用额度；可能产生费用。Spark 限额和上游冷却仍然适用。即使配额预检关闭也会检查额度可用性，除非本地配额过滤完全关闭（配额预检和限额策略都关闭）。",
     "disableCoolingDescription": "跳过瞬态冷却，以便此连接在发生可恢复错误后仍符合条件（被禁/过期等终态仍适用）。",
     "disableCoolingLabel": "禁用此连接的冷却",
     "bulkPasteAdded": "{count, plural, one {已添加 1 个 key} other {已添加 # 个 key}}",
@@ -6163,7 +6392,7 @@
     "tierFast": "快速",
     "antigravityProjectIdLabel": "谷歌云项目 ID",
     "antigravityProjectIdPlaceholder": "我的 GCP 项目 ID",
-    "grokWebCookiePlaceholder": "Grok Web Cookie",
+    "grokWebCookiePlaceholder": "Grok 网页 Cookie",
     "herokuBaseUrlHint": "Heroku 部署的 Base URL。",
     "hideEmail": "隐藏邮箱",
     "imageProviders": "图像 Provider",
@@ -6187,7 +6416,7 @@
     "tierOverridePremium": "高级",
     "tierOverrideHelpText": "将此提供者固定到特定的路由层级，而不是让 OmniRoute 根据模型定价进行推断。",
     "museSparkWebCookieHint": "从 Muse Spark Web 会话复制 Cookie。",
-    "museSparkWebCookiePlaceholder": "Muse Spark Web Cookie",
+    "museSparkWebCookiePlaceholder": "Muse Spark 网页 Cookie",
     "oauth": "OAuth",
     "openCliTools": "打开 CLI Tools",
     "openSettings": "打开设置",
@@ -6195,10 +6424,10 @@
     "openaiResponsesStoreLabel": "OpenAI Responses 存储",
     "perplexitySearchSharedKeyInfo": "Perplexity Search 可使用共享 key 配置。",
     "perplexityWebCookieHint": "从 Perplexity Web 会话复制 Cookie。",
-    "perplexityWebCookiePlaceholder": "Perplexity Web Cookie",
+    "perplexityWebCookiePlaceholder": "Perplexity 网页 Cookie",
     "personalAccessTokenLabel": "个人访问令牌",
     "qoderPatHint": "输入 Qoder Personal Access Token。",
-    "qoderPatPlaceholder": "Qoder PAT",
+    "qoderPatPlaceholder": "你的 Qoder 个人访问令牌",
     "rateLimitOverridesSection": "速率限制覆盖",
     "rateLimitOverridesMaxConcurrentHint": "此连接的最大并发请求覆盖。覆盖账户级别的上限。",
     "rateLimitOverridesMaxConcurrentLabel": "最大并发（速率限制）",
@@ -6532,6 +6761,7 @@
       "monsterapi": "在 monsterapi.ai 获取 API 密钥",
       "moonshot": "使用 API 密钥连接 Moonshot AI。",
       "morph": "免费层级：每月 250K 额度，$0",
+      "apmix": "使用来自 apmix.ai/dashboard 的 API 密钥连接 Apmix — 一份订阅，多个模型。",
       "nanogpt": "使用 API 密钥连接 NanoGPT。",
       "nebius": "注册即送约 $1 试用额度用于 API 测试",
       "nlpcloud": "NLP Cloud 使用专有的聊天机器人 API，而非 OpenAI chat/completions。OmniRoute 将 OpenAI 消息适配为 input/context/history，并公开受支持聊天机器人模型的本地目录。",
@@ -6620,7 +6850,7 @@
       "claude": "使用现有的 OAuth 流程连接 Claude Code。",
       "cline": "使用现有的 OAuth 流程连接 Cline。",
       "cursor": "使用现有的 OAuth 流程连接 Cursor IDE。",
-      "cursor-api": "使用 cursor.com/dashboard/api 中的用户 API 密钥（crsr_...）连接 Cursor；无需 IDE 会话。",
+      "cursor-api": "使用来自 cursor.com/dashboard/api 的用户 API 密钥（crsr_... 或 grok_...）连接 Cursor；无需 IDE 会话。",
       "github": "使用现有的 OAuth 流程连接 GitHub Copilot。",
       "gitlab-duo": "具有 ai_features + read_user 作用域的 OAuth 应用程序。在此 OmniRoute 实例上配置 GITLAB_DUO_OAUTH_CLIENT_ID 以及可选的 GITLAB_DUO_OAUTH_CLIENT_SECRET。",
       "kilocode": "使用现有的 OAuth 流程连接 Kilo Code。",
@@ -6628,8 +6858,7 @@
       "kiro": "免费层：50 积分/月（约 25K–100K 令牌）。⚠️ Kiro 服务条款禁止使用第三方代理/测试框架。",
       "codex": "使用现有的 OAuth 流程连接 OpenAI Codex。",
       "qwen": "使用现有的 OAuth 流程连接 Qwen Code。",
-      "github-models": "在 github.com/settings/tokens 创建具有 'models: read' 作用域的 GitHub PAT",
-      "apmix": "使用来自 apmix.ai/dashboard 的 API 密钥连接 Apmix — 一份订阅，多个模型。"
+      "github-models": "在 github.com/settings/tokens 创建具有 'models: read' 作用域的 GitHub PAT"
     },
     "passthroughModelsDescription": "{provider} 接受供应商本机模型 ID。从 /models 导入或添加用于路由的自定义 ID。",
     "bedrockModelsDescription": "Amazon Bedrock 模型的范围按 AWS 区域划分。从 /models 导入或添加在所选区域中启用的基岩模型 ID。",
@@ -6798,17 +7027,30 @@
     "searchByModelAria": "按型号搜索",
     "selectSupportedEndpoint": "请选择至少一个支持的端点",
     "antigravityClientProfileHarness": "Harness / CLI",
-    "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
+    "rateLimitOverridesModelConcurrencyLabel": "按模型的并发上限",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
-    "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyHint": "可选：每行一条 model=cap，与上游模型 id 精确匹配。超出的请求在本地排队；留空表示不按模型限制。",
+    "rateLimitOverridesModelConcurrencyInvalid": "无效的按模型并发条目 \"{entry}\"——请使用 model=cap 格式，上限为 1 到 {max} 的整数。",
+    "usedInComboTooltip": "已在 {count} 个组合中使用：{combos}",
+    "openComboTooltip": "打开组合 — 被 {combo} 使用",
+    "claudeCodeRoutingTitle": "Claude Code 流量的上游代理路由方式",
+    "routingNative": "原生",
+    "routingFallback": "回退",
+    "rerank": "重排序",
+    "video": "视频",
+    "markFreeTierTitle": "标记为免费档（开启隐藏付费模型后仍会显示）",
+    "codexTunnelTitle": "Codex 工具连接",
+    "codexTunnelDescription": "隧道仅保持出站方向。本地工具仍只由 Codex 按其沙箱与批准策略执行。",
+    "tunnelIdLabel": "隧道 ID",
+    "tunnelRuntimeKeyLabel": "隧道运行时密钥",
+    "tunnelRuntimeKeyPlaceholder": "运行时密钥",
+    "tunnelRuntimeKeyHint": "与 Cookie 一起加密存储，绝不写入日志。",
+    "tunnelRuntimeKeyNewLabel": "新的隧道运行时密钥",
+    "tunnelRuntimeKeyNewHint": "仅与新的 Cookie 一起填写。该值将加密存储。",
+    "chatgptConnectorLabel": "ChatGPT 自定义连接器",
+    "doctorChecking": "正在检查状态…",
+    "doctorCheck": "检查诊断状态",
+    "fallbackRetryBackendTitle": "回退重试后端"
   },
   "settings": {
     "title": "设置",
@@ -7104,16 +7346,6 @@
     "settingsSidebarDesc": "选择要显示的侧边栏项目。“基础”模式下仍可通过搜索找到高级工具。",
     "hideHealthLogs": "隐藏健康检查日志",
     "hideHealthLogsDesc": "开启后，将抑制服务器控制台中的 [HealthCheck] 消息",
-    "themeAccent": "主题颜色",
-    "themeAccentDesc": "选择预设颜色，或使用单一颜色创建你自己的主题",
-    "themeCreate": "创建主题",
-    "themeCustom": "自定义主题",
-    "themeBlue": "蓝色",
-    "themeRed": "红色",
-    "themeGreen": "绿色",
-    "themeViolet": "紫色",
-    "themeOrange": "橙色",
-    "themeCyan": "青色",
     "whitelabeling": "品牌定制",
     "whitelabelingDesc": "自定义应用名称和 Logo",
     "appName": "应用名称",
@@ -7160,10 +7392,10 @@
         "SELECTOR_SWITCH_FAILED": "代理核心控制调用失败；上一条路由保持有效。请检查控制 URL 和密钥，然后刷新。",
         "SELECTOR_EARLY_NO_CONTROL": "无控制 URL",
         "SELECTOR_EARLY_UNMAPPED": "无匹配订阅",
-        "CORE_CONFIG_NOT_GENERATED": "The local-core config was not generated; the adopted file is unchanged. Check the path and refresh.",
+        "CORE_CONFIG_NOT_GENERATED": "未生成本地核心配置；已采用的文件未变更。请检查路径后刷新。",
         "CORE_CONFIG_NOT_APPLIED": "生成的核心配置无法替换已采纳的文件；已改为保留旁边的副本。",
-        "CORE_RELOAD_UNDECLARED": "No reload channel is declared for the replaced core config. Declare one: a control URL on a compatible core, the OMNIROUTE_PROXY_CORE_RELOAD_COMMAND variable as a JSON argument array, or the value external for an outside observer.",
-        "CORE_RELOAD_FAILED": "The proxy core reload failed; the new config file stays in place. Check the reload command, then refresh.",
+        "CORE_RELOAD_UNDECLARED": "被替换的核心配置未声明重载通道。请声明一种：兼容核心上的控制 URL、OMNIROUTE_PROXY_CORE_RELOAD_COMMAND 变量（JSON 参数数组），或值 external（由外部观察者处理）。",
+        "CORE_RELOAD_FAILED": "代理核心重载失败；新配置文件保持原样。请检查重载命令后刷新。",
         "CORE_CONFIG_ENTRIES_SKIPPED": "生成期间跳过了某些条目。请查看服务器日志。"
       },
       "description": "粘贴你的代理订阅链接，开启后即可按全局或规则（指定 Provider）模式走代理。订阅节点会自动同步进代理池，并复用既有的轮询、健康检查与防泄漏机制。",
@@ -7230,7 +7462,7 @@
       "coreNodesHint": "核心节点提示",
       "create": "创建",
       "deleteConfirm": "删除确认",
-      "empty": "空的",
+      "empty": "暂无共享订阅。添加一个组合开始订阅共享。",
       "globalModeDescription": "全局模式描述",
       "localCoreHint": "本地核心提示",
       "nodeSummary": "节点摘要",
@@ -7252,20 +7484,21 @@
       "lastSwitchMember": "服务中的成员",
       "nextSwitch": "下次可切换",
       "nextSwitchNow": "现在",
-      "coreConfigPath": "Core config file",
+      "coreConfigPath": "核心配置文件",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
-      "lastSwitchKind": "Switch reason",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "lastSwitchKind": "切换原因",
       "switchKind": {
-        "ip_quota_429": "quota",
-        "proxy_unreachable": "unreachable",
-        "transport": "transport",
-        "slow": "slow"
+        "ip_quota_429": "配额",
+        "proxy_unreachable": "不可达",
+        "transport": "传输",
+        "slow": "慢速"
       },
-      "coreReloadAppliedBy": "Applied by: {mode}",
+      "coreReloadAppliedBy": "应用方式：{mode}",
       "coreBinaryPath": "核心二进制文件路径",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "可选：在替换已采纳的文件之前，使用核心二进制文件验证生成的文件。留空则继续写入到旁边。目录不存在时会自动创建。"
+      "coreBinaryPathHelp": "可选：在替换已采纳的文件之前，使用核心二进制文件验证生成的文件。留空则继续写入到旁边。目录不存在时会自动创建。",
+      "urlFeedlessHint": "留空以仅使用选择器的订阅：在下方设置控制 URL，不会获取、刷新或绑定任何 feed。"
     },
     "bulkHealthcheck": "批量健康检查",
     "bulkHealthcheckDesc": "针对目标 URL 测试所有已配置代理，找出可用代理。",
@@ -7706,6 +7939,7 @@
     "configured": "已配置",
     "none": "无",
     "modelOverrideValuePlaceholder": "数字值",
+    "modelOverrideKey": "覆盖键",
     "modelOverrideReasoningEffortsPlaceholder": "使用英文逗号分隔，例如 low, medium, high",
     "addKeyValue": "添加键值",
     "noModelOverrides": "该模型尚未配置覆盖。",
@@ -7754,7 +7988,6 @@
     "customPricingNote": "你可以覆盖特定模型的默认定价。自定义覆盖会优先于自动检测到的定价。",
     "editPricing": "编辑定价",
     "viewFullDetails": "查看完整详情",
-    "themeCoral": "珊瑚色",
     "adaptiveVolumeRouting": "自适应流量路由",
     "adaptiveVolumeRoutingDesc": "根据实时负载量和吞吐压力，动态调整各提供者连接承载的流量。",
     "lkgpToggleTitle": "最后已知良好提供者（LKGP）",
@@ -7849,6 +8082,8 @@
     "compressionDesc": "在发送给提供者之前压缩提示词，以减少 token 使用量",
     "autoCombosTitle": "自动组合",
     "autoCombosDesc": "允许此密钥使用内置的 auto/* 组合，这些组合会从所有已配置的提供者中自动选择模型",
+    "ccDiscoveryAliasesTitle": "Claude Code 发现别名",
+    "ccDiscoveryAliasesDesc": "为此密钥已可访问的模型和组合通告 claude/... 兼容性镜像",
     "compressionGuidanceFullGuideLink": "完整压缩指南",
     "compressionGuidanceShow": "详情",
     "compressionGuidanceHide": "隐藏详情",
@@ -8222,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "窗口百分比",
     "compressionAdaptivePolicyAbsolute": "绝对 token 预算",
     "compressionOutputStylesDescription": "注入响应塑造指令，而无需重写服务商输出。自由组合。",
+    "compressionOutputStylesPreviewNote": "请求仅注入一种语言：检测到的语言，否则是第一个包。上面的块是每个包装的变体，而不是组合注射。",
     "mcpAccessibilityDescription": "限制 MCP 工具输出的范围 (独立存储)。",
     "compressionStylesTileSummary": "{tokens, number} 个 token 已节省 · {runs, plural, one {# 次运行已应用样式} other {# 次运行已应用样式}}",
     "compressionStylesTileEmpty": "尚无已应用样式的运行。",
@@ -8799,6 +9035,8 @@
     "qdrantHost": "主机",
     "qdrantCollection": "集合",
     "catalogVisibilityHint": "隐藏的模型 ID 仍可使用相同的访问权限调用。",
+    "exposeCombosOnly": "在 /v1/models 中仅列出组合",
+    "exposeCombosOnlyDesc": "自动发现模型的客户端将看到你的组合（以及未隐藏的 auto/*），而不是原始的提供者模型。显式的 provider/model ID 仍会正常路由。",
     "catalogScopeTitle": "Models API 列表",
     "catalogScopeDesc": "GET /v1/models 为此密钥公开的内容。缩小列表范围绝不会改变此密钥可以调用的模型。",
     "catalogScopeAll": "两者",
@@ -8918,7 +9156,9 @@
         "financial": "金融",
         "brazilian": "巴西",
         "usa": "美国",
-        "full": "全部"
+        "full": "全部",
+        "gdpr": "GDPR（欧盟）",
+        "popia": "POPIA（南非）"
       },
       "builtinTypes": "内置类型",
       "types": {
@@ -8932,7 +9172,19 @@
         "ip_address": "IPv4 地址",
         "ipv6_address": "IPv6 地址",
         "aws_key": "AWS 访问密钥",
-        "api_key_generic": "API 密钥和令牌"
+        "api_key_generic": "API 密钥和令牌",
+        "iban": "IBAN 银行账号",
+        "eu_vat": "欧盟增值税号",
+        "es_dni_nie": "西班牙 DNI / NIE",
+        "it_codice_fiscale": "意大利 Codice Fiscale",
+        "pl_pesel": "波兰 PESEL",
+        "nl_bsn": "荷兰 BSN",
+        "de_steuer_id": "德国 Steuer-ID",
+        "se_personnummer": "瑞典 personnummer",
+        "za_id": "南非身份证号码",
+        "za_phone": "南非电话号码",
+        "za_vat": "南非增值税号",
+        "za_tax_ref": "南非税务参考号"
       },
       "customPatterns": "自定义模式",
       "customPatternsDesc": "匹配项会被替换为 [CUSTOM_REDACTED]。最多 {max} 个模式。存在灾难性回溯风险的模式会被拒绝。",
@@ -8982,8 +9234,8 @@
     "rawOutputMaxBytes": "原始输出最大字节数",
     "filterTesting": "过滤测试",
     "pasteOutput": "粘贴工具输出以测试过滤...",
-    "presetHigh": "好斗的",
-    "presetLow": "光",
+    "presetHigh": "激进",
+    "presetLow": "轻量",
     "presetMaxChars": "最大输出字符数",
     "presetMaxLines": "最大输出线数",
     "presetMedium": "标准型",
@@ -9034,7 +9286,8 @@
     "tomlTestPassed": "已通过",
     "tomlTestFailed": "已失败",
     "tomlImportError": "无法处理 RTK TOML 文件。",
-    "tomlFileReadError": "无法读取选定的 TOML 文件。"
+    "tomlFileReadError": "无法读取选定的 TOML 文件。",
+    "viewMode": "视图模式"
   },
   "compressionEngineConfig": {
     "loading": "正在加载…",
@@ -9256,7 +9509,8 @@
     "languagePacksList": "语言包：{packs}",
     "dragToReorder": "拖动以重新排序步骤",
     "engine": "引擎",
-    "intensity": "强度"
+    "intensity": "强度",
+    "compressionOverride": "压缩覆盖"
   },
   "compressionStudio": {
     "noRun": "没有可用的压缩运行记录。",
@@ -9316,7 +9570,8 @@
     "encoderWinner": "胜出者：{winner}",
     "encoder": "编码器",
     "bytes": "字节",
-    "tokensCl100k": "Token (cl100k)"
+    "tokensCl100k": "Token (cl100k)",
+    "studioViews": "Studio 视图"
   },
   "omniglyph": {
     "preview": "预览",
@@ -9522,7 +9777,9 @@
     "tooltipMinLength": "比这短的消息不会被压缩。更低=更多压缩。",
     "tooltipMinSavings": "仅当至少保存这么多令牌时才进行压缩。",
     "ultraSettings": "超级设置",
-    "ultraSettingsDesc": "SLM 支持的语义压缩"
+    "ultraSettingsDesc": "SLM 支持的语义压缩",
+    "defaultLanguage": "默认语言",
+    "viewMode": "视图模式"
   },
   "translator": {
     "title": "翻译器",
@@ -9834,6 +10091,9 @@
     "streamTransformFailed": "转换流失败"
   },
   "usage": {
+    "healthExtraUsageBypass": "额度已用完；已允许额外用量，仍可继续服务。",
+    "healthPaidCreditsBypass": "额度已用完；有可用的付费额度，仍可继续服务。",
+    "healthFilteringBypass": "额度已用完；已关闭本地额度过滤，仍可继续服务。",
     "title": "用量",
     "grokExtraUsageCredits": "额外使用积分",
     "grokAutoTopUp": "自动充值",
@@ -9997,6 +10257,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "提供者限制",
     "noProviders": "没有连接提供者",
+    "quotaAuthRequired": "需要身份验证 - 请登录控制面板",
+    "quotaAuthRequiredHint": "由于控制面板会话缺失或已过期，无法加载提供者连接。请登录并刷新，以查看您的配额限制。",
     "connectProvidersForQuota": "通过 OAuth 连接提供者，以跟踪 API 配额限制和使用情况。",
     "accountsCount": "{count, plural, one {# 个账户} other {# 个账户}}",
     "filteredFromCount": "（从 {count} 过滤）",
@@ -10046,9 +10308,6 @@
     "tierLite": "轻量",
     "tierUnknown": "未知",
     "statTotal": "总计",
-    "statCritical": "严重",
-    "statAlert": "警报",
-    "statHealthy": "健康",
     "filterPurchaseTypeLabel": "类型",
     "filterTierLabel": "层级",
     "purchaseAll": "全部",
@@ -10287,10 +10546,64 @@
     "lastRefreshed": "上次刷新",
     "providerQuota": "提供者配额",
     "providerQuotaHomeHint": "已连接账户的实时状态",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "claudeResetCreditDefaultTitle": "Claude 限额重置",
+    "confirmRedeemClaudeResetCredit": "兑换将立即重置符合条件的 Claude 使用限额，并永久消耗此点数。",
+    "claudeResetCreditsModalTitle": "Claude 重置点数",
+    "claudeResetCreditsModalExplainer": "此账户可用的 Claude 重置点数和每周会话重置次数。",
+    "codexPaidCreditsLabel": "付费 Codex 额度",
+    "codexPaidCreditsAvailable": "可用（余额未上报）",
+    "codexPaidCreditsUnavailable": "不可用或已达支出上限",
+    "codexPaidCreditsUnlimited": "不限",
+    "healthAccountHint": "根据最近观测判断当前可用性，并非实时探活。选择账号查看详情。",
+    "healthRecovery": "预计恢复时间",
+    "healthAvailable": "可用",
+    "healthRestricted": "部分受限",
+    "healthUnavailable": "不可用",
+    "healthPeakHourProtection": "高峰时段保护",
+    "healthCooldown": "冷却中",
+    "healthQuotaExhausted": "配额已用尽",
+    "healthOverview": "健康总览",
+    "layoutFull": "完整",
+    "layoutCompact": "紧凑",
+    "healthQuotaError": "额度读取失败",
+    "healthNoRuntime": "运行状态不可得",
+    "healthPreviousSnapshot": "最近一次刷新失败，显示上次结果",
+    "healthPreviousFailure": "上次请求失败，冷却已结束",
+    "healthAwaitingSync": "已过重置时间，等待下次同步",
+    "healthVerdictUnavailable": "可用性结论暂时读不到，仅显示额度",
+    "healthSummaryFailed": "运行状态摘要读取失败，模型锁定信息可能缺失",
+    "healthRuntimeObserved": "运行状态 {time}更新",
+    "healthQuotaObserved": "额度观测于 {time}",
+    "healthOldestQuota": "额度快照最早 {time}",
+    "healthRecoveryUnknown": "恢复时间未知",
+    "healthDetailsHint": "点击查看详情与操作",
+    "healthFiveHour": "5 小时",
+    "healthOverall": "总体",
+    "healthAction": "需要处理",
+    "healthTitle": "账号可用性",
+    "healthDrag": "拖动调整渠道顺序",
+    "healthDragPosition": "{provider}, {count, plural, other {第 {position, number} / # 位}}",
+    "healthResetOrder": "恢复默认顺序",
+    "healthPool": "{name} 池",
+    "healthOtherPool": "同一个号的{pool}：{status}（剩 {remaining}）",
+    "healthIncluded": "含 {count, number} 个部分受限",
+    "healthBannerUnavailable": "{count, number} 个号暂时不能用",
+    "healthBannerAvailable": "全部 {count, number} 个号可用",
+    "healthLegendHide": "隐藏图例",
+    "healthLegendShow": "显示图例",
+    "healthLegendOk": "实心 = 剩余额度，半透明 = 已用掉",
+    "healthLegendCooldown": "{window}额度用完；实心 = 已等过的时间，半透明 = 还要等多久",
+    "healthLegendAction": "授权失效或被封，等不回来",
+    "healthLegendPartial": "还能用，顶部黄帽 = 某个模型或模型池被限",
+    "healthWaited": "已等 {percent}",
+    "healthWait": "还要 {duration}（{time} 恢复）",
+    "healthFastest": "最快 {duration} 后恢复",
+    "healthRatio": "{available, number} / {active, number} 可用",
+    "healthCd5": "5h 冷却",
+    "healthCdw": "周冷却",
+    "healthRecentSuccessBypass": "此账号刚有请求成功，路由暂时放行。",
+    "healthPurchasedBalanceBypass": "套餐内额度耗尽后，仍可使用已购余额。",
+    "healthCutoffAtRequest": "实时额度阈值在路由请求时检查。"
   },
   "modals": {
     "waitingAuth": "等待授权",
@@ -10883,7 +11196,7 @@
     "lastUpdated": "最后更新：{date}",
     "policyLastUpdatedDate": "2026 年 2 月 13 日",
     "listSeparator": "-",
-    "questionsVisit": "有问题吗？访问我们的",
+    "questionsVisit": "有关这些条款的问题，请访问项目仓库。",
     "githubRepository": "GitHub 仓库",
     "privacySection1Title": "1. 本地优先架构",
     "privacySection1Text": "OmniRoute 是一款本地优先的应用。所有数据处理和存储都只发生在你的设备上，不存在集中式服务器收集你的信息。",
@@ -11077,7 +11390,8 @@
       "message": "消息",
       "error": "错误",
       "completion": "补全"
-    }
+    },
+    "statusFilter": "状态"
   },
   "templateNames": {
     "simple-chat": "简单对话",
@@ -11258,7 +11572,8 @@
     "minutesAgo": "{minutes} 分钟前",
     "hoursAgo": "{hours} 小时前",
     "daysAgo": "{days} 天前",
-    "entries": "条目"
+    "entries": "条目",
+    "viewSwitcherAria": "缓存视图"
   },
   "proxyConfigModal": {
     "levelGlobal": "全局",
@@ -11371,6 +11686,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth 尚未配置。在 {applicationsUrl} 注册一个 OAuth 应用，使用重定向 URI {redirectUri} 和范围 \"{scopes}\"，然后设置 {clientIdEnv}（可选地设置 {clientSecretEnv}）并重启。",
     "gitlabDuoSetupDescription": "在应用程序注册并在此 OmniRoute 实例上设置环境变量后，单击继续以开始 OAuth 登录。",
     "continue": "继续",
+    "copilotPolicyTitle": "实验提供者：政策状态不明确",
+    "copilotPolicyLine1": "OmniRoute通过 api.githubcopilot.com 连接， GitHub尚未将其发布为通用第三方推理API。此集成是实验性的，可能会发生更改，恕不另行通知。",
+    "copilotPolicyLine2": "只能连接您自己的GitHub帐户。切勿共享凭据、池帐户或尝试超出您的计划限制。",
+    "copilotPolicyLine3": "免费和学生计划用户只能收到自动模型选择。您的Copilot计划条款和任何使用限制仍由您负责。",
+    "copilotPolicyAcknowledge": "我明白了，连接",
     "tabPasteSetupToken": "设置令牌",
     "claudeSetupTokenDescription": "在终端中运行 `claude setup-token`，然后粘贴它输出的令牌。该令牌有效期为一年，没有刷新令牌。OmniRoute 会在保存前向 Anthropic 发送一次测试请求。",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11766,7 @@
     "tableHealth": "健康状态（24小时）",
     "tableUsage": "使用情况",
     "tableActions": "操作",
+    "moreActions": "更多操作",
     "test": "测试",
     "edit": "编辑",
     "delete": "删除",
@@ -11525,7 +11846,7 @@
     "bulkImportNoValidEntries": "未找到有效条目。请检查格式后重试。",
     "bulkImportSuccess": "导入完成：已创建 {created} 个，已更新 {updated} 个，失败 {failed} 个",
     "bulkImportErrorLine": "第 {line} 行：{reason}",
-    "bulkImportMaxExceeded": "每次最多导入 100 个代理",
+    "bulkImportMaxExceeded": "每次最多导入 {max} 个代理",
     "bulkImportPreview": "预览",
     "clearAssignment": "（明确分配）",
     "bulkProxyAssignment": "批量代理分配",
@@ -11586,6 +11907,7 @@
     "poolSetAsideKindIpQuota429": "IP 速率限制 (429)",
     "poolSetAsideKindSlow": "响应缓慢",
     "poolSetAsideKindGeoBlocked": "地区受限 (403/451)",
+    "poolSetAsideKindOperatorReported": "运营商报告的故障",
     "poolSetAsideUntil": "{endsAt}恢复轮换",
     "poolSetAsideRepeat": "已搁置{count, plural, one {#次} other {#次}}",
     "poolUnknownAddress": "未知地址",
@@ -11695,7 +12017,6 @@
     "exportCodeTitle": "导出代码",
     "exportShort": "导出",
     "noStateToExport": "没有可导出的 Playground 状态。",
-    "closeExportModal": "关闭导出模态框",
     "close": "关闭",
     "exportRealKeyWarning": "安全警告：导出被阻止 — 输出中检测到真实的 API 密钥。请重置您的 API 密钥并重试。",
     "placeholderHintPrefix": "替换",
@@ -11808,7 +12129,8 @@
       "nextButton": "下一步",
       "runButton": "运行",
       "promptPlaceholder": "输入您的消息…（按 Enter 发送，Shift+Enter 换行）"
-    }
+    },
+    "playgroundTabs": "Playground 模式"
   },
   "miniPlayground": {
     "endpoint": "端点",
@@ -11879,7 +12201,8 @@
     "assistant": "助手",
     "errorLabel": "错误",
     "requestFailed": "请求失败",
-    "stop": "停止"
+    "stop": "停止",
+    "messageInputAria": "消息"
   },
   "requestLogger": {
     "recording": "正在录制",
@@ -12066,8 +12389,22 @@
       "resilienceRotations": "轮换帐户{count}次",
       "resilienceRetried": "重试空轮次",
       "resilienceContinued": "在流中途恢复",
-      "resilienceRecovered": "通过弹性操作恢复"
-    }
+      "resilienceRecovered": "通过弹性操作恢复",
+      "conversationContext": "对话上下文",
+      "goToBottom": "转到底部",
+      "liveRefreshOn": "实时刷新：开启",
+      "liveRefreshOff": "实时刷新：关闭",
+      "liveRefresh": "实时刷新",
+      "continuesFromParent": "从父项继续",
+      "continuesFrom": "从 {id} 继续",
+      "viewConversation": "查看对话",
+      "openConversation": "打开对话 {id}"
+    },
+    "tableLabel": "请求日志",
+    "throughputPostFirstToken": "首个令牌后",
+    "throughputEndToEnd": "端到端",
+    "throughputRate": "{value} 个令牌/秒",
+    "throughputExplanation": "两种速率均使用输出令牌数和推理令牌数中的较大值。首个令牌后速率会排除有效的 TTFT；否则使用完整时长。端到端速率始终使用完整时长。缓冲响应可能具有较高的突发传输速率，但这并不意味着模型生成速度更快。"
   },
   "proxyLogger": {
     "filterAll": "全部",
@@ -12112,7 +12449,9 @@
     "colServedBy": "由...提供",
     "filterTraffic": "流量",
     "filterTests": "测试",
-    "filterSource": "来源"
+    "filterSource": "来源",
+    "tableLabel": "代理日志",
+    "sortLogs": "排序日志"
   },
   "endpointOptions": {
     "speech": "语音",
@@ -12197,14 +12536,15 @@
     "statusExhausted": "已耗尽",
     "statusAlerting": "告警中",
     "statusError": "错误",
-    "moreSuffix": "+{count} 更多"
+    "moreSuffix": "+{count} 更多",
+    "feedFilterLabel": "筛选事件"
   },
   "quotaShare": {
     "weightPercent": "权重 %",
     "title": "配额共享",
     "description": "通过百分比限制跨 API 密钥共享提供者配额",
     "newPool": "新建池",
-    "betaTitle": "Beta — UI preview.",
+    "betaTitle": "Beta —— 界面预览。",
     "betaDescription": "配置保存在 localStorage 中（尚未持久化到服务器）。每次请求的上限执行将在未来更新中实现。",
     "kpiActivePools": "活跃池",
     "kpiKeysAllocated": "已分配密钥",
@@ -12259,7 +12599,7 @@
     "quotaTotal": "总计",
     "kpiAvgUtilization": "平均利用率",
     "kpiBorrowingNow": "现在借款",
-    "conceptTitle": "配额分成是如何工作的",
+    "conceptTitle": "配额共享的工作原理",
     "conceptIntro": "配额共享通过节约型公平分享将供应商的配额分配给多个 API 密钥：每个密钥获得一个按比例分配的份额，但可以在不超过全球上限的情况下从自由余额中借用。",
     "conceptFairShare": "公平共享：每个键接收与其配置权重成比例的配额",
     "conceptBorrowing": "借用：密钥可以在不违反上限的情况下消耗他人的自由余额",
@@ -12311,33 +12651,33 @@
     "accountQuotaNone": "—",
     "logTitle": "使用日志",
     "logEmpty": "尚未使用",
-    "schedulesTitle": "Time windows",
-    "schedulesHint": "Say when OmniRoute may use these accounts, and how much it may take. Allow windows act as a whitelist: add one and the pool is closed outside it. A block window is a blackout and always wins over an allow window it overlaps.",
-    "schedulesEmpty": "No time windows — the pool is available around the clock",
-    "schedulesAdd": "Add window",
-    "schedulesRemove": "Remove window",
-    "schedulesEnabled": "Window enabled",
-    "schedulesMode": "Window type",
-    "schedulesModeAllow": "Allow",
-    "schedulesModeBlock": "Block",
-    "schedulesFrom": "From",
+    "schedulesTitle": "时间窗口",
+    "schedulesHint": "指定 OmniRoute 何时可以使用这些账户、可以用多少。允许窗口相当于白名单：添加一个之后，窗口之外池即关闭。屏蔽窗口是黑名单，与允许窗口重叠时始终优先。",
+    "schedulesEmpty": "无时间窗口——池全天候可用",
+    "schedulesAdd": "添加窗口",
+    "schedulesRemove": "移除窗口",
+    "schedulesEnabled": "窗口已启用",
+    "schedulesMode": "窗口类型",
+    "schedulesModeAllow": "允许",
+    "schedulesModeBlock": "屏蔽",
+    "schedulesFrom": "起始",
     "schedulesTo": "To",
-    "schedulesReserve": "Keep free",
-    "schedulesReserveHint": "Stop using the account once less than this share of a quota window is left. Counts everyone's usage, so someone else working on the same account pushes OmniRoute out first. Add one floor per window: a weekly reserve that protects the whole week would throttle every short burst if it also governed the 5h window.",
-    "schedulesReserveNone": "no floor — OmniRoute may use the account down to empty",
-    "schedulesReserveAdd": "Add floor",
-    "schedulesReserveRemove": "Remove floor",
-    "schedulesReserveWindow": "Quota window this floor guards",
-    "schedulesReserveWindowAny": "any window",
-    "schedulesBudget": "OmniRoute budget",
-    "schedulesBudgetHint": "How much OmniRoute itself may spend in this window. Counts only its own traffic, so usage by anyone else neither eats nor inflates it.",
-    "schedulesBudgetUnit": "Budget unit",
-    "schedulesBudgetWindow": "Budget window",
-    "schedulesTimezone": "Time zone",
-    "schedulesPriority": "Priority",
-    "schedulesSaved": "Time windows saved",
-    "schedulesSaveError": "Could not save the time windows",
-    "schedulesLoadError": "Could not load the time windows",
+    "schedulesReserve": "保留余量",
+    "schedulesReserveHint": "当配额窗口剩余低于此比例时停止使用该账户。统计所有人的用量，因此其他人使用同一账户会先把 OmniRoute 挤出去。每个窗口加一条底线：保护整周的周级保留如果也管 5 小时窗口，会掐断每个短突发。",
+    "schedulesReserveNone": "无底线——OmniRoute 可以把账户用到见底",
+    "schedulesReserveAdd": "添加底线",
+    "schedulesReserveRemove": "移除底线",
+    "schedulesReserveWindow": "此底线守护的配额窗口",
+    "schedulesReserveWindowAny": "任意窗口",
+    "schedulesBudget": "OmniRoute 预算",
+    "schedulesBudgetHint": "OmniRoute 自己在此窗口内可花费的量。只统计它自己的流量，其他人的使用既不消耗也不抬升它。",
+    "schedulesBudgetUnit": "预算单位",
+    "schedulesBudgetWindow": "预算窗口",
+    "schedulesTimezone": "时区",
+    "schedulesPriority": "优先级",
+    "schedulesSaved": "时间窗口已保存",
+    "schedulesSaveError": "无法保存时间窗口",
+    "schedulesLoadError": "无法加载时间窗口",
     "groupLabel": "组",
     "newGroup": "新建组",
     "renameGroup": "重命名组",
@@ -12364,7 +12704,10 @@
     "ungroupedTitle": "未分组",
     "ungroupedHint": "这些池未分配给已知组。编辑一个池以将其移动到真实组中。",
     "removeFailed": "无法移除此池。",
-    "dismiss": "关闭"
+    "dismiss": "关闭",
+    "allocationsHeading": "分配",
+    "wizardRemoveDimension": "移除维度",
+    "wizardRemoveKey": "移除键"
   },
   "plugins": {
     "title": "插件",
@@ -12522,7 +12865,8 @@
       "settingsUpdateFailed": "设置更新失败",
       "serviceRevealApiKey": "{actor} 揭露了 {target} 的 API 密钥",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "关闭错误提示"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12607,7 +12951,7 @@
     "wizardRunning": "运行中",
     "wizardNotRunning": "未运行",
     "wizardCertCheck": "证书",
-    "wizardTrusted": "可信的",
+    "wizardTrusted": "无人值守 / 守护进程",
     "wizardNotTrusted": "尚未信任 — 使用信任证书按钮",
     "wizardTutorialTitle": "设置说明：",
     "wizardEnableDns": "添加 /etc/hosts 条目",
@@ -12655,7 +12999,21 @@
       "goNow": "现在去",
       "message": "MITM Proxy 现在归 AgentBridge 所有。",
       "title": "此页面已移动"
-    }
+    },
+    "dnsOn": "DNS 已开启",
+    "dnsOff": "DNS 已关闭",
+    "showServerSettings": "显示服务器设置",
+    "hideServerSettings": "隐藏服务器设置",
+    "upstreamCaTesting": "正在测试…",
+    "removeMapping": "移除映射",
+    "mappingSourcePlaceholder": "例如 gemini-3.6-flash-medium，或使用 * 表示所有未映射的模型",
+    "mappingWildcardHint": "使用 * 作为源，将所有未显式映射的模型通过 OmniRoute 路由到所选目标。精确的源匹配始终优先于 *。",
+    "wizardDetectingModels": "正在从截获的流量中检测模型...",
+    "wizardDetectedModels": "在截获的流量中发现了 {count, plural, one {# 个模型} other {# 个模型}}。请选择要添加的模型：",
+    "wizardSelectedModels": "已选择 {count, plural, one {# 个模型} other {# 个模型}}。你将在下一个页面中将它们映射到 OmniRoute 模型。",
+    "wizardAddModels": "添加 {count, plural, one {# 个模型} other {# 个模型}}",
+    "wizardNoModelsDetected": "尚未检测到模型。请使用 {agent} 发起请求，然后再次运行此向导，以从流量中自动检测模型。",
+    "wizardNoModelsHint": "或者关闭此向导，并在智能体卡片中手动添加映射。"
   },
   "providerStats": {
     "unknownError": "未知错误",
@@ -12685,7 +13043,12 @@
     "avgTtft": "平均 TTFT",
     "avgTotal": "平均总计",
     "requestTelemetry": "请求遥测",
-    "requestTelemetryDescription": "7 阶段流水线明细（最近 5 分钟）"
+    "requestTelemetryDescription": "7 阶段流水线明细（最近 5 分钟）",
+    "title": "提供者统计信息",
+    "description": "按提供者和模型统计的流量、延迟和成功率",
+    "combo": "组合",
+    "toggleModels": "显示 {provider} 的模型",
+    "windowSince": "自 {date}"
   },
   "relay": {
     "title": "Serverless 中继代理",
@@ -12812,7 +13175,7 @@
     "timingStatus": "状态",
     "timingRequestSize": "请求大小",
     "timingResponseSize": "响应大小",
-    "pausedNewBadge": "{count} 新的",
+    "pausedNewBadge": "{count} 条新记录",
     "clearContextFilter": "清除",
     "invalidHostname": "主机名无效",
     "invalidHost": "主机无效",
@@ -12846,7 +13209,18 @@
     "noRequestBody": "无请求体。",
     "noResponseBody": "无响应体。",
     "formatted": "格式化",
-    "raw": "原始"
+    "raw": "原始",
+    "requestCount": "{count, plural, one {# 个请求} other {# 个请求}}",
+    "expandList": "展开列表",
+    "collapseList": "折叠列表",
+    "snippetLanguage": "代码片段语言",
+    "headersTable": "请求头",
+    "showSecrets": "显示密钥",
+    "maskSecrets": "隐藏密钥",
+    "llmNotAvailable": "此请求没有可用的 LLM 元数据。",
+    "llmStreamYes": "是（SSE）",
+    "llmStreamNo": "否",
+    "llmTotalTokens": "总计：{count} 个令牌"
   },
   "cliCommon": {
     "companion": {
@@ -12874,7 +13248,7 @@
     },
     "concept": {
       "code": {
-        "title": "CLI 代码的",
+        "title": "工具与路由",
         "phrase": "指向 OmniRoute 的代码工具",
         "flow": "你 → CLI 代码 → OmniRoute → 供应商",
         "seeOther": "查看 →"
@@ -12951,7 +13325,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI 代码的",
     "pageSubtitle": "指向 OmniRoute 的代码工具",
     "searchPlaceholder": "搜索 CLI…",
     "filterDetectionLabel": "检测",
@@ -12961,7 +13334,8 @@
     "detectionNotFound": "未找到",
     "baseUrlAll": "所有",
     "baseUrlFull": "完整",
-    "baseUrlPartial": "部分"
+    "baseUrlPartial": "部分",
+    "title": "CLI 编程工具接入"
   },
   "cliAgents": {
     "pageTitle": "CLI 代理",
@@ -13006,7 +13380,7 @@
     "versionCommandPlaceholder": "例如：myagent --version",
     "spawnArgs": "生成参数",
     "spawnArgsPlaceholder": "例如：--quiet，--json",
-    "cliCodeRedirectCta": "打开 CLI 代码的"
+    "cliCodeRedirectCta": "前往 CLI 编程工具接入页"
   },
   "agentSkills": {
     "catalog": {
@@ -13305,7 +13679,8 @@
     "colReliabilityHelp": "过去 24 小时内此提供者实际响应的调用占比。破折号表示其处理的流量过少，无法确定比率。",
     "reliabilitySample": "过去 {hours} 小时内，{requests} 次调用中有 {successes} 次成功",
     "reliabilityTooFew": "过去 {hours} 小时内仅有 {requests} 次调用——调用次数太少，无法给出成功率",
-    "reliabilityNoTraffic": "过去 24 小时内未记录任何调用"
+    "reliabilityNoTraffic": "过去 24 小时内未记录任何调用",
+    "categoryFilter": "任务类别"
   },
   "discovery": {
     "title": "服务商探索",
@@ -13330,7 +13705,11 @@
     "method": "方式",
     "auth": "认证",
     "feasibility": "可行性",
-    "models": "模型"
+    "models": "模型",
+    "provider": "提供者",
+    "status": "状态",
+    "endpoint": "端点",
+    "actions": "操作"
   },
   "noAuthProvider": {
     "title": "无需身份验证",
@@ -13379,7 +13758,8 @@
     "ownProxy": "自有代理",
     "freeTierPause": "模型 {model} 已暂停 (429)，将于 {time} 恢复",
     "freeTierPauseProvider": "已暂停 (429)，将于 {time} 恢复",
-    "freeTierPauseNote": "该实例上的进程内暂停"
+    "freeTierPauseNote": "该实例上的进程内暂停",
+    "proxyType": "代理类型"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13932,10 @@
         "description": "一个隐藏成就等待解锁...",
         "criteria": "完成隐藏成就以揭晓此徽章。"
       }
-    }
+    },
+    "leaderboardTitle": "排行榜",
+    "leaderboardDescription": "您的各个 API 密钥的排名和成就",
+    "badgeLocked": "已锁定"
   },
   "featureFlags": {
     "title": "功能标志",
@@ -13610,7 +13993,9 @@
       "disabled": "已禁用",
       "dual": "双重",
       "alias": "别名",
-      "canonical": "规范"
+      "canonical": "规范",
+      "fail_closed": "拦截 (fail_closed)",
+      "count_as_zero": "按 $0 计 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14142,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "受保护优先级基础设施中止时返回 502",
         "description": "当仅配额回退的优先级目标因可证实并非配额的原因（提供者断路器处于打开状态或预测性延迟跳过）而停止组合时，返回 502 而不是 503。"
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "记录账户 ID 日志",
+        "description": "在 AUTH 日志行中包含账户前缀（例如 \"Using '<provider>' account: abc12345...\"）。默认关闭，使账户标识符在共享/多租户进程日志中被隐藏。与调试模式相互独立；开关调试模式不会显示此项。"
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "OIDC 启用时禁用密码登录",
+        "description": "启用 OIDC 后禁用密码登录，用户只能通过 OIDC 单点登录认证。关闭（默认）时密码登录和 OIDC 均可用。"
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "远程音频提供者节点",
+        "description": "允许 /v1/audio/* 路由使用部署在 localhost 之外的 OpenAI 兼容提供者节点。默认关闭——把音频路由到远程主机会改变出口身份，必须由运维明确决定。回环节点始终允许，不受影响。"
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "远程 Rerank 提供者节点",
+        "description": "允许 POST /v1/rerank（以及记忆引擎内部经回环调用它的重排步骤）使用部署在 localhost 之外的 OpenAI 兼容提供者节点——例如运行 TEI、Infinity、vLLM 的局域网机器或 Tailscale 对端。默认关闭——路由到远程主机会改变出口身份，必须由运维明确决定。回环节点始终允许且不受影响。远程节点还须通过提供者出站 URL 策略。"
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "轮换共享出口守卫",
+        "description": "多账户轮换执行器遇到网络异常（超时、连接拒绝/重置）时，若失败账户没有专用代理，施加短冷却并在该请求的余下部分跳过其他无代理账户，而不是逐个重试。默认开启（安全：不改变出口 IP，只降低共享出口账户的延迟/冷却风险）。关闭可恢复首个无代理抛出时立即传播。"
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "跳过近期失败的代理",
+        "description": "代理池和 opencode 的按账户轮换在一段进程级时间内不再选用刚失败的代理（TCP 探测被拒，或经它收到 429），该时间每次重复翻倍、有上限。不写入任何代理状态；所有候选都被搁置时选择不变。默认开启；PROXY_SKIP_RECENTLY_FAILED=false 时选择顺序与纯轮换完全一致。"
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "共享出口池排序",
+        "description": "对按出口地址配额的提供者，把与近期被拒成员观测到相同出口地址的池成员排在健康成员之后。只调顺序，绝不排除。依赖 PROXY_SKIP_RECENTLY_FAILED 提供它读取的拒绝信号。默认关闭：选择顺序与纯轮换完全一致。"
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "轮换归因日志",
+        "description": "opencode 轮换记录由哪个账户服务或被跳过（仅脱敏 id，绝不记录完整账户 id），并把代理日志条目关联到其请求，便于运维区分被跳过的账户和未使用的账户。默认关闭：不写额外日志行，不写额外列。"
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "代理池出口观测",
+        "description": "在仪表盘的代理池下展示最近 24 小时服务过其成员的观测出口 IP 数量、使用它们的连接数，以及单个 IP 后最多承载的连接数。只读，由代理日志计算，绝不用于路由。默认关闭：池编辑器不变，观测路由返回 null。"
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "运维推送出口观测",
+        "description": "接受运维按池成员推送的带日期观测地址，与日志读取合并后用于展示和池排序。默认关闭：推送路由返回 404，池读取行为与之前完全一致。"
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses 停滞轮换",
+        "description": "对 OpenCode 执行器，监视流式 Responses 回复的首个正文字节（窗口：RESPONSES_FIRST_BYTE_TIMEOUT_MS，默认 15000）。超过窗口仍静默的 2xx Responses 流视为停滞：冷却该账户并把请求轮换到下一个账户一次；第二次停滞立即失败。默认关闭：停滞的流保持现状等待，直到流就绪超时。"
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked 轮换",
+        "description": "对 OpenCode 执行器，当上游返回带 user_blocked 拒绝的 403 或 451（非地域封锁、非 Cloudflare 指纹拒绝）时，冷却被拒账户并轮换到下一个账户，每请求最多一次；第二次拒绝原样返回且不记成功。默认关闭：绕过上游用户封禁看起来像是规避行为，还会把标记扩散到整个账户舰队，因此除非运维明确开启，拒绝原样返回。"
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode 瞬时故障切换退避",
+        "description": "对 OpenCode 多账户轮换，连续两次尝试因瞬时上游错误（5xx 或空 400 拒绝）失败后，先暂停再派发到下一个账户。暂停从 1.5 秒起，每次连续失败翻倍，每次暂停上限 6 秒、每请求上限 10 秒，客户端断开时跳过，等待前释放失败响应体。默认关闭：故障切换保持立即进行。"
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "空轮次冲刷重试",
+        "description": "对翻译后的流式轮次，当上游轮次没有可用内容（仅推理完成或零有效块）时，在向客户端暴露任何内容之前，经正常凭据路径做有界重试（上限 STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX）。默认关闭：空轮次保持现状（空 200 或空内容 502）。"
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "空流兄弟恢复",
+        "description": "Claude/Codex 流式：在首个生命周期事件后短暂探测（最多 1 秒 / 64 KiB）可用输出；以无内容结束的流变为 empty_content 失败，并把现有有界重试用在另一个合格连接上（不冷却、不锁定模型），round-robin 组合在客户端断开后停止重试。探测内还把 refusal、pause_turn 和 model_context_window_exceeded 视为合法的空终止。默认关闭：就绪、空内容处理和组合重试与之前完全一致。"
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "流迟到输出探测",
+        "description": "流式输出探测：前 64 个转发块之后，每 16 块抽样一块检查首个可见输出，使迟到开始的输出仍把流标记为已产出。此后出现的孤立 5xx 保持请求级，而不再记为模型级锁定，firstOutputMs 回填为当前抽样间隔内的首个输出块。默认关闭：只探测前 64 个转发块，与之前一致。"
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode 限流 429 提前停止",
+        "description": "对 OpenCode 多账户轮换，遇到首个被判定为真实限流的 429（带可解析 Retry-After 头，或正文指明速率/用量限制）时停止账户波次，并原样返回该上游 429（状态码、正文、Retry-After 和配额头），而不是试完所有剩余账户。未分类的 429 继续轮换。默认关闭：免费层按出口 IP 限流（#9611），每个 429 都轮换到下一账户，波次耗尽时返回最后一个上游 429。"
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 挂起恢复",
+        "description": "对 OpenCode 多账户轮换，在反复出现瞬时 429（或新的池紧张标记）后带心跳挂起请求，然后重放一段最多 3 个顺序账户的有上限行程，而不是把整个舰队扇出。默认关闭：每个 429 都轮换到下一账户，与之前一致。"
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "流就绪停滞重试",
+        "description": "对流式聊天请求，当首个上游正文在产出可用事件前停滞时，经同一路由路径以相同就绪预算做一次有界的第二次尝试，不惩罚账户。默认关闭：首个正文停滞直接判请求失败，不重试。"
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 池重选",
+        "description": "对 OpenCode 多账户轮换，在环境池上下文下，无代理账户从按出口配额的提供者收到 429 后，向连接池请求另一个成员做下次尝试，而不是重试同一出口地址。只排序，不排除：池耗尽时保持现状。默认关闭：每个 429 都轮换到下一账户，与之前一致。"
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 客户端指纹",
+        "description": "在 OpenCode Zen/Go 请求上发送 OpenCode v2 CLI 客户端指纹（#16571）：User-Agent opencode/latest/<2.x>/cli 与 x-opencode-client cli；仅当客户端 User-Agent 是 2.x OpenCode 客户端时才保留它；在受门控的免费层请求上不发 x-opencode-request，会话镜像到 x-opencode-session-id/x-session-affinity/x-session-id，注入的占位工具使用 v2 CLI 的 read/shell schema，丢弃 \"none\" 的 tool_choice。默认关闭：每个 OpenCode 请求逐字节保持现有身份、头和正文。"
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen 出口 IP 锁定",
+        "description": "把 OpenCode Zen（opencode-zen）加入默认出口 IP 锁定家族，一个 Zen 连接上的 429 会同时冷却共享其出口 IP 的所有兄弟 Zen 连接。默认关闭：Zen 按 key 隔离，各连接各自冷却，与之前一致。显式的 OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS 值始终优先于此标志。"
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode 全文错误规则",
+        "description": "让内置 OpenCode 错误规则（opencode-zen、opencode-go、opencode-cli）匹配上游错误全文，使 organization_quota_exceeded 或 \"monthly usage limit reached\" 等正文标记把 429 判定为配额耗尽并施加连接级锁定。默认关闭：这些规则只看结构化错误码，此类 429 仍是短限流，与之前一致。"
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI 全文错误规则",
+        "description": "让内置 Cloudflare Workers AI 错误规则匹配上游错误全文，使 \"daily free allocation\" 正文的 429 判定为配额耗尽而非短限流。默认关闭：规则只看结构化错误码，与之前一致。"
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "能力过滤器",
+        "description": "目标模型缺少所需能力（视觉、工具、结构化输出、上下文窗口）时，在派发前拒绝请求。保护绕过组合层兼容过滤器的直连单提供者请求。"
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "USD 配额忽略未定价用量",
+        "description": "在按 key 的 USD 用量配额中，把没有价格的模型用量按 $0 计，而不是视为配额已超。默认关闭：未定价模型或路由别名可能隐藏真实花费，因此配额按失败关闭处理。"
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "启用 OmniRoute Radar 模块（目录源订阅与同步）。默认关闭；启用只解锁 UI——数据同步仍需单独开启。"
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "模型端点能力门",
+        "description": "强制校验可信的模型端点标签（由提供者目录声明、从特定模型 id 推断、或由运维设置）：对模型不服务的端点，在 /v1/chat/completions、/v1/embeddings、/v1/rerank、/v1/images/generations、/v1/videos/generations、/v1/music/generations 和 /v1/audio/* 派发前以 HTTP 400 拒绝；在 /v1/models 中隐藏其标签端点没有 OmniRoute 适配器的模型；对此类模型的仪表盘模型测试返回 422。默认关闭：端点标签仅作信息展示，请求派发与之前完全一致。"
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "通用上下文交接",
+        "description": "组合路由切换模型时生成并注入对话摘要。关闭则把模型切换视为相互独立，并为所有现有和未来的组合阻止后台交接请求。"
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "推理重放",
+        "description": "在多轮对话间缓存并重放模型推理。关闭则停止存储和重新注入推理内容。"
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server 传输",
+        "description": "允许 Codex 使用本地 app-server WebSocket JSON-RPC 传输（codexTransport=app-server）。关闭时，选择了 app-server 的连接回退到 Codex 的其他传输。"
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code 发现别名",
+        "description": "在 /v1/models 上公布 claude/'<provider>'/'<model>' 镜像 id，使 Claude Code 网关的模型发现能列出非 Claude 模型。警告：全局启用会让所有客户端的目录条目翻倍。"
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "无思考模型别名",
+        "description": "no-think/'<provider>'/'<model>' 网关别名的总开关。开（默认）：/v1/models 为每个合格的带思考能力 Claude 模型公布一个无思考变体，请求中的 no-think/ id 解析回真实模型并抑制推理。关：不公布变体，no-think/ id 按未知模型 id 处理。此开关开启时，每个模型 ModelSpec.noThinkingAlias 的单独选择仍然有效。"
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "禁用思考档位变体",
+        "description": "禁止在 /v1/models 目录中生成思考档位变体（如 -low、-medium、-high）。"
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "自适应虚拟准入通道",
+        "description": "为提供者派发启用按租户自适应的虚拟准入通道（#9654）：一个租户的突发不再把另一个租户打到 503。OMNIROUTE_CHAT_VIRTUAL_LANES 环境变量优先于此仪表盘开关；变更在服务器重启后生效。"
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "功能网关镜像",
+        "description": "对规范属主没有活动凭据、但某个有活动凭据的透传网关能路由的模型，在 /v1/models 上公布 '<gateway-alias>'/'<model>' 镜像 id。警告：全局启用会为所有客户端增加目录条目。"
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API 聚合余额",
+        "description": "为 New-API / One-API / Sub2API 聚合兼容节点启用余额检测。启用后，设置了聚合标记的兼容节点会在仪表盘和配额预检路由中报告余额。"
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "隐藏已删除搜索连接",
+        "description": "搜索统计和最近搜索只统计仍有活连接的提供者（duckduckgo-free 等无 key 提供者始终计入）。关闭则保留所有带提供者 id 的搜索行。"
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "严格免费徽章",
+        "description": "仪表盘提供者页：只在提供者认可的信号上显示 Free 徽章——去掉显示名启发式、非布尔 free 字段，以及无文档免费层的注册提供者上的 :free 后缀。关闭则保持历史徽章规则。"
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "自动组合：空池返回 503",
+        "description": "当自动组合的候选池在工具调用预过滤前已为空（所有目标都被冷却、锁定或耗尽跳过）时，返回 503 no_eligible_targets，而不是旧版 400 \"No target supports tool calling\" capability_mismatch。默认关闭：空池保持旧版 400。"
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral 含糊 401 软锁定",
+        "description": "裸 Mistral 401（'{\"detail\":\"Unauthorized\"}'，无明确认证信号）在 key 被吊销和配额耗尽时逐字节相同。启用后，此类 401 冷却连接而不是按过期停放，一小时内最多 3 次；下一次仍按过期停放，使被吊销的 key 最终收敛。默认关闭：每个裸 Mistral 401 都按过期停放，与之前一致。"
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Batch 与文件自动清理",
+        "description": "让自动清理扫描删除早于 OMNIROUTE_BATCH_RETENTION_DAYS 的终态（已完成/失败/取消/过期）Batch API 作业及其逐行检查点，并清除超过各自 expires_at 的上传文件 BLOB 内容。默认关闭：在运维开启前，每个现有部署完全保持这些数据不变。运维触发的 DELETE /api/v1/batches/delete-completed 路由两种情况下都不受影响——它是独立、无条件的公开 API 契约。"
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity 账户租用",
+        "description": "把选中的 Antigravity 账户为挑选它的请求的流式生命周期保留，使并发重试或凭据交接不能重选已承诺给在飞流的账户。租用按（连接、可调用上游模型）限定范围，一个账户仍可同时服务两个不同模型。当该模型的所有合格账户都已租出时，请求返回带有限 Retry-After 的结构化 503 POOL_BUSY，而不是堆到繁忙账户上。默认关闭：账户选择与之前完全一致，不做任何保留。"
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "自动清理过期组合步骤",
+        "description": "对权威实时目录的模型同步成功后，移除钉在目录已不再列出的模型上的组合步骤，每个被移除步骤记一条审计。同步失败、降级或仅免费层时绝不清理，也绝不清空组合。默认关闭：过期步骤只做标记。"
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth 摘要式思考",
+        "description": "让请求可读思考（thinking.display \"summarized\"）的 Claude OAuth 请求去掉 redact-thinking-2026-02-12 这个 Anthropic beta——否则 Anthropic 会返回空的、仅含签名的思考块。默认关闭：该 beta 是 Claude Code OAuth 线上指纹的一部分，OAuth 请求保持原样。API key 的 Claude 请求无此标志已支持摘要式思考；OMNIROUTE_REDACT_THINKING=false 也只在此标志开启时作用于 OAuth。"
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro 工具调用修复",
+        "description": "当流式 Kiro 响应在任何可见输出前发出畸形的 tool_call 包装（缺 input.name 或 input.arguments）时，抑制它并用一条纠正指令重发请求一次，而不是以 invalid_kiro_tool_call 结束该轮。重试多花一次 Kiro 请求；第二次失败以 kiro_tool_call_repair_retry_failed 结束该轮。默认开启。设为 false 则在首个畸形包装时直接失败该轮。"
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev 思考档位",
+        "description": "当运维未覆盖且提供者注册表也未声明时，使用 models.dev 公布的推理档位（收敛到已知档位词表），并把声明的空档位列表按\"无档位\"处理，用于 /v1/models 的 effort_tiers 和组合档位交集。默认关闭：effort_tiers 和解析出的 supportedThinkingEfforts 与之前完全一致。"
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena 合成 cx 遥测",
+        "description": "给每个没有运维提供 providerSpecificData.cx 的 Arena（lmarena）create-evaluation 请求附带一个合成的程序化 cx 客户端交互 blob（即 arena.ai 自身对无记录交互页面发送的值）。默认关闭：cx 字段是 Arena 的反自动化信号，因此 OmniRoute 只转发运维从真实浏览器会话捕获的值（providerSpecificData.cx），否则完全不发送 cx。上游收益未经证实；仅当 Arena 开始拒绝无 cx 的请求时再启用。"
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "原生 Codex 反应式压缩",
+        "description": "让反应式（阈值）和最后手段的上下文压缩也能改写原生 Codex 透传历史（POST /v1/responses 到 codex 提供者），当它们超出上下文预算时使用 Responses input[] 适配器。默认关闭：原生 Codex 历史归 Codex 客户端所有，永不被压缩改写；超大请求保持上下文预算检查失败，与之前一致。要求全局压缩已开启且模型未被排除。"
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "配额窗口：遵守有界停放",
+        "description": "让按窗口的配额策略（账户选择使用的 session/周阈值）遵守有界耗尽停放：有上限的停放期限过后，或缓存的配额观测比停放上限更旧时，窗口停止排除该账户直到获取新的配额。默认关闭：缓存的窗口按其最后报告的百分比一直阻断到自身重置时间。"
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "图像生成：长作业",
+        "description": "对 OpenAI 兼容图像生成：使用连接的超时（providerSpecificData.timeoutMs），否则用中央上游 fetch 超时（FETCH_TIMEOUT_MS，再 REQUEST_TIMEOUT_MS，默认 600 秒），代替固定 120 秒图像预算；调用方取消的请求以 499 结束；让 Playground 以带保活心跳的 SSE 流接收长图像作业。默认关闭：应用固定预算且不传播调用方取消。覆盖响应体读取的截止期限始终开启。"
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "目录镜像细化",
+        "description": "细化 /v1/models 上的 claude/ 发现和功能网关镜像。默认关闭：两个镜像通道与之前行为完全一致。开启：claude/ 发现镜像还覆盖列出的推理档位变体（-low/-medium/-high/-xhigh），跳过请求路径无法实体化的内置 auto/* id，跳过已列出的别名；功能网关镜像跳过组合和 OmniRoute 合成的 id（claude/、no-think/），从 owned_by 取属主，绝不把属主当自己的网关，跳过在 blockedProviders 中禁用的网关和不在网关权威实时目录中的模型。"
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "代理健康：被拒重置失败连击",
+        "description": "在代理健康扫描中，让目标拒绝的探测（401/403/429：代理转发了，但目标拒绝了该出口 IP）像正常服务的探测一样重置代理的连续失败计数。默认关闭：拒绝保持中性并保留连击（#10654）。5xx 两种情况下都无结论，拒绝也绝不会移除、禁用或重新激活代理。"
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok 订阅图像",
+        "description": "注册 xai-oauth（xao）和 grok-cli 图像路由，并把 OpenAI 质量 high/hd 映射为 xAI 的 medium。默认关闭：API key 的 xAI 图像路径保持现有 OpenAI 兼容请求，不注册订阅路由。"
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth 实时模型发现",
+        "description": "用 OAuth bearer token 从 https://api.x.ai/v1/models 为 xai-oauth 连接拉取实时 xAI 模型目录，代替冻结的静态种子。默认开启。把标志设为 false 则继续用静态种子。HTTP 失败时发现路由回退到种子；标志读取本身不发 HTTP。"
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic 兼容：对话中途 system 轮",
+        "description": "在普通 anthropic-compatible-* 中继（claude → claude 透传）上，把对话中途的 role:system 轮保留在 messages[] 里，而不是提升到顶层 system 参数，使缓存的提示词前缀跨轮稳定。仅当客户端自己发送了 mid-conversation-system-2026-04-07 这个 anthropic-beta 时生效（原样转发上游）。默认关闭：每个 system 轮与之前一样提升，因为不支持该 beta 的中继会以 400 拒绝 role:system 消息。"
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "数据库健康检查：推迟启动扫描",
+        "description": "把启动时的数据库完整性/健康检查放到服务器开始接收请求之后（经 setImmediate），而不是阻塞启动直到完成。默认关闭：启动与 #13717 之前一样阻塞在检查上，损坏的数据库仍会在服务首个请求前被抓住。开启：启动立即返回，检查（现在是有界/分页的，对真实文件型数据库还在可取消的子进程中隔离）紧随其后运行。"
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode 已发布目录路由",
+        "description": "让没有显式注册端点的 OpenCode Zen 和 OpenCode Go 模型从每 6 小时后台读取的 models.opencode.ai 已发布目录获取请求面（@ai-sdk/openai 用 Responses，@ai-sdk/anthropic 用 Messages）。默认关闭：端点与之前一样来自注册表启发式，且从不拉取该目录。"
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Auto 请求：解析后能力权重",
+        "description": "让 auto/* 请求（resolveModelOrError 和 auto 路由包装）用解析出的模型能力（视觉、推理、思考）和观测质量分构建候选池，像 /v1/models 目录一样一次批量读取。默认关闭：请求时快照权重与之前完全一致（能力按需解析且不进入权重）。开启：这些信号进入快照权重，候选权重乃至选择结果可能改变。"
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "自动组合：无 key 传输门",
+        "description": "把传输需要本地浏览器（browserBacked）或本地安装 CLI（isLocalCli）的无 key（免认证）提供者挡在 auto/* 候选池外，避免卡住的成员把 auto 请求拖到单目标超时（#17036）。默认关闭：每个支持模拟工具调用的免认证提供者与之前一样留在池中。直接 '<alias>'/'<model>' 调用两种方式都可用。"
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN：内联推理重放",
+        "description": "对需要推理重放的 codebuddy-cn 思考模型（DeepSeek-V4 / Kimi-K2 家族），把每个重放的 assistant reasoning_content 作为可见 '<thought>' 块内联到消息内容前面，使其在丢弃 reasoning_content 字段的网关下也能存活（#13632）。默认关闭：codebuddy-cn 请求原样发送；reasoning_content 字段本身始终保留。"
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "提供者安全停止：终态",
+        "description": "把显式的提供者安全停止（misalignment_policy_violation、content_policy_violation，或标记为 provider_safety_rejection 的精确旧文 'blocked by our safety systems' 拒绝）保持为终态、请求级拒绝：其代码在 HTTP、Responses、WebSocket 和已完成流错误中原样保留，组合遇到它就停止而不再重试其他目标，并取消已准入的兄弟请求（#17049）。默认关闭：这些错误保持现有处理，组合路由不变。"
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "凭据健康：重测自动禁用的连接",
+        "description": "让凭据健康扫描重测被网关自己关闭的连接（标记 autoDisabledAt；每个最多每 6 小时一次、每次扫描最多 5 个），重测通过就把连接切回开启（#16190）。默认关闭：被关闭的连接保持关闭，直到运维重新启用或重测，与之前一致。运维禁用的连接和永久封禁后关闭的连接绝不重测。"
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "凭据门：仅认证诊断",
+        "description": "收窄组合凭据门：缓存的失败凭据探测只在诊断证明是坏凭据（upstream_auth_error、auth_missing、token_expired、token_refresh_failed、reauth_required、account_deactivated、auth_required）时才阻断连接。无结论的失败（超时、限流、故障、不支持的探测和无类型的调度错误）按未知处理，连接继续接收流量。默认关闭：任何缓存的探测错误在缓存 TTL（5 分钟）内都阻断连接。"
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "组合：遇内容策略拒绝即停",
+        "description": "当组合目标返回精确的内容策略拒绝（code 或 type 为 cyber_policy / content_policy_violation）时，停止组合并返回该拒绝，即使剩余目标是不同模型，不再前进到下一目标。默认关闭：该拒绝不冷却账户也不触发提供者断路器，组合与之前一样前进到下一目标。"
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "冷却重试：跳过 403/410 拒绝",
+        "description": "当所有账户都在冷却、且最早结束的冷却由 403（拒绝访问）或 410（已删除）引起时，立即返回该拒绝，而不是等冷却结束再重发请求；续约中的 agentrouter 连接级配额 403 会以 errorCode 429 持久化，保持可重试。默认关闭：只有 401 跳过等待，每个拒绝都按到达时的状态码持久化。"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "未定价用量的预算策略",
+        "description": "按密钥设置的每日/每周 USD 限额，如何处理其提供者/模型没有定价记录的成功用量。fail_closed（默认）会把该窗口视为已超额，确保未知成本不会绕过硬性上限。count_as_zero 把这部分用量按 $0 计入，已定价的消费仍照常限制。无论哪种策略，未定价的模型都会显示在仪表板首页。"
       }
     }
   },
@@ -13793,6 +14446,7 @@
     "latency": "延迟",
     "quota": "配额",
     "rangeWindow": "{range} 窗口",
+    "timeRange": "时间范围",
     "runtimeHealthBlend": "运行时/健康度融合",
     "averageResponseTime": "平均响应时间",
     "worstQuota": "最差配额",
@@ -13923,7 +14577,11 @@
       "ok": "总体宽松"
     },
     "allProviders": "所有提供者",
-    "noApiKeyRequired": "无需 API 密钥"
+    "noApiKeyRequired": "无需 API 密钥",
+    "searchPlaceholder": "搜索模型、提供者…",
+    "searchAria": "搜索免费模型",
+    "filterProviderAria": "按提供者筛选",
+    "keylessOnly": "仅限免密钥"
   },
   "providerHealthAutopilot": {
     "title": "提供者健康自动巡航",
@@ -13994,7 +14652,11 @@
     "learnMore": "了解更多",
     "changelogLoadFailed": "无法加载更新日志。请稍后重试。",
     "retry": "重试",
-    "viewFullHistory": "在 GitHub 上查看完整历史记录"
+    "viewFullHistory": "在 GitHub 上查看完整历史记录",
+    "title": "新闻与更新日志",
+    "description": "来自 OmniRoute 团队的公告和最新版本说明",
+    "viewLabel": "查看",
+    "loadingNews": "正在加载公告..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15207,9 @@
       "circuitBreakerState": "提供者电路断路器状态",
       "lastUpdate": "最后更新：{timestamp}",
       "uptimeMinutes": "{minutes}分钟",
-      "uptimeHoursMinutes": "{hours}小时 {minutes}分钟"
+      "uptimeHoursMinutes": "{hours}小时 {minutes}分钟",
+      "breakerClosed": "已关闭",
+      "breakerNotClosed": "打开或半打开"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15284,9 @@
         "primaryAction": "维护详情",
         "secondaryAction": "系统状态"
       }
+    },
+    "miniapp": {
+      "askAnything": "您可以问任何问题…"
     }
   },
   "kiroAuthModal": {
@@ -14806,11 +15473,24 @@
     "day": "天",
     "unknownModel": "未知",
     "pending": "待处理",
-    "allApiKeys": "All API keys",
+    "allApiKeys": "全部 API key",
     "mcp": "MCP",
-    "mcpTool": "MCP tool",
-    "scope": "Scope",
-    "apiKey": "API key"
+    "mcpTool": "MCP 工具",
+    "scope": "范围",
+    "apiKey": "API key",
+    "visibleCount": "显示 {visible} 个 / 共 {total} 个",
+    "modeLabel": "视图模式",
+    "jumpToNow": "跳转到当前时间，NOW 线将重置到 {position}% 的位置",
+    "laneReuse": "时间行复用",
+    "laneReuseLabel": "时间行复用窗口（分钟）",
+    "laneReuseHint": "只要请求之间的间隔小于此处设置的分钟数，共享同一会话 ID 的请求就会保留在同一时间轴行中。",
+    "laneReuseUnit": "分钟",
+    "autoRefresh": "自动刷新",
+    "autoRefreshLabel": "自动刷新间隔（秒）",
+    "autoRefreshHint": "时间轴从服务器重新获取请求列表的频率。",
+    "autoRefreshUnit": "秒",
+    "zoomOut": "缩小",
+    "zoomIn": "放大"
   },
   "metadata": {
     "compressionTitle": "压缩",
@@ -14857,7 +15537,7 @@
     "faroPlaceholder": "和法罗交谈……",
     "faroSend": "发送",
     "faroOffline": "Faro (发言人) 离线",
-    "yes": "是的",
+    "yes": "是",
     "no": "不",
     "pushToTalk": "按住说话",
     "speakAnswers": "说出答案",
@@ -15073,5 +15753,118 @@
     "importButton": "导入",
     "importFailed": "导入失败。",
     "importSuccess": "已导入 {connections} 个账号和 {nodes} 个提供者节点;跳过 {skipped} 个。"
+  },
+  "conversations": {
+    "title": "对话",
+    "countSummary": "{total, plural, other {# 条对话}}含 2 轮及以上",
+    "autoRefreshTitle": "列表从服务器重新拉取的频率。",
+    "autoRefresh": "自动刷新",
+    "loading": "正在加载对话…",
+    "colConversation": "对话",
+    "colTurns": "轮次",
+    "colContinuation": "续接",
+    "colLastModel": "最近模型",
+    "colProvider": "提供者",
+    "colStatus": "状态",
+    "colLastSeen": "最近活跃",
+    "drawerTitle": "对话",
+    "prevConversation": "上一条对话",
+    "nextConversation": "下一条对话",
+    "gotoLatestRequest": "跳到最新请求",
+    "goToBottom": "回到底部",
+    "statusInProgress": "进行中",
+    "continuationGenuineTitle": "最后一轮使用了 previous_response_id 且已在服务端解析",
+    "continuationBadge": "续接",
+    "stalledTitle": "最后一轮未以 stop 结束，且 5 分钟以上没有后续",
+    "stalledBadge": "停滞",
+    "noTurns": "该对话没有记录到任何轮次。"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "从当前位置开始（跳过现有日志）",
+    "pageTitle": "日志导出",
+    "pageSubtitle": "把「日志」页签中的调用日志持续推送到外部分析存储。",
+    "addDestination": "添加目标",
+    "scheduleTitle": "调度计划",
+    "cronLabel": "Cron",
+    "notScheduled": "未调度",
+    "lastScheduledRun": "最近一次计划执行",
+    "lastRunSummary": "{startedAt} — {status}，{rows} 行",
+    "never": "从未",
+    "highWaterMark": "调用日志高水位线",
+    "rowPrefix": "第 {id} 行",
+    "noDestinations": "暂无导出目标",
+    "noDestinationsHint": "添加一个目标，即可按每小时计划开始推送调用日志。",
+    "errLoadStatus": "加载导出状态失败",
+    "errSaveDestination": "保存目标失败",
+    "msgDestinationSaved": "目标已保存。",
+    "errConnectionTest": "连接测试失败",
+    "msgRunInFlight": "该目标已有一次导出正在执行，未重复发送。",
+    "errExportRun": "导出执行失败",
+    "errUpdateDestination": "更新目标失败",
+    "errDeleteDestination": "删除目标失败",
+    "deleteTitle": "删除目标",
+    "deleteConfirm": "确定删除「{name}」吗？其导出游标也会一并移除，重新添加将从最早保留的调用日志开始导出。",
+    "statusDisabled": "已禁用",
+    "statusFailing": "失败中",
+    "statusHealthy": "正常",
+    "statusNotRunYet": "尚未运行",
+    "typeNotInstalled": "类型未安装",
+    "metaLine": "最近运行 {lastRun} · 已导出 {exported} 行 · {pending} 行待导出 · 游标 {cursor}",
+    "btnTest": "测试",
+    "btnRunNow": "立即运行",
+    "btnDisable": "禁用",
+    "btnEnable": "启用",
+    "btnEdit": "编辑",
+    "btnDelete": "删除"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI 账号",
+    "cardSubtitle": "来自已认证管理 API 的只读状态",
+    "btnRefresh": "刷新",
+    "listAria": "CLIProxyAPI 账号健康状态",
+    "noAccounts": "未找到 CLIProxyAPI 账号。",
+    "loading": "正在加载账号健康状态…",
+    "stateReady": "账号健康状态",
+    "stateDisabled": "未安装 CLIProxyAPI",
+    "stateMissingKey": "未配置管理密钥",
+    "stateUnreachable": "管理 API 不可达",
+    "stateUnauthorized": "管理密钥被拒绝",
+    "stateUnsupported": "该 CLIProxyAPI 版本不提供账号健康状态",
+    "stateInvalidResponse": "管理 API 返回了无法识别的响应"
+  },
+  "darioPanel": {
+    "title": "Claude 账号",
+    "description": "使用你的 Claude Pro/Max 订阅为 Dario 鉴权。流量计入你的订阅额度池。Dario 至少需要接入一个账号才能路由请求（在此之前 /health 报告为降级）。",
+    "noAccounts": "尚未配置任何账号。",
+    "importTitle": "从 OmniRoute 导入",
+    "importDescription": "复用 OmniRoute 中已有 Claude 连接的 OAuth 令牌，无需再次登录——完全跳过浏览器授权步骤。",
+    "importPendingTooltip": "OmniRoute 中存在 Claude 连接后即可使用。",
+    "btnImport": "导入",
+    "btnImporting": "正在导入…",
+    "aliasPlaceholder": "别名（可选）",
+    "btnStartLogin": "开始登录",
+    "btnStarting": "正在启动…",
+    "btnCompleteLogin": "完成登录",
+    "btnCompleting": "正在完成…",
+    "codePlaceholder": "code#state 或纯 code",
+    "noticeImported": "已导入为账号「{alias}」——Dario 已重启以生效。",
+    "noticeAdded": "账号「{alias}」已添加。",
+    "expiresInHours": "约 {hours} 小时后过期",
+    "expiresInMinutes": "约 {minutes} 分钟后过期",
+    "expiresAt": "于 {date} 过期",
+    "scopes": "{count, plural, other {# 个权限范围}}",
+    "btnRemove": "移除",
+    "btnRefresh": "刷新",
+    "loginStep1": "1. 在浏览器中打开此链接，为账号 <mono>{alias}</mono> 授权：",
+    "pendingExpires": "待完成的登录将于 {time} 过期",
+    "loginStep2": "2. 粘贴 Anthropic 显示的验证码："
+  },
+  "miniapp": {
+    "title": "OmniRoute 小程序",
+    "errTelegramOnly": "此页面必须在 Telegram 小程序内打开。",
+    "greeting": "👋 你好，{name}！发一条消息即可通过你的 OmniRoute 网关开始对话。",
+    "greetingFallbackName": "朋友",
+    "errNoReply": "⚠️ 网关没有回复。",
+    "btnSend": "发送"
   }
 }

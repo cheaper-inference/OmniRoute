@@ -25,8 +25,10 @@
     "confirm": "Bist du sicher?",
     "refresh": "Aktualisieren",
     "close": "Schließen",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Vorherige Seite",
     "nextPage": "Nächste Seite",
+    "pagination": "Seitennummerierung",
     "capsLockOn": "Feststelltaste ist aktiviert",
     "dismissNotification": "Benachrichtigung verwerfen",
     "toggleColumns": "Spalten umschalten",
@@ -182,6 +184,7 @@
     "combos": "Kombinationen",
     "noModelsFound": "Keine Modelle gefunden",
     "clear": "Löschen",
+    "clearFilters": "Filter zurücksetzen",
     "done": "Fertig",
     "selectAll": "Alle auswählen",
     "unselectAll": "Auswahl aufheben",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Verwendet von {count, plural, one {# Batch} other {# Batches}}",
     "batchFilePreview": "Vorschau",
     "batchFilePreviewTruncated": "Zeige die ersten {shown} Zeilen ({total} insgesamt)",
-    "batchFileDownloadFull": "Vollständige Datei herunterladen"
+    "batchFileDownloadFull": "Vollständige Datei herunterladen",
+    "tokensPageTitle": "Token",
+    "tokensPageDescription": "Übertrage Token zwischen API-Schlüsseln, teile Einladungscodes und verbinde Community-Server.",
+    "tokensServerUrlLabel": "Server-URL"
   },
   "disabled": "Deaktiviert",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Anfragen mit erschöpftem Budget an den kostenlosen Notfall-Fallback-Anbieter/das Notfall-Fallback-Modell weiterleiten.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Der Proxyserver wurde gestoppt oder wird neu gestartet.",
     "expandSidebar": "Seitenleiste erweitern",
     "collapseSidebar": "Seitenleiste einklappen",
-    "themes": "Themen",
-    "presetColors": "Beliebte Farben",
     "createTheme": "Thema erstellen",
     "chooseColor": "Wählen Sie eine Farbe",
-    "themeCoral": "Koralle",
-    "themeBlue": "Blau",
-    "themeRed": "Rot",
-    "themeGreen": "Grün",
-    "themeViolet": "Violett",
-    "themeOrange": "Orange",
-    "themeCyan": "Cyan",
     "cliToolsShort": "Werkzeuge",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Theme-System",
     "whitelabelingDesc": "Beschreibung des Whitelabelings",
     "switchThemes": "Themes wechseln",
-    "themeAccentDesc": "Beschreibung der Theme-Akzentfarbe",
     "uploadFavicon": "Favicon hochladen",
     "themeDark": "Dunkles Theme",
     "customLogoDesc": "Beschreibung des benutzerdefinierten Logos",
     "sidebarVisibilityToggle": "Sichtbarkeit der Seitenleiste umschalten",
-    "themeAccent": "Akzentfarbe des Designs",
     "resetFavicon": "Favicon zurücksetzen",
     "whitelabeling": "White-Labeling",
     "darkMode": "Dunkelmodus",
@@ -1122,10 +1117,8 @@
     "customLogo": "Benutzerdefiniertes Logo",
     "appearance": "Erscheinungsbild",
     "themeSelectionAria": "ARIA-Label für die Designauswahl",
-    "themeCreate": "Design erstellen",
     "customFaviconDesc": "Beschreibung des benutzerdefinierten Favicons",
     "logoPreview": "Logo-Vorschau",
-    "themeCustom": "Benutzerdefiniertes Design",
     "hideHealthLogsDesc": "Beschreibung zum Ausblenden von Integritätsprotokollen",
     "faviconPreview": "Favicon-Vorschau",
     "changelog": "Änderungsprotokoll",
@@ -1352,7 +1345,9 @@
       "open": "öffnen",
       "close": "schließen"
     },
-    "noResults": "Keine Ergebnisse"
+    "noResults": "Keine Ergebnisse",
+    "costsTeams": "Teams",
+    "costsTeamsSubtitle": "Team-Kostenstellen"
   },
   "webhooks": {
     "title": "Webhooks",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 oder @channelname",
       "chatIdHint": "Die eindeutige numerische Kennung oder der öffentliche Benutzername des Chats/Kanals.",
       "tutorial": "So konfigurierst du den Telegram-Webhook:"
-    }
+    },
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "expandDetails": "Details anzeigen",
+    "collapseDetails": "Details ausblenden"
   },
   "compliance": {
     "auditTitle": "Prüfung",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Anrufe (24h)",
     "mcpMetricSuccessRate": "Erfolgsquote",
     "mcpMetricAvgDuration": "Durchschnittliche Dauer",
-    "mcpMetricTopTool": "Top-Tool"
-  },
-  "themesPage": {
-    "title": "Themen",
-    "description": "Wählen Sie ein voreingestelltes Thema oder erstellen Sie Ihr eigenes mit einer einzigen Farbe",
-    "presetColors": "Beliebte Farben",
-    "customTheme": "Benutzerdefiniertes Thema",
-    "customThemeDesc": "Klicken Sie auf „Thema erstellen“ und wählen Sie eine Farbe aus",
-    "createTheme": "Thema erstellen",
-    "activePreset": "Aktives Thema"
+    "mcpMetricTopTool": "Top-Tool",
+    "dismissError": "Fehlermeldung schließen"
   },
   "header": {
     "logout": "Abmelden",
     "quickNavigation": "Schnellnavigation",
     "quickNavigationTitle": "Schnellnavigation (⌘K / Strg+K)",
     "openQuickNavigation": "Schnellnavigation öffnen",
+    "openMenu": "Menü öffnen",
+    "products": "Keak-Produkte",
     "switchToLightMode": "Zum hellen Modus wechseln",
     "switchToDarkMode": "Zum dunklen Modus wechseln",
     "language": "Sprache",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Anthropic-kompatibel",
     "media": "Medien",
     "mediaDescription": "Generieren Sie Bilder, Videos und Musik",
-    "themes": "Themen",
-    "themesDescription": "Wählen Sie ein Farbthema für das gesamte Dashboard-Panel",
     "costsDescription": "Überwachen Sie Ausgaben, analysieren Sie Trends und verwalten Sie Ihr KI-Budget anbieterübergreifend",
     "cacheDescription": "Überwachen Sie die Effizienz des Prompt-Cachings bei Anbietern und die lokale semantische Wiederverwendung von Antworten.",
     "limitsDescription": "Konfigurieren Sie Ratenbegrenzungen und Kontingente pro API-Schlüssel und Anbieter",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Erweiterte Payload-Regeln, Anfragelimits und Proxy-API-Einstellungen",
     "mitmProxyDescription": "MITM-Proxy-Einstellungen für Datenverkehrsinspektion und Debugging konfigurieren",
     "oneProxyDescription": "1Proxy-Einstellungen für erweiterte Proxy-Verkettung konfigurieren",
-    "omniSkillsDescription": "Sandbox-Skills für die automatisierte Prompt- und Tool-Ausführung installieren und verwalten"
+    "omniSkillsDescription": "Sandbox-Skills für die automatisierte Prompt- und Tool-Ausführung installieren und verwalten",
+    "teamsDescription": "Team-Kostenschätzungen und gemeinsame weiche Budgets"
   },
   "cloudSyncStatus": {
     "synced": "Synchronisiert",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "Endpunkt kopieren",
     "readinessStep4": "Testanfrage senden",
     "readinessContinue": "Einrichtung fortsetzen",
-    "readinessDismiss": "Vorerst ausblenden"
+    "readinessDismiss": "Vorerst ausblenden",
+    "unpricedUsageTitle": "{count, plural, one {# Modell} other {# Modelle}} mit kürzlicher Nutzung, aber ohne konfigurierten Preis",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-Schlüssel mit Nutzungsbeschränkung hat diese Modelle in den letzten 8 Tagen verwendet. Während diese Nutzung im täglichen oder wöchentlichen Fenster des Schlüssels liegt, wird der Schlüssel als über dem Kontingent liegend behandelt und seine Anfragen werden blockiert (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).} other {# API-Schlüssel mit Nutzungsbeschränkung haben diese Modelle in den letzten 8 Tagen verwendet. Während diese Nutzung im täglichen oder wöchentlichen Fenster des Schlüssels liegt, wird der Schlüssel als über dem Kontingent liegend behandelt und seine Anfragen werden blockiert (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).}}",
+    "unpricedUsageCountAsZero": "Diese Nutzung wird für die pro-Schlüssel-Nutzungsgrenzen mit $0 angerechnet (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# Anfrage} other {# Anfragen}}, {keys, plural, one {# begrenzter Schlüssel} other {# begrenzte Schlüssel}}",
+    "unpricedUsageMore": "…und {count} weitere",
+    "unpricedUsageConfigure": "Preise konfigurieren",
+    "unpricedUsageDismiss": "Schließen"
   },
   "analytics": {
     "title": "Analytik",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "Nur ausgewählte Verbindungen",
     "selectAtLeastOneConnection": "Wählen Sie mindestens eine Verbindung oder „Alle Verbindungen“ aus.",
     "allConnectionsDesc": "Dieser Schlüssel kann jede aktive Verbindung verwenden.",
-    "restrictedToConnections": "Auf {count, plural, one {# Verbindung} other {# Verbindungen}} beschränkt."
+    "restrictedToConnections": "Auf {count, plural, one {# Verbindung} other {# Verbindungen}} beschränkt.",
+    "preferredConnections": "Bevorzugte Verbindungen",
+    "preferredConnectionsDesc": "Prioritätsreihenfolge pro Schlüssel. Ist eine bevorzugte Verbindung nicht verfügbar, weicht das Routing auf die nächste zulässige aus.",
+    "preferredConnectionsNone": "Keine Präferenz festgelegt — die Standard-Routing-Strategie wird verwendet.",
+    "preferredConnectionsClear": "Leeren",
+    "removeSelection": "{name} entfernen"
   },
   "auditLog": {
     "title": "Audit-Protokoll",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Konfigurieren Sie die Bild→Text-Brücke in den Modality Bridge-Einstellungen",
     "sttBridgeCta": "Konfigurieren Sie die Speech→Text-Brücke in den Modality Bridge-Einstellungen",
     "existingConnection": "Bestehende Verbindung",
-    "openrouterSttDescription": "Die OpenRouter-Spracherkennungsmodelle verwenden Ihre konfigurierte OpenRouter-Verbindung. Es sind keine separaten Anmeldeinformationen erforderlich."
+    "openrouterSttDescription": "Die OpenRouter-Spracherkennungsmodelle verwenden Ihre konfigurierte OpenRouter-Verbindung. Es sind keine separaten Anmeldeinformationen erforderlich.",
+    "modalityTabsAria": "Medientyp",
+    "serviceKindsAria": "Diensttyp"
   },
   "search": {
     "searchQuery": "Suchanfrage",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw – Manuelle Konfiguration",
     "clineManualConfiguration": "Manuelle Cline-Konfiguration",
     "kiloManualConfiguration": "Manuelle Konfiguration des Kilo-Codes",
+    "piManualConfiguration": "Pi – Manuelle Konfiguration",
+    "piConfigInvalidTitle": "Pi models.json ist unlesbar",
+    "piOmnirouteConfigured": "OmniRoute ist als benutzerdefinierter Pi-Anbieter konfiguriert",
+    "piModelHelp": "Pi erkennt Modelle für benutzerdefinierte Endpunkte nicht automatisch — das von Ihnen ausgewählte Modell explizit in models.json geschrieben wird.",
+    "piManualConfigTitle": "Oder bearbeiten Sie ~/.pi/agent/models.json manuell",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Starten Sie dann Pi und wählen Sie den omniroute Anbieter aus. Stellen Sie PI_CODING_AGENT_DIR so ein, dass das gesamte Agentenverzeichnis verschoben wird.",
+    "piUnownedNote": "Dieser Eintrag wurde außerhalb von OmniRoute hinzugefügt (z. B. benutzerdefinierte Endpunkte von pi-gui). Wer sich bewirbt, wird es übernehmen; Beim Zurücksetzen werden nur Einträge entfernt, OmniRoute geschrieben hat.",
     "whenToUseLabel": "Wann zu verwenden",
     "openToolDocs": "Tool-Dokumente öffnen",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Verwenden Sie es, wenn Sie einen leichten terminal-nativen KI-Assistenten für schnelle Aufgaben benötigen.",
       "hermes-agent": "Verwenden, wenn Sie Hermes Agent (von Nousresearch) mit Standard-, Delegations-, Vision- und Hilfsmodellen benötigen, die über OmniRoute weitergeleitet werden.",
+      "whycodes": "Verwenden, wenn Sie WhyCodes als vielseitigen autonomen CLI-Agenten (TUI, benannte Agenten, Gedächtnis, Swarm) auf OmniRoute ausrichten möchten.",
       "custom": "Verwendung für benutzerdefinierte Tool-Implementierungen oder generische OpenAI-kompatible Konfigurationen."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI-Coding-Agent mit Unterstützung für benutzerdefinierte Anbieter",
       "droid": "Fabrik-Droiden-KI-Assistent",
       "openclaw": "Öffnen Sie den Klauen-KI-Assistenten",
+      "openclaude": "OpenClaude Coding-Agent-CLI mit Unterstützung für OpenAI-kompatible Anbieter",
       "cline": "Cline KI-Programmierassistent-CLI",
       "kilo": "Kilo Code KI-Assistent-CLI",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "Warp AI-Terminal mit Unterstützung für benutzerdefinierte Anbieter",
       "agent-deck": "Agent Deck Multi-Agenten-Orchestrator",
       "5dive": "5dive — selbst gehostete Flotte von Coding-Agenten; ein Auth-Profil richtet sie alle auf OmniRoute aus",
+      "whycodes": "WhyCodes, autonomer CLI-Agent mit OpenAI-kompatibler Basis-URL",
       "zed": "Zed-Code-Editor — integrierter Agent über einen OpenAI-kompatiblen Anbieter"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "Unbekannt",
     "cliproxyapiUpdate": "Aktualisieren",
     "cliproxyapiUpdateAvailable": "Update verfügbar: v{current} → v{latest}",
-    "cliproxyapiVersion": "Version"
+    "cliproxyapiVersion": "Version",
+    "piInstallTitle": "Installieren Sie den Pi Coding Agent",
+    "piInstallInstructions": "Installieren Sie den Pi CLI und kehren Sie dann hierher zurück, um ihn mit OmniRoute zu verbinden.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Verwenden Sie den URL der von der Maschine aus erreichbar ist, auf der Pi ausgeführt wird. Der OpenAI-kompatible /v1-Endpunkt wird automatisch hinzugefügt.",
+    "piManualMergeHint": "Nur Vorschau. Führen Sie diesen providers.omniroute Eintrag in models.json zusammen, damit Ihre anderen Anbieter und Einstellungen erhalten bleiben.",
+    "removeMapping": "Zuordnung entfernen",
+    "customUrl": "Eigene URL",
+    "customEndpointAria": "Eigener Endpunkt",
+    "useDefaultKey": "Standard-Schlüssel von OmniRoute verwenden",
+    "mainModelAria": "Hauptmodell",
+    "manualConfigTitle": "Grok Build manuelle Konfiguration"
   },
   "modelCatalog": {
     "title": "Modelle & Combos",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "z. B. 10",
     "testSelected": "Ausgewählte testen ({count})",
     "testAllFiltered": "Alle gefilterten testen ({count})",
+    "visibility": "Sichtbarkeit",
+    "allVisibility": "Sichtbar und ausgeblendet",
+    "visibleOnly": "Sichtbar",
+    "hiddenOnly": "Ausgeblendet",
+    "visibleColumn": "Sichtbar",
+    "hideModel": "{name} in /v1/models ausblenden",
+    "showModel": "{name} in /v1/models anzeigen",
+    "hiddenBadge": "Ausgeblendet",
+    "hideFiltered": "Gefilterte ausblenden ({count})",
+    "showFiltered": "Gefilterte anzeigen ({count})",
+    "visibilityCounts": "{visible} sichtbar · {hidden} ausgeblendet · {total} gesamt",
+    "visibilityUpdateFailed": "Sichtbarkeit des Modells konnte nicht aktualisiert werden",
     "cancel": "Abbrechen",
     "clearResults": "Ergebnisse löschen",
     "testing": "Wird getestet...",
@@ -3397,16 +3438,53 @@
     "httpError": "Anfrage fehlgeschlagen mit HTTP {status}",
     "testFailedNoDetail": "Test ohne Fehlermeldung fehlgeschlagen",
     "additionalCapabilities": "Zusätzliche Fähigkeiten: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "API-Schlüssel-Zugriff",
+    "allowedInKeys": "Zulässig in: {count, plural, one {# Schlüssel} other {# Schlüsseln}}",
+    "keysLoading": "API-Schlüssel werden geladen…",
+    "keysRetry": "Laden der Schlüssel wiederholen",
+    "accessViaPattern": "über {pattern}",
+    "accessBlocked": "Blockiert durch {pattern}",
+    "editKeyAccess": "Schlüsselzugriff bearbeiten",
+    "toggleKeyAccess": "{item} auf {name} erlauben",
+    "resultNetworkError": "Zuweisung fehlgeschlagen",
+    "resultWouldEmptyModels": "Würde diesen Schlüssel ohne erlaubte Modelle hinterlassen – bearbeiten Sie stattdessen den Schlüsselzugriff",
+    "resultWouldEmptyCombos": "Würde diesen Schlüssel ohne erlaubte Combos hinterlassen – bearbeiten Sie stattdessen den Schlüsselzugriff",
+    "keyUpdatePending": "{name} wird noch aktualisiert. Versuchen Sie es gleich noch einmal.",
+    "assignToKeys": "API-Schlüsseln zuweisen…",
+    "assignApply": "Änderungen anwenden",
+    "assignComplete": "API-Schlüssel-Zugriff aktualisiert",
+    "assignFailed": "Einige Aktualisierungen der API-Schlüssel sind fehlgeschlagen",
+    "assignNoChanges": "Kein API-Schlüsselzugriff geändert",
+    "selectedAccessItems": "Ausgewählte Elemente: {count}",
+    "assignExcludedCombos": "{count, plural, one {# ausgewählte Combo-Zeile ist kein Modell und wird hier übersprungen} other {# ausgewählte Combo-Zeilen sind keine Modelle und werden hier übersprungen}}. Weisen Sie Combos über den Tab „Combos“ zu.",
+    "assignActionAdd": "Hinzufügen",
+    "assignActionRemove": "Entfernen",
+    "searchKeys": "API-Schlüssel suchen",
+    "selectApiKey": "API-Schlüssel {name} auswählen",
+    "allModelsAccess": "Alle Modelle",
+    "allCombosAccess": "Alle Combos",
+    "modelAccessCount": "Modelle: {count}",
+    "comboAccessCount": "Combos: {count}",
+    "keyInactive": "Inaktiv",
+    "keyBanned": "Gesperrt",
+    "keyRevoked": "Widerrufen",
+    "switchRestrictedConfirm": "Diesen Schlüssel auf eingeschränkten Zugriff umstellen: Nur die ausgewählten Elemente werden erlaubt",
+    "removeNoChangeHint": "Dieser Schlüssel erlaubt alles; das Entfernen ausgewählter Elemente bewirkt keine Änderung",
+    "removeStaysAllowedHint": "Für diesen Schlüssel über {patterns} weiterhin erlaubt",
+    "resultChanged": "Geändert",
+    "resultUnchanged": "Keine Änderung",
+    "resultSkipped": "Übersprungen",
+    "resultNeedsSwitch": "Umstellung auf eingeschränkt erforderlich"
   },
   "combos": {
+    "title": "Kombinationen",
+    "description": "Erstellen Sie Modellkombinationen mit gewichtetem Routing und Fallback-Unterstützung",
+    "autoCatalogTitle": "Katalog für automatisches Routing",
     "autoTosLoadError": "Die Richtlinie zu den Nutzungsbedingungen konnte nicht geladen werden. Versuchen Sie es vor einer Änderung erneut.",
     "autoTosSaveError": "Die Richtlinie zu den Nutzungsbedingungen konnte nicht gespeichert werden. Die vorherige Einstellung wird weiterhin angezeigt. Versuchen Sie es erneut.",
     "autoTosIncludeLabel": "Mit ToS: avoid markierte Anbieter in auto einbeziehen",
     "autoTosDescription": "Standardmäßig deaktiviert. Gilt für alle auto-Kombinationen, nicht nur für ein Konto. Das Verbinden eines Anbieters aktiviert diese Option nicht.",
-    "title": "Kombinationen",
-    "description": "Erstellen Sie Modellkombinationen mit gewichtetem Routing und Fallback-Unterstützung",
-    "autoCatalogTitle": "Katalog für automatisches Routing",
     "autoCatalogTemplateCount": "{count} Vorlagen",
     "autoCatalogDescription": "Integrierte Auto/*-Kombinationen werden dynamisch von verbundenen Anbietern aufgelöst. Verwenden Sie eine dieser IDs als Modellfeld – keine Einrichtung erforderlich.",
     "autoCatalogExpand": "Erweitern Sie den Katalog für automatisches Routing",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "Fehler beim Aktualisieren der Combo",
     "errorDeleting": "Fehler beim Löschen der Combo",
     "testFailed": "Testanforderung fehlgeschlagen",
+    "removeErrorModels": "{count} fehlgeschlagene(s) Modell(e) löschen",
+    "removingErrorModels": "Wird entfernt…",
+    "errorModelsRemoved": "{count} fehlgeschlagene(s) Modell(e) aus der Combo entfernt",
+    "noErrorModelsFound": "Keine fehlgeschlagenen Modelle unter den eigenen Schritten dieser Combo gefunden",
+    "cannotRemoveAllModels": "Es können nicht alle Modelle aus der Combo entfernt werden",
+    "removeErrorModelsConfirm": "{count} fehlgeschlagene(s) Modell(e) aus „{name}“ entfernen? Zeitüberschreitungen und Ratenlimits werden nicht gezählt.",
     "failedToggle": "Die Kombination konnte nicht umgeschaltet werden",
     "testResults": "Testergebnisse – {name}",
     "resolvedBy": "Gelöst von:",
@@ -3518,6 +3602,9 @@
     "moveUp": "Bewegen Sie sich nach oben",
     "moveDown": "Bewegen Sie sich nach unten",
     "removeModel": "Entfernen",
+    "testStep": "Dieses Modell testen",
+    "testStepRunning": "Wird getestet…",
+    "testStepNotTestable": "Nur Schritte mit einem einzelnen Modell können getestet werden",
     "saving": "Sparen...",
     "liveNoProviders": "Noch keine Provider beobachtet.",
     "liveFleetDataHint": "Fleet-Daten treffen über Live-Combo-Events ein.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "Noch keine Combos konfiguriert.",
     "playgroundCreateFirst": "Zuerst eine erstellen",
     "weighted": "Gewichtet",
+    "weightPercent": "Gewichtung (%)",
     "leastUsed": "Am wenigsten genutzt",
     "costOpt": "Kosten-Opt",
     "strategyGuideTitle": "So nutzen Sie diese Strategie",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# Konto} other {# Konten}}",
     "builderGlobalAdded": "Hinzugefügt",
     "builderGlobalAdd": "Hinzufügen",
+    "clearSearch": "Suche löschen",
     "manualModel": "Manuelles Modell",
     "manualModelInvalid": "Geben Sie ein Modell als provider/model ein.",
     "manualModelUnknownProvider": "Unbekanntes Provider-Präfix.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "Kombinationsreferenz hinzufügen",
     "builderPinnedAccount": "Angeheftetes Konto",
     "builderLegacyEntry": "Legacy-Eintrag",
+    "builderStaleModel": "Nicht im Live-Katalog",
     "reviewName": "Name",
     "reviewStrategy": "Strategie",
     "reviewSteps": "Schritte",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "Mindestinhaltslänge (Zeichen)",
     "responseValidationJsonPaths": "JSON-Path-Prüfungen",
     "responseValidationAddCheck": "+ Prüfung hinzufügen",
+    "responseValidationRemoveCheck": "Prüfung entfernen",
+    "responseValidationPath": "JSON-Pfad",
+    "responseValidationCondition": "Bedingung",
+    "responseValidationValue": "Erwarteter Wert",
     "agentFeaturesSystemMessageOverride": "Systemmeldung überschreiben",
     "agentFeaturesSystemMessagePlaceholder": "Sie sind ein erfahrener Assistent...",
     "agentFeaturesSystemMessageHint": "Überschreibung von Systemnachrichten für Agenten",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "Einträge insgesamt",
     "type": "Typ",
-    "memoryEnabled": "Memory aktiviert"
+    "memoryEnabled": "Memory aktiviert",
+    "qdrantTutorialTitle": "Kurztutorial: Speicher mit Qdrant",
+    "qdrantTutorialIntro": "Qdrant speichert die Vektoren und Metadaten von Speicherelementen, sodass relevanter Kontext abgerufen werden kann. Es komprimiert Tokens nicht direkt; die Einsparungen sind indirekt, indem Kontext vermieden wird, der nicht zum_request passt.",
+    "qdrantTutorialStep1": "Sichern Sie den Server vor dem Produktiveinsatz mit HTTPS und einem API-Schlüssel.",
+    "qdrantTutorialStep2": "Geben Sie Host, Port, Collection und ein Modell im provider/model-Format mit einem konfigurierten Credential ein.",
+    "qdrantTutorialStep3": "Die Dimensionsanzahl der Collection muss mit der Dimension übereinstimmen, die das Modell erzeugt. Eine bestehende 2048-Dimension-Collection akzeptiert keine 1536-Dimension-Embeddings.",
+    "qdrantTutorialStep4": "Speichern, die Verbindung testen und den Suchtest ausführen. Aktivieren Sie Qdrant erst dann.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Credits: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Fähigkeiten",
@@ -5288,7 +5390,8 @@
         "skipped": "bereits konfiguriert",
         "failed": "fehlgeschlagen"
       }
-    }
+    },
+    "stepProgress": "Einrichtungsfortschritt"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Dieser Anbieter ist standardmäßig von auto ausgeschlossen",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "CSV-Vorlage herunterladen",
     "importFromFileMoreErrors": "+{count} weitere",
     "importFromFileSchemaHint": "Die CSV-Spalten sind positionsabhängig: provider, name, apiKey, baseUrl (optional), priority (optional). Die Spalte provider muss die ID eines vorhandenen verwalteten Anbieters oder die ID eines bereits registrierten OpenAI-/Anthropic-kompatiblen Knotens enthalten — dieser Import erstellt keine neuen Endpunktknoten.",
+    "importOAuthExport": "OAuth-Export importieren",
+    "oauthExportTitle": "Export aus Kontomanager importieren",
+    "oauthExportDescription": "Lade einen Klartext-Export aus einem Kontomanager hoch (z. B. den cloud-accounts-Export von Antigravity Manager). Tokens werden serverseitig aktualisiert und jedes Konto wird zu einer OAuth-Verbindung — Duplikate werden direkt aktualisiert.",
+    "oauthExportProviderLabel": "Anbieter",
+    "oauthExportChoose": "Datei auswählen",
+    "oauthExportFileAria": "JSON-Datei mit Kontoexport",
+    "oauthExportSchemaHint": "Akzeptiert: ein Dokument mit einem \"accounts\"-Array, ein reines Array oder ein einzelner Datensatz. Tokens können in einem verschachtelten token-Objekt oder direkt im Datensatz liegen.",
+    "oauthExportDetected": "{count} Konto/Konten erkannt",
+    "oauthExportSelectAll": "Alle Konten auswählen",
+    "oauthExportSelectAccount": "Konto {index} auswählen",
+    "oauthExportColEmail": "E-Mail",
+    "oauthExportColProvider": "Anbieter",
+    "oauthExportColRefresh": "Refresh-Token",
+    "oauthExportNoEmail": "(keine E-Mail)",
+    "oauthExportYes": "ja",
+    "oauthExportNo": "nein",
+    "oauthExportImporting": "Importieren…",
+    "oauthExportImport": "{count} Konto/Konten importieren",
+    "oauthExportResult": "{imported}/{total} importiert — {failed} fehlgeschlagen",
+    "oauthExportParseError": "Aus dieser Datei konnten keine Konten gelesen werden.",
+    "oauthExportUnknownError": "unbekannter Fehler",
     "adaptaTutorial": {
       "title": "So verbinden Sie Adapta Web",
       "introPrefix": "Adapta authentifiziert sich über Clerk. Das Token",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "Alle Modelle sind bereits importiert",
     "noNewModelsToImport": "Keine neuen Modelle zum Importieren — alle Modelle sind bereits in der Registry oder der Liste benutzerdefinierter Modelle",
     "localCatalogFallbackStatus": "Die Modellliste des Anbieters ist nicht erreichbar – der integrierte Katalog wird angezeigt",
+    "discoveryDegradedStatus": "Modellentdeckung fehlgeschlagen {time}",
     "skippingExistingModels": "Überspringe {count} vorhandene Modelle",
     "autoSync": "Automatische Synchronisierung",
     "autoSyncShort": "Synchronisieren",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "z. B. 131072",
     "contextWindowOverrideHint": "Legen Sie das tatsächliche Kontextfenster (Tokens) dieses Modells manuell fest, wenn der Anbieter es falsch meldet. Hat Vorrang vor automatisch erkannten/Katalog-Werten und verhindert, dass das Combo-Routing das Modell verwirft.",
     "contextWindowOverrideInvalid": "Die Kontextfenster-Überschreibung muss eine positive ganze Zahl von Tokens sein",
+    "maxOutputTokenOverrideInvalid": "Die Überschreibung der maximalen Ausgabetoken muss eine positive ganze Zahl von Tokens sein",
     "visionCapableLabel": "Vision-fähig",
     "visionCapableHint": "Markieren Sie dieses Modell manuell als vision-fähig, wenn die Discovery-Metadaten des Anbieters keine Bildeingabe-Modalität melden (häufig bei selbst gehosteten/lokalen Backends).",
     "compatParamFiltersLabel": "Parameterfilter",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "Überschreibung hinzufügen",
     "ccAliasLoadError": "Einstellungen für Discovery-Aliasse konnten nicht geladen werden: {error}",
     "ccAliasSaveError": "Einstellung für Discovery-Aliasse konnte nicht gespeichert werden: {error}",
+    "cliVersionSectionTitle": "Angekündigte CLI Client-Version",
+    "cliVersionEffectiveLabel": "Derzeit ausgeschrieben",
+    "cliVersionSourceLabel": "Gelöst von: {source}",
+    "cliVersionPinnedLabel": "Standardmäßig erfasst: {pinned}",
+    "cliVersionSourceSettings": "Dashboard-Überschreibung",
+    "cliVersionSourceEnv": "Umgebungsvariable",
+    "cliVersionSourceDiscovered": "Automatisch erkannte neueste Version",
+    "cliVersionSourceDefault": "erfasste Standardeinstellung",
+    "cliVersionInputLabel": "Override-Version",
+    "cliVersionInputPlaceholder": "Override-Version; leer löscht",
+    "cliVersionSaveButton": "Speichern",
+    "cliVersionResetButton": "Auf Standard zurücksetzen",
+    "cliVersionLoadError": "Die Einstellungen CLI Version konnten nicht geladen werden: {error}",
+    "cliVersionSaveError": "CLI Version konnte nicht gespeichert werden: {error}",
+    "cliVersionLoadFailed": "Die aktuellen CLI -Versionseinstellungen konnten nicht geladen werden.",
+    "cliVersionHintClaude": "Anthropic schaltet neuere Claude-Modelle auf die Claude Code-Clientversion ein, die es sieht. Dies ist die Version, OmniRoute bei jeder Anthropic-Anfrage bewirbt.",
+    "cliVersionCaveatClaude": "Hinweis zur Abrechnung: Die Abrechnungsversion ist '<version>'.'<build-revision>' und die Build-Revision ist eine separate erfasste Konstante. Werbung 2.1.260 meldet 2.1.260.1e2, was nicht das ist, was eine echte 2.1.260-Binärdatei sendet.",
+    "cliVersionHintCodex": "OpenAI steuert neuere Modelle auf der angezeigten Codex Clientversion, zum Beispiel mit dem Fehler: Das Modell „gpt-6-astra“ erfordert eine neuere Version von Codex.",
+    "cliVersionCaveatCodex": "Rückschlussvorbehalt: Eine Version, die Ihr eigener Anrufer meldet, übertrifft immer noch die CODEX_CLIENT_VERSION Umgebungsvariable, aber diese Überschreibung übertrifft beide, da es sich um eine explizite Absicht des Operators handelt.",
     "compatUpstreamHeadersLabel": "Zusätzliche Upstream-Header",
     "compatUpstreamHeadersHint": "Einstellung mit hohen Berechtigungen – dieselbe Vertrauensstufe wie beim Bearbeiten der API-Zugangsdaten des Anbieters; sie sollte nur von vertrauenswürdigen Administratoren verwendet werden. Diese Header werden zusammengeführt, nachdem OmniRoute die Authentifizierung über den API-Schlüssel des Anbieters hinzugefügt hat. Wenn ein benutzerdefinierter Header denselben Namen wie ein vorhandener Header verwendet (z. B. Authorization), ersetzt Ihr Wert den automatisch generierten Header vollständig (einschließlich des Bearer-Tokens) – der Upstream sieht nur Ihre Eingabe, nicht den Schlüssel aus den Einstellungen. Eine Fehlkonfiguration kann zu einem 401-Fehler oder einer fehlerhaften Upstream-Authentifizierung führen. Eine Zeile pro Header (z. B. zusätzliche Authentication für bestimmte Gateways). Bewegen Sie den Mauszeiger über den Wert oder fokussieren Sie ihn, um eine Vorschau anzuzeigen. Wird bei Fokusverlust, einem Klick außerhalb oder beim Schließen dieses Bereichs gespeichert.",
     "compatUpstreamHeaderName": "Header-Name",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "Bezeichnung des API-Formats",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "API-Region China",
-    "apiRegionHint": "Hinweis zur API-Region",
-    "apiRegionInternational": "API-Region International",
-    "apiRegionLabel": "Bezeichnung der API-Region",
+    "apiRegionChina": "Festlandchina",
+    "apiRegionHint": "Wählen Sie die Endpunktregion aus, die für den API-Zugriff und die Kontingentverfolgung verwendet wird.",
+    "apiRegionInternational": "International",
+    "apiRegionLabel": "API-Region",
     "apikey": "API-Schlüssel",
     "audio": "Audio",
     "audioProvidersHeading": "Überschrift für Audioanbieter",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "Wenn dieses Konto sein 5-Stunden-Nutzungslimit erreicht und Anthropic die Lane mit niedrigerer Priorität anbietet, akzeptiert OmniRoute diese und sendet weiterhin Anfragen mit anthropic-usage-limit: slow, bis das Zeitfenster zurückgesetzt wird, anstatt die Verbindung abkühlen zu lassen. Das Wochenlimit gilt weiterhin und Antworten warten möglicherweise auf freie Kapazität.",
     "claudeAutoLimitResetLabel": "Sitzungslimit automatisch zurücksetzen (einmal pro Woche)",
     "claudeAutoLimitResetDescription": "Wenn dieses Konto sein 5-Stunden-Nutzungslimit erreicht und ein Zurücksetzen des Sitzungslimits verfügbar ist, beansprucht OmniRoute dieses automatisch und versucht es erneut mit voller Geschwindigkeit. Nutzt das einmal pro Woche verfügbare Zurücksetzen des Kontos und wird weiterhin auf das Wochenlimit angerechnet.",
+    "codexPaidCreditsShort": "Zusatz-Credits",
+    "codexPaidCreditsToggleTitle": "Kostenpflichtige Codex-Credits zulassen, nachdem das Abo-Kontingent aufgebraucht ist (es können zusätzliche Kosten anfallen)",
+    "codexPaidCreditsEnabled": "Kostenpflichtige Codex-Credits aktiviert (es können zusätzliche Kosten anfallen)",
+    "codexPaidCreditsDisabled": "Kostenpflichtige Codex-Credits deaktiviert",
+    "failedUpdateCodexPaidCredits": "Codex-Richtlinie für kostenpflichtige Credits konnte nicht aktualisiert werden",
+    "allowCodexPaidCreditsLabel": "Kostenpflichtige Codex-Credits zulassen",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Vorübergehende Abklingzeit überspringen, damit diese Verbindung auch nach behebbaren Fehlern verfügbar bleibt (endgültige Zustände wie gesperrt/abgelaufen gelten weiterhin).",
     "disableCoolingLabel": "Abklingzeit für diese Verbindung deaktivieren",
     "bulkPasteAdded": "{count, plural, one {1 Schlüssel hinzugefügt} other {# Schlüssel hinzugefügt}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "API-Schlüssel unter monsterapi.ai abrufen",
       "moonshot": "Moonshot AI mit einem API-Schlüssel verbinden.",
       "morph": "Kostenlose Stufe: 250K Credits/Monat, 0 $",
+      "apmix": "Verbinde Apmix mit einem API-Schlüssel von apmix.ai/dashboard — ein Abo, viele Modelle.",
       "nanogpt": "NanoGPT mit einem API-Schlüssel verbinden.",
       "nebius": "Ca. 1 $ Testguthaben bei Registrierung für API-Tests",
       "nlpcloud": "NLP Cloud verwendet eine proprietäre Chatbot-API anstelle von OpenAI chat/completions. OmniRoute passt OpenAI-Nachrichten an Eingabe/Kontext/Verlauf an und stellt einen lokalen Katalog unterstützter Chatbot-Modelle bereit.",
@@ -6620,7 +6773,7 @@
       "claude": "Claude Code mit dem bestehenden OAuth-Flow verbinden.",
       "cline": "Cline mit dem bestehenden OAuth-Flow verbinden.",
       "cursor": "Cursor IDE mit dem bestehenden OAuth-Flow verbinden.",
-      "cursor-api": "Verbinde Cursor mit einem Benutzer-API-Schlüssel (crsr_...) von cursor.com/dashboard/api; keine IDE-Sitzung erforderlich.",
+      "cursor-api": "Verbinden Sie Cursor mit einem Benutzer-API-Schlüssel (crsr_... oder grok_...) von cursor.com/dashboard/api; keine IDE-Sitzung erforderlich.",
       "github": "GitHub Copilot mit dem bestehenden OAuth-Flow verbinden.",
       "gitlab-duo": "OAuth-Anwendung mit den Scopes ai_features + read_user. Konfigurieren Sie GITLAB_DUO_OAUTH_CLIENT_ID und optional GITLAB_DUO_OAUTH_CLIENT_SECRET auf dieser OmniRoute-Instanz.",
       "kilocode": "Kilo Code mit dem bestehenden OAuth-Flow verbinden.",
@@ -6628,8 +6781,7 @@
       "kiro": "Kostenlose Stufe: 50 Credits/Monat (~25K–100K Token). ⚠️ Die Nutzungsbedingungen von Kiro verbieten die Nutzung von Drittanbieter-Proxys/Harnesses.",
       "codex": "OpenAI Codex mit dem bestehenden OAuth-Flow verbinden.",
       "qwen": "Qwen Code mit dem bestehenden OAuth-Flow verbinden.",
-      "github-models": "Erstellen Sie einen GitHub-PAT mit dem Scope 'models: read' unter github.com/settings/tokens",
-      "apmix": "Verbinde Apmix mit einem API-Schlüssel von apmix.ai/dashboard — ein Abo, viele Modelle."
+      "github-models": "Erstellen Sie einen GitHub-PAT mit dem Scope 'models: read' unter github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} akzeptiert provider-native Modell-IDs. Importiere sie über /models oder füge eigene IDs fürs Routing hinzu.",
     "bedrockModelsDescription": "Amazon-Bedrock-Modelle hängen von der AWS-Region ab. Importiere sie über /models oder füge Bedrock-Modell-IDs hinzu, die in der gewählten Region aktiviert sind.",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: ein Modell=Limit pro Zeile, abgeglichen mit der exakten Modell-ID beim Anbieter. Überzählige Anfragen werden lokal in eine Warteschlange gestellt; leer bedeutet kein Limit pro Modell.",
     "rateLimitOverridesModelConcurrencyInvalid": "Ungültiger Parallelitätseintrag pro Modell „{entry}“ – verwenden Sie Modell=Limit mit einer ganzen Zahl von 1 bis {max}.",
-    "codexPaidCreditsShort": "Zusatz-Credits",
-    "codexPaidCreditsToggleTitle": "Kostenpflichtige Codex-Credits zulassen, nachdem das Abo-Kontingent aufgebraucht ist (es können zusätzliche Kosten anfallen)",
-    "codexPaidCreditsEnabled": "Kostenpflichtige Codex-Credits aktiviert (es können zusätzliche Kosten anfallen)",
-    "codexPaidCreditsDisabled": "Kostenpflichtige Codex-Credits deaktiviert",
-    "failedUpdateCodexPaidCredits": "Codex-Richtlinie für kostenpflichtige Credits konnte nicht aktualisiert werden",
-    "allowCodexPaidCreditsLabel": "Kostenpflichtige Codex-Credits zulassen",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "Verwendet in {count} Kombination(en): {combos}",
+    "openComboTooltip": "Kombinationen öffnen — verwendet von {combo}",
+    "claudeCodeRoutingTitle": "Upstream-Proxy-Weiterleitung für Claude-Code-Verkehr",
+    "routingNative": "Nativ",
+    "routingFallback": "Fallback",
+    "rerank": "Neubewertung",
+    "video": "Video",
+    "markFreeTierTitle": "Als Free-Tier markieren (wird angezeigt, auch wenn das Ausblenden bezahlter Modelle aktiviert ist)",
+    "codexTunnelTitle": "Verbindung des Codex-Tools",
+    "codexTunnelDescription": "Der Tunnel bleibt strikt ausgehend. Lokale Tools werden weiterhin nur von Codex unter seiner Sandbox- und Genehmigungsrichtlinie ausgeführt.",
+    "tunnelIdLabel": "Tunnel-ID",
+    "tunnelRuntimeKeyLabel": "Tunnel-Laufzeit-Schlüssel",
+    "tunnelRuntimeKeyPlaceholder": "Laufzeit-Schlüssel",
+    "tunnelRuntimeKeyHint": "Wird verschlüsselt zusammen mit dem Cookie gespeichert und niemals in Logs geschrieben.",
+    "tunnelRuntimeKeyNewLabel": "Neuer Tunnel-Laufzeit-Schlüssel",
+    "tunnelRuntimeKeyNewHint": "Nur zusammen mit einem neuen Cookie eingeben. Der Wert wird verschlüsselt gespeichert.",
+    "chatgptConnectorLabel": "ChatGPT Custom Connector",
+    "doctorChecking": "Status wird geprüft…",
+    "doctorCheck": "Doctor-Status prüfen",
+    "fallbackRetryBackendTitle": "Fallback-Backend für Wiederholungen"
   },
   "settings": {
     "title": "Einstellungen",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "Wählen Sie aus, welche Elemente in der Seitenleiste angezeigt werden sollen. Bei „Grundfunktionen“ bleiben erweiterte Werkzeuge durchsuchbar.",
     "hideHealthLogs": "Gesundheitsprüfungsprotokolle ausblenden",
     "hideHealthLogsDesc": "Wenn diese Option aktiviert ist, werden [HealthCheck]-Meldungen in der Serverkonsole unterdrückt",
-    "themeAccent": "Themenfarbe",
-    "themeAccentDesc": "Wähle eine voreingestellte Farbe oder erstelle dein eigenes Thema mit einer Farbe",
-    "themeCreate": "Thema erstellen",
-    "themeCustom": "Benutzerdefiniertes Thema",
-    "themeBlue": "Blau",
-    "themeRed": "Rot",
-    "themeGreen": "Grün",
-    "themeViolet": "Violett",
-    "themeOrange": "Orange",
-    "themeCyan": "Cyan",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Anwendungsnamen und Logo anpassen",
     "appName": "Anwendungsname",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "Jetzt",
       "coreConfigPath": "Core-Konfigurationsdatei",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absoluter Pfad zu einer .json-Datei (Erweiterung in Kleinbuchstaben). Leer = keine Generierung. Jede Synchronisierung schreibt '<Pfad>'.generated neben die übernommene Datei, niemals in sie hinein.",
+      "coreConfigPathDesc": "Absoluter Pfad zu einer .json/.yaml/.yml-Datei (Erweiterung in Kleinbuchstaben). Leer = keine Generierung. Jede Synchronisierung schreibt '<Pfad>'.generated neben die übernommene Datei, niemals in sie hinein.",
       "lastSwitchKind": "Wechselgrund",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Pfad zur Kern-Binary",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Optional: Überprüft die generierte Datei mit der Kern-Binary, bevor die übernommene Datei ersetzt wird. Leer lassen, um daneben zu schreiben. Das Verzeichnis wird bei Bedarf erstellt."
+      "coreBinaryPathHelp": "Optional: Überprüft die generierte Datei mit der Kern-Binary, bevor die übernommene Datei ersetzt wird. Leer lassen, um daneben zu schreiben. Das Verzeichnis wird bei Bedarf erstellt.",
+      "urlFeedlessHint": "Leer lassen, um ein reines Selektor-Abonnement zu verwenden: Setzen Sie unten eine URL-Steuerung fest, es wird kein Feed abgerufen, aktualisiert oder gebunden."
     },
     "bulkHealthcheck": "Massenprüfung des Zustands",
     "bulkHealthcheckDesc": "Alle konfigurierten Proxys anhand einer Ziel-URL testen, um festzustellen, welche funktionieren.",
@@ -7706,6 +7862,7 @@
     "configured": "konfiguriert",
     "none": "Keine",
     "modelOverrideValuePlaceholder": "Numerischer Wert",
+    "modelOverrideKey": "Überschreibungsschlüssel",
     "modelOverrideReasoningEffortsPlaceholder": "Englisch, kommagetrennt, z. B. low, medium, high",
     "addKeyValue": "Schlüssel-Wert hinzufügen",
     "noModelOverrides": "Keine Overrides für dieses Modell konfiguriert.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "Sie können die Standardpreise für bestimmte Modelle überschreiben. Benutzerdefinierte Überschreibungen haben Vorrang vor automatisch erkannten Preisen.",
     "editPricing": "Preise bearbeiten",
     "viewFullDetails": "Vollständige Details anzeigen",
-    "themeCoral": "Koralle",
     "adaptiveVolumeRouting": "Adaptive volumenbasierte Weiterleitung",
     "adaptiveVolumeRoutingDesc": "Verbindungen basierend auf Nutzlastvolumen und Durchsatzbelastung dynamisch skalieren.",
     "lkgpToggleTitle": "Zuletzt funktionierender Anbieter (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "Reduzieren Sie die Token-Nutzung, indem Sie Prompts vor dem Senden an Anbieter komprimieren",
     "autoCombosTitle": "Auto-Kombos",
     "autoCombosDesc": "Diesem Schlüssel die Verwendung der integrierten auto/*-Kombos erlauben, die automatisch ein Modell aus allen konfigurierten Anbietern auswählen",
+    "ccDiscoveryAliasesTitle": "Claude-Code-Erkennungsaliase",
+    "ccDiscoveryAliasesDesc": "Bewirbt claude/...-Kompatibilitätsspiegelungen für Modelle und Combos, auf die dieser Schlüssel bereits zugreifen kann",
     "compressionGuidanceFullGuideLink": "Vollständiger Komprimierungsleitfaden",
     "compressionGuidanceShow": "Details",
     "compressionGuidanceHide": "Details ausblenden",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Prozentsatz des Fensters",
     "compressionAdaptivePolicyAbsolute": "Absolutes Token-Budget",
     "compressionOutputStylesDescription": "Anweisungen zur Antwortgestaltung einfügen, ohne die Provider-Ausgabe umzuschreiben. Frei kombinierbar.",
+    "compressionOutputStylesPreviewNote": "Eine Anfrage fügt nur eine Sprache ein: die erkannte Sprache, andernfalls das erste Paket. Bei den oben genannten Blöcken handelt es sich um Varianten pro Packung, nicht um eine kombinierte Injektion.",
     "mcpAccessibilityDescription": "Schränkt MCP-Tool-Ausgaben ein (separater Speicher).",
     "compressionStylesTileSummary": "{tokens, number} Tokens eingespart · {runs, plural, one {# Ausführung gestylt} other {# Ausführungen gestylt}}",
     "compressionStylesTileEmpty": "Noch keine gestylten Ausführungen.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "Host",
     "qdrantCollection": "Sammlung",
     "catalogVisibilityHint": "Ausgeblendete Modell-IDs bleiben mit denselben Zugriffsrechten aufrufbar.",
+    "exposeCombosOnly": "Nur Kombos in /v1/models auflisten",
+    "exposeCombosOnlyDesc": "Clients, die Modelle automatisch erkennen, sehen Ihre Kombos (und auto/*, sofern nicht ausgeblendet) statt der rohen Anbietermodelle. Explizite provider/model-IDs werden weiterhin geroutet.",
     "catalogScopeTitle": "Auflistung der Models API",
     "catalogScopeDesc": "Was GET /v1/models für diesen Schlüssel ausgibt. Eine Einschränkung der Liste ändert niemals, welche Modelle der Schlüssel aufrufen kann.",
     "catalogScopeAll": "Beides",
@@ -8918,7 +9079,9 @@
         "financial": "Finanzen",
         "brazilian": "Brasilien",
         "usa": "USA",
-        "full": "Vollständig"
+        "full": "Vollständig",
+        "gdpr": "DSGVO (EU)",
+        "popia": "POPIA (Südafrika)"
       },
       "builtinTypes": "Integrierte Typen",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "IPv4-Adressen",
         "ipv6_address": "IPv6-Adressen",
         "aws_key": "AWS-Zugriffsschlüssel",
-        "api_key_generic": "API-Schlüssel und Tokens"
+        "api_key_generic": "API-Schlüssel und Tokens",
+        "iban": "IBAN-Kontonummern",
+        "eu_vat": "EU-USt-IdNr.",
+        "es_dni_nie": "Spanische DNI / NIE",
+        "it_codice_fiscale": "Italienischer Codice Fiscale",
+        "pl_pesel": "Polnische PESEL",
+        "nl_bsn": "Niederländische BSN",
+        "de_steuer_id": "Deutsche Steuer-ID",
+        "se_personnummer": "Schwedische Personnummer",
+        "za_id": "Südafrikanische ID-Nummern",
+        "za_phone": "Südafrikanische Telefonnummern",
+        "za_vat": "Südafrikanische USt-Nummern",
+        "za_tax_ref": "Südafrikanische Steuernummern"
       },
       "customPatterns": "Eigene Muster",
       "customPatternsDesc": "Treffer werden durch [CUSTOM_REDACTED] ersetzt. Bis zu {max} Muster. Muster mit Risiko für katastrophales Backtracking werden abgelehnt.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "Bestanden",
     "tomlTestFailed": "Fehlgeschlagen",
     "tomlImportError": "Die RTK-TOML-Datei konnte nicht verarbeitet werden.",
-    "tomlFileReadError": "Die ausgewählte TOML-Datei konnte nicht gelesen werden."
+    "tomlFileReadError": "Die ausgewählte TOML-Datei konnte nicht gelesen werden.",
+    "viewMode": "Ansichtsmodus"
   },
   "compressionEngineConfig": {
     "loading": "Laden…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "Sprachpakete: {packs}",
     "dragToReorder": "Ziehen, um Schritt neu anzuordnen",
     "engine": "Engine",
-    "intensity": "Intensität"
+    "intensity": "Intensität",
+    "compressionOverride": "Komprimierung überschreiben"
   },
   "compressionStudio": {
     "noRun": "Kein Komprimierungsdurchlauf verfügbar.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "Gewinner: {winner}",
     "encoder": "Encoder",
     "bytes": "Bytes",
-    "tokensCl100k": "Token (cl100k)"
+    "tokensCl100k": "Token (cl100k)",
+    "studioViews": "Studio-Ansichten"
   },
   "omniglyph": {
     "preview": "Vorschau",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "Nachrichten, die kürzer sind, werden nicht komprimiert. Niedriger = mehr Komprimierung.",
     "tooltipMinSavings": "Komprimieren Sie nur, wenn dadurch mindestens so viele Token eingespart werden.",
     "ultraSettings": "Ultra-Einstellungen",
-    "ultraSettingsDesc": "SLM-gestützte semantische Komprimierung"
+    "ultraSettingsDesc": "SLM-gestützte semantische Komprimierung",
+    "defaultLanguage": "Standardsprache",
+    "viewMode": "Ansichtsmodus"
   },
   "translator": {
     "title": "Übersetzer",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "Stream konnte nicht transformiert werden"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kontingent aufgebraucht; zusätzliche Nutzung ist erlaubt, daher läuft der Dienst weiter.",
+    "healthPaidCreditsBypass": "Kontingent aufgebraucht; verfügbare bezahlte Guthaben ermöglichen den weiteren Betrieb.",
+    "healthFilteringBypass": "Kontingent aufgebraucht; die lokale Kontingentfilterung ist deaktiviert, daher läuft der Dienst weiter.",
     "title": "Nutzung",
     "grokExtraUsageCredits": "Zusätzliche Nutzungsguthaben",
     "grokAutoTopUp": "Automatische Aufladung",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Anbieterbeschränkungen",
     "noProviders": "Keine Anbieter verbunden",
+    "quotaAuthRequired": "Authentifizierung erforderlich – melde dich beim Dashboard an",
+    "quotaAuthRequiredHint": "Die Anbieterverbindungen konnten nicht geladen werden, da die Dashboard-Sitzung fehlt oder abgelaufen ist. Melde dich an und aktualisiere die Seite, um deine Kontingentlimits anzuzeigen.",
     "connectProvidersForQuota": "Stellen Sie über OAuth eine Verbindung zu Anbietern her, um Ihre API-Kontingentgrenzen und -Nutzung zu verfolgen.",
     "accountsCount": "{count, plural, one {# Konto} other {# Konten}}",
     "filteredFromCount": "(gefiltert aus {count})",
@@ -10046,9 +10231,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Unbekannt",
     "statTotal": "Gesamt",
-    "statCritical": "Kritisch",
-    "statAlert": "Alarm",
-    "statHealthy": "Gesund",
     "filterPurchaseTypeLabel": "Typ",
     "filterTierLabel": "Stufe",
     "purchaseAll": "Alle",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "Zuletzt aktualisiert",
     "providerQuota": "Anbieter-Kontingent",
     "providerQuotaHomeHint": "Live-Status über verbundene Konten hinweg",
+    "claudeResetCreditDefaultTitle": "Claude-Limit-Reset",
+    "confirmRedeemClaudeResetCredit": "Das Einlösen setzt die berechtigten Claude-Nutzungslimits sofort zurück und verbraucht dieses Guthaben dauerhaft.",
+    "claudeResetCreditsModalTitle": "Claude-Reset-Guthaben",
+    "claudeResetCreditsModalExplainer": "Verfügbares Claude-Reset-Guthaben und wöchentliche Sitzungs-Resets für dieses Konto.",
     "codexPaidCreditsLabel": "Kostenpflichtige Codex-Credits",
     "codexPaidCreditsAvailable": "Verfügbar (Guthaben nicht gemeldet)",
     "codexPaidCreditsUnavailable": "Nicht verfügbar oder Ausgabenlimit erreicht",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Basierend auf den letzten Beobachtungen, keine Live-Prüfung. Konto für Details auswählen.",
+    "healthRecovery": "Voraussichtliche Wiederherstellung",
+    "healthAvailable": "Verfügbar",
+    "healthRestricted": "Teilweise eingeschränkt",
+    "healthUnavailable": "Nicht verfügbar",
+    "healthPeakHourProtection": "Schutz zu Spitzenzeiten",
+    "healthCooldown": "Wartezeit",
+    "healthQuotaExhausted": "Kontingent aufgebraucht",
+    "healthOverview": "Übersicht",
+    "layoutFull": "Vollständig",
+    "layoutCompact": "Kompakt",
+    "healthQuotaError": "Kontingent konnte nicht gelesen werden",
+    "healthNoRuntime": "Betriebsstatus nicht verfügbar",
+    "healthPreviousSnapshot": "Letzte Aktualisierung fehlgeschlagen; vorheriges Ergebnis wird angezeigt",
+    "healthPreviousFailure": "Letzte Anfrage fehlgeschlagen; Abklingzeit beendet",
+    "healthAwaitingSync": "Rücksetzzeit verstrichen; warte auf Synchronisierung",
+    "healthVerdictUnavailable": "Verfügbarkeitsprüfung nicht verfügbar; nur Kontingentanzeigen werden angezeigt",
+    "healthSummaryFailed": "Statusübersicht konnte nicht gelesen werden; Modellsperren fehlen möglicherweise",
+    "healthRuntimeObserved": "Betriebsstatus aktualisiert: {time}",
+    "healthQuotaObserved": "Kontingent erfasst: {time}",
+    "healthOldestQuota": "Ältester Kontingentstand: {time}",
+    "healthRecoveryUnknown": "Wiederherstellungszeit unbekannt",
+    "healthDetailsHint": "Für Details und Aktionen klicken",
+    "healthFiveHour": "5 Stunden",
+    "healthOverall": "Gesamt",
+    "healthAction": "Aktion erforderlich",
+    "healthTitle": "Kontoverfügbarkeit",
+    "healthDrag": "Ziehen, um Anbieter neu anzuordnen",
+    "healthDragPosition": "{provider}, {count, plural, one {Position {position, number} von #} other {Position {position, number} von #}}",
+    "healthResetOrder": "Standardreihenfolge wiederherstellen",
+    "healthPool": "{name}-Pool",
+    "healthOtherPool": "Dasselbe Konto · {pool}: {status} ({remaining} übrig)",
+    "healthIncluded": "{count, plural, one {Enthält # teilweise eingeschränktes Konto} other {Enthält # teilweise eingeschränkte Konten}}",
+    "healthBannerUnavailable": "{count, plural, one {# Konto vorübergehend nicht verfügbar} other {# Konten vorübergehend nicht verfügbar}}",
+    "healthBannerAvailable": "{count, plural, one {# Konto verfügbar} other {Alle # Konten verfügbar}}",
+    "healthLegendHide": "Legende ausblenden",
+    "healthLegendShow": "Legende anzeigen",
+    "healthLegendOk": "Deckend = verbleibendes Kontingent; durchscheinend = verbraucht.",
+    "healthLegendCooldown": "Kontingent für {window} erschöpft. Deckend = vergangene Wartezeit; durchscheinend = verbleibende Wartezeit.",
+    "healthLegendAction": "Autorisierung abgelaufen oder Konto gesperrt; Warten hilft nicht.",
+    "healthLegendPartial": "Weiter nutzbar. Gelbe Kappe = Modell oder Pool eingeschränkt.",
+    "healthWaited": "Wartezeit verstrichen: {percent}",
+    "healthWait": "Noch {duration} (verfügbar um {time})",
+    "healthFastest": "Früheste Erholung in {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} verfügbar} other {# / {active, number} verfügbar}}",
+    "healthCd5": "5 Stunden · Wartezeit",
+    "healthCdw": "Wöchentlich · Wartezeit",
+    "healthRecentSuccessBypass": "Das Routing lässt dieses Konto zu, weil kürzlich eine Anfrage erfolgreich war.",
+    "healthPurchasedBalanceBypass": "Nach Verbrauch des enthaltenen Kontingents kann gekauftes Guthaben weiter genutzt werden.",
+    "healthCutoffAtRequest": "Echtzeit-Kontingentschwellen werden beim Routing einer Anfrage geprüft."
   },
   "modals": {
     "waitingAuth": "Warten auf Autorisierung",
@@ -11077,7 +11313,8 @@
       "message": "Nachricht",
       "error": "Fehler",
       "completion": "Abschluss"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Einfacher Chat",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "vor {minutes}m",
     "hoursAgo": "vor {hours}h",
     "daysAgo": "vor {days}d",
-    "entries": "Einträge"
+    "entries": "Einträge",
+    "viewSwitcherAria": "Cache-Ansicht"
   },
   "proxyConfigModal": {
     "levelGlobal": "Global",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth ist nicht konfiguriert. Registrieren Sie eine OAuth-Anwendung unter {applicationsUrl} mit der Umleitungs-URI {redirectUri} und den Berechtigungen \"{scopes}\", setzen Sie dann {clientIdEnv} (und optional {clientSecretEnv}) und starten Sie neu.",
     "gitlabDuoSetupDescription": "Nachdem die Anwendung registriert ist und die Umgebungsvariablen für diese OmniRoute-Instanz festgelegt sind, klicken Sie auf Weiter, um den OAuth-Login zu starten.",
     "continue": "Fortfahren",
+    "copilotPolicyTitle": "Experimenteller Anbieter: Der Richtlinienstatus ist nicht eindeutig",
+    "copilotPolicyLine1": "OmniRoute stellt eine Verbindung über api.githubcopilot.com her, was GitHub nicht als allgemeine Drittanbieter-Inferenz API veröffentlicht hat. Diese Integration ist experimentell und kann ohne Vorankündigung geändert werden.",
+    "copilotPolicyLine2": "Es darf nur Ihr eigenes GitHub Konto verbunden werden. Geben Sie niemals Zugangsdaten weiter, bündeln Sie keine Konten und versuchen Sie niemals, die Grenzen Ihres Plans zu überschreiten.",
+    "copilotPolicyLine3": "Nutzer des Free- und Student-Plans erhalten nur eine automatische Modellauswahl. Die Bedingungen Ihres Copilot -Plans und etwaige Nutzungsbeschränkungen liegen in Ihrer Verantwortung.",
+    "copilotPolicyAcknowledge": "Ich verstehe, verbinde dich",
     "tabPasteSetupToken": "Setup-Token",
     "claudeSetupTokenDescription": "Führen Sie `claude setup-token` in einem Terminal aus und fügen Sie das ausgegebene Token ein. Es ist ein Jahr gültig und hat kein Refresh-Token. OmniRoute sendet vor dem Speichern eine Testanfrage an Anthropic.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Weitere Aktionen",
     "test": "Testen",
     "edit": "Bearbeiten",
     "delete": "Löschen",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "Keine gültigen Einträge gefunden. Überprüfen Sie das Format und versuchen Sie es erneut.",
     "bulkImportSuccess": "Import abgeschlossen: {created} erstellt, {updated} aktualisiert, {failed} fehlgeschlagen",
     "bulkImportErrorLine": "Zeile {line}: {reason}",
-    "bulkImportMaxExceeded": "Maximal 100 Proxys pro Import",
+    "bulkImportMaxExceeded": "Maximal {max} Proxys pro Import",
     "bulkImportPreview": "Vorschau",
     "clearAssignment": "(klare Zuordnung)",
     "bulkProxyAssignment": "Massen-Proxy-Zuweisung",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "IP-Ratenlimit (429)",
     "poolSetAsideKindSlow": "langsame Antworten",
     "poolSetAsideKindGeoBlocked": "regionen-blockiert (403/451)",
+    "poolSetAsideKindOperatorReported": "Störung vom Betreiber gemeldet",
     "poolSetAsideUntil": "Zurück in Rotation {endsAt}",
     "poolSetAsideRepeat": "Zurückgestellt {count, plural, one {# Mal} other {# Mal}}",
     "poolUnknownAddress": "Unbekannte Adresse",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "Code exportieren",
     "exportShort": "Exportieren",
     "noStateToExport": "Kein Playground-Zustand zum Exportieren verfügbar.",
-    "closeExportModal": "Export-Modal schließen",
     "close": "Schließen",
     "exportRealKeyWarning": "Sicherheitswarnung: Export blockiert — ein echter API-Schlüssel wurde in der Ausgabe erkannt. Bitte setzen Sie Ihren API-Schlüssel zurück und versuchen Sie es erneut.",
     "placeholderHintPrefix": "Ersetzen Sie",
@@ -11808,7 +12052,8 @@
       "nextButton": "Weiter",
       "runButton": "Ausführen",
       "promptPlaceholder": "Geben Sie Ihre Nachricht ein… (Eingabetaste zum Senden, Umschalt+Eingabetaste für neue Zeile)"
-    }
+    },
+    "playgroundTabs": "Playground-Modi"
   },
   "miniPlayground": {
     "endpoint": "Endpunkt",
@@ -11879,7 +12124,8 @@
     "assistant": "Assistent",
     "errorLabel": "Fehler",
     "requestFailed": "Anfrage fehlgeschlagen",
-    "stop": "Stopp"
+    "stop": "Stopp",
+    "messageInputAria": "Nachricht"
   },
   "requestLogger": {
     "recording": "Aufzeichnung",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} Kontorotationen",
       "resilienceRetried": "Leere Runde wiederholt",
       "resilienceContinued": "Mitten im Stream fortgesetzt",
-      "resilienceRecovered": "Durch Resilienzaktion wiederhergestellt"
-    }
+      "resilienceRecovered": "Durch Resilienzaktion wiederhergestellt",
+      "conversationContext": "Konversationskontext",
+      "goToBottom": "Zum Ende springen",
+      "liveRefreshOn": "Live-Aktualisierung: ein",
+      "liveRefreshOff": "Live-Aktualisierung: aus",
+      "liveRefresh": "Live-Aktualisierung",
+      "continuesFromParent": "wird vom übergeordneten Element fortgesetzt",
+      "continuesFrom": "Wird von {id} fortgesetzt",
+      "viewConversation": "Konversation anzeigen",
+      "openConversation": "Konversation {id} öffnen"
+    },
+    "tableLabel": "Anfrageprotokolle",
+    "throughputPostFirstToken": "Nach erstem Token",
+    "throughputEndToEnd": "End-to-End",
+    "throughputRate": "{value} Tokens/Sek.",
+    "throughputExplanation": "Beide Raten verwenden den größeren der Token-Zählwerte für Ausgabe und Reasoning. „Nach erstem Token“ schließt eine gültige TTFT aus; andernfalls wird die volle Dauer verwendet. End-to-End verwendet immer die volle Dauer. Eine gepufferte Antwort kann eine hohe Burst-Lieferrate aufweisen, ohne dass das Modell schneller generiert."
   },
   "proxyLogger": {
     "filterAll": "Alle",
@@ -12112,7 +12372,9 @@
     "colServedBy": "Bedient durch",
     "filterTraffic": "Verkehr",
     "filterTests": "Tests",
-    "filterSource": "Quelle"
+    "filterSource": "Quelle",
+    "tableLabel": "Proxy-Protokolle",
+    "sortLogs": "Protokolle sortieren"
   },
   "endpointOptions": {
     "speech": "Sprachausgabe",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "AUSGESCHÖPFT",
     "statusAlerting": "ALARM AKTIV",
     "statusError": "FEHLER",
-    "moreSuffix": "+{count} weitere"
+    "moreSuffix": "+{count} weitere",
+    "feedFilterLabel": "Ereignisse filtern"
   },
   "quotaShare": {
     "weightPercent": "Gewichtung %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "Nicht gruppiert",
     "ungroupedHint": "Diese Pools sind keiner bekannten Gruppe zugewiesen. Bearbeiten Sie einen Pool, um ihn in eine echte Gruppe zu verschieben.",
     "removeFailed": "Dieser Pool konnte nicht entfernt werden.",
-    "dismiss": "Schließen"
+    "dismiss": "Schließen",
+    "allocationsHeading": "Zuweisungen",
+    "wizardRemoveDimension": "Dimension entfernen",
+    "wizardRemoveKey": "Schlüssel entfernen"
   },
   "plugins": {
     "title": "Plug-ins",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "Aktualisierung der Einstellungen fehlgeschlagen",
       "serviceRevealApiKey": "{actor} hat API-Schlüssel für {target} aufgedeckt",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Fehler schließen"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "Jetzt aufrufen",
       "message": "Der MITM-Proxy befindet sich jetzt unter AgentBridge.",
       "title": "Diese Seite ist umgezogen"
-    }
+    },
+    "dnsOn": "DNS an",
+    "dnsOff": "DNS aus",
+    "showServerSettings": "Servereinstellungen anzeigen",
+    "hideServerSettings": "Servereinstellungen ausblenden",
+    "upstreamCaTesting": "Wird getestet…",
+    "removeMapping": "Zuordnung entfernen",
+    "mappingSourcePlaceholder": "z. B. gemini-3.6-flash-medium oder * für alle nicht zugeordneten Modelle",
+    "mappingWildcardHint": "Verwenden Sie * als Quelle, um jedes Modell ohne explizite Zuordnung über OmniRoute an das ausgewählte Ziel weiterzuleiten. Exakte Übereinstimmungen mit der Quelle haben immer Vorrang vor *.",
+    "wizardDetectingModels": "Modelle werden im abgefangenen Datenverkehr erkannt...",
+    "wizardDetectedModels": "Im abgefangenen Datenverkehr wurden {count, plural, one {# Modell} other {# Modelle}} gefunden. Wählen Sie die Modelle aus, die Sie hinzufügen möchten:",
+    "wizardSelectedModels": "{count, plural, one {# Modell ausgewählt} other {# Modelle ausgewählt}}. Im nächsten Bildschirm ordnen Sie sie OmniRoute-Modellen zu.",
+    "wizardAddModels": "{count, plural, one {# Modell} other {# Modelle}} hinzufügen",
+    "wizardNoModelsDetected": "Noch keine Modelle erkannt. Stellen Sie mit {agent} eine Anfrage und führen Sie anschließend diesen Assistenten erneut aus, um Modelle automatisch aus dem Datenverkehr zu erkennen.",
+    "wizardNoModelsHint": "Oder schließen Sie diesen Assistenten und fügen Sie Zuordnungen manuell in der Agentenkarte hinzu."
   },
   "providerStats": {
     "unknownError": "Unbekannter Fehler",
@@ -12685,7 +12966,12 @@
     "avgTtft": "Avg. TTFT",
     "avgTotal": "Avg. Gesamt",
     "requestTelemetry": "Anfragetelemetrie",
-    "requestTelemetryDescription": "Aufschlüsselung der 7-Phasen-Pipeline (letzte 5 Minuten)"
+    "requestTelemetryDescription": "Aufschlüsselung der 7-Phasen-Pipeline (letzte 5 Minuten)",
+    "title": "Anbieterstatistiken",
+    "description": "Datenverkehr, Latenz und Erfolgsraten pro Anbieter und Modell",
+    "combo": "Kombination",
+    "toggleModels": "Modelle für {provider} anzeigen",
+    "windowSince": "Seit {date}"
   },
   "relay": {
     "title": "Serverless-Relay-Proxies",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "Kein Request-Body.",
     "noResponseBody": "Kein Response-Body.",
     "formatted": "Formatiert",
-    "raw": "Roh"
+    "raw": "Roh",
+    "requestCount": "{count, plural, one {# Anfrage} other {# Anfragen}}",
+    "expandList": "Liste erweitern",
+    "collapseList": "Liste reduzieren",
+    "snippetLanguage": "Sprache des Codeausschnitts",
+    "headersTable": "Header",
+    "showSecrets": "Geheimnisse anzeigen",
+    "maskSecrets": "Geheimnisse maskieren",
+    "llmNotAvailable": "Für diese Anfrage sind keine LLM-Metadaten verfügbar.",
+    "llmStreamYes": "ja (SSE)",
+    "llmStreamNo": "nein",
+    "llmTotalTokens": "Gesamt: {count} Token"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI-Codes",
     "pageSubtitle": "Code-Tools, die auf OmniRoute verweisen",
     "searchPlaceholder": "CLI durchsuchen…",
     "filterDetectionLabel": "Erkennung",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "Nicht gefunden",
     "baseUrlAll": "Alle",
     "baseUrlFull": "Vollständig",
-    "baseUrlPartial": "Teilweise"
+    "baseUrlPartial": "Teilweise",
+    "title": "CLI-Code"
   },
   "cliAgents": {
     "pageTitle": "CLI-Agenten",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "Anteil der Aufrufe, die dieser Anbieter in den letzten 24 Stunden tatsächlich beantwortet hat. Ein Gedankenstrich bedeutet, dass er zu wenig Datenverkehr verarbeitet hat, um eine Quote anzugeben.",
     "reliabilitySample": "{successes} von {requests} Aufrufen waren in den letzten {hours} Std. erfolgreich",
     "reliabilityTooFew": "Nur {requests} Aufrufe in den letzten {hours} Std. – zu wenige, um eine Quote anzugeben",
-    "reliabilityNoTraffic": "In den letzten 24 Std. wurden keine Aufrufe aufgezeichnet"
+    "reliabilityNoTraffic": "In den letzten 24 Std. wurden keine Aufrufe aufgezeichnet",
+    "categoryFilter": "Aufgabenkategorie"
   },
   "discovery": {
     "title": "Anbieter-Erkennung",
@@ -13330,7 +13628,11 @@
     "method": "Methode",
     "auth": "Authentifizierung",
     "feasibility": "Machbarkeit",
-    "models": "Modelle"
+    "models": "Modelle",
+    "provider": "Anbieter",
+    "status": "Status",
+    "endpoint": "Endpunkt",
+    "actions": "Aktionen"
   },
   "noAuthProvider": {
     "title": "Keine Authentifizierung erforderlich",
@@ -13379,7 +13681,8 @@
     "ownProxy": "Eigener Proxy",
     "freeTierPause": "Modell {model} pausiert (429), zurück um {time}",
     "freeTierPauseProvider": "Pausiert (429), zurück um {time}",
-    "freeTierPauseNote": "Pause im Prozess auf dieser Instanz"
+    "freeTierPauseNote": "Pause im Prozess auf dieser Instanz",
+    "proxyType": "Proxy-Typ"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "Ein versteckter Erfolg wartet...",
         "criteria": "Schließe den versteckten Erfolg ab, um dieses Abzeichen zu enthüllen."
       }
-    }
+    },
+    "leaderboardTitle": "Bestenliste",
+    "leaderboardDescription": "Ranglisten und Erfolge für deine API-Schlüssel",
+    "badgeLocked": "Gesperrt"
   },
   "featureFlags": {
     "title": "Feature-Flags",
@@ -13610,7 +13916,9 @@
       "disabled": "Deaktiviert",
       "dual": "Dual",
       "alias": "Alias",
-      "canonical": "Kanonisch"
+      "canonical": "Kanonisch",
+      "fail_closed": "Blockieren (fail_closed)",
+      "count_as_zero": "Als $0 anrechnen (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Infrastrukturbedingte Stopps mit geschützter Priorität als 502",
         "description": "Mit 502 statt 503 antworten, wenn ein Prioritätsziel mit ausschließlich kontingentbedingtem Fallback die Combo aus einem nachweislich nicht kontingentbedingten Grund stoppt: ein offener Circuit Breaker des Anbieters oder ein prädiktives Überspringen aufgrund der Latenz."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Konten-IDs protokollieren",
+        "description": "Kontenpräfix in AUTH-Protokollierzeilen einbinden (z. B. \"'<provider>'“-Konto wird verwendet: abc12345...). Standardmäßig deaktiviert, damit Kontenkennzeichnungen aus geteilten bzw. Multi-Tenant-Prozessprotokollen herausgefiltert werden. Unabhängig vom Debug-Modus; das Umschalten des Debug-Modus zeigt diese Information nicht an."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Passwort-Anmeldung bei OIDC deaktivieren",
+        "description": "Wenn OIDC aktiviert ist, wird die Passwort-Anmeldung deaktiviert, sodass sich Benutzer nur über OIDC Single Sign-On authentifizieren können. Wenn deaktiviert (Standard), sind sowohl Passwort-Anmeldung als auch OIDC verfügbar."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Remote-Audio-Provider-Knoten",
+        "description": "Erlaubt den /v1/audio/*-Routen die Verwendung von OpenAI-kompatiblen Provider-Knoten, die außerhalb von localhost gehostet werden. Standardmäßig deaktiviert – das Routing von Audio an einen Remote-Host ändert die Egress-Identität und muss eine explizite Entscheidung des Operators sein. Loopback-Knoten sind immer zulässig und nicht betroffen."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Remote-Rerank-Provider-Knoten",
+        "description": "Erlaubt POST /v1/rerank (und dem Rerank-Schritt der Memory-Engine, der diesen über Loopback aufruft), OpenAI-kompatible Provider-Knoten zu verwenden, die außerhalb von localhost gehostet werden – etwa ein LAN-Gerät oder Tailscale-Peer, auf dem TEI, Infinity, vLLM usw. ausgeführt werden. Standardmäßig deaktiviert – das Routing zu einem Remote-Host ändert die Egress-Identität und muss eine explizite Entscheidung des Operators sein. Loopback-Knoten sind immer zulässig und nicht betroffen. Remote-Knoten müssen außerdem die Outbound-URL-Richtlinie des Providers erfüllen."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Shared-Egress-Schutz bei Netzwerkrotation",
+        "description": "Bei einer Netzwerk-Exception (Timeout, Verbindung abgelehnt/zurückgesetzt) für einen Multi-Account-Rotations-Executor: Wenn der fehlschlagende Account keinen dedizierten Proxy hat, wird ein kurzer Cooldown angewendet und andere proxylose Accounts werden für den Rest der Anfrage übersprungen, anstatt jeden einzelnen erneut zu versuchen. Standardmäßig aktiviert (sicher: keine Änderung der Egress-IP, verringert nur das Latenz-/Cooldown-Risiko bei Shared-Egress-Accounts). Deaktivieren, um die sofortige Weiterleitung beim ersten Fehler ohne Proxy wiederherzustellen."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Kürzlich fehlgeschlagene Proxys überspringen",
+        "description": "Proxy-Pools und die Account-spezifische Rotation von opencode setzen Proxys vorübergehend aus, die gerade fehlgeschlagen sind (abgelehnter TCP-Probe oder ein darüber empfangener 429-Fehler). Dies gilt für eine prozessbezogene Dauer, die sich bei jeder Wiederholung bis zu einer Obergrenze verdoppelt. Es wird kein Proxy-Status geschrieben; wenn alle Kandidaten zurückgestellt wurden, bleibt die Auswahl unverändert. Standardmäßig aktiviert: Die Auswahlreihenfolge entspricht nur mit PROXY_SKIP_RECENTLY_FAILED=false exakt der einfachen Rotation."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Pool-Reihenfolge bei geteiltem Egress",
+        "description": "Ordnet bei Anbietern, deren Kontingente nach Egress-Adresse aufgeteilt sind, ein Pool-Mitglied mit derselben beobachteten Egress-Adresse wie ein kürzlich abgewiesenes Mitglied direkt hinter intakten Mitgliedern ein. Nur Sortierung, niemals Ausschluss. Erfordert PROXY_SKIP_RECENTLY_FAILED, welches das gelesene Ablehnungssignal erzeugt. Standardmäßig deaktiviert: Die Auswahlreihenfolge entspricht exakt der einfachen Rotation."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Protokollierung der Rotationszuordnung",
+        "description": "Die opencode-Rotation zeichnet auf, welcher Account Anfragen bedient hat oder übersprungen wurde (nur maskierte IDs, niemals vollständige Account-IDs), und verknüpft Proxy-Log-Einträge mit ihrer Anfrage, sodass Betreiber übersprungene von ungenutzten Accounts unterscheiden können. Standardmäßig deaktiviert: Es werden keine zusätzlichen Log-Zeilen oder Spalten geschrieben."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Proxy-Pool-Egress-Beobachtung",
+        "description": "Zeigt unter einem Proxy-Pool im Dashboard an, wie viele beobachtete Egress-IPs dessen Mitglieder in den letzten 24 Stunden bedient haben, wie viele Verbindungen sie nutzten und das Maximum hinter einer einzelnen IP. Schreibgeschützt, aus dem Proxy-Log berechnet und niemals für das Routing verwendet. Standardmäßig deaktiviert: Der Pool-Editor bleibt unverändert und die Beobachtungs-Route antwortet mit null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Proxy-Betreiber-Egress",
+        "description": "Akzeptiert vom Betreiber übermittelte, zeitgestempelte beobachtete Adressen pro Pool-Mitglied und führt sie für die Anzeige und Pool-Reihenfolge mit den aus dem Journal gelesenen Daten zusammen. Standardmäßig deaktiviert: Die Push-Route antwortet mit 404 und das Auslesen von Pools verhält sich exakt wie zuvor."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses Stall-Rotation",
+        "description": "Für den OpenCode-Executor das erste Body-Byte einer gestreamten Responses-Antwort überwachen (Zeitfenster: RESPONSES_FIRST_BYTE_TIMEOUT_MS, Standard: 15000). Ein 2xx-Responses-Stream, der nach Ablauf des Zeitfensters stumm bleibt, wird als blockiert gewertet: Das Konto wird in den Cooldown versetzt und die Anfrage rotiert einmalig zum nächsten Konto; ein zweiter Stillstand führt zu einem Fail-Fast. Standardmäßig deaktiviert: Blockierte Streams behalten das bisherige Warten bis zum Stream-Readiness-Timeout bei."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked-Rotation",
+        "description": "Für den OpenCode-Executor: Wenn ein Upstream mit 403 oder 451 antwortet und eine user_blocked-Ablehnung enthält (keine Geo-Sperre, keine Cloudflare-Fingerprint-Abweisung), das abgelehnte Konto in den Cooldown versetzen und höchstens einmal pro Anfrage zum nächsten Konto rotieren; eine zweite Ablehnung wird unverändert ohne Erfolgsmarkierung zurückgegeben. Standardmäßig deaktiviert: Das Umgehen einer Upstream-Benutzersperre kann wie eine Umgehung (Evasion) wirken und die Markierung über die gesamte Kontenflotte verbreiten, daher wird die Ablehnung unverändert zurückgegeben, es sei denn, der Operator aktiviert dies explizit."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode Transient-Failover-Backoff",
+        "description": "Für die OpenCode-Multi-Account-Rotation: Vor der Weiterleitung an das nächste Konto pausieren, sobald zwei aufeinanderfolgende Versuche mit einem vorübergehenden Upstream-Fehler (5xx oder eine leere 400-Abweisung) fehlgeschlagen sind. Die Pause beginnt bei 1,5 s, verdoppelt sich bei jedem weiteren aufeinanderfolgenden Fehler, ist auf maximal 6 s pro Pause und 10 s pro Anfrage begrenzt, wird übersprungen, wenn der Client die Verbindung trennt, und der fehlgeschlagene Response-Body wird vor dem Warten freigegeben. Standardmäßig deaktiviert: Failover erfolgt weiterhin sofort."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Flush-Retry bei leerem Turn",
+        "description": "Bei übersetzten Streaming-Turns: Wenn der Upstream-Turn keinen verwertbaren Inhalt liefert (reine Reasoning-Vervollständigung oder null nutzbare Chunks), begrenzte Wiederholungsversuche über den normalen Anmeldedaten-Pfad (bis zu `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) ausführen, bevor etwas an den Client weitergegeben wird. Standardmäßig deaktiviert: Leere Turns behalten das bisherige Verhalten bei (leeres 200 oder 502 bei leerem Inhalt)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Sibling-Recovery bei leerem Stream",
+        "description": "Claude/Codex-Streaming: Nach dem ersten Lifecycle-Event kurz (bis zu 1 s / 64 KiB) auf nutzbare Ausgabe prüfen; ein Stream, der ohne Inhalt endet, wird zu einem empty_content-Fehler, der den bestehenden begrenzten Wiederholungsversuch auf einer anderen geeigneten Verbindung aufbraucht (kein Cooldown, keine Modellsperre), und Round-Robin-Kombinationen brechen Wiederholungsversuche ab, sobald der Client die Verbindung trennt. Behandelt refusal, pause_turn und model_context_window_exceeded innerhalb der Prüfung ebenfalls als legitime leere Endzustände. Standardmäßig deaktiviert: Bereitschaft, Empty-Content-Handling und Combo-Wiederholungsversuche bleiben genau wie zuvor."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Prüfung auf späte Stream-Ausgabe",
+        "description": "Streaming-Ausgabeprüfung: Nach den ersten 64 weitergeleiteten Chunks wird weiterhin jeder 16. Chunk auf die erste sichtbare Ausgabe hin abgetastet, sodass eine spät beginnende Ausgabe den Stream dennoch als ausgabeführend kennzeichnet. Ein einzelner 5xx-Fehler nach diesem Zeitpunkt bleibt dann auf die Anfrage beschränkt, anstatt eine reine Modellsperre aufzuzeichnen, und firstOutputMs wird rückwirkend mit dem ersten Ausgabe-Chunk des aktuellen Abtastintervalls befüllt. Standardmäßig deaktiviert: Es werden wie bisher genau nur die ersten 64 weitergeleiteten Chunks geprüft."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode: Vorzeitiger Abbruch bei 429-Rate-Limit",
+        "description": "Für die OpenCode-Multi-Account-Rotation: Stoppt die Account-Welle beim ersten 429, der als echtes Rate-Limit klassifiziert wird (ein parsbarer Retry-After-Header oder ein Body, der ein Raten-/Nutzungslimit nennt), und gibt diesen Upstream-429 unverändert zurück (Status, Body, Retry-After- und Quota-Header), anstatt jeden verbleibenden Account zu versuchen. Nicht klassifizierte 429-Fehler rotieren weiter. Standardmäßig deaktiviert: Der Free-Tier ist pro Egress-IP begrenzt (#9611), sodass jeder 429 zum nächsten Account rotiert und eine erschöpfte Welle den letzten Upstream-429 zurückgibt."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429: Parken und Fortsetzen",
+        "description": "Für die OpenCode-Multi-Account-Rotation: Parkt die Anfrage nach wiederholten vorübergehenden 429-Fehlern (oder einer neuen Pool-Belastungsmarkierung) mit einem Heartbeat und führt anschließend einen begrenzten Durchlauf von bis zu 3 aufeinanderfolgenden Accounts erneut aus, anstatt die gesamte Flotte aufzufächern. Standardmäßig deaktiviert: Jeder 429 rotiert genau wie bisher zum nächsten Account."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Wiederholung bei Stream-Bereitschaftsstillstand",
+        "description": "Bei Streaming-Chat-Anfragen: Wenn der erste Upstream-Body stockt, bevor ein verwertbares Event erzeugt wird, wird ein begrenzter zweiter Versuch über denselben Routing-Pfad mit demselben Readiness-Budget und ohne Account-Penalty ausgeführt. Standardmäßig deaktiviert: Ein stockender erster Body lässt die Anfrage ohne Wiederholungsversuch fehlschlagen."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429: Pool-Neuauswahl",
+        "description": "Für die OpenCode-Multi-Account-Rotation: Fragt nach einem 429 von einem Provider mit Egress-Bucketing auf einem Account ohne Proxy in einem Ambient-Pool-Kontext den Verbindungspool nach einem anderen Mitglied für den nächsten Versuch, anstatt dieselbe Egress-Adresse erneut zu verwenden. Sortiert, schließt niemals aus: Ein erschöpfter Pool behält das bisherige Verhalten bei. Standardmäßig deaktiviert: Jeder 429 rotiert genau wie bisher zum nächsten Account."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2-Client-Fingerprint",
+        "description": "Den OpenCode v2 CLI-Client-Fingerprint bei OpenCode Zen/Go-Anfragen (#16571) senden: User-Agent opencode/latest/<2.x>/cli und x-opencode-client cli, ein Client-User-Agent wird nur beibehalten, wenn es sich um einen 2.x-OpenCode-Client handelt, und bei reglementierten Free-Tier-Anfragen kein x-opencode-request, die Session gespiegelt auf x-opencode-session-id/x-session-affinity/x-session-id, die v2-CLI-read/shell-Schemas bei injizierten Platzhalter-Tools und ein tool_choice von \"none\" verworfen. Standardmäßig deaktiviert: Jede OpenCode-Anfrage behält die aktuelle Identität, Header und Body Byte für Byte bei."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen Egress-IP-Sperre",
+        "description": "OpenCode Zen (opencode-zen) zur standardmäßigen Egress-IP-Sperrfamilie hinzufügen, sodass ein 429 auf einer Zen-Verbindung auch jede Geschwister-Zen-Verbindung abkühlt, die dieselbe Egress-IP nutzt. Standardmäßig deaktiviert: Zen ist geschlüsselt und jede Verbindung kühlt eigenständig ab, genau wie zuvor. Ein expliziter OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS-Wert hat immer Vorrang vor diesem Flag."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode-Volltext-Fehlerregeln",
+        "description": "Die integrierten OpenCode-Fehlerregeln (opencode-zen, opencode-go, opencode-cli) mit dem vollständigen Upstream-Fehlertext abgleichen lassen, sodass Body-Marker wie organization_quota_exceeded oder \"monthly usage limit reached\" einen 429 als erschöpftes Kontingent mit einer verbindungsspezifischen Sperre klassifizieren. Standardmäßig deaktiviert: Diese Regeln sehen nur den strukturierten Fehlercode und ein solcher 429 bleibt ein kurzes Rate-Limit, genau wie zuvor."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI-Volltext-Fehlerregeln",
+        "description": "Die integrierte Cloudflare Workers AI-Fehlerregel mit dem vollständigen Upstream-Fehlertext abgleichen lassen, sodass der 429-\"daily free allocation\"-Body als erschöpftes Kontingent statt als kurzes Rate-Limit klassifiziert wird. Standardmäßig deaktiviert: Die Regel sieht nur den strukturierten Fehlercode, genau wie zuvor."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Capability-Filter",
+        "description": "Anfragen vor dem Weiterleiten ablehnen, wenn dem Zielmodell erforderliche Funktionen fehlen (Vision, Tools, strukturierte Ausgabe, Kontextfenster). Schützt direkte Einzelanbieter-Anfragen, die den Kompatibilitätsfilter des Combo-Layers umgehen."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Unbepreiste Nutzung in USD-Kontingenten ignorieren",
+        "description": "Nutzung von Modellen ohne Preis in USD-Nutzungskontingenten pro Schlüssel als $0 werten, anstatt das Kontingent als überschritten zu behandeln. Standardmäßig deaktiviert: Ein unbepreistes Modell oder Routing-Alias kann tatsächliche Ausgaben verbergen, sodass das Kontingent sicherheitshalber sperrt."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "OmniRoute Radar-Modul aktivieren (Katalog-Feed-Ansichten und Synchronisierung). Standardmäßig deaktiviert; die Aktivierung schaltet nur die UI frei – die Datensynchronisierung bleibt ein separates Opt-in."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Modell-Endpunkt-Funktionsprüfung",
+        "description": "Vertrauenswürdige Modell-Endpunkt-Tags erzwingen (vom Provider-Katalog deklariert, aus einer speziellen Modell-ID abgeleitet oder vom Betreiber festgelegt): Weist Anfragen an einen Endpunkt, der vom Modell nicht bedient wird, vor dem Dispatch an /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations und /v1/audio/* mit HTTP 400 ab; blendet Modelle, deren getaggte Endpunkte keinen OmniRoute-Adapter haben, in /v1/models aus; und beantwortet den Modelltest im Dashboard für solche Modelle mit 422. Standardmäßig deaktiviert: Endpunkt-Tags bleiben rein informativ und Anfragen werden genau wie zuvor weitergeleitet."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Universelle Kontextübergabe",
+        "description": "Unterhaltungszusammenfassungen generieren und einfügen, wenn beim Combo-Routing das Modell gewechselt wird. Deaktivieren, um Modellwechsel unabhängig zu behandeln und Hintergrund-Handoff-Anfragen für alle bestehenden und zukünftigen Combos zu verhindern."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Reasoning-Wiedergabe",
+        "description": "Modell-Reasoning über Multi-Turn-Unterhaltungen hinweg zwischenspeichern und wiedergeben. Deaktivieren, um das Speichern und erneute Einfügen von Reasoning zu beenden."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server-Transport",
+        "description": "Erlaubt Codex, den lokalen App-Server-WebSocket-JSON-RPC-Transport (codexTransport=app-server) zu verwenden. Wenn deaktiviert, fallen Verbindungen, die app-server gewählt haben, auf die anderen Transporte von Codex zurück."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude-Code-Erkennungs-Aliase",
+        "description": "Bietet auf /v1/models claude/'<provider>'/'<model>'-Spiegel-IDs an, damit die Modell-Erkennung des Claude-Code-Gateways Nicht-Claude-Modelle auflistet. Warnung: Verdoppelt bei globaler Aktivierung die Katalogeinträge für alle Clients."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "No-Thinking-Modell-Aliase",
+        "description": "Hauptschalter für die no-think/'<provider>'/'<model>'-Gateway-Aliase. Aktiv (Standard): /v1/models wirbt eine no-thinking-Variante für jedes geeignete, denkfähige Claude-Modell an, und eine gesendete no-think/-ID löst sich auf das echte Modell mit unterdrückter Reasoning zurück. Inaktiv: Es werden keine Varianten beworben und eine no-think/-ID wird wie jede andere unbekannte Modell-ID behandelt. Das Modell-spezifische Opt-in/Opt-out von ModelSpec.noThinkingAlias gilt weiterhin, solange dies aktiviert ist."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Thinking-Level-Varianten deaktivieren",
+        "description": "Deaktiviert die Generierung von Thinking-Level-Varianten (z. B. -low, -medium, -high) im /v1/models-Katalog."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptive virtuelle Admission-Lanes",
+        "description": "Aktiviert mandantenspezifische adaptive virtuelle Admission-Lanes für den Provider-Dispatch (#9654): Lastspitzen eines Mandanten führen nicht mehr zu 503-Fehlern bei einem anderen. Die Umgebungsvariable OMNIROUTE_CHAT_VIRTUAL_LANES hat Vorrang vor dieser Dashboard-Einstellung; Änderungen werden beim Server-Neustart wirksam."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Funktionelle Gateway-Spiegelungen",
+        "description": "Bietet auf /v1/models '<gateway-alias>'/'<model>'-Spiegel-IDs für Modelle an, deren kanonischer Inhaber keine aktiven Anmeldedaten hat, die aber ein Passthrough-Gateway mit aktiven Anmeldedaten routet. Warnung: Fügt bei globaler Aktivierung Katalogeinträge für alle Clients hinzu."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API-Aggregator-Guthaben",
+        "description": "Guthabenerkennung für mit New-API / One-API / Sub2API-Aggregatoren kompatible Nodes aktivieren. Wenn aktiviert, melden kompatible Nodes mit gesetztem Aggregator-Flag ihr Guthaben im Dashboard und beim Quota-Preflight-Routing."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Gelöschte Suchverbindungen ausblenden",
+        "description": "Suchstatistiken und letzte Suchanfragen zählen nur Provider, die noch über eine aktive Verbindung verfügen (schlüssellose Provider wie duckduckgo-free zählen immer). Deaktiviert behält jede gespeicherte Suchzeile mit einer Provider-ID bei."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Striktes Free-Badge",
+        "description": "Dashboard-Provider-Seiten: Free-Badge nur bei Signalen anzeigen, die der Provider berücksichtigt – ignoriert die Heuristik für Anzeigenamen, nicht-boolesche Free-Felder und :free-Suffixe bei registrierten Providern ohne dokumentierte kostenlose Stufe. Deaktiviert behält die bisherige Badge-Regel bei."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto-Combo: Leerer Pool antwortet mit 503",
+        "description": "Wenn der Kandidatenpool einer Auto-Combo bereits leer ist, bevor der Tool-Calling-Vorfilter ausgeführt wird (jedes Ziel aufgrund von Cooldowns, Sperren oder Erschöpfung übersprungen), mit 503 no_eligible_targets antworten anstelle des bisherigen 400 \"No target supports tool calling\" capability_mismatch. Standardmäßig deaktiviert: Der leere Pool behält den bisherigen 400 bei."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral-eindeutige 401-Weiche Sperre",
+        "description": "Ein bloßer Mistral 401 ('{\"detail\":\"Unauthorized\"}', ohne explizites Auth-Signal) ist byteschließlich identisch für einen widerrufenen Schlüssel und für eine erschöpfte Kontingentierung. Bei Aktivierung kühlt ein solcher 401 die Verbindung ab, statt sie als abgelaufen zu parken, bis zu 3 Mal innerhalb einer Stunde; der nächste parkt sie dann als abgelaufen, sodass ein widerrufenes Konstante konvergiert. Standardmäßig deaktiviert: jeder bloße Mistral 401 parkt die Verbindung als abgelaufen wie zuvor."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Automatische Batch- und Datei-Bereinigung",
+        "description": "Ermöglicht dem automatischen Bereinigungslauf, terminale (abgeschlossene/fehlgeschlagene/abgebrochene/abgelaufene) Batch-API-Jobs, die älter als OMNIROUTE_BATCH_RETENTION_DAYS sind, zusammen mit ihren zeilenweisen Prüfpunkten zu löschen und den BLOB-Inhalt hochgeladener Dateien nach deren eigenem expires_at zu leeren. Standardmäßig deaktiviert: Jede bestehende Installation behält diese Daten genau wie bisher, bis sich ein Operator aktiv dafür entscheidet. Die vom Operator ausgelöste Route DELETE /api/v1/batches/delete-completed bleibt in jedem Fall unberührt – sie ist ein separater, bedingungsloser öffentlicher API-Vertrag."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity-Account-Lease",
+        "description": "Reserviert das ausgewählte Antigravity-Konto für den Streaming-Lebenszyklus der Anfrage, die es ausgewählt hat, sodass ein gleichzeitiger Wiederholungsversuch oder die Übergabe von Anmeldedaten kein Konto erneut auswählen kann, das bereits an einen aktiven Stream gebunden ist. Die Reservierung ist auf (connection, callable upstream model) beschränkt, sodass ein Konto weiterhin zwei verschiedene Modelle gleichzeitig bedienen kann. Wenn jedes berechtigte Konto für dieses Modell bereits geleast ist, gibt die Anfrage ein strukturiertes 503 POOL_BUSY mit einem begrenzten Retry-After zurück, anstatt sich auf einem ausgelasteten Konto zu stauen. Standardmäßig deaktiviert: Die Kontenauswahl bleibt genau wie bisher und es wird keine Reservierung vorgenommen."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Veraltete Combo-Schritte automatisch bereinigen",
+        "description": "Entfernt nach einer erfolgreichen Modellsynchronisierung mit einem verbindlichen Live-Katalog Combo-Schritte, die an Modelle gebunden sind, die nicht mehr im Katalog aufgeführt sind, mit einem Audit-Eintrag pro entferntem Schritt. Bereinigt niemals bei einer fehlgeschlagenen, degradierten oder rein kostenlosen Synchronisierung und leert niemals eine Combo vollständig. Standardmäßig deaktiviert: Veraltete Schritte werden nur markiert."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude-OAuth – Zusammengefasstes Denken",
+        "description": "Ermöglicht einer Claude-OAuth-Anfrage, die lesbares Denken anfordert (thinking.display \"summarized\"), den Beta-Header redact-thinking-2026-02-12 von Anthropic wegzulassen, der Anthropic andernfalls dazu veranlasst, leere Denkblöcke nur mit Signatur zurückzugeben. Standardmäßig deaktiviert: Diese Beta ist Teil des Claude Code OAuth-Wire-Fingerprints, daher behalten OAuth-Anfragen sie unverändert bei. API-Key-basierte Claude-Anfragen unterstützen zusammengefasstes Denken bereits ohne dieses Flag; OMNIROUTE_REDACT_THINKING=false erreicht OAuth ebenfalls nur, wenn dieses Flag aktiviert ist."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro-Tool-Call-Reparatur",
+        "description": "Wenn eine gestreamte Kiro-Antwort vor jeder sichtbaren Ausgabe einen fehlerhaften tool_call-Wrapper ausgibt (fehlendes input.name oder input.arguments), diesen unterdrücken und die Anfrage einmal mit einer Korrekturanweisung erneut senden, anstatt den Turn mit invalid_kiro_tool_call zu beenden. Der Wiederholungsversuch kostet eine zusätzliche Kiro-Anfrage; ein zweiter Fehlschlag beendet den Turn mit kiro_tool_call_repair_retry_failed. Standardmäßig aktiviert. Auf false setzen, um den Turn bereits beim ersten fehlerhaften Wrapper fehlschlagen zu lassen."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev-Effort-Stufen",
+        "description": "Die von models.dev veröffentlichten Reasoning-Effort-Stufen verwenden (eingegrenzt auf das bekannte Aufwandsvokabular), wenn weder ein Operator-Override noch die Provider-Registry Stufen deklariert, und eine deklarierte leere Stufenliste als \"keine Stufen\" in /v1/models effort_tiers und Kombi-Stufen-Schnittmengen behandeln. Standardmäßig deaktiviert: effort_tiers und aufgelöste supportedThinkingEfforts bleiben genau wie zuvor."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Synthetisierte Arena-cx-Telemetrie",
+        "description": "Einen synthetisierten programmatischen cx-Client-Interaktions-Blob (den Wert, den arena.ai selbst für eine Seite ohne aufgezeichnete Interaktion sendet) an jede Arena-Create-Evaluation-Anfrage (lmarena) anhängen, die kein vom Operator bereitgestelltes providerSpecificData.cx enthält. Standardmäßig deaktiviert: Das cx-Feld ist ein Anti-Automatisierungs-Signal von Arena, weshalb OmniRoute nur Werte weiterleitet, die der Operator aus einer echten Browser-Sitzung erfasst hat (providerSpecificData.cx), und ansonsten überhaupt kein cx sendet. Unbestätigter Upstream-Nutzen; nur aktivieren, wenn Arena Anfragen ohne cx ablehnt."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Reaktive Kompaktierung für natives Codex",
+        "description": "Die reaktiven (schwellenwertbasierten) und Notfall-Kontextkompaktierungsdurchläufe über den Responses-input[]-Adapter auch native Codex-Passthrough-Historien (POST /v1/responses an den codex-Provider) umschreiben lassen, wenn diese das Kontextbudget überschreiten. Standardmäßig deaktiviert: Native Codex-Historien unterliegen dem Codex-Client und werden durch Kompaktierung nie umgeschrieben; überdimensionierte Anfragen schlagen bei der Kontextbudget-Prüfung genau wie zuvor fehl. Erfordert, dass die globale Komprimierung aktiviert ist und das Modell nicht ausgeschlossen ist."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Kontingentfenster: Begrenztes Parken berücksichtigen",
+        "description": "Die fensterbasierte Kontingentrichtlinie (von der Kontoauswahl genutzte Sitzungs-/Wochenschwellenwerte) das begrenzte Erschöpfungs-Parken berücksichtigen lassen: Sobald die Obergrenze der Park-Frist abgelaufen ist oder der zwischengespeicherte Kontingentmesswert älter als das Park-Limit ist, schließt das Fenster das Konto bis zum erneuten Abrufen des Kontingents nicht mehr aus. Standardmäßig deaktiviert: Ein zwischengespeichertes Fenster blockiert weiterhin basierend auf seinem zuletzt gemeldeten Prozentsatz bis zu seiner eigenen Reset-Zeit."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Bildgenerierung: Lange Jobs",
+        "description": "Für OpenAI-kompatible Bildgenerierung: Den Timeout der Verbindung (providerSpecificData.timeoutMs) verwenden, andernfalls den zentralen Upstream-Fetch-Timeout (FETCH_TIMEOUT_MS, dann REQUEST_TIMEOUT_MS, standardmäßig 600 s) anstelle des festen 120-s-Bildbudgets; eine vom Aufrufer abgebrochene Anfrage mit 499 beenden; und den Playground lange Bild-Jobs als SSE-Stream mit Keepalive-Heartbeats empfangen lassen. Standardmäßig deaktiviert: Das feste Budget gilt und Abbrüche durch den Aufrufer werden nicht weitergeleitet. Die Frist für das Lesen des Response-Bodys ist immer aktiv."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Katalog-Mirror-Verfeinerungen",
+        "description": "Verfeinert die claude/-Discovery- und Functional-Gateway-Mirrors unter /v1/models. Standardmäßig deaktiviert: Beide Mirror-Durchläufe verhalten sich exakt wie zuvor. Aktiviert: claude/-Discovery-Mirrors decken auch aufgelistete reasoning-effort-Varianten ab (-low/-medium/-high/-xhigh), überspringen integrierte auto/*-IDs, die der Anfragepfad nicht materialisieren kann, und überspringen bereits aufgelistete Aliase; Functional-Gateway-Mirrors überspringen Kombinationen und von OmniRoute synthetisierte IDs (claude/, no-think/), übernehmen den Eigentümer aus owned_by, verwenden den Eigentümer niemals als sein eigenes Gateway, überspringen in blockedProviders deaktivierte Gateways sowie Modelle außerhalb des maßgeblichen Live-Katalogs eines Gateways."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Proxy-Health: Ablehnung setzt Fehlschlagsserie zurück",
+        "description": "Lässt bei der Proxy-Health-Prüfung eine vom Ziel abgelehnte Testanfrage (401/403/429: Der Proxy hat weitergeleitet, das Ziel hat diese Egress-IP abgelehnt) die Serie aufeinanderfolgender Fehlschläge des Proxys wie eine erfolgreiche Testanfrage zurücksetzen. Standardmäßig deaktiviert: Eine Ablehnung bleibt neutral und behält die Serie bei (#10654). Ein 5xx bleibt in jedem Fall unschlüssig, und eine Ablehnung entfernt, deaktiviert oder reaktiviert einen Proxy niemals."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok-Abonnement-Bilder",
+        "description": "Registriert xai-oauth- (xao) und grok-cli-Bildrouten und bildet die OpenAI-Qualität high/hd auf xAI medium ab. Standardmäßig deaktiviert: Der xAI-Bildpfad per API-Key verbleibt bei der bestehenden OpenAI-kompatiblen Anfrage und die Abonnement-Routen werden nicht registriert."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI-OAuth-Live-Modellerkennung",
+        "description": "Ruft den Live-xAI-Modellkatalog für xai-oauth-Verbindungen von https://api.x.ai/v1/models unter Verwendung des OAuth-Bearer-Tokens ab, anstelle des eingefrorenen statischen Seeds. Standardmäßig aktiviert. Setzen Sie das Flag auf false, um weiterhin den statischen Seed bereitzustellen. HTTP-Fehler greifen in der Discovery-Route auf den Seed zurück; der Flag-Getter selbst führt keine HTTP-Anfragen aus."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-kompatible Mid-Conversation-System-Turns",
+        "description": "Bei einfachen anthropic-compatible-*-Relays (claude → claude passthrough) werden role:system-Turns mitten in der Konversation in messages[] behalten, anstatt sie in den Top-Level-Parameter system zu verschieben, damit das gecachte Prompt-Präfix über mehrere Turns hinweg stabil bleibt. Gilt nur, wenn der Client selbst mid-conversation-system-2026-04-07 anthropic-beta gesendet hat (wird unverändert upstream weitergeleitet). Standardmäßig deaktiviert: Jeder System-Turn wird genau wie bisher nach oben verschoben, da Relays, die die Beta nicht unterstützen, role:system-Nachrichten mit 400 ablehnen."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB-Health-Check: Startup-Scan verzögern",
+        "description": "Führt die DB-Integritäts-/Health-Prüfung beim Start aus, nachdem der Server begonnen hat, Anfragen anzunehmen (via setImmediate), anstatt den Start bis zu deren Abschluss zu blockieren. Standardmäßig deaktiviert: Der Start blockiert bei der Prüfung genau wie vor #13717, sodass eine beschädigte Datenbank weiterhin vor der ersten bearbeiteten Anfrage erkannt wird. Aktiviert: Der Start wird sofort abgeschlossen und die Prüfung (nun begrenzt/paginiert und bei einer echten dateibasierten DB in einem abbrechbaren Child-Prozess isoliert) wird direkt im Anschluss ausgeführt."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "Routing über veröffentlichten OpenCode-Katalog",
+        "description": "Ermöglicht OpenCode Zen- und OpenCode Go-Modellen ohne expliziten Registry-Endpunkt, ihre Request-Oberfläche (Responses für @ai-sdk/openai, Messages für @ai-sdk/anthropic) aus dem veröffentlichten models.opencode.ai-Katalog zu beziehen, der alle 6 Std. im Hintergrund gelesen wird. Standardmäßig deaktiviert: Der Endpunkt stammt genau wie bisher aus den Registry-Heuristiken und der Katalog wird nie abgerufen."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Auto-Requests: Aufgelöste Capability-Gewichtungen",
+        "description": "Ermöglicht es auto/*-Requests (resolveModelOrError und dem Auto-Routing-Wrapper), den Kandidatenpool mit aufgelösten Modell-Capabilities (vision, reasoning, thinking) und beobachteten Qualitätsbewertungen aufzubauen, eingelesen in einem einzigen Bulk-Durchlauf wie der /v1/models-Katalog. Standardmäßig deaktiviert: Die Snapshot-Gewichtungen zur Anfragezeit bleiben genau wie bisher (Capabilities werden bei Bedarf aufgelöst und fließen nicht in die Gewichtungen ein). Aktiviert: Diese Signale fließen in die Snapshot-Gewichtungen ein, sodass sich Kandidatengewichtungen und somit die Auswahl ändern können."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Schlüsselloser Transport-Gate",
+        "description": "Hält schlüssellose (nicht-authentifizierte) Provider, deren Transport einen lokalen Browser (browserBacked) oder ein lokal installiertes CLI (isLocalCli) benötigt, aus dem Kandidatenpool für auto/* heraus, damit ein hängender Member eine auto-Anfrage nicht bis zum Timeout pro Ziel blockieren kann (#17036). Standardmäßig deaktiviert: Jeder nicht-authentifizierte Provider mit emuliertem Tool-Calling bleibt genau wie zuvor im Pool. Direkte Aufrufe von '<alias>'/'<model>' funktionieren in beiden Fällen."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Inline-Reasoning-Replay",
+        "description": "Für thinking-Modelle von codebuddy-cn (die DeepSeek-V4- / Kimi-K2-Familien, die ein Reasoning-Replay benötigen), wird jeder replaysierte Assistant reasoning_content als sichtbarer '<thought>'-Block am Anfang des Nachrichteninhalts eingefügt, damit er ein Gateway übersteht, das das reasoning_content-Feld verworfen wird (#13632). Standardmäßig deaktiviert: codebuddy-cn-Anfragen werden unverändert gesendet; das reasoning_content-Feld selbst wird immer beibehalten."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Provider-Sicherheitsstopps: Terminal",
+        "description": "Einen expliziten Provider-Sicherheitsstopp (misalignment_policy_violation, content_policy_violation oder die exakte Legacy-Ablehnung 'blocked by our safety systems' mit der Kennzeichnung provider_safety_rejection) als terminale, anfragebezogene Verweigerung beibehalten: Sein Code bleibt bei HTTP-, Responses-, WebSocket- und Completed-Stream-Fehlern erhalten, und eine Combo stoppt dabei, anstatt andere Ziele erneut zu versuchen, wodurch zugelassene Siblings abgebrochen werden (#17049). Standardmäßig deaktiviert: Diese Fehler behalten ihre bisherige Handhabung bei und das Combo-Routing bleibt unverändert."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Credential-Health: Automatisch deaktivierte Verbindungen erneut testen",
+        "description": "Den Credential-Health-Sweep Verbindungen erneut testen lassen, die das Gateway selbstständig abgeschaltet hat (markiert mit autoDisabledAt; jeweils höchstens einmal alle 6 Stunden und maximal 5 pro Sweep), und eine Verbindung wieder einschalten, wenn deren erneuter Test erfolgreich ist (#16190). Standardmäßig deaktiviert: Abgeschaltete Verbindungen bleiben deaktiviert, bis ein Operator sie wieder aktiviert oder erneut testet – genau wie zuvor. Von Operatoren deaktivierte Verbindungen und Verbindungen, die nach einer dauerhaften Sperrung abgeschaltet wurden, werden niemals erneut getestet."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Credential-Gate: Nur Auth-Diagnosen",
+        "description": "Das Combo-Credential-Gate so eingrenzen, dass ein im Cache gespeicherter fehlgeschlagener Credential-Probe eine Verbindung nur dann blockiert, wenn dessen Diagnose fehlerhafte Zugangsdaten nachweist (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Nicht eindeutige Fehler (Timeouts, Rate-Limits, Ausfälle, nicht unterstützte Probes und untypisierte Scheduler-Fehler) werden dann als unbekannt behandelt, und die Verbindung empfängt weiterhin Traffic. Standardmäßig deaktiviert: Jeder im Cache gespeicherte Probe-Fehler blockiert die Verbindung für die Cache-TTL (5 Minuten)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: Stopp bei Content-Policy-Verweigerung",
+        "description": "Wenn ein Combo-Ziel mit einer exakten Content-Policy-Verweigerung antwortet (Code oder Typ cyber_policy / content_policy_violation), die Combo stoppen und diese Verweigerung zurückgeben, selbst wenn die verbleibenden Ziele andere Modelle sind, anstatt zum nächsten Ziel überzugehen. Standardmäßig deaktiviert: Die Verweigerung versetzt das Konto niemals in einen Cooldown oder löst den Provider-Breaker aus, und die Combo geht genau wie zuvor zum nächsten Ziel über."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Cooldown-Wiederholung: 403/410-Ablehnungen überspringen",
+        "description": "Wenn sich alle Konten im Cooldown befinden und der Cooldown, der als erster endet, durch einen 403 (Zugriff verweigert) oder einen 410 (nicht mehr vorhanden) verursacht wurde, wird diese Ablehnung sofort zurückgegeben, anstatt den Cooldown abzuwarten und die Anfrage erneut zu senden; ein sich erneuernder verbindungsspezifischer agentrouter-Quota-403 wird dann mit errorCode 429 gespeichert, damit er wiederholbar bleibt. Standardmäßig deaktiviert: Nur ein 401 überspringt die Wartezeit, und jede Ablehnung wird mit dem Status gespeichert, mit dem sie empfangen wurde."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Richtlinie für nicht bepreiste Nutzung",
+        "description": "Wie sich USD-Limits pro Schlüssel (täglich/wöchentlich) gegenüber erfolgreicher Nutzung verhalten, deren Anbieter/Modell keine Preiszeile hat. fail_closed (Standard) markiert das Fenster als überschritten, sodass ein unbekannter Kostenpunkt niemals an einer festen Obergrenze vorbeigelangen kann. count_as_zero wertet diese Nutzung als $0 und setzt die Durchsetzung der bepreisten Ausgaben fort. Unpreisige Modelle werden in jedem Fall auf der Dashboard-Startseite aufgeführt."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "Latenz",
     "quota": "Kontingent",
     "rangeWindow": "{range}-Fenster",
+    "timeRange": "Zeitraum",
     "runtimeHealthBlend": "Laufzeit/Zustand-Mischung",
     "averageResponseTime": "durchschnittliche Antwortzeit",
     "worstQuota": "Schlechtestes Kontingent",
@@ -13923,7 +14500,11 @@
       "ok": "Generell zulässig"
     },
     "allProviders": "Alle Anbieter",
-    "noApiKeyRequired": "Kein API-Schlüssel erforderlich"
+    "noApiKeyRequired": "Kein API-Schlüssel erforderlich",
+    "searchPlaceholder": "Modell, Anbieter suchen…",
+    "searchAria": "Kostenlose Modelle suchen",
+    "filterProviderAria": "Nach Anbieter filtern",
+    "keylessOnly": "Nur Schlüssellos"
   },
   "providerHealthAutopilot": {
     "title": "Anbieter-Status-Autopilot",
@@ -13994,7 +14575,11 @@
     "learnMore": "Mehr erfahren",
     "changelogLoadFailed": "Der Changelog konnte nicht geladen werden. Bitte versuchen Sie es später erneut.",
     "retry": "Wiederholen",
-    "viewFullHistory": "Vollständigen Verlauf auf GitHub anzeigen"
+    "viewFullHistory": "Vollständigen Verlauf auf GitHub anzeigen",
+    "title": "Neuigkeiten und Änderungsprotokoll",
+    "description": "Ankündigungen des OmniRoute-Teams und die neuesten Versionshinweise",
+    "viewLabel": "Anzeigen",
+    "loadingNews": "Ankündigungen werden geladen..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "Anbieter Sicherungszustand",
       "lastUpdate": "Letzte Aktualisierung: {timestamp}",
       "uptimeMinutes": "{minutes} Min.",
-      "uptimeHoursMinutes": "{hours} Std. {minutes} Min."
+      "uptimeHoursMinutes": "{hours} Std. {minutes} Min.",
+      "breakerClosed": "Geschlossen",
+      "breakerNotClosed": "Offen oder halb offen"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "Wartungsdetails",
         "secondaryAction": "Systemstatus"
       }
+    },
+    "miniapp": {
+      "askAnything": "Frag einfach…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} sichtbar / {total} insgesamt",
+    "modeLabel": "Ansichtsmodus",
+    "jumpToNow": "Zur aktuellen Zeit springen; die JETZT-Linie wird auf Position {position} % zurückgesetzt",
+    "laneReuse": "Zeilenwiederverwendung",
+    "laneReuseLabel": "Zeitfenster für Zeilenwiederverwendung (Minuten)",
+    "laneReuseHint": "Anfragen mit derselben Konversations-ID bleiben in derselben Zeitleistenzeile, solange der Abstand zwischen ihnen weniger als diese Anzahl von Minuten beträgt.",
+    "laneReuseUnit": "Min.",
+    "autoRefresh": "Automatische Aktualisierung",
+    "autoRefreshLabel": "Intervall für automatische Aktualisierung (Sekunden)",
+    "autoRefreshHint": "Gibt an, wie oft die Zeitleiste die Anfrageliste erneut vom Server abruft.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Verkleinern",
+    "zoomIn": "Vergrößern"
   },
   "metadata": {
     "compressionTitle": "Kompression",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "Schließen"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Deaktiviert die Generierung von Denkstufenvarianten (z. B. -low, -medium, -high) im /v1/models-Katalog.",
+  "teamCosts": {
+    "title": "Team-Kosten",
+    "subtitle": "Gemeinsame weiche Budgets und Katalog-Kostenschätzungen verwalten.",
+    "refresh": "Aktualisieren",
+    "create": "Team erstellen",
+    "edit": "Team bearbeiten",
+    "archive": "Archivieren",
+    "selectTeam": "Teams",
+    "searchTeams": "Teams suchen",
+    "statusFilter": "Team-Status",
+    "active": "Aktiv",
+    "archived": "Archiviert · schreibgeschützt",
+    "allTeams": "Alle Teams",
+    "noTeams": "Keine passenden Teams.",
+    "selectHint": "Erstellen oder wählen Sie ein Team, um Kosten anzuzeigen.",
+    "loading": "Team-Kosten werden geladen…",
+    "budgetTitle": "Aktuelles weiches Budget",
+    "budgetSubtitle": "Erfolgreiche verbuchte Nutzung · gleitendes Fenster · unabhängig von den Berichtsdaten",
+    "archivedBudget": "Archiviert: Die Budgetdurchsetzung ist inaktiv. Historische Berichte bleiben verfügbar.",
+    "unlimited": "Unbegrenzt – kein gemeinsames weiches Budget konfiguriert.",
+    "budgetUnavailable": "Der Budgetstatus ist nicht verfügbar. Zum Wiederholen aktualisieren.",
+    "used": "Erfolgreiche Nutzung",
+    "maximum": "Budgetmaximum",
+    "remaining": "Bekannter Rest",
+    "resets": "Wird zurückgesetzt",
+    "unpricedBudget": "Für einen Teil der erfolgreichen Nutzung ist der Preis unbekannt. Die bekannte Summe ist unvollständig; die Budgetdurchsetzung wertet dieses Fenster als überschritten.",
+    "overBudget": "Budget erreicht oder überschritten · {amount} darüber",
+    "reportTitle": "Nutzungsbericht",
+    "reportSubtitle": "Alle Versuche · Katalogschätzung in USD, keine Rechnung · ganze UTC-Tage",
+    "reportPeriod": "Berichtszeitraum",
+    "day1": "1 Tag",
+    "day7": "7 Tage",
+    "day30": "30 Tage",
+    "allTime": "Gesamte Zeit",
+    "reportSpend": "Geschätzte Berichtsausgaben",
+    "requests": "Anfragen",
+    "assignedKeys": "Zugewiesene Schlüssel",
+    "unpricedReport": "Dieser Bericht enthält unbekannte Preise. Die geschätzten Ausgaben sind unvollständig.",
+    "breakdown": "Kosten pro API-Schlüssel",
+    "noUsage": "Keine Nutzung in diesem Berichtszeitraum.",
+    "keyName": "Name des API-Schlüssels",
+    "tokens": "Eingabe- + Ausgabe-Tokens",
+    "unnamedKey": "Unbenannter oder gelöschter Schlüssel",
+    "unpriced": "Unbekannter Preis",
+    "members": "Mitgliedschaft",
+    "memberSubtitle": "Eine Änderung der Mitgliedschaft belässt die historischen Ausgaben beim ursprünglichen Team.",
+    "searchKeys": "Schlüssel oder aktuelle Eigentümer suchen",
+    "chooseKey": "API-Schlüssel auswählen",
+    "unassigned": "Nicht zugewiesen",
+    "ownership": "Aktuelles Abrechnungsteam: {team}",
+    "assign": "Zuweisen",
+    "remove": "Entfernen",
+    "noMembers": "Keine aktuellen Mitglieder. Historische Nutzung kann weiterhin auf das Budget angerechnet werden.",
+    "assignedAt": "Zugewiesen {date} (UTC)",
+    "name": "Teamname",
+    "description": "Beschreibung",
+    "enableBudget": "Gemeinsames weiches Budget aktivieren",
+    "amount": "Budgetbetrag (USD)",
+    "duration": "Gleitendes Budgetfenster",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "confirm": "Bestätigen",
+    "transferTitle": "Schlüsselübertragung bestätigen",
+    "transferMessage": "Diesen Schlüssel von „{source}“ nach „{destination}“ verschieben? Historische Ausgaben bleiben beim ursprünglichen Team.",
+    "removeTitle": "Schlüsselzuweisung entfernen",
+    "removeMessage": "Diesen Schlüssel aus „{team}“ entfernen? Historische Ausgaben bleiben in diesem Team.",
+    "archiveTitle": "Team archivieren",
+    "archiveMessage": "„{team}“ archivieren? Alle aktuellen Bindungen werden beendet und die Budgetdurchsetzung stoppt. Historische Berichte bleiben verfügbar.",
+    "invalidName": "Geben Sie einen Namen (1–200 Zeichen) und eine Beschreibung mit höchstens 2.000 Zeichen ein.",
+    "invalidAmount": "Geben Sie einen endlichen Budgetbetrag größer als null ein.",
+    "unauthorized": "Melden Sie sich im Verwaltungs-Dashboard an, um fortzufahren.",
+    "forbidden": "Sie haben keine Berechtigung, Teams zu verwalten. Ihre Eingabe bleibt erhalten.",
+    "notFound": "Dieses Team oder diese Zuweisung existiert nicht mehr.",
+    "conflict": "Die Zuweisung oder das Team hat sich geändert. Aktualisieren und aktuelle Zuordnung bestätigen, bevor Sie es erneut versuchen.",
+    "failed": "Die Anfrage ist fehlgeschlagen. Ihre Eingabe bleibt erhalten; bitte erneut versuchen.",
+    "partialBudget": "Einige aufbewahrte Tages-Buckets überschneiden die Fenstergrenze und lassen sich nicht exakt aufteilen. Die angezeigten Ausgaben sind unvollständig; das verbleibende Kontingent ist nicht verfügbar. Die bestehende Richtlinie für weiche Budgets bleibt unverändert."
+  },
   "connectionTest": {
     "title": "Testnachricht",
     "description": "Sende eine echte Anfrage über diesen Account. Das verbraucht etwas Quota und kann je nach Anbieter ein Nutzungsfenster starten.",
@@ -15073,5 +15753,118 @@
     "importButton": "Importieren",
     "importFailed": "Import fehlgeschlagen.",
     "importSuccess": "{connections} Konten und {nodes} Anbieterknoten importiert; {skipped} übersprungen."
+  },
+  "conversations": {
+    "title": "Conversations",
+    "countSummary": "{total, plural, one {# Conversation} other {# Conversations}} mit 2+ Runden",
+    "autoRefreshTitle": "Wie oft diese Liste vom Server neu abgerufen wird.",
+    "autoRefresh": "Automatische Aktualisierung",
+    "loading": "Conversations werden geladen...",
+    "colConversation": "Unterhaltung",
+    "colTurns": "Runden",
+    "colContinuation": "Fortsetzung",
+    "colLastModel": "Letztes Modell",
+    "colProvider": "Anbieter",
+    "colStatus": "Status",
+    "colLastSeen": "Zuletzt gesehen",
+    "drawerTitle": "Unterhaltung",
+    "prevConversation": "Vorherige Unterhaltung",
+    "nextConversation": "Nächste Unterhaltung",
+    "gotoLatestRequest": "Zum letzten Anfrage springen",
+    "goToBottom": "Zum Ende springen",
+    "statusInProgress": "Wird ausgeführt",
+    "continuationGenuineTitle": "Der letzte Zug verwendete previous_response_id und wurde serverseitig aufgelöst",
+    "continuationBadge": "Fortsetzung",
+    "stalledTitle": "Der letzte Zug endete nicht mit stop und es wurden seit 5+ Minuten keine Fortschritte gemacht",
+    "stalledBadge": "Gescheitert",
+    "noTurns": "Für dieses Gespräch wurden keine Züge aufgezeichnet."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Ab aktueller Position starten (vorhandene Protokolle überspringen)",
+    "pageTitle": "Protokoll-Export",
+    "pageSubtitle": "Sende die Aufrufprotokolle aus dem Tab „Protokolle“ kontinuierlich in einen externen Analysespeicher.",
+    "addDestination": "Ziel hinzufügen",
+    "scheduleTitle": "Zeitplan",
+    "cronLabel": "Cron",
+    "notScheduled": "nicht eingeplant",
+    "lastScheduledRun": "Letzter eingeplanter Lauf",
+    "lastRunSummary": "{startedAt} — {status}, {rows} Zeilen",
+    "never": "nie",
+    "highWaterMark": "Hochwassermarkierung der Aufrufprotokolle",
+    "rowPrefix": "Zeile {id}",
+    "noDestinations": "Keine Exportziele",
+    "noDestinationsHint": "Füge ein Ziel hinzu, um die Lieferung von Protokollen im stündlichen Intervall zu starten.",
+    "errLoadStatus": "Fehler beim Laden des Exportstatus",
+    "errSaveDestination": "Fehler beim Speichern des Ziels",
+    "msgDestinationSaved": "Ziel gespeichert.",
+    "errConnectionTest": "Verbindungstest fehlgeschlagen",
+    "msgRunInFlight": "Für dieses Ziel läuft bereits ein Durchlauf; nichts wurde doppelt gesendet.",
+    "errExportRun": "Der Exportdurchlauf ist fehlgeschlagen",
+    "errUpdateDestination": "Fehler beim Aktualisieren des Ziels",
+    "errDeleteDestination": "Fehler beim Löschen des Ziels",
+    "deleteTitle": "Ziellöschen",
+    "deleteConfirm": "„{name}\" löschen? Der Export-Cursor wird ebenfalls entfernt, sodass er beim erneuten Hinzufügen beim ältesten gespeicherten Anrufprotokoll beginnt.",
+    "statusDisabled": "Deaktiviert",
+    "statusFailing": "fehlschlagend",
+    "statusHealthy": "Gesund",
+    "statusNotRunYet": "Noch nicht ausgeführt",
+    "typeNotInstalled": "Typ nicht installiert",
+    "metaLine": "Letzter Lauf {lastRun} · {exported} Zeilen exportiert · {pending} ausstehend · Cursor {cursor}",
+    "btnTest": "Test",
+    "btnRunNow": "Jetzt ausführen",
+    "btnDisable": "Deaktivieren",
+    "btnEnable": "Aktivieren",
+    "btnEdit": "Bearbeiten",
+    "btnDelete": "Löschen"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI-Konten",
+    "cardSubtitle": "Nur-Lese-Status aus der authentifizierten Verwaltungs-API",
+    "btnRefresh": "Aktualisieren",
+    "listAria": "Status der CLIProxyAPI-Konten",
+    "noAccounts": "Keine CLIProxyAPI-Konten gefunden.",
+    "loading": "Lade Kontostatus…",
+    "stateReady": "Kontozustand",
+    "stateDisabled": "CLIProxyAPI ist nicht installiert",
+    "stateMissingKey": "Verwaltungsschlüssel ist nicht konfiguriert",
+    "stateUnreachable": "Verwaltungs-API ist nicht erreichbar",
+    "stateUnauthorized": "Der Verwaltungsschlüssel wurde abgelehnt",
+    "stateUnsupported": "Diese CLIProxyAPI-Version gibt keine Kontoinformationen aus",
+    "stateInvalidResponse": "Die Verwaltungs-API hat eine nicht unterstützte Antwort zurückgegeben"
+  },
+  "darioPanel": {
+    "title": "Claude-Konten",
+    "description": "Authentifiziere Dario mit deinem Claude Pro/Max-Abonnement. Der Verkehr wird aus deinem Abo-Pool abgerechnet. Mindestens ein Konto muss konfiguriert sein, bevor Dario Anfragen weiterleiten kann (bis dahin meldet /health einen eingeschränkten Zustand).",
+    "noAccounts": "Noch keine Konten konfiguriert.",
+    "importTitle": "Aus OmniRoute importieren",
+    "importDescription": "Statt sich erneut anzumelden, werden die OAuth-Tokens einer bestehenden OmniRoute-Claude-Verbindung wiederverwendet – der Browser-Bestellschritt wird ganz übersprungen.",
+    "importPendingTooltip": "Wird aktiv, sobald eine Claude-Verbindung in OmniRoute vorhanden ist.",
+    "btnImport": "Importieren",
+    "btnImporting": "Wird importiert…",
+    "aliasPlaceholder": "Alias (optional)",
+    "btnStartLogin": "Anmeldung starten",
+    "btnStarting": "Wird gestartet…",
+    "btnCompleteLogin": "Anmeldung abschließen",
+    "btnCompleting": "Wird abgeschlossen…",
+    "codePlaceholder": "code#state oder nur code",
+    "noticeImported": "Als Konto „{alias}“ importiert — Dario hat neu gestartet, um es zu übernehmen.",
+    "noticeAdded": "Konto „{alias}“ hinzugefügt.",
+    "expiresInHours": "läuft in ca. {hours} Std. ab",
+    "expiresInMinutes": "läuft in ca. {minutes} Min. ab",
+    "expiresAt": "läuft am {date} ab",
+    "scopes": "{count, plural, one {# Bereich} other {# Bereiche}}",
+    "btnRemove": "Entfernen",
+    "btnRefresh": "Aktualisieren",
+    "loginStep1": "1. Öffnen Sie diese URL in Ihrem Browser und genehmigen Sie den Zugriff für das Konto <mono>{alias}</mono>:",
+    "pendingExpires": "Anmeldezeitlimit läuft in {time} ab",
+    "loginStep2": "2. Füge den von Anthropic angezeigten Code ein:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini-App",
+    "errTelegramOnly": "Diese Seite muss innerhalb der Telegram-Mini-App geöffnet werden.",
+    "greeting": "👋 Hallo {name}! Sende eine Nachricht, um über dein OmniRoute-Gateway zu chatten.",
+    "greetingFallbackName": "dort",
+    "errNoReply": "⚠️ Keine Antwort vom Gateway.",
+    "btnSend": "Senden"
   }
 }

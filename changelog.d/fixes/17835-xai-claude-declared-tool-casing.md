@@ -1,0 +1,1 @@
+- **fix(xai):** `xaiCompletedToClaudeJson` now restores each tool-call name to the spelling the client declared instead of upgrading known Claude Code tools to PascalCase, matching the `/v1/messages` translate paths from #17119; callers without an original request are unchanged ([#17835](https://github.com/diegosouzapw/OmniRoute/pull/17835))

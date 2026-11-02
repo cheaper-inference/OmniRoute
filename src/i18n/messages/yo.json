@@ -25,8 +25,10 @@
     "confirm": "Ṣé ó dá ọ lójú?",
     "refresh": "Tún un ṣe",
     "close": "Pa á",
+    "dialogTitleFallback": "Àpótí ìbánisọ̀rọ̀",
     "previousPage": "Ojú-ewé ìṣáájú",
     "nextPage": "Ojú-ewé tó kàn",
+    "pagination": "Pípín sí ojúewé",
     "capsLockOn": "Caps Lock ti tàn",
     "dismissNotification": "Pa ìfitónilétí náà",
     "toggleColumns": "Ṣí tàbí pa àwọn ọwọ̀n",
@@ -182,6 +184,7 @@
     "combos": "Àwọn àkójọpọ̀",
     "noModelsFound": "A kò rí awoṣe kankan",
     "clear": "Nu rẹ́",
+    "clearFilters": "Pa àwọn àsẹ̀ rẹ́",
     "done": "Ti parí",
     "selectAll": "Yan gbogbo rẹ̀",
     "unselectAll": "Yọ gbogbo yíyan kúrò",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {Batch # kan ló lò ó} other {Àwọn batch # ló lò ó}}",
     "batchFilePreview": "Àwòtẹ́lẹ̀",
     "batchFilePreviewTruncated": "Ń ṣàfihàn àwọn ìlà {shown} àkọ́kọ́ (àpapọ̀ ìlà {total})",
-    "batchFileDownloadFull": "Gba Fáìlì Kíkún Sílẹ̀"
+    "batchFileDownloadFull": "Gba Fáìlì Kíkún Sílẹ̀",
+    "tokensPageTitle": "Àwọn tọ́kẹ́ẹ̀nì",
+    "tokensPageDescription": "Fi àwọn tọ́kẹ́ẹ̀nì ránṣẹ́ láàárín àwọn kọ́kọ́rọ́ API, pín àwọn kóòdù ìpè, kí o sì so àwọn olupin àwùjọ pọ̀.",
+    "tokensServerUrlLabel": "URL olupin"
   },
   "disabled": "Ti pa",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Darí àwọn ìbéèrè tí wọ́n ti lo gbogbo ààlà ìnáwó wọn sí olùpèsè/àwòṣe ìrànlọ́wọ́ pàjáwìrì ọ̀fẹ́.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "A ti dá olùpín proxy dúró tàbí ó ń tún bẹ̀rẹ̀.",
     "expandSidebar": "Fẹ́ àpá ẹ̀gbẹ́ síta",
     "collapseSidebar": "Kó àpá ẹ̀gbẹ́ wọlé",
-    "themes": "Àwọn àkòrí",
-    "presetColors": "Àwọn àwọ̀ tó gbajúmọ̀",
     "createTheme": "Ṣẹ̀dá àkòrí",
     "chooseColor": "Yan àwọ̀ kan",
-    "themeCoral": "Àwọ̀ iyùn",
-    "themeBlue": "Búlúù",
-    "themeRed": "Pupa",
-    "themeGreen": "Àwọ̀ ewé",
-    "themeViolet": "Àwọ̀ àlùkò",
-    "themeOrange": "Àwọ̀ ọsàn",
-    "themeCyan": "Síánì",
     "cliToolsShort": "Àwọn irinṣẹ́",
     "cache": "Àpamọ́",
     "cacheShort": "Àpamọ́",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Ètò Àkòrí",
     "whitelabelingDesc": "Àpèjúwe Ìsàmì Àdáni",
     "switchThemes": "Yí Àkòrí Padà",
-    "themeAccentDesc": "Àpèjúwe Àwọ̀ Àfikún Àkòrí",
     "uploadFavicon": "Gbe Favicon sókè",
     "themeDark": "Àkòrí Òkùnkùn",
     "customLogoDesc": "Àpèjúwe Àmì Àdáni",
     "sidebarVisibilityToggle": "Yí Híhan Àpá Ẹ̀gbẹ́ Padà",
-    "themeAccent": "Àwọ̀ Àfikún Àkòrí",
     "resetFavicon": "Dá Favicon padà sí ìṣètò àkọ́kọ́",
     "whitelabeling": "Ìsàmì Àdáni",
     "darkMode": "Ìpo Òkùnkùn",
@@ -1122,10 +1117,8 @@
     "customLogo": "Àmì Àdáni",
     "appearance": "Ìrísí",
     "themeSelectionAria": "Àmì ARIA fún Yíyan Àkòrí",
-    "themeCreate": "Ṣẹ̀dá Àkòrí",
     "customFaviconDesc": "Àpèjúwe Favicon Àdáni",
     "logoPreview": "Àwòtẹ́lẹ̀ Àmì Ìdámọ̀",
-    "themeCustom": "Àkòrí Àdáni",
     "hideHealthLogsDesc": "Àpèjúwe Fífipamọ́ Àwọn Àkọsílẹ̀ Ìlera",
     "faviconPreview": "Àwòtẹ́lẹ̀ Favicon",
     "changelog": "Àkọsílẹ̀ Àwọn Àyípadà",
@@ -1352,7 +1345,9 @@
       "open": "ṣí",
       "close": "pa"
     },
-    "noResults": "Kò sí àbájáde"
+    "noResults": "Kò sí àbájáde",
+    "costsTeams": "Àwọn ẹgbẹ́",
+    "costsTeamsSubtitle": "Àwọn ibùdó ìnáwó ẹgbẹ́"
   },
   "webhooks": {
     "title": "Àwọn Webhook",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 tàbí @channelname",
       "chatIdHint": "Àmì ìdánimọ̀ nọ́ńbà aláìlẹ́gbẹ́ tàbí orúkọ olùlò gbogbogbò ti ìfọ̀rọ̀wérọ̀/ikanni náà.",
       "tutorial": "Bí a ṣe ń ṣètò webhook Telegram:"
-    }
+    },
+    "copy": "Ṣe àdàkọ",
+    "copied": "Ti ṣe àdàkọ!",
+    "expandDetails": "Fi àwọn àlàyé hàn",
+    "collapseDetails": "Fi àwọn àlàyé pamọ́"
   },
   "compliance": {
     "auditTitle": "Àyẹ̀wò",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Àwọn ìpè (24h)",
     "mcpMetricSuccessRate": "Ìwọ̀n àṣeyọrí",
     "mcpMetricAvgDuration": "Àpapọ̀ àkókò",
-    "mcpMetricTopTool": "Ohun èlò aṣáájú"
-  },
-  "themesPage": {
-    "title": "Àwọn àkòrí",
-    "description": "Yan àkòrí tí a ti pèsè tàbí ṣẹ̀dá tirẹ pẹ̀lú àwọ̀ kan ṣoṣo",
-    "presetColors": "Àwọn àwọ̀ tó gbajúmọ̀",
-    "customTheme": "Àkòrí àdáni",
-    "customThemeDesc": "Tẹ “Ṣẹ̀dá àkòrí”, kí o sì yan àwọ̀ kan",
-    "createTheme": "Ṣẹ̀dá àkòrí",
-    "activePreset": "Àkòrí tó ń ṣiṣẹ́"
+    "mcpMetricTopTool": "Ohun èlò aṣáájú",
+    "dismissError": "Yọ àṣìṣe náà kúrò"
   },
   "header": {
     "logout": "Jáde",
     "quickNavigation": "Ìlọ kiri kíákíá",
     "quickNavigationTitle": "Ìlọ kiri kíákíá (⌘K / Ctrl+K)",
     "openQuickNavigation": "Ṣí ìlọ kiri kíákíá",
+    "openMenu": "Ṣí àkojọ aṣàyàn",
+    "products": "Àwọn ọjà Keak",
     "switchToLightMode": "Yí padà sí ìpo ìmọ́lẹ̀",
     "switchToDarkMode": "Yí padà sí ìpo òkùnkùn",
     "language": "Èdè",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Bá Anthropic mu",
     "media": "Mídíà",
     "mediaDescription": "Ṣẹ̀dá àwọn àwòrán, fídíò, àti orin",
-    "themes": "Àwọn àkòrí àwọ̀",
-    "themesDescription": "Yan àkòrí àwọ̀ fún gbogbo pánẹ́ẹ̀lì dashboard náà",
     "costsDescription": "Tọpinpin ìnáwó, ṣe àyẹ̀wò àwọn àṣà ìyípadà, kí o sì ṣàkóso ètò ìnáwó AI rẹ lórí gbogbo àwọn olùpèsè",
     "cacheDescription": "Ṣàbójútó bí cache prompt olùpèsè ṣe munadoko àti àtúnlò ìdáhùn semantic àdúgbò.",
     "limitsDescription": "Ṣètò àwọn ààlà oṣuwọn àti quota fún API key àti olùpèsè kọ̀ọ̀kan",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Àwọn òfin payload onípele-gíga, àwọn ààlà ìbéèrè, àti àwọn ètò API aṣojú",
     "mitmProxyDescription": "Ṣètò àwọn ètò aṣojú MITM fún ṣíṣe àyẹ̀wò ìrìn-àjò dátà àti ìṣàwárí àṣìṣe",
     "oneProxyDescription": "Ṣètò àwọn ètò 1Proxy fún ṣíṣe àsopọ̀ ọ̀pọ̀ aṣojú onípele-gíga",
-    "omniSkillsDescription": "Fi àwọn ọgbọ́n sandbox sori ẹrọ kí o sì ṣàkóso wọn fún ìmúṣẹ́ prompt àti irinṣẹ́ láìfọwọ́ṣe"
+    "omniSkillsDescription": "Fi àwọn ọgbọ́n sandbox sori ẹrọ kí o sì ṣàkóso wọn fún ìmúṣẹ́ prompt àti irinṣẹ́ láìfọwọ́ṣe",
+    "teamsDescription": "Ìdíyelé ìnáwó ẹgbẹ́ àti àwọn ìṣúná rírọ̀ àjọpín"
   },
   "cloudSyncStatus": {
     "synced": "Ti múṣiṣẹ́pọ̀",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "Ṣe àdàkọ endpoint rẹ",
     "readinessStep4": "Fi ìbéèrè ìdánwò ránṣẹ́",
     "readinessContinue": "Tẹ̀ síwájú pẹ̀lú ìṣètò",
-    "readinessDismiss": "Pa á tì fún ìsinsìnyí"
+    "readinessDismiss": "Pa á tì fún ìsinsìnyí",
+    "unpricedUsageTitle": "{count, plural, one {# módelì} other {# módelì}} pẹ̀lú ìlò tuntun ṣùgbọ́n kò sí ìye owó tí a ṣètò",
+    "unpricedUsageFailClosed": "{keys, plural, one {# bọtini API tó ní ìdínà ìlò} other {# bọtini API tí ó ní ìdínà ìlò}} lo àwọn módelì wọ̀nyí ní ọjọ́ mẹjọ tó kọjá. Nígbà tí ìlò yẹn wà nínú àkókò ọjọ́ tàbí àkókò ọ̀sẹ̀ ti bọtini, a ka bọtini náà sí ìjàmbá ju ìwọn lọ, a sì dina ìbéèrè rẹ̀ (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Ìlò yìí kà sí $0 sí ìwọn ìlò fún bọtini kọọkan (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# ìbéèrè} other {# ìbéèrè}}, {keys, plural, one {# bọtini tí ó ní ìdínà} other {# bọtini tí ó ní ìdínà}}",
+    "unpricedUsageMore": "… àti {count} míì",
+    "unpricedUsageConfigure": "Ṣètò ìye",
+    "unpricedUsageDismiss": "Fagilé"
   },
   "analytics": {
     "title": "Ìtúpalẹ̀",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "Àwọn àsopọ̀ tí a yàn nìkan",
     "selectAtLeastOneConnection": "Yan àsopọ̀ kan ó kéré tán tàbí yan Gbogbo àwọn àsopọ̀.",
     "allConnectionsDesc": "Kọ́kọ́rọ́ yìí lè lo àsopọ̀ èyíkéyìí tó ń ṣiṣẹ́.",
-    "restrictedToConnections": "A fi ààlà sí {count, plural, one {# àsopọ̀} other {# àwọn àsopọ̀}}."
+    "restrictedToConnections": "A fi ààlà sí {count, plural, one {# àsopọ̀} other {# àwọn àsopọ̀}}.",
+    "preferredConnections": "Àwọn ìsopọ̀ tí a fẹ́ràn",
+    "preferredConnectionsDesc": "Ètò àkọ́kọ́ fún kọ́kọ́rọ́ kọ̀ọ̀kan. Bí ìsopọ̀ tí a fẹ́ràn kò bá sí, ìdarí yóò lọ sí èyí tó yẹ tó tẹ̀lé e.",
+    "preferredConnectionsNone": "A kò ṣètò àyànfẹ́ kankan — ọgbọ́n ìdarí àìyipada ni a ń lò.",
+    "preferredConnectionsClear": "Pa rẹ́",
+    "removeSelection": "Yọ {name} kúrò"
   },
   "auditLog": {
     "title": "Àkọsílẹ̀ Àyẹ̀wò",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Ṣètò afárá Image→Text nínú àwọn ààtò Modality Bridge",
     "sttBridgeCta": "Ṣètò afárá Speech→Text nínú àwọn ààtò Modality Bridge",
     "existingConnection": "Ìsopọ̀ tó ti wà",
-    "openrouterSttDescription": "Àwọn módẹ́lì OpenRouter speech-to-text máa ń lo ìsopọ̀ OpenRouter tí o ti ṣètò. A kò nílò ẹ̀rí ìdánimọ̀ ọ̀tọ̀."
+    "openrouterSttDescription": "Àwọn módẹ́lì OpenRouter speech-to-text máa ń lo ìsopọ̀ OpenRouter tí o ti ṣètò. A kò nílò ẹ̀rí ìdánimọ̀ ọ̀tọ̀.",
+    "modalityTabsAria": "Irú mídíà",
+    "serviceKindsAria": "Irú iṣẹ́"
   },
   "search": {
     "searchQuery": "Ìbéèrè Ìṣàwárí",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Ìṣètò aláfọwọ́ṣe",
     "clineManualConfiguration": "Ìṣètò aláfọwọ́ṣe Cline",
     "kiloManualConfiguration": "Ìṣètò aláfọwọ́ṣe Kilo Code",
+    "piManualConfiguration": "Pi - Afowoyi iṣeto ni",
+    "piConfigInvalidTitle": "Pi models.json ko ṣee ka",
+    "piOmnirouteConfigured": "OmniRoute jẹ atunto bi olupese aṣa Pi kan",
+    "piModelHelp": "Pi ko ṣe iwari awọn awoṣe adaṣe fun awọn aaye ipari aṣa — awoṣe ti o mu ni a kọ sinu models.json ni gbangba.",
+    "piManualConfigTitle": "Tabi ṣatunkọ ~/.pi/agent/models.json pẹlu ọwọ",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Lẹhinna bẹrẹ Pi ko si yan olupese omniroute. Ṣeto PI_CODING_AGENT_DIR lati gbe gbogbo itọsọna aṣoju lọ.",
+    "piUnownedNote": "Ti fikun titẹsi yii ni ita OmniRoute (fun apẹẹrẹ awọn aaye ipari Aṣa pi-gui). Nbere yoo gba o; Tunto nikan yọ awọn titẹ sii OmniRoute kowe kuro.",
     "whenToUseLabel": "Ìgbà tí o yẹ kí o lò ó",
     "openToolDocs": "Ṣí àwọn ìwé ìtọ́sọ́nà irinṣẹ́",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Lò ó nígbà tí o bá fẹ́ àwọn ìṣàn iṣẹ́ kúkúrú Amp, ṣùgbọ́n tí o ṣì nílò ìfipámúṣe àwọn orúkọ àfidípò àti ìlànà ìdarí OmniRoute.",
       "hermes": "Lò ó nígbà tí o bá nílò olùrànlọ́wọ́ AI inú terminal tó fẹ́ẹ́rẹ́ fún àwọn iṣẹ́ kíákíá.",
       "hermes-agent": "Lò ó nígbà tí o bá nílò Hermes Agent (láti ọwọ́ Nousresearch), tí àwọn módẹ́lì àkọ́kọ́, fífi iṣẹ́ lé aṣojú, ìríran àti olùrànlọ́wọ́ rẹ̀ sì ń gba OmniRoute kọjá.",
+      "whycodes": "Lò ó nígbà tí o bá fẹ́ WhyCodes gẹ́gẹ́ bí aṣojú CLI adáṣe fún onírúurú ìlò (TUI, àwọn aṣojú tí a dárúkọ, ìrántí, swarm) tí a darí sí OmniRoute.",
       "custom": "Lò ó fún àwọn ìmúlò irinṣẹ́ àdáni tàbí àwọn ìṣètò gbogbogbò tí ó bá OpenAI mu."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "Aṣojú ìkọ́ kóòdù xAI Grok Build TUI pẹ̀lú àtìlẹ́yìn olùpèsè àdáni",
       "droid": "Olùrànlọ́wọ́ AI Factory Droid",
       "openclaw": "Olùrànlọ́wọ́ AI Open Claw",
+      "openclaude": "CLI aṣojú ìkọ́ kóòdù OpenClaude pẹ̀lú àtìlẹ́yìn olùpèsè tó bá OpenAI mu",
       "cline": "CLI Olùrànlọ́wọ́ Ìkọ́ Kóòdù AI Cline",
       "kilo": "CLI Olùrànlọ́wọ́ AI Kilo Code",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "Terminal AI Warp pẹ̀lú àtìlẹ́yìn olùpèsè àdáni",
       "agent-deck": "Olùṣètò ọ̀pọ̀ aṣojú Agent Deck",
       "5dive": "5dive — agbo àwọn aṣojú kíkó kóòdù tí o ń gbàlejò fúnra rẹ; prófáìlì ìfàṣẹsí kan ń darí gbogbo wọn sí OmniRoute",
+      "whycodes": "Aṣojú CLI adáṣe WhyCodes pẹ̀lú base URL tó bá OpenAI mu",
       "zed": "Olùṣàtúnṣe kóòdù Zed — aṣojú tí a kọ́ sínú rẹ̀ nípasẹ̀ olùpèsè tí ó bá OpenAI mu"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "A kò mọ̀",
     "cliproxyapiUpdate": "Ṣe ìmúdójúìwọ̀n",
     "cliproxyapiUpdateAvailable": "Ìmúdójúìwọ̀n wà: v{current} → v{latest}",
-    "cliproxyapiVersion": "Ẹ̀yà"
+    "cliproxyapiVersion": "Ẹ̀yà",
+    "piInstallTitle": "Fi Aṣoju Ifaminsi Pi sori ẹrọ",
+    "piInstallInstructions": "Fi Pi CLI sori ẹrọ, lẹhinna pada si ibi lati so pọ mọ OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Lo URL arọwọto lati ẹrọ nṣiṣẹ Pi. Oju opo opin /v1 ti OpenAI-ibaramu ti wa ni afikun laifọwọyi.",
+    "piManualMergeHint": "Awotẹlẹ nikan. Darapọ iwọle providers.omniroute yii sinu models.json nitoribẹẹ awọn olupese ati eto rẹ miiran wa ni mimule.",
+    "removeMapping": "Yọ ìbáṣepọ̀ náà kúrò",
+    "customUrl": "URL ti a ṣe aṣa",
+    "customEndpointAria": "endpoint ti a ṣe aṣa",
+    "useDefaultKey": "Lo aṣẹ ti a gbe silẹ ni OmniRoute",
+    "mainModelAria": "Model pataki",
+    "manualConfigTitle": "Apẹrẹ iṣeto ọwọ-ọwọ fun Grok Build"
   },
   "modelCatalog": {
     "title": "Àwọn Àwòṣe & Àwọn Àkópọ̀",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "b.a. 10",
     "testSelected": "Dán àwọn tí a yàn wò ({count})",
     "testAllFiltered": "Dán gbogbo àwọn tí a sẹ̀ wò ({count})",
+    "visibility": "Hihan",
+    "allVisibility": "Ti o han ati ti a fi pamọ",
+    "visibleOnly": "Ti o han",
+    "hiddenOnly": "Ti a fi pamọ",
+    "visibleColumn": "O han",
+    "hideModel": "Fi {name} pamọ kuro ni /v1/models",
+    "showModel": "Fi {name} han ni /v1/models",
+    "hiddenBadge": "A ti fi pamọ",
+    "hideFiltered": "Fi awọn ti a ṣe àlẹmọ pamọ ({count})",
+    "showFiltered": "Fi awọn ti a ṣe àlẹmọ han ({count})",
+    "visibilityCounts": "{visible} ti o han · {hidden} ti a fi pamọ · {total} lapapọ",
+    "visibilityUpdateFailed": "Kuna lati ṣe imudojuiwọn hihan awoṣe",
     "cancel": "Fagilé",
     "clearResults": "Pa àwọn èsì rẹ́",
     "testing": "Ń dán an wò...",
@@ -3397,16 +3438,53 @@
     "httpError": "Ìbéèrè kùnà pẹ̀lú HTTP {status}",
     "testFailedNoDetail": "Àdánwò kùnà láìsí ìránṣẹ́ àṣìṣe",
     "additionalCapabilities": "Àwọn agbára àfikún: {list}",
-    "comboRefMember": "Àkópọ̀ → {name}"
+    "comboRefMember": "Àkópọ̀ → {name}",
+    "keyAccessButton": "Ìwọlé kọ́kọ́rọ́ API",
+    "allowedInKeys": "Gbà láàyè nínú: {count, plural, one {# kọ́kọ́rọ́} other {# àwọn kọ́kọ́rọ́}}",
+    "keysLoading": "Ń gbé àwọn kọ́kọ́rọ́ API wá…",
+    "keysRetry": "Tún gbìyànjú láti gbé àwọn kọ́kọ́rọ́ wá",
+    "accessViaPattern": "nípasẹ̀ {pattern}",
+    "accessBlocked": "Díwọ́ nípasẹ̀ {pattern}",
+    "editKeyAccess": "Ṣàtúnṣe ìwọlé kọ́kọ́rọ́",
+    "toggleKeyAccess": "Gba {item} láàyè lórí {name}",
+    "resultNetworkError": "Ìyànnáfún kùnà",
+    "resultWouldEmptyModels": "Yóò fi kọ́kọ́rọ́ yìí sílẹ̀ láìní àwọn àwòṣe tí a gbà láàyè kankan — ṣàtúnṣe àyè kọ́kọ́rọ́ dípò rẹ̀",
+    "resultWouldEmptyCombos": "Yóò fi kọ́kọ́rọ́ yìí sílẹ̀ láìní àwọn combo tí a gbà láàyè kankan — ṣàtúnṣe àyè kọ́kọ́rọ́ dípò rẹ̀",
+    "keyUpdatePending": "A ṣì ń sọ {name} dọ̀tun. Gbìyànjú lẹ́ẹ̀kan síi láìpẹ́.",
+    "assignToKeys": "Yàn fún àwọn kọ́kọ́rọ́ API…",
+    "assignApply": "Mú àwọn àyípadà ṣiṣẹ́",
+    "assignComplete": "A ti ṣe àmúdàtúnṣe ìwọlé kọ́kọ́rọ́ API",
+    "assignFailed": "Àwọn àmúdàtúnṣe kọ́kọ́rọ́ API kan kùnà",
+    "assignNoChanges": "Kò sí àyè kọ́kọ́rọ́ API tí a yípadà",
+    "selectedAccessItems": "Àwọn ohun tí a yàn: {count}",
+    "assignExcludedCombos": "{count, plural, one {# ìlà combo tí a yàn kì í ṣe àwòṣe, a ó sì fò kọjá níhìn-ín} other {# àwọn ìlà combo tí a yàn kì í ṣe àwòṣe, a ó sì fò wọ́n kọjá níhìn-ín}}. Yan àwọn combo láti inú táàbù Combos.",
+    "assignActionAdd": "Fi kún un",
+    "assignActionRemove": "Yọ kúrò",
+    "searchKeys": "Wá àwọn kọ́kọ́rọ́ API",
+    "selectApiKey": "Yan kọ́kọ́rọ́ API {name}",
+    "allModelsAccess": "Gbogbo àwọn àwòṣe",
+    "allCombosAccess": "Gbogbo àwọn àpapọ̀",
+    "modelAccessCount": "Àwọn àwòṣe: {count}",
+    "comboAccessCount": "Àwọn àpapọ̀: {count}",
+    "keyInactive": "Kò ṣiṣẹ́",
+    "keyBanned": "Tí a dènà",
+    "keyRevoked": "Ti fagilé",
+    "switchRestrictedConfirm": "Yí kọ́kọ́rọ́ yìí padà sí àǹfààní tí a dènà: àwọn ohun tí a yàn nìkan ni a ó gbà láàyè",
+    "removeNoChangeHint": "Kọ́kọ́rọ́ yìí gba ohun gbogbo láàyè; yíyọ àwọn ohun tí a yàn kúrò kò ní yí ohunkóhun padà",
+    "removeStaysAllowedHint": "A ṣì gbà á láàyè lórí kọ́kọ́rọ́ yìí nípasẹ̀ {patterns}",
+    "resultChanged": "Yípadà",
+    "resultUnchanged": "Kò sí àyípadà",
+    "resultSkipped": "Fò kọjá",
+    "resultNeedsSwitch": "Nílò ìyípadà sí ètò tí a dènà"
   },
   "combos": {
-    "autoTosIncludeLabel": "Fi àwọn olùpèsè tí a samisi ToS: avoid sí auto",
-    "autoTosDescription": "Ó wà ní pípa ní ìbẹ̀rẹ̀. Ó kan gbogbo àkójọpọ̀ auto, kì í ṣe àkọọlẹ̀ kan ṣoṣo. Síso olùpèsè pọ̀ kò tan àṣàyàn yìí.",
-    "autoTosSaveError": "A kò lè fi ìlànà ToS pamọ́. Ètò ìṣáájú ṣì hàn. Gbìyànjú lẹ́ẹ̀kan sí i.",
-    "autoTosLoadError": "A kò lè ṣí ìlànà ToS. Gbìyànjú lẹ́ẹ̀kan sí i kí o tó yí i padà.",
     "title": "Àwọn àkójọpọ̀",
     "description": "Ṣẹ̀dá àwọn àkójọpọ̀ awoṣe pẹ̀lú ìtọ́sọ́nà oníwọ̀n àti àtìlẹ́yìn ìpadàsẹ́yìn",
     "autoCatalogTitle": "Àkójọ ìtọ́sọ́nà aládàáṣe",
+    "autoTosLoadError": "A kò lè ṣí ìlànà ToS. Gbìyànjú lẹ́ẹ̀kan sí i kí o tó yí i padà.",
+    "autoTosSaveError": "A kò lè fi ìlànà ToS pamọ́. Ètò ìṣáájú ṣì hàn. Gbìyànjú lẹ́ẹ̀kan sí i.",
+    "autoTosIncludeLabel": "Fi àwọn olùpèsè tí a samisi ToS: avoid sí auto",
+    "autoTosDescription": "Ó wà ní pípa ní ìbẹ̀rẹ̀. Ó kan gbogbo àkójọpọ̀ auto, kì í ṣe àkọọlẹ̀ kan ṣoṣo. Síso olùpèsè pọ̀ kò tan àṣàyàn yìí.",
     "autoCatalogTemplateCount": "Àwọn àdàkọ {count}",
     "autoCatalogDescription": "Àwọn àkójọpọ̀ auto/* tí a fi sínú rẹ̀ ni a ń yanjú ní ìmúdàgba láti ọ̀dọ̀ àwọn olùpèsè tí a ti sopọ̀. Lo èyíkéyìí nínú àwọn ID wọ̀nyí gẹ́gẹ́ bí ààyè awoṣe — kò nílò ìṣètò.",
     "autoCatalogExpand": "Fẹ̀ àkójọ ìtọ́sọ́nà aládàáṣe sí i",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "Àṣìṣe nígbà tí a ń ṣe ìmúdójúìwọ̀n àkójọpọ̀",
     "errorDeleting": "Àṣìṣe nígbà tí a ń pa àkójọpọ̀ rẹ́",
     "testFailed": "Ìbéèrè ìdánwò kùnà",
+    "removeErrorModels": "Pa àwọn àwòṣe {count} tí ó kùnà rẹ́",
+    "removingErrorModels": "Ó ń yọ kúrò…",
+    "errorModelsRemoved": "A ti yọ àwọn àwòṣe {count} tí ó kùnà kúrò nínú àkójọpọ̀ náà",
+    "noErrorModelsFound": "A kò rí àwòṣe tí ó kùnà nínú àwọn ìgbésẹ̀ àkójọpọ̀ yìí",
+    "cannotRemoveAllModels": "Kò ṣeé ṣe láti yọ gbogbo àwòṣe kúrò nínú àkójọpọ̀ náà",
+    "removeErrorModelsConfirm": "Ṣé kí a yọ àwọn àwòṣe {count} tí ó kùnà kúrò nínú “{name}”? A kò ka àkókò tí ó kọjá àti ààlà ìwọ̀n.",
     "failedToggle": "Kùnà láti yí ipò àkójọpọ̀ padà",
     "testResults": "Àwọn Àbájáde Ìdánwò — {name}",
     "resolvedBy": "Olùyànjú:",
@@ -3518,6 +3602,9 @@
     "moveUp": "Gbé sókè",
     "moveDown": "Gbé sọ̀kalẹ̀",
     "removeModel": "Yọ kúrò",
+    "testStep": "Dán àwòṣe yìí wò",
+    "testStepRunning": "Ń dán an wò…",
+    "testStepNotTestable": "Àwọn ìgbésẹ̀ àwòṣe kan ṣoṣo nìkan ni a lè dán wò",
     "saving": "Ń fipamọ́...",
     "liveNoProviders": "Kò sí olupèsè kankan tí a ti rí síbẹ̀.",
     "liveFleetDataHint": "Dátà ẹgbẹ́ àwòṣe ń dé nípasẹ̀ àwọn ìṣẹ̀lẹ̀ combo ní àkókò gidi.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "Kò tíì sí combo tí a ṣètò.",
     "playgroundCreateFirst": "Kọ́kọ́ ṣẹ̀dá ọ̀kan",
     "weighted": "Tí a Fún ní Ìwọ̀n",
+    "weightPercent": "Ìwọ̀n (%)",
     "leastUsed": "Èyí tí a Lò Kéré Jù",
     "costOpt": "Ìmúdára-Iye Owó",
     "strategyGuideTitle": "Bí a ṣe ń lo ọgbọ́n yìí",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# àkọọ́lẹ̀} other {# àwọn àkọọ́lẹ̀}}",
     "builderGlobalAdded": "A ti ṣàfikún",
     "builderGlobalAdd": "Ṣàfikún",
+    "clearSearch": "Pa ìṣàwárí rẹ́",
     "manualModel": "Módẹ́lì àfọwọ́ṣe",
     "manualModelInvalid": "Tẹ módẹ́lì kan sí i gẹ́gẹ́ bí provider/model.",
     "manualModelUnknownProvider": "Ìṣáájú orúkọ olùpèsè tí a kò mọ̀.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "Ṣàfikún ìtọ́kasí àkójọpọ̀",
     "builderPinnedAccount": "Àkọọ́lẹ̀ Tí A Dè Mọ́",
     "builderLegacyEntry": "Àkọsílẹ̀ àtijọ́",
+    "builderStaleModel": "Kò sí nínú katalọ́gì tààrà",
     "reviewName": "Orúkọ",
     "reviewStrategy": "Ìlànà",
     "reviewSteps": "Àwọn Ìgbésẹ̀",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "Ìwọ̀n gígùn àkóónú tó kéré jù (àwọn àmì-ọ̀rọ̀)",
     "responseValidationJsonPaths": "Àwọn àyẹ̀wò JSON-path",
     "responseValidationAddCheck": "+ Ṣàfikún àyẹ̀wò",
+    "responseValidationRemoveCheck": "Yọ àyẹ̀wò náà kúrò",
+    "responseValidationPath": "Ipa ọ̀nà JSON",
+    "responseValidationCondition": "Àdéhùn",
+    "responseValidationValue": "Iye tí a ń retí",
     "agentFeaturesSystemMessageOverride": "Rọ́pò ìfiránṣẹ́ ètò",
     "agentFeaturesSystemMessagePlaceholder": "O jẹ́ olùrànlọ́wọ́ amòye...",
     "agentFeaturesSystemMessageHint": "Ìfiránṣẹ́ ètò tí yóò rọ́pò èyí tó wà fún àwọn aṣojú",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "Àpapọ̀ Àwọn Àkọsílẹ̀",
     "type": "Irú",
-    "memoryEnabled": "Ìrántí ṣiṣẹ́"
+    "memoryEnabled": "Ìrántí ṣiṣẹ́",
+    "qdrantTutorialTitle": "ẹkọ lẹsẹkẹsẹ: iroyin pẹlu Qdrant",
+    "qdrantTutorialIntro": "Qdrant gbin vectors ati metadata ti iroyin ni eyiti a le gba alaye kan ti o ba mu. Kò ma ṣe itọju tokens taara; awọn aṣayan wọpọ jẹ aṣayan, nipa didiwọn ifihan ti kii ṣe iṣeduro pẹlu iṣeduro.",
+    "qdrantTutorialStep1": "Ṣe ilọsiwaju server pẹlu HTTPS ati aṣẹ API ṣaaju lilo ni ọna iṣẹ.",
+    "qdrantTutorialStep2": "Kọ host, port, collection, ati model ni ilana provider/model pẹlu aṣẹ ti a ṣe aṣa.",
+    "qdrantTutorialStep3": "Dimeeters collection gbọdọ jọna pẹlu dimeeters ti o model le da. Collection 2048-dimeeters ti o wa ni bayi kò n gba 1536-dimeeters embeddings.",
+    "qdrantTutorialStep4": "Ṣe iṣẹ, ṣe idanipo asopọ, ati ṣe idanipiyi idanileṣe. Nígbà náìí, ṣe iṣẹ Qdrant.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Credits: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Àwọn Ọgbọ́n",
@@ -5288,7 +5390,8 @@
         "skipped": "ti ṣètò tẹ́lẹ̀",
         "failed": "kùnà"
       }
-    }
+    },
+    "stepProgress": "Ìlọsíwájú ìṣètò"
   },
   "providers": {
     "tosAvoidNoticeTitle": "A yọ olùpèsè yìí kúrò nínú auto ní ìbẹ̀rẹ̀",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "Ṣàgbàsílẹ̀ àwòṣe CSV",
     "importFromFileMoreErrors": "+{count} sí i",
     "importFromFileSchemaHint": "Àwọn ọ̀wọ̀n CSV wà ní ipò yìí: provider, name, apiKey, baseUrl (kò pọn dandan), priority (kò pọn dandan). Ọ̀wọ̀n provider gbọ́dọ̀ jẹ́ id olùpèsè tó wà tẹ́lẹ̀ tí a ń ṣàkóso tàbí id nóòdù tó báramu pẹ̀lú OpenAI/Anthropic tí a ti forúkọsílẹ̀ tẹ́lẹ̀ — ìṣàgbéwọlé yìí kì í ṣẹ̀dá àwọn nóòdù endpoint tuntun.",
+    "importOAuthExport": "Ṣàgbéwọlé ìkójáde OAuth",
+    "oauthExportTitle": "Ṣàgbéwọlé ìkójáde olùṣàkóso àkọọ́lẹ̀",
+    "oauthExportDescription": "Gbé ìkójáde ọ̀rọ̀ lásán sókè láti ọ̀dọ̀ olùṣàkóso àkọọ́lẹ̀ (fún àpẹẹrẹ ìkójáde cloud-accounts ti Antigravity Manager). A ń sọ àwọn tókìnì dọ̀tun lórí olupin, àkọọ́lẹ̀ kọ̀ọ̀kan sì di ìsopọ̀ OAuth — a ń sọ àwọn àdàkọ dọ̀tun ní ipò wọn.",
+    "oauthExportProviderLabel": "Olùpèsè",
+    "oauthExportChoose": "Yan fáìlì",
+    "oauthExportFileAria": "Fáìlì JSON ìkójáde àkọọ́lẹ̀",
+    "oauthExportSchemaHint": "Ohun tí a gbà: ìwé tí ó ní àkójọ \"accounts\", àkójọ lásán, tàbí àkọsílẹ̀ kan ṣoṣo. Àwọn tókìnì lè wà nínú ohun token tí a fi sínú tàbí tààrà lórí àkọsílẹ̀ náà.",
+    "oauthExportDetected": "A rí àkọọ́lẹ̀ {count}",
+    "oauthExportSelectAll": "Yan gbogbo àkọọ́lẹ̀",
+    "oauthExportSelectAccount": "Yan àkọọ́lẹ̀ {index}",
+    "oauthExportColEmail": "Í-meèlì",
+    "oauthExportColProvider": "Olùpèsè",
+    "oauthExportColRefresh": "Tókìnì ìsọdọ̀tun",
+    "oauthExportNoEmail": "(kò sí í-meèlì)",
+    "oauthExportYes": "bẹ́ẹ̀ ni",
+    "oauthExportNo": "rárá",
+    "oauthExportImporting": "Ń ṣàgbéwọlé…",
+    "oauthExportImport": "Ṣàgbéwọlé àkọọ́lẹ̀ {count}",
+    "oauthExportResult": "A ṣàgbéwọlé {imported}/{total} — {failed} kùnà",
+    "oauthExportParseError": "A kò lè ka àkọọ́lẹ̀ kankan láti inú fáìlì yìí.",
+    "oauthExportUnknownError": "àṣìṣe àìmọ̀",
     "adaptaTutorial": {
       "title": "Bí a ṣe ń so Adapta Web pọ̀",
       "introPrefix": "Adapta ń ṣe ìfàṣẹsí nípasẹ̀ Clerk. Àmi náà",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "A ti ṣàgbéwọlé gbogbo àwọn módẹ́lì tẹ́lẹ̀",
     "noNewModelsToImport": "Kò sí módẹ́lì tuntun láti ṣàgbéwọlé — gbogbo àwọn módẹ́lì ti wà nínú ìforúkọsílẹ̀ tàbí àkójọ àwọn módẹ́lì àdáni",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Ikuna iwara ako {time}",
     "skippingExistingModels": "Ń foju kọ àwọn módẹ́lì {count} tó ti wà",
     "autoSync": "Ìmúdọ́gba Aládàáṣiṣẹ́",
     "autoSyncShort": "Múdọ́gba",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "f.à. 131072",
     "contextWindowOverrideHint": "Ṣètò fèrèsé àyíká-ọ̀rọ̀ gidi ti módẹ́lì yìí (àwọn token) pẹ̀lú ọwọ́ nígbà tí olupèsè bá jabo rẹ̀ lọ́nà tí kò tọ́. Èyí yóò borí àwọn iye tí a ṣàwárí láìfọwọ́yí/tó wà nínú àkójọ, yóò sì dènà combo routing láti yọ módẹ́lì náà kúrò.",
     "contextWindowOverrideInvalid": "Ìṣètò àfikún fèrèsé àyíká-ọ̀rọ̀ gbọ́dọ̀ jẹ́ nọ́mbà odidi rere ti àwọn token",
+    "maxOutputTokenOverrideInvalid": "Ìṣètò àfikún iye tó pọ̀ jù ti àwọn token àbájáde gbọ́dọ̀ jẹ́ nọ́mbà odidi rere ti àwọn token",
     "visionCapableLabel": "Ó lè ṣiṣẹ́ pẹ̀lú ìran àwòrán",
     "visionCapableHint": "Fi ọwọ́ samì sí módẹ́lì yìí pé ó lè ṣiṣẹ́ pẹ̀lú ìran àwòrán nígbà tí dátà-àfikún àwárí olupèsè kò bá jabo irú ìgbéwọlé àwòrán (èyí wọ́pọ̀ fún àwọn backend tí a gbàlejò fúnra ẹni/tó wà lórí ẹ̀rọ agbègbè).",
     "compatParamFiltersLabel": "Àwọn Àlẹ̀ Párámítà",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "Ṣàfikún àtúnṣe",
     "ccAliasLoadError": "Kò ṣeé ṣe láti ṣàkójọpọ̀ àwọn ètò àlias ìṣàwárí: {error}",
     "ccAliasSaveError": "Kò ṣeé ṣe láti fi ètò àlias ìṣàwárí pamọ́: {error}",
+    "cliVersionSectionTitle": "Ipolowo ikede onibara CLI",
+    "cliVersionEffectiveLabel": "Lọwọlọwọ ipolowo",
+    "cliVersionSourceLabel": "Ti yanju lati: {source}",
+    "cliVersionPinnedLabel": "Yaworan aiyipada: {pinned}",
+    "cliVersionSourceSettings": "dasibodu idojuk",
+    "cliVersionSourceEnv": "oniyipada ayika",
+    "cliVersionSourceDiscovered": "auto-awari titun Tu",
+    "cliVersionSourceDefault": "sile aiyipada",
+    "cliVersionInputLabel": "Yiyipada ẹya",
+    "cliVersionInputPlaceholder": "Yipada ẹya; òfo clears",
+    "cliVersionSaveButton": "Fipamọ",
+    "cliVersionResetButton": "Tunto si aiyipada",
+    "cliVersionLoadError": "Kuna lati kojọpọ awọn eto ẹya CLI : {error}",
+    "cliVersionSaveError": "Kuna lati fipamọ ẹya CLI : {error}",
+    "cliVersionLoadFailed": "Ko le kojọpọ awọn eto ẹya CLI lọwọlọwọ.",
+    "cliVersionHintClaude": "Awọn ẹnubode Anthropic Opo awọn awoṣe Claude lori ẹya alabara koodu Claude ti o rii. Eyi ni ikede OmniRoute ti n polowo lori gbogbo ibeere ti o ni asopọ Anthropic.",
+    "cliVersionCaveatClaude": "Ifiweranṣẹ ìdíyelé: ẹyà ìdíyelé jẹ '<version>'.'<build-revision>', ati atunyẹwo kikọ jẹ igbagbogbo ti a gba silẹ lọtọ. Ipolongo 2.1.260 iroyin 2.1.260.1e2, eyi ti o jẹ ko ohun ti a gidi 2.1.260 alakomeji rán.",
+    "cliVersionHintCodex": "OpenAI gates awọn awoṣe tuntun lori ẹya alabara Codex ti o rii, fun apẹẹrẹ aṣiṣe: Awoṣe 'gpt-6-astra' nilo ẹya tuntun ti Codex.",
+    "cliVersionCaveatCodex": "Ifiweranṣẹ Itọkasi: ẹya kan ti awọn ijabọ olupe tirẹ tun lu CODEX_CLIENT_VERSION env var, ṣugbọn yi danu lu awọn mejeeji, nitori pe o jẹ ero inu oniṣẹ ti o han gbangba.",
     "compatUpstreamHeadersLabel": "Àwọn àkọlé upstream àfikún",
     "compatUpstreamHeadersHint": "Ètò tó ní àṣẹ gíga — ó ní ìpele ìgbẹ́kẹ̀lé kan náà pẹ̀lú ṣíṣàtúnṣe àwọn ẹ̀rí API olupèsè; àwọn alábòójútó tí a gbẹ́kẹ̀lé nìkan ló yẹ kí wọ́n lò ó. A ó dapọ̀ rẹ̀ lẹ́yìn tí OmniRoute bá ṣàfikún ìfàṣẹsí láti inú kọ́kọ́rọ́ API olupèsè. Tí àkọlé àdáni kan bá lo orúkọ kan náà bí èyí tó ti wà (fún àpẹẹrẹ, Authorization), iye rẹ yóò rọ́pò àkọlé tí a ṣẹ̀dá láìfọwọ́ṣe pátápátá (pẹ̀lú àmì Bearer) — upstream yóò rí ohun tí o tẹ̀ nìkan, kì í ṣe kọ́kọ́rọ́ inú àwọn ètò. Àṣìṣe nínú ìṣètò lè fa 401 tàbí ba ìfàṣẹsí upstream jẹ́. Ìlà kan fún àkọlé kọ̀ọ̀kan (fún àpẹẹrẹ, Authentication àfikún fún àwọn gateway kan). Gbé kọ́sọ̀ sí orí iye náà tàbí gbé àfiyèsí sí i láti wo àwòtẹ́lẹ̀. Ó máa ń fipamọ́ nígbà tí àfiyèsí bá kúrò lórí rẹ̀, tí a bá tẹ ibòmíràn níta rẹ̀, tàbí tí a bá ti pánẹ́ẹ̀lì yìí.",
     "compatUpstreamHeaderName": "Orúkọ àkọlé",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "Àkọlé Fọ́mátì API",
     "apiKeyOptionalHint": "Fi sílẹ̀ ní òfo bí ètò agbègbè rẹ tàbí olùpèsè rẹ kò bá nílò ìfàṣẹsí.",
     "apiKeyOptionalLabel": "API Key (kì í ṣe dandan)",
-    "apiRegionChina": "Ẹkùn API China",
-    "apiRegionHint": "Àbá Ẹkùn API",
-    "apiRegionInternational": "Ẹkùn API Àgbáyé",
-    "apiRegionLabel": "Àkọlé Ẹkùn API",
+    "apiRegionChina": "Ilẹ̀ China ńlá",
+    "apiRegionHint": "Yan agbègbè endpoint tí a ń lò fún ìwọlé API àti títọpa iye àṣẹ.",
+    "apiRegionInternational": "Káríayé",
+    "apiRegionLabel": "Agbègbè API",
     "apikey": "API Key",
     "audio": "Ohùn",
     "audioProvidersHeading": "Àkọlé Àwọn Olùpèsè Ohùn",
@@ -6539,6 +6684,7 @@
       "monsterapi": "Gba kọ́kọ́rọ́ API ní monsterapi.ai",
       "moonshot": "So Kimi pọ̀ pẹ̀lú kọ́kọ́rọ́ API kan.",
       "morph": "Ìpele ọ̀fẹ́: kirẹditi 250K/oṣù, $0",
+      "apmix": "So Apmix pọ mọ API key kan láti apmix.ai/dashboard — ìfọwọ́sí kan, ọ̀pọ̀ àwọn módéèlù.",
       "nanogpt": "So NanoGPT pọ̀ mọ́ kọ́kọ́rọ́ API kan.",
       "nebius": "Kirẹditi ìdánwò tó tó ~$1 nígbà ìforúkọsílẹ̀ fún ṣíṣàyẹ̀wò API",
       "nlpcloud": "NLP Cloud ń lo API chatbot aládàáni dípò OpenAI chat/completions. OmniRoute ń ṣàtúnṣe àwọn ìfiránṣẹ́ OpenAI sí input/context/history, ó sì ń pèsè àkójọ abẹ́lé ti àwọn àwòṣe chatbot tí a ṣètìlẹ́yìn fún.",
@@ -6635,8 +6781,7 @@
       "kiro": "Ìpele ọ̀fẹ́: kírẹ́díìtì 50/oṣù (~25K–100K tokens). ⚠️ Àwọn ToS Kiro kọ lílo proxy/harness ẹni-kẹta.",
       "codex": "So OpenAI Codex pọ̀ pẹ̀lú ìṣàn OAuth tó wà tẹ́lẹ̀.",
       "qwen": "So Qwen Code pọ̀ pẹ̀lú ìṣàn OAuth tó wà tẹ́lẹ̀.",
-      "github-models": "Ṣẹ̀dá GitHub PAT kan pẹ̀lú àyè 'models: read' ní github.com/settings/tokens",
-      "apmix": "So Apmix pọ mọ API key kan láti apmix.ai/dashboard — ìfọwọ́sí kan, ọ̀pọ̀ àwọn módéèlù."
+      "github-models": "Ṣẹ̀dá GitHub PAT kan pẹ̀lú àyè 'models: read' ní github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} ń gba àwọn ID model abinibi-provider. Gbé wọlé láti /models tàbí fi àwọn ID àdáni kún un fún ìdarí ipa-ọ̀nà.",
     "bedrockModelsDescription": "Àwọn model Amazon Bedrock jẹ́ dídín mọ́ agbègbè AWS. Gbé wọlé láti /models tàbí fi àwọn ID model Bedrock tí a ti mú ṣiṣẹ́ ní agbègbè tí a yàn kún un.",
@@ -6808,7 +6953,27 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "A lò ó nínú àkópọ̀ {count}: {combos}",
+    "openComboTooltip": "Ṣí Àwọn Àkópọ̀ — {combo} ń lò ó",
+    "claudeCodeRoutingTitle": "Lilo oniwun iṣiro fohunra fun ifowosan agbegbe ti Claude Code",
+    "routingNative": "Ìran",
+    "routingFallback": "Padàṣẹ",
+    "rerank": "Rerank",
+    "video": "Fíídíò",
+    "markFreeTierTitle": "Ṣafihan gẹgẹ bi oṣuwọ̀n ìwọ̀n ọfẹ (yanju bẹni a ti fa aṣiṣe awọn alakan ti o baamu)",
+    "codexTunnelTitle": "Ṣiṣẹpọpọ ti igbelarugbe Codex",
+    "codexTunnelDescription": "Ojuwo yii wa ni ilọpo si ita nikan. Aṣanidunni agbegbe tun ṣiṣẹ nipa Codex nikan, labẹ sandbox ati itannaṣe rẹ.",
+    "tunnelIdLabel": "ID ojuwo",
+    "tunnelRuntimeKeyLabel": "Oriṣi iṣiṣẹ ojuwo",
+    "tunnelRuntimeKeyPlaceholder": "Oriṣi iṣiṣẹ",
+    "tunnelRuntimeKeyHint": "A fi ọwọ-oriṣi pamọ pẹlu cookie kanna ati pe ko rọra ni log.",
+    "tunnelRuntimeKeyNewLabel": "Oriṣi iṣiṣẹ ojuwo tuntun",
+    "tunnelRuntimeKeyNewHint": "Tẹ ọwọ-oriṣi tuntun pẹlu cookie tuntun nikan. A fi ọwọ-oriṣi pamọ.",
+    "chatgptConnectorLabel": "Oju iṣẹ akoran ChatGPT",
+    "doctorChecking": "Nṣayẹwo ipo…",
+    "doctorCheck": "Ṣayẹwo ipo dokita",
+    "fallbackRetryBackendTitle": "Oníṣẹ́ àsọtẹ́lẹ́ ìṣọ̀ṣe"
   },
   "settings": {
     "title": "Àwọn Ààtò",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "Yan àwọn ohun inú sidebar tí o fẹ́ fi hàn. Àwọn ohun pàtàkì ń jẹ́ kí àwọn irinṣẹ́ ìpele gíga ṣì ṣeé wá.",
     "hideHealthLogs": "Fi Àwọn Àkọọlẹ̀ Àyẹ̀wò Ìlera Pamọ́",
     "hideHealthLogsDesc": "Nígbà tí ó bá wà ní ON, má ṣe fi àwọn ìfiránṣẹ́ [HealthCheck] hàn nínú server console",
-    "themeAccent": "Àwọ̀ àkòrí",
-    "themeAccentDesc": "Yan àwọ̀ tí a ti ṣètò tẹ́lẹ̀ tàbí ṣẹ̀dá àkòrí tirẹ̀ pẹ̀lú àwọ̀ kan",
-    "themeCreate": "Ṣẹ̀dá àkòrí",
-    "themeCustom": "Àkòrí àdáni",
-    "themeBlue": "Búlúù",
-    "themeRed": "Pupa",
-    "themeGreen": "Àwọ̀ ewé",
-    "themeViolet": "Àwọ̀ àlùkò",
-    "themeOrange": "Ọsàn",
-    "themeCyan": "Sáyánì",
     "whitelabeling": "Ìdánimọ̀ àmì-ọjà",
     "whitelabelingDesc": "Ṣe orúkọ àti logo ohun elo náà ní àdáni",
     "appName": "Orúkọ Ohun Elo",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "Nísinsìnyí",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Ọ̀nà ẹrọ àkókò pàtàkì",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Àìṣe: yẹrí àwọn fáìlì tí a ṣe pẹ̀lú ẹrọ àkókò pàtàkì kí ọ yí iwe tó ti hàn padà. Fi òótó sí i láti tẹ̀síwájú kí o kọ̀ síbẹ̀. A ṣàkójọ tẹ́nu díẹ̀ bí ó bá kù."
+      "coreBinaryPathHelp": "Àìṣe: yẹrí àwọn fáìlì tí a ṣe pẹ̀lú ẹrọ àkókò pàtàkì kí ọ yí iwe tó ti hàn padà. Fi òótó sí i láti tẹ̀síwájú kí o kọ̀ síbẹ̀. A ṣàkójọ tẹ́nu díẹ̀ bí ó bá kù.",
+      "urlFeedlessHint": "Fi fọlẹ̀ fún àkọ̀kọ́ ìtẹ̀wọ́gbà olùyàn ipò kan: ëtò URL ìdarí sókè, a kò mú fíìdíi kan, a kò tuntun sí i, tàbí a kò bá a sọ́kọ̀."
     },
     "bulkHealthcheck": "Ìṣàyẹ̀wò ìlera ọ̀pọ̀lọpọ̀",
     "bulkHealthcheckDesc": "Ṣàyẹ̀wò gbogbo àwọn aṣojú tí a ti ṣètò pẹ̀lú URL àfojúsùn kan láti mọ àwọn tó ń ṣiṣẹ́.",
@@ -7706,6 +7862,7 @@
     "configured": "tí a ṣètò",
     "none": "Kò sí",
     "modelOverrideValuePlaceholder": "Iye nọ́ńbà",
+    "modelOverrideKey": "Kọ́kọ́rọ́ àtúnkọjá",
     "modelOverrideReasoningEffortsPlaceholder": "Àwọn ọ̀rọ̀ Gẹ̀ẹ́sì tí a fi àmì kọ́má yà, àpẹẹrẹ low, medium, high",
     "addKeyValue": "Fi kọ́kọ́rọ́ àti iye kún un",
     "noModelOverrides": "Kò sí ìṣàtúnṣe kankan tí a ṣètò fún awoṣe yìí.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "O lè yí iye owó àkọ́kọ́ padà fún àwọn àwòṣe kan pàtó. Àwọn ìyípadà àdáni ló máa ní ààyò ju iye owó tí a ṣàwárí laifọwọ́yi lọ.",
     "editPricing": "Ṣàtúnṣe Iye Owó",
     "viewFullDetails": "Wo Àlàyé Kíkún",
-    "themeCoral": "Kọ́ráàlì",
     "adaptiveVolumeRouting": "Ìtọ́sọ́nà Ìwọ̀n Tó Ń Múra Dọ́gba",
     "adaptiveVolumeRoutingDesc": "Mú iye àwọn àsopọ̀ pọ̀ tàbí dín kù laifọwọ́yi ní ìbámu pẹ̀lú ìwọ̀n payload àti ìfúnpá ìṣàn iṣẹ́.",
     "lkgpToggleTitle": "Olùpèsè Tó Ṣiṣẹ́ Dáadáa Kẹ́yìn (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "Dín lílo token kù nípa fífúnpọ̀ àwọn ọ̀rọ̀ ìtọ́sọ́nà kí a tó fi wọ́n ránṣẹ́ sí àwọn olùpèsè",
     "autoCombosTitle": "Àwọn Àkópọ̀ Aládàáṣe",
     "autoCombosDesc": "Gba kọ́kọ́rọ́ yìí láàyè láti lo àwọn àkópọ̀ auto/* tí a kọ́ sínú ẹ̀rọ, tí ń yan àwòṣe kan láìfọwọ́yí láti ọ̀dọ̀ gbogbo olùpèsè tí a ti ṣètò",
+    "ccDiscoveryAliasesTitle": "Àwọn orúkọ mìíràn ìṣàwárí Claude Code",
+    "ccDiscoveryAliasesDesc": "Kéde àwọn dígí ìbáṣepọ̀ claude/... fún àwọn àpẹẹrẹ àti àwọn ìdàpọ̀ tí kọ́kọ́rọ́ yìí ti lè wọlé sí tẹ́lẹ̀",
     "compressionGuidanceFullGuideLink": "Itọ́sọ́nà ìfúnpọ̀ ní kíkún",
     "compressionGuidanceShow": "Àwọn àlàyé",
     "compressionGuidanceHide": "Fi àwọn àlàyé pamọ́",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Ìdá ọgọ́rùn-ún ti fèrèsé",
     "compressionAdaptivePolicyAbsolute": "Ìnáwó àmì ọ̀rọ̀ tí iye rẹ̀ jẹ́ pàtó",
     "compressionOutputStylesDescription": "Fi àwọn ìtọ́nisọ́nà tó ń ṣe àgbékalẹ̀ èsì kún un láì tún àbájáde olùpèsè kọ. Darapọ̀ wọn bí o ṣe fẹ́.",
+    "compressionOutputStylesPreviewNote": "Ibere fifun ede kan nikan: ede ti a rii, bibẹẹkọ idii akọkọ. Awọn bulọọki loke jẹ awọn iyatọ-pack, kii ṣe abẹrẹ apapọ.",
     "mcpAccessibilityDescription": "Ó fi ààlà sí àwọn àbájáde irinṣẹ́ MCP (ibi ìpamọ́ ọ̀tọ̀).",
     "compressionStylesTileSummary": "A fi àmì ọ̀rọ̀ {tokens, number} pamọ́ · {runs, plural, one {# ìṣiṣẹ́ tí a fi ọ̀nà àfihàn sí} other {# àwọn ìṣiṣẹ́ tí a fi ọ̀nà àfihàn sí}}",
     "compressionStylesTileEmpty": "Kò tíì sí ìṣiṣẹ́ tí a fi ọ̀nà àfihàn sí.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "Olùgbàlejò",
     "qdrantCollection": "Àkójọpọ̀",
     "catalogVisibilityHint": "A ṣì lè pe ID àwòṣe tí a fi pamọ́ pẹ̀lú àwọn àṣẹ ìwọlé kan náà.",
+    "exposeCombosOnly": "Ṣe àkójọ àwọn àkópọ̀ nìkan ní /v1/models",
+    "exposeCombosOnlyDesc": "Àwọn oníbàárà tí ń ṣàwárí àwòṣe fúnra wọn yóò rí àwọn àkópọ̀ rẹ (àti auto/* àyàfi tí wọ́n bá farapamọ́) dípò àwọn àwòṣe olùpèsè tí a kò ṣàtúnṣe. Àwọn ID provider/model tí a sọ ní kedere ṣì ń jẹ́ dídarí.",
     "catalogScopeTitle": "Àkójọ àwòṣe API",
     "catalogScopeDesc": "Ohun tí GET /v1/models fi hàn fún kọ́kọ́rọ́ yìí. Dídín àkójọ náà kù kì í yí ohun tí kọ́kọ́rọ́ náà lè pè padà.",
     "catalogScopeAll": "Méjèèjì",
@@ -8918,7 +9079,9 @@
         "financial": "Ti ìnáwó",
         "brazilian": "Ti Brazil",
         "usa": "Amẹ́ríkà",
-        "full": "Kíkún"
+        "full": "Kíkún",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Súúsù Áfíríkà)"
       },
       "builtinTypes": "Àwọn irú tí a kọ́ sínú",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "Àwọn àdírẹ́sì IPv4",
         "ipv6_address": "Àwọn àdírẹ́sì IPv6",
         "aws_key": "Àwọn kọ́kọ́rọ́ ìwọlé AWS",
-        "api_key_generic": "Àwọn kọ́kọ́rọ́ API àti tókìnì"
+        "api_key_generic": "Àwọn kọ́kọ́rọ́ API àti tókìnì",
+        "iban": "IBAN ifowo iroyin awọn nọmba",
+        "eu_vat": "EU VAT awọn nọmba",
+        "es_dni_nie": "Spani DNI / NIE",
+        "it_codice_fiscale": "Italian Codece Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID awọn nọmba",
+        "za_phone": "Awọn nọmba foonu South Africa",
+        "za_vat": "South African VAT awọn nọmba",
+        "za_tax_ref": "South African-ori to jo"
       },
       "customPatterns": "Àwọn àpẹẹrẹ àdáni",
       "customPatternsDesc": "A ó fi [CUSTOM_REDACTED] rọ́pò àwọn tí ó bá mu. Títí dé àpẹẹrẹ {max}. A ó kọ àwọn àpẹẹrẹ tí ó ní ewu ìpadàsẹ́yìn burúkú.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "Kọjá",
     "tomlTestFailed": "Kùnà",
     "tomlImportError": "Kò ṣeé ṣe láti ṣiṣẹ́ lórí fáìlì RTK TOML.",
-    "tomlFileReadError": "Kò ṣeé ṣe láti ka fáìlì TOML tí a yàn."
+    "tomlFileReadError": "Kò ṣeé ṣe láti ka fáìlì TOML tí a yàn.",
+    "viewMode": "Ipò ìwò"
   },
   "compressionEngineConfig": {
     "loading": "Ń gbé wọlé…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "Àwọn àkójọpọ̀ èdè: {packs}",
     "dragToReorder": "Fà á láti tún ipò ìgbésẹ̀ tò",
     "engine": "Ẹ́ńjìnnì",
-    "intensity": "Ìwọ̀n agbára"
+    "intensity": "Ìwọ̀n agbára",
+    "compressionOverride": "Àtúnkọjá ìfúnpọ̀"
   },
   "compressionStudio": {
     "noRun": "Kò sí iṣẹ́ ìfúnpọ̀ kankan tó wà.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "olùborí: {winner}",
     "encoder": "ẹ̀rọ ìyípadà",
     "bytes": "báìtì",
-    "tokensCl100k": "àwọn tókìnì (cl100k)"
+    "tokensCl100k": "àwọn tókìnì (cl100k)",
+    "studioViews": "Àwọn ìwò Studio"
   },
   "omniglyph": {
     "preview": "Àwòrán àkọ́kọ́",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "A kì í fún àwọn ìfiránṣẹ́ tó kúrú ju èyí lọ pọ̀. Tó bá kéré = ìfúnpọ̀ púpọ̀ sí i.",
     "tooltipMinSavings": "Fún un pọ̀ nìkan bí ó bá fi iye token yìí tàbí jù bẹ́ẹ̀ lọ pamọ́.",
     "ultraSettings": "Àwọn Ààtò Ultra",
-    "ultraSettingsDesc": "Ìfúnpọ̀ ìtumọ̀ tí SLM ń ṣe"
+    "ultraSettingsDesc": "Ìfúnpọ̀ ìtumọ̀ tí SLM ń ṣe",
+    "defaultLanguage": "Èdè àiyipada",
+    "viewMode": "Ipò ìwò"
   },
   "translator": {
     "title": "Olùtumọ̀",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "Yíyí ṣiṣàn padà kùnà"
   },
   "usage": {
+    "healthExtraUsageBypass": "Ààlà lílò ti tán; a gba àfikún lílò láàyè, nítorí náà iṣẹ́ ń bá a lọ.",
+    "healthPaidCreditsBypass": "Ààlà lílò ti tán; kírẹ́dítì tí a sanwó fún tó wà jẹ́ kí iṣẹ́ lè bá a lọ.",
+    "healthFilteringBypass": "Ààlà lílò ti tán; a ti pa àlẹ̀mọ́ ààlà lílò àdúgbò, nítorí náà iṣẹ́ ń bá a lọ.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
@@ -10001,6 +10184,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Àwọn Ààlà Olùpèsè",
     "noProviders": "Kò sí olùpèsè kankan tí a sopọ̀ mọ́",
+    "quotaAuthRequired": "A nílò ìfàṣẹsí — wọlé sí pánẹ́ẹ̀lì ìṣàkóso",
+    "quotaAuthRequiredHint": "A kò lè ṣàkójọpọ̀ àwọn àsopọ̀ olùpèsè nítorí pé àkókò ìṣiṣẹ́ pánẹ́ẹ̀lì ìṣàkóso kò sí tàbí ó ti parí. Wọlé kí o sì sọ ojú-ìwé náà dọ̀tun láti rí àwọn ààlà ìwọ̀n lílò rẹ.",
     "connectProvidersForQuota": "Sopọ̀ mọ́ àwọn olùpèsè pẹ̀lú OAuth láti tọpinpin àwọn ààlà ìpín API àti lílò rẹ.",
     "accountsCount": "{count, plural, one {# àkọọ́lẹ̀} other {# àkọọ́lẹ̀}}",
     "filteredFromCount": "(ti a ṣe àlẹ̀mọ́ láti inú {count})",
@@ -10050,9 +10235,6 @@
     "tierLite": "Fúyẹ́",
     "tierUnknown": "Àìmọ̀",
     "statTotal": "Àpapọ̀",
-    "statCritical": "Léwu púpọ̀",
-    "statAlert": "Ìkìlọ̀",
-    "statHealthy": "Ó dára",
     "filterPurchaseTypeLabel": "Irú",
     "filterTierLabel": "Ìpele",
     "purchaseAll": "Gbogbo rẹ̀",
@@ -10290,7 +10472,61 @@
     "updatedShort": "Ti sọ di tuntun",
     "lastRefreshed": "Ìgbà tí a sọ di tuntun kẹ́yìn",
     "providerQuota": "Ìpín Olùpèsè",
-    "providerQuotaHomeHint": "Ipò lọ́wọ́lọ́wọ́ lórí gbogbo àwọn àkọọ́lẹ̀ tí a so pọ̀"
+    "providerQuotaHomeHint": "Ipò lọ́wọ́lọ́wọ́ lórí gbogbo àwọn àkọọ́lẹ̀ tí a so pọ̀",
+    "claudeResetCreditDefaultTitle": "Àtúntò ààlà Claude",
+    "confirmRedeemClaudeResetCredit": "Rírapadà lẹ́sẹ̀kẹsẹ̀ ń tún àwọn ààlà ìlò Claude tí ó yẹ ṣe, yóò sì lo kírẹ́dìtì yìí run pátápátá.",
+    "claudeResetCreditsModalTitle": "Àwọn kírẹ́dìtì àtúntò Claude",
+    "claudeResetCreditsModalExplainer": "Àwọn kírẹ́dìtì àtúntò Claude tí ó wà àti àwọn àtúntò àkókò ìlò ọ̀sọ̀ọ̀sẹ̀ fún àkọọ́lẹ̀ yìí.",
+    "healthAccountHint": "Ó dá lórí àwọn àkíyèsí àìpẹ́, kì í ṣe ìdánwò tààrà. Yan àkọọlẹ̀ fún ẹ̀kúnrẹ́rẹ́.",
+    "healthRecovery": "Àkókò ìpadà tí a ń retí",
+    "healthAvailable": "Wà",
+    "healthRestricted": "A dí apá kan lọ́wọ́",
+    "healthUnavailable": "Kò wà",
+    "healthPeakHourProtection": "Ààbò ní àkókò ìdàpọ̀ iṣẹ́",
+    "healthCooldown": "Àkókò ìdúró",
+    "healthQuotaExhausted": "Ìpín ti tán",
+    "healthOverview": "Àkótán",
+    "layoutFull": "Kíkún",
+    "layoutCompact": "Ṣókí",
+    "healthQuotaError": "Kíkà ìpín kùnà",
+    "healthNoRuntime": "Ipò iṣẹ́ kò sí",
+    "healthPreviousSnapshot": "Ìmúdójúìwọ̀n ìkẹyìn kùnà; àbájáde ìṣáájú ni a ń fihàn",
+    "healthPreviousFailure": "Ìbéèrè ìkẹyìn kùnà; àkókò ìdúró ti parí",
+    "healthAwaitingSync": "Àkókò àtúntò ti kọjá; a ń dúró de ìṣiṣẹ́pọ̀",
+    "healthVerdictUnavailable": "Àbájáde àyẹ̀wò wíwà kò sí; ìwọ̀n ààlà lílo nìkan ni a ń fi hàn",
+    "healthSummaryFailed": "Kíkà àkótán ipò kùnà; àlàyé títì àwòṣe lè sọnù",
+    "healthRuntimeObserved": "A mú ipò dójú ìwọ̀n {time}",
+    "healthQuotaObserved": "A ṣàkíyèsí ìpín {time}",
+    "healthOldestQuota": "Àwòrán ìpín tó dàgbà jù: {time}",
+    "healthRecoveryUnknown": "A kò mọ àkókò ìmúpadàbọ̀",
+    "healthDetailsHint": "Tẹ̀ fún àlàyé àti iṣẹ́",
+    "healthFiveHour": "Wákàtí 5",
+    "healthOverall": "Lápapọ̀",
+    "healthAction": "Ó nílò ìgbésẹ̀",
+    "healthTitle": "Wíwà àwọn àkọọ́lẹ̀",
+    "healthDrag": "Fà láti tún àwọn olùpèsè tò",
+    "healthDragPosition": "{provider}, {count, plural, other {ipò {position, number} nínú #}}",
+    "healthResetOrder": "Dá ètò àiyipada padà",
+    "healthPool": "Ẹgbẹ́ {name}",
+    "healthOtherPool": "Àkọọ́lẹ̀ kan náà · {pool}: {status} ({remaining} ló kù)",
+    "healthIncluded": "Tí a dí díẹ̀: {count, number}",
+    "healthBannerUnavailable": "Àkọọ́lẹ̀ tí kò sí fún ìgbà díẹ̀: {count, number}",
+    "healthBannerAvailable": "Gbogbo àkọọ́lẹ̀ {count, number} wà",
+    "healthLegendHide": "Fi àlàyé àmì pamọ́",
+    "healthLegendShow": "Ṣàfihàn àlàyé àmì",
+    "healthLegendOk": "Àwọ̀ kíkún = ìpín tó kù; àwọ̀ tí ó mọ́ díẹ̀ = tí a ti lò.",
+    "healthLegendCooldown": "Ìpín {window} ti tán. Àwọ̀ kíkún = àkókò tí a ti dúró; àwọ̀ tí ó mọ́ díẹ̀ = àkókò tó kù.",
+    "healthLegendAction": "Àṣẹ ti parí tàbí a ti dí àkọọ́lẹ̀; dídúró kò ní tún un ṣe.",
+    "healthLegendPartial": "Ó ṣì ṣeé lò. Òkè ofeefee = àwoṣe tàbí ẹgbẹ́ tí a dí.",
+    "healthWaited": "A ti dúró {percent}",
+    "healthWait": "{duration} síi (yóò padà ní {time})",
+    "healthFastest": "Ìpadà tó súnmọ́ jù lẹ́yìn {duration}",
+    "healthRatio": "{available, number} / {active, number} wà",
+    "healthCd5": "Wákàtí 5 · Àkókò ìdúró",
+    "healthCdw": "Ọ̀sọ̀ọ̀sẹ̀ · Àkókò ìdúró",
+    "healthRecentSuccessBypass": "Ìdarí ìbéèrè gba àkọọ́lẹ̀ yìí láyè nítorí ìbéèrè kan ṣàṣeyọrí láìpẹ́.",
+    "healthPurchasedBalanceBypass": "Owó tó ṣẹ́ kù nínú èyí tí a rà jẹ́ kí lílò máa bá a lọ lẹ́yìn tí ìpín tó wà nínú ètò bá tán.",
+    "healthCutoffAtRequest": "A máa ń ṣàyẹ̀wò ààlà ìpín ti àkókò gidi nígbà dídarí ìbéèrè."
   },
   "modals": {
     "waitingAuth": "Ń dúró de Àṣẹ",
@@ -11077,7 +11313,8 @@
       "message": "Ìfiránṣẹ́",
       "error": "Àṣìṣe",
       "completion": "Ìparí"
-    }
+    },
+    "statusFilter": "Ipò"
   },
   "templateNames": {
     "simple-chat": "Ìjíròrò Rọrùn",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "ìṣẹ́jú {minutes} sẹ́yìn",
     "hoursAgo": "wákàtí {hours} sẹ́yìn",
     "daysAgo": "ọjọ́ {days} sẹ́yìn",
-    "entries": "Àwọn Àkọsílẹ̀"
+    "entries": "Àwọn Àkọsílẹ̀",
+    "viewSwitcherAria": "Ìwò cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Gbogbogbo",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "A kò tíì ṣètò GitLab Duo OAuth. Forúkọsílẹ̀ ohun èlò OAuth ní {applicationsUrl} pẹ̀lú URI ìpadà {redirectUri} àti àwọn scopes \"{scopes}\", lẹ́yìn náà ṣètò {clientIdEnv} (àti {clientSecretEnv} bí o bá fẹ́) kí o sì tún un bẹ̀rẹ̀.",
     "gitlabDuoSetupDescription": "Lẹ́yìn tí a bá ti forúkọsílẹ̀ ohun èlò náà tí a sì ti ṣètò àwọn env vars lórí instance OmniRoute yìí, tẹ Tẹ̀síwájú láti bẹ̀rẹ̀ ìwọlé OAuth.",
     "continue": "Tẹ̀síwájú",
+    "copilotPolicyTitle": "Olupese esiperimenta: ipo eto imulo jẹ aibikita",
+    "copilotPolicyLine1": "OmniRoute sopọ nipasẹ api.githubcopilot.com, eyiti GitHub ko ti ṣe atẹjade bi itọkasi ẹnikẹta gbogbogbo API. Ibarapọ yii jẹ adanwo ati pe o le yipada laisi akiyesi.",
+    "copilotPolicyLine2": "Akọọlẹ GitHub tirẹ nikan ni o le sopọ. Maṣe pin awọn iwe-ẹri, awọn akọọlẹ adagun-odo, tabi gbiyanju lati kọja awọn opin ero rẹ.",
+    "copilotPolicyLine3": "Ọfẹ ati awọn olumulo ero ọmọ ile-iwe gba yiyan awoṣe adaṣe nikan. Awọn ofin ero Copilot rẹ ati awọn opin lilo eyikeyi jẹ ojuṣe rẹ.",
+    "copilotPolicyAcknowledge": "Mo ye, so",
     "tabPasteSetupToken": "Àmì ìṣètò",
     "claudeSetupTokenDescription": "Ṣiṣẹ́ `claude setup-token` nínú tẹ́mínà kí o sì lẹ àmì tí ó tẹ̀ jáde. Ó wúlò fún ọdún kan kò sì ní àmì ìsọdọ̀tun. OmniRoute ń fi ìbéèrè ìdánwò kan ránṣẹ́ sí Anthropic kí ó tó fi pamọ́.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Ìlera (wákàtí 24)",
     "tableUsage": "Ìlò",
     "tableActions": "Àwọn ìgbésẹ̀",
+    "moreActions": "Àwọn ìgbésẹ̀ míì",
     "test": "Dán wò",
     "edit": "Ṣàtúnṣe",
     "delete": "Paarẹ́",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "A kò rí àkọsílẹ̀ tó péye. Ṣàyẹ̀wò ọ̀nà ìṣètò náà kí o sì gbìyànjú lẹ́ẹ̀kan sí i.",
     "bulkImportSuccess": "Ìṣàgbéwọlé ti parí: a ṣẹ̀dá {created}, a ṣe ìmúdójúìwọ̀n {updated}, {failed} kùnà",
     "bulkImportErrorLine": "Ìlà {line}: {reason}",
-    "bulkImportMaxExceeded": "Proxy 100 ni ó pọ̀ jù fún ìṣàgbéwọlé kọ̀ọ̀kan",
+    "bulkImportMaxExceeded": "Prọ́ṣì {max} ni ó pọ̀ jù fún ìṣàgbéwọlé kọ̀ọ̀kan",
     "bulkImportPreview": "Àwòtẹ́lẹ̀",
     "clearAssignment": "(yọ ìyàn kúrò)",
     "bulkProxyAssignment": "Ìyàn Prọ́ṣì Ní Ọ̀pọ̀lọpọ̀",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "ìdíwọ̀n ìyára IP (429)",
     "poolSetAsideKindSlow": "ìdáhùn tó lọ́ra",
     "poolSetAsideKindGeoBlocked": "agbègbè dídínà (403/451)",
+    "poolSetAsideKindOperatorReported": "ṣìṣẹ́ tí olùṣàkóso ṣe ìkìlọ̀",
     "poolSetAsideUntil": "Pada si yiyi {endsAt}",
     "poolSetAsideRepeat": "A ya sọtọ {count, plural, one {# igba} other {# igba}}",
     "poolUnknownAddress": "Adirẹsi aimọ",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "Gbé Kóòdù Jáde",
     "exportShort": "Gbé jáde",
     "noStateToExport": "Kò sí ipò playground tó wà láti gbé jáde.",
-    "closeExportModal": "Pa fèrèsé gbígbéjáde",
     "close": "Pa á",
     "exportRealKeyWarning": "Ìkìlọ̀ ààbò: a dènà gbígbéjáde — a ṣàwárí bọ́tìnì API gidi kan nínú àbájáde náà. Jọ̀wọ́ tún bọ́tìnì API rẹ ṣètò kí o sì gbìyànjú lẹ́ẹ̀kan síi.",
     "placeholderHintPrefix": "Rọ́pò",
@@ -11808,7 +12052,8 @@
       "nextButton": "Tókàn",
       "runButton": "Mú ṣiṣẹ́",
       "promptPlaceholder": "Tẹ ìfiránṣẹ́ rẹ… (Enter láti fi ránṣẹ́, Shift+Enter fún ìlà tuntun)"
-    }
+    },
+    "playgroundTabs": "Àwọn ipò Playground"
   },
   "miniPlayground": {
     "endpoint": "Ojú-ọ̀nà ìparí",
@@ -11879,7 +12124,8 @@
     "assistant": "Olùrànlọ́wọ́",
     "errorLabel": "Àṣìṣe",
     "requestFailed": "Ìbéèrè náà kùnà",
-    "stop": "Dá dúró"
+    "stop": "Dá dúró",
+    "messageInputAria": "Ìfiránṣẹ́"
   },
   "requestLogger": {
     "recording": "Ń ṣe àkọsílẹ̀",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "Ìyípo àkáǹtì {count}",
       "resilienceRetried": "A tún gbìyànjú àyípo òfo",
       "resilienceContinued": "A tẹ̀síwájú láàrin ìṣàn",
-      "resilienceRecovered": "A gbà padà nípasẹ̀ ìgbésẹ̀ ìfaradà"
-    }
+      "resilienceRecovered": "A gbà padà nípasẹ̀ ìgbésẹ̀ ìfaradà",
+      "conversationContext": "Àyíká ìjíròrò",
+      "goToBottom": "Lọ sí ìsàlẹ̀",
+      "liveRefreshOn": "Ìsọdọ̀tun lẹ́sẹ̀kẹsẹ̀: ń ṣiṣẹ́",
+      "liveRefreshOff": "Ìsọdọ̀tun lẹ́sẹ̀kẹsẹ̀: kò ṣiṣẹ́",
+      "liveRefresh": "Ìsọdọ̀tun lẹ́sẹ̀kẹsẹ̀",
+      "continuesFromParent": "ń tẹ̀síwájú láti ìbéèrè òbí",
+      "continuesFrom": "Tẹ̀síwájú láti {id}",
+      "viewConversation": "wo ìjíròrò",
+      "openConversation": "Ṣí ìjíròrò {id}"
+    },
+    "tableLabel": "Àwọn àkọọlẹ̀ ìbéèrè",
+    "throughputPostFirstToken": "Lẹ́yìn àkọ́kọ́ tọ́kẹ̀nì",
+    "throughputEndToEnd": "Láti ìbẹ̀rẹ̀ dé ìparí",
+    "throughputRate": "{value} tọ́kẹ̀nì/sẹ́kọ̀ndì",
+    "throughputExplanation": "Àwọn ìwọ̀n méjèèjì ń lo èyí tó tóbi jù nínú iye tọ́kẹ̀nì ìjáde àti ìrònú. Lẹ́yìn àkọ́kọ́ tọ́kẹ̀nì kò ní TTFT tó wúlò; bí bẹ́ẹ̀ kọ́, ó ń lo gbogbo àkókò. Láti ìbẹ̀rẹ̀ dé ìparí ń lo gbogbo àkókò nígbà gbogbo. Ìdáhùn tí a kó jọ lè ní ìwọ̀n ìfijíṣẹ́ gíga láìsí ìpilẹ̀ṣẹ̀ àwòkọ́ tó yára jù."
   },
   "proxyLogger": {
     "filterAll": "Gbogbo rẹ̀",
@@ -12112,7 +12372,9 @@
     "colServedBy": "Ti a ṣe nipasẹ",
     "filterTraffic": "Iṣan omi",
     "filterTests": "Awọn idanwo",
-    "filterSource": "Orisun"
+    "filterSource": "Orisun",
+    "tableLabel": "Àwọn àkọọlẹ̀ aṣojú",
+    "sortLogs": "Ṣètò àwọn àkọọlẹ̀"
   },
   "endpointOptions": {
     "speech": "Ọ̀rọ̀",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "Ó TI TÁN",
     "statusAlerting": "ÌKÌLỌ̀ Ń LỌ",
     "statusError": "ÀṢÌṢE",
-    "moreSuffix": "+{count} míì"
+    "moreSuffix": "+{count} míì",
+    "feedFilterLabel": "Ṣe àlẹ̀mọ́ àwọn ìṣẹ̀lẹ̀"
   },
   "quotaShare": {
     "weightPercent": "Ìwọ̀n %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "Àìpín-sí-ẹgbẹ́",
     "ungroupedHint": "A kò yan àwọn àkójọpọ̀ wọ̀nyí sí ẹgbẹ́ tí a mọ̀. Ṣàtúnṣe àkójọpọ̀ kan láti gbé e sínú ẹgbẹ́ gidi.",
     "removeFailed": "A kò lè yọ àkójọpọ̀ yìí kúrò.",
-    "dismiss": "Pa á tì"
+    "dismiss": "Pa á tì",
+    "allocationsHeading": "Àwọn ìpín",
+    "wizardRemoveDimension": "Yọ ìwọ̀n kúrò",
+    "wizardRemoveKey": "Yọ kọ́kọ́rọ́ kúrò"
   },
   "plugins": {
     "title": "Àwọn àfikún",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "Ìmúdójúìwọ̀n àwọn ààtò kùnà",
       "serviceRevealApiKey": "{actor} ṣàfihàn kọ́kọ́rọ́ API fún {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Pa àṣìṣe náà tì"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "Lọ báyìí",
       "message": "MITM Proxy wà lábẹ́ AgentBridge báyìí.",
       "title": "A ti gbé ojúewé yìí lọ"
-    }
+    },
+    "dnsOn": "DNS ti tan",
+    "dnsOff": "DNS ti kú",
+    "showServerSettings": "Ṣàfihàn àwọn ètò olupin",
+    "hideServerSettings": "Fi àwọn ètò olupin pamọ́",
+    "upstreamCaTesting": "Ń dán wò…",
+    "removeMapping": "Yọ ìbámu kúrò",
+    "mappingSourcePlaceholder": "fún àpẹẹrẹ, gemini-3.6-flash-medium, tàbí * fún gbogbo èyí tí kò ní ìbámu",
+    "mappingWildcardHint": "Lo * gẹ́gẹ́ bí orísun láti darí gbogbo àwòṣe tí kò ní ìbámu pàtó gba OmniRoute lọ sí ibi àfojúsùn tí a yàn. Ìbámu orísun gangan máa ń ní ẹ̀tọ́ ṣáájú * ní gbogbo ìgbà.",
+    "wizardDetectingModels": "Ń ṣàwárí àwọn àwòṣe láti inú ìṣàn dátà tí a dá sí ọ̀nà...",
+    "wizardDetectedModels": "A rí {count, plural, one {# àwòṣe} other {# àwọn àwòṣe}} nínú ìṣàn dátà tí a dá sí ọ̀nà. Yan àwọn tí o fẹ́ ṣàfikún:",
+    "wizardSelectedModels": "A ti yan {count, plural, one {# àwòṣe} other {# àwọn àwòṣe}}. Ìwọ yóò ṣe ìbámu wọn pẹ̀lú àwọn àwòṣe OmniRoute ní ojú-ìwé tó kàn.",
+    "wizardAddModels": "Ṣàfikún {count, plural, one {# àwòṣe} other {# àwọn àwòṣe}}",
+    "wizardNoModelsDetected": "A kò tíì ṣàwárí àwòṣe kankan. Lo {agent} láti ṣe ìbéèrè kan, lẹ́yìn náà tún olùrànlọ́wọ́ ìṣètò yìí ṣiṣẹ́ láti ṣàwárí àwọn àwòṣe láti inú ìṣàn dátà láìfọwọ́ṣe.",
+    "wizardNoModelsHint": "Tàbí pa olùrànlọ́wọ́ ìṣètò yìí, kí o sì ṣàfikún àwọn ìbámu fúnra rẹ nínú káàdì aṣojú."
   },
   "providerStats": {
     "unknownError": "Àṣìṣe àìmọ̀",
@@ -12685,7 +12966,12 @@
     "avgTtft": "TTFT Ní Ìpíndọ́gba",
     "avgTotal": "Àpapọ̀ Àkókò Ní Ìpíndọ́gba",
     "requestTelemetry": "Tẹlímẹ́tírì Ìbéèrè",
-    "requestTelemetryDescription": "Ìpín ọ̀nà ìṣiṣẹ́ onípele méje (ìṣẹ́jú márùn-ún tó kọjá)"
+    "requestTelemetryDescription": "Ìpín ọ̀nà ìṣiṣẹ́ onípele méje (ìṣẹ́jú márùn-ún tó kọjá)",
+    "title": "Àwọn ìṣirò olùpèsè",
+    "description": "Ìṣàn, àkókò ìdádúró àti àwọn oṣùwọ̀n àṣeyọrí fún olùpèsè kọ̀ọ̀kan àti àwòṣe kọ̀ọ̀kan",
+    "combo": "Àkójọpọ̀",
+    "toggleModels": "Ṣàfihàn àwọn àwòṣe fún {provider}",
+    "windowSince": "Tió {date}"
   },
   "relay": {
     "title": "Àwọn Prọ́ọ̀sì Relay Aláìní Sẹ́fà",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "Kò sí àkóónú ìbéèrè.",
     "noResponseBody": "Kò sí àkóónú ìdáhùn.",
     "formatted": "Tí a ṣe àgbékalẹ̀",
-    "raw": "Gẹ́gẹ́ bí ó ṣe rí"
+    "raw": "Gẹ́gẹ́ bí ó ṣe rí",
+    "requestCount": "{count, plural, one {# ìbéèrè} other {# àwọn ìbéèrè}}",
+    "expandList": "Fẹ àkójọ náà sí i",
+    "collapseList": "Kó àkójọ náà pọ̀",
+    "snippetLanguage": "Èdè àjákù kóòdù",
+    "headersTable": "Àwọn àkọlé",
+    "showSecrets": "Ṣàfihàn àwọn àṣírí",
+    "maskSecrets": "Bo àwọn àṣírí",
+    "llmNotAvailable": "Àlàyé àfikún LLM kò sí fún ìbéèrè yìí.",
+    "llmStreamYes": "bẹ́ẹ̀ ni (SSE)",
+    "llmStreamNo": "rárá",
+    "llmTotalTokens": "Àpapọ̀: àmì {count}"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "Àwọn CLI fún kóòdù",
     "pageSubtitle": "Àwọn irinṣẹ́ kóòdù tó ń tọ́ka sí OmniRoute",
     "searchPlaceholder": "Ṣàwárí CLI…",
     "filterDetectionLabel": "Ìṣàwárí",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "A kò rí i",
     "baseUrlAll": "Gbogbo rẹ̀",
     "baseUrlFull": "Kíkún",
-    "baseUrlPartial": "Apá kan"
+    "baseUrlPartial": "Apá kan",
+    "title": "Kóòṣì CLI"
   },
   "cliAgents": {
     "pageTitle": "Àwọn Aṣojú CLI",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "Ìpín àwọn ìpè tí olùpèsè yìí dáhùn ní ti gidi láàárín wákàtí 24 tó kọjá. Àmì ìlà túmọ̀ sí pé ìwọ̀n ìrìnàjò tó bójú tó kéré jù láti fi sọ ìwọ̀n kan.",
     "reliabilitySample": "{successes} nínú àwọn ìpè {requests} ló ṣàṣeyọrí láàárín {hours}h tó kọjá",
     "reliabilityTooFew": "Àwọn ìpè {requests} péré láàárín {hours}h tó kọjá — ó kéré jù láti fi sọ ìwọ̀n kan",
-    "reliabilityNoTraffic": "A kò ṣe àkọsílẹ̀ ìpè kankan láàárín 24h tó kọjá"
+    "reliabilityNoTraffic": "A kò ṣe àkọsílẹ̀ ìpè kankan láàárín 24h tó kọjá",
+    "categoryFilter": "Ẹ̀ka iṣẹ́"
   },
   "discovery": {
     "title": "Ìṣàwárí Olùpèsè",
@@ -13330,7 +13628,11 @@
     "method": "Ọ̀nà",
     "auth": "Ìfàṣẹsí",
     "feasibility": "Ṣíṣeéṣe",
-    "models": "Àwọn àwòṣe"
+    "models": "Àwọn àwòṣe",
+    "provider": "Olùpèsè",
+    "status": "Ipò",
+    "endpoint": "Ojú-ọ̀nà ìparí",
+    "actions": "Àwọn ìṣe"
   },
   "noAuthProvider": {
     "title": "Kò nílò ìfàṣẹsí",
@@ -13379,7 +13681,8 @@
     "ownProxy": "Proxy tirẹ",
     "freeTierPause": "Ọ̀rọ̀ àwọnìwò {model} dúró (429), padà ní {time}",
     "freeTierPauseProvider": "Dúró (429), padà ní {time}",
-    "freeTierPauseNote": "Ìdádúró inú ohun àtìjọṣọ lórí àfihàn yìí"
+    "freeTierPauseNote": "Ìdádúró inú ohun àtìjọṣọ lórí àfihàn yìí",
+    "proxyType": "Irú proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "Àṣeyọrí ìkọ̀kọ̀ kan ń dúró de ọ...",
         "criteria": "Parí àṣeyọrí ìkọ̀kọ̀ náà láti ṣí báàjì yìí payá."
       }
-    }
+    },
+    "leaderboardTitle": "Tábìlì ipò",
+    "leaderboardDescription": "Àwọn ipò àti àṣeyọrí káàkiri àwọn kọ́kọ́rọ́ API rẹ",
+    "badgeLocked": "Tíì pa"
   },
   "featureFlags": {
     "title": "Àwọn Àsìá Ẹ̀yà",
@@ -13610,7 +13916,9 @@
       "disabled": "Ti pa",
       "dual": "Méjèèjì",
       "alias": "Orúkọ àfirọ́pò",
-      "canonical": "Àṣẹ̀dá"
+      "canonical": "Àṣẹ̀dá",
+      "fail_closed": "Dínà (fail_closed)",
+      "count_as_zero": "Kà sí $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Àwọn Ìdádúró Amáyédẹrùn Tó Ní Ààyò Ààbò Gẹ́gẹ́ Bí 502",
         "description": "Dáhùn pẹ̀lú 502 dípò 503 nígbà tí ibi-àfojúsùn tó ní ààyò, tí ìfàsẹ́yìn rẹ̀ jẹ́ fún quota nìkan, bá dá combo dúró nítorí ohun tí a lè fi ẹ̀rí hàn pé kì í ṣe quota: provider circuit breaker tó ṣí tàbí fífo nítorí ìdádúró àsọtẹ́lẹ̀."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Ṣàkàn Ẹ̀kọ́ àwọn ID iṣẹ́",
+        "description": "Àfikún àwọn prefix iṣẹ́ nínpo àwọn ohun-ọrọ̀ log AUTH (ọ. d. \"Nílò iṣẹ́ '<provider>': abc12345...\"). Ó wà ní pípa ní àkọ́kọ́ láti yọ àwọn idénà iṣẹ́ kúrò nínpo àwọn log ọ̀rẹ́/àwọn olùtẹ́jọ ẹ̀yà méjì. Ó dúró sí oríṣiṣe; lílo Debug Mode kò fi e dá wọ́le."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Dí Ẹ̀wọ̀n Tún Sí Wọlé Pẹ̀lú OIDC",
+        "description": "Nígbà tí OIDC bá wà ní títàn, dí ẹ̀wọ̀n tún sí wọlé kí àwọn olùtẹ́jọ wọle nìkan nípasí OIDC Single Sign-On. Nígbà tí ó wà ní pípa (àkọ́kọ́), ẹ̀wọ̀n tún sí wọlé àti OIDC jẹ́ àṣàyàn méjèèjì."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Àwọn Nòòdù Ìṣẹ́ Ọ̀ràn Kù-àtọ́ka Ẹ̀yà Mésan",
+        "description": "Sọ àwọn /v1/audio/* láti lo àwọn nòòdù iṣẹ́ ìlò OpenAI-compatible tí wọ́n wà ní ìbámu pẹ̀lú àwọn ìpèjè kọ̀tẹ̀kọ̀tẹ̀. Ó wà ní pípa ní àkọ́kọ́ — jíji ọ̀ràn kù-àtọ́ka sí olùkúlù kòtẹ̀kọ̀tẹ̀ mú ipò egress yípadà, ó sì gbọdọ̀ jẹ́ ìpinnu alabúsè tó ṣeéṣe. Àwọn nòòdù loopback máa nílò nígbàkọ̀gbe, kò ní ipa."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Àwọn Nòòdù Ìṣẹ́ Rerank Ẹ̀yà Mésan",
+        "description": "Sọ POST /v1/rerank (àti ìgbé-ìbámu rerank ọ̀rọ̀-ẹ̀yà, tí ọ pẹ́ loopback) láti lo àwọn nòòdù iṣẹ́ ìlò OpenAI-compatible tí wọ́n wà ní ìbámu pẹ̀lú àwọn ìpèjè kọ̀tẹ̀kọ̀tẹ̀ — ọkọ LAN tààṣe Tailscale peer tí TEI, Infinity, vLLM, b. tí wọn wà lórí e. Ó wà ní pípa ní àkọ́kọ́ — jíji sí olùkúlù kòtẹ̀kọ̀tẹ̀ mú ipò egress yípadà, ó sì gbọdọ̀ jẹ́ ìpinnu alabúsè tó ṣeéṣe. Àwọn nòòdù loopback máa nílò nígbàkọ̀gbe, kò ní ipa. Àwọn nòòdù ẹ̀yà mésan gbọdọ̀ kọ́pa pọ̀nìpèjè URL iṣẹ́ oju-ọrọ̀ láti inú kó."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Àdánidá Ìbámu Egress Ẹ̀wọ̀n Tún Sí",
+        "description": "Nígbà tí ìṣẹlẹ̀ nẹ́tìwọ̀nà (timeout, ìbámu kò ṣeéṣe/àdúrà) bọ sí olùkúlù àwọn iṣẹ́ méjèèjì, nígbà tí iṣẹ́ kan kò ní proxy kan patọ̀, ṣe àdúrà kúkù, kí o si yọ àwọn iṣẹ́ tí kò ní proxy yókò ojú àkókò tí ó kù fún ìbámu yẹn, dọ́gba ṣe ayẹ́ tí kò ní proxy. Ó wà ní títàn ní àkọ́kọ́ (tótò: kò yí padà IP egress, ṣṣí ṣe irọrun latency/àdúrà lórí àwọn iṣẹ́ egress ẹ̀wọ̀n tún sí). Dí e láti tún ìbámu ìbẹ̀rẹ̀ padà lórí ìbá tí kò ní proxy àkọ́kọ́."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Da Ẹlẹ́ṣẹ́́ tí Ó Ìṣẹ́síì Ọjọ́ Ọwọ́n Rẹ́",
+        "description": "A gbigbe pool ẹlẹ́ṣẹ́́ àti iyipada ìṣẹ̀lẹ̀ tó jẹ́ àyíká àkọsílẹ̀ oṣùwọ̀n ìṣẹ́ opencode yòò dáwọ̀ mọ́ ẹlẹ́ṣẹ́́ tí ó dàbá ìyọ̀ (tí ó wà ní aabo TCP probe, tàbí 429 tí ó wá kọ́pa nínú ẹnuun rẹ̀) fún àyà ìṣẹ̀lẹ̀ tí ó mọ́ lórí ìṣẹ̀lẹ̀ kọ̀ọ̀kan, dé ibi tí ó pọ̀ jù. Kò sí àwọn ìṣàwísí ẹlẹ́ṣẹ́́ tí a kọ; pẹ̀lú àwọn àkójọpọ̀ ológbé àti àkójọpọ̀ tí a fí ìgbárá, ìṣàwísí kò yípadà. Ó ṣiṣẹ́ ní ìbẹ̀rẹ̀ pẹ̀lú: àṣàyàn ìṣàwísí jẹ́ àyà ìṣẹ̀lẹ̀ tó pẹ́ tó àwọn ẹlẹ́ṣẹ́́ nígbà tí PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Àyà ìṣàwísí Pool Egress Tí Wọ́n Kọ́pa Rárá",
+        "description": "Fún àwọn ìṣàyàn tí oṣùwọ̀n wọn jẹ́ àyà tí a túmọ̀ pẹ̀lú àdírẹ́sì egress, sọ ìṣàwísí olóòrì pool tí ó gbé àdírẹ́sì egress tí a rí jọwọ́ tí olóòrì tí ó dàbá ìyọ̀ jọ. Àyà ìṣàwísí nìkan, kì í ṣe àyà tí a fí iṣàwísí. Ó nílò PROXY_SKIP_RECENTLY_FAILED, èyí tí ó ṣe àkọsílẹ̀ ìṣàwísí rẹ̀. Kò ṣiṣẹ́ ní ìbẹ̀rẹ̀: àyà ìṣàwísí jẹ́ àyà ìṣàwísí tó pẹ́ tó àwọn ẹlẹ́ṣẹ́́."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Àkọsílẹ̀ Ìṣẹ̀lẹ̀ Ìṣàwísí",
+        "description": "Ìṣàwísí Opencode kọ àwọn akọsilẹ tí ó fìdí rẹ̀ múlẹ̀ pé akọsilẹ kan ni ó kó ìṣàwísí tàbí tí a fí ìṣàwísí (àwọn akọsilẹ tí a fí àwoṣe nìkan, kì í ṣe àwọn akọsilẹ̀ tó ní gbogbo àwọn akọsilẹ̀) àti ó gbe àwọn àkọsilẹ̀ ẹlẹ́ṣẹ́́ mọ́ àwọn ìbéèrè wọn, nígbà tí a lè sọ àwọn akọsilẹ̀ tí a fí ìṣàwísí àti àwọn tí a kò ṣàkójọpadà. Kò ṣiṣẹ́ ní ìbẹ̀rẹ̀: kò sí àwọn àkọsílẹ̀ àdárà, kò sí àwọn àdákọ àdárà tí a kọ."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Ìyàjọ Àyà Egress Pool Ẹlẹ́ṣẹ́́",
+        "description": "Fihàn, lábẹ́ pool ẹlẹ́ṣẹ́́ ní inu dashboard, iye àwọn àdírẹ́sì egress tí a rí tí wọ́n kó ìṣàwísí fún àwọn olóòrì rẹ̀ nínú àwọn wákàtí 24 tẹ́lẹ̀, iye àwọn ìso-ọ̀rọ tí ó lo wọn àti àyà tí ó pọ̀ jù ń lẹ́ẹ̀kọ̀ọ̀kan lẹ́ẹ̀yà. Àkọsílẹ̀ nìkan, tí a ṣe ìṣirò lati ọdọ àkọsílẹ̀ ẹlẹ́ṣẹ́́, kì í ṣe àyà tí a lè lo fún ìṣàwísí. Kò ṣiṣẹ́ ní ìbẹ̀rẹ̀: olùkọ́ àdún pool kò yípadà, àti àyà ìyàjọ náà dáwọ̀ mọ́ null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Iṣẹ́lẹ̀ Ẹlẹ́ṣẹ́́ Egress Tí O Ìṣàkóso",
+        "description": "Gbà àwọn àdírẹ́sì tí a ṣe àyẹ̀ tí a wà fún àyè kọ̀ọ̀kan nínú àyè olóòrì pool àti jọpa pẹ̀lú àkọsílẹ̀ tí a ka fún ìtọ́ka àti àyà pool. Kò ṣiṣẹ́ ní ìbẹ̀rẹ̀: ìbẹ̀rẹ̀ ìṣàwísí náà dáwọ̀ mọ́ 404, àti àwọn ìka pool ṣiṣẹ́ gẹ́gẹ́ bí òṣùwọ̀n rí ni."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses Stall Rotation",
+        "description": "Fún OpenCode executor, ṣàkíyèsí byte àkọ́kọ́ ti body ìdáhùn Responses tí a ń ṣàn (fèrèsé: RESPONSES_FIRST_BYTE_TIMEOUT_MS, àìyípadà 15000). Ìṣàn Responses 2xx tí ó bá dákẹ́ kọjá fèrèsé náà ni a ó kà sí èyí tí ó dúró: a ó fi àkọọ́lẹ̀ náà sí àkókò ìsinmi, ìbéèrè náà yóò sì yí lọ sí àkọọ́lẹ̀ tókàn lẹ́ẹ̀kan; ìdúró kejì yóò kùnà lẹ́sẹ̀kẹsẹ̀. Pípa ní àìyípadà: àwọn ìṣàn tí ó dúró yóò máa dúró bí ti òní títí àkókò ìmúrasílẹ̀ ìṣàn (stream readiness timeout) yóò fi tán."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked Rotation",
+        "description": "Fún OpenCode executor, nígbà tí upstream bá dáhùn pẹ̀lú 403 tàbí 451 tí ó gbé ìkọ̀sílẹ̀ user_blocked (kì í ṣe ìdènà agbègbè, kì í ṣe ìkọ̀sílẹ̀ fingerprint Cloudflare), fi àkọọ́lẹ̀ tí a kọ̀ náà sí àkókò ìsinmi kí o sì yí lọ sí àkọọ́lẹ̀ tókàn ní ẹ̀ẹ̀kan péré fún ìbéèrè kọ̀ọ̀kan; ìkọ̀sílẹ̀ kejì ni a ó dá padà bí ó ti rí láìsí àmì àṣeyọrí. Pípa ní àìyípadà: yíyí ọ̀nà ká ìdènà olùmúlò upstream lè dàbí ìyẹ̀sílẹ̀, ó sì lè tan àmì náà ká gbogbo àwọn àkọọ́lẹ̀, nítorí náà a ó dá ìkọ̀sílẹ̀ náà padà láìyípadà àyàfi tí olùṣiṣẹ́ bá yàn án."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode Transient Failover Backoff",
+        "description": "Fún yíyípo ọ̀pọ̀ àkọọ́lẹ̀ OpenCode, dúró díẹ̀ kí o tó fi ìbéèrè ránṣẹ́ sí àkọọ́lẹ̀ tó kàn nígbà tí ìgbìyànjú méjì tó tẹ̀léra bá kùnà pẹ̀lú àṣìṣe upstream onígbà díẹ̀ (5xx tàbí ìkọ̀sílẹ̀ 400 tó ṣófo). Ìdúró náà bẹ̀rẹ̀ ní 1.5s, ó máa ń di ìlọ́po méjì fún ìkùnà kọ̀ọ̀kan tó tún tẹ̀lé e, kò lè ju 6s lọ fún ìdúró kan àti 10s fún ìbéèrè kan, a máa fò ó nígbà tí client bá já ìsopọ̀, a sì máa tú body ìdáhùn tó kùnà sílẹ̀ kí a tó dúró. Ó wà ní pípa ní àkọ́kọ́: failover máa ń ṣẹlẹ̀ lẹ́sẹ̀kẹsẹ̀."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Flush Empty Turn Retry",
+        "description": "Lórí àwọn ìyípo streaming tí a túmọ̀, nígbà tí ìyípo upstream kò ní àkóónú tó wúlò (completion tí ó jẹ́ reasoning nìkan tàbí láìsí chunk tó níye lórí kankan), ṣe àwọn ìgbìyànjú lẹ́ẹ̀kan sí i tó ní ààlà nípasẹ̀ ọ̀nà credential déédéé (títí dé `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) kí ohunkóhun tó hàn sí client. Ó wà ní pípa ní àkọ́kọ́: àwọn ìyípo tó ṣófo máa ń tẹ̀síwájú pẹ̀lú ìhùwàsí lọ́wọ́lọ́wọ́ (200 tó ṣófo tàbí 502 àkóónú tó ṣófo)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Empty Stream Sibling Recovery",
+        "description": "Claude/Codex streaming: lẹ́yìn ìṣẹ̀lẹ̀ lifecycle àkọ́kọ́, ṣàyẹ̀wò ní ṣókí (títí dé 1s / 64 KiB) fún ìjáde tó wúlò; stream tó parí láìsí àkóónú máa di ìkùnà empty_content tí ó lo ìgbìyànjú lẹ́ẹ̀kan sí i tó ní ààlà tó wà tẹ́lẹ̀ lórí ìsopọ̀ mìíràn tó yẹ (kò sí cooldown, kò sí títi àwòṣe pa), àwọn combo round-robin sì máa dúró láti gbìyànjú lẹ́ẹ̀kan sí i ní kété tí client bá já ìsopọ̀. Ó tún ka refusal, pause_turn àti model_context_window_exceeded sí ìparí òfo tó bófin mu nínú àyẹ̀wò náà. Ó wà ní pípa ní àkọ́kọ́: readiness, ìtọ́jú àkóónú tó ṣófo àti ìgbìyànjú lẹ́ẹ̀kan sí i ti combo máa wà gẹ́gẹ́ bí ti tẹ́lẹ̀ gan-an."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Ìtọ́sọ́nà Ìṣẹ̀ Ẹ̀mí Ìdíwọ́n Ìsàlẹ́",
+        "description": "Ìtọ́sọ́nà Ìṣẹ̀ Ẹ̀mí Ìdíwọ́n: lẹ́yìn pé àwọn ẹ́yọ́ ìgbésí-ayé 64 àkọ́kọ́ tí a tí gbe sókè, bẹ̀rẹ̀ ẹ́yọ́ kan nínu 16 fún àwọn àkójọ́pọ̀ ìwé àkọ́kọ́ tí a ṣe àwárí, kó ó sì jẹ́ ká tọ́ka pé ẹ̀mí náà ti fífá àkójọ́pọ̀ láti í ṣíṣẹ́. Lẹ́yìn ibẹ̀, 5xx kan nìkan yóò dà bí i ìbéèrè àtọ́jú kọ́ọ̀kọ́ rẹ̀, kò sì fi àmì ìdènà àfàhàn lórí àwọn ẹ̀rín tí a lo nìkan, níbi tí firstOutputMs ti máa gbẹ́ kẹ́ ní àkójọ́pọ̀ àkọ́kọ́ nínu ìbákùn àwárí yìí. Kò tí í ṣiṣẹ́ ní ìbẹ̀rẹ̀: àwọn ẹ́yọ́ ìgbésí-ayé 64 àkọ́kọ́ tí a gbe sókè nìkan ni a ń ṣe àwárí, gẹ́gẹ́ bí i t’ì yà lójú."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode À Ìdíwọ́n Ìkọ́lu 429 Lọ́tọ̀tọ̀",
+        "description": "Fún ìyípadà àwọn akọ́ka OpenCode púpọ̀, dúró àwọn akọ́ka ní ìkọ́lu 429 àkọ́kọ́ tí a ṣe àfihàn gẹ́gẹ́ bí i ìdíwọ́n ìkọ́lu tó tọ́ (tábìlẹ́tí Retry-After tí a lè kà, tàbí ẹ̀tù tí ń tọ́ka sí ìdíwọ́n ẹ̀rún/lilo), kí o sì padá àti upstream 429 yẹn gan-an (status, ẹ̀tù, Retry-After àti àwọn tábìlẹ́tí quota), dípò tí a bá ṣe àníyàn fún àwọn akọ́ka kọ̀ọ̀kọ́ tí ó kù. Àwọn 429 tí kò ní àfihàn yóò tún yí padà. Kò tí í ṣiṣẹ́ ní ìbẹ̀rẹ̀: ìpele ìfẹ́jọ́ ní ìdíwọ́n fún egress IP kan (#9611), nítorí náà 429 kọ̀ọ̀kọ́ ń yí padà sí akọ́ka kejì, àti ipin tí ó ìwọ̀n kún yóò padà sí 429 upstream ti o sẹ́sẹ̀."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 Àtúmọ̀ àti Í Ṣíṣẹ́ Padà",
+        "description": "Fún ìyípadà àwọn akọ́ka OpenCode púpọ̀, sọ ìbéèrè wọ́n sí ìpàdé lẹ́yìn àwọn 429 aṣẹkù ìṣàlẹ́ púpọ̀ (tàbí àmì ìtú àfíkanpín ẹlọ tuntun) pẹ̀lú àmì, lẹ́yìn náà, tún ìgbésí-ayé kan tí ó tó àkójọ 3 akọ́ka wákàtá kan ṣe padà, dípò tí a bá tẹ̀ ẹ́yọ kọ̀ọ̀kọ́ ti ọ̀pọ̀lọpọ̀ iparun. Kò tí í ṣiṣẹ́ ní ìbẹ̀rẹ̀: 429 kọ̀ọ̀kọ́ ń yí padà sí akọ́ka kejì gẹ́gẹ́ bí i t’ì yà lójú."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Ìtọ́sọ́nà Ìṣẹ́ Àtúmọ̀ Ìṣẹ̀ Padà",
+        "description": "Fún àwọn ìbéèrè ìhìnràn ìtọ́sọ́nà, nígbà tí àkójọ́pọ̀ ìwé akọ́kọ́ inú-ìtọ́sọ́nà dúró kò tí i fífá ìṣẹ̀ tí ó ṣe é lo, ṣe ìṣẹ́ ìṣẹ̀ méjì nìkan pẹ̀lú ọ̀nà ìtọ́sọ́nà kan náà, àti àyè àtúmọ̀ kan náà, láì ṣe àníyàn lórí akọ́ka. Kò tí í ṣiṣẹ́ ní ìbẹ̀rẹ̀: àkójọ́pọ̀ ìwé akọ́kọ́ tí ó dúró yóò foju ìbéèrè láì ṣe ìṣẹ́ padà."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 Ìṣẹ̀ Padà Àfihàn Ọ̀nà",
+        "description": "Fún ìyípadà àwọn akọ́ka OpenCode púpọ̀, lẹ́yìn 429 láti ẹlṣíṣẹ tí ó ní àwọn apá egress kan, lórí akọ́ka tí kò ní ọ̀nà ìṣàn, lábẹ́ àyíká ọ̀nà ìṣàn kọ́ọ̀kọ́, béèrè ọ̀nà ìṣàn fún ẹgbẹ́ kejì fún ìṣẹ́ kẹyìn, dípò tí a bá ṣe ìṣẹ́ padà lórí àdírẹ́ egress kan náà. Ó ń tọ́ka, kò ní àfihàn: ọ̀nà ìṣàn tí ó ìwọ̀n kún ń gbe ipin ìṣẹ̀ t’ì yà lójú jẹ́. Kò tí í ṣiṣẹ́ ní ìbẹ̀rẹ̀: 429 kọ̀ọ̀kọ́ ń yí padà sí akọ́ka kejì gẹ́gẹ́ bí i t’ì yà lójú."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "Fingerprint onimọrọ OpenCode v2",
+        "description": "Fi fingerprint onimọrọ CLI OpenCode v2 lọ si awọn oloselu OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli ati x-opencode-client cli, onimọrọ User-Agent kan naa ti a ti fi pamọ nikan ti o ba jẹ onimọrọ OpenCode 2.x, ati lori awọn oloselu ọfẹ ti a ti sọ mọlẹ, kii ṣe x-opencode-request, siseni ti a ti ṣe alaye ni x-opencode-session-id/x-session-affinity/x-session-id, awọn ẹda CLI v2 si/iṣẹ lori awọn ọna aṣa ti a ti kunu ati tool_choice ti \"none\" ti a ti ya. Ó wà ní pípa ní àkọ́kọ́: gbogbo oloselu OpenCode maa n tẹsiwaju aṣoju, awọn oriṣi ati agbegbe nibi ti wọn ṣiṣẹ, byte fun byte."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "Ṣiṣẹ-ọna e-siyi OpenCode Zen Egress-IP",
+        "description": "Fi OpenCode Zen (opencode-zen) kun pẹlu aarin ọna e-siyi e-siyi ọna kọọkan, nitorinaa 429 lori ọna Zen kọọkan yoo ṣe aṣeyọri gbogbo awọn ọna Zen aṣiwaju ti o ba wa nipa aarin ọna e-siyi kan. Ó wà ní pípa ní àkọ́kọ́: Zen ni o kọsi aarin ọna kọọkan maa n ṣe aṣeyọri funra rẹ, daadaa bi o ti jẹ tẹlẹ. Iye OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS kan pato yoo daadaa ju ami yìí lọ nitori aarin ọna kọọkan."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Awọn Ìlànà Aṣiṣe OpenCode Taara",
+        "description": "Ṣe ki awọn ìlànà aṣiṣe OpenCode ti a fi pamọ (opencode-zen, opencode-go, opencode-cli) ba daradara mọlẹ lori agbegbe aṣiṣe ìdarakọ taara, nitorinaa awọn ami agbegbe bii organization_quota_exceeded tabi \"monthly usage limit reached\" maa n ṣe aṣeyọri 429 bi aṣiṣe ti a ti kọ si, pẹlu aṣeyọri ni ọna aarin kọọkan. Ó wà ní pípa ní àkọ́kọ́: awọn ìlànà yẹn maa n ka aṣiṣe kọ si kan pato, nitorinaa 429 yìi maa n kete aṣeyọri, daadaa bi o ti jẹ tẹlẹ."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Awọn Ìlànà Aṣiṣe Cloudflare Workers AI Taara",
+        "description": "Ṣe ki ìlànà aṣiṣe Cloudflare Workers AI ti a fi pamọ ba daradara mọlẹ lori agbegbe aṣiṣe ìdarakọ taara, nitorinaa 429 \"daily free allocation\" agbegbe maa n ṣe aṣeyọri aṣiṣe ti a ti kọ si dipo pe o kete aṣeyọri. Ó wà ní pípa ní àkọ́kọ́: ìlànà naa maa n ka aṣiṣe kọ si kan pato, daadaa bi o ti jẹ tẹlẹ."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Oloselu Ọna-ṣiṣe",
+        "description": "Kun oloselu ṣaaju ti a fi si iṣẹ ti aarin ọna kọọkan ti o kere si aarin ọna kọọkan (aṣeyọri, awọn ọna aṣa, agbegbe aṣoju, aarin ọna aṣoju). Dídáa ọna aarin kọọkan kan pato ti o yẹ aarin ọna aṣoju ti a fi pamọ."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Ṣàkúdà Ẹ̀rọ̀ Alagbara tí kò ní Àwọn Àyẹ̀wò US",
+        "description": "Ṣe aṣẹ lilo awọn ọna ṣiṣe ti ko ni idiye gẹ́gẹ́ bí $0 nínú àwọn ààlà lilo USD fún ọkọ̀ọ́kọ́ (per-key) dípò yílo ààlà náà gẹ́gẹ́ bí ti kọsílẹ̀. Ó wà ní pípa ní àkọ́kọ́: ọna ṣiṣe tàbí àyíká àdúkọ tí ko ni idiye lè bo lilo ìní gidi, nítorí náà ààlà náà ṣiṣẹ́ pẹ̀lú àabo (fails closed)."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Fa ẹya OmniRoute Radar ṣiṣe (awọn iwọn apoti aṣiṣe ati isopọ̀). Kò ṣiṣe ní àkọ́kọ́; ẹ̀yà yìí kàn ṣe àgbé àṣẹ fún UI — isopọ̀ àwòṣe kò ṣe ìyànjú nípa tirákún kan."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Ẹrọ Iṣẹ Alaye Agbe",
+        "description": "Àgbẹ́kẹ́lé àmì àgbégbè ojú-ọ̀nà onímọ̀ ti a gbà wí pé ó dógba (tí olùpèlèpèpè fún, tí a ṣàṣẹ̀dá láti inú oní-àpẹẹrẹ model id, tàbí tí olùṣiṣẹ́ ṣètò): kọ ẹwọn àpẹẹrẹ tí a kọ sí ojú-ọ̀nà tí model kò ṣiṣẹ́ pẹ̀lú HTTP 400 kí ó tó ìpè lórí /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations àti /v1/audio/*; fẹ́ models tí àmì wọn àwọn ojú-ọ̀nà kò ní OmniRoute adapter láti /v1/models; àti dá àbérẹ̀ àwọn model tẹ́lẹ̀ sí 422 fún àwọn models bẹ́ẹ̀ni. Ó wà ní pípa ní àkọ́kọ́: àwọn àmì ojú-ọ̀nà máa ṣe àkíyèsí àti àwọn ìpè àwọn kó ń ṣe àyẹ kọ́ọ̀tú bẹ́ẹ̀ní."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Ìpamọ́ Àdúrà Fún Gbogbo",
+        "description": "Generate and inject conversation summaries when combo routing switches models. Disable to treat model switches independently and prevent background handoff requests for all existing and future combos."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Ṣe ìṣirò pada",
+        "description": "Gbigbe ati sọ itumọ alaye iṣedede nla pọ lori awọn iforukọsọ awọn ọna pupọ. Wa afipamọ ati ṣẹda alaye iṣedede nla lẹẹkansi."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Iṣẹ́ Látà Codex App-Server",
+        "description": "Ṣe afúnfun Codex láti lo ìdìwòlẹ̀ JSON-RPC WebSocket app-server agbọ́nna (codexTransport=app-server). Nígbà tí ó wà níra, àwọn ìso ìdáhùn tí ó yàn fún app-server padà sọ́rí àwọn ìdìwòlẹ̀ miiran Codex."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Àwọn Orúkọ Àfèéwò Claude Code",
+        "description": "Sún àwọn àkójìpúpọ̀ claude/'<provider>'/'<model>' lórí /v1/models ní kí ìwádìí àwọn àkójìpúpọ̀ Claude Code gateway ṣàlèpo àwọn àkójìpúpọ̀ tí kò jẹ́ Claude. Àfìkún: ó mú àwọn orúkọ inú catálogos méjì fún gbogbo olùlo nígbà tí ó ṣi sí gbogbo ibi."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Àwọn Orúkọ Àkójìpúpọ̀ Alajìṣẹ́-Ìròyìn",
+        "description": "Látà olókùnkún fún àwọn orúkọ gateway no-think/'<provider>'/'<model>'. Nígbà tí ó wà ní títàn (àkọ́kọ́): /v1/models sún àwọn oní àkójìpúpọ̀ alajìṣẹ́-ìròyìn fún gbogbo àkójìpúpọ̀ Claude tó ní agbára ìròyìn, àti pe àkójìpúpọ̀ no-think/ tí a fi lọsí ìbéèrè padà sọ́rí àkójìpúpọ̀ títín ní ìròyìn tí a ti da. Nígbà tí ó wà ní pípa: kò sí oní àkójìpúpọ̀ tí a sún, àti pe àkójìpúpọ̀ no-think/ fi bẹ́ẹ̀ ní bi àwọn àkójìpúpọ̀ míì tí a mọ̀ rá. Àfèéwò ModelSpec.noThinkingAlias fun ẹ́yà kọ̀ọ̀kan ṣe lójúṣe yígbà tí ó ṣi."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Yí àwọn Oríṣi Ìpe Ìròyìn",
+        "description": "Yí ìṣẹ̀dá àwọn oríṣi ìpe ìròyìn (bíi -low, -medium, -high) nínú catálogos /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Àwọn Ìkà Àyẹ́yẹ́ Oríṣi Agbára",
+        "description": "Lorí àwọn ìkà àyẹyẹyẹ oríṣi agbára fún olùlo kọ̀ọ̀kan fún ìṣẹ̀da provider (#9654): ìdúró ìkan kò mú 503 fún omiiran. Okùn yípadà OMNIROUTE_CHAT_VIRTUAL_LANES dún lórí ìyípadà dashboard yìí; àwọn ìyípadà ṣi nígbà tí a tún server padà."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Àwòṣe Iṣọ́rìn tó Ṣiṣẹ́",
+        "description": "Ṣe afihan ‘'<gateway-alias>'/'<model>'’ àwọn àkọsílẹ̀ àwòṣe níbi /v1/models fún àwọn oníyà tí ọmọ́ṣe olókùfù wọn kò ní ìdámọ̀nláṣẹ̀ ṣíṣẹ́, ṣùgbọ́n àgbékalẹ̀ àwòṣe pẹ̀lú ìdámọ̀nláṣẹ̀ ṣíṣẹ̀ ló ń ránṣẹ́ wọn. Ìkílọ̀: ó ń fi àwọn àkọsílẹ̀ oníyà kọ̀ọ̀kan ṣá ẹnu fún gbogbo alágbaàjò nígbà tí a gbé rẹ̀ ṣẹ́lẹ̀ lórí-ọ́pọ̀."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "Iye Àkọsílẹ̀ Aggregator New-API",
+        "description": "Ṣe iṣẹ́ àṣẹ ńfààràn iye fún àwọn node tí ó bá New-API / One-API / Sub2API aggregator mu. Nígbà tí ó bá ṣiṣẹ́, àwọn node tí ó bá mu pẹ̀lú àkọsílẹ̀ aggregator yóò rípo iye wọn nínú dashboard àti ẹ̀kọ́ àlàyé quota-preflight routing."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Fi àwọn Ìsopọ̀ Wíwádìí tí À gbọ́wọ́n Ṣubú Sí",
+        "description": "Àwọn ìṣirò wíwádìí àti àwọn wíwádìí tuntun kàn nínú olùdásílẹ̀ kan bíi tí wọn tí ní ìsopọ̀ ṣíṣẹ́ (olùdásílẹ̀ tí kò ní àkọsílẹ̀ bíi duckduckgo-free máa ń wọ̀ ní pẹ̀pẹ̀). Off ń di àwọn ìlà wíwádìí tí ó kù tí ó ní àkọsílẹ̀ olùdásílẹ̀."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Àmì Ẹlẹ́rìní Gbọ́kẹmọ́",
+        "description": "Àwọn ojú olùdásílẹ̀ nínú dashboard: fi àmì Ẹlẹ́rìní hàn níbi tí olùdásílẹ̀ bá gba àmì yìí nìkan — ó ń fagilé ìwádìí orúkọ àfihàn, àwọn agbékalẹ̀ ẹlẹ́rìní tí kò ni ètò ẹlẹ́rìní àti ọ̀rọ̀ ìparí :free nínú àwọn olùdásílẹ̀ tí kò ní àmì ẹlẹ́rìní tí a kọ́. Off ń di ìlútorí àmì ẹlẹ́rìní aijèlẹ́nì."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Àlè àlè: Ìdáhùn Pool Tí Kò Sí 503",
+        "description": "Nígbà tí àlè àlè kò ní oníyà kankan nínú ọ́pọ̀ oníyà rẹ̀ kúrò ní ìṣàkóso íṣirò kí ó tó ṣe àṣẹ wíwíwádìí (gbogbo ibi tí a fagbálẹ̀ nípasẹ̀ ìdádùn, àṣẹ gbigbè tàbí ìparí), dáhùn 503 no_eligible_targets dípò 400 àtijọ́nì \"No target supports tool calling\" capability_mismatch. Ó wà ní pípa ní àkọ́kọ́: pool tí kò sí yóò kó 400 àtijọ́nì."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral Amubigwus 401 Soft Lockout",
+        "description": "Mistral 401 gbọnii (‘'{\"detail\":\"Unauthorized\"}'’, ko si aami idanimọ ti o han gbangba) jọ iru kanna si awoṣe ti a fagile ati awọn olugba ti o ti parẹ. Nigba ti a gba, 401 bẹẹ o dídùn, kò sọ asiko di ti o ti fagile, títí dé ìgbà 3 láàrin wákàtí kan; eyi tí ó gbé yọ̀ ní sí fagile, nítorí náà awoṣe ti a fagile ní àṣàtún. Ó wà ní pípa ní àkọ́kọ́: gbogbo Mistral 401 gbọ̀n sọ asiko di ti o ti fagile, bí ó ti wà l’iṣẹ̀yín."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Ìṣakojọpọmọ ọna asoju ati Idinku Atilobooṣe",
+        "description": "Ìdinku asoju yóò gba ẹ́ káa ṣe ìṣíṣẹ́ Batch API tí ó gbíyẹ́ (parẹ́/didùn/ṣíṣi/fagile) tí ó tógbò níwọ̀n OMNIROUTE_BATCH_RETENTION_DAYS, pẹ̀lu checkpoint kọ́ọ̀kọ́ ìṣẹ̀ náà, àti mú BLOB content awọn faịlì tí a gbọ́ ìparẹ́ wọn. Ó wà ní pípa ní àkọ́kọ́: gbogbo ìṣirò àtijọ́ ní àṣàtún títí oṣiṣẹ́ ṣe afihán. Ikilú tí oṣiṣẹ́ ṣe DELETE /api/v1/batches/delete-completed kò ni ipa, ìjọṣe kán ni ìṣẹ́ asoju tí ó ní àgbèkú."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Ìrèéde Àkọṣu Antigravity",
+        "description": "Gba àkọṣu Antigravity tí a ṣe àyàn náà sí ìṣẹ́lẹ̀ streaming ẹ̀dùn, kí ojutu àyàdí àti ìbárú idanimọ kò tún àkọṣu tí a ti mú sọ asiko. Ìṣe ìgbẹ́ ní àgbèkú (connection, awoṣe upstream tí o lè kọ), nítorí náà àkọṣu káà lè gba awoṣe meji tí ó dúró ṣiṣẹ́. Nígbà tí gbogbo àkọṣu tí ó ní àṣàtún ti gba ìṣẹ́ awoṣe náà, àyè yóò padá 503 POOL_BUSY ìpilẹ̀ṣẹ́ tí a kọ, tó lè ṣe ìdúró, dípò kí ó mú àkọṣu tí ó ní iṣẹ́. Ó wà ní pípa ní àkọ́kọ́: àyàn àkọṣu wà ní àṣàtún, kò sí àyè tí a mú."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Ìdinku Atilobooṣe Ọ̀nà Ìṣẹ́ Combo Tí Ko Dá",
+        "description": "Lẹ́yìn ìṣe àtúnṣe awoṣe tí ó dá lórí akọsílẹ̀ tí ó ní iṣẹ́, ṣe ẹ́ káa ṣe ọ̀nà combo tí a ti sọ asiko sí awọn awoṣe tí àkọsílẹ̀ kò ránsìn ní báyìí, pẹ̀lu àtọ́kasí kọ́ọ̀kọ́ fún ọ̀nà tí a kọ́. Kò ṣe ẹ́ káa ṣe lẹ́yìn ìṣe tí ó fà, tí ó ṣíṣe, tabì fún kọ́ ọ́nà. Kò ṣe ẹ́ káa ṣe ọ̀nà tí ó dúró. Ó wà ní pípa ní àkọ́kọ́: ọ̀nà tí kò dá ní àṣàtún nìkan."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth Gbogbo Ìmọ̀",
+        "description": "Gbé Claude OAuth àyè tí ó ń gba ìmọ̀ tí a lè kà (thinking.display \"summarized\") padá Anthropic beta redact-thinking-2026-02-12, tí ní ìparí tí Anthropic yóò padá kòkù tí kò ránsìn, signature nìkan. Ó wà ní pípa ní àkọ́kọ́: beta yìí jẹ́ ẹyẹkún àmì Claude Code OAuth, nítorí náà OAuth àyè máa ń gbé kó. Claude àyè tí ó lè kọ lẹ́yìn nìkan ní àṣàtún àyàdí kọ́ọ̀kọ́; OMNIROUTE_REDACT_THINKING=false tún sọ asiko OAuth ní ọ̀nà yìí."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Ìtẹsíwájú Ìyẹwà Kiro",
+        "description": "Nígbà tí àdúdú Kiro tó ń ṣiṣẹ́ dá aṣẹ tool_call tí kò tọ́ (fẹ́lẹ́ tí ó ṣẹ́lẹ̀ input.name tàbí input.arguments) ṣaaju ìfúkùn tí a lè rí, dènù rẹ̀ kí o sì tún àyẹwo padà kọ́gan pẹ̀lú ìmúdandan ṣíṣe àyẹ̀sọ̀rọ̀ díẹ̀ sí i dọ́gba bí ó ti ṣe yẹ, dípò kí o parí ìyípo pẹ̀lú invalid_kiro_tool_call. Ìyípadà yìí láti kọ́gan nípa àyẹwo Kiro díẹ̀ sí i; ìfaìlì kejì yóò parí ìyípo pẹ̀lú kiro_tool_call_repair_retry_failed. Ó wà ní títàn ní àkọ́kọ́. Ṣe àtúnṣe sí false láti fa ìfaìlì ìyípo ní ìfaìlì àkọ́kọ́ fun wrapper tí kò tọ́."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "Àwọn Ìpele Effort models.dev",
+        "description": "Lo àwọn ìpele effort tí models.dev ti gba ìpín (tí a tẹ́síwájú sí ọ̀rọ̀-ọnà tí a mọ̀) nígbà tí kò sí ìyípadà àṣẹ ìṣakóso tàbí registry olùpèsè tí kọ ọ́rọ-àṣẹ èyí, tí o sì gbà àkójọ ìpele tí ó dájú bíi pé “kò sí ìpele” nínu /v1/models effort_tiers àti àwọn ìdábúpọ̀ ìpele àjọṣepọ̀. Ó wà ní pípa ní àkọ́kọ́: effort_tiers àti resolved supportedThinkingEfforts yóò di ẹni tí wọ́n ti jẹ́."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Àwọn Ohun-èlò Télemetri ara ẹni Arena",
+        "description": "Lo ara ẹni cx tí a ṣẹdá nípasẹ̀ kọ̀dí (èyí tí arena.ai fún ní ọ̀fẹ́ fún ojú-ọ̀nà tí kò sí ìṣàkóso ìpinnu) sí gbogbo ìbéèrè create-evaluation Arena (lmarena) tí kò ní providerSpecificData.cx tí àṣẹ ìṣakóso fún ní ọ̀fẹ́. Ó wà ní pípa ní àkọ́kọ́: cx ni àmì àti-òfin tí a ṣe lórí automation, nítorí náà OmniRoute kan máa ń sọ àmì tí àṣẹ ìṣakóso gbà láti browser gidi (providerSpecificData.cx) tí ó máa ń sọ á yìí ní àyeyè tí kò jẹ́ èyí tí kò sọ. Ìlò tí kò ṣe ìpèníní; ṣe àtúnṣe ní àyeyè tí Arena bẹ̀rú láti yípadà ìbéèrè láti kọ cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Àǹfàní Codex tí Ó ń Dádú",
+        "description": "Gbà ìpadà àṣẹ (threshold) àti ìpinnu ìpinnu fún ìṣàkóso ìdíwọ̀n tí a kọ ní ọ̀fẹ̀ láti tún ìṣẹ̀gùn ìdíwọ̀n Codex gidi (POST /v1/responses sí codex provider) tí ó dákì kún ìdákìdákì tí a sọ ìdíwọ̀n nínu ìdíwọ̀n rẹ̀, pẹ̀lú àdábọ̀ àṣẹ tí a lè ńṣe ìgbọ̀rísí. Ó wà ní pípa ní àkọ́kọ́: ìṣẹ̀gùn Codex gidi ní ọ̀dọ́ ìyìjì Codex, tí a kò tíì tún ṣe; ìbéèrè tó ń lọ pẹ́pẹ́ pẹ́ yóò máa parí pẹ̀lú ìdíwọ̀n tí ó bá àyà kò sí ní ìṣírí kún ìdákìdákì tí wọ́n ti jẹ́. Ó nílò ìsọ́dọ̀pọ̀ àṣẹ tí a ṣe kópa, tí a sì kọ àǹfàní náà fún àwọn èrè tí a kọ kọ̀ọ́."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Àǹfàní Ọ̀pọ̀: Gbá Ìdíwọ̀n àmí tí a kọ ní ọ̀fẹ̀",
+        "description": "Gbiyanju ìdíwọ̀n ọ̀pọ̀ ní àyè àṣẹ àyíká (session/weekly thresholds tí a lo fún àṣẹ àǹfàní) kí ó gbà ìdíwọ̀n tí a kọ ní ọ̀fẹ̀: láti ìyẹn tí kò ní àǹfàní díẹ̀ sí i, àti àwọn ohun tí a gbé kó ọ̀pọ̀ tí ó wọ́pọ̀ ju ìdíwọ̀n àmí, àyè àṣẹ àyíká yìí á kọ àmí tí a kọ ní ọ̀fẹ̀ títí di àǹfàní ọ̀pọ̀ tuntun. Ó wà ní pípa ní àkọ́kọ́: àyè àṣẹ àyíká tí ó jẹ́ ìṣẹ̀gùn á parí pẹ̀lú ọ̀nà tí ó ṣe àlùmọ́ kò sí ní ìṣírí kún ìdákìdákì tí wọ́n ti jẹ́."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Iṣẹ́ Ṣíṣẹ̀dá Àwòrán: Àwọn Iṣẹ́ Pẹ́",
+        "description": "Fún ṣíṣẹ̀dá àwòrán tó ṣe àtòngṣelu pẹ̀lú OpenAI: lo ààyà akoko àjọṣepọ̀ (providerSpecificData.timeoutMs), tàbí ààyà akoko yín lókè (FETCH_TIMEOUT_MS, lẹ́yìn REQUEST_TIMEOUT_MS, ìbẹ̀rẹ̀ 600 s) dípò ọwọ́kọ́ọ̀pọ̀ 120 s fún àwòrán; parí ìbéèrè tí olukọ́wọ́pọ̀ ṣàpẹẹrẹ pẹ̀lú 499; kí àpẹẹrẹ náà gba àwọn iṣẹ́ àwòrán tí ó sẹ́pẹ̀ pẹ̀lú SSE stream pẹ̀lú keepalive heartbeats. Kò ṣi sílẹ̀ ní ìbẹ̀rẹ̀: ọwọ́kọ́ọ̀pọ̀ tí ó pàápẹẹrẹ fẹ́tí, àti àpẹẹrẹ kò ń sinmi. Àìsàn tó bo àṣàlẹ̀ àgbìbò yà ló máa ṣi jùmọ́."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Ìṣàkóso Àṣàtẹlẹ̀ Àyẹ̀túnṣe",
+        "description": "Ṣàyẹ̀wò àwọn ìṣirò àtúnṣe claude/ àti àwọn functional-gateway mirrors lori /v1/models. Kò ṣi ní ìbẹ̀rẹ̀: àwọn ìṣirò méjèèjì yóò ṣe àtẹ́lẹ̀ bí iṣẹ́ ọjọ́. Nígbà tí ó bá wà ní títàn: àwọn ìṣirò claude/ yóò tún bo àwọn ìṣirò ìròyìn-ìròyìn tí ó wà lórí àwọn àkọsílẹ̀ (-low/-medium/-high/-xhigh), kó ojú-ọ̀nà àwọn àkọsílẹ̀ auto/* tí àwọn ìbéèrè kò le ṣe àtẹ́lẹ̀, àti kó àwọn àkọsílẹ̀ tí ó ṣàtúnṣe tọ́kalẹ̀; àwọn functional-gateway mirrors yóò kó àwọn àpapọ̀ àti àwọn àkọsílẹ̀ tí OmniRoute ṣe àtẹ́lẹ̀ (claude/, no-think/), gba ọ̀nà owner láti owned_by, kò lo owner gẹ́gẹ́ bí àyíká rẹ̀, kó àwọn àyíká tí ó kọ àwọn àkọsílẹ̀ tí kò wà ní àwọn àkọsílẹ̀ tó ṣe àtẹ́lẹ̀."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Àwárí Proxy: Àtúnṣe Fífalẹ̀ Fífalẹ̀",
+        "description": "Nínú àwárí àwárí proxy, jẹ́ kí àwárí tí àyíká kọ (401/403/429: proxy ṣe àtẹ́lẹ̀, àyíká kọ e) mú àwárí àwárí fífalẹ̀ tí ó ń ṣẹlẹ̀, bí iṣẹ́ àwárí. Kò ṣi ní ìbẹ̀rẹ̀: àwárí yóò kù ṣe àtẹ́lẹ̀ kí ó ṣẹlẹ̀ àwárí (#10654). 5xx yóò kù ṣe àtẹ́lẹ̀ ní àkọsílẹ̀ méjèèjì, àti àwárí kò yọ, kọ, tàbí tún àyíká ṣẹlẹ̀."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Àwòrán Ìṣẹ́ xAI",
+        "description": "Kọ àwọn àyíká àwòrán xai-oauth (xao) àti grok-cli, kí ó sì ṣe àtúnṣe ìpà OpenAI quality high/hd sí xAI medium. Kò ṣi ní ìbẹ̀rẹ̀: ọwọ́kọ́ọ̀pọ̀ xAI API-key yóò dá lori ìbéèrè OpenAI tí ó ṣe àtẹ́lẹ̀, àti àwọn àyíká ìṣẹ́ kò ṣe àtẹ́lẹ̀."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "Ìwádìí Ìlọpọ̀ Ìlọpọ̀ xAI OAuth",
+        "description": "Gba àwọn àkọsílẹ̀ ìlọpọ̀ xAI tí ó wà ní àyíká fún àwọn àjọṣepọ̀ xai-oauth láti https://api.x.ai/v1/models nípa lílo àwọn àkọsílẹ̀ OAuth bearer token, dípò àwọn àkọsílẹ̀ tí kò ṣe àtẹ́lẹ̀. Ó ṣi ní ìbẹ̀rẹ̀. Ṣe àtúnṣe àwọn àkọsílẹ̀ sí false láti gbé àwọn àkọsílẹ̀ tí kò ṣe àtẹ́lẹ̀. Àwọn àṣiṣe HTTP yóò ṣe àtúnṣe sí àwọn àkọsílẹ̀ tí kò ṣe àtẹ́lẹ̀; àwọn àkọsílẹ̀ kò ṣe àtẹ́lẹ̀ HTTP."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Iṣeto Ẹda Mid-Conversation System-ṣiṣe ti o ba darapo pẹlu Anthropic",
+        "description": "Lori awọn relay anthropic-compatible-* ṣọto (claude → claude passthrough), da awọn turns role:system ni agbedemeji imọlẹ sinu messages[] ni, dipo ki a gbe wọn lọ si apẹrẹ system ti o wa ni giga, ki a ti le ṣe idaniloju pe eto agbegbe ti o wa ni agbedemeji yoo wa ni titẹ si lori awọn turns. O nlo kan nitosi ti eleyan (client) naa ṣe ifiranṣẹ mid-conversation-system-2026-04-07 anthropic-beta (tí a fífún si oke-ìlà bí o ti jẹ). Ó wà ní pípa ní àkọ́kọ́: gbogbo system turn ti a gbe si oke ni deede bi ìparí kan náà, nítorí pé awọn relay tí kò tọ́ nípa beta yí jẹ́ ẹ́ ṣàníṣárole:system pẹ̀lú 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "Ìṣàyẹ̀wò Ìlera DB: Dídìdẹ Ìṣàwákì Ìṣiṣẹ́ Ìṣiṣe",
+        "description": "Ṣiṣe ìṣàyẹ̀wò ìfọwọ́kan / ìlera DB ìṣiṣẹ́ ìṣiṣẹ́ lẹ́yìn tí sẹ́sẹ́ tẹ́ ń gba àwọn ìbéèrè (nípasẹ̀ setImmediate) dípò pé ó dídì ìṣiṣẹ́ ìṣiṣẹ́ títí ó tó. Ó wà ní pípa ní àkọ́kọ́: ìṣiṣẹ́ ìṣiṣẹ́ ń dídì lórí ìṣàyẹ̀wò náà gẹ́gẹ́ bí ìparí kan náà ní #13717, nítorí náà àdábó data tí ó fẹ́rù ṣùgbón ṣì ṣe ìṣàwárí kí àkọ́kọ́ tí a bàwọ́lẹ́. Ṣiṣi: ìṣiṣẹ́ ìṣiṣẹ́ ń pada ní ṣíṣe àti pé ìṣàyẹ̀wò (ọ̀pọ̀, àti, fún àdábó data aléèlèèlè, tí a ti fún ni àyíká ọmọ tó le jẹ kí a dúró) ń ṣiṣẹ́ lẹ́yìn náà."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "Ìṣiṣẹ́ Àgbéjáde OpenCode Catalog",
+        "description": "Jẹ́ kí àwọn OpenCode Zen àti OpenCode Go tí kò ní ìṣeyan ẹrù ìranlọ́ láti gba àwọn ojú ìbéèrè wọn (Responses fún @ai-sdk/openai, Messages fún @ai-sdk/anthropic) láti inú àgbéjáde catalog models.opencode.ai tí a ka ní ìgbésẹ̀ àyà kọ̀ọ̀kan ní ọwọ́ 6. Ó wà ní pípa ní àkọ́kọ́: ìṣeyan ẹrù ń wá láti àwọn ìṣẹ̀wé ìwádìí àgbejáde gẹ́gẹ́ bí ìparí kan náà àti catalog kò ṣe ìwádìí."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Ìbéèrè Àtọ́ka: Aṣayan Ìṣe Ọ̀gọ̀ọ̀gọ̀nà",
+        "description": "Jẹ́ kí àwọn ìbéèrè auto/* (resolveModelOrError àti auto-routing wrapper) kọ àwọn aṣàyàn pẹ̀lú àwọn ìṣe àdánidá (vision, reasoning, thinking) àti àwọn àmì ìfáńfá àyẹ̀-ẹ̀yà tí a ti rí, tí a ka ní ìgbésẹ̀ ọ̀kan gẹ́gẹ́ bí /v1/models catalog. Ó wà ní pípa ní àkọ́kọ́: àwọn àmì ìfáńfá àyẹ̀-ẹ̀yà ń dúró gẹ́gẹ́ bí ìparí kan náà (àwọn ìṣe ń ṣe àtúnṣe lẹ́ẹ̀kan-kan àti pé kò gbé àwọn àmì yìí lọ). Ṣiṣi: àwọn àmì yìí ń gbé àwọn àmì ìfáńfá àyẹ̀-ẹ̀yà, nítorí náà àwọn aṣayan àmì, àti nítorí náà àyànà, lè yí padà."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Keyless Transport Gate",
+        "description": "Fi àwọn olùpèsè keyless (no-auth) tí transport wọn nílò browser agbègbè (browserBacked) tàbí CLI tí a fi sórí ẹ̀rọ (isLocalCli) sílẹ̀ kúrò nínú àkójọ olùdíje auto/*, kí ọmọ ẹgbẹ́ tí ó dúró má baà dí ìbéèrè auto lọ́wọ́ títí di timeout ti ibi-àfojúsùn kọ̀ọ̀kan (#17036). Pípa ní àìyípadà: gbogbo olùpèsè no-auth tí ó ní ìpè irinṣẹ́ àfarawé yóò wà nínú àkójọ náà gẹ́gẹ́ bí ti tẹ́lẹ̀. Àwọn ìpè tààrà '<alias>'/'<model>' ń ṣiṣẹ́ ní ọ̀nà méjèèjì."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Tunnunṣe Atunṣe Tẹlẹ (Inline)",
+        "description": "Fun awọn imọ-ọgọ codebuddy-cn (awọn ẹgbẹ DeepSeek-V4 / Kimi-K2 ti a nilo tunṣe tunṣe), fi agbara ẹda aṣiri ti o tẹ lẹhin ti a tunṣe gbe kọdi-ẹgbẹ gẹgẹbi agbegbe '<thought>' ti o ṣe-ṣe ni apakan alaye itẹka naa, ki o ba ni irọrun si ọna-ọna ti o le foju ni apakan reasoning_content (#13632). Ó wà ní pípa ní àkọ́kọ́: awọn ibeere codebuddy-cn ni a fi silẹ kọ ni kọ; apakan reasoning_content ara rẹ n wa ni aaye ni gbogbo igba."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Ipari Aabo Imẹlọ: Ebi-Ọpa",
+        "description": "Gbe awọn ipari aabo imẹlọ ti o ṣe-ṣe (misalignment_policy_violation, content_policy_violation, tabi idilọwọ ibi-ọna 'blocked by our safety systems' ti a fi ami provider_safety_rejection) bi ipari aabo ni ọna kan: koodu rẹ ma n wa ni iṣẹ ti o ni alaye, ṣiṣe ni HTTP, awọn iṣẹ, WebSocket, ati awọn iṣẹ ti o ti ṣe, ati pe combo kan yoo duro ni ibi naa dipo ki o ba ṣiṣẹ-ṣiṣẹ awọn aṣayan miiran, ati ki o ba di-ọpa awọn ẹgbẹ ti a gba (#17049). Ó wà ní pípa ní àkọ́kọ́: awọn iṣẹ wọnyi yoo jẹ ki wọn nṣiṣẹ ni ọna ti wọn n ṣiṣẹ, ati pe ọna-ọna combo ko ni iyipada."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Iṣẹ Imọ-ọgọ: Ti a ti Dì",
+        "description": "Gbiyanju awọn asopọ ti a ti di nipa gbigbe ọpọ-ọpọ-ọpọ (tí a sàmì sí autoDisabledAt; ẹ̀ẹ̀kan péré láàrin wákàtí 6 fún ọ̀kọ̀ọ̀kan, àti 5 péré fún sweep kọ̀ọ̀kan). A yoo tun ṣiṣe awọn asopọ yẹn ni ṣiṣe ti a ba le ni iṣẹ ni igba keji (#16190). Ó wà ní pípa ní àkọ́kọ́: awọn asopọ ti a di ṣiṣe ni o ni a ni aṣa kan ṣiṣe-ṣiṣe, nkan ti o ṣẹlẹ tẹlẹ. Awọn asopọ ti a di nipa oluṣiṣe-ṣiṣẹ, ati awọn ti a di lẹhin ipinnu ti a di di ko ni iṣẹ ni igba keji."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Aṣa Imọ-ọgọ: Ìdánimọ Iṣẹ Iṣẹlẹ Nìkan",
+        "description": "Dinku iṣẹ-ṣiṣe aṣa imọ-ọgọ combo ki ẹda imọ-ọgọ ti o di iṣẹ-ṣiṣe ti o ni aṣa ń ṣe-ṣe-ṣiṣe asopọ nìkan ni a ba ṣe-ṣe-ṣiṣe ni ẹda imọ-ọgọ ti ko le ni aṣa (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Iṣẹ ti ko ni aṣa ni iṣẹ-ṣiṣe (timeout, isopọ iṣẹlẹ, iṣẹ lẹ, awọn iṣẹ ti a ko ni aṣa, ati awọn iṣẹ ti a ko ni aṣa nipa aṣa iṣẹ) yoo jẹ aṣa ti a ṣe-ṣe-ṣiṣe, ati pe asopọ yoo jẹ ki o ni aṣa ni aṣa kan. Ó wà ní pípa ní àkọ́kọ́: gbogbo aṣa iṣẹ-ṣiṣe ni aṣa yoo jẹ ki asopọ naa n aṣa ni aṣa iṣẹ-ṣiṣe (iṣẹ-ṣiṣe 5 oṣu-ṣiṣẹ)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: Duro ni Idilọwọ Aṣa Iṣẹ-ṣiṣe",
+        "description": "When a combo target answers with an exact content-policy refusal (code or type cyber_policy / content_policy_violation), stop the combo and return that refusal even when the remaining targets are different models, instead of advancing to the next target. Off by default: the refusal never cools the account or trips the provider breaker, and the combo advances to its next target exactly as before."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Ìdíwàpadà Ìdíwàpadà: Yẹra 403/410 Ìṣàkóso",
+        "description": "When every account is cooling down and the cooldown that ends first was caused by a 403 (access refused) or a 410 (gone), return that refusal at once instead of waiting the cooldown out and re-sending the request; a renewing agentrouter connection-scoped quota 403 is then persisted with errorCode 429 so it stays retryable. Off by default: only a 401 skips the wait, and every refusal is persisted with the status it arrived with."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Ilana Isuna Ìlò Aláìníye",
+        "description": "Bá ìwọn USD ọjọ́/ọ̀sẹ̀ fún bọtini kọọkan ṣe tọju ìlò tí ó ṣeyebíye tí olupese/módelì rẹ̀ kò ní ìkọ̀ọ́kan ìye. fail_closed (aìyipada) máa samisi àkókò náà gẹ́gẹ́ bí ti kọjá, nítorí náà iye tí a kò mọ̀ kò ní lè kọjá ẹ̀dá àgbára ìdínà. count_as_zero kà ìlò yẹn sí $0 kí ó sì tẹ̀síwájú ní mímú ìnáwó tí a ti ṣètò. Àwọn módelì aláìníye wà ní àtòkọ lórí ojú-ìwé ilé dasibọ́ọdu ní gbogbo ọ̀nà."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "Àkókò ìdádúró",
     "quota": "Ìpín",
     "rangeWindow": "fèrèsé {range}",
+    "timeRange": "Àkókò",
     "runtimeHealthBlend": "àkópọ̀ àkókò ìṣiṣẹ́/ìlera",
     "averageResponseTime": "ìpíndọ́gba àkókò ìdáhùn",
     "worstQuota": "Ìpín tó burú jù",
@@ -13923,7 +14500,11 @@
       "ok": "Ó sábà máa ń gba nǹkan láàyè"
     },
     "allProviders": "Gbogbo àwọn olùpèsè",
-    "noApiKeyRequired": "Kò nílò kọ́kọ́rọ́ API"
+    "noApiKeyRequired": "Kò nílò kọ́kọ́rọ́ API",
+    "searchPlaceholder": "Ṣẹ́wàṣe model, awọn olupamọ́…",
+    "searchAria": "Ṣẹ́wàṣe awọn model ńlá",
+    "filterProviderAria": "Yàtú nípasẹ̀ olupamọ́",
+    "keylessOnly": "Láì kókó nìkan"
   },
   "providerHealthAutopilot": {
     "title": "Olùdarí Aládàáṣiṣẹ́ Ìlera Olùpèsè",
@@ -13994,7 +14575,11 @@
     "learnMore": "Kọ́ sí i",
     "changelogLoadFailed": "A kò lè gbé àkọsílẹ̀ àwọn àyípadà wọlé. Jọ̀wọ́ gbìyànjú lẹ́ẹ̀kan sí i nígbà míì.",
     "retry": "Tún gbìyànjú",
-    "viewFullHistory": "Wo gbogbo ìtàn lórí GitHub"
+    "viewFullHistory": "Wo gbogbo ìtàn lórí GitHub",
+    "title": "Ìròyìn àti àkọsílẹ̀ àwọn àyípadà",
+    "description": "Àwọn ìkéde láti ọ̀dọ̀ ẹgbẹ́ OmniRoute àti àwọn àkọsílẹ̀ ìtújáde tuntun",
+    "viewLabel": "Wo",
+    "loadingNews": "Ń ṣàkójọpọ̀ àwọn ìkéde..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "Ipò Circuit Breaker Olùpèsè",
       "lastUpdate": "Ìmúdójúìwọ̀n tó kẹ́yìn: {timestamp}",
       "uptimeMinutes": "{minutes} ìṣ.",
-      "uptimeHoursMinutes": "{hours} wák. {minutes} ìṣ."
+      "uptimeHoursMinutes": "{hours} wák. {minutes} ìṣ.",
+      "breakerClosed": "Tí pa",
+      "breakerNotClosed": "Ṣí tàbí ṣí ní àbọ̀"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "Àwọn Àlàyé Ìtọ́jú",
         "secondaryAction": "Ipò Ètò"
       }
+    },
+    "miniapp": {
+      "askAnything": "Béèrè ohunkóhun…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} ló hàn / àpapọ̀ {total}",
+    "modeLabel": "Ìpo ìfihàn",
+    "jumpToNow": "Lọ sí àkókò lọ́wọ́lọ́wọ́, ìlà NOW yóò padà sí ipò {position}%",
+    "laneReuse": "Àtúnlò ìlà",
+    "laneReuseLabel": "Àkókò ààyè àtúnlò ìlà (ìṣẹ́jú)",
+    "laneReuseHint": "Àwọn ìbéèrè tó ń lo conversation id kan náà yóò dúró lórí ìlà kan náà nínú àkókò bí àlàfo láàárín wọn kò bá ju iye ìṣẹ́jú yìí lọ.",
+    "laneReuseUnit": "ìṣẹ́jú",
+    "autoRefresh": "Àtúnṣe aládàáṣe",
+    "autoRefreshLabel": "Àárín àkókò àtúnṣe aládàáṣe (ìṣẹ́jú-àáyá)",
+    "autoRefreshHint": "Bí àkókò ṣe máa ń tún àkójọ ìbéèrè gba láti server lọ́pọ̀ ìgbà.",
+    "autoRefreshUnit": "ìṣẹ́jú-àáyá",
+    "zoomOut": "Dín àfihàn kù",
+    "zoomIn": "Mú àfihàn tóbi sí i"
   },
   "metadata": {
     "compressionTitle": "Ìfúnpọ̀",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "Pa á tì"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Pa ṣíṣẹ̀dá àwọn ẹ̀yà ìpele ìrònú (fún àpẹẹrẹ -low, -medium, -high) nínú àkójọ /v1/models.",
+  "teamCosts": {
+    "title": "Àwọn ìnáwó ẹgbẹ́",
+    "subtitle": "Ṣàkóso àwọn ìṣúná rírọ̀ àjọpín àti ìdíyelé ìnáwó ìwé-àtòjọ.",
+    "refresh": "Sọ di tuntun",
+    "create": "Ṣẹ̀dá ẹgbẹ́",
+    "edit": "Ṣàtúnṣe ẹgbẹ́",
+    "archive": "Kó sínú ibi ìpamọ́",
+    "selectTeam": "Àwọn ẹgbẹ́",
+    "searchTeams": "Wá àwọn ẹgbẹ́",
+    "statusFilter": "Ipò ẹgbẹ́",
+    "active": "Ń ṣiṣẹ́",
+    "archived": "A ti kó sínú ibi ìpamọ́ · kíkà nìkan",
+    "allTeams": "Gbogbo ẹgbẹ́",
+    "noTeams": "Kò sí ẹgbẹ́ tó bá mu.",
+    "selectHint": "Ṣẹ̀dá tàbí yan ẹgbẹ́ kan láti wo àwọn ìnáwó.",
+    "loading": "Ń gbé àwọn ìnáwó ẹgbẹ́ wọlé…",
+    "budgetTitle": "Ìṣúná rírọ̀ lọ́wọ́lọ́wọ́",
+    "budgetSubtitle": "Lílò tó yọrí sí rere tí a gbà sílẹ̀ · fèrèsé tó ń yípo · kò gbára lé àwọn ọjọ́ ìròyìn",
+    "archivedBudget": "A ti kó sínú ibi ìpamọ́: ìmúlò ìṣúná kò ṣiṣẹ́. Àwọn ìròyìn ìtàn ṣì wà.",
+    "unlimited": "Kò ní ààlà — a kò tíì ṣètò ìṣúná rírọ̀ àjọpín kankan.",
+    "budgetUnavailable": "Ipò ìṣúná kò sí. Sọ di tuntun láti tún gbìyànjú.",
+    "used": "Lílò tó yọrí sí rere",
+    "maximum": "Òpin ìṣúná",
+    "remaining": "Ìyókù tí a mọ̀",
+    "resets": "Yóò tún bẹ̀rẹ̀",
+    "unpricedBudget": "Iye owó apá kan lílò tó yọrí sí rere kò dá wa lójú. Àpapọ̀ tí a mọ̀ kò pé; ìmúlò ìṣúná kà fèrèsé yìí sí èyí tó ti kọjá.",
+    "overBudget": "Ìṣúná ti dé tàbí ti kọjá · {amount} ju bó ṣe yẹ lọ",
+    "reportTitle": "Ìròyìn lílò",
+    "reportSubtitle": "Gbogbo ìgbìyànjú · ìdíyelé ìwé-àtòjọ ní USD, kì í ṣe ìwé-owó · àwọn ọjọ́ UTC pípé",
+    "reportPeriod": "Àkókò ìròyìn",
+    "day1": "Ọjọ́ 1",
+    "day7": "Ọjọ́ 7",
+    "day30": "Ọjọ́ 30",
+    "allTime": "Gbogbo àkókò",
+    "reportSpend": "Ìnáwó ìròyìn tí a díyelé",
+    "requests": "Àwọn ìbéèrè",
+    "assignedKeys": "Àwọn kọ́kọ́rọ́ tí a yàn",
+    "unpricedReport": "Ìròyìn yìí ní àwọn iye owó tí a kò mọ̀. Ìnáwó tí a díyelé kò pé.",
+    "breakdown": "Ìnáwó nípasẹ̀ kọ́kọ́rọ́ API",
+    "noUsage": "Kò sí lílò ní àkókò ìròyìn yìí.",
+    "keyName": "Orúkọ kọ́kọ́rọ́ API",
+    "tokens": "Àwọn àmì ìtẹ̀wọlé + ìjáde",
+    "unnamedKey": "Kọ́kọ́rọ́ aláìlórúkọ tàbí tí a pa rẹ́",
+    "unpriced": "Iye owó tí a kò mọ̀",
+    "members": "Ìkópa",
+    "memberSubtitle": "Yíyí ìkópa padà ń jẹ́ kí ìnáwó ìtàn wà pẹ̀lú ẹgbẹ́ àkọ́kọ́.",
+    "searchKeys": "Wá àwọn kọ́kọ́rọ́ tàbí àwọn onílé lọ́wọ́lọ́wọ́",
+    "chooseKey": "Yan kọ́kọ́rọ́ API kan",
+    "unassigned": "A kò yàn án",
+    "ownership": "Ẹgbẹ́ ìdíyelé lọ́wọ́lọ́wọ́: {team}",
+    "assign": "Yàn",
+    "remove": "Yọ kúrò",
+    "noMembers": "Kò sí ọmọ ẹgbẹ́ lọ́wọ́lọ́wọ́. Lílò ìtàn lè ṣì wà nínú ìṣúná.",
+    "assignedAt": "A yàn án ní {date} (UTC)",
+    "name": "Orúkọ ẹgbẹ́",
+    "description": "Àpèjúwe",
+    "enableBudget": "Mú ìṣúná rírọ̀ àjọpín ṣiṣẹ́",
+    "amount": "Iye ìṣúná (USD)",
+    "duration": "Fèrèsé ìṣúná tó ń yípo",
+    "cancel": "Fagilé",
+    "save": "Fipamọ́",
+    "confirm": "Jẹ́rìí",
+    "transferTitle": "Jẹ́rìí ìgbékalẹ̀ kọ́kọ́rọ́",
+    "transferMessage": "Kó kọ́kọ́rọ́ yìí láti “{source}” sí “{destination}”? Ìnáwó ìtàn ṣì wà pẹ̀lú ẹgbẹ́ àkọ́kọ́.",
+    "removeTitle": "Yọ ìyàn kọ́kọ́rọ́ kúrò",
+    "removeMessage": "Yọ kọ́kọ́rọ́ yìí kúrò ní “{team}”? Ìnáwó ìtàn ṣì wà nínú ẹgbẹ́ yìí.",
+    "archiveTitle": "Kó ẹgbẹ́ sínú ibi ìpamọ́",
+    "archiveMessage": "Kó “{team}” sínú ibi ìpamọ́? Gbogbo ìsopọ̀ lọ́wọ́lọ́wọ́ yóò ti, ìmúlò ìṣúná yóò sì dúró. Àwọn ìròyìn ìtàn ṣì wà.",
+    "invalidName": "Tẹ orúkọ (àmì 1–200) àti àpèjúwe tí kò ju àmì 2,000 lọ.",
+    "invalidAmount": "Tẹ iye ìṣúná tó ní ààlà tó tóbi ju òdo lọ.",
+    "unauthorized": "Wọlé sí pátákó ìṣàkóso láti tẹ̀síwájú.",
+    "forbidden": "O kò ní ìyọ̀ǹda láti ṣàkóso àwọn ẹgbẹ́. A ti pa ohun tí o tẹ̀ mọ́.",
+    "notFound": "Ẹgbẹ́ tàbí ìyàn yìí kò sí mọ́.",
+    "conflict": "Ìyàn tàbí ẹgbẹ́ ti yípadà. Sọ di tuntun kí o sì jẹ́rìí ìní lọ́wọ́lọ́wọ́ kí o tó tún gbìyànjú.",
+    "failed": "Ìbéèrè kùnà. A ti pa ohun tí o tẹ̀ mọ́; jọ̀wọ́ tún gbìyànjú.",
+    "partialBudget": "Àwọn garawa ojoojúmọ́ kan tí a pamọ́ ń dà pọ̀ mọ́ ààlà fèrèsé, a kò sì lè pín wọn ní pàtó. Ìnáwó tí a fihàn kò pé; ìyọ̀ǹda tó kù kò sí. Ìlànà ìṣúná rírọ̀ tó wà kò yípadà."
+  },
   "connectionTest": {
     "title": "Ìfiránṣẹ́ ìdánwò",
     "description": "Fi ìbéèrè gidi kan ránṣẹ́ nípasẹ̀ account yìí. Èyí máa ń lo ìwọ̀nba quota díẹ̀, ó sì lè bẹ̀rẹ̀ àkókò lílò, ó da lórí provider náà.",
@@ -15073,5 +15753,118 @@
     "importButton": "Kó wọlé",
     "importFailed": "Ìkówọlé kùnà.",
     "importSuccess": "A kó àkọọ́lẹ̀ {connections} àti node olùpèsè {nodes} wọlé; a fò {skipped}."
+  },
+  "conversations": {
+    "title": "Àwọn ìwádìí",
+    "countSummary": "{total, plural, one {ìwádìí #} other {àwọn ìwádìí #}} pẹ̀lú àwọn yíyí méjì tàbí ju bẹ́ẹ̀ lọ",
+    "autoRefreshTitle": "Báwo ni kókó yìí ṣe ń tún ṣàgbéjáde láti ọ̀wọ́ síséré fúnra rẹ̀.",
+    "autoRefresh": "Ìdáhùn àfoṣoṣu",
+    "loading": "Ìṣàpẹẹrẹ àwọn ìwádìí...",
+    "colConversation": "Ìwádìí",
+    "colTurns": "Ìgbésí",
+    "colContinuation": "Títoro",
+    "colLastModel": "Òkúnigbágan",
+    "colProvider": "Ẹnu",
+    "colStatus": "Àkọ́kọ́",
+    "colLastSeen": "Ìfowákan Tí Kẹ́yìn",
+    "drawerTitle": "Ìwádìí",
+    "prevConversation": "Ìwádìí Tí Ní Ṣíwájú",
+    "nextConversation": "Ìwádìí Tí Ní Wà",
+    "gotoLatestRequest": "Ṣe afipamọ́ sí ìbéèrè tí ó tẹ́le jù",
+    "goToBottom": "Ṣe a kọ́ sí ìsàlẹ̀",
+    "statusInProgress": "Nínú ìṣíṣẹ́",
+    "continuationGenuineTitle": "Ìgbésẹ̀ tí ó tẹ́le jù ló lo previous_response_id, ó sì tí ṣe àsọtẹ́lẹ̀ nínú ọjà server",
+    "continuationBadge": "tíìtẹ̀hún",
+    "stalledTitle": "Ìgbésẹ̀ tí ó tẹ́le jù kò parí ní stop, kò sì sí ohun-kan tí ó tẹ̀wàlá fún irú ṣẹ́sẹ́ṣẹ́tá oṣùṣe 5+",
+    "stalledBadge": "kọ̀fún",
+    "noTurns": "Kò sí ìgbésẹ̀ tí a kọ́ fún ìfọ̀rọ̀wérọ̀ yì."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Bẹ̀rẹ̀ láti ipò ìsinsìnyí (fo àwọn àkọsílẹ̀ tó wà tẹ́lẹ̀)",
+    "pageTitle": "Ìsọndi àwọn àkọsílẹ̀",
+    "pageSubtitle": "Gbe àwọn àpẹẹrẹ ìwé ìfọwọ́sí tí ó wá láti àtùnjẹ́ Logs sí ibi àwòrò ìṣírò kọọ̀kọ́ àti ìtọ́sọ́nà ìwádìí.",
+    "addDestination": "Ṣàfikún ibi tí ó ṣe pàtó",
+    "scheduleTitle": "Ìpinnu ìgbà",
+    "cronLabel": "Cron",
+    "notScheduled": "kò ṣe àtúnjẹ́ rárá",
+    "lastScheduledRun": "Ìdáhùn ìpinnu ìgbà tí ó sẹ́yìn",
+    "lastRunSummary": "{startedAt} — {status}, {rows} àyíká",
+    "never": "hàà",
+    "highWaterMark": "Aṣẹ ìbẹ̀rẹ̀ àpẹẹrẹ ìwé ìfọwọ́sí",
+    "rowPrefix": "àyíká {id}",
+    "noDestinations": "Ko si ibi asanrẹwo",
+    "noDestinationsHint": "Ṣafikun ibi asanrẹwo lati bẹ̀rẹ̀ ìfipamọ̀ àwọn àkọsílẹ̀ ìpè ní ẹ̀yọ wákàtí kan.",
+    "errLoadStatus": "Iṣẹ́ àkọsílẹ̀ asanrẹwo kọ́jú",
+    "errSaveDestination": "Iṣẹ́ ìpamọ́ ibi asanrẹwo kọ́jú",
+    "msgDestinationSaved": "Ibi asanrẹwo ti parí.",
+    "errConnectionTest": "Ìdàwẹ́ ìsopọ̀ kọ́jú",
+    "msgRunInFlight": "Ìpẹ́ tí ó bá ibi asanrẹwo yìí mu ti ń ṣiṣẹ́ ní báyé; kò sí nǹkan tí a gbé sí inú méjì.",
+    "errExportRun": "Ìpẹ́ asanrẹwo kọ́jú",
+    "errUpdateDestination": "Ìyípadà ibi asanrẹwo kọ́jú",
+    "errDeleteDestination": "Ìyọkúrè ibi asanrẹwo kọ́jú",
+    "deleteTitle": "Pa ṣiṣe ipin gbigbe",
+    "deleteConfirm": "Ṣe o da \" {name} \" silẹ? Gbigbe akopọpọ rẹ yoo tun paradi, nitorinaa ti o ba tun fi pada, yoo bẹrẹ lati log ita ounjẹ ti a pinpin ti o jara julọ.",
+    "statusDisabled": "Iyokuro",
+    "statusFailing": "Ibaje",
+    "statusHealthy": "Ilera",
+    "statusNotRunYet": "Ko tọka si aṣiṣe",
+    "typeNotInstalled": "Iwe ti a ko ṣe da fifi sori rira",
+    "metaLine": "Itọka ti iṣeeṣe {lastRun} · gbigbe awọn orisiriri {exported} · {pending} wọn o kan · akopọpọ {cursor}",
+    "btnTest": "Idanwo",
+    "btnRunNow": "Ṣiṣe bayi",
+    "btnDisable": "Àfikún",
+    "btnEnable": "Mú ṣiṣẹ",
+    "btnEdit": "Ṣàyẹ̀wò",
+    "btnDelete": "Pa ṣi"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "Àwọn akáǹtí CLIProxyAPI",
+    "cardSubtitle": "Ìbúye ìpeye tí kò le tí wọlé sí láti inu API ìṣakoso tí ó tọ́ sí",
+    "btnRefresh": "Yí padà",
+    "listAria": "Ìwọn iṣura àwọn akáǹtí CLIProxyAPI",
+    "noAccounts": "Kò sọ́ àwọn akáǹtí CLIProxyAPI náà.",
+    "loading": "Ìnupadà ìwọn iṣura àwọn akáǹtí…",
+    "stateReady": "Àṣiṣe ọfà iṣẹ ẹnu",
+    "stateDisabled": "Kii ṣe CLIProxyAPI ti ṣe iṣẹ",
+    "stateMissingKey": "Kii ṣe Management key ti ṣe iṣẹ",
+    "stateUnreachable": "Kii ṣe Management API ti ṣe iṣẹ",
+    "stateUnauthorized": "Management key kii ṣe iṣẹ",
+    "stateUnsupported": "Kii ṣe CLIProxyAPI version ti ṣe iṣẹ",
+    "stateInvalidResponse": "Management API kii ṣe iṣẹ"
+  },
+  "darioPanel": {
+    "title": "Awọn iṣẹ ẹnu Claude",
+    "description": "Ṣe Dario pẹlu ẹnu Claude Pro/Max rẹ. Iṣẹ ẹnu rẹ yoo ṣe iṣẹ pẹlu ẹnu rẹ. O kere ju ẹnu kan ṣe ṣaaju ti Dario ṣe iṣẹ (titi naa /health ṣe iṣẹ).",
+    "noAccounts": "Kii ṣe awọn iṣẹ ẹnu ti ṣe iṣẹ.",
+    "importTitle": "Wọle lati OmniRoute",
+    "importDescription": "Lo awọn tokini OAuth ti asopọ Claude ti o wa tẹlẹ ninu OmniRoute dipo lati wọle lẹẹkansi — o yoo ṣàìwàlé igbohunsafẹfẹ ipinnu ẹrọ aṣa.",
+    "importPendingTooltip": "Yoo wa ni iṣẹlọpọ nigba kan asopọ Claude ba wa ninu OmniRoute.",
+    "btnImport": "Wọle",
+    "btnImporting": "Nínú wọlé…",
+    "aliasPlaceholder": "orukọ miiran (aṣayan)",
+    "btnStartLogin": "Bẹrẹ Wọlé",
+    "btnStarting": "Nínú bẹrẹ…",
+    "btnCompleteLogin": "Parí Wọlé",
+    "btnCompleting": "Nínú parí…",
+    "codePlaceholder": "code#state tàbí code nìkan",
+    "noticeImported": "Ti a gbé wọle bi aṣẹda \"{alias}\" — Dario kọju mọ́ fun rẹ.",
+    "noticeAdded": "A ti kun aṣẹda \"{alias}\" sii.",
+    "expiresInHours": "fa ìparí ní ~{hours}h",
+    "expiresInMinutes": "fa ìparí ní ~{minutes}m",
+    "expiresAt": "fa ìparí {date}",
+    "scopes": "{count, plural, one {àgbègbè #} other {àgbègbè #}}",
+    "btnRemove": "Yọ kuro",
+    "btnRefresh": "Tun ṣe",
+    "loginStep1": "1. Fọwọsowọ́pọ̀ URL yìí nínu aṣàwáwé ọ̀rùn rẹ kí o si yẹ ẹ́ kọ́ aṣẹda <mono>{alias}</mono>:",
+    "pendingExpires": "Ìpẹ̀típẹ́tí ìjẹ̀ mọ́tẹ́tẹ́ ni {time}",
+    "loginStep2": "2. Kọ́ kọ́di tí Anthropic ṣe àfihàn sí wá:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "Ó yẹ kí ó ṣiṣẹ́ ojú-iṣẹ́ yìí nínú Telegram Mini App.",
+    "greeting": "👋 Ìbéni {name}! Fún ìtọ́kà sí àwòṣe tàkò nípasẹ̀ ọwọ́ OmniRoute rẹ.",
+    "greetingFallbackName": "yìí",
+    "errNoReply": "⚠️ Kò sí ìdáhùn láti ọwọ́ gateway.",
+    "btnSend": "Fún"
   }
 }

@@ -47,6 +47,9 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   // + top-up credits (GET https://api.apmix.ai/v1/usage, Bearer key)
   "apmix",
   "deepseek",
+  // StepFun account balance (GET /v1/accounts; see usage/stepfun.ts — the
+  // base-URL override selects China vs international platform)
+  "stepfun",
   "moonshot",
   "kimi",
   "xiaomi-mimo",
@@ -98,6 +101,8 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "kilocode",
   // OpenRouter key limits + account credits (GET /api/v1/key + /api/v1/credits)
   "openrouter",
+  // Muse Code has no live quota endpoint; its fetcher surfaces persisted subscription metadata.
+  "muse-code",
   // LLM Gateway DevPass allowance (GET /v1/key → monthly + weekly premium)
   "llmgateway",
   // Lyceum credit balance (GET /api/v2/external/billing/credits)
