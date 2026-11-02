@@ -128,14 +128,11 @@ components` részében, ha a javítás stílusjellegű), soha ne a `packages/ui-
    adapternél hasonlítsd össze a renderelt markupot a változtatás előtt és után — a padding- vagy
    wrapper-változások minden képernyőre továbbterjednek.
 
-## 5. A kit frissítése
+## 5. A készlet frissítése
 
-A `scripts/dev/sync-ui-kit.sh <commit> [clone]` az adott commitnál az upstream `src/` tartalmát a
-`packages/ui-kit/src` könyvtárba másolja, és alkalmazza az egyetlen megengedett átalakítást (levágja a
-`.js` végződést a relatív importokról). Ezután: nézd át a `git diff packages/ui-kit` kimenetét, végezz
-vizuális átnézést a providers, settings, combos, usage és endpoint felületeken mindkét témában, futtasd az
-`npm run check:ui-kit-snapshot` és az `npm run test:vitest:ui` parancsot, és nyisd meg a PR-t az upstream
-changeloggal.
+`npm run check:ui-kit-upstream` összehasonlítja a `packages/ui-kit/UPSTREAM.md` ben rögzített verziót az upstream repo legújabb `v*` címkéjével, és kiírja a szinkronizálási parancsot, amikor egy kiadás megjelent. A heti `UI Kit upstream watch` munkafolyamat (`.github/workflows/ui-kit-upstream-watch.yml`) ugyanazt az ellenőrzést futtatja, és nyitva tart egy nyomkövetési problémát, amíg a tű mögött van; az upstream repo privát, így a munkafolyamatnak csak olvasható tokenre van szüksége a `UI_KIT_READ_TOKEN` secret-ben, és e nélkül is inert marad.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` átmásolja az upstream `src/` az adott véglegesítésnél (`latest` = a legújabb `v*` címke) `packages/ui-kit/src` be, alkalmazza az egyetlen engedélyezett átalakítást (elhagyja a `.js` utótagot a relatív importálásból), és beállítja a `packages/ui-kit/package.json` és `package-lock.json` munkaterület verzióját az upstream verzióra. Ezután tekintse át `git diff packages/ui-kit`, végezzen vizuális átadást a szolgáltatókról, a beállításokról, a kombinációkról, a használatról és a végpontról mindkét témában, futtassa `npm run check:ui-kit-snapshot` és `npm run test:vitest:ui`, és nyissa meg a PR az upstream változásnaplóval.
 
 ## 6. README diagramok
 

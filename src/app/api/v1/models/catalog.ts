@@ -55,6 +55,7 @@ import {
 } from "@/lib/db/readCache";
 import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableModels";
 import {
+  isDiscoveryImportedCustomSource,
   providerUsesCuratedModelsOnly,
   providerUsesExclusiveSyncedListing,
 } from "@/lib/providers/modelListingCapability";
@@ -113,6 +114,7 @@ import {
   getConnectionScopedEffortTiers,
   type ConnectionScopedReasoningCatalog,
   memoizeTargetMetadata,
+  pickSyncedCatalogName,
 } from "./catalogHelpers";
 import {
   qualifyOpenRouterModelId,
@@ -182,12 +184,32 @@ export type { CachedCatalog, BackgroundRefreshScheduler } from "./catalogCache";
  */
 export type CatalogResponseOptions = {
   scheduleBackgroundRefresh?: BackgroundRefreshScheduler;
+  /** Management-only build that keeps operator-hidden models (`/api/models/catalog`). */
+  revealHidden?: boolean;
+  /** Management/lookup callers keep provider rows even when `exposeCombosOnly` is on. */
+  ignoreExposeCombosOnly?: boolean;
+};
+
+/** Build-time switches forwarded from {@link getUnifiedModelsResponse} to the catalog builder. */
+type CatalogBuildFlags = {
+  /** Keep operator-hidden model rows (management catalog only, #16749). */
+  revealHidden?: boolean;
+  /** Advertise only combos (`settings.exposeCombosOnly`). */
+  combosOnly?: boolean;
 };
 
 const BUILTIN_AUTO_YIELD_INTERVAL = 2;
 
 function yieldCatalogBuildTurn(): Promise<void> {
   return new Promise((resolve) => setImmediate(resolve));
+}
+
+/** `exposeCombosOnly` trims the public catalog; management/lookup callers opt out. */
+function resolveCombosOnly(
+  settings: Record<string, unknown> | null | undefined,
+  options: CatalogResponseOptions
+): boolean {
+  return settings?.exposeCombosOnly === true && options.ignoreExposeCombosOnly !== true;
 }
 
 /**
@@ -202,7 +224,7 @@ function yieldCatalogBuildTurn(): Promise<void> {
 export async function getUnifiedModelsResponse(
   request: Request,
   corsHeaders: Record<string, string> = {},
-  options: { scheduleBackgroundRefresh?: BackgroundRefreshScheduler; revealHidden?: boolean } = {}
+  options: CatalogResponseOptions = {}
 ) {
   const diagnosticHeaders = getCatalogDiagnosticsHeaders({ request });
 
@@ -232,11 +254,15 @@ export async function getUnifiedModelsResponse(
     incrementCcDiscoveryHitCount();
   }
 
+  const buildFlags: CatalogBuildFlags = {
+    combosOnly: resolveCombosOnly(settingsForAuth, options),
+    revealHidden: options.revealHidden === true,
+  };
   try {
     return await resolveCachedCatalogResponse(
       request,
       { corsHeaders, diagnosticHeaders },
-      options.revealHidden ? (req) => buildCatalogPayload(req, true) : buildCatalogPayload,
+      (req) => buildCatalogPayload(req, buildFlags),
       {
         // #10831: a disabled router hides auto/* just as hideAutoCombos does, so
         // the two collapse into one cache dimension — the resulting catalogs are
@@ -244,8 +270,9 @@ export async function getUnifiedModelsResponse(
         hideAutoCombos:
           settingsForAuth?.hideAutoCombos === true || settingsForAuth?.autoRoutingEnabled === false,
         hideNoThinkVariants: settingsForAuth?.hideNoThinkVariants === true,
+        exposeCombosOnly: buildFlags.combosOnly,
         scheduleBackgroundRefresh: options.scheduleBackgroundRefresh,
-        revealHidden: options.revealHidden === true,
+        revealHidden: buildFlags.revealHidden,
       }
     );
   } catch (err) {
@@ -265,9 +292,9 @@ export async function getUnifiedModelsResponse(
 
 async function buildCatalogPayload(
   request: Request,
-  revealHidden = false
+  flags: CatalogBuildFlags = {}
 ): Promise<{ body: string; headers: Record<string, string>; status: number; cacheTTL: number }> {
-  const built = await buildUnifiedModelsResponseCore(request, {}, revealHidden);
+  const built = await buildUnifiedModelsResponseCore(request, {}, flags);
   const body = await built.text();
   const headers: Record<string, string> = {};
   built.headers.forEach((value, key) => {
@@ -294,8 +321,10 @@ async function buildCatalogPayload(
 async function buildUnifiedModelsResponseCore(
   request: Request,
   corsHeaders: Record<string, string> = {},
-  revealHidden = false
+  flags: CatalogBuildFlags = {}
 ) {
+  const combosOnly = flags.combosOnly === true;
+  const revealHidden = flags.revealHidden === true;
   const diagnosticHeaders = getCatalogDiagnosticsHeaders({ request });
   // #9147: this builder walks connections + model registries at catalog scale with no
   // event-loop yield, so a large deployment pins the single Node.js thread for the
@@ -1375,6 +1404,13 @@ async function buildUnifiedModelsResponseCore(
             continue;
           }
 
+          // The provider's published name, unless the registry already names the model.
+          const syncedName = pickSyncedCatalogName(sm, [
+            PROVIDER_MODELS[alias],
+            PROVIDER_MODELS[providerId],
+            PROVIDER_MODELS[canonicalProviderId],
+          ]);
+          const syncedNameField = syncedName ? { name: syncedName } : {};
           if (includeAlias || Boolean(prefix) || selfAliased) {
             models.push({
               id: aliasId,
@@ -1385,6 +1421,7 @@ async function buildUnifiedModelsResponseCore(
               root: sm.id,
               parent: null,
               ...syncedFields,
+              ...syncedNameField,
             });
           }
           if ((includeAlias || Boolean(prefix)) && modelType === "audio") {
@@ -1405,6 +1442,7 @@ async function buildUnifiedModelsResponseCore(
               ...(endpoints.length > 1 || !endpoints.includes("chat")
                 ? { supported_endpoints: endpoints }
                 : {}),
+              ...syncedNameField,
             });
           }
 
@@ -1420,6 +1458,7 @@ async function buildUnifiedModelsResponseCore(
                 root: sm.id,
                 parent: includeAlias ? aliasId : null,
                 ...syncedFields,
+                ...syncedNameField,
               });
             }
           }
@@ -1726,7 +1765,9 @@ async function buildUnifiedModelsResponseCore(
       for (const [providerId, rawProviderCustomModels] of Object.entries(customModelsMap)) {
         await maybeYieldCatalogBuild();
         // Curated providers publish no upstream catalog, but an operator-added id is a
-        // local decision: it must reach /v1/models or it is unusable for routing.
+        // local decision: it must reach /v1/models or it is unusable for routing (#18018).
+        // Rows a discovery sync imported are stale on those providers and stay out (#8451).
+        const curatedProvider = providerUsesCuratedModelsOnly(providerId);
         // Skip Gemini — handled by syncedAvailableModels above
         if (providerId === "gemini") continue;
         if (providerId === "reka") continue;
@@ -1758,6 +1799,7 @@ async function buildUnifiedModelsResponseCore(
           await maybeYieldCatalogBuild();
           const modelId = typeof model.id === "string" ? model.id : null;
           if (!modelId) continue;
+          if (curatedProvider && isDiscoveryImportedCustomSource(model.source)) continue;
           if (!isUnifiedChatSourceModelSelectable(canonicalProviderId, { ...model, id: modelId }))
             continue;
           if (model.isHidden === true && !revealHidden) continue;
@@ -2054,7 +2096,9 @@ async function buildUnifiedModelsResponseCore(
 
     // Filter by API key permissions if requested
     const apiKey = extractApiKey(request);
-    let finalModels = models;
+    // exposeCombosOnly: same row test as the per-key `catalogScope: "combos"`; the
+    // per-key filter below then intersects with it.
+    let finalModels = combosOnly ? models.filter((m) => m.owned_by === "combo") : models;
     if (apiKey) {
       const apiKeyPermissions = await import("@/lib/db/apiKeys");
       const { filterCatalogModelsForKey } = await import("./catalogKeyFilter");
@@ -2082,7 +2126,7 @@ async function buildUnifiedModelsResponseCore(
       } else {
         finalModels = await filterCatalogModelsForKey(
           apiKey,
-          models,
+          finalModels,
           keyMeta,
           apiKeyPermissions,
           maybeYieldCatalogBuild
