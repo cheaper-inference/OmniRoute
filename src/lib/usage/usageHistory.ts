@@ -174,7 +174,8 @@ declare global {
           byAccount: Record<string, Record<string, number>>;
           details: Record<string, Record<string, PendingRequestDetail[]>>;
         };
-        totalPendingDetailBytes?: number;
+        // Absent/non-finite on state created by older module instances; recounted once below.
+        totalPendingDetailBytes: number;
         pendingById: Map<string, PendingRequestDetail>;
         pendingIdByCorrelation: Map<string, { id: string; touchedAt: number }>;
       }
