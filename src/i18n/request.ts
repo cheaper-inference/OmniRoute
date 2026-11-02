@@ -155,7 +155,9 @@ const loadLocaleMessages = createLocaleMessagesLoader(
 
 const normalizedCache = new WeakMap<Record<string, unknown>, Record<string, unknown>>();
 
-function getNormalizedLocaleMessages(messages: Record<string, unknown>): Record<string, unknown> {
+export function getNormalizedLocaleMessages(
+  messages: Record<string, unknown>
+): Record<string, unknown> {
   const cached = normalizedCache.get(messages);
   if (cached) return cached;
   const normalized = normalizeComplianceEventTypes(messages);

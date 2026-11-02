@@ -13,6 +13,7 @@ import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import Button from "./Button";
 import Icon from "./Icon";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 
 export default function MaintenanceBanner() {
   const [show, setShow] = useState(false);
@@ -23,7 +24,6 @@ export default function MaintenanceBanner() {
 
   useEffect(() => {
     const checkHealth = async () => {
-      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort("Health check timeout"), 8000);
       try {
@@ -59,10 +59,8 @@ export default function MaintenanceBanner() {
       }
     };
 
-    // Run immediately on mount, then every 10 seconds
-    checkHealth();
-    const interval = setInterval(checkHealth, 10000);
-    return () => clearInterval(interval);
+    // Run on mount, then every 10 seconds while the tab is visible
+    return startVisiblePolling(checkHealth, 10000);
   }, [t]);
 
   if (!show) return null;

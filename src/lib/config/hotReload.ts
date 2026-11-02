@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { SQLITE_FILE } from "@/lib/db/core";
 import { getSettings } from "@/lib/db/settings";
+import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { applyRuntimeSettings, type RuntimeReloadChange } from "./runtimeSettings";
 
 const DEFAULT_POLL_INTERVAL_MS = 5_000;
@@ -11,6 +12,7 @@ let activeCheck: Promise<void> | null = null;
 let queuedSource: string | null = null;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let sqliteWatcher: fs.FSWatcher | null = null;
+let hotReloadStarted = false;
 
 function getPollIntervalMs() {
   const parsed = Number.parseInt(process.env.OMNIROUTE_CONFIG_HOT_RELOAD_MS || "", 10);
@@ -64,18 +66,16 @@ function queueHotReloadCheck(source: string) {
 }
 
 export function startRuntimeConfigHotReload(options: { pollIntervalMs?: number } = {}) {
-  if (pollTimer || sqliteWatcher) return;
+  if (hotReloadStarted) return;
+  hotReloadStarted = true;
 
-  const bgDisabled = process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
-  const isBgDisabled =
-    bgDisabled && new Set(["1", "true", "yes", "on"]).has(bgDisabled.trim().toLowerCase());
-
+  const pollEnabled = !isBackgroundServicesDisabled();
   const pollIntervalMs = Math.max(
     options.pollIntervalMs || getPollIntervalMs(),
     MIN_POLL_INTERVAL_MS
   );
 
-  if (!isBgDisabled) {
+  if (pollEnabled) {
     pollTimer = setInterval(() => {
       queueHotReloadCheck("hot-reload:poll");
     }, pollIntervalMs);
@@ -94,14 +94,16 @@ export function startRuntimeConfigHotReload(options: { pollIntervalMs?: number }
       });
     } catch (error) {
       console.warn(
-        "[HOT_RELOAD] SQLite file watch unavailable, polling only:",
+        pollEnabled
+          ? "[HOT_RELOAD] SQLite file watch unavailable, polling only:"
+          : "[HOT_RELOAD] SQLite file watch unavailable and polling is off, settings apply at restart:",
         error instanceof Error ? error.message : error
       );
     }
   }
 
   console.log(
-    `[HOT_RELOAD] Runtime config hot-reload started (poll=${pollIntervalMs}ms, fsWatch=${
+    `[HOT_RELOAD] Runtime config hot-reload started (poll=${pollEnabled ? `${pollIntervalMs}ms` : "off"}, fsWatch=${
       sqliteWatcher ? "on" : "off"
     })`
   );
@@ -116,6 +118,7 @@ export function stopRuntimeConfigHotReloadForTests() {
   }
   sqliteWatcher?.close();
   sqliteWatcher = null;
+  hotReloadStarted = false;
   queuedSource = null;
   activeCheck = null;
 }

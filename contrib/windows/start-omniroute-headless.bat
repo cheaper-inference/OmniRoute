@@ -8,12 +8,14 @@ set OMNIROUTE_DISABLE_BACKGROUND_SERVICES=true
 
 echo Starting OmniRoute in Headless Mode on http://localhost:20128 ...
 echo Proxy endpoints (/v1/*) are active. Dashboard is disabled.
+echo Background services are off: no connection recovery, quota refresh, sync jobs,
+echo retention cleanup or scheduled VACUUM. See contrib\windows\README.md.
 echo Leave this window open. Close it to stop the server.
 echo.
 call npm run dev
 if errorlevel 1 (
     echo.
-    echo O servidor encerrou com erro.
+    echo The server exited with an error.
     echo.
 )
 endlocal

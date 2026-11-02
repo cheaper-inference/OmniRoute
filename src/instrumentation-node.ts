@@ -7,6 +7,7 @@
  */
 
 import { markServerReady, markServerStarting } from "@/lib/serverLifecycle";
+import { isBackgroundServicesDisabled } from "@/lib/env/backgroundServices";
 import { normalizeBootError } from "@/lib/instrumentationBootError";
 import { isHeadless, skipInHeadless } from "@/lib/system/headless";
 
@@ -103,11 +104,7 @@ export async function ensureDbReadyForBoot(
   }
 }
 
-export function isBackgroundServicesDisabled(): boolean {
-  const raw = process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
-  if (!raw) return false;
-  return new Set(["1", "true", "yes", "on"]).has(raw.trim().toLowerCase());
-}
+export { isBackgroundServicesDisabled };
 
 async function ensureSecrets(): Promise<void> {
   let getPersistedSecret = (_key: string): string | null => null;

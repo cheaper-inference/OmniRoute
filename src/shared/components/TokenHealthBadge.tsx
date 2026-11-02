@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 
 import { useState, useEffect, useRef } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@omniroute/ui-kit/popover";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 import Badge from "./Badge";
 import Button from "./Button";
 import Icon from "./Icon";
@@ -45,7 +46,6 @@ export default function TokenHealthBadge() {
 
   useEffect(() => {
     const fetchHealth = async () => {
-      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
       try {
         const res = await fetch("/api/token-health");
         if (res.ok) {
@@ -57,9 +57,7 @@ export default function TokenHealthBadge() {
       }
     };
 
-    fetchHealth();
-    const interval = setInterval(fetchHealth, 60000);
-    return () => clearInterval(interval);
+    return startVisiblePolling(fetchHealth, 60000);
   }, []);
 
   if (!health || health.total === 0) return null;
