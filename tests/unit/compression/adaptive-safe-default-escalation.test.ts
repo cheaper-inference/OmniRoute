@@ -96,3 +96,36 @@ test("a Default plan that already carries a lossy step is not treated as the saf
   });
   assert.equal(plan, lossyDefault);
 });
+
+test("an explicit ladderOverride stays authoritative: no lite is forced in", () => {
+  const { plan, telemetry } = resolveAdaptivePlan({
+    basePlan: safeDefault,
+    estimatedTokens: 1_030_337,
+    modelContextLimit: WINDOW,
+    requestMaxTokens: null,
+    config: { ...dial, ladderOverride: [{ engine: "rtk", intensity: "standard" }] },
+  });
+  assert.deepEqual(telemetry?.stagesApplied, ["rtk"]);
+  assert.equal(
+    plan.stackedPipeline.find((s) => s.engine === "lite")?.config?.compressToolResults,
+    false,
+    "lite truncation stays off when the operator's ladder excludes lite"
+  );
+});
+
+test("a lossless Default without lite gets lite once, never twice", () => {
+  const noLite: DerivedPlan = {
+    mode: "stacked",
+    source: "default",
+    stackedPipeline: [{ engine: "session-dedup" }, { engine: "headroom" }],
+  };
+  const { telemetry } = resolveAdaptivePlan({
+    basePlan: noLite,
+    estimatedTokens: 5_000_000,
+    modelContextLimit: WINDOW,
+    requestMaxTokens: null,
+    config: dial,
+  });
+  const stages = telemetry?.stagesApplied ?? [];
+  assert.equal(stages.filter((e) => e === "lite").length, 1, JSON.stringify(stages));
+});

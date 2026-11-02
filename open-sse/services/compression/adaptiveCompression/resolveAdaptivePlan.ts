@@ -111,12 +111,10 @@ function defersToBasePlan(config: ContextBudgetConfig, basePlan: DerivedPlan): b
 
 /** Escalation: start just ABOVE the base plan's aggressiveness (floor escalates beyond it). */
 function escalationStages(config: ContextBudgetConfig, basePlan: DerivedPlan): LadderStage[] {
-  const ladder =
-    config.ladderOverride && config.ladderOverride.length > 0
-      ? config.ladderOverride
-      : DEFAULT_LADDER;
+  const override = config.ladderOverride && config.ladderOverride.length > 0;
+  const ladder = override ? (config.ladderOverride as LadderStage[]) : DEFAULT_LADDER;
   if (config.mode === "replace-autotrigger" && isLosslessDefault(basePlan)) {
-    return losslessDefaultStages(basePlan, ladder);
+    return losslessDefaultStages(basePlan, ladder, Boolean(override));
   }
   const startTier =
     config.mode === "floor" ? aggressivenessOf(basePlan.mode) : aggressivenessOf("off");
@@ -150,17 +148,24 @@ function isLosslessDefault(plan: DerivedPlan): boolean {
 }
 
 /**
- * Escalation order for the lossless safe Default: first re-enable its own lite tool-result
- * truncation (the step every request ran before the lossy request policy made it opt-in,
- * and the one measured to fit long sessions), then the ladder engines the base does not
- * already run, only while the estimate is still over target.
+ * Escalation order for the lossless safe Default. With the default ladder: first re-enable
+ * lite's tool-result truncation (the step every request ran before the lossy request policy
+ * made it opt-in, and the one measured to fit long sessions), then the ladder engines the
+ * base does not already run. An operator ladderOverride is authoritative: its stages run in
+ * its order and lite is never forced in. A base engine is never credited twice, except lite,
+ * whose stage upgrades the base step in place.
  */
-function losslessDefaultStages(basePlan: DerivedPlan, ladder: LadderStage[]): LadderStage[] {
+function losslessDefaultStages(
+  basePlan: DerivedPlan,
+  ladder: LadderStage[],
+  override: boolean
+): LadderStage[] {
   const baseEngines = new Set(basePlan.stackedPipeline.map((step) => step.engine));
-  return [
-    { engine: "lite" },
-    ...ladder.filter((s) => !baseEngines.has(s.engine) && aggressivenessOf(s.engine) > 0),
-  ];
+  const remaining = ladder.filter(
+    (s) => (!baseEngines.has(s.engine) || s.engine === "lite") && aggressivenessOf(s.engine) > 0
+  );
+  if (override) return remaining;
+  return [{ engine: "lite" }, ...remaining.filter((s) => s.engine !== "lite")];
 }
 
 /**
