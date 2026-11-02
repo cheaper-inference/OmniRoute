@@ -959,10 +959,17 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
 
     let toolCalls = gate.calls;
 
-    // Retry if the current response ends with a colon (mid-sentence stop) and
-    // no tool call was produced — the model stopped before finishing its answer.
+    // Retry if a request that carries tools got a response ending with a colon
+    // (mid-sentence stop) and no tool call — the model stopped before acting. A
+    // tool-less reply ending in a colon is a normal answer and opens no second session.
     const responseEndsWithColon = parser.text.trim().endsWith(":");
-    if (responseEndsWithColon && toolCalls.length === 0 && !timedOut && !signal?.aborted) {
+    if (
+      hasTools &&
+      responseEndsWithColon &&
+      toolCalls.length === 0 &&
+      !timedOut &&
+      !signal?.aborted
+    ) {
       const colonRetry = await runAttempt(attemptMessages(), "-colon-retry");
       if (colonRetry.ok === true) {
         parser = colonRetry.parser;

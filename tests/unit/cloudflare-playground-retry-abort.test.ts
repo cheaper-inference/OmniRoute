@@ -152,3 +152,48 @@ test("the retry delay still applies when the request is not aborted", async () =
   assert.equal(rooms.length, 2);
   assert.ok(Date.now() - startedAt >= 50, "the delay must run before the retry session");
 });
+
+// ── Colon retry: only for requests that carry tools ──────────────────────────
+
+function makeColonExecutor(rooms: string[]) {
+  return new CloudflarePlaygroundExecutor((chatId) => {
+    rooms.push(chatId);
+    return new FakeTransport(buildSuccessFrames(chatId, "Here is the list:"));
+  });
+}
+
+test("a tool-less reply ending in a colon opens no second session", async () => {
+  const rooms: string[] = [];
+  const args = readArgs();
+  const { tools: _tools, ...toollessBody } = args.body as Record<string, unknown>;
+
+  const result = await makeColonExecutor(rooms).execute({ ...args, body: toollessBody });
+  const parsed = JSON.parse(await result.response.text()) as {
+    choices: Array<{ message: { content: string }; finish_reason: string }>;
+  };
+
+  assert.equal(rooms.length, 1);
+  assert.equal(parsed.choices[0].message.content, "Here is the list:");
+  assert.equal(parsed.choices[0].finish_reason, "stop");
+});
+
+test("an empty tools list counts as tool-less for the colon retry", async () => {
+  const rooms: string[] = [];
+  const args = readArgs();
+  const body = { ...(args.body as Record<string, unknown>), tools: [] };
+
+  const result = await makeColonExecutor(rooms).execute({ ...args, body });
+  await result.response.body?.cancel();
+
+  assert.equal(rooms.length, 1);
+});
+
+test("a request with tools still takes the colon retry", async () => {
+  const rooms: string[] = [];
+
+  const result = await makeColonExecutor(rooms).execute(readArgs());
+  await result.response.body?.cancel();
+
+  assert.equal(rooms.length, 2);
+  assert.notEqual(rooms[0], rooms[1], "the retry must open a fresh room");
+});
