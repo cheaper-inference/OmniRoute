@@ -22,6 +22,7 @@ import { updateProviderCredentials } from "../services/tokenRefresh";
 import { detectFormatFromEndpoint } from "@omniroute/open-sse/services/provider.ts";
 import { resolveChatCoreTargetFormat } from "@omniroute/open-sse/handlers/chatCore/targetFormat.ts";
 import { handleChatCore } from "@omniroute/open-sse/handlers/chatCore.ts";
+import { runWithTurnExecutionOwnership } from "@omniroute/open-sse/handlers/chatCore/turnExecutionContext.ts";
 import {
   checkResourcePressureGuard,
   type ResourcePressureGuardResult,
@@ -512,7 +513,10 @@ export async function executeChatWithBreaker({
     const chatFn = () =>
       capture(() =>
         runWithProxyContext(proxyInfo?.proxy || null, () =>
-          (handleChatCore as any)({
+          // One turn-execution ownership scope per client request (#18716):
+          // chat.ts retries and combo legs re-enter handleChatCore under this
+          // dispatch and must reuse the turn slot instead of 409ing themselves.
+          runWithTurnExecutionOwnership(() => (handleChatCore as any)({
             body: { ...body, model: `${provider}/${model}` },
             // Preserve the resolved catalog metadata and per-model wire format
             // through the dispatch boundary, including native reasoning tiers.
@@ -621,7 +625,7 @@ export async function executeChatWithBreaker({
                 buildExhaustionOptions(correlationId ?? null, { isCombo, streamOutputEmitted })
               );
             },
-          })
+          }))
         )
       );
 
