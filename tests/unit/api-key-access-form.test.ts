@@ -19,6 +19,8 @@ import assert from "node:assert/strict";
 import {
   buildApiKeyAccessPayload,
   createInitialFormState,
+  movePreferredConnectionId,
+  prunePreferredConnections,
   validateForm,
   type ApiKeyAccessData,
   type ApiKeyAccessFormState,
@@ -136,6 +138,7 @@ const keyBehaviourToggles: ApiKeyAccessData = {
   streamDefaultMode: "json",
   compressionEnabled: false,
   allowAutoCombos: false,
+  allowCcDiscoveryAliases: false,
   catalogScope: "combos",
   disableNonPublicModels: true,
   allowUsageCommand: true,
@@ -153,6 +156,7 @@ const unrestrictedState: ApiKeyAccessFormState = {
   selectedCombos: [],
   allowAllConnections: true,
   selectedConnections: [],
+  selectedPreferredConnections: [],
   allowAllEndpoints: true,
   selectedEndpoints: [],
   noLog: false,
@@ -175,6 +179,7 @@ const unrestrictedState: ApiKeyAccessFormState = {
   streamDefaultMode: "legacy",
   compressionEnabled: true,
   allowAutoCombos: true,
+  allowCcDiscoveryAliases: true,
   catalogScope: "all",
   disableNonPublicModels: false,
   allowUsageCommand: false,
@@ -217,6 +222,7 @@ test("initial state matches the legacy modal: connections restricted (legacy abs
     allowAllCombos: false,
     allowAllConnections: false,
     selectedConnections: [UUID_A, UUID_B],
+    selectedPreferredConnections: [],
     allowAllEndpoints: false,
     selectedEndpoints: ["chat", "embeddings"],
     selfUsageEnabled: false,
@@ -267,6 +273,7 @@ test("initial state matches the legacy modal: behaviour toggles", () => {
     streamDefaultMode: "json",
     compressionEnabled: false,
     allowAutoCombos: false,
+    allowCcDiscoveryAliases: false,
     catalogScope: "combos",
     disableNonPublicModels: true,
     allowUsageCommand: true,
@@ -353,6 +360,7 @@ test("PATCH body matches the legacy handler: unrestricted key", () => {
     blockedModels: [],
     allowedCombos: ["combo/*"],
     allowedConnections: [],
+    preferredConnections: [],
     noLog: false,
     autoResolve: false,
     isActive: true,
@@ -367,6 +375,7 @@ test("PATCH body matches the legacy handler: unrestricted key", () => {
     streamDefaultMode: "legacy",
     compressionEnabled: true,
     allowAutoCombos: true,
+    allowCcDiscoveryAliases: true,
     catalogScope: "all",
     disableNonPublicModels: false,
     allowUsageCommand: false,
@@ -392,6 +401,7 @@ test("PATCH body matches the legacy handler: restricted models + combos", () => 
     blockedModels: ["legacy-model", "claude-haiku*", "haiku"],
     allowedCombos: ["smart-coding", "rt-vision"],
     allowedConnections: [],
+    preferredConnections: [],
     noLog: false,
     autoResolve: true,
     isActive: true,
@@ -406,6 +416,7 @@ test("PATCH body matches the legacy handler: restricted models + combos", () => 
     streamDefaultMode: "legacy",
     compressionEnabled: true,
     allowAutoCombos: false,
+    allowCcDiscoveryAliases: true,
     catalogScope: "combos",
     disableNonPublicModels: true,
     allowUsageCommand: false,
@@ -430,6 +441,7 @@ test("PATCH body matches the legacy handler: connections restricted", () => {
     blockedModels: [],
     allowedCombos: [],
     allowedConnections: [UUID_A, UUID_B],
+    preferredConnections: [],
     noLog: false,
     autoResolve: false,
     isActive: true,
@@ -444,6 +456,7 @@ test("PATCH body matches the legacy handler: connections restricted", () => {
     streamDefaultMode: "legacy",
     compressionEnabled: true,
     allowAutoCombos: true,
+    allowCcDiscoveryAliases: true,
     catalogScope: "models",
     disableNonPublicModels: false,
     allowUsageCommand: false,
@@ -468,6 +481,7 @@ test("PATCH body matches the legacy handler: limits + schedule", () => {
     blockedModels: [],
     allowedCombos: [],
     allowedConnections: [],
+    preferredConnections: [],
     noLog: false,
     autoResolve: false,
     isActive: true,
@@ -491,6 +505,7 @@ test("PATCH body matches the legacy handler: limits + schedule", () => {
     streamDefaultMode: "legacy",
     compressionEnabled: true,
     allowAutoCombos: true,
+    allowCcDiscoveryAliases: true,
     catalogScope: "all",
     disableNonPublicModels: false,
     allowUsageCommand: false,
@@ -515,6 +530,7 @@ test("PATCH body matches the legacy handler: behaviour toggles", () => {
     blockedModels: [],
     allowedCombos: [],
     allowedConnections: [],
+    preferredConnections: [],
     noLog: true,
     autoResolve: true,
     isActive: false,
@@ -529,6 +545,7 @@ test("PATCH body matches the legacy handler: behaviour toggles", () => {
     streamDefaultMode: "json",
     compressionEnabled: false,
     allowAutoCombos: false,
+    allowCcDiscoveryAliases: false,
     catalogScope: "combos",
     disableNonPublicModels: true,
     allowUsageCommand: true,
@@ -574,6 +591,7 @@ test("PATCH body matches the legacy handler after edits (sanitize, clamp, filter
     // #12267: an empty restriction is persisted as-is (deny-all), never widened to combo/*.
     allowedCombos: [],
     allowedConnections: [UUID_A],
+    preferredConnections: [],
     noLog: true,
     autoResolve: false,
     isActive: true,
@@ -588,6 +606,7 @@ test("PATCH body matches the legacy handler after edits (sanitize, clamp, filter
     streamDefaultMode: "legacy",
     compressionEnabled: true,
     allowAutoCombos: true,
+    allowCcDiscoveryAliases: true,
     catalogScope: "all",
     disableNonPublicModels: false,
     allowUsageCommand: false,
@@ -645,4 +664,60 @@ test("validation accepts an empty combo restriction (#12267)", () => {
   const errors = validateForm({ ...unrestrictedState, allowAllCombos: false, selectedCombos: [] });
   assert.deepEqual(errors.combos, []);
   assert.equal(Object.values(errors).flat().length, 0);
+});
+
+// ── Preferred connections (#13102) ─────────────────────────────────────────
+
+const UUID_C = "1b2c3d4e-5f60-4718-9a0b-1c2d3e4f5a6b";
+
+test("initial state keeps the stored preference order, pruned to the allowed connections", () => {
+  const restricted = createInitialFormState({
+    ...keyConnectionsRestricted,
+    preferredConnections: [UUID_B, UUID_C, UUID_A, UUID_B, "not-a-uuid"],
+  });
+  assert.deepEqual(restricted.selectedPreferredConnections, [UUID_B, UUID_A]);
+
+  const unrestricted = createInitialFormState({
+    ...keyUnrestricted,
+    preferredConnections: [UUID_C, UUID_A],
+  });
+  assert.deepEqual(unrestricted.selectedPreferredConnections, [UUID_C, UUID_A]);
+});
+
+test("PATCH body sends the ordered preference and never a connection outside the restriction", () => {
+  const state: ApiKeyAccessFormState = {
+    ...createInitialFormState(keyConnectionsRestricted),
+    selectedConnections: [UUID_A],
+    selectedPreferredConnections: [UUID_B, UUID_A],
+  };
+  const body = buildApiKeyAccessPayload(state, keyConnectionsRestricted);
+  assert.deepEqual(body.allowedConnections, [UUID_A]);
+  assert.deepEqual(body.preferredConnections, [UUID_A]);
+
+  const allState: ApiKeyAccessFormState = {
+    ...createInitialFormState(keyUnrestricted),
+    selectedPreferredConnections: [UUID_C, UUID_A],
+  };
+  const allBody = buildApiKeyAccessPayload(allState, keyUnrestricted);
+  assert.deepEqual(allBody.allowedConnections, []);
+  assert.deepEqual(allBody.preferredConnections, [UUID_C, UUID_A]);
+});
+
+test("prunePreferredConnections drops malformed, duplicate and no-longer-allowed ids in order", () => {
+  assert.deepEqual(
+    prunePreferredConnections([UUID_C, "x", UUID_A, UUID_C, UUID_B], false, [UUID_A, UUID_C]),
+    [UUID_C, UUID_A]
+  );
+  assert.deepEqual(prunePreferredConnections([UUID_C, UUID_A], true, []), [UUID_C, UUID_A]);
+  assert.deepEqual(prunePreferredConnections([UUID_C], false, []), []);
+});
+
+test("movePreferredConnectionId swaps neighbours and ignores out-of-range moves", () => {
+  const order = [UUID_A, UUID_B, UUID_C];
+  assert.deepEqual(movePreferredConnectionId(order, UUID_B, -1), [UUID_B, UUID_A, UUID_C]);
+  assert.deepEqual(movePreferredConnectionId(order, UUID_B, 1), [UUID_A, UUID_C, UUID_B]);
+  assert.equal(movePreferredConnectionId(order, UUID_A, -1), order);
+  assert.equal(movePreferredConnectionId(order, UUID_C, 1), order);
+  assert.equal(movePreferredConnectionId(order, "missing", 1), order);
+  assert.deepEqual(order, [UUID_A, UUID_B, UUID_C], "input is not mutated");
 });

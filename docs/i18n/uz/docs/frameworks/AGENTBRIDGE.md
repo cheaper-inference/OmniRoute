@@ -12,38 +12,38 @@ AgentBridge — OmniRoute’ning MITM (Man-in-the-Middle) proksisi bo‘lib, IDE
 
 ---
 
-## §1 Umumiy ko‘rinish
+## §1 Umumiy ko'rinish
 
 ### AgentBridge nima?
 
-IDE agenti (masalan, GitHub Copilot, Cursor, Claude Code) API chaqiruvini amalga oshirganda, u bevosita yuqori oqimdagi AI provayderiga (OpenAI, Anthropic va boshqalar) ulanadi. AgentBridge ushbu ulanishni TLS darajasida shaffof tarzda — agent konfiguratsiyasini o‘zgartirishni talab qilmasdan — tutib oladi va so‘rovni OmniRoute orqali qayta yo‘naltiradi.
+IDE agenti (masalan, GitHub Copilot, Cursor, Claude Code) API chaqiruvini amalga oshirganda, u to‘g‘ridan-to‘g‘ri yuqoridagi AI provayderiga (OpenAI, Anthropic va boshqalar) ulanadi. AgentBridge ushbu ulanishni TLS darajasida shaffof tarzda ushlab turadi - hech qanday agent konfiguratsiyasini o'zgartirishni talab qilmasdan - va so'rovni OmniRoute orqali qayta yozadi.
 
-Bu sizga quyidagilarni amalga oshirish imkonini beradi:
+Bu shuni anglatadiki, siz:
 
-- **Istalgan agentni istalgan provayderga qayta yo‘naltirish**: Copilot OpenAI bilan ishlayaptimi? Uni Anthropic Claude, Gemini yoki OmniRouteʼning 374 ta provayderidan istalgan biriga qayta yo‘naltiring.
-- **Model mosliklarini qo‘llash**: `gemini-3-flash` → `claude-sonnet-4.7` mosligini ishlov beruvchi darajasida shaffof tarzda qo‘llang.
-- **Agentning barcha trafikini kuzatish**: tutib olingan har bir so‘rov [Trafik inspektori](./TRAFFIC_INSPECTOR.md) orqali eʼlon qilinadi.
-- **OmniRoute barqarorlik imkoniyatlarini qo‘llash**: kombinatsiyalangan marshrutlash, avtomatik uzgichlar, zaxira yo‘llari va xarajatlarni kuzatish IDE agenti trafigi uchun ham ishlaydi.
+- **Har qanday agentni istalgan provayderga yo'naltiring** : Copilot OpenAI bilan gaplashyapsizmi? Uni Anthropic Claude, Gemini yoki OmniRoute ning 377 provayderlaridan biriga yo‘naltiring.
+- **Model xaritalarini qo'llang** : ishlov beruvchi darajasida `gemini-3-flash` → `claude-sonnet-4.7` shaffof.
+- **Barcha agent trafigini kuzating** : har bir ushlangan so'rov [Yo'l harakati inspektoriga](./TRAFFIC_INSPECTOR.md) e'lon qilinadi.
+- **OmniRoute chidamliligini qo'llang** : kombinatsiyalangan marshrutlash, o'chirgichlar, zaxiralar va IDE agent trafiki uchun xarajatlarni kuzatish ham ishlaydi.
 
-### Bozordagi o‘rni
+### Bozorga nisbatan joylashishni aniqlash
 
-| Xususiyat                  | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| -------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot             |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                 |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex               |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                 |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries             |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                |    —    |    —     |        ✓        |             ✓             |
-| Open Code                  |    —    |    —     |        ✓        |             ✓             |
-| Trae                       |    —    |    —     |        —        |     🔍 O‘rganilmoqda      |
-| Boshqaruv paneli UIʼsi     |    ✓    |    ✗     |        ✗        |             ✓             |
-| Trafik inspektori          |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute marshrutlash     |    ✗    |    ✗     |        ✗        |             ✓             |
-| Model mosliklari UIʼsi     |    ✗    |    ✗     |        ✗        |             ✓             |
-| Chetlab o‘tish ro‘yxati    |    ✗    |    ✗     |        ✓        |             ✓             |
-| Yuqori oqim CA sertifikati |    ✗    |    ✗     |        ✓        |             ✓             |
+| Xususiyat                  | 9 router | anti-api | llm-to'xtatuvchi | **OmniRoute AgentBridge** |
+| -------------------------- | :------: | :------: | :--------------: | :-----------------------: |
+| Antigravity                |    ✓     |    ✓     |        —         |             ✓             |
+| GitHub Copilot             |    ✓     |    ✓     |        —         |             ✓             |
+| Kiro (AWS)                 |    ✓     |    ✓     |        —         |             ✓             |
+| OpenAI Codex               |    —     |    ✓     |        —         |             ✓             |
+| Cursor IDE                 |    ✓     |    ✓     |        —         |             ✓             |
+| Zed Industries             |    —     |    ✓     |        —         |             ✓             |
+| Claude kodi                |    —     |    —     |        ✓         |             ✓             |
+| Kodni oching               |    —     |    —     |        ✓         |             ✓             |
+| Trae                       |    —     |    —     |        —         |         🔍 tergov         |
+| Boshqaruv paneli UI        |    ✓     |    ✗     |        ✗         |             ✓             |
+| Yo'l harakati inspektori   |    ✗     |    ✗     |        ✓         |             ✓             |
+| OmniRoute marshrutlash     |    ✗     |    ✗     |        ✗         |             ✓             |
+| Model xaritalash UI        |    ✗     |    ✗     |        ✗         |             ✓             |
+| O'tish ro'yxati            |    ✗     |    ✗     |        ✓         |             ✓             |
+| Yuqori oqim CA sertifikati |    ✗     |    ✗     |        ✓         |             ✓             |
 
 ---
 

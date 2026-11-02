@@ -55,6 +55,8 @@ export interface UsageLike {
   candidatesTokenCount?: number;
   totalTokenCount?: number;
   cachedContentTokenCount?: number;
+  /** Internal Gemini cache evidence; removed by filterUsageForFormat. */
+  cache_evidence?: "hit" | "miss" | "unreported" | "invalid";
   thoughtsTokenCount?: number;
   context_budget_input_tokens?: number;
   context_budget_prompt_tokens?: number;
@@ -142,8 +144,8 @@ function getBufferTokens(): number {
 
 async function _loadBufferFromDb(): Promise<void> {
   try {
-    const { getSettings } = await import("@/lib/db/settings");
-    const settings = await getSettings();
+    const { getCachedSettings } = await import("@/lib/db/readCache");
+    const settings = await getCachedSettings();
     const val = settings.usageTokenBuffer;
     if (typeof val === "number" && val >= 0) {
       _cachedBuffer = val;
@@ -172,12 +174,8 @@ export function setBufferTokensCache(value: number): void {
 
 // Get HH:MM:SS timestamp
 function getTimeString() {
-  return new Date().toLocaleTimeString("en-US", {
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
 }
 
 /**
@@ -686,12 +684,19 @@ export function normalizeUsage(usage: UsageLike | null | undefined) {
   assignNumber("output_tokens", usage?.output_tokens);
   assignNumber("cache_read_input_tokens", usage?.cache_read_input_tokens);
   assignNumber("cache_creation_input_tokens", pickCacheCreationTokens(usage));
-  assignNumber(
-    "cached_tokens",
+  const reportedCachedTokens =
     usage?.cached_tokens ??
-      usage?.prompt_tokens_details?.cached_tokens ??
-      usage?.input_tokens_details?.cached_tokens
-  );
+    usage?.prompt_tokens_details?.cached_tokens ??
+    usage?.input_tokens_details?.cached_tokens;
+  if (reportedCachedTokens !== undefined) assignNumber("cached_tokens", reportedCachedTokens);
+  if (
+    usage?.cache_evidence === "hit" ||
+    usage?.cache_evidence === "miss" ||
+    usage?.cache_evidence === "unreported" ||
+    usage?.cache_evidence === "invalid"
+  ) {
+    (normalized as UsageLike).cache_evidence = usage.cache_evidence;
+  }
   assignNumber("no_cache_tokens", usage?.no_cache_tokens);
   assignNumber("reasoning_tokens", usage?.reasoning_tokens);
   // Credits metered by a credit-metered provider (see
@@ -936,11 +941,27 @@ export function extractUsage(chunk: UsagePayloadLike | null | undefined) {
     // Gemini reports thoughts outside candidates. Fold them into completion so
     // every provider keeps reasoning as a subset of completion tokens.
     const thoughts = usageMeta.thoughtsTokenCount || 0;
+    const promptTokens = usageMeta.promptTokenCount || 0;
+    const reportedCachedTokens = usageMeta.cachedContentTokenCount;
+    const cachedTokens =
+      typeof reportedCachedTokens === "number" &&
+      Number.isFinite(reportedCachedTokens) &&
+      reportedCachedTokens >= 0 &&
+      reportedCachedTokens <= promptTokens
+        ? reportedCachedTokens
+        : undefined;
     return normalizeUsage({
-      prompt_tokens: usageMeta.promptTokenCount || 0,
+      prompt_tokens: promptTokens,
       completion_tokens: (usageMeta.candidatesTokenCount || 0) + thoughts,
       total_tokens: usageMeta.totalTokenCount,
-      cached_tokens: usageMeta.cachedContentTokenCount,
+      ...(cachedTokens !== undefined ? { cached_tokens: cachedTokens } : {}),
+      cache_evidence: !Object.prototype.hasOwnProperty.call(usageMeta, "cachedContentTokenCount")
+        ? "unreported"
+        : cachedTokens === undefined
+          ? "invalid"
+          : cachedTokens > 0
+            ? "hit"
+            : "miss",
       reasoning_tokens: thoughts,
     });
   }
@@ -1022,7 +1043,7 @@ export function estimateInputTokens(body: unknown) {
     }
 
     return messageTokens + toolTokens;
-  } catch (err) {
+  } catch {
     // Fallback if stringify fails
     return 0;
   }

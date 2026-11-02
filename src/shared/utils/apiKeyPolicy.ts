@@ -11,9 +11,8 @@
 import { extractApiKey } from "@/sse/services/auth";
 import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { getApiKeyMetadata, isModelAllowedForKey, getApiKeyById } from "@/lib/db/apiKeys";
-import { getComboByName } from "@/lib/db/combos";
+import { getCachedComboByName, getCachedComboForModel } from "@/lib/db/readCache";
 import { isDashboardSessionAuthenticated } from "./apiAuth";
-import { resolveComboForModel } from "@/lib/db/modelComboMappings";
 import { checkBudget } from "@/domain/costRules";
 import { checkKeyQuota } from "@/domain/keyQuota";
 import { checkTokenLimits } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
@@ -24,6 +23,8 @@ import {
 } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
+import { getSsoShadowSecret } from "@/lib/db/ssoIdentities";
+import { AUTHZ_HEADER_AUTH_ID, AUTHZ_HEADER_AUTH_KIND } from "@/server/authz/headers";
 import { checkRateLimit, RateLimitRule } from "./rateLimiter";
 import {
   resolveCanonicalEndpointPath,
@@ -32,6 +33,7 @@ import {
 import { resolveQuotaKeyScope } from "@/lib/quota/quotaKey";
 import { isQuotaModelName, parseQuotaModelName } from "@/lib/quota/quotaModelNaming";
 import { buildApiKeyUsageLimitPolicyRejection } from "@/lib/usage/apiKeyUsageLimits";
+import { buildTeamUsageLimitPolicyRejection } from "@/lib/usage/teamUsageLimits";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { hasApiKeyModelRestrictions } from "./resolvedModelAccess";
 import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
@@ -84,6 +86,7 @@ export interface ApiKeyMetadata {
   blockedModels?: string[];
   allowedCombos?: string[];
   allowedConnections?: string[];
+  preferredConnections?: string[];
   allowedQuotas?: string[];
   noLog?: boolean;
   autoResolve?: boolean;
@@ -263,16 +266,16 @@ function policyErrorResponse(
 }
 
 async function resolveRequestedComboName(modelStr: string): Promise<string | null> {
-  const exact = await getComboByName(modelStr);
+  const exact = await getCachedComboByName(modelStr);
   if (exact && typeof exact.name === "string") return exact.name;
 
   if (modelStr.startsWith("combo/")) {
     const withoutPrefix = modelStr.slice(6);
-    const prefixed = await getComboByName(withoutPrefix);
+    const prefixed = await getCachedComboByName(withoutPrefix);
     if (prefixed && typeof prefixed.name === "string") return prefixed.name;
   }
 
-  const mapped = await resolveComboForModel(modelStr);
+  const mapped = await getCachedComboForModel(modelStr);
   const mappedName = normalizeComboAccessName(mapped?.name);
   return mappedName;
 }
@@ -442,6 +445,9 @@ export interface ApiKeyPolicyResult {
   rejection: Response | null;
 }
 
+type PolicyValidationStage =
+  "validateEndpointAccess" | "validateTeamUsage" | "validateQuotaAccess" | "validateModelAccess";
+
 export interface EnforceApiKeyPolicyOptions {
   /**
    * Where the metered dollar budget is enforced for this request.
@@ -459,6 +465,8 @@ export interface EnforceApiKeyPolicyOptions {
    * entirely. Every other check on this path is unaffected.
    */
   meteredBudget?: "enforce" | "defer-to-candidate";
+  /** Test/diagnostic observer; it cannot alter policy outcomes. */
+  validationObserver?: (stage: PolicyValidationStage) => void;
 }
 
 /**
@@ -530,7 +538,7 @@ function validateKeyStatus(context: PolicyContext): Response | null {
 }
 
 async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Response | null> {
-  const { request, apiKey, apiKeyInfo } = context;
+  const { request, apiKeyInfo } = context;
   if (apiKeyInfo.accessSchedule?.enabled && !isWithinSchedule(apiKeyInfo.accessSchedule)) {
     const { from, until, tz } = apiKeyInfo.accessSchedule;
     return errorResponse(
@@ -551,6 +559,15 @@ async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Resp
   } catch (error) {
     log.error("API_POLICY", "API key USD usage limit check failed. Request blocked.", { error });
     return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "API key usage limit unavailable");
+  }
+}
+
+async function validateTeamUsage(context: PolicyContext): Promise<Response | null> {
+  try {
+    return await buildTeamUsageLimitPolicyRejection(context.request, context.apiKeyInfo.id);
+  } catch (error) {
+    log.error("API_POLICY", "Team shared usage limit check failed. Request blocked.", { error });
+    return errorResponse(HTTP_STATUS.SERVICE_UNAVAILABLE, "Team usage limit unavailable");
   }
 }
 
@@ -579,7 +596,7 @@ function validateEndpointAccess(context: PolicyContext): Response | null {
 }
 
 async function validateQuotaAccess(context: PolicyContext): Promise<Response | null> {
-  const { apiKey, apiKeyInfo, modelStr } = context;
+  const { apiKeyInfo, modelStr } = context;
   if (!modelStr) return null;
   const allowedQuotas = Array.isArray(apiKeyInfo.allowedQuotas) ? apiKeyInfo.allowedQuotas : [];
   if (isQuotaModelName(modelStr) && allowedQuotas.length === 0) {
@@ -610,9 +627,9 @@ async function validateQuotaAccess(context: PolicyContext): Promise<Response | n
 }
 
 /**
- * Whether this key is barred from the built-in `auto/*` combos.
+ * Whether this key is barred from the built-in `auto` / `auto/*` combos.
  *
- * `auto/*` ids are virtual, so they resolve to no stored combo and
+ * Built-in auto ids are virtual, so they resolve to no stored combo and
  * `isComboAllowedForKey()` fails open on them; `validateModelAccess()` then
  * returns before the allow/deny model lists are consulted. This flag is the
  * only per-key gate that reaches them. It defaults to allowed (undefined) so
@@ -620,28 +637,69 @@ async function validateQuotaAccess(context: PolicyContext): Promise<Response | n
  */
 export function isAutoComboDeniedForKey(
   apiKeyInfo: { allowAutoCombos?: boolean } | null | undefined,
-  modelStr: string | null | undefined
+  modelStr: string | null | undefined,
+  resolvedComboName: string | null = null
 ): boolean {
-  if (!modelStr || !modelStr.startsWith("auto/")) return false;
+  if (!modelStr || (modelStr !== "auto" && !modelStr.startsWith("auto/"))) return false;
+  if (modelStr === "auto" && resolvedComboName === "auto") return false;
   return apiKeyInfo?.allowAutoCombos === false;
+}
+
+function autoComboDeniedResponse(request: Request, modelStr: string): Response {
+  return policyErrorResponse(
+    request,
+    HTTP_STATUS.FORBIDDEN,
+    `Auto combo "${modelStr}" is not allowed for this API key`,
+    `Auto combos are not enabled for this API key. Choose an explicit model or combo.`,
+    "invalid_request_error",
+    HTTP_STATUS.BAD_REQUEST
+  );
+}
+
+/**
+ * Bare `auto` falls through to the built-in router only when no persisted
+ * combo literally named "auto" exists, so resolve the combo before deciding
+ * whether `allowAutoCombos=false` applies. Resolution failure fails closed.
+ */
+async function resolveBareAutoPolicy(
+  context: PolicyContext,
+  requestedComboName: string | null
+): Promise<{ comboName: string | null; rejection: Response | null }> {
+  const { request, apiKeyInfo, modelStr } = context;
+  let comboName = requestedComboName;
+  if (!comboName && isAutoComboDeniedForKey(apiKeyInfo, modelStr)) {
+    try {
+      comboName = await resolveRequestedComboName(String(modelStr));
+    } catch (error) {
+      log.error("API_POLICY", "Bare auto combo resolution failed. Request blocked.", { error });
+      return {
+        comboName: null,
+        rejection: errorResponse(
+          HTTP_STATUS.SERVICE_UNAVAILABLE,
+          "API key combo policy unavailable"
+        ),
+      };
+    }
+  }
+  if (isAutoComboDeniedForKey(apiKeyInfo, modelStr, comboName)) {
+    return { comboName, rejection: autoComboDeniedResponse(request, String(modelStr)) };
+  }
+  return { comboName, rejection: null };
 }
 
 async function validateModelAccess(context: PolicyContext): Promise<Response | null> {
   const { request, apiKey, apiKeyInfo, modelStr } = context;
   if (!modelStr || apiKeyInfo.allowedQuotas?.length) return null;
-  if (isAutoComboDeniedForKey(apiKeyInfo, modelStr)) {
-    return policyErrorResponse(
-      request,
-      HTTP_STATUS.FORBIDDEN,
-      `Auto combo "${modelStr}" is not allowed for this API key`,
-      `Auto combos are not enabled for this API key. Choose an explicit model or combo.`,
-      "invalid_request_error",
-      HTTP_STATUS.BAD_REQUEST
-    );
+  // `auto/*` always denotes the built-in virtual router; bare `auto` is
+  // resolved against persisted combos in resolveBareAutoPolicy() below.
+  if (modelStr !== "auto" && isAutoComboDeniedForKey(apiKeyInfo, modelStr)) {
+    return autoComboDeniedResponse(request, modelStr);
   }
   const comboAccess = await validateComboAccess(apiKeyInfo.allowedCombos, modelStr);
   if (comboAccess.rejection) return comboAccess.rejection;
-  let requestedComboName = comboAccess.comboName;
+  const autoPolicy = await resolveBareAutoPolicy(context, comboAccess.comboName);
+  if (autoPolicy.rejection) return autoPolicy.rejection;
+  let requestedComboName = autoPolicy.comboName;
 
   const hasModelRestrictions = hasApiKeyModelRestrictions(apiKeyInfo);
   if (!requestedComboName && hasModelRestrictions) {
@@ -823,6 +881,33 @@ function extractUngatedClientApiKey(request: Request): string | null {
 }
 
 /**
+ * Resolve an SSO-authenticated request onto its shadow API key, using the
+ * subject the auth layer already verified and stamped. The stamps are
+ * trustworthy because the pipeline strips any client-supplied copy before
+ * classification (src/server/authz/pipeline.ts).
+ *
+ * MUST be consulted before extractApiKey()/extractUngatedClientApiKey(): Claude
+ * Code sends an apiKeyHelper credential in BOTH `Authorization: Bearer` and
+ * `x-api-key`, so both extractors would return the raw Entra JWT, which hashes
+ * to no key and silently drops the user's entire policy — the same
+ * auth-vs-policy divergence as GHSA-2phc-xp22-9f56 above.
+ */
+function resolveSsoApiKeySecret(request: Request): string | null {
+  const kind = request.headers.get(AUTHZ_HEADER_AUTH_KIND);
+  if (kind !== "sso_user") return null;
+
+  const oid = request.headers.get(AUTHZ_HEADER_AUTH_ID);
+  if (!oid || !oid.trim()) return null;
+
+  try {
+    return getSsoShadowSecret(oid.trim());
+  } catch (error) {
+    log.error("API_POLICY", "Failed to resolve SSO shadow key", { error });
+    return null;
+  }
+}
+
+/**
  * The API key the policy layer evaluates for a request. The credential that
  * actually validated wins (a stale Bearer sent next to a valid x-api-key must
  * not hide that key's policy); then a real bearer key; then a bare
@@ -831,6 +916,9 @@ function extractUngatedClientApiKey(request: Request): string | null {
  * policy by id (resolved server-side, secret never sent).
  */
 export async function resolvePolicyApiKey(request: Request): Promise<string | null> {
+  // SSO first: its bearer is a JWT, not a key, and must map to the shadow key.
+  const ssoSecret = resolveSsoApiKeySecret(request);
+  if (ssoSecret) return ssoSecret;
   const resolved = await resolveClientApiKey(request);
   return (
     (resolved.valid ? resolved.apiKey : null) ||
@@ -927,6 +1015,28 @@ function unresolvedScopedKeyRejection(selfLoopScope: SelfLoopScope): Response | 
 }
 
 /**
+ * Endpoint, Team usage, quota and model access checks, in this fixed order (endpoint
+ * authorization must precede any Team budget lookup). The first rejection wins.
+ */
+async function runAccessValidators(
+  context: PolicyContext,
+  options?: EnforceApiKeyPolicyOptions
+): Promise<Response | null> {
+  const stages: Array<[PolicyValidationStage, () => Response | null | Promise<Response | null>]> = [
+    ["validateEndpointAccess", () => validateEndpointAccess(context)],
+    ["validateTeamUsage", () => validateTeamUsage(context)],
+    ["validateQuotaAccess", () => validateQuotaAccess(context)],
+    ["validateModelAccess", () => validateModelAccess(context)],
+  ];
+  for (const [stage, validate] of stages) {
+    options?.validationObserver?.(stage);
+    const rejection = await validate();
+    if (rejection) return rejection;
+  }
+  return null;
+}
+
+/**
  * Internal sub-request of a parent request that already passed the full policy
  * (schedule, budget, limits): re-check authorization only, so the key's
  * allowances are not charged twice.
@@ -979,13 +1089,8 @@ export async function enforceApiKeyPolicy(
   }
   const scheduleRejection = await validateKeyScheduleAndUsage(context);
   if (scheduleRejection) return { apiKey, apiKeyInfo, rejection: scheduleRejection };
-  const endpointRejection = validateEndpointAccess(context);
-  if (endpointRejection) return { apiKey, apiKeyInfo, rejection: endpointRejection };
-
-  const quotaRejection = await validateQuotaAccess(context);
-  if (quotaRejection) return { apiKey, apiKeyInfo, rejection: quotaRejection };
-  const modelRejection = await validateModelAccess(context);
-  if (modelRejection) return { apiKey, apiKeyInfo, rejection: modelRejection };
+  const accessRejection = await runAccessValidators(context, options);
+  if (accessRejection) return { apiKey, apiKeyInfo, rejection: accessRejection };
 
   const budgetRejection = validateBudgetUnlessDeferred(context, options);
   if (budgetRejection) return { apiKey, apiKeyInfo, rejection: budgetRejection };

@@ -343,8 +343,10 @@ describe("RTK page config saves", { timeout: 20_000 }, () => {
 
     expect(inputFor("maxChars").value).toBe("20000");
     expect(pageText()).toContain("settings.saveFailed");
-    // Screen readers skip the icon's ligature text and read only the message.
-    expect(screen.getByText("error").getAttribute("aria-hidden")).toBe("true");
+    // Screen readers skip the icon and read only the message (KEA-7886: a Lucide svg via <Icon>).
+    expect(
+      document.querySelector('svg.oi-icon[data-icon="error"]')?.getAttribute("aria-hidden")
+    ).toBe("true");
     // While the page is open the message shows on the page, not as a toast.
     expect(errorToasts()).toEqual([]);
   });

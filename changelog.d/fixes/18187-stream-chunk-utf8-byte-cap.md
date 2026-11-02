@@ -1,0 +1,1 @@
+- **fix(sse):** Enforce stream chunk log byte limits using UTF-8, preserving complete Unicode code points and bounding capture independently at all three pipeline stages ([#18187](https://github.com/cheaper-inference/OmniRoute/pull/18187)) — thanks @AiCaptain357

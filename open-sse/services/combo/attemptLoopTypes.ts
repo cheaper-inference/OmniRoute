@@ -39,6 +39,10 @@ export type AttemptLoopState = {
   exhaustedProviders: Set<string>;
   exhaustedConnections: Set<string>;
   transientRateLimitedProviders: Set<string>;
+  /** Durable exhaustion carried across set retries (quota, credits, auth). */
+  durableExhaustedProviders?: Set<string>;
+  /** Durable exhaustion carried across set retries, keyed `provider:connectionId`. */
+  durableExhaustedConnections?: Set<string>;
   abortControllers: Map<number, AbortController>;
   dispatchedTargets: Set<string>;
   targetFailureTrust: Map<string, { observedFailure: boolean; allObservedFailuresQuota: boolean }>;
@@ -54,6 +58,11 @@ export type AttemptLoopState = {
   /** Normalized provider/model keys already refused request-scoped this dispatch. */
   requestScopedRejectedModelKeys?: Set<string>;
   observeFailure(quotaExhausted: boolean, targetExecutionKey?: string): void;
+  /**
+   * Last partial result of a target whose stream was cut (#18460 follow-up), returned when
+   * no later target succeeds (`truncatedStreamFailover.ts`).
+   */
+  heldTruncatedResponse?: Response | null;
 };
 
 export type AttemptLoopDeps = {

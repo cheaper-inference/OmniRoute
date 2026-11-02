@@ -12,6 +12,9 @@ import {
 } from "@/shared/constants/designerWebRetirement";
 
 import { getImageProvider, parseImageModel } from "../config/imageRegistry.ts";
+import { handleGrokImageGeneration } from "./grokMedia.ts";
+import { saveCallLog, saveImageSuccessResult, saveImageErrorResult } from "./imageResult.ts";
+export { saveImageSuccessResult, saveImageErrorResult } from "./imageResult.ts";
 import { HTTP_STATUS } from "../config/constants.ts";
 import { applyAntigravityClientProfileHeaders } from "../services/antigravityClientProfile.ts";
 import { getAntigravityEnvelopeUserAgent } from "../services/antigravityIdentity.ts";
@@ -19,7 +22,6 @@ import { kieExecutor } from "../executors/kie.ts";
 import { mapImageSize } from "../translator/image/sizeMapper.ts";
 import { getCodexClientVersion, getCodexUserAgent } from "../config/codexClient.ts";
 import { isCodexFreePlan } from "../executors/codex/tools.ts";
-import { saveCallLog } from "@/lib/usageDb";
 import { sleep } from "../utils/sleep.ts";
 import { normalizeImageBuffer } from "../utils/imageNormalize.ts";
 import {
@@ -43,9 +45,6 @@ import {
   getConfiguredTimeout,
 } from "@/shared/utils/fetchTimeout";
 import { sanitizeErrorMessage, sanitizeUpstreamDetails } from "../utils/error.ts";
-// Shared with imageUpscale/shared.ts — see imageErrorLog.ts for why a bare
-// String(value) is unsafe here (null-prototype sanitizeUpstreamDetails() payloads, #12506).
-import { stringifyImageErrorForLog } from "./imageErrorLog.ts";
 
 import { handleSDWebUIImageGeneration } from "./imageGeneration/providers/sdWebUI.ts";
 import { handleHyperbolicImageGeneration } from "./imageGeneration/providers/hyperbolic.ts";
@@ -66,7 +65,10 @@ import { buildXaiImageRequest } from "./imageGeneration/providers/xaiImage.ts";
 import { handleMaxaiImageGeneration } from "./imageGeneration/providers/maxaiImage.ts";
 import { handleAdobeFireflyImageGeneration } from "./imageGeneration/providers/adobeFirefly.ts";
 import { handleSyntxImageGeneration } from "./imageGeneration/providers/syntx.ts";
-import { geminiInlineImagePart } from "./imageGeneration/providers/geminiInline.ts";
+import {
+  geminiInlineImagePart,
+  geminiReferenceImageError,
+} from "./imageGeneration/providers/geminiInline.ts";
 import { handleAlibabaImageGeneration } from "./imageGeneration/providers/alibabaImage.ts";
 import { handleAiHordeImageGeneration } from "./imageGeneration/providers/aihorde.ts";
 import * as codexImages from "./imageGeneration/providers/codexImages.ts";
@@ -539,6 +541,10 @@ export async function handleImageGeneration({
     });
   }
 
+  if (providerConfig.format === "grok-image") {
+    return handleGrokImageGeneration({ model, providerConfig, body, credentials, signal });
+  }
+
   if (providerConfig.format === "zenmux-image") {
     return handleZenmuxImageGeneration({
       model,
@@ -749,7 +755,15 @@ export async function handleImageGeneration({
   }
 
   if (providerConfig.format === "syntx-image") {
-    return handleSyntxImageGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleSyntxImageGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "nanobanana") {
@@ -1181,6 +1195,18 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
       startTime,
       error:
         "Missing Google projectId for Antigravity account. Please reconnect OAuth in Providers so OmniRoute can fetch your Cloud Code project.",
+      requestBody: logRequestBody,
+    });
+  }
+
+  const referenceError = geminiReferenceImageError(body);
+  if (referenceError) {
+    return saveImageErrorResult({
+      provider,
+      model,
+      status: 400,
+      startTime,
+      error: referenceError,
       requestBody: logRequestBody,
     });
   }
@@ -2759,80 +2785,6 @@ export async function handleCodexImageEdit({
     logPath: "/v1/images/edits",
   });
   return result as CodexImageEditResult;
-}
-
-export function saveImageSuccessResult({
-  provider,
-  model,
-  startTime,
-  requestBody = null,
-  responseBody = null,
-  created = null,
-  images,
-  path = "/v1/images/generations",
-}) {
-  saveCallLog({
-    method: "POST",
-    path,
-    status: 200,
-    model: `${provider}/${model}`,
-    provider,
-    duration: Date.now() - startTime,
-    requestBody,
-    responseBody,
-  }).catch(() => {});
-
-  return {
-    success: true,
-    data: {
-      created: created || Math.floor(Date.now() / 1000),
-      data: images,
-    },
-  };
-}
-
-export function saveImageErrorResult({
-  provider,
-  model,
-  status,
-  startTime,
-  error,
-  requestBody = null,
-  path = "/v1/images/generations",
-  // #8307: opt-in signal for executeImageWithCredentialFallback — set by a
-  // provider handler when the failure is account/session-specific (expired
-  // or blocked credentials) rather than a generic request/provider error, so
-  // the retry loop tries the next eligible account even when the upstream
-  // status isn't a plain 401. Defaults to unset (existing 401-only behavior
-  // for every other provider is unchanged).
-  retryable = undefined,
-}: {
-  provider: string;
-  model: string;
-  status: number;
-  startTime: number;
-  error: unknown;
-  requestBody?: unknown;
-  path?: string;
-  retryable?: boolean;
-}) {
-  saveCallLog({
-    method: "POST",
-    path,
-    status,
-    model: `${provider}/${model}`,
-    provider,
-    duration: Date.now() - startTime,
-    error: stringifyImageErrorForLog(error).slice(0, 500),
-    requestBody,
-  }).catch(() => {});
-
-  return {
-    success: false,
-    status,
-    error,
-    ...(retryable !== undefined ? { retryable } : {}),
-  };
 }
 
 /**

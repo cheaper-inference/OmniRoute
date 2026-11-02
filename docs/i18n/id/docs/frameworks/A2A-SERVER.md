@@ -47,7 +47,7 @@ A2A dikendalikan oleh sakelar **Endpoints → A2A** dan dinonaktifkan secara def
 
 ### `message/send` — Eksekusi Sinkron
 
-Mengirim pesan ke sebuah skill dan menunggu respons lengkap.
+Mengirim pesan ke suatu skill dan menunggu respons lengkap.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Untuk `smart-routing`, `metadata.combo` merupakan penggantian eksplisit terhadap
+`metadata.model` untuk permintaan gateway; nilai tersebut dikirim sebagai `model` yang sebenarnya,
+bukan sebagai bidang JSON `x-combo` yang diabaikan. Otorisasi normal gateway berdasarkan kunci API dan
+per target tetap berlaku. Combo yang tidak valid atau kosong akan ditolak.
+
+Hasilnya menampilkan `requested_combo` (maksud pemanggil), `dispatched_model`
+(permintaan gateway yang sebenarnya), `response_model` (respons gateway), dan
+`confirmed_combo`. Bidang terakhir bernilai `null` kecuali gateway secara eksplisit
+mengidentifikasi suatu combo. Log keputusan A2A mengatribusikan eksekusi hanya kepada
+combo yang telah dikonfirmasi, sementara permintaan yang belum dikonfirmasi tetap disimpan sebagai `requestedCombo`.
+
 **Respons:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Streaming SSE
 
-Sama seperti `message/send`, tetapi mengembalikan Server-Sent Events untuk streaming secara real-time.
+Sama seperti `message/send`, tetapi mengembalikan Server-Sent Events untuk streaming waktu nyata.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Skill yang Tersedia
+## Keterampilan yang Tersedia
 
-OmniRoute menyediakan 6 skill A2A yang terhubung di `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul skill berada di `src/lib/a2a/skills/`.
+OmniRoute memperlihatkan 6 keterampilan A2A yang dihubungkan ke `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul keterampilan ada di `src/lib/a2a/skills/`.
 
-| Skill              | ID                   | Deskripsi                                                                                                                                                            | Tag                      | Contoh                                      |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------- | :------------------------------------------ |
-| Perutean Cerdas    | `smart-routing`      | Merutekan prompt melalui penyedia/kombinasi optimal menggunakan mesin kombinasi + penilaian OmniRoute                                                                | perutean, penyedia       | "Rutekan prompt ini melalui model terbaik"  |
-| Manajemen Kuota    | `quota-management`   | Melaporkan status kuota per penyedia, membantu pemanggil memutuskan kapan harus membatasi/beralih                                                                    | kuota, penyedia          | "Periksa kuota untuk anthropic"             |
-| Penemuan Penyedia  | `provider-discovery` | Menampilkan daftar penyedia yang terinstal beserta kapabilitas, penanda tingkat gratis, dan status OAuth                                                             | penyedia, penemuan       | "Penyedia apa saja yang tersedia?"          |
-| Analisis Biaya     | `cost-analysis`      | Memperkirakan biaya permintaan/percakapan berdasarkan katalog + penggunaan terkini                                                                                   | biaya, penggunaan        | "Perkirakan biaya percakapan ini"           |
-| Laporan Kesehatan  | `health-report`      | Mengagregasi status pemutus sirkuit, waktu tunggu, dan penguncian per penyedia                                                                                       | kesehatan, ketahanan     | "Tampilkan status kesehatan semua penyedia" |
-| Daftar Kapabilitas | `list-capabilities`  | Mengembalikan katalog lengkap Agent Skills berisi 45 entri (23 API + 21 CLI + 1 konfigurasi) sebagai tabel markdown dengan URL mentah SKILL.md untuk injeksi konteks | katalog, penemuan, skill | "Cantumkan semua kapabilitas OmniRoute"     |
+| Keahlian          | ID                   | Keterangan                                                                                                                                                        | Tag                             | Contoh                                         |
+| :---------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :--------------------------------------------- |
+| Perutean Cerdas   | `smart-routing`      | Merutekan prompt melalui provider/combo optimal menggunakan skor + mesin kombo OmniRoute                                                                          | perutean, penyedia              | "Rutekan permintaan ini melalui model terbaik" |
+| Manajemen Kuota   | `quota-management`   | Melaporkan status kuota per penyedia, membantu penelepon memutuskan kapan harus melakukan throttle/switch                                                         | kuota, penyedia                 | "Periksa kuota untuk antropik"                 |
+| Penemuan Penyedia | `provider-discovery` | Mencantumkan penyedia terinstal dengan kemampuan, tanda tingkat gratis, status OAuth                                                                              | penyedia, penemuan              | “Penyedia apa saja yang tersedia?”             |
+| Analisis Biaya    | `cost-analysis`      | Memperkirakan biaya request/conversation berdasarkan katalog + penggunaan terkini                                                                                 | biaya, penggunaan               | "Perkirakan biaya untuk percakapan ini"        |
+| Laporan Kesehatan | `health-report`      | Agregat pemutus sirkuit, cooldown, status penguncian per penyedia                                                                                                 | kesehatan, ketahanan            | "Tampilkan status kesehatan semua penyedia"    |
+| Daftar Kemampuan  | `list-capabilities`  | Mengembalikan katalog Keahlian Agen 45 entri lengkap (23 API + 21 CLI + 1 config) sebagai tabel penurunan harga dengan SKILL.md URLs mentah untuk injeksi konteks | katalog, penemuan, keterampilan | "Daftar semua kemampuan OmniRoute "            |
 
-> Agent Card harus tetap diselaraskan dengan katalog aktif yang berisi 374 penyedia; jumlah penyedia dan metadata gratis/tanpa autentikasi bersumber dari registri runtime.
+> Kartu Agen harus tetap selaras dengan katalog penyedia 377 langsung; jumlah penyedia dan metadata free/no-auth bersumber dari registri runtime.
 
-### Detail Skill `list-capabilities`
+### `list-capabilities` Detail Keterampilan
 
-Skill `list-capabilities` sangat berguna bagi agen eksternal yang perlu mengetahui apa yang disediakan OmniRoute sebelum mengirim panggilan API. Skill ini mengembalikan artefak tabel markdown terstruktur:
+Keterampilan `list-capabilities` sangat berguna bagi agen eksternal yang perlu mengetahui apa yang diekspos OmniRoute sebelum mengirim panggilan API. Ini mengembalikan artefak tabel penurunan harga terstruktur:
 
 ```
-| ID | Nama | Kategori | Area | Endpoint/Perintah | URL Mentah |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentikasi & Sesi | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Setiap baris menyertakan kolom `rawUrl` agar agen dapat langsung mengambil SKILL.md lengkap. Bidang `metadata.totalSkills` mencerminkan ukuran katalog (saat ini 45). Implementasi: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Setiap baris menyertakan kolom `rawUrl` sehingga agen dapat segera mengambil SKILL.md secara lengkap. Bidang `metadata.totalSkills` mencerminkan ukuran katalog (45 hari ini). Implementasi: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -197,9 +201,9 @@ Endpoint JSON-RPC `/a2a` adalah titik masuk A2A kanonis. Endpoint REST di bawah 
 
 1. **Buat file skill:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Ekspor fungsi asinkron `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur skill yang sudah ada seperti `smartRouting.ts`.
+   Ekspor fungsi asinkron `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur skill yang sudah ada, seperti `smartRouting.ts`.
 
-2. **Daftarkan handler:** dalam `src/lib/a2a/taskExecution.ts`, tambahkan entri ke `A2A_SKILL_HANDLERS`:
+2. **Daftarkan handler:** di `src/lib/a2a/taskExecution.ts`, tambahkan entri ke `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -211,21 +215,21 @@ Endpoint JSON-RPC `/a2a` adalah titik masuk A2A kanonis. Endpoint REST di bawah 
    };
    ```
 
-3. **Ekspos dalam Agent Card:** dalam `src/app/.well-known/agent.json/route.ts`, tambahkan ke array `skills`:
+3. **Tampilkan di Agent Card:** di `src/lib/a2a/agentCardMetadata.ts` (digunakan bersama oleh `/.well-known/agent.json` dan `/.well-known/agent-card.json`), tambahkan ke array `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Skill Anda",
-     "description": "Deskripsi singkat yang berfokus pada tujuan",
-     "tags": ["perutean", "kuota"],
-     "examples": ["Contoh pemanggilan dengan bahasa alami"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Tulis pengujian:** `tests/unit/a2a-<your-skill>.test.ts`. Cakup alur sukses + alur kesalahan.
+4. **Tulis pengujian:** `tests/unit/a2a-<your-skill>.test.ts`. Cakup alur berhasil + alur kesalahan.
 
-5. **Dokumentasikan** skill baru dalam tabel `Available Skills` pada file ini.
+5. **Dokumentasikan** skill baru dalam tabel `Available Skills` di file ini.
 
 ---
 
@@ -264,7 +268,7 @@ dikirim → sedang diproses → selesai
 
 ## Contoh Integrasi
 
-### Python (requests)
+### Python (permintaan)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (mengambil)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

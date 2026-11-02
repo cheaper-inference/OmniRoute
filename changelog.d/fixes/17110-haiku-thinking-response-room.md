@@ -1,0 +1,1 @@
+- **fix(claude):** Preserve Haiku's capped output allowance when fitting a thinking budget so requests with large `max_tokens` and low reasoning effort retain room for the response ([#17110](https://github.com/diegosouzapw/OmniRoute/pull/17110)).

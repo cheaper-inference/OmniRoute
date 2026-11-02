@@ -1,0 +1,1 @@
+- **feat(opencode-plugin-v2):** publish one catalog branch with `prefix/*` and hide every combo with `combos: false` ([#18135](https://github.com/cheaper-inference/OmniRoute/pull/18135)) — thanks @maxmad64bis

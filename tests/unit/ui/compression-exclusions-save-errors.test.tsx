@@ -133,7 +133,9 @@ describe("ExclusionsPanel reports failed saves and loads", () => {
       expectShown("saveFailed");
       expect(textarea.value).toBe(TYPED);
       // Screen readers skip the icon's ligature text and read only the message.
-      expect(screen.getByText("error").getAttribute("aria-hidden")).toBe("true");
+      expect(
+        document.querySelector('svg.oi-icon[data-icon="error"]')?.getAttribute("aria-hidden")
+      ).toBe("true");
     }
   );
 
@@ -245,7 +247,9 @@ describe("ExclusionsPanel reports failed saves and loads", () => {
       const { textarea, save } = await renderPanel();
 
       expectShown("failedLoadWithStatus");
-      expect(screen.getByText("error").getAttribute("aria-hidden")).toBe("true");
+      expect(
+        document.querySelector('svg.oi-icon[data-icon="error"]')?.getAttribute("aria-hidden")
+      ).toBe("true");
       expect(textarea.disabled, "textarea disabled after a failed load").toBe(true);
       expect(save.disabled, "Save disabled after a failed load").toBe(true);
 

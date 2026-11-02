@@ -173,15 +173,15 @@ Omfang (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 # Alle tester (enhet + vitest + økosystem + e2e)
 npm run test:all
 
-# Én enkelt testfil (Node.js' innebygde testkjører – de fleste testene bruker denne)
+# Én enkelt testfil (Node.js sin innebygde testkjører — de fleste tester bruker denne)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Bare enhetstestene som påvirkes av endringen din (samme TIA-velger som CI-porten, #8084)
+# Bare enhetstestene som påvirkes av endringen din (samme TIA-velger som CI-kontrollen, #8084)
 npm run test:scoped            # endringer i siste commit (eller arbeidstreet)
-npm run test:scoped:staged     # bare staged-endringer – passer godt med en pre-commit-kjøring
-npm run test:scoped:full       # bygg kartet over importgrafen på nytt først (etter at filer er lagt til/flyttet)
-# Exit 1 + «run the full suite» betyr at en sentral fil (tsconfig, package.json, …) eller en
-# ikke-kartlagt kilde ble endret – velgeren feiler på en sikker måte og hopper aldri over noe i stillhet.
+npm run test:scoped:staged     # bare klargjorte endringer — passer godt med en pre-commit-kjøring
+npm run test:scoped:full       # bygg kartet over importgrafen på nytt først (etter å ha lagt til/flyttet filer)
+# Exit 1 + «kjør hele testpakken» betyr at en sentral fil (tsconfig, package.json, …) eller en
+# ikke-kartlagt kilde ble endret — velgeren feiler sikkert og hopper aldri over noe uten varsel.
 
 # Vitest (MCP-server, autoCombo, hurtigbuffer)
 npm run test:vitest
@@ -195,49 +195,50 @@ npm run test:protocols:e2e
 # Kompatibilitetstester for økosystemet
 npm run test:ecosystem
 
-# Dekningsport: 60 % setninger/linjer/funksjoner/grener
+# Dekningskrav: 60 % setninger/linjer/funksjoner/grener
 npm run test:coverage
 npm run coverage:report
 
-# Linting + formateringskontroll
+# Kontroll av linting + formatering
 npm run lint
 npm run check
 
-# Begrenset smoke-test med reelle oppstrømstjenester i kombinasjon (krever VPS-tilgang + kreditter hos reelle leverandører)
-# Treffer REELLE leverandører – koster litt. Kjøres ALDRI i CI. Hoppes over uten feil når porten mangler.
+# Kontrollert smoke-test av kombinasjoner mot reelle oppstrømstjenester (krever VPS-tilgang + kreditter hos reelle leverandører)
+# Kaller REELLE leverandører — koster litt. Kjører ALDRI i CI. Hoppes problemfritt over uten kontrollvariabelen.
 # Krever: tilgang med ssh root@192.168.0.15 (henter et skrivebeskyttet DB-øyeblikksbilde fra VPS-en).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Fase 3-smoke-test mot aktiv VPS – vanlige Node ESM-skript som treffer den aktive .15-serveren direkte.
+# Fase 3-smoke-test direkte mot VPS — vanlige Node ESM-skript som kaller den aktive .15-serveren direkte.
 # Krever: tilgang med ssh root@192.168.0.15 (kombinasjoner opprettes/fjernes via SSH sqlite).
-# Treffer REELLE leverandører (liten kostnad). Oppretter/sletter bare __live_test__*-kombinasjoner. Kjøres ALDRI i CI.
+# Kaller REELLE leverandører (liten kostnad). Oppretter/sletter bare __live_test__*-kombinasjoner. Kjører ALDRI i CI.
 # REQUIRE_API_KEY=false på .15, så ingen API-nøkkel er nødvendig, men COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY respekteres hvis de er angitt.
-npm run test:combo:live:vps              # 7 HTTP-scenarioer (prioritet/round-robin/vektet/kostnad/fusion/auto + tilstand)
+npm run test:combo:live:vps              # 7 HTTP-scenarioer (priority/round-robin/weighted/cost/fusion/auto + helsesjekk)
 npm run test:combo:live:vps:failover     # legger til et reelt failover-scenario på tvers av leverandører (totalt 8)
 ```
 
 Merknader om dekning:
 
-- `npm run test:coverage` måler kildedekning for hovedpakken med enhetstester, ekskluderer `tests/**` og inkluderer `open-sse/**`
-- Pull requests må holde dekningsporten på **60 %+** for setninger/linjer/funksjoner/grener
+- `npm run test:coverage` måler kodedekningen for hovedpakken med enhetstester, utelater `tests/**` og inkluderer `open-sse/**`
+- Pull requests må holde dekningskravet på **60 %+** for setninger/linjer/funksjoner/grener
 - Hvis en PR endrer produksjonskode i `src/`, `open-sse/`, `electron/` eller `bin/`, må den legge til eller oppdatere automatiserte tester i samme PR
 - `npm run coverage:report` skriver ut den detaljerte rapporten fil for fil fra den siste dekningskjøringen
-- `npm run test:coverage:legacy` bevarer den eldre måleverdien for historisk sammenligning
-- Se `docs/ops/COVERAGE_PLAN.md` for den faseinndelte planen for forbedring av dekningen
+- `npm run test:coverage:legacy` bevarer den eldre målemetoden for historisk sammenligning
+- Se `docs/ops/COVERAGE_PLAN.md` for den trinnvise planen for forbedring av kodedekningen
 
 ### Krav til pull requests
 
-Før du åpner en PR, bruker du
-[anbefalt bidragsprosess](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) for å kjøre den fokuserte løkken for
-det du har endret. Hele enhetstestpakken (4 CI-sharder), Vitest, dekningsporten på **60 %+** og
-produksjonsbygget er CIs ansvar – å kjøre dem lokalt gir ingen informasjon som PR-kontrollene
-ikke allerede gir deg, og på mindre maskiner kan det overbelaste verten (#8084):
+Før du åpner en PR, bruk
+[den anbefalte bidragsflyten](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) til å kjøre den fokuserte løkken for
+det du har endret. Hele enhetstestpakken (4 CI-deler), Vitest, dekningskravet på **60 %+** og
+produksjonsbygget er CI-systemets ansvar — lokal kjøring av disse gir ingen informasjon som PR-
+kontrollene ikke allerede vil gi deg, og på mindre maskiner kan det overbelaste verten (#8084):
 
 - Kjør testfilene som dekker endringen din: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Kjør `npm run lint`
 - Inkluder eller oppdater automatiserte tester i samme PR hver gang produksjonskoden endres
-- Oppgi de endrede eller tillagte testfilene i PR-beskrivelsen når produksjonskoden er endret
-- Kontroller SonarQube-resultatet i PR-en når prosjektets hemmeligheter er konfigurert i CI
+- I `node:test`-filer må alle `await` på toppnivå (som `await import(...)`) plasseres før den første `test()` / `describe()`: med `--test-force-exit` kan tester som registreres etter dette, i stillhet aldri bli kjørt (#18045; håndheves av `npm run check:test-tla-order`)
+- Inkluder de endrede eller nye testfilene i PR-beskrivelsen når produksjonskoden er endret
+- Kontroller SonarQube-resultatet for PR-en når prosjektets hemmeligheter er konfigurert i CI
 
 Gjeldende teststatus: **122 enhetstestfiler** som dekker:
 
@@ -247,8 +248,8 @@ Gjeldende teststatus: **122 enhetstestfiler** som dekker:
 - Databaseoperasjoner og skjema (21 DB-moduler)
 - OAuth-flyter og autentisering
 - Validering av API-endepunkter (Zod v4)
-- MCP-serververktøy og håndheving av tilgangsomfang
-- Memory- og Skills-systemene
+- Verktøy for MCP-serveren og håndheving av scopes
+- Minne- og ferdighetssystemer
 
 ---
 

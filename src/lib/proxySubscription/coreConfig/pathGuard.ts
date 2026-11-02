@@ -24,7 +24,7 @@ const MAX_PATH_LENGTH = 1024;
 /**
  * Whether `p` is an acceptable adopted core-config path: non-empty,
  * at most 1024 chars, no NUL byte, absolute, no `..` segment, `.json`
- * extension (case-sensitive). Never throws.
+ * or `.yaml`/`.yml` extension (case-sensitive). Never throws.
  */
 export function isCoreConfigPathAllowed(p: string): CoreConfigPathVerdict {
   try {
@@ -35,8 +35,10 @@ export function isCoreConfigPathAllowed(p: string): CoreConfigPathVerdict {
     if (p.split("/").includes("..") || p.split(path.sep).includes("..")) {
       return { allowed: false, reason: "dotdot_segment" };
     }
-    if (!p.endsWith(".json")) return { allowed: false, reason: "bad_extension" };
-    return { allowed: true };
+    if (p.endsWith(".json") || p.endsWith(".yaml") || p.endsWith(".yml")) {
+      return { allowed: true };
+    }
+    return { allowed: false, reason: "bad_extension" };
   } catch {
     return { allowed: false, reason: "empty" };
   }
@@ -53,10 +55,15 @@ export interface CoreBinaryGuardVerdict {
 /**
  * Native check command per supported core binary, keyed by file name.
  * The checker runs `checkArgs + [candidateFile]` via `execFile` (no shell).
- * Adding a core = one table entry.
+ * Adding a core = one table entry. The mihomo entry mirrors the
+ * `mihomo -t -f <file>` check (mihomo docs "Command-line flags",
+ * consulted at implementation time: `-t` tests the config, `-f` names
+ * the file): no project source pins another spelling, so the table entry
+ * stays the single reference.
  */
 export const CORE_CHECK_ARGS: Record<string, readonly string[]> = {
   "sing-box": ["check", "-c"],
+  mihomo: ["-t", "-f"],
 };
 
 /** Check arguments for a binary file name, or null when not allow-listed. */

@@ -371,13 +371,20 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
         ? "process"
         : this.deps.resolveComboVisionDecision
           ? await this.deps.resolveComboVisionDecision(model)
-        : this.deps.checkModelHasComboMapping
-          ? (await this.deps.checkModelHasComboMapping(model))
-            ? "process"
-            : "skip"
-          : await getComboVisionBridgeDecision(model);
+          : this.deps.checkModelHasComboMapping
+            ? (await this.deps.checkModelHasComboMapping(model))
+              ? "process"
+              : "skip"
+            : await getComboVisionBridgeDecision(model);
 
-      if (comboVisionBridgeDecision === "skip") {
+      // #18008: "skip" = every step proven vision-capable. "process" (mixed, no forced
+      // bridge) also keeps raw images — combo dispatch filters text-only targets.
+      const usesRealComboResolver =
+        !this.deps.resolveComboVisionDecision && !this.deps.checkModelHasComboMapping;
+      if (
+        comboVisionBridgeDecision === "skip" ||
+        (comboVisionBridgeDecision === "process" && !forceVisionBridge && usesRealComboResolver)
+      ) {
         return { block: false };
       }
 
@@ -772,12 +779,11 @@ export class VisionBridgeGuardrail extends BaseGuardrail {
       (allNull && comboVisionBridgeDecision === "process")
     ) {
       const totalImagesToReplace =
-        confirmedTextOnlyDirectTarget || noVisionCombo
-          ? imageParts.length
-          : descriptions.length;
+        confirmedTextOnlyDirectTarget || noVisionCombo ? imageParts.length : descriptions.length;
       for (let i = 0; i < totalImagesToReplace; i++) {
         if (descriptions[i] == null) {
-          descriptions[i] = `[Image ${i + 1}]: (unavailable — no vision-capable provider connected)`;
+          descriptions[i] =
+            `[Image ${i + 1}]: (unavailable — no vision-capable provider connected)`;
         }
       }
     }

@@ -102,17 +102,18 @@ test("flag validation: exclusive modes, rollback only with execute, known adviso
 
 test("isCanonicalRemoteUrl catches every URL form of the canonical repository", () => {
   for (const url of [
-    "https://github.com/diegosouzapw/OmniRoute.git",
-    "https://github.com/diegosouzapw/omniroute",
-    "git@github.com:diegosouzapw/OmniRoute.git",
-    "ssh://git@github.com/diegosouzapw/OmniRoute.git",
-    "https://x-access-token:abc@github.com/diegosouzapw/OmniRoute.git",
+    "https://github.com/cheaper-inference/OmniRoute.git",
+    "https://github.com/cheaper-inference/omniroute",
+    "https://github.com/diegosouzapw/omniroute", // former owner — GitHub redirects it
+    "git@github.com:cheaper-inference/OmniRoute.git",
+    "ssh://git@github.com/cheaper-inference/OmniRoute.git",
+    "https://x-access-token:abc@github.com/cheaper-inference/OmniRoute.git",
   ]) {
     assert.equal(isCanonicalRemoteUrl(url, CANONICAL_REPO), true, url);
   }
   for (const url of [
     "https://github.com/someone/OmniRoute.git",
-    "git@github.com:diegosouzapw/OmniRoute-rehearsal.git",
+    "git@github.com:cheaper-inference/OmniRoute-rehearsal.git",
     "",
   ]) {
     assert.equal(isCanonicalRemoteUrl(url, CANONICAL_REPO), false, url);
@@ -308,7 +309,7 @@ on:
   workflow_dispatch:
 jobs:
   forward-port:
-    if: github.ref == 'refs/heads/stable/v3' && github.repository == 'diegosouzapw/OmniRoute'
+    if: github.ref == 'refs/heads/stable/v3' && github.repository == 'cheaper-inference/OmniRoute'
     runs-on: ubuntu-latest
     steps:
       - name: Check that develop exists
@@ -326,7 +327,7 @@ jobs:
       - run: git ls-remote --heads origin develop
   publish:
     needs: detect
-    if: (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') && vars.NIGHTLY_PUBLISH == 'true'
+    if: (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') && vars.NIGHTLY_PUBLISH == 'true'
     runs-on: ubuntu-latest
     steps:
       - run: echo publish
@@ -338,7 +339,7 @@ test("analyzeDormantWorkflow reports what turns on, what stays gated, and fork c
   assert.ok(fp.triggers.includes("push → stable/v3"));
   assert.ok(fp.activates.some((l) => /forward-port.*stable\/v3/.test(l)));
   assert.ok(fp.activates.some((l) => /develop exists/.test(l)));
-  assert.ok(fp.forkCaveats.some((l) => /diegosouzapw\/OmniRoute/.test(l)));
+  assert.ok(fp.forkCaveats.some((l) => /cheaper-inference\/OmniRoute/.test(l)));
 
   const nightly = analyzeDormantWorkflow("nightly-v4-build.yml", NIGHTLY);
   assert.ok(nightly.stillGated.some((l) => /vars\.NIGHTLY_PUBLISH/.test(l)));
@@ -397,7 +398,7 @@ function fakeIo(remoteUrl = "https://github.com/rehearsal-bot/OmniRoute.git") {
 }
 
 test("executeCut refuses a remote whose URL is the canonical repository", async () => {
-  const io = fakeIo("git@github.com:diegosouzapw/OmniRoute.git");
+  const io = fakeIo("git@github.com:cheaper-inference/OmniRoute.git");
   const opts = parseCutArgs(["--execute", "--remote", "rehearsal"]);
   await assert.rejects(
     executeCut(buildCutPlan(opts, goodFacts()), opts, io, async () => true),

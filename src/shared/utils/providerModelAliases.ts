@@ -1,5 +1,9 @@
 type AliasMap = Record<string, string>;
 
+function canUseAlias(alias: string, fullModel: string, existingAliases: AliasMap): boolean {
+  return !(alias in existingAliases) || existingAliases[alias] === fullModel;
+}
+
 export function getDefaultModelAliasBase(modelId: string): string {
   const trimmed = modelId.trim();
   if (!trimmed) return "";
@@ -9,6 +13,28 @@ export function getDefaultModelAliasBase(modelId: string): string {
     .map((segment) => segment.trim())
     .filter(Boolean);
   return segments[segments.length - 1] || trimmed;
+}
+
+function findSuffixedAlias(
+  baseAlias: string,
+  displayAlias: string,
+  fullModel: string,
+  existingAliases: AliasMap
+): string | null {
+  for (let suffix = 2; suffix <= 5000; suffix += 1) {
+    if (displayAlias) {
+      const prefixed = `${displayAlias}-${baseAlias}-${suffix}`;
+      if (canUseAlias(prefixed, fullModel, existingAliases)) {
+        return prefixed;
+      }
+    }
+
+    const fallback = `${baseAlias}-${suffix}`;
+    if (canUseAlias(fallback, fullModel, existingAliases)) {
+      return fallback;
+    }
+  }
+  return null;
 }
 
 export function resolveManagedModelAlias({
@@ -45,24 +71,10 @@ export function resolveManagedModelAlias({
   }
 
   for (const candidate of candidates) {
-    if (!(candidate in existingAliases) || existingAliases[candidate] === fullModel) {
+    if (canUseAlias(candidate, fullModel, existingAliases)) {
       return candidate;
     }
   }
 
-  for (let suffix = 2; suffix <= 5000; suffix += 1) {
-    if (displayAlias) {
-      const prefixed = `${displayAlias}-${baseAlias}-${suffix}`;
-      if (!(prefixed in existingAliases) || existingAliases[prefixed] === fullModel) {
-        return prefixed;
-      }
-    }
-
-    const fallback = `${baseAlias}-${suffix}`;
-    if (!(fallback in existingAliases) || existingAliases[fallback] === fullModel) {
-      return fallback;
-    }
-  }
-
-  return null;
+  return findSuffixedAlias(baseAlias, displayAlias, fullModel, existingAliases);
 }

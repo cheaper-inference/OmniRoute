@@ -1,0 +1,1 @@
+- **fix(oauth):** Accept Cursor's permission-based `grok_` user API keys alongside legacy `crsr_` keys through the shared Cursor key validator, including the Agent image CLI env selection ([#17905](https://github.com/cheaper-inference/OmniRoute/pull/17905)) — thanks @stanleytejakusuma

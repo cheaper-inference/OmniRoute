@@ -1,0 +1,1 @@
+- **fix(translator):** GitHub Copilot Responses-API reasoning summaries are no longer duplicated, nor leaked to Claude clients as assistant text on tool-call turns — reasoning dedupe now also matches by `output_index` (Copilot rotates the reasoning item id), and FIX B only synthesizes a text block for reasoning-only replies (#17898 — thanks @lkolchin)

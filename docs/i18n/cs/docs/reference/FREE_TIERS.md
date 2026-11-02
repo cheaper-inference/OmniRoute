@@ -44,17 +44,18 @@ Největší **zdokumentovaní** přispěvatelé: `mistral` 1,00B, `nara` 210M, `
 
 ---
 
-## Aktualizace 2026-06-17 — co se změnilo od 2026-06-05
+## 2026-06-17 aktualizace — co se změnilo od 2026-06-05
 
-Celý katalog byl aktualizován na základě webového průzkumu provedeného 50 agenty (oficiální dokumentace + zprávy z posledních 7 dnů, adversariálně ověřeno). Hlavní změny:
+Průchod webového výzkumu s 50 agenty (oficiální dokumentace + zprávy za posledních 7 dní, kontradiktoricky ověřeno) obnovil celý katalog. Hlavní body:
 
-- **Odstraněno / bez bezplatné úrovně (2026):** `chutes` (bezplatná úroveň skončila 2026-03), `phind` (společnost ukončila činnost 2026-01), `kluster` (ukončeno 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (bezplatný přístup k MiMo zrušen 2026-05-24, promoakce Nemotron skončila 2026-06 — znovu ověřeno 2026-06-18), `aimlapi` (bezplatná úroveň pozastavena — znovu ověřeno 2026-06-18), `yi` (Yi-Light vyřazen, nyní průběžné platby podle využití — znovu ověřeno 2026-06-18), `featherless-ai` (aktuálně bez bezplatné úrovně), `chipotle` („Pepper AI“ společnosti Chipotle — reverzně analyzovaný chatovací widget Amelia na `amelia.chipotle.com`, se kterým poskytovatel komunikoval, nyní vrací 404 na všech cestách včetně kořenové; backend byl vyřazen nebo přesunut, potvrzeno 2026-09-15 — z katalogu zcela odstraněno, #13131/#4037). `iflytek` / `sparkdesk` zůstávají uvedeny, ale obsahují upozornění týkající se podmínek používání (Spark Lite je zdarma; podmínky používání omezují použití přes proxy/relay).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` byly ukončeny 2026-06-01 a `2.5 Pro` opustil bezplatnou úroveň (2026-04); bezplatná úroveň nyní zahrnuje **pouze rodinu Flash** (2.5/3/3.1/3.5 Flash + Gemma). Katalog nyní rodinu Flash **sdružuje** (dříve byla hodnota nadsazena samostatným započítáváním každé varianty: 462M → 60M).
-- **Opravené hodnoty:** `cloudflare-ai` 122M → **30M** (skutečných 10k Neurons/den), `doubao` překlasifikováno na jednorázový kredit za registraci (nikoli opakovaný), `llm7` 4M → **150M** (zdokumentovaných 5M tokenů/den), bezplatné endpointy „-Free“ služby `together` byly ukončeny → odstraněn byl také registrační kredit $25 (vyžaduje minimální nákup za $5, bez bezplatného zkušebního období), skončila Preview verze `longcat` a modely Flash byly vyřazeny → pouze **LongCat-2.0**, překlasifikováno na jednorázový registrační kredit ve výši **10M** tokenů (podmíněný KYC, nikoli opakovaný).
-- **Nově objevení bezplatní poskytovatelé:** ⭐ **Kilo Code** (`kilo-gateway` — rotující sada „Auto Free“: rodina NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 rotujících bezplatných modelů pro programování), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash trvale zdarma + registrační bonus 20M) a `arcee-ai` Trinity Large Preview.
-- **Nové transparentní úrovně** (viz Metodika): kategorie _trvale zdarma, ale bez stanoveného limitu_ (skutečný opakovaný přístup bez limitu tokenů, který by bylo možné započítat) a _navýšení odemčené vkladem_ (OpenRouter $10 → +24M/měsíc); obě jsou uváděny **samostatně**, aby nikdy nenavyšovaly hlavní souhrnnou hodnotu.
+- **Odebráno / žádný bezplatný tarif (2026):** `chutes` (bezplatný tarif skončil 2026-03), `phind` (společnost ukončila činnost 2026-01), `kluster` (ukončeno 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (bezplatný MiMo zrušen 2026-05-24, promo Nemotron skončilo 2026-06 — znovu ověřeno 2026-06-18), `aimlapi` (bezplatný tarif pozastaven — znovu ověřeno 2026-06-18), `yi` (Yi-Light vyřazen, pouze pay-as-you-go — znovu ověřeno 2026-06-18), `featherless-ai` (aktuálně žádný bezplatný tarif), `chipotle` (Chipotle "Pepper AI" — reverzně analyzovaný chatovací widget Amelia na `amelia.chipotle.com`, se kterým poskytovatel komunikoval, nyní vrací 404 na všech trasách včetně kořenové; backend vyřazen/přesunut, potvrzeno 2026-09-15 — zcela odebráno z katalogu, #13131/#4037). `iflytek` / `sparkdesk` zůstávají uvedeny, ale nesou upozornění ohledně podmínek služby (Spark Lite je bezplatný; podmínky služby omezují použití proxy/předávání).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` ukončeny 2026-06-01 a `2.5 Pro` opustil bezplatný tarif (2026-04); bezplatný tarif je nyní **pouze rodina Flash** (2.5/3/3.1/3.5 Flash + Gemma). Katalog nyní **sdružuje** rodinu Flash (dříve byla hodnota nafouknutá počítáním každé varianty zvlášť: 462M → 60M).
+- **Opravené údaje:** `cloudflare-ai` 122M → **30M** (reálných 10 tis. Neuronů/den), `doubao` překlasifikován jako jednorázový registrační kredit (ne opakující se), `llm7` 4M → **150M** (zdokumentovaných 5M tokenů/den), `together` endpointy "-Free" ukončeny → registrační kredit $25 rovněž odebrán (vyžaduje minimální nákup $5, žádná bezplatná zkušební verze), `longcat` Preview skončilo + modely Flash vyřazeny → pouze **LongCat-2.0**, překlasifikován jako jednorázový registrační kredit **10M** tokenů (podmíněno KYC, ne opakující se).
+- **Ukončení přímé inference Poolside (ověřeno 2026-10-20):** [oficiální platforma](https://platform.poolside.ai/) oznamuje ukončení provozu **2026-10-31** a odkazuje uživatele na stažení svých modelů z Hugging Face pro self-hosting. Přímý poskytovatel `poolside` nese toto upozornění. Ručně spravovaný bezplatný katalog neobsahuje žádné přímé položky Poolside; jeho položky s názvem Poolside patří `kilo-gateway`. Toto oznámení nepotvrzuje dostupnost modelů poskytovaných přes Kilo, Cline, NVIDIA či jiné brány, takže tyto záznamy nejsou na tomto základě vyřazeny.
+- **Nově objevení bezplatní poskytovatelé:** ⭐ **Kilo Code** (`kilo-gateway` — rotující sada "Auto Free": rodina NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 rotujících bezplatných modelů pro kódování, obnoveno 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash trvale zdarma + registrační bonus 20M) a `arcee-ai` Trinity Large Preview.
+- **Nové poctivé úrovně** (viz Metodika): kategorie _trvale bezplatné, ale neomezené_ (skutečný opakující se přístup, žádný tokenový limit k započítání) a _navýšení odemčené vkladem_ (OpenRouter $10 → +24M/měs.), obě zobrazeny **samostatně**, aby nikdy nafukovaly hlavní číslo.
 
-> Podrobná tabulka jednotlivých poskytovatelů níže představuje **snímek k 2026-06-05**; výše uvedené změny mají přednost. Aktuálním kanonickým zdrojem je katalog jednotlivých modelů `open-sse/config/freeModelCatalog.ts`.
+> Podrobná tabulka jednotlivých poskytovatelů níže je snímkem ze **2026-06-05**; změny uvedené výše ji nahrazují. Živým, kanonickým zdrojem je katalog jednotlivých modelů `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -114,7 +115,7 @@ záměrně.
 ## Metodika a upozornění
 
 - Čísla jsou **odhady horní hranice** založené na zdokumentovaných limitech bezplatných tarifů jednotlivých poskytovatelů k datu **2026-06-17**, získané průzkumem webu. Bezplatné tarify se neustále mění — než se na některý údaj spolehnete, znovu jej ověřte.
-- **Za co položka skutečně ručí.** Žádná položka neobsahuje vlastní hodnocení spolehlivosti a API žádné neposkytuje — každý výše uvedený údaj považujte za odhad stejné, blíže neurčené kvality. Dvě skutečnosti se liší, protože jsou spravovány ručně, nikoli odvozeny: 44 položek obsahuje nezávisle zdokumentované pevné zastavení (39 z nich jsou řádky xKiro, které všechny sdílejí jeden denní příděl) a 12 položek obsahuje informaci o používání promptů k trénování. `hardStopGuaranteed` je nastaveno pouze tehdy, když vlastní podmínky poskytovatele uvádějí, že překročení bezplatného přídělu povede k odmítnutí požadavku, nikoli k tichému zahájení účtování; zdroj je uveden v komentáři vedle položky. Nikdy není ve výchozím nastavení nastaveno na `true` a u položky, kterou nikdo neověřil, zůstává nenastaveno. Chybějící příznak pevného zastavení tedy znamená „nezjištěno“, nikoli „je známo, že vám začne účtovat“. **Režim STRICT** (volitelná ochrana směrování `freeAccessPolicy=strict`) důvěřuje pouze položkám, které tento příznak obsahují; každý jiný bezplatný tarif je vyloučen jako `no-hard-stop` (viz `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Když ochrana filtruje fond, protokol viditelný operátorovi uvádí jak počet vyloučených položek, tak jejich podíl `no-hard-stop`.
+- **Za co položka skutečně ručí.** Žádná položka neobsahuje vlastní hodnocení spolehlivosti a API žádné neposkytuje — každý výše uvedený údaj považujte za odhad stejné, blíže neurčené kvality. Dvě skutečnosti se liší, protože jsou spravovány ručně, nikoli odvozeny: 44 položek obsahuje nezávisle zdokumentované pevné zastavení (39 z nich jsou řádky xKiro, které všechny sdílejí jeden denní příděl) a 20 položek obsahuje informaci o používání promptů k trénování. `hardStopGuaranteed` je nastaveno pouze tehdy, když vlastní podmínky poskytovatele uvádějí, že překročení bezplatného přídělu povede k odmítnutí požadavku, nikoli k tichému zahájení účtování; zdroj je uveden v komentáři vedle položky. Nikdy není ve výchozím nastavení nastaveno na `true` a u položky, kterou nikdo neověřil, zůstává nenastaveno. Chybějící příznak pevného zastavení tedy znamená „nezjištěno“, nikoli „je známo, že vám začne účtovat“. **Režim STRICT** (volitelná ochrana směrování `freeAccessPolicy=strict`) důvěřuje pouze položkám, které tento příznak obsahují; každý jiný bezplatný tarif je vyloučen jako `no-hard-stop` (viz `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Když ochrana filtruje fond, protokol viditelný operátorovi uvádí jak počet vyloučených položek, tak jejich podíl `no-hard-stop`.
 - `estMonthlyFreeTokens` = pouze pravidelně obnovované měsíční tokeny. **Jednorázové kredity za registraci se neobnovují** a započítávají se jako 0. Ukončené tarify jsou rovněž 0.
 - Denní limit tokenů → `monthly = daily × 30`. Je-li zdokumentováno pouze RPD → `RPD × ~800 výstupních tokenů × 30`. Je-li uvedeno pouze RPM/TPM (bez denního limitu) → **bez limitu** (viz níže).
 - **Trvale zdarma, ale bez zveřejněného limitu tokenů** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): jde o skutečný pravidelně obnovovaný bezplatný přístup omezený rychlostí nebo souběžností. Klasifikujeme je jako `recurring-uncapped` a **nikdy je nezapočítáváme do součtu** — vynásobení `RPM × 24/7 × 30d` by vytvořilo nereálný strop (takové nadsazení odmítáme). Jsou uvedeny, abyste věděli, že existují.
@@ -242,75 +243,75 @@ Většina údajů o „bezplatných tokenech za měsíc“ v této oblasti vznik
 
 ---
 
-## Bezplatná úroveň podle poskytovatele (Bytez/Nous ověřeny 2026-10-15; řádky znovu auditovány 2026-09-02; ostatní 2026-06-17)
+## Bezplatná úroveň podle poskytovatele (Bytez/Nous zkontrolováno 2026-10-15; řádky znovu ověřeny 2026-09-02; ostatní 2026-06-17)
 
-> Znovu vygenerováno z katalogu jednotlivých modelů (`open-sse/config/freeModelCatalog.ts`), s odstraněním duplicit podle poolu. Seřazeno podle pravidelného stabilního počtu tokenů/měs. `uncapped*` = trvale zdarma, ale bez zveřejněného limitu tokenů (omezeno rychlostí/souběžností) — skutečný přístup, který se **nezapočítává** do souhrnného údaje. `—` = pouze kredit / bez nutnosti klíče / nelze vyčíslit v tokenech.
+> Znovu vygenerováno z katalogu jednotlivých modelů (`open-sse/config/freeModelCatalog.ts`) a deduplikováno napříč fondy. Seřazeno podle pravidelně dostupného počtu tokenů za měsíc. `uncapped*` = trvale zdarma, ale bez zveřejněného limitu tokenů (s omezením rychlosti/souběžnosti) — skutečně dostupné, **nezapočítává se však** do souhrnného údaje. `—` = pouze kredit / bez klíče / nelze vyjádřit počtem tokenů.
 
-| Poskytovatel     | Typ bezplatnosti     | Pravidelné tokeny/měs. | Kredit na první měsíc | Podmínky použití | Modely |
-| ---------------- | -------------------- | ---------------------- | --------------------- | ---------------- | ------ |
-| `mistral`        | opakovaně            | ~1.00B                 | —                     | opatrnost        | 5      |
-| `nara`           | opakovaně            | ~210M                  | —                     | opatrnost        | 8      |
-| `llm7`           | opakovaně            | ~150M                  | —                     | opatrnost        | 4      |
-| `xkiro`          | opakovaně            | ~150M                  | —                     | opatrnost        | 39     |
-| `longcat`        | jednorázově          | —                      | 10M                   | opatrnost        | 1      |
-| `cerebras`       | jednorázově          | —                      | kredit $5             | opatrnost        | 2      |
-| `cloudflare-ai`  | opakovaně            | ~30M                   | —                     | opatrnost        | 9      |
-| `groq`           | opakovaně            | ~30M                   | —                     | opatrnost        | 5      |
-| `api-airforce`   | opakovaně            | ~24M                   | —                     | opatrnost        | 7      |
-| `bluesminds`     | opakovaně            | ~7M                    | —                     | nejednoznačné    | 22     |
-| `sambanova`      | opakovaně            | ~6M                    | —                     | opatrnost        | 5      |
-| `arcee-ai`       | opakovaně            | ~5M                    | —                     | opatrnost        | 1      |
-| `bazaarlink`     | opakovaně            | ~4M                    | —                     | opatrnost        | 32     |
-| `openrouter`     | opakovaně            | ~1M                    | —                     | opatrnost        | 1      |
-| `cohere`         | opakovaně            | ~800K                  | —                     | opatrnost        | 6      |
-| `huggingchat`    | opakovaně            | ~500K                  | —                     | opatrnost        | 4      |
-| `morph`          | opakovaně            | ~400K                  | —                     | v pořádku        | 2      |
-| `huggingface`    | opakovaně            | ~200K                  | —                     | opatrnost        | 6      |
-| `kiro`           | opakovaně            | ~25K                   | —                     | vyhnout se       | 12     |
-| `glm-cn`         | bez omezení          | bez omezení\*          | ~20M                  | v pořádku        | 4      |
-| `baidu`          | bez omezení          | bez omezení\*          | —                     | opatrnost        | 1      |
-| `gemini`         | bez omezení          | bez omezení\*          | —                     | opatrnost        | 4      |
-| `kilo-gateway`   | bez omezení          | bez omezení\*          | —                     | opatrnost        | 7      |
-| `ollama-cloud`   | bez omezení          | bez omezení\*          | —                     | nejednoznačné    | 8      |
-| `opencode-zen`   | bez omezení          | bez omezení\*          | —                     | opatrnost        | 6      |
-| `tencent`        | bez omezení          | bez omezení\*          | —                     | opatrnost        | 1      |
-| `vertex`         | kredit za registraci | —                      | ~300M                 | opatrnost        | 10     |
-| `agentrouter`    | kredit za registraci | —                      | ~200M                 | opatrnost        | 4      |
-| `predibase`      | kredit za registraci | —                      | ~25M                  | opatrnost        | 1      |
-| `doubao`         | kredit za registraci | —                      | ~15M                  | nejednoznačné    | 1      |
-| `ai21`           | kredit za registraci | —                      | ~10M                  | vyhnout se       | 2      |
-| `deepseek`       | kredit za registraci | —                      | ~5M                   | v pořádku        | 2      |
-| `hyperbolic`     | kredit za registraci | —                      | ~5M                   | v pořádku        | 8      |
-| `nscale`         | kredit za registraci | —                      | ~5M                   | opatrnost        | 6      |
-| `bytez`          | kredit (opakovaně)   | —                      | neznámý               | nejednoznačné    | 1      |
-| `deepinfra`      | kredit za registraci | —                      | ~1M                   | opatrnost        | 22     |
-| `fireworks`      | kredit za registraci | —                      | ~1M                   | vyhnout se       | 10     |
-| `nebius`         | kredit za registraci | —                      | ~1M                   | opatrnost        | 1      |
-| `qoder`          | kredit za registraci | —                      | ~1M                   | opatrnost        | 14     |
-| `scaleway`       | kredit za registraci | —                      | ~1M                   | v pořádku        | 6      |
-| `novita`         | kredit za registraci | —                      | ~500K                 | opatrnost        | 1      |
-| `agy`            | bez klíče            | —                      | —                     | vyhnout se       | 16     |
-| `baichuan`       | bez klíče            | —                      | —                     | nejednoznačné    | 1      |
-| `blackbox`       | bez klíče            | —                      | —                     | vyhnout se       | 6      |
-| `coze`           | bez klíče            | —                      | —                     | vyhnout se       | 1      |
-| `duckduckgo-web` | bez klíče            | —                      | —                     | vyhnout se       | 6      |
-| `freemodel-dev`  | bez klíče            | —                      | —                     | neznámé          | 4      |
-| `friendliai`     | bez klíče            | —                      | —                     | vyhnout se       | 2      |
-| `iflytek`        | bez klíče            | —                      | —                     | vyhnout se       | 1      |
-| `inference-net`  | bez klíče            | —                      | —                     | opatrnost        | 3      |
-| `liquid`         | bez klíče            | —                      | —                     | neznámé          | 1      |
-| `monsterapi`     | bez klíče            | —                      | —                     | nejednoznačné    | 1      |
-| `muse-spark-web` | bez klíče            | —                      | —                     | vyhnout se       | 3      |
-| `nlpcloud`       | bez klíče            | —                      | —                     | vyhnout se       | 1      |
-| `nvidia`         | bez klíče            | —                      | —                     | opatrnost        | 13     |
-| `pollinations`   | bez klíče            | —                      | —                     | opatrnost        | 31     |
-| `publicai`       | bez klíče            | —                      | —                     | opatrnost        | 3      |
-| `reka`           | bez klíče            | —                      | —                     | opatrnost        | 2      |
-| `sensenova`      | bez klíče            | —                      | —                     | opatrnost        | 1      |
-| `sparkdesk`      | bez klíče            | —                      | —                     | opatrnost        | 1      |
-| `stepfun`        | bez klíče            | —                      | —                     | v pořádku        | 1      |
-| `t3-web`         | bez klíče            | —                      | —                     | vyhnout se       | 23     |
-| `uncloseai`      | bez klíče            | —                      | —                     | opatrnost        | 3      |
+| Poskytovatel     | Typ bezplatné nabídky | Stálé tokeny/měs. | Kredit na první měsíc | Podmínky použití | Modely |
+| ---------------- | --------------------- | ----------------- | --------------------- | ---------------- | ------ |
+| `mistral`        | opakovaná             | ~1.00B            | —                     | opatrnost        | 5      |
+| `nara`           | opakovaná             | ~210M             | —                     | opatrnost        | 8      |
+| `llm7`           | opakovaná             | ~150M             | —                     | opatrnost        | 4      |
+| `xkiro`          | opakovaná             | ~150M             | —                     | opatrnost        | 39     |
+| `longcat`        | jednorázová           | —                 | 10M                   | opatrnost        | 1      |
+| `cerebras`       | jednorázová           | —                 | kredit $5             | opatrnost        | 2      |
+| `cloudflare-ai`  | opakovaná             | ~30M              | —                     | opatrnost        | 9      |
+| `groq`           | opakovaná             | ~30M              | —                     | opatrnost        | 5      |
+| `api-airforce`   | opakovaná             | ~24M              | —                     | opatrnost        | 7      |
+| `bluesminds`     | opakovaná             | ~7M               | —                     | nejednoznačné    | 22     |
+| `sambanova`      | opakovaná             | ~6M               | —                     | opatrnost        | 5      |
+| `arcee-ai`       | opakovaná             | ~5M               | —                     | opatrnost        | 1      |
+| `bazaarlink`     | opakovaná             | ~4M               | —                     | opatrnost        | 32     |
+| `openrouter`     | opakovaná             | ~1M               | —                     | opatrnost        | 1      |
+| `cohere`         | opakovaná             | ~800K             | —                     | opatrnost        | 6      |
+| `huggingchat`    | opakovaná             | ~500K             | —                     | opatrnost        | 4      |
+| `morph`          | opakovaná             | ~400K             | —                     | v pořádku        | 2      |
+| `huggingface`    | opakovaná             | ~200K             | —                     | opatrnost        | 6      |
+| `kiro`           | opakovaná             | ~25K              | —                     | vyhnout se       | 12     |
+| `glm-cn`         | bez omezení           | bez omezení\*     | ~20M                  | v pořádku        | 4      |
+| `baidu`          | bez omezení           | bez omezení\*     | —                     | opatrnost        | 1      |
+| `gemini`         | bez omezení           | bez omezení\*     | —                     | opatrnost        | 4      |
+| `kilo-gateway`   | bez omezení           | bez omezení\*     | —                     | opatrnost        | 7      |
+| `ollama-cloud`   | bez omezení           | bez omezení\*     | —                     | nejednoznačné    | 8      |
+| `opencode-zen`   | bez omezení           | bez omezení\*     | —                     | opatrnost        | 10     |
+| `tencent`        | bez omezení           | bez omezení\*     | —                     | opatrnost        | 1      |
+| `vertex`         | kredit za registraci  | —                 | ~300M                 | opatrnost        | 10     |
+| `agentrouter`    | kredit za registraci  | —                 | ~200M                 | opatrnost        | 4      |
+| `predibase`      | kredit za registraci  | —                 | ~25M                  | opatrnost        | 1      |
+| `doubao`         | kredit za registraci  | —                 | ~15M                  | nejednoznačné    | 1      |
+| `ai21`           | kredit za registraci  | —                 | ~10M                  | vyhnout se       | 2      |
+| `deepseek`       | kredit za registraci  | —                 | ~5M                   | v pořádku        | 2      |
+| `hyperbolic`     | kredit za registraci  | —                 | ~5M                   | v pořádku        | 8      |
+| `nscale`         | kredit za registraci  | —                 | ~5M                   | opatrnost        | 6      |
+| `bytez`          | kredit (opak.)        | —                 | neznámý               | nejednoznačné    | 1      |
+| `deepinfra`      | kredit za registraci  | —                 | ~1M                   | opatrnost        | 22     |
+| `fireworks`      | kredit za registraci  | —                 | ~1M                   | vyhnout se       | 10     |
+| `nebius`         | kredit za registraci  | —                 | ~1M                   | opatrnost        | 1      |
+| `qoder`          | kredit za registraci  | —                 | ~1M                   | opatrnost        | 14     |
+| `scaleway`       | kredit za registraci  | —                 | ~1M                   | v pořádku        | 6      |
+| `novita`         | kredit za registraci  | —                 | ~500K                 | opatrnost        | 1      |
+| `agy`            | bez klíče             | —                 | —                     | vyhnout se       | 16     |
+| `baichuan`       | bez klíče             | —                 | —                     | nejednoznačné    | 1      |
+| `blackbox`       | bez klíče             | —                 | —                     | vyhnout se       | 6      |
+| `coze`           | bez klíče             | —                 | —                     | vyhnout se       | 1      |
+| `duckduckgo-web` | bez klíče             | —                 | —                     | vyhnout se       | 6      |
+| `freemodel-dev`  | bez klíče             | —                 | —                     | neznámé          | 4      |
+| `friendliai`     | bez klíče             | —                 | —                     | vyhnout se       | 2      |
+| `iflytek`        | bez klíče             | —                 | —                     | vyhnout se       | 1      |
+| `inference-net`  | bez klíče             | —                 | —                     | opatrnost        | 3      |
+| `liquid`         | bez klíče             | —                 | —                     | neznámé          | 1      |
+| `monsterapi`     | bez klíče             | —                 | —                     | nejednoznačné    | 1      |
+| `muse-spark-web` | bez klíče             | —                 | —                     | vyhnout se       | 3      |
+| `nlpcloud`       | bez klíče             | —                 | —                     | vyhnout se       | 1      |
+| `nvidia`         | bez klíče             | —                 | —                     | opatrnost        | 13     |
+| `pollinations`   | bez klíče             | —                 | —                     | opatrnost        | 31     |
+| `publicai`       | bez klíče             | —                 | —                     | opatrnost        | 3      |
+| `reka`           | bez klíče             | —                 | —                     | opatrnost        | 2      |
+| `sensenova`      | bez klíče             | —                 | —                     | opatrnost        | 1      |
+| `sparkdesk`      | bez klíče             | —                 | —                     | obezřetnost      | 1      |
+| `stepfun`        | bez klíče             | —                 | —                     | v pořádku        | 1      |
+| `t3-web`         | bez klíče             | —                 | —                     | vyhnout se       | 23     |
+| `uncloseai`      | bez klíče             | —                 | —                     | obezřetnost      | 3      |
 
 ---
 

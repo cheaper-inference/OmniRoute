@@ -41,13 +41,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/diegosouzapw/OmniRoute.git",
+    "url": "https://github.com/cheaper-inference/OmniRoute.git",
     "directory": "@omniroute/opencode-plugin"
   },
   "bugs": {
-    "url": "https://github.com/diegosouzapw/OmniRoute/issues"
+    "url": "https://github.com/cheaper-inference/OmniRoute/issues"
   },
-  "homepage": "https://github.com/diegosouzapw/OmniRoute/tree/main/%40omniroute/opencode-plugin#readme",
+  "homepage": "https://github.com/cheaper-inference/OmniRoute/tree/main/%40omniroute/opencode-plugin#readme",
   "engines": {
     "node": ">=22.22.3"
   },
@@ -58,7 +58,7 @@
     "@opencode-ai/plugin": "*"
   },
   "dependencies": {
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@opencode-ai/plugin": "^1.15.6",
@@ -69,6 +69,7 @@
   },
   "overrides": {
     "esbuild": "^0.28.1",
-    "toml": "^4.1.2"
+    "toml": "^5.0.1",
+    "zod": "$zod"
   }
 }

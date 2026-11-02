@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { ComboLiveStudio } from "./ComboLiveStudio";
 import { useLiveComboStatus } from "@/hooks/useLiveDashboard";
 import { useProviderBreakerHealth } from "@/hooks/useProviderBreakerHealth";
@@ -18,16 +20,20 @@ import { useProviderBreakerHealth } from "@/hooks/useProviderBreakerHealth";
 export default function ComboLiveStudioPage() {
   const { comboEvents, activeCombos, isConnected } = useLiveComboStatus();
   const { providerHealth, connectionHealth } = useProviderBreakerHealth();
+  const t = useTranslations("sidebar");
 
   return (
-    <div className="p-4 h-[calc(100dvh-6rem)] min-h-[480px]">
-      <ComboLiveStudio
-        comboEvents={comboEvents}
-        combos={[...activeCombos]}
-        isConnected={isConnected}
-        providerHealth={providerHealth}
-        connectionHealth={connectionHealth}
-      />
+    <div className="flex h-[calc(100dvh-6rem)] min-h-[480px] flex-col gap-3 p-4">
+      <PageHeader compact title={t("combosLive")} description={t("combosLiveSubtitle")} />
+      <div className="min-h-0 flex-1">
+        <ComboLiveStudio
+          comboEvents={comboEvents}
+          combos={[...activeCombos]}
+          isConnected={isConnected}
+          providerHealth={providerHealth}
+          connectionHealth={connectionHealth}
+        />
+      </div>
     </div>
   );
 }

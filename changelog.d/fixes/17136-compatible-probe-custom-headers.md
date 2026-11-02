@@ -1,0 +1,1 @@
+- **fix(validation):** OpenAI-, Anthropic- and Claude Code-compatible connection tests send the connection's `customHeaders`, so a gateway behind an access proxy is no longer reported as "Invalid API key" and skipped by the credential gate ([#17136](https://github.com/diegosouzapw/OmniRoute/pull/17136)) — thanks @guiguan

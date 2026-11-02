@@ -32,6 +32,7 @@ import {
 } from "../../../scripts/build/runtime-env.mjs";
 import { resolveTlsOptions } from "../../../scripts/dev/tls-options.mjs";
 import { startDetachedTray, validateTrayOptions } from "../tray/detachedTray.mjs";
+import { resolveTrayPreference } from "../tray/preferences.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const _pkg = JSON.parse(readFileSync(join(__dirname, "..", "..", "..", "package.json"), "utf8"));
@@ -139,7 +140,25 @@ export function resetInstrumentationFailureHintForTests() {
   instrumentationFailureHintPrinted = false;
 }
 
+/** Explicit launch modes override the saved desktop default without modifying it. */
+export function resolveServeTrayOptions(opts = {}, env = process.env) {
+  const incompatibleMode =
+    opts.daemon ||
+    resolveServeHeadless(opts, env) ||
+    opts.log ||
+    opts.recovery === false ||
+    opts.noRecovery === true;
+  const tray =
+    typeof opts.tray === "boolean"
+      ? opts.tray
+      : incompatibleMode
+        ? false
+        : resolveTrayPreference(opts);
+  return { ...opts, tray };
+}
+
 export async function runServe(opts = {}) {
+  opts = resolveServeTrayOptions(opts);
   const startedAt = performance.now();
 
   const trayOptionError = validateTrayOptions(opts);

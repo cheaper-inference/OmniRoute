@@ -11,7 +11,8 @@ const TO_NUMBER_RESTRICTION = {
   selector: "FunctionDeclaration[id.name='toNumber'], VariableDeclarator[id.name='toNumber']",
   message:
     "New local `toNumber` definitions are barred — import `toNumber` from " +
-    "`@/shared/utils/numeric` instead (#7879). See that module's JSDoc for the " +
+    "`@/shared/utils/numeric` (src) or `open-sse/utils/numeric.ts` (engine) instead " +
+    "(#7879). See that module's JSDoc for the " +
     "canonical coercion shape and the `toNumberOrNull`/`toNumberArray` variants.",
 };
 
@@ -143,9 +144,10 @@ const eslintConfig = [
       "no-restricted-syntax": ["error", TO_NUMBER_RESTRICTION],
     },
   },
-  // Canonical helper module itself is exempt from its own restriction.
+  // Canonical helper module itself is exempt from its own restriction. It lives in the engine so
+  // open-sse can import it without a new open-sse → src edge; src/shared/utils/numeric.ts re-exports it.
   {
-    files: ["src/shared/utils/numeric.ts"],
+    files: ["open-sse/utils/numeric.ts"],
     rules: {
       "no-restricted-syntax": "off",
     },
@@ -240,6 +242,8 @@ const eslintConfig = [
       ".source/**",
       // VS Code extension and its large test fixtures
       "vscode-extension/**",
+      // packages/ui-kit/ — snapshot vendorizado do CI UI Kit (lintado upstream; patches locais proibidos)
+      "packages/ui-kit/**",
       "_references/**",
       "_mono_repo/**",
       "review/**",

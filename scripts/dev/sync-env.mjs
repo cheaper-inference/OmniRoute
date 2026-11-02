@@ -64,7 +64,7 @@ const CRYPTO_SECRETS = {
  * Note: STORAGE_ENCRYPTION_KEY is no longer auto-generated in postinstall.
  * It's generated at server startup in bin/omniroute.mjs and persisted to
  * ~/.omniroute/.env to survive across upgrades.
- * @see https://github.com/diegosouzapw/OmniRoute/issues/1622
+ * @see https://github.com/cheaper-inference/OmniRoute/issues/1622
  */
 const ENCRYPTION_BOUND_KEYS = new Set([]);
 

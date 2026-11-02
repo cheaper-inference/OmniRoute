@@ -35,10 +35,17 @@ export const FREE_APIKEY_PROVIDER_IDS = new Set([
   // key for higher queue priority. The no-auth page still enables the provider;
   // this flag admits an optional apikey connection so that stored key is used.
   "aihorde",
+  // Veo AI Free accepts optional web-session credentials (wordpress_logged_in cookie)
+  // for authenticated generation.
+  "veoaifree-web",
 ]);
 
 export function supportsApiKeyOnFreeProvider(providerId: unknown): boolean {
-  return typeof providerId === "string" && FREE_APIKEY_PROVIDER_IDS.has(providerId);
+  if (typeof providerId !== "string") return false;
+  return (
+    FREE_APIKEY_PROVIDER_IDS.has(providerId) ||
+    FREE_APIKEY_PROVIDER_IDS.has(resolveProviderId(providerId))
+  );
 }
 
 // Providers presented as one dashboard card with OAuth as the primary action
@@ -51,6 +58,7 @@ const DUAL_AUTH_PROVIDER_IDS = new Set([
   "muse-code",
   "cline",
   "kilocode",
+  "freebuff",
 ]);
 
 export function supportsDualAuthProvider(providerId: unknown): boolean {
@@ -161,8 +169,10 @@ export const AGGREGATOR_PROVIDER_IDS = new Set([
   "logfare",
   "seekai",
   "tokenmarket",
+  "tokenharbor",
   "demonroute",
   "daoxe",
+  "gisoo",
 ]);
 
 export const ENTERPRISE_CLOUD_PROVIDER_IDS = new Set([
@@ -275,14 +285,18 @@ const EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS = new Set([
 ]);
 
 export function providerAllowsOptionalApiKey(providerId: unknown): boolean {
+  if (typeof providerId !== "string") return false;
+  const canonicalId = resolveProviderId(providerId);
   return (
     // ponytail: any noAuth provider auto-qualifies — no per-provider maintenance
-    (typeof providerId === "string" && providerId in NOAUTH_PROVIDERS) ||
-    (typeof providerId === "string" && EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS.has(providerId)) ||
-    isLocalProvider(providerId) ||
-    isSelfHostedChatProvider(providerId) ||
-    isOpenAICompatibleProvider(providerId) ||
-    isAnthropicCompatibleProvider(providerId)
+    canonicalId in NOAUTH_PROVIDERS ||
+    providerId in NOAUTH_PROVIDERS ||
+    EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS.has(canonicalId) ||
+    EXPLICIT_OPTIONAL_APIKEY_PROVIDER_IDS.has(providerId) ||
+    isLocalProvider(canonicalId) ||
+    isSelfHostedChatProvider(canonicalId) ||
+    isOpenAICompatibleProvider(canonicalId) ||
+    isAnthropicCompatibleProvider(canonicalId)
   );
 }
 

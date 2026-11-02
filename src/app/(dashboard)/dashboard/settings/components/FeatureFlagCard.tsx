@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Badge, Button, Card, Select, Spinner, Toggle } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 interface FeatureFlagCardProps {
   flag: {
@@ -12,6 +14,8 @@ interface FeatureFlagCardProps {
     enumValues?: string[] | null;
     effectiveValue: string;
     source: "db" | "env" | "default";
+    configuredSource?: "db" | "env" | "default";
+    sourceKey?: string;
     requiresRestart: boolean;
     warningLevel?: "info" | "caution" | "danger";
   };
@@ -22,77 +26,29 @@ interface FeatureFlagCardProps {
   descriptionMode?: "clamp" | "full";
 }
 
-const CATEGORY_STYLES: Record<
-  FeatureFlagCardProps["flag"]["category"],
-  { bg: string; border: string; text: string }
-> = {
-  security: {
-    bg: "bg-red-50 dark:bg-red-500/15",
-    border: "border-red-200 dark:border-red-500/20",
-    text: "text-red-700 dark:text-red-300",
-  },
-  network: {
-    bg: "bg-sky-50 dark:bg-blue-500/15",
-    border: "border-sky-200 dark:border-blue-500/20",
-    text: "text-sky-700 dark:text-blue-300",
-  },
-  policies: {
-    bg: "bg-amber-50 dark:bg-amber-500/15",
-    border: "border-amber-200 dark:border-amber-500/20",
-    text: "text-amber-700 dark:text-amber-300",
-  },
-  runtime: {
-    bg: "bg-violet-50 dark:bg-purple-500/15",
-    border: "border-violet-200 dark:border-purple-500/20",
-    text: "text-violet-700 dark:text-purple-300",
-  },
-  cli: {
-    bg: "bg-emerald-50 dark:bg-green-500/15",
-    border: "border-emerald-200 dark:border-green-500/20",
-    text: "text-emerald-700 dark:text-green-300",
-  },
-  health: {
-    bg: "bg-cyan-50 dark:bg-cyan-500/15",
-    border: "border-cyan-200 dark:border-cyan-500/20",
-    text: "text-cyan-700 dark:text-cyan-300",
-  },
+type BadgeTone = "default" | "primary" | "success" | "warning" | "error" | "info";
+
+// Category and source chips use the kit Badge tones (globals.css "Badge status tones").
+const CATEGORY_TONE: Record<FeatureFlagCardProps["flag"]["category"], BadgeTone> = {
+  security: "error",
+  network: "info",
+  policies: "warning",
+  runtime: "primary",
+  cli: "success",
+  health: "default",
 };
 
 const SOURCE_STYLES: Record<
   FeatureFlagCardProps["flag"]["source"],
-  { bg: string; border: string; text: string; label: string }
+  { tone: BadgeTone; label: string }
 > = {
-  db: {
-    bg: "bg-sky-50 dark:bg-blue-500/20",
-    border: "border-sky-200 dark:border-blue-500/30",
-    text: "text-sky-700 dark:text-blue-300",
-    label: "DB",
-  },
-  env: {
-    bg: "bg-amber-50 dark:bg-amber-500/20",
-    border: "border-amber-200 dark:border-amber-500/30",
-    text: "text-amber-700 dark:text-amber-300",
-    label: "ENV",
-  },
-  default: {
-    bg: "bg-slate-100 dark:bg-slate-500/20",
-    border: "border-slate-200 dark:border-slate-500/30",
-    text: "text-slate-600 dark:text-slate-300",
-    label: "DEF",
-  },
+  db: { tone: "info", label: "DB" },
+  env: { tone: "warning", label: "ENV" },
+  default: { tone: "default", label: "DEF" },
 };
 
 function isEnabled(value: string): boolean {
   return value === "true" || value === "1" || value === "yes";
-}
-
-function Spinner() {
-  return (
-    <span
-      className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-border border-t-text-primary"
-      aria-hidden="true"
-    />
-  );
 }
 
 /**
@@ -111,7 +67,7 @@ function EnvPrecedenceWarning({
 }) {
   if (flag.key !== "EXPOSE_CC_DISCOVERY_ALIASES" || flag.source !== "env") return null;
   return (
-    <p className="mb-3 rounded border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+    <p className="mb-3 rounded border border-warning/30 bg-warning-bg px-2 py-1 text-xs text-warning">
       {text}
     </p>
   );
@@ -126,92 +82,71 @@ export default function FeatureFlagCard({
 }: FeatureFlagCardProps) {
   const t = useTranslations("featureFlags");
   const enabled = flag.type === "boolean" ? isEnabled(flag.effectiveValue) : false;
-  const category = CATEGORY_STYLES[flag.category];
   const source = SOURCE_STYLES[flag.source];
 
-  const cardBorder =
-    flag.type === "boolean" && enabled
-      ? "border-emerald-300 shadow-emerald-500/10 dark:border-green-500/30"
-      : "border-border";
-
   return (
-    <div
+    <Card
       role="group"
       aria-label={flag.label}
-      className={`rounded-xl border bg-card p-4 shadow-soft transition-all duration-200 hover:-translate-y-px hover:border-black/15 hover:bg-bg-subtle/60 hover:shadow-elevated dark:hover:border-white/15 dark:hover:bg-surface ${cardBorder}`}
+      padding="sm"
+      className={flag.type === "boolean" && enabled ? "border-success/40" : undefined}
     >
       {/* Top row: category badge + toggle/select */}
-      <div className="flex items-center justify-between mb-3">
-        <span
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <Badge
+          variant={CATEGORY_TONE[flag.category]}
+          size="sm"
           aria-label={t("categoryLabel", { category: t(`categories.${flag.category}`) })}
-          className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${category.bg} ${category.border} ${category.text}`}
         >
           {t(`categories.${flag.category}`)}
-        </span>
+        </Badge>
 
         <div className="flex items-center gap-2">
-          {saving && <Spinner />}
+          {saving && <Spinner size="sm" />}
 
           {flag.type === "boolean" ? (
-            <button
-              role="switch"
-              aria-checked={enabled}
-              aria-label={flag.label}
+            <Toggle
+              size="sm"
+              ariaLabel={flag.label}
+              checked={enabled}
               disabled={saving}
-              onClick={() => onToggle(flag.key, enabled ? "false" : "true")}
-              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 ${
-                enabled ? "bg-emerald-500" : "bg-slate-300 dark:bg-white/20"
-              }`}
-            >
-              <span
-                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
-                  enabled ? "translate-x-4" : "translate-x-0.5"
-                }`}
-                aria-hidden="true"
-              />
-            </button>
+              onChange={() => onToggle(flag.key, enabled ? "false" : "true")}
+            />
           ) : (
-            <select
+            <Select
+              compact
               aria-label={flag.label}
               disabled={saving}
               value={flag.effectiveValue}
               onChange={(e) => onToggle(flag.key, e.target.value)}
-              className="rounded-md border border-border bg-bg-subtle px-2 py-0.5 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {(flag.enumValues ?? []).map((val) => (
-                <option key={val} value={val} className="bg-card text-text-primary">
-                  {t.has(`enumValues.${val}`) ? t(`enumValues.${val}`) : val}
-                </option>
-              ))}
-            </select>
+              options={(flag.enumValues ?? []).map((val) => ({
+                value: val,
+                label: t.has(`enumValues.${val}`) ? t(`enumValues.${val}`) : val,
+              }))}
+            />
           )}
         </div>
       </div>
 
       {/* Flag key + warning icon */}
       <div className="flex items-center gap-2 mb-1.5">
-        <span className="flex-1 truncate font-mono text-xs font-semibold text-text-primary">
+        <span className="flex-1 truncate font-mono text-xs font-semibold text-text-main">
           {flag.key}
         </span>
 
         {flag.warningLevel === "caution" && (
-          <span className="text-sm text-amber-500 dark:text-amber-300" aria-label={t("caution")}>
-            ⚠️
-          </span>
+          <Icon name="warning" size={16} className="text-warning" ariaLabel={t("caution")} />
         )}
         {flag.warningLevel === "danger" && (
-          <span className="text-sm animate-pulse" aria-label={t("danger")}>
-            🔴
-          </span>
+          <Icon name="error" size={16} className="text-error" ariaLabel={t("danger")} />
         )}
         {flag.requiresRestart && (
-          <span
-            className="rounded border border-slate-300 bg-slate-50 px-1 text-[10px] text-slate-600 dark:border-slate-400/30 dark:bg-transparent dark:text-slate-300"
-            title={t("requiresRestart")}
-            aria-label={t("requiresRestart")}
-          >
-            restart
-          </span>
+          <Icon
+            name="restart_alt"
+            size={14}
+            className="text-text-muted"
+            ariaLabel={t("requiresRestart")}
+          />
         )}
       </div>
 
@@ -232,7 +167,7 @@ export default function FeatureFlagCard({
           <div
             id={`desc-tooltip-${flag.key}`}
             role="tooltip"
-            className="pointer-events-none invisible absolute left-0 top-full z-50 mt-2 w-80 rounded-lg border border-border bg-surface p-3 text-xs leading-relaxed text-text-primary opacity-0 shadow-lg transition-opacity duration-150 group-hover/desc:visible group-hover/desc:opacity-100"
+            className="pointer-events-none invisible absolute left-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-3rem)] rounded-lg border border-border bg-surface p-3 text-xs leading-relaxed text-text-main opacity-0 shadow-lg transition-opacity duration-150 group-hover/desc:visible group-hover/desc:opacity-100"
           >
             {flag.description}
           </div>
@@ -245,27 +180,27 @@ export default function FeatureFlagCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <span className="text-xs text-text-muted">{t("source")}:</span>
-          <span
-            className={`inline-flex items-center rounded border px-1.5 py-0.5 font-mono text-xs font-medium ${source.bg} ${source.border} ${source.text}`}
-          >
+          <Badge variant={source.tone} size="sm" className="font-mono">
             {source.label}
-          </span>
+          </Badge>
+          {flag.sourceKey && flag.sourceKey !== flag.key && (
+            <span className="font-mono text-xs text-text-muted">{flag.sourceKey}</span>
+          )}
         </div>
 
-        {flag.source === "db" && (
-          <button
+        {(flag.configuredSource ?? flag.source) === "db" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            icon="refresh"
             aria-label={t("resetFlag", { label: flag.label })}
             disabled={saving}
             onClick={() => onReset(flag.key)}
-            className="inline-flex items-center gap-1 rounded text-xs text-text-muted transition-colors hover:text-text-primary disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
-            <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-              refresh
-            </span>
             {t("reset")}
-          </button>
+          </Button>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

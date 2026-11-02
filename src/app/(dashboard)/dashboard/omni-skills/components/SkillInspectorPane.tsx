@@ -2,6 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Icon from "@/shared/components/Icon";
+import Button from "@/shared/components/Button";
+import { cn } from "@/shared/utils/cn";
 import type { OmniSkill } from "./OmniSkillCard";
 
 interface SkillDetail extends OmniSkill {
@@ -94,7 +106,7 @@ export function SkillInspectorPane({
   if (!selectedSkillId || !skill) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-text-muted text-sm text-center p-6">
-        <span className="material-symbols-outlined text-[40px] mb-3 opacity-30">manage_search</span>
+        <Icon name="manage_search" size={40} className="mb-3 opacity-30" />
         <span>{t("selectSkillToInspect")}</span>
       </div>
     );
@@ -114,9 +126,7 @@ export function SkillInspectorPane({
       {/* Inspector header */}
       <div className="px-4 pt-4 pb-2 border-b border-border">
         <div className="flex items-center gap-2 mb-1">
-          <span className="material-symbols-outlined text-[18px] text-violet-400">
-            auto_fix_high
-          </span>
+          <Icon name="auto_fix_high" size={18} className="text-primary" />
           <h3 className="font-semibold text-text-main text-sm">{skill.name}</h3>
         </div>
         <p className="text-xs text-text-muted line-clamp-2">{skill.description}</p>
@@ -124,36 +134,36 @@ export function SkillInspectorPane({
           <span
             className={`text-[10px] px-1.5 py-0.5 rounded ${
               effectiveMode === "on"
-                ? "bg-emerald-500/10 text-emerald-400"
+                ? "bg-success/10 text-success"
                 : effectiveMode === "auto"
-                  ? "bg-amber-500/10 text-amber-400"
-                  : "bg-surface/60 text-text-muted"
+                  ? "bg-warning/10 text-warning"
+                  : "bg-surface-2 text-text-muted"
             }`}
           >
             {t("mode")}: {effectiveMode}
           </span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface/60 text-text-muted">
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-2 text-text-muted">
             {(skill.sourceProvider || "local").toUpperCase()}
           </span>
         </div>
       </div>
 
       {/* Inspector sub-tabs */}
-      <div className="flex gap-0 border-b border-border px-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-              activeTab === tab.id
-                ? "border-violet-500 text-violet-400"
-                : "border-transparent text-text-muted hover:text-text-main"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        variant="underline"
+        value={activeTab}
+        onValueChange={(next) => setActiveTab(next as typeof activeTab)}
+        className="px-2"
+      >
+        {/* The inspector panels below render themselves (no TabsContent). */}
+        <TabsList aria-label={skill.name}>
+          {tabs.map((tab) => (
+            <TabsTrigger key={tab.id} value={tab.id} aria-controls={undefined} className="text-xs">
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {/* Inspector content */}
       <div className="flex-1 overflow-auto p-4">
@@ -163,7 +173,7 @@ export function SkillInspectorPane({
               <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
                 {t("inputSchema")}
               </p>
-              <pre className="text-xs bg-surface/40 rounded-lg p-3 overflow-auto max-h-[200px] text-text-main font-mono whitespace-pre-wrap">
+              <pre className="text-xs bg-bg-subtle rounded-lg p-3 overflow-auto max-h-[200px] text-text-main font-mono whitespace-pre-wrap">
                 {JSON.stringify(detail?.schema?.input ?? {}, null, 2) || "{}"}
               </pre>
             </div>
@@ -171,7 +181,7 @@ export function SkillInspectorPane({
               <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
                 {t("outputSchema")}
               </p>
-              <pre className="text-xs bg-surface/40 rounded-lg p-3 overflow-auto max-h-[200px] text-text-main font-mono whitespace-pre-wrap">
+              <pre className="text-xs bg-bg-subtle rounded-lg p-3 overflow-auto max-h-[200px] text-text-main font-mono whitespace-pre-wrap">
                 {JSON.stringify(detail?.schema?.output ?? {}, null, 2) || "{}"}
               </pre>
             </div>
@@ -183,7 +193,7 @@ export function SkillInspectorPane({
             <p className="text-xs font-medium text-text-muted uppercase tracking-wide mb-1.5">
               {t("handlerCode")}
             </p>
-            <pre className="text-xs bg-surface/40 rounded-lg p-3 overflow-auto max-h-[400px] text-text-main font-mono whitespace-pre-wrap">
+            <pre className="text-xs bg-bg-subtle rounded-lg p-3 overflow-auto max-h-[400px] text-text-main font-mono whitespace-pre-wrap">
               {detail?.handler ?? `// ${t("handlerUnavailable")}`}
             </pre>
           </div>
@@ -196,38 +206,42 @@ export function SkillInspectorPane({
             ) : executions.length === 0 ? (
               <div className="text-xs text-text-muted text-center py-6">{t("noExecutions")}</div>
             ) : (
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="text-left text-text-muted border-b border-border">
-                    <th className="pb-2 font-medium">{t("status")}</th>
-                    <th className="pb-2 font-medium">{t("duration")}</th>
-                    <th className="pb-2 font-medium">{t("time")}</th>
-                  </tr>
-                </thead>
-                <tbody>
+              <Table
+                className="text-xs"
+                aria-label={t("executionsTab")}
+                scrollbarLabel={t("executionsTab")}
+              >
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t("status")}</TableHead>
+                    <TableHead>{t("duration")}</TableHead>
+                    <TableHead>{t("time")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {executions.map((exec) => (
-                    <tr key={exec.id} className="border-b border-border/40">
-                      <td className="py-2">
+                    <TableRow key={exec.id}>
+                      <TableCell>
                         <span
                           className={`px-1.5 py-0.5 rounded ${
                             exec.status === "success"
-                              ? "bg-emerald-500/10 text-emerald-400"
+                              ? "bg-success/10 text-success"
                               : exec.status === "error"
-                                ? "bg-red-500/10 text-red-400"
-                                : "bg-amber-500/10 text-amber-400"
+                                ? "bg-error/10 text-error"
+                                : "bg-warning/10 text-warning"
                           }`}
                         >
                           {exec.status}
                         </span>
-                      </td>
-                      <td className="py-2 text-text-muted">{exec.duration}ms</td>
-                      <td className="py-2 text-text-muted">
+                      </TableCell>
+                      <TableCell className="text-text-muted">{exec.duration}ms</TableCell>
+                      <TableCell className="text-text-muted">
                         {new Date(exec.createdAt).toLocaleString(locale)}
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             )}
           </div>
         )}
@@ -245,7 +259,7 @@ export function SkillInspectorPane({
             ].map((item) => (
               <div
                 key={item.label}
-                className="flex items-center justify-between p-2.5 rounded-lg bg-surface/30"
+                className="flex items-center justify-between p-2.5 rounded-lg bg-bg-subtle"
               >
                 <div>
                   <p className="text-xs font-medium">{item.label}</p>
@@ -254,9 +268,9 @@ export function SkillInspectorPane({
                 <span className="text-xs font-mono text-text-muted">{item.value}</span>
               </div>
             ))}
-            <button className="w-full mt-3 px-3 py-2 text-xs font-medium rounded-lg border border-border text-text-muted hover:text-text-main hover:border-violet-500/50 transition-colors">
+            <Button variant="outline" size="sm" fullWidth className="mt-3 text-xs text-text-muted">
               {t("runTestPlaceholder")}
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -264,30 +278,36 @@ export function SkillInspectorPane({
       {/* Inspector action buttons */}
       <div className="px-4 py-3 border-t border-border flex items-center gap-1.5">
         {(["on", "auto", "off"] as const).map((mode) => (
-          <button
+          <Button
             key={mode}
+            variant="outline"
+            size="sm"
             onClick={() => onSetMode(skill.id, mode)}
             aria-label={t("setModeAria", { mode })}
-            className={`flex-1 text-xs px-2 py-1.5 rounded border transition-colors ${
+            aria-pressed={effectiveMode === mode}
+            className={cn(
+              "flex-1 text-xs",
               effectiveMode === mode
                 ? mode === "on"
-                  ? "border-emerald-500 text-emerald-400 bg-emerald-500/5"
+                  ? "border-success text-success bg-success/10"
                   : mode === "auto"
-                    ? "border-amber-500 text-amber-400 bg-amber-500/5"
-                    : "border-red-500 text-red-400 bg-red-500/5"
-                : "border-border text-text-muted hover:border-border/80"
-            }`}
+                    ? "border-warning text-warning bg-warning/10"
+                    : "border-error text-error bg-error/10"
+                : "text-text-muted"
+            )}
           >
             {mode === "on" ? t("onMode") : mode === "auto" ? t("autoMode") : t("offMode")}
-          </button>
+          </Button>
         ))}
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => onUninstall(skill.id)}
           aria-label={t("uninstallSkill")}
-          className="flex-1 text-xs px-2 py-1.5 rounded border border-border text-red-400 hover:bg-red-500/10 transition-colors"
+          className="flex-1 text-xs text-error hover:bg-error/10 hover:text-error"
         >
           {t("delete")}
-        </button>
+        </Button>
       </div>
     </div>
   );

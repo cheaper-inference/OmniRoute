@@ -676,9 +676,10 @@ test("bounded session cache closes the least-recently-used idle session", async 
     };
   }, 2);
 
-  await client.fetch("https://upstream.example/v1", { proxy: "http://proxy-1:8080" });
-  await client.fetch("https://upstream.example/v1", { proxy: "http://proxy-2:8080" });
-  await client.fetch("https://upstream.example/v1", { proxy: "http://proxy-3:8080" });
+  for (const proxy of ["http://proxy-1:8080", "http://proxy-2:8080", "http://proxy-3:8080"]) {
+    const response = await client.fetch("https://upstream.example/v1", { proxy });
+    assert.equal(await response.text(), "ok");
+  }
 
   assert.deepEqual(closed, ["http://proxy-1:8080"]);
   await client.exit();

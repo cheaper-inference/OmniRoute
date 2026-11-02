@@ -2,16 +2,22 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Toggle from "@/shared/components/Toggle";
 
-type VisibilitySettings = { hideAutoCombos: boolean; hideNoThinkVariants: boolean };
-const FLAGS = ["hideAutoCombos", "hideNoThinkVariants"] as const;
+type VisibilitySettings = {
+  hideAutoCombos: boolean;
+  hideNoThinkVariants: boolean;
+  exposeCombosOnly: boolean;
+};
+const FLAGS = ["hideAutoCombos", "hideNoThinkVariants", "exposeCombosOnly"] as const;
 
 function visibilitySettings(value: Partial<VisibilitySettings>): VisibilitySettings {
   return {
     hideAutoCombos: value.hideAutoCombos === true,
     hideNoThinkVariants: value.hideNoThinkVariants === true,
+    exposeCombosOnly: value.exposeCombosOnly === true,
   };
 }
 
@@ -75,19 +81,25 @@ export default function CatalogVisibilityCard() {
         {FLAGS.map((key) => (
           <Toggle
             key={key}
-            label={`${common("hide")} ${key === "hideAutoCombos" ? "auto/*" : "no-think/*"}`}
+            label={
+              key === "exposeCombosOnly"
+                ? t("exposeCombosOnly")
+                : `${common("hide")} ${key === "hideAutoCombos" ? "auto/*" : "no-think/*"}`
+            }
+            description={key === "exposeCombosOnly" ? t("exposeCombosOnlyDesc") : undefined}
             checked={value?.[key] ?? false}
             disabled={loading || saving || !value}
             onChange={(checked) => void save(key, checked)}
           />
         ))}
         {error && (
-          <p role="alert" className="text-sm text-rose-500">
+          <p role="alert" className="text-sm text-error">
             {error === "load" ? common("failedToLoad") : t("settingSaveFailed")}
             {error === "load" && (
-              <button
-                type="button"
-                className="ml-3 underline"
+              <Button
+                variant="ghost"
+                size="sm"
+                className="ml-3"
                 onClick={() => {
                   setLoading(true);
                   setError(null);
@@ -95,7 +107,7 @@ export default function CatalogVisibilityCard() {
                 }}
               >
                 {common("retry")}
-              </button>
+              </Button>
             )}
           </p>
         )}

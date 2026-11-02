@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import {
   BaseExecutor,
   type ExecuteInput,
@@ -17,6 +18,7 @@ import {
   runWithProxyContext,
   noteRotationAccount,
   noteAddedWait,
+  proxyFetch,
   resolveProxyForRequest,
   type AddedWaitCause,
 } from "../utils/proxyFetch.ts";
@@ -66,6 +68,8 @@ import {
   noteFreeTierOutcome,
   prepareFreeTierRequest,
   rebuildJsonFromForcedStream,
+  resolveFreeTierCredential,
+  resolveGatedCredential,
   surfaceFromBaseUrl,
 } from "./opencodeFreeTierContract.ts";
 import {
@@ -74,6 +78,13 @@ import {
   isResponsesTerminalLine,
   normalizeMuseSparkFinishReason,
 } from "./opencodeMuseSpark.ts";
+import {
+  applyMuseSparkResponsesEffort,
+  dispatchWithMuseSparkMaxFallback,
+  parseDynamicMuseSparkEffort,
+  type HttpExecuteResult,
+} from "./opencodeMuseSparkEffort.ts";
+export { isUnsupportedReasoningEffortRejection } from "./opencodeMuseSparkEffort.ts";
 import { currentRequestContext, runInRequestContext } from "./opencodeRequestContext.ts";
 import {
   handleLoopFreeTierRefusal,
@@ -113,8 +124,13 @@ import {
   isOpencodePublishedCatalogRoutingEnabled,
   isOpencodeV2ClientFingerprintEnabled,
 } from "@/shared/utils/featureFlags";
-import { setPublishedCatalogRoutingGate } from "../utils/opencodePublishedCatalog.ts";
-import { isEgressBucketedLockScope } from "../config/providerErrorRules.ts";
+import {
+  getPublishedBaseUrl,
+  setPublishedCatalogFetch,
+  setPublishedCatalogRoutingGate,
+} from "../utils/opencodePublishedCatalog.ts";
+import { setToolSchemaMemoryGate } from "./opencodeToolObservation.ts";
+import { rotatesEgressOnQuotaRefusal } from "../config/providerErrorRules.ts";
 import {
   BURST_PARK_THRESHOLD,
   parkWaitMs,
@@ -141,6 +157,186 @@ export type { ScopedAccount as OpencodeAccountState };
 
 const EFFORT_LEVELS = ["none", "low", "high", "max"] as const;
 
+const MAX_TOOL_NAME_LEN = 128;
+
+function clampResponsesCallId(callId: unknown): string {
+  const s = String(callId || "").trim();
+  return s || `call_${randomUUID().replace(/-/g, "").slice(0, 16)}`;
+}
+
+function coerceResponsesArguments(args: unknown): string {
+  if (typeof args === "string") return args;
+  if (args && typeof args === "object") {
+    try {
+      return JSON.stringify(args);
+    } catch {
+      return "{}";
+    }
+  }
+  return "{}";
+}
+
+function coerceResponsesOutput(output: unknown): string {
+  if (typeof output === "string") return output;
+  if (output && typeof output === "object") {
+    try {
+      return JSON.stringify(output);
+    } catch {
+      return "";
+    }
+  }
+  return String(output ?? "");
+}
+
+/**
+ * Move a legacy max_tokens/max_completion_tokens value to the Responses API's
+ * max_output_tokens field, in place. Extracted from sanitizeResponsesBody to
+ * keep that function under the max-lines-per-function ratchet.
+ */
+function normalizeResponsesTokenFields(body: Record<string, unknown>): void {
+  if (body.max_output_tokens === undefined) {
+    if (body.max_completion_tokens !== undefined) {
+      body.max_output_tokens = body.max_completion_tokens;
+    } else if (body.max_tokens !== undefined) {
+      body.max_output_tokens = body.max_tokens;
+    }
+  }
+  delete body.max_tokens;
+  delete body.max_completion_tokens;
+}
+
+/**
+ * Fold a legacy reasoning_effort field into the Responses API's reasoning
+ * object, in place. Extracted from sanitizeResponsesBody (see above).
+ */
+function normalizeResponsesReasoningField(body: Record<string, unknown>): void {
+  if (body.reasoning_effort !== undefined && body.reasoning === undefined) {
+    body.reasoning = { effort: body.reasoning_effort, summary: "auto" };
+  }
+  if (body.reasoning && typeof body.reasoning === "object" && !Array.isArray(body.reasoning)) {
+    const r = body.reasoning as Record<string, unknown>;
+    if (!r.summary) r.summary = "auto";
+  }
+  delete body.reasoning_effort;
+}
+
+/** Whether `value` is a non-array, non-null object. */
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+/**
+ * A string field on `toolObj`, falling back to the same field on a nested
+ * Chat-Completions `function` object when `toolObj` itself does not have it.
+ */
+function pickToolStringField(
+  toolObj: Record<string, unknown>,
+  fn: Record<string, unknown> | null,
+  key: "name" | "description"
+): string {
+  if (typeof toolObj[key] === "string") return toolObj[key] as string;
+  const nested = fn?.[key];
+  return typeof nested === "string" ? nested : "";
+}
+
+/**
+ * The tool's JSON-schema parameters object, from `toolObj` or a nested
+ * `function` object, defaulting to an empty object schema and always
+ * carrying a `properties` map (the Responses API rejects one without it).
+ */
+function resolveToolParameters(
+  toolObj: Record<string, unknown>,
+  fn: Record<string, unknown> | null
+): Record<string, unknown> {
+  const parameters = (isPlainRecord(toolObj.parameters) ? toolObj.parameters : null) ??
+    (isPlainRecord(fn?.parameters) ? (fn!.parameters as Record<string, unknown>) : null) ?? {
+      type: "object",
+      properties: {},
+    };
+  return parameters.type === "object" && !parameters.properties
+    ? { ...parameters, properties: {} }
+    : parameters;
+}
+
+/**
+ * Normalize one Responses-API tool entry to the flat `{type, name, description,
+ * parameters}` shape (accepting either that shape or a nested Chat-Completions
+ * `{function: {...}}` shape as input), mutating it in place. Returns `null` for
+ * an entry with no resolvable name, which the caller drops.
+ */
+function normalizeResponsesToolEntry(t: unknown): Record<string, unknown> | null {
+  if (!isPlainRecord(t)) return null;
+  const toolObj = t;
+  const fn = isPlainRecord(toolObj.function) ? toolObj.function : null;
+  const name = pickToolStringField(toolObj, fn, "name").trim();
+  if (!name) return null;
+  const description = pickToolStringField(toolObj, fn, "description");
+  const parameters = resolveToolParameters(toolObj, fn);
+  for (const k of Object.keys(toolObj)) delete toolObj[k];
+  toolObj.type = "function";
+  toolObj.name = name.slice(0, MAX_TOOL_NAME_LEN);
+  if (description) toolObj.description = description;
+  toolObj.parameters = parameters;
+  return toolObj;
+}
+
+/** Whether a Responses-API reasoning item carries plaintext in `content` or `summary`. */
+function hasReplayableReasoningText(item: Record<string, unknown>): boolean {
+  return [item.content, item.summary].some(
+    (parts) =>
+      Array.isArray(parts) &&
+      parts.some((part) => isPlainRecord(part) && typeof part.text === "string" && part.text !== "")
+  );
+}
+
+/**
+ * Whether a Responses-API `input` item should be kept, normalizing
+ * function_call/function_call_output entries in place as a side effect.
+ */
+function shouldKeepResponsesInputItem(item: unknown): boolean {
+  if (!item || typeof item !== "object" || Array.isArray(item)) return true;
+  const rec = item as Record<string, unknown>;
+  delete rec.encrypted_content;
+  delete rec.reasoning_encrypted_content;
+  // An opaque reasoning item means nothing to this upstream, but one with readable text is the
+  // replayed thinking DeepSeek rejects a turn without (#13031).
+  if (rec.type === "reasoning") return hasReplayableReasoningText(rec);
+  if (rec.type === "function_call") {
+    if (!rec.name || typeof rec.name !== "string" || (rec.name as string).trim() === "")
+      return false;
+    rec.name = (rec.name as string).trim().slice(0, MAX_TOOL_NAME_LEN);
+    rec.call_id = clampResponsesCallId(rec.call_id);
+    rec.arguments = coerceResponsesArguments(rec.arguments);
+    return true;
+  }
+  if (rec.type === "function_call_output") {
+    rec.call_id = clampResponsesCallId(rec.call_id);
+    rec.output = coerceResponsesOutput(rec.output);
+    return true;
+  }
+  return true;
+}
+
+/**
+ * Sanitize body for OpenAI Responses API endpoint (/responses) (PR #4145).
+ */
+export function sanitizeResponsesBody(body: Record<string, unknown>): void {
+  if (!body || typeof body !== "object") return;
+
+  normalizeResponsesTokenFields(body);
+  normalizeResponsesReasoningField(body);
+
+  if (Array.isArray(body.tools)) {
+    body.tools = body.tools
+      .map((t: unknown) => normalizeResponsesToolEntry(t))
+      .filter((t: Record<string, unknown> | null): t is Record<string, unknown> => t !== null);
+  }
+
+  if (Array.isArray(body.input)) {
+    body.input = body.input.filter(shouldKeepResponsesInputItem);
+  }
+}
+
 /**
  * Models on opencode-go that support effort-tier aliases. Each entry maps the
  * canonical base id to the set of effort suffixes the upstream supports.
@@ -156,8 +352,11 @@ const EFFORT_LEVELS = ["none", "low", "high", "max"] as const;
  *   grok-4.5 low/medium/high; hy3 none/low/high; kimi-k3 max;
  *   qwen3.6-plus / qwen3.7-max / qwen3.7-plus high/max;
  *   muse-spark-1.2-contributor minimal/low/medium/high/xhigh (no max)
- * - #12674 Muse Spark 1.3 Contributor: minimal/low/medium/high/xhigh (no max),
- *   verified via `opencode models opencode-go --refresh --verbose`
+ * - #12674 Muse Spark 1.3 Contributor: minimal/low/medium/high/xhigh verified
+ *   via `opencode models opencode-go --refresh --verbose`; #12687 adds `max`
+ *   as an explicit alias suffix — the wire tier is still sent verbatim and
+ *   falls back to xhigh only on the upstream's unsupported-effort 400 (see
+ *   dispatchWithMuseSparkMaxFallback).
  */
 const EFFORT_TIERS: Record<string, readonly string[]> = {
   "deepseek-v4-pro": EFFORT_LEVELS,
@@ -170,8 +369,8 @@ const EFFORT_TIERS: Record<string, readonly string[]> = {
   "qwen3.6-plus": ["high", "max"],
   "qwen3.7-max": ["high", "max"],
   "qwen3.7-plus": ["high", "max"],
+  "muse-spark-1.3-contributor": ["minimal", "low", "medium", "high", "xhigh", "max"],
   "muse-spark-1.2-contributor": ["minimal", "low", "medium", "high", "xhigh"],
-  "muse-spark-1.3-contributor": ["minimal", "low", "medium", "high", "xhigh"],
 };
 
 /**
@@ -189,7 +388,7 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
       }
     }
   }
-  return null;
+  return parseDynamicMuseSparkEffort(m);
 }
 
 // #16798: the published-catalog surface lookup in providerModels.ts is client-reachable and
@@ -197,6 +396,11 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
 // pipeline) hands it the OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED reader. Unregistered
 // (client bundle) reads as off.
 setPublishedCatalogRoutingGate(isOpencodePublishedCatalogRoutingEnabled);
+// The catalog read goes through the proxy-aware transport; the module itself cannot import
+// it (client-reachable). The same flag also turns on the client's own x-opencode-* header
+// relay and the accepted tool-schema memory.
+setPublishedCatalogFetch(proxyFetch);
+setToolSchemaMemoryGate(isOpencodePublishedCatalogRoutingEnabled);
 
 /**
  * Resolves the registry `targetFormat` for a model, aliasing `provider` first.
@@ -294,12 +498,50 @@ export class OpencodeExecutor extends BaseExecutor {
   // Member health shared across requests on this alias, keyed by member id.
   // Each request still walks its own list (see `opencodeAccountScope.ts`).
   accountHealth = new Map<string, ScopedAccountHealth>();
+  // Explicit invalidation for view setters and request writeback.
+  #accountsVersion = 0;
+  // Cached live view of accounts getter. Invalidate when version changes.
+  #accountsCache: ScopedAccount[] | null = null;
+  // Cached version when #accountsCache was built.
+  #accountsCacheVersion = 0;
+  #accountsCacheStore: Map<string, ScopedAccountHealth> | null = null;
+  #accountsCacheSize = 0;
+  // Invalidate the accounts cache (call after any accountHealth mutation).
+  #invalidateAccountsCache(): void {
+    this.#accountsVersion++;
+    this.#accountsCache = null;
+    this.#accountsCacheVersion = 0;
+  }
   get accounts(): ScopedAccount[] {
     const store = this.accountHealth;
+    if (
+      this.#accountsCache &&
+      this.#accountsCacheVersion === this.#accountsVersion &&
+      this.#accountsCacheStore === store &&
+      this.#accountsCacheSize === store.size
+    ) {
+      // The public Map can be changed through retained references or replaced.
+      // Compare ordered membership in O(n), without rebuilding the live objects.
+      let index = 0;
+      let sameMembers = true;
+      for (const fingerprint of store.keys()) {
+        if (this.#accountsCache[index++]?.fingerprint !== fingerprint) {
+          sameMembers = false;
+          break;
+        }
+      }
+      if (sameMembers) return this.#accountsCache;
+    }
+    this.#accountsCacheStore = store;
+    this.#accountsCacheSize = store.size;
     // Cold parity with the historical default direct member (read-only).
     if (store.size === 0) {
-      return [{ fingerprint: "", cooldownUntil: 0, consecutiveFails: 0, proxy: null }];
+      const empty = [{ fingerprint: "", cooldownUntil: 0, consecutiveFails: 0, proxy: null }];
+      this.#accountsCache = empty;
+      this.#accountsCacheVersion = this.#accountsVersion;
+      return empty;
     }
+    const invalidate = () => this.#invalidateAccountsCache();
     const live = [...store.entries()].map(([fingerprint]) => ({
       fingerprint,
       get cooldownUntil() {
@@ -308,6 +550,7 @@ export class OpencodeExecutor extends BaseExecutor {
       set cooldownUntil(value: number) {
         const current = store.get(fingerprint) ?? { cooldownUntil: 0, consecutiveFails: 0 };
         store.set(fingerprint, { ...current, cooldownUntil: value });
+        invalidate();
       },
       get consecutiveFails() {
         return store.get(fingerprint)?.consecutiveFails ?? 0;
@@ -315,9 +558,12 @@ export class OpencodeExecutor extends BaseExecutor {
       set consecutiveFails(value: number) {
         const current = store.get(fingerprint) ?? { cooldownUntil: 0, consecutiveFails: 0 };
         store.set(fingerprint, { ...current, consecutiveFails: value });
+        invalidate();
       },
       proxy: null as ScopedAccount["proxy"],
     }));
+    this.#accountsCache = live;
+    this.#accountsCacheVersion = this.#accountsVersion;
     return live;
   }
   // Sleep used by the opt-in transient failover pause (#13615). Not `private`:
@@ -543,7 +789,7 @@ export class OpencodeExecutor extends BaseExecutor {
         return withRequestShapeRetry(input, (i) => this.executeOnce(i));
       });
     } finally {
-      releaseRequestList(input.body, this.accountHealth);
+      releaseRequestList(input.body, this.accountHealth, () => this.#invalidateAccountsCache());
     }
   }
 
@@ -606,8 +852,10 @@ export class OpencodeExecutor extends BaseExecutor {
       const poolReselectOn = isOpencodePoolReselectEnabled();
       // Resolver published by the chat layer when the ambient egress came from
       // a live connection pool (undefined otherwise). Read once per request.
+      // The provider test is the quota-refusal scope, so an operator widening it
+      // (OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS=all) reaches the free zen ids too.
       const poolReselect =
-        poolReselectOn && isEgressBucketedLockScope(this.provider) && hasAmbientProxyContext()
+        poolReselectOn && rotatesEgressOnQuotaRefusal(this.provider) && hasAmbientProxyContext()
           ? (currentRequestContext()?.reselectPoolMember ?? null)
           : null;
       // Key of the ambient pool member this request egressed through (null when
@@ -645,9 +893,14 @@ export class OpencodeExecutor extends BaseExecutor {
         // execute() in runWithProxyContext(proxyInfo.proxy, ...) before we run.
         // Only pin direct egress when no such context exists; otherwise let the
         // ambient proxy stand instead of clobbering it with the direct sentinel.
-        const dispatch = () => super.execute(input);
+        const dispatch = (effInput: ExecuteInput) =>
+          super.execute(effInput) as Promise<HttpExecuteResult>;
         const single = (await guardStall(
-          await (hasAmbientProxyContext() ? dispatch() : runWithDirectFetchContext(dispatch))
+          await (hasAmbientProxyContext()
+            ? dispatchWithMuseSparkMaxFallback(input, dispatch, parseEffortLevel)
+            : runWithDirectFetchContext(() =>
+                dispatchWithMuseSparkMaxFallback(input, dispatch, parseEffortLevel)
+              ))
         )) as HttpExecuteResult;
         const retryAfterRefusal = await retryFreeTierRefusalWithObservedTools(
           this.freeTierRetryCtx(input),
@@ -703,10 +956,6 @@ export class OpencodeExecutor extends BaseExecutor {
       // This loop only ever dispatches through super.execute() (the HTTP request
       // path), which always resolves the object-shaped arm of ExecutorExecuteResult
       // — the bare-Response arm belongs to web/scraping executors only (base.ts:290).
-      type HttpExecuteResult = Extract<
-        Awaited<ReturnType<BaseExecutor["execute"]>>,
-        { response: Response }
-      >;
       let lastResult: HttpExecuteResult | null = null;
       let lastSharedEgressError: unknown = null;
       const sharedEgressGuardEnabled = isNetworkRotationSharedEgressGuardEnabled();
@@ -912,16 +1161,19 @@ export class OpencodeExecutor extends BaseExecutor {
             accounts,
             isProxiedCandidate,
             (attemptSignal) =>
-              (async () =>
-                guardStall(
-                  await runWithProxyContext(account.proxy ?? reselectedProxy, () =>
+              (async () => {
+                const loopDispatch = (effInput: ExecuteInput) =>
+                  runWithProxyContext(account.proxy ?? reselectedProxy, () =>
                     super.execute({
-                      ...input,
+                      ...effInput,
                       skipUpstreamRetry: true,
-                      signal: attemptSignal ?? input.signal,
+                      signal: attemptSignal ?? effInput.signal,
                     })
-                  )
-                ) as Promise<HttpExecuteResult>)(),
+                  ) as Promise<HttpExecuteResult>;
+                return guardStall(
+                  await dispatchWithMuseSparkMaxFallback(input, loopDispatch, parseEffortLevel)
+                ) as Promise<HttpExecuteResult>;
+              })(),
             input.signal
           );
           if (outcome.kind !== "ok") {
@@ -1296,10 +1548,12 @@ export class OpencodeExecutor extends BaseExecutor {
     void urlIndex;
     void credentials;
 
+    // Off, unpublished or invalid: the registered base URL. A gated free-tier request keeps
+    // the inference contract's constant and never consults the catalog.
     const base =
       Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
         ? FREE_TIER_INFERENCE_BASE_URL
-        : this.config.baseUrl;
+        : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
     switch (this._requestFormat) {
       case "claude":
         return `${base}/messages`;
@@ -1335,19 +1589,18 @@ export class OpencodeExecutor extends BaseExecutor {
     body?: unknown
   ) {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
-    // #8467: honor Extra API Keys rotation via BaseExecutor.resolveEffectiveKey.
-    // Fall back to accessToken only when no apiKey/extras resolve to a key.
-    const key = credentials
-      ? this.resolveEffectiveKey(credentials) || credentials.accessToken
-      : undefined;
 
-    // The free tier only answers streamed requests (measured 2026-09-17: a non-streamed
-    // body answers 403 FreeTierError), so a JSON client is served by streaming upstream and
-    // rebuilding the JSON body from the event stream — the path chatCore already takes for
-    // any buffered event-stream response. Announcing the stream here keeps that buffering an
-    // expected outcome rather than a warning.
+    // A gated request rides buildUrl() to the anonymous /inference lane, which since
+    // 2026-10-21 answers 403 "Model access is disabled" to a real API key while serving
+    // `Bearer public` — the credential flips with the lane; see opencodeFreeTierContract.ts.
     const gatedScope =
       Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model);
+    const freeTier = gatedScope ? resolveFreeTierCredential() : null;
+    // #8467: honor Extra API Keys rotation via BaseExecutor.resolveEffectiveKey.
+    // Fall back to accessToken only when no apiKey/extras resolve to a key.
+    const key = resolveGatedCredential(freeTier, () =>
+      credentials ? this.resolveEffectiveKey(credentials) || credentials.accessToken : undefined
+    );
 
     if (key) {
       if (this._requestFormat === "claude" || this.usesZenApiKeyAuth()) {
@@ -1360,6 +1613,11 @@ export class OpencodeExecutor extends BaseExecutor {
     if (this._requestFormat === "claude") {
       headers["anthropic-version"] = "2023-06-01";
     }
+    // The free tier only answers streamed requests (measured 2026-09-17: a non-streamed
+    // body answers 403 FreeTierError), so a JSON client is served by streaming upstream and
+    // rebuilding the JSON body from the event stream — the path chatCore already takes for
+    // any buffered event-stream response. Announcing the stream here keeps that buffering an
+    // expected outcome rather than a warning.
     if (stream || gatedScope) {
       headers["Accept"] = "text/event-stream";
     }
@@ -1386,6 +1644,7 @@ export class OpencodeExecutor extends BaseExecutor {
         sessionBody: projectOpencodeSessionBody(body),
         reencodeSession: gatedScope,
         v2Fingerprint,
+        forwardAllOpencodeHeaders: isOpencodePublishedCatalogRoutingEnabled(),
       });
     }
 
@@ -1447,10 +1706,10 @@ export class OpencodeExecutor extends BaseExecutor {
       if (typeof systemMessage.content === "string") {
         systemMessage.content = `${systemMessage.content}\\n\\n${prompt}`;
       } else if (Array.isArray(systemMessage.content)) {
-        systemMessage.content.push({
-          type: "text",
-          text: `\\n\\n${prompt}`,
-        });
+        systemMessage.content = [
+          ...systemMessage.content,
+          { type: "text", text: `\\n\\n${prompt}` },
+        ];
       }
     } else {
       messages.unshift({
@@ -1518,6 +1777,17 @@ export class OpencodeExecutor extends BaseExecutor {
     if (modifiedBody && typeof modifiedBody === "object" && !Array.isArray(modifiedBody)) {
       const mb = modifiedBody as Record<string, unknown>;
       mb.model = stripOpencodeModelPrefix(mb.model); // see providerModels.ts
+      // PR #4145 (9router): Responses API payload sanitization — additive and safe on every
+      // surface, unlike the stream:true forcing / fingerprint-tool injection this port also
+      // proposed (dropped here): both are already fully covered on this tip by the free-tier
+      // request contract above for gated requests, and forcing them for a NON-gated (paid)
+      // request regressed the "a paid model keeps the client's own stream/tools" contract
+      // (see the "transformRequest: ... skipped for a paid one" test in
+      // opencode-free-tier-request-contract.test.ts) — so only the sanitizer is wired in.
+      if (this._requestFormat === "openai-responses") {
+        sanitizeResponsesBody(mb);
+      }
+
       // OpenCode accepts stream_options only on streaming Chat Completions (#13699).
       const format = this._requestFormat ?? resolveOpencodeTargetFormat(this.provider, model);
       if (format !== "openai" || mb.stream !== true) {
@@ -1527,6 +1797,7 @@ export class OpencodeExecutor extends BaseExecutor {
       if (parsed) {
         const deepseekFamily =
           parsed.baseModel === "deepseek-v4-pro" || parsed.baseModel === "deepseek-v4-flash";
+        const museSparkFamily = parsed.baseModel.startsWith("muse-spark");
         if (deepseekFamily) {
           // DeepSeek via opencode-go proxies the native DeepSeek contract, which
           // accepts a flat reasoning_effort field (#4647).
@@ -1534,6 +1805,8 @@ export class OpencodeExecutor extends BaseExecutor {
           if (mb.reasoning_effort === undefined) {
             mb.reasoning_effort = parsed.effort;
           }
+        } else if (museSparkFamily) {
+          applyMuseSparkResponsesEffort(mb, parsed);
         }
         // #10788: every other family's ONLY native effort mechanism is the
         // -<tier> suffix in the model id itself (the ids `opencode models

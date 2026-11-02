@@ -638,27 +638,29 @@ sudo systemctl enable --now omniroute-update.path
 
 El servicio elimina la solicitud antes de descargar la imagen para que una ejecución fallida no provoque un bucle. Sin `DOCKER_UPDATE_TRIGGER_FILE`, el panel mantiene el flujo de comandos manuales.
 
-## Disponibilidad: SQLite predeterminado admite una sola réplica
+## Disponibilidad: SQLite predeterminado es una réplica única
 
-La configuración estándar de OmniRoute para Docker/Kubernetes consta de **un proceso de Node + un escritor de SQLite**. La alta disponibilidad **no es compatible** con esta topología.
+Stock Docker / Kubernetes OmniRoute es** un proceso de nodo + un escritor SQLite** . La alta disponibilidad es** no soportado** en esa topología.
 
-| Restricción                                        | Consecuencia                                                                                                                                                                                                                                                                                                                                                                |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Escritor único                                     | **No** ejecute varias réplicas con el mismo archivo de SQLite. Esto corrompe la base de datos.                                                                                                                                                                                                                                                                              |
-| Recreación/reinicio/finalización por `HEALTHCHECK` | **Interrupción total** de las conexiones SSE en curso, las sesiones del panel y el estado en memoria. Todos los clientes conectados se desconectan. Las solicitudes nuevas durante el intervalo sin endpoints reciben del proxy inverso **`502 Bad Gateway: Unknown error`**, no JSON de OmniRoute; los clientes no pueden distinguirlo de un fallo del proveedor (#11015). |
-| Mismo bucle de eventos que `/healthz`              | Un ciclo de catálogo o compresión con mucha carga puede retrasar las sondas; un tiempo de espera corto reinicia entonces la **única** réplica.                                                                                                                                                                                                                              |
+| Restricción                           | Consecuencia                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| escritor único                        | Hacer** no** ejecute varias réplicas en el mismo archivo SQLite. Eso corrompe el DB.                                                                                                                                                                                                                                                |
+| Recrear/reiniciar/ HEALTHCHECK matar  | **Apagón total** de SSE en vuelo, sesiones de panel y estado en memoria. Cada cliente conectado cae. Las nuevas solicitudes durante la ventana de punto final vacío obtienen un proxy inverso**`502 Bad Gateway: Unknown error`** , no OmniRoute JSON : los clientes no pueden distinguir esto de una falla del proveedor (#11015). |
+| Mismo bucle de eventos que `/healthz` | Un catálogo ocupado o un tick de compresión pueden retrasar las exploraciones; un breve tiempo de espera y luego reinicia el** solo** réplica.                                                                                                                                                                                      |
 
-**Matriz de sondas** (consulte también las [recomendaciones de sondas para Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Matriz de sonda** (consulte también [las recomendaciones de la sonda Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Sonda            | Destino                                                                     | No usar                                                                         |
-| ---------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Actividad        | TCP en `PORT` (valor predeterminado: `20128`) o HTTP flexible en `/healthz` | `/api/monitoring/health`                                                        |
-| Disponibilidad   | HTTP `GET /healthz`                                                         | Tiempos de espera estrictos que consideren inactivo un bucle de eventos ocupado |
-| Profunda/humanos | `/api/monitoring/health`                                                    | Actividad automatizada de kubelet                                               |
+| Sonda              | Objetivo                                                         | no usar                                                                        |
+| ------------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| vivacidad          | TCP en `PORT` ( `20128` predeterminado), o `/healthz` HTTP suave | `/api/monitoring/health`                                                       |
+| Preparación        | HTTP `GET /healthz`                                              | Tiempos de espera ajustados que tratan el bucle de eventos ocupado como muerto |
+| Profundo / humanos | `/api/monitoring/health`                                         | Vida de kubelet automatizada                                                   |
 
-**Actualizaciones:** espere que todas las sesiones se desconecten. Drene los clientes si es posible; no hay actualizaciones graduales con SQLite predeterminado. La combinación de `restart: unless-stopped` de Compose y `HEALTHCHECK` de Docker también reemplazará el único proceso cuando el contenedor tenga el estado Unhealthy, con el mismo alcance del impacto.
+**Actualizaciones:** espere que cada sesión caiga. Drene a los clientes si puede; no hay ninguna actualización continua en SQLite predeterminado. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` también reemplazará el único proceso cuando el contenedor no esté en buen estado: el mismo radio de explosión.
 
-Fragmento de Kubernetes para una **sola réplica** (se requiere Recreate; no aumente `replicas` con un único archivo de SQLite):
+Los manifiestos listos para usar y un gráfico de Helm se encuentran en `deploy/kubernetes/` y `deploy/helm/omniroute/` ; consulte la [guía de implementación de Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Fragmento de Kubernetes para un** réplica única** (Es necesario recrear; no eleve `replicas` contra un archivo SQLite ):
 
 ```yaml
 spec:
@@ -685,9 +687,9 @@ spec:
             periodSeconds: 20
 ```
 
-La espera de `preStop` permite que kube elimine los endpoints del Service antes de SIGTERM para que el tráfico **nuevo** deje de llegar al proceso que está terminando. Las conexiones SSE de `/v1/responses` en curso se drenan durante un máximo de `SHUTDOWN_TIMEOUT_MS` (30 s de forma predeterminada) mediante concesiones de admisión de alto consumo (#11015). Las solicitudes nuevas que aun así llegan al proceso reciben `503` + `Retry-After: 5`. El intervalo sin endpoints de Recreate hasta que el reemplazo esté Ready sigue siendo una interrupción total del servicio: se debe a la topología de SQLite, no a una configuración incorrecta de las sondas.
+`preStop` sleep permite que kube elimine los puntos finales de servicio antes que SIGTERM por lo que** nuevo** el tráfico deja de afectar el proceso de muerte. `/v1/responses` SSE a bordo se agota hasta `SHUTDOWN_TIMEOUT_MS` (30 segundos por defecto) a través de arrendamientos de admisión pesados (#11015). Las nuevas solicitudes que aún llegan al proceso obtienen `503` + `Retry-After: 5`. La brecha Recrear punto final vacío hasta que el reemplazo esté listo sigue siendo una interrupción brusca: esa es la topología SQLite, no un error de configuración de la sonda.
 
-Postgres externo / HA con múltiples escritores **no** es una vía estándar documentada. Si necesita HA, mantenga una sola réplica o ejecute una topología que el proyecto haya probado y documentado por separado. El trabajo relacionado con Postgres/MySQL se encuentra en [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Hasta que esté disponible, la única forma compatible de multiplicar la capacidad de `/v1/responses` **grandes** es usar N procesos independientes (sección siguiente), no `replicas > 1` en un solo volumen.
+Postgres externo/ HA multiescritor es** no** una ruta de stock documentada. Si necesita HA, mantenga una única réplica o ejecute una topología que el proyecto haya probado y documentado por separado. La obra Postgres/MySQL vive en [el número 8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Hasta que se envíe, la única forma admitida de multiplicar** grande** La capacidad `/v1/responses` es N procesos independientes (siguiente sección), no `replicas > 1` en un volumen.
 
 ## Escalado horizontal: N procesos independientes
 

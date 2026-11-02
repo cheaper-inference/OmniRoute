@@ -105,9 +105,9 @@ describe("Radar opt-in page", () => {
     expect(container.textContent).toContain("activateTitle");
     expect(container.textContent).toContain("activateButton");
     const activationIcon = container.querySelector(
-      'span.material-symbols-outlined[aria-hidden="true"]'
+      'svg.oi-icon[aria-hidden="true"][data-icon="radar"]'
     );
-    expect(activationIcon?.textContent).toBe("radar");
+    expect(activationIcon?.getAttribute("data-icon")).toBe("radar");
     expect(container.textContent).not.toContain("📡");
   });
 

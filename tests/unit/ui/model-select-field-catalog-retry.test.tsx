@@ -3,6 +3,9 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import ModelSelectField from "../../../src/shared/components/ModelSelectField";
+// The shared Select renders the kit (Radix) Select for `options` since KEA-7886: no DOM
+// <select>/<option>; the helpers read the menu items (data-value) and the controlled value.
+import { kitSelectOptions, kitSelectTriggers, kitSelectValue } from "../../helpers/kitSelect";
 
 const mounted: Array<{ root: ReturnType<typeof createRoot>; element: HTMLDivElement }> = [];
 
@@ -65,10 +68,10 @@ it("recovers after a catalog 503 without changing the saved model", async () => 
   });
 
   expect(fetchMock).toHaveBeenCalledTimes(2);
-  const select = element.querySelector("select");
-  expect(select).not.toBeNull();
-  expect(select?.value).toBe("saved/custom-model");
-  expect(Array.from(select?.options ?? [], (option) => option.value)).toContain("fixture/vision");
+  const select = kitSelectTriggers(element)[0];
+  expect(select).toBeTruthy();
+  expect(kitSelectValue(select)).toBe("saved/custom-model");
+  expect(kitSelectOptions(select).map((option) => option.value)).toContain("fixture/vision");
   expect(onChange).not.toHaveBeenCalled();
 });
 
@@ -82,6 +85,7 @@ it("stops after one retry and preserves editable custom input on persistent 503"
   });
   expect(fetchMock).toHaveBeenCalledTimes(2);
   expect(element.querySelector("select")).toBeNull();
+  expect(kitSelectTriggers(element)).toHaveLength(0);
   expect(element.querySelector("input")?.value).toBe("saved/custom-model");
 });
 
@@ -146,8 +150,9 @@ it("aborts an in-flight catalog request and ignores its late result after a sour
     pending.resolve(success());
   });
   expect(fetchMock).toHaveBeenCalledTimes(2);
-  expect(element.querySelector("select option[value='fresh/available']")).not.toBeNull();
-  expect(element.querySelector("select option[value='fixture/vision']")).toBeNull();
+  const values = kitSelectOptions(kitSelectTriggers(element)[0]).map((option) => option.value);
+  expect(values).toContain("fresh/available");
+  expect(values).not.toContain("fixture/vision");
 });
 
 it("honors Retry-After HTTP dates", async () => {
@@ -167,7 +172,7 @@ it("honors Retry-After HTTP dates", async () => {
     await vi.advanceTimersByTimeAsync(1);
   });
   expect(fetchMock).toHaveBeenCalledTimes(2);
-  expect(element.querySelector("select")?.value).toBe("saved/custom-model");
+  expect(kitSelectValue(kitSelectTriggers(element)[0])).toBe("saved/custom-model");
 });
 
 it("uses one second when Retry-After is malformed", async () => {

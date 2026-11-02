@@ -1,0 +1,1 @@
+- **fix(codex):** registered Codex image models (`gpt-image-2`, `gpt-image-2.5-*`) are no longer filtered by the synced Codex chat inventory, which never lists them — `/v1/images/generations` stops failing with "No credentials for image provider: codex" once a Codex inventory is synced (#17942).

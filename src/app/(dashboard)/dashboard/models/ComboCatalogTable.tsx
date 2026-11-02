@@ -1,6 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { SortableTableHead } from "@omniroute/ui-kit/data-table-shell";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 import { Badge, Button } from "@/shared/components";
 import CatalogTestBadge from "./CatalogTestBadge";
 import {
@@ -39,25 +48,17 @@ function SortableHeading({
   onSort: (field: ComboSortField) => void;
 }) {
   const active = field === activeField;
+  // The page's onSort owns the flip rule (same field flips, a new field starts "asc").
   return (
-    <th
+    <SortableTableHead
       scope="col"
-      aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : "none"}
-      className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-muted"
+      className="px-4"
+      direction={active ? direction : undefined}
+      defaultDirection="asc"
+      onDirectionChange={() => onSort(field)}
     >
-      <button
-        type="button"
-        onClick={() => onSort(field)}
-        className="inline-flex min-h-8 items-center gap-1 rounded-sm text-left hover:text-text-main focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-      >
-        {label}
-        {active && (
-          <span className="material-symbols-outlined text-base text-primary" aria-hidden="true">
-            {direction === "asc" ? "arrow_upward" : "arrow_downward"}
-          </span>
-        )}
-      </button>
-    </th>
+      {label}
+    </SortableTableHead>
   );
 }
 
@@ -78,8 +79,8 @@ function ComboCatalogTableHead({
 }) {
   const t = useTranslations("modelCatalog");
   return (
-    <thead className="border-b border-border bg-black/[0.02] dark:bg-white/[0.02]">
-      <tr>
+    <TableHeader>
+      <TableRow>
         <SelectAllHeaderCell
           checked={allOnPageSelected}
           indeterminate={someOnPageSelected}
@@ -116,8 +117,8 @@ function ComboCatalogTableHead({
         />
         <PlainHeading>{t("healthTest")}</PlainHeading>
         <ActionsHeading />
-      </tr>
-    </thead>
+      </TableRow>
+    </TableHeader>
   );
 }
 
@@ -125,7 +126,7 @@ function ComboCatalogTableHead({
 function ComboMembersCell({ combo }: { combo: ComboCatalogRow }) {
   const t = useTranslations("modelCatalog");
   return (
-    <td className="px-4 py-3">
+    <TableCell className="h-auto whitespace-normal px-4 py-3 align-top">
       <span className="font-medium tabular-nums text-text-main">
         {combo.memberCount}{" "}
         {combo.memberCount === 1 ? t("modelCountSingle") : t("modelCountPlural")}
@@ -135,7 +136,7 @@ function ComboMembersCell({ combo }: { combo: ComboCatalogRow }) {
           {combo.models.slice(0, 3).map((m, idx) => (
             <span
               key={idx}
-              className="inline-block max-w-[150px] truncate rounded bg-black/5 px-1.5 py-0.5 font-mono text-[10px] text-text-muted dark:bg-white/5"
+              className="inline-block max-w-[150px] truncate rounded bg-bg-subtle px-1.5 py-0.5 font-mono text-[10px] text-text-muted"
               title={m.model}
             >
               {m.label ||
@@ -151,7 +152,7 @@ function ComboMembersCell({ combo }: { combo: ComboCatalogRow }) {
           )}
         </div>
       )}
-    </td>
+    </TableCell>
   );
 }
 
@@ -161,6 +162,7 @@ function ComboCatalogTableRow({
   testResults,
   activeTestingKeys,
   onToggleSelect,
+  renderKeyAccess,
   onTestCombo,
   bulkRunning,
 }: {
@@ -169,6 +171,7 @@ function ComboCatalogTableRow({
   testResults: Record<string, CatalogTestResult>;
   activeTestingKeys: ReadonlySet<string>;
   onToggleSelect: (id: string) => void;
+  renderKeyAccess?: (id: string) => import("react").ReactNode;
   onTestCombo: (comboName: string) => void;
   bulkRunning: boolean;
 }) {
@@ -178,17 +181,13 @@ function ComboCatalogTableRow({
   const result = testResults[testKey];
 
   return (
-    <tr
-      className={`align-top transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02] ${
-        isSelected ? "bg-primary/[0.03]" : ""
-      }`}
-    >
+    <TableRow data-state={isSelected ? "selected" : undefined} className="align-top">
       <SelectRowCell
         checked={isSelected}
         onToggle={() => onToggleSelect(combo.id)}
         label={t("selectCombo", { name: combo.name })}
       />
-      <td className="max-w-sm px-4 py-3">
+      <TableCell className="h-auto max-w-sm whitespace-normal px-4 py-3 align-top">
         <div className="font-medium text-text-main">{combo.displayName}</div>
         {combo.displayName !== combo.name && (
           <span className="font-mono text-xs text-text-muted">{combo.name}</span>
@@ -196,22 +195,23 @@ function ComboCatalogTableRow({
         {combo.description && (
           <p className="mt-1 line-clamp-2 text-xs text-text-muted">{combo.description}</p>
         )}
-      </td>
-      <td className="whitespace-nowrap px-4 py-3">
+      </TableCell>
+      <TableCell className="h-auto px-4 py-3 align-top">
         <Badge size="sm" variant="default">
           {humanize(combo.strategy)}
         </Badge>
-      </td>
+      </TableCell>
       <ComboMembersCell combo={combo} />
-      <td className="whitespace-nowrap px-4 py-3">
+      <TableCell className="h-auto px-4 py-3 align-top">
         <Badge size="sm" variant={combo.status === "active" ? "success" : "default"}>
           {combo.status === "active" ? t("active") : t("paused")}
         </Badge>
-      </td>
-      <td className="whitespace-nowrap px-4 py-3">
+      </TableCell>
+      <TableCell className="h-auto px-4 py-3 align-top">
         <CatalogTestBadge result={result} loading={isTesting} />
-      </td>
-      <td className="whitespace-nowrap px-4 py-3 text-right">
+      </TableCell>
+      <TableCell className="h-auto whitespace-nowrap px-4 py-3 text-right align-top">
+        {renderKeyAccess?.(combo.name)}
         <Button
           variant="secondary"
           size="sm"
@@ -221,8 +221,8 @@ function ComboCatalogTableRow({
         >
           {t("test")}
         </Button>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -240,6 +240,7 @@ interface ComboCatalogTableProps {
   onToggleSelectAll: () => void;
   testResults: Record<string, CatalogTestResult>;
   activeTestingKeys: ReadonlySet<string>;
+  renderKeyAccess?: (id: string) => import("react").ReactNode;
   onTestCombo: (comboName: string) => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -261,6 +262,7 @@ export default function ComboCatalogTable({
   onToggleSelectAll,
   testResults,
   activeTestingKeys,
+  renderKeyAccess,
   onTestCombo,
   onPrevious,
   onNext,
@@ -275,14 +277,13 @@ export default function ComboCatalogTable({
 
   return (
     <>
-      <div
-        className="overflow-x-auto"
-        role="region"
-        aria-label={t("combosTableRegion")}
-        tabIndex={0}
-      >
-        <table className="min-w-[900px] w-full border-collapse text-sm">
-          <caption className="sr-only">{t("combosTableCaption")}</caption>
+      <div role="region" aria-label={t("combosTableRegion")}>
+        <Table
+          scrollbarLabel={t("combosTableRegion")}
+          containerClassName="rounded-none border-0"
+          className="min-w-[900px]"
+        >
+          <TableCaption className="sr-only">{t("combosTableCaption")}</TableCaption>
           <ComboCatalogTableHead
             sortField={sortField}
             sortDirection={sortDirection}
@@ -291,7 +292,7 @@ export default function ComboCatalogTable({
             someOnPageSelected={someOnPageSelected}
             onToggleSelectAll={onToggleSelectAll}
           />
-          <tbody className="divide-y divide-border">
+          <TableBody>
             {rows.map((combo) => (
               <ComboCatalogTableRow
                 key={combo.id}
@@ -300,12 +301,13 @@ export default function ComboCatalogTable({
                 testResults={testResults}
                 activeTestingKeys={activeTestingKeys}
                 onToggleSelect={onToggleSelect}
+                renderKeyAccess={renderKeyAccess}
                 onTestCombo={onTestCombo}
                 bulkRunning={bulkRunning}
               />
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <CatalogTableFooter page={page} pageCount={pageCount} onPrevious={onPrevious} onNext={onNext}>

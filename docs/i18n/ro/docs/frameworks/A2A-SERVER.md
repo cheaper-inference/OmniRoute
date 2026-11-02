@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Pentru `smart-routing`, `metadata.combo` suprascrie în mod explicit
+`metadata.model` pentru cererea către gateway; acesta este trimis drept câmpul `model` real,
+nu drept un câmp JSON `x-combo` ignorat. Autorizarea obișnuită a gateway-ului, bazată pe cheia API și
+specifică fiecărei destinații, se aplică în continuare. Un combo nevalid sau gol este respins.
+
+Rezultatul expune `requested_combo` (intenția apelantului), `dispatched_model`
+(cererea efectivă către gateway), `response_model` (răspunsul gateway-ului) și
+`confirmed_combo`. Ultimul câmp este `null`, cu excepția cazului în care gateway-ul
+identifică în mod explicit un combo. Jurnalele de decizie A2A atribuie execuția numai unui
+combo confirmat, păstrând o cerere neconfirmată drept `requestedCombo`.
+
 **Răspuns:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — Transmitere în flux prin SSE
+### `message/stream` — Streaming SSE
 
-La fel ca `message/send`, dar returnează evenimente trimise de server pentru transmiterea în flux în timp real.
+La fel ca `message/send`, dar returnează evenimente trimise de server pentru streaming în timp real.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Competențe disponibile
+## Abilități disponibile
 
-OmniRoute expune 6 competențe A2A conectate în `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Fiecare modul de competență se află în `src/lib/a2a/skills/`.
+OmniRoute expune 6 abilități A2A conectate în `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Fiecare modul de abilități locuiește în `src/lib/a2a/skills/`.
 
-| Competență                | ID                   | Descriere                                                                                                                                                                            | Etichete                         | Exemple                                           |
-| :------------------------ | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------------ |
-| Rutare inteligentă        | `smart-routing`      | Direcționează un prompt prin furnizorul/combinația optimă, utilizând motorul de combinații și sistemul de evaluare OmniRoute                                                         | rutare, furnizori                | „Rutează acest prompt prin cel mai bun model”     |
-| Gestionarea cotelor       | `quota-management`   | Raportează starea cotei pentru fiecare furnizor și ajută apelanții să decidă când să limiteze traficul/schimbe furnizorul                                                            | cotă, furnizori                  | „Verifică cota pentru anthropic”                  |
-| Descoperirea furnizorilor | `provider-discovery` | Listează furnizorii instalați, împreună cu capabilitățile, indicatorii pentru nivelul gratuit și starea OAuth                                                                        | furnizori, descoperire           | „Ce furnizori sunt disponibili?”                  |
-| Analiza costurilor        | `cost-analysis`      | Estimează costul unei solicitări/conversații pe baza catalogului și a utilizării recente                                                                                             | cost, utilizare                  | „Estimează costul acestei conversații”            |
-| Raport de sănătate        | `health-report`      | Agregă starea mecanismului circuit breaker, perioada de așteptare și blocarea pentru fiecare furnizor                                                                                | sănătate, reziliență             | „Arată starea de sănătate a tuturor furnizorilor” |
-| Listarea capabilităților  | `list-capabilities`  | Returnează catalogul complet Agent Skills, cu 45 de intrări (23 API + 21 CLI + 1 configurare), sub forma unui tabel markdown cu URL-uri SKILL.md brute pentru injectarea contextului | catalog, descoperire, competențe | „Listează toate capabilitățile OmniRoute”         |
+| Îndemânare                | ID                   | Descriere                                                                                                                                                                   | Etichete                         | Exemple                                             |
+| :------------------------ | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :-------------------------------------------------- |
+| Rutare inteligentă        | `smart-routing`      | Direcționează un prompt prin provider/combo optimă folosind scorul + al motorului combo al lui OmniRoute                                                                    | rutare, furnizori                | „Dirijați acest prompt prin cel mai bun model”      |
+| Managementul cotelor      | `quota-management`   | Raportează starea cotei pentru fiecare furnizor, îi ajută pe apelanți să decidă când să throttle/switch                                                                     | cotă, furnizori                  | „Verificați cota pentru antropic”                   |
+| Descoperirea furnizorului | `provider-discovery` | Enumeră furnizorii instalați cu capacități, steaguri de nivel gratuit, OAuth                                                                                                | furnizori, descoperire           | „Ce furnizori sunt disponibili?”                    |
+| Analiza costurilor        | `cost-analysis`      | Estimează costul unui request/conversation având în vedere utilizarea recentă a catalogului +                                                                               | cost, utilizare                  | „Cost estimat pentru această conversație”           |
+| Raport de sănătate        | `health-report`      | Agregă întrerupător, răcire, stare de blocare per furnizor                                                                                                                  | sănătate, rezistență             | „Afișați starea de sănătate a tuturor furnizorilor” |
+| Lista de capabilități     | `list-capabilities`  | Returnează întregul catalog de abilități de agent cu 45 de intrări (23 API + 21 CLI + 1 config) ca un tabel de reducere cu SKILL.md URLs brut pentru injectarea contextului | catalog, descoperire, aptitudini | „Enumeră toate capabilitățile OmniRoute ”           |
 
-> Fișa agentului trebuie menținută sincronizată cu catalogul activ de 374 de furnizori; numărul furnizorilor și metadatele privind accesul gratuit/fără autentificare provin din registrul de execuție.
+> Cardul de agent trebuie menținut aliniat cu catalogul live 377 de furnizori; Numărul furnizorilor și metadatele free/no-auth provin din registrul de rulare.
 
-### Detalii despre competența `list-capabilities`
+### `list-capabilities` Detaliu abilitate
 
-Competența `list-capabilities` este deosebit de utilă pentru agenții externi care trebuie să descopere ce expune OmniRoute înainte de a trimite apeluri API. Aceasta returnează un artefact structurat sub forma unui tabel markdown:
+Abilitatea `list-capabilities` este deosebit de utilă pentru agenții externi care trebuie să descopere ce expune OmniRoute înainte de a trimite apeluri API. Returnează un artefact structurat de tabel de reducere:
 
 ```
-| ID | Nume | Categorie | Zonă | Endpoint-uri/Comenzi | URL brut |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentificare și sesiuni | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Fiecare rând include coloana `rawUrl`, astfel încât agenții să poată prelua imediat fișierul SKILL.md complet. Câmpul `metadata.totalSkills` reflectă dimensiunea catalogului (45 în prezent). Implementare: `src/lib/a2a/skills/listCapabilities.ts`. Consultați și [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Fiecare rând include coloana `rawUrl`, astfel încât agenții să poată prelua imediat SKILL.md complet. Câmpul `metadata.totalSkills` reflectă dimensiunea catalogului (45 astăzi). Implementare: `src/lib/a2a/skills/listCapabilities.ts`. Vezi și [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -193,17 +197,17 @@ Punctul final JSON-RPC `/a2a` este punctul de intrare A2A canonic. Punctele fina
 
 ---
 
-## Adăugarea unei competențe noi
+## Adăugarea unei abilități noi
 
-1. **Creați fișierul competenței:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Creați fișierul abilității:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportați o funcție asincronă `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Urmați structura competențelor existente, precum `smartRouting.ts`.
+   Exportați o funcție asincronă `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Urmați structura abilităților existente, precum `smartRouting.ts`.
 
-2. **Înregistrați gestionarul:** în `src/lib/a2a/taskExecution.ts`, adăugați o intrare în `A2A_SKILL_HANDLERS`:
+2. **Înregistrați handlerul:** în `src/lib/a2a/taskExecution.ts`, adăugați o intrare în `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...competențe existente
+     // ...abilități existente
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -211,13 +215,13 @@ Punctul final JSON-RPC `/a2a` este punctul de intrare A2A canonic. Punctele fina
    };
    ```
 
-3. **Expuneți în Fișa agentului:** în `src/app/.well-known/agent.json/route.ts`, adăugați la sfârșitul matricei `skills`:
+3. **Expuneți abilitatea în fișa agentului:** în `src/lib/a2a/agentCardMetadata.ts` (partajat de `/.well-known/agent.json` și `/.well-known/agent-card.json`), adăugați următorul obiect în matricea `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Competența dvs.",
-     "description": "Descriere scurtă, axată pe intenție",
+     "name": "Abilitatea dvs.",
+     "description": "Descriere succintă, axată pe intenție",
      "tags": ["rutare", "cotă"],
      "examples": ["Exemplu de invocare în limbaj natural"]
    }
@@ -225,7 +229,7 @@ Punctul final JSON-RPC `/a2a` este punctul de intrare A2A canonic. Punctele fina
 
 4. **Scrieți teste:** `tests/unit/a2a-<your-skill>.test.ts`. Acoperiți scenariul reușit și scenariul de eroare.
 
-5. **Documentați** noua competență în tabelul `Competențe disponibile` din acest fișier.
+5. **Documentați** noua abilitate în tabelul `Available Skills` din acest fișier.
 
 ---
 
@@ -264,7 +268,7 @@ trimisă → în lucru → finalizată
 
 ## Exemple de integrare
 
-### Python (requests)
+### Python (cereri)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (preluare)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

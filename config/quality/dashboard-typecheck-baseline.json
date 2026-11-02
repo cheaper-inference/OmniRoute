@@ -18,22 +18,9 @@
     "TS2503": 3
   },
   "src/app/(dashboard)/dashboard/cache/__tests__/CachePage.test.tsx": {
-    "TS2305": 4,
     "TS1117": 2
   },
-  "src/app/(dashboard)/dashboard/cache/__tests__/CachePerformance.test.tsx": {
-    "TS2305": 2,
-    "TS2322": 3
-  },
-  "src/app/(dashboard)/dashboard/cache/__tests__/CacheTrends.test.tsx": {
-    "TS2305": 2,
-    "TS2322": 8
-  },
-  "src/app/(dashboard)/dashboard/cache/__tests__/IdempotencyLayer.test.tsx": {
-    "TS2305": 2
-  },
   "src/app/(dashboard)/dashboard/cache/__tests__/MemoryCards.test.tsx": {
-    "TS2305": 2,
     "TS2322": 2
   },
   "src/app/(dashboard)/dashboard/cache/components/CachePerformance.tsx": {
@@ -55,7 +42,7 @@
     "TS2339": 5,
     "TS2345": 6,
     "TS2698": 2,
-    "TS2322": 16
+    "TS2322": 15
   },
   "src/app/(dashboard)/dashboard/compression/studio/EncoderComparisonTable.tsx": {
     "TS2322": 2
@@ -72,14 +59,8 @@
   "src/app/(dashboard)/dashboard/costs/quota-share/components/UsageLogCard.tsx": {
     "TS2869": 3
   },
-  "src/app/(dashboard)/dashboard/discovery/__tests__/DiscoveryPageClient.test.tsx": {
-    "TS2305": 3
-  },
   "src/app/(dashboard)/dashboard/endpoint/EndpointPageClient.tsx": {
     "TS2322": 22
-  },
-  "src/app/(dashboard)/dashboard/memory/components/tabs/MemoriesTab.tsx": {
-    "TS2322": 2
   },
   "src/app/(dashboard)/dashboard/omni-skills/OmniSkillsPageClient.tsx": {
     "TS2503": 2
@@ -114,9 +95,6 @@
   "src/app/(dashboard)/dashboard/providers/[id]/__tests__/phase1e.test.tsx": {
     "TS2741": 3
   },
-  "src/app/(dashboard)/dashboard/providers/[id]/components/CompatibleModelsSection.tsx": {
-    "TS2741": 2
-  },
   "src/app/(dashboard)/dashboard/providers/[id]/components/ConnectionsListPanel.tsx": {
     "TS2322": 3
   },
@@ -147,14 +125,8 @@
   "src/app/(dashboard)/dashboard/quota/page.tsx": {
     "TS2339": 5
   },
-  "src/app/(dashboard)/dashboard/runtime/RuntimePageClient.tsx": {
-    "TS2304": 2
-  },
   "src/app/(dashboard)/dashboard/settings/components/AppearanceTab.tsx": {
     "TS2339": 5
-  },
-  "src/app/(dashboard)/dashboard/settings/components/RedisLauncherPanel.tsx": {
-    "TS2345": 14
   },
   "src/app/(dashboard)/dashboard/tools/traffic-inspector/components/CustomHostsManager.tsx": {
     "TS2339": 2
@@ -171,9 +143,6 @@
   "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/index.tsx": {
     "TS2339": 3
   },
-  "src/app/(dashboard)/dashboard/usage/components/ProviderLimits/parts/QuotaEnvGroup.tsx": {
-    "TS2739": 2
-  },
   "src/lib/combos/builderDraft.ts": {
     "TS2741": 2
   },
@@ -181,14 +150,8 @@
     "TS2322": 3,
     "TS2345": 3
   },
-  "src/mitm/inspector/sseMerger.ts": {
-    "TS2352": 2
-  },
-  "src/shared/components/Header.tsx": {
-    "TS2353": 2
-  },
   "src/shared/components/OAuthModal.tsx": {
-    "TS2769": 4,
+    "TS2769": 3,
     "TS2345": 4
   },
   "src/shared/components/SkillsConceptCard.tsx": {
@@ -206,5 +169,6 @@
   "src/shared/schemas/cliCatalog.ts": {
     "TS2554": 3
   },
-  "_relax_velocity_2026_08_30": "per-file TS diagnostic counts raised by 20% (229 → 324); velocity phase, see quality-baseline.json _policy."
+  "_relax_velocity_2026_08_30": "per-file TS diagnostic counts raised by 20% (229 \u2192 324); velocity phase, see quality-baseline.json _policy.",
+  "_ratchet_2026_10_22_kea7886": "Surgical ratchet-down after the UI kit migration (KEA-7886, Task 42): (file, code) pairs now at 0 removed; the others set to min(baseline, ceil(live * 1.2)) so the velocity-phase 20% headroom is kept. Live 194; sum of counts 322 -> 270 (16 pairs)."
 }

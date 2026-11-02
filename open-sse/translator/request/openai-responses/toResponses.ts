@@ -15,6 +15,7 @@ import { chatStrictForResponses } from "../../helpers/toolStrict.ts";
 import {
   JsonRecord,
   RESPONSES_STORE_MARKER,
+  REASONING_SUMMARY_OPT_OUT_MARKER,
   toRecord,
   toArray,
   toString,
@@ -33,6 +34,18 @@ import {
 // explicit `reasoning` object from a Responses-shaped client is preserved as-is.
 const DEFAULT_RESPONSES_REASONING_SUMMARY = "auto";
 const RESPONSES_REASONING_ENCRYPTED_CONTENT_INCLUDE = "reasoning.encrypted_content";
+
+// Preserve the client's effort-only request shape for the listed model families
+// during Chat-to-Responses translation (optional `codex/` or `cx/` routing prefix,
+// optional effort suffix). Do not add a default summary or encrypted-content
+// include on this path. This compatibility policy makes no claim about the cause
+// or resolution of upstream safety rejections.
+const CODEX_MODEL_PATTERN =
+  /^(?:(?:codex|cx)\/)?(?:gpt-6(?:\.1)?-(?:astra|sol|luna)|gpt-5\.6-(?:sol|terra|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/;
+function isCodexModel(model: unknown): boolean {
+  if (typeof model !== "string") return false;
+  return CODEX_MODEL_PATTERN.test(model.trim().toLowerCase());
+}
 
 // Chat Completions JSON `response_format` → Responses API `text.format`.
 // Merges into any existing `result.text` (e.g. verbosity) so structured-output schemas from
@@ -537,9 +550,20 @@ export function openaiToOpenAIResponsesRequest(
     const effort = normalizeResponsesReasoningEffort(root.reasoning_effort, model ?? root.model);
     if (effort && effort !== "none") {
       // Effort-only chat request: default a reasoning summary so the upstream
-      // streams thinking back (see the constant's note above).
-      result.reasoning = { effort, summary: DEFAULT_RESPONSES_REASONING_SUMMARY };
-      defaultedReasoningSummary = true;
+      // streams thinking back (see the constant's note above). For Codex-family
+      // models, preserve the effort-only request shape rather
+      // than adding an inferred summary and encrypted-content include. This
+      // compatibility path applies only to Chat-to-Responses translation.
+      if (isCodexModel(model ?? root.model)) {
+        result.reasoning = { effort };
+        // Tell the Codex executor not to re-add the defaults on the wire. Native
+        // Responses clients never carry this marker, so they keep their
+        // encrypted-reasoning continuity.
+        result[REASONING_SUMMARY_OPT_OUT_MARKER] = true;
+      } else {
+        result.reasoning = { effort, summary: DEFAULT_RESPONSES_REASONING_SUMMARY };
+        defaultedReasoningSummary = true;
+      }
     } else if (effort) {
       result.reasoning = { effort };
     }
