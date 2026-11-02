@@ -15,8 +15,8 @@
  * connection's burst cannot starve others (#9654).
  */
 
-import { getCachedSettings } from "../../lib/db/readCache";
-import { getConfiguredBodySizeLimitBytes } from "./bodySizeGuard";
+import { getCachedBodySizeSettings } from "../../lib/db/readCache";
+import { getSavedBodySizeLimitBytes } from "./bodySizeGuard";
 import { createLogger } from "../utils/logger";
 import { DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS } from "../../lib/resilience/settings";
 import v8 from "node:v8";
@@ -61,6 +61,17 @@ function parseNonNegativeInt(value: string | undefined, fallback: number): numbe
 export const CHAT_LARGE_BODY_BYTES = parsePositiveInt(
   process.env.OMNIROUTE_CHAT_LARGE_BODY_BYTES,
   256 * 1024
+);
+
+export const CHAT_HARD_MAX_BODY_BYTES = parsePositiveInt(
+  process.env.OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES,
+  50 * 1024 * 1024
+);
+
+/** Set only when the operator chose a chat ceiling; it then caps a saved limit as well. */
+const CHAT_EXPLICIT_HARD_MAX_BODY_BYTES = parsePositiveInt(
+  process.env.OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES,
+  Number.POSITIVE_INFINITY
 );
 
 export const CHAT_MAX_HEAVY_IN_FLIGHT = parsePositiveInt(
@@ -1023,15 +1034,19 @@ function rebuildRequest(request: Request, body: Uint8Array): Request {
   } as RequestInit & { duplex: "half" });
 }
 
+/**
+ * The saved `maxBodySizeMb` when there is one, the same limit the header guard uses for these
+ * routes; otherwise the chat default. A read failure also falls back to that default.
+ */
 async function getChatBodyLimitBytes(): Promise<number> {
   try {
-    return getConfiguredBodySizeLimitBytes(await getCachedSettings());
+    const saved = getSavedBodySizeLimitBytes(await getCachedBodySizeSettings());
+    return saved === null
+      ? CHAT_HARD_MAX_BODY_BYTES
+      : Math.min(saved, CHAT_EXPLICIT_HARD_MAX_BODY_BYTES);
   } catch (error) {
-    shedLog.warn(
-      { err: error },
-      "Failed to load request body limit; using the environment default"
-    );
-    return getConfiguredBodySizeLimitBytes();
+    shedLog.warn({ err: error }, "Failed to load request body limit; using the chat default");
+    return CHAT_HARD_MAX_BODY_BYTES;
   }
 }
 
@@ -1074,8 +1089,7 @@ export async function admitChatRequest(
   const controller =
     options.controller ?? perConnectionAdmissionController.getController(sessionId);
   const largeBodyBytes = options.largeBodyBytes ?? CHAT_LARGE_BODY_BYTES;
-  // Snapshot the same saved limit used by the header guard, once per request.
-  // Legacy OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES is not a second, hidden ceiling.
+  // Snapshot the limit once per request: a body in flight keeps the limit it started under.
   const hardMaxBytes = options.hardMaxBytes ?? (await getChatBodyLimitBytes());
   const queueMs = options.queueMs ?? 0;
   const internalBypass = isInternalAdmissionBypass(request);

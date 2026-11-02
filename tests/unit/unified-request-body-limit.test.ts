@@ -3,19 +3,19 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import zlib from "node:zlib";
 
 const MIB = 1024 * 1024;
 const directory = fs.mkdtempSync(path.join(os.tmpdir(), "omni-unified-body-limit-"));
 process.env.DATA_DIR = directory;
 process.env.MAX_BODY_SIZE_BYTES = String(3 * MIB);
-// A stale deployment override must not remain a second, hidden ceiling.
-process.env.OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES = "1";
+delete process.env.OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES;
 process.env.APP_LOG_TO_FILE = "false";
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 
 const core = await import("../../src/lib/db/core.ts");
 const { getSettings, updateSettings } = await import("../../src/lib/db/settings.ts");
-const { getCachedSettings } = await import("../../src/lib/db/readCache.ts");
+const { getCachedBodySizeSettings } = await import("../../src/lib/db/readCache.ts");
 const { checkBodySize, getBodySizeLimit } =
   await import("../../src/shared/middleware/bodySizeGuard.ts");
 const { admitChatRequest, ChatAdmissionController, resolveSelfLoopBearer } =
@@ -84,21 +84,36 @@ test.after(async () => {
   fs.rmSync(directory, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
-test("canonical env seeds the visible setting and both checks; stale chat env is ignored", async () => {
-  assert.equal((await getSettings()).maxBodySizeMb, 3);
-  const incoming = request("/api/v1/responses", 2, 3 * MIB + 1);
+// These two run first, before any test saves a limit: nothing here can delete a saved setting.
+test("without a saved limit the LLM routes keep 50 MiB, whatever the env default says", async () => {
+  assert.equal((await getSettings()).maxBodySizeMb, 3, "the env still seeds the visible setting");
+  const settings = await getCachedBodySizeSettings();
+  assert.equal(settings.savedMaxBodySizeMb, null, "the seeded default does not count as saved");
+  assert.equal(getBodySizeLimit("/api/v1/responses", settings), 50 * MIB);
+  assert.equal(getBodySizeLimit("/api/v1/chat/completions", settings), 50 * MIB);
+  assert.equal(getBodySizeLimit("/api/v1/messages", settings), 3 * MIB);
+
+  const aboveEnvDefault = 3 * MIB + 1;
+  const accepted = await admit(
+    request("/api/v1/responses", aboveEnvDefault, aboveEnvDefault).value
+  );
+  assert.equal(accepted.admit, true);
+});
+
+test("without a saved limit chat admission still rejects above 50 MiB", async () => {
+  const incoming = request("/api/v1/responses", 2, 50 * MIB + 1);
   const result = await admit(incoming.value);
   assert.equal(result.admit, false);
   if (result.admit) return;
   assert.equal(result.response.status, 413);
-  assert.match((await result.response.json()).error.message, /3 MB/);
+  assert.match((await result.response.json()).error.message, /50 MB/);
   assert.equal(incoming.pulls(), 0, "oversized declaration is rejected before ingestion");
 });
 
 for (const pathname of paths) {
   test(`${pathname}: a saved limit has no route floor or independent chat ceiling`, async () => {
     await updateSettings({ maxBodySizeMb: 1 });
-    const limit = getBodySizeLimit(pathname, await getCachedSettings());
+    const limit = getBodySizeLimit(pathname, await getCachedBodySizeSettings());
     assert.equal(limit, MIB);
     const incoming = request(pathname, 2, MIB + 1);
     assert.equal(checkBodySize(incoming.value, limit)?.status, 413);
@@ -142,7 +157,7 @@ test("exact saved boundary is admitted, including chunked bodies and self-loops"
 test("saving a larger limit immediately admits a body above the former 50 MiB ceiling", async () => {
   await updateSettings({ maxBodySizeMb: 100 });
   const bytes = 51 * MIB;
-  const limit = getBodySizeLimit("/api/v1/responses", await getCachedSettings());
+  const limit = getBodySizeLimit("/api/v1/responses", await getCachedBodySizeSettings());
   assert.equal(limit, 100 * MIB);
   const incoming = request("/api/v1/responses", bytes, bytes);
   assert.equal(checkBodySize(incoming.value, limit), null);
@@ -202,4 +217,20 @@ test("an admitted stream keeps its limit snapshot while subsequent requests see 
   stream.close();
   assert.equal((await pending).admit, true);
   assert.equal((await admit(request("/v1/responses", MIB + 1).value)).admit, false);
+});
+
+test("a compressed body expanding past the saved limit gets a 413", async () => {
+  await updateSettings({ maxBodySizeMb: 1 });
+  const compressed = zlib.gzipSync(Buffer.alloc(MIB + 1, 120));
+  assert.ok(compressed.byteLength < MIB, "the compressed bytes alone must fit the limit");
+  const incoming = new Request("http://localhost/v1/responses", {
+    method: "POST",
+    headers: { "content-type": "application/json", "content-encoding": "gzip" },
+    body: compressed,
+  });
+  const result = await admit(incoming);
+  assert.equal(result.admit, false);
+  if (result.admit) return;
+  assert.equal(result.response.status, 413);
+  assert.match((await result.response.json()).error.message, /1 MB/);
 });
