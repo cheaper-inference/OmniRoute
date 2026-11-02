@@ -14344,6 +14344,10 @@
         "label": "Combo: Kwụsị n'Ajụjụ Content-Policy",
         "description": "Mgbe ebumnuche combo zaghachiri site n'ajụjụ doro anya nke content-policy (koodu ma ọ bụ ụdị cyber_policy / content_policy_violation), kwụsị combo ahụ ma weghachi ajụjụ ahụ ọbụlagodi mgbe ebumnuche ndị fọdụrụ bụ ụdị dị iche iche, kama ịga n'ihu na ebumnuche na-esonụ. Agbanyụrụ na ndabara: ajụjụ ahụ anaghị eme ka akaụntụ dajụọ ma ọ bụ kpalite provider breaker, combo na-agakwa n'ihu na ebumnuche ya na-esonụ kpọmkwem dịka ọ dị na mbụ."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Ngwakọta: Ọkụkụ-oké Breaker",
+        "description": "Gbanye ihe mgbaru ọsọ nke onye na-eweta ya tupu izipu (ihe kpatara crash_storm) ozugbo otu ọdịda nke onwe ya (mmebi mmebi mpaghara ma ọ bụ nkwekọrịta mmegide, 5xx) na-emegharị ya n'ime windo na-amị amị: OMNIROUTE_CRASH_STORM_THRESHOLD (10) na OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Ọ dịghị mgbe ọ na-ede oyi ma ọ bụ mkpọchi, na ezigbo 5xx dị elu anaghị enye ya nri. Gbanyụọ na ndabara: ọ nweghị ihe edekọ ma ọ nweghị ebumnuche awụpụ."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Nnwagharị Cooldown: Mafere Ọjụjụ 403/410",
         "description": "Mgbe akaụntụ niile nọ na cooldown ma cooldown nke na-ebu ụzọ gwụ bụ nke 403 (ajụrụ ohere) ma ọ bụ 410 (adịkwaghị) kpatara, weghachi ọjụjụ ahụ ozugbo kama ichere ka cooldown ahụ gwụ ma zigharịa arịrịọ ahụ; a na-echekwa agentrouter connection-scoped quota 403 na-emeghachi ọhụrụ nwere errorCode 429 ka o wee nọgide na-enwe ike ịnwagharị ya. Agbanyụrụ na ndabara: naanị 401 na-amafe nchere ahụ, a na-echekwa ọjụjụ ọ bụla nwere ọnọdụ o ji bịa."

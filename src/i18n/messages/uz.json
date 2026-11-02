@@ -14344,6 +14344,10 @@
         "label": "Kombinatsiya: Kontent Siyosati Rad Etishda To‘xtash",
         "description": "Kombinatsiya maqsadi aniq kontent siyosati rad etish bilan javob qaytarganda (kod yoki tur cyber_policy / content_policy_violation), kombinatsiyani to‘xtating va bu rad etishni qaytaring, garchi qolgan maqsadlar boshqa modellarda bo‘lsa ham, keyingi maqsadga o‘tmasdan. Standart holatda o‘chiq: bu rad etish hech qachon hisobni sovuq tushirmaydi yoki provayder circuit breaker’ini ishlamasdan qoldirmaydi, va kombinatsiya xuddi avvalgidec keyingi maqsadga o‘tadi."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombo: Crash-Storm Breaker",
+        "description": "Bir xil oʻz-oʻzidan yuzaga kelgan nosozlik (mahalliy ijro xatosi yoki ijrochi shartnomasining buzilishi, 5xx) siljish oynasi ichida takrorlanganda, joʻnatishdan oldin provayderning kombinatsiyalangan maqsadlarini oʻtkazib yuboring: OMNIROUTE_CRASH_STORM_THRESHOLD (10) va OMNIROUTE_CRASH_STORM_WINDOW_MS (5 daqiqa). U hech qachon sovutish yoki qulflashni yozmaydi va haqiqiy yuqori oqim 5xx uni hech qachon oziqlantirmaydi. Sukut bo'yicha o'chirilgan: hech narsa yozilmaydi va hech qanday maqsad o'tkazib yuborilmaydi."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Poxatona takrorlash: 403/410 radlarini oʻtkazib yuborish",
         "description": "Agar barcha hisoblar poxatona holatida boʻlsa va birinchi tugaydigan poxatona 403 (kirish rad etildi) yoki 410 (yoʻq qilindi) tufayli yuzaga kelgan boʻlsa, soʻrovni kutib qayta yuborishning oʻrniga shu radni darhol qaytariladi; yangilanayotgan agentrouter ulanish-scopeli kvota 403 endi errorCode 429 bilan saqlanadi, shunda u qayta urinish uchun saqlanib qoladi. Standart holdan o'chirilgan: faqat 401 kutishni oʻtkazib yuboradi va har bir rad kelgan holat kodida saqlanadi."

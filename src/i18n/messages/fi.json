@@ -14344,6 +14344,10 @@
         "label": "Combo: Pysäytä sisältökäytännön hylkäykseen",
         "description": "Kun combo-kohde vastaa täsmällisellä sisältökäytännön hylkäyksellä (koodi tai tyyppi cyber_policy / content_policy_violation), pysäytä combo ja palauta kyseinen hylkäys myös silloin, kun jäljellä olevat kohteet ovat eri malleja, sen sijaan että siirryttäisiin seuraavaan kohteeseen. Oletusarvoisesti poissa käytöstä: hylkäys ei koskaan aseta tiliä jäähdytystilaan tai laukaise palveluntarjoajan katkaisinta, ja combo siirtyy seuraavaan kohteeseensa aivan kuten ennenkin."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Yhdistelmä: Crash-Storm Breaker",
+        "description": "Ohita palveluntarjoajan yhdistelmäkohteet ennen lähettämistä (syy crash_storm), kun sama itse aiheutettu vika (paikallinen suoritusvirhe tai toimeenpanijan sopimusrikkomus, 5xx) toistuu siinä liukuvassa ikkunassa: OMNIROUTE_CRASH_STORM_THRESHOLD (10) ja OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Se ei koskaan kirjoita jäähdytystä tai lukitusta, ja aito upstream 5xx ei koskaan syötä sitä. Oletusarvoisesti pois päältä: mitään ei tallenneta eikä kohdetta ohiteta."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jäähtymisajan uudelleenyritys: Ohita 403/410-hylkäykset",
         "description": "Kun kaikki tilit ovat jäähtymässä ja ensimmäisenä päättyvän jäähtymisajan aiheutti 403 (pääsy evätty) tai 410 (poistunut), palauta kyseinen hylkäys heti sen sijaan, että odotettaisiin jäähtymisajan päättymistä ja lähetettäisiin pyyntö uudelleen; uusiutuva agentrouter-yhteyskohtainen kiintiö-403 tallennetaan tällöin koodilla errorCode 429, jotta se pysyy uudelleen yritettävissä. Oletuksena pois käytöstä: vain 401 ohittaa odotuksen, ja jokainen hylkäys tallennetaan sillä tilalla, jolla se saapui."

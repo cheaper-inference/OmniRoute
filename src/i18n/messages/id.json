@@ -14344,6 +14344,10 @@
         "label": "Combo: Berhenti saat Penolakan Kebijakan Konten",
         "description": "Ketika target combo merespons dengan penolakan kebijakan konten yang persis (kode atau jenis cyber_policy / content_policy_violation), hentikan combo dan kembalikan penolakan tersebut meskipun target yang tersisa adalah model yang berbeda, alih-alih beralih ke target berikutnya. Nonaktif secara default: penolakan tersebut tidak pernah menerapkan cooldown pada akun atau memicu breaker penyedia, dan combo beralih ke target berikutnya persis seperti sebelumnya."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombo: Pemecah Badai",
+        "description": "Lewati target kombo penyedia sebelum pengiriman (alasan crash_storm) setelah kegagalan yang disebabkan oleh diri sendiri (kesalahan eksekusi lokal atau pelanggaran kontrak pelaksana, 5xx) terulang di dalam jendela geser: OMNIROUTE_CRASH_STORM_THRESHOLD (10) dan OMNIROUTE_CRASH_STORM_WINDOW_MS (5 menit). Itu tidak pernah menulis cooldown atau kunci, dan 5xx upstream asli tidak pernah memasukkannya. Nonaktif secara default: tidak ada yang direkam dan tidak ada target yang dilewati."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Coba Ulang Cooldown: Lewati Penolakan 403/410",
         "description": "Ketika semua akun sedang dalam masa cooldown dan cooldown yang selesai lebih awal disebabkan oleh 403 (akses ditolak) atau 410 (hilang), segera kembalikan penolakan tersebut alih-alih menunggu masa cooldown selesai dan mengirim ulang permintaan; kuota 403 connection-scoped agentrouter yang diperbarui kemudian disimpan dengan errorCode 429 agar tetap dapat dicoba ulang. Nonaktif secara default: hanya 401 yang melewati waktu tunggu, dan setiap penolakan disimpan dengan status saat diterima."

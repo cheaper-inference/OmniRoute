@@ -14344,6 +14344,10 @@
         "label": "Combo: Oprire la refuzul politicii de conținut",
         "description": "Atunci când o țintă din combo răspunde cu un refuz exact legat de politica de conținut (cod sau tip cyber_policy / content_policy_violation), oprește combo-ul și returnează acel refuz chiar și atunci când țintele rămase sunt modele diferite, în loc să avansezi la următoarea țintă. Dezactivat în mod implicit: refuzul nu plasează niciodată contul în cooldown și nu declanșează disjunctorul furnizorului, iar combo-ul avansează la următoarea sa țintă exact ca înainte."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Omiteți țintele combinate ale unui furnizor înainte de expediere (motiv crash_storm) odată ce același eșec auto-provocat (eroare de execuție locală sau încălcare a contractului de executant, 5xx) se repetă pe el în interiorul unei ferestre glisante: OMNIROUTE_CRASH_STORM_THRESHOLD (10) și OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nu scrie niciodată un cooldown sau o blocare, iar un 5xx autentic din amonte nu îl alimentează niciodată. Dezactivat în mod implicit: nimic nu este înregistrat și nicio țintă nu este omisă."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Reîncercare cooldown: Omite refuzurile 403/410",
         "description": "Când toate conturile sunt în cooldown, iar cooldown-ul care se termină primul a fost cauzat de un 403 (acces refuzat) sau un 410 (dispărut), returnează imediat acel refuz în loc să aștepți expirarea cooldown-ului și să retrimiți cererea; un 403 de cotă la nivel de conexiune agentrouter care se reînnoiește este apoi salvat cu errorCode 429, astfel încât să rămână reîncercabil. Dezactivat în mod prestabilit: doar un 401 omite așteptarea, iar fiecare refuz este salvat cu statusul cu care a sosit."

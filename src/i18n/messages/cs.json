@@ -14421,6 +14421,10 @@
         "label": "Kombo: Zastavit při odmítnutí z důvodu zásad obsahu",
         "description": "Pokud cíl komba odpoví přesným odmítnutím z důvodu zásad obsahu (kód nebo typ cyber_policy / content_policy_violation), zastavit kombo a vrátit toto odmítnutí i v případě, že zbývající cíle jsou jiné modely, namísto přechodu na další cíl. Ve výchozím stavu vypnuto: odmítnutí nikdy neochladí účet ani nespustí jistič poskytovatele a kombo přejde na svůj další cíl přesně jako dříve."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombinace: Crash-Storm Breaker",
+        "description": "Přeskočte kombinované cíle poskytovatele před odesláním (reason crash_storm), jakmile se stejné selhání, které si sami způsobili (chyba místního provádění nebo porušení smlouvy exekutora, 5xx), zopakuje v posuvném okně: OMNIROUTE_CRASH_STORM_THRESHOLD (10) a OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nikdy nezapíše cooldown nebo zámek a originální upstream 5xx ho nikdy nenapáje. Ve výchozím nastavení vypnuto: nic se nezaznamená a žádný cíl se nepřeskočí."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Opakování při cooldownu: Přeskočit odmítnutí 403/410",
         "description": "Pokud jsou všechny účty v cooldownu a cooldown, který skončí jako první, byl způsoben kódem 403 (přístup odepřen) nebo 410 (již není k dispozici), vrátí se toto odmítnutí ihned namísto čekání na vypršení cooldownu a opětovného odeslání požadavku; obnovující se kód 403 kvóty na úrovni připojení pro agentrouter je poté uložen s errorCode 429, aby bylo možné pokus opakovat. Ve výchozím nastavení vypnuto: čekání přeskočí pouze kód 401 a každé odmítnutí je uloženo se stavem, se kterým přišlo."

@@ -14344,6 +14344,10 @@
         "label": "Kombinacija: Ustavi se pri zavrnitvi politike vsebine",
         "description": "Ko kombinacijski cilj odgovori s točno zavrnitvijo politike vsebine (koda ali tip cyber_policy / content_policy_violation), ustavi kombinacijo in vrni to zavrnitev, tudi če so preostali cilji različni modeli, namesto napredovanja na naslednji cilj. Privzeto je izklopljeno: zavrnitev nikoli ne ohladi računa ali sproži varnostnega prekinitva ponudnika, kombinacija pa napreduje na svoj naslednji cilj natanko kot prej."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombinacija: Crash-Storm Breaker",
+        "description": "Preskoči kombinirane cilje ponudnika pred pošiljanjem (razlog crash_storm), ko se ista samopovzročena napaka (lokalna napaka pri izvajanju ali kršitev pogodbe izvajalca, 5xx) ponovi na njem znotraj drsnega okna: OMNIROUTE_CRASH_STORM_THRESHOLD (10) in OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nikoli ne zapiše ohlajanja ali zaklepanja in pristen upstream 5xx ga nikoli ne napaja. Privzeto izklopljeno: nič se ne zabeleži in noben cilj ni preskočen."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovna poskusa po čakanju: Preskoči zavrge 403/410",
         "description": "Ko so vse račune v stanju čakanja in je najprej končano čakanje povzročilo 403 (dostop zavrnjen) ali 410 (odstranjeno), takoj vrnite to zavrnitev namesto da bi čakali, da se čakanje konča, in ponovno poslali zahtevo; obnavljajoča se povezava agentroutera z omejeno kvoto 403 se nato shranjuje s kodo napake 429, da ostane ponovno poskusna. Privzeto izklopljeno: le 401 preskoči čakanje, vsaka zavrnitev pa se shrani s stanjem, s katerim je prišla."

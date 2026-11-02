@@ -14344,6 +14344,10 @@
         "label": "Combo: sustabdyti gavus turinio politikos atmetimą",
         "description": "Kai „combo“ taikinys atsako tiksliu turinio politikos atmetimu (kodas arba tipas cyber_policy / content_policy_violation), sustabdyti „combo“ ir grąžinti tą atmetimą net tada, kai likę taikiniai yra kitokie modeliai, užuot pereinant prie kito taikinio. Pagal numatytuosius nustatymus išjungta: atmetimas niekada neatvėsina paskyros ir nesuaktyvina teikėjo grandinės pertraukiklio, o „combo“ pereina prie kito taikinio lygiai taip pat, kaip anksčiau."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Derinys: „Crash-Storm Breaker“.",
+        "description": "Prieš išsiuntimą praleiskite tiekėjo kombinuotus tikslus (priežastis „crash_storm“), kai slankiojančiame lange pasikartoja tokia pati savaime sukelta klaida (vietinė vykdymo klaida arba vykdytojo sutarties pažeidimas, 5xx): OMNIROUTE_CRASH_STORM_THRESHOLD (10) ir OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min.). Jis niekada neįrašo atšalimo ar užrakto, o tikras prieš srovę esantis 5xx niekada jo nepadeda. Išjungta pagal numatytuosius nustatymus: niekas neįrašoma ir joks tikslas nepraleidžiamas."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atvėsimo pakartotinis bandymas: praleisti 403/410 atmetimus",
         "description": "Kai visos paskyros yra atvėsimo būsenoje ir anksčiausiai pasibaigiantis atvėsimas kilo dėl 403 (prieiga atmesta) arba 410 (nebeegzistuoja), iš karto grąžinti šį atmetimą, užuot laukus atvėsimo pabaigos ir iš naujo siuntus užklausą; atsinaujinantis agentrouter ryšio aprėpties kvotos 403 atsakymas tuomet išsaugomas su errorCode 429, kad išliktų kartojamas. Pagal numatytuosius nustatymus išjungta: tik 401 praleidžia laukimą, o kiekvienas atmetimas išsaugomas su ta būsena, su kuria buvo gautas."

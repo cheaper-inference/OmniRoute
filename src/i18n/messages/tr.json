@@ -14344,6 +14344,10 @@
         "label": "Kombinasyon: İçerik Politikası Reddinde Dur",
         "description": "Bir kombinasyon hedefi tam bir içerik politikası reddiyle (kod veya tür cyber_policy / content_policy_violation) yanıt verdiğinde, kalan hedefler farklı modeller olsa bile kombinasyonu durdurur ve bu reddi döndürür, bir sonraki hedefe ilerlemek yerine. Varsayılan olarak kapalıdır: bu reddi, hesabı soğutmaz veya sağlayıcı sigortasını tetiklemez; kombinasyon tam olarak önceki gibi bir sonraki hedefine ilerler."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombo: Çarpışma-Fırtına Kırıcı",
+        "description": "Kendi kendine oluşan aynı hata (yerel yürütme hatası veya uygulayıcı sözleşme ihlali, 5xx) kayan bir pencere içinde tekrarlandığında, göndermeden önce sağlayıcının birleşik hedeflerini atlayın (neden kaza_fırtınası): OMNIROUTE_CRASH_STORM_THRESHOLD (10) ve OMNIROUTE_CRASH_STORM_WINDOW_MS (5 dk). Asla bir bekleme süresi veya kilitleme yazmaz ve gerçek bir yukarı akış 5xx onu asla beslemez. Varsayılan olarak kapalı: hiçbir şey kaydedilmez ve hiçbir hedef atlanmaz."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Soğuma Yeniden Denemesi: 403/410 Redlerini Atla",
         "description": "Tüm hesaplar soğuma modundayken ve en kısa sürede bitecek soğumanın bir 403 (erişim reddedildi) veya 410 (kaynak yok) hatasından kaynaklanması durumunda, soğuma süresini bekleyip isteği yeniden göndermek yerine o reddi anında geri döndürün; bu durumda, yenidenlanan agentrouter bağlantı kapsamındaki kota 403 hatası, yeniden denenebilir kalması için errorCode 429 ile kalıcı hale getirilir. Varsayılan olarak kapalıdır: yalnızca 401 bekleme adımını atlar ve her red, geldiği durum koduyla kalıcı hale getirilir."

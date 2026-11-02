@@ -59,7 +59,7 @@ const {
 // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, OpenCode model surface from the
 // published catalog, default off) takes it to 87.
 // UNPRICED_USAGE_BUDGET_POLICY (#14604, explicit enum policy, default fail_closed) to 113.
-const EXPECTED_FEATURE_FLAG_COUNT = 113;
+const EXPECTED_FEATURE_FLAG_COUNT = 114;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
@@ -84,6 +84,7 @@ const EXPECTED_FEATURE_FLAG_COUNT = 113;
 // (#17000, per-window quota policy honours the bounded park, default off) to 88.
 // default off) to 87; IMAGE_GENERATION_LONG_JOBS
 // (#16260, connection image timeout + caller cancellation + Playground SSE, default off) to 88.
+// CRASH_STORM_BREAKER_ENABLED (#18448, default off) takes it to 114.
 
 // ──────────────────────────────────────────────────────
 // Test group 1 — Flag definitions registry

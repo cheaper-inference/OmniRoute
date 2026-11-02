@@ -14344,6 +14344,10 @@
         "label": "Combo : arrêt sur refus de politique de contenu",
         "description": "Lorsqu'une cible de combo répond par un refus exact lié à la politique de contenu (code ou type cyber_policy / content_policy_violation), arrêter le combo et renvoyer ce refus même lorsque les cibles restantes sont des modèles différents, au lieu de passer à la cible suivante. Désactivé par défaut : le refus ne met jamais le compte en période de refroidissement et ne déclenche pas le disjoncteur du fournisseur, et le combo passe à sa cible suivante exactement comme avant."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo : Brise-tempête-crash",
+        "description": "Ignorez les cibles combinées d'un fournisseur avant l'envoi (raison crash_storm) une fois que le même échec auto-infligé (erreur d'exécution locale ou violation du contrat de l'exécuteur, 5xx) se répète dans une fenêtre glissante : OMNIROUTE_CRASH_STORM_THRESHOLD (10) et OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Il n'écrit jamais de temps de recharge ou de verrouillage, et un véritable 5xx en amont ne l'alimente jamais. Désactivé par défaut : rien n'est enregistré et aucune cible n'est ignorée."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Réessai lors du cooldown : ignorer les refus 403/410",
         "description": "Lorsque tous les comptes sont en cooldown et que le cooldown qui se termine en premier a été causé par une erreur 403 (accès refusé) ou une erreur 410 (disparu), renvoie immédiatement ce refus au lieu d'attendre la fin du cooldown et de renvoyer la requête ; une erreur 403 de quota agentrouter à portée de connexion en cours de renouvellement est alors persistée avec errorCode 429 afin de rester réessayable. Désactivé par défaut : seule une erreur 401 évite l'attente, et chaque refus est persisté avec le statut avec lequel il est arrivé."

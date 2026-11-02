@@ -14344,6 +14344,10 @@
         "label": "Combo: apstāties satura politikas atteikuma gadījumā",
         "description": "Kad combo mērķis atbild ar precīzu satura politikas atteikumu (kods vai tips cyber_policy / content_policy_violation), apturēt combo un atgriezt šo atteikumu pat tad, ja atlikušie mērķi ir citi modeļi, nevis pāriet pie nākamā mērķa. Pēc noklusējuma izslēgts: atteikums nekad neatvēsina kontu un neiedarbina pakalpojumu sniedzēja slēdzi, un combo pāriet pie nākamā mērķa tieši tāpat kā iepriekš."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombinācija: Crash-Storm Breaker",
+        "description": "Izlaidiet nodrošinātāja kombinētos mērķus pirms nosūtīšanas (avārijas_vētra iemesls), ja bīdāmā logā atkārtojas tā pati pašradīta kļūme (lokāla izpildes kļūda vai izpildītāja līguma pārkāpums, 5xx): OMNIROUTE_CRASH_STORM_THRESHOLD (10) un OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Tas nekad neieraksta atdzišanu vai bloķēšanu, un īsts augšējais 5xx nekad to nebaro. Pēc noklusējuma izslēgts: nekas netiek ierakstīts un neviens mērķis netiek izlaists."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atdzišanas atkārtošana: izlaist 403/410 atteikumus",
         "description": "Kad visiem kontiem ir atdzišanas periods un atdzišanu, kas beidzas vispirms, izraisīja 403 (piekļuve atteikta) vai 410 (vairs nepastāv), nekavējoties atgriezt šo atteikumu, nevis nogaidīt atdzišanas beigas un atkārtoti nosūtīt pieprasījumu; atjaunojošs agentrouter savienojuma tvēruma kvotas 403 atteikums tad tiek saglabāts ar errorCode 429, lai tas paliktu atkārtojams. Pēc noklusējuma izslēgts: tikai 401 izlaiž gaidīšanu, un katrs atteikums tiek saglabāts ar statusu, ar kādu tas tika saņemts."

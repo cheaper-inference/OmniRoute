@@ -14421,6 +14421,10 @@
         "label": "Combo፦ የይዘት ፖሊሲ እምቢታ ሲያጋጥም አቁም",
         "description": "አንድ የ Combo ዒላማ በትክክለኛ የይዘት ፖሊሲ እምቢታ (ኮድ ወይም ዓይነት cyber_policy / content_policy_violation) ምላሽ ሲሰጥ፣ ወደ ቀጣዩ ዒላማ ከማለፍ ይልቅ የቀሩት ዒላማዎች የተለያዩ ሞዴሎች ቢሆኑም እንኳ Comboውን ያቁሙ እና ያንን እምቢታ ይመልሱ። በነባሪነት ጠፍቷል፦ እምቢታው መለያውን በፍጹም cooldown ውስጥ አያስገባም ወይም provider breakerን አያስነሳም፣ እንዲሁም Comboው ልክ እንደቀድሞው ወደ ቀጣዩ ዒላማው ያልፋል።"
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "ጥምር፡ የብልሽት-አውሎ ነፋስ ሰባሪ",
+        "description": "ከመላኩ በፊት የአቅራቢውን ጥምር ኢላማዎች ዝለል (ምክንያት የብልሽት_አውሎ ነፋስ) አንድ ጊዜ ተመሳሳይ እራስን ያደረሰ ውድቀት (አካባቢያዊ የማስፈጸሚያ ስህተት ወይም የአስፈፃሚ ውል ጥሰት፣ 5xx) በተንሸራታች መስኮት ውስጥ ይደገማል OMNIROUTE_CRASH_STORM_THRESHOLD (10) እና OMNIROUTE_CRASH_STORM_WINDOW_MS (5 ደቂቃ)። ቀዝቀዝ ወይም መቆለፊያን ፈጽሞ አይጽፍም፣ እና እውነተኛ የላይ ዥረት 5xx በጭራሽ አይመገብም። በነባሪ ጠፍቷል፡ ምንም አልተመዘገበም እና ምንም ዒላማ አልተዘለለም።"
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "የ Cooldown ዳግም ሙከራ፦ የ 403/410 እምቢታዎችን ዝለል",
         "description": "ሁሉም መለያዎች በ cooldown ላይ ሲሆኑ እና መጀመሪያ የሚያበቃው cooldown በ 403 (access refused) ወይም በ 410 (gone) የተከሰተ ከሆነ፣ የ cooldown ጊዜ እስኪያበቃ ከመጠበቅ እና ጥያቄውን በድጋሚ ከመላክ ይልቅ ያንን እምቢታ ወዲያውኑ ይመልሱ፤ የሚታደስ agentrouter connection-scoped quota 403 ዳግም ሊሞከር የሚችል ሆኖ እንዲቀጥል ከ errorCode 429 ጋር ይቀመጣል። በነባሪነት ጠፍቷል፦ ጥበቃውን የሚዘለው 401 ብቻ ነው፣ እንዲሁም እያንዳንዱ እምቢታ በመጣበት status ይቀመጣል።"

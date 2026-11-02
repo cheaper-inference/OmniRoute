@@ -26,11 +26,15 @@ import { getCachedProviderConnectionById } from "../../../src/lib/db/readCache.t
 import { evaluateCliproxyPreflightGate } from "../../../src/lib/services/cliproxyManagementPreflight.ts";
 import { lookupPositiveCap } from "./concurrencyCaps.ts";
 import { recordComboDecision } from "./decisionTrace.ts";
+import { isCrashStorming } from "../crashStormBreaker.ts";
 import { recordPersistedSkipBypass } from "../comboMetrics.ts";
 import { getExhaustedTargetSkipReason } from "./comboPredicates.ts";
 import { resolveAndRecordPersistedCooldown } from "./persistedConnectionCooldown.ts";
 import { resolveQuotaExhaustionCutoffForTarget } from "./quotaExhaustionCutoff.ts";
-import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.ts";
+import {
+  isCrashStormBreakerEnabled,
+  type ProtectedPriorityStopCause,
+} from "./protectedPriorityStopStatus.ts";
 import type { AttemptLoopDeps, AttemptLoopState, GateDecision } from "./attemptLoopTypes.ts";
 import { modelAvailabilitySkipReason, type ResolvedComboTarget } from "./types.ts";
 import { recordSkippedConnectionCooldown } from "./skippedConnectionCooldown.ts";
@@ -163,6 +167,32 @@ export async function evaluateExecuteTargetGates(opts: {
         `Provider ${provider} circuit breaker is open`,
         "circuit_open"
       ),
+    };
+  }
+
+  // Crash-storm gate (opt-in, CRASH_STORM_BREAKER_ENABLED): the breakers above
+  // deliberately ignore local execution errors and client aborts so a gateway-side
+  // fault never blacklists an innocent upstream — which means a self-inflicted
+  // failure storm has no backpressure anywhere. When the same provider hits the same
+  // normalized failure signature often enough inside the storm window, skip its
+  // targets here (healthy providers unaffected; decay self-heals). Dispatch-skip
+  // only: never writes a provider cooldown or lock, so upstream reputation
+  // stays untouched by design.
+  if (isCrashStormBreakerEnabled() && isCrashStorming(provider)) {
+    deps.log.info(
+      "COMBO",
+      `Skipping ${modelStr} — crash storm on ${provider} (same normalized failure signature repeated within the storm window)`
+    );
+    recordComboDecision(deps.traceInvocationId, {
+      step: target.executionKey,
+      target: modelStr,
+      decision: "skipped_before_dispatch",
+      reason: "crash_storm",
+    });
+    bumpFallback();
+    return {
+      kind: "skip",
+      result: stopProtectedPriorityTarget(`Provider ${provider} is in a crash storm`),
     };
   }
 

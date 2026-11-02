@@ -14421,6 +14421,10 @@
         "label": "Combo: Zaustavljanje pri odbijanju zbog politike sadržaja",
         "description": "Kada cilj komboa odgovori tačnim odbijanjem zbog politike sadržaja (kod ili tip cyber_policy / content_policy_violation), zaustavite combo i vratite to odbijanje čak i kada su preostali ciljevi različiti modeli, umjesto prelaska na sljedeći cilj. Podrazumijevano isključeno: odbijanje nikada ne hladi nalog niti aktivira prekidač pružaoca usluge, a combo prelazi na svoj sljedeći cilj tačno kao i ranije."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombinacija: Crash-Storm Breaker",
+        "description": "Preskočite provajderove kombinovane ciljeve prije slanja (razlog crash_storm) nakon što se isti kvar koji je sam izazvao (lokalna greška u izvršenju ili kršenje ugovora izvršitelja, 5xx) ponovi na njemu unutar kliznog prozora: OMNIROUTE_CRASH_STORM_THRESHOLD (10) i OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nikada ne upisuje hlađenje ili zaključavanje, a pravi uzvodni 5xx ga nikada ne hrani. Podrazumevano isključeno: ništa se ne snima i nijedan cilj nije preskočen."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovni pokušaj tokom hlađenja: Preskoči odbijanja 403/410",
         "description": "Kada su svi računi u periodu hlađenja i period hlađenja koji prvi završava je uzrokovan statusom 403 (pristup odbijen) ili 410 (nestalo), odmah vrati to odbijanje umjesto čekanja da period hlađenja istekne i ponovnog slanja zahtjeva; obnavljajući agentrouter 403 za kvotu na nivou konekcije se zatim sprema uz errorCode 429 kako bi se mogao ponovo pokušati. Podrazumijevano isključeno: samo 401 preskače čekanje, a svako odbijanje se sprema sa statusom s kojim je stiglo."

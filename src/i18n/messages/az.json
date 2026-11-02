@@ -14421,6 +14421,10 @@
         "label": "Kombo: Məzmun Siyasətinə Görə İmtina Zamanı Dayandır",
         "description": "Kombo hədəfi dəqiq məzmun siyasəti imtinası ilə cavab verdikdə (kod və ya növü cyber_policy / content_policy_violation), növbəti hədəfə keçmək əvəzinə, komboyu dayandırın və qalan hədəflər fərqli modellər olsa belə, həmin imtina cavabını qaytarın. Defolt olaraq qeyri-aktivdir: rədd cavabı heç vaxt hesabı soyutmur və ya provayder kəsicisini işə salmır və kombo əvvəlki kimi növbəti hədəfinə keçir."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombo: Qəza-Fırtına Qırıcı",
+        "description": "Sürüşmə pəncərəsində eyni öz-özünə yaranan nasazlıq (yerli icra xətası və ya icraçı müqaviləsinin pozulması, 5xx) təkrarlanandan sonra göndərilməzdən əvvəl provayderin kombinə edilmiş hədəflərini keçin (səbəb crash_storm): OMNIROUTE_CRASH_STORM_THRESHOLD (10) və OMNIROUTE_CRASH_STORM_WINDOW_MS (5 dəq). O, heç vaxt soyuma müddətini və ya kilidi yazmır və orijinal yuxarı axın 5xx heç vaxt onu qidalandırmır. Defolt olaraq söndürülür: heç nə qeydə alınmır və heç bir hədəf atılmır."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Soyuma Təkrar Cəhdi: 403/410 İmtinalarını Keç",
         "description": "Bütün hesablar soyuma rejimində olduqda və ən tez bitən soyuma müddətinə 403 (giriş rədd edildi) və ya 410 (artıq mövcud deyil) səbəb olduqda, soyuma müddətinin bitməsini gözləyib sorğunu yenidən göndərmək əvəzinə, həmin imtina dərhal qaytarılır; yenilənən agentrouter bağlantı səviyyəli kvota 403 xətası isə təkrar cəhd edilə bilən qalması üçün errorCode 429 ilə saxlanılır. Defolt olaraq qeyri-aktivdir: yalnız 401 gözləməni keçir və hər bir imtina daxil olduğu status ilə saxlanılır."

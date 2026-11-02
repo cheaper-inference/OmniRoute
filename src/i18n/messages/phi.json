@@ -14344,6 +14344,10 @@
         "label": "Combo: Huminto sa Pagtanggi sa Content-Policy",
         "description": "Kapag sumagot ang isang target ng combo ng isang eksaktong pagtanggi sa content-policy (code o uri na cyber_policy / content_policy_violation), ihinto ang combo at ibalik ang pagtangging iyon kahit na magkakaibang modelo ang mga natitirang target, sa halip na magpatuloy sa susunod na target. Naka-off bilang default: hindi kailanman pinapalamig ng pagtanggi ang account o pinapagana ang provider breaker, at uusad ang combo sa susunod nitong target eksakto tulad ng dati."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Combo: Crash-Storm Breaker",
+        "description": "Laktawan ang mga combo na target ng provider bago ipadala (dahilan ng crash_storm) kapag naulit dito ang parehong self-inflicted failure (local execution error o executor contract violation, 5xx) sa loob ng sliding window: OMNIROUTE_CRASH_STORM_THRESHOLD (10) at OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Hindi ito kailanman nagsusulat ng cooldown o lock, at hindi ito pinapakain ng isang tunay na upstream 5xx. Naka-off bilang default: walang naitala at walang target na nilaktawan."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Laktawan ang mga Pagtangging 403/410",
         "description": "Kapag ang bawat account ay nasa cooldown at ang cooldown na unang magtatapos ay sanhi ng 403 (tinanggihan ang access) o 410 (wala na), ibalik agad ang pagtangging iyon sa halip na hintaying matapos ang cooldown at muling ipadala ang kahilingan; ang isang nagre-renew na agentrouter connection-scoped quota 403 ay pananatilihin gamit ang errorCode 429 upang manatili itong puwedeng subukang muli. Naka-off bilang default: 401 lamang ang lumalaktaw sa paghihintay, at ang bawat pagtanggi ay pinananatili gamit ang status na kasama nitong dumating."

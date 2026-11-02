@@ -14344,6 +14344,10 @@
         "label": "Combo: Zastavenie pri odmietení politikou obsahu",
         "description": "Keď cieľ combo odpovie presným odmietnutím politiky obsahu (kód alebo typ cyber_policy / content_policy_violation), zastaviť combo a vrátiť toto odmietnutie aj vtedy, ak zvyšné ciele sú iné modely, namiesto pokračovania na ďalší cieľ. V prednastavenom stave je vypnuté: toto odmietnutie nikdy nezchladí účet ani nespadne predmetový spínač, a combo pokračuje na svoj ďalší cieľ presne ako predtým."
       },
+      "CRASH_STORM_BREAKER_ENABLED": {
+        "label": "Kombinácia: Crash-Storm Breaker",
+        "description": "Preskočte kombinované ciele poskytovateľa pred odoslaním (reason crash_storm), keď sa na ňom v posuvnom okne zopakuje rovnaké zlyhanie, ktoré ste si sami spôsobili (miestna chyba vykonania alebo porušenie zmluvy vykonávateľa, 5xx): OMNIROUTE_CRASH_STORM_THRESHOLD (10) a OMNIROUTE_CRASH_STORM_WINDOW_MS (5 min). Nikdy nezapíše cooldown alebo zámok a originálny upstream 5xx ho nikdy nenapája. Predvolene vypnuté: nič sa nezaznamená a žiadny cieľ sa nepreskočí."
+      },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Skip 403/410 Odmietnutia",
         "description": "Keď sú všetky účty v chladiacom režime a najskôr končiace cooldown bol spôsobený 403 (prístup odmietnutý) alebo 410 (prejdené), vráť to odmietnutie ihneď namiesto čakania na koniec cooldownu a opätovného odosielania požiadavky; obnovovaný agentrouter spojené kvóty 403 sa potom zachovávajú s errorCode 429, aby zostali znova vykonateľné. Predvolene vypnuté: iba 401 preskočí čakanie a každý odmietnutý požiadavka sa uchováva so statusom, s ktorým prišla."
