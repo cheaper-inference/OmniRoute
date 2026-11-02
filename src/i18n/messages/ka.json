@@ -3683,6 +3683,8 @@
     "testStepRunning": "მიმდინარეობს ტესტირება…",
     "testStepNotTestable": "ტესტირება შესაძლებელია მხოლოდ ერთმოდელიანი ნაბიჯებისთვის",
     "saving": "ინახება...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "პროვაიდერები ჯერ არ დაფიქსირებულა.",
     "liveFleetDataHint": "ფლოტის მონაცემები რეალურ დროში კომბინაციის მოვლენების მეშვეობით შემოდის.",
     "liveActiveCount": "აქტიური ({count})",

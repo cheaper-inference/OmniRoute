@@ -3606,6 +3606,8 @@
     "testStepRunning": "Δοκιμή σε εξέλιξη…",
     "testStepNotTestable": "Μόνο βήματα με ένα μοντέλο μπορούν να δοκιμαστούν",
     "saving": "Αποθήκευση...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Δεν έχουν εντοπιστεί πάροχοι ακόμη.",
     "liveFleetDataHint": "Τα δεδομένα του στόλου λαμβάνονται μέσω ζωντανών συμβάντων συνδυασμού.",
     "liveActiveCount": "Ενεργοί ({count})",

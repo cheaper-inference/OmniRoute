@@ -3606,6 +3606,8 @@
     "testStepRunning": "Preizkušanje…",
     "testStepNotTestable": "Preizkusiti je mogoče samo korake z enim modelom",
     "saving": "Shranjevanje ...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Zaznan ni še noben ponudnik.",
     "liveFleetDataHint": "Podatki o floti prihajajo prek dogodkov kombinacij v živo.",
     "liveActiveCount": "Aktivni ({count})",

@@ -3683,6 +3683,8 @@
     "testStepRunning": "Qed jiġi ttestjat…",
     "testStepNotTestable": "Jistgħu jiġu ttestjati biss passi b'mudell wieħed",
     "saving": "Qed jiġi ssejvjat...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Għadu ma ġie osservat l-ebda fornitur.",
     "liveFleetDataHint": "Id-data tal-flotta tasal permezz ta' avvenimenti diretti tal-combo.",
     "liveActiveCount": "Attivi ({count})",

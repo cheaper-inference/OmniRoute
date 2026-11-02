@@ -3683,6 +3683,8 @@
     "testStepRunning": "A testar…",
     "testStepNotTestable": "Só é possível testar passos com um único modelo",
     "saving": "Salvando...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Nenhum fornecedor observado ainda.",
     "liveFleetDataHint": "Os dados da frota chegam através de eventos combo em tempo real.",
     "liveActiveCount": "Ativos ({count})",

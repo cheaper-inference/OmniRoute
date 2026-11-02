@@ -3606,6 +3606,8 @@
     "testStepRunning": "Testuje sa…",
     "testStepNotTestable": "Testovať možno iba kroky s jedným modelom",
     "saving": "Ukladá sa...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Zatiaľ neboli zaznamenaní žiadni poskytovatelia.",
     "liveFleetDataHint": "Údaje o flotile prichádzajú prostredníctvom živých udalostí combo.",
     "liveActiveCount": "Aktívne ({count})",

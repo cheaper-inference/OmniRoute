@@ -3606,6 +3606,8 @@
     "testStepRunning": "Đang kiểm tra…",
     "testStepNotTestable": "Chỉ có thể kiểm tra các bước dùng một mô hình",
     "saving": "Đang lưu...",
+    "liveAccountLabel": "tk: {id}",
+    "liveAccountTooltip": "Tài khoản: {id}",
     "liveNoProviders": "Chưa quan sát thấy nhà cung cấp nào.",
     "liveFleetDataHint": "Dữ liệu toàn cụm được nhận qua các sự kiện combo trực tiếp.",
     "liveActiveCount": "Đang hoạt động ({count})",

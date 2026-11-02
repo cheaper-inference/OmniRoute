@@ -3606,6 +3606,8 @@
     "testStepRunning": "Test en cours…",
     "testStepNotTestable": "Seules les étapes à modèle unique peuvent être testées",
     "saving": "Sauvegarde...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Aucun fournisseur observé pour le moment.",
     "liveFleetDataHint": "Les données de la flotte arrivent via des événements combo en direct.",
     "liveActiveCount": "Actifs ({count})",

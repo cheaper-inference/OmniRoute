@@ -3606,6 +3606,8 @@
     "testStepRunning": "Փորձարկվում է…",
     "testStepNotTestable": "Կարելի է փորձարկել միայն մեկ մոդելով քայլերը",
     "saving": "Պահվում է...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Դեռևս որևէ մատակարար չի նկատվել։",
     "liveFleetDataHint": "Համակազմի տվյալները ստացվում են համակցությունների ուղիղ իրադարձությունների միջոցով։",
     "liveActiveCount": "Ակտիվ ({count})",

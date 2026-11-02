@@ -3606,6 +3606,8 @@
     "testStepRunning": "Bezig met testen…",
     "testStepNotTestable": "Alleen stappen met één model kunnen worden getest",
     "saving": "Opslaan...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Nog geen providers waargenomen.",
     "liveFleetDataHint": "Fleet-gegevens komen binnen via live combo-events.",
     "liveActiveCount": "Actief ({count})",

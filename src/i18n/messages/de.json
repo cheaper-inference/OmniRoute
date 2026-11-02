@@ -3606,6 +3606,8 @@
     "testStepRunning": "Wird getestet…",
     "testStepNotTestable": "Nur Schritte mit einem einzelnen Modell können getestet werden",
     "saving": "Sparen...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Noch keine Provider beobachtet.",
     "liveFleetDataHint": "Fleet-Daten treffen über Live-Combo-Events ein.",
     "liveActiveCount": "Aktiv ({count})",

@@ -16,8 +16,14 @@ export { emit };
 
 export interface RRDashboardEvents {
   attempt(): void;
-  succeeded(latencyMs: number): void;
-  failed(error: string, latencyMs: number): void;
+  /** `selected` is the connection that actually served, when the response names one. */
+  succeeded(latencyMs: number, selected?: string): void;
+  failed(error: string, latencyMs: number, selected?: string): void;
+}
+
+/** The connection a target's response names: pooled targets only learn theirs from here. */
+export function selectedConnectionIdOf(response: Response): string | undefined {
+  return response.headers?.get("X-OmniRoute-Selected-Connection-Id") || undefined;
 }
 
 export function createRRDashboardEvents(
@@ -27,6 +33,10 @@ export function createRRDashboardEvents(
   model: string,
   connectionId?: string | null
 ): RRDashboardEvents {
+  const connectionField = (selected?: string) => {
+    const id = selected || connectionId;
+    return id ? { connectionId: id } : {};
+  };
   return {
     attempt() {
       emit("combo.target.attempt", {
@@ -36,20 +46,20 @@ export function createRRDashboardEvents(
         model,
         timestamp: Date.now(),
         strategy: "round-robin",
-        ...(connectionId ? { connectionId } : {}),
+        ...connectionField(),
       });
     },
-    succeeded(latencyMs) {
+    succeeded(latencyMs, selected) {
       emit("combo.target.succeeded", {
         comboName,
         targetIndex,
         provider,
         model,
         latencyMs,
-        ...(connectionId ? { connectionId } : {}),
+        ...connectionField(selected),
       });
     },
-    failed(error, latencyMs) {
+    failed(error, latencyMs, selected) {
       emit("combo.target.failed", {
         comboName,
         targetIndex,
@@ -57,7 +67,7 @@ export function createRRDashboardEvents(
         model,
         error,
         latencyMs,
-        ...(connectionId ? { connectionId } : {}),
+        ...connectionField(selected),
       });
     },
   };

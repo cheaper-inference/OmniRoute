@@ -3606,6 +3606,8 @@
     "testStepRunning": "テスト中…",
     "testStepNotTestable": "テストできるのは単一モデルのステップのみです",
     "saving": "保存中...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "プロバイダーはまだ検出されていません。",
     "liveFleetDataHint": "フリートデータはライブコンボイベント経由で届きます。",
     "liveActiveCount": "アクティブ ({count})",

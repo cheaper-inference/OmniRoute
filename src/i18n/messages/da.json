@@ -3683,6 +3683,8 @@
     "testStepRunning": "Tester…",
     "testStepNotTestable": "Kun trin med én model kan testes",
     "saving": "Gemmer...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Ingen udbydere observeret endnu.",
     "liveFleetDataHint": "Flådedata ankommer via live combo-hændelser.",
     "liveActiveCount": "Aktive ({count})",

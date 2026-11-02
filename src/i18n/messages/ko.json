@@ -3606,6 +3606,8 @@
     "testStepRunning": "테스트 중…",
     "testStepNotTestable": "단일 모델 단계만 테스트할 수 있습니다",
     "saving": "저장 중...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "아직 감지된 제공업체가 없습니다.",
     "liveFleetDataHint": "플릿 데이터는 라이브 콤보 이벤트를 통해 수신됩니다.",
     "liveActiveCount": "활성 ({count})",

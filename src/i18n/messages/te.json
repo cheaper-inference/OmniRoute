@@ -3606,6 +3606,8 @@
     "testStepRunning": "పరీక్షిస్తోంది…",
     "testStepNotTestable": "ఒకే మోడల్ ఉన్న దశలను మాత్రమే పరీక్షించగలరు",
     "saving": "సేవ్ చేస్తోంది...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "ఇంకా ఏ ప్రొవైడర్‌లు గమనించబడలేదు.",
     "liveFleetDataHint": "ఫ్లీట్ డేటా లైవ్ కాంబో ఈవెంట్‌ల ద్వారా వస్తుంది.",
     "liveActiveCount": "యాక్టివ్ ({count})",

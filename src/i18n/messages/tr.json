@@ -3606,6 +3606,8 @@
     "testStepRunning": "Test ediliyor…",
     "testStepNotTestable": "Yalnızca tek modelli adımlar test edilebilir",
     "saving": "Kaydediliyor...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Henüz hiçbir sağlayıcı gözlemlenmedi.",
     "liveFleetDataHint": "Filo verileri canlı kombo etkinlikleri aracılığıyla gelir.",
     "liveActiveCount": "Aktif ({count})",

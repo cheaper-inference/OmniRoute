@@ -3606,6 +3606,8 @@
     "testStepRunning": "กำลังทดสอบ…",
     "testStepNotTestable": "ทดสอบได้เฉพาะขั้นตอนที่มีโมเดลเดียวเท่านั้น",
     "saving": "กำลังบันทึก...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "ยังไม่พบผู้ให้บริการใดๆ",
     "liveFleetDataHint": "ข้อมูลฟลีตจะเข้ามาผ่านเหตุการณ์คอมโบแบบสด",
     "liveActiveCount": "ใช้งานอยู่ ({count})",

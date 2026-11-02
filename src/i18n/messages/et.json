@@ -3606,6 +3606,8 @@
     "testStepRunning": "Testimine…",
     "testStepNotTestable": "Testida saab ainult ühe mudeliga samme",
     "saving": "Salvestamine...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Ühtegi teenusepakkujat pole veel tuvastatud.",
     "liveFleetDataHint": "Pargi andmed saabuvad reaalajas kombinatsioonisündmuste kaudu.",
     "liveActiveCount": "Aktiivsed ({count})",

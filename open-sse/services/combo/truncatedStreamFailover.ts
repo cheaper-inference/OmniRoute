@@ -16,7 +16,7 @@
  * The cut response is held, not discarded: when no later target succeeds, the combo
  * returns the last partial result (`length`), exactly what a single target returns.
  */
-import { emit } from "./rrDashboardEvents.ts";
+import { emit, selectedConnectionIdOf } from "./rrDashboardEvents.ts";
 import { recordComboRequest } from "../comboMetrics.ts";
 import { isTruncatedStreamResponse } from "../../utils/truncatedStreamPolicy.ts";
 import type { AttemptLoopDeps, AttemptLoopState } from "./attemptLoopTypes.ts";
@@ -54,6 +54,7 @@ export function recordTruncatedStreamAttempt(opts: {
   deps: Pick<AttemptLoopDeps, "combo" | "log" | "startTime" | "strategy">;
 }): void {
   const { result, modelStr, target, state, deps } = opts;
+  const connectionId = selectedConnectionIdOf(result) || target.connectionId;
   deps.log.warn(
     "COMBO",
     `Model ${modelStr} returned a stream cut before its terminal signal — trying the next target`
@@ -84,6 +85,7 @@ export function recordTruncatedStreamAttempt(opts: {
     model: modelStr,
     error: TRUNCATED_STREAM_COMBO_REASON,
     latencyMs: Date.now() - deps.startTime,
+    ...(connectionId ? { connectionId } : {}),
   });
   if (state.heldTruncatedResponse !== result) cancelBody(state.heldTruncatedResponse);
   state.heldTruncatedResponse = result;

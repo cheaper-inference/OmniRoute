@@ -3683,6 +3683,8 @@
     "testStepRunning": "ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ…",
     "testStepNotTestable": "ਸਿਰਫ਼ ਇਕੱਲੇ-ਮਾਡਲ ਵਾਲੇ ਕਦਮਾਂ ਦੀ ਹੀ ਜਾਂਚ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ",
     "saving": "ਸੇਵ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "ਹਾਲੇ ਤੱਕ ਕੋਈ ਪ੍ਰਦਾਤਾ ਨਹੀਂ ਦੇਖਿਆ ਗਿਆ।",
     "liveFleetDataHint": "ਫਲੀਟ ਡਾਟਾ ਲਾਈਵ ਕੌਂਬੋ ਇਵੈਂਟਾਂ ਰਾਹੀਂ ਆਉਂਦਾ ਹੈ।",
     "liveActiveCount": "ਸਰਗਰਮ ({count})",

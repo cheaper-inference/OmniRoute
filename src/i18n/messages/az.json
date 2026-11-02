@@ -3683,6 +3683,8 @@
     "testStepRunning": "Sınanır…",
     "testStepNotTestable": "Yalnız tək modelli addımlar sınana bilər",
     "saving": "Yadda saxlanılır...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Hələ heç bir provayder müşahidə edilməyib.",
     "liveFleetDataHint": "Donanma məlumatları canlı kombo hadisələri vasitəsilə daxil olur.",
     "liveActiveCount": "Aktiv ({count})",

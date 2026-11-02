@@ -1,6 +1,7 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { useTranslations } from "next-intl";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { StatusDot } from "@/shared/components/flow/StatusDot";
 import { FLOW_EDGE_COLORS, flowColorAlpha } from "@/shared/components/flow/edgeStyles";
@@ -111,6 +112,21 @@ export interface ProviderCascadeNodeData {
  *
  * Has Left (target) and Right (source) Handles for the cascade flow.
  */
+/** Which account served this target. Connection ids are UUIDs, so the node shows a short prefix. */
+function ConnectionLabel({ connectionId }: { connectionId: string }) {
+  const t = useTranslations("combos");
+  const shortId = connectionId.length > 8 ? `${connectionId.slice(0, 8)}...` : connectionId;
+  return (
+    <span
+      className="text-[9px] text-text-muted font-mono truncate"
+      title={t("liveAccountTooltip", { id: connectionId })}
+      data-testid="connection-id"
+    >
+      {t("liveAccountLabel", { id: shortId })}
+    </span>
+  );
+}
+
 export function ProviderCascadeNode({ data }: NodeProps) {
   const {
     provider,
@@ -181,15 +197,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
         >
           {model as string}
         </span>
-        {connectionId && (
-          <span
-            className="text-[9px] text-muted font-mono truncate"
-            title={`Account: ${connectionId}`}
-            data-testid="connection-id"
-          >
-            acct: {connectionId.length > 12 ? `${connectionId.slice(0, 8)}...` : connectionId}
-          </span>
-        )}
+        {connectionId && <ConnectionLabel connectionId={connectionId as string} />}
         {latencyMs != null && (
           <span className="text-[10px] text-text-muted">{(latencyMs as number).toFixed(0)}ms</span>
         )}

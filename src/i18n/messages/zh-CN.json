@@ -3683,6 +3683,8 @@
     "testStepRunning": "测试中…",
     "testStepNotTestable": "只能测试单模型步骤",
     "saving": "保存中...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "尚未检测到任何提供者。",
     "liveFleetDataHint": "集群数据通过实时组合事件传入。",
     "liveActiveCount": "活跃 ({count})",

@@ -3606,6 +3606,8 @@
     "testStepRunning": "Перевірка…",
     "testStepNotTestable": "Перевіряти можна лише кроки з однією моделлю",
     "saving": "Збереження...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Постачальників ще не виявлено.",
     "liveFleetDataHint": "Дані флоту надходять через події комбо в реальному часі.",
     "liveActiveCount": "Активні ({count})",

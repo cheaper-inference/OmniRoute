@@ -3606,6 +3606,8 @@
     "testStepRunning": "Sedang menguji…",
     "testStepNotTestable": "Hanya langkah model tunggal boleh diuji",
     "saving": "Menyimpan...",
+    "liveAccountLabel": "__MISSING__:acct: {id}",
+    "liveAccountTooltip": "__MISSING__:Account: {id}",
     "liveNoProviders": "Belum ada penyedia yang diperhatikan.",
     "liveFleetDataHint": "Data armada tiba melalui acara kombo langsung.",
     "liveActiveCount": "Aktif ({count})",

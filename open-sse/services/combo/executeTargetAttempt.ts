@@ -474,7 +474,7 @@ export async function executeTargetAttempt(
           model: modelStr,
           error: `Quality: ${quality.reason}`,
           latencyMs: Date.now() - deps.startTime,
-          ...(effectiveConnectionId || target.connectionId ? { connectionId: effectiveConnectionId || target.connectionId } : {}),
+          ...(effectiveConnectionId ? { connectionId: effectiveConnectionId } : {}),
         });
         state.observeFailure(false, target.executionKey);
         if (handlePreContentStreamRetry(quality, retry, deps, modelStr)) {
@@ -553,7 +553,7 @@ export async function executeTargetAttempt(
         provider,
         model: modelStr,
         latencyMs,
-        ...(effectiveConnectionId || target.connectionId ? { connectionId: effectiveConnectionId || target.connectionId } : {}),
+        ...(effectiveConnectionId ? { connectionId: effectiveConnectionId } : {}),
       });
       deps.log.info(
         "COMBO",
