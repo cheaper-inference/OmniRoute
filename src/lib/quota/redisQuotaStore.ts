@@ -36,6 +36,8 @@ interface RedisLike {
   eval(script: string, numkeys: number, ...args: unknown[]): Promise<unknown>;
   del(...keys: string[]): Promise<number>;
   quit(): Promise<string>;
+  disconnect?(): void;
+  on?(event: string, handler: (...args: unknown[]) => void): unknown;
 }
 
 /**
@@ -48,20 +50,39 @@ export async function getRedisClient(url: string): Promise<RedisLike> {
   }
 
   // Lazy dynamic require — ioredis is an optional dependency
-  let Redis: new (url: string) => RedisLike;
+  let Redis: new (url: string, opts?: Record<string, unknown>) => RedisLike;
   try {
     const mod = await import("ioredis");
-    Redis = (mod.default ?? mod) as new (url: string) => RedisLike;
+    Redis = (mod.default ?? mod) as new (url: string, opts?: Record<string, unknown>) => RedisLike;
   } catch {
     throw new Error("Redis driver requires ioredis package. Run npm install ioredis.");
   }
 
-  _redisClient = new Redis(url);
+  const client = new Redis(url, {
+    maxRetriesPerRequest: 2,
+    connectTimeout: 2000,
+    enableOfflineQueue: false,
+    retryStrategy: (times: number) => (times > 2 ? null : 100),
+  });
+  if (typeof client.on === "function") {
+    client.on("error", () => {});
+  }
+  _redisClient = client;
   return _redisClient as RedisLike;
 }
 
 /** Test-only: reset the Redis singleton. */
 export function resetRedisClient(): void {
+  if (
+    _redisClient &&
+    typeof (_redisClient as { disconnect?: () => void }).disconnect === "function"
+  ) {
+    try {
+      (_redisClient as { disconnect: () => void }).disconnect();
+    } catch {
+      // ignore
+    }
+  }
   _redisClient = null;
 }
 

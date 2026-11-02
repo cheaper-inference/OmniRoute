@@ -169,8 +169,12 @@ test("redisQuotaStore: consume calls INCRBYFLOAT + EXPIRE and returns sliding wi
       msg.includes("Redis") ||
       msg.includes("maxRetriesPerRequest") ||
       msg.includes("Reached the max retries") ||
+      msg.includes("enableOfflineQueue") ||
+      msg.includes("Stream isn't writeable") ||
       msg.includes("retry");
     assert.ok(isExpectedError, `Unexpected error: ${msg}`);
+  } finally {
+    resetRedisClient();
   }
 });
 
@@ -205,9 +209,13 @@ test("redisQuotaStore: getRedisClient throws clear error if ioredis not installe
 
     const client = await getRedisClient("redis://localhost:6399");
     assert.ok(client, "Should return a client when ioredis is available");
-    // Try to quit to avoid hanging connections
+    // Try to quit/disconnect to avoid hanging connections
     try {
-      await client.quit();
+      if (typeof (client as { disconnect?: () => void }).disconnect === "function") {
+        (client as { disconnect: () => void }).disconnect();
+      } else {
+        await client.quit();
+      }
     } catch {
       // ignore — redis not running
     }
