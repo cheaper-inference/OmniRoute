@@ -1,0 +1,1 @@
+- Stop truncating earlier tool results on the default compression path: without a request opt-in (`allow-lossy`, `engine:lite`, a named combo) the lossy request policy now runs `lite` with `compressToolResults: false`, so the safe pipeline really is dedup plus whitespace folding. One live 1,009,611-token agent request had lost 42% of its context to silent tool-result cuts.

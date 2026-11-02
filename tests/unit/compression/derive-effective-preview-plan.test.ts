@@ -22,10 +22,14 @@ const namedCombos = {
 };
 
 // #14529 then kept lossy engines off the header-less path: the runtime replaces lossy steps with
-// session-dedup + lite unless the request opts in (`allow-lossy`, `engine:<id>`, a named combo).
+// session-dedup + lite (without tool-result truncation) unless the request opts in
+// (`allow-lossy`, `engine:<id>`, a named combo).
 // The preview must follow — otherwise it shows rtk → caveman while requests run the safe pair,
 // which is #12063 again. Every case below pins preview == runtime, not just a literal plan.
-const SAFE_PIPELINE = [{ engine: "session-dedup" }, { engine: "lite" }];
+const SAFE_PIPELINE = [
+  { engine: "session-dedup" },
+  { engine: "lite", config: { compressToolResults: false } },
+];
 
 function runtimePlan(config: CompressionConfig) {
   return selectCompressionPlan(
@@ -111,7 +115,7 @@ test("no active profile => the engines-derived plan after the lossy policy, same
   assert.equal(preview.mode, "stacked");
 });
 
-test("a safe-only active profile is shown unchanged", () => {
+test("a safe-only active profile keeps its steps, with lite not truncating tool results", () => {
   const combos = { safe: [{ engine: "session-dedup" }, { engine: "lite" }] };
   const config: CompressionConfig = {
     ...DEFAULT_COMPRESSION_CONFIG,
@@ -120,7 +124,7 @@ test("a safe-only active profile is shown unchanged", () => {
   };
   assert.deepEqual(deriveEffectivePreviewPlan(config, combos as never), {
     mode: "stacked",
-    stackedPipeline: combos.safe,
+    stackedPipeline: SAFE_PIPELINE,
   });
 });
 

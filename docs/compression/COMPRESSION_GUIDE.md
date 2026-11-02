@@ -40,15 +40,17 @@ No compression applied. All messages pass through unchanged.
 
 ### Lite Mode (~15% savings, <1ms latency)
 
-The safest mode — zero semantic change, only formatting cleanup:
+The safest mode — formatting cleanup. Its tool-result truncation is lossy, so the default
+path (no `allow-lossy`, `engine:lite` or named-combo opt-in) runs lite with
+`compressToolResults: false`: earlier tool results reach the provider unchanged.
 
-| Technique                | Description                                       |
-| ------------------------ | ------------------------------------------------- |
-| `collapseWhitespace`     | Merge consecutive blank lines and trailing spaces |
-| `dedupSystemPrompt`      | Remove duplicate system messages                  |
-| `compressToolResults`    | Compress verbose tool/function outputs            |
-| `removeRedundantContent` | Strip repeated instructions                       |
-| `replaceImageUrls`       | Shorten base64 image data URIs                    |
+| Technique                | Description                                                                       |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Merge consecutive blank lines and trailing spaces                                 |
+| `dedupSystemPrompt`      | Remove duplicate system messages                                                  |
+| `compressToolResults`    | Truncate earlier tool results to the lite cap (lossy: only with a request opt-in) |
+| `removeRedundantContent` | Strip repeated instructions                                                       |
+| `replaceImageUrls`       | Shorten base64 image data URIs                                                    |
 
 **Best for:** Always-on usage, safety-critical workflows.
 

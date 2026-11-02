@@ -3,8 +3,8 @@ import type { DerivedPlan } from "./deriveDefaultPlan.ts";
 
 /**
  * HouMinXi's plan for the default path: dedup and whitespace folding stay on.
- * Summaries, relevance filters, and style rewrites run only when the request
- * opts in.
+ * Summaries, relevance filters, style rewrites and tool-result truncation run only when
+ * the request opts in.
  */
 const LOSSY_SINGLE_MODES = new Set([
   "standard",
@@ -16,7 +16,17 @@ const LOSSY_SINGLE_MODES = new Set([
   "codex-responses",
 ]);
 
-export const SAFE_DEFAULT_PIPELINE = [{ engine: "session-dedup" }, { engine: "lite" }] as const;
+/**
+ * Lite folds whitespace, but its tool-result step cuts every earlier tool result to a few
+ * thousand characters. On a long agent session that silently removed ~42% of the context
+ * (1,009,611 -> 580,575 tokens on one live request) without any opt-in. Without an opt-in
+ * lite runs whitespace/dedup cleanup only; an explicit step config wins over settings.lite.
+ */
+const LOSSLESS_LITE_STEP = { engine: "lite", config: { compressToolResults: false } } as const;
+
+export const SAFE_DEFAULT_PIPELINE = [{ engine: "session-dedup" }, LOSSLESS_LITE_STEP] as const;
+
+type PlanStep = DerivedPlan["stackedPipeline"][number];
 
 function isSafeEngine(id: string): boolean {
   try {
@@ -24,6 +34,11 @@ function isSafeEngine(id: string): boolean {
   } catch {
     return false;
   }
+}
+
+function withoutToolResultTruncation(step: PlanStep): PlanStep {
+  if (step.engine !== "lite") return step;
+  return { ...step, config: { ...(step.config ?? {}), compressToolResults: false } };
 }
 
 /**
@@ -51,11 +66,13 @@ export function downgradeUnrequestedLossy(plan: DerivedPlan): DerivedPlan {
 
   if (plan.mode === "stacked") {
     const kept = plan.stackedPipeline.filter((step) => isSafeEngine(step.engine));
-    if (kept.length === plan.stackedPipeline.length) return plan;
+    const allKept = kept.length === plan.stackedPipeline.length;
+    if (allKept && !kept.some((step) => step.engine === "lite")) return plan;
     return {
       ...plan,
       mode: "stacked",
-      stackedPipeline: kept.length > 0 ? kept : [...SAFE_DEFAULT_PIPELINE],
+      stackedPipeline:
+        kept.length > 0 ? kept.map(withoutToolResultTruncation) : [...SAFE_DEFAULT_PIPELINE],
     };
   }
 
