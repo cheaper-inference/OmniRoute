@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import * as yaml from "js-yaml";
 
 /** Refresh the deployed spec from its canonical source without trusting request headers. */
@@ -11,7 +12,7 @@ export function writePublicOpenApi(projectRoot, outputRoot = projectRoot) {
   const spec = yaml.load(original);
   const { version } = JSON.parse(readFileSync(join(projectRoot, "package.json"), "utf8"));
   if (!spec?.info || !spec.paths || typeof version !== "string" || !version) {
-    throw new Error("Invalid OpenAPI source or package version");
+    throw new Error(`Invalid OpenAPI source (${source}) or package version`);
   }
   spec.info.version = version;
   // OAS 3.1 Server Object: relative to the URL of /[basePath/]openapi.yaml.
@@ -33,4 +34,11 @@ export function writePublicOpenApi(projectRoot, outputRoot = projectRoot) {
   mkdirSync(join(outputRoot, "public"), { recursive: true });
   writeFileSync(target, content);
   return true;
+}
+
+// `npm run gen:public-openapi` refreshes the committed copy. Dev and build never write to it:
+// builds generate their own output (assembleStandalone), so the source tree stays clean.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const written = writePublicOpenApi(process.cwd());
+  console.log(written ? "public/openapi.yaml updated." : "public/openapi.yaml is up to date.");
 }
