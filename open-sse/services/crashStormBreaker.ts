@@ -18,7 +18,12 @@
  * provider cooldown or lock — when the storm source is fixed, eligibility
  * returns by itself.
  *
- * Env knobs (lazy-read, hot):
+ * Opt-in: CRASH_STORM_BREAKER_ENABLED (default off) gates both the feed and the
+ * gate in open-sse/services/combo. Only failures classified as self-inflicted
+ * feed it (see isSelfInflictedComboFailure), so a genuine upstream 5xx stays with
+ * the provider breaker and never skips a provider here.
+ *
+ * Env knobs (lazy-read, hot), meaningful once the flag is on:
  *   OMNIROUTE_CRASH_STORM_THRESHOLD  same-signature failures in-window to trip
  *                                    (default 10; 0 disables the breaker)
  *   OMNIROUTE_CRASH_STORM_WINDOW_MS  sliding window ms (default 300000 = 5 min)
@@ -64,10 +69,10 @@ function prune(key: string, now: number, windowMs: number): number[] {
 }
 
 /**
- * Record one failed attempt. Only 5xx count — 429/4xx have their own quota
- * and credential machinery and are not storms. Empty messages cannot be
- * signed and are skipped. Called per attempt, so one multi-target combo
- * request contributes at most one sample per provider.
+ * Record one failed target. Only 5xx count — 429/4xx have their own quota and
+ * credential machinery and are not storms. Empty messages cannot be signed and
+ * are skipped. The combo feeds this once per target, not per retry, so a retry
+ * loop inside one target cannot trip the breaker by itself.
  */
 export function recordCrashFailure(
   provider: string | undefined | null,
@@ -85,21 +90,14 @@ export function recordCrashFailure(
   const samples = prune(key, now, resolveWindowMs());
   samples.push(now);
   if (samples.length > MAX_SAMPLES_PER_KEY) samples.shift();
+  // Re-insert so Map order is least-recently-seen first: the eviction below is O(1).
+  stormSamples.delete(key);
   stormSamples.set(key, samples);
 
-  // Boundedness: cap the signature-family map (long-run memory growth) and
-  // evict the least-recently-seen key when over budget.
+  // Boundedness: cap the signature-family map (long-run memory growth).
   if (stormSamples.size > MAX_TRACKED_SIGNATURES) {
-    let oldestKey: string | null = null;
-    let oldestTs = Infinity;
-    for (const [k, v] of stormSamples) {
-      const last = v[v.length - 1] ?? 0;
-      if (last < oldestTs) {
-        oldestTs = last;
-        oldestKey = k;
-      }
-    }
-    if (oldestKey) stormSamples.delete(oldestKey);
+    const oldestKey = stormSamples.keys().next().value;
+    if (oldestKey !== undefined) stormSamples.delete(oldestKey);
   }
 }
 
@@ -118,7 +116,7 @@ export function isCrashStorming(provider: string | undefined | null): boolean {
   return false;
 }
 
-/** Diagnostics: still-active signature entries (in-window count ≥ 2). */
+/** Still-active signature entries (in-window count ≥ 2). No status route reads this yet. */
 export function crashStormStatus(): Array<{ provider: string; signature: string; count: number }> {
   const now = Date.now();
   const windowMs = resolveWindowMs();
