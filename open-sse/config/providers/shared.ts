@@ -301,6 +301,26 @@ export interface RegistryEntry {
    */
   naiveResetTimezone?: string;
   /**
+   * Trust this provider's OWN reset date in a 429 body and freeze the connection
+   * until it, instead of the short transient cooldown.
+   *
+   * The connection-cooldown profile sets `useUpstreamRetryHints` per CATEGORY
+   * (all OAuth providers share one value, all API-key providers another), so a
+   * single provider whose 429 carries an authoritative date cannot opt in
+   * without flipping the policy for hundreds of others. This flag is that
+   * per-provider opt-in.
+   *
+   * When true, a 429 whose parsed reset date comes from the provider body is
+   * treated as authoritative: it is used verbatim (never clamped to the
+   * operator's `maxCooldownMs`) and persisted on
+   * `provider_connections.rate_limited_until`, so the account is not retried
+   * before the date the provider itself stated.
+   *
+   * Only set this for providers whose 429 date is VERIFIED against a live
+   * capture — a wrong date parks a healthy account for hours.
+   */
+  trustUpstreamResetDate?: boolean;
+  /**
    * Protocolos alternativos que este provedor aceita (ex.: um endpoint
    * Anthropic-compatible alem do OpenAI-compatible padrao). A conexao escolhe
    * via providerSpecificData.targetFormat; ver config/providers/alternateFormats.ts.

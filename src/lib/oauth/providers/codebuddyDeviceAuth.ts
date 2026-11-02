@@ -47,6 +47,60 @@ export interface CodeBuddyPollResult {
   data: Record<string, unknown> | CodeBuddyTokens;
 }
 
+/**
+ * Captured device-login envelope code: the gateway answers `11217` with
+ * `msg: "login ing..."` while the user has not authorized the CLI yet. It is a
+ * PENDING state, not an error — treating it as one aborts the modal mid-flow.
+ */
+export const CODEBUDDY_LOGIN_PENDING_CODE = 11217;
+
+/** Body of `POST /v2/plugin/auth/state?platform=CLI` — captured as literal `{}`. */
+export function buildCodeBuddyStateRequestBody(): string {
+  return "{}";
+}
+
+/**
+ * Map a raw `/v2/plugin/auth/token` envelope onto the generic device-flow
+ * contract. `authorization_pending` is what `pollForToken()` already knows how
+ * to propagate as `pending`, so the 11217 envelope is normalized there instead
+ * of leaking a provider-specific code into the OAuth modal.
+ */
+export function normalizeCodeBuddyPollResponse(
+  envelope: CodeBuddyEnvelope<CodeBuddyTokenPayload>
+): CodeBuddyPollResult {
+  if (envelope?.code === 0 && envelope.data?.accessToken) {
+    return {
+      ok: true,
+      data: {
+        access_token: envelope.data.accessToken,
+        refresh_token: envelope.data.refreshToken || "",
+        token_type: envelope.data.tokenType || "Bearer",
+        expires_in: envelope.data.expiresIn,
+      },
+    };
+  }
+
+  if (envelope?.code === CODEBUDDY_LOGIN_PENDING_CODE) {
+    return {
+      ok: false,
+      data: {
+        error: "authorization_pending",
+        error_description: envelope.msg || "login pending",
+        pending: true,
+        code: envelope.code,
+      },
+    };
+  }
+
+  // A genuine failure must still surface through the `error` field the device
+  // flow consumer reads (`pollForToken` → `result.data.error`); `code`/`msg`
+  // are kept only as diagnostics.
+  return {
+    ok: false,
+    data: { error: envelope?.code, error_description: envelope?.msg, code: envelope?.code },
+  };
+}
+
 export async function requestDeviceCode(
   config: CodeBuddyDeviceCodeConfig
 ): Promise<CodeBuddyDeviceCodeResponse> {
@@ -64,7 +118,7 @@ export async function requestDeviceCode(
       "X-No-User-Id": "true",
       "X-Product": "SaaS",
     },
-    body: JSON.stringify({ platform: config.platform }),
+    body: buildCodeBuddyStateRequestBody(),
   });
 
   if (!response.ok) {
@@ -110,18 +164,7 @@ export async function pollToken(
   });
   if (!response.ok) return { ok: false, data: { error: "request_failed" } };
   const data = (await response.json()) as CodeBuddyEnvelope<CodeBuddyTokenPayload>;
-  if (data.code === 0 && data.data?.accessToken) {
-    return {
-      ok: true,
-      data: {
-        access_token: data.data.accessToken,
-        refresh_token: data.data.refreshToken || "",
-        token_type: data.data.tokenType || "Bearer",
-        expires_in: data.data.expiresIn,
-      },
-    };
-  }
-  return { ok: false, data: { code: data.code, msg: data.msg } };
+  return normalizeCodeBuddyPollResponse(data);
 }
 
 export function mapTokens(tokens: CodeBuddyTokens) {

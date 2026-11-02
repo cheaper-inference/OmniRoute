@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-113 flags across 6 categories. **Default** is the definition default — the value
+114 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (10)
@@ -179,6 +179,7 @@ same effective policy.
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false` |         | Let the per-window quota policy (session/weekly thresholds used by account selection) honour the bounded exhaustion park (#17000): once the capped park deadline has passed, or the cached observation is older than the park cap, the window stops excluding the account until a fresh quota fetch. Off by default: a cached window keeps blocking on its last reported percentage until its own reset time.                                                                                                                                                                                                                                   |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false` |         | For OpenAI-compatible image generation (#16260): use the connection timeout (`providerSpecificData.timeoutMs`), else the central upstream fetch timeout (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → default 600 s) instead of the fixed 120 s image budget; answer 499 when the caller cancels; let the Playground receive long image jobs as an SSE stream with keepalive heartbeats. Off by default: the fixed budget applies and caller cancellation is not propagated. The deadline covering the response body read is always on.                                                                                                          |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |         | Stop offering and forwarding the `max` reasoning effort for Cursor Grok 4.7 (#17386): Cursor's docs list only low/medium/high/xhigh, so the `grok-4.7-max` fallback alias disappears from the catalog and a `max` effort request is sent without an effort parameter. Off by default: `max` stays offered and forwarded, as a live AgentService/Run probe accepted it.                                                                                                                                                                                                                                                                          |
+| `CODEBUDDY_TELEMETRY_ENABLED`                  | boolean | `false` |         | Report each `codebuddy-intl` turn to CodeBuddy's `POST /v2/report` and `POST /v1/traces`, mirroring the official CLI (#18398). Off by default: it is a side channel that carries the account identity to an endpoint the operator did not ask for.                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ### CLI (5)
 
@@ -264,7 +265,7 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 113 flags
+    // ... all 114 flags
   ],
   "summary": {
     "total": 56,

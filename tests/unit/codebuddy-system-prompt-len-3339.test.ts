@@ -210,7 +210,13 @@ async function executeWithMockedUpstream(
   const originalFetch = globalThis.fetch;
   const calls: Captured[] = [];
   const logs: string[] = [];
-  globalThis.fetch = async (_url: string | URL | Request, init?: RequestInit) => {
+  globalThis.fetch = async (url: string | URL | Request, init?: RequestInit) => {
+    // Telemetry (`/v2/report`, `/v1/traces`) is a separate side channel fired
+    // after the turn; only chat dispatches are counted here.
+    const target = String(url);
+    if (!target.includes("/chat/completions")) {
+      return new Response("{}", { status: 200, headers: { "Content-Type": "application/json" } });
+    }
     calls.push({ body: JSON.parse(String(init?.body ?? "{}")) as Body });
     const response = responses.shift();
     assert.ok(response, "unexpected extra upstream dispatch");

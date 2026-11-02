@@ -34,7 +34,10 @@ function parseCatalog(): DocRow[] {
       category = heading[1].toLowerCase();
       continue;
     }
-    const cells = line.match(/^\| `([A-Z0-9_]+)` +\| (\w+) +\| ([^|]+?) +\|(.*)$/);
+    // `\r?` keeps this working on a Windows checkout (`core.autocrlf=true`):
+    // `(.*)$` without the `m` flag cannot cross the CRLF's trailing `\r`, so
+    // the row would silently fail to parse and every flag would look missing.
+    const cells = line.match(/^\| `([A-Z0-9_]+)` +\| (\w+) +\| ([^|]+?) +\|(.*?)\r?$/);
     if (!cells) continue;
     rows.push({
       key: cells[1],
