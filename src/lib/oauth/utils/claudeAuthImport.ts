@@ -205,6 +205,22 @@ function isSameClaudeIdentity(
 
 // ──── Create / update connection ──────────────────────────────────────────────
 
+// The identity and plan fields an import writes, on a new connection and over an existing one.
+function importedClaudeData(enriched: EnrichedClaudeAuth): JsonRecord {
+  return {
+    accountUUID: enriched.accountUUID,
+    organizationUUID: enriched.organizationUUID,
+    organizationName: enriched.organizationName,
+    organizationType: enriched.organizationType,
+    rateLimitTier: enriched.rateLimitTier,
+    ...(enriched.seatTier ? { seatTier: enriched.seatTier } : {}),
+    scopes: enriched.scopes,
+    subscriptionType: enriched.subscriptionType,
+    bootstrapEmail: enriched.email,
+    importedAt: new Date().toISOString(),
+  };
+}
+
 export async function createConnectionFromAuthFile(
   enriched: EnrichedClaudeAuth,
   options: CreateConnectionOptions
@@ -240,16 +256,7 @@ export async function createConnectionFromAuthFile(
         testStatus: "active",
         providerSpecificData: {
           ...toRecord(existing.providerSpecificData),
-          accountUUID: enriched.accountUUID,
-          organizationUUID: enriched.organizationUUID,
-          organizationName: enriched.organizationName,
-          organizationType: enriched.organizationType,
-          rateLimitTier: enriched.rateLimitTier,
-          ...(enriched.seatTier ? { seatTier: enriched.seatTier } : {}),
-          scopes: enriched.scopes,
-          subscriptionType: enriched.subscriptionType,
-          bootstrapEmail: enriched.email,
-          importedAt: new Date().toISOString(),
+          ...importedClaudeData(enriched),
           // #10143: preserve an already-persisted device identity across
           // re-imports so the connection doesn't present as a new device to
           // Anthropic on every process restart; only mint one if absent.
@@ -287,16 +294,7 @@ export async function createConnectionFromAuthFile(
     isActive: true,
     testStatus: "active",
     providerSpecificData: {
-      accountUUID: enriched.accountUUID,
-      organizationUUID: enriched.organizationUUID,
-      organizationName: enriched.organizationName,
-      organizationType: enriched.organizationType,
-      rateLimitTier: enriched.rateLimitTier,
-      ...(enriched.seatTier ? { seatTier: enriched.seatTier } : {}),
-      scopes: enriched.scopes,
-      subscriptionType: enriched.subscriptionType,
-      bootstrapEmail: enriched.email,
-      importedAt: new Date().toISOString(),
+      ...importedClaudeData(enriched),
       // #10143: mint a persistent device identity so this imported
       // connection doesn't fall back to a lazy-random device id that
       // regenerates on every process restart (see resolveCliUserID).
