@@ -190,13 +190,13 @@ JSON-RPC son nöqtəsi `/a2a` əsas A2A giriş nöqtəsidir. Aşağıdakı REST 
 
 ---
 
-## Yeni Bacarığın Əlavə Edilməsi
+## Yeni Bacarıq Əlavə Etmək
 
 1. **Bacarıq faylını yaradın:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` formasında asinxron funksiya ixrac edin. `smartRouting.ts` kimi mövcud bacarıqların strukturunu izləyin.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` tipli asinxron funksiya ixrac edin. `smartRouting.ts` kimi mövcud bacarıqların strukturuna əməl edin.
 
-2. **İşləyicini qeydiyyatdan keçirin:** `src/lib/a2a/taskExecution.ts` faylında `A2A_SKILL_HANDLERS` obyektinə giriş əlavə edin:
+2. **Emalçını qeydiyyatdan keçirin:** `src/lib/a2a/taskExecution.ts` faylında `A2A_SKILL_HANDLERS` obyektinə bir element əlavə edin:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -208,21 +208,21 @@ JSON-RPC son nöqtəsi `/a2a` əsas A2A giriş nöqtəsidir. Aşağıdakı REST 
    };
    ```
 
-3. **Agent Kartında təqdim edin:** `src/app/.well-known/agent.json/route.ts` faylında `skills` massivinə əlavə edin:
+3. **Agent Kartında təqdim edin:** `src/lib/a2a/agentCardMetadata.ts` faylında (`/.well-known/agent.json` və `/.well-known/agent-card.json` tərəfindən paylaşılır) `skills` massivinə əlavə edin:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
-     "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "name": "Sizin Bacarığınız",
+     "description": "Niyyətə yönəlmiş qısa təsvir",
+     "tags": ["marşrutlaşdırma", "kvota"],
+     "examples": ["Təbii dildə nümunə çağırış"]
    }
    ```
 
 4. **Testlər yazın:** `tests/unit/a2a-<your-skill>.test.ts`. Uğurlu icra ssenarisini və xəta ssenarisini əhatə edin.
 
-5. **Yeni bacarığı** bu fayldakı `Available Skills` cədvəlində sənədləşdirin.
+5. Yeni bacarığı bu fayldakı `Available Skills` cədvəlində **sənədləşdirin**.
 
 ---
 

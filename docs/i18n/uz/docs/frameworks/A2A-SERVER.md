@@ -196,13 +196,13 @@ JSON-RPC endpointi `/a2a` kanonik A2A kirish nuqtasidir. Quyidagi REST endpointl
 
 ---
 
-## Yangi ko‘nikma qoʻshish
+## Yangi ko‘nikma qo‘shish
 
 1. **Ko‘nikma faylini yarating:** `src/lib/a2a/skills/<your-skill>.ts`
 
    `(task: A2ATask) => Promise<{ artifacts, metadata }>` asinxron funksiyasini eksport qiling. `smartRouting.ts` kabi mavjud ko‘nikmalar tuzilishiga amal qiling.
 
-2. **Ishlov beruvchini roʻyxatdan oʻtkazing:** `src/lib/a2a/taskExecution.ts` faylidagi `A2A_SKILL_HANDLERS` obyektiga yozuv qoʻshing:
+2. **Ishlov beruvchini ro‘yxatdan o‘tkazing:** `src/lib/a2a/taskExecution.ts` faylida `A2A_SKILL_HANDLERS` obyektiga yozuv qo‘shing:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -214,21 +214,21 @@ JSON-RPC endpointi `/a2a` kanonik A2A kirish nuqtasidir. Quyidagi REST endpointl
    };
    ```
 
-3. **Agent kartasida koʻrsating:** `src/app/.well-known/agent.json/route.ts` faylidagi `skills` massiviga qoʻshing:
+3. **Agent kartasida taqdim eting:** `src/lib/a2a/agentCardMetadata.ts` faylida (`/.well-known/agent.json` va `/.well-known/agent-card.json` tomonidan umumiy foydalaniladi) `skills` massiviga quyidagini qo‘shing:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Ko‘nikmangiz",
-     "description": "Qisqa, maqsadga yoʻnaltirilgan tavsif",
-     "tags": ["marshrutlash", "kvota"],
-     "examples": ["Tabiiy tildagi chaqiruv namunasi"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
 4. **Testlar yozing:** `tests/unit/a2a-<your-skill>.test.ts`. Muvaffaqiyatli bajarilish va xatolik holatlarini qamrab oling.
 
-5. **Yangi ko‘nikmani** ushbu fayldagi `Mavjud ko‘nikmalar` jadvalida hujjatlashtiring.
+5. Ushbu fayldagi `Available Skills` jadvalida yangi ko‘nikmani **hujjatlashtiring**.
 
 ---
 

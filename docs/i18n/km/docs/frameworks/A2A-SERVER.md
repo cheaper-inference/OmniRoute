@@ -194,9 +194,9 @@ OmniRoute លាតត្រដាងជំនាញ A2A ចំនួន 6 ដ�
 
 1. **បង្កើតឯកសារជំនាញ៖** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Export អនុគមន៍ async `(task: A2ATask) => Promise<{ artifacts, metadata }>`។ អនុវត្តតាមទម្រង់របស់ជំនាញដែលមានស្រាប់ដូចជា `smartRouting.ts`។
+   នាំចេញអនុគមន៍អសមកាល `(task: A2ATask) => Promise<{ artifacts, metadata }>`។ អនុវត្តតាមទម្រង់របស់ជំនាញដែលមានស្រាប់ ដូចជា `smartRouting.ts`។
 
-2. **ចុះឈ្មោះ handler៖** នៅក្នុង `src/lib/a2a/taskExecution.ts` បន្ថែមធាតុមួយទៅ `A2A_SKILL_HANDLERS`៖
+2. **ចុះឈ្មោះ handler៖** នៅក្នុង `src/lib/a2a/taskExecution.ts` សូមបន្ថែម entry មួយទៅក្នុង `A2A_SKILL_HANDLERS`៖
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -208,7 +208,7 @@ OmniRoute លាតត្រដាងជំនាញ A2A ចំនួន 6 ដ�
    };
    ```
 
-3. **បង្ហាញក្នុងកាតភ្នាក់ងារ៖** នៅក្នុង `src/app/.well-known/agent.json/route.ts` បន្ថែមទៅខាងចុងនៃ array `skills`៖
+3. **បង្ហាញក្នុង Agent Card៖** នៅក្នុង `src/lib/a2a/agentCardMetadata.ts` (ដែលត្រូវបានប្រើរួមគ្នាដោយ `/.well-known/agent.json` និង `/.well-known/agent-card.json`) សូមបន្ថែមទៅក្នុង array `skills`៖
 
    ```json
    {
@@ -220,9 +220,9 @@ OmniRoute លាតត្រដាងជំនាញ A2A ចំនួន 6 ដ�
    }
    ```
 
-4. **សរសេរការធ្វើតេស្ត៖** `tests/unit/a2a-<your-skill>.test.ts`។ គ្របដណ្តប់ទាំងករណីជោគជ័យ + ករណីមានកំហុស។
+4. **សរសេរការធ្វើតេស្ត៖** `tests/unit/a2a-<your-skill>.test.ts`។ គ្របដណ្ដប់ទាំងករណីដំណើរការជោគជ័យ និងករណីមានកំហុស។
 
-5. **ចងក្រងឯកសារ** សម្រាប់ជំនាញថ្មីនៅក្នុងតារាង `Available Skills` របស់ឯកសារនេះ។
+5. **ចងក្រងឯកសារ** អំពីជំនាញថ្មីនៅក្នុងតារាង `Available Skills` របស់ឯកសារនេះ។
 
 ---
 

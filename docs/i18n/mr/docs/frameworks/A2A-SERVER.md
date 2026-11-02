@@ -199,9 +199,9 @@ JSON-RPC एंडपॉइंट `/a2a` हा अधिकृत A2A प्र
 
 1. **कौशल्य फाइल तयार करा:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` हे async फंक्शन एक्सपोर्ट करा. `smartRouting.ts` यांसारख्या विद्यमान कौशल्यांच्या संरचनेचे अनुसरण करा.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` हे async function export करा. `smartRouting.ts` यांसारख्या विद्यमान कौशल्यांच्या संरचनेचे अनुसरण करा.
 
-2. **हँडलरची नोंदणी करा:** `src/lib/a2a/taskExecution.ts` मध्ये, `A2A_SKILL_HANDLERS` मध्ये नोंद जोडा:
+2. **हँडलरची नोंदणी करा:** `src/lib/a2a/taskExecution.ts` मध्ये, `A2A_SKILL_HANDLERS` मध्ये एक नोंद जोडा:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -213,7 +213,7 @@ JSON-RPC एंडपॉइंट `/a2a` हा अधिकृत A2A प्र
    };
    ```
 
-3. **Agent Card मध्ये उपलब्ध करा:** `src/app/.well-known/agent.json/route.ts` मध्ये, `skills` अॅरेमध्ये जोडा:
+3. **Agent Card मध्ये उपलब्ध करा:** `src/lib/a2a/agentCardMetadata.ts` मध्ये (`/.well-known/agent.json` आणि `/.well-known/agent-card.json` या दोन्हींद्वारे सामायिकपणे वापरले जाते), `skills` array मध्ये पुढील नोंद जोडा:
 
    ```json
    {
