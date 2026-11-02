@@ -39,7 +39,6 @@
     "testFiles": [
       "tests/unit/muse-session-ownership.test.ts",
       "tests/unit/muse-empty-response-retry.test.ts",
-      "tests/unit/custom-json-muse-no-replay.test.ts",
       "tests/unit/deepseek-api-flash-vision.test.ts",
       "tests/unit/provider-limits-recovery.test.ts",
       "tests/unit/veoaifree-optional-credentials.test.ts",
@@ -50,6 +49,7 @@
       "tests/unit/anthropic-fallback-policy-16406.test.ts",
       "tests/unit/combo-family-selected-connection-16223.test.ts",
       "tests/unit/combo-safety-stop.test.ts",
+      "tests/unit/custom-json-muse-no-replay.test.ts",
       "tests/unit/model-family-fallback-eligibility.test.ts",
       "tests/unit/noauth-autocombo-lockout-7623.test.ts",
       "tests/unit/auth-opencode-zen-noauth-fallback.test.ts",
