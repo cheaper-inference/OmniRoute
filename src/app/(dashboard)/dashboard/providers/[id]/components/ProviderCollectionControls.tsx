@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
+import { Table } from "@omniroute/ui-kit/table";
 import { Button, Select } from "@/shared/components";
 import { providerText } from "../providerPageHelpers";
 
@@ -159,7 +160,7 @@ export function CollectionLayout({
   if (view === "table")
     return (
       <div className="max-w-full overflow-x-auto rounded-lg border border-border">
-        <table className="w-full min-w-[800px] text-left text-sm">
+        <Table className="w-full min-w-[800px] text-left text-sm">
           <thead className="bg-bg-subtle">
             <tr>
               {headers.map((h) => (
@@ -170,7 +171,7 @@ export function CollectionLayout({
             </tr>
           </thead>
           <tbody className="divide-y divide-border">{children}</tbody>
-        </table>
+        </Table>
       </div>
     );
   return (
