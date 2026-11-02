@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "tamo",
     "errNoReply": "⚠️ Nema odgovora od upravljačke točke.",
     "btnSend": "Pošalji"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Bilježi pojednostavljene korake razgovora (korisnički upit, odgovor asistenta, pozvani alati) za sesije agenta za kodiranje i izlaže ih vlasniku sesije putem GET /v1/me/sessions/{id}/messages. Prema zadanim postavkama isključeno: koraci se ne bilježe osim ako ova zastavica nije omogućena. Nikada se ne bilježe za noLog API ključeve."
 }

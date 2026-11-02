@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "acolo",
     "errNoReply": "⚠️ Niciun răspuns din partea poartei.",
     "btnSend": "Trimite"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Înregistrează replicile simplificate ale conversației (prompt utilizator, răspuns asistent, instrumente apelate) pentru sesiunile agenților de programare și le expune proprietarului sesiunii prin GET /v1/me/sessions/{id}/messages. Dezactivat în mod implicit: replicile nu sunt înregistrate decât dacă acest flag este activat. Nu sunt înregistrate niciodată pentru cheile API noLog."
 }

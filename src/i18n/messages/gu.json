@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "ત્યાં",
     "errNoReply": "⚠️ ગેટવેમાંથી કોઈ પ્રતિરૂદ્ધ નથી.",
     "btnSend": "મોકલો"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "કોડિંગ-એજન્ટ સત્રો માટે સરળીકૃત વાતચીતના ટર્ન (user prompt, assistant response, called tools) કેપ્ચર કરો અને તેને સત્રના માલિક માટે GET /v1/me/sessions/{id}/messages દ્વારા ઉપલબ્ધ કરાવો. ડિફૉલ્ટ રૂપે બંધ: જ્યાં સુધી આ ફ્લેગ સક્ષમ કરવામાં ન આવે ત્યાં સુધી ટર્ન કેપ્ચર થતા નથી. noLog API કી માટે ક્યારેય કેપ્ચર થતા નથી."
 }

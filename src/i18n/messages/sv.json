@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "där",
     "errNoReply": "⚠️ Inget svar från gateway.",
     "btnSend": "Skicka"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Fånga förenklade konversationsturer (användarprompt, assistantsvar, anropade verktyg) för kodningsagentsessioner och exponera dem via GET /v1/me/sessions/{id}/messages för sessionsägaren. Inaktiverat som standard: turer fångas inte såvida inte denna flagga är aktiverad. Fångas aldrig för noLog-API-nycklar."
 }

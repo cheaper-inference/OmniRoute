@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "tu",
     "errNoReply": "⚠️ Nema odgovora od gatewaya.",
     "btnSend": "Pošalji"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Zabilježi pojednostavljene korake razgovora (korisnički upit, odgovor asistenta, pozvani alati) za sesije agenta za kodiranje i izloži ih vlasniku sesije putem GET /v1/me/sessions/{id}/messages. Podrazumijevano isključeno: koraci se ne bilježe osim ako ova zastavica nije omogućena. Nikada se ne bilježe za noLog API ključeve."
 }

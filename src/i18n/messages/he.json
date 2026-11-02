@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "שם",
     "errNoReply": "⚠️ אין תגובה מהשער.",
     "btnSend": "שלח"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "לכידת סבבי שיחה מפושטים (הנחיית משתמש, תגובת עוזר, כלים שנקראו) עבור הפעלות של סוכן קידוד וחשיפתם באמצעות GET /v1/me/sessions/{id}/messages לבעל ההפעלה. כבוי כברירת מחדל: סבבים אינם נלכדים אלא אם כן דגל זה מופעל. לעולם אינם נלכדים עבור מפתחות API מסוג noLog."
 }

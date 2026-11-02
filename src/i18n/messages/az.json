@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "orada",
     "errNoReply": "⚠️ Qəpazədən cavab gəlmir.",
     "btnSend": "Göndər"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Kodlaşdırma agenti sessiyaları üçün sadələşdirilmiş söhbət növbələrini (istifadəçi sorğusu, köməkçi cavabı, çağırılan alətlər) qeydə alın və GET /v1/me/sessions/{id}/messages vasitəsilə sessiya sahibinə təqdim edin. Varsayılan olaraq deaktivdir: bu bayraq aktivləşdirilmədikcə növbələr qeydə alınmır. noLog API açarları üçün heç vaxt qeydə alınmır."
 }

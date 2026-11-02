@@ -10,6 +10,7 @@
 import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
 import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
+import type { CompiledPiiRule } from "@/shared/utils/piiCustomPatterns";
 import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
 
 // ─── Prompt Injection Patterns ───────────────────────────────────────
@@ -220,7 +221,7 @@ function collectPartText(part, contents) {
 }
 
 function extractMessageContents(body) {
-  const contents = [];
+  const contents: string[] = [];
 
   const messageSource = body.messages !== undefined ? body.messages : body.input;
   const messages = Array.isArray(messageSource)
@@ -297,7 +298,7 @@ function buildInjectionScanText(text) {
  * @returns {Array<{pattern: string, severity: string, match: string}>}
  */
 function detectInjection(text) {
-  const detections = [];
+  const detections: Array<{ pattern: string; severity: string; match: string }> = [];
   const scanText = buildInjectionScanText(text);
   for (const rule of INJECTION_PATTERNS) {
     const match = scanText.match(rule.pattern);
@@ -330,6 +331,12 @@ function resolvePiiRules(options) {
   return custom.length > 0 ? [...builtins, ...custom] : builtins;
 }
 
+/** Per-type selection and pre-compiled custom rules (structurally a PiiRuleConfig). */
+type PiiRuleOptions = {
+  enabledTypes?: ReadonlySet<string> | null;
+  customRules?: CompiledPiiRule[];
+};
+
 /**
  * Scan and optionally redact PII from text.
  * @param {string} text
@@ -337,8 +344,8 @@ function resolvePiiRules(options) {
  * @param {{ enabledTypes?: ReadonlySet<string> | null, customRules?: Array<{name: string, regex: RegExp, replacement: string}> }} [options] - per-type selection and custom rules
  * @returns {{ text: string, detections: Array<{type: string, count: number}> }}
  */
-function processPII(text, redact = false, options = undefined) {
-  const detections = [];
+function processPII(text, redact = false, options?: PiiRuleOptions) {
+  const detections: Array<{ type: string; count: number }> = [];
   let processed = text;
 
   for (const rule of resolvePiiRules(options)) {
@@ -393,7 +400,13 @@ function redactValidatedMatches(text, rule, redact) {
 export function sanitizeRequest(body, logger = console) {
   const config = getConfig();
 
-  const result = {
+  const result: {
+    blocked: boolean;
+    modified: boolean;
+    detections: Array<{ pattern: string; severity: string; match: string }>;
+    piiDetections: Array<{ type: string; count: number }>;
+    sanitizedBody: Record<string, unknown> | null;
+  } = {
     blocked: false,
     modified: false,
     detections: [],

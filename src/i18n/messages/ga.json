@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "ansin",
     "errNoReply": "⚠️ Níl aon freagra ón ngeata.",
     "btnSend": "Seol"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Gabh sealanna comhrá simplithe (leid úsáideora, freagra cúntóra, uirlisí ar glaodh orthu) le haghaidh seisiúin gníomhaire códaithe agus cuir ar fáil iad trí GET /v1/me/sessions/{id}/messages d'úinéir an tseisiúin. Múchta de réir réamhshocraithe: ní ghabhtar sealanna mura bhfuil an bhratach seo cumasaithe. Ní ghabhtar choíche le haghaidh eochracha API noLog."
 }

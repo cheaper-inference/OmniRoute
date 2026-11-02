@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "doon",
     "errNoReply": "⚠️ Walang sagot mula sa gateway.",
     "btnSend": "Ipadala"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "I-capture ang mga pinasimpleng turn ng pag-uusap (prompt ng user, tugon ng assistant, mga tinawag na tool) para sa mga coding-agent session at i-expose ang mga ito sa pamamagitan ng GET /v1/me/sessions/{id}/messages sa may-ari ng session. Naka-off bilang default: hindi kina-capture ang mga turn maliban kung naka-enable ang flag na ito. Hindi kailanman kina-capture para sa mga noLog API key."
 }

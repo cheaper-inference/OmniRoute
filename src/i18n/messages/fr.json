@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "là",
     "errNoReply": "⚠️ Pas de réponse de la passerelle.",
     "btnSend": "Envoyer"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Capture les échanges simplifiés de conversation (prompt utilisateur, réponse de l'assistant, outils appelés) pour les sessions d'agent de codage et les expose via GET /v1/me/sessions/{id}/messages au propriétaire de la session. Désactivé par défaut : les échanges ne sont pas capturés tant que cette option n'est pas activée. Jamais capturés pour les clés API noLog."
 }

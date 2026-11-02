@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "orada",
     "errNoReply": "⚠️ Geçiş noktasından yanıt gelmedi.",
     "btnSend": "Gönder"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Kodlama aracısı oturumları için basitleştirilmiş konuşma turlarını (kullanıcı istemi, asistan yanıtı, çağrılan araçlar) yakalayın ve bunları GET /v1/me/sessions/{id}/messages üzerinden oturum sahibine sunun. Varsayılan olarak kapalıdır: Bu bayrak etkinleştirilmediği sürece turlar yakalanmaz. noLog API anahtarları için hiçbir zaman yakalanmaz."
 }

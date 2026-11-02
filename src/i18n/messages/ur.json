@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "اتھا",
     "errNoReply": "⚠️ گیٹوے سے کوئی جواب نہیں ملا۔",
     "btnSend": "بھیجیں"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "کوڈنگ ایجنٹ سیشنز کے لیے گفتگو کے آسان مراحل (user prompt، اسسٹنٹ کا جواب، کال کیے گئے ٹولز) محفوظ کریں اور سیشن کے مالک کے لیے GET /v1/me/sessions/{id}/messages کے ذریعے دستیاب کریں۔ پہلے سے بند: جب تک یہ فلیگ فعال نہ ہو مراحل محفوظ نہیں کیے جاتے۔ noLog API keys کے لیے کبھی بھی محفوظ نہیں کیے جاتے۔"
 }

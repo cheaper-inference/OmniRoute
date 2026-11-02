@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "there",
     "errNoReply": "⚠️ No reply from gateway.",
     "btnSend": "Send"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Capture simplified conversation turns (user prompt, assistant response, called tools) for coding-agent sessions and expose them through GET /v1/me/sessions/{id}/messages to the session owner. Off by default: turns are not captured unless this flag is enabled. Never captured for noLog API keys."
 }

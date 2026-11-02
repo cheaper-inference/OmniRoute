@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "ali",
     "errNoReply": "⚠️ Sem resposta do gateway.",
     "btnSend": "Enviar"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Capturar turnos de conversa simplificados (prompt do usuário, resposta do assistente, ferramentas chamadas) para sessões de coding-agent e expô-los através de GET /v1/me/sessions/{id}/messages para o proprietário da sessão. Desativado por padrão: os turnos não são capturados a menos que esta flag esteja ativada. Nunca são capturados para chaves de API noLog."
 }

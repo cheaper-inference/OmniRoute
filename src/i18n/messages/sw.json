@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "hapa",
     "errNoReply": "⚠️ Hakuna jibu kutoka kwa lango.",
     "btnSend": "Tuma"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Nasa awamu zilizorahisishwa za mazungumzo (kidokezo cha mtumiaji, jibu la msaidizi, zana zilizoitwa) kwa ajili ya vipindi vya coding-agent na uzifanye zipatikane kupitia GET /v1/me/sessions/{id}/messages kwa mmiliki wa kipindi. Imezimwa kwa chaguomsingi: awamu hazinaswi isipokuwa alama hii iwashwe. Hazinaswi kamwe kwa funguo za API za noLog."
 }

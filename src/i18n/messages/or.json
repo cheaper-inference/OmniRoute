@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "ସେଠାରେ",
     "errNoReply": "⚠️ ଗେଟ୍‌ୱେ ଦେଖିବାକୁ କୌଣସି ଉତ୍ତର ନାହିଁ।",
     "btnSend": "ପଠାନ୍"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "କୋଡିଂ-ଏଜେଣ୍ଟ ସେସନ୍ ପାଇଁ ସରଳୀକୃତ ବାର୍ତ୍ତାଳାପ ଟର୍ଣ୍ଣଗୁଡ଼ିକ (user prompt, assistant response, called tools) କ୍ୟାପଚର୍ କରନ୍ତୁ ଏବଂ ସେସନ୍ ମାଲିକଙ୍କୁ GET /v1/me/sessions/{id}/messages ମାଧ୍ୟମରେ ଉପଲବ୍ଧ କରାନ୍ତୁ। ଡିଫଲ୍ଟ ଭାବରେ ବନ୍ଦ: ଏହି ଫ୍ଲାଗ୍ ସକ୍ଷମ ନହେବା ପର୍ଯ୍ୟନ୍ତ ଟର୍ଣ୍ଣଗୁଡ଼ିକ କ୍ୟାପଚର୍ ହୁଏ ନାହିଁ। noLog API କିଗୁଡ଼ିକ ପାଇଁ କଦାପି କ୍ୟାପଚର୍ ହୁଏ ନାହିଁ।"
 }

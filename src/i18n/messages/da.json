@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "der",
     "errNoReply": "⚠️ Intet svar fra gatewayen.",
     "btnSend": "Send"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Registrer forenklede samtalerunder (brugerprompt, assistentsvar, kaldte værktøjer) for coding-agent-sessioner og eksponer dem via GET /v1/me/sessions/{id}/messages for sessionsejeren. Deaktiveret som standard: runder registreres ikke, medmindre dette flag er aktiveret. Registreres aldrig for noLog-API-nøgler."
 }

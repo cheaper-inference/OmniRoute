@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "lì",
     "errNoReply": "⚠️ Nessuna risposta dal gateway.",
     "btnSend": "Invia"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Acquisisci i turni di conversazione semplificati (prompt dell'utente, risposta dell'assistente, strumenti chiamati) per le sessioni dell'agente di coding ed esponili al proprietario della sessione tramite GET /v1/me/sessions/{id}/messages. Disattivato per impostazione predefinita: i turni non vengono acquisiti a meno che questo flag non sia abilitato. Non vengono mai acquisiti per le chiavi API noLog."
 }

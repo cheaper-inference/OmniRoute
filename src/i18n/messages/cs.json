@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "tam",
     "errNoReply": "⚠️ Žádná odpověď z brány.",
     "btnSend": "Odeslat"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Zaznamenávat zjednodušené kroky konverzace (prompt uživatele, odpověď asistenta, volané nástroje) pro relace kódovacích agentů a zpřístupnit je vlastníkovi relace prostřednictvím GET /v1/me/sessions/{id}/messages. Ve výchozím nastavení vypnuto: kroky se nezaznamenávají, pokud není tento příznak povolen. Pro API klíče noLog se nikdy nezaznamenávají."
 }

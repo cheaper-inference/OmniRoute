@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "ott",
     "errNoReply": "⚠️ Nincs válasz a kaputól.",
     "btnSend": "Küldés"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Egyszerűsített beszélgetési fordulók (felhasználói prompt, asszisztens válasza, meghívott eszközök) rögzítése a coding-agent munkamenetekhez, és elérhetővé tételük a munkamenet tulajdonosa számára a GET /v1/me/sessions/{id}/messages végponton keresztül. Alapértelmezés szerint kikapcsolva: a fordulók nem kerülnek rögzítésre, hacsak ez a jelző nincs engedélyezve. A noLog API-kulcsok esetén soha nem kerülnek rögzítésre."
 }

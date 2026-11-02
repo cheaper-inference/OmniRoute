@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "ở đó",
     "errNoReply": "⚠️ Không có phản hồi từ cổng.",
     "btnSend": "Gửi"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Ghi lại các lượt hội thoại giản lược (lời nhắc của người dùng, phản hồi của trợ lý, công cụ được gọi) cho các phiên coding-agent và cung cấp chúng qua GET /v1/me/sessions/{id}/messages cho chủ sở hữu phiên. Tắt theo mặc định: các lượt trò chuyện sẽ không được ghi lại trừ khi cờ này được bật. Không bao giờ ghi lại đối với các khóa API noLog."
 }

@@ -15884,5 +15884,6 @@
     "greetingFallbackName": "tja",
     "errNoReply": "⚠️ Ni odgovora od gatewaysa.",
     "btnSend": "Pošlji"
-  }
+  },
+  "featureFlagAgentSessionMessagesEnabledDescription": "Zajame poenostavljene pogovorne poteze (uporabniški poziv, odgovor asistenta, klicana orodja) za seje agenta za kodiranje in jih prek GET /v1/me/sessions/{id}/messages ponudi lastniku seje. Privzeto izklopljeno: poteze se ne zajemajo, razen če je ta zastavica omogočena. Nikoli se ne zajemajo za ključe API noLog."
 }
