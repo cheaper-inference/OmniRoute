@@ -118,13 +118,11 @@
    ਤੋਂ ਪਹਿਲਾਂ ਅਤੇ ਬਾਅਦ ਦੇ ਰੈਂਡਰ ਕੀਤੇ ਮਾਰਕਅੱਪ ਦੀ ਤੁਲਨਾ ਕਰੋ — padding ਜਾਂ wrapper ਦੀਆਂ ਤਬਦੀਲੀਆਂ ਹਰ ਸਕ੍ਰੀਨ
    'ਤੇ ਫੈਲ ਜਾਂਦੀਆਂ ਹਨ।
 
-## 5. ਕਿੱਟ ਅੱਪਡੇਟ ਕਰਨਾ
+## 5. ਕਿੱਟ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨਾ
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` ਉਸ ਕਮਿੱਟ 'ਤੇ ਮੌਜੂਦ ਅਪਸਟ੍ਰੀਮ `src/` ਨੂੰ `packages/ui-kit/src`
-ਵਿੱਚ ਕਾਪੀ ਕਰਦਾ ਹੈ ਅਤੇ ਇਕੋ ਇੱਕ ਮਨਜ਼ੂਰਸ਼ੁਦਾ ਤਬਦੀਲੀ ਲਾਗੂ ਕਰਦਾ ਹੈ (ਇਹ relative imports ਤੋਂ `.js` ਸਫਿਕਸ ਹਟਾ
-ਦਿੰਦਾ ਹੈ)। ਫਿਰ: `git diff packages/ui-kit` ਦੀ ਸਮੀਖਿਆ ਕਰੋ, ਦੋਵੇਂ ਥੀਮਾਂ ਵਿੱਚ providers, settings, combos,
-usage ਅਤੇ endpoint ਦੀ ਵਿਜ਼ੂਅਲ ਜਾਂਚ ਕਰੋ, `npm run check:ui-kit-snapshot` ਅਤੇ `npm run test:vitest:ui`
-ਚਲਾਓ, ਅਤੇ ਅਪਸਟ੍ਰੀਮ changelog ਨਾਲ PR ਖੋਲ੍ਹੋ।
+`npm run check:ui-kit-upstream` ਅੱਪਸਟਰੀਮ ਰੈਪੋ ਦੇ ਸਭ ਤੋਂ ਨਵੇਂ `v*` ਟੈਗ ਨਾਲ `packages/ui-kit/UPSTREAM.md` ਵਿੱਚ ਪਿੰਨ ਕੀਤੇ ਸੰਸਕਰਣ ਦੀ ਤੁਲਨਾ ਕਰਦਾ ਹੈ ਅਤੇ ਇੱਕ ਰੀਲੀਜ਼ ਦੇ ਬਾਹਰ ਹੋਣ 'ਤੇ ਸਿੰਕ ਕਮਾਂਡ ਨੂੰ ਪ੍ਰਿੰਟ ਕਰਦਾ ਹੈ। ਹਫਤਾਵਾਰੀ `UI Kit upstream watch` ਵਰਕਫਲੋ (`.github/workflows/ui-kit-upstream-watch.yml`) ਉਹੀ ਜਾਂਚ ਚਲਾਉਂਦਾ ਹੈ ਅਤੇ ਪਿੰਨ ਦੇ ਪਿੱਛੇ ਹੋਣ ਦੇ ਦੌਰਾਨ ਇੱਕ ਟਰੈਕਿੰਗ ਮੁੱਦੇ ਨੂੰ ਖੁੱਲ੍ਹਾ ਰੱਖਦਾ ਹੈ; ਅੱਪਸਟ੍ਰੀਮ ਰੈਪੋ ਪ੍ਰਾਈਵੇਟ ਹੈ, ਇਸਲਈ ਵਰਕਫਲੋ ਨੂੰ `UI_KIT_READ_TOKEN` ਸੀਕ੍ਰੇਟ ਵਿੱਚ ਇੱਕ ਰੀਡ-ਓਨਲੀ ਟੋਕਨ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ ਅਤੇ ਇਸ ਤੋਂ ਬਿਨਾਂ ਅੜਿੱਕਾ ਰਹਿੰਦਾ ਹੈ।
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` ਉਸ ਕਮਿਟ (`latest` = ਸਭ ਤੋਂ ਨਵਾਂ `v*` ਟੈਗ) 'ਤੇ ਅੱਪਸਟ੍ਰੀਮ `src/` `packages/ui-kit/src` ਵਿੱਚ ਨਕਲ ਕਰਦਾ ਹੈ, ਸਿੰਗਲ ਪ੍ਰਵਾਨਿਤ ਪਰਿਵਰਤਨ ਨੂੰ ਲਾਗੂ ਕਰਦਾ ਹੈ (ਇਹ ਸੰਬੰਧਿਤ ਆਯਾਤ ਤੋਂ `.js` ਪਿਛੇਤਰ ਨੂੰ ਛੱਡਦਾ ਹੈ), ਅਤੇ `packages/ui-kit/package.json` ਅਤੇ `package-lock.json` ਵਿੱਚ ਵਰਕਸਪੇਸ ਸੰਸਕਰਣ ਨੂੰ ਅੱਪਸਟ੍ਰੀਮ ਇੱਕ ਵਿੱਚ ਸੈੱਟ ਕਰਦਾ ਹੈ। ਫਿਰ: `git diff packages/ui-kit` ਦੀ ਸਮੀਖਿਆ ਕਰੋ, ਦੋਵਾਂ ਥੀਮਾਂ ਵਿੱਚ ਪ੍ਰਦਾਤਾਵਾਂ, ਸੈਟਿੰਗਾਂ, ਕੰਬੋਜ਼, ਵਰਤੋਂ ਅਤੇ ਐਂਡਪੁਆਇੰਟ 'ਤੇ ਇੱਕ ਵਿਜ਼ੂਅਲ ਪਾਸ ਕਰੋ, `npm run check:ui-kit-snapshot` ਅਤੇ `npm run test:vitest:ui` ਚਲਾਓ, ਅਤੇ ਅੱਪਸਟ੍ਰੀਮ ਚੇਂਜਲੌਗ ਨਾਲ PR ਨੂੰ ਖੋਲ੍ਹੋ।
 
 ## 6. README ਚਿੱਤਰ
 

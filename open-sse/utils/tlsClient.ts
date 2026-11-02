@@ -1,23 +1,9 @@
 import { createHash } from "node:crypto";
-import * as nodeModule from "node:module";
 import { getTlsClientTimeoutConfig } from "@/shared/utils/runtimeTimeouts";
+import { getWreqRuntimeModule, newestChromeProfile } from "./browserProfiles.ts";
 // #12656 — re-exported so proxyFetch.ts (frozen at its file-size cap) can
 // import the first-byte watchdog alongside TlsClient without adding a line.
 export { guardTlsFirstByte } from "./tlsFirstByteWatchdog.ts";
-
-// #12491 — anchor on process.argv[1]||cwd() rather than import.meta.url: the
-// standalone Docker runtime re-lays-out files at a different relative depth
-// than the build, so an import.meta.url-relative resolution can miss even
-// though this loader already keeps the specifier itself dynamic (see
-// loadRuntimeModule() below). Matches src/lib/machineToken.ts and
-// src/lib/db/adapters/runtimeRequire.ts's established anchor pattern.
-const runtimeRequire = nodeModule.createRequire(process.argv[1] || process.cwd());
-
-function loadRuntimeModule(moduleName: string): unknown {
-  // Keep the specifier dynamic. Turbopack rewrites a literal createRequire call
-  // to a hashed external name that is absent from the standalone Docker runtime.
-  return Reflect.apply(runtimeRequire, undefined, [moduleName]);
-}
 
 export type WreqTransportLike = {
   close: () => Promise<void> | void;
@@ -68,23 +54,6 @@ export class WreqTransportCapacityError extends Error {
 }
 
 type EmulationOs = "windows" | "macos" | "linux" | "android" | "ios";
-
-let wreqRuntimeModule: Record<string, unknown> | null = null;
-let wreqRuntimeModuleError: unknown;
-let wreqRuntimeModuleResolved = false;
-
-function getWreqRuntimeModule(): Record<string, unknown> {
-  if (!wreqRuntimeModuleResolved) {
-    wreqRuntimeModuleResolved = true;
-    try {
-      wreqRuntimeModule = loadRuntimeModule("wreq-js") as Record<string, unknown>;
-    } catch (error) {
-      wreqRuntimeModuleError = error;
-    }
-  }
-  if (wreqRuntimeModule) return wreqRuntimeModule;
-  throw wreqRuntimeModuleError ?? new Error("wreq-js runtime unavailable");
-}
 
 const TRANSPORT_POOL_KEY = Symbol.for("omniroute.wreqTransportPool.instance");
 const TRANSPORT_POOL_LIFECYCLE_KEY = Symbol.for("omniroute.wreqTransportPool.lifecycle");
@@ -636,7 +605,7 @@ function toNativeResponse(
 }
 
 /**
- * TLS Client — Chrome 124 TLS fingerprint spoofing via wreq-js.
+ * TLS Client — browser TLS fingerprint spoofing via wreq-js (profile follows the installed catalog).
  * Sessions, cookie jars, and circuit state are isolated by account scope and exact proxy.
  */
 export class TlsClient {
@@ -937,7 +906,7 @@ export class TlsClient {
     this.reserveSessionCapacity(key);
 
     const sessionOpts: Record<string, unknown> = {
-      browser: "chrome_124",
+      browser: newestChromeProfile(),
       os: "macos",
     };
     if (resolvedProxy) sessionOpts.proxy = resolvedProxy;
@@ -965,7 +934,7 @@ export class TlsClient {
         this.sessions.set(key, session);
         this.sessionLastUsed.set(key, ++this.accessSequence);
         this.evictSessionsIfNeeded(key);
-        console.log("[TlsClient] Session created (Chrome 124 TLS fingerprint)");
+        console.log(`[TlsClient] Session created (${newestChromeProfile()} TLS fingerprint)`);
         return session;
       })
       .finally(() => {
@@ -978,7 +947,7 @@ export class TlsClient {
     return creating;
   }
 
-  /** Fetch with Chrome 124 TLS fingerprint and an account-scoped persistent cookie jar. */
+  /** Fetch with the catalog-resolved TLS fingerprint and an account-scoped persistent cookie jar. */
   async fetch(url: string, options: TlsFetchOptions = {}): Promise<Response> {
     const resolvedProxy = this.resolveProxy(options.proxy);
     const key = this.getSessionKey(resolvedProxy, options.sessionScope);

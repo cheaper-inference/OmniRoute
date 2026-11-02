@@ -198,11 +198,11 @@ JSON-RPC 端点 `/a2a` 是规范的 A2A 入口点。以下 REST 端点为仪表�
 
 ## 添加新技能
 
-1. **创建技能文件：**`src/lib/a2a/skills/<your-skill>.ts`
+1. **创建技能文件：** `src/lib/a2a/skills/<your-skill>.ts`
 
    导出一个异步函数 `(task: A2ATask) => Promise<{ artifacts, metadata }>`。遵循现有技能（例如 `smartRouting.ts`）的结构。
 
-2. **注册处理程序：**在 `src/lib/a2a/taskExecution.ts` 中，向 `A2A_SKILL_HANDLERS` 添加一个条目：
+2. **注册处理程序：** 在 `src/lib/a2a/taskExecution.ts` 中，向 `A2A_SKILL_HANDLERS` 添加一个条目：
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -214,7 +214,7 @@ JSON-RPC 端点 `/a2a` 是规范的 A2A 入口点。以下 REST 端点为仪表�
    };
    ```
 
-3. **在 Agent Card 中公开：**在 `src/app/.well-known/agent.json/route.ts` 中，追加到 `skills` 数组：
+3. **在 Agent Card 中公开：** 在 `src/lib/a2a/agentCardMetadata.ts`（由 `/.well-known/agent.json` 和 `/.well-known/agent-card.json` 共享）中，向 `skills` 数组追加以下内容：
 
    ```json
    {
@@ -226,9 +226,9 @@ JSON-RPC 端点 `/a2a` 是规范的 A2A 入口点。以下 REST 端点为仪表�
    }
    ```
 
-4. **编写测试：**`tests/unit/a2a-<your-skill>.test.ts`。覆盖正常路径和错误路径。
+4. **编写测试：** `tests/unit/a2a-<your-skill>.test.ts`。覆盖正常路径和错误路径。
 
-5. **记录文档：**在此文件的 `Available Skills` 表格中记录新技能。
+5. **记录文档：** 在此文件的 `Available Skills` 表格中记录新技能。
 
 ---
 

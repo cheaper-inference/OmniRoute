@@ -199,11 +199,11 @@ Le point de terminaison JSON-RPC `/a2a` est le point d’entrée A2A canonique. 
 
 ## Ajout d’une nouvelle compétence
 
-1. **Créez le fichier de la compétence :** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Créer le fichier de la compétence :** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportez une fonction asynchrone `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Respectez la structure des compétences existantes telles que `smartRouting.ts`.
+   Exportez une fonction asynchrone `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Suivez la structure des compétences existantes telles que `smartRouting.ts`.
 
-2. **Enregistrez le gestionnaire :** dans `src/lib/a2a/taskExecution.ts`, ajoutez une entrée à `A2A_SKILL_HANDLERS` :
+2. **Enregistrer le gestionnaire :** dans `src/lib/a2a/taskExecution.ts`, ajoutez une entrée à `A2A_SKILL_HANDLERS` :
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,21 +215,21 @@ Le point de terminaison JSON-RPC `/a2a` est le point d’entrée A2A canonique. 
    };
    ```
 
-3. **Exposez-la dans la carte d’agent :** dans `src/app/.well-known/agent.json/route.ts`, ajoutez-la au tableau `skills` :
+3. **L’exposer dans la carte de l’agent :** dans `src/lib/a2a/agentCardMetadata.ts` (partagé par `/.well-known/agent.json` et `/.well-known/agent-card.json`), ajoutez l’objet suivant au tableau `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "Votre compétence",
-     "description": "Description brève et axée sur l’intention",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Exemple d’invocation en langage naturel"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Écrivez des tests :** `tests/unit/a2a-<your-skill>.test.ts`. Couvrez le scénario nominal et le scénario d’erreur.
+4. **Écrire des tests :** `tests/unit/a2a-<your-skill>.test.ts`. Couvrez le cas nominal et le cas d’erreur.
 
-5. **Documentez** la nouvelle compétence dans le tableau `Available Skills` de ce fichier.
+5. **Documenter** la nouvelle compétence dans le tableau `Available Skills` de ce fichier.
 
 ---
 

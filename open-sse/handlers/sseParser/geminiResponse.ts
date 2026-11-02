@@ -205,6 +205,22 @@ function resolveCompletionTokens(
       ? nonNegativeOr(previousUsage.completion_tokens, undefined)
       : candidateTokens + (reasoningTokens ?? 0);
   return { completionTokens, reasoningTokens };
+/** Resolve total tokens while preserving Gemini's first-zero and later-zero semantics. */
+function resolveTotalTokens(
+  reportedTotalTokens: number | undefined,
+  previousUsage: Record<string, unknown>,
+  previousTotalTokens: number | undefined,
+  promptTokens: number | undefined,
+  completionTokens: number | undefined
+): number | undefined {
+  const derivedTotal =
+    typeof promptTokens === "number" && typeof completionTokens === "number"
+      ? promptTokens + completionTokens
+      : undefined;
+  return reportedTotalTokens === 0 &&
+    !Object.prototype.hasOwnProperty.call(previousUsage, "total_tokens")
+    ? derivedTotal
+    : (reportedTotalTokens ?? previousTotalTokens ?? derivedTotal);
 }
 
 /** Extract usageMetadata into the OpenAI-shaped usage object, if present. */
@@ -213,15 +229,19 @@ function applyUsageMetadata(parsed: Record<string, unknown>, acc: GeminiSSEAccum
   if (!um) return;
 
   const previousUsage = acc.usage ?? {};
-  const promptTokens = nonNegativeOr(um.promptTokenCount, previousUsage.prompt_tokens);
+  const previousPromptTokens = nonNegativeOr(previousUsage.prompt_tokens, undefined);
+  const previousTotalTokens = nonNegativeOr(previousUsage.total_tokens, undefined);
+  const promptTokens = nonNegativeOr(um.promptTokenCount, previousPromptTokens);
   const { completionTokens, reasoningTokens } = resolveCompletionTokens(um, previousUsage);
-  // Gemini may omit totalTokenCount (or report 0); keep the last total, else derive it.
-  const totalTokens =
-    nonNegativeOr(um.totalTokenCount, 0) ||
-    previousUsage.total_tokens ||
-    (typeof promptTokens === "number" && typeof completionTokens === "number"
-      ? promptTokens + completionTokens
-      : undefined);
+  // Preserve the upstream total-zero semantics and the PR reasoning-inclusive counts.
+  const totalTokens = resolveTotalTokens(
+    nonNegativeOr(um.totalTokenCount, undefined),
+    previousUsage,
+    previousTotalTokens,
+    promptTokens,
+    completionTokens
+  );
+
   const previousCachedTokens = (
     previousUsage.prompt_tokens_details as { cached_tokens?: number } | undefined
   )?.cached_tokens;

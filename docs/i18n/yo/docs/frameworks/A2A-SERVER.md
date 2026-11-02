@@ -197,17 +197,17 @@ Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-
 
 ---
 
-## Fífi Ọgbọ́n Tuntun Kún Un
+## Fí Ìmọ̀ Tuntun Kún Un
 
-1. **Ṣẹ̀dá fáìlì ọgbọ́n:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Ṣẹ̀dá fáìlì ìmọ̀:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Gbé iṣẹ́ async kan jáde `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Tẹ̀lé ìrísí àwọn ọgbọ́n tó ti wà bíi `smartRouting.ts`.
+   Ṣe àgbéjáde iṣẹ́ async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Tẹ̀lé ìṣètò àwọn ìmọ̀ tó ti wà tẹ́lẹ̀ bíi `smartRouting.ts`.
 
-2. **Forúkọsílẹ̀ olùtọ́jú:** nínú `src/lib/a2a/taskExecution.ts`, fi àkọsílẹ̀ kan kún `A2A_SKILL_HANDLERS`:
+2. **Forúkọsílẹ̀ olùṣàkóso:** nínú `src/lib/a2a/taskExecution.ts`, fi àkọsílẹ̀ kan kún `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...àwọn ọgbọ́n tó ti wà
+     // ...àwọn ìmọ̀ tó ti wà tẹ́lẹ̀
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-
    };
    ```
 
-3. **Ṣàfihàn rẹ̀ nínú Káàdì Aṣojú:** nínú `src/app/.well-known/agent.json/route.ts`, fi kún àkójọpọ̀ `skills`:
+3. **Ṣàfihàn rẹ̀ nínú Káàdì Agent:** nínú `src/lib/a2a/agentCardMetadata.ts` (tí `/.well-known/agent.json` àti `/.well-known/agent-card.json` ń lò papọ̀), fi kún àkójọpọ̀ `skills`:
 
    ```json
    {
@@ -227,9 +227,9 @@ Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-
    }
    ```
 
-4. **Kọ àwọn ìdánwò:** `tests/unit/a2a-<your-skill>.test.ts`. Ṣe àyẹ̀wò ipa ọ̀nà àṣeyọrí + ipa ọ̀nà àṣìṣe.
+4. **Kọ àwọn àyẹ̀wò:** `tests/unit/a2a-<your-skill>.test.ts`. Ṣe àyẹ̀wò ọ̀nà àṣeyọrí àti ọ̀nà àṣìṣe.
 
-5. **Ṣàkọsílẹ̀** ọgbọ́n tuntun náà sínú tábìlì `Available Skills` ti fáìlì yìí.
+5. **Ṣàkọsílẹ̀ àlàyé** ìmọ̀ tuntun náà sínú tábìlì `Available Skills` ti fáìlì yìí.
 
 ---
 

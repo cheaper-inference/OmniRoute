@@ -104,9 +104,9 @@
 
 ## 5. تحديث المجموعة
 
-ينسخ `scripts/dev/sync-ui-kit.sh <commit> [clone]` مجلد `src/` المصدري عند ذلك الالتزام (commit) إلى
-`packages/ui-kit/src` ويطبق التحويل الوحيد المسموح به (إزالة اللاحقة `.js` من عمليات الاستيراد النسبية). ثم: راجع `git diff packages/ui-kit`، وقم بجولة بصرية على الموفرين (providers) والإعدادات والمجموعات (combos) والاستخدام ونقطة النهاية في كلا السمتين، وشغِّل `npm run check:ui-kit-snapshot` و`npm run test:vitest:ui`،
-وافتح طلب الدمج (PR) مع سجل التغييرات من المصدر الأصلي.
+يقارن `npm run check:ui-kit-upstream` الإصدار المثبت في `packages/ui-kit/UPSTREAM.md` مع أحدث علامة `v*` في الريبو الأولي ويطبع أمر المزامنة عند انتهاء الإصدار. يقوم سير عمل `UI Kit upstream watch` الأسبوعي (`.github/workflows/ui-kit-upstream-watch.yml`) بتشغيل نفس الفحص ويبقي مشكلة تتبع واحدة مفتوحة أثناء وجود الدبوس في الخلف؛ يعد الريبو الأولي خاصًا، لذا يحتاج سير العمل إلى رمز مميز للقراءة فقط في سر `UI_KIT_READ_TOKEN` ويظل خاملاً بدونه.
+
+ينسخ `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` المنبع `src/` عند ذلك الالتزام (`latest` = أحدث علامة `v*` ) إلى `packages/ui-kit/src`، ويطبق التحويل الفردي المسموح به (يسقط لاحقة `.js` من الواردات النسبية)، ويضبط إصدار مساحة العمل في `packages/ui-kit/package.json` و `package-lock.json` على الإصدار المنبع. بعد ذلك: قم بمراجعة `git diff packages/ui-kit`، وقم بإجراء تمريرة مرئية على الموفرين، والإعدادات، والمجموعات، والاستخدام ونقطة النهاية في كلا الموضوعين، وقم بتشغيل `npm run check:ui-kit-snapshot` و `npm run test:vitest:ui`، وافتح PR باستخدام سجل التغيير الأولي.
 
 ## 6. المخططات README
 
