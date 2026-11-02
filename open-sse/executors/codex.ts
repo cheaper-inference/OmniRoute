@@ -961,7 +961,17 @@ export class CodexExecutor extends BaseExecutor {
     }
 
     const url = CODEX_RESPONSES_WS_URL;
-    const headers = normalizeCodexWsHeaders(this.buildHeaders(nextInput.credentials, true));
+    // Same identity inputs as the HTTP path (base.ts): the client's session headers and body.
+    const headers = normalizeCodexWsHeaders(
+      this.buildHeaders(
+        nextInput.credentials,
+        true,
+        nextInput.clientHeaders,
+        nextInput.model,
+        undefined,
+        nextInput.body
+      )
+    );
     mergeUpstreamExtraHeaders(headers, nextInput.upstreamExtraHeaders);
 
     const transformedBody = (await this.transformRequest(

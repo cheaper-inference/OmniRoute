@@ -108,3 +108,39 @@ test("session_id carries the client's own session (header alias, then client pro
   }) as Record<string, string>;
   assert.equal(viaBody.session_id, "conv-client-B");
 });
+
+test("the WebSocket transport carries the client's session like the HTTP path", async () => {
+  const { __setCodexWebSocketTransportForTesting } =
+    await import("../../open-sse/executors/codex.ts");
+  let socket: {
+    send: (data: string) => void;
+    close: () => void;
+    onmessage: ((event: { data: unknown }) => void) | null;
+    onerror: ((event: { message?: string }) => void) | null;
+    onclose: ((event?: { code?: number; reason?: string }) => void) | null;
+  } | null = null;
+  __setCodexWebSocketTransportForTesting(async () => {
+    socket = { send() {}, close() {}, onmessage: null, onerror: null, onclose: null };
+    return socket;
+  });
+  try {
+    const result = (await new CodexExecutor().execute({
+      model: "gpt-6.1-sol",
+      body: { model: "gpt-6.1-sol", input: [], prompt_cache_key: "conv-client-B", stream: true },
+      stream: true,
+      credentials: {
+        accessToken: "t",
+        providerSpecificData: {
+          workspaceId: "ws-account-wide-1",
+          codexTransport: "websocket",
+          codexFingerprintMode: "off",
+        },
+      },
+      clientHeaders: { "x-opencode-session-id": "ses_opencode_A" },
+    } as never)) as { headers?: Record<string, string> };
+    assert.equal(result.headers?.session_id, "ses_opencode_A");
+  } finally {
+    socket?.onclose?.({ code: 1000 });
+    __setCodexWebSocketTransportForTesting(undefined);
+  }
+});
