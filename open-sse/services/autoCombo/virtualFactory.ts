@@ -11,7 +11,7 @@ import { isMicrosoftDesignerWebRetiredProviderId } from "@/shared/constants/desi
 import { isRuntimeRetiredProviderId } from "@/shared/constants/providerRetirement";
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";
 import { hasUsableWebSessionCredential } from "@/shared/providers/webSessionCredentials";
-import { toNumber } from "@/shared/utils/numeric";
+import { toNumber } from "../../utils/numeric.ts";
 import { isCompatibleProviderConnectionId } from "@/shared/utils/compatibleProviderId";
 import { defaultLogger as log } from "@omniroute/open-sse/utils/logger";
 import { getTokenLimit } from "../contextManager";
