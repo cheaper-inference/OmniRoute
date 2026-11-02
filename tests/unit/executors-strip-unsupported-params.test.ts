@@ -72,11 +72,15 @@ test("stripUnsupportedParams: github strips temperature for GPT-5.4+ and GPT-6.x
     "gpt-6-astra",
     "gpt-6.0",
     "gpt-6.1-sol",
+    "gpt-6.1-terra",
     "GPT-6.10",
   ]) {
     const body: Record<string, unknown> = { temperature: 0.7, top_p: 1 };
     stripUnsupportedParams("github", model, body);
-    assert.deepEqual(body, { top_p: 1 }, `${model}: temperature must be stripped`);
+    assert.deepEqual(body, { top_p: 1 }, `${model}: temperature must be stripped for github`);
+    const gheBody: Record<string, unknown> = { temperature: 0.7, top_p: 1 };
+    stripUnsupportedParams("ghe-copilot", model, gheBody);
+    assert.deepEqual(gheBody, { top_p: 1 }, `${model}: temperature must be stripped for ghe-copilot`);
   }
 });
 

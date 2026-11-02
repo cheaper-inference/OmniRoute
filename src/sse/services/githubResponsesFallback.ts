@@ -12,15 +12,18 @@
  * Claude and Gemini ids are excluded: Copilot's /responses endpoint rejects them.
  */
 
-const GITHUB_RESPONSES_ONLY_GPT = /^gpt-(?:[6-9]|5\.[5-9])/i;
+const GITHUB_RESPONSES_ONLY_GPT = /^(?:.*codex.*|gpt-(?:[6-9]|5\.[5-9]).*)$/i;
 const NON_RESPONSES_FAMILY = /claude|gemini/i;
 
 export function inferGithubUnsyncedTargetFormat(
   providerId: string,
   modelId: string
 ): "openai-responses" | undefined {
-  if (providerId !== "github") return undefined;
-  if (!GITHUB_RESPONSES_ONLY_GPT.test(modelId) || NON_RESPONSES_FAMILY.test(modelId)) {
+  if (providerId !== "github" && providerId !== "gh" && providerId !== "ghe-copilot") {
+    return undefined;
+  }
+  const bareModelId = modelId.replace(/^(?:github|gh|ghe-copilot)\//i, "");
+  if (!GITHUB_RESPONSES_ONLY_GPT.test(bareModelId) || NON_RESPONSES_FAMILY.test(bareModelId)) {
     return undefined;
   }
   return "openai-responses";

@@ -59,10 +59,6 @@ export function resolveChatCoreTargetFormat(opts: {
   // #8994: model-level targetFormat overrides (from registry or custom-model DB override)
   // take precedence over apiFormat="responses" — otherwise Vertex Claude models with
   // targetFormat="claude" get wrongly routed to OpenAI Responses format.
-  // #9161: a custom OpenAI-compatible Chat connection must likewise keep its configured
-  // outbound protocol when a Responses-shaped client (for example Codex) calls /responses.
-  // Registry-declared connection alternates are equally explicit: a DeepSeek connection set to
-  // Anthropic must stay on /anthropic/v1/messages even when the caller speaks Responses.
   let targetFormat =
     modelTargetFormat ||
     customModelTargetFormat ||
