@@ -50,6 +50,8 @@ import {
   parseCfToolCalls,
   buildCfToolConversationPrompt,
   stripCfToolMarkup,
+  stripCfToolResults,
+  hasFabricatedCfToolResult,
   finalizeCfToolCalls,
   hasMalformedCfToolIntent,
   cfToolNonce,
@@ -85,26 +87,31 @@ const BLOCKED_MESSAGE =
 
 /**
  * Maximum number of retry attempts for tool call validation failures.
+ *
+ * Each retry is a *fresh* playground room carrying a corrective reminder that
+ * names the exact gate that failed, so the budget is what a drifting model
+ * gets before the turn is declared unrecoverable (see the hard failure after
+ * the loop — a turn that never produced a call is no longer silently shipped
+ * as `finish_reason: "stop"`). Exported so tests can assert the production
+ * budget without paying it in wall clock.
  */
-const MAX_TOOL_RETRIES = 3;
+export const MAX_TOOL_RETRIES = 10;
 
 /**
  * Delay between retry attempts in milliseconds.
+ *
+ * Deliberately not shortened: the playground rate-limits per IP per minute
+ * ("3021: rate limiting: inference request per min rate reached"), and a burst
+ * of back-to-back repair attempts is exactly what trips it. Exported for the
+ * same reason as MAX_TOOL_RETRIES.
  */
-const RETRY_DELAY_MS = 5000;
+export const RETRY_DELAY_MS = 5000;
 
 /**
  * Build a targeted corrective reminder based on the specific validation failure.
  */
 function buildToolRetryReminder(
-  failure:
-    | "invalid_json"
-    | "missing_type"
-    | "wrong_type"
-    | "missing_name"
-    | "invalid_name"
-    | "missing_arguments"
-    | "malformed_intent",
+  failure: CfToolGateFailure,
   availableTools: CfToolDef[],
   nonce: string
 ): string {
@@ -183,6 +190,27 @@ function buildToolRetryReminder(
         "\n" +
         "Retry with a valid arguments object."
       );
+    case "fabricated_result":
+      return (
+        "Your previous response invented a tool result: it contained a " +
+        '{"tool_result": ...} object for a tool that has not been run. ' +
+        "No tool has executed in this conversation yet, and you must never write a tool's " +
+        "output yourself — only the harness can return one. " +
+        "Take the action instead. Reply with ONLY the JSON call:\n" +
+        schemaExample +
+        "\n\nAvailable tools: " +
+        toolNames +
+        "\nThe harness will run the tool and send you its real result as the next message."
+      );
+    case "empty_response":
+      return (
+        "Your previous response was empty — it carried neither text nor a tool call, so there " +
+        "was nothing for the client to act on. Perform the next concrete step now. If it needs " +
+        "a tool, reply with ONLY the JSON call:\n" +
+        schemaExample +
+        "\n\nAvailable tools: " +
+        toolNames
+      );
     case "malformed_intent":
     default:
       return (
@@ -210,6 +238,23 @@ export type CfEnvelopeGateFailure =
   | "missing_name"
   | "invalid_name"
   | "missing_arguments";
+
+/**
+ * Every reason a reply can fail the tool-call contract. The envelope failures
+ * above are shape failures on one JSON document; the two below are failures of
+ * the turn as a whole — a reply that only *looks* like tool intent
+ * (`malformed_intent`), one that answers its own call (`fabricated_result`),
+ * and one that carries nothing at all (`empty_response`).
+ */
+export type CfToolGateFailure =
+  CfEnvelopeGateFailure | "malformed_intent" | "fabricated_result" | "empty_response";
+
+/** The verdict one reply (or one channel of it) earns from the gates. */
+export interface CfGateOutcome {
+  calls: CfParsedToolCall[];
+  retry: boolean;
+  reason: CfToolGateFailure | null;
+}
 
 /**
  * Gate one raw envelope value — the bytes the model actually sent — against
@@ -733,7 +778,12 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       new PlaywrightCfTransport(chatId),
     // Injectable so tests can force the timeout branch without waiting
     // CHAT_TIMEOUT_MS (120s) for a real timer to fire.
-    private chatTimeoutMs: number = CHAT_TIMEOUT_MS
+    private chatTimeoutMs: number = CHAT_TIMEOUT_MS,
+    // Same reasoning: exercising exhaustion otherwise costs
+    // MAX_TOOL_RETRIES * RETRY_DELAY_MS (10 * 5s = 50s) of real wall clock per
+    // test, and the production values are asserted separately.
+    private maxToolRetries: number = MAX_TOOL_RETRIES,
+    private retryDelayMs: number = RETRY_DELAY_MS
   ) {
     super("cloudflare-playground", { id: "cloudflare-playground", baseUrl: PLAYGROUND_URL });
   }
@@ -851,18 +901,20 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     const requestedNames = getRequestedToolNames(tools);
 
     /**
-     * Evaluate one raw reply against every tool-call gate. `retry` is the
-     * decision: any gate that fails sets it, and the executor re-asks the
-     * model with a reminder naming the exact failure. `calls` holds the
-     * accepted calls when every gate passed.
+     * Evaluate one raw channel of a reply against every tool-call gate. `retry`
+     * is the decision: any gate that fails sets it, and the executor re-asks the
+     * model with a reminder naming the exact failure. `calls` holds the accepted
+     * calls when every gate passed.
+     *
+     * Deliberately channel-agnostic about *where* the bytes came from: the
+     * playground decides whether a reply lands on `text-delta` or
+     * `reasoning-delta`, and reasoner models (gpt-oss-120b observed) routinely
+     * emit the whole answer — tool call included — on the reasoning channel
+     * with an empty text channel. Gating only `text` was why those turns
+     * returned `finish_reason: "stop"` with the call sitting unread in the
+     * thinking block.
      */
-    const evaluateReply = (
-      text: string
-    ): {
-      calls: CfParsedToolCall[];
-      retry: boolean;
-      reason: CfEnvelopeGateFailure | "malformed_intent" | null;
-    } => {
+    const evaluateReply = (text: string): CfGateOutcome => {
       if (!hasTools) return { calls: [], retry: false, reason: null };
 
       // Gate A — a reply that *is* one JSON value must be a valid envelope:
@@ -895,6 +947,47 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       return { calls: [], retry: false, reason: null };
     };
 
+    /**
+     * Gate one reply across both of the channels it may have arrived on.
+     *
+     * Order is load-bearing:
+     *   1. **fabrication** — a reply that emits its own `{"tool_result": …}`
+     *      is untrustworthy even when it also carries a well-formed call: the
+     *      model believes the tool already ran, so continuing off it would
+     *      resume from an invented state;
+     *   2. **the text channel**, authoritative whenever it yields anything, so
+     *      a real answer is never overridden by a stray tool-shaped thought;
+     *   3. **the reasoning channel**, consulted only when the text channel had
+     *      nothing — this is the fallback that recovers a reasoning-only call;
+     *   4. **nothing anywhere** — no text, no reasoning, no call is a blank
+     *      assistant message and is retried rather than shipped.
+     *
+     * Pure prose in the reasoning channel with an empty text channel is *not*
+     * a failure: it returns `retry: false`, and the response builder promotes
+     * it to `content` so a legitimate finished-task summary still reaches the
+     * client as a normal `stop`.
+     */
+    const evaluateReplyChannels = (text: string, reasoning: string): CfGateOutcome => {
+      if (!hasTools) return { calls: [], retry: false, reason: null };
+
+      if (hasFabricatedCfToolResult(text) || hasFabricatedCfToolResult(reasoning)) {
+        return { calls: [], retry: true, reason: "fabricated_result" };
+      }
+
+      const primary = evaluateReply(text);
+      if (primary.calls.length > 0 || primary.retry) return primary;
+
+      if (reasoning.trim()) {
+        const fallback = evaluateReply(reasoning);
+        if (fallback.calls.length > 0 || fallback.retry) return fallback;
+      }
+
+      if (!text.trim() && !reasoning.trim()) {
+        return { calls: [], retry: true, reason: "empty_response" };
+      }
+      return primary;
+    };
+
     const attemptMessages = (repairNote?: string) =>
       repairNote ? [...originalMessages, { role: "user", content: repairNote }] : originalMessages;
 
@@ -911,12 +1004,29 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
 
     let parser = attempt.parser;
     let timedOut = attempt.timedOut;
-    let gate = evaluateReply(parser.text);
 
-    // Retry loop: any failed gate re-asks the model (up to MAX_TOOL_RETRIES
+    /**
+     * Gate a finished attempt's reply.
+     *
+     * An upstream error frame (rate limit, blocked session) or our own chat
+     * timer means the reply never arrived — it is not a tool-call failure and
+     * must not be charged against the model's retry budget, or a single 3021
+     * would burn all ten attempts while the upstream stays unhappy.
+     */
+    const gateReply = (p: CfStreamParser, timedOutFlag: boolean): CfGateOutcome => {
+      if (p.error) return { calls: [], retry: false, reason: null };
+      if (timedOutFlag && !p.text.trim() && !p.reasoningText.trim()) {
+        return { calls: [], retry: false, reason: null };
+      }
+      return evaluateReplyChannels(p.text, p.reasoningText);
+    };
+
+    let gate = gateReply(parser, timedOut);
+
+    // Retry loop: any failed gate re-asks the model (up to maxToolRetries
     // times, one fresh room each) with a reminder naming the exact failure.
     let retryCount = 0;
-    while (gate.retry && retryCount < MAX_TOOL_RETRIES) {
+    while (gate.retry && retryCount < this.maxToolRetries) {
       retryCount++;
 
       const reminder = buildToolRetryReminder(
@@ -926,13 +1036,13 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       );
       const retrySuffix = `-retry-${retryCount}`;
 
-      await sleep(RETRY_DELAY_MS);
+      await sleep(this.retryDelayMs);
 
       const retry = await runAttempt(attemptMessages(reminder), retrySuffix);
       if (retry.ok === true) {
         parser = retry.parser;
         timedOut = retry.timedOut;
-        gate = evaluateReply(parser.text);
+        gate = gateReply(parser, timedOut);
       } else {
         gate = { calls: [], retry: false, reason: null };
         break;
@@ -942,16 +1052,65 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     let toolCalls = gate.calls;
 
     // Retry if the current response ends with a colon (mid-sentence stop) and
-    // no tool call was produced — the model stopped before finishing its answer.
+    // no tool call was produced — the model stopped before finishing its
+    // answer. Skipped when the gate loop already exhausted: that reply has been
+    // re-asked `maxToolRetries` times, and one more attempt without a reminder
+    // would reproduce the same failure.
     const responseEndsWithColon = parser.text.trim().endsWith(":");
-    if (responseEndsWithColon && toolCalls.length === 0 && !timedOut) {
+    if (!gate.retry && responseEndsWithColon && toolCalls.length === 0 && !timedOut) {
       const colonRetry = await runAttempt(attemptMessages(), "-colon-retry");
       if (colonRetry.ok === true) {
         parser = colonRetry.parser;
         timedOut = colonRetry.timedOut;
-        toolCalls = evaluateReply(parser.text).calls;
+        gate = gateReply(parser, timedOut);
+        toolCalls = gate.calls;
       }
     }
+
+    /**
+     * Hard failure: the model was re-asked `maxToolRetries` times and still
+     * never produced a usable call. Returning its last broken reply as
+     * `finish_reason: "stop"` is what made OpenCode appear to stop mid-task
+     * with no error at all — the client had no way to tell a finished turn
+     * from an unrecoverable one. Non-streaming reports it as HTTP 502 (which
+     * OmniRoute's fallback treats as a retryable upstream failure, so the
+     * router can move the request to another provider); streaming has already
+     * committed 200, so it emits an error chunk before `[DONE]`.
+     *
+     * A reply that legitimately has no call — prose, a promoted summary — has
+     * `retry: false` and never reaches this branch.
+     */
+    let recoveryFailure: { message: string; failure: CfToolGateFailure; attempts: number } | null =
+      null;
+    if (gate.retry && gate.reason) {
+      const failure = gate.reason;
+      const attempts = 1 + retryCount;
+      recoveryFailure = {
+        failure,
+        attempts,
+        message:
+          `Cloudflare Playground model failed to produce a valid tool call after ` +
+          `${attempts} attempt${attempts === 1 ? "" : "s"} ` +
+          `(last failure: ${failure}). The tool was never executed.`,
+      };
+    }
+
+    /**
+     * A reasoner that answered entirely on the reasoning channel still
+     * produced an answer. Promote it to `content` so a finished-task summary
+     * reaches the client as a normal `stop` instead of `content: null` — the
+     * text channel always wins when it has anything.
+     */
+    const reasoningContent = stripCfToolResults(
+      stripCfToolMarkup(
+        parser.reasoningText,
+        availableTools.map((t) => t.name)
+      )
+    );
+    const promoteReasoning =
+      !parser.text.trim() && Boolean(reasoningContent.trim()) && toolCalls.length === 0;
+    const answerText = promoteReasoning ? reasoningContent : parser.text;
+    const emittedReasoning = promoteReasoning ? "" : reasoningContent;
 
     if (!wantStream) {
       if (parser.error) {
@@ -960,8 +1119,11 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       if (timedOut && !parser.text) {
         return makeErrorResult(504, "Cloudflare Playground timed out", body, PLAYGROUND_URL);
       }
+      if (recoveryFailure) {
+        return makeErrorResult(502, recoveryFailure.message, body, PLAYGROUND_URL);
+      }
 
-      const text = parser.text;
+      const text = answerText;
       let finishReason = parser.finishReason ?? "stop";
       let content: string | null = text;
       if (toolCalls.length > 0) {
@@ -975,8 +1137,8 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       }
 
       const messagePayload: Record<string, unknown> = { role: "assistant", content };
-      if (parser.reasoningText) {
-        messagePayload.reasoning_content = parser.reasoningText;
+      if (emittedReasoning) {
+        messagePayload.reasoning_content = emittedReasoning;
       }
       if (toolCalls.length > 0) {
         messagePayload.tool_calls = toolCalls.map((tc) => ({
@@ -1002,7 +1164,7 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
             ],
             usage: {
               prompt_tokens: 0,
-              completion_tokens: Math.ceil((text.length + parser.reasoningText.length) / 4),
+              completion_tokens: Math.ceil((text.length + emittedReasoning.length) / 4),
               total_tokens: 0,
             },
           }),
@@ -1017,15 +1179,22 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     // Streaming: buffer the full response first, then parse tool calls and emit clean chunks
     const encoder = new TextEncoder();
     const bufferError = parser.error ?? null;
-    const bufferReasoning = parser.reasoningText;
+    const bufferReasoning = emittedReasoning;
 
-    const fullText = parser.text;
+    const fullText = answerText;
     let finishReason = parser.finishReason ?? "stop";
     let content: string | null = fullText;
     if (toolCalls.length > 0) {
       finishReason = "tool_calls";
       content = stripCfToolMarkup(fullText, toolNames);
       if (!content) content = null;
+    } else if (recoveryFailure) {
+      // Never stream a half-answered turn as `finish_reason: "stop"`: the
+      // client would read it as a normal completion (this is exactly how the
+      // reasoning-channel bug shipped). Nothing of the broken reply goes out
+      // ahead of the error — see the error chunk below.
+      content = null;
+      finishReason = "stop";
     }
 
     // Build the response stream
@@ -1043,8 +1212,9 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
           // Emit role
           enqueue({ delta: { role: "assistant" }, finish_reason: null });
 
-          // Emit reasoning if present
-          if (bufferReasoning) {
+          // Emit reasoning if present — suppressed on a failed recovery, where
+          // there is no trustworthy answer to stream at all.
+          if (bufferReasoning && !recoveryFailure) {
             enqueue({ delta: { reasoning_content: bufferReasoning }, finish_reason: null });
           }
 
@@ -1089,6 +1259,19 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
                 message: "Cloudflare Playground timed out",
                 type: "timeout_error",
                 code: "HTTP_504",
+              },
+            });
+          } else if (recoveryFailure) {
+            // The streaming response already committed HTTP 200, so the only
+            // way left to fail loudly is an error chunk before [DONE] — the
+            // same channel the timeout_error above uses. Message goes through
+            // no upstream text (it is ours), but is still bounded and
+            // stack-free: it carries the gate reason and attempt count only.
+            enqueue({
+              error: {
+                message: recoveryFailure.message,
+                type: "tool_call_recovery_failed",
+                code: "HTTP_502",
               },
             });
           }
