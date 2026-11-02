@@ -215,7 +215,7 @@ Mỗi hàng bao gồm cột `rawUrl` để các tổng đài viên có thể tì
    };
    ```
 
-3. **Công khai trong Agent Card:** trong `src/app/.well-known/agent.json/route.ts`, thêm vào mảng `skills`:
+3. **Công khai trong Thẻ tác nhân:** trong `src/lib/a2a/agentCardMetadata.ts` (được dùng chung bởi `/.well-known/agent.json` và `/.well-known/agent-card.json`), thêm vào mảng `skills`:
 
    ```json
    {
@@ -227,9 +227,9 @@ Mỗi hàng bao gồm cột `rawUrl` để các tổng đài viên có thể tì
    }
    ```
 
-4. **Viết kiểm thử:** `tests/unit/a2a-<your-skill>.test.ts`. Bao quát luồng thành công + luồng lỗi.
+4. **Viết kiểm thử:** `tests/unit/a2a-<your-skill>.test.ts`. Bao quát trường hợp thành công và trường hợp lỗi.
 
-5. **Ghi lại tài liệu** cho kỹ năng mới trong bảng `Available Skills` của tệp này.
+5. **Ghi tài liệu** cho kỹ năng mới trong bảng `Available Skills` của tệp này.
 
 ---
 

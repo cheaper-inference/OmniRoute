@@ -119,13 +119,11 @@
    primerjajte izrisani markup pred spremembo in po njej — spremembe odmika ali ovojnice se prenesejo na
    vsak zaslon.
 
-## 5. Posodabljanje kita
+## 5. Posodabljanje kompleta
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` skopira upstream `src/` pri tem commitu v
-`packages/ui-kit/src` in uporabi edino dovoljeno transformacijo (odstrani pripono `.js` iz relativnih
-uvozov). Nato: preglejte `git diff packages/ui-kit`, vizualno preverite ponudnike, nastavitve, kombinacije,
-uporabo in končno točko v obeh temah, zaženite `npm run check:ui-kit-snapshot` in `npm run test:vitest:ui`
-ter odprite PR z upstream dnevnikom sprememb.
+`npm run check:ui-kit-upstream` primerja različico, pripeto v `packages/ui-kit/UPSTREAM.md` z najnovejšo oznako `v*` zgornjega repoja in natisne ukaz za sinhronizacijo, ko je izdaja izdana. Tedenski potek dela `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) izvaja isto preverjanje in ohranja eno težavo s sledenjem odprto, medtem ko je žebljiček zadaj; repo navzgor je zaseben, zato potek dela potrebuje žeton samo za branje v skrivnosti `UI_KIT_READ_TOKEN` in ostane neaktiven brez njega.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` prekopira `src/` navzgor pri tej objavi (`latest` = najnovejša oznaka `v*` ) v `packages/ui-kit/src`, uporabi eno samo dovoljeno transformacijo (spusti pripono `.js` iz relativnih uvozov) in nastavi različico delovnega prostora v `packages/ui-kit/package.json` in `package-lock.json` na navzgor. Nato: preglejte `git diff packages/ui-kit`, vizualno preglejte ponudnike, nastavitve, kombinacije, uporabo in končno točko v obeh temah, zaženite `npm run check:ui-kit-snapshot` in `npm run test:vitest:ui` ter odprite PR z dnevnikom sprememb navzgor.
 
 ## 6. README diagrami
 

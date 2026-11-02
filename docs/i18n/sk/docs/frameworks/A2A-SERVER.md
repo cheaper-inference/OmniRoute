@@ -215,15 +215,15 @@ Koncový bod JSON-RPC `/a2a` je štandardným vstupným bodom A2A. Nižšie uved
    };
    ```
 
-3. **Sprístupnite ju na karte agenta:** v súbore `src/app/.well-known/agent.json/route.ts` ju pridajte do poľa `skills`:
+3. **Sprístupnite ju v karte agenta:** v súbore `src/lib/a2a/agentCardMetadata.ts` (zdieľanom medzi `/.well-known/agent.json` a `/.well-known/agent-card.json`) pridajte do poľa `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
-     "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "name": "Vaša zručnosť",
+     "description": "Stručný opis zameraný na zámer",
+     "tags": ["smerovanie", "kvóta"],
+     "examples": ["Ukážkové vyvolanie v prirodzenom jazyku"]
    }
    ```
 

@@ -199,37 +199,37 @@ Il-punt ta' dħul JSON-RPC `/a2a` huwa l-punt A2A kanoniku. L-estremitajiet REST
 
 ## Żieda ta' Ħila Ġdida
 
-1. **Ħoloq tal-ħila:** `src/lib/a2a/skills/<ħila-ġdida>.ts`
+1. **Oħloq il-fajl tal-ħila:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Esporta funzjoni asinkrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Segwi l-forma ta' ħiliet eżistenti bħal `smartRouting.ts`.
+   Esporta funzjoni asinkronika `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Segwi l-istruttura tal-ħiliet eżistenti bħal `smartRouting.ts`.
 
-2. **Irreġistra l-handlur:** f'`src/lib/a2a/taskExecution.ts`, żid dħul għal `A2A_SKILL_HANDLERS`:
+2. **Irreġistra l-handler:** f'`src/lib/a2a/taskExecution.ts`, żid entrata ma' `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...ħiliet eżistenti
-     "ħila-ġdida": async (task) => {
-       const skillModule = await import("./skills/skillGdida");
-       return skillModule.executeSkillGdida(task);
+     "your-skill": async (task) => {
+       const skillModule = await import("./skills/yourSkill");
+       return skillModule.executeYourSkill(task);
      },
    };
    ```
 
-3. **Agħmilha disponibbli fil-Kard tal-Aġent:** f'`src/app/.well-known/agent.json/route.ts`, appendi għall-kunsinna `skills`:
+3. **Esponiha fil-Kard tal-Aġent:** f'`src/lib/a2a/agentCardMetadata.ts` (kondiviż minn `/.well-known/agent.json` u `/.well-known/agent-card.json`), żid mal-array `skills`:
 
    ```json
    {
-     "id": "ħila-ġdida",
-     "name": "Ħila Ġdida",
-     "description": "Deskrizzjoni qasira, iffukata l-intenzjoni",
+     "id": "your-skill",
+     "name": "Il-Ħila Tiegħek",
+     "description": "Deskrizzjoni qasira ffukata fuq l-intenzjoni",
      "tags": ["routing", "quota"],
-     "examples": ["Eżempju ta' sejħa bil-lingwa naturali"]
+     "examples": ["Eżempju ta' invokazzjoni b'lingwa naturali"]
    }
    ```
 
-4. **Ikteb testijiet:** `tests/unit/a2a-<ħila-ġdida>.test.ts`. Ħu ħsieb it-triq ferħana + it-triq tal-żbalji.
+4. **Ikteb it-testijiet:** `tests/unit/a2a-<your-skill>.test.ts`. Inkludi l-każ ta' suċċess u l-każ ta' żball.
 
-5. **Dokumenta** l-ħila ġdida fil-tabella `Available Skills` ta' dan il-fajl.
+5. **Iddokumenta** l-ħila l-ġdida fit-tabella `Available Skills` ta' dan il-fajl.
 
 ---
 

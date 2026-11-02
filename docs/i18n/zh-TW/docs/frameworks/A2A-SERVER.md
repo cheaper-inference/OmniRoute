@@ -198,11 +198,11 @@ JSON-RPC 端點 `/a2a` 是標準的 A2A 進入點。以下 REST 端點為儀表�
 
 ## 新增技能
 
-1. **建立技能檔案：**`src/lib/a2a/skills/<your-skill>.ts`
+1. **建立技能檔案：** `src/lib/a2a/skills/<your-skill>.ts`
 
-   匯出非同步函式 `(task: A2ATask) => Promise<{ artifacts, metadata }>`。請依循現有技能（例如 `smartRouting.ts`）的結構。
+   匯出一個非同步函式 `(task: A2ATask) => Promise<{ artifacts, metadata }>`。請遵循現有技能的結構，例如 `smartRouting.ts`。
 
-2. **註冊處理常式：**在 `src/lib/a2a/taskExecution.ts` 中，新增項目至 `A2A_SKILL_HANDLERS`：
+2. **註冊處理常式：** 在 `src/lib/a2a/taskExecution.ts` 中，新增一個項目至 `A2A_SKILL_HANDLERS`：
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -214,21 +214,21 @@ JSON-RPC 端點 `/a2a` 是標準的 A2A 進入點。以下 REST 端點為儀表�
    };
    ```
 
-3. **公開於 Agent Card：**在 `src/app/.well-known/agent.json/route.ts` 中，附加至 `skills` 陣列：
+3. **公開於代理卡片中：** 在 `src/lib/a2a/agentCardMetadata.ts`（由 `/.well-known/agent.json` 與 `/.well-known/agent-card.json` 共用）中，將以下內容附加至 `skills` 陣列：
 
    ```json
    {
      "id": "your-skill",
      "name": "您的技能",
-     "description": "以意圖為重點的簡短說明",
+     "description": "簡短且聚焦於意圖的描述",
      "tags": ["路由", "配額"],
-     "examples": ["自然語言呼叫範例"]
+     "examples": ["自然語言叫用範例"]
    }
    ```
 
-4. **撰寫測試：**`tests/unit/a2a-<your-skill>.test.ts`。涵蓋成功路徑與錯誤路徑。
+4. **撰寫測試：** `tests/unit/a2a-<your-skill>.test.ts`。涵蓋成功路徑與錯誤路徑。
 
-5. **記錄**此檔案之 `Available Skills` 表格中的新技能。
+5. **記錄** 此檔案的 `Available Skills` 表格中的新技能。
 
 ---
 

@@ -119,11 +119,9 @@
 
 ## 5. Kusasisha kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` hunakili `src/` ya upstream kwenye commit hiyo hadi
-`packages/ui-kit/src` na kutekeleza ubadilishaji mmoja tu unaoruhusiwa (huondoa kiambishi `.js` kutoka kwa
-imports za relative). Kisha: kagua `git diff packages/ui-kit`, fanya ukaguzi wa macho kwenye providers, settings, combos,
-usage na endpoint katika mandhari zote mbili, endesha `npm run check:ui-kit-snapshot` na `npm run test:vitest:ui`, na
-fungua PR ukiambatanisha changelog ya upstream.
+`npm run check:ui-kit-upstream` inalinganisha toleo lililobandikwa katika `packages/ui-kit/UPSTREAM.md` na lebo mpya zaidi ya `v*` ya repo ya juu na huchapisha amri ya kusawazisha wakati toleo limetoka. Mtiririko wa kazi `UI Kit upstream watch` wa kila wiki (`.github/workflows/ui-kit-upstream-watch.yml`) huendesha hundi sawa na huweka suala moja la ufuatiliaji wazi wakati pini iko nyuma; repo ya juu ni ya faragha, kwa hivyo mtiririko wa kazi unahitaji ishara ya kusoma tu katika siri `UI_KIT_READ_TOKEN` na hukaa ajizi bila hiyo.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` inakili `src/` ya juu kwenye ahadi hiyo (`latest` = `v*` tag mpya zaidi) katika `packages/ui-kit/src`, inatumia badiliko moja linaloruhusiwa (hudondosha kiambishi tamati cha `.js` kutoka kwa uagizaji jamaa), na kuweka toleo la nafasi ya kazi katika `packages/ui-kit/package.json` na `package-lock.json` hadi moja ya juu. Kisha: kagua `git diff packages/ui-kit`, fanya kibali cha kuona kwa watoa huduma, mipangilio, michanganyiko, matumizi na sehemu ya mwisho katika mada zote mbili, endesha `npm run check:ui-kit-snapshot` na `npm run test:vitest:ui`, na ufungue PR na logi ya mabadiliko ya mkondo wa juu.
 
 ## 6. michoro ya README
 

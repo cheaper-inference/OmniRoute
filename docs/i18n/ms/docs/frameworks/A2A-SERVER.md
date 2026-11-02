@@ -197,11 +197,11 @@ Titik akhir JSON-RPC `/a2a` ialah titik masuk A2A kanonik. Titik akhir REST di b
 
 ---
 
-## Menambahkan Kemahiran Baharu
+## Menambah Kemahiran Baharu
 
 1. **Cipta fail kemahiran:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksport fungsi tak segerak `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur kemahiran sedia ada seperti `smartRouting.ts`.
+   Eksport fungsi async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur kemahiran sedia ada seperti `smartRouting.ts`.
 
 2. **Daftarkan pengendali:** dalam `src/lib/a2a/taskExecution.ts`, tambahkan entri kepada `A2A_SKILL_HANDLERS`:
 
@@ -215,15 +215,15 @@ Titik akhir JSON-RPC `/a2a` ialah titik masuk A2A kanonik. Titik akhir REST di b
    };
    ```
 
-3. **Dedahkan dalam Kad Ejen:** dalam `src/app/.well-known/agent.json/route.ts`, tambahkan kepada tatasusunan `skills`:
+3. **Dedahkan dalam Kad Ejen:** dalam `src/lib/a2a/agentCardMetadata.ts` (dikongsi oleh `/.well-known/agent.json` dan `/.well-known/agent-card.json`), tambahkan pada tatasusunan `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
-     "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "name": "Kemahiran Anda",
+     "description": "Penerangan ringkas yang memfokuskan niat",
+     "tags": ["penghalaan", "kuota"],
+     "examples": ["Contoh seruan bahasa semula jadi"]
    }
    ```
 

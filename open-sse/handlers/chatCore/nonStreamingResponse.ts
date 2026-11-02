@@ -58,7 +58,7 @@ import { runNonStreamingProviderLeg } from "../chatCore/nonStreamingProviderLeg.
 import type { NonStreamingProviderLegResult } from "@/lib/skills/toolLoopTypes.ts";
 import { finalizeToolLoopError } from "../chatCore/nonStreamingFinalization.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
-import { deleteSessionAccountAffinity } from "@/lib/db/sessionAccountAffinity";
+import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
 import { MEMORY_BUILTIN_TOOL_NAMES } from "@/lib/skills/memoryBuiltins";
 
@@ -310,11 +310,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
               extractSessionAffinityKey(body, clientRawRequest?.headers) ||
               null;
             if (!key) return;
-            try {
-              deleteSessionAccountAffinity(key, "codex");
-            } catch {
-              // best-effort
-            }
+            deleteSessionAccountAffinityBestEffort(key, "codex");
           },
           onAuditAccountRotation: (params) => {
             logAuditEvent({
@@ -444,7 +440,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         cacheSource: "upstream",
       });
       persistFailureUsage(err.status, err.errorCode || `upstream_${err.status}`);
-      trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+      trackPendingRequest(
+        model,
+        provider,
+        pendingConnId,
+        false,
+        undefined,
+        pendingScope.owner ?? pendingRequestId
+      );
       return {
         response: err,
         carry: {
@@ -594,7 +597,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           persistFailureUsage,
           persistAttemptLogs,
           trackPendingRequest,
-          pendingRequestId,
+          pendingRequestId: pendingScope.owner ?? pendingRequestId,
         }),
         carry: {
           translatedBody,
@@ -923,7 +926,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         cacheSource: "upstream",
       });
       persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "malformed_translated_response");
-      trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+      trackPendingRequest(
+        model,
+        provider,
+        pendingConnId,
+        false,
+        undefined,
+        pendingScope.owner ?? pendingRequestId
+      );
       // Routing event (feedback foundation) — record the malformed outcome so
       // the quality tracker de-prioritizes this model over time.
       void emitRoutingEvent(
@@ -1133,7 +1143,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       },
     };
   } catch (error) {
-    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    trackPendingRequest(
+      model,
+      provider,
+      pendingConnId,
+      false,
+      undefined,
+      pendingScope.owner ?? pendingRequestId
+    );
     const errorMetadata = getSafeErrorMetadata(error);
     const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
     if (managedLeaseFenceCode)
