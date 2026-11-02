@@ -29,15 +29,17 @@ test("smoke test verifies the container health status", () => {
   assert.match(smoke[0], /healthy/);
 });
 
-test("latest promotion preserves every published image flavor", () => {
+test("latest promotion requires Node and Web and moves Bun aliases only when complete", () => {
   const promotion = workflow.match(
     /- name: Promote Docker Hub latest tags[\s\S]*?(?=\n      - name: Inspect image)/
   );
 
   assert.ok(promotion, "Docker Hub latest promotion must exist");
-  assert.match(promotion[0], /for suffix in "" -web -bun -web-bun/);
+  assert.match(promotion[0], /for suffix in "" -web; do/);
   assert.match(promotion[0], /promote_tag "\$suffix"/);
   assert.match(promotion[0], /docker-image-complete\.mjs/);
+  assert.match(promotion[0], /add_bun_alias "\$\{PUBLISH_BUN_BASE:-false\}" -bun/);
+  assert.match(promotion[0], /add_bun_alias "\$\{PUBLISH_BUN_WEB:-false\}" -web-bun/);
   assert.doesNotMatch(promotion[0], /if docker.*imagetools inspect/);
   assert.match(workflow, /Promote GHCR latest tags/);
 });
