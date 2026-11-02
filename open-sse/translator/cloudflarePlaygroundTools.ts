@@ -193,6 +193,8 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
 
   const toolLines: string[] = [];
   for (const tool of tools) {
+    // ChatCompletionTool also covers custom tools, which carry no function schema.
+    if (!("function" in tool)) continue;
     const fn = tool.function;
     const signature = renderCompactSchema(fn.parameters);
     const description = (fn.description ?? "").replace(/\s+/g, " ").trim().slice(0, 160);
