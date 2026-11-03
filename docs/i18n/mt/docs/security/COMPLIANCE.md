@@ -11,55 +11,73 @@ OmniRoute jirreġistra azzjonijiet amministrattivi, avvenimenti ta’ awtentikaz
 
 L-implimentazzjoni tinsab f’`src/lib/compliance/index.ts` (T-43 — "Kontrolli tal-Konformità") u `src/lib/compliance/providerAudit.ts`. Il-kitbiet tal-awditjar qatt ma jiġġeneraw eċċezzjoni: jekk iseħħ xi falliment, is-sejħa tiġi injorata fis-skiet sabiex ir-reġistrazzjoni tal-awditjar ma tkunx tista’ tfixkel il-fluss ewlieni tat-talba.
 
-## X’Jiġi Rreġistrat
+## X’jiġi rreġistrat
 
-### Avvenimenti tal-awditjar amministrattiv (`audit_log`)
+### Avvenimenti tal-verifika amministrattiva (`audit_log`)
 
-Kull sejħa lil `logAuditEvent({ action, actor, target, details, ... })` tipproduċi ringiela waħda. Is-strings tal-azzjoni jsegwu mudell `domain.verb` (jew `domain.verb.outcome`). It-tipi ta’ azzjoni kkonfermati fil-kodiċi jinkludu:
+Kull sejħa lil `logAuditEvent({ action, actor, target, details, ... })` tipproduċi
+ringiela waħda. Is-sekwenzi tal-azzjonijiet isegwu mudell
+`domain.verb` (jew `domain.verb.outcome`). It-tipi ta’ azzjonijiet ikkonfermati
+fis-siġra tal-kodiċi jinkludu:
 
-| Azzjoni                              | Sors                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Azzjoni                              | Sors                                     |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Kull entrata tirreġistra `action`, `actor` (li awtomatikament ikun `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id`, u `timestamp`. Iċ-ċwievet sensittivi (`apiKey`, `accessToken`, `refreshToken`, `password`, kull ħaġa li taqbel ma’ `*token`/`*secret`/`*apikey`, eċċ.) jiġu moħbija rikursivament bħala `"[redacted]"` qabel tinkiteb ir-ringiela.
+Kull entrata taqbad `action`, `actor` (b’valur awtomatiku ta’ `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, u `timestamp`. Iċ-ċwievet sensittivi (`apiKey`, `accessToken`,
+`refreshToken`, `password`, kull ħaġa li taqbel ma’ `*token`/`*secret`/`*apikey`,
+eċċ.) jiġu moħbija b’mod rikorsiv għal `"[redacted]"` qabel ma tinkiteb ir-ringiela.
+
+Ir-ringieli `api_key.auth.touch` jirreġistraw metadata taċ-ċwievet API li ntużaw
+b’suċċess u qari ta’ skoperta (GET/HEAD) li qatt ma jaslu fir-reġistru tat-talbiet:
+liema ċavetta, meta, u l-mogħdija normalizzata, miġbura flimkien u limitati għal
+1,000 ringiela. Iċ-ċwievet b’`noLog` u ċ-ċavetta tal-ambjent jinqabżu. L-indirizz
+IP u l-user agent tas-sejjieħ jiżdiedu biss meta l-bandiera tal-karatteristika
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` tkun attivata (mhux attivata awtomatikament).
 
 ### Sejħiet tal-għodod MCP (`mcp_tool_audit`)
 
-Kull invokazzjoni ta’ għodda MCP tikteb ringiela permezz ta’ `open-sse/mcp-server/audit.ts`. Skema (minn `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+Kull invokazzjoni ta’ għodda MCP tikteb ringiela permezz ta’
+`open-sse/mcp-server/audit.ts`. L-iskema (minn
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`) hija:
 
-| Kolonna          | Noti                                          |
-| ---------------- | --------------------------------------------- |
-| `id`             | inkrementazzjoni awtomatika                   |
-| `tool_name`      | identifikatur tal-għodda MCP                  |
-| `input_hash`     | sha256 tal-input (ma jinħażen l-ebda payload) |
-| `output_summary` | sommarju qasir u maqtugħ                      |
-| `duration_ms`    | ħin reali li għadda                           |
-| `api_key_id`     | min għamel is-sejħa (jista’ jkun null)        |
-| `success`        | `1` / `0`                                     |
-| `error_code`     | kodiċi tal-iżball finali f’każ ta’ falliment  |
-| `created_at`     | timestamp ISO                                 |
+| Kolonna          | Noti                                                 |
+| ---------------- | ---------------------------------------------------- |
+| `id`             | awto-inkrement                                       |
+| `tool_name`      | identifikatur tal-għodda MCP                         |
+| `input_hash`     | sha256 tal-input (l-ebda payload ma jinħażen)        |
+| `output_summary` | sommarju qasir u mqassar                             |
+| `duration_ms`    | il-ħin totali                                        |
+| `api_key_id`     | is-sejjieħ (jista’ jkun null)                        |
+| `success`        | `1` / `0`                                            |
+| `error_code`     | kodiċi tal-iżball terminali meta jkun hemm falliment |
+| `created_at`     | timbru taż-żmien ISO                                 |
 
 ### Reġistri tat-talbiet / tal-użu
 
-Dawn huma telemetrija operazzjonali (mhux strettament awditjar amministrattiv), iżda jużaw l-istess proċess ta’ żamma:
+Dawn huma telemetrija operattiva (mhux verifika amministrattiva stretta), iżda
+jaqsmu l-istess pipeline taż-żamma:
 
 - `usage_history` — sommarju tal-użu għal kull talba
-- `call_logs` — reġistru sħiħ għal kull talba (soġġett għal limitu ta’ ringieli, ara hawn taħt)
-- `proxy_logs` — reġistru tat-traffiku tal-proxy (soġġett għal limitu ta’ ringieli)
-- `request_detail_logs` — reġistru dettaljat preċedenti tat-talbiet (għadu jitnaddaf jekk ikun preżenti)
+- `call_logs` — reġistru sħiħ għal kull talba (suġġett għal limitu ta’ ringieli, ara hawn taħt)
+- `proxy_logs` — reġistru tat-traffiku tal-proxy (suġġett għal limitu ta’ ringieli)
+- `request_detail_logs` — reġistru dettaljat talbiet legat (xorta jitnaddaf jekk ikun preżenti)
 
 ## Skema tal-Ħażna
 
