@@ -11,55 +11,75 @@ OmniRoute நிர்வாகச் செயல்கள், அங்கீ�
 
 செயலாக்கம் `src/lib/compliance/index.ts` (T-43 — "இணக்கக் கட்டுப்பாடுகள்") மற்றும் `src/lib/compliance/providerAudit.ts` ஆகியவற்றில் உள்ளது. தணிக்கை எழுதல்கள் ஒருபோதும் பிழையை எறிவதில்லை: தணிக்கைப் பதிவு முதன்மைக் கோரிக்கை ஓட்டத்தைப் பாதிக்காமல் இருப்பதற்காக, ஏதேனும் தோல்வி ஏற்பட்டால் அழைப்பு எந்த அறிவிப்புமின்றி புறக்கணிக்கப்படுகிறது.
 
-## என்னென்ன பதிவு செய்யப்படுகின்றன
+## என்ன பதிவு செய்யப்படுகிறது
 
 ### நிர்வாகத் தணிக்கை நிகழ்வுகள் (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })`-க்கான ஒவ்வொரு அழைப்பும் ஒரு வரிசையை உருவாக்குகிறது. செயல் சரங்கள் `domain.verb` (அல்லது `domain.verb.outcome`) வடிவத்தைப் பின்பற்றுகின்றன. மூலக் கட்டமைப்பில் உறுதிப்படுத்தப்பட்டுள்ள செயல் வகைகள்:
+`logAuditEvent({ action, actor, target, details, ... })`-க்கான ஒவ்வொரு அழைப்பும்
+ஒரு வரியை உருவாக்குகிறது. செயல் சரங்கள் `domain.verb` (அல்லது
+`domain.verb.outcome`) வடிவமைப்பைப் பின்பற்றுகின்றன. மரத்தில் உறுதிப்படுத்தப்பட்ட
+செயல் வகைகள்:
 
-| செயல்                                | மூலம்                                   |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-ஒவ்வொரு உள்ளீடும் `action`, `actor` (இயல்புநிலை `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` மற்றும் `timestamp` ஆகியவற்றைப் பதிவு செய்கிறது. வரிசை எழுதப்படுவதற்கு முன், உணர்திறன் மிக்க விசைகள் (`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey` ஆகியவற்றுடன் பொருந்தும் அனைத்தும் போன்றவை) சுழல்முறையில் `"[redacted]"` என மறைக்கப்படுகின்றன.
+ஒவ்வொரு பதிவும் `action`, `actor` (இயல்புநிலை `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, மற்றும் `timestamp` ஆகியவற்றைப் பதிவு செய்கிறது. முக்கியமான
+விசைகள் (`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey`
+வடிவத்துடன் பொருந்தும் எதுவும் உள்ளிட்டவை) வரி எழுதப்படுவதற்கு முன் மீண்டும்
+மீண்டும் மறைக்கப்பட்டு `"[redacted]"` ஆக மாற்றப்படுகின்றன.
+
+`api_key.auth.touch` வரிசைகள் கோரிக்கை பதிவை எட்டாத வெற்றிகரமான API key
+மெட்டாடேட்டா மற்றும் கண்டறிதல் வாசிப்புகளை (GET/HEAD) பதிவு செய்கின்றன: எந்த விசை,
+எப்போது, மற்றும் இயல்பாக்கப்பட்ட பாதை ஆகியவை இதில் அடங்கும். இவை ஒன்றிணைக்கப்பட்டு
+1,000 வரிகளாக வரையறுக்கப்படுகின்றன. `noLog` கொண்ட விசைகளும் சூழல் விசையும்
+தவிர்க்கப்படுகின்றன. அழைப்பாளரின் IP முகவரியும் user-agent-மும்
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` அம்சக் கொடி இயக்கப்பட்டிருக்கும்போது மட்டுமே
+சேர்க்கப்படும் (இயல்புநிலையில் முடக்கப்பட்டுள்ளது).
 
 ### MCP கருவி அழைப்புகள் (`mcp_tool_audit`)
 
-ஒவ்வொரு MCP கருவி அழைப்பும் `open-sse/mcp-server/audit.ts` வழியாக ஒரு வரிசையை எழுதுகிறது. திட்டவடிவம் (`src/lib/db/migrations/002_mcp_a2a_tables.sql`-இலிருந்து):
+ஒவ்வொரு MCP கருவி அழைப்பும் `open-sse/mcp-server/audit.ts` வழியாக ஒரு வரியை
+எழுதுகிறது. திட்டவட்டம்
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`-லிருந்து பெறப்பட்டது:
 
-| நெடுவரிசை        | குறிப்புகள்                                         |
-| ---------------- | --------------------------------------------------- |
-| `id`             | தானாக அதிகரிக்கும்                                  |
-| `tool_name`      | MCP கருவி அடையாளங்காட்டி                            |
-| `input_hash`     | உள்ளீட்டின் sha256 (தரவு உள்ளடக்கம் சேமிக்கப்படாது) |
-| `output_summary` | சுருக்கமான, துண்டிக்கப்பட்ட சுருக்கம்               |
-| `duration_ms`    | மொத்தக் காலம்                                       |
-| `api_key_id`     | அழைப்பாளர் (பூஜ்யமாக இருக்கலாம்)                    |
-| `success`        | `1` / `0`                                           |
-| `error_code`     | தோல்வியின்போது இறுதிப் பிழைக் குறியீடு              |
-| `created_at`     | ISO நேரமுத்திரை                                     |
+| Column           | Notes                                       |
+| ---------------- | ------------------------------------------- |
+| `id`             | தானாக அதிகரிக்கும்                          |
+| `tool_name`      | MCP கருவி அடையாளங்காட்டி                    |
+| `input_hash`     | உள்ளீட்டின் sha256 (payload சேமிக்கப்படாது) |
+| `output_summary` | சுருக்கமான, குறுக்கப்பட்ட சுருக்கம்         |
+| `duration_ms`    | முழு நேரம்                                  |
+| `api_key_id`     | அழைப்பாளர் (nullable)                       |
+| `success`        | `1` / `0`                                   |
+| `error_code`     | தோல்வியின்போது இறுதி பிழைக் குறியீடு        |
+| `created_at`     | ISO நேரமுத்திரை                             |
 
 ### கோரிக்கை / பயன்பாட்டுப் பதிவுகள்
 
-இவை செயல்பாட்டுத் தொலைஅளவியல் தரவுகள் (கண்டிப்பாக நிர்வாகத் தணிக்கை அல்ல), ஆனால் அதே தக்கவைப்புச் செயல்முறையைப் பகிர்ந்துகொள்கின்றன:
+இவை செயல்பாட்டு தொலைஅளவியல் தரவுகள் (கண்டிப்பாக நிர்வாகத் தணிக்கை அல்ல);
+ஆனால் இவையும் அதே தக்கவைப்பு செயல்முறையைப் பகிர்கின்றன:
 
 - `usage_history` — ஒவ்வொரு கோரிக்கைக்குமான பயன்பாட்டுத் தொகுப்பு
-- `call_logs` — ஒவ்வொரு கோரிக்கைக்குமான முழுப் பதிவு (வரிசை வரம்புக்கு உட்பட்டது; கீழே காண்க)
-- `proxy_logs` — பதிலாள் போக்குவரத்துப் பதிவு (வரிசை வரம்புக்கு உட்பட்டது)
-- `request_detail_logs` — மரபுவழி விரிவான கோரிக்கைப் பதிவு (இருந்தால் இன்னும் சீரமைக்கப்படும்)
+- `call_logs` — ஒவ்வொரு கோரிக்கைக்குமான முழுப் பதிவு (கீழே உள்ள வரி வரம்புக்கு உட்பட்டது)
+- `proxy_logs` — proxy போக்குவரத்துப் பதிவு (கீழே உள்ள வரி வரம்புக்கு உட்பட்டது)
+- `request_detail_logs` — மரபுவழி விரிவான கோரிக்கைப் பதிவு (இருந்தால் இன்னும் சுத்தப்படுத்தப்படும்)
 
 ## சேமிப்பகத் திட்டவடிவம்
 
