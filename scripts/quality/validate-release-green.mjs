@@ -47,6 +47,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load as parseYaml } from "js-yaml";
 import { runGateProcess } from "./gate-process.mjs";
+import { buildProgressEnvironment } from "../build/buildPhaseProgress.mjs";
 import { unitDiagnosticReference } from "../ci/unit-diagnostics.mjs";
 import { eslintMeasurementCounts, readEslintMeasurement } from "./eslint-measurement.mjs";
 import {
@@ -787,6 +788,7 @@ async function run(cmd, cmdArgs, opts = {}) {
     cwd: ROOT,
     env: buildGateEnv({
       ...opts.env,
+      ...buildProgressEnvironment(packPhase),
       ...(unitDiagnostics
         ? {
             OMNIROUTE_UNIT_INVOCATION_ID: unitDiagnostics.invocationId || "",

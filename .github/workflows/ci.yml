@@ -913,9 +913,11 @@ jobs:
       - name: Extract Next.js build artifact
         run: |
           tar -xzf next-build-artifact/e2e-build.tar.gz
-      # build:cli consumes the downloaded .build/next standalone artifact and assembles dist/;
-      # it only rebuilds if the downloaded standalone artifact is missing.
+      # This consumer must use the downloaded standalone artifact; a missing input
+      # fails before a second Next build can hide a producer/extraction failure.
       - run: npm run build:cli
+        env:
+          OMNIROUTE_REQUIRE_PREBUILT_NEXT: "1"
       - name: Assert dist/server.js exists
         run: test -f dist/server.js || (echo "dist/server.js missing — build:cli did not assemble correctly" && exit 1)
       # `build:cli` monta dist/ mas NAO grava dist/BUILD_SHA — so `build:release` faz
