@@ -210,7 +210,6 @@ describe("new connection proxy preference", () => {
     it(`aborts a started read and awaits its late ${outcome} after unmount`, async () => {
       const stale = deferred<Response>();
       const started = deferred<AbortSignal>();
-      const consumed = deferred<void>();
       let reads = 0;
       let pending = true;
       const unhandled: unknown[] = [];
@@ -244,6 +243,7 @@ describe("new connection proxy preference", () => {
         await waitFor(() => expect(control().getAttribute("aria-checked")).toBe("false"));
         await act(async () => {
           if (outcome === "response") {
+            const consumed = deferred<void>();
             const response = json(snapshot(true, 3));
             const readBody = response.json.bind(response);
             response.json = async () => {
@@ -283,8 +283,7 @@ describe("new connection proxy preference", () => {
     const reload = deferred<Response>();
     loadReply = () => reload.promise;
     try {
-      fireEvent.click(retry);
-      fireEvent.click(retry);
+      await userEvent.setup().dblClick(retry);
       expect(screen.queryByRole("button", { name: en.common.retry })).toBeNull();
       expect(screen.queryByRole("switch")).toBeNull();
       expect(fetchMock.mock.calls.filter(([url]) => url === "/api/settings")).toHaveLength(2);
