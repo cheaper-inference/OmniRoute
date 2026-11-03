@@ -597,6 +597,16 @@ export function getXaiOauthLiveModelsConfig(): ProviderModelsConfigEntry | undef
   }
 }
 
+// OpenRouter's /api/v1/models is public (200 with or without a key) and is also
+// the catalog served by fal.ai's OpenRouter router. Shared so both entries stay
+// in sync; only the real OpenRouter connection authenticates the probe.
+const OPENROUTER_PUBLIC_MODELS_CONFIG: ProviderModelsConfigEntry = {
+  url: "https://openrouter.ai/api/v1/models",
+  method: "GET",
+  headers: { "Content-Type": "application/json" },
+  parseResponse: (data) => data.data || [],
+};
+
 // Provider models endpoints configuration
 export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> = {
   alibaba: ALIBABA_MODEL_STUDIO_MODELS_CONFIG,
@@ -686,13 +696,14 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     parseResponse: parseGrokBuildModels,
   },
   openrouter: {
-    url: "https://openrouter.ai/api/v1/models",
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
+    ...OPENROUTER_PUBLIC_MODELS_CONFIG,
     authHeader: "Authorization",
     authPrefix: "Bearer ",
-    parseResponse: (data) => data.data || [],
   },
+  // fal's router serves the OpenRouter catalog but has no /models endpoint of
+  // its own. Deliberately no authHeader: the connection's fal key must never be
+  // sent to openrouter.ai.
+  "fal-openrouter": { ...OPENROUTER_PUBLIC_MODELS_CONFIG },
   aimlapi: {
     // #5570: AI/ML API's live catalog lives at the public, auth-free /models
     // database endpoint (NOT /v1/models). The registry has no modelsUrl, so
