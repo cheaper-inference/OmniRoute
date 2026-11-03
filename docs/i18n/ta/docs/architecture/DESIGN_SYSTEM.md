@@ -4,7 +4,17 @@
 
 ---
 
-> **நிலை:** டாஷ்போர்டு கட்டப்பட்டுள்ளது** Keak CI UI கிட்** (`@keak/cheaper-inference-ui-kit`), பணியிடமாக `packages/ui-kit` விற்கப்படுகிறது (`@omniroute/ui-kit`; அப்ஸ்ட்ரீம் ஸ்னாப்ஷாட் `packages/ui-kit/UPSTREAM.md` இல் பின் செய்யப்பட்டு `npm run check:ui-kit-snapshot` ஆல் பாதுகாக்கப்படுகிறது). ஒளி என்பது நியமன தீம்; இயல்புநிலை விருப்பம் `system` ஆகும். உச்சரிப்பு Keak lime (`--ci-color-accent`) ஆகும். Switzer என்பது UI, காட்சி மற்றும் குறியீடு உரை (`--ci-font-ui`; `--ci-font-display` மற்றும் `--ci-font-mono` தீர்க்கும்) ஆகியவற்றிற்கான ஒற்றைக் குடும்பமாகும் (zqk ; zql மற்றும் zqm அதைத் தீர்க்கும்), கிட் மூலம் சுயமாக ஹோஸ்ட் செய்யப்பட்டது (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ஆல் இறக்குமதி செய்யப்பட்டது). ஒவ்வொரு ஐகானும் ஒரு லூசிட் கிளிஃப் ஆகும்.
+> **நிலை:** டாஷ்போர்டு **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) மீது உருவாக்கப்பட்டுள்ளது; இது
+> `packages/ui-kit` (`@omniroute/ui-kit`) என்ற workspace-ஆக vendor செய்யப்பட்டுள்ளது; upstream snapshot
+> `packages/ui-kit/UPSTREAM.md` இல் pin செய்யப்பட்டு, `npm run check:ui-kit-snapshot` மூலம்
+> பாதுகாக்கப்படுகிறது. Light என்பது canonical theme; இயல்புநிலை preference `system`. Accent என்பது
+> Keak lime (`--ci-color-accent`). UI, display மற்றும் code text ஆகிய அனைத்திற்கும் Switzer ஒரே
+> family ஆகும் (`--ci-font-ui`; `--ci-font-display` மற்றும் `--ci-font-mono` அதற்கே resolve ஆகின்றன);
+> இது kit-ஆல் தானே self-host செய்யப்படுகிறது (`packages/ui-kit/src/ci-fonts.css`,
+> `ci-tokens.css` மூலம் imported). Switzer இல் இல்லாத scripts-க்கு glyph-by-glyph fallback
+> பயன்படுத்தப்படுகிறது (`src/app/globals.css`): Cyrillic, Greek மற்றும் Vietnamese ஆகியவற்றிற்கு
+> Inter, மேலும் `html[dir="rtl"]` இன் கீழ் மட்டும் Arabic script-க்கு Vazirmatn.
+> ஒவ்வொரு icon-மும் Lucide glyph ஆகும்.
 
 ## 1. விஷயங்கள் எங்கே உள்ளன
 
