@@ -7302,6 +7302,8 @@
     "enableThinking": "Enable Thinking",
     "maxThinkingTokens": "Max Thinking Tokens",
     "enableProxy": "Enable Proxy",
+    "defaultNewConnectionProxyEnabled": "Enable proxy by default for new connections",
+    "defaultNewConnectionProxyEnabledDesc": "Sets the initial proxy state of new provider accounts unless explicitly overridden. Existing connections are unchanged. Routing still depends on global settings and proxy configuration. You can change each account later.",
     "perKeyProxyEnabled": "Enable per-key proxy assignment",
     "perKeyProxyEnabledDesc": "When enabled, each provider connection can use its own proxy assignment",
     "proxyUrl": "Proxy URL",

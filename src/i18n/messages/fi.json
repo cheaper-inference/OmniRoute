@@ -7225,6 +7225,8 @@
     "enableThinking": "Ota ajattelu käyttöön",
     "maxThinkingTokens": "Ajattelutokenien enimmäismäärä",
     "enableProxy": "Ota välityspalvelin käyttöön",
+    "defaultNewConnectionProxyEnabled": "Ota välityspalvelin oletuksena käyttöön uusissa yhteyksissä",
+    "defaultNewConnectionProxyEnabledDesc": "Asettaa uusien palveluntarjoajatilien välityspalvelimen alkutilan, ellei muuta nimenomaisesti valita. Nykyiset yhteydet eivät muutu. Reititys riippuu yleisasetuksista ja välityspalvelimen määrityksistä. Jokaista tiliä voi muuttaa myöhemmin.",
     "perKeyProxyEnabled": "Ota käyttöön avainkohtainen välityspalvelimen määritys",
     "perKeyProxyEnabledDesc": "Kun käytössä, jokainen tarjoajayhteys voi käyttää omaa välityspalvelinmääritystään",
     "proxyUrl": "Välityspalvelimen URL-osoite",

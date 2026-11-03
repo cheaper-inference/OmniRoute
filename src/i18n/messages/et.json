@@ -7225,6 +7225,8 @@
     "enableThinking": "Luba mõtlemine",
     "maxThinkingTokens": "Maksimaalne mõtlemistookenite arv",
     "enableProxy": "Luba puhverserver",
+    "defaultNewConnectionProxyEnabled": "Luba puhverserver uute ühenduste puhul vaikimisi",
+    "defaultNewConnectionProxyEnabledDesc": "Määrab uute teenusepakkuja kontode algse puhverserveri oleku, kui pole sõnaselgelt teisiti valitud. Olemasolevad ühendused ei muutu. Marsruutimine sõltub üldsätetest ja puhverserveri seadistusest. Iga kontot saab hiljem muuta.",
     "perKeyProxyEnabled": "Luba puhverserveri määramine võtme kaupa",
     "perKeyProxyEnabledDesc": "Kui see on lubatud, saab iga teenusepakkuja ühendus kasutada oma puhverserveri määrangut",
     "proxyUrl": "Puhverserveri URL",

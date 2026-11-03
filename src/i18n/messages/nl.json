@@ -7225,6 +7225,8 @@
     "enableThinking": "Maak het denken mogelijk",
     "maxThinkingTokens": "Max Thinking-tokens",
     "enableProxy": "Schakel proxy in",
+    "defaultNewConnectionProxyEnabled": "Proxy standaard inschakelen voor nieuwe verbindingen",
+    "defaultNewConnectionProxyEnabledDesc": "Bepaalt de initiële proxystatus van nieuwe provideraccounts, tenzij expliciet anders gekozen. Bestaande verbindingen blijven ongewijzigd. Routering hangt af van globale instellingen en proxyconfiguratie. Elk account kan later worden gewijzigd.",
     "perKeyProxyEnabled": "Proxy-toewijzing per sleutel inschakelen",
     "perKeyProxyEnabledDesc": "Indien ingeschakeld, kan elke providerverbinding zijn eigen proxy-toewijzing gebruiken",
     "proxyUrl": "Proxy-URL",

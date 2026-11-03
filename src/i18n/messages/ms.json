@@ -7225,6 +7225,8 @@
     "enableThinking": "Dayakan Berfikir",
     "maxThinkingTokens": "Token Pemikiran Maks",
     "enableProxy": "Dayakan Proksi",
+    "defaultNewConnectionProxyEnabled": "Dayakan proksi secara lalai untuk sambungan baharu",
+    "defaultNewConnectionProxyEnabledDesc": "Menetapkan keadaan proksi awal akaun penyedia baharu melainkan pilihan lain dinyatakan secara jelas. Sambungan sedia ada tidak berubah. Penghalaan masih bergantung pada tetapan global dan konfigurasi proksi. Setiap akaun boleh diubah kemudian.",
     "perKeyProxyEnabled": "Dayakan penyerahan proksi bagi setiap kunci",
     "perKeyProxyEnabledDesc": "Apabila didayakan, setiap sambungan penyedia boleh menggunakan penyerahan proksinya sendiri",
     "proxyUrl": "URL proksi",

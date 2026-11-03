@@ -7225,6 +7225,8 @@
     "enableThinking": "Paganahin ang Pag-iisip",
     "maxThinkingTokens": "Max Thinking Token",
     "enableProxy": "Paganahin ang Proxy",
+    "defaultNewConnectionProxyEnabled": "Paganahin ang proxy bilang default para sa mga bagong koneksyon",
+    "defaultNewConnectionProxyEnabledDesc": "Itinatakda ang unang estado ng proxy ng mga bagong provider account maliban kung may tahasang ibang pagpili. Hindi binabago ang mga kasalukuyang koneksyon. Nakadepende pa rin ang routing sa mga pandaigdigang setting at pagsasaayos ng proxy. Maaari mong baguhin ang bawat account sa ibang pagkakataon.",
     "perKeyProxyEnabled": "Paganahin ang pagtatalaga ng proxy bawat key",
     "perKeyProxyEnabledDesc": "Kapag pinagana, ang bawat koneksyon ng provider ay maaaring gumamit ng sarili nitong pagtatalaga ng proxy",
     "proxyUrl": "URL ng proxy",

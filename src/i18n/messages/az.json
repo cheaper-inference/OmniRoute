@@ -7302,6 +7302,8 @@
     "enableThinking": "Düşünməni aktivləşdir",
     "maxThinkingTokens": "Maksimum düşünmə tokenlərinin sayı",
     "enableProxy": "Proksini aktivləşdir",
+    "defaultNewConnectionProxyEnabled": "Yeni bağlantılar üçün proksini standart olaraq aktiv et",
+    "defaultNewConnectionProxyEnabledDesc": "Açıq seçim olmadıqda yeni provayder hesablarının ilkin proksi vəziyyətini təyin edir. Mövcud bağlantılar dəyişmir. Marşrutlaşdırma ümumi parametrlərdən və proksi konfiqurasiyasından asılıdır. Hər hesabı sonra dəyişə bilərsiniz.",
     "perKeyProxyEnabled": "Hər açar üçün proksi təyinatını aktivləşdirin",
     "perKeyProxyEnabledDesc": "Aktiv olduqda, hər provayder bağlantısı öz proksi təyinatından istifadə edə bilər",
     "proxyUrl": "Proksi URL-i",

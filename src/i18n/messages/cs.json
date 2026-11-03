@@ -7302,6 +7302,8 @@
     "enableThinking": "Umožněte Thinking",
     "maxThinkingTokens": "Max Thinking Tokenů",
     "enableProxy": "Povolit Proxy",
+    "defaultNewConnectionProxyEnabled": "Zapnout proxy ve výchozím nastavení pro nová připojení",
+    "defaultNewConnectionProxyEnabledDesc": "Nastaví počáteční stav proxy nových účtů poskytovatelů, pokud není výslovně zvoleno jinak. Stávající připojení se nemění. Směrování závisí na globálních nastaveních a konfiguraci proxy. Každý účet lze později změnit.",
     "perKeyProxyEnabled": "Povolit přiřazení proxy pro každý klíč",
     "perKeyProxyEnabledDesc": "Pokud je povoleno, každé připojení poskytovatele může používat své vlastní přiřazení proxy",
     "proxyUrl": "URL proxy",

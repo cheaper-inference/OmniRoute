@@ -7225,6 +7225,8 @@
     "enableThinking": "Kunna Tunani",
     "maxThinkingTokens": "Matsakaicin Adadin Token na Tunani",
     "enableProxy": "Kunna Proxy",
+    "defaultNewConnectionProxyEnabled": "Kunna wakili ta tsohuwa don sabbin haɗi",
+    "defaultNewConnectionProxyEnabledDesc": "Yana saita yanayin wakili na farko don sabbin asusun masu samarwa sai an zaɓi wani yanayi a sarari. Haɗin da ake da su ba sa canzawa. Hanyar sadarwa ta dogara da saitunan gama-gari da tsarin wakili. Za a iya canza kowane asusu daga baya.",
     "perKeyProxyEnabled": "Kunna ware proxy ga kowane maɓalli",
     "perKeyProxyEnabledDesc": "Idan an kunna, kowane haɗin mai samarwa na iya amfani da nasa saitin proxy",
     "proxyUrl": "URL na Proxy",

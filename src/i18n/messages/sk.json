@@ -7225,6 +7225,8 @@
     "enableThinking": "Povoliť myslenie",
     "maxThinkingTokens": "Maximálne žetóny myslenia",
     "enableProxy": "Povoliť server proxy",
+    "defaultNewConnectionProxyEnabled": "Predvolene zapnúť proxy pre nové pripojenia",
+    "defaultNewConnectionProxyEnabledDesc": "Nastaví počiatočný stav proxy nových účtov poskytovateľov, pokiaľ nie je výslovne zvolené inak. Existujúce pripojenia sa nemenia. Smerovanie závisí od globálnych nastavení a konfigurácie proxy. Každý účet možno neskôr zmeniť.",
     "perKeyProxyEnabled": "Povoliť priradenie proxy pre každý kľúč",
     "perKeyProxyEnabledDesc": "Keď je táto možnosť povolená, každé pripojenie poskytovateľa môže použiť vlastné priradenie proxy",
     "proxyUrl": "Adresa URL proxy",

@@ -7225,6 +7225,8 @@
     "enableThinking": "Denken aktivieren",
     "maxThinkingTokens": "Maximale Thinking-Tokens",
     "enableProxy": "Proxy aktivieren",
+    "defaultNewConnectionProxyEnabled": "Proxy für neue Verbindungen standardmäßig aktivieren",
+    "defaultNewConnectionProxyEnabledDesc": "Legt den anfänglichen Proxyzustand neuer Anbieterkonten fest, sofern nicht ausdrücklich anders gewählt. Bestehende Verbindungen bleiben unverändert. Das Routing hängt weiterhin von globalen Einstellungen und der Proxykonfiguration ab. Jedes Konto lässt sich später ändern.",
     "perKeyProxyEnabled": "Proxy-Zuweisung pro Schlüssel aktivieren",
     "perKeyProxyEnabledDesc": "Wenn aktiviert, kann jede Provider-Verbindung ihre eigene Proxy-Zuweisung verwenden",
     "proxyUrl": "Proxy-URL",

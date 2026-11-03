@@ -7225,6 +7225,8 @@
     "enableThinking": "Mú Ìrònú Ṣiṣẹ́",
     "maxThinkingTokens": "Iye Token Ìrònú Tó Pọ̀ Jù",
     "enableProxy": "Mú Proxy Ṣiṣẹ́",
+    "defaultNewConnectionProxyEnabled": "Tan proksi sílẹ̀ láìfọwọ́yí fún àwọn ìsopọ̀ tuntun",
+    "defaultNewConnectionProxyEnabledDesc": "Ó ṣètò ipò proksi àkọ́kọ́ fún àwọn àkọọ́lẹ̀ olùpèsè tuntun bí kò bá sí àṣàyàn mìíràn tó hàn gbangba. Àwọn ìsopọ̀ tó wà kò yí padà. Ìtọ́sọ́nà ṣì sinmi lórí ètò àgbáyé àti ìṣètò proksi. A lè yí àkọọ́lẹ̀ kọ̀ọ̀kan padà lẹ́yìn náà.",
     "perKeyProxyEnabled": "Mú ìpín proxy fún kọ́kọ́rọ̀ kọ̀ọ̀kan ṣiṣẹ́",
     "perKeyProxyEnabledDesc": "Nígbà tí èyí bá ṣiṣẹ́, àsopọ̀ olùpèsè kọ̀ọ̀kan lè lo ìpín proxy tirẹ̀",
     "proxyUrl": "URL Proxy",

@@ -7225,6 +7225,8 @@
     "enableThinking": "Ativar Raciocínio",
     "maxThinkingTokens": "Máximo de Tokens de Raciocínio",
     "enableProxy": "Ativar Proxy",
+    "defaultNewConnectionProxyEnabled": "Ativar proxy por padrão para novas conexões",
+    "defaultNewConnectionProxyEnabledDesc": "Define o estado inicial do proxy das novas contas de provedores, salvo escolha explícita diferente. As conexões existentes não mudam. O roteamento ainda depende das configurações globais e da configuração do proxy. Cada conta pode ser alterada depois.",
     "perKeyProxyEnabled": "Ativar atribuição de proxy por tecla",
     "perKeyProxyEnabledDesc": "Quando habilitado, cada conexão de provedor pode usar sua própria atribuição de proxy",
     "proxyUrl": "URL do Proxy",

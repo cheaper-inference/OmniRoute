@@ -7225,6 +7225,8 @@
     "enableThinking": "Włącz thinking",
     "maxThinkingTokens": "Maksymalna liczba thinking tokens",
     "enableProxy": "Włącz proxy",
+    "defaultNewConnectionProxyEnabled": "Domyślnie włączaj proxy dla nowych połączeń",
+    "defaultNewConnectionProxyEnabledDesc": "Ustawia początkowy stan proxy nowych kont dostawców, o ile nie wybrano jawnie inaczej. Istniejące połączenia pozostają bez zmian. Routing nadal zależy od ustawień globalnych i konfiguracji proxy. Każde konto można później zmienić.",
     "perKeyProxyEnabled": "Włącz przypisywanie proxy do każdego klucza",
     "perKeyProxyEnabledDesc": "Po włączeniu każde połączenie provider może używać własnego przypisanego proxy.",
     "proxyUrl": "URL proxy",

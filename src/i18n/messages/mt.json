@@ -7302,6 +7302,8 @@
     "enableThinking": "Attiva l-Ħsieb",
     "maxThinkingTokens": "Għadd Massimu ta’ Tokens għall-Ħsieb",
     "enableProxy": "Attiva l-Proxy",
+    "defaultNewConnectionProxyEnabled": "Attiva l-proxy b’mod predefinit għal konnessjonijiet ġodda",
+    "defaultNewConnectionProxyEnabledDesc": "Jissettja l-istat inizjali tal-proxy għal kontijiet ġodda tal-fornituri sakemm ma jintgħażilx mod ieħor b’mod espliċitu. Il-konnessjonijiet eżistenti ma jinbidlux. Ir-routing jiddependi mis-settings globali u l-konfigurazzjoni tal-proxy. Kull kont jista’ jinbidel aktar tard.",
     "perKeyProxyEnabled": "Attiva l-assenjazzjoni ta’ proxy għal kull ċavetta",
     "perKeyProxyEnabledDesc": "Meta jkun attivat, kull konnessjoni tal-fornitur tista’ tuża l-assenjazzjoni ta’ proxy tagħha stess",
     "proxyUrl": "URL tal-Proxy",

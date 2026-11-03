@@ -7225,6 +7225,8 @@
     "enableThinking": "Cumasaigh Smaointeoireacht",
     "maxThinkingTokens": "Uasmhéid Comharthaí Smaointeoireachta",
     "enableProxy": "Cumasaigh Seachfhreastalaí",
+    "defaultNewConnectionProxyEnabled": "Cumasaigh seachfhreastalaí de réir réamhshocraithe do naisc nua",
+    "defaultNewConnectionProxyEnabledDesc": "Socraíonn sé staid tosaigh an tseachfhreastalaí do chuntais nua soláthraithe mura roghnaítear a mhalairt go sainráite. Ní athraítear na naisc atá ann. Braitheann ródú ar shocruithe domhanda agus cumraíocht an tseachfhreastalaí. Is féidir gach cuntas a athrú níos déanaí.",
     "perKeyProxyEnabled": "Cumasaigh sannadh seachfhreastalaí do gach eochair",
     "perKeyProxyEnabledDesc": "Nuair a chumasaítear é, is féidir le gach nasc soláthraí a sheachfhreastalaí sannta féin a úsáid.",
     "proxyUrl": "URL Seachfhreastalaí",

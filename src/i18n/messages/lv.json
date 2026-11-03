@@ -7225,6 +7225,8 @@
     "enableThinking": "Iespējot domāšanu",
     "maxThinkingTokens": "Maksimālais domāšanas tokenu skaits",
     "enableProxy": "Iespējot starpniekserveri",
+    "defaultNewConnectionProxyEnabled": "Jaunajiem savienojumiem pēc noklusējuma ieslēgt starpniekserveri",
+    "defaultNewConnectionProxyEnabledDesc": "Iestata jauno pakalpojumu sniedzēju kontu sākotnējo starpniekservera stāvokli, ja nav skaidri izvēlēts citādi. Esošie savienojumi nemainās. Maršrutēšana ir atkarīga no globālajiem iestatījumiem un starpniekservera konfigurācijas. Katru kontu vēlāk var mainīt.",
     "perKeyProxyEnabled": "Iespējot starpniekservera piešķiršanu katrai atslēgai",
     "perKeyProxyEnabledDesc": "Ja iespējots, katrs pakalpojumu sniedzēja savienojums var izmantot savu starpniekservera piešķiršanu",
     "proxyUrl": "Starpniekservera URL",

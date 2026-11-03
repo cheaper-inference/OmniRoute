@@ -7225,6 +7225,8 @@
     "enableThinking": "Omogući razmišljanje",
     "maxThinkingTokens": "Maks. broj tokena za razmišljanje",
     "enableProxy": "Omogući proxy",
+    "defaultNewConnectionProxyEnabled": "Zadano uključi proxy za nove veze",
+    "defaultNewConnectionProxyEnabledDesc": "Postavlja početno stanje proxyja za nove račune pružatelja, osim ako je izričito odabrano drukčije. Postojeće veze ostaju nepromijenjene. Usmjeravanje ovisi o globalnim postavkama i konfiguraciji proxyja. Svaki račun možete naknadno promijeniti.",
     "perKeyProxyEnabled": "Omogući dodjelu proxyja po ključu",
     "perKeyProxyEnabledDesc": "Kada je omogućeno, svaka veza s davateljem može koristiti vlastitu dodjelu proxyja",
     "proxyUrl": "URL proxyja",

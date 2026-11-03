@@ -7225,6 +7225,8 @@
     "enableThinking": "Aktivera tänkande",
     "maxThinkingTokens": "Max antal resonemangstoken",
     "enableProxy": "Aktivera proxy",
+    "defaultNewConnectionProxyEnabled": "Aktivera proxy som standard för nya anslutningar",
+    "defaultNewConnectionProxyEnabledDesc": "Anger det ursprungliga proxyläget för nya leverantörskonton om inget annat uttryckligen väljs. Befintliga anslutningar ändras inte. Routning beror fortfarande på globala inställningar och proxykonfiguration. Varje konto kan ändras senare.",
     "perKeyProxyEnabled": "Aktivera proxytilldelning per nyckel",
     "perKeyProxyEnabledDesc": "När detta är aktiverat kan varje leverantörsanslutning använda sin egen proxytilldelning",
     "proxyUrl": "Proxy-URL",

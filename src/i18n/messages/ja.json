@@ -7225,6 +7225,8 @@
     "enableThinking": "思考を可能にする",
     "maxThinkingTokens": "最大思考トークン",
     "enableProxy": "プロキシを有効にする",
+    "defaultNewConnectionProxyEnabled": "新しい接続でプロキシを既定で有効にする",
+    "defaultNewConnectionProxyEnabledDesc": "明示的な指定がない場合、新しいプロバイダーアカウントの初期プロキシ状態を設定します。既存の接続は変更されません。実際のルーティングはグローバル設定とプロキシ構成に依存します。各アカウントは後から変更できます。",
     "perKeyProxyEnabled": "キーごとのプロキシ割り当てを有効にする",
     "perKeyProxyEnabledDesc": "有効にすると、各プロバイダー接続で独自のプロキシ割り当てを使用できます。",
     "proxyUrl": "プロキシ URL",

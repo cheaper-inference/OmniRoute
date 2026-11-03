@@ -7225,6 +7225,8 @@
     "enableThinking": "Washa Kufikiri",
     "maxThinkingTokens": "Idadi ya Juu ya Tokeni za Kufikiri",
     "enableProxy": "Washa Proksi",
+    "defaultNewConnectionProxyEnabled": "Washa proksi kwa chaguomsingi kwa miunganisho mipya",
+    "defaultNewConnectionProxyEnabledDesc": "Huweka hali ya awali ya proksi ya akaunti mpya za watoa huduma isipokuwa chaguo tofauti limebainishwa wazi. Miunganisho iliyopo haibadiliki. Uelekezaji bado unategemea mipangilio ya jumla na usanidi wa proksi. Kila akaunti inaweza kubadilishwa baadaye.",
     "perKeyProxyEnabled": "Wezesha ugawaji wa seva mbadala kwa kila ufunguo",
     "perKeyProxyEnabledDesc": "Ikiwezeshwa, kila muunganisho wa mtoa huduma unaweza kutumia ugawaji wake wa seva mbadala",
     "proxyUrl": "URL ya Proksi",

@@ -7225,6 +7225,8 @@
     "enableThinking": "Omogoči razmišljanje",
     "maxThinkingTokens": "Največje število žetonov za razmišljanje",
     "enableProxy": "Omogoči posredniški strežnik",
+    "defaultNewConnectionProxyEnabled": "Privzeto vklopi posredniški strežnik za nove povezave",
+    "defaultNewConnectionProxyEnabledDesc": "Nastavi začetno stanje posredniškega strežnika za nove račune ponudnikov, razen ob izrecni drugačni izbiri. Obstoječe povezave se ne spremenijo. Usmerjanje je odvisno od splošnih nastavitev in konfiguracije posredniškega strežnika. Vsak račun lahko pozneje spremenite.",
     "perKeyProxyEnabled": "Omogoči dodelitev posredniškega strežnika za posamezen ključ",
     "perKeyProxyEnabledDesc": "Ko je omogočeno, lahko vsaka povezava ponudnika uporablja svojo dodelitev posredniškega strežnika",
     "proxyUrl": "URL posredniškega strežnika",

@@ -7225,6 +7225,8 @@
     "enableThinking": "Kwado Ntụgharị Uche",
     "maxThinkingTokens": "Ọnụọgụ Token Ntụgharị Uche Kachasị Elu",
     "enableProxy": "Kwado Proxy",
+    "defaultNewConnectionProxyEnabled": "Gbanye proksi na ndabara maka njikọ ọhụrụ",
+    "defaultNewConnectionProxyEnabledDesc": "Na-ahazi ọnọdụ proksi mbụ nke akaụntụ ndị na-eweta ọrụ ọhụrụ ma ọ bụrụ na ahọrọghị nke ọzọ n’ụzọ doro anya. Njikọ dị ugbu a anaghị agbanwe. Ntugharị ka dabere na ntọala zuru ụwa ọnụ na nhazi proksi. Enwere ike ịgbanwe akaụntụ ọ bụla ma emechaa.",
     "perKeyProxyEnabled": "Kwado ikenye proxy maka key ọ bụla",
     "perKeyProxyEnabledDesc": "Mgbe enyere ya aka, njikọ provider ọ bụla nwere ike iji proxy e kenyere ya",
     "proxyUrl": "URL Proxy",

@@ -7225,6 +7225,8 @@
     "enableThinking": "사고 활성화",
     "maxThinkingTokens": "최대 사고 토큰 수",
     "enableProxy": "프록시 활성화",
+    "defaultNewConnectionProxyEnabled": "새 연결에 프록시를 기본으로 활성화",
+    "defaultNewConnectionProxyEnabledDesc": "명시적인 선택이 없으면 새 공급자 계정의 초기 프록시 상태를 설정합니다. 기존 연결은 변경되지 않습니다. 실제 라우팅은 전역 설정과 프록시 구성에 따라 달라집니다. 각 계정은 나중에 변경할 수 있습니다.",
     "perKeyProxyEnabled": "키별 프록시 할당 활성화",
     "perKeyProxyEnabledDesc": "활성화하면 각 제공자 연결에서 자체 프록시 할당을 사용할 수 있습니다",
     "proxyUrl": "프록시 URL",

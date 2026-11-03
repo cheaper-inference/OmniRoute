@@ -7225,6 +7225,8 @@
     "enableThinking": "Fikrlashni yoqish",
     "maxThinkingTokens": "Maksimal fikrlash tokenlari",
     "enableProxy": "Proksini yoqish",
+    "defaultNewConnectionProxyEnabled": "Yangi ulanishlar uchun proksini sukut bo‘yicha yoqish",
+    "defaultNewConnectionProxyEnabledDesc": "Boshqa holat aniq tanlanmasa, yangi provayder hisoblarining dastlabki proksi holatini belgilaydi. Mavjud ulanishlar o‘zgarmaydi. Yo‘naltirish umumiy sozlamalar va proksi konfiguratsiyasiga bog‘liq. Har bir hisobni keyin o‘zgartirish mumkin.",
     "perKeyProxyEnabled": "Har bir kalit uchun proksi biriktirishni yoqish",
     "perKeyProxyEnabledDesc": "Yoqilganda, har bir provayder ulanishi o‘z proksi biriktirmasidan foydalanishi mumkin",
     "proxyUrl": "Proksi URL manzili",

@@ -7225,6 +7225,8 @@
     "enableThinking": "Habilitar el pensamiento",
     "maxThinkingTokens": "Fichas de pensamiento máximo",
     "enableProxy": "Habilitar proxy",
+    "defaultNewConnectionProxyEnabled": "Activar el proxy por defecto para conexiones nuevas",
+    "defaultNewConnectionProxyEnabledDesc": "Define el estado inicial del proxy de las cuentas nuevas de proveedores, salvo elección explícita. Las conexiones existentes no cambian. El enrutamiento sigue dependiendo de los ajustes globales y la configuración del proxy. Puedes cambiar cada cuenta después.",
     "perKeyProxyEnabled": "Activar la asignación de proxy por clave",
     "perKeyProxyEnabledDesc": "Cuando está activada, cada conexión de proveedor puede usar su propia asignación de proxy",
     "proxyUrl": "URL de proxy",

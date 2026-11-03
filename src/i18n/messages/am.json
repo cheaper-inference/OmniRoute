@@ -7302,6 +7302,8 @@
     "enableThinking": "ማሰብን አንቃ",
     "maxThinkingTokens": "ከፍተኛው የማሰብ ቶከኖች ብዛት",
     "enableProxy": "ፕሮክሲን አንቃ",
+    "defaultNewConnectionProxyEnabled": "ለአዲስ ግንኙነቶች ፕሮክሲን በነባሪ አንቃ",
+    "defaultNewConnectionProxyEnabledDesc": "ሌላ ምርጫ በግልጽ ካልተወሰነ የአዲስ አቅራቢ መለያዎችን የመጀመሪያ ፕሮክሲ ሁኔታ ይወስናል። ያሉ ግንኙነቶች አይቀየሩም። የትራፊክ መንገድ አሁንም በአጠቃላይ ቅንብሮች እና በፕሮክሲ ውቅር ላይ ይመሰረታል። እያንዳንዱን መለያ በኋላ መቀየር ይችላሉ።",
     "perKeyProxyEnabled": "ለእያንዳንዱ ቁልፍ የፕሮክሲ ምደባን አንቃ",
     "perKeyProxyEnabledDesc": "ሲነቃ እያንዳንዱ የአቅራቢ ግንኙነት የራሱን የፕሮክሲ ምደባ መጠቀም ይችላል",
     "proxyUrl": "የፕሮክሲ URL",

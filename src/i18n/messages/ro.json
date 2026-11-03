@@ -7225,6 +7225,8 @@
     "enableThinking": "Activați gândirea",
     "maxThinkingTokens": "Număr maxim de tokenuri de raționament",
     "enableProxy": "Activați proxy",
+    "defaultNewConnectionProxyEnabled": "Activează proxy implicit pentru conexiunile noi",
+    "defaultNewConnectionProxyEnabledDesc": "Stabilește starea inițială a proxy-ului pentru conturile noi de furnizor, dacă nu este aleasă explicit altă opțiune. Conexiunile existente nu se modifică. Rutarea depinde de setările globale și de configurația proxy. Fiecare cont poate fi modificat ulterior.",
     "perKeyProxyEnabled": "Activează alocarea proxy-ului per cheie",
     "perKeyProxyEnabledDesc": "Când este activat, fiecare conexiune de furnizor poate utiliza propria alocare de proxy",
     "proxyUrl": "Adresa URL proxy",

@@ -7225,6 +7225,8 @@
     "enableThinking": "Gondolkodás engedélyezése",
     "maxThinkingTokens": "Max gondolkodási jelzők",
     "enableProxy": "Proxy engedélyezése",
+    "defaultNewConnectionProxyEnabled": "Proxy alapértelmezett engedélyezése az új kapcsolatokhoz",
+    "defaultNewConnectionProxyEnabledDesc": "Beállítja az új szolgáltatói fiókok kezdeti proxyállapotát, ha nincs kifejezetten más választás. A meglévő kapcsolatok nem változnak. Az útválasztás továbbra is a globális beállításoktól és a proxy konfigurációjától függ. Minden fiók később módosítható.",
     "perKeyProxyEnabled": "Kulcsonkénti proxy-hozzárendelés engedélyezése",
     "perKeyProxyEnabledDesc": "Ha engedélyezve van, minden szolgáltatói kapcsolat saját proxy-hozzárendelést használhat",
     "proxyUrl": "Proxy URL-címe",

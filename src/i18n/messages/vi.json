@@ -7225,6 +7225,8 @@
     "enableThinking": "Kích hoạt tư duy",
     "maxThinkingTokens": "Số token tư duy tối đa",
     "enableProxy": "Kích hoạt proxy",
+    "defaultNewConnectionProxyEnabled": "Bật proxy mặc định cho kết nối mới",
+    "defaultNewConnectionProxyEnabledDesc": "Đặt trạng thái proxy ban đầu cho tài khoản nhà cung cấp mới trừ khi có lựa chọn rõ ràng khác. Kết nối hiện có không thay đổi. Định tuyến vẫn phụ thuộc vào cài đặt chung và cấu hình proxy. Có thể thay đổi từng tài khoản sau.",
     "perKeyProxyEnabled": "Kích hoạt gán proxy cho từng khóa",
     "perKeyProxyEnabledDesc": "Khi được kích hoạt, mỗi kết nối nhà cung cấp có thể sử dụng cài đặt proxy riêng của mình",
     "proxyUrl": "URL proxy",

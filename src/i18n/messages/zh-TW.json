@@ -7225,6 +7225,8 @@
     "enableThinking": "激發思考",
     "maxThinkingTokens": "最大思考權杖",
     "enableProxy": "啟用代理",
+    "defaultNewConnectionProxyEnabled": "預設對新連線啟用代理",
+    "defaultNewConnectionProxyEnabledDesc": "設定新供應商帳戶的初始代理狀態，明確指定的選擇優先。現有連線保持不變。實際路由仍取決於全域設定和代理組態。之後可以個別修改每個帳戶。",
     "perKeyProxyEnabled": "啟用按金鑰代理分配",
     "perKeyProxyEnabledDesc": "啟用後，每個提供者連線可以使用自己的代理分配",
     "proxyUrl": "代理網址",

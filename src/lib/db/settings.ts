@@ -23,6 +23,7 @@ import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
 import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
+import { DEFAULT_NEW_CONNECTION_PROXY_ENABLED } from "@/shared/constants/newConnectionProxy.mjs";
 
 /**
  * Settings values stored encrypted at rest (AES-256-GCM via ./encryption).
@@ -277,6 +278,7 @@ export async function getSettings() {
     autoDisableBannedScope: "all",
     proxyEnabled: true,
     perKeyProxyEnabled: false,
+    defaultNewConnectionProxyEnabled: DEFAULT_NEW_CONNECTION_PROXY_ENABLED,
     customSystemPromptEnabled: false,
     customSystemPrompt: "",
     // #6316: Opt-in filter that hides paid-only models from the /v1/models catalog.

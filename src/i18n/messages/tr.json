@@ -7225,6 +7225,8 @@
     "enableThinking": "Düşünmeyi Etkinleştir",
     "maxThinkingTokens": "Maksimum Düşünme Jetonları",
     "enableProxy": "Proxy'yi Etkinleştir",
+    "defaultNewConnectionProxyEnabled": "Yeni bağlantılar için proxy varsayılan olarak etkin olsun",
+    "defaultNewConnectionProxyEnabledDesc": "Açıkça aksi seçilmedikçe yeni sağlayıcı hesaplarının başlangıç proxy durumunu belirler. Mevcut bağlantılar değişmez. Yönlendirme genel ayarlara ve proxy yapılandırmasına bağlıdır. Her hesap daha sonra değiştirilebilir.",
     "perKeyProxyEnabled": "Anahtar başına proxy atamasını etkinleştir",
     "perKeyProxyEnabledDesc": "Etkinleştirildiğinde, her sağlayıcı bağlantısı kendi proxy atamasını kullanabilir",
     "proxyUrl": "Proxy URL'si",
