@@ -57,7 +57,9 @@ export async function PUT(request: Request, route: Context) {
   try {
     const { id } = await route.params;
     await connectionContext(id);
-    const definition = registration.parse(await request.json());
+    const parsed = registration.safeParse(await request.json());
+    if (!parsed.success) throw parsed.error;
+    const definition = parsed.data;
     definition.endpoint_id = canonicalFalEndpoint(definition.endpoint_id);
     const capabilities = falCapabilities(definition);
     compileFalInput(definition);

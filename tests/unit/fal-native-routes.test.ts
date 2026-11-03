@@ -305,6 +305,43 @@ test("management registration validates a manual schema and gives it a real nati
   );
 });
 
+test("manual registration rejects invalid envelopes before discovery or dispatch", async () => {
+  for (const value of [null, [], {}, { endpoint_id: endpoint, openapi: [] }]) {
+    const response = await registration.PUT(
+      new Request(`http://localhost/api/providers/${connection.id}/fal`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${key.key}`, "Content-Type": "application/json" },
+        body: JSON.stringify(value),
+      }),
+      { params: Promise.resolve({ id: String(connection.id) }) }
+    );
+    assert.equal(response.status, 400, await response.clone().text());
+  }
+  assert.equal(sent.length, 0);
+});
+
+test("socket input rejects invalid envelopes without spending another inference", async () => {
+  const id = "invalid-socket-envelope";
+  db.saveFalJob({
+    id,
+    owner: key.id,
+    connectionId: String(connection.id),
+    endpoint: "fal-ai/fast-lcm-diffusion",
+    transport: "realtime",
+    status: "REALTIME",
+    createdAt: Date.now(),
+    accounted: true,
+  });
+  for (const value of [null, [], {}, { input: [] }, { input: {}, extra: true }]) {
+    const response = await jobs.POST(request(`jobs/${id}`, "POST", value), {
+      params: Promise.resolve({ id }),
+    });
+    assert.equal(response.status, 400, await response.clone().text());
+  }
+  assert.equal(sent.length, 0);
+  assert.equal(db.loadFalJob(id)?.status, "REALTIME");
+});
+
 test("image edit JSON preserves quality, custom dimensions, masks, count and schema-specific reference limit", async () => {
   const response = await edits.POST(
     new Request("http://localhost/api/v1/images/edits", {

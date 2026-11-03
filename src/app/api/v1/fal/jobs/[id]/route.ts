@@ -137,10 +137,12 @@ export async function POST(request: Request, route: Context) {
     const context = await falContext(request, job.endpoint, job.connectionId);
     if (!("client" in context)) return context.rejection;
     if (context.owner !== job.owner) throw new FalError("Fal job not found", 404);
-    const body = z
+    const parsed = z
       .object({ input: z.record(z.string(), z.unknown()) })
       .strict()
-      .parse(await request.json());
+      .safeParse(await request.json());
+    if (!parsed.success) throw parsed.error;
+    const body = parsed.data;
     const guard = createInjectionGuard()({ prompt: JSON.stringify(body.input) });
     if (guard.blocked) throw new FalError("Request blocked: potential prompt injection detected");
     sendFalRealtime(id, body.input);
