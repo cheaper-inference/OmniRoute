@@ -14,7 +14,7 @@ Is geata ródaithe áitiúil AI agus painéal é OmniRoute tógtha ar Next.js. S
 
 Cumais lárnacha:
 
-- Dromchla API atá comhoiriúnach le OpenAI do CLI/tools (377 soláthraí, 156 modúl seiceadóir)
+- Dromchla API atá comhoiriúnach le OpenAI do CLI/tools (380 soláthraí, 156 modúl seiceadóir)
 - Request/response aistriúchán thar formáidí soláthraí
 - Cúltaca teaglama samhail (seicheamh ilmhúnlaí)
 - Céimeanna teaglama struchtúrtha (`provider + model + connection`) le hordú ama rite ag `compositeTiers`
@@ -33,7 +33,7 @@ Cumais lárnacha:
 - Smaoinigh ar pharsáil chlib (`<think>...</think>`) le haghaidh samhlacha réasúnaíochta
 - Sanitization freagartha le haghaidh comhoiriúnacht dhian OpenAI SDK
 - Normalú róil (córas → forbróir, úsáideoir córas →) le haghaidh comhoiriúnacht tras-soláthraí
-- Comhshó aschuir struchtúrtha (json_schema → Gemini responseSchema)
+- Comhshó aschuir struchtúrtha ( json_schema → Gemini responseSchema)
 - Marthanacht áitiúil do sholáthraithe, eochracha, ailiasanna, combos, socruithe, praghsáil (modúil 122 DB )
 - Usage/cost rianú agus logáil iarratais
 - Sioncronú scamall roghnach le haghaidh multi-device/state sync
@@ -71,7 +71,7 @@ Cumais lárnacha:
 - GLM Smaointeoireacht (`glmt`) soláthraí den chéad scoth réamhshocraithe
 - Comhaireamh dearbhán hibrideach ( `/messages/count_tokens` taobh an tsoláthraí le haisíoc meastacháin)
 - Uathshíolú ailias samhail (30 + normalú canúint tras-seachfhreastalaí ag am tosaithe)
-- Gabh amach sábháilte le garda SSRF, blocáil príobháideach URL, agus atriail inchumraithe
+- Gabh amach sábháilte le garda SSRF, blocáil phríobháideach URL, agus atriail inchumraithe
 - Iarrann comhrá ar an eolas faoi fhuarú arís le `requestRetry` agus `maxRetryIntervalSec` inchumraithe
 - Bailíochtú timpeallacht ama rite le Zod ag am tosaithe
 - Iniúchadh comhlíonta v2 le huimhrigh, imeachtaí an tsoláthraí CRUD, agus logáil bailíochtaithe bactha ag SSRF

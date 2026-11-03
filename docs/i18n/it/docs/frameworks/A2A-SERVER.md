@@ -163,7 +163,7 @@ OmniRoute espone 6 abilità A2A cablate in `src/lib/a2a/taskExecution.ts::A2A_SK
 | Rapporto sulla salute   | `health-report`      | Aggrega interruttore automatico, raffreddamento e stato di blocco per fornitore                                                                                                                     | salute, resilienza             | "Mostra lo stato di salute di tutti i fornitori"         |
 | Elenco capacità         | `list-capabilities`  | Restituisce il catalogo completo delle competenze dell'agente a 45 voci (23 API + 21 CLI + 1 configurazione) come tabella di ribasso con SKILL.md URLs non elaborato per l'inserimento del contesto | catalogo, scoperta, competenze | "Elenca tutte le funzionalità OmniRoute "                |
 
-> La Carta Agente deve essere mantenuta allineata al catalogo live del fornitore 377; i conteggi dei provider e i metadati free/no-auth provengono dal registro di runtime.
+> La Carta Agente deve essere mantenuta allineata al catalogo live dei fornitori 380; i conteggi dei provider e i metadati free/no-auth provengono dal registro di runtime.
 
 ### `list-capabilities` Dettaglio abilità
 
@@ -197,17 +197,17 @@ L'endpoint JSON-RPC `/a2a` è il punto di ingresso A2A canonico. Gli endpoint RE
 
 ---
 
-## Aggiunta di una nuova skill
+## Aggiunta di una nuova abilità
 
-1. **Crea il file della skill:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Crea file di abilità:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Esporta una funzione asincrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Segui la struttura delle skill esistenti, come `smartRouting.ts`.
+   Esporta una funzione asincrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Segui la forma delle competenze esistenti come `smartRouting.ts`.
 
-2. **Registra l'handler:** in `src/lib/a2a/taskExecution.ts`, aggiungi una voce a `A2A_SKILL_HANDLERS`:
+2. **Gestore del registro:** in `src/lib/a2a/taskExecution.ts`, aggiungi una voce a `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...skill esistenti
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ L'endpoint JSON-RPC `/a2a` è il punto di ingresso A2A canonico. Gli endpoint RE
    };
    ```
 
-3. **Esponila nella Agent Card:** in `src/lib/a2a/agentCardMetadata.ts` (condiviso da `/.well-known/agent.json` e `/.well-known/agent-card.json`), aggiungila all'array `skills`:
+3. **Esporre nella scheda agente:** in `src/lib/a2a/agentCardMetadata.ts` (condiviso da `/.well-known/agent.json` e `/.well-known/agent-card.json`), aggiungi all'array `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "La tua skill",
-     "description": "Breve descrizione incentrata sull'intento",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Esempio di invocazione in linguaggio naturale"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Scrivi i test:** `tests/unit/a2a-<your-skill>.test.ts`. Copri il percorso corretto e quello di errore.
+4. **Scrivi i test:** `tests/unit/a2a-<your-skill>.test.ts`. Coprire il percorso felice del percorso di errore +.
 
-5. **Documenta** la nuova skill nella tabella `Available Skills` di questo file.
+5. **Documento** la nuova abilità nella tabella `Available Skills` di questo file.
 
 ---
 

@@ -10,11 +10,11 @@ _Naposledy aktualizované: 2026-06-28_
 
 ## Zhrnutie
 
-OmniRoute je lokálna smerovacia brána a dashboard AI postavená na Next.js. Poskytuje jeden koncový bod kompatibilný s OpenAI (`/v1/*`) a smeruje prevádzku medzi viacerých upstream poskytovateľov s prekladom, záložným, obnovovaním tokenov a sledovaním používania.
+OmniRoute je lokálna smerovacia brána AI a riadiaci panel postavený na Next.js. Poskytuje jeden koncový bod kompatibilný s OpenAI (`/v1/*`) a smeruje prevádzku medzi viacerých upstream poskytovateľov s prekladom, záložným, obnovovaním tokenov a sledovaním používania.
 
 Základné schopnosti:
 
-- Povrch API kompatibilný s OpenAI pre CLI/tools (377 poskytovateľov, 156 spúšťacích modulov)
+- Povrch API kompatibilný s OpenAI pre CLI/tools (380 poskytovateľov, 156 spúšťacích modulov)
 - preklad Request/response naprieč formátmi poskytovateľov
 - Záložná kombinácia modelov (sekvencia viacerých modelov)
 - Štruktúrované kombinované kroky (`provider + model + connection`) s riadením runtime podľa `compositeTiers`
@@ -74,7 +74,7 @@ Základné schopnosti:
 - Bezpečné odchádzajúce načítanie s ochranou SSRF, súkromným blokovaním URL a konfigurovateľným opakovaním
 - Opakujú sa pokusy o chat s konfigurovateľnými `requestRetry` a `maxRetryIntervalSec`
 - Overenie runtime prostredia pomocou Zod pri spustení
-- Audit súladu v2 so stránkovaním, udalosťami CRUD poskytovateľa a protokolom overovania blokovaným SSRF
+- Audit súladu v2 so stránkovaním, udalosťami poskytovateľa CRUD a protokolom overovania blokovaným SSRF
 
 Primárny runtime model:
 
