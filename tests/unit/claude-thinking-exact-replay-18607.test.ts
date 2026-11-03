@@ -13,7 +13,9 @@ import { claudeToOpenAIResponse } from "../../open-sse/translator/response/claud
 import { translateRequest } from "../../open-sse/translator/index.ts";
 import { FORMATS } from "../../open-sse/translator/formats.ts";
 
-const MODEL = "claude-opus-5-5";
+// Manual extended thinking (type:"enabled"): adaptive-only models never restore (#17324).
+const MODEL = "claude-sonnet-4-5";
+const CONN = "conn-18607";
 const T1 = { type: "thinking", thinking: "SYNTHETIC_1", signature: "SYNTHETIC_SIG_1" };
 const T2 = { type: "redacted_thinking", data: "SYNTHETIC_OPAQUE_2" };
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
@@ -21,7 +23,11 @@ const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(va
 /** Replay a Claude stream whose content is [T1, text, tool_use A, T2, tool_use B]. */
 function captureInterleavedTurn() {
   clearClaudeThinkingStore();
-  const state: Record<string, unknown> = { provider: "claude", toolCalls: new Map() };
+  const state: Record<string, unknown> = {
+    provider: "claude",
+    connectionId: CONN,
+    toolCalls: new Map(),
+  };
   const events = [
     { type: "message_start", message: { id: "msg_1", model: MODEL } },
     { type: "content_block_start", index: 0, content_block: { type: "thinking", thinking: "" } },
@@ -95,7 +101,7 @@ function translate(assistantMessages: Array<Record<string, unknown>>) {
       tools: [{ type: "function", function: { name: "read", parameters: { type: "object" } } }],
     },
     false,
-    {},
+    { _connectionId: CONN },
     "claude"
   ) as { messages: Array<{ role: string; content: Array<Record<string, unknown>> }> };
   return result.messages
@@ -167,7 +173,7 @@ test("#18607(b) negative: a history that only carries toolu_B gets T2, never too
       tools: [{ type: "function", function: { name: "read", parameters: { type: "object" } } }],
     },
     false,
-    {},
+    { _connectionId: CONN },
     "claude"
   ) as { messages: Array<{ role: string; content: Array<Record<string, unknown>> }> };
   const [turn] = result.messages
@@ -185,7 +191,7 @@ test("#18607 negative: a different model restores nothing from the layout store"
   const result = translateRequest(
     FORMATS.OPENAI,
     FORMATS.CLAUDE,
-    "claude-sonnet-4-5",
+    "claude-opus-4-1",
     {
       reasoning_effort: "high",
       messages: [
@@ -201,7 +207,7 @@ test("#18607 negative: a different model restores nothing from the layout store"
       tools: [{ type: "function", function: { name: "read", parameters: { type: "object" } } }],
     },
     false,
-    {},
+    { _connectionId: CONN },
     "claude"
   ) as { messages: Array<{ role: string; content: Array<Record<string, unknown>> }> };
   const signed = result.messages
