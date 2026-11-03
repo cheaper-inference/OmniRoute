@@ -6,16 +6,16 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="Painéal OmniRoute" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="Deais OmniRoute" width="820"/>
 
 <br/>
 <br/>
 
-# 🚀 OmniRoute — An Geata AI Saor in Aisce
+# 🚀 OmniRoute — Geata AI Saor in Aisce
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Cruthaithe ag [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ná stop códú choíche. Gach uirlis AI → 380 soláthraí — 150+ saor in aisce — trí aon phointe deiridh amháin. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity isteach i CLAUDE / GPT / Gemini SAOR IN AISCE le hath-thitim uathoibríoch. Comhbhrú RTK + Caveman cruachta sábhálann 15–95% de thóicéid (~89% ar an meán) — ná sroich teorainneacha choíche. 380 soláthraí AI · 150+ sraitheanna saor in aisce · ~1.62B tóicéid saor in aisce/mí · 20 straitéis ródaithe · $0 le tosú."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Ná stop ag códú riamh. Gach uirlis AI → 380 soláthraí — 150+ saor in aisce — trí chríochphointe amháin. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity go Claude / GPT / Gemini SAOR IN AISCE le cúlathrú uathoibríoch. Sábhálann comhbhrú cruachta RTK + Caveman 15–95% de na tóca(i)ní (~89% ar an meán) — ná sroich teorainneacha riamh. 380 soláthraí AI · 150+ sraith saor in aisce · ~1.62B tócan saor in aisce/mí · 20 straitéis ródaithe · $0 le tosú."/>
 
 </div>
 
@@ -1301,21 +1301,21 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
 <table>
   <tr><th align="left">Ciseal</th><th align="left">Teicneolaíocht</th></tr>
   <tr><td nowrap><b>Am rite</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Teanga</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> trasna <code>src/</code> agus <code>open-sse/</code> (nialas <code>any</code> sa chroí ó v2.0)</td></tr>
+  <tr><td nowrap><b>Teanga</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> ar fud <code>src/</code> agus <code>open-sse/</code> (gan <code>any</code> ar bith sa chroí ó v2.0 i leith)</td></tr>
   <tr><td nowrap><b>Creat</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, dialannú WAL) + LowDB (JSON oidhreachta) — 147 modúl fearainn, 222 imirce</td></tr>
+  <tr><td nowrap><b>Bunachar sonraí</b></td><td>better-sqlite3 (SQLite, logáil WAL) + LowDB (JSON oidhreachta) — 147 modúl fearainn, 222 imirce</td></tr>
   <tr><td nowrap><b>Cuimhne</b></td><td>Téacs iomlán SQLite FTS5 + leabuithe veicteora cainníochtaithe int8, meath clóscríofa</td></tr>
-  <tr><td nowrap><b>Scéimeanna</b></td><td>Zod 4 — bailíochtú I/O uirlisí MCP + conarthaí API</td></tr>
+  <tr><td nowrap><b>Scéimeanna</b></td><td>Zod 4 — bailíochtú ionchuir/aschuir uirlisí MCP + conarthaí API</td></tr>
   <tr><td nowrap><b>Prótacail</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Sruthú</b></td><td>Imeachtaí Seolta ag an bhFreastalaí (SSE) + droichead WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Comhbhrú</b></td><td>Píblíne 12 inneall — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Fíordheimhniú &amp; slándáil</b></td><td>OAuth 2.0 (PKCE) + JWT + Eochracha API + fíordheimhniú scóipeáilte MCP · AES-256-GCM ag an gcuid eile · DOMPurify</td></tr>
-  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — pearsanú méarlorg TLS JA3 / JA4, seachfhreastalaí 3 leibhéal</td></tr>
-  <tr><td nowrap><b>Athléimneacht</b></td><td>Briseoir ciorcaid, cúlú easpónantúil, cosc ar ró-ualach comhuaineach, féinleigheas uathoibríoch teaglamaí</td></tr>
+  <tr><td nowrap><b>Comhbhrú</b></td><td>Tuile 12 inneall — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Fíordheimhniú &amp; slándáil</b></td><td>OAuth 2.0 (PKCE) + JWT + Eochracha API + fíordheimhniú MCP le raon feidhme · AES-256-GCM ar fos · DOMPurify</td></tr>
+  <tr><td nowrap><b>Ceilt</b></td><td>wreq-js — pearsanú méarlorg TLS JA3 / JA4, seachfhreastalaí 3 leibhéal</td></tr>
+  <tr><td nowrap><b>Athléimneacht</b></td><td>Briseadh ciorcaid, cúltaca easpónantúil, frith-thruailliú slua, féinleigheas uathoibríoch teaglama</td></tr>
   <tr><td nowrap><b>Logáil</b></td><td>pino — logaí JSON struchtúrtha le comhthéacs iarratais</td></tr>
-  <tr><td nowrap><b>Tástáil</b></td><td>Rithálaí tástálacha Node.js + Vitest — <b>níos mó ná 60,000 dearbhú tástála statacha</b> trasna níos mó ná 8,400 comhad tástála rianaithe (aonaid, comhtháthú, E2E, slándáil, éiceachóras)</td></tr>
+  <tr><td nowrap><b>Tástáil</b></td><td>Rithire tástála Node.js + Vitest — <b>níos mó ná 60,000 dearbhú tástála statacha</b> ar fud níos mó ná 8,400 comhad tástála rianaithe (aonaid, comhtháthú, E2E, slándáil, éiceachóras)</td></tr>
   <tr><td nowrap><b>Ardáin</b></td><td>Deasc (Electron) · Android (Termux) · PWA (brabhsálaí ar bith)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — foilsiú uathoibríoch npm + Docker Hub tráth eisiúna</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — foilsiú uathoibríoch npm + Docker Hub ag an scaoileadh</td></tr>
   <tr><td nowrap><b>Naisc</b></td><td><a href="https://omniroute.online">Suíomh Gréasáin</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1814,9 +1814,9 @@ Ceadúnas MIT - féach [LICENSE](LICENSE) le haghaidh sonraí.
 
 <div align="center">
 
-**[⬆ Ar ais go barr](#-omniroute)** · Tógtha le ❤️ do phobal an AI foinse oscailte.
+**[⬆ Ar ais go barr](#-omniroute)** · Tógtha le ❤️ do phobal AI na foinse oscailte.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Cruthaithe ag <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Ceadúnas MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions cumasaithe le haghaidh C&F an phobail -->
+<!-- Cumasaíodh Plé GitHub le haghaidh Ceisteanna agus Freagraí an phobail -->
