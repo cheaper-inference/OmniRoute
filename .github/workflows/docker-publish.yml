@@ -77,8 +77,10 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || '' }}
-          # Need full tag history for semver comparison when deciding :latest.
-          fetch-depth: 0
+          # Shallow: the :latest decision reads tag NAMES from `git ls-remote` below, so the
+          # 2.6 GB history is not needed. A full clone took 30+ min on a Blacksmith runner
+          # (outside GitHub's network) on 2026-11-03.
+          fetch-depth: 1
 
       - name: Resolve version, latest-promotion, and skip flag
         id: version
@@ -119,12 +121,16 @@ jobs:
           elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             PROMOTE="${PROMOTE_INPUT:-false}"
           else
-            git fetch --tags --quiet || true
             # Decide via the extracted helper, which folds VERSION into the
             # candidate set so the result is independent of git-tag sync timing
             # on `release` events (#5301). Without that, the freshly-created tag
             # is often not yet visible here and :latest stays a release behind.
-            PROMOTE=$(git tag -l 'v[0-9]*' | bash scripts/ci/should-promote-latest.sh "$VERSION")
+            # Tag names come straight from the remote (same set `git fetch --tags`
+            # gave the full clone); under pipefail a failed listing fails the step
+            # instead of promoting against an empty list.
+            PROMOTE=$(git ls-remote --tags --refs origin \
+              | sed -n 's#^[0-9a-f]*[[:space:]]refs/tags/\(v[0-9].*\)$#\1#p' \
+              | bash scripts/ci/should-promote-latest.sh "$VERSION")
             if [ "$PROMOTE" != "true" ]; then
               echo "Version $VERSION is not the highest stable semver. Not promoting :latest."
             fi
@@ -246,7 +252,8 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || '' }}
-          fetch-depth: 0
+          # .dockerignore drops .git, so the image build never reads history.
+          fetch-depth: 1
 
       - name: Assert Docker Engine
         run: docker info
@@ -457,7 +464,8 @@ jobs:
         with:
           persist-credentials: false
           ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/v{0}', inputs.version) || '' }}
-          fetch-depth: 0
+          # Manifests, smoke test and scans read no git history.
+          fetch-depth: 1
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
