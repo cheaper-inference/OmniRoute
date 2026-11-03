@@ -274,6 +274,31 @@ export function getRetryDispatcher(hostname?: string): Dispatcher {
 }
 
 /**
+ * Dedicated Codex image generation can take several minutes before returning headers.
+ * Its undici transport limits must exceed the image-specific response-start watchdog:
+ * generic model routes on this host deliberately use far shorter timeouts.
+ * Use a fresh-socket configuration; never replay an image generation POST.
+ */
+const dedicatedCodexImageDispatchers = new Map<number, Dispatcher>();
+export function getDedicatedCodexImageDispatcher(responseStartTimeoutMs: number): Dispatcher {
+  const timeoutMs = Math.max(60_000, responseStartTimeoutMs + 60_000);
+  let dispatcher = dedicatedCodexImageDispatchers.get(timeoutMs);
+  if (!dispatcher) {
+    const defaults = getDispatcherOptions();
+    dispatcher = new Agent({
+      ...defaults,
+      headersTimeout: Math.max(defaults.headersTimeout, timeoutMs),
+      bodyTimeout: Math.max(defaults.bodyTimeout, timeoutMs),
+      keepAliveTimeout: 1,
+      keepAliveMaxTimeout: 1,
+      pipelining: 0,
+    });
+    dedicatedCodexImageDispatchers.set(timeoutMs, dispatcher);
+  }
+  return dispatcher;
+}
+
+/**
  * Extract the port from a proxy URL string before URL parsing.
  * `new URL("http://host:80")` strips port 80 since it's the HTTP default,
  * but proxy servers commonly listen on port 80/443, so we need to preserve it.
