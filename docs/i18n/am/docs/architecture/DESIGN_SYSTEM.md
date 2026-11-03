@@ -4,7 +4,7 @@
 
 ---
 
-> **ሁኔታ፡** ዳሽቦርዱ የተገነባው በ** Keak CI UI ኪት** (`@keak/cheaper-inference-ui-kit`)፣ እንደ የሥራ ቦታ `packages/ui-kit` (`@omniroute/ui-kit`) የሚሸጥ (zqe፣ የላይኛው ዥረት ቅጽበታዊ ገጽ እይታ በ `packages/ui-kit/UPSTREAM.md` የተሰካ እና በ `npm run check:ui-kit-snapshot` የተጠበቀ ነው)። ብርሃን ቀኖናዊ ጭብጥ ነው; ነባሪው ምርጫ `system` ነው። ዘዬው Keak lime (`--ci-color-accent`) ነው። ስዊዘርዘር ለ UI፣ የማሳያ እና ኮድ ጽሑፍ (`--ci-font-ui`፣ `--ci-font-display` እና `--ci-font-mono` መፍታት ያለበት) ነጠላ ቤተሰብ ነው፣ በራሱ በራሱ የሚስተናገደው (`packages/ui-kit/src/ci-fonts.css`፣ በ `ci-tokens.css` የመጣ)። እያንዳንዱ አዶ የሉሲድ ግሊፍ ነው።
+> **ሁኔታ፡** ዳሽቦርዱ የተገነባው በ** Keak CI UI ኪት** (`@keak/cheaper-inference-ui-kit`)፣ እንደ የሥራ ቦታ `packages/ui-kit` (`@omniroute/ui-kit`፣ የላይኛው ዥረት ቅጽበታዊ ገጽ እይታ በ `packages/ui-kit/UPSTREAM.md` ላይ ተሰክቷል እና በ `npm run check:ui-kit-snapshot` ይጠበቃል)። ብርሃን ቀኖናዊ ጭብጥ ነው; ነባሪው ምርጫ `system` ነው። ዘዬው Keak lime (`--ci-color-accent`) ነው። ስዊዘርዘር ለ UI፣ የማሳያ እና ኮድ ጽሑፍ (`--ci-font-ui`፣ `--ci-font-display` እና `--ci-font-mono` መፍታት ያለበት) ነጠላ ቤተሰብ ነው፣ በራሱ በራሱ የሚስተናገደው (`packages/ui-kit/src/ci-fonts.css`፣ በ `ci-tokens.css` የመጣ)። ስክሪፕቶች ስዊዘርላንድ ይጎድላቸዋል glyph በ glyph (`src/app/globals.css`): ኢንተር ለሲሪሊክ፣ ግሪክ እና ቬትናምኛ እና፣ `html[dir="rtl"]` ስር ብቻ፣ ቫዚርማትን ለአረብኛ ፊደል። እያንዳንዱ አዶ የሉሲድ ግሊፍ ነው።
 
 ## 1. ነገሮች የሚገኙበት ቦታ
 
@@ -59,7 +59,16 @@
 
 ## 5. ኪት ማዘመን
 
-`npm run check:ui-kit-upstream` በ `packages/ui-kit/UPSTREAM.md` ውስጥ የተሰካውን ስሪት ከአዲሱ `v*` መለያ ጋር ያወዳድራል እና ልቀቱ ሲወጣ የማመሳሰል ትዕዛዙን ያትማል። ሳምንታዊው `UI Kit upstream watch` የስራ ፍሰት (`.github/workflows/ui-kit-upstream-watch.yml`) ተመሳሳይ ፍተሻ ያካሂዳል እና ፒኑ ከኋላ እያለ አንድ የመከታተያ ጉዳይ ክፍት ያደርገዋል። ወደ ላይ ያለው ሪፖ ግላዊ ነው፣ ስለዚህ የስራ ፍሰቱ በ `UI_KIT_READ_TOKEN` ሚስጥር ውስጥ ተነባቢ-ብቻ ማስመሰያ ያስፈልገዋል እና ያለሱ ንቁ ሆኖ ይቆያል።
+`npm run check:ui-kit-upstream` በ `packages/ui-kit/UPSTREAM.md` ውስጥ የተሰካውን ስሪት ከአዲሱ `v*` መለያ ጋር ያወዳድራል እና ልቀቱ ሲወጣ የማመሳሰል ትዕዛዙን ያትማል።
+
+የየቀኑ `UI Kit upstream watch` የስራ ፍሰት (`.github/workflows/ui-kit-upstream-watch.yml`) ተመሳሳይ ፍተሻ ይሰራል። ፒኑ ከኋላ እያለ፣ `scripts/ci/ui-kit-sync-pr.sh` አንድ የማመሳሰል PR ከከፍተኛው `release/vX.Y.Z` ቅርንጫፍ ጋር፣ በሚንከባለል ቅርንጫፍ `chore/ui-kit-sync-latest` ላይ ክፍት ያደርገዋል። በፍፁም አይዋሃድም፡ እያንዳንዱ ኪት መለቀቅ አሁንም በአካባቢው VPS ላይ የእይታ ፍተሻ ያስፈልገዋል። ቅርንጫፉ የሚገነባው አዲስ ልቀት ሲወጣ እና ካልሆነ ብቻውን ሲተው ነው። የተከፈተ PR በእጅ የተገፈፈ አልተፃፈም፣ እና ጠባቂ የተዘጋው አንድ PR አዲስ እስኪወጣ ድረስ ተዘግቶ ይቆያል።
+
+ምንም PR መክፈት በማይቻልበት ጊዜ (የታለመው መልቀቅ በረዶ ሲሆን, PR በእጅ ተገፋ, PR ተዘግቷል, ወይም ምንም PR ቶከን አልተዘጋጀም) የስራ ሂደቱ ለምን እንደሆነ የሚገልጽ አንድ የመከታተያ ጉዳይ ይከፍታል.
+
+የአሰራር ሂደቱ ሁለት ምስጢሮችን ይጠቀማል-
+
+- `secrets.UI_KIT_READ_TOKEN`፡ ለግል ወደ ላይ ለሚደረገው ሪፖ ተነባቢ-ብቻ ማስመሰያ። የስራ ፍሰቱ ወደ ላይ ማንበብ በማይችልበት ጊዜ (ምንም ማስመሰያ፣ መስራት ያቆመ ቶከን፣ ወይም GitHub የማይደረስበት) ሩጫው አረንጓዴ ሆኖ ይቆያል ነገር ግን ማስጠንቀቂያ ይጽፋል እና አንድ የተለየ እትም ክፍት ያደርገዋል፣ ይህም አንድ ጊዜ ራሱን ይዘጋል፣ በኋላ ሩጫ እንደገና ወደላይ ማንበብ ይችላል።
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: በዚህ ማከማቻ ላይ ከይዘት እና የመጎተት ጥያቄዎች ጋር የመዳረሻ መፃፍ ያለው ጥሩ-ጥራጥሬ ማስመሰያ። ነባሪው `GITHUB_TOKEN` እዚህ PRs መፍጠር አይችልም፣ እና የተከፈተው PR CI አያነሳሳም። ያለዚህ ማስመሰያ የስራ ሂደቱ ቅርንጫፉን ብቻ ይገፋፋል.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` የላይኛውን `src/` በዛ ቁርጠኝነት ይገለብጣል (`latest` = the new `v*` tag) ወደ `packages/ui-kit/src`, ነጠላ የተፈቀደውን ለውጥ ይተገበራል (ከአንፃራዊ ማስመጣት የ `.js` ቅጥያ ይጥላል) እና የስራ ቦታ ሥሪቱን በ `packages/ui-kit/package.json` እና `package-lock.json` ወደ ላይኛው ያዘጋጃል። በመቀጠል `git diff packages/ui-kit` ይገምግሙ፣ በአቅራቢዎች፣ መቼቶች፣ ጥንብሮች፣ አጠቃቀም እና የመጨረሻ ነጥብ በሁለቱም ጭብጦች ላይ ያድርጉ፣ `npm run check:ui-kit-snapshot` እና `npm run test:vitest:ui` ን ያሂዱ እና PR ከላይ ባለው የለውጥ ሎግ ይክፈቱ።
 
@@ -67,12 +76,12 @@
 
 አሥራ ሁለቱ ሥዕላዊ መግለጫዎች `README.md` መክተቻ ሥር (`docs/diagrams/*.svg`) በማይንቀሳቀስ ምስል ላይ የሚተገበረው ኪት ናቸው፣ እና የሚመነጩ እንጂ በእጅ የተሳሉ አይደሉም፡ 13 የጄነሬተር ፋይሎች በ `scripts/docs/gen-readme-*.mjs` (አሥራ ሁለት ሥዕላዊ መግለጫዎች እና የ `gen-readme-diagrams.mjs` ሾፌር) እና 12 የዝግታ ፈተናዎች በ `tests/unit/docs/readme-*-svg.test.ts`፣ አንድ በሥዕላዊ መግለጫ፣ እያንዳንዱ ባይት-ውፅዓት ከጄኔሬተሩ ጋር በማወዳደር ( `test-unit`)።
 
-- **ማስመሰያዎች** `scripts/docs/readme-diagram-theme.mjs` ቤተ-ስዕሉን ከ `packages/ui-kit/src/ci-tokens.css` ይገለብጣል (በዚያ ፋይል ላይ በ `tests/unit/docs/readme-diagram-theme.test.ts` የተሰካ) እና የጽሑፍ ሚናዎች በመሳሪያው ቀደምት ፊቶች ላይ - Instrument Serif for display, Inter for UI text, IBM Plex Mono ለሥዕሎች እና ኮድ - ከ `@fontsource` ጥቅሎች (ዳሽቦርዱ ራሱ የኪት ስዊዘርን ከኪት 6 0.0 ጀምሮ ይጠቀማል)። የብርሃን እሴቶች በ `:root` ላይ ይቀመጣሉ፣ ጨለማ እሴቶች ከ `prefers-color-scheme: dark` ጀርባ፣ በፋይሉ ውስጥ፣ ስለዚህ እያንዳንዱ ምስል በ GitHub ላይ የተመልካቹን እቅድ ይከተላል።
-- **ቅርጸ ቁምፊዎች.** `scripts/docs/readme-fonts.mjs` እነዚያን woff2 ፋይሎችን ወደ ጂሊፍስ ያስቀምጣቸዋል እያንዳንዱ ሥዕላዊ መግለጫ እንደ `@font-face` `data:` URIs ይከተላቸዋል - የኪት ትየባ ወደ README ምስል የሚደርስበት ብቸኛው መንገድ GitHub Markdown ምንም CSS ስለማይወስድ እና camo proxy እያንዳንዱን የውጭ ማምጣትን ስለሚከለክል ነው። ንዑስ ስብስቦች ላቲን-ብቻ ናቸው; ወደ ስርዓቱ ቁልል የሚመለሱት የምልክት ግሊፎች አንድ በአንድ በ `SYMBOL_FALLBACKS` ውስጥ ይፈቀዳሉ፣ እና ማንኛውም ሌላ ያልተሸፈነ ግሊፍ መጣል።
+- **ማስመሰያዎች** `scripts/docs/readme-diagram-theme.mjs` ቤተ-ስዕሉን ከ `packages/ui-kit/src/ci-tokens.css` ይገለበጣል (በዚያ ፋይል ላይ በ `tests/unit/docs/readme-diagram-theme.test.ts` የተሰካ) እና የጽሑፍ ሚናዎችን በኪቲው ዓይነት ሚዛን ይገልፃል፡ ስዊዘርላንድ በኪት ክብደት (400/500/600፣ በ 500 ማሳያ) እና ሁሉንም ነገር መከታተል፣ ከኮድ ሚናዎች (`.cmd`፣ `.term`፣ `.term-lg`፣ `.mono`፣ `.mono-sm`፣ `.mono-xs` በስተቀር)፣ የትኛውም IBM ትዕዛዞች፣ URLs፣ መለያዎች እና ተርሚናል ስክሪኖች። የብርሃን እሴቶች በ `:root` ላይ ይቀመጣሉ፣ ጨለማ እሴቶች `prefers-color-scheme: dark` በስተጀርባ፣ በፋይሉ ውስጥ፣ ስለዚህ እያንዳንዱ ምስል በ GitHub ላይ የተመልካቹን እቅድ ይከተላል።
+- **ቅርጸ ቁምፊዎች.** GitHub Markdown ምንም CSS አልያዘም እና የ camo proxy እያንዳንዱን የውጭ ማምጣትን ያግዳል፣ ስለዚህ የኪት አይነት በፋይሉ ውስጥ መጓዝ አለበት። የጄኔሬተር ሁሉ የመጨረሻ ደረጃ `scripts/docs/readme-outline.mjs` የስዊዘርላቹን ሚናዎች በ HarfBuzz ይቀርፃቸዋል እና እንደ ቬክተር ዝርዝር (`<defs>` paths እና `<use>`) ይሳሉ፣ ቀስቶቹ እና ጂኦሜትሪክ ምልክቶች ስዊዘርላንድ በራሱ መለኪያዎች አልተሳለም። ዝርዝር መግለጫዎች፣ መቼም የተከተተ ቅርጸ-ቁምፊ፡ የስዊዘርላንድ ፍቃድ (`packages/ui-kit/src/fonts/FFL.txt`) ያለ የጽሁፍ ስምምነት ንዑስ ቅንብር እና ቅርጸት መቀየርን ይከለክላል እና የቬክተር ስዕሎችን ይፈቅዳል፣ ስለዚህ Switzer `@font-face` ወይም `data:` URI ዳግም አያስተዋውቁ። በፋይል ውስጥ የቀረው አንድ ቅርጸ-ቁምፊ የ OFL IBM Plex Mono ንዑስ ስብስብ ነው እውነተኛ የኮድ ጽሑፍ (`scripts/docs/readme-fonts.mjs`) ፣ ከእነዚያ ቁምፊዎች የተሰራ። ማንኛውንም ግሊፍ መወርወርን መክተት አይችልም።
 - **እንደገና ማመንጨት።** `npm run docs:readme-diagrams` አስራ ሁለቱን በ README ቅደም ተከተል እንደገና ይጽፋል እና በአንድ ፋይል አንድ መስመር በመጠን ያትማል። ነጠላ ጀነሬተር እንዲሁ በራሱ ይሰራል (`node scripts/docs/gen-readme-<name>.mjs`፣ `free-tier-budget` `node --import tsx/esm` ይፈልጋል ምክንያቱም አሃዞቹ በ `open-sse/config/freeModelCatalog.ts` ውስጥ ካለው የቀጥታ ካታሎግ ጫኝ ነው ፣ የካታሎግ ለውጥ የ CI ውጤት `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` ውስጥ ነው)። ጄነሬተሩን እና SVG አንድ ላይ ያድርጉ።
 - **ማረጋገጫ።** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` አንድን ፋይል GitHub በሚያገለግልበት መንገድ (የ `<img>` መለያ፣ camo's `Content-Security-Policy`፣ `image/svg+xml`)፣ ብርሃን እና ጨለማ ፍሬም ይይዛል እና ገጹ የተሰራውን የውጭ ቅርጸ-ቁምፊ ጥያቄ ሪፖርት ያደርጋል (0 መሆን አለበት)።
 - **በጀት።** በአንድ ፋይል ከ 200 KB በታች (እያንዳንዱ የዝግታ ሙከራ ያረጋግጣል); 500 KB ለማንኛውም README ምስል (የ SVG ስቱዲዮ አረጋጋጭ ህግ) ጠንካራ ቆብ ነው።
-- **ቅዳ ሳይለወጥ፣ ከበሩ ላይ ይቆጠራል።** የዳግም ብራንድ ተቀይሯል አይነት እና ቤተ-ስዕል እንጂ ቃላት አይደለም፡ እያንዳንዱ ጀነሬተር የዲያግራሙን ግልባጭ በ `*_COPY` ቋሚ (ወይንም ከቀጥታ ካታሎግ ይገነባል) ይህም በተሳለው ጽሁፍ እና በቅርጸ ቁምፊ ንዑስ ስብስብ ግብአት ነው። ቀኖናዊ አኃዞች በ `<text>` ኖዶች ውስጥ ይቆያሉ፣ በ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) ይነበባሉ; በሩ የሚያነቡት የሥዕላዊ መግለጫዎች የቆይታ ፈተናዎች አረጋጋጭዎቹን በተፈጠረው ፋይል ላይ ያካሂዳሉ፣ ስለዚህ ከኮዱ የወጣ አሃዝ ፈተናውን ወድቋል - በሩ የሚነበብበትን ምንጭ አስተካክል እንጂ በጄነሬተር ውስጥ ያለው ቁጥር የለም።
+- **ቅዳ ሳይለወጥ፣ ከበሩ ላይ ይቆጠራል።** የዳግም ብራንድ ተቀይሯል አይነት እና ቤተ-ስዕል እንጂ ቃላት አይደለም፡ እያንዳንዱ ጀነሬተር የዲያግራሙን ግልባጭ በ `*_COPY` ቋሚ (ወይንም ከቀጥታ ካታሎግ ይገነባዋል) ይህም የተሳለው ጽሁፍ እና የመግለጫው ደረጃ ግብአት ነው። ቀኖናዊ አኃዞች በ `<text>` ኖዶች ውስጥ ይቆያሉ (አንድ ጊዜ ተዘርዝረዋል ፣ `fill-opacity:0`) ፣ በ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) የተነበበ; በር የሚያነቡት የሥዕላዊ መግለጫዎች የቆይታ ፈተናዎች አረጋጋጮችን በተፈጠረው ፋይል ላይ ያካሂዳሉ፣ ስለዚህ ከኮዱ የወጣ አሃዝ ሙከራው አልተሳካም — በሩ የሚያነበውን ምንጭ ያስተካክላል እንጂ በጄነሬተር ውስጥ ያለው ቁጥር የለም።
 
 ## 7. የማጣቀሻ ማውጫ
 

@@ -164,7 +164,12 @@ export async function GET(
     ) {
       try {
         const completed = getCompletedDetails();
-        const inMem = completed.get(id);
+        const direct = completed.get(id);
+        // The listed durable ID differs from the reused public preview ID.
+        const inMem = persistedRequest
+          ? ([...completed.values()].find((detail) => detail.persistedLogId === id) ??
+            (direct?.attemptGeneration ? undefined : direct))
+          : direct;
         if (inMem) {
           const safeStreamChunks = projectManagementStreamChunks(inMem.streamChunks);
           const pipelinePayloads: any = {
@@ -195,8 +200,8 @@ export async function GET(
           persistedRequest = persistedRequest
             ? {
                 ...persistedRequest,
-                pipelinePayloads: persistedRequest.pipelinePayloads || pipelinePayloads,
-                hasPipelineDetails: persistedRequest.hasPipelineDetails || true,
+                pipelinePayloads,
+                hasPipelineDetails: true,
               }
             : minimal;
         }

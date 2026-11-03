@@ -122,6 +122,11 @@ const AUTHORITATIVE_PROVIDER_CONTEXT_WINDOWS = new Map<string, number>([
   ["opencode-go/deepseek-v4.1-flash", 1000000],
   ["opencode-go/deepseek-flash", 1000000],
   ["opencode-go/minimax-m2.5", 204800],
+  // #17386: Cursor's standard Grok 4.7 window is 256k (500k is the separate
+  // `cursor-grok-4.7-<effort>-500k` variant). Without this row a bare `cursor/grok-4.7`
+  // resolves to no window and falls back to the provider's 200000 default.
+  // Mirrors GROK_47_CONTEXTS["256k"] (open-sse/config/providers/registry/cursor/grok47.ts).
+  ["cursor/grok-4.7", 256000],
   // The opposite direction: models.dev lists OpenCode's free DeepSeek V4.1
   // Flash at 1M, but the free backend rejects prompts above ~330k tokens
   // (measured 2026-10-26). Advertising 1M stops clients from compacting and

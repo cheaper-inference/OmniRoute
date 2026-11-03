@@ -163,7 +163,7 @@ OmniRoute يكشف عن 6 مهارات A2A موصولة في `src/lib/a2a/taskEx
 | تقرير الصحة   | `health-report`      | تجميع قاطع الدائرة الكهربائية وحالة التهدئة وحالة القفل لكل مزود                                                                         | الصحة والمرونة               | "إظهار الحالة الصحية لجميع مقدمي الخدمة" |
 | قائمة القدرات | `list-capabilities`  | إرجاع كتالوج مهارات الوكيل الكامل المكون من 45 إدخالًا (23 API + 21 CLI + 1 config) كجدول تخفيض السعر مع SKILL.md URLs الخام لحقن السياق | الكتالوج والاكتشاف والمهارات | "سرد جميع إمكانيات OmniRoute "           |
 
-> يجب أن تظل بطاقة الوكيل متوافقة مع كتالوج الموفر المباشر 377؛ يتم الحصول على أعداد الموفرين وبيانات تعريف free/no-auth من سجل وقت التشغيل.
+> يجب أن تظل بطاقة الوكيل متوافقة مع كتالوج الموفر المباشر 380؛ يتم الحصول على أعداد الموفرين وبيانات تعريف free/no-auth من سجل وقت التشغيل.
 
 ### تفاصيل مهارة `list-capabilities`
 
@@ -199,15 +199,15 @@ OmniRoute يكشف عن 6 مهارات A2A موصولة في `src/lib/a2a/taskEx
 
 ## إضافة مهارة جديدة
 
-1. **أنشئ ملف المهارة:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **إنشاء ملف المهارات:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   صدّر دالة غير متزامنة `(task: A2ATask) => Promise<{ artifacts, metadata }>`. اتبع بنية المهارات الموجودة مثل `smartRouting.ts`.
+   تصدير دالة غير متزامنة `(task: A2ATask) => Promise<{ artifacts, metadata }>`. اتبع شكل المهارات الموجودة مثل `smartRouting.ts`.
 
-2. **سجّل المعالج:** في `src/lib/a2a/taskExecution.ts`، أضف إدخالًا إلى `A2A_SKILL_HANDLERS`:
+2. **سجل المعالج:** في `src/lib/a2a/taskExecution.ts`، قم بإضافة إدخال إلى `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...المهارات الموجودة
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ OmniRoute يكشف عن 6 مهارات A2A موصولة في `src/lib/a2a/taskEx
    };
    ```
 
-3. **أظهرها في بطاقة الوكيل:** في `src/app/.well-known/agent.json/route.ts`، ألحق العنصر التالي بمصفوفة `skills`:
+3. **كشف في بطاقة الوكيل:** في `src/lib/a2a/agentCardMetadata.ts` (المشتركة بين `/.well-known/agent.json` و `/.well-known/agent-card.json`)، قم بإلحاق المصفوفة `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ OmniRoute يكشف عن 6 مهارات A2A موصولة في `src/lib/a2a/taskEx
    }
    ```
 
-4. **اكتب الاختبارات:** `tests/unit/a2a-<your-skill>.test.ts`. غطِّ مسار النجاح ومسار الخطأ.
+4. **كتابة الاختبارات:** `tests/unit/a2a-<your-skill>.test.ts`. تغطية المسار السعيد مسار الخطأ +.
 
-5. **وثّق** المهارة الجديدة في جدول `Available Skills` بهذا الملف.
+5. **وثيقة** المهارة الجديدة في جدول `Available Skills` لهذا الملف.
 
 ---
 

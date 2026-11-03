@@ -18,6 +18,7 @@ import {
   runWithProxyContext,
   noteRotationAccount,
   noteAddedWait,
+  proxyFetch,
   resolveProxyForRequest,
   type AddedWaitCause,
 } from "../utils/proxyFetch.ts";
@@ -77,6 +78,13 @@ import {
   isResponsesTerminalLine,
   normalizeMuseSparkFinishReason,
 } from "./opencodeMuseSpark.ts";
+import {
+  applyMuseSparkResponsesEffort,
+  dispatchWithMuseSparkMaxFallback,
+  parseDynamicMuseSparkEffort,
+  type HttpExecuteResult,
+} from "./opencodeMuseSparkEffort.ts";
+export { isUnsupportedReasoningEffortRejection } from "./opencodeMuseSparkEffort.ts";
 import { currentRequestContext, runInRequestContext } from "./opencodeRequestContext.ts";
 import {
   handleLoopFreeTierRefusal,
@@ -116,7 +124,12 @@ import {
   isOpencodePublishedCatalogRoutingEnabled,
   isOpencodeV2ClientFingerprintEnabled,
 } from "@/shared/utils/featureFlags";
-import { setPublishedCatalogRoutingGate } from "../utils/opencodePublishedCatalog.ts";
+import {
+  getPublishedBaseUrl,
+  setPublishedCatalogFetch,
+  setPublishedCatalogRoutingGate,
+} from "../utils/opencodePublishedCatalog.ts";
+import { setToolSchemaMemoryGate } from "./opencodeToolObservation.ts";
 import { rotatesEgressOnQuotaRefusal } from "../config/providerErrorRules.ts";
 import {
   BURST_PARK_THRESHOLD,
@@ -267,6 +280,15 @@ function normalizeResponsesToolEntry(t: unknown): Record<string, unknown> | null
   return toolObj;
 }
 
+/** Whether a Responses-API reasoning item carries plaintext in `content` or `summary`. */
+function hasReplayableReasoningText(item: Record<string, unknown>): boolean {
+  return [item.content, item.summary].some(
+    (parts) =>
+      Array.isArray(parts) &&
+      parts.some((part) => isPlainRecord(part) && typeof part.text === "string" && part.text !== "")
+  );
+}
+
 /**
  * Whether a Responses-API `input` item should be kept, normalizing
  * function_call/function_call_output entries in place as a side effect.
@@ -274,9 +296,11 @@ function normalizeResponsesToolEntry(t: unknown): Record<string, unknown> | null
 function shouldKeepResponsesInputItem(item: unknown): boolean {
   if (!item || typeof item !== "object" || Array.isArray(item)) return true;
   const rec = item as Record<string, unknown>;
-  if (rec.type === "reasoning") return false;
   delete rec.encrypted_content;
   delete rec.reasoning_encrypted_content;
+  // An opaque reasoning item means nothing to this upstream, but one with readable text is the
+  // replayed thinking DeepSeek rejects a turn without (#13031).
+  if (rec.type === "reasoning") return hasReplayableReasoningText(rec);
   if (rec.type === "function_call") {
     if (!rec.name || typeof rec.name !== "string" || (rec.name as string).trim() === "")
       return false;
@@ -328,8 +352,11 @@ export function sanitizeResponsesBody(body: Record<string, unknown>): void {
  *   grok-4.5 low/medium/high; hy3 none/low/high; kimi-k3 max;
  *   qwen3.6-plus / qwen3.7-max / qwen3.7-plus high/max;
  *   muse-spark-1.2-contributor minimal/low/medium/high/xhigh (no max)
- * - #12674 Muse Spark 1.3 Contributor: minimal/low/medium/high/xhigh (no max),
- *   verified via `opencode models opencode-go --refresh --verbose`
+ * - #12674 Muse Spark 1.3 Contributor: minimal/low/medium/high/xhigh verified
+ *   via `opencode models opencode-go --refresh --verbose`; #12687 adds `max`
+ *   as an explicit alias suffix — the wire tier is still sent verbatim and
+ *   falls back to xhigh only on the upstream's unsupported-effort 400 (see
+ *   dispatchWithMuseSparkMaxFallback).
  */
 const EFFORT_TIERS: Record<string, readonly string[]> = {
   "deepseek-v4-pro": EFFORT_LEVELS,
@@ -342,8 +369,8 @@ const EFFORT_TIERS: Record<string, readonly string[]> = {
   "qwen3.6-plus": ["high", "max"],
   "qwen3.7-max": ["high", "max"],
   "qwen3.7-plus": ["high", "max"],
+  "muse-spark-1.3-contributor": ["minimal", "low", "medium", "high", "xhigh", "max"],
   "muse-spark-1.2-contributor": ["minimal", "low", "medium", "high", "xhigh"],
-  "muse-spark-1.3-contributor": ["minimal", "low", "medium", "high", "xhigh"],
 };
 
 /**
@@ -361,7 +388,7 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
       }
     }
   }
-  return null;
+  return parseDynamicMuseSparkEffort(m);
 }
 
 // #16798: the published-catalog surface lookup in providerModels.ts is client-reachable and
@@ -369,6 +396,11 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
 // pipeline) hands it the OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED reader. Unregistered
 // (client bundle) reads as off.
 setPublishedCatalogRoutingGate(isOpencodePublishedCatalogRoutingEnabled);
+// The catalog read goes through the proxy-aware transport; the module itself cannot import
+// it (client-reachable). The same flag also turns on the client's own x-opencode-* header
+// relay and the accepted tool-schema memory.
+setPublishedCatalogFetch(proxyFetch);
+setToolSchemaMemoryGate(isOpencodePublishedCatalogRoutingEnabled);
 
 /**
  * Resolves the registry `targetFormat` for a model, aliasing `provider` first.
@@ -861,9 +893,14 @@ export class OpencodeExecutor extends BaseExecutor {
         // execute() in runWithProxyContext(proxyInfo.proxy, ...) before we run.
         // Only pin direct egress when no such context exists; otherwise let the
         // ambient proxy stand instead of clobbering it with the direct sentinel.
-        const dispatch = () => super.execute(input);
+        const dispatch = (effInput: ExecuteInput) =>
+          super.execute(effInput) as Promise<HttpExecuteResult>;
         const single = (await guardStall(
-          await (hasAmbientProxyContext() ? dispatch() : runWithDirectFetchContext(dispatch))
+          await (hasAmbientProxyContext()
+            ? dispatchWithMuseSparkMaxFallback(input, dispatch, parseEffortLevel)
+            : runWithDirectFetchContext(() =>
+                dispatchWithMuseSparkMaxFallback(input, dispatch, parseEffortLevel)
+              ))
         )) as HttpExecuteResult;
         const retryAfterRefusal = await retryFreeTierRefusalWithObservedTools(
           this.freeTierRetryCtx(input),
@@ -919,10 +956,6 @@ export class OpencodeExecutor extends BaseExecutor {
       // This loop only ever dispatches through super.execute() (the HTTP request
       // path), which always resolves the object-shaped arm of ExecutorExecuteResult
       // — the bare-Response arm belongs to web/scraping executors only (base.ts:290).
-      type HttpExecuteResult = Extract<
-        Awaited<ReturnType<BaseExecutor["execute"]>>,
-        { response: Response }
-      >;
       let lastResult: HttpExecuteResult | null = null;
       let lastSharedEgressError: unknown = null;
       const sharedEgressGuardEnabled = isNetworkRotationSharedEgressGuardEnabled();
@@ -1128,16 +1161,19 @@ export class OpencodeExecutor extends BaseExecutor {
             accounts,
             isProxiedCandidate,
             (attemptSignal) =>
-              (async () =>
-                guardStall(
-                  await runWithProxyContext(account.proxy ?? reselectedProxy, () =>
+              (async () => {
+                const loopDispatch = (effInput: ExecuteInput) =>
+                  runWithProxyContext(account.proxy ?? reselectedProxy, () =>
                     super.execute({
-                      ...input,
+                      ...effInput,
                       skipUpstreamRetry: true,
-                      signal: attemptSignal ?? input.signal,
+                      signal: attemptSignal ?? effInput.signal,
                     })
-                  )
-                ) as Promise<HttpExecuteResult>)(),
+                  ) as Promise<HttpExecuteResult>;
+                return guardStall(
+                  await dispatchWithMuseSparkMaxFallback(input, loopDispatch, parseEffortLevel)
+                ) as Promise<HttpExecuteResult>;
+              })(),
             input.signal
           );
           if (outcome.kind !== "ok") {
@@ -1512,10 +1548,12 @@ export class OpencodeExecutor extends BaseExecutor {
     void urlIndex;
     void credentials;
 
+    // Off, unpublished or invalid: the registered base URL. A gated free-tier request keeps
+    // the inference contract's constant and never consults the catalog.
     const base =
       Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
         ? FREE_TIER_INFERENCE_BASE_URL
-        : this.config.baseUrl;
+        : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
     switch (this._requestFormat) {
       case "claude":
         return `${base}/messages`;
@@ -1606,6 +1644,7 @@ export class OpencodeExecutor extends BaseExecutor {
         sessionBody: projectOpencodeSessionBody(body),
         reencodeSession: gatedScope,
         v2Fingerprint,
+        forwardAllOpencodeHeaders: isOpencodePublishedCatalogRoutingEnabled(),
       });
     }
 
@@ -1758,6 +1797,7 @@ export class OpencodeExecutor extends BaseExecutor {
       if (parsed) {
         const deepseekFamily =
           parsed.baseModel === "deepseek-v4-pro" || parsed.baseModel === "deepseek-v4-flash";
+        const museSparkFamily = parsed.baseModel.startsWith("muse-spark");
         if (deepseekFamily) {
           // DeepSeek via opencode-go proxies the native DeepSeek contract, which
           // accepts a flat reasoning_effort field (#4647).
@@ -1765,6 +1805,8 @@ export class OpencodeExecutor extends BaseExecutor {
           if (mb.reasoning_effort === undefined) {
             mb.reasoning_effort = parsed.effort;
           }
+        } else if (museSparkFamily) {
+          applyMuseSparkResponsesEffort(mb, parsed);
         }
         // #10788: every other family's ONLY native effort mechanism is the
         // -<tier> suffix in the model id itself (the ids `opencode models
