@@ -140,34 +140,34 @@ papildināta:
 
 Dažas `MANAGEMENT` darbības ir **tikai operatoram**: viena `manage` atslēga nepietiek. Saglabāto pilnvaru eksports (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), dublējuma atjaunošana pār pašreizējiem datiem (`POST /api/db-backups/import`, ieskaitot `dryRun=true`, `POST /api/db-backups` atjaunošana pēc id, `POST /api/settings/import-json`) un atjaunošanas punktu iznīcināšana (`DELETE /api/db-backups` tīrīšana, kā arī `PATCH /api/db-backups`, jo saglabātais glabāšanas laiks vada automātisko tīrīšanu pēc katras dublējuma kopijas) prasa infopaneļa sesiju, vietējo CLI identitāti vai to, ka pieteikšanās ir atspējota. Sinhronizācijas žetona izdošana (`POST /api/sync/tokens`) un `admin` darbības jomas CLI piekļuves žetona izveide (`POST /api/cli/tokens`) prasa infopaneļa sesiju vai vietējo CLI identitāti jebkurā pieteikšanās režīmā. API atslēgas jebkurā darbības jomā un `oma_` piekļuves žetoni nav operatora pilnvaras: tiem atgriež `403`, kad tāda nepieciešama. Pārbaude atrodas failā `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Pieteikšanās iestatījumu maiņa arī ir tikai operatoram: `POST /api/settings/require-login` (iestatīt pārvaldības paroli / pārslēgt `requireLogin`) pieņem šīs pilnvaras tikai tad, kad parole jau ir. Sākotnējās iestatīšanas bootstrap logs (paroles vēl nav) nemainās, un infopaneļa sesijai, lai aizstātu paroli, jānosūta `currentPassword` (`403`, ja tā trūkst vai ir nepareiza, reģistrēts kā `settings.update_failed`). Vietējais CLI un instance ar atspējotu pieteikšanos saglabā atjaunošanas ceļu un drīkst iestatīt paroli bez tā, jo abi ir piesaistīti resursdatoram, kas pieder datu direktorijai.
 
-## Konveijers
+## Cauruļvads
 
 ```
-Ienākošais pieprasījums → src/proxy.ts
-  → runAuthzPipeline() failā src/server/authz/pipeline.ts
-    1. Noņemt uzticamos iekšējos header laukus (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Ģenerēt pieprasījuma id, klasificēt maršrutu ar classifyRoute()
-    3. Ja pathname == "/" → novirzīt uz /dashboard
-    4. Ja notiek pieprasījumu apkalpošanas pārtraukšana (graceful shutdown) un /api/* → 503
-    5. Ja /api/* pieprasījums nav GET → checkBodySize() pārbaude
-    6. Ja OPTIONS → CORS pirmslidojuma pārbaude 204
-    7. Ja options.enforce == false → turpināt apstrādi ar maršruta klases header laukiem
-    8. Pretējā gadījumā: POLICIES[routeClass].evaluate(ctx)
-       - atļaut  → pievienot x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - noraidīt → JSON kļūda ar correlation_id (informācijas paneļa lapas → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Uzticamie iekšējie header lauki (definēti `src/server/authz/headers.ts`) tiek **noņemti no ienākošajiem pieprasījumiem** pirms klasifikācijas — klienti nevar iepriekš pievienot `x-omniroute-auth-*`, lai uzdotos par subjektu.
+Uzticamas iekšējās galvenes (definētas `src/server/authz/headers.ts`) ir** atņemts no ienākošajiem pieprasījumiem** pirms klasifikācijas — klienti nevar iepriekš aizpildīt `x-omniroute-auth-*`, lai uzdotos par subjektu.
 
-### Politiku līgumi
+### Polišu līgumi
 
-Katrai maršrutu klasei ir politika direktorijā `src/server/authz/policies/`:
+Katrai maršruta klasei ir `src/server/authz/policies/` politika:
 
 - **`publicPolicy`** (`policies/public.ts`) — vienmēr atgriež `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — izgūst Bearer un validē to ar `validateApiKey()`. Pāriet uz anonīmu piekļuvi tikai tad, ja efektīvais `REQUIRE_API_KEY` funkcionalitātes karogs ir atspējots. Efektīvais karogs tiek noteikts ar `isRequireApiKeyEnabled()` (`DB funkcionalitātes karoga pārrakstīšana > process.env.REQUIRE_API_KEY > noklusējums`), lai informācijas paneļa funkcionalitātes karogi un vides mainīgie konsekventi pārvaldītu `/api/v1/*`, `/api/v1beta/*` un aizstājējvārdus; atrisinātāja kļūmes izraisa piekļuves liegšanu. Atļauj informācijas paneļa sesijas pieprasījumus klienta API maršrutos (tostarp `/api/v1/models`, ko izmanto informācijas paneļa modeļu katalogs).
-- **`managementPolicy`** (`policies/management.ts`) — pieņem informācijas paneļa sesiju un iekšējos modeļu sinhronizācijas pieprasījumus (kas atbilst `/api/providers/[name]/(sync-models|models)`) vai pilnībā izlaiž pārbaudi, ja `isAuthRequired()` atgriež false. Atgriež 403 (`AUTH_001`), ja Bearer pilnvara ir norādīta, bet nederīga; citos gadījumos atgriež 401. Pirms jebkura autentifikācijas atzara piemēro arī maršrutu aizsardzības līmeņus (LOCAL_ONLY / ALWAYS_PROTECTED) — skatiet [Maršrutu aizsardzības līmeņi](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY` ceļiem, kas iekļauti `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (pašlaik: `/api/mcp/`), var piekļūt no adresēm ārpus lokālās atgriezeniskās cilpas, ja Bearer atslēgai ir `manage` tvērums; visi pārējie `LOCAL_ONLY` ceļi neatkarīgi no tvēruma joprojām ir stingri pieejami tikai no lokālās atgriezeniskās cilpas.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — izvilkumi nesējs, apstiprina, izmantojot `validateApiKey()`. Tiek uzskatīts par anonīmu tikai tad, ja ir atspējots efektīvais `REQUIRE_API_KEY` līdzekļa karodziņš. Efektīvais karodziņš tiek atrisināts, izmantojot `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), tāpēc informācijas paneļa līdzekļu karogi un vides mainīgie konsekventi pārvalda `/api/v1/*`, `/api/v1beta/*` un aizstājvārdus; atrisinātāja kļūmes neizdodas aizvērtas. Ļauj informācijas paneļa sesiju pieprasījumus klienta API maršrutos (tostarp `/api/v1/models`, ko izmanto informācijas paneļa modeļu katalogā). Kad Entra ID SSO ir iespējots, nesēju, kas strukturāli ir Entra marķieris (trīs base64url segmenti, `RS*` alg, `kid`), apstrādā SSO filiāle.** pirms tam** `validateApiKey()` un tā spriedums ir galīgs — tas nekad neietilpst API atslēgas ceļā vai atzarojumā no degradācijas uz anonīmu, tāpēc identitātes nodrošinātāja darbības pārtraukums nevar kļūt par atvērtu piekļuvi. Statiskie API taustiņi netiek ietekmēti. Skatiet sadaļu [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — pieņem informācijas paneļa sesiju, iekšējā modeļa sinhronizācijas pieprasījumus (saskaņo ar `/api/providers/[name]/(sync-models|models)`) vai pilnībā izlaiž, ja `isAuthRequired()` atgriež false. Atgriež 403 (`AUTH_001`), ja uzrādītāja marķieris ir, bet nederīgs, pretējā gadījumā atgriež 401. Ievieš arī maršruta apsardzes līmeņus (LOCAL_ONLY / ALWAYS_PROTECTED) pirms jebkuras autentifikācijas filiāles — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY ceļiem `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (šodien: `/api/mcp/`) var piekļūt no atpakaļcilpas, ja nesēja atslēga nes `manage` tvērumu; visi pārējie LOCAL_ONLY ceļi paliek stingras cilpas neatkarīgi no darbības jomas.
 
-Sekmīga politika atgriež `AuthSubject` ar `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Pakārtotie apstrādātāji var to nolasīt ar `assertAuth(request, "CLIENT_API")` failā `src/server/authz/assertAuth.ts`, atkārtoti neizpildot autentifikācijas loģiku.
+Veiksmīga politika atgriež `AuthSubject` ar `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Pakārtotie apstrādātāji var to nolasīt, izmantojot `assertAuth(request, "CLIENT_API")` programmā `src/server/authz/assertAuth.ts` nevis atkārtoti palaist autentifikācijas loģiku.
 
 ## Publisko maršrutu saraksts
 
@@ -315,23 +315,23 @@ Galapunktiem `/api/v1/agents/tasks/*` un `/api/resilience/model-cooldowns` **tag
 
 ## Atkļūdošana
 
-Konveijers atbildēm vienmēr pievieno šādas galvenes:
+Cauruļvads vienmēr apzīmogo atbildes ar:
 
 ```
-x-request-id:               <korelācijas id, atkārtots kļūdu atbilžu pamattekstā>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Autentificētiem pieprasījumiem augšupstraumes (apdarinātāja puses) pieprasījumu galvenēs ir iekļauts arī:
+Autentificētiem pieprasījumiem augšupējās (apstrādātāja puses) pieprasījumu galvenes ietver arī:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<pēdējie-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (neobligāts)
-x-omniroute-auth-scopes:    ar komatiem atdalīts saraksts
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Apdarinātājos izmantojiet `assertAuth(req, expectedClass)` — tas izmet `AuthzAssertionError` ar kodu `AUTHZ_NOT_INITIALIZED`, ja starpprogrammatūra tika apieta (tas palīdz testos konstatēt konfigurācijas regresijas).
+Lietojiet `assertAuth(req, expectedClass)` iekšējie apstrādātāji — tas izmet `AuthzAssertionError` ar kodu `AUTHZ_NOT_INITIALIZED` ja starpprogrammatūra tika apieta (noder, lai pārbaudēs uztvertu konfigurācijas regresijas).
 
 ## Skatīt arī
 

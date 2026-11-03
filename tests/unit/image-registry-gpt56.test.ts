@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   getAllImageModels,
+  getImageModelEntry,
   IMAGE_PROVIDERS,
   parseImageModel,
 } from "../../open-sse/config/imageRegistry.ts";
@@ -27,6 +28,11 @@ test("text-only ChatGPT Web and its retired alias stay absent from the image cat
 test("Codex image catalog exposes the GPT-5.6 hosted-tool ids and the GPT Image models", () => {
   assert.deepEqual(IMAGE_PROVIDERS.codex.models, [
     {
+      id: "gpt-6.1-sol",
+      catalogId: "gpt-6.1-sol-image",
+      name: "GPT 6.1 Sol (Codex Image)",
+    },
+    {
       id: "gpt-5.6-sol",
       catalogId: "gpt-5.6-sol-image",
       name: "GPT 5.6 Sol (Codex Image)",
@@ -46,9 +52,19 @@ test("Codex image catalog exposes the GPT-5.6 hosted-tool ids and the GPT Image 
     { id: "gpt-image-2", name: "GPT Image 2 (Codex)" },
   ]);
 
-  for (const model of ["gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"]) {
+  for (const model of ["gpt-6.1-sol", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna"]) {
     assert.deepEqual(parseImageModel(`cx/${model}`), { provider: "codex", model });
     assert.deepEqual(parseImageModel(`cx/${model}-image`), { provider: "codex", model });
+  }
+});
+
+// #18687: image combos keep only targets getImageModelEntry() resolves, and
+// /v1/images/edits rejects Codex ids it cannot resolve.
+test("Codex gpt-6.1-sol resolves as an image model under every accepted spelling", () => {
+  for (const modelStr of ["cx/gpt-6.1-sol", "codex/gpt-6.1-sol", "codex/gpt-6.1-sol-image"]) {
+    const entry = getImageModelEntry(modelStr);
+    assert.equal(entry?.provider, "codex", modelStr);
+    assert.equal(entry?.model, "gpt-6.1-sol", modelStr);
   }
 });
 
@@ -57,6 +73,7 @@ test("Codex GPT-5.6 image listings do not shadow the chat catalog ids", () => {
   assert.deepEqual(
     imageModels.map((model) => model.id),
     [
+      "codex/gpt-6.1-sol-image",
       "codex/gpt-5.6-sol-image",
       "codex/gpt-5.6-terra-image",
       "codex/gpt-5.6-luna-image",

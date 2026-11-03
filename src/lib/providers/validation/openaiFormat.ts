@@ -19,7 +19,7 @@ import {
   isBedrockNativeAuthError,
 } from "@omniroute/open-sse/services/bedrock.ts";
 import { addModelsSuffix, normalizeBaseUrl, resolveChatUrl } from "./urlHelpers";
-import { applyCustomUserAgent, buildBearerHeaders } from "./headers";
+import { applyCustomUserAgent, buildBearerHeaders, mergeConnectionCustomHeaders } from "./headers";
 import { toValidationErrorResult, validationRead, validationWrite } from "./transport";
 import { validateDirectChatProvider } from "./directChatProbe";
 import { extractCozeValidationError } from "./cozeError";
@@ -482,6 +482,14 @@ async function readModelsPayloadForReasoningControl(
   }
 }
 
+// Probes send the connection's custom headers like the chat path (#8369).
+function buildProbeHeaders(apiKey: string, providerSpecificData: unknown) {
+  return mergeConnectionCustomHeaders(
+    buildBearerHeaders(apiKey, providerSpecificData),
+    providerSpecificData
+  );
+}
+
 export async function validateOpenAICompatibleProvider({
   apiKey,
   providerSpecificData = {},
@@ -502,7 +510,7 @@ export async function validateOpenAICompatibleProvider({
   try {
     const modelsRes = await validationRead(`${baseUrl}/models`, {
       method: "GET",
-      headers: buildBearerHeaders(apiKey, providerSpecificData),
+      headers: buildProbeHeaders(apiKey, providerSpecificData),
     });
 
     modelsReachable = true;
@@ -582,7 +590,7 @@ export async function validateOpenAICompatibleProvider({
   try {
     const chatRes = await validationWrite(chatUrl, {
       method: "POST",
-      headers: buildBearerHeaders(apiKey, providerSpecificData),
+      headers: buildProbeHeaders(apiKey, providerSpecificData),
       body: JSON.stringify(testBody),
     });
 
@@ -677,7 +685,7 @@ export async function validateOpenAICompatibleProvider({
   try {
     const pingRes = await validationRead(baseUrl, {
       method: "GET",
-      headers: buildBearerHeaders(apiKey, providerSpecificData),
+      headers: buildProbeHeaders(apiKey, providerSpecificData),
     });
 
     // If the server responds at all (even with an error page), it's reachable

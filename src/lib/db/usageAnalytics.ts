@@ -942,6 +942,12 @@ export function getAllUsageHistory(): Record<string, unknown>[] {
   return db.prepare("SELECT * FROM usage_history").all() as Record<string, unknown>[];
 }
 
+/** Returns durable team-dimensional summaries after raw history retention. */
+export function getAllDailyTeamUsageSummary(): Record<string, unknown>[] {
+  const db = getDbInstance();
+  return db.prepare("SELECT * FROM daily_team_usage_summary").all() as Record<string, unknown>[];
+}
+
 /**
  * Returns all rows from `domain_cost_history` for backup export.
  */

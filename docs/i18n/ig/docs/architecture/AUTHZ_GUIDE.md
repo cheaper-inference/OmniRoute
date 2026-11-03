@@ -135,34 +135,34 @@ na-agbakwụnye ihe na ya:
 
 Omume `MANAGEMENT` ụfọdụ bụ **naanị maka operator**: igodo `manage` adịghị ezu. Ibupu credentials echekwara (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), iweghachi backup n'elu data dị ndụ (`POST /api/db-backups/import` gụnyere `dryRun=true`, `POST /api/db-backups` restore site na id, `POST /api/settings/import-json`), na ibibi ebe iweghachi (`DELETE /api/db-backups` cleanup, na `PATCH /api/db-backups` n'ihi na retention ọ na-echekwa bụ ihe na-eme pruning akpaaka mgbe backup ọ bụla gasịrị) chọrọ dashboard session, onye CLI nke ime ụlọ, ma ọ bụ login akwụsịla. Inye sync token (`POST /api/sync/tokens`) na imepụta `admin` CLI access token (`POST /api/cli/tokens`) chọrọ dashboard session ma ọ bụ onye CLI nke ime ụlọ n'ọnọdụ ịbanye ọ bụla. Igodo API nke ókè ọ bụla na `oma_` access tokens abụghị credentials nke operator: ha na-anata `403` mgbe ọ bụla a chọrọ ya. Nyocha a dị na `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Mgbanwe ntọala ịbanye bụkwa naanị maka operator: `POST /api/settings/require-login` (tọọ paswọọdụ njikwa / gbanwee `requireLogin`) na-anabata credentials ndị a naanị mgbe paswọọdụ dịrị. Oge bootstrap nke mbụ (paswọọdụ adịghị ugbu a) anọghị n'agbanwe, dashboard session ga-ezipụkwa `currentPassword` iji dochie paswọọdụ (`403` mgbe ọ dịghị ma ọ bụ ọ dị njọ, a na-edekọ ya dị ka `settings.update_failed`). CLI nke ime ụlọ na instance nke login akwụsịrị na-ejigide ụzọ nweghachi ma nwee ike itọ paswọọdụ na-enweghị ya, n'ihi na ha abụọ jikọtara na host nwere data directory.
 
-## Usoro Nhazi
+## Pipeline
 
 ```
-Arịrịọ na-abata → src/proxy.ts
-  → runAuthzPipeline() n'ime src/server/authz/pipeline.ts
-    1. Wepụ headers ime ndị a tụkwasịrị obi (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Mepụta id arịrịọ, jiri classifyRoute() kewaa ụzọ
-    3. Ọ bụrụ na pathname == "/" → bugharịa gaa /dashboard
-    4. Ọ bụrụ na a na-eme draining (mgbanyụ dị nro) ma bụrụ /api/* → 503
-    5. Ọ bụrụ na ọ bụghị GET ma bụrụ /api/* → ihe nche checkBodySize()
-    6. Ọ bụrụ na ọ bụ OPTIONS → CORS preflight 204
-    7. Ọ bụrụ na options.enforce == false → hapụ ya ka ọ gafee na headers klas-ụzọ
-    8. Ma ọ bụghị ya: POLICIES[routeClass].evaluate(ctx)
-       - kwe → tinye x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - jụ → njehie JSON nwere correlation_id (peeji dashboard → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-A na-**ewepụ headers ime ndị a tụkwasịrị obi n'arịrịọ na-abata** (akọwapụtara na `src/server/authz/headers.ts`) tupu nkewa — ndị ahịa enweghị ike ibu ụzọ tinye `x-omniroute-auth-*` iji mee ka à ga-asị na ha bụ subject ọzọ.
+Ndị nkụnye eji isi mee ntụkwasị obi (akọwapụtara na `src/server/authz/headers.ts`) bụ** wepụrụ arịrịọ mbata** tupu nhazi — ndị ahịa enweghị ike ibu ụzọ buo `x-omniroute-auth-*` ka ha yie isiokwu.
 
-### Nkwekọrịta policy
+### Nkwekọrịta iwu
 
-Klas ụzọ ọ bụla nwere policy na `src/server/authz/policies/`:
+Klas ụzọ ọ bụla nwere amụma na `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — na-eweghachi `allow({ kind: "anonymous", id: "anonymous" })` mgbe niile.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — na-ewepụta Bearer, wee jiri `validateApiKey()` nyochaa ya. Ọ na-adaba na anonymous naanị mgbe agbanyụrụ ọkọlọtọ atụmatụ `REQUIRE_API_KEY` dị irè. A na-ekpebi ọkọlọtọ dị irè site na `isRequireApiKeyEnabled()` (`mgbanwe ọkọlọtọ atụmatụ DB > process.env.REQUIRE_API_KEY > uru ndabara`) ka Dashboard Feature Flags na environment variables nwee ike ịchịkwa `/api/v1/*`, `/api/v1beta/*`, na aha nnọchi n'otu ụzọ; ọdịda resolver na-eme ka usoro ahụ jụ arịrịọ. Ọ na-ekwe arịrịọ oge nnọkọ dashboard n'ụzọ client API (gụnyere `/api/v1/models`, nke katalọgụ model dashboard na-eji).
-- **`managementPolicy`** (`policies/management.ts`) — na-anabata oge nnọkọ dashboard, arịrịọ model-sync ime (nke e jiri `/api/providers/[name]/(sync-models|models)` tụnyere), ma ọ bụ na-awụfe kpamkpam ma ọ bụrụ na `isAuthRequired()` weghachiri false. Ọ na-eweghachi 403 (`AUTH_001`) mgbe token Bearer dị mana ọ bụghị nke ziri ezi, ma ọ bụghị ya ọ na-eweghachi 401. Ọ na-amanyekwa ọkwa route-guard (LOCAL_ONLY / ALWAYS_PROTECTED) tupu ngalaba nkwenye njirimara ọ bụla — lee [Ọkwa Route Guard](../security/ROUTE_GUARD_TIERS.md). Enwere ike ịnweta ụzọ LOCAL_ONLY dị na `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ugbu a: `/api/mcp/`) site na ebe na-abụghị loopback mgbe igodo Bearer nwere scope `manage`; ụzọ LOCAL_ONLY ndị ọzọ niile ga-anọgide na-achọ loopback kpọmkwem n'agbanyeghị scope.
+- **`publicPolicy`** (`policies/public.ts`) — na-alaghachi `allow({ kind: "anonymous", id: "anonymous" })` mgbe niile.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — wepụ ihe na-ebu, kwadoro site na `validateApiKey()`. Ọ ga-adaba na onye na-amaghị aha naanị mgbe enwere nkwarụ njirimara `REQUIRE_API_KEY` dị irè. A na-edozi ọkọlọtọ dị irè site na `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ya mere Dashboard Njirimara ọkọlọtọ na mgbanwe gburugburu ebe obibi na-achịkwa `/api/v1/*`, `/api/v1beta/*`, na aliases mgbe niile; Ọdịda nke solver ada emechie. Na-enye ohere arịrịọ dashboard na ụzọ API onye ahịa (gụnyere `/api/v1/models`, nke katalọgụ ụdị dashboard na-eji). Mgbe etinyere Entra ID SSO, ngalaba SSO na-elekọta onye na-ebu nke bụ ahaziri aha Entra token (ngalaba base64url atọ, `RS*` alg, `kid`).** mbụ** `validateApiKey()` na mkpebi ya bụ — ikpeazụ ọ dịghị mgbe ọ ga-adaba na ụzọ igodo API ma ọ bụ ngalaba na-eweda ya na-amaghị aha, yabụ nkwụsị onye na-enye njirimara enweghị ike ịghọ oghere mepere emepe. Igodo API kwụ ọtọ emetụtaghị ya. Lee [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — na-anabata nnọkọ dashboard, arịrịọ imekọrịta ihe n'ime ime (dakọtara na `/api/providers/[name]/(sync-models|models)`), ma ọ bụ na-amafe kpamkpam ma ọ bụrụ na `isAuthRequired()` lọghachite ụgha. Na-eweghachi 403 (`AUTH_001`) mgbe ihe nrịbama onye na-ebu dị ugbu a mana adịghị mma, 401 ma ọ bụghị. Na-amanyekwa usoro ndị nche ụzọ (LOCAL_ONLY / ALWAYS_PROTECTED) tupu alaka ụlọ ọrụ auth — hụ [Tiers Nchekwa okporo ụzọ](../security/ROUTE_GUARD_TIERS.md). ụzọ LOCAL_ONLY na `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ( taa: `/api/mcp/`) nwere ike ịnweta site na-abụghị loopback mgbe igodo bearer na-ebu oke `manage` ; Ụzọ LOCAL_ONLY ndị ọzọ na-anọgidesi ike-loopback n'agbanyeghị oke.
 
-Policy gara nke ọma na-eweghachi `AuthSubject` nwere `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Ndị handler nọ n'okpuru nwere ike iji `assertAuth(request, "CLIENT_API")` dị na `src/server/authz/assertAuth.ts` gụọ ya kama ịmegharị logic nkwenye njirimara ọzọ.
+Amụma na-aga nke ọma na-eji `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` weghachi `AuthSubject`. Ndị na-ahụ maka mgbada nwere ike ịgụ ya site na `assertAuth(request, "CLIENT_API")` na `src/server/authz/assertAuth.ts` kama ịmegharị mgbagha nyocha.
 
 ## Ndepụta Ụzọ Ọha
 
@@ -308,25 +308,25 @@ Ebe njedebe `/api/v1/agents/tasks/*` na `/api/resilience/model-cooldowns` **ch�
 - Ndepụta ohere ọha: `tests/unit/public-api-routes.test.ts`.
 - Gbaa nnwale lekwasịrị anya: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## Nchọpụta nsogbu
+## Ndozigharị
 
-Pipeline ahụ na-etinye ihe ndị a mgbe niile na nzaghachi:
+Pipeline na-eji stampụ nzaghachi mgbe niile:
 
 ```
-x-request-id:               <NJ njikọ, a na-emegharị ya n'ime ahụ njehie>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Maka arịrịọ ndị enyochala njirimara ha, nkụnye isi arịrịọ upstream (n'akụkụ handler) na-agụnyekwa:
+Maka arịrịọ ekwenyesiri ike ndị isi arịrịọ nke elu (handler-side) gụnyekwara:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (nhọrọ)
-x-omniroute-auth-scopes:    ndepụta e ji rikoma kewaa
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Jiri `assertAuth(req, expectedClass)` n'ime handlers — ọ na-atụpụta `AuthzAssertionError` nwere koodu `AUTHZ_NOT_INITIALIZED` ma ọ bụrụ na agafere middleware ahụ (nke a bara uru maka ịchọpụta ndaghachi azụ na nhazi n'ime ule).
+Jiri `assertAuth(req, expectedClass)` n'ime njikwa — ọ na-atụba `AuthzAssertionError` na koodu `AUTHZ_NOT_INITIALIZED` ma ọ bụrụ na agafere middleware (na-enyere aka ijide nhazi nhazi na ule).
 
 ## Hụkwa
 
