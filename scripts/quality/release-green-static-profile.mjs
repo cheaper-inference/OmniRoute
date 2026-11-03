@@ -4,7 +4,11 @@ import { load as parseYaml } from "js-yaml";
 import { execFileSync } from "node:child_process";
 import { assertUiCandidateUnchanged, resolveUiDiffBase } from "../i18n/resolve-ui-diff-base.mjs";
 
-const UI_DIFFERENTIAL_GATES = new Set(["i18n:check-value-drift", "i18n:check-new-keys"]);
+const UI_DIFFERENTIAL_GATES = new Set([
+  "i18n:check-value-drift",
+  "i18n:check-new-keys",
+  "i18n:check-ui-references",
+]);
 const IMMUTABLE_SHA = /^[0-9a-f]{40}$/;
 
 function testMaskingGit(root, args) {

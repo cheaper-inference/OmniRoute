@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
-  cpSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -14,6 +13,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
+import { copyReleaseGreenModuleFixture } from "../../_helpers/copyReleaseGreenModuleFixture.mjs";
 
 const root = new URL("../../../", import.meta.url);
 const verifier = fileURLToPath(new URL("scripts/ci/release-green-result.mjs", root));
@@ -103,23 +103,7 @@ function observe({
     ]) {
       mkdirSync(join(dir, path), { recursive: true });
     }
-    for (const name of [
-      "validate-release-green.mjs",
-      "gate-process.mjs",
-      "eslint-measurement.mjs",
-      "release-green-static-profile.mjs",
-    ]) {
-      cpSync(new URL(`scripts/quality/${name}`, root), join(dir, "scripts/quality", name));
-    }
-    // Include the static-profile comparison and gate-process inspection dependencies.
-    for (const path of [
-      "scripts/i18n/resolve-ui-diff-base.mjs",
-      "scripts/check/openapiBaseline.mjs",
-      "scripts/dev/resource-budget-process.mjs",
-      "scripts/ci/unit-diagnostics.mjs",
-    ]) {
-      cpSync(new URL(path, root), join(dir, path));
-    }
+    copyReleaseGreenModuleFixture(fileURLToPath(root), dir);
     writeFileSync(
       join(dir, "config/quality/release-green-static-profile.json"),
       JSON.stringify({

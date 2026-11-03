@@ -318,6 +318,7 @@
     "alibaba:sync-allowlist": "node --import tsx/esm scripts/ops/sync-alibaba-allowlist.mjs",
     "check:vitest-exclusions": "node scripts/check/check-vitest-exclusions.mjs",
     "i18n:check-new-keys": "node scripts/i18n/check-new-key-coverage.mjs",
+    "i18n:check-ui-references": "node scripts/i18n/check-new-ui-references.mjs",
     "i18n:translate-new-keys": "bash scripts/i18n/translate-new-keys.sh",
     "i18n:check-keys": "node scripts/i18n/check-key-completeness.mjs",
     "i18n:check-keys:cli": "node scripts/i18n/check-key-completeness.mjs --catalog=cli",

@@ -621,6 +621,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/i18n/resolve-ui-diff-base.mjs
+      - name: i18n new UI references (referenced messages must exist in English)
+        env:
+          I18N_BASE_SHA: ${{ steps.i18n_base.outputs.base_sha }}
+          I18N_BASE_TIP_SHA: ${{ steps.i18n_base.outputs.base_tip_sha }}
+          I18N_CANDIDATE_SHA: ${{ steps.i18n_base.outputs.candidate_sha }}
+          I18N_COMPARISON_SOURCE: ${{ steps.i18n_base.outputs.source }}
+          I18N_COMPARISON_SCOPE: ${{ steps.i18n_base.outputs.scope }}
+        run: npm run i18n:check-ui-references
       - name: i18n UI value drift (stale translations)
         env:
           I18N_BASE_SHA: ${{ steps.i18n_base.outputs.base_sha }}
