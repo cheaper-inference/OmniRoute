@@ -240,19 +240,18 @@ I tillegg installerer `updateNssDatabases()` sertifikatet i NSS-databaser per br
 
 Alle MITM-endepunkter krever administrasjonsautentisering (`requireCliToolsAuth`). Sudo-passordet bufres i modulens omfang (aldri `globalThis`) og slettes ved `stopMitm()`.
 
-## Overstyringer av User-Agent — miljøvariabler (`.env.example` del 12)
+## User-Agent overstyrer — env vars (`.env.example` seksjon 12)
 
-| Variabel                 | Standardverdi                                                   |
-| ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
-| `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
-| `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |
-| `QODER_USER_AGENT`       | `Qoder-Cli`                                                     |
-| `CURSOR_USER_AGENT`      | `Cursor/3.4`                                                    |
+| Variabel            | Misligholde                                   |
+| ------------------- | --------------------------------------------- |
+| `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
+| `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
+| `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0`                    |
+| `KIRO_USER_AGENT`   | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`             |
+| `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
+| `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Brukes av `open-sse/executors/base.ts::buildHeaders()` via dynamisk oppslag. **Oppdater disse når leverandørene lanserer nye CLI-versjoner** — utdaterte UA-strenger begynner å bli avvist som utdaterte klienter.
+Brukes av `open-sse/executors/base.ts::buildHeaders()` via dynamisk oppslag.** Bump disse når leverandører slipper nye CLI versjoner** — foreldede UA -strenger begynner å bli avvist som utdaterte klienter.
 
 ## Brytere for CLI-kompatibilitetsmodus (`.env.example` del 13)
 

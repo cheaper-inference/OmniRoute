@@ -139,34 +139,34 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 ጥቂት `MANAGEMENT` ድርጊቶች **ለኦፕሬተር ብቻ** ናቸው፦ `manage` ቁልፍ በቂ አይደለም። የተቀመጡ ምስክርነቶችን ወደ ውጭ ማውጣት (`GET /api/settings/export-json`፣ `GET /api/db-backups/export`፣ `GET /api/db-backups/exportAll`)፣ ምትኬን በቀጥታ ዳታ ላይ መመለስ (`dryRun=true`ን ጨምሮ `POST /api/db-backups/import`፣ በID መመለስ `POST /api/db-backups`፣ `POST /api/settings/import-json`)፣ እና የመመለሻ ነጥቦችን ማጥፋት (`DELETE /api/db-backups` ማጽዳት፣ እንዲሁም `PATCH /api/db-backups` ምክንያቱም የሚያስቀምጠው የማቆያ ፖሊሲ ከእያንዳንዱ ምትኬ በኋላ ራስ-ሰር መቁረጥን ስለሚመራ) የዳሽቦርድ ክፍለ-ጊዜ፣ የአካባቢው CLI ርዕሰ-ጉዳይ ወይም መግቢያ የተሰናከለ መሆን ይፈልጋሉ። የማመሳሰያ ቶከን ማውጣት (`POST /api/sync/tokens`) እና `admin` የCLI መዳረሻ ቶከን መፍጠር (`POST /api/cli/tokens`) በማንኛውም የመግቢያ ሁነታ የዳሽቦርድ ክፍለ-ጊዜ ወይም የአካባቢው CLI ርዕሰ-ጉዳይ ይፈልጋሉ። የማንኛውም ወሰን የAPI ቁልፎችና `oma_` የመዳረሻ ቶከኖች የኦፕሬተር ምስክርነቶች አይደሉም፦ ኦፕሬተር ሲፈለግ `403` ያገኛሉ። ምርመራው በ`src/lib/api/operatorCredential.ts` ውስጥ ነው (`resolveOperatorCredential()` / `requireOperatorCredential()`)። የመግቢያ ቅንብሮችን መቀየርም ለኦፕሬተር ብቻ ነው፦ `POST /api/settings/require-login` (የአስተዳዳሪ የይለፍ ቃል ማዘጋጀት / `requireLogin`ን መቀያየር) የይለፍ ቃል ካለ በኋላ እነዚህን ምስክርነቶች ብቻ ይቀበላል — የመጀመሪያ-ሩጫ bootstrap መስኮት (ገና የይለፍ ቃል ከሌለ) ግን አይለወጥም — እና የዳሽቦርድ ክፍለ-ጊዜ የይለፍ ቃሉን ለመተካት `currentPassword` መላክ አለበት (ከጎደለ ወይም ትክክል ካልሆነ `403`፣ እንደ `settings.update_failed` ኦዲት ይደረጋል)። የአካባቢው CLI እና መግቢያው የተሰናከለበት ምሳሌ የማገገሚያ መንገዱን ይዘው ይቆያሉ እና ያለ እሱ የይለፍ ቃል ማዘጋጀት ይችላሉ፤ ሁለቱም የዳታ ማውጫውን ከያዘው አስተናጋጅ ጋር የተሳሰሩ ናቸው።
 
-## Pipeline
+## የቧንቧ መስመር
 
 ```
-የሚመጣ request → src/proxy.ts
-  → runAuthzPipeline() በ src/server/authz/pipeline.ts
-    1. የታመኑ internal headersን አስወግድ (x-omniroute-auth-*, x-omniroute-route-class)
-    2. request id ፍጠር፣ routeን በ classifyRoute() መድብ
-    3. pathname == "/" ከሆነ → ወደ /dashboard redirect አድርግ
-    4. draining (graceful shutdown) ላይ ከሆነ እና /api/* ከሆነ → 503
-    5. GET ያልሆነ /api/* ከሆነ → checkBodySize() guardን ፈትሽ
-    6. OPTIONS ከሆነ → CORS preflight 204
-    7. options.enforce == false ከሆነ → ከroute-class headers ጋር እንዲያልፍ አድርግ
-    8. አለበለዚያ፦ POLICIES[routeClass].evaluate(ctx)
-       - allow  → x-omniroute-auth-{kind,id,label,scopes} አክል → NextResponse.next()
-       - reject → የJSON ስህተት ከ correlation_id ጋር (የdashboard ገጾች → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-የታመኑ internal headers (በ`src/server/authz/headers.ts` የተገለጹ) ከመመደባቸው በፊት **ከሚመጡ requests ይወገዳሉ** — clients አንድን subject ለማስመሰል `x-omniroute-auth-*`ን አስቀድመው መሙላት አይችሉም።
+የታመኑ የውስጥ ራስጌዎች (በ `src/server/authz/headers.ts` የተገለጹ) ናቸው።** ከገቢ ጥያቄዎች ተወግዷል** ከምድብ በፊት — ደንበኞች አንድን ርዕሰ ጉዳይ ለማስመሰል `x-omniroute-auth-*` አስቀድመው መሙላት አይችሉም።
 
-### የPolicy ውሎች
+### የፖሊሲ ውሎች
 
-እያንዳንዱ የroute ክፍል በ`src/server/authz/policies/` ውስጥ policy አለው፦
+እያንዳንዱ የመንገድ ክፍል `src/server/authz/policies/` ውስጥ ፖሊሲ አለው፡-
 
 - **`publicPolicy`** (`policies/public.ts`) — ሁልጊዜ `allow({ kind: "anonymous", id: "anonymous" })` ይመልሳል።
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearerን አውጥቶ በ`validateApiKey()` ያረጋግጣል። ወደ anonymous የሚያልፈው ውጤታማው `REQUIRE_API_KEY` feature flag ሲሰናከል ብቻ ነው። ውጤታማው flag በ`isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) በኩል ይወሰናል፤ በዚህም የDashboard Feature Flags እና environment variables `/api/v1/*`፣ `/api/v1beta/*` እና aliasesን በወጥነት ይቆጣጠራሉ፤ የresolver ውድቀቶች መዳረሻን ይዘጋሉ። በclient API routes ላይ የDashboard-session requestsን ይፈቅዳል (በdashboard model catalog የሚጠቀሙበትን `/api/v1/models` ጨምሮ)።
-- **`managementPolicy`** (`policies/management.ts`) — የDashboard session፣ internal model-sync requests (`/api/providers/[name]/(sync-models|models)` ጋር የሚዛመዱ) ይቀበላል፣ ወይም `isAuthRequired()` false ከመለሰ ሙሉ በሙሉ ይዘለዋል። Bearer token ካለ ነገር ግን invalid ከሆነ 403 (`AUTH_001`)፣ አለበለዚያ 401 ይመልሳል። ከማንኛውም auth branch በፊት የroute-guard tiersን (LOCAL_ONLY / ALWAYS_PROTECTED) ያስገድዳል — [የRoute Guard Tiers](../security/ROUTE_GUARD_TIERS.md)ን ይመልከቱ። በ`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ውስጥ ያሉ LOCAL_ONLY paths (በአሁኑ ጊዜ፦ `/api/mcp/`) Bearer keyው `manage` scopeን ከያዘ ከnon-loopback ላይ ሊደረስባቸው ይችላል፤ ሌሎች ሁሉም LOCAL_ONLY paths scope ምንም ይሁን ምን strict-loopback ሆነው ይቆያሉ።
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ተዋጽኦዎች Bearer፣ በ `validateApiKey()` በኩል ያረጋግጣል። ውጤታማው `REQUIRE_API_KEY` ባህሪ ባንዲራ ሲሰናከል ብቻ ወደ ማንነቱ ያልታወቀ ይሆናል። ውጤታማው ባንዲራ በ `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ነው የሚፈታው ስለዚህ የዳሽቦርድ ባህሪ ባንዲራዎች እና የአካባቢ ተለዋዋጮች `/api/v1/*`, `/api/v1beta/*`, እና ቅጽል ስሞች በወጥነት ይገዛሉ; የመፍትሄው አለመሳካቶች ተዘግተዋል. የዳሽቦርድ-ክፍለ-ጊዜ ጥያቄዎችን በደንበኛ API መንገዶች ( `/api/v1/models` ጨምሮ፣ በዳሽቦርድ ሞዴል ካታሎግ ጥቅም ላይ እንደሚውል) ይፈቅዳል። Entra ID SSO ሲነቃ፣ መዋቅራዊ የኢንትራ ቶከን የሆነ ተሸካሚ (ሦስት base64url ክፍሎች፣ `RS*` alg፣ `kid`) በ SSO ቅርንጫፍ ይካሄዳል።** ከዚህ በፊት** `validateApiKey()` እና ፍርዱ የመጨረሻ ነው — በጭራሽ ወደ ኤፒአይ-ቁልፍ መንገድ ወይም ወደ ስም-አልባ ቅርንጫፉ አይወድቅም፣ ስለዚህ የማንነት አቅራቢው መቋረጥ ክፍት መዳረሻ ሊሆን አይችልም። የማይለዋወጡ API ቁልፎች አልተነኩም። [Entra ID SSO](../security/ENTRA_SSO.md) ይመልከቱ።
+- **`managementPolicy`** (`policies/management.ts`) — የዳሽቦርድ ክፍለ ጊዜን፣ የውስጥ ሞዴል-አመሳስል ጥያቄዎችን ( `/api/providers/[name]/(sync-models|models)` ጋር የሚዛመድ) ይቀበላል ወይም `isAuthRequired()` በውሸት ከተመለሰ ሙሉ በሙሉ ይዘላል። የተሸካሚ ማስመሰያ ሲኖር ግን ልክ ያልሆነ 403 (`AUTH_001`) ይመልሳል፣ ካልሆነ 401። እንዲሁም የመንገድ ጠባቂ ደረጃዎችን (LOCAL_ONLY / ALWAYS_PROTECTED) ከማንኛውም የድጋፍ ቅርንጫፍ በፊት ያስፈጽማል — [የመንገድ ጠባቂ ደረጃዎችን](../security/ROUTE_GUARD_TIERS.md) ይመልከቱ። በ `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ውስጥ LOCAL_ONLY ዱካዎች (ዛሬ: `/api/mcp/`) የተሸካሚው ቁልፍ `manage` ወሰን ሲይዝ ከloopback ሊደረስበት ይችላል; ሁሉም ሌሎች LOCAL_ONLY ዱካዎች ምንም ያህል ስፋት ቢኖራቸውም ጥብቅ-loopback ይቆያሉ።
 
-የተሳካ policy `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` ያለውን `AuthSubject` ይመልሳል። Downstream handlers የauth logicን እንደገና ከማስኬድ ይልቅ በ`src/server/authz/assertAuth.ts` ውስጥ ባለው `assertAuth(request, "CLIENT_API")` በኩል ሊያነቡት ይችላሉ።
+የተሳካ ፖሊሲ `AuthSubject` በ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ይመልሳል። የታች ተፋሰስ ተቆጣጣሪዎች የድጋሚ የቃል አመክንዮ ከማሄድ ይልቅ በ `assertAuth(request, "CLIENT_API")` በ `src/server/authz/assertAuth.ts` በኩል ሊያነቡት ይችላሉ።
 
 ## የይፋዊ መስመሮች ዝርዝር
 
@@ -312,23 +312,23 @@ credential ብቻ ነው። [የአስተዳደር ማረጋገጫ](../guides/MA
 
 ## ማረም
 
-ፓይፕላይኑ ሁልጊዜ ምላሾችን በሚከተሉት ራስጌዎች ያትማል፦
+ቧንቧው ሁል ጊዜ ምላሾችን በሚከተሉት ምልክቶች ያስቀምጣል።
 
 ```
 x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-ማንነት ለተረጋገጠባቸው ጥያቄዎች፣ ወደላይኛው አገልግሎት የሚላኩት (በhandler በኩል ያሉ) የጥያቄ ራስጌዎች የሚከተሉትንም ያካትታሉ፦
+ለተረጋገጡ ጥያቄዎች የላይ (ከአስተዳዳሪ-ጎን) የጥያቄ ራስጌዎች በተጨማሪ ያካትታሉ፡
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```
 
-በhandler ውስጥ `assertAuth(req, expectedClass)`ን ይጠቀሙ — middlewareው ከተዘለለ፣ `AUTHZ_NOT_INITIALIZED` ኮድ ያለውን `AuthzAssertionError` ይጥላል (ይህም በሙከራዎች ውስጥ የውቅር ወደኋላ መመለሶችን ለመለየት ጠቃሚ ነው)።
+`assertAuth(req, expectedClass)` ከውስጥ ተቆጣጣሪዎች ይጠቀሙ — መካከለኛው ዌር ከተታለፈ `AuthzAssertionError` በኮድ `AUTHZ_NOT_INITIALIZED` ይጥላል (በሙከራዎች ውስጥ የውቅር ለውጦችን ለመያዝ ይጠቅማል)።
 
 ## በተጨማሪ ይመልከቱ
 
