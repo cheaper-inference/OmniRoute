@@ -100,41 +100,42 @@ omniroute setup-whycodes
 
 ---
 
-## 1. የCLI Code ካታሎግ (27 መሣሪያዎች)
+## 1. CLI Code's Catalog (28 መሳሪያዎች)
 
-በ`/dashboard/cli-code` ውስጥ የሚታዩ ሁሉም መሣሪያዎች። `baseUrlSupport: none` ያላቸው መሣሪያዎች ብጁ base URL ከመጠቀም ይልቅ በMITM ወይም በእጅ ማዋቀሪያ መመሪያ በኩል ተገናኝተዋል፦
+በ `/dashboard/cli-code` ውስጥ የሚታዩ ሁሉም መሳሪያዎች . `baseUrlSupport: none` ያላቸው ከብጁ መሰረት URL ይልቅ በ MITM ወይም በእጅ መመሪያ ነው የተለጠፉት
 
-| id           | name                    | vendor                | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | --------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic             | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI                | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                  | none           | custom         | false        |
-| cline        | Cline                   | OSS (የቀድሞ Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org              | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)             | full           | guide          | false        |
-| continue     | Continue                | continue.dev          | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)     | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ           | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)        | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)     | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)          | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (የቀድሞ SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI            | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS             | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere             | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)     | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)      | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                   | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)           | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba               | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries        | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere             | none           | guide          | false        |
-| antigravity  | Antigravity             | Google                | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research         | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon                | none           | mitm           | false        |
-| custom       | Custom CLI              | —                     | full           | custom-builder | false        |
+| መታወቂያ      | ስም                 | ሻጭ                 | baseUrlSupport | configType | acpSpawnable |
+| ---------- | ------------------ | ------------------ | -------------- | ---------- | ------------ |
+| ክላውድ       | Claude ኮድ          | Anthropic          | ሙሉ             | env        | እውነት ነው።     |
+| ኮዴክስ       | OpenAI Codex CLI   | OpenAI             | ሙሉ             | ብጁ         | እውነት ነው።     |
+| zcode      | ZCode (GLM ኮድ ፕላን) | ዛ.አይ               | ምንም            | ብጁ         | የውሸት         |
+| ክሊን        | Cline              | OSS (የቀድሞው ክሎድ ዴቭ) | ሙሉ             | ብጁ         | እውነት ነው።     |
+| ኪሎ         | ኪሎ ኮድ              | ኪሎ-ኦርጅ             | ሙሉ             | ብጁ         | የውሸት         |
+| ሩ          | Roo ኮድ             | ሩ (OSS)            | ሙሉ             | መመሪያ       | የውሸት         |
+| ቀጥል        | ቀጥል                | ቀጥል.dev            | ሙሉ             | መመሪያ       | የውሸት         |
+| ረዳት        | ረዳት                | OSS (P. Gauthier)  | ሙሉ             | መመሪያ       | እውነት ነው።     |
+| ፎርጅ        | ForgeCode          | አንቲኖሚ HQ           | ሙሉ             | ብጁ         | እውነት ነው።     |
+| jcode      | jcode              | 1 jehuang (OSS)    | ሙሉ             | ብጁ         | የውሸት         |
+| ጥልቅ ፍለጋ-ቱኢ | DeepSeek TUI       | አዳኝ ቦውን (OSS)      | ሙሉ             | ብጁ         | የውሸት         |
+| codewhale  | CodeWhale          | ሃምቦን (OSS)         | ሙሉ             | ብጁ         | የውሸት         |
+| ክፍት ኮድ     | OpenCode           | Anomaly (የቀድሞ SST) | ሙሉ             | መመሪያ       | እውነት ነው።     |
+| ድሮይድ       | ፋብሪካ Droid         | AI ፋብሪካ            | ከፊል            | መመሪያ       | የውሸት         |
+| አብራሪ       | GitHub Copilot CLI | GitHub/MS          | ሙሉ             | ብጁ         | የውሸት         |
+| ጠቋሚ-ክሊ     | Cursor CLI         | ማንኛውም ቦታ           | ከፊል            | መመሪያ       | እውነት ነው።     |
+| ቀለጠ        | ማሽተት               | ሊዮናርድሴር (OSS)      | ሙሉ             | ብጁ         | የውሸት         |
+| ፒ          | ፒ (ፒ-ኮዲንግ-ወኪል)     | ኤም. ዘቸነር (OSS)     | ሙሉ             | ብጁ         | የውሸት         |
+| ግሮክ-ግንባታ   | Grok መገንባት         | xAI                | ሙሉ             | ብጁ         | የውሸት         |
+| መፍጨት       | መጨፍለቅ              | OSS (ማራኪ)          | ሙሉ             | ብጁ         | የውሸት         |
+| qwen       | Qwen ኮድ            | Alibaba            | ሙሉ             | መመሪያ       | እውነት ነው።     |
+| ክላዉድ       | OpenClaude         | Gitlawb (OSS)      | ሙሉ             | መመሪያ       | የውሸት         |
+| ዜድ         | Zed                | Zed ኢንዱስትሪዎች       | ሙሉ             | መመሪያ       | የውሸት         |
+| ጠቋሚ        | Cursor             | ማንኛውም ቦታ           | ምንም            | መመሪያ       | የውሸት         |
+| ፀረ-ስበት ኃይል | Antigravity        | Google             | ምንም            | ሚቲም        | የውሸት         |
+| ሄርሜስ       | ሄርሜስ               | የኑስ ምርምር           | ምንም            | መመሪያ       | የውሸት         |
+| ኪሮ         | Kiro AI            | Amazon             | ምንም            | ሚቲም        | የውሸት         |
+| ብጁ         | ብጁ CLI             | —                  | ሙሉ             | ብጁ-ገንቢ     | የውሸት         |
 
-`baseUrlSupport: "partial"` ያላቸው መሣሪያዎች በዳሽቦርድ ካርዱ ላይ "⚠ ከፊል Base URL" የሚል ባጅ ያሳያሉ።
+`baseUrlSupport: "partial"` ያላቸው መሳሪያዎች በዳሽቦርድ ካርዱ ውስጥ "⚠ Base URL parcial" የሚል ባጅ ያሳያሉ።
 ---
 
 ## 2. CLI ወኪሎች ካታሎግ (11 መሳሪያዎች)
@@ -212,22 +213,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. ለአዳዲስ መሣሪያዎች የቅንብር ማስተናገጃዎች
+## 6. ለአዲስ መሳሪያዎች ቅንጅቶች ተቆጣጣሪዎች
 
-`configType: "custom"` ያላቸው አዳዲስ መሣሪያዎች የተለዩ የቅንብር API መስመሮች አሏቸው፦
+አዳዲስ መሳሪያዎች `configType: "custom"` ያላቸው የዝ API መንገዶችን የወሰኑ ቅንብሮች አሏቸው፡-
 
-| መስመር                                        | መሣሪያ                                                       |
-| ------------------------------------------- | ---------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                    |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url ፍላግ)                                     |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL፣ የቀድሞ)                       |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL፣ ዋና + የቀድሞ `~/.deepseek` ማመሳሰል) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                      |
-| `POST /api/cli-tools/pi-settings`           | Pi የኮድ ኤጀንት                                                |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml፣ `[model.omniroute]`)      |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + የተለየ `.env` ቁልፍ)      |
+| መንገድ                                        | መሳሪያ                                                              |
+| ------------------------------------------- | ----------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                           |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url ባንዲራ)                                           |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL፣ ቅርስ)                               |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL፣ የመጀመሪያ ደረጃ + ቅርስ `~/.deepseek` አመሳስል) |
+| `POST /api/cli-tools/smelt-settings`        | ማሽተት                                                              |
+| `POST /api/cli-tools/pi-settings`           | የፒ ኮድ ወኪል (`~/.pi/agent/models.json`፣ `providers.omniroute`)      |
+| `POST /api/cli-tools/grok-build-settings`   | Grok ገንባ (~/.grok/config.toml, `[model.omniroute]`)               |
+| `POST /api/cli-tools/qwen-settings`         | Qwen ኮድ (`~/.qwen/settings.json` + የተወሰነ `.env` ቁልፍ)              |
 
-ሁሉም መስመሮች ለስህተት ምላሾች `sanitizeErrorMessage()`ን ይጠቀማሉ (ጥብቅ ደንብ #12)።
+ሁሉም መንገዶች `sanitizeErrorMessage()` ለስህተት ምላሾች ይጠቀማሉ (ሃርድ ህግ ቁጥር 12)።
 
 ---
 
@@ -282,21 +283,21 @@ interface ToolBatchStatus {
 
 ---
 
-## 9. ፈጣን አጀማመር
+## 9. ፈጣን ጅምር
 
-### ደረጃ 1 — የOmniRoute API Key ያግኙ
+### ደረጃ 1 — የ OmniRoute API ቁልፍ ያግኙ
 
-1. `/dashboard/api-manager` ይክፈቱ → **API Key ይፍጠሩ**
+1. `/dashboard/api-manager` → ክፈት** API ቁልፍን ይፍጠሩ**
 2. ስም ይስጡት (ለምሳሌ `cli-tools`) እና ሁሉንም ፈቃዶች ይምረጡ
-3. keyውን ይቅዱ — ከታች ላለው እያንዳንዱ CLI ያስፈልግዎታል
+3. ከታች ለእያንዳንዱ CLI የሚያስፈልግዎትን — ቁልፍ ይቅዱ
 
-> የእርስዎ key ይህን ይመስላል፦ `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> ቁልፍህ ይህን ይመስላል: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### ደረጃ 2 — የCLI መሣሪያዎችን ይጫኑ
+### ደረጃ 2 — CLI መሳሪያዎችን ጫን
 
-ሁሉም npm-ተኮር መሣሪያዎች Node.js 22.22.2+ ወይም 24.x ይፈልጋሉ፦
+ሁሉም በ npm ላይ የተመሰረቱ መሳሪያዎች Node.js 22.22.2 + ወይም 24.x ያስፈልጋቸዋል
 
 ```bash
 # Claude Code (Anthropic)
@@ -317,58 +318,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (`omniroute run gemini` በመጠቀም ሊጀመር የሚችል → /v1beta surface)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust-ተኮር
+cargo install smelt  # Rust-based
 
 # Pi coding agent
-# ለመጫን https://github.com/zechnerj/pi-coding-agent ይመልከቱ
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# ለመጫን https://github.com/1jehuang/jcode ይመልከቱ
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### ደረጃ 3 — በDashboard በኩል ያዋቅሩ
+### ደረጃ 3 — በዳሽቦርድ በኩል አዋቅር
 
-1. ወደ `http://localhost:20128/dashboard/cli-code` ይሂዱ
-2. መሣሪያዎን በgrid ውስጥ ያግኙ
-3. የመሣሪያውን ዝርዝር ገጽ ለመክፈት ካርዱን ጠቅ ያድርጉ
-4. የእርስዎን API key እና base URL ይምረጡ
-5. **Config ተግብር** የሚለውን ጠቅ ያድርጉ ወይም በእጅ የሚዋቀርበትን config snippet ይቅዱ
+1. ወደ `http://localhost:20128/dashboard/cli-code` ሂድ
+2. መሳሪያዎን በፍርግርግ ውስጥ ያግኙት።
+3. የመሳሪያውን ዝርዝር ገጽ ለመክፈት ካርዱን ጠቅ ያድርጉ
+4. የእርስዎን API ቁልፍ እና ቤዝ URL ይምረጡ
+5. ጠቅ ያድርጉ** ውቅረትን ተግብር** ወይም በእጅ የተዋቀረ ቅንጣቢውን ይቅዱ
 
 ---
 
-### ደረጃ 4 — ዓለም-አቀፍ Environment Variables ያዘጋጁ
+### ደረጃ 4 — ዓለም አቀፍ የአካባቢ ተለዋዋጮችን አዘጋጅ
 
 ```bash
-# OmniRoute ሁለንተናዊ Endpoint
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI GOOGLE_GEMINI_BASE_URLን ከROOT ያነባል (SDKው /v1beta/...ን ራሱ ይጨምራል)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> ለ**ርቀት server** `localhost:20128`ን በserver IP ወይም domain ይተኩ፣
-> ለምሳሌ `http://<your-server-ip>:20128`።
+> ለ** የርቀት አገልጋይ** `localhost:20128` ን በአገልጋዩ IP ወይም ጎራ ይተኩ፣ ለምሳሌ `http://<your-server-ip>:20128`.
 
 ---
 
 ### ደረጃ 4 — እያንዳንዱን መሣሪያ ያዋቅሩ
 
-#### Claude Code
+#### Claude ኮድ
 
 ```bash
-# ~/.claude/settings.jsonን ይፍጠሩ፦
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -379,18 +379,15 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-ለClaude Code የተዋሐደውን Anthropic gateway root ይጠቀሙ። እዚህ `/v1`ን አይጨምሩ።
+ለ Claude ኮድ የተዋሃደውን Anthropic ጌትዌይ ስር ይጠቀሙ። እዚህ `/v1` አትጨምር።
 
-**ሙከራ፦** `claude "say hello"`
+**ሙከራ፡-** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-ዘመናዊው Codex (v0.137+) `~/.codex/config.toml`ን ብቻ ያነባል — የቆየው
-`config.yaml` የlegacy npm CLI ሲሆን ያለምንም ማስጠንቀቂያ ችላ ይባላል። API
-keyው ሁልጊዜ በ`OMNIROUTE_API_KEY` environment variable (`env_key`) ውስጥ ይቆያል፤
-በፋይሉ ውስጥ ፈጽሞ አይቀመጥም፦
+ዘመናዊ Codex (v0.137 +) `~/.codex/config.toml` ብቻ — ያነባል የድሮው `config.yaml` የ npm CLI ውርስ ነው እና በዝምታ ችላ ይባላል። የ API ቁልፉ በ `OMNIROUTE_API_KEY` አካባቢ ተለዋዋጭ (`env_key`) ውስጥ ይቆያል፣ በጭራሽ በፋይሉ ውስጥ የለም
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -405,9 +402,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-ሙሉ ማጣቀሻ (profiles፣ `wire_api`፣ context windows)፦ [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md)።
+ሙሉ ማጣቀሻ (መገለጫዎች, `wire_api`, አውድ መስኮቶች): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**ሙከራ፦** `codex "what is 2+2?"`
+**ሙከራ፡-** `codex "what is 2+2?"`
 
 ---
 
@@ -436,16 +433,46 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**ሙከራ፦** `opencode`
+**ሙከራ፡-** `opencode`
 
-> የthinking variantsን ለመላክ `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> ይጠቀሙ።
+> የአስተሳሰብ ልዩነቶችን ለመላክ `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` ይጠቀሙ።
 
 ---
 
-#### Cline (CLI ወይም VS Code)
+#### ፒ ኮድ ማድረጊያ ወኪል
 
-**CLI mode፦**
+ይፋዊውን የ Pi ኮድ ወኪል ጥቅል በ `npm install -g --ignore-scripts @earendil-works/pi-coding-agent` ይጫኑ። Pi ብጁ አቅራቢዎችን ከ `~/.pi/agent/models.json` ያነባል; አጠቃላይ የወኪሉን ማውጫ ለማንቀሳቀስ `PI_CODING_AGENT_DIR` ያዘጋጁ። ዳሽቦርዱ ያንን መሻር ይከተላል። ፒ ከተበጁ የመጨረሻ ነጥቦች ላይ ሞዴሎችን አያገኝም፣ ስለዚህ OmniRoute የተመረጠውን ሞዴል በ `models[]` ውስጥ Pi's `openai-completions` API እና OmniRoute OpenAI-ተኳሃኝ የሆነውን `/v1` የመጨረሻ ነጥብን በመጠቀም ይጽፋል።
+
+ውስጥ**CLI መሳሪያዎች → Pi** ፣ የመጨረሻ ነጥብ ፣ API ቁልፍ እና ሞዴል ይምረጡ ፣ የአቅራቢውን ቅድመ እይታ ይገምግሙ እና ያመልክቱ። ቅድመ እይታው የአቅራቢ ቁራጭ ነው፡ ሌሎች አቅራቢዎች እና ቅንጅቶች ሳይበላሹ እንዲቀጥሉ `providers.omniroute` ወደ ነባሩ `models.json` ያዋህዱ።
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+`/model` ሲከፍቱ Pi `models.json` ይጭናል. የተዋቀረውን መንገድ በመረጡት የአቅራቢ መታወቂያ እና የሞዴል መታወቂያ ይሞክሩ፡
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+ማጣቀሻዎች [፡ የፒ ሞዴሎች እና ብጁ አቅራቢዎች](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md) ፣ [የፒ አካባቢ ተለዋዋጮች](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md) ፣ [የፒ ጫን መመሪያዎች](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md) ።
+
+---
+
+#### Cline (CLI ወይም VS ኮድ)
+
+**CLI ሁነታ:**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -457,22 +484,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code mode፦**
-የCline extension settings → API Provider፦ `OpenAI Compatible` → Base URL፦ `http://localhost:20128/v1`
+**VS ኮድ ሁነታ፡-** Cline ቅጥያ ቅንብሮች → API አቅራቢ `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
 
-ወይም OmniRoute dashboardን ይጠቀሙ → **CLI Tools → Cline → Config ተግብር**።
+ወይም የ OmniRoute ዳሽቦርድ → ተጠቀም**CLI Tools → Cline → ውቅረትን ተግብር** .
 
 ---
 
-#### KiloCode (CLI ወይም VS Code)
+#### KiloCode (CLI ወይም VS ኮድ)
 
-**CLI mode፦**
+**CLI ሁነታ:**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code settings፦**
+**VS ኮድ ቅንብሮች**
 
 ```json
 {
@@ -481,13 +507,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-ወይም OmniRoute dashboardን ይጠቀሙ → **CLI Tools → KiloCode → Config ተግብር**።
+ወይም የ OmniRoute ዳሽቦርድ → ተጠቀም**CLI Tools → KiloCode → ውቅረትን ተግብር** .
 
 ---
 
-#### Continue (VS Code Extension)
+#### ቀጥል (VS ኮድ ቅጥያ)
 
-`~/.continue/config.yaml`ን ያርትዑ፦
+`~/.continue/config.yaml` አርትዕ
 
 ```yaml
 models:
@@ -499,20 +525,20 @@ models:
     default: true
 ```
 
-ካርትዑ በኋላ VS Codeን እንደገና ያስጀምሩ።
+ከአርትዖት በኋላ VS ኮድን እንደገና ያስጀምሩ.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-VS Code Insiders ለcustom endpoint models ሲዋቀር እና OmniRoute ያለcustom header field እንዲሠራ ሲፈልጉ ይህን ይጠቀሙ።
+ይህንን ይጠቀሙ VS Code Insiders ለብጁ የመጨረሻ ነጥብ ሞዴሎች ሲዋቀር እና OmniRoute ያለ ብጁ የራስጌ መስክ እንዲሰራ ሲፈልጉ ይጠቀሙ።
 
-**የሚመከር ቦታ፦**
+**የሚመከር አካባቢ፡**
 
-- Linux፦ `~/.config/Code - Insiders/User/chatLanguageModels.json`
-- Windows፦ `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
+- Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
+- Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**ቶከን የተካተተበትን የOmniRoute ተለዋጭ ስም የመጠቀም ምሳሌ፦**
+**የማስመሰያ OmniRoute ተለዋጭ ስም በመጠቀም ምሳሌ፡-**
 
 ```json
 [
@@ -534,29 +560,28 @@ VS Code Insiders ለcustom endpoint models ሲዋቀር እና OmniRoute ያለc
 ]
 ```
 
-**ማስታወሻዎች፦**
+**ማስታወሻዎች፡-**
 
-- `sk-your-omniroute-key`ን በOmniRoute ውስጥ በተፈጠረ API ቁልፍ ይተኩ።
-- የ`url` መስክ ወደ `/api/v1/vscode/{token}/chat/completions` መጠቆም አለበት።
-- የ`modelsUrl` መስክ ወደ `/api/v1/vscode/{token}/models` መጠቆም አለበት።
-- ደንበኛው ብጁ ራስጌዎችን የሚደግፍ ከሆነ፣ መደበኛውን `/v1` + Bearer ራስጌ ፍሰት ይምረጡ።
-- በURL ውስጥ የተካተቱ ቶከኖች ለተኳኋኝነት የሚያገለግሉ አማራጭ መፍትሔዎች ሲሆኑ፣ በአርታዒ መዝገቦች ወይም በፕሮክሲ ታሪክ ውስጥ ሊታዩ ይችላሉ።
+- `sk-your-omniroute-key` በ OmniRoute ውስጥ በተፈጠረው API ቁልፍ ይተኩ።
+- `url` መስክ ወደ `/api/v1/vscode/{token}/chat/completions` መጠቆም አለበት።
+- `modelsUrl` መስክ ወደ `/api/v1/vscode/{token}/models` መጠቆም አለበት።
+- ደንበኛው ብጁ ራስጌዎችን ሲደግፍ የተለመደውን `/v1` + Bearer header ፍሰትን ይምረጡ።
+- በዩአርኤል የተካተቱ ቶከኖች የተኳኋኝነት ውድቀት ናቸው እና በአርታዒ ምዝግብ ማስታወሻዎች ወይም በተኪ ታሪክ ውስጥ ሊታዩ ይችላሉ።
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# ወደ AWS/Kiro መለያዎ ይግቡ፦
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLIው የራሱን ማረጋገጫ ይጠቀማል — ለKiro CLI ራሱ OmniRoute እንደ ባክኤንድ አያስፈልግም።
-# ለሌሎች መሣሪያዎች kiro-cliን ከOmniRoute ጎን ለጎን ይጠቀሙ።
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-ለ**Kiro IDE** ዴስክቶፕ መተግበሪያ፣ በOmniRoute
-ስር `/dashboard/cli-tools → Kiro` የቀረበውን MITM መዳረሻ ይጠቀሙ።
+ለ**Kiro IDE** የዴስክቶፕ መተግበሪያ፣ `/dashboard/cli-tools → Kiro` OmniRoute የተጋለጠውን የ MITM የመጨረሻ ነጥብ ተጠቀም።
 
 ---
 

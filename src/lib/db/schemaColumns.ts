@@ -271,6 +271,11 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE call_logs ADD COLUMN added_wait_ms INTEGER DEFAULT NULL");
       console.log("[DB] Added call_logs.added_wait_ms column");
     }
+    // The call-log INSERT names this column on every write (migration 224).
+    if (!columnNames.has("queue_wait_ms")) {
+      db.exec("ALTER TABLE call_logs ADD COLUMN queue_wait_ms INTEGER DEFAULT NULL");
+      console.log("[DB] Added call_logs.queue_wait_ms column");
+    }
     if (!columnNames.has("added_wait_cause")) {
       db.exec("ALTER TABLE call_logs ADD COLUMN added_wait_cause TEXT DEFAULT NULL");
       console.log("[DB] Added call_logs.added_wait_cause column");
@@ -359,6 +364,14 @@ export function ensureProxyLogsColumns(db: SqliteDatabase) {
     if (!columnNames.has("egress_ip")) {
       db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip TEXT");
       console.log("[DB] Added proxy_logs.egress_ip column");
+    }
+    if (!columnNames.has("egress_ip_v4")) {
+      db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip_v4 TEXT");
+      console.log("[DB] Added proxy_logs.egress_ip_v4 column");
+    }
+    if (!columnNames.has("egress_ip_v6")) {
+      db.exec("ALTER TABLE proxy_logs ADD COLUMN egress_ip_v6 TEXT");
+      console.log("[DB] Added proxy_logs.egress_ip_v6 column");
     }
     if (!columnNames.has("upstream_status")) {
       db.exec("ALTER TABLE proxy_logs ADD COLUMN upstream_status INTEGER");

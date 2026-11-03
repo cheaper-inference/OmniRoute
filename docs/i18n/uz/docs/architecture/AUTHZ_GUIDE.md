@@ -146,34 +146,34 @@ qo‘shimcha imkoniyat bilan to‘ldiriladi:
 
 Ba’zi `MANAGEMENT` amallari **faqat operator** uchun: `manage` kaliti yetarli emas. Saqlangan hisob ma’lumotlarini eksport qilish (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), jonli ma’lumotlar ustiga zaxira nusxasini tiklash (`dryRun=true` bilan `POST /api/db-backups/import`, identifikator bo‘yicha tiklash `POST /api/db-backups` va `POST /api/settings/import-json`) hamda tiklash nuqtalarini yo‘q qilish (`DELETE /api/db-backups` tozalashi va `PATCH /api/db-backups`, chunki u saqlagan saqlash muddati har bir zaxiradan keyingi avtomatik tozalashni boshqaradi) boshqaruv paneli seansini, mahalliy CLI subyektini yoki kirish o‘chirilganligini talab qiladi. Sinxronizatsiya tokenini berish (`POST /api/sync/tokens`) va `admin` CLI kirish tokenini chiqarish (`POST /api/cli/tokens`) har qanday kirish rejimida boshqaruv paneli seansini yoki mahalliy CLI subyektini talab qiladi. Har qanday doirali API kalitlari va `oma_` kirish tokenlari operator hisob ma’lumotlari emas: kerak bo‘lganda ular `403` oladi. Tekshiruv `src/lib/api/operatorCredential.ts` da joylashgan (`resolveOperatorCredential()` / `requireOperatorCredential()`). Kirish sozlamalarini o‘zgartirish ham faqat operator uchun: parol mavjud bo‘lgandan keyin `POST /api/settings/require-login` (boshqaruv parolini o‘rnatish / `requireLogin` ni almashtirish) faqat shu hisob ma’lumotlarini qabul qiladi — birinchi o‘rnatish bootstrap oynasi (hali parol yo‘q bo‘lsa) o‘zgarmaydi — va boshqaruv paneli seansi parolni almashtirish uchun `currentPassword` yuborishi kerak (yo‘q yoki noto‘g‘ri bo‘lsa `403`, `settings.update_failed` sifatida auditga yoziladi). Mahalliy CLI va kirish o‘chirilgan nusxa tiklash yo‘lini saqlab qoladi va parolni unsiz ham o‘rnatishi mumkin, chunki ikkalasi ham ma’lumotlar katalogiga ega bo‘lgan xostga bog‘langan.
 
-## Konveyer
+## Quvur liniyasi
 
 ```
-Kiruvchi so‘rov → src/proxy.ts
-  → src/server/authz/pipeline.ts ichidagi runAuthzPipeline()
-    1. Ishonchli ichki sarlavhalarni olib tashlash (x-omniroute-auth-*, x-omniroute-route-class)
-    2. So‘rov identifikatorini yaratish, marshrutni classifyRoute() orqali tasniflash
-    3. Agar pathname == "/" bo‘lsa → /dashboard manziliga yo‘naltirish
-    4. Agar tizim yakunlanayotgan bo‘lsa (to‘g‘ri yakunlash) va /api/* bo‘lsa → 503
-    5. Agar GET bo‘lmagan /api/* bo‘lsa → checkBodySize() himoyasini tekshirish
-    6. Agar OPTIONS bo‘lsa → CORS preflight 204
-    7. Agar options.enforce == false bo‘lsa → marshrut sinfi sarlavhalari bilan o‘tkazib yuborish
-    8. Aks holda: POLICIES[routeClass].evaluate(ctx)
-       - allow  → x-omniroute-auth-{kind,id,label,scopes} ni belgilash → NextResponse.next()
-       - reject → correlation_id bilan JSON xatosi (boshqaruv paneli sahifalari → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Ishonchli ichki sarlavhalar (`src/server/authz/headers.ts` ichida belgilangan) tasniflashdan oldin **kiruvchi so‘rovlardan olib tashlanadi** — mijozlar boshqa subyekt nomidan ish ko‘rish uchun `x-omniroute-auth-*` sarlavhalarini oldindan kirita olmaydi.
+Ishonchli ichki sarlavhalar ( `src/server/authz/headers.ts` da belgilangan).** kiruvchi so'rovlardan mahrum** tasniflashdan oldin — mijozlari sub'ektga taqlid qilish uchun `x-omniroute-auth-*` oldindan to'ldira olmaydi.
 
-### Siyosat shartnomalari
+### Siyosiy shartnomalar
 
-Har bir marshrut sinfi `src/server/authz/policies/` ichida o‘z siyosatiga ega:
+Har bir marshrut sinfida `src/server/authz/policies/` siyosati mavjud:
 
 - **`publicPolicy`** (`policies/public.ts`) — har doim `allow({ kind: "anonymous", id: "anonymous" })` qaytaradi.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer qiymatini ajratib oladi va `validateApiKey()` orqali tekshiradi. Faqat amaldagi `REQUIRE_API_KEY` funksiya bayrog‘i o‘chirilganida anonim kirishga o‘tadi. Amaldagi bayroq `isRequireApiKeyEnabled()` orqali aniqlanadi (`DB funksiya bayrog‘i ustuvor qiymati > process.env.REQUIRE_API_KEY > standart qiymat`), shu sababli boshqaruv panelidagi funksiya bayroqlari va muhit o‘zgaruvchilari `/api/v1/*`, `/api/v1beta/*` hamda taxalluslarni izchil boshqaradi; aniqlashdagi xatoliklar kirishni yopadi. Mijoz API marshrutlarida, jumladan boshqaruv panelining modellar katalogi foydalanadigan `/api/v1/models` marshrutida, boshqaruv paneli sessiyasiga ega so‘rovlarga ruxsat beradi.
-- **`managementPolicy`** (`policies/management.ts`) — boshqaruv paneli sessiyasini, ichki model sinxronlash so‘rovlarini (`/api/providers/[name]/(sync-models|models)` bilan moslashtiriladi) qabul qiladi yoki `isAuthRequired()` false qaytarsa, tekshiruvni butunlay o‘tkazib yuboradi. Bearer tokeni mavjud, ammo yaroqsiz bo‘lsa 403 (`AUTH_001`), aks holda 401 qaytaradi. Shuningdek, autentifikatsiyaning har qanday tarmog‘idan oldin marshrut himoyasi darajalarini (LOCAL_ONLY / ALWAYS_PROTECTED) qo‘llaydi — [Marshrut himoyasi darajalari](../security/ROUTE_GUARD_TIERS.md) bo‘limiga qarang. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ichidagi LOCAL_ONLY yo‘llariga (hozirda: `/api/mcp/`) Bearer kaliti `manage` doirasiga ega bo‘lsa, loopback bo‘lmagan manzildan kirish mumkin; boshqa barcha LOCAL_ONLY yo‘llari doiradan qat’i nazar faqat loopback orqali kirish talabini qat’iy saqlaydi.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearerni chiqaradi, `validateApiKey()` orqali tasdiqlaydi. Faqat samarali `REQUIRE_API_KEY` funksiyasi bayrog'i o'chirilganda anonimga tushadi. Samarali bayroq `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) orqali hal qilinadi, shuning uchun asboblar paneli funksiyasi Bayroqlar va muhit oʻzgaruvchilari `/api/v1/*`, `/api/v1beta/*` va taxalluslarni doimiy ravishda boshqaradi; hal qiluvchi nosozliklar yopilmadi. Mijoz API marshrutlari boʻyicha asboblar paneli-sessiya soʻrovlariga ruxsat beradi (jumladan, asboblar paneli modellari katalogi tomonidan ishlatiladigan `/api/v1/models`). Entra ID SSO yoqilganda, tizimli ravishda Entra tokeni (uchta base64url segmenti, `RS*` alg, `kid`) bo‘lgan Tashuvchi SSO filiali tomonidan boshqariladi.** oldin** `validateApiKey()` va uning hukmi yakuniy — bo'lib, u hech qachon API-kalit yo'liga yoki degradatsiyadan anonimga o'tishga tushmaydi, shuning uchun identifikatsiya provayderining uzilishi ochiq kirishga aylanmaydi. Statik API kalitlari ta'sir qilmaydi. [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — asboblar paneli seansini, ichki model-sinxronizatsiya so‘rovlarini qabul qiladi ( `/api/providers/[name]/(sync-models|models)` ga mos keladi) yoki `isAuthRequired()` noto‘g‘ri qiymatini qaytarsa, butunlay o‘tkazib yuboradi. Bearer tokeni mavjud boʻlsa, lekin yaroqsiz boʻlsa, 403 (`AUTH_001`) ni qaytaradi, aks holda 401. Shuningdek, marshrutni qo'riqlash sathlarini (LOCAL_ONLY / ALWAYS_PROTECTED) har qanday [autentifikatsiya](../security/ROUTE_GUARD_TIERS.md) bo'limi — qarang. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (bugungi kunda: `/api/mcp/`) dagi LOCAL_ONLY yo'llariga Bearer kaliti `manage` skopini olib yurganida, orqaga qaytmagan holda kirish mumkin; boshqa barcha LOCAL_ONLY yo'llari qamrovdan qat'i nazar, qat'iy orqaga qaytish bo'lib qoladi.
 
-Muvaffaqiyatli siyosat `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` qiymatiga ega `AuthSubject` qaytaradi. Quyi oqimdagi ishlov beruvchilar autentifikatsiya mantiqini qayta ishga tushirish o‘rniga uni `src/server/authz/assertAuth.ts` ichidagi `assertAuth(request, "CLIENT_API")` orqali o‘qishi mumkin.
+Muvaffaqiyatli siyosat `AuthSubject` `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` bilan qaytaradi. Pastki oqim ishlovchilari autentifikatsiya mantiqini qayta ishga tushirish o'rniga `src/server/authz/assertAuth.ts` -da `assertAuth(request, "CLIENT_API")` orqali o'qishlari mumkin.
 
 ## Ommaviy marshrutlar roʻyxati
 
@@ -308,23 +308,23 @@ Mijoz API kalitini majburlash `process.env.REQUIRE_API_KEY` ni to‘g‘ridan-to
 
 ## Nosozliklarni tuzatish
 
-Konveyer javoblarga har doim quyidagi sarlavhalarni qoʻshadi:
+Quvur liniyasi har doim javoblarni quyidagicha belgilaydi:
 
 ```
-x-request-id:               <korrelyatsiya identifikatori, xato javoblari tanasida qaytariladi>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Autentifikatsiya qilingan soʻrovlar uchun yuqori oqimdagi (ishlov beruvchi tomonidagi) soʻrov sarlavhalari quyidagilarni ham oʻz ichiga oladi:
+Autentifikatsiya qilingan so'rovlar uchun yuqoridagi (ishlovchi tomoni) so'rov sarlavhalari quyidagilarni o'z ichiga oladi:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<oxirgi-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (ixtiyoriy)
-x-omniroute-auth-scopes:    vergul bilan ajratilgan roʻyxat
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Ishlov beruvchilar ichida `assertAuth(req, expectedClass)` dan foydalaning — agar oraliq dasturiy taʼminot chetlab oʻtilgan boʻlsa, u `AUTHZ_NOT_INITIALIZED` kodli `AuthzAssertionError` xatosini chiqaradi (testlarda konfiguratsiya regressiyalarini aniqlash uchun foydali).
+Ishlovchilar ichida `assertAuth(req, expectedClass)` foydalaning — agar o'rta dastur chetlab o'tilgan bo'lsa, `AUTHZ_NOT_INITIALIZED` kodi bilan `AuthzAssertionError` chiqaradi (testlarda konfiguratsiya regressiyalarini aniqlash uchun foydali).
 
 ## Yana qarang
 

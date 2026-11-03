@@ -25,26 +25,27 @@ omniroute launch --profile glm52  # Claude Code koji upotrebljava glm/glm-5.2 pu
 
 ---
 
-## Kako se Claude Code povezuje s pristupnikom
+## Kako Claude kod povezuje s pristupnikom
 
-Claude Code komunicira putem API-ja **Anthropic Messages API** i usmjerava se na prilagođenu
-krajnju točku pomoću varijabli okruženja (nema zastavicu `--base-url`):
+Claude Code talks the**Anthropic Poruke API** i usmjeren je na prilagođenu krajnju točku s varijablama okruženja (nema `--base-url` oznaku):
 
-| Varijabla                                    | Svrha                                                                                              |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Korijenski URL pristupnika (Claude Code dodaje `/v1/messages`). **Bez sufiksa `/v1`.**             |
-| `ANTHROPIC_AUTH_TOKEN`                       | Šalje se kao `Authorization: Bearer …` — upotrijebite pristupni token / API ključ OmniRoutea       |
-| `ANTHROPIC_API_KEY`                          | Alternativa: šalje se kao `x-api-key`. Ako su oba postavljena, `ANTHROPIC_AUTH_TOKEN` ima prednost |
-| `ANTHROPIC_MODEL`                            | Prisilno postavlja određeni model (nadjačava zadanu vrijednost birača `/model`)                    |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → izvorni birač `/model` navodi modele `claude*`/`anthropic*` iz `/v1/models`                  |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Ograničava broj izlaznih tokena po odgovoru (npr. `65536`)                                         |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Prag broja tokena za automatsko sažimanje                                                          |
+| Varijabilna                                  | Svrha                                                                                          |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Korijen pristupnika URL ( kod Claude dodaje `/v1/messages`).** Nema sufiksa `/v1`.**           |
+| `ANTHROPIC_AUTH_TOKEN`                       | Poslano kao `Authorization: Bearer …` — koristite svoj OmniRoute pristupni token / API ključ   |
+| `ANTHROPIC_API_KEY`                          | Alternativa: poslano kao `x-api-key`. Ako su oba postavljena, `ANTHROPIC_AUTH_TOKEN` pobjeđuje |
+| `ANTHROPIC_MODEL`                            | Prisilni određeni model (nadjačava zadani `/model` birač)                                      |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → izvorni `/model` birač navodi `claude*`/`anthropic*` modele iz `/v1/models`              |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Ograničenje izlaznih tokena po odgovoru (npr. `65536`)                                         |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Prag tokena za automatsko sažimanje                                                            |
 
-> Varijable okruženja čitaju se **jednom pri pokretanju** — ponovno pokrenite Claude Code nakon što ih promijenite.
+> Env vars se čitaju** jednom prilikom pokretanja** — ponovno pokrenite Claude kod nakon što ih promijenite.
 
-`omniroute launch` postavlja sve navedeno umjesto vas: određuje osnovni URL i token
-iz aktivnog konteksta (tako da nakon `omniroute connect <vps>` naredba `omniroute launch`
-jednostavno radi), provjerava stanje poslužitelja i izvršava `claude`.
+Za vjerodajnicu koja se rotira umjesto fiksnog niza, postavite `apiKeyHelper` u `~/.claude/settings.json` na naredbu koja ispisuje trenutnu vjerodajnicu u stdout. Claude kod prema zadanim postavkama sprema svoj izlaz pet minuta (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` to nadjačava) i šalje vrijednost u `Authorization: Bearer` i `x-api-key`. Skripta mora ispisati vjerodajnicu i ništa drugo — banner uz to ne uspijeva pomagaču na v2.1.227 +.
+
+Ovako radi Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` ispisuje kratkotrajni Entra pristupni token koji OmniRoute provjerava umjesto ključa API. Vidi [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` postavlja sve ovo umjesto vas: rješava osnovni URL + token iz aktivnog konteksta (tako da `omniroute connect <vps>` onda `omniroute launch` jednostavno radi), provjerava ispravnost poslužitelja i izvršava `claude`.
 
 ---
 
