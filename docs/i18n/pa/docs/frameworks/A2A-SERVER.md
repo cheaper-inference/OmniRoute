@@ -158,11 +158,11 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ਵਿੱਚ ਵਾ
 | ਸਿਹਤ ਰਿਪੋਰਟ    | `health-report`      | ਪ੍ਰਤੀ ਪ੍ਰਦਾਤਾ ਸਰਕਟ ਬ੍ਰੇਕਰ, ਕੂਲਡਾਉਨ, ਤਾਲਾਬੰਦੀ ਸਥਿਤੀ ਨੂੰ ਇਕੱਠਾ ਕਰਦਾ ਹੈ                                                                            | ਸਿਹਤ, ਲਚਕਤਾ        | "ਸਾਰੇ ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ ਸਿਹਤ ਸਥਿਤੀ ਦਿਖਾਓ"     |
 | ਸੂਚੀ ਸਮਰੱਥਾਵਾਂ | `list-capabilities`  | ਸੰਦਰਭ ਟੀਕੇ ਲਈ ਕੱਚੇ SKILL.md URLs ਦੇ ਨਾਲ ਇੱਕ ਮਾਰਕਡਾਊਨ ਸਾਰਣੀ ਦੇ ਤੌਰ 'ਤੇ ਪੂਰਾ 45-ਐਂਟਰੀ ਏਜੰਟ ਹੁਨਰ ਕੈਟਾਲਾਗ (23 API + 21 CLI + 1 ਸੰਰਚਨਾ) ਵਾਪਸ ਕਰਦਾ ਹੈ | ਕੈਟਾਲਾਗ, ਖੋਜ, ਹੁਨਰ | "ਸਾਰੀਆਂ OmniRoute ਸਮਰੱਥਾਵਾਂ ਦੀ ਸੂਚੀ ਬਣਾਓ" |
 
-> ਏਜੰਟ ਕਾਰਡ ਨੂੰ ਲਾਈਵ 377-ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ ਨਾਲ ਇਕਸਾਰ ਰੱਖਿਆ ਜਾਣਾ ਚਾਹੀਦਾ ਹੈ; ਪ੍ਰਦਾਤਾ ਗਿਣਤੀ ਅਤੇ free/no-auth ਮੈਟਾਡੇਟਾ ਰਨਟਾਈਮ ਰਜਿਸਟਰੀ ਤੋਂ ਪ੍ਰਾਪਤ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।
+> ਏਜੰਟ ਕਾਰਡ ਨੂੰ ਲਾਈਵ 380-ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ ਨਾਲ ਇਕਸਾਰ ਰੱਖਿਆ ਜਾਣਾ ਚਾਹੀਦਾ ਹੈ; ਪ੍ਰਦਾਤਾ ਗਿਣਤੀ ਅਤੇ free/no-auth ਮੈਟਾਡੇਟਾ ਰਨਟਾਈਮ ਰਜਿਸਟਰੀ ਤੋਂ ਪ੍ਰਾਪਤ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।
 
 ### `list-capabilities` ਹੁਨਰ ਵੇਰਵੇ
 
-`list-capabilities` ਹੁਨਰ ਖਾਸ ਤੌਰ 'ਤੇ ਬਾਹਰੀ ਏਜੰਟਾਂ ਲਈ ਲਾਭਦਾਇਕ ਹੈ ਜਿਨ੍ਹਾਂ ਨੂੰ ਇਹ ਖੋਜਣ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ ਕਿ API ਕਾਲਾਂ ਭੇਜਣ ਤੋਂ ਪਹਿਲਾਂ OmniRoute ਕੀ ਪ੍ਰਗਟ ਕਰਦਾ ਹੈ। ਇਹ ਇੱਕ ਸਟ੍ਰਕਚਰਡ ਮਾਰਕਡਾਊਨ ਟੇਬਲ ਆਰਟੀਫੈਕਟ ਵਾਪਸ ਕਰਦਾ ਹੈ:
+`list-capabilities` ਹੁਨਰ ਖਾਸ ਤੌਰ 'ਤੇ ਬਾਹਰੀ ਏਜੰਟਾਂ ਲਈ ਲਾਭਦਾਇਕ ਹੈ ਜਿਨ੍ਹਾਂ ਨੂੰ ਇਹ ਖੋਜਣ ਦੀ ਜ਼ਰੂਰਤ ਹੁੰਦੀ ਹੈ ਕਿ API ਕਾਲਾਂ ਭੇਜਣ ਤੋਂ ਪਹਿਲਾਂ OmniRoute ਕੀ ਪ੍ਰਗਟ ਕਰਦਾ ਹੈ। ਇਹ ਇੱਕ ਸਟ੍ਰਕਚਰਡ ਮਾਰਕਡਾਊਨ ਟੇਬਲ ਆਰਟੀਫੈਕਟ ਵਾਪਸ ਕਰਦਾ ਹੈ:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -192,17 +192,17 @@ JSON-RPC ਐਂਡਪੌਇੰਟ `/a2a` ਪ੍ਰਮਾਣਿਕ A2A ਪ੍ਰ�
 
 ---
 
-## ਨਵਾਂ ਹੁਨਰ ਸ਼ਾਮਲ ਕਰਨਾ
+## ਇੱਕ ਨਵਾਂ ਹੁਨਰ ਜੋੜਨਾ
 
-1. **ਹੁਨਰ ਫ਼ਾਈਲ ਬਣਾਓ:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **ਹੁਨਰ ਫਾਈਲ ਬਣਾਓ:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   ਇੱਕ async ਫੰਕਸ਼ਨ `(task: A2ATask) => Promise<{ artifacts, metadata }>` ਐਕਸਪੋਰਟ ਕਰੋ। `smartRouting.ts` ਵਰਗੇ ਮੌਜੂਦਾ ਹੁਨਰਾਂ ਦੀ ਬਣਤਰ ਦੀ ਪਾਲਣਾ ਕਰੋ।
+   ਇੱਕ async ਫੰਕਸ਼ਨ `(task: A2ATask) => Promise<{ artifacts, metadata }>` ਨਿਰਯਾਤ ਕਰੋ। ਮੌਜੂਦਾ ਹੁਨਰ ਜਿਵੇਂ ਕਿ `smartRouting.ts` ਦੀ ਸ਼ਕਲ ਦਾ ਪਾਲਣ ਕਰੋ।
 
-2. **ਹੈਂਡਲਰ ਰਜਿਸਟਰ ਕਰੋ:** `src/lib/a2a/taskExecution.ts` ਵਿੱਚ, `A2A_SKILL_HANDLERS` ਵਿੱਚ ਇੱਕ ਐਂਟਰੀ ਸ਼ਾਮਲ ਕਰੋ:
+2. **ਰਜਿਸਟਰ ਹੈਂਡਲਰ:** `src/lib/a2a/taskExecution.ts` ਵਿੱਚ, `A2A_SKILL_HANDLERS` ਵਿੱਚ ਇੱਕ ਐਂਟਰੀ ਜੋੜੋ:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ਮੌਜੂਦਾ ਹੁਨਰ
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -210,7 +210,7 @@ JSON-RPC ਐਂਡਪੌਇੰਟ `/a2a` ਪ੍ਰਮਾਣਿਕ A2A ਪ੍ਰ�
    };
    ```
 
-3. **ਏਜੰਟ ਕਾਰਡ ਵਿੱਚ ਪ੍ਰਗਟ ਕਰੋ:** `src/app/.well-known/agent.json/route.ts` ਵਿੱਚ, `skills` ਐਰੇ ਵਿੱਚ ਜੋੜੋ:
+3. **ਏਜੰਟ ਕਾਰਡ ਵਿੱਚ ਪ੍ਰਗਟ ਕਰੋ:** `src/lib/a2a/agentCardMetadata.ts` ਵਿੱਚ ( `/.well-known/agent.json` ਅਤੇ `/.well-known/agent-card.json` ਦੁਆਰਾ ਸਾਂਝਾ ਕੀਤਾ ਗਿਆ), `skills` ਐਰੇ ਵਿੱਚ ਜੋੜੋ:
 
    ```json
    {
@@ -222,9 +222,9 @@ JSON-RPC ਐਂਡਪੌਇੰਟ `/a2a` ਪ੍ਰਮਾਣਿਕ A2A ਪ੍ਰ�
    }
    ```
 
-4. **ਟੈਸਟ ਲਿਖੋ:** `tests/unit/a2a-<your-skill>.test.ts`। ਸਫਲਤਾ ਮਾਰਗ + ਤਰੁੱਟੀ ਮਾਰਗ ਨੂੰ ਕਵਰ ਕਰੋ।
+4. **ਟੈਸਟ ਲਿਖੋ:** `tests/unit/a2a-<your-skill>.test.ts` ਹੈਪੀ ਪਾਥ + ਗਲਤੀ ਮਾਰਗ ਨੂੰ ਕਵਰ ਕਰੋ।
 
-5. **ਇਸ ਫ਼ਾਈਲ ਦੀ `Available Skills` ਸਾਰਣੀ ਵਿੱਚ ਨਵੇਂ ਹੁਨਰ ਦਾ ਦਸਤਾਵੇਜ਼ੀਕਰਨ ਕਰੋ।**
+5. **ਦਸਤਾਵੇਜ਼** ਇਸ ਫਾਈਲ ਦੇ `Available Skills` ਟੇਬਲ ਵਿੱਚ ਨਵਾਂ ਹੁਨਰ।
 
 ---
 
