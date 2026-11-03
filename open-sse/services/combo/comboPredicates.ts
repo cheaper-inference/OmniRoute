@@ -303,6 +303,9 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   rate_limit_queue_timeout: true,
   rate_limit_queue_full: true,
   rate_limit_queue_wedged: true,
+  // Local account-semaphore capacity — same verdict, different gate.
+  semaphore_timeout: true,
+  semaphore_queue_full: true,
   token_limit_exceeded: true,
   // #10360: our own executor-result contract violation. An internal defect, not
   // a provider/account fault — it must never cool a connection or trip a breaker.
@@ -350,10 +353,30 @@ export function isRequestScopedUpstreamFailure(error?: {
     type === "invalid_request_error" ||
     type === "context_length_exceeded" ||
     type === "local_queue_capacity" ||
+    type === "account_semaphore_capacity" ||
     // #14313: OpenCode free-tier refusal (FreeTierError) — same verdict on every
     // account for the same request; never a connection/model health signal.
     type === "freetiererror" ||
     code === "freetiererror"
+  );
+}
+
+/**
+ * A full per-account concurrency gate. It stays request-scoped (no lockout, no
+ * cooldown, no connection blame), but unlike the other request-scoped failures
+ * it is momentary, so the combo keeps its same-target retry for it: a slot can
+ * free up while the retry waits.
+ */
+export function isAccountSemaphoreCapacityFailure(error?: {
+  code?: string | null;
+  type?: string | null;
+}): boolean {
+  const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
+  const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
+  return (
+    code === "semaphore_timeout" ||
+    code === "semaphore_queue_full" ||
+    type === "account_semaphore_capacity"
   );
 }
 

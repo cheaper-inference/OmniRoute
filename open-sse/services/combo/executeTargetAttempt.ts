@@ -59,6 +59,7 @@ import {
   isComboRequestScopedFailure as isScopedFailure,
   shouldRecordModelLockoutForComboFailure,
   isLocalKeyPolicyBreachErrorBody,
+  isAccountSemaphoreCapacityFailure,
   isLocalQueueCapacityErrorBody,
   toRecordedTarget,
   resolveDelayMs,
@@ -1112,7 +1113,7 @@ export async function executeTargetAttempt(
     const isTransient =
       !isStreamReadinessFailure &&
       !isTokenLimitBreach &&
-      !scopedFailure &&
+      (!scopedFailure || isAccountSemaphoreCapacityFailure(structuredError)) &&
       [408, 429, 500, 502, 503, 504].includes(result.status);
     // failoverBeforeRetry means what it says: prefer the next sibling
     // target over hammering this one again. Without this check, a
