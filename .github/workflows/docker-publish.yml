@@ -65,10 +65,17 @@ jobs:
     # well: on 2026-11-03 this job waited 3 h for a hosted ubuntu-latest slot behind ~300 queued
     # PR runs. About 2.5 min here plus 4.5 min in `merge` per publish, on 2 vCPU.
     runs-on: ${{ vars.DOCKER_AMD64_RUNNER == 'blacksmith' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      # Read this month's docker-publish jobs for the Blacksmith budget step.
+      actions: read
     outputs:
       version: ${{ steps.version.outputs.version }}
       promote_latest: ${{ steps.version.outputs.promote_latest }}
       skip: ${{ steps.version.outputs.skip }}
+      # 'true' while DOCKER_AMD64_RUNNER=blacksmith and the month's Blacksmith minutes are
+      # under BLACKSMITH_MONTHLY_MINUTES_CAP; `build` and `merge` route on it.
+      blacksmith: ${{ steps.budget.outputs.blacksmith }}
     env:
       IMAGE_NAME: diegosouzapw/omniroute
     steps:
@@ -81,6 +88,19 @@ jobs:
           # 2.6 GB history is not needed. A full clone took 30+ min on a Blacksmith runner
           # (outside GitHub's network) on 2026-11-03.
           fetch-depth: 1
+
+      # Blacksmith keeps running and invoices past its free 3,000 minutes, and a publish costs
+      # ~90 of them, so the month's usage is summed here and the build falls back to the hosted
+      # runner at the cap (default 2,500, leaving room for the jobs already in flight).
+      - name: Stay within the Blacksmith monthly minutes
+        id: budget
+        env:
+          WANT: ${{ vars.DOCKER_AMD64_RUNNER }}
+          CAP: ${{ vars.BLACKSMITH_MONTHLY_MINUTES_CAP || '2500' }}
+          REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+          SELF_RUN_ID: ${{ github.run_id }}
+        run: node scripts/ci/blacksmith-budget.mjs
 
       - name: Resolve version, latest-promotion, and skip flag
         id: version
@@ -217,7 +237,8 @@ jobs:
     #   hosted     → ubuntu-24.04 (16 GB)
     #   unset      → unchanged: omni-build when the .113 opt-in is on, hosted otherwise
     # The Dockerfile build is sized for 16 GB (OMNIROUTE_BUILD_WORKERS, #7518).
-    runs-on: ${{ matrix.arch == 'amd64' && (vars.DOCKER_AMD64_RUNNER == 'blacksmith' && 'blacksmith-4vcpu-ubuntu-2404' || vars.DOCKER_AMD64_RUNNER != 'hosted' && vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
+    # `blacksmith` routes through prepare's budget output; at the monthly cap it lands on hosted.
+    runs-on: ${{ matrix.arch == 'amd64' && (needs.prepare.outputs.blacksmith == 'true' && 'blacksmith-4vcpu-ubuntu-2404' || vars.DOCKER_AMD64_RUNNER != 'hosted' && vars.DOCKER_AMD64_RUNNER != 'blacksmith' && vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
     # Share the 1-slot omni-build ceiling (#12048) with ci.yml `Build` /
     # npm-publish. Same group as main's Build so a :next publish waits beside
     # the artefact instead of sitting next to it. arm64 is hosted — its own
@@ -453,8 +474,8 @@ jobs:
       needs.prepare.result == 'success' && needs.build.result == 'success' &&
       needs.prepare.outputs.skip != 'true' &&
       (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute')
-    # Same switch as `prepare` (see there).
-    runs-on: ${{ vars.DOCKER_AMD64_RUNNER == 'blacksmith' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
+    # On Blacksmith with the amd64 build; on hosted once the monthly budget is spent.
+    runs-on: ${{ needs.prepare.outputs.blacksmith == 'true' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     permissions:
       contents: read
       packages: write
