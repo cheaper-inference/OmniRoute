@@ -165,7 +165,7 @@ protocol and URL; similarly named Decisions APIs are not wire-compatible.
 `GET /v1/systemone/models` returns qualified IDs, `type: decisions`,
 `supported_endpoints`, decision/vision capability and `pricing: null`. It
 includes both native protocols and filters by the caller's connection/model
-scope. `X-OmniRoute-Catalog-Status` is `partial` on backend failures. Enumeration
+scope. `X-OmniRoute-Catalog-Status` is `partial` on backend failures or malformed connection records. Enumeration
 does not rotate account selection. Decision-only synced models are excluded
 from chat selection; mixed models retain chat capabilities.
 

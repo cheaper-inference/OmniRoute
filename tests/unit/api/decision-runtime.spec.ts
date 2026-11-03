@@ -225,3 +225,21 @@ describe("decision routes use real runtime policy wiring", () => {
     expect(deps.fetch).not.toHaveBeenCalled();
   });
 });
+
+describe("discovery connection record validation", () => {
+  it("marks malformed database rows partial without forwarding credentials", async () => {
+    deps.valid.mockResolvedValue(true);
+    deps.policy.mockResolvedValue({ rejection: null });
+    deps.metadata.mockResolvedValue({ allowedEndpoints: ["decisions"] });
+    deps.scope.mockResolvedValue({ allowedConnections: ["c1"], rejection: null });
+    deps.connections.mockResolvedValue([
+      { id: "c1", provider: null },
+      { id: 42, provider: "basal" },
+    ]);
+    deps.fetch.mockClear();
+    const response = await GET(makeRequest());
+    expect(response.headers.get("X-OmniRoute-Catalog-Status")).toBe("partial");
+    expect((await response.json()).data).toEqual([]);
+    expect(deps.fetch).not.toHaveBeenCalled();
+  });
+});

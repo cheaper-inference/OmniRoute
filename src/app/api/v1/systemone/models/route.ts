@@ -8,6 +8,7 @@ import { resolveDecisionBackend } from "@omniroute/open-sse/config/decisionRegis
 import { discoverDecisionModels } from "@omniroute/open-sse/handlers/decisionDiscovery.ts";
 import { fetchDecision } from "@omniroute/open-sse/handlers/decisionTransport.ts";
 import {
+  record,
   type DecisionCredentials,
   type DecisionModel,
 } from "@omniroute/open-sse/handlers/decisionTypes.ts";
@@ -33,15 +34,32 @@ export async function GET(request: Request) {
       partial = true;
       break;
     }
-    if (scope.allowedConnections && !scope.allowedConnections.includes(row.id)) continue;
+    const connectionId = row.id;
+    const provider = row.provider;
     if (
-      !["openai", "ollama-local", "basal", "julia-local"].includes(row.provider) &&
-      !row.providerSpecificData?.decision
+      typeof connectionId !== "string" ||
+      !connectionId ||
+      typeof provider !== "string" ||
+      !provider
+    ) {
+      partial = true;
+      continue;
+    }
+    if (scope.allowedConnections && !scope.allowedConnections.includes(connectionId)) continue;
+    const providerSpecificData = record(row.providerSpecificData);
+    if (
+      !["openai", "ollama-local", "basal", "julia-local"].includes(provider) &&
+      !providerSpecificData.decision
     )
       continue;
     try {
-      const credentials = { ...row, connectionId: row.id } as DecisionCredentials;
-      const backend = resolveDecisionBackend(row.provider, credentials);
+      const credentials: DecisionCredentials = {
+        connectionId,
+        providerSpecificData,
+        ...(typeof row.apiKey === "string" ? { apiKey: row.apiKey } : {}),
+        ...(typeof row.accessToken === "string" ? { accessToken: row.accessToken } : {}),
+      };
+      const backend = resolveDecisionBackend(provider, credentials);
       const signal = AbortSignal.any([
         catalogSignal,
         AbortSignal.timeout(Math.min(backend.timeoutMs, 10_000)),
