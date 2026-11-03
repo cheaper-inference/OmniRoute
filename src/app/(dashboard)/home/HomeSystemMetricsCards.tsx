@@ -46,8 +46,80 @@ function getUsageBarColor(percent: number): string {
 
 const POLL_INTERVAL_MS = 3500;
 
-export default function HomeSystemMetricsCards() {
-  const t = useTranslations("home");
+function UsageBar({ percent }: { percent: number }) {
+  return (
+    <div className="mt-2.5 mb-2 h-1.5 w-full overflow-hidden rounded-full bg-bg-muted/30">
+      <div
+        data-testid="usage-bar"
+        className={`h-full rounded-full transition-all duration-500 ${getUsageBarColor(percent)}`}
+        style={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
+      />
+    </div>
+  );
+}
+
+interface MetricCardProps {
+  icon: string;
+  title: string;
+  activeTitle: string;
+  subtitle: string;
+  hostLabel: string;
+  value: string;
+  percent: number;
+  breakdownLabel: string;
+  breakdownValue: string;
+}
+
+function MetricCard({
+  icon,
+  title,
+  activeTitle,
+  subtitle,
+  hostLabel,
+  value,
+  percent,
+  breakdownLabel,
+  breakdownValue,
+}: MetricCardProps) {
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-border/80 bg-bg-subtle/50 p-3.5 transition-colors hover:bg-bg-subtle/70">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
+            <Icon name={icon} size={15} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-semibold text-text-main">{title}</span>
+              <span
+                className="size-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"
+                title={activeTitle}
+              />
+            </div>
+            <span className="text-[11px] text-text-muted truncate block">{subtitle}</span>
+          </div>
+        </div>
+
+        <div className="text-right shrink-0">
+          <span className="text-sm font-semibold tabular-nums text-text-main">{value}</span>
+          <span className="block text-[10px] text-text-muted uppercase tracking-wider">
+            {hostLabel}
+          </span>
+        </div>
+      </div>
+
+      <UsageBar percent={percent} />
+
+      {/* Breakdown for OmniRoute process */}
+      <div className="flex items-center justify-between text-[11px] text-text-muted pt-1 border-t border-border/30">
+        <span>{breakdownLabel}</span>
+        <span className="font-medium text-text-main tabular-nums">{breakdownValue}</span>
+      </div>
+    </div>
+  );
+}
+
+function useSystemMetrics(): SystemMetrics | null {
   const [metrics, setMetrics] = useState<SystemMetrics | null>(null);
 
   const fetchMetrics = useCallback(async (signal?: AbortSignal) => {
@@ -93,130 +165,53 @@ export default function HomeSystemMetricsCards() {
     };
   }, [fetchMetrics]);
 
+  return metrics;
+}
+
+export default function HomeSystemMetricsCards() {
+  const t = useTranslations("home");
+  const metrics = useSystemMetrics();
+  const loading = t("systemMetricsLoading");
+  const placeholder = "--";
+  const host = metrics?.host;
+  const proc = metrics?.process;
+
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-label={t("systemMetricsTitle")}>
-      {/* Card CPU */}
-      <div className="relative overflow-hidden rounded-xl border border-border/80 bg-bg-subtle/50 p-3.5 transition-colors hover:bg-bg-subtle/70">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
-              <Icon name="speed" size={15} />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-semibold text-text-main">
-                  {t("systemMetricsCpu")}
-                </span>
-                <span
-                  className="size-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"
-                  title={t("systemMetricsActive")}
-                />
-              </div>
-              <span className="text-[11px] text-text-muted truncate block">
-                {metrics
-                  ? t("systemMetricsCpuCount", {
-                      count: metrics.host.cpuCount,
-                      platform: metrics.host.platform,
-                    })
-                  : t("systemMetricsLoading")}
-              </span>
-            </div>
-          </div>
-
-          <div className="text-right shrink-0">
-            <span className="text-sm font-semibold tabular-nums text-text-main">
-              {metrics ? `${metrics.host.cpuPercent.toFixed(1)}%` : "--"}
-            </span>
-            <span className="block text-[10px] text-text-muted uppercase tracking-wider">
-              {t("systemMetricsHost")}
-            </span>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="mt-2.5 mb-2 h-1.5 w-full overflow-hidden rounded-full bg-bg-muted/30">
-          <div
-            data-testid="usage-bar"
-            className={`h-full rounded-full transition-all duration-500 ${getUsageBarColor(
-              metrics?.host.cpuPercent ?? 0
-            )}`}
-            style={{
-              width: `${Math.min(100, Math.max(0, metrics?.host.cpuPercent ?? 0))}%`,
-            }}
-          />
-        </div>
-
-        {/* Breakdown for OmniRoute process */}
-        <div className="flex items-center justify-between text-[11px] text-text-muted pt-1 border-t border-border/30">
-          <span>{t("systemMetricsProcessCpu")}</span>
-          <span className="font-medium text-text-main tabular-nums">
-            {metrics ? `${metrics.process.cpuPercent.toFixed(1)}%` : "--"}
-          </span>
-        </div>
-      </div>
-
-      {/* Card RAM */}
-      <div className="relative overflow-hidden rounded-xl border border-border/80 bg-bg-subtle/50 p-3.5 transition-colors hover:bg-bg-subtle/70">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
-              <Icon name="memory" size={15} />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-semibold text-text-main">
-                  {t("systemMetricsMemory")}
-                </span>
-                <span
-                  className="size-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"
-                  title={t("systemMetricsActive")}
-                />
-              </div>
-              <span className="text-[11px] text-text-muted truncate block">
-                {metrics
-                  ? `${formatBytes(metrics.host.memory.usedBytes)} / ${formatBytes(
-                      metrics.host.memory.totalBytes
-                    )}`
-                  : t("systemMetricsLoading")}
-              </span>
-            </div>
-          </div>
-
-          <div className="text-right shrink-0">
-            <span className="text-sm font-semibold tabular-nums text-text-main">
-              {metrics ? `${metrics.host.memory.usedPercent.toFixed(1)}%` : "--"}
-            </span>
-            <span className="block text-[10px] text-text-muted uppercase tracking-wider">
-              {t("systemMetricsHost")}
-            </span>
-          </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="mt-2.5 mb-2 h-1.5 w-full overflow-hidden rounded-full bg-bg-muted/30">
-          <div
-            data-testid="usage-bar"
-            className={`h-full rounded-full transition-all duration-500 ${getUsageBarColor(
-              metrics?.host.memory.usedPercent ?? 0
-            )}`}
-            style={{
-              width: `${Math.min(100, Math.max(0, metrics?.host.memory.usedPercent ?? 0))}%`,
-            }}
-          />
-        </div>
-
-        {/* Breakdown for OmniRoute process */}
-        <div className="flex items-center justify-between text-[11px] text-text-muted pt-1 border-t border-border/30">
-          <span>{t("systemMetricsProcessMemory")}</span>
-          <span className="font-medium text-text-main tabular-nums">
-            {metrics
-              ? `${formatBytes(metrics.process.memory.rssBytes)} (${formatBytes(
-                  metrics.process.memory.heapUsedBytes
-                )})`
-              : "--"}
-          </span>
-        </div>
-      </div>
+      <MetricCard
+        icon="speed"
+        title={t("systemMetricsCpu")}
+        activeTitle={t("systemMetricsActive")}
+        subtitle={
+          host
+            ? t("systemMetricsCpuCount", { count: host.cpuCount, platform: host.platform })
+            : loading
+        }
+        hostLabel={t("systemMetricsHost")}
+        value={host ? `${host.cpuPercent.toFixed(1)}%` : placeholder}
+        percent={host?.cpuPercent ?? 0}
+        breakdownLabel={t("systemMetricsProcessCpu")}
+        breakdownValue={proc ? `${proc.cpuPercent.toFixed(1)}%` : placeholder}
+      />
+      <MetricCard
+        icon="memory"
+        title={t("systemMetricsMemory")}
+        activeTitle={t("systemMetricsActive")}
+        subtitle={
+          host
+            ? `${formatBytes(host.memory.usedBytes)} / ${formatBytes(host.memory.totalBytes)}`
+            : loading
+        }
+        hostLabel={t("systemMetricsHost")}
+        value={host ? `${host.memory.usedPercent.toFixed(1)}%` : placeholder}
+        percent={host?.memory.usedPercent ?? 0}
+        breakdownLabel={t("systemMetricsProcessMemory")}
+        breakdownValue={
+          proc
+            ? `${formatBytes(proc.memory.rssBytes)} (${formatBytes(proc.memory.heapUsedBytes)})`
+            : placeholder
+        }
+      />
     </section>
   );
 }

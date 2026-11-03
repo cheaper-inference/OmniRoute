@@ -307,14 +307,6 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
     let controller: AbortController | null = null;
 
     const loadTopologyActivity = async () => {
-      // Pause polling while the tab is backgrounded
-      if (typeof document !== "undefined" && document.visibilityState !== "visible") {
-        if (!cancelled) {
-          timeoutId = setTimeout(loadTopologyActivity, 3000);
-        }
-        return;
-      }
-
       const currentController = new AbortController();
       controller = currentController;
       try {
@@ -333,12 +325,9 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
           }
         }
       } catch (error) {
-        const isAbortError =
-          (error instanceof DOMException && error.name === "AbortError") ||
-          currentController.signal.aborted ||
-          cancelled;
+        const isAbortError = error instanceof DOMException && error.name === "AbortError";
         if (!cancelled && !isAbortError) {
-          console.warn("Failed to load topology activity:", error);
+          console.error("Failed to load topology activity:", error);
         }
       } finally {
         if (controller === currentController) {
