@@ -1,1 +1,0 @@
-- **feat(providers):** improve Antigravity and Cursor request handling and resilience ([#13125](https://github.com/diegosouzapw/OmniRoute/pull/13125)) — thanks @tuandinh0801
