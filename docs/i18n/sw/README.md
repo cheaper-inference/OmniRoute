@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gateway Inaendelea Kukua
+## 📈 Lango Linaendelea Kukua
 
 <div align="center">
 
 |                                                 |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Watoa huduma                                 |           352            |   **358**   |          380          |
-| 🧠 Vitambulisho vya kipekee vya modeli za gumzo |           1320           |  **1374**   |         1475          |
-| 🖼️ Modality Bridge                              | 🆕 maono + sauti + video |      ✓      |           ✓           |
-| 📡 Katalogi ya bure ya Radar                    | 🆕 chaguo la kujumuishwa |      ✓      |           ✓           |
-| ⚖️ Ratiba inayojua mgao                         |     🆕 Mgao wa Quota     |      ✓      |           ✓           |
-| 📊 Telemetria ya mgao                           |       🆕 mubashara       |      ✓      |           ✓           |
-| 🧰 Hali ya bila kichwa                          |            —             |      —      | 🆕 `serve --headless` |
-| 🛤️ Miundombinu ya reli ya LTS                   |            —             |      —      |  🆕 njia za kutolea   |
-| 🔎 API ya ugunduzi wa modeli                    |            —             |      —      | 🆕 `/v1/models/query` |
+| 🧠 Vitambulisho vya kipekee vya miundo ya gumzo |           1320           |  **1374**   |         1491          |
+| 🖼️ Daraja la modali                             | 🆕 maono + sauti + video |      ✓      |           ✓           |
+| 📡 Katalogi huria ya Radar                      |  🆕 kujiunga kwa hiari   |      ✓      |           ✓           |
+| ⚖️ Upangaji unaozingatia mgao                   |      🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 Telemetria ya mgao                           |     🆕 moja kwa moja     |      ✓      |           ✓           |
+| 🧰 Modi isiyo na kiolesura                      |            —             |      —      | 🆕 `serve --headless` |
+| 🛤️ Miundombinu ya njia ya LTS                   |            —             |      —      | 🆕 vituo vya matoleo  |
+| 🔎 API ya ugunduzi wa miundo                    |            —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Ramani ya Njia](ROADMAP.md) — tukielekea kwenye reli ya `v3.9.0 LTS`**
+**→ [Ramani ya maendeleo](ROADMAP.md) — tukifuata njia kuelekea `v3.9.0 LTS`**
 
 </div>
 
@@ -99,45 +99,45 @@
 <table>
   <tr>
     <td align="right"><b>🚀 Anza</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Mwanzo wa Haraka</a></td>
+    <td align="center"><a href="#-quick-start">🚀 Anza ya Haraka</a></td>
     <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Sakinisha</a></td>
     <td align="center"><a href="#first-run">🆓 Unganisha mtoa huduma</a></td>
   </tr>
   <tr>
     <td align="right"><b>💡 Jifunze</b></td>
     <td align="center"><a href="#-the-promise">💥 Ahadi</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Kwa Nini OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Kinachotofautisha</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Kwa nini OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Kinachoitofautisha</a></td>
   </tr>
   <tr>
     <td align="right"><b>⚙️ Vipengele</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 Kombos</a></td>
-    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Watoa Huduma</a></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 Mchanganyiko</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Watoa huduma</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Kubana</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Inakofanya Kazi</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Mfinyazo</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Inapoendeshwa</a></td>
     <td align="center"><a href="#-private--local-first">🔒 Faragha</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Tazama</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Katika Matendo</a></td>
-    <td align="center"><a href="#-whats-new">✨ Kipya</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 CLI Zinazolingana</a></td>
+    <td align="right"><b>👀 Ione</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 Katika matumizi</a></td>
+    <td align="center"><a href="#-whats-new">✨ Nini kipya</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 CLI zinazooana</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Msaada</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Saidia / Changia</a></td>
-    <td align="center"><a href="#-community--help">💬 Jamii</a></td>
-    <td align="center"><a href="#-sponsors">💖 Wadhamini</a></td>
+    <td align="right"><b>💚 Usaidizi</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Saidia / Toa mchango</a></td>
+    <td align="center"><a href="#-community--help">💬 Jumuiya</a></td>
+    <td align="center"><a href="#-sponsors">💖 Wafadhili</a></td>
   </tr>
   <tr>
     <td align="right"><b>📦 Mradi</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Teknolojia</a></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Teknolojia zinazotumika</a></td>
     <td align="center"><a href="#-documentation">📖 Nyaraka</a></td>
-    <td align="center"><a href="#-900-contributors">👥 Wachangiaji</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Wachangiaji</a></td>
   </tr>
 </table>
 
@@ -146,73 +146,73 @@
 <div align="center">
   <b>🌐 Katika lugha 67</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Kiingereza (en)" title="Kiingereza (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Kireno — Brazili (pt-BR)" title="Kireno — Brazili (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Kireno (pt)" title="Kireno (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Kihispania (es)" title="Kihispania (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Kifaransa (fr)" title="Kifaransa (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Kiitalia (it)" title="Kiitalia (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Kijerumani (de)" title="Kijerumani (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Kiholanzi (nl)" title="Kiholanzi (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Kirusi (ru)" title="Kirusi (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Kiukraini (uk-UA)" title="Kiukraini (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Kipolandi (pl)" title="Kipolandi (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Kicheki (cs)" title="Kicheki (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Kislovakia (sk)" title="Kislovakia (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Kiromania (ro)" title="Kiromania (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Kihungaria (hu)" title="Kihungaria (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Kibulgaria (bg)" title="Kibulgaria (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Kidenmaki (da)" title="Kidenmaki (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Kifini (fi)" title="Kifini (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Kinorwei (no)" title="Kinorwei (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Kiswidi (sv)" title="Kiswidi (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Kichina — Rahisi (zh-CN)" title="Kichina — Rahisi (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Kichina — Cha jadi (zh-TW)" title="Kichina — Cha jadi (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Kijapani (ja)" title="Kijapani (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Kikorea (ko)" title="Kikorea (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Kithai (th)" title="Kithai (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Kivietinamu (vi)" title="Kivietinamu (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Kiindonesia (id)" title="Kiindonesia (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Kimalei (ms)" title="Kimalei (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Kifilipino (phi)" title="Kifilipino (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kihindi (hi)" title="Kihindi (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kigujarati (gu)" title="Kigujarati (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kimarathi (mr)" title="Kimarathi (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kitamili (ta)" title="Kitamili (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kitelugu (te)" title="Kitelugu (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Kibengali (bn)" title="Kibengali (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Kiurdu (ur)" title="Kiurdu (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Kiajemi (fa)" title="Kiajemi (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Kiarabu (ar)" title="Kiarabu (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Kiebrania (he)" title="Kiebrania (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Kituruki (tr)" title="Kituruki (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Kiazerbaijani (az)" title="Kiazerbaijani (az)"></a>
   <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Kigiriki (el)" title="Kigiriki (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Kikorasia (hr)" title="Kikorasia (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Kiserbia (sr)" title="Kiserbia (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Kilithuania (lt)" title="Kilithuania (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Kiestonia (et)" title="Kiestonia (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Kilatvia (lv)" title="Kilatvia (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Kislovenia (sl)" title="Kislovenia (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Kimalta (mt)" title="Kimalta (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Kiayalandi (ga)" title="Kiayalandi (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kikanada (kn)" title="Kikanada (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kimalayalam (ml)" title="Kimalayalam (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kiodia (or)" title="Kiodia (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kipunjabi (pa)" title="Kipunjabi (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Kinepali (ne)" title="Kinepali (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Kisinhala (si)" title="Kisinhala (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Kiburma (my)" title="Kiburma (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Kikambodia (km)" title="Kikambodia (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Kihausa (ha)" title="Kihausa (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Kiyoruba (yo)" title="Kiyoruba (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Kiigbo (ig)" title="Kiigbo (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Kiamhari (am)" title="Kiamhari (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Kiuzbeki (uz)" title="Kiuzbeki (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Kijiojia (ka)" title="Kijiojia (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Kiarmenia (hy)" title="Kiarmenia (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Kibosnia (bs)" title="Kibosnia (bs)"></a>
 </div>
 
 <br/>
@@ -1217,28 +1217,28 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
 <br/>
 <div align="center">
 
-## 🛠️ Msururu wa Teknolojia
+## 🛠️ Rundo la Teknolojia
 
 </div>
 
 <table>
-  <tr><th align="left">Tabaka</th><th align="left">Teknolojia</th></tr>
-  <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Lugha</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kwenye <code>src/</code> na <code>open-sse/</code> (hakuna <code>any</code> kwenye msingi tangu v2.0)</td></tr>
-  <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — moduli 147 za domaini, uhamishaji 219</td></tr>
-  <tr><td nowrap><b>Kumbukumbu</b></td><td>SQLite FTS5 full-text + int8-quantized vector embeddings, typed decay</td></tr>
-  <tr><td nowrap><b>Miundo</b></td><td>Zod 4 — uthibitishaji wa I/O wa zana ya MCP + mikataba ya API</td></tr>
+  <tr><th align="left">Safu</th><th align="left">Teknolojia</th></tr>
+  <tr><td nowrap><b>Mazingira ya utekelezaji</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Lugha</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> katika <code>src/</code> na <code>open-sse/</code> (<code>any</code> sifuri katika msingi tangu v2.0)</td></tr>
+  <tr><td nowrap><b>Kiunzi</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa WAL) + LowDB (JSON ya urithi) — moduli 147 za kikoa, uhamishaji 220</td></tr>
+  <tr><td nowrap><b>Kumbukumbu</b></td><td>SQLite FTS5 kwa utafutaji kamili wa maandishi + embeddings za vekta zilizokadiriwa kwa int8, upunguzaji wenye aina</td></tr>
+  <tr><td nowrap><b>Skima</b></td><td>Zod 4 — uthibitishaji wa I/O ya zana za MCP + mikataba ya API</td></tr>
   <tr><td nowrap><b>Itifaki</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Upeperushaji</b></td><td>Server-Sent Events (SSE) + WebSocket bridge (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Mbonyezo</b></td><td>12-engine pipeline — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Uthibitishaji &amp; usalama</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM katika hifadhi · DOMPurify</td></tr>
-  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint impersonation, wakala wa ngazi 3</td></tr>
-  <tr><td nowrap><b>Ustahimilivu</b></td><td>Circuit breaker, exponential backoff, anti-thundering-herd, auto-combo self-healing</td></tr>
-  <tr><td nowrap><b>Kurekodi</b></td><td>pino — rekodi za JSON zilizopangwa na muktadha wa ombi</td></tr>
-  <tr><td nowrap><b>Upimaji</b></td><td>Node.js test runner + Vitest — <b>56,000+ tamko za majaribio tuli</b> kwenye faili 7,800+ za majaribio zilizofuatiliwa (unit, integration, E2E, usalama, mfumo)</td></tr>
-  <tr><td nowrap><b>Majukwaa</b></td><td>Desktop (Electron) · Android (Termux) · PWA (kivinjari chochote)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — auto npm publish + Docker Hub kwenye toleo</td></tr>
+  <tr><td nowrap><b>Utiririshaji</b></td><td>Matukio Yanayotumwa na Seva (SSE) + daraja la WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Mfinyazo</b></td><td>Bomba la injini 12 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Uthibitishaji &amp; usalama</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + uthibitishaji wenye upeo wa MCP · AES-256-GCM wakati wa kuhifadhi · DOMPurify</td></tr>
+  <tr><td nowrap><b>Ujifichaji</b></td><td>wreq-js — uigaji wa alama za vidole za JA3 / JA4 TLS, proksi ya viwango 3</td></tr>
+  <tr><td nowrap><b>Ustahimilivu</b></td><td>Kikata mzunguko, kurudia kwa kusubiri kwa kielelezo cha ongezeko, kinga dhidi ya msongamano wa ghafla, kujiponya kiotomatiki kwa mchanganyiko</td></tr>
+  <tr><td nowrap><b>Uwekaji kumbukumbu</b></td><td>pino — kumbukumbu za JSON zilizopangwa zenye muktadha wa ombi</td></tr>
+  <tr><td nowrap><b>Majaribio</b></td><td>Kiendeshaji cha majaribio cha Node.js + Vitest — <b>matangazo tuli ya majaribio 60,000+</b> katika faili za majaribio 8,400+ zinazofuatiliwa (kitengo, ujumuishaji, E2E, usalama, mfumo-ikolojia)</td></tr>
+  <tr><td nowrap><b>Majukwaa</b></td><td>Kompyuta ya mezani (Electron) · Android (Termux) · PWA (kivinjari chochote)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — uchapishaji wa npm kiotomatiki + Docker Hub wakati wa toleo</td></tr>
   <tr><td nowrap><b>Viungo</b></td><td><a href="https://omniroute.online">Tovuti</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1254,108 +1254,108 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
 
 <table>
   <tr><th align="left">Nyaraka</th><th align="left">Maelezo</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Mwongozo wa Mtumiaji</a></b></td><td>Watoa huduma, mchanganyiko, muunganiko wa CLI, usambazaji</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Mwongozo wa Usanidi</a></b></td><td>Njia kamili za usakinishaji, mipangilio ya zana za CLI, usanidi wa itifaki, urekebishaji wa muda wa kusubiri</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Mwongozo wa Mtumiaji</a></b></td><td>Watoa huduma, mchanganyiko, muunganisho wa CLI, uwekaji</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Mwongozo wa Usanidi</a></b></td><td>Mbinu kamili za usakinishaji, usanidi wa zana za CLI, usanidi wa itifaki, urekebishaji wa muda wa kuisha</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Mwongozo wa Zana za CLI</a></b></td><td>Usanidi wa kila zana kwa Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Hali ya Mbali</a></b></td><td>Endesha OmniRoute (VPS) ya mbali kutoka CLI ya laptop yako kupitia tokeni za ufikiaji zilizopangwa</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Usanidi wa Claude Code</a></b></td><td>Elekeza Claude Code kwenye OmniRoute (ya ndani/mbali) kwa kutumia <code>launch</code> + wasifu wa kila mfano</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Kuanza Haraka</a></b></td><td>Usakinishaji wa hatua 3 → unganisha → sanidi</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Hali ya Mbali</a></b></td><td>Endesha OmniRoute ya mbali (VPS) kutoka kwa CLI ya kompyuta yako mpakato ukitumia tokeni za ufikiaji zenye mipaka</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Usanidi wa Claude Code</a></b></td><td>Elekeza Claude Code kwenye OmniRoute (ya ndani/ya mbali) ukitumia <code>launch</code> + wasifu kwa kila modeli</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">Kuanza Haraka</a></b></td><td>Usakinishaji wa hatua 3 → kuunganisha → kusanidi</td></tr>
 </table>
 
-### 🔧 Uendeshaji & Usambazaji
+### 🔧 Uendeshaji na Uwekaji
 
 <table>
   <tr><th align="left">Nyaraka</th><th align="left">Maelezo</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Mwongozo wa Docker</a></b></td><td>Uendeshaji wa Docker, wasifu wa Compose, Caddy HTTPS, mitaro, lebo za picha</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Mwongozo wa Podman</a></b></td><td>Muunganiko wa Quadlet systemd, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Usambazaji wa VM</a></b></td><td>Mwongozo kamili: usanidi wa VM + nginx + Cloudflare</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Usambazaji wa Fly.io</a></b></td><td>Sambaza kwenye Fly.io na hifadhi ya kudumu</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Mwongozo wa Docker</a></b></td><td>Uendeshaji wa Docker, wasifu wa Compose, HTTPS ya Caddy, vichuguu, tagi za picha</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Mwongozo wa Podman</a></b></td><td>Muunganisho wa Quadlet systemd, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Uwekaji wa VM</a></b></td><td>Mwongozo kamili: usanidi wa VM + nginx + Cloudflare</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Uwekaji wa Fly.io</a></b></td><td>Weka kwenye Fly.io ukitumia hifadhi endelevu</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Mwongozo wa Termux</a></b></td><td>Endesha OmniRoute kwenye Android kupitia Termux</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Mwongozo wa PWA</a></b></td><td>Usakinishaji wa Progressive Web App, uhifadhi, usanifu</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Mwongozo wa Kuondoa</a></b></td><td>Kuondoa kabisa kwa njia zote za usakinishaji</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Usanidi wa Mazingira</a></b></td><td>Orodha kamili ya vigezo vya <code>.env</code> na marejeo</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Mwongozo wa PWA</a></b></td><td>Usakinishaji wa Progressive Web App, uhifadhi wa akiba, usanifu</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Mwongozo wa Kuondoa</a></b></td><td>Uondoaji safi kwa mbinu zote za usakinishaji</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Usanidi wa Mazingira</a></b></td><td>Vigezo na marejeo kamili ya <code>.env</code></td></tr>
 </table>
 
-### 🧠 Vipengele & Usanifu
+### 🧠 Vipengele na Usanifu
 
 <table>
   <tr><th align="left">Nyaraka</th><th align="left">Maelezo</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Usanifu</a></b></td><td>Usanifu wa mfumo, mtiririko wa data, na mambo ya ndani</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Mwongozo wa Ubanaji</a></b></td><td>Mfumo wa chaguzi 7: imezimwa / nyepesi / kawaida / kali / ultra / RTK / mfululizo</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Ubanaji wa RTK</a></b></td><td>Ubanaji wa matokeo ya amri, vichujio, uaminifu, hakiki, urejeshaji wa matokeo ghafi</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Injini za Ubanaji</a></b></td><td>Caveman, RTK, mifumo ya mfululizo, dashibodi/API/MCP</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Muundo wa Kanuni za Ubanaji</a></b></td><td>Miundo ya rule-pack ya JSON kwa vichujio vya Caveman na RTK</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Paketiza Lugha za Ubanaji</a></b></td><td>Utambuzi wa lugha na uandishi wa rule-pack za Caveman</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Mwongozo wa Ustahimilivu</a></b></td><td>Vikatiza mzunguko, muda wa kupoa, foleni, kinga dhidi ya msongamano, TLS spoofing</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Injini ya Auto-Combo</a></b></td><td>Uwekaji alama wa vigezo 16, paketiza hali, kujirekebisha</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Mwongozo wa Proxy</a></b></td><td>Mfumo wa proxy wa ngazi 3, soko la 1proxy, usajili CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Viwango Bure</a></b></td><td>Sarufi iliyounganishwa: hifadhi 34 zinazorudiwa / viingilio 485 vya bure vilivyoorodheshwa</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Matukio ya Vipengele</a></b></td><td>Ziara ya dashibodi kwa picha za skrini</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Nyaraka za Msimbo</a></b></td><td>Utangulizi wa kirafiki wa msimbo kwa wanaoanza</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Usanifu</a></b></td><td>Usanifu wa mfumo, mtiririko wa data na vipengele vya ndani</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Mwongozo wa Ukandamizaji</a></b></td><td>Mchakato wa chaguo 7: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Ukandamizaji wa RTK</a></b></td><td>Ukandamizaji wa matokeo ya amri, vichujio, uaminifu, uthibitishaji, urejeshaji wa matokeo ghafi</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Injini za Ukandamizaji</a></b></td><td>Caveman, RTK, michakato iliyopangwa kwa tabaka, miingiliano ya dashboard/API/MCP</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Muundo wa Sheria za Ukandamizaji</a></b></td><td>Miundo ya vifurushi vya sheria za JSON kwa vichujio vya Caveman na RTK</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Vifurushi vya Lugha za Ukandamizaji</a></b></td><td>Ugunduzi wa lugha na uandishi wa vifurushi vya sheria za Caveman</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Mwongozo wa Ustahimilivu</a></b></td><td>Vivunja mzunguko, vipindi vya kupoa, foleni, kuzuia msongamano wa ghafla, udanganyifu wa TLS</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Injini ya Auto-Combo</a></b></td><td>Uwekaji alama wa vipengele 16, vifurushi vya hali, kujiponya</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Mwongozo wa Proksi</a></b></td><td>Mfumo wa proksi wa viwango 3, soko la 1proxy, CRUD ya sajili</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Viwango vya Bure</a></b></td><td>Saraka iliyounganishwa: hifadhi 34 za mara kwa mara zilizoandikwa / maingizo 485 ya viwango vya bure yaliyowekwa kwenye katalogi</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Mkusanyiko wa Vipengele</a></b></td><td>Ziara ya kuona ya dashboard yenye picha za skrini</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Nyaraka za Codebase</a></b></td><td>Mafunzo ya codebase yaliyo rahisi kwa wanaoanza</td></tr>
 </table>
 
-### 🤖 Itifaki & API
+### 🤖 Itifaki na API
 
 <table>
   <tr><th align="left">Nyaraka</th><th align="left">Maelezo</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Marejeo ya API</a></b></td><td>Njia zote na mifano</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI Spec</a></b></td><td>Maelezo ya OpenAPI 3.0</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP Server</a></b></td><td>Zana 110 za MCP, mipangilio ya IDE, wateja wa Python/TS/Go</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Mwongozo wa MCP Server</a></b></td><td>Usakinishaji wa MCP, usafirishaji, na marejeo ya zana</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A Server</a></b></td><td>Itifaki ya JSON-RPC 2.0, ujuzi, utiririshaji, usimamizi wa kazi</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Mwongozo wa A2A Server</a></b></td><td>Kadi ya wakala wa A2A, kazi, ujuzi, na utiririshaji</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Marejeo ya API</a></b></td><td>Endpoints zote zikiwa na mifano</td></tr>
+  <tr><td nowrap><b><a href="docs/openapi.yaml">Spec ya OpenAPI</a></b></td><td>Spec ya OpenAPI 3.0</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">Seva ya MCP</a></b></td><td>Zana 110 za MCP, usanidi wa IDE, wateja wa Python/TS/Go</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Mwongozo wa Seva ya MCP</a></b></td><td>Usakinishaji wa MCP, usafirishaji na marejeo ya zana</td></tr>
+  <tr><td nowrap><b><a href="src/lib/a2a/README.md">Seva ya A2A</a></b></td><td>Itifaki ya JSON-RPC 2.0, ujuzi, utiririshaji, usimamizi wa majukumu</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Mwongozo wa Seva ya A2A</a></b></td><td>Kadi ya wakala ya A2A, majukumu, ujuzi na utiririshaji</td></tr>
 </table>
 
-### 📋 Mradi & Ubora
+### 📋 Mradi na Ubora
 
 <table>
   <tr><th align="left">Hati</th><th align="left">Maelezo</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Kuchangia</a></b></td><td>Usanidi wa maendeleo na miongozo</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Mfumo wa Matawi & Toleo</a></b></td><td>PRs zinapolenga (<code>release/*</code>), maana ya <code>main</code> na vitambulisho</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">Changelog</a></b></td><td>Historia kamili ya matoleo kwa kila toleo</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Sera ya Usalama</a></b></td><td>Kuripoti udhaifu na mbinu za usalama</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Kuchangia</a></b></td><td>Usanidi na miongozo ya uundaji</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Muundo wa Matawi na Matoleo</a></b></td><td>PRs zinalenga wapi (<code>release/*</code>), maana ya <code>main</code> na lebo</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">Kumbukumbu ya Mabadiliko</a></b></td><td>Historia kamili ya matoleo kwa kila toleo</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Sera ya Usalama</a></b></td><td>Kuripoti udhaifu na taratibu za usalama</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">Mwongozo wa i18n</a></b></td><td>Msaada wa lugha 67, mtiririko wa tafsiri, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Orodha ya Ukaguzi wa Toleo</a></b></td><td>Hatua za uthibitishaji kabla ya kutoa toleo</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Mpango wa Ufunikaji</a></b></td><td>Mkakati wa ufunikaji wa majaribio kwa zaidi ya tamko 56,000 za majaribio tuli katika zaidi ya faili 7,800 za majaribio zinazofuatiliwa</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Orodha Hakiki ya Toleo</a></b></td><td>Hatua za uthibitishaji kabla ya toleo</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Mpango wa Ufunikaji</a></b></td><td>Mbinu ya ufunikaji wa majaribio kwa matamko ya majaribio tuli zaidi ya 60,000 katika faili za majaribio zinazofuatiliwa zaidi ya 8,400</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ Wachangiaji Bora
+# ⭐ Wachangiaji Wakuu
 
-> OmniRoute imeundwa na jamii yenye shauku ya chanzo huria. Watu hawa wametoa michango ya kipekee ambayo inaathiri moja kwa moja ubora, uthabiti, na upana wa mradi. **Asanteni sana.**
+> OmniRoute imeundwa na jumuiya yenye shauku ya programu huria. Watu hawa wametoa michango ya kipekee inayoathiri moja kwa moja ubora, uthabiti na ufikiaji wa mradi. **Asanteni.**
 
-### Wachangiaji wa nje kwa PR zilizojumuishwa
+### Wachangiaji wa nje kwa pull requests zilizounganishwa
 
 <table>
-  <tr><th align="center">Nafasi</th><th align="left">Mchangiaji</th><th align="center">PR Zilizojumuishwa</th><th align="right">~Mistari Iliyobadilishwa</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><th align="center">Nafasi</th><th align="left">Mchangiaji</th><th align="center">PR zilizounganishwa</th><th align="right">Mistari iliyobadilishwa ~</th></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Sensa ilichukuliwa 2026-10-18 15:09:09 UTC ikiwa na <code>release/v3.8.52</code> ya sasa <code>656f01cb43</code>. Sensa ya GitHub GraphQL yenye kurasa ina PR 9,191 zilizojumuishwa: 3,834 na mmiliki wa jalada, 229 na Dependabot, 6 na roboti/programu zingine, na <b>5,122 PR za nje kutoka kwa wachangiaji 835 tofauti</b>. “Mistari iliyobadilishwa” ni jumla ya ongezeko na upunguzaji wa GitHub na inajumuisha faili zilizotengenezwa, lockfiles, katalogi, tafsiri na nyaraka; ni mabadiliko, si LOC iliyoandikwa. PR 49 zinaripoti tofauti za GitHub zaidi ya mistari 500,000 (kwa mfano #13399, mtoa huduma mmoja tu, inaorodhesha faili 2,347 zilizobadilishwa), jambo ambalo linapandisha baadhi ya jumla hapo juu. Nafasi zilizofungana zimeorodheshwa pamoja.</sub>
+<sub>Sensa ilifanywa 2026-11-03 03:01:19 UTC kwa kutumia kilele cha moja kwa moja cha <code>release/v3.8.53</code> <code>05bc048d6c</code>. Sensa ya GitHub GraphQL yenye kurasa ina PR 9,947 zilizounganishwa: 4,130 zikiwa za mmiliki wa hazina, 240 zikiwa za Dependabot, 6 zikiwa za roboti/programu nyingine, na <b>PR 5,571 za nje kutoka kwa wachangiaji 883 tofauti</b>. “Mistari iliyobadilishwa” ni jumla ya nyongeza + ufutaji wa GitHub na inajumuisha faili zilizozalishwa, lockfiles, katalogi, tafsiri na nyaraka; ni mabadiliko ya mara kwa mara, si LOC iliyoandikwa. PR 53 zinaripoti tofauti za GitHub zilizo na zaidi ya mistari 500,000 (kwa mfano #13399, nyongeza moja ya mtoa huduma, inaorodhesha faili 2,347 zilizobadilishwa), jambo linaloongeza baadhi ya jumla zilizo hapo juu. Nafasi zinazolingana zimepewa nafasi moja.</sub>
 
-### Michango ya commit inayotambuliwa na GitHub
+### Michango iliyohusishwa na GitHub
 
 <table>
   <tr>
@@ -1364,86 +1364,93 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 michango ya GitHub iliyohusishwa</sub>
+      <sub>🥇 418 commits zilizohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 michango ya GitHub iliyohusishwa</sub>
+      <sub>🥈 294 commits zilizohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 229 michango ya GitHub iliyohusishwa</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/backryun">
-        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
-        <b>backryun</b>
-      </a><br/>
-      <sub>🏅 202 michango ya GitHub iliyohusishwa</sub>
+      <sub>🥉 229 commits zilizohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 174 michango ya GitHub iliyohusishwa</sub>
+      <sub>🏅 222 commits zilizohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/RaviTharuma">
-        <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
-        <b>Ravi Tharuma</b>
+      <a href="https://github.com/backryun">
+        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
+        <b>backryun</b>
       </a><br/>
-      <sub>🏅 126 michango ya GitHub iliyohusishwa</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="160">
-      <a href="https://github.com/hartmark">
-        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
-        <b>Markus Hartung</b>
-      </a><br/>
-      <sub>🏅 114 michango ya GitHub iliyohusishwa</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/rdself">
-        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
-        <b>Randi</b>
-      </a><br/>
-      <sub>🏅 108 michango ya GitHub iliyohusishwa</sub>
+      <sub>🏅 202 commits zilizohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 87 michango ya GitHub iliyohusishwa</sub>
+      <sub>🏅 134 commits zilizohusishwa na GitHub</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://github.com/RaviTharuma">
+        <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
+        <b>Ravi Tharuma</b>
+      </a><br/>
+      <sub>🏅 126 commits zilizohusishwa na GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/hartmark">
+        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
+        <b>Markus Hartung</b>
+      </a><br/>
+      <sub>🏅 115 commits zilizohusishwa na GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/rdself">
+        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
+        <b>Randi</b>
+      </a><br/>
+      <sub>🏅 108 commits zilizohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 michango ya GitHub iliyohusishwa</sub>
+      <sub>🏅 70 commits zilizohusishwa na GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 commits zilizohusishwa na GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 68 michango ya GitHub iliyohusishwa</sub>
+      <sub>🏅 68 commits zilizohusishwa na GitHub</sub>
     </td>
   </tr>
 </table>
 
-<sub>Imekaguliwa tena tarehe 2026-10-18 14:44:45 UTC: Michango ya GitHub iliyoripotiwa na Contributors API ya hazina kwa tawi chaguo-msingi la <code>release/v3.8.52</code>. API ilirudisha utambulisho 849 (watumiaji 429, roboti 2, wasiojitambulisha 418); jedwali hili halijumuishi msimamizi, roboti na utambulisho usiojulikana na linahifadhi sare za ushindani. Tofauti na orodha ya viwango vya PR zilizojumuishwa hapo juu na sensa ya metadata ya Git hapa chini.</sub>
+<sub>Ilikaguliwa tena tarehe 2026-11-03 02:09:16 UTC: commits zilizohusishwa na GitHub zilizoripotiwa na Contributors API ya hazina kwa tawi chaguo-msingi la <code>release/v3.8.53</code>. API ilirejesha utambulisho 903 (watumiaji 429, roboti 2, wasiojulikana 472); jedwali hili linawaondoa maintainer, roboti na utambulisho usiojulikana, na linahifadhi sare za ushindani. Linatofautiana na viwango vya PR zilizounganishwa vilivyo hapo juu na pia sensa ya metadata ya Git iliyo hapa chini.</sub>
 
-> 🙏 Vipengele, marekebisho ya hitilafu, na maboresho ya miundombinu ya wachangiaji hawa ni **sehemu kuu** ya kile kinachofanya OmniRoute kuwa thabiti na tajiri kwa vipengele. Kila ombi la kuvuta, kila kesi ya majaribio, na kila faili ya tafsiri ya i18n ni muhimu. Chanzo huria kinajengwa na watu kama wao.
+> 🙏 Vipengele, marekebisho ya hitilafu na maboresho ya miundombinu ya wachangiaji hawa ni **sehemu kuu** ya kinachofanya OmniRoute iwe thabiti na yenye vipengele vingi. Kila ombi la kuvuta, kila kisa cha majaribio na kila faili ya tafsiri ya i18n ni muhimu. Chanzo huria hujengwa na watu kama wao.
 
 </div>
 
@@ -1553,22 +1560,22 @@ Shukrani za dhati kwa watu wanaofadhili OmniRoute kutoka mifukoni mwao — kila 
 
 <div align="center">
 
-## 👥 Wachangiaji 900+
+## 👥 Wachangiaji 1,000+
 
 </div>
 
-[![Wachangiaji](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>Ilifanyiwa ukaguzi tarehe 2026-10-18 kwenye ncha ya moja kwa moja ya <code>release/v3.8.52</code>, <code>ad160ab2d1</code> (commit 6,826): <b>vitambulisho 993 vya kawaida vya wanadamu kwenye Git</b> — 707 vinaonekana kama watunzi wa commit (ikiwemo mtunzaji) na 286 vinaonekana tu kwenye viambatisho dhahiri vya <code>Co-authored-by</code>. Sensa hutumia <code>.mailmap</code>, hulinganisha anwani za barua pepe bila kujali herufi kubwa au ndogo, huunganisha anwani za GitHub noreply za nambari na za kawaida ikiwa tu zinasimba jina lilelile la mtumiaji, huondoa vitambulisho 26 vya bot/ajenti/huduma/vishikilia nafasi, na haiunganishi anwani za kawaida za barua pepe kwa sababu tu majina yake yanayoonyeshwa yanafanana. Ukaguzi wa 2026-08-24 ulichapisha idadi ya 639; mbinu hii ilipoendeshwa tena kwenye msingi wa ukaguzi huo wa <code>ac02c5b42f</code> ilitoa 619, kwa hivyo ongezeko hilo linatokana na wachangiaji wapya, si mbinu yenye masharti mepesi zaidi.</sub>
+<sub>Imekaguliwa tarehe 2026-11-02 kwenye ncha ya moja kwa moja ya <code>release/v3.8.53</code> <code>1c7135e0fb</code> (commiti 7,972): <b>utambulisho 1,074 wa binadamu uliosanifishwa wa Git</b> — 759 wanaonekana kama waandishi wa commit (akiwemo msimamizi) na 315 wanaonekana tu katika viongezi vya wazi vya <code>Co-authored-by</code>. Sensa inatumia <code>.mailmap</code>, inalinganisha anwani za barua pepe bila kujali herufi kubwa au ndogo, inaunganisha anwani za GitHub noreply za nambari na za kawaida tu zinapoweka msimbo wa jina lilelile, inaondoa utambulisho 29 wa roboti/agent/huduma/vishikilia-mahali, na haiunganishi anwani za kawaida za barua pepe kwa sababu tu majina yao ya kuonyeshwa yanafanana. Ukaguzi wa 2026-08-24 ulichapisha 639; kuendesha tena mbinu hii kwenye msingi wa ukaguzi huo <code>ac02c5b42f</code> kunatoa 619, kwa hiyo ongezeko limetokana na wachangiaji wapya, si mbinu iliyolegezwa.</sub>
 
 ### Jinsi ya Kuchangia
 
-1. Tengeneza fork ya hazina
-2. Unda tawi kutoka kwenye ncha **inayotumika** ya `release/vX.Y.Z` (si `main`) — tazama [Muundo wa Matawi na Matoleo](docs/ops/BRANCHING_MODEL.md)
-3. Unda tawi lako la kipengele (`git checkout -b feat/amazing-feature`)
-4. Wasilisha mabadiliko yako (`git commit -m 'feat: add amazing feature'`)
-5. Sukuma kwenye tawi (`git push origin feat/amazing-feature`)
-6. Fungua Pull Request yenye **base = tawi hilo la `release/vX.Y.Z`**
+1. Fanya fork ya hazina
+2. Unda branch kutoka kwenye ncha **amilifu** ya `release/vX.Y.Z` (si `main`) — tazama [Muundo wa Branch na Utoaji](docs/ops/BRANCHING_MODEL.md)
+3. Unda branch yako ya kipengele (`git checkout -b feat/amazing-feature`)
+4. Fanya commit ya mabadiliko yako (`git commit -m 'feat: add amazing feature'`)
+5. Push kwenye branch (`git push origin feat/amazing-feature`)
+6. Fungua Pull Request yenye **base = branch hiyo ya** `release/vX.Y.Z`
 
 Tazama [CONTRIBUTING.md](CONTRIBUTING.md) kwa miongozo ya kina.
 
@@ -1617,109 +1624,109 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 </div>
 
-OmniRoute imesimama juu ya mabega ya wabobezi. Ilianza kama fork ya **[9router](https://github.com/decolua/9router)** na uhamishaji kwenda TypeScript wa mradi wa Go **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — na kuanzia hapo, kila mfumo mdogo ulio hapa chini ulitiwa moyo na mradi wa programu huria uliotangulia. Kila mmoja uliunda sehemu mahususi ya OmniRoute. Hii ni shukrani yetu kwao wote. 🙏
+OmniRoute imejengwa kwa msingi wa kazi za watangulizi mahiri. Ilianza kama fork ya **[9router](https://github.com/decolua/9router)** na port ya TypeScript ya mradi wa Go **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — na tangu hapo, kila mfumo mdogo hapa chini ulipata msukumo kutoka kwa mradi wa open-source uliowahi kufanikisha hilo kwanza. Kila mmoja uliunda sehemu mahususi ya OmniRoute. Hii ndiyo shukrani yetu kwao wote. 🙏
 
-> ⭐ idadi za nyota zilithibitishwa kupitia REST API ya GitHub mnamo Oktoba 18, 2026 — nendeni mkaipatie miradi hii nyota. Idadi hizi ni taswira kamili ya tarehe hiyo na kwa kawaida zitabadilika.
+> ⭐ Idadi za nyota zimethibitishwa kupitia GitHub's REST API tarehe 3 Novemba 2026 — nenda ukazipatie miradi hii nyota. Idadi hizi ni picha sahihi ya tarehe hiyo na kwa kawaida zitabadilika.
 
-### 🧬 Chimbuko na lango
+### 🧬 Asili na lango
 
 <table>
-  <tr><th align="left">Mradi</th><th align="center">⭐</th><th align="left">Jinsi ulivyoitia moyo OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>Mradi asili ambao fork hii imejengwa juu yake — umepanuliwa hapa kwa API za modi nyingi na uandishi upya kamili katika TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>Utekelezaji wa Go uliotia moyo uhamishaji huu kwenda JavaScript / TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>Lango la AI ambalo mkusanyiko wake wa data ya bei za umma unawezesha usawazishaji wetu wa ufuatiliaji wa gharama na ambalo muundo wake wa kusawazisha watoa huduma ulisaidia kubuni uelekezaji wetu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>Chanzo cha MIT kilichorekebishwa katika daraja lililojumuishwa la ChatGPT Web → Codex Responses, likiwemo kipindi cha kivinjari, upangaji wa fremu za majibu, matumizi na adapta za utafutaji wa wavuti.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>Miundo iliyohamishwa katika urejeshaji wa mtiririko, lakabu za kutofikiri, utafutaji mbadala wa wavuti, vikomo vya dirisha linalosogea, ufichaji wa data nyeti kwenye kumbukumbu na mitiririko iliyoimarishwa ya kizindua.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Miundo ya Cursor Composer ya uteuzi wa zana, vizuizi vya matokeo na uthibitishaji wa zana iliyorekebishwa katika kitekelezaji asilia cha Cursor.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>Miundo ya kuingia upya na mzunguko wa tokeni za kuonyesha upya iliyohamishwa katika uthibitishaji upya wa Codex OAuth.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Chaguo-msingi za ubadilishaji zinazooana na Claude Code pamoja na tabia ya vichwa vya malipo zilizofanywa kuwa za jumla katika daraja la OmniRoute linaloendeshwa na usanidi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Ulinganishaji wake wa modeli za Grok, jenereta ya Statsig ya TypeError bandia, chaguo-msingi za ombi na kifaa, pamoja na kichakataji cha majibu cha NDJSON vilirekebishwa kwa kiasi kikubwa katika kitekelezaji cha Grok Web cha OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>Chanzo kikuu cha msimbo wa mpito kilicho nyuma ya grok2api-merged; utekelezaji wake wa modeli, kichwa, payload, Statsig na kichakataji umehifadhiwa katika chimbuko la Grok Web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>Chanzo msingi cha MIT cha payload ya Grok na chaguo-msingi za kifaa, jenereta ya Statsig na kichakataji cha <code>result.response</code> kilichopitishwa kupitia TQZHR na grok2api-merged.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Chanzo cha mpito kilichotambuliwa na grok2api-merged kwa safu yake ya mkusanyiko wa proksi; OmniRoute inahifadhi taarifa hiyo ya chimbuko lakini haidai kuwa imehamisha mkusanyiko wa proksi katika kitekelezaji chake cha Grok Web chenye mipaka.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>Proksi yake ya Grok inayothibitishwa kwa cookie na muundo wa utiririshaji wa <code>result.response.token</code> ilisaidia kubuni usafirishaji wa Grok Web wa OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Utekelezaji asili wa Grok Web ulirejelea muundo wake wa HTTP/kivinjari wa huduma ya juu; njia yake ya moja kwa moja ya HTTP inatokana na GrokProxy, kwa hivyo hakuna uhamishaji huru wa msimbo unaodaiwa.</td></tr>
+  <tr><th align="left">Mradi</th><th align="center">⭐</th><th align="left">Jinsi ulivyoleta msukumo kwa OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>Mradi wa awali ambao fork hii imejengwa juu yake — uliopanuliwa hapa kwa APIs za aina nyingi na uandishi upya kamili wa TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>Utekelezaji wa Go uliotoa msukumo kwa port hii ya JavaScript / TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>Lango la AI ambalo seti yake ya data ya bei za umma hutumika kulisha usawazishaji wetu wa ufuatiliaji wa gharama, na ambalo modeli yake ya usanifishaji wa watoa huduma ilitoa mwongozo kwa uelekezaji wetu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>Chanzo cha MIT kilichorekebishwa kuwa daraja la ChatGPT Web → Codex Responses lililowekwa ndani, likijumuisha adapta za kipindi cha kivinjari, upangaji wa fremu za majibu, matumizi na utafutaji wa wavuti.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Mifumo iliyohamishwa katika urejeshaji wa mtiririko, lakabu za no-thinking, utafutaji wa wavuti wa fallback, vikomo vya dirisha linaloteleza, ufichaji wa data kwenye kumbukumbu na mtiririko wa uanzishaji ulioimarishwa.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Mifumo ya Cursor Composer ya uchaguzi wa zana, vizuizi vya matokeo na kukamilisha zana ilibadilishwa kuwa executor asilia wa Cursor.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Mifumo ya kuingia upya na mzunguko wa refresh-token ilihamishwa katika uthibitishaji upya wa OAuth wa Codex.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Mipangilio chaguo-msingi ya mabadiliko inayooana na Claude Code na tabia ya vichwa vya malipo ilipanuliwa kuwa daraja la OmniRoute linaloendeshwa na usanidi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Uchoraji wake wa modeli za Grok, jenereta bandia ya TypeError ya Statsig, chaguo-msingi za maombi na kifaa, pamoja na kichakataji cha majibu cha NDJSON, vilibadilishwa kwa kiasi kikubwa kuwa executor ya Grok Web ya OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>Chanzo kikuu cha msimbo wa mpito nyuma ya grok2api-merged; utekelezaji wake wa modeli, vichwa, mzigo wa data, Statsig na kichakataji umehifadhiwa katika mfululizo wa Grok Web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Chanzo cha msingi cha MIT cha mipangilio chaguo-msingi ya mzigo wa data na kifaa cha Grok, jenereta ya Statsig, na kichakataji cha <code>result.response</code> kilichopitishwa kupitia TQZHR na grok2api-merged.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Chanzo cha mpito kilichotajwa na grok2api-merged kwa safu yake ya proxy-pool; OmniRoute inahifadhi taarifa hiyo ya asili lakini haidai kuwa imehamisha proxy-pool katika executor yake yenye mipaka ya Grok Web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>Proxy yake ya Grok inayothibitisha kwa cookie na mfumo wake wa utiririshaji wa <code>result.response.token</code> vilitoa mwongozo kwa usafirishaji wa Grok Web wa OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Utekelezaji wake wa awali wa Grok Web ulitusaidia kuelewa muundo wa HTTP/browser upstream; njia yake ya HTTP ya moja kwa moja inatokana na GrokProxy, kwa hiyo hakuna port huru ya msimbo inayodaiwa.</td></tr>
 </table>
 
-### 🗜️ Muktadha na ubanaji wa tokeni — injini
+### 🗜️ Mfinyazo wa muktadha na tokeni — injini sautiેણ
 
 <table>
-  <tr><th align="left">Mradi</th><th align="center">⭐</th><th align="left">Jinsi ulivyoihamasisha OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>Mradi uliosambaa sana wa "kwa nini utumie tokeni nyingi wakati chache zinatosha" — falsafa yake ya lugha ya watu wa mapangoni ndiyo msingi wa hali yetu ya kawaida ya ubanaji na kanuni zaidi ya 30 za kuondoa maneno ya ziada/kufupisha.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>Ubanaji wenye utendaji wa juu wa matokeo ya amri — ulihamasisha injini yetu ya RTK, DSL ya vichujio vya JSON, urejeshaji wa matokeo ghafi na mnyororo uliopangwa wa RTK → Caveman.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>Ubanaji wa muktadha unaoweza kutenduliwa (SmartCrusher) — ulihamasisha injini yetu ya <code>headroom</code> na muundo wa alama ya urejeshaji ya <code>ccr</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>Utafiti wa ubanaji wa vidokezo (LLMLingua / LLMLingua-2) — ulihamasisha injini yetu ya <code>llmlingua</code> isiyosawazishwa, salama kwa msimbo na inayoruhusu mwendelezo ikishindwa.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>Toleo la JS/ONNX (MobileBERT / XLM-RoBERTa) linalotumika kama mfumo wa nyuma wa uzi-tekelezi kwa injini yetu ya LLMLingua.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>Ubanaji wa tokeni za pt-BR — huendesha kifurushi chetu cha lugha cha pt-BR: upunguzaji wa urudiaji wa maana na uondoaji wa maneno ya ziada ulioboreshwa kwa sarufi ya Kireno cha Brazili.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>Ujuzi uliosambaa sana wa msanidi mkuu "mvivu" wa kuandika msimbo kwa kanuni ya YAGNI — ulihamasisha Mtindo wetu wa Matokeo wa <b>less-code</b>: mwongozo wa kufanya badiliko dogo zaidi linalofanya kazi, unaopunguza msimbo _unaozalishwa_ (ndugu wa mhimili wa matokeo wa nathari fupi ya Caveman).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>Mtindo wake wa majibu unaotanguliza vitendo na unaowafaa watu wenye ADHD ulirekebishwa kuwa mtindo mfupi wa matokeo wa OmniRoute katika lugha tano.</td></tr>
+  <tr><th align="left">Mradi</th><th align="center">⭐</th><th align="left">Jinsi ulivyoipa OmniRoute msukumo</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>Mradi maarufu wa "kwa nini utumie tokeni nyingi wakati tokeni chache zinatosha" — falsafa yake ya lugha ya caveman inaendesha hali yetu ya kawaida ya kubana na kanuni zaidi ya 30 za kuondoa maneno ya kujaza/kufupisha.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>Ubanaji wa utendaji wa juu wa matokeo ya amri — uliupa msukumo injini yetu ya RTK, DSL ya kuchuja JSON, urejeshaji wa matokeo ghafi na mchakato uliopangwa wa RTK → Caveman.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>Ubanaji wa muktadha unaoweza kubadilishwa kurudi katika hali ya awali (SmartCrusher) — uliupa msukumo injini yetu ya <code>headroom</code> na muundo wa alama ya urejeshaji wa <code>ccr</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Utafiti wa kubana vidokezo (LLMLingua / LLMLingua-2) — uliupa msukumo injini yetu ya <code>llmlingua</code> isiyosawazisha, salama kwa msimbo na inayofunguka inaposhindwa.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>Port ya JS/ONNX (MobileBERT / XLM-RoBERTa) inayotumika kama backend ya worker-thread kwa injini yetu ya LLMLingua.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>Ubanaji wa tokeni za PT-BR — unaendesha kifurushi chetu cha lugha ya pt-BR: kupunguza pleonasm na kuondoa maneno ya kujaza yaliyoboreshwa kwa sarufi ya Kireno cha Brazili.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>Ustadi maarufu wa mtindo wa msimbo wa YAGNI wa "msanidi mkuu mvivu" — uliupa msukumo <b>less-code</b> Output Style yetu: uelekezaji wa mabadiliko madogo zaidi yanayofanya kazi, unaopunguza msimbo _unaozalishwa_ (mwenzake wa mhimili wa matokeo kwa nathari fupi ya Caveman).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>Mtindo wake wa majibu unaotanguliza vitendo na unaofaa kwa watu wenye ADHD ulibadilishwa kuwa mtindo mfupi wa matokeo wa OmniRoute katika lugha tano.</td></tr>
 </table>
 
-### 🧩 Miundo iliyobanwa, utafiti wa tokeni na zana zinazotambua msimbo
+### 🧩 Miundo fupi, utafiti wa tokeni na zana zinazotambua msimbo
 
 <table>
-  <tr><th align="left">Mradi</th><th align="center">⭐</th><th align="left">Jinsi ulivyoihamasisha OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>Uakilishaji wa Vitu Unaoelekezwa kwa Tokeni — modeli yake ya kisafu yenye kichwa pamoja na safu iliunda hatua yetu ya ubanaji wa data ya kijedwali.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>Muundo wake uliobanwa wa grafu na usanifu wa wasifu wa jumla uliongoza ubanaji wa data ya kijedwali wa OmniRoute na muundo wa kodeki ya Headroom.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Utekelezaji wa MIT wa TypeScript uliojumuishwa moja kwa moja na kupanuliwa kama kodeki ya wasifu wa jumla ya Headroom.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Akiba ya Brotli/SQLite pamoja na tofauti ya muktadha kwa kila kipindi — ulihamasisha injini yetu ya <code>session-dedup</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Ubanaji wa matokeo ya Bash pamoja na wasifu wa MCP — ulihamasisha kanuni yetu ya kusitisha ubanaji inapobidi na upunguzaji wa orodha ya zana za MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>Ubanaji wa matokeo unaotambua maudhui kulingana na kila aina ya faili, ukiwa na usitishaji unaozingatia kushindwa — ulithibitisha uelekezaji wetu kulingana na aina na urukaji pale faida inapokuwa chini ya kiwango cha chini.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>"Tafuta tokeni hewa" — muundo wake wa kuhamishia mzigo kwingine pamoja na kishikio kinachoweza kurejeshwa uliongoza fikra zetu kuhusu kuhamishia CCR kwingine.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>Mchoro wa awali wa grafu ya kipindi pamoja na uondoaji wa mistari inayojirudia katika zamu tofauti, ulioongoza usanifu wetu wa session-dedup.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON ya kisafu ya Rust pamoja na urejeshaji unaotegemea anwani ya maudhui na uondoaji wa marudio katika ujumbe tofauti — ulithibitisha usanifu wa injini zetu za <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> na kanuni thabiti kwa akiba kwamba "umbo lililobanwa halitegemei nafasi".</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>Ubanaji wa skima/maelezo ya zana za MCP — uliongoza upunguzaji wetu wa idadi ya vipengee katika orodha ya zana za MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Upangaji wa viwango wa ramani ya hazina kwa mtindo wa Aider — uliongoza uchunguzi wetu wa ramani ya hazina/upangaji wa viwango vya urejeshaji.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Upunguzaji tangazifu wa matokeo ya shell kupitia MCP — ulithibitisha ubanaji wetu tangazifu wa matokeo ya bash.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>Zana za TypeScript Compiler API — zilihamasisha uondoaji wetu wa maoni unaotegemea kichanganuzi na unaohifadhi literali za tungo, violezo na regex.</td></tr>
+  <tr><th align="left">Mradi</th><th align="center">⭐</th><th align="left">Jinsi ulivyoipa OmniRoute msukumo</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Token-Oriented Object Notation — muundo wake wa safu wima, wenye kichwa pamoja na mistari, uliunda hatua yetu ya kubana data ya jedwali.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>Muundo wake mfupi wa grafu na usanifu wa wasifu wa jumla uliiongoza OmniRoute katika ubanaji wa data ya jedwali na muundo wa kodeki wa Headroom.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Utekelezaji wa TypeScript wenye leseni ya MIT uliowekwa moja kwa moja ndani na kupanuliwa kama kodeki ya wasifu wa jumla ya Headroom.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Akiba ya Brotli/SQLite pamoja na context-delta ya kila kipindi — uliupa msukumo injini yetu ya <code>session-dedup</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Ubanaji wa matokeo ya Bash pamoja na wasifu wa MCP — uliupa msukumo nidhamu yetu ya kusitisha ubanaji inapokuwa haina faida na kupunguza manifesti ya zana za MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Ubanaji wa matokeo unaotambua maudhui na unaotofautiana kwa kila aina ya faili, pamoja na kusitisha unapokumbana na hitilafu — ulithibitisha utumaji wetu kwa kila aina na kuruka pale faida inapokuwa ndogo kuliko kiwango cha chini.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>"Tafuta tokeni zilizofichika" — muundo wake wa kuhamisha pamoja na kishikio kinachoweza kurejeshwa uliuongoza mtazamo wetu wa kuhamisha kupitia CCR.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>Mwongozo wa muundo wa grafu ya kipindi pamoja na kuondoa nakala za mistari katika zamu mbalimbali, ambao uliuongoza usanifu wetu wa session-dedup.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON ya Rust ya safu wima pamoja na urejeshaji unaotegemea anwani ya maudhui na kuondoa nakala katika jumbe mbalimbali — ulithibitisha usanifu wa injini zetu za <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> na kanuni thabiti ya akiba kwamba "muundo uliobanwa hautegemei nafasi".</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>Ubanaji wa schema/maelezo ya zana za MCP — uliuongoza upunguzaji wetu wa idadi ya manifesti ya zana za MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Upangaji wa viwango vya ramani ya repo kwa mtindo wa Aider — uliuongoza uchunguzi wetu wa ramani ya repo / upangaji wa viwango vya urejeshaji.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Upunguzaji unaotegemea matamko wa matokeo ya shell kupitia MCP — ulithibitisha ubanaji wetu wa matokeo ya bash unaotegemea matamko.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>Zana ya API ya Compiler ya TypeScript — iliupa msukumo uondoaji wetu wa maoni unaotegemea parser, unaohifadhi literal za string, template na regex.</td></tr>
 </table>
 
 ### 🧠 Kumbukumbu na RAG
 
 <table>
   <tr><th align="left">Mradi</th><th align="center">⭐</th><th align="left">Jinsi ulivyoihamasisha OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>Safu ya kumbukumbu ya jumla — muundo wake wa proksi kama mpaka wa kuandika/kusoma uliunda usanifu wetu wa kumbukumbu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>Mawakala wenye hali na kumbukumbu yenye viwango — ilihamasisha muundo wetu wenye viwango wa Udhibiti na Urejeshaji wa Muktadha (CCR).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>Taksonomia ya ProblemMap ya hali 16 zinazojirudia za kushindwa kwa RAG/LLM — msamiati wa pamoja katika mwongozo wetu wa utatuzi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>Safu ya kumbukumbu ya ulimwengu wote — modeli yake ya proksi kama mpaka wa kuandika/kusoma iliunda usanifu wetu wa kumbukumbu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>Ajenti zenye hali na kumbukumbu zenye ngazi — ziliwezesha modeli yetu yenye ngazi ya Context Control & Recovery (CCR).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>Taksonomia ya ProblemMap ya aina 16 za hitilafu zinazojirudia za RAG/LLM — msamiati wa pamoja katika mwongozo wetu wa utatuzi wa matatizo.</td></tr>
 </table>
 
 ### 🛰️ Ukaguzi wa trafiki, MITM na proksi ya uwazi
 
 <table>
   <tr><th align="left">Mradi</th><th align="center">⭐</th><th align="left">Jinsi ulivyoihamasisha OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>Ukamataji/uchanganuzi wa MITM wa trafiki kati ya msaidizi wa uandishi wa msimbo ↔ LLM uliathiri mahitaji ya awali ya Kikaguzi cha Trafiki. Moduli nne zilizokuwa zimetoholewa hapo awali — kuunganisha SSE, kusawazisha mazungumzo, kuficha siri na kusafisha vichwa — zimebadilishwa na utekelezaji huru wa clean-room unaotegemea viwango vya itifaki vya umma. Sehemu mbili za upitishaji wa moja kwa moja kwa seva pangishi (<code>passthrough.ts</code> na <code>_internal/bypass.cjs</code>) zinasalia kuwa utekelezaji wa ndani wa OmniRoute uliowekwa katika uainishaji tofauti; hazikuandikwa upya kama sehemu ya ubadilishaji huo.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>Uelekezaji wa proksi ya uwazi kwa kila mchakato — ulihamasisha uzimaji wetu wa MITM unaostahimili hitilafu, muda wa kuisha wa soketi zisizotumika, uhusishaji wa michakato kupitia <code>/proc</code> na ukamataji wa TPROXY.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>Uingiliaji/uchanganuzi wa MITM wa trafiki kati ya msaidizi wa uandishi wa programu ↔ LLM uliwezesha mahitaji ya awali ya Traffic Inspector. Moduli nne zilizotokana hapo awali — uunganishaji wa SSE, usanifishaji wa mazungumzo, ufichaji wa siri na usafishaji wa vichwa — zimebadilishwa na utekelezaji huru wa clean-room unaotegemea viwango vya itifaki vya umma. Nyuso mbili za host-passthrough (<code>passthrough.ts</code> na <code>_internal/bypass.cjs</code>) zinasalia kuwa utekelezaji wa ndani wa OmniRoute uliowekwa katika kundi kwa kujitegemea; hazikuandikwa upya kama sehemu ya uingizwaji huo.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>Uelekezaji wa proksi wa uwazi kwa kila mchakato — ulihamasisha uondoaji salama wa MITM wakati wa hitilafu, muda wa kusubiri wa soketi zisizotumika, uhusishaji wa mchakato kupitia <code>/proc</code> na kunasa kwa TPROXY.</td></tr>
 </table>
 
-### 📚 Data ya modeli, uangalizi na UI
+### 📚 Data za modeli, ufuatiliaji na UI
 
 <table>
   <tr><th align="left">Mradi</th><th align="center">⭐</th><th align="left">Jinsi ulivyoihamasisha OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>Hifadhidata wazi ya vipimo, bei na uwezo wa modeli za AI — imesawazishwa kiasili katika katalogi yetu ya modeli.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>Maktaba ya grafu inayotegemea nodi ambayo inaendesha Studio yetu ya Mfinyazo na Studio ya Combo/Uelekezaji kwa wakati halisi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>Uonyeshaji wa moja kwa moja wa grafu ya mtiririko wa kazi wa LangGraph Studio ulihamasisha mwonekano wa wakati halisi wa mfululizo katika Studio zetu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>Muundo wake wa uangalizi wa ufuatiliaji → kipindi → uzalishaji uliunda mwonekano wetu wa mtiririko katika Studio ya Mfinyazo.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Uangalizi wa matundu ya huduma ya Istio — ulihamasisha beji zetu za vivunja saketi na taswira za kingo za hitilafu katika Studio ya Uelekezaji/Combo.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>Nembo za chapa za AI/LLM zinazoonyesha ikoni za watoa huduma kwenye dashibodi yetu.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>Hutoa bendera za SVG zilizo chini ya leseni ya MIT zinazotumiwa na kiteuzi cha lugha cha README.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>Hifadhidata huria ya vipimo, bei na uwezo wa modeli za AI — inasawazishwa moja kwa moja kwenye katalogi yetu ya modeli.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>Maktaba ya grafu yenye nodi inayowezesha Compression Studio na Combo/Routing Studio zetu za wakati halisi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>Uonyeshaji wa moja kwa moja wa grafu ya mtiririko wa kazi wa LangGraph Studio ulihamasisha mwonekano wa kuteleza wa wakati halisi katika Studios zetu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>Modeli yake ya ufuatiliaji ya trace → span → generation iliunda waterfall ya Compression Studio yetu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Ufuatiliaji wa service-mesh ya Istio — ulihamasisha beji za circuit-breaker na vielelezo vya kingo za hitilafu katika Routing/Combo Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>Nembo za chapa za AI/LLM zinazoonyesha aikoni za watoa huduma katika dashibodi yetu.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>Hutoa bendera za SVG zilizo na leseni ya MIT zinazotumiwa na kichaguzi cha lugha cha README.</td></tr>
 </table>
 
 ### 🛡️ Usalama
 
 <table>
   <tr><th align="left">Mradi</th><th align="center">⭐</th><th align="left">Jinsi ulivyoihamasisha OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>Orodha iliyoratibiwa ya maktaba zilizo salama kwa chaguo-msingi ambayo inaongoza maamuzi yetu ya usalama (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>Orodha iliyoratibiwa ya maktaba zilizo salama kwa chaguo-msingi inayotuongoza katika chaguo zetu za usalama (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
-### 🧭 Zana zinazokamilishana
+### 🧭 Zana saidizi
 
 <table>
   <tr><th align="left">Mradi</th><th align="center">⭐</th><th align="left">Jinsi ulivyoihamasisha OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>Ilihamasisha uondoaji wa maombi yanayojirudia, njia mbadala ya dharura isiyo na gharama, mikakati inayoweza kuunganishwa ya Auto-Combo na uainishaji wa nia kwa lugha nyingi.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>Urekebishaji wake wa uhusishaji wa modeli unaozingatia akaunti, uthibitishaji wa njia ya faili tekelezi na tabia ya lebo za mipango viliathiri mazingira ya utekelezaji ya Antigravity ya OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>Muundo wake mfupi wa kuhesabu muda uliosalia hadi uwekaji upya wa mgao ulihamasisha onyesho husika la kikomo cha mtoa huduma katika OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>Miunganisho yake ya ACP ilihamasisha ugunduzi wa kiotomatiki wa OmniRoute wa mawakala wa CLI waliosakinishwa.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>Ilitambua sehemu ya mgao ya Grok Build; kisha OmniRoute ilithibitisha na kusahihisha kwa kujitegemea muundo wa moja kwa moja wa data inayopitishwa.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>Ulihamasisha uondoaji wa nakala za maombi, njia mbadala ya dharura isiyogharimu chochote, mikakati inayoweza kuchomekwa ya Auto-Combo na uainishaji wa dhamira katika lugha nyingi.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>Uchoraji upya wa modeli unaozingatia akaunti, uthibitishaji wa njia za utekelezaji na tabia ya lebo za mipango uliwezesha runtime ya Antigravity ya OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Muundo wake mfupi wa kuhesabu chini hadi kuwekwa upya kwa mgao ulihamasisha onyesho linalolingana la kikomo cha mtoa huduma katika OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>Miunganisho yake ya ACP ilihamasisha utambuzi wa kiotomatiki wa ajenti za CLI zilizosakinishwa wa OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Ulibainisha eneo la mgao la Grok Build; OmniRoute kisha ikathibitisha na kurekebisha muundo halisi wa waya kwa kujitegemea.</td></tr>
 </table>
 
 ## 📄 Leseni

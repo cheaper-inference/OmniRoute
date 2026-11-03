@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 गेटवे सतत वाढत आहे
+## 📈 गेटवे सतत विस्तारत आहे
 
 <div align="center">
 
-|                          |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
-| ------------------------ | :------------------------: | :---------: | :-------------------: |
-| 🌐 प्रदाते               |            ३५२             |   **३५८**   |          ३८०          |
-| 🧠 अद्वितीय चॅट मॉडेल ID |            १३२०            |  **१३७४**   |         १४७५          |
-| 🖼️ मोडॅलिटी ब्रिज        | 🆕 व्हिजन + ऑडिओ + व्हिडिओ |      ✓      |           ✓           |
-| 📡 रडार मोफत कॅटलॉग      |         🆕 ऑप्ट-इन         |      ✓      |           ✓           |
-| ⚖️ कोटा-अवेयर शेड्युलिंग |        🆕 कोटा-शेअर        |      ✓      |           ✓           |
-| 📊 कोटा टेलीमेट्री       |         🆕 लाईव्ह          |      ✓      |           ✓           |
-| 🧰 हेडलेस मोड            |             —              |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS रेल इन्फ्रा       |             —              |      —      |   🆕 रिलीज चॅनेल्स    |
-| 🔎 मॉडेल डिस्कवरी API    |             —              |      —      | 🆕 `/v1/models/query` |
+|                           |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------- | :------------------------: | :---------: | :-------------------: |
+| 🌐 प्रदाते                |            352             |   **358**   |          380          |
+| 🧠 अद्वितीय चॅट मॉडेल IDs |            1320            |  **1374**   |         1491          |
+| 🖼️ मोडॅलिटी ब्रिज         | 🆕 दृष्टी + ऑडिओ + व्हिडिओ |      ✓      |           ✓           |
+| 📡 Radar विनामूल्य कॅटलॉग |         🆕 opt-in          |      ✓      |           ✓           |
+| ⚖️ कोटाविषयक वेळापत्रक    |       🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 कोटा टेलिमेट्री        |           🆕 थेट           |      ✓      |           ✓           |
+| 🧰 हेडलेस मोड             |             —              |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS रेल इन्फ्रा        |             —              |      —      |   🆕 रिलीज चॅनेल्स    |
+| 🔎 मॉडेल शोध API          |             —              |      —      | 🆕 `/v1/models/query` |
 
-**→ [रोडमॅप](ROADMAP.md) — `v3.9.0 LTS` कडे रेलवर प्रवास**
+**→ [रोडमॅप](ROADMAP.md) — `v3.9.0 LTS` कडे रेल्वेने प्रवास**
 
 </div>
 
@@ -89,55 +89,55 @@
 
 ## 🧩 उपलब्ध
 
-[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
+[![npm आवृत्ती](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
+![NPM मासिक](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![परवाना: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+![Docker डाउनलोड्स](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
+![Electron डाउनलोड्स](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
-    <td align="right"><b>🚀 सुरू करा</b></td>
-    <td align="center"><a href="#-quick-start">🚀 जलद प्रारंभ</a></td>
+    <td align="right"><b>🚀 प्रारंभ</b></td>
+    <td align="center"><a href="#-quick-start">🚀 झटपट प्रारंभ</a></td>
     <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 इंस्टॉल करा</a></td>
-    <td align="center"><a href="#first-run">🆓 प्रदाता कनेक्ट करा</a></td>
+    <td align="center"><a href="#first-run">🆓 प्रदात्याशी कनेक्ट करा</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 शिका</b></td>
+    <td align="right"><b>💡 जाणून घ्या</b></td>
     <td align="center"><a href="#-the-promise">💥 वचन</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 का OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 काय वेगळं करतं</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 OmniRoute का</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 वेगळेपण</a></td>
   </tr>
   <tr>
     <td align="right"><b>⚙️ वैशिष्ट्ये</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 कॉम्बोज</a></td>
     <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 प्रदाते</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
+    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI आणि MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
-    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ संक्षेपण</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ कुठे चालते</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 खाजगी</a></td>
+    <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ संकुचन</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ हे कुठे चालते</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 खासगी</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 पहा</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 कृतीत</a></td>
+    <td align="right"><b>👀 पाहा</b></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 प्रत्यक्ष वापर</a></td>
     <td align="center"><a href="#-whats-new">✨ नवीन काय</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 सुसंगत CLI</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 सुसंगत CLIs</a></td>
   </tr>
   <tr>
     <td align="right"><b>💚 समर्थन</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 समर्थन / दान</a></td>
+    <td align="center"><a href="#-support-omniroute">💚 समर्थन / देणगी</a></td>
     <td align="center"><a href="#-community--help">💬 समुदाय</a></td>
     <td align="center"><a href="#-sponsors">💖 प्रायोजक</a></td>
   </tr>
   <tr>
     <td align="right"><b>📦 प्रकल्प</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ टेक स्टॅक</a></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ तंत्रज्ञान संच</a></td>
     <td align="center"><a href="#-documentation">📖 दस्तऐवज</a></td>
-    <td align="center"><a href="#-900-contributors">👥 योगदानकर्ते</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 योगदानकर्ते</a></td>
   </tr>
 </table>
 
@@ -146,73 +146,73 @@
 <div align="center">
   <b>🌐 ६७ भाषांमध्ये</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="इंग्रजी (en)" title="इंग्रजी (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="पोर्तुगीज — ब्राझील (pt-BR)" title="पोर्तुगीज — ब्राझील (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="पोर्तुगीज (pt)" title="पोर्तुगीज (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="स्पॅनिश (es)" title="स्पॅनिश (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="फ्रेंच (fr)" title="फ्रेंच (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="इटालियन (it)" title="इटालियन (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="जर्मन (de)" title="जर्मन (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="डच (nl)" title="डच (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="रशियन (ru)" title="रशियन (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="युक्रेनियन (uk-UA)" title="युक्रेनियन (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="पोलिश (pl)" title="पोलिश (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="चेक (cs)" title="चेक (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="स्लोव्हाक (sk)" title="स्लोव्हाक (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="रोमानियन (ro)" title="रोमानियन (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="हंगेरियन (hu)" title="हंगेरियन (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="बल्गेरियन (bg)" title="बल्गेरियन (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="डॅनिश (da)" title="डॅनिश (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="फिनिश (fi)" title="फिनिश (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="नॉर्वेजियन (no)" title="नॉर्वेजियन (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="स्वीडिश (sv)" title="स्वीडिश (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="चिनी — सरलीकृत (zh-CN)" title="चिनी — सरलीकृत (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="चिनी — पारंपरिक (zh-TW)" title="चिनी — पारंपरिक (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="जपानी (ja)" title="जपानी (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="कोरियन (ko)" title="कोरियन (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="थाई (th)" title="थाई (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="व्हिएतनामी (vi)" title="व्हिएतनामी (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="इंडोनेशियन (id)" title="इंडोनेशियन (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="मलय (ms)" title="मलय (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="फिलिपिनो (phi)" title="फिलिपिनो (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिंदी (hi)" title="हिंदी (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="गुजराती (gu)" title="गुजराती (gu)"></a>
   <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="तमिळ (ta)" title="तमिळ (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="तेलुगू (te)" title="तेलुगू (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="बंगाली (bn)" title="बंगाली (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="उर्दू (ur)" title="उर्दू (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="पर्शियन (fa)" title="पर्शियन (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="अरबी (ar)" title="अरबी (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="हिब्रू (he)" title="हिब्रू (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="तुर्की (tr)" title="तुर्की (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="अझरबैजानी (az)" title="अझरबैजानी (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="स्वाहिली (sw)" title="स्वाहिली (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="ग्रीक (el)" title="ग्रीक (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="क्रोएशियन (hr)" title="क्रोएशियन (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="सर्बियन (sr)" title="सर्बियन (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="लिथुआनियन (lt)" title="लिथुआनियन (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="एस्टोनियन (et)" title="एस्टोनियन (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="लाटवियन (lv)" title="लाटवियन (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="स्लोव्हेनियन (sl)" title="स्लोव्हेनियन (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="माल्टीज (mt)" title="माल्टीज (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="आयरिश (ga)" title="आयरिश (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="कन्नड (kn)" title="कन्नड (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मल्याळम (ml)" title="मल्याळम (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ओडिया (or)" title="ओडिया (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="पंजाबी (pa)" title="पंजाबी (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाळी (ne)" title="नेपाळी (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="सिंहला (si)" title="सिंहला (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="बर्मी (my)" title="बर्मी (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ख्मेर (km)" title="ख्मेर (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="हौसा (ha)" title="हौसा (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="योरुबा (yo)" title="योरुबा (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="इग्बो (ig)" title="इग्बो (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="अम्हारिक (am)" title="अम्हारिक (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="उझ्बेक (uz)" title="उझ्बेक (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="जॉर्जियन (ka)" title="जॉर्जियन (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="आर्मेनियन (hy)" title="आर्मेनियन (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="बोस्नियन (bs)" title="बोस्नियन (bs)"></a>
 </div>
 
 <br/>
@@ -1283,29 +1283,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 देखील �
 <br/>
 <div align="center">
 
-## 🛠️ टेक स्टॅक
+## 🛠️ तंत्रज्ञान संच
 
 </div>
 
 <table>
   <tr><th align="left">स्तर</th><th align="left">तंत्रज्ञान</th></tr>
   <tr><td nowrap><b>रनटाइम</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>भाषा</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> संपूर्ण <code>src/</code> आणि <code>open-sse/</code> मध्ये (v2.0 पासून मुख्य भागात शून्य <code>any</code>)</td></tr>
+  <tr><td nowrap><b>भाषा</b></td><td>TypeScript 6.0 — <code>src/</code> आणि <code>open-sse/</code> मध्ये <b>100% TypeScript</b> (v2.0 पासून कोअरमध्ये शून्य <code>any</code>)</td></tr>
   <tr><td nowrap><b>फ्रेमवर्क</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON legacy) — १४७ डोमेन मॉड्यूल्स, २१९ माइग्रेशन्स</td></tr>
-  <tr><td nowrap><b>मेमरी</b></td><td>SQLite FTS5 फुल-टेक्स्ट + int8-quantized व्हेक्टर एम्बेडिंग्स, टाईप्ड डिके</td></tr>
-  <tr><td nowrap><b>स्कीमाज</b></td><td>Zod 4 — MCP टूल I/O व्हॅलिडेशन + API करार</td></tr>
-  <tr><td nowrap><b>प्रोटोकॉल्स</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
+  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगसी) — 147 डोमेन मॉड्यूल्स, 220 माइग्रेशन्स</td></tr>
+  <tr><td nowrap><b>मेमरी</b></td><td>SQLite FTS5 पूर्ण-मजकूर + int8-क्वांटाइझ्ड व्हेक्टर एम्बेडिंग्ज, टाइप्ड डीके</td></tr>
+  <tr><td nowrap><b>स्कीमा</b></td><td>Zod 4 — MCP टूल I/O व्हॅलिडेशन + API करार</td></tr>
+  <tr><td nowrap><b>प्रोटोकॉल</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>स्ट्रीमिंग</b></td><td>Server-Sent Events (SSE) + WebSocket ब्रिज (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>कंप्रेशन</b></td><td>१२-इंजिन पाइपलाइन — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>प्रमाणीकरण व सुरक्षा</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP स्कोप्ड ऑथ · AES-256-GCM विश्रांतीत · DOMPurify</td></tr>
-  <tr><td nowrap><b>स्टेल्थ</b></td><td>wreq-js — JA3 / JA4 TLS फिंगरप्रिंट इम्पर्सोनेशन, ३-स्तरीय प्रॉक्सी</td></tr>
-  <tr><td nowrap><b>लवचिकता</b></td><td>सर्किट ब्रेकर, एक्स्पोनेंशियल बॅकऑफ, अँटी-थंडरिंग-हर्ड, ऑटो-कॉम्बो सेल्फ-हीलिंग</td></tr>
-  <tr><td nowrap><b>लॉगिंग</b></td><td>pino — रिक्वेस्ट संदर्भासह स्ट्रक्चर्ड JSON लॉग्स</td></tr>
-  <tr><td nowrap><b>चाचणी</b></td><td>Node.js टेस्ट रनर + Vitest — <b>५६,०००+ स्थिर चाचणी डिक्लेरेशन</b> ७,८००+ ट्रॅक केलेल्या चाचणी फाइल्समध्ये (युनिट, इंटिग्रेशन, E2E, सुरक्षा, इकोसिस्टम)</td></tr>
-  <tr><td nowrap><b>प्लॅटफॉर्म्स</b></td><td>डेस्कटॉप (Electron) · Android (Termux) · PWA (कोणतेही ब्राउझर)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — रिलीजवर ऑटो npm publish + Docker Hub</td></tr>
-  <tr><td nowrap><b>लिंक्स</b></td><td><a href="https://omniroute.online">वेबसाइट</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>कॉम्प्रेशन</b></td><td>12-इंजिन पाइपलाइन — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>प्रमाणीकरण आणि सुरक्षा</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP स्कोप्ड ऑथ · AES-256-GCM at rest · DOMPurify</td></tr>
+  <tr><td nowrap><b>स्टील्थ</b></td><td>wreq-js — JA3 / JA4 TLS फिंगरप्रिंट इम्पर्सोनेशन, 3-स्तरीय प्रॉक्सी</td></tr>
+  <tr><td nowrap><b>लवचिकता</b></td><td>सर्किट ब्रेकर, एक्सपोनेन्शियल बॅकऑफ, अँटी-थंडरिंग-हर्ड, ऑटो-कॉम्बो सेल्फ-हीलिंग</td></tr>
+  <tr><td nowrap><b>लॉगिंग</b></td><td>pino — रिक्वेस्ट संदर्भासह संरचित JSON लॉग्स</td></tr>
+  <tr><td nowrap><b>चाचणी</b></td><td>Node.js टेस्ट रनर + Vitest — 8,400+ ट्रॅक केलेल्या टेस्ट फाइल्समध्ये (युनिट, इंटिग्रेशन, E2E, सुरक्षा, इकोसिस्टम) <b>60,000+ स्थिर टेस्ट घोषणा</b></td></tr>
+  <tr><td nowrap><b>प्लॅटफॉर्म्स</b></td><td>डेस्कटॉप (Electron) · Android (Termux) · PWA (कोणताही ब्राउझर)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — रिलीजवर स्वयंचलित npm प्रकाशन + Docker Hub</td></tr>
+  <tr><td nowrap><b>दुवे</b></td><td><a href="https://omniroute.online">वेबसाइट</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
@@ -1316,60 +1316,60 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 देखील �
 
 </div>
 
-### 📘 सुरुवात कशी करावी
+### 📘 सुरुवात
 
 <table>
   <tr><th align="left">दस्तऐवज</th><th align="left">वर्णन</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">वापरकर्ता मार्गदर्शक</a></b></td><td>प्रोव्हायडर्स, कॉम्बोज, CLI एकत्रीकरण, डिप्लॉयमेंट</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">सेटअप मार्गदर्शक</a></b></td><td>पूर्ण इन्स्टॉल पद्धती, CLI टूल कॉन्फिग्स, प्रोटोकॉल सेटअप, टाइमआउट ट्यूनिंग</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI टूल्स मार्गदर्शक</a></b></td><td>प्रत्येक टूलसाठी सेटअप: Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">रिमोट मोड</a></b></td><td>तुमच्या लॅपटॉप CLI वरून स्कोप केलेल्या ऍक्सेस टोकन्सद्वारे रिमोट OmniRoute (VPS) चालवा</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code कॉन्फिग</a></b></td><td><code>launch</code> + प्रत्येक मॉडेल प्रोफाइलसह Claude Code ला OmniRoute (लोकल/रिमोट) कडे पॉइंट करा</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">क्विक स्टार्ट</a></b></td><td>३-स्टेप इन्स्टॉल → कनेक्ट → कॉन्फिगर करा</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">वापरकर्ता मार्गदर्शक</a></b></td><td>प्रदाता, कॉम्बो, CLI एकत्रीकरण, उपयोजन</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">सेटअप मार्गदर्शक</a></b></td><td>संपूर्ण इंस्टॉल पद्धती, CLI साधन संरचना, प्रोटोकॉल सेटअप, टाइमआउट ट्युनिंग</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI साधन मार्गदर्शक</a></b></td><td>Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot साठी प्रत्येक साधनाचे सेटअप</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">रिमोट मोड</a></b></td><td>स्कोप केलेल्या अॅक्सेस टोकनद्वारे तुमच्या लॅपटॉपवरील CLI मधून रिमोट OmniRoute (VPS) नियंत्रित करा</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code संरचना</a></b></td><td><code>launch</code> + प्रत्येक मॉडेलसाठी प्रोफाइल वापरून Claude Code ला OmniRoute (स्थानिक/रिमोट) शी जोडा</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">त्वरित सुरुवात</a></b></td><td>3 टप्प्यांत इंस्टॉल → कनेक्ट → संरचीत करा</td></tr>
 </table>
 
-### 🔧 ऑपरेशन्स आणि डिप्लॉयमेंट
+### 🔧 ऑपरेशन्स आणि उपयोजन
 
 <table>
   <tr><th align="left">दस्तऐवज</th><th align="left">वर्णन</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker मार्गदर्शक</a></b></td><td>Docker रन, Compose प्रोफाइल्स, Caddy HTTPS, टनेल्स, इमेज टॅग्स</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker मार्गदर्शक</a></b></td><td>Docker रन, Compose प्रोफाइल, Caddy HTTPS, टनेल्स, इमेज टॅग</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman मार्गदर्शक</a></b></td><td>Quadlet systemd एकत्रीकरण, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM डिप्लॉयमेंट</a></b></td><td>पूर्ण मार्गदर्शक: VM + nginx + Cloudflare सेटअप</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io डिप्लॉयमेंट</a></b></td><td>Fly.io वर पर्सिस्टंट स्टोरेजसह डिप्लॉय करा</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM उपयोजन</a></b></td><td>संपूर्ण मार्गदर्शक: VM + nginx + Cloudflare सेटअप</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io उपयोजन</a></b></td><td>सतत उपलब्ध स्टोरेजसह Fly.io वर उपयोजन करा</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux मार्गदर्शक</a></b></td><td>Termux द्वारे Android वर OmniRoute चालवा</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA मार्गदर्शक</a></b></td><td>प्रोग्रेसिव वेब अॅप इन्स्टॉल, कॅशिंग, आर्किटेक्चर</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">अनइन्स्टॉल मार्गदर्शक</a></b></td><td>सर्व इन्स्टॉल पद्धतींसाठी स्वच्छ काढून टाका</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">एन्व्हायर्नमेंट कॉन्फिग</a></b></td><td>पूर्ण <code>.env</code> व्हेरिएबल्स आणि संदर्भ</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA मार्गदर्शक</a></b></td><td>Progressive Web App इंस्टॉल, कॅशिंग, आर्किटेक्चर</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">अनइंस्टॉल मार्गदर्शक</a></b></td><td>सर्व इंस्टॉल पद्धतींसाठी स्वच्छपणे काढून टाकणे</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">पर्यावरण संरचना</a></b></td><td>संपूर्ण <code>.env</code> व्हेरिएबल्स आणि संदर्भ</td></tr>
 </table>
 
 ### 🧠 वैशिष्ट्ये आणि आर्किटेक्चर
 
 <table>
   <tr><th align="left">दस्तऐवज</th><th align="left">वर्णन</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">आर्किटेक्चर</a></b></td><td>सिस्टम आर्किटेक्चर, डेटा फ्लो, आणि अंतर्गत रचना</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">कंप्रेशन मार्गदर्शक</a></b></td><td>७-पर्याय पाइपलाइन: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK कंप्रेशन</a></b></td><td>कमांड-आउटपुट कंप्रेशन, फिल्टर्स, ट्रस्ट, व्हेरिफाय, raw-output रिकव्हरी</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">कंप्रेशन इंजिन्स</a></b></td><td>Caveman, RTK, stacked पाइपलाइन्स, डॅशबोर्ड/API/MCP पृष्ठभाग</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">कंप्रेशन नियम फॉरमॅट</a></b></td><td>Caveman आणि RTK फिल्टर्ससाठी JSON नियम-पॅक स्कीमा</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">कंप्रेशन भाषा पॅक्स</a></b></td><td>भाषा ओळख आणि Caveman नियम-पॅक लेखन</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Resilience मार्गदर्शक</a></b></td><td>सर्किट ब्रेकर्स, कूलडाऊन्स, क्यू, anti-thundering herd, TLS spoofing</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo इंजिन</a></b></td><td>१६-घटक स्कोअरिंग, मोड पॅक्स, self-healing</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">प्रॉक्सी मार्गदर्शक</a></b></td><td>३-स्तरीय प्रॉक्सी सिस्टम, 1proxy मार्केटप्लेस, रजिस्ट्री CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">फ्री टियर्स</a></b></td><td>एकत्रित निर्देशिका: ३४ दस्तऐवजीकृत पुनरावृत्ती पूल्स / ४८५ सूचीबद्ध फ्री-टियर नोंदी</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">वैशिष्ट्ये गॅलरी</a></b></td><td>स्क्रीनशॉटसह व्हिज्युअल डॅशबोर्ड टूर</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">कोडबेस दस्तऐवजीकरण</a></b></td><td>नवशिक्यांसाठी कोडबेस वॉकथ्रू</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">आर्किटेक्चर</a></b></td><td>सिस्टम आर्किटेक्चर, डेटा प्रवाह आणि अंतर्गत रचना</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">कॉम्प्रेशन मार्गदर्शक</a></b></td><td>7-पर्यायांची पाइपलाइन: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK कॉम्प्रेशन</a></b></td><td>कमांड-आउटपुट कॉम्प्रेशन, फिल्टर्स, विश्वास, पडताळणी, रॉ-आउटपुट पुनर्प्राप्ती</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">कॉम्प्रेशन इंजिन्स</a></b></td><td>Caveman, RTK, स्टॅक्ड पाइपलाइन्स, डॅशबोर्ड/API/MCP पृष्ठभाग</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">कॉम्प्रेशन नियम स्वरूप</a></b></td><td>Caveman आणि RTK फिल्टर्ससाठी JSON नियम-पॅक स्कीमा</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">कॉम्प्रेशन भाषा पॅक्स</a></b></td><td>भाषा शोध आणि Caveman नियम-पॅक लेखन</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">लवचिकता मार्गदर्शक</a></b></td><td>सर्किट ब्रेकर्स, कूलडाउन्स, रांग, अँटी-थंडरिंग हर्ड, TLS स्पूफिंग</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">ऑटो-कॉम्बो इंजिन</a></b></td><td>16-घटक स्कोअरिंग, मोड पॅक्स, स्व-उपचार</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">प्रॉक्सी मार्गदर्शक</a></b></td><td>3-स्तरीय प्रॉक्सी सिस्टम, 1proxy मार्केटप्लेस, रजिस्ट्री CRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">मोफत स्तर</a></b></td><td>एकत्रित निर्देशिका: दस्तऐवजीकृत 34 पुनरावर्ती पूल / कॅटलॉगमध्ये नोंदवलेल्या 485 मोफत-स्तरीय नोंदी</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">वैशिष्ट्ये गॅलरी</a></b></td><td>स्क्रीनशॉट्ससह दृश्य डॅशबोर्ड फेरफटका</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">कोडबेस दस्तऐवजीकरण</a></b></td><td>सुरुवातीच्या वापरकर्त्यांसाठी अनुकूल कोडबेस मार्गदर्शन</td></tr>
 </table>
 
-### 🤖 प्रोटोकॉल्स आणि API
+### 🤖 प्रोटोकॉल आणि APIs
 
 <table>
   <tr><th align="left">दस्तऐवज</th><th align="left">वर्णन</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API संदर्भ</a></b></td><td>सर्व एंडपॉइंट्स उदाहरणांसह</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI स्पेसिफिकेशन</a></b></td><td>OpenAPI 3.0 स्पेसिफिकेशन</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP सर्व्हर</a></b></td><td>११० MCP टूल्स, IDE कॉन्फिग्स, Python/TS/Go क्लायंट्स</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP सर्व्हर मार्गदर्शक</a></b></td><td>MCP इन्स्टॉलेशन, ट्रान्सपोर्ट्स, आणि टूल संदर्भ</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A सर्व्हर</a></b></td><td>JSON-RPC 2.0 प्रोटोकॉल, कौशल्ये, स्ट्रिमिंग, टास्क व्यवस्थापन</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A सर्व्हर मार्गदर्शक</a></b></td><td>A2A एजंट कार्ड, टास्क्स, कौशल्ये, आणि स्ट्रिमिंग</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API संदर्भ</a></b></td><td>उदाहरणांसह सर्व एंडपॉइंट्स</td></tr>
+  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI तपशील</a></b></td><td>OpenAPI 3.0 तपशील</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP सर्व्हर</a></b></td><td>110 MCP साधने, IDE संरचना, Python/TS/Go क्लायंट्स</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP सर्व्हर मार्गदर्शक</a></b></td><td>MCP इंस्टॉलेशन, ट्रान्सपोर्ट्स आणि साधन संदर्भ</td></tr>
+  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A सर्व्हर</a></b></td><td>JSON-RPC 2.0 प्रोटोकॉल, कौशल्ये, स्ट्रीमिंग, कार्य व्यवस्थापन</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A सर्व्हर मार्गदर्शक</a></b></td><td>A2A एजंट कार्ड, कार्ये, कौशल्ये आणि स्ट्रीमिंग</td></tr>
 </table>
 
 ### 📋 प्रकल्प आणि गुणवत्ता
@@ -1377,51 +1377,51 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 देखील �
 <table>
   <tr><th align="left">दस्तऐवज</th><th align="left">वर्णन</th></tr>
   <tr><td nowrap><b><a href="CONTRIBUTING.md">योगदान</a></b></td><td>विकास सेटअप आणि मार्गदर्शक तत्त्वे</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ब्रँचिंग आणि रिलीज मॉडेल</a></b></td><td>PR कुठे टार्गेट करतात (<code>release/*</code>), <code>main</code> आणि टॅग्स यांचा अर्थ काय</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">चेंजलॉग</a></b></td><td>प्रत्येक आवृत्तीचा संपूर्ण रिलीज इतिहास</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">सुरक्षा धोरण</a></b></td><td>दुर्बलता अहवाल आणि सुरक्षा पद्धती</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n मार्गदर्शक</a></b></td><td>६७ भाषांसाठी समर्थन, भाषांतर कार्यप्रवाह, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">रिलीज तपासणी यादी</a></b></td><td>रिलीजपूर्व पडताळणी पावले</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">कव्हरेज योजना</a></b></td><td>५६,०००+ स्थिर चाचणी घोषणांसाठी ७,८००+ ट्रॅक केलेल्या चाचणी फाइल्समध्ये चाचणी कव्हरेज धोरण</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ब्रँचिंग आणि रिलीज मॉडेल</a></b></td><td>PRs कुठे लक्ष्यित होतात (<code>release/*</code>), <code>main</code> आणि टॅग्जचा अर्थ काय</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">बदलनोंद</a></b></td><td>प्रत्येक आवृत्तीचा संपूर्ण रिलीज इतिहास</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">सुरक्षा धोरण</a></b></td><td>असुरक्षा अहवाल देणे आणि सुरक्षा पद्धती</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n मार्गदर्शक</a></b></td><td>67 भाषांसाठी समर्थन, भाषांतर कार्यप्रवाह, RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">रिलीज तपासणीसूची</a></b></td><td>रिलीजपूर्व पडताळणीच्या पायऱ्या</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">कव्हरेज योजना</a></b></td><td>8,400+ ट्रॅक केलेल्या चाचणी फाइल्समधील 60,000+ स्थिर चाचणी घोषणांसाठी चाचणी कव्हरेज धोरण</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ शीर्ष योगदानकर्ते
+# ⭐ प्रमुख योगदानकर्ते
 
-> OmniRoute हे एक उत्कट मुक्त स्रोत समुदायाने घडवले आहे. या व्यक्तींनी प्रकल्पाच्या गुणवत्ता, स्थिरता आणि पोहोच यावर थेट परिणाम करणारे अपवादात्मक योगदान दिले आहे. **धन्यवाद.**
+> OmniRoute ला उत्साही ओपन-सोर्स समुदायाने आकार दिला आहे. या व्यक्तींनी प्रकल्पाची गुणवत्ता, स्थिरता आणि आवाका यांवर थेट परिणाम करणारे अपवादात्मक योगदान दिले आहे. **धन्यवाद.**
 
-### मर्ज केलेल्या पुल विनंत्यांनुसार बाह्य योगदानकर्ते
+### विलीन केलेल्या pull requests नुसार बाह्य योगदानकर्ते
 
 <table>
-  <tr><th align="center">क्रमांक</th><th align="left">योगदानकर्ता</th><th align="center">मर्ज केलेले PRs</th><th align="right">~बदललेल्या ओळी</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><th align="center">क्रमांक</th><th align="left">योगदानकर्ता</th><th align="center">विलीन केलेले PRs</th><th align="right">~बदललेल्या ओळी</th></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>जनगणना २०२६-१०-१८ १५:०९:०९ UTC रोजी live <code>release/v3.8.52</code> tip <code>656f01cb43</code> सह घेतली. पॅजिनेटेड GitHub GraphQL जनगणनेमध्ये ९,१९१ मर्ज केलेले PRs आहेत: ३,८३४ रेपॉजिटरी मालकाकडून, २२९ Dependabot कडून, ६ इतर बॉट्स/अॅप्स कडून, आणि <b>८३५ वेगळ्या योगदानकर्त्यांकडून ५,१२२ बाह्य PRs</b>. “Changed lines” म्हणजे GitHub additions + deletions आणि यात जनरेट केलेल्या फाइल्स, लॉकफाइल्स, कॅटलॉग्स, भाषांतरे आणि दस्तऐवज समाविष्ट आहेत; हे churn आहे, लिहिलेल्या LOC नाही. ४९ PRs मध्ये GitHub diffs ५००,००० ओळींपेक्षा जास्त आहेत (उदा. #13399, एका प्रदाता जोडणीसाठी, २,३४७ बदललेल्या फाइल्स दाखवतो), ज्यामुळे काही एकूण आकडे वाढतात. टाय असल्यास एकत्र रँक केले आहे.</sub>
+<sub>2026-11-03 03:01:19 UTC रोजी <code>release/v3.8.53</code> च्या लाइव्ह टिप <code>05bc048d6c</code> सह गणना करण्यात आली. पृष्ठांकित GitHub GraphQL गणनेमध्ये 9,947 विलीन केलेले PRs आहेत: रिपॉझिटरी मालकाने केलेले 4,130, Dependabot ने केलेले 240, इतर बॉट्स/अॅप्सनी केलेले 6 आणि <b>883 वेगवेगळ्या योगदानकर्त्यांकडून आलेले 5,571 बाह्य PRs</b>. “बदललेल्या ओळी” म्हणजे GitHub वरील जोडण्या + वगळण्या असून, त्यात जनरेट केलेल्या फाइल्स, लॉकफाइल्स, कॅटलॉग्ज, भाषांतरे आणि दस्तऐवजीकरण समाविष्ट आहे; हे churn आहे, लिहिलेल्या LOC चे प्रमाण नाही. 53 PRs मध्ये GitHub diffs 500,000 ओळींपेक्षा जास्त असल्याचे दिसते (उदाहरणार्थ #13399 मध्ये, एका provider addition साठी, 2,347 बदललेल्या फाइल्स नमूद आहेत), ज्यामुळे वरीलपैकी अनेक एकूण आकडे फुगले आहेत. समान क्रमांक असलेल्यांना एकत्रितपणे क्रमांकित केले आहे.</sub>
 
-### GitHub-ने श्रेय दिलेली कमिट्स
+### GitHub-श्रेयांकित कमिट्स
 
 <table>
   <tr>
@@ -1430,86 +1430,93 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 देखील �
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 ३६७ GitHub-नियुक्त कमिट्स</sub>
+      <sub>🥇 GitHub-विशेषता असलेल्या 418 कमिट्स</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 २६९ GitHub-नियुक्त कमिट्स</sub>
+      <sub>🥈 GitHub-विशेषता असलेल्या 294 कमिट्स</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 २२९ GitHub-नियुक्त कमिट्स</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/backryun">
-        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
-        <b>backryun</b>
-      </a><br/>
-      <sub>🏅 २०२ GitHub-नियुक्त कमिट्स</sub>
+      <sub>🥉 GitHub-विशेषता असलेल्या 229 कमिट्स</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 १७४ GitHub-नियुक्त कमिट्स</sub>
+      <sub>🏅 GitHub-विशेषता असलेल्या 222 कमिट्स</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/RaviTharuma">
-        <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
-        <b>Ravi Tharuma</b>
+      <a href="https://github.com/backryun">
+        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
+        <b>backryun</b>
       </a><br/>
-      <sub>🏅 १२६ GitHub-नियुक्त कमिट्स</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="160">
-      <a href="https://github.com/hartmark">
-        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
-        <b>Markus Hartung</b>
-      </a><br/>
-      <sub>🏅 ११४ GitHub-नियुक्त कमिट्स</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/rdself">
-        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
-        <b>Randi</b>
-      </a><br/>
-      <sub>🏅 १०८ GitHub-नियुक्त कमिट्स</sub>
+      <sub>🏅 GitHub-विशेषता असलेल्या 202 कमिट्स</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 ८७ GitHub-नियुक्त कमिट्स</sub>
+      <sub>🏅 GitHub-विशेषता असलेल्या 134 कमिट्स</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://github.com/RaviTharuma">
+        <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
+        <b>Ravi Tharuma</b>
+      </a><br/>
+      <sub>🏅 GitHub-विशेषता असलेल्या 126 कमिट्स</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/hartmark">
+        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
+        <b>Markus Hartung</b>
+      </a><br/>
+      <sub>🏅 GitHub-विशेषता असलेल्या 115 कमिट्स</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/rdself">
+        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
+        <b>Randi</b>
+      </a><br/>
+      <sub>🏅 GitHub-विशेषता असलेल्या 108 कमिट्स</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 ७० GitHub-नियुक्त कमिट्स</sub>
+      <sub>🏅 GitHub-विशेषता असलेल्या 70 कमिट्स</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 GitHub-विशेषता असलेल्या 68 कमिट्स</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 ६८ GitHub-नियुक्त कमिट्स</sub>
+      <sub>🏅 GitHub-विशेषता असलेल्या 68 कमिट्स</sub>
     </td>
   </tr>
 </table>
 
-<sub>२०२६-१०-१८ १४:४४:४५ UTC रोजी पुन्हा तपासले: GitHub-नियुक्त कमिट्स हे <code>release/v3.8.52</code> डिफॉल्ट ब्रँचसाठी रेपॉजिटरी Contributors API ने दिले आहेत. API ने ८४९ ओळखी (४२९ वापरकर्ते, २ बॉट्स, ४१८ अज्ञात); या तक्त्यात देखभालकर्ता, बॉट्स आणि अज्ञात ओळखी वगळल्या आहेत आणि स्पर्धेतील टाय ठेवले आहेत. हे वरील merged-PR क्रमवारी आणि खालील Git-metadata जनगणनेपेक्षा वेगळे आहे.</sub>
+<sub>2026-11-03 02:09:16 UTC रोजी पुन्हा तपासले: <code>release/v3.8.53</code> या डीफॉल्ट शाखेसाठी रिपॉझिटरीच्या Contributors API ने नोंदवलेल्या GitHub-विशेषता असलेल्या कमिट्स. API ने 903 ओळखी परत केल्या (429 वापरकर्ते, 2 बॉट्स, 472 अनामिक); या तक्त्यात मेंटेनर, बॉट्स आणि अनामिक ओळखी वगळल्या आहेत आणि समान क्रमांकावरील स्पर्धक कायम ठेवले आहेत. हा तक्ता वरील मर्ज केलेल्या PR क्रमवारीपेक्षा तसेच खालील Git-मेटाडेटा जनगणनेपेक्षा वेगळा आहे.</sub>
 
-> 🙏 या योगदानकर्त्यांच्या वैशिष्ट्ये, बग फिक्सेस आणि इन्फ्रास्ट्रक्चर सुधारणा या OmniRoute ला विश्वासार्ह आणि वैशिष्ट्यपूर्ण बनवण्यात **मूलभूत भाग** आहेत. प्रत्येक pull request, प्रत्येक test case, आणि प्रत्येक i18n भाषांतर फाइल महत्त्वाची आहे. ओपन सोर्स हे अशा लोकांनीच घडते.
+> 🙏 या योगदानकर्त्यांची वैशिष्ट्ये, दोषनिराकरणे आणि पायाभूत सुविधांमधील सुधारणा या OmniRoute ला विश्वासार्ह आणि अनेक वैशिष्ट्यांनी समृद्ध बनवणाऱ्या गोष्टींचा **मूलभूत भाग** आहेत. प्रत्येक पुल रिक्वेस्ट, प्रत्येक चाचणी प्रकरण आणि प्रत्येक i18n भाषांतर फाइल महत्त्वाची आहे. ओपन सोर्स त्यांच्यासारख्या लोकांमुळे उभे राहते.
 
 </div>
 
@@ -1619,29 +1626,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 देखील �
 
 <div align="center">
 
-## 👥 900+ योगदानकर्ते
+## 👥 1,000+ योगदानकर्ते
 
 </div>
 
-[![योगदानकर्ते](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![योगदानकर्ते](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>2026-10-18 रोजी थेट <code>release/v3.8.52</code> च्या नवीनतम <code>ad160ab2d1</code> कमिटवर (6,826 कमिट्स) लेखापरीक्षण केले: <b>993 सामान्यीकृत मानवी Git ओळखी</b> — 707 कमिट लेखक म्हणून दिसतात (देखभालकर्त्यासह) आणि 286 केवळ स्पष्ट <code>Co-authored-by</code> ट्रेलर्समध्ये दिसतात. ही गणना <code>.mailmap</code> लागू करते, ई-मेल पत्त्यांची अक्षरांचा आकार विचारात न घेता तुलना करते, संख्यात्मक आणि साधे GitHub noreply पत्ते केवळ ते समान हँडल दर्शवत असतील तेव्हाच जोडते, 26 बॉट/एजंट/सेवा/प्लेसहोल्डर ओळखी वगळते आणि केवळ त्यांची दर्शनी नावे जुळतात म्हणून सामान्य ई-मेल पत्ते एकत्रित करत नाही. 2026-08-24 च्या लेखापरीक्षणात 639 ही संख्या प्रकाशित करण्यात आली होती; ही पद्धत त्या लेखापरीक्षणाच्या मूळ <code>ac02c5b42f</code> वर पुन्हा चालवल्यावर 619 ही संख्या मिळते, त्यामुळे ही वाढ अधिक शिथिल पद्धतीमुळे नव्हे, तर नवीन योगदानकर्त्यांमुळे झाली आहे.</sub>
+<sub>2026-11-02 रोजी live <code>release/v3.8.53</code> tip <code>1c7135e0fb</code> (7,972 commits) वर ऑडिट केले: <b>1,074 सामान्यीकृत मानवी Git ओळखी</b> — 759 commit authors म्हणून दिसतात (maintainer सहित) आणि 315 फक्त स्पष्ट <code>Co-authored-by</code> trailers मध्ये आहेत. या गणनेत <code>.mailmap</code> लागू केले जाते, ई-मेल पत्त्यांची तुलना case-insensitive पद्धतीने केली जाते, numeric आणि साधे GitHub noreply पत्ते केवळ ते समान handle दर्शवत असतील तेव्हाच एकत्र केले जातात, 29 bot/agent/service/placeholder ओळखी वगळल्या जातात आणि केवळ display names जुळतात म्हणून सामान्य ई-मेल पत्ते एकत्र केले जात नाहीत. 2026-08-24 च्या ऑडिटमध्ये 639 प्रकाशित केले होते; त्या ऑडिटच्या base <code>ac02c5b42f</code> वर ही पद्धत पुन्हा चालवल्यावर 619 मिळतात, त्यामुळे ही वाढ नवीन योगदानकर्त्यांमुळे आहे, अधिक सैल पद्धतीमुळे नाही.</sub>
 
 ### योगदान कसे द्यावे
 
-1. रिपॉझिटरीचा फोर्क तयार करा
-2. **सक्रिय** `release/vX.Y.Z` च्या नवीनतम कमिटपासून ब्रँच तयार करा (`main` पासून नाही) — [ब्रँचिंग आणि रिलीझ मॉडेल](docs/ops/BRANCHING_MODEL.md) पहा
-3. तुमची फीचर ब्रँच तयार करा (`git checkout -b feat/amazing-feature`)
-4. तुमचे बदल कमिट करा (`git commit -m 'feat: add amazing feature'`)
-5. ब्रँचवर पुश करा (`git push origin feat/amazing-feature`)
-6. **base = ती `release/vX.Y.Z` ब्रँच** ठेवून Pull Request उघडा
+1. रिपॉझिटरी fork करा
+2. **सक्रिय** `release/vX.Y.Z` tip पासून branch तयार करा (`main` पासून नाही) — [Branching & Release Model](docs/ops/BRANCHING_MODEL.md) पहा
+3. तुमची feature branch तयार करा (`git checkout -b feat/amazing-feature`)
+4. तुमचे बदल commit करा (`git commit -m 'feat: add amazing feature'`)
+5. branch वर push करा (`git push origin feat/amazing-feature`)
+6. **base = ती `release/vX.Y.Z` branch** ठेवून Pull Request उघडा
 
 तपशीलवार मार्गदर्शक तत्त्वांसाठी [CONTRIBUTING.md](CONTRIBUTING.md) पहा.
 
-### नवीन आवृत्ती रिलीझ करणे
+### नवीन आवृत्ती रिलीज करणे
 
 ```bash
-# रिलीझ तयार करा — npm publish आपोआप होते
+# रिलीज तयार करा — npm publish आपोआप होते
 VERSION=x.y.z
 gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 ```
@@ -1683,109 +1690,109 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 </div>
 
-OmniRoute दिग्गजांच्या पायावर उभे आहे. त्याची सुरुवात **[9router](https://github.com/decolua/9router)** च्या फोर्कच्या आणि Go प्रकल्प **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** च्या TypeScript पोर्टच्या रूपात झाली — आणि त्यानंतर, खालील प्रत्येक उपप्रणालीला आधीच ते साध्य केलेल्या एका मुक्त-स्रोत प्रकल्पातून प्रेरणा मिळाली. यांपैकी प्रत्येकाने OmniRoute च्या एका ठोस भागाला आकार दिला. त्या सर्वांचे आभार मानण्याचा हा आमचा प्रयत्न आहे. 🙏
+OmniRoute हे अनेक दिग्गजांच्या कार्यावर उभे आहे. याची सुरुवात **[9router](https://github.com/decolua/9router)** च्या fork म्हणून आणि Go प्रकल्प **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** च्या TypeScript port म्हणून झाली — आणि त्यानंतर खालील प्रत्येक उपप्रणालीची प्रेरणा याआधीच मार्ग दाखवणाऱ्या एका मुक्त-स्रोत प्रकल्पातून मिळाली. प्रत्येक प्रकल्पाने OmniRoute च्या एका ठोस भागाला आकार दिला. हा त्या सर्वांसाठी आमचा धन्यवाद आहे. 🙏
 
-> ⭐ स्टारची संख्या 18 ऑक्टोबर 2026 रोजी GitHub च्या REST API वरून सत्यापित केली — या प्रकल्पांना नक्की स्टार द्या. ही संख्या विशिष्ट तारखेचा अचूक स्नॅपशॉट आहे आणि कालांतराने स्वाभाविकपणे बदलेल.
+> ⭐ GitHub च्या REST API द्वारे 3 नोव्हेंबर 2026 रोजी स्टार संख्या पडताळल्या आहेत — या प्रकल्पांना स्टार द्या. या संख्या त्या दिनांकाची अचूक snapshot आहेत आणि स्वाभाविकपणे बदलतील.
 
-### 🧬 वंशपरंपरा आणि गेटवे
-
-<table>
-  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">त्याने OmniRoute ला कशी प्रेरणा दिली</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>हा फोर्क ज्या मूळ प्रकल्पावर आधारित आहे — येथे त्याचा बहु-माध्यमीय APIs आणि संपूर्ण TypeScript पुनर्लेखनासह विस्तार करण्यात आला आहे.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>या JavaScript / TypeScript पोर्टला प्रेरणा देणारी Go अंमलबजावणी.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>हा असा AI गेटवे आहे, ज्याचा सार्वजनिक किंमत डेटासेट आमच्या खर्च-ट्रॅकिंग समक्रमणाला डेटा पुरवतो आणि ज्याच्या प्रदाता-सामान्यीकरण मॉडेलने आमच्या रूटिंगला दिशा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>ब्राउझर-सत्र, प्रतिसाद-फ्रेमिंग, वापर आणि वेब-शोध अॅडॅप्टर्ससह, समाविष्ट केलेल्या ChatGPT Web → Codex Responses ब्रिजमध्ये रूपांतरित केलेला MIT स्रोत.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>स्ट्रीम पुनर्प्राप्ती, विचार-विरहित उपनावे, फॉलबॅक वेब शोध, सरकत्या-विंडो मर्यादा, लॉगमधील संवेदनशील माहिती लपवणे आणि अधिक सुरक्षित लाँचर प्रवाहांमध्ये पोर्ट केलेले नमुने.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Cursor Composer मधील साधन-निवड, आउटपुट-मर्यादा आणि साधन-कमिट नमुने मूळ Cursor एक्झिक्युटरमध्ये रूपांतरित केले.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>नवीन लॉगिन आणि रिफ्रेश-टोकन रोटेशन नमुने Codex OAuth पुनर्प्रमाणीकरणामध्ये पोर्ट केले.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Claude Code-सुसंगत रूपांतरणाची डीफॉल्ट मूल्ये आणि बिलिंग-हेडरचे वर्तन OmniRoute च्या कॉन्फिग-आधारित ब्रिजमध्ये सामान्यीकृत केले.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>त्याची Grok मॉडेल मॅपिंग्ज, बनावट-TypeError Statsig जनरेटर, विनंती व उपकरणाची डीफॉल्ट मूल्ये आणि NDJSON प्रतिसाद प्रोसेसर यांचे OmniRoute च्या Grok Web एक्झिक्युटरमध्ये लक्षणीय रूपांतर करण्यात आले.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>grok2api-merged मागील प्रमुख अप्रत्यक्ष कोड स्रोत; त्याची मॉडेल, हेडर, पेलोड, Statsig आणि प्रोसेसर अंमलबजावणी Grok Web च्या वंशपरंपरेत जतन केली आहे.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>TQZHR आणि grok2api-merged मार्फत पुढे आलेल्या Grok पेलोड व उपकरणाच्या डीफॉल्ट मूल्यांचा, Statsig जनरेटरचा आणि <code>result.response</code> प्रोसेसरचा मूलभूत MIT स्रोत.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>grok2api-merged ने त्याच्या प्रॉक्सी-पूल स्तरासाठी श्रेय दिलेला अप्रत्यक्ष स्रोत; OmniRoute ही वंशपरंपरेची नोंद जतन करते, परंतु त्याच्या मर्यादित Grok Web एक्झिक्युटरमध्ये प्रॉक्सी-पूल पोर्ट केल्याचा दावा करत नाही.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>त्याच्या कुकी-प्रमाणीकृत Grok प्रॉक्सी आणि <code>result.response.token</code> स्ट्रीमिंग नमुन्याने OmniRoute च्या Grok Web ट्रान्सपोर्टला दिशा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>मूळ Grok Web अंमलबजावणीने त्याच्या HTTP/ब्राउझर अपस्ट्रीम डिझाइनचा संदर्भ घेतला; त्याचा थेट HTTP मार्ग GrokProxy मधून व्युत्पन्न झाला असल्याने, स्वतंत्र कोड पोर्टचा दावा केला जात नाही.</td></tr>
-</table>
-
-### 🗜️ संदर्भ आणि टोकन संक्षेपण — इंजिने
+### 🧬 वंशपरंपरा आणि gateway
 
 <table>
-  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">त्याने OmniRoute ला कशी प्रेरणा दिली</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>व्हायरल झालेला "अनेक टोकन का वापरायचे, जेव्हा काही टोकनने काम होते" प्रकल्प — त्याचे गुहामानव-सदृश भाषेचे तत्त्वज्ञान आमच्या मानक कॉम्प्रेशन मोडला आणि 30+ अनावश्यक मजकूर काढण्याच्या/संक्षेपणाच्या नियमांना आधार देते.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>उच्च-कार्यक्षमता कमांड-आउटपुट कॉम्प्रेशन — याने आमचे RTK इंजिन, JSON फिल्टर DSL, रॉ-आउटपुट पुनर्प्राप्ती आणि स्तरित RTK → Caveman पाइपलाइन यांना प्रेरणा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>पूर्ववत करता येणारे संदर्भ-कॉम्प्रेशन (SmartCrusher) — याने आमच्या <code>headroom</code> इंजिनला आणि <code>ccr</code> पुनर्प्राप्ती-मार्कर पॅटर्नला प्रेरणा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>प्रॉम्प्ट-कॉम्प्रेशन संशोधन (LLMLingua / LLMLingua-2) — याने आमच्या असिंक्रोनस, कोड-सुरक्षित, फेल-ओपन <code>llmlingua</code> इंजिनला प्रेरणा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>आमच्या LLMLingua इंजिनसाठी वर्कर-थ्रेड बॅकएंड म्हणून वापरलेले JS/ONNX पोर्ट (MobileBERT / XLM-RoBERTa).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>PT-BR टोकन कॉम्प्रेशन — आमच्या pt-BR भाषा पॅकला आधार देते: ब्राझिलियन-पोर्तुगीज व्याकरणासाठी अनुकूल केलेले पुनरुक्ती-संक्षेपण आणि अनावश्यक मजकूर काढणे.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>व्हायरल झालेली "आळशी वरिष्ठ डेव्हलपर" YAGNI-कोडर कौशल्यपद्धती — याने आमच्या <b>less-code</b> आउटपुट शैलीला प्रेरणा दिली: सर्वांत लहान कार्यक्षम बदलाकडे मार्गदर्शन, ज्यामुळे _व्युत्पन्न केलेला_ कोड कमी होतो (Caveman च्या संक्षिप्त गद्याचा आउटपुट-अक्षावरील समकक्ष).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>त्याची कृती-प्रथम, ADHD-अनुकूल प्रतिसाद शैली पाच भाषांमधील OmniRoute च्या संक्षिप्त आउटपुट शैलीत रूपांतरित करण्यात आली.</td></tr>
+  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">OmniRoute ला मिळालेली प्रेरणा</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>ज्या मूळ प्रकल्पावर हा fork आधारित आहे — येथे multi-modal APIs आणि संपूर्ण TypeScript rewrite सह विस्तारित केला आहे.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>या JavaScript / TypeScript port साठी प्रेरणा देणारी Go implementation.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>ज्या AI gateway च्या सार्वजनिक pricing dataset मधून आमच्या cost-tracking sync ला डेटा मिळतो आणि ज्याच्या provider-normalization model ने आमच्या routing ला दिशा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>MIT source चे रूपांतर करून vendored ChatGPT Web → Codex Responses bridge मध्ये वापरले आहे; यात browser-session, response-framing, usage आणि web-search adapters समाविष्ट आहेत.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Stream recovery, no-thinking aliases, fallback web search, sliding-window limits, log redaction आणि hardened launcher flows मध्ये यातील patterns port केले आहेत.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Cursor Composer चे tool-choice, output-constraint आणि tool-commit patterns native Cursor executor मध्ये रूपांतरित केले आहेत.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Fresh-login आणि refresh-token rotation patterns Codex OAuth reauthentication मध्ये port केले आहेत.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Claude Code-सुसंगत transform defaults आणि billing-header behavior यांना सर्वसाधारण करून OmniRoute च्या config-driven bridge मध्ये समाविष्ट केले आहे.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>यातील Grok model mappings, fake-TypeError Statsig generator, request आणि device defaults, तसेच NDJSON response processor यांचे OmniRoute च्या Grok Web executor मध्ये महत्त्वपूर्ण रूपांतर केले आहे.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>grok2api-merged मागील प्रमुख transitive code source; यातील model, header, payload, Statsig आणि processor implementations Grok Web lineage मध्ये जतन केल्या आहेत.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Grok payload आणि device defaults, Statsig generator आणि <code>result.response</code> processor यांचा मूळ MIT source; हे घटक TQZHR आणि grok2api-merged मार्फत पुढे आले आहेत.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>grok2api-merged ने proxy-pool layer साठी ज्या transitive source ला श्रेय दिले आहे; OmniRoute ही lineage notice जतन करते, परंतु तिच्या bounded Grok Web executor मध्ये proxy-pool port केल्याचा दावा करत नाही.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>यातील cookie-authenticated Grok proxy आणि <code>result.response.token</code> streaming pattern ने OmniRoute च्या Grok Web transport ला दिशा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>याच्या HTTP/browser upstream design चा मूळ Grok Web implementation सल्ल्यासाठी वापरला; यातील direct HTTP path GrokProxy मधून आलेला असल्याने स्वतंत्र code port केल्याचा दावा केलेला नाही.</td></tr>
 </table>
 
-### 🧩 संक्षिप्त स्वरूपे, टोकन संशोधन आणि कोड-जागरूक साधने
-
-<table>
-  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">त्याने OmniRoute ला कशी प्रेरणा दिली</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>टोकन-केंद्रित ऑब्जेक्ट नोटेशन — त्याच्या स्तंभीय, हेडर-प्लस-रो मॉडेलने आमच्या सारणीबद्ध संक्षेपण टप्प्याला आकार दिला.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>त्याच्या संक्षिप्त ग्राफ स्वरूपाने आणि जेनेरिक-प्रोफाइल रचनेने OmniRoute च्या सारणीबद्ध संक्षेपणाला आणि Headroom कोडेक स्वरूपाला दिशा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Headroom जेनेरिक-प्रोफाइल कोडेक म्हणून थेट समाविष्ट करून विस्तारित केलेली MIT TypeScript अंमलबजावणी.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Brotli/SQLite कॅशे + प्रति-सत्र संदर्भ-फरक — याने आमच्या <code>session-dedup</code> इंजिनला प्रेरणा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Bash-आउटपुट संक्षेपण + MCP प्रोफाइल — याने आमच्या कॉम्प्रेशनमधून माघार घेण्याच्या शिस्तीला आणि MCP टूल-मॅनिफेस्ट संक्षेपणाला प्रेरणा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>अपयश-जागरूक माघारीसह सामग्री-जागरूक, प्रति-फाइल-प्रकार आउटपुट कॉम्प्रेशन — याने आमच्या प्रति-प्रकार डिस्पॅचला आणि किमान-लाभ वगळण्याच्या पद्धतीला पुष्टी दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>"अदृश्य टोकन शोधा" — त्याच्या ऑफलोड + पुनर्प्राप्त करण्यायोग्य-हँडल पॅटर्नने आमच्या CCR ऑफलोड संकल्पनेला दिशा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>आमच्या session-dedup रचनेला दिशा देणारा सत्र-ग्राफ + टर्न-पार ओळ-डीडुप आराखडा.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust स्तंभीय-JSON + सामग्री-पत्तायुक्त पुनर्प्राप्ती + संदेश-पार डीडुप — याने आमच्या <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> इंजिन रचनेला आणि कॅशे-स्थिर "संक्षिप्त स्वरूप स्थानापासून स्वतंत्र असते" या अपरिवर्तनीय तत्त्वाला पुष्टी दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>MCP टूल-स्कीमा/वर्णन कॉम्प्रेशन — याने आमच्या MCP टूल-मॅनिफेस्ट कार्डिनॅलिटी संक्षेपणाला दिशा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Aider-शैलीतील रेपो-मॅप क्रमवारी — याने आमच्या रेपो-मॅप / पुनर्प्राप्ती-क्रमवारी अन्वेषणाला दिशा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>MCP वरील घोषणात्मक शेल-आउटपुट संक्षेपण — याने आमच्या घोषणात्मक bash-आउटपुट संक्षेपणाला पुष्टी दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>TypeScript Compiler API टूलकिट — याने स्ट्रिंग, टेम्पलेट आणि regex लिटरल जतन करणाऱ्या आमच्या पार्सर-आधारित टिप्पणी काढण्याच्या पद्धतीला प्रेरणा दिली.</td></tr>
-</table>
-
-### 🧠 मेमरी आणि RAG
+### 🗜️ Context आणि token compression — engines
 
 <table>
   <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">याने OmniRoute ला कशी प्रेरणा दिली</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>सार्वत्रिक मेमरी स्तर — त्याच्या proxy-as-write/read-boundary मॉडेलने आमच्या मेमरी आर्किटेक्चरला आकार दिला.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>स्तरीकृत मेमरी असलेले स्थिती-जागरूक एजंट — आमच्या Context Control & Recovery (CCR) स्तरीकृत मॉडेलसाठी प्रेरणादायी ठरले.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>वारंवार उद्भवणाऱ्या 16 RAG/LLM अपयश प्रकारांची ProblemMap वर्गीकरण-प्रणाली — आमच्या समस्या-निवारण मार्गदर्शिकेतील सामायिक शब्दसंग्रह.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>व्हायरल "why use many token when few token do trick" प्रकल्प — त्याचे caveman-speak तत्त्वज्ञान आमच्या मानक compression mode आणि 30+ filler/condensation नियमांना सामर्थ्य देते.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>उच्च-कार्यक्षमता command-output compression — याने आमच्या RTK engine, JSON filter DSL, raw-output recovery आणि एकत्रित RTK → Caveman pipeline ला प्रेरणा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>पुनर्प्राप्य context-compression (SmartCrusher) — याने आमच्या <code>headroom</code> engine आणि <code>ccr</code> retrieve-marker pattern ला प्रेरणा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Prompt-compression संशोधन (LLMLingua / LLMLingua-2) — याने आमच्या asynchronous, code-safe, fail-open <code>llmlingua</code> engine ला प्रेरणा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>आमच्या LLMLingua engine साठी worker-thread backend म्हणून वापरलेले JS/ONNX port (MobileBERT / XLM-RoBERTa).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>PT-BR token compression — आमच्या pt-BR language pack ला सामर्थ्य देते: Brazilian-Portuguese व्याकरणासाठी अनुरूप केलेली pleonasm reduction आणि filler removal.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>व्हायरल "lazy senior dev" YAGNI-coder skill — याने आमच्या <b>less-code</b> Output Style ला प्रेरणा दिली: Caveman च्या terse prose च्या output-axis sibling प्रमाणे, _व्युत्पन्न_ code कमी करणारे smallest-working-change steering.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>त्याची action-first, ADHD-friendly response style पाच भाषांमधील OmniRoute च्या concise output style मध्ये रूपांतरित करण्यात आली.</td></tr>
+</table>
+
+### 🧩 Compact formats, token research & code-aware tooling
+
+<table>
+  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">याने OmniRoute ला कशी प्रेरणा दिली</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Token-Oriented Object Notation — त्याच्या columnar, header-plus-rows model ने आमच्या tabular compaction stage ला आकार दिला.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>त्याच्या compact graph format आणि generic-profile design ने OmniRoute च्या tabular compaction आणि Headroom codec format ला दिशा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Headroom generic-profile codec म्हणून थेट vendored आणि extended केलेली MIT TypeScript implementation.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Brotli/SQLite cache + per-session context-delta — याने आमच्या <code>session-dedup</code> engine ला प्रेरणा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Bash-output compaction + MCP profiles — याने आमच्या compression bail-out discipline आणि MCP tool-manifest reduction ला प्रेरणा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Failure-aware bail-out सह content-aware, per-file-type output compression — याने आमच्या per-type dispatch आणि minimum-gain skip ची पुष्टी केली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>"Find the ghost tokens" — त्याच्या offload + recoverable-handle pattern ने आमच्या CCR offload विचारांना दिशा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>आमच्या session-dedup design ला दिशा देणारा session-graph + cross-turn line-dedup blueprint.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust columnar-JSON + content-addressed retrieve + cross-message dedup — याने आमच्या <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> engine design आणि cache-stable "compressed form is position-independent" invariant ची पुष्टी केली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>MCP tool-schema/description compression — याने आमच्या MCP tool-manifest cardinality reduction ला दिशा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Aider-style repo-map ranking — याने आमच्या repo-map / retrieval-ranking exploration ला दिशा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>MCP वर आधारित declarative shell-output reduction — याने आमच्या declarative bash-output compaction ची पुष्टी केली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>TypeScript Compiler API toolkit — याने string, template आणि regex literals जतन करणाऱ्या parser-based comment removal ला प्रेरणा दिली.</td></tr>
+</table>
+
+### 🧠 Memory & RAG
+
+<table>
+  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">याने OmniRoute ला कशाप्रकारे प्रेरणा दिली</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>सार्वत्रिक मेमरी स्तर — त्याच्या प्रॉक्सी-अॅज-राइट/रीड-बाउंडरी मॉडेलने आमच्या मेमरी आर्किटेक्चरला आकार दिला.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>स्तरित मेमरी असलेले स्टेटफुल एजंट — याने आमच्या Context Control & Recovery (CCR) स्तरित मॉडेलला प्रेरणा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>वारंवार आढळणाऱ्या 16 RAG/LLM अपयश-प्रकारांची ProblemMap वर्गीकरणपद्धती — आमच्या समस्यानिवारण मार्गदर्शकातील सामायिक शब्दसंग्रह.</td></tr>
 </table>
 
 ### 🛰️ ट्रॅफिक तपासणी, MITM आणि पारदर्शक प्रॉक्सी
 
 <table>
-  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">याने OmniRoute ला कशी प्रेरणा दिली</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>कोडिंग-असिस्टंट ↔ LLM ट्रॅफिकच्या MITM इंटरसेप्शन/विश्लेषणाने Traffic Inspector च्या सुरुवातीच्या आवश्यकतांना दिशा दिली. पूर्वी त्यावरून तयार केलेले चार मॉड्यूल — SSE विलीनीकरण, संभाषण सामान्यीकरण, गुपितांचे मास्किंग आणि हेडर निर्जंतुकीकरण — सार्वजनिक प्रोटोकॉल मानकांवर आधारित स्वतंत्र clean-room अंमलबजावण्यांनी बदलण्यात आले आहेत. दोन होस्ट-पासथ्रू पृष्ठभाग (<code>passthrough.ts</code> आणि <code>_internal/bypass.cjs</code>) स्वतंत्रपणे वर्गीकृत केलेल्या OmniRoute-अंतर्गत अंमलबजावण्या म्हणून कायम आहेत; त्या बदलाचा भाग म्हणून ते पुन्हा लिहिले गेले नाहीत.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>प्रत्येक प्रक्रियेसाठी पारदर्शक प्रॉक्सी राउटिंग — आमच्या क्रॅश-सुरक्षित MITM टिअरडाउन, सॉकेट निष्क्रियता-कालमर्यादा, <code>/proc</code> प्रक्रिया-अट्रिब्युशन आणि TPROXY कॅप्चरसाठी प्रेरणादायी ठरले.</td></tr>
+  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">याने OmniRoute ला कशाप्रकारे प्रेरणा दिली</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>कोडिंग-असिस्टंट ↔ LLM ट्रॅफिकच्या MITM इंटरसेप्शन/विश्लेषणामुळे सुरुवातीच्या Traffic Inspector आवश्यकतांना दिशा मिळाली. यापूर्वी तयार केलेली चार मॉड्यूल्स — SSE मर्जिंग, संभाषण सामान्यीकरण, गुपिते मास्क करणे आणि हेडर स्वच्छता — सार्वजनिक प्रोटोकॉल मानकांवर आधारित स्वतंत्र क्लीन-रूम अंमलबजावणींनी बदलली आहेत. दोन होस्ट-पासथ्रू पृष्ठभाग (<code>passthrough.ts</code> आणि <code>_internal/bypass.cjs</code>) OmniRoute-अंतर्गत स्वतंत्रपणे वर्गीकृत केलेल्या अंमलबजावणी म्हणून कायम आहेत; त्या बदलाचा भाग म्हणून त्यांचे पुनर्लेखन केलेले नाही.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>प्रति-प्रक्रिया पारदर्शक प्रॉक्सी रूटिंग — याने आमच्या क्रॅश-सुरक्षित MITM टिअरडाउन, सॉकेट निष्क्रिय-टाइमआउट्स, <code>/proc</code> प्रक्रिया अॅट्रिब्युशन आणि TPROXY कॅप्चरला प्रेरणा दिली.</td></tr>
 </table>
 
 ### 📚 मॉडेल डेटा, निरीक्षणक्षमता आणि UI
 
 <table>
-  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">याने OmniRoute ला कशी प्रेरणा दिली</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>AI मॉडेल तपशील, किंमत आणि क्षमतांचा मुक्त डेटाबेस — आमच्या मॉडेल कॅटलॉगमध्ये मूळ स्वरूपात समक्रमित केला आहे.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>आमच्या रिअल-टाइम Compression Studio आणि Combo/Routing Studio ला कार्यरत ठेवणारी नोड-आधारित ग्राफ लायब्ररी.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>LangGraph Studio च्या थेट वर्कफ्लो-ग्राफ दृश्यांकनाने आमच्या Studios मधील रिअल-टाइम कॅस्केड दृश्याला प्रेरणा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>त्याच्या trace → span → generation निरीक्षणक्षमता मॉडेलने आमच्या Compression Studio वॉटरफॉलला आकार दिला.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Istio सर्व्हिस-मेश निरीक्षणक्षमता — Routing/Combo Studio मधील आमच्या सर्किट-ब्रेकर बॅजेस आणि त्रुटी-एज दृश्यांसाठी प्रेरणादायी ठरली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>आमच्या डॅशबोर्डवर प्रदात्यांची आयकॉन प्रदर्शित करणारे AI/LLM ब्रँड लोगो.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>README भाषा निवडकर्त्याद्वारे वापरले जाणारे MIT-परवानाधारक SVG ध्वज पुरवते.</td></tr>
+  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">याने OmniRoute ला कशाप्रकारे प्रेरणा दिली</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>AI मॉडेलच्या तपशील, किंमत आणि क्षमतांचा खुला डेटाबेस — आमच्या मॉडेल कॅटलॉगमध्ये मूळ स्वरूपात समक्रमित केला जातो.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>आमच्या रिअल-टाइम Compression Studio आणि Combo/Routing Studio ला चालना देणारी नोड-आधारित ग्राफ लायब्ररी.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>LangGraph Studio च्या लाइव्ह वर्कफ्लो-ग्राफ दृश्यांकनामुळे आमच्या Studios च्या रिअल-टाइम कॅस्केड दृश्याला प्रेरणा मिळाली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>त्याच्या ट्रेस → स्पॅन → जनरेशन निरीक्षणक्षमतेच्या मॉडेलने आमच्या Compression Studio वॉटरफॉलला आकार दिला.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Istio सर्व्हिस-मेश निरीक्षणक्षमता — याने Routing/Combo Studio मधील आमच्या सर्किट-ब्रेकर बॅजेस आणि त्रुटी-एज दृश्यांना प्रेरणा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>आमच्या डॅशबोर्डवर प्रदाता आयकॉन्स म्हणून रेंडर होणारे AI/LLM ब्रँड लोगो.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>README भाषा निवडीसाठी वापरले जाणारे MIT-परवानाधारक SVG ध्वज उपलब्ध करून देते.</td></tr>
 </table>
 
 ### 🛡️ सुरक्षा
 
 <table>
-  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">याने OmniRoute ला कशी प्रेरणा दिली</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>डीफॉल्टनुसार सुरक्षित असलेल्या लायब्ररींची काळजीपूर्वक निवडलेली सूची, जी आमच्या सुरक्षा-संबंधित निवडींना मार्गदर्शन करते (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">याने OmniRoute ला कशाप्रकारे प्रेरणा दिली</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>सुरक्षित-डीफॉल्ट लायब्ररींची निवडक यादी, जी आमच्या सुरक्षा निवडींना मार्गदर्शन करते (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
 ### 🧭 पूरक साधने
 
 <table>
-  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">याने OmniRoute ला कशी प्रेरणा दिली</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>विनंती डिडुप्लिकेशन, आपत्कालीन शून्य-खर्च फॉलबॅक, प्लग करण्यायोग्य Auto-Combo धोरणे आणि बहुभाषिक हेतू वर्गीकरणासाठी प्रेरणा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>त्याच्या खाते-जागरूक मॉडेल रीमॅपिंग, एक्झिक्युटेबल-पाथ प्रमाणीकरण आणि प्लॅन-लेबल वर्तनाने OmniRoute च्या Antigravity रनटाइमला दिशा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>त्याच्या संक्षिप्त कोटा-रीसेट काउंटडाउन स्वरूपाने OmniRoute मधील संबंधित प्रदाता-मर्यादा प्रदर्शनाला प्रेरणा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>त्याच्या ACP एकत्रीकरणांनी OmniRoute मधील स्थापित CLI एजंटच्या स्वयंचलित शोधाला प्रेरणा दिली.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>Grok Build कोटा पृष्ठभाग ओळखला; त्यानंतर OmniRoute ने थेट वायर स्वरूप स्वतंत्रपणे पडताळले आणि दुरुस्त केले.</td></tr>
+  <tr><th align="left">प्रकल्प</th><th align="center">⭐</th><th align="left">याने OmniRoute ला कशाप्रकारे प्रेरणा दिली</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>रिक्वेस्ट डीडुप्लिकेशन, आणीबाणीच्या वेळी शून्य-किमतीचा फॉलबॅक, प्लगेबल Auto-Combo धोरणे आणि बहुभाषिक इंटेंट वर्गीकरणासाठी प्रेरणा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>त्याचे खाते-जागरूक मॉडेल रीमॅपिंग, एक्झिक्युटेबल-पाथ प्रमाणीकरण आणि प्लॅन-लेबल वर्तन यांनी OmniRoute च्या Antigravity रनटाइमला दिशा दिली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>त्याच्या संक्षिप्त कोटा-रीसेट काउंटडाउन स्वरूपामुळे OmniRoute मधील संबंधित प्रदाता-सीमा प्रदर्शनाला प्रेरणा मिळाली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>त्याच्या ACP एकत्रीकरणांमुळे OmniRoute च्या स्थापित CLI एजंट्सच्या स्वयंचलित शोधाला प्रेरणा मिळाली.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Grok Build कोटा पृष्ठभाग ओळखला; त्यानंतर OmniRoute ने लाइव्ह वायर स्वरूपाची स्वतंत्रपणे पडताळणी करून दुरुस्ती केली.</td></tr>
 </table>
 
 ## 📄 परवाना

@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                                     |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
-| ----------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 პროვაიდერები                     |           352            |   **358**   |          380          |
-| 🧠 უნიკალური ჩატის მოდელის ID-ები   |           1320           |  **1374**   |         1475          |
-| 🖼️ მოდალობის ხიდი                   | 🆕 ხედვა + აუდიო + ვიდეო |      ✓      |           ✓           |
-| 📡 Radar-ის უფასო კატალოგი          |       🆕 არჩევითია       |      ✓      |           ✓           |
-| ⚖️ კვოტის გათვალისწინებული დაგეგმვა |   🆕 კვოტის გაზიარება    |      ✓      |           ✓           |
-| 📊 კვოტის ტელემეტრია                |     🆕 რეალურ დროში      |      ✓      |           ✓           |
-| 🧰 Headless რეჟიმი                  |            —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS rail ინფრასტრუქტურა          |            —             |      —      | 🆕 გამოშვების არხები  |
-| 🔎 მოდელის აღმოჩენის API            |            —             |      —      | 🆕 `/v1/models/query` |
+|                                    |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| ---------------------------------- | :----------------------: | :---------: | :-------------------: |
+| 🌐 პროვაიდერები                    |           352            |   **358**   |          380          |
+| 🧠 ჩატის უნიკალური მოდელის ID-ები  |           1320           |  **1374**   |         1491          |
+| 🖼️ მოდალობების ხიდი                | 🆕 ხედვა + აუდიო + ვიდეო |      ✓      |           ✓           |
+| 📡 Radar-ის უფასო კატალოგი         |    🆕 არჩევითი ჩართვა    |      ✓      |           ✓           |
+| ⚖️ კვოტის გათვალისწინებით დაგეგმვა |      🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 კვოტის ტელემეტრია               |     🆕 რეალურ დროში      |      ✓      |           ✓           |
+| 🧰 ჰედლეს რეჟიმი                   |            —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS-ის სარელსო ინფრასტრუქტურა   |            —             |      —      | 🆕 გამოშვების არხები  |
+| 🔎 მოდელების აღმოჩენის API         |            —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [გზის რუკა](ROADMAP.md) — ვმოძრაობთ რელსებზე `v3.9.0 LTS`-მდე**
+**→ [სამოქმედო გეგმა](ROADMAP.md) — რელსებზე `v3.9.0 LTS`-ისკენ**
 
 </div>
 
@@ -90,30 +90,30 @@
 ## 🧩 ხელმისაწვდომია
 
 [![npm ვერსია](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM თვიური](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
+![NPM ყოველთვიური ჩამოტვირთვები](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![ლიცენზია: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+![ლიცენზია: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+![Docker-ის ჩამოტვირთვები](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
+![Electron-ის ჩამოტვირთვები](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
     <td align="right"><b>🚀 დაწყება</b></td>
     <td align="center"><a href="#-quick-start">🚀 სწრაფი დაწყება</a></td>
     <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 ინსტალაცია</a></td>
-    <td align="center"><a href="#first-run">🆓 პროვაიდერის დაკავშირება</a></td>
+    <td align="center"><a href="#first-run">🆓 პროვაიდერთან დაკავშირება</a></td>
   </tr>
   <tr>
     <td align="right"><b>💡 სწავლა</b></td>
     <td align="center"><a href="#-the-promise">💥 დაპირება</a></td>
     <td align="center"><a href="#-why-omniroute">🤔 რატომ OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 რა გამოარჩევს</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 რა განასხვავებს მას</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ ფუნქციები</b></td>
-    <td align="center"><a href="#-combos--the-flagship">🎯 კომბოები</a></td>
+    <td align="right"><b>⚙️ შესაძლებლობები</b></td>
+    <td align="center"><a href="#-combos--the-flagship">🎯 კომბინაციები</a></td>
     <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 პროვაიდერები</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
+    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI და MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
@@ -122,22 +122,22 @@
     <td align="center"><a href="#-private--local-first">🔒 პირადი</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 ნახეთ</b></td>
+    <td align="right"><b>👀 იხილეთ</b></td>
     <td align="center"><a href="#-omniroute-in-action">🎬 მოქმედებაში</a></td>
     <td align="center"><a href="#-whats-new">✨ რა არის ახალი</a></td>
     <td align="center"><a href="#-compatible-clis--coding-agents">🤖 თავსებადი CLI-ები</a></td>
   </tr>
   <tr>
     <td align="right"><b>💚 მხარდაჭერა</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 მხარდაჭერა / დონაცია</a></td>
+    <td align="center"><a href="#-support-omniroute">💚 მხარდაჭერა / შემოწირულობა</a></td>
     <td align="center"><a href="#-community--help">💬 საზოგადოება</a></td>
     <td align="center"><a href="#-sponsors">💖 სპონსორები</a></td>
   </tr>
   <tr>
     <td align="right"><b>📦 პროექტი</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ ტექნოლოგიური სტეკი</a></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ ტექნოლოგიური დასტა</a></td>
     <td align="center"><a href="#-documentation">📖 დოკუმენტაცია</a></td>
-    <td align="center"><a href="#-900-contributors">👥 კონტრიბუტორები</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 კონტრიბუტორები</a></td>
   </tr>
 </table>
 
@@ -146,73 +146,73 @@
 <div align="center">
   <b>🌐 67 ენაზე</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="ინგლისური (en)" title="ინგლისური (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="პორტუგალიური — ბრაზილია (pt-BR)" title="პორტუგალიური — ბრაზილია (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="პორტუგალიური (pt)" title="პორტუგალიური (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="ესპანური (es)" title="ესპანური (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="ფრანგული (fr)" title="ფრანგული (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="იტალიური (it)" title="იტალიური (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="გერმანული (de)" title="გერმანული (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="ნიდერლანდური (nl)" title="ნიდერლანდური (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="რუსული (ru)" title="რუსული (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="უკრაინული (uk-UA)" title="უკრაინული (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="პოლონური (pl)" title="პოლონური (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="ჩეხური (cs)" title="ჩეხური (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="სლოვაკური (sk)" title="სლოვაკური (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="რუმინული (ro)" title="რუმინული (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="უნგრული (hu)" title="უნგრული (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="ბულგარული (bg)" title="ბულგარული (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="დანიური (da)" title="დანიური (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="ფინური (fi)" title="ფინური (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="ნორვეგიული (no)" title="ნორვეგიული (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="შვედური (sv)" title="შვედური (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="ჩინური — გამარტივებული (zh-CN)" title="ჩინური — გამარტივებული (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="ჩინური — ტრადიციული (zh-TW)" title="ჩინური — ტრადიციული (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="იაპონური (ja)" title="იაპონური (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="კორეული (ko)" title="კორეული (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ტაილანდური (th)" title="ტაილანდური (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="ვიეტნამური (vi)" title="ვიეტნამური (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="ინდონეზიური (id)" title="ინდონეზიური (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="მალაიური (ms)" title="მალაიური (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="ფილიპინური (phi)" title="ფილიპინური (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ჰინდი (hi)" title="ჰინდი (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="გუჯარათული (gu)" title="გუჯარათული (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="მარათული (mr)" title="მარათული (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ტამილური (ta)" title="ტამილური (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ტელუგუ (te)" title="ტელუგუ (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="ბენგალური (bn)" title="ბენგალური (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="ურდუ (ur)" title="ურდუ (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="სპარსული (fa)" title="სპარსული (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="არაბული (ar)" title="არაბული (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="ებრაული (he)" title="ებრაული (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="თურქული (tr)" title="თურქული (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="აზერბაიჯანული (az)" title="აზერბაიჯანული (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="სუაჰილი (sw)" title="სუაჰილი (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="ბერძნული (el)" title="ბერძნული (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="ხორვატული (hr)" title="ხორვატული (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="სერბული (sr)" title="სერბული (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="ლიეტუვური (lt)" title="ლიეტუვური (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="ესტონური (et)" title="ესტონური (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="ლატვიური (lv)" title="ლატვიური (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="სლოვენური (sl)" title="სლოვენური (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="მალტური (mt)" title="მალტური (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="ირლანდიური (ga)" title="ირლანდიური (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="კანადა (kn)" title="კანადა (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="მალაიალამური (ml)" title="მალაიალამური (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ოდია (or)" title="ოდია (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="პენჯაბური (pa)" title="პენჯაბური (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="ნეპალური (ne)" title="ნეპალური (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="სინჰალური (si)" title="სინჰალური (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="ბირმული (my)" title="ბირმული (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ქმერული (km)" title="ქმერული (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="ჰაუსა (ha)" title="ჰაუსა (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="იორუბა (yo)" title="იორუბა (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="იგბო (ig)" title="იგბო (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="ამჰარული (am)" title="ამჰარული (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="უზბეკური (uz)" title="უზბეკური (uz)"></a>
   <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="სომხური (hy)" title="სომხური (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="ბოსნიური (bs)" title="ბოსნიური (bs)"></a>
 </div>
 
 <br/>
@@ -1289,23 +1289,23 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 <table>
   <tr><th align="left">ფენა</th><th align="left">ტექნოლოგია</th></tr>
-  <tr><td nowrap><b>გამშვები გარემო</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>ენა</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> მთელ <code>src/</code> და <code>open-sse/</code> დირექტორიებში (ბირთვში არცერთი <code>any</code> v2.0-დან)</td></tr>
+  <tr><td nowrap><b>გაშვების გარემო</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>ენა</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code>-სა და <code>open-sse/</code>-ში (<code>any</code>-ის ნულოვანი რაოდენობა ბირთვში v2.0-დან)</td></tr>
   <tr><td nowrap><b>ფრეიმვორკი</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>მონაცემთა ბაზა</b></td><td>better-sqlite3 (SQLite, WAL ჟურნალი) + LowDB (JSON მემკვიდრეობა) — 147 დომენური მოდული, 219 მიგრაცია</td></tr>
-  <tr><td nowrap><b>მეხსიერება</b></td><td>SQLite FTS5 სრული ტექსტი + int8-კვანტიზებული ვექტორული ემბედინგები, ტიპიზირებული დაკეი</td></tr>
-  <tr><td nowrap><b>სქემები</b></td><td>Zod 4 — MCP ინსტრუმენტის I/O ვალიდაცია + API კონტრაქტები</td></tr>
+  <tr><td nowrap><b>მონაცემთა ბაზა</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 დომენური მოდული, 220 მიგრაცია</td></tr>
+  <tr><td nowrap><b>მეხსიერება</b></td><td>SQLite FTS5 სრული ტექსტის ძიება + int8-quantized ვექტორული ემბედინგები, ტიპიზებული დეგრადაცია</td></tr>
+  <tr><td nowrap><b>სქემები</b></td><td>Zod 4 — MCP ხელსაწყოების I/O ვალიდაცია + API კონტრაქტები</td></tr>
   <tr><td nowrap><b>პროტოკოლები</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>სტრიმინგი</b></td><td>Server-Sent Events (SSE) + WebSocket ხიდი (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>სტრიმინგი</b></td><td>სერვერის მიერ გაგზავნილი მოვლენები (SSE) + WebSocket ხიდი (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>კომპრესია</b></td><td>12-ძრავიანი პაიპლაინი — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>ავთენტიფიკაცია და უსაფრთხოება</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP სკოპირებული ავთენტიფიკაცია · AES-256-GCM მონაცემთა დასვენებისას · DOMPurify</td></tr>
-  <tr><td nowrap><b>სტელსი</b></td><td>wreq-js — JA3 / JA4 TLS ანაბეჭდის იმიტაცია, 3-დონიანი პროქსი</td></tr>
-  <tr><td nowrap><b>გამძლეობა</b></td><td>ცირკუტ ბრეიკერი, ექსპონენციალური უკუსვლა, ანტი-თანდერინგ-ჰერდი, ავტომატური კომბო თვითგანკურნება</td></tr>
+  <tr><td nowrap><b>ავტენტიფიკაცია და უსაფრთხოება</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP scoped auth · AES-256-GCM დასვენებულ მონაცემებზე · DOMPurify</td></tr>
+  <tr><td nowrap><b>ფარულობა</b></td><td>wreq-js — JA3 / JA4 TLS fingerprint impersonation, 3-დონიანი პროქსი</td></tr>
+  <tr><td nowrap><b>მედეგობა</b></td><td>ამომრთველი, ექსპონენციური backoff, anti-thundering-herd, auto-combo თვითაღდგენა</td></tr>
   <tr><td nowrap><b>ლოგირება</b></td><td>pino — სტრუქტურირებული JSON ლოგები მოთხოვნის კონტექსტით</td></tr>
-  <tr><td nowrap><b>ტესტირება</b></td><td>Node.js ტესტ რანერი + Vitest — <b>56,000+ სტატიკური ტესტის დეკლარაცია</b> 7,800+ მონიტორინგულ ტესტ ფაილში (unit, integration, E2E, უსაფრთხოება, ეკოსისტემა)</td></tr>
+  <tr><td nowrap><b>ტესტირება</b></td><td>Node.js test runner + Vitest — <b>60,000-ზე მეტი სტატიკური ტესტის დეკლარაცია</b> 8,400-ზე მეტ თვალყურის დევნებულ ტესტის ფაილში (unit, integration, E2E, security, ecosystem)</td></tr>
   <tr><td nowrap><b>პლატფორმები</b></td><td>დესკტოპი (Electron) · Android (Termux) · PWA (ნებისმიერი ბრაუზერი)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ავტომატური npm გამოქვეყნება + Docker Hub გამოშვებისას</td></tr>
-  <tr><td nowrap><b>ბმულები</b></td><td><a href="https://omniroute.online">ვებგვერდი</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — npm-ის ავტომატური გამოქვეყნება + Docker Hub-ზე გამოქვეყნება რელიზისას</td></tr>
+  <tr><td nowrap><b>ბმულები</b></td><td><a href="https://omniroute.online">ვებსაიტი</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">
@@ -1316,29 +1316,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 </div>
 
-### 📘 დასაწყისი
+### 📘 დაწყება
 
 <table>
   <tr><th align="left">დოკუმენტი</th><th align="left">აღწერა</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">მომხმარებლის გზამკვლევი</a></b></td><td>პროვაიდერები, კომბოები, CLI ინტეგრაცია, განთავსება</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">დაყენების გზამკვლევი</a></b></td><td>სრული ინსტალაციის მეთოდები, CLI ინსტრუმენტების კონფიგურაცია, პროტოკოლის დაყენება, timeout-ის მორგება</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI ინსტრუმენტების გზამკვლევი</a></b></td><td>თითოეული ინსტრუმენტის დაყენება: Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">დაშორებული რეჟიმი</a></b></td><td>მართეთ დაშორებული OmniRoute (VPS) თქვენი ლეპტოპის CLI-დან სკოპირებული წვდომის ტოკენებით</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code კონფიგურაცია</a></b></td><td>Claude Code-ის მიბმა OmniRoute-ზე (ლოკალური/დაშორებული) <code>launch</code>-ით და თითოეული მოდელის პროფილებით</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">სწრაფი დასაწყისი</a></b></td><td>3-ნაბიჯიანი ინსტალაცია → დაკავშირება → კონფიგურაცია</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">მომხმარებლის სახელმძღვანელო</a></b></td><td>პროვაიდერები, კომბინაციები, CLI ინტეგრაცია, განთავსება</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">გამართვის სახელმძღვანელო</a></b></td><td>ინსტალაციის სრული მეთოდები, CLI ხელსაწყოების კონფიგურაციები, პროტოკოლის გამართვა, ტაიმაუტის მორგება</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI ხელსაწყოების სახელმძღვანელო</a></b></td><td>თითოეული ხელსაწყოს გამართვა Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot-ისთვის</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">დისტანციური რეჟიმი</a></b></td><td>დისტანციური OmniRoute-ის (VPS) მართვა ლეპტოპის CLI-დან შეზღუდული წვდომის ტოკენების მეშვეობით</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code-ის კონფიგურაცია</a></b></td><td>Claude Code-ის OmniRoute-ზე (ლოკალურ/დისტანციურ) მიბმა <code>launch</code>-ისა და თითოეული მოდელის პროფილების მეშვეობით</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">სწრაფი დაწყება</a></b></td><td>ინსტალაცია → დაკავშირება → კონფიგურაცია 3 ნაბიჯში</td></tr>
 </table>
 
 ### 🔧 ოპერაციები და განთავსება
 
 <table>
   <tr><th align="left">დოკუმენტი</th><th align="left">აღწერა</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker-ის გზამკვლევი</a></b></td><td>Docker run, Compose პროფილები, Caddy HTTPS, გვირაბები, იმიჯის ტეგები</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Podman-ის გზამკვლევი</a></b></td><td>Quadlet-ის systemd ინტეგრაცია, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM განთავსება</a></b></td><td>სრული სახელმძღვანელო: VM + nginx + Cloudflare დაყენება</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io განთავსება</a></b></td><td>განათავსეთ Fly.io-ზე მუდმივი საცავით</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux-ის გზამკვლევი</a></b></td><td>OmniRoute-ის გაშვება Android-ზე Termux-ის საშუალებით</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA გზამკვლევი</a></b></td><td>Progressive Web App-ის ინსტალაცია, ქეშირება, არქიტექტურა</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">წაშლის გზამკვლევი</a></b></td><td>სუფთა წაშლა ყველა ინსტალაციის მეთოდისთვის</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker-ის სახელმძღვანელო</a></b></td><td>Docker-ის გაშვება, Compose პროფილები, Caddy HTTPS, გვირაბები, იმიჯის ტეგები</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Podman-ის სახელმძღვანელო</a></b></td><td>Quadlet-ის systemd ინტეგრაცია, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM-ის განთავსება</a></b></td><td>სრული სახელმძღვანელო: VM + nginx + Cloudflare-ის გამართვა</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io-ზე განთავსება</a></b></td><td>Fly.io-ზე განთავსება მუდმივი საცავით</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux-ის სახელმძღვანელო</a></b></td><td>OmniRoute-ის გაშვება Android-ზე Termux-ის მეშვეობით</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-ის სახელმძღვანელო</a></b></td><td>Progressive Web App-ის ინსტალაცია, ქეშირება, არქიტექტურა</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">დეინსტალაციის სახელმძღვანელო</a></b></td><td>ყველა ინსტალაციის მეთოდის სრულად წაშლა</td></tr>
   <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">გარემოს კონფიგურაცია</a></b></td><td>სრული <code>.env</code> ცვლადები და მითითებები</td></tr>
 </table>
 
@@ -1346,82 +1346,82 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 <table>
   <tr><th align="left">დოკუმენტი</th><th align="left">აღწერა</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">არქიტექტურა</a></b></td><td>სისტემის არქიტექტურა, მონაცემთა ნაკადი და შიდა სტრუქტურა</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">კომპრესიის გზამკვლევი</a></b></td><td>7-ვარიანტიანი პაიპლაინი: გამორთული / მსუბუქი / სტანდარტული / აგრესიული / ულტრა / RTK / სტეკირებული</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK კომპრესია</a></b></td><td>ბრძანების-გამოტანის კომპრესია, ფილტრები, ნდობა, გადამოწმება, ნედლი გამოტანის აღდგენა</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">კომპრესიის ძრავები</a></b></td><td>Caveman, RTK, სტეკირებული პაიპლაინები, დაფა/API/MCP ზედაპირები</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">კომპრესიის წესების ფორმატი</a></b></td><td>JSON წესების პაკეტის სქემები Caveman-ისა და RTK ფილტრებისთვის</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">კომპრესიის ენის პაკეტები</a></b></td><td>ენის ამოცნობა და Caveman-ის წესების პაკეტის ავტორობა</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">გამძლეობის გზამკვლევი</a></b></td><td>ცირკუტ ბრეიკერები, cooldown-ები, რიგი, ანტი-thundering herd, TLS spoofing</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo ძრავა</a></b></td><td>16-ფაქტორიანი სკორინგი, რეჟიმის პაკეტები, თვითგანკურნება</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">პროქსის გზამკვლევი</a></b></td><td>3-დონიანი პროქსის სისტემა, 1proxy ბაზარი, რეესტრის CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">უფასო ტირები</a></b></td><td>კონსოლიდირებული დირექტორია: 34 დოკუმენტირებული განმეორებადი პული / 485 კატალოგირებული უფასო ტირის ჩანაწერი</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">ფუნქციების გალერეა</a></b></td><td>ვიზუალური დაფის ტური ეკრანული სურათებით</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">კოდის ბაზის დოკუმენტაცია</a></b></td><td>დამწყებთათვის მეგობრული კოდის ბაზის მიმოხილვა</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">არქიტექტურა</a></b></td><td>სისტემის არქიტექტურა, მონაცემთა ნაკადი და შიდა მექანიზმები</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">შეკუმშვის სახელმძღვანელო</a></b></td><td>7-ვარიანტიანი კონვეიერი: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK შეკუმშვა</a></b></td><td>ბრძანების შედეგის შეკუმშვა, ფილტრები, ნდობა, verify, დაუმუშავებელი შედეგის აღდგენა</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">შეკუმშვის ძრავები</a></b></td><td>Caveman, RTK, ერთმანეთზე დაწყობილი კონვეიერები, dashboard/API/MCP ზედაპირები</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">შეკუმშვის წესების ფორმატი</a></b></td><td>JSON წესების პაკეტების სქემები Caveman-ისა და RTK-ის ფილტრებისთვის</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">შეკუმშვის ენობრივი პაკეტები</a></b></td><td>ენის ამოცნობა და Caveman-ის წესების პაკეტების შექმნა</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">მედეგობის სახელმძღვანელო</a></b></td><td>ამომრთველი მექანიზმები, გაგრილების პერიოდები, რიგი, ერთდროული მოთხოვნების პრევენცია, TLS-ის გაყალბება</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo ძრავა</a></b></td><td>16-ფაქტორიანი შეფასება, რეჟიმების პაკეტები, თვითაღდგენა</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">პროქსის სახელმძღვანელო</a></b></td><td>პროქსის 3-დონიანი სისტემა, 1proxy marketplace, რეესტრის CRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">უფასო დონეები</a></b></td><td>გაერთიანებული დირექტორია: 34 დოკუმენტირებული განმეორებადი პული / უფასო დონის 485 კატალოგიზებული ჩანაწერი</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">ფუნქციების გალერეა</a></b></td><td>dashboard-ის ვიზუალური მიმოხილვა ეკრანის ანაბეჭდებით</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">კოდბაზის დოკუმენტაცია</a></b></td><td>კოდბაზის მიმოხილვა დამწყებთათვის</td></tr>
 </table>
 
 ### 🤖 პროტოკოლები და API-ები
 
 <table>
   <tr><th align="left">დოკუმენტი</th><th align="left">აღწერა</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API მითითება</a></b></td><td>ყველა endpoint მაგალითებით</td></tr>
-  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI სპეციფიკაცია</a></b></td><td>OpenAPI 3.0 სპეციფიკაცია</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP სერვერი</a></b></td><td>110 MCP ინსტრუმენტი, IDE კონფიგურაციები, Python/TS/Go კლიენტები</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP სერვერის გზამკვლევი</a></b></td><td>MCP ინსტალაცია, ტრანსპორტები და ინსტრუმენტების მითითება</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API-ის ცნობარი</a></b></td><td>ყველა endpoint მაგალითებით</td></tr>
+  <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI-ის სპეციფიკაცია</a></b></td><td>OpenAPI 3.0-ის სპეციფიკაცია</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP სერვერი</a></b></td><td>110 MCP ხელსაწყო, IDE-ის კონფიგურაციები, Python/TS/Go კლიენტები</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP სერვერის სახელმძღვანელო</a></b></td><td>MCP-ის ინსტალაცია, ტრანსპორტები და ხელსაწყოების ცნობარი</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A სერვერი</a></b></td><td>JSON-RPC 2.0 პროტოკოლი, უნარები, სტრიმინგი, ამოცანების მართვა</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A სერვერის გზამკვლევი</a></b></td><td>A2A აგენტის ბარათი, ამოცანები, უნარები და სტრიმინგი</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A სერვერის სახელმძღვანელო</a></b></td><td>A2A აგენტის ბარათი, ამოცანები, უნარები და სტრიმინგი</td></tr>
 </table>
 
 ### 📋 პროექტი და ხარისხი
 
 <table>
   <tr><th align="left">დოკუმენტი</th><th align="left">აღწერა</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">შეწყობა</a></b></td><td>დეველოპმენტის გარემოს დაყენება და სახელმძღვანელოები</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Branching & Release Model</a></b></td><td>სად მიემართება PR-ები (<code>release/*</code>), რას ნიშნავს <code>main</code> და ტეგები</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">ცვლილებების ჟურნალი</a></b></td><td>სრული გამოშვების ისტორია ვერსიების მიხედვით</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">უსაფრთხოების პოლიტიკა</a></b></td><td>მოწყვლადობის რეპორტინგი და უსაფრთხოების პრაქტიკები</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">კონტრიბუცია</a></b></td><td>განვითარების გარემოს მომზადება და სახელმძღვანელო მითითებები</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">ბრანჩებისა და რელიზების მოდელი</a></b></td><td>სად მიემართება PR-ები (<code>release/*</code>), რას ნიშნავს <code>main</code> და ტეგები</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">ცვლილებების ჟურნალი</a></b></td><td>რელიზების სრული ისტორია ვერსიების მიხედვით</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">უსაფრთხოების პოლიტიკა</a></b></td><td>მოწყვლადობების შესახებ შეტყობინება და უსაფრთხოების პრაქტიკები</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n სახელმძღვანელო</a></b></td><td>67 ენის მხარდაჭერა, თარგმნის სამუშაო პროცესი, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">გამოშვების საკონტროლო სია</a></b></td><td>გამოშვებამდე შემოწმების ნაბიჯები</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">გაფარვის გეგმა</a></b></td><td>ტესტირების დაფარვის სტრატეგია 56,000+ სტატიკური ტესტის დეკლარაციაზე 7,800+ მონიტორინგირებულ ტესტ ფაილში</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">რელიზის საკონტროლო სია</a></b></td><td>რელიზამდე ვალიდაციის ეტაპები</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">დაფარვის გეგმა</a></b></td><td>ტესტების დაფარვის სტრატეგია 8,400-ზე მეტ თვალყურის დევნებულ სატესტო ფაილში განთავსებული 60,000-ზე მეტი სტატიკური სატესტო დეკლარაციისთვის</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ წამყვანი კონტრიბუტორები
+# ⭐ მთავარი კონტრიბუტორები
 
-> OmniRoute ყალიბდება ენთუზიაზმით სავსე ღია კოდის საზოგადოების მიერ. ამ ადამიანებმა განსაკუთრებული წვლილი შეიტანეს პროექტის ხარისხში, სტაბილურობასა და მასშტაბურობაში. **გმადლობთ.**
+> OmniRoute ჩამოყალიბებულია ღია კოდის ენთუზიასტი საზოგადოების მიერ. ამ ადამიანებმა შეიტანეს განსაკუთრებული წვლილი, რომელმაც პირდაპირ იმოქმედა პროექტის ხარისხზე, სტაბილურობასა და მასშტაბზე. **გმადლობთ.**
 
 ### გარე კონტრიბუტორები გაერთიანებული pull request-ების მიხედვით
 
 <table>
-  <tr><th align="center">რანგი</th><th align="left">კონტრიბუტორი</th><th align="center">გაერთიანებული PR-ები</th><th align="right">~შეცვლილი ხაზები</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><th align="center">რეიტინგი</th><th align="left">კონტრიბუტორი</th><th align="center">გაერთიანებული PR-ები</th><th align="right">~შეცვლილი ხაზები</th></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>ცენზუსი აღებულია 2026-10-18 15:09:09 UTC-ზე, მიმდინარე <code>release/v3.8.52</code> წვერით <code>656f01cb43</code>. GitHub GraphQL-ის პაგინირებული ცენზუსი მოიცავს 9,191 გაერთიანებულ PR-ს: 3,834 რეპოზიტორიის მფლობელის მიერ, 229 Dependabot-ის მიერ, 6 სხვა ბოტებისა/აპების მიერ და <b>5,122 გარე PR 835 უნიკალური კონტრიბუტორისგან</b>. “შეცვლილი ხაზები” ნიშნავს GitHub-ის დამატებებს + წაშლას და მოიცავს გენერირებულ ფაილებს, lockfile-ებს, კატალოგებს, თარგმანებს და დოკუმენტაციას; ეს არის ცვლილებების მოცულობა და არა ავტორის მიერ დაწერილი კოდი. 49 PR-ს აქვს GitHub-ის მიხედვით 500,000-ზე მეტი შეცვლილი ხაზი (მაგალითად #13399, ერთი პროვაიდერის დამატება, შეიცავს 2,347 შეცვლილ ფაილს), რაც ზრდის ზოგიერთ ჯამურ მაჩვენებელს. თანაბარი შედეგები ერთადაა განთავსებული.</sub>
+<sub>აღწერა აღებულია 2026-11-03 03:01:19 UTC-ზე, აქტიური <code>release/v3.8.53</code> ტოტის ბოლო კომიტით <code>05bc048d6c</code>. გვერდებად დაყოფილი GitHub GraphQL აღწერა მოიცავს 9,947 გაერთიანებულ PR-ს: 4,130 რეპოზიტორიის მფლობელისგან, 240 Dependabot-ისგან, 6 სხვა ბოტებისა და აპებისგან და <b>5,571 გარე PR-ს 883 განსხვავებული კონტრიბუტორისგან</b>. „შეცვლილი ხაზები“ არის GitHub-ის დამატებებისა და წაშლის ჯამი და მოიცავს გენერირებულ ფაილებს, lockfile-ებს, კატალოგებს, თარგმანებსა და დოკუმენტაციას; ეს არის ცვლილებების მოცულობა და არა ავტორის მიერ დაწერილი LOC. 53 PR-ში GitHub-ის დიფები 500,000 ხაზზე მეტია (მაგალითად, #13399-ში, რომელიც ერთი პროვაიდერის დამატებას წარმოადგენს, მითითებულია 2,347 შეცვლილი ფაილი), რაც ზემოთ მოცემულ რამდენიმე ჯამურ მაჩვენებელს ზრდის. თანაბარი შედეგების მქონე მონაწილეებს ერთი რეიტინგი აქვთ.</sub>
 
-### GitHub-ით მინიჭებული კომიტები
+### GitHub-ისთვის მიკუთვნებული კომიტები
 
 <table>
   <tr>
@@ -1430,86 +1430,93 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 GitHub-თან დაკავშირებული კომიტი</sub>
+      <sub>🥇 418 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 GitHub-თან დაკავშირებული კომიტი</sub>
+      <sub>🥈 294 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 229 GitHub-თან დაკავშირებული კომიტი</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/backryun">
-        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
-        <b>backryun</b>
-      </a><br/>
-      <sub>🏅 202 GitHub-თან დაკავშირებული კომიტი</sub>
+      <sub>🥉 229 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 174 GitHub-თან დაკავშირებული კომიტი</sub>
+      <sub>🏅 222 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/RaviTharuma">
-        <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
-        <b>Ravi Tharuma</b>
+      <a href="https://github.com/backryun">
+        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
+        <b>backryun</b>
       </a><br/>
-      <sub>🏅 126 GitHub-თან დაკავშირებული კომიტი</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="160">
-      <a href="https://github.com/hartmark">
-        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
-        <b>Markus Hartung</b>
-      </a><br/>
-      <sub>🏅 114 GitHub-თან დაკავშირებული კომიტი</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/rdself">
-        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
-        <b>Randi</b>
-      </a><br/>
-      <sub>🏅 108 GitHub-თან დაკავშირებული კომიტი</sub>
+      <sub>🏅 202 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 87 GitHub-თან დაკავშირებული კომიტი</sub>
+      <sub>🏅 134 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://github.com/RaviTharuma">
+        <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
+        <b>Ravi Tharuma</b>
+      </a><br/>
+      <sub>🏅 126 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/hartmark">
+        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
+        <b>Markus Hartung</b>
+      </a><br/>
+      <sub>🏅 115 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/rdself">
+        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
+        <b>Randi</b>
+      </a><br/>
+      <sub>🏅 108 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 GitHub-თან დაკავშირებული კომიტი</sub>
+      <sub>🏅 70 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 68 GitHub-თან დაკავშირებული კომიტი</sub>
+      <sub>🏅 68 GitHub-ისთვის მიკუთვნებული კომიტი</sub>
     </td>
   </tr>
 </table>
 
-<sub>ხელახლა შემოწმებულია 2026-10-18 14:44:45 UTC-ზე: GitHub-თან დაკავშირებული კომიტები, რომლებიც დაფიქსირდა რეპოზიტორიის Contributors API-ის მიერ <code>release/v3.8.52</code> ნაგულისხმევი ბრენჩისთვის. API-მ დააბრუნა 849 იდენტობა (429 მომხმარებელი, 2 ბოტი, 418 ანონიმური); ეს ცხრილი გამორიცხავს მენტორს, ბოტებს და ანონიმურ იდენტობებს და ინარჩუნებს კონკურენციის ფრეს. იგი განსხვავდება როგორც ზემოთ მოცემული merged-PR რეიტინგისგან, ასევე ქვემოთ მოცემული Git-მეტადატების აღწერისგან.</sub>
+<sub>გადამოწმებულია 2026-11-03 02:09:16 UTC-ზე: GitHub-ისთვის მიკუთვნებული კომიტები, რომლებიც რეპოზიტორიის Contributors API-მ <code>release/v3.8.53</code> ნაგულისხმევი ბრენჩისთვის დააფიქსირა. API-მ დააბრუნა 903 იდენტიფიკატორი (429 მომხმარებელი, 2 ბოტი, 472 ანონიმური); ეს ცხრილი გამორიცხავს მმართველს, ბოტებსა და ანონიმურ იდენტიფიკატორებს და ინარჩუნებს თანაბარ შედეგებს. ის განსხვავდება როგორც ზემოთ მოცემული გაერთიანებული PR-ების რეიტინგისგან, ისე ქვემოთ მოცემული Git-მეტამონაცემების აღწერისგან.</sub>
 
-> 🙏 ამ კონტრიბუტორების მიერ დამატებული ფუნქციები, შეცდომების გასწორება და ინფრასტრუქტურის გაუმჯობესება არის **ძირითადი ნაწილი** იმისა, რაც OmniRoute-ს სანდო და ფუნქციურად მდიდარს ხდის. თითოეული pull request, თითოეული ტესტის ქეისი და თითოეული i18n თარგმანის ფაილი მნიშვნელოვანია. ღია კოდი შენდება სწორედ ასეთი ადამიანების მიერ.
+> 🙏 ამ კონტრიბუტორების ფუნქციები, ხარვეზების აღმოფხვრა და ინფრასტრუქტურის გაუმჯობესებები **ძირითადად განაპირობებს** OmniRoute-ის საიმედოობასა და ფუნქციონალურ სიმდიდრეს. მნიშვნელოვანია ყოველი pull request, ყოველი სატესტო შემთხვევა და i18n-ის ყოველი თარგმანის ფაილი. ღია კოდს სწორედ ასეთი ადამიანები ქმნიან.
 
 </div>
 
@@ -1619,26 +1626,26 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
 
 <div align="center">
 
-## 👥 900+ კონტრიბუტორი
+## 👥 1,000+ კონტრიბუტორი
 
 </div>
 
-[![კონტრიბუტორები](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![კონტრიბუტორები](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>აუდიტი ჩატარდა 2026-10-18-ს, მოქმედი <code>release/v3.8.52</code> ვერსიის ბოლო <code>ad160ab2d1</code> კომიტზე (6,826 კომიტი): <b>993 ნორმალიზებული, ადამიანის კუთვნილი Git-იდენტობა</b> — 707 წარმოდგენილია კომიტის ავტორად (მათ შორის, პროექტის შემნახველი), ხოლო 286 — მხოლოდ აშკარა <code>Co-authored-by</code> ჩანაწერებში. აღწერისას გამოიყენება <code>.mailmap</code>, ელფოსტის მისამართები შედარებულია რეგისტრის გაუთვალისწინებლად, GitHub-ის რიცხვითი და ჩვეულებრივი noreply მისამართები ერთიანდება მხოლოდ მაშინ, როდესაც ისინი იმავე მომხმარებლის სახელს შეიცავს, გამორიცხულია ბოტის/აგენტის/სერვისის/ადგილმჭერის 26 იდენტობა და ჩვეულებრივი ელფოსტის მისამართები არ ერთიანდება მხოლოდ იმიტომ, რომ მათი საჩვენებელი სახელები ემთხვევა. 2026-08-24-ის აუდიტში გამოქვეყნებული იყო 639; ამ მეთოდის ხელახლა გამოყენება იმ აუდიტის საბაზისო <code>ac02c5b42f</code> კომიტზე იძლევა 619-ს, ამიტომ ზრდა ახალი კონტრიბუტორების დამსახურებაა და არა ნაკლებად მკაცრი მეთოდის.</sub>
+<sub>აუდიტი ჩატარდა 2026-11-02-ს live <code>release/v3.8.53</code> tip <code>1c7135e0fb</code>-ზე (7,972 commit): <b>1,074 ნორმალიზებული ადამიანის Git-იდენტიფიკატორი</b> — 759 ჩანს commit-ის ავტორებად (მათ შორის, maintainer-იც), ხოლო 315 მხოლოდ მკაფიო <code>Co-authored-by</code> trailer-ებში. აღწერისას გამოყენებულია <code>.mailmap</code>, ელფოსტის მისამართები შედარებულია რეგისტრის გაუთვალისწინებლად, რიცხვითი და ჩვეულებრივი GitHub noreply მისამართები გაერთიანებულია მხოლოდ მაშინ, როცა ისინი ერთსა და იმავე handle-ს განსაზღვრავენ, გამორიცხულია 29 ბოტის/აგენტის/სერვისის/placeholder-ის იდენტიფიკატორი და ჩვეულებრივი ელფოსტის მისამართები არ გაერთიანებულა მხოლოდ display name-ების დამთხვევის საფუძველზე. 2026-08-24-ის აუდიტში გამოქვეყნებული იყო 639; ამ აუდიტის საბაზისო <code>ac02c5b42f</code>-ზე მეთოდის ხელახლა გაშვების შედეგად მიიღება 619, ამიტომ ზრდა ახალი კონტრიბუტორებით არის განპირობებული და არა უფრო ნაკლები შეზღუდვის მქონე მეთოდით.</sub>
 
-### როგორ შეიტანოთ წვლილი
+### როგორ შევიტანოთ წვლილი
 
-1. შექმენით რეპოზიტორიის ფორკი
-2. შექმენით განშტოება **აქტიური** `release/vX.Y.Z` განშტოების ბოლო მდგომარეობიდან (არა `main`-იდან) — იხილეთ [განშტოებებისა და გამოშვების მოდელი](docs/ops/BRANCHING_MODEL.md)
-3. შექმენით თქვენი ფუნქციონალის განშტოება (`git checkout -b feat/amazing-feature`)
-4. დააკომიტეთ თქვენი ცვლილებები (`git commit -m 'feat: add amazing feature'`)
-5. ატვირთეთ ცვლილებები განშტოებაში (`git push origin feat/amazing-feature`)
-6. გახსენით Pull Request, სადაც **base = შესაბამისი `release/vX.Y.Z` განშტოება**
+1. შექმენით repository-ის fork
+2. განშტოება შექმენით აქტიური `release/vX.Y.Z` tip-იდან (არა `main`-იდან) — იხილეთ [განშტოებისა და რელიზების მოდელი](docs/ops/BRANCHING_MODEL.md)
+3. შექმენით თქვენი feature branch (`git checkout -b feat/amazing-feature`)
+4. დააკომიტეთ ცვლილებები (`git commit -m 'feat: add amazing feature'`)
+5. ატვირთეთ branch-ზე (`git push origin feat/amazing-feature`)
+6. გახსენით Pull Request-ი **base = ეს `release/vX.Y.Z` branch**
 
 დეტალური მითითებებისთვის იხილეთ [CONTRIBUTING.md](CONTRIBUTING.md).
 
-### ახალი ვერსიის გამოშვება
+### ახალი ვერსიის რელიზი
 
 ```bash
 # შექმენით რელიზი — npm publish ავტომატურად შესრულდება
@@ -1683,109 +1690,109 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 </div>
 
-OmniRoute გიგანტების მხრებზე დგას. ის დაიწყო, როგორც **[9router](https://github.com/decolua/9router)**-ის ფორკი და Go პროექტის, **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)**-ის, TypeScript-ზე პორტი — შემდგომ კი ქვემოთ ჩამოთვლილი თითოეული ქვესისტემა შთაგონებული იყო ღია კოდის პროექტით, რომელმაც ეს მანამდე გააკეთა. თითოეულმა მათგანმა OmniRoute-ის კონკრეტული ნაწილი ჩამოაყალიბა. ამით ყველა მათგანს მადლობას ვუხდით. 🙏
+OmniRoute გიგანტების მხრებზე დგას. ის დაიწყო როგორც **[9router](https://github.com/decolua/9router)**-ის fork-ი და Go პროექტის **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** TypeScript-პორტი — შემდეგ კი ქვემოთ ჩამოთვლილი თითოეული ქვესისტემა შთაგონებული იყო open-source პროექტით, რომელმაც ეს გზა პირველმა გაიარა. თითოეულმა მათგანმა OmniRoute-ის კონკრეტული ნაწილი ჩამოაყალიბა. ეს ჩვენი მადლობის გადახდაა ყველა მათგანისთვის. 🙏
 
-> ⭐ ვარსკვლავების რაოდენობა გადამოწმებულია GitHub-ის REST API-ის მეშვეობით 2026 წლის 18 ოქტომბერს — დაუჭირეთ მხარი ამ პროექტებს ვარსკვლავით. რაოდენობები კონკრეტული თარიღისთვის დაფიქსირებული ზუსტი მონაცემებია და, ბუნებრივია, შეიცვლება.
+> ⭐ ვარსკვლავების რაოდენობა დადასტურებულია GitHub-ის REST API-დან 2026 წლის 3 ნოემბერს — ეწვიეთ ამ პროექტებს და დაუმატეთ ვარსკვლავი. რაოდენობები წარმოადგენს კონკრეტული თარიღის ზუსტ სურათს და ბუნებრივად შეიცვლება.
 
-### 🧬 წარმომავლობა და კარიბჭე
+### 🧬 წარმომავლობა და gateway
 
 <table>
-  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>საწყისი პროექტი, რომელზეც ეს ფორკია აგებული — აქ გაფართოებულია მრავალმოდალური API-ებით და სრულად გადაწერილია TypeScript-ზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>Go-ზე შექმნილი იმპლემენტაცია, რომელმაც JavaScript / TypeScript-ზე ამ პორტის შექმნა შთააგონა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>AI-კარიბჭე, რომლის საჯარო ფასების მონაცემთა ნაკრები ჩვენი ხარჯების აღრიცხვის სინქრონიზაციას ამარაგებს, ხოლო პროვაიდერების ნორმალიზაციის მოდელმა ჩვენი მარშრუტიზაცია განსაზღვრა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>MIT-ლიცენზირებული საწყისი კოდი, რომელიც ადაპტირდა ჩაშენებულ ChatGPT Web → Codex Responses ხიდში, მათ შორის ბრაუზერის სესიის, პასუხის ჩარჩოების ფორმირების, გამოყენების აღრიცხვისა და ვებძიების ადაპტერები.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>ნიმუშები, რომლებიც პორტირდა ნაკადის აღდგენაში, აზროვნების გარეშე მოქმედ ფსევდონიმებში, სარეზერვო ვებძიებაში, მცოცავი ფანჯრის ლიმიტებში, ჟურნალების მონაცემთა დაფარვასა და გაძლიერებულ გამშვებ პროცესებში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Cursor Composer-ის ხელსაწყოს არჩევის, გამომავალი მონაცემების შეზღუდვისა და ხელსაწყოს დაფიქსირების ნიმუშები, რომლებიც ადაპტირდა Cursor-ის ნატიურ შემსრულებელში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>ახალი შესვლისა და განახლების ტოკენის როტაციის ნიმუშები, რომლებიც პორტირდა Codex OAuth-ის ხელახალ ავთენტიფიკაციაში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Claude Code-თან თავსებადი გარდაქმნის ნაგულისხმევი პარამეტრები და ბილინგის სათაურების ქცევა, რომლებიც განზოგადდა OmniRoute-ის კონფიგურაციით მართვად ხიდში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>მისი Grok მოდელების შესაბამისობები, ყალბი TypeError-ის Statsig-გენერატორი, მოთხოვნისა და მოწყობილობის ნაგულისხმევი პარამეტრები და NDJSON პასუხების დამმუშავებელი მნიშვნელოვნად ადაპტირდა OmniRoute-ის Grok Web შემსრულებელში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>grok2api-merged-ის უკან მდგომი მთავარი ტრანზიტული კოდის წყარო; მისი მოდელის, სათაურის, დატვირთვის, Statsig-ისა და დამმუშავებლის იმპლემენტაციები შენარჩუნებულია Grok Web-ის წარმომავლობაში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>MIT-ლიცენზირებული საბაზისო წყარო Grok-ის დატვირთვისა და მოწყობილობის ნაგულისხმევი პარამეტრებისთვის, Statsig-გენერატორისა და <code>result.response</code> დამმუშავებლისთვის, რომლებიც TQZHR-ისა და grok2api-merged-ის გავლით გადმოვიდა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>grok2api-merged-ის მიერ მისი პროქსი-პულის შრის წყაროდ მითითებული ტრანზიტული წყარო; OmniRoute ინარჩუნებს წარმომავლობის ამ მითითებას, თუმცა თავის შეზღუდული შესაძლებლობების Grok Web შემსრულებელში პროქსი-პულის პორტზე პრეტენზიას არ აცხადებს.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>მისმა ქუქით ავთენტიფიცირებულმა Grok პროქსიმ და <code>result.response.token</code> ნაკადური გადაცემის ნიმუშმა OmniRoute-ის Grok Web ტრანსპორტის შექმნაზე მოახდინა გავლენა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Grok Web-ის საწყისი იმპლემენტაციის შექმნისას გათვალისწინებული იყო მისი HTTP/ბრაუზერის ზედა დონის სერვისის დიზაინი; მისი პირდაპირი HTTP გზა GrokProxy-დან მომდინარეობს, ამიტომ დამოუკიდებელი კოდის პორტზე პრეტენზია არ არის გაცხადებული.</td></tr>
+  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>ორიგინალი პროექტი, რომელზეც ეს fork-ია აგებული — აქ გაფართოებულია მრავალმოდალური API-ებით და სრულად არის გადაწერილი TypeScript-ზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>Go-თი განხორციელებული იმპლემენტაცია, რომელმაც შთააგონა ეს JavaScript / TypeScript პორტი.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>AI gateway, რომლის საჯარო ფასების მონაცემთა ნაკრები ამარაგებს ჩვენი ხარჯების აღრიცხვის სინქრონიზაციას და რომლის პროვაიდერების ნორმალიზაციის მოდელმა გავლენა მოახდინა ჩვენს მარშრუტიზაციაზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>MIT-ის წყარო ადაპტირებულია vendored ChatGPT Web → Codex Responses bridge-ში, მათ შორის ბრაუზერის სესიის, პასუხების framing-ის, გამოყენების და ვებძიების ადაპტერები.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>პატერნები გადატანილია stream recovery-ში, no-thinking alias-ებში, fallback ვებძიებაში, sliding-window ლიმიტებში, ჟურნალების რედაქტირებასა და გამაგრებულ launcher-ის ნაკადებში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Cursor Composer-ის tool-choice, output-constraint და tool-commit პატერნები ადაპტირებულია native Cursor executor-ში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Fresh-login-ისა და refresh-token-ის როტაციის პატერნები გადატანილია Codex OAuth-ის ხელახალ ავთენტიფიკაციაში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Claude Code-თან თავსებადი transform-ის ნაგულისხმევი პარამეტრები და billing-header-ის ქცევა განზოგადებულია OmniRoute-ის კონფიგურაციაზე დაფუძნებულ bridge-ში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>მისი Grok-ის მოდელების mapping-ები, fake-TypeError Statsig generator, request-ისა და device-ის ნაგულისხმევი პარამეტრები და NDJSON response processor არსებითად იქნა ადაპტირებული OmniRoute-ის Grok Web executor-ში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>grok2api-merged-ის ძირითადი ტრანზიტული კოდის წყარო; მისი model, header, payload, Statsig და processor-ის იმპლემენტაციები შენარჩუნებულია Grok Web-ის წარმომავლობაში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Grok-ის payload-ისა და device-ის ნაგულისხმევი პარამეტრების, Statsig generator-ისა და <code>result.response</code> processor-ის საფუძვლად არსებული MIT-ის წყარო, რომელიც TQZHR-ისა და grok2api-merged-ის გავლით გადმოვიდა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>grok2api-merged-ის მიერ მისი proxy-pool ფენისთვის მითითებული ტრანზიტული წყარო; OmniRoute ინარჩუნებს ამ წარმომავლობის მითითებას, თუმცა თავის bounded Grok Web executor-ში proxy-pool-ის პორტირებას არ იჩემებს.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>მისმა cookie-ით ავთენტიფიცირებულმა Grok proxy-მ და <code>result.response.token</code>-ის streaming პატერნმა გავლენა მოახდინა OmniRoute-ის Grok Web transport-ზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Grok Web-ის ორიგინალურ იმპლემენტაციას გაეცნენ მისი HTTP/browser upstream-ის დიზაინისთვის; მისი პირდაპირი HTTP გზა GrokProxy-დან მომდინარეობს, ამიტომ კოდის დამოუკიდებელი პორტირება არ არის მითითებული.</td></tr>
 </table>
 
-### 🗜️ კონტექსტისა და ტოკენების შეკუმშვა — ძრავები
+### 🗜️ კონტექსტისა და token-ის შეკუმშვა — engines
 
 <table>
-  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>ვირუსული პროექტი „რატომ გამოიყენო ბევრი ტოკენი, როცა ცოტაც აკეთებს საქმეს“ — მისი გამოქვაბულის კაცის მეტყველების ფილოსოფია საფუძვლად უდევს ჩვენს სტანდარტულ შეკუმშვის რეჟიმსა და შემავსებელი სიტყვების მოცილების/კონდენსაციის 30-ზე მეტ წესს.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>ბრძანებების გამოტანილი მონაცემების მაღალწარმადობრივი შეკუმშვა — შთააგონა ჩვენი RTK ძრავა, JSON ფილტრების DSL, დაუმუშავებელი გამოტანილი მონაცემების აღდგენა და კასკადური RTK → Caveman კონვეიერი.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>კონტექსტის შექცევადი შეკუმშვა (SmartCrusher) — შთააგონა ჩვენი <code>headroom</code> ძრავა და <code>ccr</code> აღდგენის მარკერის შაბლონი.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>პრომპტების შეკუმშვის კვლევა (LLMLingua / LLMLingua-2) — შთააგონა ჩვენი ასინქრონული, კოდისთვის უსაფრთხო და შეცდომისას საწყის მონაცემებზე დაბრუნებადი <code>llmlingua</code> ძრავა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>JS/ONNX პორტი (MobileBERT / XLM-RoBERTa), რომელიც ჩვენი LLMLingua ძრავის მუშა ნაკადის ბექენდად გამოიყენება.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>pt-BR ტოკენების შეკუმშვა — უზრუნველყოფს ჩვენს pt-BR ენობრივ პაკეტს: ბრაზილიურ-პორტუგალიურ გრამატიკაზე მორგებულ პლეონაზმების შემცირებასა და შემავსებელი სიტყვების მოცილებას.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>ვირუსული „ზარმაცი უფროსი დეველოპერის“ YAGNI-კოდერის უნარი — შთააგონა ჩვენი <b>less-code</b> გამოტანის სტილი: უმცირეს მუშა ცვლილებაზე ორიენტირება, რომელიც ამცირებს _გენერირებულ_ კოდს (Caveman-ის ლაკონიური პროზის ანალოგი გამოტანის ღერძზე).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>მისი მოქმედებაზე ორიენტირებული, ADHD-ის მქონე ადამიანებისთვის მოსახერხებელი პასუხის სტილი ადაპტირდა OmniRoute-ის ლაკონიურ გამოტანის სტილად ხუთ ენაზე.</td></tr>
+  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>ვირუსული პროექტი — „რატომ გამოვიყენოთ ბევრი ტოკენი, როცა ცოტაოდენი ტოკენიც ასრულებს საქმეს“ — მისი გამოქვაბულის ადამიანის მეტყველების ფილოსოფია ამუშავებს ჩვენს სტანდარტულ შეკუმშვის რეჟიმს და 30-ზე მეტ შემავსებლის/კონდენსაციის წესს.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>ბრძანებების გამოსავლის მაღალი წარმადობის შეკუმშვამ შთააგონა ჩვენი RTK ძრავა, JSON-ის ფილტრაციის DSL, დაუმუშავებელი გამოსავლის აღდგენა და ერთმანეთზე დაწყობილი RTK → Caveman კონვეიერი.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>კონტექსტის შექცევადმა შეკუმშვამ (SmartCrusher) შთააგონა ჩვენი <code>headroom</code> ძრავა და <code>ccr</code> აღდგენის მარკერის შაბლონი.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>პრომპტების შეკუმშვის კვლევამ (LLMLingua / LLMLingua-2) შთააგონა ჩვენი ასინქრონული, კოდისთვის უსაფრთხო, შეცდომისას ღია <code>llmlingua</code> ძრავა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>JS/ONNX პორტი (MobileBERT / XLM-RoBERTa), რომელიც ჩვენი LLMLingua ძრავისთვის worker-thread-ის ბექენდად გამოიყენება.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>PT-BR ტოკენების შეკუმშვა — ამუშავებს ჩვენს pt-BR ენობრივ პაკეტს: ბრაზილიური პორტუგალიური გრამატიკისთვის მორგებულ პლეონაზმების შემცირებასა და შემავსებლების მოცილებას.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>ვირუსულმა „ზარმაცი უფროსი დეველოპერის“ YAGNI-კოდერის უნარმა შთააგონა ჩვენი <b>less-code</b> Output Style: უმცირესი სამუშაო ცვლილების მართვა, რომელიც ამცირებს _გენერირებულ_ კოდს (გამოსავლის ღერძზე Caveman-ის ლაკონური პროზის მეწყვილე).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>მისი მოქმედებაზე ორიენტირებული, ADHD-სთვის მოსახერხებელი პასუხების სტილი ადაპტირდა OmniRoute-ის ლაკონურ გამოსავლის სტილად ხუთ ენაზე.</td></tr>
 </table>
 
-### 🧩 კომპაქტური ფორმატები, ტოკენების კვლევა და კოდის მცოდნე ხელსაწყოები
+### 🧩 კომპაქტური ფორმატები, ტოკენების კვლევა და კოდისადმი გააზრებული ხელსაწყოები
 
 <table>
-  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>ტოკენებზე ორიენტირებული ობიექტების ნოტაცია — მისმა სვეტოვანმა, სათაურისა და სტრიქონების მოდელმა ჩამოაყალიბა ჩვენი ცხრილური კომპაქტირების ეტაპი.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>მისმა კომპაქტურმა გრაფის ფორმატმა და ზოგადი პროფილის დიზაინმა გავლენა მოახდინა OmniRoute-ის ცხრილურ კომპაქტირებასა და Headroom კოდეკის ფორმატზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>MIT TypeScript იმპლემენტაცია, რომელიც უშუალოდ ჩავაშენეთ და გავაფართოეთ, როგორც Headroom-ის ზოგადი პროფილის კოდეკი.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Brotli/SQLite ქეში + თითოეული სესიის კონტექსტის დელტა — შთააგონა ჩვენი <code>session-dedup</code> ძრავა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Bash-ის გამოტანილი მონაცემების კომპაქტირება + MCP პროფილები — შთააგონა შეკუმშვის შეწყვეტის ჩვენი დისციპლინა და MCP ხელსაწყოების მანიფესტის შემცირება.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>შიგთავსის გათვალისწინებით, ფაილის თითოეული ტიპისთვის გამოტანილი მონაცემების შეკუმშვა და წარუმატებლობის გათვალისწინებით პროცესის შეწყვეტა — დაადასტურა ჩვენი ტიპების მიხედვით გადანაწილება და მინიმალური მოგებისას გამოტოვება.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>„იპოვე მოჩვენებითი ტოკენები“ — მისმა გატანისა და აღდგენადი მაჩვენებლის შაბლონმა გავლენა მოახდინა CCR-ის გატანის ჩვენს მიდგომაზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>სესიის გრაფისა და სხვადასხვა ბიჯს შორის სტრიქონების დუბლიკატების მოცილების გეგმა, რომელმაც გავლენა მოახდინა ჩვენს session-dedup დიზაინზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust-ის სვეტოვანი JSON + შიგთავსის მისამართით აღდგენა + შეტყობინებებს შორის დუბლიკატების მოცილება — დაადასტურა ჩვენი <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> ძრავების დიზაინი და ქეშისადმი სტაბილური ინვარიანტი „შეკუმშული ფორმა პოზიციისგან დამოუკიდებელია“.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>MCP ხელსაწყოების სქემების/აღწერების შეკუმშვა — გავლენა მოახდინა MCP ხელსაწყოების მანიფესტის კარდინალურობის შემცირებაზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Aider-ის სტილის რეპოზიტორიის რუკის რანჟირება — გავლენა მოახდინა რეპოზიტორიის რუკის / მოძიების რანჟირების ჩვენს კვლევაზე.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Shell-ის გამოტანილი მონაცემების დეკლარაციული შემცირება MCP-ის მეშვეობით — დაადასტურა Bash-ის გამოტანილი მონაცემების ჩვენი დეკლარაციული კომპაქტირება.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>TypeScript Compiler API-ის ხელსაწყოთა ნაკრები — შთააგონა პარსერზე დაფუძნებული კომენტარების მოცილება, რომელიც ინარჩუნებს სტრიქონულ, შაბლონურ და რეგულარული გამოსახულებების ლიტერალებს.</td></tr>
+  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Token-Oriented Object Notation — მისმა სვეტებზე დაფუძნებულმა, სათაურისა და მწკრივების მოდელმა ჩამოაყალიბა ჩვენი ტაბულარული კომპაქტაციის ეტაპი.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>მისმა კომპაქტურმა გრაფის ფორმატმა და ზოგადი პროფილის დიზაინმა გავლენა მოახდინა OmniRoute-ის ტაბულარულ კომპაქტაციასა და Headroom კოდეკის ფორმატზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>MIT-ის ლიცენზიით გამოქვეყნებული TypeScript-ის იმპლემენტაცია, რომელიც პირდაპირ იქნა ჩაშენებული და გაფართოებული Headroom-ის ზოგადი პროფილის კოდეკად.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Brotli/SQLite-ის ქეში + სესიებზე დაყოფილი კონტექსტის სხვაობა — შთააგონა ჩვენი <code>session-dedup</code> ძრავა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Bash-ის გამოსავლის კომპაქტაციამ + MCP-ის პროფილებმა შთააგონა ჩვენი შეკუმშვაზე უარის თქმის დისციპლინა და MCP ხელსაწყოების მანიფესტის შემცირება.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>შიგთავსზე ორიენტირებულმა, თითოეული ფაილის ტიპისთვის ცალ-ცალკე გამოსავლის შეკუმშვამ, მარცხის გათვალისწინებით უარის თქმამ, დაადასტურა ჩვენი ტიპების მიხედვით დისპეტჩინგი და მინიმალური მოგებისას გამოტოვება.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>„იპოვე მოჩვენება ტოკენები“ — მისმა გადატვირთვისა და აღდგენადი დესკრიპტორის შაბლონმა გავლენა მოახდინა ჩვენს CCR გადატვირთვის კონცეფციაზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>სესიების გრაფისა და სხვადასხვა turn-ს შორის სტრიქონების დუბლიკატების მოცილების სქემამ გავლენა მოახდინა ჩვენს session-dedup დიზაინზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust-ის სვეტოვანმა JSON-მა + შიგთავსის მისამართზე დაფუძნებულმა მიღებამ + შეტყობინებებს შორის დუბლიკატების მოცილებამ დაადასტურა ჩვენი <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> ძრავების დიზაინი და ქეშისთვის სტაბილური ინვარიანტი „შეკუმშული ფორმა პოზიციისგან დამოუკიდებელია“.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>MCP ხელსაწყოს სქემისა და აღწერის შეკუმშვამ გავლენა მოახდინა ჩვენს MCP ხელსაწყოების მანიფესტის კარდინალურობის შემცირებაზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Aider-ის სტილის რეპოზიტორიის რუკის რანჟირებამ გავლენა მოახდინა ჩვენი რეპოზიტორიის რუკისა და მიღების რანჟირების კვლევაზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>MCP-ის გავლით დეკლარაციულმა shell-ის გამოსავლის შემცირებამ დაადასტურა ჩვენი დეკლარაციული bash-ის გამოსავლის კომპაქტაცია.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>TypeScript Compiler API-ის ხელსაწყოთა ნაკრებმა შთააგონა ჩვენი პარსერზე დაფუძნებული კომენტარების მოცილება, რომელიც ინარჩუნებს სტრიქონულ, template- და regex-ლიტერალებს.</td></tr>
 </table>
 
 ### 🧠 მეხსიერება და RAG
 
 <table>
-  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>უნივერსალური მეხსიერების შრე — მისმა პროქსიზე, როგორც ჩაწერა/წაკითხვის საზღვარზე დაფუძნებულმა მოდელმა, ჩვენი მეხსიერების არქიტექტურა ჩამოაყალიბა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>მდგომარეობის მქონე აგენტები დონეებად დაყოფილი მეხსიერებით — ჩვენი დონეებად დაყოფილი Context Control & Recovery (CCR) მოდელის შთაგონების წყარო.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>ProblemMap-ის ტაქსონომია, რომელიც RAG/LLM-ის 16 განმეორებად შეფერხების რეჟიმს მოიცავს — საერთო ტერმინოლოგია ჩვენს პრობლემების აღმოფხვრის სახელმძღვანელოში.</td></tr>
+  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა OmniRoute-ს</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>უნივერსალური მეხსიერების ფენა — მისმა proxy-as-write/read-boundary მოდელმა ჩამოაყალიბა ჩვენი მეხსიერების არქიტექტურა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>მდგომარეობის მქონე აგენტები იერარქიული მეხსიერებით — შთააგონა ჩვენს Context Control & Recovery (CCR) იერარქიულ მოდელს.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>ProblemMap-ის ტაქსონომია RAG/LLM-ის 16 განმეორებადი წარუმატებლობის რეჟიმისთვის — საერთო ლექსიკა ჩვენს პრობლემების აღმოფხვრის სახელმძღვანელოში.</td></tr>
 </table>
 
-### 🛰️ ტრაფიკის შემოწმება, MITM და გამჭვირვალე პროქსი
+### 🛰️ ტრაფიკის ინსპექტირება, MITM და გამჭვირვალე პროქსი
 
 <table>
-  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>კოდირების ასისტენტსა და LLM-ს შორის ტრაფიკის MITM-ჩაჭრამ/ანალიზმა Traffic Inspector-ის ადრეული მოთხოვნების ჩამოყალიბებაზე იმოქმედა. ადრე მის საფუძველზე შექმნილი ოთხი მოდული — SSE-ის გაერთიანება, საუბრების ნორმალიზაცია, საიდუმლო მონაცემების შენიღბვა და სათაურების გასუფთავება — ჩანაცვლდა საჯარო პროტოკოლის სტანდარტებზე დაფუძნებული, დამოუკიდებელი clean-room რეალიზაციებით. ჰოსტის პირდაპირი გატარების ორი ზედაპირი (<code>passthrough.ts</code> და <code>_internal/bypass.cjs</code>) კვლავ OmniRoute-ის შიდა, დამოუკიდებლად კლასიფიცირებულ რეალიზაციებად რჩება; ისინი ამ ჩანაცვლების ფარგლებში თავიდან არ დაწერილა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>გამჭვირვალე პროქსი-მარშრუტიზაცია თითოეული პროცესისთვის — შთააგონა ჩვენი ავარიისადმი მდგრადი MITM-ის გათიშვა, სოკეტების უმოქმედობის დროის ამოწურვები, პროცესების მიკუთვნება <code>/proc</code>-ის მეშვეობით და TPROXY-ჩაჭერა.</td></tr>
+  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა OmniRoute-ს</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>კოდირების ასისტენტსა და LLM-ს შორის ტრაფიკის MITM-ით გადაჭერამ/ანალიზმა განსაზღვრა Traffic Inspector-ის ადრეული მოთხოვნები. ადრე მიღებული ოთხი მოდული — SSE-ის გაერთიანება, საუბრების ნორმალიზაცია, საიდუმლოებების დაფარვა და ჰედერების გასუფთავება — ჩანაცვლებულია დამოუკიდებელი, clean-room პრინციპით განხორციელებული რეალიზაციებით, რომლებიც საჯარო პროტოკოლის სტანდარტებს ეფუძნება. ჰოსტებზე passthrough-ის ორი ზედაპირი (<code>passthrough.ts</code> და <code>_internal/bypass.cjs</code>) კვლავ OmniRoute-ის შიდა რეალიზაციებად რჩება და დამოუკიდებლად არის კლასიფიცირებული; ისინი ამ ჩანაცვლების ფარგლებში ხელახლა არ დაწერილა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>თითოეული პროცესისთვის გამჭვირვალე პროქსით მარშრუტიზაციამ შთააგონა ავარიის მიმართ უსაფრთხო MITM-ის დასრულება, სოკეტის უმოქმედობის ტაიმ-აუტები, პროცესების ატრიბუცია <code>/proc</code>-ის მეშვეობით და TPROXY-ის დაჭერა.</td></tr>
 </table>
 
 ### 📚 მოდელების მონაცემები, დაკვირვებადობა და UI
 
 <table>
-  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>AI-მოდელების სპეციფიკაციების, ფასებისა და შესაძლებლობების ღია მონაცემთა ბაზა — ბუნებრივად სინქრონიზებულია ჩვენი მოდელების კატალოგთან.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>კვანძებზე დაფუძნებული გრაფების ბიბლიოთეკა, რომელიც საფუძვლად უდევს ჩვენს რეალურ დროში მომუშავე Compression Studio-სა და Combo/Routing Studio-ს.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>LangGraph Studio-ს სამუშაო პროცესის გრაფის ცოცხალმა ვიზუალიზაციამ შთააგონა ჩვენი Studio-ების რეალურ დროში კასკადური ხედი.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>მისმა დაკვირვებადობის მოდელმა „ტრასა → შუალედი → გენერაცია“ ჩვენი Compression Studio-ს ჩანჩქერული წარმოდგენა ჩამოაყალიბა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Istio-ს სერვისების ბადის დაკვირვებადობა — შთააგონა ჩვენი ავტომატური ამომრთველის ნიშნები და შეცდომის წიბოების ვიზუალიზაცია Routing/Combo Studio-ში.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>AI/LLM ბრენდების ლოგოები, რომლებიც ჩვენი მართვის პანელის მასშტაბით პროვაიდერების ხატულებს ასახავს.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>უზრუნველყოფს MIT-ლიცენზირებულ SVG დროშებს, რომლებსაც README-ის ენის ამომრჩევი იყენებს.</td></tr>
+  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა OmniRoute-ს</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>AI მოდელების სპეციფიკაციების, ფასებისა და შესაძლებლობების ღია მონაცემთა ბაზა — ბუნებრივად სინქრონიზებულია ჩვენს მოდელების კატალოგთან.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>კვანძებზე დაფუძნებული გრაფების ბიბლიოთეკა, რომელიც უზრუნველყოფს ჩვენს რეალურ დროში მოქმედ Compression Studio-სა და Combo/Routing Studio-ს.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>LangGraph Studio-ს რეალურ დროში სამუშაო პროცესის გრაფის ვიზუალიზაციამ შთააგონა ჩვენი Studio-ების რეალურ დროში კასკადური ხედი.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>მისმა trace → span → generation დაკვირვებადობის მოდელმა ჩამოაყალიბა ჩვენი Compression Studio-ს waterfall.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Istio-ს სერვის-მეშის დაკვირვებადობამ შთააგონა ჩვენი circuit-breaker-ის ბეიჯები და შეცდომების წიბოების ვიზუალიზაცია Routing/Combo Studio-ში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>AI/LLM-ის ბრენდების ლოგოები, რომლებიც ჩვენი dashboard-ის მასშტაბით პროვაიდერების ხატულებს ასახავს.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>უზრუნველყოფს MIT-ლიცენზირებულ SVG დროშებს, რომლებსაც README-ის ენის ამომრჩეველი იყენებს.</td></tr>
 </table>
 
 ### 🛡️ უსაფრთხოება
 
 <table>
-  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>ნაგულისხმევად უსაფრთხო ბიბლიოთეკების კურირებული სია, რომელიც უსაფრთხოებასთან დაკავშირებულ ჩვენს არჩევანს წარმართავს (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა OmniRoute-ს</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>უსაფრთხო ნაგულისხმევი პარამეტრებით ბიბლიოთეკების კურირებული სია, რომელიც წარმართავს ჩვენს უსაფრთხოების არჩევანს (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
-### 🧭 დამატებითი ინსტრუმენტები
+### 🧭 დამატებითი ხელსაწყოები
 
 <table>
-  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა მან OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>შთააგონა მოთხოვნების დუბლირების აღმოფხვრა, საგანგებო უფასო სარეზერვო ვარიანტი, ჩასანაცვლებელი Auto-Combo სტრატეგიები და განზრახვის მრავალენოვანი კლასიფიკაცია.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>მისმა ანგარიშის გათვალისწინებით მოდელების ხელახალმა ასახვამ, შესრულებადი ფაილის გზის ვალიდაციამ და გეგმის ნიშნულების ქცევამ OmniRoute-ის Antigravity-ის შესრულების გარემოს ჩამოყალიბებაზე იმოქმედა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>მისმა კვოტის განულებამდე დარჩენილი დროის კომპაქტურმა ფორმატმა შთააგონა OmniRoute-ში პროვაიდერის ლიმიტის შესაბამისი ჩვენება.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>მისმა ACP ინტეგრაციებმა შთააგონა OmniRoute-ის მიერ დაყენებული CLI აგენტების ავტომატური აღმოჩენა.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>გამოავლინა Grok Build-ის კვოტის ინტერფეისი; შემდეგ OmniRoute-მა დამოუკიდებლად გადაამოწმა და შეასწორა აქტიური სადენზე გადაცემის ფორმატი.</td></tr>
+  <tr><th align="left">პროექტი</th><th align="center">⭐</th><th align="left">როგორ შთააგონა OmniRoute-ს</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>შთააგონა მოთხოვნების დუბლიკატების აღმოფხვრა, საგანგებო ნულოვანი ღირებულების fallback, პლაგინირებადი Auto-Combo სტრატეგიები და მრავალენოვანი ინტენტის კლასიფიკაცია.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>მისმა ანგარიშზე დამოკიდებულმა მოდელების გადამისამართებამ, შესრულებადი ფაილების გზების ვალიდაციამ და გეგმის იარლიყების ქცევამ გავლენა მოახდინა OmniRoute-ის Antigravity runtime-ზე.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>მისმა კვოტის განულებამდე დარჩენილი დროის კომპაქტურმა ათვლის ფორმატმა შთააგონა შესაბამისი პროვაიდერის ლიმიტის ჩვენება OmniRoute-ში.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>მისმა ACP ინტეგრაციებმა შთააგონა OmniRoute-ში დაინსტალირებული CLI აგენტების ავტომატური აღმოჩენა.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>გამოავლინა Grok Build-ის კვოტის ზედაპირი; OmniRoute-მა შემდეგ დამოუკიდებლად გადაამოწმა და შეასწორა wire-ის ცოცხალი ფორმატი.</td></tr>
 </table>
 
 ## 📄 ლიცენზია

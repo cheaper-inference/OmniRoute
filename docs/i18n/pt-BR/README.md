@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                                  |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
-| -------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Provedores                    |           352            |   **358**   |          380          |
-| 🧠 IDs únicos de modelos de chat |           1320           |  **1374**   |         1475          |
-| 🖼️ Modality Bridge               | 🆕 visão + áudio + vídeo |      ✓      |           ✓           |
-| 📡 Catálogo Radar grátis         |        🆕 opt-in         |      ✓      |           ✓           |
-| ⚖️ Agendamento ciente de cotas   |      🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Telemetria de cotas           |        🆕 ao vivo        |      ✓      |           ✓           |
-| 🧰 Modo headless                 |            —             |      —      | 🆕 `serve --headless` |
-| 🛤️ Infraestrutura LTS rail       |            —             |      —      | 🆕 canais de release  |
-| 🔎 API de descoberta de modelos  |            —             |      —      | 🆕 `/v1/models/query` |
+|                                      |         v3.8.50          | **v3.8.51** |       `v3.8.53+`        |
+| ------------------------------------ | :----------------------: | :---------: | :---------------------: |
+| 🌐 Provedores                        |           352            |   **358**   |           380           |
+| 🧠 IDs exclusivos de modelos de chat |           1320           |  **1374**   |          1491           |
+| 🖼️ Ponte de modalidades              | 🆕 visão + áudio + vídeo |      ✓      |            ✓            |
+| 📡 Catálogo gratuito do Radar        |        🆕 opt-in         |      ✓      |            ✓            |
+| ⚖️ Agendamento ciente de cotas       |      🆕 Quota-Share      |      ✓      |            ✓            |
+| 📊 Telemetria de cotas               |        🆕 ao vivo        |      ✓      |            ✓            |
+| 🧰 Modo headless                     |            —             |      —      |  🆕 `serve --headless`  |
+| 🛤️ Infraestrutura ferroviária LTS    |            —             |      —      | 🆕 canais de lançamento |
+| 🔎 API de descoberta de modelos      |            —             |      —      |  🆕 `/v1/models/query`  |
 
-**→ [Roadmap](ROADMAP.md) — embarcando nos trilhos rumo ao `v3.9.0 LTS`**
+**→ [Roteiro](ROADMAP.md) — seguindo os trilhos rumo ao `v3.9.0 LTS`**
 
 </div>
 
@@ -98,46 +98,46 @@
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Início</b></td>
-    <td align="center"><a href="#-quick-start">🚀 Início Rápido</a></td>
+    <td align="right"><b>🚀 Comece</b></td>
+    <td align="center"><a href="#-quick-start">🚀 Início rápido</a></td>
     <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Instalar</a></td>
     <td align="center"><a href="#first-run">🆓 Conectar um provedor</a></td>
   </tr>
   <tr>
     <td align="right"><b>💡 Aprenda</b></td>
-    <td align="center"><a href="#-the-promise">💥 A Promessa</a></td>
-    <td align="center"><a href="#-why-omniroute">🤔 Por que OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 O Que Diferencia</a></td>
+    <td align="center"><a href="#-the-promise">💥 A promessa</a></td>
+    <td align="center"><a href="#-why-omniroute">🤔 Por que o OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 O que o diferencia</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Funcionalidades</b></td>
+    <td align="right"><b>⚙️ Recursos</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
     <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Provedores</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
+    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI e MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
     <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ Compressão</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Onde Roda</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ Onde ele é executado</a></td>
     <td align="center"><a href="#-private--local-first">🔒 Privado</a></td>
   </tr>
   <tr>
     <td align="right"><b>👀 Veja</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 Em Ação</a></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 Em ação</a></td>
     <td align="center"><a href="#-whats-new">✨ Novidades</a></td>
-    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 CLIs Compatíveis</a></td>
+    <td align="center"><a href="#-compatible-clis--coding-agents">🤖 CLIs compatíveis</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Apoio</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Apoie / Doe</a></td>
+    <td align="right"><b>💚 Apoie</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Apoiar / Doar</a></td>
     <td align="center"><a href="#-community--help">💬 Comunidade</a></td>
     <td align="center"><a href="#-sponsors">💖 Patrocinadores</a></td>
   </tr>
   <tr>
     <td align="right"><b>📦 Projeto</b></td>
-    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Stack Tecnológica</a></td>
+    <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Stack tecnológica</a></td>
     <td align="center"><a href="#-documentation">📖 Documentação</a></td>
-    <td align="center"><a href="#-900-contributors">👥 Contribuidores</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Contribuidores</a></td>
   </tr>
 </table>
 
@@ -146,14 +146,14 @@
 <div align="center">
   <b>🌐 Em 67 idiomas</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Inglês (en)" title="Inglês (en)"></a>
   <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
   <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
   <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Espanhol (es)" title="Espanhol (es)"></a>
   <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Francês (fr)" title="Francês (fr)"></a>
   <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
   <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Alemão (de)" title="Alemão (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Holandês (nl)" title="Holandês (nl)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Neerlandês (nl)" title="Neerlandês (nl)"></a>
   <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Russo (ru)" title="Russo (ru)"></a>
   <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Ucraniano (uk-UA)" title="Ucraniano (uk-UA)"></a>
   <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polonês (pl)" title="Polonês (pl)"></a>
@@ -176,10 +176,10 @@
   <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Malaio (ms)" title="Malaio (ms)"></a>
   <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
   <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Hindi (hi)" title="Hindi (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Gujarati (gu)" title="Gujarati (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Marathi (mr)" title="Marathi (mr)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Guzerate (gu)" title="Guzerate (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Marata (mr)" title="Marata (mr)"></a>
   <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Tâmil (ta)" title="Tâmil (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Telugu (te)" title="Telugu (te)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Telugo (te)" title="Telugo (te)"></a>
   <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Bengali (bn)" title="Bengali (bn)"></a>
   <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Urdu (ur)" title="Urdu (ur)"></a>
   <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Persa (fa)" title="Persa (fa)"></a>
@@ -199,8 +199,8 @@
   <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Irlandês (ga)" title="Irlandês (ga)"></a>
   <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Canarês (kn)" title="Canarês (kn)"></a>
   <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Malaiala (ml)" title="Malaiala (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Oriá (or)" title="Oriá (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Panjabi (pa)" title="Panjabi (pa)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Odia (or)" title="Odia (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Punjabi (pa)" title="Punjabi (pa)"></a>
   <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Nepalês (ne)" title="Nepalês (ne)"></a>
   <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Cingalês (si)" title="Cingalês (si)"></a>
   <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Birmanês (my)" title="Birmanês (my)"></a>
@@ -1284,28 +1284,28 @@ Métricas canônicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
 <br/>
 <div align="center">
 
-## 🛠️ Stack Tecnológico
+## 🛠️ Pilha tecnológica
 
 </div>
 
 <table>
   <tr><th align="left">Camada</th><th align="left">Tecnologia</th></tr>
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Linguagem</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> em <code>src/</code> e <code>open-sse/</code> (zero <code>any</code> no core desde a v2.0)</td></tr>
+  <tr><td nowrap><b>Linguagem</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> em <code>src/</code> e <code>open-sse/</code> (zero <code>any</code> no núcleo desde a v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Banco de Dados</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legado) — 147 módulos de domínio, 219 migrações</td></tr>
-  <tr><td nowrap><b>Memória</b></td><td>SQLite FTS5 full-text + embeddings vetoriais int8 quantizados, decaimento tipado</td></tr>
-  <tr><td nowrap><b>Esquemas</b></td><td>Zod 4 — Validação de I/O de ferramentas MCP + contratos de API</td></tr>
+  <tr><td nowrap><b>Banco de dados</b></td><td>better-sqlite3 (SQLite, registro WAL) + LowDB (JSON legado) — 147 módulos de domínio, 220 migrações</td></tr>
+  <tr><td nowrap><b>Memória</b></td><td>Pesquisa de texto completo com SQLite FTS5 + embeddings vetoriais quantizados em int8, decaimento tipado</td></tr>
+  <tr><td nowrap><b>Esquemas</b></td><td>Zod 4 — validação de E/S de ferramentas MCP + contratos de API</td></tr>
   <tr><td nowrap><b>Protocolos</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Streaming</b></td><td>Server-Sent Events (SSE) + ponte WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Compressão</b></td><td>Pipeline de 12 engines — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Auth &amp; segurança</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + auth com escopo MCP · AES-256-GCM em repouso · DOMPurify</td></tr>
-  <tr><td nowrap><b>Stealth</b></td><td>wreq-js — Impersonação de fingerprint TLS JA3 / JA4, proxy em 3 níveis</td></tr>
-  <tr><td nowrap><b>Resiliência</b></td><td>Circuit breaker, backoff exponencial, anti-thundering-herd, auto-combo de auto-recuperação</td></tr>
-  <tr><td nowrap><b>Logging</b></td><td>pino — logs JSON estruturados com contexto de requisição</td></tr>
-  <tr><td nowrap><b>Testes</b></td><td>Node.js test runner + Vitest — <b>56.000+ declarações de testes estáticos</b> em mais de 7.800 arquivos de teste rastreados (unitário, integração, E2E, segurança, ecossistema)</td></tr>
+  <tr><td nowrap><b>Streaming</b></td><td>Eventos enviados pelo servidor (SSE) + ponte WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Compressão</b></td><td>Pipeline com 12 mecanismos — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autenticação e segurança</b></td><td>OAuth 2.0 (PKCE) + JWT + chaves de API + autenticação MCP com escopo · AES-256-GCM em repouso · DOMPurify</td></tr>
+  <tr><td nowrap><b>Furtividade</b></td><td>wreq-js — imitação de impressão digital TLS JA3 / JA4, proxy de 3 níveis</td></tr>
+  <tr><td nowrap><b>Resiliência</b></td><td>Disjuntor, recuo exponencial, proteção contra efeito manada, autocorreção por combinação automática</td></tr>
+  <tr><td nowrap><b>Registro</b></td><td>pino — registros JSON estruturados com contexto da solicitação</td></tr>
+  <tr><td nowrap><b>Testes</b></td><td>Executor de testes do Node.js + Vitest — <b>mais de 60.000 declarações estáticas de testes</b> em mais de 8.400 arquivos de teste monitorados (unitários, de integração, E2E, de segurança e do ecossistema)</td></tr>
   <tr><td nowrap><b>Plataformas</b></td><td>Desktop (Electron) · Android (Termux) · PWA (qualquer navegador)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publicação automática no npm + Docker Hub ao liberar versão</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — publicação automática no npm + Docker Hub no lançamento</td></tr>
   <tr><td nowrap><b>Links</b></td><td><a href="https://omniroute.online">Site</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1317,112 +1317,112 @@ Métricas canônicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
 
 </div>
 
-### 📘 Primeiros Passos
+### 📘 Primeiros passos
 
 <table>
   <tr><th align="left">Documento</th><th align="left">Descrição</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Guia do Usuário</a></b></td><td>Provedores, combos, integração com CLI, implantação</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Guia de Instalação</a></b></td><td>Métodos de instalação completos, configurações da ferramenta CLI, configuração de protocolo, ajuste de timeout</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Guia das Ferramentas CLI</a></b></td><td>Configuração por ferramenta para Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Modo Remoto</a></b></td><td>Controle um OmniRoute remoto (VPS) a partir do seu laptop via CLI usando tokens de acesso com escopo</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Guia do usuário</a></b></td><td>Provedores, combinações, integração com CLI, implantação</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Guia de configuração</a></b></td><td>Métodos completos de instalação, configurações de ferramentas CLI, configuração de protocolo, ajuste de timeout</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Guia de ferramentas CLI</a></b></td><td>Configuração por ferramenta para Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Modo remoto</a></b></td><td>Controle um OmniRoute remoto (VPS) a partir da CLI do seu laptop usando tokens de acesso com escopo</td></tr>
   <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Configuração do Claude Code</a></b></td><td>Aponte o Claude Code para o OmniRoute (local/remoto) com <code>launch</code> + perfis por modelo</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Início Rápido</a></b></td><td>Instalação em 3 passos → conectar → configurar</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">Início rápido</a></b></td><td>Instale → conecte → configure em 3 etapas</td></tr>
 </table>
 
-### 🔧 Operações & Implantação
+### 🔧 Operações e implantação
 
 <table>
   <tr><th align="left">Documento</th><th align="left">Descrição</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Guia Docker</a></b></td><td>Execução Docker, perfis Compose, Caddy HTTPS, túneis, tags de imagem</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Guia Podman</a></b></td><td>Integração Quadlet com systemd, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Guia do Docker</a></b></td><td>Execução do Docker, perfis do Compose, HTTPS com Caddy, túneis, tags de imagem</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Guia do Podman</a></b></td><td>Integração com systemd via Quadlet, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Implantação em VM</a></b></td><td>Guia completo: configuração de VM + nginx + Cloudflare</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Implantação Fly.io</a></b></td><td>Implante no Fly.io com armazenamento persistente</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Guia Termux</a></b></td><td>Execute o OmniRoute no Android via Termux</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Guia PWA</a></b></td><td>Instalação de Progressive Web App, cache, arquitetura</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Guia de Desinstalação</a></b></td><td>Remoção limpa para todos os métodos de instalação</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Configuração de Ambiente</a></b></td><td>Variáveis completas do <code>.env</code> e referências</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Implantação no Fly.io</a></b></td><td>Implante no Fly.io com armazenamento persistente</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Guia do Termux</a></b></td><td>Execute o OmniRoute no Android via Termux</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Guia de PWA</a></b></td><td>Instalação, cache e arquitetura de Progressive Web App</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Guia de desinstalação</a></b></td><td>Remoção completa para todos os métodos de instalação</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Configuração do ambiente</a></b></td><td>Variáveis e referências completas de <code>.env</code></td></tr>
 </table>
 
-### 🧠 Funcionalidades & Arquitetura
+### 🧠 Recursos e arquitetura
 
 <table>
   <tr><th align="left">Documento</th><th align="left">Descrição</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Arquitetura</a></b></td><td>Arquitetura do sistema, fluxo de dados e internos</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Guia de Compressão</a></b></td><td>Pipeline com 7 opções: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Compressão RTK</a></b></td><td>Compressão de saída de comandos, filtros, confiança, verificação, recuperação de saída bruta</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Mecanismos de Compressão</a></b></td><td>Caveman, RTK, pipelines empilhados, superfícies do dashboard/API/MCP</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Formato das Regras de Compressão</a></b></td><td>Esquemas de pacotes de regras JSON para filtros Caveman e RTK</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Pacotes de Idioma de Compressão</a></b></td><td>Detecção de idioma e criação de pacotes de regras Caveman</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Guia de Resiliência</a></b></td><td>Disjuntores, cooldowns, fila, anti-thundering herd, falsificação de TLS</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Mecanismo Auto-Combo</a></b></td><td>Pontuação de 16 fatores, pacotes de modo, auto-recuperação</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Guia de Proxy</a></b></td><td>Sistema de proxy em 3 níveis, marketplace 1proxy, CRUD de registro</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Planos Gratuitos</a></b></td><td>Diretório consolidado: 34 pools recorrentes documentados / 485 entradas de planos gratuitos catalogadas</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeria de Funcionalidades</a></b></td><td>Tour visual pelo dashboard com capturas de tela</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Documentação do Código-Fonte</a></b></td><td>Visão geral do código-fonte para iniciantes</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Arquitetura</a></b></td><td>Arquitetura do sistema, fluxo de dados e componentes internos</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Guia de compressão</a></b></td><td>Pipeline com 7 opções: desativado / leve / padrão / agressivo / ultra / RTK / empilhado</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Compressão RTK</a></b></td><td>Compressão da saída de comandos, filtros, confiança, verificação, recuperação da saída bruta</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Mecanismos de compressão</a></b></td><td>Caveman, RTK, pipelines empilhados, interfaces do dashboard/API/MCP</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Formato das regras de compressão</a></b></td><td>Esquemas de pacotes de regras JSON para filtros Caveman e RTK</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Pacotes de idiomas de compressão</a></b></td><td>Detecção de idioma e criação de pacotes de regras Caveman</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Guia de resiliência</a></b></td><td>Disjuntores, períodos de espera, fila, prevenção do efeito rebanho, falsificação de TLS</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Mecanismo de combinações automáticas</a></b></td><td>Pontuação com 16 fatores, pacotes de modo, autorrecuperação</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Guia de proxy</a></b></td><td>Sistema de proxy em 3 níveis, marketplace 1proxy, CRUD do registro</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Planos gratuitos</a></b></td><td>Diretório consolidado: 34 grupos recorrentes documentados / 485 entradas de planos gratuitos catalogadas</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galeria de recursos</a></b></td><td>Visão geral visual do dashboard com capturas de tela</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Documentação da base de código</a></b></td><td>Visão geral da base de código para iniciantes</td></tr>
 </table>
 
-### 🤖 Protocolos & APIs
+### 🤖 Protocolos e APIs
 
 <table>
   <tr><th align="left">Documento</th><th align="left">Descrição</th></tr>
   <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">Referência da API</a></b></td><td>Todos os endpoints com exemplos</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">Especificação OpenAPI</a></b></td><td>Especificação OpenAPI 3.0</td></tr>
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">Servidor MCP</a></b></td><td>110 ferramentas MCP, configurações de IDE, clientes Python/TS/Go</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Guia do Servidor MCP</a></b></td><td>Instalação do MCP, transportes e referência de ferramentas</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Guia do servidor MCP</a></b></td><td>Instalação do MCP, transportes e referência de ferramentas</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">Servidor A2A</a></b></td><td>Protocolo JSON-RPC 2.0, habilidades, streaming, gerenciamento de tarefas</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Guia do Servidor A2A</a></b></td><td>Cartão de agente A2A, tarefas, habilidades e streaming</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Guia do servidor A2A</a></b></td><td>Cartão do agente A2A, tarefas, habilidades e streaming</td></tr>
 </table>
 
-### 📋 Projeto & Qualidade
+### 📋 Projeto e qualidade
 
 <table>
   <tr><th align="left">Documento</th><th align="left">Descrição</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Contribuindo</a></b></td><td>Configuração de desenvolvimento e diretrizes</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Modelo de Branch & Release</a></b></td><td>Onde os PRs são direcionados (<code>release/*</code>), o que <code>main</code> e tags significam</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">Changelog</a></b></td><td>Histórico completo de lançamentos por versão</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Política de Segurança</a></b></td><td>Relato de vulnerabilidades e práticas de segurança</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">Guia de i18n</a></b></td><td>Suporte a 67 idiomas, fluxo de tradução, RTL</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Checklist de Release</a></b></td><td>Etapas de validação pré-lançamento</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Plano de Cobertura</a></b></td><td>Estrategia de cobertura de testes para mais de 56.000 declarações de teste estáticas em mais de 7.800 arquivos de teste monitorados</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Como contribuir</a></b></td><td>Configuração e diretrizes de desenvolvimento</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Modelo de ramificação e lançamento</a></b></td><td>Para onde os PRs são direcionados (<code>release/*</code>), o que <code>main</code> e as tags significam</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">Registro de alterações</a></b></td><td>Histórico completo de lançamentos por versão</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Política de segurança</a></b></td><td>Relato de vulnerabilidades e práticas de segurança</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">Guia de i18n</a></b></td><td>Suporte a 67 idiomas, fluxo de trabalho de tradução, RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Lista de verificação de lançamento</a></b></td><td>Etapas de validação antes do lançamento</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Plano de cobertura</a></b></td><td>Estratégia de cobertura de testes para mais de 60.000 declarações de testes estáticos em mais de 8.400 arquivos de teste acompanhados</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ Principais Contribuidores
+# ⭐ Principais contribuidores
 
-> OmniRoute é moldado por uma comunidade open-source apaixonada. Estes indivíduos fizeram contribuições excepcionais que impactam diretamente a qualidade, estabilidade e alcance do projeto. **Obrigado.**
+> O OmniRoute é moldado por uma apaixonada comunidade de código aberto. Essas pessoas fizeram contribuições excepcionais que impactam diretamente a qualidade, a estabilidade e o alcance do projeto. **Obrigado.**
 
 ### Contribuidores externos por pull requests mesclados
 
 <table>
-  <tr><th align="center">Posição</th><th align="left">Contribuidor</th><th align="center">PRs Mesclados</th><th align="right">~Linhas alteradas</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25.326.561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13.456.272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270.562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411.243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78.276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3.562.936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5.972.314</td></tr>
-  <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80.663</td></tr>
-  <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500.065</td></tr>
-  <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230.872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2.849.554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68.548</td></tr>
-  <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43.502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6.661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245.976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33.626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809.391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147.896</td></tr>
-  <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13.112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26.093</td></tr>
+  <tr><th align="center">Classificação</th><th align="left">Contribuidor</th><th align="center">PRs mesclados</th><th align="right">~Linhas alteradas</th></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
+  <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
+  <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
+  <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
 </table>
 
-<sub>Censo realizado em 2026-10-18 15:09:09 UTC com o tip ao vivo <code>release/v3.8.52</code> <code>656f01cb43</code>. O censo paginado do GitHub GraphQL contém 9.191 PRs mesclados: 3.834 pelo proprietário do repositório, 229 pelo Dependabot, 6 por outros bots/apps e <b>5.122 PRs externos de 835 contribuidores distintos</b>. “Linhas alteradas” é a soma de adições + deleções do GitHub e inclui arquivos gerados, lockfiles, catálogos, traduções e documentação; é churn, não LOC autorado. 49 PRs relatam diffs do GitHub acima de 500.000 linhas (por exemplo #13399, uma única adição de provedor, lista 2.347 arquivos alterados), o que infla alguns totais acima. Empates são ranqueados juntos.</sub>
+<sub>Censo realizado em 2026-11-03 03:01:19 UTC com a ponta atual de <code>release/v3.8.53</code> em <code>05bc048d6c</code>. O censo paginado do GitHub GraphQL contém 9.947 PRs mesclados: 4.130 pelo proprietário do repositório, 240 pelo Dependabot, 6 por outros bots/aplicativos e <b>5.571 PRs externos de 883 contribuidores distintos</b>. “Linhas alteradas” são as adições + exclusões do GitHub e incluem arquivos gerados, arquivos de bloqueio, catálogos, traduções e documentação; isso representa churn, não LOC de autoria. 53 PRs informam diferenças do GitHub superiores a 500.000 linhas (por exemplo, o #13399, uma única adição de provedor, lista 2.347 arquivos alterados), o que infla vários totais acima. Empates são classificados juntos.</sub>
 
-### Commits atribuídos pelo GitHub
+### Commits atribuídos ao GitHub
 
 <table>
   <tr>
@@ -1431,86 +1431,93 @@ Métricas canônicas em 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 commits atribuídos no GitHub</sub>
+      <sub>🥇 418 commits atribuídos pelo GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 commits atribuídos no GitHub</sub>
+      <sub>🥈 294 commits atribuídos pelo GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 229 commits atribuídos no GitHub</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/backryun">
-        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
-        <b>backryun</b>
-      </a><br/>
-      <sub>🏅 202 commits atribuídos no GitHub</sub>
+      <sub>🥉 229 commits atribuídos pelo GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 174 commits atribuídos no GitHub</sub>
+      <sub>🏅 222 commits atribuídos pelo GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/RaviTharuma">
-        <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
-        <b>Ravi Tharuma</b>
+      <a href="https://github.com/backryun">
+        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
+        <b>backryun</b>
       </a><br/>
-      <sub>🏅 126 commits atribuídos no GitHub</sub>
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="160">
-      <a href="https://github.com/hartmark">
-        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
-        <b>Markus Hartung</b>
-      </a><br/>
-      <sub>🏅 114 commits atribuídos no GitHub</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/rdself">
-        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
-        <b>Randi</b>
-      </a><br/>
-      <sub>🏅 108 commits atribuídos no GitHub</sub>
+      <sub>🏅 202 commits atribuídos pelo GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 87 commits atribuídos no GitHub</sub>
+      <sub>🏅 134 commits atribuídos pelo GitHub</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="160">
+      <a href="https://github.com/RaviTharuma">
+        <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
+        <b>Ravi Tharuma</b>
+      </a><br/>
+      <sub>🏅 126 commits atribuídos pelo GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/hartmark">
+        <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
+        <b>Markus Hartung</b>
+      </a><br/>
+      <sub>🏅 115 commits atribuídos pelo GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/rdself">
+        <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
+        <b>Randi</b>
+      </a><br/>
+      <sub>🏅 108 commits atribuídos pelo GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 commits atribuídos no GitHub</sub>
+      <sub>🏅 70 commits atribuídos pelo GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 commits atribuídos pelo GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 68 commits atribuídos no GitHub</sub>
+      <sub>🏅 68 commits atribuídos pelo GitHub</sub>
     </td>
   </tr>
 </table>
 
-<sub>Reverificado em 2026-10-18 14:44:45 UTC: commits atribuídos no GitHub reportados pela API de Contribuidores do repositório para o branch padrão <code>release/v3.8.52</code>. A API retornou 849 identidades (429 usuários, 2 bots, 418 anônimos); esta tabela exclui o mantenedor, bots e identidades anônimas e mantém empates na competição. É distinta tanto do ranking de PRs mesclados acima quanto do censo de metadados do Git abaixo.</sub>
+<sub>Reverificado em 2026-11-03 02:09:16 UTC: commits atribuídos pelo GitHub, informados pela API de colaboradores do repositório para o branch padrão <code>release/v3.8.53</code>. A API retornou 903 identidades (429 usuários, 2 bots, 472 anônimas); esta tabela exclui o mantenedor, os bots e as identidades anônimas, e mantém os empates. Ela é distinta tanto do ranking de PRs mesclados acima quanto do censo de metadados do Git abaixo.</sub>
 
-> 🙏 Os recursos, correções de bugs e melhorias de infraestrutura destes colaboradores são uma **parte fundamental** do que torna o OmniRoute confiável e rico em funcionalidades. Cada pull request, cada caso de teste e cada arquivo de tradução i18n importa. O open source é construído por pessoas como eles.
+> 🙏 Os recursos, as correções de bugs e as melhorias de infraestrutura desses colaboradores são uma **parte fundamental** do que torna o OmniRoute confiável e completo em recursos. Cada pull request, cada caso de teste e cada arquivo de tradução i18n são importantes. O código aberto é construído por pessoas como eles.
 
 </div>
 
@@ -1620,29 +1627,29 @@ Um agradecimento de coração às pessoas que financiam o OmniRoute do próprio 
 
 <div align="center">
 
-## 👥 Mais de 900 colaboradores
+## 👥 Mais de 1.000 colaboradores
 
 </div>
 
-[![Colaboradores](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>Auditado em 2026-10-18 na ponta ativa de <code>release/v3.8.52</code>, commit <code>ad160ab2d1</code> (6.826 commits): <b>993 identidades humanas normalizadas do Git</b> — 707 aparecem como autores de commits (incluindo o mantenedor) e 286 apenas em trailers explícitos de <code>Co-authored-by</code>. O levantamento aplica o <code>.mailmap</code>, compara endereços de e-mail sem diferenciar maiúsculas de minúsculas, une endereços noreply numéricos e simples do GitHub somente quando codificam o mesmo identificador, exclui 26 identidades de bots/agentes/serviços/placeholders e não mescla endereços de e-mail comuns apenas porque seus nomes de exibição coincidem. A auditoria de 2026-08-24 publicou 639; uma nova execução deste método sobre a base <code>ac02c5b42f</code> daquela auditoria resulta em 619, portanto o aumento vem de novos colaboradores, não de um método menos rigoroso.</sub>
+<sub>Auditado em 2026-11-02 no tip ativo de <code>release/v3.8.53</code> <code>1c7135e0fb</code> (7.972 commits): <b>1.074 identidades humanas normalizadas do Git</b> — 759 aparecem como autores de commits (incluindo o mantenedor) e 315 apenas em trailers explícitos <code>Co-authored-by</code>. O censo aplica <code>.mailmap</code>, compara endereços de e-mail sem diferenciar maiúsculas de minúsculas, associa endereços numéricos e simples do GitHub noreply somente quando eles codificam o mesmo identificador, exclui 29 identidades de bots/agentes/serviços/placeholder e não mescla endereços de e-mail comuns apenas porque seus nomes de exibição coincidem. A auditoria de 2026-08-24 publicou 639; a execução novamente deste método na base <code>ac02c5b42f</code> dessa auditoria resulta em 619, portanto o aumento vem de novos colaboradores, não de um método menos rigoroso.</sub>
 
 ### Como contribuir
 
 1. Faça um fork do repositório
-2. Crie uma branch a partir da ponta **ativa** de `release/vX.Y.Z` (não de `main`) — consulte [Modelo de branches e releases](docs/ops/BRANCHING_MODEL.md)
+2. Crie uma branch a partir do tip **ativo** de `release/vX.Y.Z` (não de `main`) — consulte [Modelo de Branching e Releases](docs/ops/BRANCHING_MODEL.md)
 3. Crie sua branch de funcionalidade (`git checkout -b feat/amazing-feature`)
 4. Faça commit das suas alterações (`git commit -m 'feat: add amazing feature'`)
-5. Envie para a branch (`git push origin feat/amazing-feature`)
-6. Abra um Pull Request com a **base = aquela branch `release/vX.Y.Z`**
+5. Envie as alterações para a branch (`git push origin feat/amazing-feature`)
+6. Abra um Pull Request com **base = aquela branch `release/vX.Y.Z`**
 
-Consulte [CONTRIBUTING.md](CONTRIBUTING.md) para obter diretrizes detalhadas.
+Consulte [CONTRIBUTING.md](CONTRIBUTING.md) para obter orientações detalhadas.
 
 ### Lançando uma nova versão
 
 ```bash
-# Crie uma release — a publicação no npm acontece automaticamente
+# Crie um release — npm publish acontece automaticamente
 VERSION=x.y.z
 gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 ```
@@ -1684,109 +1691,109 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 </div>
 
-O OmniRoute se apoia sobre os ombros de gigantes. Ele começou como um fork do **[9router](https://github.com/decolua/9router)** e como uma versão em TypeScript do projeto em Go **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — e, a partir daí, cada subsistema abaixo foi inspirado por um projeto de código aberto que chegou lá primeiro. Cada um deles moldou uma parte concreta do OmniRoute. Este é o nosso agradecimento a todos eles. 🙏
+O OmniRoute se apoia no trabalho de gigantes. Ele começou como um fork do **[9router](https://github.com/decolua/9router)** e uma adaptação para TypeScript do projeto em Go **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)** — e, a partir daí, cada subsistema abaixo foi inspirado por um projeto de código aberto que chegou lá primeiro. Cada um deles moldou uma parte concreta do OmniRoute. Este é o nosso agradecimento a todos eles. 🙏
 
-> ⭐ contagens de estrelas verificadas por meio da API REST do GitHub em 18 de outubro de 2026 — dê uma estrela a esses projetos. As contagens são um retrato exato daquela data e naturalmente mudarão.
+> ⭐ contagens de estrelas verificadas pela API REST do GitHub em 3 de novembro de 2026 — vá dar uma estrela a esses projetos. As contagens são um instantâneo exato com data definida e naturalmente mudarão.
 
 ### 🧬 Linhagem e gateway
 
 <table>
-  <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>O projeto original no qual este fork se baseia — ampliado aqui com APIs multimodais e uma reescrita completa em TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>A implementação em Go que inspirou esta versão em JavaScript / TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>O gateway de IA cujo conjunto público de dados de preços alimenta nossa sincronização de monitoramento de custos e cujo modelo de normalização de provedores orientou nosso roteamento.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>Código-fonte MIT adaptado para a ponte incorporada ChatGPT Web → Codex Responses, incluindo adaptadores de sessão do navegador, estruturação de respostas, uso e pesquisa na web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>Padrões portados para recuperação de streams, aliases sem raciocínio, pesquisa na web alternativa, limites de janela deslizante, ocultação de dados em logs e fluxos reforçados de inicialização.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Padrões de escolha de ferramentas, restrição de saída e confirmação de ferramentas do Cursor Composer adaptados ao executor nativo do Cursor.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>Padrões de novo login e rotação de tokens de atualização portados para a reautenticação OAuth do Codex.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Valores padrão de transformação compatíveis com o Claude Code e comportamento de cabeçalhos de cobrança generalizados na ponte orientada por configuração do OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Seus mapeamentos de modelos Grok, gerador Statsig com TypeError simulado, padrões de requisição e dispositivo e processador de respostas NDJSON foram substancialmente adaptados ao executor Grok Web do OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>A principal fonte transitiva de código por trás do grok2api-merged; suas implementações de modelos, cabeçalhos, payloads, Statsig e processadores são preservadas na linhagem do Grok Web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>O código-fonte MIT subjacente para os padrões de payload e dispositivo do Grok, o gerador Statsig e o processador <code>result.response</code>, incorporados por meio do TQZHR e do grok2api-merged.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Uma fonte transitiva creditada pelo grok2api-merged por sua camada de pool de proxies; o OmniRoute preserva esse aviso de linhagem, mas não reivindica uma adaptação do pool de proxies em seu executor Grok Web de escopo limitado.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>Seu proxy do Grok autenticado por cookies e o padrão de streaming <code>result.response.token</code> orientaram o transporte Grok Web do OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>A implementação original do Grok Web consultou seu design de upstream via HTTP/navegador; seu caminho HTTP direto deriva do GrokProxy, portanto não se reivindica nenhuma adaptação independente de código.</td></tr>
+  <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como ele inspirou o OmniRoute</th></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>O projeto original no qual este fork se baseia — estendido aqui com APIs multimodais e uma reescrita completa em TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>A implementação em Go que inspirou esta adaptação para JavaScript / TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>O gateway de IA cujo conjunto de dados público de preços alimenta nossa sincronização de acompanhamento de custos e cujo modelo de normalização de provedores orientou nosso roteamento.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>Fonte MIT adaptada para a ponte incorporada ChatGPT Web → Codex Responses, incluindo adaptadores de sessão do navegador, enquadramento de respostas, uso e pesquisa na Web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Padrões incorporados à recuperação de streams, aliases sem raciocínio, pesquisa na Web alternativa, limites de janela deslizante, redação de logs e fluxos de inicialização reforçados.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Padrões de escolha de ferramentas do Cursor Composer, restrição de saída e confirmação de ferramentas adaptados ao executor nativo do Cursor.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Padrões de novo login e rotação de tokens de atualização incorporados à reautenticação OAuth do Codex.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Configurações padrão de transformação compatíveis com Claude Code e comportamento de cabeçalhos de cobrança generalizados na ponte orientada por configuração do OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Seus mapeamentos de modelos Grok, gerador de Statsig de fake-TypeError, padrões padrão de solicitação e dispositivo e processador de respostas NDJSON foram adaptados de forma substancial ao executor Grok Web do OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>A principal fonte de código transitiva por trás de grok2api-merged; suas implementações de modelo, cabeçalho, payload, Statsig e processador são preservadas na linhagem do Grok Web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>A fonte MIT subjacente para os padrões de payload e dispositivo do Grok, o gerador de Statsig e o processador <code>result.response</code> mantidos por TQZHR e grok2api-merged.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Uma fonte transitiva creditada por grok2api-merged por sua camada de pool de proxies; o OmniRoute preserva esse aviso de linhagem, mas não reivindica uma adaptação de pool de proxies em seu executor Grok Web limitado.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>Seu proxy Grok autenticado por cookie e o padrão de streaming <code>result.response.token</code> influenciaram o transporte Grok Web do OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>A implementação original do Grok Web foi consultada para o design do upstream HTTP/navegador; seu caminho HTTP direto deriva do GrokProxy, portanto nenhuma adaptação de código independente é reivindicada.</td></tr>
 </table>
 
-### 🗜️ Contexto e compactação de tokens — mecanismos
+### 🗜️ Compressão de contexto e tokens — mecanismosores
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>O projeto viral "por que usar muitos token quando poucos token resolvem" — sua filosofia de fala de homem das cavernas é a base do nosso modo de compressão padrão e de mais de 30 regras de remoção de termos supérfluos e condensação.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>Compressão de saída de comandos de alto desempenho — inspirou nosso mecanismo RTK, a DSL de filtros JSON, a recuperação da saída bruta e o pipeline empilhado RTK → Caveman.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>Compressão reversível de contexto (SmartCrusher) — inspirou nosso mecanismo <code>headroom</code> e o padrão de marcadores de recuperação <code>ccr</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>Pesquisa sobre compressão de prompts (LLMLingua / LLMLingua-2) — inspirou nosso mecanismo <code>llmlingua</code> assíncrono, seguro para código e com continuidade em caso de falha.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>O port para JS/ONNX (MobileBERT / XLM-RoBERTa) usado como backend em thread de trabalho para nosso mecanismo LLMLingua.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>Compressão de tokens em PT-BR — é a base do nosso pacote de idioma pt-BR: redução de pleonasmos e remoção de termos supérfluos ajustadas à gramática do português brasileiro.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>A habilidade viral de programação YAGNI do "desenvolvedor sênior preguiçoso" — inspirou nosso Estilo de Saída <b>less-code</b>: orientação para a menor alteração funcional, que reduz o código _gerado_ (a contraparte no eixo da saída à prosa concisa do Caveman).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>Seu estilo de resposta orientado à ação e adequado a pessoas com TDAH foi adaptado para o estilo de saída conciso do OmniRoute em cinco idiomas.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>O projeto viral da filosofia “por que usar muitos tokens quando poucos tokens resolvem” — sua filosofia de fala de homem das cavernas alimenta nosso modo de compressão padrão e mais de 30 regras de preenchimento/condensação.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>Compressão de saída de comandos de alto desempenho — inspirou nosso mecanismo RTK, a DSL de filtros JSON, a recuperação de saída bruta e o pipeline empilhado RTK → Caveman.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>Compressão de contexto reversível (SmartCrusher) — inspirou nosso mecanismo <code>headroom</code> e o padrão de marcador de recuperação <code>ccr</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Pesquisa sobre compressão de prompts (LLMLingua / LLMLingua-2) — inspirou nosso mecanismo <code>llmlingua</code> assíncrono, seguro para código e com falha aberta.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>A porta JS/ONNX (MobileBERT / XLM-RoBERTa) usada como backend em thread de trabalho para nosso mecanismo LLMLingua.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>Compressão de tokens em PT-BR — alimenta nosso pacote de idioma pt-BR: redução de pleonasmos e remoção de palavras de preenchimento ajustadas à gramática do português brasileiro.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>A habilidade viral de codificação YAGNI do “desenvolvedor sênior preguiçoso” — inspirou nosso estilo de saída <b>less-code</b>: direcionamento para a menor alteração funcional que reduz o código _gerado_ (o equivalente no eixo de saída à prosa concisa do Caveman).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>Seu estilo de resposta que prioriza ações e é amigável para pessoas com TDAH foi adaptado ao estilo de saída conciso do OmniRoute em cinco idiomas.</td></tr>
 </table>
 
-### 🧩 Formatos compactos, pesquisa sobre tokens e ferramentas que reconhecem código
+### 🧩 Formatos compactos, pesquisa sobre tokens e ferramentas com conhecimento de código
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>Notação de Objetos Orientada a Tokens — seu modelo colunar de cabeçalho e linhas moldou nossa etapa de compactação tabular.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>Seu formato compacto de grafos e design de perfil genérico serviram de base para a compactação tabular e o formato do codec Headroom do OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>A implementação em TypeScript sob licença MIT, incorporada diretamente e estendida como o codec de perfil genérico do Headroom.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Cache Brotli/SQLite + delta de contexto por sessão — inspirou nosso mecanismo <code>session-dedup</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Compactação de saída do Bash + perfis MCP — inspirou nossa disciplina de interrupção da compressão e a redução de manifestos de ferramentas MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>Compressão de saída sensível ao conteúdo e por tipo de arquivo, com interrupção em caso de falha — validou nosso despacho por tipo e a omissão quando o ganho é inferior ao mínimo.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>"Encontre os tokens fantasmas" — seu padrão de descarregamento + identificador recuperável orientou nossa abordagem de descarregamento CCR.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>Um modelo de grafo de sessão + desduplicação de linhas entre turnos que serviu de base para nosso design de desduplicação de sessão.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON colunar em Rust + recuperação endereçada por conteúdo + desduplicação entre mensagens — validou o design de nossos mecanismos <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> e a invariante estável para cache de que "a forma comprimida independe da posição".</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>Compressão de esquemas/descrições de ferramentas MCP — serviu de base para nossa redução da cardinalidade de manifestos de ferramentas MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Classificação de mapas de repositório no estilo Aider — serviu de base para nossa exploração de mapas de repositório / classificação de recuperação.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Redução declarativa da saída do shell sobre MCP — validou nossa compactação declarativa da saída do Bash.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>Kit de ferramentas da API do compilador TypeScript — inspirou nossa remoção de comentários baseada em parser, que preserva literais de string, template e expressões regulares.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Notação de Objetos Orientada a Tokens — seu modelo colunar de cabeçalho e linhas moldou nossa etapa de compactação tabular.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>Seu formato compacto de grafos e seu design de perfil genérico orientaram a compactação tabular do OmniRoute e o formato de codec do Headroom.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>A implementação em TypeScript sob licença MIT foi incorporada diretamente e estendida como o codec de perfil genérico do Headroom.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Cache Brotli/SQLite + delta de contexto por sessão — inspirou nosso mecanismo <code>session-dedup</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Compactação de saída do Bash + perfis MCP — inspirou nossa disciplina de desistência da compressão e a redução do manifesto de ferramentas MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Compressão de saída sensível ao conteúdo e por tipo de arquivo, com desistência consciente de falhas — validou nosso despacho por tipo e a ignorância quando o ganho é mínimo.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>“Encontre os tokens fantasmas” — seu padrão de descarregamento + identificador recuperável orientou nossa abordagem de descarregamento do CCR.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>Um modelo de grafo de sessão + deduplicação de linhas entre turnos que orientou o design do nosso session-dedup.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>JSON colunar em Rust + recuperação endereçada por conteúdo + deduplicação entre mensagens — validou o design dos nossos mecanismos <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> e o invariante estável de cache de que a “forma comprimida é independente da posição”.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>Compressão de esquemas/descrições de ferramentas MCP — orientou nossa redução da cardinalidade do manifesto de ferramentas MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Classificação de mapa de repositório no estilo Aider — orientou nossa exploração de mapa de repositório / classificação de recuperação.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Redução declarativa de saída do shell sobre MCP — validou nossa compactação declarativa de saída do bash.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>Toolkit da API do compilador TypeScript — inspirou nossa remoção de comentários baseada em parser, que preserva literais de string, template e expressão regular.</td></tr>
 </table>
 
 ### 🧠 Memória e RAG
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>Camada universal de memória — seu modelo de proxy como limite de escrita/leitura moldou nossa arquitetura de memória.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>Agentes com estado e memória em camadas — inspiraram nosso modelo em camadas de Controle e Recuperação de Contexto (CCR).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>A taxonomia ProblemMap de 16 modos recorrentes de falha em RAG/LLM — o vocabulário compartilhado em nosso guia de solução de problemas.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>Camada de memória universal — seu modelo de proxy como limite de escrita/leitura moldou nossa arquitetura de memória.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>Agentes com estado e memória em camadas — inspirou nosso modelo em camadas de Context Control & Recovery (CCR).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>A taxonomia ProblemMap de 16 modos recorrentes de falha em RAG/LLM — o vocabulário compartilhado em nosso guia de solução de problemas.</td></tr>
 </table>
 
 ### 🛰️ Inspeção de tráfego, MITM e proxy transparente
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>A interceptação/análise MITM do tráfego entre assistentes de programação ↔ LLM embasou os requisitos iniciais do Inspetor de Tráfego. Quatro módulos derivados anteriormente — mesclagem de SSE, normalização de conversas, mascaramento de segredos e sanitização de cabeçalhos — foram substituídos por implementações independentes de sala limpa, baseadas em padrões públicos de protocolo. As duas superfícies de passagem direta ao host (<code>passthrough.ts</code> e <code>_internal/bypass.cjs</code>) continuam sendo implementações internas do OmniRoute classificadas de forma independente; elas não foram reescritas como parte dessa substituição.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>Roteamento transparente de proxy por processo — inspirou nosso encerramento MITM seguro em caso de falhas, tempos limite de inatividade de sockets, atribuição de processos via <code>/proc</code> e captura TPROXY.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>A interceptação/análise MITM do tráfego entre assistentes de programação e LLMs orientou os primeiros requisitos do Traffic Inspector. Quatro módulos anteriormente derivados — mesclagem de SSE, normalização de conversas, mascaramento de segredos e sanitização de cabeçalhos — foram substituídos por implementações independentes em ambiente isolado, baseadas em padrões públicos de protocolo. As duas superfícies de passagem direta de host (<code>passthrough.ts</code> e <code>_internal/bypass.cjs</code>) continuam sendo implementações internas do OmniRoute, classificadas de forma independente; elas não foram reescritas como parte dessa substituição.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>Roteamento de proxy transparente por processo — inspirou nossa desmontagem MITM segura contra falhas, tempos limite de inatividade de socket, atribuição de processos via <code>/proc</code> e captura TPROXY.</td></tr>
 </table>
 
 ### 📚 Dados de modelos, observabilidade e interface
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>Banco de dados aberto com especificações, preços e recursos de modelos de IA — sincronizado nativamente com nosso catálogo de modelos.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>A biblioteca de grafos baseada em nós que sustenta nosso Compression Studio e Combo/Routing Studio em tempo real.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>A visualização ao vivo de grafos de fluxo de trabalho do LangGraph Studio inspirou a visualização de cascata em tempo real dos nossos Studios.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>Seu modelo de observabilidade de rastreamento → intervalo → geração moldou a visualização em cascata do nosso Compression Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Observabilidade da malha de serviços Istio — inspirou nossos indicadores de disjuntores e elementos visuais de arestas com erro no Routing/Combo Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>Logotipos de marcas de IA/LLM usados para renderizar os ícones dos provedores em todo o nosso painel.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>Fornece as bandeiras SVG licenciadas sob a MIT usadas pelo seletor de idiomas do README.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>Banco de dados aberto de especificações, preços e recursos de modelos de IA — sincronizado nativamente com nosso catálogo de modelos.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>A biblioteca de grafos baseada em nós que alimenta nosso Compression Studio e o Combo/Routing Studio em tempo real.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>A visualização ao vivo de grafos de fluxo de trabalho do LangGraph Studio inspirou a visualização em cascata em tempo real dos nossos Studios.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>Seu modelo de observabilidade trace → span → generation moldou o waterfall do nosso Compression Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Observabilidade do service mesh do Istio — inspirou nossos indicadores de circuit breaker e visuais de arestas de erro no Routing/Combo Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>Logotipos de marcas de IA/LLM que exibem os ícones dos provedores em nosso dashboard.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>Fornece as bandeiras SVG licenciadas pelo MIT usadas pelo seletor de idioma do README.</td></tr>
 </table>
 
 ### 🛡️ Segurança
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>Uma lista selecionada de bibliotecas seguras por padrão que orienta nossas escolhas de segurança (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>Uma lista selecionada de bibliotecas seguras por padrão que orienta nossas escolhas de segurança (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
 ### 🧭 Ferramentas complementares
 
 <table>
   <tr><th align="left">Projeto</th><th align="center">⭐</th><th align="left">Como inspirou o OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>Inspirou a deduplicação de solicitações, o fallback emergencial de custo zero, as estratégias plugáveis de Auto-Combo e a classificação multilíngue de intenções.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>Seu remapeamento de modelos baseado em contas, a validação de caminhos de executáveis e o comportamento dos rótulos de planos embasaram o runtime Antigravity do OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>Seu formato compacto de contagem regressiva para redefinição de cotas inspirou a exibição correspondente dos limites dos provedores no OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>Suas integrações ACP inspiraram a detecção automática, pelo OmniRoute, dos agentes de CLI instalados.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>Identificou a superfície de cotas do Grok Build; em seguida, o OmniRoute verificou e corrigiu de forma independente o formato real dos dados transmitidos.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>Inspirou a deduplicação de solicitações, o fallback emergencial sem custo, as estratégias Auto-Combo conectáveis e a classificação multilíngue de intenções.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>Seu remapeamento de modelos com reconhecimento de contas, validação de caminhos de executáveis e comportamento de rótulos de planos orientaram o runtime Antigravity do OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Seu formato compacto de contagem regressiva para redefinição de cota inspirou a exibição correspondente de limites de provedores no OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>Suas integrações ACP inspiraram a detecção automática de agentes CLI instalados pelo OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Identificou a superfície de cota do Grok Build; o OmniRoute então verificou e corrigiu o formato ativo na rede de forma independente.</td></tr>
 </table>
 
 ## 📄 Licença
