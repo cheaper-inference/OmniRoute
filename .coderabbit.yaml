@@ -49,8 +49,11 @@ reviews:
     - "!docs/i18n/**"
     - "!.i18n-state.json"
     # Translated UI catalogs; the English source catalog stays in review.
-    - "!src/i18n/messages/**"
-    - "src/i18n/messages/en.json"
+    # Exclusions only: a pattern without "!" turns the filter into an allowlist, and
+    # exclusions always win, so an "en.json" include left every file out of review.
+    # The two classes match every catalog except en.json (el, es, et start with "e").
+    - "!src/i18n/messages/[a-df-z]*.json"
+    - "!src/i18n/messages/e[a-mo-z]*.json"
     - "!**/package-lock.json"
     # Generated files.
     - "!docs/reference/PROVIDER_REFERENCE.md"
