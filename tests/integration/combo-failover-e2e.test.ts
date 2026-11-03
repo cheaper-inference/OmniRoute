@@ -169,7 +169,10 @@ test("protected priority falls back on structured context overflow without chang
     name: "router-context-fit",
     strategy: "priority",
     config: { maxRetries: 0, retryDelayMs: 0, fallbackDelayMs: 0 },
-    models: ["openai/gpt-4o-mini", "openai/gpt-4.1"],
+    models: [
+      { kind: "model", model: "openai/gpt-4o-mini", fallbackOnlyOnQuotaExhaustion: true },
+      "openai/gpt-4.1",
+    ],
   });
   const messages = [
     { role: "system", content: "Preserve this system instruction exactly." },

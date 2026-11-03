@@ -11,7 +11,8 @@ import assert from "node:assert/strict";
 //      400 and rate-limit as 429 (instead of rewriting everything to 502).
 
 const { checkFallbackError } = await import("../../open-sse/services/accountFallback.ts");
-const { isRequestScoped400 } = await import("../../open-sse/services/accountFallback/requestScoped400.ts");
+const { isRequestScoped400 } =
+  await import("../../open-sse/services/accountFallback/requestScoped400.ts");
 const { isContextOverflow400, isContextOverflowFailure, isParamValidation400, isModelScoped400 } =
   await import("../../open-sse/services/combo.ts");
 const { normalizeUpstreamFailure } =
