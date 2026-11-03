@@ -1009,6 +1009,7 @@
   "disabled": "已停用",
   "featureFlagOmnirouteEmergencyFallbackDescription": "將預算耗盡的請求路由到緊急免費備用提供者/模型。",
   "featureFlagArenaEloSyncEnabledDescription": "啟用定期 Arena AI 排行榜 ELO 同步，用於模型智慧排名。",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "當組合路由切換模型時，產生並注入對話摘要。停用後，模型切換將各自獨立處理，並防止所有現有及未來的組合發出背景交接請求。",
   "featureFlagReasoningReplayEnabledDescription": "在多輪對話中快取並重播模型推理。停用以停止儲存與重新注入推理。",
   "featureFlagExposeCcDiscoveryAliasesDescription": "在 /v1/models 上廣告 claude/&lt;provider&gt;/&lt;model&gt; 鏡像 ID，以便 Claude Code 閘道模型發現列出非 Claude 模型。警告：當全域啟用時，會為所有客戶端重複目錄條目。",

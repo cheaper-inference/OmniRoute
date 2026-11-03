@@ -1009,6 +1009,7 @@
   "disabled": "Desabilitado",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Roteie solicitações com orçamento esgotado para o provedor/modelo de fallback gratuito de emergência.",
   "featureFlagArenaEloSyncEnabledDescription": "Ativar a sincronização periódica do ELO do leaderboard da Arena AI para classificações de inteligência do modelo.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Gera e injeta resumos da conversa quando o roteamento de combo troca de modelo. Desative para tratar trocas de modelo de forma independente e evitar requisições de handoff em segundo plano para todos os combos existentes e futuros.",
   "featureFlagReasoningReplayEnabledDescription": "Armazena e reproduz o raciocínio do modelo em conversas de vários turnos. Desative para interromper o armazenamento e a reinjeção do raciocínio.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Divulgar ids espelho claude/&lt;provider&gt;/&lt;model&gt; em /v1/models para que a descoberta de modelos do gateway Claude Code liste modelos não-Claude. Atenção: duplica as entradas do catálogo para todos os clientes quando ativado globalmente.",

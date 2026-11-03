@@ -7,6 +7,8 @@ import path from "node:path";
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), "usage-daily-scheduler-"));
 process.env.DATA_DIR = dir;
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
+// The daily rollup is opt-in (USAGE_DAILY_ROLLUP_ENABLED, off by default); these tests drive the on path.
+process.env.USAGE_DAILY_ROLLUP_ENABLED = "true";
 const core = await import("../../src/lib/db/core.ts");
 const settings = await import("../../src/lib/db/databaseSettings.ts");
 const cleanup = await import("../../src/lib/db/cleanup.ts");
@@ -90,6 +92,18 @@ test("scheduled daily publication respects the aggregation setting", async () =>
   await write("2026-06-02");
   await at(NOW, () => cleanup.runScheduledCleanupPass("startup"));
   assert.deepEqual(totals("2026-06-02"), { summary: 0, raw: 1 });
+});
+
+test("scheduled daily publication is off unless USAGE_DAILY_ROLLUP_ENABLED is on", async () => {
+  delete process.env.USAGE_DAILY_ROLLUP_ENABLED;
+  try {
+    await write("2026-06-02");
+    await at(NOW, () => cleanup.runScheduledCleanupPass("startup"));
+    await at(NOW, () => cleanup.runScheduledCleanupPass("periodic"));
+    assert.deepEqual(totals("2026-06-02"), { summary: 0, raw: 1 });
+  } finally {
+    process.env.USAGE_DAILY_ROLLUP_ENABLED = "true";
+  }
 });
 
 test("late writes on a previously published complete day are republished without moving pointer backward", async () => {

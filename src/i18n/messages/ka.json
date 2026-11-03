@@ -1086,6 +1086,7 @@
   "disabled": "გამორთულია",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ბიუჯეტის ამოწურვის გამო დაუმუშავებელი მოთხოვნები გადაამისამართეთ საგანგებო უფასო სარეზერვო პროვაიდერთან/მოდელთან.",
   "featureFlagArenaEloSyncEnabledDescription": "ჩართეთ Arena AI-ის ლიდერბორდის ELO რეიტინგის პერიოდული სინქრონიზაცია მოდელების ინტელექტის რეიტინგებისთვის.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "კომბინირებული მარშრუტიზაციისას მოდელის გადართვის დროს შექმენით და ჩასვით საუბრის შეჯამებები. გამორთეთ, რათა მოდელების გადართვები ერთმანეთისგან დამოუკიდებლად დამუშავდეს და ყველა არსებული და მომავალი კომბინაციისთვის ფონური გადაცემის მოთხოვნები აიკრძალოს.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "გამოაქვეყნეთ claude/&lt;provider&gt;/&lt;model&gt; სარკისებური ID-ები /v1/models-ზე, რათა Claude Code-ის კარიბჭის მოდელების აღმოჩენის სიაში არა-Claude მოდელებიც გამოჩნდეს. გაფრთხილება: გლობალურად ჩართვის შემთხვევაში კატალოგის ჩანაწერების რაოდენობა ყველა კლიენტისთვის გაორმაგდება.",

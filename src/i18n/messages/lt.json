@@ -1009,6 +1009,7 @@
   "disabled": "Išjungta",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Nukreipti užklausas, kurių biudžetas išnaudotas, į avarinį nemokamą atsarginį teikėją / modelį.",
   "featureFlagArenaEloSyncEnabledDescription": "Įjungti periodinę Arena AI lyderių lentelės ELO sinchronizaciją modelių intelekto reitingams.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Generuoti ir įterpti pokalbio santraukas, kai kombinuoto maršruto parinkimas perjungia modelius. Išjunkite, kad modelių perjungimai būtų vertinami nepriklausomai ir būtų išvengta foninių perdavimo užklausų visoms esamoms ir būsimoms kombinacijoms.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Skelbti claude/&lt;provider&gt;/&lt;model&gt; dubliuojamuosius ID per /v1/models, kad Claude Code šliuzo modelių aptikimo funkcija rodytų ne Claude modelius. Įspėjimas: įjungus visuotinai, katalogo įrašų skaičius padvigubėja visiems klientams.",

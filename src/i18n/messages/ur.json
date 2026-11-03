@@ -1009,6 +1009,7 @@
   "disabled": "غیر فعال",
   "featureFlagOmnirouteEmergencyFallbackDescription": "بجٹ ختم ہونے والی درخواستوں کو ہنگامی مفت متبادل provider/model کی طرف بھیجیں۔",
   "featureFlagArenaEloSyncEnabledDescription": "ماڈل انٹیلی جنس درجہ بندی کے لیے Arena AI لیڈربورڈ ELO کی وقتاً فوقتاً ہم وقت سازی فعال کریں۔",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "جب کومبو روٹنگ ماڈلز تبدیل کرے تو گفتگو کے خلاصے بنائیں اور شامل کریں۔ ماڈل کی تبدیلیوں کو الگ الگ سمجھنے اور تمام موجودہ و آئندہ کومبوز کے لیے پس منظر کی حوالگی کی درخواستوں کو روکنے کے لیے اسے غیر فعال کریں۔",
   "featureFlagReasoningReplayEnabledDescription": "کثیر باری گفتگوؤں میں ماڈل کی استدلال کو کیش کریں اور دوبارہ چلائیں۔ استدلال محفوظ کرنے اور دوبارہ داخل کرنے سے روکنے کے لیے غیر فعال کریں۔",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models پر claude/&lt;provider&gt;/&lt;model&gt; آئینہ شناختوں کا اشتہار دیں تاکہ Claude Code گیٹ وے ماڈل کی دریافت غیر-Claude ماڈلز کی فہرست بنائے۔ انتباہ: جب عالمی طور پر فعال ہو تو تمام کلائنٹس کے لیے کیٹلاگ کی اندراجات دوگنا کرتا ہے۔",

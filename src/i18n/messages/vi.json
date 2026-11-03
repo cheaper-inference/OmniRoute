@@ -1009,6 +1009,7 @@
   "disabled": "Đã tắt",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Định tuyến các yêu cầu đã hết ngân sách đến nhà cung cấp/mô hình dự phòng khẩn cấp miễn phí.",
   "featureFlagArenaEloSyncEnabledDescription": "Bật đồng bộ ELO định kỳ từ bảng xếp hạng Arena AI để xếp hạng năng lực của mô hình.",
+  "featureFlagUsageDailyRollupEnabledDescription": "Xuất bản các ngày sử dụng đã đóng vào usage_daily_summary trước khi hết thời hạn lưu giữ, để các khung phân tích dài đọc tổng theo ngày thay vì các hàng thô. Tắt theo mặc định: các ngày đã xuất bản mất chi tiết theo kết nối, theo khóa API, trạng thái thành công và độ trễ trong phân tích, và chi phí của chúng giữ nguyên như khi được xuất bản.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Tạo và chèn bản tóm tắt hội thoại khi định tuyến combo chuyển đổi mô hình. Tắt để xử lý các lần chuyển mô hình một cách độc lập và ngăn các yêu cầu bàn giao chạy nền cho mọi combo hiện có và trong tương lai.",
   "featureFlagReasoningReplayEnabledDescription": "Lưu vào bộ nhớ đệm và phát lại phần suy luận của mô hình trong các cuộc hội thoại nhiều lượt. Tắt để ngừng lưu trữ và chèn lại phần suy luận.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Quảng bá các id phản chiếu claude/&lt;provider&gt;/&lt;model&gt; trên /v1/models để tính năng khám phá mô hình qua gateway của Claude Code liệt kê được các mô hình không phải Claude. Cảnh báo: khi bật ở phạm vi toàn cục, số mục trong danh mục tăng gấp đôi với mọi client.",

@@ -1009,6 +1009,7 @@
   "disabled": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ಬಜೆಟ್ ಖಾಲಿಯಾದ ವಿನಂತಿಗಳನ್ನು ತುರ್ತು ಉಚಿತ ಫಾಲ್ಬ್ಯಾಕ್ ಪ್ರೊವೈಡರ್/ಮಾಡೆಲ್ಗೆ ರೂಟ್ ಮಾಡಿ.",
   "featureFlagArenaEloSyncEnabledDescription": "ಮಾಡೆಲ್ ಬುದ್ಧಿವಂತಿಕೆ ಶ್ರೇಣಿಗಳಿಗಾಗಿ ಪೀರಿಯಾಡಿಕ್ Arena AI ಲೀಡರ್ಬೋರ್ಡ್ ELO ಸಿಂಕ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "ಕಾಂಬೋ ರೂಟಿಂಗ್ ಮಾಡೆಲ್ಗಳನ್ನು ಬದಲಾಯಿಸಿದಾಗ ಸಂಭಾಷಣೆ ಸಾರಾಂಶಗಳನ್ನು ರಚಿಸಿ ಮತ್ತು ಸೇರಿಸಿ. ಮಾಡೆಲ್ ಬದಲಾವಣೆಗಳನ್ನು ಸ್ವತಂತ್ರವಾಗಿ ಪರಿಗಣಿಸಲು ಮತ್ತು ಎಲ್ಲಾ ಹಾಲಿ ಮತ್ತು ಭವಿಷ್ಯದ ಕಾಂಬೋಗಳಿಗೆ ಹಿನ್ನೆಲೆ ಹ್ಯಾಂಡ್ಒಫ್ ವಿನಂತಿಗಳನ್ನು ತಡೆಯಲು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "claude/&lt;provider&gt;/&lt;model&gt; ಮಿರರ್ ಐಡಿಗಳನ್ನು /v1/models ನಲ್ಲಿ ಪ್ರಕಟಿಸಿ, ಆದ್ದರಿಂದ Claude Code gateway ಮಾಡೆಲ್ ಆವಿಷ್ಕಾರವು non-Claude ಮಾಡೆಲ್ಗಳನ್ನು ಪಟ್ಟಿಮಾಡುತ್ತದೆ. ಎಚ್ಚರಿಕೆ: ಜಾಗತಿಕವಾಗಿ ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ ಎಲ್ಲಾ ಕ್ಲೈಂಟ್ಗಳಿಗೆ ಕ್ಯಾಟಲಾಗ್ ಎಂಟ್ರಿಗಳನ್ನು ದ್ವಿಗುಣಗೊಳಿಸುತ್ತದೆ.",

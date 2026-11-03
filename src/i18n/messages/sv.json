@@ -1009,6 +1009,7 @@
   "disabled": "Inaktiverad",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Dirigera anrop med förbrukad budget till den kostnadsfria reservleverantören/-modellen för nödfall.",
   "featureFlagArenaEloSyncEnabledDescription": "Aktivera periodisk synkronisering av Arena AI-topplistans ELO för rankning av modellintelligens.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Generera och infoga konversationssammanfattningar när kombinationsroutning byter modell. Inaktivera för att behandla modellbyten oberoende av varandra och förhindra bakgrundsförfrågningar för överlämning för alla befintliga och framtida kombinationer.",
   "featureFlagReasoningReplayEnabledDescription": "Cachelagra och spela upp modellens resonemang över samtal med flera turer. Inaktivera för att sluta lagra och återinfoga resonemang.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Reklamera claude/&lt;provider&gt;/&lt;model&gt; spegel-id på /v1/models så att Claude Code gateway-modellens upptäcktslista visar icke-Claude-modeller. Varning: dubblerar katalogposter för alla klienter när det är aktiverat globalt.",

@@ -1086,6 +1086,7 @@
   "disabled": "নিষ্ক্রিয়",
   "featureFlagOmnirouteEmergencyFallbackDescription": "বাজেট শেষ হয়ে যাওয়া অনুরোধগুলো জরুরি ফ্রি ফলব্যাক প্রোভাইডার/মডেলে রুট করুন।",
   "featureFlagArenaEloSyncEnabledDescription": "মডেল ইন্টেলিজেন্স র‍্যাঙ্কিংয়ের জন্য পর্যায়ক্রমিক Arena AI লিডারবোর্ড ELO সিঙ্ক সক্ষম করুন।",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "কম্বো রাউটিংয়ে মডেল পরিবর্তন হলে কথোপকথনের সারাংশ তৈরি করে যুক্ত করুন। মডেল পরিবর্তনগুলোকে স্বতন্ত্রভাবে বিবেচনা করতে এবং বিদ্যমান ও ভবিষ্যতের সব কম্বোর জন্য ব্যাকগ্রাউন্ড হ্যান্ডঅফ অনুরোধ প্রতিরোধ করতে এটি নিষ্ক্রিয় করুন।",
   "featureFlagReasoningReplayEnabledDescription": "একাধিক পালাবিশিষ্ট কথোপকথনে মডেলের যুক্তি ক্যাশ করে পুনরায় চালান। যুক্তি সংরক্ষণ ও পুনরায় ঢোকানো বন্ধ করতে নিষ্ক্রিয় করুন।",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models এ claude/&lt;provider&gt;/&lt;model&gt; মিরর আইডি বিজ্ঞাপন দিন যাতে Claude Code গেটওয়ে মডেল আবিষ্কার non-Claude মডেল তালিকাভুক্ত করে। সতর্কতা: এটি গ্লোবালি সক্ষম হলে সমস্ত ক্লায়েন্টের জন্য ক্যাটালগ এন্ট্রি দ্বিগুণ করে।",

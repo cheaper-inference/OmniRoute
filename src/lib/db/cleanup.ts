@@ -1164,7 +1164,12 @@ let _cleanupSchedulerTimer: ReturnType<typeof setInterval> | null = null;
  */
 export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Promise<void> {
   const label = phase === "startup" ? "Startup" : "Periodic";
-  if (getUserDatabaseSettings().aggregation.enabled) {
+  // Publishing a day ahead of retention trades its per-connection, per-API-key, success and
+  // latency detail for daily totals, so it is opt-in (USAGE_DAILY_ROLLUP_ENABLED).
+  if (
+    getUserDatabaseSettings().aggregation.enabled &&
+    isFeatureFlagEnabled("USAGE_DAILY_ROLLUP_ENABLED")
+  ) {
     try {
       await runDailyRollup(new Date());
     } catch (error) {

@@ -1009,6 +1009,7 @@
   "disabled": "Отключено",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Перенаправлять запросы при исчерпании бюджета на резервный бесплатный провайдер/модель.",
   "featureFlagArenaEloSyncEnabledDescription": "Включить периодическую синхронизацию ELO из таблицы лидеров Arena AI для рейтинга интеллектуальности моделей.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Создавайте и добавляйте сводки бесед, когда комбинированная маршрутизация переключает модели. Отключите эту функцию, чтобы обрабатывать переключения моделей независимо и запретить фоновые запросы передачи контекста для всех существующих и будущих комбинаций.",
   "featureFlagReasoningReplayEnabledDescription": "Кэшируйте и воспроизводите рассуждения модели в многоходовых диалогах. Отключите, чтобы прекратить сохранение и повторную подстановку рассуждений.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Публиковать claude/&lt;провайдер&gt;/&lt;модель&gt; зеркальные ID на /v1/models, чтобы Claude Code мог видеть не-Claude модели. Внимание: удваивает записи каталога для всех клиентов при глобальном включении.",

@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-114 flags across 6 categories. **Default** is the definition default — the value
+115 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (10)
@@ -119,7 +119,7 @@ Invalid enum values and unreadable feature-flag storage fail closed. Neither opt
 priced spend or a failed pricing lookup. Enforcement and the administrator report resolve the
 same effective policy.
 
-### Runtime (55)
+### Runtime (56)
 
 | Key                                            | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------------------------------------------- | ------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -178,6 +178,7 @@ same effective policy.
 | `COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED`         | boolean | `false` |         | When every account is cooling down and the cooldown that ends first was caused by a 403 (access refused) or a 410 (gone), return that refusal at once instead of waiting the cooldown out and re-sending the request (#16305). A renewing agentrouter connection-scoped quota 403 is then persisted with `errorCode` 429 so it stays retryable. Off by default: only a 401 skips the wait, and every refusal is persisted with the status it arrived with.                                                                                                                                                                                      |
 | `QUOTA_WINDOW_BOUNDED_PARK`                    | boolean | `false` |         | Let the per-window quota policy (session/weekly thresholds used by account selection) honour the bounded exhaustion park (#17000): once the capped park deadline has passed, or the cached observation is older than the park cap, the window stops excluding the account until a fresh quota fetch. Off by default: a cached window keeps blocking on its last reported percentage until its own reset time.                                                                                                                                                                                                                                   |
 | `IMAGE_GENERATION_LONG_JOBS`                   | boolean | `false` |         | For OpenAI-compatible image generation (#16260): use the connection timeout (`providerSpecificData.timeoutMs`), else the central upstream fetch timeout (`FETCH_TIMEOUT_MS` → `REQUEST_TIMEOUT_MS` → default 600 s) instead of the fixed 120 s image budget; answer 499 when the caller cancels; let the Playground receive long image jobs as an SSE stream with keepalive heartbeats. Off by default: the fixed budget applies and caller cancellation is not propagated. The deadline covering the response body read is always on.                                                                                                          |
+| `USAGE_DAILY_ROLLUP_ENABLED`                   | boolean | `false` |         | Publish closed usage days into `usage_daily_summary` ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.                                                                                                                                                                                                                                                                                                                                        |
 | `CURSOR_GROK_47_DROP_MAX_EFFORT`               | boolean | `false` |         | Stop offering and forwarding the `max` reasoning effort for Cursor Grok 4.7 (#17386): Cursor's docs list only low/medium/high/xhigh, so the `grok-4.7-max` fallback alias disappears from the catalog and a `max` effort request is sent without an effort parameter. Off by default: `max` stays offered and forwarded, as a live AgentService/Run probe accepted it.                                                                                                                                                                                                                                                                          |
 | `COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE`  | boolean | `false` |         | In the compression cache stats, count a compressed request to an automatic-prefix-caching provider (OpenAI, Codex, Azure, or a custom connection that declares prompt caching with marker stripping) as an estimated cache hit even without `cache_control` markers (#17114). The estimate is a cache-eligibility signal, not an observed hit, so the reported hit rate for those providers trends toward 100%. Off by default: only a request carrying `cache_control` markers to a caching provider counts as an estimated hit, so automatic-prefix providers keep reporting 0.                                                               |
 
@@ -265,10 +266,10 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 114 flags
+    // ... all 115 flags
   ],
   "summary": {
-    "total": 114,
+    "total": 115,
     "active": 0,
     "inactive": 0,
     "overriddenByDb": 0,

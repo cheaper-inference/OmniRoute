@@ -1009,6 +1009,7 @@
   "disabled": "Keelatud",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Suunake ammendunud eelarvega päringud tasuta hädaolukorra varupakkuja/-mudeli juurde.",
   "featureFlagArenaEloSyncEnabledDescription": "Lubage mudelite intelligentsuse paremusjärjestuste jaoks Arena AI edetabeli ELO perioodiline sünkroonimine.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Looge ja sisestage vestluste kokkuvõtted, kui kombomarsruutimine vahetab mudelit. Keelake see, et käsitleda mudelivahetusi sõltumatult ja takistada taustal üleandmispäringuid kõigi olemasolevate ja tulevaste kombode puhul.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Avaldage claude/&lt;provider&gt;/&lt;model&gt; peegel-ID-d lõpp-punktis /v1/models, et Claude Code'i lüüsi mudeliotsing loetleks ka mitte-Claude'i mudelid. Hoiatus: globaalsel lubamisel kahekordistab see kõigi klientide kataloogikirjete arvu.",

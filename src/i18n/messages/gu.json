@@ -1009,6 +1009,7 @@
   "disabled": "નિષ્ક્રિય કરેલ",
   "featureFlagOmnirouteEmergencyFallbackDescription": "બજેટ-સમાપ્ત વિનંતીઓને કટોકટીના મફત ફોલબેક પ્રદાતા/મોડેલ પર રૂટ કરો.",
   "featureFlagArenaEloSyncEnabledDescription": "મોડેલ ઇન્ટેલિજન્સ રેન્કિંગ માટે સમયાંતરે Arena AI લીડરબોર્ડ ELO સિંક સક્ષમ કરો.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "કોમ્બો રાઉટિંગ મોડલ બદલે ત્યારે વાર્તાલાપના સારાંશ જનરેટ કરીને દાખલ કરો. મોડલ સ્વિચને સ્વતંત્ર રીતે સંભાળવા અને હાલના તથા ભવિષ્યના તમામ કોમ્બો માટે પૃષ્ઠભૂમિ હેન્ડઓફ વિનંતીઓ અટકાવવા માટે અક્ષમ કરો.",
   "featureFlagReasoningReplayEnabledDescription": "બહુ-વાર્તાલાપમાં મોડલના તર્કને કેશ કરો અને ફરી ચલાવો. તર્ક સંગ્રહ અને ફરીથી દાખલ કરવાનું બંધ કરવા માટે અક્ષમ કરો.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models પર claude/&lt;provider&gt;/&lt;model&gt; મિરર આઈડીઓનું જાહેરાત કરો જેથી Claude Code ગેટવે મોડલ શોધી કાઢે છે non-Claude મોડલ. ચેતવણી: જ્યારે વૈશ્વિક રીતે સક્રિય કરવામાં આવે ત્યારે તમામ ક્લાયન્ટ માટે કૅટલોગ એન્ટ્રીઓ ડબલ કરે છે.",

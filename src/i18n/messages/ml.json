@@ -1086,6 +1086,7 @@
   "disabled": "പ്രവർത്തനരഹിതമാക്കി",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ബജറ്റ് തീർന്ന അഭ്യർത്ഥനകൾ അടിയന്തര സൗജന്യ ഫാൾബാക്ക് പ്രൊവൈഡർ/മോഡലിലേക്ക് റൂട്ട് ചെയ്യുക.",
   "featureFlagArenaEloSyncEnabledDescription": "മോഡൽ ഇന്റലിജൻസ് റാങ്കിങ്ങുകൾക്കായി Arena AI ലീഡർബോർഡ് ELO ആനുകാലികമായി സമന്വയിപ്പിക്കുന്നത് പ്രവർത്തനക്ഷമമാക്കുക.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "കോംബോ റൂട്ടിങ് മോഡലുകൾ മാറുമ്പോൾ സംഭാഷണ സംഗ്രഹങ്ങൾ സൃഷ്ടിച്ച് ഉൾപ്പെടുത്തുക. മോഡൽ മാറ്റങ്ങളെ സ്വതന്ത്രമായി പരിഗണിക്കാനും നിലവിലുള്ളതും ഭാവിയിലുള്ളതുമായ എല്ലാ കോംബോകൾക്കുമുള്ള പശ്ചാത്തല കൈമാറ്റ അഭ്യർത്ഥനകൾ തടയാനും ഇത് പ്രവർത്തനരഹിതമാക്കുക.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Claude Code ഗേറ്റ്വേ മോഡൽ കണ്ടെത്തലിൽ Claude ഇതര മോഡലുകൾ പട്ടികപ്പെടുത്തുന്നതിനായി /v1/models-ൽ claude/&lt;provider&gt;/&lt;model&gt; മിറർ ഐഡികൾ പ്രസിദ്ധപ്പെടുത്തുക. മുന്നറിയിപ്പ്: ആഗോളതലത്തിൽ പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ എല്ലാ ക്ലയന്റുകൾക്കുമുള്ള കാറ്റലോഗ് എൻട്രികളുടെ എണ്ണം ഇരട്ടിയാകും.",

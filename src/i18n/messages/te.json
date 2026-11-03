@@ -1009,6 +1009,7 @@
   "disabled": "నిలిపివేయబడింది",
   "featureFlagOmnirouteEmergencyFallbackDescription": "బడ్జెట్ ముగిసిపోయిన అభ్యర్థనలను అత్యవసర ఉచిత ఫాల్‌బ్యాక్ ప్రొవైడర్/మోడల్‌కు రూట్ చేయండి.",
   "featureFlagArenaEloSyncEnabledDescription": "మోడల్ ఇంటెలిజెన్స్ ర్యాంకింగ్‌ల కోసం క్రమానుగత Arena AI లీడర్‌బోర్డ్ ELO సమకాలీకరణను ప్రారంభించండి.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "కాంబో రూటింగ్ మోడళ్ల మధ్య మారినప్పుడు సంభాషణ సారాంశాలను రూపొందించి, చొప్పిస్తుంది. మోడల్ మార్పులను స్వతంత్రంగా పరిగణించడానికి మరియు ప్రస్తుతం ఉన్న, భవిష్యత్తులో సృష్టించబడే అన్ని కాంబోల కోసం బ్యాక్గ్రౌండ్ హ్యాండ్ఆఫ్ అభ్యర్థనలను నిరోధించడానికి దీన్ని నిలిపివేయండి.",
   "featureFlagReasoningReplayEnabledDescription": "బహుళ-వంతుల సంభాషణల్లో మోడల్ తర్కాన్ని కాష్ చేసి మళ్లీ ప్లే చేయండి. తర్కాన్ని నిల్వ చేయడం మరియు మళ్లీ చొప్పించడం ఆపేందుకు నిలిపివేయండి.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models లో claude/&lt;provider&gt;/&lt;model&gt; మిర్రర్ ఐడీలను ప్రచారం చేయండి కాబట్టి Claude Code గేట్వే మోడల్ డిస్కవరీ non-Claude మోడళ్లను జాబితా చేస్తుంది. హెచ్చరిక: ఇది ప్రపంచవ్యాప్తంగా ప్రారంభించినప్పుడు అన్ని క్లయింట్ల కోసం కాటలాగ్ ఎంట్రీలను డబుల్ చేస్తుంది.",

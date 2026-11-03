@@ -1009,6 +1009,7 @@
   "disabled": "Imezimwa",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Elekeza maombi yaliyomaliza bajeti kwenye mtoa huduma/muundo wa dharura wa akiba usiolipiwa.",
   "featureFlagArenaEloSyncEnabledDescription": "Washa usawazishaji wa mara kwa mara wa ELO wa ubao wa wanaoongoza wa Arena AI kwa viwango vya akili vya muundo.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Tengeneza na uingize muhtasari wa mazungumzo wakati uelekezaji wa michanganyiko unapobadilisha modeli. Zima ili kushughulikia mabadiliko ya modeli kwa kujitegemea na kuzuia maombi ya uhamishaji ya chinichini kwa michanganyiko yote iliyopo na ya baadaye.",
   "featureFlagReasoningReplayEnabledDescription": "Hifadhi kwenye cache na ucheze tena hoja ya modeli katika mazungumzo ya zamu nyingi. Zima ili kuacha kuhifadhi na kuingiza tena hoja.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Tangaza claude/&lt;provider&gt;/&lt;model&gt; vitambulisho vya kioo kwenye /v1/models ili orodha ya kugundua modeli za Claude Code iwe na modeli zisizo za Claude. Onyo: inafanya kuingia mara mbili kwenye katalogi kwa wateja wote inapowekwa kuwa ya ulimwengu mzima.",

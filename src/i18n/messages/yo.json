@@ -1009,6 +1009,7 @@
   "disabled": "Ti pa",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Darí àwọn ìbéèrè tí wọ́n ti lo gbogbo ààlà ìnáwó wọn sí olùpèsè/àwòṣe ìrànlọ́wọ́ pàjáwìrì ọ̀fẹ́.",
   "featureFlagArenaEloSyncEnabledDescription": "Mú ìmúdójúìwọ̀n ELO ti àtòjọ ipò Arena AI lẹ́ẹ̀kọ̀ọ̀kan ṣiṣẹ́ fún àwọn ipò òye àwòṣe.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Ṣẹ̀dá kí o sì fi àwọn àkótán ìjíròrò sínú ìbéèrè nígbà tí combo routing bá yí àwòṣe padà. Pa á láti ṣe ìtọ́jú àwọn ìyípadà àwòṣe lọ́tọ̀ọ̀tọ̀ àti láti dènà àwọn ìbéèrè ìfàṣẹ́ránṣẹ́ abẹ́lẹ̀ fún gbogbo combos tó wà àti ti ọjọ́ iwájú.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Ṣàfihàn àwọn mirror ids claude/&lt;provider&gt;/&lt;model&gt; lórí /v1/models kí ìṣàwárí àwòṣe gateway Claude Code lè ṣàtòjọ àwọn àwòṣe tí kì í ṣe ti Claude. Ìkìlọ̀: èyí máa sọ iye àwọn àkọsílẹ̀ katalọ́ọ̀gù di ìlọ́po méjì fún gbogbo clients nígbà tí a bá mú un ṣiṣẹ́ kárí ayé.",

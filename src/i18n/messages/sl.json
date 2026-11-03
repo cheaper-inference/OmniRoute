@@ -1009,6 +1009,7 @@
   "disabled": "Onemogočeno",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Zahteve z izčrpanim proračunom usmeri k brezplačnemu ponudniku/modelu za zasilni preklop.",
   "featureFlagArenaEloSyncEnabledDescription": "Omogoči redno sinhronizacijo ocen ELO z lestvice Arena AI za razvrščanje inteligentnosti modelov.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Ustvari in vstavi povzetke pogovorov, ko kombinirano usmerjanje preklopi med modeli. Onemogoči, če želiš preklapljanje med modeli obravnavati neodvisno in preprečiti zahteve za predajo v ozadju za vse obstoječe in prihodnje kombinacije.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Objavi zrcalne ID-je claude/&lt;provider&gt;/&lt;model&gt; na /v1/models, da odkrivanje modelov prehoda Claude Code prikaže tudi modele, ki niso Claude. Opozorilo: če je možnost omogočena globalno, se število vnosov v katalogu podvoji za vse odjemalce.",

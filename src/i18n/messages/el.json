@@ -1009,6 +1009,7 @@
   "disabled": "Απενεργοποιημένο",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Δρομολόγηση αιτημάτων των οποίων ο προϋπολογισμός έχει εξαντληθεί στον δωρεάν εφεδρικό πάροχο/μοντέλο έκτακτης ανάγκης.",
   "featureFlagArenaEloSyncEnabledDescription": "Ενεργοποίηση περιοδικού συγχρονισμού ELO του πίνακα κατάταξης Arena AI για βαθμολογίες ευφυΐας μοντέλων.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Δημιουργία και εισαγωγή περιλήψεων συνομιλιών όταν η δρομολόγηση combo αλλάζει μοντέλα. Απενεργοποιήστε για να αντιμετωπίζονται οι αλλαγές μοντέλων ανεξάρτητα και να αποτρέπονται αιτήματα παρασκηνίου handoff για όλα τα υπάρχοντα και μελλοντικά combo.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Διαφήμιση αναγνωριστικών καθρέφτη claude/&lt;provider&gt;/&lt;model&gt; στο /v1/models ώστε η ανακάλυψη μοντέλων πύλης Claude Code να εμφανίζει μη-Claude μοντέλα. Προειδοποίηση: διπλασιάζει τις εγγραφές καταλόγου για όλους τους πελάτες όταν ενεργοποιείται καθολικά.",

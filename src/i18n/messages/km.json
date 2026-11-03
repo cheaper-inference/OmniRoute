@@ -1086,6 +1086,7 @@
   "disabled": "បានបិទ",
   "featureFlagOmnirouteEmergencyFallbackDescription": "បញ្ជូនសំណើដែលអស់ថវិកាទៅកាន់ provider/model ជំនួសឥតគិតថ្លៃសម្រាប់គ្រាអាសន្ន។",
   "featureFlagArenaEloSyncEnabledDescription": "បើកការធ្វើសមកាលកម្ម ELO តាមកាលកំណត់ពីតារាងចំណាត់ថ្នាក់ Arena AI សម្រាប់ចំណាត់ថ្នាក់ភាពវៃឆ្លាតរបស់ម៉ូដែល។",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "បង្កើត និងបញ្ចូលសេចក្ដីសង្ខេបការសន្ទនា នៅពេល combo routing ប្ដូរម៉ូដែល។ បិទវា ដើម្បីចាត់ទុកការប្ដូរម៉ូដែលដាច់ដោយឡែកពីគ្នា និងទប់ស្កាត់សំណើប្រគល់បន្តនៅផ្ទៃខាងក្រោយសម្រាប់ combo ដែលមានស្រាប់ និងនាពេលអនាគតទាំងអស់។",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "ផ្សព្វផ្សាយ mirror ids របស់ claude/&lt;provider&gt;/&lt;model&gt; នៅលើ /v1/models ដើម្បីឱ្យការស្វែងរកម៉ូដែលតាម gateway របស់ Claude Code រាយបញ្ជីម៉ូដែលដែលមិនមែនជា Claude។ ការព្រមាន៖ វានឹងបង្កើនធាតុក្នុងកាតាឡុកទ្វេដងសម្រាប់ client ទាំងអស់ នៅពេលបើកជាសកល។",

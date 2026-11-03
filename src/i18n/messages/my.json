@@ -1086,6 +1086,7 @@
   "disabled": "ပိတ်ထားသည်",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ဘတ်ဂျက်ကုန်ဆုံးသွားသော တောင်းဆိုမှုများကို အရေးပေါ် အခမဲ့ အရန် provider/model သို့ လမ်းကြောင်းပြောင်းပါ။",
   "featureFlagArenaEloSyncEnabledDescription": "မော်ဒယ်ဉာဏ်ရည်ဆိုင်ရာ အဆင့်သတ်မှတ်ချက်များအတွက် Arena AI leaderboard ELO ကို အခါအားလျော်စွာ ထပ်တူပြုခြင်းအား ဖွင့်ပါ။",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "combo လမ်းကြောင်းရွေးချယ်မှုက မော်ဒယ်များ ပြောင်းသည့်အခါ စကားဝိုင်းအနှစ်ချုပ်များကို ထုတ်လုပ်၍ ထည့်သွင်းပါ။ မော်ဒယ်ပြောင်းလဲမှုများကို သီးခြားစီ ကိုင်တွယ်ရန်နှင့် လက်ရှိနှင့် အနာဂတ် combo အားလုံးအတွက် နောက်ခံလွှဲပြောင်းတောင်းဆိုမှုများကို တားဆီးရန် ပိတ်ပါ။",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Claude Code gateway ၏ မော်ဒယ်ရှာဖွေမှုစာရင်းတွင် Claude မဟုတ်သော မော်ဒယ်များ ပါဝင်စေရန် /v1/models တွင် claude/&lt;provider&gt;/&lt;model&gt; mirror ids များကို ဖော်ပြပါ။ သတိပေးချက်- အားလုံးအတွက် ဖွင့်ထားပါက client အားလုံးတွင် catalog entry အရေအတွက် နှစ်ဆဖြစ်စေသည်။",

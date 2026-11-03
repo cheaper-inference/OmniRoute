@@ -1009,6 +1009,7 @@
   "disabled": "असक्षम",
   "featureFlagOmnirouteEmergencyFallbackDescription": "बजेट सकिएका अनुरोधहरूलाई आपत्कालीन निःशुल्क फलब्याक प्रदायक/मोडेलमा पठाउनुहोस्।",
   "featureFlagArenaEloSyncEnabledDescription": "मोडेल इन्टेलिजेन्स श्रेणीकरणका लागि आवधिक Arena AI लिडरबोर्ड ELO समक्रमण सक्षम गर्नुहोस्।",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "कम्बो राउटिङले मोडेलहरू परिवर्तन गर्दा वार्तालापका सारांशहरू सिर्जना गरी समावेश गर्नुहोस्। मोडेल परिवर्तनहरूलाई स्वतन्त्र रूपमा व्यवहार गर्न र सबै विद्यमान तथा भावी कम्बोहरूका पृष्ठभूमि ह्यान्डअफ अनुरोधहरू रोक्न यसलाई असक्षम गर्नुहोस्।",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Claude Code गेटवे मोडेल खोजले गैर-Claude मोडेलहरू सूचीबद्ध गरोस् भन्नका लागि /v1/models मा claude/&lt;provider&gt;/&lt;model&gt; मिरर id हरू देखाउनुहोस्। चेतावनी: विश्वव्यापी रूपमा सक्षम गर्दा सबै क्लाइन्टका लागि क्याटलग प्रविष्टिहरू दोब्बर हुन्छन्।",

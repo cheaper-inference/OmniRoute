@@ -1009,6 +1009,7 @@
   "disabled": "முடக்கப்பட்டது",
   "featureFlagOmnirouteEmergencyFallbackDescription": "பட்ஜெட் தீர்ந்த கோரிக்கைகளை அவசரகால இலவச ஃபால்பேக் வழங்குநர்/மாடலுக்கு வழிசெலுத்துங்கள்.",
   "featureFlagArenaEloSyncEnabledDescription": "மாடல் நுண்ணறிவு தரவரிசைகளுக்காக அவ்வப்போதான Arena AI லீடர்போர்டு ELO ஒத்திசைவை இயக்குங்கள்.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "காம்போ வழித்தடம் மாடல்களை மாற்றும்போது உரையாடல் சுருக்கங்களை உருவாக்கி உட்செலுத்தவும். மாடல் மாற்றங்களைத் தனித்தனியாகக் கையாளவும், ஏற்கனவே உள்ள மற்றும் எதிர்கால காம்போக்கள் அனைத்திற்குமான பின்னணி ஒப்படைப்புக் கோரிக்கைகளைத் தடுக்கவும் இதை முடக்கவும்.",
   "featureFlagReasoningReplayEnabledDescription": "பல முறை பேசும் உரையாடல்களில் மாதிரியின் பகுத்தறிவை தற்காலிகமாக சேமித்து மீண்டும் இயக்குங்கள். பகுத்தறிவை சேமிப்பதையும் மீண்டும் செலுத்துவதையும் நிறுத்த முடக்கவும்.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models இல் Claude Code gateway மாதிரி கண்டுபிடிப்பு பட்டியலில் non-Claude மாதிரிகளை காட்ட Claude/&lt;provider&gt;/&lt;model&gt; மின்னூல் அடையாளங்களை விளம்பரம் செய்யவும். எச்சரிக்கை: உலகளாவியமாக செயல்படுத்தப்பட்டால் அனைத்து கிளையன்டுகளுக்கும் பட்டியல் பதிவுகளை இரட்டைப்படுத்துகிறது.",

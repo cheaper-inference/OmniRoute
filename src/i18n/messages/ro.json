@@ -1009,6 +1009,7 @@
   "disabled": "Dezactivat",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Redirecționează cererile cu buget epuizat către furnizorul/modelul de rezervă gratuit de urgență.",
   "featureFlagArenaEloSyncEnabledDescription": "Activează sincronizarea periodică ELO a clasamentului Arena AI pentru clasamentele de inteligență ale modelelor.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Generați și inserați rezumate ale conversațiilor atunci când rutarea combinată schimbă modelele. Dezactivați opțiunea pentru a trata separat schimbările de model și pentru a împiedica solicitările de transfer în fundal pentru toate combinațiile existente și viitoare.",
   "featureFlagReasoningReplayEnabledDescription": "Pune în cache și reia raționamentul modelului în conversațiile cu mai multe ture. Dezactivează pentru a opri stocarea și reintroducerea raționamentului.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Publica id-urile mirror claude/&lt;provider&gt;/&lt;model&gt; pe /v1/models astfel încât lista de descoperire a modelului Claude Code să includă modele non-Claude. Atenție: dublează intrările din catalog pentru toți clienții când este activat global.",

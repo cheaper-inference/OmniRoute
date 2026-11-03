@@ -1009,6 +1009,7 @@
   "disabled": "An Kashe",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Tura buƙatun da kasafin kuɗinsu ya ƙare zuwa provider/model na gaggawa mai kyauta.",
   "featureFlagArenaEloSyncEnabledDescription": "Kunna daidaita ELO na jadawalin jagorancin Arena AI lokaci-lokaci domin martabar ƙwarewar samfura.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Ƙirƙira da shigar da taƙaitattun tattaunawa lokacin da tsarin tura haɗe-haɗe ya sauya samfura. Kashe wannan domin ɗaukar sauyin samfura daban-daban da kuma hana buƙatun miƙa aiki na bayan fage ga duk haɗe-haɗe na yanzu da na gaba.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Bayyana ID na madubi na claude/&lt;provider&gt;/&lt;model&gt; a /v1/models domin gano samfuran gateway na Claude Code ya jera samfuran da ba na Claude ba. Gargadi: idan aka kunna wannan a ko’ina, zai ninka shigarwar kundin ga duk abokan ciniki.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",

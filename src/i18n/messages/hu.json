@@ -1009,6 +1009,7 @@
   "disabled": "Letiltva",
   "featureFlagOmnirouteEmergencyFallbackDescription": "A keretet kimerítő kérések átirányítása a vészhelyzeti ingyenes tartalék szolgáltatóhoz/modellhez.",
   "featureFlagArenaEloSyncEnabledDescription": "Rendszeres Arena AI ranglista ELO szinkronizáció engedélyezése a modellintelligencia rangsorokhoz.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Beszélgetés-összefoglalók létrehozása és beillesztése, amikor a kombinált útválasztás modellt vált. Tiltsa le, ha a modellváltásokat egymástól függetlenül szeretné kezelni, és meg szeretné akadályozni a háttérben futó átadási kéréseket minden meglévő és jövőbeli kombinációnál.",
   "featureFlagReasoningReplayEnabledDescription": "Gyorsítótárazza és játssza le a modell indoklását a többfordulós beszélgetésekben. Tiltsa le a tárolás és az indoklás újbóli beillesztésének leállításához.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Hirdesse a claude/&lt;provider&gt;/&lt;model&gt; tükör azonosítókat a /v1/models-on, hogy a Claude Code átjáró modell felfedezése nem Claude modelleket is listázzon. Figyelmeztetés: globális engedélyezés esetén megduplázza a katalógus bejegyzéseket minden kliens számára.",

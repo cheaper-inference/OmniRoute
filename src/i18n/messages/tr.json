@@ -1009,6 +1009,7 @@
   "disabled": "Devre dışı",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Bütçesi tükenmiş istekleri acil durum ücretsiz yedek sağlayıcıya/modele yönlendirin.",
   "featureFlagArenaEloSyncEnabledDescription": "Model zekası sıralamaları için periyodik Arena AI liderlik tablosu ELO senkronizasyonunu etkinleştirin.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Kombinasyon yönlendirmesi model değiştirdiğinde konuşma özetleri oluşturup ekleyin. Model değişikliklerini birbirinden bağımsız ele almak ve mevcut ve gelecekteki tüm kombinasyonlar için arka plandaki devir isteklerini önlemek üzere devre dışı bırakın.",
   "featureFlagReasoningReplayEnabledDescription": "Çok turlu konuşmalarda model muhakemesini önbelleğe alın ve yeniden oynatın. Muhakemeyi saklamayı ve yeniden enjekte etmeyi durdurmak için devre dışı bırakın.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models üzerinde claude/&lt;provider&gt;/&lt;model&gt; ayna kimliklerini tanıtın, böylece Claude Code geçidi model keşfi, Claude olmayan modelleri listeler. Uyarı: Küresel olarak etkinleştirildiğinde tüm istemciler için katalog girişlerini iki katına çıkarır.",

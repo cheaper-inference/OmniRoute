@@ -1086,6 +1086,7 @@
   "disabled": "ਅਯੋਗ",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ਬਜਟ ਖ਼ਤਮ ਹੋ ਚੁੱਕੀਆਂ ਬੇਨਤੀਆਂ ਨੂੰ ਐਮਰਜੈਂਸੀ ਮੁਫ਼ਤ ਫਾਲਬੈਕ ਪ੍ਰਦਾਤਾ/ਮਾਡਲ ਵੱਲ ਭੇਜੋ।",
   "featureFlagArenaEloSyncEnabledDescription": "ਮਾਡਲ ਇੰਟੈਲੀਜੈਂਸ ਰੈਂਕਿੰਗਾਂ ਲਈ ਸਮੇਂ-ਸਮੇਂ 'ਤੇ Arena AI ਲੀਡਰਬੋਰਡ ELO ਸਿੰਕ ਸਮਰੱਥ ਕਰੋ।",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "ਜਦੋਂ ਕੰਬੋ ਰਾਊਟਿੰਗ ਮਾਡਲ ਬਦਲਦੀ ਹੈ, ਤਾਂ ਗੱਲਬਾਤ ਦੇ ਸਾਰ ਤਿਆਰ ਕਰਕੇ ਸ਼ਾਮਲ ਕਰੋ। ਮਾਡਲ ਬਦਲਾਵਾਂ ਨੂੰ ਸੁਤੰਤਰ ਤੌਰ 'ਤੇ ਸੰਭਾਲਣ ਅਤੇ ਸਾਰੇ ਮੌਜੂਦਾ ਤੇ ਭਵਿੱਖੀ ਕੰਬੋਜ਼ ਲਈ ਬੈਕਗ੍ਰਾਊਂਡ ਹੈਂਡਆਫ਼ ਬੇਨਤੀਆਂ ਨੂੰ ਰੋਕਣ ਵਾਸਤੇ ਇਸਨੂੰ ਅਯੋਗ ਕਰੋ।",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models ਉੱਤੇ claude/&lt;provider&gt;/&lt;model&gt; ਮਿਰਰ IDs ਦਾ ਪ੍ਰਚਾਰ ਕਰੋ, ਤਾਂ ਜੋ Claude Code ਗੇਟਵੇ ਮਾਡਲ ਖੋਜ ਵਿੱਚ ਗੈਰ-Claude ਮਾਡਲ ਸੂਚੀਬੱਧ ਹੋਣ। ਚੇਤਾਵਨੀ: ਗਲੋਬਲ ਤੌਰ 'ਤੇ ਸਮਰੱਥ ਕਰਨ 'ਤੇ ਇਹ ਸਾਰੇ ਕਲਾਇੰਟਾਂ ਲਈ ਕੈਟਾਲਾਗ ਐਂਟਰੀਆਂ ਨੂੰ ਦੁੱਗਣਾ ਕਰ ਦਿੰਦਾ ਹੈ।",

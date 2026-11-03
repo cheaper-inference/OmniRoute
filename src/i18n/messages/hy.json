@@ -1009,6 +1009,7 @@
   "disabled": "Անջատված է",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Բյուջեն սպառած հարցումներն ուղղորդել արտակարգ անվճար պահուստային մատակարարին/մոդելին։",
   "featureFlagArenaEloSyncEnabledDescription": "Միացնել Arena AI առաջատարների աղյուսակի ELO-ի պարբերական համաժամացումը՝ մոդելների ինտելեկտի վարկանիշների համար։",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Ստեղծել և ներարկել զրույցների ամփոփումներ, երբ համակցված երթուղավորումը փոխում է մոդելները։ Անջատեք՝ մոդելների փոխարկումներն անկախ մշակելու և բոլոր առկա ու ապագա համակցությունների համար ֆոնային փոխանցման հարցումները կանխելու նպատակով։",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Հրապարակել claude/&lt;provider&gt;/&lt;model&gt; հայելային նույնացուցիչները /v1/models-ում, որպեսզի Claude Code դարպասի մոդելների հայտնաբերման ցանկում ցուցադրվեն ոչ Claude մոդելները։ Զգուշացում․ գլոբալ միացնելու դեպքում կրկնապատկում է կատալոգի գրառումները բոլոր հաճախորդների համար։",

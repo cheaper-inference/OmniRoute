@@ -1009,6 +1009,7 @@
   "disabled": "Deaktivert",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Rut forespørsler med oppbrukt budsjett til gratis reserveleverandør/-modell for nødstilfeller.",
   "featureFlagArenaEloSyncEnabledDescription": "Aktiver periodisk synkronisering av Arena AI-ledertavlens ELO for rangering av modellintelligens.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Generer og legg inn samtalesammendrag når kombinasjonsruting bytter modell. Deaktiver dette for å behandle modellbytter uavhengig og forhindre overleveringsforespørsler i bakgrunnen for alle eksisterende og fremtidige kombinasjoner.",
   "featureFlagReasoningReplayEnabledDescription": "Mellomlagre og spill av modellens resonnering på tvers av samtaler med flere turer. Deaktiver for å slutte å lagre og sette inn resonnering på nytt.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Reklamer claude/&lt;provider&gt;/&lt;model&gt; speil-id-er på /v1/models slik at Claude Code gateway-modelloppdagelse viser ikke-Claude-modeller. Advarsel: dobler katalogoppføringer for alle klienter når det er aktivert globalt.",

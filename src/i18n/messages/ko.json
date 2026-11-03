@@ -1009,6 +1009,7 @@
   "disabled": "비활성화됨",
   "featureFlagOmnirouteEmergencyFallbackDescription": "예산이 소진된 요청을 긴급 무료 폴백 제공자/모델로 라우팅합니다.",
   "featureFlagArenaEloSyncEnabledDescription": "모델 지능 순위를 위해 주기적인 Arena AI 리더보드 ELO 동기화를 활성화합니다.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "콤보 라우팅에서 모델을 전환할 때 대화 요약을 생성하여 삽입합니다. 모델 전환을 서로 독립적으로 처리하고 기존 및 향후 모든 콤보에 대한 백그라운드 핸드오프 요청을 방지하려면 비활성화하세요.",
   "featureFlagReasoningReplayEnabledDescription": "여러 턴의 대화에서 모델의 추론을 캐시하고 재생합니다. 추론 저장 및 재주입을 중지하려면 비활성화하세요.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models에서 Claude Code 게이트웨이 모델 검색 목록에 비Claude 모델이 포함되도록 claude/&lt;provider&gt;/&lt;model&gt; 미러 ID를 광고합니다. 경고: 전역적으로 활성화하면 모든 클라이언트에 대해 카탈로그 항목이 두 배로 증가합니다.",

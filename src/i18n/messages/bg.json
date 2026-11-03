@@ -1086,6 +1086,7 @@
   "disabled": "Деактивирано",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Маршрутизиране на заявки с изчерпан бюджет към аварийния безплатен резервен доставчик/модел.",
   "featureFlagArenaEloSyncEnabledDescription": "Активиране на периодична синхронизация на ELO от класацията на Arena AI за класиране на интелигентността на моделите.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Генериране и вмъкване на обобщения на разговорите, когато комбинираното маршрутизиране превключва между модели. Деактивирайте, за да третирате превключванията между модели независимо и да предотвратите фонови заявки за предаване за всички съществуващи и бъдещи комбинации.",
   "featureFlagReasoningReplayEnabledDescription": "Кеширайте и възпроизвеждайте разсъжденията на модела в многоходови разговори. Изключете, за да спрете съхраняването и повторното вмъкване на разсъжденията.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Рекламирайте claude/&lt;provider&gt;/&lt;model&gt; mirror идентификатори на /v1/models, така че списъкът с модели на Claude Code gateway да включва неклаудови модели. Внимание: удвоява записите в каталога за всички клиенти, когато е активирано глобално.",

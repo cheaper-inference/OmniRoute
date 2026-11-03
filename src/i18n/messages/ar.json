@@ -1086,6 +1086,7 @@
   "disabled": "معطل",
   "featureFlagOmnirouteEmergencyFallbackDescription": "توجيه الطلبات التي استنفدت الميزانية إلى موفر/نموذج الاحتياط المجاني للطوارئ.",
   "featureFlagArenaEloSyncEnabledDescription": "تمكين المزامنة الدورية لتصنيف ELO للوحة صدارة Arena AI لتصنيفات ذكاء النماذج.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "إنشاء ملخصات للمحادثات وإدراجها عند تبديل النماذج بواسطة التوجيه المركّب. عطّل هذا الخيار للتعامل مع عمليات تبديل النماذج بشكل مستقل ومنع طلبات التسليم في الخلفية لجميع التركيبات الحالية والمستقبلية.",
   "featureFlagReasoningReplayEnabledDescription": "تخزين منطق استدلال النموذج وإعادة تشغيله عبر المحادثات متعددة الجولات. عطّل الخيار لإيقاف تخزين الاستدلال وإعادة حقنه.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "اعلن عن معرفات مرآة claude/&lt;provider&gt;/&lt;model&gt; على /v1/models حتى تظهر قائمة اكتشاف نماذج بوابة Claude Code نماذج غير Claude. تحذير: يؤدي إلى تكرار إدخالات الكتالوج لجميع العملاء عند تفعيله عالميًا.",

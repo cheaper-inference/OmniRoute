@@ -1009,6 +1009,7 @@
   "disabled": "ଅକ୍ଷମ",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ବଜେଟ୍ ଶେଷ ହୋଇଥିବା ଅନୁରୋଧଗୁଡ଼ିକୁ ଜରୁରୀକାଳୀନ ମାଗଣା ଫଲ୍ବ୍ୟାକ୍ ପ୍ରଦାତା/ମଡେଲ୍କୁ ରୁଟ୍ କରନ୍ତୁ।",
   "featureFlagArenaEloSyncEnabledDescription": "ମଡେଲ୍ ଇଣ୍ଟେଲିଜେନ୍ସ ର୍ୟାଙ୍କିଙ୍ଗ୍ ପାଇଁ Arena AI ଲିଡର୍ବୋର୍ଡର ନିୟମିତ ELO ସିଙ୍କ୍ ସକ୍ଷମ କରନ୍ତୁ।",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "କମ୍ବୋ ରାଉଟିଂ ମଡେଲ୍ ପରିବର୍ତ୍ତନ କଲେ ବାର୍ତ୍ତାଳାପ ସାରାଂଶ ସୃଷ୍ଟି କରି ଯୋଡ଼ନ୍ତୁ। ମଡେଲ୍ ପରିବର୍ତ୍ତନଗୁଡ଼ିକୁ ସ୍ୱାଧୀନ ଭାବରେ ପରିଚାଳନା କରିବା ଏବଂ ସମସ୍ତ ବର୍ତ୍ତମାନର ଓ ଭବିଷ୍ୟତ କମ୍ବୋ ପାଇଁ ପୃଷ୍ଠଭୂମି ହ୍ୟାଣ୍ଡଅଫ୍ ଅନୁରୋଧକୁ ରୋକିବାକୁ ଏହାକୁ ଅକ୍ଷମ କରନ୍ତୁ।",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/modelsରେ claude/&lt;provider&gt;/&lt;model&gt; ମିରର୍ IDଗୁଡ଼ିକ ପ୍ରକାଶ କରନ୍ତୁ, ଯାହାଦ୍ୱାରା Claude Code ଗେଟୱେ ମଡେଲ୍ ଆବିଷ୍କାରରେ Claude ବ୍ୟତୀତ ଅନ୍ୟ ମଡେଲ୍ଗୁଡ଼ିକ ତାଲିକାଭୁକ୍ତ ହେବ। ଚେତାବନୀ: ବିଶ୍ୱବ୍ୟାପୀ ଭାବେ ସକ୍ଷମ କଲେ ଏହା ସମସ୍ତ କ୍ଲାଏଣ୍ଟ ପାଇଁ କ୍ୟାଟାଲଗ୍ ଏଣ୍ଟ୍ରି ସଂଖ୍ୟାକୁ ଦ୍ୱିଗୁଣିତ କରେ।",

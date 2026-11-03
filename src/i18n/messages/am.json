@@ -1086,6 +1086,7 @@
   "disabled": "ተሰናክሏል",
   "featureFlagOmnirouteEmergencyFallbackDescription": "በጀታቸው ያለቀባቸውን ጥያቄዎች ወደ ድንገተኛው ነፃ ተተኪ አቅራቢ/ሞዴል ያዛውሩ።",
   "featureFlagArenaEloSyncEnabledDescription": "ለሞዴል ብልህነት ደረጃዎች የArena AI የደረጃ ሰንጠረዥ ELO በየጊዜው እንዲመሳሰል ያንቁ።",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "የጥምር ማዘዋወሪያ ሞዴሎችን ሲቀይር የውይይት ማጠቃለያዎችን ያመንጩ እና ያስገቡ። የሞዴል ለውጦችን በተናጥል ለመያዝ እና ለሁሉም ነባርና ወደፊት ለሚፈጠሩ ጥምረቶች የጀርባ ርክክብ ጥያቄዎችን ለመከልከል ያሰናክሉት።",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "የClaude Code ጌትዌይ ሞዴል ፍለጋ Claude ያልሆኑ ሞዴሎችን እንዲዘረዝር፣ የclaude/&lt;provider&gt;/&lt;model&gt; መስታወት መለያዎችን በ/v1/models ላይ ያስተዋውቁ። ማስጠንቀቂያ፦ በዓለም አቀፍ ደረጃ ሲነቃ ለሁሉም ደንበኞች የካታሎግ ግቤቶችን በእጥፍ ያደርጋል።",

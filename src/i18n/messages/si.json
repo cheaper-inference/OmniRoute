@@ -1009,6 +1009,7 @@
   "disabled": "අක්රියයි",
   "featureFlagOmnirouteEmergencyFallbackDescription": "අයවැය අවසන් වූ ඉල්ලීම් හදිසි නොමිලේ විකල්ප සපයන්නා/මාදිලිය වෙත යොමු කරන්න.",
   "featureFlagArenaEloSyncEnabledDescription": "මාදිලි බුද්ධි ශ්රේණිගත කිරීම් සඳහා Arena AI ප්රමුඛතා පුවරුවේ ELO දත්ත කාලානුරූපව සමමුහුර්ත කිරීම සබල කරන්න.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "සංයෝජන මාර්ගගත කිරීමේදී මාදිලි මාරු වන විට සංවාද සාරාංශ ජනනය කර ඇතුළත් කරන්න. මාදිලි මාරු කිරීම් ස්වාධීනව සැලකීමට සහ පවතින හා අනාගත සියලු සංයෝජන සඳහා පසුබිම් භාරදීමේ ඉල්ලීම් වැළැක්වීමට මෙය අක්රිය කරන්න.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Claude Code ද්වාරයේ මාදිලි සොයාගැනීම් ලැයිස්තුවේ Claude නොවන මාදිලි පෙන්වීම සඳහා /v1/models හි claude/&lt;provider&gt;/&lt;model&gt; කැඩපත් හැඳුනුම් ප්රචාරය කරන්න. අවවාදයයි: ගෝලීයව සබල කළ විට සියලු සේවාලාභීන් සඳහා නාමාවලි ඇතුළත් කිරීම් දෙගුණ වේ.",

@@ -1009,6 +1009,7 @@
   "disabled": "Naka-disable",
   "featureFlagOmnirouteEmergencyFallbackDescription": "I-route ang mga request na naubusan ng budget sa emergency free fallback provider/model.",
   "featureFlagArenaEloSyncEnabledDescription": "I-enable ang pana-panahong Arena AI leaderboard ELO sync para sa mga ranking ng intelligence ng modelo.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Bumuo at awtomatikong maglagay ng mga buod ng pag-uusap kapag nagpapalit ng mga modelo ang combo routing. I-disable upang ituring nang hiwalay ang mga pagpapalit ng modelo at pigilan ang mga kahilingan sa paglipat sa background para sa lahat ng kasalukuyan at hinaharap na combo.",
   "featureFlagReasoningReplayEnabledDescription": "I-cache at i-replay ang reasoning ng modelo sa mga usapang maraming turn. I-disable para ihinto ang pag-store at muling pag-inject ng reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "I-anunsyo ang claude/&lt;provider&gt;/&lt;model&gt; mirror ids sa /v1/models upang ang Claude Code gateway model discovery ay maglista ng mga non-Claude models. Babala: nagdodoble ng catalog entries para sa lahat ng kliyente kapag pinagana nang globally.",

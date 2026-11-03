@@ -1009,6 +1009,7 @@
   "disabled": "Agbanyụrụ",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Ziga arịrịọ ndị mmefu ego ha gwụrụ na provider/model ndabere efu maka ọnọdụ mberede.",
   "featureFlagArenaEloSyncEnabledDescription": "Gbanye mmekọrịta ELO nke leaderboard Arena AI kwa oge maka ogo ọgụgụ isi model.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Mepụta ma tinye nchịkọta mkparịta ụka mgbe combo routing gbanwere model. Gbanyụọ ya ka e were mgbanwe model ọ bụla dịka ihe nọọrọ onwe ya ma gbochie arịrịọ nnyefe na ndabere maka combo niile dị ugbu a na ndị ga-adị n'ọdịnihu.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Kpọsa id mirror claude/&lt;provider&gt;/&lt;model&gt; na /v1/models ka nchọpụta model nke gateway Claude Code depụta model ndị na-abụghị Claude. Ịdọ aka ná ntị: nke a na-eme ka ọnụ ọgụgụ ihe dị na katalọgụ bụrụ okpukpu abụọ maka client niile mgbe agbanyere ya n'ụwa niile.",

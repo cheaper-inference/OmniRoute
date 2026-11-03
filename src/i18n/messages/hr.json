@@ -1009,6 +1009,7 @@
   "disabled": "Onemogućeno",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Preusmjeri zahtjeve s iscrpljenim budžetom na besplatnog pružatelja/model za hitne slučajeve.",
   "featureFlagArenaEloSyncEnabledDescription": "Omogući periodičnu sinkronizaciju ELO ljestvice Arena AI za rangiranje inteligencije modela.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Generiraj i umetni sažetke razgovora kada kombinirano usmjeravanje promijeni model. Onemogući kako bi se promjene modela tretirale neovisno i spriječili pozadinski zahtjevi za prijenos konteksta za sve postojeće i buduće kombinacije.",
   "featureFlagReasoningReplayEnabledDescription": "Cache and replay model reasoning across multi-turn conversations. Disable to stop storing and re-injecting reasoning.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Oglašavaj claude/&lt;provider&gt;/&lt;model&gt; zrcalne identifikatore na /v1/models kako bi otkrivanje modela Claude Code gatewaya prikazivalo modele koji nisu Claude. Upozorenje: udvostručuje unose kataloga za sve klijente kada je globalno omogućeno.",

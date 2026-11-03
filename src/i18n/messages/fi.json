@@ -1009,6 +1009,7 @@
   "disabled": "Poistettu käytöstä",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Reititä budjettinsa ylittäneet pyynnöt varalla olevalle ilmaiselle varatarjoajalle/-mallille.",
   "featureFlagArenaEloSyncEnabledDescription": "Ota käyttöön jaksottainen Arena AI -tulostaulukon ELO-synkronointi mallien älykkyysluokituksia varten.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Luo ja lisää keskusteluyhteenvedot, kun yhdistelmäreititys vaihtaa mallia. Poista käytöstä, jos haluat käsitellä mallinvaihdot toisistaan riippumatta ja estää taustalla tehtävät siirtopyynnöt kaikissa nykyisissä ja tulevissa yhdistelmissä.",
   "featureFlagReasoningReplayEnabledDescription": "Välimuistita ja toista mallin päättely usean vuoron keskusteluissa. Poista käytöstä, jos et halua tallentaa äläkä syöttää päättelyä uudelleen.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Mainosta claude/&lt;provider&gt;/&lt;model&gt; peilid tunnuksia /v1/models, jotta Claude Code -portin mallin löytölistalla näkyvät ei-Claude-mallit. Varoitus: kaksinkertaistaa luettelo-merkinnät kaikille asiakkaille, kun se on otettu käyttöön globaalisti.",

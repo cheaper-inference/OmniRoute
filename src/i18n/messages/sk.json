@@ -1009,6 +1009,7 @@
   "disabled": "Zakázané",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Smerovať požiadavky s vyčerpaným rozpočtom na núdzového bezplatného záložného poskytovateľa/model.",
   "featureFlagArenaEloSyncEnabledDescription": "Povoliť pravidelnú synchronizáciu ELO z rebríčka Arena AI pre hodnotenie inteligencie modelov.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Generovať a vkladať súhrny konverzácií, keď kombinované smerovanie prepína modely. Vypnutím sa prepnutia modelov budú spracúvať nezávisle a zabránite požiadavkám na odovzdanie na pozadí pre všetky existujúce aj budúce kombinácie.",
   "featureFlagReasoningReplayEnabledDescription": "Ukladajte do vyrovnávacej pamäte a prehrávajte uvažovanie modelu v konverzáciách s viacerými ťahmi. Vypnutím zastavíte ukladanie a opätovné vkladanie uvažovania.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Inzerujte claude/&lt;provider&gt;/&lt;model&gt; zrkadlové ID na /v1/models, aby zoznam objavovania modelov Claude Code obsahoval aj modely, ktoré nie sú Claude. Upozornenie: pri globálnom povolení zdvojuje záznamy v katalógu pre všetkých klientov.",

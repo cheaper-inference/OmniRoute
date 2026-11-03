@@ -1009,6 +1009,7 @@
   "disabled": "Dinonaktifkan",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Arahkan permintaan yang kehabisan anggaran ke penyedia/model fallback gratis darurat.",
   "featureFlagArenaEloSyncEnabledDescription": "Aktifkan sinkronisasi ELO papan peringkat Arena AI berkala untuk peringkat kecerdasan model.",
+  "featureFlagUsageDailyRollupEnabledDescription": "__MISSING__:Publish closed usage days into usage_daily_summary ahead of retention, so long analytics windows read daily totals instead of raw rows. Off by default: published days lose their per-connection, per-API-key, success and latency detail in analytics, and their cost stays as priced when published.",
   "featureFlagUniversalContextHandoffEnabledDescription": "Buat dan sisipkan ringkasan percakapan ketika perutean kombo beralih model. Nonaktifkan untuk memperlakukan peralihan model secara terpisah dan mencegah permintaan serah terima latar belakang untuk semua kombo yang ada maupun yang akan dibuat.",
   "featureFlagReasoningReplayEnabledDescription": "Cache dan putar ulang penalaran model di percakapan multi-giliran. Nonaktifkan untuk berhenti menyimpan dan menyuntikkan ulang penalaran.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Iklankan claude/&lt;provider&gt;/&lt;model&gt; mirror ids di /v1/models sehingga daftar penemuan model gateway Claude Code mencantumkan model non-Claude. Peringatan: menggandakan entri katalog untuk semua klien saat diaktifkan secara global.",
