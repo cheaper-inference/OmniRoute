@@ -1293,6 +1293,12 @@ values in `modelOutputOverrides`, including models without a custom-model row. T
 uses the runtime `max_output_tokens` capability and survives a model re-sync. The OpenAI-compatible
 provider page offers the same edit/clear controls and marks models with explicit vision support.
 
+On a compatible provider node, the write paths (`POST`, `PUT`, `PATCH`, `DELETE` and
+`/api/provider-models/validate-and-add`) store the model id as the bare upstream id: an id
+pasted from a prefixed listing has any leading stack of the node's own prefix collapsed, and
+responses echo the stored id. Canonical providers' slashed ids (e.g. `nvidia/nemotron-…`) are
+stored verbatim. `/v1/models` never emits a stacked `<prefix>/<prefix>/<model>` id.
+
 Custom Chat Completions nodes adapt explicit reasoning opt-outs to the upstream backend. A
 successful connection test automatically selects chat-template controls for each exact model ID
 whose `/models` entry proves a recognized `owned_by` value: `vllm`, `sglang`, or `llamacpp`.

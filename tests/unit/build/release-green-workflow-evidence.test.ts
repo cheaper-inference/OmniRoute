@@ -94,6 +94,7 @@ function observe({
     for (const path of [
       "scripts/quality",
       "scripts/dev",
+      "scripts/ci",
       "scripts/i18n",
       "scripts/check",
       "config/quality",
@@ -115,6 +116,7 @@ function observe({
       "scripts/i18n/resolve-ui-diff-base.mjs",
       "scripts/check/openapiBaseline.mjs",
       "scripts/dev/resource-budget-process.mjs",
+      "scripts/ci/unit-diagnostics.mjs",
     ]) {
       cpSync(new URL(path, root), join(dir, path));
     }

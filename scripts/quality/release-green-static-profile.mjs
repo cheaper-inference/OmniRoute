@@ -5,6 +5,78 @@ import { execFileSync } from "node:child_process";
 import { assertUiCandidateUnchanged, resolveUiDiffBase } from "../i18n/resolve-ui-diff-base.mjs";
 
 const UI_DIFFERENTIAL_GATES = new Set(["i18n:check-value-drift", "i18n:check-new-keys"]);
+const IMMUTABLE_SHA = /^[0-9a-f]{40}$/;
+
+function testMaskingGit(root, args) {
+  try {
+    return execFileSync("git", ["-c", "protocol.allow=never", ...args], {
+      cwd: root,
+      encoding: "utf8",
+      timeout: 30000,
+      maxBuffer: 4096,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: {
+        ...process.env,
+        GIT_ALLOW_PROTOCOL: "",
+        GIT_NO_LAZY_FETCH: "1",
+        GIT_OPTIONAL_LOCKS: "0",
+      },
+    }).trim();
+  } catch {
+    throw new Error("Cannot resolve test-masking comparison from local Git objects");
+  }
+}
+
+function assertTestMaskingSha(value) {
+  if (typeof value !== "string" || !IMMUTABLE_SHA.test(value) || /^0+$/.test(value)) {
+    throw new Error("Test-masking comparison requires an immutable base SHA");
+  }
+  return value;
+}
+
+/** Resolve the test-masking base once, independently of the observer's i18n base. */
+export function resolveTestMaskingBase(root, argv = []) {
+  const flag = "--test-masking-base-sha";
+  if (argv.some((arg) => arg.startsWith("--test-masking") && arg !== flag)) {
+    throw new Error("Unknown observer test-masking argument or unsupported syntax");
+  }
+  const positions = argv.flatMap((arg, index) => (arg === flag ? [index] : []));
+  if (positions.length > 1) throw new Error("Repeated observer test-masking base SHA");
+  const explicit = positions.length ? assertTestMaskingSha(argv[positions[0] + 1]) : null;
+  const base = assertTestMaskingSha(
+    testMaskingGit(root, [
+      "rev-parse",
+      "--verify",
+      "--end-of-options",
+      `${explicit || "refs/remotes/origin/main"}^{commit}`,
+    ])
+  );
+  if (explicit && base !== explicit)
+    throw new Error("Test-masking base SHA did not resolve exactly");
+  testMaskingGateEnv(root, base);
+  return base;
+}
+
+/** Validate retained objects without resolving a moving ref or performing a fetch. */
+export function testMaskingGateEnv(root, baseSha) {
+  assertTestMaskingSha(baseSha);
+  const resolved = testMaskingGit(root, [
+    "rev-parse",
+    "--verify",
+    "--end-of-options",
+    `${baseSha}^{commit}`,
+  ]);
+  if (resolved !== baseSha) throw new Error("Pinned test-masking base is unavailable");
+  // The gate's three-dot diff must have usable local ancestry; its internal Git helper
+  // otherwise turns an unavailable merge base into an empty comparison.
+  assertTestMaskingSha(testMaskingGit(root, ["merge-base", "--all", baseSha, "HEAD"]));
+  return {
+    GITHUB_BASE_SHA: baseSha,
+    GITHUB_BASE_REF: "",
+    GIT_ALLOW_PROTOCOL: "",
+    GIT_NO_LAZY_FETCH: "1",
+  };
+}
 
 /** Validate a versioned argv inventory; workflow shell is inspected, never executed or expanded. */
 export function validateFullCiProfile(profile, scripts, ci, quality) {
@@ -158,7 +230,7 @@ export function resolveFullCiComparison(root, argv, env = process.env) {
   return comparison;
 }
 
-export function loadFullCiProfile(root, { comparison } = {}) {
+export function loadFullCiProfile(root, { comparison, testMaskingBaseSha } = {}) {
   const read = (path) => readFileSync(join(root, path), "utf8");
   const gates = validateFullCiProfile(
     JSON.parse(read("config/quality/release-green-static-profile.json")),
@@ -191,7 +263,9 @@ export function loadFullCiProfile(root, { comparison } = {}) {
         I18N_COMPARISON_SCOPE: uiComparison.scope,
       };
     }
-    if (gate.env?.GITHUB_BASE_REF) {
+    if (gate.id === "check:test-masking") {
+      gate.env = { ...gate.env, ...testMaskingGateEnv(root, testMaskingBaseSha) };
+    } else if (gate.env?.GITHUB_BASE_REF) {
       const base = execFileSync(
         "git",
         ["rev-parse", "--verify", `origin/${gate.env.GITHUB_BASE_REF}^{commit}`],

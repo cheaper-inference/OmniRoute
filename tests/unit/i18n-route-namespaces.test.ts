@@ -127,3 +127,21 @@ test("pickMessages selects namespaces and ignores unknown/unsafe keys", () => {
   ]);
   assert.deepEqual(picked, { common: { hello: "world" }, disabled: "Disabled" });
 });
+
+test("combos payload includes its reused model catalog pagination messages", () => {
+  const { sections } = JSON.parse(readFileSync(MAP_PATH, "utf8"));
+  const catalog = {
+    common: { previousPage: "Previous page", nextPage: "Next page" },
+    combos: { reorderAll: "Reorder all" },
+    modelCatalog: {
+      showingCombos: "Showing {first}–{last} of {total} combos",
+      page: "Page {page} of {pageCount}",
+    },
+    unrelatedNamespace: { value: "Do not serialize this" },
+  };
+  const payload = pickMessages(catalog, sections.combos);
+  assert.deepEqual(payload.modelCatalog, catalog.modelCatalog);
+  assert.deepEqual(payload.common, catalog.common);
+  assert.deepEqual(payload.combos, catalog.combos);
+  assert.equal("unrelatedNamespace" in payload, false);
+});

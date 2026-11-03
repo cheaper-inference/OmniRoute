@@ -271,7 +271,6 @@ type InFlightBuild = {
   promise: Promise<CachedCatalog>;
   lastKeptAt?: number;
   timeoutCount?: number;
-  lastTimeoutCountedAt?: number;
 };
 const catalogInFlight = new Map<string, InFlightBuild>();
 
@@ -438,6 +437,7 @@ async function awaitCatalogInFlight(
   corsHeaders: Record<string, string>,
   diagnosticHeaders: Record<string, string>
 ): Promise<Response> {
+  const observedTimeoutCount = inflight.timeoutCount ?? 0;
   let payload: CachedCatalog;
   try {
     payload = await withTimeout(inflight.promise, catalogBuildTimeoutMs(), "catalog_build_timeout");
@@ -462,14 +462,10 @@ async function awaitCatalogInFlight(
     const shared = catalogInFlight.get(cacheKey);
     if (shared && shared.promise === inflight.promise) {
       const now = Date.now();
-      // Concurrent waiters observe one expired build window. Counting each
-      // waiter would replace a live build after just one busy timeout wave.
-      if (
-        shared.lastTimeoutCountedAt === undefined ||
-        now - shared.lastTimeoutCountedAt >= boundMs
-      ) {
-        shared.timeoutCount = (shared.timeoutCount ?? 0) + 1;
-        shared.lastTimeoutCountedAt = now;
+      // A waiter belongs to the timeout wave it joined, even when its callback
+      // is delayed. Only the first observer of that wave consumes an attempt.
+      if ((shared.timeoutCount ?? 0) === observedTimeoutCount) {
+        shared.timeoutCount = observedTimeoutCount + 1;
       }
       shared.lastKeptAt = now;
     }

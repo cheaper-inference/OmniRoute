@@ -78,6 +78,7 @@ function observe(
       "scripts/i18n/resolve-ui-diff-base.mjs",
       "scripts/check/openapiBaseline.mjs",
       "scripts/dev/resource-budget-process.mjs",
+      "scripts/ci/unit-diagnostics.mjs",
     ]) {
       copyFileSync(join(root, path), join(dir, path));
     }

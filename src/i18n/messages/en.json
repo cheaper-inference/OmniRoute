@@ -4198,7 +4198,9 @@
     "importCombosReplace": "Replace all",
     "importCombosDone": "Combos imported: {created}. Skipped: {skipped}.",
     "importCombosFailed": "Failed to import combos",
-    "importCombosWarnings": "Imported with warnings"
+    "importCombosWarnings": "Imported with warnings",
+    "reorderAll": "Reorder all",
+    "reorderAllDescription": "Reordering all {count} combos. Drag handles are enabled."
   },
   "costs": {
     "title": "Costs",
@@ -14428,6 +14430,10 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Skip 403/410 Refusals",
         "description": "When every account is cooling down and the cooldown that ends first was caused by a 403 (access refused) or a 410 (gone), return that refusal at once instead of waiting the cooldown out and re-sending the request; a renewing agentrouter connection-scoped quota 403 is then persisted with errorCode 429 so it stays retryable. Off by default: only a 401 skips the wait, and every refusal is persisted with the status it arrived with."
+      },
+      "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE": {
+        "description": "In the compression cache stats, count a compressed request to an automatic-prefix-caching provider (OpenAI, Codex, Azure, or a custom connection that declares prompt caching with marker stripping) as an estimated cache hit even without cache_control markers. The estimate is a cache-eligibility signal, not an observed hit, so the reported hit rate for those providers trends toward 100%. Off by default: only a request carrying cache_control markers to a caching provider counts as an estimated hit, so automatic-prefix providers keep reporting 0.",
+        "label": "Compression Cache Stats: Automatic-Prefix Eligibility"
       }
     }
   },

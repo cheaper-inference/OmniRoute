@@ -109,6 +109,7 @@ test(
     t.after(() => rmSync(directory, { recursive: true, force: true }));
     for (const name of [
       "scripts/quality/validate-release-green.mjs",
+      "scripts/ci/unit-diagnostics.mjs",
       "scripts/quality/gate-process.mjs",
       "scripts/quality/eslint-measurement.mjs",
       "scripts/quality/release-green-static-profile.mjs",
