@@ -41,6 +41,95 @@ test("combo test helper ignores keepalives and extracts streamed model content",
   assert.equal(text, "OK");
 });
 
+function streamDeltas(...deltas: Record<string, unknown>[]) {
+  return (
+    deltas.map((delta) => `data: ${JSON.stringify({ choices: [{ delta }] })}\n\n`).join("") +
+    "data: [DONE]\n\n"
+  );
+}
+
+for (const [name, reasoning] of [
+  ["reasoning_content", { reasoning_content: "thinking" }],
+  ["reasoning", { reasoning: "thinking" }],
+  ["reasoning_text", { reasoning_text: "thinking" }],
+  ["reasoning_details", { reasoning_details: [{ type: "reasoning.text", text: "thinking" }] }],
+] as const) {
+  test(`streamed ${name} is excluded when a final answer follows`, () => {
+    assert.equal(extractComboTestStreamText(streamDeltas(reasoning, { content: "2" })), "2");
+  });
+}
+
+test("streamed reasoning after final content is excluded", () => {
+  assert.equal(
+    extractComboTestStreamText(streamDeltas({ content: "2" }, { reasoning_content: "thinking" })),
+    "2"
+  );
+});
+
+test("a mixed reasoning and final content chunk returns only final content", () => {
+  assert.equal(
+    extractComboTestStreamText(streamDeltas({ content: "2", reasoning_content: "thinking" })),
+    "2"
+  );
+});
+
+test("streamed final content preserves whitespace between chunks", () => {
+  assert.equal(
+    extractComboTestStreamText(
+      streamDeltas({ content: "Hello" }, { content: " " }, { content: " world" }, { content: "!" })
+    ),
+    "Hello  world!"
+  );
+});
+
+test("streamed content blocks preserve whitespace between blocks and chunks", () => {
+  assert.equal(
+    extractComboTestStreamText(
+      streamDeltas(
+        {
+          content: [
+            { type: "text", text: "Hello" },
+            { type: "text", text: " " },
+          ],
+        },
+        { content: [{ type: "output_text", text: "world" }] }
+      )
+    ),
+    "Hello world"
+  );
+});
+
+test("empty and whitespace-only content do not suppress the reasoning-only fallback", () => {
+  assert.equal(
+    extractComboTestStreamText(
+      streamDeltas({ content: "" }, { content: "  " }, { reasoning_content: "thinking" })
+    ),
+    "thinking"
+  );
+});
+
+test("reasoning-only streams remain a healthy signal", () => {
+  assert.equal(extractComboTestStreamText(streamDeltas({ reasoning: "thinking" })), "thinking");
+});
+
+test("empty content and reasoning do not appear around a final answer", () => {
+  assert.equal(
+    extractComboTestStreamText(
+      streamDeltas({ content: " " }, { reasoning: "thinking" }, { content: "2" }, { content: "" })
+    ),
+    "2"
+  );
+});
+
+test("non-streaming final content is preferred over reasoning", () => {
+  assert.equal(
+    extractComboTestResponseText({
+      choices: [{ message: { content: "2", reasoning_content: "thinking" } }],
+    }),
+    "2"
+  );
+});
+
 test("combo test helper preserves streamed upstream errors", () => {
   const result = extractComboTestStreamResult(
     'data: {"error":{"message":"Rate limit exceeded","code":"429"}}\n\n'
