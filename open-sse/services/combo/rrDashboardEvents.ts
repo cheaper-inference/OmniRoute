@@ -10,6 +10,10 @@
  */
 import { emit } from "../../../src/lib/events/eventBus";
 
+// Single seam from the combo services to the dashboard event bus: other combo modules take `emit`
+// from here instead of importing src/ themselves (boundary ratchet, quality-baseline.json).
+export { emit };
+
 export interface RRDashboardEvents {
   attempt(): void;
   succeeded(latencyMs: number): void;
