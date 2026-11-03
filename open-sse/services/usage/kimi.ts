@@ -237,7 +237,7 @@ function getKimiPlanName(level: unknown): string {
 
 async function getKimiProfilePlanName(usageUrl: string, credential?: string): Promise<string> {
   const controller = new AbortController();
-  let timer: ReturnType<typeof setTimeout>;
+  let timer: ReturnType<typeof setTimeout> | undefined;
   const deadline = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
       controller.abort();
