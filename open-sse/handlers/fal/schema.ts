@@ -80,12 +80,16 @@ export function falInputSchema(definition: FalDefinition, transport: FalTranspor
   const candidates = posts.filter(([path]) =>
     transport === "stream" ? path.endsWith("/stream") : !path.endsWith("/stream")
   );
+  const operation =
+    transport === "stream" && !definition.endpoint_id.endsWith("/stream")
+      ? `/${definition.endpoint_id}/stream`
+      : `/${definition.endpoint_id}`;
   const selected =
-    candidates.find(([path]) => path === `/${definition.endpoint_id}`) ??
+    posts.find(([path]) => path === operation) ??
     (candidates.length === 1 ? candidates[0] : undefined);
   if (!selected) throw new Error(`No unambiguous ${transport} input schema for this endpoint`);
-  const operation = falRecord(falRecord(selected[1]).post);
-  const requestBody = resolveFalSchema(definition.openapi, operation.requestBody);
+  const post = falRecord(falRecord(selected[1]).post);
+  const requestBody = resolveFalSchema(definition.openapi, post.requestBody);
   const content = falRecord(requestBody.content);
   const schema = resolveFalSchema(
     definition.openapi,

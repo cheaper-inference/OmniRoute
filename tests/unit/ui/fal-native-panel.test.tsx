@@ -267,3 +267,38 @@ test("in-memory recovery sends the original draft and refuses another connection
   ).toBe(true);
   expect(posted).toHaveLength(2);
 });
+
+test("a zero-valued final stream result is complete", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) =>
+      url === "/api/v1/fal/run"
+        ? new Response('event: final\ndata: {"partial":false,"output":0}\n\n', {
+            headers: { "Content-Type": "text/event-stream" },
+          })
+        : Response.json({
+            endpoint_id: "publisher/app",
+            capabilities: { inputs: {}, required: [], reasoning: {}, transports: { stream: true } },
+          })
+    )
+  );
+  render(<FalNativePanel connectionId="connection-1" />);
+  fireEvent.change(screen.getByRole("textbox", { name: "falNative.endpoint" }), {
+    target: { value: "publisher/app" },
+  });
+  fireEvent.click(screen.getAllByRole("button", { name: "common.refresh" })[0]);
+  await waitFor(() =>
+    expect(
+      (screen.getByRole("button", { name: "falNative.run" }) as HTMLButtonElement).disabled
+    ).toBe(false)
+  );
+  fireEvent.click(screen.getByRole("button", { name: "falNative.run" }));
+  await waitFor(() =>
+    expect(
+      (screen.getByRole("button", { name: "falNative.newGeneration" }) as HTMLButtonElement)
+        .disabled
+    ).toBe(false)
+  );
+  expect(screen.queryByRole("alert")).toBeNull();
+  expect(screen.getByText(/"final": 0/)).toBeTruthy();
+});

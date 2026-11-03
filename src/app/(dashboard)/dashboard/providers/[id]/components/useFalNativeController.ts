@@ -238,11 +238,14 @@ async function stream(c: Context, response: Response, transport: string) {
     response.body,
     (event) => {
       state = mergeFalEvent(state, event);
-      c.patch({ result: { ...state }, ...(state.error ? { error: c.t("streamError") } : {}) });
+      c.patch({
+        result: { ...state },
+        ...(state.error !== undefined ? { error: c.t("streamError") } : {}),
+      });
     },
     c.abort.current?.signal
   );
-  if (!state.final && transport === "stream") throw new Error(c.t("streamIncomplete"));
+  if (state.final === undefined && transport === "stream") throw new Error(c.t("streamIncomplete"));
 }
 async function run(c: Context, recover: boolean) {
   const value = await snapshot(c, recover);

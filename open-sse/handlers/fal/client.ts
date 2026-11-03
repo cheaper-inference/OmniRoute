@@ -168,7 +168,7 @@ export class FalClient {
       transport === "stream" && streamUrl
         ? new URL(streamUrl)
         : new URL(
-            `https://${transport === "queue" ? "queue.fal.run" : "fal.run"}/${id}${transport === "stream" ? "/stream" : ""}`
+            `https://${transport === "queue" ? "queue.fal.run" : "fal.run"}/${id}${transport === "stream" && !id.endsWith("/stream") ? "/stream" : ""}`
           );
     if (
       url.origin !== (transport === "queue" ? "https://queue.fal.run" : "https://fal.run") ||

@@ -6,6 +6,16 @@ import {
   type FalStreamState,
 } from "../../open-sse/handlers/fal/events.ts";
 
+test("native final snapshots preserve null, false, zero and empty text", () => {
+  for (const value of [null, false, 0, ""]) {
+    const state = mergeFalEvent(
+      { artifacts: [], events: [] },
+      { event: "final", data: { partial: false, output: value } }
+    );
+    assert.equal(state.final, value);
+  }
+});
+
 test("SSE preserves split UTF-8, CRLF, multiline data, native names, files and cumulative snapshots", async () => {
   const url = "https://cdn.example/mesh.glb?signature=a%2Fb&x=1";
   const payload = {

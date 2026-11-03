@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       if (recovered) return recovered;
     }
     const context = await falContext(request, endpoint, body.connection_id);
-    if (context.rejection) return context.rejection;
+    if (!("client" in context)) return context.rejection;
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(getConfiguredTimeout())]);
     const definition = await resolveFalDefinition(
       context.client,

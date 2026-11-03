@@ -14,7 +14,7 @@ export async function GET(request: Request) {
       ? canonicalFalEndpoint(query.get("endpoint_id")!)
       : null;
     const context = await falContext(request, endpoint, query.get("connection_id") ?? undefined);
-    if (context.rejection) return context.rejection;
+    if (!("client" in context)) return context.rejection;
     if (endpoint) {
       const definition = await resolveFalDefinition(
         context.client,

@@ -23,6 +23,41 @@ function fixture(id: string): FalDefinition {
   );
 }
 
+test("an exact native /stream endpoint keeps its HTTP schema and never duplicates the operation suffix", async () => {
+  const endpoint = "fal-ai/any-llm/stream";
+  const definition: FalDefinition = {
+    endpoint_id: endpoint,
+    openapi: {
+      openapi: "3.0.0",
+      paths: {
+        [`/${endpoint}`]: {
+          post: {
+            requestBody: {
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: { prompt: { type: "string" }, reasoning: { type: "boolean" } },
+                    required: ["prompt"],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
+  const input = { prompt: "test", reasoning: false };
+  assert.deepEqual(compileFalInput(definition, "http-websocket")(input), input);
+  assert.equal(falCapabilities(definition).transports["http-websocket"], true);
+  const client = new FalClient("test", async (url) => {
+    assert.equal(url, `https://fal.run/${endpoint}`);
+    return new Response('data: {"partial":false,"output":"done"}\n\n');
+  });
+  await client.execute(endpoint, input, "stream");
+});
+
 test("direct reasoning output and progressive SSE retain native partial/final semantics", async () => {
   const definition = fixture("fal-ai/any-llm");
   const input = { prompt: "explain a cube", reasoning: true };

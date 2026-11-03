@@ -183,6 +183,11 @@ the event contains an artifact URL. This avoids converting binary HTTP response 
 text. Files expire after 10 minutes, reside on the same worker, have a 32 MiB response limit
 and a shared 128 MiB cache limit (oldest files may be evicted sooner). Fetch promptly.
 
+Registered exact operation IDs such as `fal-ai/any-llm/stream` retain their own HTTP input
+schema and path; the gateway never appends a second `/stream`. Register the operation's
+schema when discovery exposes only the parent app. Final snapshots preserve explicit
+null, false, zero and empty text; these values do not mean that completion is missing.
+
 After `end`, clients can submit another invocation with `POST /v1/fal/jobs/{id}`. Every
 invocation repeats authorization, quota, budget and schema checks and records one attributed
 dispatch. A pending invocation returns 409 rather than accepting a duplicate. Each invocation

@@ -164,6 +164,54 @@ for (const transport of ["realtime", "http-websocket"]) {
   });
 }
 
+test("HTTP WebSockets accept the documented native /stream operation through the real route", async () => {
+  const endpoint = "fal-ai/any-llm/stream";
+  db.saveFalDefinition(
+    connectionId,
+    {
+      endpoint_id: endpoint,
+      openapi: {
+        openapi: "3.0.0",
+        paths: {
+          [`/${endpoint}`]: {
+            post: {
+              requestBody: {
+                content: {
+                  "application/json": {
+                    schema: {
+                      type: "object",
+                      properties: { prompt: { type: "string" } },
+                      required: ["prompt"],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    true
+  );
+  peer.sends.mockClear();
+  const response = await run.POST(
+    request("run", "POST", {
+      endpoint_id: endpoint,
+      connection_id: connectionId,
+      transport: "http-websocket",
+      input: { prompt: "test" },
+    })
+  );
+  expect(response.status).toBe(200);
+  expect(peer.sends).toHaveBeenCalledExactlyOnceWith({ prompt: "test" });
+  expect(vi.mocked(httpSocket.connectFalHttpWebsocket).mock.calls.at(-1)?.[0].endpoint).toBe(
+    endpoint
+  );
+  const id = response.headers.get("X-Request-ID")!;
+  await jobs.DELETE(request(`jobs/${id}`, "DELETE"), { params: Promise.resolve({ id }) });
+  await response.body?.cancel();
+});
+
 test("a failed WebSocket handshake sends no invocation and records no spend", async () => {
   const record = vi.spyOn(accounting, "recordFalDispatch");
   peer.sends.mockClear();

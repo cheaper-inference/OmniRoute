@@ -89,6 +89,14 @@ function mergeArtifacts(
   }
   return artifacts;
 }
+function nativeValue(
+  record: Record<string, unknown>,
+  payload: Record<string, unknown>,
+  data: unknown
+) {
+  if (Object.hasOwn(record, "output")) return record.output;
+  return Object.hasOwn(payload, "output") ? payload.output : data;
+}
 export function mergeFalEvent(state: FalStreamState, event: FalEvent): FalStreamState {
   const payload = eventRecord(event.data) ?? {};
   const nativeRecord = eventRecord(payload.output) ?? payload;
@@ -97,7 +105,7 @@ export function mergeFalEvent(state: FalStreamState, event: FalEvent): FalStream
   const next = { ...state, artifacts, events: [...state.events, event].slice(-40) };
   if (event.event === "error" || payload.error) next.error = payload.error ?? event.data;
   if (nativeRecord.reasoning !== undefined) next.reasoning = nativeRecord.reasoning;
-  const native = nativeRecord.output ?? payload.output ?? event.data;
+  const native = nativeValue(nativeRecord, payload, event.data);
   const partial = nativeRecord.partial ?? payload.partial;
   if (partial === true) next.partial = native;
   else if (partial === false || event.event === "final" || event.data === "[DONE]")

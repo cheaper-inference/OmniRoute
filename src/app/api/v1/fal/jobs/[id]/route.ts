@@ -26,7 +26,7 @@ async function track(request: Request, route: Context, cancel: boolean) {
     const job = loadFalJob(id);
     if (!job) throw new FalError("Fal job not found", 404);
     const context = await falContext(request, job.endpoint, job.connectionId, true);
-    if (context.rejection) return context.rejection;
+    if (!("client" in context)) return context.rejection;
     if (context.owner !== job.owner) throw new FalError("Fal job not found", 404);
     const artifactId = new URL(request.url).searchParams.get("artifact");
     if (artifactId && !cancel) return download(job, artifactId);
@@ -135,7 +135,7 @@ export async function POST(request: Request, route: Context) {
     if (!job || !["realtime", "http-websocket"].includes(job.transport ?? ""))
       throw new FalError("Fal WebSocket job not found", 404);
     const context = await falContext(request, job.endpoint, job.connectionId);
-    if (context.rejection) return context.rejection;
+    if (!("client" in context)) return context.rejection;
     if (context.owner !== job.owner) throw new FalError("Fal job not found", 404);
     const body = z
       .object({ input: z.record(z.string(), z.unknown()) })
