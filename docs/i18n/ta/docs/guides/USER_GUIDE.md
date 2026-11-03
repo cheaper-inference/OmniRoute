@@ -609,14 +609,14 @@ post_install() {
 
 ---
 
-## 📊 கிடைக்கக்கூடிய மாதிரிகள்
+## 📊 கிடைக்கும் மாதிரிகள்
 
 <details>
-<summary><b>கிடைக்கக்கூடிய அனைத்து மாதிரிகளையும் காண்க</b></summary>
+<summary><b>கிடைக்கும் அனைத்து மாதிரிகளையும் காண்க</b></summary>
 
-> கீழேயுள்ள பட்டியல் v3.8.0-க்கான `open-sse/config/providerRegistry.ts`-இலிருந்து தொகுக்கப்பட்டுள்ளது. கிளவுட் பட்டியல்கள் (Gemini, OpenRouter போன்றவை) மாறும் வகையில் ஒத்திசைக்கப்படுகின்றன — முழுமையான நேரடிப் பட்டியலைக் காண **Dashboard → Providers → [provider] → Available Models** என்பதைத் திறக்கவும் அல்லது `GET /api/models/catalog`-ஐ அழைக்கவும்.
+> கீழுள்ள பட்டியல் v3.8.0-க்காக `open-sse/config/providerRegistry.ts`-இலிருந்து தொகுக்கப்பட்டது. கிளவுட் பட்டியல்கள் (Gemini, OpenRouter போன்றவை) டைனமிக்காக ஒத்திசைக்கப்படுகின்றன — முழு நேரடி பட்டியலுக்கு **Dashboard → Providers → [provider] → Available Models** ஐத் திறக்கவும் அல்லது `GET /api/models/catalog` ஐ அழைக்கவும்.
 >
-> வழங்குநரின் உள்ளமைக்கப்பட்ட பட்டியல் காலப்போக்கில் மாறியிருந்தால், நேரடி மூலப் பட்டியலைப் பெற அந்தப் பக்கத்தில் உள்ள **Import from /models** என்பதைப் பயன்படுத்தவும் (அல்லது **Auto-Sync**-ஐ இயக்கவும்). இது LLM7.io (`gemini-3.1-flash-lite`) மற்றும் UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ஆகியவற்றுக்கு v3.8.50-இல் சரிபார்க்கப்பட்டது; அதே சோதனைச் சுற்றின்போது Pollinations-இன் அடையாளமற்ற அணுகல், மூலச் சேவையின் வரம்புகளுக்கு உட்பட்டதாகவே இருந்தது.
+> ஒரு வழங்குநரின் உள்ளமைக்கப்பட்ட பட்டியல் மாறிவிட்டால், நேரடி அப்ஸ்ட்ரீம் பட்டியலைப் பெற அந்தப் பக்கத்தில் உள்ள **Import from /models** ஐப் பயன்படுத்தவும் (அல்லது **Auto-Sync** ஐ இயக்கவும்). இது v3.8.50-இல் LLM7.io (`gemini-3.1-flash-lite`) மற்றும் UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ஆகியவற்றுக்கு சரிபார்க்கப்பட்டது; அதே சோதனைச் சுற்றில் Pollinations அநாமதேய அணுகல் அப்ஸ்ட்ரீம் வரம்புக்கு உட்பட்டதாகவே இருந்தது.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -624,7 +624,7 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — இலவச OAuth: **Dashboard → Providers → Kiro → Available Models** என்பதன் கீழ் காட்டப்படும் நேரடிப் பட்டியலைப் பயன்படுத்தவும். கிடைக்கும் தன்மை கணக்கு மற்றும் திட்டத்தைச் சார்ந்தது.
+**Kiro (`kr/`)** — இலவச OAuth: **Dashboard → Providers → Kiro → Available Models** இல் காண்பிக்கப்படும் நேரடி பட்டியலைப் பயன்படுத்தவும். கிடைக்கும் தன்மை கணக்கு மற்றும் திட்டத்தைப் பொறுத்து மாறுபடும்.
 
 **Qoder (`if/`)** — இலவச OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,37 +632,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — மாதத்திற்கு நிலையான $9 அல்லது பயன்பாட்டுக்கு ஏற்ப: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/மாதம் நிலையான கட்டணம் அல்லது பயன்பாட்டிற்கேற்ப: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API விசை: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — அதிவேகமானது: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — மிக வேகமானது: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — இயல்புநிலை Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok நேட்டிவ்: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — EU-இல் ஹோஸ்ட் செய்யப்பட்டது: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — தேடலால் மேம்படுத்தப்பட்டது: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — தேடல்-மேம்படுத்தப்பட்டது: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — திறந்த மூலம்: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (இலவசம்), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — திறந்த மூல: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (இலவசம்), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — வேகமான அனுமானம்: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — வேகமான இன்ஃபரன்ஸ்: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — வேஃபர் அளவிலானது: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — வேஃபர்-அளவு: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-ஐ மையமாகக் கொண்டது: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG-மையம்: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — நிறுவனப் பயன்பாடு: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — எண்டர்பிரைஸ்: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google-இலிருந்து ஒவ்வொரு API விசைக்கும் நேரடியாக ஒத்திசைக்கப்படுகிறது — நிலையான பட்டியல் இல்லை. **Dashboard → Providers** என்பதில் ஒரு விசையை இணைத்து, தற்போதைய பட்டியலை இறக்குமதி செய்ய **Available Models** என்பதைப் பயன்படுத்தவும் (எ.கா. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google-இலிருந்து API விசை வாரியாக நேரடியாக ஒத்திசைக்கப்படுகிறது — நிலையான பட்டியல் இல்லை. **Dashboard → Providers** இல் ஒரு விசையை இணைத்துவிட்டு, தற்போதைய பட்டியலை இறக்குமதி செய்ய **Available Models** ஐப் பயன்படுத்தவும் (எ.கா. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**பிற இணக்கமான வழங்குநர்கள்** (தேர்ந்தெடுக்கப்பட்டவை): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` வழியாக), `azure-ai`, `openrouter` (இடைமாற்றமில்லா பட்டியல்), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ஒவ்வொன்றும் `providerRegistry.ts`-இல் தனது சொந்த மாதிரிப் பட்டியலைப் பராமரிக்கிறது; மேலும் வழங்குநர் `/models` முனைப்புள்ளியை வெளிப்படுத்தும்போது அவற்றைத் தானாக ஒத்திசைக்க முடியும்.
+**மற்ற இணக்கமான வழங்குநர்கள்** (தேர்ந்தெடுக்கப்பட்டவை): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` வழியாக), `azure-ai`, `openrouter` (பாஸ்த்ரூ பட்டியல்), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ஒவ்வொன்றும் `providerRegistry.ts`-இல் தனது சொந்த மாதிரி பட்டியலைப் பராமரிக்கிறது; வழங்குநர் `/models` எண்ட்பாயிண்ட்டை வெளிப்படுத்தும்போது தானாகவே ஒத்திசைக்கப்படலாம்.
 
-**மாதிரி ID-கள் குறித்த குறிப்பு:** OmniRoute வழங்குநருக்குரிய அசல் ID-களைப் பயன்படுத்துகிறது (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). மூல API அவற்றை அவ்வாறே எதிர்பார்ப்பதால், சில ID-களில் புள்ளிகளுடன் கூடிய பதிப்புகள் உள்ளன. ஒரு மாதிரி மேலே பட்டியலிடப்படவில்லை என்றால், அது கிடைக்கிறதா என்பதை உறுதிப்படுத்த `omniroute models --search <term>`-ஐ இயக்கவும் அல்லது `GET /api/models/catalog`-ஐ அணுகவும்.
+**மாதிரி ID-கள் குறித்த குறிப்பு:** OmniRoute வழங்குநர்-நேட்டிவ் ID-களைப் பயன்படுத்துகிறது (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). சில ID-கள் புள்ளியிட்ட பதிப்புகளைக் கொண்டுள்ளன, ஏனெனில் அப்ஸ்ட்ரீம் API அவற்றை அவ்வாறே எதிர்பார்க்கிறது. ஏதேனும் மாதிரி மேலே பட்டியலிடப்படவில்லை என்றால், கிடைக்கும் தன்மையை உறுதிப்படுத்த `omniroute models --search <term>` ஐ இயக்கவும் அல்லது `GET /api/models/catalog` ஐ அணுகவும்.
 
 </details>
 
@@ -672,70 +672,73 @@ post_install() {
 
 ### தனிப்பயன் மாதிரிகள்
 
-செயலி புதுப்பிப்புக்காகக் காத்திருக்காமல் எந்த வழங்குநரிலும் எந்த மாதிரி ID-யையும் சேர்க்கலாம்:
+ஆப்ஸ் புதுப்பிப்புக்காகக் காத்திருக்காமல் எந்தவொரு வழங்குநருக்கும் எந்த மாதிரியான ID சேர்க்கவும்:
 
 ```bash
-# API வழியாக
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# பட்டியலிட: curl http://localhost:20128/api/provider-models?provider=openai
-# அகற்ற: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-அல்லது Dashboard-ஐப் பயன்படுத்தவும்: **Providers → [Provider] → Custom Models**.
+அல்லது டாஷ்போர்டைப் பயன்படுத்தவும்:** வழங்குநர்கள் → [வழங்குபவர்] → தனிப்பயன் மாதிரிகள்** .
 
 குறிப்புகள்:
 
-- OpenRouter மற்றும் OpenAI/Anthropic-இணக்கமான வழங்குநர்கள் **Available Models** மூலமாக மட்டுமே நிர்வகிக்கப்படுகின்றனர். கைமுறையாகச் சேர்த்தல், இறக்குமதி செய்தல் மற்றும் தானியங்கியாக ஒத்திசைத்தல் ஆகிய அனைத்தும் ஒரே கிடைக்கக்கூடிய-மாதிரிகள் பட்டியலில் சேரும்; எனவே அந்த வழங்குநர்களுக்குத் தனியான Custom Models பிரிவு இல்லை.
-- நிர்வகிக்கப்படும் கிடைக்கக்கூடிய-மாதிரி இறக்குமதிகளை வழங்காத வழங்குநர்களுக்காக **Custom Models** பிரிவு அமைக்கப்பட்டுள்ளது.
+- OpenRouter மற்றும் OpenAI/Anthropic-compatible வழங்குநர்கள் இலிருந்து நிர்வகிக்கப்படுகிறார்கள்** கிடைக்கும் மாதிரிகள்** மட்டுமே. ஒரே மாதிரி பட்டியலில் உள்ள அனைத்து நிலங்களையும் கைமுறையாகச் சேர்ப்பது, இறக்குமதி செய்வது மற்றும் தானாக ஒத்திசைப்பது, எனவே அந்த வழங்குநர்களுக்கு தனியான தனிப்பயன் மாதிரிகள் பிரிவு இல்லை.
+- தி** தனிப்பயன் மாதிரிகள்** பிரிவானது நிர்வகிக்கப்படும் கிடைக்கக்கூடிய மாதிரி இறக்குமதிகளை வெளிப்படுத்தாத வழங்குநர்களுக்கானது.
 
-### தனிப்பயன் OpenAI-இணக்கமான வழங்குநர்கள்
+### விருப்ப OpenAI-இணக்கமான வழங்குநர்கள்
 
-OpenAI API-ஐப் பயன்படுத்தும் எந்த gateway-யையும் (சுயமாக ஹோஸ்ட் செய்யப்பட்ட proxy, vLLM, மூன்றாம் தரப்பு aggregator)
-அதற்கெனத் தனி வழங்குநர் node-ஆகச் சேர்க்கலாம்:
+OpenAI API பேசும் எந்த நுழைவாயிலையும் (சுய-ஹோஸ்ட் செய்யப்பட்ட ப்ராக்ஸி, vLLM, மூன்றாம் தரப்பு திரட்டி) அதன் சொந்த வழங்குநர் முனையாகச் சேர்க்கலாம்:
 
-1. **Providers → Add OpenAI Compatible**.
-2. **Name**: node-க்கான காட்சிப்படுத்தல் பெயர்.
-3. **Prefix**: routing பெயர். Clients மாதிரிகளை `<prefix>/<model>` என அழைக்கின்றன; எனவே
-   `mygw` prefix கொண்ட node, `mygw/gpt-4o-mini`-ஐ வழங்கும். இது கட்டாயம்; எழுத்துக்குறி கட்டுப்பாடுகள் எதுவுமில்லை.
-4. **API Type**: gateway வழங்கும் endpoint குடும்பம் (Chat Completions, Responses,
-   Embeddings, audio, images).
-5. **Base URL**: `/v1` வரை, அதையும் உள்ளடக்கிய API root (எடுத்துக்காட்டாக
-   `https://gateway.example.com/v1`); முழுமையான `/chat/completions` path அல்ல. தரநிலையற்ற
-   paths கொண்ட gateways அவற்றை **Advanced Settings** என்பதன் கீழ் அமைக்க வேண்டும் (chat path, models path).
-6. **API Key (for Check)** புலம் இணைப்பை மட்டுமே சோதிக்கும். node-ஐ உருவாக்கிய பிறகு,
-   அதைத் திறந்து, கோரிக்கைகள் பயன்படுத்தும் key-ஐச் சேமிக்க **Add Connection**-ஐப் பயன்படுத்தவும்.
+1. **வழங்குநர்கள் → இணக்கமான OpenAI சேர்க்கவும்** .
+2. **பெயர்** : முனைக்கான காட்சி லேபிள்.
+3. **முன்னொட்டு** : ரூட்டிங் பெயர். வாடிக்கையாளர்கள் மாடல்களை `<prefix>/<model>` என அழைக்கிறார்கள், எனவே `mygw` முன்னொட்டுடன் கூடிய முனை `mygw/gpt-4o-mini` சேவை செய்கிறது. தேவை; எந்த எழுத்து கட்டுப்பாடும் இல்லை.
+4. **API வகை** : கேட்வே சேவை செய்யும் எண்ட்பாயிண்ட் குடும்பம் (அரட்டை நிறைவுகள், பதில்கள், உட்பொதிப்புகள், ஆடியோ, படங்கள்).
+5. **அடிப்படை URL** : API ரூட், `/v1` வரை மற்றும் உட்பட (உதாரணமாக `https://gateway.example.com/v1`), முழு `/chat/completions` பாதை அல்ல. தரமற்ற பாதைகள் கொண்ட நுழைவாயில்கள் அவற்றை கீழே அமைக்கின்றன** மேம்பட்ட அமைப்புகள்** (அரட்டை பாதை, மாதிரிகள் பாதை).
+6. தி**API விசை (சரிபார்ப்பதற்காக)** புலம் இணைப்பை மட்டுமே சோதிக்கிறது. முனையை உருவாக்கிய பிறகு, அதைத் திறந்து பயன்படுத்தவும்** இணைப்பைச் சேர்க்கவும்** கோரிக்கைகள் பயன்படுத்தும் விசையை சேமிக்க.
 
-node-க்கு `openai-compatible-<apiType>-<uuid>` வடிவிலான உள் id கிடைக்கும்; அதை நீங்கள் ஒருபோதும்
-தட்டச்சு செய்ய வேண்டியதில்லை, prefix-தான் பொது பெயராகும்.
+முனை `openai-compatible-<apiType>-<uuid>` வடிவத்தின் உள் ஐடியைப் பெறுகிறது; நீங்கள் அதை தட்டச்சு செய்ய தேவையில்லை, முன்னொட்டு பொதுப் பெயர்.
 
-#### ஒதுக்கப்பட்ட prefixes
+#### ஒதுக்கப்பட்ட முன்னொட்டுகள்
 
-ஒரு prefix, உள்ளமைக்கப்பட்ட வழங்குநரின் id அல்லது alias-ஆக (எடுத்துக்காட்டாக `openai`, `cf`) இருக்கக்கூடாது;
-ஓய்வுபெற்ற வழங்குநரின் id-ஆகவும் இருக்கக்கூடாது. மாதிரி resolver, தனிப்பயன் nodes-க்கு முன்பாக
-உள்ளமைக்கப்பட்ட ids மற்றும் aliases-ஐச் சரிபார்க்கும்; எனவே அவற்றில் ஒன்றை prefix-ஆகப் பயன்படுத்தும் node
-ஒருபோதும் traffic-ஐப் பெறாது: `<prefix>/model` அதற்குப் பதிலாக உள்ளமைக்கப்பட்ட வழங்குநரிடம் செல்லும்,
-அல்லது அந்த வழங்குநர் ஓய்வுபெற்றிருந்தால் பாதுகாப்பாகத் தோல்வியடையும். அத்தகைய prefix கொண்ட node-ஐ
-உருவாக்குவது அல்லது திருத்துவது பின்வரும் செய்தியுடன் நிராகரிக்கப்படும்:
+முன்னொட்டு என்பது உள்ளமைக்கப்பட்ட வழங்குநரின் ஐடி அல்லது மாற்றுப்பெயராக இருக்கக்கூடாது (உதாரணமாக `openai`, `cf`), அல்லது ஓய்வுபெற்ற வழங்குநரின் ஐடி. மாடல் ரிசல்வர் தனிப்பயன் முனைகளுக்கு முன் உள்ளமைக்கப்பட்ட ஐடிகள் மற்றும் மாற்றுப்பெயர்களைச் சரிபார்க்கிறது, எனவே அந்த முன்னொட்டுகளில் ஒன்றைப் பயன்படுத்தும் முனை ஒருபோதும் டிராஃபிக்கைப் பெறாது: அதற்குப் பதிலாக `<prefix>/model` உள்ளமைக்கப்பட்ட வழங்குநரிடம் செல்லும், அல்லது அந்த வழங்குநர் ஓய்வு பெற்றால் மூடப்படும். அத்தகைய முன்னொட்டுடன் ஒரு முனையை உருவாக்குவது அல்லது திருத்துவது நிராகரிக்கப்படுகிறது:
 
 ```text
-prefix: "<prefix>" என்பது ஒதுக்கப்பட்ட வழங்குநர் prefix — வேறொரு prefix-ஐத் தேர்ந்தெடுக்கவும் (ஒதுக்கப்பட்ட ids/aliases-ஐ தனிப்பயன் nodes-க்குப் பயன்படுத்த முடியாது, ஏனெனில் <prefix>/model போன்ற கோரிக்கைகள் உள்ளமைக்கப்பட்ட வழங்குநருக்கு route செய்யப்படும் அல்லது அது ஓய்வுபெற்றிருந்தால் பாதுகாப்பாகத் தோல்வியடையும்)
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-தனித்துவமான prefix-ஐத் தேர்ந்தெடுக்கவும் (`mygw`, `acme-proxy`). தனிப்பயன் node-க்கான கோரிக்கைகள்,
-உள்ளமைக்கப்பட்ட வழங்குநர் அல்லது அதன் நற்சான்றுகளைக் குறிப்பிடும் பிழையுடன் தோல்வியடைந்தால், node-இன்
-prefix ஒதுக்கப்பட்டதா என்பதைச் சரிபார்க்கவும்: இந்த விதி உருவாவதற்கு முன்பு சேமிக்கப்பட்ட nodes இன்னும்
-சேமிப்பகத்தில் இருக்கும், ஆனால் அவற்றின் prefix உள்ளமைக்கப்பட்ட வழங்குநருக்கு route செய்யப்படும்.
-node-ஐத் திருத்தி அதற்குப் புதிய prefix-ஐ வழங்கவும்.
+ஒரு தனித்துவமான முன்னொட்டைத் தேர்ந்தெடுக்கவும் (`mygw`, `acme-proxy`). தனிப்பயன் முனைக்கான கோரிக்கைகள் உள்ளமைக்கப்பட்ட வழங்குநர் அல்லது அதன் நற்சான்றிதழ்களை பெயரிடும் பிழையால் தோல்வியுற்றால், முனையின் முன்னொட்டு ஒதுக்கப்பட்டுள்ளதா என்பதைச் சரிபார்க்கவும்: இந்த விதி இருக்கும் முன் சேமிக்கப்பட்ட முனைகள் இன்னும் சேமிக்கப்பட்டுள்ளன, ஆனால் உள்ளமைக்கப்பட்ட வழங்குநருக்கு அவற்றின் முன்னொட்டு வழிகள். முனையைத் திருத்தி புதிய முன்னொட்டைக் கொடுங்கள்.
 
-### OmniRoute Peers-ஐச் சங்கிலியாக இணைத்தல்
+#### ஒரு இணைப்பு நுழைவாயில் விருப்பங்கள்
 
-மற்றொரு OmniRoute gateway-ஐ **Custom OpenAI-compatible** வழங்குநராகச் சேர்க்கலாம். அந்த peer-இன்
-`/v1` base URL மற்றும் அந்த peer வழங்கிய பிரத்யேகமான, குறைந்தபட்சச் சலுகைகள் கொண்ட API key-ஐப் பயன்படுத்தவும்.
+இந்த விசைகள் இணைப்பின் `providerSpecificData` இல் செல்கின்றன (எடுத்துக்காட்டாக `PUT /api/providers/{id}` வழியாக):
 
-இருவழி அல்லது பல-hop சங்கிலிகளுக்கு, ஒவ்வொரு gateway-யிலும் விருப்பத்தேர்வு loop guard-ஐ இயக்கவும்:
+- `toolNameMaxLength` (முழு எண், 1–1024) — OpenAI அரட்டை வடிவ இணக்கமான இணைப்புகளுக்கு, அதன் நுழைவாயில் நீண்ட கருவிப் பெயர்களை நிராகரிக்கிறது. நீண்ட பெயர்கள் குறுகிய மாற்றுப்பெயர்களாக அனுப்பப்பட்டு பதிலில் மீட்டமைக்கப்படும்.
+- `quotaEndpoint` — கேட்வேயின் quota/credits எண்ட்பாயிண்ட், டேஷ்போர்டு கோட்டா ஸ்டிரிப் மற்றும் கோட்டா-அவேர் ரூட்டிங் ஆகியவற்றைப் படிக்கவும். OpenAI- மற்றும் Anthropic-compatible இணைப்புகள் இரண்டிலும் வேலை செய்கிறது; முழு வடிவம் `open-sse/services/usage/openaiCompatible.ts` இல் ஆவணப்படுத்தப்பட்டுள்ளது.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### சங்கிலி OmniRoute பியர்ஸ்
+
+மற்றொரு OmniRoute நுழைவாயிலை a ஆக சேர்க்கலாம்** தனிப்பயன் OpenAI- இணக்கமானது** வழங்குபவர். பியரின் `/v1` அடிப்படை URL மற்றும் அந்த பியர் வழங்கிய பிரத்யேக, குறைந்தபட்ச சலுகை API விசையைப் பயன்படுத்தவும்.
+
+பரஸ்பர அல்லது மல்டி-ஹாப் சங்கிலிகளுக்கு, ஒவ்வொரு நுழைவாயிலிலும் தேர்வு செய்யும் லூப் கார்டை இயக்கவும்:
 
 ```bash
 # gateway-a
@@ -751,20 +754,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-வெளிப்படையாக அனுமதிப்பட்டியலில் சேர்க்கப்பட்ட peer URL-க்கு அனுப்பப்படும் கோரிக்கைகள் மட்டுமே
-`X-OmniRoute-Peer-Trace` header-ஐப் பெறும். மீண்டும் வரும் instance ID அல்லது தீர்ந்துவிட்ட hop
-வரம்பைக் கொண்ட கோரிக்கையை gateway, HTTP `508 Loop Detected` உடன் நிராகரிக்கும்; வழக்கமான upstream
-வழங்குநர்கள் எந்த peer metadata-வையும் பெற மாட்டார்கள்.
+வெளிப்படையாக அனுமதிக்கப்பட்ட peer URL க்கு அனுப்பப்படும் கோரிக்கைகள் மட்டுமே `X-OmniRoute-Peer-Trace` தலைப்பைப் பெறும். HTTP `508 Loop Detected` உடன் மீண்டும் மீண்டும் ID அல்லது தீர்ந்து போன ஹாப் பட்ஜெட்டை கேட்வே நிராகரிக்கிறது; சாதாரண அப்ஸ்ட்ரீம் வழங்குநர்கள் பியர் மெட்டாடேட்டாவைப் பெறுவதில்லை.
 
-Peer சங்கிலியிணைப்பு என்பது database replication அல்லது host failover அல்ல. ஒவ்வொரு gateway-யும்
-தனித்தனி SQLite state, caches, rate counters மற்றும் sessions-ஐ வைத்திருக்கும். active/passive அல்லது
-active/active கிடைப்புத்தன்மைக்கு health-check செய்யப்பட்ட reverse proxy அல்லது client failover-ஐப்
-பயன்படுத்தவும்; ஒரே SQLite database-ஐ இயங்கிக்கொண்டிருக்கும் பல OmniRoute instances-க்குள் ஒருபோதும்
-mount செய்ய வேண்டாம்.
+பியர் சங்கிலி என்பது தரவுத்தள பிரதி அல்லது ஹோஸ்ட் தோல்வி அல்ல. ஒவ்வொரு நுழைவாயிலும் சுயாதீனமான SQLite நிலை, தற்காலிக சேமிப்புகள், ரேட் கவுண்டர்கள் மற்றும் அமர்வுகளை வைத்திருக்கிறது. active/passive அல்லது active/active கிடைப்பதற்கு ஆரோக்கியம் சரிபார்க்கப்பட்ட தலைகீழ் ப்ராக்ஸி அல்லது கிளையன்ட் தோல்வியைப் பயன்படுத்தவும், மேலும் ஒரு SQLite தரவுத்தளத்தை பல இயங்கும் OmniRoute நிகழ்வுகளில் ஏற்ற வேண்டாம்.
 
-### பிரத்யேக வழங்குநர் Routes
+### அர்ப்பணிக்கப்பட்ட வழங்குநர் வழிகள்
 
-மாதிரி சரிபார்ப்புடன் கோரிக்கைகளை ஒரு குறிப்பிட்ட வழங்குநருக்கு நேரடியாக route செய்யவும்:
+மாதிரி சரிபார்ப்புடன் ஒரு குறிப்பிட்ட வழங்குநரிடம் நேரடியாக வழி கோரிக்கைகள்:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -772,140 +768,140 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-வழங்குநர் prefix இல்லாவிட்டால் அது தானாகச் சேர்க்கப்படும். பொருந்தாத மாதிரிகள் `400`-ஐத் திருப்பியனுப்பும்.
+வழங்குநர் முன்னொட்டு விடுபட்டால் தானாகச் சேர்க்கப்படும். பொருந்தாத மாதிரிகள் `400` திரும்பும்.
 
-### Network Proxy உள்ளமைவு
+### நெட்வொர்க் ப்ராக்ஸி கட்டமைப்பு
 
 ```bash
-# உலகளாவிய proxy-ஐ அமைக்கவும்
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# ஒவ்வொரு வழங்குநருக்குமான proxy
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# proxy-ஐச் சோதிக்கவும்
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**முன்னுரிமை:** Key-குறிப்பிட்டது → Combo-குறிப்பிட்டது → வழங்குநர்-குறிப்பிட்டது → உலகளாவியது → சூழல்.
+**முன்னுரிமை:** முக்கிய-குறிப்பிட்ட → சேர்க்கை-குறிப்பிட்ட → வழங்குநர்-குறிப்பிட்ட → உலகளாவிய → சூழல்.
 
-### மாதிரி Catalog API
+### மாதிரி பட்டியல் API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-வழங்குநரின்படி வகைப்படுத்தப்பட்ட மாதிரிகளை அவற்றின் வகைகளுடன் (`chat`, `embedding`, `image`) திருப்பியனுப்பும்.
+(`chat`, `embedding`, `image`) வகைகளுடன் வழங்குநரால் குழுவாக்கப்பட்ட மாதிரிகளை வழங்குகிறது.
 
-### Cloud Sync
+### கிளவுட் ஒத்திசைவு
 
-- சாதனங்களுக்கிடையே வழங்குநர்கள், combos மற்றும் அமைப்புகளை ஒத்திசைக்கவும்
-- timeout + fail-fast உடனான தானியங்கி பின்னணி ஒத்திசைவு
-- production-இல் server-side `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`-ஐ முன்னுரிமைப்படுத்தவும்
+- சாதனங்கள் முழுவதும் வழங்குநர்கள், சேர்க்கைகள் மற்றும் அமைப்புகளை ஒத்திசைக்கவும்
+- தாமதமான + தோல்வி-வேகத்துடன் தானியங்கி பின்னணி ஒத்திசைவு
+- உற்பத்தியில் சர்வர் பக்க `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ஐ விரும்பு
 
-### Cloudflare Quick Tunnel
+### Cloudflare விரைவு சுரங்கப்பாதை
 
-- Docker மற்றும் பிற சுய-ஹோஸ்ட் செய்யப்பட்ட நிறுவல்களுக்கு **Dashboard → Endpoints** என்பதில் கிடைக்கும்
-- உங்கள் தற்போதைய OpenAI-இணக்கமான `/v1` endpoint-க்கு வழிமாற்றும் தற்காலிக `https://*.trycloudflare.com` URL-ஐ உருவாக்குகிறது
-- முதன்முறையாக இயக்கும்போது, தேவைப்பட்டால் மட்டுமே `cloudflared` நிறுவப்படும்; பின்னர் செய்யப்படும் மறுதொடக்கங்கள் அதே நிர்வகிக்கப்பட்ட binary-ஐ மீண்டும் பயன்படுத்தும்
-- OmniRoute அல்லது container மறுதொடக்கத்திற்குப் பிறகு Quick Tunnels தானாக மீட்டமைக்கப்படாது; தேவைப்படும்போது dashboard-இலிருந்து அவற்றை மீண்டும் இயக்கவும்
-- Tunnel URL-கள் தற்காலிகமானவை; tunnel-ஐ நிறுத்தி/தொடங்கும் ஒவ்வொரு முறையும் அவை மாறும்
-- கட்டுப்பாடுகளுள்ள container-களில் தேவையற்ற QUIC UDP buffer எச்சரிக்கைகளைத் தவிர்க்க, நிர்வகிக்கப்படும் Quick Tunnels இயல்புநிலையாக HTTP/2 transport-ஐப் பயன்படுத்தும்
-- நிர்வகிக்கப்படும் transport தேர்வை மாற்ற விரும்பினால் `CLOUDFLARED_PROTOCOL=quic` அல்லது `auto` என்பதை அமைக்கவும்
-- நிர்வகிக்கப்பட்ட பதிவிறக்கத்திற்குப் பதிலாக முன்பே நிறுவப்பட்ட `cloudflared` binary-ஐப் பயன்படுத்த விரும்பினால் `CLOUDFLARED_BIN` என்பதை அமைக்கவும்
-- Cloudflare Quick Tunnel, Tailscale Funnel மற்றும் ngrok Tunnel panel-களை **Settings → Appearance** என்பதில் காட்டலாம் அல்லது மறைக்கலாம். ஒரு panel-ஐ மறைப்பது இயங்கிக்கொண்டிருக்கும் tunnel-ஐ நிறுத்தாது.
+- இல் கிடைக்கும்** டாஷ்போர்டு → இறுதிப்புள்ளிகள்** Docker மற்றும் பிற சுய-ஹோஸ்ட் செய்யப்பட்ட வரிசைப்படுத்தல்களுக்கு
+- உங்கள் தற்போதைய OpenAI-இணக்கமான `/v1` இறுதிப்புள்ளிக்கு அனுப்பும் தற்காலிக `https://*.trycloudflare.com` URL உருவாக்குகிறது
+- முதலில் தேவைப்படும் போது மட்டும் `cloudflared` நிறுவல்களை இயக்கவும்; பின்னர் மறுதொடக்கம் அதே நிர்வகிக்கப்பட்ட பைனரியை மீண்டும் பயன்படுத்துகிறது
+- OmniRoute அல்லது கொள்கலன் மறுதொடக்கம் செய்த பிறகு விரைவான சுரங்கங்கள் தானாக மீட்டமைக்கப்படாது; தேவைப்படும்போது டாஷ்போர்டிலிருந்து அவற்றை மீண்டும் இயக்கவும்
+- சுரங்கப்பாதை URLs இடைக்காலமானது மற்றும் ஒவ்வொரு முறையும் நீங்கள் சுரங்கப்பாதையை stop/start மாற்றும்
+- கட்டுப்படுத்தப்பட்ட கொள்கலன்களில் சத்தமில்லாத QUIC UDP இடையக எச்சரிக்கைகளைத் தவிர்க்க, நிர்வகிக்கப்படும் விரைவு சுரங்கங்கள் HTTP/2 போக்குவரத்துக்கு இயல்புநிலை
+- நிர்வகிக்கப்பட்ட போக்குவரத்துத் தேர்வை நீங்கள் மேலெழுத விரும்பினால் `CLOUDFLARED_PROTOCOL=quic` அல்லது `auto` அமைக்கவும்
+- நிர்வகிக்கப்பட்ட பதிவிறக்கத்திற்குப் பதிலாக முன்பே நிறுவப்பட்ட `cloudflared` பைனரியைப் பயன்படுத்த விரும்பினால் `CLOUDFLARED_BIN` அமைக்கவும்
+- Cloudflare விரைவு சுரங்கப்பாதை, Tailscale புனல் மற்றும் ngrok டன்னல் பேனல்கள் காட்டப்படலாம் அல்லது மறைக்கப்படலாம்** அமைப்புகள் → தோற்றம்** . பேனலை மறைப்பது இயங்கும் சுரங்கப்பாதையை நிறுத்தாது.
 
-### LLM Gateway நுண்ணறிவு (கட்டம் 9)
+### LLM கேட்வே நுண்ணறிவு (கட்டம் 9)
 
-- **Semantic Cache** — streaming அல்லாத, temperature=0 பதில்களைத் தானாக cache செய்கிறது (`X-OmniRoute-No-Cache: true` மூலம் தவிர்க்கலாம்)
-- **Request Idempotency** — `Idempotency-Key` அல்லது `X-Request-Id` header மூலம் 5 வினாடிகளுக்குள் வரும் கோரிக்கைகளின் நகல்களை நீக்குகிறது
-- **Progress Tracking** — `X-OmniRoute-Progress: true` header மூலம் விருப்பத்தேர்வு அடிப்படையிலான SSE `event: progress` நிகழ்வுகளை வழங்குகிறது
-
----
-
-### மொழிபெயர்ப்புச் சோதனைக் களம்
-
-**Dashboard → Translator** வழியாக அணுகவும். வழங்குநர்களுக்கு இடையே API கோரிக்கைகளை OmniRoute எவ்வாறு மொழிபெயர்க்கிறது என்பதைப் பிழைத்திருத்தி காட்சிப்படுத்தவும்.
-
-| பயன்முறை         | நோக்கம்                                                                                                           |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Playground**   | மூல/இலக்கு வடிவங்களைத் தேர்ந்தெடுத்து, ஒரு கோரிக்கையை ஒட்டி, மொழிபெயர்க்கப்பட்ட வெளியீட்டை உடனடியாகப் பார்க்கவும் |
-| **Chat Tester**  | proxy வழியாக நேரடி chat செய்திகளை அனுப்பி, முழுமையான கோரிக்கை/பதில் சுழற்சியை ஆய்வு செய்யவும்                     |
-| **Test Bench**   | மொழிபெயர்ப்பின் துல்லியத்தைச் சரிபார்க்க, பல வடிவக் கலவைகளில் தொகுதிச் சோதனைகளை இயக்கவும்                         |
-| **Live Monitor** | கோரிக்கைகள் proxy வழியாகச் செல்லும்போது நிகழ்நேர மொழிபெயர்ப்புகளைக் கண்காணிக்கவும்                                |
-
-**பயன்பாட்டு நிலைகள்:**
-
-- குறிப்பிட்ட client/provider கலவை ஏன் தோல்வியடைகிறது என்பதைப் பிழைத்திருத்துதல்
-- thinking tag-கள், tool call-கள் மற்றும் system prompt-கள் சரியாக மொழிபெயர்க்கப்படுகின்றனவா என்பதைச் சரிபார்த்தல்
-- OpenAI, Claude, Gemini மற்றும் Responses API வடிவங்களுக்கு இடையிலான வடிவ வேறுபாடுகளை ஒப்பிடுதல்
+- **சொற்பொருள் கேச்** - ஸ்ட்ரீமிங் அல்லாத, வெப்பநிலை= 0 மறுமொழிகள் ( `X-OmniRoute-No-Cache: true` உடன் பைபாஸ்) தானியங்கு-கேச்கள்
+- **ஐடெம்போடென்சியைக் கோருங்கள்** — `Idempotency-Key` அல்லது `X-Request-Id` தலைப்பு வழியாக 5விக்குள் கோரிக்கைகளை நகலெடுக்கிறது
+- **முன்னேற்ற கண்காணிப்பு** — `X-OmniRoute-Progress: true` தலைப்பு வழியாக SSE `event: progress` நிகழ்வுகளைத் தேர்ந்தெடுக்கவும்
 
 ---
 
-### Routing உத்திகள்
+### மொழிபெயர்ப்பாளர் விளையாட்டு மைதானம்
 
-**Dashboard → Settings → Routing** வழியாக உள்ளமைக்கவும். அதிகம் பயன்படுத்தப்படும் ஆறு உத்திகளை dashboard வழங்குகிறது; combo-களும் auto-router-உம் உள்நிலையில் மேலும் விரிவான உத்தித் தொகுப்பை ஆதரிக்கின்றன.
+வழியாக அணுகலாம்** டாஷ்போர்டு → மொழிபெயர்ப்பாளர்** . வழங்குநர்களிடையே API கோரிக்கைகளை OmniRoute எவ்வாறு மொழிபெயர்க்கிறது என்பதை பிழைத்திருத்தி காட்சிப்படுத்தவும்.
 
-**Dashboard-இல் காணக்கூடிய உத்திகள் (account-நிலை routing):**
+| பயன்முறை               | நோக்கம்                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **விளையாட்டு மைதானம்** | source/target வடிவங்களைத் தேர்ந்தெடுத்து, கோரிக்கையை ஒட்டவும், மொழிபெயர்க்கப்பட்ட வெளியீட்டை உடனடியாகப் பார்க்கவும் |
+| **அரட்டை சோதனையாளர்**  | ப்ராக்ஸி மூலம் நேரடி அரட்டை செய்திகளை அனுப்பவும் மற்றும் முழு request/response சுழற்சியை ஆய்வு செய்யவும்            |
+| **சோதனை பெஞ்ச்**       | மொழிபெயர்ப்பின் சரியான தன்மையை சரிபார்க்க, பல வடிவமைப்பு சேர்க்கைகளில் தொகுதி சோதனைகளை இயக்கவும்                    |
+| **நேரடி கண்காணிப்பு**  | ப்ராக்ஸி மூலம் கோரிக்கைகள் வரும்போது நிகழ்நேர மொழிபெயர்ப்புகளைப் பார்க்கவும்                                        |
 
-| உத்தி                          | விளக்கம்                                                                                                                                                |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Fill First**                 | முன்னுரிமை வரிசையில் account-களைப் பயன்படுத்துகிறது — கிடைக்காமல் போகும் வரை முதன்மை account அனைத்து கோரிக்கைகளையும் கையாளும்                           |
-| **Round Robin**                | உள்ளமைக்கக்கூடிய sticky வரம்புடன் அனைத்து account-களையும் சுழற்சி முறையில் பயன்படுத்துகிறது (இயல்புநிலை: ஒவ்வொரு account-க்கும் 3 அழைப்புகள்)           |
-| **P2C (Power of Two Choices)** | சீரற்ற முறையில் 2 account-களைத் தேர்ந்தெடுத்து, ஆரோக்கியமான ஒன்றுக்கு வழிநடத்துகிறது — ஆரோக்கிய நிலையைக் கருத்தில் கொண்டு சுமையைச் சமநிலைப்படுத்துகிறது |
-| **Random**                     | Fisher-Yates shuffle-ஐப் பயன்படுத்தி ஒவ்வொரு கோரிக்கைக்கும் ஒரு account-ஐ சீரற்ற முறையில் தேர்ந்தெடுக்கிறது                                             |
-| **Least Used**                 | மிகப் பழைய `lastUsedAt` timestamp கொண்ட account-க்கு வழிநடத்தி, traffic-ஐச் சமமாகப் பகிர்கிறது                                                          |
-| **Cost Optimized**             | மிகக் குறைந்த முன்னுரிமை மதிப்பைக் கொண்ட account-க்கு வழிநடத்தி, குறைந்த செலவுள்ள provider-களுக்காக மேம்படுத்துகிறது                                    |
+**வழக்குகளைப் பயன்படுத்தவும்:**
 
-**மேம்பட்ட combo மற்றும் auto உத்திகள்** (ஒவ்வொரு combo-விற்கும் தனித்தனியாக அல்லது `auto/*` prefix-கள் மூலம் உள்ளமைக்கக்கூடியவை — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) பார்க்கவும்):
+- ஒரு குறிப்பிட்ட client/provider கலவை ஏன் தோல்வியடைகிறது என்பதை பிழைத்திருத்தம் செய்யவும்
+- சிந்தனை குறிச்சொற்கள், கருவி அழைப்புகள் மற்றும் கணினி தூண்டுதல்கள் சரியாக மொழிபெயர்க்கப்படுவதை சரிபார்க்கவும்
+- OpenAI, Claude, Gemini, மற்றும் Responses API வடிவங்களுக்கு இடையே உள்ள வடிவமைப்பு வேறுபாடுகளை ஒப்பிடுக
 
-- `priority` — கண்டிப்பான வரிசை; ஒருபோதும் round-robin செய்யாது
-- `weighted` — ஒவ்வொரு model-க்குமான weight-களின் அடிப்படையில் விகிதாசார traffic பிரிப்பு
-- `fill-first` — வரம்புகளை எட்டும் வரை முதல் model-ஐ முழுமையாகப் பயன்படுத்தும்
+---
+
+### ரூட்டிங் உத்திகள்
+
+மூலம் கட்டமைக்கவும்** டாஷ்போர்டு → அமைப்புகள் → ரூட்டிங்** . டாஷ்போர்டு ஆறு அதிகம் பயன்படுத்தப்படும் உத்திகளை வெளிப்படுத்துகிறது; காம்போஸ் மற்றும் ஆட்டோ-ரவுட்டர் உள்நாட்டில் ஒரு பரந்த தொகுப்பை ஆதரிக்கின்றன.
+
+**டாஷ்போர்டு-தெரியும் உத்திகள் (கணக்கு-நிலை ரூட்டிங்):**
+
+| உத்தி                                 | விளக்கம்                                                                                                                      |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **முதலில் நிரப்பவும்**                | முன்னுரிமை வரிசையில் கணக்குகளைப் பயன்படுத்துகிறது - முதன்மைக் கணக்கு கிடைக்காத வரை அனைத்து கோரிக்கைகளையும் கையாளும்           |
+| **ரவுண்ட் ராபின்**                    | உள்ளமைக்கக்கூடிய ஒட்டும் வரம்புடன் அனைத்து கணக்குகளிலும் சுழற்சிகள் (இயல்புநிலை: ஒரு கணக்கிற்கு 3 அழைப்புகள்)                 |
+| **P2C (இரண்டு விருப்பங்களின் சக்தி)** | 2 சீரற்ற கணக்குகள் மற்றும் ஆரோக்கியமான ஒன்றிற்கான வழிகளைத் தேர்ந்தெடுக்கிறது - ஆரோக்கியம் பற்றிய விழிப்புணர்வுடன் சமநிலை சுமை |
+| **சீரற்ற**                            | ஃபிஷர்-யேட்ஸ் ஷஃபிளைப் பயன்படுத்தி ஒவ்வொரு கோரிக்கைக்கும் ஒரு கணக்கைத் தோராயமாகத் தேர்ந்தெடுக்கிறது                           |
+| **குறைவாக பயன்படுத்தப்பட்டது**        | பழைய `lastUsedAt` நேர முத்திரையுடன் கணக்கிற்கான வழிகள், போக்குவரத்தை சமமாக விநியோகிக்கின்றன                                   |
+| **செலவு உகந்ததாக உள்ளது**             | மிகக் குறைந்த முன்னுரிமை மதிப்புடன் கணக்கிற்கான வழிகள், குறைந்த விலை வழங்குநர்களுக்கு மேம்படுத்துதல்                          |
+
+**மேம்பட்ட காம்போ மற்றும் ஆட்டோ உத்திகள்** (காம்போ ஒன்றுக்கு அல்லது `auto/*` முன்னொட்டுகள் வழியாக கட்டமைக்கக்கூடியது - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) பார்க்கவும்):
+
+- `priority` - கண்டிப்பான ஒழுங்கு, ரவுண்ட் ராபின்கள் இல்லை
+- `weighted` - விகிதாசார போக்குவரத்து ஒரு மாதிரி எடைகளால் பிரிக்கப்படுகிறது
+- `fill-first` - வரம்புகள் வரும் வரை முதல் மாதிரியை வடிகட்டவும்
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
+- `p2c` (இரண்டு விருப்பங்களின் சக்தி)
 - `least-used` மற்றும் `cost-optimized`
-- `auto` — அனைத்து candidate-களிலும் score அடிப்படையிலான தேர்வு
-- `lkgp` (Last Known Good Provider) — கடைசியாக வெற்றிகரமாகச் செயல்பட்ட provider-ஐ நிலைநிறுத்தி, பின்னர் விதிகளின் அடிப்படையில் fallback செய்கிறது
-- `context-optimized` — மிகப்பெரிய இலவச context window கொண்ட model-ஐத் தேர்ந்தெடுக்கிறது
-- `context-relay` — தொடர்ச்சியான turn-களுக்காக நீண்ட-context model-களைச் சங்கிலியாக இணைக்கிறது
+- `auto` - அனைத்து வேட்பாளர்களுக்கும் மதிப்பெண் உந்துதல்
+- `lkgp` (கடைசியாக அறியப்பட்ட நல்ல வழங்குநர்) — கடைசியாக வெற்றிகரமான வழங்குநருக்கு பின்கள், பின்னர் விதிகளுக்குத் திரும்பும்
+- `context-optimized` - மிகப்பெரிய இலவச சூழல் சாளரத்துடன் மாதிரியைத் தேர்ந்தெடுக்கிறது
+- `context-relay` — தொடர் திருப்பங்களுக்கான சங்கிலிகள் நீண்ட சூழல் மாதிரிகள்
 
-#### வெளிப்புற Sticky Session Header
+#### வெளிப்புற ஒட்டும் அமர்வு தலைப்பு
 
-வெளிப்புற session affinity-க்காக (எடுத்துக்காட்டாக, reverse proxy-களுக்குப் பின்னால் உள்ள Claude Code/Codex agent-கள்), பின்வருவதை அனுப்பவும்:
+வெளிப்புற அமர்வு தொடர்புக்கு (எடுத்துக்காட்டாக, ரிவர்ஸ் ப்ராக்ஸிகளுக்குப் பின்னால் உள்ள Claude Code/Codex முகவர்கள்), அனுப்பவும்:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute, `x_session_id` என்பதையும் ஏற்று, செயல்பாட்டிலுள்ள session key-ஐ `X-OmniRoute-Session-Id` என்பதில் திருப்பி வழங்குகிறது.
+OmniRoute `x_session_id` ஏற்றுக்கொள்கிறது மற்றும் `X-OmniRoute-Session-Id` இல் பயனுள்ள அமர்வு விசையை வழங்குகிறது.
 
-நீங்கள் Nginx-ஐப் பயன்படுத்தி underscore வடிவ header-களை அனுப்பினால், பின்வருவதை இயக்கவும்:
+நீங்கள் Nginx ஐப் பயன்படுத்தி, அடிக்கோடிட்டு-படிவ தலைப்புகளை அனுப்பினால், இயக்கவும்:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Wildcard Model Alias-கள்
+#### வைல்டு கார்டு மாதிரி மாற்றுப்பெயர்கள்
 
-model பெயர்களை மறுவரைபடம் செய்ய wildcard pattern-களை உருவாக்கவும்:
-
-```
-வடிவம்: claude-sonnet-*     →  இலக்கு: cc/claude-sonnet-4-6
-வடிவம்: gpt-*               →  இலக்கு: gh/gpt-5.3-codex
-```
-
-Wildcard-கள் `*` (எந்த எழுத்துகளும்) மற்றும் `?` (ஒற்றை எழுத்து) ஆகியவற்றை ஆதரிக்கின்றன.
-
-#### Fallback சங்கிலிகள்
-
-அனைத்து கோரிக்கைகளுக்கும் பொருந்தும் global fallback சங்கிலிகளை வரையறுக்கவும்:
+மாதிரி பெயர்களை மறுவடிவமைக்க வைல்டு கார்டு வடிவங்களை உருவாக்கவும்:
 
 ```
-சங்கிலி: production-fallback
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+```
+
+வைல்டு கார்டுகள் `*` (எந்த எழுத்துகளும்) மற்றும் `?` (ஒற்றை எழுத்து) ஆகியவற்றை ஆதரிக்கின்றன.
+
+#### வீழ்ச்சி சங்கிலிகள்
+
+அனைத்து கோரிக்கைகளுக்கும் பொருந்தும் உலகளாவிய பின்னடைவு சங்கிலிகளை வரையறுக்கவும்:
+
+```
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -913,22 +909,22 @@ Wildcard-கள் `*` (எந்த எழுத்துகளும்) ம�
 
 ---
 
-### பொதுவான Provider கலவைகள் & Routing வடிவங்கள்
+### பொதுவான வழங்குநர் சேர்க்கைகள் & ரூட்டிங் வடிவங்கள்
 
-OmniRoute-இல் பல provider-களை இணைத்து அவற்றுக்கு இடையே routing செய்வதற்கான எடுத்துக்காட்டு வடிவங்கள் இங்கே உள்ளன:
+பல வழங்குநர்களை இணைப்பதற்கும் அவர்களுக்கு இடையே OmniRoute இல் ரூட்டிங் செய்வதற்கும் எடுத்துக்காட்டு வடிவங்கள் இங்கே உள்ளன:
 
-#### 1. Coding Agent Combo: செலவு/வேக Fallback உடன் உயர்நிலை Reasoning
+#### 1. குறியீட்டு முகவர் சேர்க்கை: Cost/Speed ஃபால்பேக் உடன் உயர்-எண்ட் ரீசனிங்
 
-coding agent-களுக்கு (OpenCode, Claude Code, Cursor, Cline) ஏற்றது. ஆரம்பத்தில் frontier reasoning model-களுக்கு வழிநடத்தி, quota தீர்ந்துவிட்டாலோ பிழைகள் ஏற்பட்டாலோ வேகமான coding model-களுக்கு fallback செய்கிறது.
+குறியீட்டு முகவர்களுக்கு ஏற்றது (OpenCode, Claude குறியீடு, Cursor, Cline). கோட்டா தீர்ந்துபோதல் அல்லது பிழைகள் ஏற்பட்டால், ஃபிரான்டியர் ரீசனிங் மாடல்களுக்கான ஆரம்ப வழிகள், வேகமான குறியீட்டு மாதிரிகளுக்குத் திரும்பும்.
 
-- **Dashboard**: Combos → New Combo → பெயர்: `agent-coding` → உத்தி: `Priority`
-- **Model-கள்**:
-  1. `claude/claude-sonnet-4-6` (முதன்மை coding agent)
-  2. `openai/gpt-4o` (இரண்டாம் நிலை உயர்-திறன் fallback)
-  3. `deepseek/deepseek-v4-flash` (அதிக செயல்திறனும் செலவுச் சிக்கனமும் கொண்ட fallback)
+- **டாஷ்போர்டு** : Combos → புதிய Combo → பெயர்: `agent-coding` → வியூகம்: `Priority`
+- **மாதிரிகள்** :
+  1. `claude/claude-sonnet-4-6` (முதன்மை குறியீட்டு முகவர்)
+  2. `openai/gpt-4o` (இரண்டாம் நிலை உயர் திறன் வீழ்ச்சி)
+  3. `deepseek/deepseek-v4-flash` (உயர் செயல்திறன், செலவு குறைந்த பின்னடைவு)
 
 ```bash
-# API வழியான எடுத்துக்காட்டு
+# Example via API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -943,182 +939,178 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. இலவச அடுக்கு தானியங்கி மாற்று இணைவு
+#### 2. இலவச அடுக்கு ஆட்டோ ஃபெயில்ஓவர் காம்போ
 
-API செலவுகள் இல்லாமல் செயல்பாட்டு நேரத்தை அதிகப்படுத்த, பல இலவச அடுக்கு மற்றும் விசை தேவையற்ற வழங்குநர்களைத் தொடராக இணைக்கிறது.
+API செலவுகள் இல்லாமல் நேரத்தை அதிகரிக்க பல இலவச அடுக்கு மற்றும் கீலெஸ் வழங்குநர்கள் சங்கிலிகள்.
 
-- **உத்தி**: `Least Used` அல்லது `Round Robin` (ஒதுக்கீடுகளுக்கு இடையே சுமையைப் பகிர்ந்தளிக்கிறது)
-- **மாதிரிகள்**:
+- **உத்தி** : `Least Used` அல்லது `Round Robin` (ஒதுக்கீடு முழுவதும் சுமைகளை விநியோகிக்கிறது)
+- **மாதிரிகள்** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# CLI வழியான எடுத்துக்காட்டு
+# Example via CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. பல்வகைத் தரவு / காட்சி மற்றும் உரைச் செயலாக்கத் தொடர்
+#### 3. மல்டிமோடல் / விஷன் & டெக்ஸ்ட் பைப்லைன்
 
-படத்தைப் புரிந்துகொள்வதும் குறியீட்டை உருவாக்குவதும் அடங்கிய பணிப்பாய்வுகளுக்காக, சிறப்பு காட்சி மாதிரிகளை அதிவேக உரை உருவாக்கத்துடன் இணைத்தல்.
+படப் புரிதல் மற்றும் குறியீடு உருவாக்கம் சம்பந்தப்பட்ட பணிப்பாய்வுகளுக்கு அதிவேக உரை உருவாக்கத்துடன் சிறப்புப் பார்வை மாதிரிகளை இணைத்தல்.
 
-- **வடிவமைப்பு**: காட்சித் திறனுள்ள மாதிரிகளை முதலில் பட்டியலிட்டு, அதிகச் செயல்திறன் கொண்ட உரை/குறியீட்டு மாதிரியை இறுதியில் வைக்கும் ஒரு `Priority` இணைவு.
-- **மாதிரிகள்**:
-  1. `gemini/gemini-2.5-pro` (வலுவான படம்/பல்வகைத் தரவுப் புரிதல்)
-  2. `openai/gpt-4o` (சமநிலையான காட்சி மற்றும் கருவிப் பயன்பாடு)
-  3. `deepseek/deepseek-v4-flash` (உரை/குறியீடு உருவாக்கம்)
+- **முறை** : ஒரு `Priority` காம்போ, முதலில் பார்வை திறன் கொண்ட மாடல்களையும் கடைசியாக உயர்-செயல்திறன் கொண்ட text/code மாதிரியையும் பட்டியலிடுகிறது.
+- **மாதிரிகள்** :
+  1. `gemini/gemini-2.5-pro` (வலுவான image/multimodal புரிதல்)
+  2. `openai/gpt-4o` (சமநிலை பார்வை மற்றும் கருவி பயன்பாடு)
+  3. `deepseek/deepseek-v4-flash` (Text/code தலைமுறை)
 
 ---
 
-### மீள்திறன் மற்றும் சர்க்யூட் பிரேக்கர்கள்
+### மீள்தன்மை மற்றும் சர்க்யூட் பிரேக்கர்கள்
 
-**Dashboard → Settings → Resilience** வழியாக உள்ளமைக்கவும்.
+மூலம் கட்டமைக்கவும்** டாஷ்போர்டு → அமைப்புகள் → மீள்தன்மை** .
 
-OmniRoute ஐந்து கூறுகளுடன் வழங்குநர்-நிலை மீள்திறனைச் செயல்படுத்துகிறது:
+OmniRoute ஐந்து கூறுகளுடன் வழங்குநர்-நிலை பின்னடைவை செயல்படுத்துகிறது:
 
-1. **கோரிக்கை வரிசை மற்றும் வேகக் கட்டுப்பாடு** — அமைப்பு-நிலை கோரிக்கை வடிவமைப்பு:
-   - **நிமிடத்திற்கு கோரிக்கைகள் (RPM)** — ஒரு கணக்கிற்கு நிமிடத்திற்கு அனுமதிக்கப்படும் அதிகபட்ச கோரிக்கைகள்
-   - **கோரிக்கைகளுக்கு இடையிலான குறைந்தபட்ச நேரம்** — கோரிக்கைகளுக்கு இடையே மில்லிவினாடிகளில் குறைந்தபட்ச இடைவெளி
-   - **அதிகபட்ச ஒரேநேரக் கோரிக்கைகள்** — ஒரு கணக்கிற்கான அதிகபட்ச ஒரேநேரக் கோரிக்கைகள்
+1. **வரிசை & வேகத்தைக் கோருங்கள்** - கணினி நிலை கோரிக்கை வடிவமைத்தல்:
+   - **நிமிடத்திற்கான கோரிக்கைகள் (RPM)** - ஒரு கணக்கிற்கு நிமிடத்திற்கு அதிகபட்ச கோரிக்கைகள்
+   - **கோரிக்கைகளுக்கு இடையிலான குறைந்தபட்ச நேரம்** - கோரிக்கைகளுக்கு இடையே மில்லி விநாடிகளில் குறைந்தபட்ச இடைவெளி
+   - **அதிகபட்ச ஒரே நேரத்தில் கோரிக்கைகள்** - ஒரு கணக்கிற்கு அதிகபட்ச ஒரே நேரத்தில் கோரிக்கைகள்
 
-2. **இணைப்பு குளிர்விப்பு** — மீண்டும் முயற்சிக்கக்கூடிய தோல்விகளுக்குப் பிறகு, ஒற்றை இணைப்பிற்கான அங்கீகார-வகை வாரியான உள்ளமைவு:
-   - **அடிப்படை குளிர்விப்பு** — மீண்டும் முயற்சிக்கக்கூடிய மேல்நிலைத் தோல்விகளுக்கான இயல்புநிலை குளிர்விப்புக் காலம்
-   - **மேல்நிலை மறுமுயற்சிக் குறிப்புகளைப் பயன்படுத்துதல்** — வழங்கப்பட்டால், அதிகாரப்பூர்வமான `Retry-After` அல்லது மீட்டமைப்புக் குறிப்புகளைப் பின்பற்றுகிறது
-   - **அதிகபட்ச பின்வாங்கல் படிகள்** — தொடர்ச்சியான தோல்விகளுக்கான அதிகபட்ச அதிவேகப் பின்வாங்கல் நிலை
+2. **இணைப்பு கூல்டவுன்** — மீண்டும் முயற்சி செய்யக்கூடிய தோல்விகளுக்குப் பிறகு ஒற்றை இணைப்புக்கான அங்கீகார வகை உள்ளமைவு:
+   - **அடிப்படை கூல்டவுன்** — மீண்டும் முயற்சிக்கக்கூடிய அப்ஸ்ட்ரீம் தோல்விகளுக்கான இயல்புநிலை கூல்டவுன் சாளரம்
+   - **அப்ஸ்ட்ரீம் மீண்டும் முயற்சி குறிப்புகளைப் பயன்படுத்தவும்** - வழங்கப்படும் போது அதிகாரப்பூர்வ `Retry-After` அல்லது ரீசெட் குறிப்புகளை மதிக்கிறது
+   - **மேக்ஸ் பேக்ஆஃப் படிகள்** - தொடர்ச்சியான தோல்விகளுக்கான அதிகபட்ச அதிவேக பேக்ஆஃப் நிலை
 
-3. **வழங்குநர் சர்க்யூட் பிரேக்கர்** — வழங்குநரின் தொடக்கம்-முதல்-முடிவு வரையிலான தோல்விகளைக் கண்காணித்து, உள்ளமைக்கப்பட்ட எச்சரிக்கை வரம்பில் வழங்குநரைத் தரம்குறைந்ததாகக் குறிக்கிறது; மேலும், உள்ளமைக்கப்பட்ட தோல்வி வரம்பை அடையும்போது பிரேக்கரைத் திறக்கிறது:
-   - **தரம்குறைவு வரம்பு** — `DEGRADED` நிலைக்குச் செல்வதற்கு முன் ஏற்படும் தொடர்ச்சியான வழங்குநர் தோல்விகள்
-   - **தோல்வி வரம்பு** — `OPEN` நிலைக்குச் செல்வதற்கு முன் ஏற்படும் தொடர்ச்சியான வழங்குநர் தோல்விகள்
-   - **மீட்டமைப்பு காலாவதி** — வழங்குநர் மீண்டும் சோதிக்கப்படுவதற்கு முன் உள்ள கால இடைவெளி
-   - **CLOSED** (ஆரோக்கியமானது) — கோரிக்கைகள் வழக்கம்போல் செல்கின்றன
-   - **DEGRADED** — அதிகரித்த தோல்விகள் கண்காணிக்கப்படும் நிலையில் கோரிக்கைகள் தொடர்ந்து செல்கின்றன
-   - **OPEN** — தொடர்ச்சியான தோல்விகளுக்குப் பிறகு வழங்குநர் தற்காலிகமாகத் தடுக்கப்படுகிறார்
-   - **HALF_OPEN** — வழங்குநர் மீண்டுள்ளாரா என்பதைச் சோதிக்கிறது
+3. **வழங்குநர் சர்க்யூட் பிரேக்கர்** — எண்ட்-டு-எண்ட் வழங்குநரின் தோல்விகளைக் கண்காணிக்கும், உள்ளமைக்கப்பட்ட எச்சரிக்கை வாசலில் தரம் தாழ்ந்த வழங்குநரைக் குறிக்கும், மேலும் உள்ளமைக்கப்பட்ட தோல்வி வரம்பை அடைந்ததும் பிரேக்கரைத் திறக்கும்:
+   - **சீரழிவு வாசல்** — `DEGRADED` நுழைவதற்கு முன் தொடர்ச்சியான வழங்குநர் தோல்விகள்
+   - **தோல்வி வரம்பு** — `OPEN` நுழைவதற்கு முன் தொடர்ச்சியான வழங்குநர் தோல்விகள்
+   - **காலக்கெடுவை மீட்டமைக்கவும்** - வழங்குநர் மீண்டும் சோதிக்கப்படுவதற்கு முன் நேர சாளரம்
+   - **CLOSED** (ஆரோக்கியமான) - கோரிக்கைகள் சாதாரணமாக வரும்
+   - **DEGRADED** - உயர்ந்த தோல்விகள் கண்காணிக்கப்படும்போதும் கோரிக்கைகள் தொடர்ந்து வருகின்றன
+   - **OPEN** - தொடர்ச்சியான தோல்விகளுக்குப் பிறகு வழங்குநர் தற்காலிகமாகத் தடுக்கப்பட்டார்
+   - **HALF_OPEN** - வழங்குநர் குணமடைந்துவிட்டாரா என்பதைச் சோதித்தல்
 
-   இணைப்பு-சார்ந்த `429` வீத வரம்புகள் **இணைப்பு குளிர்விப்பிலேயே** இருக்கும்; அவை வழங்குநர் பிரேக்கருக்காகக் கணக்கிடப்படாது.
+   இணைப்பு-நோக்கிய `429` வீத வரம்புகள் இருக்கும்** இணைப்பு கூல்டவுன்** மற்றும் வழங்குனர் பிரேக்கரை நோக்கி எண்ண வேண்டாம்.
 
-   வழங்குநர் பிரேக்கரின் இயக்கநேர நிலை **Dashboard → Health** என்பதில் மட்டுமே காட்டப்படும்.
+   வழங்குநர் பிரேக்கர் இயக்க நேர நிலை காட்டப்பட்டுள்ளது** டாஷ்போர்டு → ஆரோக்கியம்** மட்டுமே.
 
-4. **குளிர்விப்புக்காகக் காத்திருத்தல்** — தேர்வுக்குரிய ஒவ்வொரு இணைப்பும் ஏற்கெனவே குளிர்விப்பு நிலையில் இருந்தால், OmniRoute மிக விரைவில் முடிவடையும் குளிர்விப்பு வரை காத்திருந்து, அதே கிளையன்ட் கோரிக்கையைத் தானாகவே மீண்டும் முயற்சிக்க முடியும்.
+4. **கூல்டவுனுக்காக காத்திருங்கள்** - ஒவ்வொரு கேண்டிடேட் இணைப்பும் ஏற்கனவே குளிர்ச்சியடைந்தால், OmniRoute ஆரம்ப கூல்டவுன் வரை காத்திருந்து அதே கிளையன்ட் கோரிக்கையை தானாக மீண்டும் முயற்சி செய்யலாம்.
 
-5. **வீத வரம்பைத் தானாகக் கண்டறிதல்** — மேல்நிலை வழங்குநர்கள் வெளிப்படையான காத்திருப்புக் காலங்களைத் திருப்பி அனுப்பும்போது, இந்த அமைப்பு இயக்கப்பட்டிருந்தால் அந்தக் குறிப்புகள் உள்ளூர் இணைப்புக் குளிர்விப்பை மேலெழுதும்.
+5. **விகித வரம்பு தானியங்கு-கண்டறிதல்** — அப்ஸ்ட்ரீம் வழங்குநர்கள் வெளிப்படையான காத்திருப்பு சாளரங்களை வழங்கும் போது, அமைப்பு இயக்கப்பட்டிருக்கும் போது அந்த குறிப்புகள் உள்ளூர் இணைப்பு கூல்டவுனை மீறும்.
 
-**நிபுணர் குறிப்பு:** செயலிழப்புக்குப் பிறகு நேரடி வழங்குநர் பிரேக்கர்களை ஆய்வு செய்து மீட்டமைக்க **Health** பக்கத்தைப் பயன்படுத்தவும். Resilience பக்கம் உள்ளமைவை மட்டுமே மாற்றுகிறது.
+**சார்பு உதவிக்குறிப்பு:** பயன்படுத்தவும்** ஆரோக்கியம்** செயலிழப்புக்குப் பிறகு நேரடி வழங்குநர் பிரேக்கர்களை ஆய்வு செய்து மீட்டமைப்பதற்கான பக்கம். பின்னடைவு பக்கம் உள்ளமைவை மட்டுமே மாற்றுகிறது.
 
 ---
 
 ### தரவுத்தள ஏற்றுமதி / இறக்குமதி
 
-**Dashboard → Settings → System & Storage** என்பதில் தரவுத்தளக் காப்புப்பிரதிகளை நிர்வகிக்கவும்.
+தரவுத்தள காப்புப்பிரதிகளை நிர்வகிக்கவும்** டாஷ்போர்டு → அமைப்புகள் → சிஸ்டம் & ஸ்டோரேஜ்** .
 
-| செயல்                                   | விளக்கம்                                                                                                                                                                              |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **தரவுத்தளத்தை ஏற்றுமதி செய்**          | தற்போதைய SQLite தரவுத்தளத்தை `.sqlite` கோப்பாகப் பதிவிறக்குகிறது                                                                                                                      |
-| **அனைத்தையும் ஏற்றுமதி செய் (.tar.gz)** | தரவுத்தளம், அமைப்புகள், இணைவுகள், வழங்குநர் இணைப்புகள் (நற்சான்றுகள் இல்லாமல்), API விசை மேதரவு ஆகியவை அடங்கிய முழுக் காப்பகத்தைப் பதிவிறக்குகிறது                                    |
-| **தரவுத்தளத்தை இறக்குமதி செய்**         | தற்போதைய தரவுத்தளத்தை மாற்றுவதற்கு `.sqlite` கோப்பைப் பதிவேற்றுகிறது. `DISABLE_SQLITE_AUTO_BACKUP=true` என அமைக்கப்படாதவரை, இறக்குமதிக்கு முந்தைய காப்புப்பிரதி தானாக உருவாக்கப்படும் |
+| செயல்                                   | விளக்கம்                                                                                                                                                                   |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ஏற்றுமதி தரவுத்தளம்**                 | தற்போதைய SQLite தரவுத்தளத்தை `.sqlite` கோப்பாகப் பதிவிறக்குகிறது                                                                                                           |
+| **அனைத்தையும் ஏற்றுமதி செய் (.tar.gz)** | தரவுத்தளம், அமைப்புகள், சேர்க்கைகள், வழங்குநர் இணைப்புகள் (நற்சான்றிதழ்கள் இல்லை), API முக்கிய மெட்டாடேட்டா உட்பட முழு காப்புப் பிரதி காப்பகத்தைப் பதிவிறக்குகிறது         |
+| **தரவுத்தளத்தை இறக்குமதி செய்யவும்**    | தற்போதைய தரவுத்தளத்தை மாற்ற, `.sqlite` கோப்பைப் பதிவேற்றவும். `DISABLE_SQLITE_AUTO_BACKUP=true` இல்லாவிட்டால், இறக்குமதிக்கு முந்தைய காப்புப்பிரதி தானாகவே உருவாக்கப்படும் |
 
 ```bash
-# API: தரவுத்தளத்தை ஏற்றுமதி செய்
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: அனைத்தையும் ஏற்றுமதி செய் (முழுக் காப்பகம்)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: தரவுத்தளத்தை இறக்குமதி செய்
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**இறக்குமதிச் சரிபார்ப்பு:** இறக்குமதி செய்யப்பட்ட கோப்பு ஒருமைப்பாடு (SQLite pragma சோதனை), தேவையான அட்டவணைகள் (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) மற்றும் அளவு (அதிகபட்சம் 100MB) ஆகியவற்றிற்காகச் சரிபார்க்கப்படுகிறது.
+**இறக்குமதி சரிபார்ப்பு:** இறக்குமதி செய்யப்பட்ட கோப்பு ஒருமைப்பாடு (SQLite ப்ராக்மா சரிபார்ப்பு), தேவையான அட்டவணைகள் (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) மற்றும் அளவு (அதிகபட்சம் 100MB) ஆகியவற்றிற்காக சரிபார்க்கப்பட்டது.
 
-**பயன்பாட்டு நிகழ்வுகள்:**
+**வழக்குகளைப் பயன்படுத்தவும்:**
 
-- இயந்திரங்களுக்கு இடையே OmniRoute-ஐ இடமாற்றுதல்
-- பேரிடர் மீட்புக்காக வெளிப்புறக் காப்புப்பிரதிகளை உருவாக்குதல்
-- குழு உறுப்பினர்களிடையே உள்ளமைவுகளைப் பகிர்தல் (அனைத்தையும் ஏற்றுமதி செய் → காப்பகத்தைப் பகிர்)
-
----
-
-### அமைப்புகள் கட்டுப்பாட்டுப் பலகை
-
-எளிதான வழிசெலுத்தலுக்காக அமைப்புகள் பக்கம் **7 தாவல்களாக** ஒழுங்கமைக்கப்பட்டுள்ளது:
-
-| தாவல்              | உள்ளடக்கங்கள்                                                                                                                                                                                                    |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **பொது**           | கணினிச் சேமிப்பகக் கருவிகள், இயல்புநிலை நடத்தை, Endpoint tunnel தெரிவுநிலை                                                                                                                                       |
-| **தோற்றம்**        | தீம் கட்டுப்பாடுகள் (ஒளி/இருள்/கணினி), பக்கப்பட்டை தெரிவுநிலை, Cloudflare/Tailscale/ngrok tunnel அட்டைகளுக்கான பலகை நிலைமாற்றிகள்                                                                                |
-| **AI**             | சிந்தனை வரம்பு (நேரடியாக அனுப்புதல் / தானாக அகற்றுதல் / தனிப்பயன் / தகவமைப்பு — [THINKING_BUDGET.md](./THINKING_BUDGET.md) பார்க்கவும்), உலகளாவிய கணினித் தூண்டல், தூண்டல் தற்காலிகச் சேமிப்பகப் புள்ளிவிவரங்கள் |
-| **பாதுகாப்பு**     | உள்நுழைவு/கடவுச்சொல் அமைப்புகள், IP அணுகல் கட்டுப்பாடு, `/models`-க்கான API அங்கீகாரம், வழங்குநர் தடுப்பு, prompt-injection பாதுகாப்பு                                                                           |
-| **வழிச்செலுத்தல்** | உலகளாவிய வழிச்செலுத்தல் உத்தி (முதலில் நிரப்பு / சுழற்சி முறை / P2C / சீரற்ற / குறைவாகப் பயன்படுத்தப்பட்டது / செலவுக்கு உகந்தது), wildcard மாதிரி மாற்றுப்பெயர்கள், fallback சங்கிலிகள், combo இயல்புநிலைகள்     |
-| **மீட்சித்திறன்**  | கோரிக்கை வரிசை, இணைப்பு cooldown, வழங்குநர் breaker உள்ளமைவு மற்றும் cooldown முடியும் வரை காத்திருக்கும் நடத்தை                                                                                                 |
-| **மேம்பட்டவை**     | உலகளாவிய proxy உள்ளமைவு (HTTP/SOCKS5), வழங்குநர் வாரியான proxy மேலெழுதல்கள்                                                                                                                                      |
-
-பொது தாவல், படிக்க மட்டுமான பதிவேடு மற்றும் தற்காலிகச் சேமிப்பகம் குறித்த குறிப்புகளை இனி நகலெடுத்துக் காட்டாது. தரவுத்தளத் தக்கவைப்பு மற்றும்
-உகப்பாக்க அமைப்புகள் `/api/settings/database` வழியாக நிலைநிறுத்தப்படுகின்றன; தற்காலிகச் சேமிப்பகத்தை கைமுறையாக அழிக்க
-`DELETE /api/cache` பயன்படுத்தப்படுகிறது. கோரிக்கை மற்றும் proxy பதிவேட்டு வரிசைகளின் உச்ச வரம்புகள்
-`CALL_LOGS_TABLE_MAX_ROWS` மற்றும் `PROXY_LOGS_TABLE_MAX_ROWS` ஆகியவற்றால் கட்டுப்படுத்தப்படுகின்றன.
+- இயந்திரங்களுக்கு இடையில் OmniRoute நகர்த்தவும்
+- பேரிடர் மீட்புக்கான வெளிப்புற காப்புப்பிரதிகளை உருவாக்கவும்
+- குழு உறுப்பினர்களிடையே உள்ளமைவுகளைப் பகிரவும் (எல்லா → பங்கு காப்பகத்தையும் ஏற்றுமதி செய்)
 
 ---
 
-### செலவுகள் மற்றும் பட்ஜெட் மேலாண்மை
+### அமைப்புகள் டாஷ்போர்டு
 
-**Dashboard → Costs** வழியாக அணுகவும்.
+அமைப்புகள் பக்கம் ஒழுங்கமைக்கப்பட்டுள்ளது** 7 தாவல்கள்** எளிதான வழிசெலுத்தலுக்கு:
 
-| தாவல்       | நோக்கம்                                                                                                                   |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **பட்ஜெட்** | தினசரி/வாராந்திர/மாதாந்திர பட்ஜெட்கள் மற்றும் நிகழ்நேரக் கண்காணிப்புடன் ஒவ்வொரு API key-க்கும் செலவு வரம்புகளை அமைக்கவும் |
-| **விலை**    | மாதிரி விலைப் பதிவுகளைப் பார்த்துத் திருத்தவும் — ஒவ்வொரு வழங்குநருக்கும் 1K உள்ளீடு/வெளியீடு token-களுக்கான செலவு        |
+| தாவல்          | உள்ளடக்கம்                                                                                                                                                                                      |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **பொது**       | கணினி சேமிப்பக கருவிகள், இயல்புநிலை நடத்தை, எண்ட்பாயிண்ட் டன்னல் தெரிவுநிலை                                                                                                                     |
+| **தோற்றம்**    | தீம் கட்டுப்பாடுகள் (light/dark/system), பக்கப்பட்டியின் தெரிவுநிலை, Cloudflare/Tailscale/ngrok டன்னல் கார்டுகளுக்கான பேனல் நிலைமாற்றங்கள்                                                      |
+| **AI**         | சிந்தனை வரவு செலவுத் திட்டம் (பாஸ்த்ரூ / ஆட்டோ-ஸ்டிரிப் / தனிப்பயன் / அடாப்டிவ் — பார்க்க [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), குளோபல் சிஸ்டம் ப்ராம்ட், ப்ராம்ட் கேச் புள்ளிவிவரங்கள் |
+| **பாதுகாப்பு** | Login/Password அமைப்புகள், IP அணுகல் கட்டுப்பாடு, `/models` க்கான API அங்கீகாரம், வழங்குநரைத் தடுப்பது, உடனடி ஊசி பாதுகாப்பு                                                                    |
+| **ரூட்டிங்**   | உலகளாவிய ரூட்டிங் உத்தி (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), வைல்டு கார்டு மாடல் மாற்றுப்பெயர்கள், ஃபால்பேக் செயின்கள், காம்போ டீஃபால்ட்கள்                 |
+| **மீள்தன்மை**  | கோரிக்கை வரிசை, இணைப்பு கூல்டவுன், வழங்குநர் பிரேக்கர் கட்டமைப்பு மற்றும் குளிர்ச்சிக்காக காத்திருக்கும் நடத்தை                                                                                 |
+| **மேம்பட்டது** | உலகளாவிய ப்ராக்ஸி உள்ளமைவு (HTTP/SOCKS5), ஒவ்வொரு வழங்குநருக்கும் ப்ராக்ஸி மேலெழுதப்பட்டது                                                                                                      |
+
+பொது இனி படிக்க மட்டுமேயான பதிவு மற்றும் கேச் குறிப்புகளை நகல் எடுக்காது. தரவுத்தளத் தக்கவைப்பு மற்றும் தேர்வுமுறை அமைப்புகள் `/api/settings/database` மூலம் தொடரப்படுகின்றன; கையேடு கேச் கிளியரிங் `DELETE /api/cache` ஐப் பயன்படுத்துகிறது. கோரிக்கை மற்றும் ப்ராக்ஸி பதிவு வரிசை தொப்பிகள் `CALL_LOGS_TABLE_MAX_ROWS` மற்றும் `PROXY_LOGS_TABLE_MAX_ROWS` ஆல் கட்டுப்படுத்தப்படுகின்றன.
+
+---
+
+### செலவுகள் & பட்ஜெட் மேலாண்மை
+
+வழியாக அணுகலாம்** டாஷ்போர்டு → செலவுகள்** .
+
+| தாவல்             | நோக்கம்                                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| **பட்ஜெட்**       | daily/weekly/monthly பட்ஜெட்டுகள் மற்றும் நிகழ்நேர கண்காணிப்பு மூலம் API விசைக்கு செலவு வரம்புகளை அமைக்கவும் |
+| **விலை நிர்ணயம்** | மாதிரி விலை உள்ளீடுகளைப் பார்க்கவும் திருத்தவும் — ஒரு வழங்குநருக்கு 1K input/output டோக்கன்களுக்கான விலை    |
 
 ```bash
-# API: ஒரு பட்ஜெட்டை அமைக்கவும்
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: தற்போதைய பட்ஜெட் நிலையைப் பெறவும்
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**செலவுக் கண்காணிப்பு:** ஒவ்வொரு கோரிக்கையும் token பயன்பாட்டைப் பதிவுசெய்து, விலை அட்டவணையைப் பயன்படுத்திச் செலவைக் கணக்கிடுகிறது. வழங்குநர், மாதிரி மற்றும் API key வாரியான விவரப் பிரிவுகளை **Dashboard → Usage**-இல் பார்க்கவும்.
+**செலவு கண்காணிப்பு:** ஒவ்வொரு கோரிக்கையும் டோக்கன் பயன்பாட்டை பதிவு செய்கிறது மற்றும் விலை அட்டவணையைப் பயன்படுத்தி செலவைக் கணக்கிடுகிறது. முறிவுகளைக் காண்க** டாஷ்போர்டு → பயன்பாடு** வழங்குநர், மாதிரி மற்றும் API விசை மூலம்.
 
 ---
 
-### ஒலி உரைமாற்றம்
+### ஆடியோ டிரான்ஸ்கிரிப்ஷன்
 
-OpenAI-உடன் இணக்கமான பின்வரும் endpoint வழியாக OmniRoute ஒலி உரைமாற்றத்தை ஆதரிக்கிறது:
+OmniRoute OpenAI-இணக்கமான இறுதிப்புள்ளி வழியாக ஆடியோ டிரான்ஸ்கிரிப்ஷனை ஆதரிக்கிறது:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# curl பயன்படுத்தும் எடுத்துக்காட்டு
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` என்பது இயல்பான Deepgram வழித்தடமாகும்; அதற்கு Deepgram API key தேவை.
-OpenRouter மட்டுமே உள்ளமைக்கப்பட்டிருந்தால், `openrouter/deepgram/nova-3` பயன்படுத்தவும்.
+`deepgram/nova-3` என்பது பூர்வீக டீப்கிராம் பாதை மற்றும் இதற்கு டீப்கிராம் API விசை தேவை. OpenRouter மட்டும் கட்டமைக்கப்பட்டிருந்தால், `openrouter/deepgram/nova-3` பயன்படுத்தவும்.
 
-**பேச்சிலிருந்து உரை (உரைமாற்றம்)** வழங்குநர்கள்:
+**ஸ்பீச்-டு-டெக்ஸ்ட் (டிரான்ஸ்கிரிப்ஷன்)** வழங்குநர்கள்:
 
-- `openai/` (whisper-உடன் இணக்கமானது)
-- `groq/` (Groq Whisper Turbo)
-- `deepgram/` (Nova குடும்பம்)
+- `openai/` (விஸ்பர்-இணக்கமானது)
+- `groq/` (Groq விஸ்பர் டர்போ)
+- `deepgram/` (நோவா குடும்பம்)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canary)
-- `huggingface/` (whisper வகைகள்)
+- `nvidia/` (பராகீட், கேனரி)
+- `huggingface/` (விஸ்பர் மாறுபாடுகள்)
 - `qwen/`
 
 **உரையிலிருந்து பேச்சு (`POST /v1/audio/speech`)** வழங்குநர்கள்:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
-- `deepgram/` (Aura)
+- `deepgram/` (ஆரா)
 - `nvidia/` (Magpie TTS)
 - `elevenlabs/`
 - `huggingface/`
@@ -1131,52 +1123,45 @@ OpenRouter மட்டுமே உள்ளமைக்கப்பட்ட�
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-உரைமாற்றத்திற்கு ஆதரிக்கப்படும் ஒலி வடிவங்கள்: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS வெளியீட்டு வடிவங்கள் வழங்குநரைச் சார்ந்தவை (mp3, wav, opus, pcm, mulaw).
+டிரான்ஸ்கிரிப்ஷனுக்கான ஆதரவு ஆடியோ வடிவங்கள்: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS வெளியீட்டு வடிவங்கள் வழங்குநரைப் பொறுத்தது (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-### Combo சமநிலைப்படுத்தல் உத்திகள்
+### காம்போ பேலன்சிங் உத்திகள்
 
-**Dashboard → Combos → Create/Edit → Strategy** என்பதில் ஒவ்வொரு combo-வுக்குமான சமநிலைப்படுத்தலை உள்ளமைக்கவும்.
+ஒவ்வொரு சேர்க்கை சமநிலையை உள்ளமைக்கவும்** டாஷ்போர்டு → காம்போஸ் → Create/Edit →** .
 
-| உத்தி                            | விளக்கம்                                                                                                       |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **சுழற்சி முறை**                 | மாதிரிகளிடையே தொடர்ச்சியான வரிசையில் சுழல்கிறது                                                                |
-| **முன்னுரிமை**                   | எப்போதும் முதல் மாதிரியை முயற்சிக்கும்; பிழை ஏற்பட்டால் மட்டுமே fallback செய்கிறது                             |
-| **சீரற்றது**                     | ஒவ்வொரு கோரிக்கைக்கும் combo-விலிருந்து ஒரு சீரற்ற மாதிரியைத் தேர்ந்தெடுக்கிறது                                |
-| **எடையிடப்பட்டது**               | ஒவ்வொரு மாதிரிக்கும் ஒதுக்கப்பட்ட எடைகளின் அடிப்படையில் விகிதாசாரமாக வழிச்செலுத்துகிறது                        |
-| **குறைவாகப் பயன்படுத்தப்பட்டது** | அண்மையில் மிகக் குறைந்த கோரிக்கைகளைப் பெற்ற மாதிரிக்கு வழிச்செலுத்துகிறது (combo அளவீடுகளைப் பயன்படுத்துகிறது) |
-| **செலவுக்கு உகந்தது**            | கிடைக்கக்கூடிய மிக மலிவான மாதிரிக்கு வழிச்செலுத்துகிறது (விலை அட்டவணையைப் பயன்படுத்துகிறது)                    |
+| உத்தி                            | விளக்கம்                                                                                             |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **ரவுண்ட்-ராபின்**               | வரிசையாக மாதிரிகள் மூலம் சுழலும்                                                                     |
+| **முன்னுரிமை**                   | எப்போதும் முதல் மாதிரியை முயற்சிக்கவும்; பிழையில் மட்டுமே பின்வாங்குகிறது                            |
+| **சீரற்ற**                       | ஒவ்வொரு கோரிக்கைக்கும் காம்போவிலிருந்து ஒரு சீரற்ற மாதிரியைத் தேர்ந்தெடுக்கிறது                      |
+| **எடையுள்ள**                     | ஒரு மாதிரிக்கு ஒதுக்கப்பட்ட எடைகளின் அடிப்படையில் விகிதாசார அடிப்படையில் வழிகள்                      |
+| **குறைவாகப் பயன்படுத்தப்பட்டது** | மிகக் குறைவான சமீபத்திய கோரிக்கைகளைக் கொண்ட மாதிரிக்கான வழிகள் (காம்போ அளவீடுகளைப் பயன்படுத்துகிறது) |
+| **செலவு உகந்தது**                | மலிவான மாடலுக்கான வழிகள் (விலை அட்டவணையைப் பயன்படுத்துகிறது)                                         |
 
-உலகளாவிய combo இயல்புநிலைகளை **Dashboard → Settings → Routing → Combo Defaults** என்பதில் அமைக்கலாம்.
-Combo இலக்கு timeout-கள் இயல்பாகத் தற்போதைய கோரிக்கை timeout-ஐப் பெறுகின்றன. இலக்கு வாரியான குறுகிய வரம்பு
-விரைவான fallback-ஐத் தூண்ட வேண்டியபோது மட்டும் combo இயல்புநிலைகளிலோ தனிப்பட்ட combo-விலோ **Target timeout
-(seconds)** என்பதைப் பயன்படுத்தவும்.
+உலகளாவிய சேர்க்கை இயல்புநிலைகளை அமைக்கலாம்** டாஷ்போர்டு → அமைப்புகள் → ரூட்டிங் → காம்போ இயல்புநிலைகள்** . காம்போ டார்கெட் டைம்அவுட்கள் இயல்புநிலையாக தற்போதைய கோரிக்கை காலாவதியைப் பெறுகின்றன. பயன்படுத்தவும்** இலக்கு நேரம் முடிந்தது (வினாடிகள்)** காம்போ இயல்புநிலைகள் அல்லது தனிப்பட்ட காம்போவில் ஒரு இலக்கு வரம்பு குறைவாக இருக்கும் போது மட்டுமே வேகமாக வீழ்ச்சியைத் தூண்டும்.
 
-பூஜ்ஜியத் தாமத combo உகப்பாக்கங்கள் விருப்பத் தேர்வாகும். இந்தத் தாமத அம்சங்கள் fallback இலக்குகளுடன்
-போட்டியிடுவதையும், TTFT வரலாற்றின் அடிப்படையில் இலக்குகளைத் தவிர்ப்பதையும் அல்லது fallback கோரிக்கைகளைச்
-சுருக்குவதையும் தடுக்க, **Zero-latency optimizations** என்பதை முடக்கப்பட்ட நிலையிலேயே விடவும்; அதை இயக்குவது,
-குறைந்த tail latency-க்காக வழிச்செலுத்தல்/கோரிக்கை துல்லியத்தை விட்டுக்கொடுத்து, உள்ளமைக்கப்பட்ட hedging,
-முன்கணிப்பு TTFT தவிர்ப்புகள் மற்றும் முன்கூட்டிய fallback சுருக்கத்தை அனுமதிக்கிறது.
+ஜீரோ-லேட்டன்சி காம்போ மேம்படுத்தல்கள் தேர்வு செய்யப்படுகின்றன. கிளம்பு** ஜீரோ-லேட்டன்சி மேம்படுத்தல்கள்** ரேசிங் ஃபால்பேக் இலக்குகள், TTFT வரலாற்றின் அடிப்படையிலான இலக்குகளைத் தவிர்ப்பது அல்லது பின்னடைவு கோரிக்கைகளை சுருக்குவது போன்றவற்றிலிருந்து இந்த தாமத அம்சங்களைத் தடுக்க முடக்கப்பட்டது; அதை செயல்படுத்துவது கட்டமைக்கப்பட்ட ஹெட்ஜிங், முன்கணிப்பு TTFT ஸ்கிப்ஸ் மற்றும் குறைந்த டெயில் லேட்டன்சிக்கு routing/request நம்பகத்தன்மையை வர்த்தகம் செய்ய ப்ராக்டிவ் ஃபால்பேக் சுருக்கத்தை அனுமதிக்கிறது.
 
-அப்ஸ்ட்ரீம் வழங்குநர்களுக்கு கடுமையான `max_tokens` / `maxOutputTokens` வரம்புகள் தேவைப்படும்போது **Reasoning token buffer**-ஐ முடக்கவும். இது இயக்கப்பட்டிருக்கும்போது, அறியப்பட்ட வெளியீட்டு உச்சவரம்பைக் கொண்ட மாதிரிகளுக்கு மட்டுமே காம்போ ரூட்டிங் ரீசனிங் மாதிரிக்கான கூடுதல் இடத்தைச் சேர்க்கும்; மேலும் பாதுகாப்பான பஃபர் மதிப்பு அந்த உச்சவரம்பை மீறினால், கிளையன்ட் டோக்கன் வரம்பை மாற்றாமல் வைத்திருக்கும். கிளையன்ட் வரம்பு ஏற்கனவே அறியப்பட்ட உச்சவரம்பை விட அதிகமாக இருந்தால், அப்ஸ்ட்ரீம் கோரிக்கையை அனுப்புவதற்கு முன் OmniRoute அதை அந்த உச்சவரம்பிற்குக் குறைக்கும்.
+முடக்கு** ரீசனிங் டோக்கன் பஃபர்** அப்ஸ்ட்ரீம் வழங்குநர்களுக்கு கடுமையான `max_tokens` / `maxOutputTokens` வரம்புகள் தேவைப்படும்போது. இயக்கப்பட்டால், காம்போ ரூட்டிங் ஆனது, அறியப்பட்ட வெளியீட்டு தொப்பியைக் கொண்ட மாடல்களுக்கான காரண-மாடல் ஹெட்ரூமை மட்டுமே சேர்க்கிறது மற்றும் பாதுகாப்பான இடையக மதிப்பு அந்த தொப்பியை மீறும் போது கிளையன்ட் டோக்கன் வரம்பை மாற்றாது. கிளையன்ட் வரம்பு ஏற்கனவே அறியப்பட்ட தொப்பியை விட அதிகமாக இருந்தால், அப்ஸ்ட்ரீம் கோரிக்கையை அனுப்பும் முன், OmniRoute அதை அந்த தொப்பியுடன் இணைக்கிறது.
 
 ---
 
-### ஆரோக்கிய டாஷ்போர்டு
+### சுகாதார டாஷ்போர்டு
 
-**Dashboard → Health** வழியாக அணுகவும். 6 கார்டுகளுடன் நிகழ்நேர சிஸ்டம் ஆரோக்கியக் கண்ணோட்டம்:
+வழியாக அணுகலாம்** டாஷ்போர்டு → ஆரோக்கியம்** . 6 கார்டுகளுடன் நிகழ்நேர அமைப்பு ஆரோக்கிய கண்ணோட்டம்:
 
-| கார்டு                      | இது காட்டுவது                                                         |
-| --------------------------- | --------------------------------------------------------------------- |
-| **சிஸ்டம் நிலை**            | செயல்பாட்டு நேரம், பதிப்பு, நினைவகப் பயன்பாடு, தரவுக் கோப்பகம்        |
-| **வழங்குநர் ஆரோக்கியம்**    | உலகளாவிய வழங்குநர் சர்க்யூட் பிரேக்கரின் இயக்கநேர நிலை                |
-| **விகித வரம்புகள்**         | மீதமுள்ள நேரத்துடன், கணக்கு வாரியான செயலில் உள்ள இணைப்பு கூல்டவுன்கள் |
-| **செயலில் உள்ள பூட்டல்கள்** | செயலில் உள்ள மாதிரி-வரம்புடைய பூட்டல்கள் மற்றும் தற்காலிக விலக்குகள்  |
-| **கையொப்ப கேஷ்**            | நகல் நீக்க கேஷ் புள்ளிவிவரங்கள் (செயலில் உள்ள விசைகள், ஹிட் விகிதம்)  |
-| **தாமத டெலிமெட்ரி**         | வழங்குநர் வாரியான p50/p95/p99 தாமதத் தொகுப்பு                         |
+| அட்டை                    | இது என்ன காட்டுகிறது                                                      |
+| ------------------------ | ------------------------------------------------------------------------- |
+| **கணினி நிலை**           | இயக்க நேரம், பதிப்பு, நினைவக பயன்பாடு, தரவு கோப்பகம்                      |
+| **வழங்குநர் ஆரோக்கியம்** | உலகளாவிய வழங்குநர் சர்க்யூட் பிரேக்கர் இயக்க நேர நிலை                     |
+| **விகித வரம்புகள்**      | மீதமுள்ள நேரத்தில் ஒரு கணக்கிற்கு செயலில் உள்ள இணைப்பு கூல்டவுன்கள்       |
+| **செயலில் பூட்டுதல்கள்** | செயலில் உள்ள மாதிரி-நோக்கிய லாக்அவுட்கள் மற்றும் தற்காலிக விலக்குகள்      |
+| **கையொப்ப கேச்**         | டியூப்ளிகேஷன் கேச் புள்ளிவிவரங்கள் (செயலில் உள்ள விசைகள், வெற்றி விகிதம்) |
+| **லேட்டன்சி டெலிமெட்ரி** | ஒரு வழங்குநருக்குp50/p95/p99 தாமதத் திரட்டல்                              |
 
-**சிறப்பு உதவிக்குறிப்பு:** ஆரோக்கியப் பக்கம் ஒவ்வொரு 10 வினாடிகளுக்கும் தானாகப் புதுப்பிக்கப்படும். எந்த வழங்குநர்கள் சிக்கல்களை எதிர்கொள்கிறார்கள் என்பதைக் கண்டறிய சர்க்யூட் பிரேக்கர் கார்டைப் பயன்படுத்தவும்.
+**சார்பு உதவிக்குறிப்பு:** உடல்நலம் பக்கம் ஒவ்வொரு 10 வினாடிக்கும் தானாகப் புதுப்பிக்கப்படும். எந்த வழங்குநர்கள் சிக்கல்களை எதிர்கொள்கிறார்கள் என்பதைக் கண்டறிய சர்க்யூட் பிரேக்கர் கார்டைப் பயன்படுத்தவும்.
 
 ---
 

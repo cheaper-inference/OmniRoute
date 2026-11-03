@@ -78,6 +78,7 @@ import {
   getStickyRoundRobinStartIndex,
   recordStickyRoundRobinSuccess,
   resolveComboStickyRoundRobinLimit,
+  rotateWithinVisionTiers,
 } from "./rrState.ts";
 import { expandTargetsForAllStrategies } from "./connectionAwareExpansion.ts";
 import {
@@ -87,6 +88,12 @@ import {
   toRetryAfterDisplayValue,
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
+import {
+  AGENTIC_STALL_COMBO_REASON,
+  agenticStallOutcome,
+  isAgenticStallComboAttempt,
+} from "./agenticStallFailover.ts";
+import { holdAttemptResponse } from "./truncatedStreamFailover.ts";
 import {
   TRANSIENT_FOR_SEMAPHORE,
   MAX_FALLBACK_WAIT_MS,
@@ -107,6 +114,7 @@ import {
   requestScopedReplayKey,
   resolvePersistedConnectionCooldownSkipReason,
 } from "./comboPredicates.ts";
+import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import { handlePreContentStreamRetry } from "./executeTargetClassify.ts";
 import {
   handleEmptyContentRetry,
@@ -129,8 +137,10 @@ import {
 import { resolveShadowTargets, scheduleShadowRouting } from "./shadowRouting.ts";
 import {
   computeCompatRejectedTargets,
+  deriveRequestCompatibilityRequirements,
   describeCapabilityFilterExhaustion,
   filterTargetsByRequestCompatibility,
+  partitionConfirmedVisionTargets,
   resolveComboTargets,
 } from "./comboStructure.ts";
 import { releaseStickyPinOnFailure, clearStaleLKGP } from "../combo.ts";
@@ -170,6 +180,7 @@ export async function handleRoundRobinCombo({
   requestHeaders: _requestHeaders = null,
   relayOptions,
   perTargetAdmission = null,
+  heldAttempt = {},
 }: HandleRoundRobinOptions): Promise<Response> {
   const config = settings
     ? resolveComboConfig(combo, settings)
@@ -446,6 +457,24 @@ export async function handleRoundRobinCombo({
     if (stickyIdx >= 0) rrStartIndex = stickyIdx;
   }
 
+  // #17289: unknown-vision targets are a last resort for image requests. Rotating
+  // the whole filtered list would hand them a share of the traffic, so rotate
+  // WITHIN the confirmed tier and only fall through to the unknown tier after it.
+  // The partition is stable (a no-op unless prompt-cache affinity reordered the
+  // list), and the start index follows the target it pointed at.
+  const rrVisionTiers = partitionConfirmedVisionTargets(
+    filteredTargets,
+    deriveRequestCompatibilityRequirements(body)
+  );
+  const rrConfirmedCount = rrVisionTiers.confirmedCount;
+  if (rrConfirmedCount > 0) {
+    const pivot = filteredTargets[rrStartIndex % modelCount];
+    filteredTargets = rrVisionTiers.targets;
+    rrStartIndex = Math.max(0, filteredTargets.indexOf(pivot));
+  }
+  const rrTargetIndexAt = (offset: number): number =>
+    rotateWithinVisionTiers(offset, rrStartIndex, modelCount, rrConfirmedCount);
+
   const clientRequestedStream = body?.stream === true;
   const startTime = Date.now();
   let lastError: string | null = null;
@@ -559,7 +588,7 @@ export async function handleRoundRobinCombo({
       if (clientGone()) return errorResponse(499, "Client disconnected");
       // G4: stop launching new work once the safety timer fired.
       if (rrExpired) break;
-      const modelIndex = (rrStartIndex + offset) % modelCount;
+      const modelIndex = rrTargetIndexAt(offset);
       const target = filteredTargets[modelIndex];
       const modelStr = target.modelStr;
       const provider = target.provider;
@@ -903,6 +932,33 @@ export async function handleRoundRobinCombo({
                 handlePreContentStreamRetry(quality, retry, { maxRetries, signal, log }, modelStr)
               )
                 continue;
+              fallbackCount++;
+              break; // move to next model
+            }
+            // #13954 (opt-in): same contract as the priority loop (agenticStallFailover.ts).
+            if (
+              await isAgenticStallComboAttempt({
+                body,
+                result,
+                modelStr,
+                hasNextTarget: offset + 1 < modelCount,
+                log,
+              })
+            ) {
+              log.warn("COMBO-RR", `${modelStr} ${AGENTIC_STALL_COMBO_REASON}`);
+              rrEvents.failed(AGENTIC_STALL_COMBO_REASON, Date.now() - startTime);
+              recordComboRequest(combo.name, modelStr, {
+                success: false,
+                latencyMs: Date.now() - startTime,
+                fallbackCount,
+                strategy: "round-robin",
+                target: toRecordedTarget(target),
+              });
+              recordedAttempts++;
+              lastError = AGENTIC_STALL_COMBO_REASON;
+              lastStatus = 502;
+              rrOutcomes.push(agenticStallOutcome(modelStr));
+              holdAttemptResponse(heldAttempt, result);
               fallbackCount++;
               break; // move to next model
             }
@@ -1266,7 +1322,12 @@ export async function handleRoundRobinCombo({
             !(
               (result.status === 500 || result.status === 429) &&
               hasPerModelQuota(provider, rawModel)
-            )
+            ) &&
+            // Same rationale as the provider breaker in executeTargetAttempt.ts:
+            // a failure raised by our own shutdown must not cool the provider
+            // down for every later request. The drain flag is read live on
+            // every call — it never latches.
+            !isDraining()
           ) {
             recordProviderCooldown(
               provider,

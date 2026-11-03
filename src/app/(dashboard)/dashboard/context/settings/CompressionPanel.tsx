@@ -341,13 +341,15 @@ export default function CompressionPanel() {
   const [status, setStatus] = useState<"" | "saved" | "error">("");
   const saveGenRef = useRef(0);
   const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(
-    () => () => {
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
       if (statusTimerRef.current !== null) clearTimeout(statusTimerRef.current);
       saveGenRef.current++;
-    },
-    []
-  );
+    };
+  }, []);
   // The last config the server confirmed.
   const lastConfirmedRef = useRef(config);
   // Saves still waiting on the server, oldest first.
@@ -472,6 +474,7 @@ export default function CompressionPanel() {
   // error or the timeout) may still have been stored — the re-read below picks that up.
   const save = async (updates: Partial<CompressionConfig>) => {
     saveGenRef.current += 1;
+    if (statusTimerRef.current !== null) clearTimeout(statusTimerRef.current);
     if (pendingRef.current.length === 0) {
       batchFailedRef.current = false;
       setStatus("");
@@ -493,6 +496,7 @@ export default function CompressionPanel() {
       threw = true;
       console.error("Failed to save compression settings:", error);
     }
+    if (!mountedRef.current) return;
     pendingRef.current = pendingRef.current.filter((pending) => pending !== updates);
     if (ok) {
       for (const key of Object.keys(updates)) {
@@ -511,6 +515,7 @@ export default function CompressionPanel() {
     const latestGen = saveGenRef.current;
     if (statusTimerRef.current !== null) clearTimeout(statusTimerRef.current);
     statusTimerRef.current = setTimeout(() => {
+      statusTimerRef.current = null;
       if (latestGen === saveGenRef.current) setStatus("");
     }, SAVED_STATUS_CLEAR_MS);
   };

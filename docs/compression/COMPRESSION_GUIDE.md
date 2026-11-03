@@ -99,7 +99,7 @@ RTK mode is optimized for verbose tool outputs that appear in coding-agent sessi
 - Applies JSON filter packs from `open-sse/services/compression/engines/rtk/filters/`
 - Imports RTK TOML schema v1 filters from project or global `filters.toml` files, with inline-test
   validation and trust-gating for project files
-- Ships 55 built-in filters with inline verify samples
+- Ships 56 built-in filters with inline verify samples
 - Removes ANSI control sequences, progress bars, repeated lines, and non-actionable noise
 - Preserves failures, errors, warnings, changed files, summaries, and the tail of long output
 - Supports trust-gated project filters, global filters, and optional redacted raw-output recovery

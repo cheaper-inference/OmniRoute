@@ -1,0 +1,1 @@
+- **fix(combo):** Apply the global per-target expansion cap when a combo sets none ([#18130](https://github.com/cheaper-inference/OmniRoute/pull/18130)) — thanks @maxmad64bis

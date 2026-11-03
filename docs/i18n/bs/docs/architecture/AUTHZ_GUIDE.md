@@ -145,31 +145,31 @@ Nekoliko radnji `MANAGEMENT` je **samo za operatera**: ključ `manage` nije dovo
 ## Pipeline
 
 ```
-Dolazni zahtjev → src/proxy.ts
-  → runAuthzPipeline() u src/server/authz/pipeline.ts
-    1. Ukloni pouzdana interna zaglavlja (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Generiši ID zahtjeva, klasifikuj rutu putem classifyRoute()
-    3. Ako je pathname == "/" → preusmjeri na /dashboard
-    4. Ako je u toku pražnjenje (graceful shutdown) i /api/* → 503
-    5. Ako nije GET /api/* → checkBodySize() zaštita
-    6. Ako je OPTIONS → CORS preflight 204
-    7. Ako je options.enforce == false → propusti sa route-class zaglavljima
-    8. U suprotnom: POLICIES[routeClass].evaluate(ctx)
-       - allow  → označi x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → JSON greška sa correlation_id (stranice kontrolne table → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Pouzdana interna zaglavlja (definisana u `src/server/authz/headers.ts`) se **uklanjaju iz dolaznih zahtjeva** prije klasifikacije — klijenti ne mogu unaprijed popuniti `x-omniroute-auth-*` da bi se lažno predstavili kao subjekat.
+Pouzdana interna zaglavlja (definirana u `src/server/authz/headers.ts`) su** skinut sa dolaznih zahtjeva** prije klasifikacije — klijenti ne mogu unaprijed popuniti `x-omniroute-auth-*` da bi oponašali subjekt.
 
-### Ugovori o politikama
+### Politički ugovori
 
 Svaka klasa rute ima politiku u `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — uvijek vraća `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — izvlači Bearer, validira putem `validateApiKey()`. Prelazi na anonymous samo kada je onemogućena efektivna feature zastavica `REQUIRE_API_KEY`. Efektivna zastavica se razrješava kroz `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) tako da Dashboard Feature Flags i varijable okruženja konzistentno upravljaju sa `/api/v1/*`, `/api/v1beta/*` i aliasima; neuspjesi razrješivača rezultiraju blokiranjem. Dozvoljava zahtjeve sesije kontrolne table na klijentskim API rutama (uključujući `/api/v1/models`, koje koristi katalog modela kontrolne table).
-- **`managementPolicy`** (`policies/management.ts`) — prihvata sesiju kontrolne table, interne zahtjeve za sinhronizaciju modela (podudaranje sa `/api/providers/[name]/(sync-models|models)`), ili u potpunosti preskače ako `isAuthRequired()` vrati false. Vraća 403 (`AUTH_001`) kada je Bearer token prisutan, ali nevažeći, u suprotnom 401. Takođe sprovodi nivoe zaštite ruta (`LOCAL_ONLY` / `ALWAYS_PROTECTED`) prije bilo koje grane autorizacije — pogledajte [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY` putanjama u `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (danas: `/api/mcp/`) se može pristupiti sa ne-loopback adresa kada Bearer ključ nosi `manage` opseg; sve ostale `LOCAL_ONLY` putanje ostaju strogo loopback bez obzira na opseg.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — izdvaja nosioca, potvrđuje preko `validateApiKey()`. Prelazi na anonimno samo kada je deaktivirana zastavica `REQUIRE_API_KEY` funkcije onemogućena. Efektivna zastavica se rješava kroz `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) tako da zastavice karakteristika kontrolne table i varijable okruženja dosljedno upravljaju `/api/v1/*`, `/api/v1beta/*` i aliasima; neuspjeh razrješavača zatvoren. Dozvoljava zahtjeve sesije nadzorne ploče na klijentskim API rutama (uključujući `/api/v1/models`, koji koristi katalog modela nadzorne ploče). Kada je Entra ID SSO omogućen, nosilac koji je strukturno Entra token (tri base64url segmenta, `RS*` alg, `kid`) upravlja SSO grana** prije** `validateApiKey()` i njegova presuda je konačna — nikada ne pada na putanju API-ključa ili granu degradiranja u anonimnu, tako da prekid provajdera identiteta ne može postati otvoreni pristup. Statični API ključevi nisu pogođeni. Vidi [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — prihvata sesiju kontrolne table, interne zahteve za sinhronizaciju modela (uparene sa `/api/providers/[name]/(sync-models|models)`) ili u potpunosti preskače ako `isAuthRequired()` vrati netačno. Vraća 403 (`AUTH_001`) kada je token nosioca prisutan, ali nevažeći, 401 u suprotnom. Također provodi nivoe čuvanja rute (LOCAL_ONLY / ALWAYS_PROTECTED) prije bilo koje grane auth — vidi [Slojeve zaštite rute](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY stazama u `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (danas: `/api/mcp/`) može se pristupiti iz bez povratne petlje kada ključ nosioca nosi `manage` opseg; sve ostale LOCAL_ONLY staze ostaju striktne petlje bez obzira na opseg.
 
-Uspješna politika vraća `AuthSubject` sa `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Handleri nizvodno ga mogu pročitati putem `assertAuth(request, "CLIENT_API")` u `src/server/authz/assertAuth.ts` umjesto ponovnog pokretanja logike autorizacije.
+Uspješna politika vraća `AuthSubject` sa `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Nizvodni rukovaoci ga mogu pročitati preko `assertAuth(request, "CLIENT_API")` u `src/server/authz/assertAuth.ts` umjesto ponovnog pokretanja auth logike.
 
 ## Lista javnih ruta
 
@@ -318,23 +318,23 @@ Krajnje tačke `/api/v1/agents/tasks/*` i `/api/resilience/model-cooldowns` **sa
 
 ## Otklanjanje grešaka
 
-Pipeline uvijek označava odgovore sa:
+Cjevovod uvijek označava odgovore sa:
 
 ```
-x-request-id:               <id korelacije, ponovljen u tijelima grešaka>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Za autentifikovane zahtjeve, zaglavlja zahtjeva na strani upstream-a (strana handlera) takođe uključuju:
+Za provjerene zahtjeve, zaglavlja zahtjeva uzvodno (na strani rukovatelja) također uključuju:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (opciono)
-x-omniroute-auth-scopes:    lista razdvojena zarezima
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Koristite `assertAuth(req, expectedClass)` unutar handlera — on izbacuje `AuthzAssertionError` sa kodom `AUTHZ_NOT_INITIALIZED` ako je middleware zaobiđen (korisno za hvatanje regresija konfiguracije u testovima).
+Koristite `assertAuth(req, expectedClass)` unutar rukovaoca — on baca `AuthzAssertionError` sa kodom `AUTHZ_NOT_INITIALIZED` ako je međuverzija zaobiđena (korisno za hvatanje regresije konfiguracije u testovima).
 
 ## Pogledajte također
 
