@@ -6,7 +6,10 @@
  * predicates are re-exported from combo.ts for backward compatibility.
  */
 
-import { EXECUTOR_CONTRACT_VIOLATION_CODE } from "../../config/constants.ts";
+import {
+  EXECUTOR_CONTRACT_VIOLATION_CODE,
+  LOCAL_CONFIGURATION_ERROR_CODES,
+} from "../../config/constants.ts";
 import { finitePercentUsed, remainingPercentFromQuotaWindows } from "../antigravityQuotaFamily.ts";
 import { errorResponse } from "../../utils/error.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
@@ -18,7 +21,8 @@ import {
   isModelCapacityOverloadError,
 } from "@/shared/utils/circuitBreaker";
 import {
-  CONTEXT_OVERFLOW_PATTERNS,
+  isContextOverflowText,
+  isTokenRateLimitWording,
   PARAM_VALIDATION_PATTERNS,
   RATE_LIMIT_TEXT_PATTERNS,
   AUTH_CREDENTIAL_ERROR_PATTERNS,
@@ -299,6 +303,9 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   rate_limit_queue_timeout: true,
   rate_limit_queue_full: true,
   rate_limit_queue_wedged: true,
+  // Local account-semaphore capacity — same verdict, different gate.
+  semaphore_timeout: true,
+  semaphore_queue_full: true,
   token_limit_exceeded: true,
   // #10360: our own executor-result contract violation. An internal defect, not
   // a provider/account fault — it must never cool a connection or trip a breaker.
@@ -315,6 +322,8 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   // markAccountUnavailable, the provider breaker, or the #1731/#1731v2 combo
   // skip-marking — in a combo it only skips this one target.
   quota_share_blocked: true,
+  // #18019: missing/unsafe local executor config (see LOCAL_CONFIGURATION_ERROR_CODES).
+  ...Object.fromEntries([...LOCAL_CONFIGURATION_ERROR_CODES].map((code) => [code, true])),
 };
 
 /** Request/model-specific failures must not poison provider-wide resilience state. */
@@ -344,10 +353,30 @@ export function isRequestScopedUpstreamFailure(error?: {
     type === "invalid_request_error" ||
     type === "context_length_exceeded" ||
     type === "local_queue_capacity" ||
+    type === "account_semaphore_capacity" ||
     // #14313: OpenCode free-tier refusal (FreeTierError) — same verdict on every
     // account for the same request; never a connection/model health signal.
     type === "freetiererror" ||
     code === "freetiererror"
+  );
+}
+
+/**
+ * A full per-account concurrency gate. It stays request-scoped (no lockout, no
+ * cooldown, no connection blame), but unlike the other request-scoped failures
+ * it is momentary, so the combo keeps its same-target retry for it: a slot can
+ * free up while the retry waits.
+ */
+export function isAccountSemaphoreCapacityFailure(error?: {
+  code?: string | null;
+  type?: string | null;
+}): boolean {
+  const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
+  const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
+  return (
+    code === "semaphore_timeout" ||
+    code === "semaphore_queue_full" ||
+    type === "account_semaphore_capacity"
   );
 }
 
@@ -424,7 +453,7 @@ export function isInputBoundRequestFailure(error?: {
 }): boolean {
   const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
   const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
-  return INPUT_BOUND_ERROR_CODES.has(code) || type === "context_length_exceeded";
+  return INPUT_BOUND_ERROR_CODES.has(code) || INPUT_BOUND_ERROR_CODES.has(type);
 }
 
 /**
@@ -820,12 +849,21 @@ export async function resolvePersistedConnectionCooldownSkipReason(
 export function isContextOverflow400(errorText: string | null | undefined): boolean {
   const text = String(errorText || "");
   if (!text) return false;
+  if (isTokenRateLimitWording(text)) return false;
   return (
     /\bcontext.*(?:length_exceeded|too long|overflow|exceeded|window|limit)\b/i.test(text) ||
     /exceeds.*context/i.test(text) ||
+    /input exceeds maximum input tokens(?:\s*[,.]|$)/i.test(text) ||
     /your input exceeds/i.test(text) ||
-    CONTEXT_OVERFLOW_PATTERNS.some((p) => p.test(text))
+    isContextOverflowText(text)
   );
+}
+
+export function isContextOverflowFailure(
+  errorText: string | null | undefined,
+  error?: { code?: string | null; type?: string | null }
+): boolean {
+  return isInputBoundRequestFailure(error) || isContextOverflow400(errorText);
 }
 
 /** @param {string} errorText */

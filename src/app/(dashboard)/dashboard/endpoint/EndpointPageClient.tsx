@@ -109,7 +109,12 @@ type EndpointModelSummary = {
   root?: string;
 };
 
-type CopyHandler = (text: string, key?: string) => void | Promise<void>;
+/**
+ * Copy handlers report whether the write succeeded; useCopyToClipboard returns
+ * Promise<boolean>. Promise<boolean> is not assignable to Promise<void>, so the
+ * type has to admit the boolean even though most call sites ignore it.
+ */
+type CopyHandler = (text: string, key?: string) => void | Promise<boolean>;
 
 type EndpointTunnelVisibility = {
   showCloudflaredTunnel: boolean;

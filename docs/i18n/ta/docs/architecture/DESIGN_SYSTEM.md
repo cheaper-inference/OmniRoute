@@ -4,7 +4,7 @@
 
 ---
 
-> **நிலை:** டாஷ்போர்டு கட்டப்பட்டுள்ளது** Keak CI UI கிட்** (`@keak/cheaper-inference-ui-kit`), பணியிடமாக `packages/ui-kit` விற்கப்படுகிறது (`@omniroute/ui-kit`; அப்ஸ்ட்ரீம் ஸ்னாப்ஷாட் `packages/ui-kit/UPSTREAM.md` இல் பின் செய்யப்பட்டு `npm run check:ui-kit-snapshot` ஆல் பாதுகாக்கப்படுகிறது). ஒளி என்பது நியமன தீம்; இயல்புநிலை விருப்பம் `system` ஆகும். உச்சரிப்பு Keak lime (`--ci-color-accent`) ஆகும். Switzer என்பது UI, காட்சி மற்றும் குறியீடு உரை (`--ci-font-ui`; `--ci-font-display` மற்றும் `--ci-font-mono` தீர்க்கும்) ஆகியவற்றிற்கான ஒற்றைக் குடும்பமாகும் (zqk ; zql மற்றும் zqm அதைத் தீர்க்கும்), கிட் மூலம் சுயமாக ஹோஸ்ட் செய்யப்பட்டது (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ஆல் இறக்குமதி செய்யப்பட்டது). ஒவ்வொரு ஐகானும் ஒரு லூசிட் கிளிஃப் ஆகும்.
+> **நிலை:** டாஷ்போர்டு **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) அடிப்படையில் உருவாக்கப்பட்டுள்ளது; இது workspace `packages/ui-kit` (`@omniroute/ui-kit`) ஆக vendored செய்யப்பட்டுள்ளது; upstream snapshot `packages/ui-kit/UPSTREAM.md` இல் pin செய்யப்பட்டு, `npm run check:ui-kit-snapshot` மூலம் பாதுகாக்கப்படுகிறது. Light என்பது canonical theme; இயல்புநிலை preference `system`. Accent என்பது Keak lime (`--ci-color-accent`). UI, display மற்றும் code text ஆகிய அனைத்திற்கும் Switzer ஒரே font family ஆகும் (`--ci-font-ui`; `--ci-font-display` மற்றும் `--ci-font-mono` ஆகியவை இதையே resolve செய்கின்றன); இது kit-ஆல் தானே self-host செய்யப்படுகிறது (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` மூலம் imported செய்யப்படுகிறது). Switzer-ல் இல்லாத எழுத்துருக்கள் glyph-by-glyph fallback செய்யப்படுகின்றன (`src/app/globals.css`): Cyrillic, Greek மற்றும் Vietnamese ஆகியவற்றுக்கு Inter; மேலும் `html[dir="rtl"]` இன் கீழ் மட்டும் Arabic script-க்கு Vazirmatn. ஒவ்வொரு icon-மும் Lucide glyph ஆகும்.
 
 ## 1. விஷயங்கள் எங்கே உள்ளன
 
@@ -62,14 +62,44 @@
 
 ## 6. README வரைபடங்கள்
 
-ரூட் `README.md` உட்பொதிக்கப்பட்ட (`docs/diagrams/*.svg`) பன்னிரண்டு வரைபடங்கள் ஒரு நிலையான படத்திற்குப் பயன்படுத்தப்படும் கிட் ஆகும், மேலும் அவை கையால் வரையப்படாமல் உருவாக்கப்படுகின்றன: `scripts/docs/gen-readme-*.mjs` இல் 13 ஜெனரேட்டர் கோப்புகள் (பன்னிரெண்டு வரைபடங்கள் மற்றும் `gen-readme-diagrams.mjs` இயக்கி) மற்றும் `tests/unit/docs/readme-*-svg.test.ts` ஒவ்வொரு கோப்பிலும் 12 நிலைத்தன்மை சோதனைகள். ஜெனரேட்டரின் வெளியீடு (வேலை `test-unit`).
+மூல `README.md` உட்பொதிக்கும் பன்னிரண்டு வரைபடங்கள் (`docs/diagrams/*.svg`) நிலையான
+படத்திற்குப் பயன்படுத்தப்படும் கிட் ஆகும்; அவை கையால் வரையப்பட்டவை அல்ல, உருவாக்கப்படுபவை: `scripts/docs/gen-readme-*.mjs`
+இல் உள்ள 13 உருவாக்கி கோப்புகள் (பன்னிரண்டு வரைபடங்களும் `gen-readme-diagrams.mjs` இயக்கியும்), மேலும்
+`tests/unit/docs/readme-*-svg.test.ts` இல் உள்ள 12 காலாவதித் தன்மைச் சோதனைகள், ஒவ்வொரு வரைபடத்திற்கும் ஒன்று, ஒவ்வொன்றும்
+சமர்ப்பிக்கப்பட்ட கோப்பை அதன் உருவாக்கியின் வெளியீட்டுடன் byte-by-byte ஒப்பிடுகின்றன (`test-unit` பணியில்).
 
-- **டோக்கன்கள்.** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` இலிருந்து தட்டுகளை நகலெடுக்கிறது (அந்த கோப்பிற்கு எதிராக `tests/unit/docs/readme-diagram-theme.test.ts` ஆல் பின் செய்யப்பட்டது) மற்றும் கிட்டின் முந்தைய முகங்களில் உள்ள உரை பாத்திரங்களை வரையறுக்கிறது - காட்சிக்கான Instrument Serif, UI உரைக்கான Inter, புள்ளிவிவரங்கள் மற்றும் குறியீட்டிற்கான IBM ப்ளெக்ஸ் மோனோ - `@fontsource` தொகுப்புகளில் இருந்து (டாஷ்போர்டு kitz'0 ஐப் பயன்படுத்துவதால், kitz'0 ஐப் பயன்படுத்துகிறது). கோப்பின் உள்ளே ஒளி மதிப்புகள் `:root`, இருண்ட மதிப்புகள் `prefers-color-scheme: dark` க்கு பின்னால் இருக்கும், எனவே ஒவ்வொரு படமும் GitHub இல் பார்வையாளரின் திட்டத்தைப் பின்பற்றுகிறது.
-- **எழுத்துருக்கள்.** `scripts/docs/readme-fonts.mjs` அந்த woff2 கோப்புகளை க்ளிஃப்ஸுடன் இணைக்கிறது, ஒவ்வொரு வரைபடமும் வரைந்து அவற்றை `@font-face` `data:` URIs ஆக உட்பொதிக்கிறது - கிட் அச்சுக்கலை ஒரு README படத்தை அடையும் ஒரே வழி, ஏனெனில் GitHub Markdown CSS கொண்டிருக்கவில்லை மற்றும் கேமோ ப்ராக்ஸி ஒவ்வொரு வெளிப்புறப் பெறுதலையும் தடுக்கிறது. துணைக்குழுக்கள் லத்தீன் மொழி மட்டுமே; சிஸ்டம் ஸ்டேக்கிற்குத் திரும்பும் சிம்பல் கிளிஃப்கள் ஒவ்வொன்றாக `SYMBOL_FALLBACKS` ல் அனுமதிக்கப்படும், மேலும் வேறு ஏதேனும் மறைக்கப்படாத கிளிஃப் வீசுதல்கள்.
-- **மீண்டும் உருவாக்கு.** `npm run docs:readme-diagrams` அனைத்து பன்னிரண்டையும் README வரிசையில் மீண்டும் எழுதுகிறது மற்றும் அதன் அளவுடன் ஒரு கோப்பிற்கு ஒரு வரியை அச்சிடுகிறது. ஒரு ஒற்றை ஜெனரேட்டரும் தானே இயங்குகிறது (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` க்கு `node --import tsx/esm` தேவைப்படுகிறது, ஏனெனில் அதன் புள்ளிவிவரங்கள் `open-sse/config/freeModelCatalog.ts` இல் உள்ள நேரடி அட்டவணை ஏற்றியிலிருந்து வருகிறது; அட்டவணை மாற்றத்தின் CI விளைவு `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` இல் உள்ளது). ஜெனரேட்டரையும் SVG ஐயும் ஒன்றாக இணைக்கவும்.
-- **ஆதாரம்.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ஒரு கோப்பை GitHub வழங்கும் விதத்தில் வழங்குகிறது (ஒரு `<img>` டேக், camo's `Content-Security-Policy`, `image/svg+xml`), ஒளி மற்றும் இருண்ட சட்டத்தைப் படம்பிடித்து, பக்கத்தின் வெளிப்புற எழுத்துருக் கோரிக்கைகளைப் புகாரளிக்கிறது (0 ஆக இருக்க வேண்டும்).
-- **பட்ஜெட்.** ஒரு கோப்பிற்கு 200 KB கீழ் 500 KB என்பது எந்த README படத்திற்கும் கடினமான தொப்பியாகும் ( SVG ஸ்டுடியோ வேலிடேட்டரின் விதி).
-- **நகல் மாறாமல், வாயிலில் இருந்து எண்ணப்படும்.** ரீபிராண்ட் மாற்றப்பட்ட வகை மற்றும் தட்டு வார்த்தைகள் அல்ல: ஒவ்வொரு ஜெனரேட்டரும் அதன் வரைபடத்தின் நகலை `*_COPY` மாறிலியில் (அல்லது நேரடி அட்டவணையில் இருந்து உருவாக்குகிறது) கொண்டு செல்கிறது, அது வரையப்பட்ட உரை மற்றும் எழுத்துரு-துணை உள்ளீடு ஆகிய இரண்டும் ஆகும். நியமன உருவங்கள் `<text>` முனைகளில் இருக்கும், `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) மூலம் படிக்கப்படும்; கேட் படிக்கும் வரைபடங்களின் தேக்கநிலை சோதனைகள் உருவாக்கப்பட்ட கோப்பில் அதன் வேலிடேட்டர்களை இயக்குகிறது, எனவே குறியீட்டிலிருந்து விலகிச் செல்லும் ஒரு உருவம் சோதனையில் தோல்வியடைகிறது - கேட் படிக்கும் மூலத்தை சரிசெய்யவும், ஜெனரேட்டரில் உள்ள எண்ணை ஒருபோதும் இல்லை.
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs`, நிறத் தொகுப்பை `packages/ui-kit/src/ci-tokens.css`
+  இலிருந்து நகலெடுக்கிறது (`tests/unit/docs/readme-diagram-theme.test.ts` மூலம் அந்தக் கோப்புடன் பிணைக்கப்பட்டுள்ளது), மேலும் கிட்-இன்
+  type scale-இல் உரைப் பங்குகளை வரையறுக்கிறது: கிட்-இன் எடைகளில் (400/500/600, display 500-இல்) Switzer மற்றும்
+  அனைத்திற்குமான tracking; இதற்கு விதிவிலக்காக code roles (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) IBM Plex Mono ஆகவும்,
+  கட்டளைகள், URL-கள், அடையாளங்காட்டிகள் மற்றும் terminal திரைகளுக்காக மட்டும் பயன்படுத்தப்படுகின்றன.
+  Light மதிப்புகள் `:root`-இல் உள்ளன; dark மதிப்புகள் கோப்பிற்குள் `prefers-color-scheme: dark`-க்கு பின்னால் உள்ளன,
+  ஆகவே GitHub-இல் ஒவ்வொரு படமும் பார்வையாளரின் scheme-ஐப் பின்பற்றுகிறது.
+- **Fonts.** GitHub Markdown CSS-ஐக் கொண்டு செல்லாது, மேலும் camo proxy அனைத்து வெளிப்புற fetch-களையும் தடுக்கிறது; எனவே
+  கிட்-இன் type கோப்பிற்குள்ளேயே இருக்க வேண்டும். ஒவ்வொரு உருவாக்கியின் இறுதிப் படியான `scripts/docs/readme-outline.mjs`,
+  HarfBuzz-ஐப் பயன்படுத்தி Switzer roles-ஐ வடிவமைத்து, அவற்றை vector outlines (`<defs>` paths மற்றும் `<use>`) ஆக வரைகிறது;
+  Switzer-இல் இல்லாத arrows மற்றும் geometric symbols, அதன் சொந்த metrics-ஐப் பயன்படுத்தி வரையப்படுகின்றன. Embedded font அல்ல,
+  outlines மட்டுமே: Switzer-இன் licence (`packages/ui-kit/src/fonts/FFL.txt`), எழுத்துப்பூர்வ ஒப்புதல் இல்லாமல் subsetting மற்றும்
+  format conversion-ஐத் தடை செய்கிறது, மேலும் vector drawings-ஐ அனுமதிக்கிறது; ஆகவே Switzer `@font-face` அல்லது `data:` URI-ஐ
+  மீண்டும் அறிமுகப்படுத்த வேண்டாம். கோப்பில் மீதமுள்ள ஒரே font, உண்மையான code text ஆகத் தொடரும் உரைக்கான OFL IBM Plex Mono subset ஆகும்
+  (`scripts/docs/readme-fonts.mjs`); அது உட்பொதிக்க முடியாத எந்த glyph-உம் பிழையை ஏற்படுத்தும்.
+- **Regenerate.** `npm run docs:readme-diagrams`, அனைத்து பன்னிரண்டையும் README வரிசையில் மீண்டும் எழுதுகிறது, மேலும்
+  ஒவ்வொரு கோப்பிற்கும் அதன் அளவைக் காட்டும் ஒரு வரியை அச்சிடுகிறது. ஒரு தனிப்பட்ட உருவாக்கியும் தனியாக இயங்கும்
+  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget`-க்கு `node --import tsx/esm` தேவை, ஏனெனில் அதன் figures,
+  `open-sse/config/freeModelCatalog.ts`-இல் உள்ள live catalog loader-இலிருந்து வருகின்றன; catalog மாற்றத்தின் CI விளைவு
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` இல் உள்ளது). உருவாக்கியையும் SVG-யையும் ஒன்றாக commit செய்யவும்.
+- **Proof.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`, GitHub அதை வழங்கும் முறையில் ஒரு கோப்பை render செய்கிறது
+  (ஒரு `<img>` tag, camo-வின் `Content-Security-Policy`, `image/svg+xml`), light மற்றும் dark frame-களைப் பிடிக்கிறது, மேலும்
+  பக்கம் செய்த வெளிப்புற font requests-ஐ அறிக்கையிடுகிறது (அவை 0 ஆக இருக்க வேண்டும்).
+- **Budget.** ஒவ்வொரு கோப்பிற்கும் 200 KB-க்குக் கீழ் இருக்க வேண்டும் (ஒவ்வொரு காலாவதித் தன்மைச் சோதனையும் இதை உறுதிப்படுத்துகிறது);
+  எந்த README image-க்கும் 500 KB என்பது கடின வரம்பாகும் (SVG studio validator-இன் விதி).
+- **Copy unchanged, counts from the gate.** Rebrand, type மற்றும் palette-ஐ மாற்றியது; சொற்களை மாற்றவில்லை: ஒவ்வொரு உருவாக்கியும்
+  தனது வரைபடத்தின் copy-ஐ ஒரு `*_COPY` constant-இல் கொண்டுள்ளது (அல்லது live catalog-இலிருந்து உருவாக்குகிறது); இது வரையப்பட்ட
+  text-ஆகவும் outlining படியின் input-ஆகவும் பயன்படுகிறது. Canonical figures, `<text>` nodes-இல் வைக்கப்படுகின்றன
+  (outlined ஆனதும் `fill-opacity:0` காரணமாகக் கண்ணுக்குத் தெரியாது), மேலும் `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`) மூலம் படிக்கப்படுகின்றன; gate படிக்கும் வரைபடங்களின் காலாவதித் தன்மைச் சோதனைகள்
+  உருவாக்கப்பட்ட கோப்பில் அதன் validators-ஐயும் இயக்குகின்றன, ஆகவே code-இலிருந்து விலகும் figure சோதனையில் தோல்வியடையும் — generator-இல்
+  உள்ள எண்ணை ஒருபோதும் சரிசெய்யாமல், gate படிக்கும் source-ஐச் சரிசெய்யவும்.
 
 ## 7. குறிப்பு அட்டவணை
 
