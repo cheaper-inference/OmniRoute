@@ -891,7 +891,8 @@ The generic `time_range` now reaches both providers: Exa gets `startPublishedDat
 timestamp) and Tavily gets `start_date` (`YYYY-MM-DD`). An explicit date in `provider_options`
 overrides the mapped one.
 
-Exa results keep `id`, `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
+Exa results keep `id`, `highlights` (every highlight, not only the first one used as the
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
 `provider_raw`. Tavily results keep `images` and `favicon`.
 
 Linkup search cost is recorded at $0.005 for `depth` `fast` and `standard` and $0.05 for
@@ -1292,6 +1293,12 @@ clears it to restore the default. `GET /api/provider-models?provider=<provider>`
 values in `modelOutputOverrides`, including models without a custom-model row. The override
 uses the runtime `max_output_tokens` capability and survives a model re-sync. The OpenAI-compatible
 provider page offers the same edit/clear controls and marks models with explicit vision support.
+
+On a compatible provider node, the write paths (`POST`, `PUT`, `PATCH`, `DELETE` and
+`/api/provider-models/validate-and-add`) store the model id as the bare upstream id: an id
+pasted from a prefixed listing has any leading stack of the node's own prefix collapsed, and
+responses echo the stored id. Canonical providers' slashed ids (e.g. `nvidia/nemotron-…`) are
+stored verbatim. `/v1/models` never emits a stacked `<prefix>/<prefix>/<model>` id.
 
 Custom Chat Completions nodes adapt explicit reasoning opt-outs to the upstream backend. A
 successful connection test automatically selects chat-template controls for each exact model ID

@@ -488,11 +488,11 @@ Nke a na-ahụ maka:
 
 | Faịlụ                         | Ebumnuche                                                  |
 | ----------------------------- | ---------------------------------------------------------- |
-| `providerRegistry.ts`         | Ndekọ nkata ihe nlere anya karịa katalọgụ ndị na-eweta 377 |
+| `providerRegistry.ts`         | Ndekọ nkata ihe nlere anya karịa katalọgụ ndị na-eweta 380 |
 | `providerModels.ts`           | Utu aha ụdị, eserese usoro                                 |
 | `constants.ts`                | Ọpụpụ, oke, koodu ọkwa                                     |
 | `defaultThinkingSignature.ts` | mbinye aka echiche Claude dapụtara                         |
-| `modelStrip.ts` (na ọrụ)      | Onye na-enye onye na-eweta ihe ịkwapụ ubi                  |
+| `modelStrip.ts` (na ọrụ)      | Onye na-enye ndị na-eweta ihe ịkwapụ ubi                   |
 
 ### Atụmatụ ndekọ onye na-eweta
 

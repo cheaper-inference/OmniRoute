@@ -72,7 +72,7 @@
 |                              |          v3.8.50           | **v3.8.51** |        `v3.8.53+`         |
 | ---------------------------- | :------------------------: | :---------: | :-----------------------: |
 | 🌐 ପ୍ରଦାନକାରୀ \|             |            352             |   **358**   |            380            |
-| 🧠 ଅନନ୍ୟ ଚାଟ୍ ମଡେଲ୍ IDs      |            1320            |  **1374**   |           1475            |
+| 🧠 ଅନନ୍ୟ ଚାଟ୍ ମଡେଲ୍ IDs      |            1320            |  **1374**   |           1491            |
 | 🖼️ ମୋଡାଲିଟି ବ୍ରିଜ୍ \|        | 🆕 ଦର୍ଶନ + ଅଡିଓ + ଭିଡିଓ \| |      ✓      |             ✓             |
 | 📡 ରାଡାର ମାଗଣା କାଟାଲଗ୍ \|    |       🆕 ଅପ୍ଟ-ଇନ୍ \|       |      ✓      |             ✓             |
 | ⚖️ କୋଟା-ସଚେତନ କାର୍ଯ୍ୟସୂଚୀ \| |     🆕 କୋଟା-ଅଂଶୀଦାର \|     |      ✓      |             ✓             |
@@ -137,7 +137,7 @@
     <td align="right"><b>📦 ପ୍ରକଳ୍ପ</b></td>
     <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ ପ୍ରଯୁକ୍ତି ଷ୍ଟାକ୍</a></td>
     <td align="center"><a href="#-documentation">📖 ଦଲିଲପତ୍ର</a></td>
-    <td align="center"><a href="#-900-contributors">👥 ଅବଦାନକାରୀମାନେ</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 ଅବଦାନକାରୀମାନେ</a></td>
   </tr>
 </table>
 
@@ -1290,7 +1290,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
   <tr><td nowrap><b>ରନ୍ଟାଇମ୍</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ଭାଷା</b></td><td>TypeScript 6.0 — <code>src/</code> ଏବଂ <code>open-sse/</code> ମଧ୍ୟରେ <b>100% TypeScript</b> (v2.0 ପରଠାରୁ କୋରରେ ଶୂନ୍ୟ <code>any</code>)</td></tr>
   <tr><td nowrap><b>ଫ୍ରେମ୍ୱାର୍କ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL ଜର୍ଣ୍ଣାଲିଂ) + LowDB (JSON ଲେଗାସି) — 147 ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 219 ମାଇଗ୍ରେସନ୍</td></tr>
+  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL ଜର୍ଣ୍ଣାଲିଂ) + LowDB (JSON ଲେଗାସି) — 147 ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 220 ମାଇଗ୍ରେସନ୍</td></tr>
   <tr><td nowrap><b>ମେମୋରି</b></td><td>SQLite FTS5 ଫୁଲ୍-ଟେକ୍ଷ୍ଟ + int8-କ୍ୱାଣ୍ଟାଇଜ୍ କରାଯାଇଥିବା ଭେକ୍ଟର ଏମ୍ବେଡିଂ, ଟାଇପ୍ କରାଯାଇଥିବା ଡିକେ</td></tr>
   <tr><td nowrap><b>ସ୍କିମା</b></td><td>Zod 4 — MCP ଟୁଲ୍ I/O ବୈଧୀକରଣ + API କଣ୍ଟ୍ରାକ୍ଟ</td></tr>
   <tr><td nowrap><b>ପ୍ରୋଟୋକଲ୍</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1300,7 +1300,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
   <tr><td nowrap><b>ଷ୍ଟେଲ୍ଥ</b></td><td>wreq-js — JA3 / JA4 TLS ଫିଙ୍ଗରପ୍ରିଣ୍ଟ ଇମ୍ପର୍ସୋନେସନ୍, 3-ସ୍ତରୀୟ ପ୍ରକ୍ସି</td></tr>
   <tr><td nowrap><b>ସ୍ଥିତିସ୍ଥାପକତା</b></td><td>ସର୍କିଟ ବ୍ରେକର, ଏକ୍ସପୋନେନସିଆଲ ବ୍ୟାକ୍ଅଫ୍, ଆଣ୍ଟି-ଥଣ୍ଡରିଂ-ହାର୍ଡ, ଅଟୋ-କମ୍ବୋ ସେଲ୍ଫ-ହିଲିଂ</td></tr>
   <tr><td nowrap><b>ଲଗିଂ</b></td><td>pino — ଅନୁରୋଧ ପ୍ରସଙ୍ଗ ସହିତ ଗଠିତ JSON ଲଗ୍</td></tr>
-  <tr><td nowrap><b>ଟେଷ୍ଟିଂ</b></td><td>Node.js ଟେଷ୍ଟ ରନର୍ + Vitest — 7,800+ ଟ୍ରାକ୍ କରାଯାଇଥିବା ଟେଷ୍ଟ ଫାଇଲରେ <b>56,000+ ଷ୍ଟାଟିକ ଟେଷ୍ଟ ଘୋଷଣା</b> (ୟୁନିଟ୍, ଇଣ୍ଟିଗ୍ରେସନ୍, E2E, ସୁରକ୍ଷା, ଇକୋସିଷ୍ଟମ୍)</td></tr>
+  <tr><td nowrap><b>ଟେଷ୍ଟିଂ</b></td><td>Node.js ଟେଷ୍ଟ ରନର୍ + Vitest — 8,400+ ଟ୍ରାକ୍ କରାଯାଇଥିବା ଟେଷ୍ଟ ଫାଇଲରେ <b>60,000+ ଷ୍ଟାଟିକ ଟେଷ୍ଟ ଘୋଷଣା</b> (ୟୁନିଟ୍, ଇଣ୍ଟିଗ୍ରେସନ୍, E2E, ସୁରକ୍ଷା, ଇକୋସିଷ୍ଟମ୍)</td></tr>
   <tr><td nowrap><b>ପ୍ଲାଟଫର୍ମ</b></td><td>ଡେସ୍କଟପ୍ (Electron) · Android (Termux) · PWA (ଯେକୌଣସି ବ୍ରାଉଜର୍)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ରିଲିଜ୍ ଉପରେ ସ୍ୱୟଂଚାଳିତ npm ପବ୍ଲିସ୍ + Docker Hub</td></tr>
   <tr><td nowrap><b>ଲିଙ୍କ୍</b></td><td><a href="https://omniroute.online">ୱେବସାଇଟ୍</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1380,7 +1380,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
   <tr><td nowrap><b><a href="SECURITY.md">ସୁରକ୍ଷା ନୀତି</a></b></td><td>ଦୁର୍ବଳତା ରିପୋର୍ଟିଂ ଏବଂ ସୁରକ୍ଷା ଅଭ୍ୟାସ</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n ମାର୍ଗଦର୍ଶିକା</a></b></td><td>67ଟି ଭାଷା ପାଇଁ ସମର୍ଥନ, ଅନୁବାଦ କାର୍ଯ୍ୟପ୍ରବାହ, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">ରିଲିଜ୍ ଯାଞ୍ଚତାଲିକା</a></b></td><td>ରିଲିଜ୍-ପୂର୍ବ ବୈଧତା ଯାଞ୍ଚ ପଦକ୍ଷେପ</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">କଭରେଜ୍ ଯୋଜନା</a></b></td><td>7,800+ ଟ୍ରାକ୍ କରାଯାଇଥିବା ପରୀକ୍ଷଣ ଫାଇଲ୍ରେ 56,000+ ସ୍ଥିର ପରୀକ୍ଷଣ ଘୋଷଣା ପାଇଁ ପରୀକ୍ଷଣ କଭରେଜ୍ ରଣନୀତି</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">କଭରେଜ୍ ଯୋଜନା</a></b></td><td>8,400+ ଟ୍ରାକ୍ କରାଯାଇଥିବା ପରୀକ୍ଷଣ ଫାଇଲ୍ରେ 60,000+ ସ୍ଥିର ପରୀକ୍ଷଣ ଘୋଷଣା ପାଇଁ ପରୀକ୍ଷଣ କଭରେଜ୍ ରଣନୀତି</td></tr>
 </table>
 
 <br/>
@@ -1395,29 +1395,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
 
 <table>
   <tr><th align="center">କ୍ରମ</th><th align="left">ଅବଦାନକାରୀ</th><th align="center">ମର୍ଜ୍ ହୋଇଥିବା PR</th><th align="right">~ପରିବର୍ତ୍ତିତ ଧାଡ଼ି</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>ସକ୍ରିୟ <code>release/v3.8.52</code> ଟିପ୍ <code>656f01cb43</code> ସହିତ 2026-10-18 15:09:09 UTCରେ ଗଣନା କରାଯାଇଥିଲା। ପୃଷ୍ଠାଙ୍କିତ GitHub GraphQL ଗଣନାରେ 9,191ଟି ମର୍ଜ୍ ହୋଇଥିବା PR ରହିଛି: ରିପୋଜିଟୋରି ମାଲିକଙ୍କ ଦ୍ୱାରା 3,834ଟି, Dependabot ଦ୍ୱାରା 229ଟି, ଅନ୍ୟ ବଟ୍/ଆପ୍ଗୁଡ଼ିକ ଦ୍ୱାରା 6ଟି ଏବଂ <b>835 ଜଣ ସ୍ୱତନ୍ତ୍ର ଅବଦାନକାରୀଙ୍କଠାରୁ 5,122ଟି ବାହ୍ୟ PR</b>। “ପରିବର୍ତ୍ତିତ ଧାଡ଼ି” ହେଉଛି GitHubର ଯୋଗ + ବିଲୋପ ଏବଂ ଏଥିରେ ଉତ୍ପାଦିତ ଫାଇଲ୍, ଲକ୍ଫାଇଲ୍, କ୍ୟାଟାଲଗ୍, ଅନୁବାଦ ଓ ଦଲିଲ ଅନ୍ତର୍ଭୁକ୍ତ; ଏହା ପରିବର୍ତ୍ତନର ପରିମାଣ, ଲିଖିତ LOC ନୁହେଁ। 49ଟି PRରେ GitHub diff 500,000 ଧାଡ଼ିରୁ ଅଧିକ ବୋଲି ରିପୋର୍ଟ କରାଯାଇଛି (ଉଦାହରଣ ସ୍ୱରୂପ #13399ରେ, ଗୋଟିଏ ପ୍ରଦାତା ଯୋଗ ପାଇଁ 2,347ଟି ପରିବର୍ତ୍ତିତ ଫାଇଲ୍ ତାଲିକାଭୁକ୍ତ ହୋଇଛି), ଯାହା ଉପରୋକ୍ତ ଅନେକ ମୋଟ ସଂଖ୍ୟାକୁ ବଢ଼ାଇ ଦେଇଛି। ସମାନ ସ୍ଥାନରେ ଥିବା ଅବଦାନକାରୀମାନଙ୍କୁ ଏକାଠି କ୍ରମାଙ୍କିତ କରାଯାଇଛି।</sub>
+<sub>ସକ୍ରିୟ <code>release/v3.8.53</code> ଟିପ୍ <code>05bc048d6c</code> ସହିତ 2026-11-03 03:01:19 UTCରେ ଗଣନା କରାଯାଇଥିଲା। ପୃଷ୍ଠାଙ୍କିତ GitHub GraphQL ଗଣନାରେ 9,947ଟି ମର୍ଜ୍ ହୋଇଥିବା PR ରହିଛି: ରିପୋଜିଟୋରି ମାଲିକଙ୍କ ଦ୍ୱାରା 4,130ଟି, Dependabot ଦ୍ୱାରା 240ଟି, ଅନ୍ୟ ବଟ୍/ଆପ୍ଗୁଡ଼ିକ ଦ୍ୱାରା 6ଟି ଏବଂ <b>883 ଜଣ ସ୍ୱତନ୍ତ୍ର ଅବଦାନକାରୀଙ୍କଠାରୁ 5,571ଟି ବାହ୍ୟ PR</b>। “ପରିବର୍ତ୍ତିତ ଧାଡ଼ି” ହେଉଛି GitHubର ଯୋଗ + ବିଲୋପ ଏବଂ ଏଥିରେ ଉତ୍ପାଦିତ ଫାଇଲ୍, ଲକ୍ଫାଇଲ୍, କ୍ୟାଟାଲଗ୍, ଅନୁବାଦ ଓ ଦଲିଲ ଅନ୍ତର୍ଭୁକ୍ତ; ଏହା ପରିବର୍ତ୍ତନର ପରିମାଣ, ଲିଖିତ LOC ନୁହେଁ। 53ଟି PRରେ GitHub diff 500,000 ଧାଡ଼ିରୁ ଅଧିକ ବୋଲି ରିପୋର୍ଟ କରାଯାଇଛି (ଉଦାହରଣ ସ୍ୱରୂପ #13399ରେ, ଗୋଟିଏ ପ୍ରଦାତା ଯୋଗ ପାଇଁ 2,347ଟି ପରିବର୍ତ୍ତିତ ଫାଇଲ୍ ତାଲିକାଭୁକ୍ତ ହୋଇଛି), ଯାହା ଉପରୋକ୍ତ ଅନେକ ମୋଟ ସଂଖ୍ୟାକୁ ବଢ଼ାଇ ଦେଇଛି। ସମାନ ସ୍ଥାନରେ ଥିବା ଅବଦାନକାରୀମାନଙ୍କୁ ଏକାଠି କ୍ରମାଙ୍କିତ କରାଯାଇଛି।</sub>
 
 ### GitHub-ଦ୍ୱାରା ଆରୋପିତ କମିଟ୍
 
@@ -1428,14 +1428,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub-ଆରୋପିତ 367ଟି କମିଟ୍</sub>
+      <sub>🥇 GitHub-ଆରୋପିତ 418ଟି କମିଟ୍</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub-ଆରୋପିତ 269ଟି କମିଟ୍</sub>
+      <sub>🥈 GitHub-ଆରୋପିତ 294ଟି କମିଟ୍</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1445,6 +1445,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
       <sub>🥉 GitHub-ଆରୋପିତ 229ଟି କମିଟ୍</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 GitHub-ଆରୋପିତ 222ଟି କମିଟ୍</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1452,12 +1459,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
       <sub>🏅 GitHub-ଆରୋପିତ 202ଟି କମିଟ୍</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub-ଆରୋପିତ 174ଟି କମିଟ୍</sub>
+      <sub>🏅 GitHub-ଆରୋପିତ 134ଟି କମିଟ୍</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1465,14 +1474,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
       </a><br/>
       <sub>🏅 GitHub-ଆରୋପିତ 126ଟି କମିଟ୍</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub-ଆରୋପିତ 114ଟି କମିଟ୍</sub>
+      <sub>🏅 GitHub-ଆରୋପିତ 115ଟି କମିଟ୍</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1482,18 +1489,18 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
       <sub>🏅 GitHub-ଆରୋପିତ 108ଟି କମିଟ୍</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 GitHub-ଆରୋପିତ 87ଟି କମିଟ୍</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 GitHub-ଆରୋପିତ 70ଟି କମିଟ୍</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 GitHub-ଆରୋପିତ 68ଟି କମିଟ୍</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1505,7 +1512,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTCରେ ପୁନଃଯାଞ୍ଚ କରାଯାଇଛି: <code>release/v3.8.52</code> ଡିଫଲ୍ଟ ବ୍ରାଞ୍ଚ ପାଇଁ ରିପୋଜିଟୋରୀର Contributors API ଦ୍ୱାରା ରିପୋର୍ଟ କରାଯାଇଥିବା GitHub-ଆରୋପିତ କମିଟ୍। API 849ଟି ପରିଚୟ (429 ଜଣ ବ୍ୟବହାରକାରୀ, 2ଟି ବଟ୍, 418ଟି ଅଜ୍ଞାତ) ଫେରାଇଥିଲା; ଏହି ସାରଣୀରୁ ରକ୍ଷଣାବେକ୍ଷକ, ବଟ୍ ଏବଂ ଅଜ୍ଞାତ ପରିଚୟଗୁଡ଼ିକୁ ବାଦ ଦିଆଯାଇଛି ଏବଂ ସମାନ ପ୍ରତିଯୋଗିତାମୂଳକ ସ୍ଥାନଗୁଡ଼ିକୁ ବଜାୟ ରଖାଯାଇଛି। ଏହା ଉପରୋକ୍ତ ମର୍ଜ୍ ହୋଇଥିବା PR ର୍ୟାଙ୍କିଙ୍ଗ୍ ଏବଂ ନିମ୍ନୋକ୍ତ Git-ମେଟାଡାଟା ଜନଗଣନା—ଉଭୟଠାରୁ ଭିନ୍ନ।</sub>
+<sub>2026-11-03 02:09:16 UTCରେ ପୁନଃଯାଞ୍ଚ କରାଯାଇଛି: <code>release/v3.8.53</code> ଡିଫଲ୍ଟ ବ୍ରାଞ୍ଚ ପାଇଁ ରିପୋଜିଟୋରୀର Contributors API ଦ୍ୱାରା ରିପୋର୍ଟ କରାଯାଇଥିବା GitHub-ଆରୋପିତ କମିଟ୍। API 903ଟି ପରିଚୟ (429 ଜଣ ବ୍ୟବହାରକାରୀ, 2ଟି ବଟ୍, 472ଟି ଅଜ୍ଞାତ) ଫେରାଇଥିଲା; ଏହି ସାରଣୀରୁ ରକ୍ଷଣାବେକ୍ଷକ, ବଟ୍ ଏବଂ ଅଜ୍ଞାତ ପରିଚୟଗୁଡ଼ିକୁ ବାଦ ଦିଆଯାଇଛି ଏବଂ ସମାନ ପ୍ରତିଯୋଗିତାମୂଳକ ସ୍ଥାନଗୁଡ଼ିକୁ ବଜାୟ ରଖାଯାଇଛି। ଏହା ଉପରୋକ୍ତ ମର୍ଜ୍ ହୋଇଥିବା PR ର୍ୟାଙ୍କିଙ୍ଗ୍ ଏବଂ ନିମ୍ନୋକ୍ତ Git-ମେଟାଡାଟା ଜନଗଣନା—ଉଭୟଠାରୁ ଭିନ୍ନ।</sub>
 
 > 🙏 ଏହି ଅବଦାନକାରୀମାନଙ୍କର ବୈଶିଷ୍ଟ୍ୟ, ବଗ୍ ସମାଧାନ ଏବଂ ଭିତ୍ତିଭୂମି ଉନ୍ନତିଗୁଡ଼ିକ OmniRouteକୁ ନିର୍ଭରଯୋଗ୍ୟ ଓ ବୈଶିଷ୍ଟ୍ୟ-ସମୃଦ୍ଧ କରୁଥିବା ବିଷୟର ଏକ **ମୂଳ ଅଂଶ**। ପ୍ରତ୍ୟେକ ପୁଲ୍ ରିକ୍ୱେଷ୍ଟ, ପ୍ରତ୍ୟେକ ପରୀକ୍ଷଣ କେସ୍ ଏବଂ ପ୍ରତ୍ୟେକ i18n ଅନୁବାଦ ଫାଇଲ୍ ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ। ସେମାନଙ୍କ ଭଳି ଲୋକମାନଙ୍କ ଦ୍ୱାରା ଓପନ୍ ସୋର୍ସ ନିର୍ମିତ ହୁଏ।
 
@@ -1617,13 +1624,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
 
 <div align="center">
 
-## 👥 900+ ଅବଦାନକାରୀ
+## 👥 1,000+ ଅବଦାନକାରୀ
 
 </div>
 
-[![ଅବଦାନକାରୀ](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![ଅବଦାନକାରୀ](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>2026-10-18 ରେ ସକ୍ରିୟ <code>release/v3.8.52</code> ର ଶୀର୍ଷ <code>ad160ab2d1</code> (6,826ଟି କମିଟ୍) ଉପରେ ଅଡିଟ୍ କରାଯାଇଛି: <b>993ଟି ସ୍ୱାଭାବିକୀକୃତ ମାନବ Git ପରିଚୟ</b> — 707ଟି ପରିଚୟ କମିଟ୍ ଲେଖକ ଭାବେ ଦେଖାଯାଆନ୍ତି (ରକ୍ଷଣାବେକ୍ଷଣକାରୀଙ୍କ ସମେତ) ଏବଂ 286ଟି କେବଳ ସ୍ପଷ୍ଟ <code>Co-authored-by</code> ଟ୍ରେଲର୍ରେ ଅଛନ୍ତି। ଏହି ଗଣନା <code>.mailmap</code> ପ୍ରୟୋଗ କରେ, ଇ-ମେଲ୍ ଠିକଣାଗୁଡ଼ିକୁ ଅକ୍ଷରର କେସ୍କୁ ଅଣଦେଖା କରି ତୁଳନା କରେ, ସଂଖ୍ୟାତ୍ମକ ଏବଂ ସାଧାରଣ GitHub noreply ଠିକଣାଗୁଡ଼ିକ ସମାନ ହ୍ୟାଣ୍ଡଲ୍କୁ ସୂଚାଇଲେ ମାତ୍ର ସେଗୁଡ଼ିକୁ ଯୋଡ଼େ, 26ଟି ବଟ୍/ଏଜେଣ୍ଟ/ସେବା/ପ୍ଲେସ୍ହୋଲ୍ଡର୍ ପରିଚୟକୁ ବାଦ ଦିଏ, ଏବଂ କେବଳ ପ୍ରଦର୍ଶନ ନାମ ମେଳ ଖାଉଥିବା କାରଣରୁ ସାଧାରଣ ଇ-ମେଲ୍ ଠିକଣାଗୁଡ଼ିକୁ ମିଶ୍ରଣ କରେ ନାହିଁ। 2026-08-24 ର ଅଡିଟ୍ରେ 639 ପ୍ରକାଶ କରାଯାଇଥିଲା; ସେହି ଅଡିଟ୍ର ଆଧାର <code>ac02c5b42f</code> ଉପରେ ଏହି ପଦ୍ଧତିକୁ ପୁନଃ ଚାଳନ କଲେ 619 ମିଳେ, ତେଣୁ ଏହି ବୃଦ୍ଧି ଅଧିକ ଶିଥିଳ ପଦ୍ଧତି ଯୋଗୁଁ ନୁହେଁ, ବରଂ ନୂତନ ଅବଦାନକାରୀଙ୍କ ଯୋଗୁଁ ହୋଇଛି।</sub>
+<sub>2026-11-02 ରେ ସକ୍ରିୟ <code>release/v3.8.53</code> ର ଶୀର୍ଷ <code>1c7135e0fb</code> (7,972ଟି କମିଟ୍) ଉପରେ ଅଡିଟ୍ କରାଯାଇଛି: <b>1,074ଟି ସ୍ୱାଭାବିକୀକୃତ ମାନବ Git ପରିଚୟ</b> — 759ଟି ପରିଚୟ କମିଟ୍ ଲେଖକ ଭାବେ ଦେଖାଯାଆନ୍ତି (ରକ୍ଷଣାବେକ୍ଷଣକାରୀଙ୍କ ସମେତ) ଏବଂ 315ଟି କେବଳ ସ୍ପଷ୍ଟ <code>Co-authored-by</code> ଟ୍ରେଲର୍ରେ ଅଛନ୍ତି। ଏହି ଗଣନା <code>.mailmap</code> ପ୍ରୟୋଗ କରେ, ଇ-ମେଲ୍ ଠିକଣାଗୁଡ଼ିକୁ ଅକ୍ଷରର କେସ୍କୁ ଅଣଦେଖା କରି ତୁଳନା କରେ, ସଂଖ୍ୟାତ୍ମକ ଏବଂ ସାଧାରଣ GitHub noreply ଠିକଣାଗୁଡ଼ିକ ସମାନ ହ୍ୟାଣ୍ଡଲ୍କୁ ସୂଚାଇଲେ ମାତ୍ର ସେଗୁଡ଼ିକୁ ଯୋଡ଼େ, 29ଟି ବଟ୍/ଏଜେଣ୍ଟ/ସେବା/ପ୍ଲେସ୍ହୋଲ୍ଡର୍ ପରିଚୟକୁ ବାଦ ଦିଏ, ଏବଂ କେବଳ ପ୍ରଦର୍ଶନ ନାମ ମେଳ ଖାଉଥିବା କାରଣରୁ ସାଧାରଣ ଇ-ମେଲ୍ ଠିକଣାଗୁଡ଼ିକୁ ମିଶ୍ରଣ କରେ ନାହିଁ। 2026-08-24 ର ଅଡିଟ୍ରେ 639 ପ୍ରକାଶ କରାଯାଇଥିଲା; ସେହି ଅଡିଟ୍ର ଆଧାର <code>ac02c5b42f</code> ଉପରେ ଏହି ପଦ୍ଧତିକୁ ପୁନଃ ଚାଳନ କଲେ 619 ମିଳେ, ତେଣୁ ଏହି ବୃଦ୍ଧି ଅଧିକ ଶିଥିଳ ପଦ୍ଧତି ଯୋଗୁଁ ନୁହେଁ, ବରଂ ନୂତନ ଅବଦାନକାରୀଙ୍କ ଯୋଗୁଁ ହୋଇଛି।</sub>
 
 ### କିପରି ଅବଦାନ ଦେବେ
 
@@ -1683,25 +1690,25 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 OmniRoute ଦିଗ୍ଗଜମାନଙ୍କ କାର୍ଯ୍ୟ ଉପରେ ଭିତ୍ତି କରି ନିର୍ମିତ। ଏହା **[9router](https://github.com/decolua/9router)**-ର ଏକ fork ଏବଂ Go ପ୍ରକଳ୍ପ **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)**-ର ଏକ TypeScript port ଭାବେ ଆରମ୍ଭ ହୋଇଥିଲା — ଏବଂ ସେଠାରୁ, ନିମ୍ନରେ ଥିବା ପ୍ରତ୍ୟେକ subsystem ଏକ open-source ପ୍ରକଳ୍ପରୁ ପ୍ରେରଣା ପାଇଛି, ଯାହା ଏହି କାମ ପ୍ରଥମେ କରିଥିଲା। ପ୍ରତ୍ୟେକଟି OmniRoute-ର ଏକ ନିର୍ଦ୍ଦିଷ୍ଟ ଅଂଶକୁ ରୂପ ଦେଇଛି। ସେମାନଙ୍କ ସମସ୍ତଙ୍କ ପ୍ରତି ଏହା ଆମର କୃତଜ୍ଞତା। 🙏
 
-> ⭐ star ସଂଖ୍ୟାଗୁଡ଼ିକୁ 18 ଅକ୍ଟୋବର 2026ରେ GitHub-ର REST API ମାଧ୍ୟମରେ ଯାଞ୍ଚ କରାଯାଇଛି — ଯାଇ ଏହି ପ୍ରକଳ୍ପଗୁଡ଼ିକୁ ଏକ star ଦିଅନ୍ତୁ। ଏହି ସଂଖ୍ୟାଗୁଡ଼ିକ ନିର୍ଦ୍ଦିଷ୍ଟ ତାରିଖର ଏକ ସଠିକ୍ snapshot ଏବଂ ସ୍ୱାଭାବିକ ଭାବେ ସମୟ ସହିତ ପରିବର୍ତ୍ତିତ ହେବ।
+> ⭐ star ସଂଖ୍ୟାଗୁଡ଼ିକୁ 2026-11-03ରେ GitHub-ର REST API ମାଧ୍ୟମରେ ଯାଞ୍ଚ କରାଯାଇଛି — ଯାଇ ଏହି ପ୍ରକଳ୍ପଗୁଡ଼ିକୁ ଏକ star ଦିଅନ୍ତୁ। ଏହି ସଂଖ୍ୟାଗୁଡ଼ିକ ନିର୍ଦ୍ଦିଷ୍ଟ ତାରିଖର ଏକ ସଠିକ୍ snapshot ଏବଂ ସ୍ୱାଭାବିକ ଭାବେ ସମୟ ସହିତ ପରିବର୍ତ୍ତିତ ହେବ।
 
 ### 🧬 ପରମ୍ପରା ଓ gateway
 
 <table>
   <tr><th align="left">ପ୍ରକଳ୍ପ</th><th align="center">⭐</th><th align="left">ଏହା OmniRouteକୁ କିପରି ପ୍ରେରଣା ଦେଇଛି</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>ଏହି fork ଯେଉଁ ମୂଳ ପ୍ରକଳ୍ପ ଉପରେ ନିର୍ମିତ — ଏଠାରେ ଏହାକୁ multi-modal API ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ TypeScript rewrite ସହିତ ବିସ୍ତାର କରାଯାଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>ଏହି JavaScript / TypeScript portକୁ ପ୍ରେରଣା ଦେଇଥିବା Go implementation।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>ଏହି AI gateway-ର ସାର୍ବଜନୀନ pricing dataset ଆମର cost-tracking syncକୁ ତଥ୍ୟ ଯୋଗାଏ, ଏବଂ ଏହାର provider-normalization model ଆମର routingକୁ ଆକାର ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>browser-session, response-framing, usage ଏବଂ web-search adapter ସମେତ vendored ChatGPT Web → Codex Responses bridgeରେ ଅନୁକୂଳିତ MIT source।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>stream recovery, no-thinking alias, fallback web search, sliding-window limit, log redaction ଏବଂ ଅଧିକ ସୁରକ୍ଷିତ launcher flowରେ port କରାଯାଇଥିବା patternଗୁଡ଼ିକ।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>native Cursor executorରେ ଅନୁକୂଳିତ Cursor Composer tool-choice, output-constraint ଏବଂ tool-commit patternଗୁଡ଼ିକ।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>Codex OAuth ପୁନଃପ୍ରମାଣୀକରଣରେ port କରାଯାଇଥିବା fresh-login ଏବଂ refresh-token rotation patternଗୁଡ଼ିକ।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Claude Code-ସୁସଙ୍ଗତ transform default ଏବଂ billing-header ଆଚରଣକୁ OmniRoute-ର config-driven bridgeରେ ସାଧାରଣୀକୃତ କରାଯାଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>ଏହି fork ଯେଉଁ ମୂଳ ପ୍ରକଳ୍ପ ଉପରେ ନିର୍ମିତ — ଏଠାରେ ଏହାକୁ multi-modal API ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ TypeScript rewrite ସହିତ ବିସ୍ତାର କରାଯାଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>ଏହି JavaScript / TypeScript portକୁ ପ୍ରେରଣା ଦେଇଥିବା Go implementation।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>ଏହି AI gateway-ର ସାର୍ବଜନୀନ pricing dataset ଆମର cost-tracking syncକୁ ତଥ୍ୟ ଯୋଗାଏ, ଏବଂ ଏହାର provider-normalization model ଆମର routingକୁ ଆକାର ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>browser-session, response-framing, usage ଏବଂ web-search adapter ସମେତ vendored ChatGPT Web → Codex Responses bridgeରେ ଅନୁକୂଳିତ MIT source।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>stream recovery, no-thinking alias, fallback web search, sliding-window limit, log redaction ଏବଂ ଅଧିକ ସୁରକ୍ଷିତ launcher flowରେ port କରାଯାଇଥିବା patternଗୁଡ଼ିକ।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>native Cursor executorରେ ଅନୁକୂଳିତ Cursor Composer tool-choice, output-constraint ଏବଂ tool-commit patternଗୁଡ଼ିକ।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Codex OAuth ପୁନଃପ୍ରମାଣୀକରଣରେ port କରାଯାଇଥିବା fresh-login ଏବଂ refresh-token rotation patternଗୁଡ଼ିକ।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Claude Code-ସୁସଙ୍ଗତ transform default ଏବଂ billing-header ଆଚରଣକୁ OmniRoute-ର config-driven bridgeରେ ସାଧାରଣୀକୃତ କରାଯାଇଛି।</td></tr>
   <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>ଏହାର Grok model mapping, fake-TypeError Statsig generator, request ଓ device default, ଏବଂ NDJSON response processorକୁ OmniRoute-ର Grok Web executorରେ ଉଲ୍ଲେଖନୀୟ ଭାବେ ଅନୁକୂଳିତ କରାଯାଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>grok2api-merged ପଛରେ ଥିବା ପ୍ରମୁଖ transitive code source; ଏହାର model, header, payload, Statsig ଏବଂ processor implementationଗୁଡ଼ିକୁ Grok Web ପରମ୍ପରାରେ ସଂରକ୍ଷିତ ରଖାଯାଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>TQZHR ଏବଂ grok2api-merged ମାଧ୍ୟମରେ ଆସିଥିବା Grok payload ଓ device default, Statsig generator, ଏବଂ <code>result.response</code> processor ପାଇଁ ଅନ୍ତର୍ନିହିତ MIT source।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>grok2api-merged ପଛରେ ଥିବା ପ୍ରମୁଖ transitive code source; ଏହାର model, header, payload, Statsig ଏବଂ processor implementationଗୁଡ଼ିକୁ Grok Web ପରମ୍ପରାରେ ସଂରକ୍ଷିତ ରଖାଯାଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>TQZHR ଏବଂ grok2api-merged ମାଧ୍ୟମରେ ଆସିଥିବା Grok payload ଓ device default, Statsig generator, ଏବଂ <code>result.response</code> processor ପାଇଁ ଅନ୍ତର୍ନିହିତ MIT source।</td></tr>
   <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>ଏହାର proxy-pool layer ପାଇଁ grok2api-merged ଦ୍ୱାରା ସ୍ୱୀକୃତ ଏକ transitive source; OmniRoute ସେହି ପରମ୍ପରା ସୂଚନାକୁ ସଂରକ୍ଷିତ ରଖେ, କିନ୍ତୁ ଏହାର ସୀମିତ Grok Web executorରେ proxy-pool port କରାଯାଇଥିବା ଦାବି କରେ ନାହିଁ।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>ଏହାର cookie-ପ୍ରମାଣୀକୃତ Grok proxy ଏବଂ <code>result.response.token</code> streaming pattern OmniRoute-ର Grok Web transportକୁ ଆକାର ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>ଏହାର cookie-ପ୍ରମାଣୀକୃତ Grok proxy ଏବଂ <code>result.response.token</code> streaming pattern OmniRoute-ର Grok Web transportକୁ ଆକାର ଦେଇଛି।</td></tr>
   <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>ମୂଳ Grok Web implementation ଏହାର HTTP/browser upstream designକୁ ପରାମର୍ଶ କରିଥିଲା; ଏହାର direct HTTP path GrokProxyରୁ ଉତ୍ପନ୍ନ ହୋଇଥିବାରୁ, କୌଣସି ସ୍ୱାଧୀନ code port ଦାବି କରାଯାଉ ନାହିଁ।</td></tr>
 </table>
 
@@ -1709,81 +1716,81 @@ OmniRoute ଦିଗ୍ଗଜମାନଙ୍କ କାର୍ଯ୍ୟ ଉପର�
 
 <table>
   <tr><th align="left">ପ୍ରକଳ୍ପ</th><th align="center">⭐</th><th align="left">ଏହା OmniRouteକୁ କିପରି ପ୍ରେରିତ କରିଥିଲା</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>ଭାଇରାଲ୍ ହୋଇଥିବା "ଅଳ୍ପ ଟୋକନ୍ରେ କାମ ହେଉଥିବାବେଳେ ଅଧିକ ଟୋକନ୍ କାହିଁକି ବ୍ୟବହାର କରିବେ" ପ୍ରକଳ୍ପ — ଏହାର ଆଦିମାନବ-ଶୈଳୀ ଦର୍ଶନ ଆମର ମାନକ ସଙ୍କୋଚନ ମୋଡ୍ ଏବଂ 30+ ଭରଣ/ସଂକ୍ଷେପଣ ନିୟମକୁ ଶକ୍ତି ଯୋଗାଏ।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>ଉଚ୍ଚ-କାର୍ଯ୍ୟଦକ୍ଷତା କମାଣ୍ଡ-ଆଉଟପୁଟ୍ ସଙ୍କୋଚନ — ଆମର RTK ଇଞ୍ଜିନ୍, JSON ଫିଲ୍ଟର୍ DSL, କଞ୍ଚା-ଆଉଟପୁଟ୍ ପୁନରୁଦ୍ଧାର ଏବଂ ସ୍ତରୀକୃତ RTK → Caveman ପାଇପଲାଇନ୍କୁ ପ୍ରେରିତ କରିଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>ପ୍ରତ୍ୟାବର୍ତ୍ତନୀୟ ପ୍ରସଙ୍ଗ-ସଙ୍କୋଚନ (SmartCrusher) — ଆମର <code>headroom</code> ଇଞ୍ଜିନ୍ ଏବଂ <code>ccr</code> ପୁନରୁଦ୍ଧାର-ଚିହ୍ନକ ଢାଞ୍ଚାକୁ ପ୍ରେରିତ କରିଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>ପ୍ରମ୍ପ୍ଟ-ସଙ୍କୋଚନ ଗବେଷଣା (LLMLingua / LLMLingua-2) — ଆମର ଅସମକାଳୀନ, କୋଡ୍-ସୁରକ୍ଷିତ, ତ୍ରୁଟି ସମୟରେ ମୂଳ ଇନପୁଟ୍ ବ୍ୟବହାର କରୁଥିବା <code>llmlingua</code> ଇଞ୍ଜିନ୍କୁ ପ୍ରେରିତ କରିଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>ଆମ LLMLingua ଇଞ୍ଜିନ୍ ପାଇଁ ୱାର୍କର୍-ଥ୍ରେଡ୍ ବ୍ୟାକେଣ୍ଡ୍ ଭାବରେ ବ୍ୟବହୃତ JS/ONNX ପୋର୍ଟ୍ (MobileBERT / XLM-RoBERTa)।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>ଭାଇରାଲ୍ ହୋଇଥିବା "ଅଳ୍ପ ଟୋକନ୍ରେ କାମ ହେଉଥିବାବେଳେ ଅଧିକ ଟୋକନ୍ କାହିଁକି ବ୍ୟବହାର କରିବେ" ପ୍ରକଳ୍ପ — ଏହାର ଆଦିମାନବ-ଶୈଳୀ ଦର୍ଶନ ଆମର ମାନକ ସଙ୍କୋଚନ ମୋଡ୍ ଏବଂ 30+ ଭରଣ/ସଂକ୍ଷେପଣ ନିୟମକୁ ଶକ୍ତି ଯୋଗାଏ।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>ଉଚ୍ଚ-କାର୍ଯ୍ୟଦକ୍ଷତା କମାଣ୍ଡ-ଆଉଟପୁଟ୍ ସଙ୍କୋଚନ — ଆମର RTK ଇଞ୍ଜିନ୍, JSON ଫିଲ୍ଟର୍ DSL, କଞ୍ଚା-ଆଉଟପୁଟ୍ ପୁନରୁଦ୍ଧାର ଏବଂ ସ୍ତରୀକୃତ RTK → Caveman ପାଇପଲାଇନ୍କୁ ପ୍ରେରିତ କରିଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>ପ୍ରତ୍ୟାବର୍ତ୍ତନୀୟ ପ୍ରସଙ୍ଗ-ସଙ୍କୋଚନ (SmartCrusher) — ଆମର <code>headroom</code> ଇଞ୍ଜିନ୍ ଏବଂ <code>ccr</code> ପୁନରୁଦ୍ଧାର-ଚିହ୍ନକ ଢାଞ୍ଚାକୁ ପ୍ରେରିତ କରିଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>ପ୍ରମ୍ପ୍ଟ-ସଙ୍କୋଚନ ଗବେଷଣା (LLMLingua / LLMLingua-2) — ଆମର ଅସମକାଳୀନ, କୋଡ୍-ସୁରକ୍ଷିତ, ତ୍ରୁଟି ସମୟରେ ମୂଳ ଇନପୁଟ୍ ବ୍ୟବହାର କରୁଥିବା <code>llmlingua</code> ଇଞ୍ଜିନ୍କୁ ପ୍ରେରିତ କରିଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>ଆମ LLMLingua ଇଞ୍ଜିନ୍ ପାଇଁ ୱାର୍କର୍-ଥ୍ରେଡ୍ ବ୍ୟାକେଣ୍ଡ୍ ଭାବରେ ବ୍ୟବହୃତ JS/ONNX ପୋର୍ଟ୍ (MobileBERT / XLM-RoBERTa)।</td></tr>
   <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>PT-BR ଟୋକନ୍ ସଙ୍କୋଚନ — ଆମର pt-BR ଭାଷା ପ୍ୟାକ୍କୁ ଶକ୍ତି ଯୋଗାଏ: ବ୍ରାଜିଲୀୟ-ପର୍ତ୍ତୁଗୀଜ୍ ବ୍ୟାକରଣ ପାଇଁ ସମନ୍ୱିତ ପୁନରୁକ୍ତି ହ୍ରାସ ଏବଂ ଭରଣ ଶବ୍ଦ ଅପସାରଣ।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>ଭାଇରାଲ୍ ହୋଇଥିବା "ଆଳସୀ ବରିଷ୍ଠ ଡେଭେଲପର୍" YAGNI-କୋଡର୍ ଦକ୍ଷତା — ଆମର <b>କମ୍-କୋଡ୍</b> ଆଉଟପୁଟ୍ ଶୈଳୀକୁ ପ୍ରେରିତ କରିଛି: _ଉତ୍ପନ୍ନ_ କୋଡ୍ କମାଉଥିବା ସବୁଠାରୁ ଛୋଟ-କାର୍ଯ୍ୟକ୍ଷମ-ପରିବର୍ତ୍ତନ ମାର୍ଗଦର୍ଶନ (Cavemanର ସଂକ୍ଷିପ୍ତ ଗଦ୍ୟର ଆଉଟପୁଟ୍-ଅକ୍ଷ ସହୋଦର)।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>ଏହାର କାର୍ଯ୍ୟ-ପ୍ରଥମ, ADHD-ଅନୁକୂଳ ପ୍ରତିକ୍ରିୟା ଶୈଳୀକୁ ପାଞ୍ଚଟି ଭାଷାରେ OmniRouteର ସଂକ୍ଷିପ୍ତ ଆଉଟପୁଟ୍ ଶୈଳୀରେ ଅନୁକୂଳିତ କରାଯାଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>ଭାଇରାଲ୍ ହୋଇଥିବା "ଆଳସୀ ବରିଷ୍ଠ ଡେଭେଲପର୍" YAGNI-କୋଡର୍ ଦକ୍ଷତା — ଆମର <b>କମ୍-କୋଡ୍</b> ଆଉଟପୁଟ୍ ଶୈଳୀକୁ ପ୍ରେରିତ କରିଛି: _ଉତ୍ପନ୍ନ_ କୋଡ୍ କମାଉଥିବା ସବୁଠାରୁ ଛୋଟ-କାର୍ଯ୍ୟକ୍ଷମ-ପରିବର୍ତ୍ତନ ମାର୍ଗଦର୍ଶନ (Cavemanର ସଂକ୍ଷିପ୍ତ ଗଦ୍ୟର ଆଉଟପୁଟ୍-ଅକ୍ଷ ସହୋଦର)।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>ଏହାର କାର୍ଯ୍ୟ-ପ୍ରଥମ, ADHD-ଅନୁକୂଳ ପ୍ରତିକ୍ରିୟା ଶୈଳୀକୁ ପାଞ୍ଚଟି ଭାଷାରେ OmniRouteର ସଂକ୍ଷିପ୍ତ ଆଉଟପୁଟ୍ ଶୈଳୀରେ ଅନୁକୂଳିତ କରାଯାଇଛି।</td></tr>
 </table>
 
 ### 🧩 ସଂକ୍ଷିପ୍ତ ଫର୍ମାଟ୍, ଟୋକନ୍ ଗବେଷଣା ଏବଂ କୋଡ୍-ସଚେତନ ସାଧନ
 
 <table>
   <tr><th align="left">ପ୍ରକଳ୍ପ</th><th align="center">⭐</th><th align="left">ଏହା OmniRouteକୁ କିପରି ପ୍ରେରିତ କରିଥିଲା</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>ଟୋକନ୍-ଅଭିମୁଖୀ ଅବଜେକ୍ଟ ନୋଟେସନ୍ — ଏହାର ସ୍ତମ୍ଭୀୟ, ହେଡର୍-ଓ-ଧାଡ଼ି ମଡେଲ୍ ଆମର ସାରଣୀବଦ୍ଧ ସଂକ୍ଷିପ୍ତକରଣ ପର୍ଯ୍ୟାୟକୁ ଆକାର ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>ଏହାର ସଂକ୍ଷିପ୍ତ ଗ୍ରାଫ୍ ଫର୍ମାଟ୍ ଏବଂ ସାଧାରଣ-ପ୍ରୋଫାଇଲ୍ ଡିଜାଇନ୍ OmniRouteର ସାରଣୀବଦ୍ଧ ସଂକ୍ଷିପ୍ତକରଣ ଏବଂ Headroom କୋଡେକ୍ ଫର୍ମାଟ୍କୁ ଆକାର ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>ଟୋକନ୍-ଅଭିମୁଖୀ ଅବଜେକ୍ଟ ନୋଟେସନ୍ — ଏହାର ସ୍ତମ୍ଭୀୟ, ହେଡର୍-ଓ-ଧାଡ଼ି ମଡେଲ୍ ଆମର ସାରଣୀବଦ୍ଧ ସଂକ୍ଷିପ୍ତକରଣ ପର୍ଯ୍ୟାୟକୁ ଆକାର ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>ଏହାର ସଂକ୍ଷିପ୍ତ ଗ୍ରାଫ୍ ଫର୍ମାଟ୍ ଏବଂ ସାଧାରଣ-ପ୍ରୋଫାଇଲ୍ ଡିଜାଇନ୍ OmniRouteର ସାରଣୀବଦ୍ଧ ସଂକ୍ଷିପ୍ତକରଣ ଏବଂ Headroom କୋଡେକ୍ ଫର୍ମାଟ୍କୁ ଆକାର ଦେଇଛି।</td></tr>
   <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Headroom ସାଧାରଣ-ପ୍ରୋଫାଇଲ୍ କୋଡେକ୍ ଭାବରେ ସିଧାସଳଖ ଭେଣ୍ଡର୍ କରାଯାଇ ବିସ୍ତାରିତ MIT TypeScript କାର୍ଯ୍ୟାନ୍ୱୟନ।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Brotli/SQLite କ୍ୟାଶ୍ + ପ୍ରତି-ସେସନ୍ ପ୍ରସଙ୍ଗ-ପାର୍ଥକ୍ୟ — ଆମର <code>session-dedup</code> ଇଞ୍ଜିନ୍କୁ ପ୍ରେରିତ କରିଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Bash-ଆଉଟପୁଟ୍ ସଂକ୍ଷିପ୍ତକରଣ + MCP ପ୍ରୋଫାଇଲ୍ — ଆମର ସଙ୍କୋଚନ ପରିତ୍ୟାଗ ନୀତି ଏବଂ MCP ସାଧନ-ମ୍ୟାନିଫେଷ୍ଟ୍ ହ୍ରାସକୁ ପ୍ରେରିତ କରିଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>ବିଫଳତା-ସଚେତନ ପରିତ୍ୟାଗ ସହିତ ବିଷୟବସ୍ତୁ-ସଚେତନ, ପ୍ରତି-ଫାଇଲ୍-ପ୍ରକାର ଆଉଟପୁଟ୍ ସଙ୍କୋଚନ — ଆମର ପ୍ରତି-ପ୍ରକାର ପ୍ରେଷଣ ଏବଂ ସର୍ବନିମ୍ନ-ଲାଭ ଏଡ଼ାଇବା ନୀତିକୁ ସତ୍ୟାପିତ କରିଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>"ଅଦୃଶ୍ୟ ଟୋକନ୍ଗୁଡ଼ିକୁ ଖୋଜନ୍ତୁ" — ଏହାର ଅଫ୍ଲୋଡ୍ + ପୁନରୁଦ୍ଧାରଯୋଗ୍ୟ-ହ୍ୟାଣ୍ଡଲ୍ ଢାଞ୍ଚା ଆମର CCR ଅଫ୍ଲୋଡ୍ ଚିନ୍ତାଧାରାକୁ ଆକାର ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>ଆମର session-dedup ଡିଜାଇନ୍କୁ ଆକାର ଦେଇଥିବା ଏକ ସେସନ୍-ଗ୍ରାଫ୍ + ବିଭିନ୍ନ ଟର୍ନ୍ରେ ଧାଡ଼ି-ପ୍ରତିଲିପି ଅପସାରଣ ନକ୍ସା।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Brotli/SQLite କ୍ୟାଶ୍ + ପ୍ରତି-ସେସନ୍ ପ୍ରସଙ୍ଗ-ପାର୍ଥକ୍ୟ — ଆମର <code>session-dedup</code> ଇଞ୍ଜିନ୍କୁ ପ୍ରେରିତ କରିଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Bash-ଆଉଟପୁଟ୍ ସଂକ୍ଷିପ୍ତକରଣ + MCP ପ୍ରୋଫାଇଲ୍ — ଆମର ସଙ୍କୋଚନ ପରିତ୍ୟାଗ ନୀତି ଏବଂ MCP ସାଧନ-ମ୍ୟାନିଫେଷ୍ଟ୍ ହ୍ରାସକୁ ପ୍ରେରିତ କରିଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>ବିଫଳତା-ସଚେତନ ପରିତ୍ୟାଗ ସହିତ ବିଷୟବସ୍ତୁ-ସଚେତନ, ପ୍ରତି-ଫାଇଲ୍-ପ୍ରକାର ଆଉଟପୁଟ୍ ସଙ୍କୋଚନ — ଆମର ପ୍ରତି-ପ୍ରକାର ପ୍ରେଷଣ ଏବଂ ସର୍ବନିମ୍ନ-ଲାଭ ଏଡ଼ାଇବା ନୀତିକୁ ସତ୍ୟାପିତ କରିଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>"ଅଦୃଶ୍ୟ ଟୋକନ୍ଗୁଡ଼ିକୁ ଖୋଜନ୍ତୁ" — ଏହାର ଅଫ୍ଲୋଡ୍ + ପୁନରୁଦ୍ଧାରଯୋଗ୍ୟ-ହ୍ୟାଣ୍ଡଲ୍ ଢାଞ୍ଚା ଆମର CCR ଅଫ୍ଲୋଡ୍ ଚିନ୍ତାଧାରାକୁ ଆକାର ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>ଆମର session-dedup ଡିଜାଇନ୍କୁ ଆକାର ଦେଇଥିବା ଏକ ସେସନ୍-ଗ୍ରାଫ୍ + ବିଭିନ୍ନ ଟର୍ନ୍ରେ ଧାଡ଼ି-ପ୍ରତିଲିପି ଅପସାରଣ ନକ୍ସା।</td></tr>
   <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Rust ସ୍ତମ୍ଭୀୟ-JSON + ବିଷୟବସ୍ତୁ-ଠିକଣାଯୁକ୍ତ ପୁନରୁଦ୍ଧାର + ବାର୍ତ୍ତାଗୁଡ଼ିକ ମଧ୍ୟରେ ପ୍ରତିଲିପି ଅପସାରଣ — ଆମର <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> ଇଞ୍ଜିନ୍ ଡିଜାଇନ୍ ଏବଂ କ୍ୟାଶ୍-ସ୍ଥିର "ସଙ୍କୋଚିତ ରୂପ ଅବସ୍ଥାନ-ନିରପେକ୍ଷ" ଅପରିବର୍ତ୍ତନୀୟତାକୁ ସତ୍ୟାପିତ କରିଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>MCP ସାଧନ-ସ୍କିମା/ବର୍ଣ୍ଣନା ସଙ୍କୋଚନ — ଆମର MCP ସାଧନ-ମ୍ୟାନିଫେଷ୍ଟ୍ ସଂଖ୍ୟାତ୍ମକତା ହ୍ରାସକୁ ଆକାର ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Aider-ଶୈଳୀ ରିପୋ-ମ୍ୟାପ୍ ଶ୍ରେଣୀକରଣ — ଆମର ରିପୋ-ମ୍ୟାପ୍ / ପୁନରୁଦ୍ଧାର-ଶ୍ରେଣୀକରଣ ଅନ୍ୱେଷଣକୁ ଆକାର ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>MCP ସାଧନ-ସ୍କିମା/ବର୍ଣ୍ଣନା ସଙ୍କୋଚନ — ଆମର MCP ସାଧନ-ମ୍ୟାନିଫେଷ୍ଟ୍ ସଂଖ୍ୟାତ୍ମକତା ହ୍ରାସକୁ ଆକାର ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Aider-ଶୈଳୀ ରିପୋ-ମ୍ୟାପ୍ ଶ୍ରେଣୀକରଣ — ଆମର ରିପୋ-ମ୍ୟାପ୍ / ପୁନରୁଦ୍ଧାର-ଶ୍ରେଣୀକରଣ ଅନ୍ୱେଷଣକୁ ଆକାର ଦେଇଛି।</td></tr>
   <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>MCP ଉପରେ ଘୋଷଣାତ୍ମକ ଶେଲ୍-ଆଉଟପୁଟ୍ ହ୍ରାସ — ଆମର ଘୋଷଣାତ୍ମକ bash-ଆଉଟପୁଟ୍ ସଂକ୍ଷିପ୍ତକରଣକୁ ସତ୍ୟାପିତ କରିଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>TypeScript Compiler API ସାଧନସମୂହ — ଷ୍ଟ୍ରିଙ୍ଗ୍, ଟେମ୍ପଲେଟ୍ ଏବଂ ରେଗେକ୍ସ୍ ଲିଟେରାଲ୍କୁ ସଂରକ୍ଷଣ କରୁଥିବା ଆମର ପାର୍ସର୍-ଭିତ୍ତିକ ମନ୍ତବ୍ୟ ଅପସାରଣକୁ ପ୍ରେରିତ କରିଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>TypeScript Compiler API ସାଧନସମୂହ — ଷ୍ଟ୍ରିଙ୍ଗ୍, ଟେମ୍ପଲେଟ୍ ଏବଂ ରେଗେକ୍ସ୍ ଲିଟେରାଲ୍କୁ ସଂରକ୍ଷଣ କରୁଥିବା ଆମର ପାର୍ସର୍-ଭିତ୍ତିକ ମନ୍ତବ୍ୟ ଅପସାରଣକୁ ପ୍ରେରିତ କରିଛି।</td></tr>
 </table>
 
 ### 🧠 ସ୍ମୃତି ଏବଂ RAG
 
 <table>
   <tr><th align="left">ପ୍ରକଳ୍ପ</th><th align="center">⭐</th><th align="left">ଏହା OmniRouteକୁ କିପରି ପ୍ରେରଣା ଦେଇଛି</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>ସାର୍ବଜନୀନ ମେମୋରି ସ୍ତର — ଏହାର proxy-as-write/read-boundary ମଡେଲ୍ ଆମର ମେମୋରି ଆର୍କିଟେକ୍ଚରକୁ ଆକାର ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>ସ୍ତରୀକୃତ ମେମୋରି ସହିତ ଷ୍ଟେଟ୍ଫୁଲ୍ ଏଜେଣ୍ଟ — ଆମର Context Control & Recovery (CCR) ସ୍ତରୀକୃତ ମଡେଲ୍କୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>ବାରମ୍ବାର ଘଟୁଥିବା 16ଟି RAG/LLM ବିଫଳତା ଧରଣର ProblemMap ବର୍ଗୀକରଣ — ଆମର ସମସ୍ୟା-ନିବାରଣ ଗାଇଡ୍ର ସାଧାରଣ ଶବ୍ଦାବଳୀ।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>ସାର୍ବଜନୀନ ମେମୋରି ସ୍ତର — ଏହାର proxy-as-write/read-boundary ମଡେଲ୍ ଆମର ମେମୋରି ଆର୍କିଟେକ୍ଚରକୁ ଆକାର ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>ସ୍ତରୀକୃତ ମେମୋରି ସହିତ ଷ୍ଟେଟ୍ଫୁଲ୍ ଏଜେଣ୍ଟ — ଆମର Context Control & Recovery (CCR) ସ୍ତରୀକୃତ ମଡେଲ୍କୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>ବାରମ୍ବାର ଘଟୁଥିବା 16ଟି RAG/LLM ବିଫଳତା ଧରଣର ProblemMap ବର୍ଗୀକରଣ — ଆମର ସମସ୍ୟା-ନିବାରଣ ଗାଇଡ୍ର ସାଧାରଣ ଶବ୍ଦାବଳୀ।</td></tr>
 </table>
 
 ### 🛰️ ଟ୍ରାଫିକ୍ ନିରୀକ୍ଷଣ, MITM ଏବଂ ସ୍ୱଚ୍ଛ ପ୍ରକ୍ସି
 
 <table>
   <tr><th align="left">ପ୍ରକଳ୍ପ</th><th align="center">⭐</th><th align="left">ଏହା OmniRouteକୁ କିପରି ପ୍ରେରଣା ଦେଇଛି</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>କୋଡିଂ-ଆସିଷ୍ଟାଣ୍ଟ ↔ LLM ଟ୍ରାଫିକ୍ର MITM ଇଣ୍ଟରସେପ୍ସନ୍/ବିଶ୍ଳେଷଣ ପ୍ରାରମ୍ଭିକ Traffic Inspector ଆବଶ୍ୟକତାଗୁଡ଼ିକୁ ସୂଚିତ କରିଥିଲା। ପୂର୍ବରୁ ବ୍ୟୁତ୍ପନ୍ନ ହୋଇଥିବା ଚାରିଟି ମଡ୍ୟୁଲ୍ — SSE ମର୍ଜିଂ, କଥୋପକଥନ ସ୍ୱାଭାବିକୀକରଣ, ଗୁପ୍ତ ତଥ୍ୟ ମାସ୍କିଂ ଏବଂ ହେଡର୍ ସାନିଟାଇଜେସନ୍ — ସାର୍ବଜନୀନ ପ୍ରୋଟୋକଲ୍ ମାନକ ଆଧାରିତ ସ୍ୱାଧୀନ clean-room କାର୍ଯ୍ୟାନ୍ୱୟନ ଦ୍ୱାରା ପ୍ରତିସ୍ଥାପିତ ହୋଇଛି। ଦୁଇଟି host-passthrough ସର୍ଫେସ୍ (<code>passthrough.ts</code> ଏବଂ <code>_internal/bypass.cjs</code>) ସ୍ୱାଧୀନ ଭାବେ ବର୍ଗୀକୃତ OmniRoute-ଆଭ୍ୟନ୍ତରୀଣ କାର୍ଯ୍ୟାନ୍ୱୟନ ଭାବେ ରହିଛି; ସେହି ପ୍ରତିସ୍ଥାପନର ଅଂଶ ଭାବେ ସେଗୁଡ଼ିକୁ ପୁନଃଲେଖନ କରାଯାଇନଥିଲା।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>ସ୍ୱଚ୍ଛ ପ୍ରତି-ପ୍ରକ୍ରିୟା ପ୍ରକ୍ସି ରାଉଟିଂ — ଆମର କ୍ରାଶ୍-ସୁରକ୍ଷିତ MITM ଟିୟର୍ଡାଉନ୍, ସକେଟ୍ ନିଷ୍କ୍ରିୟତା-ଟାଇମ୍ଆଉଟ୍, <code>/proc</code> ପ୍ରକ୍ରିୟା ଆରୋପଣ ଏବଂ TPROXY କ୍ୟାପଚର୍କୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>କୋଡିଂ-ଆସିଷ୍ଟାଣ୍ଟ ↔ LLM ଟ୍ରାଫିକ୍ର MITM ଇଣ୍ଟରସେପ୍ସନ୍/ବିଶ୍ଳେଷଣ ପ୍ରାରମ୍ଭିକ Traffic Inspector ଆବଶ୍ୟକତାଗୁଡ଼ିକୁ ସୂଚିତ କରିଥିଲା। ପୂର୍ବରୁ ବ୍ୟୁତ୍ପନ୍ନ ହୋଇଥିବା ଚାରିଟି ମଡ୍ୟୁଲ୍ — SSE ମର୍ଜିଂ, କଥୋପକଥନ ସ୍ୱାଭାବିକୀକରଣ, ଗୁପ୍ତ ତଥ୍ୟ ମାସ୍କିଂ ଏବଂ ହେଡର୍ ସାନିଟାଇଜେସନ୍ — ସାର୍ବଜନୀନ ପ୍ରୋଟୋକଲ୍ ମାନକ ଆଧାରିତ ସ୍ୱାଧୀନ clean-room କାର୍ଯ୍ୟାନ୍ୱୟନ ଦ୍ୱାରା ପ୍ରତିସ୍ଥାପିତ ହୋଇଛି। ଦୁଇଟି host-passthrough ସର୍ଫେସ୍ (<code>passthrough.ts</code> ଏବଂ <code>_internal/bypass.cjs</code>) ସ୍ୱାଧୀନ ଭାବେ ବର୍ଗୀକୃତ OmniRoute-ଆଭ୍ୟନ୍ତରୀଣ କାର୍ଯ୍ୟାନ୍ୱୟନ ଭାବେ ରହିଛି; ସେହି ପ୍ରତିସ୍ଥାପନର ଅଂଶ ଭାବେ ସେଗୁଡ଼ିକୁ ପୁନଃଲେଖନ କରାଯାଇନଥିଲା।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>ସ୍ୱଚ୍ଛ ପ୍ରତି-ପ୍ରକ୍ରିୟା ପ୍ରକ୍ସି ରାଉଟିଂ — ଆମର କ୍ରାଶ୍-ସୁରକ୍ଷିତ MITM ଟିୟର୍ଡାଉନ୍, ସକେଟ୍ ନିଷ୍କ୍ରିୟତା-ଟାଇମ୍ଆଉଟ୍, <code>/proc</code> ପ୍ରକ୍ରିୟା ଆରୋପଣ ଏବଂ TPROXY କ୍ୟାପଚର୍କୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
 </table>
 
 ### 📚 ମଡେଲ୍ ତଥ୍ୟ, ପର୍ଯ୍ୟବେକ୍ଷଣୀୟତା ଏବଂ UI
 
 <table>
   <tr><th align="left">ପ୍ରକଳ୍ପ</th><th align="center">⭐</th><th align="left">ଏହା OmniRouteକୁ କିପରି ପ୍ରେରଣା ଦେଇଛି</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>AI ମଡେଲ୍ ବିବରଣୀ, ମୂଲ୍ୟ ଏବଂ କ୍ଷମତାର ଏକ ଖୋଲା ଡାଟାବେସ୍ — ଆମର ମଡେଲ୍ କ୍ୟାଟାଲଗ୍ରେ ସ୍ୱଦେଶୀ ଭାବେ ସିଙ୍କ୍ କରାଯାଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>ଆମର ରିଅଲ୍-ଟାଇମ୍ Compression Studio ଏବଂ Combo/Routing Studioକୁ ଚାଳିତ କରୁଥିବା ନୋଡ୍-ଆଧାରିତ ଗ୍ରାଫ୍ ଲାଇବ୍ରେରୀ।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>LangGraph Studioର ଲାଇଭ୍ ୱର୍କଫ୍ଲୋ-ଗ୍ରାଫ୍ ଭିଜୁଆଲାଇଜେସନ୍ ଆମ Studiosର ରିଅଲ୍-ଟାଇମ୍ କ୍ୟାସକେଡ୍ ଦୃଶ୍ୟକୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>ଏହାର trace → span → generation ପର୍ଯ୍ୟବେକ୍ଷଣୀୟତା ମଡେଲ୍ ଆମର Compression Studio ୱାଟରଫଲ୍କୁ ଆକାର ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Istio ସର୍ଭିସ୍-ମେଶ୍ ପର୍ଯ୍ୟବେକ୍ଷଣୀୟତା — Routing/Combo Studioରେ ଆମର ସର୍କିଟ୍-ବ୍ରେକର୍ ବ୍ୟାଜ୍ ଏବଂ ତ୍ରୁଟି-ଏଜ୍ ଭିଜୁଆଲ୍ଗୁଡ଼ିକୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>ଆମର ଡ୍ୟାସ୍ବୋର୍ଡରେ ପ୍ରଦାତା ଆଇକନ୍ଗୁଡ଼ିକୁ ରେଣ୍ଡର୍ କରୁଥିବା AI/LLM ବ୍ରାଣ୍ଡ ଲୋଗୋ।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>README ଭାଷା ଚୟନକର୍ତ୍ତା ଦ୍ୱାରା ବ୍ୟବହୃତ MIT-ଲାଇସେନ୍ସପ୍ରାପ୍ତ SVG ପତାକାଗୁଡ଼ିକ ପ୍ରଦାନ କରେ।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>AI ମଡେଲ୍ ବିବରଣୀ, ମୂଲ୍ୟ ଏବଂ କ୍ଷମତାର ଏକ ଖୋଲା ଡାଟାବେସ୍ — ଆମର ମଡେଲ୍ କ୍ୟାଟାଲଗ୍ରେ ସ୍ୱଦେଶୀ ଭାବେ ସିଙ୍କ୍ କରାଯାଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>ଆମର ରିଅଲ୍-ଟାଇମ୍ Compression Studio ଏବଂ Combo/Routing Studioକୁ ଚାଳିତ କରୁଥିବା ନୋଡ୍-ଆଧାରିତ ଗ୍ରାଫ୍ ଲାଇବ୍ରେରୀ।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>LangGraph Studioର ଲାଇଭ୍ ୱର୍କଫ୍ଲୋ-ଗ୍ରାଫ୍ ଭିଜୁଆଲାଇଜେସନ୍ ଆମ Studiosର ରିଅଲ୍-ଟାଇମ୍ କ୍ୟାସକେଡ୍ ଦୃଶ୍ୟକୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>ଏହାର trace → span → generation ପର୍ଯ୍ୟବେକ୍ଷଣୀୟତା ମଡେଲ୍ ଆମର Compression Studio ୱାଟରଫଲ୍କୁ ଆକାର ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Istio ସର୍ଭିସ୍-ମେଶ୍ ପର୍ଯ୍ୟବେକ୍ଷଣୀୟତା — Routing/Combo Studioରେ ଆମର ସର୍କିଟ୍-ବ୍ରେକର୍ ବ୍ୟାଜ୍ ଏବଂ ତ୍ରୁଟି-ଏଜ୍ ଭିଜୁଆଲ୍ଗୁଡ଼ିକୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>ଆମର ଡ୍ୟାସ୍ବୋର୍ଡରେ ପ୍ରଦାତା ଆଇକନ୍ଗୁଡ଼ିକୁ ରେଣ୍ଡର୍ କରୁଥିବା AI/LLM ବ୍ରାଣ୍ଡ ଲୋଗୋ।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>README ଭାଷା ଚୟନକର୍ତ୍ତା ଦ୍ୱାରା ବ୍ୟବହୃତ MIT-ଲାଇସେନ୍ସପ୍ରାପ୍ତ SVG ପତାକାଗୁଡ଼ିକ ପ୍ରଦାନ କରେ।</td></tr>
 </table>
 
 ### 🛡️ ସୁରକ୍ଷା
 
 <table>
   <tr><th align="left">ପ୍ରକଳ୍ପ</th><th align="center">⭐</th><th align="left">ଏହା OmniRouteକୁ କିପରି ପ୍ରେରଣା ଦେଇଛି</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>ଡିଫଲ୍ଟ ଭାବେ ସୁରକ୍ଷିତ ଲାଇବ୍ରେରୀଗୁଡ଼ିକର ଏକ ସୁଚୟିତ ତାଲିକା, ଯାହା ଆମର ସୁରକ୍ଷା ପସନ୍ଦଗୁଡ଼ିକୁ ମାର୍ଗଦର୍ଶନ କରେ (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink)।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>ଡିଫଲ୍ଟ ଭାବେ ସୁରକ୍ଷିତ ଲାଇବ୍ରେରୀଗୁଡ଼ିକର ଏକ ସୁଚୟିତ ତାଲିକା, ଯାହା ଆମର ସୁରକ୍ଷା ପସନ୍ଦଗୁଡ଼ିକୁ ମାର୍ଗଦର୍ଶନ କରେ (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink)।</td></tr>
 </table>
 
 ### 🧭 ପରିପୂରକ ଉପକରଣ
 
 <table>
   <tr><th align="left">ପ୍ରକଳ୍ପ</th><th align="center">⭐</th><th align="left">ଏହା OmniRouteକୁ କିପରି ପ୍ରେରଣା ଦେଇଛି</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>ଅନୁରୋଧ ଡିଡୁପ୍ଲିକେସନ୍, ଜରୁରୀକାଳୀନ ଶୂନ୍ୟ-ମୂଲ୍ୟ ଫଲ୍ବ୍ୟାକ୍, ପ୍ଲଗ୍ଯୋଗ୍ୟ Auto-Combo କୌଶଳ ଏବଂ ବହୁଭାଷୀ ଉଦ୍ଦେଶ୍ୟ ବର୍ଗୀକରଣକୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>ଏହାର ଆକାଉଣ୍ଟ-ସଚେତନ ମଡେଲ୍ ରିମ୍ୟାପିଂ, ଏକ୍ସିକ୍ୟୁଟେବଲ୍-ପାଥ୍ ବୈଧତା ଯାଞ୍ଚ ଏବଂ ପ୍ଲାନ୍-ଲେବଲ୍ ଆଚରଣ OmniRouteର Antigravity ରନ୍ଟାଇମ୍କୁ ସୂଚିତ କରିଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>ଏହାର ସଂକ୍ଷିପ୍ତ କୋଟା-ରିସେଟ୍ କାଉଣ୍ଟଡାଉନ୍ ଫର୍ମାଟ୍ OmniRouteର ସମ୍ବନ୍ଧିତ ପ୍ରଦାତା-ସୀମା ପ୍ରଦର୍ଶନକୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>ଏହାର ACP ଇଣ୍ଟିଗ୍ରେସନ୍ଗୁଡ଼ିକ OmniRouteର ସ୍ଥାପିତ CLI ଏଜେଣ୍ଟଗୁଡ଼ିକର ସ୍ୱୟଂଚାଳିତ ଚିହ୍ନଟକୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>Grok Build କୋଟା ସର୍ଫେସ୍କୁ ଚିହ୍ନଟ କରିଥିଲା; ଏହା ପରେ OmniRoute ସ୍ୱାଧୀନ ଭାବେ ଲାଇଭ୍ ୱାୟାର୍ ଫର୍ମାଟ୍କୁ ଯାଞ୍ଚ ଏବଂ ସଂଶୋଧନ କରିଥିଲା।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>ଅନୁରୋଧ ଡିଡୁପ୍ଲିକେସନ୍, ଜରୁରୀକାଳୀନ ଶୂନ୍ୟ-ମୂଲ୍ୟ ଫଲ୍ବ୍ୟାକ୍, ପ୍ଲଗ୍ଯୋଗ୍ୟ Auto-Combo କୌଶଳ ଏବଂ ବହୁଭାଷୀ ଉଦ୍ଦେଶ୍ୟ ବର୍ଗୀକରଣକୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>ଏହାର ଆକାଉଣ୍ଟ-ସଚେତନ ମଡେଲ୍ ରିମ୍ୟାପିଂ, ଏକ୍ସିକ୍ୟୁଟେବଲ୍-ପାଥ୍ ବୈଧତା ଯାଞ୍ଚ ଏବଂ ପ୍ଲାନ୍-ଲେବଲ୍ ଆଚରଣ OmniRouteର Antigravity ରନ୍ଟାଇମ୍କୁ ସୂଚିତ କରିଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>ଏହାର ସଂକ୍ଷିପ୍ତ କୋଟା-ରିସେଟ୍ କାଉଣ୍ଟଡାଉନ୍ ଫର୍ମାଟ୍ OmniRouteର ସମ୍ବନ୍ଧିତ ପ୍ରଦାତା-ସୀମା ପ୍ରଦର୍ଶନକୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>ଏହାର ACP ଇଣ୍ଟିଗ୍ରେସନ୍ଗୁଡ଼ିକ OmniRouteର ସ୍ଥାପିତ CLI ଏଜେଣ୍ଟଗୁଡ଼ିକର ସ୍ୱୟଂଚାଳିତ ଚିହ୍ନଟକୁ ପ୍ରେରଣା ଦେଇଛି।</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Grok Build କୋଟା ସର୍ଫେସ୍କୁ ଚିହ୍ନଟ କରିଥିଲା; ଏହା ପରେ OmniRoute ସ୍ୱାଧୀନ ଭାବେ ଲାଇଭ୍ ୱାୟାର୍ ଫର୍ମାଟ୍କୁ ଯାଞ୍ଚ ଏବଂ ସଂଶୋଧନ କରିଥିଲା।</td></tr>
 </table>
 
 ## 📄 ଲାଇସେନ୍ସ

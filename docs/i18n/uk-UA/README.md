@@ -72,7 +72,7 @@
 |                                  |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------------- | :-----------------------: | :---------: | :-------------------: |
 | Постачальники 🌐                 |            352            |   **358**   |          380          |
-| 🧠 Унікальна модель чату IDs     |           1320            |  **1374**   |         1475          |
+| 🧠 Унікальна модель чату IDs     |           1320            |  **1374**   |         1491          |
 | Міст модальності 🖼️              | 🆕 vision + audio + video |      ✓      |           ✓           |
 | Безкоштовний каталог 📡 Radar    |     підключення до 🆕     |      ✓      |           ✓           |
 | ⚖️ Планування з урахуванням квот |       🆕 квотування       |      ✓      |           ✓           |
@@ -137,7 +137,7 @@
     <td align="right"><b>📦 Проєкт</b></td>
     <td align="center"><a href="#%EF%B8%8F-tech-stack">🛠️ Технологічний стек</a></td>
     <td align="center"><a href="#-documentation">📖 Документація</a></td>
-    <td align="center"><a href="#-900-contributors">👥 Учасники</a></td>
+    <td align="center"><a href="#-1000-contributors">👥 Учасники</a></td>
   </tr>
 </table>
 
@@ -1290,7 +1290,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
   <tr><td nowrap><b>Середовище виконання</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Мова</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у <code>src/</code> та <code>open-sse/</code> (жодного <code>any</code> в ядрі з v2.0)</td></tr>
   <tr><td nowrap><b>Фреймворк</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База даних</b></td><td>better-sqlite3 (SQLite, журналювання WAL) + LowDB (застарілий JSON) — 147 доменних модулів, 219 міграцій</td></tr>
+  <tr><td nowrap><b>База даних</b></td><td>better-sqlite3 (SQLite, журналювання WAL) + LowDB (застарілий JSON) — 147 доменних модулів, 220 міграцій</td></tr>
   <tr><td nowrap><b>Пам'ять</b></td><td>Повнотекстовий SQLite FTS5 + int8-квантовані векторні ембедінги, типізоване згасання</td></tr>
   <tr><td nowrap><b>Схеми</b></td><td>Zod 4 — валідація I/O інструментів MCP + контракти API</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1300,7 +1300,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
   <tr><td nowrap><b>Stealth</b></td><td>wreq-js — імітація TLS-відбитків JA3 / JA4, 3-рівневий проксі</td></tr>
   <tr><td nowrap><b>Стійкість</b></td><td>Запобіжник (circuit breaker), експоненційна затримка, захист від thundering herd, самовідновлення auto-combo</td></tr>
   <tr><td nowrap><b>Логування</b></td><td>pino — структуровані JSON-логи з контекстом запиту</td></tr>
-  <tr><td nowrap><b>Тестування</b></td><td>Node.js test runner + Vitest — <b>понад 56 000 статичних декларацій тестів</b> у понад 7 800 відстежуваних тестових файлах (юніт, інтеграційні, E2E, безпека, екосистема)</td></tr>
+  <tr><td nowrap><b>Тестування</b></td><td>Node.js test runner + Vitest — <b>понад 60 000 статичних декларацій тестів</b> у понад 8 400 відстежуваних тестових файлах (юніт, інтеграційні, E2E, безпека, екосистема)</td></tr>
   <tr><td nowrap><b>Платформи</b></td><td>Десктоп (Electron) · Android (Termux) · PWA (будь-який браузер)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автопублікація в npm + Docker Hub під час релізу</td></tr>
   <tr><td nowrap><b>Посилання</b></td><td><a href="https://omniroute.online">Вебсайт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1380,7 +1380,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
   <tr><td nowrap><b><a href="SECURITY.md">Політика безпеки</a></b></td><td>Повідомлення про вразливості та практики безпеки</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">Посібник з i18n</a></b></td><td>Підтримка 67 мов, процес перекладу, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Контрольний список випуску</a></b></td><td>Етапи перевірки перед випуском</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">План покриття</a></b></td><td>Стратегія тестового покриття для понад 56 000 статичних оголошень тестів у понад 7 800 відстежуваних файлах тестів</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">План покриття</a></b></td><td>Стратегія тестового покриття для понад 60 000 статичних оголошень тестів у понад 8 400 відстежуваних файлах тестів</td></tr>
 </table>
 
 <br/>
@@ -1395,29 +1395,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
 
 <table>
   <tr><th align="center">Місце</th><th align="left">Учасник</th><th align="center">Об’єднані PR</th><th align="right">~Змінених рядків</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Статистику зібрано 2026-10-18 15:09:09 UTC для актуальної вершини <code>release/v3.8.52</code> — <code>656f01cb43</code>. Посторінкова статистика GitHub GraphQL містить 9 191 об’єднаний PR: 3 834 від власника репозиторію, 229 від Dependabot, 6 від інших ботів/застосунків і <b>5 122 зовнішні PR від 835 різних учасників</b>. «Змінені рядки» — це сума доданих і видалених рядків за даними GitHub, що охоплює згенеровані файли, файли блокування, каталоги, переклади та документацію; це обсяг змін, а не кількість авторських рядків коду. Для 49 PR GitHub повідомляє про понад 500 000 змінених рядків (наприклад, #13399 — додавання одного провайдера — містить 2 347 змінених файлів), що завищує кілька наведених вище підсумків. Учасники з однаковими показниками посідають однакове місце.</sub>
+<sub>Статистику зібрано 2026-11-03 03:01:19 UTC для актуальної вершини <code>release/v3.8.53</code> — <code>05bc048d6c</code>. Посторінкова статистика GitHub GraphQL містить 9 947 об’єднаний PR: 4 130 від власника репозиторію, 240 від Dependabot, 6 від інших ботів/застосунків і <b>5 571 зовнішні PR від 883 різних учасників</b>. «Змінені рядки» — це сума доданих і видалених рядків за даними GitHub, що охоплює згенеровані файли, файли блокування, каталоги, переклади та документацію; це обсяг змін, а не кількість авторських рядків коду. Для 53 PR GitHub повідомляє про понад 500 000 змінених рядків (наприклад, #13399 — додавання одного провайдера — містить 2 347 змінених файлів), що завищує кілька наведених вище підсумків. Учасники з однаковими показниками посідають однакове місце.</sub>
 
 ### Коміти, зараховані GitHub
 
@@ -1428,14 +1428,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 комітів, зарахованих GitHub</sub>
+      <sub>🥇 418 комітів, зарахованих GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 комітів, зарахованих GitHub</sub>
+      <sub>🥈 294 комітів, зарахованих GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1445,19 +1445,28 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
       <sub>🥉 229 комітів, зарахованих GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/backryun">
-        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
-        <b>backryun</b>
-      </a><br/>
-      <sub>🏅 202 коміти, зараховані GitHub</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 174 коміти, зараховані GitHub</sub>
+      <sub>🏅 222 комітів, зарахованих GitHub</sub>
     </td>
+    <td align="center" width="160">
+      <a href="https://github.com/backryun">
+        <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
+        <b>backryun</b>
+      </a><br/>
+      <sub>🏅 202 комітів, зарахованих GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
+      </a><br/>
+      <sub>🏅 134 комітів, зарахованих GitHub</sub>
+    </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1465,14 +1474,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
       </a><br/>
       <sub>🏅 126 комітів, зарахованих GitHub</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 114 комітів, зарахованих GitHub</sub>
+      <sub>🏅 115 комітів, зарахованих GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1482,18 +1489,18 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
       <sub>🏅 108 комітів, зарахованих GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 87 комітів, зарахованих GitHub</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 70 комітів, зарахованих GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 комітів, зарахованих GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1505,7 +1512,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
   </tr>
 </table>
 
-<sub>Повторно перевірено 2026-10-18 14:44:45 UTC: коміти, зараховані GitHub, згідно з даними API учасників репозиторію для гілки <code>release/v3.8.52</code> за замовчуванням. API повернув 849 ідентичностей (429 користувачів, 2 ботів, 418 анонімних); ця таблиця не містить супровідника, ботів та анонімних ідентичностей і зберігає однакові місця в рейтингу. Вона відрізняється як від наведеного вище рейтингу об’єднаних PR, так і від наведеного нижче переліку метаданих Git.</sub>
+<sub>Повторно перевірено 2026-11-03 02:09:16 UTC: коміти, зараховані GitHub, згідно з даними API учасників репозиторію для гілки <code>release/v3.8.53</code> за замовчуванням. API повернув 903 ідентичностей (429 користувачів, 2 ботів, 472 анонімних); ця таблиця не містить супровідника, ботів та анонімних ідентичностей і зберігає однакові місця в рейтингу. Вона відрізняється як від наведеного вище рейтингу об’єднаних PR, так і від наведеного нижче переліку метаданих Git.</sub>
 
 > 🙏 Функції, виправлення помилок і вдосконалення інфраструктури, створені цими учасниками, є **невіддільною частиною** того, що робить OmniRoute надійним і багатофункціональним. Кожен запит на злиття, кожен тестовий випадок і кожен файл перекладу i18n мають значення. Відкритий код створюють саме такі люди, як вони.
 
@@ -1617,13 +1624,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
 
 <div align="center">
 
-## 👥 900+ учасників
+## 👥 1,000+ учасників
 
 </div>
 
-[![Учасники](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=993&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
+[![Учасники](https://contrib.rocks/image?repo=diegosouzapw/OmniRoute&max=1074&columns=20&anon=1)](https://github.com/diegosouzapw/OmniRoute/graphs/contributors)
 
-<sub>Перевірено 2026-10-18 на актуальній вершині <code>release/v3.8.52</code> <code>ad160ab2d1</code> (6 826 комітів): <b>993 нормалізовані людські ідентичності Git</b> — 707 зазначені як автори комітів (включно із супроводжувачем), а 286 — лише в явних завершальних рядках <code>Co-authored-by</code>. Під час підрахунку застосовується <code>.mailmap</code>, адреси електронної пошти порівнюються без урахування регістру, числові та звичайні адреси GitHub noreply об’єднуються лише тоді, коли вони кодують однаковий нікнейм, виключаються 26 ідентичностей ботів, агентів, служб і заповнювачів, а звичайні адреси електронної пошти не об’єднуються лише через збіг відображуваних імен. Аудит від 2026-08-24 зафіксував 639; повторне застосування цього методу до бази того аудиту <code>ac02c5b42f</code> дає 619, тож збільшення зумовлене новими учасниками, а не менш суворим методом.</sub>
+<sub>Перевірено 2026-11-02 на актуальній вершині <code>release/v3.8.53</code> <code>1c7135e0fb</code> (7 972 комітів): <b>1,074 нормалізовані людські ідентичності Git</b> — 759 зазначені як автори комітів (включно із супроводжувачем), а 315 — лише в явних завершальних рядках <code>Co-authored-by</code>. Під час підрахунку застосовується <code>.mailmap</code>, адреси електронної пошти порівнюються без урахування регістру, числові та звичайні адреси GitHub noreply об’єднуються лише тоді, коли вони кодують однаковий нікнейм, виключаються 29 ідентичностей ботів, агентів, служб і заповнювачів, а звичайні адреси електронної пошти не об’єднуються лише через збіг відображуваних імен. Аудит від 2026-08-24 зафіксував 639; повторне застосування цього методу до бази того аудиту <code>ac02c5b42f</code> дає 619, тож збільшення зумовлене новими учасниками, а не менш суворим методом.</sub>
 
 ### Як зробити внесок
 
@@ -1683,25 +1690,25 @@ gh release create "v${VERSION}" --title "v${VERSION}" --generate-notes
 
 OmniRoute стоїть на плечах гігантів. Він почався як форк **[9router](https://github.com/decolua/9router)** і TypeScript-порт Go-проєкту **[CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)**, а відтоді кожна наведена нижче підсистема надихалася проєктом із відкритим вихідним кодом, який проклав цей шлях раніше. Кожен із них сформував певну частину OmniRoute. Так ми дякуємо їм усім. 🙏
 
-> ⭐ кількість зірок перевірено через REST API GitHub 18 жовтня 2026 року — поставте цим проєктам зірку. Наведені значення є точним знімком станом на вказану дату й із часом закономірно змінюватимуться.
+> ⭐ кількість зірок перевірено через REST API GitHub 2026-11-03 року — поставте цим проєктам зірку. Наведені значення є точним знімком станом на вказану дату й із часом закономірно змінюватимуться.
 
 ### 🧬 Походження та шлюз
 
 <table>
   <tr><th align="left">Проєкт</th><th align="center">⭐</th><th align="left">Як він надихнув OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,004</td><td>Оригінальний проєкт, на якому побудовано цей форк; тут його розширено мультимодальними API та повністю переписано на TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">55,591</td><td>Реалізація мовою Go, що надихнула на створення цього порту для JavaScript / TypeScript.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">61,482</td><td>Шлюз ШІ, чий загальнодоступний набір даних про ціни використовується для синхронізації відстеження витрат, а модель нормалізації провайдерів стала основою для нашої маршрутизації.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">14,526</td><td>Вихідний код під ліцензією MIT, адаптований у вбудований міст ChatGPT Web → Codex Responses, зокрема адаптери браузерних сесій, структурування відповідей, обліку використання та вебпошуку.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">61,430</td><td>Патерни, перенесені до відновлення потоків, псевдонімів без міркувань, резервного вебпошуку, обмежень ковзного вікна, редагування конфіденційних даних у журналах і посилених процесів запуску.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">346</td><td>Патерни вибору інструментів, обмежень виведення та підтвердження інструментів Cursor Composer, адаптовані до нативного виконавця Cursor.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">553</td><td>Патерни нового входу та ротації токенів оновлення, перенесені до повторної автентифікації Codex OAuth.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">558</td><td>Сумісні з Claude Code типові налаштування перетворень і поведінку заголовків білінгу узагальнено в керованому конфігурацією мості OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/decolua/9router">9router</a></b></td><td align="center">31,861</td><td>Оригінальний проєкт, на якому побудовано цей форк; тут його розширено мультимодальними API та повністю переписано на TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/router-for-me/CLIProxyAPI">CLIProxyAPI</a></b></td><td align="center">57,329</td><td>Реалізація мовою Go, що надихнула на створення цього порту для JavaScript / TypeScript.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BerriAI/litellm">LiteLLM</a></b></td><td align="center">62,580</td><td>Шлюз ШІ, чий загальнодоступний набір даних про ціни використовується для синхронізації відстеження витрат, а модель нормалізації провайдерів стала основою для нашої маршрутизації.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/miuuyy/codex-chatgpt-web">codex-chatgpt-web</a></b></td><td align="center">15,435</td><td>Вихідний код під ліцензією MIT, адаптований у вбудований міст ChatGPT Web → Codex Responses, зокрема адаптери браузерних сесій, структурування відповідей, обліку використання та вебпошуку.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Alishahryar1/free-claude-code">free-claude-code</a></b></td><td align="center">65,966</td><td>Патерни, перенесені до відновлення потоків, псевдонімів без міркувань, резервного вебпошуку, обмежень ковзного вікна, редагування конфіденційних даних у журналах і посилених процесів запуску.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/standardagents/composer-api">composer-api</a></b></td><td align="center">347</td><td>Патерни вибору інструментів, обмежень виведення та підтвердження інструментів Cursor Composer, адаптовані до нативного виконавця Cursor.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ndycode/codex-multi-auth">codex-multi-auth</a></b></td><td align="center">561</td><td>Патерни нового входу та ротації токенів оновлення, перенесені до повторної автентифікації Codex OAuth.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ex-machina-co/opencode-anthropic-auth">opencode-anthropic-auth</a></b></td><td align="center">562</td><td>Сумісні з Claude Code типові налаштування перетворень і поведінку заголовків білінгу узагальнено в керованому конфігурацією мості OmniRoute.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/520mmxx/grok2api-merged">grok2api-merged</a></b></td><td align="center">2</td><td>Його зіставлення моделей Grok, генератор Statsig із підробленим TypeError, типові налаштування запитів і пристроїв та обробник відповідей NDJSON були суттєво адаптовані до виконавця Grok Web в OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">706</td><td>Основне транзитивне джерело коду для grok2api-merged; його реалізації моделей, заголовків, корисного навантаження, Statsig та обробника збережено в лінії походження Grok Web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,819</td><td>Базове джерело під ліцензією MIT для типових налаштувань корисного навантаження Grok і пристроїв, генератора Statsig та обробника <code>result.response</code>, перенесеного через TQZHR і grok2api-merged.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/TQZHR/grok2api">TQZHR/grok2api</a></b></td><td align="center">707</td><td>Основне транзитивне джерело коду для grok2api-merged; його реалізації моделей, заголовків, корисного навантаження, Statsig та обробника збережено в лінії походження Grok Web.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chenyme/grok2api">chenyme/grok2api</a></b></td><td align="center">7,874</td><td>Базове джерело під ліцензією MIT для типових налаштувань корисного навантаження Grok і пристроїв, генератора Statsig та обробника <code>result.response</code>, перенесеного через TQZHR і grok2api-merged.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/miuzhaii/grok2api-pro">grok2api-pro</a></b></td><td align="center">27</td><td>Транзитивне джерело, зазначене в grok2api-merged для його шару пулу проксі; OmniRoute зберігає згадку про це походження, але не заявляє про перенесення пулу проксі до свого обмеженого виконавця Grok Web.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">51</td><td>Його проксі Grok з автентифікацією через cookie та патерн потокового передавання <code>result.response.token</code> стали основою для транспорту Grok Web в OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/CNFlyCat/GrokProxy">GrokProxy</a></b></td><td align="center">52</td><td>Його проксі Grok з автентифікацією через cookie та патерн потокового передавання <code>result.response.token</code> стали основою для транспорту Grok Web в OmniRoute.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/lianying1716/GrokBridge">GrokBridge</a></b></td><td align="center">5</td><td>Під час створення оригінальної реалізації Grok Web враховувалася його архітектура висхідного HTTP/браузерного з’єднання; прямий HTTP-шлях походить від GrokProxy, тому про незалежне перенесення коду не заявляється.</td></tr>
 </table>
 
@@ -1709,81 +1716,81 @@ OmniRoute стоїть на плечах гігантів. Він почався
 
 <table>
   <tr><th align="left">Проєкт</th><th align="center">⭐</th><th align="left">Як він надихнув OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">113,396</td><td>Вірусний проєкт «навіщо використовувати багато токенів, коли мало токенів роблять справу» — його філософія печерної мови лежить в основі нашого стандартного режиму стиснення та понад 30 правил видалення слів-паразитів і ущільнення.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">83,835</td><td>Високопродуктивне стиснення виводу команд — надихнуло нас на рушій RTK, DSL для фільтрації JSON, відновлення необробленого виводу та послідовний конвеєр RTK → Caveman.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">75,741</td><td>Оборотне стиснення контексту (SmartCrusher) — надихнуло нас на рушій <code>headroom</code> і шаблон маркерів отримання <code>ccr</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,757</td><td>Дослідження стиснення промптів (LLMLingua / LLMLingua-2) — надихнуло нас на асинхронний, безпечний для коду рушій <code>llmlingua</code> із безпечним пропуском у разі збою.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">32</td><td>Порт для JS/ONNX (MobileBERT / XLM-RoBERTa), який використовується як серверна частина на основі робочого потоку для нашого рушія LLMLingua.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/JuliusBrussee/caveman">Caveman</a></b></td><td align="center">116,957</td><td>Вірусний проєкт «навіщо використовувати багато токенів, коли мало токенів роблять справу» — його філософія печерної мови лежить в основі нашого стандартного режиму стиснення та понад 30 правил видалення слів-паразитів і ущільнення.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/rtk-ai/rtk">RTK – Rust Token Killer</a></b></td><td align="center">85,350</td><td>Високопродуктивне стиснення виводу команд — надихнуло нас на рушій RTK, DSL для фільтрації JSON, відновлення необробленого виводу та послідовний конвеєр RTK → Caveman.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/headroomlabs-ai/headroom">headroom</a></b></td><td align="center">78,672</td><td>Оборотне стиснення контексту (SmartCrusher) — надихнуло нас на рушій <code>headroom</code> і шаблон маркерів отримання <code>ccr</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/microsoft/LLMLingua">LLMLingua</a></b></td><td align="center">6,797</td><td>Дослідження стиснення промптів (LLMLingua / LLMLingua-2) — надихнуло нас на асинхронний, безпечний для коду рушій <code>llmlingua</code> із безпечним пропуском у разі збою.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atjsh/llmlingua-2-js">llmlingua-2-js</a></b></td><td align="center">33</td><td>Порт для JS/ONNX (MobileBERT / XLM-RoBERTa), який використовується як серверна частина на основі робочого потоку для нашого рушія LLMLingua.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/leninejunior/troglodita">Troglodita</a></b></td><td align="center">50</td><td>Стиснення токенів pt-BR — забезпечує роботу нашого мовного пакета pt-BR: скорочення плеоназмів і видалення слів-паразитів, налаштовані для бразильсько-португальської граматики.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">166,731</td><td>Вірусна навичка YAGNI-програміста «лінивий старший розробник» — надихнула нас на стиль виводу <b>less-code</b>: спрямування до найменшої працездатної зміни, що скорочує _згенерований_ код (аналог лаконічної прози Caveman для осі виводу).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">57,628</td><td>Його орієнтований на дію та зручний для людей із РДУГ стиль відповідей було адаптовано в лаконічний стиль виводу OmniRoute п’ятьма мовами.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/DietrichGebert/ponytail">ponytail</a></b></td><td align="center">182,929</td><td>Вірусна навичка YAGNI-програміста «лінивий старший розробник» — надихнула нас на стиль виводу <b>less-code</b>: спрямування до найменшої працездатної зміни, що скорочує _згенерований_ код (аналог лаконічної прози Caveman для осі виводу).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ayghri/i-have-adhd">i-have-adhd</a></b></td><td align="center">59,838</td><td>Його орієнтований на дію та зручний для людей із РДУГ стиль відповідей було адаптовано в лаконічний стиль виводу OmniRoute п’ятьма мовами.</td></tr>
 </table>
 
 ### 🧩 Компактні формати, дослідження токенів та інструменти з урахуванням коду
 
 <table>
   <tr><th align="left">Проєкт</th><th align="center">⭐</th><th align="left">Як він надихнув OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,509</td><td>Об’єктна нотація, орієнтована на токени, — її стовпцева модель «заголовок плюс рядки» сформувала наш етап табличного ущільнення.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">59</td><td>Його компактний формат графів і дизайн універсального профілю вплинули на табличне ущільнення OmniRoute та формат кодека Headroom.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/toon-format/toon">TOON</a></b></td><td align="center">25,602</td><td>Об’єктна нотація, орієнтована на токени, — її стовпцева модель «заголовок плюс рядки» сформувала наш етап табличного ущільнення.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf">GCF – Graph Compact Format</a></b></td><td align="center">61</td><td>Його компактний формат графів і дизайн універсального профілю вплинули на табличне ущільнення OmniRoute та формат кодека Headroom.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/blackwell-systems/gcf-typescript">gcf-typescript</a></b></td><td align="center">4</td><td>Реалізацію TypeScript із ліцензією MIT безпосередньо вбудовано та розширено як кодек універсального профілю Headroom.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">551</td><td>Кеш Brotli/SQLite + дельта контексту для кожного сеансу — надихнули нас на рушій <code>session-dedup</code>.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,182</td><td>Ущільнення виводу Bash + профілі MCP — надихнули нас на дисциплінований вихід зі стиснення та скорочення маніфесту інструментів MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">154</td><td>Контекстно-залежне стиснення виводу для кожного типу файлу з виходом у разі збою — підтвердило наш підхід із диспетчеризацією за типом і пропуском за недостатнього виграшу.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,595</td><td>«Знайди токени-привиди» — його шаблон вивантаження + відновлюваного дескриптора вплинув на наш підхід до вивантаження CCR.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">33</td><td>Схема графа сеансу + дедуплікації рядків між репліками, що вплинула на наш дизайн session-dedup.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ooples/token-optimizer-mcp">token-optimizer-mcp</a></b></td><td align="center">566</td><td>Кеш Brotli/SQLite + дельта контексту для кожного сеансу — надихнули нас на рушій <code>session-dedup</code>.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Mibayy/token-savior">token-savior</a></b></td><td align="center">1,203</td><td>Ущільнення виводу Bash + профілі MCP — надихнули нас на дисциплінований вихід зі стиснення та скорочення маніфесту інструментів MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/ppgranger/token-saver">token-saver</a></b></td><td align="center">162</td><td>Контекстно-залежне стиснення виводу для кожного типу файлу з виходом у разі збою — підтвердило наш підхід із диспетчеризацією за типом і пропуском за недостатнього виграшу.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/alexgreensh/token-optimizer">token-optimizer</a></b></td><td align="center">2,853</td><td>«Знайди токени-привиди» — його шаблон вивантаження + відновлюваного дескриптора вплинув на наш підхід до вивантаження CCR.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/Shweta-Mishra-ai/tokenmizer">TokenMizer</a></b></td><td align="center">34</td><td>Схема графа сеансу + дедуплікації рядків між репліками, що вплинула на наш дизайн session-dedup.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/jessefreitas/OmniCompress">OmniCompress</a></b></td><td align="center">3</td><td>Стовпцевий JSON на Rust + адресоване за вмістом отримання + дедуплікація між повідомленнями — підтвердили дизайн наших рушіїв <code>headroom</code>/<code>ccr</code>/<code>session-dedup</code> та стабільний для кешу інваріант «стиснена форма не залежить від позиції».</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">133</td><td>Стиснення схем/описів інструментів MCP — вплинуло на наше скорочення кардинальності маніфесту інструментів MCP.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">217</td><td>Ранжування карти репозиторію в стилі Aider — вплинуло на наше дослідження карти репозиторію / ранжування отримання.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/atlassian-labs/mcp-compressor">mcp-compressor</a></b></td><td align="center">140</td><td>Стиснення схем/описів інструментів MCP — вплинуло на наше скорочення кардинальності маніфесту інструментів MCP.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/pdavis68/RepoMapper">RepoMapper</a></b></td><td align="center">218</td><td>Ранжування карти репозиторію в стилі Aider — вплинуло на наше дослідження карти репозиторію / ранжування отримання.</td></tr>
   <tr><td nowrap><b><a href="https://github.com/mrsimpson/quiet-shell-mcp">quiet-shell-mcp</a></b></td><td align="center">4</td><td>Декларативне скорочення виводу оболонки через MCP — підтвердило наш підхід до декларативного ущільнення виводу bash.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,205</td><td>Інструментарій TypeScript Compiler API — надихнув нас на видалення коментарів за допомогою парсера зі збереженням рядкових, шаблонних і regex-літералів.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/dsherret/ts-morph">ts-morph</a></b></td><td align="center">6,222</td><td>Інструментарій TypeScript Compiler API — надихнув нас на видалення коментарів за допомогою парсера зі збереженням рядкових, шаблонних і regex-літералів.</td></tr>
 </table>
 
 ### 🧠 Пам’ять і RAG
 
 <table>
   <tr><th align="left">Проєкт</th><th align="center">⭐</th><th align="left">Як він надихнув OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">67,385</td><td>Універсальний шар пам’яті — його модель проксі як межі запису/читання сформувала нашу архітектуру пам’яті.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,179</td><td>Агенти зі станом і багаторівневою пам’яттю — надихнули нашу багаторівневу модель керування контекстом і відновлення (CCR).</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,800</td><td>Таксономія ProblemMap із 16 повторюваних режимів відмов RAG/LLM — спільний словник у нашому посібнику з усунення несправностей.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/mem0ai/mem0">Mem0</a></b></td><td align="center">68,294</td><td>Універсальний шар пам’яті — його модель проксі як межі запису/читання сформувала нашу архітектуру пам’яті.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/letta-ai/letta">Letta (MemGPT)</a></b></td><td align="center">25,321</td><td>Агенти зі станом і багаторівневою пам’яттю — надихнули нашу багаторівневу модель керування контекстом і відновлення (CCR).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/onestardao/WFGY">WFGY</a></b></td><td align="center">1,804</td><td>Таксономія ProblemMap із 16 повторюваних режимів відмов RAG/LLM — спільний словник у нашому посібнику з усунення несправностей.</td></tr>
 </table>
 
 ### 🛰️ Перевірка трафіку, MITM і прозорий проксі
 
 <table>
   <tr><th align="left">Проєкт</th><th align="center">⭐</th><th align="left">Як він надихнув OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">79</td><td>Перехоплення й аналіз трафіку між асистентом програмування та LLM за допомогою MITM стали основою ранніх вимог до інспектора трафіку. Чотири раніше похідні модулі — об’єднання SSE, нормалізація розмов, маскування секретів і санітизація заголовків — було замінено незалежними реалізаціями за принципом «чистої кімнати», заснованими на публічних стандартах протоколів. Дві поверхні наскрізного переспрямування хостів (<code>passthrough.ts</code> і <code>_internal/bypass.cjs</code>) залишаються внутрішніми реалізаціями OmniRoute, класифікованими незалежно; їх не переписували в межах цієї заміни.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,814</td><td>Прозора маршрутизація через проксі на рівні окремих процесів — надихнула наше відмовостійке завершення роботи MITM, тайм-аути бездіяльності сокетів, атрибуцію процесів через <code>/proc</code> і перехоплення TPROXY.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/chouzz/llm-interceptor">llm-interceptor</a></b></td><td align="center">81</td><td>Перехоплення й аналіз трафіку між асистентом програмування та LLM за допомогою MITM стали основою ранніх вимог до інспектора трафіку. Чотири раніше похідні модулі — об’єднання SSE, нормалізація розмов, маскування секретів і санітизація заголовків — було замінено незалежними реалізаціями за принципом «чистої кімнати», заснованими на публічних стандартах протоколів. Дві поверхні наскрізного переспрямування хостів (<code>passthrough.ts</code> і <code>_internal/bypass.cjs</code>) залишаються внутрішніми реалізаціями OmniRoute, класифікованими незалежно; їх не переписували в межах цієї заміни.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/InterceptSuite/ProxyBridge">ProxyBridge</a></b></td><td align="center">6,978</td><td>Прозора маршрутизація через проксі на рівні окремих процесів — надихнула наше відмовостійке завершення роботи MITM, тайм-аути бездіяльності сокетів, атрибуцію процесів через <code>/proc</code> і перехоплення TPROXY.</td></tr>
 </table>
 
 ### 📚 Дані моделей, спостережуваність та інтерфейс
 
 <table>
   <tr><th align="left">Проєкт</th><th align="center">⭐</th><th align="left">Як він надихнув OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,286</td><td>Відкрита база даних специфікацій, цін і можливостей моделей ШІ — нативно синхронізується з нашим каталогом моделей.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,705</td><td>Вузлова бібліотека графів, на якій працюють наші Compression Studio та Combo/Routing Studio в реальному часі.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">43,443</td><td>Візуалізація графів робочих процесів у реальному часі в LangGraph Studio надихнула каскадне подання в реальному часі в наших Studios.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">35,990</td><td>Його модель спостережуваності «трасування → сегмент → генерація» сформувала наше каскадне подання в Compression Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,645</td><td>Спостережуваність за сервісною сіткою Istio — надихнула значки автоматичних вимикачів і візуалізацію ребер із помилками в Routing/Combo Studio.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,615</td><td>Логотипи брендів ШІ/LLM, які відображають піктограми постачальників на нашій панелі керування.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,473</td><td>Надає ліцензовані за MIT SVG-прапори, що використовуються перемикачем мов у README.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/anomalyco/models.dev">models.dev</a></b></td><td align="center">7,486</td><td>Відкрита база даних специфікацій, цін і можливостей моделей ШІ — нативно синхронізується з нашим каталогом моделей.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/xyflow/xyflow">React Flow / xyflow</a></b></td><td align="center">38,874</td><td>Вузлова бібліотека графів, на якій працюють наші Compression Studio та Combo/Routing Studio в реальному часі.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langchain-ai/langgraph">LangGraph</a></b></td><td align="center">44,349</td><td>Візуалізація графів робочих процесів у реальному часі в LangGraph Studio надихнула каскадне подання в реальному часі в наших Studios.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/langfuse/langfuse">Langfuse</a></b></td><td align="center">36,907</td><td>Його модель спостережуваності «трасування → сегмент → генерація» сформувала наше каскадне подання в Compression Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/kiali/kiali">Kiali</a></b></td><td align="center">3,647</td><td>Спостережуваність за сервісною сіткою Istio — надихнула значки автоматичних вимикачів і візуалізацію ребер із помилками в Routing/Combo Studio.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lobehub/lobe-icons">lobe-icons</a></b></td><td align="center">2,666</td><td>Логотипи брендів ШІ/LLM, які відображають піктограми постачальників на нашій панелі керування.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lipis/flag-icons">flag-icons</a></b></td><td align="center">12,499</td><td>Надає ліцензовані за MIT SVG-прапори, що використовуються перемикачем мов у README.</td></tr>
 </table>
 
 ### 🛡️ Безпека
 
 <table>
   <tr><th align="left">Проєкт</th><th align="center">⭐</th><th align="left">Як він надихнув OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">722</td><td>Добірка бібліотек із безпечними налаштуваннями за замовчуванням, яка визначає наш вибір засобів безпеки (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/tldrsec/awesome-secure-defaults">awesome-secure-defaults</a></b></td><td align="center">723</td><td>Добірка бібліотек із безпечними налаштуваннями за замовчуванням, яка визначає наш вибір засобів безпеки (Helmet.js, DOMPurify, ssrf-req-filter, safe-regex, Google Tink).</td></tr>
 </table>
 
 ### 🧭 Доповнювальні інструменти
 
 <table>
   <tr><th align="left">Проєкт</th><th align="center">⭐</th><th align="left">Як він надихнув OmniRoute</th></tr>
-  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,628</td><td>Надихнув дедуплікацію запитів, аварійний резервний варіант із нульовою вартістю, підключувані стратегії Auto-Combo та багатомовну класифікацію намірів.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,333</td><td>Його перепризначення моделей з урахуванням облікових записів, перевірка шляхів до виконуваних файлів і поведінка міток планів вплинули на середовище виконання Antigravity в OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,850</td><td>Його компактний формат зворотного відліку до скидання квоти надихнув відповідне відображення обмежень постачальника в OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,611</td><td>Його інтеграції ACP надихнули автоматичне виявлення встановлених CLI-агентів у OmniRoute.</td></tr>
-  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,616</td><td>Виявив інтерфейс квоти Grok Build; після цього OmniRoute незалежно перевірив і виправив фактичний формат передавання даних.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/BlockRunAI/ClawRouter">ClawRouter</a></b></td><td align="center">6,649</td><td>Надихнув дедуплікацію запитів, аварійний резервний варіант із нульовою вартістю, підключувані стратегії Auto-Combo та багатомовну класифікацію намірів.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/lbjlaq/Antigravity-Manager">Antigravity-Manager</a></b></td><td align="center">32,785</td><td>Його перепризначення моделей з урахуванням облікових записів, перевірка шляхів до виконуваних файлів і поведінка міток планів вплинули на середовище виконання Antigravity в OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/jlcodes99/vscode-antigravity-cockpit">vscode-antigravity-cockpit</a></b></td><td align="center">4,852</td><td>Його компактний формат зворотного відліку до скидання квоти надихнув відповідне відображення обмежень постачальника в OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/iOfficeAI/AionUi">AionUi</a></b></td><td align="center">33,996</td><td>Його інтеграції ACP надихнули автоматичне виявлення встановлених CLI-агентів у OmniRoute.</td></tr>
+  <tr><td nowrap><b><a href="https://github.com/steipete/CodexBar">CodexBar</a></b></td><td align="center">22,955</td><td>Виявив інтерфейс квоти Grok Build; після цього OmniRoute незалежно перевірив і виправив фактичний формат передавання даних.</td></tr>
 </table>
 
 ## 📄 Ліцензія
