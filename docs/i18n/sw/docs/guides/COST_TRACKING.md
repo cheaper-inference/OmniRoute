@@ -37,65 +37,61 @@ Kwa sababu nambari hiyo ni makadirio:
 
 ---
 
-## Jinsi gharama zinavyokadiriwa
+## Jinsi gharama zinakadiriwa
 
 ### Chanzo cha bei
 
-Gharama hutoka kwenye jedwali la bei linalotatuliwa kwa mpangilio huu wa kipaumbele
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Gharama hutoka kwa jedwali la bei lililounganishwa katika [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), kwa mpangilio huu wa utangulizi (** ya juu kwanza** ):
 
-1. **Mabadiliko ya mtumiaji** — bei unazoweka kwenye dashibodi / kupitia `PATCH /api/pricing`.
-2. **Bei za nje zilizosawazishwa** — zinazopakuliwa kutoka kwenye
-   `model_prices_and_context_window.json` ya umma ya LiteLLM wakati usawazishaji umewashwa
-   (huhifadhiwa katika nafasi tofauti ya majina ya `pricing_synced` ili zisibadilishe kamwe mabadiliko yako).
-3. **Chaguo-msingi zilizowekwa moja kwa moja kwenye msimbo** — husambazwa pamoja na OmniRoute.
+1. **Mtumiaji anabatilisha** — bei zilizowekwa kwenye dashibodi au kupitia `PATCH /api/pricing` (nafasi ya majina `pricing` ).
+2. **ulandanishi wa model.dev** — bei iliyochukuliwa kutoka `https://models.dev/api.json` (nafasi ya jina ya `models_dev_pricing` ).
+3. **usawazishaji LiteLLM** — bei zilizochukuliwa kutoka `model_prices_and_context_window.json` ya umma ya LiteLLM(nafasi ya jina ya `pricing_synced` ).
+4. **Misimbo chaguomsingi yenye msimbo gumu** viwango vya — kusafirishwa kwa [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Usawazishaji wa bei za nje ni wa **kujiunga kwa hiari**, na umezimwa kwa chaguo-msingi. Vigeu husika vya mazingira
-(tazama [`.env.example`](../../.env.example)):
+Kwa provider/model sawa, thamani kutoka kwa tabaka za kipaumbele cha juu hubatilisha sehemu zinazolingana katika tabaka za chini; shamba ambazo hazipo kwenye safu ya juu bado zinaweza kutoka kwa safu ya chini. Agizo hurekebishwa hata kazi zote mbili huru za kusawazisha zinaendeshwa kwa wakati mmoja. `GET /api/pricing?includeSources=1` hurejesha `pricing` na `sourceMap`, ambazo lebo za kila modeli (`user`, `modelsDev`, `litellm`, `default`) hubainisha safu ya kipaumbele cha juu iliyo na modeli hiyo.
 
-| Kigeu cha mazingira     | Chaguo-msingi | Madhumuni                                                                           |
-| ----------------------- | ------------- | ----------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`       | Washa usawazishaji wa bei wa LiteLLM wa chinichini wakati wa kuanza.                |
-| `PRICING_SYNC_INTERVAL` | `86400`       | Kipindi cha usawazishaji kwa **sekunde** (chaguo-msingi ni kila siku).              |
-| `PRICING_SYNC_SOURCES`  | `litellm`     | Orodha ya vyanzo iliyotenganishwa kwa koma (`litellm` pekee ndiyo inayotumika leo). |
+**usawazishaji LiteLLM** ni kuchagua kuingia, imezimwa kwa chaguomsingi. Viwango vyake vya mazingira (tazama [`.env.example`](../../.env.example) ) ni:
+
+| Env var                 | Chaguomsingi | Kusudi                                                                                       |
+| ----------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`      | Washa usawazishaji wa bei LiteLLM ya usuli.                                                  |
+| `PRICING_SYNC_INTERVAL` | `86400`      | Muda wa kusawazisha kwa sekunde (kila siku).                                                 |
+| `PRICING_SYNC_SOURCES`  | `litellm`    | Uchaguzi wa chanzo kwa usawazishaji huu pekee; kwa sasa ni `litellm` pekee inayoungwa mkono. |
+
+**ulandanishi wa model.dev** ni tofauti na ulandanishi wa LiteLLM na pia imezimwa kwa chaguo-msingi. Iwashe katika Mipangilio (models.dev sync) au utumie vigeu hivi:
+
+| Env var                    | Chaguomsingi   | Kusudi                                                                                                                              |
+| -------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(haijawekwa)_ | Haijawekwa hufuata ugeuzaji wa Mipangilio; `1/true/on/yes` inawasha na `0/false/off/no` inazima (hata kama Mipangilio inaiwezesha). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`        | Muda wa kusawazisha wa models.dev chaguomsingi katika sekunde (kila siku).                                                          |
+
+`PRICING_SYNC_SOURCES` hufanya** sivyo** wezesha models.dev; inadhibiti usawazishaji LiteLLM pekee. Kufuta ubatilishaji wa mtumiaji hakuondoi nafasi ya majina iliyosawazishwa; safu inayofuata ya bei inayopatikana inakuwa nzuri. Kwa muundo usio na bei, angalia mipangilio yote ya usawazishaji na `sourceMap` kabla ya kuongeza ubatilishaji wa mikono.
 
 ### Fomula ya gharama
 
-Gharama hukokotolewa kwa kila ombi kutokana na idadi ya tokeni na viwango vya kila tokeni milioni katika
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+Gharama inakokotolewa kwa kila ombi kutoka kwa hesabu za tokeni na viwango vya tokeni kwa kila milioni katika [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Tokeni za ingizo** (bila tokeni za usomaji wa akiba muda na tokeni za kuunda akiba muda) × kiwango cha `input`.
-- **Tokeni za usomaji wa akiba muda** × kiwango cha `cached` (hutumia kiwango cha ingizo kama mbadala).
-- **Tokeni za kuunda akiba muda** × kiwango cha `cache_creation` (hutumia kiwango cha ingizo kama mbadala).
-- **Tokeni za matokeo** × kiwango cha `output`.
-- **Tokeni za kufikiri** × kiwango cha `reasoning` (hutumia kiwango cha matokeo kama mbadala).
+- **Ishara za kuingiza** (ondoa akiba ya usomaji na tokeni za kuunda akiba) × `input` kiwango.
+- **Ishara za kusoma kache** kiwango cha × `cached` (hurejea kwa kiwango cha uingizaji).
+- **Ishara za kuunda akiba** kiwango cha × `cache_creation` (hurejea kwa kiwango cha uingizaji).
+- **Tokeni za pato** kiwango cha × `output`.
+- **Ishara za hoja** kiwango cha × `reasoning` (kinarudi kwa kiwango cha pato).
 
-Viwango vyote hufasiriwa kama USD kwa kila tokeni 1,000,000. Kiwango cha huduma cha Codex
-"fast"/"priority" au "flex" hutumia kizidishi cha gharama (`getCodexFastCostMultiplier`) — kwa mfano, flex
-hutozwa kwa punguzo la 50% la tokeni, linaloonyeshwa kama **akiba ya flex** kwenye dashibodi.
+Viwango vyote vinafasiriwa kama USD kwa tokeni 1,000,000. Ngazi ya huduma ya Codex "haraka"/"kipaumbele" au "flex" inatumika kiongeza gharama (`getCodexFastCostMultiplier`) — mfano flex inatozwa kwa punguzo la tokeni la 50%.** akiba rahisi** kwenye dashibodi.
 
-Majina ya modeli husawazishwa kwanza (viambishi awali vya njia za mtoa huduma kama `openai/` au
-`accounts/fireworks/models/` huondolewa) ili safu mlalo za kihistoria ziendelee kulingana na bei.
+Majina ya miundo yanarekebishwa kwanza (viambishi awali vya njia ya mtoaji kama vile `openai/` au `accounts/fireworks/models/` vimeondolewa) kwa hivyo safu mlalo za kihistoria bado zinalingana na bei.
 
-### Jinsi matumizi yanavyorekodiwa
+### Jinsi matumizi yanarekodiwa
 
-- Gharama ya kila ombi hukokotolewa baada ya jibu na kurekodiwa bila kusubiri matokeo ili
-  isiongeze kamwe ucheleweshaji kwa kiteja. Matumizi ya mgao wa pamoja hupangwa kwenye mzunguko
-  unaofuata wa tukio kupitia [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Matumizi ya ufunguo wa API huhifadhiwa kwa muda na kuandikwa kwa mafungu na
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (kipindi chaguo-msingi cha sekunde 60 cha kuandika,
-  bafa ya maingizo 1,000). Inaweza kurekebishwa kupitia:
+- Gharama ya kila ombi hukokotwa baada ya jibu na kurekodiwa kwa moto-na-kusahau hivyo haiongezi kamwe muda wa kusubiri kwa mteja. Utumiaji wa mgawo ulioshirikiwa umeratibiwa kwenye tiki inayofuata ya kitanzi cha tukio kupitia [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Utumiaji wa vitufe vya API huakibishwa na kusukumwa kwa makundi na [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (muda chaguomsingi wa 60s, bafa ya kuingia 1,000). Tunaweza kupitia:
 
-  | Kigeu cha mazingira                 | Chaguo-msingi | Madhumuni                                           |
-  | ----------------------------------- | ------------- | --------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`       | Kipindi cha kuandika kwa milisekunde.               |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`        | Upeo wa maingizo yanayohifadhiwa kabla ya kuandika. |
+  | Env var                             | Chaguomsingi | Kusudi                                                  |
+  | ----------------------------------- | ------------ | ------------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`      | Muda wa kuvuta maji kwa milisekunde.                    |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`       | Ingizo la juu zaidi lililoakibishwa kabla ya kusafisha. |
 
-Takwimu za gharama za dashibodi **hazisomwi** kutoka kwenye kiasi cha dola kilichohifadhiwa kwa kila safu mlalo —
-hukokotolewa upya papo hapo kutokana na idadi ya tokeni na jedwali la sasa la bei kila mara kituo cha mwisho cha
-uchanganuzi kinapoendeshwa. Hii inamaanisha kuwa kusahihisha bei isiyo sahihi (na kusawazisha upya) husasisha
-makadirio ya kihistoria ya gharama kwa kutumika kwa kipindi kilichopita.
+Takwimu za gharama za dashibodi ni** sivyo** soma kutoka kwa kiasi cha dola kwa kila safu iliyohifadhiwa — hukokotwa tena kutoka kwa hesabu za tokeni na jedwali la sasa la bei kila wakati mwisho wa uchambuzi. Hiyo inamaanisha kusahihisha bei isiyo sahihi (na kusawazisha tena) husasisha makadirio ya gharama ya kihistoria kwa kurudi nyuma.
 
 ---
 
@@ -141,53 +137,50 @@ Eneo la Gharama pia lina kurasa zifuatazo (zote chini ya `/dashboard/costs/`):
 
 ---
 
-## Miisho ya API
+## API mwisho
 
-Yote haya yanahitaji uthibitishaji wa usimamizi (loopback/JWT, kupitia `requireManagementAuth`) isipokuwa
-ilipobainishwa vinginevyo.
+Yote haya yanahitaji usimamizi auth (loopback/JWT, kupitia `requireManagementAuth`) isipokuwa kama imebainishwa.
 
-### Uchanganuzi wa matumizi na gharama
+### Uchambuzi wa matumizi na gharama
 
-| Mbinu | Mwisho                   | Madhumuni                                                                                                                                                                                       |
-| ----- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET` | `/api/usage/analytics`   | Uchanganuzi kamili wa gharama/matumizi: muhtasari, mwenendo wa kila siku, kwa mtoa huduma/modeli/ufunguo wa API/akaunti/kiwango. Hoja: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET` | `/api/usage/utilization` | Matumizi ya kiwango cha kila mtoa huduma kwa muda. Hoja: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                                           |
-| `GET` | `/api/usage/history`     | Safu ghafi za historia ya matumizi.                                                                                                                                                             |
-| `GET` | `/api/usage/call-logs`   | Kumbukumbu za kila ombi (modeli, tokeni, gharama, ucheleweshaji, hali).                                                                                                                         |
-| `GET` | `/api/usage/quota`       | Hali ya kiwango cha mtoa huduma.                                                                                                                                                                |
-| `GET` | `/api/usage/proxy-logs`  | Kumbukumbu za maombi ya proksi.                                                                                                                                                                 |
+| Mbinu | Mwisho                   | Kusudi                                                                                                                                                                   |
+| ----- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET` | `/api/usage/analytics`   | Uchanganuzi kamili cost/usage : muhtasari, mwelekeo wa kila siku, na provider/model/API key/account/tier. Hoja: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET` | `/api/usage/utilization` | Utumiaji wa mgao wa kila mtoaji baada ya muda. Hoja: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                        |
+| `GET` | `/api/usage/history`     | Safu mlalo za historia ya matumizi ghafi.                                                                                                                                |
+| `GET` | `/api/usage/call-logs`   | Kumbukumbu za wito kwa ombi (mfano, ishara, gharama, muda, hali).                                                                                                        |
+| `GET` | `/api/usage/quota`       | Hali ya mgao wa mtoaji.                                                                                                                                                  |
+| `GET` | `/api/usage/proxy-logs`  | Kumbukumbu za ombi la wakala.                                                                                                                                            |
 
 ### Bajeti
 
-| Mbinu  | Mwisho                   | Madhumuni                                                                                                    |
-| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `GET`  | `/api/usage/budget`      | Muhtasari wa gharama + ukaguzi wa bajeti kwa ufunguo mmoja wa API (kigezo cha hoja `apiKeyId` kinahitajika). |
-| `POST` | `/api/usage/budget`      | Weka vikomo vya kila siku/kila wiki/kila mwezi kwa USD + kiwango cha onyo kwa ufunguo wa API.                |
-| `GET`  | `/api/usage/budget/bulk` | Mihtasari ya bajeti kwa wingi katika funguo za API.                                                          |
+| Mbinu  | Mwisho                   | Kusudi                                                                                               |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Muhtasari wa gharama + ukaguzi wa bajeti kwa ufunguo mmoja wa API (`apiKeyId` query param required). |
+| `POST` | `/api/usage/budget`      | Weka daily/weekly/monthly USD mipaka ya onyo ya + kwa ufunguo wa API.                                |
+| `GET`  | `/api/usage/budget/bulk` | Muhtasari mwingi wa bajeti kwenye funguo za API.                                                     |
 
-> API ya bajeti ina upeo wa kila **ufunguo wa API** (`apiKeyId`). Vikomo vinavyorejeshwa na
-> `GET /api/usage/budget` vinajumuisha `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> `warningThreshold`, na jumla zinazoendelea (`totalCostToday`, `totalCostMonth`, …).
+> API ya bajeti imepangwa kulingana na** ufunguo wa API** (`apiKeyId`). Vikomo vinavyorejeshwa na `GET /api/usage/budget` ni pamoja na `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold`, na jumla zinazoendeshwa (`totalCostToday`, `totalCostMonth`, …).
 
 ### Bei
 
-| Mbinu    | Mwisho                  | Madhumuni                                                                                                                           |
-| -------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Bei ya sasa iliyounganishwa (ya mtumiaji + iliyosawazishwa + chaguomsingi). `?includeSources=1` ili kuona chanzo kwa kila kipengee. |
-| `PATCH`  | `/api/pricing`          | Batilisha bei kwa `{ provider: { model: { input, output, cached, … } } }`.                                                          |
-| `DELETE` | `/api/pricing`          | Rejesha bei kwenye chaguomsingi (kwa hiari ikiwa na upeo wa `?provider=&model=`).                                                   |
-| `GET`    | `/api/pricing/defaults` | Onyesha viwango chaguomsingi vya mbadala kwa kila milioni 1.                                                                        |
-| `GET`    | `/api/pricing/models`   | Bei zilizopangwa kwa modeli.                                                                                                        |
-| `POST`   | `/api/pricing/sync`     | Anzisha usawazishaji mwenyewe kutoka vyanzo vya nje (LiteLLM).                                                                      |
-| `GET`    | `/api/pricing/sync`     | Hali ya sasa ya usawazishaji.                                                                                                       |
-| `DELETE` | `/api/pricing/sync`     | Futa data yote ya bei iliyosawazishwa.                                                                                              |
+| Mbinu    | Mwisho                  | Kusudi                                                                                                                                                           |
+| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Bei zilizounganishwa za safu nne (mtumiaji, models.dev, LiteLLM, chaguo-msingi). `?includeSources=1` inarudisha `pricing` + `sourceMap`.                         |
+| `PATCH`  | `/api/pricing`          | Batilisha bei ya `{ provider: { model: { input, output, cached, … } } }`.                                                                                        |
+| `DELETE` | `/api/pricing`          | Ondoa ubatilishaji wa bei ya mtumiaji (hiari imepewa `?provider=&model=`); viwango vilivyosawazishwa au chaguo-msingi zilizojumuishwa husalia kama njia mbadala. |
+| `GET`    | `/api/pricing/defaults` | Onyesha viwango chaguo-msingi per-1M.                                                                                                                            |
+| `GET`    | `/api/pricing/models`   | Bei iliyowekwa na modeli.                                                                                                                                        |
+| `POST`   | `/api/pricing/sync`     | Anzisha usawazishaji wa mwongozo kutoka kwa vyanzo vya nje (LiteLLM).                                                                                            |
+| `GET`    | `/api/pricing/sync`     | Hali ya sasa ya usawazishaji.                                                                                                                                    |
+| `DELETE` | `/api/pricing/sync`     | Futa bei iliyosawazishwa na LiteLLM pekee (`pricing_synced`); data ya model.dev ni tofauti.                                                                      |
 
-### Miisho mingine inayohusiana na gharama
+### Viwango vingine vinavyohusiana na gharama
 
-| Mbinu | Endpoint                      | Madhumuni                                                                                  |
-| ----- | ----------------------------- | ------------------------------------------------------------------------------------------ |
-| `GET` | `/api/free-tier/summary`      | Jumla ya tokeni za modeli zisizolipishwa, zilizotumika mwezi huu, na salio lisilolipishwa. |
-| `GET` | `/api/quota/pools/[id]/usage` | Matumizi ya kundi la kiwango cha matumizi kinachoshirikiwa.                                |
+| Mbinu | Mwisho                        | Kusudi                                                                                            |
+| ----- | ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| `GET` | `/api/free-tier/summary`      | Jumla ya tokeni za muundo bila malipo, zilizotumika mwezi huu, na posho iliyosalia isiyolipishwa. |
+| `GET` | `/api/quota/pools/[id]/usage` | Matumizi ya bwawa la sehemu iliyoshirikiwa.                                                       |
 
 ---
 

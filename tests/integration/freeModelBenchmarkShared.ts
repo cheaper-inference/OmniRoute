@@ -87,8 +87,8 @@ export const FREE_MODELS: FreeModelSpec[] = [
   },
   {
     provider: "opencode",
-    model: "opencode/deepseek-v4-flash-free",
-    displayName: "DeepSeek V4 Flash Free (OpenCode)",
+    model: "opencode/deepseek-v4.1-flash-free",
+    displayName: "DeepSeek V4.1 Flash Free (OpenCode)",
   },
   {
     provider: "duckduckgo-web",
@@ -178,8 +178,8 @@ export const FREE_MODELS: FreeModelSpec[] = [
   { provider: "opencode", model: "opencode/big-pickle", displayName: "Big Pickle (OpenCode)" },
   {
     provider: "opencode",
-    model: "opencode/mimo-v2.5-free",
-    displayName: "MiMo V2.5 Free (OpenCode)",
+    model: "opencode/mimo-v2.6-flash-free",
+    displayName: "MiMo V2.6 Flash Free (OpenCode)",
   },
 ];
 
@@ -209,7 +209,7 @@ export const NEWLY_ENABLED_MODELS: FreeModelSpec[] = FREE_MODELS.filter((m) =>
     "opencode/north-mini-code-free",
     "opencode/laguna-s-2.1-free",
     "opencode/big-pickle",
-    "opencode/mimo-v2.5-free",
+    "opencode/mimo-v2.6-flash-free",
   ].includes(m.model)
 );
 

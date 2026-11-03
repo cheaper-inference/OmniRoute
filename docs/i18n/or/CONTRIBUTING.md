@@ -13,14 +13,14 @@ UI/UX, i18n, CLI, database, ଏବଂ build/deploy ପରିବର୍ତ୍ତ�
 
 ---
 
-## ବିକାଶ ସେଟଅପ୍
+## ଡେଭଲପମେଣ୍ଟ ସେଟଅପ୍
 
 ### ପୂର୍ବାବଶ୍ୟକତା
 
-- **Node.js** `>=22.22.3 <23`, କିମ୍ବା `>=24.0.0 <27` (ସୁପାରିସ୍: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, କିମ୍ବା `>=24.0.0 <27` (ସୁପାରିସକୃତ: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ ବ୍ୟବହାରକାରୀ (Node 24+):** `npm install` ପରେ, native modules ଇନଷ୍ଟଲ୍ ହୋଇଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ:
+> **npm v11+ ବ୍ୟବହାରକାରୀମାନେ (Node 24+):** `npm install` ପରେ, ନେଟିଭ୍ ମଡ୍ୟୁଲଗୁଡ଼ିକ ଇନଷ୍ଟଲ୍ ହୋଇଛି କି ନାହିଁ ଯାଞ୍ଚ କରନ୍ତୁ:
 > `node -e "require('better-sqlite3')"`. ଯଦି ଏହା `MODULE_NOT_FOUND` ସହିତ ବିଫଳ ହୁଏ,
 > `npm approve-scripts better-sqlite3 && npm install` ଚଲାନ୍ତୁ। ଦେଖନ୍ତୁ
 > [ସମସ୍ୟା ସମାଧାନ](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
@@ -35,90 +35,90 @@ cd OmniRoute
 npm install
 ```
 
-### ପରିବେଶ ଭେରିଏବଲ୍
+### ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ
 
 ```bash
-# ଟେମ୍ପଲେଟ୍ରୁ ଆପଣଙ୍କର .env ସୃଷ୍ଟି କରନ୍ତୁ
+# ଟେମ୍ପଲେଟ୍ରୁ ଆପଣଙ୍କର .env ତିଆରି କରନ୍ତୁ
 cp .env.example .env
 
-# ଆବଶ୍ୟକୀୟ ଗୁପ୍ତ ମୂଲ୍ୟଗୁଡ଼ିକ ସୃଷ୍ଟି କରନ୍ତୁ
+# ଆବଶ୍ୟକ ସିକ୍ରେଟ୍ଗୁଡ଼ିକ ଜେନେରେଟ୍ କରନ୍ତୁ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-ବିକାଶ ପାଇଁ ପ୍ରମୁଖ ଭେରିଏବଲ୍ଗୁଡ଼ିକ:
+ଡେଭଲପମେଣ୍ଟ ପାଇଁ ପ୍ରମୁଖ ଭେରିଏବଲ୍ଗୁଡ଼ିକ:
 
-| ଭେରିଏବଲ୍               | ବିକାଶ ଡିଫଲ୍ଟ             | ବର୍ଣ୍ଣନା               |
-| ---------------------- | ------------------------ | ---------------------- |
-| `PORT`                 | `20128`                  | ସର୍ଭର୍ ପୋର୍ଟ           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | frontend ପାଇଁ ମୂଳ URL  |
-| `JWT_SECRET`           | (ଉପରେ ସୃଷ୍ଟି କରନ୍ତୁ)     | JWT ସାଇନିଂ ଗୁପ୍ତ ମୂଲ୍ୟ |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | ପ୍ରଥମ login ପାସ୍ୱାର୍ଡ  |
-| `APP_LOG_LEVEL`        | `info`                   | logର ବିସ୍ତୃତତା ସ୍ତର    |
+| ଭେରିଏବଲ୍               | ଡେଭଲପମେଣ୍ଟ ଡିଫଲ୍ଟ        | ବର୍ଣ୍ଣନା                 |
+| ---------------------- | ------------------------ | ------------------------ |
+| `PORT`                 | `20128`                  | ସର୍ଭର ପୋର୍ଟ              |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ଫ୍ରଣ୍ଟଏଣ୍ଡ ପାଇଁ ବେସ୍ URL |
+| `JWT_SECRET`           | (ଉପରେ ଜେନେରେଟ୍ କରନ୍ତୁ)   | JWT ସାଇନିଂ ସିକ୍ରେଟ୍      |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | ପ୍ରଥମ ଲଗଇନ୍ ପାସୱାର୍ଡ     |
+| `APP_LOG_LEVEL`        | `info`                   | ଲଗ୍ ବିବରଣୀ ସ୍ତର          |
 
 ### ଡ୍ୟାସବୋର୍ଡ ସେଟିଂସ୍
 
-ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ ମାଧ୍ୟମରେ ମଧ୍ୟ ବିନ୍ୟାସ କରାଯାଇପାରୁଥିବା ବୈଶିଷ୍ଟ୍ୟଗୁଡ଼ିକ ପାଇଁ ଡ୍ୟାସବୋର୍ଡ UI ଟଗଲ୍ ପ୍ରଦାନ କରେ:
+ଡ୍ୟାସବୋର୍ଡ ଏପରି ବୈଶିଷ୍ଟ୍ୟଗୁଡ଼ିକ ପାଇଁ UI ଟଗଲ୍ ପ୍ରଦାନ କରେ, ଯେଉଁଗୁଡ଼ିକୁ ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ ମାଧ୍ୟମରେ ମଧ୍ୟ କନଫିଗର୍ କରାଯାଇପାରେ:
 
-| ସେଟିଂର ଅବସ୍ଥାନ   | ଟଗଲ୍                | ବର୍ଣ୍ଣନା                               |
-| ---------------- | ------------------- | -------------------------------------- |
-| ସେଟିଂସ୍ → ଉନ୍ନତ  | ଡିବଗ୍ ମୋଡ୍          | ଡିବଗ୍ request logs (UI) ସକ୍ରିୟ କରନ୍ତୁ  |
-| ସେଟିଂସ୍ → ସାଧାରଣ | ସାଇଡବାର୍ ଦୃଶ୍ୟମାନତା | ସାଇଡବାର୍ ବିଭାଗଗୁଡ଼ିକ ଦେଖାନ୍ତୁ/ଲୁଚାନ୍ତୁ |
+| ସେଟିଂର ଅବସ୍ଥାନ   | ଟଗଲ୍                | ବର୍ଣ୍ଣନା                                    |
+| ---------------- | ------------------- | ------------------------------------------- |
+| ସେଟିଂସ୍ → ଉନ୍ନତ  | ଡିବଗ୍ ମୋଡ୍          | ଡିବଗ୍ ରିକ୍ୱେଷ୍ଟ ଲଗ୍ଗୁଡ଼ିକ ସକ୍ଷମ କରନ୍ତୁ (UI) |
+| ସେଟିଂସ୍ → ସାଧାରଣ | ସାଇଡବାର୍ ଦୃଶ୍ୟମାନତା | ସାଇଡବାର୍ ବିଭାଗଗୁଡ଼ିକ ଦେଖାନ୍ତୁ/ଲୁଚାନ୍ତୁ      |
 
-ଏହି ସେଟିଂସ୍ଗୁଡ଼ିକ databaseରେ ସଂରକ୍ଷିତ ହୁଏ ଏବଂ restart ପରେ ମଧ୍ୟ ରହିଥାଏ; ସେଗୁଡ଼ିକ ସେଟ୍ କରାଯାଇଥିଲେ env varର ଡିଫଲ୍ଟ ମୂଲ୍ୟକୁ ଓଭର୍ରାଇଡ୍ କରେ।
+ଏହି ସେଟିଂସ୍ଗୁଡ଼ିକ ଡାଟାବେସ୍ରେ ସଂରକ୍ଷିତ ହୁଏ ଏବଂ ପୁନଃଚାଳନ ପରେ ମଧ୍ୟ ବଜାୟ ରହେ; ସେଟ୍ କରାଯାଇଥିଲେ ଏଗୁଡ଼ିକ env var ଡିଫଲ୍ଟଗୁଡ଼ିକୁ ଓଭରରାଇଡ୍ କରେ।
 
-### ସ୍ଥାନୀୟ ଭାବେ ଚଲାଇବା
+### ସ୍ଥାନୀୟ ଭାବରେ ଚଲାଇବା
 
 ```bash
-# ବିକାଶ ମୋଡ୍ (ହଟ୍ ରିଲୋଡ୍)
+# ଡେଭଲପମେଣ୍ଟ ମୋଡ୍ (ହଟ୍ ରିଲୋଡ୍)
 npm run dev
 
 # ପ୍ରଡକ୍ସନ୍ ବିଲ୍ଡ
-npm run build    # next build → .build/next/ ତାପରେ assembleStandalone → dist/
+npm run build    # next build → .build/next/ ତା’ପରେ assembleStandalone → dist/
 npm run start
 
-# ଅବଦାନକାରୀଙ୍କ ପରିବର୍ତ୍ତନ ପାଇଁ ଦ୍ରୁତ backend/API-ମାତ୍ର compile
+# ଅବଦାନକାରୀଙ୍କ ପରିବର୍ତ୍ତନ ପାଇଁ ଦ୍ରୁତ ବ୍ୟାକଏଣ୍ଡ/API-ମାତ୍ର କମ୍ପାଇଲ୍
 npm run build:contributor
 
-# ରିଲିଜ୍ ବିଲ୍ଡ (ପରିଷ୍କାର ପୁନଃବିଲ୍ଡ + HEAD sentinel — deploy ପାଇଁ ଆବଶ୍ୟକ)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ଲେଖେ
+# ରିଲିଜ୍ ବିଲ୍ଡ (ପରିଷ୍କାର ପୁନଃବିଲ୍ଡ + HEAD ସେଣ୍ଟିନେଲ୍ — ଡିପ୍ଲୟ ପାଇଁ ଆବଶ୍ୟକ)
+npm run build:release   # rm -rf .build dist && ବିଲ୍ଡ + dist/BUILD_SHA ଲେଖେ
 
-# ସାଧାରଣ ପୋର୍ଟ ବିନ୍ୟାସ
+# ସାଧାରଣ ପୋର୍ଟ କନଫିଗରେସନ୍
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ଅବଦାନକାରୀ build କେବଳ compile validation କରେ: ଏହା standalone
-distribution assemble କରେ ନାହିଁ କିମ୍ବା ଇଚ୍ଛାଧୀନ native packaging assets build କରେ ନାହିଁ। ପଠାଯୋଗ୍ୟ bundleକୁ
-validate କରିବା ଆବଶ୍ୟକ ହେଲେ ନିୟମିତ production build ବ୍ୟବହାର କରନ୍ତୁ।
+ଅବଦାନକାରୀ ବିଲ୍ଡ କେବଳ କମ୍ପାଇଲ୍ ସତ୍ୟାପନ କରେ: ଏହା ଷ୍ଟାଣ୍ଡଅଲୋନ୍
+ଡିଷ୍ଟ୍ରିବ୍ୟୁସନ୍ ସଂଯୋଜନ କରେ ନାହିଁ କିମ୍ବା ଇଚ୍ଛାଧୀନ ନେଟିଭ୍ ପ୍ୟାକେଜିଂ ଆସେଟ୍ଗୁଡ଼ିକ ବିଲ୍ଡ କରେ ନାହିଁ। ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ ସତ୍ୟାପନ
+କରିବା ଆବଶ୍ୟକ ହେଲେ ନିୟମିତ ପ୍ରଡକ୍ସନ୍ ବିଲ୍ଡ ବ୍ୟବହାର କରନ୍ତୁ।
 
-### ବିଲ୍ଡ ଆଉଟପୁଟ୍ର ବିନ୍ୟାସ
+### ବିଲ୍ଡ ଆଉଟପୁଟ୍ ବିନ୍ୟାସ
 
 | ଡିରେକ୍ଟୋରୀ | ବିଷୟବସ୍ତୁ                                                                            | ଟ୍ରାକ୍ କରାଯାଏ |
 | ---------- | ------------------------------------------------------------------------------------ | ------------- |
 | `src/`     | ଆପ୍ଲିକେସନ୍ ସୋର୍ସ (TypeScript / TSX)                                                  | ହଁ            |
 | `.build/`  | ମଧ୍ୟବର୍ତ୍ତୀ ଫାଇଲ୍ଗୁଡ଼ିକ — `next build` ଆଉଟପୁଟ୍ (gitignored, `distDir = .build/next`) | ନା            |
-| `dist/`    | ପଠାଯୋଗ୍ୟ bundle — `assembleStandalone` ଦ୍ୱାରା assemble କରାଯାଇଛି (gitignored)         | ନା            |
+| `dist/`    | ପଠାଯୋଗ୍ୟ ବଣ୍ଡଲ୍ — `assembleStandalone` ଦ୍ୱାରା ସଂଯୋଜିତ (gitignored)                   | ନା            |
 
-build pipeline ଏକକ passରେ ସମ୍ପନ୍ନ ହୁଏ:
+ବିଲ୍ଡ ପାଇପଲାଇନ୍ ଗୋଟିଏ ପାସ୍ରେ ସମ୍ପନ୍ନ ହୁଏ:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js ଆଉଟପୁଟ୍)
-  └─ assembleStandalone()                 (standalone + static + public + native assets କପି କରେ)
-       └─ ଆଉଟପୁଟ୍: dist/                  (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (ଷ୍ଟାଣ୍ଡଅଲୋନ୍ + ଷ୍ଟାଟିକ୍ + ପବ୍ଲିକ୍ + ନେଟିଭ୍ ଆସେଟ୍ଗୁଡ଼ିକ କପି କରେ)
+       └─ ଆଉଟପୁଟ୍: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ଅତିରିକ୍ତ ଭାବେ ପ୍ରଥମେ ଉଭୟ ଡିରେକ୍ଟୋରୀକୁ ପରିଷ୍କାର କରେ ଏବଂ deploy integrity sentinel ଭାବରେ
+`npm run build:release` ଅତିରିକ୍ତ ଭାବରେ ପ୍ରଥମେ ଉଭୟ ଡିରେକ୍ଟୋରୀକୁ ପରିଷ୍କାର କରେ ଏବଂ ଡିପ୍ଲୟ ଅଖଣ୍ଡତା ସେଣ୍ଟିନେଲ୍ ଭାବେ
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ଲେଖେ।
 
-`npm run build:contributor` backend-ମାତ୍ର build profile ବ୍ୟବହାର କରେ। ଏହା build କରିବା ସମୟରେ ଅସ୍ଥାୟୀ ଭାବେ
-dashboard UI filesକୁ stub କରେ, API route handlersକୁ ରଖେ, ଏବଂ build ପରେ ମୂଳ filesକୁ
-ପୁନଃସ୍ଥାପନ କରେ। dashboard UIକୁ ପ୍ରଭାବିତ କରୁଥିବା ପରିବର୍ତ୍ତନ କିମ୍ବା ସମ୍ପୂର୍ଣ୍ଣ
-release validation ପାଇଁ `npm run build` ବ୍ୟବହାର କରନ୍ତୁ; contributor profile release buildର ବିକଳ୍ପ ନୁହେଁ।
+`npm run build:contributor` କେବଳ ବ୍ୟାକଏଣ୍ଡ ପାଇଁ ଥିବା ବିଲ୍ଡ ପ୍ରୋଫାଇଲ୍ ବ୍ୟବହାର କରେ। ବିଲ୍ଡ କରିବା ସମୟରେ ଏହା ଅସ୍ଥାୟୀ ଭାବରେ
+ଡ୍ୟାସବୋର୍ଡ UI ଫାଇଲ୍ଗୁଡ଼ିକୁ ଷ୍ଟବ୍ କରେ, API ରୁଟ୍ ହ୍ୟାଣ୍ଡଲର୍ଗୁଡ଼ିକୁ ରଖେ ଏବଂ ବିଲ୍ଡ ପରେ ମୂଳ ଫାଇଲ୍ଗୁଡ଼ିକୁ
+ପୁନଃସ୍ଥାପନ କରେ। ଡ୍ୟାସବୋର୍ଡ UIକୁ ପ୍ରଭାବିତ କରୁଥିବା ପରିବର୍ତ୍ତନ କିମ୍ବା ସମ୍ପୂର୍ଣ୍ଣ
+ରିଲିଜ୍ ସତ୍ୟାପନ ପାଇଁ `npm run build` ବ୍ୟବହାର କରନ୍ତୁ; ଅବଦାନକାରୀ ପ୍ରୋଫାଇଲ୍ ରିଲିଜ୍ ବିଲ୍ଡର ବିକଳ୍ପ ନୁହେଁ।
 
-> **VPS deploy ଟିପ୍ପଣୀ:** remote image directory `/usr/lib/node_modules/omniroute/app/`
-> ଅପରିବର୍ତ୍ତିତ ରହିଛି। deploy skills `dist/`ର ବିଷୟବସ୍ତୁକୁ ଏହା ଭିତରକୁ rsync କରେ।
-> କେବଳ repository ଭିତରେ ଥିବା build output path ପରିବର୍ତ୍ତିତ ହୋଇଛି (`app/` → `dist/`)।
+> **VPS ଡିପ୍ଲୟ ଟିପ୍ପଣୀ:** ରିମୋଟ୍ ଇମେଜ୍ ଡିରେକ୍ଟୋରୀ `/usr/lib/node_modules/omniroute/app/`
+> ଅପରିବର୍ତ୍ତିତ ରହିଛି। ଡିପ୍ଲୟ ସ୍କିଲ୍ଗୁଡ଼ିକ `dist/`ର ବିଷୟବସ୍ତୁକୁ ଏଥିରେ rsync କରନ୍ତି।
+> କେବଳ ରିପୋଜିଟୋରୀ ମଧ୍ୟରେ ଥିବା ବିଲ୍ଡ ଆଉଟପୁଟ୍ ପଥ ପରିବର୍ତ୍ତିତ ହୋଇଛି (`app/` → `dist/`)।
 
 ଡିଫଲ୍ଟ URLଗୁଡ଼ିକ:
 
@@ -171,35 +171,35 @@ Scopeଗୁଡ଼ିକ (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`,
 
 ---
 
-## Test ଚଲାଇବା
+## ପରୀକ୍ଷାଗୁଡ଼ିକ ଚଲାଇବା
 
 ```bash
-# ସମସ୍ତ test (unit + vitest + ecosystem + e2e)
+# ସମସ୍ତ ପରୀକ୍ଷା (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# ଗୋଟିଏ test file (Node.js native test runner — ଅଧିକାଂଶ test ଏହାକୁ ବ୍ୟବହାର କରେ)
+# ଏକକ ପରୀକ୍ଷା ଫାଇଲ୍ (Node.js ନେଟିଭ୍ ପରୀକ୍ଷା ରନର୍ — ଅଧିକାଂଶ ପରୀକ୍ଷା ଏହାକୁ ବ୍ୟବହାର କରେ)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# କେବଳ ଆପଣଙ୍କ ପରିବର୍ତ୍ତନରେ ପ୍ରଭାବିତ unit testଗୁଡ଼ିକ (CI gate ପରି ସମାନ TIA selector, #8084)
+# କେବଳ ଆପଣଙ୍କ ପରିବର୍ତ୍ତନ ଦ୍ୱାରା ପ୍ରଭାବିତ unit ପରୀକ୍ଷାଗୁଡ଼ିକ (CI ଗେଟ୍ ସହିତ ସମାନ TIA ସିଲେକ୍ଟର୍, #8084)
 npm run test:scoped            # ଶେଷ commitରେ (କିମ୍ବା working treeରେ) ହୋଇଥିବା ପରିବର୍ତ୍ତନ
-npm run test:scoped:staged     # କେବଳ staged ପରିବର୍ତ୍ତନ — pre-commit run ସହିତ ଭଲ ଭାବରେ କାମ କରେ
-npm run test:scoped:full       # ପ୍ରଥମେ import-graph map ପୁନଃନିର୍ମାଣ କରନ୍ତୁ (file ଯୋଗ/ସ୍ଥାନାନ୍ତର କରିବା ପରେ)
-# Exit 1 + "ସମ୍ପୂର୍ଣ୍ଣ suite ଚଲାନ୍ତୁ"ର ଅର୍ଥ ହେଉଛି ଏକ hub file (tsconfig, package.json, …) କିମ୍ବା ଏକ
-# map ହୋଇନଥିବା source ପରିବର୍ତ୍ତିତ ହୋଇଛି — selector ସୁରକ୍ଷିତ ଭାବେ ବିଫଳ ହୁଏ, ଏହା କେବେବି ନିରବରେ ଛାଡ଼ିଯାଏ ନାହିଁ।
+npm run test:scoped:staged     # କେବଳ staged ପରିବର୍ତ୍ତନଗୁଡ଼ିକ — pre-commit ରନ୍ ସହିତ ଭଲ ଭାବେ କାମ କରେ
+npm run test:scoped:full       # ପ୍ରଥମେ import-graph ମ୍ୟାପ୍ ପୁନଃନିର୍ମାଣ କରେ (ଫାଇଲ୍ ଯୋଡ଼ିବା/ସ୍ଥାନାନ୍ତର କରିବା ପରେ)
+# Exit 1 + "ସମ୍ପୂର୍ଣ୍ଣ suite ଚଲାନ୍ତୁ"ର ଅର୍ଥ ହେଉଛି ଗୋଟିଏ hub ଫାଇଲ୍ (tsconfig, package.json, …) କିମ୍ବା
+# ମ୍ୟାପ୍ ହୋଇନଥିବା source ପରିବର୍ତ୍ତିତ ହୋଇଛି — ସିଲେକ୍ଟର୍ ନିରାପଦ ଭାବେ ବିଫଳ ହୁଏ, ଏହା କେବେ ମଧ୍ୟ ନିରବରେ ଛାଡ଼ି ଦିଏ ନାହିଁ।
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
-# E2E test (Playwright ଆବଶ୍ୟକ)
+# E2E ପରୀକ୍ଷାଗୁଡ଼ିକ (Playwright ଆବଶ୍ୟକ)
 npm run test:e2e
 
-# Protocol client E2E (MCP transport, A2A)
+# Protocol clients E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem compatibility test
+# Ecosystem ସୁସଙ୍ଗତତା ପରୀକ୍ଷାଗୁଡ଼ିକ
 npm run test:ecosystem
 
-# Coverage gate: statement/line/function/branch ପାଇଁ 60%
+# Coverage ଗେଟ୍: statements/lines/functions/branches ପାଇଁ 60%
 npm run test:coverage
 npm run coverage:report
 
@@ -207,51 +207,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Gate ଦ୍ୱାରା ନିୟନ୍ତ୍ରିତ real-upstream combo smoke (VPS access + ପ୍ରକୃତ provider credit ଆବଶ୍ୟକ)
-# ପ୍ରକୃତ providerଗୁଡ଼ିକୁ hit କରେ — ଅଳ୍ପ ଖର୍ଚ୍ଚ ହୁଏ। CIରେ କେବେବି ଚାଲେ ନାହିଁ। Gate ନଥିଲେ ସ୍ୱଚ୍ଛ ଭାବରେ skip କରେ।
-# ଆବଶ୍ୟକ: ssh root@192.168.0.15 access (VPSରୁ ଏକ read-only DB snapshot source କରେ)।
+# ଗେଟ୍ କରାଯାଇଥିବା ପ୍ରକୃତ-upstream combo smoke (VPS ପ୍ରବେଶ + ପ୍ରକୃତ provider credits ଆବଶ୍ୟକ)
+# ପ୍ରକୃତ providersକୁ ଅନୁରୋଧ ପଠାଏ — ଅଳ୍ପ ଖର୍ଚ୍ଚ ହୁଏ। CIରେ କେବେ ମଧ୍ୟ ଚାଲେ ନାହିଁ। ଗେଟ୍ ନଥିଲେ ସ୍ୱଚ୍ଛ ଭାବେ ଛାଡ଼ିଦିଏ।
+# ଆବଶ୍ୟକ: ssh root@192.168.0.15 ପ୍ରବେଶ (VPSରୁ ଗୋଟିଏ read-only DB snapshot source କରେ)।
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — ସରଳ Node ESM script, live .15 serverକୁ ସିଧାସଳଖ hit କରେ।
-# ଆବଶ୍ୟକ: ssh root@192.168.0.15 access (SSH sqlite ମାଧ୍ୟମରେ combo ତିଆରି/ଅପସାରଣ କରାଯାଏ)।
-# ପ୍ରକୃତ providerଗୁଡ଼ିକୁ hit କରେ (ଅଳ୍ପ ଖର୍ଚ୍ଚ)। କେବଳ __live_test__* combo ତିଆରି/ବିଲୋପ କରେ। CIରେ କେବେବି ଚାଲେ ନାହିଁ।
-# .15ରେ REQUIRE_API_KEY=false ଥିବାରୁ API key ଆବଶ୍ୟକ ନୁହେଁ, କିନ୍ତୁ ସେଟ୍ ହୋଇଥିଲେ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEYକୁ ସମ୍ମାନ କରେ।
-npm run test:combo:live:vps              # 7ଟି HTTP scenario (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # ଏକ ପ୍ରକୃତ cross-provider failover scenario ଯୋଗ କରେ (ମୋଟ 8ଟି)
+# Phase-3 VPS live smoke — ସାଧାରଣ Node ESM scripts, live .15 serverକୁ ସିଧାସଳଖ ଅନୁରୋଧ ପଠାଏ।
+# ଆବଶ୍ୟକ: ssh root@192.168.0.15 ପ୍ରବେଶ (SSH sqlite ମାଧ୍ୟମରେ combos ସୃଷ୍ଟି/ବିଲୋପ କରାଯାଏ)।
+# ପ୍ରକୃତ providersକୁ ଅନୁରୋଧ ପଠାଏ (ଅଳ୍ପ ଖର୍ଚ୍ଚ)। କେବଳ __live_test__* combos ସୃଷ୍ଟି/ବିଲୋପ କରେ। CIରେ କେବେ ମଧ୍ୟ ଚାଲେ ନାହିଁ।
+# .15ରେ REQUIRE_API_KEY=false, ତେଣୁ API key ଆବଶ୍ୟକ ନାହିଁ, କିନ୍ତୁ ସେଟ୍ ହୋଇଥିଲେ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEYକୁ ସମ୍ମାନ କରେ।
+npm run test:combo:live:vps              # 7ଟି HTTP ପରିଦୃଶ୍ୟ (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # ଏକ ପ୍ରକୃତ cross-provider failover ପରିଦୃଶ୍ୟ ଯୋଡ଼େ (ମୋଟ 8ଟି)
 ```
 
-Coverage ଟିପ୍ପଣୀ:
+Coverage ସମ୍ବନ୍ଧୀୟ ଟିପ୍ପଣୀ:
 
-- `npm run test:coverage` ମୁଖ୍ୟ unit test suite ପାଇଁ source coverage ମାପେ, `tests/**`କୁ ବାଦ ଦିଏ ଏବଂ `open-sse/**`କୁ ସାମିଲ କରେ
-- Pull requestଗୁଡ଼ିକରେ statement/line/function/branch ପାଇଁ coverage gate **60%+** ରହିବା ଆବଶ୍ୟକ
-- ଯଦି ଏକ PR `src/`, `open-sse/`, `electron/`, କିମ୍ବା `bin/`ର production code ପରିବର୍ତ୍ତନ କରେ, ତେବେ ସେହି PRରେ automated test ଯୋଗ କିମ୍ବା ଅଦ୍ୟତନ କରିବା ଆବଶ୍ୟକ
-- `npm run coverage:report` ସର୍ବଶେଷ coverage runରୁ ବିସ୍ତୃତ file-by-file report print କରେ
+- `npm run test:coverage` ମୁଖ୍ୟ unit test suite ପାଇଁ source coverage ମାପେ, `tests/**`କୁ ବାଦ ଦିଏ ଏବଂ `open-sse/**`କୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ
+- Pull requestsଗୁଡ଼ିକୁ statements/lines/functions/branches ପାଇଁ coverage ଗେଟ୍ **60%+**ରେ ରଖିବାକୁ ହେବ
+- ଯଦି କୌଣସି PR `src/`, `open-sse/`, `electron/`, କିମ୍ବା `bin/`ରେ production code ପରିବର୍ତ୍ତନ କରେ, ତେବେ ସେହି PRରେ automated tests ଯୋଡ଼ିବା କିମ୍ବା ଅଦ୍ୟତନ କରିବା ଆବଶ୍ୟକ
+- `npm run coverage:report` ସର୍ବଶେଷ coverage runରୁ ବିସ୍ତୃତ file-by-file report ପ୍ରିଣ୍ଟ କରେ
 - `npm run test:coverage:legacy` ଐତିହାସିକ ତୁଳନା ପାଇଁ ପୁରୁଣା metricକୁ ସଂରକ୍ଷିତ ରଖେ
-- ପର୍ଯ୍ୟାୟଭିତ୍ତିକ coverage ଉନ୍ନତି roadmap ପାଇଁ `docs/ops/COVERAGE_PLAN.md` ଦେଖନ୍ତୁ
+- ପର୍ଯ୍ୟାୟକ୍ରମିକ coverage ଉନ୍ନତି roadmap ପାଇଁ `docs/ops/COVERAGE_PLAN.md` ଦେଖନ୍ତୁ
 
-### Pull Request ଆବଶ୍ୟକତା
+### Pull Request ଆବଶ୍ୟକତାଗୁଡ଼ିକ
 
-ଏକ PR ଖୋଲିବା ପୂର୍ବରୁ, ଆପଣ ଯାହା ପରିବର୍ତ୍ତନ କରିଛନ୍ତି ତାହା ପାଇଁ focused loop ଚଲାଇବାକୁ
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ବ୍ୟବହାର କରନ୍ତୁ। ସମ୍ପୂର୍ଣ୍ଣ unit suite (4ଟି CI shard), Vitest, **60%+** coverage gate ଏବଂ
+ଗୋଟିଏ PR ଖୋଲିବା ପୂର୍ବରୁ, ଆପଣ ଯାହା ପରିବର୍ତ୍ତନ କରିଛନ୍ତି ତାହା ପାଇଁ କେନ୍ଦ୍ରିତ loop ଚଲାଇବାକୁ
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ବ୍ୟବହାର କରନ୍ତୁ। ସମ୍ପୂର୍ଣ୍ଣ unit suite (4ଟି CI shards), Vitest, **60%+** coverage ଗେଟ୍, ଏବଂ
 production build ହେଉଛି CIର ଦାୟିତ୍ୱ — ସେଗୁଡ଼ିକୁ ସ୍ଥାନୀୟ ଭାବେ ଚଲାଇଲେ PR
-ଯାଞ୍ଚରୁ ପୂର୍ବରୁ ନ ମିଳିବା ଭଳି କୌଣସି ଅତିରିକ୍ତ ସଙ୍କେତ ମିଳେ ନାହିଁ, ଏବଂ ଛୋଟ machineରେ ଏହା hostକୁ ଅତ୍ୟଧିକ ବ୍ୟସ୍ତ କରିପାରେ (#8084):
+ଯାଞ୍ଚଗୁଡ଼ିକ ପୂର୍ବରୁ ଦେଉନଥିବା କୌଣସି ଅତିରିକ୍ତ ସଙ୍କେତ ମିଳେ ନାହିଁ, ଏବଂ ଛୋଟ machineଗୁଡ଼ିକରେ ଏହା hostକୁ ସନ୍ତୃପ୍ତ କରିପାରେ (#8084):
 
-- ଆପଣଙ୍କ ପରିବର୍ତ୍ତନକୁ cover କରୁଥିବା test fileଗୁଡ଼ିକ ଚଲାନ୍ତୁ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- ଆପଣଙ୍କ ପରିବର୍ତ୍ତନକୁ cover କରୁଥିବା test files ଚଲାନ୍ତୁ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` ଚଲାନ୍ତୁ
-- Production code ପରିବର୍ତ୍ତିତ ହେଲେ ସେହି PRରେ automated test ଯୋଗ କିମ୍ବା ଅଦ୍ୟତନ କରନ୍ତୁ
-- Production code ପରିବର୍ତ୍ତିତ ହେଲେ PR descriptionରେ ପରିବର୍ତ୍ତିତ କିମ୍ବା ଯୋଗ କରାଯାଇଥିବା test fileଗୁଡ଼ିକ ସାମିଲ କରନ୍ତୁ
-- CIରେ project secretଗୁଡ଼ିକ configure ହୋଇଥିଲେ PRରେ SonarQube result ଯାଞ୍ଚ କରନ୍ତୁ
+- production code ପରିବର୍ତ୍ତିତ ହେଲେ ସେହି PRରେ automated tests ଅନ୍ତର୍ଭୁକ୍ତ କିମ୍ବା ଅଦ୍ୟତନ କରନ୍ତୁ
+- `node:test` ଫାଇଲ୍ଗୁଡ଼ିକରେ, ପ୍ରତ୍ୟେକ top-level `await` (ଯେପରିକି `await import(...)`)କୁ ପ୍ରଥମ `test()` / `describe()` ପୂର୍ବରୁ ରଖନ୍ତୁ: `--test-force-exit` ଅଧୀନରେ, ଏହା ପରେ register ହୋଇଥିବା tests କେବେ ମଧ୍ୟ ନିରବରେ ଚାଲିନପାରେ (#18045; `npm run check:test-tla-order` ଦ୍ୱାରା ବାଧ୍ୟତାମୂଳକ)
+- production code ପରିବର୍ତ୍ତିତ ହେଲେ PR ବର୍ଣ୍ଣନାରେ ପରିବର୍ତ୍ତିତ କିମ୍ବା ଯୋଡ଼ାଯାଇଥିବା test files ଅନ୍ତର୍ଭୁକ୍ତ କରନ୍ତୁ
+- CIରେ project secrets configure ହୋଇଥିଲେ PRରେ SonarQube ଫଳାଫଳ ଯାଞ୍ଚ କରନ୍ତୁ
 
-ବର୍ତ୍ତମାନର test ସ୍ଥିତି: **122ଟି unit test file**, ଯେଉଁଗୁଡ଼ିକ ଏସବୁକୁ cover କରେ:
+ବର୍ତ୍ତମାନର test ସ୍ଥିତି: **122ଟି unit test files**, ଯାହା ନିମ୍ନଲିଖିତକୁ cover କରେ:
 
-- Provider translator ଏବଂ format conversion
-- Rate limiting, circuit breaker ଏବଂ resilience
-- Semantic cache, idempotency ଏବଂ progress tracking
-- Database operation ଏବଂ schema (21ଟି DB module)
-- OAuth flow ଏବଂ authentication
+- Provider translators ଏବଂ format conversion
+- Rate limiting, circuit breaker, ଏବଂ resilience
+- Semantic cache, idempotency, progress tracking
+- Database operations ଏବଂ schema (21ଟି DB modules)
+- OAuth flows ଏବଂ authentication
 - API endpoint validation (Zod v4)
-- MCP server tool ଏବଂ scope enforcement
-- Memory ଏବଂ Skills system
+- MCP server tools ଏବଂ scope enforcement
+- Memory ଏବଂ Skills systems
 
 ---
 
@@ -291,72 +292,72 @@ production build ହେଉଛି CIର ଦାୟିତ୍ୱ — ସେଗୁଡ
 
 ---
 
-## ପ୍ରକଳ୍ପ ସଂରଚନା
+## ପ୍ରକଳ୍ପ ଗଠନ
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
 │   ├── (dashboard)/        # ଡ୍ୟାସବୋର୍ଡ ପୃଷ୍ଠାଗୁଡ଼ିକ (23ଟି ବିଭାଗ)
-│   ├── api/                # API ରୁଟ୍ଗୁଡ଼ିକ (51ଟି ଡିରେକ୍ଟୋରି)
-│   └── login/              # ପ୍ରମାଣୀକରଣ ପୃଷ୍ଠାଗୁଡ଼ିକ (.tsx)
+│   ├── api/                # API ରୁଟ୍ଗୁଡ଼ିକ (51ଟି ଡିରେକ୍ଟୋରୀ)
+│   └── login/              # ପ୍ରାମାଣିକରଣ ପୃଷ୍ଠାଗୁଡ଼ିକ (.tsx)
 ├── domain/                 # ପଲିସି ଇଞ୍ଜିନ୍ (policyEngine, comboResolver, costRules, ଇତ୍ୟାଦି)
 ├── lib/                    # ମୂଳ ବ୍ୟବସାୟିକ ତର୍କ (.ts)
 │   ├── a2a/                # Agent-to-Agent v0.3 ପ୍ରୋଟୋକଲ୍ ସର୍ଭର୍
 │   ├── acp/                # Agent Communication Protocol ରେଜିଷ୍ଟ୍ରି
 │   ├── compliance/         # ଅନୁପାଳନ ପଲିସି ଇଞ୍ଜିନ୍
-│   ├── db/                 # SQLite ଡୋମେନ୍ ମଡ୍ୟୁଲ୍ + 130ଟି ମାଇଗ୍ରେସନ୍
-│   ├── memory/             # ସ୍ଥାୟୀ ବାର୍ତ୍ତାଳାପ ସ୍ମୃତି
-│   ├── oauth/              # OAuth ପ୍ରଦାନକାରୀ, ସେବା ଏବଂ ଉପଯୋଗିତା
+│   ├── db/                 # SQLite ଡୋମେନ୍ ମଡ୍ୟୁଲ୍ଗୁଡ଼ିକ + 130ଟି ମାଇଗ୍ରେସନ୍
+│   ├── memory/             # ସ୍ଥାୟୀ କଥୋପକଥନ ସ୍ମୃତି
+│   ├── oauth/              # OAuth ପ୍ରଦାତା, ସେବା ଏବଂ ଉପଯୋଗିତାଗୁଡ଼ିକ
 │   ├── skills/             # ବିସ୍ତାରଯୋଗ୍ୟ ଦକ୍ଷତା ଫ୍ରେମୱାର୍କ
 │   ├── usage/              # ବ୍ୟବହାର ଟ୍ରାକିଂ ଏବଂ ଖର୍ଚ୍ଚ ଗଣନା
-│   └── localDb.ts          # କେବଳ ପୁନଃ-ରପ୍ତାନି ସ୍ତର — ଏଠାରେ କେବେ ମଧ୍ୟ ତର୍କ ଯୋଡ଼ନ୍ତୁ ନାହିଁ
-├── middleware/              # ଅନୁରୋଧ ମିଡଲୱେୟାର୍ (promptInjectionGuard)
+│   └── localDb.ts          # କେବଳ ପୁନଃ-ରପ୍ତାନି ସ୍ତର — ଏଠାରେ କେବେବି ତର୍କ ଯୋଡ଼ନ୍ତୁ ନାହିଁ
+├── middleware/              # ଅନୁରୋଧ ମିଡଲୱେର୍ (promptInjectionGuard)
 ├── mitm/                   # MITM ପ୍ରକ୍ସି (ସାର୍ଟିଫିକେଟ୍, DNS, ଲକ୍ଷ୍ୟ ରାଉଟିଂ)
 ├── shared/
-│   ├── components/         # React କମ୍ପୋନେଣ୍ଟ୍ଗୁଡ଼ିକ (.tsx)
-│   ├── constants/          # ପ୍ରଦାନକାରୀ ସଂଜ୍ଞାଗୁଡ଼ିକ (329), MCP ସ୍କୋପ୍, 19ଟି ରାଉଟିଂ କୌଶଳ
-│   ├── utils/              # ସର୍କିଟ୍ ବ୍ରେକର୍, ସାନିଟାଇଜର୍, ପ୍ରମାଣୀକରଣ ସହାୟକ
-│   └── validation/         # Zod v4 ସ୍କିମା
+│   ├── components/         # React କମ୍ପୋନେଣ୍ଟଗୁଡ଼ିକ (.tsx)
+│   ├── constants/          # ପ୍ରଦାତା ସଂଜ୍ଞାଗୁଡ଼ିକ (329), MCP ସ୍କୋପ୍ଗୁଡ଼ିକ, 20ଟି ରାଉଟିଂ କୌଶଳ
+│   ├── utils/              # ସର୍କିଟ୍ ବ୍ରେକର୍, ସାନିଟାଇଜର୍, ପ୍ରାମାଣିକରଣ ସହାୟକ
+│   └── validation/         # Zod v4 ସ୍କିମାଗୁଡ଼ିକ
 └── sse/                    # SSE ପ୍ରକ୍ସି ପାଇପଲାଇନ୍
 
 open-sse/                   # @omniroute/open-sse ୱର୍କସ୍ପେସ୍
-├── executors/              # 89ଟି ଏକ୍ଜିକ୍ୟୁଟର୍ କାର୍ଯ୍ୟାନ୍ୱୟନ ମଡ୍ୟୁଲ୍
-├── handlers/               # 11ଟି ଅନୁରୋଧ ହ୍ୟାଣ୍ଡଲର୍ (ଚାଟ୍, ରେସ୍ପନ୍ସ, ଏମ୍ବେଡିଂ, ଛବି, ଇତ୍ୟାଦି)
-├── mcp-server/             # MCP ସର୍ଭର୍ (110ଟି ଅନନ୍ୟ ଟୁଲ୍, 3ଟି ଟ୍ରାନ୍ସପୋର୍ଟ୍, 33ଟି ସ୍କୋପ୍)
+├── executors/              # 150ଟି ଏକ୍ସିକ୍ୟୁଟର୍ ମଡ୍ୟୁଲ୍ (ଏକ୍ସିକ୍ୟୁଟର୍ କ୍ଲାସ୍ + ପ୍ରତି-ପ୍ରଦାତା ସହାୟକ)
+├── handlers/               # 11ଟି ଅନୁରୋଧ ହ୍ୟାଣ୍ଡଲର୍ (ଚାଟ୍, ପ୍ରତିକ୍ରିୟା, ଏମ୍ବେଡିଂ, ପ୍ରତିଛବି, ଇତ୍ୟାଦି)
+├── mcp-server/             # MCP ସର୍ଭର୍ (110ଟି ଅନନ୍ୟ ଟୁଲ୍, 3ଟି ଟ୍ରାନ୍ସପୋର୍ଟ, 33ଟି ସ୍କୋପ୍)
 ├── services/               # 178ଟି ଶୀର୍ଷ-ସ୍ତରୀୟ ସେବା (combo, autoCombo, rateLimitManager, ଇତ୍ୟାଦି)
-├── translator/             # ଫର୍ମାଟ୍ ଅନୁବାଦକ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API ଟ୍ରାନ୍ସଫର୍ମର୍
+├── translator/             # ଫର୍ମାଟ୍ ଅନୁବାଦକଗୁଡ଼ିକ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API ରୂପାନ୍ତରକ
 └── utils/                  # 22ଟି ଉପଯୋଗିତା ମଡ୍ୟୁଲ୍ (ଷ୍ଟ୍ରିମ୍, TLS, ପ୍ରକ୍ସି, ଲଗିଂ)
 
-electron/                   # Electron ଡେସ୍କଟପ୍ ଆପ୍ (କ୍ରସ୍-ପ୍ଲାଟଫର୍ମ)
+electron/                   # Electron ଡେସ୍କଟପ୍ ଆପ୍ (ବହୁ-ପ୍ଲାଟଫର୍ମ)
 
 tests/
-├── unit/                   # Node.js ପରୀକ୍ଷଣ ରନର୍ (1,574ଟି ପରୀକ୍ଷଣ ଫାଇଲ୍)
-├── integration/            # ଇଣ୍ଟିଗ୍ରେସନ୍ ପରୀକ୍ଷଣ
-├── e2e/                    # Playwright ପରୀକ୍ଷଣ
-├── security/               # ସୁରକ୍ଷା ପରୀକ୍ଷଣ
-├── translator/             # ଅନୁବାଦକ-ନିର୍ଦ୍ଦିଷ୍ଟ ପରୀକ୍ଷଣ
-└── load/                   # ଲୋଡ୍ ପରୀକ୍ଷଣ
+├── unit/                   # Node.js ପରୀକ୍ଷା ରନର୍ (1,574ଟି ପରୀକ୍ଷା ଫାଇଲ୍)
+├── integration/            # ଇଣ୍ଟିଗ୍ରେସନ୍ ପରୀକ୍ଷାଗୁଡ଼ିକ
+├── e2e/                    # Playwright ପରୀକ୍ଷାଗୁଡ଼ିକ
+├── security/               # ସୁରକ୍ଷା ପରୀକ୍ଷାଗୁଡ଼ିକ
+├── translator/             # ଅନୁବାଦକ-ନିର୍ଦ୍ଦିଷ୍ଟ ପରୀକ୍ଷାଗୁଡ଼ିକ
+└── load/                   # ଲୋଡ୍ ପରୀକ୍ଷାଗୁଡ଼ିକ
 
 docs/
-├── adr/                     # ସ୍ଥାପତ୍ୟ ନିଷ୍ପତ୍ତି ରେକର୍ଡ
+├── adr/                     # ସ୍ଥାପତ୍ୟ ନିଷ୍ପତ୍ତି ରେକର୍ଡଗୁଡ଼ିକ
 ├── architecture/            # ସିଷ୍ଟମ୍ ସ୍ଥାପତ୍ୟ ଏବଂ ସ୍ଥିତିସ୍ଥାପକତା
 ├── comparison/              # OmniRoute ବନାମ ବିକଳ୍ପଗୁଡ଼ିକ
-├── compression/             # କମ୍ପ୍ରେସନ୍ ମାର୍ଗଦର୍ଶିକା ଏବଂ ନିୟମ
-├── dev/                     # ବିକାଶ ମାର୍ଗଦର୍ଶିକା
-├── diagrams/                # ସ୍ଥାପତ୍ୟ ଚିତ୍ର
+├── compression/             # ସଙ୍କୋଚନ ମାର୍ଗଦର୍ଶିକା ଏବଂ ନିୟମଗୁଡ଼ିକ
+├── dev/                     # ବିକାଶ ମାର୍ଗଦର୍ଶିକାଗୁଡ଼ିକ
+├── diagrams/                # ସ୍ଥାପତ୍ୟ ଚିତ୍ରଗୁଡ଼ିକ
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # ବ୍ୟବହାରକାରୀ ମାର୍ଗଦର୍ଶିକା, Docker, ସେଟଅପ୍, ସମସ୍ୟା ନିବାରଣ
-├── i18n/                    # ଆନ୍ତର୍ଜାତୀୟକୃତ README ଅନୁବାଦ
+├── guides/                  # ବ୍ୟବହାରକାରୀ ମାର୍ଗଦର୍ଶିକା, Docker, ସେଟଅପ୍, ସମସ୍ୟା ସମାଧାନ
+├── i18n/                    # ଆନ୍ତର୍ଜାତୀୟକୃତ README ଅନୁବାଦଗୁଡ଼ିକ
 ├── marketing/               # ବିପଣନ ସାମଗ୍ରୀ
-├── ops/                     # ଡିପ୍ଲୟମେଣ୍ଟ୍, ପ୍ରକ୍ସି, କଭରେଜ୍, ରିଲିଜ୍
-├── providers/               # ପ୍ରଦାନକାରୀ-ନିର୍ଦ୍ଦିଷ୍ଟ ଡକ୍ୟୁମେଣ୍ଟ୍
-├── reference/               # API ସନ୍ଦର୍ଭ, env vars, CLI ଟୁଲ୍, ମାଗଣା ସ୍ତର
+├── ops/                     # ନିୟୋଜନ, ପ୍ରକ୍ସି, କଭରେଜ୍, ରିଲିଜ୍
+├── providers/               # ପ୍ରଦାତା-ନିର୍ଦ୍ଦିଷ୍ଟ ଡକ୍ୟୁମେଣ୍ଟେସନ୍
+├── reference/               # API ସନ୍ଦର୍ଭ, ପରିବେଶ ଭେରିଏବଲ୍, CLI ଟୁଲ୍, ମାଗଣା ସ୍ତର
 ├── releases/                # ରିଲିଜ୍ ଟିପ୍ପଣୀ
-├── routing/                 # ଅଟୋ-କମ୍ବୋ ଇଞ୍ଜିନ୍, ଯୁକ୍ତି ପୁନଃଚାଳନ
-├── screenshots/             # ଡ୍ୟାସବୋର୍ଡ ସ୍କ୍ରିନ୍ଶଟ୍
-├── security/                # ଗାର୍ଡରେଲ୍, ଅନୁପାଳନ, ଗୋପନୀୟତା, ଟୋକେନ୍
-└── specs/                   # ଡିଜାଇନ୍ ନିର୍ଦ୍ଦିଷ୍ଟକରଣ
+├── routing/                 # ଅଟୋ-କମ୍ବୋ ଇଞ୍ଜିନ୍, ତର୍କ ପୁନଃଚାଳନ
+├── screenshots/             # ଡ୍ୟାସବୋର୍ଡ ସ୍କ୍ରିନ୍ଶଟ୍ଗୁଡ଼ିକ
+├── security/                # ସୁରକ୍ଷା ବ୍ୟବସ୍ଥା, ଅନୁପାଳନ, ଗୋପନୀୟତା, ଟୋକେନ୍
+└── specs/                   # ଡିଜାଇନ୍ ବିବରଣୀ
 ```
 
 ---

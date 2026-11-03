@@ -1,1 +1,0 @@
-- **perf(usage-analytics):** resolve each provider and model price grid once per `GET /api/usage/analytics` request instead of once per aggregated row, cutting about a third of the uncached response time on large `usage_history` tables; amounts are unchanged ([#16334](https://github.com/diegosouzapw/OmniRoute/pull/16334)) — thanks @maxmad64bis

@@ -12,9 +12,14 @@ import {
   applyCacheHitTokensToUsage,
   applyCacheHitTokensToResponsesUsage,
 } from "./responseSanitizer/cacheHitTokens.ts";
+import {
+  ALLOWED_USAGE_FIELDS,
+  ALLOWED_RESPONSES_USAGE_FIELDS,
+} from "./responseSanitizer/usageFields.ts";
 import { stripObfuscationZeroWidth } from "../utils/zeroWidth.ts";
 import { normalizeArrayContentChunk } from "../utils/arrayContentDelta.ts";
 import { assignAliasCacheWrite } from "../utils/pickCacheCreationTokens.ts";
+import { findBalancedJsonEnd } from "./responseSanitizer/balancedJson.ts";
 export {
   extractThinkingFromContent,
   shouldParseTextualReasoningTags,
@@ -30,31 +35,6 @@ export {
  * 3. Normalizes response id, object, and usage fields
  * 4. Converts developer role → system for non-OpenAI providers
  */
-
-const ALLOWED_USAGE_FIELDS = new Set([
-  "prompt_tokens",
-  "completion_tokens",
-  "total_tokens",
-  "cached_tokens",
-  "prompt_tokens_details",
-  "completion_tokens_details",
-  "cache_read_input_tokens",
-  "cache_creation_input_tokens",
-  // Keep through sanitize → applyClientUsageBuffer so heuristic web usage is
-  // not inflated by the default USAGE_TOKEN_BUFFER (2000).
-  "estimated",
-]);
-const ALLOWED_RESPONSES_USAGE_FIELDS = new Set([
-  "input_tokens",
-  "output_tokens",
-  "total_tokens",
-  "input_tokens_details",
-  "output_tokens_details",
-  "estimated",
-  "cost_in_usd_ticks",
-  "server_side_tool_usage_details",
-  "server_side_tool_usage",
-]);
 
 const RESPONSES_EXTRA_TOP_LEVEL_FIELDS = [
   "server_side_tool_usage_details",
@@ -131,50 +111,6 @@ function stripZeroWidthValue(value: unknown): unknown {
     );
   }
   return value;
-}
-
-function findBalancedJsonEnd(text: string, startIndex: number): number {
-  if (startIndex < 0 || startIndex >= text.length || text[startIndex] !== "{") return -1;
-
-  let depth = 0;
-  let inString = false;
-  let escaped = false;
-
-  for (let index = startIndex; index < text.length; index += 1) {
-    const char = text[index];
-
-    if (inString) {
-      if (escaped) {
-        escaped = false;
-        continue;
-      }
-      if (char === "\\") {
-        escaped = true;
-        continue;
-      }
-      if (char === '"') {
-        inString = false;
-      }
-      continue;
-    }
-
-    if (char === '"') {
-      inString = true;
-      continue;
-    }
-
-    if (char === "{") {
-      depth += 1;
-      continue;
-    }
-
-    if (char === "}") {
-      depth -= 1;
-      if (depth === 0) return index;
-    }
-  }
-
-  return -1;
 }
 
 function stripInternalToolEnvelopeText(content: string): string {
@@ -524,6 +460,11 @@ function sanitizeUsage(usage: unknown): unknown {
     }
   }
   applyCacheHitTokensToUsage(usageRecord, sanitized); // DeepSeek/MiniMax/Bedrock cache-hit passthrough (#8171)
+  // OpenRouter's provider-billed USD cost: keep it only as a finite bare number.
+  const reportedCost = usageRecord.cost;
+  if (typeof reportedCost === "number" && Number.isFinite(reportedCost) && reportedCost >= 0) {
+    sanitized.cost = reportedCost;
+  }
   // Ensure required fields
   const promptTokens = toNumber(sanitized.prompt_tokens) ?? 0;
   const completionTokens = toNumber(sanitized.completion_tokens) ?? 0;

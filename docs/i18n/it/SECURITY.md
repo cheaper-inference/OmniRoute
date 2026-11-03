@@ -31,20 +31,21 @@ Se scopri una vulnerabilità di sicurezza in OmniRoute, segnalala in modo respon
 
 ## Finestra di supporto LTS (v3.9.x)
 
-Dopo la 3.8.59, la versione successiva è la **3.9.0**, che inaugura la linea di supporto a lungo termine sul branch
-`stable/v3` (vedi [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
+Dopo la 3.8.59, la versione successiva è la **3.9.0**, che inaugura la linea di supporto a lungo termine sul
+branch `stable/v3` (vedere [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
 
 - **Cosa riceve `stable/v3`:** correzioni di bug, patch di sicurezza e aggiornamenti dei provider. Le nuove
-  funzionalità vengono aggiunte al canale v4; la linea LTS privilegia la stabilità. `npm install omniroute`
-  (il dist-tag `latest`) rimane sulla v3 durante l'intero ciclo della v4.
-- **Durata della finestra:** `<T-GAP-3: decisione del proprietario in sospeso — vedi ROADMAP.md>`. La durata della
-  finestra dopo la disponibilità generale della v4.0 (quando `latest` passa alla v4) **non è stata ancora decisa**; questa
-  sezione verrà aggiornata quando il manutentore la annuncerà. Fino ad allora, non presumere una data di fine.
-- **Segnalazione di una vulnerabilità nella linea LTS:** usa lo stesso canale previsto per qualsiasi altra versione —
+  funzionalità vengono introdotte nel canale v4; la linea LTS privilegia la stabilità. `npm install omniroute`
+  (il dist-tag `latest`) rimane sulla v3 per l'intero ciclo della v4.
+- **Durata della finestra:** `stable/v3` riceve **correzioni di sicurezza e delle regressioni critiche per
+  12 mesi dopo il rilascio della 3.9.0, oppure fino a 90 giorni dopo la pubblicazione della v4.0.0 come `latest` —
+  a seconda di quale data sia successiva**. La data di fine risultante viene registrata nelle note di rilascio della 3.9.0 e in
+  [`ROADMAP.md`](ROADMAP.md) al momento del rilascio.
+- **Segnalazione di una vulnerabilità nella linea LTS:** utilizzare lo stesso canale previsto per qualsiasi altra versione —
   un [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privato,
-  mai una issue pubblica. Indica quale versione hai testato (ad esempio `3.9.2`); le correzioni vengono applicate a
-  `stable/v3` e propagate in avanti alla v4.
-- **Baseline di sicurezza al momento della creazione della LTS:** lo stato rilevato dagli scanner, le verifiche delle protezioni delle route e
+  mai una issue pubblica. Indicare quale versione è stata testata (ad esempio `3.9.2`); le correzioni vengono integrate in
+  `stable/v3` e successivamente portate sulla v4.
+- **Baseline di sicurezza al rilascio LTS:** lo stato rilevato dagli scanner, le verifiche delle protezioni delle route e
   delle credenziali pubbliche sono registrati in
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 

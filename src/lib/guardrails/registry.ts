@@ -100,14 +100,14 @@ export function resolveDisabledGuardrails({
     apiKeyInfo && typeof apiKeyInfo === "object"
       ? (apiKeyInfo as Record<string, unknown>).disabledGuardrails
       : undefined;
-  const headerDisabled =
-    getHeaderValue(headers, "x-omniroute-disabled-guardrails") ||
-    getHeaderValue(headers, "x-disabled-guardrails");
+  const headerDisabled = getHeaderValue(headers, "x-omniroute-disabled-guardrails");
+  const legacyHeaderDisabled = getHeaderValue(headers, "x-disabled-guardrails");
 
   return [...coerceDisabledGuardrails(apiKeyDisabled)]
     .concat(coerceDisabledGuardrails(bodyRecord?.disabledGuardrails))
     .concat(coerceDisabledGuardrails(metadata?.disabledGuardrails))
     .concat(coerceDisabledGuardrails(headerDisabled))
+    .concat(coerceDisabledGuardrails(legacyHeaderDisabled))
     .filter((value, index, list) => list.indexOf(value) === index);
 }
 

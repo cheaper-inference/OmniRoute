@@ -530,24 +530,27 @@ mv recovered.db ~/.omniroute/storage.sqlite
 
 ### Scenár 2: Poškodenie súboru hlavnej databázy
 
-Obnovte databázu zo zálohy:
+Obnovte ju zo zálohy:
 
 ```bash
-omniroute sync pull --merge   # alebo: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` iba stiahne úplný archív `.tar.gz` zo spusteného servera
+(`GET /api/db-backups/exportAll`, vyžadujú sa prihlasovacie údaje operátora); nevykoná žiadnu obnovu.
 
 ### Scenár 3: Strata šifrovacieho kľúča
 
-Bez kľúča **nie je možná žiadna obnova**. Šifrované polia sú nečitateľné. Manuálne znova pridajte všetkých poskytovateľov s novými prihlasovacími údajmi.
+Bez kľúča **nie je možná žiadna obnova**. Zašifrované polia sú nečitateľné. Znova manuálne pridajte všetkých poskytovateľov s novými prihlasovacími údajmi.
 
-> **Zmiernenie rizika**: Šifrovací kľúč vždy zálohujte samostatne, ideálne v správcovi hesiel alebo v KMS.
+> **Preventívne opatrenie**: Šifrovací kľúč vždy zálohujte samostatne, ideálne v správcovi hesiel alebo v KMS.
 
 ### Scenár 4: Plný disk
 
 SQLite bude vracať chyby `SQLITE_FULL`. Uvoľnite miesto na disku a potom vykonajte:
 
 ```bash
-# Vytvorenie kontrolného bodu WAL na uvoľnenie miesta
+# Vykonajte kontrolný bod WAL na uvoľnenie miesta
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

@@ -138,21 +138,21 @@ omniroute providers validate
 
 ## Daidaita Kayan Aikin CLI
 
-### 1) Haɗa Masu Samar da Sabis kuma Ƙirƙiri Maɓallin API
+### 1) Haɗa Masu Bayarwa kuma Ƙirƙiri Maɓallin API
 
-1. Buɗe Dashboard → `Providers` sannan ka haɗa aƙalla mai samar da sabis guda ɗaya (OAuth ko maɓallin API).
+1. Buɗe Dashboard → `Providers` sannan ka haɗa aƙalla mai bayarwa ɗaya (OAuth ko maɓallin API).
 2. Buɗe Dashboard → `Endpoints` sannan ka ƙirƙiri maɓallin API.
-3. (Na zaɓi) Buɗe Dashboard → `Combos` sannan ka saita jerin madadin naka.
+3. (Na zaɓi) Buɗe Dashboard → `Combos` sannan ka saita jerin madadinka.
 
-### 2) Daidaita Kayan Aikin Rubuta Lambarka
+### 2) Nuna wa Kayan Aikin Rubuta Lambarka Hanya
 
 ```txt
 Tushen URL: http://localhost:20128/v1
 Maɓallin API:  [kwafa daga shafin Endpoint]
-Samfuri:    if/qwen3.8-max-preview (ko kowane prefix na provider/model)
+Samfuri:    if/qwen3.8-max-preview (ko kowane prefix na mai bayarwa/samfuri)
 ```
 
-Idan editanka ba zai iya aika `Authorization: Bearer ...` ba, yi amfani da tushen daidaituwa mai token a maimakonsa:
+Idan editanka ba zai iya aika `Authorization: Bearer ...` ba, yi amfani da tushen da aka saka token don dacewa a maimakonsa:
 
 ```txt
 Tushen URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -163,37 +163,38 @@ URL na Alamomin Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 
 Yana aiki da Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, da SDKs masu dacewa da OpenAI.
 
-#### Daidaitawa ta atomatik da `setup-*`
+#### Yi daidaitawa ta atomatik da `setup-*`
 
-Maimakon liƙa tushen URL da maɓalli da hannu, bari OmniRoute ya rubuta saitunan kowane kayan aiki
-daga kundin samfura na kai tsaye. Umarni guda ɗaya ga kowane kayan aiki:
+Maimakon manna tushen URL da maɓallin da hannu, bari OmniRoute ya rubuta saitunan kowane kayan aiki
+daga kundin samfuran da ke aiki. Umurni ɗaya ga kowane kayan aiki:
 
 ```bash
-omniroute setup-codex        # Bayanan martaba na ~/.codex/<name>.config.toml
+omniroute setup-codex        # bayanan martaba na ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (mai dacewa da openai)
-omniroute setup-cline        # Saitunan Cline CLI + tsawo na VS Code
+omniroute setup-cline        # Saitunan Cline CLI + tsawaitawar VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Yana buga matakan da za a bi a cikin Cursor
-omniroute setup-roo          # Shigo da Roo Code + manunin autoImport
+omniroute setup-cursor       # yana buga matakan cikin manhajar Cursor
+omniroute setup-roo          # shigar da Roo Code + manunin autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Kowane ɗaya yana karɓar `--remote <url> --api-key <key>` don daidaita kayan aiki na gida da
+Kowannensu yana karɓar `--remote <url> --api-key <key>` don daidaita kayan aikin gida da
 OmniRoute na **nesa**, tare da `--dry-run` don samfoti. Don ƙaddamar da CLI tare da
-env da ya dace ba tare da rubuta wani saitin ba kwata-kwata, yi amfani da mai ƙaddamarwa na gama-gari
+env ɗin da ya dace da aka saka ba tare da rubuta wani saitin ba, yi amfani da mai ƙaddamarwa na gama-gari
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
 tsofaffin masu ƙaddamarwa na kowane kayan aiki `omniroute launch` (Claude Code) da
 `omniroute launch-codex` (Codex) suna nan har yanzu.
 
-Don cikakken tebur (abin da kowane umarni yake rubutawa, dukkan flags, na gida da na nesa, ƙa'idodin tushen URL
-`/v1`), duba **[Haɗaɗɗun CLI](./CLI-INTEGRATIONS.md)**.
+Don cikakken jadawalin (abin da kowane umurni ke rubutawa, dukkan tutoci, na gida da na nesa, ƙa'idodin tushen URL
+na `/v1`), duba **[Haɗaɗɗun CLI](./CLI-INTEGRATIONS.md)**.
 
-Don cikakken bayanin daidaita kowane kayan aiki (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, da sauransu), duba keɓantaccen **[Jagorar Kayan Aikin CLI](../reference/CLI-TOOLS.md)**.
+Don cikakken bayani kan daidaita kowane kayan aiki (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, da sauransu), duba keɓaɓɓen **[Jagoran Kayan Aikin CLI](../reference/CLI-TOOLS.md)**.
 
 ---
 
@@ -324,7 +325,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Samfurin Void Linux (xbps-src)
 
-Ga masu amfani da Void Linux, za ku iya gina kunshin asali ta amfani da `xbps-src`. Ajiye wannan ɓangaren a matsayin `srcpkgs/omniroute/template`:
+Ga masu amfani da Void Linux, za ku iya gina kunshin asali ta amfani da `xbps-src`. Ajiye wannan sashe a matsayin `srcpkgs/omniroute/template`:
 
 ```bash
 # Fayil ɗin samfuri na 'omniroute'
@@ -333,12 +334,12 @@ version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+short_desc="Ƙofar AI ta bai ɗaya mai sarrafa turawa cikin hikima don masu samar da LLM da yawa"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Sake samar da checksum ga kowace fitarwa da:
+# Sake samar da checksum ga kowace fitarwa ta amfani da:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

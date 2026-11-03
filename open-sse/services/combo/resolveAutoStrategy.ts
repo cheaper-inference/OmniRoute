@@ -21,6 +21,7 @@ import { parseModel } from "../model.ts";
 import { supportsToolCalling } from "../modelCapabilities.ts";
 import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
 import { parseAutoConfig } from "./autoConfig.ts";
+import { isComboEmptyPoolNoEligibleTargetsEnabled } from "./protectedPriorityStopStatus.ts";
 import { dedupeTargetsByExecutionKey } from "./comboData.ts";
 import { restoreIncomingOrder } from "./rungOrder.ts";
 import {
@@ -46,6 +47,7 @@ import type {
   ComboLogger,
   ResolvedComboTarget,
 } from "./types.ts";
+import { normalizeAutoConnectionScope } from "./autoConnectionScope.ts";
 
 /**
  * Dependency-injected `buildAutoCandidates` — it lives in `combo.ts` (the host of
@@ -57,7 +59,8 @@ type BuildAutoCandidates = (
   comboName: string,
   sessionId?: string | null,
   resetWindowConfig?: ResetWindowConfig,
-  resilienceSettings?: ResilienceSettings | null
+  resilienceSettings?: ResilienceSettings | null,
+  apiKeyAllowedConnections?: string[] | null
 ) => Promise<AutoProviderCandidate[]>;
 
 export interface ResolveAutoStrategyDeps {
@@ -65,7 +68,11 @@ export interface ResolveAutoStrategyDeps {
   body: Record<string, unknown>;
   combo: ComboLike;
   settings: Record<string, unknown> | null | undefined;
-  config: { complexityAwareRouting?: boolean; compatFilterFailOpen?: boolean };
+  // Index signature keeps this structurally assignable from the caller's much
+  // wider `resolveComboSetupConfig()` return type — without it, TS2559 ("no
+  // properties in common") fires now that `complexityAwareRouting` (the one
+  // property the two types used to share) is gone (#13386).
+  config: { compatFilterFailOpen?: boolean } & Record<string, unknown>;
   relayOptions?: {
     bypassProviderQuotaPolicy?: boolean;
     sessionId?: string | null;
@@ -79,6 +86,7 @@ export interface ResolveAutoStrategyDeps {
   resilienceSettings: ResilienceSettings;
   log: ComboLogger;
   buildAutoCandidates: BuildAutoCandidates;
+  apiKeyAllowedConnections?: string[] | null;
 }
 
 export type ResolveAutoStrategyResult =
@@ -96,6 +104,7 @@ export interface EvaluateAutoCandidatesOptions {
   resilienceSettings?: ResilienceSettings | null;
   manifestHint?: RoutingHint | null;
   buildAutoCandidates: BuildAutoCandidates;
+  apiKeyAllowedConnections?: string[] | null;
 }
 
 export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOptions) {
@@ -104,7 +113,8 @@ export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOpti
     options.comboName,
     options.sessionId,
     options.resetWindowConfig,
-    options.resilienceSettings
+    options.resilienceSettings,
+    options.apiKeyAllowedConnections
   );
   const cacheAffinityScores = calculatePromptCacheAffinityScores(
     builtCandidates,
@@ -130,6 +140,31 @@ export async function evaluateAutoCandidates(options: EvaluateAutoCandidatesOpti
       options.manifestHint
     ),
   };
+}
+
+/**
+ * #14313 — an auto combo whose candidate pool is already EMPTY (every target skipped by
+ * cooldowns, lockouts or exhaustion before the tool pre-filter ran) used to fall into the
+ * tool pre-filter and answer 400 "No target in combo X supports tool calling", a
+ * capability_mismatch that describes a filter rejecting a populated pool. With the
+ * COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED flag on, the empty pool answers a truthful,
+ * retryable 503 `no_eligible_targets` instead. Off by default (client-visible status and
+ * body change); `null` keeps the legacy path.
+ */
+function emptyCandidatePoolResponse(poolSize: number, comboName: string): Response | null {
+  if (poolSize !== 0 || !isComboEmptyPoolNoEligibleTargetsEnabled()) return null;
+  return errorResponseWithComboDiagnostics(
+    503,
+    `No eligible targets in combo ${comboName}; the candidate pool is empty`,
+    {
+      poolSize: 0,
+      attempted: 0,
+      excluded: [],
+      attemptOrder: [],
+      terminalReason: "no_eligible_targets",
+    },
+    { code: "no_eligible_targets", type: "api_error" }
+  );
 }
 
 /**
@@ -168,6 +203,11 @@ export async function resolveAutoStrategyOrder(
       true;
 
   if (requestHasTools) {
+    // #14313 (opt-in, COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED): an empty pool is
+    // not a tool-calling mismatch. Off by default: the pool falls into the pre-filter
+    // below and answers the legacy 400 capability_mismatch exactly as before.
+    const emptyPoolResponse = emptyCandidatePoolResponse(eligibleTargets.length, combo.name);
+    if (emptyPoolResponse) return { earlyResponse: emptyPoolResponse };
     // Keep #5240 prompt-emulation providers (toolCalling:"emulated") even when
     // registry/capability rows honestly report toolCalling:false.
     const filtered = eligibleTargets.filter(
@@ -236,7 +276,17 @@ export async function resolveAutoStrategyOrder(
       );
     }
 
-    eligibleTargets = await expandAutoComboCandidatePool(eligibleTargets, combo);
+    eligibleTargets = await expandAutoComboCandidatePool(
+      eligibleTargets,
+      combo,
+      deps.apiKeyAllowedConnections ?? null
+    );
+  } else if (normalizeAutoConnectionScope(deps.apiKeyAllowedConnections)) {
+    eligibleTargets = await expandAutoComboCandidatePool(
+      eligibleTargets,
+      combo,
+      deps.apiKeyAllowedConnections ?? null
+    );
   }
 
   const prompt = extractPromptForIntent(body);
@@ -313,17 +363,18 @@ export async function resolveAutoStrategyOrder(
           },
         }
       : resilienceSettings;
-  // Complexity-aware routing (2026, opt-in): classify the request's
-  // difficulty and feed a tier hint into scoring so tierAffinity /
-  // specificityMatch favor candidates whose tier matches the request.
-  const autoManifestHint: RoutingHint | null =
-    config.complexityAwareRouting === true
-      ? await buildComplexityRoutingHint(
-          eligibleTargets.filter((t) => t.kind === "model"),
-          body,
-          log
-        )
-      : null;
+  // Complexity-aware routing: classify the request's difficulty and feed a
+  // tier hint into scoring so tierAffinity / specificityMatch favor
+  // candidates whose tier matches the request.  Always-on since #13386 — the
+  // former opt-in gate (config.complexityAwareRouting) was orphaned by
+  // migration 103 which stripped it as a legacy key, leaving the feature
+  // permanently disabled.  The classification is lightweight (regex-only, no
+  // LLM call) so always running it has negligible cost.
+  const autoManifestHint: RoutingHint | null = await buildComplexityRoutingHint(
+    eligibleTargets.filter((t) => t.kind === "model"),
+    body,
+    log
+  );
 
   const { sourceCandidates, candidates, routableCandidates, scoredTargets } =
     await evaluateAutoCandidates({
@@ -337,6 +388,7 @@ export async function resolveAutoStrategyOrder(
       resilienceSettings: autoCandidateResilienceSettings,
       manifestHint: autoManifestHint,
       buildAutoCandidates,
+      apiKeyAllowedConnections: deps.apiKeyAllowedConnections ?? null,
     });
   for (let index = 0; index < sourceCandidates.length; index += 1) {
     sourceCandidates[index].cacheAffinity = candidates[index]?.cacheAffinity;
@@ -382,6 +434,7 @@ export async function resolveAutoStrategyOrder(
             sla: slaPolicy,
             weights,
             explorationRate,
+            manifestHint: autoManifestHint,
             messages: body.messages,
             nadir: nadirConfig,
           },
@@ -415,6 +468,7 @@ export async function resolveAutoStrategyOrder(
             budgetFallback,
             estimatedInputTokens,
             explorationRate,
+            manifestHint: autoManifestHint,
           },
           routableCandidates,
           taskType

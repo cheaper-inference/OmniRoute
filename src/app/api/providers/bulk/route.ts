@@ -28,6 +28,7 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isManagedProviderConnectionId } from "@/lib/providers/catalog";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { validateProviderApiKey } from "@/lib/providers/validation";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { getProxyForLevel } from "@/lib/db/settings";
 import { resolveProxyForProvider } from "@/lib/db/proxies";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
@@ -149,6 +150,8 @@ export async function POST(request: Request) {
             provider,
             apiKey: entry.apiKey,
             providerSpecificData: entryProviderSpecificData,
+            // S-01 (#15159, #15766 shape): devin CLI-spawn fallback is loopback/LAN-only.
+            allowLocalSpawn: getRequestPeerLocality(request) !== "remote",
           })
         );
         testStatus = probe?.valid ? "active" : "failed";

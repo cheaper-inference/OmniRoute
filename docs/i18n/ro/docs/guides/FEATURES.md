@@ -298,13 +298,13 @@ Comportamente principale:
 
 ## 🔑 Tokenuri de sincronizare și pachet de configurare _(v3.6.6+)_
 
-Accesul de pe mai multe dispozitive și accesul operatorilor externi sunt acum posibile prin **tokenuri de sincronizare cu domeniu limitat**:
+Accesul de pe mai multe dispozitive și accesul operatorilor externi sunt acum posibile prin **tokenuri de sincronizare cu domeniu de aplicare limitat**:
 
-- **`POST /api/sync/tokens`** — Emite un nou token de sincronizare (cu domeniu limitat și expirare opțională)
+- **`POST /api/sync/tokens`** — Emite un nou token de sincronizare (cu domeniu de aplicare limitat și expirare opțională)
 - **`DELETE /api/sync/tokens/:id`** — Revocă un token
-- **`GET /api/sync/bundle`** — Descarcă un instantaneu JSON versionat, identificat prin ETag, al tuturor setărilor nesensibile (parolele sunt ocultate)
+- **`GET /api/sync/bundle`** — Descarcă un instantaneu JSON versionat al configurației, identificat prin ETag (autentificat exclusiv cu un token de sincronizare). Setările de autentificare, precum parola tabloului de bord, sunt eliminate, însă sunt incluse credențialele furnizorilor și cheile API, așadar tratați fișierul ca pe un secret
 
-Pachetul de configurare este generat de `src/lib/sync/bundle.ts`. Consumatorii compară antetul de răspuns `ETag` pentru a detecta modificările fără a descărca din nou întregul conținut.
+Pachetul de configurare este generat de `src/lib/sync/bundle.ts`. Consumatorii compară antetul de răspuns `ETag` pentru a detecta modificările fără a descărca din nou întregul conținut. Din CLI, `omniroute sync bundle <outPath> --token <syncToken>` (sau `OMNIROUTE_SYNC_TOKEN`) îl salvează într-un fișier accesibil doar proprietarului.
 
 ---
 

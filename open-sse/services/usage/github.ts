@@ -13,6 +13,7 @@
  */
 
 import { getGitHubCopilotInternalUserHeaders } from "../../config/providerHeaderProfiles.ts";
+import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { toRecord, toNumber, getFieldValue, clampPercentage, toDisplayLabel } from "./scalars.ts";
 import { type UsageQuota, parseResetTime } from "./quota.ts";
 
@@ -28,16 +29,31 @@ export function shouldDisplayGitHubQuota(quota: UsageQuota | null): quota is Usa
  * GitHub Copilot Usage
  * Uses GitHub accessToken (not copilotToken) to call copilot_internal/user API
  */
-export async function getGitHubUsage(accessToken?: string, providerSpecificData?: JsonRecord) {
+export async function getGitHubUsage(
+  accessToken?: string,
+  providerSpecificData?: JsonRecord,
+  connectionId?: string
+) {
   try {
     if (!accessToken) {
       throw new Error("No GitHub access token available. Please re-authorize the connection.");
     }
 
     // copilot_internal/user API requires GitHub OAuth token, not copilotToken
-    const response = await fetch("https://api.github.com/copilot_internal/user", {
-      headers: getGitHubCopilotInternalUserHeaders(`token ${accessToken}`),
-    });
+    const response = connectionId
+      ? await fetchWithConnectionProxy(
+          connectionId,
+          "https://api.github.com/copilot_internal/user",
+          {
+            headers: getGitHubCopilotInternalUserHeaders(`token ${accessToken}`),
+          }
+        )
+      : await globalThis.fetch("https://api.github.com/copilot_internal/user", {
+          headers: getGitHubCopilotInternalUserHeaders(`token ${accessToken}`),
+        });
+    if (!response) {
+      return { message: "GitHub Copilot connected. Unable to parse quota data." };
+    }
 
     if (!response.ok) {
       const error = await response.text();

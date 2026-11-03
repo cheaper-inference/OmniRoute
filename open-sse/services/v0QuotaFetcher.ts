@@ -19,9 +19,15 @@
  * Registration: call registerV0QuotaFetcher() once at server startup.
  */
 
-import { registerQuotaFetcher, registerQuotaWindows, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  registerQuotaWindows,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 
 const V0_CONFIG = {
   baseUrl: "https://api.v0.dev",
@@ -115,17 +121,19 @@ interface WindowFetchResult {
  * rate-limits (dailyOps) calls — the only difference is the response shape parser.
  */
 async function fetchWindow(
+  connectionId: string,
   url: string,
   headers: Record<string, string>,
   parse: (data: unknown) => { billingType: string | null; window: WindowFetchResult["window"] }
 ): Promise<WindowFetchResult> {
   try {
     await throttleQuotaFetch();
-    const response = await fetch(url, {
+    const response = await fetchWithConnectionProxy(connectionId, url, {
       method: "GET",
       headers,
       signal: AbortSignal.timeout(8_000),
     });
+    if (!response) return { window: null, billingType: null, invalidCredential: false };
 
     if (response.status === 401 || response.status === 403) {
       return { window: null, billingType: null, invalidCredential: true };
@@ -219,6 +227,7 @@ export async function fetchV0Quota(
   let billingType = "unknown";
 
   const billingResult = await fetchWindow(
+    connectionId,
     `${V0_CONFIG.baseUrl}${V0_CONFIG.billingPath}`,
     headers,
     parseBillingResponse
@@ -229,6 +238,7 @@ export async function fetchV0Quota(
   }
 
   const rateLimitsResult = await fetchWindow(
+    connectionId,
     `${V0_CONFIG.baseUrl}${V0_CONFIG.rateLimitsPath}`,
     headers,
     parseRateLimitsResponse
@@ -262,6 +272,7 @@ export function invalidateV0QuotaCache(connectionId: string): void {
  */
 export function registerV0QuotaFetcher(): void {
   registerQuotaFetcher("v0-vercel", fetchV0Quota);
+  registerQuotaCacheInvalidator("v0-vercel", invalidateV0QuotaCache);
   registerMonitorFetcher("v0-vercel", fetchV0Quota);
   registerQuotaWindows("v0-vercel", [V0_WINDOW_CREDITS, V0_WINDOW_DAILY_OPS]);
 }

@@ -1,1 +1,0 @@
-- **feat(proxy-subscription):** prune nodes the core check rejects, then retry verification before keeping the previous file ([#15295](https://github.com/diegosouzapw/OmniRoute/pull/15295)) — thanks @maxmad64bis

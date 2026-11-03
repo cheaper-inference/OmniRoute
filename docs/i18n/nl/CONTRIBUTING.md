@@ -8,11 +8,11 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Ontwikkelomgeving
+## Ontwikkelomgeving instellen
 
 ### Vereisten
 
-- **Node.js** `>=22.22.3 <23`, of `>=24.0.0 <27` (aanbevolen: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, of `>=24.0.0 <27` (aanbevolen: 24 LTS)
 - **npm** 10+
 
 > **Gebruikers van npm v11+ (Node 24+):** Controleer na `npm install` of de native modules zijn geïnstalleerd:
@@ -33,34 +33,34 @@ npm install
 ### Omgevingsvariabelen
 
 ```bash
-# Maak je .env aan op basis van de sjabloon
+# Maak uw .env aan op basis van de sjabloon
 cp .env.example .env
 
-# Genereer de vereiste geheime waarden
+# Genereer de vereiste geheimen
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 Belangrijke variabelen voor ontwikkeling:
 
-| Variabele              | Standaardwaarde voor ontwikkeling | Beschrijving                  |
-| ---------------------- | --------------------------------- | ----------------------------- |
-| `PORT`                 | `20128`                           | Serverpoort                   |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`          | Basis-URL voor de frontend    |
-| `JWT_SECRET`           | (hierboven genereren)             | Geheim voor JWT-ondertekening |
-| `INITIAL_PASSWORD`     | `CHANGEME`                        | Wachtwoord voor eerste login  |
-| `APP_LOG_LEVEL`        | `info`                            | Niveau van loguitvoer         |
+| Variabele              | Standaardwaarde voor ontwikkeling | Beschrijving                    |
+| ---------------------- | --------------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                           | Serverpoort                     |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`          | Basis-URL voor de frontend      |
+| `JWT_SECRET`           | (hierboven genereren)             | Geheim voor JWT-ondertekening   |
+| `INITIAL_PASSWORD`     | `CHANGEME`                        | Wachtwoord voor eerste login    |
+| `APP_LOG_LEVEL`        | `info`                            | Detailniveau van logregistratie |
 
 ### Dashboardinstellingen
 
 Het dashboard biedt UI-schakelaars voor functies die ook via omgevingsvariabelen kunnen worden geconfigureerd:
 
-| Locatie van instelling     | Schakelaar            | Beschrijving                                            |
-| -------------------------- | --------------------- | ------------------------------------------------------- |
-| Instellingen → Geavanceerd | Foutopsporingsmodus   | Logboeken voor foutopsporingsverzoeken inschakelen (UI) |
-| Instellingen → Algemeen    | Zichtbaarheid zijbalk | Secties in de zijbalk tonen/verbergen                   |
+| Locatie van instelling     | Schakelaar            | Beschrijving                                   |
+| -------------------------- | --------------------- | ---------------------------------------------- |
+| Instellingen → Geavanceerd | Debugmodus            | Logboeken voor debugverzoeken inschakelen (UI) |
+| Instellingen → Algemeen    | Zichtbaarheid zijbalk | Secties in de zijbalk tonen/verbergen          |
 
-Deze instellingen worden opgeslagen in de database en blijven behouden na herstarts. Wanneer ze zijn ingesteld, overschrijven ze de standaardwaarden van omgevingsvariabelen.
+Deze instellingen worden in de database opgeslagen en blijven behouden na herstarts. Wanneer ze zijn ingesteld, overschrijven ze de standaardwaarden van omgevingsvariabelen.
 
 ### Lokaal uitvoeren
 
@@ -69,50 +69,50 @@ Deze instellingen worden opgeslagen in de database en blijven behouden na hersta
 npm run dev
 
 # Productiebuild
-npm run build    # next build → .build/next/ en daarna assembleStandalone → dist/
+npm run build    # next build → .build/next/ en vervolgens assembleStandalone → dist/
 npm run start
 
-# Snelle compilatie van alleen de backend/API voor wijzigingen van bijdragers
+# Snelle compilatie van alleen backend/API voor wijzigingen van bijdragers
 npm run build:contributor
 
-# Releasebuild (schone rebuild + HEAD-controlebestand — vereist voor implementatie)
+# Releasebuild (schone herbouw + HEAD-controlebestand — vereist voor implementatie)
 npm run build:release   # rm -rf .build dist && build + schrijft dist/BUILD_SHA
 
-# Algemene poortconfiguratie
+# Gebruikelijke poortconfiguratie
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-De bijdragersbuild voert uitsluitend compilatievalidatie uit: deze stelt niet de zelfstandige
-distributie samen en bouwt geen optionele native pakketassets. Gebruik de reguliere productiebuild wanneer
-je de leverbare bundel moet valideren.
+De bijdragersbuild voert alleen compilatievalidatie uit: deze stelt de zelfstandige
+distributie niet samen en bouwt geen optionele native pakketassets. Gebruik de reguliere productiebuild wanneer
+u de distribueerbare bundel moet valideren.
 
 ### Indeling van builduitvoer
 
-| Map       | Inhoud                                                                                   | Gevolgd |
-| --------- | ---------------------------------------------------------------------------------------- | ------- |
-| `src/`    | Broncode van de toepassing (TypeScript / TSX)                                            | Ja      |
-| `.build/` | Tussenbestanden — uitvoer van `next build` (genegeerd door Git, `distDir = .build/next`) | Nee     |
-| `dist/`   | Leverbare bundel — samengesteld door `assembleStandalone` (genegeerd door Git)           | Nee     |
+| Map       | Inhoud                                                                                   | Bijgehouden |
+| --------- | ---------------------------------------------------------------------------------------- | ----------- |
+| `src/`    | Broncode van de applicatie (TypeScript / TSX)                                            | Ja          |
+| `.build/` | Tussenbestanden — uitvoer van `next build` (genegeerd door Git, `distDir = .build/next`) | Nee         |
+| `dist/`   | Distribueerbare bundel — samengesteld door `assembleStandalone` (genegeerd door Git)     | Nee         |
 
-De buildpijplijn bestaat uit één doorgang:
+De buildpipeline bestaat uit één doorgang:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js-uitvoer)
-  └─ assembleStandalone()                 (kopieert zelfstandige uitvoer + statische bestanden + openbare bestanden + native assets)
+  └─ assembleStandalone()                 (kopieert standalone + static + public + native assets)
        └─ uitvoer: dist/                  (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` schoont bovendien eerst beide mappen op en schrijft
+`npm run build:release` maakt bovendien eerst beide mappen leeg en schrijft
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) als controlebestand voor de integriteit van de implementatie.
 
-`npm run build:contributor` gebruikt het buildprofiel voor alleen de backend. Tijdens het bouwen vervangt het tijdelijk
-de UI-bestanden van het dashboard door tijdelijke bestanden, behoudt het de API-routehandlers en herstelt het de oorspronkelijke bestanden
-na de build. Gebruik `npm run build` voor wijzigingen die van invloed zijn op de UI van het dashboard of voor volledige
+`npm run build:contributor` gebruikt het buildprofiel voor alleen de backend. Tijdens het builden worden
+dashboard-UI-bestanden tijdelijk vervangen door stubs, blijven API-routehandlers behouden en worden de oorspronkelijke bestanden
+na de build hersteld. Gebruik `npm run build` voor wijzigingen die invloed hebben op de dashboard-UI of voor volledige
 releasevalidatie; het bijdragersprofiel is geen vervanging voor de releasebuild.
 
 > **Opmerking voor VPS-implementatie:** de externe image-map `/usr/lib/node_modules/omniroute/app/`
-> blijft ongewijzigd. De implementatieroutines synchroniseren de inhoud van `dist/` ernaartoe met rsync.
+> blijft ongewijzigd. De implementatietaken synchroniseren de inhoud van `dist/` er via rsync naartoe.
 > Alleen het pad voor builduitvoer binnen de repository is gewijzigd (`app/` → `dist/`).
 
 Standaard-URL's:
@@ -173,14 +173,14 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 # Alle tests (unit + vitest + ecosysteem + e2e)
 npm run test:all
 
-# Eén testbestand (native Node.js-testrunner — de meeste tests gebruiken deze)
+# Eén testbestand (ingebouwde testrunner van Node.js — de meeste tests gebruiken deze)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Alleen de unittests waarop je wijziging invloed heeft (dezelfde TIA-selector als de CI-gate, #8084)
+# Alleen de unit-tests die door je wijziging worden beïnvloed (dezelfde TIA-selector als de CI-gate, #8084)
 npm run test:scoped            # wijzigingen in de laatste commit (of de werkmap)
-npm run test:scoped:staged     # alleen gestagede wijzigingen — werkt goed in combinatie met een pre-commit-run
-npm run test:scoped:full       # bouw eerst de importgrafiek opnieuw op (na het toevoegen/verplaatsen van bestanden)
-# Exitcode 1 + "voer de volledige suite uit" betekent dat een centraal bestand (tsconfig, package.json, …) of een
+npm run test:scoped:staged     # alleen gestagede wijzigingen — goed te combineren met een pre-commit-run
+npm run test:scoped:full       # bouw eerst de importgraaf opnieuw op (na het toevoegen/verplaatsen van bestanden)
+# Exit 1 + "run the full suite" betekent dat een centraal bestand (tsconfig, package.json, …) of een
 # niet-toegewezen bronbestand is gewijzigd — de selector faalt veilig en slaat nooit stilzwijgend iets over.
 
 # Vitest (MCP-server, autoCombo, cache)
@@ -195,60 +195,61 @@ npm run test:protocols:e2e
 # Compatibiliteitstests voor het ecosysteem
 npm run test:ecosystem
 
-# Dekkingsdrempel: 60% statements/lines/functions/branches
+# Dekkingsgate: 60% statements/lines/functions/branches
 npm run test:coverage
 npm run coverage:report
 
-# Lint- en opmaakcontrole
+# Controle op linting en opmaak
 npm run lint
 npm run check
 
-# Afgeschermde combo-rooktest met echte upstreams (vereist VPS-toegang + tegoed bij echte providers)
-# Benadert ECHTE providers — kost een klein bedrag. Wordt NOOIT uitgevoerd in CI. Wordt netjes overgeslagen zonder de gate.
+# Afgeschermde combo-smoketest met echte upstreams (vereist VPS-toegang + echt providertegoed)
+# Benadert ECHTE providers — kost een klein bedrag. Wordt NOOIT in CI uitgevoerd. Wordt netjes overgeslagen zonder de gate.
 # Vereist: toegang via ssh root@192.168.0.15 (haalt een alleen-lezen DB-snapshot op van de VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Fase 3-live-rooktest voor de VPS — gewone Node ESM-scripts die de live .15-server rechtstreeks benaderen.
+# Live-smoketest voor fase 3 op de VPS — gewone Node ESM-scripts die de live .15-server rechtstreeks benaderen.
 # Vereist: toegang via ssh root@192.168.0.15 (combo's worden via SSH sqlite aangemaakt/verwijderd).
-# Benadert ECHTE providers (lage kosten). Maakt/verwijdert alleen combo's met __live_test__*. Wordt NOOIT uitgevoerd in CI.
+# Benadert ECHTE providers (lage kosten). Maakt/verwijdert alleen combo's met __live_test__*. Wordt NOOIT in CI uitgevoerd.
 # REQUIRE_API_KEY=false op .15, dus er is geen API-sleutel nodig, maar COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY worden gebruikt indien ingesteld.
-npm run test:combo:live:vps              # 7 HTTP-scenario's (prioriteit/round-robin/gewogen/kosten/fusie/automatisch + status)
-npm run test:combo:live:vps:failover     # voegt een echt failoverscenario tussen providers toe (8 in totaal)
+npm run test:combo:live:vps              # 7 HTTP-scenario's (prioriteit/round-robin/gewogen/kosten/fusie/auto + status)
+npm run test:combo:live:vps:failover     # voegt een echt provideroverschrijdend failoverscenario toe (8 in totaal)
 ```
 
 Opmerkingen over dekking:
 
-- `npm run test:coverage` meet de broncodedekking voor de belangrijkste unittestsuite, sluit `tests/**` uit en neemt `open-sse/**` mee
-- Pull requests moeten de dekkingsdrempel voor statements/lines/functions/branches op **60%+** houden
+- `npm run test:coverage` meet de broncodedekking voor de belangrijkste unit-testsuite, sluit `tests/**` uit en neemt `open-sse/**` op
+- Pull requests moeten de dekkingsgate op **60%+** statements/lines/functions/branches houden
 - Als een PR productiecode in `src/`, `open-sse/`, `electron/` of `bin/` wijzigt, moeten in dezelfde PR geautomatiseerde tests worden toegevoegd of bijgewerkt
 - `npm run coverage:report` toont het gedetailleerde rapport per bestand van de meest recente dekkingsrun
-- `npm run test:coverage:legacy` behoudt de oudere meetwaarde voor historische vergelijking
-- Zie `docs/ops/COVERAGE_PLAN.md` voor de gefaseerde roadmap om de dekking te verbeteren
+- `npm run test:coverage:legacy` behoudt de oudere metriek voor historische vergelijking
+- Zie `docs/ops/COVERAGE_PLAN.md` voor de gefaseerde roadmap voor verbetering van de dekking
 
 ### Vereisten voor pull requests
 
 Gebruik voordat je een PR opent het
-[standaardtraject voor bijdragen](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) om de gerichte cyclus uit te voeren voor
-wat je hebt gewijzigd. De volledige unittestsuite (4 CI-shards), Vitest, de dekkingsdrempel van **60%+** en
-de productiebuild vallen onder de verantwoordelijkheid van CI — ze lokaal uitvoeren levert geen extra signaal op dat de
-PR-controles je niet al geven, en op kleinere machines kan dit de host overbelasten (#8084):
+[Gouden pad voor bijdragen](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) om de gerichte cyclus uit te voeren voor
+wat je hebt gewijzigd. De volledige unit-testsuite (4 CI-shards), Vitest, de dekkingsgate van **60%+** en
+de productiebuild vallen onder de verantwoordelijkheid van CI — ze lokaal uitvoeren levert geen extra
+informatie op die de PR-controles je niet al geven, en op kleinere machines kan dit de host overbelasten (#8084):
 
-- Voer de testbestanden uit die je wijziging dekken: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Voer de testbestanden uit die je wijziging afdekken: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Voer `npm run lint` uit
-- Voeg geautomatiseerde tests toe of werk ze bij in dezelfde PR wanneer productiecode wordt gewijzigd
+- Voeg geautomatiseerde tests toe of werk ze bij in dezelfde PR wanneer productiecode verandert
+- Plaats in `node:test`-bestanden elke `await` op het hoogste niveau (zoals `await import(...)`) vóór de eerste `test()` / `describe()`: onder `--test-force-exit` kunnen tests die daarna worden geregistreerd stilzwijgend nooit worden uitgevoerd (#18045; afgedwongen door `npm run check:test-tla-order`)
 - Vermeld de gewijzigde of toegevoegde testbestanden in de PR-beschrijving wanneer productiecode is gewijzigd
-- Controleer het SonarQube-resultaat van de PR wanneer de projectgeheimen in CI zijn geconfigureerd
+- Controleer het SonarQube-resultaat voor de PR wanneer de projectgeheimen in CI zijn geconfigureerd
 
-Huidige teststatus: **122 unittestsbestanden** met dekking voor:
+Huidige teststatus: **122 unit-testbestanden** met dekking voor:
 
-- Providervertalers en formaatconversie
-- Snelheidsbeperking, circuitbreaker en robuustheid
+- Providertranslators en formaatconversie
+- Snelheidsbegrenzing, circuitbreaker en robuustheid
 - Semantische cache, idempotentie en voortgangsregistratie
-- Databasebewerkingen en -schema (21 DB-modules)
+- Databasebewerkingen en schema (21 DB-modules)
 - OAuth-flows en authenticatie
-- Validatie van API-eindpunten (Zod v4)
+- Validatie van API-endpoints (Zod v4)
 - MCP-servertools en afdwinging van scopes
-- Geheugen- en Skills-systemen
+- Memory- en Skills-systemen
 
 ---
 
@@ -288,65 +289,72 @@ Zie `open-sse/utils/stream.ts` en `open-sse/utils/streamHandler.ts` voor toegepa
 
 ---
 
-## Project Structure
+## Projectstructuur
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # Dashboardpagina's (23 secties)
+│   ├── api/                # API-routes (51 mappen)
+│   └── login/              # Authenticatiepagina's (.tsx)
+├── domain/                 # Beleidsengine (policyEngine, comboResolver, costRules, enz.)
+├── lib/                    # Kernlogica voor bedrijfsprocessen (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3-protocolserver
+│   ├── acp/                # Register voor het Agent Communication Protocol
+│   ├── compliance/         # Beleidsengine voor compliance
+│   ├── db/                 # SQLite-domeinmodules + 130 migraties
+│   ├── memory/             # Permanent gespreksgeheugen
+│   ├── oauth/              # OAuth-providers, -services en -hulpprogramma's
+│   ├── skills/             # Uitbreidbaar skill-framework
+│   ├── usage/              # Gebruiksregistratie en kostenberekening
+│   └── localDb.ts          # Alleen re-exportlaag — voeg hier nooit logica toe
+├── middleware/              # Request-middleware (promptInjectionGuard)
+├── mitm/                   # MITM-proxy (certificaat, DNS, doelroutering)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React-componenten (.tsx)
+│   ├── constants/          # Providerdefinities (329), MCP-scopes, 20 routeringsstrategieën
+│   ├── utils/              # Circuitbreaker, sanitizer en authenticatiehulpprogramma's
+│   └── validation/         # Zod v4-schema's
+└── sse/                    # SSE-proxypijplijn
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse-workspace
+├── executors/              # 150 executormodules (executorklassen + helpers per provider)
+├── handlers/               # 11 requesthandlers (chat, responses, embeddings, afbeeldingen, enz.)
+├── mcp-server/             # MCP-server (110 unieke tools, 3 transportmethoden, 33 scopes)
+├── services/               # 178 services op het hoogste niveau (combo, autoCombo, rateLimitManager, enz.)
+├── translator/             # Formaatvertalers (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API-transformer
+└── utils/                  # 22 hulpprogrammamodules (stream, TLS, proxy, logging)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Electron-desktopapp (platformonafhankelijk)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js-testrunner (1.574 testbestanden)
+├── integration/            # Integratietests
+├── e2e/                    # Playwright-tests
+├── security/               # Beveiligingstests
+├── translator/             # Vertalerspecifieke tests
+└── load/                   # Belastingtests
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Architectuurbesluiten
+├── architecture/            # Systeemarchitectuur en veerkracht
+├── comparison/              # OmniRoute versus alternatieven
+├── compression/             # Compressiehandleidingen en -regels
+├── dev/                     # Ontwikkelhandleidingen
+├── diagrams/                # Architectuurdiagrammen
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Gebruikershandleiding, Docker, installatie, probleemoplossing
+├── i18n/                    # Geïnternationaliseerde README-vertalingen
+├── marketing/               # Marketingmateriaal
+├── ops/                     # Implementatie, proxy, dekking, releases
+├── providers/               # Providerspecifieke documentatie
+├── reference/               # API-referentie, omgevingsvariabelen, CLI-tools, gratis niveaus
+├── releases/                # Releaseopmerkingen
+├── routing/                 # Auto-combo-engine, herhaling van redeneringen
+├── screenshots/             # Dashboardschermafbeeldingen
+├── security/                # Vangrails, compliance, stealth, tokens
+└── specs/                   # Ontwerpspecificaties
 ```
 
 ---
@@ -406,9 +414,13 @@ Schrijf unittests in `tests/unit/` die minimaal het volgende afdekken:
 
 ---
 
-## Releasing
+## Releases uitbrengen
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+Releases worden beheerd via de `/generate-release`-workflow. Wanneer er een nieuwe GitHub Release wordt aangemaakt, wordt het pakket via GitHub Actions **automatisch naar npm gepubliceerd**.
+
+Gebruik voor VPS-deployments `npm run build:release` (niet `npm run build`) — deze opdracht voert een schone
+rebuild uit, stelt de bundel samen in `dist/` en schrijft het sentinelbestand `dist/BUILD_SHA`.
+Gebruik vervolgens de `/deploy-vps-*-cc`-skills, die `dist/` via rsync naar de externe map `app/` synchroniseren.
 
 ---
 

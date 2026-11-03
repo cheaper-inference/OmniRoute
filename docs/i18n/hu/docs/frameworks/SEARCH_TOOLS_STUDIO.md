@@ -42,30 +42,30 @@ A meglévő `SearchForm` + `ResultsPanel` + `RerankPanel` elemeket egy lappá fe
 
 - Lekérdezés → találatok (cím, URL, kivonat, relevanciapontszám).
 - Szolgáltatói metaadatok a Konfiguráció panelen (költség, kvóta, állapot).
-- Újrarangsorolási szakasz: újrarangsoroló modell kiválasztása, találatok átrendezése, a `positionDelta` megjelenítése.
-- Üres állapot cselekvésre ösztönző felhívással, ha nincs beállítva keresési szolgáltató.
-- Keresési előzmények a `SearchHistory.tsx` használatával.
+- Újrarangsorolási szakasz: újrarangsorolási modell kiválasztása, találatok átrendezése, `positionDelta` megjelenítése.
+- Üres állapot cselekvésre ösztönző elemmel, ha nincs konfigurálva keresési szolgáltató.
+- Keresési előzmények a `SearchHistory.tsx` segítségével.
 - Meghívja a `POST /v1/search` végpontot (meglévő végpont, változtatások nélkül).
 
-### Kinyerés lap
+### Webtartalom-kinyerés lap
 
-Új lap egy URL tartalmának kinyeréséhez a `POST /v1/web/fetch` végponton keresztül (a 05-ös tervben létrehozva):
+Új lap tartalom URL-ről történő kinyeréséhez a `POST /v1/web/fetch` végponton keresztül (a 05-ös tervben létrehozva):
 
-- Bemenet: URL + teljes oldal kapcsoló + formátumválasztó (markdown / szöveg / HTML).
-- Küldés → lekérés → a `ScrapeResult.tsx` megjelenítése.
+- Bemenet: URL + teljes oldalas kapcsoló + formátumválasztó (markdown / szöveg / HTML).
+- Küldés → lekérés → `ScrapeResult.tsx` megjelenítése.
 - A `ScrapeResult` markdown-előnézetet és nyersnézet-kapcsolót jelenít meg.
-- Korlát: ha a válasz törzse nagyobb mint **256 KB**, a felhasználói felület megjeleníti a `(csonkolva, nyers változat megtekintése)` szöveget, és a nyers változatot egy Monaco modális ablakban nyitja meg (D21).
-- Metaadatpanel: szolgáltató (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), késleltetés, költség, válaszméret, hivatkozások száma.
+- Korlát: ha a válasz törzse nagyobb mint **256 KB**, a felhasználói felület megjeleníti a `(csonkolva, nyers tartalom megtekintése)` szöveget, és a nyers tartalmat egy Monaco modális ablakban nyitja meg (D21).
+- Metaadatpanel: szolgáltató (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), késleltetés, költség, válaszméret, hivatkozások száma.
 - A `useScrapeFetch.ts` hookot használja.
 
 ### Összehasonlítás lap
 
-Ugyanazt a lekérdezést/URL-t futtatja legfeljebb **4 szolgáltatón párhuzamosan** (D22):
+Ugyanazt a lekérdezést/URL-t legfeljebb **4 szolgáltatónál párhuzamosan** futtatja (D22):
 
 - Szolgáltatónként egymás melletti oszlopok.
 - Mérőszámok: késleltetés, költség, találatok száma, válaszméret.
-- URL-átfedés kiszámítása keresésnél (a közös URL-ek száma a kezdeti találathoz képest).
-- Szolgáltatónként meghívja a `POST /v1/search` (keresés) vagy a `POST /v1/web/fetch` (kinyerés) végpontot.
+- URL-átfedés számítása kereséskor (a megosztott URL-ek száma a kezdeti találathoz viszonyítva).
+- Szolgáltatónként meghívja a `POST /v1/search` (keresés) vagy a `POST /v1/web/fetch` (webtartalom-kinyerés) végpontot.
 
 ---
 
@@ -100,12 +100,12 @@ Ugyanazt a lekérdezést/URL-t futtatja legfeljebb **4 szolgáltatón párhuzamo
 
 ## Szolgáltatókatalógus
 
-A `ProviderCatalog.tsx` megjeleníti a szolgáltatók teljes listáját a `GET /api/search/providers`
-végpontról (az F4-ben kibővítve a lekérési szolgáltatókkal):
+A `ProviderCatalog.tsx` megjeleníti a teljes szolgáltatólistát a `GET /api/search/providers` végpontból
+(az F4-ben kibővítve a lekérési szolgáltatókkal):
 
-| `kind` | `"search"` (20 szolgáltató) vagy `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 szolgáltató) vagy `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Az állapot meghatározása **a kérés időpontjában történik** annak ellenőrzésével, hogy léteznek-e hitelesítő adatok, és hogy
+Az állapot **a kérés időpontjában kerül meghatározásra** annak ellenőrzésével, hogy léteznek-e hitelesítő adatok, és hogy
 jelenleg minden kulcs várakozási időszakban van-e.
 
 ---
@@ -118,15 +118,15 @@ Az API-kulcs helyőrzője mindig `$OMNIROUTE_API_KEY` (D11, megosztva a Playgrou
 
 ---
 
-## Backend módosításai
+## Backend módosítások
 
-Ehhez a funkcióhoz mindössze egy backendmódosításra volt szükség:
+Ehhez a funkcióhoz mindössze egyetlen backend módosításra volt szükség:
 
 ### Kibővített `GET /api/search/providers`
 
 A `src/app/api/search/providers/route.ts` a következőkkel bővült:
 
-- Mind a 6 lekérési szolgáltató (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) felvétele a tömbbe.
+- Az összes lekérési szolgáltató (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) hozzáadása a tömbhöz.
 - A `kind: "search" | "fetch"` hozzáadása minden elemhez.
 - Az élő hitelesítőadat-állapotból származtatott `status: "configured" | "missing" | "rate_limited"` hozzáadása.
 - A visszafelé kompatibilitás fenntartása — a meglévő mezők (`id`, `name` stb.) változatlanok maradtak.

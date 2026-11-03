@@ -4,6 +4,7 @@
  * through deps.
  */
 import { markEmptyTurnExecution, inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
+import { noteUpstreamDispatch } from "../../utils/proxyFetch.ts";
 
 import type { BaseExecutor } from "../../executors/base.ts";
 import type { AgentGoalPolicy } from "../../utils/agentGoalPolicy.ts";
@@ -35,8 +36,7 @@ import { HTTP_STATUS, STREAM_RECOVERY } from "../../config/constants.ts";
 import { parseRetryAfterMs } from "../../services/apiKeyRotator.ts";
 import { createRecoverableStream, makeContinuationBody } from "../../services/streamRecovery.ts";
 import { persistCodexChildQuotaResponse } from "../../services/codexAccount/index.ts";
-import { invalidateCodexQuotaCache } from "../../services/codexQuotaFetcher.ts";
-import { invalidateGenericQuotaCacheOnStatus } from "../../services/genericQuotaFetcher.ts";
+import { invalidateQuotaCacheOnStatus } from "../../services/genericQuotaFetcher.ts";
 import {
   isRateLimitEnabled,
   withRateLimit,
@@ -64,6 +64,7 @@ import { resolveProviderId } from "@/shared/constants/providers";
 import { buildContinuationLogHooks } from "./recoveryTraceLogging.ts";
 import { formatStreamRecoveryRetryWarning } from "./streamErrorResult.ts";
 import { injectSystemPromptPostTranslation } from "../../services/systemPrompt.ts";
+import type { ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
 
 export type ChatCoreExecutorResult = {
   response: Response;
@@ -138,6 +139,7 @@ export type ExecuteProviderRequestDeps = {
   requestedModel: string;
   resilienceSettings: ResilienceSettings;
   settings: Record<string, unknown> | null | undefined;
+  toolDisclosure?: ToolDisclosureConfig | null;
   skipUpstreamRetry: boolean;
   stream: boolean;
   streamController: { signal: AbortSignal };
@@ -192,6 +194,7 @@ export async function executeProviderRequest(
     traceId,
     translatedBody,
     trustedEffortContext,
+    toolDisclosure,
     upstreamStream,
     userAgent: _userAgent,
   } = deps;
@@ -212,6 +215,7 @@ export async function executeProviderRequest(
       isOpencodeClient,
       rawBody: body,
       clientRawRequest,
+      toolDisclosure,
     });
 
     // Global System Prompt — SINGLE injection point (post-translation) for
@@ -225,7 +229,7 @@ export async function executeProviderRequest(
     // `systemInstruction`, responses `instructions`. Carrier-less targets
     // (kiro user-fold, antigravity Cloud Code envelope) are covered by the
     // gated PRE-translation pass before translateRequest instead.
-    bodyToSend = injectSystemPromptPostTranslation(bodyToSend, { targetFormat });
+    bodyToSend = injectSystemPromptPostTranslation(bodyToSend, { targetFormat, provider });
 
     updatePendingScope(pendingScope, {
       providerRequest: bodyToSend,
@@ -337,8 +341,9 @@ export async function executeProviderRequest(
                   signal: streamController.signal,
                   log,
                   execute: (signal) =>
-                    runWithCapture(providerRequestCapture, () =>
-                      executor.execute({
+                    runWithCapture(providerRequestCapture, () => {
+                      noteUpstreamDispatch();
+                      return executor.execute({
                         model: modelToCall,
                         body: bodyToSend,
                         stream: upstreamStream,
@@ -353,8 +358,8 @@ export async function executeProviderRequest(
                         skipUpstreamRetry,
                         contextEditing: { enabled: contextEditingEnabled },
                         correlationId,
-                      })
-                    ),
+                      });
+                    }),
                 });
               },
               streamController.signal,
@@ -400,16 +405,15 @@ export async function executeProviderRequest(
                     log?.debug?.("CODEX", persistedQuota.exhaustionLog);
                   }
                 }
-                if (res.response.status === 429) {
-                  invalidateCodexQuotaCache(String(attemptConnectionId));
-                }
               } catch (err) {
                 const errMessage = err instanceof Error ? err.message : String(err);
                 log?.debug?.("CODEX", `Failed to persist codex quota state: ${errMessage}`);
               }
-            } else if (attemptConnectionId && res.response.status === 429) {
-              // Dropped generic quota cache after 429
-              invalidateGenericQuotaCacheOnStatus({
+            }
+            if (attemptConnectionId && res.response.status === 429) {
+              // Dropped generic quota cache after 429 — bespoke fetchers drop their
+              // own cache through the registry; the generic wrapper is the fallback.
+              invalidateQuotaCacheOnStatus({
                 provider,
                 connectionId: String(attemptConnectionId),
                 status: res.response.status,
@@ -544,8 +548,9 @@ export async function executeProviderRequest(
                       signal: streamController.signal,
                       log,
                       execute: (signal) =>
-                        runWithCapture(providerRequestCapture, () =>
-                          executor.execute({
+                        runWithCapture(providerRequestCapture, () => {
+                          noteUpstreamDispatch();
+                          return executor.execute({
                             model: modelToCall,
                             body,
                             stream: upstreamStream,
@@ -560,8 +565,8 @@ export async function executeProviderRequest(
                             skipUpstreamRetry,
                             contextEditing: { enabled: contextEditingEnabled },
                             correlationId,
-                          })
-                        ),
+                          });
+                        }),
                     });
                     const retryRes = normalizeExecutorResult(retryRaw);
                     const retryOk =

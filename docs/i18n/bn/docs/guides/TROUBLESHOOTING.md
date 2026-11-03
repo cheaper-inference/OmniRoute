@@ -37,33 +37,33 @@ OmniRoute-এর সাধারণ সমস্যা ও সমাধান।
 
 ---
 
-### বিনামূল্যের Provider-এ Rate Limiting (429 / 400 / 401)
+### বিনামূল্যের প্রোভাইডারগুলোতে রেট লিমিটিং (429 / 400 / 401)
 
-**লক্ষণ**: বিনামূল্যের/auth-বিহীন provider (opencode, auggie ইত্যাদি)-এর সঙ্গে `model: "auto"` ব্যবহার করার সময়, আপনি মাঝেমধ্যে উত্তরের বদলে `HTTP 429`, `400`, অথবা `401` পান। কিছুক্ষণ পর একই prompt পুনরায় চেষ্টা করলে request সফল হয়, কিন্তু automation (cron job, agent, script) প্রথম ব্যর্থতাতেই বন্ধ হয়ে যায়।
+**উপসর্গ**: বিনামূল্যের/প্রমাণীকরণবিহীন প্রোভাইডারগুলোর (auggie ইত্যাদি) সঙ্গে `model: "auto"` ব্যবহার করার সময় উত্তরের পরিবর্তে মাঝে মাঝে `HTTP 429`, `400`, বা `401` পাওয়া যায়। কয়েক মুহূর্ত পরে একই প্রম্পট পুনরায় চেষ্টা করলে অনুরোধগুলো সফল হয়, কিন্তু প্রথম ব্যর্থতাতেই অটোমেশন (cron জব, এজেন্ট, স্ক্রিপ্ট) বন্ধ হয়ে যায়।
 
-**মূল কারণ**: তিনটি স্বতন্ত্র ব্যর্থতার ধরন একসঙ্গে জমা হয়:
+**মূল কারণ**: তিনটি স্বতন্ত্র ব্যর্থতার ধরন একসঙ্গে ঘটে:
 
-1. **Provider rate-limit (`429`)**: বিনামূল্যের tier প্রতিটি সময়সীমার জন্য একটি quota প্রয়োগ করতে পারে। একসঙ্গে অনেকগুলো call-এর ঢল এটি নিঃশেষ করে দেয়, ফলে সময়সীমা reset না হওয়া পর্যন্ত পরবর্তী request প্রত্যাখ্যাত হয়।
-2. **Passthrough-এ অকার্যকর model (`400`/`401`)**: `auto/*` pool-এ `opencode`-এর এমন passthrough model থাকতে পারে, যেগুলো catalog-এ নিবন্ধিত কিন্তু কোনো সক্রিয় credentials নেই (যেমন `oc/north-mini-code-free` → `401`)। Auto-router একটি চেষ্টা করে, ব্যর্থ হয়, এবং fallback কার্যকর হওয়ার আগেই error ছড়িয়ে পড়ে।
-3. **Concurrency amplification (চাপের মধ্যে `429`)**: যখন একাধিক agent/cron session একই সময়ে `auto`-তে request পাঠায়, তখন সম্মিলিত request rate বিনামূল্যের provider-গুলোর সহ্যসীমা ছাড়িয়ে যায়, ফলে বৈধ call-ও অপব্যবহার হিসেবে চিহ্নিত হয়।
+1. **প্রোভাইডারের রেট লিমিট (`429`)**: বিনামূল্যের টিয়ারগুলো প্রতিটি সময়-উইন্ডোর জন্য কোটা প্রয়োগ করতে পারে। একসঙ্গে অনেকগুলো সমান্তরাল কল করলে সেটি নিঃশেষ হয়ে যায়, ফলে উইন্ডো রিসেট না হওয়া পর্যন্ত পরবর্তী অনুরোধ প্রত্যাখ্যান করা হয়।
+2. **পাসথ্রুতে ত্রুটিপূর্ণ মডেল (`400`/`401`)**: `auto/*` পুলে এমন পাসথ্রু মডেল থাকতে পারে, যেগুলো ক্যাটালগে নিবন্ধিত হলেও কার্যকর ক্রেডেনশিয়াল নেই (→ `401`)। অটো-রাউটার সেগুলোর একটি চেষ্টা করে, ব্যর্থ হয়, এবং ফলব্যাক কার্যকর হওয়ার আগেই ত্রুটিটি ছড়িয়ে পড়ে।
+3. **কনকারেন্সি অ্যামপ্লিফিকেশন (লোডের অধীনে `429`)**: একাধিক এজেন্ট/cron সেশন একসঙ্গে `auto` ব্যবহার করলে সম্মিলিত অনুরোধের হার বিনামূল্যের প্রোভাইডারগুলোর সহনসীমা অতিক্রম করে, ফলে বৈধ কলগুলোও অপব্যবহারমূলক হিসেবে চিহ্নিত হয়।
 
-**যাচাইকৃত সমাধান (community-র প্রতিবেদন অনুযায়ী, 2026-08-10)**: তিনটি environment variable এমনভাবে সমন্বয় করুন, যাতে rotation, concurrency, এবং fallback বিনামূল্যের tier-এর অস্থিরতা সামলে নেয়, এর কারণে বন্ধ হয়ে না যায়:
+**যাচাইকৃত সমাধান (কমিউনিটি কর্তৃক প্রতিবেদনকৃত, 2026-08-10)**: তিনটি এনভায়রনমেন্ট ভেরিয়েবল সমন্বয় করুন, যাতে রোটেশন, কনকারেন্সি এবং ফলব্যাক বিনামূল্যের টিয়ারের অস্থিরতা সামলে নিতে পারে, তাতে ব্যর্থ হয়ে বন্ধ না হয়ে যায়:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 হলে অন্য model/provider-এ যান (অকার্যকর passthrough model এড়িয়ে যায়)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # heavyweight request গ্রহণের সুস্পষ্ট সর্বোচ্চ সীমা (ডিফল্টভাবে unset: request-সংখ্যার কোনো cap নেই, নিচের note দেখুন)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ধীর upstream-এর জন্য সীমাবদ্ধ অপেক্ষার সময় RATE_LIMIT_MAX_WAIT_MS-এর ডিফল্ট মানের চেয়ে বাড়ান
+export OMNIROUTE_ROTATE_ON_400=true           # 400/401 হলে অন্য মডেল/প্রোভাইডারে যান (ত্রুটিপূর্ণ পাসথ্রু মডেল এড়িয়ে যায়)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # হেভিওয়েট অনুরোধ গ্রহণের সুস্পষ্ট সর্বোচ্চ সীমা (ডিফল্টভাবে সেট করা নেই: অনুরোধ-সংখ্যার কোনো সীমা নেই, নিচের নোট দেখুন)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ধীরগতির আপস্ট্রিমের জন্য সীমাবদ্ধ অপেক্ষার সময় RATE_LIMIT_MAX_WAIT_MS-এর ডিফল্ট মানের চেয়ে বাড়ান
 ```
 
-এগুলো OmniRoute process environment-এ (daemon-এ, যেমন LaunchAgent plist অথবা `systemctl edit`-এর মাধ্যমে) সেট করুন, তারপর OmniRoute restart করুন। Rotation flag-ই সবচেয়ে বেশি প্রভাবশালী ব্যবস্থা: এটি একটি hard failure-কে pool-এর কোনো সচল provider-এর বিরুদ্ধে স্বচ্ছ retry-তে রূপান্তর করে।
+এগুলো OmniRoute প্রসেসের এনভায়রনমেন্টে সেট করুন (ডেমনটিতে, যেমন LaunchAgent plist বা `systemctl edit`-এর মাধ্যমে), তারপর OmniRoute পুনরায় চালু করুন। রোটেশন ফ্ল্যাগটি এককভাবে সবচেয়ে কার্যকর নিয়ামক: এটি একটি অনতিক্রম্য ব্যর্থতাকে পুলের কোনো সুস্থ প্রোভাইডারের বিপরীতে স্বচ্ছ পুনঃচেষ্টায় রূপান্তর করে।
 
-**দ্রষ্টব্য**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` একই সময়ে কতগুলো heavyweight — দীর্ঘ-context — request চলবে তা সীমাবদ্ধ করে; এই সীমাটি একটি admission gate, provider rate limiter নয়। **#503-fanout আপডেট:** এই var এখন আর ডিফল্টভাবে সেট করা হয় না (উপরের মতো সুস্পষ্টভাবে configure করলেই এটি এখন কার্যকর হয়) — এর পরিবর্তে heavyweight admission একটি স্বয়ংক্রিয়ভাবে নির্ণীত byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) দ্বারা নিয়ন্ত্রিত হয়, যা host-এর প্রকৃত memory ceiling অনুযায়ী নিজেকে scale করে। তাই একেবারে নতুন deployment-এ এই var একেবারেই সেট না করেও অনেক কম `503 chat_admission_busy` rejection দেখা উচিত; এখানে সুস্পষ্টভাবে সেট করলেও এটি documentation-এ বর্ণিত ঠিক একইভাবে কাজ করবে। সুস্পষ্ট byte-budget override 8 MiB–2 GiB সীমার মধ্যে clamp করা হয়। একটি `413 body_exceeds_budget` ক্ষণস্থায়ী নয়: ওই byte budget বাড়ান, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` কমান, অথবা process memory ceiling বাড়ান। একটি `inflight_bytes_budget` shed হলো সাময়িক contention এবং এটি retry করা যায়। প্রতি-provider rate limiting (`open-sse/services/rateLimitManager.ts`) আলাদাভাবে `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, এবং `RATE_LIMIT_AUTO_ENABLE` দ্বারা নিয়ন্ত্রিত হয় — `.env.example` দেখুন।
+**নোট**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` একই সময়ে কতগুলো হেভিওয়েট—দীর্ঘ-কনটেক্সট—অনুরোধ চলবে তা সীমাবদ্ধ করে; এই সীমাটি একটি অ্যাডমিশন গেট, প্রোভাইডারের রেট লিমিটার নয়। **#503-fanout আপডেট:** এই ভেরিয়েবলটি এখন আর ডিফল্টভাবে সেট করা থাকে না (এখন এটি কেবল সুস্পষ্টভাবে কনফিগার করা হলেই কার্যকর হয়, যেমনটি উপরে করা হয়েছে)—এর পরিবর্তে হেভিওয়েট অ্যাডমিশন একটি স্বয়ংক্রিয়ভাবে নির্ধারিত বাইট বাজেট (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) দ্বারা নিয়ন্ত্রিত হয়, যা হোস্টের প্রকৃত মেমরি সীমা অনুযায়ী নিজেকে স্কেল করে। তাই নতুন ডিপ্লয়মেন্টে এই ভেরিয়েবল একেবারেই সেট না করেও অনেক কম `503 chat_admission_busy` প্রত্যাখ্যান দেখা উচিত; এখানে সুস্পষ্টভাবে সেট করলেও এটি নথিভুক্ত পদ্ধতি অনুযায়ী ঠিক একইভাবে কাজ করবে। সুস্পষ্ট বাইট-বাজেট ওভাররাইডগুলো 8 MiB–2 GiB-এর মধ্যে সীমাবদ্ধ থাকে। একটি `413 body_exceeds_budget` ক্ষণস্থায়ী নয়: সেই বাইট বাজেট বাড়ান, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` কমান, অথবা প্রসেসের মেমরি সীমা বাড়ান। একটি `inflight_bytes_budget` শেড সাময়িক প্রতিযোগিতাজনিত অবস্থা এবং এটি পুনরায় চেষ্টা করা যায়। প্রতিটি প্রোভাইডারের রেট লিমিটিং (`open-sse/services/rateLimitManager.ts`) আলাদাভাবে `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, এবং `RATE_LIMIT_AUTO_ENABLE` দ্বারা নিয়ন্ত্রিত হয়—দেখুন `.env.example`।
 
-**এটি কাজ করেছে কিনা যাচাই করার উপায়**: আপনার agent/cron পরপর দ্রুত দুবার চালান এবং নিশ্চিত করুন যে দুবারই সফল হয়েছে। সমাধানটি প্রয়োগের আগে, দ্বিতীয়বার চালালে সাধারণত `429`/`401` ত্রুটি দেখা যায়। সমাধানটি প্রয়োগের পরে, ব্যর্থতা (যদি থাকে) স্বচ্ছভাবে পুনরায় চেষ্টা করা হয় এবং কলটি সম্পন্ন হয়। এছাড়াও, আপনি `curl /monitoring/health` চালিয়ে provider সংযোগগুলোর `rateLimitedUntil` ফিল্ড এবং প্রভাবিত provider-গুলোর `circuitBreakers.providerBreakers[].state` পর্যবেক্ষণ করতে পারেন — state-টি `CLOSED`, `DEGRADED`, `OPEN`, অথবা `HALF_OPEN`-এর মধ্যে একটি (দেখুন `src/shared/utils/circuitBreaker.ts`), এবং কোনো provider বারবার ব্যর্থ হলে reset window একটি probe-কে যেতে দেওয়ার (`HALF_OPEN`) আগে সেটি `CLOSED → DEGRADED → OPEN`-এ পরিবর্তিত হবে।
+**এটি কাজ করেছে কি না যাচাই করার উপায়**: আপনার এজেন্ট/cron দ্রুত পরপর দুবার চালান এবং নিশ্চিত করুন যে উভয়বারই সফল হয়েছে। সমাধানটি প্রয়োগের আগে দ্বিতীয়বার চালালে সাধারণত `429`/`401` দেখা যায়। সমাধানের পরে ব্যর্থতাগুলো (যদি থাকে) স্বচ্ছভাবে পুনরায় চেষ্টা করা হয় এবং কলটি সম্পন্ন হয়। এছাড়াও আপনি `curl /monitoring/health` চালিয়ে প্রোভাইডার সংযোগগুলোর `rateLimitedUntil` ফিল্ড এবং প্রভাবিত প্রোভাইডারগুলোর `circuitBreakers.providerBreakers[].state` পর্যবেক্ষণ করতে পারেন—স্টেটটি `CLOSED`, `DEGRADED`, `OPEN`, বা `HALF_OPEN`-এর একটি হয় (দেখুন `src/shared/utils/circuitBreaker.ts`), এবং কোনো প্রোভাইডার ক্রমাগত ব্যর্থ হলে রিসেট উইন্ডো একটি প্রোবকে যেতে দেওয়ার (`HALF_OPEN`) আগে সেটি `CLOSED → DEGRADED → OPEN` অবস্থায় পরিবর্তিত হবে।
 
-**যদি এখনও 429 দেখা যায়**: ওই provider-এর সক্রিয় account সত্যিই তার _quota_ শেষ করে ফেলেছে (শুধু rate নয়)। OmniRoute dashboard → Providers → Accounts-এ একই provider-এর জন্য দ্বিতীয় একটি account যোগ করুন, অথবা অন্য কোনো বিনামূল্যের provider (যেমন `routeway`, `auggie`) অন্তর্ভুক্ত করুন। Rotation শুধু সাময়িক rate/400/401 সমস্যায় সাহায্য করে; quota পুরোপুরি শেষ হয়ে গেলে দ্বিতীয় credential বা ভিন্ন provider প্রয়োজন।
+**এরপরও 429 দেখলে**: সেই প্রোভাইডারের সক্রিয় অ্যাকাউন্টের _কোটা_ সত্যিই নিঃশেষ হয়ে গেছে (শুধু রেট নয়)। OmniRoute ড্যাশবোর্ড → প্রোভাইডার → অ্যাকাউন্টে একই প্রোভাইডারের জন্য দ্বিতীয় একটি অ্যাকাউন্ট যোগ করুন, অথবা অন্য কোনো বিনামূল্যের প্রোভাইডার (যেমন `routeway`, `auggie`) অন্তর্ভুক্ত করুন। রোটেশন কেবল ক্ষণস্থায়ী রেট/400/401 সমস্যায় সহায়তা করে; সম্পূর্ণ কোটা নিঃশেষ হলে দ্বিতীয় ক্রেডেনশিয়াল বা ভিন্ন প্রোভাইডার প্রয়োজন।
 
-**vision model-এ (`auto/vision`, `bazaarlink/*`) 403 দেখা গেলে**: সংযুক্ত account-টিতে vision-সহ কোনো paid plan নেই, অথবা API key-টির পর্যাপ্ত permission নেই। provider dashboard-এ যাচাই করুন যে key scope-এ vision/multimodal অন্তর্ভুক্ত রয়েছে, অথবা একটি paid tier account সংযুক্ত করে সেটিকে vision target হিসেবে রাখুন।
+**ভিশন মডেলে (`auto/vision`, `bazaarlink/*`) 403 দেখলে**: সংযুক্ত অ্যাকাউন্টে ভিশন অন্তর্ভুক্ত এমন কোনো পেইড প্ল্যান নেই, অথবা API কীটির পর্যাপ্ত অনুমতি নেই। প্রোভাইডারের ড্যাশবোর্ডে যাচাই করুন যে কীটির স্কোপে ভিশন/মাল্টিমোডাল অন্তর্ভুক্ত আছে, অথবা একটি পেইড টিয়ার অ্যাকাউন্ট সংযুক্ত করে সেটিকে ভিশন টার্গেট হিসেবে রাখুন।
 
 ---
 
@@ -89,39 +89,39 @@ npm install -g omniroute --legacy-peer-deps
 
 ---
 
-## npm install-scripts ব্লক হওয়ার সতর্কতা (global install)
+## npm install-scripts ব্লক হওয়ার সতর্কতা (গ্লোবাল ইনস্টল)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` চালানোর সময়, নতুন npm version-গুলো (v11+ এবং v12+) ডিফল্টভাবে package lifecycle script ব্লক করে এবং একটি install-scripts সতর্কতা দেখায়:
+`npm install -g omniroute` চালানোর সময়, npm-এর নতুন সংস্করণগুলো (v11+ এবং v12+) ডিফল্টভাবে প্যাকেজ লাইফসাইকেল স্ক্রিপ্ট ব্লক করে এবং একটি install-scripts সতর্কতা দেখায়:
 
 ```
-npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
+npm warn install-scripts 7টি প্যাকেজের install script ব্লক করা হয়েছে, কারণ সেগুলো allowScripts-এর আওতাভুক্ত নয়:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### এই সতর্কতাটি কি উপেক্ষা করা যায়?
 
-**আংশিকভাবে, তবে script ছাড়া চালানো সুপারিশ করা হয় না।** OmniRoute-এ graceful fallback রয়েছে: standalone bundle থেকে native `better-sqlite3` binding লোড করা না গেলে, application-টি `node:sqlite` বা `sql.js`-এর মতো বিকল্প driver ব্যবহার করে (দেখুন [SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md))। Server তখনও চালু হবে, তবে `sql.js`-এর মতো WASM fallback-এ চালালে SQLite WAL (Write-Ahead Logging) mode নিষ্ক্রিয় হয়ে যায় এবং memory ও disk-sync overhead বৃদ্ধি পায়।
+**আংশিকভাবে, তবে স্ক্রিপ্ট ছাড়া চালানো বাঞ্ছনীয় নয়।** OmniRoute-এ স্বয়ংক্রিয় ফলব্যাক রয়েছে: স্বতন্ত্র বান্ডল থেকে নেটিভ `better-sqlite3` বাইন্ডিং লোড করা না গেলে, অ্যাপ্লিকেশনটি `node:sqlite` বা `sql.js`-এর মতো বিকল্প ড্রাইভারে ফলব্যাক করে ([SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md) দেখুন)। সার্ভার তারপরও চালু হবে, কিন্তু `sql.js`-এর মতো WASM ফলব্যাকে চালালে SQLite WAL (Write-Ahead Logging) মোড নিষ্ক্রিয় হয় এবং মেমরি ও ডিস্ক-সিঙ্কের অতিরিক্ত ব্যয় বৃদ্ধি পায়।
 
-### আসলে কোন script-গুলো প্রয়োজন?
+### কোন স্ক্রিপ্টগুলো আসলে প্রয়োজনীয়?
 
-ব্লক হওয়া সব script OmniRoute চালানোর জন্য অপরিহার্য নয়:
+ব্লক হওয়া সব স্ক্রিপ্ট OmniRoute চালানোর জন্য অপরিহার্য নয়:
 
-- **অপরিহার্য (`omniroute`, `better-sqlite3`):** OmniRoute একটি Next.js standalone application bundle (`dist/`) থেকে চলে। ইনস্টলেশনের সময় npm top-level `node_modules/better-sqlite3/`-এ host-specific native SQLite driver download বা compile করে। এরপর OmniRoute-এর `postinstall` script (`scripts/build/postinstall.mjs`) এই host-specific binary-গুলো যাচাই করে `dist/node_modules/`-এ copy করে, যাতে standalone server সেগুলো access করতে পারে। `omniroute`-এর postinstall script ব্লক করা হলে এই copy করার ধাপটি বাদ পড়ে যায়।
-- **ঐচ্ছিক/transitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** এগুলো build helper, watcher tool বা system keychain utility। এগুলোকে অনুমতি দিলে build warning এড়ানো যায়, তবে core routing functionality-এর জন্য এগুলো প্রয়োজনীয় নয়।
-- **বাদ দেওয়া (`onnxruntime-node`):** এটি local AI embedding-এর জন্য একটি ঐচ্ছিক dependency এবং OmniRoute চালানোর জন্য **প্রয়োজনীয় নয়**। এর postinstall script NuGet থেকে প্রায় 300MB CUDA asset download করে; সমর্থিত hardware-এ local ONNX acceleration ব্যবহারের সুস্পষ্ট পরিকল্পনা না থাকলে এটিকে allow-list-এ অন্তর্ভুক্ত করবেন না।
+- **অপরিহার্য (`omniroute`, `better-sqlite3`):** OmniRoute একটি Next.js স্বতন্ত্র অ্যাপ্লিকেশন বান্ডল (`dist/`) থেকে চলে। ইনস্টলেশনের সময়, npm শীর্ষ-স্তরের `node_modules/better-sqlite3/`-এ হোস্ট-নির্দিষ্ট নেটিভ SQLite ড্রাইভার ডাউনলোড বা কম্পাইল করে। এরপর OmniRoute-এর `postinstall` স্ক্রিপ্ট (`scripts/build/postinstall.mjs`) এই হোস্ট-নির্দিষ্ট বাইনারিগুলো যাচাই করে `dist/node_modules/`-এ কপি করে, যাতে স্বতন্ত্র সার্ভার সেগুলো অ্যাক্সেস করতে পারে। `omniroute`-এর postinstall স্ক্রিপ্ট ব্লক করা হলে, এই কপি করার ধাপটি বাদ পড়ে যায়।
+- **ঐচ্ছিক/ট্রানজিটিভ (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** এগুলো বিল্ড সহায়ক, ওয়াচার টুল বা সিস্টেম কীচেইন ইউটিলিটি। এগুলোকে অনুমতি দিলে বিল্ড-সংক্রান্ত সতর্কতা এড়ানো যায়, তবে মূল রাউটিং কার্যকারিতার জন্য এগুলো প্রয়োজনীয় নয়।
+- **বাদ দেওয়া (`onnxruntime-node`):** এটি স্থানীয় AI এম্বেডিংয়ের জন্য একটি ঐচ্ছিক ডিপেন্ডেন্সি এবং OmniRoute চালানোর জন্য **প্রয়োজনীয় নয়**। এর postinstall স্ক্রিপ্ট NuGet থেকে প্রায় 300MB CUDA অ্যাসেট ডাউনলোড করে; সমর্থিত হার্ডওয়্যারে স্থানীয় ONNX অ্যাক্সেলারেশন ব্যবহার করার সুস্পষ্ট ইচ্ছা না থাকলে এটিকে allow-list-এ অন্তর্ভুক্ত করবেন না।
 
 ### প্রস্তাবিত সমাধান
 
-global install-এর সময় প্রয়োজনীয় install script-গুলোকে অনুমতি দিতে এবং সতর্কতা নীরব করতে OmniRoute ও এর native dependency-গুলোর জন্য `--allow-scripts` দিন:
+গ্লোবাল ইনস্টলের সময় প্রয়োজনীয় install script-গুলোকে অনুমতি দিতে এবং সতর্কতা বন্ধ করতে, OmniRoute ও এর নেটিভ ডিপেন্ডেন্সিগুলোর জন্য `--allow-scripts` পাস করুন:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-বিকল্পভাবে, আপনার user account-এর সব global installation-এর জন্য এটি স্থায়ীভাবে configure করতে:
+বিকল্পভাবে, আপনার ব্যবহারকারী অ্যাকাউন্টের সব গ্লোবাল ইনস্টলেশনের জন্য এটি স্থায়ীভাবে কনফিগার করতে:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -130,7 +130,7 @@ npm install -g omniroute
 
 ### আপনার ইনস্টলেশন যাচাই করুন
 
-ইনস্টলেশনের পর native binding এবং runtime environment ঠিকভাবে কাজ করছে কি না নিশ্চিত করতে built-in diagnostic tool চালান:
+ইনস্টলেশনের পর, নেটিভ বাইন্ডিং ও রানটাইম পরিবেশ সঠিকভাবে কাজ করছে কি না তা নিশ্চিত করতে বিল্ট-ইন ডায়াগনস্টিক টুল চালান:
 
 ```bash
 omniroute doctor

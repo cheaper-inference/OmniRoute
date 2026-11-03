@@ -2,6 +2,8 @@
 
 import { useCallback } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
+import Badge from "@/shared/components/Badge";
 import type { AgentSkill } from "@/lib/agentSkills/types";
 
 interface SkillCardProps {
@@ -20,7 +22,7 @@ export function SkillCard({ skill, selected, onClick }: SkillCardProps): JSX.Ele
         onClick();
       }
     },
-    [onClick],
+    [onClick]
   );
 
   const previewItems: string[] =
@@ -40,7 +42,7 @@ export function SkillCard({ skill, selected, onClick }: SkillCardProps): JSX.Ele
       data-testid={`skill-card-${skill.id}`}
       className={`flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${
         selected
-          ? "border-primary/40 bg-primary/5"
+          ? "border-primary/40 bg-primary/10"
           : "border-border bg-bg hover:bg-bg-subtle hover:border-border"
       }`}
     >
@@ -49,45 +51,41 @@ export function SkillCard({ skill, selected, onClick }: SkillCardProps): JSX.Ele
           selected ? "bg-primary/15" : "bg-bg-subtle"
         }`}
       >
-        <span
-          className={`material-symbols-outlined text-[18px] ${
-            selected ? "text-primary" : "text-text-muted"
-          }`}
-        >
-          {skill.icon ?? "article"}
-        </span>
+        <Icon
+          name={skill.icon ?? "article"}
+          size={18}
+          className={selected ? "text-primary" : "text-text-muted"}
+        />
       </div>
 
       <div className="min-w-0 flex-1">
         <div className="mb-0.5 flex flex-wrap items-center gap-1.5">
           <span className="text-sm font-semibold text-text-main">{skill.name}</span>
 
-          <span
-            className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${
-              skill.category === "api"
-                ? "bg-blue-500/10 text-blue-700 dark:text-blue-400"
-                : skill.category === "cli"
-                  ? "bg-violet-500/10 text-violet-700 dark:text-violet-400"
-                  : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-            }`}
+          <Badge
+            size="sm"
+            variant={
+              skill.category === "api" ? "info" : skill.category === "cli" ? "primary" : "success"
+            }
+            className="font-bold uppercase tracking-wide"
           >
             {skill.category === "api"
               ? t("categoryApi")
               : skill.category === "cli"
                 ? t("categoryCli")
                 : t("categoryConfig")}
-          </span>
+          </Badge>
 
           {skill.isEntry && (
-            <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+            <Badge variant="primary" size="sm" className="font-bold uppercase tracking-wide">
               start
-            </span>
+            </Badge>
           )}
 
           {skill.isNew && (
-            <span className="rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+            <Badge variant="warning" size="sm" className="font-bold uppercase tracking-wide">
               new
-            </span>
+            </Badge>
           )}
         </div>
 

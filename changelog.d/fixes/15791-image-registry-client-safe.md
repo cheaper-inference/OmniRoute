@@ -1,1 +1,0 @@
-- **fix(imageRegistry):** split image-registry data from flag-gated logic so the client bundle does not leak server-only registry code ([#15791](https://github.com/diegosouzapw/OmniRoute/pull/15791)) — thanks @Junior-HJ

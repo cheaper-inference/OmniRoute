@@ -17,11 +17,11 @@ pokrivenost i korake usklađivanja.
 
 ### Preduvjeti
 
-- **Node.js** `>=22.22.3 <23`, ili `>=24.0.0 <27` (preporučeno: 24 LTS)
+- **Node.js** `>=22.22.2 <23` ili `>=24.0.0 <27` (preporučeno: 24 LTS)
 - **npm** 10+
 
-> **Korisnici npm v11+ (Node 24+):** Nakon `npm install`, provjerite jesu li izvorni moduli instalirani:
-> `node -e "require('better-sqlite3')"`. Ako ne uspije s greškom `MODULE_NOT_FOUND`,
+> **Korisnici verzije npm v11+ (Node 24+):** Nakon naredbe `npm install` provjerite jesu li nativni moduli instalirani:
+> `node -e "require('better-sqlite3')"`. Ako naredba ne uspije uz pogrešku `MODULE_NOT_FOUND`,
 > pokrenite `npm approve-scripts better-sqlite3 && npm install`. Pogledajte
 > [Rješavanje problema](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -35,10 +35,10 @@ cd OmniRoute
 npm install
 ```
 
-### Varijable okoline
+### Varijable okruženja
 
 ```bash
-# Stvorite svoju .env datoteku iz predloška
+# Izradite svoj .env prema predlošku
 cp .env.example .env
 
 # Generirajte potrebne tajne ključeve
@@ -48,77 +48,77 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Ključne varijable za razvoj:
 
-| Varijabla              | Zadana vrijednost za razvoj | Opis                            |
-| ---------------------- | --------------------------- | ------------------------------- |
-| `PORT`                 | `20128`                     | Poslužiteljski port             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`    | Osnovni URL za sučelje          |
-| `JWT_SECRET`           | (generirajte gore)          | Tajni ključ za JWT potpisivanje |
-| `INITIAL_PASSWORD`     | `CHANGEME`                  | Lozinka za prvu prijavu         |
-| `APP_LOG_LEVEL`        | `info`                      | Razina detaljnosti zapisnika    |
+| Varijabla              | Zadana razvojna vrijednost | Opis                              |
+| ---------------------- | -------------------------- | --------------------------------- |
+| `PORT`                 | `20128`                    | Port poslužitelja                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Osnovni URL za sučelje            |
+| `JWT_SECRET`           | (generirajte iznad)        | Tajni ključ za potpisivanje JWT-a |
+| `INITIAL_PASSWORD`     | `CHANGEME`                 | Lozinka za prvu prijavu           |
+| `APP_LOG_LEVEL`        | `info`                     | Razina opširnosti zapisnika       |
 
 ### Postavke nadzorne ploče
 
-Nadzorna ploča pruža UI prekidače za značajke koje se također mogu konfigurirati putem varijabli okoline:
+Nadzorna ploča pruža kontrole korisničkog sučelja za značajke koje se također mogu konfigurirati putem varijabli okruženja:
 
-| Lokacija postavke   | Prekidač                    | Opis                                                     |
-| ------------------- | --------------------------- | -------------------------------------------------------- |
-| Postavke → Napredno | Način otklanjanja pogrešaka | Omogući zapisnike zahtjeva za otklanjanje pogrešaka (UI) |
-| Postavke → Općenito | Vidljivost bočne trake      | Prikaži/sakrij sekcije bočne trake                       |
+| Lokacija postavke   | Kontrola                            | Opis                                                       |
+| ------------------- | ----------------------------------- | ---------------------------------------------------------- |
+| Postavke → Napredno | Način rada za otklanjanje pogrešaka | Omogućuje zapisnike zahtjeva za otklanjanje pogrešaka (UI) |
+| Postavke → Općenito | Vidljivost bočne trake              | Prikazuje/skriva odjeljke bočne trake                      |
 
-Ove postavke pohranjuju se u bazu podataka i zadržavaju se nakon ponovnog pokretanja, nadjačavajući zadane vrijednosti varijabli okoline kada su postavljene.
+Te se postavke pohranjuju u bazu podataka i zadržavaju nakon ponovnih pokretanja, pri čemu, ako su postavljene, nadjačavaju zadane vrijednosti varijabli okruženja.
 
-### Pokretanje lokalno
+### Lokalno pokretanje
 
 ```bash
-# Razvojni način rada (vruće ponovno učitavanje)
+# Razvojni način rada (automatsko ponovno učitavanje)
 npm run dev
 
 # Produkcijska izgradnja
-npm run build    # next build → .build/next/ zatim assembleStandalone → dist/
+npm run build    # next build → .build/next/, zatim assembleStandalone → dist/
 npm run start
 
-# Brzo kompajliranje samo pozadinskog dijela/API-ja za promjene suradnika
+# Brzo kompajliranje samo pozadinskog sustava/API-ja za izmjene suradnika
 npm run build:contributor
 
-# Izgradnja za objavu (čista ponovna izgradnja + HEAD sentinel — obavezno za postavljanje)
-npm run build:release   # rm -rf .build dist && izgradnja + upisuje dist/BUILD_SHA
+# Izgradnja izdanja (čista ponovna izgradnja + kontrolna oznaka HEAD — obavezno za implementaciju)
+npm run build:release   # rm -rf .build dist && izgradnja + zapisuje dist/BUILD_SHA
 
 # Uobičajena konfiguracija porta
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Izgradnja za suradnike izvodi samo provjeru kompajliranja: ne sastavlja samostalnu
-distribuciju niti gradi neobavezne izvorne pakete. Koristite regularnu produkcijsku izgradnju kada
+Izgradnja za suradnike provodi samo provjeru kompajliranjem: ne sastavlja samostalnu
+distribuciju niti izrađuje dodatne nativne resurse za pakiranje. Upotrijebite uobičajenu produkcijsku izgradnju kada
 trebate provjeriti paket spreman za isporuku.
 
-### Raspored izlaznih direktorija izgradnje
+### Raspored izlaznih datoteka izgradnje
 
-| Direktorij | Sadržaj                                                                  | Praćen |
-| ---------- | ------------------------------------------------------------------------ | ------ |
-| `src/`     | Izvorni kod aplikacije (TypeScript / TSX)                                | Da     |
-| `.build/`  | Međuproizvodi — izlaz `next build` (gitignored, `distDir = .build/next`) | Ne     |
-| `dist/`    | Paket spreman za isporuku — sastavlja `assembleStandalone` (gitignored)  | Ne     |
+| Direktorij | Sadržaj                                                                                | Prati se |
+| ---------- | -------------------------------------------------------------------------------------- | -------- |
+| `src/`     | Izvorni kod aplikacije (TypeScript / TSX)                                              | Da       |
+| `.build/`  | Međurezultati — izlaz naredbe `next build` (zanemaren u Gitu, `distDir = .build/next`) | Ne       |
+| `dist/`    | Paket spreman za isporuku — sastavlja ga `assembleStandalone` (zanemaren u Gitu)       | Ne       |
 
-Cjevovod izgradnje je jedan prolaz:
+Proces izgradnje odvija se u jednom prolazu:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js izlaz)
-  └─ assembleStandalone()                 (kopira standalone + static + public + izvorne resurse)
+  └─ next build → .build/next/standalone  (izlaz alata Next.js)
+  └─ assembleStandalone()                 (kopira samostalnu verziju + statičke + javne + nativne resurse)
        └─ izlaz: dist/                    (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` dodatno čisti oba direktorija prije toga i upisuje
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao sentinel za integritet postavljanja.
+`npm run build:release` dodatno najprije čisti oba direktorija i zapisuje
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kao kontrolnu oznaku integriteta implementacije.
 
-`npm run build:contributor` koristi profil izgradnje samo za pozadinski dio. Privremeno zamjenjuje
-datoteke UI nadzorne ploče stub datotekama tijekom izgradnje, zadržava upravljače API ruta i vraća izvorne datoteke
-nakon izgradnje. Koristite `npm run build` za promjene koje utječu na UI nadzorne ploče ili za potpunu
-provjeru objave; profil za suradnike nije zamjena za izgradnju objave.
+`npm run build:contributor` koristi profil izgradnje samo za pozadinski sustav. Tijekom izgradnje privremeno zamjenjuje
+datoteke korisničkog sučelja nadzorne ploče pomoćnim datotekama, zadržava rukovatelje API ruta i vraća izvorne datoteke
+nakon izgradnje. Upotrijebite `npm run build` za izmjene koje utječu na korisničko sučelje nadzorne ploče ili za potpunu
+provjeru izdanja; profil za suradnike nije zamjena za izgradnju izdanja.
 
-> **Napomena za postavljanje na VPS:** udaljeni direktorij slike `/usr/lib/node_modules/omniroute/app/`
-> ostaje nepromijenjen. Vještine postavljanja sinkroniziraju sadržaj `dist/` u njega.
-> Samo je putanja izlaza izgradnje u repozitoriju premještena (`app/` → `dist/`).
+> **Napomena o implementaciji na VPS-u:** udaljeni direktorij slike `/usr/lib/node_modules/omniroute/app/`
+> ostaje nepromijenjen. Postupci implementacije pomoću alata rsync sinkroniziraju sadržaj direktorija `dist/` s njim.
+> Promijenjena je samo putanja izlaza izgradnje unutar repozitorija (`app/` → `dist/`).
 
 Zadani URL-ovi:
 
@@ -171,29 +171,29 @@ Opsezi (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 
 ---
 
-## Pokretanje Testova
+## Pokretanje testova
 
 ```bash
-# Svi testovi (unit + vitest + ecosystem + e2e)
+# Svi testovi (jedinični + vitest + ekosustav + e2e)
 npm run test:all
 
-# Jedna datoteka s testovima (Node.js nativni pokretač testova — većina testova koristi ovo)
+# Jedna testna datoteka (izvorni pokretač testova za Node.js — većina testova koristi njega)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Samo unit testovi na koje utječe vaša izmjena (isti TIA selektor kao CI prolaznik, #8084)
-npm run test:scoped            # izmjene u zadnjem commitu (ili radnom stablu)
-npm run test:scoped:staged     # samo staged izmjene — dobro se kombinira s pre-commit pokretanjem
-npm run test:scoped:full       # prvo ponovo izgradi mapu import-grafa (nakon dodavanja/premještanja datoteka)
-# Izlaz 1 + "pokrenite cijelu kolekciju" znači da se promijenila hub datoteka (tsconfig, package.json, …) ili
-# nemapiran izvor — selektor sigurno ne uspijeva, nikad tiho ne preskače.
+# Samo jedinični testovi na koje utječe vaša promjena (isti TIA selektor kao na CI kontrolnoj točki, #8084)
+npm run test:scoped            # promjene u posljednjem commitu (ili radnom stablu)
+npm run test:scoped:staged     # samo pripremljene promjene — dobro se uklapa s pokretanjem prije commita
+npm run test:scoped:full       # prvo ponovno izgradite mapu grafa uvoza (nakon dodavanja/premještanja datoteka)
+# Izlaz 1 + "pokrenite cijeli skup" znači da se promijenila središnja datoteka (tsconfig, package.json, …) ili
+# nemapirani izvor — selektor radi sigurno i nikada ništa prešutno ne preskače.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (MCP poslužitelj, autoCombo, predmemorija)
 npm run test:vitest
 
 # E2E testovi (zahtijeva Playwright)
 npm run test:e2e
 
-# E2E testovi protokolarnih klijenata (MCP transporti, A2A)
+# E2E klijenata protokola (MCP prijenosi, A2A)
 npm run test:protocols:e2e
 
 # Testovi kompatibilnosti ekosustava
@@ -207,51 +207,53 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Zaštićeni real-upstream combo smoke (zahtijeva VPS pristup + stvarne kredite pružatelja)
-# Pogađa STVARNE pružatelje — malo košta. NIKAD se ne pokreće u CI-u. Preskače čisto bez prolaznika.
-# Potrebno: ssh root@192.168.0.15 pristup (učitava snimku baze podataka samo za čitanje s VPS-a).
+# Kontrolirani osnovni test stvarnih vanjskih sustava za combo (zahtijeva pristup VPS-u + stvarne kredite pružatelja)
+# Pristupa STVARNIM pružateljima — stvara mali trošak. NIKADA se ne pokreće u CI-ju. Uredno se preskače bez kontrolne zastavice.
+# Potrebno: pristup ssh root@192.168.0.15 (učitava snimku baze podataka samo za čitanje s VPS-a).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — jednostavne Node ESM skripte, pogađaju živi .15 poslužitelj direktno.
-# Potrebno: ssh root@192.168.0.15 pristup (comboi se stvaraju/brišu putem SSH sqlite).
-# Pogađa STVARNE pružatelje (mali trošak). Stvara/briše samo __live_test__* comboe. NIKAD se ne pokreće u CI-u.
-# REQUIRE_API_KEY=false na .15 pa nije potreban API ključ, ali poštuje COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ako su postavljeni.
-npm run test:combo:live:vps              # 7 HTTP scenarija (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # dodaje stvarni cross-provider failover scenarij (ukupno 8)
+# Aktivni VPS osnovni test 3. faze — obične Node ESM skripte izravno pristupaju aktivnom .15 poslužitelju.
+# Zahtijeva: pristup ssh root@192.168.0.15 (combo konfiguracije stvaraju se/uklanjaju putem SSH sqlitea).
+# Pristupa STVARNIM pružateljima (mali trošak). Stvara/briše samo combo konfiguracije __live_test__*. NIKADA se ne pokreće u CI-ju.
+# Na .15 je REQUIRE_API_KEY=false pa API ključ nije potreban, ali poštuje COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ako su postavljeni.
+npm run test:combo:live:vps              # 7 HTTP scenarija (prioritet/kružno raspoređivanje/ponderirano/trošak/fuzija/automatski + stanje)
+npm run test:combo:live:vps:failover     # dodaje stvarni scenarij prebacivanja između pružatelja (ukupno 8)
 ```
 
 Napomene o pokrivenosti:
 
-- `npm run test:coverage` mjeri pokrivenost izvornog koda za glavni skup unit testova, isključuje `tests/**` i uključuje `open-sse/**`
-- Pull requestovi moraju održavati prag pokrivenosti na **60%+** naredbi/redaka/funkcija/grana
-- Ako PR mijenja produkcijski kod u `src/`, `open-sse/`, `electron/` ili `bin/`, mora dodati ili ažurirati automatizirane testove u istom PR-u
-- `npm run coverage:report` ispisuje detaljno izvješće po datotekama iz zadnjeg pokretanja pokrivenosti
-- `npm run test:coverage:legacy` čuva stariju metriku za povijesnu usporedbu
-- Pogledajte `docs/ops/COVERAGE_PLAN.md` za plan poboljšanja pokrivenosti u fazama
+- `npm run test:coverage` mjeri pokrivenost izvornog koda za glavni skup jediničnih testova, izuzima `tests/**` i uključuje `open-sse/**`
+- Zahtjevi za spajanje moraju održavati prag pokrivenosti od **60%+** za naredbe/retke/funkcije/grane
+- Ako PR mijenja produkcijski kod u `src/`, `open-sse/`, `electron/` ili `bin/`, u istom PR-u mora dodati ili ažurirati automatizirane testove
+- `npm run coverage:report` ispisuje detaljno izvješće za svaku datoteku iz posljednjeg pokretanja pokrivenosti
+- `npm run test:coverage:legacy` zadržava stariju metriku radi povijesne usporedbe
+- Pogledajte `docs/ops/COVERAGE_PLAN.md` za fazni plan poboljšanja pokrivenosti
 
-### Zahtjevi za Pull Request
+### Zahtjevi za zahtjev za spajanje
 
-Prije otvaranja PR-a, koristite
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) za pokretanje fokusiranog ciklusa za
-ono što ste promijenili. Puni skup unit testova (4 CI sharda), Vitest, prag pokrivenosti **60%+** i
-produkcijski build su odgovornost CI-a — lokalno pokretanje ne dodaje nikakav signal koji provjere PR-a već neće dati, a na manjim strojevima može zasititi host (#8084):
+Prije otvaranja PR-a upotrijebite
+[Zlatni put za doprinošenje](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) kako biste pokrenuli usredotočeni ciklus za
+ono što ste promijenili. Za cijeli skup jediničnih testova (4 CI segmenta), Vitest, prag pokrivenosti od **60%+** i
+produkcijsku izgradnju odgovoran je CI — njihovo lokalno pokretanje ne pruža dodatne informacije koje vam
+provjere PR-a već neće dati, a na slabijim računalima može preopteretiti sustav (#8084):
 
-- Pokrenite testne datoteke koje pokrivaju vašu izmjenu: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Pokrenite testne datoteke koje pokrivaju vašu promjenu: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Pokrenite `npm run lint`
-- Uključite ili ažurirajte automatizirane testove u istom PR-u kad god se mijenja produkcijski kod
-- Uključite izmijenjene ili dodane testne datoteke u opis PR-a kada se promijenio produkcijski kod
-- Provjerite SonarQube rezultat na PR-u kada su tajne projekta konfigurirane u CI-u
+- Dodajte ili ažurirajte automatizirane testove u istom PR-u kad god se promijeni produkcijski kod
+- U datotekama `node:test` postavite svaki `await` najviše razine (kao što je `await import(...)`) prije prvog `test()` / `describe()`: uz `--test-force-exit`, testovi registrirani nakon njega mogu se prešutno uopće ne pokrenuti (#18045; provodi se naredbom `npm run check:test-tla-order`)
+- Kada se promijeni produkcijski kod, u opis PR-a uključite promijenjene ili dodane testne datoteke
+- Provjerite rezultat SonarQubea na PR-u kada su tajne projekta konfigurirane u CI-ju
 
-Trenutni status testova: **122 unit testne datoteke** koje pokrivaju:
+Trenutačno stanje testova: **122 datoteke jediničnih testova** koje pokrivaju:
 
-- Prevoditelje pružatelja i konverziju formata
-- Ograničavanje brzine, circuit breaker i otpornost
-- Semantički cache, idempotentnost, praćenje napretka
-- Operacije s bazom podataka i shemu (21 DB modul)
+- Prevoditelje pružatelja i pretvorbu formata
+- Ograničavanje brzine, prekidač strujnog kruga i otpornost
+- Semantičku predmemoriju, idempotentnost i praćenje napretka
+- Operacije baze podataka i shemu (21 modul baze podataka)
 - OAuth tokove i autentifikaciju
-- Validaciju API krajnjih točaka (Zod v4)
-- Alate MCP poslužitelja i provođenje opsega
-- Sustave Memorije i Vještina
+- Validaciju krajnjih točaka API-ja (Zod v4)
+- Alate MCP poslužitelja i provedbu opsega
+- Sustave memorije i vještina
 
 ---
 
@@ -296,67 +298,67 @@ Pogledajte `open-sse/utils/stream.ts` i `open-sse/utils/streamHandler.ts` za pri
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Stranice nadzorne ploče (23 sekcije)
+│   ├── (dashboard)/        # Stranice nadzorne ploče (23 odjeljka)
 │   ├── api/                # API rute (51 direktorij)
-│   └── login/              # Stranice autentikacije (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, itd.)
-├── lib/                    # Osnovna poslovna logika (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protokol server
-│   ├── acp/                # Agent Communication Protocol registar
-│   ├── compliance/         # Engine politike usklađenosti
-│   ├── db/                 # SQLite domenske module + 130 migracija
-│   ├── memory/             # Trajno konverzacijsko pamćenje
-│   ├── oauth/              # OAuth pružatelji, servisi i uslužni programi
+│   └── login/              # Stranice za autentifikaciju (.tsx)
+├── domain/                 # Mehanizam pravila (policyEngine, comboResolver, costRules itd.)
+├── lib/                    # Temeljna poslovna logika (.ts)
+│   ├── a2a/                # Poslužitelj protokola Agent-to-Agent v0.3
+│   ├── acp/                # Registar protokola Agent Communication Protocol
+│   ├── compliance/         # Mehanizam pravila usklađenosti
+│   ├── db/                 # SQLite domenski moduli + 130 migracija
+│   ├── memory/             # Trajna konverzacijska memorija
+│   ├── oauth/              # OAuth pružatelji, servisi i pomoćni alati
 │   ├── skills/             # Proširivi okvir vještina
-│   ├── usage/              # Praćenje korištenja i izračun troškova
-│   └── localDb.ts          # Samo sloj ponovnog izvoza — nikada ne dodavajte logiku ovdje
-├── middleware/              # Međusloj zahtjeva (promptInjectionGuard)
-├── mitm/                   # MITM proxy (certifikat, DNS, usmjeravanje cilja)
+│   ├── usage/              # Praćenje upotrebe i izračun troškova
+│   └── localDb.ts          # Samo sloj za ponovni izvoz — ovdje nikada nemojte dodavati logiku
+├── middleware/              # Posrednički softver zahtjeva (promptInjectionGuard)
+├── mitm/                   # MITM proxy (certifikat, DNS, usmjeravanje prema odredištu)
 ├── shared/
 │   ├── components/         # React komponente (.tsx)
-│   ├── constants/          # Definicije pružatelja (329), MCP opsezi, 19 strategija usmjeravanja
-│   ├── utils/              # Circuit breaker, sanitizer, pomoćni programi za autentikaciju
+│   ├── constants/          # Definicije pružatelja (329), MCP opsezi, 20 strategija usmjeravanja
+│   ├── utils/              # Prekidač strujnog kruga, alat za sanitizaciju, pomoćni alati za autentifikaciju
 │   └── validation/         # Zod v4 sheme
 └── sse/                    # SSE proxy cjevovod
 
 open-sse/                   # @omniroute/open-sse radni prostor
-├── executors/              # 89 modula implementacije executora
-├── handlers/               # 11 rukovatelja zahtjevima (chat, responses, embeddings, images, itd.)
-├── mcp-server/             # MCP server (110 jedinstvenih alata, 3 transporta, 33 opsega)
-├── services/               # 178 servisa najviše razine (combo, autoCombo, rateLimitManager, itd.)
+├── executors/              # 150 modula izvršitelja (klase izvršitelja + pomoćni alati po pružatelju)
+├── handlers/               # 11 rukovatelja zahtjevima (razgovor, odgovori, ugradnje, slike itd.)
+├── mcp-server/             # MCP poslužitelj (110 jedinstvenih alata, 3 transporta, 33 opsega)
+├── services/               # 178 servisa najviše razine (combo, autoCombo, rateLimitManager itd.)
 ├── translator/             # Prevoditelji formata (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 modula uslužnih programa (stream, TLS, proxy, logiranje)
+├── transformer/            # Transformator Responses API-ja
+└── utils/                  # 22 pomoćna modula (tok, TLS, proxy, zapisivanje)
 
-electron/                   # Electron desktop aplikacija (višeplatformska)
+electron/                   # Electron aplikacija za stolna računala (višeplatformska)
 
 tests/
-├── unit/                   # Node.js test runner (1.574 testnih datoteka)
+├── unit/                   # Node.js pokretač testova (1.574 datoteke testova)
 ├── integration/            # Integracijski testovi
 ├── e2e/                    # Playwright testovi
 ├── security/               # Sigurnosni testovi
-├── translator/             # Testovi specifični za prevoditelje
+├── translator/             # Testovi specifični za prevoditelj
 └── load/                   # Testovi opterećenja
 
 docs/
 ├── adr/                     # Zapisi o arhitektonskim odlukama
 ├── architecture/            # Arhitektura sustava i otpornost
-├── comparison/              # OmniRoute vs alternative
-├── compression/             # Vodiči i pravila kompresije
+├── comparison/              # OmniRoute u usporedbi s alternativama
+├── compression/             # Vodiči i pravila za kompresiju
 ├── dev/                     # Vodiči za razvoj
-├── diagrams/                # Dijagrami arhitekture
+├── diagrams/                # Arhitektonski dijagrami
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
 ├── guides/                  # Korisnički vodič, Docker, postavljanje, rješavanje problema
 ├── i18n/                    # Internacionalizirani prijevodi README-a
 ├── marketing/               # Marketinški materijali
 ├── ops/                     # Implementacija, proxy, pokrivenost, izdanja
 ├── providers/               # Dokumentacija specifična za pružatelje
-├── reference/               # API referenca, env varijable, CLI alati, besplatni planovi
-├── releases/                # Bilješke o izdanjima
-├── routing/                 # Auto-combo engine, ponavljanje zaključivanja
+├── reference/               # Referenca API-ja, varijable okruženja, CLI alati, besplatne razine
+├── releases/                # Napomene uz izdanja
+├── routing/                 # Mehanizam automatskog kombiniranja, ponovna reprodukcija zaključivanja
 ├── screenshots/             # Snimke zaslona nadzorne ploče
-├── security/                # Zaštitne mjere, usklađenost, stealth, tokeni
-└── specs/                   # Dizajnerske specifikacije
+├── security/                # Zaštitne mjere, usklađenost, prikrivanje, tokeni
+└── specs/                   # Specifikacije dizajna
 ```
 
 ---

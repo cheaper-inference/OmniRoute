@@ -4,6 +4,11 @@
 // `success: false` but carried no `error` field, so the dashboard rendered a bare
 // "failed" with no diagnostic and nothing was logged server-side.
 
+// Free-plan edge relays (Vercel / Deno / Cloudflare) cold-start slowly: the first
+// request after idle routinely takes 10-25s, so a 10s budget reported healthy
+// relays as dead. Covers the abort timer and undici's headers/body timeouts.
+export const RELAY_TEST_TIMEOUT_MS = 30_000;
+
 export interface RelayTestResult {
   success: boolean;
   publicIp: string | null;

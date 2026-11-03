@@ -31,22 +31,23 @@ Wenn Sie eine Sicherheitslücke in OmniRoute entdecken, melden Sie diese bitte v
 
 ## LTS-Supportzeitraum (v3.9.x)
 
-Nach 3.8.59 folgt als nächste Version **3.9.0**, mit der der Langzeit-Support-Zweig auf dem
+Nach 3.8.59 ist die nächste Version **3.9.0**, mit der die Long-Term-Support-Linie auf dem
 Branch `stable/v3` eröffnet wird (siehe [`ROADMAP.md`](ROADMAP.md) → „Phase 3 — v3.9.0 LTS“).
 
-- **Was `stable/v3` erhält:** Fehlerbehebungen, Sicherheitspatches und Provider-Updates. Neue
-  Funktionen werden im v4-Kanal bereitgestellt; beim LTS-Zweig steht Stabilität an erster Stelle. `npm install omniroute`
-  (der Dist-Tag `latest`) bleibt während des gesamten v4-Zyklus auf v3.
-- **Dauer des Zeitraums:** `<T-GAP-3: Entscheidung des Verantwortlichen ausstehend — siehe ROADMAP.md>`. Die Dauer des
-  Zeitraums nach der allgemeinen Verfügbarkeit von v4.0 (wenn `latest` zu v4 wechselt) wurde **noch nicht festgelegt**; dieser
-  Abschnitt wird aktualisiert, sobald der Maintainer sie bekannt gibt. Gehen Sie bis dahin nicht von einem Enddatum aus.
-- **Melden einer Sicherheitslücke im LTS-Zweig:** derselbe Kanal wie bei jeder anderen Version —
-  ein privates [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  niemals ein öffentliches Issue. Geben Sie an, welche Version Sie getestet haben (zum Beispiel `3.9.2`); Korrekturen werden in
-  `stable/v3` übernommen und vorwärts auf v4 portiert.
-- **Sicherheits-Baseline zum LTS-Stichtag:** Der gemessene Scannerstatus sowie Nachweise für Route Guards und
-  öffentliche Anmeldedaten werden in
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) dokumentiert.
+- **Was `stable/v3` erhält:** Fehlerbehebungen, Sicherheitspatches und Provider-Aktualisierungen. Neue
+  Funktionen werden im v4-Kanal veröffentlicht; bei der LTS-Linie steht Stabilität an erster Stelle. `npm install omniroute`
+  (der `latest`-Dist-Tag) bleibt während des gesamten v4-Zyklus auf v3.
+- **Dauer des Zeitraums:** `stable/v3` erhält **Sicherheitskorrekturen und Korrekturen kritischer Regressionen für
+  12 Monate nach der Freigabe von 3.9.0 oder bis 90 Tage, nachdem v4.0.0 als `latest` veröffentlicht wurde —
+  je nachdem, welcher Zeitpunkt später liegt**. Das daraus resultierende Enddatum wird zum Zeitpunkt der Freigabe in den Versionshinweisen zu 3.9.0 und in
+  [`ROADMAP.md`](ROADMAP.md) festgehalten.
+- **Melden einer Schwachstelle in der LTS-Linie:** über denselben Kanal wie bei jeder anderen Version —
+  eine private [GitHub-Sicherheitsempfehlung](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  niemals über ein öffentliches Issue. Geben Sie an, welche Version Sie getestet haben (zum Beispiel `3.9.2`); Korrekturen werden in
+  `stable/v3` übernommen und anschließend auf v4 vorwärtsportiert.
+- **Sicherheitsbasislinie bei der LTS-Freigabe:** Der gemessene Scannerstatus sowie Nachweise für den Routenschutz und
+  öffentliche Zugangsdaten werden in
+  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) festgehalten.
 
 ---
 

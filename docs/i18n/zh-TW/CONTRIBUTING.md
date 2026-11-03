@@ -13,15 +13,15 @@ UI/UX、i18n、CLI、資料庫和建置/部署變更對應到其合約、重點�
 
 ---
 
-## 開發設定
+## 開發環境設定
 
 ### 先決條件
 
-- **Node.js** `>=22.22.3 <23`，或 `>=24.0.0 <27`（建議：24 LTS）
+- **Node.js** `>=22.22.2 <23`，或 `>=24.0.0 <27`（建議：24 LTS）
 - **npm** 10+
 
-> **npm v11+ 使用者（Node 24+）：** 在 `npm install` 之後，請驗證原生模組是否已安裝：
-> `node -e "require('better-sqlite3')"`。如果失敗並顯示 `MODULE_NOT_FOUND`，
+> **npm v11+ 使用者（Node 24+）：** 執行 `npm install` 後，請確認原生模組已安裝：
+> `node -e "require('better-sqlite3')"`。若執行失敗並顯示 `MODULE_NOT_FOUND`，
 > 請執行 `npm approve-scripts better-sqlite3 && npm install`。請參閱
 > [疑難排解](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)。
 
@@ -38,34 +38,34 @@ npm install
 ### 環境變數
 
 ```bash
-# 從範本建立您的 .env 檔案
+# 從範本建立您的 .env
 cp .env.example .env
 
-# 產生所需的密鑰
+# 產生必要的密鑰
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-開發用的關鍵變數：
+開發環境的主要變數：
 
-| 變數                   | 開發預設值               | 說明             |
-| ---------------------- | ------------------------ | ---------------- |
-| `PORT`                 | `20128`                  | 伺服器連接埠     |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 前端的基礎 URL   |
-| `JWT_SECRET`           | （如上產生）             | JWT 簽章密鑰     |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | 首次登入密碼     |
-| `APP_LOG_LEVEL`        | `info`                   | 日誌詳細程度層級 |
+| 變數                   | 開發環境預設值           | 說明           |
+| ---------------------- | ------------------------ | -------------- |
+| `PORT`                 | `20128`                  | 伺服器連接埠   |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 前端的基礎 URL |
+| `JWT_SECRET`           | （於上方產生）           | JWT 簽署密鑰   |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | 首次登入密碼   |
+| `APP_LOG_LEVEL`        | `info`                   | 日誌詳細程度   |
 
 ### 儀表板設定
 
-儀表板提供可透過環境變數設定的功能切換開關：
+儀表板提供可切換功能的 UI 選項，這些功能也可以透過環境變數設定：
 
-| 設定位置    | 切換開關     | 說明                   |
+| 設定位置    | 切換選項     | 說明                   |
 | ----------- | ------------ | ---------------------- |
-| 設定 → 進階 | 除錯模式     | 啟用除錯請求日誌（UI） |
-| 設定 → 一般 | 側邊欄可見性 | 顯示/隱藏側邊欄區段    |
+| 設定 → 進階 | 偵錯模式     | 啟用偵錯請求日誌（UI） |
+| 設定 → 一般 | 側邊欄可見性 | 顯示／隱藏側邊欄區段   |
 
-這些設定儲存在資料庫中，並在重新啟動後持續存在，設定後會覆蓋環境變數的預設值。
+這些設定會儲存在資料庫中，並在重新啟動後持續保留；設定後會覆寫環境變數的預設值。
 
 ### 在本機執行
 
@@ -73,51 +73,52 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 # 開發模式（熱重新載入）
 npm run dev
 
-# 生產建置
-npm run build    # next build → .build/next/ 然後 assembleStandalone → dist/
+# 正式環境建置
+npm run build    # next build → .build/next/，接著 assembleStandalone → dist/
 npm run start
 
-# 快速後端/僅 API 編譯，適用於貢獻者變更
+# 針對貢獻者變更的快速後端／僅 API 編譯
 npm run build:contributor
 
-# 發行建置（全新重建 + HEAD 哨兵 — 部署所需）
-npm run build:release   # rm -rf .build dist && build + 寫入 dist/BUILD_SHA
+# 發行建置（全新重建 + HEAD 哨兵檔案——部署時必要）
+npm run build:release   # rm -rf .build dist && 建置 + 寫入 dist/BUILD_SHA
 
-# 常見連接埠設定
+# 常用連接埠設定
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-貢獻者建置執行僅編譯的驗證：它不會組合獨立
-發行版或建置選用的原生封裝資產。當您需要驗證可出貨的套件時，請使用一般的生產建置。
+貢獻者建置只會執行編譯驗證：它不會組裝獨立執行版發行內容，
+也不會建置選用的原生封裝資產。需要驗證可交付套件時，
+請使用一般的正式環境建置。
 
-### 建置輸出佈局
+### 建置輸出配置
 
-| 目錄      | 內容                                                             | 追蹤 |
-| --------- | ---------------------------------------------------------------- | ---- |
-| `src/`    | 應用程式原始碼（TypeScript / TSX）                               | 是   |
-| `.build/` | 中間產物 — `next build` 輸出（git忽略，`distDir = .build/next`） | 否   |
-| `dist/`   | 可出貨套件 — 由 `assembleStandalone` 組合（git忽略）             | 否   |
+| 目錄      | 內容                                                                | 是否追蹤 |
+| --------- | ------------------------------------------------------------------- | -------- |
+| `src/`    | 應用程式原始碼（TypeScript / TSX）                                  | 是       |
+| `.build/` | 中間產物——`next build` 輸出（由 git 忽略，`distDir = .build/next`） | 否       |
+| `dist/`   | 可交付套件——由 `assembleStandalone` 組裝（由 git 忽略）             | 否       |
 
-建置管線是單次傳遞：
+建置管線只會執行一輪：
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js 輸出)
-  └─ assembleStandalone()                 (複製 standalone + static + public + 原生資產)
-       └─ 輸出： dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  （Next.js 輸出）
+  └─ assembleStandalone()                 （複製獨立執行版 + 靜態檔案 + 公開檔案 + 原生資產）
+       └─ 輸出：dist/                     （server.js、.next/static/、public/、node_modules/）
 ```
 
-`npm run build:release` 會額外先清理兩個目錄，並寫入
-`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）作為部署完整性哨兵。
+`npm run build:release` 還會先清除這兩個目錄，並寫入
+`dist/BUILD_SHA`（= `git rev-parse --short HEAD`）作為部署完整性哨兵檔案。
 
-`npm run build:contributor` 使用僅後端的建置設定檔。它會在建置時暫時存根
-儀表板 UI 檔案，保留 API 路由處理常式，並在建置後還原原始檔案。
-對於影響儀表板 UI 的變更或完整的發行驗證，請使用 `npm run build`；
+`npm run build:contributor` 使用僅限後端的建置設定檔。它會在建置期間暫時以替代檔案取代
+儀表板 UI 檔案、保留 API 路由處理常式，並在建置後還原原始檔案。
+若變更會影響儀表板 UI，或需要進行完整的發行驗證，請使用 `npm run build`；
 貢獻者設定檔不能取代發行建置。
 
 > **VPS 部署注意事項：** 遠端映像目錄 `/usr/lib/node_modules/omniroute/app/`
-> 保持不變。部署技能會將 `dist/` 的內容 rsync 到其中。
-> 只有儲存庫內的建置輸出路徑已移動（`app/` → `dist/`）。
+> 維持不變。部署技能會使用 rsync 將 `dist/` 的內容同步至該目錄。
+> 只有儲存庫內的建置輸出路徑有所變更（`app/` → `dist/`）。
 
 預設 URL：
 
@@ -174,18 +175,18 @@ refactor(db): consolidate rate limit tables
 ## 執行測試
 
 ```bash
-# 所有測試（單元 + vitest + ecosystem + e2e）
+# 所有測試（單元 + vitest + 生態系統 + e2e）
 npm run test:all
 
-# 單一測試檔案（Node.js 原生測試執行器 — 大多數測試使用這個）
+# 單一測試檔案（Node.js 原生測試執行器——大多數測試使用此方式）
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# 只執行受你的變更影響的單元測試（與 CI 閘門相同的 TIA 選擇器，#8084）
-npm run test:scoped            # 最後一次提交（或工作區）中的變更
-npm run test:scoped:staged     # 僅限已暫存的變更 — 很適合搭配 pre-commit 執行
-npm run test:scoped:full       # 先重建 import-graph 映射（在新增/移動檔案之後）
-# 結束碼 1 +「run the full suite」表示中樞檔案（tsconfig、package.json、…）或
-# 未對應的原始碼已變更 — 選擇器會安全地失敗，絕不會默默略過。
+# 僅執行受你變更影響的單元測試（與 CI 閘門使用相同的 TIA 選擇器，#8084）
+npm run test:scoped            # 上一次提交（或工作樹）中的變更
+npm run test:scoped:staged     # 僅限已暫存的變更——很適合搭配提交前執行
+npm run test:scoped:full       # 先重新建置匯入圖對應表（新增／移動檔案後）
+# 結束碼 1 +「執行完整測試套件」表示某個中樞檔案（tsconfig、package.json、……）或未對應的
+# 原始碼發生變更——選擇器會以安全方式失敗，絕不會無聲略過。
 
 # Vitest（MCP 伺服器、autoCombo、快取）
 npm run test:vitest
@@ -193,13 +194,13 @@ npm run test:vitest
 # E2E 測試（需要 Playwright）
 npm run test:e2e
 
-# 協定用戶端 E2E（MCP 傳輸、A2A）
+# 通訊協定用戶端 E2E（MCP 傳輸、A2A）
 npm run test:protocols:e2e
 
 # 生態系統相容性測試
 npm run test:ecosystem
 
-# 覆蓋率閘門：60% 語句/行/函式/分支
+# 覆蓋率閘門：陳述式／行／函式／分支均為 60%
 npm run test:coverage
 npm run coverage:report
 
@@ -207,45 +208,46 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# 有閘門的真實上游 combo 煙霧測試（需要 VPS 存取 + 真實 provider 額度）
-# 會實際呼叫真實 provider — 會有一點成本。絕不在 CI 中執行。沒有閘門時會乾淨地略過。
-# 需要：ssh root@192.168.0.15 存取權（會從 VPS 取得唯讀 DB 快照）。
+# 受閘門控制、使用真實上游服務的組合冒煙測試（需要 VPS 存取權限 + 真實提供者點數）
+# 會呼叫真實提供者——需少量費用。絕不會在 CI 中執行。未啟用閘門時會正常略過。
+# 需要：ssh root@192.168.0.15 存取權限（從 VPS 載入唯讀 DB 快照）。
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# 第 3 階段 VPS 即時煙霧測試 — 純 Node ESM 指令碼，直接呼叫線上的 .15 伺服器。
-# 需要：ssh root@192.168.0.15 存取權（combo 會透過 SSH sqlite 建立/拆除）。
-# 會實際呼叫真實 provider（小幅成本）。只會建立/刪除 __live_test__* combo。絕不在 CI 中執行。
-# .15 上的 REQUIRE_API_KEY=false，因此不需要 API 金鑰，但若已設定，仍會採用 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY。
-npm run test:combo:live:vps              # 7 個 HTTP 情境（priority/round-robin/weighted/cost/fusion/auto + health）
-npm run test:combo:live:vps:failover     # 新增真實的跨 provider 容錯移轉情境（共 8 個）
+# 第 3 階段 VPS 即時冒煙測試——純 Node ESM 指令碼，直接呼叫即時 .15 伺服器。
+# 需要：ssh root@192.168.0.15 存取權限（透過 SSH sqlite 建立／移除組合）。
+# 會呼叫真實提供者（少量費用）。僅建立／刪除 __live_test__* 組合。絕不會在 CI 中執行。
+# .15 上的 REQUIRE_API_KEY=false，因此不需要 API 金鑰，但若有設定，仍會採用 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY。
+npm run test:combo:live:vps              # 7 個 HTTP 情境（優先順序／循環／加權／成本／融合／自動 + 健康狀態）
+npm run test:combo:live:vps:failover     # 新增真實的跨提供者容錯移轉情境（共 8 個）
 ```
 
 覆蓋率注意事項：
 
-- `npm run test:coverage` 會測量主要單元測試套件的原始碼覆蓋率，排除 `tests/**`，並包含 `open-sse/**`
-- Pull Request 必須讓覆蓋率閘門維持在 **60%+** 語句/行/函式/分支
-- 如果 PR 變更了 `src/`、`open-sse/`、`electron/` 或 `bin/` 中的正式程式碼，就必須在同一個 PR 中新增或更新自動化測試
-- `npm run coverage:report` 會列印最近一次覆蓋率執行的詳細逐檔報告
-- `npm run test:coverage:legacy` 會保留舊指標，以供歷史比較
-- 請參閱 `docs/ops/COVERAGE_PLAN.md` 以了解分階段的覆蓋率改善藍圖
+- `npm run test:coverage` 會測量主要單元測試套件的原始碼覆蓋率、排除 `tests/**`，並包含 `open-sse/**`
+- Pull Request 必須維持陳述式／行／函式／分支的覆蓋率閘門在 **60%+**
+- 如果 PR 變更了 `src/`、`open-sse/`、`electron/` 或 `bin/` 中的正式環境程式碼，則必須在同一個 PR 中新增或更新自動化測試
+- `npm run coverage:report` 會輸出最近一次覆蓋率執行結果的逐檔詳細報告
+- `npm run test:coverage:legacy` 會保留較舊的指標，以供歷史比較
+- 分階段改善覆蓋率的路線圖請參閱 `docs/ops/COVERAGE_PLAN.md`
 
 ### Pull Request 要求
 
-在開啟 PR 之前，請使用
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) 針對
-你所變更的內容執行聚焦循環。完整單元測試套件（4 個 CI 分片）、Vitest、**60%+** 覆蓋率閘門，以及
-正式建置都是 CI 的責任 — 在本機執行它們不會帶來 PR
-檢查不會提供的額外訊號，而且在較小的機器上可能會讓主機飽和（#8084）：
+開啟 PR 前，請使用
+[貢獻黃金路徑](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)，針對你所做的變更執行聚焦迴圈。
+完整單元測試套件（4 個 CI 分片）、Vitest、**60%+** 覆蓋率閘門，以及
+正式環境建置均由 CI 負責——在本機執行它們不會提供 PR 檢查之外的額外訊號，
+而且在較小型的機器上可能會耗盡主機資源（#8084）：
 
-- 執行涵蓋你變更的測試檔案：`node --import tsx/esm --test tests/unit/<file>.test.ts`
+- 執行涵蓋你所做變更的測試檔案：`node --import tsx/esm --test tests/unit/<file>.test.ts`
 - 執行 `npm run lint`
-- 每當正式程式碼變更時，請在同一個 PR 中包含或更新自動化測試
-- 當正式程式碼變更時，請在 PR 描述中包含變更或新增的測試檔案
-- 當 CI 中已設定專案密鑰時，請檢查 PR 上的 SonarQube 結果
+- 每當正式環境程式碼有所變更時，請在同一個 PR 中加入或更新自動化測試
+- 在 `node:test` 檔案中，請將每個頂層 `await`（例如 `await import(...)`）放在第一個 `test()` / `describe()` 之前：使用 `--test-force-exit` 時，在其後註冊的測試可能會無聲地完全不執行（#18045；由 `npm run check:test-tla-order` 強制檢查）
+- 正式環境程式碼變更時，請在 PR 說明中列出已變更或新增的測試檔案
+- 若 CI 中已設定專案密鑰，請檢查 PR 上的 SonarQube 結果
 
-目前測試狀態：**122 個單元測試檔案**，涵蓋：
+目前的測試狀態：**122 個單元測試檔案**，涵蓋：
 
-- Provider 轉譯器與格式轉換
+- 提供者轉譯器與格式轉換
 - 速率限制、斷路器與韌性
 - 語意快取、冪等性、進度追蹤
 - 資料庫操作與結構描述（21 個 DB 模組）
@@ -296,33 +298,33 @@ src/                        # TypeScript（.ts / .tsx）
 │   ├── api/                # API 路由（51 個目錄）
 │   └── login/              # 驗證頁面（.tsx）
 ├── domain/                 # 政策引擎（policyEngine、comboResolver、costRules 等）
-├── lib/                    # 核心業務邏輯（.ts）
+├── lib/                    # 核心商業邏輯（.ts）
 │   ├── a2a/                # Agent-to-Agent v0.3 協定伺服器
-│   ├── acp/                # Agent Communication Protocol 註冊表
+│   ├── acp/                # Agent Communication Protocol 登錄檔
 │   ├── compliance/         # 合規政策引擎
 │   ├── db/                 # SQLite 領域模組 + 130 個遷移
-│   ├── memory/             # 持久性對話記憶
+│   ├── memory/             # 持久化對話記憶
 │   ├── oauth/              # OAuth 提供者、服務與工具
-│   ├── skills/             # 可擴展技能框架
+│   ├── skills/             # 可擴充的技能框架
 │   ├── usage/              # 使用量追蹤與成本計算
-│   └── localDb.ts          # 僅為重新匯出層 — 絕不在此加入邏輯
+│   └── localDb.ts          # 僅限重新匯出層——切勿在此新增邏輯
 ├── middleware/              # 請求中介軟體（promptInjectionGuard）
-├── mitm/                   # MITM 代理（憑證、DNS、目標路由）
+├── mitm/                   # MITM Proxy（憑證、DNS、目標路由）
 ├── shared/
 │   ├── components/         # React 元件（.tsx）
-│   ├── constants/          # 提供者定義（329）、MCP 範圍、19 種路由策略
+│   ├── constants/          # 提供者定義（329 個）、MCP 範圍、20 種路由策略
 │   ├── utils/              # 斷路器、清理器、驗證輔助工具
-│   └── validation/         # Zod v4 schema
-└── sse/                    # SSE 代理管線
+│   └── validation/         # Zod v4 結構描述
+└── sse/                    # SSE Proxy 管線
 
 open-sse/                   # @omniroute/open-sse 工作區
-├── executors/              # 89 個執行器實作模組
-├── handlers/               # 11 個請求處理器（chat、responses、embeddings、images 等）
-├── mcp-server/             # MCP 伺服器（110 個獨特工具、3 種傳輸、33 個範圍）
+├── executors/              # 150 個執行器模組（執行器類別 + 各提供者的輔助工具）
+├── handlers/               # 11 個請求處理常式（聊天、回應、嵌入、影像等）
+├── mcp-server/             # MCP 伺服器（110 個不重複工具、3 種傳輸方式、33 個範圍）
 ├── services/               # 178 個頂層服務（combo、autoCombo、rateLimitManager 等）
 ├── translator/             # 格式轉換器（OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama）
 ├── transformer/            # Responses API 轉換器
-└── utils/                  # 22 個工具模組（stream、TLS、proxy、logging）
+└── utils/                  # 22 個工具模組（串流、TLS、Proxy、記錄）
 
 electron/                   # Electron 桌面應用程式（跨平台）
 
@@ -337,21 +339,21 @@ tests/
 docs/
 ├── adr/                     # 架構決策記錄
 ├── architecture/            # 系統架構與韌性
-├── comparison/              # OmniRoute 與替代方案
+├── comparison/              # OmniRoute 與替代方案的比較
 ├── compression/             # 壓縮指南與規則
 ├── dev/                     # 開發指南
-├── diagrams/                # 架構圖表
+├── diagrams/                # 架構圖
 ├── frameworks/              # MCP、A2A、OpenCode、Memory、Skills
 ├── guides/                  # 使用者指南、Docker、設定、疑難排解
 ├── i18n/                    # 國際化 README 翻譯
-├── marketing/               # 行銷素材
-├── ops/                     # 部署、代理、覆蓋率、發布
-├── providers/               # 提供者專屬文件
+├── marketing/               # 行銷資料
+├── ops/                     # 部署、Proxy、覆蓋率、版本發布
+├── providers/               # 提供者專用文件
 ├── reference/               # API 參考、環境變數、CLI 工具、免費方案
-├── releases/                # 版本說明
+├── releases/                # 版本資訊
 ├── routing/                 # 自動組合引擎、推理重播
-├── screenshots/             # 儀表板螢幕截圖
-├── security/                # 護欄、合規、隱匿、權杖
+├── screenshots/             # 儀表板螢幕擷取畫面
+├── security/                # 防護措施、合規性、隱匿性、權杖
 └── specs/                   # 設計規格
 ```
 

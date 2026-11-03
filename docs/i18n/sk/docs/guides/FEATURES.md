@@ -298,13 +298,13 @@ Kľúčové správanie:
 
 ## 🔑 Synchronizačné tokeny a konfiguračný balík _(v3.6.6+)_
 
-Prístup z viacerých zariadení a prístup externých operátorov je teraz možný prostredníctvom **synchronizačných tokenov s definovaným rozsahom**:
+Prístup z viacerých zariadení a prístup externých operátorov je teraz možný prostredníctvom **synchronizačných tokenov s obmedzeným rozsahom**:
 
-- **`POST /api/sync/tokens`** — Vydá nový synchronizačný token (s definovaným rozsahom a voliteľnou platnosťou)
-- **`DELETE /api/sync/tokens/:id`** — Zruší token
-- **`GET /api/sync/bundle`** — Stiahne verziovanú snímku JSON všetkých necitlivých nastavení s kľúčom ETag (heslá sú skryté)
+- **`POST /api/sync/tokens`** — Vydá nový synchronizačný token (s obmedzeným rozsahom a voliteľnou platnosťou)
+- **`DELETE /api/sync/tokens/:id`** — Zneplatní token
+- **`GET /api/sync/bundle`** — Stiahne verziovanú snímku konfigurácie vo formáte JSON identifikovanú pomocou ETag (overenie iba synchronizačným tokenom). Nastavenia overovania, ako je heslo ovládacieho panela, sú odstránené, ale prihlasovacie údaje poskytovateľov a kľúče API sú zahrnuté, preto tento súbor považujte za tajný
 
-Konfiguračný balík vytvára `src/lib/sync/bundle.ts`. Klienti porovnávajú hlavičku odpovede `ETag`, aby zistili zmeny bez opätovného sťahovania celého obsahu.
+Konfiguračný balík sa zostavuje pomocou `src/lib/sync/bundle.ts`. Klienti porovnávajú hlavičku odpovede `ETag`, aby zistili zmeny bez opätovného sťahovania celého obsahu. V rozhraní CLI ho príkaz `omniroute sync bundle <outPath> --token <syncToken>` (alebo `OMNIROUTE_SYNC_TOKEN`) uloží do súboru prístupného iba vlastníkovi.
 
 ---
 

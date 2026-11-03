@@ -45,6 +45,7 @@ import {
   shouldForceScopeEnforcement,
   type McpToolExtraLike,
 } from "./scopeEnforcement.ts";
+import { resolveMcpToolOwnerId } from "./mcpCallerIdentity.ts";
 import {
   handleSimulateRoute,
   handleSetBudgetGuard,
@@ -64,6 +65,7 @@ import {
   handleOneproxyStats,
 } from "./tools/advancedTools.ts";
 import { handlePickFastestModel } from "./tools/pickFastestModel.ts";
+import { registerPerplexityResearchTool } from "./tools/perplexityResearch.ts";
 // #15159 M-01 — "file = register + wrap. handle* -> tools/canonical/*.ts".
 // These twelve handlers used to be defined inline below `withScopeEnforcement`,
 // which made this file a 784-line registration-and-implementation mix. They are
@@ -577,6 +579,8 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
     )
   );
 
+  registerPerplexityResearchTool(server, withScopeEnforcement);
+
   server.registerTool(
     "omniroute_x_search",
     {
@@ -986,8 +990,7 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
         withScopeEnforcement(
           toolName,
           async (args, extra) => {
-            const scopeContext = resolveCallerScopeContext(extra, Array.from(MCP_ALLOWED_SCOPES));
-            const apiKeyId = scopeContext.callerId || "mcp";
+            const apiKeyId = (await resolveMcpToolOwnerId(extra)) ?? "mcp";
             try {
               const execution = await skillExecutor.execute(
                 skill.name,

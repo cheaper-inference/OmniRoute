@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
 import { useScrapeFetch } from "../../hooks/useScrapeFetch";
 import ScrapeResult from "../ScrapeResult";
 import type { ConfigState } from "../SearchToolsConfigPane";
@@ -59,15 +62,12 @@ export default function ScrapeTab({ configState, onMetrics }: ScrapeTabProps) {
     <div className="flex flex-col h-full p-4 space-y-4" data-testid="scrape-tab">
       {/* URL input */}
       <div className="bg-surface border border-border rounded-lg p-4 space-y-3">
-        <label
-          htmlFor="scrape-url"
-          className="block text-[10px] font-semibold text-text-muted uppercase tracking-wider"
-        >
-          {t("scrapeUrl")}
-        </label>
-        <div className="flex gap-2">
-          <input
+        <div className="flex items-end gap-2">
+          <Input
             id="scrape-url"
+            label={t("scrapeUrl")}
+            className="flex-1"
+            error={urlError ? <span data-testid="url-error">{urlError}</span> : undefined}
             type="url"
             value={url}
             onChange={(e) => {
@@ -75,27 +75,20 @@ export default function ScrapeTab({ configState, onMetrics }: ScrapeTabProps) {
               if (urlError) setUrlError(null);
             }}
             placeholder="https://example.com/article"
-            className="flex-1 bg-bg-alt border border-border rounded-lg px-3 py-2 text-sm text-text-main focus:outline-none focus:ring-2 focus:ring-primary/30"
             onKeyDown={(e) => {
               if (e.key === "Enter") void handleSubmit();
             }}
             data-testid="url-input"
           />
-          <button
-            className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          <Button
+            variant="primary"
             onClick={() => void handleSubmit()}
             disabled={loading}
             data-testid="scrape-button"
           >
             {loading ? t("scrapeExtracting") : t("scrapeExtract")}
-          </button>
+          </Button>
         </div>
-
-        {urlError && (
-          <p className="text-xs text-error" data-testid="url-error">
-            {urlError}
-          </p>
-        )}
 
         {/* Options summary */}
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-text-muted">
@@ -132,12 +125,7 @@ export default function ScrapeTab({ configState, onMetrics }: ScrapeTabProps) {
       {/* Loading spinner */}
       {loading && (
         <div className="flex items-center justify-center py-12" data-testid="scrape-loading">
-          <span
-            className="material-symbols-outlined text-[32px] text-primary animate-spin"
-            aria-hidden="true"
-          >
-            progress_activity
-          </span>
+          <Icon name="progress_activity" size={32} className="text-primary animate-spin" />
         </div>
       )}
 

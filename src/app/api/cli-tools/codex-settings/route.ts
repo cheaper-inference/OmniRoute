@@ -12,11 +12,18 @@ import {
 } from "@/shared/services/cliRuntime";
 import { createMultiBackup } from "@/shared/services/backupService";
 import { saveCliToolLastConfigured, deleteCliToolLastConfigured } from "@/lib/db/cliToolState";
-import { cliModelConfigSchema } from "@/shared/validation/schemas";
+import { codexSettingsConfigSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { resolveApiKey } from "@/shared/services/apiKeyResolver";
 import { normalizeCodexBaseUrl } from "@/shared/utils/codexBaseUrl";
 import { migrateCodexFeatureFlags } from "@/shared/utils/codexConfig";
+import {
+  getCodexCatalogPath,
+  listOmniRouteChatModels,
+  removeCodexModelCatalog,
+  writeCodexModelCatalog,
+  type CodexCatalogWriteResult,
+} from "@/lib/cliTools/codexModelCatalogWriter";
 import {
   configClobberRefusalResponse,
   parseJsonObject,
@@ -26,6 +33,9 @@ import {
 const getCodexConfigPath = () => getCliConfigPaths("codex").config;
 const getCodexAuthPath = () => getCliConfigPaths("codex").auth;
 const getCodexDir = () => path.dirname(getCodexConfigPath());
+// TOML basic strings treat a backslash as an escape and this file's writer does not escape,
+// so the catalog path is stored with forward slashes (Codex accepts them on Windows).
+const toTomlPath = (filePath: string) => filePath.replace(/\\/g, "/");
 
 // Parse TOML config to object (simple parser for codex config)
 const parseToml = (content: string) => {
@@ -224,11 +234,12 @@ export async function POST(request: Request) {
     // we always write the full key value to the config file.
     const keyId = typeof rawBody?.keyId === "string" ? rawBody.keyId.trim() : null;
 
-    const validation = validateBody(cliModelConfigSchema, rawBody);
+    const validation = validateBody(codexSettingsConfigSchema, rawBody);
     if (isValidationFailure(validation)) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
-    const { baseUrl, model, reasoningEffort, wireApi, modelMappings } = validation.data;
+    const { baseUrl, model, reasoningEffort, wireApi, modelMappings, modelCatalog } =
+      validation.data;
     // Canonical key resolution (#13563): by keyId -> submitted apiKey -> sk_omniroute.
     // Matches cline/forge/openclaw/grok-build/jcode-settings.
     const apiKey = await resolveApiKey(keyId, validation.data.apiKey);
@@ -295,6 +306,18 @@ export async function POST(request: Request) {
       delete parsed._sections["notice.model_migrations"];
     }
 
+    // Point Codex's /model picker at an OmniRoute catalog. Fail-open: on any failure
+    // Apply still succeeds, a previous value is left alone and a warning is returned.
+    let catalog: CodexCatalogWriteResult | null = null;
+    if (modelCatalog === true) {
+      catalog = await writeCodexModelCatalog({
+        codexDir,
+        selectedModels: [model, ...Object.values(modelMappings ?? {})],
+        listModels: () => listOmniRouteChatModels(request),
+      });
+      if (catalog.catalogPath) parsed._root.model_catalog_json = toTomlPath(catalog.catalogPath);
+    }
+
     // Write merged config
     const configContent = toToml(parsed);
     await fs.writeFile(configPath, configContent);
@@ -314,6 +337,10 @@ export async function POST(request: Request) {
       success: true,
       message: "Codex settings applied successfully!",
       configPath,
+      ...(catalog?.catalogPath
+        ? { catalogPath: catalog.catalogPath, catalogModelCount: catalog.count }
+        : {}),
+      ...(catalog?.warning ? { catalogWarning: catalog.warning } : {}),
     });
   } catch (error) {
     const refusal = configClobberRefusalResponse(error);
@@ -368,6 +395,16 @@ export async function DELETE(request: Request) {
     // Remove omniroute provider section
     delete parsed._sections["model_providers.omniroute"];
 
+    // Remove the model catalog only when it is the one OmniRoute wrote
+    const codexDir = getCodexDir();
+    const catalogValue = parsed._root.model_catalog_json;
+    if (
+      typeof catalogValue === "string" &&
+      toTomlPath(catalogValue) === toTomlPath(getCodexCatalogPath(codexDir))
+    ) {
+      delete parsed._root.model_catalog_json;
+    }
+
     // Write updated config
     const configContent = toToml(parsed);
     await fs.writeFile(configPath, configContent);
@@ -388,6 +425,8 @@ export async function DELETE(request: Request) {
     } catch {
       /* No auth file */
     }
+
+    await removeCodexModelCatalog(codexDir);
 
     // Clear last-configured timestamp
     try {

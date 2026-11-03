@@ -39,31 +39,31 @@ Problemi komuni u soluzzjonijiet għal OmniRoute.
 
 ### Limitazzjoni tar-Rata fuq Fornituri Bla Ħlas (429 / 400 / 401)
 
-**Sintomu**: Meta tuża `model: "auto"` ma' fornituri bla ħlas/li ma jeħtiġux awtentikazzjoni (opencode, auggie, eċċ.), kultant tirċievi `HTTP 429`, `400`, jew `401` minflok tweġibiet. It-talbiet jirnexxu meta terġa' tipprova l-istess prompt ftit mumenti wara, iżda l-awtomatizzazzjoni (kompiti cron, aġenti, skripts) tieqaf taħdem mal-ewwel falliment.
+**Sintomu**: Meta tuża `model: "auto"` ma’ fornituri bla ħlas/li ma jeħtiġux awtentikazzjoni (auggie, eċċ.), kultant tirċievi `HTTP 429`, `400`, jew `401` minflok tweġibiet. It-talbiet jirnexxu meta terġa’ tipprova l-istess prompt ftit mumenti wara, iżda l-awtomazzjoni (kompiti cron, aġenti, skripts) tieqaf mal-ewwel falliment.
 
-**Kawża ewlenija**: Tliet modi indipendenti ta' falliment jakkumulaw:
+**Kawża ewlenija**: Tliet modi indipendenti ta’ falliment jakkumulaw:
 
-1. **Limitu tar-rata tal-fornitur (`429`)**: Il-livelli bla ħlas jistgħu jinfurzaw kwota għal kull perjodu. Mewġa ta' sejħiet paralleli teżawrixxiha, għalhekk it-talba li jmiss tiġi rrifjutata sakemm il-perjodu jiġi ssettjat mill-ġdid.
-2. **Mudell difettuż fil-passthrough (`400`/`401`)**: Il-pools `auto/*` jistgħu jinkludu mudelli passthrough minn `opencode` li huma rreġistrati fil-katalgu iżda m'għandhomx kredenzjali attivi (eż. `oc/north-mini-code-free` → `401`). L-auto-router jipprova wieħed, ifalli, u l-iżball jiġi propagat qabel ma tibda l-alternattiva.
-3. **Amplifikazzjoni tal-konkorrenza (`429` taħt tagħbija)**: Meta diversi sessjonijiet ta' aġenti/cron jaċċessaw `auto` fl-istess ħin, ir-rata aggregata tat-talbiet taqbeż dak li jittolleraw il-fornituri bla ħlas, u għalhekk sejħiet leġittimi jiġu mmarkati bħala abbużivi.
+1. **Limitazzjoni tar-rata tal-fornitur (`429`)**: Il-livelli bla ħlas jistgħu jinfurzaw kwota għal kull intervall ta’ żmien. Żieda f’daqqa ta’ sejħiet paralleli teżawrixxi l-kwota, u għalhekk it-talba li jmiss tiġi rrifjutata sakemm l-intervall jerġa’ jibda.
+2. **Mudell difettuż fil-passthrough (`400`/`401`)**: Il-pools `auto/*` jistgħu jinkludu mudelli passthrough li huma rreġistrati fil-katalgu iżda ma għandhomx kredenzjali attivi (→ `401`). L-auto-router jipprova wieħed minnhom, ifalli, u l-iżball jiġi propagat qabel ma jibda l-fallback.
+3. **Amplifikazzjoni tal-konkorrenza (`429` taħt tagħbija)**: Meta diversi sessjonijiet ta’ aġenti/cron jaċċessaw `auto` fl-istess ħin, ir-rata aggregata tat-talbiet taqbeż dak li jittolleraw il-fornituri bla ħlas, u għalhekk sejħiet leġittimi jiġu mmarkati bħala abbużivi.
 
-**Soluzzjoni vverifikata (irrappurtata mill-komunità, 2026-08-10)**: irranġa tliet varjabbli tal-ambjent sabiex ir-rotazzjoni, il-konkorrenza u l-alternattiva jassorbu l-instabbiltà tal-livell bla ħlas minflok jieqfu minħabba fiha:
+**Soluzzjoni vverifikata (irrappurtata mill-komunità, 2026-08-10)**: aġġusta tliet varjabbli tal-ambjent sabiex ir-rotazzjoni, il-konkorrenza u l-fallback jassorbu l-instabbiltà tal-livell bla ħlas minflok ma jieqfu minħabba fiha:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # aqleb għal mudell/fornitur ieħor f'każ ta' 400/401 (taqbeż mudelli passthrough difettużi)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # limitu espliċitu għall-ammissjoni ta' xogħlijiet tqal (mhux issettjat b'mod predefinit: l-ebda limitu fuq l-għadd tat-talbiet, ara n-nota hawn taħt)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # żid l-istennija limitata lil hinn mill-valur predefinit ta' RATE_LIMIT_MAX_WAIT_MS għal sistemi upstream bil-mod
+export OMNIROUTE_ROTATE_ON_400=true           # aqleb għal mudell/fornitur ieħor fuq 400/401 (taqbeż mudelli passthrough difettużi)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # limitu espliċitu ta’ ammissjoni għal talbiet tqal (mhux issettjat b’mod predefinit: l-ebda limitu fuq l-għadd tat-talbiet, ara n-nota hawn taħt)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # żid l-istennija limitata lil hinn mill-valur predefinit ta’ RATE_LIMIT_MAX_WAIT_MS għal servizzi upstream bil-mod
 ```
 
-Issettja dawn fl-ambjent tal-proċess OmniRoute (id-daemon, eż. permezz tal-LaunchAgent plist jew `systemctl edit`), imbagħad erġa' ibda OmniRoute. Il-flag tar-rotazzjoni huwa l-aktar mekkaniżmu effettiv: jibdel falliment komplet f'tentattiv ġdid trasparenti ma' fornitur b'saħħtu fil-pool.
+Issettjahom fl-ambjent tal-proċess OmniRoute (id-daemon, eż. permezz tal-plist ta’ LaunchAgent jew `systemctl edit`), imbagħad erġa’ ibda OmniRoute. Il-flag tar-rotazzjoni huwa l-aktar mekkaniżmu effettiv: jikkonverti falliment definittiv f’tentattiv mill-ġdid trasparenti ma’ fornitur f’saħħtu fil-pool.
 
-**Nota**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` jillimita kemm-il talba tqila — b'kuntest twil — tista' taħdem fl-istess ħin; il-limitu huwa punt ta' kontroll għall-ammissjoni, mhux limitatur tar-rata tal-fornitur. **Aġġornament #503-fanout:** din il-varjabbli m'għadhiex tiġi ssettjata b'mod predefinit (issa tapplika biss meta tiġi kkonfigurata b'mod espliċitu, bħal hawn fuq) — minflok, l-ammissjoni ta' talbiet tqal hija kkontrollata minn baġit tal-bytes derivat awtomatikament (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) li jadatta ruħu għal-limitu reali tal-memorja tal-host, għalhekk skjerament ġdid għandu jara ħafna inqas rifjuti `503 chat_admission_busy` mingħajr ma din il-varjabbli tiġi ssettjata; jekk tissettjaha b'mod espliċitu hawn, xorta taħdem eżattament kif dokumentat. Sostituzzjonijiet espliċiti tal-baġit tal-bytes jiġu limitati għal 8 MiB–2 GiB. `413 body_exceeds_budget` mhuwiex temporanju: żid dak il-baġit tal-bytes, naqqas `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, jew żid il-limitu tal-memorja tal-proċess. Tnaqqis `inflight_bytes_budget` huwa kontenzjoni temporanja u jibqa' eliġibbli għal tentattiv mill-ġdid. Il-limitazzjoni tar-rata għal kull fornitur (`open-sse/services/rateLimitManager.ts`) hija rregolata separatament minn `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, u `RATE_LIMIT_AUTO_ENABLE` — ara `.env.example`.
+**Nota**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` jillimita kemm-il talba tqila — b’kuntest twil — tista’ titħaddem fl-istess ħin; il-limitu huwa bieb ta’ ammissjoni, mhux limitatur tar-rata tal-fornitur. **Aġġornament dwar #503-fanout:** din il-varjabbli m’għadhiex issettjata b’mod predefinit (issa tapplika biss meta tiġi kkonfigurata espliċitament, kif muri hawn fuq) — minflok, l-ammissjoni ta’ talbiet tqal hija kkontrollata minn baġit ta’ bytes idderivat awtomatikament (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) li jaġġusta ruħu skont il-limitu reali tal-memorja tal-host, għalhekk deployment ġdid għandu jara ħafna inqas rifjuti `503 chat_admission_busy` mingħajr ma din il-varjabbli tiġi ssettjata; jekk tiġi ssettjata espliċitament hawn, xorta taħdem eżatt kif iddokumentat. Overrides espliċiti tal-baġit tal-bytes jiġu limitati għal 8 MiB–2 GiB. `413 body_exceeds_budget` mhuwiex temporanju: żid dak il-baġit tal-bytes, naqqas `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`, jew żid il-limitu tal-memorja tal-proċess. Tneħħija minħabba `inflight_bytes_budget` hija kontenzjoni temporanja u tista’ tibqa’ tiġi ppruvata mill-ġdid. Il-limitazzjoni tar-rata għal kull fornitur (`open-sse/services/rateLimitManager.ts`) hija rregolata separatament minn `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, u `RATE_LIMIT_AUTO_ENABLE` — ara `.env.example`.
 
-**Kif tivverifika li ħadmet**: ħaddem l-agent/cron tiegħek darbtejn wara xulxin fi żmien qasir u kkonferma li t-tnejn jirnexxu. Qabel it-tiswija, it-tieni eżekuzzjoni tipikament tirritorna `429`/`401`. Wara t-tiswija, il-fallimenti (jekk ikun hemm) jerġgħu jiġu ppruvati b’mod trasparenti u s-sejħa titlesta. Tista’ wkoll tagħmel `curl /monitoring/health` u tosserva l-field `rateLimitedUntil` fuq il-konnessjonijiet tal-fornituri u `circuitBreakers.providerBreakers[].state` għall-fornituri affettwati — l-istat ikun wieħed minn `CLOSED`, `DEGRADED`, `OPEN`, jew `HALF_OPEN` (ara `src/shared/utils/circuitBreaker.ts`), u fornitur li jibqa’ jfalli jgħaddi minn `CLOSED → DEGRADED → OPEN` qabel ma l-intervall ta’ reset jippermetti li jgħaddi test (`HALF_OPEN`).
+**Kif tivverifika li ħadmet**: ħaddem l-aġent/cron tiegħek darbtejn wara xulxin f’intervall qasir u kkonferma li t-tnejn jirnexxu. Qabel is-soluzzjoni, it-tieni tħaddim tipikament jirritorna `429`/`401`. Wara s-soluzzjoni, il-fallimenti (jekk ikun hemm) jerġgħu jiġu ppruvati b’mod trasparenti u s-sejħa titlesta. Tista’ wkoll tuża `curl /monitoring/health` u tosserva l-field `rateLimitedUntil` fuq il-konnessjonijiet tal-fornituri u `circuitBreakers.providerBreakers[].state` għall-fornituri affettwati — l-istat ikun wieħed minn `CLOSED`, `DEGRADED`, `OPEN`, jew `HALF_OPEN` (ara `src/shared/utils/circuitBreaker.ts`), u fornitur li jibqa’ jfalli jaqleb minn `CLOSED → DEGRADED → OPEN` qabel ma l-intervall ta’ reset jippermetti li jgħaddi probe (`HALF_OPEN`).
 
-**Jekk xorta tara 429**: il-kont attiv għal dak il-fornitur ikun ġenwinament eżawrixxa l-_quota_ tiegħu (mhux biss il-limitu tar-rata). Żid kont ieħor għall-istess fornitur fid-dashboard ta’ OmniRoute → Providers → Accounts, jew inkludi fornitur bla ħlas ieħor (eż. `routeway`, `auggie`). Ir-rotazzjoni tgħin biss b’limitazzjonijiet temporanji tar-rata/400/401; l-eżawriment sħiħ tal-quota jeħtieġ kredenzjali oħra jew fornitur differenti.
+**Jekk xorta tara 429**: il-kont attiv għal dak il-fornitur ikun ġenwinament eżawrixxa l-_kwota_ tiegħu (mhux biss ir-rata). Żid kont ieħor għall-istess fornitur fid-dashboard ta’ OmniRoute → Providers → Accounts, jew inkludi fornitur bla ħlas ieħor (eż. `routeway`, `auggie`). Ir-rotazzjoni tgħin biss b’limitazzjonijiet temporanji tar-rata/400/401; eżawriment definittiv tal-kwota jeħtieġ kredenzjali oħra jew fornitur differenti.
 
-**Jekk tara 403 fuq mudelli tal-viżjoni (`auto/vision`, `bazaarlink/*`)**: il-kont konness m’għandux pjan imħallas li jinkludi l-viżjoni, jew l-API key m’għandhiex permessi biżżejjed. Ivverifika fid-dashboard tal-fornitur li l-ambitu tal-key jinkludi l-viżjoni/multimodali, jew qabbad kont ta’ livell imħallas u żommu bħala l-mira għall-viżjoni.
+**Jekk tara 403 fuq mudelli tal-viżjoni (`auto/vision`, `bazaarlink/*`)**: il-kont konness m’għandux pjan bi ħlas li jinkludi l-viżjoni, jew l-API key m’għandhiex permessi biżżejjed. Ivverifika fid-dashboard tal-fornitur li l-ambitu tal-key jinkludi viżjoni/multimodali, jew qabbad kont ta’ livell bi ħlas u żommu bħala l-mira tal-viżjoni.
 
 ---
 
@@ -90,39 +90,39 @@ It-twissijiet ġejjin minn meded skaduti ta' dipendenzi peer f'pakketti ta' part
 
 ---
 
-## Twissija dwar Skripts ta' npm install Imblukkati (installazzjoni globali)
+## Twissija dwar npm install-scripts Imblukkati (installazzjoni globali)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Meta tħaddem `npm install -g omniroute`, verżjonijiet aktar ġodda ta' npm (v11+ u v12+) jimblukkaw awtomatikament l-iskripts taċ-ċiklu tal-ħajja tal-pakketti u juru twissija dwar l-iskripts tal-installazzjoni:
+Meta tħaddem `npm install -g omniroute`, verżjonijiet aktar ġodda ta’ npm (v11+ u v12+) jimblukkaw l-iskripts taċ-ċiklu tal-ħajja tal-pakketti b’mod awtomatiku u juru twissija dwar install-scripts:
 
 ```
-npm warn install-scripts 7 pakketti kellhom l-iskripts tal-installazzjoni tagħhom imblukkati għax mhumiex koperti minn allowScripts:
+npm warn install-scripts 7 pakketti kellhom l-iskripts tal-installazzjoni tagħhom imblukkati minħabba li mhumiex koperti minn allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
-### Din it-twissija tista' tiġi injorata?
+### Din it-twissija tista’ tiġi injorata?
 
-**Parzjalment, iżda mhuwiex irrakkomandat li tħaddem mingħajr skripts.** OmniRoute jinkludi alternattivi gradwali: jekk il-bindings nattivi ta' `better-sqlite3` ma jkunux jistgħu jitgħabbew mill-bundle awtonomu, l-applikazzjoni taqleb għal drivers alternattivi bħal `node:sqlite` jew `sql.js` (ara [Riżoluzzjoni tar-Runtime ta' SQLite](../ops/SQLITE_RUNTIME.md)). Is-server xorta jibda, iżda l-użu ta' alternattivi WASM bħal `sql.js` jiddiżattiva l-modalità WAL (Write-Ahead Logging) ta' SQLite u jżid l-ispiża addizzjonali tal-memorja u tas-sinkronizzazzjoni mad-diska.
+**Parzjalment, iżda mhux rakkomandat li tħaddem mingħajr skripts.** OmniRoute jinkludi alternattivi ta’ riżerva affidabbli: jekk il-bindings nattivi ta’ `better-sqlite3` ma jkunux jistgħu jitgħabbew mill-bundle awtonomu, l-applikazzjoni taqleb għal drivers alternattivi bħal `node:sqlite` jew `sql.js` (ara [Riżoluzzjoni tar-Runtime ta’ SQLite](../ops/SQLITE_RUNTIME.md)). Is-server xorta jibda, iżda l-użu ta’ alternattivi ta’ riżerva WASM bħal `sql.js` jiddiżattiva l-modalità WAL (Write-Ahead Logging) ta’ SQLite u jżid l-ispiża ġenerali tal-memorja u tas-sinkronizzazzjoni mad-diska.
 
 ### Liema skripts huma fil-fatt meħtieġa?
 
 Mhux l-iskripts imblukkati kollha huma essenzjali biex jitħaddem OmniRoute:
 
-- **Essenzjali (`omniroute`, `better-sqlite3`):** OmniRoute jitħaddem minn bundle awtonomu ta' applikazzjoni Next.js (`dist/`). Waqt l-installazzjoni, npm iniżżel jew jikkompila d-driver nattiv ta' SQLite speċifiku għall-host fil-`node_modules/better-sqlite3/` tal-ogħla livell. Imbagħad, l-iskript `postinstall` ta' OmniRoute (`scripts/build/postinstall.mjs`) jivverifika u jikkopja dawn il-binarji speċifiċi għall-host f'`dist/node_modules/` sabiex is-server awtonomu jkun jista' jaċċessahom. Jekk l-iskript postinstall ta' `omniroute` ikun imblukkat, dan il-pass tal-ikkupjar jinqabeż.
-- **Fakultattivi/tranżittivi (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Dawn huma utilitajiet tal-build, għodod ta' monitoraġġ, jew utilitajiet tal-keychain tas-sistema. Jekk tippermettilhom, jiġu evitati t-twissijiet tal-build, iżda mhumiex meħtieġa għall-funzjonalità ewlenija tar-routing.
-- **Eskluż (`onnxruntime-node`):** Dipendenza fakultattiva għall-embeddings lokali tal-IA u **mhijiex** meħtieġa biex jitħaddem OmniRoute. L-iskript postinstall tagħha jniżżel madwar 300MB ta' assi CUDA minn NuGet; tinkludihiex fil-lista tal-permessi sakemm ma jkollokx l-intenzjoni espliċita li tuża aċċellerazzjoni ONNX lokali fuq hardware appoġġjat.
+- **Essenzjali (`omniroute`, `better-sqlite3`):** OmniRoute jitħaddem minn bundle ta’ applikazzjoni awtonoma ta’ Next.js (`dist/`). Matul l-installazzjoni, npm iniżżel jew jikkompila d-driver nattiv ta’ SQLite speċifiku għall-host fil-`node_modules/better-sqlite3/` tal-ogħla livell. L-iskript `postinstall` ta’ OmniRoute (`scripts/build/postinstall.mjs`) imbagħad jivverifika u jikkopja dawn il-binarji speċifiċi għall-host għal ġo `dist/node_modules/` sabiex is-server awtonomu jkun jista’ jaċċessahom. Jekk l-iskript postinstall ta’ `omniroute` ikun imblukkat, dan il-pass tal-ikkupjar jinqabeż.
+- **Fakultattivi/tranżittivi (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Dawn huma għodod ta’ għajnuna għall-bini, għodod ta’ monitoraġġ, jew utilitajiet tal-keychain tas-sistema. Jekk tippermettilhom, tevita twissijiet tal-bini, iżda mhumiex meħtieġa għall-funzjonalità ewlenija tar-routing.
+- **Eskluż (`onnxruntime-node`):** Dipendenza fakultattiva għall-embeddings lokali tal-IA u **mhijiex** meħtieġa biex jitħaddem OmniRoute. L-iskript postinstall tagħha jniżżel madwar 300MB ta’ assi CUDA minn NuGet; tinkludihiex fil-lista tal-permessi sakemm ma tkunx biħsiebek espliċitament tuża aċċellerazzjoni ONNX lokali fuq hardware appoġġjat.
 
 ### Soluzzjoni rakkomandata
 
-Biex tippermetti l-iskripts tal-installazzjoni meħtieġa waqt installazzjoni globali u trażżan it-twissijiet, għaddi `--allow-scripts` għal OmniRoute u d-dipendenzi nattivi tiegħu:
+Biex tippermetti l-iskripts tal-installazzjoni meħtieġa waqt installazzjoni globali u telimina t-twissijiet, għaddi `--allow-scripts` għal OmniRoute u d-dipendenzi nattivi tiegħu:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Inkella, biex tikkonfigura dan b'mod permanenti għall-installazzjonijiet globali kollha fil-kont tal-utent tiegħek:
+Alternattivament, biex tikkonfigura dan b’mod permanenti għall-installazzjonijiet globali kollha fil-kont tal-utent tiegħek:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user

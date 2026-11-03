@@ -20,6 +20,13 @@ import {
   clearRecoveredProviderState,
 } from "@/sse/services/auth";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
+import {
+  comboTargetsNotAllowedResponse,
+  filterComboTargetsForKey,
+  isKeyScopeBlockedCredentials,
+  keylessProviderRejection,
+  type ComboKeyScope,
+} from "@omniroute/open-sse/services/comboKeyScope.ts";
 import { handleAudioSpeech } from "@omniroute/open-sse/handlers/audioSpeech.ts";
 import { attachOmniRouteMetaToResponse } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
@@ -27,14 +34,24 @@ import { calculateModalCost } from "@/lib/usage/costCalculator";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import {
+  isTerminalMediaFailure,
+  narrowMediaConnectionScope,
+  pinnedConnectionIds,
+} from "./mediaComboFallback.ts";
 
 /**
  * Execute a full combo strategy for a text-to-speech request.
+ *
+ * `keyScope` (GHSA-3w2r) keeps the fan-out inside the caller API key's scope:
+ * targets its model policy refuses are dropped and every credential lookup is
+ * bounded by its allowed connections. Omitted = unrestricted (unchanged).
  */
 export async function executeSpeechCombo(
   comboName: string,
   body: Record<string, unknown>,
-  startTime: number
+  startTime: number,
+  keyScope: ComboKeyScope = {}
 ): Promise<Response> {
   const combo = await getComboByName(comboName);
   if (!combo) {
@@ -42,10 +59,12 @@ export async function executeSpeechCombo(
   }
 
   const allCombos = await getCombos();
-  const targets = resolveComboTargets(combo as never, allCombos as never);
-  if (!targets || targets.length === 0) {
+  const resolvedTargets = resolveComboTargets(combo as never, allCombos as never);
+  if (!resolvedTargets || resolvedTargets.length === 0) {
     return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
   }
+  const targets = await filterComboTargetsForKey(resolvedTargets, keyScope.isTargetAllowed);
+  if (targets.length === 0) return comboTargetsNotAllowedResponse(comboName);
 
   // Dynamic provider nodes are resolved once and reused for every target, the
   // same list the direct route builds.
@@ -78,7 +97,8 @@ export async function executeSpeechCombo(
   let lastError: { status: number; error: string } | null = null;
   let fallbackCount = 0;
 
-  for (const target of speechTargets) {
+  for (let targetIndex = 0; targetIndex < speechTargets.length; targetIndex += 1) {
+    const target = speechTargets[targetIndex];
     const { provider: targetProvider, model: resolvedModel } = parseSpeechModel(
       target.modelStr,
       dynamicProviders
@@ -93,14 +113,32 @@ export async function executeSpeechCombo(
       getSpeechProvider(targetProvider) ||
       dynamicProviders.find((dp) => dp.id === targetProvider) ||
       null;
+    const targetAllowedConnections = narrowMediaConnectionScope(
+      keyScope.allowedConnections,
+      pinnedConnectionIds(target)
+    );
 
     let credentials = null;
     if (providerConfig && providerConfig.authType !== "none") {
       const credentialKey = providerConfig.credentialProviderId || targetProvider;
       try {
-        credentials = await getProviderCredentialsWithQuotaPreflight(credentialKey);
+        credentials = await getProviderCredentialsWithQuotaPreflight(
+          credentialKey,
+          null,
+          targetAllowedConnections,
+          resolvedModel
+        );
       } catch {
         lastError = { status: 502, error: `Failed to resolve credentials for ${targetProvider}` };
+        fallbackCount += 1;
+        continue;
+      }
+
+      if (isKeyScopeBlockedCredentials(credentials)) {
+        lastError = {
+          status: 403,
+          error: `[${targetProvider}] No connection allowed for this API key`,
+        };
         fallbackCount += 1;
         continue;
       }
@@ -113,6 +151,28 @@ export async function executeSpeechCombo(
 
       if (isAllRateLimitedCredentials(credentials)) {
         lastError = { status: 429, error: `[${targetProvider}] All accounts rate limited` };
+        fallbackCount += 1;
+        continue;
+      }
+    } else if (providerConfig) {
+      // GHSA-3w2r: keyless targets follow chat's #9057 rule for the caller key.
+      const keylessCredentialKey = providerConfig.credentialProviderId || targetProvider;
+      const keylessRejection = await keylessProviderRejection(
+        targetProvider,
+        targetAllowedConnections,
+        () =>
+          getProviderCredentialsWithQuotaPreflight(
+            keylessCredentialKey,
+            null,
+            targetAllowedConnections,
+            resolvedModel
+          )
+      );
+      if (keylessRejection) {
+        lastError = {
+          status: keylessRejection.status,
+          error: `[${targetProvider}] No connection allowed for this API key`,
+        };
         fallbackCount += 1;
         continue;
       }
@@ -156,7 +216,18 @@ export async function executeSpeechCombo(
       // non-text or already-consumed body — keep the status-line message
     }
 
-    if (status === 400 || status === 401 || status === 403) {
+    if (
+      isTerminalMediaFailure({
+        status,
+        provider: targetProvider,
+        credentials,
+        target,
+        remaining: speechTargets.slice(targetIndex + 1).map((candidate) => ({
+          target: candidate,
+          provider: parseSpeechModel(candidate.modelStr, dynamicProviders).provider,
+        })),
+      })
+    ) {
       return errorResponse(status, `[${targetProvider}] ${error}`);
     }
 

@@ -202,21 +202,6 @@ export function aggregateLedger(
  * which per-key USD quotas already count from usage_history.
  */
 export const SEARCH_LEDGER_SERVICE_TIER = "search";
-/** System One, like search, is priced only in the ledger, not usage_history. */
-export const SYSTEMONE_LEDGER_SERVICE_TIER = "systemone";
-
-/** Sum only explicitly ledger-only request families; chat is counted from history. */
-export function sumLedgerOnlySpendSince(apiKeyId: string, sinceIso: string): number {
-  if (!apiKeyId) return 0;
-  const row = getDbInstance()
-    .prepare(
-      `SELECT COALESCE(SUM(amount_usd), 0) AS amount_usd
-       FROM request_cost_ledger
-       WHERE api_key_id = ? AND timestamp >= ? AND service_tier = ?`
-    )
-    .get(apiKeyId, sinceIso, SYSTEMONE_LEDGER_SERVICE_TIER);
-  return sumSearchLedgerSpendSince(apiKeyId, sinceIso) + getAggRow(row).amountUsd;
-}
 
 /**
  * Total web-search spend for an api key since an ISO timestamp, failed calls

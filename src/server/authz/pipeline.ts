@@ -10,6 +10,11 @@ import {
 } from "@/shared/utils/dashboardSessionToken";
 import { generateRequestId } from "../../shared/utils/requestId";
 import { applyCorsHeaders } from "../cors/origins";
+import {
+  buildMcpInvalidOriginBody,
+  isMcpOriginGuardedPath,
+  validateMcpRequestOrigin,
+} from "../origin/mcpOrigin";
 import { validateBrowserMutationOrigin } from "../origin/publicOrigin";
 import { classifyRoute } from "./classify";
 import { validateDashboardCsrfToken } from "./csrf";
@@ -36,6 +41,7 @@ import {
   PEER_IP_HEADER,
   VIA_PROXY_HEADER,
   CLIENT_IP_HEADER,
+  AUTHZ_HEADER_TRUSTED_CLIENT_IP,
 } from "./headers";
 import type { AuthSubject, RouteClass, RouteClassification } from "./types";
 import type { AuthOutcome, RoutePolicy } from "./context";
@@ -208,6 +214,12 @@ function invalidOriginResponse(requestId: string): NextResponse {
   return response;
 }
 
+function mcpInvalidOriginResponse(requestId: string): NextResponse {
+  const response = NextResponse.json(buildMcpInvalidOriginBody(requestId), { status: 403 });
+  response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
+  return response;
+}
+
 function isUnsafeMutationMethod(method: string): boolean {
   return !["GET", "HEAD", "OPTIONS"].includes(method.toUpperCase());
 }
@@ -342,6 +354,18 @@ export async function runAuthzPipeline(
   if (trustedPeerIp) {
     requestHeaders.set(AUTHZ_HEADER_TRUSTED_PEER_IP, trustedPeerIp);
   }
+  // The server stamps the client address to judge (the peer, or what a trusted proxy
+  // reported for it). Forward it too, so route handlers that key a per-client control on
+  // "who is calling" (e.g. the relay throttle) read the same resolution as the IP filter
+  // below — a direct caller cannot move it with X-Forwarded-For, and clients behind one
+  // reverse proxy are still told apart. Requests without that stamp get no header.
+  const stampedClientIp = resolveStampedPeer(
+    request.headers.get(CLIENT_IP_HEADER),
+    process.env.OMNIROUTE_PEER_STAMP_TOKEN
+  );
+  if (stampedClientIp) {
+    requestHeaders.set(AUTHZ_HEADER_TRUSTED_CLIENT_IP, stampedClientIp);
+  }
   // Local CLI-token auth is decided centrally above. Preserve that trusted
   // decision for route-level requireManagementAuth without forwarding the
   // machine token itself: custom client auth headers are stripped before the
@@ -384,12 +408,8 @@ export async function runAuthzPipeline(
       request.headers.get(VIA_PROXY_HEADER),
       process.env.OMNIROUTE_PEER_STAMP_TOKEN
     );
-    // The server stamps the client address to judge (the peer, or what a trusted proxy
-    // reported for it). Requests without that stamp keep the earlier rule.
-    const stampedClientIp = resolveStampedPeer(
-      request.headers.get(CLIENT_IP_HEADER),
-      process.env.OMNIROUTE_PEER_STAMP_TOKEN
-    );
+    // The stamped client address (resolved above) is judged; requests without that stamp
+    // keep the earlier rule.
     const ipVerdict = checkRequestIP(request, stampedClientIp ?? (viaProxy ? null : trustedPeerIp));
     if (!ipVerdict.allowed) {
       const blocked = NextResponse.json(
@@ -411,8 +431,33 @@ export async function runAuthzPipeline(
     }
 
     const rejection = rejectionResponse(outcome, classification, requestId);
+    // Rejections keep the presence-based relax: their bodies are fixed error
+    // envelopes (no data), and browser/Electron clients with a revoked or
+    // mistyped key must still be able to read the 401 instead of an opaque
+    // CORS failure (#5242).
     applyCorsHeaders(rejection, request, corsRelaxOrigin);
     return rejection;
+  }
+
+  // MCP Streamable HTTP spec: Origin MUST be validated on every connection, for
+  // every caller — API key, CLI token, dashboard session or anonymous loopback
+  // (requireLogin=false). Runs here, not in the route handlers, because only the
+  // original request still carries the token-stamped peer headers the trusted
+  // proxy / direct-LAN origin candidates are derived from. A dashboard session
+  // that proves same-origin with its CSRF token keeps the fallback it already has
+  // for mutations below (tunnel-served dashboards without a configured base URL).
+  if (isMcpOriginGuardedPath(guardedPathname)) {
+    const mcpOriginVerdict = validateMcpRequestOrigin(request);
+    const csrfOriginFallback =
+      !mcpOriginVerdict.ok &&
+      outcome.subject.kind === "dashboard_session" &&
+      validateDashboardCsrfToken(request);
+    if (!mcpOriginVerdict.ok && !csrfOriginFallback) {
+      const rejection = mcpInvalidOriginResponse(requestId);
+      rejection.headers.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
+      applyCorsHeaders(rejection, request);
+      return rejection;
+    }
   }
 
   if (
@@ -436,7 +481,20 @@ export async function runAuthzPipeline(
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
   response.headers.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
-  applyCorsHeaders(response, request, corsRelaxOrigin);
+  // Only relax CORS for a CLIENT_API request whose credential actually
+  // validated. requestCarriesTokenOrPreflight() looks at header presence, and on
+  // a keyless install (REQUIRE_API_KEY=false) clientApiPolicy serves an
+  // unvalidated credential as anonymous; an anonymous response keeps the
+  // fail-closed origin policy.
+  const relaxForValidatedCredential =
+    corsRelaxOrigin &&
+    (classification.routeClass !== "CLIENT_API" || outcome.subject.kind !== "anonymous");
+  applyCorsHeaders(response, request, relaxForValidatedCredential);
+  if (corsRelaxOrigin && !relaxForValidatedCredential) {
+    // The anonymous response still negotiates content-encoding: keep the
+    // `Vary: Accept-Encoding` that applyCorsHeaders() stamps on this surface (#6737).
+    response.headers.append("Vary", "Accept-Encoding");
+  }
   if (managementDashboardRoute) {
     await refreshDashboardSessionIfNeeded(response, request);
   }

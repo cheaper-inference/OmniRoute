@@ -32,91 +32,82 @@ Az OmniRoute moduláris prompttömörítési folyamatot valósít meg, amely **p
 
 ## Tömörítési módok
 
-### Kikapcsolva
+### Off
 
-Nincs alkalmazva tömörítés. Minden üzenet változatlanul halad át.
+Nincs alkalmazott tömörítés. Minden üzenet változatlanul halad át.
 
-### Enyhe mód (~15%-os megtakarítás, <1 ms késleltetés)
+### Lite mód (~15% megtakarítás, <1ms késleltetés)
 
-A legbiztonságosabb mód — nulla szemantikai változtatás, csak formázástisztítás:
+A legbiztonságosabb mód – nulla szemantikai változás, kizárólag formázási tisztítás:
 
-| Technika                 | Leírás                                                      |
-| ------------------------ | ----------------------------------------------------------- |
-| `collapseWhitespace`     | Az egymást követő üres sorok és a záró szóközök összevonása |
-| `dedupSystemPrompt`      | Az ismétlődő rendszerüzenetek eltávolítása                  |
-| `compressToolResults`    | A részletes eszköz-/függvénykimenetek tömörítése            |
-| `removeRedundantContent` | Az ismétlődő utasítások eltávolítása                        |
-| `replaceImageUrls`       | A base64-kódolású képadat-URI-k rövidítése                  |
+| Technika                 | Leírás                                                    |
+| ------------------------ | --------------------------------------------------------- |
+| `collapseWhitespace`     | Egymást követő üres sorok és sorvégi szóközök összevonása |
+| `dedupSystemPrompt`      | Ismétlődő rendszerüzenetek eltávolítása                   |
+| `compressToolResults`    | Terjengős eszköz-/függvénykimenetek tömörítése            |
+| `removeRedundantContent` | Ismétlődő utasítások eltávolítása                         |
+| `replaceImageUrls`       | Base64-es kép-adat-URI-k lerövidítése                     |
 
-**Ideális ehhez:** Folyamatos használat, biztonságkritikus munkafolyamatok.
+**Ajánlott:** Folyamatosan aktív használathoz, biztonságkritikus munkafolyamatokhoz.
 
-### Normál mód (~30%-os megtakarítás)
+### Standard mód (~30% megtakarítás)
 
-A [Caveman](https://github.com/JuliusBrussee/caveman) által ihletett mód — eltávolítja a töltelékszavakat és a terjengős megfogalmazást, miközben megőrzi a jelentést:
+A [Caveman](https://github.com/JuliusBrussee/caveman) által inspirálva – eltávolítja a töltelékszavakat és a terjengős megfogalmazásokat a jelentés megőrzése mellett:
 
-- Eltávolítja a töltelékszavakat („kérem”, „azt hiszem”, „alapvetően”, „valójában”)
-- Tömöríti a terjengős kifejezéseket („annak érdekében, hogy” → „hogy”, „annak eredményeként” → „mert”)
-- Eltávolítja az udvarias óvatoskodást („Megtenné, hogy...”, „Ha esetleg meg tudná...”)
-- Több mint 30, programozási promptokra hangolt reguláris kifejezési szabály
+- Eltávolítja a töltelékszavakat ("please", "I think", "basically", "actually")
+- Tömörebbre fogalmazza a terjengős kifejezéseket ("in order to" → "to", "as a result of" → "because")
+- Levágja az udvarias határozatlansági formulákat ("Would you mind...", "If you could possibly...")
+- 30+ kódolási promptokra hangolt regex-szabály
 
-**Ideális ehhez:** Mindennapi programozási munkafolyamatok, költségtudatos csapatok.
+**Ajánlott:** Napi kódolási munkafolyamatokhoz, költségtudatos csapatoknak.
 
-### Agresszív mód (~50%-os megtakarítás)
+### Aggressive mód (~50% megtakarítás)
 
 Intelligens előzménykezelés hosszú munkamenetekhez:
 
-- **Üzenetek öregítése** — a régebbi üzenetek fokozatosan egyre erősebb tömörítést kapnak
-- **Eszközeredmények tömörítése** — a hosszú eszközkimenetek csonkolása vagy kihagyása (első/utolsó sorok,
-  egyező sorok szerinti szűrés, JSON-kulcsok tömörítése)
-- **Szerkezeti integritást védő mechanizmusok** — biztosítják, hogy a `tool_use` + `tool_result` párok konzisztensek maradjanak
-- **Kontextusablak figyelembevétele** — tiszteletben tartja az egyes modellek tokenkorlátait
+- **Üzenetek öregedése** – a régebbi üzenetek fokozatosan egyre erősebben tömörítődnek
+- **Eszközeredmény-tömörítés** – a hosszú eszközkimenetek csonkolása vagy kihagyásos rövidítése (első/utolsó sorok, találatsor-szűrés, JSON-kulcsok tömörítése)
+- **Strukturális integritási védelmek** – biztosítják, hogy a `tool_use` + `tool_result` párok konzisztensek maradjanak
+- **Kontextusablak-érzékelés** – tiszteletben tartja a modellenkénti tokenkorlátokat
 
-**Ideális ehhez:** Hosszabb hibakeresési munkamenetek, nagy kódbázisok.
+**Ajánlott:** Hosszas hibakeresési munkamenetekhez, nagy kódbázisokhoz.
 
-### Ultra mód (~75%-os megtakarítás)
+### Ultra mód (~75% megtakarítás)
 
-Maximális tömörítés a tokentakarékosságot igénylő helyzetekhez:
+Maximális tömörítés tokenkritikus helyzetekre:
 
-- **Heurisztikus ritkítás** — a próza pontszámalapú tokenritkítása
-- **Szerkezetmegőrzés** — a keretezett kódblokkokat, a soron belüli kódot, az URL-eket és az azonosítókat
-  helyőrzőkkel váltja ki, majd változatlanul visszailleszti; ezeket soha nem ritkítja
-- **Opcionális SLM-szint** — konfigurálás esetén egy kis helyi modell finomíthatja a ritkítást
-- Független az Agresszív módtól: nem futtat üzenetöregítést, eszközeredmény-tömörítést
-  vagy tartalék összegzőt (csak az SLM-szint meghibásodása irányíthat egy tartalék feldolgozási menetet
-  az agresszív módon keresztül)
+- **Heurisztikus metszés** – a prózai szöveg pontszámalapú tokenmetszése
+- **Struktúramegőrzés** – a fenced kódblokkok, a soron belüli kód, az URL-ek és az azonosítók tombstone-jelölést kapnak, majd szó szerint visszaillesztésre kerülnek, és soha nem esnek áldozatul a metszésnek
+- **Opcionális SLM-szint** – beállítás esetén egy kis helyi modell finomíthatja a metszést
+- Független az Aggressive módtól: nem futtat üzenetöregedést, eszközeredmény-tömörítést vagy a tartalék-összefoglalót (csak az SLM-szint meghibásodása irányíthat egy tartalék menetet az aggressive felé)
 
-**Ideális ehhez:** Ha rendszeresen eléri a kontextuskorlátokat.
+**Ajánlott:** Ha ismétlődően beleütközik a kontextuskorlátokba.
 
-### RTK mód (60–90%-os tartomány a háttérszolgáltató felé)
+### RTK mód (60–90%-os upstream-tartomány)
 
-Az RTK mód a programozási ügynökök munkameneteiben megjelenő terjengős eszközkimenetekre van optimalizálva:
+Az RTK mód a kódolóügynök-munkamenetekben felbukkanó terjengős eszközkimenetekre van optimalizálva:
 
-- Felismeri az olyan parancs-/kimenetosztályokat, mint a `git status`, `git diff`, `git log`, tesztfuttatók,
-  TypeScript-/Vite-/Webpack-buildek, ESLint/Biome/Prettier, npm-auditok/-telepítések, Docker-naplók, infrastruktúra-
-  kimenetek és általános shellkimenetek
-- JSON-szűrőcsomagokat alkalmaz az `open-sse/services/compression/engines/rtk/filters/` könyvtárból
-- Projekt- vagy globális `filters.toml` fájlokból importál RTK TOML séma v1 szerinti szűrőket, beágyazott tesztesetek
-  ellenőrzésével és a projektfájlokra vonatkozó bizalmi kapuval
-- 55 beépített szűrőt tartalmaz beágyazott ellenőrzési mintákkal
-- Eltávolítja az ANSI vezérlőszekvenciákat, folyamatjelző sávokat, ismétlődő sorokat és a beavatkozást nem igénylő zajt
-- Megőrzi a sikertelenségeket, hibákat, figyelmeztetéseket, módosított fájlokat, összegzéseket és a hosszú kimenetek végét
-- Támogatja a bizalmi kapuval védett projektszűrőket, a globális szűrőket és az opcionális, kitakart nyerskimenet-visszaállítást
+- Parancs-/kimenetosztályokat ismer fel, például: `git status`, `git diff`, `git log`, tesztfuttatók, TypeScript/Vite/Webpack buildek, ESLint/Biome/Prettier, npm audit/telepítések, Docker-naplók, infrastruktúra-kimenet és általános shell-kimenet
+- JSON-szűrőcsomagokat alkalmaz az `open-sse/services/compression/engines/rtk/filters/` útvonalról
+- RTK TOML schema v1 szűrőket importál projekt- vagy globális `filters.toml` fájlokból, inline-tesztvalidációval és a projektfájlok trust-gatingjével
+- 56 beépített szűrőt tartalmaz inline ellenőrzőmintákkal
+- Eltávolítja az ANSI-vezérlősorozatokat, a folyamatjelzőket, az ismétlődő sorokat és a cselekvés szempontjából lényegtelen zajt
+- Megőrzi a meghiúsulásokat, hibákat, figyelmeztetéseket, a módosult fájlokat, az összefoglalókat és a hosszú kimenetek végét
+- Támogatja a trust-gatingelt projektszűrőket, a globális szűrőket és az opcionális, kitakart nyerskimenet-visszaállítást
 
-**Ideális ehhez:** Shell-, build-, teszt-, git-, grep- és fájlkimeneti átiratokat tartalmazó ügynökmunkamenetek.
+**Ajánlott:** Shell-, build-, teszt-, git-, grep- és fájlkimenet-átiratokkal dolgozó ügynökmunkamenetekhez.
 
-### Halmozott mód (78–95%-os tartomány az alkalmas tartalmon)
+### Stacked mód (78–95% az alkalmazható tartományban)
 
-A Halmozott mód több tömörítőmotort futtat determinisztikus sorrendben. Az alapértelmezett folyamat:
+A Stacked mód több tömörítési motort futtat determinisztikus sorrendben. Az alapértelmezett pipeline:
 
 ```txt
 RTK -> Caveman
 ```
 
-Ez a sorrend először a terminál-/eszközkimenetet tömöríti, majd Caveman szemantikai tömörítést alkalmaz
-a fennmaradó természetes nyelvű promptra. A halmozott folyamatok globálisan vagy az útválasztási
-kombinációkhoz rendelt tömörítési kombinációkon keresztül konfigurálhatók.
+Ez a sorrend először a terminál-/eszközkimenetet tömöríti, majd a fennmaradó természetes nyelvű promptra alkalmazza a Caveman szemantikai sűrítését. A stacked pipeline-ok globálisan vagy a routing-kombókhoz rendelt tömörítési kombókon keresztül konfigurálhatók.
 
-**Ideális ehhez:** Nagy eszköznaplókat, valamint emberi utasításokat vagy asszisztensi összegzéseket egyaránt tartalmazó vegyes kontextus.
+**Ajánlott:** Nagy eszköznaplókat valamint emberi utasításokat vagy asszisztens-összefoglalókat egyaránt tartalmazó vegyes kontextushoz.
 
 ---
 
@@ -300,34 +291,39 @@ Az RTK módot az **[RTK AI](https://github.com/rtk-ai)** **[RTK - Rust Token Kil
 
 ## Fejlett tömörítési rendszerek
 
-A fent ismertetett 7 módon túl (a forrás a `codex-responses` és az
-`omniglyph` módokat is elfogadja, amelyekkel ez az útmutató nem foglalkozik) az alábbi szakaszok
-azokat a funkciókat mutatják be, amelyek e módokon belül vagy azok mellett működnek: a Tool Result Compression és a Progressive Aging
-az agresszív motor 1. és 2. lépése (Aggressive módban és egy halmozott
-folyamat `aggressive` lépéseként), a Stacked Pipeline határozza meg a Stacked mód működését, a Cache-Aware Compression
-az `aggressive` és `ultra` módokat `standard` módra állítja vissza a gyorsítótárazást támogató szolgáltatóknál, amikor a tömörítés
-be van kapcsolva, a Caveman Output Mode és az Output Styles pedig alapértelmezés szerint kikapcsolt, opcionális rendszerprompt-utasítások,
-amelyek a kérés tömörítése helyett a modell kimenetét alakítják.
+A fent ismertetett 7 módon túl (a forrás elfogadja a `codex-responses` és az
+`omniglyph` módokat is, amelyekre ez az útmutató nem tér ki) az alábbi szakaszok
+azokat a funkciókat mutatják be, amelyek e módokon belül vagy azok mellett működnek:
+a Tool Result Compression és a Progressive Aging az agresszív motor 1. és 2. lépése
+(Aggressive mód, illetve egy összefűzött feldolgozási folyamat `aggressive` lépése),
+a Stacked Pipeline határozza meg a Stacked mód működését, a Cache-Aware Compression
+az `aggressive` és `ultra` módokat `standard` módra fokozza vissza a gyorsítótárazást
+használó szolgáltatóknál, amikor a tömörítés be van kapcsolva, a Caveman Output Mode
+és az Output Styles pedig alapértelmezés szerint kikapcsolt, opcionális rendszerprompt-
+utasítások, amelyek a kérés tömörítése helyett a modell kimenetét alakítják.
 
 ### Gyorsítótár-tudatos tömörítés
 
-Egyes szolgáltatók (például az Anthropic prompt-gyorsítótárazással) támogatják a **prompt-gyorsítótárazást**,
-amely lehetővé teszi számukra a prompt egyes részeinek gyorsítótárazását a költségek és a késleltetés csökkentése érdekében. Ha
-a gyorsítótárazás engedélyezve van, az agresszív tömörítés valójában **ronthatja** a teljesítményt,
-mert módosítja a gyorsítótárazott tokeneket, ezáltal érvénytelenítve a gyorsítótárat.
+Egyes szolgáltatók (például az Anthropic promptgyorsítótárazással) támogatják a
+**promptgyorsítótárazást**, amely lehetővé teszi számukra a prompt egyes részeinek
+gyorsítótárazását a költségek és a késleltetés csökkentése érdekében. Ha a
+gyorsítótárazás engedélyezve van, az agresszív tömörítés valójában **ronthatja**
+a teljesítményt, mert megváltoztatja a gyorsítótárazott tokeneket, és ezzel
+érvényteleníti a gyorsítótárat.
 
-A `cachingAware.ts` modul ezt a **gyorsítótárazási kontextus észlelésével** és
-a **tömörítési stratégia ennek megfelelő módosításával** oldja meg.
+A `cachingAware.ts` modul ezt a **gyorsítótárazási környezet észlelésével** és
+a **tömörítési stratégia megfelelő módosításával** oldja meg.
 
 #### Működése
 
-1. **A gyorsítótárazási kontextus észlelése** — Megkeresi a kérés törzsében a `cache_control` jelölőket
-2. **A gyorsítótárazást támogató szolgáltatók azonosítása** — Ellenőrzi, hogy a célszolgáltató támogatja-e a gyorsítótárazást
-3. **A stratégia módosítása** — Az `aggressive`/`ultra` módot `standard` módra állítja vissza a gyorsítótárazást támogató szolgáltatóknál
-4. **A rendszerprompt kihagyása** — A rendszerpromptok általában gyorsítótárazva vannak, ezért nem kell tömöríteni őket
+1. **Gyorsítótárazási környezet észlelése** — Átvizsgálja a kérés törzsét `cache_control` jelölők után
+2. **Gyorsítótárazást támogató szolgáltatók azonosítása** — Ellenőrzi, hogy a célszolgáltató támogatja-e a gyorsítótárazást
+3. **Stratégia módosítása** — Az `aggressive`/`ultra` módot `standard` módra fokozza vissza a gyorsítótárazást támogató szolgáltatóknál
+4. **Rendszerprompt kihagyása** — A rendszerpromptokat általában gyorsítótárazzák, ezért ezeket nem tömöríti
 
-A stratégiai segédfüggvény egy `deterministicOnly` jelzőt is visszaad, de a tervkészítő
-csak a stratégiát használja fel — jelenleg a folyamat későbbi részeiben semmi sem olvassa ezt a jelzőt.
+A stratégiasegéd egy `deterministicOnly` jelzőt is visszaad, de a tervkészítő csak
+a stratégiát használja fel — jelenleg a feldolgozási lánc későbbi részein semmi sem
+olvassa ezt a jelzőt.
 
 #### Kódpélda
 
@@ -340,7 +336,7 @@ import {
 const body = {
   model: "anthropic/claude-sonnet-4.5",
   messages: [{ role: "user", content: "Hello" }],
-  cache_control: { type: "ephemeral" }, // ← Gyorsítótár-jelölő
+  cache_control: { type: "ephemeral" }, // ← Gyorsítótárjelölő
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
@@ -352,26 +348,30 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### Mikor használja
 
-A gyorsítótár-tudatos tömörítés **mindig be van kapcsolva** — nincs szükség konfigurációra. Akkor aktiválódik, amikor
-a tömörítés be van kapcsolva, és a célszolgáltató támogatja a prompt-gyorsítótárazást (Anthropic, OpenAI
-stb.); nincs szükség explicit `cache_control` jelölőkre — önmagában egy gyorsítótárazást támogató szolgáltató
-is kiváltja a visszaállítást, a jelölők azonban önmagukban soha nem teszik ezt meg (a jelölők észlelése a gyorsítótárazási
-telemetriát táplálja, nem a stratégiai döntést).
+A gyorsítótár-tudatos tömörítés **mindig be van kapcsolva** — nincs szükség
+konfigurációra. Akkor lép működésbe, amikor a tömörítés be van kapcsolva, és a
+célszolgáltató támogatja a promptgyorsítótárazást (Anthropic, OpenAI stb.); explicit
+`cache_control` jelölők nem szükségesek — már önmagában egy gyorsítótárazást támogató
+szolgáltató is kiváltja a visszafokozást, míg a jelölők önmagukban soha nem teszik ezt
+(a jelölők észlelése a gyorsítótár telemetriájához szolgáltat adatokat, nem a stratégiai
+döntéshez).
 
 ### Progresszív öregítés
 
-A hosszú beszélgetések számos üzenetváltást halmoznak fel, de a régebbi fordulók egyre kevésbé
-relevánsak. A `progressiveAging.ts` modul **a fordulók távolsága alapján fokozatosan csökkenti az üzenetek részletességét**
-(a távolságot a beszélgetés végétől mérve). A kiadott alapértelmezett beállításokkal
-(`verbatim: 2, light: 2, moderate: 3`):
+A hosszú beszélgetésekben sok üzenetforduló halmozódik fel, de a régebbi fordulók
+egyre kevésbé relevánsak. A `progressiveAging.ts` modul **a fordulótávolság alapján
+egyszerűsíti az üzeneteket** (a távolságot a beszélgetés végétől mérve). A mellékelt
+alapértelmezésekkel (`verbatim: 2, light: 2, moderate: 3`):
 
-- **Utolsó 2 forduló (távolság ≤ 2)**: Szó szerint megőrizve
-- **3-as távolság**: Ősember-tömörítés (töltelékszavak eltávolítása)
-- **4+ távolság**: Az asszisztens üzenetei összefoglalva; a felhasználói üzenetek az első
-  sorukra rövidítve, legfeljebb 120 karakterre; a többi szerep érintetlen marad. A rendszerpromptok, a már öregített
-  üzenetek és a legutóbbi felhasználói üzenet a távolságtól függetlenül mindig szó szerint maradnak meg.
-  Semmi sem kerül teljesen eldobásra, és a `light`
-  sáv az alapértelmezett beállításokkal nem érhető el (a `light` megegyezik a `verbatim` értékével).
+- **Utolsó 2 forduló (távolság ≤ 2)**: Változtatás nélkül marad
+- **3-as távolság**: Ősember-tömörítés (a töltelékszavak eltávolítása)
+- **4-es vagy nagyobb távolság**: Az asszisztens üzeneteit összegzi; a felhasználói
+  üzeneteket az első sorukra rövidíti, legfeljebb 120 karakterre; a többi szerepkört
+  változatlanul hagyja. A rendszerpromptok, a már öregített üzenetek és a legutóbbi
+  felhasználói üzenet a távolságtól függetlenül mindig változtatás nélkül maradnak.
+  Semmit sem dob el teljesen, a `light`
+  sáv pedig nem érhető el a mellékelt alapértelmezésekkel (a `light` értéke megegyezik
+  a `verbatim` értékével).
 
 #### Kódpélda
 
@@ -386,51 +386,55 @@ const messages = [
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // utolsó 3 forduló: szó szerint
-  light: 8, // távolság <= 8: enyhe tömörítés
+  verbatim: 3, // utolsó 3 forduló: változtatás nélkül
+  light: 8, // távolság <= 8: könnyű tömörítés
   moderate: 20, // távolság <= 20: ősember-tömörítés
-  fullSummary: 5, // a típus megköveteli, de a sávkiválasztó kód nem olvassa
-  // távolság > 20: összefoglalva (asszisztens) / első sor megtartva (felhasználó)
+  fullSummary: 5, // a típus megköveteli, de a sávkezelő kód nem olvassa
+  // távolság > 20: összegzés (asszisztens) / az első sor megtartása (felhasználó)
 });
 
 // saved = a megtakarított tokenek száma
 ```
 
-#### Mikor érdemes használni
+#### Mikor használja
 
-A progresszív öregítés **mindig be van kapcsolva** `aggressive` módban — ez a
-`compressAggressive()` 2. lépése. Az Ultra mód nem futtatja. Különösen hatékony a következőkhöz:
+A progresszív öregítés **mindig be van kapcsolva** az `aggressive` módban — ez a
+`compressAggressive()` 2. lépése. Az Ultra mód nem futtatja. Különösen hatékony
+a következő esetekben:
 
-- Hosszú ideig futó kódolási munkamenetek
+- Hosszan futó programozási munkamenetek
 - Többnapos beszélgetések
 - Sok eszközhívást tartalmazó ügynöki munkafolyamatok
 
 ### Ősember kimeneti mód
 
 Az ősember kimeneti mód **rendszerprompt-utasításokat** ad hozzá, amelyek tömör
-kimenetet kérnek magától a modelltől — a `lite` szint teljes mondatokat megtartó tömör válaszokat kér, a `full`
-azt kéri, hogy „válaszolj tömören, mint egy okos ősember”, az `ultra` pedig távirati stílusú kimenetet kér;
-az utasítások csak kérik ezt, garantálni nem tudják. A kérések az
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) függvényen keresztül kapják meg ezeket:
-az `open-sse/handlers/chatCore.ts` először a visszafelé kompatibilitási köztes réteggel oldja fel a kiválasztást
-(`resolveOutputStyleSelection()` az
-`open-sse/services/compression/outputStyles/backCompat.ts` fájlban), amely üres `outputStyles`
-esetén az engedélyezett `cavemanOutputMode` beállítást a `terse-prose` kimeneti stílusra képezi le a
-`cavemanOutputMode.intensity` intenzitással (lásd alább a Visszafelé kompatibilitás részt); a nem üres `outputStyles`
-kiválasztás változatlanul lesz felhasználva, és ekkor a `cavemanOutputMode.enabled` és az `intensity`
-nincs hatással, miközben az `autoClarity` kapcsoló továbbra is érvényesül. Az `outputMode.ts` tartalmazza az
-utasításszövegeket (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), a tartalmi megkerülést és a
-beillesztés által használt elhelyezési segédfüggvényt; a saját `applyCavemanOutputMode()` beillesztőjének nincs
-éles környezetben használt hívója.
+kimenetet kérnek magától a modelltől — a `lite` szint tömör, de teljes mondatokat
+megőrző válaszokat kér, a `full` arra kéri, hogy „válaszolj tömören, mint egy okos
+ősember”, az `ultra` pedig távirati stílusú kimenetet kér; az utasítások csak kérik
+ezt, garantálni nem tudják. A kérések az `applyOutputStyles()` függvényen
+(`open-sse/services/compression/outputStyles/apply.ts`) keresztül kapják meg ezeket:
+az `open-sse/handlers/chatCore.ts` először a visszafelé kompatibilitási segédréteggel
+oldja fel a kiválasztást (`resolveOutputStyleSelection()` az
+`open-sse/services/compression/outputStyles/backCompat.ts` fájlban), amely üres
+`outputStyles` esetén az engedélyezett `cavemanOutputMode` beállítást a `terse-prose`
+kimeneti stílusra képezi le a `cavemanOutputMode.intensity` intenzitással (lásd alább
+a Visszafelé kompatibilitás című részt); a nem üres `outputStyles` kiválasztást
+változtatás nélkül használja, és ekkor a `cavemanOutputMode.enabled` és az `intensity`
+nincs hatással, míg az `autoClarity` kapcsolója továbbra is érvényesül. Az
+`outputMode.ts` tartalmazza az utasításszövegeket
+(`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), a tartalmi megkerülést és az elhelyezési
+segédfüggvényt, amelyet a beszúrás használ; a saját `applyCavemanOutputMode()`
+beszúrójának nincs éles környezetben használt hívója.
 
-#### Működés
+#### Működése
 
 Ez a mód nem tömöríti a bemenetet. Egy utasításblokkot ad a rendszerprompthoz
-(lásd alább a Beillesztés működése részt), és a kéréshez kiválasztott bármely bemenettömörítési mód
-ezután továbbra is lefut azon a törzsön, amely már tartalmazza a blokkot. A minden szint végén szereplő közös
-korlátozási záradék előtt az angol `full` szint szövege a következő:
+(lásd alább: Hogyan működik a beillesztés), és a kéréshez kiválasztott bármely bemenettömörítési mód
+ezután továbbra is lefut az immár blokkot tartalmazó törzsön. A minden szint végén szereplő közös
+korlátozási záradék előtt az angol `full` szint szövege:
 
-> „Válaszolj tömören, mint egy okos ősember. Hagyd el a névelőket (a/an/the), a töltelékszavakat (just/really/basically/actually/simply), az udvariaskodást és a bizonytalankodó megfogalmazást. Mondattöredékek rendben. Rövid szinonimák (big, nem extensive; fix, nem implement). Minden technikai tartalmat, kódot, hibát, URL-t és azonosítót pontosan őrizz meg.”
+> "Válaszolj tömören, mint okos ősember. Hagyd el a névelőket (a/an/the), a töltelékszavakat (just/really/basically/actually/simply), az udvariaskodást és az óvatoskodást. Töredékek rendben. Rövid szinonimák (big, nem extensive; fix, nem implement). Minden technikai tartalmat, kódot, hibát, URL-t és azonosítót őrizz meg pontosan."
 
 Ez különösen jól működik a következőkhöz:
 
@@ -438,10 +442,10 @@ Ez különösen jól működik a következőkhöz:
 - Gyors kérdések és válaszok (nincs szükség részletes magyarázatokra)
 - Kötegelt feldolgozás (maximális áteresztőképesség)
 
-#### Mikor érdemes használni
+#### Mikor használd
 
-Az ősember kimeneti mód **külön bekapcsolandó**. Bekapcsolt tömörítés mellett (`enabled: true`, a
-Tömörítési beállítások oldal főkapcsolója) a `cavemanOutputMode.enabled` beállítással kapcsolható be; az `intensity`
+A caveman kimeneti mód használata **külön engedélyezendő**. Bekapcsolt tömörítés mellett (`enabled: true`, a Compression Settings oldalon lévő főkapcsoló
+bekapcsolva) a `cavemanOutputMode.enabled` beállítással kapcsolható be; az `intensity`
 választja ki a `lite`, `full` vagy `ultra` szintet:
 
 ```json
@@ -454,105 +458,107 @@ választja ki a `lite`, `full` vagy `ultra` szintet:
 }
 ```
 
-Egy tömörítési kombináció **Kimeneti mód** kapcsolója (`outputMode`, a szint az `outputModeIntensity` mezőben)
+Egy tömörítési kombináció **Output Mode** kapcsolója (`outputMode`, a szint pedig az `outputModeIntensity`)
 ugyanezt a kapcsolót állítja be azokra a kérésekre, amelyekre a kombináció vonatkozik, az
 `omniroute_set_compression_engine` MCP-eszköz pedig a logikai `outputMode`
-argumentumán keresztül írja be. A nem üres `outputStyles` kiválasztás elsőbbséget élvez ezzel a kapcsolóval szemben. Az
-irányítópulton a **Tömör próza** kimeneti stílus engedélyezése ugyanezt a blokkot illeszti be (lásd alább a Kimeneti
-stílusok részt).
+argumentumán keresztül írja azt. Egy nem üres `outputStyles`-kiválasztás elsőbbséget élvez ezzel a kapcsolóval szemben. Az
+irányítópulton a **Terse prose** kimeneti stílus engedélyezése ugyanezt a blokkot illeszti be (lásd alább:
+Kimeneti stílusok).
 
 ### Kimeneti stílusok (katalógus)
 
-A fenti ősember kimeneti mód az **örökölt egyetlen stílusú útvonal**. A 4. fázis ezt
+A fenti caveman kimeneti mód a **régi, egyetlen stílust használó útvonal**. A 4. fázis ezt
 komponálható kimeneti stílusok katalógusává általánosította: `OUTPUT_STYLE_CATALOG` az
 `open-sse/services/compression/outputStyles/catalog.ts` fájlban. Minden stílus egy rendszerprompt-
-utasítás, amely olcsóbb kimenetet kér magától a modelltől; a stílusok együtt is engedélyezhetők,
-és katalógusbeli sorrendben kerülnek beillesztésre.
+utasítás, amely olcsóbb kimenetet kér magától a modelltől; a stílusok
+együtt is engedélyezhetők, és katalógusbeli sorrendben lesznek beillesztve.
 
-| Stílus                           | `id`          | Mit csinál                                                                                                                                                                                                                                                       | Utasítások nyelvei                            |
-| -------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Tömör próza                      | `terse-prose` | Elhagyja a töltelékszavakat, névelőket és bizonytalankodó fordulatokat; a műszaki tartalmat pontosan megőrzi. Ugyanaz a szöveg, mint a korábbi ősemberes kimeneti módban (csak hivatkozva, nem újra leírva).                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Kevesebb kód                     | `less-code`   | YAGNI-lépcső: a legkisebb működő módosítás, kéretlen absztrakciók nélkül.                                                                                                                                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Lófarok (lusta senior fejlesztő) | `ponytail`    | „A legjobb kód az, amelyet soha nem írtak meg”: újrafelhasználás > újraírás, kiváltó ok > tünet, legrövidebb működő diff.                                                                                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| ADHD-m van (cselekvésközpontú)   | `i-have-adhd` | Először a cselekvés (parancs/útvonal/kódrészlet a próza előtt), számozott és korlátozott számú lépések, EGY konkrét következő lépés, bevezető/összefoglaló/zárás nélkül. Az [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) alapján adaptálva (MIT). | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Tömör CJK (文言)                 | `terse-cjk`   | `full`/`ultra` válasz klasszikus kínai nyelven (文言); a `lite` csak rövid, funkciószavak, udvariassági formulák és díszítések nélküli válaszokat kér.                                                                                                           | zh (területi beállításhoz kötött, lásd alább) |
+| Stílus                                  | `id`            | Mit csinál                                                                                                                                                                                                                                                                                                                          | Utasítások nyelvei                            |
+| --------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Tömör próza                             | `terse-prose`   | Elhagyja a töltelékszavakat/névelőket/óvatoskodást; a technikai tartalmat pontosan megőrzi. Ugyanaz a szöveg, mint a régi caveman kimeneti módban (hivatkozva, nem ismételten leírva).                                                                                                                                              | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Kevesebb kód                            | `less-code`     | YAGNI-létra: a legkisebb működő módosítás, nem kért absztrakciók nélkül.                                                                                                                                                                                                                                                            | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Lófarok (lusta senior fejlesztő)        | `ponytail`      | „A legjobb kód az, amelyet sosem írtak meg”: újrafelhasználás > újraírás, kiváltó ok > tünet, legrövidebb működő diff.                                                                                                                                                                                                              | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| ADHD-m van (cselekvésközpontú)          | `i-have-adhd`   | Először a művelet (parancs/útvonal/kódrészlet a próza előtt), számozott és korlátozott lépések, EGY konkrét következő lépés, nincs bevezetés/összefoglalás/lezárás. Az [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) alapján adaptálva (MIT).                                                                         | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop UI-szűrő                       | `antislop-ui`   | Minden vizuális technikának át kell mennie egy célszerűségi teszten (hierarchia, identitás, olvashatóság); nincsenek alapértelmezett színátmenetek/üveghatás/ragyogás, korlátozott paletta, nincsenek sablonelrendezések. Mindkét antislop stílus hozzáad egy nem működő vezérlőelemeket és kitalált állításokat tiltó korlátozást. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop szöveg- és emberközpontú szűrő | `antislop-copy` | Konkrét szöveg (nincs gondolatjel, általános CTA, divatszó, chatbothoz illő lezárás vagy kitalált tény), valamint emberekre vonatkozó szabályok: WCAG AA kontraszt, látható fókusz, billentyűzetes elérhetőség, üres/betöltési/hibaállapotok, mobilos újratördelés.                                                                 | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Tömör CJK (文言)                        | `terse-cjk`     | `full`/`ultra` válasz klasszikus kínai nyelven (文言); a `lite` csak rövid válaszokat kér funkciószavak, udvariaskodás vagy díszítés nélkül.                                                                                                                                                                                        | zh (területi beállításhoz kötött, lásd alább) |
 
-Minden stílus három intenzitási szinttel érkezik — `lite`, `full`, `ultra` —, és minden
-szint a közös korlátozási záradékkal végződik (`SHARED_BOUNDARIES` az `outputMode.ts`
-fájlban), amely pontosan megőrzi a kódblokkokat, fájlútvonalakat, parancsokat, hibákat
-és URL-eket. A `terse-prose` és `terse-cjk` szintek szövegei az azonosítókat is
-hozzáadják ehhez a listához.
+Minden stílus három intenzitási szinttel érkezik — `lite`, `full`, `ultra` —, és minden szint
+a közös korlátozási záradékkal végződik (`SHARED_BOUNDARIES` az `outputMode.ts` fájlban), amely
+pontosan megőrzi a kódblokkokat, fájlútvonalakat, parancsokat, hibákat és URL-eket. A `terse-prose` és
+`terse-cjk` szintek szövegei az azonosítókat is hozzáadják ehhez a listához.
 
-A `terse-cjk` két helyen is a `zh` területi beállításhoz van kötve. A Tömörítési
-beállítások oldal csak akkor jeleníti meg a sorát, ha az irányítópult felhasználói
-felületének nyelve kínai (`zh-CN` vagy `zh-TW`), az `applyOutputStyles()` pedig csak
-akkor illeszti be, ha a kérés feloldott nyelve (lásd alább a Nyelvválasztás részt) `zh`.
-A sor elrejtése nem törli a mentett `terse-cjk`-kijelölést: a beállítási API bármilyen
-stílusazonosítót elfogad, és az oldalon más stílusok mentése megőrzi azt. A kérés
-feldolgozásakor az `applyOutputStyles()` nyelvi ellenőrzése az egyetlen területi
-korlátozás.
+A `terse-cjk` két helyen is a `zh` területi beállításhoz van kötve. A Compression Settings oldal
+csak akkor jeleníti meg a sorát, ha az irányítópult felhasználói felületének nyelve kínai (`zh-CN` vagy `zh-TW`), az
+`applyOutputStyles()` pedig csak akkor illeszti be, ha a kérés feloldott nyelve (lásd alább:
+Nyelvválasztás) `zh`. A sor elrejtése nem törli a mentett `terse-cjk`-kiválasztást:
+a beállítási API bármely stílusazonosítót elfogad, és más stílusok mentése az oldalon megtartja azt. A
+kérés feldolgozásakor az `applyOutputStyles()` nyelvi ellenőrzése az egyetlen területi korlátozás.
 
-#### A beillesztés működése
+#### Hogyan működik a beillesztés
 
 Az `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) feloldja
-a kijelölést a katalógus alapján (az ismeretlen azonosítók és a területi beállítással
-nem egyező stílusok elvetésre kerülnek, de soha nem okoznak hibát; ha a kijelölésből
-egyetlen stílus sem oldható fel, a törzs változatlan marad, és `no_styles` okkal
-kimarad), katalógussorrendben összefűzi a kijelölt utasításokat,
-**egyszer** hozzáfűzi a korlátozási záradékot (valamint a biztonsági záradékot,
-`SAFETY_BOUNDARIES` vagy annak fordítását, ha a `less-code` vagy a `ponytail` van
-kijelölve), és egyetlen idempotenciajelölővel (`[OmniRoute Output Styles]`) kezdi a
-blokkot, így az ismételt alkalmazás nem végez módosítást. Ha a feloldott nyelvhez
-(lásd alább a Nyelvválasztás részt) létezik fordítás, az angol helyett a lokalizált
-utasítás kerül beillesztésre.
+a kiválasztást a katalógus alapján (az ismeretlen azonosítók és a területi beállítással
+nem egyező stílusok el lesznek vetve, ez soha nem eredményez hibát; ha a kiválasztás
+feloldása egyetlen stílust sem eredményez, a törzs változatlan marad, és `no_styles`
+okkal lesz kihagyva), a kiválasztott utasításokat katalógusbeli sorrendben összefűzi,
+**egyszer** hozzáfűzi a korlátokra vonatkozó záradékot (valamint a biztonsági záradékot,
+a `SAFETY_BOUNDARIES` értékét vagy annak fordítását, ha a `less-code` vagy a `ponytail`
+van kiválasztva), és a blokkot egyetlen idempotenciajelölővel
+(`[OmniRoute Output Styles]`) kezdi, így az ismételt alkalmazás nem jár módosítással. Ha
+a feloldott nyelvhez (lásd alább a Nyelvválasztás részt) létezik fordítás, az angol
+helyett a lokalizált utasítás kerül beillesztésre.
 
 Nem üres `messages` tömböt tartalmazó törzsön az idempotencia-ellenőrzés a
-tartalmi megkerülés előtt fut le: ha az `[OmniRoute Output Styles]` jelölő már
-megtalálható a legfelső szintű `system` mezőben (karakterláncban vagy tartalomblokkok
-tömbjében), illetve egy karakterlánc-tartalmú rendszerüzenetben, a törzs
-`already_applied` állapottal változatlan marad, és nem fut le kulcsszó-ellenőrzés.
-Egyébként a tartalmi megkerülés (`shouldBypassCavemanOutputMode()` az
-`open-sse/services/compression/outputMode.ts` fájlban) az utolsó három üzenet szövegét
-vizsgálja azok szerepétől függetlenül, és az egész fordulóra kihagyja a stílusokat,
-ha a szöveg biztonsági, visszafordíthatatlan műveletekre vagy pontosításra vonatkozó
-kulcsszavakat tartalmaz, illetve egy sorrendérzékeny szekvenciát: `first`, `then`,
-`after that`, `before`, `rollback` vagy `backup`, amelyet 240 karakteren belül
-`delete`, `drop`, `migrate`, `deploy` vagy `release` követ. A megkerülés addig fut,
-amíg az **Auto-Clarity Bypass** kapcsoló (`cavemanOutputMode.autoClarity`, alapértelmezés
-szerint bekapcsolva) be van kapcsolva; a kapcsoló kikapcsolása kihagyja a
-kulcsszó-ellenőrzést.
+tartalomalapú megkerülés előtt fut le: ha az `[OmniRoute Output Styles]` jelölő már
+szerepel a felső szintű `system` mezőben (amely lehet karakterlánc vagy
+tartalomblokkokból álló tömb), illetve karakterlánc típusú tartalommal rendelkező
+rendszerüzenetben, a törzs `already_applied` okkal változatlan marad, és
+kulcsszó-ellenőrzés sem fut le. Ellenkező esetben egy tartalomalapú megkerülés
+(`shouldBypassCavemanOutputMode()` az
+`open-sse/services/compression/outputMode.ts` fájlban) ellenőrzi az utolsó három üzenet
+szövegét, a szerepüktől függetlenül, és az egész fordulóra kihagyja a stílusokat, ha a
+szöveg megfelel a biztonsági, visszafordíthatatlan műveletekre vagy pontosításra
+vonatkozó kulcsszavaknak, illetve egy sorrendérzékeny sorozatnak: `first`, `then`,
+`after that`, `before`, `rollback` vagy `backup`, amelyet 240 karakteren belül `delete`,
+`drop`, `migrate`, `deploy` vagy `release` követ. A megkerülés addig fut, amíg az
+**Automatikus egyértelműsítési megkerülés** kapcsoló
+(`cavemanOutputMode.autoClarity`, alapértelmezés szerint bekapcsolva) be van kapcsolva;
+a kapcsoló kikapcsolásával a kulcsszó-ellenőrzés kimarad.
 
 Ha a megkerülés átengedi a fordulót, a `placeSystemInstruction()` (ugyanabban a
-fájlban), amely soha nem hoz létre új `messages[0]` elemet, az alábbiak közül az első
-megtalált helyre teszi a blokkot:
+fájlban), amely soha nem hoz létre új `messages[0]` elemet, a blokkot az alábbiak közül
+az első megtalált helyre teszi:
 
-1. Karakterlánc-tartalmú kezdő rendszerüzenet: a blokkot annak szövege után fűzi.
-2. A legfelső szintű `system` mező: a blokkot egy karakterlánc szövege után fűzi, vagy
-   új szövegblokként hozzáadja egy tartalomblokkokból álló tömbhöz.
-3. Az első későbbi, karakterlánc-tartalmú rendszerüzenet: a blokkot annak szövege után
-   fűzi.
-4. Ha a fentiek egyike sem található: a blokk új rendszerüzenetként a `messages` végére
-   kerül.
+1. Egy kezdő, karakterlánc típusú tartalommal rendelkező rendszerüzenet: a blokk annak
+   szövege után lesz hozzáfűzve.
+2. A felső szintű `system` mező: a blokk egy karakterlánc szövege után lesz hozzáfűzve,
+   vagy új szövegblokként kerül egy tartalomblokkokból álló tömbbe.
+3. Az első későbbi, karakterlánc típusú tartalommal rendelkező rendszerüzenet: a blokk
+   annak szövege után lesz hozzáfűzve.
+4. Ha a fentiek egyike sem található: a blokk a `messages` végén létrehozott új
+   rendszerüzenetbe kerül.
 
-`messages` tömb nélküli (vagy üres tömböt tartalmazó) törzsön nem fut tartalmi
-megkerülés, és a legfelső szintű `system` mezőt sem vizsgálja a rendszer. A blokkot egy
-karakterlánc típusú `instructions` mező szövege után fűzi, kivéve, ha a mező már
-tartalmazza az `[OmniRoute Output Styles]` jelölőt; ebben az esetben a törzs
-`already_applied` állapottal változatlan marad. Ha a törzsnek nincs karakterlánc típusú
-`instructions` mezője, de tartalmaz `input` mezőt (karakterláncot vagy tömböt), a blokk
-lesz az `instructions` értéke, felülírva a mező esetleges nem karakterlánc típusú
-értékét. Az a törzs, amely sem karakterlánc típusú `instructions` mezőt, sem
-karakterlánc vagy tömb típusú `input` mezőt nem tartalmaz, változatlan marad, és
-`no_messages` okkal kimarad.
+`messages` tömb nélküli (vagy üres tömbbel rendelkező) törzsön nem fut tartalomalapú
+megkerülés, és a felső szintű `system` mezőt sem veszi figyelembe a rendszer. A blokk
+egy karakterlánc típusú `instructions` mező szövege után lesz hozzáfűzve, kivéve, ha az
+a mező már tartalmazza az `[OmniRoute Output Styles]` jelölőt; ebben az esetben a törzs
+`already_applied` okkal változatlan marad. Ha a törzs nem rendelkezik karakterlánc
+típusú `instructions` mezővel, de tartalmaz `input` mezőt (karakterláncot vagy tömböt),
+akkor a blokk lesz az `instructions` értéke, felülírva a mező esetleges nem
+karakterlánc típusú értékét. Az olyan törzs, amely sem karakterlánc típusú
+`instructions` mezővel, sem karakterlánc vagy tömb típusú `input` mezővel nem
+rendelkezik, változatlan marad, és `no_messages` okkal lesz kihagyva.
 
-#### Engedélyezés módja
+#### Engedélyezés
 
-Az irányítópulton: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), az Output styles szakaszban: stílusonként egy sor egy be-/kikapcsolóval
-és egy szintválasztóval. A stílusok akkor kerülnek beillesztésre, amikor maga a tömörítés be van kapcsolva (az oldal
-főkapcsolója, `enabled`). Az **Auto-Clarity Bypass** kapcsoló a **Caveman**
-oldalon (`/dashboard/context/caveman`), annak **Output Mode** kártyáján található. Programozottan a
-tömörítési konfiguráció a következőképpen őrzi meg a kiválasztást:
+Az irányítópulton: **Tömörítési kontextus → Tömörítési beállítások**
+(`/dashboard/context/settings`), a Kimeneti stílusok szakaszban: stílusonként egy sor,
+egy be-/kikapcsolóval és egy szintválasztóval. A stílusok addig kerülnek beillesztésre,
+amíg maga a tömörítés be van kapcsolva (az oldal `enabled` főkapcsolója). Az
+**Automatikus egyértelműsítési megkerülés** kapcsoló a **Caveman** oldalon
+(`/dashboard/context/caveman`), annak **Kimeneti mód** kártyáján található. Programozott
+használat esetén a tömörítési konfiguráció a következőképpen tárolja a kiválasztást:
 
 ```json
 {
@@ -563,143 +569,151 @@ tömörítési konfiguráció a következőképpen őrzi meg a kiválasztást:
 }
 ```
 
-Visszamenőleges kompatibilitás: amíg az `outputStyles` üres, a régi `cavemanOutputMode.enabled`
-beállítás a `terse-prose` értékre képeződik le a `cavemanOutputMode.intensity` intenzitással. A blokk ezután
-az `[OmniRoute Output Styles]` jelölővel kezdődik, míg a régi `applyCavemanOutputMode()`
-beillesztő az `[OmniRoute Caveman Output Mode]` jelölőt írta. A jelölő alatt a szöveg megegyezik a
-régi beillesztéssel az en, pt-BR, es, de, fr, it, ru, id és vi nyelveken; ja és zh esetén egy
-további szóköz található a határokról szóló tagmondat előtt. A `terse-prose` rendelkezik pt-BR, es, de,
-fr, it, ru, zh, ja, id és vi fordítással, ezért egy olyan kérés, amelynek feloldott nyelve `hu`, az
-angol szöveget kapja ott, ahol a régi beillesztő a magyar szöveget használta.
+Visszafelé kompatibilitás: amíg az `outputStyles` üres, a régi
+`cavemanOutputMode.enabled` beállítás a `terse-prose` stílusra képeződik le a
+`cavemanOutputMode.intensity` intenzitással. Ekkor a blokk az
+`[OmniRoute Output Styles]` jelölővel kezdődik, míg a régi
+`applyCavemanOutputMode()` beillesztő az `[OmniRoute Caveman Output Mode]` jelölőt írta.
+A jelölő alatt a szöveg megegyezik a régi beillesztés szövegével en, pt-BR, es, de, fr,
+it, ru, id és vi nyelven; ja és zh nyelven egy további szóközt tartalmaz a korlátokra
+vonatkozó záradék előtt. A `terse-prose` rendelkezik pt-BR, es, de, fr, it, ru, zh, ja,
+id és vi fordítással, ezért a `hu` feloldott nyelvű kérés angol szöveget kap ott, ahol a
+régi beillesztő a magyar változatot használta.
 
 A kimeneti stílus nyelvének kiválasztása (`resolveOutputStyleLanguage()` az
-`outputStyles/apply.ts` fájlban): ha a `languageConfig.enabled` be van kapcsolva, az `autoDetect` mintát vesz a
-kérés `messages` tömbjének legutóbbi, szöveget tartalmazó felhasználói üzenetéből (karakterlánc típusú tartalom,
-vagy a tartalmi részek `text` mezője), és lefuttatja rajta a Caveman motor érzékelőjét
-(`detectCompressionLanguage()`). Az érzékelő `zh` értéket ad vissza a han karaktereket, de kanát nem
-tartalmazó szövegnél; egyébként az `it`, `pt-BR`, `es`, `de`,
-`fr`, `ru`, `ja`, `hu` és `id` közül azt adja vissza, amelyhez a legtöbb utalás illeszkedik, illetve `en` értéket,
-ha egyikhez sem talál egyezést — az általa nem osztályozható szöveg angol lesz, soha nem `defaultLanguage`, és a
-`vi` nyelvet soha nem érzékeli, noha a stílusokhoz tartozik `vi` szöveg. A Responses API törzse a fordulóit az
-`input` mezőben tartja, amelyből nem történik mintavétel, így a `defaultLanguage`, majd az angol lesz használva. Ha a
-`messages` egyetlen felhasználói üzenete sem tartalmaz szöveget, vagy az `autoDetect` ki van kapcsolva, a
-`defaultLanguage`, majd az angol lesz alkalmazva. Ha a `languageConfig.enabled` ki van kapcsolva, a nyelv angol —
-kivéve, ha egy tömörítési kombináció vonatkozik a kérésre (a kérés útválasztási kombinációjához rendelt kombináció,
-vagy az alapértelmezett tömörítési kombináció, amelyre a chatCore visszaáll a beépített, egymásra épülő
-folyamatnál): egy kombináció alkalmazása az adott kéréshez bekapcsolja a `languageConfig.enabled` beállítást, és a
-`defaultLanguage` értékét a kombináció nyelvi csomagjai alapján állítja be (a mentett értékre, ha az szerepel a
-kombináció csomagjai között, ellenkező esetben a kombináció első csomagjára, amely alapértelmezés szerint `en`),
-miközben továbbra is a mentett `autoDetect` beállítás érvényes (alapértelmezés szerint bekapcsolva). A Caveman
-bemeneti motor eltérően választja ki a szabálycsomag nyelvét — szövegrészenként, és kikapcsolt automatikus
-észlelés esetén az `enabledPacks` alapján korlátozva.
+`outputStyles/apply.ts` fájlban): ha a `languageConfig.enabled` be van kapcsolva, az
+`autoDetect` mintát vesz a kérés `messages` tömbjének legutóbbi, szöveget tartalmazó
+felhasználói üzenetéből (karakterlánc típusú tartalomból vagy a tartalomrészek `text`
+értékéből), és lefuttatja rajta a Caveman motor érzékelőjét
+(`detectCompressionLanguage()`). Az érzékelő `zh` értéket ad vissza a Han-írásjegyeket,
+de kanát nem tartalmazó szövegekhez; egyébként az `it`, `pt-BR`, `es`, `de`, `fr`, `ru`,
+`ja`, `hu` és `id` közül azt adja vissza, amelyiknél a legtöbb utalás egyezik, és `en`
+értéket, ha nincs egyezés — az osztályozhatatlan szöveg mindig angol lesz, soha nem a
+`defaultLanguage`, a `vi` nyelvet pedig soha nem érzékeli, noha a stílusokhoz tartozik
+`vi` nyelvű szöveg. A Responses API törzse az `input` mezőben tárolja a fordulóit,
+amelyből nem történik mintavétel, így az először a `defaultLanguage`, majd az angol
+nyelvet kapja. Ha a `messages` egyetlen felhasználói üzenete sem tartalmaz szöveget,
+vagy az `autoDetect` ki van kapcsolva, a `defaultLanguage`, majd az angol nyelv lesz
+alkalmazva. Ha a `languageConfig.enabled` ki van kapcsolva, a nyelv angol — kivéve, ha
+egy tömörítési kombináció vonatkozik a kérésre (a kérés útválasztási kombinációjához
+rendelt kombináció, vagy az alapértelmezett tömörítési kombináció, amelyre a chatCore
+visszaáll a beépített, rétegzett feldolgozási folyamat esetén): egy kombináció
+alkalmazása az adott kéréshez bekapcsolja a `languageConfig.enabled` beállítást, és a
+kombináció nyelvi csomagjai alapján állítja be a `defaultLanguage` értékét (a mentett
+értéket, ha az szerepel a kombináció csomagjai között, egyébként a kombináció első
+csomagját, amely alapértelmezés szerint `en`), miközben a mentett `autoDetect`
+(alapértelmezés szerint bekapcsolva) továbbra is érvényes. A Caveman bemeneti motor
+eltérően választja ki a szabálycsomag nyelvét — szövegrészenként, kikapcsolt automatikus
+érzékelés esetén pedig az `enabledPacks` alapján korlátozva.
 
 A stílus × nyelv mátrixot a
-`tests/unit/compression/output-styles-i18n-matrix.test.ts` rögzíti: minden katalógusbeli stílushoz
-bejegyzés szükséges a teszt `BASELINE_LANGUAGES` elemében; a területi beállítás alapján nem korlátozott stílusoknak
-rendelkezniük kell pt-BR fordítással (a területi beállítás alapján korlátozott `terse-cjk` mentesül e szabály alól),
-kivéve, ha szerepelnek a `KNOWN_ENGLISH_ONLY` listában, amely csak olyan stílusokat tartalmazhat, amelyekhez
-egyáltalán nincs fordítás — ha egy felsorolt stílushoz bármilyen fordítás tartozik, a teszt meghiúsul; továbbá egy
-stílus tesztje akkor is meghiúsul, ha elveszít egy olyan nyelvet, amely szerepel a hozzá tartozó
-`BASELINE_LANGUAGES` bejegyzésben. Új stílus hozzáadásához lásd:
+`tests/unit/compression/output-styles-i18n-matrix.test.ts` rögzíti: minden katalógusstílushoz
+kell tartoznia egy bejegyzésnek a teszt `BASELINE_LANGUAGES` értékében; a területi
+beállításhoz nem kötött stílusokhoz pt-BR fordítást kell biztosítani (a területi beállításhoz
+kötött `terse-cjk` mentesül e szabály alól), kivéve, ha a stílus szerepel a
+`KNOWN_ENGLISH_ONLY` listában, amely kizárólag olyan stílusokat tartalmazhat, amelyekhez
+egyáltalán nincs fordítás — ha egy felsorolt stílushoz bármilyen fordítás tartozik, a
+teszt sikertelen lesz; továbbá egy stílus tesztje akkor is sikertelen, ha elveszít egy
+olyan nyelvet, amely szerepel a hozzá tartozó `BASELINE_LANGUAGES` bejegyzésben. Új stílus
+hozzáadásához lásd:
 [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
 ### Eszközeredmények tömörítése
 
-Az `open-sse/services/compression/toolResultCompressor.ts` fájlban található `compressToolResult()`
-**5 stratégiával** tömöríti az eszközeredmények szövegét. Ezeket az alábbi sorrendben próbálja ki, és az első
-olyan engedélyezett stratégia határozza meg az eredményt, amelynek ellenőrzése illeszkedik a tartalomhoz:
+Az `open-sse/services/compression/toolResultCompressor.ts` fájlban található
+`compressToolResult()` **5 stratégiával** tömöríti az eszközeredmények szövegét. Ezeket
+ebben a sorrendben próbálja ki, és az első olyan engedélyezett stratégia határozza meg
+az eredményt, amelynek ellenőrzése illeszkedik a tartalomra:
 
 1. **`fileContent`**: legalább 3 sorból álló tartalom, amelyben legalább egy sor — a
    kezdő behúzást figyelmen kívül hagyva — `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` vagy `return ` szöveggel (a kulcsszó és egy szóköz), illetve
-   `if`, `for` vagy `while` szöveggel, majd `(` vagy ` (` karakterekkel kezdődik;
-   megtartja az első 20 és az utolsó 5 sort, a kihagyott középső részt megjelölve.
-2. **`grepSearch`**: olyan tartalom, amelyben legalább egy `<path>:<digits>:` formájú sor
-   található, ahol az első kettőspont előtti szöveg nem tartalmaz térközt; csak ezeket a
-   sorokat tartja meg, legfeljebb 30-at, majd feltünteti a további találatok számát és az
-   egyező fájlok listáját; minden más sort eldob. Már egyetlen ilyen sor is elegendő a
-   stratégia aktiválásához, így például egy `12:30:45` időbélyeggel kezdődő naplósor is
-   találatnak számít.
-3. **`shellOutput`**: az olyan kimenetből, amely ANSI CSI-szekvenciát (`ESC[`, majd
-   számjegyek vagy pontosvesszők, végül egy betű, mint a színkódokban), illetve a
-   szövegben bárhol térközkarakterrel követett `$` jelet tartalmaz, eltávolítja ezeket a
-   szekvenciákat (más escape-szekvenciákat, például az `ESC[?25l` vagy egy OSC
-   ablakcímszekvenciát megtart), és megőrzi az utolsó 50 sort, miközben összevonja az
-   egymást követő ismétlődő sorokat. Mivel ez az ellenőrzés a `json` és az
-   `errorMessage` előtt fut, az ilyen `$` jelet tartalmazó JSON- vagy hibakimenet soha
-   nem jut el hozzájuk, amíg a `shellOutput` be van kapcsolva.
-4. **`json`**: a 2 000 karakternél hosszabb JSON-adattartalom, amely opcionális
-   térközkarakterek után `{` vagy `[` karakterrel kezdődik, és sikeresen feldolgozható,
-   összegzésre kerül: egy 7-nél több elemet tartalmazó tömbből megmarad az első 5 és az
-   utolsó 2 elem, valamint az elemek teljes száma; egy objektumból pedig az első 20
-   kulcs marad meg, miközben minden beágyazott objektum- vagy tömbértéket egy
-   `{…N keys}` helyőrző vált fel (tömb esetén N a tömb hossza), továbbá egy
-   `_remaining_<N>_keys` jelölő adja meg az első 20 után eldobott kulcsok számát. A
-   skalárértékek teljes egészükben másolódnak, így egy legfeljebb 20 kulcsot tartalmazó,
-   beágyazott értékek nélküli objektum csupán új behúzást kap — egy tömörített objektum
-   több karakterből fog állni, ezért változatlan marad.
+   `const `, `let `, `var ` vagy `return ` karakterlánccal (a kulcsszó és egy szóköz),
+   illetve `if`, `for` vagy `while` karakterlánccal kezdődik, amelyet `(` vagy ` (` követ;
+   megtartja az első 20 és az utolsó 5 sort, a kihagyott középső részt pedig megjelöli.
+2. **`grepSearch`**: olyan tartalom, amelyben legalább egy `<path>:<digits>:` alakú sor
+   található, ahol az első kettőspont előtti szövegben nincs térköz; csak ezeket a
+   sorokat tartja meg, legfeljebb 30-at, majd feltünteti a további találatok számát és
+   az egyező fájlok listáját; minden más sort eldob. Már egyetlen ilyen sor elegendő a
+   stratégia aktiválásához, ezért egy időbélyeggel, például `12:30:45` értékkel kezdődő
+   naplósor is találatnak számít.
+3. **`shellOutput`**: az olyan kimenetből, amely ANSI CSI-szekvenciát tartalmaz (`ESC[`,
+   majd számjegyek vagy pontosvesszők, végül egy betű, mint a színkódokban), vagy
+   amelyben a szöveg bármely részén egy `$` jelet térköz követ, eltávolítja ezeket a
+   szekvenciákat (a többi escape-szekvenciát, például az `ESC[?25l` értéket vagy egy
+   OSC-ablakcím-szekvenciát megtartja), és az utolsó 50 sort tartja meg, az egymást
+   követő ismétlődő sorokat összevonva. Mivel ez az ellenőrzés a `json` és az
+   `errorMessage` előtt fut le, az ilyen `$` jelet tartalmazó JSON- vagy hibakimenet
+   soha nem jut el hozzájuk, amíg a `shellOutput` be van kapcsolva.
+4. **`json`**: a 2 000 karakternél hosszabb, `{` vagy `[` karakterrel kezdődő (az
+   opcionális térközök után), sikeresen elemezhető JSON-adat rövidített összegzést kap:
+   a 7-nél több elemet tartalmazó tömbből megmarad az első 5 és az utolsó 2 elem,
+   valamint az elemek teljes száma; egy objektumból pedig az első 20 kulcs marad meg,
+   miközben minden beágyazott objektum- vagy tömbértéket egy `{…N keys}` helyőrző vált
+   fel (tömb esetén N a tömb hossza), és egy `_remaining_<N>_keys` jelölő mutatja az
+   első 20 után eldobott kulcsok számát. A skalárértékeket teljes egészében átmásolja,
+   így egy legfeljebb 20 kulcsból álló, beágyazott értékek nélküli objektum csupán új
+   behúzást kap — a tömörített változat karaktereinek száma nő, ezért változatlan marad.
 5. **`errorMessage`**: az olyan kimenet, amely bárhol és a kis- és nagybetűktől
-   függetlenül tartalmazza az `error:`, `error ` (a szó és egy szóköz, például
+   függetlenül tartalmazza az `error:`, `error ` (a szó, amelyet szóköz követ, például
    `no error found`), `[error]`, `exception:`, `exception `, `[exception]` vagy
-   `traceback` szöveget, megtartja az első sort, az azt követő 10 sort és az utolsó 3
-   sort, a közöttük lévő sorok helyén pedig egy `… [N frames elided] …` jelölőt helyez
-   el. A jelölő csak akkor jelenik meg, ha az első sort több mint 13 sor követi, így a
-   legfeljebb 14 soros hibakimenet nem rövidül (12 vagy 13 sor esetén az utolsó 3 sor
-   megismétli a már megtartott sorokat).
+   `traceback` karakterláncot, megtartja az első sort, a következő 10 sort és az utolsó
+   3 sort, a közöttük lévő sorokat pedig egy `… [N frames elided] …` jelölővel
+   helyettesíti. A jelölő csak akkor jelenik meg, ha az első sort több mint 13 sor
+   követi, ezért a legfeljebb 14 soros hibakimenet nem rövidül (12 vagy 13 sor esetén az
+   utolsó 3 sor megismétli a már megtartott sorokat).
 
-Miután egy stratégia egyezést talál, a későbbi stratégiák akkor sem futnak le, ha az
-adott stratégia semmit sem takarít meg. Ha az egyező stratégia nem takarít meg becsült
-tokeneket (hossz ÷ 4, felfelé kerekítve) — például egy legfeljebb 25 soros, kódszerű
-fájl vagy egy 2 000 karakternél hosszabb, legfeljebb 7 elemből álló JSON-tömb esetén —,
-az agresszív motor megtartja az eredeti eszközeredményt: mindkét hívó
+Ha egy stratégia illeszkedik, a későbbi stratégiákat már nem próbálja ki, még akkor sem,
+ha az adott stratégia semmit sem takarít meg. Ha az illeszkedő stratégia becslés szerint
+egyetlen tokent sem takarít meg (hossz ÷ 4, felfelé kerekítve) — például egy legfeljebb
+25 soros, kódszerű fájl vagy egy 2 000 karakternél hosszabb, legfeljebb 7 elemből álló
+JSON-tömb esetén —, az agresszív motor megtartja az eredeti eszközeredményt: mindkét hívó
 (`compressAggressive()` és `compressAnthropicToolResultBlock()`) megtartja az eredetit,
-ha a `saved` értéke 0 vagy kisebb, míg maga a `compressToolResult()` továbbra is az
-adott stratégia kimenetét adja vissza. Az eszközeredmény feldolgozási lépése nem az
-utolsó szó: a motor tartalék összegzője továbbra is lerövidítheti a 8 192 karakternél
-hosszabb `tool` vagy `function` üzeneteket (`maxTokensPerMessage`, 2 048, szorozva
-4-gyel).
+ha a `saved` értéke 0 vagy kisebb, miközben maga a `compressToolResult()` továbbra is az
+adott stratégia kimenetét adja vissza. Az eszközeredmény lépése nem feltétlenül a végső
+döntés: a motor tartalék összegzője továbbra is lerövidítheti a 8 192 karakternél
+hosszabb `tool` vagy `function` üzeneteket (`maxTokensPerMessage`, 2 048, szorozva 4-gyel).
 
-#### Mikor használandó
+#### Mikor érdemes használni
 
 Az eszközeredmények tömörítése az agresszív motor 1. lépése (`compressAggressive()` az
-`open-sse/services/compression/aggressive.ts` fájlban), így Aggressive módban és egy
-halmozott feldolgozási folyamat `aggressive` lépéseként fut. Az OpenAI-formátumú `tool`
-és `function` üzeneteket, valamint az Anthropic `tool_result` blokkjain belüli szöveget
-tömöríti. Minden stratégiának saját kapcsolója van az `aggressive.toolStrategies`
-alatt, és alapértelmezés szerint mindegyik be van kapcsolva. Az irányítópulton a
-kapcsolók a Caveman oldal **Advanced** nézetében találhatók, amikor a tömörítés be van
-kapcsolva, és az alapértelmezett mód Aggressive.
+`open-sse/services/compression/aggressive.ts` fájlban), ezért Aggressive módban és egy
+halmozott folyamat `aggressive` lépésében fut. Tömöríti az OpenAI-formátumú `tool` és
+`function` üzeneteket, valamint az Anthropic `tool_result` blokkokban lévő szöveget.
+Minden stratégiának saját kapcsolója van az `aggressive.toolStrategies` alatt, és
+alapértelmezés szerint mindegyik be van kapcsolva. Az irányítópulton a kapcsolók a
+Caveman oldal **Advanced** nézetében találhatók, amikor a tömörítés be van kapcsolva,
+és az alapértelmezett mód Aggressive.
 
-### Halmozott feldolgozási folyamat
+### Halmozott folyamat
 
 A halmozott mód **több motort futtat egymás után** — általában először az RTK-t
 (60–90%-os megtakarítás az eszközkimeneten), majd a Cavemant a fennmaradó szövegen
-(~46%-os bemeneti megtakarítás). Együtt ez adja a **78–95%-os alkalmazható tartományt**
-(lásd fent: Upstream Savings Math): `1 - (1 - 0.60..0.90) × (1 - 0.46)` átlaga ≈89%.
+(~46%-os bemeneti megtakarítás). Ezek együtt a **78–95%-os alkalmazható tartományt**
+adják (lásd fentebb az upstream megtakarítások számítását):
+`1 - (1 - 0.60..0.90) × (1 - 0.46)` átlaga ≈89%.
 
-#### Hogyan működik
+#### Működése
 
 ```
 Bemenet (1000 token)
-  → RTK (parancstudatos szűrő) → 200 token
+  → RTK (parancsérzékeny szűrő) → 200 token
     → Caveman (töltelékszöveg eltávolítása) → 108 token
   → Kimenet (108 token, ~89%-os megtakarítás)
 ```
 
-#### Mikor használandó
+#### Mikor érdemes használni
 
-Használja a halmozott módot a következőkhöz:
+A halmozott módot a következőkhöz használja:
 
 - Eszközigényes munkafolyamatok (ágensalapú kódolás, kutatás)
 - Költségérzékeny kötegelt feldolgozás
 - Amikor maximális tokenmegtakarításra van szüksége
 
-A halmozott feldolgozási folyamatok a globális `stackedPipeline` tömörítési beállításon
-keresztül, vagy egy útválasztási kombinációhoz rendelt, névvel ellátott tömörítési
-kombinációval konfigurálhatók (lásd fent: Per-Combo Override) — nem pedig egy
-automatikus kombináció `modePack` mezőjén keresztül (ez a mező csak az automatikus
-kombináció modellválasztásának súlyozását módosítja, és a `stacked` nem érvényes
-csomagnév).
+A halmozott folyamatokat a globális `stackedPipeline` tömörítési beállítással, vagy egy
+útválasztási kombinációhoz rendelt, elnevezett tömörítési kombinációval lehet
+konfigurálni (lásd fentebb a kombinációnkénti felülbírálást) — nem pedig egy automatikus
+kombináció `modePack` mezőjén keresztül (ez a mező csak újrasúlyozza az automatikus
+kombináció modellválasztását, és a `stacked` nem érvényes csomagnév).
 
 ---
 

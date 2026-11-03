@@ -25,9 +25,15 @@ import { handleGeminiTtsSpeech } from "../executors/geminiTts.ts";
 import { handleAwsPollySpeech } from "../executors/awsPollyTts.ts";
 import { GttsUpstreamError, normalizeGttsLang, synthesizeGtts } from "../executors/gtts.ts";
 import { handleFishAudioSpeech } from "../executors/fishAudioTts.ts";
+import { handleDashscopeTtsSpeech } from "../executors/dashscopeTts.ts";
 import { errorResponse } from "../utils/error.ts";
+import { handleGrokSpeech } from "./grokMedia.ts";
 import { resolveElevenLabsVoiceId } from "./elevenLabsVoiceMap.ts";
-import { audioStreamResponse, upstreamErrorResponse } from "../utils/audioResponse.ts";
+import {
+  audioErrorResponse,
+  audioStreamResponse,
+  upstreamErrorResponse,
+} from "../utils/audioResponse.ts";
 import { handleSyntxSpeech } from "./syntxAudio.ts";
 import {
   getKieCallbackUrl,
@@ -916,6 +922,10 @@ export async function handleAudioSpeech({
 
   try {
     // Route to provider-specific handler
+    if (providerConfig.format === "grok-tts") {
+      return handleGrokSpeech(providerConfig, body, credentials);
+    }
+
     if (providerConfig.format === "uc-tts") {
       const { handleUcTextToSpeech } = await import("./uc/ucTts.ts");
       const result = await handleUcTextToSpeech({
@@ -1008,6 +1018,10 @@ export async function handleAudioSpeech({
       return handleXiaomiMimoSpeech(providerConfig, body, modelId, token, credentials);
     }
 
+    if (providerConfig.format === "dashscope-tts") {
+      return handleDashscopeTtsSpeech(providerConfig, body, modelId, token, credentials);
+    }
+
     if (providerConfig.format === "minimax-tts") {
       return handleMinimaxSpeech(providerConfig, body, modelId, token);
     }
@@ -1038,7 +1052,7 @@ export async function handleAudioSpeech({
       body: JSON.stringify({
         model: modelId,
         input: body.input,
-        voice: body.voice || "alloy",
+        voice: body.voice || providerConfig.defaultVoice || "alloy",
         response_format: normalizeSpeechResponseFormat(body.response_format),
         speed: body.speed || 1.0,
       }),
@@ -1050,6 +1064,6 @@ export async function handleAudioSpeech({
 
     return audioStreamResponse(res);
   } catch (err) {
-    return errorResponse(500, `Speech request failed: ${err.message}`);
+    return audioErrorResponse(500, `Speech request failed: ${err.message}`);
   }
 }

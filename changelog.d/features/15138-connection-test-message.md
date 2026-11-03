@@ -1,1 +1,0 @@
-- **feat(dashboard):** per-account "Test message" action on each provider connection — a saved test model per connection (Edit connection) and a global test prompt in Settings → AI, backed by `GET/PUT/POST /api/providers/{id}/test-message`; the quota card footer actions also wrap responsively (#15138 — thanks @JxnLexn)

@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 // src/app/(dashboard)/dashboard/playground/components/tabs/ApiTab.tsx
 // D14: Preserves 100% of the original page.tsx Monaco multi-endpoint editor.
 // Content migrated from src/app/(dashboard)/dashboard/playground/page.tsx (889 LOC).
@@ -7,11 +9,21 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useTranslations } from "next-intl";
+// Barrel import kept on purpose: tests/unit/ui/playground-api-tab.test.tsx mocks "@/shared/components".
 import { Card, Button, Select, Badge } from "@/shared/components";
+import Input from "@/shared/components/Input";
 import { ALIAS_TO_ID } from "@/shared/constants/providers";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import dynamic from "next/dynamic";
+import {
+  PLAYGROUND_IMAGE_STREAM_HEADER,
+  restorePlaygroundImageResponse,
+} from "@/shared/utils/playgroundImageStream";
+import ImageResultsInline, {
+  extractPlaygroundImageResults,
+  type PlaygroundImageResult,
+} from "../ImageResultsInline";
 
 // Monaco editor lazy-loaded (ssr: false) to avoid SSR issues (F10 requirement)
 const Editor = dynamic(() => import("@/shared/components/MonacoEditor"), { ssr: false });
@@ -141,46 +153,6 @@ async function fileToBase64(file: File): Promise<string> {
   });
 }
 
-function ImageResultsInline({ data }: { data: unknown }) {
-  const t = useTranslations("playground");
-  const typed = data as {
-    data?: Array<{ url?: string; b64_json?: string; revised_prompt?: string }>;
-  };
-  const images = typed?.data || [];
-  if (images.length === 0) return null;
-  return (
-    <div className="p-4 space-y-3">
-      <p className="text-xs text-text-muted font-medium uppercase tracking-wider">
-        {t("imagesGenerated", { count: images.length })}
-      </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {images.map((img, i) => {
-          const src = img.url || (img.b64_json ? `data:image/png;base64,${img.b64_json}` : null);
-          if (!src) return null;
-          return (
-            <div key={i} className="relative group rounded-lg overflow-hidden border border-border">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={src}
-                alt={img.revised_prompt || t("generatedImage", { index: i + 1 })}
-                className="w-full"
-              />
-              <a
-                href={src}
-                download={`image-${i + 1}.png`}
-                className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"
-              >
-                <span className="material-symbols-outlined text-[13px]">download</span>
-                {t("save")}
-              </a>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 interface ApiTabProps {
   // configState is received but ApiTab manages its own JSON state (D14)
   configState?: unknown;
@@ -220,7 +192,7 @@ export default function ApiTab(_props: ApiTabProps) {
   const [requestBody, setRequestBody] = useState("");
   const [responseBody, setResponseBody] = useState("");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [imageData, setImageData] = useState<unknown>(null);
+  const [imageData, setImageData] = useState<PlaygroundImageResult[] | null>(null);
   const [transcriptionText, setTranscriptionText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [responseStatus, setResponseStatus] = useState<number | null>(null);
@@ -429,12 +401,17 @@ export default function ApiTab(_props: ApiTabProps) {
         if (selectedConnection) {
           fetchHeaders["X-OmniRoute-Connection"] = selectedConnection;
         }
+        if (isImageEndpoint) fetchHeaders[PLAYGROUND_IMAGE_STREAM_HEADER] = "1";
         res = await fetch(`/api${path}`, {
           method: "POST",
           headers: fetchHeaders,
           body: JSON.stringify(parsed),
           signal: controller.signal,
         });
+      }
+
+      if (isImageEndpoint) {
+        res = await restorePlaygroundImageResponse(res, controller.signal);
       }
 
       setResponseStatus(res.status);
@@ -461,8 +438,9 @@ export default function ApiTab(_props: ApiTabProps) {
       } else {
         const data = (await res.json()) as Record<string, unknown>;
         setResponseBody(JSON.stringify(data, null, 2));
-        if (isImageEndpoint && data?.data && Array.isArray(data.data) && res.ok) {
-          setImageData(data);
+        if (isImageEndpoint && res.ok) {
+          const images = extractPlaygroundImageResults(data);
+          if (images.length > 0) setImageData(images);
         }
         if (isTranscriptionEndpoint && typeof (data as { text?: string })?.text === "string") {
           setTranscriptionText(
@@ -512,9 +490,7 @@ export default function ApiTab(_props: ApiTabProps) {
     <div className="space-y-5 p-4 overflow-y-auto">
       {/* Info Banner */}
       <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/10 text-sm text-text-muted">
-        <span className="material-symbols-outlined text-primary text-[20px] mt-0.5 shrink-0">
-          science
-        </span>
+        <Icon name="science" size={20} className="text-primary mt-0.5" />
         <div>
           <p className="font-medium text-text-main mb-0.5">{t("title")}</p>
           <p>{t("description")}</p>
@@ -525,10 +501,8 @@ export default function ApiTab(_props: ApiTabProps) {
       <Card>
         <div className="p-4 flex flex-col sm:flex-row items-end gap-4">
           <div className="flex-1 w-full">
-            <label className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wider">
-              {t("endpoint")}
-            </label>
             <Select
+              label={t("endpoint")}
               value={selectedEndpoint}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                 handleEndpointChange(e.target.value)
@@ -540,10 +514,8 @@ export default function ApiTab(_props: ApiTabProps) {
 
           {!isSearchEndpoint && (
             <div className="flex-1 w-full">
-              <label className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wider">
-                {t("provider")}
-              </label>
               <Select
+                label={t("provider")}
                 value={selectedProvider}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   handleProviderChange(e.target.value)
@@ -556,10 +528,8 @@ export default function ApiTab(_props: ApiTabProps) {
 
           {!isSearchEndpoint && (
             <div className="flex-1 w-full">
-              <label className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wider">
-                {t("model")}
-              </label>
               <Select
+                label={t("model")}
                 value={selectedModel}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   handleModelChange(e.target.value)
@@ -572,10 +542,8 @@ export default function ApiTab(_props: ApiTabProps) {
 
           {!isSearchEndpoint && (
             <div className="flex-1 w-full">
-              <label className="block text-xs font-medium text-text-muted mb-1.5 uppercase tracking-wider">
-                {t("accountKey")}
-              </label>
               <Select
+                label={t("accountKey")}
                 value={selectedConnection}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                   setSelectedConnection(e.target.value)
@@ -626,9 +594,7 @@ export default function ApiTab(_props: ApiTabProps) {
         <Card>
           <div className="p-4 space-y-3">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-text-muted">
-                attach_file
-              </span>
+              <Icon name="attach_file" size={18} className="text-text-muted" />
               <h3 className="text-sm font-semibold text-text-main">
                 {isTranscriptionEndpoint ? t("audioFile") : t("attachImages")}
               </h3>
@@ -645,23 +611,22 @@ export default function ApiTab(_props: ApiTabProps) {
             </div>
             {isTranscriptionEndpoint && (
               <div>
-                <input
+                <Input
                   type="file"
                   accept="audio/*,video/*"
                   onChange={handleAudioFileChange}
-                  className="w-full px-3 py-2 rounded-lg bg-surface border border-border text-text-main text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary/10 file:text-primary file:text-sm"
+                  aria-label={t("audioFile")}
+                  inputClassName="text-sm file:mr-3 file:rounded file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-sm"
                 />
                 {uploadedFile && (
                   <p className="text-xs text-text-muted mt-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[12px] text-green-500">
-                      check_circle
-                    </span>
+                    <Icon name="check_circle" size={12} className="text-success" />
                     {uploadedFile.name} ({(uploadedFile.size / 1024).toFixed(0)} KB)
                   </p>
                 )}
                 {!uploadedFile && (
-                  <p className="text-xs text-amber-500 mt-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[12px]">info</span>
+                  <p className="text-xs text-warning mt-1 flex items-center gap-1">
+                    <Icon name="info" size={12} />
                     {t("selectAudioFile")}
                   </p>
                 )}
@@ -669,12 +634,13 @@ export default function ApiTab(_props: ApiTabProps) {
             )}
             {supportsVision && (
               <div>
-                <input
+                <Input
                   type="file"
                   accept="image/*"
                   multiple
                   onChange={(e) => void handleImageFileChange(e)}
-                  className="w-full px-3 py-2 rounded-lg bg-surface border border-border text-text-main text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-primary/10 file:text-primary file:text-sm"
+                  aria-label={t("attachImages")}
+                  inputClassName="text-sm file:mr-3 file:rounded file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-sm"
                 />
                 {uploadedImages.length > 0 && (
                   <div className="flex gap-2 mt-2 flex-wrap">
@@ -689,22 +655,26 @@ export default function ApiTab(_props: ApiTabProps) {
                           alt={`Attached ${i + 1}`}
                           className="w-full h-full object-cover"
                         />
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon"
                           onClick={() =>
                             setUploadedImages((prev) => prev.filter((_, idx) => idx !== i))
                           }
-                          className="absolute inset-0 bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">close</span>
-                        </button>
+                          className="absolute inset-0 size-full rounded-none bg-bg/70 opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+                          aria-label={`${t("clearAll")} ${i + 1}`}
+                          icon="close"
+                        />
                       </div>
                     ))}
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => setUploadedImages([])}
-                      className="text-xs text-text-muted hover:text-red-500 self-center ml-1"
+                      className="self-center ml-1 text-xs text-text-muted hover:text-error"
                     >
                       {t("clearAll")}
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -719,41 +689,41 @@ export default function ApiTab(_props: ApiTabProps) {
           <div className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-text-muted">
-                  upload
-                </span>
+                <Icon name="upload" size={18} className="text-text-muted" />
                 <h3 className="text-sm font-semibold text-text-main">{t("request")}</h3>
                 <Badge variant="info" size="sm">
                   POST {ENDPOINT_PATHS[selectedEndpoint]}
                 </Badge>
               </div>
               <div className="flex items-center gap-1">
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => void handleCopy(requestBody)}
-                  className="p-1.5 rounded hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-text-main transition-colors"
+                  className="text-text-muted"
                   title={t("copy")}
-                >
-                  <span className="material-symbols-outlined text-[16px]">content_copy</span>
-                </button>
-                <button
+                  aria-label={t("copy")}
+                  icon="content_copy"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => {
                     const template = { ...DEFAULT_BODIES[selectedEndpoint] };
                     if ("model" in template)
                       (template as Record<string, unknown>).model = selectedModel;
                     setRequestBody(JSON.stringify(template, null, 2));
                   }}
-                  className="p-1.5 rounded hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-text-main transition-colors"
+                  className="text-text-muted"
                   title={t("resetToDefault")}
-                >
-                  <span className="material-symbols-outlined text-[16px]">restart_alt</span>
-                </button>
+                  aria-label={t("resetToDefault")}
+                  icon="restart_alt"
+                />
               </div>
             </div>
             {isTranscriptionEndpoint && (
-              <p className="text-xs text-text-muted bg-amber-500/10 border border-amber-500/20 rounded px-2 py-1.5 flex items-start gap-1">
-                <span className="material-symbols-outlined text-[12px] text-amber-500 mt-0.5">
-                  info
-                </span>
+              <p className="text-xs text-text-muted bg-warning/10 border border-warning/20 rounded px-2 py-1.5 flex items-start gap-1">
+                <Icon name="info" size={12} className="text-warning mt-0.5" />
                 {t("transcriptionHint")}
               </p>
             )}
@@ -782,9 +752,7 @@ export default function ApiTab(_props: ApiTabProps) {
           <div className="p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[18px] text-text-muted">
-                  download
-                </span>
+                <Icon name="download" size={18} className="text-text-muted" />
                 <h3 className="text-sm font-semibold text-text-main">{t("response")}</h3>
                 {responseStatus !== null && (
                   <Badge
@@ -798,19 +766,19 @@ export default function ApiTab(_props: ApiTabProps) {
                   <span className="text-xs text-text-muted">{responseDuration}ms</span>
                 )}
                 {loading && (
-                  <span className="material-symbols-outlined text-[14px] text-primary animate-spin">
-                    progress_activity
-                  </span>
+                  <Icon name="progress_activity" size={14} className="text-primary animate-spin" />
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => void handleCopy(responseBody)}
-                  className="p-1.5 rounded hover:bg-black/5 dark:hover:bg-white/5 text-text-muted hover:text-text-main transition-colors"
+                  className="text-text-muted"
                   title={t("copy")}
-                >
-                  <span className="material-symbols-outlined text-[16px]">content_copy</span>
-                </button>
+                  aria-label={t("copy")}
+                  icon="content_copy"
+                />
               </div>
             </div>
             <div className="border border-border rounded-lg overflow-hidden">
@@ -822,12 +790,12 @@ export default function ApiTab(_props: ApiTabProps) {
                     download="speech.mp3"
                     className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
                   >
-                    <span className="material-symbols-outlined text-[16px]">download</span>
+                    <Icon name="download" size={16} />
                     {t("downloadAudio")}
                   </a>
                 </div>
               ) : imageData ? (
-                <ImageResultsInline data={imageData} />
+                <ImageResultsInline images={imageData} />
               ) : transcriptionText !== null ? (
                 <div className="p-4 space-y-2">
                   <p className="text-xs text-text-muted font-medium uppercase tracking-wider">
@@ -836,13 +804,15 @@ export default function ApiTab(_props: ApiTabProps) {
                   <div className="bg-surface/50 rounded p-3 text-sm text-text-main leading-relaxed whitespace-pre-wrap">
                     {transcriptionText}
                   </div>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon="content_copy"
                     onClick={() => void handleCopy(transcriptionText)}
-                    className="text-xs text-primary hover:underline flex items-center gap-1"
+                    className="text-xs"
                   >
-                    <span className="material-symbols-outlined text-[12px]">content_copy</span>
                     {t("copyText")}
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 <Editor

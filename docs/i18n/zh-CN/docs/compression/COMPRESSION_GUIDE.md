@@ -34,88 +34,88 @@ OmniRoute 实现了一套模块化提示词压缩管线，会在请求到达上�
 
 ### 关闭
 
-不应用压缩。所有消息均原样传递。
+不应用任何压缩。所有消息原样通过。
 
-### 轻量模式（节省约 15%，延迟 <1ms）
+### Lite 模式（节省约 15%，延迟 <1ms）
 
-最安全的模式——语义零变化，仅清理格式：
+最安全的模式——零语义变更，仅进行格式清理：
 
-| 技术                     | 说明                       |
-| ------------------------ | -------------------------- |
-| `collapseWhitespace`     | 合并连续空行并移除行尾空格 |
-| `dedupSystemPrompt`      | 移除重复的系统消息         |
-| `compressToolResults`    | 压缩冗长的工具/函数输出    |
-| `removeRedundantContent` | 删除重复的指令             |
-| `replaceImageUrls`       | 缩短 base64 图像数据 URI   |
+| 技术                     | 描述                      |
+| ------------------------ | ------------------------- |
+| `collapseWhitespace`     | 合并连续空行和行尾空格    |
+| `dedupSystemPrompt`      | 移除重复的系统消息        |
+| `compressToolResults`    | 压缩冗长的工具/函数输出   |
+| `removeRedundantContent` | 删除重复的指令            |
+| `replaceImageUrls`       | 缩短 base64 图片 data URI |
 
-**最适合：** 始终启用的场景、安全关键型工作流。
+**适用场景：** 常驻启用、对安全性要求极高的工作流。
 
 ### 标准模式（节省约 30%）
 
-灵感来自 [Caveman](https://github.com/JuliusBrussee/caveman)——在保留含义的同时移除填充词和冗长表达：
+灵感来自 [Caveman](https://github.com/JuliusBrussee/caveman)——在保留语义的前提下移除填充词和冗长措辞：
 
-- 移除填充词（“please”“I think”“basically”“actually”）
-- 精简冗长短语（“in order to”→“to”，“as a result of”→“because”）
-- 移除礼貌性的委婉表达（“Would you mind...”“If you could possibly...”）
-- 30 多条针对编码提示词优化的正则表达式规则
+- 移除填充词（如 "please"、"I think"、"basically"、"actually"）
+- 精简冗长短语（"in order to" → "to"，"as a result of" → "because"）
+- 删除礼貌性的弱化措辞（如 "Would you mind..."、"If you could possibly..."）
+- 30+ 条针对编码提示调优的正则规则
 
-**最适合：** 日常编码工作流、注重成本的团队。
+**适用场景：** 日常编码工作流、注重成本的团队。
 
 ### 激进模式（节省约 50%）
 
-针对长会话的智能历史记录管理：
+面向长会话的智能历史管理：
 
-- **消息老化**——对越早的消息进行越深度的压缩
-- **工具结果压缩**——截断或省略过长的工具输出（保留首尾行、
-  按匹配行过滤、压缩 JSON 键）
-- **结构完整性防护**——确保 `tool_use` + `tool_result` 对保持一致
-- **上下文窗口感知**——遵循各模型的令牌限制
+- **消息老化（Message Aging）**——较早的消息会被逐步压缩
+- **工具结果压缩**——过长的工具输出会被截断或省略（保留首/尾行、
+  匹配行过滤、JSON 键压缩）
+- **结构完整性保护**——确保 `tool_use` 与 `tool_result` 成对保持一致
+- **上下文窗口感知**——遵守各模型的 token 上限
 
-**最适合：** 长时间调试会话、大型代码库。
+**适用场景：** 长时间的调试会话、大型代码库。
 
-### 超强模式（节省约 75%）
+### 极限模式（节省约 75%）
 
-面向令牌高度受限场景的最大压缩：
+面向 token 紧张场景的最大化压缩：
 
-- **启发式剪枝**——基于评分对文本进行令牌剪枝
-- **结构保留**——使用占位标记暂存带围栏的代码块、行内代码、URL 和标识符，并逐字重新拼接，绝不剪枝
-- **可选 SLM 层级**——配置后，可使用小型本地模型优化剪枝
-- 独立于激进模式：不会运行消息老化、工具结果压缩
-  或后备摘要器（只有 SLM 层级失败时，才可能通过
-  激进模式执行后备处理）
+- **启发式剪枝**——基于评分对叙述性文本进行 token 剪枝
+- **结构保留**——围栏代码块、行内代码、URL 和标识符会被打上墓碑标记
+  （tombstone）并按原样重新拼接，绝不会被剪枝
+- **可选 SLM 层**——配置后可由小型本地模型优化剪枝效果
+- 独立于激进模式：不运行消息老化、工具结果压缩或回退摘要器
+  （仅当 SLM 层失败时，回退处理才可能经由激进模式执行）
 
-**最适合：** 反复达到上下文限制的情况。
+**适用场景：** 当你反复触及上下文上限时。
 
-### RTK 模式（上游节省范围为 60-90%）
+### RTK 模式（上游区间 60-90%）
 
-RTK 模式针对编码代理会话中出现的冗长工具输出进行了优化：
+RTK 模式针对编码代理会话中常见的冗长工具输出进行了优化：
 
-- 检测命令/输出类别，例如 `git status`、`git diff`、`git log`、测试运行器、
-  TypeScript/Vite/Webpack 构建、ESLint/Biome/Prettier、npm 审计/安装、Docker 日志、基础设施
-  输出和通用 shell 输出
+- 可检测多种命令/输出类别，例如 `git status`、`git diff`、`git log`、测试运行器、
+  TypeScript/Vite/Webpack 构建、ESLint/Biome/Prettier、npm audit/install、Docker 日志、
+  基础设施输出以及通用 shell 输出
 - 应用来自 `open-sse/services/compression/engines/rtk/filters/` 的 JSON 过滤器包
-- 从项目或全局 `filters.toml` 文件导入 RTK TOML schema v1 过滤器，并进行内联测试
-  验证和项目文件信任门控
-- 随附 55 个内置过滤器及内联验证样例
-- 移除 ANSI 控制序列、进度条、重复行和无操作价值的噪声
-- 保留失败信息、错误、警告、已更改文件、摘要以及长输出的末尾部分
-- 支持受信任门控约束的项目过滤器、全局过滤器，以及可选的脱敏原始输出恢复
+- 从项目级或全局 `filters.toml` 文件导入 RTK TOML schema v1 过滤器，
+  支持内联测试验证，并对项目文件实施信任门控
+- 内置 56 个过滤器，均附带内联验证示例
+- 移除 ANSI 控制序列、进度条、重复行以及无操作价值的噪音
+- 保留失败、错误、警告、变更文件、摘要以及长输出的尾部
+- 支持信任门控的项目过滤器、全局过滤器，以及可选的脱敏原始输出恢复
 
-**最适合：** 包含 shell、构建、测试、git、grep 和文件输出记录的代理会话。
+**适用场景：** 包含 shell、构建、测试、git、grep 及文件输出记录的代理会话。
 
-### 堆叠模式（符合条件的内容节省范围为 78-95%）
+### 堆叠模式（符合条件部分可达 78-95%）
 
-堆叠模式以确定性顺序运行多个压缩引擎。默认管线为：
+堆叠模式按确定性顺序运行多个压缩引擎。默认流水线为：
 
 ```txt
 RTK -> Caveman
 ```
 
-此顺序先压缩终端/工具输出，再对
-剩余的自然语言提示词应用 Caveman 语义精简。堆叠管线可以进行全局配置，也可以通过
-分配给路由组合的压缩组合进行配置。
+该顺序先压缩终端/工具输出，再对剩余的自然语言提示应用 Caveman 语义精简。
+堆叠流水线可以全局配置，也可以通过分配给路由组合（routing combos）的压缩组合
+（compression combos）来配置。
 
-**最适合：** 同时包含大量工具日志以及人工指令或助手摘要的混合上下文。
+**适用场景：** 混合上下文——既有大量工具日志，又有人工指令或助手摘要。
 
 ---
 
@@ -258,7 +258,7 @@ curl -X POST http://localhost:20128/api/context/rtk/test \
 
 ## 压缩统计信息
 
-每个压缩后的请求都会在服务器日志中包含统计信息：
+每个压缩请求都会在服务器日志中包含统计信息：
 
 ```json
 {
@@ -298,22 +298,27 @@ RTK 模式受 **[RTK AI](https://github.com/rtk-ai)** 开发的 **[RTK - Rust To
 
 ## 高级压缩系统
 
-除上述 7 种模式外（源代码还接受 `codex-responses` 和 `omniglyph` 模式，但本指南不作介绍），以下各节涵盖在这些模式内部或与其配合使用的功能：工具结果压缩和渐进式老化是 Aggressive 引擎的第 1 步和第 2 步（用于 Aggressive 模式以及堆叠流水线中的 `aggressive` 步骤）；堆叠流水线是 Stacked 模式的运行方式；启用压缩时，缓存感知压缩会针对缓存提供者将 `aggressive` 和 `ultra` 降级为 `standard`；而 Caveman 输出模式和输出样式则是默认关闭的可选系统提示词指令，它们用于塑造模型的输出，而不是压缩请求。
+除了上述 7 种模式之外（源代码还接受 `codex-responses` 和
+`omniglyph` 模式，但本指南不予介绍），以下各节涵盖可在这些模式内部或与其配合使用的功能：工具结果压缩和渐进式老化是激进引擎的第 1 步和第 2 步（即激进模式，以及堆叠管道中的 `aggressive` 步骤），堆叠管道是堆叠模式的运行方式，缓存感知压缩会在启用压缩时，针对缓存提供者将 `aggressive` 和 `ultra` 降级为 `standard`，而穴居人输出模式和输出样式则是可选的系统提示词指令，默认关闭；它们用于塑造模型的输出，而不是压缩请求。
 
 ### 缓存感知压缩
 
-某些提供者（例如支持提示词缓存的 Anthropic）支持**提示词缓存**，允许它们缓存提示词的部分内容，以降低成本和延迟。启用缓存后，激进压缩实际上可能会**损害**性能，因为它会更改已缓存的令牌，导致缓存失效。
+一些提供者（例如支持提示词缓存的 Anthropic）支持**提示词缓存**，
+从而可以缓存提示词的部分内容，以降低成本和延迟。启用缓存后，激进压缩实际上可能会**损害**性能，
+因为它会更改已缓存的 token，导致缓存失效。
 
-`cachingAware.ts` 模块通过**检测缓存上下文**并相应地**调整压缩策略**来解决此问题。
+`cachingAware.ts` 模块通过**检测缓存上下文**并
+相应地**调整压缩策略**来解决此问题。
 
 #### 工作原理
 
-1. **检测缓存上下文** — 扫描请求体中的 `cache_control` 标记
+1. **检测缓存上下文** — 扫描请求正文中的 `cache_control` 标记
 2. **识别缓存提供者** — 检查目标提供者是否支持缓存
-3. **调整策略** — 针对缓存提供者，将 `aggressive`/`ultra` 降级为 `standard`
+3. **调整策略** — 针对缓存提供者将 `aggressive`/`ultra` 降级为 `standard`
 4. **跳过系统提示词** — 系统提示词通常会被缓存，因此不要压缩它们
 
-策略辅助函数还会返回一个 `deterministicOnly` 标志，但计划构建器只使用策略——目前下游没有任何内容读取该标志。
+该策略辅助函数还会返回一个 `deterministicOnly` 标志，但计划构建器只使用
+策略——目前下游没有任何组件读取该标志。
 
 #### 代码示例
 
@@ -338,15 +343,22 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### 使用时机
 
-缓存感知压缩**始终启用**——无需配置。只要启用了压缩并且目标提供者支持提示词缓存（Anthropic、OpenAI 等），它就会生效；不要求显式提供 `cache_control` 标记——仅缓存提供者本身就会触发降级，而仅有标记永远不会触发降级（标记检测用于缓存遥测，而非策略决策）。
+缓存感知压缩**始终启用**——无需配置。当压缩已启用且目标提供者支持提示词缓存（Anthropic、OpenAI
+等）时，它就会生效；不要求显式提供 `cache_control` 标记——仅缓存提供者本身就会触发降级，而仅有标记则永远不会触发降级（标记检测用于缓存遥测，而不是策略决策）。
 
 ### 渐进式老化
 
-长对话会累积许多消息轮次，但较早的轮次会逐渐变得不那么相关。`progressiveAging.ts` 模块会**根据轮次距离降低消息的保真度**（距离从对话末尾开始计算）。使用发布时的默认值（`verbatim: 2, light: 2, moderate: 3`）：
+长对话会累积许多轮消息，但较早的轮次会变得不那么
+相关。`progressiveAging.ts` 模块会**根据轮次距离对消息进行降级**
+（距离从对话末尾开始计算）。使用随附的默认值
+（`verbatim: 2, light: 2, moderate: 3`）时：
 
-- **最近 2 轮（距离 ≤ 2）**：原样保留
-- **距离 3**：穴居人式压缩（移除填充词）
-- **距离 4+**：总结助手消息；用户消息缩减为第一行，最多 120 个字符；其他角色保持不变。无论距离如何，系统提示词、已经老化的消息以及最新用户消息始终原样保留。不会直接丢弃任何内容；使用随附的默认值时，`light` 分段不可达（`light` 等于 `verbatim`）。
+- **最后 2 轮（距离 ≤ 2）**：逐字保留
+- **距离 3**：穴居人压缩（移除冗余内容）
+- **距离 4+**：对助手消息进行摘要；将用户消息缩减为第一行，
+  最多保留 120 个字符；其他角色保持不变。无论距离如何，系统提示词、已经老化的消息以及最新的用户消息始终会逐字保留。
+  不会直接丢弃任何内容，并且使用随附的默认值时，`light`
+  区间不可达（`light` 等于 `verbatim`）。
 
 #### 代码示例
 
@@ -357,23 +369,24 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ……另外 50 轮……
+  // ... 再增加 50 轮 ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // 最近 3 轮：原样保留
+  verbatim: 3, // 最后 3 轮：逐字保留
   light: 8, // 距离 <= 8：轻量压缩
-  moderate: 20, // 距离 <= 20：穴居人式压缩
-  fullSummary: 5, // 类型要求提供，但分段代码不会读取
-  // 距离 > 20：总结（助手）/ 保留第一行（用户）
+  moderate: 20, // 距离 <= 20：穴居人压缩
+  fullSummary: 5, // 类型要求提供，但分区代码不会读取
+  // 距离 > 20：摘要（助手）/ 保留第一行（用户）
 });
 
 // saved = 节省的 token 数量
 ```
 
-#### 何时使用
+#### 使用时机
 
-渐进式老化在 `aggressive` 模式下**始终启用**——它是 `compressAggressive()` 的第 2 步。Ultra 模式不会运行它。它尤其适用于：
+对于 `aggressive` 模式，渐进式老化**始终启用**——它是
+`compressAggressive()` 的第 2 步。Ultra 模式不会运行它。它尤其适用于：
 
 - 长时间运行的编码会话
 - 跨越多天的对话
@@ -381,23 +394,43 @@ const { messages: aged, saved } = applyAging(messages, {
 
 ### 穴居人输出模式
 
-穴居人输出模式会添加**系统提示词指令**，要求模型自身生成简洁输出——`lite` 级别要求使用保留完整句子的简明回答，`full` 要求其“像聪明的穴居人一样简短作答”，而 `ultra` 则要求使用电报式输出；指令只能提出要求，无法保证实际效果。请求通过 `applyOutputStyles()`（`open-sse/services/compression/outputStyles/apply.ts`）接收这些指令：`open-sse/handlers/chatCore.ts` 首先使用向后兼容适配层（`open-sse/services/compression/outputStyles/backCompat.ts` 中的 `resolveOutputStyleSelection()`）解析选择；当 `outputStyles` 为空时，该适配层会将已启用的 `cavemanOutputMode` 映射为 `cavemanOutputMode.intensity` 强度下的 `terse-prose` 输出样式（参见下文“向后兼容”）；非空的 `outputStyles` 选择会按原样使用，此时 `cavemanOutputMode.enabled` 和 `intensity` 不再生效，但其 `autoClarity` 开关仍然适用。`outputMode.ts` 包含指令文本（`CAVEMAN_INSTRUCTION_BY_LANGUAGE`）、内容绕过逻辑以及注入时使用的位置辅助函数；它自身的 `applyCavemanOutputMode()` 注入器没有生产环境调用方。
+穴居人输出模式会添加**系统提示词指令**，要求模型自身生成
+简短输出——`lite` 级别要求使用保留完整句子的简洁回答，`full`
+要求它“像聪明的穴居人一样简短回应”，而 `ultra` 要求生成电报式输出；
+这些指令只是提出要求，无法保证模型一定遵循。请求通过
+`applyOutputStyles()`（`open-sse/services/compression/outputStyles/apply.ts`）接收这些指令：
+`open-sse/handlers/chatCore.ts` 首先使用向后兼容垫片解析选择
+（`open-sse/services/compression/outputStyles/backCompat.ts` 中的
+`resolveOutputStyleSelection()`）；当 `outputStyles`
+为空时，该垫片会将已启用的 `cavemanOutputMode` 映射为
+`cavemanOutputMode.intensity` 强度下的 `terse-prose` 输出样式
+（参见下文的向后兼容）；非空的 `outputStyles`
+选择会原样使用，此时 `cavemanOutputMode.enabled` 和 `intensity` 不再产生任何
+影响，但其 `autoClarity` 开关仍会生效。`outputMode.ts` 包含
+指令文本（`CAVEMAN_INSTRUCTION_BY_LANGUAGE`）、内容绕过逻辑以及注入所使用的
+放置辅助函数；其自身的 `applyCavemanOutputMode()` 注入器在生产环境中没有
+调用方。
 
 #### 工作原理
 
-此模式不会压缩输入。它会向系统提示词添加一个指令块（参见下文“注入的工作原理”），随后仍会在此时已包含该指令块的正文上运行针对请求所选的任何输入压缩模式。在每个级别末尾共有的边界条款之前，英文 `full` 级别的内容如下：
+此模式不会压缩输入。它会向系统提示词添加一个指令块
+（请参阅下文的“注入方式”），而且为请求选择的任何输入压缩模式
+仍会随后对现已包含该指令块的正文运行。在每个级别结尾共有的
+边界条款之前，英文 `full` 级别内容如下：
 
-> “像聪明的穴居人一样简短作答。省略冠词（a/an/the）、填充词（just/really/basically/actually/simply）、客套话和模糊措辞。可以使用句子片段。使用简短的同义词（用 big 而不是 extensive，用 fix 而不是 implement）。准确保留所有技术实质、代码、错误、URL 和标识符。”
+> “像聪明的穴居人一样简短回答。省略冠词（a/an/the）、填充词（just/really/basically/actually/simply）、客套话和模棱两可的措辞。可以使用句子片段。使用简短的同义词（用 big，不用 extensive；用 fix，不用 implement）。所有技术内容、代码、错误、URL 和标识符必须保持原样。”
 
-它尤其适用于：
+此模式尤其适合：
 
-- 代码生成（输出越简洁 = token 越少）
+- 代码生成（输出更简短 = token 更少）
 - 快速问答（无需详尽解释）
-- 批量处理（最大化吞吐量）
+- 批处理（最大化吞吐量）
 
 #### 何时使用
 
-穴居人输出模式是**可选启用**的。启用压缩（`enabled: true`，即“压缩设置”页面上的主开关）后，通过 `cavemanOutputMode.enabled` 将其打开；`intensity` 可选择 `lite`、`full` 或 `ultra`：
+穴居人输出模式是**选择启用**的。开启压缩（`enabled: true`，即“压缩设置”页面上的总开关）
+后，可通过 `cavemanOutputMode.enabled` 将其开启；`intensity`
+可选择 `lite`、`full` 或 `ultra`：
 
 ```json
 {
@@ -409,44 +442,61 @@ const { messages: aged, saved } = applyAging(messages, {
 }
 ```
 
-压缩组合的 **Output Mode** 开关（`outputMode`，级别位于 `outputModeIntensity` 中）会针对该组合适用的请求设置同一开关，而 `omniroute_set_compression_engine` MCP 工具会通过其布尔型 `outputMode` 参数写入该设置。非空的 `outputStyles` 选择优先于此开关。在仪表板中，启用 **Terse prose** 输出样式会注入相同的指令块（参见下文“输出样式”）。
+压缩组合的 **Output Mode** 开关（`outputMode`，级别位于 `outputModeIntensity`）
+会为该组合所应用的请求设置同一开关，而
+`omniroute_set_compression_engine` MCP 工具会通过其布尔参数 `outputMode`
+写入该设置。非空的 `outputStyles` 选择优先于此开关。在
+仪表板中，启用 **Terse prose** 输出样式会注入相同的指令块（请参阅下文的“输出
+样式”）。
 
 ### 输出样式（目录）
 
-上文的穴居人输出模式是**旧版单样式路径**。第 4 阶段将其泛化为一个可组合输出样式目录：`open-sse/services/compression/outputStyles/catalog.ts` 中的 `OUTPUT_STYLE_CATALOG`。每种样式都是一条系统提示词指令，要求模型自身生成成本更低的输出；可以同时启用多种样式，并按目录顺序注入。
+上述穴居人输出模式是**旧版单样式路径**。第 4 阶段将其扩展为
+可组合的输出样式目录：`open-sse/services/compression/outputStyles/catalog.ts` 中的
+`OUTPUT_STYLE_CATALOG`。每种样式都是一条系统提示词指令，要求模型自身生成成本更低的输出；样式可以
+同时启用，并按目录顺序注入。
 
-| 样式                       | `id`          | 功能                                                                                                                                                                                                | 指令语言                                      |
-| -------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| 精简散文                   | `terse-prose` | 删除填充词、冠词和模糊措辞；精确保留技术实质。文本与旧版 caveman 输出模式相同（仅引用，不重复录入）。                                                                                               | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| 更少代码                   | `less-code`   | YAGNI 阶梯：采用能正常工作的最小改动，不引入未请求的抽象。                                                                                                                                          | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| 马尾辫（慵懒的资深开发者） | `ponytail`    | “最好的代码是从未写下的代码”：复用 > 重写，根因 > 症状，采用能正常工作的最短差异。                                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| 我有 ADHD（行动优先）      | `i-have-adhd` | 行动优先（先给出命令/路径/代码片段，再给出说明），采用数量有限的编号步骤，只提供一个具体的下一步，不要前言/回顾/结束语。改编自 [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)（MIT）。 | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| 精简 CJK（文言）           | `terse-cjk`   | `full`/`ultra` 使用文言文回答；`lite` 仅要求简短回答，不使用虚词、客套话或修饰语。                                                                                                                  | zh（受语言区域限制，见下文）                  |
+| 样式                       | `id`            | 作用                                                                                                                                                                                        | 指令语言                                      |
+| -------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| 简洁文风                   | `terse-prose`   | 省略填充词、冠词和模棱两可的措辞；保持技术内容准确。与旧版穴居人输出模式的文本相同（引用而非重新输入）。                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| 更少代码                   | `less-code`     | YAGNI 阶梯：采用能运行的最小改动，不添加未要求的抽象。                                                                                                                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| 马尾辫（懒惰的高级开发者） | `ponytail`      | “最好的代码是从未写下的代码”：复用 > 重写，根因 > 症状，使用最短且能运行的差异。                                                                                                            | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| 我有 ADHD（行动优先）      | `i-have-adhd`   | 行动优先（先给命令/路径/代码片段，再给说明），步骤编号且数量有限，只给一个具体的后续步骤，不写前言/回顾/结束语。改编自 [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)（MIT）。 | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| 反低质 UI 过滤器           | `antislop-ui`   | 每种视觉技巧都必须通过目的测试（层次、辨识度、可读性）；不默认使用渐变/玻璃效果/光晕，限制配色，不使用模板化布局。两种反低质样式都会添加禁止无效控件/禁止捏造声明的边界。                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| 反低质文案与人性化过滤器   | `antislop-copy` | 使用具体文案（不使用破折号、通用 CTA、流行语、聊天机器人式结束语或虚构事实），并遵循面向用户的规则：WCAG AA 对比度、可见焦点、键盘可访问、空白/加载/错误状态以及移动端重排。                | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| 简洁 CJK（文言）           | `terse-cjk`     | `full`/`ultra` 使用文言文回答；`lite` 仅要求简短回答，不使用虚词、客套话或修饰。                                                                                                            | zh（受区域设置限制，见下文）                  |
 
-每种样式均提供三个强度级别——`lite`、`full`、`ultra`——且每个级别均以共享边界条款（`outputMode.ts` 中的 `SHARED_BOUNDARIES`）结尾，该条款要求原样保留代码块、文件路径、命令、错误和 URL。`terse-prose` 和 `terse-cjk` 的级别文本还将标识符加入该列表。
+每种样式均提供三个强度级别——`lite`、`full`、`ultra`——且每个级别
+均以共有的边界条款结尾（`outputMode.ts` 中的 `SHARED_BOUNDARIES`），该条款会
+确保代码块、文件路径、命令、错误和 URL 保持原样。`terse-prose` 和
+`terse-cjk` 的级别文本还会将标识符加入该列表。
 
-`terse-cjk` 在两处仅限 `zh` 语言区域。仅当控制面板 UI 语言为中文（`zh-CN` 或 `zh-TW`）时，“压缩设置”页面才会显示其对应行；且仅当请求解析出的语言（参见下文“语言选择”）为 `zh` 时，`applyOutputStyles()` 才会注入该样式。隐藏该行不会清除已保存的 `terse-cjk` 选择：设置 API 接受任意样式 id，在页面上保存其他样式时也会保留它。请求处理期间，`applyOutputStyles()` 的语言检查是唯一的语言区域门控。
+`terse-cjk` 在两个位置受 `zh` 区域设置限制。仅当仪表板 UI 语言为中文（`zh-CN` 或 `zh-TW`）时，
+“压缩设置”页面才会列出其所在行，而
+`applyOutputStyles()` 仅在请求解析后的语言（请参阅下文的“语言
+选择”）为 `zh` 时才会注入该样式。隐藏该行不会清除已保存的 `terse-cjk` 选择：
+设置 API 接受任何样式 id，而且在页面上保存其他样式时会保留它。在
+请求处理期间，`applyOutputStyles()` 的语言检查是唯一的区域设置门控。
 
 #### 注入方式
 
-`applyOutputStyles()`（`open-sse/services/compression/outputStyles/apply.ts`）根据目录解析选择项（未知 id 和语言区域不匹配的样式会被丢弃，且绝不会报错；若选择项未解析出任何样式，则请求体保持不变，并以 `no_styles` 跳过），按照目录顺序拼接所选指令，附加一次边界条款（选择 `less-code` 或 `ponytail` 时，还会附加安全条款 `SAFETY_BOUNDARIES` 或其翻译），并以单个幂等标记（`[OmniRoute Output Styles]`）开始该区块，因此重复应用不会产生任何效果。当解析出的语言（参见下文“语言选择”）有相应翻译时，将注入本地化指令而非英文指令。
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) 会根据目录解析所选样式（未知 id 和区域设置不匹配的样式会被丢弃，且绝不会导致错误；如果所选内容解析后没有任何样式，则正文保持不变，并以 `no_styles` 为原因跳过），按照目录顺序拼接所选指令，追加**一次**边界条款（当选择 `less-code` 或 `ponytail` 时，还会追加安全条款 `SAFETY_BOUNDARIES` 或其译文），并以单个幂等性标记 (`[OmniRoute Output Styles]`) 开始该区块，因此重复应用不会执行任何操作。如果解析出的语言（参见下文的语言选择）存在译文，则会注入本地化指令而非英文指令。
 
-对于包含非空 `messages` 数组的请求体，幂等性检查先于内容绕过执行：当顶层 `system` 字段（字符串或内容块数组）或内容为字符串的系统消息中已存在 `[OmniRoute Output Styles]` 标记时，请求体将保持不变并记为 `already_applied`，且不会执行关键词检查。否则，内容绕过（`open-sse/services/compression/outputMode.ts` 中的 `shouldBypassCavemanOutputMode()`）会检查最后三条消息的文本，无论其角色为何；当文本匹配安全、不可逆操作或澄清关键词，或匹配以下对顺序敏感的序列时，将为整个轮次跳过这些样式：`first`、`then`、`after that`、`before`、`rollback` 或 `backup`，并且其后 240 个字符内出现 `delete`、`drop`、`migrate`、`deploy` 或 `release`。当 **Auto-Clarity Bypass** 开关（`cavemanOutputMode.autoClarity`，默认开启）处于开启状态时，会执行该绕过检查；关闭此开关后将跳过关键词检查。
+对于具有非空 `messages` 数组的正文，幂等性检查会先于内容绕过检查运行：当顶层 `system` 字段（字符串或内容块数组）中，或内容为字符串的系统消息中，已经存在 `[OmniRoute Output Styles]` 标记时，正文将保持不变，并标记为 `already_applied`，且不会运行关键词检查。否则，内容绕过（`open-sse/services/compression/outputMode.ts` 中的 `shouldBypassCavemanOutputMode()`）会检查最后三条消息的文本，无论其角色为何；当该文本匹配安全、不可逆操作或澄清类关键词，或者匹配以下顺序敏感的序列时，会在整个轮次中跳过这些样式：`first`、`then`、`after that`、`before`、`rollback` 或 `backup`，后面 240 个字符以内出现 `delete`、`drop`、`migrate`、`deploy` 或 `release`。只要 **Auto-Clarity Bypass** 开关（`cavemanOutputMode.autoClarity`，默认开启）处于开启状态，就会运行绕过检查；关闭该开关则会跳过关键词检查。
 
-当绕过检查允许该轮次继续时，`placeSystemInstruction()`（同一文件）绝不会新建 `messages[0]`，并会将该区块放置到按以下顺序找到的第一个位置：
+当绕过检查允许处理该轮次时，`placeSystemInstruction()`（同一文件中）会将区块放入它找到的以下第一个位置，并且绝不会新建 `messages[0]`：
 
-1. 开头且内容为字符串的系统消息：将区块附加到其文本之后。
-2. 顶层 `system` 字段：若其为字符串，则将区块附加到文本之后；若其为内容块数组，则添加为新的文本块。
-3. 后续第一条内容为字符串的系统消息：将区块附加到其文本之后。
-4. 以上均不存在：将区块放入 `messages` 末尾新建的系统消息中。
+1. 位于开头且内容为字符串的系统消息：将区块追加到其文本之后。
+2. 顶层 `system` 字段：如果是字符串，则将区块追加到文本之后；如果是内容块数组，则添加一个新的文本块。
+3. 后续第一条内容为字符串的系统消息：将区块追加到其文本之后。
+4. 以上均不存在：将区块放入新增的系统消息中，并把该消息添加到 `messages` 末尾。
 
-对于不含 `messages` 数组（或该数组为空）的请求体，不执行内容绕过，也不检查顶层 `system` 字段。若 `instructions` 字段为字符串，则将区块附加到其文本之后；除非该字段已包含 `[OmniRoute Output Styles]` 标记，此时请求体将保持不变并记为 `already_applied`。当请求体没有字符串类型的 `instructions` 字段，但包含 `input`（字符串或数组）时，该区块将成为 `instructions`，并替换该字段原有的任何非字符串值。既没有字符串类型的 `instructions` 字段，也没有字符串或数组类型的 `input` 的请求体将保持不变，并以 `no_messages` 跳过。
+对于没有 `messages` 数组（或该数组为空）的正文，不会运行内容绕过检查，也不会读取顶层 `system` 字段。区块会追加到字符串 `instructions` 字段的文本之后；但如果该字段已包含 `[OmniRoute Output Styles]` 标记，则正文保持不变，并标记为 `already_applied`。当正文没有字符串 `instructions` 字段，但包含 `input`（字符串或数组）时，该区块会成为 `instructions` 的值，并替换该字段原有的任何非字符串值。如果正文既没有字符串 `instructions` 字段，也没有字符串或数组形式的 `input`，则正文保持不变，并以 `no_messages` 为原因跳过。
 
 #### 如何启用
 
-在仪表板中的 **Compression Context → Compression Settings**
-（`/dashboard/context/settings`）页面，其 Output styles 部分会为每种样式显示一行，并提供开关和级别选择器。只要压缩本身处于开启状态（页面的主开关 `enabled`），样式就会被注入。**Auto-Clarity Bypass** 开关位于 **Caveman**
-页面（`/dashboard/context/caveman`）的 **Output Mode** 卡片中。在程序层面，压缩配置会按以下格式持久化所选项：
+在仪表板中：**压缩上下文 → 压缩设置**
+(`/dashboard/context/settings`) 的“输出样式”部分：每种样式占一行，包含一个开关和一个级别选择器。只要压缩功能本身处于开启状态（即页面的总开关 `enabled`），样式就会被注入。**Auto-Clarity Bypass** 开关位于 **Caveman** 页面 (`/dashboard/context/caveman`) 的 **Output Mode** 卡片中。通过编程方式配置时，压缩配置会按以下形式持久化所选内容：
 
 ```json
 {
@@ -457,82 +507,80 @@ const { messages: aged, saved } = applyAging(messages, {
 }
 ```
 
-向后兼容：当 `outputStyles` 为空时，旧版 `cavemanOutputMode.enabled`
-设置会映射到 `terse-prose`，其级别为 `cavemanOutputMode.intensity`。该块随后以
-`[OmniRoute Output Styles]` 标记开头，而旧版 `applyCavemanOutputMode()`
-注入器写入的是 `[OmniRoute Caveman Output Mode]`。在该标记下方，文本与
-en、pt-BR、es、de、fr、it、ru、id 和 vi 中的旧版注入内容一致；在 ja 和 zh 中，边界子句前会多出一个空格。`terse-prose` 已翻译为 pt-BR、es、de、
-fr、it、ru、zh、ja、id 和 vi，因此，如果请求解析出的语言为 `hu`，它会获得英文文本，而旧版注入器使用的是匈牙利语文本。
+向后兼容：当 `outputStyles` 为空时，旧版 `cavemanOutputMode.enabled` 设置会映射到 `cavemanOutputMode.intensity` 级别的 `terse-prose`。此时区块会以 `[OmniRoute Output Styles]` 标记开头，而旧版 `applyCavemanOutputMode()` 注入器使用的是 `[OmniRoute Caveman Output Mode]`。在该标记下方，en、pt-BR、es、de、fr、it、ru、id 和 vi 的文本与旧版注入内容一致；ja 和 zh 的文本则会在边界条款前多出一个空格。`terse-prose` 提供 pt-BR、es、de、fr、it、ru、zh、ja、id 和 vi 的翻译，因此解析语言为 `hu` 的请求会获得英文文本，而旧版注入器会使用其匈牙利语文本。
 
-输出样式的语言选择（`outputStyles/apply.ts` 中的
-`resolveOutputStyleLanguage()`）：当 `languageConfig.enabled` 开启时，`autoDetect` 会从请求的 `messages` 数组中选取最近一条包含文本的用户消息（字符串内容，或其内容部分中的 `text`），并使用 Caveman 引擎的检测器
-（`detectCompressionLanguage()`）进行检测。如果文本包含汉字但不包含假名，检测器会返回 `zh`；否则，它会返回 `it`、`pt-BR`、`es`、`de`、
-`fr`、`ru`、`ja`、`hu` 和 `id` 中提示匹配数最多的语言；若没有任何匹配，则返回 `en`——无法分类的文本会使用英语，而不会使用 `defaultLanguage`，并且即使样式提供了 `vi` 文本，也永远不会检测为 `vi`。Responses API 请求体将其对话轮次保存在
-`input` 中，而该字段不会被采样，因此它会先使用 `defaultLanguage`，然后回退到英语。当 `messages` 中没有任何包含文本的用户消息，或 `autoDetect` 关闭时，会先应用 `defaultLanguage`，然后回退到英语。当 `languageConfig.enabled` 关闭时，语言为英语——除非请求应用了压缩组合（分配给请求路由组合的压缩组合，或 chatCore 为内置堆叠管线回退使用的默认压缩组合）：应用组合会为该请求开启 `languageConfig.enabled`，并根据组合的语言包设置
-`defaultLanguage`（如果已保存的值属于该组合的语言包，则使用该值；否则使用组合的第一个语言包，默认为 `en`），而已保存的 `autoDetect` 设置（默认开启）仍然适用。Caveman 输入引擎选择规则包语言的方式不同——它会按各个文本部分分别选择；当自动检测关闭时，还会受 `enabledPacks` 限制。
+输出样式语言选择（`outputStyles/apply.ts` 中的 `resolveOutputStyleLanguage()`）：当 `languageConfig.enabled` 开启时，`autoDetect` 会从请求的 `messages` 数组中选取最新一条包含文本的用户消息（字符串内容，或其内容部分中的 `text`），并对其运行 Caveman 引擎的检测器 (`detectCompressionLanguage()`)。对于包含汉字但不含假名的文本，检测器返回 `zh`；否则，它会在 `it`、`pt-BR`、`es`、`de`、`fr`、`ru`、`ja`、`hu` 和 `id` 中返回提示匹配数最多的语言；如果没有任何匹配，则返回 `en`——无法分类的文本会使用英语，绝不会使用 `defaultLanguage`，而且即使样式提供了 `vi` 文本，也永远不会检测出 `vi`。Responses API 正文将其轮次保存在 `input` 中，而该字段不会被采样，因此它会先使用 `defaultLanguage`，然后回退到英语。当 `messages` 中没有包含文本的用户消息，或者 `autoDetect` 关闭时，会先应用 `defaultLanguage`，然后回退到英语。当 `languageConfig.enabled` 关闭时，语言为英语——除非某个压缩组合适用于该请求（分配给请求路由组合的压缩组合，或 chatCore 为内置堆叠管线回退使用的默认压缩组合）：应用组合会为该请求开启 `languageConfig.enabled`，并根据组合的语言包设置 `defaultLanguage`（如果已保存的值属于该组合的语言包，则使用该值；否则使用组合的第一个语言包，而其默认值为 `en`），同时仍然应用已保存的 `autoDetect` 设置（默认开启）。Caveman 输入引擎选择其规则包语言的方式不同——它会按各个文本部分进行选择；当自动检测关闭时，还会受到 `enabledPacks` 的限制。
 
 样式 × 语言矩阵由
-`tests/unit/compression/output-styles-i18n-matrix.test.ts` 固定：目录中的每种样式都必须在测试的 `BASELINE_LANGUAGES` 中拥有对应条目；不受区域设置限制的样式必须提供 pt-BR 翻译（受区域设置限制的 `terse-cjk` 不受此规则约束），除非该样式列在 `KNOWN_ENGLISH_ONLY` 中；该列表只能包含完全没有任何翻译的样式——已列入其中但拥有任何翻译的样式都会导致测试失败；如果某种样式缺少其 `BASELINE_LANGUAGES` 条目中列出的任何语言，也会导致测试失败。要添加样式，请参阅
+`tests/unit/compression/output-styles-i18n-matrix.test.ts` 固定：目录中的每种样式都需要在测试的
+`BASELINE_LANGUAGES` 中有一个条目；未受区域设置限制的样式必须提供
+pt-BR 翻译（受区域设置限制的 `terse-cjk` 不受此规则约束），除非该样式被
+列入 `KNOWN_ENGLISH_ONLY`，而此列表只能包含完全没有任何翻译的样式 —
+如果列出的样式存在任何翻译，测试就会失败；如果某种样式缺少其
+`BASELINE_LANGUAGES` 条目中列出的语言，测试也会失败。要添加样式，请参阅
 [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style)。
 
 ### 工具结果压缩
 
 `open-sse/services/compression/toolResultCompressor.ts` 中的 `compressToolResult()`
-使用 **5 种策略**压缩工具结果文本。它会按以下顺序尝试这些策略，第一个已启用且其检查与内容匹配的策略将决定结果：
+使用 **5 种策略**压缩工具结果文本。它会按以下顺序尝试这些策略，第一个已启用且检查结果与内容
+匹配的策略将决定最终结果：
 
-1. **`fileContent`**：对于包含 3 行或更多行的内容，如果至少有一行在忽略
-   行首缩进后，以 `import `、`export `、`function `、`class `、
-   `const `、`let `、`var ` 或 `return ` 开头（关键字后加一个空格），或者以 `if`、
-   `for` 或 `while` 开头且后接 `(` 或 ` (`，则保留其前 20 行和后 5 行，并标记
-   中间被省略的部分。
-2. **`grepSearch`**：对于至少包含一行 `<path>:<digits>:` 格式的内容，
-   如果第一个冒号之前的文本不含空白字符，则仅保留这些行，最多保留 30 行，随后附上
-   其余匹配项的数量和匹配文件的列表；其他所有行都会被丢弃。只需有一行符合这种格式
-   即可触发该策略，因此，以时间戳开头的日志行（例如 `12:30:45`）也会被视为匹配。
-3. **`shellOutput`**：如果输出包含 ANSI CSI 序列（`ESC[` 后接数字或
-   分号，再接一个字母，如颜色代码），或者文本中的任何位置包含后接空白字符的 `$`，
-   则会移除这些序列（其他转义序列会保留，例如 `ESC[?25l` 或 OSC 窗口标题序列），
-   并保留最后 50 行，同时合并连续重复的行。由于此检查在 `json` 和 `errorMessage`
-   之前运行，因此，包含此类 `$` 的 JSON 或错误输出在启用 `shellOutput` 时
-   永远不会进入这些后续策略。
-4. **`json`**：对于超过 2,000 个字符、在可选空白字符之后以 `{` 或 `[` 开头且
-   能够成功解析的 JSON 载荷，会进行摘要处理：包含超过 7 个元素的数组会保留
-   前 5 个和后 2 个元素以及元素总数；对象会保留前 20 个键，并将每个嵌套对象或
-   数组值替换为 `{…N keys}` 占位符（对于数组，N 是其长度），同时添加
-   `_remaining_<N>_keys` 标记，用于表示前 20 个键之后被丢弃的键数。
-   标量值会被完整复制，因此，键数不超过 20 且不含嵌套值的对象只会被重新缩进——
-   压缩成单行的对象反而会增加字符数，因此保持不变。
-5. **`errorMessage`**：如果输出中的任何位置包含以下内容（不区分字母大小写）：
-   `error:`、`error `（单词后接一个空格，例如 `no error found`）、`[error]`、
-   `exception:`、`exception `、`[exception]` 或 `traceback`，则保留第一行、
-   接下来的 10 行以及最后 3 行，并使用 `… [N frames elided] …` 标记替代
-   它们之间的行。仅当第一行之后还有超过 13 行时才会出现该标记，因此，14 行或
-   更少的错误输出不会被缩短（在总计 12 或 13 行时，最后 3 行会与已保留的行重复）。
+1. **`fileContent`**：对于包含 3 行或更多行的内容，如果其中至少一行忽略
+   前导缩进后以 `import `、`export `、`function `、`class `、
+   `const `、`let `、`var ` 或 `return ` 开头（关键字后跟一个空格），或者以 `if`、
+   `for` 或 `while` 后跟 `(` 或 ` (` 开头，则保留开头 20 行和末尾 5 行，并
+   标记中间被省略的内容。
+2. **`grepSearch`**：对于至少包含一行 `<path>:<digits>:` 形式的内容，
+   其中第一个冒号之前的文本不含空白字符，则仅保留这些行，最多保留 30 行，随后附上其余匹配项的数量和匹配文件列表；
+   其他所有行都会被丢弃。只需有一行这样的内容即可触发该策略，因此
+   以时间戳开头的日志行（例如 `12:30:45`）也会被计入。
+3. **`shellOutput`**：对于包含 ANSI CSI 序列（`ESC[` 后跟数字或
+   分号，再跟一个字母，如颜色代码）或文本任意位置存在后跟空白字符的 `$` 的输出，
+   会移除这些序列（其他转义序列，例如 `ESC[?25l` 或
+   OSC 窗口标题序列，将被保留），并保留其最后 50 行，同时折叠连续的重复行。
+   由于此检查在 `json` 和 `errorMessage` 之前运行，
+   包含此类 `$` 的 JSON 或错误输出在启用
+   `shellOutput` 时永远不会进入这些策略。
+4. **`json`**：对于长度超过 2,000 个字符、在可选空白字符之后以 `{` 或 `[` 开头且
+   能够解析的 JSON 负载，会进行摘要：包含超过 7 个条目的数组会
+   保留前 5 个和最后 2 个条目以及条目总数；对象会保留前 20 个
+   键，并将每个嵌套对象或数组值替换为 `{…N keys}` 占位符
+   （对于数组，N 为其长度），同时添加 `_remaining_<N>_keys` 标记，用于统计
+   前 20 个键之后被丢弃的键数。标量值会被完整复制，因此键数不超过 20 且
+   不含嵌套值的对象只会被重新缩进 — 压缩格式的对象反而会增加字符数，
+   因此保持不变。
+5. **`errorMessage`**：对于任意位置包含以下内容且不区分大小写的输出：`error:`、
+   `error `（该词后跟一个空格，例如 `no error found`）、`[error]`、
+   `exception:`、`exception `、`[exception]` 或 `traceback`，会保留其第一行、
+   接下来的 10 行和最后 3 行，并使用 `… [N frames elided] …` 标记替换
+   它们之间的行。仅当第一行之后超过 13 行时才会出现该标记，
+   因此 14 行或更少的错误输出不会被缩短（在 12 或 13 行时，最后 3 行会重复已保留的行）。
 
-某个策略一旦匹配，即使没有节省任何内容，也不会再尝试后续策略。当匹配策略没有节省
-估算 token 数（长度 ÷ 4，向上取整）时——例如，类似代码的文件只有 25 行或更少，
-或者超过 2,000 个字符的 JSON 数组只有 7 个或更少的元素——激进引擎会保留原始工具
+某个策略一旦匹配，即使没有节省任何内容，也不会再尝试后续策略。
+如果匹配策略未节省任何估算 token（长度 ÷ 4，向上取整）—
+例如，不超过 25 行的类代码文件，或超过 2,000
+个字符但条目不超过 7 个的 JSON 数组 — 激进引擎会保留原始工具
 结果：两个调用方（`compressAggressive()` 和 `compressAnthropicToolResultBlock()`）
-都会在 `saved` 为 0 或更低时保留原始内容，而 `compressToolResult()` 本身仍会返回
-该策略的输出。工具结果处理步骤并非最终处理：引擎的后备摘要器仍可缩短超过
-8,192 个字符（`maxTokensPerMessage` 为 2,048，再乘以 4）的 `tool` 或 `function`
-消息。
+在 `saved` 为 0 或更低时都会保留原始内容，而 `compressToolResult()` 本身仍会
+返回该策略的输出。工具结果步骤并非最后一道处理：引擎的后备摘要器仍可缩短
+长度超过 8,192 个字符（`maxTokensPerMessage` 为 2,048，再乘以 4）的 `tool` 或 `function` 消息。
 
-#### 何时使用
+#### 使用时机
 
-工具结果压缩是激进引擎的第 1 步（`open-sse/services/compression/aggressive.ts`
-中的 `compressAggressive()`），因此它会在 Aggressive 模式以及堆叠管线的
-`aggressive` 步骤中运行。它会压缩 OpenAI 格式的 `tool` 和 `function` 消息，
-以及 Anthropic `tool_result` 块内的文本。每种策略在 `aggressive.toolStrategies`
-下都有自己的开关，默认全部开启。在仪表板中，启用压缩且默认模式为 Aggressive 时，
-这些开关位于 Caveman 页面的 **Advanced** 视图中。
+工具结果压缩是激进引擎的第 1 步（`open-sse/services/compression/aggressive.ts` 中的
+`compressAggressive()`），因此它会在 Aggressive 模式和堆叠流水线的
+`aggressive` 步骤中运行。它会压缩 OpenAI 结构的 `tool` 和 `function`
+消息，以及 Anthropic `tool_result` 块内的文本。每种策略在
+`aggressive.toolStrategies` 下都有各自的开关，默认全部启用。在控制面板中，当压缩开启且
+默认模式为 Aggressive 时，这些开关位于 Caveman 页面的 **Advanced** 视图中。
 
-### 堆叠管线
+### 堆叠流水线
 
-堆叠模式会**依次运行多个引擎**——通常先运行 RTK（可节省工具输出的 60-90%），
-然后对剩余文本运行 Caveman（输入节省约 46%）。组合后可达到**符合条件内容节省
-78-95% 的范围**（请参阅上文的 Upstream Savings Math）：
-`1 - (1 - 0.60..0.90) × (1 - 0.46)`，平均值约为 89%。
+堆叠模式会**依次运行多个引擎** — 通常先运行 RTK
+（工具输出可节省 60-90%），然后对剩余文本运行 Caveman（输入可节省约 46%）。
+组合后，即为 **78-95% 的适用范围**（请参阅上文的上游节省量计算）：
+`1 - (1 - 0.60..0.90) × (1 - 0.46)` 平均约为 89%。
 
 #### 工作原理
 
@@ -543,18 +591,18 @@ fr、it、ru、zh、ja、id 和 vi，因此，如果请求解析出的语言为 
   → 输出（108 个 token，节省约 89%）
 ```
 
-#### 何时使用
+#### 使用时机
 
 以下情况适合使用堆叠模式：
 
 - 大量使用工具的工作流（智能体编程、研究）
-- 对成本敏感的批处理
+- 成本敏感型批处理
 - 需要最大限度节省 token 时
 
-堆叠管线通过全局 `stackedPipeline` 压缩设置进行配置，或者通过分配给路由组合的
-命名压缩组合进行配置（请参阅上文的 Per-Combo Override）——不能通过自动组合的
-`modePack` 进行配置（该字段只会重新调整自动组合模型选择的权重，并且 `stacked`
-不是有效的包名称）。
+堆叠流水线通过全局 `stackedPipeline` 压缩设置进行配置，
+也可以通过分配给路由组合的命名压缩组合进行配置（请参阅上文的
+“按组合覆盖”）— 而不是通过自动组合的 `modePack` 进行配置（该字段仅用于
+重新调整自动组合模型选择的权重，且 `stacked` 不是有效的包名称）。
 
 ---
 

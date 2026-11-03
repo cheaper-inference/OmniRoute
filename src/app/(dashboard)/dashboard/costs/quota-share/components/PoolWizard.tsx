@@ -20,6 +20,13 @@
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Modal } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
+import Checkbox from "@/shared/components/Checkbox";
+import Input from "@/shared/components/Input";
+import SegmentedControl from "@/shared/components/SegmentedControl";
+import Select from "@/shared/components/Select";
+import { getSeriesColor } from "@/shared/components/analytics/chartColors";
+import Icon from "@/shared/components/Icon";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { maskEmailLikeValue } from "@/shared/utils/maskEmail";
 import { getKnownPlan } from "@/lib/quota/planRegistry";
@@ -86,17 +93,6 @@ export interface PoolWizardProps {
 const UNIT_OPTIONS: QuotaUnit[] = ["percent", "requests", "tokens", "usd"];
 const WINDOW_OPTIONS: QuotaWindow[] = ["5h", "hourly", "daily", "weekly", "monthly"];
 
-const SLICE_PALETTE = [
-  "#a78bfa",
-  "#60a5fa",
-  "#34d399",
-  "#fbbf24",
-  "#f87171",
-  "#22d3ee",
-  "#f472b6",
-  "#94a3b8",
-];
-
 /** A few representative model names to show in the preview. */
 const PREVIEW_MODELS_BY_PROVIDER: Record<string, string[]> = {
   openai: ["gpt-4o", "gpt-4o-mini", "o3", "gpt-4-turbo"],
@@ -127,32 +123,39 @@ function Stepper({ currentStep }: { currentStep: 1 | 2 | 3 }) {
     { num: 3, label: t("wizardStep3Label") },
   ];
 
+  // Built from kit tokens, not the kit Wizard: its step/back/skip/save copy is hard-coded
+  // English and it always renders a Skip action (see the lote 6 pendências).
   return (
-    <div className="flex items-center gap-0 px-4 py-3 border-b border-border bg-bg-alt shrink-0">
+    <ol
+      aria-label={t("wizardTitle")}
+      className="flex shrink-0 flex-wrap items-center gap-y-2 border-b border-border bg-bg-subtle px-4 py-3"
+    >
       {steps.map((step, idx) => (
-        <div key={step.num} className="flex items-center">
+        <li
+          key={step.num}
+          className="flex items-center"
+          aria-current={currentStep === step.num ? "step" : undefined}
+        >
           {idx > 0 && (
             <div
-              className={`h-px w-8 mx-2 transition-colors ${
+              aria-hidden="true"
+              className={`mx-2 h-px w-8 transition-colors ${
                 currentStep > step.num ? "bg-primary" : "bg-border"
               }`}
             />
           )}
           <div className="flex items-center gap-1.5">
             <span
-              className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-semibold transition-colors ${
+              aria-hidden="true"
+              className={`flex size-5 items-center justify-center rounded-full text-[11px] font-semibold transition-colors ${
                 currentStep === step.num
-                  ? "bg-primary text-white"
+                  ? "bg-primary text-accent-foreground"
                   : currentStep > step.num
                     ? "bg-primary/20 text-primary"
                     : "bg-border text-text-muted"
               }`}
             >
-              {currentStep > step.num ? (
-                <span className="material-symbols-outlined text-[12px]">check</span>
-              ) : (
-                step.num
-              )}
+              {currentStep > step.num ? <Icon name="check" size={12} /> : step.num}
             </span>
             <span
               className={`text-xs font-medium transition-colors ${
@@ -162,9 +165,9 @@ function Stepper({ currentStep }: { currentStep: 1 | 2 | 3 }) {
               {step.label}
             </span>
           </div>
-        </div>
+        </li>
       ))}
-    </div>
+    </ol>
   );
 }
 
@@ -186,7 +189,7 @@ function pickWizardDimensions(
 }
 
 // Pure predicate hoisted out of the component to keep its cognitive budget flat
-// (check:cognitive-complexity new-code mode): snap the group <select> to a real,
+// (check:cognitive-complexity new-code mode): snap the group Select to a real,
 // selectable option in create mode once groups load.
 function poolWizardNeedsGroupSnap(
   open: boolean,
@@ -399,7 +402,7 @@ export default function PoolWizard({
     setSaving,
     setGroupId,
   });
-  // Keep the group <select> on a real, selectable option (create mode) — self-
+  // Keep the group Select on a real, selectable option (create mode) — self-
   // extinguishing state adjustment during render (react-hooks/set-state-in-effect).
   if (poolWizardNeedsGroupSnap(open, Boolean(editPool), groups, groupId)) {
     setGroupId(groups[0].id);
@@ -644,88 +647,87 @@ export default function PoolWizard({
 
             {/* Connection multi-select (checkboxes) */}
             <div>
-              <label className="text-[11px] uppercase tracking-wide text-text-muted font-semibold block mb-1">
+              <span
+                id="pool-wizard-connections-label"
+                className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-text-muted"
+              >
                 {t("wizardConnectionsLabel")}
-              </label>
+              </span>
               {lockedProvider && (
-                <p className="text-[10px] text-amber-400 mb-1.5">
+                <p className="text-[10px] text-warning mb-1.5">
                   {t("wizardSingleProviderNote")} ({lockedProvider})
                 </p>
               )}
-              <div className="space-y-1.5 rounded border border-border bg-bg-base px-3 py-2 max-h-48 overflow-y-auto">
+              <div
+                role="group"
+                aria-labelledby="pool-wizard-connections-label"
+                className="max-h-48 space-y-1.5 overflow-y-auto rounded border border-border bg-bg px-3 py-2"
+              >
                 {availableConnections.map((c) => {
                   const checked = connectionIds.includes(c.id);
                   const isPrimary = connectionIds[0] === c.id;
                   return (
-                    <label
+                    <Checkbox
                       key={c.id}
-                      className="flex items-center gap-2 cursor-pointer select-none py-0.5"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => {
-                          setConnectionIds((prev) => {
-                            if (prev.includes(c.id)) {
-                              const next = prev.filter((id) => id !== c.id);
-                              if (next.length === 0) setPoolName("");
-                              return next;
-                            } else {
-                              return [...prev, c.id];
-                            }
-                          });
-                        }}
-                        className="accent-primary w-3.5 h-3.5 shrink-0"
-                      />
-                      <span className="text-sm truncate">{connLabel(c)}</span>
-                      {isPrimary && (
-                        <span className="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded shrink-0">
-                          {t("wizardPrimaryBadge")}
+                      checked={checked}
+                      onChange={() => {
+                        setConnectionIds((prev) => {
+                          if (prev.includes(c.id)) {
+                            const next = prev.filter((id) => id !== c.id);
+                            if (next.length === 0) setPoolName("");
+                            return next;
+                          } else {
+                            return [...prev, c.id];
+                          }
+                        });
+                      }}
+                      label={
+                        <span className="flex min-w-0 items-center gap-2">
+                          <span className="truncate text-sm">{connLabel(c)}</span>
+                          {isPrimary && (
+                            <Badge size="sm" variant="primary" className="shrink-0">
+                              {t("wizardPrimaryBadge")}
+                            </Badge>
+                          )}
                         </span>
-                      )}
-                    </label>
+                      }
+                    />
                   );
                 })}
                 {connections
                   .filter((c) => existingPoolConnectionIds.has(c.id))
                   .map((c) => (
-                    <label
+                    <Checkbox
                       key={c.id}
-                      className="flex items-center gap-2 cursor-not-allowed select-none py-0.5 opacity-40"
-                    >
-                      <input
-                        type="checkbox"
-                        disabled
-                        checked={false}
-                        readOnly
-                        className="w-3.5 h-3.5 shrink-0"
-                      />
-                      <span className="text-sm truncate">
-                        {connLabel(c)} {t("alreadyUsedSuffix")}
-                        {connectionPoolName[c.id] ? ` — ${connectionPoolName[c.id]}` : ""}
-                      </span>
-                    </label>
+                      disabled
+                      checked={false}
+                      readOnly
+                      className="opacity-60"
+                      label={
+                        <span className="truncate text-sm">
+                          {connLabel(c)} {t("alreadyUsedSuffix")}
+                          {connectionPoolName[c.id] ? ` — ${connectionPoolName[c.id]}` : ""}
+                        </span>
+                      }
+                    />
                   ))}
               </div>
               {connections.length === 0 && (
-                <p className="text-[10px] text-amber-400 mt-1">{t("noEligibleConnections")}</p>
+                <p className="text-[10px] text-warning mt-1">{t("noEligibleConnections")}</p>
               )}
             </div>
 
             {/* Pool name */}
             {connectionIds.length > 0 && (
               <div>
-                <label className="text-[11px] uppercase tracking-wide text-text-muted font-semibold block mb-1">
-                  {t("wizardPoolNameLabel")}
-                </label>
-                <input
+                <Input
                   type="text"
+                  label={t("wizardPoolNameLabel")}
                   value={poolName}
                   onChange={(e) => setPoolName(e.target.value)}
                   placeholder={
                     selectedConn ? selectedConn.provider : t("wizardPoolNamePlaceholder")
                   }
-                  className="w-full px-3 py-2 rounded border border-border bg-bg-base text-sm"
                 />
               </div>
             )}
@@ -733,61 +735,52 @@ export default function PoolWizard({
             {/* Group picker */}
             {connectionIds.length > 0 && groups.length > 0 && (
               <div>
-                <label className="text-[11px] uppercase tracking-wide text-text-muted font-semibold block mb-1">
-                  {t("wizardGroupLabel")}
-                </label>
-                <select
+                <Select
+                  label={t("wizardGroupLabel")}
                   value={groupId}
                   onChange={(e) => setGroupId(e.target.value)}
-                  className="w-full px-3 py-2 rounded border border-border bg-bg-base text-sm"
                 >
                   {groups.map((g) => (
                     <option key={g.id} value={g.id}>
                       {g.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             )}
 
             {/* Default policy */}
             {connectionIds.length > 0 && (
               <div>
-                <label className="text-[11px] uppercase tracking-wide text-text-muted font-semibold block mb-1">
+                <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-text-muted">
                   {t("policyLabel")}
-                </label>
-                <div className="flex gap-1">
-                  {(["hard", "soft", "burst"] as Policy[]).map((p) => (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => setDefaultPolicy(p)}
-                      className={`px-3 py-1.5 rounded-md border text-xs cursor-pointer transition-colors ${
-                        defaultPolicy === p
-                          ? "bg-primary/15 border-primary/40 text-primary font-semibold"
-                          : "border-border text-text-muted hover:text-text-main"
-                      }`}
-                    >
-                      {p === "hard"
+                </span>
+                <SegmentedControl
+                  aria-label={t("policyLabel")}
+                  size="sm"
+                  value={defaultPolicy}
+                  onChange={(value) => setDefaultPolicy(value as Policy)}
+                  options={(["hard", "soft", "burst"] as Policy[]).map((p) => ({
+                    value: p,
+                    label:
+                      p === "hard"
                         ? t("policyHard")
                         : p === "soft"
                           ? t("policySoft")
-                          : t("policyBurst")}
-                    </button>
-                  ))}
-                </div>
+                          : t("policyBurst"),
+                  }))}
+                />
               </div>
             )}
 
             <div className="flex justify-end pt-2">
-              <button
+              <Button
                 onClick={() => setStep(2)}
                 disabled={connectionIds.length === 0}
-                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                iconRight="arrow_forward"
               >
                 {t("wizardNext")}
-                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -803,19 +796,14 @@ export default function PoolWizard({
             </div>
 
             {/* Dimensions editor (ported from ProviderPlanConfigClient) */}
-            <div className="rounded-lg border border-border/40 bg-bg-subtle/10 p-3">
+            <div className="rounded-lg border border-border bg-bg-subtle p-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] uppercase tracking-wide font-bold text-text-muted">
                   {tPlans("dimensionLabel")}
                 </span>
-                <button
-                  type="button"
-                  onClick={addDimension}
-                  className="text-[11px] text-primary hover:underline cursor-pointer flex items-center gap-1"
-                >
-                  <span className="material-symbols-outlined text-[14px]">add</span>
+                <Button variant="ghost" size="sm" icon="add" onClick={addDimension}>
                   {tPlans("addDimension")}
-                </button>
+                </Button>
               </div>
 
               {editDimensions.length === 0 && (
@@ -831,76 +819,73 @@ export default function PoolWizard({
                     className="grid items-center gap-2"
                     style={{ gridTemplateColumns: "1fr 1fr 90px 24px" }}
                   >
-                    <select
+                    <Select
+                      aria-label={tPlans("dimensionLabel")}
                       value={dim.unit}
                       onChange={(e) => updateDimension(i, { unit: e.target.value as QuotaUnit })}
-                      className="px-2 py-1.5 rounded border border-border bg-bg-base text-xs"
+                      selectClassName="ci-select-native--sm text-xs"
                     >
                       {UNIT_OPTIONS.map((u) => (
                         <option key={u} value={u}>
                           {tPlans(`unitOptions.${u}`)}
                         </option>
                       ))}
-                    </select>
-                    <select
+                    </Select>
+                    <Select
+                      aria-label={tPlans(`windowOptions.${dim.window}`)}
                       value={dim.window}
                       onChange={(e) =>
                         updateDimension(i, { window: e.target.value as QuotaWindow })
                       }
-                      className="px-2 py-1.5 rounded border border-border bg-bg-base text-xs"
+                      selectClassName="ci-select-native--sm text-xs"
                     >
                       {WINDOW_OPTIONS.map((w) => (
                         <option key={w} value={w}>
                           {tPlans(`windowOptions.${w}`)}
                         </option>
                       ))}
-                    </select>
-                    <input
+                    </Select>
+                    <Input
                       type="number"
                       min={0}
+                      aria-label={tPlans("limitLabel")}
                       value={dim.limit}
                       onChange={(e) => updateDimension(i, { limit: Number(e.target.value) })}
                       placeholder={tPlans("limitLabel")}
-                      className="px-2 py-1.5 rounded border border-border bg-bg-base text-xs tabular-nums text-right"
+                      inputClassName="h-8 min-h-8 text-right text-xs tabular-nums"
                     />
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => removeDimension(i)}
-                      className="p-0.5 rounded hover:bg-red-500/10 text-text-muted hover:text-red-400 cursor-pointer"
+                      aria-label={t("wizardRemoveDimension")}
+                      className="size-6 min-h-6 text-text-muted hover:bg-error/10 hover:text-error"
                     >
-                      <span className="material-symbols-outlined text-[16px]">close</span>
-                    </button>
+                      <Icon name="close" size={16} />
+                    </Button>
                   </div>
                 ))}
               </div>
             </div>
 
             {dimensionsEdited && (
-              <p className="text-[10px] text-amber-400">{t("wizardDimensionsEditedNotice")}</p>
+              <p className="text-[10px] text-warning">{t("wizardDimensionsEditedNotice")}</p>
             )}
 
             {/* Helper note when pool has multiple connections */}
             {connectionIds.length > 1 && (
-              <p className="text-[10px] text-text-muted bg-bg-subtle/40 px-3 py-2 rounded border border-border/40">
+              <p className="rounded border border-border bg-bg-subtle px-3 py-2 text-[10px] text-text-muted">
                 {t("wizardAdditionalConnectionsNote")}
               </p>
             )}
 
             <div className="flex items-center justify-between pt-2">
-              <button
-                onClick={() => setStep(1)}
-                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg border border-border text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-              >
-                <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+              <Button variant="outline" icon="arrow_back" onClick={() => setStep(1)}>
                 {t("wizardBack")}
-              </button>
-              <button
-                onClick={() => setStep(3)}
-                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
-              >
+              </Button>
+              <Button iconRight="arrow_forward" onClick={() => setStep(3)}>
                 {t("wizardNext")}
-                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -917,13 +902,13 @@ export default function PoolWizard({
 
             {/* Allocation rows (ported from EditAllocationsModal) */}
             {allocations.length === 0 ? (
-              <div className="text-[12px] text-text-muted italic py-4 text-center bg-bg-subtle/40 rounded-md">
+              <div className="rounded-md bg-bg-subtle py-4 text-center text-[12px] italic text-text-muted">
                 {t("noKeysAdded")}
               </div>
             ) : (
               <div className="space-y-2">
                 {allocations.map((a, i) => {
-                  const color = SLICE_PALETTE[i % SLICE_PALETTE.length];
+                  const color = getSeriesColor(i);
                   return (
                     <div
                       key={a.apiKeyId}
@@ -935,16 +920,17 @@ export default function PoolWizard({
                         style={{ background: color }}
                       />
                       <span className="text-[12px] font-mono truncate">{keyLabel(a.apiKeyId)}</span>
-                      <input
+                      <Input
                         type="number"
                         min={0}
                         max={100}
                         value={a.weight}
                         onChange={(e) => updateWeight(a.apiKeyId, Number(e.target.value))}
-                        className="px-2 py-1 rounded border border-border bg-bg-base text-sm text-right tabular-nums"
+                        inputClassName="h-8 min-h-8 px-2 text-right tabular-nums"
                         title={t("weightPercent")}
+                        aria-label={t("weightPercent")}
                       />
-                      <input
+                      <Input
                         type="number"
                         min={0}
                         value={a.capValue ?? ""}
@@ -955,27 +941,31 @@ export default function PoolWizard({
                           )
                         }
                         placeholder={t("policyCapAbsolutePlaceholder")}
-                        className="px-2 py-1 rounded border border-border bg-bg-base text-xs tabular-nums"
+                        inputClassName="h-8 min-h-8 px-2 text-xs tabular-nums"
                         title={t("policyCapAbsoluteLabel")}
+                        aria-label={t("policyCapAbsoluteLabel")}
                       />
-                      <select
+                      <Select
+                        aria-label={t("policyLabel")}
                         value={a.policy}
                         onChange={(e) =>
                           updateAllocationPolicy(a.apiKeyId, e.target.value as Policy)
                         }
-                        className="px-1 py-1 rounded border border-border bg-bg-base text-xs"
+                        selectClassName="ci-select-native--sm text-xs"
                       >
                         <option value="hard">{t("policyHard")}</option>
                         <option value="soft">{t("policySoft")}</option>
                         <option value="burst">{t("policyBurst")}</option>
-                      </select>
-                      <button
-                        type="button"
+                      </Select>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => removeAllocation(a.apiKeyId)}
-                        className="p-0.5 rounded hover:bg-red-500/10 text-text-muted hover:text-red-400 cursor-pointer"
+                        aria-label={t("wizardRemoveKey")}
+                        className="size-6 min-h-6 text-text-muted hover:bg-error/10 hover:text-error"
                       >
-                        <span className="material-symbols-outlined text-[16px]">close</span>
-                      </button>
+                        <Icon name="close" size={16} />
+                      </Button>
                     </div>
                   );
                 })}
@@ -983,14 +973,14 @@ export default function PoolWizard({
             )}
 
             {/* Add key + equal split controls */}
-            <div className="flex items-center justify-between text-[11px] pt-1 border-t border-border/40">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-1 text-[11px]">
               <span
                 className={`font-bold tabular-nums ${
                   totalWeight === 100
-                    ? "text-emerald-400"
+                    ? "text-success"
                     : totalWeight > 100
-                      ? "text-red-400"
-                      : "text-amber-400"
+                      ? "text-error"
+                      : "text-warning"
                 }`}
               >
                 {t("totalLabel", { percent: totalWeight })}{" "}
@@ -998,10 +988,11 @@ export default function PoolWizard({
               </span>
               <div className="flex items-center gap-2">
                 {availableKeys.length > 0 && (
-                  <select
+                  <Select
+                    aria-label={t("addKey")}
                     value=""
                     onChange={(e) => e.target.value && addKey(e.target.value)}
-                    className="px-2 py-1 rounded border border-border bg-bg-base text-xs"
+                    selectClassName="ci-select-native--sm text-xs"
                   >
                     <option value="">{t("addKey")}</option>
                     {availableKeys.map((k) => (
@@ -1009,7 +1000,7 @@ export default function PoolWizard({
                         {k.name || k.id.slice(0, 12) + "…"}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 )}
                 <Button
                   variant="secondary"
@@ -1023,24 +1014,26 @@ export default function PoolWizard({
             </div>
 
             {/* Exclusive checkbox */}
-            <label className="flex items-start gap-2 cursor-pointer select-none pt-1 border-t border-border/40">
-              <input
-                type="checkbox"
+            <div className="border-t border-border pt-2">
+              <Checkbox
                 checked={exclusive}
                 onChange={(e) => setExclusive(e.target.checked)}
-                className="mt-0.5 accent-primary w-4 h-4"
+                label={
+                  <span className="flex flex-col">
+                    <span className="text-sm font-semibold text-text-main">
+                      {t("wizardExclusiveLabel")}
+                    </span>
+                    <span className="mt-0.5 text-[11px] text-text-muted">
+                      {t("wizardExclusiveHint")}
+                    </span>
+                  </span>
+                }
               />
-              <div>
-                <span className="text-sm font-semibold text-text-main">
-                  {t("wizardExclusiveLabel")}
-                </span>
-                <p className="text-[11px] text-text-muted mt-0.5">{t("wizardExclusiveHint")}</p>
-              </div>
-            </label>
+            </div>
 
             {/* quotaModelName preview — grouped by provider */}
             {previewByProvider.length > 0 && (
-              <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3 text-[11px]">
+              <div className="rounded-md border border-border bg-bg-subtle p-3 text-[11px]">
                 <div className="font-semibold text-text-muted uppercase tracking-wide mb-1.5 text-[10px]">
                   {t("wizardPreviewLabel")}
                 </div>
@@ -1074,22 +1067,24 @@ export default function PoolWizard({
             )}
 
             {error && (
-              <p className="text-[11px] text-red-400 bg-red-500/10 px-3 py-2 rounded">{error}</p>
+              <p role="alert" className="rounded bg-error/10 px-3 py-2 text-[11px] text-error">
+                {error}
+              </p>
             )}
 
-            <div className="flex items-center justify-between pt-2 border-t border-border/40">
-              <button
+            <div className="flex items-center justify-between border-t border-border pt-2">
+              <Button
+                variant="outline"
+                icon="arrow_back"
                 onClick={() => setStep(2)}
                 disabled={saving}
-                className="flex items-center gap-1.5 text-sm px-4 py-2 rounded-lg border border-border text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5 transition-colors disabled:opacity-40"
               >
-                <span className="material-symbols-outlined text-[16px]">arrow_back</span>
                 {t("wizardBack")}
-              </button>
+              </Button>
               <Button
                 variant="primary"
-                size="sm"
                 onClick={() => void handleFinish()}
+                loading={saving}
                 disabled={totalWeight > 100 || saving}
               >
                 {saving ? t("loading") : editPool ? t("saveChanges") : t("wizardCreatePool")}

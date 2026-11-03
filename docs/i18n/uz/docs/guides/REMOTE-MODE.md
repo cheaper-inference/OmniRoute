@@ -251,105 +251,89 @@ tunnelni ochiq saqlang.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ maxfiy qiymatni FAQAT BIR MARTA chiqaradi — uni hozir nusxalang
-omniroute tokens list                 # niqoblangan: id, nom, qamrov, prefiks, holat, amal qilish muddati
-omniroute tokens revoke <id|prefix>   # darhol bekor qilish
-omniroute tokens scopes               # uchta qamrovni tushuntirish
+#   ↳ sirni FAQAT BIR MARTA chop etadi — hozir nusxalang
+omniroute tokens list                 # maskalangan: identifikator, nom, doira, prefiks, holat, muddat
+omniroute tokens revoke <id|prefix>   # darhol bekor qiladi
+omniroute tokens scopes               # uchta doirani tushuntiradi
 ```
 
-`tokens` buyruqlari **admin** hisob ma’lumotini talab qiladi. Tokenlarni boshqaruv
-panelidagi **Sozlamalar → Kirish tokenlari** bo‘limida ham boshqarishingiz mumkin
-(yaratish, bekor qilish, bir marta nusxalash).
+`tokens` buyruqlari **admin** hisob ma’lumotini talab qiladi. Tokenlarni boshqaruv panelida **Sozlamalar → Kirish tokenlari** bo‘limida ham boshqarishingiz mumkin (yaratish, bekor qilish, bir martalik nusxalash).
+
+Token hech qachon yaratuvchisi egalagandan ko‘proq imtiyoz bilan chiqarilmaydi. `admin` tokenni faqat operator yaratishi mumkin: boshqaruv paneli seansi, serverning o‘zidagi mahalliy CLI yoki `omniroute connect` parol bilan. Mashina hisob ma’lumotlari (`admin` kirish tokeni yoki `manage`/`admin` doirali API kaliti) faqat `write` va `read` tokenlarini chiqarishi mumkin; ulardan `--scope admin` so‘ralsa, `403` qaytadi. Kirishni o‘chirish tokenlarni chiqarishni ochmaydi: istalgan doiradagi kirish tokeni doimo autentifikatsiyalangan marshrutlar qabul qiladigan hisob ma’lumotidir, shuning uchun anonim chaqiruv istalgan doirada `401` oladi.
 
 ---
 
-## Masofaviy katalogdan dasturlash CLI’sini sozlash
+## Masofaviy katalogdan kodlash CLI’sini sozlash
 
-`omniroute configure` **faol serverning** joriy model katalogini o‘qiydi va
-**sizning** kompyuteringizda konfiguratsiya yozadi.
+`omniroute configure` **faol serverning** jonli model katalogini o‘qiydi va **sizning** kompyuteringizda konfiguratsiya yozadi.
 
 ```bash
 omniroute configure codex
 #   Provayderlar: glm, kmc, ollamacloud, opencode-go, …
 #   Provayder: glm
 #   Model identifikatori: glm/glm-5.2
-#   ✔ ~/.codex/glm52.config.toml fayliga yozildi
+#   ✔ Yozildi: ~/.codex/glm52.config.toml
 #   Foydalanish:  codex --profile glm52
 
-# interaktiv bo‘lmagan
+# interaktiv bo‘lmagan rejim
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# tez-tez ishlatiladigan modelni interaktiv tanlagichning yuqorisida saqlash
+# tez-tez ishlatiladigan modelni interaktiv tanlovchining yuqorisida saqlang
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Tanlagich mahalliy `model-preferences.json` faylida faqat model identifikatorlarini
-(URL yoki hisob ma’lumotlarini hech qachon emas) saqlaydi va ularni kontekst hamda CLI
-maqsadi bo‘yicha ajratadi. Sevimlilar so‘nggi tanlovlardan oldin ko‘rsatiladi; tanlangan
-modelni shu kontekst/maqsad ro‘yxatidan olib tashlash uchun `--unfavorite`dan foydalaning.
+Tanlovchi mahalliy `model-preferences.json` faylida faqat model identifikatorlarini (hech qachon URL yoki hisob ma’lumotlarini emas) kontekst va CLI maqsadi bo‘yicha ajratilgan holda saqlaydi. Sevimlilar so‘nggi tanlovlardan oldin ko‘rsatiladi; tanlangan modelni o‘sha kontekst/maqsad ro‘yxatidan olib tashlash uchun `--unfavorite` dan foydalaning.
 
-Yozilgan profil inference kalitiga env var orqali murojaat qiladi
-(`OMNIROUTE_API_KEY`) — maxfiy qiymat hech qachon diskka yozilmaydi. Codex’ni bir martalik
-asosiy sozlash (`[model_providers.omniroute]` bloki) uchun
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md) fayliga qarang.
+Yozilgan profil inference kalitiga muhit o‘zgaruvchisi (`OMNIROUTE_API_KEY`) orqali murojaat qiladi — maxfiy kalit hech qachon diskka yozilmaydi. Bir martalik asosiy Codex sozlamasi (`[model_providers.omniroute]` bloki) uchun qarang: [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Masofaviy serverga qarshi CLI’ni ishga tushirish (konfiguratsiya yozilmaydi)
+### CLI’ni masofaviy server bilan ishga tushirish (konfiguratsiya yozilmaydi)
 
-`omniroute run <target>` ham faol kontekstni hisobga oladi: masofaviy asosiy URL
-va kontekst hisob ma’lumoti faqat ishga tushirilgan jarayonga kiritiladi.
+`omniroute run <target>` ham faol kontekstni hisobga oladi: masofaviy asosiy URL va kontekst hisob ma’lumoti faqat ishga tushirilgan jarayonga kiritiladi.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → masofaviy server
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → masofaviy
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Aynan nima ishga tushirilishini oldindan ko‘rish (faqat env KALIT NOMLARI, qiymatlar hech qachon emas):
+# Aniq nima ishga tushirilishini oldindan ko‘ring (faqat muhit o‘zgaruvchisi NOMLARI, hech qachon qiymatlari):
 omniroute run codex --dry-run --json
 ```
 
-Maqsadlar: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(yagona manba: `bin/cli/cli-manifest.mjs`). Qwen va Gemini chiqishda o‘chirib
-tashlanadigan vaqtinchalik izolyatsiyalangan home bilan ishlaydi, shuning uchun ishga
-tushirish shaxsiy vosita konfiguratsiyangizga hech qachon tegmaydi yoki unga ma’lumot
-sizib chiqarmaydi.
+Maqsadlar: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (yagona manba: `bin/cli/cli-manifest.mjs`). Qwen va Gemini chiqishda o‘chiriladigan vaqtinchalik izolyatsiyalangan bosh katalog bilan ishlaydi, shuning uchun ishga tushirish shaxsiy vosita konfiguratsiyangizga hech qachon tegmaydi va unga oqib kirmaydi.
 
-### Har bir CLI uchun sozlash buyruqlari
+### CLI bo‘yicha sozlash buyruqlari
 
-Qo‘llab-quvvatlanadigan har bir CLI masofaviy serverni hisobga oluvchi sozlash
-buyrug‘iga ega (barchasi faol kontekstni yoki `--remote <url> --api-key <key>`ni
-hisobga oladi):
+Har bir qo‘llab-quvvatlanadigan CLI masofaviy serverni taniydigan sozlash buyrug‘iga ega (barchasi faol kontekstga yoki `--remote <url> --api-key <key>` ga bo‘ysunadi):
 
-| CLI         | Buyruq                     | Nimalarni yozadi                                                                                                                                                                           |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` profillari (har bir model uchun)                                                                                                                             |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (har bir model uchun)                                                                                                                            |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — katalogdagi barcha modellarga ega OpenAI bilan mos `omniroute` provayderi (`opencode -m omniroute/<model>` buyrugʻini ishga tushiring)                |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI rejimi) + joylashtirish uchun VS Code kengaytmasi sozlamalarini chiqaradi (OpenAI bilan mos, asosiy URL `/v1`siz)                          |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` sozlamalari — OpenAI bilan mos, asosiy URL `/v1` bilan                                                                        |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` `/v1` bilan, kalit `${{ secrets.OMNIROUTE_API_KEY }}` orqali                                      |
-| Cursor      | `omniroute setup-cursor`   | ilova ichidagi bosqichlarni chiqaradi (Settings → Models → Override OpenAI Base URL `/v1` bilan + kalit + model). Cursor konfiguratsiyasi yopiq SQLite formatida — faqat chat paneli       |
-| Roo Code    | `omniroute setup-roo`      | Roo import JSON faylini (`~/.omniroute/roo-settings.json`) yozadi + `roo-cline.autoImportSettingsPath`ni oʻrnatadi + UI bosqichlarini chiqaradi (OpenAI bilan mos, asosiy URL `/v1` bilan) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` provayderi, `base_url` `/v1` bilan, kalit `$OMNIROUTE_API_KEY` orqali                                                                       |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` `/v1`siz + `GOOSE_MODEL`) + muhit sozlamalari retsepti                                                              |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` `/v1`siz + `model: openai/<id>`) + muhit sozlamalari retsepti (`aider --message --yes`)                                                             |
-| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` faylidagi V4 `modelProviders.openai` yozuvi + `~/.qwen/.env` ichidagi `OMNIROUTE_API_KEY`                                                                          |
+| CLI         | Buyruq                     | Nimani yozadi                                                                                                                                                                                        |
+| ----------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` profillari (har bir model uchun)                                                                                                                                       |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (har bir model uchun)                                                                                                                                      |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — barcha katalog modellari bilan `omniroute` openai-mos provayderi (`opencode -m omniroute/<model>` bilan ishga tushiring)                                        |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI rejimi) + joylashtirish uchun VS Code kengaytma sozlamalarini chop etadi (OpenAI-mos, Asosiy URL **`/v1` siz**)                                      |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` sozlamalari — OpenAI-mos, Asosiy URL **`/v1` bilan**                                                                                    |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **`/v1` bilan**, kalit `${{ secrets.OMNIROUTE_API_KEY }}` orqali                                            |
+| Cursor      | `omniroute setup-cursor`   | ilova ichidagi qadamlarni chop etadi (Sozlamalar → Modellar → OpenAI Base URL ni bekor qilish **`/v1` bilan** + kalit + model). Cursor konfiguratsiyasi shaffof bo‘lmagan SQLite — faqat chat paneli |
+| Roo Code    | `omniroute setup-roo`      | Roo import JSON faylini yozadi (`~/.omniroute/roo-settings.json`), `roo-cline.autoImportSettingsPath` ni o‘rnatadi va UI qadamlarini chop etadi (OpenAI-mos, Asosiy URL **`/v1` bilan**)             |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` provayderi, `base_url` **`/v1` bilan**, kalit `$OMNIROUTE_API_KEY` orqali                                                                             |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **`/v1` bilan**, kalitni Zed `$OMNIROUTE_API_KEY` dan o‘qiydi (hech qachon yozilmaydi)                      |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **`/v1` siz** + `GOOSE_MODEL`) + muhit retsepti                                                                               |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **`/v1` siz** + `model: openai/<id>`) + muhit retsepti (`aider --message --yes`)                                                                              |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` yozuvi + `~/.qwen/.env` da `OMNIROUTE_API_KEY`                                                                                                    |
 
 ```bash
-# OpenCode (OpenAI bilan mos provayder, katalogdagi barcha modellar, masofaviy VPS)
+# OpenCode (openai-mos provayder, barcha katalog modellari, masofaviy VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # faqat mos keluvchi modellarni saqlang
-opencode -m omniroute/glm/glm-5.2 "..."          # avval OMNIROUTE_API_KEY qiymatini eksport qiling
+omniroute setup-opencode --only glm,kimi        # faqat mos modellarni saqlaydi
+opencode -m omniroute/glm/glm-5.2 "..."          # avval OMNIROUTE_API_KEY ni eksport qiling
 ```
 
-> OpenCode yanada keng imkoniyatli **plagin** integratsiyasiga ham ega: `omniroute setup opencode`
-> (endi `--remote` orqali masofaviy rejimni qoʻllab-quvvatlaydi) `@omniroute/opencode-plugin`ni oʻrnatadi.
-> `setup-opencode` — OpenAI bilan mos yengil muqobil. API kalitiga
-> `{env:OMNIROUTE_API_KEY}` orqali murojaat qilinadi — u hech qachon diskka yozilmaydi.
+> OpenCode’da boyroq **plagin** integratsiyasi ham bor: `omniroute setup opencode` (endi `--remote` orqali masofaviy serverni taniydi) `@omniroute/opencode-plugin` paketini o‘rnatadi.
 >
-> OpenCode v2 da uning oʻrniga `@omniroute/opencode-plugin-v2`dan foydalaning: katalog bir xil,
-> ammo yuklovchi shartnomasi boshqacha. Integratsiya ulanganda u kalitni OpenCode’ning oʻz hisob maʼlumotlari
-> omboridan oʻqiydi, shuning uchun masofaviy shlyuzga `opencode.json` ichida umuman kalit kerak emas.
+> `setup-opencode` yengil, openai-mos muqobil variant hisoblanadi. API kaliti `{env:OMNIROUTE_API_KEY}` orqali havola qilinadi — hech qachon diskka yozilmaydi.
+>
+> OpenCode v2 da buning o‘rniga `@omniroute/opencode-plugin-v2` dan foydalaning: bir xil katalog, boshqacha yuklovchi shartnomasi. Integratsiya ulanganda kalitni OpenCode’ning o‘z hisob ma’lumotlari omboridan o‘qiydi, shuning uchun masofaviy shlyuzga `opencode.json` da umuman kalit kerak emas.
 
 ---
 

@@ -4,51 +4,47 @@
 
 ---
 
-Usa esta guía para elegir el ciclo de desarrollo fiable más pequeño para una solicitud de cambios. No
-sustituye los documentos de arquitectura y seguridad específicos de cada área enlazados a continuación;
-conecta cada tipo de cambio habitual con sus contratos, comprobaciones específicas y cobertura de CI.
+Usa esta guía para elegir el ciclo de desarrollo fiable más pequeño para una solicitud de incorporación de cambios. No
+sustituye los documentos de arquitectura y seguridad específicos de cada área enlazados a continuación; conecta cada tipo
+de cambio habitual con sus contratos, comprobaciones específicas y cobertura de CI.
 
-## La ruta que sigue cada cambio
+## El proceso que sigue cada cambio
 
-1. **Elige la rama base antes de editar.** Busca la rama `release/v*` activa más reciente y crea tu
-   rama desde su punta. Usa esa rama como destino, no `main`. Si hay una congelación de versión activa,
-   no uses la rama congelada como destino; usa el siguiente ciclo activo descrito en
-   [Modelo de ramificación y publicación](BRANCHING_MODEL.md).
-2. **Identifica los contratos.** Identifica cada catálogo, esquema, artefacto generado, API pública o
-   interfaz de usuario que afecte el cambio. La tabla siguiente indica el conjunto inicial mínimo.
-3. **Escribe o actualiza pruebas específicas.** Los cambios de producción en `src/`, `open-sse/`,
-   `electron/` o `bin/` requieren una prueba automatizada en la misma PR. Ejecuta los archivos de
-   prueba mínimos que demuestren el comportamiento y, después, las comprobaciones específicas indicadas.
-4. **Deja que CI ejecute la matriz amplia.** En la PR se ejecutan todos los fragmentos de pruebas
-   unitarias, Vitest, el ajuste progresivo de cobertura y la compilación de producción. Ejecuta
-   localmente un conjunto amplio solo cuando un fallo específico apunte a un impacto mayor o cuando
-   el cambio abarque varios subsistemas.
-5. **Concilia los cambios antes de la revisión.** Recupera la rama base activa, inspecciona sus commits
-   nuevos y tu diff respecto a ella y, a continuación, reorganiza los commits mediante rebase o
-   fusiona la rama base según el flujo de trabajo de colaboradores. Resuelve los conflictos de archivos
-   generados y catálogos desde su fuente, vuelve a generarlos, repite el ciclo específico y confirma que
-   la PR siga apuntando a la rama de publicación activa.
-6. **Registra las evidencias.** En la plantilla de la PR, enumera los comandos ejecutados, cada archivo
-   de prueba añadido o modificado, las migraciones o feature flags y cualquier validación exclusiva de
-   CI que aún esté pendiente.
+1. **Elige la base antes de editar.** Busca la rama `release/v*` activa más reciente y crea una rama desde
+   su punta. Usa esa rama como destino, no `main`. Si hay una congelación de versión activa, no uses como destino
+   la rama congelada; usa el siguiente ciclo activo descrito en
+   [Modelo de ramas y versiones](BRANCHING_MODEL.md).
+2. **Identifica los contratos.** Identifica todos los catálogos, esquemas, artefactos generados, API públicas o
+   interfaces de usuario que afecte el cambio. La tabla siguiente proporciona el conjunto inicial mínimo.
+3. **Escribe o actualiza pruebas específicas.** Los cambios de producción en `src/`, `open-sse/`, `electron/` o
+   `bin/` requieren una prueba automatizada en la misma PR. Ejecuta los archivos de prueba mínimos que demuestren el
+   comportamiento y, después, las comprobaciones específicas indicadas.
+4. **Deja que CI ejecute la matriz completa.** Las particiones completas de pruebas unitarias, Vitest, el ajuste progresivo de cobertura y
+   la compilación de producción se ejecutan en la PR. Ejecuta un conjunto amplio localmente solo cuando un fallo específico indique
+   un impacto más amplio o cuando el cambio abarque varios subsistemas.
+5. **Concilia los cambios antes de la revisión.** Obtén la base activa, inspecciona sus nuevas confirmaciones y las diferencias de tu rama respecto
+   a ella y, después, reorganiza o fusiona la base de acuerdo con el flujo de trabajo de colaboradores. Resuelve los conflictos de archivos generados
+   y catálogos desde su fuente, vuelve a generarlos, ejecuta de nuevo el ciclo específico y confirma que la
+   PR siga teniendo como destino la rama de versión activa.
+6. **Registra las evidencias.** En la plantilla de la PR, enumera los comandos ejecutados, todos los archivos de prueba añadidos o modificados,
+   las migraciones o indicadores de funcionalidad y cualquier validación exclusiva de CI que aún esté pendiente.
 
 ## Rutas recomendadas por tipo de cambio
 
-Los comandos siguientes son las comprobaciones específicas mínimas, no un permiso para omitir una
-prueba que cubra directamente el comportamiento que has modificado.
+Los comandos siguientes son comprobaciones específicas mínimas, no una autorización para omitir una prueba que cubra directamente el
+comportamiento que has cambiado.
 
 ### Proveedor
 
 **Contratos**
 
-- Definición del proveedor en `src/shared/constants/providers/` y su composición en
+- La definición del proveedor en `src/shared/constants/providers/` y su composición en
   `src/shared/constants/providers.ts`.
-- Modelos y capacidades en `open-sse/config/providerRegistry.ts` o en sus archivos de registro extraídos.
-- Selección de ejecutor/traductor, configuración de OAuth o de clave de API, recursos del panel y
-  referencia de proveedores generada cuando corresponda.
-- Las credenciales públicas deben usar `resolvePublicCred()`; las respuestas de error deben usar las
-  utilidades compartidas de saneamiento de errores. Consulta `docs/security/PUBLIC_CREDS.md` (git; no
-  se compila en `/docs`) y
+- Los modelos y las capacidades en `open-sse/config/providerRegistry.ts` o en sus archivos de registro extraídos.
+- La selección del ejecutor/traductor, la configuración de OAuth o de la clave de API, los recursos del panel y la referencia
+  generada del proveedor cuando corresponda.
+- Las credenciales públicas deben usar `resolvePublicCred()`; las respuestas de error deben usar las funciones auxiliares compartidas
+  de saneamiento de errores. Consulta `docs/security/PUBLIC_CREDS.md` (git; no se compila en `/docs`) y
   [Saneamiento de errores](../security/ERROR_SANITIZATION.md).
 
 **Ciclo específico**
@@ -58,47 +54,43 @@ npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # cuando cambie el catálogo; incluye el diff generado en el commit
+npm run gen:provider-reference   # cuando cambie el catálogo; confirma las diferencias generadas
 npm run lint
 ```
 
-Prueba también cada familia de solicitudes afectada: chat, Responses, imágenes, embeddings, audio o
-vídeo. Revisa los diffs del catálogo generado y de referencia como cambios de contrato; no los aceptes
-a ciegas.
+Prueba también cada familia de solicitudes afectada: chat, Responses, imágenes, incrustaciones, audio o vídeo.
+Revisa las diferencias del catálogo generado y de las referencias maestras como cambios de contrato; no las aceptes sin revisarlas.
 
 ### Enrutamiento
 
 **Contratos**
 
-- Valores de estrategia públicos y metadatos de la interfaz en `src/shared/constants/routingStrategies.ts`.
-- Distribución y ordenación en `open-sse/services/combo.ts` y `open-sse/services/combo/`.
-- Esquemas de combos, persistencia, estado de resiliencia, capacidades de los modelos y controles de
-  API/interfaz.
-- [Motor Auto-Combo](../routing/AUTO-COMBO.md) y documentación de resiliencia cuando cambie el
-  comportamiento.
+- Los valores públicos de las estrategias y los metadatos de la interfaz de usuario en `src/shared/constants/routingStrategies.ts`.
+- La distribución y el orden en `open-sse/services/combo.ts` y `open-sse/services/combo/`.
+- Los esquemas de Combo, la persistencia, el estado de resiliencia, las capacidades de los modelos y los controles de la API/interfaz de usuario.
+- [Motor Auto-Combo](../routing/AUTO-COMBO.md) y la documentación de resiliencia cuando cambie el comportamiento.
 
 **Ciclo específico**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
 npm run test:combo:matrix        # cambios de estrategia o distribución
-npm run check:known-symbols      # cambios en el registro de estrategias
+npm run check:known-symbols      # cambios de registro de estrategias
 npm run lint
 ```
 
-Usa localmente pruebas deterministas con servicios ascendentes simulados. Las pruebas de humo de combos
-en vivo requieren credenciales y son manuales; no sustituyen a CI.
+Usa localmente pruebas deterministas con servicios ascendentes simulados. Las pruebas rápidas de Combo en vivo requieren credenciales y son
+manuales, no sustituyen a CI.
 
-### UI / UX
+### Interfaz de usuario / Experiencia de usuario
 
 **Contratos**
 
-- Ruta/página de Next.js y límites de componentes compartidos en `src/app/` y
+- La ruta/página de Next.js y los límites de los componentes compartidos en `src/app/` y
   `src/shared/components/`.
-- Formatos de respuesta de la API, estados de carga/vacío/error, comportamiento con teclado y lectores
-  de pantalla, diseño adaptable, temas y expansión de configuraciones regionales.
-- Cadenas fuente en inglés de la interfaz en `src/i18n/messages/en.json`; no codifiques directamente
-  nuevo texto visible para el usuario.
+- Las formas de las respuestas de la API, los estados de carga/vacío/error, el comportamiento del teclado y de los lectores de pantalla,
+  el diseño adaptable, los temas y la ampliación de configuraciones regionales.
+- Las cadenas fuente en inglés de la interfaz de usuario en `src/i18n/messages/en.json`; no codifiques directamente nuevos textos visibles para el usuario.
 
 **Ciclo específico**
 
@@ -109,22 +101,20 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Ejecuta la aplicación para cambios visuales o de interacción y comprueba tanto viewports estrechos como
-anchos. CI ejecuta la compilación de producción y conjuntos de pruebas más amplios; el comportamiento
-visual sigue necesitando una comprobación específica del componente, con Playwright o una comprobación
-manual documentada adecuada al cambio.
+Ejecuta la aplicación para los cambios visuales o de interacción y comprueba tanto ventanas gráficas estrechas como anchas. CI ejecuta la
+compilación de producción y conjuntos de pruebas más amplios; el comportamiento visual sigue necesitando una comprobación específica mediante componentes,
+Playwright o una comprobación manual documentada adecuada al cambio.
 
 ### i18n
 
 **Contratos**
 
-- `src/i18n/messages/en.json` es la fuente de la interfaz; `config/i18n.json` es la fuente de las
-  configuraciones regionales.
-- Los catálogos de la CLI se almacenan por separado en `bin/cli/locales/`.
-- Conserva exactamente los marcadores de posición y las etiquetas ICU. No traduzcas nombres de
-  productos/proveedores/modelos, nombres de protocolos y cabeceras, comandos, identificadores de
-  código/JSON, URLs, variables de entorno ni términos protegidos como `OmniRoute`, `OAuth`, `MCP` y
-  `A2A`. La lista fuente actual es `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` es la fuente de la interfaz de usuario; `config/i18n.json` es la fuente de las configuraciones regionales.
+- Los catálogos de la CLI se encuentran por separado en `bin/cli/locales/`.
+- Conserva exactamente los marcadores de posición y las etiquetas de ICU. No traduzcas nombres de productos/proveedores/modelos,
+  nombres de protocolos y encabezados, comandos, identificadores de código/JSON, URL, variables de entorno ni
+  términos protegidos como `OmniRoute`, `OAuth`, `MCP` y `A2A`. La lista fuente actual es
+  `scripts/i18n/glossary/protected-terms.json`.
 
 **Ciclo específico**
 
@@ -137,10 +127,10 @@ npm run check:cli-i18n          # cuando cambien las cadenas o los catálogos de
 npm run lint
 ```
 
-Estas son indicaciones para el sistema existente, no una invitación a ampliar sus herramientas ni su
-modelo de claves. Mantén los parches de i18n precisos y limitados mientras se diseña el sistema de
-reemplazo. No ejecutes comandos de traducción que llamen a servicios externos salvo que la tarea
-requiera explícitamente traducciones generadas y hayas revisado el diff resultante.
+Estas son directrices para el sistema existente, no una invitación a ampliar sus herramientas ni su modelo de claves.
+Mantén los parches de i18n muy específicos mientras se diseña el sistema de reemplazo. No ejecutes comandos de traducción
+que llamen a servicios externos, salvo que la tarea requiera explícitamente traducciones generadas y
+hayas revisado las diferencias resultantes.
 
 ### CLI
 
@@ -148,10 +138,10 @@ requiera explícitamente traducciones generadas y hayas revisado el diff resulta
 
 - Comandos públicos y flags en `bin/cli/`, comandos de API generados, códigos de salida, stdout/stderr y
   estructuras de salida JSON, comportamiento de la configuración/entorno y archivos empaquetados.
-- Las cadenas de la CLI de cara al usuario deben usar la capa de i18n de la CLI y mantener alineados los catálogos `en`/`pt-BR`.
+- Las cadenas de la CLI visibles para el usuario deben usar la capa i18n de la CLI y mantener alineados los catálogos `en`/`pt-BR`.
 - Mantenga Node como el entorno de ejecución compatible y preserve el contrato del binario publicado.
 
-**Bucle específico**
+**Ciclo específico**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
@@ -161,19 +151,19 @@ npm run check:pack-policy     # cambios en la superficie del paquete
 npm run lint
 ```
 
-Use el comando exacto en un directorio temporal de datos cuando el comportamiento dependa del análisis, los archivos o el estado
-de salida. CI realiza las comprobaciones más amplias del artefacto del paquete y del ecosistema.
+Use el comando exacto en un directorio de datos temporal cuando el comportamiento dependa del análisis, de los archivos o del estado de
+salida. CI realiza las comprobaciones más amplias de los artefactos del paquete y del ecosistema.
 
 ### Base de datos
 
 **Contratos**
 
-- Módulos de dominio en `src/lib/db/`; importe directamente módulos específicos (se eliminó la antigua capa de reexportación `localDb.ts`).
-- Migraciones SQL numeradas e idempotentes en `src/lib/db/migrations/`, seguridad de las transacciones, comportamiento de las
-  actualizaciones, índices y todos los consumidores afectados por el esquema.
+- Módulos de dominio en `src/lib/db/`; importe módulos específicos directamente (se eliminó la antigua capa de reexportación `localDb.ts`).
+- Migraciones SQL numeradas e idempotentes en `src/lib/db/migrations/`, seguridad de las transacciones, comportamiento de
+  actualización, índices y cada invocador afectado por el esquema.
 - Las rutas y los manejadores nunca ejecutan SQL sin procesar directamente.
 
-**Bucle específico**
+**Ciclo específico**
 
 ```bash
 npm run check:migration-numbering
@@ -183,98 +173,129 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Al añadir una migración, pruebe tanto una base de datos nueva como la actualización desde el esquema anterior. Las pruebas de la base de datos
+Al añadir una migración, pruebe tanto una base de datos nueva como la actualización desde el esquema anterior. Las pruebas de base de datos
 deben cerrar los manejadores y llamar a `resetDbInstance()` durante la limpieza. Ejecute `npm run test:bun:db` únicamente cuando
-cambie la ruta del adaptador de Bun de mejor esfuerzo; Node sigue siendo la referencia oficial.
+cambie la ruta del adaptador de Bun sin garantías; Node sigue siendo la referencia autoritativa.
 
 ### Compilación / despliegue
 
 **Contratos**
 
-- Manifiestos/archivo de bloqueo de la raíz y los espacios de trabajo, `scripts/build/`, ensamblaje independiente de Next.js, contenido del paquete
-  `dist/`, metadatos de plataforma de Electron, flujos de trabajo de CI y centinelas de despliegue.
-- Los rangos de Node compatibles y el uso de Bun incluido en la lista de permitidos de `CLAUDE.md` deben permanecer intactos.
+- Manifiestos/archivo de bloqueo de la raíz y del workspace, `scripts/build/`, ensamblado standalone de Next.js, contenido del paquete `dist/`,
+  metadatos de plataforma de Electron, flujos de trabajo de CI y centinelas de despliegue.
+- Los rangos de Node compatibles y el uso permitido de Bun en `CLAUDE.md` deben permanecer intactos.
 - Los artefactos de compilación no deben incluirse en el control de versiones; se aplican las políticas de dependencias, licencias, flujos de trabajo y paquetes.
 
-**Bucle específico**
+**Ciclo específico**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # cambios en dependencias o en el archivo de bloqueo
+npm run check:lockfile         # cambios en las dependencias o en el archivo de bloqueo
 npm run check:pack-policy      # cambios en la superficie del paquete publicado
 npm run lint
 ```
 
-Use `npm run build` localmente solo cuando el cambio afecte a la compilación, el ensamblaje independiente, los recursos
-o el empaquetado en tiempo de ejecución. Use `npm run build:release` únicamente para la validación de versiones/despliegues. La compilación de CI es
-la señal multiplataforma definitiva; los cambios de Electron específicos de una plataforma necesitan la compilación específica correspondiente
-o evidencia de una prueba de humo.
+Use `npm run build` localmente solo cuando el cambio afecte a la compilación, al ensamblado standalone, a los recursos
+o al empaquetado en tiempo de ejecución. Use `npm run build:release` únicamente para la validación de versiones/despliegues. La compilación de CI es
+la señal final multiplataforma; los cambios de Electron específicos de una plataforma necesitan la compilación específica correspondiente
+o evidencias de una prueba de humo.
 
-## Bucle local de candidatos
+## Scripts de desarrollo para una máquina compartida
 
-Las pruebas del código fuente no pueden demostrar que el artefacto empaquetado arranque: las listas de empaquetado, las dependencias eliminadas
-y los binarios nativos solo fallan una vez que el tarball se instala y se inicia. `npm run dev:candidate`
-(`scripts/dev/candidate.mjs`) es la parte local del flujo compilar una vez / validar / promover del
-RFC #8084: compila un candidato, valida ese artefacto exacto, lo promueve mediante cambios de nombre
-de directorios y lo revierte cuando la ranura promovida no supera su comprobación de estado.
+Dos utilidades de `scripts/dev/` implementan el ciclo local en un devbox donde hay otras sesiones activas:
 
 ```bash
-npm run dev:candidate -- run --dry-run --json  # mostrar el plan sin cambiar nada
-npm run dev:candidate -- run                   # compilar + validar + promover, con reversión automática
-npm run dev:candidate -- build                 # npm pack + instalar en _artifacts/candidate/<id>/
-npm run dev:candidate -- validate --id <id>    # arrancar en un puerto libre, /api/health + /v1/models
-npm run dev:candidate -- promote --id <id>     # <id> → current, current → previous
-npm run dev:candidate -- rollback              # intercambiar current y previous
-npm run dev:candidate -- run --from-tarball <file.tgz>  # reutilizar un tarball compilado en otro lugar (CI)
+scripts/dev/typecheck-touched.sh --base release/vX.Y.Z   # archivos desde merge-base(HEAD, base)..HEAD
+scripts/dev/typecheck-touched.sh src/a.ts tests/unit/b.test.ts   # exactamente estos archivos
+scripts/dev/new-worktree.sh fix/1234-slug release/vX.Y.Z  # worktree aislado, seguro en paralelo
 ```
 
-- **Compilar una vez.** `build` empaqueta el árbol actual (necesita `dist/server.js`, así que ejecute
-  primero `npm run build:release`) o copia `--from-tarball` y, a continuación, instala el tarball en un
-  prefijo npm aislado, ya que el tarball no contiene `node_modules`. El ID es el sha corto de `HEAD`
-  (`-dirty` cuando el árbol tiene cambios locales) o `tgz-<sha256>` para un tarball. Si un ID limpio
-  ya está compilado, se reutiliza en lugar de volver a compilarlo; use `--force` para recompilarlo.
-- **Validar el paquete, no el código fuente.** `validate` inicia la CLI instalada
-  (`serve --port <free port>`) con un `DATA_DIR=<candidate>/data` nuevo, secretos ficticios y las
-  variables `OMNIROUTE_API_KEY`, `STORAGE_ENCRYPTION_KEY` e `INITIAL_PASSWORD` del operador eliminadas del
-  entorno, por lo que comprueba la configuración de bucle invertido sin claves de una instalación nueva. Espera a que
-  `GET /api/health` devuelva 200, exige que `GET /v1/models` devuelva 200, detiene el grupo de procesos
-  y registra el veredicto en `validation.json` junto con el hash del tarball.
-- **Promover el mismo artefacto.** `promote` rechaza un candidato que no tenga una validación satisfactoria para el
-  hash de su tarball actual. La ranura activa predeterminada es `_artifacts/candidate/current`; `--target <dir>`
-  selecciona otro directorio en el mismo sistema de archivos, y su ranura anterior es `<dir>.previous`.
-  Cada cambio de nombre es atómico, y un fallo durante el proceso revierte los cambios de nombre que ya se hayan ejecutado.
-- **Revertir.** `run` vuelve a validar la ranura promovida e intercambia de nuevo `current` y `previous` cuando
-  esa comprobación falla. Un candidato que no supera la primera validación nunca se promueve.
+- `typecheck-touched.sh` comprueba los tipos únicamente de los archivos `.ts/.tsx` modificados mediante un
+  `tsconfig.touched.tmp.json` temporal (`extends ./tsconfig.json`, `types: ["node"]`, `noEmit`,
+  `incremental: false`) con un heap de 6 GB, por lo que sustituye al `tsc -p tsconfig.json` de todo
+  el proyecto que provoca OOM en una máquina con mucha carga. Muestra los errores de los archivos
+  modificados más una línea de resumen y termina con `1` si hay errores en los archivos modificados,
+  con `2` cuando los únicos errores están en archivos importados o cuando tsc termina sin emitir
+  diagnósticos (consulta el registro que indica en `_artifacts/typecheck-touched/`) y con `0` cuando
+  no hay errores. El tsconfig temporal siempre se elimina; nunca confirmes uno en el repositorio.
+- `new-worktree.sh` serializa las ejecuciones simultáneas mediante `<git-common-dir>/omniroute-new-worktree.lock`
+  (espera hasta 600 s de forma predeterminada y muestra un mensaje visible; la cabecera del script
+  documenta cómo sobrescribir este valor) y revierte
+  la rama que creó cuando `git worktree add` falla antes de que exista el worktree, por lo que un
+  nuevo intento no requiere ejecutar manualmente `git branch -D`. Los `node_modules` enlazados
+  físicamente y la copia de `.husky/_` no cambian.
 
-Todo se escribe en el directorio ignorado por git `_artifacts/candidate/`; una instalación existente de OmniRoute
-y su directorio de datos nunca se modifican. La CLI promovida es
-`_artifacts/candidate/current/prefix/bin/omniroute`; iníciela con su propio `DATA_DIR` cuando la utilice.
-Códigos de salida: `0` éxito, `1` validación o promoción fallida, `2` error de uso o compilación ausente.
+## Ciclo local del candidato
+
+Las pruebas del código fuente no pueden demostrar que el artefacto empaquetado arranque: las listas
+de empaquetado, las dependencias eliminadas y los binarios nativos solo fallan cuando el tarball se
+instala e inicia. `npm run dev:candidate` (`scripts/dev/candidate.mjs`) es la parte local del flujo de
+compilar una vez / validar / promover del RFC #8084: compila un candidato, valida exactamente ese
+artefacto, lo promueve mediante cambios de nombre de directorios y lo revierte cuando la ranura
+promovida no supera su comprobación de estado.
+
+```bash
+npm run dev:candidate -- run --dry-run --json  # muestra el plan sin cambiar nada
+npm run dev:candidate -- run                   # compila + valida + promueve, con reversión automática
+npm run dev:candidate -- build                 # npm pack + instalación en _artifacts/candidate/<id>/
+npm run dev:candidate -- validate --id <id>    # arranca en un puerto libre, /api/health + /v1/models
+npm run dev:candidate -- promote --id <id>     # <id> → current, current → previous
+npm run dev:candidate -- rollback              # intercambia current y previous
+npm run dev:candidate -- run --from-tarball <file.tgz>  # reutiliza un tarball compilado en otro lugar (CI)
+```
+
+- **Compila una sola vez.** `build` empaqueta el árbol actual (necesita `dist/server.js`, por lo que
+  primero debes ejecutar `npm run build:release`) o copia `--from-tarball` y, después, instala el
+  tarball en un prefijo de npm aislado, porque el tarball no contiene `node_modules`. El id es el
+  sha corto de `HEAD` (`-dirty` cuando el árbol tiene cambios locales) o `tgz-<sha256>` para un
+  tarball. Un id limpio que ya esté compilado se reutiliza en lugar de volver a compilarse; pasa
+  `--force` para recompilarlo.
+- **Valida el paquete, no el código fuente.** `validate` inicia la CLI instalada
+  (`serve --port <free port>`) con un `DATA_DIR=<candidate>/data` nuevo, secretos ficticios y las
+  variables `OMNIROUTE_API_KEY`, `STORAGE_ENCRYPTION_KEY` e `INITIAL_PASSWORD` del operador
+  eliminadas del entorno, de modo que comprueba el comportamiento de loopback sin claves de una
+  instalación nueva. Espera a que `GET /api/health` devuelva 200, exige que `GET /v1/models`
+  devuelva 200, detiene el grupo de procesos y registra el veredicto en `validation.json` junto con
+  el hash del tarball.
+- **Promueve el mismo artefacto.** `promote` rechaza un candidato que no tenga una validación
+  satisfactoria para el hash de su tarball actual. La ranura activa predeterminada es
+  `_artifacts/candidate/current`; `--target <dir>` selecciona otro directorio en el mismo sistema de
+  archivos, y su ranura anterior es `<dir>.previous`. Cada cambio de nombre es atómico, y un fallo
+  a mitad del proceso revierte los cambios de nombre que ya se hayan ejecutado.
+- **Revierte.** `run` vuelve a validar la ranura promovida e intercambia de nuevo `current` y
+  `previous` cuando esa comprobación falla. Un candidato que no supera la primera validación nunca
+  se promueve.
+
+Todo se escribe en el directorio `_artifacts/candidate/`, ignorado por git; nunca se modifican una
+instalación existente de OmniRoute ni su directorio de datos. La CLI promovida se encuentra en
+`_artifacts/candidate/current/prefix/bin/omniroute`; iníciala con tu propio `DATA_DIR` cuando la
+utilices. Códigos de salida: `0` indica éxito, `1` una validación o promoción fallida y `2` un error
+de uso o una compilación inexistente.
 
 ## Bucle local frente a CI
 
-| Ejecutar localmente para cada parche                                                                              | CI proporciona la señal general                                                                    |
-| ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Pruebas directas de comportamiento y controles por categoría anteriores                                           | Suite de pruebas unitarias completa, fragmentada, y pruebas en serie                               |
-| `npm run lint`                                                                                                    | Suites de Vitest y umbrales progresivos de cobertura/calidad                                       |
-| Comprobación de tipos o compilación solo cuando el contrato afectado lo requiera                                  | Compilación de producción y controles de seguridad, documentación, dependencias y políticas de PR  |
-| Comprobaciones manuales de interacción/en vivo solo cuando la automatización no pueda demostrar el comportamiento | Comprobaciones de integración entre trabajos y de plataformas configuradas por el flujo de trabajo |
+| Ejecutar localmente para cada parche                                                                              | CI proporciona una señal amplia                                                                       |
+| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Pruebas directas de comportamiento y comprobaciones de categoría anteriores                                       | Suite completa de pruebas unitarias fragmentada y pruebas en serie                                    |
+| `npm run lint`                                                                                                    | Suites de Vitest y umbrales progresivos de cobertura/calidad                                          |
+| Comprobación de tipos o compilación solo cuando lo exija el contrato afectado                                     | Compilación de producción, seguridad, documentación, dependencias y comprobaciones de políticas de PR |
+| Comprobaciones manuales de interacción/en vivo solo cuando la automatización no pueda demostrar el comportamiento | Comprobaciones de integración entre tareas y de plataformas configuradas por el flujo de trabajo      |
 
-Un bucle específico correcto constituye evidencia sobre el contrato modificado, no una prueba de que pasarán las comprobaciones de CI no relacionadas.
-Por el contrario, no haga que cada edición local tenga que esperar a la matriz completa del repositorio.
+Un bucle específico correcto constituye evidencia sobre el contrato modificado, no una prueba de que las comprobaciones de CI no relacionadas
+vayan a superarse. Del mismo modo, no haga que cada edición local espere a toda la matriz del repositorio.
 
-## Lista de comprobación para la conciliación
+## Lista de comprobación de conciliación
 
 Antes de solicitar una revisión:
 
 - Confirme que la base del PR siga siendo la rama `release/v*` activa más reciente.
-- Obtenga esa base y revise los commits incorporados desde que creó su rama.
+- Obtenga esa base y revise los commits incorporados desde que creó la rama.
 - Revise `git diff <active-base>...HEAD` para detectar cambios accidentales o generados.
 - Resuelva los conflictos de catálogos y documentos generados actualizando la fuente y regenerando la salida.
-- Vuelva a ejecutar todas las pruebas y controles específicos enumerados en la descripción del PR después de la conciliación.
-- Nunca debilite las aserciones ni elimine pruebas obligatorias simplemente para ajustarse a una base que ha cambiado.
+- Vuelva a ejecutar todas las pruebas y comprobaciones específicas enumeradas en la descripción del PR después de la conciliación.
+- Nunca debilite las aserciones ni elimine pruebas obligatorias simplemente para adaptarse a una base que ha cambiado.
 
 Para consultar las reglas de congelación de versiones y cambio de destino, use
-[Modelo de ramificación y versiones](BRANCHING_MODEL.md). Para consultar el inventario completo de CI, use
+[Modelo de ramificación y publicación](BRANCHING_MODEL.md). Para consultar el inventario completo de CI, use
 [Referencia de controles de calidad](../architecture/QUALITY_GATES.md).

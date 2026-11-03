@@ -39,31 +39,31 @@ OmniRoute 的常見問題與解決方案。
 
 ### 免費提供者的速率限制（429 / 400 / 401）
 
-**症狀**：搭配免費／無須驗證的提供者（opencode、auggie 等）使用 `model: "auto"` 時，您會間歇性收到 `HTTP 429`、`400` 或 `401`，而非正常回答。稍後使用相同提示詞重試時，請求會成功，但自動化作業（cron 工作、代理程式、指令碼）會在第一次失敗時中斷。
+**症狀**：使用免費／無需驗證的提供者（auggie 等）搭配 `model: "auto"` 時，您會間歇性地收到 `HTTP 429`、`400` 或 `401`，而非正常回覆。稍後使用相同提示重試時，請求會成功，但自動化作業（cron 工作、代理程式、指令碼）會在第一次失敗時中斷。
 
-**根本原因**：三種獨立的失敗模式會疊加發生：
+**根本原因**：三種彼此獨立的失敗模式會疊加：
 
-1. **提供者速率限制（`429`）**：免費方案可能會針對每個時間區段強制執行配額。突發的大量平行呼叫會耗盡配額，因此後續請求會遭到拒絕，直到時間區段重設為止。
-2. **直通模式中的故障模型（`400`/`401`）**：`auto/*` 集區可能包含來自 `opencode` 的直通模型；這些模型雖已登錄於目錄中，卻沒有有效的認證資訊（例如 `oc/north-mini-code-free` → `401`）。自動路由器會嘗試其中一個模型，但該模型失敗後，錯誤會在備援機制啟動前就向外傳播。
-3. **並行放大效應（負載下出現 `429`）**：當多個代理程式／cron 工作階段同時呼叫 `auto` 時，彙總請求速率會超過免費提供者可容許的範圍，導致合法呼叫被標記為濫用。
+1. **提供者速率限制（`429`）**：免費方案可能會強制執行每個時間視窗的配額。突發的大量平行呼叫會耗盡配額，因此在時間視窗重設之前，後續請求都會遭到拒絕。
+2. **直通模式中的故障模型（`400`/`401`）**：`auto/*` 集區可能包含已在目錄中註冊、但沒有有效憑證的直通模型（→ `401`）。自動路由器嘗試其中一個模型後失敗，而錯誤會在備援機制啟動前向外傳播。
+3. **並行放大效應（負載下出現 `429`）**：當多個代理程式／cron 工作階段同時存取 `auto` 時，彙總請求速率會超出免費提供者可承受的範圍，導致合法呼叫被標記為濫用。
 
-**已驗證的修正方式（社群回報，2026-08-10）**：調整三個環境變數，讓輪替、並行控制與備援機制吸收免費方案的不穩定狀況，而不是因此失敗：
+**經驗證的修正方式（社群回報，2026-08-10）**：調整三個環境變數，讓輪替、並行控制與備援機制能夠吸收免費方案的不穩定狀況，而不是直接因其失敗：
 
 ```bash
 export OMNIROUTE_ROTATE_ON_400=true           # 遇到 400/401 時切換至其他模型／提供者（略過故障的直通模型）
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # 明確設定重量級請求的准入上限（預設未設定：無請求數量上限，請參閱下方註記）
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # 將有限的等待時間提高至超過慢速上游的 RATE_LIMIT_MAX_WAIT_MS 預設值
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # 明確設定重量級請求的准入上限（預設未設定：沒有請求數量上限，請參閱下方說明）
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # 對於緩慢的上游，將有限等待時間提高至超過 RATE_LIMIT_MAX_WAIT_MS 的預設值
 ```
 
-請在 OmniRoute 程序的環境中設定這些變數（常駐程式，例如透過 LaunchAgent plist 或 `systemctl edit`），然後重新啟動 OmniRoute。輪替旗標是單一效益最高的調整項目：它能將硬性失敗轉換為對集區內健康提供者的透明重試。
+請在 OmniRoute 程序環境中設定這些變數（即常駐程式，例如透過 LaunchAgent plist 或 `systemctl edit`），然後重新啟動 OmniRoute。輪替旗標是效果最顯著的單一調整項目：它會將硬性失敗轉換為對集區中健康提供者的透明重試。
 
-**註記**：`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 會限制可同時執行的重量級（長上下文）請求數量；此限制是准入閘門，而不是提供者速率限制器。**#503-fanout 更新：**此變數不再預設設定（現在只有在明確設定時才會生效，如上所示）——重量級請求的准入改由自動衍生的位元組預算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`）管控；該預算會根據主機的實際記憶體上限自動調整，因此全新部署即使完全不設定此變數，也應該會大幅減少 `503 chat_admission_busy` 拒絕；在此明確設定仍會完全依照文件所述運作。明確指定的位元組預算覆寫值會被限制在 8 MiB–2 GiB 之間。`413 body_exceeds_budget` 並非暫時性問題：請提高該位元組預算、降低 `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`，或提高程序的記憶體上限。`inflight_bytes_budget` 卸載是暫時性的資源爭用，仍可重試。各提供者的速率限制（`open-sse/services/rateLimitManager.ts`）則由 `RATE_LIMIT_MAX_WAIT_MS`、`RATE_LIMIT_MAX_QUEUE_DEPTH` 與 `RATE_LIMIT_AUTO_ENABLE` 分別控制——請參閱 `.env.example`。
+**注意**：`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 會限制可同時執行的重量級（長上下文）請求數量；此限制是准入閘門，而非提供者速率限制器。**#503-fanout 更新：**此變數預設不再設定（現在只有在明確設定時才會生效，如上所示）——重量級請求的准入改由自動推導的位元組預算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`）控管，該預算會根據主機的實際記憶體上限自行調整，因此全新部署即使完全不設定此變數，也應該會遇到少得多的 `503 chat_admission_busy` 拒絕；在此明確設定它仍會完全依照文件所述運作。明確指定的位元組預算覆寫值會限制在 8 MiB–2 GiB 之間。`413 body_exceeds_budget` 並非暫時性錯誤：請提高該位元組預算、降低 `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`，或提高程序記憶體上限。`inflight_bytes_budget` 卸載表示暫時性的資源爭用，仍可重試。各提供者的速率限制（`open-sse/services/rateLimitManager.ts`）由 `RATE_LIMIT_MAX_WAIT_MS`、`RATE_LIMIT_MAX_QUEUE_DEPTH` 與 `RATE_LIMIT_AUTO_ENABLE` 分別控管——請參閱 `.env.example`。
 
-**如何驗證修正是否生效**：快速連續執行兩次代理程式／cron，並確認兩次都成功。修正前，第二次執行通常會拋出 `429`／`401`。修正後，系統會自動重試失敗的請求（若有），並完成呼叫。你也可以執行 `curl /monitoring/health`，觀察提供者連線上的 `rateLimitedUntil` 欄位，以及受影響提供者的 `circuitBreakers.providerBreakers[].state`——狀態會是 `CLOSED`、`DEGRADED`、`OPEN` 或 `HALF_OPEN` 之一（請參閱 `src/shared/utils/circuitBreaker.ts`）；持續失敗的提供者會依序從 `CLOSED → DEGRADED → OPEN` 切換，直到重設時間窗允許探測請求通過（`HALF_OPEN`）。
+**如何驗證修正是否生效**：快速連續執行代理程式／cron 兩次，並確認兩次皆成功。修正前，第二次執行通常會拋出 `429`/`401`。修正後，失敗（如果有）會被透明地重試，且呼叫會完成。您也可以執行 `curl /monitoring/health`，並觀察提供者連線上的 `rateLimitedUntil` 欄位，以及受影響提供者的 `circuitBreakers.providerBreakers[].state`——其狀態會是 `CLOSED`、`DEGRADED`、`OPEN` 或 `HALF_OPEN` 其中之一（請參閱 `src/shared/utils/circuitBreaker.ts`）；持續失敗的提供者會依序從 `CLOSED → DEGRADED → OPEN` 切換，直到重設時間視窗允許探測請求通過（`HALF_OPEN`）。
 
-**如果仍然看到 429**：該提供者目前使用中的帳戶確實已耗盡其_配額_（而不只是觸及速率限制）。請在 OmniRoute 儀表板 → Providers → Accounts 中，為同一提供者新增第二個帳戶，或混用另一個免費提供者（例如 `routeway`、`auggie`）。輪替機制只對暫時性的速率限制／400／401 有幫助；若配額已完全耗盡，則需要第二組憑證或改用其他提供者。
+**如果仍看到 429**：該提供者目前使用中的帳戶確實已耗盡其_配額_（不只是速率限制）。請在 OmniRoute 儀表板 → Providers → Accounts 中，為同一提供者新增第二個帳戶，或混用另一個免費提供者（例如 `routeway`、`auggie`）。輪替只能處理暫時性的速率限制／400／401；硬性配額耗盡需要第二組憑證或不同的提供者。
 
-**如果在視覺模型（`auto/vision`、`bazaarlink/*`）上看到 403**：已連線的帳戶沒有包含視覺功能的付費方案，或 API 金鑰的權限不足。請在提供者儀表板中確認金鑰的權限範圍包含視覺／多模態功能，或連線至付費方案帳戶，並將其保留為視覺模型的目標帳戶。
+**如果在視覺模型（`auto/vision`、`bazaarlink/*`）上看到 403**：已連線的帳戶沒有包含視覺功能的付費方案，或 API 金鑰權限不足。請在提供者儀表板中確認金鑰範圍包含視覺／多模態功能，或連線付費方案帳戶並將其保留為視覺功能的目標提供者。
 
 ---
 
@@ -90,11 +90,11 @@ npm install -g omniroute --legacy-peer-deps
 
 ---
 
-## npm 安裝指令碼遭封鎖警告（全域安裝）
+## npm install-scripts 遭封鎖警告（全域安裝）
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-執行 `npm install -g omniroute` 時，較新的 npm 版本（v11+ 和 v12+）預設會封鎖套件生命週期指令碼，並顯示安裝指令碼警告：
+執行 `npm install -g omniroute` 時，較新版本的 npm（v11+ 和 v12+）預設會封鎖套件生命週期指令碼，並顯示 install-scripts 警告：
 
 ```
 npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
@@ -104,25 +104,25 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### 可以忽略此警告嗎？
 
-**可以部分忽略，但不建議在不執行指令碼的情況下運作。** OmniRoute 內含平穩的備援機制：如果無法從獨立套件組合載入原生 `better-sqlite3` 繫結，應用程式會依序改用其他驅動程式，例如 `node:sqlite` 或 `sql.js`（請參閱 [SQLite 執行階段解析](../ops/SQLITE_RUNTIME.md)）。伺服器仍可啟動，但使用 `sql.js` 之類的 WASM 備援方案時，會停用 SQLite WAL（預寫式記錄）模式，並增加記憶體與磁碟同步負擔。
+**部分可以，但不建議在不執行指令碼的情況下運作。** OmniRoute 包含完善的後備機制：如果無法從獨立套件載入原生 `better-sqlite3` 繫結，應用程式會改用 `node:sqlite` 或 `sql.js` 等替代驅動程式（請參閱 [SQLite 執行階段解析](../ops/SQLITE_RUNTIME.md)）。伺服器仍會啟動，但使用 `sql.js` 這類 WASM 後備方案時，將停用 SQLite WAL（預寫式記錄）模式，並增加記憶體與磁碟同步的額外負擔。
 
 ### 實際需要哪些指令碼？
 
 並非所有遭封鎖的指令碼都是執行 OmniRoute 所必需的：
 
-- **必要（`omniroute`、`better-sqlite3`）：** OmniRoute 從 Next.js 獨立應用程式套件組合（`dist/`）執行。安裝期間，npm 會在頂層 `node_modules/better-sqlite3/` 中下載或編譯主機專用的原生 SQLite 驅動程式。接著，OmniRoute 的 `postinstall` 指令碼（`scripts/build/postinstall.mjs`）會驗證這些主機專用的二進位檔，並將其複製到 `dist/node_modules/`，讓獨立伺服器可以存取它們。如果 `omniroute` 的 postinstall 指令碼遭到封鎖，便會略過此複製步驟。
-- **選用／遞移（`keytar`、`@parcel/watcher`、`@swc/core`、`protobufjs`、`esbuild`）：** 這些是建置輔助工具、監看工具或系統鑰匙圈公用程式。允許執行這些指令碼可避免建置警告，但核心路由功能不需要它們。
-- **排除（`onnxruntime-node`）：** 這是用於本機 AI 嵌入的選用依賴項，OmniRoute 的執行**不需要**它。其 postinstall 指令碼會從 NuGet 下載約 300MB 的 CUDA 資源；除非您明確打算在支援的硬體上使用本機 ONNX 加速，否則請勿將它加入允許清單。
+- **必要（`omniroute`、`better-sqlite3`）：** OmniRoute 從 Next.js 獨立應用程式套件（`dist/`）執行。安裝期間，npm 會下載或編譯頂層 `node_modules/better-sqlite3/` 中主機專用的原生 SQLite 驅動程式。接著，OmniRoute 的 `postinstall` 指令碼（`scripts/build/postinstall.mjs`）會驗證這些主機專用二進位檔，並將其複製到 `dist/node_modules/`，讓獨立伺服器可以存取。如果 `omniroute` 的 postinstall 指令碼遭到封鎖，就會略過此複製步驟。
+- **選用／遞移相依套件（`keytar`、`@parcel/watcher`、`@swc/core`、`protobufjs`、`esbuild`）：** 這些是建置輔助工具、檔案監看工具或系統鑰匙圈公用程式。允許其執行可避免建置警告，但核心路由功能並不需要它們。
+- **排除（`onnxruntime-node`）：** 這是用於本機 AI 嵌入的選用相依套件，OmniRoute 執行時**不需要**它。其 postinstall 指令碼會從 NuGet 下載約 300MB 的 CUDA 資產；除非您明確打算在支援的硬體上使用本機 ONNX 加速，否則請勿將其加入允許清單。
 
 ### 建議的修正方式
 
-若要在全域安裝期間允許執行必要的安裝指令碼並消除警告，請針對 OmniRoute 及其原生依賴項傳入 `--allow-scripts`：
+若要在全域安裝期間允許執行必要的安裝指令碼並消除警告，請為 OmniRoute 及其原生相依套件傳入 `--allow-scripts`：
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-或者，若要為您使用者帳戶下的所有全域安裝永久設定此選項：
+或者，若要針對您使用者帳戶中的所有全域安裝永久設定此選項：
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +131,7 @@ npm install -g omniroute
 
 ### 驗證您的安裝
 
-安裝後，請執行內建診斷工具，確認原生繫結及執行階段環境均正常：
+安裝後，請執行內建的診斷工具，以確保原生繫結與執行階段環境皆運作正常：
 
 ```bash
 omniroute doctor

@@ -488,9 +488,15 @@ export async function evaluateBadges(
           .get(apiKeyId) as { first_at: string | null } | undefined;
 
         if (firstLog?.first_at) {
-          const joinDate = new Date(firstLog.first_at);
+          // SQLite datetime('now') is UTC "YYYY-MM-DD HH:MM:SS" without a zone marker;
+          // a bare Date parse would read it as server-local time.
+          const joinDate = new Date(
+            /(?:Z|[+-]\d{2}:?\d{2})$/i.test(firstLog.first_at)
+              ? firstLog.first_at
+              : `${firstLog.first_at.replace(" ", "T")}Z`
+          );
           const windowEnd = new Date(joinDate);
-          windowEnd.setDate(windowEnd.getDate() + (criteria as FirstCriteria).window_days);
+          windowEnd.setUTCDate(windowEnd.getUTCDate() + (criteria as FirstCriteria).window_days);
           unlocked = new Date() <= windowEnd;
         }
         break;

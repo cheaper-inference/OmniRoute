@@ -4,13 +4,13 @@
 
 ---
 
-Web Cookie nodrošinātāji ļauj OmniRoute izmantot MI pakalpojumu, lietojot jūsu esošo pārlūkprogrammas sesiju, nevis API atslēgu. Tie ir noderīgi, ja jums jau ir piekļuve pakalpojumam, izmantojot tā tīmekļa vietni, un vēlaties, lai OmniRoute izmantotu to pašu autentificēto sesiju.
+Web Cookie nodrošinātāji ļauj OmniRoute izmantot MI pakalpojumu, lietojot jūsu esošo pārlūkprogrammas sesiju, nevis API atslēgu. Tie ir noderīgi, ja jums jau ir piekļuve pakalpojumam tā tīmekļa vietnē un vēlaties, lai OmniRoute izmantotu to pašu autentificēto sesiju.
 
-Atšķirībā no API atslēgu nodrošinātājiem Web Cookie nodrošinātāji autentifikācijai izmanto akreditācijas datus, ko jūsu pārlūkprogramma nosūta tīmekļa vietnei.
+Atšķirībā no API atslēgu nodrošinātājiem Web Cookie nodrošinātāji autentifikācijai izmanto akreditācijas datus, kurus jūsu pārlūkprogramma nosūta tīmekļa vietnei.
 
 ---
 
-# Pirms sākat
+# Pirms darba sākšanas
 
 > **Svarīgi:** Vienmēr kopējiet akreditācijas datus no **aktīva tīkla pieprasījuma**, **nevis** no pārlūkprogrammas sīkfailu krātuves.
 
@@ -18,7 +18,7 @@ Daudzas autentifikācijas problēmas rodas, kopējot sīkfailus no nepareizās v
 
 ## Nekopējiet no sīkfailu krātuves
 
-Lielākā daļa pārlūkprogrammu saglabātos sīkfailus parāda šeit:
+Vairumā pārlūkprogrammu saglabātajiem sīkfailiem var piekļūt šādi:
 
 ```
 Izstrādātāja rīki
@@ -28,15 +28,15 @@ Izstrādātāja rīki
 
 Lai gan šie sīkfaili var izskatīties pareizi, tie var būt:
 
-- novecojuši
-- nepilnīgi
-- bez sīkfailiem, kas tiek nosūtīti tikai autentificētos pieprasījumos
+- novecojuši;
+- nepilnīgi;
+- bez sīkfailiem, kas tiek nosūtīti tikai autentificētos pieprasījumos.
 
 Šo vērtību izmantošana var izraisīt autentifikācijas kļūmes, pat ja tās šķiet derīgas.
 
-## Kopējiet no aktīva pieprasījuma
+## Kopēšana no aktīva pieprasījuma
 
-Tā vietā izmantojiet veiksmīga pieprasījuma sīkfailus:
+Tā vietā izmantojiet sīkfailus no veiksmīga pieprasījuma:
 
 ```
 Izstrādātāja rīki
@@ -47,15 +47,15 @@ Izstrādātāja rīki
 → Cookie
 ```
 
-Pieprasījuma galvene `Cookie` satur precīzu autentifikācijas informāciju, ko jūsu pārlūkprogramma veiksmīgi izmantoja.
+Pieprasījuma galvene `Cookie` satur precīzu autentifikācijas informāciju, kuru pārlūkprogramma veiksmīgi izmantoja.
 
 Vairumam Web Cookie nodrošinātāju šī ir vērtība, kas jāielīmē OmniRoute.
 
 ---
 
-# Vispārīgā iestatīšana
+# Vispārīga iestatīšana
 
-Iestatīšanas process lielākajai daļai Web Cookie nodrošinātāju ir vienāds.
+Vairumam Web Cookie nodrošinātāju iestatīšanas process ir vienāds.
 
 1. Pierakstieties nodrošinātāja tīmekļa vietnē.
 2. Atveriet pārlūkprogrammas izstrādātāja rīkus.
@@ -64,7 +64,7 @@ Iestatīšanas process lielākajai daļai Web Cookie nodrošinātāju ir vienād
 5. Atveriet autentificētu tērzēšanas vai sarunas pieprasījumu.
 6. Nokopējiet nepieciešamos autentifikācijas akreditācijas datus.
 7. Atveriet OmniRoute.
-8. Dodieties uz **Nodrošinātāji → Pievienot nodrošinātāju**.
+8. Atveriet sadaļu **Nodrošinātāji → Pievienot nodrošinātāju**.
 9. Atlasiet savu Web Cookie nodrošinātāju.
 10. Ielīmējiet akreditācijas datus.
 11. Noklikšķiniet uz **Pārbaudīt savienojumu**.
@@ -88,68 +88,68 @@ Dažādas tīmekļa vietnes autentifikācijas datus glabā atšķirīgi. Dažām
 | Grok Web                        | _(jāpārbauda)_                    |                                  |
 | ...                             | ...                               | ...                              |
 
-> Atjauniniet šo tabulu, kad tiek pievienoti jauni Web Cookie nodrošinātāji vai esošie nodrošinātāji maina savas autentifikācijas prasības.
+> Atjauniniet šo tabulu, kad tiek pievienoti jauni Web Cookie nodrošinātāji vai mainās esošo nodrošinātāju autentifikācijas prasības.
 
 ## NoTrack (notrack-web)
 
-NoTrack ([notrack.ai](https://notrack.ai)) ir bezmaksas patērētājiem paredzēta tērzēšanas platforma, kurai nav nepieciešama reģistrācija — sesija tiek izveidota anonīmi pirmajā apmeklējuma reizē un tiek saglabāta, izmantojot trīs sīkdatnes: `uid`, `si_usr_id` un `si_ses_id`. OmniRoute maršrutē to pašu `/api/dispatch` galapunktu, izmantojot vienu modeļa ID (`notrack-c`, aizstājvārds `ntw`).
+NoTrack ([notrack.ai](https://notrack.ai)) ir bezmaksas patērētāju tērzēšanas platforma, kurai nav nepieciešama reģistrācija — sesija tiek izveidota anonīmi pirmā apmeklējuma laikā un saglabāta, izmantojot trīs sīkfailus: `uid`, `si_usr_id` un `si_ses_id`. OmniRoute starpnieko tam pašam `/api/dispatch` galapunktam, izmantojot vienu modeļa ID (`notrack-c`, aizstājvārds `ntw`).
 
 ### Savienojuma izveides darbības
 
-1. Pārlūkprogrammā atveriet [notrack.ai](https://notrack.ai) un ļaujiet iestatīt anonīmās sesijas sīkdatni.
-2. Atveriet **DevTools → Network**, atsvaidziniet lapu un noklikšķiniet uz jebkura `/api` pieprasījuma.
-3. Sadaļā **Request Headers** nokopējiet pilnu `Cookie` galvenes vērtību.
-4. OmniRoute atveriet **Providers → Add Provider → NoTrack Web (Free)**.
-5. Ielīmējiet sīkdatnes virkni laukā `apiKey` un noklikšķiniet uz **Save**.
+1. Pārlūkprogrammā atveriet [notrack.ai](https://notrack.ai) un ļaujiet iestatīt anonīmās sesijas sīkfailu.
+2. Atveriet **Izstrādātāja rīki → Tīkls**, atsvaidziniet lapu un noklikšķiniet uz jebkura `/api` pieprasījuma.
+3. Sadaļā **Pieprasījuma galvenes** nokopējiet pilnu `Cookie` galvenes vērtību.
+4. OmniRoute atveriet **Pakalpojumu sniedzēji → Pievienot pakalpojumu sniedzēju → NoTrack Web (bezmaksas)**.
+5. Ielīmējiet sīkfailu virkni laukā `apiKey` un noklikšķiniet uz **Saglabāt**.
 
-OmniRoute no ielīmētās virknes izgūst `uid`, `si_usr_id` un `si_ses_id` un izveido jaunu, tīru `Cookie` galveni tikai ar šiem pāriem, kā arī `nt_session` (`ntk_…` marķieri, kas tiek iestatīts kontiem, kuros lietotājs ir pieteicies), ja tas ir pieejams. Ja trūkst kāda no trim elementiem, neapstrādātā ielīmētā virkne tiek pārsūtīta nemainītā veidā, lai operatori varētu eksperimentēt ar alternatīvām struktūrām.
+OmniRoute no ielīmētās virknes izgūst `uid`, `si_usr_id` un `si_ses_id` un izveido tīru `Cookie` galveni tikai ar šiem pāriem, kā arī `nt_session` (`ntk_…` marķieri, kas iestatīts kontiem, kuros veikta pieteikšanās), ja tas ir pieejams. Ja trūkst kādas no šīm trim vērtībām, neapstrādātā ielīmētā virkne tiek pārsūtīta nemainīta, lai operatori varētu eksperimentēt ar alternatīvām struktūrām.
 
 ### Modeļu ID
 
-| Modeļa ID   | Parādāmais nosaukums | Piezīmes                                                                   |
-| ----------- | -------------------- | -------------------------------------------------------------------------- |
-| `notrack-c` | NoTrack C            | Noklusējums — augšupstraumes nosūtīšanas modelis `C`.                      |
-| `C`         | NoTrack C            | `notrack-c` aizstājvārds (neapstrādātais augšupstraumes nosūtīšanas kods). |
-| `notrack`   | NoTrack C            | `notrack-c` aizstājvārds.                                                  |
-| `ntw`       | NoTrack C            | `notrack-c` īsais aizstājvārds.                                            |
+| Modeļa ID   | Attēlojamais nosaukums | Piezīmes                                                                      |
+| ----------- | ---------------------- | ----------------------------------------------------------------------------- |
+| `notrack-c` | NoTrack C              | Noklusējums — augšupējās sistēmas nosūtīšanas modelis `C`.                    |
+| `C`         | NoTrack C              | `notrack-c` aizstājvārds (neapstrādāts augšupējās sistēmas nosūtīšanas kods). |
+| `notrack`   | NoTrack C              | `notrack-c` aizstājvārds.                                                     |
+| `ntw`       | NoTrack C              | `notrack-c` īsais aizstājvārds.                                               |
 
-Visi četri modeļu ID tiek kartēti uz vienu un to pašu augšupstraumes nosūtīšanas modeli (`C`).
+Visi četri modeļu ID tiek kartēti uz vienu un to pašu augšupējās sistēmas nosūtīšanas modeli (`C`).
 
 ### Pieprasījuma opcijas
 
-Izpildītājs pieprasījuma pamattekstā pieņem šādus neobligātos laukus:
+Izpildītājs pieprasījuma pamattekstā pieņem šādus neobligātus laukus:
 
-| Pamatteksta lauks     | Noklusējums | Nolūks                                                                              |
-| --------------------- | ----------- | ----------------------------------------------------------------------------------- |
-| `notrack_mode`        | `usual`     | Nosūtīšanas režīms (brīvas formas virkne; augšupstraume pieņem `usual`, …)          |
-| `notrack_max_turns`   | `6`         | Iekšējo gājienu skaits, ko augšupstraume drīkst veikt pirms atbildēšanas.           |
-| `notrack_chat_id`     | `null`      | Atsākt esošu augšupstraumes tērzēšanu (izlaidiet, lai sāktu jaunu tērzēšanu).       |
-| `notrack_attachments` | `[]`        | Nemainītā veidā pārsūtāms augšupstraumes pielikumu deskriptoru masīvs.              |
-| `notrack_regenerate`  | `false`     | Iestatiet `true`, lai pieprasītu atkārtoti ģenerētu atbildi uz iepriekšējo gājienu. |
+| Pamatteksta lauks     | Noklusējums | Nolūks                                                                               |
+| --------------------- | ----------- | ------------------------------------------------------------------------------------ |
+| `notrack_mode`        | `usual`     | Nosūtīšanas režīms (brīvas formas virkne; augšupējā sistēma pieņem `usual`, …)       |
+| `notrack_max_turns`   | `6`         | Iekšējo iterāciju skaits, ko augšupējā sistēma drīkst veikt pirms atbildēšanas.      |
+| `notrack_chat_id`     | `null`      | Atsākt esošu augšupējās sistēmas tērzēšanu (izlaidiet, lai sāktu jaunu tērzēšanu).   |
+| `notrack_attachments` | `[]`        | Caurlaides masīvs ar augšupējās sistēmas pielikumu deskriptoriem.                    |
+| `notrack_regenerate`  | `false`     | Iestatiet `true`, lai pieprasītu atkārtoti ģenerētu atbildi iepriekšējai iterācijai. |
 
 ### Iespējas
 
-- **Straumētas un nestraumētas** tērzēšanas pabeigšanas.
-- **Rīku izsaukšana** — pieprasījumā iestatiet `tools: [...]`; izpildītājs tos serializē rīku izsaukumu aploksnes līgumā un parsē modeļa atbildes atpakaļ OpenAI `tool_calls` formātā.
-- **`response_format`** — tiek atbalstīti `json_object` un `json_schema`. Izpildītājs izgūst pirmo JSON objektu no modeļa atbildes un pirms atgriešanas pārveido to par virkni.
-- **Spriešanas norāde** — izpildītājs izvada `reasoning` izmaiņu, kad augšupstraume nosūta `thinking` notikumu.
+- Tērzēšanas pabeigšana **ar straumēšanu un bez straumēšanas**.
+- **Rīku izsaukšana** — pieprasījumā iestatiet `tools: [...]`; izpildītājs serializē tos atbilstoši rīku izsaukumu aploksnes līgumam un parsē modeļa atbildes atpakaļ OpenAI `tool_calls` formātā.
+- **`response_format`** — tiek atbalstīti `json_object` un `json_schema`. Izpildītājs no modeļa atbildes izgūst pirmo JSON objektu un pirms atgriešanas pārveido to par virkni.
+- **Spriešanas norāde** — izpildītājs izvada `reasoning` izmaiņu, kad augšupējā sistēma nosūta `thinking` notikumu.
 
 ### Ierobežojumi
 
-- Augšupstraume piemēro anonīmās lietošanas kvotas — kad tās tiek pārsniegtas, izpildītājs atgriež kļūdu 429 ar saprotamu ziņojumu.
-- Visi modeļu ID tiek atrisināti uz vienu un to pašu augšupstraumes nosūtīšanas modeli; nav iespējas pārslēgties starp atsevišķiem modeļiem.
-- Izpildītājs neizsauc augšupstraumes `/api/chats` galapunktu, tāpēc tērzēšanas vēsture/sesijas netiek pārvaldītas automātiski. Izmantojiet `notrack_chat_id`, lai atsāktu esošu augšupstraumes tērzēšanu.
+- Augšupējā sistēma piemēro anonīmās lietošanas kvotas — kad tās tiek pārsniegtas, izpildītājs atgriež kļūdu 429 ar saprotamu ziņojumu.
+- Visi modeļu ID tiek atrisināti uz vienu un to pašu augšupējās sistēmas nosūtīšanas modeli; nav iespējams pārslēgties starp atsevišķiem modeļiem.
+- Izpildītājs neizsauc augšupējās sistēmas `/api/chats` galapunktu, tādēļ tērzēšanas vēsture un sesijas netiek pārvaldītas automātiski. Izmantojiet `notrack_chat_id`, lai atsāktu esošu augšupējās sistēmas tērzēšanu.
 
 ---
 
-# Ko tīmekļa sīkdatņu nodrošinātāji var un nevar darīt
+# Ko tīmekļa sīkfailu pakalpojumu sniedzēji spēj un nespēj
 
-Tīmekļa sīkdatņu nodrošinātāji atkārtoti izmanto vietnes tērzēšanas saskarni. Tie **nenodrošina** tādas pašas iespējas kā oficiālās API.
+Tīmekļa sīkfailu pakalpojumu sniedzēji atkārtoti izmanto vietnes tērzēšanas saskarni. Tie **nenodrošina** tādas pašas iespējas kā oficiālās API.
 
 ## Atbalstīts
 
 - Autentifikācija, izmantojot esošo pārlūkprogrammas sesiju
-- Piekļuve jūsu kontā pieejamajiem modeļiem
+- Piekļuve modeļiem, kas pieejami jūsu kontā
 - Tērzēšanas atbilžu straumēšana
 - API atslēga nav nepieciešama
 
@@ -158,10 +158,10 @@ Tīmekļa sīkdatņu nodrošinātāji atkārtoti izmanto vietnes tērzēšanas s
 - Funkciju izsaukšana
 - Rīku izsaukšana
 - Automātiska failu rediģēšana
-- Aģentu IDE darbplūsmas
-- Tikai API pieejamās funkcijas
+- Aģentiskas IDE darbplūsmas
+- Funkcijas, kas pieejamas tikai ar API
 
-Tā ir paredzētā darbība, un tā **nav** kļūda.
+Šāda darbība ir paredzēta un **nav** kļūda.
 
 Ja jums nepieciešama rīku izpilde, automātiska failu rediģēšana vai citas aģentu darbplūsmas, Web Cookie nodrošinātāja vietā izmantojiet **API atslēgas nodrošinātāju**.
 
@@ -169,9 +169,9 @@ Ja jums nepieciešama rīku izpilde, automātiska failu rediģēšana vai citas 
 
 # Validācijas ierobežojums
 
-Veiksmīga **Test Connection** pārbaude vai sīkfailu validācija tikai apstiprina, ka norādītie akreditācijas dati šķietami atbilst paredzētajam formātam.
+Veiksmīga darbība **Test Connection** vai sīkfailu validācija tikai apstiprina, ka norādītie akreditācijas dati šķiet esam paredzētajā formātā.
 
-Kamēr nav atrisināta problēma #7857, veiksmīga validācija **negarantē**, ka nodrošinātājs spēs sekmīgi autentificēties.
+Kamēr nav atrisināta problēma #7857, veiksmīga validācija **negarantē**, ka nodrošinātājs spēs sekmīgi veikt autentifikāciju.
 
 Ja autentifikācija joprojām neizdodas, pārbaudiet, vai akreditācijas datus nokopējāt no aktīva tīkla pieprasījuma, nevis no pārlūkprogrammas sīkfailu krātuves.
 
@@ -189,7 +189,7 @@ Network
 → Cookie
 ```
 
-nevis no:
+un **nevis** no:
 
 ```
 Application
@@ -200,9 +200,9 @@ Application
 
 ## Sīkfails darbojas pārlūkprogrammā, bet ne OmniRoute
 
-Daži nodrošinātāji izmanto sīkfailus, kas tiek nosūtīti tikai autentificētu pieprasījumu laikā.
+Daži nodrošinātāji iekļauj sīkfailus, kas tiek nosūtīti tikai autentificētu pieprasījumu laikā.
 
-Pēc sekmīgas sarunas atvēršanas vēlreiz nokopējiet akreditācijas datus no jauna tīkla pieprasījuma.
+Pēc veiksmīgas sarunas atvēršanas vēlreiz nokopējiet akreditācijas datus no jauna tīkla pieprasījuma.
 
 ---
 
@@ -214,7 +214,7 @@ Ja pārlūkprogrammas sesijas derīgums beidzas vai jūs izrakstāties, jums ir 
 
 ---
 
-## Test Connection pārbaude izdodas, bet pieprasījumi neizdodas
+## Test Connection ir sekmīgs, bet pieprasījumi neizdodas
 
 Kamēr nav atrisināta problēma #7857, sekmīga validācija negarantē, ka autentifikācijas pieprasījums izdosies.
 
@@ -222,20 +222,37 @@ Pirms turpmākas problēmu novēršanas vēlreiz nokopējiet akreditācijas datu
 
 ---
 
-# Nodrošinātāja piemērs
+## ChatGPT Web neizdodas ar kļūdu "Unsupported ChatGPT integrity dependency"
 
-Pilnīgu, konkrētam nodrošinātājam paredzētu pamācību skatiet šeit:
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
 
-- **Claude Web** — `docs/providers/CLAUDE_WEB.md`
+Akreditācijas dati ir derīgi — šo kļūdu rada tilts, nevis sesija. chatgpt.com piešķir savus
+moduļu ID katrai izvietošanai, un tilts iepriekš fiksēja tā izveidotā Sentinel palīga ID, tāpēc
+chatgpt.com jaunais būvējums, kurā palīgs tika pārdēvēts, pārtrauca katru mijiedarbību, kamēr sīkfails palika derīgs. Savienojuma
+atkārtota autorizēšana to nevar novērst.
 
-Claude Web ceļvedī ir parādīts pilns Web Cookie nodrošinātāja iestatīšanas process, un tas kalpo kā atsauces realizācija.
+Būvējumos, kas moduli nosaka, izmantojot pašas lapas izpildlaiku, netiek fiksēts neviens ID, un šī problēma nerodas. Ja redzat šo
+kļūdu, jauniniet OmniRoute un vēlreiz palaidiet savienojuma pārbaudi.
 
 ---
 
-# Ieteicamā prakse
+# Nodrošinātāja piemērs
+
+Pilnīgu konkrētajam nodrošinātājam paredzētu pamācību skatiet šeit:
+
+- **Claude Web** — `docs/providers/CLAUDE_WEB.md`
+
+Claude Web ceļvedī ir parādīts pilns Web Cookie nodrošinātāja iestatīšanas process, un tas kalpo kā atsauces implementācija.
+
+---
+
+# Labākā prakse
 
 - Kopējiet akreditācijas datus no jauna autentificēta pieprasījuma.
 - Neizmantojiet atkārtoti vecus sīkfailus.
-- Izmantojot Web Cookie nodrošinātājus, uzturiet pārlūkprogrammas sesiju aktīvu.
-- Pret nokopētajiem sīkfailiem izturieties kā pret sensitīviem akreditācijas datiem.
-- Ja nepieciešama funkciju izsaukšana vai aģentu darbplūsmas, izmantojiet API atslēgas nodrošinātājus.
+- Web Cookie nodrošinātāju izmantošanas laikā uzturiet pārlūkprogrammas sesiju aktīvu.
+- Izturieties pret nokopētajiem sīkfailiem kā pret sensitīviem akreditācijas datiem.
+- Izmantojiet API atslēgas nodrošinātājus, ja nepieciešama funkciju izsaukšana vai aģentu darbplūsmas.

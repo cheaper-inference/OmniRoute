@@ -128,6 +128,8 @@ omniroute keys show <id>
 - `--rate-limit <n>`
 - `--max-cost <n>`
 - `--allowed-models <list>`
+- `--model-access-mode <mode>`
+- `--unrestricted`
 
 **Example:**
 

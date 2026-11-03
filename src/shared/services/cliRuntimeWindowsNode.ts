@@ -1,4 +1,5 @@
 import fsSync from "fs";
+import os from "os";
 import path from "path";
 
 /**
@@ -23,7 +24,8 @@ const PROGRAM_FILES_PARENTS = ["C:\\Program Files", "C:\\Program Files (x86)"];
  * containment, but historically never enumerated as known install paths.
  */
 export const getWindowsSystemNodeBinDirs = (validateEnvPath: ValidateEnvPath): string[] => {
-  if (process.platform !== "win32") return [];
+  // #17157: read os.platform() at runtime; process.platform is constant-folded by Turbopack
+  if (os.platform() !== "win32") return [];
 
   const roots = [
     validateEnvPath(process.env.ProgramFiles, PROGRAM_FILES_PARENTS),

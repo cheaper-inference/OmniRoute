@@ -1,7 +1,7 @@
 import { FREE_MODEL_BUDGETS, grantsFreeAccess } from "@omniroute/open-sse/config/freeModelCatalog";
 import { getProviderById, resolveProviderId } from "@/shared/constants/providers";
 import { globToRegex } from "@/shared/utils/globPattern";
-import { hasPayloadFreeEvidence } from "@/shared/utils/payloadFreeEvidence";
+import { hasPayloadFreeEvidence, hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
 import { AI_MODELS } from "@/shared/constants/models";
 
 /**
@@ -48,7 +48,13 @@ import { AI_MODELS } from "@/shared/constants/models";
 const FREE_BUDGETS = FREE_MODEL_BUDGETS.filter((m) => grantsFreeAccess(m.freeType));
 
 /** Provider ids that have at least one documented free model. */
-export const PROVIDERS_WITH_FREE_MODELS: Set<string> = new Set(FREE_BUDGETS.map((m) => m.provider));
+// SiliconFlow has a live free-labelled catalog but the shipped ten-flagship list
+// was actually billable (#17028). Accept only verified per-model live evidence.
+const LIVE_EVIDENCE_ONLY_PROVIDERS = ["siliconflow"] as const;
+export const PROVIDERS_WITH_FREE_MODELS: Set<string> = new Set([
+  ...FREE_BUDGETS.map((m) => m.provider),
+  ...LIVE_EVIDENCE_ONLY_PROVIDERS,
+]);
 
 const FREE_MODEL_IDS_BY_PROVIDER: Map<string, Set<string>> = (() => {
   const map = new Map<string, Set<string>>();
@@ -77,6 +83,8 @@ export interface FreeModelCandidate {
   /** Raw `pricing` object from the provider's /models entry (any shape). */
   pricing?: unknown;
   isFree?: boolean;
+  is_free?: unknown;
+  free?: unknown;
   tags?: unknown;
 }
 
@@ -94,6 +102,12 @@ export function isCatalogFreeModel(provider: string, modelId: unknown): boolean 
  * shipped-catalog entry, or a payload signal on a provider with a documented free tier.
  */
 export function isFreeModel(provider: string, model: FreeModelCandidate): boolean {
+  // SiliconFlow's old unconditional free entries were pay-as-you-go (#17028).
+  // With an active price or explicit paid flag, do not trust even an isFree=true
+  // marker or :free suffix: a wrong verdict here can trigger a real charge.
+  if (resolveProviderId(provider) === "siliconflow") {
+    return !hasPayloadPaidEvidence(model) && hasPayloadFreeEvidence(model);
+  }
   if (isCatalogFreeModel(provider, model.id)) return true;
   return providerHasFreeModels(provider) && hasPayloadFreeEvidence(model);
 }
@@ -109,6 +123,9 @@ export interface FreeBadgeCandidate {
   name?: string | null;
   free?: unknown;
   isFree?: unknown;
+  is_free?: unknown;
+  pricing?: unknown;
+  tags?: unknown;
 }
 
 /** Feature flag that turns on the stricter badge rule (default off). */
@@ -136,6 +153,18 @@ export function isModelFreeBadge(
   model: FreeBadgeCandidate,
   options: { strict?: boolean } = {}
 ): boolean {
+  // A display name, truthy string or cached Free badge is not proof against
+  // SiliconFlow billing. Apply the same live-evidence gate as free-only import.
+  if (resolveProviderId(provider) === "siliconflow") {
+    return isFreeModel(provider, {
+      id: model.id,
+      pricing: model.pricing,
+      free: model.free,
+      isFree: typeof model.isFree === "boolean" ? model.isFree : undefined,
+      is_free: model.is_free,
+      tags: model.tags,
+    });
+  }
   if (!options.strict) {
     return (
       Boolean(model.free) ||

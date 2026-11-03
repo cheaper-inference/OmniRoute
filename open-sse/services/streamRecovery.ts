@@ -34,6 +34,20 @@ function isToolcallOrderFixEnabled(): boolean {
   }
 }
 
+export const EMPTY_STREAM_SIBLING_RECOVERY_FLAG = "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED";
+
+/**
+ * #16438 opt-in: Claude/Codex empty-stream content probe plus a bounded retry on a
+ * sibling connection. Fail-closed: any resolution failure keeps the release behavior.
+ */
+export function isEmptyStreamSiblingRecoveryEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled(EMPTY_STREAM_SIBLING_RECOVERY_FLAG);
+  } catch {
+    return false;
+  }
+}
+
 /** Raised internally when an upstream stream ends without a terminal SSE marker. */
 export class TruncatedStreamError extends Error {
   constructor(message = "Provider stream ended without a terminal marker") {

@@ -10,52 +10,51 @@
 
 ## Ano ang Provider?
 
-Isipin ang provider na parang isang **kumpanya ng telekomunikasyon**. Kung paanong kailangan mo ng kumpanya ng telekomunikasyon upang makatawag, kailangan mo rin ng AI provider upang magamit ang mga AI model. Ang OmniRoute ay parang teleponong gumagana sa **lahat ng kumpanya ng telekomunikasyon** — maaari kang awtomatikong lumipat sa pagitan ng mga ito.
+Isipin ang provider bilang isang **telecommunications carrier**. Kung paanong kailangan mo ng carrier para makatawag, kailangan mo rin ng AI provider para gumamit ng mga AI model. Ang OmniRoute ay parang teleponong gumagana sa **lahat ng carrier** — maaari kang awtomatikong lumipat sa pagitan ng mga ito.
 
 ### Mga Uri ng Provider
 
-| Uri            | Ano Ito                          | Mga Halimbawa                     | Gastos                        |
-| -------------- | -------------------------------- | --------------------------------- | ----------------------------- |
-| **Libre**      | Walang kinakailangang bayad      | Kiro, OpenCode Free, Pollinations | $0                            |
-| **API Key**    | Kailangan mo ng API key          | OpenAI, Anthropic, Google         | Magbayad batay sa paggamit    |
-| **OAuth**      | Mag-login gamit ang account      | Claude Code, GitHub Copilot       | Subscription                  |
-| **Web Cookie** | Ginagamit ang browser session mo | ChatGPT Web (Codex), Gemini Web   | $0 (ginagamit ang account mo) |
+| Uri            | Ano Ito                             | Mga Halimbawa                   | Gastos                        |
+| -------------- | ----------------------------------- | ------------------------------- | ----------------------------- |
+| **Libre**      | Walang kinakailangang bayad         | Kiro, Pollinations              | $0                            |
+| **API Key**    | Kailangan mo ng API key             | OpenAI, Anthropic, Google       | Magbayad batay sa paggamit    |
+| **OAuth**      | Mag-login gamit ang iyong account   | Claude Code, GitHub Copilot     | Subscription                  |
+| **Web Cookie** | Ginagamit ang session ng browser mo | ChatGPT Web (Codex), Gemini Web | $0 (ginagamit ang account mo) |
 
 ### Mga Web Cookie Provider
 
-Tingnan ang **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** para sa mga pangkalahatang tagubilin sa pag-set up, limitasyon, pag-troubleshoot, at gabay sa authentication na partikular sa bawat provider.
+Tingnan ang **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** para sa mga pangkalahatang tagubilin sa pag-setup, mga limitasyon, pag-troubleshoot, at gabay sa authentication na partikular sa bawat provider.
 ---
 
 ## Mabilisang Pagsisimula: Ikonekta ang Iyong Unang Provider
 
-### Opsyonal na pag-set up ng libreng provider sa unang pagpapatakbo
+### Opsyonal na pag-setup ng libreng provider sa unang paggamit
 
-Nag-aalok ang wizard sa unang pagpapatakbo ng tahasang card na **Mag-set up ng mga libreng provider**. Kinukuha nito ang kasalukuyang
-listahan ng mga kuwalipikadong provider mula sa registry ng OmniRoute para sa mga provider na hindi nangangailangan ng authentication, pagkatapos ay hinahayaan kang suriin at alisin sa pagkakapili ang bawat
-provider bago kumpirmahin. Ipinapakita ng OmniRoute ang abiso ng pag-iingat ng provider at isang link patungo sa site nito
+Nag-aalok ang wizard sa unang paggamit ng tahasang card na **Mag-set up ng mga libreng provider**. Kinukuha nito ang kasalukuyang
+listahan ng mga kwalipikadong provider mula sa registry ng mga provider ng OmniRoute na hindi nangangailangan ng authentication, pagkatapos ay hinahayaan kang suriin at alisin sa pagkakapili ang bawat
+provider bago kumpirmahin. Ipinapakita ng OmniRoute ang paalala sa pag-iingat ng provider at isang link sa site nito
 upang masuri mo muna ang mga tuntunin, privacy, availability, at rate limit ng third party.
 
-Opsyonal ang pagkilos na ito: hindi kailanman tahimik na gumagawa ng mga koneksyon sa libreng provider ang pagtatapos sa wizard.
-Gumagawa lamang ito ng mga provider na wala pa rin, hindi nito binabago ang mga kasalukuyang naka-customize na koneksyon,
-at paisa-isa nitong iniuulat ang mga nagawang provider, mga naka-configure na, at mga nabigong provider. Maaari mong
+Opsyonal ang pagkilos na ito: hindi kailanman palihim na gumagawa ng mga koneksyon sa libreng provider ang pagtatapos sa wizard.
+Ginagawa lamang nito ang mga provider na wala pa, hindi nito binabago ang mga kasalukuyang naka-customize na koneksyon,
+at paisa-isa nitong iniuulat ang mga nagawa, naka-configure na, at nabigong provider. Maaari mong
 ligtas na subukang muli ang mga nabigo lamang pagkatapos ng bahagyang resulta.
 
-### Opsyon A: Libreng Provider (Walang Credit Card)
+### Opsyon A: Libreng Provider (Hindi Kailangan ng Credit Card)
 
 1. Buksan ang dashboard sa `http://localhost:20128`
 2. Pumunta sa **Mga Provider** → **Magdagdag ng Provider**
 3. Pumili ng isa sa mga libreng provider na ito:
-   - **Kiro AI** — Mga libreng Claude model (walang kinakailangang authentication)
-   - **OpenCode Free** — Mga libreng GPT model (walang kinakailangang authentication)
-   - **Pollinations** — Libreng GPT-5, Claude, Gemini (walang kinakailangang key)
+   - **Kiro AI** — Mga libreng Claude model (hindi kailangan ng authentication)
+   - **Pollinations** — Libreng GPT-5, Claude, Gemini (hindi kailangan ng key)
    - **LongCat** — 10M libreng token (isang beses na grant, nangangailangan ng account + KYC)
    - **Cloudflare AI** — 50+ model, 10K neuron/araw
    - **MLX Gemma 26B** — Lokal na Apple Silicon model (~38.5 tok/s, ~15.9GB RAM)
    - **MLX Qwen 3.8 27B** — Lokal na Apple Silicon model (~9.1 tok/s, ~13.1GB RAM)
-4. I-click ang **Ikonekta**
-5. Tapos na! Mayroon ka na ngayong libreng access sa AI.
+4. I-click ang **Kumonekta**
+5. Tapos na! Mayroon ka nang libreng access sa AI.
 
-### Opsyon B: API Key Provider (May Bayad)
+### Opsyon B: Provider na Gumagamit ng API Key (May Bayad)
 
 1. Kumuha ng API key mula sa website ng provider:
    - **OpenAI**: https://platform.openai.com/api-keys
@@ -67,8 +66,8 @@ ligtas na subukang muli ang mga nabigo lamang pagkatapos ng bahagyang resulta.
 3. Pumunta sa **Mga Provider** → **Magdagdag ng Provider**
 4. Piliin ang iyong provider
 5. I-paste ang iyong API key
-6. I-click ang **Ikonekta**
-7. Tapos na! Mayroon ka na ngayong access sa mga model ng provider na iyon.
+6. I-click ang **Kumonekta**
+7. Tapos na! May access ka na ngayon sa mga model ng provider na iyon.
 
 ### Opsyon C: OAuth Provider (Subscription)
 
@@ -77,15 +76,15 @@ ligtas na subukang muli ang mga nabigo lamang pagkatapos ng bahagyang resulta.
 3. Piliin ang iyong provider (hal., Claude Code, GitHub Copilot)
 4. I-click ang **Kumonekta gamit ang OAuth**
 5. Mag-login gamit ang iyong account
-6. Tapos na! Mayroon ka na ngayong access sa mga model na kasama sa iyong subscription.
+6. Tapos na! May access ka na ngayon sa mga model na kasama sa iyong subscription.
 
 ### Opsyon D: Mga Lokal na MLX Model (Apple Silicon)
 
-Para sa mga Apple Silicon Mac na may unified memory, sinusuportahan ng OmniRoute ang pagkonekta sa mga lokal na MLX model na tumatakbo sa pamamagitan ng `mlx-lm.server` bilang mga regular na lokal na provider na compatible sa OpenAI.
+Para sa mga Apple Silicon Mac na may unified memory, sinusuportahan ng OmniRoute ang pagkonekta sa mga lokal na MLX model na tumatakbo sa pamamagitan ng `mlx-lm.server` bilang mga karaniwang lokal na provider na compatible sa OpenAI.
 
 #### Mga Kinakailangan
 
-- **Apple Silicon Mac** (M1/M2/M3/M4) na may inirerekomendang 24GB+ unified memory
+- **Apple Silicon Mac** (M1/M2/M3/M4) na may 24GB+ unified memory ang inirerekomenda
 - **uv** package manager: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
@@ -114,7 +113,7 @@ Para sa mga Apple Silicon Mac na may unified memory, sinusuportahan ng OmniRoute
 3. **Kumonekta sa OmniRoute Dashboard**:
    - Pumunta sa **Mga Provider** → **Magdagdag ng Provider**
    - Piliin ang **MLX Gemma 26B** o **MLX Qwen 3.8 27B**
-   - I-click ang **Ikonekta** (walang kinakailangang API key)
+   - I-click ang **Kumonekta** (hindi kailangan ng API key)
 
 4. **Gamitin sa OpenCode**:
    ```bash
@@ -129,22 +128,22 @@ Para sa mga Apple Silicon Mac na may unified memory, sinusuportahan ng OmniRoute
 
 #### Pamamahala ng Memory
 
-**Mahalaga**: Sa 24GB unified memory, **isang malaking MLX model lamang ang maaaring tumakbo sa bawat pagkakataon**.
+**Mahalaga**: Sa 24GB na unified memory, **isang malaking MLX model lamang ang maaaring tumakbo sa bawat pagkakataon**.
 
-- Gemma 26B: ~15.9GB peak memory
-- Qwen 3.8 27B: ~13.1GB peak memory
+- Gemma 26B: ~15.9GB pinakamataas na paggamit ng memory
+- Qwen 3.8 27B: ~13.1GB pinakamataas na paggamit ng memory
 
-Kailangan mo itong pamahalaan nang manu-mano:
+Dapat mo itong pamahalaan nang manu-mano:
 
 - Magpatakbo lamang ng isang MLX server sa bawat pagkakataon, o
 - Patakbuhin ang dalawa sa magkahiwalay na machine, o
 - Ihinto ang isa bago simulan ang isa pa
 
-Hindi awtomatikong pinamamahalaan ng OmniRoute ang mga proseso ng MLX server — inililipat lamang nito ang mga request sa mga endpoint na compatible sa OpenAI na kino-configure mo.
+Hindi awtomatikong pinamamahalaan ng OmniRoute ang mga proseso ng MLX server — niruruta lamang nito ang mga request sa mga endpoint na compatible sa OpenAI na kino-configure mo.
 
 #### Suporta sa Tool Calling
 
-Sinusuportahan ng dalawang model ang tool calling na compatible sa OpenAI. Subukan gamit ang:
+Sinusuportahan ng parehong model ang tool calling na compatible sa OpenAI. Subukan gamit ang:
 
 ```bash
 curl -X POST http://localhost:20128/v1/chat/completions \
@@ -152,20 +151,20 @@ curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "mlx-gemma/gemma-4-26b",
-    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
-    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+    "messages": [{"role": "user", "content": "Ano ang 2+2? Gamitin ang calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Kalkulahin", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
   }'
 ```
 
 #### Pag-troubleshoot
 
-| Isyu                            | Solusyon                                                                                                        |
-| ------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Hindi gumagana ang server       | Suriin ang `uv run mlx_lm.server --help` at tiyaking tama ang mga model ID                                      |
-| Kulang ang memory               | Tiyaking isang model lang ang tumatakbo; isara ang ibang app; tingnan ang Activity Monitor                      |
-| Tinanggihan ang koneksyon       | Tiyaking tumatakbo ang server sa tamang port (11435/11436)                                                      |
-| Mabagal ang mga tugon           | Nilo-load ng unang request ang model sa memory (~30-60s); mabilis na ang mga susunod na request                 |
-| Hindi gumagana ang tool calling | Tiyaking sinusuportahan ng model ang mga tool; tingnan ang mga log ng OmniRoute para sa mga error sa pagsasalin |
+| Isyu                       | Solusyon                                                                                                        |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Hindi magsimula ang server | Suriin ang `uv run mlx_lm.server --help` at tiyaking tama ang mga model ID                                      |
+| Kulang ang memory          | Tiyaking isang model lamang ang tumatakbo; isara ang ibang app; tingnan ang Activity Monitor                    |
+| Tinanggihan ang koneksyon  | Tiyaking tumatakbo ang server sa tamang port (11435/11436)                                                      |
+| Mabagal na mga tugon       | Nilo-load ng unang request ang model sa memory (~30-60s); mabilis na ang mga susunod na request                 |
+| Nabibigo ang tool calling  | Tiyaking sinusuportahan ng model ang mga tool; tingnan ang mga log ng OmniRoute para sa mga error sa pagsasalin |
 
 ---
 
@@ -173,17 +172,16 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 Nag-aalok ang mga provider na ito ng **libreng access** nang hindi nangangailangan ng credit card:
 
-| Provider          | Libreng Quota                | Mga Model                                | Paano Kumonekta                   |
-| ----------------- | ---------------------------- | ---------------------------------------- | --------------------------------- |
-| **Kiro AI**       | 50 credit/buwan              | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Hindi kailangan ng authentication |
-| **OpenCode Free** | Walang limitasyon            | GPT-4o, Claude, Gemini                   | Hindi kailangan ng authentication |
-| **Pollinations**  | Hindi kailangan ng key       | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Hindi kailangan ng authentication |
-| **LongCat**       | 10M nang isang beses         | LongCat-2.0                              | API key + KYC                     |
-| **Cloudflare AI** | 10K neuron/araw              | 50+ model                                | Hindi kailangan ng authentication |
-| **NVIDIA NIM**    | ~40 RPM                      | 129 model                                | Kailangan ng API key              |
-| **Cerebras**      | $5 credit sa pagpaparehistro | GLM 4.7, GPT-OSS 120B                    | API key + card                    |
+| Provider          | Libreng Quota            | Mga Model                                | Paano Kumonekta         |
+| ----------------- | ------------------------ | ---------------------------------------- | ----------------------- |
+| **Kiro AI**       | 50 credit/buwan          | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Hindi kailangan ng auth |
+| **Pollinations**  | Hindi kailangan ng key   | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Hindi kailangan ng auth |
+| **LongCat**       | 10M nang isang beses     | LongCat-2.0                              | API key + KYC           |
+| **Cloudflare AI** | 10K neuron/araw          | 50+ model                                | Hindi kailangan ng auth |
+| **NVIDIA NIM**    | ~40 RPM                  | 129 model                                | Kailangan ng API key    |
+| **Cerebras**      | $5 credit sa pag-sign up | GLM 4.7, GPT-OSS 120B                    | API key + card          |
 
-**Tip**: Ikonekta ang maraming libreng provider para sa **walang limitasyong libreng AI** na may awtomatikong fallback!
+**Tip**: Kumonekta sa maraming libreng provider para sa **walang limitasyong libreng AI** na may awtomatikong fallback!
 
 ---
 
@@ -236,24 +234,24 @@ Nakakonekta na ang iyong provider. Magagamit mo ito sa pamamagitan ng `model: "a
 
 ---
 
-## Paggamit ng Maraming Provider
+## Paggamit ng Maramihang Provider
 
-Pinakamahusay na gumagana ang OmniRoute kapag may **maraming provider**. Binibigyan ka nito ng:
+Pinakamahusay gumana ang OmniRoute kapag may **maramihang provider**. Nagbibigay ito sa iyo ng:
 
-- **Awtomatikong fallback** — Kapag pumalya ang isang provider, susubukan ng OmniRoute ang susunod
+- **Awtomatikong fallback** — Kung pumalya ang isang provider, susubukan ng OmniRoute ang susunod
 - **Pag-optimize ng gastos** — Pinipili ng OmniRoute ang pinakamurang provider para sa bawat request
 - **Pag-optimize ng bilis** — Pinipili ng OmniRoute ang pinakamabilis na provider para sa bawat request
 - **Pag-optimize ng kalidad** — Pinipili ng OmniRoute ang pinakamahusay na provider para sa bawat gawain
 
 ### Inirerekomendang Setup
 
-Kumonekta sa hindi bababa sa **3 provider** para sa pinakamahusay na karanasan:
+Ikonekta ang hindi bababa sa **3 provider** para sa pinakamagandang karanasan:
 
-1. **Isang libreng provider** (Kiro, OpenCode Free, o Pollinations) — Palaging available
+1. **Isang libreng provider** (Kiro o Pollinations) — Palaging available
 2. **Isang mabilis na provider** (Groq, Cerebras) — Para sa mabilis na mga tugon
-3. **Isang de-kalidad na provider** (OpenAI, Anthropic, Google) — Para sa mga komplikadong gawain
+3. **Isang provider na may mataas na kalidad** (OpenAI, Anthropic, Google) — Para sa mga komplikadong gawain
 
-Pagkatapos, gamitin ang `model: "auto"` at awtomatikong pipiliin ng OmniRoute ang pinakamahusay para sa bawat request.
+Pagkatapos, gamitin ang `model: "auto"` at awtomatikong pipiliin ng OmniRoute ang pinakamahusay na provider para sa bawat request.
 
 ---
 
@@ -333,27 +331,27 @@ at nako-configure na timeout; hindi ipinapangako ng gawi na ito ang mga iyon.
 
 ## Mga Karaniwang Tanong
 
-### "Kailangan ko bang magbayad para magamit ang OmniRoute?"
+### "Kailangan ko bang magbayad para gamitin ang OmniRoute?"
 
-**Hindi!** Libre at open-source ang OmniRoute. Maaari kang gumamit ng mga libreng provider (Kiro, OpenCode Free, Pollinations) nang walang anumang bayad. Magbabayad ka lang kung pipiliin mong gumamit ng mga may bayad na provider.
+**Hindi!** Libre at open-source ang OmniRoute. Maaari kang gumamit ng mga libreng provider (Kiro, Pollinations) nang walang anumang bayad. Magbabayad ka lamang kung pipiliin mong gumamit ng mga bayad na provider.
 
-### "Aling provider ang dapat kong unang gamitin?"
+### "Aling provider ang dapat kong simulang gamitin?"
 
-Magsimula sa **Kiro AI** — libre ito, hindi nangangailangan ng API key, at nagbibigay sa iyo ng access sa mga Claude model. Pagkatapos, magdagdag ng iba pang provider kung kinakailangan.
+Magsimula sa **Kiro AI** — libre ito, hindi nangangailangan ng API key, at binibigyan ka nito ng access sa mga Claude model. Pagkatapos, magdagdag ng iba pang provider kung kinakailangan.
 
 ### "Maaari ba akong gumamit ng maraming provider nang sabay-sabay?"
 
-**Oo!** Iyan ang pangunahing layunin ng OmniRoute. Ikonekta ang maraming provider at gamitin ang `model: "auto"` upang hayaan ang OmniRoute na piliin ang pinakamahusay para sa bawat request.
+**Oo!** Iyan mismo ang layunin ng OmniRoute. Ikonekta ang maraming provider at gamitin ang `model: "auto"` upang hayaan ang OmniRoute na piliin ang pinakamahusay para sa bawat request.
 
-### "Paano kung hindi gumana ang isang provider?"
+### "Paano kung mawalan ng serbisyo ang isang provider?"
 
-Awtomatikong nilalampasan ng OmniRoute ang mga provider na hindi gumana at sinusubukan ang susunod. Wala kang kailangang gawin.
+Awtomatikong nilalaktawan ng OmniRoute ang mga provider na nagkaaberya at sinusubukan ang susunod. Wala kang kailangang gawin.
 
 ### "Paano ko ididiskonekta ang isang provider?"
 
-Pumunta sa Mga Provider → i-click ang provider → i-click ang **Idiskonekta**.
+Pumunta sa Providers → i-click ang provider → i-click ang **Disconnect**.
 
-### "Maaari ko bang gamitin ang aking mga kasalukuyang API key?"
+### "Maaari ko bang gamitin ang mga kasalukuyan kong API key?"
 
 **Oo!** Kung mayroon ka nang mga API key para sa OpenAI, Anthropic, Google, at iba pa, maaari mong gamitin ang mga ito sa OmniRoute. I-paste lamang ang mga ito kapag ikinokonekta ang provider.
 

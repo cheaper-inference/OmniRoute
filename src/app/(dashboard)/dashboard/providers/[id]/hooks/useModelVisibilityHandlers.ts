@@ -116,7 +116,9 @@ export function useModelVisibilityHandlers({
   const [clearingModels, setClearingModels] = useState(false);
   const [modelFilter, setModelFilter] = useState("");
   const [testingModelId, setTestingModelId] = useState<string | null>(null);
-  const [modelTestStatus, setModelTestStatus] = useState<Record<string, "ok" | "error" | "quota">>({});
+  const [modelTestStatus, setModelTestStatus] = useState<Record<string, "ok" | "error" | "quota">>(
+    {}
+  );
   const [testingAll, setTestingAll] = useState(false);
   const [testProgress, setTestProgress] = useState<{ done: number; total: number } | null>(null);
   const [autoHideFailed, setAutoHideFailed] = useState(false);
@@ -263,11 +265,17 @@ export function useModelVisibilityHandlers({
     if (!confirm(t("clearAllModelsConfirm"))) return;
     setClearingModels(true);
     try {
-      const res = await fetch(
-        `/api/provider-models?provider=${encodeURIComponent(providerStorageAlias)}&all=true`,
-        { method: "DELETE" }
+      const targetProviders = Array.from(
+        new Set([providerStorageAlias, providerId].filter(Boolean))
       );
-      if (res.ok) {
+      const responses = await Promise.all(
+        targetProviders.map((targetProvider) =>
+          fetch(`/api/provider-models?provider=${encodeURIComponent(targetProvider)}&all=true`, {
+            method: "DELETE",
+          })
+        )
+      );
+      if (responses.every((res) => res.ok)) {
         // Also delete all aliases that belong to this provider
         await Promise.all(
           providerAliasEntries.map(([alias]) =>
@@ -316,6 +324,11 @@ export function useModelVisibilityHandlers({
           )
         );
         setModelTestStatus((prev) => ({ ...prev, [modelId]: "ok" }));
+      } else if (data.skipped) {
+        // A skipped probe never ran — neither healthy nor broken, so no status icon.
+        notify.info(
+          extractApiErrorMessage(data, providerText(t, "modelTestFailed", "Model test failed"))
+        );
       } else {
         // extractApiErrorMessage coerces any object-shaped `error` (e.g. a Zod
         // format object) to a string so notify.error never hands the toast a

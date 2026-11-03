@@ -1,5 +1,10 @@
 "use client";
 
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import Toggle from "@/shared/components/Toggle";
+import Input from "@/shared/components/Input";
+
 import {
   useMemo,
   useState,
@@ -45,6 +50,7 @@ interface ModelsTabProps {
   blockClaudeCodeFamily: (familyId: ClaudeCodeBlockableFamilyId) => void;
   setCatalogScope: (scope: CatalogScope) => void;
   setDisableNonPublicModels: (disabled: boolean) => void;
+  setForcedModel: (model: string) => void;
   errors?: string[];
 }
 
@@ -179,30 +185,26 @@ function ModelAccessModeToggle({
   return (
     <div className="flex gap-2 p-1 bg-surface rounded-lg">
       {/* Access Mode Toggle */}
-      <button
-        type="button"
+      <Button
+        size="sm"
+        variant={allowAll ? "primary" : "ghost"}
+        aria-pressed={allowAll}
         onClick={onSelectAll}
-        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-          allowAll
-            ? "bg-primary text-white"
-            : "text-text-muted hover:bg-black/5 dark:hover:bg-white/5"
-        }`}
+        className="gap-1.5 text-xs flex-1 justify-center"
       >
-        <span className="material-symbols-outlined text-[18px]">lock_open</span>
+        <Icon name="lock_open" size={18} />
         {t("allowAll")}
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        size="sm"
+        variant={!allowAll ? "primary" : "ghost"}
+        aria-pressed={!allowAll}
         onClick={onRestrict}
-        className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-          !allowAll
-            ? "bg-primary text-white"
-            : "text-text-muted hover:bg-black/5 dark:hover:bg-white/5"
-        }`}
+        className="gap-1.5 text-xs flex-1 justify-center"
       >
-        <span className="material-symbols-outlined text-[18px]">lock</span>
+        <Icon name="lock" size={18} />
         {t("restrict")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -225,25 +227,17 @@ function ModelAccessInfoBanner({
     <div
       className={`flex items-start gap-2 p-3 rounded-lg ${
         formState.allowAll
-          ? "bg-green-500/10 border border-green-500/30"
-          : "bg-amber-500/10 border border-amber-500/30"
+          ? "bg-success/10 border border-success/30"
+          : "bg-warning/10 border border-warning/30"
       }`}
     >
       {/* Info Banner */}
-      <span
-        className={`material-symbols-outlined text-[18px] ${
-          formState.allowAll ? "text-green-500" : "text-amber-500"
-        }`}
-      >
-        {formState.allowAll ? "info" : "warning"}
-      </span>
-      <p
-        className={`text-xs ${
-          formState.allowAll
-            ? "text-green-700 dark:text-green-300"
-            : "text-amber-700 dark:text-amber-300"
-        }`}
-      >
+      <Icon
+        name={formState.allowAll ? "info" : "warning"}
+        size={18}
+        className={formState.allowAll ? "text-success" : "text-warning"}
+      />
+      <p className={`text-xs ${formState.allowAll ? "text-success" : "text-warning"}`}>
         {formState.allowAll
           ? t("allowAllDesc")
           : !modelsLoaded
@@ -258,13 +252,42 @@ function ModelAccessInfoBanner({
   );
 }
 
+/** Per-key enforced model: every chat request with this key is routed to it. */
+function ForcedModelSetting({
+  formState,
+  allModels,
+  setForcedModel,
+}: Pick<ModelsTabProps, "formState" | "allModels" | "setForcedModel">) {
+  const t = useTranslations("apiManager");
+
+  return (
+    <div className="flex flex-col gap-2 p-4 rounded-lg border border-border bg-surface/40">
+      <Input
+        id="api-key-forced-model"
+        label={t("forcedModel")}
+        hint={t("forcedModelDesc")}
+        type="text"
+        list="api-key-forced-model-options"
+        value={formState.forcedModel}
+        maxLength={300}
+        onChange={(e) => setForcedModel(e.target.value)}
+        placeholder={t("forcedModelPlaceholder")}
+      />
+      <datalist id="api-key-forced-model-options">
+        {allModels.map((model) => (
+          <option key={model.id} value={model.id} />
+        ))}
+      </datalist>
+    </div>
+  );
+}
+
 function CatalogVisibilitySettings({
   formState,
   setCatalogScope,
   setDisableNonPublicModels,
 }: Pick<ModelsTabProps, "formState" | "setCatalogScope" | "setDisableNonPublicModels">) {
   const t = useTranslations("apiManager");
-  const tc = useTranslations("common");
 
   return (
     <>
@@ -277,22 +300,13 @@ function CatalogVisibilitySettings({
           <p className="text-sm font-medium text-text-main">{t("disableNonPublicModels")}</p>
           <p className="text-xs text-text-muted">{t("disableNonPublicModelsDesc")}</p>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={formState.disableNonPublicModels}
-          onClick={() => setDisableNonPublicModels(!formState.disableNonPublicModels)}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-            formState.disableNonPublicModels
-              ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30"
-              : "bg-black/5 dark:bg-white/5 text-text-muted border border-border"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[14px]">
-            {formState.disableNonPublicModels ? "shield_lock" : "shield"}
-          </span>
-          {formState.disableNonPublicModels ? tc("yes") : tc("no")}
-        </button>
+        <Toggle
+          size="sm"
+          className="shrink-0"
+          checked={formState.disableNonPublicModels}
+          onChange={() => setDisableNonPublicModels(!formState.disableNonPublicModels)}
+          ariaLabel={t("disableNonPublicModels")}
+        />
       </div>
     </>
   );
@@ -337,20 +351,22 @@ function SelectedModelsSummary({
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-primary">{selectedPermissionSummary}</span>
         <div className="flex gap-1">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => selectAllModels(allModels.map((m) => m.id))}
-            className="text-[10px] text-primary hover:bg-primary/10 px-1.5 py-0.5 rounded transition-colors"
+            className="h-auto min-h-0 px-1.5 py-0.5 text-[10px]"
           >
             {tc("all")}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={deselectAllModels}
-            className="text-[10px] text-red-500 hover:bg-red-500/10 px-1.5 py-0.5 rounded transition-colors"
+            className="h-auto min-h-0 px-1.5 py-0.5 text-[10px] text-error"
           >
             {t("clear")}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -424,28 +440,33 @@ function ClaudeCodeDefaultScopeChip({
   return (
     <div className="flex flex-col gap-1 basis-full">
       <span className="inline-flex w-fit items-center gap-0.5 px-1.5 py-0.5 bg-primary/10 text-text-main text-[10px] rounded border border-primary/35">
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="sm"
           onClick={() => setClaudeCodeFamiliesExpanded((prev) => !prev)}
-          className="inline-flex items-center gap-1 font-mono text-text-main"
+          className="h-auto min-h-0 gap-1 p-0 font-mono text-[10px] text-text-main"
           title={t("expandClaudeCodeFamilies")}
           aria-expanded={claudeCodeFamiliesExpanded}
         >
           <span className="truncate max-w-[140px]" title={scope}>
             {CLAUDE_CODE_DEFAULT_MODEL_NAME}
           </span>
-          <span className="material-symbols-outlined text-[12px] text-primary">
-            {claudeCodeFamiliesExpanded ? "expand_less" : "expand_more"}
-          </span>
-        </button>
-        <button
-          type="button"
+          <Icon
+            name={claudeCodeFamiliesExpanded ? "expand_less" : "expand_more"}
+            size={12}
+            className="text-primary"
+          />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon-sm"
           onClick={() => toggleModel(scope)}
-          className="text-text-muted hover:text-red-500 transition-colors"
+          className="h-4 w-4 min-h-0 min-w-0 p-0 text-text-muted hover:text-error"
           title={t("removeClaudeCodeDefault")}
+          aria-label={t("removeClaudeCodeDefault")}
         >
-          <span className="material-symbols-outlined text-[12px]">close</span>
-        </button>
+          <Icon name="close" size={12} />
+        </Button>
       </span>
 
       {claudeCodeFamiliesExpanded && (
@@ -491,8 +512,8 @@ function ClaudeCodeFamilyChips({
             key={family.id}
             className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] rounded border ${
               canBlock
-                ? "bg-white dark:bg-surface text-text-main border-border"
-                : "bg-black/5 dark:bg-white/5 text-text-muted border-border"
+                ? "bg-surface text-text-main border-border"
+                : "bg-surface-2 text-text-muted border-border"
             }`}
             title={
               canBlock
@@ -502,14 +523,16 @@ function ClaudeCodeFamilyChips({
           >
             <span className="font-mono">{family.label}</span>
             {canBlock && (
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={() => blockClaudeCodeFamily(family.id as ClaudeCodeBlockableFamilyId)}
-                className="text-text-muted hover:text-red-500 transition-colors"
+                className="h-4 w-4 min-h-0 min-w-0 p-0 text-text-muted hover:text-error"
                 title={`Block ${family.label} family`}
+                aria-label={`Block ${family.label} family`}
               >
-                <span className="material-symbols-outlined text-[12px]">close</span>
-              </button>
+                <Icon name="close" size={12} />
+              </Button>
             )}
           </span>
         );
@@ -522,6 +545,7 @@ function ProviderScopeChip({
   scope,
   toggleModel,
 }: Pick<ModelsTabProps, "toggleModel"> & { scope: string }) {
+  const t = useTranslations("apiManager");
   const provider = scope.slice(0, -2);
   return (
     <span
@@ -529,13 +553,15 @@ function ProviderScopeChip({
       title={scope}
     >
       <span className="font-mono truncate max-w-[120px]">{provider}</span>
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={() => toggleModel(scope)}
-        className="text-text-muted hover:text-red-500 transition-colors"
+        className="h-4 w-4 min-h-0 min-w-0 p-0 text-text-muted hover:text-error"
+        aria-label={t("removeSelection", { name: provider })}
       >
-        <span className="material-symbols-outlined text-[12px]">close</span>
-      </button>
+        <Icon name="close" size={12} />
+      </Button>
     </span>
   );
 }
@@ -544,18 +570,21 @@ function SelectedModelChip({
   modelId,
   toggleModel,
 }: Pick<ModelsTabProps, "toggleModel"> & { modelId: string }) {
+  const t = useTranslations("apiManager");
   return (
-    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-white dark:bg-surface text-text-main text-[10px] rounded border border-border">
+    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-surface text-text-main text-[10px] rounded border border-border">
       <span className="font-mono truncate max-w-[120px]" title={modelId}>
         {getModelDisplayName(modelId)}
       </span>
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="icon-sm"
         onClick={() => toggleModel(modelId)}
-        className="text-text-muted hover:text-red-500 transition-colors"
+        className="h-4 w-4 min-h-0 min-w-0 p-0 text-text-muted hover:text-error"
+        aria-label={t("removeSelection", { name: getModelDisplayName(modelId) })}
       >
-        <span className="material-symbols-outlined text-[12px]">close</span>
-      </button>
+        <Icon name="close" size={12} />
+      </Button>
     </span>
   );
 }
@@ -575,6 +604,7 @@ export default function ModelsTab({
   blockClaudeCodeFamily,
   setCatalogScope,
   setDisableNonPublicModels,
+  setForcedModel,
   errors,
 }: ModelsTabProps) {
   const { expandedProviders, expandAllProviders, handleToggleExpand } = useProviderGroupExpansion(
@@ -602,6 +632,11 @@ export default function ModelsTab({
         formState={formState}
         setCatalogScope={setCatalogScope}
         setDisableNonPublicModels={setDisableNonPublicModels}
+      />
+      <ForcedModelSetting
+        formState={formState}
+        allModels={allModels}
+        setForcedModel={setForcedModel}
       />
       {!formState.allowAll && scopeSummary.selectedCount > 0 && (
         <SelectedModelsSummary

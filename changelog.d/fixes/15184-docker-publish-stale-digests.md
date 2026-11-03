@@ -1,1 +1,0 @@
-- fix(ci): docker-publish no longer leaks stale digests from self-hosted runners into version manifests (#15184)

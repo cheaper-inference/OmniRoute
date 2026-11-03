@@ -37,33 +37,33 @@ Biežāk sastopamās OmniRoute problēmas un to risinājumi.
 
 ---
 
-### Bezmaksas pakalpojumu sniedzēju pieprasījumu biežuma ierobežojumi (429 / 400 / 401)
+### Bezmaksas pakalpojumu sniedzēju ātruma ierobežošana (429 / 400 / 401)
 
-**Pazīme**: Izmantojot `model: "auto"` ar bezmaksas pakalpojumu sniedzējiem vai tādiem, kuriem nav vajadzīga autentifikācija (opencode, auggie u.c.), dažkārt atbilžu vietā tiek parādīts `HTTP 429`, `400` vai `401`. Pēc īsa brīža atkārtoti nosūtot to pašu uzvedni, pieprasījumi izdodas, taču automatizācija (cron uzdevumi, aģenti, skripti) pārtrauc darbu jau pēc pirmās kļūmes.
+**Simptoms**: izmantojot `model: "auto"` ar bezmaksas/autentifikāciju neprasošiem pakalpojumu sniedzējiem (auggie u.c.), atbilžu vietā periodiski tiek saņemts `HTTP 429`, `400` vai `401`. Atkārtoti nosūtot to pašu uzvedni pēc dažiem mirkļiem, pieprasījumi izdodas, taču automatizācija (cron uzdevumi, aģenti, skripti) pārtrauc darbu pēc pirmās kļūmes.
 
-**Pamatcēlonis**: Vienlaikus sakrīt trīs neatkarīgi kļūmju veidi:
+**Pamatcēlonis**: summējas trīs neatkarīgi kļūmju režīmi:
 
-1. **Pakalpojuma sniedzēja pieprasījumu biežuma ierobežojums (`429`)**: Bezmaksas līmeņiem var tikt piemērota kvota noteiktam laika intervālam. Paralēlu izsaukumu vilnis to izsmeļ, tāpēc nākamais pieprasījums tiek noraidīts, līdz sākas jauns laika intervāls.
-2. **Bojāts modelis tiešās pārsūtīšanas režīmā (`400`/`401`)**: `auto/*` kopās var būt iekļauti `opencode` tiešās pārsūtīšanas modeļi, kuri ir reģistrēti katalogā, bet kuriem nav derīgu akreditācijas datu (piem., `oc/north-mini-code-free` → `401`). Automātiskais maršrutētājs izmēģina kādu no tiem, rodas kļūme, un kļūda tiek nodota tālāk, pirms tiek aktivizēta pārslēgšanās uz rezerves variantu.
-3. **Vienlaicīguma izraisīta pastiprināšanās (`429` slodzes apstākļos)**: Ja vairākas aģentu vai cron sesijas vienlaikus izmanto `auto`, kopējais pieprasījumu biežums pārsniedz bezmaksas pakalpojumu sniedzēju pieļaujamo līmeni, tāpēc derīgi izsaukumi tiek atzīmēti kā ļaunprātīgi.
+1. **Pakalpojumu sniedzēja ātruma ierobežojums (`429`)**: bezmaksas līmeņi var noteikt kvotu katram laika logam. Paralēlu izsaukumu vilnis to iztērē, tāpēc nākamais pieprasījums tiek noraidīts, līdz logs tiek atiestatīts.
+2. **Bojāts modelis tiešās pārsūtīšanas režīmā (`400`/`401`)**: `auto/*` kopās var būt tiešās pārsūtīšanas modeļi, kuri ir reģistrēti katalogā, bet kuriem nav derīgu akreditācijas datu (→ `401`). Automātiskais maršrutētājs izmēģina vienu no tiem, cieš neveiksmi, un kļūda tiek nodota tālāk, pirms sāk darboties atkāpšanās mehānisms.
+3. **Vienlaicīguma pastiprinājums (`429` slodzes apstākļos)**: ja vairākas aģentu/cron sesijas vienlaikus izmanto `auto`, kopējais pieprasījumu biežums pārsniedz bezmaksas pakalpojumu sniedzēju pieļaujamo līmeni, tāpēc leģitīmi izsaukumi tiek atzīmēti kā ļaunprātīgi.
 
-**Pārbaudīts risinājums (kopienas ziņojums, 2026-08-10)**: pielāgojiet trīs vides mainīgos, lai rotācija, vienlaicīguma pārvaldība un pārslēgšanās uz rezerves variantu absorbētu bezmaksas līmeņa svārstības, nevis to dēļ pārtrauktu darbību:
+**Pārbaudīts risinājums (kopienas ziņojums, 2026-08-10)**: pielāgojiet trīs vides mainīgos, lai rotācija, vienlaicīguma kontrole un atkāpšanās mehānisms absorbētu bezmaksas līmeņa nestabilitāti, nevis tās dēļ pārtrauktu darbību:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 gadījumā pāriet uz citu modeli/pakalpojuma sniedzēju (izlaiž bojātos tiešās pārsūtīšanas modeļus)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # tieši noteikts apjomīgu pieprasījumu uzņemšanas maksimums (pēc noklusējuma nav iestatīts: pieprasījumu skaita ierobežojuma nav; skatiet piezīmi tālāk)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # ierobežoto gaidīšanas laiku palielina virs RATE_LIMIT_MAX_WAIT_MS noklusējuma vērtības lēniem augšupējiem pakalpojumiem
+export OMNIROUTE_ROTATE_ON_400=true           # pārslēgties uz citu modeli/pakalpojumu sniedzēju pēc 400/401 (izlaiž bojātus tiešās pārsūtīšanas modeļus)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # precīzi noteikts smagsvara pieprasījumu pieņemšanas ierobežojums (pēc noklusējuma nav iestatīts: nav pieprasījumu skaita ierobežojuma; skatiet piezīmi tālāk)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # palielināt ierobežoto gaidīšanas laiku virs RATE_LIMIT_MAX_WAIT_MS noklusējuma vērtības lēniem augšupējiem pakalpojumiem
 ```
 
-Iestatiet tos OmniRoute procesa vidē (dēmona vidē, piemēram, izmantojot LaunchAgent plist vai `systemctl edit`) un pēc tam restartējiet OmniRoute. Rotācijas karodziņš ir vienīgais visefektīvākais līdzeklis: tas pilnīgu kļūmi pārvērš pārskatāmā atkārtotā mēģinājumā, izmantojot citu, darbspējīgu kopas pakalpojuma sniedzēju.
+Iestatiet tos OmniRoute procesa vidē (dēmonam, piemēram, izmantojot LaunchAgent plist vai `systemctl edit`) un pēc tam restartējiet OmniRoute. Rotācijas karodziņš ir vienīgais visefektīvākais līdzeklis: tas pārvērš neatgriezenisku kļūmi par nemanāmu atkārtotu mēģinājumu, izmantojot citu, darbspējīgu pakalpojumu sniedzēju kopā.
 
-**Piezīme**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ierobežo vienlaikus izpildāmo apjomīgo — gara konteksta — pieprasījumu skaitu; šis ierobežojums ir uzņemšanas vārteja, nevis pakalpojuma sniedzēja pieprasījumu biežuma ierobežotājs. **#503-fanout atjauninājums:** šis mainīgais pēc noklusējuma vairs netiek iestatīts (tagad tas ir saistošs tikai tad, ja ir tieši konfigurēts, kā parādīts iepriekš) — tā vietā apjomīgu pieprasījumu uzņemšanu ierobežo automātiski noteikts baitu budžets (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), kas pielāgojas resursdatora faktiskajam atmiņas ierobežojumam, tāpēc jaunā izvietojumā vajadzētu būt ievērojami mazāk `503 chat_admission_busy` noraidījumu, pat ja šis mainīgais vispār nav iestatīts; tā tieša iestatīšana šeit joprojām darbojas tieši tā, kā dokumentēts. Tieši norādītas baitu budžeta pārrakstīšanas vērtības tiek ierobežotas diapazonā no 8 MiB līdz 2 GiB. `413 body_exceeds_budget` nav pārejoša kļūme: palieliniet šo baitu budžetu, samaziniet `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` vai palieliniet procesa atmiņas ierobežojumu. `inflight_bytes_budget` izraisīta slodzes nomešana ir īslaicīga resursu konkurence, un šādā gadījumā pieprasījumu joprojām var mēģināt atkārtot. Katra pakalpojuma sniedzēja pieprasījumu biežuma ierobežošanu (`open-sse/services/rateLimitManager.ts`) atsevišķi pārvalda `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` un `RATE_LIMIT_AUTO_ENABLE` — skatiet `.env.example`.
+**Piezīme**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ierobežo to, cik daudz smagsvara — gara konteksta — pieprasījumu var izpildīt vienlaikus; šis ierobežojums ir pieņemšanas vārteja, nevis pakalpojumu sniedzēja ātruma ierobežotājs. **#503-fanout atjauninājums:** šis mainīgais vairs netiek iestatīts pēc noklusējuma (tagad tas stājas spēkā tikai tad, ja ir skaidri konfigurēts, kā norādīts iepriekš) — tā vietā smagsvara pieprasījumu pieņemšanu ierobežo automātiski aprēķināts baitu budžets (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`), kas pielāgojas resursdatora faktiskajam atmiņas ierobežojumam, tāpēc jaunā izvietojumā vajadzētu būt ievērojami mazāk `503 chat_admission_busy` noraidījumu, pat neiestatot šo mainīgo; tā skaidra iestatīšana šeit joprojām darbojas tieši tā, kā dokumentēts. Skaidri norādīti baitu budžeta pārrakstījumi tiek ierobežoti diapazonā no 8 MiB līdz 2 GiB. `413 body_exceeds_budget` nav pārejoša kļūda: palieliniet šo baitu budžetu, samaziniet `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` vai palieliniet procesa atmiņas ierobežojumu. `inflight_bytes_budget` izraisīta slodzes nomešana ir īslaicīga resursu konkurence, un šādu pieprasījumu joprojām var mēģināt atkārtot. Katra pakalpojumu sniedzēja ātruma ierobežošanu (`open-sse/services/rateLimitManager.ts`) atsevišķi pārvalda `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` un `RATE_LIMIT_AUTO_ENABLE` — skatiet `.env.example`.
 
-**Kā pārbaudīt, vai tas darbojas**: palaidiet savu aģentu/cron divas reizes īsā laika intervālā un pārliecinieties, ka abas izpildes ir veiksmīgas. Pirms labojuma otrā izpilde parasti izraisīja `429`/`401`. Pēc labojuma kļūmes (ja tādas rodas) tiek automātiski atkārtoti mēģinātas, un izsaukums tiek pabeigts. Varat arī izpildīt `curl /monitoring/health` un pakalpojumu sniedzēju savienojumos vērot lauku `rateLimitedUntil`, kā arī `circuitBreakers.providerBreakers[].state` attiecīgajiem pakalpojumu sniedzējiem — stāvoklis var būt `CLOSED`, `DEGRADED`, `OPEN` vai `HALF_OPEN` (skatiet `src/shared/utils/circuitBreaker.ts`), un pakalpojumu sniedzējs, kura izsaukumi turpina neizdoties, pārslēgsies no `CLOSED → DEGRADED → OPEN`, pirms atiestatīšanas periods ļaus veikt pārbaudes pieprasījumu (`HALF_OPEN`).
+**Kā pārbaudīt, vai risinājums darbojas**: divreiz īsā laika intervālā palaidiet savu aģentu/cron un pārliecinieties, ka abas izpildes ir veiksmīgas. Pirms labojuma otrā izpilde parasti rada `429`/`401`. Pēc labojuma kļūmju gadījumā tās tiek nemanāmi atkārtoti apstrādātas, un izsaukums tiek pabeigts. Varat arī izpildīt `curl /monitoring/health` un novērot lauku `rateLimitedUntil` pakalpojumu sniedzēju savienojumos, kā arī `circuitBreakers.providerBreakers[].state` attiecīgajiem pakalpojumu sniedzējiem — stāvoklis ir viens no `CLOSED`, `DEGRADED`, `OPEN` vai `HALF_OPEN` (skatiet `src/shared/utils/circuitBreaker.ts`), un pakalpojumu sniedzējs, kura darbība atkārtoti neizdodas, pārslēgsies no `CLOSED → DEGRADED → OPEN`, pirms atiestatīšanas logs atļaus pārbaudes pieprasījumu (`HALF_OPEN`).
 
-**Ja joprojām redzat 429**: šī pakalpojumu sniedzēja aktīvais konts patiešām ir izsmēlis savu _kvotu_ (ne tikai pieprasījumu biežuma ierobežojumu). Pievienojiet otru tā paša pakalpojumu sniedzēja kontu OmniRoute informācijas panelī → Providers → Accounts vai izmantojiet arī citu bezmaksas pakalpojumu sniedzēju (piemēram, `routeway`, `auggie`). Rotācija palīdz tikai īslaicīgu pieprasījumu biežuma ierobežojumu un 400/401 kļūdu gadījumā; pilnīgai kvotas izsmelšanai ir nepieciešami otra konta akreditācijas dati vai cits pakalpojumu sniedzējs.
+**Ja joprojām redzat 429**: šī pakalpojumu sniedzēja aktīvais konts patiešām ir iztērējis savu _kvotu_ (nevis tikai sasniedzis ātruma ierobežojumu). Pievienojiet otru tā paša pakalpojumu sniedzēja kontu OmniRoute informācijas panelī → Providers → Accounts vai pievienojiet citu bezmaksas pakalpojumu sniedzēju (piemēram, `routeway`, `auggie`). Rotācija palīdz tikai pārejošu ātruma ierobežojuma/400/401 kļūmju gadījumā; pilnīgai kvotas izsmelšanai nepieciešami otra konta akreditācijas dati vai cits pakalpojumu sniedzējs.
 
-**Ja redzat 403 redzes modeļiem (`auto/vision`, `bazaarlink/*`)**: pievienotajam kontam nav maksas plāna, kas ietver redzes iespējas, vai API atslēgai nav pietiekamu atļauju. Pakalpojumu sniedzēja informācijas panelī pārbaudiet, vai atslēgas tvērums ietver redzes/multimodālās iespējas, vai pievienojiet maksas līmeņa kontu un paturiet to kā redzes pieprasījumu mērķi.
+**Ja redzes modeļiem (`auto/vision`, `bazaarlink/*`) redzat 403**: pievienotajam kontam nav maksas plāna, kas ietver redzes funkcionalitāti, vai arī API atslēgai nav pietiekamu atļauju. Pakalpojumu sniedzēja informācijas panelī pārbaudiet, vai atslēgas tvērums ietver redzi/multimodalitāti, vai pievienojiet maksas līmeņa kontu un saglabājiet to kā redzes pieprasījumu mērķi.
 
 ---
 
@@ -94,29 +94,29 @@ Brīdinājumus rada novecojuši vienādranga atkarību diapazoni trešo pušu pa
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Palaižot `npm install -g omniroute`, jaunākas npm versijas (v11+ un v12+) pēc noklusējuma bloķē pakotņu dzīves cikla skriptus un parāda brīdinājumu par instalēšanas skriptiem:
+Palaižot `npm install -g omniroute`, jaunākās npm versijas (v11+ un v12+) pēc noklusējuma bloķē pakotņu dzīves cikla skriptus un parāda brīdinājumu par instalēšanas skriptiem:
 
 ```
-npm warn install-scripts 7 pakotņu instalēšanas skripti tika bloķēti, jo tie nav ietverti allowScripts:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Vai šo brīdinājumu var ignorēt?
 
-**Daļēji, taču darbināšana bez skriptiem nav ieteicama.** OmniRoute ietver saudzīgas rezerves iespējas: ja vietējās `better-sqlite3` sasaistes nevar ielādēt no savrupā komplekta, lietojumprogramma pārslēdzas uz alternatīviem draiveriem, piemēram, `node:sqlite` vai `sql.js` (skatiet [SQLite izpildlaika atrisināšana](../ops/SQLITE_RUNTIME.md)). Serveris joprojām tiks palaists, taču WASM rezerves risinājumu, piemēram, `sql.js`, izmantošana atspējo SQLite WAL (priekšrakstīšanas žurnāla) režīmu un palielina atmiņas patēriņu un diska sinhronizācijas papildu slodzi.
+**Daļēji, taču palaišana bez skriptiem nav ieteicama.** OmniRoute ietver drošus rezerves risinājumus: ja savrupajā komplektā nevar ielādēt vietējos `better-sqlite3` saistījumus, lietojumprogramma pārslēdzas uz alternatīviem draiveriem, piemēram, `node:sqlite` vai `sql.js` (skatiet [SQLite izpildlaika noteikšana](../ops/SQLITE_RUNTIME.md)). Serveris joprojām tiks palaists, taču WASM rezerves risinājumu, piemēram, `sql.js`, izmantošana atspējo SQLite WAL (Write-Ahead Logging — priekšrakstīšanas žurnalēšana) režīmu un palielina atmiņas patēriņu un diska sinhronizācijas slodzi.
 
 ### Kuri skripti patiešām ir nepieciešami?
 
 Ne visi bloķētie skripti ir būtiski OmniRoute darbībai:
 
-- **Būtiski (`omniroute`, `better-sqlite3`):** OmniRoute darbojas no Next.js savrupās lietojumprogrammas komplekta (`dist/`). Instalēšanas laikā npm lejupielādē vai kompilē resursdatoram specifisko vietējo SQLite draiveri augstākā līmeņa direktorijā `node_modules/better-sqlite3/`. Pēc tam OmniRoute `postinstall` skripts (`scripts/build/postinstall.mjs`) pārbauda un kopē šos resursdatoram specifiskos bināros failus uz `dist/node_modules/`, lai savrupais serveris varētu tiem piekļūt. Ja `omniroute` postinstall skripts ir bloķēts, šī kopēšanas darbība tiek izlaista.
-- **Neobligāti/tranzitīvi (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Tie ir būvēšanas palīgrīki, failu izmaiņu uzraudzības rīki vai sistēmas atslēgu saišķa utilītas. To atļaušana novērš būvēšanas brīdinājumus, taču tie nav nepieciešami maršrutēšanas pamatfunkcionalitātei.
-- **Izslēgts (`onnxruntime-node`):** Neobligāta atkarība lokāliem MI iegulumiem, un tā **nav** nepieciešama OmniRoute darbībai. Tās postinstall skripts lejupielādē aptuveni 300 MB CUDA resursu no NuGet; neiekļaujiet to atļauto vienumu sarakstā, ja vien nepārprotami neplānojat izmantot lokālu ONNX paātrinājumu atbalstītā aparatūrā.
+- **Būtiski (`omniroute`, `better-sqlite3`):** OmniRoute darbojas no Next.js savrupās lietojumprogrammas komplekta (`dist/`). Instalēšanas laikā npm lejupielādē vai kompilē resursdatora videi paredzēto vietējo SQLite draiveri augstākā līmeņa direktorijā `node_modules/better-sqlite3/`. Pēc tam OmniRoute `postinstall` skripts (`scripts/build/postinstall.mjs`) pārbauda šos resursdatora videi paredzētos bināros failus un kopē tos uz `dist/node_modules/`, lai savrupais serveris varētu tiem piekļūt. Ja `omniroute` postinstall skripts ir bloķēts, šī kopēšanas darbība tiek izlaista.
+- **Neobligāti/tranzitīvi (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Tie ir būvēšanas palīgrīki, izmaiņu uzraudzības rīki vai sistēmas atslēgu saišķa utilītas. To atļaušana novērš būvēšanas brīdinājumus, taču tie nav nepieciešami maršrutēšanas pamatfunkcionalitātei.
+- **Izslēgts (`onnxruntime-node`):** Neobligāta atkarība lokāliem MI iegulumiem, kas **nav** nepieciešama OmniRoute darbībai. Tās postinstall skripts no NuGet lejupielādē aptuveni 300 MB CUDA resursu; neiekļaujiet to atļauto vienumu sarakstā, ja vien skaidri neplānojat izmantot lokālu ONNX paātrinājumu atbalstītā aparatūrā.
 
 ### Ieteicamais risinājums
 
-Lai globālas instalēšanas laikā atļautu nepieciešamos instalēšanas skriptus un nerādītu brīdinājumus, norādiet `--allow-scripts` OmniRoute un tā vietējām atkarībām:
+Lai globālas instalēšanas laikā atļautu nepieciešamos instalēšanas skriptus un novērstu brīdinājumus, norādiet `--allow-scripts` OmniRoute un tā vietējām atkarībām:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
@@ -131,7 +131,7 @@ npm install -g omniroute
 
 ### Pārbaudiet instalāciju
 
-Pēc instalēšanas palaidiet iebūvēto diagnostikas rīku, lai pārliecinātos, ka vietējās sasaistes un izpildlaika vide darbojas pareizi:
+Pēc instalēšanas palaidiet iebūvēto diagnostikas rīku, lai pārliecinātos, ka vietējie saistījumi un izpildlaika vide darbojas pareizi:
 
 ```bash
 omniroute doctor

@@ -19,16 +19,14 @@ import {
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { getSettings } from "@/lib/db/settings";
 import { resolveGuardedProxyConfig } from "@/lib/tokenHealthCheckProxyGuard";
-import {
-  getAccessToken,
-  getDeprecationNotice,
-  supportsTokenRefresh,
-  isUnrecoverableRefreshError,
-  refreshCopilotToken,
-} from "@omniroute/open-sse/services/tokenRefresh.ts";
+import * as tokenRefresh from "@omniroute/open-sse/services/tokenRefresh.ts";
+import { ROTATION_LOCK_GROUP } from "@omniroute/open-sse/services/refreshSerializer.ts";
 import { pickMaskedDisplayValue } from "@/shared/utils/maskEmail";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
-import { refreshGithubCopilotSubTokenIfNeeded } from "@/lib/tokenHealthCheckCopilot";
+import {
+  probeGitHubAccessToken,
+  refreshGithubCopilotSubTokenIfNeeded,
+} from "@/lib/tokenHealthCheckCopilot";
 import { checkCursorConnectionIfNeeded } from "@/lib/tokenHealthCheckCursor";
 import { checkKimiWebConnectionIfNeeded } from "@/lib/tokenHealthCheckKimi";
 import {
@@ -46,22 +44,12 @@ const TICK_MS = 60 * 1000; // sweep interval: every 60 seconds (restored — #77
 const DEFAULT_BATCH_SIZE = 20;
 const DEFAULT_HEALTH_CHECK_INTERVAL_MIN = 60; // default per-connection interval
 const EXPIRED_RETRY_MAX = 3; // max retry attempts for expired connections before giving up
-const ROTATING_REFRESH_PROVIDERS = new Set([
-  "codex",
-  "openai",
-  "kimi-coding",
-  "cline",
-  "kiro",
-  "amazon-q",
-  "gitlab-duo",
-  "claude",
-  "openference",
-]);
+// Derived from the rotation-lane map so the two lists cannot drift apart.
+const ROTATING_REFRESH_PROVIDERS = new Set(Object.keys(ROTATION_LOCK_GROUP));
 
 export function shouldNullRefreshTokenAfterUnrecoverable(provider: unknown): boolean {
   const id = String(provider || "").toLowerCase();
-  if (id === "claude") return false;
-  return ROTATING_REFRESH_PROVIDERS.has(id);
+  return ROTATING_REFRESH_PROVIDERS.has(id) && !preservesRefreshTokenOnUnrecoverable(id);
 }
 
 const EXPIRED_RETRY_BACKOFF_MIN = 5; // backoff between expired retries (minutes)
@@ -587,6 +575,10 @@ export async function checkConnection(conn) {
   // Determine interval (0 = disabled)
   const intervalMin = conn.healthCheckInterval ?? DEFAULT_HEALTH_CHECK_INTERVAL_MIN;
   if (intervalMin <= 0) return;
+  if (tokenRefresh.isPassiveCodex(conn.provider)) {
+    await tokenRefresh.getAccessToken(conn.provider, { ...conn, connectionId: conn.id });
+    return;
+  }
   if (!conn.isActive) {
     // #P0: allow expired connections with retry budget remaining to pass
     // through so transient OAuth failures can self-heal instead of being
@@ -642,7 +634,7 @@ export async function checkConnection(conn) {
   // Placed AFTER the terminal-status guard above, which makes this idempotent for free:
   // once marked "expired" the connection is skipped on every later sweep, so this writes
   // exactly once instead of rewriting the same reason each cycle.
-  const deprecation = getDeprecationNotice(String(conn.provider || ""));
+  const deprecation = tokenRefresh.getDeprecationNotice(String(conn.provider || ""));
   if (deprecation) {
     const now = new Date().toISOString();
     await updateProviderConnection(conn.id, {
@@ -748,12 +740,23 @@ export async function checkConnection(conn) {
         },
       };
 
-      const copilotResult = await refreshCopilotToken(
-        conn.accessToken,
-        healthCheckLog,
-        proxyConfig,
-        getCopilotTokenBaseUrl(conn)
-      );
+      // Rotate the Copilot sub-token only when it needs renewal or when an
+      // expired connection needs a recovery probe. A healthy sub-token still
+      // gets a cheap GitHub /user probe so a revoked access token demotes.
+      const shouldProbeCopilot = copilotAboutToExpire || conn.testStatus === "expired";
+
+      const copilotResult = shouldProbeCopilot
+        ? await tokenRefresh.refreshCopilotToken(
+            conn.accessToken,
+            healthCheckLog,
+            proxyConfig,
+            getCopilotTokenBaseUrl(conn)
+          )
+        : await probeGitHubAccessToken({
+            accessToken: conn.accessToken,
+            apiBaseUrl: getCopilotTokenBaseUrl(conn),
+            proxyConfig,
+          });
       if (copilotResult?.status === 401) {
         await updateProviderConnection(conn.id, {
           testStatus: "expired",
@@ -850,7 +853,7 @@ export async function checkConnection(conn) {
     // Anthropic's own /api/oauth/usage rate-limits well below that.
     const refreshCapableNeedsReauth = shouldMarkRefreshCapableExpired(
       conn,
-      supportsTokenRefresh(conn.provider)
+      tokenRefresh.supportsTokenRefresh(conn.provider)
     );
     if (refreshCapableNeedsReauth) {
       const now = new Date().toISOString();
@@ -891,7 +894,7 @@ export async function checkConnection(conn) {
     );
   }
 
-  if (!supportsTokenRefresh(conn.provider)) {
+  if (!tokenRefresh.supportsTokenRefresh(conn.provider)) {
     const now = new Date().toISOString();
     await updateProviderConnection(conn.id, { lastHealthCheckAt: now });
     log(
@@ -979,7 +982,7 @@ export async function checkConnection(conn) {
   let persistedResult: RefreshResultShape | null = null;
   let result: RefreshResultShape | null;
   try {
-    result = await getAccessToken(
+    result = await tokenRefresh.getAccessToken(
       conn.provider,
       credentials,
       healthCheckLog,
@@ -1101,7 +1104,7 @@ export async function checkConnection(conn) {
   // OpenAI Codex uses rotating one-time-use refresh tokens.
   // Once used, the old token is permanently invalidated.
   // Retrying will never succeed → deactivate and stop the loop.
-  if (isUnrecoverableRefreshError(result)) {
+  if (tokenRefresh.isUnrecoverableRefreshError(result)) {
     const currentConnection = await getProviderConnectionById(conn.id);
     const credentialsChangedSinceSweep =
       !!currentConnection &&

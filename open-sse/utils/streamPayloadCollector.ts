@@ -1,5 +1,5 @@
 import { cloneLogPayload } from "@/lib/logPayloads";
-import { toNumber } from "@/shared/utils/numeric";
+import { toNumber } from "./numeric.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { jsonLength } from "./jsonSize.ts";
 
@@ -950,6 +950,10 @@ export function createStructuredSSECollector(options: CollectorOptions = {}) {
 
     getEvents() {
       return events.map((event) => cloneLogPayload(event));
+    },
+
+    getEventCount() {
+      return events.length + droppedEvents;
     },
 
     // The reducer-computed summary, built incrementally from EVERY pushed

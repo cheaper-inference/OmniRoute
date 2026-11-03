@@ -15,19 +15,19 @@ coverage, र reconciliation चरणहरूसँग नक्साङ्�
 
 ## विकास सेटअप
 
-### पूर्वावश्यकताहरू
+### पूर्वापेक्षाहरू
 
-- **Node.js** `>=22.22.3 <23`, वा `>=24.0.0 <27` (सिफारिस गरिएको: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, वा `>=24.0.0 <27` (सिफारिस गरिएको: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ प्रयोगकर्ताहरू (Node 24+):** `npm install` पछि, native modules स्थापना भएका छन् कि छैनन् भनी पुष्टि गर्नुहोस्:
+> **npm v11+ प्रयोगकर्ताहरू (Node 24+):** `npm install` पछि, नेटिभ मोड्युलहरू स्थापना भएका छन् भनी प्रमाणित गर्नुहोस्:
 > `node -e "require('better-sqlite3')"`. यदि यो `MODULE_NOT_FOUND` सहित असफल भयो भने,
 > `npm approve-scripts better-sqlite3 && npm install` चलाउनुहोस्। हेर्नुहोस्
 > [समस्या निवारण](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)।
 
 - **Git**
 
-### Clone र स्थापना
+### क्लोन र स्थापना
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,94 +35,94 @@ cd OmniRoute
 npm install
 ```
 
-### Environment Variables
+### वातावरण चरहरू
 
 ```bash
 # टेम्प्लेटबाट आफ्नो .env सिर्जना गर्नुहोस्
 cp .env.example .env
 
-# आवश्यक secrets उत्पन्न गर्नुहोस्
+# आवश्यक गोप्य मानहरू उत्पन्न गर्नुहोस्
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-विकासका लागि मुख्य variables:
+विकासका लागि मुख्य चरहरू:
 
-| Variable               | विकासको पूर्वनिर्धारित मान | विवरण                     |
-| ---------------------- | -------------------------- | ------------------------- |
-| `PORT`                 | `20128`                    | Server port               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Frontend का लागि base URL |
-| `JWT_SECRET`           | (माथि उत्पन्न गर्नुहोस्)   | JWT signing secret        |
-| `INITIAL_PASSWORD`     | `CHANGEME`                 | पहिलो login password      |
-| `APP_LOG_LEVEL`        | `info`                     | Log verbosity level       |
+| चर                     | विकासको पूर्वनिर्धारित मान | विवरण                   |
+| ---------------------- | -------------------------- | ----------------------- |
+| `PORT`                 | `20128`                    | सर्भर पोर्ट             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | फ्रन्टएन्डको आधार URL   |
+| `JWT_SECRET`           | (माथि उत्पन्न गर्नुहोस्)   | JWT हस्ताक्षर गोप्य मान |
+| `INITIAL_PASSWORD`     | `CHANGEME`                 | पहिलो लगइनको पासवर्ड    |
+| `APP_LOG_LEVEL`        | `info`                     | लगको विस्तृतताको स्तर   |
 
-### Dashboard Settings
+### ड्यासबोर्ड सेटिङहरू
 
-Dashboard ले environment variables मार्फत पनि configure गर्न सकिने features का लागि UI toggles उपलब्ध गराउँछ:
+ड्यासबोर्डले वातावरण चरहरूमार्फत पनि कन्फिगर गर्न सकिने सुविधाहरूका लागि UI टगलहरू प्रदान गर्छ:
 
-| Setting को स्थान    | Toggle             | विवरण                                    |
-| ------------------- | ------------------ | ---------------------------------------- |
-| Settings → Advanced | Debug Mode         | Debug request logs सक्षम गर्नुहोस् (UI)  |
-| Settings → General  | Sidebar Visibility | Sidebar sections देखाउनुहोस्/लुकाउनुहोस् |
+| सेटिङको स्थान      | टगल               | विवरण                                   |
+| ------------------ | ----------------- | --------------------------------------- |
+| सेटिङहरू → उन्नत   | डिबग मोड          | डिबग अनुरोध लगहरू सक्षम गर्नुहोस् (UI)  |
+| सेटिङहरू → सामान्य | साइडबारको दृश्यता | साइडबार खण्डहरू देखाउनुहोस्/लुकाउनुहोस् |
 
-यी settings database मा भण्डारण हुन्छन् र restart पछि पनि कायम रहन्छन्, साथै set गरिएका बेला env var का पूर्वनिर्धारित मानहरूलाई override गर्छन्।
+यी सेटिङहरू डेटाबेसमा भण्डारण हुन्छन् र पुनः सुरु गरेपछि पनि कायम रहन्छन्। सेट गरिएका बेला तिनले वातावरण चरका पूर्वनिर्धारित मानहरूलाई अधिलेखन गर्छन्।
 
 ### स्थानीय रूपमा चलाउने
 
 ```bash
-# विकास mode (hot reload)
+# विकास मोड (हट रिलोड)
 npm run dev
 
-# Production build
+# उत्पादन बिल्ड
 npm run build    # next build → .build/next/ त्यसपछि assembleStandalone → dist/
 npm run start
 
-# योगदानकर्ताका परिवर्तनहरूका लागि छिटो backend/API-मात्र compile
+# योगदानकर्ताका परिवर्तनहरूका लागि द्रुत ब्याकएन्ड/API-मात्र कम्पाइल
 npm run build:contributor
 
-# Release build (सफा rebuild + HEAD sentinel — deploy का लागि आवश्यक)
+# रिलिज बिल्ड (सफा पुनःबिल्ड + HEAD सेन्टिनेल — डिप्लोयका लागि आवश्यक)
 npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA लेख्छ
 
-# सामान्य port configuration
+# सामान्य पोर्ट कन्फिगरेसन
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Contributor build ले compile-मात्र validation गर्छ: यसले standalone
-distribution assemble गर्दैन वा वैकल्पिक native packaging assets build गर्दैन। पठाउन मिल्ने bundle validate गर्नुपर्ने बेला
-नियमित production build प्रयोग गर्नुहोस्।
+योगदानकर्ता बिल्डले कम्पाइल-मात्र प्रमाणीकरण गर्छ: यसले standalone
+वितरण तयार गर्दैन वा वैकल्पिक नेटिभ प्याकेजिङ एसेटहरू बिल्ड गर्दैन। वितरण गर्न मिल्ने बन्डल प्रमाणित गर्न
+आवश्यक हुँदा नियमित उत्पादन बिल्ड प्रयोग गर्नुहोस्।
 
-### Build Output को संरचना
+### बिल्ड आउटपुटको संरचना
 
-| Directory | सामग्री                                                                        | Track गरिएको |
-| --------- | ------------------------------------------------------------------------------ | ------------ |
-| `src/`    | Application source (TypeScript / TSX)                                          | हो           |
-| `.build/` | मध्यवर्ती फाइलहरू — `next build` output (gitignored, `distDir = .build/next`)  | होइन         |
-| `dist/`   | पठाउन मिल्ने bundle — `assembleStandalone` द्वारा assemble गरिएको (gitignored) | होइन         |
+| डाइरेक्टरी | सामग्री                                                                             | ट्र्याक गरिएको |
+| ---------- | ----------------------------------------------------------------------------------- | -------------- |
+| `src/`     | एप्लिकेसन स्रोत (TypeScript / TSX)                                                  | हो             |
+| `.build/`  | मध्यवर्ती फाइलहरू — `next build` आउटपुट (gitignore गरिएको, `distDir = .build/next`) | होइन           |
+| `dist/`    | वितरणयोग्य बन्डल — `assembleStandalone` द्वारा तयार गरिएको (gitignore गरिएको)       | होइन           |
 
-Build pipeline एकल pass हो:
+बिल्ड पाइपलाइन एकल पासमा चल्छ:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js output)
-  └─ assembleStandalone()                 (standalone + static + public + native assets प्रतिलिपि गर्छ)
-       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js आउटपुट)
+  └─ assembleStandalone()                 (standalone + static + public + नेटिभ एसेटहरू प्रतिलिपि गर्छ)
+       └─ आउटपुट: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ले थप रूपमा पहिले दुवै directories सफा गर्छ र deploy integrity sentinel का रूपमा
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लेख्छ।
+`npm run build:release` ले थप रूपमा पहिले दुवै डाइरेक्टरी सफा गर्छ र
+डिप्लोयको अखण्डता सेन्टिनेलका रूपमा `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) लेख्छ।
 
-`npm run build:contributor` ले backend-मात्र build profile प्रयोग गर्छ। यसले build गर्दा अस्थायी रूपमा
-dashboard UI files लाई stubs ले प्रतिस्थापन गर्छ, API route handlers कायम राख्छ, र build पछि मूल files
-पुनर्स्थापित गर्छ। Dashboard UI लाई असर गर्ने परिवर्तनहरू वा पूर्ण
-release validation का लागि `npm run build` प्रयोग गर्नुहोस्; contributor profile release build को विकल्प होइन।
+`npm run build:contributor` ले ब्याकएन्ड-मात्र बिल्ड प्रोफाइल प्रयोग गर्छ। यसले बिल्ड गर्दा अस्थायी रूपमा
+ड्यासबोर्ड UI फाइलहरूलाई स्टब गर्छ, API रुट ह्यान्डलरहरू कायम राख्छ, र बिल्डपछि मूल फाइलहरू
+पुनर्स्थापित गर्छ। ड्यासबोर्ड UI लाई असर गर्ने परिवर्तनहरू वा पूर्ण रिलिज प्रमाणीकरणका लागि `npm run build`
+प्रयोग गर्नुहोस्; योगदानकर्ता प्रोफाइल रिलिज बिल्डको प्रतिस्थापन होइन।
 
-> **VPS deploy सम्बन्धी टिप्पणी:** remote image directory `/usr/lib/node_modules/omniroute/app/`
-> अपरिवर्तित छ। Deploy skills ले `dist/` का सामग्रीहरू यसमा rsync गर्छन्।
-> Repository भित्रको build output path मात्र परिवर्तन भएको हो (`app/` → `dist/`)।
+> **VPS डिप्लोय टिप्पणी:** रिमोट इमेज डाइरेक्टरी `/usr/lib/node_modules/omniroute/app/`
+> अपरिवर्तित छ। डिप्लोय स्किलहरूले `dist/` का सामग्रीहरू यसमा rsync गर्छन्।
+> रिपोजिटरीभित्रको बिल्ड आउटपुट पथ मात्र सारिएको हो (`app/` → `dist/`)।
 
-पूर्वनिर्धारित URLs:
+पूर्वनिर्धारित URL हरू:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **ड्यासबोर्ड**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -172,35 +172,35 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 
 ---
 
-## Test हरू चलाउने
+## परीक्षणहरू सञ्चालन गर्ने
 
 ```bash
-# सबै test हरू (unit + vitest + ecosystem + e2e)
+# सबै परीक्षणहरू (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# एउटा test file (Node.js को native test runner — अधिकांश test ले यही प्रयोग गर्छन्)
+# एउटै परीक्षण फाइल (Node.js को नेटिभ परीक्षण रनर — अधिकांश परीक्षणहरूले यही प्रयोग गर्छन्)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# तपाईंको परिवर्तनबाट प्रभावित unit test हरू मात्र (CI gate कै TIA selector, #8084)
-npm run test:scoped            # पछिल्लो commit मा भएका परिवर्तनहरू (वा working tree)
+# तपाईंको परिवर्तनबाट प्रभावित unit परीक्षणहरू मात्र (CI gate कै TIA selector, #8084)
+npm run test:scoped            # पछिल्लो commit (वा working tree) का परिवर्तनहरू
 npm run test:scoped:staged     # staged परिवर्तनहरू मात्र — pre-commit run सँग राम्रोसँग मिल्छ
-npm run test:scoped:full       # पहिले import-graph map पुनः निर्माण गर्नुहोस् (file थपेपछि/सारेपछि)
-# Exit 1 + "run the full suite" को अर्थ hub file (tsconfig, package.json, …) वा
+npm run test:scoped:full       # पहिले import-graph map पुनर्निर्माण गर्नुहोस् (फाइलहरू थपेपछि/सारेपछि)
+# Exit 1 + "पूर्ण suite चलाउनुहोस्" को अर्थ hub file (tsconfig, package.json, …) वा
 # map नगरिएको source परिवर्तन भएको हो — selector सुरक्षित रूपमा असफल हुन्छ, यसले कहिल्यै चुपचाप छोड्दैन।
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
-# E2E test हरू (Playwright आवश्यक पर्छ)
+# E2E परीक्षणहरू (Playwright आवश्यक पर्छ)
 npm run test:e2e
 
-# Protocol client E2E (MCP transports, A2A)
+# Protocol clients E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem compatibility test हरू
+# Ecosystem compatibility परीक्षणहरू
 npm run test:ecosystem
 
-# Coverage gate: statements/lines/functions/branches का लागि 60%
+# Coverage gate: statements/lines/functions/branches मा 60%
 npm run test:coverage
 npm run coverage:report
 
@@ -208,52 +208,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Gate गरिएको वास्तविक-upstream combo smoke (VPS पहुँच + वास्तविक provider credits आवश्यक पर्छ)
-# वास्तविक provider हरूमा request पठाउँछ — थोरै लागत लाग्छ। CI मा कहिल्यै चल्दैन। gate नभएमा सफासँग skip हुन्छ।
+# Gate गरिएको वास्तविक upstream combo smoke (VPS पहुँच + वास्तविक provider credits आवश्यक पर्छ)
+# वास्तविक providers मा अनुरोध पठाउँछ — थोरै खर्च हुन्छ। CI मा कहिल्यै चल्दैन। gate नभएमा सफा रूपमा skip हुन्छ।
 # आवश्यक: ssh root@192.168.0.15 पहुँच (VPS बाट read-only DB snapshot source गर्छ)।
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — साधारण Node ESM script हरू, live .15 server मा सिधै request पठाउँछन्।
-# आवश्यक: ssh root@192.168.0.15 पहुँच (combo हरू SSH sqlite मार्फत सिर्जना/हटाइन्छन्)।
-# वास्तविक provider हरूमा request पठाउँछ (सानो लागत)। __live_test__* combo हरू मात्र सिर्जना/मेटाउँछ। CI मा कहिल्यै चल्दैन।
+# Phase-3 VPS live smoke — साधारण Node ESM scripts, live .15 server मा सीधै अनुरोध पठाउँछन्।
+# आवश्यक: ssh root@192.168.0.15 पहुँच (combos लाई SSH sqlite मार्फत सिर्जना/हटाइन्छ)।
+# वास्तविक providers मा अनुरोध पठाउँछ (सानो खर्च)। __live_test__* combos मात्र सिर्जना/मेटाउँछ। CI मा कहिल्यै चल्दैन।
 # .15 मा REQUIRE_API_KEY=false भएकाले API key आवश्यक पर्दैन, तर सेट गरिएको भए COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY लाई मान्छ।
-npm run test:combo:live:vps              # 7 HTTP scenario हरू (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # वास्तविक cross-provider failover scenario थप्छ (जम्मा 8)
+npm run test:combo:live:vps              # 7 HTTP परिदृश्यहरू (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # वास्तविक cross-provider failover परिदृश्य थप्छ (जम्मा 8)
 ```
 
 Coverage सम्बन्धी टिप्पणीहरू:
 
 - `npm run test:coverage` ले मुख्य unit test suite को source coverage मापन गर्छ, `tests/**` लाई समावेश गर्दैन, र `open-sse/**` लाई समावेश गर्छ
-- Pull request हरूले statements/lines/functions/branches का लागि coverage gate **60%+** मा कायम राख्नुपर्छ
-- कुनै PR ले `src/`, `open-sse/`, `electron/`, वा `bin/` भित्रको production code परिवर्तन गर्छ भने, त्यसै PR मा automated test थप्न वा अद्यावधिक गर्नुपर्छ
-- `npm run coverage:report` ले पछिल्लो coverage run बाट विस्तृत file-by-file report प्रिन्ट गर्छ
+- Pull requests ले statements/lines/functions/branches मा coverage gate **60%+** कायम राख्नुपर्छ
+- यदि PR ले `src/`, `open-sse/`, `electron/`, वा `bin/` भित्रको production code परिवर्तन गर्छ भने, त्यही PR मा automated tests थप्न वा अद्यावधिक गर्नुपर्छ
+- `npm run coverage:report` ले पछिल्लो coverage run बाट विस्तृत file-by-file report देखाउँछ
 - `npm run test:coverage:legacy` ले ऐतिहासिक तुलनाका लागि पुरानो metric सुरक्षित राख्छ
 - चरणबद्ध coverage सुधार roadmap का लागि `docs/ops/COVERAGE_PLAN.md` हेर्नुहोस्
 
 ### Pull Request का आवश्यकताहरू
 
-PR खोल्नुअघि, तपाईंले परिवर्तन गरेको भागका लागि केन्द्रित loop चलाउन
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) प्रयोग गर्नुहोस्।
-पूर्ण unit suite (4 CI shards), Vitest, **60%+** coverage gate, र production build को
-जिम्मेवारी CI को हो — तिनलाई स्थानीय रूपमा चलाउँदा PR का जाँचहरूले पहिल्यै नदिने कुनै थप
-संकेत प्राप्त हुँदैन, र साना machine हरूमा यसले host लाई अत्यधिक व्यस्त बनाउन सक्छ (#8084):
+PR खोल्नुअघि, तपाईंले परिवर्तन गर्नुभएको कुराका लागि focused loop चलाउन
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) प्रयोग गर्नुहोस्। पूर्ण unit suite (4 CI shards), Vitest, **60%+** coverage gate, र
+production build CI को जिम्मेवारी हुन् — तिनलाई स्थानीय रूपमा चलाउँदा PR
+checks ले पहिल्यै नदिने कुनै अतिरिक्त संकेत प्राप्त हुँदैन, र साना machines मा यसले host लाई अत्यधिक व्यस्त बनाउन सक्छ (#8084):
 
-- तपाईंको परिवर्तन समेट्ने test file हरू चलाउनुहोस्: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- तपाईंको परिवर्तन समेट्ने test files चलाउनुहोस्: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` चलाउनुहोस्
-- production code परिवर्तन हुँदा त्यसै PR मा automated test हरू समावेश वा अद्यावधिक गर्नुहोस्
-- production code परिवर्तन भएको अवस्थामा PR description मा परिवर्तन वा थप गरिएका test file हरू समावेश गर्नुहोस्
-- CI मा project secrets configure गरिएका छन् भने PR मा SonarQube को नतिजा जाँच गर्नुहोस्
+- production code परिवर्तन हुँदा त्यही PR मा automated tests समावेश वा अद्यावधिक गर्नुहोस्
+- `node:test` files मा, प्रत्येक top-level `await` (जस्तै `await import(...)`) लाई पहिलो `test()` / `describe()` भन्दा अगाडि राख्नुहोस्: `--test-force-exit` अन्तर्गत, त्यसपछि दर्ता गरिएका tests कहिलेकाहीँ चुपचाप नचल्न सक्छन् (#18045; `npm run check:test-tla-order` द्वारा लागू गरिएको)
+- production code परिवर्तन हुँदा परिवर्तन गरिएका वा थपिएका test files लाई PR description मा समावेश गर्नुहोस्
+- CI मा project secrets configure गरिएका बेला PR मा SonarQube result जाँच गर्नुहोस्
 
-हालको test स्थिति: निम्नलाई समेट्ने **122 unit test file हरू**:
+हालको परीक्षण स्थिति: **122 unit test files**, जसले निम्न कुराहरू समेट्छन्:
 
-- Provider translator र format conversion
+- Provider translators र format conversion
 - Rate limiting, circuit breaker, र resilience
 - Semantic cache, idempotency, progress tracking
-- Database operation र schema (21 DB modules)
-- OAuth flow र authentication
+- Database operations र schema (21 DB modules)
+- OAuth flows र authentication
 - API endpoint validation (Zod v4)
-- MCP server tool र scope enforcement
-- Memory र Skills system हरू
+- MCP server tools र scope enforcement
+- Memory र Skills systems
 
 ---
 
@@ -308,7 +308,7 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── acp/                # Agent Communication Protocol रजिस्ट्री
 │   ├── compliance/         # अनुपालन नीति इन्जिन
 │   ├── db/                 # SQLite डोमेन मोड्युलहरू + 130 माइग्रेसन
-│   ├── memory/             # दीर्घकालीन संवादात्मक मेमोरी
+│   ├── memory/             # स्थायी संवादात्मक मेमोरी
 │   ├── oauth/              # OAuth प्रदायकहरू, सेवाहरू र उपयोगिताहरू
 │   ├── skills/             # विस्तारयोग्य सीप फ्रेमवर्क
 │   ├── usage/              # प्रयोग ट्र्याकिङ र लागत गणना
@@ -317,19 +317,19 @@ src/                        # TypeScript (.ts / .tsx)
 ├── mitm/                   # MITM प्रोक्सी (प्रमाणपत्र, DNS, लक्ष्य रुटिङ)
 ├── shared/
 │   ├── components/         # React कम्पोनेन्टहरू (.tsx)
-│   ├── constants/          # प्रदायक परिभाषाहरू (329), MCP स्कोपहरू, 19 रुटिङ रणनीतिहरू
+│   ├── constants/          # प्रदायक परिभाषाहरू (329), MCP स्कोपहरू, 20 रुटिङ रणनीतिहरू
 │   ├── utils/              # सर्किट ब्रेकर, स्यानिटाइजर, प्रमाणीकरण सहायकहरू
 │   └── validation/         # Zod v4 स्किमाहरू
 └── sse/                    # SSE प्रोक्सी पाइपलाइन
 
-open-sse/                   # @omniroute/open-sse वर्कस्पेस
-├── executors/              # 89 एक्जिक्युटर कार्यान्वयन मोड्युल
-├── handlers/               # 11 अनुरोध ह्यान्डलर (च्याट, प्रतिक्रियाहरू, एम्बेडिङहरू, छविहरू, आदि)
+open-sse/                   # @omniroute/open-sse कार्यक्षेत्र
+├── executors/              # 150 एक्जिक्युटर मोड्युलहरू (एक्जिक्युटर क्लासहरू + प्रत्येक प्रदायकका सहायकहरू)
+├── handlers/               # 11 अनुरोध ह्यान्डलरहरू (च्याट, प्रतिक्रियाहरू, एम्बेडिङहरू, छविहरू, आदि)
 ├── mcp-server/             # MCP सर्भर (110 विशिष्ट उपकरण, 3 ट्रान्सपोर्ट, 33 स्कोप)
-├── services/               # 178 शीर्ष-स्तरीय सेवा (combo, autoCombo, rateLimitManager, आदि)
+├── services/               # 178 शीर्ष-स्तरीय सेवाहरू (combo, autoCombo, rateLimitManager, आदि)
 ├── translator/             # ढाँचा अनुवादकहरू (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Responses API ट्रान्सफर्मर
-└── utils/                  # 22 उपयोगिता मोड्युल (स्ट्रिम, TLS, प्रोक्सी, लगिङ)
+└── utils/                  # 22 उपयोगिता मोड्युलहरू (स्ट्रिम, TLS, प्रोक्सी, लगिङ)
 
 electron/                   # Electron डेस्कटप एप (बहु-प्लेटफर्म)
 
@@ -344,7 +344,7 @@ tests/
 docs/
 ├── adr/                     # वास्तुकला निर्णय अभिलेखहरू
 ├── architecture/            # प्रणाली वास्तुकला र उत्थानशीलता
-├── comparison/              # OmniRoute बनाम विकल्पहरू
+├── comparison/              # OmniRoute र विकल्पहरूबीचको तुलना
 ├── compression/             # कम्प्रेसन मार्गदर्शिका र नियमहरू
 ├── dev/                     # विकास मार्गदर्शिकाहरू
 ├── diagrams/                # वास्तुकला रेखाचित्रहरू
@@ -352,14 +352,14 @@ docs/
 ├── guides/                  # प्रयोगकर्ता मार्गदर्शिका, Docker, सेटअप, समस्या निवारण
 ├── i18n/                    # अन्तर्राष्ट्रियकृत README अनुवादहरू
 ├── marketing/               # मार्केटिङ सामग्रीहरू
-├── ops/                     # डिप्लोयमेन्ट, प्रोक्सी, कभरेज, रिलिजहरू
+├── ops/                     # परिनियोजन, प्रोक्सी, कभरेज, रिलिजहरू
 ├── providers/               # प्रदायक-विशिष्ट दस्तावेजहरू
-├── reference/               # API सन्दर्भ, वातावरण चरहरू, CLI उपकरणहरू, निःशुल्क टियरहरू
+├── reference/               # API सन्दर्भ, वातावरण चरहरू, CLI उपकरणहरू, निःशुल्क तहहरू
 ├── releases/                # रिलिज टिप्पणीहरू
-├── routing/                 # स्वतः-कम्बो इन्जिन, तर्क पुनःप्रदर्शन
+├── routing/                 # स्वतः-कम्बो इन्जिन, रिजनिङ रिप्ले
 ├── screenshots/             # ड्यासबोर्ड स्क्रिनसटहरू
 ├── security/                # सुरक्षा सीमाहरू, अनुपालन, गोपनीयता, टोकनहरू
-└── specs/                   # डिजाइन विशिष्टताहरू
+└── specs/                   # डिजाइन विनिर्देशहरू
 ```
 
 ---

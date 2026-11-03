@@ -1,1 +1,0 @@
-- fix(memory): rebuild memory_fts bound to memories.memory_id via migration 203 so legacy NULL-id rows no longer leave orphan FTS docs or hide new memories (#15707)

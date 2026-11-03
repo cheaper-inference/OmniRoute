@@ -1,1 +1,0 @@
-- **chore(keys):** remove the unused `open-sse/services/keyGroupAuth.ts`. It had no importers, and it duplicated the key-group model check that `isModelAllowedForKey` already enforces through `checkKeyModelAccess` (`src/lib/db/apiKeyGroups.ts`).

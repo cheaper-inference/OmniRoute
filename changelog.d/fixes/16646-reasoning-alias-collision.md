@@ -1,1 +1,0 @@
-- sse: drop the `reasoning` alias once `reasoning_content` carries the replay, fixing GLM/Kimi 400 "duplicate field reasoning_content" (#16646)

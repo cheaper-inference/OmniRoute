@@ -64,7 +64,7 @@ test("readFragments: origin = the commit that ADDED the fragment, text + prefix 
     // README/.gitkeep are never fragments
     commitFile(dir, "changelog.d/maintenance/.gitkeep", "", "chore: keep");
 
-    const frags = readFragments("HEAD", dir);
+    const frags = readFragments(dir);
     assert.deepEqual(
       frags.map((f) => [f.path, f.section, f.originHash, f.originPr, f.prefixPr]),
       [
@@ -99,7 +99,7 @@ test("fragmentOrigins: a fragment deleted and re-added keeps its ORIGINAL adding
       "oldest add wins"
     );
     assert.match(origins.get("changelog.d/fixes/phantom.md")?.subject ?? "", /\(#100\)$/);
-    assert.equal(readFragments("HEAD", dir)[0].originPr, 100);
+    assert.equal(readFragments(dir)[0].originPr, 100);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -108,8 +108,52 @@ test("fragmentOrigins: a fragment deleted and re-added keeps its ORIGINAL adding
 test("readFragments: empty tree / missing changelog.d is not an error", () => {
   const dir = makeRepo();
   try {
-    assert.deepEqual(readFragments("HEAD", dir), []);
+    assert.deepEqual(readFragments(dir), []);
     assert.equal(fragmentOrigins(dir).size, 0);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("readFragments: inventory comes from the WORKING TREE, origins from git (v3.8.52 lesson)", () => {
+  // Second reconciliation pass with the first pass's fragment deletions still uncommitted: HEAD
+  // carries every fragment, the disk does not. Reading HEAD re-folded ~990 bullets in v3.8.52.
+  const dir = makeRepo();
+  try {
+    const hKept = commitFile(
+      dir,
+      "changelog.d/fixes/kept.md",
+      "- **fix(a):** still on disk\n",
+      "fix(a): kept (#100)"
+    );
+    commitFile(
+      dir,
+      "changelog.d/fixes/consumed.md",
+      "- **fix(b):** folded by the previous pass\n",
+      "fix(b): consumed (#200)"
+    );
+    // pass 1 consumed this fragment (unlinked from disk, deletion NOT committed yet)
+    fs.rmSync(path.join(dir, "changelog.d/fixes/consumed.md"));
+    // a fragment that exists on disk but was never committed is still part of the inventory
+    fs.mkdirSync(path.join(dir, "changelog.d/features"), { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, "changelog.d/features/untracked.md"),
+      "- **feat(c):** written, not committed\n"
+    );
+    // README/.gitkeep on disk are never fragments
+    fs.writeFileSync(path.join(dir, "changelog.d/features/README.md"), "# how to\n");
+
+    const frags = readFragments(dir);
+    assert.deepEqual(
+      frags.map((f) => [f.path, f.section, f.originHash, f.originPr]),
+      [
+        ["changelog.d/features/untracked.md", "features", null, null],
+        ["changelog.d/fixes/kept.md", "fixes", hKept, 100],
+      ],
+      "only fragments present on disk are folded; a fragment deleted in the working tree is gone"
+    );
+    assert.equal(frags[0].text, "- **feat(c):** written, not committed");
+    assert.equal(frags[1].text, "- **fix(a):** still on disk");
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }

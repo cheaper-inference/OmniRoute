@@ -36,7 +36,11 @@ import {
 } from "../services/openrouterFreeWindow.ts";
 import { gateOutboundRequest } from "../services/wafRateLimit.ts";
 import { ClaudeUsageLimitGuard } from "./claudeUsageLimit.ts";
-import { shouldSkipIntraRetryFor429 } from "./rateLimitIntraRetry.ts";
+import {
+  INTRA_RETRY_MAX_HINT_MS,
+  readRateLimitRetryHintMs,
+  shouldSkipIntraRetryFor429,
+} from "./rateLimitIntraRetry.ts";
 import type { PoolConfig } from "../services/sessionPool/types.ts";
 import type { Session } from "../services/sessionPool/session.ts";
 import { SessionPool } from "../services/sessionPool/sessionPool.ts";
@@ -50,6 +54,7 @@ import {
   runWithOnPersist,
   getRefreshLeadMs,
   isUnrecoverableRefreshError,
+  NO_REFRESH_NEEDED,
 } from "../services/tokenRefresh.ts";
 import type { ProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { signRequestBody } from "../services/claudeCodeCCH.ts";
@@ -63,6 +68,7 @@ import {
   modelSupportsContext1mBeta,
 } from "../services/claudeCodeCompatible.ts";
 import { getClaudeCodeCompatibleRequestDefaults } from "@/lib/providers/requestDefaults";
+import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import {
   cloakThirdPartyToolNames,
   remapToolNamesInRequest,
@@ -94,6 +100,8 @@ import {
   stripProxyToolPrefix,
 } from "./claudeIdentity.ts";
 import { withForcedResponsesUpstream } from "./forceResponsesUpstream.ts";
+import { finalizeClaudeThinkingOptions } from "./claudeThinkingOptions.ts";
+import { detachClaudeCodeRewriteTargets } from "./claudeOauthBodyIsolation.ts";
 import {
   mergeUpstreamExtraHeaders,
   setUserAgentHeader,
@@ -128,6 +136,7 @@ export type { ProviderCredentials, StrictValidationDispatch } from "./base/valid
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
 import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
 import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
+import { stripRedactThinkingBetaForVisibleThinking } from "./base/redactThinkingBeta.ts";
 
 function parseSerializedBody(bodyString: string): unknown {
   try {
@@ -224,11 +233,7 @@ export type CountTokensInput = {
   signal?: AbortSignal | null;
 };
 
-import {
-  hasActiveClaudeThinking,
-  readNestedThinkingBudget,
-  clampNestedThinkingBudget,
-} from "../utils/thinkingBudget.ts";
+import { readNestedThinkingBudget, clampNestedThinkingBudget } from "../utils/thinkingBudget.ts";
 
 /**
  * Strip the OmniRoute provider prefix from tool model fields (e.g.
@@ -552,7 +557,12 @@ export class BaseExecutor {
       const cloned = { ...body } as Record<string, unknown>;
 
       if (Array.isArray(cloned.input)) {
-        cloned.input = sanitizeResponsesInputItems(cloned.input, false);
+        // #17834: native openai-compatible Responses passthrough keeps assistant commentary
+        // history, like the native Codex path (#3107). Other bodies keep the default drop.
+        cloned.input = sanitizeResponsesInputItems(cloned.input, false, {
+          dropInternalAssistantMessages:
+            cloned._nativeOpenAICompatibleResponsesPassthrough !== true,
+        });
       }
 
       if (Array.isArray(cloned.tools)) {
@@ -605,6 +615,15 @@ export class BaseExecutor {
     delayMs: 1500,
     backoffMultiplier: 2,
   };
+  /**
+   * Equal jitter for intra-URL retry backoff: returns a value in [base/2, base].
+   * Spreads concurrent retries over time so parallel requests hitting the same
+   * upstream throttle don't retry in lockstep (thundering herd). `random` is
+   * injectable for deterministic tests.
+   */
+  static jitterRetryDelayMs(baseMs: number, random: () => number = Math.random): number {
+    return Math.round(baseMs * (0.5 + random() * 0.5));
+  }
   // Timeout for receiving the initial upstream response headers. Once the response
   // starts streaming, STREAM_IDLE_TIMEOUT_MS / Undici bodyTimeout handle stalls.
   static FETCH_START_TIMEOUT_MS = FETCH_TIMEOUT_MS;
@@ -620,8 +639,9 @@ export class BaseExecutor {
   }
 
   needsRefresh(credentials?: ProviderCredentials | null) {
-    if (!credentials?.expiresAt) return false;
-    const expiresAtMs = new Date(credentials.expiresAt).getTime();
+    // Numeric epochs (s/ms, incl. the TEXT-column string form) and ISO; 0 = unknown.
+    const expiresAtMs = parseTokenExpiryMs(credentials?.expiresAt);
+    if (expiresAtMs <= 0) return false;
     // Use the provider-specific lead time (REFRESH_LEAD_MS) so rotating-token
     // providers like Codex refresh proactively far ahead of expiry. Keeping the
     // refresh_token "warm" prevents Auth0 from marking it as stale and revoking
@@ -763,7 +783,10 @@ export class BaseExecutor {
           this.refreshCredentials(credentials, log || null)
         );
 
-        if (refreshed && !proactivePersistRan) {
+        // API-key connections (no refresh token) answer with the shared
+        // NO_REFRESH_NEEDED sentinel: nothing was attempted, so there is
+        // nothing to classify, spread or warn about — keep the credentials.
+        if (refreshed && refreshed !== NO_REFRESH_NEEDED && !proactivePersistRan) {
           // ─────────────────────────────────────────────────────────────────────
           // ⚠️ SOURCE OF TRUTH — do not flip the proactive path back to
           //    "persist expired+inactive". Ask the operator first.
@@ -1006,7 +1029,7 @@ export class BaseExecutor {
           transformedBody !== null
         ) {
           const tb = transformedBody as Record<string, unknown>;
-
+          detachClaudeCodeRewriteTargets(tb);
           stripProxyToolPrefix(tb);
           remapToolNamesInRequest(tb);
           // Cloak third-party tool names + sanitize invalid tool schemas so
@@ -1143,14 +1166,12 @@ export class BaseExecutor {
             }
           }
 
-          // Real CLI always pairs context_management with thinking. Mirror
-          // that invariant so long sessions don't accumulate thinking blocks
-          // toward the context cap.
-          if (hasActiveClaudeThinking(tb) && !tb.context_management) {
-            tb.context_management = {
-              edits: [{ type: "clear_thinking_20251015", keep: "all" }],
-            };
-          }
+          finalizeClaudeThinkingOptions(
+            tb,
+            this.provider,
+            getClaudeCodeCompatibleRequestDefaults(requestCredentials?.providerSpecificData)
+              .summarizeThinking === true
+          );
 
           const seed = activeCredentials?.accessToken || activeCredentials?.apiKey || "anon";
           const psd = activeCredentials?.providerSpecificData as
@@ -1401,16 +1422,27 @@ export class BaseExecutor {
           );
         }
 
+        // Explicit `thinking.display: "summarized"` must not be blanked by redact-thinking.
+        // Claude OAuth keeps its fingerprint beta unless the default-off
+        // CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED flag is on.
+        stripRedactThinkingBetaForVisibleThinking(headers, transformedBody, clientHeaders, {
+          connectionOptedIn: ccRequestDefaults.redactThinking === true,
+          claudeOAuth: this.provider === "claude" && hasClaudeOAuthToken,
+        });
         stripInternalBodyFields(transformedBody);
-        let bodyString = JSON.stringify(transformedBody);
 
         const shouldFingerprint =
           isCliCompatEnabled(fingerprintProvider) ||
           (this.provider === "claude" && (isClaudeCodeClient || hasClaudeOAuthToken));
+        let bodyString: string;
         if (shouldFingerprint) {
+          // Serialize once: applyFingerprint produces the body string itself — an
+          // eager stringify here would be a full multi-MB allocation, read never.
           const fingerprinted = applyFingerprint(fingerprintProvider, headers, transformedBody);
           finalHeaders = fingerprinted.headers;
           bodyString = fingerprinted.bodyString;
+        } else {
+          bodyString = JSON.stringify(transformedBody);
         }
 
         // CCH signing — replaces the cch=00000 placeholder in the billing
@@ -1668,9 +1700,10 @@ export class BaseExecutor {
           if (/content[_-]blocked/i.test(wafErrText)) {
             retryAttemptsByUrl[urlIndex] = (retryAttemptsByUrl[urlIndex] ?? 0) + 1;
             const wafAttempt = retryAttemptsByUrl[urlIndex];
-            const wafBackoff =
+            const wafBackoff = BaseExecutor.jitterRetryDelayMs(
               BaseExecutor.WAF_RETRY_CONFIG.delayMs *
-              Math.pow(BaseExecutor.WAF_RETRY_CONFIG.backoffMultiplier, wafAttempt - 1);
+                Math.pow(BaseExecutor.WAF_RETRY_CONFIG.backoffMultiplier, wafAttempt - 1)
+            );
             log?.debug?.(
               "WAF_RETRY",
               `400 content-blocked intra-retry ${wafAttempt}/${BaseExecutor.WAF_RETRY_CONFIG.maxAttempts} on ${url} — waiting ${wafBackoff}ms`
@@ -1693,11 +1726,20 @@ export class BaseExecutor {
         ) {
           retryAttemptsByUrl[urlIndex] = (retryAttemptsByUrl[urlIndex] ?? 0) + 1;
           const attempt = retryAttemptsByUrl[urlIndex];
+          // Honor the upstream retry hint (Retry-After header / body) when it
+          // sits inside the intra-retry window — the skip guard above already
+          // dropped anything larger, so the wait is bounded by
+          // INTRA_RETRY_MAX_HINT_MS. Without a hint, jitter the fixed delay.
+          const hintMs = await readRateLimitRetryHintMs(response);
+          const waitMs =
+            hintMs !== null && hintMs <= INTRA_RETRY_MAX_HINT_MS
+              ? hintMs
+              : BaseExecutor.jitterRetryDelayMs(BaseExecutor.RETRY_CONFIG.delayMs);
           log?.debug?.(
             "RETRY",
-            `429 intra-retry ${attempt}/${BaseExecutor.RETRY_CONFIG.maxAttempts} on ${url} — waiting ${BaseExecutor.RETRY_CONFIG.delayMs}ms`
+            `429 intra-retry ${attempt}/${BaseExecutor.RETRY_CONFIG.maxAttempts} on ${url} — waiting ${waitMs}ms${hintMs !== null ? " (upstream hint)" : ""}`
           );
-          await new Promise((resolve) => setTimeout(resolve, BaseExecutor.RETRY_CONFIG.delayMs));
+          await new Promise((resolve) => setTimeout(resolve, waitMs));
           urlIndex--; // re-run this urlIndex on the next loop iteration
           continue;
         }

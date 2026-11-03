@@ -1,1 +1,0 @@
-- sse: Cloudflare Workers AI no longer rejects tool-call-only assistant turns with HTTP 400 — missing or null `content` is now sent as an empty string (#16637)

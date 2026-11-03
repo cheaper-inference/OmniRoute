@@ -4,7 +4,7 @@
 
 ---
 
-> **Trumpai**: Įdiekite → Prijunkite nemokamą teikėją → Nukreipkite savo IDE į OmniRoute. Baigta.
+> **TL;DR**: Įdiekite → Prijunkite tinkamą paslaugų teikėją → Nukreipkite savo IDE į „OmniRoute“. Viskas.
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute paleidžiama adresu `http://localhost:20128`. Valdymo skydelis atidaro
 
 ---
 
-## 3 veiksmas: prijunkite nemokamą teikėją
+## 3 veiksmas: prijunkite tinkamą paslaugų teikėją
 
-OmniRoute galite naudoti **visiškai nemokamai**, prijungę nemokamą teikėją.
+Pasirinkite paslaugų teikėją, kurio sąlygos ir kvota atitinka jūsų poreikius. Skiltyje **Dashboard → Providers** prijunkite savo paskyrą arba API raktą, tada patikrinkite ryšį. Nemokama prieiga ir galimybė naudotis be rakto nėra garantuojamos.
 
-### A parinktis: Kiro (nemokamas Claude — nereikia kredito kortelės)
-
-1. Atidarykite valdymo skydelį adresu `http://localhost:20128`
-2. Eikite į **Teikėjai** → **Pridėti teikėją**
-3. Pasirinkite **Kiro AI**
-4. Spustelėkite **Prisijungti** (API rakto nereikia!)
-5. Baigta! Dabar galite nemokamai naudotis Claude modeliais.
-
-### B parinktis: OpenCode Free (nereikia autentifikuotis)
-
-1. Atidarykite valdymo skydelį adresu `http://localhost:20128`
-2. Eikite į **Teikėjai** → **Pridėti teikėją**
-3. Pasirinkite **OpenCode Free**
-4. Spustelėkite **Prisijungti** (API rakto nereikia!)
-5. Baigta! Dabar galite nemokamai naudotis keliais modeliais.
-
-### C parinktis: Pollinations (rakto nereikia)
-
-1. Atidarykite valdymo skydelį adresu `http://localhost:20128`
-2. Eikite į **Teikėjai** → **Pridėti teikėją**
-3. Pasirinkite **Pollinations**
-4. Spustelėkite **Prisijungti** (API rakto nereikia!)
-5. Baigta! Dabar galite nemokamai naudotis GPT-5, Claude, Gemini ir kitais modeliais.
+Pagal numatytuosius nustatymus `auto` neįtraukia paslaugų teikėjų, pažymėtų `tos: avoid`, įskaitant Kiro. Paskyros prijungimas šios politikos nekeičia. Pasirinkimas skiltyje **Dashboard → Combos** taikomas visiems automatiniams deriniams. Prieš pasirinkdami paslaugų teikėją, peržiūrėkite [nemokamų planų vadovą](./FREE-TIERS-GUIDE.md).
 
 ---
 
@@ -152,34 +130,34 @@ Užklausos informaciją galite peržiūrėti kairėje šoninėje juostoje spuste
 
 ## Kas toliau?
 
-- **[Auto-Combo vadovas](./AUTO-COMBO-GUIDE.md)** — leiskite OmniRoute parinkti jums tinkamiausią DI
-- **[Teikėjų vadovas](./PROVIDERS-GUIDE.md)** — prijunkite daugiau teikėjų (nemokamų ir mokamų)
-- **[Nemokamų planų vadovas](./FREE-TIERS-GUIDE.md)** — naudokitės DI nemokamai ir be kredito kortelės
-- **[Trikčių šalinimas](../guides/TROUBLESHOOTING.md)** — išspręskite dažniausiai pasitaikančias problemas
+- **[Automatinio derinio vadovas](./AUTO-COMBO-GUIDE.md)** — Leiskite „OmniRoute“ parinkti jums tinkamiausią DI
+- **[Teikėjų vadovas](./PROVIDERS-GUIDE.md)** — Prijunkite daugiau teikėjų (nemokamų ir mokamų)
+- **[Nemokamų planų vadovas](./FREE-TIERS-GUIDE.md)** — Peržiūrėkite teikėjų sąlygas ir nemokamų planų apribojimus
+- **[Trikčių šalinimas](../guides/TROUBLESHOOTING.md)** — Išspręskite dažniausiai pasitaikančias problemas
 
 ---
 
-## Dažniausi klausimai
+## Dažniausiai užduodami klausimai
 
 ### „Ar man reikia API rakto?“
 
-**Ne!** Nemokamais teikėjais (Kiro, OpenCode Free, Pollinations) galite naudotis be jokio API rakto. Tiesiog prijunkite juos valdymo skydelyje.
+OmniRoute API raktas autentifikuoja jūsų įrankius. Tiekėjų prisijungimo duomenys priklauso nuo konkretaus tiekėjo: kai kuriems reikia API rakto arba prisijungti prie paskyros. Nemokama prieiga negarantuojama.
 
 ### „Kas yra `auto`?“
 
-`auto` nurodo OmniRoute automatiškai parinkti tinkamiausią teikėją kiekvienai užklausai. Atsižvelgiama į greitį, kainą, kokybę ir pasiekiamumą. Išsamesnės informacijos rasite [Auto-Combo vadove](./AUTO-COMBO-GUIDE.md).
+`auto` nurodo OmniRoute automatiškai parinkti geriausią tiekėją kiekvienai užklausai. Atsižvelgiama į spartą, kainą, kokybę ir pasiekiamumą. Daugiau informacijos rasite [automatinio derinio vadove](./AUTO-COMBO-GUIDE.md).
 
 ### „Kiek tai kainuoja?“
 
-Pati OmniRoute yra **nemokama ir atvirojo kodo**. Mokate tik už naudojamus teikėjus. Daugelis teikėjų siūlo nemokamus planus — žr. [nemokamų planų vadovą](./FREE-TIERS-GUIDE.md).
+Pats OmniRoute yra **nemokamas ir atvirojo kodo**. Mokate tik už naudojamus tiekėjus. Daugelis tiekėjų siūlo nemokamus planus — žr. [nemokamų planų vadovą](./FREE-TIERS-GUIDE.md).
 
-### „Ar galiu ją naudoti su Claude Code / Cursor / Copilot?“
+### „Ar galiu jį naudoti su Claude Code / Cursor / Copilot?“
 
-**Taip!** OmniRoute veikia su bet kuriuo įrankiu, palaikančiu OpenAI formatą. Tiesiog nustatykite bazinį URL į `http://localhost:20128/v1`. Konkrečias sąrankos instrukcijas rasite [CLI įrankių vadove](../reference/CLI-TOOLS.md).
+**Taip!** OmniRoute veikia su bet kuriuo OpenAI formatą palaikančiu įrankiu. Tiesiog nustatykite bazinį URL į `http://localhost:20128/v1`. Konkrečias sąrankos instrukcijas rasite [CLI įrankių vadove](../reference/CLI-TOOLS.md).
 
-### „Kas nutiks, jei teikėjas nustos veikti?“
+### „Kas nutinka, jei tiekėjas nustoja veikti?“
 
-OmniRoute automatiškai praleidžia neveikiančius teikėjus ir bando kitą. Jums nieko daryti nereikia. Išsamesnės informacijos rasite [Auto-Combo vadove](./AUTO-COMBO-GUIDE.md).
+OmniRoute automatiškai praleidžia neveikiančius tiekėjus ir išbando kitą. Jums nieko daryti nereikia. Daugiau informacijos rasite [automatinio derinio vadove](./AUTO-COMBO-GUIDE.md).
 
 ---
 

@@ -15,7 +15,7 @@ OmniRoute มีไปป์ไลน์การอนุญาตที่ร�
 
 ## โหมดการยืนยันตัวตนสองแบบ
 
-### 1. API Key (Bearer)
+### 1. คีย์ API (Bearer)
 
 ใช้สำหรับ API ไคลเอนต์ที่เข้ากันได้กับ OpenAI/Anthropic/Gemini และเส้นทางการจัดการบางรายการเมื่อคีย์มีขอบเขต `manage`
 
@@ -23,7 +23,7 @@ OmniRoute มีไปป์ไลน์การอนุญาตที่ร�
 Authorization: Bearer <api-key>
 ```
 
-ตรวจสอบโดย `isValidApiKey()` / `extractApiKey()` ใน `src/sse/services/auth.ts` และส่งออกซ้ำผ่าน `src/shared/utils/apiAuth.ts` ตัวตรวจสอบยังยอมรับตัวแปรสภาพแวดล้อม `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` เป็นคีย์ส่งผ่านแบบถาวรด้วย (ปัญหา #1350)
+ตรวจสอบความถูกต้องโดย `isValidApiKey()` / `extractApiKey()` ใน `src/sse/services/auth.ts` และส่งออกซ้ำผ่าน `src/shared/utils/apiAuth.ts` ตัวตรวจสอบยังยอมรับตัวแปรสภาพแวดล้อม `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` เป็นคีย์ส่งผ่านแบบถาวรด้วย (issue #1350)
 
 ### 2. เซสชันแดชบอร์ด (คุกกี้ auth_token)
 
@@ -33,84 +33,132 @@ Authorization: Bearer <api-key>
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-คุกกี้จะถือเป็นเซสชันก็ต่อเมื่อ JWT ผ่านการตรวจสอบความถูกต้อง **และ** มี `authenticated: true`
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`) ผู้ใช้งาน
-คุกกี้ทุกรายการ (ตัวป้องกันเส้นทางแดชบอร์ด (`isDashboardSessionAuthenticated()`), การรีเฟรชไปป์ไลน์ authz, การจับมือ WebSocket, เซิร์ฟเวอร์
-แบบสด, `/api/settings/require-login`, `/api/auth/status`) จะดำเนินการผ่านตัวช่วยดังกล่าว
+คุกกี้จะถือเป็นเซสชันก็ต่อเมื่อ JWT ผ่านการตรวจสอบ **และ** มี `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`) ผู้ใช้คุกกี้ทั้งหมด (ตัวป้องกันเส้นทางแดชบอร์ด (`isDashboardSessionAuthenticated()`), การรีเฟรชไปป์ไลน์ authz, การแฮนด์เชก WebSocket, เซิร์ฟเวอร์แบบไลฟ์, `/api/settings/require-login`, `/api/auth/status`) จะดำเนินการผ่านตัวช่วยดังกล่าว
 ยังมี JWT อื่นที่ลงนามด้วย `JWT_SECRET` — การส่งผ่าน Cursor CLI จะออกโทเค็น
 `iss "omniroute" / aud "cursor-cli"` ให้แก่ผู้ถือคีย์ — และโทเค็นเหล่านี้จะไม่ถือเป็นเซสชัน
 (#13298)
 
-ตรวจสอบโดย `isDashboardSessionAuthenticated()` ใน `src/shared/utils/apiAuth.ts` ไปป์ไลน์จะรีเฟรช JWT โดยอัตโนมัติเมื่ออายุการใช้งาน 30 วันเหลือน้อยกว่า 7 วัน
+ตรวจสอบโดย `isDashboardSessionAuthenticated()` ใน `src/shared/utils/apiAuth.ts` ไปป์ไลน์จะรีเฟรช JWT โดยอัตโนมัติเมื่ออายุการใช้งาน 30 วันเหลือเวลาไม่ถึง 7 วัน
 
-เซสชันอาจสิ้นสุดลงก่อนครบ 30 วันได้เช่นกัน เนื่องจากตัวออกโทเค็นทุกตัวดำเนินการผ่าน `mintDashboardSessionToken` (มีเวลาออกโทเค็น `iat` และรหัส `jti`) และตัวตรวจสอบจะตรวจสอบการตั้งค่าสองรายการ ได้แก่ `sessionsValidAfter` ซึ่งถูกกำหนดเมื่อมีการเปลี่ยนรหัสผ่าน เพื่อให้ทุกเซสชันที่ออกก่อนเวลาดังกล่าวไม่ผ่านการตรวจสอบอีกต่อไป (เบราว์เซอร์ที่เปลี่ยนรหัสผ่านจะได้รับคุกกี้ใหม่) และ `revokedDashboardSessions` ซึ่ง `POST /api/auth/logout` จะเพิ่ม `jti` ของเซสชันที่ออกจากระบบลงไป เซสชันที่ออกโดยรุ่นเก่าจะไม่มีการอ้างสิทธิ์ทั้งสองรายการและยังคงใช้งานได้จนกว่าจะมีการเปลี่ยนรหัสผ่านครั้งแรก หากไม่สามารถอ่านการตั้งค่าได้ ระบบจะไม่เชื่อถือเซสชันนั้น
+เซสชันยังสามารถสิ้นสุดก่อนครบ 30 วันได้ เนื่องจากทุกส่วนที่ออกโทเค็นจะดำเนินการผ่าน `mintDashboardSessionToken` (พร้อมเวลาออก `iat` และรหัส `jti`) และตัวตรวจสอบจะตรวจสอบการตั้งค่าสองรายการ ได้แก่ `sessionsValidAfter` ซึ่งจะถูกกำหนดเมื่อมีการเปลี่ยนรหัสผ่าน เพื่อให้ทุกเซสชันที่ออกก่อนเวลานั้นหยุดผ่านการตรวจสอบ (เบราว์เซอร์ที่เปลี่ยนรหัสผ่านจะได้รับคุกกี้ใหม่) และ `revokedDashboardSessions` ซึ่ง `POST /api/auth/logout` จะเพิ่ม `jti` ของเซสชันที่ออกจากระบบลงไป เซสชันที่ออกโดยรุ่นเก่าจะไม่มีการอ้างสิทธิ์ทั้งสองรายการและยังคงใช้งานได้จนกว่าจะมีการเปลี่ยนรหัสผ่านครั้งแรก หากไม่สามารถอ่านการตั้งค่าได้ ระบบจะไม่เชื่อถือเซสชันนั้น
 
-เส้นทางการจัดการบางรายการยอมรับ **โหมดใดโหมดหนึ่ง**: คุกกี้ หรือ `Bearer <key>` เมื่อ API key มีขอบเขต `manage` (หรือ `admin`) นี่คือสิ่งที่ทำให้เวิร์กโฟลว์ "กำหนดค่าผ่านการเรียก API" ซึ่งเพิ่มเข้ามาใน v3.8 สามารถทำงานได้
+เส้นทางการจัดการบางรายการยอมรับโหมด **อย่างใดอย่างหนึ่ง** ได้แก่ คุกกี้ หรือ `Bearer <key>` เมื่อคีย์ API มีขอบเขต `manage` (หรือ `admin`) นี่คือสิ่งที่ทำให้เวิร์กโฟลว์ "กำหนดค่าผ่านการเรียก API ได้" ซึ่งเพิ่มเข้ามาใน v3.8 ใช้งานได้
 
-#### เกตการเข้าสู่ระบบ OIDC แบบเลือกใช้ (#6973)
+#### เกตการเข้าสู่ระบบด้วย OIDC ซึ่งเลือกเปิดใช้ได้ (#6973)
 
-การเข้าสู่ระบบผู้ดูแลแดชบอร์ดยังรองรับโฟลว์ OIDC (OpenID Connect) แบบ **เลือกเปิดใช้**
-ควบคู่ไปกับการเข้าสู่ระบบด้วยรหัสผ่านที่เป็นค่าเริ่มต้น — การเข้าสู่ระบบด้วยรหัสผ่านจะไม่ถูกนำออก แต่เป็นเพียง
-การเสริมตัวเลือกเท่านั้น:
+การเข้าสู่ระบบของผู้ดูแลแดชบอร์ดยังรองรับโฟลว์ OIDC (OpenID Connect) แบบ **เลือกเปิดใช้** ควบคู่กับการเข้าสู่ระบบด้วยรหัสผ่านตามค่าเริ่มต้น — การเข้าสู่ระบบด้วยรหัสผ่านจะไม่ถูกนำออก แต่เป็นเพียงการเพิ่มตัวเลือกเสริม:
 
-- ปิดใช้งาน เว้นแต่ `settings.oidcEnabled === true` **และ** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` จะได้รับการกำหนดค่าครบทั้งหมด (Settings → Auth)
+- ปิดใช้งาน เว้นแต่ `settings.oidcEnabled === true` **และ** มีการกำหนดค่า `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` ครบทั้งหมด (การตั้งค่า → การยืนยันตัวตน)
   มิฉะนั้น `GET /api/auth/oidc/login` จะส่งคืน `400`
-- `GET /api/auth/oidc/login` ค้นหา `authorization_endpoint` จาก
-  `/.well-known/openid-configuration` ของผู้ออกโทเค็น (หากไม่สำเร็จจะใช้
-  `<issuer>/authorize`) สร้าง URI เปลี่ยนเส้นทางจากคำขอขาเข้า
-  (รองรับ `x-forwarded-proto`) และเปลี่ยนเส้นทางไปยัง IdP พร้อม `state` แบบสุ่ม
-  ที่จัดเก็บไว้ในคุกกี้ `oidc_state` แบบ `httpOnly`
-- `GET /api/auth/oidc/callback` ตรวจสอบ `state` แลกเปลี่ยนรหัสการอนุญาต
-  และตรวจสอบลายเซ็นของ ID token ผ่าน JWKS ของผู้ออกโทเค็น
-  (`createRemoteJWKSet` ของ `jose` ซึ่งแคชแยกตาม JWKS URI) พร้อมการตรวจสอบ `issuer`/`audience`
-  รายการอนุญาต `oidcAllowedSubjects` ซึ่งเป็นทางเลือกจะจับคู่กับการอ้างสิทธิ์
-  `sub` หรือการอ้างสิทธิ์ `email` ของโทเค็น — การอ้างสิทธิ์อีเมลจะได้รับการยอมรับก็ต่อเมื่อ
-  `email_verified === true` ดังนั้นอีเมลที่ยังไม่ได้รับการยืนยันจาก IdP จะไม่สามารถผ่าน
-  เกตนี้ได้
-- เมื่อสำเร็จ ระบบจะออก JWT `auth_token` อายุ 30 วันซึ่ง **เหมือนกันทุกประการ** กับที่การเข้าสู่ระบบด้วยรหัสผ่าน
-  ออกให้ (`src/app/api/auth/login/route.ts`) ดังนั้นส่วนที่เหลือของ
-  ไปป์ไลน์เซสชันแดชบอร์ด (การรีเฟรชอัตโนมัติ, แฟล็กคุกกี้) จะไม่เปลี่ยนแปลง —
-  OIDC เปลี่ยนเฉพาะวิธีการออกคุกกี้เท่านั้น ไม่ได้เปลี่ยนสิทธิ์ที่คุกกี้มอบให้
+- `GET /api/auth/oidc/login` จะค้นหา `authorization_endpoint` จาก
+  `/.well-known/openid-configuration` ของผู้ออก (หากไม่พบจะใช้
+  `<issuer>/authorize`) สร้าง URI การเปลี่ยนเส้นทางจากคำขอขาเข้า
+  (รองรับ `x-forwarded-proto`) และเปลี่ยนเส้นทางไปยัง IdP พร้อมค่า `state`
+  แบบสุ่มที่จัดเก็บไว้ในคุกกี้ `oidc_state` แบบ `httpOnly`
+- `GET /api/auth/oidc/callback` จะตรวจสอบ `state` แลกเปลี่ยนรหัสการอนุญาต
+  และตรวจสอบลายเซ็นของโทเค็น ID ผ่าน JWKS ของผู้ออก
+  (`createRemoteJWKSet` ของ `jose` ซึ่งแคชแยกตาม URI ของ JWKS) พร้อมตรวจสอบ
+  `issuer`/`audience` การอนุญาตให้เข้าถึงแดชบอร์ดต้องมีรายการ
+  `oidcAllowedSubjects` ที่ไม่ว่างเปล่า นโยบาย `oidcAdmissionClaim` หรือทั้งสองอย่าง
+  รายการ subject จะจับคู่กับ `sub` หรือ `email` เฉพาะเมื่อ `email_verified === true`
+  เท่านั้น นโยบาย claim ซึ่งกำหนดหรือไม่ก็ได้จะรับพาธ claim ของโทเค็น ID
+  ที่คั่นด้วยจุด (ตัวอย่างเช่น `realm_access.roles`) และอาร์เรย์ของค่าที่ยอมรับ
+  claim ที่ได้จากพาธต้องเป็นอาร์เรย์ของสตริงซึ่งมีค่าที่ยอมรับอย่างน้อยหนึ่งค่า
+  หากกำหนดนโยบายทั้งสองไว้ ทั้งคู่ต้องผ่าน การไม่มี claim หรือ claim ที่มีรูปแบบ
+  ไม่ถูกต้องจะถูกปฏิเสธโดยค่าเริ่มต้น และหากไม่มีนโยบายใดเลย callback จะปฏิเสธ
+  การเข้าสู่ระบบ (`not_configured`) การกำหนดค่าที่มีเฉพาะ subject อยู่เดิม
+  จะยังคงทำงานโดยไม่มีการเปลี่ยนแปลง
+- โดยปกติ Keycloak จะจับคู่บทบาทระดับ realm ลงใน access token ซึ่งไม่จำเป็นต้อง
+  อยู่ในโทเค็น ID หากต้องการกำหนดให้ต้องมีบทบาทระดับ realm เป็น `admin`
+  ให้กำหนดค่า protocol mapper สำหรับไคลเอนต์นี้เพื่อรวม `realm_access.roles`
+  ไว้ใน **โทเค็น ID** จากนั้นตั้งค่า `oidcAdmissionClaim` เป็น
+  `{ "path": "realm_access.roles", "values": ["admin"] }`
+  ตรวจสอบ claim จริงในโทเค็น ID สำหรับไคลเอนต์นี้ก่อนเปิดใช้การอนุญาตที่อาศัย
+  เฉพาะบทบาท แอปพลิเคชันจะไม่อ่านบทบาทจาก access token การปฏิเสธโทเค็น
+  ฝั่ง IdP สามารถใช้เสริมได้ แต่ไม่สามารถใช้แทนการตรวจสอบฝั่งแอปพลิเคชันนี้
+- เมื่อสำเร็จ ระบบจะสร้าง JWT `auth_token` อายุ 30 วันซึ่ง **เหมือนกันทุกประการ**
+  กับที่การเข้าสู่ระบบด้วยรหัสผ่านออกให้ (`src/app/api/auth/login/route.ts`)
+  ดังนั้นกระบวนการเซสชันแดชบอร์ดส่วนที่เหลือ (การรีเฟรชอัตโนมัติและแฟล็กคุกกี้)
+  จึงไม่เปลี่ยนแปลง — OIDC เปลี่ยนเฉพาะวิธีสร้างคุกกี้ ไม่ได้เปลี่ยนสิทธิ์
+  ที่คุกกี้มอบให้ การเปลี่ยนแปลงบทบาท/กลุ่มใน IdP จะไม่ทำให้เซสชัน OmniRoute
+  ที่มีอยู่เป็นโมฆะ อายุของเซสชันยังคงขึ้นอยู่กับการออกจากระบบ การเปลี่ยนรหัสผ่าน
+  หรือการหมดอายุของเซสชัน
+- การตั้งค่า `oidc*` ทุกรายการ (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) อยู่ใน `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  จะตอบกลับ `400 PASSWORD_REQUIRED` เว้นแต่ body จะมีรหัสผ่านสำหรับการจัดการ
+  เป็น `currentPassword` (`401 PASSWORD_MISMATCH` เมื่อรหัสผ่านไม่ถูกต้อง)
+  `oidcDisablePasswordLogin` จะปฏิเสธการ _เข้าสู่ระบบ_ ด้วยรหัสผ่าน
+  (`POST /api/auth/login`) แต่ยังคงเก็บแฮชรหัสผ่านไว้ และการยืนยันตัวตนซ้ำ
+  จะยังคงตรวจสอบ `currentPassword` กับแฮชดังกล่าว
+- `corsOrigins` และ `bruteForceProtection` อยู่ใน `SECURITY_IMPACTING_SETTINGS_KEYS`
+  เช่นกัน การผ่อนปรนค่าใดค่าหนึ่งทำให้การป้องกันการเข้าสู่ระบบอ่อนแอลง
+  ดังนั้นจึงต้องยืนยันตัวตนซ้ำด้วย `currentPassword` ในลักษณะเดียวกัน
+  (แท็บความปลอดภัยจะขอค่านี้) และการนำเข้า JSON จะตัดค่าเหล่านี้ออก
+- คีย์นโยบายความปลอดภัยทุกรายการ — รายการใน `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  คีย์ `oidc*` ทุกคีย์ และสถานะเซสชันแดชบอร์ด — เป็นสิทธิ์ **เฉพาะผู้ควบคุมระบบ**
+  สำหรับ `PATCH /api/settings`: API key ที่มีขอบเขต `manage` หรือ access token
+  แบบ `oma_` จะถูกปฏิเสธด้วย `403` แม้จะส่ง `currentPassword` ที่ถูกต้อง
+  และการปฏิเสธจะถูกบันทึกใน audit log เป็น `settings.update_failed` พร้อม
+  `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` ใน
+  `src/lib/api/operatorCredential.ts`) การตั้งค่าทั่วไป (ธีมและการตั้งค่าการแสดงผล)
+  ยังคงแก้ไขได้ด้วยคีย์ `manage` หรือ access token แบบ `admin` การเปลี่ยนแปลงใดๆ
+  ที่ `/api/settings` โดยตรง (รวมถึง `/api/settings/require-login`) ยังต้องใช้
+  ขอบเขต access token แบบ `admin` ด้วย (`ADMIN_MUTATION_EXACT_PATHS` ใน
+  `src/server/authz/accessScopes.ts` ซึ่งจับคู่พาธแบบตรงกันทุกประการ);
+  `GET` ยังคงใช้ `read` และเส้นทางย่อย `/api/settings/*` อื่นๆ (พร็อกซี
+  ค่าเริ่มต้นของคอมโบ นามแฝงโมเดล การบีบอัด การล้างข้อมูล…) ยังคงใช้ขอบเขต
+  `write` ที่อนุมานจากเมธอด
+- `POST /api/settings/import-json` จะข้ามการยืนยันตัวตนซ้ำดังกล่าว ดังนั้นก่อนเขียน
+  ระบบจึงตัดทุกคีย์ใน `IMPORT_STRIPPED_SETTINGS_KEYS` (ไฟล์เดียวกัน) ออก:
+  รหัสผ่านและ `currentPassword`, ทุกรายการใน `SECURITY_IMPACTING_SETTINGS_KEYS`
+  และสถานะเซสชันแดชบอร์ด (`sessionsValidAfter`, `revokedDashboardSessions`)
+  ดังนั้นการนำเข้าข้อมูลสำรองเก่าจึงไม่สามารถทำให้เซสชันที่สิ้นสุดไปแล้วจาก
+  การเปลี่ยนรหัสผ่านหรือการออกจากระบบกลับมาใช้งานได้อีก
 
-## คลาสของเส้นทาง (Route Classes)
+## คลาสของเส้นทาง
 
-`src/server/authz/types.ts` กำหนดคลาสสามประเภท; เส้นทางใดๆ ที่ไม่สามารถจัดประเภทได้อย่างชัดเจนจะถูกจัดเป็น `MANAGEMENT` โดยปริยาย
+`src/server/authz/types.ts` กำหนดคลาสไว้สามคลาส และเส้นทางใดที่จัดประเภทได้อย่างแน่นอนไม่ได้จะตกไปอยู่ที่ `MANAGEMENT` เสมอ
 
-| คลาส         | คำอธิบาย                                                                                                                                                    | การยืนยันตัวตนที่จำเป็น                                                           |
-| :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
-| `PUBLIC`     | เส้นทางที่ปลอดภัยอย่างชัดเจน — การเข้าสู่ระบบ, การออกจากระบบ, สถานะ, การเริ่มต้น, สุขภาพ, การเริ่มต้นใช้งาน (onboarding bootstrap)                          | ไม่มี                                                                             |
-| `CLIENT_API` | ปลายทางสำหรับการให้บริการโมเดล — `/api/v1/*`, `/api/v1beta/*`, รวมถึงชื่อแทน `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*` | คีย์ Bearer เมื่อมีการเปิดใช้งานแฟล็กคุณสมบัติ `REQUIRE_API_KEY` ที่มีผลบังคับใช้ |
-| `MANAGEMENT` | หน้าแดชบอร์ด, การตั้งค่า, ผู้ให้บริการ, คีย์, ปลายทางสำหรับผู้ดูแลระบบและการวินิจฉัย                                                                        | เซสชันแดชบอร์ด หรือ Bearer ที่มีขอบเขต `manage`                                   |
+| Class        | Description                                                                                                                                      | Auth required                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| `PUBLIC`     | เส้นทางที่ปลอดภัยอย่างชัดเจน — ล็อกอิน ล็อกเอาต์ สถานะ การเริ่มต้นระบบ health check และการบูตสแตรปการเริ่มใช้งาน                                 | ไม่ต้องใช้                                                     |
+| `CLIENT_API` | เอนด์พอยต์ให้บริการโมเดล — `/api/v1/*`, `/api/v1beta/*` และ alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*` | Bearer key เมื่อเปิดฟีเจอร์แฟล็ก `REQUIRE_API_KEY` ที่มีผลอยู่ |
+| `MANAGEMENT` | หน้าแดชบอร์ด การตั้งค่า ผู้ให้บริการ คีย์ และเอนด์พอยต์ของผู้ดูแลระบบและการวินิจฉัย                                                              | เซสชันแดชบอร์ด หรือ Bearer ที่มีขอบเขต `manage`                |
 
-## ไปป์ไลน์ (Pipeline)
+การกระทำบางอย่างใน `MANAGEMENT` เป็น **สำหรับผู้ดูแลระบบเท่านั้น** การมีคีย์ `manage` เพียงอย่างเดียวไม่พอ ได้แก่ การส่งออกข้อมูลรับรองที่เก็บไว้ (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`) การกู้คืนแบ็กอัปทับข้อมูลสดที่ใช้งานอยู่ (`POST /api/db-backups/import` รวมถึง `dryRun=true`, `POST /api/db-backups` การกู้คืนด้วย id, `POST /api/settings/import-json`) และการทำลายจุดกู้คืน (`DELETE /api/db-backups` สำหรับการเคลียร์ และ `PATCH /api/db-backups` เพราะการตั้งค่าการเก็บรักษาที่มันบันทึกไว้จะขับเคลื่อนการลบอัตโนมัติหลังสร้างแบ็กอัปทุกครั้ง) ซึ่งต้องใช้เซสชันแดชบอร์ด ตัวตน CLI ในเครื่อง หรือการปิดการล็อกอินอยู่ การออกโทเค็นการซิงก์ (`POST /api/sync/tokens`) และการสร้างโทเค็นการเข้าถึง CLI แบบ `admin` (`POST /api/cli/tokens`) ต้องใช้เซสชันแดชบอร์ดหรือตัวตน CLI ในเครื่องในทุกโหมดการล็อกอิน คีย์ API ทุกขอบเขตและโทเค็นการเข้าถึง `oma_` ไม่ใช่ข้อมูลรับรองของผู้ดูแลระบบ จึงจะได้รับ `403` ทุกครั้งที่ต้องใช้ข้อมูลรับรองแบบนั้น การตรวจสอบนี้อยู่ใน `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`) การเปลี่ยนการตั้งค่าการล็อกอินก็เป็นงานของผู้ดูแลระบบเช่นกัน `POST /api/settings/require-login` (ตั้งรหัสผ่านผู้จัดการ หรือสลับ `requireLogin`) จะยอมรับเฉพาะข้อมูลรับรองเหล่านี้เมื่อมีรหัสผ่านแล้ว ช่วงบูตสแตรปครั้งแรกที่ยังไม่มีรหัสผ่านไม่มีการเปลี่ยนแปลง และเซสชันแดชบอร์ดต้องส่ง `currentPassword` มาเพื่อแทนที่รหัสผ่าน (ตอบ `403` เมื่อไม่มีหรือผิด และบันทึกเป็น audit ว่า `settings.update_failed`) CLI ในเครื่องและอินสแตนซ์ที่ปิดการล็อกอินอยู่จะคงเส้นทางการกู้คืนไว้ และตั้งรหัสผ่านได้โดยไม่ต้องใช้ค่านี้ เพราะทั้งสองผูกกับโฮสต์ที่เป็นเจ้าของไดเรกทอรีข้อมูล
+
+## ไปป์ไลน์
 
 ```
-คำขอขาเข้า → src/proxy.ts
-  → runAuthzPipeline() ใน src/server/authz/pipeline.ts
-    1. ลบส่วนหัวภายในที่เชื่อถือได้ (x-omniroute-auth-*, x-omniroute-route-class)
-    2. สร้างรหัสคำขอ, จัดประเภทเส้นทางผ่าน classifyRoute()
-    3. หาก pathname == "/" → เปลี่ยนเส้นทางไปที่ /dashboard
-    4. หากกำลังระบาย (ปิดระบบอย่างนุ่มนวล) และ /api/* → 503
-    5. หากไม่ใช่ GET /api/* → ตรวจสอบ checkBodySize() guard
-    6. หาก OPTIONS → CORS preflight 204
-    7. หาก options.enforce == false → ส่งผ่านพร้อมส่วนหัว route-class
-    8. มิฉะนั้น: POLICIES[routeClass].evaluate(ctx)
-       - อนุญาต  → ประทับ x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - ปฏิเสธ → ข้อผิดพลาด JSON พร้อม correlation_id (หน้าแดชบอร์ด → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-ส่วนหัวภายในที่เชื่อถือได้ (กำหนดไว้ใน `src/server/authz/headers.ts`) จะ**ถูกลบออกจากคำขอขาเข้า**ก่อนการจัดประเภท — ลูกค้าไม่สามารถใส่ `x-omniroute-auth-*` ล่วงหน้าเพื่อปลอมตัวเป็นผู้ใช้ได้
+ส่วนหัวภายในที่เชื่อถือได้ (กำหนดใน `src/server/authz/headers.ts`) คือ** ถูกตัดออกจากคำขอที่เข้ามา** ก่อนการจำแนกประเภทไคลเอ็นต์ — ไม่สามารถเติม `x-omniroute-auth-*` ล่วงหน้าเพื่อเลียนแบบหัวเรื่องได้
 
-### สัญญาของนโยบาย (Policy contracts)
+### สัญญานโยบาย
 
-แต่ละคลาสของเส้นทางมีนโยบายอยู่ใน `src/server/authz/policies/`:
+แต่ละคลาสเส้นทางมีนโยบายเป็น `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — จะคืนค่า `allow({ kind: "anonymous", id: "anonymous" })` เสมอ
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — ดึง Bearer ออกมา, ตรวจสอบความถูกต้องผ่าน `validateApiKey()` จะเปลี่ยนไปใช้ anonymous ก็ต่อเมื่อแฟล็กคุณสมบัติ `REQUIRE_API_KEY` ที่มีผลบังคับใช้ถูกปิดใช้งาน แฟล็กที่มีผลบังคับใช้จะถูกแก้ไขผ่าน `isRequireApiKeyEnabled()` (การแทนที่แฟล็กคุณสมบัติของ DB > `process.env.REQUIRE_API_KEY` > ค่าเริ่มต้น) ดังนั้นแฟล็กคุณสมบัติของแดชบอร์ดและตัวแปรสภาพแวดล้อมจึงควบคุม `/api/v1/*`, `/api/v1beta/*` และชื่อแทนได้อย่างสอดคล้องกัน; ความล้มเหลวในการแก้ไขจะทำให้การเข้าถึงถูกปฏิเสธ อนุญาตคำขอเซสชันแดชบอร์ดบนเส้นทาง API ของไคลเอ็นต์ (รวมถึง `/api/v1/models` ที่ใช้โดยแคตตาล็อกโมเดลของแดชบอร์ด)
-- **`managementPolicy`** (`policies/management.ts`) — ยอมรับเซสชันแดชบอร์ด, คำขอซิงค์โมเดลภายใน (ที่ตรงกับ `/api/providers/[name]/(sync-models|models)`) หรือข้ามทั้งหมดหาก `isAuthRequired()` คืนค่าเป็น false คืนค่า 403 (`AUTH_001`) เมื่อมีโทเค็น Bearer แต่ไม่ถูกต้อง, มิฉะนั้นจะคืนค่า 401 นอกจากนี้ยังบังคับใช้ระดับการป้องกันเส้นทาง (LOCAL_ONLY / ALWAYS_PROTECTED) ก่อนที่จะมีการตรวจสอบการยืนยันตัวตนใดๆ — ดู [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) เส้นทาง LOCAL_ONLY ใน `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (ปัจจุบัน: `/api/mcp/`) อาจเข้าถึงได้จากภายนอก loopback เมื่อคีย์ Bearer มีขอบเขต `manage`; เส้นทาง LOCAL_ONLY อื่นๆ ทั้งหมดจะยังคงเป็น strict-loopback โดยไม่คำนึงถึงขอบเขต
+- **`publicPolicy`** (`policies/public.ts`) — จะส่งกลับ `allow({ kind: "anonymous", id: "anonymous" })` เสมอ
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — แยก Bearer ตรวจสอบผ่าน `validateApiKey()` ตกสู่สถานะไม่ระบุชื่อเฉพาะเมื่อมีการปิดใช้งานแฟล็กคุณลักษณะ `REQUIRE_API_KEY` ที่มีผลใช้งาน แฟล็กที่มีประสิทธิผลได้รับการแก้ไขผ่าน `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ดังนั้น Dashboard Feature Flags และตัวแปรสภาพแวดล้อมจะควบคุม `/api/v1/*`, `/api/v1beta/*` และนามแฝงอย่างสม่ำเสมอ ความล้มเหลวของตัวแก้ไขล้มเหลวปิด อนุญาตคำขอเซสชันแดชบอร์ดบนเส้นทาง API ของไคลเอ็นต์ (รวมถึง `/api/v1/models` ที่ใช้โดยแค็ตตาล็อกโมเดลแดชบอร์ด) เมื่อเปิดใช้งาน Entra ID SSO ผู้ถือที่มีโครงสร้างเป็นโทเค็น Entra (สามเซ็กเมนต์ base64url, `RS*` alg, `kid`) จะได้รับการจัดการโดยสาขา SSO** ก่อน** `validateApiKey()` และคำตัดสินถือเป็นที่สิ้นสุด — จะไม่ผ่านไปยังเส้นทางคีย์ API หรือสาขาที่ลดระดับลงเป็นนิรนาม ดังนั้นการหยุดทำงานของผู้ให้บริการข้อมูลประจำตัวจึงไม่กลายเป็นการเข้าถึงแบบเปิด คีย์ API แบบคงที่จะไม่ได้รับผลกระทบ ดู [ที่ ID SSO](../security/ENTRA_SSO.md)
+- **`managementPolicy`** (`policies/management.ts`) — ยอมรับเซสชันแดชบอร์ด คำขอซิงค์โมเดลภายใน (จับคู่กับ `/api/providers/[name]/(sync-models|models)`) หรือข้ามทั้งหมดหาก `isAuthRequired()` ส่งคืนค่าเท็จ ส่งคืน 403 (`AUTH_001`) เมื่อมีโทเค็น Bearer อยู่แต่ไม่ถูกต้อง มิฉะนั้น 401 จะส่งคืน นอกจากนี้ยังบังคับใช้ระดับการป้องกันเส้นทาง (LOCAL_ONLY / ALWAYS_PROTECTED) ก่อนสาขาการรับรองความถูกต้องใดๆ — โปรดดูที่ [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) เส้นทาง LOCAL_ONLY ใน `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (วันนี้: `/api/mcp/`) อาจเข้าถึงได้จาก non-loopback เมื่อคีย์ Bearer มีขอบเขต `manage` เส้นทาง LOCAL_ONLY อื่นๆ ทั้งหมดยังคงเป็นแบบวนกลับแบบเข้มงวดโดยไม่คำนึงถึงขอบเขต
 
-นโยบายที่สำเร็จจะคืนค่า `AuthSubject` ที่มี `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` แฮนเดิลเลอร์ปลายน้ำสามารถอ่านได้ผ่าน `assertAuth(request, "CLIENT_API")` ใน `src/server/authz/assertAuth.ts` แทนที่จะเรียกใช้ตรรกะการยืนยันตัวตนซ้ำ
+นโยบายที่ประสบความสำเร็จจะส่งคืน `AuthSubject` ด้วย `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ตัวจัดการดาวน์สตรีมสามารถอ่านผ่าน `assertAuth(request, "CLIENT_API")` ใน `src/server/authz/assertAuth.ts` แทนที่จะรันตรรกะการตรวจสอบสิทธิ์อีกครั้ง
 
 ## รายการเส้นทางสาธารณะ
 
@@ -219,15 +267,15 @@ export async function POST(request: Request) {
 
 `read` / `write` / `admin` บนโทเค็น `oma_live_…` จัดอันดับโดย `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`) การจัดอันดับนี้ใช้กับข้อมูลประจำตัวของโทเค็นการเข้าถึงเท่านั้น ดู [Management Authentication](../guides/MANAGEMENT-AUTH.md)
 
-## การสลับการบังคับใช้การรับรองความถูกต้อง
+## สวิตช์การกำหนดให้ต้องยืนยันตัวตน
 
-`isAuthRequired()` ใน `src/shared/utils/apiAuth.ts` จะตัดสินใจว่ามีการบังคับใช้การรับรองความถูกต้อง **ใดๆ** สำหรับคำขอหรือไม่:
+`isAuthRequired()` ใน `src/shared/utils/apiAuth.ts` ตัดสินว่าคำขอหนึ่ง ๆ จะถูกบังคับให้ยืนยันตัวตน **หรือไม่** ดังนี้:
 
-- `settings.requireLogin === false` → การรับรองความถูกต้องถูกปิดใช้งานทั่วโลก
-- ไม่ได้กำหนดรหัสผ่าน **และ** ไม่มีตัวแปรสภาพแวดล้อม `INITIAL_PASSWORD` → โหมด bootstrap อนุญาตให้ใช้วิซาร์ดการเริ่มต้นใช้งานและคำขอ loopback แต่คำขอเครือข่ายที่เปิดเผยยังคงต้องการข้อมูลประจำตัว
-- ข้อผิดพลาดของ DB ใดๆ → ล้มเหลวแบบปิด (ปลอดภัยโดยค่าเริ่มต้น)
+- `settings.requireLogin === false` → ปิดการยืนยันตัวตนทั้งระบบ ยกเว้นระดับที่ป้องกันเสมอ (ดู [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) และการเรียกที่ออกข้อมูลรับรองซึ่งระบบยอมรับ ซึ่งต้องใช้ข้อมูลรับรองเดียวกับตอนที่เปิดการล็อกอิน ได้แก่ การออกโทเค็นการซิงก์ การสร้างโทเค็นการเข้าถึง CLI ทุกขอบเขต การสร้างคีย์ API ที่มีขอบเขต `manage`/`admin` การให้ขอบเขตนั้นแก่คีย์ การสร้างใหม่หรือการเปิดเผยคีย์ดังกล่าว (`requireCredentialForManagementScopedKey()` ใน `src/lib/api/requireManagementAuth.ts`) คีย์สำหรับการอนุมาน (inference) อย่างเดียวยังคงเปิดอยู่
+- ยังไม่ได้ตั้งรหัสผ่าน **และ** ไม่มีตัวแปรสภาพแวดล้อม `INITIAL_PASSWORD` → โหมดบูตสแตรปอนุญาตวิซาร์ดการเริ่มต้นใช้งานและคำขอจาก loopback แต่คำขอจากเครือข่ายภายนอกยังต้องใช้ข้อมูลรับรอง
+- ข้อผิดพลาดของ DB ใด ๆ → ปิดล็อก (fails closed, ค่าเริ่มต้นที่ปลอดภัย)
 
-การบังคับใช้คีย์ API ของไคลเอ็นต์ใช้ `isRequireApiKeyEnabled()` ใน `src/shared/utils/featureFlags.ts` ไม่ใช่การอ่าน `process.env.REQUIRE_API_KEY` โดยตรง สิ่งนี้สำคัญสำหรับอินสแตนซ์ที่ปรับใช้: การสลับ `REQUIRE_API_KEY` ใน Dashboard → Feature Flags จะจัดเก็บการแทนที่ DB และส่งผลกระทบโดยตรงต่อ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` และการตรวจสอบการรับรองความถูกต้องของ Client-API อื่นๆ ที่ใช้ตัวช่วยนี้ร่วมกัน หากไม่สามารถอ่านที่เก็บแฟล็กคุณสมบัติได้ การรับรองความถูกต้องของ Client API จะล้มเหลวแบบปิดและต้องใช้คีย์
+การบังคับใช้ API key ของไคลเอนต์ใช้ `isRequireApiKeyEnabled()` ใน `src/shared/utils/featureFlags.ts` แทนการอ่าน `process.env.REQUIRE_API_KEY` โดยตรง ซึ่งสำคัญสำหรับอินสแตนซ์ที่นำไปใช้งานจริง เมื่อสลับ `REQUIRE_API_KEY` ใน Dashboard → Feature Flags ระบบจะเก็บค่า override ลงฐานข้อมูล และมีผลทันทีต่อ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` และการตรวจสอบการยืนยันตัวตนของ client API อื่น ๆ ที่ใช้ฟังก์ชันตัวช่วยนี้ร่วมกัน หากอ่านที่เก็บ feature flag ไม่ได้ การยืนยันตัวตนของ client API จะปิดล็อกและต้องการคีย์
 
 ## การเปลี่ยนแปลงที่ส่งผลกระทบ — v3.8.0
 
@@ -245,23 +293,23 @@ export async function POST(request: Request) {
 
 ## การดีบัก
 
-ไปป์ไลน์จะประทับการตอบกลับด้วย:
+ไปป์ไลน์จะประทับคำตอบด้วย:
 
 ```
 x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-สำหรับการร้องขอที่ผ่านการรับรองความถูกต้อง ส่วนหัวการร้องขอต้นน้ำ (ฝั่งแฮนเดิลเลอร์) จะรวมถึง:
+สำหรับคำขอที่ได้รับการตรวจสอบสิทธิ์ ส่วนหัวคำขออัปสตรีม (ฝั่งตัวจัดการ) ยังรวมถึง:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```
 
-ใช้ `assertAuth(req, expectedClass)` ภายในแฮนเดิลเลอร์ — มันจะโยน `AuthzAssertionError` พร้อมโค้ด `AUTHZ_NOT_INITIALIZED` หากมิดเดิลแวร์ถูกข้าม (มีประโยชน์สำหรับการตรวจจับการถดถอยของการกำหนดค่าในการทดสอบ)
+ใช้ `assertAuth(req, expectedClass)` ภายในตัวจัดการ — มันจะส่ง `AuthzAssertionError` พร้อมรหัส `AUTHZ_NOT_INITIALIZED` หากมิดเดิลแวร์ถูกข้าม (มีประโยชน์สำหรับการตรวจจับการถดถอยของการกำหนดค่าในการทดสอบ)
 
 ## ดูเพิ่มเติม
 

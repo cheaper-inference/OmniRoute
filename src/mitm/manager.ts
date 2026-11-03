@@ -29,6 +29,12 @@ import {
 } from "./repair.ts";
 import { runPrivilegedMitmStep } from "./privilegedMitmStep.ts";
 import { removeDnsEntriesAfterFailedStart, removeStopDnsEntries } from "./stopDnsTeardown.ts";
+import {
+  deriveOrphanedState,
+  revertHostsAfterUnexpectedExit,
+  type UnexpectedExitDeps,
+} from "./childExitCleanup.ts";
+import { canRunPrivilegedMitmSteps } from "./sudoGate.ts";
 
 export { buildRepairPlan, collectManagedHosts, type RepairPlan };
 
@@ -116,6 +122,10 @@ export function releaseMitmStartLock(): void {
 // teardown). The dashboard surfaces this to offer a one-click Repair. Cleared
 // by repairMitm(). (Gap 7.)
 let _orphanedStateDetected = false;
+
+// Children this process killed on purpose (stopMitm / parent signal). Marked
+// BEFORE kill() so their later `exit` event is not mistaken for a crash.
+const _intentionallyStopped = new WeakSet<ChildProcess>();
 
 // Guards installCleanupHandlers() so the parent-process signal handlers are
 // registered at most once. (Gap 7.)
@@ -327,7 +337,10 @@ export async function handleExitCleanup(
   };
 
   try {
-    if (serverProcess && !serverProcess.killed) serverProcess.kill("SIGTERM");
+    if (serverProcess && !serverProcess.killed) {
+      _intentionallyStopped.add(serverProcess);
+      serverProcess.kill("SIGTERM");
+    }
   } catch {
     // ignore
   }
@@ -432,8 +445,54 @@ export async function getMitmStatus(agentId?: string): Promise<{
     pid,
     dnsConfigured,
     certExists,
-    orphanedStateDetected: _orphanedStateDetected,
+    orphanedStateDetected: deriveOrphanedState({
+      flagged: _orphanedStateDetected,
+      running,
+      dnsConfigured,
+      starting: mitmStarting,
+    }),
   };
+}
+
+/**
+ * `exit` handler of the spawned MITM child. Clears the in-memory handle and PID
+ * file (only when the exiting child is still the current one, so a late exit of
+ * a previous child cannot orphan a freshly started one). When the child died on
+ * its own AFTER a confirmed start — not via stopMitm()/the signal handler, and
+ * not during startup, whose failure path already reverts DNS — revert the hosts
+ * entries with the cached sudo password, or flag orphaned state for Repair.
+ * @param _depsOverride - optional dependency override, used in tests for DI.
+ */
+export async function handleMitmChildExit(
+  proc: ChildProcess,
+  code: number | null,
+  opts: { startConfirmed: boolean },
+  _depsOverride?: Partial<UnexpectedExitDeps>
+): Promise<void> {
+  log.info({ exitCode: code }, "MITM server exited");
+  if (serverProcess === proc) {
+    serverProcess = null;
+    serverPid = null;
+    try {
+      fs.unlinkSync(PID_FILE);
+    } catch {
+      // Ignore
+    }
+  }
+
+  if (!opts.startConfirmed || _intentionallyStopped.has(proc)) return;
+
+  const reverted = await revertHostsAfterUnexpectedExit(
+    {
+      getCachedPassword: _depsOverride?.getCachedPassword ?? getCachedPassword,
+      canRunPrivileged: _depsOverride?.canRunPrivileged ?? canRunPrivilegedMitmSteps,
+      removeDNSEntry: _depsOverride?.removeDNSEntry ?? removeDNSEntry,
+      removeDNSEntries: _depsOverride?.removeDNSEntries ?? removeDNSEntries,
+      collectManagedHosts: _depsOverride?.collectManagedHosts ?? collectManagedHosts,
+    },
+    code
+  );
+  if (!reverted) _orphanedStateDetected = true;
 }
 
 /**
@@ -659,17 +718,11 @@ async function startMitmInternal(
     log.error({ source: "mitm-server" }, chunk.trim());
   });
 
+  // Flipped once the startup check below passes; an exit before that is a
+  // failed start, whose own path reverts DNS.
+  let startConfirmed = false;
   proc.on("exit", (code) => {
-    log.info({ exitCode: code }, "MITM server exited");
-    serverProcess = null;
-    serverPid = null;
-
-    // Remove PID file
-    try {
-      fs.unlinkSync(PID_FILE);
-    } catch (error) {
-      // Ignore
-    }
+    void handleMitmChildExit(proc, code, { startConfirmed });
   });
 
   // Wait and verify server actually started
@@ -721,6 +774,7 @@ async function startMitmInternal(
     );
     throw new Error(interpretMitmStartupError(stderrBuffer, port));
   }
+  startConfirmed = true;
 
   return {
     running: true,
@@ -740,6 +794,7 @@ async function killMitmServerProcessOnStop(): Promise<void> {
   const proc = serverProcess;
   if (proc && !proc.killed) {
     log.info("Stopping MITM server...");
+    _intentionallyStopped.add(proc);
     proc.kill("SIGTERM");
     await new Promise((resolve) => setTimeout(resolve, 1000));
     if (!proc.killed) {

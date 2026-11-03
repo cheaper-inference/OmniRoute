@@ -13,6 +13,14 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof ResizeObserver;
+
 const stableT = (key: string) => key;
 vi.mock("next-intl", () => ({
   useTranslations: () => stableT,

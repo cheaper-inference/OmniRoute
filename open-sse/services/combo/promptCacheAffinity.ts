@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
 import {
   analyzePrefix,
   generatePromptCacheKey,
@@ -114,7 +114,7 @@ export function resolvePromptCacheAffinityKey(
   if (!key) return null;
 
   const source: PromptCacheAffinitySource = explicit ? "explicit" : "prefix";
-  const fingerprint = createHash("sha256").update(key).digest("hex").slice(0, 12);
+  const fingerprint = opaqueTokenFingerprint(key, { length: 12 });
   return { key, source, fingerprint };
 }
 
@@ -125,8 +125,8 @@ export function promptCacheTargetIdentity(target: PromptCacheAffinityTarget): st
 }
 
 function rendezvousScore(key: string, identity: string): bigint {
-  const digest = createHash("sha256").update(key).update("\0").update(identity).digest("hex");
-  return BigInt(`0x${digest.slice(0, 32)}`);
+  const digest = opaqueTokenFingerprint(`${key}\0${identity}`, { length: 32 });
+  return BigInt(`0x${digest}`);
 }
 
 const MAX_RENDEZVOUS_HIGH_BITS = (1n << 64n) - 1n;

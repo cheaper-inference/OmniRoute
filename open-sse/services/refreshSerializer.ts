@@ -18,9 +18,11 @@
  * serialized — their refresh_tokens are permanent and there is no cascade.
  */
 
+import { AsyncLocalStorage } from "node:async_hooks";
+
 // Providers mapped to the same string share one serialized lane. Codex and the
 // raw `openai` provider use the same Auth0 backend, so they MUST share a lane.
-const ROTATION_LOCK_GROUP: Record<string, string> = {
+export const ROTATION_LOCK_GROUP: Record<string, string> = {
   codex: "openai-auth0",
   openai: "openai-auth0",
   claude: "anthropic-oauth",
@@ -33,6 +35,12 @@ const ROTATION_LOCK_GROUP: Record<string, string> = {
   // already listed in tokenHealthCheck's ROTATING_REFRESH_PROVIDERS, so sibling
   // connections could refresh concurrently and present superseded tokens.
   cline: "cline",
+  // Amazon Q dispatches to the same refreshKiroToken backend as kiro, so sibling
+  // Kiro-IdP connections must not POST their rotating refresh tokens concurrently.
+  "amazon-q": "kiro",
+  // Openference rotates one-time-use refresh tokens on its own endpoint; a
+  // concurrent sibling refresh would burn the token, so it gets its own lane.
+  openference: "openference",
 };
 
 // Protective settle gap (ms) between two consecutive sibling refreshes when the
@@ -60,6 +68,13 @@ export function getRefreshSpacingMs(): number {
 
 // Tail promise per group — each new refresh chains after the previous one.
 const groupTail = new Map<string, Promise<void>>();
+
+// Rotation groups whose lane the current async call chain already holds. The lane
+// is not a reentrant lock on its own: `refreshAndUpdateCredentials` serializes
+// `executor.refreshCredentials()`, and the Codex/Claude executors call
+// `getAccessToken()`, which serializes again on the same group. Without this the
+// inner call queues behind its own caller until the lane bound fires.
+const heldGroups = new AsyncLocalStorage<ReadonlySet<string>>();
 
 // #14970: upper bound on how long one refresh may hold the group lane. Not
 // every provider's refresh fetch carries an AbortSignal, so one hung upstream
@@ -98,6 +113,11 @@ export async function serializeRefresh<T>(
   const group = rotationGroupFor(provider);
   if (!group) return fn();
 
+  // Reentrant: this call chain already holds the group's lane, so the network
+  // refresh still runs at concurrency=1 for the group. Queueing would deadlock.
+  const held = heldGroups.getStore();
+  if (held?.has(group)) return fn();
+
   const prevTail = groupTail.get(group) ?? Promise.resolve();
   let releaseMine!: () => void;
   const mine = new Promise<void>((resolve) => {
@@ -115,8 +135,8 @@ export async function serializeRefresh<T>(
   // rejection handled while the lane releases for queued siblings.
   let laneTimer: ReturnType<typeof setTimeout> | null = null;
   try {
-    return await Promise.race([
-      fn(),
+    return (await Promise.race([
+      heldGroups.run(new Set([...(held ?? []), group]), fn),
       new Promise<null>((resolve) => {
         laneTimer = setTimeout(() => {
           log?.error?.(
@@ -127,7 +147,7 @@ export async function serializeRefresh<T>(
         }, refreshLaneMaxMs);
         (laneTimer as { unref?: () => void })?.unref?.();
       }),
-    ]) as T;
+    ])) as T;
   } finally {
     if (laneTimer) clearTimeout(laneTimer);
     // Only pay the settle gap when a sibling is already queued behind us — a

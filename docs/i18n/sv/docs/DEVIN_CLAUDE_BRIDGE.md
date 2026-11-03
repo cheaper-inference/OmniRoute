@@ -4,84 +4,93 @@
 
 ---
 
-`devin-cli-agentic` låter den riktiga Claude Code-körmiljön använda OmniRoutes lokala Anthropic
-Messages-slutpunkt medan den officiella Devin CLI:n tillhandahåller modellsvar via ACP stdio. Den
+`devin-cli-agentic` låter den verkliga Claude Code-körmiljön använda OmniRoutes lokala Anthropic
+Messages-slutpunkt medan den officiella Devin CLI tillhandahåller modellsvar via ACP stdio. Den
 ändrar inte de befintliga leverantörerna Anthropic, Claude OAuth, Claude Web eller `devin-cli`.
 
-> **Aktuell status: låst till Claude Code `2.1.258`; offline- och livevalidering registrerades
-> senast på `2.1.220`.** Låsningen till `2.1.220` slutförde tre isolerade scenarier via Devin CLI
+För verktygsanrop som ägs av klienten ska routning ske genom `devin-cli-agentic` (alias `dva`), den
+verktygskapabla leverantören i Claude-format. Den äldre ACP-exekveraren `devin-cli` (`dv`) är
+endast textbaserad: den kör Devins sammanfattare utan verktyg och kan inte returnera verktygsanrop. Dess
+modellmetadata är markerad i enlighet med detta, så kombinationsroutning som kräver verktyg undviker den.
+
+> **Aktuell status: Claude Code är låst till `2.1.258`; offline- och livevalidering registrerades senast
+> för `2.1.220`.** Låsningen till `2.1.220` slutförde tre isolerade scenarier via Devin CLI
 > `3000.2.17` och modellen `swe-1-7-lightning`; den slutliga livekörningen bekräftade klientägda
-> `Read`-, `Edit`- och `Bash`-omgångar, godkända resultat från `npm test`, identifiering av
-> projektkommandon och färdigheter, dirigering endast via Devin samt noll utgående trafik till
-> Claude. Låsningen höjdes därefter till `2.1.258` (CLI-generationen som OmniRoutes Claude-identitet
-> utger sig för att vara och den första versionen som har inbyggt stöd för Fable 5.1-nivån).
-> Med den nya låsningen verifierades installationslagret och `claude --version` på den låsta
-> basavbildningen, och bryggans enhetstestsvit, `compose config` och det statiska isoleringsbeviset
-> går igenom – men offline-scenariot med en mock och livesviten med tre scenarier har ännu inte
-> körts om. Kör dem igen (se "Uppdatera låsta verktyg") innan du förlitar dig på bryggan med
-> denna låsning.
+> `Read`-, `Edit`- och `Bash`-omgångar, lyckade resultat från `npm test`, identifiering av
+> projektkommandon och färdigheter, routning enbart via Devin samt noll utgående trafik till Claude. Låsningen
+> höjdes därefter till `2.1.258` (den CLI-generation som OmniRoutes Claude-identitet imiterar och
+> den första versionen som har inbyggt stöd för Fable 5.1-nivån). För den nya låsningen verifierades
+> installationslagret och `claude --version` på den låsta basavbildningen, och bryggans enhetstestsvit,
+> `compose config` samt det statiska isoleringsbeviset godkänns — men varken mockscenariot offline eller
+> livesviten med tre scenarier har körts om ännu. Kör om dem (se ”Uppdatera låsta verktyg”) innan du
+> förlitar dig på bryggan med denna låsning.
 
 ## Arkitektur
 
 ```text
 Claude Code 2.1.258 (isolerad Linux-container utan root-behörighet)
   -> http://omniroute:20128/v1/messages
-  -> devin-cli-agentic (Claude-format, leverantör utan autentisering)
-  -> devin acp --agent-type summarizer (officiell ACP-stdio, inga Devin-verktyg)
+  -> devin-cli-agentic (Claude-format, autentiseringsfri leverantör)
+  -> devin acp --agent-type summarizer (officiell ACP stdio, inga Devin-verktyg)
   -> Devin-konto i den dedikerade devin-auth-volymen
 ```
 
 Den officiella CLI:ns förvalda ACP-agent kan köra sina egna verktyg, så den här bryggan använder
-den inte. Den startar den fasta ACP-agenten `summarizer`, vars officiella CLI-läge saknar verktyg,
-och ramar in den serialiserade Anthropic-begäran som ett exekveringsspår. När ytterligare en
-Claude-ägd åtgärd behövs måste svaret innehålla exakt ett klientverktygskuvert. Alla ACP-händelser
-av typen `tool_call` eller `tool_call_update` avvisas innan ett svar kan rapporteras som
+den inte. Den startar den fasta ACP-agenten `summarizer`, vars officiella CLI-läge saknar verktyg, och
+ramar in den serialiserade Anthropic-begäran som ett exekveringsspår. När en annan Claude-ägd
+åtgärd behövs måste svaret innehålla exakt ett klientverktygshölje. Alla ACP-
+`tool_call` eller `tool_call_update` avvisas innan ett svar kan rapporteras som
 lyckat.
 
 Serialiseraren i `open-sse/executors/devin-agentic/serializer.ts` bevarar `system`,
 `text`, `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `tool_choice` och de
-verktyg som tillhandahålls av Claude Code. Bilder och okända block leder uttryckligen till fel.
-Stora verktygsresultat använder en synlig trunkeringsmarkör.
+verktyg som Claude Code tillhandahåller. Bilder och okända block orsakar ett explicit fel. Stora verktygsresultat
+använder en synlig trunkeringsmarkör.
 
-Parsern accepterar ett fristående `<tool>{...}</tool>`-kuvert per modellomgång. Den kontrollerar
-namnet mot begärans verktygslista, validerar argumenten mot verktygets JSON Schema, avvisar
-blandningar av berättande text och åtgärder samt tillåter ett begränsat reparationsförsök.
-Claude Code kör sedan det resulterande Anthropic-`tool_use` lokalt och skickar tillbaka
-`tool_result` via OmniRoute.
+Parsern accepterar ett fristående `<tool>{...}</tool>`-hölje per modellomgång. Den kontrollerar
+namnet mot begärans verktygslista, validerar argumenten mot verktygets JSON
+Schema, avvisar blandningar av beskrivande text och åtgärder samt tillåter ett begränsat reparationsförsök. Claude Code
+kör sedan det resulterande Anthropic-`tool_use` lokalt och skickar tillbaka `tool_result` via
+OmniRoute.
+
+## Automatisk routning
+
+Leverantören är valbar i OmniRoutes `auto/*`-kandidatpooler när den inte är blockerad.
+Att en kandidat är valbar garanterar inte att den väljs: kombinationens routningsstrategi (exempelvis
+senast fungerande) kan föredra en annan leverantör. Använd `dva/<model>` eller en kombination med Devin
+som förstahandsval när du kräver att varje begäran ska gå genom Devin.
 
 ## Isolering och hotmodell
 
-Värdens Claude-installation, konto och konfiguration ligger utanför omfattningen och betraktas
-som förbjudna. Compose-tjänsterna:
+Värdens Claude-installation, konto och konfiguration ligger utanför omfånget och betraktas som
+förbjudna. Compose-tjänsterna:
 
 - körs som UID/GID `10001:10001`, med ett skrivskyddat rotfilsystem, borttagna funktioner och
   `no-new-privileges`;
-- använder ett privat `/home/bridge`, en dedikerad Claude-konfigurationsvolym, isolerade
-  OmniRoute-data och en separat `devin-auth`-volym;
-- monterar endast tillfälliga `.sandbox`-arbetsytor/bevis;
-- monterar inte värdens hemkatalog, Keychain, SSH, molnautentiseringsuppgifter eller
-  Docker-socket;
-- konstruerar explicita miljöer och tar bort Anthropic-variabler för API, OAuth och dirigering;
-- dirigerar Claude Code-inferens endast till `http://omniroute:20128` med en nyckel som endast
-  gäller lokalt.
+- använder en privat `/home/bridge`, en dedikerad Claude-konfigurationsvolym, isolerade OmniRoute-data
+  och en separat `devin-auth`-volym;
+- monterar endast temporära `.sandbox`-arbetsytor/bevis;
+- monterar inte värdens hemkatalog, Keychain, SSH, molninloggningsuppgifter eller Docker-socket;
+- konstruerar explicita miljöer och tar bort Anthropic-variabler för API/OAuth/routning;
+- dirigerar Claude Code-inferens endast till `http://omniroute:20128` med en nyckel som enbart är lokal.
 
-Offline-profilen använder ett internt nätverk. I live-profilen når OmniRoute de officiella
-Devin-slutpunkterna endast via `network-guard`; orelaterade destinationer nekas. Claude Code
-har ett separat utgående trafikfilter som nekar allt och kan endast nå den lokala
-OmniRoute-tjänsten via `NO_PROXY`. Skyddets granskningsfiler monteras endast av respektive
+Offlineprofilen använder ett internt nätverk. I liveprofilen når OmniRoute endast de
+officiella Devin-slutpunkterna genom `network-guard`; orelaterade destinationer nekas.
+Claude Code har ett separat utgående skydd som nekar all trafik och kan endast nå den lokala
+OmniRoute-tjänsten genom `NO_PROXY`. Skyddens granskningsfiler monteras endast av respektive
 skyddsprocess. Skripten verifierar filägarskap, läge, länkräkning och varje beslut innan
 tokenfria bevis exporteras.
 
-Kör isoleringsbeviset separat:
+Kör isoleringsbeviset oberoende:
 
 ```bash
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Det validerar topologi, namngivna monteringar, inställningar för körning utan root och med
-skrivskydd, explicit lokal dirigering, frånvaro av känsliga miljövariabler, frånvaro av
-Docker-socket, blockerad åtkomst till `api.anthropic.com` och `claude.ai`, leverantörsval
-endast för Devin samt uttryckligt fel när ACP-serverdelen inte är tillgänglig.
+Det validerar topologi, namngivna monteringar, inställningar för icke-root/skrivskydd,
+explicit lokal routning, frånvaro av känsliga miljövariabler, frånvaro av Docker-socket,
+blockerad åtkomst till `api.anthropic.com` och `claude.ai`, val av enbart Devin-leverantör
+samt explicit fel när ACP-backend inte är tillgänglig.
 
 ## Förstagångskonfiguration och normal användning
 
@@ -97,19 +106,24 @@ Autentisera endast den isolerade Devin-volymen:
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/login-devin
 ```
 
-Inloggningskommandot använder det officiella manuella tokenflödet som är avsett för fjärr- och containermiljöer. Värdet anges direkt i CLI-prompten; det skickas inte som ett processargument, skrivs inte till Git och kopieras inte från värden.
+Inloggningskommandot använder det officiella manuella tokenflödet som är avsett för
+fjärr-/containermiljöer. Värdet anges direkt i CLI-prompten; det skickas inte som ett
+processargument, skrivs inte till Git och kopieras inte från värden.
 
-Starta den isolerade exekveringsmiljön för Claude Code:
+Starta den isolerade Claude Code-körmiljön:
 
 ```bash
 ./scripts/devin-bridge/launch
 ```
 
-`launch` kontrollerar isoleringen, Devin-autentiseringen och modellidentifieringen på nytt innan den containeriserade Claude Code startas. Det kör aldrig värdens körbara Claude-fil. Modellalias kan anges i `.env.devin-bridge`; varje konfigurerat värde måste behålla prefixet `devin-cli-agentic/`.
+`launch` kontrollerar isoleringen, Devin-autentiseringen och modellidentifieringen på nytt
+innan den containeriserade Claude Code startas. Det kör aldrig värdens Claude-körbara fil.
+Modellalias kan anges i `.env.devin-bridge`; varje konfigurerat värde måste behålla
+prefixet `devin-cli-agentic/`.
 
 ## Valideringskommandon
 
-Den reproducerbara offlinevägen kräver inget Devin-konto och saknar internetåtkomst under körning:
+Den reproducerbara offlinevägen kräver inget Devin-konto och har ingen Internetåtkomst under körning:
 
 ```bash
 ./scripts/devin-bridge/test-unit
@@ -118,48 +132,56 @@ Den reproducerbara offlinevägen kräver inget Devin-konto och saknar internetå
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Den autentiserade, frivilliga livevägen är:
+Den autentiserade, valfria livevägen är:
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/test-live-devin
 ```
 
-Liveköraren väntar mellan scenarierna för att undvika att öppna ACP-sessioner i en skur och validerar strukturerade händelser från Claude-strömmen i stället för att lita på textpåståenden. Dess tre scenarier bevisar:
+Liveköraren väntar mellan scenarier för att undvika att öppna ACP-sessioner i en skur och
+validerar strukturerade Claude-strömhändelser i stället för att lita på textbaserade påståenden.
+Dess tre scenarier bevisar:
 
 1. direkt läsning av projektet och felanalys;
-2. en faktisk `Edit`, ett klientägt `Bash`-kommando med `npm test` och ett terminalresultat;
-3. `/bridge-check` samt identifiering av `bridge-proof`, läsning av projektet, ännu ett lyckat klientägt `npm test` och slutförande utan väntande arbete.
+2. en verklig `Edit`, ett klientägt `Bash`-`npm test` och ett slutresultat;
+3. `/bridge-check` samt identifiering av `bridge-proof`, läsning av projektet, ytterligare ett
+   lyckat klientägt `npm test` och slutförande utan väntande arbete.
 
-Den slutliga kontrollen granskar även Devins nätverkslogg och kräver att Claudes utgående trafiklogg förblir tom.
+Den slutliga grinden kontrollerar även Devins nätverksgranskning och kräver att Claude-granskningen
+av utgående trafik förblir tom.
 
 ## Uppdatera versionslåsta verktyg
 
-Avbildningen låser versionerna för Node, Claude Code och Devin CLI i `docker/devin-bridge/Dockerfile`. Så här uppdaterar du:
+Avbildningen låser versionerna av Node, Claude Code och Devin CLI i
+`docker/devin-bridge/Dockerfile`. Så här uppdaterar du dem:
 
-1. ändra de uttryckligen angivna versionerna;
-2. ersätt båda arkitekturspecifika kontrollsummorna för Devin-arkivet med värden för den officiella artefakten;
-3. bygg om och kör samtliga valideringskommandon för offlineläget;
-4. bekräfta versionerna inuti avbildningen;
-5. kör den autentiserade livesviten med tre scenarier igen.
+1. ändra de uttryckliga versionsnumren;
+2. ersätt kontrollsummorna för Devin-arkiven för båda arkitekturerna med värdena för den officiella
+   artefakten;
+3. bygg om och kör samtliga kommandon för offlinevalidering;
+4. bekräfta versionerna i avbildningen;
+5. kör om den autentiserade live-sviten med tre scenarier.
 
-Installera inte någon av CLI:erna globalt på värden och ersätt inte kontrollsummeverifieringen med en overifierad nedladdning.
+Installera inte någon av CLI:erna globalt på värden och ersätt inte kontrollsummekontrollen med en
+overifierad nedladdning.
 
 ## Diagnostik och rensning
 
 - `docker compose -f docker/devin-bridge/compose.yml --profile offline logs omniroute`
   visar lokal routning och sanerade exekveringsfel.
 - `.sandbox/evidence/mock-acp.jsonl` registrerar deterministiska simulerade ACP-åtgärder.
-- `.sandbox/evidence/claude-stream.jsonl` registrerar den faktiska offlinekörningen av Claude Code.
-- `.sandbox/evidence/live-*.jsonl` registrerar de tre validerade liveströmmarna.
-- `.sandbox/evidence/egress.jsonl` och `.sandbox/evidence/claude-egress.jsonl` är validerade, tokenfria kopior av skyddsloggarna.
+- `.sandbox/evidence/claude-stream.jsonl` registrerar den verkliga offlinekörningen av Claude Code.
+- `.sandbox/evidence/live-*.jsonl` registrerar de tre validerade live-strömmarna.
+- `.sandbox/evidence/egress.jsonl` och `.sandbox/evidence/claude-egress.jsonl` är validerade,
+  tokenfria kopior av skyddsgranskningarna.
 
-Stoppa ägda containrar och nätverk men bevara volymer för inloggning och konfiguration:
+Stoppa ägda containrar och nätverk samtidigt som inloggnings-/konfigurationsvolymer bevaras:
 
 ```bash
 ./scripts/devin-bridge/clean
 ```
 
-Ta bort hela den bryggägda miljön, inklusive namngivna volymer:
+Ta bort hela miljön som ägs av bryggan, inklusive namngivna volymer:
 
 ```bash
 ./scripts/devin-bridge/clean --all
@@ -167,15 +189,14 @@ Ta bort hela den bryggägda miljön, inklusive namngivna volymer:
 
 ## Begränsningar
 
-- Bryggan förlitar sig på den fasta `summarizer`-rollen utan verktyg eftersom Devin CLI `3000.2.17`
-  inte exponerar en neutral ACP-agent utan verktyg. Adaptern kompenserar för sammanfattningsformade
-  mellanliggande svar, men en begränsad reparation kan fortfarande misslyckas explicit.
-- Aktiva ACP-anrop kan returnera tillfälliga `502`-/`504`-svar. Testharnesket sprider ut scenarierna;
-  ihållande fel förblir stängda vid fel och väljer aldrig en annan leverantör.
-- ACP-kontexten rekonstrueras från varje Anthropic-förfrågan; det finns ingen
-  process-/sessionsaffinitet.
+- Bryggan är beroende av den fasta verktygslösa rollen `summarizer` eftersom Devin CLI `3000.2.17`
+  inte tillhandahåller någon neutral verktygslös ACP-agent. Adaptern kompenserar för sammanfattningsformade
+  mellanliggande svar, men ett begränsat reparationsförsök kan fortfarande misslyckas explicit.
+- Live-ACP-anrop kan returnera tillfälliga `502`-/`504`-svar. Testverktyget fördelar scenarierna över tid;
+  bestående fel förblir fail-closed och leder aldrig till att en annan leverantör väljs.
+- ACP-kontexten rekonstrueras från varje Anthropic-begäran; det finns ingen process-/sessionsaffinitet.
 - Ett verktygsanrop stöds per modellsvar; parallella anrop avvisas.
-- Bilder stöds uttryckligen inte. Bildanalys, resonemangsutdata, ansträngningskontroller och ett
+- Bilder stöds uttryckligen inte. Bildanalys, utdata för tänkande, ansträngningskontroller och ett
   kontextfönster på 1M annonseras inte.
-- SSE använder giltiga Anthropic-livscykelhändelser men skickas efter att den begränsade ACP-turen
-  har samlats in; ACP-delsegment vidarebefordras inte inkrementellt.
+- SSE använder giltiga Anthropic-livscykelhändelser men skickas efter att den begränsade ACP-turen har
+  samlats in; ACP-segment vidarebefordras inte inkrementellt.

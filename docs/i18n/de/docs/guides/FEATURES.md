@@ -296,15 +296,15 @@ Wichtige Verhaltensweisen:
 
 ---
 
-## 🔑 Sync-Tokens & Konfigurationspaket _(v3.6.6+)_
+## 🔑 Sync-Tokens & Konfigurations-Bundle _(v3.6.6+)_
 
-Der Zugriff über mehrere Geräte und durch externe Betreiber ist jetzt über **bereichsgebundene Sync-Tokens** möglich:
+Der Zugriff über mehrere Geräte und durch externe Operatoren ist jetzt über **bereichsgebundene Sync-Tokens** möglich:
 
 - **`POST /api/sync/tokens`** — Stellt ein neues Sync-Token aus (bereichsgebunden, mit optionalem Ablaufdatum)
 - **`DELETE /api/sync/tokens/:id`** — Widerruft ein Token
-- **`GET /api/sync/bundle`** — Lädt einen versionierten, über ETag identifizierten JSON-Snapshot aller nicht vertraulichen Einstellungen herunter (Passwörter werden unkenntlich gemacht)
+- **`GET /api/sync/bundle`** — Lädt einen versionierten, über einen ETag identifizierten JSON-Snapshot der Konfiguration herunter (Authentifizierung ausschließlich mit einem Sync-Token). Authentifizierungseinstellungen wie das Dashboard-Passwort werden entfernt, Anbieter-Zugangsdaten und API-Schlüssel sind jedoch enthalten. Behandeln Sie die Datei daher als vertrauliches Geheimnis
 
-Das Konfigurationspaket wird von `src/lib/sync/bundle.ts` erstellt. Clients vergleichen den `ETag`-Antwortheader, um Änderungen zu erkennen, ohne die vollständigen Nutzdaten erneut herunterzuladen.
+Das Konfigurations-Bundle wird von `src/lib/sync/bundle.ts` erstellt. Clients vergleichen den `ETag`-Antwortheader, um Änderungen zu erkennen, ohne die vollständigen Daten erneut herunterzuladen. Über die CLI speichert `omniroute sync bundle <outPath> --token <syncToken>` (oder `OMNIROUTE_SYNC_TOKEN`) das Bundle in einer Datei, auf die nur der Eigentümer zugreifen kann.
 
 ---
 

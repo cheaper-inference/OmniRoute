@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 import Badge from "@/shared/components/Badge";
+import Card from "@/shared/components/Card";
 import { cn } from "@/shared/utils/cn";
 
 export type CliConceptType = "code" | "agent" | "acp";
@@ -24,9 +25,7 @@ export default function CliConceptCard({ currentType }: CliConceptCardProps) {
   const types: CliConceptType[] = ["code", "agent", "acp"];
 
   return (
-    <div
-      className={cn("bg-surface border rounded-lg shadow-sm p-4", "border-primary/30 bg-primary/5")}
-    >
+    <Card padding="sm" className={cn("border-primary/30 bg-primary/5")}>
       <div className="flex flex-col gap-3">
         {/* Current type — highlighted */}
         <div className="flex flex-col gap-1">
@@ -47,20 +46,20 @@ export default function CliConceptCard({ currentType }: CliConceptCardProps) {
         </div>
 
         {/* Other types as chips */}
-        <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-black/5 dark:border-white/5">
+        <div className="flex items-center gap-2 flex-wrap pt-1 border-t border-border">
           {types
             .filter((type) => type !== currentType)
             .map((type) => (
               <Link
                 key={type}
                 href={TYPE_HREFS[type]}
-                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-black/5 dark:bg-white/5 text-text-muted hover:text-primary hover:bg-primary/10 transition-colors"
+                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full bg-bg-subtle text-text-muted hover:text-primary hover:bg-primary/10 transition-colors"
               >
                 {t(`concept.${type}.title`)} — {t(`concept.${type}.seeOther`)}
               </Link>
             ))}
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

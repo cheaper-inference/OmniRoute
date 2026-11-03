@@ -23,6 +23,15 @@ const KIMI_CODE_STATIC_THINKING_POLICIES: Record<string, KimiCodeThinkingPolicy>
   },
 };
 
+/**
+ * Spec names that the Kimi Coding endpoint only accepts under their wire id. Mirrors
+ * MODEL_SPECS["kimi-k3"].aliases (`k3` is the Kimi Coding wire id, #8250); upstream rejects
+ * `kimi-k3-high` with "Please set model id as `k3`" (#16985).
+ */
+export const KIMI_CODING_WIRE_MODEL_ALIASES: Readonly<Record<string, string>> = {
+  "kimi-k3": "k3",
+};
+
 export function getKimiCodeStaticThinkingPolicy(modelId: unknown): KimiCodeThinkingPolicy | null {
   if (typeof modelId !== "string") return null;
   const normalizedModel = modelId.trim().toLowerCase().split("/").pop() || "";
@@ -112,7 +121,12 @@ function readFreshCache(): string | null {
 export function getKimiCodeCliVersion(): string {
   const override = readEnvOverride();
   if (override) return override;
-  if (typeof process !== "undefined" && !process.env.NODE_TEST_CONTEXT && !readFreshCache() && !inFlight) {
+  if (
+    typeof process !== "undefined" &&
+    !process.env.NODE_TEST_CONTEXT &&
+    !readFreshCache() &&
+    !inFlight
+  ) {
     void refreshKimiCodeCliVersion();
   }
   return pickAtLeastPin(readFreshCache());

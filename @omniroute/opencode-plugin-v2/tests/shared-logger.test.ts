@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { createLogger, getLogLevel } from "../src/shared/logger.js";
+import { createLogger, getLogLevel, setHostSink } from "../src/shared/logger.js";
 
 function capture(): {
   warns: string[];
@@ -126,5 +126,87 @@ describe("shared leveled logger (v1 parity)", () => {
     }
     assert.equal(cap.warns.length, 1);
     assert.match(cap.warns[0], /breadcrumb/);
+  });
+
+  it("host sink receives the line in addition to the console", () => {
+    const log = createLogger("warn");
+    const cap = capture();
+    const seen: Array<{ level: string; message: string }> = [];
+    setHostSink((level, message) => {
+      seen.push({ level, message });
+    });
+    try {
+      log.warn("hello sink");
+    } finally {
+      setHostSink(undefined);
+      cap.restore();
+    }
+    assert.equal(cap.warns.length, 1);
+    assert.equal(seen.length, 1);
+    assert.equal(seen[0].level, "warn");
+    assert.match(seen[0].message, /hello sink/);
+  });
+
+  it("host sink respects the logger level", () => {
+    const log = createLogger("error");
+    const cap = capture();
+    const seen: string[] = [];
+    setHostSink((level, message) => {
+      seen.push(`${level}:${message}`);
+    });
+    try {
+      log.warn("suppressed");
+      log.error("loud");
+    } finally {
+      setHostSink(undefined);
+      cap.restore();
+    }
+    assert.deepEqual(seen.length, 1);
+    assert.match(seen[0], /loud/);
+  });
+
+  it("a throwing host sink traces once on the console then stays silent", () => {
+    const log = createLogger("warn");
+    const cap = capture();
+    let calls = 0;
+    setHostSink(() => {
+      calls += 1;
+      throw new Error("sink down");
+    });
+    try {
+      log.warn("first");
+      log.warn("second");
+    } finally {
+      setHostSink(undefined);
+      cap.restore();
+    }
+    assert.equal(calls, 1);
+    assert.equal(cap.warns.length, 3);
+    assert.match(cap.warns[1], /host log sink failed/);
+  });
+
+  it("resetting the sink clears the failure marker for the next receiver", () => {
+    const log = createLogger("warn");
+    const cap = capture();
+    setHostSink(() => {
+      throw new Error("sink down");
+    });
+    const seen: string[] = [];
+    try {
+      log.warn("first");
+    } finally {
+      setHostSink(undefined);
+    }
+    setHostSink((_level, message) => {
+      seen.push(message);
+    });
+    try {
+      log.warn("second");
+    } finally {
+      setHostSink(undefined);
+      cap.restore();
+    }
+    assert.equal(seen.length, 1);
+    assert.match(seen[0], /second/);
   });
 });

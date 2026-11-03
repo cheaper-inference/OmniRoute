@@ -22,6 +22,23 @@ const mk = (id: string, extra: Record<string, unknown> = {}) => ({
 
 // ── constants / labels ───────────────────────────────────────────────────────
 
+test("variant construction preserves custom roots, empty names, and source entries", () => {
+  const source = mk("cc/claude-fable-5", {
+    root: "custom-root",
+    name: "",
+    metadata: { keep: true },
+  });
+  const result = appendClaudeEffortVariants([source], { cc: "claude" });
+  const high = result.find((entry) => entry.id === "claude/claude-fable-5-high");
+  assert.ok(high);
+  assert.equal(high.root, "custom-root-high");
+  assert.equal(high.name, "");
+  assert.equal(high.metadata, source.metadata);
+  assert.equal(result[0], source);
+  assert.equal(source.root, "custom-root");
+  assert.equal(source.id, "cc/claude-fable-5");
+});
+
 test("advertises Low/Medium/High as the base effort levels", () => {
   assert.deepEqual([...CLAUDE_EFFORT_VARIANT_LEVELS], ["low", "medium", "high"]);
   assert.equal(CLAUDE_XHIGH_EFFORT_LEVEL, "xhigh");
@@ -203,6 +220,17 @@ test("CLAUDE_EFFORT_SUFFIX_RE stays in sync across claudeEffortVariants/noThinki
       mirrored.length,
       1,
       `ccDiscoveryAliases must never mirror an effort-suffixed id (${suffix})`
+    );
+    // Opt-in CATALOG_MIRROR_REFINEMENTS_ENABLED (`refined`) deliberately mirrors the
+    // listed effort variant; only the default contract above is the drift guard.
+    const refinedMirror = appendCcDiscoveryAliases(
+      [{ id: `cc/${BASE}${suffix}`, owned_by: "cc" }],
+      () => true,
+      { refined: true }
+    );
+    assert.deepEqual(
+      refinedMirror.map((m) => m.id),
+      [`cc/${BASE}${suffix}`, `claude/cc/${BASE}${suffix}`]
     );
   }
 

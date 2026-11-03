@@ -1,1 +1,0 @@
-- **fix(pack):** Include the global-error catalog generator imported by the published isolated-build entrypoint without allowing unrelated i18n scripts ([#16171](https://github.com/diegosouzapw/OmniRoute/pull/16171)).

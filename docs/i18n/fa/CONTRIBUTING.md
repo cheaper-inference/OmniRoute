@@ -12,10 +12,10 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### پیشنیازها
 
-- **Node.js** `>=22.22.3 <23`، یا `>=24.0.0 <27` (پیشنهادشده: 24 LTS)
-- **npm** 10+
+- **Node.js** نسخهٔ `>=22.22.2 <23` یا `>=24.0.0 <27` (پیشنهادی: 24 LTS)
+- **npm** نسخهٔ 10+
 
-> **کاربران npm v11+ ‏(Node 24+):** پس از `npm install`، بررسی کنید که ماژولهای بومی نصب شده باشند:
+> **کاربران npm v11+‏ (Node 24+):** پس از `npm install`، بررسی کنید که ماژولهای بومی نصب شده باشند:
 > `node -e "require('better-sqlite3')"`. اگر با خطای `MODULE_NOT_FOUND` مواجه شد،
 > دستور `npm approve-scripts better-sqlite3 && npm install` را اجرا کنید. به
 > [عیبیابی](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) مراجعه کنید.
@@ -33,34 +33,34 @@ npm install
 ### متغیرهای محیطی
 
 ```bash
-# فایل .env خود را از روی قالب ایجاد کنید
+# فایل .env خود را از روی الگو ایجاد کنید
 cp .env.example .env
 
-# مقادیر محرمانه موردنیاز را تولید کنید
+# مقادیر محرمانهٔ موردنیاز را تولید کنید
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
 متغیرهای کلیدی برای توسعه:
 
-| متغیر                  | مقدار پیشفرض توسعه       | توضیحات                 |
-| ---------------------- | ------------------------ | ----------------------- |
-| `PORT`                 | `20128`                  | پورت سرور               |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | آدرس پایه برای فرانتاند |
-| `JWT_SECRET`           | (در بالا تولید کنید)     | مقدار محرمانه امضای JWT |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | گذرواژه نخستین ورود     |
-| `APP_LOG_LEVEL`        | `info`                   | سطح جزئیات گزارشها      |
+| متغیر                  | مقدار پیشفرض توسعه       | توضیحات                  |
+| ---------------------- | ------------------------ | ------------------------ |
+| `PORT`                 | `20128`                  | پورت سرور                |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | نشانی پایه برای فرانتاند |
+| `JWT_SECRET`           | (در بالا تولید کنید)     | کلید محرمانهٔ امضای JWT  |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | گذرواژهٔ ورود نخست       |
+| `APP_LOG_LEVEL`        | `info`                   | سطح جزئیات گزارشها       |
 
 ### تنظیمات داشبورد
 
-داشبورد کلیدهای رابط کاربری را برای قابلیتهایی ارائه میدهد که از طریق متغیرهای محیطی نیز قابل پیکربندی هستند:
+داشبورد برای قابلیتهایی که از طریق متغیرهای محیطی نیز قابل پیکربندی هستند، گزینههای روشن/خاموش رابط کاربری ارائه میدهد:
 
-| محل تنظیمات       | کلید             | توضیحات                                            |
+| محل تنظیمات       | گزینه            | توضیحات                                            |
 | ----------------- | ---------------- | -------------------------------------------------- |
 | تنظیمات ← پیشرفته | حالت اشکالزدایی  | فعالسازی گزارش درخواستهای اشکالزدایی (رابط کاربری) |
-| تنظیمات ← عمومی   | نمایش نوار کناری | نمایش/پنهانسازی بخشهای نوار کناری                  |
+| تنظیمات ← عمومی   | نمایش نوار کناری | نمایش/پنهانکردن بخشهای نوار کناری                  |
 
-این تنظیمات در پایگاه داده ذخیره میشوند و پس از راهاندازیهای مجدد باقی میمانند؛ در صورت تنظیم شدن، مقادیر پیشفرض متغیرهای محیطی را بازنویسی میکنند.
+این تنظیمات در پایگاه داده ذخیره میشوند و پس از راهاندازی مجدد نیز باقی میمانند؛ همچنین در صورت تنظیمشدن، مقادیر پیشفرض متغیرهای محیطی را بازنویسی میکنند.
 
 ### اجرای محلی
 
@@ -68,54 +68,49 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 # حالت توسعه (بارگذاری مجدد خودکار)
 npm run dev
 
-# ساخت نسخه تولید
-npm run build    # next build ← .build/next/، سپس assembleStandalone ← dist/
+# ساخت نسخهٔ تولیدی
+npm run build    # next build → .build/next/ سپس assembleStandalone → dist/
 npm run start
 
-# کامپایل سریعِ صرفاً بکاند/API برای تغییرات مشارکتکنندگان
+# کامپایل سریع و صرفاً بکاند/API برای تغییرات مشارکتکنندگان
 npm run build:contributor
 
 # ساخت انتشار (ساخت مجدد پاک + نشانگر HEAD — الزامی برای استقرار)
-npm run build:release   # rm -rf .build dist، سپس ساخت + نوشتن dist/BUILD_SHA
+npm run build:release   # rm -rf .build dist && build + فایل dist/BUILD_SHA را مینویسد
 
-# پیکربندی رایج پورت
+# پیکربندی متداول پورت
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ساخت مشارکتکننده فقط اعتبارسنجی کامپایل را انجام میدهد: این فرایند توزیع مستقل را مونتاژ نمیکند
-و داراییهای اختیاری بستهبندی بومی را نیز نمیسازد. هنگامی که نیاز دارید بسته قابل انتشار را
-اعتبارسنجی کنید، از ساخت معمول نسخه تولید استفاده کنید.
+ساخت مخصوص مشارکتکنندگان فقط اعتبارسنجی کامپایل را انجام میدهد: این فرایند توزیع مستقل را مونتاژ نمیکند و داراییهای اختیاری بستهبندی بومی را نمیسازد. هنگامی که نیاز دارید بستهٔ قابلانتشار را اعتبارسنجی کنید، از ساخت معمول نسخهٔ تولیدی استفاده کنید.
 
 ### ساختار خروجی ساخت
 
-| دایرکتوری | محتوا                                                                                 | ردیابیشده |
+| پوشه      | محتویات                                                                               | رهگیریشده |
 | --------- | ------------------------------------------------------------------------------------- | --------- |
 | `src/`    | کد منبع برنامه (TypeScript / TSX)                                                     | بله       |
 | `.build/` | فایلهای میانی — خروجی `next build` (نادیدهگرفتهشده توسط git، `distDir = .build/next`) | خیر       |
-| `dist/`   | بسته قابل انتشار — مونتاژشده توسط `assembleStandalone` (نادیدهگرفتهشده توسط git)      | خیر       |
+| `dist/`   | بستهٔ قابلانتشار — مونتاژشده توسط `assembleStandalone` (نادیدهگرفتهشده توسط git)      | خیر       |
 
-خط لوله ساخت در یک مرحله اجرا میشود:
+خط لولهٔ ساخت در یک مرحله اجرا میشود:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (خروجی Next.js)
-  └─ assembleStandalone()                 (کپی فایلهای مستقل + ایستا + عمومی + داراییهای بومی)
-       └─ خروجی: dist/                    (server.js، .next/static/، public/، node_modules/)
+  └─ assembleStandalone()                 (فایلهای مستقل + ایستا + عمومی + داراییهای بومی را کپی میکند)
+       └─ خروجی: dist/                    (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` علاوه بر این، ابتدا هر دو دایرکتوری را پاک میکند و
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) را بهعنوان نشانگر یکپارچگی استقرار مینویسد.
+`npm run build:release` علاوه بر این، ابتدا هر دو پوشه را پاک میکند و
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) را بهعنوان نشانگر صحت استقرار مینویسد.
 
-`npm run build:contributor` از پروفایل ساخت صرفاً بکاند استفاده میکند. هنگام ساخت، فایلهای
-رابط کاربری داشبورد را موقتاً با فایلهای جایگزین عوض میکند، کنترلکنندههای مسیر API را نگه میدارد و پس از ساخت، فایلهای اصلی را
-بازیابی میکند. برای تغییراتی که بر رابط کاربری داشبورد اثر میگذارند یا برای اعتبارسنجی کامل
-انتشار، از `npm run build` استفاده کنید؛ پروفایل مشارکتکننده جایگزین ساخت انتشار نیست.
+`npm run build:contributor` از نمایهٔ ساخت صرفاً بکاند استفاده میکند. هنگام ساخت، فایلهای رابط کاربری داشبورد را بهطور موقت با فایلهای جایگزین ساده عوض میکند، کنترلکنندههای مسیر API را نگه میدارد و پس از ساخت، فایلهای اصلی را بازیابی میکند. برای تغییراتی که بر رابط کاربری داشبورد تأثیر میگذارند یا برای اعتبارسنجی کامل انتشار، از `npm run build` استفاده کنید؛ نمایهٔ مشارکتکنندگان جایگزینی برای ساخت انتشار نیست.
 
-> **نکته استقرار VPS:** دایرکتوری ایمیج راهدور `/usr/lib/node_modules/omniroute/app/`
-> بدون تغییر باقی مانده است. مهارتهای استقرار با استفاده از rsync محتویات `dist/` را در آن کپی میکنند.
-> فقط مسیر خروجی ساخت درون مخزن تغییر کرده است (`app/` ← `dist/`).
+> **نکتهٔ استقرار روی VPS:** پوشهٔ ایمیج راهدور `/usr/lib/node_modules/omniroute/app/`
+> بدون تغییر باقی مانده است. ابزارهای استقرار، محتویات `dist/` را با rsync در آن همگامسازی میکنند.
+> فقط مسیر خروجی ساخت درون مخزن تغییر کرده است (`app/` → `dist/`).
 
-آدرسهای پیشفرض:
+نشانیهای پیشفرض:
 
 - **داشبورد**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -167,35 +162,35 @@ refactor(db): یکپارچهسازی جدولهای محدودیت نرخ
 
 ---
 
-## اجرای آزمونها
+## اجرای تستها
 
 ```bash
-# همهٔ آزمونها (واحد + vitest + اکوسیستم + e2e)
+# همهٔ تستها (واحد + vitest + اکوسیستم + e2e)
 npm run test:all
 
-# یک فایل آزمون (اجراکنندهٔ بومی آزمون Node.js — بیشتر آزمونها از این استفاده میکنند)
+# یک فایل تست (اجراکنندهٔ بومی تست Node.js — بیشتر تستها از این استفاده میکنند)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# فقط آزمونهای واحدی که تحت تأثیر تغییر شما قرار گرفتهاند (همان انتخابگر TIA دروازهٔ CI، #8084)
-npm run test:scoped            # تغییرات در آخرین commit (یا درخت کاری)
+# فقط تستهای واحدی که تحت تأثیر تغییر شما قرار گرفتهاند (همان انتخابگر TIA دروازهٔ CI، #8084)
+npm run test:scoped            # تغییرات آخرین commit (یا working tree)
 npm run test:scoped:staged     # فقط تغییرات staged — برای اجرا پیش از commit مناسب است
-npm run test:scoped:full       # ابتدا نگاشت گراف import را بازسازی میکند (پس از افزودن/انتقال فایلها)
-# خروج با کد 1 بههمراه «مجموعهٔ کامل را اجرا کنید» یعنی یک فایل مرکزی (tsconfig، package.json، …) یا یک
-# منبع نگاشتنشده تغییر کرده است — انتخابگر بهشکل ایمن شکست میخورد و هرگز بیسروصدا چیزی را رد نمیکند.
+npm run test:scoped:full       # ابتدا نگاشت import-graph را دوباره بسازید (پس از افزودن/انتقال فایلها)
+# خروج با کد 1 و پیام «مجموعهٔ کامل را اجرا کنید» یعنی یک فایل مرکزی (tsconfig، package.json، …) یا یک
+# منبع نگاشتنشده تغییر کرده است — انتخابگر بهصورت ایمن متوقف میشود و هرگز بیسروصدا چیزی را رد نمیکند.
 
-# Vitest (سرور MCP، autoCombo، حافظهٔ نهان)
+# Vitest (سرور MCP، autoCombo، کش)
 npm run test:vitest
 
-# آزمونهای E2E (به Playwright نیاز دارد)
+# تستهای E2E (نیازمند Playwright)
 npm run test:e2e
 
-# آزمون E2E کلاینتهای پروتکل (انتقالهای MCP، A2A)
+# تست E2E کلاینتهای پروتکل (انتقالهای MCP، A2A)
 npm run test:protocols:e2e
 
-# آزمونهای سازگاری اکوسیستم
+# تستهای سازگاری اکوسیستم
 npm run test:ecosystem
 
-# دروازهٔ پوشش: 60٪ دستورها/خطوط/توابع/شاخهها
+# دروازهٔ پوشش: 60٪ برای عبارتها/خطوط/توابع/شاخهها
 npm run test:coverage
 npm run coverage:report
 
@@ -203,48 +198,49 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# آزمون سریع و کنترلشدهٔ ترکیب واقعی upstream (به دسترسی VPS و اعتبار واقعی ارائهدهنده نیاز دارد)
-# با ارائهدهندگان واقعی ارتباط برقرار میکند — کمی هزینه دارد. هرگز در CI اجرا نمیشود. بدون دروازه بهدرستی رد میشود.
+# تست سریع gated برای ترکیب واقعی upstream (نیازمند دسترسی VPS و اعتبار واقعی ارائهدهنده)
+# به ارائهدهندگان واقعی درخواست میفرستد — اندکی هزینه دارد. هرگز در CI اجرا نمیشود. بدون gate بهدرستی رد میشود.
 # نیازمند: دسترسی ssh root@192.168.0.15 (یک snapshot فقطخواندنی از DB را از VPS بارگذاری میکند).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# آزمون سریع زندهٔ VPS در فاز 3 — اسکریپتهای سادهٔ Node ESM که مستقیماً به سرور زندهٔ .15 متصل میشوند.
+# تست سریع زندهٔ VPS در فاز 3 — اسکریپتهای سادهٔ Node ESM که مستقیماً به سرور زندهٔ .15 درخواست میفرستند.
 # نیازمند: دسترسی ssh root@192.168.0.15 (ترکیبها از طریق SSH sqlite ایجاد/حذف میشوند).
-# با ارائهدهندگان واقعی ارتباط برقرار میکند (هزینهٔ اندک). فقط ترکیبهای __live_test__* را ایجاد/حذف میکند. هرگز در CI اجرا نمیشود.
-# مقدار REQUIRE_API_KEY=false روی .15 است، بنابراین کلید API لازم نیست؛ اما در صورت تنظیم، COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY را رعایت میکند.
-npm run test:combo:live:vps              # 7 سناریوی HTTP (اولویت/نوبتگردشی/وزندار/هزینه/ادغام/خودکار + سلامت)
-npm run test:combo:live:vps:failover     # یک سناریوی واقعی failover میان ارائهدهندگان اضافه میکند (در مجموع 8 مورد)
+# به ارائهدهندگان واقعی درخواست میفرستد (هزینهٔ اندک). فقط ترکیبهای __live_test__* را ایجاد/حذف میکند. هرگز در CI اجرا نمیشود.
+# مقدار REQUIRE_API_KEY=false روی .15 است، بنابراین به کلید API نیازی نیست، اما در صورت تنظیم، COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY را رعایت میکند.
+npm run test:combo:live:vps              # 7 سناریوی HTTP (اولویت/round-robin/وزندار/هزینه/fusion/خودکار + سلامت)
+npm run test:combo:live:vps:failover     # یک سناریوی واقعی failover بین ارائهدهندگان اضافه میکند (در مجموع 8 مورد)
 ```
 
 نکات مربوط به پوشش:
 
-- `npm run test:coverage` پوشش کد منبع را برای مجموعهٔ اصلی آزمونهای واحد اندازهگیری میکند، `tests/**` را کنار میگذارد و `open-sse/**` را شامل میشود
-- درخواستهای ادغام باید دروازهٔ پوشش را برای دستورها/خطوط/توابع/شاخهها در سطح **60%+** نگه دارند
-- اگر یک PR کد عملیاتی را در `src/`، `open-sse/`، `electron/` یا `bin/` تغییر دهد، باید در همان PR آزمونهای خودکار را اضافه یا بهروزرسانی کند
+- `npm run test:coverage` پوشش کد منبع را برای مجموعهٔ اصلی تستهای واحد اندازهگیری میکند، `tests/**` را مستثنا میکند و `open-sse/**` را در بر میگیرد
+- درخواستهای pull باید دروازهٔ پوشش را برای عبارتها/خطوط/توابع/شاخهها در سطح **60%+** نگه دارند
+- اگر یک PR کد عملیاتی موجود در `src/`، `open-sse/`، `electron/` یا `bin/` را تغییر دهد، باید در همان PR تستهای خودکار را اضافه یا بهروزرسانی کند
 - `npm run coverage:report` گزارش تفصیلی فایلبهفایل را از آخرین اجرای پوشش نمایش میدهد
 - `npm run test:coverage:legacy` معیار قدیمیتر را برای مقایسهٔ تاریخی حفظ میکند
-- برای نقشهٔ راه مرحلهای بهبود پوشش، `docs/ops/COVERAGE_PLAN.md` را ببینید
+- برای نقشهٔ راه مرحلهای بهبود پوشش، به `docs/ops/COVERAGE_PLAN.md` مراجعه کنید
 
-### الزامات درخواست ادغام
+### الزامات درخواست Pull
 
 پیش از باز کردن یک PR، از
-[مسیر طلایی مشارکت](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) استفاده کنید تا چرخهٔ متمرکز مربوط به
-تغییرات خود را اجرا کنید. مجموعهٔ کامل آزمونهای واحد (4 بخش CI)، Vitest، دروازهٔ پوشش **60%+** و
-ساخت عملیاتی بر عهدهٔ CI هستند — اجرای محلی آنها هیچ اطلاعاتی فراتر از آنچه بررسیهای PR
-ارائه میکنند به دست نمیدهد و در سیستمهای ضعیفتر میتواند میزبان را اشباع کند (#8084):
+[مسیر طلایی مشارکت](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) برای اجرای چرخهٔ متمرکز مربوط به
+تغییرات خود استفاده کنید. مجموعهٔ کامل تستهای واحد (4 بخش CI)، Vitest، دروازهٔ پوشش **60%+** و
+ساخت عملیاتی بر عهدهٔ CI هستند — اجرای محلی آنها هیچ اطلاعاتی فراتر از بررسیهای PR
+ارائه نمیکند و در دستگاههای ضعیفتر ممکن است تمام ظرفیت میزبان را اشغال کند (#8084):
 
-- فایلهای آزمونی را که تغییر شما را پوشش میدهند اجرا کنید: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- فایلهای تستی را که تغییر شما را پوشش میدهند اجرا کنید: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` را اجرا کنید
-- هر زمان کد عملیاتی تغییر میکند، آزمونهای خودکار را در همان PR اضافه یا بهروزرسانی کنید
-- هنگامی که کد عملیاتی تغییر کرده است، فایلهای آزمون تغییریافته یا افزودهشده را در توضیحات PR ذکر کنید
+- هر زمان کد عملیاتی تغییر میکند، تستهای خودکار را نیز در همان PR اضافه یا بهروزرسانی کنید
+- در فایلهای `node:test`، هر `await` سطح بالا (مانند `await import(...)`) را پیش از نخستین `test()` / `describe()` قرار دهید: در حالت `--test-force-exit`، تستهایی که پس از آن ثبت میشوند ممکن است بدون هیچ هشداری هرگز اجرا نشوند (#18045؛ با `npm run check:test-tla-order` اعمال میشود)
+- هنگامی که کد عملیاتی تغییر کرده است، فایلهای تست تغییرکرده یا افزودهشده را در توضیحات PR ذکر کنید
 - وقتی secretهای پروژه در CI پیکربندی شدهاند، نتیجهٔ SonarQube را در PR بررسی کنید
 
-وضعیت فعلی آزمونها: **122 فایل آزمون واحد** با پوشش موارد زیر:
+وضعیت فعلی تست: **122 فایل تست واحد** که موارد زیر را پوشش میدهند:
 
-- مترجمهای ارائهدهندگان و تبدیل قالب
+- مترجمهای ارائهدهنده و تبدیل قالب
 - محدودسازی نرخ، circuit breaker و تابآوری
-- حافظهٔ نهان معنایی، idempotency و رهگیری پیشرفت
-- عملیات پایگاه داده و schema (21 ماژول DB)
+- کش معنایی، idempotency و پیگیری پیشرفت
+- عملیات و schema پایگاه داده (21 ماژول DB)
 - جریانهای OAuth و احراز هویت
 - اعتبارسنجی endpointهای API ‏(Zod v4)
 - ابزارهای سرور MCP و اعمال scope
@@ -283,65 +279,72 @@ npm run test:combo:live:vps:failover     # یک سناریوی واقعی failov
 
 ---
 
-## Project Structure
+## ساختار پروژه
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+├── app/                    # مسیریاب برنامه Next.js 16
+│   ├── (dashboard)/        # صفحات داشبورد (۲۳ بخش)
+│   ├── api/                # مسیرهای API (۵۱ دایرکتوری)
+│   └── login/              # صفحات احراز هویت (.tsx)
+├── domain/                 # موتور سیاستگذاری (policyEngine، comboResolver، costRules و غیره)
+├── lib/                    # منطق اصلی کسبوکار (.ts)
+│   ├── a2a/                # سرور پروتکل Agent-to-Agent v0.3
+│   ├── acp/                # رجیستری Agent Communication Protocol
+│   ├── compliance/         # موتور سیاستگذاری انطباق
+│   ├── db/                 # ماژولهای دامنه SQLite + ۱۳۰ مهاجرت
+│   ├── memory/             # حافظه پایدار مکالمه
+│   ├── oauth/              # ارائهدهندگان، سرویسها و ابزارهای OAuth
+│   ├── skills/             # چارچوب مهارت توسعهپذیر
+│   ├── usage/              # ردیابی میزان استفاده و محاسبه هزینه
+│   └── localDb.ts          # فقط لایه بازصادرکردن — هرگز منطق را اینجا اضافه نکنید
+├── middleware/              # میانافزار درخواست (promptInjectionGuard)
+├── mitm/                   # پراکسی MITM (گواهی، DNS، مسیریابی مقصد)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # مؤلفههای React (.tsx)
+│   ├── constants/          # تعاریف ارائهدهندگان (۳۲۹)، محدودههای MCP، ۲۰ راهبرد مسیریابی
+│   ├── utils/              # قطعکننده مدار، پاکساز و ابزارهای احراز هویت
+│   └── validation/         # شِماهای Zod v4
+└── sse/                    # خط لوله پراکسی SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # فضای کاری @omniroute/open-sse
+├── executors/              # ۱۵۰ ماژول اجراکننده (کلاسهای اجراکننده + ابزارهای ویژه هر ارائهدهنده)
+├── handlers/               # ۱۱ کنترلکننده درخواست (گفتوگو، پاسخها، جاسازیها، تصاویر و غیره)
+├── mcp-server/             # سرور MCP (۱۱۰ ابزار منحصربهفرد، ۳ انتقال، ۳۳ محدوده)
+├── services/               # ۱۷۸ سرویس سطحبالا (combo، autoCombo، rateLimitManager و غیره)
+├── translator/             # مترجمهای قالب (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # تبدیلکننده Responses API
+└── utils/                  # ۲۲ ماژول کاربردی (جریان، TLS، پراکسی، ثبت رویداد)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # برنامه دسکتاپ Electron (چندسکویی)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # اجراکننده آزمون Node.js (۱٬۵۷۴ فایل آزمون)
+├── integration/            # آزمونهای یکپارچهسازی
+├── e2e/                    # آزمونهای Playwright
+├── security/               # آزمونهای امنیتی
+├── translator/             # آزمونهای ویژه مترجم
+└── load/                   # آزمونهای بار
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # سوابق تصمیمهای معماری
+├── architecture/            # معماری و تابآوری سیستم
+├── comparison/              # مقایسه OmniRoute با جایگزینها
+├── compression/             # راهنماها و قواعد فشردهسازی
+├── dev/                     # راهنماهای توسعه
+├── diagrams/                # نمودارهای معماری
+├── frameworks/              # MCP، A2A، OpenCode، حافظه، مهارتها
+├── guides/                  # راهنمای کاربر، Docker، راهاندازی، عیبیابی
+├── i18n/                    # ترجمههای بینالمللیشده README
+├── marketing/               # مطالب بازاریابی
+├── ops/                     # استقرار، پراکسی، پوشش آزمون، انتشارها
+├── providers/               # مستندات ویژه ارائهدهندگان
+├── reference/               # مرجع API، متغیرهای محیطی، ابزارهای CLI، سطوح رایگان
+├── releases/                # یادداشتهای انتشار
+├── routing/                 # موتور ترکیب خودکار، بازپخش استدلال
+├── screenshots/             # تصاویر داشبورد
+├── security/                # محدودیتهای ایمنی، انطباق، پنهانکاری، توکنها
+└── specs/                   # مشخصات طراحی
 ```
 
 ---
@@ -401,9 +404,12 @@ docs/                       # Documentation
 
 ---
 
-## Releasing
+## انتشار
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+انتشارها از طریق گردشکار `/generate-release` مدیریت میشوند. هنگامی که یک GitHub Release جدید ایجاد شود، بسته از طریق GitHub Actions **بهطور خودکار در npm منتشر میشود**.
+
+برای استقرار روی VPS، از `npm run build:release` (نه `npm run build`) استفاده کنید — این فرمان یک بازسازی پاک انجام میدهد، بسته را در `dist/` مونتاژ میکند و فایل نشانهگر `dist/BUILD_SHA` را مینویسد.
+سپس از مهارتهای `/deploy-vps-*-cc` استفاده کنید که با استفاده از rsync، پوشهٔ `dist/` را به دایرکتوری راهدور `app/` منتقل میکنند.
 
 ---
 

@@ -1,7 +1,16 @@
 // @vitest-environment jsdom
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach, afterEach } from "vitest";
+
+// Warm the component modules once, outside the 5 s per-test budget: the first cold transform
+// of the kit (Alert, PageHeader, Table…) can take several seconds on a loaded runner, which
+// made whichever test imported first time out. Assertions are unchanged.
+beforeAll(async () => {
+  await import("../../../src/app/(dashboard)/dashboard/resilience/connections/components/ResilienceConnectionsClient");
+  await import("../../../src/app/(dashboard)/dashboard/resilience/connections/components/ConnectionsTable");
+  await import("../../../src/app/(dashboard)/dashboard/resilience/connections/components/BreakerTimeline");
+}, 60_000);
 
 // next-intl: return the key so we can assert on stable strings. When options are
 // passed, append their JSON so interpolated values (e.g. the degraded banner's
@@ -342,6 +351,38 @@ describe("ConnectionsTable", () => {
     await waitFor(() => el!.textContent?.includes("detail.title"));
     expect(el!.textContent).toContain("OPEN");
     expect(el!.textContent).toContain("gpt-4");
+  });
+
+  it("ConnectionDetail shows the last close verdict beside the failure kind", async () => {
+    const CLOSE_AT = Date.UTC(2026, 9, 18, 12, 34, 56);
+    const { default: Table } =
+      await import("../../../src/app/(dashboard)/dashboard/resilience/connections/components/ConnectionsTable");
+    const conn = makeConnection({
+      breaker: {
+        state: "CLOSED",
+        failureCount: 0,
+        retryAfterMs: 0,
+        lastFailureKind: null,
+        lastClose: { at: CLOSE_AT, from: "HALF_OPEN", reason: "probe-success" },
+      },
+      lockouts: [],
+    });
+    let el: HTMLDivElement;
+    act(() => {
+      el = render(
+        <Table connections={[conn]} receivedAt={Date.now()} degraded={[]} />
+      ) as HTMLDivElement;
+    });
+    const row = el!.querySelector("tbody tr") as HTMLTableRowElement;
+    expect(row).toBeTruthy();
+    act(() => {
+      row.click();
+    });
+    await waitFor(() => el!.textContent?.includes("detail.title"));
+    expect(el!.textContent).toContain("HALF_OPEN");
+    expect(el!.textContent).toContain("probe-success");
+    // The close time is shown too, not just the verdict.
+    expect(el!.textContent).toContain(new Date(CLOSE_AT).toISOString());
   });
 
   it("selected connection deleted -> ConnectionDetail closes gracefully", async () => {

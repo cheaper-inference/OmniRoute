@@ -123,7 +123,9 @@
       "maxCostOpt": "ថ្លៃចំណាយអតិបរមាក្នុងមួយថ្ងៃ (USD)",
       "allowedModelsOpt": "បញ្ជីម៉ូដែលដែលអនុញ្ញាត បំបែកដោយសញ្ញាក្បៀស",
       "nothingToSet": "មិនមានវាលគោលការណ៍ដែលបានផ្ដល់ទេ។ ប្រើ --rate-limit, --max-cost ឬ --allowed-models។",
-      "updated": "បានធ្វើបច្ចុប្បន្នភាពគោលការណ៍។"
+      "updated": "បានធ្វើបច្ចុប្បន្នភាពគោលការណ៍។",
+      "modelAccessModeOpt": "របៀបចូលប្រើម៉ូដែល (all | restricted)",
+      "unrestrictedOpt": "អនុញ្ញាតម៉ូដែលទាំងអស់ (--model-access-mode all)"
     },
     "expiration": {
       "title": "ការផុតកំណត់សោ",
@@ -1169,32 +1171,18 @@
   "sync": {
     "description": "ធ្វើសមកាលកម្មការកំណត់រចនាសម្ព័ន្ធរវាង instance របស់ OmniRoute",
     "push": {
-      "description": "បញ្ជូនការកំណត់រចនាសម្ព័ន្ធទៅ cloud ឬ instance ពីចម្ងាយ",
-      "target": "គោលដៅ (cloud ឬ context:name)",
-      "bundle": "ផ្នែកនៃ bundle ដែលត្រូវធ្វើសមកាលកម្ម",
-      "dryRun": "មើលជាមុនដោយមិនអនុវត្ត"
+      "description": "បញ្ជូនការកំណត់រចនាសម្ព័ន្ធទៅ cloud ឬ instance ពីចម្ងាយ"
     },
     "pull": {
-      "description": "ទាញយកការកំណត់រចនាសម្ព័ន្ធពី cloud ឬពីចម្ងាយ",
-      "source": "ប្រភព (cloud ឬ context:name)",
-      "merge": "បញ្ចូលជាមួយការកំណត់រចនាសម្ព័ន្ធដែលមានស្រាប់",
-      "replace": "ជំនួសការកំណត់រចនាសម្ព័ន្ធដែលមានស្រាប់",
-      "dryRun": "មើលជាមុនដោយមិនអនុវត្ត"
-    },
-    "diff": {
-      "source": "បរិបទប្រភព",
-      "target": "បរិបទគោលដៅ"
+      "description": "ទាញយកការកំណត់រចនាសម្ព័ន្ធពី cloud ឬពីចម្ងាយ"
     },
     "bundle": {
       "description": "នាំចេញការកំណត់រចនាសម្ព័ន្ធជាឯកសារកញ្ចប់",
-      "include": "ផ្នែកដែលត្រូវរួមបញ្ចូល (បំបែកដោយសញ្ញាក្បៀស)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "នាំចូលឯកសារកញ្ចប់",
       "dryRun": "ផ្ទៀងផ្ទាត់ដោយមិនអនុវត្ត"
-    },
-    "initialize": {
-      "fromCloud": "ចាប់ផ្ដើមពីការបម្រុងទុកលើក្លោដ"
     },
     "tokens": {
       "description": "គ្រប់គ្រងថូខិនធ្វើសមកាលកម្ម",
@@ -1206,9 +1194,6 @@
       "revoke": {
         "yes": "រំលងការបញ្ជាក់"
       }
-    },
-    "resolve": {
-      "description": "ដោះស្រាយការប៉ះទង្គិចនៃការធ្វើសមកាលកម្មដោយអន្តរកម្ម"
     }
   },
   "config": {

@@ -1,1 +1,0 @@
-- **feat(dashboard):** full-page API key access editor with tabs, replacing the permissions modal ([#14885](https://github.com/diegosouzapw/OmniRoute/pull/14885)).

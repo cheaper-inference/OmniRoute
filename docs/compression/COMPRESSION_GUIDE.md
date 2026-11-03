@@ -99,7 +99,7 @@ RTK mode is optimized for verbose tool outputs that appear in coding-agent sessi
 - Applies JSON filter packs from `open-sse/services/compression/engines/rtk/filters/`
 - Imports RTK TOML schema v1 filters from project or global `filters.toml` files, with inline-test
   validation and trust-gating for project files
-- Ships 55 built-in filters with inline verify samples
+- Ships 56 built-in filters with inline verify samples
 - Removes ANSI control sequences, progress bars, repeated lines, and non-actionable noise
 - Preserves failures, errors, warnings, changed files, summaries, and the tail of long output
 - Supports trust-gated project filters, global filters, and optional redacted raw-output recovery
@@ -503,13 +503,15 @@ into a catalog of composable output styles: `OUTPUT_STYLE_CATALOG` in
 instruction that asks the model itself for cheaper output; styles can be enabled
 together and are injected in catalog order.
 
-| Style                      | `id`          | What it does                                                                                                                                                                                                 | Instruction languages                         |
-| -------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
-| Terse prose                | `terse-prose` | Drop filler/articles/hedging; keep technical substance exact. Same text as the legacy caveman output mode (referenced, not re-typed).                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Less code                  | `less-code`   | YAGNI ladder: smallest working change, no unrequested abstractions.                                                                                                                                          | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ponytail (lazy senior dev) | `ponytail`    | "The best code is the code never written": reuse > rewrite, root cause > symptom, shortest working diff.                                                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| I have ADHD (action-first) | `i-have-adhd` | Action first (command/path/snippet before prose), numbered bounded steps, ONE concrete next step, no preamble/recap/closers. Adapted from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Terse CJK (文言)           | `terse-cjk`   | `full`/`ultra` answer in Classical Chinese (文言); `lite` only asks for brief answers without function words, pleasantries or embellishment.                                                                 | zh (locale-gated, see below)                  |
+| Style                          | `id`            | What it does                                                                                                                                                                                                                           | Instruction languages                         |
+| ------------------------------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Terse prose                    | `terse-prose`   | Drop filler/articles/hedging; keep technical substance exact. Same text as the legacy caveman output mode (referenced, not re-typed).                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Less code                      | `less-code`     | YAGNI ladder: smallest working change, no unrequested abstractions.                                                                                                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Ponytail (lazy senior dev)     | `ponytail`      | "The best code is the code never written": reuse > rewrite, root cause > symptom, shortest working diff.                                                                                                                               | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| I have ADHD (action-first)     | `i-have-adhd`   | Action first (command/path/snippet before prose), numbered bounded steps, ONE concrete next step, no preamble/recap/closers. Adapted from [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop UI filter             | `antislop-ui`   | Every visual technique must pass a purpose test (hierarchy, identity, readability); no default gradients/glass/glow, capped palette, no template layouts. Both antislop styles add a no-dead-controls / no-fabricated-claims boundary. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop copy and human filter | `antislop-copy` | Specific copy (no em dash, generic CTAs, buzzwords, chatbot closers, invented facts) plus people rules: WCAG AA contrast, visible focus, keyboard reach, empty/loading/error states, mobile reflow.                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Terse CJK (文言)               | `terse-cjk`     | `full`/`ultra` answer in Classical Chinese (文言); `lite` only asks for brief answers without function words, pleasantries or embellishment.                                                                                           | zh (locale-gated, see below)                  |
 
 Every style ships three intensity levels — `lite`, `full`, `ultra` — and every level
 ends with the shared boundaries clause (`SHARED_BOUNDARIES` in `outputMode.ts`), which

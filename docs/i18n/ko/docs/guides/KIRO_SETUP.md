@@ -114,26 +114,37 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ## API 키 가져오기 흐름
 
-API 키 인증은 수명이 긴 Kiro / AWS CodeWhisperer Bearer 자격 증명에 사용됩니다. OAuth 갱신을 사용하지 않으므로 공유 OIDC 세션이 무효화되는 것을 방지합니다.
+API 키 인증은 장기간 유효한 Kiro / AWS CodeWhisperer 전달자 자격 증명을 위한 것입니다. OAuth 새로 고침을
+사용하지 않으므로 공유 OIDC 세션이 무효화되는 문제를 방지합니다.
 
 ### 대시보드
 
-1. **Dashboard -> Providers -> Kiro**를 엽니다.
-2. **API Key**를 선택합니다.
-3. API 키와 선택 사항인 AWS 리전(기본값은 `us-east-1`)을 붙여넣습니다.
-4. OmniRoute가 키를 검증하고 연결을 저장합니다.
+1. **대시보드 -> 공급자 -> Kiro**를 엽니다.
+2. **API 키**를 선택합니다.
+3. API 키를 붙여 넣고 AWS 리전을 선택합니다. **자동 감지**(기본값), **미국 동부
+   (버지니아 북부)** 또는 **유럽(프랑크푸르트)** 중 하나를 선택할 수 있습니다.
+4. OmniRoute는 키를 검증하고 해당 키가 작동하는 리전에 고정하여 연결을 저장합니다.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region`에는 `auto`(기본값), `us-east-1` 또는 `eu-central-1`을 사용할 수 있으며, 그 외의 값은
+HTTP 400으로 거부됩니다.
 
 ### 내부 계약
 
-API 경로는 `KiroService.validateApiKey()`를 호출하여 키를 검증합니다. 이 메서드는 리전과 일치하는 CodeWhisperer/Amazon Q 엔드포인트에 대해 `ListAvailableProfiles`를 사용하고 `profileArn`을 확인합니다.
+API 경로는 `KiroService.validateApiKey()`를 호출하여 키를 검증하며, 이 메서드는
+리전별 10초 타임아웃으로 `GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(Amazon Q 인터페이스가 API 키 추론에 사용하는 API)를 호출합니다.
+`auto` 모드에서는 `us-east-1`을 먼저 시도한 다음 `eu-central-1`을 시도하고, 키를
+허용한 첫 번째 리전을 저장합니다. 모든 후보 리전에서 거부된 키는 HTTP 400으로
+가져오기에 실패합니다. 그런 다음 선택적 `profileArn`을 확인하기 위해
+`ListAvailableProfiles`를 최선형 방식으로 호출합니다(AWS는 대부분의 API 키에 대해 이를 거부합니다).
 
 저장된 연결은 다음을 사용합니다.
 
@@ -148,7 +159,13 @@ API 경로는 `KiroService.validateApiKey()`를 호출하여 키를 검증합니
 }
 ```
 
-런타임에 `KiroExecutor.buildHeaders()`는 키를 `Authorization: Bearer <key>` 형식으로 전송하고 `tokentype: API_KEY`를 추가합니다. 할당량/프로필 호출도 동일한 마커를 사용하므로 AWS는 이 Bearer를 OIDC 또는 소셜 액세스 토큰이 아닌 수명이 긴 API 키로 처리합니다.
+런타임에 `KiroExecutor.buildHeaders()`는 키를 `Authorization: Bearer <key>`로
+전송하고 `tokentype: API_KEY`를 추가합니다. 할당량/프로필 호출에서도 동일한 표시자를
+사용하므로 AWS는 해당 전달자를 OIDC 또는 소셜 액세스 토큰이 아닌 장기간 유효한 API 키로
+처리합니다. `KiroExecutor.execute()`는 API 키 추론을
+`https://q.<region>.amazonaws.com/generateAssistantResponse`에만 전송합니다(`us-east-1`
+포함). 이는 Kiro IDE 게이트웨이가 `TokenType=API_KEY`를 거부하고
+`codewhisperer.us-east-1`이 API 키 페이로드를 잘못된 요청 본문으로 거부하기 때문입니다(HTTP 400).
 
 ---
 

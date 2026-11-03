@@ -17,6 +17,7 @@ import {
 } from "./base.ts";
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
 import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
+import { peekCommandCodeCliStream } from "./commandCode/cliEmbeddedError.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -667,10 +668,26 @@ function usageFromCommandCode(usage: JsonRecord | null) {
       "cacheReadTokens",
       "cache_read_tokens",
     ]);
+  // Cache writes are part of the cache-inclusive inputTokens, like reads.
+  const cacheWrite =
+    firstNumber(usage, [
+      "cacheWriteInputTokens",
+      "cache_write_input_tokens",
+      "cacheCreationInputTokens",
+      "cache_creation_input_tokens",
+      "cacheWriteTokens",
+      "cache_write_tokens",
+    ]) ??
+    firstNumber(inputDetails, [
+      "cacheWriteTokens",
+      "cache_write_tokens",
+      "cacheCreationTokens",
+      "cache_creation_tokens",
+    ]);
   const noCache = firstNumber(inputDetails, ["noCacheTokens", "no_cache_tokens"]);
   const prompt =
     firstNumber(usage, ["inputTokens", "input_tokens", "promptTokens", "prompt_tokens"]) ??
-    (noCache ?? 0) + (cacheRead ?? 0);
+    (noCache ?? 0) + (cacheRead ?? 0) + (cacheWrite ?? 0);
   const reasoning =
     firstNumber(usage, ["reasoningTokens", "reasoning_tokens"]) ??
     firstNumber(outputDetails, ["reasoningTokens", "reasoning_tokens"]) ??
@@ -692,6 +709,10 @@ function usageFromCommandCode(usage: JsonRecord | null) {
     total_tokens: total,
   };
   if (cacheRead !== undefined && cacheRead > 0) result.cache_read_input_tokens = cacheRead;
+  if (cacheWrite !== undefined && cacheWrite > 0) {
+    (result.prompt_tokens_details as JsonRecord).cache_creation_tokens = cacheWrite;
+    result.cache_creation_input_tokens = cacheWrite;
+  }
   if (noCache !== undefined && noCache > 0) result.no_cache_tokens = noCache;
   if (reasoning !== undefined && reasoning > 0) result.reasoning_tokens = reasoning;
   return result;
@@ -1052,9 +1073,13 @@ export class CommandCodeExecutor extends BaseExecutor {
       };
     }
 
-    const response = stream
-      ? createStreamResponse(cliUpstream, model, signal, toolNameMap)
-      : await createJsonResponse(cliUpstream, model, signal, toolNameMap);
+    // An embedded `error` frame before any content fails the request with its own status.
+    const peeked = await peekCommandCodeCliStream(cliUpstream, signal);
+    const response = !peeked.ok
+      ? peeked
+      : stream
+        ? createStreamResponse(peeked, model, signal, toolNameMap)
+        : await createJsonResponse(peeked, model, signal, toolNameMap);
 
     return { response, url: cliUrl, headers: cliHeaders, transformedBody: cliTransformedBody };
   }

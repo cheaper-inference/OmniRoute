@@ -1,5 +1,5 @@
 import { SEARCH_PROVIDERS } from "../config/searchRegistry.ts";
-import { systemOneChatError } from "../config/systemoneChatGuard.ts";
+import { SearchProviderChatError } from "../utils/searchProviderChatError.ts";
 import { assertMicrosoftDesignerWebProviderAvailable } from "@/shared/constants/designerWebRetirement";
 import { assertRuntimeProviderAvailable } from "@/shared/constants/providerRetirement";
 import { assertCommonChatGptWebProviderAvailable } from "@/shared/constants/chatgptWebRetirement";
@@ -76,7 +76,6 @@ const lazyExecutors: Record<string, () => Promise<BaseExecutor>> = {
   fb: () => import("./freebuff.ts").then((m) => new m.FreebuffExecutor()), // Alias
   "opencode-zen": () => import("./opencode.ts").then((m) => new m.OpencodeExecutor("opencode-zen")),
   "opencode-go": () => import("./opencode.ts").then((m) => new m.OpencodeExecutor("opencode-go")),
-  opencode: () => import("./opencode.ts").then((m) => new m.OpencodeExecutor("opencode-zen")), // Alias for opencode-zen
   vertex: () => import("./vertex.ts").then((m) => new m.VertexExecutor()),
   "vertex-partner": () => import("./vertex.ts").then((m) => new m.VertexExecutor()),
   cliproxyapi: () => import("./cliproxyapi.ts").then((m) => new m.CliproxyapiExecutor()),
@@ -226,7 +225,6 @@ const CHAT_UNSUPPORTED_CLOUD_AGENT_PROVIDERS = new Set(["jules"]);
 const CHAT_UNSUPPORTED_SEARCH_PROVIDERS = new Set(Object.keys(SEARCH_PROVIDERS));
 
 export async function getExecutor(provider: string): Promise<BaseExecutor> {
-  if (provider === "typesafe") throw systemOneChatError(provider, "");
   assertMicrosoftDesignerWebProviderAvailable(provider);
   assertRuntimeProviderAvailable(provider);
   assertCommonChatGptWebProviderAvailable(provider);
@@ -240,11 +238,7 @@ export async function getExecutor(provider: string): Promise<BaseExecutor> {
     throw err;
   }
   if (CHAT_UNSUPPORTED_SEARCH_PROVIDERS.has(provider)) {
-    const err = new Error(
-      `Provider "${provider}" is a search provider and does not support chat completions; use the /v1/search endpoint instead.`
-    );
-    (err as Error & { status?: number }).status = 400;
-    throw err;
+    throw new SearchProviderChatError(provider);
   }
   return getDefaultExecutor(provider);
 }

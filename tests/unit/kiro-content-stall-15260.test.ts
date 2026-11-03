@@ -76,7 +76,8 @@ async function runKiroStream(steps: Step[], options: RunOptions = {}) {
     },
   });
   globalThis.fetch = async (input, init) => {
-    assert.match(String(input), /^https:\/\/codewhisperer\.us-east-1\.amazonaws\.com\//);
+    // API-key connections run on the regional Amazon Q host, us-east-1 included.
+    assert.match(String(input), /^https:\/\/q\.us-east-1\.amazonaws\.com\//);
     assert.equal(init?.signal, controller.signal);
     fetches++;
     return new Response(body, {

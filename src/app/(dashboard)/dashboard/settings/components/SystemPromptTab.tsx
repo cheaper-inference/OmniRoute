@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Card, Toggle } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import { Field } from "@omniroute/ui-kit/field";
+import { Card, Textarea, Toggle } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 export default function SystemPromptTab() {
   const [config, setConfig] = useState({ enabled: false, prefixPrompt: "", suffixPrompt: "" });
@@ -61,25 +63,23 @@ export default function SystemPromptTab() {
   return (
     <Card>
       <div className="flex items-center gap-3 mb-5">
-        <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-            edit_note
-          </span>
+        <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+          <Icon name="edit_note" size={20} />
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-semibold">{t("globalSystemPrompt")}</h3>
         </div>
         <div className="flex items-center gap-3">
           {status === "saved" && (
-            <span className="text-xs font-medium text-emerald-500 flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px]">check_circle</span>{" "}
-              {t("saved")}
+            <span className="text-xs font-medium text-success flex items-center gap-1">
+              <Icon name="check_circle" size={14} /> {t("saved")}
             </span>
           )}
           <Toggle
             checked={config.enabled}
             onChange={() => save({ enabled: !config.enabled })}
             disabled={loading}
+            ariaLabel={t("globalSystemPrompt")}
           />
         </div>
       </div>
@@ -87,54 +87,58 @@ export default function SystemPromptTab() {
       {config.enabled && (
         <div className="flex flex-col gap-5">
           {/* Before Prompt — injected BEFORE agent/provider instructions */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-text-secondary flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[16px]">vertical_align_top</span>
-              {t("beforePromptLabel")}
-            </label>
-            <p className="text-xs text-text-muted/70">{t("beforePromptDesc")}</p>
+          <Field
+            htmlFor="system-prompt-before"
+            label={
+              <span className="flex items-center gap-1.5">
+                <Icon name="vertical_align_top" size={16} />
+                {t("beforePromptLabel")}
+              </span>
+            }
+            hint={t("beforePromptDesc")}
+          >
             <div className="relative">
-              <textarea
+              <Textarea
+                id="system-prompt-before"
                 value={config.prefixPrompt}
                 onChange={(e) => handleFieldChange("prefixPrompt", e.target.value)}
                 placeholder={t("beforePromptPlaceholder")}
                 rows={9}
-                className="w-full px-4 py-3 rounded-lg border border-border/50 bg-surface/30 text-sm
-                           placeholder:text-text-muted/50 resize-y min-h-[220px]
-                           focus:outline-none focus:ring-1 focus:ring-amber-500/30 focus:border-amber-500/50
-                           transition-colors"
+                className="min-h-[220px] resize-y"
                 disabled={loading}
               />
-              <div className="absolute bottom-2 right-3 text-xs text-text-muted/60 tabular-nums">
+              <div className="absolute bottom-2 right-3 text-xs text-text-muted tabular-nums">
                 {t("chars", { count: config.prefixPrompt.length })}
               </div>
             </div>
-          </div>
+          </Field>
 
           {/* After Prompt — injected AFTER agent/provider instructions */}
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-text-secondary flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[16px]">vertical_align_bottom</span>
-              {t("afterPromptLabel")}
-            </label>
-            <p className="text-xs text-text-muted/70">{t("afterPromptDesc")}</p>
+          <Field
+            htmlFor="system-prompt-after"
+            label={
+              <span className="flex items-center gap-1.5">
+                <Icon name="vertical_align_bottom" size={16} />
+                {t("afterPromptLabel")}
+              </span>
+            }
+            hint={t("afterPromptDesc")}
+          >
             <div className="relative">
-              <textarea
+              <Textarea
+                id="system-prompt-after"
                 value={config.suffixPrompt}
                 onChange={(e) => handleFieldChange("suffixPrompt", e.target.value)}
                 placeholder={t("afterPromptPlaceholder")}
                 rows={9}
-                className="w-full px-4 py-3 rounded-lg border border-border/50 bg-surface/30 text-sm
-                           placeholder:text-text-muted/50 resize-y min-h-[220px]
-                           focus:outline-none focus:ring-1 focus:ring-amber-500/30 focus:border-amber-500/50
-                           transition-colors"
+                className="min-h-[220px] resize-y"
                 disabled={loading}
               />
-              <div className="absolute bottom-2 right-3 text-xs text-text-muted/60 tabular-nums">
+              <div className="absolute bottom-2 right-3 text-xs text-text-muted tabular-nums">
                 {t("chars", { count: config.suffixPrompt.length })}
               </div>
             </div>
-          </div>
+          </Field>
         </div>
       )}
     </Card>

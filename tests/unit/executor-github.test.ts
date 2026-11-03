@@ -586,6 +586,37 @@ test("GithubExecutor.transformRequest strips temperature for gpt-5.4 (port from 
   assert.equal(kept.temperature, 0.7, "temperature must be preserved for non-gpt-5.4 models");
 });
 
+test("GithubExecutor.transformRequest strips temperature for Copilot GPT-5.4+ and GPT-6 ids on chat and Responses bodies", () => {
+  // gpt-5.6-* and gpt-6-astra ship in the GitHub registry and Copilot rejects
+  // `temperature` for them with HTTP 400, exactly like gpt-5.4.
+  const executor = new GithubExecutor();
+
+  for (const model of ["gpt-5.6-sol", "gpt-5.6-luna", "gpt-6-astra", "gpt-6.1-sol"]) {
+    const responsesBody = {
+      input: [{ role: "user", content: "hello" }],
+      temperature: 0.7,
+      max_output_tokens: 1024,
+    };
+    const out = executor.transformRequest(model, responsesBody, true, {});
+    assert.equal("temperature" in out, false, `${model}: Responses body must lose temperature`);
+    assert.equal(out.max_output_tokens, 1024, `${model}: other params must survive`);
+    assert.equal(responsesBody.temperature, 0.7, `${model}: caller body must not be mutated`);
+
+    const chatBody = { temperature: 0.4, messages: [{ role: "user", content: "hi" }] };
+    const chatOut = executor.transformRequest(model, chatBody, true, {});
+    assert.equal("temperature" in chatOut, false, `${model}: chat body must lose temperature`);
+    assert.equal(chatBody.temperature, 0.4, `${model}: caller chat body must not be mutated`);
+  }
+
+  const kept = executor.transformRequest(
+    "gpt-5.3-codex",
+    { input: [{ role: "user", content: "hello" }], temperature: 0.7 },
+    true,
+    {}
+  );
+  assert.equal(kept.temperature, 0.7, "gpt-5.3-codex must keep temperature");
+});
+
 test("GithubExecutor.transformRequest strips invalid synthetic Responses reasoning ids", () => {
   const executor = new GithubExecutor();
   const result = executor.transformRequest(

@@ -8,7 +8,6 @@
  * The catalog promise is memoized per request-scope object so combo candidates
  * share one getActiveSyncedCatalog fetch instead of re-hitting the DB.
  */
-import { isSystemOneOnlyModel } from "@omniroute/open-sse/config/systemoneRegistry.ts";
 import {
   catalogContainsModel,
   getActiveSyncedCatalog,
@@ -61,9 +60,6 @@ export async function ghComboGate(
   resolvedModel: string,
   loadCatalog?: (id: string) => Promise<ActiveSyncedCatalog>
 ): Promise<boolean | null> {
-  // This existing pre-credential gate also isolates non-chat System One members.
-  // Do not even preselect a shared Cloudflare connection for an unsupported endpoint.
-  if (isSystemOneOnlyModel(provider, resolvedModel)) return false;
   if (!provider) return true;
   if (provider !== "github" && provider !== "gh") return null;
   const inLiveCatalog = catalogContainsModel(

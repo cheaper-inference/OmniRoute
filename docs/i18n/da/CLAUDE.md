@@ -11,14 +11,15 @@ assistenter (arkitektur, konventioner, test, kvalitetskontroller, git-arbejdsgan
 erfaringer om PII). Læs den i sin helhed; tilføj ikke projektregler her igen. Alt nedenfor gælder KUN
 for Claude Code — operationelle præciseringer af regler, der allerede er defineret i `AGENTS.md`.
 
-## Worktree-isolation — specifikt for Claude Code
+## Worktree-isolering — Claude Code-specifikke detaljer
 
-Den fulde obligatoriske worktree-protokol (bekræftelse af basisgren, `.claude/worktrees/` som kanonisk
-sti, `cp -al` node_modules, regler for oprydning) findes i `AGENTS.md` → Git-arbejdsgang → "Worktree-
-isolation". Punkter, der er specifikke for Claude Code:
+Den fulde obligatoriske worktree-protokol (bekræftelse af basisbranch, kanonisk sti
+`.claude/worktrees/`, `cp -al` node_modules, oprydningsregler) findes i
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (opsummeret i `AGENTS.md` →
+Git-arbejdsgang → "Worktree-isolering"). Claude Code-specifikke punkter:
 
-- Bekræft basisgrenen med operatøren via `AskUserQuestion` (hård regel #19), medmindre vedkommende
-  allerede har oplyst den.
+- Bekræft basisbranchen med operatøren via `AskUserQuestion` (hård regel nr. 19), medmindre de
+  allerede har fortalt dig det.
 - Foretræk det indbyggede `EnterWorktree`-værktøj — det opretter allerede worktrees under
   `.claude/worktrees/` (den kanoniske sti). Opret worktreet med den dokumenterede `git
 worktree add`-kommando, og kald derefter `EnterWorktree` med dets `path`.

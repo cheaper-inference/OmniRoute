@@ -17,7 +17,7 @@ import { getAppLogFilePath } from "../logEnv";
 import { protectPayloadForLog } from "../logPayloads";
 import { sanitizePII } from "../piiSanitizer";
 import { resolveProviderId } from "@/shared/constants/providers";
-import { writeCallArtifact, type CallLogArtifact } from "./callLogArtifacts";
+import { writeCallArtifact, getCallLogsDir, type CallLogArtifact } from "./callLogArtifacts";
 import {
   resolveImportedUsageAccountIdentity,
   resolveOrphanedUsageAccountIdentity,
@@ -28,7 +28,6 @@ export const shouldPersistToDisk = !isCloud && !isBuildPhase;
 
 const LEGACY_DATA_DIR = isCloud ? null : getLegacyDotDataDir();
 
-export const CALL_LOGS_DIR = isCloud ? null : path.join(DATA_DIR, "call_logs");
 export const LOG_ARCHIVES_DIR = isCloud ? null : path.join(DATA_DIR, "log_archives");
 
 const LEGACY_LAYOUT_MARKER =
@@ -128,15 +127,15 @@ function ensureArchiveDir() {
 }
 
 /**
- * Directory the live file logger writes to (`buildLogger()` in
+ * File the live logger writes to (`buildLoggerResource()` in
  * `src/shared/utils/logger.ts`), so the legacy-log sweep below never zips-then-deletes
- * a directory it does not own. Since PR #6234 (fix for #6197) the default app log path
+ * that file or its containing subtree. Since PR #6234 (fix for #6197) the default app log path
  * moved from a `process.cwd()`-anchored location to `DATA_DIR/logs/application/app.log`,
  * landing it inside the same `DATA_DIR/logs` tree this "legacy" migration sweeps (#6799).
  */
-function getLiveAppLogDir(): string | null {
+function getLiveAppLogPath(): string | null {
   try {
-    return path.dirname(getAppLogFilePath());
+    return path.resolve(getAppLogFilePath());
   } catch {
     return null;
   }
@@ -145,13 +144,23 @@ function getLiveAppLogDir(): string | null {
 function listRequestLogArchiveEntries(): ArchiveTarget[] {
   if (!CURRENT_REQUEST_LOGS_DIR || !fs.existsSync(CURRENT_REQUEST_LOGS_DIR)) return [];
 
-  const liveAppLogDir = getLiveAppLogDir();
+  const liveAppLogPath = getLiveAppLogPath();
   const entries = fs.readdirSync(CURRENT_REQUEST_LOGS_DIR);
   const targets: ArchiveTarget[] = [];
 
   for (const entry of entries) {
     const entryPath = path.join(CURRENT_REQUEST_LOGS_DIR, entry);
-    if (liveAppLogDir && isSamePath(entryPath, liveAppLogDir)) continue;
+    if (liveAppLogPath) {
+      const relativeLogPath = path.relative(entryPath, liveAppLogPath);
+      if (
+        relativeLogPath === "" ||
+        (relativeLogPath !== ".." &&
+          !relativeLogPath.startsWith(`..${path.sep}`) &&
+          !path.isAbsolute(relativeLogPath))
+      ) {
+        continue;
+      }
+    }
 
     targets.push({
       sourcePath: entryPath,
@@ -174,9 +183,10 @@ function listArchiveTargets(): ArchiveTarget[] {
     });
   }
 
-  if (CALL_LOGS_DIR && containsLegacyCallLogLayout(CALL_LOGS_DIR)) {
+  const callLogsDir = getCallLogsDir();
+  if (callLogsDir && containsLegacyCallLogLayout(callLogsDir)) {
     targets.push({
-      sourcePath: CALL_LOGS_DIR,
+      sourcePath: callLogsDir,
       archiveRoot: "data/call_logs",
       deleteAfterArchive: true,
     });

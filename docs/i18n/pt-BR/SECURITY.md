@@ -31,21 +31,22 @@ Se você descobrir uma vulnerabilidade de segurança no OmniRoute, relate-a de f
 
 ## Janela de suporte LTS (v3.9.x)
 
-Após a 3.8.59, a próxima versão será a **3.9.0**, que inaugura a linha de suporte de longo prazo na
+Após a 3.8.59, a próxima versão é a **3.9.0**, que inicia a linha de suporte de longo prazo na
 branch `stable/v3` (consulte [`ROADMAP.md`](ROADMAP.md) → "Fase 3 — v3.9.0 LTS").
 
-- **O que `stable/v3` recebe:** correções de bugs, patches de segurança e atualizações de provedores. Novos
-  recursos seguem para o canal v4; a linha LTS prioriza a estabilidade. `npm install omniroute`
+- **O que a `stable/v3` recebe:** correções de bugs, patches de segurança e atualizações de provedores. Novos
+  recursos vão para o canal v4; a linha LTS prioriza a estabilidade. `npm install omniroute`
   (a dist-tag `latest`) permanece na v3 durante todo o ciclo da v4.
-- **Duração da janela:** `<T-GAP-3: decisão do responsável pendente — consulte ROADMAP.md>`. A duração
-  da janela após a disponibilidade geral da v4.0 (quando `latest` muda para a v4) **ainda não foi decidida**; esta
-  seção será atualizada quando o mantenedor anunciá-la. Até lá, não presuma uma data de término.
-- **Relato de vulnerabilidade na linha LTS:** use o mesmo canal que para qualquer outra versão —
-  um [Aviso de Segurança do GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privado,
+- **Duração da janela:** a `stable/v3` recebe **correções de segurança e de regressões críticas por
+  12 meses após o lançamento da 3.9.0 ou até 90 dias após a v4.0.0 ser publicada como `latest` —
+  o que ocorrer por último**. A data final resultante é registrada nas notas de lançamento da 3.9.0 e no
+  [`ROADMAP.md`](ROADMAP.md) quando o lançamento ocorrer.
+- **Como relatar uma vulnerabilidade na linha LTS:** use o mesmo canal de qualquer outra versão —
+  um [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) privado,
   nunca uma issue pública. Informe qual versão você testou (por exemplo, `3.9.2`); as correções são aplicadas à
   `stable/v3` e encaminhadas para a v4.
-- **Linha de base de segurança no corte da LTS:** o estado medido pelo scanner, o guardião de rotas e
-  as comprovações de credenciais públicas estão registrados em
+- **Linha de base de segurança no lançamento da LTS:** o estado medido do scanner, as verificações de proteção de rotas e
+  de credenciais públicas são registrados em
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

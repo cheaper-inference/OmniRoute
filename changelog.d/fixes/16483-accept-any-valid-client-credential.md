@@ -1,1 +1,0 @@
-- **fix(auth):** accept a valid `x-api-key` even when an unrelated `Authorization` bearer is present (e.g. Claude Code with a claude.ai session); identity and API-key policy bind to the credential that validated ([#16483](https://github.com/diegosouzapw/OmniRoute/pull/16483)) — thanks @omar-nahhas

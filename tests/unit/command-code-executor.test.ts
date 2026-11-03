@@ -31,6 +31,8 @@ const PINNED_COMMAND_CODE_MODELS = [
   "gpt-5.4-mini",
   "deepseek/deepseek-v4-pro",
   "deepseek/deepseek-v4-flash",
+  "deepseek/deepseek-v4-flash-vision-exp",
+  "moonshotai/Kimi-K3.1-Pro",
   "moonshotai/Kimi-K2.6",
   "moonshotai/Kimi-K2.5",
   "zai-org/GLM-5.1",

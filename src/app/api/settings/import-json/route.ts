@@ -3,7 +3,10 @@ import { getDbInstance } from "@/lib/db/core";
 import { backupDbFile } from "@/lib/db/backup";
 import { clearApiKeyCaches } from "@/lib/db/apiKeys";
 import { invalidateDbCache } from "@/lib/db/readCache";
-import { isAuthRequired, isAuthenticated } from "@/shared/utils/apiAuth";
+import {
+  CREDENTIAL_IMPORT_FORBIDDEN_MESSAGE,
+  requireOperatorCredential,
+} from "@/lib/api/operatorCredential";
 import { runJsonMigration, type LegacyJsonData } from "@/lib/db/jsonMigration";
 import { getSettings } from "@/lib/db/settings";
 import { setSystemPromptConfig } from "@omniroute/open-sse/services/systemPrompt.ts";
@@ -28,7 +31,9 @@ function stripSecurityImpactingSettings(settings: object): Record<string, unknow
  * Imports a legacy OmniRoute JSON backup into the current SQLite
  * database.  Accepts either multipart/form-data (file field) or a raw JSON body.
  *
- * 🔒 Auth-guarded.
+ * 🔒 Operator-only: dashboard session, local CLI, or login disabled. The import replaces
+ *    settings, connections and API keys, so API keys of any scope and `oma_` access tokens
+ *    get 403 (same boundary as `GET /api/settings/export-json`).
  * 🔒 Zero-Trust: IMPORT_STRIPPED_SETTINGS_KEYS are stripped before insertion — the password
  *    and `currentPassword`, every key `PATCH /api/settings` only accepts after password
  *    re-auth (SECURITY_IMPACTING_SETTINGS_KEYS: requireLogin, the LOCAL_ONLY manage-scope
@@ -38,11 +43,10 @@ function stripSecurityImpactingSettings(settings: object): Record<string, unknow
  * 🔒 A pre-import backup is created automatically before any data is written.
  */
 export async function POST(request: Request) {
-  if (await isAuthRequired(request)) {
-    if (!(await isAuthenticated(request))) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-  }
+  const operatorVerdict = await requireOperatorCredential(request, {
+    forbiddenMessage: CREDENTIAL_IMPORT_FORBIDDEN_MESSAGE,
+  });
+  if (operatorVerdict.ok === false) return operatorVerdict.response;
 
   try {
     let rawText: string | null = null;

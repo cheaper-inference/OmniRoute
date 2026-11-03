@@ -81,6 +81,8 @@ function conn(
 }
 
 beforeEach(() => {
+  // Successful imports intentionally reload the page after 2s; own that timer in each test.
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
   (
     globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
   ).IS_REACT_ACT_ENVIRONMENT = true;
@@ -89,11 +91,18 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  for (const { root, el } of roots.splice(0)) {
-    act(() => root.unmount());
-    el.remove();
+  try {
+    for (const { root, el } of roots.splice(0)) {
+      act(() => root.unmount());
+      el.remove();
+    }
+  } finally {
+    // Do not navigate after jsdom teardown or leak fake timers into the next test.
+    vi.clearAllTimers();
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
   }
-  vi.unstubAllGlobals();
 });
 
 describe("useModelImportHandlers — master autoSync", () => {
@@ -133,7 +142,7 @@ describe("useModelImportHandlers — master autoSync", () => {
       await hook.get().handleToggleAutoSync();
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
       "/api/providers/conn-a",
@@ -144,6 +153,9 @@ describe("useModelImportHandlers — master autoSync", () => {
       "/api/providers/conn-b",
       expect.objectContaining({ method: "PUT" })
     );
+    expect(
+      fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/sync-models"))
+    ).toHaveLength(2);
     expect(fetchConnections).toHaveBeenCalled();
   });
 
@@ -160,7 +172,7 @@ describe("useModelImportHandlers — master autoSync", () => {
       await hook.get().handleToggleAutoSync();
     });
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
       "/api/providers/conn-a",
@@ -182,7 +194,7 @@ describe("useModelImportHandlers — master autoSync", () => {
     });
 
     expect(hook.get().isAutoSyncEnabled).toBe(false);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
       "/api/providers/conn-a",
@@ -197,6 +209,9 @@ describe("useModelImportHandlers — master autoSync", () => {
     const secondBody = JSON.parse(fetchMock.mock.calls[1][1].body as string);
     expect(firstBody.providerSpecificData).toEqual({ autoSync: true });
     expect(secondBody.providerSpecificData).toEqual({ autoSync: true });
+    expect(
+      fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/sync-models"))
+    ).toHaveLength(1);
     expect(notify.success).toHaveBeenCalled();
   });
 
@@ -210,6 +225,7 @@ describe("useModelImportHandlers — master autoSync", () => {
     );
     const fetchMock = vi.mocked(fetch);
     fetchMock.mockResolvedValueOnce({ ok: false, status: 500 } as Response);
+    fetchMock.mockResolvedValueOnce({ ok: true } as Response);
     fetchMock.mockResolvedValueOnce({ ok: true } as Response);
 
     await act(async () => {
@@ -297,6 +313,7 @@ describe("useModelImportHandlers — upstream model auto-fetch", () => {
 
 describe("useModelImportHandlers — imported model metadata", () => {
   it("preserves a discovered per-model targetFormat", async () => {
+    const setTimeoutSpy = vi.spyOn(globalThis, "setTimeout");
     const hook = renderHook(
       buildParams({
         providerId: "vertex",
@@ -324,6 +341,9 @@ describe("useModelImportHandlers — imported model metadata", () => {
     await act(async () => {
       await hook.get().handleImportModels();
     });
+
+    expect(setTimeoutSpy.mock.calls.filter(([, delay]) => delay === 2000)).toHaveLength(1);
+    expect(vi.getTimerCount()).toBe(1);
 
     const createCall = fetchMock.mock.calls.find(
       ([url, init]) => url === "/api/provider-models" && init?.method === "POST"
@@ -412,6 +432,7 @@ describe("useModelImportHandlers — failed model creation", () => {
     expect(handleSetAlias).toHaveBeenCalledWith("stt-async-v5", "stt-async-v5", "sx");
     // No 2s auto-reload (it would wipe the failure lines); the listing is refreshed in place.
     expect(setTimeoutSpy.mock.calls.some(([, delay]) => delay === 2000)).toBe(false);
+    expect(vi.getTimerCount()).toBe(0);
     expect(fetchProviderModelMeta).toHaveBeenCalledTimes(2);
     setTimeoutSpy.mockRestore();
   });

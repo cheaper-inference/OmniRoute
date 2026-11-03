@@ -37,33 +37,33 @@ Veelvoorkomende problemen en oplossingen voor OmniRoute.
 
 ---
 
-### Frequentiebeperking bij gratis providers (429 / 400 / 401)
+### Snelheidsbeperking bij gratis providers (429 / 400 / 401)
 
-**Symptoom**: Wanneer je `model: "auto"` gebruikt met gratis providers/providers zonder authenticatie (opencode, auggie, enzovoort), krijg je af en toe `HTTP 429`, `400` of `401` in plaats van antwoorden. De verzoeken slagen wanneer je dezelfde prompt kort daarna opnieuw probeert, maar automatisering (cron-taken, agents, scripts) stopt bij de eerste fout.
+**Symptoom**: Wanneer je `model: "auto"` gebruikt met gratis providers/providers zonder authenticatie (auggie enz.), krijg je met tussenpozen `HTTP 429`, `400` of `401` in plaats van antwoorden. De verzoeken slagen wanneer je dezelfde prompt enkele ogenblikken later opnieuw probeert, maar automatisering (cronjobs, agents, scripts) stopt bij de eerste fout.
 
 **Hoofdoorzaak**: Drie onafhankelijke foutmodi stapelen zich op:
 
-1. **Frequentielimiet van de provider (`429`)**: Gratis abonnementen kunnen een quotum per tijdsvenster afdwingen. Een piek van parallelle aanroepen put dit uit, waardoor het volgende verzoek wordt geweigerd totdat het venster opnieuw wordt ingesteld.
-2. **Defect model bij passthrough (`400`/`401`)**: `auto/*`-pools kunnen passthrough-modellen van `opencode` bevatten die in de catalogus zijn geregistreerd, maar geen actieve aanmeldgegevens hebben (bijvoorbeeld `oc/north-mini-code-free` → `401`). De automatische router probeert er één, faalt, en de fout wordt doorgegeven voordat de uitwijking wordt geactiveerd.
-3. **Versterking door gelijktijdigheid (`429` onder belasting)**: Wanneer meerdere agent-/cron-sessies tegelijk `auto` aanspreken, overschrijdt de totale aanvraagsnelheid wat gratis providers tolereren, waardoor legitieme aanroepen als misbruik worden aangemerkt.
+1. **Snelheidslimiet van de provider (`429`)**: Gratis abonnementen kunnen een quotum per tijdsvenster afdwingen. Een piek van parallelle aanroepen put dit uit, waardoor het volgende verzoek wordt geweigerd totdat het tijdsvenster opnieuw wordt ingesteld.
+2. **Defect model bij passthrough (`400`/`401`)**: `auto/*`-pools kunnen passthrough-modellen bevatten die in de catalogus zijn geregistreerd, maar geen werkende referenties hebben (→ `401`). De automatische router probeert er een, faalt en geeft de fout door voordat de fallback wordt geactiveerd.
+3. **Versterking door gelijktijdigheid (`429` onder belasting)**: Wanneer meerdere agent-/cronsessies tegelijk `auto` aanroepen, overschrijdt de totale aanvraagsnelheid wat gratis providers tolereren, waardoor legitieme aanroepen als misbruik worden aangemerkt.
 
-**Geverifieerde oplossing (gemeld door de community, 2026-08-10)**: stel drie omgevingsvariabelen zo in dat rotatie, gelijktijdigheid en uitwijking de wisselvalligheid van gratis abonnementen opvangen in plaats van erop vast te lopen:
+**Geverifieerde oplossing (gemeld door de community, 2026-08-10)**: stel drie omgevingsvariabelen af, zodat rotatie, gelijktijdigheid en fallback de wisselvalligheid van de gratis laag opvangen in plaats van erop vast te lopen:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # ga bij 400/401 naar een ander model/een andere provider (slaat defecte passthrough-modellen over)
+export OMNIROUTE_ROTATE_ON_400=true           # schakel bij 400/401 over naar een ander model/een andere provider (slaat defecte passthrough-modellen over)
 export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # expliciete toelatingslimiet voor zware verzoeken (standaard niet ingesteld: geen limiet voor het aantal verzoeken, zie opmerking hieronder)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # verhoog de begrensde wachttijd tot boven de standaardwaarde van RATE_LIMIT_MAX_WAIT_MS voor trage upstreams
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # verhoog de begrensde wachttijd tot voorbij de standaardwaarde van RATE_LIMIT_MAX_WAIT_MS voor trage upstreams
 ```
 
-Stel deze in binnen de procesomgeving van OmniRoute (de daemon, bijvoorbeeld via het LaunchAgent-plist-bestand of `systemctl edit`) en start OmniRoute vervolgens opnieuw. De rotatievlag heeft de grootste impact: deze zet een harde fout om in een transparante nieuwe poging bij een gezonde provider in de pool.
+Stel deze in de procesomgeving van OmniRoute in (de daemon, bijvoorbeeld via de LaunchAgent-plist of `systemctl edit`) en start OmniRoute vervolgens opnieuw. De rotatievlag heeft verreweg de grootste impact: deze zet een onherstelbare fout om in een transparante nieuwe poging bij een gezonde provider in de pool.
 
-**Opmerking**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` beperkt hoeveel zware — long-context — verzoeken tegelijk worden uitgevoerd; de limiet is een toelatingspoort, geen frequentielimiet van een provider. **Update voor #503-fanout:** deze variabele wordt niet langer standaard ingesteld (de limiet geldt nu alleen wanneer deze expliciet wordt geconfigureerd, zoals hierboven) — de toelating van zware verzoeken wordt in plaats daarvan geregeld door een automatisch afgeleid bytebudget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) dat zichzelf schaalt op basis van de werkelijke geheugenlimiet van de host. Een nieuwe implementatie zou daardoor veel minder afwijzingen met `503 chat_admission_busy` moeten opleveren zonder dat deze variabele hoeft te worden ingesteld; expliciet instellen zoals hier beschreven werkt nog steeds precies zoals gedocumenteerd. Expliciete overschrijvingen van het bytebudget worden begrensd op 8 MiB–2 GiB. Een `413 body_exceeds_budget` is niet tijdelijk: verhoog dat bytebudget, verlaag `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` of verhoog de geheugenlimiet van het proces. Een afwijzing wegens `inflight_bytes_budget` is tijdelijke contention en kan opnieuw worden geprobeerd. De frequentiebeperking per provider (`open-sse/services/rateLimitManager.ts`) wordt afzonderlijk beheerd door `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` en `RATE_LIMIT_AUTO_ENABLE` — zie `.env.example`.
+**Opmerking**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` beperkt hoeveel zware verzoeken — met een lange context — tegelijkertijd worden uitgevoerd; de begrenzing is een toelatingspoort, geen snelheidsbeperking van de provider. **Update over #503-fanout:** deze variabele wordt niet langer standaard ingesteld (deze is nu alleen van toepassing wanneer ze expliciet wordt geconfigureerd, zoals hierboven) — de toelating van zware verzoeken wordt in plaats daarvan begrensd door een automatisch afgeleid bytebudget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) dat zichzelf schaalt op basis van de werkelijke geheugenlimiet van de host. Daardoor zou een nieuwe implementatie veel minder `503 chat_admission_busy`-afwijzingen moeten opleveren zonder dat deze variabele überhaupt wordt ingesteld; het expliciet instellen ervan werkt nog steeds precies zoals gedocumenteerd. Expliciete overschrijvingen van het bytebudget worden begrensd op 8 MiB–2 GiB. Een `413 body_exceeds_budget` is niet tijdelijk: verhoog dat bytebudget, verlaag `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` of verhoog de geheugenlimiet van het proces. Afwijzing wegens `inflight_bytes_budget` duidt op tijdelijke capaciteitsconcurrentie en kan opnieuw worden geprobeerd. De snelheidsbeperking per provider (`open-sse/services/rateLimitManager.ts`) wordt afzonderlijk geregeld door `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` en `RATE_LIMIT_AUTO_ENABLE` — zie `.env.example`.
 
-**Zo controleert u of het werkt**: voer uw agent/cron twee keer kort na elkaar uit en controleer of beide uitvoeringen slagen. Vóór de oplossing geeft de tweede uitvoering doorgaans een `429`/`401`-fout. Na de oplossing worden fouten (indien aanwezig) automatisch opnieuw geprobeerd en wordt de aanroep voltooid. U kunt ook `curl /monitoring/health` uitvoeren en het veld `rateLimitedUntil` bij de providerverbindingen en `circuitBreakers.providerBreakers[].state` voor de betrokken providers controleren — de status is `CLOSED`, `DEGRADED`, `OPEN` of `HALF_OPEN` (zie `src/shared/utils/circuitBreaker.ts`), en een provider die fouten blijft geven, schakelt van `CLOSED → DEGRADED → OPEN` voordat na het resetvenster een testaanroep wordt doorgelaten (`HALF_OPEN`).
+**Controleren of het werkt**: voer je agent/cron tweemaal kort na elkaar uit en controleer of beide uitvoeringen slagen. Vóór de oplossing levert de tweede uitvoering doorgaans `429`/`401` op. Na de oplossing worden fouten (indien aanwezig) transparant opnieuw geprobeerd en wordt de aanroep voltooid. Je kunt ook `curl /monitoring/health` uitvoeren en het veld `rateLimitedUntil` voor de providerverbindingen en `circuitBreakers.providerBreakers[].state` voor de getroffen providers bekijken — de status is `CLOSED`, `DEGRADED`, `OPEN` of `HALF_OPEN` (zie `src/shared/utils/circuitBreaker.ts`). Een provider die blijft falen, gaat van `CLOSED → DEGRADED → OPEN` voordat na het resetvenster een testverzoek wordt doorgelaten (`HALF_OPEN`).
 
-**Als u nog steeds 429 ziet**: het actieve account voor die provider heeft daadwerkelijk zijn _quotum_ opgebruikt (niet alleen de frequentielimiet bereikt). Voeg in het OmniRoute-dashboard via Providers → Accounts een tweede account voor dezelfde provider toe, of voeg een andere gratis provider toe (bijvoorbeeld `routeway`, `auggie`). Rotatie helpt alleen bij tijdelijke frequentielimieten/400/401-fouten; als het quotum volledig is opgebruikt, is een tweede set inloggegevens of een andere provider vereist.
+**Als je nog steeds 429 ziet**: het actieve account voor die provider heeft daadwerkelijk zijn _quotum_ uitgeput (niet alleen de snelheidslimiet bereikt). Voeg in het OmniRoute-dashboard via Providers → Accounts een tweede account voor dezelfde provider toe, of voeg een andere gratis provider toe (bijvoorbeeld `routeway`, `auggie`). Rotatie helpt alleen bij tijdelijke snelheidsbeperkingen en 400/401-fouten; bij volledige uitputting van het quotum zijn andere referenties of een andere provider vereist.
 
-**Als u 403 ziet bij vision-modellen (`auto/vision`, `bazaarlink/*`)**: het verbonden account heeft geen betaald abonnement dat vision ondersteunt, of de API-sleutel heeft onvoldoende machtigingen. Controleer in het providerdashboard of de scope van de sleutel vision/multimodal omvat, of koppel een account met een betaald abonnement en behoud dit als vision-doel.
+**Als je 403 ziet bij vision-modellen (`auto/vision`, `bazaarlink/*`)**: het verbonden account heeft geen betaald abonnement waarin vision is inbegrepen, of de API-sleutel heeft onvoldoende machtigingen. Controleer in het providerdashboard of het bereik van de sleutel vision/multimodal omvat, of verbind een account met een betaald abonnement en behoud dit als het vision-doel.
 
 ---
 
@@ -94,7 +94,7 @@ De waarschuwingen worden veroorzaakt door verouderde versiebereiken voor peer-af
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Wanneer u `npm install -g omniroute` uitvoert, blokkeren nieuwere npm-versies (v11+ en v12+) standaard pakketlevenscyclusscripts en tonen ze een waarschuwing over installatiescripts:
+Wanneer u `npm install -g omniroute` uitvoert, blokkeren nieuwere npm-versies (v11+ en v12+) standaard scripts voor de pakketlevenscyclus en tonen ze een waarschuwing over installatiescripts:
 
 ```
 npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
@@ -104,25 +104,25 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### Kan deze waarschuwing worden genegeerd?
 
-**Gedeeltelijk, maar uitvoering zonder scripts wordt niet aanbevolen.** OmniRoute bevat robuuste terugvalopties: als native `better-sqlite3`-bindingen niet vanuit de zelfstandige bundel kunnen worden geladen, valt de toepassing terug op alternatieve stuurprogramma's, zoals `node:sqlite` of `sql.js` (zie [SQLite-runtimebepaling](../ops/SQLITE_RUNTIME.md)). De server wordt nog steeds gestart, maar het gebruik van WASM-terugvalopties zoals `sql.js` schakelt de WAL-modus (Write-Ahead Logging) van SQLite uit en verhoogt het geheugen- en schijfsynchronisatiegebruik.
+**Gedeeltelijk, maar uitvoeren zonder scripts wordt niet aanbevolen.** OmniRoute bevat robuuste terugvalopties: als native `better-sqlite3`-bindings niet vanuit de zelfstandige bundel kunnen worden geladen, valt de toepassing terug op alternatieve stuurprogramma's zoals `node:sqlite` of `sql.js` (zie [SQLite-runtimebepaling](../ops/SQLITE_RUNTIME.md)). De server zal nog steeds starten, maar het gebruik van WASM-terugvalopties zoals `sql.js` schakelt de WAL-modus (Write-Ahead Logging) van SQLite uit en verhoogt het geheugenverbruik en de overhead van schijfsynchronisatie.
 
 ### Welke scripts zijn daadwerkelijk vereist?
 
 Niet alle geblokkeerde scripts zijn essentieel voor het uitvoeren van OmniRoute:
 
-- **Essentieel (`omniroute`, `better-sqlite3`):** OmniRoute wordt uitgevoerd vanuit een zelfstandige Next.js-toepassingsbundel (`dist/`). Tijdens de installatie downloadt of compileert npm het hostspecifieke native SQLite-stuurprogramma in `node_modules/better-sqlite3/` op het hoogste niveau. Het `postinstall`-script van OmniRoute (`scripts/build/postinstall.mjs`) verifieert en kopieert deze hostspecifieke binaire bestanden vervolgens naar `dist/node_modules/`, zodat de zelfstandige server er toegang toe heeft. Als het postinstall-script van `omniroute` wordt geblokkeerd, wordt deze kopieerstap overgeslagen.
-- **Optioneel/transitief (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Dit zijn bouwhulpmiddelen, bewakingstools of hulpprogramma's voor de systeem-sleutelhanger. Door ze toe te staan, voorkomt u buildwaarschuwingen, maar ze zijn niet vereist voor de belangrijkste routeringsfunctionaliteit.
-- **Uitgesloten (`onnxruntime-node`):** Een optionele afhankelijkheid voor lokale AI-embeddings die **niet** vereist is om OmniRoute uit te voeren. Het postinstall-script downloadt ongeveer 300 MB aan CUDA-onderdelen van NuGet; voeg dit pakket niet toe aan de lijst met toegestane pakketten, tenzij u expliciet lokale ONNX-versnelling op ondersteunde hardware wilt gebruiken.
+- **Essentieel (`omniroute`, `better-sqlite3`):** OmniRoute wordt uitgevoerd vanuit een zelfstandige Next.js-toepassingsbundel (`dist/`). Tijdens de installatie downloadt of compileert npm het hostspecifieke native SQLite-stuurprogramma in de bovenliggende map `node_modules/better-sqlite3/`. Het `postinstall`-script van OmniRoute (`scripts/build/postinstall.mjs`) verifieert en kopieert deze hostspecifieke binaire bestanden vervolgens naar `dist/node_modules/`, zodat de zelfstandige server er toegang toe heeft. Als het postinstall-script van `omniroute` wordt geblokkeerd, wordt deze kopieerstap overgeslagen.
+- **Optioneel/transitief (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Dit zijn bouwhulpmiddelen, bewakingstools of hulpprogramma's voor de sleutelhanger van het systeem. Door ze toe te staan, worden bouwwaarschuwingen voorkomen, maar ze zijn niet vereist voor de kernfunctionaliteit voor routering.
+- **Uitgesloten (`onnxruntime-node`):** Een optionele afhankelijkheid voor lokale AI-embeddings die **niet** vereist is om OmniRoute uit te voeren. Het postinstall-script downloadt circa 300 MB aan CUDA-bestanden van NuGet; neem dit pakket niet op in de lijst met toegestane pakketten, tenzij u expliciet van plan bent lokale ONNX-versnelling op ondersteunde hardware te gebruiken.
 
 ### Aanbevolen oplossing
 
-Geef `--allow-scripts` door voor OmniRoute en de native afhankelijkheden om de vereiste installatiescripts tijdens een globale installatie toe te staan en waarschuwingen te onderdrukken:
+Om de vereiste installatiescripts tijdens een globale installatie toe te staan en waarschuwingen te onderdrukken, geeft u `--allow-scripts` door voor OmniRoute en de bijbehorende native afhankelijkheden:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-U kunt dit ook permanent configureren voor alle globale installaties onder uw gebruikersaccount:
+Als alternatief kunt u dit permanent configureren voor alle globale installaties onder uw gebruikersaccount:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +131,7 @@ npm install -g omniroute
 
 ### Controleer uw installatie
 
-Voer na de installatie het ingebouwde diagnosehulpmiddel uit om te controleren of de native bindingen en de runtimeomgeving correct werken:
+Voer na de installatie het ingebouwde diagnosehulpmiddel uit om te controleren of de native bindings en de runtimeomgeving correct functioneren:
 
 ```bash
 omniroute doctor

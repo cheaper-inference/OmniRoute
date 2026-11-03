@@ -32,90 +32,90 @@ OmniRoute는 요청이 업스트림 제공자에 도달하기 **전에 선제적
 
 ## 압축 모드
 
-### 꺼짐
+### Off
 
-압축을 적용하지 않습니다. 모든 메시지가 변경 없이 그대로 전달됩니다.
+압축이 적용되지 않습니다. 모든 메시지가 변경 없이 그대로 통과합니다.
 
-### Lite 모드(약 15% 절감, 지연 시간 <1ms)
+### Lite 모드 (~15% 절감, <1ms 지연)
 
-가장 안전한 모드로, 의미는 전혀 변경하지 않고 서식만 정리합니다.
+가장 안전한 모드 — 의미 변화는 전혀 없이 형식 정리만 수행합니다:
 
-| 기법                     | 설명                          |
-| ------------------------ | ----------------------------- |
-| `collapseWhitespace`     | 연속된 빈 줄과 후행 공백 병합 |
-| `dedupSystemPrompt`      | 중복 시스템 메시지 제거       |
-| `compressToolResults`    | 장황한 도구/함수 출력 압축    |
-| `removeRedundantContent` | 반복되는 지침 제거            |
-| `replaceImageUrls`       | base64 이미지 데이터 URI 축약 |
+| 기법                     | 설명                                   |
+| ------------------------ | -------------------------------------- |
+| `collapseWhitespace`     | 연속된 빈 줄과 줄 끝 공백을 병합합니다 |
+| `dedupSystemPrompt`      | 중복된 시스템 메시지를 제거합니다      |
+| `compressToolResults`    | 장황한 도구/함수 출력을 압축합니다     |
+| `removeRedundantContent` | 반복되는 지시문을 제거합니다           |
+| `replaceImageUrls`       | base64 이미지 데이터 URI를 단축합니다  |
 
-**권장 용도:** 상시 사용, 안전이 중요한 워크플로.
+**적합한 용도:** 상시 사용, 안전이 중요한 워크플로우.
 
-### Standard 모드(약 30% 절감)
+### Standard 모드 (~30% 절감)
 
-[Caveman](https://github.com/JuliusBrussee/caveman)에서 영감을 얻은 모드로, 의미는 유지하면서 군더더기 단어와 장황한 표현을 제거합니다.
+[Caveman](https://github.com/JuliusBrussee/caveman)에서 영감을 받은 모드 — 의미를 보존하면서 군더더기 단어와 장황한 표현을 제거합니다:
 
 - 군더더기 단어 제거("please", "I think", "basically", "actually")
-- 장황한 구문 축약("in order to" → "to", "as a result of" → "because")
-- 정중하고 완곡한 표현 제거("Would you mind...", "If you could possibly...")
+- 장황한 구문을 간결하게 압축("in order to" → "to", "as a result of" → "because")
+- 정중한 완곡 표현 제거("Would you mind...", "If you could possibly...")
 - 코딩 프롬프트에 맞게 조정된 30개 이상의 정규식 규칙
 
-**권장 용도:** 일상적인 코딩 워크플로, 비용을 중시하는 팀.
+**적합한 용도:** 일상적인 코딩 워크플로우, 비용에 민감한 팀.
 
-### Aggressive 모드(약 50% 절감)
+### Aggressive 모드 (~50% 절감)
 
-장시간 세션을 위한 지능형 기록 관리 기능입니다.
+긴 세션을 위한 스마트 히스토리 관리:
 
-- **메시지 노후화** — 오래된 메시지일수록 점진적으로 더 많이 압축
-- **도구 결과 압축** — 긴 도구 출력을 잘라내거나 생략(첫 줄/마지막 줄,
+- **메시지 에이징** — 오래된 메시지가 점진적으로 압축됩니다
+- **도구 결과 압축** — 긴 도구 출력을 잘라내거나 생략합니다(첫/마지막 줄,
   일치 줄 필터링, JSON 키 압축)
-- **구조적 무결성 보호** — `tool_use` + `tool_result` 쌍의 일관성 유지
-- **컨텍스트 창 인식** — 모델별 토큰 한도 준수
+- **구조적 무결성 가드** — `tool_use` + `tool_result` 쌍이 일관되게 유지되도록 보장합니다
+- **컨텍스트 윈도우 인식** — 모델별 토큰 한도를 준수합니다
 
-**권장 용도:** 장시간 디버깅 세션, 대규모 코드베이스.
+**적합한 용도:** 장시간 디버깅 세션, 대규모 코드베이스.
 
-### Ultra 모드(약 75% 절감)
+### Ultra 모드 (~75% 절감)
 
-토큰이 매우 중요한 시나리오를 위한 최대 압축 모드입니다.
+토큰이 중요한 시나리오를 위한 최대 압축:
 
-- **휴리스틱 가지치기** — 점수 기반으로 산문에서 토큰 제거
-- **구조 보존** — 펜스 코드 블록, 인라인 코드, URL 및 식별자를
-  자리표시자로 대체한 후 원문 그대로 다시 결합하며 절대 제거하지 않음
-- **선택적 SLM 계층** — 구성된 경우 소형 로컬 모델로 가지치기 결과를 개선
-- Aggressive 모드와 독립적: 메시지 노후화, 도구 결과 압축 또는 대체 요약기를
-  실행하지 않음(SLM 계층 실패 시에만 대체 처리가 aggressive를 통해 수행될 수 있음)
+- **휴리스틱 프루닝** — 점수 기반으로 산문 텍스트의 토큰을 프루닝합니다
+- **구조 보존** — 펜스 코드 블록, 인라인 코드, URL 및 식별자는 툼스톤 처리 후
+  원문 그대로 다시 연결되며, 절대 프루닝되지 않습니다
+- **선택적 SLM 계층** — 구성된 경우 소형 로컬 모델이 프루닝을 개선할 수 있습니다
+- Aggressive 모드와 독립적: 메시지 에이징, 도구 결과 압축, 폴백 요약기를 실행하지
+  않습니다(SLM 계층 실패 시에만 폴백 패스가 aggressive를 거쳐 라우팅될 수 있음)
 
-**권장 용도:** 컨텍스트 한도에 반복적으로 도달하는 경우.
+**적합한 용도:** 컨텍스트 한도에 반복적으로 도달하는 경우.
 
-### RTK 모드(업스트림 기준 60~90%)
+### RTK 모드 (60-90% 범위, 업스트림 기준)
 
-RTK 모드는 코딩 에이전트 세션에 나타나는 장황한 도구 출력에 최적화되어 있습니다.
+RTK 모드는 코딩 에이전트 세션에 나타나는 장황한 도구 출력에 최적화되어 있습니다:
 
-- `git status`, `git diff`, `git log`, 테스트 실행기,
-  TypeScript/Vite/Webpack 빌드, ESLint/Biome/Prettier, npm 감사/설치, Docker 로그, 인프라
-  출력, 일반 셸 출력 등의 명령어/출력 클래스 감지
-- `open-sse/services/compression/engines/rtk/filters/`의 JSON 필터 팩 적용
-- 프로젝트 또는 전역 `filters.toml` 파일에서 RTK TOML 스키마 v1 필터를 가져오며, 인라인 테스트
-  검증 및 프로젝트 파일에 대한 신뢰 기반 제한 적용
-- 인라인 검증 샘플이 포함된 55개의 기본 제공 필터 제공
-- ANSI 제어 시퀀스, 진행률 표시줄, 반복 줄 및 조치 불가능한 노이즈 제거
-- 실패, 오류, 경고, 변경된 파일, 요약 및 긴 출력의 끝부분 보존
-- 신뢰 기반 제한이 적용된 프로젝트 필터, 전역 필터 및 선택적 비식별화 원시 출력 복구 지원
+- `git status`, `git diff`, `git log`, 테스트 러너, TypeScript/Vite/Webpack 빌드,
+  ESLint/Biome/Prettier, npm audit/install, Docker 로그, 인프라 출력 및 일반 셸 출력과
+  같은 명령/출력 클래스를 감지합니다
+- `open-sse/services/compression/engines/rtk/filters/`의 JSON 필터 팩을 적용합니다
+- 프로젝트 또는 전역 `filters.toml` 파일에서 RTK TOML 스키마 v1 필터를 가져오며, 인라인
+  테스트 검증 및 프로젝트 파일에 대한 신뢰 게이팅(trust-gating)을 적용합니다
+- 인라인 검증 샘플이 포함된 56개의 내장 필터를 제공합니다
+- ANSI 제어 시퀀스, 진행 표시줄, 반복되는 줄 및 조치 불가능한 노이즈를 제거합니다
+- 실패, 오류, 경고, 변경된 파일, 요약 및 긴 출력의 끝 부분을 보존합니다
+- 신뢰 게이트된 프로젝트 필터, 전역 필터 및 선택적인 마스킹된 원본 출력 복구를 지원합니다
 
-**권장 용도:** 셸, 빌드, 테스트, git, grep 및 파일 출력 기록이 포함된 에이전트 세션.
+**적합한 용도:** 셸, 빌드, 테스트, git, grep 및 파일 출력 트랜스크립트가 포함된 에이전트 세션.
 
-### Stacked 모드(적격 범위 78~95%)
+### Stacked 모드 (78-95% 범위, 적격 콘텐츠 기준)
 
-Stacked 모드는 여러 압축 엔진을 결정론적 순서로 실행합니다. 기본 파이프라인은 다음과 같습니다.
+Stacked 모드는 여러 압축 엔진을 결정적 순서로 실행합니다. 기본 파이프라인은 다음과 같습니다:
 
 ```txt
 RTK -> Caveman
 ```
 
-이 순서는 먼저 터미널/도구 출력을 간결하게 만든 다음, 남아 있는 자연어 프롬프트에 Caveman 의미 압축을
-적용합니다. Stacked 파이프라인은 전역으로 구성하거나 라우팅 콤보에 할당된
-압축 콤보를 통해 구성할 수 있습니다.
+이 순서는 터미널/도구 출력을 먼저 압축한 다음, 남은 자연어 프롬프트에 Caveman 의미 압축을
+적용합니다. Stacked 파이프라인은 전역으로 구성하거나 라우팅 콤보에 할당된 압축 콤보를 통해
+구성할 수 있습니다.
 
-**권장 용도:** 대규모 도구 로그와 사용자 지침 또는 어시스턴트 요약이 함께 포함된 혼합 컨텍스트.
+**적합한 용도:** 대규모 도구 로그와 사람의 지시 또는 어시스턴트 요약이 혼합된 컨텍스트.
 
 ---
 
@@ -260,7 +260,7 @@ RTK 원시 출력 복구 기능은 데이터가 저장되기 전에 일반적인
 
 ## 압축 통계
 
-압축된 모든 요청에는 서버 로그에 다음과 같은 통계가 포함됩니다:
+모든 압축된 요청에는 서버 로그에 통계가 포함됩니다:
 
 ```json
 {
@@ -300,21 +300,21 @@ RTK 모드는 **[RTK AI](https://github.com/rtk-ai)**가 만든 **[RTK - Rust To
 
 ## 고급 압축 시스템
 
-위에서 설명한 7가지 모드 외에도(소스는 `codex-responses` 및
-`omniglyph` 모드도 허용하지만 이 가이드에서는 다루지 않음), 아래 섹션에서는
-해당 모드 내부 또는 함께 작동하는 기능을 다룹니다. Tool Result Compression과 Progressive Aging은
-aggressive 엔진(Aggressive 모드 및 스택형 파이프라인의 `aggressive` 단계)의 1단계와 2단계이고,
-Stacked Pipeline은 Stacked 모드가 실행되는 방식이며, Cache-Aware Compression은 압축이
-활성화되어 있는 동안 캐싱 공급자에 대해 `aggressive`와 `ultra`를 `standard`로 하향 조정합니다.
-Caveman Output Mode와 Output Styles는 기본적으로 비활성화된 옵트인 시스템 프롬프트 명령으로,
-요청을 압축하는 대신 모델의 출력을 조정합니다.
+위에서 설명한 7가지 모드 외에도(소스는 `codex-responses` 및 `omniglyph` 모드도
+허용하지만 이 가이드에서는 다루지 않음), 아래 섹션에서는 해당 모드 내부 또는
+모드와 함께 작동하는 기능을 다룹니다. 도구 결과 압축과 점진적 에이징은 공격적
+엔진의 1단계와 2단계이며(공격적 모드 및 스택형 파이프라인의 `aggressive` 단계),
+스택형 파이프라인은 스택형 모드가 실행되는 방식입니다. 캐시 인식 압축은 압축이
+활성화된 동안 캐싱 제공자에 대해 `aggressive`와 `ultra`를 `standard`로
+다운그레이드합니다. 원시인 출력 모드와 출력 스타일은 요청을 압축하는 대신 모델의
+출력을 형성하는 선택적 시스템 프롬프트 지침으로, 기본적으로 비활성화되어 있습니다.
 
 ### 캐시 인식 압축
 
-일부 공급자(프롬프트 캐싱을 사용하는 Anthropic 등)는 **프롬프트 캐싱**을 지원하여
-비용과 지연 시간을 줄이기 위해 프롬프트의 일부를 캐시할 수 있습니다. 캐싱이
-활성화된 경우 aggressive 압축은 캐시된 토큰을 변경하여 캐시를 무효화하므로
-오히려 성능을 **저하시킬** 수 있습니다.
+일부 제공자(프롬프트 캐싱을 사용하는 Anthropic 등)는 **프롬프트 캐싱**을
+지원합니다. 이를 통해 프롬프트의 일부를 캐시하여 비용과 지연 시간을 줄일 수
+있습니다. 캐싱이 활성화된 경우 공격적 압축은 캐시된 토큰을 변경하여 캐시를
+무효화하므로 실제로 성능을 **저하시킬** 수 있습니다.
 
 `cachingAware.ts` 모듈은 **캐싱 컨텍스트를 감지**하고 그에 따라
 **압축 전략을 조정**하여 이 문제를 해결합니다.
@@ -322,12 +322,12 @@ Caveman Output Mode와 Output Styles는 기본적으로 비활성화된 옵트�
 #### 작동 방식
 
 1. **캐싱 컨텍스트 감지** — 요청 본문에서 `cache_control` 마커를 검색합니다
-2. **캐싱 공급자 식별** — 대상 공급자가 캐싱을 지원하는지 확인합니다
-3. **전략 조정** — 캐싱 공급자의 경우 `aggressive`/`ultra`를 `standard`로 하향 조정합니다
+2. **캐싱 제공자 식별** — 대상 제공자가 캐싱을 지원하는지 확인합니다
+3. **전략 조정** — 캐싱 제공자에 대해 `aggressive`/`ultra`를 `standard`로 다운그레이드합니다
 4. **시스템 프롬프트 건너뛰기** — 시스템 프롬프트는 일반적으로 캐시되므로 압축하지 않습니다
 
-전략 헬퍼는 `deterministicOnly` 플래그도 반환하지만, 계획 빌더는
-전략만 사용하며 현재는 다운스트림의 어떤 항목도 이 플래그를 읽지 않습니다.
+전략 헬퍼는 `deterministicOnly` 플래그도 반환하지만, 계획 빌더는 전략만
+사용하며 현재 이 플래그를 읽는 다운스트림 구성 요소는 없습니다.
 
 #### 코드 예시
 
@@ -352,25 +352,25 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### 사용 시점
 
-캐시 인식 압축은 **항상 활성화되어 있으므로** 별도의 구성이 필요하지 않습니다. 압축이
-활성화되어 있고 대상 공급자가 프롬프트 캐싱(Anthropic, OpenAI 등)을 지원할 때마다
-작동합니다. 명시적인 `cache_control` 마커는 필요하지 않습니다. 캐싱 공급자라는 사실만으로도
-하향 조정이 트리거되며, 마커만으로는 절대 트리거되지 않습니다(마커 감지는 전략 결정이 아니라
-캐시 텔레메트리에 사용됩니다).
+캐시 인식 압축은 **항상 활성화**되어 있으며 별도의 구성이 필요하지 않습니다.
+압축이 활성화되어 있고 대상 제공자가 프롬프트 캐싱을 지원할 때마다(Anthropic,
+OpenAI 등) 작동합니다. 명시적인 `cache_control` 마커는 필요하지 않습니다.
+캐싱 제공자라는 사실만으로 다운그레이드가 실행되며, 마커만으로는 절대 실행되지
+않습니다(마커 감지는 전략 결정이 아닌 캐시 텔레메트리에 사용됨).
 
 ### 점진적 에이징
 
-긴 대화에는 많은 메시지 턴이 누적되지만 오래된 턴일수록
-관련성이 떨어집니다. `progressiveAging.ts` 모듈은 **턴 거리에 따라 메시지를 축약합니다**
-(거리는 대화의 끝에서부터 측정). 제공되는 기본값
-(`verbatim: 2, light: 2, moderate: 3`)을 사용할 경우:
+긴 대화에는 많은 메시지 턴이 누적되지만, 오래된 턴일수록 관련성이 떨어집니다.
+`progressiveAging.ts` 모듈은 **턴 거리에 따라 메시지를 축약**합니다
+(거리는 대화 끝에서부터 측정). 기본 제공 설정
+(`verbatim: 2, light: 2, moderate: 3`)을 사용하는 경우:
 
-- **최근 2개 턴(거리 ≤ 2)**: 원문 그대로 유지
-- **거리 3**: 원시인식 압축(군더더기 제거)
-- **거리 4+**: 어시스턴트 메시지는 요약하고, 사용자 메시지는 첫 번째
-  줄만 남기되 120자로 제한하며, 다른 역할은 그대로 둡니다. 시스템 프롬프트, 이미 에이징된
+- **마지막 2개 턴(거리 ≤ 2)**: 원문 그대로 유지
+- **거리 3**: 원시인 압축(군더더기 제거)
+- **거리 4 이상**: 어시스턴트 메시지는 요약하고 사용자 메시지는 120자로 제한된
+  첫 번째 줄만 남기며, 다른 역할은 그대로 둡니다. 시스템 프롬프트, 이미 에이징된
   메시지 및 최신 사용자 메시지는 거리에 관계없이 항상 원문 그대로 유지됩니다.
-  어떤 것도 완전히 삭제되지 않으며, 제공되는 기본값에서는 `light`
+  어떤 항목도 완전히 삭제되지 않으며, 기본 제공 설정에서는 `light`
   구간에 도달할 수 없습니다(`light`가 `verbatim`과 같음).
 
 #### 코드 예시
@@ -382,15 +382,15 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... 50개 턴 더 ...
+  // ... 50개 이상의 턴 ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // 최근 3개 턴: 원문 그대로
+  verbatim: 3, // 마지막 3개 턴: 원문 그대로
   light: 8, // 거리 <= 8: 가벼운 압축
-  moderate: 20, // 거리 <= 20: 원시인식 압축
-  fullSummary: 5, // 타입상 필수이지만 구간 결정 코드에서는 읽지 않음
-  // 거리 > 20: 요약됨(어시스턴트) / 첫 줄 유지(사용자)
+  moderate: 20, // 거리 <= 20: 원시인 압축
+  fullSummary: 5, // 타입에서 요구하지만 구간 지정 코드에서는 읽지 않음
+  // 거리 > 20: 요약됨(어시스턴트) / 첫 번째 줄 유지(사용자)
 });
 
 // saved = 절약된 토큰 수
@@ -398,43 +398,43 @@ const { messages: aged, saved } = applyAging(messages, {
 
 #### 사용 시점
 
-점진적 에이징은 `aggressive` 모드에서 **항상 활성화**됩니다. 이는
-`compressAggressive()`의 2단계입니다. Ultra 모드에서는 실행되지 않습니다. 특히
-다음 상황에서 효과적입니다.
+점진적 에이징은 `aggressive` 모드에서 **항상 활성화**되며,
+`compressAggressive()`의 2단계입니다. Ultra 모드에서는 실행되지 않습니다.
+특히 다음과 같은 경우에 효과적입니다.
 
-- 장시간 진행되는 코딩 세션
+- 장시간 실행되는 코딩 세션
 - 여러 날에 걸친 대화
 - 도구 호출이 많은 에이전트형 워크플로
 
 ### 원시인 출력 모드
 
 원시인 출력 모드는 모델 자체에 간결한 출력을 요청하는 **시스템 프롬프트 지침**을
-추가합니다. `lite` 수준은 완전한 문장을 유지하면서 간결하게 답하도록 요청하고, `full`
-수준은 "똑똑한 원시인처럼 간결하게 응답"하도록 요청하며, `ultra` 수준은 전보식 출력을 요청합니다.
-지침은 요청만 할 뿐 이를 보장할 수는 없습니다. 요청은
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`)를 통해
-해당 지침을 받습니다. 먼저 `open-sse/handlers/chatCore.ts`가 하위 호환성 심을 사용해
-선택을 결정합니다
+추가합니다. `lite` 수준은 완전한 문장을 유지하면서 간결하게 답변하도록 요청하고,
+`full`은 "똑똑한 원시인처럼 간결하게 응답"하도록 요청하며, `ultra`는 전보식
+출력을 요청합니다. 지침은 요청일 뿐이며 이를 보장할 수는 없습니다. 요청은
+`applyOutputStyles()`(`open-sse/services/compression/outputStyles/apply.ts`)를
+통해 이러한 지침을 받습니다. `open-sse/handlers/chatCore.ts`는 먼저 하위 호환성
+심을 사용하여 선택 사항을 해석합니다
 (`open-sse/services/compression/outputStyles/backCompat.ts`의
-`resolveOutputStyleSelection()`). `outputStyles`가 비어 있는 동안에는 활성화된
-`cavemanOutputMode`를 `cavemanOutputMode.intensity` 수준의 `terse-prose` 출력 스타일로
-매핑합니다(아래 하위 호환성 참조). 비어 있지 않은 `outputStyles`
-선택은 그대로 사용되며, 이 경우 `cavemanOutputMode.enabled`와 `intensity`는
-효과가 없지만 `autoClarity` 토글은 계속 적용됩니다. `outputMode.ts`에는
-지침 텍스트(`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), 콘텐츠 우회 로직 및
-삽입에 사용되는 배치 헬퍼가 들어 있습니다. 자체 `applyCavemanOutputMode()` 삽입기는
-프로덕션 호출자가 없습니다.
+`resolveOutputStyleSelection()`). 이 심은 `outputStyles`가 비어 있을 때
+활성화된 `cavemanOutputMode`를 `cavemanOutputMode.intensity` 수준의
+`terse-prose` 출력 스타일에 매핑합니다(아래의 하위 호환성 참조). 비어 있지 않은
+`outputStyles` 선택 사항은 그대로 사용되며, 이 경우 `cavemanOutputMode.enabled`와
+`intensity`는 아무런 효과가 없지만 `autoClarity` 토글은 계속 적용됩니다.
+`outputMode.ts`에는 지침 텍스트(`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), 콘텐츠
+우회 처리 및 삽입에 사용되는 배치 헬퍼가 들어 있습니다. 자체
+`applyCavemanOutputMode()` 인젝터는 프로덕션 호출자가 없습니다.
 
 #### 작동 방식
 
 이 모드는 입력을 압축하지 않습니다. 시스템 프롬프트에 지침 블록을 추가하며
-(아래의 삽입 작동 방식 참조), 요청에 선택된 입력 압축 모드는 이제 해당 블록을 포함한
-본문에 대해 이후에도 실행됩니다. 모든 수준의 끝에 붙는 공통
-경계 조항에 앞서, 영어 `full` 수준에는 다음과 같이 적혀 있습니다.
+(아래의 주입 작동 방식 참조), 요청에 선택된 입력 압축 모드는 블록이 포함된 본문에
+이후에도 그대로 실행됩니다. 모든 레벨 마지막에 공통으로 추가되는 경계 조항 앞에서
+영어 `full` 레벨은 다음과 같습니다.
 
-> "똑똑한 원시인처럼 간결하게 응답하세요. 관사(a/an/the), 군더더기(just/really/basically/actually/simply), 인사말, 완곡한 표현을 생략하세요. 문장 조각도 괜찮습니다. 짧은 동의어를 사용하세요(extensive 대신 big, implement 대신 fix). 모든 기술적 내용, 코드, 오류, URL, 식별자는 정확히 유지하세요."
+> "똑똑한 원시인처럼 간결하게 응답하라. 관사(a/an/the), 군더더기(just/really/basically/actually/simply), 인사말, 완곡한 표현을 제거하라. 문장 조각도 허용한다. 짧은 동의어를 사용하라(extensive 대신 big, implement 대신 fix). 모든 기술적 내용, 코드, 오류, URL, 식별자는 정확히 유지하라."
 
-이는 특히 다음 상황에서 효과적입니다.
+특히 다음에 효과적입니다.
 
 - 코드 생성(더 간결한 출력 = 더 적은 토큰)
 - 빠른 질의응답(장황한 설명이 필요 없음)
@@ -442,9 +442,9 @@ const { messages: aged, saved } = applyAging(messages, {
 
 #### 사용 시점
 
-원시인 출력 모드는 **선택 사항**입니다. 압축이 켜진 상태에서(`enabled: true`, 압축 설정
-페이지의 마스터 토글) `cavemanOutputMode.enabled`로 활성화하며, `intensity`로
-`lite`, `full` 또는 `ultra`를 선택합니다.
+원시인 출력 모드는 **선택 사항**입니다. 압축을 켠 상태(`enabled: true`, Compression Settings 페이지의
+마스터 토글 활성화)에서 `cavemanOutputMode.enabled`로 켤 수 있으며, `intensity`는
+`lite`, `full`, `ultra` 중 하나를 선택합니다.
 
 ```json
 {
@@ -456,96 +456,98 @@ const { messages: aged, saved } = applyAging(messages, {
 }
 ```
 
-압축 조합의 **출력 모드** 토글(`outputMode`, 수준은 `outputModeIntensity`)은
-해당 조합이 적용되는 요청에 대해 동일한 스위치를 설정하며,
+압축 조합의 **Output Mode** 토글(`outputMode`, 레벨은 `outputModeIntensity`)은
+해당 조합이 적용되는 요청에 동일한 스위치를 설정하며,
 `omniroute_set_compression_engine` MCP 도구는 불리언 `outputMode`
-인수를 통해 이를 기록합니다. 비어 있지 않은 `outputStyles` 선택은 이 스위치보다 우선합니다.
-대시보드에서 **간결한 산문** 출력 스타일을 활성화하면 동일한 블록이 삽입됩니다(아래의 출력
-스타일 참조).
+인수를 통해 이를 기록합니다. 비어 있지 않은 `outputStyles` 선택은 이 스위치보다 우선합니다. 대시보드에서
+**Terse prose** 출력 스타일을 활성화하면 동일한 블록이 주입됩니다(아래 Output
+Styles 참조).
 
 ### 출력 스타일(카탈로그)
 
 위의 원시인 출력 모드는 **레거시 단일 스타일 경로**입니다. Phase 4에서는 이를
 조합 가능한 출력 스타일 카탈로그인
-`open-sse/services/compression/outputStyles/catalog.ts`의
-`OUTPUT_STYLE_CATALOG`로 일반화했습니다. 각 스타일은 모델 자체에 더 저렴한 출력을
-요청하는 시스템 프롬프트 지침입니다. 여러 스타일을 함께 활성화할 수 있으며
-카탈로그 순서대로 삽입됩니다.
+`open-sse/services/compression/outputStyles/catalog.ts`의 `OUTPUT_STYLE_CATALOG`로
+일반화했습니다. 각 스타일은 모델 자체에 더 저렴한 출력을 요청하는 시스템 프롬프트
+지침입니다. 스타일은 함께 활성화할 수 있으며 카탈로그 순서대로 주입됩니다.
 
-| 스타일                         | `id`          | 기능                                                                                                                                                                                                                                                   | 지원 언어                                     |
-| ------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
-| 간결한 문체                    | `terse-prose` | 군더더기/관사/완곡한 표현을 제거하고 기술적 내용을 정확하게 유지합니다. 기존 원시인 출력 모드와 동일한 텍스트입니다(참조만 하며 다시 입력하지 않음).                                                                                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| 적은 코드                      | `less-code`   | YAGNI 단계: 작동하는 가장 작은 변경만 적용하고, 요청하지 않은 추상화는 만들지 않습니다.                                                                                                                                                                | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| 포니테일(게으른 시니어 개발자) | `ponytail`    | "최고의 코드는 작성하지 않은 코드다": 재작성보다 재사용, 증상보다 근본 원인, 작동하는 가장 짧은 diff를 우선합니다.                                                                                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| ADHD가 있습니다(행동 우선)     | `i-have-adhd` | 행동을 먼저 제시하고(설명보다 명령어/경로/스니펫 우선), 개수가 제한된 번호 매기기 단계와 단 하나의 구체적인 다음 단계를 제공하며, 서문/요약/맺음말은 쓰지 않습니다. [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)(MIT)에서 수정했습니다. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| 간결한 CJK(文言)               | `terse-cjk`   | `full`/`ultra` 답변은 한문(文言)으로 작성합니다. `lite`는 기능어, 인사말 또는 수식어 없이 간략한 답변만 요청합니다.                                                                                                                                    | zh(로케일 제한, 아래 참조)                    |
+| 스타일                          | `id`            | 수행 작업                                                                                                                                                                                                                                                                    | 지침 언어                                     |
+| ------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| 간결한 산문                     | `terse-prose`   | 군더더기/관사/완곡한 표현을 제거하고 기술적 내용은 정확히 유지합니다. 레거시 원시인 출력 모드와 동일한 텍스트입니다(다시 작성하지 않고 참조).                                                                                                                                | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| 더 적은 코드                    | `less-code`     | YAGNI 단계: 작동하는 최소 변경만 수행하고, 요청하지 않은 추상화는 만들지 않습니다.                                                                                                                                                                                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| 포니테일(게으른 시니어 개발자)  | `ponytail`      | "최고의 코드는 작성하지 않은 코드다": 재작성보다 재사용, 증상보다 근본 원인, 작동하는 가장 짧은 diff를 우선합니다.                                                                                                                                                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| ADHD가 있습니다(행동 우선)      | `i-have-adhd`   | 행동 우선(설명보다 명령어/경로/스니펫 먼저), 개수가 제한된 번호 매기기 단계, 구체적인 다음 단계 단 하나, 서문/요약/맺음말 없음. [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd)(MIT)에서 각색했습니다.                                                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| 안티슬롭 UI 필터                | `antislop-ui`   | 모든 시각적 기법은 목적 테스트(계층 구조, 정체성, 가독성)를 통과해야 합니다. 기본 그라디언트/글래스/글로 효과를 사용하지 않고, 팔레트를 제한하며, 템플릿 레이아웃을 사용하지 않습니다. 두 안티슬롭 스타일 모두 작동하지 않는 컨트롤 금지/조작된 주장 금지 경계를 추가합니다. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| 안티슬롭 문구 및 인간 중심 필터 | `antislop-copy` | 구체적인 문구(전각 대시, 일반적인 CTA, 유행어, 챗봇식 맺음말, 지어낸 사실 금지)와 사용자 관련 규칙: WCAG AA 대비, 명확한 포커스, 키보드 접근성, 빈 상태/로딩/오류 상태, 모바일 리플로우.                                                                                     | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| 간결한 CJK(文言)                | `terse-cjk`     | `full`/`ultra` 답변은 한문(文言)으로 작성하며, `lite`는 기능어, 인사말 또는 수식 없이 간단히 답변하도록만 요청합니다.                                                                                                                                                        | zh(로케일 제한, 아래 참조)                    |
 
-모든 스타일은 `lite`, `full`, `ultra`의 세 가지 강도 수준을 제공하며, 각 수준은
+모든 스타일은 `lite`, `full`, `ultra`의 세 가지 강도 레벨을 제공하며, 모든 레벨은
 공통 경계 조항(`outputMode.ts`의 `SHARED_BOUNDARIES`)으로 끝납니다. 이 조항은
-코드 블록, 파일 경로, 명령어, 오류 및 URL을 정확히 유지합니다. `terse-prose` 및
-`terse-cjk` 수준의 텍스트는 이 목록에 식별자도 추가합니다.
+코드 블록, 파일 경로, 명령어, 오류 및 URL을 정확히 유지합니다. `terse-prose`와
+`terse-cjk`의 레벨 텍스트는 해당 목록에 식별자도 추가합니다.
 
-`terse-cjk`는 두 곳에서 `zh` 로케일로 제한됩니다. 압축 설정 페이지에서는
-대시보드 UI 언어가 중국어(`zh-CN` 또는 `zh-TW`)일 때만 해당 행을 표시하며,
-`applyOutputStyles()`는 요청에서 확정된 언어(아래의 언어 선택 참조)가 `zh`일
-때만 이를 삽입합니다. 행을 숨겨도 저장된 `terse-cjk` 선택은 지워지지 않습니다.
-설정 API는 모든 스타일 id를 허용하며, 페이지에서 다른 스타일을 저장해도 해당
-선택은 유지됩니다. 요청 시점에는 `applyOutputStyles()`의 언어 검사만이 유일한
-로케일 제한입니다.
+`terse-cjk`는 두 곳에서 `zh` 로케일로 제한됩니다. Compression Settings 페이지는
+대시보드 UI 언어가 중국어(`zh-CN` 또는 `zh-TW`)일 때만 해당 행을 표시하고,
+`applyOutputStyles()`는 요청에서 결정된 언어(아래 언어
+선택 참조)가 `zh`일 때만 이를 주입합니다. 행을 숨겨도 저장된 `terse-cjk` 선택은
+지워지지 않습니다. 설정 API는 모든 스타일 id를 허용하며, 페이지에서 다른 스타일을
+저장해도 이 선택은 유지됩니다. 요청 시점에는 `applyOutputStyles()`의 언어 검사가
+유일한 로케일 제한입니다.
 
-#### 삽입 방식
+#### 주입 작동 방식
 
-`applyOutputStyles()`(`open-sse/services/compression/outputStyles/apply.ts`)는
-카탈로그를 기준으로 선택을 확정합니다(알 수 없는 id와 로케일이 일치하지 않는
-스타일은 오류 없이 제외됩니다. 확정 결과에 스타일이 없으면 본문은 변경되지
-않으며 `no_styles`로 건너뜁니다). 그런 다음 선택된 지침을 카탈로그 순서대로
-연결하고, 경계 조항을 **한 번만** 추가합니다(`less-code` 또는 `ponytail`이
-선택된 경우 안전 조항인 `SAFETY_BOUNDARIES` 또는 그 번역도 추가). 또한 단일
-멱등성 마커(`[OmniRoute Output Styles]`)로 블록을 시작하므로 다시 적용해도
-아무 작업도 수행되지 않습니다. 확정된 언어(아래의 언어 선택 참조)에 번역이
-있으면 영어 대신 현지화된 지침을 삽입합니다.
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`)는 선택 항목을
+카탈로그와 대조해 해석합니다(알 수 없는 id와 로케일이 일치하지 않는 스타일은
+제외되며 오류가 발생하지 않습니다. 해석 결과 적용할 스타일이 없는 선택은 본문을
+변경하지 않고 `no_styles`로 건너뜁니다). 선택된 지침을 카탈로그 순서대로
+연결하고, 경계 조항을 **한 번만** 추가하며(`less-code` 또는 `ponytail`이 선택된
+경우 안전 조항인 `SAFETY_BOUNDARIES` 또는 해당 번역도 추가), 단일 멱등성 마커
+(`[OmniRoute Output Styles]`)로 블록을 시작하므로 다시 적용해도 아무 작업도 하지
+않습니다. 해석된 언어(아래의 언어 선택 참조)에 번역이 있으면 영어 대신 현지화된
+지침이 삽입됩니다.
 
 비어 있지 않은 `messages` 배열이 있는 본문에서는 콘텐츠 우회 검사보다 멱등성
-검사를 먼저 실행합니다. 최상위 `system` 필드(문자열 또는 콘텐츠 블록 배열)나
-문자열 콘텐츠가 있는 시스템 메시지에 `[OmniRoute Output Styles]` 마커가 이미
-있으면 본문을 `already_applied` 상태로 변경하지 않으며 키워드 검사도 실행하지
-않습니다. 그렇지 않으면 콘텐츠 우회 로직
-(`open-sse/services/compression/outputMode.ts`의
-`shouldBypassCavemanOutputMode()`)이 역할과 관계없이 마지막 세 메시지의 텍스트를
+검사가 먼저 실행됩니다. `[OmniRoute Output Styles]` 마커가 이미 최상위 `system`
+필드(문자열 또는 콘텐츠 블록 배열)에 있거나 문자열 콘텐츠가 있는 시스템 메시지에
+있으면 본문을 `already_applied` 상태로 변경하지 않고 키워드 검사도 실행하지
+않습니다. 그렇지 않으면 콘텐츠 우회(`open-sse/services/compression/outputMode.ts`의
+`shouldBypassCavemanOutputMode()`)가 역할과 관계없이 마지막 메시지 세 개의 텍스트를
 검사합니다. 해당 텍스트가 보안, 되돌릴 수 없는 작업 또는 명확화 키워드와
-일치하거나 다음과 같은 순서 종속 시퀀스와 일치하면 해당 턴 전체에 스타일을
-적용하지 않습니다. 즉 `first`, `then`, `after that`, `before`, `rollback` 또는
-`backup` 뒤 240자 이내에 `delete`, `drop`, `migrate`, `deploy` 또는 `release`가
-나오는 경우입니다. 우회는 **Auto-Clarity Bypass** 토글
-(`cavemanOutputMode.autoClarity`, 기본적으로 켜짐)이 켜져 있는 동안 실행됩니다.
-토글을 끄면 키워드 검사를 건너뜁니다.
+일치하거나, 순서에 민감한 시퀀스에서 `first`, `then`, `after that`, `before`,
+`rollback` 또는 `backup` 뒤 240자 이내에 `delete`, `drop`, `migrate`, `deploy`
+또는 `release`가 나오면 해당 턴 전체에서 스타일 적용을 건너뜁니다. 우회는
+**Auto-Clarity Bypass** 토글(`cavemanOutputMode.autoClarity`, 기본적으로 켜짐)이
+켜져 있는 동안 실행되며, 토글을 끄면 키워드 검사를 건너뜁니다.
 
-우회 검사에서 해당 턴이 통과되면, 새 `messages[0]`을 절대 생성하지 않는
-`placeSystemInstruction()`(동일한 파일)이 다음 중 가장 먼저 발견되는 위치에
-블록을 배치합니다.
+우회가 해당 턴을 통과시키면, 새 `messages[0]`을 절대 생성하지 않는
+`placeSystemInstruction()`(같은 파일)이 다음 중 처음 발견되는 위치에 블록을
+배치합니다.
 
-1. 문자열 콘텐츠가 있는 선두 시스템 메시지: 해당 텍스트 뒤에 블록을 추가합니다.
-2. 최상위 `system` 필드: 문자열이면 해당 텍스트 뒤에 블록을 추가하고, 콘텐츠
-   블록 배열이면 새 텍스트 블록으로 추가합니다.
-3. 이후 처음 나오는 문자열 콘텐츠가 있는 시스템 메시지: 해당 텍스트 뒤에 블록을
-   추가합니다.
-4. 위 항목이 모두 없는 경우: `messages` 끝에 새 시스템 메시지로 블록을
-   추가합니다.
+1. 맨 앞의 시스템 메시지에 문자열 콘텐츠가 있는 경우: 해당 텍스트 뒤에 블록을 추가합니다.
+2. 최상위 `system` 필드가 있는 경우: 문자열이면 텍스트 뒤에 블록을 추가하고,
+   콘텐츠 블록 배열이면 새 텍스트 블록으로 추가합니다.
+3. 이후에 나오는 첫 번째 시스템 메시지에 문자열 콘텐츠가 있는 경우: 해당
+   텍스트 뒤에 블록을 추가합니다.
+4. 위 항목 중 어느 것도 해당하지 않는 경우: `messages` 끝에 새 시스템 메시지를
+   만들어 블록을 넣습니다.
 
-`messages` 배열이 없는 본문(또는 빈 배열이 있는 본문)에서는 콘텐츠 우회 검사를
-실행하지 않으며 최상위 `system` 필드를 참조하지 않습니다. 문자열
-`instructions` 필드의 텍스트 뒤에 블록을 추가합니다. 단, 해당 필드에 이미
-`[OmniRoute Output Styles]` 마커가 있으면 본문을 `already_applied` 상태로
-변경하지 않습니다. 본문에 문자열 `instructions` 필드는 없지만 `input`(문자열
-또는 배열)이 있으면 블록이 `instructions`가 되며, 해당 필드에 있던 문자열이
-아닌 모든 값을 대체합니다. 문자열 `instructions` 필드도 없고 문자열 또는 배열
-`input`도 없는 본문은 변경하지 않으며 `no_messages`로 건너뜁니다.
+`messages` 배열이 없거나 빈 본문에서는 콘텐츠 우회가 실행되지 않으며 최상위
+`system` 필드도 참조하지 않습니다. 문자열 `instructions` 필드의 텍스트 뒤에
+블록을 추가합니다. 단, 해당 필드에 이미 `[OmniRoute Output Styles]` 마커가
+있으면 본문을 `already_applied` 상태로 변경하지 않습니다. 본문에 문자열
+`instructions` 필드는 없지만 `input`(문자열 또는 배열)이 있으면 블록이
+`instructions`가 되며, 해당 필드에 있던 문자열이 아닌 값을 대체합니다. 문자열
+`instructions` 필드도 없고 문자열 또는 배열 `input`도 없는 본문은 변경하지 않고
+`no_messages`로 건너뜁니다.
 
 #### 활성화 방법
 
-대시보드에서: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), Output styles 섹션: 스타일마다 켜기/끄기 토글과 레벨 선택기가 한 행에 표시됩니다. 압축 자체가 켜져 있는 동안(페이지의 마스터 토글인 `enabled`) 스타일이 삽입됩니다. **Auto-Clarity Bypass** 토글은 **Caveman**
-페이지(`/dashboard/context/caveman`)의 **Output Mode** 카드에 있습니다. 프로그래밍 방식으로 압축 설정은 선택 사항을 다음과 같이 유지합니다.
+대시보드에서 **Compression Context → Compression Settings**
+(`/dashboard/context/settings`)의 Output styles 섹션을 사용합니다. 각 스타일마다
+켜기/끄기 토글과 수준 선택기가 한 행씩 제공됩니다. 압축 자체(페이지의 마스터 토글
+`enabled`)가 켜져 있는 동안 스타일이 삽입됩니다. **Auto-Clarity Bypass** 토글은
+**Caveman** 페이지(`/dashboard/context/caveman`)의 **Output Mode** 카드에
+있습니다. 프로그래밍 방식에서는 압축 구성이 선택 항목을 다음과 같이 저장합니다.
 
 ```json
 {
@@ -556,97 +558,133 @@ const { messages: aged, saved } = applyAging(messages, {
 }
 ```
 
-하위 호환성: `outputStyles`가 비어 있는 동안 레거시 `cavemanOutputMode.enabled`
-설정은 `cavemanOutputMode.intensity`의 `terse-prose`에 매핑됩니다. 그러면 블록은 `[OmniRoute Output Styles]` 마커로 시작하며, 이는 레거시 `applyCavemanOutputMode()`
-삽입기가 `[OmniRoute Caveman Output Mode]`를 작성했던 위치입니다. 마커 아래의 텍스트는 en, pt-BR, es, de, fr, it, ru, id 및 vi에서 레거시 삽입 내용과 일치하며, ja와 zh에서는 경계 절 앞에 공백이 하나 더 있습니다. `terse-prose`는 pt-BR, es, de, fr, it, ru, zh, ja, id 및 vi로 번역되므로, 확인된 언어가 `hu`인 요청은 레거시 삽입기가 헝가리어 텍스트를 사용했던 것과 달리 영어 텍스트를 받습니다.
+하위 호환성: `outputStyles`가 비어 있는 동안 기존
+`cavemanOutputMode.enabled` 설정은 `cavemanOutputMode.intensity` 수준의
+`terse-prose`에 매핑됩니다. 그러면 블록은 `[OmniRoute Output Styles]` 마커로
+시작합니다. 기존 `applyCavemanOutputMode()` 삽입기는
+`[OmniRoute Caveman Output Mode]`를 사용했습니다. 마커 아래 텍스트는 en, pt-BR,
+es, de, fr, it, ru, id 및 vi에서 기존 삽입 내용과 일치하며, ja와 zh에서는 경계
+조항 앞에 공백이 하나 더 들어갑니다. `terse-prose`는 pt-BR, es, de, fr, it, ru,
+zh, ja, id 및 vi로 번역되므로 해석된 언어가 `hu`인 요청에는 기존 삽입기가
+헝가리어 텍스트를 사용했던 것과 달리 영어 텍스트가 사용됩니다.
 
-출력 스타일 언어 선택(`outputStyles/apply.ts`의 `resolveOutputStyleLanguage()`): `languageConfig.enabled`가 켜져 있고 `autoDetect`가 활성화된 경우, 요청의 `messages` 배열에서 텍스트가 있는 가장 최근 사용자 메시지(문자열 콘텐츠 또는 콘텐츠 파트의 `text`)를 샘플링하고 Caveman 엔진의 감지기(`detectCompressionLanguage()`)를 실행합니다. 감지기는 가나 없이 한자가 포함된 텍스트에는 `zh`를 반환합니다. 그 외에는 `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` 및 `id` 중 힌트 일치 수가 가장 많은 언어를 반환하고, 일치 항목이 없으면 `en`을 반환합니다. 즉, 분류할 수 없는 텍스트에는 `defaultLanguage`가 아닌 영어를 사용하며, 스타일에 `vi` 텍스트가 포함되어 있어도 `vi`는 감지되지 않습니다. Responses API 본문은 대화 턴을 `input`에 보관하지만 이는 샘플링되지 않으므로 `defaultLanguage`를 사용하고, 그다음 영어로 대체됩니다. `messages`에 있는 사용자 메시지 중 텍스트를 포함한 메시지가 없거나 `autoDetect`가 꺼져 있으면 `defaultLanguage`를 적용한 다음 영어로 대체합니다. `languageConfig.enabled`가 꺼져 있으면 언어는 영어입니다. 단, 요청에 압축 콤보가 적용되는 경우(요청의 라우팅 콤보에 할당된 콤보 또는 기본 제공 스택형 파이프라인에서 chatCore가 대체 사용하도록 설정된 기본 압축 콤보)는 예외입니다. 콤보를 적용하면 해당 요청에 대해 `languageConfig.enabled`가 켜지고 콤보의 언어 팩에서 `defaultLanguage`가 설정됩니다(저장된 값이 콤보의 팩 중 하나이면 그 값을 사용하고, 그렇지 않으면 콤보의 첫 번째 팩을 사용하며 기본값은 `en`). 이때 저장된 `autoDetect` 설정(기본적으로 켜짐)은 계속 적용됩니다. Caveman 입력 엔진은 규칙 팩 언어를 다르게 선택합니다. 즉, 텍스트 파트별로 선택하며 자동 감지가 꺼져 있으면 `enabledPacks`에 따라 제한됩니다.
+출력 스타일 언어 선택(`outputStyles/apply.ts`의
+`resolveOutputStyleLanguage()`): `languageConfig.enabled`가 켜진 상태에서
+`autoDetect`는 요청의 `messages` 배열에 있는 텍스트가 포함된 가장 최근 사용자
+메시지(문자열 콘텐츠 또는 콘텐츠 파트의 `text`)를 샘플링하고 Caveman 엔진의
+감지기(`detectCompressionLanguage()`)를 실행합니다. 감지기는 가나 없이 한자가
+포함된 텍스트에 대해 `zh`를 반환합니다. 그 외에는 `it`, `pt-BR`, `es`, `de`,
+`fr`, `ru`, `ja`, `hu`, `id` 중 힌트 일치 수가 가장 많은 언어를 반환하고,
+일치하는 항목이 없으면 `en`을 반환합니다. 분류할 수 없는 텍스트에는
+`defaultLanguage`가 아니라 항상 영어를 사용하며, 스타일에 `vi` 텍스트가
+포함되어 있어도 `vi`는 감지되지 않습니다. Responses API 본문은 턴을 `input`에
+보관하는데, 이는 샘플링되지 않으므로 `defaultLanguage`를 사용한 뒤 영어로
+대체됩니다. `messages`에 텍스트가 있는 사용자 메시지가 없거나 `autoDetect`가
+꺼져 있으면 `defaultLanguage`가 적용된 뒤 영어로 대체됩니다.
+`languageConfig.enabled`가 꺼져 있으면 언어는 영어입니다. 단, 압축 콤보가 요청에
+적용되는 경우(요청의 라우팅 콤보에 할당된 콤보 또는 내장 스택 파이프라인에서
+chatCore가 대체 사용하도록 설정된 기본 압축 콤보)는 예외입니다. 콤보를 적용하면
+해당 요청에서 `languageConfig.enabled`가 켜지고 콤보의 언어 팩을 기준으로
+`defaultLanguage`가 설정됩니다. 저장된 값이 콤보의 팩 중 하나라면 그 값을
+사용하고, 그렇지 않으면 기본값이 `en`인 콤보의 첫 번째 팩을 사용합니다. 이때
+저장된 `autoDetect` 설정(기본적으로 켜짐)은 계속 적용됩니다. Caveman 입력 엔진은
+다른 방식으로 규칙 팩 언어를 선택합니다. 즉, 텍스트 파트별로 선택하며 자동 감지가
+꺼져 있을 때는 `enabledPacks`를 기준으로 제한합니다.
 
 스타일 × 언어 매트릭스는
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`에 고정되어 있습니다. 모든 카탈로그 스타일에는 테스트의 `BASELINE_LANGUAGES`에 항목이 있어야 합니다. 로케일 제한이 없는 스타일은 pt-BR 번역을 제공해야 하며(로케일 제한이 있는 `terse-cjk`는 이 규칙에서 제외), 번역이 전혀 없는 스타일만 포함할 수 있는 `KNOWN_ENGLISH_ONLY`에 등재된 경우는 예외입니다. 등재된 스타일에 번역이 하나라도 있으면 테스트가 실패합니다. 또한 스타일이 해당 `BASELINE_LANGUAGES` 항목에 나열된 언어를 잃으면 테스트가 실패합니다. 스타일을 추가하려면 [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style)를 참조하세요.
+`tests/unit/compression/output-styles-i18n-matrix.test.ts`에 의해 고정됩니다. 모든 카탈로그 스타일에는 테스트의 `BASELINE_LANGUAGES`에
+항목이 있어야 합니다. 로케일 제한이 없는 스타일은 pt-BR 번역을 제공해야 하며
+(로케일 제한이 있는 `terse-cjk`는 이 규칙에서 제외됨), 그렇지 않으면
+`KNOWN_ENGLISH_ONLY`에 등록되어야 합니다. 여기에는 번역이 전혀 없는 스타일만 포함할 수 있습니다.
+등록된 스타일에 번역이 하나라도 있으면 테스트에 실패합니다. 또한 스타일이
+해당 `BASELINE_LANGUAGES` 항목에 나열된 언어를 잃으면 테스트에 실패합니다. 스타일을 추가하려면
+[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style)를 참조하세요.
 
 ### 도구 결과 압축
 
-`open-sse/services/compression/toolResultCompressor.ts`의 `compressToolResult()`는 **5가지 전략**으로 도구 결과 텍스트를 압축합니다. 다음 순서로 전략을 시도하며, 검사가 콘텐츠와 일치하는 첫 번째 활성화 전략이 결과를 결정합니다.
+`open-sse/services/compression/toolResultCompressor.ts`의 `compressToolResult()`는
+**5가지 전략**으로 도구 결과 텍스트를 압축합니다. 다음 순서대로 전략을 시도하며, 활성화된 전략 중
+검사가 콘텐츠와 일치하는 첫 번째 전략이 결과를 결정합니다.
 
-1. **`fileContent`**: 3줄 이상의 콘텐츠로, 선행 들여쓰기를 무시했을 때 하나 이상의 줄이
-   `import `, `export `, `function `, `class `, `const `, `let `, `var ` 또는
-   `return `으로 시작하거나(키워드 뒤에 공백 포함), `if`, `for` 또는 `while` 뒤에
-   `(` 또는 ` (`가 오는 경우, 처음 20줄과 마지막 5줄을 유지하고 생략된 중간 부분을
-   표시합니다.
-2. **`grepSearch`**: `<path>:<digits>:` 형식의 줄이 하나 이상 포함된 콘텐츠로,
-   첫 번째 콜론 앞의 텍스트에는 공백이 없어야 합니다. 이러한 줄만 최대 30개까지
-   유지한 다음, 추가로 일치한 항목의 수와 일치한 파일 목록을 표시하며 다른 모든 줄은
-   삭제합니다. 이러한 줄이 하나만 있어도 이 전략이 실행되므로, `12:30:45` 같은
-   타임스탬프로 시작하는 로그 줄도 해당합니다.
-3. **`shellOutput`**: ANSI CSI 시퀀스(`ESC[` 뒤에 숫자나 세미콜론이 오고 그다음
-   문자가 오는 형태로, 색상 코드 등) 또는 텍스트 어디에서든 `$` 뒤에 공백이 오는
-   출력은 해당 시퀀스를 제거하고(`ESC[?25l`이나 OSC 창 제목 시퀀스 같은 다른
-   이스케이프는 유지), 연속으로 반복되는 줄을 하나로 합친 뒤 마지막 50줄을 유지합니다.
-   이 검사는 `json`과 `errorMessage`보다 먼저 실행되므로, 이러한 `$`가 포함된 JSON
-   또는 오류 출력은 `shellOutput`이 켜져 있는 동안 해당 전략에 도달하지 않습니다.
-4. **`json`**: 선택적 공백 뒤에 `{` 또는 `[`로 시작하고 파싱 가능한 2,000자 초과의
-   JSON 페이로드를 요약합니다. 항목이 7개보다 많은 배열은 처음 5개와 마지막 2개 항목,
-   그리고 전체 개수를 유지합니다. 객체는 처음 20개의 키를 유지하고, 중첩된 각 객체나
-   배열 값은 `{…N keys}` 자리표시자로 대체합니다(배열의 경우 N은 배열 길이).
-   또한 처음 20개 이후에 삭제된 키의 수를 나타내는 `_remaining_<N>_keys` 표시를
-   추가합니다. 스칼라 값은 전체가 복사되므로, 중첩 값이 없고 키가 20개 이하인 객체는
-   들여쓰기만 다시 적용됩니다. 따라서 축소된 형식의 객체는 문자 수가 늘어나 원본
-   그대로 유지됩니다.
-5. **`errorMessage`**: 대소문자와 관계없이 어디에든 `error:`, `error `(`no error found`처럼
-   단어 뒤에 공백이 오는 경우), `[error]`, `exception:`, `exception `, `[exception]`
-   또는 `traceback`이 포함된 출력은 첫 번째 줄, 그다음 10줄, 마지막 3줄을 유지하고,
-   그 사이의 줄을 `… [N frames elided] …` 표시로 대체합니다. 이 표시는 첫 번째 줄
-   다음에 13줄보다 많은 줄이 있을 때만 나타나므로, 14줄 이하의 오류 출력은 축약되지
-   않습니다(12줄이나 13줄에서는 마지막 3줄이 이미 유지된 줄과 중복됩니다).
+1. **`fileContent`**: 3줄 이상의 콘텐츠에서 선행 들여쓰기를 무시했을 때 하나 이상의 줄이
+   `import `, `export `, `function `, `class `,
+   `const `, `let `, `var ` 또는 `return `으로 시작하거나(키워드 뒤에 공백 포함), `if`,
+   `for` 또는 `while` 뒤에 `(` 또는 ` (`가 오는 경우 첫 20줄과 마지막 5줄을 유지하고,
+   생략된 중간 부분을 표시합니다.
+2. **`grepSearch`**: `<path>:<digits>:` 형식의 줄이 하나 이상 있고,
+   첫 번째 콜론 앞의 텍스트에 공백이 없는 콘텐츠에서는 해당 줄만 최대 30개까지 유지한 뒤,
+   추가 일치 항목의 수와 일치한 파일 목록을 덧붙입니다.
+   그 밖의 모든 줄은 삭제됩니다. 이러한 줄 하나만으로도 전략이 실행되므로
+   `12:30:45` 같은 타임스탬프로 시작하는 로그 줄도 해당됩니다.
+3. **`shellOutput`**: ANSI CSI 시퀀스(`ESC[` 뒤에 숫자 또는
+   세미콜론이 오고 그 뒤에 문자가 오는 형태로, 색상 코드가 그 예임)나 텍스트 어디에서든
+   공백이 뒤따르는 `$`가 포함된 출력에서는 해당 시퀀스를 제거하고(`ESC[?25l`이나
+   OSC 창 제목 시퀀스 같은 다른 이스케이프는 유지됨), 연속으로 반복되는 줄을 하나로 합친 뒤
+   마지막 50줄을 유지합니다. 이 검사는 `json` 및 `errorMessage`보다 먼저 실행되므로,
+   그러한 `$`가 포함된 JSON 또는 오류 출력은 `shellOutput`이 활성화된 동안
+   해당 전략에 도달하지 않습니다.
+4. **`json`**: 선택적 공백 뒤에 `{` 또는 `[`로 시작하고 파싱에 성공하는 2,000자 초과의
+   JSON 페이로드를 요약합니다. 항목이 7개보다 많은 배열은 첫 5개와 마지막 2개 항목 및
+   전체 개수를 유지합니다. 객체는 첫 20개 키를 유지하되, 중첩된 각 객체 또는 배열 값을
+   `{…N keys}` 자리 표시자로 대체하고(배열의 경우 N은 배열 길이),
+   첫 20개 이후 삭제된 키의 수를 나타내는 `_remaining_<N>_keys` 표시를 추가합니다.
+   스칼라 값은 그대로 복사되므로, 중첩된 값이 없는 20개 이하의 키를 가진 객체는
+   들여쓰기만 다시 적용됩니다. 따라서 축소된 객체는 문자 수가 늘어나 원본 그대로 유지됩니다.
+5. **`errorMessage`**: 대소문자와 관계없이 출력 어디에든 `error:`,
+   `error `(`no error found`처럼 단어 뒤에 공백이 있는 경우), `[error]`,
+   `exception:`, `exception `, `[exception]` 또는 `traceback`이 포함되어 있으면
+   첫 번째 줄, 그다음 10줄, 마지막 3줄을 유지하고, 그 사이의 줄을
+   `… [N frames elided] …` 표시로 대체합니다. 이 표시는 첫 번째 줄 뒤에
+   13줄보다 많은 줄이 있을 때만 나타나므로 14줄 이하의 오류 출력은 줄어들지 않습니다
+   (12줄 또는 13줄에서는 마지막 3줄이 이미 유지된 줄과 중복됨).
 
-전략이 하나라도 일치하면, 아무것도 절약하지 못하더라도 이후 전략은 시도되지 않습니다.
-일치한 전략이 추정 토큰(길이 ÷ 4를 올림)을 전혀 절약하지 못하는 경우—예를 들어 코드와
-유사한 파일이 25줄 이하이거나, 2,000자를 초과하지만 항목이 7개 이하인 JSON 배열인
-경우—공격적 엔진은 원본 도구 결과를 유지합니다. 두 호출자(`compressAggressive()`와
+전략이 일치하면 절감량이 전혀 없더라도 후속 전략은 시도하지 않습니다.
+일치한 전략이 예상 토큰 수(길이 ÷ 4, 올림)를 전혀 절감하지 못하는 경우
+(예: 25줄 이하의 코드형 파일 또는 항목이 7개 이하인 2,000자 초과의 JSON 배열),
+공격적 엔진은 원래 도구 결과를 유지합니다. 두 호출자(`compressAggressive()` 및
 `compressAnthropicToolResultBlock()`) 모두 `saved`가 0 이하이면 원본을 유지하지만,
 `compressToolResult()` 자체는 여전히 해당 전략의 출력을 반환합니다. 도구 결과 단계가
-마지막은 아닙니다. 엔진의 대체 요약기는 8,192자(`maxTokensPerMessage` 2,048에 4를 곱한
-값)보다 긴 `tool` 또는 `function` 메시지를 여전히 축약할 수 있습니다.
+최종 결정은 아닙니다. 엔진의 폴백 요약기는 8,192자보다 긴 `tool` 또는 `function`
+메시지를 여전히 줄일 수 있습니다(`maxTokensPerMessage` 2,048에 4를 곱한 값).
 
 #### 사용 시점
 
 도구 결과 압축은 공격적 엔진(`open-sse/services/compression/aggressive.ts`의
 `compressAggressive()`)의 1단계이므로, Aggressive 모드와 스택형 파이프라인의
-`aggressive` 단계에서 실행됩니다. OpenAI 형식의 `tool` 및 `function` 메시지와 Anthropic
-`tool_result` 블록 내부의 텍스트를 압축합니다. 각 전략은 `aggressive.toolStrategies`
-아래에 자체 스위치가 있으며, 모두 기본적으로 켜져 있습니다. 대시보드에서 압축이 켜져
-있고 기본 모드가 Aggressive인 경우, 스위치는 Caveman 페이지의 **Advanced** 보기에
-있습니다.
+`aggressive` 단계에서 실행됩니다. OpenAI 형식의 `tool` 및 `function`
+메시지와 Anthropic `tool_result` 블록 내부의 텍스트를 압축합니다. 각 전략에는
+`aggressive.toolStrategies` 아래에 자체 스위치가 있으며, 모두 기본적으로 활성화되어 있습니다.
+대시보드에서 압축이 활성화되고 기본 모드가 Aggressive일 때 이 스위치는
+Caveman 페이지의 **Advanced** 보기에 있습니다.
 
 ### 스택형 파이프라인
 
-스택형 모드는 **여러 엔진을 순차적으로** 실행합니다. 일반적으로 RTK를 먼저 실행하여
-도구 출력에서 60~90%를 절약한 다음, 남은 텍스트에 Caveman을 실행하여 입력을 약 46%
-절약합니다. 이를 합성하면 **78~95%의 적용 가능 범위**가 됩니다(위의 Upstream Savings
-Math 참조). `1 - (1 - 0.60..0.90) × (1 - 0.46)`의 평균은 약 89%입니다.
+스택형 모드는 **여러 엔진을 순서대로** 실행합니다. 일반적으로 먼저 RTK를 적용하여
+도구 출력에서 60~90%를 절감한 다음, 남은 텍스트에 Caveman을 적용하여 입력을 약 46%
+절감합니다. 이를 합성하면 **78~95%의 적용 가능 범위**가 됩니다(위의 업스트림 절감 계산 참조).
+`1 - (1 - 0.60..0.90) × (1 - 0.46)`의 평균은 약 89%입니다.
 
 #### 작동 방식
 
 ```
 입력(1000개 토큰)
   → RTK(명령 인식 필터) → 200개 토큰
-    → Caveman(불필요한 내용 제거) → 108개 토큰
-  → 출력(108개 토큰, 약 89% 절약)
+    → Caveman(군더더기 제거) → 108개 토큰
+  → 출력(108개 토큰, 약 89% 절감)
 ```
 
 #### 사용 시점
 
 다음과 같은 경우 스택형 모드를 사용하세요.
 
-- 도구 사용이 많은 워크플로(에이전트형 코딩, 연구)
+- 도구 사용이 많은 워크플로(에이전트형 코딩, 조사)
 - 비용에 민감한 일괄 처리
-- 토큰을 최대한 절약해야 하는 경우
+- 최대한 많은 토큰을 절감해야 하는 경우
 
-스택형 파이프라인은 전역 `stackedPipeline` 압축 설정을 통해 구성하거나, 라우팅 콤보에
-할당된 명명된 압축 콤보를 통해 구성합니다(위의 Per-Combo Override 참조). auto-combo
-`modePack`을 통해 구성하지는 않습니다(이 필드는 auto-combo 모델 선택의 가중치만
-조정하며, `stacked`는 유효한 팩 이름이 아닙니다).
+스택형 파이프라인은 전역 `stackedPipeline` 압축 설정을 통해 구성하거나,
+라우팅 콤보에 할당된 이름 있는 압축 콤보를 통해 구성합니다(위의 콤보별 재정의 참조).
+auto-combo `modePack`을 통해 구성하는 것은 아닙니다(해당 필드는 auto-combo 모델 선택의
+가중치만 다시 조정하며, `stacked`는 유효한 팩 이름이 아닙니다).
 
 ---
 

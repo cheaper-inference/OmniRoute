@@ -3,7 +3,7 @@ import {
   FetchTimeoutError,
   getConfiguredTimeout,
 } from "@/shared/utils/fetchTimeout";
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog, saveRequestUsage } from "@/lib/usageDb";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 interface LogLike {
@@ -139,20 +139,55 @@ export async function handleOpenAIVideoGeneration({
   });
 
   if (!fetchResult.success) {
+    // Log failures too: an unlogged failure is invisible in the request log, which
+    // is the only place an operator can see a provider repeatedly erroring.
+    const failureStatus = fetchResult.status ?? 502;
+    const failureError = fetchResult.error;
+    await Promise.allSettled([
+      saveCallLog({
+        method: "POST",
+        path: "/v1/videos/generations",
+        status: failureStatus,
+        provider,
+        model: String(bodyObj.model),
+        duration: Date.now() - startTime,
+        ...(failureError ? { error: failureError } : {}),
+      }),
+      saveRequestUsage({
+        provider,
+        model: String(bodyObj.model),
+        endpoint: "video",
+        status: String(failureStatus),
+        success: false,
+        latencyMs: Date.now() - startTime,
+        ...(failureError ? { errorCode: failureError.slice(0, 200) } : {}),
+      }),
+    ]);
     return { success: false, status: fetchResult.status, error: fetchResult.error };
   }
 
-  // Save call log for billing/tracking
-  await saveCallLog({
-    provider,
-    model: String(bodyObj.model),
-    endpoint: "video",
-    status: fetchResult.status,
-    durationMs: Date.now() - startTime,
-    tokensIn: 0,
-    tokensOut: 0,
-    requestId: null,
-  });
+  // Save call log for billing/tracking. Field names follow what the call-log
+  // writer reads: `path` (not `endpoint`) and `duration` in ms (not `durationMs`);
+  // the previous names were ignored, leaving every row with duration 0 and a
+  // default path, and no usage_history row at all.
+  await Promise.allSettled([
+    saveCallLog({
+      method: "POST",
+      path: "/v1/videos/generations",
+      status: fetchResult.status ?? 200,
+      provider,
+      model: String(bodyObj.model),
+      duration: Date.now() - startTime,
+    }),
+    saveRequestUsage({
+      provider,
+      model: String(bodyObj.model),
+      endpoint: "video",
+      status: String(fetchResult.status ?? 200),
+      success: true,
+      latencyMs: Date.now() - startTime,
+    }),
+  ]);
 
   return {
     success: true,

@@ -109,63 +109,63 @@ branch de release (release continuamente verde) — a via ignora a ESPERA, nunca
 Diffs somente de testes (todos os arquivos em `tests/`, nenhum em `tests/e2e/`) ignoram a matriz
 E2E automaticamente, sem qualquer rótulo.
 
-## Checklist Detalhado
+## Checklist detalhado
 
-### Pré-release
+### Pré-lançamento
 
-- [ ] Todos os PRs destinados a esta release estão mesclados em `release/vX.Y.0`
-- [ ] Todos os itens abertos no Linear/issues para esta versão estão fechados ou movidos para o próximo marco
+- [ ] Todos os PRs destinados a esta versão foram mesclados em `release/vX.Y.0`
+- [ ] Todos os itens abertos no Linear/issues referentes a esta versão foram fechados ou transferidos para o próximo marco
 - [ ] CI verde na branch `release/vX.Y.0`
 - [ ] Nenhum marcador `TODO(release)` no código: `grep -r "TODO(release)" src/ open-sse/`
 - [ ] Imagem base do Docker atualizada (atualmente `node:24.15.0-trixie-slim`)
 
-### Versão e Changelog
+### Versão e changelog
 
 - [ ] Execute `/version-bump-cc <patch|minor|major>` (skill do Claude Code)
-  - Atualiza as versões em `package.json`, `electron/package.json`
-  - Regenera `CHANGELOG.md` a partir dos commits do git desde a última tag
+  - Incrementa as versões em `package.json` e `electron/package.json`
+  - Gera novamente o `CHANGELOG.md` a partir dos commits do git desde a última tag
   - Atualiza os badges do README.md
 - [ ] Revise manualmente o CHANGELOG.md e ajuste as mensagens de commit, se necessário
-- [ ] Garanta que a seção semver mais recente em `CHANGELOG.md` corresponda à versão de `package.json`
+- [ ] Verifique se a seção semver mais recente em `CHANGELOG.md` corresponde à versão em `package.json`
 - [ ] Mantenha `## [Unreleased]` como a primeira seção do changelog para trabalhos futuros
-- [ ] Atualize `docs/openapi.yaml` → `info.version` deve corresponder à versão de `package.json`
+- [ ] Atualize `docs/openapi.yaml` → `info.version` deve corresponder à versão em `package.json`
 
-### Qualidade do Código
+### Qualidade do código
 
 - [ ] `npm run lint` — 0 erros (os avisos já existiam)
 - [ ] `npm run typecheck:core` — sem problemas
 - [ ] `npm run typecheck:noimplicit:core` — sem problemas (estrito)
-- [ ] `npm run check:cycles` — nenhuma dependência circular
-- [ ] `npm run check:any-budget:t11` — dentro do limite
+- [ ] `npm run check:cycles:ratchet` — dentro do limite congelado de `metrics.cycles` (o comando simples `check:cycles` encerra com código 1 ao encontrar qualquer ciclo, #15281)
+- [ ] `npm run check:any-budget:t11` — dentro do orçamento
 - [ ] `npm run check:route-validation:t06` — sem problemas
-- [ ] `npm run check:node-runtime` — requisito mínimo de runtime compatível atendido (`>=22.22.2 <23`, `>=24.0.0 <27`, conforme `SUPPORTED_NODE_RANGE` em `src/shared/utils/nodeRuntimeSupport.ts`; alinhado com `engines` de `package.json`)
+- [ ] `npm run check:node-runtime` — versão mínima do runtime compatível atendida (`>=22.22.2 <23`, `>=24.0.0 <27`, conforme `SUPPORTED_NODE_RANGE` em `src/shared/utils/nodeRuntimeSupport.ts`; alinhada com `engines` de `package.json`)
 
 ### Testes
 
 - [ ] `npm run test:unit` — aprovado
 - [ ] `npm run test:vitest` — aprovado (servidor MCP, autoCombo, cache)
-- [ ] `npm run test:coverage` — requisito 60/60/60/60 atendido (instruções/linhas/funções/branches)
-- [ ] `npm run test:integration` — aprovado (se as alterações afetarem o DB / handlers)
-- [ ] `npm run test:combo:matrix` — aprovado (matriz de estratégias de combo: comprova deterministicamente as decisões de seleção de todas as 19 estratégias públicas de roteamento; execute ao alterar o roteamento de combos, a resolução de estratégias ou a lógica de fallback)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **opcional/manual** (teste rápido controlado com upstream real; obtém um snapshot somente leitura do DB no VPS `root@192.168.0.15`; acessa provedores reais, consome créditos; nunca é executado no CI; é ignorado de forma limpa sem a habilitação)
-- [ ] `npm run test:combo:live:vps` — **opcional/manual** (teste rápido ao vivo da Fase 3 no VPS: 7 cenários HTTP no servidor `.15` ativo via Node ESM puro; requer `ssh root@192.168.0.15`; cria/exclui somente combos `__live_test__*`; acessa provedores reais; nunca é executado no CI)
+- [ ] `npm run test:coverage` — limite 60/60/60/60 atendido (instruções/linhas/funções/branches)
+- [ ] `npm run test:integration` — aprovado (se as alterações afetarem o banco de dados/handlers)
+- [ ] `npm run test:combo:matrix` — aprovado (matriz de estratégias combinadas: comprova deterministicamente as decisões de seleção de todas as 19 estratégias públicas de roteamento; execute ao alterar o roteamento combinado, a resolução de estratégias ou a lógica de fallback)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **opcional/manual** (smoke test protegido com upstream real; obtém um snapshot somente leitura do banco de dados a partir do VPS `root@192.168.0.15`; acessa provedores reais e consome créditos; nunca é executado na CI; é ignorado de forma limpa sem a condição de habilitação)
+- [ ] `npm run test:combo:live:vps` — **opcional/manual** (smoke test ao vivo da Fase 3 no VPS: 7 cenários HTTP executados no servidor `.15` ativo via Node ESM puro; requer `ssh root@192.168.0.15`; cria/exclui apenas combinações `__live_test__*`; acessa provedores reais; nunca é executado na CI)
 - [ ] `npm run test:e2e` — aprovado (alterações na UI)
 - [ ] `npm run test:protocols:e2e` — aprovado (alterações em MCP/A2A)
 - [ ] `npm run test:ecosystem` — aprovado
 
-### Hooks (Validados pelo Husky)
+### Hooks (validados pelo Husky)
 
 Os hooks do Husky ficam em `.husky/` e são executados automaticamente durante operações do git.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** verificações determinísticas rápidas — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (ativadas em 2026-06-13). Exclui intencionalmente `test:unit` (lento; coberto pelo job `test-unit` do CI).
-  - Execute `npm run test:unit` manualmente antes de enviar branches de release.
+- **pre-push:** verificações rápidas e determinísticas — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (ativadas em 2026-06-13). Exclui intencionalmente `test:unit` (lento; coberto pelo job `test-unit` da CI).
+  - Execute `npm run test:unit` manualmente antes de fazer push de branches de lançamento.
 
-Se um hook falhar: corrija o problema subjacente, não o ignore com `--no-verify`.
+Se um hook falhar: corrija o problema subjacente; não o ignore usando `--no-verify`.
 
-### Commits Convencionais
+### Commits convencionais
 
-Todos os commits destinados à release devem seguir o formato `type(scope): subject`.
+Todos os commits destinados ao lançamento devem seguir o formato `type(scope): subject`.
 
 **Tipos válidos:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
@@ -175,60 +175,60 @@ Alterações incompatíveis: adicione o rodapé `BREAKING CHANGE:` ou `!` após 
 
 ### Documentação
 
-- [ ] `npm run check:docs-sync` passa (executado automaticamente pelo pre-commit)
-- [ ] `npm run check:docs-all` passa (agregador: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` termina com código 0 — o contrato de variáveis de ambiente entre o código ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` está intacto
-- [ ] `npm run check:doc-links` termina com código 0 — nenhuma referência markdown interna quebrada após a reestruturação
+- [ ] `npm run check:docs-sync` é aprovado (executado automaticamente pelo pre-commit)
+- [ ] `npm run check:docs-all` é aprovado (verificação abrangente: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` encerra com código 0 — o contrato de variáveis de ambiente entre o código ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` está íntegro
+- [ ] `npm run check:doc-links` encerra com código 0 — nenhuma referência interna de markdown quebrada após a reestruturação
 - [ ] `docs/architecture/ARCHITECTURE.md` revisado quanto a divergências de armazenamento/runtime
-- [ ] `docs/guides/TROUBLESHOOTING.md` revisado quanto a divergências de variáveis de ambiente e operacionais
+- [ ] `docs/guides/TROUBLESHOOTING.md` revisado quanto a divergências de variáveis de ambiente e operações
 - [ ] Se `.env.example` foi alterado: `docs/reference/ENVIRONMENT.md` atualizado
-- [ ] Se o novo recurso tiver uma UI: `docs/guides/USER_GUIDE.md` o menciona
-- [ ] Se o novo recurso tiver uma API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` atualizados
-- [ ] Se o novo recurso for um módulo: existe um `docs/<MODULE>.md` dedicado
-- [ ] Se houver uma alteração incompatível: `docs/guides/TROUBLESHOOTING.md` contém uma nota de migração
+- [ ] Se um novo recurso tiver uma UI: `docs/guides/USER_GUIDE.md` deve mencioná-lo
+- [ ] Se um novo recurso tiver uma API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` atualizados
+- [ ] Se um novo recurso for um módulo: deve existir um arquivo dedicado em `docs/<MODULE>.md`
+- [ ] Se houver uma alteração incompatível: `docs/guides/TROUBLESHOOTING.md` deve conter uma nota de migração
 
 ### i18n
 
-- [ ] `npm run i18n:check` termina com código 0 — o estado das traduções (`.i18n-state.json`) está sincronizado com a documentação de origem (nenhuma fonte divergente no modo estrito; um aviso no modo de advertência é aceitável para ajustes de última hora na documentação, mas deve ser 0 antes de criar a tag)
-- [ ] `npm run i18n:check-ui-coverage` termina com código 0 — cada localidade da UI está igual ou acima do limite mínimo de 80% de cobertura
-- [ ] `npm run i18n:sync-ui:dry` informa 0 chaves ausentes em todas as 42 localidades
-- [ ] Se a documentação-fonte em inglês foi alterada, execute `npm run i18n:run` (requer `OMNIROUTE_TRANSLATION_API_KEY` em `.env`) antes de criar a tag
+- [ ] `npm run i18n:check` encerra com código 0 — o estado das traduções (`.i18n-state.json`) está sincronizado com os documentos de origem (nenhuma origem divergente no modo estrito; o aviso do modo de advertência é aceitável para pequenos ajustes de última hora na documentação, mas deve ser 0 antes de criar a tag)
+- [ ] `npm run i18n:check-ui-coverage` encerra com código 0 — todas as localidades da UI atingem ou superam o limite mínimo de 80% de cobertura
+- [ ] `npm run i18n:sync-ui:dry` informa 0 chaves ausentes em todas as 66 localidades de destino (todas as localidades, exceto a origem `en`)
+- [ ] Se os documentos-fonte em inglês foram alterados, execute `npm run i18n:run` (requer `OMNIROUTE_TRANSLATION_API_KEY` em `.env`) antes de criar a tag
 - [ ] Contribuições de tradução podem ser adiadas para a próxima versão se forem pequenas (registre no CHANGELOG)
 
-### Migrações de Banco de Dados
+### Migrações de banco de dados
 
 - [ ] Se `src/lib/db/migrations/` tiver novos arquivos:
   - [ ] Cada migração é idempotente (`CREATE TABLE IF NOT EXISTS` etc.)
-  - [ ] Migrações encapsuladas em transações
-  - [ ] Numeradas corretamente (sem lacunas na sequência)
+  - [ ] Migrações envolvidas em transações
+  - [ ] Numeração correta (sem lacunas na sequência)
 - [ ] Teste em uma instalação nova: exclua `~/.omniroute/omniroute.db` e execute `npm run dev`
 - [ ] Teste em uma instalação existente: faça backup do banco de dados, execute a migração e verifique o esquema
 - [ ] Arquivos WAL (`-wal`, `-shm`) tratados corretamente se a migração reescrever tabelas
 
-### Catálogo de Provedores (validado por Zod)
+### Catálogo de provedores (validado pelo Zod)
 
-- [ ] O esquema Zod de `src/shared/constants/providers.ts` é válido no momento do carregamento
+- [ ] Esquema Zod de `src/shared/constants/providers.ts` válido no momento do carregamento
   - [ ] Todos os provedores têm os campos obrigatórios (`id`, `label`, `kind` etc.)
   - [ ] `freeNote` fornecido para novos provedores gratuitos
   - [ ] Provedores OAuth têm `oauthConfig` registrado em `src/lib/oauth/constants/oauth.ts`
-- [ ] Se um novo provedor foi adicionado: executor correspondente em `open-sse/executors/`
+- [ ] Se um novo provedor for adicionado: executor correspondente em `open-sse/executors/`
 - [ ] Se o formato não for OpenAI: tradutor em `open-sse/translator/`
 - [ ] Modelos registrados em `open-sse/config/providerRegistry.ts`
-- [ ] Testes unitários em `tests/unit/` cobrem a classificação e o roteamento de provedores
+- [ ] Testes unitários em `tests/unit/` abrangem a classificação e o roteamento de provedores
 
 ### Desktop (Electron)
 
-Se `electron/` foi alterado:
+Se `electron/` tiver sido alterado:
 
 - [ ] `npm run electron:smoke:packaged` passa
-- [ ] Builds testados para pelo menos um entre `:win`, `:mac`, `:linux`
-- [ ] Certificados de assinatura de código não expiraram (se houver assinatura)
-- [ ] A versão em `electron/package.json` corresponde à do `package.json` raiz
-- [ ] O ponteiro do canal de atualização automática foi atualizado em caso de lançamento para `stable`
+- [ ] Builds testados para pelo menos uma das opções `:win`, `:mac`, `:linux`
+- [ ] Certificados de assinatura de código não estão expirados (se houver assinatura)
+- [ ] A versão em `electron/package.json` corresponde à versão no `package.json` raiz
+- [ ] O ponteiro do canal de atualização automática foi atualizado se a release for para `stable`
 
-### Estrutura de Build
+### Estrutura de build
 
-O repositório usa três diretórios de saída distintos — nunca os confunda:
+O repositório usa três diretórios de saída distintos — nunca os misture:
 
 | Diretório | Finalidade                                                  | Rastreado?              |
 | --------- | ----------------------------------------------------------- | ----------------------- |
@@ -236,9 +236,9 @@ O repositório usa três diretórios de saída distintos — nunca os confunda:
 | `.build/` | Intermediários de build — saída de `next build` (`distDir`) | Não (ignorado pelo git) |
 | `dist/`   | Pacote npm distribuível — montado por `assembleStandalone`  | Não (ignorado pelo git) |
 
-> **Nota para operadores:** o diretório de imagem no VPS remoto continua sendo `/usr/lib/node_modules/omniroute/app/`.
-> Somente a saída de build **dentro do repositório** foi movida (`app/` → `dist/`). As skills de implantação sincronizam
-> o conteúdo de `dist/` via rsync com o diretório remoto `app/` — nenhuma alteração nos caminhos do VPS é necessária.
+> **Nota para o operador:** o diretório de imagem no VPS remoto permanece `/usr/lib/node_modules/omniroute/app/`.
+> Apenas a saída de build **dentro do repositório** foi movida (`app/` → `dist/`). As skills de deploy sincronizam via rsync
+> o conteúdo de `dist/` com o diretório remoto `app/` — nenhuma alteração nos caminhos do VPS é necessária.
 
 **Fluxo de build único:**
 
@@ -246,27 +246,27 @@ O repositório usa três diretórios de saída distintos — nunca os confunda:
 npm run build:release
   └─ rm -rf .build dist          (limpeza)
   └─ next build → .build/next/   (intermediários)
-  └─ assembleStandalone          (copia standalone + static + public + natives → dist/)
+  └─ assembleStandalone          (copia standalone + static + public + binários nativos → dist/)
   └─ grava dist/BUILD_SHA        (sentinela do HEAD)
 ```
 
-NÃO execute `npm run build` seguido por um `npm run build:cli` separado para a implantação — use
-`npm run build:release`, que realiza uma reconstrução limpa + cria o sentinela em um único comando.
+NÃO execute `npm run build` seguido por um `npm run build:cli` separado para o deploy — use
+`npm run build:release`, que realiza uma reconstrução limpa + sentinela em um único comando.
 
-### Validação de Artefatos
+### Validação de artefatos
 
 - [ ] `npm run build:release` é concluído com sucesso e `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` sem problemas — nenhum `app.__qa_backup`, `scripts/scratch`, `package-lock.json` ou outro resíduo local
+- [ ] `npm run check:pack-artifact` sem problemas — sem `app.__qa_backup`, `scripts/scratch`, `package-lock.json` ou outros resíduos locais
 - [ ] `dist/server.js` existe após o build
-- [ ] Smoke test local opcional do runtime empacotado: `npm run dev:candidate -- validate` após `npm run dev:candidate -- build` inicializa o tarball empacotado em um `DATA_DIR` isolado e verifica `/api/health` + `/v1/models` (consulte [Caminho Ideal de Contribuição](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] Smoke test local opcional do runtime empacotado: `npm run dev:candidate -- validate` após `npm run dev:candidate -- build` inicializa o tarball empacotado em um `DATA_DIR` isolado e verifica `/api/health` + `/v1/models` (consulte o [Caminho recomendado para contribuições](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
 
-### Criação de Tag e Lançamento
+### Tag e release
 
 - [ ] Execute `/generate-release-cc` (skill do Claude Code):
   - Cria a tag `vX.Y.Z`
   - Envia a tag e a branch
-  - Abre uma Release no GitHub com o conteúdo do changelog
-  - Anexa os instaladores do Electron (se gerados)
+  - Abre uma Release no GitHub com o changelog no corpo
+  - Anexa os instaladores do Electron (se compilados)
 - [ ] Ou manualmente:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -274,46 +274,46 @@ NÃO execute `npm run build` seguido por um `npm run build:cli` separado para a 
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Implantação
+### Deploy
 
-As skills de implantação usam o fluxo leve com rsync — sem `npm pack`, sem `npm i -g`:
+As skills de deploy usam o fluxo leve com rsync — sem `npm pack`, sem `npm i -g`:
 
-- [ ] Use a skill de deploy que corresponda ao destino:
+- [ ] Use a skill de deploy correspondente ao destino:
   - `/deploy-vps-local-cc` — VPS local (192.168.0.15)
   - `/deploy-vps-akamai-cc` — VPS da Akamai (69.164.221.35)
   - `/deploy-vps-both-cc` — ambos
 - [ ] Antes de fazer o deploy, confirme que `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] O build deve ser executado onde `node_modules` seja real (checkout principal ou worktree com `npm ci` executado — NÃO um worktree com link simbólico)
-- [ ] Execute um teste de fumaça na instância implantada:
-  - Abra `/dashboard/health` → verifique se a string da versão corresponde à release
-  - Execute uma requisição `/v1/chat/completions` em um provedor conhecido
+- [ ] O build deve ser executado onde `node_modules` seja real (checkout principal ou worktree em que `npm ci` tenha sido executado — NÃO um worktree com link simbólico)
+- [ ] Faça o smoke test da instância implantada:
+  - Abra `/dashboard/health` → verifique se a string de versão corresponde à release
+  - Execute uma solicitação a `/v1/chat/completions` usando um provedor conhecido
   - Verifique se `/api/monitoring/health` retorna circuit breakers `CLOSED`
-  - Confirme que os transportes MCP respondem (`/mcp` HTTP, `/mcp-sse` SSE)
+  - Confirme se os transportes MCP respondem (`/mcp` HTTP, `/mcp-sse` SSE)
 
 ### Pós-release
 
 - [ ] Execute `/capture-release-evidences-cc` (skill do Claude Code)
-  - Captura screenshots/gravações em WebP das novas funcionalidades
-  - Anexa às notas da release/publicação do blog
-- [ ] Atualize o GitHub Discussions/Discord com o anúncio da release
+  - Captura screenshots/gravações WebP dos novos recursos
+  - Anexa às notas da release / publicação do blog
+- [ ] Atualize o GitHub Discussions / Discord com o anúncio da release
 - [ ] Abra um milestone para a próxima versão
 - [ ] Se for crítico: fixe a discussão ou publique em `news.json` para exibir um banner no aplicativo
 
 ### Critérios para o lançamento público do Radar
 
-O anúncio do Radar foi intencionalmente commitado com `active: false`. A ativação é uma alteração separada
-após cada item abaixo ter evidências:
+O anúncio do Radar foi intencionalmente commitado com `active: false`. A ativação é uma alteração
+separada, feita após cada item abaixo ter sido comprovado:
 
-- [ ] Todos os PRs empilhados do Radar foram mesclados e a CI do release-tip está verde
-- [ ] Faça o deploy e o teste de fumaça das rotas OSS do Radar com `RADAR_ENABLED` ainda desativado por padrão
-- [ ] Faça o teste de fumaça de `GET /planos`, `/termos`, `/privacidade` e `/reembolso` no host nomeado do Radar
+- [ ] Todos os PRs empilhados do Radar foram mesclados e a CI da ponta da release está verde
+- [ ] Faça o deploy e o smoke test das rotas OSS do Radar com `RADAR_ENABLED` ainda desativado por padrão
+- [ ] Faça o smoke test de `GET /planos`, `/termos`, `/privacidade` e `/reembolso` no host designado do Radar
 - [ ] Registre a identidade/contato/endereço do operador e a revisão jurídica aprovada pelo proprietário no serviço privado
 - [ ] Teste o Stripe Checkout e o webhook assinado somente no modo de teste
 - [ ] Teste uma entrega de e-mail transacional criptografado com o remetente/domínio aprovado
-- [ ] Comprove a restauração do backup e uma execução de pesquisa supervisionada e limitada por orçamento
+- [ ] Comprove a restauração de backup e uma execução de pesquisa supervisionada, com limite de orçamento
 - [ ] Aprove a política de revisão de BRL/PIX antes de aceitar comprovantes de doação
 - [ ] Habilite o Checkout público somente após os critérios anteriores e, em seguida, ative o novo ID de `news.json`
-- [ ] Verifique se o banner da Home usa texto localizado e se um novo ID reaparece após um ID mais antigo ser dispensado
+- [ ] Verifique se o banner da página inicial usa texto localizado e se um novo ID reaparece após um ID mais antigo ser dispensado
 
 ## Teste de fumaça dos serviços integrados (v3.8.4+)
 
@@ -387,8 +387,8 @@ Antes de publicar qualquer versão v3.8.x, verifique também estes itens:
 ## Corte da versão 3.9.0 LTS (ensaiado na 3.8.58)
 
 Após a v3.8.59, a próxima versão é a 3.9.0, e sua ponta se torna duas branches de longa duração:
-`stable/v3` (a linha LTS v3, npm `latest`) e `develop` (v4, incrementada para 4.0.0, npm
-`nightly`). O modelo de branches/canais, o forward-port e os rótulos estão em
+`stable/v3` (a linha LTS da v3, npm `latest`) e `develop` (v4, atualizada para 4.0.0, npm
+`nightly`). O modelo de branches/canais, o forward-port e os labels estão em
 [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); o plano está no [ROADMAP](../../ROADMAP.md) (Fase 3). O corte é executado uma única vez;
 a 3.8.58 o ensaia de ponta a ponta em um fork, e a 3.8.59 é encerrada com a
 [lista de verificação GO/NO-GO](./LTS_GO_NO_GO.md).
@@ -401,89 +401,92 @@ npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # fixa o commit de origem
 ```
 
 `scripts/release/dry-run-lts-cut.mjs` não executa nada: ele lê o git e o `gh` e imprime a
-sequência completa — pré-condições (a origem é resolvida, a tag anterior existe, `package.json` está na
-versão de destino, uma issue `release-freeze` está aberta, não há nenhuma issue `Release branch not green`
-aberta em uma branch de release existente — uma branch inexistente informa `?` desconhecido, nunca
+sequência completa — pré-condições (a origem pode ser resolvida, o repositório de origem tem o histórico completo —
+um clone raso não consegue enviar `stable/v3`, o lado receptor rejeita o pacote no primeiro
+pai enxertado, portanto faça o corte a partir de um clone completo ou execute `git fetch --unshallow origin` primeiro — a tag
+anterior existe, o `package.json` contém a versão de destino, uma issue `release-freeze` está aberta, não há
+nenhuma issue `Release branch not green` aberta
+em uma branch de release existente — uma branch que não existe informa `?` desconhecido, nunca
 verde — a fila `release` do Mergify está configurada (G11: `queue_rules`, `checks_timeout`,
-rótulo `queue`), o conjunto de regras de `release/*` ainda bloqueia exclusões e force-pushes, e
-`stable/v3` e `develop` ainda não existem), as duas etapas de branch, quais gatilhos de workflows
-inativos e condições `if:` se tornam verdadeiros (e quais permanecem bloqueados por uma variável do repositório ou
-fixados ao repositório canônico), os dist-tags esperados (`latest` → 3.9.0, `next` e
-`nightly` vazios) e a reversão. Saída `0` = `RESULT: READY`, `1` = falha em uma pré-condição
-bloqueante (`✗`), `2` = erro de uso. `--advisory <id,...>` rebaixa uma verificação para aviso (`!`)
+label `queue`), o ruleset `release/*` ainda bloqueia exclusões e force-pushes, e
+`stable/v3` e `develop` ainda não existem), as duas etapas de criação de branches, quais gatilhos de
+workflows inativos e condições `if:` se tornam verdadeiros (e quais permanecem bloqueados por uma variável do repositório ou
+fixados no repositório canônico), os dist-tags esperados (`latest` → 3.9.0, `next` e
+`nightly` vazios) e o rollback. Código de saída `0` = `RESULT: READY`, `1` = falha em uma pré-condição
+obrigatória (`✗`), `2` = erro de uso. `--advisory <id,...>` rebaixa uma verificação para aviso (`!`)
 sem ocultá-la.
 
-Execute a simulação do corte real enquanto o congelamento da release 3.9.0 ainda estiver aberto — as branches são
-criadas após a tag e antes que a Fase 12c encerre o congelamento.
+Execute a simulação do corte real enquanto o congelamento da release 3.9.0 ainda estiver ativo — as branches são
+criadas após a tag e antes de a Fase 12c encerrar o congelamento.
 
 ### Ensaio da 3.8.58 (somente em fork)
 
 ```bash
-# 1. Simulação na ponta atual com os parâmetros do ensaio
+# 1. Simulação na ponta atual com parâmetros de ensaio
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Executar em um remote de FORK (origin, ou qualquer remote cuja URL seja a do repositório
+# 2. Execute em um remote de FORK (origin, ou qualquer remote cuja URL seja a do repositório
 #    canônico, é recusado; cada etapa solicita confirmação no terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Exercitar os workflows inativos no fork (workflow_dispatch onde a simulação
-#    informa uma fixação ao repositório canônico) e, em seguida, reverter
+# 3. Exercite os workflows inativos no fork (workflow_dispatch quando a simulação
+#    informar uma fixação no repositório canônico) e, em seguida, faça o rollback
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-O commit de incremento de `develop` é criado com o encanamento interno do git (nenhuma árvore de trabalho é alterada) e incrementa
+O commit de atualização de develop é criado com o plumbing do git (nenhuma árvore de trabalho é alterada) e atualiza
 os mesmos cinco arquivos de um commit de abertura de ciclo: `package.json`, `open-sse/package.json`,
 `electron/package.json`, `package-lock.json` e `docs/openapi.yaml`. A seção `[4.0.0]` do
-CHANGELOG e seus espelhos de i18n são abertos em `develop` posteriormente, antes de seu primeiro
+CHANGELOG e seus espelhos de i18n são abertos posteriormente em `develop`, antes do primeiro
 PR. O script nunca altera os dist-tags do npm — ensaie-os em um pacote temporário.
 
-### Artefato de pré-visualização do PR (compile uma vez, promova os mesmos bytes)
+### Artefato de prévia do PR (compile uma vez, promova os mesmos bytes)
 
-`.github/workflows/preview-artifact.yml` compila um tarball de produção a partir do head de um PR e
-valida exatamente essa compilação (fatia (a) da #8084). Somente PRs do mesmo repositório; nada é publicado.
+`.github/workflows/preview-artifact.yml` cria um único tarball de produção a partir do head de um PR e
+valida exatamente essa build (parte (a) da #8084). Somente PRs do mesmo repositório; nada é publicado.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # ou adicione o rótulo `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # ou adicione o label `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # instalação de pré-visualização
+npm install -g ./omniroute-*.tgz                          # instalação da prévia
 ```
 
 A execução realiza `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, empacota o
 tarball, executa `npm run check:pack-boot` (segredos falsos, diretório de dados efêmero), reempacota e
-falha a menos que o digest seja idêntico; em seguida, registra `artifact-identity.json` (SHA do head, SHA da base,
-hash do lockfile, plataforma, arquitetura, ABI do node, bundler, política de compilação —
+falha, a menos que o digest seja idêntico; em seguida, registra `artifact-identity.json` (SHA do head, SHA da
+base, hash do lockfile, plataforma, arquitetura, ABI do node, bundler, política de build —
 `scripts/release/artifact-identity.mjs`) e atesta o tarball em um job separado. Promover
-uma pré-visualização significa instalar esse tarball: nunca recompile a partir do código-fonte.
+uma prévia significa instalar esse tarball: nunca faça uma nova build a partir do código-fonte.
 
 ### O corte (3.9.0, após o GO)
 
 1. GO registrado em [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` imprime `RESULT: READY`.
-3. Crie manualmente as branches em `origin` com os comandos impressos pela simulação — o
-   script se recusa a fazer push para `origin`. Para reutilizar um commit de `develop` revisado, execute primeiro o
-   ensaio com `--execute` na ponta da 3.9.0 em seu fork; ele imprime ambos os SHAs, e
+3. Crie as branches em `origin` manualmente usando os comandos impressos pela simulação — o
+   script se recusa a fazer push para `origin`. Para reutilizar um commit de develop revisado, execute o
+   ensaio com `--execute` na ponta da 3.9.0 em seu fork primeiro; ele imprime ambos os SHAs, e
    os mesmos commits podem ser enviados:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Proteja `stable/v3` e `develop` (conjuntos de regras + fila de merge) antes que o primeiro PR seja integrado.
+4. Proteja `stable/v3` e `develop` (conjuntos de regras + fila de merge) antes da entrada do primeiro PR.
 5. Os workflows inativos são ativados pela existência das branches: `forward-port.yml` (push para
    `stable/v3`), `validate-stable-pr.yml` (PRs para `stable/v3`) e `nightly-v4-build.yml`
-   (compila `develop`). Antes da entrada em produção, defina o segredo de repositório `secrets.FORWARD_PORT_TOKEN` (para que a CI seja executada nos
+   (compila `develop`). Antes da entrada em produção, defina o segredo de repositório `secrets.FORWARD_PORT_TOKEN` (para que a CI seja executada em
    PRs de forward-port); a publicação nightly permanece desativada até que o proprietário defina a variável de repositório
    `vars.NIGHTLY_PUBLISH` como `true` e o npm Trusted Publishing aceite
-   `nightly-v4-build.yml`. A resolução de canais fica em `scripts/release/dist-tag.mjs`, o mesmo
+   `nightly-v4-build.yml`. A resolução de canais é feita por `scripts/release/dist-tag.mjs`, o mesmo
    resolvedor usado por `npm-publish.yml`.
 6. Verifique os canais: `npm view omniroute dist-tags --json` mostra `latest` = 3.9.0 e nenhum
-   `next` / `nightly` até que a v4 seja publicada.
+   `next` / `nightly` até a publicação da v4.
 7. Reversão, se necessário: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    e `npm dist-tag add omniroute@3.8.59 latest`.
 

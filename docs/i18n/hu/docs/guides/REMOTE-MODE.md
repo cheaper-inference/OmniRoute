@@ -214,103 +214,89 @@ nem jelenik meg.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ a titkos értéket EGYSZER írja ki — másolja ki most
+#   ↳ egyszer írja ki a titkot — másolja ki most
 omniroute tokens list                 # maszkolva: azonosító, név, hatókör, előtag, állapot, lejárat
 omniroute tokens revoke <id|prefix>   # azonnali visszavonás
-omniroute tokens scopes               # a három hatókör ismertetése
+omniroute tokens scopes               # a három hatókör magyarázata
 ```
 
-A `tokens` parancsokhoz **admin** hitelesítő adat szükséges. A tokeneket
-az irányítópult **Settings → Access Tokens** részében is kezelheti (létrehozás, visszavonás, egyszeri másolás).
+A `tokens` parancsokhoz **admin** hitelesítő adat szükséges. A tokeneket az irányítópulton is kezelheti a **Beállítások → Hozzáférési tokenek** menüpontban (létrehozás, visszavonás, egyszeri másolás).
+
+Egy token soha nem kaphat több jogosultságot, mint a létrehozója. `admin` tokent csak az operátor hozhat létre: az irányítópult-munkamenet, a szerveren futó helyi CLI, vagy az `omniroute connect` jelszóval. A gépi hitelesítő adatok (`admin` hozzáférési token, vagy `manage`/`admin` hatókörű API-kulcs) csak `write` és `read` tokeneket hozhatnak létre; ha `--scope admin` hatókört kérnek, `403`-at kapnak. A bejelentkezés kikapcsolása nem nyitja meg a létrehozást: bármilyen hatókörű hozzáférési token olyan hitelesítő adat, amelyet a mindig hitelesített útvonalak elfogadnak, így egy névtelen hívás bármilyen hatókörnél `401`-et kap.
 
 ---
 
-## Kódolási CLI konfigurálása a távoli katalógusból
+## Kódoló CLI konfigurálása a távoli katalógusból
 
-Az `omniroute configure` beolvassa az **aktív szerver** élő modellkatalógusát, és konfigurációt ír
-az **Ön** gépére.
+Az `omniroute configure` az **aktív szerver** élő modellkatalógusát olvassa, és konfigurációt ír a **saját** gépére.
 
 ```bash
 omniroute configure codex
-#   Providers: glm, kmc, ollamacloud, opencode-go, …
-#   Provider: glm
-#   Model id: glm/glm-5.2
-#   ✔ Létrehozva: ~/.codex/glm52.config.toml
+#   Szolgáltatók: glm, kmc, ollamacloud, opencode-go, …
+#   Szolgáltató: glm
+#   Modellazonosító: glm/glm-5.2
+#   ✔ Megírva: ~/.codex/glm52.config.toml
 #   Használat:  codex --profile glm52
 
 # nem interaktív
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# egy gyakran használt modell megtartása az interaktív választó tetején
+# gyakran használt modell tartása az interaktív választó tetején
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-A választó kizárólag modellazonosítókat (URL-eket vagy hitelesítő adatokat soha) tárol a helyi
-`model-preferences.json` fájlban, kontextus és CLI-cél szerint elkülönítve. A kedvencek
-a legutóbbi választások előtt jelennek meg; a `--unfavorite` használatával távolíthat el egy kiválasztott modellt
-az adott kontextus-/céllistából.
+A választó csak modellazonosítókat tart meg (soha URL-t vagy hitelesítő adatot) a helyi `model-preferences.json` fájlban, kontextus és CLI-cél szerint elkülönítve. A kedvencek a legutóbbi választások elé kerülnek. A `--unfavorite` kapcsolóval eltávolítható a kiválasztott modell az adott kontextus/cél listájáról.
 
-A létrehozott profil környezeti változóval hivatkozik a következtetési kulcsra
-(`OMNIROUTE_API_KEY`) — a titkos érték soha nem kerül lemezre. A Codex egyszeri
-alapbeállításával (a `[model_providers.omniroute]` blokkal) kapcsolatban lásd:
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+A megírt profil a következtetési kulcsra környezeti változóval (`OMNIROUTE_API_KEY`) hivatkozik — a titkos kulcs soha nem kerül lemezre. Az egyszeri alapvető Codex-beállításhoz (a `[model_providers.omniroute]` blokk) lásd: [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### CLI indítása a távoli példányhoz (konfiguráció írása nélkül)
+### CLI indítása a távoli szerveren (nem ír konfigurációt)
 
-Az `omniroute run <target>` szintén figyelembe veszi az aktív kontextust: a távoli alap-URL
-és a kontextus hitelesítő adatai csak az elindított folyamatba kerülnek be.
+Az `omniroute run <target>` is tiszteletben tartja az aktív kontextust: a távoli alap-URL és a kontextus hitelesítő adata csak az elindított folyamatba kerül.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → távoli példány
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → távoli
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Annak pontos előnézete, hogy mi indulna el (csak a környezeti változók KULCSNEVEI, az értékek soha):
+# Pontos előnézet arról, mi indulna el (csak környezeti változó NEVEK, soha az értékek):
 omniroute run codex --dry-run --json
 ```
 
-Célok: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(egyetlen forrás: `bin/cli/cli-manifest.mjs`). A Qwen és a Gemini ideiglenes,
-elkülönített kezdőkönyvtárral fut, amely kilépéskor törlődik, így az indítás soha nem módosítja —
-és nem is szivárogtatja ki — a személyes eszközkonfigurációját.
+Célok: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (egyetlen forrás: `bin/cli/cli-manifest.mjs`). A Qwen és a Gemini ideiglenes, elkülönített kezdőkönyvtárral fut, amely kilépéskor törlődik, így az indítás soha nem érinti — és nem szivárog bele — a személyes eszközkonfigurációba.
 
-### CLI-nkénti beállítási parancsok
+### CLI-nkénti beállítóparancsok
 
-Minden támogatott CLI rendelkezik távoli környezetet kezelő beállítási paranccsal (mindegyik figyelembe veszi az aktív
-kontextust, illetve a `--remote <url> --api-key <key>` beállítást):
+Minden támogatott CLI-hez van távoli szervert ismerő beállítóparancs (mindegyik tiszteletben tartja az aktív kontextust, vagy a `--remote <url> --api-key <key>` megadást):
 
-| CLI         | Parancs                    | Amit ír                                                                                                                                                                                                |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` profilok (modellenként)                                                                                                                                                  |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (modellenként)                                                                                                                                               |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — az `omniroute` OpenAI-kompatibilis szolgáltató az összes katalógusmodellel (futtatás: `opencode -m omniroute/<model>`)                                            |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI mód) + kiírja a beillesztendő VS Code-bővítménybeállításokat (OpenAI-kompatibilis, alap-URL `/v1` **nélkül**)                                          |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` beállítások — OpenAI-kompatibilis, alap-URL `/v1` **értékkel**                                                                            |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` `/v1` **értékkel**, kulcs a `${{ secrets.OMNIROUTE_API_KEY }}` használatával                                  |
-| Cursor      | `omniroute setup-cursor`   | kiírja az alkalmazáson belüli lépéseket (Settings → Models → Override OpenAI Base URL `/v1` **értékkel** + kulcs + modell). A Cursor konfigurációja átlátszatlan SQLite — csak a csevegőpanel          |
-| Roo Code    | `omniroute setup-roo`      | Roo-importálási JSON-t ír (`~/.omniroute/roo-settings.json`) + beállítja a `roo-cline.autoImportSettingsPath` értékét + kiírja a felületi lépéseket (OpenAI-kompatibilis, alap-URL `/v1` **értékkel**) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` szolgáltató, `base_url` `/v1` **értékkel**, kulcs a `$OMNIROUTE_API_KEY` használatával                                                                  |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` `/v1` **nélkül** + `GOOSE_MODEL`) + környezetbeállítási recept                                                                  |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` `/v1` **nélkül** + `model: openai/<id>`) + környezetbeállítási recept (`aider --message --yes`)                                                                 |
-| Qwen Code   | `omniroute setup-qwen`     | V4-es `modelProviders.openai` bejegyzés a `~/.qwen/settings.json` fájlban + `OMNIROUTE_API_KEY` a `~/.qwen/.env` fájlban                                                                               |
+| CLI         | Parancs                    | Mit ír                                                                                                                                                                                                   |
+| ----------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` profilok (modellenként)                                                                                                                                                    |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (modellenként)                                                                                                                                                 |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — az `omniroute` openai-kompatibilis szolgáltató az összes katalógusmodellel (futtatás: `opencode -m omniroute/<model>`)                                              |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI mód) + kiírja a beillesztendő VS Code bővítmény-beállításokat (OpenAI-kompatibilis, alap-URL **`/v1` végződés nélkül**)                                  |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*` beállítások — OpenAI-kompatibilis, alap-URL **`/v1` végződéssel**                                                                           |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **`/v1` végződéssel**, a kulcs `${{ secrets.OMNIROUTE_API_KEY }}` hivatkozással                                 |
+| Cursor      | `omniroute setup-cursor`   | kiírja az alkalmazáson belüli lépéseket (Beállítások → Modellek → OpenAI Base URL felülírása **`/v1` végződéssel** + kulcs + modell). A Cursor konfigurációja átlátszatlan SQLite — csak a csevegőpanel  |
+| Roo Code    | `omniroute setup-roo`      | Roo importáló JSON-t ír (`~/.omniroute/roo-settings.json`), beállítja a `roo-cline.autoImportSettingsPath` értéket, és kiírja a felületi lépéseket (OpenAI-kompatibilis, alap-URL **`/v1` végződéssel**) |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` szolgáltató, `base_url` **`/v1` végződéssel**, a kulcs `$OMNIROUTE_API_KEY` változóból                                                                    |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **`/v1` végződéssel**, a kulcsot a Zed olvassa a `$OMNIROUTE_API_KEY` változóból (soha nem íródik ki)           |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **`/v1` végződés nélkül** + `GOOSE_MODEL`) + környezeti recept                                                                    |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **`/v1` végződés nélkül** + `model: openai/<id>`) + környezeti recept (`aider --message --yes`)                                                                   |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` bejegyzés + `OMNIROUTE_API_KEY` a `~/.qwen/.env` fájlban                                                                                              |
 
 ```bash
-# OpenCode (OpenAI-kompatibilis szolgáltató, minden katalógusmodell, távoli VPS)
+# OpenCode (OpenAI-kompatibilis szolgáltató, az összes katalógusmodell, távoli VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # csak az egyező modellek megtartása
+omniroute setup-opencode --only glm,kimi        # csak az egyezőket tartja meg
 opencode -m omniroute/glm/glm-5.2 "..."          # előbb exportálja az OMNIROUTE_API_KEY változót
 ```
 
-> Az OpenCode gazdagabb **bővítményes** integrációval is rendelkezik: `omniroute setup opencode`
-> (mostantól távoli használatot is támogat a `--remote` kapcsolóval), amely telepíti az `@omniroute/opencode-plugin` csomagot.
-> A `setup-opencode` a könnyűsúlyú, OpenAI-kompatibilis alternatíva. Az API-kulcsra
-> a `{env:OMNIROUTE_API_KEY}` hivatkozik — soha nem írja lemezre.
+> Az OpenCode-nak gazdagabb **bővítmény**-integrációja is van: az `omniroute setup opencode` (már ismeri a távoli szervert a `--remote` kapcsolón keresztül) telepíti az `@omniroute/opencode-plugin` csomagot.
 >
-> OpenCode v2 esetén használja helyette az `@omniroute/opencode-plugin-v2` csomagot: ugyanaz a katalógus,
-> eltérő betöltői szerződés. Amikor az integráció csatlakoztatva van, a kulcsot az OpenCode saját hitelesítőadat-tárolójából
-> olvassa be, így egy távoli átjáró esetén egyáltalán nincs szükség kulcsra az
-> `opencode.json` fájlban.
+> A `setup-opencode` a könnyebb, OpenAI-kompatibilis alternatíva. Az API-kulcsra a `{env:OMNIROUTE_API_KEY}` hivatkozik — soha nem kerül lemezre.
+>
+> OpenCode v2 alatt helyette a `@omniroute/opencode-plugin-v2` csomagot használja: ugyanaz a katalógus, eltérő betöltési szerződés. Ha az integráció csatlakoztatva van, a kulcsot az OpenCode saját hitelesítő-tárából olvassa, így a távoli átjárónak egyáltalán nem kell kulcs az `opencode.json` fájlban.
 
 ---
 

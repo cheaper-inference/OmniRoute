@@ -30,93 +30,97 @@ Arịrịọ Client
 
 ---
 
-## Compression Modes
+## Ụdị Mwekota
 
-### Off
+### Gbanyụrụ
 
-A naghị etinye compression ọ bụla. Ozi niile na-agafe na-agbanweghị.
+Enweghị mwekota etinyere. Ozi niile na-agafeghị mgbanwe ọ bụla.
 
-### Lite Mode (~15% nchekwa, <1ms latency)
+### Ụdị Lite (~15% nchekwa, <1ms nkwụsịtụ)
 
-Mode kacha dị nchebe — enweghị mgbanwe semantic ọ bụla, naanị nhicha formatting:
+Ụdị kacha nchebe — enweghị mgbanwe nkọwa ọ bụla, naanị nhicha nhazi:
 
-| Usoro                    | Nkọwa                                                         |
-| ------------------------ | ------------------------------------------------------------- |
-| `collapseWhitespace`     | Jikọta ahịrị efu ndị na-esochi ibe ha na oghere dị na njedebe |
-| `dedupSystemPrompt`      | Wepụ system message ndị e megharịrị                           |
-| `compressToolResults`    | Mee ka output tool/function ndị toro ogologo dị mkpụmkpụ      |
-| `removeRedundantContent` | Wepụ ntuziaka ndị e megharịrị                                 |
-| `replaceImageUrls`       | Mee ka URI data onyonyo base64 dị mkpụmkpụ                    |
+| Usoro                    | Nkọwa                                                        |
+| ------------------------ | ------------------------------------------------------------ |
+| `collapseWhitespace`     | Jikọta ahịrị oghere ndị na-esote ọnụ na oghere dị na njedebe |
+| `dedupSystemPrompt`      | Wepu ozi sistemụ ndị yiri ibe ha                             |
+| `compressToolResults`    | Mekota nsonaazụ ngwaọrụ/ọrụ ogologo                          |
+| `removeRedundantContent` | Wepu ntụziaka ndị na-emegharị onwe ha                        |
+| `replaceImageUrls`       | Mee ka data URIs base64 nke onyonyo dị mkpirikpi             |
 
-**Kachasị mma maka:** Ojiji na-arụ ọrụ mgbe niile, workflow ebe nchekwa dị oke mkpa.
+**Kacha mma maka:** Ojiji mgbe niile, usoro ọrụ ndị nchekwa dị mkpa.
 
-### Standard Mode (~30% nchekwa)
+### Ụdị Standard (~30% nchekwa)
 
-[Caveman](https://github.com/JuliusBrussee/caveman) kpaliri ya — ọ na-ewepụ okwu mgbakwunye na ahịrịokwu toro ogologo ma na-echekwa ihe ha pụtara:
+Nke [Caveman](https://github.com/JuliusBrussee/caveman) kpaliri — na-ewepu okwu mmejupụta na okwu ogologo ebe ọ na-edebe nkọwa:
 
-- Na-ewepụ okwu mgbakwunye ("biko", "echere m", "n'ụzọ bụ isi", "n'ezie")
-- Na-eme ka ahịrịokwu toro ogologo dị mkpụmkpụ ("iji mee" → "ime", "n'ihi nke a" → "n'ihi na")
-- Na-ewepụ okwu nkwanye ùgwù na-egosi enweghị nkwenye ("Ọ ga-ewute gị...", "Ọ bụrụ na ị nwere ike...")
-- Iwu regex karịrị 30 a haziri maka coding prompt
+- Na-ewepu okwu mmejupụta ("please", "I think", "basically", "actually")
+- Na-emechikọta okwu ogologo ("in order to" → "to", "as a result of" → "because")
+- Na-ewepu okwu nwayọ ekele ("Would you mind...", "If you could possibly...")
+- Iwu regex karịrị 30 e haziri maka prompt koodu
 
-**Kachasị mma maka:** Workflow coding kwa ụbọchị, otu ndị na-elebara ọnụ ahịa anya.
+**Kacha mma maka:** Usoro ọrụ koodu kwa ụbọchị, otu ndị na-ele ọnụ ahịa anya.
 
-### Aggressive Mode (~50% nchekwa)
+### Ụdị Aggressive (~50% nchekwa)
 
-Njikwa history nwere ọgụgụ isi maka session ndị toro ogologo:
+Njikwa akụkọ ọgbara isi maka oge ọrụ ogologo:
 
-- **Ịka Nká nke Message** — a na-eme ka message ndị ochie na-adịwanye mkpụmkpụ nwayọọ nwayọọ
-- **Compression nke Tool Result** — a na-ebipụ ma ọ bụ na-ewepụ akụkụ output tool ndị toro ogologo (ahịrị mbụ/ikpeazụ,
-  nzacha ahịrị dabara adaba, ime ka JSON key dị mkpụmkpụ)
-- **Ihe Nchekwa Structural Integrity** — na-eme ka ụzọ abụọ `tool_use` + `tool_result` nọgide kwekọọ
-- **Ịma Oke Context Window** — na-asọpụrụ oke token nke model ọ bụla
+- **Ịgbo Ozi Ochie** — ozi ochie na-enweta mwekota nke na-aga n'ihu
+- **Mwekota Nsonaazụ Ngwaọrụ** — nsonaazụ ngwaọrụ ogologo a na-epụchapụ ma ọ bụ wepụ ụfọdụ
+  (ahịrị mbụ/ikpeazụ, nzacha ahịrị dabara, mmechikọta JSON key)
+- **Ndị Nchebe Ịdịmma Ọdịdị** — na-ahụ na ụzọ abụọ `tool_use` + `tool_result` na-adabere onwe ha
+- **Nghọta Windo Ọdịnaya** — na-akwanyere ókè token nke model ọ bụla ùgwù
 
-**Kachasị mma maka:** Session debugging ogologo oge, codebase buru ibu.
+**Kacha mma maka:** Oge ọrụ debugging ogologo, codebases buru ibu.
 
-### Ultra Mode (~75% nchekwa)
+### Ụdị Ultra (~75% nchekwa)
 
-Compression kachasị elu maka ọnọdụ ebe token dị oke mkpa:
+Mwekota kacha elu maka ọnọdụ ndị token dị mkpa:
 
-- **Heuristic Pruning** — pruning token nke prose dabere na score
-- **Nchekwa Structure** — a na-akara fenced code block, inline code, URL na identifier
-  dị ka tombstone ma jikọta ha ọzọ kpọmkwem otu ha dị; a naghị eme ha pruning
-- **SLM tier Nhọrọ** — obere local model nwere ike imezi pruning ahụ mgbe a haziri ya
-- Ọ nọọrọ onwe ya pụọ na Aggressive mode: ọ naghị arụ message aging, compression nke tool-result
-  ma ọ bụ fallback summarizer (naanị ọdịda SLM-tier nwere ike iduga fallback pass site na
-  aggressive)
+- **Ntụpụ Heuristic** — ntụpụ token nke edemede dabere na akara
+- **Nchekwa Ọdịdị** — a na-akpọ ngọngọ koodu e gburugburu, koodu inline, URLs na identifiers
+  aha ebe a na-edebe ha ma jikọọ ha ọzọ otú ha dị, a naghị atụpụ ha
+- **Ọkwa SLM Nhọrọ** — obere model obodo nwere ike imezi ntụpụ ahụ mgbe e haziri ya
+- Na-adabereghị na Ụdị Aggressive: ọ naghị arụ ọrụ ịgbo ozi ochie, mwekota nsonaazụ ngwaọrụ
+  ma ọ bụ onye nchịkọta fallback (naanị ọdịda nke ọkwa SLM nwere ike ịzụga fallback pass site
+  na aggressive)
 
-**Kachasị mma maka:** Mgbe ị na-eru oke context ugboro ugboro.
+**Kacha mma maka:** Mgbe ị na-akwụ ókè ọdịnaya ugboro ugboro.
 
-### RTK Mode (oke upstream 60-90%)
+### Ụdị RTK (60-90% oke upstream)
 
-A haziri RTK mode maka output tool toro ogologo nke na-apụta na session coding-agent:
+E meziri Ụdị RTK ka ọ sie ike maka nsonaazụ ngwaọrụ ogologo ndị na-apụta na oge ọrụ coding-agent:
 
-- Na-achọpụta klaasị command/output dịka `git status`, `git diff`, `git log`, test runner,
-  build TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/install, log Docker, output
-  infra, na output shell izugbe
-- Na-etinye ngwugwu JSON filter sitere na `open-sse/services/compression/engines/rtk/filters/`
-- Na-ebubata filter RTK TOML schema v1 site na faịlụ `filters.toml` nke project ma ọ bụ nke zuru ụwa ọnụ, tinyere
-  nkwado inline-test na trust-gating maka faịlụ project
-- Na-abịa na filter arụnyere n'ime ya 55 nwere sample inline verify
-- Na-ewepụ usoro njikwa ANSI, progress bar, ahịrị ndị e megharịrị, na mkpọtụ na-enweghị uru
-- Na-echekwa ọdịda, error, warning, faịlụ gbanwere, nchịkọta, na njedebe nke output toro ogologo
-- Na-akwado project filter nwere trust-gating, global filter, na mgbake raw-output e mere redaction nke bụ nhọrọ
+- Na-achọpụta ụdị iwu/nsonaazụ dị ka `git status`, `git diff`, `git log`, test runners,
+  TypeScript/Vite/Webpack builds, ESLint/Biome/Prettier, npm audit/installs, Docker logs,
+  nsonaazụ infra, na nsonaazụ shell nkịtị
+- Na-etinye ngwugọ nzacha JSON si `open-sse/services/compression/engines/rtk/filters/`
+- Na-ebubata nzacha RTK TOML schema v1 si faịlụ `filters.toml` nke oru ma ọ bụ zuru ụwa ọnụ,
+  nke nwere nkwenye inline-test na nlekwa ntụkwasị obi maka faịlụ oru
+- Na-abịa na nzacha 56 wuru n'ime ya nke nwere ihe nlele nkwenye inline
+- Na-ewepu ANSI control sequences, ogwe ọganihu, ahịrị na-emegharị onwe ha, na mkpotu na-enweghị
+  ihe a ga-eme
+- Na-edebe ọdịda, njehie, ịdọ aka ná ntị, faịlụ ndị gbanwere, nchịkọta, na ngwụcha nke nsonaazụ
+  ogologo
+- Na-akwado nzacha oru nke ntụkwasị obi na-achịkwa, nzacha zuru ụwa ọnụ, na nweghachi raw-output
+  a zoro ezo nke nhọrọ
 
-**Kachasị mma maka:** Session agent nwere transcript shell, build, test, git, grep, na file-output.
+**Kacha mma maka:** Oge ọrụ agent nke nwere shell, build, test, git, grep, na ndekọ nsonaazụ faịlụ.
 
-### Stacked Mode (oke ndị tozuru etozu 78-95%)
+### Ụdị Stacked (78-95% oke ruuru)
 
-Stacked mode na-agba ọtụtụ compression engine n'usoro a kara aka. Pipeline ndabara bụ:
+Ụdị Stacked na-agba ọtụtụ engine mwekota ọsọ n'usoro e kpebiri nke ọma. Pipeline ndabere bụ:
 
 ```txt
 RTK -> Caveman
 ```
 
-Usoro ahụ na-ebu ụzọ mee ka output terminal/tool dị mkpụmkpụ, wee jiri Caveman mee semantic condensation na
-prompt asụsụ mmadụ fọdụrụ. Enwere ike ịhazi stacked pipeline n'ụwa niile ma ọ bụ site na
-compression combo e kenyere routing combo.
+Usoro ahụ na-edebe nsonaazụ terminal/ngwaọrụ dị mkpirikpi tupu, mgbe ahụ ọ na-etinye mmechikọta
+nkọwa Caveman na prompt asụsụ eke fọdụrụ. Enwere ike ịhazi Stacked pipelines zuru ụwa ọnụ ma ọ bụ
+site na compression combos e nyere routing combos.
 
-**Kachasị mma maka:** Context agwakọtara nwere nnukwu tool log tinyere ntuziaka mmadụ ma ọ bụ nchịkọta assistant.
+**Kacha mma maka:** Ọdịnaya jikọtara nke nwere ndekọ ngwaọrụ buru ibu gbakwunyere ntụziaka mmadụ
+ma ọ bụ nchịkọta onye enyemaka.
 
 ---
 
@@ -272,9 +276,9 @@ okwuntughe, token, na ihe nzuzo tupu e debe ihe ọ bụla.
 
 ---
 
-## Ọnụọgụ Mkpakọ
+## Ọnụọgụ Nchịkọta Mkpakọ
 
-Arịrịọ ọ bụla a pakọtara na-agụnye ọnụọgụ na ndekọ sava:
+Arịrịọ ọ bụla e tinyere mkpakọ nwere ọnụọgụ nchịkọta n'ime ndekọ sava:
 
 ```json
 {
@@ -314,36 +318,36 @@ Mode RTK sitere n'ike mmụọ nsọ nke **[RTK - Rust Token Killer](https://git
 
 ## Sistemụ Mkpakọ Dị Elu
 
-E wezụga mode 7 akọwara n'elu (isi mmalite ahụ na-anabatakwa mode `codex-responses` na
-`omniglyph`, nke ntuziaka a na-adịghị ekpuchi), ngalaba ndị dị n'okpuru na-akọwa atụmatụ
-ndị na-arụ ọrụ n'ime ma ọ bụ n'akụkụ mode ndị ahụ: Tool Result Compression na Progressive Aging
-bụ nzọụkwụ 1 na 2 nke injin aggressive (mode Aggressive na nzọụkwụ `aggressive` nke
-stacked pipeline), Stacked Pipeline bụ otu mode Stacked si arụ ọrụ, Cache-Aware Compression
-na-ewedata `aggressive` na `ultra` gaa na `standard` maka ndị na-eweta ọrụ caching mgbe mkpakọ
-dị, ebe Caveman Output Mode na Output Styles bụ ntuziaka system-prompt a na-ahọrọ iji,
-nke anaghị arụ ọrụ na ndabara, ndị na-akpụzi mmepụta model kama ịpakọ arịrịọ ahụ.
+E wezụga ụdị 7 akọwara n'elu (isi mmalite ahụ na-anabatakwa ụdị `codex-responses` na
+`omniglyph`, nke ntuziaka a anaghị ekpuchi), ngalaba ndị dị n'okpuru na-akọwa atụmatụ
+ndị na-arụ ọrụ n'ime ma ọ bụ n'akụkụ ụdị ndị ahụ: Tool Result Compression na Progressive Aging
+bụ nzọụkwụ 1 na 2 nke injin ike (ụdị Aggressive na nzọụkwụ `aggressive` nke
+paịpụ e dokọtara ọnụ), Stacked Pipeline bụ ụzọ ụdị Stacked si arụ ọrụ, Cache-Aware Compression
+na-ewedata `aggressive` na `ultra` gaa na `standard` maka ndị na-eweta ọrụ caching mgbe
+mkpakọ nọ n'ọrụ, ebe Caveman Output Mode na Output Styles bụ ntuziaka system-prompt a na-ahọrọ iji,
+ndị agbanyụrụ na ndabara, nke na-akpụpụta mmepụta model kama ịkpachikọta arịrịọ ahụ.
 
 ### Mkpakọ Na-aghọta Cache
 
-Ụfọdụ ndị na-eweta ọrụ (dịka Anthropic nwere prompt caching) na-akwado **prompt caching**,
-nke na-enye ha ohere idebe akụkụ nke prompt na cache iji belata ọnụ ahịa na oge nchere. Mgbe
-enyere caching aka, mkpakọ aggressive nwere ike **imebi** arụmọrụ n'ezie
-n'ihi na ọ na-agbanwe token ndị e debere na cache, na-eme ka cache ghara ịdị irè.
+Ụfọdụ ndị na-eweta ọrụ (dị ka Anthropic nwere prompt caching) na-akwado **prompt caching**,
+nke na-enye ha ohere idowe akụkụ ụfọdụ nke prompt na cache iji belata ụgwọ na oge nchere. Mgbe
+agbanyere caching, mkpakọ ike nwere ike n'ezie **imebi** arụmọrụ
+n'ihi na ọ na-agbanwe token ndị e debere na cache, si otú ahụ mee ka cache ahụ ghara ịdị irè.
 
 Modul `cachingAware.ts` na-edozi nke a site na **ịchọpụta ọnọdụ caching** na
-**ịhazigharị atụmatụ mkpakọ** dịka o kwesịrị.
+**ịhazigharị atụmatụ mkpakọ** dịka ọnọdụ ahụ siri dị.
 
 #### Otu o si arụ ọrụ
 
-1. **Chọpụta ọnọdụ caching** — Na-enyocha body arịrịọ maka akara `cache_control`
-2. **Chọpụta ndị na-eweta ọrụ caching** — Na-elele ma onye na-eweta ọrụ ezubere iche ọ na-akwado caching
-3. **Hazigharịa atụmatụ** — Na-ewedata `aggressive`/`ultra` gaa na `standard` maka ndị na-eweta ọrụ caching
-4. **Mafee system prompt** — A na-edebekarị system prompt na cache, ya mere epakọla ha
+1. **Chọpụta ọnọdụ caching** — Na-enyocha request body maka akara `cache_control`
+2. **Mata ndị na-eweta ọrụ caching** — Na-elele ma onye na-eweta ọrụ e zubere ọ na-akwado caching
+3. **Hazie atụmatụ** — Na-ewedata `aggressive`/`ultra` gaa na `standard` maka ndị na-eweta ọrụ caching
+4. **Mafere system prompt** — A na-edobekarị system prompt na cache, ya mere akpachikọla ha
 
-Ihe enyemaka atụmatụ ahụ na-eweghachikwa flag `deterministicOnly`, mana onye na-ewu atụmatụ ahụ na-eji
-naanị atụmatụ ahụ — ọ dịghị ihe nọ n'usoro na-esote na-agụ flag ahụ ugbu a.
+Ihe enyemaka atụmatụ ahụ na-eweghachikwa ọkọlọtọ `deterministicOnly`, mana onye na-ewu atụmatụ ahụ na-eji
+naanị atụmatụ ahụ — ọ dịghị ihe dị n'akụkụ usoro ndị na-esote na-agụ ọkọlọtọ ahụ ugbu a.
 
-#### Ihe atụ koodu
+#### Ọmụmaatụ koodu
 
 ```ts
 import {
@@ -366,26 +370,26 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### Mgbe a ga-eji ya
 
-Mkpakọ na-aghọta cache **na-arụ ọrụ mgbe niile** — nhazi adịghị mkpa. Ọ na-amalite mgbe ọ bụla
-mkpakọ dị ma onye na-eweta ọrụ ezubere iche na-akwado prompt caching (Anthropic, OpenAI,
-wdg.); akara `cache_control` doro anya adịghị mkpa — naanị onye na-eweta ọrụ caching
-na-akpalite iwedata ahụ, ebe naanị akara anaghị eme ya (nchọpụta akara na-enye telemetry cache
-data, ọ bụghị mkpebi atụmatụ).
+Mkpakọ na-aghọta cache **na-adị n'ọrụ mgbe niile** — nhazi adịghị mkpa. Ọ na-amalite mgbe ọ bụla
+mkpakọ nọ n'ọrụ ma onye na-eweta ọrụ e zubere na-akwado prompt caching (Anthropic, OpenAI,
+wdg.); akara `cache_control` akọwapụtara abụghị iwu — naanị ịbụ onye na-eweta ọrụ caching
+na-akpalite mwedata ahụ, ebe naanị akara anaghị eme ya (nchọpụta akara na-enye ozi maka
+telemetry cache, ọ bụghị mkpebi atụmatụ).
 
-### Ịka Nka Nwayọọ Nwayọọ
+### Ịka Nka Nke Ji Nwayọọ Nwayọọ
 
-Mkparịta ụka ogologo na-achịkọta ọtụtụ ntụgharị ozi, mana ntụgharị ndị ochie na-ebelata
-mkpa. Modul `progressiveAging.ts` **na-ewedata ogo ozi dịka anya ntụgharị ha si dị**
-(a na-atụ anya ahụ site na njedebe mkparịta ụka). Site na ndabara ndị e wepụtara
+Mkparịta ụka ogologo na-achịkọta ọtụtụ ntụgharị ozi, mana ntụgharị ndị ochie na-adịwanye
+ntakịrị mkpa. Modul `progressiveAging.ts` **na-ebelata ogo ozi dịka anya ntụgharị ha dị**
+(a na-atụ anya ahụ site na ngwụcha mkparịta ụka). Site na ndabara ndị e tinyere
 (`verbatim: 2, light: 2, moderate: 3`):
 
-- **Ntugharị 2 ikpeazụ (oghere ≤ 2)**: Edebere ha otu ha dị
-- **Oghere 3**: Mkpakọ ụdị onye-ọgba (iwepụ okwu mmeju)
-- **Oghere 4+**: A na-achịkọta ozi onye enyemaka; a na-ebelata ozi onye ọrụ ka ọ bụrụ naanị ahịrị mbụ ha,
-  ruo mkpụrụedemede 120 kacha elu; a naghị emetụ ọrụ ndị ọzọ aka. A na-edobe ntụziaka sistemụ, ozi ndị
-  emelarị agadi, na ozi onye ọrụ kachasị ọhụrụ otu ha dị mgbe niile, n'agbanyeghị oghere ha.
-  A naghị atụfu ihe ọ bụla kpamkpam, ma a pụghị iru band `light`
-  site na ntọala ndabara ndị e tinyere (`light` hà nhata `verbatim`).
+- **Ntụgharị 2 ikpeazụ (anya ≤ 2)**: A na-edobe ha kpọmkwem dịka ha dị
+- **Anya 3**: Mkpakọ Caveman (iwepụ okwu ndochi)
+- **Anya 4+**: A na-achịkọta ozi assistant; a na-ebelata ozi user ruo naanị ahịrị mbụ ha,
+  nke oke ya bụ mkpụrụedemede 120; a naghị emetụ role ndị ọzọ aka. System prompt, ozi ndị
+  e meela ka ha kaa nka na ozi user kacha ọhụrụ ka a na-edobe mgbe niile kpọmkwem dịka ha dị
+  n'agbanyeghị anya ha. A naghị atụfu ihe ọ bụla kpamkpam, ebe band `light`
+  enweghị ike iru site na ndabara ndị e tinyere (`light` hà nhata `verbatim`).
 
 #### Ọmụmaatụ koodu
 
@@ -396,15 +400,15 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... Ntugharị 50 ọzọ ...
+  // ... ntụgharị 50 ọzọ ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // ntugharị 3 ikpeazụ: otu ha dị
-  light: 8, // oghere <= 8: mkpakọ dị mfe
-  moderate: 20, // oghere <= 20: mkpakọ ụdị onye-ọgba
-  fullSummary: 5, // ụdị ahụ chọrọ ya, mana koodu banding anaghị agụ ya
-  // oghere > 20: achịkọtara (onye enyemaka) / edobere ahịrị mbụ (onye ọrụ)
+  verbatim: 3, // ntụgharị 3 ikpeazụ: kpọmkwem dịka ha dị
+  light: 8, // anya <= 8: mkpakọ dị mfe
+  moderate: 20, // anya <= 20: mkpakọ caveman
+  fullSummary: 5, // type chọrọ ya, mana koodu banding anaghị agụ ya
+  // anya > 20: a na-achịkọta ya (assistant) / a na-edobe ahịrị mbụ (user)
 });
 
 // saved = ọnụọgụ token echekwara
@@ -412,48 +416,49 @@ const { messages: aged, saved } = applyAging(messages, {
 
 #### Mgbe a ga-eji ya
 
-A na-agbanye ime ka ozi ochie kara aka nwayọọ nwayọọ **mgbe niile** maka ọnọdụ `aggressive` — ọ bụ nzọụkwụ 2 nke
-`compressAggressive()`. Ọnọdụ Ultra anaghị eme ya. Ọ na-arụ ọrụ nke ọma karịsịa maka:
+Ịka nka nke ji nwayọọ nwayọọ **na-adị n'ọrụ mgbe niile** maka ụdị `aggressive` — ọ bụ nzọụkwụ 2 nke
+`compressAggressive()`. Ụdị Ultra anaghị agba ya. Ọ na-arụ ọrụ nke ọma karịsịa maka:
 
 - Oge ide koodu na-aga ogologo oge
 - Mkparịta ụka na-ewe ọtụtụ ụbọchị
-- Usoro ọrụ agent nwere ọtụtụ ọkpụkpọ ngwaọrụ
+- Usoro ọrụ agentic nwere ọtụtụ ọkpụkpọ tool
 
-### Ọnọdụ Mmepụta Ụdị Onye-Ọgba
+### Ụdị Mmepụta Caveman
 
-Ọnọdụ mmepụta ụdị onye-ọgba na-agbakwunye **ntụziaka system prompt** nke na-arịọ model ahụ n'onwe ya ka o nye
-mmepụta dị nkenke — ọkwa `lite` na-arịọ azịza dị nkenke nke na-edobe ahịrịokwu zuru ezu, `full`
-na-arịọ ya ka ọ "zaghachi nkenke dịka onye-ọgba maara ihe", ma `ultra` na-arịọ mmepụta ụdị telegram;
-ntụziaka na-arịọ naanị, ha enweghị ike ikwe nkwa ya. Arịrịọ na-enweta ha site na
+Ụdị mmepụta Caveman na-agbakwunye **ntuziaka system prompt** nke na-arịọ model ahụ n'onwe ya ka o nye
+mmepụta dị nkenke — ọkwa `lite` na-arịọ maka azịza dị nkenke nke na-edobe ahịrịokwu zuru ezu, `full`
+na-arịọ ya ka ọ "zaghachi nkenke dịka caveman maara ihe", ebe `ultra` na-arịọ maka mmepụta telegraphic;
+ntuziaka na-arịọ naanị, ha enweghị ike ikwe nkwa na ọ ga-eme ya. Arịrịọ na-enweta ha site na
 `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
-`open-sse/handlers/chatCore.ts` na-ebu ụzọ jiri shim ndakọrịta ochie
+`open-sse/handlers/chatCore.ts` na-ebu ụzọ kpebie nhọrọ ahụ site na shim ndakọrịta ochie
 (`resolveOutputStyleSelection()` dị na
-`open-sse/services/compression/outputStyles/backCompat.ts`) dozie nhọrọ ahụ, nke, mgbe `outputStyles`
-tọgbọ chakoo, na-atụgharị `cavemanOutputMode` agbanyere gaa na ụdị mmepụta `terse-prose` n'ọkwa
+`open-sse/services/compression/outputStyles/backCompat.ts`), nke, mgbe `outputStyles`
+tọgbọ chakoo, na-atụgharị `cavemanOutputMode` agbanyere gaa na output style `terse-prose` na
 `cavemanOutputMode.intensity` (lee Ndakọrịta ochie n'okpuru); a na-eji nhọrọ `outputStyles`
-na-adịghị tọgbọ chakoo otu ọ dị, mgbe ahụ `cavemanOutputMode.enabled` na `intensity` anaghịzi
-emetụta ihe ọ bụla, ebe toggle `autoClarity` ya ka na-arụ ọrụ. `outputMode.ts` nwere ederede
-ntụziaka (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), ngafe ọdịnaya, na enyemaka nhazi ọnọdụ nke ntinye ahụ
-na-eji; injector `applyCavemanOutputMode()` nke ya enweghị onye na-akpọ ya na production.
+na-adịghị tọgbọ chakoo dịka ọ dị, mgbe ahụ `cavemanOutputMode.enabled` na `intensity` agaghịzi enwe
+mmetụta, ebe toggle `autoClarity` ya ka na-emetụta. `outputMode.ts` nwere ederede
+ntuziaka (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), ụzọ ịgafe ọdịnaya na ihe enyemaka nhọpụta ọnọdụ
+nke injection na-eji; injector `applyCavemanOutputMode()` nke ya enweghị onye na-akpọ ya
+na production.
 
 #### Otu o si arụ ọrụ
 
-Ọnọdụ a anaghị akpakọ input. Ọ na-agbakwunye ngọngọ ntụziaka na system prompt
-(lee Otu ntinye si arụ ọrụ n'okpuru), ma ọnọdụ mkpakọ input ọ bụla ahọpụtara maka arịrịọ ahụ
-ka na-arụ ọrụ emesịa, n'ahụ ozi nke nwere ngọngọ ahụ ugbu a. Tupu nkebi oke
-nke ọkwa ọ bụla ji mechie, ọkwa Bekee `full` na-ekwu:
+Ụdị a anaghị akpakọta ntinye. Ọ na-agbakwunye blọkụ ntụziaka na system prompt
+(lee Otu ntinye si arụ ọrụ n'okpuru), ụdị mkpakọ ntinye ọ bụla ahọpụtara maka arịrịọ ahụ
+ka na-agbakwa ma e mesịa, n'ahụ nke buzi blọkụ ahụ. Tupu nkebi oke a na-ekekọrịta
+nke ọkwa ọ bụla ji agwụ, ọkwa `full` Bekee na-ekwu:
 
-> "Zaghachi nkenke dịka onye-ọgba maara ihe. Wepụ articles (a/an/the), okwu mmeju (just/really/basically/actually/simply), ekele nkwanye ùgwù, na okwu na-egosi enweghị nkwenye. Iberibe ahịrịokwu dị mma. Jiri otuokwu dị mkpụmkpụ (big kama extensive, fix kama implement). Debe isi ihe teknụzụ niile, koodu, njehie, URL, na identifier kpọmkwem."
+> "Zaghachi nkenke dịka onye ọgba nwere ọgụgụ isi. Wepụ articles (a/an/the), okwu mmeju (just/really/basically/actually/simply), ekele, okwu na-egosi enweghị nkwenye. Iberibe ahịrịokwu dị mma. Jiri okwu ndị ọzọ dị mkpụmkpụ (big kama extensive, fix kama implement). Debe ọdịnaya teknụzụ niile, code, errors, URLs, identifiers otu ha dị."
 
 Nke a na-arụ ọrụ nke ọma karịsịa maka:
 
-- Mmepụta koodu (mmepụta ka nkenke = token ole na ole)
-- Ajụjụ na azịza ngwa ngwa (enweghị mkpa nkọwa sara mbara)
-- Nhazi ọtụtụ ihe n'otu oge (mee ka throughput kacha elu)
+- Mmepụta code (mmepụta dị nkenke = tokens ole na ole)
+- Ajụjụ na azịza ngwa ngwa (nkọwa sara mbara adịghị mkpa)
+- Nhazi n'ìgwè (mee ka throughput ruo oke)
 
 #### Mgbe a ga-eji ya
 
-Ọnọdụ mmepụta ụdị onye-ọgba bụ **ihe a na-ahọrọ ịgbanye**. Mgbe mkpakọ dị (`enabled: true`, toggle isi
+Ụdị mmepụta Caveman bụ **opt-in**. Mgbe mkpakọ dị (`enabled: true`, master toggle
 dị na ibe Compression Settings), gbanye ya site na `cavemanOutputMode.enabled`; `intensity`
 na-ahọrọ `lite`, `full` ma ọ bụ `ultra`:
 
@@ -467,92 +472,99 @@ na-ahọrọ `lite`, `full` ma ọ bụ `ultra`:
 }
 ```
 
-Toggle **Output Mode** nke ngwakọta mkpakọ (`outputMode`, ebe ọkwa dị na `outputModeIntensity`)
-na-edobe otu switch ahụ maka arịrịọ ngwakọta ahụ metụtara, ngwaọrụ MCP
-`omniroute_set_compression_engine` na-edekwa ya site na argument boolean `outputMode`
-ya. Nhọrọ `outputStyles` na-adịghị tọgbọ chakoo na-ebute ụzọ karịa switch a. Na
-dashboard, ịgbanye ụdị mmepụta **Terse prose** na-etinye otu ngọngọ ahụ (lee Output
-Styles n'okpuru).
+Toggle **Output Mode** nke combo mkpakọ (`outputMode`, ebe ọkwa dị na `outputModeIntensity`)
+na-edobe otu switch ahụ maka arịrịọ combo ahụ metụtara, ngwá ọrụ MCP
+`omniroute_set_compression_engine` na-edekwa ya site na argument boolean ya `outputMode`.
+Nhọrọ `outputStyles` na-abụghị ihe efu na-ebute ụzọ karịa switch a. Na dashboard, ịgbanye
+ụdị mmepụta **Terse prose** na-etinye otu blọkụ ahụ (lee Output Styles n'okpuru).
 
 ### Ụdị Mmepụta (katalọgụ)
 
-Ọnọdụ mmepụta ụdị onye-ọgba dị n'elu bụ **ụzọ ochie nwere naanị otu style**. Phase 4 mere ka ọ
+Ụdị mmepụta Caveman dị n'elu bụ **ụzọ otu ụdị ochie**. Phase 4 mere ka ọ gbasaa
 ghọọ katalọgụ nke ụdị mmepụta enwere ike ijikọta: `OUTPUT_STYLE_CATALOG` dị na
-`open-sse/services/compression/outputStyles/catalog.ts`. Style ọ bụla bụ ntụziaka system-prompt
-nke na-arịọ model ahụ n'onwe ya ka o nye mmepụta dị ọnụ ala karịa; enwere ike ịgbanye ọtụtụ style
-ọnụ, a na-etinyekwa ha n'usoro katalọgụ.
+`open-sse/services/compression/outputStyles/catalog.ts`. Ụdị ọ bụla bụ ntụziaka system-prompt
+nke na-arịọ model ahụ n'onwe ya ka o nye mmepụta dị ọnụ ala; enwere ike ịgbanye ọtụtụ ụdị
+ọnụ, a na-etinyekwa ha dịka usoro katalọgụ si dị.
 
-| Ụdị                                              | `id`          | Ihe ọ na-eme                                                                                                                                                                                                                         | Asụsụ ntuziaka                                |
-| ------------------------------------------------ | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
-| Nkọwa dị nkenke                                  | `terse-prose` | Wepụ okwu mmeju/edemede/nkwupụta na-enweghị nkwenye; debe isi teknụzụ ka ọ bụrụ kpọmkwem. Otu ederede ahụ dị ka ọnọdụ mmepụta caveman ochie (e zoro aka na ya, edeghị ya ọzọ).                                                       | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Koodu pere mpe                                   | `less-code`   | Usoro YAGNI: mgbanwe kacha nta na-arụ ọrụ, enweghị abstractions a na-arịọghị.                                                                                                                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ponytail (onye nrụpụta sọftụwia ukwu dị umengwụ) | `ponytail`    | "Koodu kacha mma bụ koodu a na-edeghị": iji ihe dị adị ọzọ > idegharị, isi ihe kpatara nsogbu > mgbaàmà, diff kacha mkpụmkpụ na-arụ ọrụ.                                                                                             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Enwere m ADHD (omume mbụ)                        | `i-have-adhd` | Omume mbụ (iwu/ụzọ/snippet tupu nkọwa), usoro nwere nọmba ma nwee oke, OTU nzọụkwụ doro anya na-esote, enweghị okwu mmeghe/nchịkọta/okwu mmechi. E si na [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT) hazie ya. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| CJK dị nkenke (文言)                             | `terse-cjk`   | Azịza `full`/`ultra` n'Asụsụ Chaịna Oge Ochie (文言); `lite` na-arịọ naanị azịza dị mkpirikpi na-enweghị okwu ọrụ, ekele ma ọ bụ ịchọ mma.                                                                                           | zh (locale na-achịkwa, lee n'okpuru)          |
+| Ụdị                                   | `id`            | Ihe ọ na-eme                                                                                                                                                                                                                                                                | Asụsụ ntụziaka                                |
+| ------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Prose dị nkenke                       | `terse-prose`   | Wepụ okwu mmeju/articles/okwu na-egosi enweghị nkwenye; debe ọdịnaya teknụzụ otu ọ dị. Otu ederede ahụ dịka ụdị mmepụta caveman ochie (a na-arụtụ aka na ya, anaghị edegharị ya).                                                                                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Code pere mpe                         | `less-code`     | Ọkwa YAGNI: mgbanwe kacha nta na-arụ ọrụ, enweghị abstractions a na-arịọghị.                                                                                                                                                                                                | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Ponytail (senior dev umengwụ)         | `ponytail`      | "Code kacha mma bụ code a na-edeghị mgbe ọ bụla": reuse > rewrite, root cause > symptom, diff kacha mkpụmkpụ na-arụ ọrụ.                                                                                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Enwere m ADHD (ọrụ-mbụ)               | `i-have-adhd`   | Ọrụ mbụ (command/path/snippet tupu prose), nzọụkwụ nwere nọmba na oke, OTU nzọụkwụ ọzọ doro anya, enweghị preamble/recap/closers. E si na [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT) hazie ya.                                                       | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Nzacha UI Antislop                    | `antislop-ui`   | Usoro ngosi ọ bụla ga-agafe ule ebumnuche (hierarchy, identity, readability); enweghị gradients/glass/glow ndabara, palette nwere oke, enweghị template layouts. Ụdị antislop abụọ ahụ na-agbakwunye oke enweghị-controls-na-adịghị-arụ-ọrụ / enweghị-nkwupụta-echere-eche. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Nzacha Antislop maka ederede na mmadụ | `antislop-copy` | Ederede akọwapụtara nke ọma (enweghị em dash, generic CTAs, buzzwords, chatbot closers, eziokwu echepụtara) tinyere iwu gbasara mmadụ: WCAG AA contrast, visible focus, keyboard reach, empty/loading/error states, mobile reflow.                                          | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| CJK dị nkenke (文言)                  | `terse-cjk`     | Azịza `full`/`ultra` n'asụsụ Chinese Oge Ochie (文言); `lite` na-arịọ naanị azịza dị mkpụmkpụ na-enweghị function words, ekele ma ọ bụ ịchọ mma.                                                                                                                            | zh (locale-gated, lee n'okpuru)               |
 
-Ụdị ọ bụla nwere ọkwa ike atọ — `lite`, `full`, `ultra` — ma ọkwa ọ bụla
-na-ejedebe na nkebi oke a na-ekekọrịta (`SHARED_BOUNDARIES` n'ime `outputMode.ts`), nke
-na-edobe ngọngọ koodu, ụzọ faịlụ, iwu, njehie na URL ka ha bụrụ kpọmkwem. Ederede ọkwa
-`terse-prose` na `terse-cjk` na-agbakwụnyekwa identifiers na ndepụta ahụ.
+Ụdị ọ bụla nwere ọkwa intensity atọ — `lite`, `full`, `ultra` — ọkwa ọ bụla
+na-ejedebekwa na nkebi oke a na-ekekọrịta (`SHARED_BOUNDARIES` dị na `outputMode.ts`), nke
+na-edebe code blocks, file paths, commands, errors na URLs otu ha dị. Ederede ọkwa
+`terse-prose` na `terse-cjk` na-agbakwunye identifiers na ndepụta ahụ.
 
-A na-amachi `terse-cjk` na locale `zh` n'ebe abụọ. Peeji Compression Settings na-egosi
-ahịrị ya naanị mgbe asụsụ UI dashboard bụ Chaịna (`zh-CN` ma ọ bụ `zh-TW`), ma
-`applyOutputStyles()` na-etinye ya naanị mgbe asụsụ e kpebiri maka arịrịọ ahụ (lee Nhọrọ
-asụsụ n'okpuru) bụ `zh`. Izo ahịrị ahụ anaghị ehichapụ nhọrọ `terse-cjk` echekwara:
-API ntọala na-anabata id ụdị ọ bụla, ma ichekwa ụdị ndị ọzọ na peeji ahụ na-ahapụ ya. Mgbe
-arịrịọ na-eme, nyocha asụsụ nke `applyOutputStyles()` bụ naanị mgbochi locale.
+A na-egbochi `terse-cjk` site na locale `zh` n'ebe abụọ. Ibe Compression Settings na-egosi
+ahịrị ya naanị mgbe asụsụ UI dashboard bụ Chinese (`zh-CN` ma ọ bụ `zh-TW`), ebe
+`applyOutputStyles()` na-etinye ya naanị mgbe asụsụ arịrịọ ahụ e kpebiri (lee Nhọrọ asụsụ
+n'okpuru) bụ `zh`. Izobe ahịrị ahụ anaghị ehichapụ nhọrọ `terse-cjk` echekwara:
+settings API na-anabata style id ọ bụla, ma ichekwa ụdị ndị ọzọ na ibe ahụ na-edobe ya.
+N'oge arịrịọ, nyocha asụsụ `applyOutputStyles()` bụ naanị locale gate.
 
 #### Otu ntinye si arụ ọrụ
 
 `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) na-enyocha
-nhọrọ ahụ megide katalọgụ (a na-ewepụ id ndị a na-amaghị na ụdị ndị locale ha adabaghị,
-ọ bụghị njehie ma ọlị; nhọrọ nke na-enweghị ụdị ọ bụla mgbe e kpebisiri ya na-ahapụ body
-agbanweghị, a gafere ya dịka `no_styles`), na-ejikọta ntuziaka ahọpụtara dịka usoro
-katalọgụ si dị,
-na-agbakwụnye nkebi oke ahụ **otu ugboro** (tinyere nkebi nchekwa, `SAFETY_BOUNDARIES` ma ọ bụ
-ntụgharị ya, mgbe ahọpụtara `less-code` ma ọ bụ `ponytail`), ma jiri otu akara idempotency
-(`[OmniRoute Output Styles]`) malite ngọngọ ahụ, ya mere itinye ya ọzọ anaghị eme ihe ọ bụla. Mgbe
-asụsụ e kpebiri (lee Nhọrọ asụsụ n'okpuru) nwere ntụgharị, a na-etinye ntuziaka nke asụsụ
-mpaghara ahụ kama nke Bekee.
+nhọrọ ahụ megide katalọgụ (a na-ewepụ ids ndị a na-amaghị na ụdị ndị locale ha adabaghị,
+ọ dịghị mgbe ọ bụ njehie; nhọrọ nke na-enweghị ụdị ọ bụla mgbe e nyochachara na-ahapụ body
+ahụ dịka ọ dị, a na-amafe ya dịka `no_styles`), na-ejikọta ntuziaka ndị ahọpụtara dịka
+usoro ha si dị na katalọgụ,
+na-agbakwunye nkebi boundaries ahụ **otu ugboro** (tinyere nkebi nchekwa,
+`SAFETY_BOUNDARIES` ma ọ bụ ntụgharị ya, mgbe ahọpụtara `less-code` ma ọ bụ `ponytail`),
+ma jiri otu akara idempotency (`[OmniRoute Output Styles]`) malite block ahụ, ya mere
+itinye ya ọzọ anaghị eme ihe ọ bụla. Mgbe asụsụ e kpebiri (lee Nhọrọ asụsụ n'okpuru)
+nwere ntụgharị, a na-etinye ntuziaka e mere ka ọ kwekọọ na locale kama nke Bekee.
 
-N'elu body nwere array `messages` na-adịghị efu, nyocha idempotency na-eme tupu
-ngafe ọdịnaya: mgbe akara `[OmniRoute Output Styles]` adịlarị n'ọkwa elu
-`system` field (string ma ọ bụ content-block array) ma ọ bụ n'ime ozi system nwere
-ọdịnaya string, a na-ahapụ body agbanweghị dịka `already_applied`, a naghịkwa eme nyocha keyword.
-Ma ọ bụghị ya, ngafe ọdịnaya (`shouldBypassCavemanOutputMode()` n'ime
-`open-sse/services/compression/outputMode.ts`) na-enyocha ederede ozi atọ ikpeazụ,
-n'agbanyeghị role ha, ma na-awụfe ụdị ndị ahụ maka turn ahụ dum mgbe ederede ahụ
-dabara na keyword nchekwa, omume a na-apụghị ịlaghachi azụ, ma ọ bụ arịrịọ nkọwa ya, ma ọ bụ
-usoro usoro ya dị mkpa: `first`, `then`, `after that`, `before`, `rollback` ma ọ bụ
-`backup` nke `delete`, `drop`, `migrate`, `deploy` ma ọ bụ `release` na-esochi n'ime
-mkpụrụedemede 240. Ngafe ahụ na-arụ ọrụ mgbe mgba ọkụ **Auto-Clarity Bypass**
-(`cavemanOutputMode.autoClarity`, nke dị na ndabara) dị ọkụ; imenyụ mgba ọkụ ahụ na-awụfe
-nnyocha keyword.
+N’elu body nwere array `messages` na-adịghị efu, a na-eme nyocha idempotency tupu
+content bypass: mgbe akara `[OmniRoute Output Styles]` adịlarị n’ime field `system`
+nke top-level (string ma ọ bụ content-block array), ma ọ bụ n’ime system message nwere
+string content, a na-ahapụ body ahụ dịka ọ dị dịka `already_applied`, a naghịkwa eme
+nnyocha keyword. Ma ọ bụghị ya, content bypass (`shouldBypassCavemanOutputMode()` dị na
+`open-sse/services/compression/outputMode.ts`) na-enyocha ederede nke messages atọ
+ikpeazụ, n’agbanyeghị role ha, ma na-amafe styles maka turn ahụ dum mgbe ederede ahụ
+dakọtara na keyword nchekwa, irreversible-action, ma ọ bụ clarification ya, ma ọ bụ
+usoro na-adabere n’usoro okwu: `first`, `then`, `after that`, `before`, `rollback` ma ọ bụ
+`backup` nke `delete`, `drop`, `migrate`, `deploy` ma ọ bụ `release` sochiri n’ime
+characters 240. Bypass ahụ na-arụ ọrụ mgbe toggle **Auto-Clarity Bypass**
+(`cavemanOutputMode.autoClarity`, nke dị on na ndabara) dị on; ịgbanyụ toggle ahụ
+na-eme ka a ghara ime nnyocha keyword.
 
-Mgbe ngafe ahụ kwere ka turn ahụ gafee, `placeSystemInstruction()` (otu faịlụ ahụ), nke
-na-adịghị emepụta `messages[0]` ọhụrụ ma ọlị, na-etinye ngọngọ ahụ n'ebe mbụ ọ hụrụ n'ime ndị a:
+Mgbe bypass ahụ kwere ka turn ahụ gafere, `placeSystemInstruction()` (n’otu faịlụ ahụ),
+nke na-adịghị emepụta `messages[0]` ọhụrụ, na-etinye block ahụ n’ebe mbụ n’ime ndị a ọ
+hụrụ:
 
-1. Ozi system dị n'isi nke nwere ọdịnaya string: a na-agbakwụnye ngọngọ ahụ mgbe ederede ya gasịrị.
-2. `system` field dị n'ọkwa elu: a na-agbakwụnye ngọngọ ahụ mgbe ederede string gasịrị, ma ọ bụ
-   tinye ya dịka ngọngọ ederede ọhụrụ n'ime content-block array.
-3. Ozi system mbụ na-esote nke nwere ọdịnaya string: a na-agbakwụnye ngọngọ ahụ mgbe
-   ederede ya gasịrị.
-4. Ọ dịghị nke dị n'elu: ngọngọ ahụ na-abanye n'ime ozi system ọhụrụ na njedebe `messages`.
+1. System message dị n’isi nke nwere string content: a na-agbakwunye block ahụ n’azụ
+   ederede ya.
+2. Field `system` nke top-level: a na-agbakwunye block ahụ n’azụ ederede nke string, ma ọ
+   bụ tinye ya dịka text block ọhụrụ n’ime content-block array.
+3. System message mbụ nke bịara n’azụ ma nwee string content: a na-agbakwunye block ahụ
+   n’azụ ederede ya.
+4. Ọ bụrụ na nke ọ bụla n’ime ndị dị n’elu adịghị: block ahụ na-abanye n’ime system
+   message ọhụrụ na ngwụcha `messages`.
 
-N'elu body na-enweghị array `messages` (ma ọ bụ nke nwere nke efu), enweghị ngafe ọdịnaya na-eme,
-a naghịkwa ele `system` field dị n'ọkwa elu anya. A na-agbakwụnye ngọngọ ahụ mgbe ederede
-string `instructions` field gasịrị, belụsọ ma field ahụ enwelarị akara
-`[OmniRoute Output Styles]`; n'ọnọdụ ahụ, a na-ahapụ body agbanweghị dịka
-`already_applied`. Mgbe body enweghị string `instructions` field mana o nwere `input`
-(string ma ọ bụ array), ngọngọ ahụ na-aghọ `instructions`, na-anọchi uru ọ bụla na-abụghị string
-field ahụ nwere. A na-ahapụ body na-enweghị string `instructions` field ma ọ bụ `input` nke bụ
-string ma ọ bụ array agbanweghị, a na-awụfekwa ya dịka `no_messages`.
+N’elu body na-enweghị array `messages` (ma ọ bụ nke nwere nke tọgbọ chakoo), content
+bypass anaghị arụ ọrụ, a naghịkwa ele field `system` nke top-level anya. A na-agbakwunye
+block ahụ n’azụ ederede nke string field `instructions`, belụsọ ma field ahụ enweelarị
+akara `[OmniRoute Output Styles]`; n’ọnọdụ ahụ, a na-ahapụ body ahụ dịka ọ dị dịka
+`already_applied`. Mgbe body ahụ na-enweghị string field `instructions` ma nwee `input`
+(string ma ọ bụ array), block ahụ na-aghọ `instructions`, ma dochie uru ọ bụla na-abụghị
+string nke field ahụ nwere. A na-ahapụ body na-enweghị string field `instructions` ma ọ
+bụ `input` nke bụ string ma ọ bụ array dịka ọ dị, a na-amafekwa ya dịka `no_messages`.
 
 #### Otu esi eme ka ọ rụọ ọrụ
 
-Na dashboard: **Ọnọdụ Mkpakọ → Ntọala Mkpakọ**
-(`/dashboard/context/settings`), na ngalaba Ụdị mmepụta: e nwere otu ahịrị maka ụdị ọ bụla, nke nwere mgba ọkụ ịgbanye/ịgbanyụ na ihe nhọpụta ọkwa. A na-etinye ụdị ndị ahụ mgbe mkpakọ n’onwe ya gbanyere (mgba ọkụ ukwu nke ibe ahụ, `enabled`). Mgba ọkụ **Auto-Clarity Bypass** dị na ibe **Caveman**
-(`/dashboard/context/caveman`), n’ime kaadị **Ụdị Mmepụta** ya. N’usoro mmemme, nhazi mkpakọ na-echekwa nhọrọ ahụ dị ka:
+Na dashboard: **Compression Context → Compression Settings**
+(`/dashboard/context/settings`), ngalaba Output styles: otu row maka style ọ bụla nwere
+toggle on/off na level selector. Styles na-etinye ntuziaka mgbe compression n’onwe ya dị
+on (master toggle nke ibe ahụ, `enabled`). Toggle **Auto-Clarity Bypass** dị na ibe
+**Caveman** (`/dashboard/context/caveman`), n’ime card **Output Mode** ya. Site na
+program, compression config na-echekwa nhọrọ ahụ dịka:
 
 ```json
 {
@@ -563,134 +575,138 @@ Na dashboard: **Ọnọdụ Mkpakọ → Ntọala Mkpakọ**
 }
 ```
 
-Ndakọrịta azụ: mgbe `outputStyles` tọgbọ chakoo, ntọala ochie `cavemanOutputMode.enabled`
-na-adaba na `terse-prose` n’ogo `cavemanOutputMode.intensity`. Mgbe ahụ, blọk ahụ na-amalite
-site na akara `[OmniRoute Output Styles]`, ebe injector ochie `applyCavemanOutputMode()`
-na-etinye `[OmniRoute Caveman Output Mode]`. N’okpuru akara ahụ, ederede ahụ kwekọrọ na
-ntinye ochie n’asụsụ en, pt-BR, es, de, fr, it, ru, id na vi; na ja na zh, o nwere otu
-ohere mgbakwunye tupu nkebi gbasara oke. `terse-prose` nwere ntụgharị n’asụsụ pt-BR, es,
-de, fr, it, ru, zh, ja, id na vi, ya mere arịrịọ nke asụsụ e kpebiri bụ `hu` na-enweta
-ederede Bekee ebe injector ochie jiri nke Hungarian ya.
+Ndakọrịta azụ: mgbe `outputStyles` tọgbọ chakoo, setting ochie
+`cavemanOutputMode.enabled` na-ejikọta na `terse-prose` na
+`cavemanOutputMode.intensity`. Mgbe ahụ, block ahụ na-amalite na akara
+`[OmniRoute Output Styles]`, ebe injector ochie `applyCavemanOutputMode()` dere
+`[OmniRoute Caveman Output Mode]`. N’okpuru akara ahụ, ederede ahụ dabara na injection
+ochie na en, pt-BR, es, de, fr, it, ru, id na vi; na ja na zh, ọ nwere otu oghere ọzọ
+tupu nkebi boundaries ahụ. A na-atụgharị `terse-prose` gaa na pt-BR, es, de, fr, it, ru,
+zh, ja, id na vi, ya mere request nke asụsụ e kpebiri bụ `hu` na-enweta ederede Bekee
+ebe injector ochie jiri nke Hungarian ya.
 
-Nhọpụta asụsụ ụdị mmepụta (`resolveOutputStyleLanguage()` n’ime
-`outputStyles/apply.ts`): mgbe `languageConfig.enabled` gbanyere, `autoDetect` na-ewere
-ozi onye ọrụ kachasị ọhụrụ n’usoro `messages` nke arịrịọ ahụ nke nwere ederede (ọdịnaya
-string, ma ọ bụ `text` nke akụkụ ọdịnaya ya), wee jiri ihe nchọpụta nke injin Caveman
-(`detectCompressionLanguage()`) nyochaa ya. Ihe nchọpụta ahụ na-eweghachi `zh` maka
-ederede nwere mkpụrụedemede Han ma enweghị kana; ma ọ bụghị ya, ọ na-eweghachi nke ọ bụla
-n’ime `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` na `id` nke nwere ndakọrịta
-ntụaka kachasị ukwuu, ma weghachite `en` mgbe ọ nweghị nke dakọtara — ederede ọ na-enweghị
-ike ịkewa na-enweta Bekee, ọ bụghị `defaultLanguage` ma ọlị, a naghịkwa achọpụta `vi`
-ọ bụ ezie na ụdị ndị ahụ nwere ederede `vi`. Ahụ arịrịọ Responses API na-edobe ntụgharị
-okwu ya n’ime `input`, nke a naghị ewere dịka nlele, ya mere ọ na-enweta
-`defaultLanguage`, emesịa Bekee. Mgbe ozi onye ọrụ ọ bụla n’ime `messages` enweghị
-ederede, ma ọ bụ mgbe `autoDetect` gbanyụrụ, `defaultLanguage` na-emetụta, emesịa Bekee.
-Mgbe `languageConfig.enabled` gbanyụrụ, asụsụ ahụ bụ Bekee — belụsọ ma ngwakọta mkpakọ
-emetụta arịrịọ ahụ (ngwakọta e kenyere ngwakọta ntụgharị ụzọ nke arịrịọ ahụ, ma ọ bụ
-ngwakọta mkpakọ ndabara nke chatCore na-alaghachi na ya maka pipeline stacked arụnyere
-n’ime ya): itinye ngwakọta na-agbanye `languageConfig.enabled` maka arịrịọ ahụ ma debe
-`defaultLanguage` site na ngwugwu asụsụ nke ngwakọta ahụ (uru echekwara ma ọ bụrụ na ọ
-bụ otu n’ime ngwugwu ngwakọta ahụ; ma ọ bụghị ya, ngwugwu mbụ nke ngwakọta ahụ, nke
-ndabara ya bụ `en`), ebe `autoDetect` echekwara (nke ndabara ya bụ ịgbanye) ka
-na-emetụta. Injin ntinye Caveman na-ahọrọ asụsụ ngwugwu iwu ya n’ụzọ dị iche — n’otu
-akụkụ ederede ọ bụla, ma mgbe nchọpụta akpaaka gbanyụrụ, dabere na `enabledPacks`.
+Nhọrọ asụsụ output-style (`resolveOutputStyleLanguage()` dị na
+`outputStyles/apply.ts`): mgbe `languageConfig.enabled` dị on, `autoDetect` na-ewere
+sample site na user message kacha ọhụrụ n’ime array `messages` nke request ahụ nwere
+ederede (string content, ma ọ bụ `text` nke content parts ya), wee mee ka detector nke
+Caveman engine (`detectCompressionLanguage()`) nyochaa ya. Detector ahụ na-eweghachi
+`zh` maka ederede nwere characters Han ma na-enweghị kana; ma ọ bụghị ya, ọ na-eweghachi
+nke ọ bụla n’ime `it`, `pt-BR`, `es`, `de`, `fr`, `ru`, `ja`, `hu` na `id` nke nwere hint
+matches kachasị, ma weghachite `en` mgbe ọ dịghị nke dakọtara — ederede ọ na-enweghị ike
+ịkọwa na-enweta Bekee, ọ bụghị `defaultLanguage`, a naghịkwa achọpụta `vi` ọ bụ ezie na
+styles ahụ nwere ederede `vi`. Body nke Responses API na-edebe turns ya n’ime `input`,
+nke a naghị ewere sample na ya, ya mere ọ na-enweta `defaultLanguage`, mesịa Bekee.
+Mgbe user message ọ bụla n’ime `messages` enweghị ederede, ma ọ bụ mgbe `autoDetect` dị
+off, `defaultLanguage` ka a na-eji, mesịa Bekee. Mgbe `languageConfig.enabled` dị off,
+asụsụ ahụ bụ Bekee — belụsọ ma compression combo metụtara request ahụ (combo e kenyere
+routing combo nke request ahụ, ma ọ bụ default compression combo nke chatCore na-alaghachi
+na ya maka built-in stacked pipeline): itinye combo na-agbanye
+`languageConfig.enabled` ka ọ bụrụ on maka request ahụ ma na-esetịpụ `defaultLanguage`
+site na language packs nke combo ahụ (uru echekwara ma ọ bụrụ na ọ bụ otu n’ime packs
+nke combo ahụ, ma ọ bụghị ya pack mbụ nke combo ahụ, nke ndabara ya bụ `en`), ebe
+`autoDetect` echekwara (nke dị on na ndabara) ka na-arụ ọrụ. Caveman input engine
+na-ahọrọ asụsụ rule-pack ya n’ụzọ dị iche — maka text part ọ bụla, nakwa, mgbe
+auto-detect dị off, dabere na `enabledPacks`.
 
-A na-akpọgide matriks ụdị × asụsụ site na
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`: ụdị katalọgụ ọ bụla ga-enwerịrị
-ntinye n’ime `BASELINE_LANGUAGES` nke ule ahụ; ụdị a na-ejighị locale machibido ga-enwerịrị
-ntụgharị pt-BR (a gụpụrụ `terse-cjk` nke locale machibidoro na iwu a), belụsọ ma edepụtara
-ya n’ime `KNOWN_ENGLISH_ONLY`, nke nwere ike ịnwe naanị ụdị na-enweghị ntụgharị ọ bụla —
-ụdị edepụtara nke nwere ntụgharị ọ bụla ga-ada ule ahụ; ụdị ga-adakwa ule ahụ mgbe ọ
-tufuru asụsụ nke ntinye `BASELINE_LANGUAGES` ya depụtara. Iji tinye ụdị, lee
+A na-akpọgide matriksị ụdị × asụsụ site na
+`tests/unit/compression/output-styles-i18n-matrix.test.ts`: ụdị katalọgụ ọ bụla chọrọ
+ntinye n'ime `BASELINE_LANGUAGES` nke ule ahụ; ụdị a na-ejighị locale gbochie ga-enwerịrị
+ntụgharị pt-BR (`terse-cjk` nke locale na-egbochi apụghị n'iwu a) belụsọ ma e depụtara ya
+na `KNOWN_ENGLISH_ONLY`, nke nwere ike ịnwe naanị ụdị ndị na-enweghị ntụgharị ọ bụla —
+ụdị e depụtara nke nwere ntụgharị ọ bụla ga-ada ule ahụ; ụdị ga-adakwa ule ahụ mgbe ọ
+tụfuru asụsụ e depụtara na ntinye `BASELINE_LANGUAGES` ya. Iji tinye ụdị, lee
 [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
 ### Mkpakọ Nsonaazụ Ngwaọrụ
 
-`compressToolResult()` n’ime `open-sse/services/compression/toolResultCompressor.ts`
-na-eji **usoro 5** akpakọ ederede nsonaazụ ngwa ọrụ. Ọ na-anwale ha n’usoro a, usoro mbụ
-gbanyere nke nyocha ya dabara na ọdịnaya ahụ ga-ekpebi nsonaazụ ya:
+`compressToolResult()` dị na `open-sse/services/compression/toolResultCompressor.ts`
+na-eji **usoro 5** akpakọ ederede nsonaazụ-ngwaọrụ. Ọ na-anwale ha n'usoro a, usoro mbụ
+agbanyere nke nyocha ya dabara na ọdịnaya ga-ekpebi nsonaazụ:
 
-1. **`fileContent`**: ọdịnaya nwere ahịrị 3 ma ọ bụ karịa ebe opekata mpe otu ahịrị, ma e wepụ
-   ndọbanye dị n'ihu, na-amalite na `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` ma ọ bụ `return ` (okwu isi ahụ tinyere oghere), ma ọ bụ na `if`,
-   `for` ma ọ bụ `while` nke `(` ma ọ bụ ` (` na-esochi, na-edowe ahịrị 20 mbụ na ahịrị 5 ikpeazụ ya, ebe
-   a na-etinye akara n'etiti e wepụrụ.
-2. **`grepSearch`**: ọdịnaya nwere opekata mpe otu ahịrị n'ụdị `<path>:<digits>:`,
-   ebe ederede dị tupu kọlụm mbụ na-enweghị oghere, na-edowe naanị ahịrị ndị ahụ, ruo
-   na 30 kacha, nke ọnụ ọgụgụ ndakọrịta ndị ọzọ na ndepụta faịlụ ndị dakọtara na-esochi;
-   a na-atụfu ahịrị ndị ọzọ niile. Otu ahịrị dị otú ahụ ezuola ịkpalite usoro a, ya mere
-   ahịrị ndekọ na-amalite na akara oge dịka `12:30:45` na-agụnyekwa.
-3. **`shellOutput`**: mmepụta nwere usoro ANSI CSI (`ESC[` nke ọnụọgụ ma ọ bụ
-   semicolon na mkpụrụedemede na-esochi, dịka na koodu agba) ma ọ bụ `$` nke oghere
-   na-esochi n'ebe ọ bụla n'ime ederede na-efunahụ usoro ndị ahụ (a na-edowe usoro mgbapụ ndị ọzọ, dịka `ESC[?25l` ma ọ bụ
-   usoro aha-window OSC) ma na-edowe ahịrị 50 ikpeazụ ya, ebe a na-achịkọta
-   ahịrị ndị na-emegharị n'usoro ka ha bụrụ otu. N'ihi na nyocha a na-eme tupu `json` na `errorMessage`,
-   mmepụta JSON ma ọ bụ njehie nwere `$` dị otú ahụ anaghị erute ha mgbe
-   `shellOutput` nọ n'ọrụ.
-4. **`json`**: a na-achịkọta ibu JSON karịrị mkpụrụedemede 2,000 nke na-amalite na `{` ma ọ bụ `[` (mgbe
-   oghere nhọrọ gasịrị) ma nwee ike ịtụgharị ya: array nwere ihe karịrị 7 na-edowe
-   ihe 5 mbụ na ihe 2 ikpeazụ ya na ngụkọta ọnụ ọgụgụ ya, ebe object na-edowe key 20
-   mbụ ya, a na-eji ihe njide `{…N keys}` dochie uru object ma ọ bụ array ọ bụla dị n'ime
-   (maka array, N bụ ogologo ya) yana akara `_remaining_<N>_keys` nke na-agụta key ndị
-   a tụfuru gafee 20 mbụ. A na-edegharị uru scalar n'ozuzu ya, ya mere object nwere key 20
-   ma ọ bụ ihe na-erughị ya nke na-enweghị uru dị n'ime ka a na-edobanyegharị naanị — nke e mere ka ọ dị mkpụmkpụ na-enweta mkpụrụedemede
-   ma na-anọgide na-agbanweghị.
-5. **`errorMessage`**: mmepụta nwere, n'ebe ọ bụla na n'ụdị mkpụrụedemede ukwu ma ọ bụ nta ọ bụla, `error:`,
-   `error ` (okwu ahụ nke oghere na-esochi, dịka na `no error found`), `[error]`,
-   `exception:`, `exception `, `[exception]` ma ọ bụ `traceback` na-edowe ahịrị mbụ ya,
-   ahịrị 10 na-esote na ahịrị 3 ikpeazụ, ebe akara `… [N frames elided] …` na-anọchi
-   ahịrị ndị dị n'etiti ha. Akara ahụ na-apụta naanị mgbe ihe karịrị ahịrị 13 soro ahịrị
-   mbụ, ya mere anaghị eme ka mmepụta njehie nwere ahịrị 14 ma ọ bụ ihe na-erughị ya dị mkpụmkpụ (na ahịrị 12 ma ọ bụ 13,
+1. **`fileContent`**: ọdịnaya nwere ahịrị 3 ma ọ bụ karịa, ebe ọ dịkarịa ala otu ahịrị,
+   mgbe a leghaara oghere mbido anya, ji `import `, `export `, `function `, `class `,
+   `const `, `let `, `var ` ma ọ bụ `return ` bido (okwu igodo ahụ tinyere otu oghere),
+   ma ọ bụ ji `if`, `for` ma ọ bụ `while` nke `(` ma ọ bụ ` (` na-esochi bido; ọ na-edobe
+   ahịrị 20 mbụ na ahịrị 5 ikpeazụ, ma kaa etiti ewepụrụ akara.
+2. **`grepSearch`**: ọdịnaya nwere ọ dịkarịa ala otu ahịrị n'ụdị `<path>:<digits>:`,
+   ebe ederede dị n'ihu colon mbụ na-enweghị whitespace, na-edobe naanị ahịrị ndị ahụ,
+   ruo 30 kacha elu, tinyere ọnụọgụ ndakọrịta ndị ọzọ ọ bụla na ndepụta faịlụ ndị
+   dabara; a na-atụfu ahịrị ndị ọzọ niile. Otu ahịrị dị otu a ezuru iji kpalite usoro a,
+   ya mere ahịrị ndekọ ji timestamp dịka `12:30:45` bido sokwa na ya.
+3. **`shellOutput`**: mmepụta nwere usoro ANSI CSI (`ESC[` nke digit ma ọ bụ semicolon
+   na-esochi, ma mkpụrụedemede mechie ya, dịka na koodu agba) ma ọ bụ `$` nke whitespace
+   na-esochi n'ebe ọ bụla n'ime ederede ga-efunahụ usoro ndị ahụ (a na-edobe escape ndị
+   ọzọ, dịka `ESC[?25l` ma ọ bụ usoro aha-windo OSC), ma debe ahịrị 50 ikpeazụ, ebe a
+   na-achịkọta ahịrị ndị na-emegharị n'usoro ka ha bụrụ otu. N'ihi na nyocha a na-agba
+   tupu `json` na `errorMessage`, mmepụta JSON ma ọ bụ njehie nwere `$` dị otu a
+   agaghị erute ha ma `shellOutput` dị ọkụ.
+4. **`json`**: a na-achịkọta payload JSON karịrị mkpụrụedemede 2,000 nke ji `{` ma ọ bụ
+   `[` bido (mgbe whitespace nhọrọ gasịrị) ma nwee ike ịparse: array nwere ihe karịrị
+   7 na-edobe ihe 5 mbụ na ihe 2 ikpeazụ tinyere ngụkọta ọnụọgụ ya, object na-edobekwa
+   key 20 mbụ, ebe a na-eji placeholder `{…N keys}` dochie uru object ma ọ bụ array
+   ọ bụla dị n'ime ya (maka array, N bụ ogologo ya), tinyere akara `_remaining_<N>_keys`
+   nke na-agụ key ndị a tụfuru gafee 20 mbụ. A na-eṅomi scalar value n'uju, ya mere
+   object nwere key 20 ma ọ bụ ihe na-erughị ya nke na-enweghị uru ndị dị n'ime naanị
+   ka a na-emegharị indent ya — nke e minify-rị na-enwetakwu mkpụrụedemede ma nọgide
+   na-agbanweghị.
+5. **`errorMessage`**: mmepụta nwere, n'ebe ọ bụla na n'ụdị nnukwu ma ọ bụ obere
+   mkpụrụedemede ọ bụla, `error:`, `error ` (okwu ahụ nke oghere na-esochi, dịka na
+   `no error found`), `[error]`, `exception:`, `exception `, `[exception]` ma ọ bụ
+   `traceback` na-edobe ahịrị mbụ ya, ahịrị 10 na-esote na ahịrị 3 ikpeazụ, ebe a
+   na-etinye akara `… [N frames elided] …` n'ọnọdụ ahịrị ndị dị n'etiti ha. Akara ahụ
+   na-apụta naanị mgbe ihe karịrị ahịrị 13 sochiri ahịrị mbụ, ya mere a naghị ebelata
+   mmepụta njehie nwere ahịrị 14 ma ọ bụ ihe na-erughị ya (n'ahịrị 12 ma ọ bụ 13,
    ahịrị 3 ikpeazụ na-emegharị ahịrị ndị e debelarị).
 
-Mgbe otu usoro dakọtara, ọbụna nke na-echekwaghị ihe ọ bụla, anaghị
-anwale usoro ndị na-esote. Mgbe usoro dakọtara echekwaghị token e mere atụmatụ (ogologo ÷ 4, gbakọọ ya elu) —
-dịka ọmụmaatụ faịlụ yiri koodu nwere ahịrị 25 ma ọ bụ ihe na-erughị ya, ma ọ bụ array JSON karịrị mkpụrụedemede 2,000
-nwere ihe 7 ma ọ bụ ihe na-erughị ya — injin aggressive na-edowe nsonaazụ tool
-mbụ: ndị na-akpọ ya abụọ (`compressAggressive()` na `compressAnthropicToolResultBlock()`)
-na-edowe nke mbụ mgbe `saved` bụ 0 ma ọ bụ ihe na-erughị ya, ebe `compressToolResult()` n'onwe ya ka
-na-eweghachi mmepụta usoro ahụ. Nzọụkwụ nsonaazụ-tool abụghị mkpebi ikpeazụ:
-onye nchịkọta ndabere nke injin ahụ ka nwere ike ime ka ozi `tool` ma ọ bụ `function` karịrị
-mkpụrụedemede 8,192 (`maxTokensPerMessage`, 2,048, ugboro 4) dị mkpụmkpụ.
+Mgbe usoro dabara, ọbụlagodi nke na-echekwaghị ihe ọ bụla, a naghị anwale usoro ndị
+na-esote. Mgbe usoro dabara adịghị echekwa token e mere atụmatụ ya (ogologo ÷ 4, e buliri
+ya ruo integer na-esote) — dịka ọmụmaatụ faịlụ yiri koodu nwere ahịrị 25 ma ọ bụ ihe
+na-erughị ya, ma ọ bụ array JSON karịrị mkpụrụedemede 2,000 nwere ihe 7 ma ọ bụ ihe
+na-erughị ya — engine aggressive na-edobe nsonaazụ ngwaọrụ mbụ: ndị na-akpọ ya abụọ
+(`compressAggressive()` na `compressAnthropicToolResultBlock()`) na-edobe nke mbụ mgbe
+`saved` bụ 0 ma ọ bụ ihe na-erughị ya, ebe `compressToolResult()` n'onwe ya ka na-eweghachi
+mmepụta usoro ahụ. Nzọụkwụ nsonaazụ-ngwaọrụ abụghị mkpebi ikpeazụ: fallback summarizer
+nke engine ka nwere ike ibelata ozi `tool` ma ọ bụ `function` nke karịrị mkpụrụedemede
+8,192 (`maxTokensPerMessage`, 2,048, ugboro 4).
 
-#### Mgbe a ga-eji ya
+#### Mgbe e kwesịrị iji ya
 
-Mkpakọ nsonaazụ tool bụ nzọụkwụ 1 nke injin aggressive (`compressAggressive()` dị na
-`open-sse/services/compression/aggressive.ts`), ya mere ọ na-arụ ọrụ na ọnọdụ Aggressive nakwa na
-nzọụkwụ `aggressive` nke usoro pipeline a kwakọtara. Ọ na-amịkọ `tool` na `function`
-ozi ndị yiri usoro OpenAI na ederede dị n'ime block `tool_result` nke Anthropic. Usoro ọ bụla nwere
-switch nke ya n'okpuru `aggressive.toolStrategies`, a na-agbanye ha niile na ndabara. Na dashboard,
-switch ndị ahụ dị na nlele **Advanced** nke ibe Caveman mgbe mkpakọ na-arụ ọrụ ma
-ọnọdụ ndabara bụ Aggressive.
+Mkpakọ nsonaazụ ngwaọrụ bụ nzọụkwụ 1 nke engine aggressive (`compressAggressive()` dị na
+`open-sse/services/compression/aggressive.ts`), ya mere ọ na-agba na mode Aggressive na
+na nzọụkwụ `aggressive` nke pipeline agbakọtara. Ọ na-akpakọ ozi `tool` na `function`
+nwere ọdịdị OpenAI, yana ederede dị n'ime block `tool_result` nke Anthropic. Usoro ọ bụla
+nwere switch nke ya n'okpuru `aggressive.toolStrategies`, a na-agbanye ha niile na
+ndabara. Na dashboard, switch ndị ahụ dị na nlele **Advanced** nke ibe Caveman mgbe
+mkpakọ dị ọkụ ma mode ndabara bụ Aggressive.
 
-### Pipeline A Kwakọtara
+### Pipeline Agbakọtara
 
-Ọnọdụ stacked na-eme ka **ọtụtụ injin rụọ ọrụ n'usoro** — ọ na-abụkarị RTK na-amalite
-(nchekwa 60-90% na mmepụta tool), mgbe ahụ Caveman na-arụ ọrụ na ederede fọdụrụ (~46% nchekwa
-ntinye). Mgbe e jikọtara ha, nke ahụ bụ **oke 78-95% nke ruru eru** (lee Upstream Savings Math
-n'elu): `1 - (1 - 0.60..0.90) × (1 - 0.46)` na-enye nkezi ≈89%.
+Mode stacked na-agba **ọtụtụ engine n'usoro** — ọtụtụ mgbe RTK na-ebu ụzọ
+(nchekwa 60-90% na mmepụta ngwaọrụ), Caveman esozie na ederede fọdụrụ (~46% nchekwa
+ntinye). Mgbe e jikọtara ha, nke ahụ bụ **oke 78-95% nke ruru eru** (lee Mgbakọ Nchekwa
+Upstream dị n'elu): `1 - (1 - 0.60..0.90) × (1 - 0.46)` na-enye nkezi ≈89%.
 
 #### Otu o si arụ ọrụ
 
 ```
-Ntinye (1000 token)
-  → RTK (nzacha maara command) → 200 token
-    → Caveman (iwepụ ihe mmeju) → 108 token
-  → Mmepụta (108 token, ~89% nchekwa)
+Ntinye (token 1000)
+  → RTK (ihe nzacha maara command) → token 200
+    → Caveman (iwepụ ihe mmeju) → token 108
+  → Mmepụta (token 108, ~89% nchekwa)
 ```
 
-#### Mgbe a ga-eji ya
+#### Mgbe e kwesịrị iji ya
 
-Jiri ọnọdụ stacked maka:
+Jiri mode stacked maka:
 
-- Usoro ọrụ ndị tool jupụtara na ha (agentic coding, nyocha)
-- Nhazi batch ebe ọnụ ahịa dị mkpa
+- Usoro ọrụ ndị ji ngwa ọrụ nke ukwuu (agentic coding, nyocha)
+- Nhazi batch nke na-elebara ọnụ ahịa anya
 - Mgbe ịchọrọ nchekwa token kachasị elu
 
-A na-ahazi pipeline stacked site na ntọala mkpakọ `stackedPipeline` zuru ụwa ọnụ,
-ma ọ bụ site na combo mkpakọ nwere aha e kenyere combo routing (lee
-Per-Combo Override n'elu) — ọ bụghị site na `modePack` nke auto-combo (field ahụ na-eme naanị
-mgbanwe arọ nke nhọrọ model auto-combo, na `stacked` abụghị aha pack ziri ezi).
+A na-ahazi pipeline stacked site na ntọala mkpakọ zuru ụwa ọnụ `stackedPipeline`,
+ma ọ bụ site na combo mkpakọ nwere aha e kenyere routing combo (lee
+Override Kwa-Combo dị n'elu) — ọ bụghị site na `modePack` nke auto-combo (field ahụ
+na-agbanwe naanị ibu nhọrọ model nke auto-combo, `stacked` abụghịkwa aha pack ziri ezi).
 
 ---
 

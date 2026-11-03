@@ -37,33 +37,33 @@ OmniRoute의 일반적인 문제와 해결 방법입니다.
 
 ---
 
-### 무료 제공업체의 요청 속도 제한(429 / 400 / 401)
+### 무료 제공자의 속도 제한(429 / 400 / 401)
 
-**증상**: 인증이 필요 없는 무료 제공업체(opencode, auggie 등)에서 `model: "auto"`를 사용할 때 응답 대신 간헐적으로 `HTTP 429`, `400` 또는 `401`이 발생합니다. 잠시 후 동일한 프롬프트를 다시 시도하면 요청이 성공하지만, 자동화(cron 작업, 에이전트, 스크립트)는 첫 번째 실패에서 중단됩니다.
+**증상**: 무료/무인증 제공자(auggie 등)에서 `model: "auto"`를 사용할 때 응답 대신 간헐적으로 `HTTP 429`, `400` 또는 `401` 오류가 발생합니다. 잠시 후 같은 프롬프트를 다시 시도하면 요청이 성공하지만, 자동화 작업(cron 작업, 에이전트, 스크립트)은 첫 번째 실패에서 중단됩니다.
 
-**근본 원인**: 다음 세 가지 독립적인 실패 방식이 겹쳐서 발생합니다:
+**근본 원인**: 세 가지 독립적인 장애 모드가 중첩됩니다.
 
-1. **제공업체 요청 속도 제한(`429`)**: 무료 등급에는 일정 시간 구간별 할당량이 적용될 수 있습니다. 병렬 호출이 한꺼번에 몰리면 할당량이 소진되어, 시간 구간이 초기화될 때까지 다음 요청이 거부됩니다.
-2. **패스스루의 작동하지 않는 모델(`400`/`401`)**: `auto/*` 풀에는 카탈로그에 등록되어 있지만 유효한 자격 증명이 없는 `opencode`의 패스스루 모델이 포함될 수 있습니다(예: `oc/north-mini-code-free` → `401`). 자동 라우터가 해당 모델을 시도했다가 실패하면, 대체 처리가 시작되기 전에 오류가 전파됩니다.
-3. **동시성 증폭(부하 상황의 `429`)**: 여러 에이전트/cron 세션이 동시에 `auto`를 호출하면 전체 요청 속도가 무료 제공업체가 허용할 수 있는 수준을 초과하여 정상적인 호출도 악의적인 요청으로 표시됩니다.
+1. **제공자 속도 제한(`429`)**: 무료 티어에서는 시간 구간별 할당량을 적용할 수 있습니다. 병렬 호출이 급증하면 할당량이 소진되므로, 해당 시간 구간이 초기화될 때까지 다음 요청이 거부됩니다.
+2. **패스스루의 작동하지 않는 모델(`400`/`401`)**: `auto/*` 풀에는 카탈로그에는 등록되어 있지만 유효한 자격 증명이 없는 패스스루 모델이 포함될 수 있습니다(→ `401`). 자동 라우터가 이러한 모델 중 하나를 시도한 후 실패하며, 폴백이 작동하기 전에 오류가 전파됩니다.
+3. **동시성 증폭(부하 시 `429`)**: 여러 에이전트/cron 세션이 동시에 `auto`에 요청을 보내면 총 요청 속도가 무료 제공자가 허용하는 수준을 초과하여 정상적인 호출도 악성 요청으로 판정됩니다.
 
-**검증된 해결 방법(커뮤니티 보고, 2026-08-10)**: 로테이션, 동시성 및 대체 처리가 무료 등급의 불안정성을 흡수하여 중단을 방지하도록 다음 세 가지 환경 변수를 조정하세요:
+**검증된 해결 방법(커뮤니티 보고, 2026-08-10)**: 무료 티어의 불안정성으로 인해 실패하지 않고 순환, 동시성 및 폴백으로 이를 흡수할 수 있도록 다음 세 가지 환경 변수를 조정하세요.
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 발생 시 다른 모델/제공업체로 전환(작동하지 않는 패스스루 모델 건너뛰기)
+export OMNIROUTE_ROTATE_ON_400=true           # 400/401 발생 시 다른 모델/제공자로 전환(작동하지 않는 패스스루 모델 건너뜀)
 export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # 명시적인 고부하 요청 허용 상한(기본값은 미설정: 요청 수 제한 없음, 아래 참고 사항 참조)
 export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # 느린 업스트림을 위해 제한된 대기 시간을 RATE_LIMIT_MAX_WAIT_MS 기본값보다 길게 설정
 ```
 
-이 변수를 OmniRoute 프로세스 환경(예: LaunchAgent plist 또는 `systemctl edit`를 사용하는 데몬)에 설정한 다음 OmniRoute를 재시작하세요. 로테이션 플래그는 가장 큰 효과를 내는 단일 설정입니다. 이 플래그는 치명적인 실패를 풀에 있는 정상 제공업체를 대상으로 한 투명한 재시도로 전환합니다.
+OmniRoute 프로세스 환경(예: LaunchAgent plist 또는 `systemctl edit`를 통해 구성한 데몬)에 이 값을 설정한 다음 OmniRoute를 다시 시작하세요. 순환 플래그는 단일 설정으로 가장 큰 효과를 냅니다. 이 플래그는 치명적인 실패를 풀 내의 정상 제공자에 대한 투명한 재시도로 전환합니다.
 
-**참고**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`는 동시에 실행되는 고부하 요청, 즉 긴 컨텍스트 요청의 수를 제한합니다. 이 제한은 요청 허용 게이트이며 제공업체 요청 속도 제한기가 아닙니다. **#503-fanout 업데이트:** 이 변수는 더 이상 기본적으로 설정되지 않습니다(이제 위와 같이 명시적으로 구성한 경우에만 제한이 적용됨). 대신 고부하 요청 허용 여부는 호스트의 실제 메모리 상한에 따라 자동으로 조정되는 바이트 예산(`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`)을 통해 제어되므로, 새 배포에서는 이 변수를 전혀 설정하지 않아도 `503 chat_admission_busy` 거부가 훨씬 적게 발생해야 합니다. 여기에서 명시적으로 설정해도 문서에 설명된 대로 정확히 작동합니다. 명시적인 바이트 예산 재정의 값은 8 MiB–2 GiB 범위로 제한됩니다. `413 body_exceeds_budget`은 일시적인 문제가 아닙니다. 해당 바이트 예산을 늘리거나, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`를 낮추거나, 프로세스 메모리 상한을 늘리세요. `inflight_bytes_budget`으로 인한 요청 차단은 일시적인 경합이며 재시도할 수 있습니다. 제공업체별 요청 속도 제한(`open-sse/services/rateLimitManager.ts`)은 `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` 및 `RATE_LIMIT_AUTO_ENABLE`로 별도로 제어됩니다. 자세한 내용은 `.env.example`을 참조하세요.
+**참고**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`는 동시에 실행되는 고부하 — 긴 컨텍스트 — 요청 수를 제한합니다. 이 제한은 요청 허용 게이트이지, 제공자 속도 제한기가 아닙니다. **#503-fanout 업데이트:** 이 변수는 더 이상 기본적으로 설정되지 않습니다(이제 위와 같이 명시적으로 구성한 경우에만 적용됨). 대신 고부하 요청 허용 여부는 호스트의 실제 메모리 상한에 따라 자동으로 조정되는, 자동 산출된 바이트 예산(`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`)으로 제어됩니다. 따라서 새로 배포한 환경에서는 이 변수를 전혀 설정하지 않아도 `503 chat_admission_busy` 거부가 훨씬 적게 발생해야 합니다. 여기에 명시적으로 설정하는 방식도 문서에 설명된 그대로 계속 작동합니다. 명시적인 바이트 예산 재정의 값은 8 MiB–2 GiB 범위로 제한됩니다. `413 body_exceeds_budget`는 일시적인 오류가 아닙니다. 해당 바이트 예산을 늘리거나, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES`를 낮추거나, 프로세스 메모리 상한을 늘리세요. `inflight_bytes_budget`으로 인한 요청 차단은 일시적인 경합이며 재시도할 수 있습니다. 제공자별 속도 제한(`open-sse/services/rateLimitManager.ts`)은 `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH`, `RATE_LIMIT_AUTO_ENABLE`을 통해 별도로 제어됩니다. 자세한 내용은 `.env.example`을 참조하세요.
 
-**작동 여부 확인 방법**: 에이전트/cron을 연속으로 빠르게 두 번 실행하고 두 실행 모두 성공하는지 확인하세요. 수정 전에는 일반적으로 두 번째 실행에서 `429`/`401` 오류가 발생합니다. 수정 후에는 오류가 발생하더라도 투명하게 재시도되어 호출이 완료됩니다. 또한 `curl /monitoring/health`를 실행하여 공급자 연결의 `rateLimitedUntil` 필드와 영향을 받는 공급자의 `circuitBreakers.providerBreakers[].state`를 확인할 수 있습니다. 상태는 `CLOSED`, `DEGRADED`, `OPEN`, `HALF_OPEN` 중 하나이며(`src/shared/utils/circuitBreaker.ts` 참조), 계속 실패하는 공급자는 재설정 기간이 지난 후 프로브가 허용되기 전까지 `CLOSED → DEGRADED → OPEN` 순서로 전환됩니다(`HALF_OPEN`).
+**정상 작동 확인 방법**: 에이전트/cron을 짧은 간격으로 두 번 실행하여 두 번 모두 성공하는지 확인하세요. 수정 전에는 일반적으로 두 번째 실행에서 `429`/`401` 오류가 발생합니다. 수정 후에는 오류가 발생하더라도 투명하게 재시도되며 호출이 완료됩니다. 또한 `curl /monitoring/health`를 실행하여 제공자 연결의 `rateLimitedUntil` 필드와 영향을 받는 제공자의 `circuitBreakers.providerBreakers[].state`를 확인할 수 있습니다. 상태는 `CLOSED`, `DEGRADED`, `OPEN`, `HALF_OPEN` 중 하나이며(`src/shared/utils/circuitBreaker.ts` 참조), 계속 실패하는 제공자는 재설정 시간 구간 이후 탐색 요청이 허용되기 전까지 `CLOSED → DEGRADED → OPEN`으로 전환됩니다(`HALF_OPEN`).
 
-**429가 계속 표시되는 경우**: 해당 공급자의 활성 계정에서 단순한 요청 속도 제한이 아니라 실제 _할당량_을 모두 소진한 것입니다. OmniRoute 대시보드 → Providers → Accounts에서 동일한 공급자의 두 번째 계정을 추가하거나 다른 무료 공급자(예: `routeway`, `auggie`)를 함께 사용하세요. 로테이션은 일시적인 요청 속도 제한/400/401 오류에만 도움이 됩니다. 할당량이 완전히 소진된 경우에는 두 번째 자격 증명이나 다른 공급자가 필요합니다.
+**429가 계속 발생하는 경우**: 해당 제공자의 활성 계정이 단순 속도 제한이 아니라 실제 _할당량_을 소진한 것입니다. OmniRoute 대시보드 → Providers → Accounts에서 같은 제공자의 두 번째 계정을 추가하거나 다른 무료 제공자(예: `routeway`, `auggie`)를 함께 사용하세요. 순환은 일시적인 속도 제한/400/401 오류에만 도움이 됩니다. 할당량이 완전히 소진된 경우에는 두 번째 자격 증명이나 다른 제공자가 필요합니다.
 
-**비전 모델(`auto/vision`, `bazaarlink/*`)에서 403이 표시되는 경우**: 연결된 계정에 비전 기능이 포함된 유료 플랜이 없거나 API 키의 권한이 충분하지 않은 것입니다. 공급자 대시보드에서 키 범위에 비전/멀티모달 권한이 포함되어 있는지 확인하거나, 유료 등급 계정을 연결하여 비전 대상으로 유지하세요.
+**비전 모델(`auto/vision`, `bazaarlink/*`)에서 403이 발생하는 경우**: 연결된 계정에 비전 기능이 포함된 유료 플랜이 없거나 API 키의 권한이 부족한 것입니다. 제공자 대시보드에서 키 범위에 비전/멀티모달 권한이 포함되어 있는지 확인하거나, 유료 티어 계정을 연결하여 비전 대상으로 유지하세요.
 
 ---
 
@@ -96,32 +96,32 @@ npm install -g omniroute --legacy-peer-deps
 `npm install -g omniroute`를 실행할 때 최신 npm 버전(v11+ 및 v12+)은 기본적으로 패키지 수명 주기 스크립트를 차단하고 install-scripts 경고를 표시합니다.
 
 ```
-npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
+npm warn install-scripts allowScripts에 포함되지 않아 7개 패키지의 설치 스크립트가 차단되었습니다:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### 이 경고를 무시해도 되나요?
 
-**부분적으로는 가능하지만, 스크립트 없이 실행하는 것은 권장하지 않습니다.** OmniRoute에는 정상적인 대체 메커니즘이 포함되어 있습니다. 독립 실행형 번들에서 네이티브 `better-sqlite3` 바인딩을 로드할 수 없으면 애플리케이션은 `node:sqlite` 또는 `sql.js`와 같은 대체 드라이버를 차례로 사용합니다([SQLite 런타임 확인](../ops/SQLITE_RUNTIME.md) 참조). 서버는 계속 시작되지만, `sql.js`와 같은 WASM 대체 구현을 사용하면 SQLite WAL(Write-Ahead Logging) 모드가 비활성화되고 메모리 및 디스크 동기화 오버헤드가 증가합니다.
+**부분적으로는 가능하지만, 스크립트 없이 실행하는 것은 권장하지 않습니다.** OmniRoute에는 단계적 대체 기능이 포함되어 있습니다. 독립 실행형 번들에서 네이티브 `better-sqlite3` 바인딩을 불러올 수 없는 경우, 애플리케이션은 `node:sqlite` 또는 `sql.js`와 같은 대체 드라이버를 차례로 사용합니다([SQLite 런타임 해석](../ops/SQLITE_RUNTIME.md) 참조). 서버는 계속 시작되지만, `sql.js`와 같은 WASM 대체 구현을 사용하면 SQLite WAL(Write-Ahead Logging) 모드가 비활성화되고 메모리 및 디스크 동기화 오버헤드가 증가합니다.
 
 ### 실제로 필요한 스크립트는 무엇인가요?
 
 차단된 모든 스크립트가 OmniRoute 실행에 필수적인 것은 아닙니다.
 
-- **필수(`omniroute`, `better-sqlite3`):** OmniRoute는 Next.js 독립 실행형 애플리케이션 번들(`dist/`)에서 실행됩니다. 설치 중 npm은 호스트별 네이티브 SQLite 드라이버를 최상위 `node_modules/better-sqlite3/`에 다운로드하거나 컴파일합니다. 그런 다음 OmniRoute의 `postinstall` 스크립트(`scripts/build/postinstall.mjs`)가 이러한 호스트별 바이너리를 확인하고 `dist/node_modules/`에 복사하여 독립 실행형 서버에서 접근할 수 있도록 합니다. `omniroute`의 postinstall 스크립트가 차단되면 이 복사 단계가 생략됩니다.
-- **선택 사항/전이적(`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** 빌드 도우미, 감시 도구 또는 시스템 키체인 유틸리티입니다. 이러한 스크립트를 허용하면 빌드 경고를 방지할 수 있지만, 핵심 라우팅 기능에는 필요하지 않습니다.
-- **제외(`onnxruntime-node`):** 로컬 AI 임베딩을 위한 선택적 종속성이며 OmniRoute 실행에 **필요하지 않습니다**. 이 패키지의 postinstall 스크립트는 NuGet에서 약 300MB의 CUDA 자산을 다운로드합니다. 지원되는 하드웨어에서 로컬 ONNX 가속을 명시적으로 사용하려는 경우가 아니라면 허용 목록에 포함하지 마세요.
+- **필수(`omniroute`, `better-sqlite3`):** OmniRoute는 Next.js 독립 실행형 애플리케이션 번들(`dist/`)에서 실행됩니다. 설치 중에 npm은 최상위 `node_modules/better-sqlite3/`에 호스트별 네이티브 SQLite 드라이버를 다운로드하거나 컴파일합니다. 그런 다음 OmniRoute의 `postinstall` 스크립트(`scripts/build/postinstall.mjs`)가 이러한 호스트별 바이너리를 확인하고 `dist/node_modules/`로 복사하여 독립 실행형 서버가 해당 바이너리에 접근할 수 있도록 합니다. `omniroute`의 postinstall 스크립트가 차단되면 이 복사 단계가 건너뛰어집니다.
+- **선택 사항/전이적 종속성(`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** 빌드 도우미, 감시 도구 또는 시스템 키체인 유틸리티입니다. 이를 허용하면 빌드 경고를 방지할 수 있지만, 핵심 라우팅 기능에는 필요하지 않습니다.
+- **제외(`onnxruntime-node`):** 로컬 AI 임베딩을 위한 선택적 종속성이며 OmniRoute 실행에 **필요하지 않습니다**. 이 패키지의 postinstall 스크립트는 NuGet에서 약 300MB의 CUDA 에셋을 다운로드합니다. 지원되는 하드웨어에서 로컬 ONNX 가속을 명시적으로 사용하려는 경우가 아니라면 허용 목록에 포함하지 마세요.
 
 ### 권장 해결 방법
 
-전역 설치 중 필요한 설치 스크립트를 허용하고 경고를 표시하지 않으려면 OmniRoute와 네이티브 종속성에 대해 `--allow-scripts`를 전달하세요.
+전역 설치 중 필요한 설치 스크립트를 허용하고 경고가 표시되지 않도록 하려면 OmniRoute와 해당 네이티브 종속성을 `--allow-scripts`에 지정하세요.
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-또는 사용자 계정의 모든 전역 설치에 영구적으로 적용하려면 다음과 같이 설정하세요.
+또는 사용자 계정의 모든 전역 설치에 영구적으로 적용하려면 다음과 같이 구성하세요.
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user

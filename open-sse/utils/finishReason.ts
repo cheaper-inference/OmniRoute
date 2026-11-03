@@ -72,6 +72,39 @@ export function isAbortFinishReason(value: unknown): boolean {
   return ABORT_FINISH_REASONS.has(value.toLowerCase());
 }
 
+// Valid Anthropic Messages API `stop_reason` values.
+const CLAUDE_STOP_REASONS = new Set([
+  "end_turn",
+  "max_tokens",
+  "stop_sequence",
+  "tool_use",
+  "pause_turn",
+  "refusal",
+]);
+
+const OPENAI_TO_CLAUDE_STOP_REASONS: Record<string, string> = {
+  stop: "end_turn",
+  length: "max_tokens",
+  tool_calls: "tool_use",
+  // A safety block (Gemini SAFETY/RECITATION/BLOCKLIST/PROHIBITED_CONTENT are
+  // normalized to content_filter upstream) is a refusal, not a completed turn.
+  content_filter: "refusal",
+};
+
+// Single source of truth for OpenAI finish_reason → Claude stop_reason, shared
+// by the streaming (openai-to-claude.ts) and non-streaming (responseTranslator.ts)
+// translators so the two paths cannot drift apart again.
+export function openAIFinishReasonToClaudeStopReason(reason: unknown): string {
+  if (typeof reason !== "string" || !reason) return "end_turn";
+  const mapped = OPENAI_TO_CLAUDE_STOP_REASONS[reason];
+  if (mapped) return mapped;
+  if (CLAUDE_STOP_REASONS.has(reason)) return reason;
+  // Gemini/Antigravity abort reasons (MALFORMED_FUNCTION_CALL, …) must not
+  // present as a clean completion (9router#2462 sub-bug #2): surface them as
+  // "tool_use". Genuinely unknown reasons still fall back to "end_turn".
+  return isAbortFinishReason(reason) ? "tool_use" : "end_turn";
+}
+
 // Subset of ABORT_FINISH_REASONS that specifically means "the model attempted a
 // tool call and Gemini's parser rejected it" (as opposed to language/no_image/
 // other, which aren't about tool calls at all). Live incident (dashboard log id
@@ -94,6 +127,7 @@ export function isMalformedToolCallFinishReason(value: unknown): boolean {
 
 export function normalizeOpenAICompatibleFinishReason(value: unknown): unknown {
   if (typeof value !== "string") return value;
+  if (!value.trim()) return null;
 
   const normalized = value.toLowerCase();
   if (OPENAI_FINISH_REASONS.has(normalized)) return normalized;

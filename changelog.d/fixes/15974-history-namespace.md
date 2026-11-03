@@ -1,1 +1,0 @@
-- Restore long namespaced Responses tool identities from the current request's explicit function-call history, preserving current tool declarations and avoiding ambiguous or flat-name remapping.

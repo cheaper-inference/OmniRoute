@@ -33,37 +33,37 @@ OmniRoute üçün ümumi problemlər və həllər.
 
 ---
 
-## Ətraflı problemlərin aradan qaldırılması
+## Ətraflı Nasazlıqların Aradan Qaldırılması
 
 ---
 
-### Pulsuz provayderlərdə sorğu tezliyinin məhdudlaşdırılması (429 / 400 / 401)
+### Pulsuz Provayderlərdə Sorğu Tezliyinin Məhdudlaşdırılması (429 / 400 / 401)
 
-**Əlamət**: Pulsuz/autentifikasiya tələb etməyən provayderlərlə (opencode, auggie və s.) `model: "auto"` istifadə etdikdə cavablar əvəzinə arabir `HTTP 429`, `400` və ya `401` alırsınız. Eyni sorğu bir neçə an sonra yenidən göndərildikdə uğurlu olur, lakin avtomatlaşdırma (cron tapşırıqları, agentlər, skriptlər) ilk xətada dayanır.
+**Əlamət**: Pulsuz/autentifikasiya tələb etməyən provayderlərlə (auggie və s.) `model: "auto"` istifadə edərkən cavab əvəzinə arabir `HTTP 429`, `400` və ya `401` xətaları alırsınız. Eyni sorğunu bir neçə saniyə sonra təkrar göndərdikdə sorğular uğurla tamamlanır, lakin avtomatlaşdırma (cron tapşırıqları, agentlər, skriptlər) ilk xətada dayanır.
 
 **Əsas səbəb**: Üç müstəqil nasazlıq rejimi üst-üstə düşür:
 
-1. **Provayderin sorğu tezliyi limiti (`429`)**: Pulsuz tariflər müəyyən zaman intervalı üçün kvota tətbiq edə bilər. Paralel çağırışların ani artımı bu kvotanı tükəndirir, buna görə də zaman intervalı sıfırlanana qədər növbəti sorğu rədd edilir.
-2. **Birbaşa ötürmədə nasaz model (`400`/`401`)**: `auto/*` hovuzlarına `opencode` provayderindən kataloqda qeydiyyatdan keçmiş, lakin aktiv giriş məlumatları olmayan birbaşa ötürmə modelləri daxil ola bilər (məsələn, `oc/north-mini-code-free` → `401`). Avtomatik marşrutlaşdırıcı onlardan birini sınayır, uğursuz olur və alternativə keçid işə düşməzdən əvvəl xəta ötürülür.
-3. **Paralelliyin gücləndirici təsiri (yük altında `429`)**: Bir neçə agent/cron sessiyası eyni anda `auto`-ya müraciət etdikdə ümumi sorğu tezliyi pulsuz provayderlərin dözə bildiyi həddi aşır və nəticədə etibarlı çağırışlar sui-istifadə kimi işarələnir.
+1. **Provayderin sorğu tezliyi limiti (`429`)**: Pulsuz tariflər müəyyən vaxt intervalı üzrə kvota tətbiq edə bilər. Paralel çağırışların ani artımı bu kvotanı tükəndirir, buna görə də növbəti sorğu vaxt intervalı sıfırlanana qədər rədd edilir.
+2. **Birbaşa ötürmədə işləməyən model (`400`/`401`)**: `auto/*` hovuzlarına kataloqda qeydiyyatdan keçmiş, lakin aktiv giriş məlumatları olmayan birbaşa ötürmə modelləri daxil ola bilər (→ `401`). Avtomatik yönləndirici onlardan birini sınayır, uğursuz olur və ehtiyat mexanizmi işə düşməzdən əvvəl xəta ötürülür.
+3. **Paralelliyin gücləndirici təsiri (yük altında `429`)**: Bir neçə agent/cron sessiyası eyni anda `auto`-ya müraciət etdikdə ümumi sorğu tezliyi pulsuz provayderlərin dözə biləcəyi həddi aşır və nəticədə normal çağırışlar sui-istifadə kimi işarələnir.
 
-**Təsdiqlənmiş həll (icma tərəfindən bildirilib, 2026-08-10)**: rotasiya, paralellik və alternativə keçid pulsuz tarifdəki qeyri-sabitliyi xəta ilə dayanmaq əvəzinə kompensasiya etsin deyə üç mühit dəyişənini tənzimləyin:
+**Təsdiqlənmiş həll (icma tərəfindən bildirilib, 2026-08-10)**: rotasiya, paralellik və ehtiyat mexanizminin pulsuz tariflərdəki qeyri-sabitliyi xəta ilə dayanmaq əvəzinə idarə etməsi üçün üç mühit dəyişənini tənzimləyin:
 
 ```bash
-export OMNIROUTE_ROTATE_ON_400=true           # 400/401 zamanı başqa modelə/provayderə keçin (nasaz birbaşa ötürmə modellərini ötürür)
-export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ağır sorğular üçün açıq qəbul həddi (standart olaraq təyin edilməyib: sorğu sayı limiti yoxdur, aşağıdakı qeydə baxın)
-export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # yavaş yuxarı axınlar üçün məhdud gözləmə müddətini RATE_LIMIT_MAX_WAIT_MS standart dəyərindən yuxarı qaldırın
+export OMNIROUTE_ROTATE_ON_400=true           # 400/401 zamanı başqa modelə/provayderə keçin (işləməyən birbaşa ötürmə modellərini atlayır)
+export OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT=4   # ağır sorğular üçün açıq qəbul həddi (standart olaraq təyin edilməyib: sorğu sayı məhdudiyyəti yoxdur, aşağıdakı qeydə baxın)
+export OMNIROUTE_CHAT_ADMISSION_QUEUE_MS=20000 # yavaş yuxarı axınlar üçün məhdud gözləmə müddətini standart RATE_LIMIT_MAX_WAIT_MS dəyərindən yuxarı qaldırın
 ```
 
-Bunları OmniRoute prosesinin mühitində (demonda, məsələn, LaunchAgent plist və ya `systemctl edit` vasitəsilə) təyin edin, sonra OmniRoute-u yenidən başladın. Rotasiya bayrağı ən güclü təsirə malik tənzimləmə vasitəsidir: o, ciddi xətanı hovuzdakı işlək provayder üzərindən şəffaf təkrar cəhdə çevirir.
+Bunları OmniRoute prosesinin mühitində (demon üçün, məsələn, LaunchAgent plist və ya `systemctl edit` vasitəsilə) təyin edin, sonra OmniRoute-u yenidən başladın. Rotasiya bayrağı ən böyük təsirə malik tək parametrdir: o, sərt xətanı hovuzdakı sağlam provayderə qarşı şəffaf təkrar cəhdə çevirir.
 
-**Qeyd**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` eyni vaxtda neçə ağır — uzun kontekstli — sorğunun işləyə biləcəyini məhdudlaşdırır; bu hədd provayderin sorğu tezliyi məhdudlaşdırıcısı deyil, qəbul qapısıdır. **#503-fanout yeniləməsi:** bu dəyişən artıq standart olaraq təyin edilmir (indi yalnız yuxarıdakı kimi açıq şəkildə konfiqurasiya edildikdə tətbiq olunur) — bunun əvəzinə ağır sorğuların qəbulu hostun real yaddaş həddinə uyğun olaraq özünü miqyaslandıran, avtomatik hesablanan bayt büdcəsi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ilə idarə olunur. Buna görə yeni yerləşdirmədə bu dəyişən ümumiyyətlə təyin edilmədən xeyli daha az `503 chat_admission_busy` rəddi müşahidə edilməlidir; onu burada açıq şəkildə təyin etmək yenə də sənədləşdirildiyi kimi işləyir. Bayt büdcəsinin açıq şəkildə verilən dəyərləri 8 MiB–2 GiB aralığı ilə məhdudlaşdırılır. `413 body_exceeds_budget` müvəqqəti xəta deyil: həmin bayt büdcəsini artırın, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` dəyərini azaldın və ya prosesin yaddaş həddini artırın. `inflight_bytes_budget` səbəbilə yükün azaldılması müvəqqəti resurs rəqabətidir və təkrar cəhd edilə bilər. Hər provayder üzrə sorğu tezliyinin məhdudlaşdırılması (`open-sse/services/rateLimitManager.ts`) ayrıca olaraq `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` və `RATE_LIMIT_AUTO_ENABLE` tərəfindən idarə olunur — `.env.example` faylına baxın.
+**Qeyd**: `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` eyni anda neçə ağır — uzun kontekstli — sorğunun işləyə biləcəyini məhdudlaşdırır; bu məhdudiyyət provayderin sorğu tezliyi məhdudlaşdırıcısı deyil, qəbul qapısıdır. **#503-fanout yeniləməsi:** bu dəyişən artıq standart olaraq təyin edilmir (indi yalnız yuxarıdakı kimi açıq şəkildə konfiqurasiya edildikdə qüvvəyə minir) — bunun əvəzinə ağır sorğuların qəbulu hostun real yaddaş həddinə uyğun avtomatik miqyaslanan, avtomatik hesablanmış bayt büdcəsi (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`) ilə idarə olunur. Buna görə də yeni yerləşdirmədə bu dəyişən ümumiyyətlə təyin edilmədən xeyli az `503 chat_admission_busy` rəddi müşahidə edilməlidir; onu burada açıq şəkildə təyin etmək hələ də sənədləşdirildiyi kimi işləyir. Açıq şəkildə təyin edilən bayt büdcəsi dəyərləri 8 MiB–2 GiB aralığı ilə məhdudlaşdırılır. `413 body_exceeds_budget` keçici deyil: həmin bayt büdcəsini artırın, `OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES` dəyərini azaldın və ya prosesin yaddaş həddini artırın. `inflight_bytes_budget` səbəbindən yükün azaldılması müvəqqəti resurs rəqabətidir və təkrar cəhd edilə bilər. Hər provayder üzrə sorğu tezliyinin məhdudlaşdırılması (`open-sse/services/rateLimitManager.ts`) ayrıca `RATE_LIMIT_MAX_WAIT_MS`, `RATE_LIMIT_MAX_QUEUE_DEPTH` və `RATE_LIMIT_AUTO_ENABLE` tərəfindən idarə olunur — `.env.example` faylına baxın.
 
-**İşlədiyini necə yoxlamaq olar**: agentinizi/cron tapşırığınızı qısa fasilə ilə iki dəfə işə salın və hər ikisinin uğurla tamamlandığını təsdiqləyin. Düzəlişdən əvvəl ikinci işə salınma adətən `429`/`401` xətası verir. Düzəlişdən sonra xətalar (əgər varsa) şəffaf şəkildə yenidən sınaqdan keçirilir və çağırış tamamlanır. Həmçinin `curl /monitoring/health` əmrini icra edib provayder bağlantılarındakı `rateLimitedUntil` sahəsini və təsirə məruz qalan provayderlər üçün `circuitBreakers.providerBreakers[].state` dəyərini izləyə bilərsiniz — vəziyyət `CLOSED`, `DEGRADED`, `OPEN` və ya `HALF_OPEN` dəyərlərindən biri olur (bax: `src/shared/utils/circuitBreaker.ts`) və davamlı xəta verən provayder, sıfırlama pəncərəsi sınaq sorğusunu buraxmazdan (`HALF_OPEN`) əvvəl `CLOSED → DEGRADED → OPEN` vəziyyətlərinə keçir.
+**İşlədiyini necə yoxlamaq olar**: agentinizi/cron tapşırığınızı qısa fasilə ilə iki dəfə işə salın və hər ikisinin uğurla tamamlandığını təsdiqləyin. Həll tətbiq edilməzdən əvvəl ikinci icra adətən `429`/`401` xətası verir. Həll tətbiq edildikdən sonra xətalar (əgər olarsa) şəffaf şəkildə yenidən sınanır və çağırış tamamlanır. Həmçinin `curl /monitoring/health` əmri ilə provayder bağlantılarındakı `rateLimitedUntil` sahəsini və təsirlənən provayderlər üçün `circuitBreakers.providerBreakers[].state` dəyərini izləyə bilərsiniz — vəziyyət `CLOSED`, `DEGRADED`, `OPEN` və ya `HALF_OPEN` dəyərlərindən biri olur (`src/shared/utils/circuitBreaker.ts` faylına baxın) və davamlı şəkildə uğursuz olan provayder sıfırlama intervalı yoxlama sorğusuna imkan verməzdən (`HALF_OPEN`) əvvəl `CLOSED → DEGRADED → OPEN` vəziyyətlərinə keçir.
 
-**Hələ də 429 görürsünüzsə**: həmin provayder üçün aktiv hesabın _kvotası_ həqiqətən tükənib (sadəcə sorğu tezliyi limiti deyil). OmniRoute idarəetmə panelində Providers → Accounts bölməsinə keçərək eyni provayder üçün ikinci hesab əlavə edin və ya başqa pulsuz provayderdən (məsələn, `routeway`, `auggie`) də istifadə edin. Rotasiya yalnız müvəqqəti sorğu tezliyi/400/401 xətalarında kömək edir; kvotanın tam tükənməsi ikinci giriş məlumatı və ya fərqli provayder tələb edir.
+**Hələ də 429 görürsünüzsə**: həmin provayder üçün aktiv hesab həqiqətən öz _kvotasını_ tükədib (bu, sadəcə sorğu tezliyi limiti deyil). OmniRoute idarəetmə paneli → Providers → Accounts bölməsində eyni provayder üçün ikinci hesab əlavə edin və ya başqa pulsuz provayderi (məsələn, `routeway`, `auggie`) qarışığa daxil edin. Rotasiya yalnız keçici sorğu tezliyi/400/401 xətalarında kömək edir; kvotanın tam tükənməsi ikinci giriş məlumatı və ya fərqli provayder tələb edir.
 
-**Görüntü modellərində (`auto/vision`, `bazaarlink/*`) 403 görürsünüzsə**: qoşulmuş hesabda görüntü imkanlarını əhatə edən ödənişli plan yoxdur və ya API açarının icazələri kifayət deyil. Provayderin idarəetmə panelində açarın əhatə dairəsinə görüntü/multimodal imkanlarının daxil olduğunu yoxlayın və ya ödənişli tarif hesabını qoşaraq onu görüntü üçün hədəf kimi saxlayın.
+**Görüntü modellərində (`auto/vision`, `bazaarlink/*`) 403 görürsünüzsə**: qoşulmuş hesabın görüntü imkanını əhatə edən ödənişli planı yoxdur və ya API açarının icazələri kifayət etmir. Provayderin idarəetmə panelində açarın əhatə dairəsinə görüntü/multimodal imkanlarının daxil olduğunu yoxlayın və ya ödənişli tarif hesabını qoşaraq onu görüntü üçün hədəf kimi saxlayın.
 
 ---
 
@@ -94,35 +94,35 @@ Xəbərdarlıqlar OmniRoute-un nəzarət etmədiyi üçüncü tərəf paketləri
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-`npm install -g omniroute` işlədilərkən daha yeni npm versiyaları (v11+ və v12+) paketlərin həyat dövrü skriptlərini standart olaraq bloklayır və install-scripts xəbərdarlığı göstərir:
+`npm install -g omniroute` əmri icra edilərkən daha yeni npm versiyaları (v11+ və v12+) paketlərin həyat dövrü skriptlərini standart olaraq bloklayır və install-scripts xəbərdarlığı göstərir:
 
 ```
-npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
+npm warn install-scripts 7 paketin quraşdırma skripti allowScripts tərəfindən əhatə olunmadığı üçün bloklandı:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Bu xəbərdarlığa məhəl qoymamaq olarmı?
 
-**Qismən, lakin skriptlər olmadan işlətmək tövsiyə edilmir.** OmniRoute problemsiz ehtiyat mexanizmləri ehtiva edir: yerli `better-sqlite3` bağlamalarını müstəqil paketdən yükləmək mümkün olmadıqda, tətbiq `node:sqlite` və ya `sql.js` kimi alternativ drayverlərə keçir (baxın: [SQLite İcra Mühitinin Müəyyənləşdirilməsi](../ops/SQLITE_RUNTIME.md)). Server yenə də işə düşəcək, lakin `sql.js` kimi WASM ehtiyat mexanizmləri üzərində işləmək SQLite WAL (Qabaqcadan Yazma Jurnalı) rejimini deaktiv edir, həmçinin yaddaş və disk sinxronizasiyası yükünü artırır.
+**Qismən, lakin skriptlər olmadan işlətmək tövsiyə edilmir.** OmniRoute problemsiz ehtiyat mexanizmləri ehtiva edir: əgər yerli `better-sqlite3` binar modulları müstəqil paketdən yüklənə bilmirsə, tətbiq `node:sqlite` və ya `sql.js` kimi alternativ drayverlərə keçir (baxın: [SQLite İcra Mühitinin Müəyyənləşdirilməsi](../ops/SQLITE_RUNTIME.md)). Server yenə də işə düşəcək, lakin `sql.js` kimi WASM ehtiyat mexanizmlərindən istifadə SQLite WAL (Öncədən Yazılan Jurnal) rejimini deaktiv edir və yaddaşla disk sinxronizasiyası üzrə əlavə yükü artırır.
 
-### Hansı skriptlər həqiqətən tələb olunur?
+### Əslində hansı skriptlər tələb olunur?
 
-Bloklanmış skriptlərin heç də hamısı OmniRoute-u işlətmək üçün vacib deyil:
+Bloklanmış skriptlərin hamısı OmniRoute-un işləməsi üçün vacib deyil:
 
-- **Vacib (`omniroute`, `better-sqlite3`):** OmniRoute Next.js-in müstəqil tətbiq paketindən (`dist/`) işləyir. Quraşdırma zamanı npm hosta uyğun yerli SQLite drayverini üst səviyyədəki `node_modules/better-sqlite3/` daxilində endirir və ya kompilyasiya edir. Daha sonra OmniRoute-un `postinstall` skripti (`scripts/build/postinstall.mjs`) bu hosta uyğun ikili faylları yoxlayır və müstəqil serverin onlara çıxış əldə edə bilməsi üçün `dist/node_modules/` qovluğuna köçürür. `omniroute` paketinin postinstall skripti bloklanarsa, bu köçürmə addımı ötürülür.
-- **İxtiyari/keçidli (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Bunlar yığma köməkçiləri, izləmə alətləri və ya sistem açarlar zənciri utilitləridir. Onlara icazə vermək yığma xəbərdarlıqlarının qarşısını alır, lakin onlar əsas marşrutlaşdırma funksionallığı üçün tələb olunmur.
-- **İstisna edilən (`onnxruntime-node`):** Lokal süni intellekt yerləşdirmələri üçün ixtiyari asılılıqdır və OmniRoute-un işləməsi üçün **tələb olunmur**. Onun postinstall skripti NuGet-dən təxminən 300MB həcmində CUDA resursu endirir; dəstəklənən avadanlıqda lokal ONNX sürətləndirməsindən istifadə etməyi açıq şəkildə planlaşdırmırsınızsa, onu icazə siyahısına daxil etməyin.
+- **Vacib (`omniroute`, `better-sqlite3`):** OmniRoute Next.js müstəqil tətbiq paketindən (`dist/`) işləyir. Quraşdırma zamanı npm hosta uyğun yerli SQLite drayverini üst səviyyədəki `node_modules/better-sqlite3/` qovluğuna endirir və ya kompilyasiya edir. Daha sonra OmniRoute-un `postinstall` skripti (`scripts/build/postinstall.mjs`) bu hosta uyğun binar faylları yoxlayır və müstəqil serverin onlara çıxış əldə edə bilməsi üçün `dist/node_modules/` qovluğuna köçürür. `omniroute` paketinin postinstall skripti bloklanarsa, bu köçürmə addımı ötürülür.
+- **İxtiyari/tranzitiv (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Bunlar yığma köməkçiləri, dəyişiklikləri izləmə alətləri və ya sistem açarlar zənciri utilitləridir. Onlara icazə vermək yığma xəbərdarlıqlarının qarşısını alır, lakin əsas marşrutlaşdırma funksionallığı üçün tələb olunmurlar.
+- **İstisna edilən (`onnxruntime-node`):** Lokal süni intellekt vektor təsvirləri üçün ixtiyari asılılıqdır və OmniRoute-un işləməsi üçün **tələb olunmur**. Onun postinstall skripti NuGet-dən təxminən 300MB həcmində CUDA resursu endirir; dəstəklənən avadanlıqda lokal ONNX sürətləndirilməsindən istifadə etməyi açıq şəkildə planlaşdırmırsınızsa, onu icazə siyahısına daxil etməyin.
 
-### Tövsiyə olunan həll
+### Tövsiyə edilən həll
 
-Qlobal quraşdırma zamanı tələb olunan quraşdırma skriptlərinə icazə vermək və xəbərdarlıqları gizlətmək üçün OmniRoute və onun yerli asılılıqları üçün `--allow-scripts` parametrini ötürün:
+Qlobal quraşdırma zamanı tələb olunan quraşdırma skriptlərinə icazə vermək və xəbərdarlıqları susdurmaq üçün OmniRoute və onun yerli asılılıqları üzrə `--allow-scripts` parametrini ötürün:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Alternativ olaraq, bunu istifadəçi hesabınızdakı bütün qlobal quraşdırmalar üçün daimi şəkildə konfiqurasiya etmək məqsədilə:
+Alternativ olaraq, bunu istifadəçi hesabınızdakı bütün qlobal quraşdırmalar üçün daimi şəkildə konfiqurasiya edə bilərsiniz:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -131,7 +131,7 @@ npm install -g omniroute
 
 ### Quraşdırmanızı yoxlayın
 
-Quraşdırmadan sonra yerli bağlamaların və icra mühitinin düzgün işlədiyinə əmin olmaq üçün daxili diaqnostika alətini işə salın:
+Quraşdırmadan sonra yerli binar modulların və icra mühitinin düzgün işlədiyinə əmin olmaq üçün daxili diaqnostika alətini işə salın:
 
 ```bash
 omniroute doctor

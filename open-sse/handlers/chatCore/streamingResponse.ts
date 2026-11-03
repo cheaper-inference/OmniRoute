@@ -1,4 +1,5 @@
 import { projectFailureUsageErrorCode } from "./failureUsage.ts";
+import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 
 export { extractSystemRoleMessages, relocateDirectiveOnlyMessages } from "./claudeSystemRole.ts";
 
@@ -13,7 +14,7 @@ import {
 import { recoverAnthropicThinkingSignature } from "../chatCore/thinkingSignatureRecovery.ts";
 import { runProviderExecutionPipeline } from "../chatCore/providerExecutionPipeline.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
-import { deleteSessionAccountAffinity } from "@/lib/db/sessionAccountAffinity";
+import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { buildStreamingResponseHeaders, stripStaleForwardingHeaders } from "./responseHeaders.ts";
 
 // Re-export the previously inline-defined helpers so existing importers of these
@@ -33,12 +34,7 @@ import { FORMATS } from "../../translator/formats.ts";
 
 import { COLORS } from "../../utils/stream.ts";
 
-import {
-  refreshWithRetry,
-  isUnrecoverableRefreshError,
-  runWithOnPersist,
-  runWithCasGuard,
-} from "../../services/tokenRefresh.ts";
+import * as tokens from "../../services/tokenRefresh.ts";
 
 import { runWithCapture } from "../../utils/providerRequestLogging.ts";
 
@@ -63,6 +59,7 @@ import {
 
 import { HTTP_STATUS, ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE } from "../../config/constants.ts";
 import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.ts";
+import { appendGoogleDailyQuotaViolation } from "../../services/googleDailyQuota.ts";
 
 import { updateProviderConnection, getProviderConnectionById } from "@/lib/db/providers";
 import { wasRefreshTokenRotated } from "@omniroute/open-sse/services/refreshSerializer.ts";
@@ -99,13 +96,11 @@ import { lockModel, recordCoreOwnedAntigravityQuotaState } from "../../services/
 
 import {
   isModelUnavailableError,
-  getNextFamilyFallback,
   isContextOverflowError,
-  findLargerContextModel,
-  getModelFamily,
 } from "../../services/modelFamilyFallback.ts";
 
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
+import { createRequestFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
 
@@ -185,9 +180,15 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     targetFormat,
     triedModels,
     trustedEffortContext,
+    toolDisclosure,
     upstreamStream,
     reportSignatureFailure,
   } = deps;
+  const familyFallback = createRequestFamilyFallback(provider, {
+    headers: clientRawRequest?.headers,
+    hasApiKeyMetadata: Boolean(apiKeyInfo),
+    connectionId: () => String(getCurrentConnectionId() || connectionId || ""),
+  });
 
   let claudePromptCacheLogMeta,
     currentModel,
@@ -213,6 +214,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
   let upstreamDiagnostic: Record<string, unknown> | undefined;
   try {
     const pipelineOutcome = await runProviderExecutionPipeline({
+      getNextFamilyFallback: familyFallback.getNext,
       policy: {
         allowAccountRotation: !managedLease && comboStrategy !== "context-relay",
         allowModelFallback: true,
@@ -236,10 +238,9 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         },
         onCredentialsRefreshed: handleCredentialsRefreshed,
         refreshCredentials: executeRefreshCredentials,
-        assertManagedLeaseFence: (id) => {
-          assertManagedLeaseFence(id);
-        },
+        assertManagedLeaseFence: (id) => assertManagedLeaseFence(id),
         getProviderCredentials,
+        allowedConnections: deps.allowedConnections ?? null,
       },
       wire: {
         body: translatedBody as Record<string, unknown>,
@@ -287,11 +288,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
             extractSessionAffinityKey(body, clientRawRequest?.headers) ||
             null;
           if (!key) return;
-          try {
-            deleteSessionAccountAffinity(key, "codex");
-          } catch {
-            // best-effort
-          }
+          deleteSessionAccountAffinityBestEffort(key, "codex");
         },
         onAuditAccountRotation: (params) => {
           logAuditEvent({
@@ -370,7 +367,14 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       // fail-open: saturation signal is best-effort
     }
   } catch (error) {
-    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    trackPendingRequest(
+      model,
+      provider,
+      pendingConnId,
+      false,
+      undefined,
+      pendingScope.owner ?? pendingRequestId
+    );
     const errorMetadata = getSafeErrorMetadata(error);
     const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
     if (managedLeaseFenceCode)
@@ -611,6 +615,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     !(await shouldIsolateProbeFailures()) &&
     !(await shouldSkipCredentialRefresh(provider, providerResponse))
   ) {
+    if (isPassiveCodex(provider)) recordRejectedToken(credentials);
     // Fix A: wrap refreshCredentials in runWithOnPersist so the persist callback
     // executes INSIDE the per-connection mutex held by getAccessToken. This makes
     // [network refresh + DB write + outer-state mutation] one atomic step and
@@ -651,11 +656,12 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         }
       : null;
 
-    const newCredentials = (await refreshWithRetry(
+    const newCredentials = (await tokens.refreshWithRetry(
       () =>
-        runWithCasGuard(
+        tokens.runWithCasGuard(
           casReread ? { expectedRefreshToken: attemptedRefreshToken, reread: casReread } : null,
-          () => runWithOnPersist(persistFn, () => executor.refreshCredentials(credentials, log))
+          () =>
+            tokens.runWithOnPersist(persistFn, () => executor.refreshCredentials(credentials, log))
         ),
       3,
       log,
@@ -680,7 +686,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       // mutation already happened atomically inside the mutex.
       if (!persistFnRan) {
         Object.assign(credentials, newCredentials);
-        if (onCredentialsRefreshed) {
+        if (onCredentialsRefreshed && !isPassiveCodex(provider)) {
           await onCredentialsRefreshed(newCredentials);
         }
       }
@@ -701,6 +707,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           isOpencodeClient,
           rawBody: body,
           clientRawRequest,
+          toolDisclosure,
         });
         assertManagedLeaseFence(getExecutionConnectionId(getExecutionCredentials()));
         const retryResult = normalizeExecutorResult(
@@ -716,7 +723,9 @@ export async function runStreamingResponse(deps: StreamingDeps) {
               upstreamExtraHeaders: buildUpstreamHeadersForExecute(retryModelId),
               clientHeaders: getExecutorClientHeaders(),
               clientResponseFormat,
-              onCredentialsRefreshed,
+              onCredentialsRefreshed: isPassiveCodex(provider)
+                ? handleCredentialsRefreshed
+                : onCredentialsRefreshed,
               skipUpstreamRetry: isCombo,
               contextEditing: { enabled: contextEditingEnabled },
               correlationId,
@@ -770,7 +779,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       }
     } else {
       log?.warn?.("TOKEN", `${provider?.toUpperCase()} | refresh failed`);
-      if (isUnrecoverableRefreshError(newCredentials) && onCredentialsRefreshed) {
+      if (tokens.isUnrecoverableRefreshError(newCredentials) && onCredentialsRefreshed) {
         // Front 3 (reuse-race tolerance): before deactivating, re-read the DB.
         // If a sibling/concurrent refresh already rotated this connection's
         // refresh_token (common for Codex/OpenAI under one shared Auth0 client),
@@ -800,7 +809,14 @@ export async function runStreamingResponse(deps: StreamingDeps) {
 
   // Check provider response - return error info for fallback handling
   providerFailure: if (!providerResponse.ok) {
-    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    trackPendingRequest(
+      model,
+      provider,
+      pendingConnId,
+      false,
+      undefined,
+      pendingScope.owner ?? pendingRequestId
+    );
 
     let statusCode = providerResponse.status;
     let message = "";
@@ -815,7 +831,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     } else {
       const details = await parseUpstreamError(providerResponse, provider);
       statusCode = details.statusCode;
-      message = details.message;
+      message = appendGoogleDailyQuotaViolation(details.message, details.responseBody);
       retryAfterMs = details.retryAfterMs;
       upstreamErrorBody = details.responseBody;
       upstreamErrorCode = typeof details.errorCode === "string" ? details.errorCode : undefined;
@@ -856,6 +872,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         ? { attempted: false, succeeded: false, execution: null, error: null, recoveryBody: null }
         : await recoverAnthropicThinkingSignature({
             provider,
+            model: currentModel,
             statusCode,
             message,
             body: translatedBody,
@@ -1003,7 +1020,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     // from the same family. This keeps the request alive on the same account
     // instead of failing the entire combo.
     if (!pipelineRecovered && isModelUnavailableError(statusCode, message, provider)) {
-      const nextModel = getNextFamilyFallback(currentModel, triedModels, provider);
+      const nextModel = await familyFallback.getNext(currentModel, triedModels);
       if (nextModel) {
         triedModels.add(nextModel);
         currentModel = nextModel;
@@ -1126,12 +1143,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         };
       }
     } else if (isContextOverflowError(statusCode, message)) {
-      const familyCandidates = getModelFamily(currentModel, provider).filter(
-        (m) => m !== currentModel && !triedModels.has(m)
-      );
-      const nextModel =
-        findLargerContextModel(currentModel, familyCandidates, provider) ??
-        getNextFamilyFallback(currentModel, triedModels, provider);
+      const nextModel = await familyFallback.getForContextOverflow(currentModel, triedModels);
       if (nextModel) {
         triedModels.add(nextModel);
         currentModel = nextModel;

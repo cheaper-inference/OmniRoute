@@ -34,15 +34,17 @@
 import { recordEarlyKeepaliveBytes } from "./earlyKeepaliveByteBuffer.ts";
 import { SYNTHETIC_RESPONSES_SEQUENCE_NUMBER } from "./responsesSequence.ts";
 import { withUpstreamErrorDetail } from "./upstreamErrorDetail.ts";
+import { mergeAbortSignals } from "../executors/base/mergeAbortSignals.ts";
 
 const ENCODER = new TextEncoder();
 const KEEPALIVE_FRAME = ENCODER.encode(": keepalive\n\n");
-// OpenAI-compatible keepalive: a syntactically valid empty streaming chunk.
+// OpenAI-compatible keepalive: a JSON chunk without an application choice.
 // Some OpenAI-compatible clients parse every non-empty SSE line as JSON and
 // reject legal SSE comments before their first provider chunk arrives.
-// id/model stay brand-neutral — these frames go to the client, not upstream.
+// An empty delta before the assistant role creates an untyped LangChain message
+// and drops later tool calls (#18410). No choices also avoids claiming its ID.
 export const OPENAI_KEEPALIVE_FRAME = ENCODER.encode(
-  'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk","created":0,"model":"keepalive","choices":[{"index":0,"delta":{},"finish_reason":null}]}\n\n'
+  'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk","created":0,"model":"keepalive","choices":[]}\n\n'
 );
 // The first slow-path frame must be a valid OpenAI chunk without creating
 // visible reasoning that clients persist into the conversation.
@@ -322,7 +324,9 @@ export function __getDeadlineTokenRegistrySizeForTests(): number {
 /**
  * Route-side half of the slow-path deadline contract. Creates the internal
  * deadline controller and returns it alongside a request whose signal follows
- * both the client signal and the deadline (`AbortSignal.any`), so the handler
+ * both the client signal and the deadline (a self-cleaning merge — not
+ * `AbortSignal.any`, whose composites Node pins in memory while they carry an
+ * abort listener; see `streamDeadlineSignal.ts`), so the handler
  * observes a deadline abort exactly like a client disconnect.
  *
  * The wrapped request MUST be the one the route hands downstream (admission,
@@ -352,7 +356,7 @@ export function withDeadlineSignal(request: Request): {
 } {
   const deadlineController = new AbortController();
   const combined = request.signal
-    ? AbortSignal.any([request.signal, deadlineController.signal])
+    ? mergeAbortSignals(request.signal, deadlineController.signal)
     : deadlineController.signal;
   const headers = new Headers(request.headers);
   // Internal routing token only (never logged, never forwarded upstream — the
@@ -548,6 +552,7 @@ export async function withEarlyStreamKeepalive(
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let stopped = false;
+      let streamErrored = false;
       let nextApplicationKeepaliveAt = applicationKeepalive
         ? performance.now() + applicationKeepalive.intervalMs
         : Number.POSITIVE_INFINITY;
@@ -587,6 +592,13 @@ export async function withEarlyStreamKeepalive(
 
       const onAbort = () => {
         if (aborted) return;
+        // The route's combined signal follows the deadline controller through a merge
+        // listener registered before onExpired, so a deadline abort can reach this
+        // handler first. Route it to the expiry path so the error frame is still sent.
+        if (deadlineEnabled && deadlineController?.signal.aborted) {
+          onExpired();
+          return;
+        }
         aborted = true;
         stopDeadline();
         stopKeepalive();
@@ -682,15 +694,17 @@ export async function withEarlyStreamKeepalive(
                   bytesForwarded += value.byteLength;
                 }
               }
-            } catch (readErr) {
-              // Upstream stream failed mid-flight. Only emit an error frame if
-              // NO content was forwarded yet — otherwise the client already
-              // received partial content and a late error frame would corrupt
-              // the SSE stream. Silently close instead; the client will see
-              // the stream end naturally.
+            } catch {
+              if (aborted) return;
               if (bytesForwarded === 0) {
                 controller.enqueue(errorFrame);
                 recordClientBytes(errorFrame);
+              } else {
+                // The last forwarded bytes may end inside an SSE frame. Fail the
+                // transport instead of appending invalid SSE or reporting clean EOF.
+                // Never expose the upstream exception, its stack, or its cause.
+                streamErrored = true;
+                controller.error(new Error("Upstream stream failed before completion."));
               }
             }
           } else {
@@ -734,7 +748,7 @@ export async function withEarlyStreamKeepalive(
           deadlineController.signal.removeEventListener("abort", onExpired);
         }
         try {
-          controller.close();
+          if (!streamErrored) controller.close();
         } catch {
           /* already closed */
         }
@@ -755,6 +769,11 @@ export async function withEarlyStreamKeepalive(
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      // This early-keepalive response IS the response the client receives while
+      // the real turn is still prefilling — the worst possible stream for a
+      // buffering reverse proxy to sit on. Same no-buffering instruction the
+      // central header path already sets.
+      "X-Accel-Buffering": "no",
       ...extraHeaders,
     },
   });

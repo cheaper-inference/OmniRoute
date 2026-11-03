@@ -72,6 +72,16 @@ curl -i \
 
 የ`manage` ወሰን የሌለው ቁልፍ (ወይም Bearer አለመኖር) `403 LOCAL_ONLY`ን ይመልሳል። ጎን ለጎን ያለው ቅድመ ቅጥያ `/api/cli-tools/runtime/*` ሆን ተብሎ ሊታለፍ የማይችል ነው—[የRoute Guard ደረጃዎች — የ`manage` ወሰን ልዩ ሁኔታ](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)ን ይመልከቱ።
 
+### የOrigin ማረጋገጫ
+
+ከማረጋገጫ በኋላ ወደ `/api/mcp/*` የሚላክ እያንዳንዱ ጥያቄ — ትራንስፖርቶቹ እና እንደ `status`, `tools`, `audit`, `restart` ያሉ የአስተዳደር መስመሮች — ጠሪው ማንም ይሁን (API ቁልፍ፣ የCLI ቶከን፣ የዳሽቦርድ ክፍለ ጊዜ ወይም መግቢያ ሲጠፋ ስም-አልባ loopback) የ`Origin` ራስጌው ይረጋገጣል። ይህ MCP Streamable HTTP ዝርዝር መግለጫ የሚጠይቀው የDNS rebinding ጥበቃ ነው።
+
+- **የ`Origin` ራስጌ የለም** → ይፈቀዳል። OmniRoute CLI፣ SDK እና የIDE ደንበኞች አይልኩትም።
+- **የተፈቀደ `Origin`** → በማንኛውም ወደብ ላይ `localhost` / `127.0.0.1` / `[::1]`፣ ወይም የOmniRoute የራሱ ይፋዊ origin፦ `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`፣ በታመነ reverse proxy የተላለፈ origin (`OMNIROUTE_TRUST_PROXY`፣ base URL ካልተዘጋጀ ብቻ)፣ ወይም በቀጥታ የሚደረስ loopback/LAN IP አስተናጋጅ። የ`Host` ራስጌ ብቻውን አንድን origin በጭራሽ የታመነ አያደርግም።
+- **`null`ን ጨምሮ ማንኛውም ሌላ `Origin`** → ከJSON-RPC የስህተት አካል ጋር `403`፦ `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`። ትክክለኛ የCSRF ቶከን የሚያቀርብ የዳሽቦርድ ክፍለ ጊዜ፣ እንደሌሎች የዳሽቦርድ ጽሑፎች ሁሉ፣ አሁንም ተቀባይነት አለው።
+
+ከreverse proxy ጀርባ የሚቀርብ የአሳሽ MCP ደንበኛ `OMNIROUTE_PUBLIC_BASE_URL` ያስፈልገዋል፤ ለሌሎች origins የፍቃድ ዝርዝር የለም። የCORS ቅድመ ጥያቄ (`OPTIONS`) ለOrigin አይፈተሽም፤ የሚከተለው ጥያቄ ግን ይፈተሻል።
+
 ## IDE ውቅረት
 
 ለClaude Desktop፣ Cursor፣ Cline እና ተኳኋኝ MCP ደንበኞች ማዋቀሪያ [MCP ደንበኛ ውቅረት](../guides/SETUP_GUIDE.md#mcp-client-configuration)ን ይመልከቱ።
@@ -288,186 +298,119 @@ MCP አገልጋዩ በቅንብሮች (`mcpEnabled`) ውስጥ እስኪነቃ 
 
 ---
 
-## ማረጋገጫ እና ወሰኖች
+## ማረጋገጫ እና ወሰን
 
-የMCP መሣሪያ ጥሪዎች የወሰን ሕብረቁምፊዎችን ከጠሪው ያነባሉ። ይህ ማረጋገጫ ከሦስት
-ነጻ የስም ክልሎች አንዱ ነው። በአንድ አረጋጋጭ ማለፍ በሌሎቹ ማለፍ አይደለም።
-ደንቦቹ [ሦስት የወሰን ስም ክልሎች](#three-scope-namespaces) ላይ ይገኛሉ።
-የመሣሪያዎቹ ካታሎግ [የMCP መሣሪያ ወሰኖች](#mcp-tool-scopes) ነው።
+MCP መሣሪያ ጥሪዎች ከደዋዩ የወሰን ሕብረቁምፊዎችን ያንብቡ። ያ ቼክ ከሦስቱ ገለልተኛ የስም ቦታዎች አንዱ ነው። ከአንዱ ፈታሽ ማለፍ ከሌሎቹ ማለፍ አይደለም። ደንቦቹ [ሶስት ወሰን የስም ቦታዎች](#three-scope-namespaces) ናቸው. የመሳሪያው ካታሎግ [MCP የመሳሪያ ወሰን](#mcp-tool-scopes) ነው።
 
-### ሦስት የወሰን ስም ክልሎች
+### ሶስት ወሰን የስም ቦታዎች
 
-በAPI ቁልፍ ላይ ያለው `manage`፣ በMCP መሣሪያ ላይ ያለው `read:compression` እና በ
-`oma_live_…` የመዳረሻ ቶከን ላይ ያለው `read` ሦስት የተለያዩ ፈቃዶች ናቸው። `read`
-የመዳረሻ ቶከን ወደ ለውጥ የሚያደርግ የአስተዳደር መስመር የሚልኩ ጠሪዎች HTTP 403
-`Access token scope 'read' is insufficient; 'write' required.`
-ያገኛሉ። ያ ደረጃ `scopeSatisfies` ነው። የMCP ሰንጠረዡን አያመሳክርም፣ የMCP
-አዛማጁም ያንን አያመሳክርም።
+`manage` በ API ቁልፍ፣ `read:compression` በ MCP መሳሪያ ላይ፣ እና `read` በ `oma_live_…` መዳረሻ ቶከን ላይ ሶስት የተለያዩ ድጋፎች ናቸው። የ `read` መዳረሻ ማስመሰያ ወደ ሚውቴሽን የአስተዳደር መንገድ የላኩ ደዋዮች HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` ያገኛሉ ያ ደረጃ `scopeSatisfies` ነው። የ MCP ጠረጴዛን አያማክርም, እና MCP ተዛማጅ አያማክረውም.
 
-| የስም ክልል         | ማረጋገጫ                                                  | አረጋጋጭ            | ማለፍ የሚፈቅደው                             |
-| :-------------- | :----------------------------------------------------- | :--------------- | :------------------------------------- |
-| የAPI ቁልፍ አስተዳደር | `api_keys.scopes`                                      | `hasManageScope` | ለዚያ Bearer ቁልፍ የአስተዳደር REST            |
-| የAPI ቁልፍ ተጨማሪ   | ያው ድርድር፣ አንድ በትክክል የሚመሳሰል ሕብረቁምፊዝ                      | ከታች የተጠቀሰው አጋዥ   | ያንን አንድ ብቃት ብቻ                         |
-| የMCP መሣሪያ ወሰኖች  | ያው ድርድር፣ ካልሆነ MCP `_meta`፣ ካልሆነ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`   | ማስገደዱ ከነቃ በኋላ ያንን መሣሪያ                 |
-| የመዳረሻ ቶከን       | `oma_live_…`                                           | `scopeSatisfies` | ዘዴውና ዱካው ያንን ደረጃ የሚጠይቁበትን የአስተዳደር መስመር |
+| የስም ቦታ          | ምስክርነት                                                              | አረጋጋጭ            | ማለፊያ ይፈቅዳል                                |
+| :-------------- | :------------------------------------------------------------------ | :--------------- | :---------------------------------------- |
+| ኤፒአይ-ቁልፍ አስተዳደር | `api_keys.scopes`                                                   | `hasManageScope` | ለዛ ተሸካሚ ቁልፍ አስተዳደር REST                   |
+| ኤፒአይ-ቁልፍ ተጨማሪ   | ተመሳሳይ ድርድር ፣ አንድ ትክክለኛ ሕብረቁምፊ                                       | ከታች የተጠቀሰው ረዳት   | አንድ ችሎታ ብቻ                                |
+| MCP የመሳሪያ ወሰኖች  | ተመሳሳይ ድርድር፣ ሌላ MCP `_meta` (HTTP/SSE ብቻ)፣ ሌላ `OMNIROUTE_MCP_SCOPES` | `scopeMatches`   | ያ መሳሪያ፣ አንዴ ማስፈጸሚያ ከበራ                    |
+| የመዳረሻ ማስመሰያ     | `oma_live_…`                                                        | `scopeSatisfies` | ዘዴው እና መንገዱ ያንን ደረጃ የሚያስፈልገው የአስተዳደር መንገድ |
 
-እያንዳንዱን ማረጋገጫ ስለማመንጨት
-[የአስተዳደር ማረጋገጫ](../guides/MANAGEMENT-AUTH.md) ላይ ተብራርቷል።
+እያንዳንዱን የምስክር ወረቀት ማውጣት [በአስተዳደር ማረጋገጫ](../guides/MANAGEMENT-AUTH.md) ውስጥ ተሸፍኗል።
 
-#### የAPI ቁልፍ ወሰኖች
+#### የኤፒአይ-ቁልፍ ወሰኖች
 
-አንድ `api_keys.scopes` ድርድር ሁለት ተግባራትን ያገለግላል። የተለያዩ ፋንክሽኖችን ይጠቀማሉ።
+አንድ `api_keys.scopes` ድርድር ሁለት ስራዎችን ይመገባል። የተለያዩ ተግባራትን ይጠቀማሉ.
 
-**የአስተዳደር REST።** `manage` እና `admin` የ
-`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) አባላት ናቸው።
-`hasManageScope` ለዚያ ቁልፍ የአስተዳደር መስመሮችን የሚፈቅደው ነው። `admin` በእነዚያ
-መስመሮች ላይ የአስተዳደር ብቃት አለው። እዚህ ያለው `admin` የ
-መዳረሻ-ቶከን ደረጃ አይደለም፣ ወደMCP መሣሪያ ወሰኖችም አይስፋፋም።
+**አስተዳደር REST.** `manage` እና `admin` የ `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) አባላት ናቸው። `hasManageScope` ለዚያ ቁልፍ የአስተዳደር መንገዶችን የፈቀደው ነው። `admin` በእነዚያ መንገዶች ላይ ማስተዳደር የሚችል ነው። እዚህ ላይ `admin` የሚለው ቃል የመዳረሻ-ቶከን ደረጃ አይደለም እና ወደ MCP መሣሪያ ወሰን አይስፋፋም።
 
-**ተጨማሪ ሕብረቁምፊዎች።** እያንዳንዱ በትክክል የአባልነት ሙከራ ሲሆን፣ እያንዳንዱም
-ከ`MANAGEMENT_API_KEY_SCOPES` ውጭ ይቆያል።
+**ተጨማሪ ሕብረቁምፊዎች.** እያንዳንዱ ትክክለኛ የአባልነት ፈተና ነው፣ እና እያንዳንዱ ከ `MANAGEMENT_API_KEY_SCOPES` ውጭ ይቆያል።
 
-| ወሰን                            | ማለፍ የሚፈቅደው                                                                                                                                          |
-| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | loopback ያልሆነውን `/api/mcp/` LOCAL_ONLY ልዩ ፈቃድ ብቻ (`hasMcpConnectOrManageScope`)። `manage` ወይም `admin` ያለው ቁልፍ አሁንም ያንን ልዩ ፈቃድ ያልፋል።                 |
-| `self:usage`                   | ለዚህ ቁልፍ `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)። `POST /api/keys` ሲፈጥር ይህን ወሰን ይጨምራል (`normalizeSelfServiceScopesForCreate`)። |
-| `self:account-quota`           | በዚያ የሁኔታ የውሂብ ጭነት ውስጥ ያሉ የupstream መለያ ኮታዎች (`src/lib/usage/apiKeySelfService.ts`)። የሁኔታ መስመሩ አሁንም `self:usage` ይጠይቃል።                              |
-| `policy:bypass-provider-quota` | የዚህ ቁልፍ የinference ጥሪዎች የprovider-quota ፖሊሲን ይዘላሉ (`hasProviderQuotaBypassScope` በ`src/sse/handlers/chat.ts`)።                                      |
+| ወሰን                            | ማለፊያ ይፈቅዳል                                                                                                                                             |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | ሉፕባክ ያልሆነው `/api/mcp/` LOCAL_ONLY የተቀረጸው ብቻ (`hasMcpConnectOrManageScope`)። `manage` ወይም `admin` ያለው ቁልፍ አሁንም ያንን ቀረጻ ያልፋል።                            |
+| `self:usage`                   | `GET /api/v1/me/status` ለዚህ ቁልፍ (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` ይህንን ወሰን በፍጠር (`normalizeSelfServiceScopesForCreate`) ላይ ያክላል። |
+| `self:account-quota`           | በዚያ የሁኔታ ክፍያ (`src/lib/usage/apiKeySelfService.ts`) ውስጥ ያሉ የወራጅ መለያ ኮታዎች። የሁኔታ መንገዱ አሁንም `self:usage` ያስፈልገዋል።                                         |
+| `policy:bypass-provider-quota` | የዚህ ቁልፍ ፍንጭ ጥሪዎች የአቅራቢ-ኮታ ፖሊሲን ዝለል (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`)።                                                      |
 
 #### ማዛመድ
 
-ካታሎጉ [የMCP መሣሪያ ወሰኖች](#mcp-tool-scopes) ስር ያለው ሰንጠረዥ ነው። በ
-`src/shared/constants/mcpScopes.ts` ውስጥ ያለውን `MCP_SCOPE_LIST` እንደዚያ ካታሎግ
-አትቁጠሩት፤ ይህ የመጀመሪያው typed subset ነው። በኋላ የመጡ መሣሪያዎች ተጨማሪ ወሰኖችን
-ከእሱ ጎን ያውጃሉ (`read:notion`፣ `read:skills`፣ `read:local-corpus` እና የተቀረውን ሰንጠረዥ)።
+ካታሎግ በ [MCP የመሳሪያ](#mcp-tool-scopes) ወሰን ስር ያለው ሰንጠረዥ ነው። በ `src/shared/constants/mcpScopes.ts` ውስጥ `MCP_SCOPE_LIST` እንደዚያ ካታሎግ አትያዙ፡ ዋናው የተተየበው ንዑስ ስብስብ ነው። በኋላ መሳሪያዎች ከጎኑ ያሉትን ተጨማሪ ወሰኖች ያውጃሉ (`read:notion`፣ `read:skills`፣ `read:local-corpus` እና የቀረው የሰንጠረዡ ክፍል)።
 
-በ`open-sse/mcp-server/scopeEnforcement.ts` ውስጥ ያለው `evaluateToolScopes` እያንዳንዱ
-አስፈላጊ ወሰን ከተሰጠ ወሰን ጋር ሲዛመድ ጥሪውን ይፈቅዳል፦
+`evaluateToolScopes` በ `open-sse/mcp-server/scopeEnforcement.ts` ውስጥ እያንዳንዱ አስፈላጊ ወሰን ከተወሰነ ወሰን ጋር ሲዛመድ ጥሪን ይፈቅዳል።
 
 - `*` ከእያንዳንዱ አስፈላጊ ወሰን ጋር ይዛመዳል።
-- በ`*` የሚያበቃ የተሰጠ ወሰን፣ ከኮከቢቱ በፊት ባለው ቅድመ ቅጥያ ከሚጀምር
-  አስፈላጊ ወሰን ጋር ይዛመዳል። `read:*` ከ`read:compression` ጋር ይዛመዳል።
-- ሌላ እያንዳንዱ የተሰጠ ወሰን የሚዛመደው በትክክል ከሚመሳሰለው አስፈላጊ ሕብረቁምፊ ጋር ብቻ ነው።
+- በ `*` የሚያልቅ የተሰጠ ወሰን ከኮከቡ በፊት ባለው ቅድመ ቅጥያ የሚጀምረው ከሚፈለገው ወሰን ጋር ይዛመዳል። `read:*` ግጥሚያዎች `read:compression`.
+- እያንዳንዱ ሌላ የተፈቀደ ወሰን የሚዛመደው ከተፈለገው ሕብረቁምፊ ጋር ብቻ ነው።
 
-ወሰኖቹ `["manage"]` የሆኑ ቁልፎች ለ`read:compression` `scopeMatches`ን አያልፉም።
-ብቸኛ የተሰጡ ሕብረቁምፊዎች `admin`፣ `mcp:connect`፣ `read` እና `write` ሲሆኑም ያው ጥሪ
-አያልፍም። በመጨረሻ ካለው `*` በስተቀር በMCP መሣሪያ ወሰኖች መካከል ተዋረድ የለም።
+ስፋቱ ዝቃ የሆነ ቁልፍ `["manage"]` ለ `read:compression` `scopeMatches` ። ተመሳሳይ ጥሪ ለ `admin`፣ `mcp:connect`፣ `read` እና `write` እነዚያ ብቸኛ የተሰጡ ሕብረቁምፊዎች ሲሆኑ አይሳካም። ከ `*` በላይ MCP መሣሪያ ወሰን መካከል ተዋረድ የለም።
 
-`OMNIROUTE_MCP_ENFORCE_SCOPES=true` ካልሆነ በስተቀር ማስገደዱ ጠፍቷል (ነባሪ
-`false`)። ጠፍቶ ሳለ፣ `evaluateToolScopes` ጥሪውን ይፈቅዳል እና ካታሎጉን ይዘላል።
-ነቅቶ ሳለ፣ HTTP የBearer ቁልፉን `api_keys.scopes` እንደ
-`authInfo` ይጠቀማል ([በእያንዳንዱ ቁልፍ የHTTP ወሰን ማስተሳሰር](#per-key-http-scope-binding-7895) ይመልከቱ)።
-ምንም የቁልፍ ወሰኖች ካልተፈቱ፣ የተሰጡት ስብስብ ወደMCP `_meta`፣ ከዚያም
-ወደ`OMNIROUTE_MCP_SCOPES` ያልፋል።
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` (ነባሪ `false`) ካልሆነ በስተቀር ማስፈጸሚያ ጠፍቷል። ጠፍቶ እያለ፣ `evaluateToolScopes` ጥሪውን ይፈቅዳል እና ካታሎጉን ይዘላል። በርቶ እያለ፣ HTTP የተሸካሚውን `api_keys.scopes` እንደ `authInfo` ይጠቀማል ( [የፐር-ቁልፍ HTTP ስፋት ማሰሪያን](#per-key-http-scope-binding-7895) ይመልከቱ)። ምንም የቁልፍ ወሰኖች ካልተፈቱ፣ የተሰጠው ስብስብ ወደ MCP `_meta` (ለ HTTP/SSE ደዋዮች ብቻ የተከበረ፣ በ HTTP auth አውድ ውስጥ፣ የ stdio ደዋይ `_meta` ችላ ይባላል ደንበኛው ስለሚቆጣጠረው እና የደዋይ ማንነት ስለሌለው) ከዚያም `OMNIROUTE_MCP_SCOPES`.
 
 #### የመዳረሻ-ቶከን ወሰኖች
 
-`oma_live_…` ቶከኖች (`src/lib/accessTokens/scopes.ts`) `read`፣ `write` ወይም
-`admin` ይይዛሉ። `scopeSatisfies` ደረጃ ነው፦ `admin` `write`ን እና `read`ን ይሸፍናል፣
-`write`ም `read`ን ይሸፍናል። ያልታወቁ ወሰኖች ምንም አይሸፍኑም።
+`oma_live_…` tokens (`src/lib/accessTokens/scopes.ts`) `read`፣ `write` ወይም `admin` ያዙ። `scopeSatisfies` ደረጃ ነው `admin` `write` እና `read` ይሸፍናል እና `write` `read` ይሸፍናል። ያልታወቁ መጠኖች ምንም አይሸፍኑም።
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ያንን
-ደረጃ ከ`inferRequiredScope` (`src/server/authz/accessScopes.ts`) ጋር ያወዳድራል፦
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) ያንን ደረጃ ከ `inferRequiredScope` (`src/server/authz/accessScopes.ts`) ጋር ያወዳድራል
 
-- `GET`፣ `HEAD` እና `OPTIONS` `read` ይጠይቃሉ።
-- ሌሎች ዘዴዎች በሙሉ `write` ይጠይቃሉ።
-- በ`ADMIN_SCOPE_PREFIXES` ውስጥ ያሉ ዱካዎች ለእያንዳንዱ ዘዴ `admin` ይጠይቃሉ። `/api/mcp`
-  በዚያ ዝርዝር ውስጥ ስላለ፣ `write` የመዳረሻ ቶከን አሁንም የMCP HTTP
-  በይነገጽን መጥራት አይችልም።
-- በ`ADMIN_MUTATION_PREFIXES` ውስጥ ያሉ ዱካዎች `admin`ን የሚጠይቁት ለውጦች ሲደረጉ ብቻ ነው።
+- `GET`፣ `HEAD` እና `OPTIONS` `read` ያስፈልጋቸዋል።
+- ማንኛውም ሌላ ዘዴ `write` ያስፈልገዋል.
+- በ `ADMIN_SCOPE_PREFIXES` ውስጥ ያሉ መንገዶች ለእያንዳንዱ ዘዴ `admin` ያስፈልጋቸዋል። `/api/mcp` በዚያ ዝርዝር ውስጥ አለ፣ ስለዚህ የ `write` መዳረሻ ማስመሰያ አሁንም የ MCP HTTP ወለል መደወል አይችልም።
+- በ `ADMIN_MUTATION_PREFIXES` ውስጥ ያሉ መንገዶች `admin` ለሚውቴሽን ብቻ ያስፈልጋቸዋል።
+- በ `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`፣ `/api/settings/require-login`) ውስጥ ያሉ ዱካዎች `admin` ለሚውቴሽን ብቻ ይፈልጋሉ፣ እና በትክክለኛው መንገድ ላይ ብቻ — ሌሎች `/api/settings/*` ንዑስ-መስመሮች `write` ይጠብቃሉ።
 
-`PATCH /api/keys/{id}` ለውጥ የሚያደርግ ክዋኔ ሲሆን በእነዚያ የአስተዳዳሪ ዝርዝሮች ውስጥ የለም፤ ስለዚህ
-`read` ቶከን 403 ይቀበላል፦
-`የመዳረሻ ቶከኑ ወሰን 'read' በቂ አይደለም፤ 'write' ያስፈልጋል።`
-`write` ወይም `admin` የመዳረሻ ቶከን የዚያን መስመር መስፈርት ያሟላል። የዳሽቦርድ JWT፣
-የloopback CLI machine-id ቶከን እና `manage` ወይም `admin` ያለው API ቁልፍ
-ሌሎች ቅርንጫፎችን ይከተላሉ፣ እና በዚህ ደረጃ አይገደቡም።
+`PATCH /api/keys/{id}` ሚውቴሽን ነው እና በእነዚያ የአስተዳዳሪ ዝርዝሮች ውስጥ የለም፣ ስለዚህ የ `read` ማስመሰያ 403 `Access token scope 'read' is insufficient; 'write' required.` A `write` ወይም `admin` የመዳረሻ ማስመሰያ ያንን መንገድ ያሟላል። ዳሽቦርድ JWT፣ loopback CLI machine-id token እና `manage` ወይም `admin` ያለው API ቁልፍ ሌሎች ቅርንጫፎችን ይወስዳሉ እና በዚህ ማዕረግ አይጠበቡም።
 
-ለ`/api/mcp` የ`scopeSatisfies` ፍተሻን ያለፈ የመዳረሻ ቶከን ያለፈው
-የአስተዳደር መግቢያ ፍተሻን ብቻ ነው። የመሣሪያ ጥሪዎች አሁንም `scopeMatches`ን በAPI ቁልፍ
-ወሰኖች ላይ ያስኬዳሉ። የመዳረሻ ቶከኑ ደረጃ ለ`scopeMatches` ግብዓት አይደለም።
+`scopeSatisfies` ለ `/api/mcp` የሚያልፍ የመዳረሻ ማስመሰያ የአስተዳደር በርን ብቻ አጽድቷል። የመሳሪያ ጥሪዎች አሁንም `scopeMatches` ከኤፒአይ-ቁልፍ ወሰኖች ጋር ያካሂዳሉ። የመዳረሻ-ቶከን ደረጃ ለ `scopeMatches` ግቤት አይደለም።
 
-### የMCP መሣሪያ ወሰኖች
+### MCP የመሳሪያ ወሰኖች
 
-የወሰን ማስፈጸሚያው በ`open-sse/mcp-server/scopeEnforcement.ts` ውስጥ ተማክሏል።
-እያንዳንዱ መሣሪያ የተወሰኑ ወሰኖችን ይፈልጋል፦
+የወሰን ማስፈጸሚያ በ `open-sse/mcp-server/scopeEnforcement.ts` ውስጥ የተማከለ ነው። እያንዳንዱ መሣሪያ የተወሰኑ ልኬቶችን ይፈልጋል-
 
-| ወሰን                   | መሣሪያዎች                                                                                                                                                                          |
-| :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                               |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                       |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                          |
-| `read:quota`          | `check_quota`                                                                                                                                                                   |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                          |
-| `read:models`         | `list_models_catalog`                                                                                                                                                           |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                   |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                           |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                              |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                     |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                  |
-| `read:cache`          | `cache_stats`                                                                                                                                                                   |
-| `write:cache`         | `cache_flush`                                                                                                                                                                   |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                      |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                               |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                           |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                          |
-| `read:memory`         | `memory_search`                                                                                                                                                                 |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                    |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                              |
-| `write:skills`        | `skills_enable`                                                                                                                                                                 |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                         |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                       |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                  |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                              |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                 |
-| `read:obsidian`       | 13 የማንበቢያ መሣሪያዎች — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 የመጻፊያ መሣሪያዎች — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                 |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                               |
+| ወሰን                   | መሳሪያዎች                                                                                                                                                                         |
+| :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                              |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                      |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                         |
+| `read:quota`          | `check_quota`                                                                                                                                                                  |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                         |
+| `read:models`         | `list_models_catalog`                                                                                                                                                          |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                  |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                          |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                             |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                    |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                 |
+| `read:cache`          | `cache_stats`                                                                                                                                                                  |
+| `write:cache`         | `cache_flush`                                                                                                                                                                  |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                     |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                              |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                          |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                               |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                         |
+| `read:memory`         | `memory_search`                                                                                                                                                                |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                   |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                             |
+| `write:skills`        | `skills_enable`                                                                                                                                                                |
+| `execute:skills`      | `skills_execute`                                                                                                                                                               |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                               |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                        |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                      |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                               |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                 |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                             |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                |
+| `read:obsidian`       | 13 መሳሪያዎችን ያንብቡ — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 መሳሪያዎችን ፃፍ — `obsidian_write_note`፣ `obsidian_append_note`፣ `obsidian_patch_note`፣ `obsidian_move_note`፣ `obsidian_delete_note`፣ `obsidian_sync_trigger`፣…                   |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                              |
 
-የዋይልድካርድ ወሰኖች ይደገፋሉ፦ `read:*` ሁሉንም የማንበቢያ ወሰኖች ይፈቅዳል፣ `*` ደግሞ ሙሉ መዳረሻን ይፈቅዳል።
+የ Wildcard ወሰን ይደገፋል `read:*` ሁሉንም የንባብ ወሰን ይሰጣል፣ `*` ሙሉ መዳረሻን ይሰጣል።
 
-### `mcp:connect` — የተወሰነ የመስመር ችሎታ (#7895)
+### `mcp:connect` — ጠባብ መንገድ ችሎታ (#7895)
 
-ከloopback ውጭ ያለውን HTTP/SSE MCP ማጓጓዣ (`/api/mcp/*`) ለመድረስ
-የ`/api/mcp/` LOCAL_ONLY ልዩ ፈቃድ ያስፈልጋል (`docs/security/ROUTE_GUARD_TIERS.md`ን ይመልከቱ)። ከዚህ በፊት
-ያ ልዩ ፈቃድ ሙሉ `manage`/`admin`-scope API key ብቻ ይቀበል ነበር — MCPን ብቻ
-ማነጋገር ለሚፈልግ ጠሪ ይህ ከመጠን በላይ ሰፊ ነው። `src/shared/constants/managementScopes.ts` አሁን
-`MCP_CONNECT_SCOPE = "mcp:connect"`ን ወደ ውጭ ያቀርባል፦ ተጨማሪና የተወሰነ ወሰን (`SELF_USAGE_SCOPE`ን የሚከተል)
-በ`src/server/authz/policies/management.ts` ውስጥ ያለውን `/api/mcp/` ማለፊያ ብቻ የሚፈቅድ ሲሆን — ለሌሎች የአስተዳደር መስመሮች ምንም መዳረሻ አይሰጥም
-እና ሆን ተብሎ ከ`MANAGEMENT_API_KEY_SCOPES` ውጭ ተደርጓል። `manage`/`admin`
-የያዘ key አሁንም ልዩ ፈቃዱን ያለምንም ለውጥ ያልፋል፤ `mcp:connect` ለርቀት
-MCP-ብቻ ጠሪዎች ዝቅተኛ መብት ያለው አማራጭ ሲሆን፣ በ`hasMcpConnectOrManageScope()` በኩል ይፈተሻል።
+ከloopback ወደ HTTP/SSE MCP ትራንስፖርት (`/api/mcp/*`) መድረስ `/api/mcp/` LOCAL_ONLY carve-out ያስፈልገዋል ( `docs/security/ROUTE_GUARD_TIERS.md` ይመልከቱ)። ከታሪክ አኳያ ያ ቀረጻ የተቀበለችው ሙሉ `manage`/`admin` -scope API key — ለጠሪው በጣም ሰፊ ነው MCP ማውራት ብቻ ያስፈልገዋል። `src/shared/constants/managementScopes.ts` አሁን ወደ ውጭ ይላካል `MCP_CONNECT_SCOPE = "mcp:connect"`: ተጨማሪ ጠባብ ወሰን ( `SELF_USAGE_SCOPE` ጋር ተመሳሳይ ነው) ONLY በ `src/server/authz/policies/management.ts` — ውስጥ የ `/api/mcp/` ማለፊያ ፍቃድ ሌላ የአስተዳደር-መንገድ መዳረሻ አይሰጥም እና ሆን ተብሎ OUT የ `MANAGEMENT_API_KEY_SCOPES` እንዲቆይ ይደረጋል። `manage`/`admin` የያዘ ቁልፍ አሁንም ቀረጻውን ሳይለወጥ ያልፋል። `mcp:connect` ለርቀት MCP-ብቻ ደዋዮች ዝቅተኛ መብት አማራጭ ነው፣ በ `hasMcpConnectOrManageScope()` የተረጋገጠ።
 
-### በእያንዳንዱ key ላይ የHTTP ወሰን ማሰር (#7895)
+### HTTP ወሰን ማሰሪያ (#7895)
 
-በHTTP/SSE ላይ፣ `open-sse/mcp-server/httpTransport.ts` አሁን የጠሪውን እውነተኛ
-`api_keys.scopes` በ`resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) በኩል ይፈታል
-እና ወደ MCP SDK `transport.handleRequest(req, { authInfo })` ያስተላልፈዋል፤ በዚህም
-ወደ እያንዳንዱ የመሣሪያ ጥሪ የሚደርሰው `extra.authInfo.scopes` የBearer key የራሱን ወሰኖች ያንጸባርቃል።
-በ`scopeEnforcement.ts` ውስጥ ያለው `resolveCallerScopeContext()` ከዚህ ቀደምም `authInfo`ን ከ
-`_meta` እና `OMNIROUTE_MCP_SCOPES` env የመጠባበቂያ አማራጭ በላይ ቅድሚያ ይሰጠው ነበር — ይህ ለውጥ ከዚህ በፊት በHTTP ላይ መረጃ ያልተሰጠውን የመጀመሪያውንና
-ከፍተኛ ቅድሚያ ያለውን ምንጭ ብቻ ይሞላል። ምንም API key ካልተገኘ
-(header ከሌለ፣ keyው የማይሰራ ከሆነ)፣ `authInfo` `undefined` ሆኖ ይቆያል እና ፍታው ወደ
-ነባሩ `meta`/env ሰንሰለት ያለምንም ለውጥ ይቀጥላል። stdio የየጠሪ ማንነት የለውም (`mcpCallerIdentity.ts`ን ይመልከቱ)
-እና ተጽዕኖ አይደርስበትም — በ`_meta`/env የመጠባበቂያ ሰንሰለት ላይ ይቆያል።
+በ HTTP/SSE፣ `open-sse/mcp-server/httpTransport.ts` አሁን የደዋዩን ትክክለኛ `api_keys.scopes` በ `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) ፈትቶ ወደ MCP SDK `transport.handleRequest(req, { authInfo })` ያስተላልፋል፣ ስለዚህ `extra.authInfo.scopes` ለእያንዳንዱ የመሳሪያ ጥሪ መድረስ የተሸካሚውን ቁልፍ የራሱን ወሰን ያንፀባርቃል። `scopeEnforcement.ts`'s `resolveCallerScopeContext()` አስቀድሞ ለ `authInfo` ቅድሚያ ሰጥቷል `_meta` እና `OMNIROUTE_MCP_SCOPES` env fallback — ይህ የመጀመሪያውን፣ ከፍተኛ ቅድሚያ የሚሰጠውን ምንጭ ብቻ ይሞላል፣ ይህም ቀደም ሲል ከ HTTP በላይ ያልተመገበ ነው። ምንም API ቁልፍ ሲፈታ (ራስጌ የለም፣ ልክ ያልሆነ ቁልፍ) `authInfo` `undefined` ይቆያል እና መፍታት ወደ ነባሩ `meta`/env ሰንሰለት ያልተለወጠ ነው። stdio የጠሪው ማንነት የለውም ( `mcpCallerIdentity.ts` ይመልከቱ) እና በያንዳንዱ በቁልፍ ማሰሪያ — ያልተነካ ነው `_meta` እርምጃን ይዘላል (`_meta` የተከበረው በ HTTP auth አውድ ውስጥ ብቻ ነው፣ #15159) እና ከ `OMNIROUTE_MCP_SCOPES` env ቁልፍ ብቻውን ይፈታል።
 
-**`OMNIROUTE_MCP_ENFORCE_SCOPES` ምንም ይሁን ምን፣ ለጠባብ ወሰን ላላቸው HTTP/SSE ጠሪዎች
-ማስፈጸሙ በግድ ይነቃል።** `OMNIROUTE_MCP_ENFORCE_SCOPES` በነባሪ `false` መሆኑ
-የየጠሪ ማንነት የሌለበት የlocal/stdio ነጠላ-ኦፕሬተር ፍሰት ላይ ብቻ
-ደህንነቱ የተጠበቀ ነው። `open-sse/mcp-server/server.ts::withScopeEnforcement()` በእያንዳንዱ መሣሪያ ላይ የወሰን
-ማስፈጸሚያውን ያለምንም ቅድመ ሁኔታ ያነቃል (`scopeEnforcement.ts` ውስጥ `shouldForceScopeEnforcement()`)
-`resolveCallerScopeContext()` `source === "authInfo"`ን
-በፈታ ቁጥር (ማለትም፣ እውነተኛ የየkey HTTP Authorization header፣ HTTP/SSE-ብቻ) እና ያ
-key ሙሉ `manage`/`admin` scope ካልያዘ። ይህም ከላይ ለ
-`/api/mcp/` LOCAL_ONLY ልዩ ፈቃድ ብቻ እንደሚሰጥ የተመዘገበውን ጠባብ `mcp:connect` ማለፊያ scope ብቻ
-የያዘ key — አንድ ኦፕሬተር የርቀት/non-loopback MCP መዳረሻን
-ካነቃ በኋላ፣ `OMNIROUTE_MCP_ENFORCE_SCOPES` በነባሪ `false` ሆኖ ስለሚላክ ብቻ ሁሉንም MCP መሣሪያዎች መጥራት ይችል የነበረበትን ክፍተት ይዘጋል።
-በHTTP ላይ ሙሉ `manage`/`admin` key እና ሁሉም stdio/local ጠሪዎች
-ነባሩን በ`OMNIROUTE_MCP_ENFORCE_SCOPES` የሚቆጣጠር ባህሪ ያለምንም ለውጥ ይጠብቃሉ።
+**`OMNIROUTE_MCP_ENFORCE_SCOPES` ምንም ይሁን ምን ማስፈጸሚያ በጠባብ ወሰን ላሉ HTTP/SSE ጠሪዎች ይገደዳል።** `OMNIROUTE_MCP_ENFORCE_SCOPES` ወደ `false` ነባሪ ማድረግ ለ local/stdio ነጠላ ኦፕሬተር ፍሰት ብቻ ደህንነቱ የተጠበቀ ነው፣ ይህም የሚከለክለው የደዋይ ማንነት በሌለበት ነው። `open-sse/mcp-server/server.ts::withScopeEnforcement()` በአንድ መሣሪያ ወሰን ማስፈጸሚያ ያለ ምንም ቅድመ ሁኔታ (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`) በማንኛውም ጊዜ `resolveCallerScopeContext()` ሲፈታ `source === "authInfo"` (ማለትም በያንዳንዱ ቁልፍ HTTP የፈቃድ ራስጌ፣ HTTP/SSE-only) AND ያ ቁልፍ ሙሉ `manage`/`admin` ወሰን አይይዝም። ይህ ክፍተቱን የሚዘጋው ከላይ የተመዘገበው ጠባብ `mcp:connect` ማለፊያ ወሰን ONLY ምንም ፍቃድ ሳይሰጥ ነው ግን `/api/mcp/` LOCAL_ONLY carve-out — አለበለዚያ አንድ ኦፕሬተር remote/non-loopback MCP መድረስን ካነቃቁ በኋላ እያንዳንዱን MCP መሳሪያ ሊጠራ አይችልም፣ምክንያቱም `OMNIROUTE_MCP_ENFORCE_SCOPES` በነባሪነት `false` ስለሚልክ — ። ሙሉ `manage`/`admin` ቁልፍ በ HTTP ላይ፣ እና እያንዳንዱ stdio/local ደዋይ፣ ያለውን `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated ባህሪ ሳይለወጥ ያቆዩት።
 
 ---
 

@@ -18,12 +18,18 @@
 import { getComboByName, getCombos } from "@/lib/db/combos";
 import { resolveComboTargets } from "@omniroute/open-sse/services/combo.ts";
 import { getVideoProvider } from "@omniroute/open-sse/config/videoRegistry.ts";
+import type { VideoMediaSink } from "@omniroute/open-sse/handlers/videoGeneration/job.ts";
 import { resolveVideoCredentialProvider } from "@omniroute/open-sse/handlers/videoGeneration/googleFlow.ts";
 import {
   getProviderCredentialsWithQuotaPreflight,
   clearRecoveredProviderState,
 } from "@/sse/services/auth";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
+import {
+  isKeyScopeBlockedCredentials,
+  scopeComboTargetsForKey,
+  type ComboKeyScope,
+} from "@omniroute/open-sse/services/comboKeyScope.ts";
 import { handleVideoGeneration } from "@omniroute/open-sse/handlers/videoGeneration.ts";
 import {
   isMediaGenerationFailure,
@@ -51,20 +57,32 @@ export async function executeVideoCombo(
   auth: {
     request: Request;
     policy: { apiKeyInfo?: { id?: string; name?: string } | null };
+    /** GHSA-3w2r: the caller key's scope; omitted = unrestricted (unchanged). */
+    keyScope?: ComboKeyScope;
+    /** #16372 — stores auth-gated job results; built by the route (owner + public origin). */
+    mediaSink?: VideoMediaSink;
   },
   startTime: number,
   log: typeof logger
 ): Promise<Response> {
+  // Every target gets the client's signal, so a disconnect stops each
+  // target's local polling exactly like the single-provider route.
+  const signal = auth.request.signal;
+  if (signal.aborted) return errorResponse(499, "Request aborted");
+
   const combo = await getComboByName(comboName);
   if (!combo) {
     return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
   }
 
   const allCombos = await getCombos();
-  const targets = resolveComboTargets(combo as never, allCombos as never);
-  if (!targets || targets.length === 0) {
+  const resolvedTargets = resolveComboTargets(combo as never, allCombos as never);
+  if (!resolvedTargets || resolvedTargets.length === 0) {
     return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
   }
+  const scoped = await scopeComboTargetsForKey(resolvedTargets, auth.keyScope, comboName);
+  if (scoped.rejection) return scoped.rejection;
+  const { targets, allowedConnections } = scoped;
 
   // Resolve every target once — built-in registry first, then custom
   // OpenAI-compatible provider nodes tagged with the "videos" endpoint —
@@ -113,6 +131,7 @@ export async function executeVideoCombo(
 
   const runTarget = async (modelStr: string, resolved: VideoModelTarget): Promise<void> => {
     try {
+      if (signal.aborted) return;
       const { provider: targetProvider, model: targetModel, isCustomModel } = resolved;
       if (!targetProvider) {
         lastError = { status: 400, error: `Invalid video model: ${modelStr}` };
@@ -140,7 +159,9 @@ export async function executeVideoCombo(
       if (providerConfig && providerConfig.authType !== "none") {
         try {
           credentials = await getProviderCredentialsWithQuotaPreflight(
-            resolveVideoCredentialProvider(targetProvider)
+            resolveVideoCredentialProvider(targetProvider),
+            null,
+            allowedConnections
           );
         } catch {
           lastError = { status: 502, error: `Failed to resolve credentials for ${targetProvider}` };
@@ -157,6 +178,15 @@ export async function executeVideoCombo(
           return;
         }
 
+        if (isKeyScopeBlockedCredentials(credentials)) {
+          lastError = {
+            status: 403,
+            error: `[${targetProvider}] No connection allowed for this API key`,
+          };
+          fallbackCount += 1;
+          return;
+        }
+
         if (isAllRateLimitedCredentials(credentials)) {
           lastError = { status: 429, error: `[${targetProvider}] All accounts rate limited` };
           fallbackCount += 1;
@@ -167,7 +197,7 @@ export async function executeVideoCombo(
           credentials = await getProviderCredentialsWithQuotaPreflight(
             targetProvider,
             null,
-            null,
+            allowedConnections,
             targetModel
           );
         } catch {
@@ -185,19 +215,41 @@ export async function executeVideoCombo(
           return;
         }
 
+        if (isKeyScopeBlockedCredentials(credentials)) {
+          lastError = {
+            status: 403,
+            error: `[${targetProvider}] No connection allowed for this API key`,
+          };
+          fallbackCount += 1;
+          return;
+        }
+
         if (isAllRateLimitedCredentials(credentials)) {
           lastError = { status: 429, error: `[${targetProvider}] All accounts rate limited` };
           fallbackCount += 1;
           return;
         }
       } else if (providerConfig?.authType === "none") {
-        credentials = await resolveLocalOverrideCredentials(targetProvider);
+        const local = await resolveLocalOverrideCredentials(targetProvider, allowedConnections);
+        if (local.rejection) {
+          lastError = {
+            status: local.rejection.status,
+            error: `[${targetProvider}] No connection allowed for this API key`,
+          };
+          fallbackCount += 1;
+          return;
+        }
+        credentials = local.credentials;
       }
 
       const result: MediaGenerationResultLike = await handleVideoGeneration({
         body: { ...body, model: modelStr },
         credentials,
         log,
+        // Route-injected sink, so a job-preset result is servable exactly like the
+        // fal targets' public URLs (#16372).
+        mediaSink: auth.mediaSink,
+        signal,
         ...(isCustomModel && { resolvedProvider: targetProvider }),
       });
 
@@ -265,10 +317,19 @@ export async function executeVideoCombo(
     });
   }
 
-  // All targets failed — prefer the terminal (400/401/403) error when one
-  // exists; it is the actionable misconfiguration signal. Fall back to the
-  // last failure otherwise.
-  const reportedError = terminalError ?? lastError;
+  return allVideoTargetsFailedResponse(signal, terminalError ?? lastError);
+}
+
+/**
+ * The combo response once no target succeeded: 499 when the client disconnected,
+ * otherwise the terminal (400/401/403) error when one exists — the actionable
+ * misconfiguration signal — falling back to the last failure.
+ */
+function allVideoTargetsFailedResponse(
+  signal: AbortSignal,
+  reportedError: { status: number; error: string } | null
+): Response {
+  if (signal.aborted) return errorResponse(499, "Request aborted");
   const errorPayload = toJsonErrorPayload(
     reportedError?.error || "All combo targets failed",
     "Video combo targets all failed"

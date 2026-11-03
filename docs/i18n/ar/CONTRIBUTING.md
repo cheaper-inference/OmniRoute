@@ -12,11 +12,11 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### المتطلبات الأساسية
 
-- **Node.js** بالإصدار `>=22.22.3 <23`، أو `>=24.0.0 <27` (الموصى به: 24 LTS)
-- **npm** بالإصدار 10+
+- **Node.js** `>=22.22.2 <23`، أو `>=24.0.0 <27` (الموصى به: 24 LTS)
+- **npm** 10+
 
-> **لمستخدمي npm v11+ ‏(Node 24+):** بعد تنفيذ `npm install`، تحقّق من تثبيت الوحدات الأصلية:
-> `node -e "require('better-sqlite3')"`. إذا فشل بسبب `MODULE_NOT_FOUND`،
+> **مستخدمو npm v11+ ‏(Node 24+):** بعد `npm install`، تحقّق من تثبيت الوحدات الأصلية:
+> `node -e "require('better-sqlite3')"`. إذا فشل الأمر مع `MODULE_NOT_FOUND`،
 > فنفّذ `npm approve-scripts better-sqlite3 && npm install`. راجع
 > [استكشاف الأخطاء وإصلاحها](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
@@ -33,7 +33,7 @@ npm install
 ### متغيرات البيئة
 
 ```bash
-# أنشئ ملف .env الخاص بك من القالب
+# أنشئ ملف .env من القالب
 cp .env.example .env
 
 # أنشئ الأسرار المطلوبة
@@ -47,77 +47,77 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 | ---------------------- | ------------------------- | ---------------------------------- |
 | `PORT`                 | `20128`                   | منفذ الخادم                        |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`  | عنوان URL الأساسي للواجهة الأمامية |
-| `JWT_SECRET`           | (أنشئه كما هو موضح أعلاه) | سر توقيع JWT                       |
+| `JWT_SECRET`           | (أنشئه أعلاه)             | سر توقيع JWT                       |
 | `INITIAL_PASSWORD`     | `CHANGEME`                | كلمة مرور تسجيل الدخول الأول       |
 | `APP_LOG_LEVEL`        | `info`                    | مستوى تفصيل السجلات                |
 
-### إعدادات لوحة التحكم
+### إعدادات لوحة المعلومات
 
-توفّر لوحة التحكم مفاتيح تبديل في واجهة المستخدم للميزات التي يمكن أيضًا ضبطها عبر متغيرات البيئة:
+توفر لوحة المعلومات مفاتيح تبديل في واجهة المستخدم للميزات التي يمكن أيضًا تهيئتها عبر متغيرات البيئة:
 
-| موقع الإعدادات    | مفتاح التبديل       | الوصف                                      |
-| ----------------- | ------------------- | ------------------------------------------ |
-| الإعدادات ← متقدم | وضع التصحيح         | تفعيل سجلات طلبات التصحيح (واجهة المستخدم) |
-| الإعدادات ← عام   | ظهور الشريط الجانبي | إظهار/إخفاء أقسام الشريط الجانبي           |
+| موقع الإعدادات    | مفتاح التبديل       | الوصف                                            |
+| ----------------- | ------------------- | ------------------------------------------------ |
+| الإعدادات → متقدم | وضع تصحيح الأخطاء   | تمكين سجلات تصحيح أخطاء الطلبات (واجهة المستخدم) |
+| الإعدادات → عام   | ظهور الشريط الجانبي | إظهار/إخفاء أقسام الشريط الجانبي                 |
 
-تُخزَّن هذه الإعدادات في قاعدة البيانات وتستمر عبر عمليات إعادة التشغيل، وتتجاوز القيم الافتراضية لمتغيرات البيئة عند ضبطها.
+تُخزَّن هذه الإعدادات في قاعدة البيانات وتظل محفوظة بعد عمليات إعادة التشغيل، وتتجاوز القيم الافتراضية لمتغيرات البيئة عند تعيينها.
 
 ### التشغيل محليًا
 
 ```bash
-# وضع التطوير (إعادة التحميل الفورية)
+# وضع التطوير (إعادة التحميل الفوري)
 npm run dev
 
-# بناء الإنتاج
+# إصدار الإنتاج
 npm run build    # next build → .build/next/ ثم assembleStandalone → dist/
 npm run start
 
-# ترجمة سريعة للواجهة الخلفية/API فقط من أجل تغييرات المساهمين
+# ترجمة سريعة للخلفية/واجهة API فقط من أجل تغييرات المساهمين
 npm run build:contributor
 
-# بناء الإصدار (إعادة بناء نظيفة + مؤشر HEAD — مطلوب للنشر)
-npm run build:release   # rm -rf .build dist && build + يكتب dist/BUILD_SHA
+# إصدار النشر (إعادة بناء نظيفة + علامة تحقق HEAD — مطلوب للنشر)
+npm run build:release   # rm -rf .build dist ثم البناء + كتابة dist/BUILD_SHA
 
-# إعداد المنفذ الشائع
+# تهيئة المنفذ الشائعة
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ينفّذ بناء المساهمين تحققًا يعتمد على الترجمة فقط: فهو لا يُجمّع التوزيعة المستقلة
-ولا يبني أصول الحزم الأصلية الاختيارية. استخدم بناء الإنتاج المعتاد عندما
+ينفّذ إصدار المساهمين تحققًا من الترجمة فقط: فهو لا يُجمّع التوزيعة المستقلة
+ولا يبني أصول الحزم الأصلية الاختيارية. استخدم إصدار الإنتاج المعتاد عندما
 تحتاج إلى التحقق من الحزمة القابلة للشحن.
 
-### بنية مخرجات البناء
+### تخطيط مخرجات البناء
 
-| الدليل    | المحتويات                                                                  | مُتتبَّع |
-| --------- | -------------------------------------------------------------------------- | -------- |
-| `src/`    | مصدر التطبيق (TypeScript / TSX)                                            | نعم      |
-| `.build/` | ملفات وسيطة — مخرجات `next build` (يتجاهلها git، ‏`distDir = .build/next`) | لا       |
-| `dist/`   | الحزمة القابلة للشحن — يُجمّعها `assembleStandalone` (يتجاهلها git)        | لا       |
+| الدليل    | المحتويات                                                                      | متتبَّع |
+| --------- | ------------------------------------------------------------------------------ | ------- |
+| `src/`    | الشفرة المصدرية للتطبيق (TypeScript / TSX)                                     | نعم     |
+| `.build/` | الملفات الوسيطة — مخرجات `next build` (يتجاهلها Git، ‏`distDir = .build/next`) | لا      |
+| `dist/`   | الحزمة القابلة للشحن — تُجمَّع بواسطة `assembleStandalone` (يتجاهلها Git)      | لا      |
 
-مسار البناء عبارة عن تمريرة واحدة:
+يعمل مسار البناء في تمريرة واحدة:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (مخرجات Next.js)
   └─ assembleStandalone()                 (ينسخ الملفات المستقلة + الثابتة + العامة + الأصول الأصلية)
-       └─ المخرجات: dist/                 (server.js، .next/static/، public/، node_modules/)
+       └─ المخرجات: dist/                 (server.js, .next/static/, public/, node_modules/)
 ```
 
-يقوم `npm run build:release` أيضًا بتنظيف كلا الدليلين أولًا وكتابة
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) بوصفه مؤشرًا للتحقق من سلامة النشر.
+ينظّف `npm run build:release` أيضًا كلا الدليلين أولًا ويكتب
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) بوصفه علامة تحقق من سلامة النشر.
 
-يستخدم `npm run build:contributor` ملف تعريف البناء الخاص بالواجهة الخلفية فقط. ويستبدل مؤقتًا
-ملفات واجهة مستخدم لوحة التحكم بملفات بديلة أثناء البناء، مع الاحتفاظ بمعالجات مسارات API، ثم يستعيد الملفات الأصلية
-بعد البناء. استخدم `npm run build` للتغييرات التي تؤثر في واجهة مستخدم لوحة التحكم أو للتحقق الكامل
-من الإصدار؛ فملف تعريف المساهمين ليس بديلًا عن بناء الإصدار.
+يستخدم `npm run build:contributor` ملف تعريف البناء الخاص بالخلفية فقط. ويستبدل مؤقتًا
+ملفات واجهة مستخدم لوحة المعلومات بملفات بديلة أثناء البناء، مع الاحتفاظ بمعالجات مسارات API، ثم يستعيد الملفات الأصلية
+بعد البناء. استخدم `npm run build` للتغييرات التي تؤثر في واجهة مستخدم لوحة المعلومات أو لإجراء
+تحقق كامل من الإصدار؛ فملف تعريف المساهمين ليس بديلًا عن إصدار النشر.
 
-> **ملاحظة حول النشر على VPS:** لم يتغير دليل الصورة البعيد `/usr/lib/node_modules/omniroute/app/`.
-> تقوم مهارات النشر بمزامنة محتويات `dist/` إليه باستخدام rsync.
-> لم يتغير سوى مسار مخرجات البناء داخل المستودع (`app/` ← `dist/`).
+> **ملاحظة حول النشر على VPS:** يظل دليل الصورة البعيدة `/usr/lib/node_modules/omniroute/app/`
+> دون تغيير. وتستخدم أدوات النشر `rsync` لمزامنة محتويات `dist/` إليه.
+> لم يتغير سوى مسار مخرجات البناء داخل المستودع (`app/` → `dist/`).
 
 عناوين URL الافتراضية:
 
-- **لوحة التحكم**: `http://localhost:20128/dashboard`
+- **لوحة المعلومات**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -170,26 +170,26 @@ refactor(db): consolidate rate limit tables
 ## تشغيل الاختبارات
 
 ```bash
-# جميع الاختبارات (الوحدة + vitest + المنظومة + الاختبارات الشاملة)
+# جميع الاختبارات (الوحدة + vitest + المنظومة + من طرف إلى طرف)
 npm run test:all
 
 # ملف اختبار واحد (مشغّل الاختبارات الأصلي في Node.js — تستخدمه معظم الاختبارات)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# اختبارات الوحدة المتأثرة بتغييرك فقط (مُحدِّد TIA نفسه المستخدم كبوابة CI، #8084)
+# اختبارات الوحدة المتأثرة فقط بتغييرك (محدّد TIA نفسه المستخدم كبوابة في CI، ‏#8084)
 npm run test:scoped            # التغييرات في آخر عملية تثبيت (أو شجرة العمل)
-npm run test:scoped:staged     # التغييرات المُرحّلة فقط — يتكامل جيدًا مع التشغيل قبل التثبيت
-npm run test:scoped:full       # أعد بناء خريطة مخطط الاستيراد أولًا (بعد إضافة/نقل الملفات)
-# يعني الخروج بالحالة 1 مع "run the full suite" أن ملفًا محوريًا (tsconfig، أو package.json، أو …) أو مصدرًا
-# غير معيّن قد تغيّر — يفشل المُحدِّد بأمان، ولا يتخطّى أي شيء بصمت مطلقًا.
+npm run test:scoped:staged     # التغييرات المرحّلة فقط — يتكامل جيدًا مع التشغيل قبل التثبيت
+npm run test:scoped:full       # أعِد بناء خريطة رسم الاستيراد أولًا (بعد إضافة الملفات أو نقلها)
+# الخروج بالرمز 1 مع ظهور "شغّل المجموعة الكاملة" يعني أن ملفًا محوريًا (tsconfig، أو package.json، أو …) أو مصدرًا
+# غير معيّن قد تغيّر — يفشل المحدّد بأمان ولا يتخطى أي شيء بصمت مطلقًا.
 
 # Vitest (خادم MCP، وautoCombo، وذاكرة التخزين المؤقت)
 npm run test:vitest
 
-# الاختبارات الشاملة (تتطلب Playwright)
+# اختبارات من طرف إلى طرف (تتطلب Playwright)
 npm run test:e2e
 
-# الاختبارات الشاملة لعملاء البروتوكول (وسائل نقل MCP، وA2A)
+# اختبارات عملاء البروتوكول من طرف إلى طرف (وسائط نقل MCP، وA2A)
 npm run test:protocols:e2e
 
 # اختبارات توافق المنظومة
@@ -199,19 +199,19 @@ npm run test:ecosystem
 npm run test:coverage
 npm run coverage:report
 
-# فحص التدقيق + التنسيق
+# فحص قواعد التنسيق + التنسيق
 npm run lint
 npm run check
 
-# اختبار دخان حقيقي مُقيّد للمجموعات في الأنظمة المصدرية (يتطلب وصولًا إلى VPS + أرصدة حقيقية لدى المزوّد)
-# يستخدم مزوّدين حقيقيين — بتكلفة بسيطة. لا يعمل مطلقًا في CI. يُتخطّى بسلاسة من دون البوابة.
-# يتطلب: صلاحية الوصول عبر ssh root@192.168.0.15 (يستورد لقطة DB للقراءة فقط من VPS).
+# اختبار دخاني محكوم للتركيبات مع خدمات المنبع الحقيقية (يتطلب الوصول إلى VPS + أرصدة حقيقية لدى المزوّد)
+# يتصل بمزوّدين حقيقيين — بتكلفة بسيطة. لا يعمل مطلقًا في CI. يُتخطى بشكل سليم من دون البوابة.
+# يتطلب: صلاحية وصول ssh root@192.168.0.15 (يأخذ لقطة DB للقراءة فقط من VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# اختبار دخان مباشر للمرحلة 3 على VPS — نصوص Node ESM عادية تتصل مباشرة بخادم .15 الحي.
-# يتطلب: صلاحية الوصول عبر ssh root@192.168.0.15 (تُنشأ/تُفكك المجموعات عبر SSH sqlite).
-# يستخدم مزوّدين حقيقيين (بتكلفة بسيطة). يُنشئ/يحذف مجموعات __live_test__* فقط. لا يعمل مطلقًا في CI.
-# القيمة REQUIRE_API_KEY=false على .15، لذا لا يلزم مفتاح API، لكنه يحترم COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY إذا ضُبطا.
+# اختبار دخاني مباشر للمرحلة الثالثة على VPS — نصوص Node ESM عادية، تتصل مباشرة بالخادم المباشر .15.
+# يتطلب: صلاحية وصول ssh root@192.168.0.15 (تُنشأ التركيبات وتُزال عبر SSH sqlite).
+# يتصل بمزوّدين حقيقيين (بتكلفة بسيطة). ينشئ/يحذف فقط تركيبات __live_test__*. لا يعمل مطلقًا في CI.
+# ‏REQUIRE_API_KEY=false على .15، لذا لا يلزم مفتاح API، لكنه يراعي COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY إذا ضُبطا.
 npm run test:combo:live:vps              # 7 سيناريوهات HTTP (الأولوية/التناوب/الترجيح/التكلفة/الدمج/التلقائي + السلامة)
 npm run test:combo:live:vps:failover     # يضيف سيناريو تجاوز فشل حقيقيًا بين المزوّدين (الإجمالي 8)
 ```
@@ -219,36 +219,37 @@ npm run test:combo:live:vps:failover     # يضيف سيناريو تجاوز ف
 ملاحظات التغطية:
 
 - يقيس `npm run test:coverage` تغطية المصدر لمجموعة اختبارات الوحدة الرئيسية، ويستبعد `tests/**`، ويتضمن `open-sse/**`
-- يجب أن تحافظ طلبات السحب على بوابة التغطية عند **60%+** من العبارات/الأسطر/الدوال/الفروع
-- إذا غيّر طلب سحب شيفرة الإنتاج في `src/`، أو `open-sse/`، أو `electron/`، أو `bin/`، فيجب أن يضيف اختبارات آلية أو يحدّثها ضمن طلب السحب نفسه
-- يطبع `npm run coverage:report` التقرير المفصّل ملفًا بملف من أحدث تشغيل للتغطية
+- يجب أن تحافظ طلبات السحب على بوابة تغطية بنسبة **60%+** للعبارات/الأسطر/الدوال/الفروع
+- إذا غيّر طلب سحب شيفرة إنتاج في `src/`، أو `open-sse/`، أو `electron/`، أو `bin/`، فيجب أن يضيف اختبارات آلية أو يحدّثها في طلب السحب نفسه
+- يطبع `npm run coverage:report` التقرير التفصيلي ملفًا بملف من أحدث تشغيل للتغطية
 - يحافظ `npm run test:coverage:legacy` على المقياس الأقدم للمقارنة التاريخية
-- راجع `docs/ops/COVERAGE_PLAN.md` للاطلاع على خارطة الطريق المرحلية لتحسين التغطية
+- راجع `docs/ops/COVERAGE_PLAN.md` للاطلاع على خارطة طريق تحسين التغطية على مراحل
 
 ### متطلبات طلب السحب
 
 قبل فتح طلب سحب، استخدم
-[المسار الذهبي للمساهمة](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) لتشغيل الدورة المركّزة الخاصة
-بما غيّرته. تقع مسؤولية مجموعة اختبارات الوحدة الكاملة (4 أجزاء CI)، وVitest، وبوابة التغطية
-**60%+**، وبناء الإنتاج على CI — ولا يضيف تشغيلها محليًا أي مؤشرات لن توفرها لك بالفعل
-عمليات التحقق من طلب السحب، كما قد يؤدي ذلك إلى استنزاف موارد المضيف على الأجهزة الأضعف (#8084):
+[المسار الذهبي للمساهمة](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) لتشغيل الحلقة المركّزة الخاصة
+بما غيّرته. تقع مسؤولية مجموعة اختبارات الوحدة الكاملة (4 أجزاء في CI)، وVitest، وبوابة التغطية **60%+**،
+وبناء الإنتاج على CI — ولا يضيف تشغيلها محليًا أي معلومات لن توفرها لك بالفعل
+عمليات التحقق من طلب السحب، كما قد يستنفد موارد المضيف على الأجهزة الأصغر (#8084):
 
 - شغّل ملفات الاختبار التي تغطي تغييرك: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - شغّل `npm run lint`
-- أضف اختبارات آلية أو حدّثها ضمن طلب السحب نفسه كلما تغيرت شيفرة الإنتاج
-- أدرج ملفات الاختبار التي تم تغييرها أو إضافتها في وصف طلب السحب عند تغيير شيفرة الإنتاج
+- أدرج اختبارات آلية أو حدّثها في طلب السحب نفسه كلما تغيّرت شيفرة الإنتاج
+- في ملفات `node:test`، ضع كل تعليمة `await` في المستوى الأعلى (مثل `await import(...)`) قبل أول `test()` / `describe()`: عند استخدام `--test-force-exit`، قد لا تعمل الاختبارات المسجّلة بعدها مطلقًا من دون أي تنبيه (#18045؛ يفرضه `npm run check:test-tla-order`)
+- أدرج ملفات الاختبار التي غُيّرت أو أُضيفت في وصف طلب السحب عند تغيير شيفرة الإنتاج
 - تحقّق من نتيجة SonarQube في طلب السحب عندما تكون أسرار المشروع مضبوطة في CI
 
-حالة الاختبارات الحالية: **122 ملف اختبار وحدة** تغطي:
+حالة الاختبارات الحالية: **122 ملفًا لاختبارات الوحدة** تغطي:
 
-- مترجمات المزوّدين وتحويل التنسيقات
-- تحديد المعدّل، وقاطع الدارة، والمرونة
-- ذاكرة التخزين المؤقت الدلالية، وعدم التكرار، وتتبع التقدم
+- محوّلات المزوّدين وتحويل التنسيقات
+- تحديد المعدّل، وقاطع الدائرة، والمرونة
+- ذاكرة التخزين المؤقت الدلالية، والتكرارية الآمنة، وتتبع التقدم
 - عمليات قاعدة البيانات والمخطط (21 وحدة DB)
 - تدفقات OAuth والمصادقة
 - التحقق من نقاط نهاية API ‏(Zod v4)
-- أدوات خادم MCP وفرض النطاق
-- نظامي الذاكرة والمهارات
+- أدوات خادم MCP وإنفاذ النطاق
+- نظامَي الذاكرة والمهارات
 
 ---
 
@@ -288,65 +289,72 @@ npm run test:combo:live:vps:failover     # يضيف سيناريو تجاوز ف
 
 ---
 
-## Project Structure
+## بنية المشروع
 
 ```
-src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+src/                        # TypeScript ‏(.ts / .tsx)
+├── app/                    # موجّه التطبيقات في Next.js 16
+│   ├── (dashboard)/        # صفحات لوحة المعلومات (23 قسمًا)
+│   ├── api/                # مسارات API ‏(51 دليلًا)
+│   └── login/              # صفحات المصادقة (.tsx)
+├── domain/                 # محرك السياسات (policyEngine وcomboResolver وcostRules وغيرها)
+├── lib/                    # منطق الأعمال الأساسي (.ts)
+│   ├── a2a/                # خادم بروتوكول Agent-to-Agent v0.3
+│   ├── acp/                # سجل Agent Communication Protocol
+│   ├── compliance/         # محرك سياسات الامتثال
+│   ├── db/                 # وحدات نطاق SQLite بالإضافة إلى 130 عملية ترحيل
+│   ├── memory/             # ذاكرة محادثات دائمة
+│   ├── oauth/              # موفّرو OAuth وخدماته وأدواته المساعدة
+│   ├── skills/             # إطار عمل قابل للتوسعة للمهارات
+│   ├── usage/              # تتبّع الاستخدام وحساب التكلفة
+│   └── localDb.ts          # طبقة إعادة تصدير فقط — لا تضف أي منطق هنا مطلقًا
+├── middleware/              # برمجيات وسيطة للطلبات (promptInjectionGuard)
+├── mitm/                   # وكيل MITM ‏(الشهادات وDNS وتوجيه الوجهة)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # مكوّنات React ‏(.tsx)
+│   ├── constants/          # تعريفات الموفّرين (329) ونطاقات MCP و20 استراتيجية توجيه
+│   ├── utils/              # قاطع الدائرة والمنقّي ومساعدات المصادقة
+│   └── validation/         # مخططات Zod v4
+└── sse/                    # مسار معالجة وكيل SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # مساحة عمل @omniroute/open-sse
+├── executors/              # 150 وحدة تنفيذ (فئات التنفيذ ومساعدات خاصة بكل موفّر)
+├── handlers/               # 11 معالج طلبات (الدردشة والاستجابات والتضمينات والصور وغيرها)
+├── mcp-server/             # خادم MCP ‏(110 أدوات فريدة و3 وسائل نقل و33 نطاقًا)
+├── services/               # 178 خدمة على المستوى الأعلى (combo وautoCombo وrateLimitManager وغيرها)
+├── translator/             # محوّلات التنسيقات (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # محوّل Responses API
+└── utils/                  # 22 وحدة أدوات مساعدة (التدفق وTLS والوكيل والتسجيل)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # تطبيق Electron لسطح المكتب (متعدد المنصات)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # مشغّل اختبارات Node.js ‏(1,574 ملف اختبار)
+├── integration/            # اختبارات التكامل
+├── e2e/                    # اختبارات Playwright
+├── security/               # اختبارات الأمان
+├── translator/             # اختبارات خاصة بالمحوّل
+└── load/                   # اختبارات التحميل
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # سجلات قرارات البنية
+├── architecture/            # بنية النظام والمرونة
+├── comparison/              # مقارنة OmniRoute بالبدائل
+├── compression/             # أدلة الضغط وقواعده
+├── dev/                     # أدلة التطوير
+├── diagrams/                # مخططات البنية
+├── frameworks/              # MCP وA2A وOpenCode والذاكرة والمهارات
+├── guides/                  # دليل المستخدم وDocker والإعداد واستكشاف الأخطاء وإصلاحها
+├── i18n/                    # ترجمات README المدوّلة
+├── marketing/               # مواد تسويقية
+├── ops/                     # النشر والوكيل والتغطية والإصدارات
+├── providers/               # وثائق خاصة بالموفّرين
+├── reference/               # مرجع API ومتغيرات البيئة وأدوات CLI والطبقات المجانية
+├── releases/                # ملاحظات الإصدار
+├── routing/                 # محرك الدمج التلقائي وإعادة تشغيل الاستدلال
+├── screenshots/             # لقطات شاشة للوحة المعلومات
+├── security/                # ضوابط الحماية والامتثال والتخفي والرموز المميزة
+└── specs/                   # مواصفات التصميم
 ```
 
 ---
@@ -406,9 +414,13 @@ docs/                       # Documentation
 
 ---
 
-## Releasing
+## الإصدار
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+تُدار الإصدارات عبر سير العمل `/generate-release`. عند إنشاء إصدار GitHub جديد، تُنشر الحزمة **تلقائيًا على npm** عبر GitHub Actions.
+
+لعمليات النشر على VPS، استخدم `npm run build:release` (وليس `npm run build`) — إذ يُجري
+إعادة بناء نظيفة، ويُجمّع الحزمة داخل `dist/`، وينشئ الملف الدال `dist/BUILD_SHA`.
+ثم استخدم مهارات `/deploy-vps-*-cc` التي تستخدم rsync لمزامنة `dist/` مع دليل `app/` البعيد.
 
 ---
 

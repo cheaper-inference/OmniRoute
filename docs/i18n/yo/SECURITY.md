@@ -29,23 +29,24 @@ Tí o bá ṣàwárí àìlera aabo kan nínú OmniRoute, jọ̀wọ́ jábọ̀
 | 3.7.x   | ✅ Aabo                                             |
 | < 3.7.0 | ❌ Kò ní àtìlẹ́yìn                                   |
 
-## Àkókò àtìlẹ́yìn LTS (v3.9.x)
+## Àkókò atilẹyin LTS (v3.9.x)
 
-Lẹ́yìn 3.8.59, ẹ̀yà tó tẹ̀ lé e ni **3.9.0**, èyí tó ṣí ìlà àtìlẹ́yìn fún ìgbà pípẹ́ lórí ẹ̀ka
+Lẹ́yìn 3.8.59, ẹ̀yà tó kàn ni **3.9.0**, èyí tó ṣí ìlà atilẹyin ọlọ́jọ́-pípẹ́ lórí ẹ̀ka
 `stable/v3` (wo [`ROADMAP.md`](ROADMAP.md) → "Ìpele 3 — v3.9.0 LTS").
 
-- **Ohun tí `stable/v3` ń gbà:** àwọn àtúnṣe àṣìṣe, àwọn àbùjá aabo àti àwọn ìmúdójúìwọ̀n olùpèsè. Àwọn
-  ẹ̀yà tuntun máa ń lọ sí ikanni v4; ìdúróṣinṣin ni ìlà LTS fi sí ipò àkọ́kọ́. `npm install omniroute`
-  (`latest` dist-tag) yóò dúró lórí v3 jálẹ̀ gbogbo àkókò v4.
-- **Gígùn àkókò:** `<T-GAP-3: ìpinnu olówó ṣì ń dúró — wo ROADMAP.md>`. Gígùn
-  àkókò náà lẹ́yìn v4.0 GA (nígbà tí `latest` bá yí sí v4) **kò tíì ní ìpinnu**; a ó
-  ṣe ìmúdójúìwọ̀n abala yìí nígbà tí olùtọ́jú bá kéde rẹ̀. Títí di ìgbà náà, má ṣe rò pé ọjọ́ ìparí kan wà.
-- **Ìjábọ̀ àìlera kan nínú ìlà LTS:** ikanni kan náà bí ti ẹ̀yà mìíràn —
+- **Ohun tí `stable/v3` ń gba:** àwọn àtúnṣe àṣìṣe, àwọn àlẹ̀mọ́ ààbò àti àwọn ìmúdójúìwọ̀n olùpèsè. Àwọn
+  ẹ̀ya tuntun máa ń lọ sí ikanni v4; ìdúróṣinṣin ni ìlà LTS fi ń ṣáájú. `npm install omniroute`
+  (`latest` dist-tag) máa dúró lórí v3 jálẹ̀ gbogbo ìyípo v4.
+- **Gígùn àkókò náà:** `stable/v3` máa gba **àwọn àtúnṣe ààbò àti àwọn ìpadàsẹ́yìn tó ṣe pàtàkì fún
+  oṣù 12 lẹ́yìn ìtújáde 3.9.0, tàbí títí di ọjọ́ 90 lẹ́yìn tí a bá tẹ̀jáde v4.0.0 gẹ́gẹ́ bí `latest` —
+  èyíkéyìí tó bá pẹ́ jù lọ**. A ó ṣe àkọsílẹ̀ ọjọ́ ìparí tó yọrí sí nínú àwọn àkọsílẹ̀ ìtújáde 3.9.0 àti nínú
+  [`ROADMAP.md`](ROADMAP.md) nígbà tí ìtújáde náà bá ṣẹlẹ̀.
+- **Jíjabọ̀ àléébù ààbò kan nínú ìlà LTS:** lo ikanni kan náà bíi ti ẹ̀yà míì —
   [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) aládàáni,
-  kì í ṣe ìṣòro gbogbogbò láé. Sọ ẹ̀yà tí o dánwò (fún àpẹẹrẹ `3.9.2`); àwọn àtúnṣe máa ń dé sórí
-  `stable/v3`, a sì máa ń gbé wọn lọ sí v4.
-- **Ìpìlẹ̀ aabo nígbà ìgé LTS:** ipò scanner tí a wọ̀n, route-guard àti
-  àwọn ẹ̀rí public-credential ni a ṣàkọsílẹ̀ sínú
+  kì í ṣe ọ̀ràn gbangba láé. Sọ ẹ̀yà tí o dánwò (fún àpẹẹrẹ `3.9.2`); a máa fi àwọn àtúnṣe sí
+  `stable/v3`, a sì máa gbé wọn lọ síwájú sí v4.
+- **Ìpìlẹ̀ ààbò nígbà ìtújáde LTS:** ipò skánà tí a wọn, ẹ̀rí ààbò ipa-ọ̀nà àti
+  ẹ̀rí ìwé-ẹ̀rí gbogbogbò ni a ṣe àkọsílẹ̀ wọn sínú
   [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---

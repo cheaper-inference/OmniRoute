@@ -202,6 +202,42 @@ export function looksLikeQuotaExhausted(body: unknown): boolean {
 }
 
 /**
+ * Concurrency-limit wording in 429 bodies ("too many concurrent requests").
+ * The account is healthy — it is just busy with other in-flight requests —
+ * so the right reaction is to fail over to a sibling connection, not to climb
+ * the exponential backoff ladder. Every pattern is a fixed phrase with bounded
+ * alternations only (no `.*`), per the ReDoS rule.
+ */
+const CONCURRENCY_PATTERNS: ReadonlyArray<RegExp> = [
+  /too many (?:concurrent|simultaneous|parallel) (?:requests?|connections?|sessions?|calls?)/i,
+  /concurrent (?:requests?|connections?|sessions?) limit/i,
+  /concurrency limit/i,
+  /max(?:imum)? concurrency/i,
+  /parallel requests? limit/i,
+  /simultaneous requests? limit/i,
+  /high concurrency usage/i,
+  // GLM/z.ai code 1302: "您当前使用该API的并发数过高，请降低并发…"
+  /并发数?过高/,
+];
+
+/**
+ * Returns true if a 429 body reports a CONCURRENCY limit (contention on a
+ * healthy account). An explicit quota body always wins: a body that matches
+ * any quota pattern is never treated as concurrency.
+ *
+ * Deliberately NOT a `FailureKind`: the circuit breaker's per-kind cooldowns
+ * key on `classify429`, and that contract stays unchanged (a concurrency 429
+ * still reads `rate_limit` there). Only the connection-cooldown path consumes
+ * this signal (open-sse/services/accountFallback.ts).
+ */
+export function looksLikeConcurrencyLimit(body: unknown): boolean {
+  const text = bodyToText(body);
+  if (!text) return false;
+  if (!CONCURRENCY_PATTERNS.some((pat) => pat.test(text))) return false;
+  return !looksLikeQuotaExhausted(text);
+}
+
+/**
  * A declared upstream retry window at or beyond this is treated as
  * long-period exhaustion. One hour mirrors the circuit breaker's
  * `quota_exhausted` cooldown bucket (`cooldownByKind`, wired in

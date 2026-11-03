@@ -32,30 +32,30 @@ Obsidian کمانڈز چلا سکیں، اور (اختیاری طور پر) دو
 
 ## سیٹ اپ
 
-Obsidian ٹوکن یا بنیادی URL کے لیے **کوئی ماحولیتی متغیر نہیں ہے** — دونوں کو
-`src/lib/db/obsidian.ts` کے ذریعے SQLite کی `key_value` ٹیبل (نیم اسپیس `obsidian`) میں
-محفوظ کیا جاتا ہے۔ ٹوکن **محفوظ حالت میں انکرپٹ شدہ** ہوتا ہے (AES-256-GCM، نیز
-سادہ متن کے لیے پسماندہ مطابقت کا فال بیک)۔ Endpoint ڈیش بورڈ کے **Context Sources**
-ٹیب (`ObsidianSourceCard`) سے، یا ترتیباتی REST API کے ذریعے کنفیگر کریں۔
+Obsidian ٹوکن یا بنیادی URL کے لیے **کوئی environment variable موجود نہیں ہے** — دونوں
+`src/lib/db/obsidian.ts` کے ذریعے SQLite کی `key_value` ٹیبل (namespace `obsidian`) میں
+محفوظ کیے جاتے ہیں۔ ٹوکن کو **محفوظ حالت میں خفیہ کیا جاتا ہے** (AES-256-GCM، نیز
+سادہ متن کے ساتھ پسماندہ مطابقت کا fallback)۔ Endpoint ڈیش بورڈ کے **Context Sources** ٹیب
+(`ObsidianSourceCard`) سے، یا ترتیبات کی REST API کے ذریعے تشکیل کریں۔
 
 > [!IMPORTANT]
 > **Obsidian Local REST API** پلگ اِن کا انسٹال اور فعال ہونا ضروری ہے۔ اس کا REST
 > انٹرفیس **HTTP `127.0.0.1:27123`** (ڈیفالٹ بنیادی URL) پر سنتا ہے۔ پورٹ `27124`
-> ایک _علیحدہ_ MCP/HTTPS اینڈ پوائنٹ ہے اور ترتیباتی روٹ اسے واضح طور پر مسترد کرتا ہے۔
+> ایک _علیحدہ_ MCP/HTTPS endpoint ہے اور ترتیبات کا route اسے واضح طور پر مسترد کرتا ہے۔
 > کسی دوسرے آلے سے منسلک ہوتے وقت `http://<tailscale-ip>:27123` استعمال کریں۔
 
-### کنفیگریشن کیز (SQLite `key_value`، نیم اسپیس `obsidian`)
+### کنفیگریشن کلیدیں (SQLite `key_value`، namespace `obsidian`)
 
-| کلید              | مقصد                                              | انکرپٹ شدہ |
-| ----------------- | ------------------------------------------------- | ---------- |
-| `api_key`         | Local REST API بیئرر ٹوکن                         | ہاں        |
-| `base_url`        | REST بنیادی URL (ڈیفالٹ `http://127.0.0.1:27123`) | نہیں       |
-| `vault_path`      | والٹ ڈائریکٹری کا مطلق پاتھ (سنک کے لیے)          | نہیں       |
-| `webdav_username` | تیار کردہ WebDAV صارف نام (والٹ سنک)              | نہیں       |
-| `webdav_password` | تیار کردہ WebDAV پاس ورڈ (والٹ سنک)               | ہاں        |
-| `webdav_enabled`  | آیا WebDAV والٹ سنک فعال ہے                       | نہیں       |
+| کلید              | مقصد                                              | خفیہ کردہ |
+| ----------------- | ------------------------------------------------- | --------- |
+| `api_key`         | Local REST API کا bearer ٹوکن                     | ہاں       |
+| `base_url`        | REST بنیادی URL (ڈیفالٹ `http://127.0.0.1:27123`) | نہیں      |
+| `vault_path`      | vault ڈائریکٹری کا مطلق path (sync کے لیے)        | نہیں      |
+| `webdav_username` | تیار کردہ WebDAV صارف نام (vault sync)            | نہیں      |
+| `webdav_password` | تیار کردہ WebDAV پاس ورڈ (vault sync)             | ہاں       |
+| `webdav_enabled`  | آیا WebDAV vault sync فعال ہے                     | نہیں      |
 
-### REST کے ذریعے کنفیگر کریں
+### REST کے ذریعے تشکیل کریں
 
 ```bash
 # Local REST API ٹوکن محفوظ + توثیق کریں (POST اسٹیٹس چیک کے ذریعے توثیق کرتا ہے)
@@ -71,36 +71,43 @@ curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
 تمام طریقوں کے لیے ڈیش بورڈ کی تصدیق درکار ہے۔ `POST` پورٹ `27124` پر موجود کسی بھی URL
-کو مسترد کرتا ہے اور محفوظ کرنے سے پہلے Local REST API کے اسٹیٹس اینڈ پوائنٹ کو کال
-کر کے ٹوکن کی توثیق کرتا ہے۔
+کو مسترد کرتا ہے اور محفوظ کرنے سے پہلے Local REST API کے اسٹیٹس endpoint کو کال کر کے ٹوکن کی توثیق کرتا ہے۔
 
-### WebDAV والٹ سنک
+### WebDAV vault sync
 
-`src/app/api/settings/obsidian/webdav/route.ts` ایک اختیاری WebDAV پر مبنی
-والٹ سنک کو منظم کرتا ہے (جسے `src/lib/obsidianSync.ts` چلاتا ہے)۔ اسے فعال کرنے سے
-OmniRoute ایک مقامی والٹ ڈائریکٹری کی طرف اشارہ کرتا ہے اور WebDAV کے لیے بے ترتیب
-صارف نام/پاس ورڈ کا جوڑا تیار کرتا ہے:
+`src/app/api/settings/obsidian/webdav/route.ts` ایک اختیاری WebDAV کی پشت پناہی والا
+vault sync منظم کرتا ہے (جسے `src/lib/obsidianSync.ts` چلاتا ہے)۔ اسے فعال کرنے پر OmniRoute
+کو ایک مقامی vault ڈائریکٹری کی طرف متوجہ کیا جاتا ہے اور ایک بے ترتیب WebDAV صارف نام/پاس ورڈ جوڑا تیار کیا جاتا ہے:
 
 ```bash
-# والٹ ڈائریکٹری کے لیے WebDAV سنک فعال کریں (صارف نام/پاس ورڈ تیار کرتا ہے)
+# کسی vault ڈائریکٹری کے لیے WebDAV sync فعال کریں (صارف نام/پاس ورڈ تیار کرتا ہے)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# WebDAV سنک اسٹیٹس حاصل کریں (اسناد صرف فعال ہونے کی حالت میں واپس کی جاتی ہیں)
+# WebDAV sync اسٹیٹس حاصل کریں (اسناد صرف فعال ہونے کی صورت میں واپس آتی ہیں)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# WebDAV سنک غیر فعال کریں (اسناد + زیرِ انتظام .stignore صاف کرتا ہے)
+# WebDAV sync غیر فعال کریں (اسناد + منظم کردہ .stignore صاف کرتا ہے)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
-### فی API کلید سیاقی ماخذ (اختیاری)
+### فی API کلید context source (اختیاری)
 
-Obsidian کنفیگ کو `api_key_context_sources` ٹیبل کے ذریعے **فی API کلید** اسکوپ کیا
-جا سکتا ہے (`src/lib/db/apiKeyContextSources.ts`)۔ جب کسی MCP کال کے ساتھ تصدیق شدہ API
-کلید کی id موجود ہو، تو `getObsidianConfigForApiKey()` اس کلید کے اپنے ٹوکن/بنیادی
-URL/والٹ پاتھ (`source: "api_key"`) کو ترجیح دیتا ہے، اور بصورتِ دیگر عالمی کنفیگ
-(`source: "global"`) کو فال بیک کے طور پر استعمال کرتا ہے۔
+Obsidian کنفیگریشن کو `api_key_context_sources` ٹیبل
+(`src/lib/db/apiKeyContextSources.ts`) کے ذریعے **فی API کلید** محدود کیا جا سکتا ہے۔
+جب کوئی MCP کال ایک تصدیق شدہ API کلید id کے ساتھ آتی ہے تو `getObsidianConfigForApiKey()`
+اس کلید کے اپنے ٹوکن/بنیادی URL/vault path (`source: "api_key"`) کو ترجیح دیتا ہے، اور
+بصورت دیگر عالمی کنفیگریشن (`source: "global"`) پر fallback کرتا ہے۔
+
+غیر sync MCP ٹولز کو یہ کنفیگریشن پڑھنے سے پہلے کال کنندہ کی شناخت کا تعین درکار ہوتا ہے۔
+بغیر شناخت کے کال کنندہ کو `Obsidian API token not configured` موصول ہوتا ہے، اور کوئی vault
+درخواست نہیں بھیجی جاتی۔ HTTP کال کنندگان کی شناخت ان کی درخواست کی اسناد کے ذریعے کی جاتی ہے؛ stdio کال کنندگان
+`OMNIROUTE_API_KEY` یا `ROUTER_API_KEY` کے ذریعے شناخت حاصل کر سکتے ہیں۔ ایسا HTTP کال کنندہ
+جس کی شناخت کا تعین نہ ہو سکے، سرور کی environment شناخت کا وارث نہیں بن سکتا۔ صرف placeholder IDs
+رسائی کی اجازت نہیں دیتیں؛ ایک درست environment سند جو `env-key` سے resolve ہوتی ہو، بدستور معاونت یافتہ ہے۔
+ایسی تصدیق شدہ کلیدیں جن کے لیے فی کلید Obsidian کنفیگریشن موجود نہ ہو، عالمی fallback برقرار رکھتی ہیں۔
+چاروں `obsidian_sync_*` ٹولز اپنا علیحدہ sync-token رویہ برقرار رکھتے ہیں۔
 
 ## MCP ٹولز (22)
 

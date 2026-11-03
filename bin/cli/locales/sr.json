@@ -123,7 +123,9 @@
       "maxCostOpt": "Maksimalan trošak po danu (USD)",
       "allowedModelsOpt": "Lista dozvoljenih modela, razdvojena zarezima",
       "nothingToSet": "Nisu prosleđena polja polise. Koristite --rate-limit, --max-cost, ili --allowed-models.",
-      "updated": "Polisa je ažurirana."
+      "updated": "Polisa je ažurirana.",
+      "modelAccessModeOpt": "Режим приступа моделима (all | restricted)",
+      "unrestrictedOpt": "Дозволи све моделе (--model-access-mode all)"
     },
     "expiration": {
       "title": "Isticanje ključa",
@@ -1169,32 +1171,18 @@
   "sync": {
     "description": "Sinhronizacija konfiguracije između OmniRoute instanci",
     "push": {
-      "description": "Pošalji konfiguraciju u cloud ili udaljenu instancu",
-      "target": "Odredište (cloud ili context:name)",
-      "bundle": "Delovi paketa za sinhronizaciju",
-      "dryRun": "Pregled bez primene"
+      "description": "Pošalji konfiguraciju u cloud ili udaljenu instancu"
     },
     "pull": {
-      "description": "Preuzmi konfiguraciju iz cloud-a ili sa udaljene instance",
-      "source": "Izvor (cloud ili context:name)",
-      "merge": "Spoji sa postojećom konfiguracijom",
-      "replace": "Zameni postojeću konfiguraciju",
-      "dryRun": "Preview bez primene"
-    },
-    "diff": {
-      "source": "Izvorni kontekst",
-      "target": "Ciljni kontekst"
+      "description": "Preuzmi konfiguraciju iz cloud-a ili sa udaljene instance"
     },
     "bundle": {
       "description": "Izvoz konfiguracije kao bundle fajl",
-      "include": "Delovi koje treba uključiti (razdvojeni zapetama)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Uvoz bundle fajla",
       "dryRun": "Validacija bez primene"
-    },
-    "initialize": {
-      "fromCloud": "Inicijalizuj iz cloud rezervne kopije"
     },
     "tokens": {
       "description": "Upravljanje tokenima za sinhronizaciju",
@@ -1206,9 +1194,6 @@
       "revoke": {
         "yes": "Preskoči potvrdu"
       }
-    },
-    "resolve": {
-      "description": "Interaktivno rešavanje konflikata sinhronizacije"
     }
   },
   "config": {

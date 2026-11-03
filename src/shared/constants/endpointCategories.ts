@@ -10,8 +10,6 @@
  * @module shared/constants/endpointCategories
  */
 
-import { canonicalSystemOneSdkPath } from "./systemoneEndpoints";
-
 export interface EndpointCategory {
   id: string;
   label: string;
@@ -53,8 +51,8 @@ export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
   {
     id: "elevenlabs",
     label: "ElevenLabs Voice",
-    description: "Native ElevenLabs speech-to-text, text-to-speech and voices",
-    prefixes: ["/v1/speech-to-text", "/v1/text-to-speech", "/v1/voices"],
+    description: "Native ElevenLabs speech-to-text, text-to-speech, voices and sound effects",
+    prefixes: ["/v1/speech-to-text", "/v1/text-to-speech", "/v1/voices", "/v1/sound-generation"],
   },
   {
     id: "video",
@@ -69,16 +67,16 @@ export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
     prefixes: ["/v1/music"],
   },
   {
-    id: "systemone",
-    label: "System One",
-    description: "Structured decisions (Jev, Clef)",
-    prefixes: ["/v1/systemone"],
-  },
-  {
     id: "rerank",
     label: "Rerank",
     description: "Document reranking",
     prefixes: ["/v1/rerank"],
+  },
+  {
+    id: "decisions",
+    label: "Decisions",
+    description: "System One typed decisions (Jev)",
+    prefixes: ["/v1/systemone"],
   },
   {
     id: "models",
@@ -138,7 +136,6 @@ const SORTED_PREFIXES: readonly { prefix: string; categoryId: string }[] =
  * Returns `null` if the path doesn't match any category (e.g. management routes).
  */
 export function resolveEndpointCategory(pathname: string): string | null {
-  pathname = pathname.toLowerCase();
   for (const { prefix, categoryId } of SORTED_PREFIXES) {
     if (pathname === prefix || pathname.startsWith(prefix + "/")) {
       return categoryId;
@@ -172,12 +169,10 @@ const ENDPOINT_ALIAS_REWRITES: readonly { source: string; canonical: string }[] 
  * already canonical, or belonging to no category, comes back unchanged.
  */
 export function resolveCanonicalEndpointPath(pathname: string): string {
-  const systemOnePath = canonicalSystemOneSdkPath(pathname);
-  if (systemOnePath) return systemOnePath;
-  const path = pathname.replace(/^\/api(?=\/v1\/)/i, "").replace(/^\/v1(?:\/v1)?(?=\/|$)/i, "/v1");
+  const path = pathname.replace(/^\/api(?=\/v1\/)/, "").replace(/^\/v1\/v1(?=\/|$)/, "/v1");
 
   for (const { source, canonical } of ENDPOINT_ALIAS_REWRITES) {
-    if (path.toLowerCase() === source || path.toLowerCase().startsWith(source + "/")) {
+    if (path === source || path.startsWith(source + "/")) {
       return canonical + path.slice(source.length);
     }
   }

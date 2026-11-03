@@ -6,185 +6,191 @@
 
 最終更新日: 2026-08-23
 
-OmniRoute は、3つの専用ダッシュボードページに分かれた3種類の CLI ツールと統合します。
+OmniRoute 、3 つの専用ダッシュボード ページにまたがる 3 つのカテゴリのCLIツールと統合します。
 
-| ページ         | ルート                  | 概念                                                                                    | 数               |
-| -------------- | ----------------------- | --------------------------------------------------------------------------------------- | ---------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | OmniRoute に接続するコーディングツール（クライアント → CLI → OmniRoute → プロバイダー） | 26               |
-| **CLI Agents** | `/dashboard/cli-agents` | OmniRoute に接続する自律型エージェント（同じフローで、より広範なスコープ）              | 10               |
-| **ACP Agents** | `/dashboard/acp-agents` | OmniRoute が stdio/ACP 経由でバックエンドとして起動する CLI（逆方向のフロー）           | レジストリを参照 |
+| ページ              | ルート                  | コンセプト                                                                            | カウント         |
+| ------------------- | ----------------------- | ------------------------------------------------------------------------------------- | ---------------- |
+| **CLIコード**       | `/dashboard/cli-code`   | OmniRoute (クライアント→ CLI → OmniRoute →プロバイダー) で指定するコーディング ツール | 26               |
+| **CLIエージェント** | `/dashboard/cli-agents` | OmniRouteを指す自律エージェント (同じフロー、より広い範囲)                            | 11               |
+| **ACPエージェント** | `/dashboard/acp-agents` | stdio/ACP経由でOmniRouteバックエンドとして生成されるCLIs (逆フロー)                   | レジストリを参照 |
 
-従来のルートは 308 でリダイレクトされます: `/dashboard/cli-tools` → `/dashboard/cli-code`、`/dashboard/agents` → `/dashboard/acp-agents`。
+レガシー ルートは 308 経由でリダイレクトします: `/dashboard/cli-tools` → `/dashboard/cli-code`、 `/dashboard/agents` → `/dashboard/acp-agents`。
 
 ---
 
 ## 仕組み
 
 ```
-CLIコード / CLIエージェント（消費フロー）:
+CLI Code's / CLI Agents（利用フロー）:
 Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose / ...
            │
-           ▼  (すべてOmniRouteを指す)
+           ▼  （すべて OmniRoute を接続先として使用）
     http://YOUR_SERVER:20128/v1
            │
-           ▼  (OmniRouteが適切なプロバイダーにルーティング)
+           ▼  （OmniRoute が適切なプロバイダーへルーティング）
     Anthropic / OpenAI / Gemini / DeepSeek / Groq / Mistral / ...
 
-ACPエージェント（逆生成フロー）:
-    クライアントリクエスト → OmniRoute → stdio/ACPを介してCLIを生成 → レスポンス
+ACP Agents（逆方向の起動フロー）:
+    クライアントリクエスト → OmniRoute → stdio/ACP 経由で CLI を起動 → レスポンス
 ```
 
 **利点:**
 
-- すべてのツールを管理するための1つのAPIキー
-- ダッシュボード内のすべてのCLIにわたるコスト追跡
-- すべてのツールを再構成せずにモデル切り替え
-- ローカルおよびリモートサーバー（VPS、Docker、Akamai、Cloudflare Tunnel）で動作
+- 1 つの API キーですべてのツールを管理
+- ダッシュボードですべての CLI のコストを追跡
+- 各ツールを再設定せずにモデルを切り替え
+- ローカル環境とリモートサーバー（VPS、Docker、Akamai、Cloudflare Tunnel）の両方で動作
 
 ---
 
-## `setup-*`による自動設定
+## `setup-*`による自動構成
 
-各ツールの設定を手動で記述する必要はありません。OmniRouteは、サポートされているCLIごとに`setup-*`コマンドを提供しており、実行中のOmniRoute（ローカルまたはリモート）から**ライブ**モデルカタログを読み取り、ツールの設定をマシンに書き込みます。
+各ツールの構成を手動で記述する必要はありません。 OmniRouteはCLI `setup-*`に、**ライブ**実行中のOmniRoute (ローカルまたはリモート) からモデル カタログを取得し、ツール独自の構成をマシンに書き込みます。
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-それぞれ、`--remote <url> --api-key <key>`（リモートOmniRouteに対してローカルツールを設定）、`--dry-run`（書き込みなしでプレビュー）、および`--port`を受け入れます。モデルの自動検出機能がないツール（Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive）は、`--model <id>`（および非対話型実行の場合は`--yes`）を受け入れます。`setup-5dive`は、$HOME以下に書き込まない唯一のレシピです。これは、フリートホストにroot所有の認証プロファイルを書き込むことで5diveエージェントフリートを設定するため、`sudo`を介して再実行され、独自のリモートモードはありません。適切な環境が注入され、設定が一切書き込まれないCLIを起動するには、汎用的な`omniroute run <target>`ランチャー（claude, codex, aider, goose, opencode, qwen, gemini — ターゲットとエイリアスは`bin/cli/cli-manifest.mjs`から取得されます）を使用します。レガシーなツールごとのランチャー`omniroute launch`（Claude Code）と`omniroute launch-codex`（Codex）も引き続き利用可能です。Gemini CLIは起動専用です。`omniroute run`のターゲットですが、`setup-*`/`configure`レシピはありません。
+それぞれが`--remote <url> --api-key <key>` (リモートOmniRouteに対してローカル ツールを構成)、 `--dry-run` (書き込みなしでプレビュー)、および`--port`を受け入れます。モデル自動検出のないツール (Cline、 Kilo、Roo、 Goose、Aider、 Qwen、 5dive、 WhyCodes) は`--model <id>` (および非対話型実行の場合は`--yes` ) を使用します。 `setup-5dive`は、 `$HOME`の下に書き込まない 1 つのレシピです。これは、ルート所有の認証プロファイルをフリート ホストに書き込むことによって 5dive エージェント フリートを構成するため、 `sudo`を通じて再実行され、独自のリモート モードはありません。適切な環境が挿入され、構成がまったく書き込まれていない状態でCLI起動するには、汎用の`omniroute run <target>`ランチャー (claude、codex、aider、goose、opencode、qwen、gemini、whycodes — ターゲットとエイリアスは`bin/cli/cli-manifest.mjs`から取得されます) を使用します。従来のツールごとのランチャー`omniroute launch` (Claudeコード) および`omniroute launch-codex` (Codex) は引き続き使用できます。 Gemini CLIは起動専用です。zqv ターゲットですが、 `omniroute run` /`configure`レシピ`setup-*`ありません。
 
-> **完全なリファレンス:** 各コマンドが何を書き込むか、すべてのフラグ、ローカルとリモートの違い、そしてどのツールが`/v1`サフィックスを必要とするかを示すマスターテーブルは、**[CLI Integrations](../guides/CLI-INTEGRATIONS.md)**にあります。
+> **完全な参照:**マスター テーブル — 各コマンドが書き込む内容、すべてのフラグ、ローカルとリモート、および`/v1`サフィックスが必要なツール — が存在します。** [CLI統合](../guides/CLI-INTEGRATIONS.md)**。
 
-### コンテナ内での実行
+### これらをコンテナ内で実行する
 
-OmniRouteコンテナ内で実行される`setup-*`コマンドは、コンテナ自身のホームディレクトリに書き込みますが、これはホストCLIからは読み取られず、コンテナとともに消滅します。OmniRouteはこれを検出し、書き込みを行う代わりに指示とともにコード`2`で終了します。サポートされている2つの進め方があります。ホストにCLIをインストールしてコンテナに`omniroute connect`するか、設定ディレクトリをバインドマウントして`CLI_CONFIG_HOME`（composeの`host`プロファイル）を設定します。すべての`setup-*`コマンド、さらに`omniroute configure`と`omniroute config set`は、コンテナ自身のCLIを設定することが意図されている場合に`--allow-container-write`を受け入れます。`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`はサーバーに対しても同様の動作をします。[Dockerガイド → ホストCLIツールの設定](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)を参照してください。
+OmniRouteコンテナ内で実行される`setup-*`コマンドは、コンテナ自体のホームに書き込みます。ホストCLIはホームを読み取らず、コンテナとともに消去されます。 OmniRouteそれを検出し、書き込みではなく命令で`2`終了します。サポートされている 2 つの方法 - ホストにCLIをインストールし、コンテナーに`omniroute connect`をインストールするか、構成ディレクトリをバインドマウントして`CLI_CONFIG_HOME` ( `host`構成プロファイル) を設定します。すべての`setup-*`コマンド、さらに`omniroute configure`および`omniroute config set`、コンテナー独自のCLIsを構成するときに`--allow-container-write`を受け入れます。これが実際の意味です。 `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`サーバーに対して同じことを行います。 [Dockerガイド→ホストCLIツールの構成」を](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)参照してください。
 
-ダッシュボードの**適用エンドポイント**（`POST /api/cli-tools/apply`）も同じガードを適用します。コンテナ内で、ホストからバインドマウントされていないターゲットへの書き込みは、`containerEphemeralTarget: true`という安全なエラーテキストと、ホストレシピを持つツール（claude, codex, opencode, cline, kilo, continue）の場合には、代わりにホストで実行する`hostSetupCommand`（例: `omniroute setup-opencode`）を伴って**`422`**を返します。何も書き込まれません。`dryRun: true`はコンテナモードでも機能し続け、ディスクに触れることなく編集されたプレビューとターゲットパスを返します。プレビューの内容は、コピーまたはインポートするための資格情報を含む設定ではありません。ホスト上で元のツール/ベースURL/APIキー/モデル入力を使用して適用するか、示されたホスト側のセットアップコマンドを使用してください。プレビューヘッダーとリクエスト契約については、[CLI設定のセキュリティ](../security/CLI-CONFIGURATION.md)を参照してください。この動作は意図的なものであり、`tests/unit/api/cli-tools/apply-container-guard.test.ts`によって回帰テストで保護されています。ガードを削除して422を「修正」しないでください。
-
----
-
-## 真実の源
-
-統一カタログは `src/shared/constants/cliTools.ts` に `CLI_TOOLS: Record<string, CliCatalogEntry>` として存在します。
-
-各エントリには以下のフィールドがあります（`src/shared/schemas/cliCatalog.ts` で定義されています）：
-
-| フィールド                                      | 型                                                           | 説明                                                              |
-| ----------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- |
-| `category`                                      | `"code" \| "agent"`                                          | ツールが表示されるページ                                          |
-| `vendor`                                        | `string`                                                     | ツールの出所（"Anthropic", "OSS (P. Gauthier)"）                  |
-| `acpSpawnable`                                  | `boolean`                                                    | ACPエージェントとしても使用可能（バッジ表示）                     |
-| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | カスタムエンドポイントのサポートレベル。`"none"` = MITMバックログ |
-| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | 設定メカニズム                                                    |
-| `id`, `name`, `color`, `description`, `docsUrl` | 標準                                                         | コア表示フィールド                                                |
-
-`baseUrlSupport: "none"` のエントリは **ダッシュボードページに表示されません** — それらはプラン11のMITMバックログに登録されています（`_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` を参照）。
-
-### 機能ティア（カタログ化 × 検出可能 × 設定可能 × 起動可能）
-
-すべてのカタログ化されたツールが検出可能、設定可能、または起動可能であるわけではありません。各ティアには1つの宣言ソースがあり、ドリフトテストがそれらを整合させます：
-
-| ティア         | 意味                                                                              | 宣言場所                                                             |
-| -------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| **カタログ化** | ダッシュボードカタログに表示される（名前、ベンダー、ドキュメント、設定タイプ）    | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                     |
-| **検出可能**   | バイナリ/設定の検出、ヘルスチェック、設定パス                                     | `src/shared/services/cliRuntime.ts` (`CLI_TOOLS` ランタイムカタログ) |
-| **設定可能**   | `omniroute configure <cli>` によってサポートされる（セットアップレシピが存在）    | `bin/cli/cli-manifest.mjs` (`configure: true`)                       |
-| **起動可能**   | `omniroute run <target>` によってサポートされる（env/argsの注入が定義されている） | `bin/cli/cli-manifest.mjs` (`run: true`)                             |
-
-`bin/cli/cli-manifest.mjs` はCLIコマンドの標準実行可能マニフェストであり、`run`、`configure` およびシェル補完ジェネレーターはすべてそのターゲットリスト、エイリアス解決（例えば `kilocode`/`kilo-code`/`kilo_cli` → `kilo`）および `--model` フラグの配線をそこから派生させます。ドリフトガード `tests/unit/cli/cli-manifest-drift.test.ts` は、マニフェスト、ランタイムカタログ、UIカタログ、およびすべてのコンシューマサーフェスが同期していることを確認します — 1つのサーフェスに追加されたターゲットが他のサーフェスにない場合、スイートは静かにドリフトするのではなく失敗します。
-
-## 1. CLI Code のカタログ（26ツール）
-
-`/dashboard/cli-code` に表示されるすべてのツールです。`baseUrlSupport: none` のツールは、カスタムベース URL ではなく、MITM または手動ガイドを介して接続されます。
-
-| id           | 名前                    | ベンダー           | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------ | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic          | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI             | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai               | none           | custom         | false        |
-| cline        | Cline                   | OSS (旧Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org           | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)          | full           | guide          | false        |
-| continue     | Continue                | continue.dev       | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)  | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ        | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)     | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)  | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)       | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (旧SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI         | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS          | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere          | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)  | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)   | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)        | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba            | full           | guide          | true         |
-| cursor       | Cursor                  | Anysphere          | none           | guide          | false        |
-| antigravity  | Antigravity             | Google             | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research      | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon             | none           | mitm           | false        |
-| custom       | カスタム CLI            | —                  | full           | custom-builder | false        |
-
-`baseUrlSupport: "partial"` のツールでは、ダッシュボードカードに「⚠ ベース URL は部分対応」バッジが表示されます。
----
-
-## 2. CLIエージェントカタログ（10ツール）
-
-`/dashboard/cli-agents` に表示される自律型エージェント：
-
-| id           | 名前             | ベンダー                 | baseUrl対応 | acp起動可能 |
-| ------------ | ---------------- | ------------------------ | ----------- | ----------- |
-| hermes-agent | Hermes Agent     | Nous Research            | 完全        | false       |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | 完全        | true        |
-| goose        | Goose            | Block / Linux Foundation | 完全        | true        |
-| interpreter  | Open Interpreter | OSS                      | 完全        | true        |
-| warp         | Warp AI          | Warp Inc.                | 部分的      | true        |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | 完全        | false       |
-| omp          | Oh My Pi         | OSS                      | 完全        | true        |
-| letta        | Letta CLI        | Letta                    | 完全        | false       |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | 完全        | false       |
-| 5dive        | 5dive            | OSS (5dive-ai)           | 完全        | false       |
+ダッシュボードの**エンドポイントの適用**(`POST /api/cli-tools/apply`) は同じガードを適用します。コンテナ内では、ターゲットがホストからバインドマウントされていない書き込みが応答されます。**`422`** `containerEphemeralTarget: true`、安全なエラー テキスト、およびホスト レシピ (claude、codex、opencode、cline、kilo、Continue) を持つツールの場合 - 代わりにホスト上で実行する`hostSetupCommand` (例`omniroute setup-opencode`)。何も書かれていない。 `dryRun: true`コンテナ モードで動作し続け、ディスクに触れることなく編集されたプレビュー+ターゲット パスを返します。プレビュー コンテンツは、コピーまたはインポートできる資格情報を含む構成ではありません。ホスト上の元のtool/base URL/API key/model入力を使用して適用するか、示されたホスト側のセットアップ コマンドを使用します。プレビュー ヘッダーとリクエスト コントラクトについては、 [CLI構成セキュリティ」](../security/CLI-CONFIGURATION.md)を参照してください。この動作は意図的であり、 `tests/unit/api/cli-tools/apply-container-guard.test.ts`によって回帰保護されています。ガードを削除して 422 を「修正」しないでください。
 
 ---
 
-## 3. ACPエージェント (/dashboard/acp-agents)
+## 信頼できる唯一の情報源
 
-このページ（`/dashboard/agents`から名前変更）は、OmniRouteが**スパーン**できるCLIを表示します。これらはバックエンド実行エンジンとしてstdio/ACPプロトコルを介して使用されます。カタログは`src/lib/acp/registry.ts`で別途管理されており、`CLI_TOOLS`とは**異なります**。
+統合カタログは、`src/shared/constants/cliTools.ts` 内の `CLI_TOOLS: Record<string, CliCatalogEntry>` として定義されています。
+
+各エントリには、以下のフィールドがあります（`src/shared/schemas/cliCatalog.ts` で定義）。
+
+| フィールド                                      | 型                                                           | 説明                                                               |
+| ----------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------ |
+| `category`                                      | `"code" \| "agent"`                                          | ツールが表示されるページ                                           |
+| `vendor`                                        | `string`                                                     | ツールの提供元（「Anthropic」、「OSS (P. Gauthier)」）             |
+| `acpSpawnable`                                  | `boolean`                                                    | ACP Agent としても使用可能（バッジを表示）                         |
+| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | カスタムエンドポイントのサポートレベル。`"none"` = MITM バックログ |
+| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | 設定メカニズム                                                     |
+| `id`, `name`, `color`, `description`, `docsUrl` | 標準                                                         | 表示用の主要フィールド                                             |
+
+`baseUrlSupport: "none"` のエントリは、ダッシュボードページには**表示されません**。これらはプラン 11 の MITM バックログに登録されています（`_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` を参照）。
+
+### 機能階層（カタログ登録済み × 検出可能 × 設定可能 × 起動可能）
+
+カタログに登録されたすべてのツールが、検出、設定、または起動できるとは限りません。各階層にはそれぞれ宣言元が1つあり、ドリフトテストによって整合性が維持されます。
+
+| 階層                 | 意味                                                                           | 宣言元                                                                |
+| -------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| **カタログ登録済み** | ダッシュボードカタログに表示される（名前、ベンダー、ドキュメント、設定タイプ） | `src/shared/constants/cliTools.ts`（`CLI_TOOLS`）                     |
+| **検出可能**         | バイナリ／設定の検出、ヘルスチェック、設定パス                                 | `src/shared/services/cliRuntime.ts`（`CLI_TOOLS` ランタイムカタログ） |
+| **設定可能**         | `omniroute configure <cli>` でサポートされる（セットアップレシピが存在する）   | `bin/cli/cli-manifest.mjs`（`configure: true`）                       |
+| **起動可能**         | `omniroute run <target>` でサポートされる（環境変数／引数の注入が定義済み）    | `bin/cli/cli-manifest.mjs`（`run: true`）                             |
+
+`bin/cli/cli-manifest.mjs` は、CLI コマンドインターフェースの正規の実行可能マニフェストです。`run`、`configure`、およびシェル補完ジェネレーターはすべて、ターゲット一覧、エイリアス解決（例：`kilocode`/`kilo-code`/`kilo_cli` → `kilo`）、および `--model` フラグの関連付けをこのマニフェストから導出します。ドリフトガードである `tests/unit/cli/cli-manifest-drift.test.ts` は、マニフェスト、ランタイムカタログ、UI カタログ、およびすべての利用側インターフェースが同期されていることを検証します。あるインターフェースに追加されたターゲットが他のインターフェースに追加されていない場合、気付かないまま不整合が進行するのではなく、テストスイートが失敗します。
 
 ---
 
-## 4. MITMバックログ（ダッシュボードには表示されません）
+## 1. CLIコードのカタログ (28 ツール)
 
-以下のCLIは、ネイティブにカスタムベースURLをサポートしておらず、CLIコードやCLIエージェントページには**リストされていません**。これらはプラン11でのMITMインターセプションの候補です：
+`/dashboard/cli-code`に表示されるすべてのツール。 `baseUrlSupport: none`を持つものは、カスタム ベースURLの代わりにMITMまたは手動ガイドを通じて接続されます。
 
-| CLI                 | 理由                                                  |
-| ------------------- | ----------------------------------------------------- |
-| windsurf            | BYOKは特定のClaudeモデルと企業のURL/tokenに限定される |
-| amp                 | クローズドエコシステム（Sourcegraph）                 |
-| amazon-q / kiro-cli | AWS SSO認証、カスタムURLなし                          |
-| cowork              | Anthropic Desktop、構成可能なエンドポイントなし       |
+| ID                   | 名前                             | ベンダー             | baseUrlSupport | configType       | acpSpawnable |
+| -------------------- | -------------------------------- | -------------------- | -------------- | ---------------- | ------------ |
+| クロード             | Claudeコード                     | Anthropic            | 満杯           | 環境             | 真実         |
+| コーデックス         | OpenAI Codex CLI                 | OpenAI               | 満杯           | カスタム         | 真実         |
+| zコード              | ZCode (GLMコーディング プラン)   | ザイ                 | なし           | カスタム         | 間違い       |
+| クライン             | Cline                            | OSS (元Claude Dev)   | 満杯           | カスタム         | 真実         |
+| キロ                 | キロコード                       | キロオーグ           | 満杯           | カスタム         | 間違い       |
+| ルー                 | Rooコード                        | ルー (OSS)           | 満杯           | ガイド           | 間違い       |
+| 続く                 | 続く                             | 継続.dev             | 満杯           | ガイド           | 間違い       |
+| 補助者               | 補助者                           | OSS (P. ゴーティエ)  | 満杯           | ガイド           | 真実         |
+| フォージ             | ForgeCode                        | アンチノミーHQ       | 満杯           | カスタム         | 真実         |
+| jコード              | jコード                          | 1ジェファン (OSS)    | 満杯           | カスタム         | 間違い       |
+| ディープシークトゥイ | DeepSeek TUI                     | ハンターボウ (OSS)   | 満杯           | カスタム         | 間違い       |
+| コードクジラ         | CodeWhale                        | ハンボウン (OSS)     | 満杯           | カスタム         | 間違い       |
+| オープンコード       | OpenCode                         | 異常 (元 SST)        | 満杯           | ガイド           | 真実         |
+| ドロイド             | ファクトリー・ドロイド           | ファクトリーAI       | 部分的         | ガイド           | 間違い       |
+| 副操縦士             | GitHub Copilot CLI               | GitHub/MS            | 満杯           | カスタム         | 間違い       |
+| カーソル-cli         | Cursor CLI                       | エニースフィア       | 部分的         | ガイド           | 真実         |
+| ワカサギ             | ワカサギ                         | レオナルドサー (OSS) | 満杯           | カスタム         | 間違い       |
+| 円周率               | Pi (pi-コーディングエージェント) | M. ゼヒナー (OSS)    | 満杯           | カスタム         | 間違い       |
+| グロクビルド         | Grokビルド                       | xAI                  | 満杯           | カスタム         | 間違い       |
+| 打ち砕く             | 打ち砕く                         | OSS (チャーム)       | 満杯           | カスタム         | 間違い       |
+| クウェン             | Qwenコード                       | Alibaba              | 満杯           | ガイド           | 真実         |
+| オープンクロード     | OpenClaude                       | Gitlawb (OSS)        | 満杯           | ガイド           | 間違い       |
+| ゼド                 | Zed                              | Zedインダストリーズ  | 満杯           | ガイド           | 間違い       |
+| カーソル             | Cursor                           | エニースフィア       | なし           | ガイド           | 間違い       |
+| 反重力               | Antigravity                      | Google               | なし           | ミットム         | 間違い       |
+| エルメス             | エルメス                         | ヌース研究           | なし           | ガイド           | 間違い       |
+| キロ                 | Kiro AI                          | Amazon               | なし           | ミットム         | 間違い       |
+| カスタム             | カスタムCLI                      | —                    | 満杯           | カスタムビルダー | 間違い       |
 
-完全なクロスリファレンスについては、`_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`を参照してください。
+`baseUrlSupport: "partial"`を備えたツールでは、ダッシュボード カードに「⚠ Base URL parcial」というバッジが表示されます。
+---
+
+## 2. CLIエージェント カタログ (11 ツール)
+
+`/dashboard/cli-agents`に表示される自律エージェント:
+
+| ID                   | 名前                     | ベンダー                     | ベースURLサポート | acpスポーン可能 |
+| -------------------- | ------------------------ | ---------------------------- | ----------------- | --------------- |
+| エルメスエージェント | ヘルメスエージェント     | ヌース研究                   | 満杯              | 間違い          |
+| オープンクロー       | OpenClaw                 | OSS (P. スタインバーガー)    | 満杯              | 真実            |
+| ガチョウ             | ガチョウ                 | ブロック / Linux財団         | 満杯              | 真実            |
+| 通訳者               | オープンインタープリター | OSS                          | 満杯              | 真実            |
+| ワープ               | Warp AI                  | 株式会社Warp                 | 部分的            | 真実            |
+| エージェントデッキ   | エージェントデッキ       | アシュシュゴプラニ (OSS)     | 満杯              | 間違い          |
+| ああ                 | オーマイパイ             | OSS                          | 満杯              | 真実            |
+| レッタ               | レッタ・CLI              | レッタ                       | 満杯              | 間違い          |
+| プライムエージェント | プライムエージェント     | プライム・インテレクト (OSS) | 満杯              | 間違い          |
+| 5ダイブ              | 5ダイブ                  | OSS (5dive-ai)               | 満杯              | 間違い          |
+| なぜコード           | WhyCodes                 | なぜ株式会社なのか           | 満杯              | 間違い          |
 
 ---
 
-## 5. バッチ検出API
+## 3. ACP エージェント（/dashboard/acp-agents）
+
+このページ（旧 `/dashboard/agents`）には、OmniRoute が stdio/ACP プロトコル経由でバックエンド実行エンジンとして**起動**できる CLI が表示されます。カタログは `src/lib/acp/registry.ts` で個別に管理されており、`CLI_TOOLS` と**同一ではありません**。
+
+---
+
+## 4. MITM バックログ（ダッシュボードには非表示）
+
+以下の CLI はカスタムベース URL をネイティブにサポートしておらず、CLI Code ページにも CLI Agents ページにも**掲載されていません**。これらはプラン 11 における MITM インターセプトの候補です：
+
+| CLI                 | 理由                                                     |
+| ------------------- | -------------------------------------------------------- |
+| windsurf            | BYOK は一部の Claude モデル＋企業向け URL/トークンに限定 |
+| amp                 | クローズドなエコシステム（Sourcegraph）                  |
+| amazon-q / kiro-cli | AWS SSO 認証、カスタム URL 非対応                        |
+| cowork              | Anthropic Desktop、エンドポイントの設定不可              |
+
+完全な相互参照については、`_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` を参照してください。
+
+---
+
+## 5. 一括検出 API
 
 すべてのツール検出は、単一のエンドポイントを介して集約されます：
 
 **`GET /api/cli-tools/all-statuses`**
 
-- 認証: `requireCliToolsAuth(request)`（他の`/api/cli-tools/`ルートと同じ）
-- 戻り値: `Record<toolId, ToolBatchStatus>`（型: `src/shared/types/cliBatchStatus.ts`）
-- 戦略: すべてのツールに対して`Promise.all`、ツールごとに5秒のタイムアウト
-- キャッシュ: 設定ファイル`mtime`によってインデックス付けされたメモリ内LRU。mtimeが変更されるとキャッシュが無効化されます。サーバー再起動時にリセットされます。
+- 認証：`requireCliToolsAuth(request)`（他の `/api/cli-tools/` ルートと同じ）
+- 戻り値：`Record<toolId, ToolBatchStatus>`（型：`src/shared/types/cliBatchStatus.ts`）
+- 戦略：すべてのツールに対して `Promise.all` を使用し、ツールごとのタイムアウトは 5 秒
+- キャッシュ：設定ファイルの `mtime` でインデックス化されたインメモリ LRU。mtime が変更されるとキャッシュが無効化されます。サーバー再起動時にリセットされます。
 
-ツールごとのレスポンス形状：
+ツールごとのレスポンス形式：
 
 ```ts
 interface ToolBatchStatus {
@@ -205,91 +211,93 @@ interface ToolBatchStatus {
 }
 ```
 
+---
+
 ## 6. 新しいツールの設定ハンドラー
 
-`configType: "custom"` の新しいツールには、専用の設定APIルートがあります：
+`configType: "custom"`を使用した新しいツールには、専用の設定APIルートがあります。
 
-| ルート                                      | ツール                                                           |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                          |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url フラグ)                                        |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legacy)                           |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primary + legacy `~/.deepseek` sync) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                            |
-| `POST /api/cli-tools/pi-settings`           | Pi コーディングエージェント                                      |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)            |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + 専用の `.env` キー)         |
+| ルート                                      | 道具                                                                             |
+| ------------------------------------------- | -------------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                          |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-urlフラグ)                                                         |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL、レガシー)                                         |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL、プライマリ+レガシー`~/.deepseek`同期)                |
+| `POST /api/cli-tools/smelt-settings`        | ワカサギ                                                                         |
+| `POST /api/cli-tools/pi-settings`           | Pi コーディング エージェント (`~/.pi/agent/models.json`、 `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grokビルド (~/.grok/config.toml、 `[model.omniroute]`)                           |
+| `POST /api/cli-tools/qwen-settings`         | Qwenコード (`~/.qwen/settings.json` +専用`.env`キー)                             |
 
-すべてのルートは、エラー応答に `sanitizeErrorMessage()` を使用します（ハードルール #12）。
+すべてのルートはエラー応答に`sanitizeErrorMessage()`を使用します (ハード ルール #12)。
 
 ---
 
 ## 7. ダッシュボードページのアーキテクチャ
 
-### CLI コード (`/dashboard/cli-code`)
+### CLI Code (`/dashboard/cli-code`)
 
 - `src/app/(dashboard)/dashboard/cli-code/page.tsx` — サーバーコンポーネント
 - `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — クライアントグリッド
 - `src/app/(dashboard)/dashboard/cli-code/[id]/page.tsx` — ツール詳細ページ
-- `src/app/(dashboard)/dashboard/cli-code/components/` — 12の専門ツールカード + `ToolDetailClient.tsx`
+- `src/app/(dashboard)/dashboard/cli-code/components/` — 12 個の専用ツールカード + `ToolDetailClient.tsx`
 
-### CLI エージェント (`/dashboard/cli-agents`)
+### CLI Agents (`/dashboard/cli-agents`)
 
 - `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — サーバーコンポーネント
 - `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — クライアントグリッド
 - `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — `ToolDetailClient` を再利用
 
-### ACP エージェント (`/dashboard/acp-agents`)
+### ACP Agents (`/dashboard/acp-agents`)
 
 - `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — サーバーコンポーネント（`agents/` から移動）
 
 ### 共有 UI コンポーネント (`src/shared/components/cli/`)
 
-| ファイル                | 目的                                                       |
-| ----------------------- | ---------------------------------------------------------- |
-| `CliToolCard.tsx`       | スマートステータスカード（検出 + 設定 + エンドポイント）   |
-| `CliConceptCard.tsx`    | ページごとの概念説明カード                                 |
-| `CliComparisonCard.tsx` | CLI タイプ間の三列比較                                     |
-| `BaseUrlSelect.tsx`     | エンドポイントドロップダウン（ローカル/クラウド/カスタム） |
-| `ApiKeySelect.tsx`      | API キーセレクター                                         |
-| `ManualConfigModal.tsx` | コピー可能な設定スニペットモーダル                         |
+| ファイル                | 目的                                                           |
+| ----------------------- | -------------------------------------------------------------- |
+| `CliToolCard.tsx`       | スマートステータスカード（検出 + 設定 + エンドポイント）       |
+| `CliConceptCard.tsx`    | ページごとの概念説明カード                                     |
+| `CliComparisonCard.tsx` | CLI タイプ間の 3 列比較                                        |
+| `BaseUrlSelect.tsx`     | エンドポイントのドロップダウン（ローカル／クラウド／カスタム） |
+| `ApiKeySelect.tsx`      | API キーセレクター                                             |
+| `ManualConfigModal.tsx` | コピー可能な設定スニペットのモーダル                           |
 
 ### 共有フック (`src/shared/hooks/cli/`)
 
-| ファイル                  | 目的                                                                    |
-| ------------------------- | ----------------------------------------------------------------------- |
-| `useToolBatchStatuses.ts` | `/api/cli-tools/all-statuses` を取得し、読み込み/リフレッシュ状態を管理 |
+| ファイル                  | 目的                                                             |
+| ------------------------- | ---------------------------------------------------------------- |
+| `useToolBatchStatuses.ts` | `/api/cli-tools/all-statuses` を取得し、読み込み／更新状態を管理 |
 
 ## 8. i18n
 
-プラン14 F9で追加された新しい名前空間：
+プラン 14 F9 で追加された新しい名前空間：
 
-| 名前空間    | 目的                                                            |
-| ----------- | --------------------------------------------------------------- |
-| `cliCommon` | 共有文字列（カードラベル、概念/比較テキスト、詳細ページラベル） |
-| `cliCode`   | CLIコードのページ文字列                                         |
-| `cliAgents` | CLIエージェントのページ文字列                                   |
-| `acpAgents` | ACPエージェントのページ文字列                                   |
+| 名前空間    | 用途                                                               |
+| ----------- | ------------------------------------------------------------------ |
+| `cliCommon` | 共有文字列（カードラベル、概念／比較テキスト、詳細ページのラベル） |
+| `cliCode`   | CLI Code ページの文字列                                            |
+| `cliAgents` | CLI Agents ページの文字列                                          |
+| `acpAgents` | ACP Agents ページの文字列                                          |
 
-完全なPT-BRおよびENの翻訳が提供されています。39の他のロケールは、`src/i18n/request.ts`での名前空間レベルのマージを介して自動的にENにフォールバックします。
+PT-BR および EN の完全な翻訳が提供されています。その他 39 のロケールは、`src/i18n/request.ts` での名前空間レベルのマージにより、自動的に EN にフォールバックします。
 
 ---
 
 ## 9. クイックスタート
 
-### ステップ1 — OmniRoute APIキーを取得する
+### ステップ 1 — OmniRoute APIキーを取得する
 
-1. `/dashboard/api-manager`を開く → **APIキーを作成**
-2. 名前を付ける（例：`cli-tools`）とすべての権限を選択
-3. キーをコピーする — 以下のすべてのCLIで必要になります
+1. `/dashboard/api-manager` →を開く**APIキーの作成**
+2. 名前を付けて (例: `cli-tools`)、すべての権限を選択します。
+3. キー—をコピーします。以下のすべてのCLIで必要になります。
 
-> あなたのキーは次のようになります： `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> キーは次のようになります: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### ステップ2 — CLIツールをインストールする
+### ステップ 2 — CLIツールをインストールする
 
-すべてのnpmベースのツールはNode.js 22.22.2+または24.xを必要とします：
+すべての npm ベースのツールには、 Node.js 22.22.2 +または 24.x が必要です。
 
 ```bash
 # Claude Code (Anthropic)
@@ -317,51 +325,50 @@ npm install -g @google/gemini-cli
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rustベース
+cargo install smelt  # Rust-based
 
 # Pi coding agent
-# インストールについては https://github.com/zechnerj/pi-coding-agent を参照
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# インストールについては https://github.com/1jehuang/jcode を参照
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### ステップ3 — ダッシュボードから設定する
+### ステップ 3 —ダッシュボード経由で設定する
 
-1. `http://localhost:20128/dashboard/cli-code`に移動
-2. グリッドでツールを見つける
-3. カードをクリックしてツールの詳細ページを開く
-4. APIキーとベースURLを選択
-5. **設定を適用**をクリックするか、手動設定スニペットをコピーする
+1. `http://localhost:20128/dashboard/cli-code`に行く
+2. グリッド内でツールを見つける
+3. カードをクリックしてツールの詳細ページを開きます
+4. APIキーとベースURLを選択します
+5. クリック**構成の適用**または手動構成スニペットをコピーします
 
 ---
 
-### ステップ4 — グローバル環境変数を設定する
+### ステップ 4 —グローバル環境変数を設定する
 
 ```bash
-# OmniRouteユニバーサルエンドポイント
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLIはROOTでGOOGLE_GEMINI_BASE_URLを読み取ります（そのSDKは/v1beta/...を自動的に追加します）
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **リモートサーバー**の場合、`localhost:20128`をサーバーのIPまたはドメインに置き換えてください、
-> 例：`http://<your-server-ip>:20128`。
+> のために**リモートサーバー**`localhost:20128`サーバーIPまたはドメイン ( `http://<your-server-ip>:20128`など) に置き換えます。
 
 ---
 
-### ステップ4 — 各ツールを設定する
+### ステップ 4 —各ツールを設定する
 
-#### Claude Code
+#### Claudeコード
 
 ```bash
-# ~/.claude/settings.jsonを作成：
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -372,17 +379,15 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Claude Codeには統一されたAnthropicゲートウェイのルートを使用します。ここに`/v1`を追加しないでください。
+Claudeコードには統合Anthropicゲートウェイ ルートを使用します。ここに`/v1`を追加しないでください。
 
-**テスト:** `claude "say hello"`
+**テスト：** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-モダンCodex (v0.137+)は`~/.codex/config.toml`のみを読み取ります — 古い
-`config.yaml`はレガシーnpm CLIに属し、静かに無視されます。API
-キーは`OMNIROUTE_API_KEY`環境変数（`env_key`）に保持され、ファイル内には決して含まれません：
+最新のCodex (v0.137 +) は—のみ`~/.codex/config.toml`を読み取ります。古い`config.yaml`はレガシー npm CLIに属しており、黙って無視されます。 APIキーは、ファイル内ではなく、 `OMNIROUTE_API_KEY`環境変数 (`env_key`) 内に残ります。
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -397,9 +402,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-完全なリファレンス（プロファイル、`wire_api`、コンテキストウィンドウ）： [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md)。
+完全なリファレンス (プロファイル、 `wire_api`、コンテキスト ウィンドウ): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md) 。
 
-**テスト:** `codex "what is 2+2?"`
+**テスト：** `codex "what is 2+2?"`
 
 ---
 
@@ -428,14 +433,44 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**テスト:** `opencode`
+**テスト：** `opencode`
 
-> `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`を使用して
-> 思考バリアントを送信します。
+> `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`を使用して思考のバリアントを送信します。
 
 ---
 
-#### Cline (CLIまたはVS Code)
+#### Pi コーディング エージェント
+
+`npm install -g --ignore-scripts @earendil-works/pi-coding-agent`を使用して公式の Pi コーディング エージェント パッケージをインストールします。 Pi は`~/.pi/agent/models.json`からカスタム プロバイダーを読み取ります。エージェント ディレクトリ全体を移動するように`PI_CODING_AGENT_DIR`を設定します。ダッシュボードはそのオーバーライドに従います。 Pi はカスタム エンドポイントからモデルを検出しないため、 OmniRoute Pi の`openai-completions` APIとOmniRoute OpenAI 互換の`/v1`エンドポイントを使用して、選択されたモデルを`models[]`に書き込みます。
+
+で**CLIツール→ Pi** 、エンドポイント、 APIキー、モデルを選択し、プロバイダーのプレビューを確認して適用します。プレビューはプロバイダーのフラグメントです。Pi を手動で構成するときに、 `providers.omniroute`既存の`models.json`にマージして、他のプロバイダーと設定がそのまま残るようにします。
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+`/model`を開くと、Pi は`models.json`リロードします。選択したプロバイダー ID とモデル ID を使用して、構成されたルートをテストします。
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+参考資料: [Pi モデルとカスタム プロバイダー](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md)、 [Pi 環境変数](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md)、 [Pi のインストール手順](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md)。
+
+---
+
+#### Cline (CLIまたはVSコード)
 
 **CLIモード：**
 
@@ -449,14 +484,13 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Codeモード：**
-Cline拡張設定 → APIプロバイダー：`OpenAI Compatible` → ベースURL：`http://localhost:20128/v1`
+**VSコードモード:** Cline拡張子設定→ APIプロバイダー: `OpenAI Compatible` →ベースURL: `http://localhost:20128/v1`
 
-またはOmniRouteダッシュボードを使用 → **CLIツール → Cline → 設定を適用**。
+または、 OmniRouteダッシュボード→を使用します。**CLIツール→ Cline →構成の適用**。
 
 ---
 
-#### KiloCode (CLIまたはVS Code)
+#### KiloCode (CLIまたはVSコード)
 
 **CLIモード：**
 
@@ -464,7 +498,7 @@ Cline拡張設定 → APIプロバイダー：`OpenAI Compatible` → ベースU
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code設定：**
+**VSコード設定:**
 
 ```json
 {
@@ -473,13 +507,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-またはOmniRouteダッシュボードを使用 → **CLIツール → KiloCode → 設定を適用**。
+または、 OmniRouteダッシュボード→を使用します。**CLIツール→ KiloCode →構成の適用**。
 
 ---
 
-#### Continue (VS Code拡張)
+#### 続行 (VSコード拡張)
 
-`~/.continue/config.yaml`を編集：
+`~/.continue/config.yaml`編集:
 
 ```yaml
 models:
@@ -491,20 +525,20 @@ models:
     default: true
 ```
 
-編集後にVS Codeを再起動します。
+編集後にVSコードを再起動します。
 
 ---
 
-#### VS Code Insiders (`chatLanguageModels.json`)
+#### VSコードインサイダー (`chatLanguageModels.json`)
 
-VS Code Insidersがカスタムエンドポイントモデルに設定されていて、カスタムヘッダーフィールドなしでOmniRouteを機能させたい場合に使用します。
+これは、 VS Code Insiders がカスタム エンドポイント モデル用に構成されており、カスタム ヘッダー フィールドなしでOmniRoute動作させたい場合に使用します。
 
-**推奨される場所：**
+**推奨される場所:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**トークン化されたOmniRouteエイリアスを使用した例：**
+**トークン化されたOmniRouteエイリアスを使用した例:**
 
 ```json
 [
@@ -526,40 +560,41 @@ VS Code Insidersがカスタムエンドポイントモデルに設定されて�
 ]
 ```
 
-**注意：**
+**注:**
 
-- `sk-your-omniroute-key`をOmniRouteで作成したAPIキーに置き換えてください。
+- `sk-your-omniroute-key` OmniRouteで作成したAPIキーに置き換えます。
 - `url`フィールドは`/api/v1/vscode/{token}/chat/completions`を指す必要があります。
 - `modelsUrl`フィールドは`/api/v1/vscode/{token}/models`を指す必要があります。
-- クライアントがカスタムヘッダーをサポートしている場合は、通常の`/v1` + Bearerヘッダーフローを優先してください。
-- URLに埋め込まれたトークンは互換性のためのフォールバックであり、エディタのログやプロキシ履歴に表示されることがあります。
+- クライアントがカスタム ヘッダーをサポートしている場合は、通常の`/v1` + Bearer ヘッダー フローを優先します。
+- URL 埋め込みトークンは互換性フォールバックであり、エディター ログまたはプロキシ履歴に表示される場合があります。
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# AWS/Kiroアカウントにログイン：
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLIは独自の認証を使用します — Kiro CLI自体のバックエンドとしてOmniRouteは必要ありません。
-# 他のツールのためにOmniRouteと一緒にkiro-cliを使用します。
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-**Kiro IDE**デスクトップアプリの場合、OmniRouteが提供するMITMエンドポイントを使用します
-`/dashboard/cli-tools → Kiro`の下で。
+のために**Kiro IDE**デスクトップ アプリの場合は、 `/dashboard/cli-tools → Kiro`の下のOmniRouteによって公開されるMITMエンドポイントを使用します。
+
+---
 
 ## 10. 内部 OmniRoute CLI
 
 `omniroute` バイナリは、サーバーのライフサイクル、セットアップ、診断、プロバイダー管理のためのコマンドを提供します。エントリーポイント: `bin/omniroute.mjs`。
 
 ```bash
-omniroute                              # サーバーを起動（デフォルトポートは 20128）
-omniroute setup                        # 対話型セットアップウィザード
+omniroute                              # サーバーを起動（デフォルトポート: 20128）
+omniroute setup                        # 対話式セットアップウィザード
 omniroute doctor                       # 設定、DB、ポート、ランタイムを確認
 omniroute providers list               # 設定済みのプロバイダー接続
-omniroute providers test-all           # すべての有効な接続をテスト
+omniroute providers test-all           # すべてのアクティブな接続をテスト
 omniroute reset-password               # 管理者パスワードをリセット
 omniroute logs                         # リクエストログをストリーミング
 omniroute health                       # 詳細なヘルス情報（ブレーカー、キャッシュ、メモリ）
@@ -570,23 +605,23 @@ omniroute --help                       # すべてのコマンドを表示
 ### セットアップと初期化
 
 ```bash
-omniroute setup                        # 対話型セットアップウィザード
+omniroute setup                        # 対話式セットアップウィザード
 omniroute setup --non-interactive      # CI/自動化モード（環境変数とフラグを読み取る）
 omniroute setup --password '<value>'   # 管理者パスワードを直接設定
 omniroute setup --add-provider \
   --provider openai \
   --api-key '<value>' \
-  --test-provider                      # プロバイダーを追加して一度にテスト
+  --test-provider                      # プロバイダーの追加とテストを一度に実行
 ```
 
-非対話型セットアップで認識される環境変数:
+非対話式セットアップで認識される環境変数:
 
 | 変数                | 用途                                                                         |
 | ------------------- | ---------------------------------------------------------------------------- |
-| `OMNIROUTE_API_KEY` | プロバイダー API キー（Commander の `.env()` により `--api-key` に関連付け） |
+| `OMNIROUTE_API_KEY` | プロバイダー API キー（Commander の `.env()` により `--api-key` にバインド） |
 | `DATA_DIR`          | OmniRoute データディレクトリを上書き                                         |
 
-その他のすべての非対話型入力は、環境変数ではなくフラグとして渡します:
+その他の非対話式入力はすべて、環境変数ではなくフラグとして渡します:
 `--password`、`--provider`、`--provider-name`、`--provider-base-url`、`--default-model`
 （上記の `omniroute setup` オプションを参照）。
 
@@ -594,7 +629,7 @@ omniroute setup --add-provider \
 
 ```bash
 omniroute doctor                       # 設定、DB、ポート、ランタイム、メモリ、稼働状態を確認
-omniroute doctor --json                # 機械可読な JSON
+omniroute doctor --json                # 機械可読 JSON
 omniroute doctor --no-liveness         # HTTP ヘルスプローブをスキップ
 omniroute doctor --host 0.0.0.0        # 稼働状態確認用ホストを上書き
 omniroute doctor --liveness-url <url>  # ヘルスエンドポイントの完全な URL を上書き
@@ -602,7 +637,7 @@ omniroute doctor --liveness-url <url>  # ヘルスエンドポイントの完全
 
 doctor は、`Config`、`Database`、`Storage/encryption`、
 `Port availability`、`Node runtime`、`Native binary`（better-sqlite3）、
-`Memory`、`Server liveness` の各チェックを実行します。いずれかのチェックが `fail` の場合、ゼロ以外の終了コードで終了します。
+`Memory`、`Server liveness` をチェックします。いずれかのチェックが `fail` の場合、ゼロ以外の終了コードで終了します。
 
 ### プロバイダー管理
 
@@ -610,13 +645,13 @@ doctor は、`Config`、`Database`、`Storage/encryption`、
 omniroute providers available                       # OmniRoute プロバイダーカタログ
 omniroute providers available --search openai       # ID/名前/エイリアス/カテゴリーでカタログを絞り込み
 omniroute providers available --category api-key    # カテゴリーで絞り込み（api-key、oauth、free、...）
-omniroute providers available --json                # 機械可読な JSON
+omniroute providers available --json                # 機械可読 JSON
 
 omniroute providers list                            # 設定済みのプロバイダー接続
 omniroute providers list --json
 
-omniroute providers test <id|name>                  # 設定済みの接続を 1 件テスト
-omniroute providers test-all                        # すべての有効な接続をテスト
+omniroute providers test <id|name>                  # 設定済みの接続を1つテスト
+omniroute providers test-all                        # すべてのアクティブな接続をテスト
 omniroute providers validate                        # ローカルのみの構造検証
 omniroute providers add <provider> --credential-env PROVIDER_KEY
 omniroute providers import ./providers.json --dry-run --json
@@ -625,23 +660,23 @@ omniroute providers edit <id|name> --default-model <model>
 omniroute providers remove <id|name> --yes
 ```
 
-`providers add/import/auth/edit/remove` は API 優先であるため、
-アクティブなローカルまたはリモートのコンテキストに対して動作します。認証情報の入力には
+`providers add/import/auth/edit/remove` は API ファーストであるため、
+アクティブなローカルまたはリモートコンテキストに対して動作します。認証情報の入力には
 `--credential-stdin` または `--credential-env` を使用してください。`--dry-run --json` では、
-秘匿化された有無と形式のみが報告されます。`providers available` は OmniRoute カタログを読み取ります。
-`providers list/test/test-all/validate` は従来のローカル SQLite 動作を維持し、
-サーバーが実行中である必要はありません。
+マスキングされた存在有無と形式のみが報告されます。`providers available` は OmniRoute カタログを読み取ります。
+`providers list/test/test-all/validate` は従来どおりローカルの SQLite を使用し、
+サーバーが稼働している必要はありません。
 
-カスタムの OpenAI 互換または Anthropic 互換ノードでは、
-`omniroute nodes add` から返されたノード ID に、`omniroute keys add "$NODE_ID" --stdin` を使用して認証情報を関連付けます。
-これには、実行中のサーバーと、アクティブなコンテキストに対する管理認証が必要です。
-CLI は `POST /api/providers` を使用します。これはノードを検証し、そのエンドポイント設定を
+カスタムの OpenAI 互換または Anthropic 互換ノードの場合は、
+`omniroute nodes add` から返されたノード ID に対し、`omniroute keys add "$NODE_ID" --stdin` を使用して認証情報を関連付けます。
+これには、稼働中のサーバーと、アクティブなコンテキストに対する管理認証が必要です。
+CLI は `POST /api/providers` を使用します。この API はノードを検証し、そのエンドポイント設定を
 接続にコピーします。ノードが存在しない場合、認可に失敗した場合、またはサーバーが利用できない場合は、
 ローカルのフォールバック認証情報を作成せずにエラーを返します。
 
 `nodes add --base-url` はノードのエンドポイントを設定します。これは
 `OMNIROUTE_BASE_URL` のサーバーアドレスとは異なります。OpenAPI ファイルには、
-`omniroute openapi dump --format json --out ./openapi.json` を使用してください。グローバルな `--output` は、
+`omniroute openapi dump --format json --out ./openapi.json` を使用してください。グローバルの `--output` は
 出力先のファイル名ではなく、CLI の表示形式を選択します。
 
 ### 復旧とリセット
@@ -655,23 +690,23 @@ omniroute reset-encrypted-columns --force  # SQLite 内の暗号化された認�
 ### 認証情報のエクスポート（⚠ 取り扱い注意）
 
 ```bash
-omniroute auth export                                 # 警告と確認ゲートを表示 — DB にはアクセスしない
+omniroute auth export                                 # 警告と確認手順を表示 — DB にはアクセスしない
 omniroute auth export --force                          # すべての接続の復号済み認証情報を JSON として stdout にエクスポート
 omniroute auth export --force --id <id>                 # 一致する接続のみをエクスポート
 omniroute auth export --force --format env               # OMNIROUTE_<PROVIDER>_<FIELD>=<value> 形式の行を出力
 omniroute auth export --force --out creds.json           # ファイルに書き込み（0600 権限で作成）
 ```
 
-`auth export` は**ローカル専用**（SQLite を直接読み取り、HTTP ルートは使用しません）であり、意図的に
-**プレーンテキスト**の `apiKey`/`accessToken`/`refreshToken`/`idToken` 値を表示または書き出します。これは
-バグではなく機能です。`--force` を指定しない限り、データベースからの読み取りも復号も行われません。プレーンテキストが出力される前には、必ず stderr に
-警告バナーが表示されます。`STORAGE_ENCRYPTION_KEY` が設定されている必要があります。
-復号に失敗したフィールド（古いキー、破損した暗号文）は、エクスポート全体を中止したり内部エラーを漏えいしたりする代わりに、
-`<field>DecryptFailed: true` として報告されます。
+`auth export` は**ローカル専用**です（SQLite を直接読み取り、HTTP ルートは使用しません）。また、意図的に
+**平文の** `apiKey`/`accessToken`/`refreshToken`/`idToken` の値を表示または書き込みます。これは
+バグではなく機能です。`--force` が指定されていない場合、データベースからの読み取りも復号も一切行われません。平文が出力される前には、
+必ず警告バナーが stderr に表示されます。`STORAGE_ENCRYPTION_KEY` が
+設定されている必要があります。復号に失敗したフィールド（古いキーや破損した暗号文）は、エクスポート全体を中断したり、
+根本的なエラーを漏洩したりする代わりに、`<field>DecryptFailed: true` として報告されます。
 
 ### その他のサブコマンド
 
-特に明記されていない限り、これらは OmniRoute サーバーが実行中であることを前提とします。
+特に記載がない限り、これらは OmniRoute サーバーが稼働中であることを前提とします。
 
 ```bash
 omniroute status                       # 包括的なランタイムステータス
@@ -679,7 +714,7 @@ omniroute logs                         # リクエストログをストリーミ
 omniroute config list                  # 設定済みの CLI ツールを表示
 
 omniroute provider list                # 利用可能なプロバイダーを一覧表示（providers list のエイリアス）
-omniroute provider add                 # ツールに OmniRoute をプロバイダーとして登録
+omniroute provider add                 # OmniRoute をツールのプロバイダーとして登録
 omniroute keys add | list | remove     # API キーを管理
 omniroute models [provider]            # モデルを一覧表示（--json、--search）
 omniroute combo list | switch | create | delete
@@ -688,15 +723,15 @@ omniroute backup                       # 設定と DB のスナップショッ�
 omniroute restore                      # 以前のスナップショットから復元
 
 omniroute health                       # 詳細なヘルス情報（ブレーカー、キャッシュ、メモリ）
-omniroute quota                        # プロバイダーのクォータ使用状況
+omniroute quota                        # プロバイダーのクォータ使用量
 omniroute cache                        # キャッシュのステータス
 omniroute cache clear                  # セマンティックキャッシュとシグネチャキャッシュをクリア
 
-omniroute mcp status | restart         # MCP サーバーのステータス確認 / 再起動
-omniroute a2a status | card            # A2A サーバーのステータス / エージェントカード
+omniroute mcp status | restart         # MCP サーバーのステータス確認／再起動
+omniroute a2a status | card            # A2A サーバーのステータス／エージェントカード
 
 omniroute tunnel list | create | stop  # トンネルを管理（cloudflare/tailscale/ngrok）
-omniroute env show | get <k> | set <k> <v>  # 環境変数を確認 / 設定（一時的）
+omniroute env show | get <k> | set <k> <v>  # 環境変数を確認／設定（一時的）
 
 omniroute test                         # プロバイダー接続のスモークテスト
 omniroute update                       # 更新を確認
@@ -705,53 +740,85 @@ omniroute completion                   # シェル補完を生成
 
 ### 共通フラグ
 
-| フラグ              | 説明                                                     |
-| ------------------- | -------------------------------------------------------- |
-| `--no-open`         | 起動時にブラウザーを自動で開かない                       |
-| `--port <n>`        | API ポートを上書き（デフォルトは 20128）                 |
-| `--mcp`             | stdio 経由で MCP サーバーとして実行（IDE 向け）          |
-| `--non-interactive` | CI モード（プロンプトなし。環境変数/フラグから読み取り） |
-| `--json`            | 機械可読な JSON 出力（doctor、providers など）           |
-| `--help`, `-h`      | コマンド固有のヘルプを表示                               |
-| `--version`, `-v`   | インストール済みのバージョンを表示                       |
+| フラグ              | 説明                                                      |
+| ------------------- | --------------------------------------------------------- |
+| `--no-open`         | 起動時にブラウザーを自動で開かない                        |
+| `--port <n>`        | API ポートを上書き（デフォルトは 20128）                  |
+| `--mcp`             | stdio 経由で MCP サーバーとして実行（IDE 向け）           |
+| `--non-interactive` | CI モード（プロンプトなし。環境変数／フラグから読み取る） |
+| `--json`            | 機械可読な JSON 出力（doctor、providers など）            |
+| `--help`, `-h`      | コマンド固有のヘルプを表示                                |
+| `--version`, `-v`   | インストール済みのバージョンを表示                        |
 
 ---
 
-## 利用可能なAPIエンドポイント
+## 利用可能な API エンドポイント
 
-| エンドポイント             | 説明                                 | 使用目的                        |
-| -------------------------- | ------------------------------------ | ------------------------------- |
-| `/v1/chat/completions`     | 標準チャット（すべてのプロバイダー） | すべての最新ツール              |
-| `/v1/responses`            | レスポンスAPI（OpenAI形式）          | Codex、エージェントワークフロー |
-| `/v1/completions`          | レガシーテキスト補完                 | `prompt:`を使用する古いツール   |
-| `/v1/embeddings`           | テキスト埋め込み                     | RAG、検索                       |
-| `/v1/images/generations`   | 画像生成                             | GPT-Image、Fluxなど             |
-| `/v1/audio/speech`         | テキストから音声へ                   | ElevenLabs、OpenAI TTS          |
-| `/v1/audio/transcriptions` | 音声からテキストへ                   | Deepgram、AssemblyAI            |
+| エンドポイント             | 説明                                 | 用途                              |
+| -------------------------- | ------------------------------------ | --------------------------------- |
+| `/v1/chat/completions`     | 標準チャット（すべてのプロバイダー） | すべての最新ツール                |
+| `/v1/responses`            | Responses API（OpenAI 形式）         | Codex、エージェント型ワークフロー |
+| `/v1/completions`          | 従来のテキスト補完                   | `prompt:` を使用する古いツール    |
+| `/v1/embeddings`           | テキスト埋め込み                     | RAG、検索                         |
+| `/v1/images/generations`   | 画像生成                             | GPT-Image、Flux など              |
+| `/v1/audio/speech`         | テキスト読み上げ                     | ElevenLabs、OpenAI TTS            |
+| `/v1/audio/transcriptions` | 音声からテキストへの変換             | Deepgram、AssemblyAI              |
 
-貼り付け可能なトークン化されたOmniRoute URLの例:
+トークンを含む OmniRoute URL の、そのまま貼り付けて使用できる例：
 
 ```txt
-トークン例: sk-a3ab3c080beaee3a-69f4a4-070d71af
+トークンの例: sk-a3ab3c080beaee3a-69f4a4-070d71af
 
-標準OpenAIベース: http://localhost:20128/v1
-VS Codeモデル: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
-VS Codeチャット: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/chat/completions
-VS Codeレスポンス: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/responses
-Ollamaタグ: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/tags
-Ollamaチャット: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/chat
+標準 OpenAI ベース URL: http://localhost:20128/v1
+VS Code モデル: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
+VS Code チャット: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/chat/completions
+VS Code レスポンス: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/responses
+Ollama タグ: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/tags
+Ollama チャット: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/api/chat
 ```
 
 ---
 
 ## トラブルシューティング
 
-| エラー                                                       | 原因                                 | 修正                                             |
-| ------------------------------------------------------------ | ------------------------------------ | ------------------------------------------------ |
-| `Connection refused`                                         | OmniRouteが実行されていない          | `omniroute serve`                                |
-| `401 Unauthorized`                                           | APIキーが間違っている                | `/dashboard/api-manager`で確認                   |
-| `No combo configured`                                        | アクティブなルーティングコンボがない | `/dashboard/combos`で設定                        |
-| CLIが「not installed」と表示される                           | バイナリがPATHにない                 | `which <command>`で確認                          |
-| インストール後にダッシュボードが「not detected」と表示される | キャッシュが古い                     | ダッシュボードで「⟳ 検出を更新」をクリック       |
-| 古いリンク `/dashboard/cli-tools`                            | v3.8.6以前のブックマーク             | `/dashboard/cli-code`に自動リダイレクト（308）   |
-| 古いリンク `/dashboard/agents`                               | v3.8.6以前のブックマーク             | `/dashboard/acp-agents`に自動リダイレクト（308） |
+| エラー                                                         | 原因                           | 解決方法                                                |
+| -------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------- |
+| `Connection refused`                                           | OmniRoute が実行されていない   | `omniroute serve`                                       |
+| `401 Unauthorized`                                             | API キーが間違っている         | `/dashboard/api-manager` で確認する                     |
+| `No combo configured`                                          | 有効なルーティングコンボがない | `/dashboard/combos` で設定する                          |
+| CLI に「インストールされていません」と表示される               | バイナリが PATH にない         | `which <command>` を確認する                            |
+| インストール後もダッシュボードに「検出されません」と表示される | キャッシュが古い               | ダッシュボードで「⟳ 検出を更新」をクリックする          |
+| 古いリンク `/dashboard/cli-tools`                              | v3.8.6 より前のブックマーク    | `/dashboard/cli-code` に自動リダイレクトされる（308）   |
+| 古いリンク `/dashboard/agents`                                 | v3.8.6 より前のブックマーク    | `/dashboard/acp-agents` に自動リダイレクトされる（308） |
+
+## OmniRoute CLI で推論キーポリシーを管理する
+
+認証済みの管理コンテキスト（[リモートモード](../guides/REMOTE-MODE.md)を参照）を使用して、
+既存の推論キーをその ID により確認または更新します：
+
+```bash
+omniroute --output json keys policy show KEY_ID
+omniroute keys policy set KEY_ID --unrestricted
+omniroute --output json keys policy show KEY_ID
+```
+
+`--unrestricted` は `--model-access-mode all` のエイリアスです。この更新により、
+モデル許可リストがクリアされます。スコープ、接続ルール、ブロック対象モデル、レート制限、
+およびコスト制限は維持されるため、これらの他の制御によってリクエストが拒否される場合があります。
+明示的な `--allowed-models ""` でも `all` が選択されます。許可されるモデルがない
+制限付きキーを維持するには、`--model-access-mode restricted` と組み合わせてください。
+空でないカンマ区切りリストを指定すると、明示的に別の指定をしない限り `restricted` が選択されます。
+矛盾する `all` と空でない許可リストの組み合わせは、リクエストの送信前に拒否されます。
+
+`--rate-limit 30` は 1 分あたりのリクエスト数を設定し、他の時間枠のルールは維持します。
+`--max-cost 5` は週次上限を変更せずに、1 日あたりの USD 上限を有効にします。
+`--max-cost 0` は 1 日あたりの上限を削除し、既存の使用量制限トグルと週次上限を維持します。
+省略されたポリシーフィールドは変更されません。レートの変更では、まず現在のポリシーが読み取られます。
+同じキーのレート制限配列を同時に編集することは避けてください。
+
+ポリシーコマンドは認証済みの `GET`/`PATCH /api/keys/{id}` を使用し、アクティブな
+コンテキストとグローバルな `--api-key` オプションに従います。JSON 出力にはポリシーフィールドのみが含まれ、
+保存されたキーやそのマスク表現は含まれません。推論専用の認証情報では、
+管理上の変更を承認できません。401/403 が発生した場合は、管理用の認証情報と
+コンテキストを確認する必要があります。これはローカルの CLI トークンまたはソルトの障害を示すものではありません。
+別個のローカル認証規約については、[CLI トークン](../security/CLI_TOKEN.md)を参照してください。

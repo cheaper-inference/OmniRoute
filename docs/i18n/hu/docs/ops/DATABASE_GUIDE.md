@@ -517,7 +517,7 @@ A `-wal` fájl hiányzik, de a `-shm` fájl és a fő adatbázis sértetlen:
 omniroute
 ```
 
-Ha az SQLite nem képes automatikusan helyreállítani:
+Ha az SQLite nem tudja automatikusan helyreállítani:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite ".recover" > recovered.sql
@@ -525,19 +525,22 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### 2. forgatókönyv: A fő adatbázisfájl sérült
+### 2. forgatókönyv: A fő adatbázisfájl megsérült
 
-Állítsa helyre biztonsági másolatból:
+Állítsa helyre biztonsági mentésből:
 
 ```bash
-omniroute sync pull --merge   # vagy: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+Az `omniroute sync pull [outPath]` csak egy teljes `.tar.gz` archívumot tölt le egy futó szerverről
+(`GET /api/db-backups/exportAll`, operátori hitelesítő adatok szükségesek); nem állít helyre semmit.
 
 ### 3. forgatókönyv: A titkosítási kulcs elveszett
 
-A kulcs nélkül **nem lehetséges a helyreállítás**. A titkosított mezők olvashatatlanok. Adja hozzá újra manuálisan az összes szolgáltatót új hitelesítési adatokkal.
+A kulcs nélkül **nem lehetséges a helyreállítás**. A titkosított mezők olvashatatlanok. Adja hozzá újra manuálisan az összes szolgáltatót új hitelesítő adatokkal.
 
-> **Megelőzés**: A titkosítási kulcsról mindig készítsen külön biztonsági másolatot, lehetőleg egy jelszókezelőben vagy KMS-ben.
+> **Kockázatcsökkentés**: Mindig készítsen külön biztonsági mentést a titkosítási kulcsról, lehetőleg egy jelszókezelőben vagy KMS-ben.
 
 ### 4. forgatókönyv: Megtelt a lemez
 

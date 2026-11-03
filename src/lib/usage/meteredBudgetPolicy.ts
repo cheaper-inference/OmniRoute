@@ -18,12 +18,16 @@
  *   metered allowance at all?
  * - {@link meteredBudgetCost} — how much of the allowance does a completed
  *   call consume?
+ * - {@link isUnpricedMeteredCost} — was a completed metered call's cost
+ *   unknowable (no pricing row, no provider-reported cost)?
  * - {@link checkMeteredBudgetForProvider} — may this candidate be served
  *   under the key's current budget state?
  *
  * Fail-closed by construction: the classification recognises flat-rate plans
  * explicitly, so an unknown or unclassified provider is metered and stays
- * subject to the allowance. A provider never becomes free by being unknown.
+ * subject to the allowance. A provider never becomes free by being unknown, and
+ * a metered model never becomes free by having no price: its usage closes the
+ * budget period instead (see `recordUnpricedBudgetUsage` in domain/costRules).
  *
  * Cost OBSERVABILITY is deliberately untouched. Analytics compute their own
  * per-row cost from the request log with the `flatRateAsZero` option
@@ -35,6 +39,7 @@
 
 import { checkBudget } from "@/domain/costRules";
 import { isFlatRateProvider } from "./flatRateProviders";
+import type { CostCalculationResult } from "./costCalculator";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import * as log from "@/sse/utils/logger";
@@ -66,13 +71,25 @@ export function meteredBudgetCost(
   return estimatedCost;
 }
 
+/**
+ * Whether a completed call drew on the metered allowance at a cost nobody can
+ * know: a metered provider, and no pricing row (or a failed lookup) behind the
+ * $0 estimate. A $0 here is not free usage, so the caller records it as unpriced
+ * instead of dropping it. Flat-rate plans never qualify, and a call with no
+ * reported usage (`cost` null) priced nothing at all.
+ */
+export function isUnpricedMeteredCost(
+  providerId: string | null | undefined,
+  cost: CostCalculationResult | null | undefined
+): boolean {
+  return cost?.priced === false && consumesMeteredBudget(providerId);
+}
+
 export interface MeteredBudgetDecision {
   /** May this candidate be served under the key's current budget state? */
   allowed: boolean;
   /** Client-facing reason, present only when `allowed` is false. */
   reason?: string;
-  /** Epoch-ms instant at which the exhausted budget resets. */
-  resetAt?: number;
 }
 
 const ALLOWED: MeteredBudgetDecision = { allowed: true };
@@ -97,11 +114,7 @@ export function checkMeteredBudgetForProvider(
   if (!consumesMeteredBudget(providerId)) return ALLOWED;
   const budget = checkBudget(apiKeyId);
   if (budget.allowed) return ALLOWED;
-  return {
-    allowed: false,
-    reason: budget.reason || "Budget limit exceeded",
-    resetAt: budget.budgetResetAt ?? undefined,
-  };
+  return { allowed: false, reason: budget.reason || "Budget limit exceeded" };
 }
 
 /**
@@ -124,6 +137,5 @@ export function rejectIfMeteredBudgetExceeded(
   );
   return errorResponse(HTTP_STATUS.RATE_LIMITED, decision.reason || "Budget limit exceeded", {
     code: "BUDGET_EXCEEDED",
-    retryAfter: decision.resetAt,
   });
 }

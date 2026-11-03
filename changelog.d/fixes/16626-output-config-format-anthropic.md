@@ -1,1 +1,0 @@
-- **fix(sse):** keep `output_config.format` (structured output) for the official Anthropic API-key provider in Claude passthrough ([#16626](https://github.com/diegosouzapw/OmniRoute/pull/16626)) — thanks @raflyazf

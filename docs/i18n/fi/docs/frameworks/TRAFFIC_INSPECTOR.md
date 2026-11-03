@@ -40,32 +40,32 @@ Traffic Inspector on OmniRouten sisäänrakennettu HTTPS-liikenteen vianmäärit
 
 ## §2 Kaappaustilat
 
-Traffic Inspector tukee **viittä samanaikaista kaappauslähdettä**. Kukin niistä voidaan ottaa käyttöön tai poistaa käytöstä itsenäisesti. Jokaisen `InterceptedRequest`-objektin (`src/mitm/inspector/types.ts`) `source`-kentän arvo on jokin seuraavista: `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` tai `"tproxy"`.
+Traffic Inspector tukee **viittä samanaikaista kaappauslähdettä**. Jokainen niistä voidaan ottaa käyttöön tai poistaa käytöstä itsenäisesti. Jokaisen `InterceptedRequest`-objektin (`src/mitm/inspector/types.ts`) `source`-kenttä on jokin seuraavista: `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` tai `"tproxy"`.
 
 ### Tila 1 — AgentBridge (oletus, aina käytössä)
 
 **Lähde:** AgentBridge-käsittelijät (`src/mitm/handlers/base.ts`)
-**Mekanismi:** Jokainen `MitmHandlerBase`-luokan `intercept()`-kutsu kutsuu `hookBufferStart()`-funktiota ennen välitystä ja `hookBufferUpdate()`-funktiota valmistumisen yhteydessä. Lisämäärityksiä ei tarvita — toimii heti, kun AgentBridge on käynnissä.
+**Mekanismi:** Jokainen `MitmHandlerBase`-luokan `intercept()`-kutsu kutsuu `hookBufferStart()`-funktiota ennen välitystä ja `hookBufferUpdate()`-funktiota valmistuttuaan. Ei ylimääräisiä määrityksiä — toimii heti, kun AgentBridge on käynnissä.
 **Kattavuus:** AgentBridgeen määritetyt 9 IDE-agenttia
 **Huomautus:** `InterceptedRequest`-objektin `source`-kenttä = `"agent-bridge"`
 
 ### Tila 2 — Mukautetut isännät (DNS-uudelleenohjaus)
 
 **Lähde:** Käyttäjän määrittämä isäntäluettelo (`inspector_custom_hosts`-taulu)
-**Mekanismi:** Isännän lisääminen käyttöliittymässä lisää rivin `127.0.0.1 <host>` tiedostoon `/etc/hosts` (vaatii sudo-oikeudet). Nykyinen AgentBridge-MITM-palvelin (portti 443) luo uudelle isännälle dynaamisesti SNI-varmenteen.
+**Mekanismi:** Isännän lisääminen käyttöliittymässä lisää merkinnän `127.0.0.1 <host>` tiedostoon `/etc/hosts` (edellyttää sudo-oikeuksia). Nykyinen AgentBridge MITM -palvelin (portti 443) luo dynaamisesti SNI-varmenteen uudelle isännälle.
 **Kattavuus:** Kaikki lisättyä isäntää käyttävät sovellukset — sovelluksen määrityksiä ei tarvitse muuttaa
 **Huomautus:** `source` = `"custom-host"`
 
-Esimerkkejä käyttötapauksista:
+Esimerkkikäyttötapauksia:
 
-- `api.openai.com`-liikenteen valvonta Python-skripteistä
+- Python-komentosarjojen `api.openai.com`-liikenteen valvonta
 - `my-internal-llm.company.com`-palvelun virheenkorjaus
 - Samassa verkossa olevien mobiililaitteiden liikenteen kaappaus (ARP-huijauksen avulla — edistynyt)
 
 ### Tila 3 — HTTP_PROXY-kuuntelija (portti 8080)
 
 **Lähde:** `HTTP_PROXY`/`HTTPS_PROXY`-ympäristömuuttujia käyttävät sovellukset
-**Mekanismi:** Portissa 8080 toimiva toissijainen kuuntelija (`src/mitm/inspector/httpProxyServer.ts`), joka toimii tavallisena eksplisiittisenä HTTP/HTTPS-välityspalvelimena. Hyväksyy `CONNECT`-tunnelit (HTTPS) ja suorat HTTP-pyynnöt.
+**Mekanismi:** Portissa 8080 oleva toissijainen kuuntelija (`src/mitm/inspector/httpProxyServer.ts`), joka toimii tavallisena eksplisiittisenä HTTP/HTTPS-välityspalvelimena. Hyväksyy `CONNECT`-tunnelit (HTTPS) ja suorat HTTP-pyynnöt.
 **Kattavuus:** Kaikki `HTTP_PROXY`-ympäristömuuttujaa noudattavat sovellukset — ei DNS-muutoksia eikä sudo-oikeuksia
 **Huomautus:** `source` = `"http-proxy"`
 
@@ -78,14 +78,14 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS-rajoitus:** HTTPS-`CONNECT`-tunneleista kaapataan oletusarvoisesti vain metatiedot (isäntä, portti ja ajoitus) — TLS-sisältöä ei pureta. Ota käyttöön "Pura HTTPS-salaus välityspalvelintilassa" -valitsin (valinnainen, edellyttää, että AgentBridge-varmenteeseen luotetaan), jotta koko sisältö voidaan tarkastaa.
+**TLS-rajoitus:** HTTPS kulkee salaamattoman `CONNECT`-tunnelin läpi: kuuntelija välittää salatut tavut muuttamattomina ja tallentaa vain metatiedot (isäntä, portti ja ajoitus). Se ei koskaan pura HTTPS-salausta, eikä tässä tilassa ole asetusta, jolla salauksen purkamisen voisi ottaa käyttöön. Kaappaa HTTPS-sisällöt reitittämällä isäntä tilan 1 (AgentBridge), tilan 2 (Mukautetut isännät) tai tilan 5 (TPROXY-salauksen purku) kautta.
 
-**Porttiristiriita:** Jos portti 8080 on käytössä, AgentBridge palauttaa 409-vastauksen ja jäsennellyn virheen. Vaihda portti `INSPECTOR_HTTP_PROXY_PORT`-ympäristömuuttujan avulla.
+**Porttiristiriita:** Jos portti 8080 on käytössä, AgentBridge palauttaa 409-vastauksen ja rakenteisen virheen. Vaihda portti `INSPECTOR_HTTP_PROXY_PORT`-ympäristömuuttujan avulla.
 
-### Tila 4 — Järjestelmänlaajuinen välityspalvelin (edistynyt, valinnainen)
+### Tila 4 — Järjestelmänlaajuinen välityspalvelin (edistynyt, erikseen käyttöönotettava)
 
-**Lähde:** Käyttöjärjestelmätason välityspalvelinasetukset (koskee koneen kaikkia sovelluksia)
-**Mekanismi:** Ohjaa kaiken HTTP/HTTPS-liikenteen HTTP_PROXY-kuuntelijan kautta käyttöjärjestelmän rajapintojen avulla:
+**Lähde:** Käyttöjärjestelmätason välityspalvelinasetukset (koskee kaikkia koneen sovelluksia)
+**Mekanismi:** Ohjaa kaiken HTTP/HTTPS-liikenteen HTTP_PROXY-kuuntelijan kautta käyttöjärjestelmän ohjelmointirajapintojen avulla:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
@@ -95,31 +95,31 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 
 **Turvamekanismit:**
 
-- Automaattisen käytöstäpoiston ajastin (oletusarvoisesti 30 min, määritettävissä `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`-ympäristömuuttujalla)
-- Järjestelmän välityspalvelimen aiempi tila tallennetaan tietokantaan ja palautetaan kumoamisen yhteydessä
-- Koontinäyttö näyttää "Palautetaan järjestelmän välityspalvelinta" -kehotteen, jos käyttäjä siirtyy pois sen ollessa aktiivinen
-- Käyttöliittymä näyttää `⚠ Edistynyt` -merkin ja erillisen vahvistusvalintaruudun
+- Automaattisen käytöstäpoiston ajastin (oletuksena 30 min, määritettävissä `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`-ympäristömuuttujalla)
+- Järjestelmän aiempi välityspalvelintila tallennetaan tietokantaan ja palautetaan peruutettaessa
+- Hallintapaneeli näyttää kehotteen "Palautetaan järjestelmän välityspalvelinta", jos käyttäjä siirtyy pois sen ollessa aktiivinen
+- Käyttöliittymä näyttää `⚠ Edistynyt` -tunnuksen ja erillisen vahvistusvalintaruudun
 
-### Tila 5 — Läpinäkyvä TPROXY-salauksen purku (Linux, root, valinnainen)
+### Tila 5 — Läpinäkyvä TPROXY-salauksen purku (Linux, root, erikseen käyttöönotettava)
 
 **Lähde:** Ytimen TPROXY + käytäntöpohjainen reititys (`src/mitm/tproxy/`)
-**Mekanismi:** Merkitsee uudet paikalliset lähtevät TCP-yhteydet kohdeporttiin (oletus `443`) `mangle OUTPUT`-ketjussa, minkä jälkeen `ip rule` uudelleenreitittää merkityt paketit paikalliseen toimitukseen ja `mangle PREROUTING`-ketjun `TPROXY`-kohde luovuttaa ne läpinäkyvälle (**IP_TRANSPARENT**) kuuntelijalle (oletusportti `8443`). Kuuntelija päättää TLS-yhteyden dynaamisen varmentajan **kullekin SNI-isäntänimelle tarvittaessa myöntämällä** loppuvarmenteella, kaappaa salaamattoman tiedonsiirron ja välittää pyynnön uudelleen salattuna alkuperäiseen kohteeseen.
-**Kattavuus:** **Mielivaltaiset** kohdeisännät kohdeportissa — ei `/etc/hosts`-huijausta, ei `HTTP_PROXY`-ympäristömuuttujaa eikä järjestelmänlaajuisen välityspalvelimen muuttamista. Siepattavan prosessin määrityksiä ei tarvitse muuttaa, mutta sen on luotettava dynaamiseen varmentajaan.
+**Mekanismi:** Merkitsee uudet paikalliset lähtevät TCP-yhteydet kohdeporttiin (oletus `443`) `mangle OUTPUT` -ketjussa, minkä jälkeen `ip rule` reitittää merkityt paketit uudelleen paikalliseen toimitukseen ja `mangle PREROUTING` -ketjun `TPROXY`-kohde luovuttaa ne läpinäkyvälle (**IP_TRANSPARENT**) kuuntelijalle (oletusportti `8443`). Kuuntelija päättää TLS-yhteyden dynaamisen varmentajan **tarvittaessa kullekin SNI-isäntänimelle** myöntämällä loppuvarmenteella, kaappaa puretun tiedonsiirron ja välittää pyynnön uudelleen salattuna alkuperäiseen kohteeseen.
+**Kattavuus:** **Mitkä tahansa** kohdeportin kohdeisännät — ei `/etc/hosts`-huijausta, ei `HTTP_PROXY`-ympäristömuuttujaa eikä järjestelmänlaajuisen välityspalvelimen muuttamista. Siepattavan prosessin määrityksiä ei tarvitse muuttaa, mutta sen on luotettava dynaamiseen varmentajaan.
 **Huomautus:** `source` = `"tproxy"`
 
-**Vaatimukset:** Vain Linux (**IP_TRANSPARENT** on saatavilla vain Linuxissa), **CAP_NET_ADMIN**-ominaisuus (root) ja natiivi N-API-lisäosa, joka on koostettava C-työkaluketjulla (`npm run build:native:tproxy`). Kun vaatimukset eivät täyty, koontinäytön valitsin poistetaan käytöstä ja sen työkaluvihjeenä näytetään "TPROXY-salauksen purku vaatii Linuxin, root-oikeudet ja natiivin lisäosan". Palomuurisäännöt otetaan käyttöön ja kumotaan transaktionaalisesti (kaatuminen ei koskaan jätä `mangle`-sääntöä jäljelle), ja ne tyhjennetään uudelleenkäynnistyksen yhteydessä. SO_MARK-pohjainen silmukanesto estää välityspalvelimen omaa uudelleen salattua välitystä joutumasta uudelleen siepatuksi.
+**Vaatimukset:** Vain Linux (**IP_TRANSPARENT** on käytettävissä vain Linuxissa), **CAP_NET_ADMIN**-ominaisuus (root) ja natiivi N-API-lisäosa, joka on käännettävä C-työkaluketjulla (`npm run build:native:tproxy`). Jos nämä eivät ole käytettävissä, hallintapaneelin valitsin poistetaan käytöstä ja työkaluvihjeenä näytetään "TPROXY-salauksen purku edellyttää Linuxia, root-oikeuksia ja natiivia lisäosaa". Palomuurisäännöt otetaan käyttöön ja palautetaan transaktionaalisesti (kaatuminen ei koskaan jätä `mangle`-sääntöä jäljelle), ja ne tyhjennetään uudelleenkäynnistyksen yhteydessä. SO_MARK-pohjainen silmukan esto estää välityspalvelimen omaa uudelleen salattua välitystä tulemasta siepatuksi uudelleen.
 
-Tämä on laaja alijärjestelmä, jolla on oma erillinen ylläpitäjän oppaansa — täydellinen palomuurimääritys, SNI-kohtainen dynaaminen varmentaja ja luottamussäilön asennusohjelma, vain paikallinen reitti, silmukaneston tiedot sekä määritysskeema ovat tiedostossa `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei koosteta osaksi `/docs`-hakemistoa). Valitsinta ohjataan reiteillä `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (huomautus: reitti sijaitsee AgentBridge-etuliitteen, ei Traffic Inspector -etuliitteen alla).
+Tämä on merkittävä alijärjestelmä, jolla on oma erillinen ylläpitäjän oppaansa — tiedosto `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei käännetä osaksi `/docs`-hakemistoa) sisältää täydellisen palomuurimäärityksen, SNI-kohtaisen dynaamisen varmentajan ja luottamussäilön asennusohjelman, vain paikallisen reitin, silmukan eston yksityiskohdat sekä määritysskeeman. Valitsinta ohjataan rajapinnalla `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (huomautus: reitti sijaitsee AgentBridge-etuliitteen, ei Traffic Inspector -etuliitteen, alla).
 
 ### Kaappaustilojen vertailu
 
-| Tila                      | Määritys                         |            Sudo?            | Kattavuus                                    | Huomautukset                                                                                                                                                   |
-| ------------------------- | -------------------------------- | :-------------------------: | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge            | Automaattinen                    |   Kerran (varmenne+hosts)   | 9 IDE-agenttia                               | Oletusarvoisesti käytössä                                                                                                                                      |
-| 2. Mukautetut hostit      | Hostikohtainen syöttö            |   Kyllä (hosts-tiedosto)    | Kaikki kyseistä hostia käyttävät sovellukset | Tallennetaan tietokantaan                                                                                                                                      |
-| 3. HTTP_PROXY             | `export HTTPS_PROXY=...`         |             Ei              | Ympäristömuuttujia noudattavat sovellukset   | Portti 8080, ei oletusarvoisesti TLS-salauksen purkua                                                                                                          |
-| 4. Järjestelmänlaajuinen  | Kytkin + vahvistus               |            Kyllä            | Kaikki koneen sovellukset                    | Poistuu automaattisesti käytöstä 30 minuutin kuluttua                                                                                                          |
-| 5. TPROXY-salauksen purku | Kytkin (Linux + natiivi lisäosa) | Kyllä (root + CA:n asennus) | Mikä tahansa hosti kohdeportissa             | Purkaa mielivaltaisten hostien salauksen; oletusarvoisesti pois käytöstä — katso `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei käännetä `/docs`-hakemistoon) |
+| Tila                      | Määritys                         |           Sudo?           | Kattavuus                                    | Huomautukset                                                                                                                                                              |
+| ------------------------- | -------------------------------- | :-----------------------: | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge            | Automaattinen                    |  Kerran (varmenne+hosts)  | 9 IDE-agenttia                               | Oletusarvoisesti käytössä                                                                                                                                                 |
+| 2. Mukautetut hostit      | Syöttö hostikohtaisesti          |  Kyllä (hosts-tiedosto)   | Kaikki kyseistä hostia käyttävät sovellukset | Tallennetaan tietokantaan                                                                                                                                                 |
+| 3. HTTP_PROXY             | `export HTTPS_PROXY=...`         |            Ei             | Ympäristömuuttujaa noudattavat sovellukset   | Portti 8080; HTTPS tunneloidaan CONNECT-menetelmällä (vain metatiedot, sisältöä ei koskaan pureta)                                                                        |
+| 4. Järjestelmänlaajuinen  | Kytkin + vahvistus               |           Kyllä           | Kaikki koneen sovellukset                    | Poistetaan käytöstä automaattisesti 30 minuutin kuluttua                                                                                                                  |
+| 5. TPROXY-salauksen purku | Kytkin (Linux + natiivi lisäosa) | Kyllä (root + CA-asennus) | Kaikki kohdeportin hostit                    | Purkaa mielivaltaisten hostien salauksen; oletusarvoisesti pois käytöstä — katso `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei sisälly käännettynä hakemistoon `/docs`) |
 
 ---
 
@@ -341,16 +341,16 @@ Vie istunto osoitteen `GET /api/tools/traffic-inspector/sessions/{id}/export.har
 
 ## §6 Tietoturva
 
-Traffic Inspector näyttää **kaiken siepatun HTTPS-liikenteen**, mukaan lukien valtuutusotsakkeet ja pyyntöjen rungot. Käytössä ovat seuraavat hallintakeinot:
+Traffic Inspector näyttää **kaiken siepatun HTTPS-liikenteen**, mukaan lukien valtuutusotsakkeet ja pyyntöjen rungot. Käytössä ovat seuraavat suojaustoimet:
 
-| Hallintakeino                    | Tiedot                                                                                                                                                                                                    |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LOCAL_ONLY**                   | Kaikki reitit ja WebSocket-päätepiste ovat käytettävissä vain loopback-osoitteesta (pakotetaan tiedostossa `routeGuard.ts` ennen todennusta)                                                              |
-| **Salaisuuksien peittäminen**    | Lineaarinen `maskSecret()`-skanneri peittää RFC 6750 Bearer -tunnistetiedot, palveluntarjoajan etuliitteellä varustetut avaimet ja pitkät läpinäkymättömät tunnisteet ennen `TrafficBuffer.push()`-kutsua |
-| **Rungon kokorajoitus**          | Rungot, joiden koko on yli `INSPECTOR_MAX_BODY_KB` (oletusarvo 1024 KB), katkaistaan ja niihin lisätään ilmoitus `"(katkaistu suorituskyvyn vuoksi)"`                                                     |
-| **Otsakkeiden puhdistus**        | Nimet muunnetaan pieniksi kirjaimiksi; kehystys-, hyppykohtaiset ja välityspalvelimen todennusotsakkeet poistetaan; evästeet peitetään kokonaan; tunnistetietoarvot välitetään `maskSecret()`-funktiolle  |
-| **CSP**                          | Traffic Inspector -sivuilla käytetään tiukkaa Content Security Policy -käytäntöä, joka estää injektoitujen vastausrunkojen kautta tehtävät XSS-hyökkäykset                                                |
-| **Ei oletusarvoista pysyvyyttä** | `TrafficBuffer` säilytetään muistissa ja menetetään palvelimen uudelleenkäynnistyksen yhteydessä. Istunnot tallennetaan pysyvästi vain, kun tallennus käynnistetään erikseen                              |
+| Suojaustoimi                     | Tiedot                                                                                                                                                                                                     |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                   | Kaikki reitit ja WebSocket-päätepiste ovat käytettävissä vain loopback-liitännän kautta (pakotetaan tiedostossa `routeGuard.ts` ennen todennusta)                                                          |
+| **Salaisuuksien peittäminen**    | Lineaarinen `maskSecret()`-tarkistin peittää RFC 6750 Bearer -tunnistetiedot, palveluntarjoajan etuliitteellä varustetut avaimet ja pitkät läpinäkymättömät tunnisteet ennen `TrafficBuffer.push()`-kutsua |
+| **Rungon kokorajoitus**          | Rungot, joiden koko on yli `INSPECTOR_MAX_BODY_KB` (oletusarvo 1024 KB), katkaistaan ja niihin lisätään ilmoitus `"(katkaistu suorituskyvyn vuoksi)"`                                                      |
+| **Otsakkeiden puhdistus**        | Nimet muunnetaan pieniksi kirjaimiksi; kehystys-, hop-by-hop- ja välityspalvelimen todennusotsakkeet poistetaan; evästeet peitetään kokonaan; tunnistetietoarvot käsittelee `maskSecret()`                 |
+| **CSP**                          | Traffic Inspector -sivuilla käytetään tiukkaa Content Security Policy -käytäntöä, joka estää lisättyjen vastausrunkojen kautta tehtävät XSS-hyökkäykset                                                    |
+| **Ei oletusarvoista pysyvyyttä** | `TrafficBuffer` säilytetään muistissa, ja se menetetään palvelimen uudelleenkäynnistyksen yhteydessä. Istunnot tallennetaan pysyvästi vain, kun ne nimenomaisesti nauhoitetaan                             |
 
 ### Sovellettavat ehdottomat säännöt
 
@@ -361,9 +361,9 @@ Traffic Inspector näyttää **kaiken siepatun HTTPS-liikenteen**, mukaan lukien
 
 ### Tunnetut rajoitukset
 
-- **Järjestelmänlaajuinen välityspalvelintila** vaikuttaa kaikkiin koneen sovelluksiin, mukaan lukien VPN-asiakasohjelmat ja kertakirjautuminen. Käytä sitä aina automaattisen käytöstäpoistoajastimen kanssa. Älä käytä sitä jaetuilla koneilla.
-- **CONNECT-tunnelin HTTPS**: Tila 3 (HTTP_PROXY) tallentaa HTTPS-kohteista vain tunnelin metatiedot, ellei TLS-sieppausta ole otettu käyttöön. Tämä on tarkoituksellista — läpinäkyvä tallennus ilman, että kyseiset sovellukset luottavat AgentBridge-varmenteeseen, rikkoisi niiden TLS-varmennuksen.
-- **Kovakoodatut merkkijonot joissakin komponenteissa**: Joissakin käyttöliittymäkomponenteissa (F7/F8) on pieni määrä kovakoodattuja merkkijonoja, joita i18n-avaimet eivät vielä kata. Ne on dokumentoitu tunnetuksi rajoitukseksi i18n-puuteraportissa, ja ne siirretään myöhemmällä päivityskierroksella. Kyseiset merkkijonot ovat käyttöliittymän koristeellisia tunnisteita, joiden kääntäminen ei ole toiminnallisen käytön kannalta tarpeen.
+- **Järjestelmänlaajuinen välityspalvelintila** vaikuttaa kaikkiin koneen sovelluksiin, mukaan lukien VPN-asiakasohjelmat ja SSO. Käytä sitä aina automaattisen käytöstäpoistoajastimen kanssa. Älä käytä sitä jaetuilla koneilla.
+- **CONNECT-tunnelin HTTPS**: Tila 3 (HTTP_PROXY) sieppaa HTTPS-kohteista vain tunnelin metatiedot eikä koskaan pura niiden salausta. Tämä on tarkoituksellista — salauksen purkaminen edellyttäisi, että jokainen asiakas luottaa MITM-varmenteeseen, joten kuuntelija pitää HTTPS-yhteyden päästä päähän salattuna. Käytä AgentBridgeä, Custom Hostsia tai TPROXY-salauksenpurkua, kun tarvitset HTTPS-runkojen sisällön.
+- **Joissakin komponenteissa kovakoodatut merkkijonot**: Joissakin käyttöliittymäkomponenteissa (F7/F8) on pieni määrä kovakoodattuja merkkijonoja, joita i18n-avaimet eivät vielä kata. Ne on dokumentoitu tunnettuna rajoituksena i18n-puuteraportissa, ja ne siirretään i18n-järjestelmään myöhemmässä päivityksessä. Kyseiset merkkijonot ovat käyttöliittymän koristeellisia selitteitä, joita ei tarvitse kääntää toiminnallista käyttöä varten.
 
 ---
 
@@ -434,64 +434,63 @@ Peruspolku: `/api/tools/traffic-inspector/`
 
 ### Pyyntöjen hallinta
 
-| Menetelmä | Polku                       | Kuvaus                                                                                     |
-| --------- | --------------------------- | ------------------------------------------------------------------------------------------ |
-| GET       | `/requests`                 | Luettele pyynnöt (suodatettavissa: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
-| GET       | `/requests/{id}`            | Yksittäisen pyynnön tiedot                                                                 |
-| DELETE    | `/requests`                 | Tyhjennä muistissa oleva puskuri                                                           |
-| POST      | `/requests/{id}/replay`     | Suorita sama pyyntö uudelleen OmniRoute-reitittimen kautta                                 |
-| PUT       | `/requests/{id}/annotation` | Tallenna pyynnön huomautus tai päivitä sitä                                                |
+| Metodi | Polku                       | Kuvaus                                                                                   |
+| ------ | --------------------------- | ---------------------------------------------------------------------------------------- |
+| GET    | `/requests`                 | Listaa pyynnöt (suodatettavissa: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
+| GET    | `/requests/{id}`            | Yksittäisen pyynnön tiedot                                                               |
+| DELETE | `/requests`                 | Tyhjennä muistissa oleva puskuri                                                         |
+| POST   | `/requests/{id}/replay`     | Suorita sama pyyntö uudelleen OmniRoute-reitittimen kautta                               |
+| PUT    | `/requests/{id}/annotation` | Tallenna pyyntöön liittyvä huomautus tai päivitä sitä                                    |
 
 ### WebSocket
 
-| Menetelmä | Polku | Kuvaus                                                                                                                         |
-| --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------ |
-| GET       | `/ws` | Reaaliaikainen WebSocket-virta. Lähettää yhdistettäessä `snapshot`-tapahtuman ja sen jälkeen `new`/`update`/`clear`-tapahtumia |
+| Metodi | Polku | Kuvaus                                                                                                                               |
+| ------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/ws` | Reaaliaikainen WebSocket-virta. Lähettää yhdistettäessä `snapshot`-tapahtuman ja sen jälkeen `new`-, `update`- ja `clear`-tapahtumia |
 
 ### Vienti
 
-| Menetelmä | Polku         | Kuvaus                                             |
-| --------- | ------------- | -------------------------------------------------- |
-| GET       | `/export.har` | Vie nykyinen suodatettu luettelo HAR 1.2 -muodossa |
+| Metodi | Polku         | Kuvaus                                             |
+| ------ | ------------- | -------------------------------------------------- |
+| GET    | `/export.har` | Vie nykyinen suodatettu luettelo HAR 1.2 -muodossa |
 
 ### Mukautetut isännät
 
-| Menetelmä | Polku           | Kuvaus                                                        |
-| --------- | --------------- | ------------------------------------------------------------- |
-| GET       | `/hosts`        | Luettele mukautetut isännät                                   |
-| POST      | `/hosts`        | Lisää isäntä (muokkaa `/etc/hosts`-tiedostoa automaattisesti) |
-| DELETE    | `/hosts/{host}` | Poista isäntä                                                 |
-| PATCH     | `/hosts/{host}` | Vaihda `enabled`-tilaa                                        |
+| Metodi | Polku           | Kuvaus                                                        |
+| ------ | --------------- | ------------------------------------------------------------- |
+| GET    | `/hosts`        | Listaa mukautetut isännät                                     |
+| POST   | `/hosts`        | Lisää isäntä (muokkaa `/etc/hosts`-tiedostoa automaattisesti) |
+| DELETE | `/hosts/{host}` | Poista isäntä                                                 |
+| PATCH  | `/hosts/{host}` | Vaihda `enabled`-tilaa                                        |
 
 ### Kaappaustilat
 
-| Menetelmä | Polku                          | Kuvaus                                                                                                                     |
-| --------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| GET       | `/capture-modes`               | AgentBridge- / mukautettujen isäntien / HTTP_PROXY- / järjestelmävälityspalvelintilojen tila sekä `tls-intercept`-valitsin |
-| POST      | `/capture-modes/http-proxy`    | Käynnistä/pysäytä HTTP_PROXY-kuuntelija (`{action: "start"\|"stop"}`)                                                      |
-| POST      | `/capture-modes/system-proxy`  | Ota käyttöön / kumoa järjestelmänlaajuinen välityspalvelin (`{action: "apply"\|"revert"}`)                                 |
-| POST      | `/capture-modes/tls-intercept` | Ota HTTPS-sisällön salauksen purku käyttöön tai poista se käytöstä välityspalvelintilassa (`{enabled: boolean}`)           |
+| Metodi | Polku                         | Kuvaus                                                                                               |
+| ------ | ----------------------------- | ---------------------------------------------------------------------------------------------------- |
+| GET    | `/capture-modes`              | AgentBridge-, mukautettujen isäntien, HTTP_PROXY- ja järjestelmävälityspalvelintilojen tila          |
+| POST   | `/capture-modes/http-proxy`   | Käynnistä/pysäytä HTTP_PROXY-kuuntelija (`{action: "start"\|"stop"}`)                                |
+| POST   | `/capture-modes/system-proxy` | Ota käyttöön / poista käytöstä järjestelmänlaajuinen välityspalvelin (`{action: "apply"\|"revert"}`) |
 
-> **TPROXY-salauksen purkua** (kaappaustila 5) ohjataan **erillisellä** reitillä
-> AgentBridge-etuliitteen alla — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — ei
-> polun `/api/tools/traffic-inspector/` alla. Katso
-> `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei käännetä `/docs`-hakemistoon).
+> **TPROXY-purku** (kaappaustila 5) toimii **erillisen** AgentBridge-etuliitteen
+> alaisen reitin kautta — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — eikä
+> `/api/tools/traffic-inspector/`-polun alla. Katso
+> `docs/security/MITM-TPROXY-DECRYPT.md` (gitissä; ei käännetä osaksi `/docs`-dokumentaatiota).
 
 ### Istunnot
 
-| Menetelmä | Polku                       | Kuvaus                                                                    |
-| --------- | --------------------------- | ------------------------------------------------------------------------- |
-| POST      | `/sessions`                 | Aloita tallennus (`{name?: string}`)                                      |
-| PATCH     | `/sessions/{id}`            | Pysäytä tai nimeä uudelleen (`{action: "stop"\|"rename", name?: string}`) |
-| GET       | `/sessions`                 | Luettele kaikki tallennetut istunnot                                      |
-| GET       | `/sessions/{id}`            | Istunnon tilannevedos (kaikki pyynnöt)                                    |
-| DELETE    | `/sessions/{id}`            | Poista istunto                                                            |
-| GET       | `/sessions/{id}/export.har` | Vie istunto HAR 1.2 -muodossa                                             |
+| Metodi | Polku                       | Kuvaus                                                                    |
+| ------ | --------------------------- | ------------------------------------------------------------------------- |
+| POST   | `/sessions`                 | Aloita tallennus (`{name?: string}`)                                      |
+| PATCH  | `/sessions/{id}`            | Pysäytä tai nimeä uudelleen (`{action: "stop"\|"rename", name?: string}`) |
+| GET    | `/sessions`                 | Listaa kaikki tallennetut istunnot                                        |
+| GET    | `/sessions/{id}`            | Istunnon tilannevedos (kaikki pyynnöt)                                    |
+| DELETE | `/sessions/{id}`            | Poista istunto                                                            |
+| GET    | `/sessions/{id}/export.har` | Vie istunto HAR 1.2 -muodossa                                             |
 
-### Sisäinen syöttö (D4-varamenetelmä)
+### Sisäinen vastaanotto (D4-varajärjestely)
 
-| Menetelmä | Polku              | Kuvaus                                                                                                           |
-| --------- | ------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| POST      | `/internal/ingest` | Hyväksyy siepatun pyynnön `server.cjs`-läpivientipolulta; edellyttää `INSPECTOR_INTERNAL_INGEST_TOKEN`-otsaketta |
+| Metodi | Polku              | Kuvaus                                                                                                               |
+| ------ | ------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/internal/ingest` | Vastaanottaa siepatun pyynnön `server.cjs`-läpivientipolulta; edellyttää `INSPECTOR_INTERNAL_INGEST_TOKEN`-otsaketta |
 
 Täydelliset OpenAPI-skeemat: `docs/openapi.yaml` → tunniste `Traffic Inspector`.

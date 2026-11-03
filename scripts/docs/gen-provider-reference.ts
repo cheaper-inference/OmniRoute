@@ -2,7 +2,6 @@
 // Generates docs/reference/PROVIDER_REFERENCE.md from src/shared/constants/providers.ts.
 // Run: node --import tsx scripts/docs/gen-provider-reference.ts
 
-import { renderSystemOneProviderReference } from "./systemoneProviderReference.ts";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -211,7 +210,6 @@ function main() {
     buildSection("Upstream Proxy Providers", upstreamProxy, "Upstream proxy"),
     buildSection("Cloud Agent Providers", cloudAgent, "Cloud agent"),
     buildSection("System Providers", system, "System"),
-    renderSystemOneProviderReference(),
   ];
 
   const footer = [

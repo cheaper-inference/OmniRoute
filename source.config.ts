@@ -4,8 +4,9 @@ export const docs = defineDocs({
   dir: "docs",
   docs: {
     files: [
-      "./architecture/**/*.md",
+      "./getting-started/**/*.md",
       "./guides/**/*.md",
+      "./architecture/**/*.md",
       "./reference/**/*.md",
       "./frameworks/**/*.md",
       "./routing/**/*.md",
@@ -18,6 +19,8 @@ export const docs = defineDocs({
       "!./security/PUBLIC_CREDS.md",
       "./compression/**/*.md",
       "./ops/**/*.md",
+      "./providers/**/*.md",
+      "./comparison/**/*.md",
     ],
   },
 });

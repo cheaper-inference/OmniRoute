@@ -45,7 +45,9 @@ export const CliCatalogEntrySchema = z.object({
       })
     )
     .optional(),
-  codeBlock: z.object({ language: z.string(), code: z.string() }).optional(),
+  codeBlock: z
+    .object({ title: z.string().optional(), language: z.string(), code: z.string() })
+    .optional(),
   notes: z
     .array(z.object({ type: z.enum(["info", "warning", "error", "cloudCheck"]), text: z.string() }))
     .optional(),
@@ -63,10 +65,13 @@ export const CliCatalogSchema = z.record(CliCatalogEntrySchema);
 // +1 (2026-07-02): "codewhale" added as a dual entry alongside "deepseek-tui"
 // (CodeWhale is the actively-maintained successor to DeepSeek TUI).
 // +1 (grok-build, decolua/9router#2571): xAI Grok Build TUI coding agent.
-export const EXPECTED_CODE_COUNT = 21;
+// +1 (zed): Zed editor's built-in agent via an OpenAI-compatible provider (`omniroute setup-zed`).
+// +1 (openclaude): OpenClaude (Gitlawb/openclaude) guide card.
+export const EXPECTED_CODE_COUNT = 23;
 // +2 (#6318): "omp" (Oh My Pi) and "letta" (Letta CLI) added as agent entries.
 // Note: #6318 originally also shipped duplicate "pi"/"jcode"/"codewhale" entries —
 // those tools were already delivered by a separate PR, so only omp+letta landed here.
 // +1 (#11166): "prime-agent" (PrimeIntellect-ai/prime-agent) added as an agent entry.
 // +1 (#11578): "5dive" (5dive-ai/5dive) added as an agent entry.
-export const EXPECTED_AGENT_COUNT = 10;
+// +1 (#14096): "whycodes" (whycorporation/whycodes) added as an agent entry.
+export const EXPECTED_AGENT_COUNT = 11;
