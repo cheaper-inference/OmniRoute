@@ -101,7 +101,16 @@
 
 ## 5. Imelite ngwa ahụ
 
-`npm run check:ui-kit-upstream` tụlere ụdị nke etinyere na `packages/ui-kit/UPSTREAM.md` na mkpado `v*` kachasị ọhụrụ nke repo elu wee bipụta iwu mmekọrịta mgbe mwepụta pụtara. Usoro ọrụ `UI Kit upstream watch` kwa izu (`.github/workflows/ui-kit-upstream-watch.yml`) na-agba otu nlele ahụ ma mee ka otu okwu nsochi meghee mgbe ntụtụ dị n'azụ; repo elu bụ nke nzuzo, yabụ usoro ọrụ chọrọ akara naanị ọgụgụ na nzuzo `UI_KIT_READ_TOKEN`. Mgbe ọ na-enweghị ike ịgụ elu elu (enweghị akara, akara nke kwụsịrị ịrụ ọrụ, ma ọ bụ GitHub enweghị ike ịnweta) ọsọ ahụ na-anọgide na-acha akwụkwọ ndụ akwụkwọ ndụ mana ọ na-ede ịdọ aka ná ntị ma na-eme ka otu okwu dị iche iche meghee, nke na-emechi onwe ya otu ugboro na-agba ọsọ nwere ike ịgụ elu ọzọ.
+`npm run check:ui-kit-upstream` tụlere ụdị nke etinyere na `packages/ui-kit/UPSTREAM.md` na mkpado `v*` kachasị ọhụrụ nke repo elu wee bipụta iwu mmekọrịta mgbe mwepụta pụtara.
+
+Usoro ọrụ `UI Kit upstream watch` kwa ụbọchị (`.github/workflows/ui-kit-upstream-watch.yml`) na-eme otu nlele ahụ. Mgbe ntụtụ dị n'azụ, `scripts/ci/ui-kit-sync-pr.sh` na-edobe otu PR mmekọrịta ghere oghe megide alaka `release/vX.Y.Z` kachasị elu, na ngalaba na-atụgharị `chore/ui-kit-sync-latest`. Ọ dịghị mgbe ọ na-ejikọta: ngwa ngwa ọ bụla ntọhapụ ka chọrọ nlele anya na VPS mpaghara. A na-ewughachi alaka ụlọ ọrụ ahụ mgbe ewepụtara ọhụrụ wee hapụ naanị ya ma ọ bụghị ya. Agaghị edegharị PR mepere emepe nke ejiri aka kwalie, yana PR maka ụdị nke onye na-echekwa mechiri ejikọtaghị ọnụ na-anọkwa na-emechi ruo mgbe ewepụtara ọhụrụ.
+
+Mgbe enweghị ike imeghe PR (ntọhapụ ebumnuche ahụ jụrụ oyi, PR emeela site n'aka, mechiri PR, ma ọ bụ enweghị akara PR edobere) usoro ọrụ na-eme ka otu okwu nsochi meghere nke na-ekwu ihe kpatara ya.
+
+Usoro a na-eji ụzọ abụọ eme ihe:
+
+- `secrets.UI_KIT_READ_TOKEN`: akara naanị ọgụgụ maka repo elu nkeonwe. Mgbe usoro ọrụ enweghị ike ịgụ elu elu (enweghị akara, akara nke kwụsịrị ịrụ ọrụ, ma ọ bụ GitHub enweghị ike iru) ọsọ ahụ na-adịgide ndụ ndụ mana ọ na-ede ịdọ aka ná ntị ma na-eme ka otu okwu dị iche meghee, nke na-emechi onwe ya otu ugboro na-agba ọsọ nwere ike ịgụ elu ọzọ.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: akara mara mma na ebe nchekwa a nwere ọdịnaya yana arịrịọ dọpụta dee ohere. `GITHUB_TOKEN` ndabara enweghị ike ịmepụta PRs ebe a, na PR ọ meghere agaghị akpalite CI. Na-enweghị akara ngosi a, usoro ọrụ na-akpali alaka ụlọ ọrụ naanị.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` na-eṅomi `src/` nke dị elu na ntinye ahụ (`latest` = mkpado `v*` ọhụrụ) n'ime `packages/ui-kit/src`, na-etinye mgbanwe otu ekwenyere (ọ na-ewepụ suffix `.js` site na mbubata ndị ikwu), ma debe ụdị ọrụ na `packages/ui-kit/package.json` na `package-lock.json` gaa na nke elu. Mgbe ahụ: nyochaa `git diff packages/ui-kit`, mee ihe ngosi anya na ndị na-enye, ntọala, combos, ojiji na njedebe na isiokwu abụọ ahụ, na-agba ọsọ `npm run check:ui-kit-snapshot` na `npm run test:vitest:ui`, ma mepee PR na elu mgbanwe mgbanwe.
 
