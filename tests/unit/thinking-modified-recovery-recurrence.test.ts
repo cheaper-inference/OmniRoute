@@ -186,10 +186,9 @@ test("modified-recovery: injected blocks in an EARLIER turn are stripped (recove
   );
 });
 
-test("modified-recovery under manual thinking: an EARLIER tool_use turn keeps the #5312 placeholder", () => {
-  // thinking.type "enabled" rejects an assistant tool_use turn with no thinking
-  // precursor, so the restored block on the earlier turn is swapped for the
-  // placeholder instead of being dropped (adaptive drops it, see the test above).
+test("modified-recovery under manual thinking: an EARLIER tool_use turn injects no placeholder", () => {
+  // #18036 replaced the #5312 placeholder: the restored block on the earlier turn is dropped
+  // like on adaptive (see the test above), and a bare final tool turn disables manual thinking.
   assert.equal(
     storeClaudeThinkingFromResponse(
       {
@@ -234,10 +233,11 @@ test("modified-recovery under manual thinking: an EARLIER tool_use turn keeps th
   const recovered = stripLatestAssistantThinkingForModifiedRecovery(body) as typeof body;
   assert.notEqual(recovered, body, "recovery must change the body");
   assert.deepEqual(recovered.messages[1].content, [
-    { type: "redacted_thinking", data: DEFAULT_THINKING_CLAUDE_SIGNATURE },
     { type: "tool_use", id: TOOL_ID, name: "read_file", input: {} },
   ]);
   assert.deepEqual(recovered.messages[3], body.messages[3], "clean latest turn is untouched");
+  assert.equal(JSON.stringify(recovered).includes(DEFAULT_THINKING_CLAUDE_SIGNATURE), false);
+  assert.equal(recovered.thinking, undefined, "manual thinking is disabled for the retry");
 });
 
 test("diagnostics delta: added redacted_thinking blocks are counted (was blind: 0/0/0 with +3 outbound)", () => {

@@ -163,7 +163,7 @@ OmniRoute חושף 6 מיומנויות A2A מחווטות ב- `src/lib/a2a/task
 | דו"ח בריאות     | `health-report`      | מצטבר מפסק זרם, קירור, מצב נעילה לכל ספק                                                                                     | בריאות, חוסן            | "הצג מצב בריאותי של כל הספקים"         |
 | רשימה של יכולות | `list-capabilities`  | מחזירה את הקטלוג המלא של 45 כניסות Agent Skills (23 API + 21 CLI + 1 config) כטבלת סימון עם SKILL.md URLs גולמית להזרקת הקשר | קטלוג, גילוי, מיומנויות | "רשום את כל יכולות OmniRoute "         |
 
-> יש לשמור על כרטיס הסוכן מיושר עם הקטלוג החי של ספקי 377; ספירת ספקים ומטא נתונים free/no-auth מקורם ברישום זמן הריצה.
+> יש לשמור על כרטיס הסוכן מיושר עם הקטלוג החי של ספקי 380; ספירת ספקים ומטא נתונים free/no-auth מקורם ברישום זמן הריצה.
 
 ### פרט מיומנות `list-capabilities`
 
@@ -199,15 +199,15 @@ OmniRoute חושף 6 מיומנויות A2A מחווטות ב- `src/lib/a2a/task
 
 ## הוספת מיומנות חדשה
 
-1. **צרו קובץ מיומנות:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **צור קובץ מיומנות:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   ייצאו פונקציה אסינכרונית `(task: A2ATask) => Promise<{ artifacts, metadata }>`. פעלו בהתאם למבנה של מיומנויות קיימות, כגון `smartRouting.ts`.
+   ייצא פונקציית אסינכרון `(task: A2ATask) => Promise<{ artifacts, metadata }>`. עקוב אחר הצורה של מיומנויות קיימות כגון `smartRouting.ts`.
 
-2. **רשמו מטפל:** בתוך `src/lib/a2a/taskExecution.ts`, הוסיפו רשומה אל `A2A_SKILL_HANDLERS`:
+2. **מטפל ברישום:** ב- `src/lib/a2a/taskExecution.ts`, הוסף ערך ל- `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...מיומנויות קיימות
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ OmniRoute חושף 6 מיומנויות A2A מחווטות ב- `src/lib/a2a/task
    };
    ```
 
-3. **חשפו בכרטיס הסוכן:** בתוך `src/lib/a2a/agentCardMetadata.ts` (המשותף ל־`/.well-known/agent.json` ול־`/.well-known/agent-card.json`), הוסיפו למערך `skills`:
+3. **חשיפה בכרטיס סוכן:** ב- `src/lib/a2a/agentCardMetadata.ts` (משותף ל- `/.well-known/agent.json` ו- `/.well-known/agent-card.json`), הוסף למערך `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ OmniRoute חושף 6 מיומנויות A2A מחווטות ב- `src/lib/a2a/task
    }
    ```
 
-4. **כתבו בדיקות:** `tests/unit/a2a-<your-skill>.test.ts`. כסו את התרחיש התקין ואת תרחיש השגיאה.
+4. **כתוב מבחנים:** `tests/unit/a2a-<your-skill>.test.ts`. לכסות את נתיב השגיאה +.
 
-5. **תעדו** את המיומנות החדשה בטבלה `Available Skills` שבקובץ זה.
+5. **מִסְמָך** המיומנות החדשה בטבלת `Available Skills` של קובץ זה.
 
 ---
 

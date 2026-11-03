@@ -16,7 +16,7 @@
  * tests) can discover which windows that provider exposes.
  */
 
-import { toNumberOrNull } from "@/shared/utils/numeric";
+import { toNumberOrNull } from "../utils/numeric.ts";
 
 import { hasOllamaPurchasedCredits } from "./ollamaPurchasedCredits.ts";
 import type { getUsageForProvider } from "./usage.ts";
