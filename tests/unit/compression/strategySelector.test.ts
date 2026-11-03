@@ -129,6 +129,23 @@ describe("getEffectiveMode", () => {
   });
 });
 
+describe("safe lossy downgrade pipeline", () => {
+  it("uses the configured safe subset for a lossy routing override", () => {
+    const headroom = { engine: "headroom" as const, config: { minRows: 20 } };
+    const config: CompressionConfig = {
+      ...baseConfig,
+      comboOverrides: { "my-combo": "aggressive" },
+      stackedPipeline: [{ engine: "rtk", intensity: "standard" }, headroom, { engine: "lite" }],
+    };
+
+    assert.deepEqual(selectCompressionPlan(config, "my-combo", 0), {
+      mode: "stacked",
+      source: "routing-override",
+      stackedPipeline: [headroom, config.stackedPipeline?.[2]],
+    });
+  });
+});
+
 describe("selectCompressionStrategy resolves via the engines map (Task 7)", () => {
   it("resolves mode rtk when only rtk is enabled in the engines map", () => {
     const config = engineConfig({ rtk: { enabled: true } });

@@ -1,5 +1,7 @@
 "use client";
 
+import type { RiskNoticeVariant } from "@/shared/constants/providers";
+
 // Phase 1t.5 extraction — Issue #3501
 // Pure composition of all modal elements rendered by ProviderDetailPageClient.
 import {
@@ -10,6 +12,9 @@ import {
   TraeAuthModal,
   ProxyConfigModal,
 } from "@/shared/components";
+// The barrel does not re-export the level union, so name it from the module
+// that owns it.
+import type { ProxyConfigLevel } from "@/shared/components/ProxyConfigModal";
 import RiskNoticeModal from "../../components/RiskNoticeModal";
 import CodexCliGuideModal from "../../components/CodexCliGuideModal";
 import SiliconFlowEndpointModal from "./SiliconFlowEndpointModal";
@@ -34,7 +39,7 @@ import { resolveProviderOAuthBackendId } from "../../providerPageUtils";
 interface ProviderInfo {
   name: string;
   oauthProviderId?: string;
-  riskNoticeVariant?: string;
+  riskNoticeVariant?: RiskNoticeVariant;
   website?: string;
   [key: string]: unknown;
 }
@@ -75,7 +80,7 @@ interface ProviderModalsPanelProps {
   // AddApiKey
   showAddApiKeyModal: boolean;
   siliconFlowInitialBaseUrl: string | undefined;
-  commandCodeAuthState: { phase: string; [key: string]: unknown };
+  commandCodeAuthState: import("../providerPageHelpers").CommandCodeAuthFlowState;
   handleStartCommandCodeAuth: () => void;
   handleSaveApiKey: (data: any) => Promise<void>;
   handleCloseAddApiKeyModal: () => void;
@@ -235,7 +240,7 @@ export default function ProviderModalsPanel({
     <>
       {showRiskNoticeModal && subscriptionRisk && (
         <RiskNoticeModal
-          variant={(providerInfo.riskNoticeVariant as string) ?? "oauth"}
+          variant={providerInfo.riskNoticeVariant ?? "oauth"}
           providerId={providerId}
           providerName={providerInfo.name}
           onConfirm={handleConfirmRiskNotice}
@@ -328,10 +333,10 @@ export default function ProviderModalsPanel({
         isOpen={batchDeleteConfirmOpen}
         onClose={() => setBatchDeleteConfirmOpen(false)}
         onConfirm={handleBatchDeleteConfirm}
-        title={t("batchDeleteConfirmTitle", "Delete connections")}
+        title={providerText(t, "batchDeleteConfirmTitle", "Delete connections")}
         message={t("batchDeleteConfirm", { count: selectedIds.size })}
-        confirmText={t("batchDeleteConfirmButton", "Delete")}
-        cancelText={t("cancel", "Cancel")}
+        confirmText={providerText(t, "batchDeleteConfirmButton", "Delete")}
+        cancelText={providerText(t, "cancel", "Cancel")}
         loading={batchDeleting}
       />
       <ConfirmModal
@@ -397,7 +402,7 @@ export default function ProviderModalsPanel({
           loading={externalLinkLoading}
           error={externalLinkError}
           url={externalLinkUrl}
-          copied={externalLinkCopied}
+          copied={externalLinkCopied ? "extlink" : false}
           onCopy={externalLinkCopy}
         />
       )}
@@ -442,7 +447,7 @@ export default function ProviderModalsPanel({
         <ProxyConfigModal
           isOpen={!!proxyTarget}
           onClose={() => setProxyTarget(null)}
-          level={proxyTarget.level}
+          level={proxyTarget.level as ProxyConfigLevel}
           levelId={proxyTarget.id}
           levelLabel={proxyTarget.label}
           onSaved={() => {

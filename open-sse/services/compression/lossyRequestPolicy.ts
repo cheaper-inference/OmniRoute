@@ -1,10 +1,11 @@
 import { isSafeDefault } from "./engineCatalog.ts";
 import type { DerivedPlan } from "./deriveDefaultPlan.ts";
+import type { CompressionPipelineStep } from "./types.ts";
 
 /**
  * HouMinXi's plan for the default path: dedup and non-tool whitespace folding stay on.
- * Unique tool text stays verbatim. Summaries, relevance filters, and style rewrites
- * run only when the request opts in.
+ * Unique tool text stays verbatim. Summaries, relevance filters, style rewrites and
+ * tool-result truncation run only when the request opts in.
  */
 const LOSSY_SINGLE_MODES = new Set([
   "standard",
@@ -16,10 +17,21 @@ const LOSSY_SINGLE_MODES = new Set([
   "codex-responses",
 ]);
 
-export const SAFE_DEFAULT_PIPELINE = [
-  { engine: "session-dedup" },
-  { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
-] as const;
+/**
+ * Lite folds whitespace, but its tool-result step cuts every earlier tool result to a few
+ * thousand characters. On a long agent session that silently removed ~42% of the context
+ * (1,009,611 -> 580,575 tokens on one live request) without any opt-in. Without an opt-in
+ * lite runs whitespace/dedup cleanup only and leaves tool messages verbatim; an explicit
+ * step config wins over settings.lite.
+ */
+const LOSSLESS_LITE_STEP = {
+  engine: "lite",
+  config: { compressToolResults: false, preserveToolWhitespace: true },
+} as const;
+
+export const SAFE_DEFAULT_PIPELINE = [{ engine: "session-dedup" }, LOSSLESS_LITE_STEP] as const;
+
+type PlanStep = DerivedPlan["stackedPipeline"][number];
 
 function isSafeEngine(id: string): boolean {
   try {
@@ -27,6 +39,14 @@ function isSafeEngine(id: string): boolean {
   } catch {
     return false;
   }
+}
+
+function withoutToolResultTruncation(step: PlanStep): PlanStep {
+  if (step.engine !== "lite") return step;
+  return {
+    ...step,
+    config: { ...(step.config ?? {}), compressToolResults: false, preserveToolWhitespace: true },
+  };
 }
 
 /**
@@ -43,38 +63,47 @@ export function headerOptsIntoLossy(header: string | null, plan: DerivedPlan): b
   return plan.source === "request-header";
 }
 
-/** Replace lossy steps with dedup + tool-preserving Lite unless the request opted in. */
-export function applyLossyRequestPolicy(plan: DerivedPlan, header: string | null): DerivedPlan {
+/** Replace lossy steps with a safe configured pipeline unless the request opted in. */
+export function applyLossyRequestPolicy(
+  plan: DerivedPlan,
+  header: string | null,
+  configuredPipeline?: readonly CompressionPipelineStep[]
+): DerivedPlan {
   if (headerOptsIntoLossy(header, plan)) return plan;
-  return downgradeUnrequestedLossy(plan);
+  return downgradeUnrequestedLossy(plan, configuredPipeline);
 }
 
-export function downgradeUnrequestedLossy(plan: DerivedPlan): DerivedPlan {
+export function downgradeUnrequestedLossy(
+  plan: DerivedPlan,
+  configuredPipeline?: readonly CompressionPipelineStep[]
+): DerivedPlan {
   if (plan.mode === "off") return plan;
 
-  let pipeline: DerivedPlan["stackedPipeline"];
   if (plan.mode === "stacked") {
-    pipeline = plan.stackedPipeline.filter((step) => isSafeEngine(step.engine));
-  } else if (plan.mode === "lite") {
-    // A scoped step overrides global Lite settings without changing the stored config.
-    pipeline = [{ engine: "lite" }];
-  } else if (LOSSY_SINGLE_MODES.has(plan.mode)) {
-    pipeline = [];
-  } else {
-    return plan;
+    const kept = plan.stackedPipeline.filter((step) => isSafeEngine(step.engine));
+    const allKept = kept.length === plan.stackedPipeline.length;
+    if (allKept && !kept.some((step) => step.engine === "lite")) return plan;
+    return {
+      ...plan,
+      mode: "stacked",
+      stackedPipeline:
+        kept.length > 0 ? kept.map(withoutToolResultTruncation) : [...SAFE_DEFAULT_PIPELINE],
+    };
   }
 
-  if (pipeline.length === 0) pipeline = [...SAFE_DEFAULT_PIPELINE];
-  return {
-    ...plan,
-    mode: "stacked",
-    stackedPipeline: pipeline.map((step) =>
-      step.engine === "lite"
-        ? {
-            ...step,
-            config: { ...step.config, compressToolResults: false, preserveToolWhitespace: true },
-          }
-        : step
-    ),
-  };
+  // A scoped step overrides global Lite settings without changing the stored config.
+  if (plan.mode === "lite") {
+    return { ...plan, mode: "stacked", stackedPipeline: [LOSSLESS_LITE_STEP] };
+  }
+
+  if (LOSSY_SINGLE_MODES.has(plan.mode)) {
+    const kept = (configuredPipeline ?? []).filter((step) => isSafeEngine(step.engine));
+    return {
+      ...plan,
+      mode: "stacked",
+      stackedPipeline: kept.length > 0 ? kept : [...SAFE_DEFAULT_PIPELINE],
+    };
+  }
+
+  return plan;
 }
