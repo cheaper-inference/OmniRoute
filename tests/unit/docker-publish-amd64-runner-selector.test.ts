@@ -102,6 +102,7 @@ function evaluate(source: string, context: Context): Value {
 }
 
 const VPS_ON = { "vars.USE_VPS_RUNNER": "true", "vars.USE_VPS_BUILD_RUNNER": "true" };
+const BLACKSMITH = { "vars.DOCKER_AMD64_RUNNER": "blacksmith" };
 const build = workflow.jobs.build;
 const ctx = (arch: string, vars: Context): Context => ({
   "matrix.arch": arch,
@@ -113,8 +114,13 @@ test("amd64 runner per DOCKER_AMD64_RUNNER value", () => {
   const cases: Array<[Context, Value]> = [
     [VPS_ON, ["self-hosted", "omni-build"]],
     [{}, "ubuntu-24.04"],
-    [{ ...VPS_ON, "vars.DOCKER_AMD64_RUNNER": "blacksmith" }, "blacksmith-4vcpu-ubuntu-2404"],
-    [{ "vars.DOCKER_AMD64_RUNNER": "blacksmith" }, "blacksmith-4vcpu-ubuntu-2404"],
+    [
+      { ...VPS_ON, ...BLACKSMITH, "needs.prepare.outputs.blacksmith": "true" },
+      "blacksmith-4vcpu-ubuntu-2404",
+    ],
+    [{ ...BLACKSMITH, "needs.prepare.outputs.blacksmith": "true" }, "blacksmith-4vcpu-ubuntu-2404"],
+    // Monthly Blacksmith budget spent: hosted, never the .113 slot (its preflight is skipped).
+    [{ ...VPS_ON, ...BLACKSMITH, "needs.prepare.outputs.blacksmith": "false" }, "ubuntu-24.04"],
     [{ ...VPS_ON, "vars.DOCKER_AMD64_RUNNER": "hosted" }, "ubuntu-24.04"],
   ];
   for (const [vars, expected] of cases) {
@@ -160,4 +166,24 @@ test("the omni-build preflight is skipped once amd64 leaves the slot", () => {
   for (const runner of ["blacksmith", "hosted"]) {
     assert.equal(evaluate(condition, { ...base, "vars.DOCKER_AMD64_RUNNER": runner }), false);
   }
+});
+
+test("prepare follows the selector; merge follows prepare's budget verdict", () => {
+  // 2026-11-03: `prepare` waited 3 h for a hosted ubuntu-latest slot behind ~300 queued PR runs
+  // while the amd64 build itself was already routed to Blacksmith.
+  const prepare = workflow.jobs.prepare["runs-on"];
+  assert.equal(evaluate(prepare, BLACKSMITH), "blacksmith-2vcpu-ubuntu-2404");
+  assert.equal(evaluate(prepare, { "vars.DOCKER_AMD64_RUNNER": "hosted" }), "ubuntu-latest");
+  assert.equal(evaluate(prepare, {}), "ubuntu-latest");
+
+  const merge = workflow.jobs.merge["runs-on"];
+  assert.equal(
+    evaluate(merge, { ...BLACKSMITH, "needs.prepare.outputs.blacksmith": "true" }),
+    "blacksmith-2vcpu-ubuntu-2404"
+  );
+  assert.equal(
+    evaluate(merge, { ...BLACKSMITH, "needs.prepare.outputs.blacksmith": "false" }),
+    "ubuntu-latest"
+  );
+  assert.equal(evaluate(merge, {}), "ubuntu-latest");
 });
