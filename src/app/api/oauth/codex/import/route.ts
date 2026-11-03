@@ -143,10 +143,27 @@ async function findExistingCodexConnection(
     provider: "codex",
     authType: "oauth",
   })) as ExistingCodexConnection[];
+  const incomingUserId =
+    payload.providerSpecificData &&
+    typeof payload.providerSpecificData.chatgptUserId === "string"
+      ? payload.providerSpecificData.chatgptUserId.trim()
+      : "";
   return (
-    connections.find(
-      (connection) => codexAccountId(connection.providerSpecificData) === accountId
-    ) ?? null
+    connections.find((connection) => {
+      if (codexAccountId(connection.providerSpecificData) !== accountId) return false;
+      const data =
+        connection.providerSpecificData &&
+        typeof connection.providerSpecificData === "object" &&
+        !Array.isArray(connection.providerSpecificData)
+          ? (connection.providerSpecificData as Record<string, unknown>)
+          : {};
+      const existingUserId =
+        typeof data.chatgptUserId === "string" ? data.chatgptUserId.trim() : "";
+      // Workspace IDs are shared across members. Never update another member's
+      // credentials or email based solely on the common workspace.
+      if (incomingUserId && existingUserId) return incomingUserId === existingUserId;
+      return connection.email === payload.email;
+    }) ?? null
   );
 }
 

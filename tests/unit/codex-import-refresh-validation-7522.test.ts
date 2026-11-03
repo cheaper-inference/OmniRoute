@@ -324,6 +324,58 @@ test("import: identical stored refresh_token skips a destructive validation exch
   );
 });
 
+test("import: separate users in the same Codex workspace keep separate credentials", async () => {
+  const accountId = "shared-workspace-separate-users-2026-11-03";
+  let refreshCalls = 0;
+  await withMockedFetch(
+    (async () => {
+      refreshCalls += 1;
+      if (refreshCalls === 1) {
+        return jsonResponse({
+          access_token: "alice-rotated-access",
+          refresh_token: "alice-rotated-refresh",
+          expires_in: 3600,
+        });
+      }
+      return jsonResponse({ error: { code: "refresh_token_reused" } }, 400);
+    }) as unknown as typeof fetch,
+    async () => {
+      const alice = await postImport({
+        accounts: {
+          ...BASE_RECORD,
+          email: "alice-shared@example.com",
+          account_id: accountId,
+        },
+      });
+      assert.equal(alice.body.imported, 1);
+      const bob = await postImport({
+        accounts: {
+          ...BASE_RECORD,
+          email: "bob-shared@example.com",
+          account_id: accountId,
+          access_token: jwtWithExpiry(Math.floor(Date.now() / 1000) + 3600),
+          refresh_token: "bob-new-refresh",
+        },
+      });
+      assert.equal(bob.body.imported, 1);
+      assert.equal(bob.body.failed, 0);
+      assert.equal(refreshCalls, 2);
+
+      const rows = (await providersDb.getProviderConnections({ provider: "codex" })).filter(
+        (row) =>
+          (row.providerSpecificData as Record<string, unknown> | undefined)?.chatgptAccountId ===
+          accountId
+      );
+      assert.equal(rows.length, 2, "same workspace must not merge distinct users");
+      const restoredAlice = rows.find((row) => row.email === "alice-shared@example.com");
+      const newBob = rows.find((row) => row.email === "bob-shared@example.com");
+      assert.equal(restoredAlice?.refreshToken, "alice-rotated-refresh");
+      assert.equal(restoredAlice?.accessToken, "alice-rotated-access");
+      assert.equal(newBob?.refreshToken, "bob-new-refresh");
+    }
+  );
+});
+
 test("import: error responses never leak a stack trace", async () => {
   await withMockedFetch(
     (async () =>
