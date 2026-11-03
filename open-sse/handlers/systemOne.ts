@@ -20,11 +20,18 @@ import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { saveCallLog } from "@/lib/usageDb";
 import type { SystemOneTarget } from "../config/systemOneRegistry.ts";
+import {
+  buildCloudflareDecisionRequest,
+  cloudflareErrorMessage,
+  unwrapCloudflareDecision,
+} from "./systemOneCloudflare.ts";
 
 export interface SystemOneCredentials {
   apiKey?: string | null;
   accessToken?: string | null;
   connectionId?: string | null;
+  /** `cloudflare-ai` connections keep the Workers AI account id here. */
+  providerSpecificData?: { accountId?: unknown } | null;
 }
 
 export interface SystemOneProxyOptions {
@@ -81,21 +88,60 @@ function buildSuccessResponse(
   return new Response(JSON.stringify(parsed), { status: 200, headers });
 }
 
-function postDecision(options: SystemOneProxyOptions, token: string): Promise<Response> {
+interface DecisionRequest {
+  url: string;
+  body: Record<string, unknown>;
+}
+
+/** Upstream URL + body for the target backend; null = unusable connection config. */
+function buildDecisionRequest(options: SystemOneProxyOptions): DecisionRequest | null {
+  const { target, body } = options;
+  if (target.backend === "cloudflare") {
+    return buildCloudflareDecisionRequest(
+      target.upstreamModel,
+      options.credentials?.providerSpecificData?.accountId,
+      body
+    );
+  }
+  return {
+    url: target.upstreamUrl,
+    body: { model: target.upstreamModel, state: body.state, questions: body.questions },
+  };
+}
+
+function postDecision(
+  options: SystemOneProxyOptions,
+  request: DecisionRequest,
+  token: string
+): Promise<Response> {
   const fetchImpl: typeof fetch = options.fetchImpl ?? fetch;
-  return fetchImpl(options.target.upstreamUrl, {
+  return fetchImpl(request.url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      model: options.target.upstreamModel,
-      state: options.body.state,
-      questions: options.body.questions,
-    }),
+    body: JSON.stringify(request.body),
   });
+}
+
+/**
+ * Cloudflare wraps the native body in `{ success, result }`. Unwrap it so every
+ * backend returns the same `{ model, answers, usage }`; a 200 without a usable
+ * result (`success: false`, job not completed) is reported as a 502.
+ */
+function normalizeBackendBody(
+  target: SystemOneTarget,
+  status: number,
+  parsed: SystemOneUpstreamResponse | null
+): { status: number; parsed: SystemOneUpstreamResponse | null } {
+  if (target.backend !== "cloudflare") return { status, parsed };
+  const message = cloudflareErrorMessage(parsed);
+  if (status < 200 || status >= 300) return { status, parsed: message ? { message } : parsed };
+  const native = unwrapCloudflareDecision(parsed);
+  if (native) return { status, parsed: native as SystemOneUpstreamResponse };
+  return { status: 502, parsed: { message: message || "Cloudflare returned no decision result" } };
 }
 
 function logDecisionCall(
@@ -142,25 +188,38 @@ export async function handleSystemOneProxy(options: SystemOneProxyOptions): Prom
     return errorResponse(401, `No active credentials for provider: ${provider}`);
   }
 
+  const request = buildDecisionRequest(options);
+  if (!request) {
+    return errorResponse(
+      400,
+      `Provider ${provider} needs a valid Account ID (32 lowercase hex characters) in its connection settings`
+    );
+  }
+
   try {
-    const res = await postDecision(options, token);
+    const res = await postDecision(options, request, token);
     const text = await res.text();
-    const parsed = parseUpstreamBody(text);
-    const usage = res.ok ? parsed?.usage : undefined;
+    const normalized = normalizeBackendBody(options.target, res.status, parseUpstreamBody(text));
+    const { parsed } = normalized;
+    const ok = normalized.status >= 200 && normalized.status < 300;
+    const usage = ok ? parsed?.usage : undefined;
     const answeredModel = resolveAnsweredModel(parsed, options);
     const upstreamError = upstreamErrorMessage(parsed);
 
     logDecisionCall(options, {
-      status: res.status,
-      ok: res.ok,
+      status: normalized.status,
+      ok,
       model: answeredModel,
       usage,
       error: upstreamError || text.slice(0, 500),
       startTime,
     });
 
-    if (!res.ok) {
-      return errorResponse(res.status, upstreamError || `Provider returned HTTP ${res.status}`);
+    if (!ok) {
+      return errorResponse(
+        normalized.status,
+        upstreamError || `Provider returned HTTP ${normalized.status}`
+      );
     }
 
     return buildSuccessResponse(parsed, {
