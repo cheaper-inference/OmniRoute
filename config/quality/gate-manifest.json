@@ -759,6 +759,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "i18n:check-ui-references",
+      "command": "node scripts/i18n/check-new-ui-references.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "i18n:check-keys",
       "command": "node scripts/i18n/check-key-completeness.mjs",
       "disposition": "separately-invoked"

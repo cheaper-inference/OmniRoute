@@ -1,20 +1,13 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import {
-  copyFileSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { load as parseYaml } from "js-yaml";
+import { copyReleaseGreenModuleFixture } from "../../_helpers/copyReleaseGreenModuleFixture.mjs";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
 const sha = "1".repeat(40);
@@ -66,22 +59,7 @@ function observe(
       mkdirSync(join(dir, path), { recursive: true });
     writeFileSync(join(dir, "package.json"), '{"type":"commonjs"}');
     writeFileSync(join(dir, "package-lock.json"), "{}");
-    for (const file of [
-      "validate-release-green.mjs",
-      "gate-process.mjs",
-      "eslint-measurement.mjs",
-      "release-green-static-profile.mjs",
-    ])
-      copyFileSync(join(root, "scripts/quality", file), join(dir, "scripts/quality", file));
-    // Include the static-profile comparison and gate-process inspection dependencies.
-    for (const path of [
-      "scripts/i18n/resolve-ui-diff-base.mjs",
-      "scripts/check/openapiBaseline.mjs",
-      "scripts/dev/resource-budget-process.mjs",
-      "scripts/ci/unit-diagnostics.mjs",
-    ]) {
-      copyFileSync(join(root, path), join(dir, path));
-    }
+    copyReleaseGreenModuleFixture(root, dir);
     writeFileSync(
       join(dir, "config/quality/quality-baseline.json"),
       JSON.stringify({

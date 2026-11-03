@@ -34,6 +34,7 @@ test("full static requirements include audit, mutation and translation drift", (
     "check:ui-icu",
     "i18n:check-keys:cli",
     "check:test-tla-order",
+    "i18n:check-ui-references",
   ]) {
     assert.ok(
       gates.some((gate) => gate.id === id),
@@ -75,6 +76,67 @@ function input() {
     quality: readFileSync(`${root}/.github/workflows/quality.yml`, "utf8"),
   };
 }
+
+test("new UI references have an exact blocking differential execution entry", () => {
+  const f = input();
+  const manifest = JSON.parse(readFileSync(`${root}/config/quality/gate-manifest.json`, "utf8"));
+  assert.deepEqual(
+    manifest.aliases.filter((entry) => entry.name === "i18n:check-ui-references"),
+    [
+      {
+        name: "i18n:check-ui-references",
+        command: "node scripts/i18n/check-new-ui-references.mjs",
+        disposition: "separately-invoked",
+      },
+    ]
+  );
+  assert.equal(
+    f.scripts["i18n:check-ui-references"],
+    "node scripts/i18n/check-new-ui-references.mjs"
+  );
+  assert.deepEqual(
+    f.profile.gates.filter((gate) => gate.id === "i18n:check-ui-references"),
+    [
+      {
+        id: "i18n:check-ui-references",
+        comparison: "ui-differential",
+        job: "i18n-ui-coverage",
+        args: ["run", "i18n:check-ui-references"],
+        kind: "hard",
+        command: "node scripts/i18n/check-new-ui-references.mjs",
+      },
+    ]
+  );
+  assert.equal(
+    validateFullCiProfile(f.profile, f.scripts, f.ci, f.quality).find(
+      (gate) => gate.id === "i18n:check-ui-references"
+    ).comparison,
+    "ui-differential"
+  );
+});
+
+test("the workflow UI-reference requirement cannot disappear from the profile", () => {
+  const f = input();
+  f.profile.gates = f.profile.gates.filter((gate) => gate.id !== "i18n:check-ui-references");
+  assert.throws(
+    () => validateFullCiProfile(f.profile, f.scripts, f.ci, f.quality),
+    /Unmodeled workflow command: i18n-ui-coverage\/i18n:check-ui-references/
+  );
+});
+
+test("the UI-reference entry requires the immutable differential comparison contract", () => {
+  for (const comparison of [undefined, "candidate", "unknown"]) {
+    const f = input();
+    const gate = f.profile.gates.find((entry) => entry.id === "i18n:check-ui-references");
+    assert.ok(gate, "the gate must be present before testing invalid comparison metadata");
+    if (comparison === undefined) delete gate.comparison;
+    else gate.comparison = comparison;
+    assert.throws(
+      () => validateFullCiProfile(f.profile, f.scripts, f.ci, f.quality),
+      /Invalid or stale full static gate: i18n:check-ui-references/
+    );
+  }
+});
 
 test("a new CI requirement cannot silently disappear from the profile", () => {
   const f = input();

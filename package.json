@@ -312,6 +312,7 @@
     "alibaba:sync-allowlist": "node --import tsx/esm scripts/ops/sync-alibaba-allowlist.mjs",
     "check:vitest-exclusions": "node scripts/check/check-vitest-exclusions.mjs",
     "i18n:check-new-keys": "node scripts/i18n/check-new-key-coverage.mjs",
+    "i18n:check-ui-references": "node scripts/i18n/check-new-ui-references.mjs",
     "i18n:translate-new-keys": "bash scripts/i18n/translate-new-keys.sh",
     "i18n:check-keys": "node scripts/i18n/check-key-completeness.mjs",
     "i18n:check-keys:cli": "node scripts/i18n/check-key-completeness.mjs --catalog=cli",
@@ -458,7 +459,7 @@
     "espree": "^11.2.0",
     "fast-check": "^4.10.0",
     "fumadocs-mdx": "^15.4.0",
-    "glob": "^13.0.6",
+    "glob": "^14.0.3",
     "httpyac": "^6.16.7",
     "husky": "^9.1.7",
     "intl-messageformat": "11.2.14",
@@ -524,7 +525,7 @@
   },
   "overrides": {
     "browserslist": "^4.28.8",
-    "joi": "^18.2.9",
+    "joi": "^18.3.1",
     "onnxruntime-node": "1.30.0",
     "eslint-plugin-react-hooks": "7.1.1",
     "fast-xml-parser": "^5.10.1",
@@ -570,14 +571,10 @@
     "socket.io-parser": "^4.2.7",
     "tar": "^7.5.21",
     "libxmljs2": {
-      "minimatch": {
-        "brace-expansion": "^2.1.4"
-      }
+      "minimatch": "^11.0.4"
     },
     "rimraf": {
-      "minimatch@9": {
-        "brace-expansion": "^2.1.4"
-      }
+      "minimatch@9": "^11.0.4"
     },
     "@apidevtools/json-schema-ref-parser": {
       "js-yaml": "^5.4.2"
@@ -601,6 +598,8 @@
     },
     "get-uri": {
       "basic-ftp": "^6.2.3"
-    }
+    },
+    "glob": "$glob",
+    "minimatch@>=9.0.0": "^11.0.4"
   }
 }

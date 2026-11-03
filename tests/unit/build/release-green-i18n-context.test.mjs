@@ -16,7 +16,7 @@ const comparisonFor = (fixture) => ({
   scope: "candidate",
 });
 
-test("both UI aliases receive the same pinned observer pair, not a package-derived branch", (t) => {
+test("all three UI aliases receive the same five immutable comparison fields", (t) => {
   const fixture = createReleaseGreenProfileFixture(t, root);
   const comparison = comparisonFor(fixture);
   const gates = profile.loadFullCiProfile(fixture.root, {
@@ -24,16 +24,18 @@ test("both UI aliases receive the same pinned observer pair, not a package-deriv
     testMaskingBaseSha: fixture.baseSha,
   });
   const ui = gates.filter((gate) =>
-    ["i18n:check-value-drift", "i18n:check-new-keys"].includes(gate.id)
+    ["i18n:check-value-drift", "i18n:check-new-keys", "i18n:check-ui-references"].includes(gate.id)
   );
-  assert.equal(ui.length, 2);
+  assert.equal(ui.length, 3);
   for (const gate of ui) {
     assert.equal(gate.env?.I18N_BASE_SHA, fixture.baseSha);
+    assert.equal(gate.env?.I18N_BASE_TIP_SHA, fixture.baseSha);
     assert.equal(gate.env?.I18N_CANDIDATE_SHA, fixture.headSha);
+    assert.equal(gate.env?.I18N_COMPARISON_SOURCE, "release-green:explicit");
     assert.equal(gate.env?.I18N_COMPARISON_SCOPE, "candidate");
     assert.equal(gate.env?.BASE_REF, undefined);
+    assert.deepEqual(gate.env, ui[0].env);
   }
-  assert.deepEqual(ui[0].env, ui[1].env);
 });
 
 test("missing or stale pinned observer comparison cannot execute the UI aliases", (t) => {
@@ -54,6 +56,16 @@ for (const [label, output] of [
   ["JSON", '{"ok":false,"incomplete":true,"reason":"unavailable"}\n'],
   ["pretty JSON", JSON.stringify({ ok: false, incomplete: true }, null, 2)],
   ["JSON with npm banner", '> npm run gate\n{"ok":false,"incomplete":true}\n'],
+  [
+    "UI-reference JSON",
+    JSON.stringify({
+      gate: "i18n-new-ui-references",
+      status: "INCOMPLETE",
+      ok: false,
+      incomplete: true,
+      incompleteDetails: [{ reason: "EXACT_TREE_PAIR_REQUIRED" }],
+    }),
+  ],
 ]) {
   test("observer preserves INCOMPLETE from i18n " + label, () => {
     assert.deepEqual(profile.staticGateOutcome(2, output, "FAIL"), {
@@ -176,6 +188,25 @@ test("both hosted observers pass the exact selected tip and its first parent wit
     assert.ok(step.run.includes('--i18n-base-sha "$I18N_BASE_SHA"'));
     assert.ok(step.run.includes('--i18n-candidate-sha "$VALIDATED_SHA" --i18n-scope last-commit'));
   }
+});
+
+test("the hosted UI-reference step reuses the existing resolved pair without a bypass", () => {
+  const workflow = parseYaml(readFileSync(root + "/.github/workflows/ci.yml", "utf8"));
+  const steps = workflow.jobs["i18n-ui-coverage"].steps;
+  const matches = steps.filter((step) => step.run === "npm run i18n:check-ui-references");
+  assert.equal(matches.length, 1);
+  const step = matches[0];
+  const resolverIndex = steps.findIndex((entry) => entry.id === "i18n_base");
+  assert.ok(resolverIndex >= 0 && resolverIndex < steps.indexOf(step));
+  assert.deepEqual(step.env, {
+    I18N_BASE_SHA: "${{ steps.i18n_base.outputs.base_sha }}",
+    I18N_BASE_TIP_SHA: "${{ steps.i18n_base.outputs.base_tip_sha }}",
+    I18N_CANDIDATE_SHA: "${{ steps.i18n_base.outputs.candidate_sha }}",
+    I18N_COMPARISON_SOURCE: "${{ steps.i18n_base.outputs.source }}",
+    I18N_COMPARISON_SCOPE: "${{ steps.i18n_base.outputs.scope }}",
+  });
+  assert.equal(step.if, undefined);
+  assert.equal(step["continue-on-error"], undefined);
 });
 
 test("candidate scope uses common ancestry while push-range preserves the exact before tip", (t) => {

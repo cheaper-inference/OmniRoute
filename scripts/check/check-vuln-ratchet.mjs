@@ -3,7 +3,9 @@
 // Catraca de vulnerabilidades de dependências via osv-scanner (Task 7.2 — Fase 7).
 //
 // Saída (stdout):
-//   vulnCount=N         — total de vulnerabilidades encontradas (todos os severities)
+//   vulnCount=N         — applicable findings after exact, reviewed dispositions
+//   rawVulnCount=N      — original scanner count; never hidden
+//   notAffectedCount=N — exact non-applicable artifacts (version + integrity + expiry)
 //   vulnCount=SKIP reason=binary-absent   — osv-scanner não está no PATH
 //
 // Advisory mode reports findings without blocking. With --ratchet, exit 1 means
@@ -15,12 +17,13 @@
 // baseline porque um novo CVE foi divulgado nas deps existentes — isso é o
 // comportamento ESPERADO de um gate de CVE bloqueante, não uma regressão de
 // produto. O remédio é (a) bumpar a dep afetada (preferível) ou, se não houver
-// fix, (b) re-baseline metrics.vulnCount com justificativa + issue de tracking.
+// fix, preserve the blocker. A proven absent vulnerable mechanism can be recorded
+// in vulnerability-dispositions.json with exact artifact identity and a tracking issue.
 // Ver docs/security/SUPPLY_CHAIN.md → "Variância de CVE".
 //
 // Uso:
 //   node scripts/check/check-vuln-ratchet.mjs
-//   node scripts/check/check-vuln-ratchet.mjs --json    # imprime JSON bruto do osv-scanner
+//   node scripts/check/check-vuln-ratchet.mjs --json    # OSV JSON plus explicit disposition assessment
 //   node scripts/check/check-vuln-ratchet.mjs --quiet   # suprime logs de diagnóstico
 //   node scripts/check/check-vuln-ratchet.mjs --ratchet  # falha (exit 1) numa regressão
 
@@ -98,6 +101,118 @@ export function parseOsvJson(osvJson) {
   }
 
   return { vulnCount, bySeverity };
+}
+
+// Reviewed non-applicability is narrower than ignoring an advisory or a package.
+// Every match is bound to advisory, ecosystem, exact version, lock integrity and expiry.
+export function applyVulnerabilityDispositions(osvJson, policy, lock, now = new Date()) {
+  if (policy?.schemaVersion !== 1 || !Array.isArray(policy.dispositions)) {
+    throw new Error("Invalid vulnerability disposition policy");
+  }
+  const today = now.toISOString().slice(0, 10);
+  const rules = policy.dispositions.map((entry) => {
+    if (
+      entry?.status !== "not_affected" ||
+      entry.justification !== "vulnerable_code_not_present" ||
+      !/^GHSA-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}$/.test(entry.advisory || "") ||
+      entry.ecosystem !== "npm" ||
+      !/^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/.test(entry.name || "") ||
+      !/^\d+\.\d+\.\d+$/.test(entry.version || "") ||
+      !/^sha512-[A-Za-z0-9+/]{86}==$/.test(entry.integrity || "") ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(entry.expiresOn || "") ||
+      new Date(`${entry.expiresOn}T00:00:00Z`).toISOString().slice(0, 10) !== entry.expiresOn ||
+      !/^https:\/\/github\.com\/cheaper-inference\/OmniRoute\/issues\/\d+$/.test(
+        entry.trackingIssue || ""
+      ) ||
+      typeof entry.reason !== "string" ||
+      entry.reason.trim().length < 40 ||
+      !Array.isArray(entry.references) ||
+      entry.references.length < 2 ||
+      !entry.references.every((url) => typeof url === "string" && url.startsWith("https://"))
+    ) {
+      throw new Error("Unbounded or undocumented vulnerability disposition");
+    }
+    if (!lock || !lock.packages || typeof lock.packages !== "object") {
+      throw new Error("Lock identity is required for vulnerability dispositions");
+    }
+    const suffix = `node_modules/${entry.name}`;
+    const matches = Object.entries(lock.packages).filter(([location, pkg]) => {
+      const matchesPath = location === suffix || location.endsWith(`/${suffix}`);
+      const matchesName = pkg.name === entry.name || (matchesPath && !pkg.name);
+      return matchesName && pkg.version === entry.version;
+    });
+    return {
+      ...entry,
+      applicable:
+        entry.expiresOn > today &&
+        matches.length > 0 &&
+        matches.every(([, pkg]) => pkg.integrity === entry.integrity),
+    };
+  });
+
+  const rawVulnCount = parseOsvJson(osvJson).vulnCount;
+  const applied = [];
+  const report = {
+    ...osvJson,
+    results: osvJson.results.map((result) => ({
+      ...result,
+      packages: result.packages.map((pkg) => {
+        const removedIds = new Set();
+        const vulnerabilities = pkg.vulnerabilities.filter((vuln) => {
+          const rule = rules.find(
+            (entry) =>
+              entry.applicable &&
+              pkg.package?.ecosystem === entry.ecosystem &&
+              pkg.package.name === entry.name &&
+              pkg.package.version === entry.version &&
+              vuln.id === entry.advisory
+          );
+          if (!rule) return true;
+          for (const id of [vuln.id, ...(vuln.aliases || [])]) removedIds.add(id);
+          applied.push({
+            advisory: rule.advisory,
+            name: rule.name,
+            version: rule.version,
+            trackingIssue: rule.trackingIssue,
+            expiresOn: rule.expiresOn,
+          });
+          return false;
+        });
+        if (!removedIds.size) return pkg;
+        const keptIds = new Set(
+          vulnerabilities.flatMap((vuln) => [vuln.id, ...(vuln.aliases || [])])
+        );
+        const groups = pkg.groups?.filter((group) => {
+          if (!Array.isArray(group.ids) || group.ids.length === 0) {
+            throw new Error("Unknown vulnerability group cannot be adjudicated");
+          }
+          // An unknown ID or a finding still present in a shared group remains blocking.
+          return group.ids.some((id) => keptIds.has(id) || !removedIds.has(id));
+        });
+        return { ...pkg, vulnerabilities, ...(groups ? { groups } : {}) };
+      }),
+    })),
+  };
+  const applicableVulnCount = parseOsvJson(report).vulnCount;
+  if (applicableVulnCount > rawVulnCount) {
+    throw new Error("Inconsistent vulnerability groups cannot be adjudicated");
+  }
+  return { report, rawVulnCount, notAffectedCount: rawVulnCount - applicableVulnCount, applied };
+}
+
+function readVulnerabilityDispositions(osvJson) {
+  const policyPath = path.join(ROOT, "config/quality/vulnerability-dispositions.json");
+  if (!fs.existsSync(policyPath)) {
+    return {
+      report: osvJson,
+      rawVulnCount: parseOsvJson(osvJson).vulnCount,
+      notAffectedCount: 0,
+      applied: [],
+    };
+  }
+  const policy = JSON.parse(fs.readFileSync(policyPath, "utf8"));
+  const lock = JSON.parse(fs.readFileSync(path.join(ROOT, "package-lock.json"), "utf8"));
+  return applyVulnerabilityDispositions(osvJson, policy, lock);
 }
 
 /**
@@ -297,14 +412,29 @@ function main() {
   }
 
   const osvJson = osvResult.json;
-
-  if (PRINT_JSON) {
-    process.stdout.write(JSON.stringify(osvJson, null, 2) + "\n");
-    applyRatchet(parseOsvJson(osvJson).vulnCount);
+  let assessment;
+  try {
+    assessment = readVulnerabilityDispositions(osvJson);
+  } catch {
+    incomplete("disposition-unresolved");
     return;
   }
-
-  const { vulnCount, bySeverity } = parseOsvJson(osvJson);
+  const { vulnCount, bySeverity } = parseOsvJson(assessment.report);
+  const dispositionMetadata = {
+    rawVulnCount: assessment.rawVulnCount,
+    notAffectedCount: assessment.notAffectedCount,
+    applicableVulnCount: vulnCount,
+    dispositions: assessment.applied,
+  };
+  if (PRINT_JSON) {
+    process.stdout.write(
+      JSON.stringify({ ...osvJson, omnirouteAssessment: dispositionMetadata }, null, 2) + "\n"
+    );
+    applyRatchet(vulnCount);
+    return;
+  }
+  console.log(`rawVulnCount=${assessment.rawVulnCount}`);
+  console.log(`notAffectedCount=${assessment.notAffectedCount}`);
 
   // Emitir em formato KEY=VALUE para o coletor de métricas (collect-metrics.mjs)
   console.log(`vulnCount=${vulnCount}`);
@@ -351,9 +481,9 @@ function applyRatchet(vulnCount) {
   if (regressed) {
     process.stderr.write(
       `[vuln-ratchet] REGRESSÃO — ${vulnCount} vulnerabilidades > baseline ${baselineValue}\n` +
-        "  → Bumpe a(s) dep(s) afetada(s) (preferível). Se não houver fix, re-baseline\n" +
-        "    metrics.vulnCount em config/quality/quality-baseline.json com justificativa\n" +
-        "    + issue de tracking. Ver docs/security/SUPPLY_CHAIN.md → 'Variância de CVE'.\n"
+        "  → Atualize as dependências afetadas e preserve o bloqueio enquanto faltarem correções.\n" +
+        "    Uma não aplicabilidade comprovada exige identidade exata, evidência e expiração\n" +
+        "    em config/quality/vulnerability-dispositions.json; não eleve o baseline.\n"
     );
     process.exitCode = 1;
     return;

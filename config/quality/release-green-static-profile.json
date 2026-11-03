@@ -381,6 +381,14 @@
       "command": "node scripts/i18n/check-new-key-coverage.mjs"
     },
     {
+      "id": "i18n:check-ui-references",
+      "comparison": "ui-differential",
+      "job": "i18n-ui-coverage",
+      "args": ["run", "i18n:check-ui-references"],
+      "kind": "hard",
+      "command": "node scripts/i18n/check-new-ui-references.mjs"
+    },
+    {
       "id": "i18n:check-keys",
       "job": "i18n-ui-coverage",
       "args": ["run", "i18n:check-keys"],

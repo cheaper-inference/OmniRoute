@@ -1,14 +1,15 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
-import { copyFileSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import { Writable } from "node:stream";
 import { fileURLToPath } from "node:url";
 import { setImmediate as immediate, setTimeout as delay } from "node:timers/promises";
 import test from "node:test";
 import { writeObserverJson } from "../../../scripts/quality/validate-release-green.mjs";
+import { copyReleaseGreenModuleFixture } from "../../_helpers/copyReleaseGreenModuleFixture.mjs";
 
 const observerUrl = new URL("../../../scripts/quality/validate-release-green.mjs", import.meta.url);
 
@@ -107,20 +108,7 @@ test(
     mkdirSync(artifacts, { recursive: true });
     const directory = mkdtempSync(join(artifacts, "observer-output-cancel-"));
     t.after(() => rmSync(directory, { recursive: true, force: true }));
-    for (const name of [
-      "scripts/quality/validate-release-green.mjs",
-      "scripts/ci/unit-diagnostics.mjs",
-      "scripts/quality/gate-process.mjs",
-      "scripts/quality/eslint-measurement.mjs",
-      "scripts/quality/release-green-static-profile.mjs",
-      "scripts/dev/resource-budget-process.mjs",
-      "scripts/i18n/resolve-ui-diff-base.mjs",
-      "scripts/check/openapiBaseline.mjs",
-    ]) {
-      const target = join(directory, name);
-      mkdirSync(dirname(target), { recursive: true });
-      copyFileSync(join(root, name), target);
-    }
+    copyReleaseGreenModuleFixture(root, directory);
     mkdirSync(join(directory, "bin"));
     mkdirSync(join(directory, "scripts/ad-hoc"));
     mkdirSync(join(directory, "config/quality"), { recursive: true });

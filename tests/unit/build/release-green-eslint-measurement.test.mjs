@@ -1,18 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { load as parseYaml } from "js-yaml";
+import { copyReleaseGreenModuleFixture } from "../../_helpers/copyReleaseGreenModuleFixture.mjs";
 
 const root = fileURLToPath(new URL("../../../", import.meta.url));
 const report = [{ filePath: "/repo/source.ts", errorCount: 0, warningCount: 2 }];
@@ -35,30 +28,7 @@ function fixture(run) {
       "node_modules/.bin",
     ])
       mkdirSync(join(dir, path), { recursive: true });
-    for (const name of [
-      "collect-metrics.mjs",
-      "validate-release-green.mjs",
-      "gate-process.mjs",
-      "release-green-static-profile.mjs",
-      "eslint-measurement.mjs",
-    ]) {
-      const source = join(root, "scripts/quality", name);
-      if (existsSync(source)) copyFileSync(source, join(dir, "scripts/quality", name));
-    }
-    // Include the static-profile comparison and gate-process inspection dependencies.
-    for (const path of [
-      "scripts/i18n/resolve-ui-diff-base.mjs",
-      "scripts/check/openapiBaseline.mjs",
-      "scripts/dev/resource-budget-process.mjs",
-      "scripts/ci/unit-diagnostics.mjs",
-    ]) {
-      copyFileSync(join(root, path), join(dir, path));
-    }
-    const lookup = join(root, "scripts/i18n/message-lookup.mjs");
-    if (existsSync(lookup)) {
-      mkdirSync(join(dir, "scripts/i18n"), { recursive: true });
-      copyFileSync(lookup, join(dir, "scripts/i18n/message-lookup.mjs"));
-    }
+    copyReleaseGreenModuleFixture(root, dir, { includeMetrics: true });
     writeFileSync(join(dir, "package.json"), JSON.stringify({ type: "commonjs" }));
     const executable = (name, body) =>
       writeFileSync(join(dir, name), `#!${process.execPath}\n${body}`, { mode: 0o755 });
