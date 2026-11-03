@@ -19,13 +19,7 @@ import {
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { getSettings } from "@/lib/db/settings";
 import { resolveGuardedProxyConfig } from "@/lib/tokenHealthCheckProxyGuard";
-import {
-  getAccessToken,
-  getDeprecationNotice,
-  supportsTokenRefresh,
-  isUnrecoverableRefreshError,
-  refreshCopilotToken,
-} from "@omniroute/open-sse/services/tokenRefresh.ts";
+import * as tokenRefresh from "@omniroute/open-sse/services/tokenRefresh.ts";
 import { ROTATION_LOCK_GROUP } from "@omniroute/open-sse/services/refreshSerializer.ts";
 import { pickMaskedDisplayValue } from "@/shared/utils/maskEmail";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
@@ -581,6 +575,10 @@ export async function checkConnection(conn) {
   // Determine interval (0 = disabled)
   const intervalMin = conn.healthCheckInterval ?? DEFAULT_HEALTH_CHECK_INTERVAL_MIN;
   if (intervalMin <= 0) return;
+  if (tokenRefresh.isPassiveCodex(conn.provider)) {
+    await tokenRefresh.getAccessToken(conn.provider, { ...conn, connectionId: conn.id });
+    return;
+  }
   if (!conn.isActive) {
     // #P0: allow expired connections with retry budget remaining to pass
     // through so transient OAuth failures can self-heal instead of being
@@ -636,7 +634,7 @@ export async function checkConnection(conn) {
   // Placed AFTER the terminal-status guard above, which makes this idempotent for free:
   // once marked "expired" the connection is skipped on every later sweep, so this writes
   // exactly once instead of rewriting the same reason each cycle.
-  const deprecation = getDeprecationNotice(String(conn.provider || ""));
+  const deprecation = tokenRefresh.getDeprecationNotice(String(conn.provider || ""));
   if (deprecation) {
     const now = new Date().toISOString();
     await updateProviderConnection(conn.id, {
@@ -748,7 +746,7 @@ export async function checkConnection(conn) {
       const shouldProbeCopilot = copilotAboutToExpire || conn.testStatus === "expired";
 
       const copilotResult = shouldProbeCopilot
-        ? await refreshCopilotToken(
+        ? await tokenRefresh.refreshCopilotToken(
             conn.accessToken,
             healthCheckLog,
             proxyConfig,
@@ -855,7 +853,7 @@ export async function checkConnection(conn) {
     // Anthropic's own /api/oauth/usage rate-limits well below that.
     const refreshCapableNeedsReauth = shouldMarkRefreshCapableExpired(
       conn,
-      supportsTokenRefresh(conn.provider)
+      tokenRefresh.supportsTokenRefresh(conn.provider)
     );
     if (refreshCapableNeedsReauth) {
       const now = new Date().toISOString();
@@ -896,7 +894,7 @@ export async function checkConnection(conn) {
     );
   }
 
-  if (!supportsTokenRefresh(conn.provider)) {
+  if (!tokenRefresh.supportsTokenRefresh(conn.provider)) {
     const now = new Date().toISOString();
     await updateProviderConnection(conn.id, { lastHealthCheckAt: now });
     log(
@@ -984,7 +982,7 @@ export async function checkConnection(conn) {
   let persistedResult: RefreshResultShape | null = null;
   let result: RefreshResultShape | null;
   try {
-    result = await getAccessToken(
+    result = await tokenRefresh.getAccessToken(
       conn.provider,
       credentials,
       healthCheckLog,
@@ -1106,7 +1104,7 @@ export async function checkConnection(conn) {
   // OpenAI Codex uses rotating one-time-use refresh tokens.
   // Once used, the old token is permanently invalidated.
   // Retrying will never succeed → deactivate and stop the loop.
-  if (isUnrecoverableRefreshError(result)) {
+  if (tokenRefresh.isUnrecoverableRefreshError(result)) {
     const currentConnection = await getProviderConnectionById(conn.id);
     const credentialsChangedSinceSweep =
       !!currentConnection &&

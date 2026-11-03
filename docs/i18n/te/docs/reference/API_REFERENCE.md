@@ -819,47 +819,40 @@ OpenAI-అనుకూల బ్యాచ్ ప్రాసెసింగ్.
 
 ---
 
-## శోధన API
+## API శోధించండి
 
-వెబ్/శోధన ప్రొవైడర్ అబ్స్ట్రాక్షన్ (Tavily, Brave, Exa, Serper మొదలైనవి).
+Web/search ప్రొవైడర్ సంగ్రహణ (తవిలీ, బ్రేవ్, ఎక్సా, సెర్పర్, మొదలైనవి).
 
-| పద్ధతి | పాత్                   | వివరణ                                                                                                                  |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | కాన్ఫిగర్ చేసిన శోధన ప్రొవైడర్లు + సామర్థ్యాలను జాబితా చేస్తుంది                                                       |
-| POST   | `/v1/search`           | శోధన క్వెరీని అమలు చేస్తుంది — బాడీ `v1SearchSchema` ద్వారా ధ్రువీకరించబడుతుంది, క్యాషింగ్/కోలెసింగ్కు మద్దతు ఇస్తుంది |
-| GET    | `/v1/search/analytics` | ప్రతి ప్రొవైడర్కు సంబంధించిన హిట్/లేటెన్సీ/క్యాష్ గణాంకాలు                                                             |
+| పద్ధతి | మార్గం                 | వివరణ                                                                                                         |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | కాన్ఫిగర్ చేయబడిన శోధన ప్రొవైడర్ల + సామర్థ్యాలను జాబితా చేయండి                                                |
+| POST   | `/v1/search`           | `v1SearchSchema` ద్వారా ధృవీకరించబడిన శోధన ప్రశ్న — బాడీని అమలు చేయండి, caching/coalescing కి మద్దతు ఇస్తుంది |
+| GET    | `/v1/search/analytics` | ప్రతి ప్రొవైడర్ hit/latency/cache గణాంకాలు                                                                    |
 
-**ప్రామాణీకరణ:** Bearer API కీ (`extractApiKey` + `isValidApiKey`). శోధన విధానం `enforceApiKeyPolicy` ద్వారా అమలు చేయబడుతుంది.
+**ప్రమాణీకరణ:** బేరర్ API కీ (`extractApiKey` + `isValidApiKey`). శోధన విధానం `enforceApiKeyPolicy` ద్వారా అమలు చేయబడింది.
 
 ### Exa మరియు Tavily `provider_options`
 
-Exa మరియు Tavily, నేమ్స్పేస్ చేసిన బ్యాగ్ నుండి ప్రొవైడర్-నిర్దిష్ట ఫీల్డ్లను చదువుతాయి:
-`provider_options.exa` (లేదా `provider_options["exa-search"]`) మరియు `provider_options.tavily`
-(లేదా `provider_options["tavily-search"]`). కింద ఉన్న కీలు మాత్రమే ఫార్వర్డ్ చేయబడతాయి. ప్రతి ఒక్కటీ
-`open-sse/handlers/search/providerOptionsPassthrough.ts`లోని దాని స్వంత Zod స్కీమాతో
-తనిఖీ చేయబడుతుంది, తప్పు రకాన్ని కలిగిన కీ తీసివేయబడుతుంది. ప్రామాణీకరణ, బేస్ URL,
-`stream` మరియు `outputSchema`తో సహా ఇతర కీలు విస్మరించబడతాయి. ఇతర ప్రొవైడర్లు ఉపయోగించే ఫ్లాట్ కీలు (`cx`, `depth`, ...) మునుపటిలాగే
-పని చేస్తాయి.
+నేమ్స్పేస్డ్ బ్యాగ్ నుండి Exa మరియు Tavily రీడ్ ప్రొవైడర్-నిర్దిష్ట ఫీల్డ్లు: `provider_options.exa` (లేదా `provider_options["exa-search"]`) మరియు `provider_options.tavily` (లేదా `provider_options["tavily-search"]`). దిగువన ఉన్న కీలు మాత్రమే ఫార్వార్డ్ చేయబడ్డాయి. ప్రతి ఒక్కటి `open-sse/handlers/search/providerOptionsPassthrough.ts` లో దాని స్వంత Zod స్కీమాకు వ్యతిరేకంగా తనిఖీ చేయబడుతుంది మరియు తప్పు రకంతో కీ డ్రాప్ చేయబడింది. auth, బేస్ URL, `stream` మరియు `outputSchema` లతో సహా ఏదైనా ఇతర కీ విస్మరించబడుతుంది. ఇతర ప్రొవైడర్లు ఉపయోగించే ఫ్లాట్ కీలు (`cx`, `depth`, ...) మునుపటిలా పని చేస్తాయి.
 
-| ప్రొవైడర్ | అగ్ర-స్థాయి ఫీల్డ్లు                                                                                                                                                                                                                                                                                                                                                      | నెస్టెడ్                                                                                                                                                                |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ఫ్లాట్ ప్రిమిటివ్లు), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` డిఫాల్ట్ `{ text: true, highlights: true }`పై విలీనం చేయబడుతుంది |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                       |
+| ప్రొవైడర్ | అత్యున్నత స్థాయి ఫీల్డ్లు                                                                                                                                                                                                                                                                                                                                                 | గూడు కట్టుకుంది                                                                                                                               |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| పరీక్ష    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ఫ్లాట్ ప్రిమిటివ్స్), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` డిఫాల్ట్ `{ text: true, highlights: true }` పై విలీనం చేయబడింది |
+| తవిలీ     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                             |
 
-సాధారణ ఫీల్డ్లకే ఎల్లప్పుడూ ప్రాధాన్యం ఉంటుంది: `query`, `max_results`, `filters` (డొమైన్లు), `country` మరియు
-`search_type` నుండి ఉత్పన్నమైన టాపిక్. Exaలో, `search_type: "news"` అనేది `category: "news"`ని అలాగే ఉంచుతుంది.
-Tavily, `search_type: "finance"`ను కూడా అంగీకరిస్తుంది (`topic: "finance"`).
+జెనరిక్ ఫీల్డ్లు ఎల్లప్పుడూ గెలుస్తాయి: `query`, `max_results`, `filters` (డొమైన్లు), `country` మరియు `search_type` నుండి తీసుకోబడిన అంశం. Exaలో, `search_type: "news"` `category: "news"` ఉంచుతుంది. Tavily కూడా `search_type: "finance"` (`topic: "finance"`) అంగీకరిస్తుంది.
 
-సాధారణ `time_range` ఇప్పుడు రెండు ప్రొవైడర్లకూ చేరుతుంది: Exaకు `startPublishedDate` (ISO
-టైమ్స్టాంప్), Tavilyకు `start_date` (`YYYY-MM-DD`) లభిస్తాయి. `provider_options`లో స్పష్టంగా పేర్కొన్న తేదీ
-మ్యాప్ చేసిన తేదీని ఓవర్రైడ్ చేస్తుంది.
+ఫైర్క్రాల్ శోధన ధర 10 రిటర్న్ చేసిన ఫలితాల యొక్క ప్రారంభ బ్లాక్కు నమోదు చేయబడుతుంది, ఒక బ్లాక్కి $0.002 (2 క్రెడిట్లు) మరియు ప్రతి కాల్కి కనీసం ఒక బ్లాక్ ( [ఫైర్క్రాల్ బిల్లింగ్](https://docs.firecrawl.dev/billing) ): 11 ఫలితాల ధర $0.004.
 
-Exa ఫలితాలు `id`, `highlight_scores`, `summary`, `subpages`, `entities` మరియు `extras`ను
-`provider_raw`లో ఉంచుతాయి. Tavily ఫలితాలు `images` మరియు `favicon`ను ఉంచుతాయి.
+జెనరిక్ `time_range` ఇప్పుడు రెండు ప్రొవైడర్లను చేరుకుంటుంది: Exa `startPublishedDate` (ISO టైమ్స్టాంప్) మరియు Tavily `start_date` (`YYYY-MM-DD`)ని పొందుతుంది. `provider_options` లో స్పష్టమైన తేదీ మ్యాప్ చేయబడిన తేదీని భర్తీ చేస్తుంది.
 
-వ్యయ గణన ఇప్పటికీ ఫ్లాట్ రిజిస్ట్రీ `costPerQuery`గానే ఉంటుంది. ప్రతి కాల్కు Tavilyలో
-`search_depth: "advanced"`కు ఎక్కువ క్రెడిట్లు బిల్ చేయబడతాయి, అయితే ఆ వ్యత్యాసం
-`usage.search_cost_usd`లో ప్రతిబింబించదు.
+Exa ఫలితాలు `id`, `highlight_scores`, `summary`, `subpages`, `entities` మరియు `extras` `provider_raw` లో ఉంచుతాయి. Tavily ఫలితాలు `images` మరియు `favicon` ఉంచుతాయి.
+
+లింక్అప్ శోధన ధర `depth` `fast` మరియు `standard` కోసం $0.005 మరియు `deep` కోసం $0.05 ( [Linkup ప్రైసింగ్](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` లేదా కనెక్షన్ సెట్టింగ్ల నుండి వచ్చినా నమోదు చేయబడుతుంది.
+
+Exa `type: "lite"` (Exa 3.0) చిన్న ఫీల్డ్లను అంగీకరిస్తుంది మరియు ఏదైనా ఇతర ఫీల్డ్ సెట్ చేయబడినప్పుడు మొత్తం అభ్యర్థనను తిరస్కరిస్తుంది. లైట్ కోసం, `additionalQueries`, `systemPrompt` మరియు `text` మరియు `highlights` మినహా ప్రతి `contents` కీ కాల్కు ముందు డ్రాప్ చేయబడతాయి. నిలిపివేయబడిన `subpages`, `subpageTarget`, `highlights.numSentences` మరియు `highlights.highlightsPerUrl` ఇకపై ఫార్వార్డ్ చేయబడవు.
+
+కాస్ట్ అకౌంటింగ్ అనేది ఫ్లాట్ రిజిస్ట్రీ `costPerQuery`, ఇది Exa యొక్క స్వంత ధరను అనుసరించే Exa మినహా: `auto` (మరియు లెగసీ `fast`) కోసం ప్రతి కాల్కు $0.007 లేదా `lite` (మరియు లెగసీ `instant`) కోసం $0.004 10 ఫలితాలను కవర్ చేస్తుంది; ప్రతి తదుపరి ఫలితం కోసం $0.001; మరియు `contents.summary` సెట్ చేసినప్పుడు ప్రతి ఫలితానికి $0.001. Tavily `search_depth` `basic`, `fast` మరియు `ultra-fast` కోసం 1 క్రెడిట్ ($0.008), మరియు `advanced` ( [Tavily API క్రెడిట్లు](https://docs.tavily.com/documentation/api-credits) ) కోసం 2 క్రెడిట్లు ($0.016) వద్ద రికార్డ్ చేయబడింది. Tavily అధునాతనంగా అప్గ్రేడ్ చేసిన `auto_parameters: true` తో కాల్ ఇప్పటికీ 1 క్రెడిట్లో రికార్డ్ చేయబడింది.
 
 ---
 

@@ -91,6 +91,18 @@ async function extractEndpointFromConfig(
           content.match(/baseUrl:\s*["']?([^"'\r\n]+)["']?/i);
         return match ? match[1].trim() : null;
       }
+      case "pi": {
+        // models.json: providers.<name>.baseUrl. Prefer the OmniRoute entry,
+        // fall back to the first provider that looks like us.
+        const piConfig = config as { providers?: Record<string, { baseUrl?: string }> };
+        const providers = piConfig.providers || {};
+        const omniroute = providers.omniroute;
+        if (omniroute?.baseUrl) return omniroute.baseUrl;
+        const firstMatch = Object.values(providers).find(
+          (provider) => typeof provider?.baseUrl === "string" && provider.baseUrl.startsWith("http")
+        );
+        return firstMatch?.baseUrl ?? null;
+      }
       default:
         return null;
     }

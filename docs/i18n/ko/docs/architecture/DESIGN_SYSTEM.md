@@ -57,13 +57,11 @@
 4. `tests/unit/ui/adapters/<name>.test.tsx`를 추가하거나 업데이트합니다. 호출자가 많은 어댑터의 경우,
    변경 전후의 렌더링된 마크업을 비교하세요 — 패딩이나 래퍼 변경이 모든 화면으로 퍼져나갑니다.
 
-## 5. kit 업데이트
+## 5. 키트 업데이트
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]`은 해당 커밋의 업스트림 `src/`를
-`packages/ui-kit/src`로 복사하고 허용된 단일 변환을 적용합니다 (상대 import에서 `.js` 접미사를
-제거). 그 다음: `git diff packages/ui-kit`를 검토하고, 두 테마 모두에서 providers, settings, combos,
-usage 및 endpoint를 시각적으로 점검하고, `npm run check:ui-kit-snapshot`과 `npm run test:vitest:ui`를
-실행한 후, 업스트림 변경 로그와 함께 PR을 엽니다.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` 에 고정된 버전을 업스트림 저장소의 최신 `v*` 태그와 비교하고 릴리스가 출시되면 sync 명령을 인쇄합니다. 주간 `UI Kit upstream watch` 작업 흐름(`.github/workflows/ui-kit-upstream-watch.yml`)은 동일한 검사를 실행하고 핀이 뒤에 있는 동안 하나의 추적 문제를 열어 둡니다. 업스트림 저장소는 비공개이므로 워크플로에는 `UI_KIT_READ_TOKEN` 비밀에 읽기 전용 토큰이 필요합니다. 업스트림을 읽을 수 없는 경우(토큰 없음, 작동이 중지된 토큰 또는 GitHub 연결할 수 없음) 실행은 녹색으로 유지되지만 경고를 기록하고 하나의 별도 문제를 열어 두며 나중에 실행하여 업스트림을 다시 읽을 수 있게 되면 자동으로 닫힙니다.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` 해당 커밋(최신 `v*` 태그 `latest` = )에서 업스트림 `src/` `packages/ui-kit/src` 로 복사하고, 허용되는 단일 변환을 적용하고(상대 가져오기에서 `.js` 접미사를 삭제함), `packages/ui-kit/package.json` 및 `package-lock.json` 의 작업 공간 버전을 업스트림 버전으로 설정합니다. 그런 다음 `git diff packages/ui-kit` 검토하고, 두 테마 모두에서 공급자, 설정, 콤보, 사용법 및 끝점에 대한 시각적 전달을 수행하고, `npm run check:ui-kit-snapshot` 및 `npm run test:vitest:ui` 실행하고, 업스트림 변경 로그가 있는 PR 엽니다.
 
 ## 6. README 다이어그램
 

@@ -576,6 +576,49 @@ aider --openai-api-base "{{baseUrl}}" --model "{{model}}"`,
     ],
   },
 
+  // OpenClaude (Gitlawb/openclaude) — distinct from the "openclaw" entry above.
+  openclaude: {
+    id: "openclaude",
+    name: "OpenClaude",
+    image: "/providers/cli-generic.svg",
+    color: "#000000",
+    description: "OpenClaude coding agent CLI — OpenAI-compatible provider via OPENAI_BASE_URL",
+    docsUrl: "https://github.com/Gitlawb/openclaude",
+    configType: "guide",
+    category: "code",
+    vendor: "Gitlawb (OSS)",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "openclaude",
+    notes: [
+      {
+        type: "warning",
+        text: 'OpenClaude needs --provider openai. Without it the env vars are ignored and it stops at "Not logged in".',
+      },
+    ],
+    guideSteps: [
+      { step: 1, title: "Install", desc: "npm install -g @gitlawb/openclaude" },
+      { step: 2, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 3, title: "API Key", type: "apiKeySelector" },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+      {
+        step: 5,
+        title: "Run",
+        desc: "Export the variables below, then start OpenClaude with --provider openai",
+      },
+    ],
+    codeBlock: {
+      language: "bash",
+      code: `export OPENAI_BASE_URL="{{baseUrl}}"
+export OPENAI_API_KEY="{{apiKey}}"
+export OPENAI_MODEL="{{model}}"
+openclaude --provider openai
+# Windows PowerShell:
+# $env:OPENAI_BASE_URL="{{baseUrl}}"; $env:OPENAI_API_KEY="{{apiKey}}"; $env:OPENAI_MODEL="{{model}}"
+# openclaude --provider openai`,
+    },
+  },
+
   /** ★ Added by plan 14 (CLI Pages Redesign) — 2026-05-27 */
   jcode: {
     id: "jcode",
@@ -692,6 +735,29 @@ aider --openai-api-base "{{baseUrl}}" --model "{{model}}"`,
     acpSpawnable: false,
     baseUrlSupport: "full",
     defaultCommand: "pi",
+    // Pi loads custom providers from <agent-dir>/models.json; agent-dir defaults
+    // to ~/.pi/agent and moves wholesale with PI_CODING_AGENT_DIR. See
+    // src/shared/services/piConfig.ts.
+    settingsFile: "~/.pi/agent/models.json",
+    // Hand-edit fallback shown by the guided card's manual-configuration block.
+    codeBlock: {
+      title: "~/.pi/agent/models.json",
+      language: "json",
+      code: [
+        "{",
+        '  "providers": {',
+        '    "omniroute": {',
+        '      "baseUrl": "http://127.0.0.1:20128/v1",',
+        '      "api": "openai-completions",',
+        '      "apiKey": "sk_omniroute",',
+        '      "models": [',
+        '        { "id": "auto/best-coding", "name": "OmniRoute best-coding" }',
+        "      ]",
+        "    }",
+        "  }",
+        "}",
+      ].join("\n"),
+    },
   },
 
   /** Added — ported from upstream decolua/9router#1233 (dashboard catalog entry for Crush). */
