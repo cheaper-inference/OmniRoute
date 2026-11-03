@@ -666,6 +666,18 @@
         "- **chore(quality):** rebaseline opencode.ts 1247->1251 (train-10c tip drift) (direct commit `198b3bfd8a`)",
         "- **chore(release):** reconcile the v3.8.51 CHANGELOG (pass 1) (direct commit `e8b55710ee`)"
       ]
+    },
+    {
+      "id": "courtesy-credit-17183-on-17208-2026-11-03",
+      "reason": "Owner-approved courtesy credit (2026-11-03): @PrinceThummar011 opened #17183 with the same outputDimensionality fix that landed as #17208. The v3.8.53 credit audit found no proof of copying in either direction, and the owner chose to credit both. The bullet text is unchanged; only ' / @PrinceThummar011' is appended to its thanks group.",
+      "baseChangelogSha256": "1cf8a3e6d5e1b26142d934eee1727d5e8478856f59684d9e31c7d3edbbf8a5ae",
+      "resultChangelogSha256": "a0cb5c3bfd4f2faa262cb7dc1355c2c662cc8b0690c09d0b1e4a3f6152498c27",
+      "removedBullets": [
+        "- **fix(sse):** stop injecting `outputDimensionality` into Gemini embedding requests sent to the OpenAI-compatible endpoint — sized requests failed with a 400 \"Unknown name outputDimensionality\"; `dimensions` is now forwarded untouched, the combo-level override still works and the native `embedContent` path keeps mapping it through `geminiRequestExtras` ([#17208](https://github.com/diegosouzapw/OmniRoute/pull/17208), fixes [#17158](https://github.com/diegosouzapw/OmniRoute/issues/17158)) — thanks @rafacpti23"
+      ],
+      "addedBullets": [
+        "- **fix(sse):** stop injecting `outputDimensionality` into Gemini embedding requests sent to the OpenAI-compatible endpoint — sized requests failed with a 400 \"Unknown name outputDimensionality\"; `dimensions` is now forwarded untouched, the combo-level override still works and the native `embedContent` path keeps mapping it through `geminiRequestExtras` ([#17208](https://github.com/diegosouzapw/OmniRoute/pull/17208), fixes [#17158](https://github.com/diegosouzapw/OmniRoute/issues/17158)) — thanks @rafacpti23 / @PrinceThummar011"
+      ]
     }
   ]
 }
