@@ -15,15 +15,22 @@ import { storeClaudeThinkingBlocks } from "../../open-sse/services/claudeThinkin
 
 const PROVIDER = "claude";
 const MODEL = "claude-opus-5-5";
+// Signed blocks are bound to the serving connection (#17324), so store and request share one.
+const CONNECTION = "conn-dup-ids";
+
+type Block = { type?: string; id?: string };
+type Msg = { role?: string; content?: unknown };
 
 function body(assistantTurns: Array<{ id: string }>) {
   return {
     model: MODEL,
-    max_tokens: 512,
+    max_tokens: 4096,
     stream: true,
-    thinking: { type: "adaptive" },
+    // The restore only runs for MANUAL extended thinking on the tip (adaptive-only models
+    // accept tool turns without a thinking block, #17324).
+    thinking: { type: "enabled", budget_tokens: 2048 },
     messages: [
-      { role: "user", content: "bir sey yap" },
+      { role: "user", content: "do something" },
       ...assistantTurns.map((t) => ({
         role: "assistant",
         content: "",
@@ -32,60 +39,69 @@ function body(assistantTurns: Array<{ id: string }>) {
         ],
       })),
       ...assistantTurns.map((t) => ({ role: "tool", tool_call_id: t.id, content: "12:00" })),
-      { role: "user", content: "devam" },
+      { role: "user", content: "continue" },
     ],
   };
 }
 
-function lastAssistant(messages: any[]) {
+function translate(turns: Array<{ id: string }>): { messages: Msg[] } {
+  return openaiToClaudeRequest(
+    MODEL,
+    body(turns) as unknown as Parameters<typeof openaiToClaudeRequest>[1],
+    true,
+    { _provider: PROVIDER, _connectionId: CONNECTION }
+  ) as unknown as { messages: Msg[] };
+}
+
+function lastAssistant(messages: Msg[]) {
   return [...messages].reverse().find((m) => m.role === "assistant");
 }
 
-function thinkingBlocks(msg: any) {
+function thinkingBlocks(msg: Msg | undefined): Block[] {
   return Array.isArray(msg?.content)
-    ? msg.content.filter((b: any) => b?.type === "thinking" || b?.type === "redacted_thinking")
+    ? (msg.content as Block[]).filter(
+        (b) => b?.type === "thinking" || b?.type === "redacted_thinking"
+      )
     : [];
 }
 
-test("yinelenen tool_call id: store'dan geri yukleme YAPILMAZ (400 'cannot be modified' onlemi)", () => {
+test("duplicated tool_call id: no restore from the store (prevents the 400 'cannot be modified')", () => {
   const id = "toolu_dup_1";
   assert.ok(
     storeClaudeThinkingBlocks({
       toolUseIds: [id],
-      blocks: [{ type: "thinking", thinking: "eski nesil", signature: "IMZA_A" }],
+      blocks: [{ type: "thinking", thinking: "old generation", signature: "IMZA_A" }],
       provider: PROVIDER,
       model: MODEL,
+      connectionId: CONNECTION,
     })
   );
-  const out: any = openaiToClaudeRequest(MODEL, body([{ id }, { id }]) as any, true, {
-    _provider: PROVIDER,
-  });
+  const out = translate([{ id }, { id }]);
   const son = lastAssistant(out.messages);
   assert.equal(
     thinkingBlocks(son).length,
     0,
-    "yinelenen id tasinan son asistan mesajina thinking blogu eklenmemeli"
+    "the last assistant message carrying a duplicated id must not get a thinking block"
   );
 });
 
-test("tekil tool_call id: store geri yuklemesi DEVAM eder (ozellik korunur)", () => {
+test("unique tool_call id: the store restore still runs (feature preserved)", () => {
   const id = "toolu_tekil_1";
   assert.ok(
     storeClaudeThinkingBlocks({
       toolUseIds: [id],
-      blocks: [{ type: "thinking", thinking: "dogru nesil", signature: "IMZA_B" }],
+      blocks: [{ type: "thinking", thinking: "right generation", signature: "IMZA_B" }],
       provider: PROVIDER,
       model: MODEL,
+      connectionId: CONNECTION,
     })
   );
-  const out: any = openaiToClaudeRequest(MODEL, body([{ id }]) as any, true, {
-    _provider: PROVIDER,
-  });
+  const out = translate([{ id }]);
   const son = lastAssistant(out.messages);
-  assert.equal(thinkingBlocks(son).length, 1, "tekil id'de thinking blogu geri yuklenmeli");
+  assert.equal(thinkingBlocks(son).length, 1, "a unique id must get its thinking block restored");
 });
 
-test("farkli id'ler ama biri yinelenmis: yalnizca yinelenen turn atlanir", () => {
+test("distinct ids but one duplicated: only the duplicated turn is skipped", () => {
   const dup = "toolu_mix_dup";
   const tek = "toolu_mix_tek";
   storeClaudeThinkingBlocks({
@@ -93,16 +109,12 @@ test("farkli id'ler ama biri yinelenmis: yalnizca yinelenen turn atlanir", () =>
     blocks: [{ type: "thinking", thinking: "x", signature: "IMZA_C" }],
     provider: PROVIDER,
     model: MODEL,
+    connectionId: CONNECTION,
   });
-  const out: any = openaiToClaudeRequest(
-    MODEL,
-    body([{ id: dup }, { id: dup }, { id: tek }]) as any,
-    true,
-    { _provider: PROVIDER }
-  );
-  const asistans = out.messages.filter((m: any) => m.role === "assistant");
-  const duz = asistans.filter((m: any) => thinkingBlocks(m).length > 0);
-  assert.equal(duz.length, 1, "yalnizca tekil id'ye sahip turn thinking blogu alir");
-  const aldiId = duz[0].content.find((b: any) => b?.type === "tool_use")?.id;
-  assert.equal(aldiId, tek, "blogu alan turn tekil id'li olmali");
+  const out = translate([{ id: dup }, { id: dup }, { id: tek }]);
+  const asistans = out.messages.filter((m) => m.role === "assistant");
+  const duz = asistans.filter((m) => thinkingBlocks(m).length > 0);
+  assert.equal(duz.length, 1, "only the turn with the unique id gets a thinking block");
+  const aldiId = (duz[0].content as Block[]).find((b) => b?.type === "tool_use")?.id;
+  assert.equal(aldiId, tek, "the turn that got the block must be the unique-id one");
 });
