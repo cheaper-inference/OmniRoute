@@ -163,7 +163,7 @@ Inilalantad OmniRoute ang 6 na kasanayan A2A na naka-wire sa `src/lib/a2a/taskEx
 | Ulat sa Kalusugan         | `health-report`      | Pinagsasama-sama ang circuit breaker, cooldown, estado ng lockout bawat provider                                                                                | kalusugan, katatagan           | "Ipakita ang katayuan sa kalusugan ng lahat ng provider"            |
 | Listahan ng mga Kakayahan | `list-capabilities`  | Ibinabalik ang buong 45-entry na katalogo ng Agent Skills (23 API + 21 CLI + 1 config) bilang markdown table na may raw SKILL.md URLs para sa context injection | katalogo, pagtuklas, kasanayan | "Ilista ang lahat ng kakayahan OmniRoute "                          |
 
-> Ang Agent Card ay dapat panatilihing nakahanay sa live na 377-provider catalog; Ang mga bilang ng provider at free/no-auth metadata ay mula sa runtime registry.
+> Ang Agent Card ay dapat panatilihing nakahanay sa live na 380-provider catalog; Ang mga bilang ng provider at free/no-auth metadata ay mula sa runtime registry.
 
 ### `list-capabilities` Detalye ng Kasanayan
 
@@ -197,17 +197,17 @@ Ang JSON-RPC endpoint na `/a2a` ang kanonikal na A2A entry point. Nagbibigay ang
 
 ---
 
-## Pagdaragdag ng Bagong Skill
+## Pagdaragdag ng Bagong Kasanayan
 
 1. **Gumawa ng skill file:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Mag-export ng async function na `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Sundin ang anyo ng mga kasalukuyang skill gaya ng `smartRouting.ts`.
+   Mag-export ng async function `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Sundin ang hugis ng mga umiiral na kasanayan tulad ng `smartRouting.ts`.
 
-2. **Irehistro ang handler:** sa `src/lib/a2a/taskExecution.ts`, magdagdag ng entry sa `A2A_SKILL_HANDLERS`:
+2. **Register handler:** sa `src/lib/a2a/taskExecution.ts`, magdagdag ng entry sa `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...mga kasalukuyang skill
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ Ang JSON-RPC endpoint na `/a2a` ang kanonikal na A2A entry point. Nagbibigay ang
    };
    ```
 
-3. **Ilantad sa Agent Card:** sa `src/app/.well-known/agent.json/route.ts`, idagdag sa dulo ng `skills` array:
+3. **Expose sa Agent Card:** sa `src/lib/a2a/agentCardMetadata.ts` (ibinahagi ng `/.well-known/agent.json` at `/.well-known/agent-card.json`), idagdag sa `skills` array:
 
    ```json
    {
@@ -227,9 +227,9 @@ Ang JSON-RPC endpoint na `/a2a` ang kanonikal na A2A entry point. Nagbibigay ang
    }
    ```
 
-4. **Sumulat ng mga test:** `tests/unit/a2a-<your-skill>.test.ts`. Saklawin ang matagumpay na path + error path.
+4. **Sumulat ng mga pagsubok:** `tests/unit/a2a-<your-skill>.test.ts`. Takpan ang happy path + error path.
 
-5. **Idokumento** ang bagong skill sa talahanayang `Available Skills` ng file na ito.
+5. **Dokumento** ang bagong kasanayan sa `Available Skills` table ng file na ito.
 
 ---
 

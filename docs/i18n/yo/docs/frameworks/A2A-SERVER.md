@@ -163,7 +163,7 @@ OmniRoute ṣafihan awọn ọgbọn A2A 6 ti a firanṣẹ ni `src/lib/a2a/task
 | Iroyin Ilera      | `health-report`      | Aggregates Circuit fifọ, cooldown, lockout ipinle fun olupese                                                                     | ilera, resilience      | "Fi ipo ilera han gbogbo awọn olupese"   |
 | Awọn agbara Akojọ | `list-capabilities`  | Pada ni kikun 45-iwọle Agent Skills katalogi (23 API + 21 CLI + 1 atunto) bi tabili isamisi pẹlu SKILL.md URLs aise fun abẹrẹ ọrọ | katalogi, Awari, ogbon | "Akojọ gbogbo awọn agbara OmniRoute "    |
 
-> Kaadi Aṣoju yẹ ki o wa ni ibamu pẹlu katalogi Olupese 377 laaye; Awọn iṣiro olupese ati awọn metadata free/no-auth jẹ orisun lati iforukọsilẹ akoko asiko.
+> Kaadi Aṣoju yẹ ki o wa ni ibamu pẹlu katalogi Olupese 380 laaye; Awọn iṣiro olupese ati awọn metadata free/no-auth jẹ orisun lati iforukọsilẹ akoko asiko.
 
 ### `list-capabilities` Skill Apejuwe
 
@@ -197,17 +197,17 @@ Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-
 
 ---
 
-## Fífi Ọgbọ́n Tuntun Kún Un
+## Fifi Olorijori Tuntun kan
 
-1. **Ṣẹ̀dá fáìlì ọgbọ́n:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Ṣẹda faili ogbon:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Gbé iṣẹ́ async kan jáde `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Tẹ̀lé ìrísí àwọn ọgbọ́n tó ti wà bíi `smartRouting.ts`.
+   Ṣe okeere iṣẹ async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Tẹle apẹrẹ ti awọn ọgbọn ti o wa tẹlẹ gẹgẹbi `smartRouting.ts`.
 
-2. **Forúkọsílẹ̀ olùtọ́jú:** nínú `src/lib/a2a/taskExecution.ts`, fi àkọsílẹ̀ kan kún `A2A_SKILL_HANDLERS`:
+2. **Olutọju iforukọsilẹ:** ni `src/lib/a2a/taskExecution.ts`, fi titẹ sii si `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...àwọn ọgbọ́n tó ti wà
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-
    };
    ```
 
-3. **Ṣàfihàn rẹ̀ nínú Káàdì Aṣojú:** nínú `src/app/.well-known/agent.json/route.ts`, fi kún àkójọpọ̀ `skills`:
+3. **Fi han ni Kaadi Aṣoju:** ni `src/lib/a2a/agentCardMetadata.ts` (pín nipasẹ `/.well-known/agent.json` ati `/.well-known/agent-card.json`), fi kun si eto `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ Ojú-ọ̀nà JSON-RPC `/a2a` ni ibi ìwọlé A2A àkọ́kọ́. Àwọn ojú-
    }
    ```
 
-4. **Kọ àwọn ìdánwò:** `tests/unit/a2a-<your-skill>.test.ts`. Ṣe àyẹ̀wò ipa ọ̀nà àṣeyọrí + ipa ọ̀nà àṣìṣe.
+4. **Kọ awọn idanwo:** `tests/unit/a2a-<your-skill>.test.ts`. Bo dun ona + aṣiṣe ona.
 
-5. **Ṣàkọsílẹ̀** ọgbọ́n tuntun náà sínú tábìlì `Available Skills` ti fáìlì yìí.
+5. **Iwe aṣẹ** titun olorijori ni yi faili ká `Available Skills` tabili.
 
 ---
 

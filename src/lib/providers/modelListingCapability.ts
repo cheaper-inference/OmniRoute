@@ -22,9 +22,8 @@ const CURATED_MODEL_ONLY_PROVIDERS = new Set<string>([
   // The clean-room browser integration exposes only model/effort routes
   // observed in the first-party picker. It has no upstream model-list API.
   "chatgpt-web",
-  // CodeBuddy gateways (Tencent CN and intl) publish no model-catalog endpoint;
-  // their registry models are the complete curated lineup.
-  "codebuddy-cn",
+  // CodeBuddy Intl has no verified live model-catalog endpoint; CN discovers
+  // its authenticated, account-specific roster from /v3/config.
   "codebuddy-intl",
 ]);
 
@@ -50,12 +49,13 @@ export function isDiscoveryImportedCustomSource(source: unknown): boolean {
  * static registry for dashboard / `/v1/models` / Test All listing. Static rows
  * remain offline fallback only when synced is empty.
  *
- * Cursor and Codex inventories are account-specific. Partial-discovery providers
- * retain coverage-style preservation (e.g. command-code uncovered static ids).
+ * Cursor, Codex, and CodeBuddy CN inventories are account-specific.
+ * Partial-discovery providers retain coverage-style preservation (e.g.
+ * command-code uncovered static ids).
  */
 export function providerUsesExclusiveSyncedListing(providerId: string): boolean {
   const id = providerId.trim().toLowerCase();
-  return id === "cursor" || id === "cu" || id === "codex" || id === "cx";
+  return id === "cursor" || id === "cu" || id === "codex" || id === "cx" || id === "codebuddy-cn";
 }
 
 /**

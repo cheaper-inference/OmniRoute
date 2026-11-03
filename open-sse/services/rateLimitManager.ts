@@ -47,7 +47,7 @@ import { LimiterWedgeWatchdog, WATCHDOG_INTERVAL_MS } from "./rateLimitManager/w
 import { createCancellableJob } from "./rateLimitManager/queuedJobCancel";
 import * as bodyRetryPause from "./rateLimitManager/bodyRetryPause";
 import { errorRateLimit, logRateLimit, warnRateLimit } from "./rateLimitManager/log";
-import { toNumber } from "@/shared/utils/numeric";
+import { toNumber } from "../utils/numeric.ts";
 import type { ConnectionRateLimitOverrides } from "@/lib/db/providers/columns";
 import {
   getExecutorTimeoutMs,
