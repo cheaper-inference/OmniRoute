@@ -73,11 +73,15 @@ export function createPinnedFetch(address: string, family: number): typeof fetch
       // breaking every pinned fetch — verified by
       // `tests/unit/remote-image-fetch-pin-dns-connection.test.ts`.
       lookup: (_hostname, options, callback) => {
-        if (options && typeof options === "object" && "all" in options && options.all) {
-          callback(null, [{ address, family }]);
-          return;
-        }
-        callback(null, address, family);
+        // Match Node's asynchronous DNS contract so connect errors cannot fire
+        // before the transport has installed its socket error listeners.
+        queueMicrotask(() => {
+          if (options && typeof options === "object" && "all" in options && options.all) {
+            callback(null, [{ address, family }]);
+            return;
+          }
+          callback(null, address, family);
+        });
       },
     },
   });

@@ -33,6 +33,23 @@ test("#6009 spaces concurrent fetch starts by at least minIntervalMs", async () 
   assert.equal(clock.now(), 1750);
 });
 
+test("a late timer still leaves a full interval before the next queued fetch", async () => {
+  const clock = new FakeClock();
+  clock.sleep = async (ms) => {
+    clock.slept.push(ms);
+    // A busy event loop resumes the first timer 500ms after its deadline.
+    clock.t += ms + (clock.slept.length === 1 ? 500 : 0);
+  };
+  const throttle = new MinIntervalThrottle({ minIntervalMs: 250, jitterMs: 0, clock });
+  await Promise.all([throttle.acquire(), throttle.acquire(), throttle.acquire()]);
+  assert.deepEqual(
+    clock.slept,
+    [250, 250],
+    "late wakeups must not release queued calls in a burst"
+  );
+  assert.equal(clock.now(), 2000);
+});
+
 test("#16948 zero-valued clocks still enforce spacing on the second acquisition", async () => {
   const clock = new FakeClock();
   clock.t = 0;
