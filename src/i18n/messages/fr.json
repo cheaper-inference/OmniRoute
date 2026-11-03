@@ -15385,6 +15385,7 @@
     "upstreamStatus": "État amont",
     "noResponse": "Aucune réponse",
     "egressIp": "IP de sortie",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "En-têtes après",
     "firstChunkAfter": "Premier bloc après",
     "servedBy": "Servi par",
