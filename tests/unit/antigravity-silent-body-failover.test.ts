@@ -10,6 +10,7 @@ import {
   clearAntigravityVersionCaches,
 } from "../../open-sse/services/antigravityVersion.ts";
 import { AntigravityExecutor } from "../../open-sse/executors/antigravity.ts";
+import { ANTIGRAVITY_RUNTIME_BASE_URLS } from "../../open-sse/config/antigravityUpstream.ts";
 
 describe("Part D - Antigravity silent-body watchdog and failover", () => {
   it("peekFirstAntigravitySseEvent throws AntigravityPreResponseTimeoutError on silent body", async () => {
@@ -74,6 +75,9 @@ describe("Part D - Antigravity silent-body watchdog and failover", () => {
     seedAntigravityCliVersionCache("1.11.5");
 
     const executor = new AntigravityExecutor({ streamReadinessTimeoutMs: 50 });
+    // Default generation now stays on the daily endpoint only (#18706), so the failover
+    // path needs a second base URL configured explicitly to be exercised.
+    executor.config = { ...executor.config, baseUrls: [...ANTIGRAVITY_RUNTIME_BASE_URLS] };
     const encoder = new TextEncoder();
 
     let streamGenAttempt = 0;
