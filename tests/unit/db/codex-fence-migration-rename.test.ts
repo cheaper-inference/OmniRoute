@@ -13,7 +13,7 @@ for (const filename of [
   "216_team_cost_shapes.sql",
   "217_quota_recovery_tickets.sql",
   "218_proxy_subscription_mirror_urls.sql",
-  "224_codex_connection_fences.sql",
+  "226_codex_connection_fences.sql",
 ]) {
   fs.copyFileSync(
     new URL(`../../../src/lib/db/migrations/${filename}`, import.meta.url),
@@ -66,19 +66,19 @@ test("every old Codex slot is guarded by version and name", () => {
       {
         fromVersion: "215",
         fromName: "codex_connection_fences",
-        toVersion: "224",
+        toVersion: "226",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "217",
         fromName: "codex_connection_fences",
-        toVersion: "224",
+        toVersion: "226",
         toName: "codex_connection_fences",
       },
       {
         fromVersion: "218",
         fromName: "codex_connection_fences",
-        toVersion: "224",
+        toVersion: "226",
         toName: "codex_connection_fences",
       },
     ]
@@ -92,7 +92,7 @@ for (const previous of ["codex-215", "codex-217", "codex-218", "quota", "team", 
       db.exec(schema);
       let fenceBefore: unknown;
       if (previous.startsWith("codex-")) {
-        apply(db, "224_codex_connection_fences.sql");
+        apply(db, "226_codex_connection_fences.sql");
         db.exec("UPDATE codex_connection_fences SET failure_revision = 7");
         db.prepare(
           "INSERT INTO _omniroute_migrations (version, name, applied_at) VALUES (?, 'codex_connection_fences', '2026-10-28 00:00:00')"
@@ -123,14 +123,14 @@ for (const previous of ["codex-215", "codex-217", "codex-218", "quota", "team", 
           { version: "216", name: "team_cost_shapes" },
           { version: "217", name: "quota_recovery_tickets" },
           { version: "218", name: "proxy_subscription_mirror_urls" },
-          { version: "224", name: "codex_connection_fences" },
+          { version: "226", name: "codex_connection_fences" },
         ]
       );
       if (previous.startsWith("codex-")) {
         assert.deepEqual(db.prepare("SELECT * FROM codex_connection_fences").all(), fenceBefore);
       }
       if (previous !== "fresh") {
-        const version = previous.startsWith("codex-") ? "224" : previous === "team" ? "215" : "217";
+        const version = previous.startsWith("codex-") ? "226" : previous === "team" ? "215" : "217";
         assert.equal(
           (
             db
