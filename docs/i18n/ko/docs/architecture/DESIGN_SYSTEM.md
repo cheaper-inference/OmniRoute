@@ -4,7 +4,7 @@
 
 ---
 
-> **상태:** 대시보드는** Keak CI UI 키트** (`@keak/cheaper-inference-ui-kit`), 작업 공간 `packages/ui-kit` (`@omniroute/ui-kit`; 업스트림 스냅샷은 `packages/ui-kit/UPSTREAM.md` 에 고정되고 `npm run check:ui-kit-snapshot` 에 의해 보호됨)로 판매됩니다. 빛은 표준적인 주제입니다. 기본 설정은 `system` 입니다. 악센트는 Keak 라임(`--ci-color-accent`)입니다. Switzer는 UI, 디스플레이 및 코드 텍스트(`--ci-font-ui`, `--ci-font-display` 및 `--ci-font-mono` 이를 해결함)에 대한 단일 제품군이며 키트 자체(`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` 에서 가져옴)에 의해 자체 호스팅됩니다. 모든 아이콘은 Lucide 문자 모양입니다.
+> **상태:** 대시보드는** Keak CI UI 키트** (`@keak/cheaper-inference-ui-kit`), 작업 공간 `packages/ui-kit` (`@omniroute/ui-kit`; 업스트림 스냅샷은 `packages/ui-kit/UPSTREAM.md` 에 고정되고 `npm run check:ui-kit-snapshot` 에 의해 보호됨)로 판매됩니다. 빛은 표준적인 주제입니다. 기본 설정은 `system` 입니다. 악센트는 Keak 라임(`--ci-color-accent`)입니다. Switzer는 UI, 디스플레이 및 코드 텍스트(`--ci-font-ui`, `--ci-font-display` 및 `--ci-font-mono` 이를 해결함)에 대한 단일 제품군이며 키트 자체(`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` 에서 가져옴)에 의해 자체 호스팅됩니다. 스크립트 Switzer에는 fall through glyph by glyph(`src/app/globals.css`)가 없습니다. 키릴 문자, 그리스어 및 베트남어의 경우 Inter, 아랍어 스크립트의 경우 `html[dir="rtl"]`, Vazirmatn에서만 가능합니다. 모든 아이콘은 Lucide 문자 모양입니다.
 
 ## 1. 각 요소의 위치
 
@@ -59,7 +59,7 @@
 
 ## 5. 키트 업데이트
 
-`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` 에 고정된 버전을 업스트림 저장소의 최신 `v*` 태그와 비교하고 릴리스가 출시되면 sync 명령을 인쇄합니다. 주간 `UI Kit upstream watch` 작업 흐름(`.github/workflows/ui-kit-upstream-watch.yml`)은 동일한 검사를 실행하고 핀이 뒤에 있는 동안 하나의 추적 문제를 열어 둡니다. 업스트림 저장소는 비공개이므로 워크플로는 `UI_KIT_READ_TOKEN` 비밀에 읽기 전용 토큰이 필요하며 토큰 없이는 비활성 상태를 유지합니다.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` 에 고정된 버전을 업스트림 저장소의 최신 `v*` 태그와 비교하고 릴리스가 출시되면 sync 명령을 인쇄합니다. 주간 `UI Kit upstream watch` 작업 흐름(`.github/workflows/ui-kit-upstream-watch.yml`)은 동일한 검사를 실행하고 핀이 뒤에 있는 동안 하나의 추적 문제를 열어 둡니다. 업스트림 저장소는 비공개이므로 워크플로에는 `UI_KIT_READ_TOKEN` 비밀에 읽기 전용 토큰이 필요합니다. 업스트림을 읽을 수 없는 경우(토큰 없음, 작동이 중지된 토큰 또는 GitHub 연결할 수 없음) 실행은 녹색으로 유지되지만 경고를 기록하고 하나의 별도 문제를 열어 두며 나중에 실행하여 업스트림을 다시 읽을 수 있게 되면 자동으로 닫힙니다.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` 해당 커밋(최신 `v*` 태그 `latest` = )에서 업스트림 `src/` `packages/ui-kit/src` 로 복사하고, 허용되는 단일 변환을 적용하고(상대 가져오기에서 `.js` 접미사를 삭제함), `packages/ui-kit/package.json` 및 `package-lock.json` 의 작업 공간 버전을 업스트림 버전으로 설정합니다. 그런 다음 `git diff packages/ui-kit` 검토하고, 두 테마 모두에서 공급자, 설정, 콤보, 사용법 및 끝점에 대한 시각적 전달을 수행하고, `npm run check:ui-kit-snapshot` 및 `npm run test:vitest:ui` 실행하고, 업스트림 변경 로그가 있는 PR 엽니다.
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **حالة:** لوحة القيادة مبنية على** طقم كيك CI UI** (`@keak/cheaper-inference-ui-kit`) ، يتم بيعها كمساحة العمل `packages/ui-kit` (`@omniroute/ui-kit`؛ يتم تثبيت اللقطة الأولية في `packages/ui-kit/UPSTREAM.md` وحمايتها بواسطة `npm run check:ui-kit-snapshot`). الضوء هو الموضوع الأساسي. التفضيل الافتراضي هو `system`. اللهجة هي كيك الجير (`--ci-color-accent`). Switzer هي عائلة واحدة لـ UI ونص العرض والرمز (`--ci-font-ui`; `--ci-font-display` و `--ci-font-mono` مصممان عليه)، تتم استضافتها ذاتيًا بواسطة المجموعة نفسها (`packages/ui-kit/src/ci-fonts.css`، المستوردة بواسطة `ci-tokens.css`). كل أيقونة عبارة عن حرف رسومي من Lucide.
+> **حالة:** لوحة القيادة مبنية على** طقم كيك CI UI** (`@keak/cheaper-inference-ui-kit`) ، يتم بيعها كمساحة العمل `packages/ui-kit` (`@omniroute/ui-kit`؛ يتم تثبيت اللقطة الأولية في `packages/ui-kit/UPSTREAM.md` وحمايتها بواسطة `npm run check:ui-kit-snapshot`). الضوء هو الموضوع الأساسي. التفضيل الافتراضي هو `system`. اللهجة هي كيك الجير (`--ci-color-accent`). Switzer هي عائلة واحدة لـ UI ونص العرض والرمز (`--ci-font-ui`; `--ci-font-display` و `--ci-font-mono` مصممان عليه)، تتم استضافتها ذاتيًا بواسطة المجموعة نفسها (`packages/ui-kit/src/ci-fonts.css`، المستوردة بواسطة `ci-tokens.css`). مخطوطات سويتزر تفتقر إلى الحروف الرسومية التي تتخللها (`src/app/globals.css`): Inter للسيريلية واليونانية والفيتنامية، وتحت `html[dir="rtl"]` فقط، Vazirmatn للنص العربي. كل أيقونة عبارة عن حرف رسومي من Lucide.
 
 ## 1. أين توجد الأشياء
 
@@ -104,7 +104,7 @@
 
 ## 5. تحديث المجموعة
 
-يقارن `npm run check:ui-kit-upstream` الإصدار المثبت في `packages/ui-kit/UPSTREAM.md` مع أحدث علامة `v*` في الريبو الأولي ويطبع أمر المزامنة عند انتهاء الإصدار. يقوم سير عمل `UI Kit upstream watch` الأسبوعي (`.github/workflows/ui-kit-upstream-watch.yml`) بتشغيل نفس الفحص ويبقي مشكلة تتبع واحدة مفتوحة أثناء وجود الدبوس في الخلف؛ يعد الريبو الأولي خاصًا، لذا يحتاج سير العمل إلى رمز مميز للقراءة فقط في سر `UI_KIT_READ_TOKEN` ويظل خاملاً بدونه.
+يقارن `npm run check:ui-kit-upstream` الإصدار المثبت في `packages/ui-kit/UPSTREAM.md` مع أحدث علامة `v*` في الريبو الأولي ويطبع أمر المزامنة عند انتهاء الإصدار. يقوم سير عمل `UI Kit upstream watch` الأسبوعي (`.github/workflows/ui-kit-upstream-watch.yml`) بتشغيل نفس الفحص ويبقي مشكلة تتبع واحدة مفتوحة أثناء وجود الدبوس في الخلف؛ يعد الريبو الأولي خاصًا، لذا يحتاج سير العمل إلى رمز مميز للقراءة فقط في سر `UI_KIT_READ_TOKEN`. عندما لا يتمكن من القراءة من المنبع (لا يوجد رمز مميز، أو رمز توقف عن العمل، أو لا يمكن الوصول إلى GitHub )، يظل التشغيل باللون الأخضر ولكنه يكتب تحذيرًا ويبقي مشكلة واحدة منفصلة مفتوحة، والتي تغلق نفسها بمجرد أن يتمكن التشغيل اللاحق من القراءة من المنبع مرة أخرى.
 
 ينسخ `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` المنبع `src/` عند ذلك الالتزام (`latest` = أحدث علامة `v*` ) إلى `packages/ui-kit/src`، ويطبق التحويل الفردي المسموح به (يسقط لاحقة `.js` من الواردات النسبية)، ويضبط إصدار مساحة العمل في `packages/ui-kit/package.json` و `package-lock.json` على الإصدار المنبع. بعد ذلك: قم بمراجعة `git diff packages/ui-kit`، وقم بإجراء تمريرة مرئية على الموفرين، والإعدادات، والمجموعات، والاستخدام ونقطة النهاية في كلا الموضوعين، وقم بتشغيل `npm run check:ui-kit-snapshot` و `npm run test:vitest:ui`، وافتح PR باستخدام سجل التغيير الأولي.
 

@@ -182,6 +182,14 @@ export async function checkSemanticCache({
         headers[OMNIROUTE_RESPONSE_HEADERS.cacheSimilarity] = similarity.toFixed(4);
       }
 
+      // A replayed SSE stream served straight from the cache bypasses the
+      // central response-header path — carry the no-buffering instruction
+      // explicitly so a reverse proxy streams it like a live one. JSON hits
+      // do not need it.
+      if (cachedSse) {
+        headers["X-Accel-Buffering"] = "no";
+      }
+
       // A cache HIT serves WITHOUT an upstream call, so the incremental cost billed to
       // the client is 0 (consumers that sum X-OmniRoute-Response-Cost must not charge for
       // hits). The original/would-have-been cost is surfaced via X-OmniRoute-Cost-Saved.
