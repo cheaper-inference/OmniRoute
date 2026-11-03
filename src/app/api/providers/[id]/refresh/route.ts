@@ -13,7 +13,17 @@ import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer
 type RefreshResult = {
   accessToken?: string;
   expiresIn?: number;
+  /** Absolute expiry, preferred over expiresIn when the provider returns one. */
+  expiresAt?: string;
   error?: string;
+  /**
+   * Set when the provider has been retired upstream. The caller surfaces a
+   * migration hint instead of asking the operator to re-authenticate in a loop
+   * against something that no longer exists.
+   */
+  code?: string;
+  reason?: string;
+  migrateTo?: string;
 };
 
 /**

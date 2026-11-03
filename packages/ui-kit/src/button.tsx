@@ -10,7 +10,8 @@ export type ButtonVariant =
   | "outline"
   | "secondary"
   | "ghost"
-  | "link";
+  | "link"
+  | "assistant";
 
 export type ButtonSize =
   | "default"

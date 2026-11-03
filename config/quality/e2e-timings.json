@@ -41,5 +41,6 @@
   "smoke.spec.ts": 33,
   "traffic-inspector.spec.ts": 212,
   "translator-friendly.spec.ts": 115,
-  "visual-resilience-smoke.spec.ts": 20
+  "visual-resilience-smoke.spec.ts": 20,
+  "rtl-font-loading.spec.ts": 114
 }
