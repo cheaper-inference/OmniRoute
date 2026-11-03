@@ -504,6 +504,117 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
         run: node scripts/ci/release-green-result.mjs release-green.json "$VALIDATION_EXIT" "$VALIDATED_SHA" "$EVENT_NAME"
 
+  # Resolve main once and derive its hosted matrix from that exact commit. The workflow
+  # source and the candidate can be on different release versions.
+  resolve-main:
+    name: Resolve main sweep target
+    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || (github.repository == 'cheaper-inference/OmniRoute' && github.event.schedule == '23 5 * * *')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+      matrix: ${{ steps.resolve.outputs.matrix }}
+      node-version: ${{ steps.runtime.outputs.node-version }}
+    steps:
+      # The matrix reader belongs to this workflow revision, even if main predates it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        id: runtime
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - uses: ./.github/actions/npm-ci-retry
+      - name: Resolve main and its CI matrix
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          SHA=$(gh api "repos/$GITHUB_REPOSITORY/branches/main" --jq '.commit.sha')
+          if ! printf '%s' "$SHA" | grep -qE '^[0-9a-f]{40}$'; then echo "No tip for main"; exit 1; fi
+          gh api "repos/$GITHUB_REPOSITORY/contents/.github/workflows/ci.yml?ref=$SHA" \
+            --jq '.content' | base64 --decode > "$RUNNER_TEMP/main-ci.yml"
+          MATRIX=$(node scripts/ci/release-green-matrix.mjs "$RUNNER_TEMP/main-ci.yml")
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
+  main-suites:
+    name: Hosted main suite (${{ matrix.name }})
+    needs: resolve-main
+    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || (github.repository == 'cheaper-inference/OmniRoute' && github.event.schedule == '23 5 * * *')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.resolve-main.outputs.matrix) }}
+    env:
+      JWT_SECRET: ci-nightly-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-nightly-api-key-secret-long
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.resolve-main.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: ${{ needs.resolve-main.outputs.node-version }}
+          package-manager-cache: false
+      - uses: ./.github/actions/npm-ci-retry
+      - name: Run the suite and record its result
+        env:
+          NAME: ${{ matrix.name }}
+          SUITE: ${{ matrix.script }}
+          TEST_SHARD: ${{ matrix.shard }}
+          OMNIROUTE_UNIT_CHECKOUT_SHA: ${{ needs.resolve-main.outputs.sha }}
+          OMNIROUTE_UNIT_INVOCATION_ID: ${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.name }}
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          set +e
+          if [[ "$NAME" == integration-* ]]; then
+            export DATA_DIR="/tmp/omniroute-ci-${NAME#integration-}"
+            export INITIAL_PASSWORD=ci-test-password-for-integration
+          fi
+          (
+            if [ "$NAME" = "vitest" ]; then
+              npm run test:vitest && npm run test:vitest:ui
+            elif [[ "$NAME" == vitest-* ]]; then
+              if [ "$NAME" = "vitest-1" ]; then
+                npm run test:vitest || exit "$?"
+              fi
+              npm run "$SUITE" -- --shard="$TEST_SHARD"
+            else
+              npm run "$SUITE"
+            fi
+          ) 2>&1 | tee suite.log
+          codes=("${PIPESTATUS[@]}")
+          code=${codes[0]}
+          if [ "$code" -eq 0 ] && [ "${codes[1]}" -ne 0 ]; then code=${codes[1]}; fi
+          node scripts/ci/release-green-suite.mjs "$NAME" "$code" suite.log suite-results \
+            "$GITHUB_WORKFLOW_SHA" "$SUITE" "$TEST_SHARD" || exit "$?"
+          exit "$code"
+      - name: Upload the suite result
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: main-green-suite-${{ github.run_attempt }}-${{ matrix.name }}
+          path: suite-results/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload hosted main unit diagnostics
+        if: ${{ always() && startsWith(matrix.name, 'unit-') }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: unit-progress-main-hosted-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.name }}
+          path: .artifacts/unit-progress/*.jsonl
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+
   # Companion arm for `main`. Under the parallel-cycle model, main only receives merged
   # work at the release squash — so a gate/infra fix that lands only on release leaves
   # main red the whole cycle, and repo-wide gates (CodeQL alert count, ratchet baselines)
@@ -521,7 +632,10 @@ jobs:
     # re-validated the same commit and held the single `omni-release` slot for ~2 h each
     # (2026-10-19: 08:04–10:01 right after the 2 h20 release sweep, while a `--quick` push
     # run waited ~4 h in the group). The release branch keeps all three sweeps.
-    if: ${{ (github.event_name != 'push' || github.ref_name == 'main') && (github.event_name != 'schedule' || (github.repository == 'cheaper-inference/OmniRoute' && github.event.schedule == '23 5 * * *')) }}
+    # On push the hosted jobs above are skipped; !cancelled() keeps this job from being skipped
+    # with them, and on schedule/dispatch it still reports when a suite job failed.
+    needs: [resolve-main, main-suites]
+    if: ${{ !cancelled() && (github.event_name != 'push' || github.ref_name == 'main') && (github.event_name != 'schedule' || (github.repository == 'cheaper-inference/OmniRoute' && github.event.schedule == '23 5 * * *')) }}
     # Own slot (docs/ops/RUNNER_BOX.md): `omni-release` is omniroute-113-6 only, so the
     # validation no longer queues on the single `omni-build` slot (the 2026-10-18 05:29
     # sweep waited 6 h for it). That slot is capped at 24 GB, so the validation's build
@@ -536,7 +650,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event_name == 'push' && github.sha || 'main' }}
+          ref: ${{ github.event_name == 'push' && github.sha || needs.resolve-main.outputs.sha || 'main' }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -544,12 +658,24 @@ jobs:
         id: revision
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
+      # hostedSuiteIdentity compares nodeVersion exactly, so match the hosted suites' runtime.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          node-version: "24"
+          node-version: ${{ needs.resolve-main.outputs.node-version || '24' }}
           package-manager-cache: false
 
       - uses: ./.github/actions/npm-ci-retry
+
+      - name: Collect the hosted suite results
+        if: github.event_name != 'push'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          # A partial re-run cannot reuse receipts from an earlier attempt;
+          # rerun all suite jobs for a new complete observation of the same tip.
+          pattern: main-green-suite-${{ github.run_attempt }}-*
+          path: suite-results
+          merge-multiple: true
 
       # main can predate the installers: materialize both from the workflow SHA.
       - name: Prepare pinned quality scanners
@@ -580,7 +706,9 @@ jobs:
           if [ "$EVENT_NAME" = "push" ]; then
             MODE="--quick"
           else
-            MODE="--with-build --full-ci"
+            # unit/integration/vitest ran in the hosted `main-suites` jobs; a missing result fails
+            mkdir -p suite-results
+            MODE="--with-build --full-ci --suites-from suite-results"
           fi
           echo "[main-green] mode: $MODE (event: $EVENT_NAME)"
           # This observer selected an exact main/release tip. Its UI differential scope
@@ -589,6 +717,7 @@ jobs:
           # MODE is an intentional flag list, so word-splitting is wanted here
           # shellcheck disable=SC2086
           node scripts/quality/validate-release-green.mjs --json --hermetic $MODE \
+            --suites-workflow-sha "$GITHUB_WORKFLOW_SHA" \
             --i18n-base-sha "$I18N_BASE_SHA" \
             --i18n-candidate-sha "$VALIDATED_SHA" --i18n-scope last-commit \
             1> main-green.json 2> main-green.log

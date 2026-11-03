@@ -129,6 +129,9 @@ const IGNORE_FROM_CODE = new Set([
   "GITHUB_RUN_ATTEMPT",
   "GITHUB_RUN_ID",
   "GITHUB_SHA",
+  // #18345: Actions runner-owned workflow-file commit identity used by
+  // build-provenance/admission checks; never an application .env setting.
+  "GITHUB_WORKFLOW_SHA",
   "NEEDS_JSON",
   // Set by the Actions runner; the ts7 ratchet appends its job summary there
   // (scripts/check/check-ts7-diagnostics-ratchet.mjs) — never OmniRoute runtime config (#9985).

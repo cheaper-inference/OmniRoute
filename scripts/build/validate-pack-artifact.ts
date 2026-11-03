@@ -20,6 +20,7 @@ import {
   findMissingArtifactPaths,
   findUnexpectedArtifactPaths,
   parseJsonValuesOutput,
+  needsPackStagingBuild,
 } from "./pack-artifact-policy.ts";
 
 const __filename: string = fileURLToPath(import.meta.url);
@@ -63,7 +64,8 @@ function ensureAppStagingReady(): void {
     requiredPath.startsWith("dist/")
   ).filter((requiredPath) => !existsSync(join(ROOT, requiredPath)));
 
-  if (missingAppRequiredPaths.length === 0) return;
+  if (!needsPackStagingBuild(missingAppRequiredPaths, process.argv.includes("--require-staging")))
+    return;
 
   console.log("📦 dist/ staging is missing required runtime files; running npm run build:cli...");
   runNpm(["run", "build:cli"], "inherit");
@@ -136,6 +138,9 @@ function formatBytes(bytes: number): string {
 const POLICY_ONLY = process.argv.includes("--policy-only");
 
 try {
+  if (POLICY_ONLY && process.argv.includes("--require-staging")) {
+    throw new Error("--require-staging cannot be combined with --policy-only");
+  }
   if (!POLICY_ONLY) ensureAppStagingReady();
   const packReport = runPackDryRun();
   const artifactPaths: string[] = packReport.files.map((file) => file.path);
