@@ -8,7 +8,12 @@ export function getRequestQuotaCacheState(): State {
   return readView.getStore() ?? getQuotaCacheState();
 }
 
-/** Snapshot hydration and reset advancement stay private to this synchronous read. */
+/**
+ * Snapshot hydration and reset advancement stay private to this synchronous read.
+ * With `connectionId` only that connection's cache entry is cloned (the 30-second availability
+ * poll evaluates one account at a time); without it every entry is cloned. A call nested inside
+ * an active read view reuses that view and adds the requested connection to it.
+ */
 export function withQuotaCacheReadView<T>(read: () => T, connectionId?: string): T {
   const currentStore = readView.getStore();
   if (currentStore) {
