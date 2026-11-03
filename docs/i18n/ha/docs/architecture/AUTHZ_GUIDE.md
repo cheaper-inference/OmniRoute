@@ -131,34 +131,34 @@ kalmar sirri ba, ana ƙara mata wani zaɓi ne kawai:
 
 Wasu ayyukan `MANAGEMENT` **na operator ne kawai**: maɓallin `manage` bai isa ba. Fitar da credentials da aka adana (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), mayar da backup a kan live data (`POST /api/db-backups/import` har da `dryRun=true`, `POST /api/db-backups` restore ta id, `POST /api/settings/import-json`), da lalata wuraren mayarwa (`DELETE /api/db-backups` cleanup, da `PATCH /api/db-backups` domin retention ɗin da yake ajiyewa shi ne ke tafiyar da pruning na atomatik bayan kowane backup) suna buƙatar zaman dashboard, asusun CLI na gida, ko shiga da aka kashe. Bayar da sync token (`POST /api/sync/tokens`) da ƙirƙirar `admin` CLI access token (`POST /api/cli/tokens`) suna buƙatar zaman dashboard ko asusun CLI na gida a kowane yanayin shiga. Maɓallan API na kowane iyaka da `oma_` access tokens ba credentials na operator ba ne: suna samun `403` duk lokacin da ake buƙatar ɗaya. Ana duba haka a `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Canza saitunan shiga ma na operator ne kawai: `POST /api/settings/require-login` (saita kalmar sirrin gudanarwa / kunna ko kashe `requireLogin`) yana karɓar waɗannan credentials ne kawai da zarar kalmar sirri ta wanzu. Taga bootstrap na farkon gudu (babu kalmar sirri tukuna) ba ta canzawa, kuma zaman dashboard dole ne ya aika `currentPassword` don maye gurbin kalmar sirri (`403` idan ba ta nan ko ba daidai ba ce, kuma ana rubuta ta a matsayin `settings.update_failed`). CLI na gida da instance mai shiga da aka kashe suna riƙe hanyar dawowa kuma suna iya saita kalmar sirri ba tare da ita ba, domin dukkansu an ɗaure su da host ɗin da ke mallakar data directory.
 
-## Bututun Aiki
+## Bututu
 
 ```
-Buƙata mai shigowa → src/proxy.ts
-  → runAuthzPipeline() a cikin src/server/authz/pipeline.ts
-    1. Cire amintattun kanun bayanai na ciki (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Samar da id na buƙata, tantance rukunin hanya ta hanyar classifyRoute()
-    3. Idan pathname == "/" → karkatar zuwa /dashboard
-    4. Idan ana rufe tsarin a hankali kuma hanyar ita ce /api/* → 503
-    5. Idan /api/* ce ba ta GET ba → aiwatar da kariyar checkBodySize()
-    6. Idan OPTIONS ce → gwajin-farko na CORS 204
-    7. Idan options.enforce == false → bari ta wuce tare da kanun rukunin hanya
-    8. In ba haka ba: POLICIES[routeClass].evaluate(ctx)
-       - allow  → sanya x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → kuskuren JSON mai correlation_id (shafukan dashboard → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Amintattun kanun bayanai na ciki (waɗanda aka ayyana a cikin `src/server/authz/headers.ts`) ana **cire su daga buƙatun da ke shigowa** kafin tantance rukuni — abokan hulɗa ba za su iya riga cika `x-omniroute-auth-*` don kwaikwayon wani mai amfani ba.
+Amintattun masu kai na ciki (wanda aka bayyana a cikin `src/server/authz/headers.ts`) sune** cire daga buƙatun masu shigowa** kafin rarraba — abokan ciniki ba za su iya riga-kafin `x-omniroute-auth-*` don kwaikwayi wani batu ba.
 
-### Yarjejeniyoyin manufofi
+### Kwangilolin siyasa
 
-Kowane rukunin hanya yana da manufa a cikin `src/server/authz/policies/`:
+Kowane ajin hanya yana da manufa a cikin `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — koyaushe yana mayar da `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — yana cire Bearer, sannan ya inganta shi ta hanyar `validateApiKey()`. Yana komawa ga mara suna ne kawai idan an kashe tutar fasalin `REQUIRE_API_KEY` mai aiki. Ana tantance tutar mai aiki ta hanyar `isRequireApiKeyEnabled()` (`Maye gurbin tutar fasalin DB > process.env.REQUIRE_API_KEY > tsohon ƙima`) domin Tutocin Fasali na Dashboard da sauye-sauyen muhalli su sarrafa `/api/v1/*`, `/api/v1beta/*`, da laƙabbai iri ɗaya; gazawar mai tantancewa tana hana shiga. Yana ba da izini ga buƙatun zaman dashboard a hanyoyin client API (ciki har da `/api/v1/models`, wanda kundin samfuran dashboard ke amfani da shi).
-- **`managementPolicy`** (`policies/management.ts`) — yana karɓar zaman dashboard, buƙatun daidaita samfuri na ciki (waɗanda aka dace da `/api/providers/[name]/(sync-models|models)`), ko kuma ya tsallake gaba ɗaya idan `isAuthRequired()` ya mayar da false. Yana mayar da 403 (`AUTH_001`) idan akwai alamar Bearer amma ba ta da inganci, in ba haka ba 401. Haka kuma yana tilasta matakan kariyar hanya (LOCAL_ONLY / ALWAYS_PROTECTED) kafin kowane reshen tantancewa — duba [Matakan Kariyar Hanya](../security/ROUTE_GUARD_TIERS.md). Ana iya samun damar hanyoyin LOCAL_ONLY da ke cikin `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (a yau: `/api/mcp/`) daga wurin da ba loopback ba idan maɓallin Bearer yana ɗauke da iyakar izinin `manage`; duk sauran hanyoyin LOCAL_ONLY suna ci gaba da buƙatar strict-loopback ba tare da la'akari da iyakar izini ba.
+- **`publicPolicy`** (`policies/public.ts`) — kullum yana dawowa `allow({ kind: "anonymous", id: "anonymous" })`.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — yana fitar da Mai ɗaukar nauyi, yana inganta ta hanyar `validateApiKey()`. Faɗuwa zuwa ga wanda ba a san sunansa ba kawai lokacin da aka kashe ingantaccen tutar fasalin `REQUIRE_API_KEY`. Tuta mai inganci ana warware ta ta hanyar `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) don haka Tutoci Siffofin Dashboard da masu canjin yanayi suna sarrafa `/api/v1/*`, `/api/v1beta/*`, da laƙabi akai-akai; gazawar warwarewa ta kasa rufe. Yana ba da damar buƙatun-zaman dashboard akan hanyoyin API abokin ciniki (ciki har da `/api/v1/models`, ke amfani da kundin ƙirar dashboard). Lokacin da aka kunna Entra ID SSO, reshen SSO ne ke kula da mai ɗaukar kaya wanda shine tsarin Entra token (bangaren tushe64url uku, `RS*` alg, `kid`).** kafin** `validateApiKey()` kuma hukuncinsa shine — na ƙarshe ba zai taɓa shiga hanyar API-key ba ko reshe-zuwa-wanda ba a san shi ba, don haka ƙaddamarwar mai ba da shaida ba zai iya zama buɗe hanyar shiga ba. Maɓallan API na tsaye ba su shafa ba. Duba [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — yana karɓar zaman dashboard, buƙatun ƙirar ƙira na ciki (wanda ya dace da `/api/providers/[name]/(sync-models|models)`), ko kuma ya tsallake gaba ɗaya idan `isAuthRequired()` ya dawo ƙarya. Yana dawo da 403 (`AUTH_001`) lokacin da alamar Mai ɗauka ta kasance amma bata aiki, 401 in ba haka ba. Hakanan yana tilasta matakan tsaro na hanya (LOCAL_ONLY / ALWAYS_PROTECTED) kafin kowane reshe na auth — duba [Tiers Guard Route](../security/ROUTE_GUARD_TIERS.md). hanyoyin LOCAL_ONLY a cikin `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (yau: `/api/mcp/`) ana iya samun dama daga waɗanda ba a dawo da su ba lokacin da maɓalli na Bearer ke ɗauke da iyakar `manage` ; duk sauran hanyoyin LOCAL_ONLY sun kasance masu tsattsauran ra'ayi ba tare da la'akari da iyaka ba.
 
-Manufa mai nasara tana mayar da `AuthSubject` tare da `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Masu sarrafa buƙatu na gaba za su iya karanta shi ta hanyar `assertAuth(request, "CLIENT_API")` a cikin `src/server/authz/assertAuth.ts` maimakon sake gudanar da dabarun tantancewa.
+Manufar nasara tana mayar da `AuthSubject` da `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Masu kula da ƙasa za su iya karanta ta ta `assertAuth(request, "CLIENT_API")` a cikin `src/server/authz/assertAuth.ts` maimakon sake gudanar da dabaru na gaskiya.
 
 ## Jerin Hanyoyin Jama'a
 
@@ -299,25 +299,25 @@ Wuraren ƙarshen `/api/v1/agents/tasks/*` da `/api/resilience/model-cooldowns` *
 - Jerin hanyoyin jama'a da aka amince da su: `tests/unit/public-api-routes.test.ts`.
 - Gudanar da gwaji takamaimai: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## Gano Matsala
+## Gyara kurakurai
 
-Pipeline koyaushe yana yi wa amsoshi tambari da:
+Bututun yana yin tambari koyaushe tare da:
 
 ```
-x-request-id:               <ID na daidaitawa, ana maimaita shi a jikin kuskure>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Ga buƙatun da aka tantance, headers na buƙatar upstream (a ɓangaren handler) su ma sun haɗa da:
+Don ingantattun buƙatun masu kan buƙatun buƙatun na sama (handler-gefen) suma sun haɗa da:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<lambobi-4-na-ƙarshe> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (na zaɓi)
-x-omniroute-auth-scopes:    jeri da aka raba da waƙafi
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Yi amfani da `assertAuth(req, expectedClass)` a cikin handlers — yana jefa `AuthzAssertionError` mai lambar `AUTHZ_NOT_INITIALIZED` idan an tsallake middleware (yana taimakawa wajen gano koma-baya na saiti a gwaje-gwaje).
+Yi amfani da `assertAuth(req, expectedClass)` a cikin masu kula da — yana jefa `AuthzAssertionError` tare da lambar `AUTHZ_NOT_INITIALIZED` idan an ketare na'urar tsakiya (taimaka don kama koma bayan daidaitawa a cikin gwaje-gwaje).
 
 ## Duba Kuma
 

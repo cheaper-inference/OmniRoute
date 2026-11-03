@@ -88,7 +88,7 @@
     "auto-fallback"
   ],
   "license": "MIT",
-  "author": "diegosouzapw",
+  "author": "Diego Souza (https://github.com/diegosouzapw)",
   "repository": {
     "type": "git",
     "url": "https://github.com/cheaper-inference/OmniRoute"
@@ -268,6 +268,7 @@
     "typecheck:core": "tsc --pretty false -p tsconfig.typecheck-core.json",
     "typecheck:noimplicit:core": "tsc --pretty false -p tsconfig.typecheck-noimplicit-core.json",
     "check:dashboard-typecheck": "node scripts/check/check-dashboard-typecheck.mjs",
+    "check:build-typecheck": "node scripts/check/check-build-typecheck.mjs",
     "check:open-sse-typecheck": "node scripts/check/check-open-sse-typecheck.mjs",
     "check:ts7-diagnostics-ratchet": "node scripts/check/check-ts7-diagnostics-ratchet.mjs",
     "backfill-aggregation": "node --import tsx src/scripts/backfillAggregation.ts",
@@ -336,6 +337,7 @@
     "@fontsource/ibm-plex-mono": "5.3.0",
     "@fontsource/instrument-serif": "5.3.0",
     "@fontsource/inter": "5.3.0",
+    "@fontsource/vazirmatn": "5.3.0",
     "@lobehub/icons": "^5.16.0",
     "@modelcontextprotocol/sdk": "^1.31.0",
     "@monaco-editor/react": "^4.7.0",
@@ -475,8 +477,10 @@
     "eslint-plugin-sonarjs": "^4.1.0",
     "espree": "^11.2.0",
     "fast-check": "^4.10.0",
+    "fontverter": "2.0.0",
     "fumadocs-mdx": "^15.4.0",
     "glob": "^13.0.6",
+    "harfbuzzjs": "1.6.4",
     "httpyac": "^6.16.7",
     "husky": "^9.1.7",
     "intl-messageformat": "11.2.14",
@@ -531,15 +535,13 @@
     "keytar": true,
     "protobufjs": true,
     "unrs-resolver": true,
-    "@playwright/browser-chromium@1.61.1": true,
-    "bun@1.4.2": true,
-    "libxmljs2@0.37.0": true,
-    "opencode-ai@1.18.30": true,
-    "better-sqlite3@13.0.3": true,
-    "@huggingface/transformers@4.2.0": true,
-    "keytar@7.9.0": true,
-    "sharp@0.35.4": true,
-    "onnxruntime-node@1.24.3": true
+    "@playwright/browser-chromium": true,
+    "bun": true,
+    "libxmljs2": true,
+    "opencode-ai": true,
+    "@huggingface/transformers": true,
+    "sharp": true,
+    "onnxruntime-node": false
   },
   "overrides": {
     "browserslist": "^4.28.8",
