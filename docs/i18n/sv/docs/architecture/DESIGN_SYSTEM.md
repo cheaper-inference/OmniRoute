@@ -123,16 +123,47 @@
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopierar uppströms- `src/` vid den commit (`latest` = den senaste `v*` taggen) till `packages/ui-kit/src`, tillämpar den enda tillåtna transformationen (den tar bort `.js` suffixet från relativa importer) och ställer in arbetsyteversionen i `packages/ui-kit/package.json` och `package-lock.json` till den uppströms. Sedan: granska `git diff packages/ui-kit`, gör ett visuellt pass på leverantörer, inställningar, kombinationer, användning och slutpunkt i båda teman, kör `npm run check:ui-kit-snapshot` och `npm run test:vitest:ui` och öppna PR med uppströmsändringsloggen.
 
-## 6. README diagram
+## 6. README-diagram
 
-De tolv diagrammen som roten `README.md` bäddar in (`docs/diagrams/*.svg`) är satsen som appliceras på en statisk bild, och de genereras, inte ritade för hand: 13 generatorfiler vid `scripts/docs/gen-readme-*.mjs` (tolv diagram plus `gen-readme-diagrams.mjs` drivrutinen) och 12 staleness-test vid `tests/unit/docs/readme-*-svg.test.ts`, ett per diagram, varje byte-fil jämför med sin committ's generator-fil med dess committ's `test-unit`.
+De tolv diagrammen som rotens `README.md` bäddar in (`docs/diagrams/*.svg`) är kitet som tillämpas på en statisk
+bild, och de genereras, inte ritas för hand: 13 generatorfiler i `scripts/docs/gen-readme-*.mjs`
+(tolv diagram plus drivrutinen `gen-readme-diagrams.mjs`) och 12 tester för inaktualitet i
+`tests/unit/docs/readme-*-svg.test.ts`, ett per diagram, som bytejämför den incheckade filen med resultatet från dess
+generator (jobbet `test-unit`).
 
-- **Polletter.** `scripts/docs/readme-diagram-theme.mjs` kopierar paletten från `packages/ui-kit/src/ci-tokens.css` (fäst mot den filen av `tests/unit/docs/readme-diagram-theme.test.ts`) och definierar textrollerna på satsens tidigare ansikten — Instrument Serif för visning, Inter för UI text, IBM Plex Mono för siffror och kod — från `@fontsource` paketen (instrumentpanelen själv använder satsens Switzer sedan kit 0.0.66). Ljusa värden sitter på `:root`, mörka värden bakom `prefers-color-scheme: dark`, inuti filen, så varje bild följer tittarens schema på GitHub.
-- **Teckensnitt.** `scripts/docs/readme-fonts.mjs` underställer dessa woff2-filer till glyferna som varje diagram ritar och bäddar in dem som `@font-face` `data:` URIs - det enda sättet kittypografi når en README -bild, eftersom GitHub Markdown inte har någon CSS och camo-proxyn blockerar varje extern hämtning. Delmängderna är endast latinska; symbolglyferna som faller tillbaka till systemstacken är tillåtna en efter en i `SYMBOL_FALLBACKS`, och alla andra avtäckta glyph-kast.
-- **Regenerera.** `npm run docs:readme-diagrams` skriver om alla tolv i README ordning och skriver ut en rad per fil med dess storlek. En enda generator körs också på egen hand (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` behöver `node --import tsx/esm` eftersom dess siffror kommer från livekatalogladdaren i `open-sse/config/freeModelCatalog.ts`; CI konsekvensen av en katalogändring är i `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Förbind generatorn och SVG tillsammans.
-- **Bevis.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderar en fil på det sätt som GitHub betjänar den (en `<img>` tagg, camos `Content-Security-Policy`, `image/svg+xml`), fångar en ljus och en mörk ram och rapporterar de externa teckensnittsbegäranden som sidan har gjort (måste vara 0).
-- **Budget.** Under 200 KB per fil (varje staleness test hävdar det); 500 KB är det hårda locket för alla README -bilder (regeln för SVG studiovalideraren).
-- **Kopia oförändrad, räknas från grinden.** Ommärket ändrade typ och palett, inte ord: varje generator bär sin diagramkopia i en `*_COPY` konstant (eller bygger den från livekatalogen) som är både den ritade texten och teckensnittsundermängden. Kanoniska figurer stannar i `<text>` noder, avlästa av `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); staleness-testerna för diagrammen som gate läser kör också dess validatorer på den genererade filen, så en siffra som driver från koden klarar inte testet - fixa källan som gate läser, aldrig numret i generatorn.
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopierar paletten från `packages/ui-kit/src/ci-tokens.css`
+  (låst mot den filen av `tests/unit/docs/readme-diagram-theme.test.ts`) och definierar textrollerna på
+  kitets typskala: Switzer i kitets vikter (400/500/600, display i 500) och teckenavstånd för
+  allt, utom kodrollerna (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), som
+  är IBM Plex Mono och endast används för kommandon, URL:er, identifierare och terminalskärmar.
+  Ljusa värden ligger på `:root`, mörka värden bakom `prefers-color-scheme: dark`, i filen, så att varje
+  bild följer visningsprogrammets schema på GitHub.
+- **Teckensnitt.** GitHub Markdown innehåller ingen CSS och camo-proxyn blockerar alla externa hämtningar, så kitets
+  typografi måste följa med i filen. `scripts/docs/readme-outline.mjs`, det sista steget i varje generator, formar
+  Switzer-rollerna med HarfBuzz och ritar dem som vektorlinjer (`<defs>`-sökvägar och `<use>`), medan pilarna
+  och geometriska symboler som Switzer saknar ritas utifrån sina egna mått. Konturer, aldrig ett inbäddat
+  teckensnitt: Switzers licens (`packages/ui-kit/src/fonts/FFL.txt`) förbjuder subsettering och formatkonvertering
+  utan skriftligt samtycke och tillåter vektorteckningar, så återinför inte en Switzer-`@font-face` eller
+  `data:`-URI. Det enda teckensnitt som lämnas kvar i en fil är OFL-delmängden av IBM Plex Mono för det som
+  fortfarande är riktig kodtext (`scripts/docs/readme-fonts.mjs`), byggd från dessa tecken; alla glyfer som den
+  inte kan bädda in orsakar ett fel.
+- **Generera om.** `npm run docs:readme-diagrams` skriver om alla tolv i README-ordning och skriver ut en rad per
+  fil med dess storlek. En enskild generator kan också köras separat (`node scripts/docs/gen-readme-<name>.mjs`;
+  `free-tier-budget` behöver `node --import tsx/esm` eftersom dess figurer kommer från den aktiva katalogladdaren i
+  `open-sse/config/freeModelCatalog.ts`; CI-konsekvensen av en katalogändring finns i
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Checka in generatorn och SVG-filen tillsammans.
+- **Verifiering.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderar en fil på det sätt GitHub
+  levererar den (en `<img>`-tagg, camo:s `Content-Security-Policy`, `image/svg+xml`), tar en ljus och en
+  mörk bild och rapporterar de externa teckensnittsbegäranden som sidan gjorde (måste vara 0).
+- **Budget.** Under 200 KB per fil (varje test för inaktualitet hävdar detta); 500 KB är den hårda gränsen för
+  alla README-bilder (SVG-studiots valideringsregel).
+- **Kopiera oförändrat, antal från kontrollen.** Omprofileringen ändrade typografi och palett, inte ord: varje
+  generator innehåller diagrammets text i en `*_COPY`-konstant (eller bygger den från den aktiva katalogen) som
+  både är den ritade texten och indata till kontursteget. Kanoniska figurer finns kvar i `<text>`-noder
+  (osynliga när de väl har konturiserats, `fill-opacity:0`), som läses av `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`); diagrammens tester för inaktualitet som styr kontrollerna kör också
+  dess validerare på den genererade filen, så en figur som avviker från koden gör att testet misslyckas — korrigera
+  källan som kontrollen läser, aldrig talet i generatorn.
 
 ## 7. Referensindex
 

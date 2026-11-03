@@ -48,16 +48,47 @@
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` अपस्ट्रिम `src/` त्यो कमिटमा (`latest` = सबैभन्दा नयाँ `v*` ट्याग) लाई `packages/ui-kit/src` मा प्रतिलिपि गर्दछ, एकल अनुमति दिइएको रूपान्तरण लागू गर्दछ (यसले सापेक्ष आयातबाट `.js` प्रत्यय छोड्छ), र कार्यस्थान संस्करणलाई `packages/ui-kit/package.json` र `package-lock.json` मा अपस्ट्रीममा सेट गर्दछ। त्यसपछि: `git diff packages/ui-kit` समीक्षा गर्नुहोस्, प्रदायकहरू, सेटिङहरू, कम्बोहरू, प्रयोग र दुवै थिमहरूमा अन्तिम बिन्दुमा भिजुअल पास गर्नुहोस्, `npm run check:ui-kit-snapshot` र `npm run test:vitest:ui` चलाउनुहोस्, र अपस्ट्रिम चेन्जलगको साथ PR खोल्नुहोस्।
 
-## 6. README रेखाचित्र
+## ६. README का रेखाचित्रहरू
 
-मूल `README.md` एम्बेड गरिएका बाह्र रेखाचित्रहरू (`docs/diagrams/*.svg`) स्थिर छविमा लागू गरिएको किट हुन्, र तिनीहरू हातले कोरिएका होइनन्: 13 जेनेरेटर फाइलहरू `scripts/docs/gen-readme-*.mjs` मा (बाह्र रेखाचित्रहरू थप `gen-readme-diagrams.mjs` ड्राइभर) र 12 स्टेलेनेस परीक्षणहरू प्रत्येक zqe-प्रतिबद्ध फाइलमा `tests/unit/docs/readme-*-svg.test.ts`-paring द्वारा, जेनेरेटरको आउटपुट (काम `test-unit`)।
+रूट `README.md` ले एम्बेड गर्ने बाह्रवटा रेखाचित्रहरू (`docs/diagrams/*.svg`) स्थिर
+छविमा लागू गरिएको किट हुन्, र यी हातैले कोरिएका होइनन्, उत्पन्न गरिएका हुन्: `scripts/docs/gen-readme-*.mjs`
+मा रहेका १३ वटा जनरेटर फाइलहरू (बाह्र रेखाचित्रहरू र `gen-readme-diagrams.mjs` ड्राइभर) तथा
+`tests/unit/docs/readme-*-svg.test.ts` मा रहेका १२ वटा पुरानो अवस्था जाँचहरू, प्रत्येक रेखाचित्रका लागि एउटा,
+जसले कमिट गरिएको फाइल र त्यसको जनरेटरको आउटपुटलाई byte स्तरमा तुलना गर्छन् (`test-unit` job)।
 
-- **टोकनहरू।** `scripts/docs/readme-diagram-theme.mjs` `packages/ui-kit/src/ci-tokens.css` बाट प्यालेट प्रतिलिपि गर्दछ ( `tests/unit/docs/readme-diagram-theme.test.ts` द्वारा त्यो फाइल विरुद्ध पिन गरिएको) र किटको अघिल्लो अनुहारहरूमा पाठ भूमिकाहरू परिभाषित गर्दछ — प्रदर्शनको लागि उपकरण सेरिफ, UI पाठको लागि Inter, अंक र कोडको लागि IBM Plex Mono — `@fontsource` प्याकेजहरूबाट (ड्यासबोर्ड आफैले kit'60 को kit'60 प्रयोग गर्दछ)। हल्का मानहरू `:root` मा बस्छन्, गाढा मानहरू `prefers-color-scheme: dark` पछाडि, फाइल भित्र, त्यसैले प्रत्येक छविले GitHub मा दर्शकको योजनालाई पछ्याउँछ।
-- **फन्टहरू।** `scripts/docs/readme-fonts.mjs` ती woff2 फाइलहरूलाई glyphs मा सबसेट गर्दछ प्रत्येक रेखाचित्र कोर्दछ र तिनीहरूलाई `@font-face` `data:` URIs को रूपमा एम्बेड गर्दछ — किट टाइपोग्राफीले README छविमा पुग्ने एक मात्र तरिका हो, किनकि GitHub मार्कडाउनले CSS बोक्दैन र क्यामो प्रोक्सीले प्रत्येक बाह्य फेचलाई रोक्छ। उपसमूहहरू ल्याटिन मात्र हुन्; प्रणाली स्ट्याकमा फर्किने प्रतीक ग्लिफहरूलाई `SYMBOL_FALLBACKS` मा एक एक गरी अनुमति दिइन्छ, र अन्य कुनै पनि खुला ग्लाइफ थ्रोहरू।
-- **पुन: उत्पन्न गर्नुहोस्।** `npm run docs:readme-diagrams` सबै बाह्रलाई README क्रममा पुन: लेख्छ र यसको साइजको साथ प्रति फाइल एक लाइन छाप्छ। एकल जेनेरेटर पनि आफ्नै मा चल्छ (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` `node --import tsx/esm` चाहिन्छ किनभने यसको तथ्याङ्कहरू `open-sse/config/freeModelCatalog.ts` मा लाइभ क्याटलग लोडरबाट आउँछ; क्याटलग परिवर्तनको CI परिणाम `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` मा हुन्छ)। जेनेरेटर र SVG सँगै कमिट गर्नुहोस्।
-- **प्रमाण।** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` फाइललाई GitHub सेवा गर्ने तरिकाले रेन्डर गर्छ (एक `<img>` ट्याग, camo's `Content-Security-Policy`, `image/svg+xml`), उज्यालो र अँध्यारो फ्रेम क्याप्चर गर्छ र पृष्ठमा गरिएको बाह्य फन्ट अनुरोधहरू रिपोर्ट गर्दछ (0 हुनुपर्छ)।
-- **बजेट।** प्रति फाइल 200 KB अन्तर्गत (प्रत्येक स्टेलेनेस परीक्षणले यसलाई पुष्टि गर्दछ); 500 KB कुनै पनि README छवि ( SVG स्टुडियो मान्यकर्ताको नियम) को लागि हार्ड क्याप हो।
-- **अपरिवर्तित प्रतिलिपि गर्नुहोस्, गेटबाट गणना।** रिब्रान्ड परिवर्तन गरिएको प्रकार र प्यालेट, शब्दहरू होइन: प्रत्येक जेनेरेटरले यसको रेखाचित्रको प्रतिलिपि `*_COPY` स्थिरतामा बोक्छ (वा यसलाई लाइभ क्याटलगबाट बनाउँछ) जुन कोरिएको पाठ र फन्ट-सबसेट इनपुट दुवै हो। क्यानोनिकल आंकडाहरू `<text>` नोडहरूमा रहन्छन्, `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) द्वारा पढिन्छन्; गेटले पढ्ने रेखाचित्रहरूको स्ट्यालेनेस परीक्षणहरूले उत्पन्न गरिएको फाइलमा यसको प्रमाणिकरणहरू पनि चलाउँछ, त्यसैले कोडबाट बहने एउटा आंकडा परीक्षण असफल हुन्छ — गेटले पढेको स्रोतलाई ठीक गर्नुहोस्, जेनेरेटरमा नम्बर कहिल्यै हुँदैन।
+- **Tokens।** `scripts/docs/readme-diagram-theme.mjs` ले प्यालेट `packages/ui-kit/src/ci-tokens.css`
+  बाट प्रतिलिपि गर्छ (`tests/unit/docs/readme-diagram-theme.test.ts` ले त्यस फाइलसँग पिन गरेको हुन्छ) र
+  किटको type scale मा पाठका भूमिकाहरू परिभाषित गर्छ: किटका weight हरू (400/500/600, display का लागि 500) र
+  सबै कुराका लागि tracking सहित Switzer; तर code भूमिका (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`) बाहेक,
+  जुन IBM Plex Mono हुन् र command, URL, identifier तथा terminal screen का लागि मात्र प्रयोग गरिन्छन्।
+  हल्का मानहरू `:root` मा र गाढा मानहरू फाइलभित्र `prefers-color-scheme: dark` पछाडि राखिएका छन्,
+  त्यसैले GitHub मा प्रत्येक छविले दर्शकको scheme पछ्याउँछ।
+- **Fonts।** GitHub Markdown मा CSS हुँदैन र camo proxy ले प्रत्येक बाह्य fetch रोक्छ, त्यसैले किटका type
+  फाइलभित्रै समावेश हुनुपर्छ। प्रत्येक जनरेटरको अन्तिम चरण `scripts/docs/readme-outline.mjs` ले
+  HarfBuzz प्रयोग गरी Switzer भूमिकाहरूको आकार निर्धारण गर्छ र तिनलाई vector outline का रूपमा
+  (`<defs>` paths र `<use>`) कोर्छ; Switzer मा नभएका arrow र geometric symbol हरू पनि आफ्नै metrics मा कोरिन्छन्।
+  एम्बेड गरिएको font होइन, outline मात्र: Switzer को licence (`packages/ui-kit/src/fonts/FFL.txt`) ले
+  लिखित स्वीकृतिबिना subsetting र format conversion निषेध गर्छ र vector drawing लाई अनुमति दिन्छ, त्यसैले
+  Switzer को `@font-face` वा `data:` URI पुनःप्रवेश नगराउनुहोस्। फाइलमा बाँकी रहने एउटै font
+  वास्तविक code text का लागि OFL IBM Plex Mono subset हो (`scripts/docs/readme-fonts.mjs`), जुन
+  ती अक्षरहरूबाट बनाइन्छ; यसले embed गर्न नसक्ने कुनै glyph भएमा त्रुटि उत्पन्न हुन्छ।
+- **Regenerate।** `npm run docs:readme-diagrams` ले README को क्रमअनुसार सबै बाह्रवटालाई पुनःलेख्छ र
+  प्रत्येक फाइलको size सहित एउटा पङ्क्ति प्रिन्ट गर्छ। एउटा जनरेटरलाई मात्र पनि चलाउन सकिन्छ
+  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` का figures live catalog loader
+  `open-sse/config/freeModelCatalog.ts` बाट आउने भएकाले `node --import tsx/esm` आवश्यक पर्छ;
+  catalog परिवर्तनको CI परिणाम `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` मा छ)। जनरेटर र SVG दुवै कमिट गर्नुहोस्।
+- **Proof।** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ले GitHub ले सेवा दिने तरिकाले
+  फाइल render गर्छ (`<img>` tag, camo को `Content-Security-Policy`, `image/svg+xml`), हल्का र गाढा
+  frame capture गर्छ र पृष्ठले गरेका बाह्य font request हरू रिपोर्ट गर्छ (० हुनुपर्छ)।
+- **Budget।** प्रत्येक फाइल २०० KB भन्दा कम हुनुपर्छ (प्रत्येक पुरानो अवस्था जाँचले यो सुनिश्चित गर्छ);
+  कुनै पनि README image का लागि ५०० KB कडा सीमा हो (SVG studio validator को rule)।
+- **Copy unchanged, counts from the gate।** Rebrand ले type र palette परिवर्तन गर्यो, शब्दहरू होइन:
+  प्रत्येक जनरेटरले आफ्नो रेखाचित्रको copy `*_COPY` constant मा राख्छ (वा live catalog बाट बनाउँछ),
+  जुन कोरिएको text र outlining step को input दुवै हो। Canonical figure हरू `<text>` nodes मा रहन्छन्
+  (outline गरिसकेपछि अदृश्य, `fill-opacity:0`), र `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`) ले तिनलाई पढ्छ; gate ले पढ्ने रेखाचित्रका staleness test हरूले
+  उत्पन्न फाइलमा यसका validators पनि चलाउँछन्, त्यसैले code बाट फरक परेको figure भए test असफल हुन्छ —
+  generator मा रहेको number कहिल्यै सच्याउनु हुँदैन, gate ले पढ्ने source सच्याउनुहोस्।
 
 ## 7. सन्दर्भ सूची
 

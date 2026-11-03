@@ -30,6 +30,10 @@ import {
   maskSegment,
   truncateUrl,
 } from "@/shared/utils/formatting";
+import {
+  EGRESS_FAMILY_LABEL_ARGUMENT,
+  observedEgressAddresses,
+} from "@/shared/network/egressAddress";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { getProviderDisplayLabel } from "@/shared/utils/providerDisplayLabel";
 
@@ -75,6 +79,9 @@ const DEFAULT_VISIBLE = Object.fromEntries(PROXY_COLUMN_KEYS.map((key) => [key, 
 export default function ProxyLogger() {
   const t = useTranslations("proxyLogger");
   const tCommon = useTranslations("common");
+  // The family of an egress address is labelled in the proxyLog namespace, the
+  // one the line detail uses too.
+  const tProxyLog = useTranslations("proxyLog");
   const { emailsVisible } = useEmailPrivacyStore();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -558,6 +565,12 @@ export default function ProxyLogger() {
                   label: resolvedProviderLabel,
                 };
                 const isError = log.status === "error" || log.status === "timeout";
+                const egressAddress =
+                  observedEgressAddresses({
+                    primary: log.egressIp ?? null,
+                    ipv4: log.egressIpv4 ?? null,
+                    ipv6: log.egressIpv6 ?? null,
+                  })[0] ?? null;
 
                 return (
                   <TableRow
@@ -644,7 +657,20 @@ export default function ProxyLogger() {
                     )}
                     {visibleColumns.egress && (
                       <TableCell className="px-3 py-2 font-mono text-[11px] text-success">
-                        {maskSegment(log.egressIp) || "—"}
+                        {egressAddress ? (
+                          <>
+                            {maskSegment(egressAddress.address)}
+                            {egressAddress.family ? (
+                              <span className="ml-1 text-text-muted">
+                                {tProxyLog("egressIpFamily", {
+                                  version: EGRESS_FAMILY_LABEL_ARGUMENT[egressAddress.family],
+                                })}
+                              </span>
+                            ) : null}
+                          </>
+                        ) : (
+                          "—"
+                        )}
                       </TableCell>
                     )}
                     {visibleColumns.correlation && (
