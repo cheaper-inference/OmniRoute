@@ -606,60 +606,60 @@ post_install() {
 
 ---
 
-## 📊 מודלים זמינים
+## 📊 דגמים זמינים
 
 <details>
-<summary><b>הצגת כל המודלים הזמינים</b></summary>
+<summary><b>הצג את כל הדגמים הזמינים</b></summary>
 
-> הרשימה שלמטה נאספת מתוך `open-sse/config/providerRegistry.ts` עבור v3.8.0. קטלוגי ענן (Gemini, OpenRouter וכו') מסונכרנים באופן דינמי — לקטלוג החי המלא פתחו את **Dashboard → Providers → [provider] → Available Models** או בצעו קריאה ל-`GET /api/models/catalog`.
+> הרשימה שלהלן מאוצרת מ- `open-sse/config/providerRegistry.ts` עבור v3.8.0. קטלוגי ענן (Gemini, OpenRouter, וכו') מסונכרנים באופן דינמי — עבור הקטלוג החי המלא פתוח** לוח מחוונים → ספקי → [ספק] → דגמים זמינים** או התקשר ל- `GET /api/models/catalog`.
 >
-> אם הרשימה המובנית של ספק מסוים איבדה עדכניות, השתמשו ב-**Import from /models** באותו עמוד (או הפעילו **Auto-Sync**) כדי למשוך את הקטלוג החי מהספק. זה אומת ב-v3.8.50 עבור LLM7.io (`gemini-3.1-flash-lite`) ו-UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); גישה אנונימית ל-Pollinations נותרה מוגבלת מצד הספק במהלך אותו מחזור בדיקות.
+> אם הרשימה המובנית של ספק נסחפה, השתמש** ייבוא מ /models** בדף זה (או אפשר** סנכרון אוטומטי** ) כדי למשוך את הקטלוג בשידור חי במעלה הזרם. זה אומת ב-v3.8.50 עבור LLM7.io (`gemini-3.1-flash-lite`) ו- UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); הגישה האנונימית להאבקות נותרה מוגבלת במעלה הזרם במהלך אותו מעבר מבחן.
 
-**Claude Code (`cc/`)** — OAuth של Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**קוד Claude (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth של Plus/Pro: `cx/gpt-5.5` (+ דרגות effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (רמות מאמץ + : `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth חינמי: השתמשו בקטלוג החי המוצג תחת **Dashboard → Providers → Kiro → Available Models**. הזמינות תלויה בחשבון ובמנוי.
+**Kiro (`kr/`)** — FREE OAuth: השתמש בקטלוג החי המוצג מתחת** לוח מחוונים → ספקי → Kiro → דגמים זמינים** . הזמינות תלויה בחשבון ובתוכנית.
 
-**Qoder (`if/`)** — OAuth חינמי: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — FREE OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6 לכל מיליון טוקנים: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2 לכל מיליון טוקנים: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9 לחודש בתעריף קבוע או לפי שימוש: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mo שטוח או לפי שימוש: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — מפתח API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** מפתח — API : `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — מהיר במיוחד: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok מקורי: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — מתארח באירופה: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — אירוח באיחוד האירופי: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — מועשר בחיפוש: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**תמיהה (`pplx/`)** — חיפוש מוגדל: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — קוד פתוח: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (חינם), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — הסקה מהירה: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — בקנה מידה של וופר: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — סולם רקיק: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — ממוקד RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG ממוקד: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ארגוני: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama Cloud (`ollama-cloud/`)** : `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: מסונכרן בזמן אמת לכל מפתח API מ-Google — אין רשימה סטטית. חברו מפתח ב-**Dashboard → Providers** ולאחר מכן השתמשו ב-**Available Models** כדי לייבא את הקטלוג העדכני (למשל `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)** : מסונכרן חי לכל מפתח API מ- Google — ללא רשימה סטטית. חבר מפתח פנימה** ספקי → לוח מחוונים** ואז להשתמש** דגמים זמינים** לייבא את הקטלוג הנוכחי (למשל `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**ספקים תואמים נוספים** (נבחרים): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (באמצעות `aws-bedrock`), `azure-ai`, `openrouter` (קטלוג מעבר ישיר), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. כל ספק מנהל רשימת מודלים משלו ב-`providerRegistry.ts` וניתן לסנכרנו אוטומטית כאשר הספק חושף נקודת קצה `/models`.
+**ספקים תואמים אחרים** (נבחר): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (קטלוג מעבר), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `nous-research`, `bazaarlink`, `friendliai`, , `reka`, `volcengine`, `ai21`, `gigachat`. כל אחד שומר על רשימת דגמים משלו ב- `providerRegistry.ts` וניתן לסנכרן אותו אוטומטית כאשר הספק חושף נקודת קצה `/models`.
 
-**הערה לגבי מזהי מודלים:** OmniRoute משתמש במזהים הילידיים של הספק (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). חלק מהמזהים כוללים גרסאות עם נקודות, מכיוון שכך ה-API של הספק מצפה לקבלם. אם מודל אינו מופיע ברשימה למעלה, הריצו `omniroute models --search <term>` או בצעו קריאה ל-`GET /api/models/catalog` כדי לוודא זמינות.
+**הערה על דגם IDs:** OmniRoute משתמש ב- IDs מקורי לספק (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). חלק מה- IDs כוללים גרסאות מנוקדות מכיוון שכך ה- API מצפה להן. אם דגם אינו מופיע למעלה, הפעל `omniroute models --search <term>` או הקש על `GET /api/models/catalog` כדי לאשר זמינות.
 
 </details>
 

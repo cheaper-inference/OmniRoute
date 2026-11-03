@@ -282,17 +282,17 @@ _狀態_則是暫時性的。
 
 ---
 
-## 4. 配額共享並行控制（v3.8.36）
+## 4. 配額共享並發控制 (v3.8.36)
 
-訂閱制帳號（GLM、MiniMax 等）通常只接受約 1–3 個並行請求；超過此數量會觸發 429 與冷卻。在**配額共享**（`qtSd/…`）組合下此問題尤其嚴重，因為多個 API 金鑰共享同一個上游帳號。以下三層機制可防止共享帳號被請求淹沒。
+訂閱帳戶（GLM、 MiniMax等）通常只接受~ 1-3 個並發請求；超過會觸發 429 秒和冷卻時間。這是嚴重的**配額份額**(`qtSd/…`) 組合，其中多個API金鑰共用一個上游帳戶。三層保護共享帳戶不被淹沒。
 
-### 每連線並行上限（`max_concurrent`）
+### 每個連接的並發上限 (`max_concurrent`)
 
-每個提供者連線都可以宣告一個 `max_concurrent` 上限（`provider_connections.max_concurrent`，可在連線對話框 / API / 資料庫中設定）。留空表示不設限。這是驅動下方序列化層的唯一控制項——請將其設為該帳號的實際並行數（例如 GLM 約 1、MiniMax 約 2）。
+每個提供者連接都可以宣告一個`max_concurrent`上限（`provider_connections.max_concurrent`，在連接模式 / API / DB中設定）。將其留空，沒有限制。這是驅動—下面的序列化層的單一旋鈕，將其設定為帳戶的實際並發性（例如GLM ~ 1、 MiniMax ~ 2）。
 
-### 每模型並行上限（`modelConcurrency`）
+### 每個模型的同時上限 (`modelConcurrency`)
 
-連線還可以在其 `rateLimitOverrides` 對應表中宣告精確的每模型並行上限：
+連接還可以在其`rateLimitOverrides`映射中聲明精確的每個模型並發上限：
 
 ```json
 {
@@ -303,13 +303,13 @@ _狀態_則是暫時性的。
 }
 ```
 
-可在連線對話框中設定（**Rate limit overrides（速率限制覆寫）→ Per-model concurrency caps（每模型並行上限）**，每行一組 `model=cap`），或使用相同的 JSON 結構透過 `PATCH /api/providers/[id]` 設定。關鍵語義：
+在連接模式中設定它（**速率限制覆蓋→每個模型的並發上限**，每行一個`model=cap` ）或通過具有相同JSON形狀的`PATCH /api/providers/[id]` 。關鍵語意：
 
-- **連線範圍 vs 模型專屬：** `maxConcurrent` 仍是整個連線共享的上限。當兩者都適用時，兩道閘門會在同一個複合閘門中以原子方式取得（`global → provider → account → model`）；實際生效的是適用限制中較嚴格者。
-- **模型鍵精確比對：** 鍵是路由解析後傳給執行器的模型字串——通常是裸上游模型 ID（`glm-5`），而非用戶端的 `provider/model` 別名（`zai/glm-5` 不會匹配 `glm-5`）。值為正整數的並行請求上限。
-- **本地排隊，不做探測：** 超出的請求會依現有的佇列/逾時語義在本地排隊（具類型的 `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` 准入錯誤）。OmniRoute 不會探測或推斷上游政策——它只強制執行維運者所設定的確切上限。飽和的模型閘門絕不會停用該提供者，也不會造成永久性的模型鎖定；上游的 429/冷卻/回退行為仍是錯誤的最終後盾。
-- **每連線、每進程的作用範圍：** 上限是針對每個資料庫連線設定的，並保存在記憶體中，因此兩個使用相同上游 API 金鑰的連線彼此之間不會協調。
-- **未設定即維持原狀：** 省略該對應表（或將儀表板欄位留空）就不會加入模型閘門。以下範例設定不預設任何通用的提供者限制：
+- **連接範圍與特定模型：** `maxConcurrent`仍然是共享連接範圍的上限。當兩者都適用時，兩個門都在同一個複合門（`global → provider → account → model`）中以原子方式獲取；有效行為是更嚴格的適用限制。
+- **精確的型號-密鑰匹配：**關鍵是路由解析—之後傳遞給執行器的模型字串，通常是裸露的上游模型 id (`glm-5`)，而不是客戶端`provider/model`別名 (`zai/glm-5`與`glm-5`不符)。值是正整數並發請求上限。
+- **本地排隊，沒有發現：**多餘的請求使用現有的queue/timeout語意在本地排隊（輸入`SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`准入錯誤）。 OmniRoute不會發現或推斷上游策略—它強制執行操作員配置的確切上限。飽和的模型門永遠不會禁用提供者，也永遠不會造成永久的模型鎖定；上游429/cooldown/fallback行為仍然是錯誤後備。
+- **每個連線、每個進程範圍：** caps 是針對每個資料庫連接的，並保存在記憶體中，因此重複使用相同上游API金鑰的兩個連接不會相互協調。
+- **未配置意味著未更改：**省略地圖（或將儀表板欄位留空）不會新增模型閘。不聲明任何通用提供者限制的範例配置：
 
 ```text
 glm-5=1
@@ -318,15 +318,17 @@ glm-4.7=3
 
 ### 配額共享請求序列化
 
-當配額共享派發指向一個宣告了正數 `max_concurrent` 的連線時，發往該**帳號**的並行請求會透過每連線信號量（鍵 `qsconn:<connectionId>`）被序列化：超出的請求會**在佇列中等待**，而非湧入該帳號。此機制為**故障開放（fail-open）**——佇列飽和或逾時時會在沒有名額的情況下繼續執行，而絕不拒絕可派發的請求。可在 **Settings（設定）→ Resilience（韌性）→ Quota-share per-connection concurrency（配額共享每連線並行）** 中切換（`resilienceSettings.quotaShareConcurrencyLimit.enabled`，預設開啟）。未設定 `max_concurrent` 上限時，行為維持不變。
+當配額共享調度針對聲明正`max_concurrent`連接時，對該連接的並發請求**帳戶**透過每個連接信號量（鍵`qsconn:<connectionId>`）進行序列化：多餘的請求**在隊列中等待**而不是淹沒帳戶。這是**故障開放**—飽和佇列或逾時在沒有插槽的情況下繼續進行，而不是拒絕可分派請求。切換進入**設定→彈性→每個連接的配額共享並發數**（`resilienceSettings.quotaShareConcurrencyLimit.enabled`，預設開啟）。如果沒有`max_concurrent`上限，行為不會改變。
 
-> 配額共享路由閘門（`selectQuotaShareTarget`，DRR + P2C）本身也是故障開放的，只會將已達上限的連線_降低優先順序_——在單一連線池的情況下它無法硬性限制，因此真正遏制請求洪流的是這個信號量。
+> 配額共享路由門（`selectQuotaShareTarget`、 DRR + P2C）本身是故障開放的，並且僅_deprioritize_具有單連接池的 at-cap 連接—它無法硬限制，因此該信號量實際上包含洪水。
 
 ### 組合冷卻感知重試
 
-對於每種組合策略（啟用時），當一個請求會因短暫態冷卻而形成 429 時，它會等待冷卻結束並重新派發，而非直接回傳 429——這涵蓋了多模型組合上 Gemini 級別的 TPM/RPM 視窗（約 60 秒的 retry-after），例如雙模型組合的兩個目標同時觸發每模型速率限制的情況。其上限由 **Settings（設定）→ Resilience（韌性）** 中的 `comboCooldownWait`（`enabled`、`maxWaitMs`、`maxAttempts`、`budgetMs`）約束。對於 `quota_exhausted`（鎖定至午夜）或驗證/找不到等原因，絕不等待。
+對於每個組合策略（啟用時），將具體化 429 進行SHORT短暫冷卻的請求會等待其結束並重新分派，而不是返回 429 —這涵蓋了多模型組合上的 Gemini 級TPM/RPM視窗（~ 60 秒後重試），例如 2 模型組合的兩個目標都達到了每個模型的目標速率。以`comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) 為界**設定→彈性**。它從不等待`quota_exhausted` （鎖定到午夜）或auth/not-found原因。
 
-同一道閘門也涵蓋派發前的情況（#16319）：當組合的每個目標在任何嘗試之前，都因其模型處於短暫態鎖定而被跳過時，零嘗試路徑會在相同的上限內等待鎖定結束並重新派發，而非回應一個不帶提示的 `503 ALL_TARGETS_SKIPPED`。當不允許等待時（達到上限、嘗試次數或預算耗盡，或功能關閉），最終回應會升級為 `429 rate_limit_error`，並攜帶來自最早到期的暫態鎖定的 `retry_after` / `reset_at`；配額、驗證與找不到的鎖定則維持無提示的 503。
+組合可以使用`config.comboCooldownWaitEnabled: false`選擇退出。只有文字`false`會停用這些共享組合等待（調度後冷卻和調度前circuit-open/model-lock等待）及其等待預算逾時下限擴展。缺失或`true`保留全域策略； `true`無法啟用全域停用等待。明確的`targetTimeoutMs`仍然獲勝。此選擇退出不會變更單獨的本機 Codex 轉針預調度等待。
+
+相同的門涵蓋了預調度情況（#16319）：當組合的每個目標在進行任何嘗試之前被跳過時，因為其模型處於短暫的瞬時鎖定狀態，零嘗試路徑會在相同的上限下等待鎖定並重新調度，而不是回答無提示的`503 ALL_TARGETS_SKIPPED`。當不允許等待時（上限、嘗試或預算耗盡、或功能關閉），終端回應從最早的瞬時鎖到期開始升級為攜帶`retry_after` / `reset_at`的`429 rate_limit_error` ；配額、身份驗證和未找到鎖定保留無提示 503。
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

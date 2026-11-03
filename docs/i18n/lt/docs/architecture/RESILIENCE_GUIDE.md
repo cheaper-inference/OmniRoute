@@ -286,21 +286,17 @@ _būsena_ yra laikina.
 
 ---
 
-## 4. Kvotų dalijimosi lygiagretumo valdymas (v3.8.36)
+## 4. Kvotos pasidalijimo lygiagretumo valdymas (v3.8.36)
 
-Prenumeratos paskyros (GLM, MiniMax ir kt.) dažnai priima tik ~1–3 lygiagrečias užklausas; viršijus šį skaičių, suaktyvinamos 429 klaidos ir atvėsimai. Tai ypač opu **kvotų dalijimosi** (`qtSd/…`) kombinacijose, kai keli API raktai dalijasi viena upstream paskyra. Trys sluoksniai apsaugo bendrą paskyrą nuo užtvindymo.
+Prenumeratos paskyros (GLM, MiniMax ir kt.) dažnai priima tik ~ 1–3 vienu metu vykstančias užklausas; viršijus tai suaktyvina 429s ir atvėsimus. Tai ūmus pagal** kvotos dalis** (`qtSd/…`) deriniai, kai keli API klavišai dalijasi viena išankstine paskyra. Trys sluoksniai apsaugo bendrinamą paskyrą nuo užtvindymo.
 
-### Lygiagretumo riba vienam prisijungimui (`max_concurrent`)
+### Vieno ryšio lygiagretumo riba (`max_concurrent`)
 
-Kiekvienas teikėjo prisijungimas gali deklaruoti `max_concurrent` lubas
-(`provider_connections.max_concurrent`, nustatomas prisijungimo modale / API / DB).
-Palikite tuščią, jei ribos nereikia. Tai vienintelė rankenėlė, valdanti žemiau aprašomą
-serializavimo sluoksnį — nustatykite ją pagal realų paskyros lygiagretumą (pvz., GLM ~1, MiniMax ~2).
+Kiekvienas teikėjo ryšys gali deklaruoti `max_concurrent` lubas (`provider_connections.max_concurrent`, nustatytas ryšio modal / API / DB). Palikite tuščią be jokių apribojimų. Tai vienintelė rankenėlė, kuri valdo serializacijos sluoksnį, esantį žemiau — nustato jį į tikrąją paskyros sugretinimą (pvz., GLM ~ 1, MiniMax ~ 2).
 
-### Lygiagretumo ribos pagal modelį (`modelConcurrency`)
+### Vienalaikio modelio viršutinės ribos (`modelConcurrency`)
 
-Prisijungimas papildomai gali deklaruoti tikslias lygiagretumo lubas kiekvienam modeliui
-savo `rateLimitOverrides` žemėlapyje:
+Ryšys gali papildomai nurodyti tikslias vieno modelio lygiagretumo ribas savo `rateLimitOverrides` žemėlapyje:
 
 ```json
 {
@@ -311,73 +307,32 @@ savo `rateLimitOverrides` žemėlapyje:
 }
 ```
 
-Nustatykite jį prisijungimo modale (**Dažnio ribų perrašymai → Lygiagretumo ribos pagal modelį**, po vieną `model=cap` eilutėje) arba per
-`PATCH /api/providers/[id]` su ta pačia JSON struktūra. Pagrindinė semantika:
+Nustatykite jį ryšio modale (** Kainos limitas nepaiso → Kiekvienam modeliui taikomų lygiagrečiųjų ribų** , vienas `model=cap` eilutėje) arba per `PATCH /api/providers/[id]` su ta pačia JSON forma. Pagrindinė semantika:
 
-- **Viso prisijungimo ir konkretaus modelio ribos:** `maxConcurrent` išlieka bendra
-  viso prisijungimo riba. Kai taikomos abi, abu šliuzai užimami
-  atomiškai tame pačiame sudėtiniame šliuze
-  (`global → provider → account → model`); efektyvioji elgsena atitinka
-  griežtesnę taikomą ribą.
-- **Tikslus modelio rakto atitikimas:** raktas yra modelio eilutė, perduodama
-  vykdytojui po maršruto išskyrimo — paprastai grynasis upstream modelio ID
-  (`glm-5`), o ne kliento pusės `provider/model` slapyvardis (`zai/glm-5` neatitinka
-  `glm-5`). Reikšmės yra teigiami sveikieji skaičiai — lygiagrečių užklausų lubos.
-- **Vietinė laukimo eilė, be automatinio aptikimo:** perteklinės užklausos laukia vietinėje
-  eilėje pagal esamą eilės / laiko limito semantiką (tipizuotos `SEMAPHORE_TIMEOUT` /
-  `SEMAPHORE_QUEUE_FULL` priėmimo klaidos). OmniRoute pats neatranda ir
-  nenusprendžia upstream politikos — jis vykdo tikslias operatoriaus
-  sukonfiguruotas lubas. Prisotinęs modelio šliuzas niekada neišjungia teikėjo ir niekada
-  nesukuria nuolatinio modelio blokavimo; upstream 429 / atvėsimo / atsarginio (fallback)
-  elgsena išlieka klaidų paskutine gynyba.
-- **Vieno prisijungimo, vieno proceso apimtis:** ribos taikomos kiekvienam duomenų bazės
-  prisijungimui atskirai ir laikomos operatyviojoje atmintyje, todėl du prisijungimai, naudojantys tą patį
-  upstream API raktą, tarpusavyje nekoordinuoja.
-- **Nekonfigūruota reiškia nepakeistą elgseną:** praleidus žemėlapį (arba palikus
-  skydelio lauką tuščią) modelio šliuzas nepridedamas. Konfigūracijos pavyzdys,
-  nedeklaruojantis jokios universalios teikėjo ribos:
+- **Viso ryšio ir konkretaus modelio:** `maxConcurrent` išlieka bendro ryšio lubos. Kai taikomi abu, abu vartai atomiškai įgyjami tuose pačiuose sudėtiniuose vartuose (`global → provider → account → model`); efektyvus elgesys yra griežtesnė taikoma riba.
+- **Tiksli modelio ir rakto atitiktis:** raktas yra modelio eilutė, perduodama vykdytojui po maršruto parinkimo rezoliucijos — paprastai yra atviras priešsrovinio modelio ID (`glm-5`), o ne kliento pusės `provider/model` slapyvardis (`zai/glm-5` neatitinka `glm-5`). Vertės yra teigiamų sveikųjų skaičių vienu metu teikiamos užklausos viršutinės ribos.
+- **Vietinė eilė, jokių atradimų:** perteklinių užklausų eilė vietoje su esama queue/timeout semantika (įvestos `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL` priėmimo klaidos). OmniRoute neaptinka ir nenurodo ankstesnės politikos — ji įgyvendina tikslias operatoriaus sukonfigūruotas ribas. Prisotintas modelio vartai niekada neišjungia teikėjo ir nesukuria nuolatinio modelio blokavimo; prieš srovę 429/cooldown/fallback elgesys išlieka klaida.
+- **Kiekvienam ryšiui, vienam procesui:** viršutinės ribos yra duomenų bazės ryšiui ir laikomos atmintyje, todėl du ryšiai, pakartotinai naudojantys tą patį API raktą, nederina vienas kito.
+- **Nekonfigūruota reiškia nepakeista:** praleidžiant žemėlapį (arba palikus prietaisų skydelio lauką tuščią), modelio vartai nepridedami. Konfigūracijos pavyzdys, nenurodant jokio universalaus teikėjo apribojimo:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### Kvotų dalijimosi užklausų serializavimas
+### Kvotos pasidalijimo užklausos serializavimas
 
-Kai kvotų dalijimosi išsiuntimas nukreipiamas į prisijungimą, deklaruojantį teigiamą
-`max_concurrent`, lygiagrečios užklausos į tą **paskyrą** serializuojamos per
-prisijungimo semaforą (raktas `qsconn:<connectionId>`): perteklinės užklausos **laukia
-eilėje**, užuot užtvindžiusios paskyrą. Jis veikia **fail-open** (atviro gedimo)
-principu — prisotinus eilę arba suėjus laiko limitui, užklausa leidžiama be vietos,
-o niekada neatmetama, jei ji apskritai gali būti išsiųsta. Perjungiama
-**Nustatymai → Atsparumas → Kvotų dalijimosi lygiagretumo riba pagal prisijungimą**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled`, pagal numatymą įjungta).
-Be `max_concurrent` ribos elgsena nepakitusi.
+Kai kvotos pasidalijimo siuntimas nukreipiamas į ryšį, kuris deklaruoja teigiamą `max_concurrent`, tuo pačiu metu pateikiamos užklausos** sąskaitą** yra suskirstyti per kiekvieno ryšio semaforą (raktas `qsconn:<connectionId>`): perteklinės užklausos** laukti eilėje** užuot užtvindę sąskaitą. Tai yra** nesėkmingas** — užpildyta eilė arba skirtasis laikas tęsiasi be tarpo, o ne kada nors atmetus siunčiamą užklausą. Įjungti** Parametrai → Atsparumas → Kvotos dalies vieno ryšio lygiagretumas** (`resilienceSettings.quotaShareConcurrencyLimit.enabled`, numatytasis įjungtas). Be `max_concurrent` ribos elgesys nesikeičia.
 
-> Pats kvotų dalijimosi maršruto šliuzas (`selectQuotaShareTarget`, DRR + P2C) taip pat
-> yra fail-open ir tik _sumažina prioritetą_ ribą pasiekusiam prisijungimui — turint
-> vieno prisijungimo telkinį jis negali riboti griežtai, todėl būtent šis semaforas
-> realiai sulaiko antvandį.
+> Kvotos pasidalijimo maršruto parinkimo vartai (`selectQuotaShareTarget`, DRR + P2C) pats savaime yra neatidarytas ir tik _atima pirmenybę_ didelės apimties ryšiui — su vieno ryšio telkiniu, kurio negali griežtai apriboti, todėl šis semaforas iš tikrųjų yra potvynis.
 
-### Į atvėsimą reaguojantis kombinacijų pakartotinis bandymas
+### Kombinuotas atšalimo bandymas dar kartą
 
-Kiekvienai kombinacijos strategijai (kai funkcija įjungta) užklausa, kuri sukristalizuotų 429
-klaidą dėl TRUMPO laikino atvėsimo, jį palaukia ir yra išsiunčiama iš naujo, užuot
-grąžinusi 429 — tai apima Gemini klasės TPM/RPM langus (~60 s retry-after)
-kelių modelių kombinacijose, pvz., kai abu dviejų modelių kombinacijos taikiniai
-atsitrenkia į konkretaus modelio dažnio ribą. Ribojama `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
-`budgetMs`) skiltyje **Nustatymai → Atsparumas**. Jis niekada nelaukia dėl `quota_exhausted`
-(užrakinta iki vidurnakčio) arba autentifikavimo / „nerasta" (not-found) priežasčių.
+Kiekvienoje kombinuotojo strategijoje (jei įjungta) užklausa, kuri išryškintų 429 SHORT trumpalaikiam atšalimui, laukia ir išsiunčiama iš naujo, o ne grąžina 429 — tai apima Dvynių klasės TPM/RPM langus (~ 60s rery-af) kelių modelių kombinacijose, pvz., pasiekia 2 modelio taikinių ribas. Apribota `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`)** Nustatymai → Atsparumas** . Jis niekada nelaukia `quota_exhausted` (užrakintas iki vidurnakčio) arba auth/not-found priežasčių.
 
-Tas pats šliuzas apima ir prieš išsiuntimą esantį atvejį (#16319): kai visi
-kombinacijos taikiniai praleidžiami dar prieš bet kokį bandymą, nes jų modelis yra trumpame
-laikiname užrakte, kelias be bandymų palaukia užrakto pabaigos pagal tas pačias
-lubas ir išsiunčia iš naujo, užuot atsakęs be užuominų
-`503 ALL_TARGETS_SKIPPED`. Kai laukti neleidžiama (pasiektos lubos, išsemti bandymai
-ar biudžetas arba funkcija išjungta), galutinis atsakas pakeliamas į
-`429 rate_limit_error`, nešantį `retry_after` / `reset_at` iš ankstyviausio
-laikinio užrakto galiojimo pabaigos; kvotų, autentifikavimo ir „nerasta" užraktai
-išlaiko beužuomininį 503.
+Kombinuotame variante galima atsisakyti su `config.comboCooldownWaitEnabled: false`. Tik pažodinis `false` išjungia šias bendrinamas kombinuotas laukimas (atšalimas po išsiuntimo ir circuit-open/model-lock laukimas prieš išsiuntimą) ir jų laukimo biudžeto skirtojo laiko pratęsimas. Trūksta arba `true` išsaugo pasaulinę politiką; `true` negali įjungti visuotinai išjungto laukimo. Aiškus `targetTimeoutMs` vis tiek laimi. Šis atsisakymas nekeičia atskiro vietinio kodo pasukimo laukimo prieš išsiuntimą.
+
+Tie patys vartai dengia išankstinį išsiuntimo atvejį (#16319): kai kiekvienas kombinacijos taikinys praleidžiamas prieš bet kokį bandymą, nes jo modelis yra trumpame laikiname blokavime, nulinio bandymo kelias laukia užrakinimo po tomis pačiomis lubomis ir išsiunčiamas iš naujo, užuot atsakęs į be užuominų `503 ALL_TARGETS_SKIPPED`. Kai laukti neleidžiama (lubos, bandymas ar biudžetas išnaudotas arba funkcija išjungta), terminalo atsakas atnaujinamas į `429 rate_limit_error` pernešantį `retry_after` / `reset_at` nuo anksčiausio pereinamojo užrakto galiojimo pabaigos; kvota, autentifikavimas ir nerasta užraktai išlaiko užuominą be užuominų 503.
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)

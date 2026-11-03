@@ -612,41 +612,41 @@ Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabel
 <details>
 <summary><b>Bekijk alle beschikbare modellen</b></summary>
 
-> De onderstaande lijst is samengesteld uit `open-sse/config/providerRegistry.ts` voor v3.8.0. Cloudcatalogi (Gemini, OpenRouter, enz.) worden dynamisch gesynchroniseerd — open voor de volledige live-catalogus **Dashboard → Providers → [provider] → Beschikbare modellen** of roep `GET /api/models/catalog` aan.
+> De onderstaande lijst is samengesteld vanuit `open-sse/config/providerRegistry.ts` voor v3.8.0. Cloudcatalogi (Gemini, OpenRouter, etc.) worden dynamisch — gesynchroniseerd zodat de volledige live catalogus open is** Dashboard → Providers → [provider] → Beschikbare modellen** of bel `GET /api/models/catalog`.
 >
-> Als de ingebouwde lijst van een provider is verouderd, gebruik dan **Importeren vanaf /models** op die pagina (of schakel **Auto-Sync** in) om de live upstream-catalogus op te halen. Dit is geverifieerd in v3.8.50 voor LLM7.io (`gemini-3.1-flash-lite`) en UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonieme toegang tot Pollinations bleef tijdens dezelfde testronde aan de upstream-kant beperkt.
+> Als de ingebouwde lijst van een provider is verschoven, gebruik dan** Importeren uit /modellen** op die pagina (of enable** Automatische synchronisatie** ) om de live upstream-catalogus op te halen. Dit werd geverifieerd in v3.8.50 voor LLM7.io (`gemini-3.1-flash-lite`) en UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); De anonieme toegang tot bestuivingen bleef stroomopwaarts beperkt tijdens dezelfde test.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude -code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort-niveaus: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ -inspanningsniveaus: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — GRATIS OAuth: gebruik de live-catalogus onder **Dashboard → Providers → Kiro → Beschikbare modellen**. De beschikbaarheid hangt af van het account en het abonnement.
+**Kiro (`kr/`)** — FREE OAuth: gebruik de live catalogus hieronder** Dashboard → Providers → Kiro → Beschikbare modellen** . Beschikbaarheid is afhankelijk van het account en abonnement.
 
-**Qoder (`if/`)** — GRATIS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — FREE OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mnd vast tarief of per gebruik: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mo plat of per gebruik: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API-sleutel: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API sleutel: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Ultrasnel: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok-native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-gehost: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — de EU gehost: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Zoekverrijkt: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Verbijstering (`pplx/`)** — Zoek-uitgebreid: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Snelle inferentie: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Snelle gevolgtrekking: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Waferschaal: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-gericht: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
@@ -654,13 +654,13 @@ Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabel
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
-**Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
+**Ollama -wolk (`ollama-cloud/`)** : `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Live gesynchroniseerd per API-sleutel van Google — geen statische lijst. Koppel een sleutel in **Dashboard → Providers** en gebruik daarna **Beschikbare modellen** om de actuele catalogus te importeren (bijv. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Wolk `gemini/`)** : Live gesynchroniseerd per API sleutel van Google — geen statische lijst. Sluit een sleutel aan** Dashboard → aanbieders** gebruik dan** Beschikbare modellen** om de huidige catalogus te importeren (bijvoorbeeld `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Andere compatibele providers** (selectie): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough-catalogus), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Elk beheert zijn eigen modellijst in `providerRegistry.ts` en kan automatisch worden gesynchroniseerd wanneer de provider een `/models`-endpoint beschikbaar stelt.
+**Andere compatibele providers** (geselecteerd): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough-catalogus), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Elk onderhoudt zijn eigen modellijst in `providerRegistry.ts` en kan automatisch worden gesynchroniseerd wanneer de provider een `/models` eindpunt openbaar maakt.
 
-**Opmerking over model-ID's:** OmniRoute gebruikt provider-native ID's (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Sommige ID's bevatten versies met punten, omdat de upstream-API ze zo verwacht. Als een model hierboven niet vermeld staat, voer dan `omniroute models --search <term>` uit of gebruik `GET /api/models/catalog` om de beschikbaarheid te bevestigen.
+**Opmerking over model IDs:** OmniRoute gebruikt provider-native IDs (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Sommige IDs bevatten gestippelde versies, omdat de stroomopwaartse API ze zo verwacht. Als een model hierboven niet wordt vermeld, voert u `omniroute models --search <term>` uit of drukt u op `GET /api/models/catalog` om de beschikbaarheid te bevestigen.
 
 </details>
 
