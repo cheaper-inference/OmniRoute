@@ -170,7 +170,7 @@ test("observer passes identity into the producer and uses its canonical receipt"
   assert.match(source, /runGateProcess\(cmd, cmdArgs, \{\s*receiptIdentity,/);
   assert.match(
     source,
-    /const receiptIdentity = \{\s*invocationId,\s*\.\.\.\(packPhase \? \{ packPhase \} : \{\}\),\s*\.\.\.\(unitDiagnostics \? \{ unitDiagnostics \} : \{\}\),\s*\};/
+    /const receiptIdentity = \{\s*invocationId,\s*\.\.\.\(packPhase \? \{ packPhase \} : \{\}\),\s*\.\.\.\(unitDiagnostics \? \{ unitDiagnostics \} : \{\}\),\s*\.\.\.\(integrationDiagnostics \? \{ integrationDiagnostics \} : \{\}\),\s*\};/
   );
   assert.match(
     source,

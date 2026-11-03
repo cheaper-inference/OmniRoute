@@ -134,7 +134,7 @@ test("an abnormal lint exit cannot hide behind valid-looking JSON", () =>
     assert.notEqual(result.status, 0, result.stdout + result.stderr);
   }));
 
-function observe(lintOutput, lintCode = 0, collectionCode = 0) {
+function observe(lintOutput, lintCode = 0, collectionCode = 0, diagnosticOutput = "") {
   return fixture(({ dir, executable, execute }) => {
     mkdirSync(join(dir, ".github/workflows"), { recursive: true });
     const aliases = ["quality:collect", "quality:ratchet", "check:fixture-a", "check:fixture-b"];
@@ -182,7 +182,16 @@ function observe(lintOutput, lintCode = 0, collectionCode = 0) {
       "bin/git",
       `console.log(process.argv.at(-1) === "${baseSha}^{commit}" ? "${baseSha}" : "${sha}");`
     );
-    executable("bin/npx", `console.log(${JSON.stringify(lintOutput)}); process.exit(${lintCode});`);
+    executable(
+      "bin/npx",
+      `
+      const outputIndex = process.argv.indexOf("--output-file");
+      if(outputIndex < 0 || !process.argv[outputIndex + 1]) process.exit(33);
+      require("node:fs").writeFileSync(process.argv[outputIndex + 1], ${JSON.stringify(lintOutput)});
+      console.log(${JSON.stringify(diagnosticOutput)});
+      process.exit(${lintCode});
+    `
+    );
     executable(
       "bin/npm",
       `
@@ -229,6 +238,23 @@ test("the observer gives metrics its own completed lint report, overriding stale
   assert.equal(result.invoked, true);
   assert.equal(result.ratchetInvoked, true);
   assert.equal(result.report.checks.find((check) => check.id === "quality:collect").ok, true);
+});
+
+test("observer lint diagnostics cannot corrupt the separate completed report", () => {
+  const result = observe(JSON.stringify(report), 0, 0, "[diagnostic] formatter startup notice");
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.invoked, true);
+  assert.equal(result.ratchetInvoked, true);
+  assert.equal(result.report.checks.find((check) => check.id === "quality:collect").ok, true);
+});
+
+test("valid-looking stdout cannot replace an empty observer lint report", () => {
+  const result = observe("", 0, 0, JSON.stringify(report));
+  assert.equal(result.status, 1);
+  assert.equal(result.invoked, false, "stdout must not replace the selected report file");
+  assert.equal(result.ratchetInvoked, false, "old metrics cannot validate the current ratchet");
+  assert.equal(result.report.checks.find((check) => check.id === "lint-measurement").ok, false);
+  assert.equal(result.report.checks.find((check) => check.id === "quality:collect").ok, false);
 });
 
 for (const [output, code] of [

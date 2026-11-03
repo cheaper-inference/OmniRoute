@@ -31,7 +31,12 @@ function snapshotReceiptIdentity(value) {
   const sha = (input) => typeof input === "string" && /^[0-9a-f]{40}$/.test(input);
   const positiveInteger = (input) => Number.isSafeInteger(input) && input > 0;
   const runNumber = (input) => typeof input === "string" && /^[1-9][0-9]*$/.test(input);
-  const identity = fields(value, ["invocationId"], ["packPhase", "unitDiagnostics"]);
+  const identity = fields(
+    value,
+    ["invocationId"],
+    ["packPhase", "unitDiagnostics", "integrationDiagnostics"]
+  );
+  if (identity.unitDiagnostics && identity.integrationDiagnostics) invalid();
   if (
     typeof identity.invocationId !== "string" ||
     !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
@@ -71,8 +76,12 @@ function snapshotReceiptIdentity(value) {
       invalid();
     identity.packPhase = phase;
   }
-  if (Object.hasOwn(identity, "unitDiagnostics")) {
-    const unit = fields(identity.unitDiagnostics, [
+  for (const [key, directory] of [
+    ["unitDiagnostics", ".artifacts/unit-progress"],
+    ["integrationDiagnostics", ".artifacts/integration-progress"],
+  ]) {
+    if (!Object.hasOwn(identity, key)) continue;
+    const unit = fields(identity[key], [
       "schemaVersion",
       "evidenceState",
       "invocationId",
@@ -85,11 +94,11 @@ function snapshotReceiptIdentity(value) {
       unit.evidenceState !== "UNVALIDATED" ||
       unit.invocationId !== identity.invocationId ||
       (unit.checkoutSha !== null && !sha(unit.checkoutSha)) ||
-      unit.directory !== ".artifacts/unit-progress" ||
+      unit.directory !== directory ||
       unit.memberPattern !== `*-${identity.invocationId}-*.jsonl`
     )
       invalid();
-    identity.unitDiagnostics = unit;
+    identity[key] = unit;
   }
   return identity;
 }

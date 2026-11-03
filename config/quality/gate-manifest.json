@@ -585,12 +585,12 @@
     },
     {
       "name": "test:integration",
-      "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 tests/integration/*.test.ts \"tests/integration/combo-matrix/*.test.ts\"",
+      "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 --test-reporter=spec --test-reporter=./scripts/ci/integration-progress-reporter.mjs --test-reporter-destination=stdout --test-reporter-destination=stderr tests/integration/*.test.ts \"tests/integration/combo-matrix/*.test.ts\"",
       "disposition": "separately-invoked"
     },
     {
       "name": "test:integration:ci",
-      "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 --test-shard=$TEST_SHARD tests/integration/*.test.ts \"tests/integration/combo-matrix/*.test.ts\"",
+      "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 --test-shard=$TEST_SHARD --test-reporter=spec --test-reporter=./scripts/ci/integration-progress-reporter.mjs --test-reporter-destination=stdout --test-reporter-destination=stderr tests/integration/*.test.ts \"tests/integration/combo-matrix/*.test.ts\"",
       "disposition": "separately-invoked"
     },
     {

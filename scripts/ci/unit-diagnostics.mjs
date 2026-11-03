@@ -95,6 +95,42 @@ export function unitSourcePath(value, cwd) {
     : null;
 }
 
+/** Only the two existing integration globs; unrelated nested/live suites stay excluded. */
+export function integrationSourcePath(value, cwd) {
+  if (typeof value !== "string" || /[\0\r\n]/.test(value)) return null;
+  const file = relative(cwd, resolve(cwd, value)).split(sep).join("/");
+  return /^tests\/integration\/(?:combo-matrix\/)?[\w.-]+\.test\.ts$/.test(file) ? file : null;
+}
+
+export function integrationDiagnosticIdentity(environment) {
+  const invocationId = environment.OMNIROUTE_INTEGRATION_INVOCATION_ID || "";
+  const checkoutSha = environment.OMNIROUTE_INTEGRATION_CHECKOUT_SHA || "";
+  return {
+    invocationId: /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(
+      invocationId
+    )
+      ? invocationId
+      : null,
+    checkoutSha: /^[0-9a-f]{40}$/.test(checkoutSha) ? checkoutSha : null,
+  };
+}
+
+/** Diagnostic locator only; the command exit and complete shard set still decide the gate. */
+export function integrationDiagnosticReference(args, invocationId, checkoutSha) {
+  if (args.length !== 2 || args[0] !== "run" || args[1] !== "test:integration:ci") return null;
+  const identity = integrationDiagnosticIdentity({
+    OMNIROUTE_INTEGRATION_INVOCATION_ID: invocationId,
+    OMNIROUTE_INTEGRATION_CHECKOUT_SHA: checkoutSha,
+  });
+  return {
+    schemaVersion: 2,
+    evidenceState: "UNVALIDATED",
+    ...identity,
+    directory: ".artifacts/integration-progress",
+    memberPattern: identity.invocationId ? `*-${identity.invocationId}-*.jsonl` : null,
+  };
+}
+
 const integer = (value, minimum = 0) =>
   Number.isSafeInteger(value) && value >= minimum ? value : null;
 
@@ -115,6 +151,14 @@ export function cumulativeSummary(data) {
 
 /** Projects only location, enum codes and counters. Never examines test names or error text. */
 export function createUnitDiagnostics(cwd) {
+  return createDiagnostics(cwd, unitSourcePath);
+}
+
+export function createIntegrationDiagnostics(cwd) {
+  return createDiagnostics(cwd, integrationSourcePath);
+}
+
+function createDiagnostics(cwd, sourcePath) {
   let failureEvents = 0;
   let retainedFailures = 0;
   let summary = null;
@@ -131,8 +175,8 @@ export function createUnitDiagnostics(cwd) {
       if (event.type !== "test:complete" || event.data?.details?.passed !== false) return null;
       failureEvents++;
       const data = event.data;
-      const sourceFile = unitSourcePath(data.file, cwd);
-      const file = unitSourcePath(data.entryFile, cwd) || sourceFile;
+      const sourceFile = sourcePath(data.file, cwd);
+      const file = sourcePath(data.entryFile, cwd) || sourceFile;
       if (!file || retainedFailures >= FAILURE_LIMIT) return null;
       const error = own(data.details, "error");
       const cause = own(error, "cause");
