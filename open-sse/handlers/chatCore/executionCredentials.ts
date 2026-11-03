@@ -75,6 +75,21 @@ function applyKimiExecutionMetadata(
   );
 }
 
+/** Claude Messages `output_config.effort`; blank or non-string values do not count. */
+function claudeOutputEffort(requestBody: Record<string, unknown> | undefined): string | undefined {
+  const outputConfig = requestBody?.output_config;
+  if (!outputConfig || typeof outputConfig !== "object") return undefined;
+  const effort = (outputConfig as Record<string, unknown>).effort;
+  return typeof effort === "string" && effort.trim() ? effort : undefined;
+}
+
+/** OpenAI Responses `reasoning.effort`. */
+function nestedReasoningEffort(requestBody: Record<string, unknown> | undefined): unknown {
+  const reasoning = requestBody?.reasoning;
+  if (!reasoning || typeof reasoning !== "object") return undefined;
+  return (reasoning as Record<string, unknown>).effort;
+}
+
 /** Catalog reasoning metadata for the Codex executor (discovered tiers + the caller's raw effort). */
 function buildCodexThinkingMetadata(
   provider: string | null | undefined,
@@ -82,20 +97,8 @@ function buildCodexThinkingMetadata(
   requestBody: Record<string, unknown> | undefined
 ): Record<string, unknown> | null {
   if (provider !== "codex" || !Array.isArray(modelInfo?.supportedThinkingEfforts)) return null;
-  const outputConfig = requestBody?.output_config;
-  const reasoning = requestBody?.reasoning;
-  const claudeEffort =
-    outputConfig &&
-    typeof outputConfig === "object" &&
-    "effort" in outputConfig &&
-    typeof outputConfig.effort === "string" &&
-    outputConfig.effort.trim()
-      ? outputConfig.effort
-      : undefined;
-  const nestedEffort =
-    reasoning && typeof reasoning === "object" && "effort" in reasoning
-      ? reasoning.effort
-      : undefined;
+  const claudeEffort = claudeOutputEffort(requestBody);
+  const nestedEffort = nestedReasoningEffort(requestBody);
   const requestedThinkingEffort = claudeEffort ?? nestedEffort ?? requestBody?.reasoning_effort;
   return {
     model: modelInfo.model,
