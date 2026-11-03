@@ -66,6 +66,7 @@ const ROUTE_LIMITS: BodySizeRule[] = [
   { prefix: "/api/v1/responses", limit: MAX_BODY_BYTES_LLM_API },
   { prefix: "/api/v1/images", limit: MAX_BODY_BYTES_MEDIA },
   { prefix: "/api/v1/videos", limit: MAX_BODY_BYTES_MEDIA },
+  { prefix: "/api/v1/fal/run", limit: MAX_BODY_BYTES_MEDIA },
   { prefix: "/api/v1/audio/transcriptions", limit: MAX_BODY_BYTES_AUDIO },
   { prefix: "/api/v1/files", limit: MAX_BODY_BYTES_FILE },
 ];

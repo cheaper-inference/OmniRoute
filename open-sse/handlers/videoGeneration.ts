@@ -298,7 +298,15 @@ export async function handleVideoGeneration({
   }
 
   if (providerConfig.format === "fal-ai-video") {
-    return handleFalVideoGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleFalVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "google-flow") {

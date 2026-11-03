@@ -129,7 +129,15 @@ export async function handleMusicGeneration({ body, credentials, log, signal = n
   }
 
   if (providerConfig.format === "fal-ai-music") {
-    return handleFalMusicGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleFalMusicGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "elevenlabs-music") {

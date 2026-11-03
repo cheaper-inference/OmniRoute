@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Card, Button, CardSkeleton } from "@/shared/components";
+import FalNativePanel from "./components/FalNativePanel";
 import ProviderTosNotice from "@/shared/components/ProviderTosNotice";
 import {
   NOAUTH_PROVIDERS,
@@ -792,6 +793,12 @@ export default function ProviderDetailPageClient() {
         </Card>
       )}
       {isUpstreamProxyProvider && <UpstreamProxyCard t={t} />}
+      {providerId === "fal-ai" && (
+        <FalNativePanel
+          key={selectedConnection?.id ?? connections[0]?.id ?? "none"}
+          connectionId={selectedConnection?.id ?? connections[0]?.id ?? null}
+        />
+      )}
 
       {/* Models — hidden for search providers (they don't have models) */}
       {!isSearchProvider && !isUpstreamProxyProvider && (

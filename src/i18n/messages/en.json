@@ -15886,5 +15886,20 @@
     "greetingFallbackName": "there",
     "errNoReply": "⚠️ No reply from gateway.",
     "btnSend": "Send"
+  },
+  "falNative": {
+    "title": "Fal native models",
+    "description": "Discover an endpoint, load its schema, and run its documented inputs. Queue status and native streaming remain separate.",
+    "connectionRequired": "Add a Fal API key connection first.",
+    "category": "Category",
+    "endpoint": "Endpoint ID",
+    "reasoning": "Reasoning control",
+    "input": "Native JSON input (arrays retain their order)",
+    "transport": "Transport",
+    "run": "Run model",
+    "job": "Saved job ID",
+    "register": "Register endpoint or schema override",
+    "schema": "OpenAPI 3 schema",
+    "download": "Download artifact"
   }
 }

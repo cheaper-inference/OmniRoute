@@ -16018,6 +16018,143 @@ paths:
         "401": { description: Unauthorized }
         "404": { description: Team not found }
 
+  /api/v1/fal/models:
+    get:
+      tags: [Models]
+      summary: Discover Fal endpoints or load one endpoint's validated schema
+      security:
+        - BearerAuth: []
+      parameters:
+        - { in: query, name: endpoint_id, schema: { type: string } }
+        - { in: query, name: connection_id, schema: { type: string } }
+        - { in: query, name: q, schema: { type: string } }
+        - { in: query, name: category, schema: { type: string } }
+        - { in: query, name: cursor, schema: { type: string } }
+        - { in: query, name: limit, schema: { type: integer, minimum: 1 } }
+        - { in: query, name: refresh, schema: { type: boolean } }
+      responses:
+        "200": { description: Catalog page or endpoint schema and capabilities }
+        "400": { description: Invalid endpoint or schema }
+        "502": { description: Upstream discovery unavailable or incomplete }
+  /api/v1/fal/run:
+    post:
+      tags: [Providers]
+      summary: Execute validated native Fal model inputs
+      security:
+        - BearerAuth: []
+      parameters:
+        - {
+            in: header,
+            name: Idempotency-Key,
+            schema: { type: string },
+            description: Stable queue submission key,
+          }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [endpoint_id, input]
+              properties:
+                endpoint_id:
+                  {
+                    type: string,
+                    description: Canonical owner/app/subpath without gateway provider prefix,
+                  }
+                connection_id: { type: string }
+                transport: { type: string, enum: [queue, direct, stream, realtime], default: queue }
+                input: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: Native output and artifacts, or native SSE/realtime events }
+        "202": { description: Persisted queue job receipt with gateway tracking URLs }
+        "400": { description: Invalid inputs or undocumented transport }
+        "401": { description: Missing authentication or Fal credentials }
+        "403": { description: Model, endpoint or connection scope refused }
+        "429": { description: Rate, quota or budget limit }
+        "502":
+          {
+            description: Upstream failure; recover uncertain queue submissions with the same idempotency key,
+          }
+        "504": { description: Upstream wait timed out }
+  /api/v1/fal/jobs/{id}:
+    parameters:
+      - { in: path, name: id, required: true, schema: { type: string } }
+    get:
+      tags: [Providers]
+      summary: Poll a saved Fal job or retrieve its result without resubmission
+      security:
+        - BearerAuth: []
+      parameters:
+        - { in: query, name: result, schema: { type: boolean } }
+      responses:
+        "200": { description: Job status or completed native output and artifacts }
+        "202": { description: Submission outcome is still unknown }
+        "403": { description: Connection is outside the caller's scope }
+        "404": { description: Job not found or not owned by caller }
+    post:
+      tags: [Providers]
+      summary: Send one more validated input to an active Fal realtime WebSocket
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [input]
+              additionalProperties: false
+              properties:
+                input: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: Input sent; results arrive on the original native SSE connection }
+        "410": { description: Realtime session expired or belongs to another worker }
+        "429": { description: Rate, quota or budget limit }
+    delete:
+      tags: [Providers]
+      summary: Cancel a saved Fal job or close its realtime session
+      security:
+        - BearerAuth: []
+      responses:
+        "200": { description: Queued job cancelled or realtime socket closed }
+        "202": { description: Cancellation requested; upstream may still finish }
+        "409": { description: Upstream did not provide cancellation for this job }
+  /api/providers/{id}/fal:
+    parameters:
+      - { in: path, name: id, required: true, schema: { type: string } }
+    get:
+      tags: [Providers]
+      summary: Search Fal models or load a schema for a managed connection
+      responses:
+        "200": { description: Catalog page or validated endpoint schema }
+    put:
+      tags: [Providers]
+      summary: Register a validated native Fal endpoint or schema override
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [endpoint_id, openapi]
+              additionalProperties: false
+              properties:
+                endpoint_id: { type: string }
+                openapi: { type: object, additionalProperties: true }
+                metadata: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: Schema validated and saved with native execution path }
+        "400": { description: Invalid registration or input schema }
+    delete:
+      tags: [Providers]
+      summary: Remove a Fal endpoint override and cached schema
+      parameters:
+        - { in: query, name: endpoint_id, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Cached schema or override removed }
+
 components:
   securitySchemes:
     BearerAuth:

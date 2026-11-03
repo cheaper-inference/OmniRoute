@@ -1,4 +1,6 @@
 import { randomUUID } from "crypto";
+import { canonicalFalEndpoint, isLegacyFalEndpoint } from "../config/falEndpoint.ts";
+import { prepareFalCompatibility } from "@/lib/fal/compatibility";
 /** Image generation handler for POST /v1/images/generations (OpenAI-compatible). */
 
 import {
@@ -651,6 +653,7 @@ export async function handleImageGeneration({
       body,
       credentials,
       log,
+      signal,
     });
   }
 
@@ -1747,12 +1750,13 @@ async function handleFalAIImageGeneration({
   body,
   credentials,
   log,
+  signal,
 }) {
   const startTime = Date.now();
   const token = credentials.apiKey || credentials.accessToken;
-  const falModel = model.startsWith("fal-ai/") ? model : `fal-ai/${model}`;
+  const falModel = canonicalFalEndpoint(model);
   const { imageUrl, imageUrls } = extractImageInputs(body);
-  const upstreamBody: Record<string, unknown> = {
+  let upstreamBody: Record<string, unknown> = {
     prompt: body.prompt,
     sync_mode: body.sync_mode ?? true,
   };
@@ -1796,17 +1800,26 @@ async function handleFalAIImageGeneration({
   }
 
   try {
-    const response = await fetch(`${providerConfig.baseUrl.replace(/\/$/, "")}/${falModel}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Key ${token}`,
-      },
-      body: JSON.stringify(upstreamBody),
-    });
+    if (!isLegacyFalEndpoint(model) || body.fal_input !== undefined) {
+      upstreamBody = await prepareFalCompatibility(falModel, body, credentials, signal);
+    }
+    const response = await fetchWithTimeout(
+      `${providerConfig.baseUrl.replace(/\/$/, "")}/${falModel}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Key ${token}`,
+        },
+        body: JSON.stringify(upstreamBody),
+        signal,
+        redirect: "error",
+      }
+    );
 
     if (!response.ok) {
-      const errorText = await response.text();
+      await response.body?.cancel();
+      const errorText = `Fal image request failed (${response.status})`;
       if (log)
         log.error("IMAGE", `${provider} error ${response.status}: ${errorText.slice(0, 200)}`);
       return saveImageErrorResult({
@@ -1835,7 +1848,9 @@ async function handleFalAIImageGeneration({
     return saveImageErrorResult({
       provider,
       model,
-      status: 502,
+      status: /Invalid fal input|Unsupported fal|This fal endpoint/.test(String(err.message))
+        ? 400
+        : 502,
       startTime,
       error: `Image provider error: ${sanitizeErrorMessage((err as Error).message || err)}`,
     });

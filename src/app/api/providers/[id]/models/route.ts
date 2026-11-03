@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { FalClient } from "@omniroute/open-sse/handlers/fal/client";
+import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch";
 import {
   getProviderConnectionFamilyIds,
   isClaudeCodeCompatibleProvider,
@@ -295,6 +297,40 @@ export async function GET(
     const connectionId = typeof connection.id === "string" ? connection.id : id;
     const apiKey = typeof connection.apiKey === "string" ? connection.apiKey : "";
     const accessToken = typeof connection.accessToken === "string" ? connection.accessToken : "";
+    if (provider === "fal-ai") {
+      const falProxy = await resolveProxyForConnection(connectionId, undefined, "fal-ai");
+      const client = new FalClient(apiKey || accessToken, (url, init) =>
+        runWithProxyContext(falProxy.proxy, () => fetch(url, init))
+      );
+      const query = new URLSearchParams();
+      for (const field of ["q", "category", "cursor", "limit"]) {
+        const value = searchParams.get(field);
+        if (value !== null) query.set(field, value);
+      }
+      const page = await client.discover(query, request.signal);
+      const models = (
+        page.models as Array<{
+          endpoint_id: string;
+          metadata?: { display_name?: string; category?: string };
+        }>
+      ).map((model) => ({
+        id: model.endpoint_id,
+        name: model.metadata?.display_name || model.endpoint_id,
+        category: model.metadata?.category ?? null,
+        execution_path: "/v1/fal/run",
+        verification: "discovered",
+        capabilitySource: "fal-catalog",
+      }));
+      // Do not label a catalog-only entry as chat-compatible or schema-validated.
+      return buildResponse({
+        provider,
+        connectionId,
+        models,
+        source: "api",
+        next_cursor: page.next_cursor,
+        has_more: page.has_more,
+      });
+    }
     const codexDiscoveryMode =
       provider === "codex" ? getCodexDiscoveryMode(connection.providerSpecificData) : "off";
     const autoFetchModels =

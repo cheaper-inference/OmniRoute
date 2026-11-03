@@ -439,6 +439,8 @@ type PolicyValidationStage =
   "validateEndpointAccess" | "validateTeamUsage" | "validateQuotaAccess" | "validateModelAccess";
 
 export interface EnforceApiKeyPolicyOptions {
+  /** Existing fal jobs do not dispatch inference. Authorization still applies after spend limits. */
+  existingFalJob?: boolean;
   /**
    * Where the metered dollar budget is enforced for this request.
    *
@@ -527,8 +529,8 @@ function validateKeyStatus(context: PolicyContext): Response | null {
   return null;
 }
 
-async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Response | null> {
-  const { request, apiKeyInfo } = context;
+function validateKeyAccessSchedule(context: PolicyContext): Response | null {
+  const { apiKeyInfo } = context;
   if (apiKeyInfo.accessSchedule?.enabled && !isWithinSchedule(apiKeyInfo.accessSchedule)) {
     const { from, until, tz } = apiKeyInfo.accessSchedule;
     return errorResponse(
@@ -536,6 +538,13 @@ async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Resp
       `Access denied outside allowed hours (${from}–${until} ${tz})`
     );
   }
+  return null;
+}
+
+async function validateKeyScheduleAndUsage(context: PolicyContext): Promise<Response | null> {
+  const { request, apiKeyInfo } = context;
+  const schedule = validateKeyAccessSchedule(context);
+  if (schedule) return schedule;
   if (apiKeyInfo.usageLimitEnabled !== true) return null;
 
   try {
@@ -1074,6 +1083,20 @@ export async function enforceApiKeyPolicy(
   const context = { request, apiKey, apiKeyInfo, modelStr };
   const statusRejection = validateKeyStatus(context);
   if (statusRejection) return { apiKey, apiKeyInfo, rejection: statusRejection };
+  const canonicalPath = resolveCanonicalEndpointPath(new URL(request.url).pathname);
+  if (
+    options?.existingFalJob === true &&
+    ["GET", "DELETE"].includes(request.method) &&
+    /^\/v1\/fal\/jobs\/[a-zA-Z0-9-]+$/.test(canonicalPath)
+  ) {
+    // Retrieval/cancellation remains available after this job consumes the key's budget.
+    const rejection =
+      validateKeyAccessSchedule(context) ??
+      validateEndpointAccess(context) ??
+      (await validateQuotaAccess(context)) ??
+      (await validateModelAccess(context));
+    return { apiKey, apiKeyInfo, rejection };
+  }
   if (selfLoopScope.key) {
     return { apiKey, apiKeyInfo, rejection: await validateSelfLoopScopedAccess(context) };
   }

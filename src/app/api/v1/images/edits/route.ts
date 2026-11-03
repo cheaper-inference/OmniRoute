@@ -8,7 +8,6 @@ import {
 } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import {
   handleFalAIImageEdit,
-  FAL_IMAGE_EDIT_MAX_REFERENCES,
   isFalImageEditModel,
 } from "@omniroute/open-sse/handlers/imageGeneration/providers/fal.ts";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -107,6 +106,7 @@ export async function OPTIONS() {
 }
 
 interface EditInput {
+  options?: Record<string, unknown>;
   prompt: string;
   model: string | null;
   size: string | null;
@@ -131,6 +131,32 @@ function validateCodexReferencesForModel(
 }
 
 async function readMultipartImage(formData: FormData): Promise<EditInput> {
+  const options: Record<string, unknown> = {};
+  for (const [key, value] of formData.entries()) {
+    if (key === "image" || key === "image[]") continue;
+    if (typeof value === "string") {
+      if (
+        [
+          "n",
+          "seed",
+          "sync_mode",
+          "enable_thinking",
+          "enable_safety_checker",
+          "output_compression",
+          "fal_input",
+          "image_size",
+        ].includes(key)
+      ) {
+        try {
+          options[key] = JSON.parse(value);
+        } catch {
+          options[key] = value;
+        }
+      } else options[key] = value;
+    } else if (key === "mask") {
+      options.mask = `data:${value.type || "image/png"};base64,${Buffer.from(await value.arrayBuffer()).toString("base64")}`;
+    }
+  }
   const promptRaw = formData.get("prompt");
   const prompt = typeof promptRaw === "string" ? promptRaw.trim() : "";
   const modelRaw = formData.get("model");
@@ -155,6 +181,7 @@ async function readMultipartImage(formData: FormData): Promise<EditInput> {
   }
   const firstImage = images[0] ?? null;
   return {
+    options,
     prompt,
     model,
     size,
@@ -197,7 +224,8 @@ async function readEditInput(request: Request): Promise<EditInput | null> {
         log.warn("IMAGE", `Invalid JSON edit body shape: ${parsed.error.message}`);
         return null;
       }
-      return extractImageEditInputFromJson(parsed.data);
+      const extracted = extractImageEditInputFromJson(parsed.data);
+      return extracted ? { ...extracted, options: parsed.data } : null;
     } catch (err) {
       log.warn("IMAGE", `Invalid JSON edit body: ${err instanceof Error ? err.message : err}`);
       return null;
@@ -322,6 +350,7 @@ async function handleSyntxEditRequest(params: {
 
 /** Reference/prompt payload an edit dispatch needs, shared by single + combo paths. */
 interface ImageEditContext {
+  options?: Record<string, unknown>;
   prompt: string;
   size: string | null;
   responseFormat: string | null;
@@ -453,10 +482,16 @@ async function dispatchImageEditTarget(
       provider: parsed.provider,
       model: parsed.model,
       providerConfig,
-      body: { prompt, size: size ?? undefined, response_format: responseFormat ?? undefined, n: 1 },
+      body: {
+        ...ctx.options,
+        prompt,
+        size: size ?? undefined,
+        response_format: responseFormat ?? undefined,
+      },
       images,
       credentials: credentials as never,
       log,
+      signal: request.signal,
     })) as ImageComboDispatchResult;
   }
 
@@ -720,6 +755,7 @@ async function postHandler(request: Request, _context?: unknown) {
           ? comboPolicy.apiKeyInfo.allowedConnections
           : null;
       return executeImageEditCombo(fullModel, {
+        options: input.options,
         prompt,
         size,
         responseFormat,
@@ -771,7 +807,7 @@ async function postHandler(request: Request, _context?: unknown) {
       : providerConfig?.format === "codex-responses"
         ? Number.POSITIVE_INFINITY
         : providerConfig?.format === "fal-ai" && isFalImageEditModel(parsed.model)
-          ? FAL_IMAGE_EDIT_MAX_REFERENCES
+          ? Number.POSITIVE_INFINITY
           : MAX_NON_CODEX_IMAGE_EDIT_REFERENCES;
   if (providerConfig?.format !== "codex-responses" && imageInputCount > maxRefsForProvider) {
     return errorResponse(
@@ -924,14 +960,15 @@ async function postHandler(request: Request, _context?: unknown) {
           model: parsed.model,
           providerConfig,
           body: {
+            ...input.options,
             prompt,
             size: size ?? undefined,
             response_format: responseFormat ?? undefined,
-            n: 1,
           },
           images,
           credentials: credentials as Record<string, unknown>,
           log,
+          signal: request.signal,
         })
     );
 

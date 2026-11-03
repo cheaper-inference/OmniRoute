@@ -15886,5 +15886,20 @@
     "greetingFallbackName": "সেখানে",
     "errNoReply": "⚠️ গেটওয়ে থেকে কোনো উত্তর পাওয়া যায়নি।",
     "btnSend": "পাঠান"
+  },
+  "falNative": {
+    "title": "__MISSING__:Fal native models",
+    "description": "__MISSING__:Discover an endpoint, load its schema, and run its documented inputs. Queue status and native streaming remain separate.",
+    "connectionRequired": "__MISSING__:Add a Fal API key connection first.",
+    "category": "__MISSING__:Category",
+    "endpoint": "__MISSING__:Endpoint ID",
+    "reasoning": "__MISSING__:Reasoning control",
+    "input": "__MISSING__:Native JSON input (arrays retain their order)",
+    "transport": "__MISSING__:Transport",
+    "run": "__MISSING__:Run model",
+    "job": "__MISSING__:Saved job ID",
+    "register": "__MISSING__:Register endpoint or schema override",
+    "schema": "__MISSING__:OpenAPI 3 schema",
+    "download": "__MISSING__:Download artifact"
   }
 }
