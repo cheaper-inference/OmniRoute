@@ -172,6 +172,7 @@ export const AGGREGATOR_PROVIDER_IDS = new Set([
   "tokenharbor",
   "demonroute",
   "daoxe",
+  "gisoo",
 ]);
 
 export const ENTERPRISE_CLOUD_PROVIDER_IDS = new Set([

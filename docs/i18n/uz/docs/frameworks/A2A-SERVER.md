@@ -162,11 +162,11 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`-da o'rnatilgan 6 A2
 | Sog'liqni saqlash hisoboti | `health-report`      | Har bir provayder uchun avtomatik o'chirgich, sovutish, blokirovka holatini birlashtiradi                                                                        | salomatlik, chidamlilik         | "Barcha provayderlarning sog'lig'ini ko'rsatish"      |
 | Imkoniyatlar ro'yxati      | `list-capabilities`  | To‘liq 45 ta Agent Skills katalogini (23 API + 21 CLI + 1 konfiguratsiya) kontekstni kiritish uchun xom SKILL.md URLs bilan belgilash jadvali sifatida qaytaradi | katalog, kashfiyot, ko'nikmalar | "Barcha OmniRoute imkoniyatlarini sanab o'ting"       |
 
-> Agent kartasi jonli 377 provayder katalogiga mos holda saqlanishi kerak; provayderlar soni va free/no-auth metama'lumotlari ish vaqti registridan olingan.
+> Agent kartasi jonli 380 provayder katalogiga mos holda saqlanishi kerak; provayderlar soni va free/no-auth metama'lumotlari ish vaqti registridan olingan.
 
 ### `list-capabilities` mahorat tafsilotlari
 
-`list-capabilities` mahorati, ayniqsa API qo'ng'iroqlarini yuborishdan oldin OmniRoute nimani fosh qilishini bilishi kerak bo'lgan tashqi agentlar uchun foydalidir. U tuzilgan belgilash jadvali artefaktini qaytaradi:
+`list-capabilities` mahorati, ayniqsa API qo'ng'iroqlarini yuborishdan oldin OmniRoute nimani oshkor qilishini bilishi kerak bo'lgan tashqi agentlar uchun foydalidir. U tuzilgan belgilash jadvali artefaktini qaytaradi:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -196,17 +196,17 @@ JSON-RPC endpointi `/a2a` kanonik A2A kirish nuqtasidir. Quyidagi REST endpointl
 
 ---
 
-## Yangi ko‘nikma qo‘shish
+## Yangi mahorat qo'shish
 
-1. **Ko‘nikma faylini yarating:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Malaka faylini yarating:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` asinxron funksiyasini eksport qiling. `smartRouting.ts` kabi mavjud ko‘nikmalar tuzilishiga amal qiling.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` asinx funksiyasini eksport qilish. `smartRouting.ts` kabi mavjud ko'nikmalar shakliga rioya qiling.
 
-2. **Ishlov beruvchini ro‘yxatdan o‘tkazing:** `src/lib/a2a/taskExecution.ts` faylida `A2A_SKILL_HANDLERS` obyektiga yozuv qo‘shing:
+2. **Ro'yxatdan o'tish boshqaruvchisi:** `src/lib/a2a/taskExecution.ts` da `A2A_SKILL_HANDLERS` ga yozuv qo'shing:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...mavjud ko‘nikmalar
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -214,7 +214,7 @@ JSON-RPC endpointi `/a2a` kanonik A2A kirish nuqtasidir. Quyidagi REST endpointl
    };
    ```
 
-3. **Agent kartasida taqdim eting:** `src/lib/a2a/agentCardMetadata.ts` faylida (`/.well-known/agent.json` va `/.well-known/agent-card.json` tomonidan umumiy foydalaniladi) `skills` massiviga quyidagini qo‘shing:
+3. **Agent kartasida ochish:** `src/lib/a2a/agentCardMetadata.ts` da ( `/.well-known/agent.json` va `/.well-known/agent-card.json` tomonidan taqsimlangan), `skills` massiviga qo'shing:
 
    ```json
    {
@@ -226,9 +226,9 @@ JSON-RPC endpointi `/a2a` kanonik A2A kirish nuqtasidir. Quyidagi REST endpointl
    }
    ```
 
-4. **Testlar yozing:** `tests/unit/a2a-<your-skill>.test.ts`. Muvaffaqiyatli bajarilish va xatolik holatlarini qamrab oling.
+4. **Testlarni yozing:** `tests/unit/a2a-<your-skill>.test.ts`. Baxtli yo'l + xato yo'lini yoping.
 
-5. Ushbu fayldagi `Available Skills` jadvalida yangi ko‘nikmani **hujjatlashtiring**.
+5. **Hujjat** bu faylning `Available Skills` jadvalidagi yangi mahorat.
 
 ---
 

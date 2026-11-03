@@ -1,1 +1,0 @@
-- **feat(providers):** CodeBuddy CN now imports its authenticated live model catalog while keeping a registry fallback ([#17916](https://github.com/cheaper-inference/OmniRoute/pull/17916)) — thanks @AStupidBear
