@@ -680,6 +680,7 @@
       "tests/unit/combo-hedge-isolation.test.ts",
       "tests/unit/combo-target-stream-first-output.test.ts",
       "tests/unit/combo/connection-cooldown-expansion.test.ts",
+      "tests/unit/combo/quota-expansion-cooldown-17878.test.ts",
       "tests/unit/management-capability-routes-protected.test.ts",
       "tests/unit/management-writers-always-protected.test.ts",
       "tests/unit/opencode-410-model-scope.test.ts",
