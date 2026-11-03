@@ -1404,29 +1404,29 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
 
 <table>
   <tr><th align="center">Ipò</th><th align="left">Olùkópa</th><th align="center">Àwọn PR tí a Darapọ̀</th><th align="right">~Àwọn ìlà tí a yí padà</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>A ṣe ìkànìyàn náà ní 2026-10-18 15:09:09 UTC pẹ̀lú ipò ààyè tuntun <code>release/v3.8.52</code> <code>656f01cb43</code>. Ìkànìyàn GitHub GraphQL tí a pín sí ojú-ìwé ní àwọn PR tí a ti darapọ̀ 9,191 nínú rẹ̀: 3,834 láti ọ̀dọ̀ ẹni tó ni ibi ìpamọ́ náà, 229 láti ọ̀dọ̀ Dependabot, 6 láti ọ̀dọ̀ àwọn bot/app mìíràn, àti <b>àwọn PR láti òde 5,122 láti ọ̀dọ̀ àwọn olùkópa ọ̀tọ̀ọ̀tọ̀ 835</b>. “Àwọn ìlà tí a yí padà” jẹ́ àpapọ̀ àwọn àfikún àti ìyọkúrò GitHub, ó sì ní àwọn fáìlì tí a dá sílẹ̀ láìfọwọ́kọ, lockfiles, àwọn àkójọ, àwọn ìtumọ̀ àti àkọsílẹ̀ nínú; ó jẹ́ ìwọ̀n àyípadà, kì í ṣe LOC tí a kọ. Àwọn PR 49 ròyìn àwọn ìyàtọ̀ GitHub tó lé ní ìlà 500,000 (fún àpẹẹrẹ #13399, àfikún provider kan ṣoṣo, ṣàfihàn àwọn fáìlì tí a yí padà 2,347), èyí tó mú kí àwọn àpapọ̀ mélòó kan lókè pọ̀ ju bó ṣe yẹ lọ. Àwọn tó ní iye kan náà ni a fi sí ipò kan náà.</sub>
+<sub>A ṣe ìkànìyàn náà ní 2026-11-03 03:01:19 UTC pẹ̀lú ipò ààyè tuntun <code>release/v3.8.53</code> <code>05bc048d6c</code>. Ìkànìyàn GitHub GraphQL tí a pín sí ojú-ìwé ní àwọn PR tí a ti darapọ̀ 9,947 nínú rẹ̀: 4,130 láti ọ̀dọ̀ ẹni tó ni ibi ìpamọ́ náà, 240 láti ọ̀dọ̀ Dependabot, 6 láti ọ̀dọ̀ àwọn bot/app mìíràn, àti <b>àwọn PR láti òde 5,571 láti ọ̀dọ̀ àwọn olùkópa ọ̀tọ̀ọ̀tọ̀ 883</b>. “Àwọn ìlà tí a yí padà” jẹ́ àpapọ̀ àwọn àfikún àti ìyọkúrò GitHub, ó sì ní àwọn fáìlì tí a dá sílẹ̀ láìfọwọ́kọ, lockfiles, àwọn àkójọ, àwọn ìtumọ̀ àti àkọsílẹ̀ nínú; ó jẹ́ ìwọ̀n àyípadà, kì í ṣe LOC tí a kọ. Àwọn PR 53 ròyìn àwọn ìyàtọ̀ GitHub tó lé ní ìlà 500,000 (fún àpẹẹrẹ #13399, àfikún provider kan ṣoṣo, ṣàfihàn àwọn fáìlì tí a yí padà 2,347), èyí tó mú kí àwọn àpapọ̀ mélòó kan lókè pọ̀ ju bó ṣe yẹ lọ. Àwọn tó ní iye kan náà ni a fi sí ipò kan náà.</sub>
 
 ### Àwọn commit tí GitHub dá mọ̀ ẹni tó ṣe wọ́n
 
@@ -1437,14 +1437,14 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 Àwọn commit 367 tí GitHub fi mọ́ wọn</sub>
+      <sub>🥇 Àwọn commit 418 tí GitHub fi mọ́ wọn</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 Àwọn commit 269 tí GitHub fi mọ́ wọn</sub>
+      <sub>🥈 Àwọn commit 294 tí GitHub fi mọ́ wọn</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1454,6 +1454,13 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
       <sub>🥉 Àwọn commit 229 tí GitHub fi mọ́ wọn</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 Àwọn commit 222 tí GitHub fi mọ́ wọn</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1461,12 +1468,14 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
       <sub>🏅 Àwọn commit 202 tí GitHub fi mọ́ wọn</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 Àwọn commit 174 tí GitHub fi mọ́ wọn</sub>
+      <sub>🏅 Àwọn commit 134 tí GitHub fi mọ́ wọn</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1474,14 +1483,12 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
       </a><br/>
       <sub>🏅 Àwọn commit 126 tí GitHub fi mọ́ wọn</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 Àwọn commit 114 tí GitHub fi mọ́ wọn</sub>
+      <sub>🏅 Àwọn commit 115 tí GitHub fi mọ́ wọn</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1491,18 +1498,18 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
       <sub>🏅 Àwọn commit 108 tí GitHub fi mọ́ wọn</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 Àwọn commit 87 tí GitHub fi mọ́ wọn</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 Àwọn commit 70 tí GitHub fi mọ́ wọn</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 Àwọn commit 68 tí GitHub fi mọ́ wọn</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1514,7 +1521,7 @@ port kan, nítorí náà kò sí package CLI-nìkan lọ́tọ̀ ní báyìí.
   </tr>
 </table>
 
-<sub>A tún ṣàyẹ̀wò ní 2026-10-18 14:44:45 UTC: Àwọn commit tí GitHub fi mọ́ wọn gẹ́gẹ́ bí API àwọn Olùkópa ibi ìpamọ́ náà ṣe jùmọ̀ ròyìn fún ẹ̀ka àkọ́kọ́ <code>release/v3.8.52</code>. API náà dá àwọn ìdánimọ̀ 849 padà (àwọn aṣàmúlò 429, bot 2, aláìlórúkọ 418); tábìlì yìí kò fi olùtọ́jú, àwọn bot àti àwọn ìdánimọ̀ aláìlórúkọ sínú rẹ̀, ó sì dá àwọn tó dọ́gba nínú ìdíje dúró. Ó yàtọ̀ sí ìpele àwọn PR tí a ti darapọ̀ lókè àti ìkànìyàn metadata Git ní ìsàlẹ̀.</sub>
+<sub>A tún ṣàyẹ̀wò ní 2026-11-03 02:09:16 UTC: Àwọn commit tí GitHub fi mọ́ wọn gẹ́gẹ́ bí API àwọn Olùkópa ibi ìpamọ́ náà ṣe jùmọ̀ ròyìn fún ẹ̀ka àkọ́kọ́ <code>release/v3.8.53</code>. API náà dá àwọn ìdánimọ̀ 903 padà (àwọn aṣàmúlò 429, bot 2, aláìlórúkọ 472); tábìlì yìí kò fi olùtọ́jú, àwọn bot àti àwọn ìdánimọ̀ aláìlórúkọ sínú rẹ̀, ó sì dá àwọn tó dọ́gba nínú ìdíje dúró. Ó yàtọ̀ sí ìpele àwọn PR tí a ti darapọ̀ lókè àti ìkànìyàn metadata Git ní ìsàlẹ̀.</sub>
 
 > 🙏 Àwọn ẹ̀yà tí àwọn olùkópa wọ̀nyí ṣe, àwọn àtúnṣe àṣìṣe, àti àwọn ìmúdára amáyédẹrùn jẹ́ **apá pàtàkì** nínú ohun tó mú kí OmniRoute ṣeé gbára lé, tó sì kún fún àwọn ẹ̀yà. Gbogbo pull request, gbogbo ọ̀ràn ìdánwò, àti gbogbo fáìlì ìtumọ̀ i18n ṣe pàtàkì. Àwọn ènìyàn bíi tiwọn ni wọ́n ń kọ́ orísun ṣíṣí.
 

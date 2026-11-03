@@ -1394,29 +1394,29 @@ Kanonické metriky k 2026-10-18: **1.976 jedinečných videí** · **20.220.289 
 
 <table>
   <tr><th align="center">Poradie</th><th align="left">Prispievateľ</th><th align="center">Zlúčené PR</th><th align="right">~Zmenené riadky</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Sčítanie sa uskutočnilo 2026-10-18 15:09:09 UTC podľa aktuálnej špičky vetvy <code>release/v3.8.52</code> s identifikátorom <code>656f01cb43</code>. Stránkované sčítanie prostredníctvom GitHub GraphQL obsahuje 9,191 zlúčených PR: 3,834 od vlastníka repozitára, 229 od Dependabot, 6 od iných botov/aplikácií a <b>5,122 externých PR od 835 rôznych prispievateľov</b>. „Zmenené riadky“ predstavujú súčet pridaných a odstránených riadkov podľa GitHubu a zahŕňajú generované súbory, uzamykacie súbory, katalógy, preklady a dokumentáciu; ide o objem zmien, nie o autorské riadky kódu. Pri 49 PR uvádza GitHub rozdiely presahujúce 500,000 riadkov (napríklad #13399, pridanie jediného poskytovateľa, uvádza 2,347 zmenených súborov), čo nadhodnocuje niekoľko vyššie uvedených súčtov. Pri zhode majú prispievatelia rovnaké poradie.</sub>
+<sub>Sčítanie sa uskutočnilo 2026-11-03 03:01:19 UTC podľa aktuálnej špičky vetvy <code>release/v3.8.53</code> s identifikátorom <code>05bc048d6c</code>. Stránkované sčítanie prostredníctvom GitHub GraphQL obsahuje 9,947 zlúčených PR: 4,130 od vlastníka repozitára, 240 od Dependabot, 6 od iných botov/aplikácií a <b>5,571 externých PR od 883 rôznych prispievateľov</b>. „Zmenené riadky“ predstavujú súčet pridaných a odstránených riadkov podľa GitHubu a zahŕňajú generované súbory, uzamykacie súbory, katalógy, preklady a dokumentáciu; ide o objem zmien, nie o autorské riadky kódu. Pri 53 PR uvádza GitHub rozdiely presahujúce 500,000 riadkov (napríklad #13399, pridanie jediného poskytovateľa, uvádza 2,347 zmenených súborov), čo nadhodnocuje niekoľko vyššie uvedených súčtov. Pri zhode majú prispievatelia rovnaké poradie.</sub>
 
 ### Commity priradené službou GitHub
 
@@ -1427,14 +1427,14 @@ Kanonické metriky k 2026-10-18: **1.976 jedinečných videí** · **20.220.289 
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 commitov priradených službou GitHub</sub>
+      <sub>🥇 418 commitov priradených službou GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 commitov priradených službou GitHub</sub>
+      <sub>🥈 294 commitov priradených službou GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1444,6 +1444,13 @@ Kanonické metriky k 2026-10-18: **1.976 jedinečných videí** · **20.220.289 
       <sub>🥉 229 commitov priradených službou GitHub</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 222 commitov priradených službou GitHub</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1451,12 +1458,14 @@ Kanonické metriky k 2026-10-18: **1.976 jedinečných videí** · **20.220.289 
       <sub>🏅 202 commitov priradených službou GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 174 commitov priradených službou GitHub</sub>
+      <sub>🏅 134 commitov priradených službou GitHub</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1464,14 +1473,12 @@ Kanonické metriky k 2026-10-18: **1.976 jedinečných videí** · **20.220.289 
       </a><br/>
       <sub>🏅 126 commitov priradených službou GitHub</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 114 commitov priradených službou GitHub</sub>
+      <sub>🏅 115 commitov priradených službou GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1481,18 +1488,18 @@ Kanonické metriky k 2026-10-18: **1.976 jedinečných videí** · **20.220.289 
       <sub>🏅 108 commitov priradených službou GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 87 commitov priradených službou GitHub</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 70 commitov priradených službou GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 commitov priradených službou GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1504,7 +1511,7 @@ Kanonické metriky k 2026-10-18: **1.976 jedinečných videí** · **20.220.289 
   </tr>
 </table>
 
-<sub>Opätovne skontrolované 2026-10-18 14:44:45 UTC: commity priradené službou GitHub, ktoré API prispievateľov repozitára nahlásilo pre predvolenú vetvu <code>release/v3.8.52</code>. API vrátilo 849 identít (429 používateľov, 2 botov, 418 anonymných); táto tabuľka nezahŕňa správcu, botov ani anonymné identity a zachováva zhodné umiestnenia. Líši sa od vyššie uvedeného poradia zlúčených PR aj od nižšie uvedeného súpisu metadát Git.</sub>
+<sub>Opätovne skontrolované 2026-11-03 02:09:16 UTC: commity priradené službou GitHub, ktoré API prispievateľov repozitára nahlásilo pre predvolenú vetvu <code>release/v3.8.53</code>. API vrátilo 903 identít (429 používateľov, 2 botov, 472 anonymných); táto tabuľka nezahŕňa správcu, botov ani anonymné identity a zachováva zhodné umiestnenia. Líši sa od vyššie uvedeného poradia zlúčených PR aj od nižšie uvedeného súpisu metadát Git.</sub>
 
 > 🙏 Funkcie, opravy chýb a vylepšenia infraštruktúry od týchto prispievateľov sú **kľúčovou súčasťou** toho, vďaka čomu je OmniRoute spoľahlivý a bohatý na funkcie. Záleží na každej požiadavke na zlúčenie, každom testovacom prípade a každom súbore prekladu i18n. Softvér s otvoreným zdrojovým kódom vytvárajú ľudia ako oni.
 

@@ -1395,29 +1395,29 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
 
 <table>
   <tr><th align="center">Vieta</th><th align="left">Ieguldītājs</th><th align="center">Apvienotie PR</th><th align="right">~Mainītās rindas</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Uzskaite veikta 2026-10-18 15:09:09 UTC, izmantojot aktuālo <code>release/v3.8.52</code> galotnes komitu <code>656f01cb43</code>. GitHub GraphQL uzskaite ar lapošanu ietver 9,191 apvienotu PR: 3,834 no repozitorija īpašnieka, 229 no Dependabot, 6 no citiem botiem/lietotnēm un <b>5,122 ārējus PR no 835 dažādiem ieguldītājiem</b>. “Mainītās rindas” ir GitHub pievienoto un dzēsto rindu summa, kas ietver ģenerētus failus, bloķēšanas failus, katalogus, tulkojumus un dokumentāciju; tas ir izmaiņu apjoms, nevis autora rakstīto koda rindu skaits. 49 PR GitHub uzrāda atšķirības, kas pārsniedz 500,000 rindu (piemēram, #13399, viena nodrošinātāja pievienošana, uzskaita 2,347 mainītus failus), tādēļ vairāki iepriekš minētie kopskaiti ir palielināti. Vienādu rezultātu gadījumā tiek piešķirta viena un tā pati vieta.</sub>
+<sub>Uzskaite veikta 2026-11-03 03:01:19 UTC, izmantojot aktuālo <code>release/v3.8.53</code> galotnes komitu <code>05bc048d6c</code>. GitHub GraphQL uzskaite ar lapošanu ietver 9,947 apvienotu PR: 4,130 no repozitorija īpašnieka, 240 no Dependabot, 6 no citiem botiem/lietotnēm un <b>5,571 ārējus PR no 883 dažādiem ieguldītājiem</b>. “Mainītās rindas” ir GitHub pievienoto un dzēsto rindu summa, kas ietver ģenerētus failus, bloķēšanas failus, katalogus, tulkojumus un dokumentāciju; tas ir izmaiņu apjoms, nevis autora rakstīto koda rindu skaits. 53 PR GitHub uzrāda atšķirības, kas pārsniedz 500,000 rindu (piemēram, #13399, viena nodrošinātāja pievienošana, uzskaita 2,347 mainītus failus), tādēļ vairāki iepriekš minētie kopskaiti ir palielināti. Vienādu rezultātu gadījumā tiek piešķirta viena un tā pati vieta.</sub>
 
 ### GitHub attiecinātie komiti
 
@@ -1428,14 +1428,14 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 GitHub attiecināti komiti</sub>
+      <sub>🥇 418 GitHub attiecināti komiti</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 GitHub attiecināti komiti</sub>
+      <sub>🥈 294 GitHub attiecināti komiti</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1445,6 +1445,13 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
       <sub>🥉 229 GitHub attiecināti komiti</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 222 GitHub attiecināti komiti</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1452,12 +1459,14 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
       <sub>🏅 202 GitHub attiecināti komiti</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 174 GitHub attiecināti komiti</sub>
+      <sub>🏅 134 GitHub attiecināti komiti</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1465,14 +1474,12 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
       </a><br/>
       <sub>🏅 126 GitHub attiecināti komiti</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 114 GitHub attiecināti komiti</sub>
+      <sub>🏅 115 GitHub attiecināti komiti</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1482,18 +1489,18 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
       <sub>🏅 108 GitHub attiecināti komiti</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 87 GitHub attiecināti komiti</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 70 GitHub attiecināti komiti</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 GitHub attiecināti komiti</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1505,7 +1512,7 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
   </tr>
 </table>
 
-<sub>Atkārtoti pārbaudīts 2026-10-18 14:44:45 UTC: repozitorija līdzautoru API ziņotie GitHub attiecinātie komiti noklusējuma zaram <code>release/v3.8.52</code>. API atgrieza 849 identitātes (429 lietotājus, 2 robotus, 418 anonīmas identitātes); šajā tabulā nav iekļauts uzturētājs, roboti un anonīmās identitātes, bet ir saglabātas vienādas vietas reitingā. Tā atšķiras gan no iepriekš redzamā apvienoto izmaiņu pieprasījumu reitinga, gan no tālāk redzamās Git metadatu uzskaites.</sub>
+<sub>Atkārtoti pārbaudīts 2026-11-03 02:09:16 UTC: repozitorija līdzautoru API ziņotie GitHub attiecinātie komiti noklusējuma zaram <code>release/v3.8.53</code>. API atgrieza 903 identitātes (429 lietotājus, 2 robotus, 472 anonīmas identitātes); šajā tabulā nav iekļauts uzturētājs, roboti un anonīmās identitātes, bet ir saglabātas vienādas vietas reitingā. Tā atšķiras gan no iepriekš redzamā apvienoto izmaiņu pieprasījumu reitinga, gan no tālāk redzamās Git metadatu uzskaites.</sub>
 
 > 🙏 Šo līdzautoru funkcijas, kļūdu labojumi un infrastruktūras uzlabojumi ir **būtiska daļa** no tā, kas padara OmniRoute uzticamu un funkcijām bagātu. Ikviens izmaiņu pieprasījums, ikviens testa gadījums un ikviens i18n tulkojuma fails ir svarīgs. Atvērto pirmkodu veido tādi cilvēki kā viņi.
 

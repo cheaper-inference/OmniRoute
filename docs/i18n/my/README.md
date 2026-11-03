@@ -1397,29 +1397,29 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
 
 <table>
   <tr><th align="center">အဆင့်</th><th align="left">ပံ့ပိုးပါဝင်သူ</th><th align="center">Merge လုပ်ပြီးသော PR များ</th><th align="right">~ပြောင်းလဲထားသော စာကြောင်းများ</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>စာရင်းကောက်ယူမှုကို 2026-10-18 15:09:09 UTC တွင် လက်ရှိ <code>release/v3.8.52</code> tip <code>656f01cb43</code> ဖြင့် ပြုလုပ်ထားသည်။ စာမျက်နှာခွဲထားသော GitHub GraphQL စာရင်းကောက်ယူမှုတွင် merge လုပ်ပြီးသော PR 9,191 ခု ပါဝင်သည်။ ၎င်းတို့အနက် 3,834 ခုမှာ repository ပိုင်ရှင်ထံမှဖြစ်ပြီး၊ 229 ခုမှာ Dependabot မှ၊ 6 ခုမှာ အခြား bot/app များမှဖြစ်ကာ <b>ကွဲပြားသော ပံ့ပိုးပါဝင်သူ 835 ဦးထံမှ ပြင်ပ PR 5,122 ခု</b> ဖြစ်သည်။ “ပြောင်းလဲထားသော စာကြောင်းများ” ဆိုသည်မှာ GitHub ၏ ထည့်သွင်းမှုများ + ဖျက်ပယ်မှုများဖြစ်ပြီး ထုတ်လုပ်ဖန်တီးထားသော ဖိုင်များ၊ lockfile များ၊ catalog များ၊ ဘာသာပြန်များနှင့် စာတမ်းများ ပါဝင်သည်။ ၎င်းသည် ပြောင်းလဲမှုပမာဏဖြစ်ပြီး ရေးသားထားသော LOC မဟုတ်ပါ။ PR 49 ခုတွင် GitHub diff များသည် စာကြောင်း 500,000 ကျော်ရှိကြောင်း ဖော်ပြထားသည် (ဥပမာ #13399 တွင် provider တစ်ခုတည်း ထည့်သွင်းခြင်းအတွက် ပြောင်းလဲထားသောဖိုင် 2,347 ဖိုင်ကို စာရင်းပြုထားသည်)၊ ယင်းကြောင့် အထက်ပါ စုစုပေါင်းအချို့သည် မြင့်တက်သွားသည်။ တူညီသူများကို အဆင့်တူ သတ်မှတ်ထားသည်။</sub>
+<sub>စာရင်းကောက်ယူမှုကို 2026-11-03 03:01:19 UTC တွင် လက်ရှိ <code>release/v3.8.53</code> tip <code>05bc048d6c</code> ဖြင့် ပြုလုပ်ထားသည်။ စာမျက်နှာခွဲထားသော GitHub GraphQL စာရင်းကောက်ယူမှုတွင် merge လုပ်ပြီးသော PR 9,947 ခု ပါဝင်သည်။ ၎င်းတို့အနက် 4,130 ခုမှာ repository ပိုင်ရှင်ထံမှဖြစ်ပြီး၊ 240 ခုမှာ Dependabot မှ၊ 6 ခုမှာ အခြား bot/app များမှဖြစ်ကာ <b>ကွဲပြားသော ပံ့ပိုးပါဝင်သူ 883 ဦးထံမှ ပြင်ပ PR 5,571 ခု</b> ဖြစ်သည်။ “ပြောင်းလဲထားသော စာကြောင်းများ” ဆိုသည်မှာ GitHub ၏ ထည့်သွင်းမှုများ + ဖျက်ပယ်မှုများဖြစ်ပြီး ထုတ်လုပ်ဖန်တီးထားသော ဖိုင်များ၊ lockfile များ၊ catalog များ၊ ဘာသာပြန်များနှင့် စာတမ်းများ ပါဝင်သည်။ ၎င်းသည် ပြောင်းလဲမှုပမာဏဖြစ်ပြီး ရေးသားထားသော LOC မဟုတ်ပါ။ PR 53 ခုတွင် GitHub diff များသည် စာကြောင်း 500,000 ကျော်ရှိကြောင်း ဖော်ပြထားသည် (ဥပမာ #13399 တွင် provider တစ်ခုတည်း ထည့်သွင်းခြင်းအတွက် ပြောင်းလဲထားသောဖိုင် 2,347 ဖိုင်ကို စာရင်းပြုထားသည်)၊ ယင်းကြောင့် အထက်ပါ စုစုပေါင်းအချို့သည် မြင့်တက်သွားသည်။ တူညီသူများကို အဆင့်တူ သတ်မှတ်ထားသည်။</sub>
 
 ### GitHub က သတ်မှတ်ဖော်ပြထားသော commit များ
 
@@ -1430,14 +1430,14 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub က သတ်မှတ်ထားသော commit 367 ခု</sub>
+      <sub>🥇 GitHub က သတ်မှတ်ထားသော commit 418 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub က သတ်မှတ်ထားသော commit 269 ခု</sub>
+      <sub>🥈 GitHub က သတ်မှတ်ထားသော commit 294 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1447,6 +1447,13 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
       <sub>🥉 GitHub က သတ်မှတ်ထားသော commit 229 ခု</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 GitHub က သတ်မှတ်ထားသော commit 222 ခု</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1454,12 +1461,14 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
       <sub>🏅 GitHub က သတ်မှတ်ထားသော commit 202 ခု</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub က သတ်မှတ်ထားသော commit 174 ခု</sub>
+      <sub>🏅 GitHub က သတ်မှတ်ထားသော commit 134 ခု</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1467,14 +1476,12 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
       </a><br/>
       <sub>🏅 GitHub က သတ်မှတ်ထားသော commit 126 ခု</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub က သတ်မှတ်ထားသော commit 114 ခု</sub>
+      <sub>🏅 GitHub က သတ်မှတ်ထားသော commit 115 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1484,18 +1491,18 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
       <sub>🏅 GitHub က သတ်မှတ်ထားသော commit 108 ခု</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 GitHub က သတ်မှတ်ထားသော commit 87 ခု</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 GitHub က သတ်မှတ်ထားသော commit 70 ခု</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 GitHub က သတ်မှတ်ထားသော commit 68 ခု</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1507,7 +1514,7 @@ port တစ်ခုတည်းရှိ process တစ်ခုတည်းက
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTC တွင် ပြန်လည်စစ်ဆေးခဲ့သည်- repository Contributors API က <code>release/v3.8.52</code> မူလ branch အတွက် အစီရင်ခံထားသော GitHub က သတ်မှတ်သည့် commit များဖြစ်သည်။ API က identity 849 ခု (အသုံးပြုသူ 429 ဦး၊ bot 2 ခု၊ အမည်မသိ 418 ဦး) ကို ပြန်ပေးခဲ့သည်။ ဤဇယားတွင် ထိန်းသိမ်းသူ၊ bot များနှင့် အမည်မသိ identity များကို ဖယ်ထုတ်ထားပြီး အဆင့်တူသူများကို ဆက်လက်ထည့်သွင်းထားသည်။ ၎င်းသည် အထက်ပါ ပေါင်းစည်းပြီးသော PR အဆင့်သတ်မှတ်ချက်နှင့် အောက်ပါ Git metadata စာရင်းကောက်ယူမှု နှစ်ခုစလုံးမှ သီးခြားဖြစ်သည်။</sub>
+<sub>2026-11-03 02:09:16 UTC တွင် ပြန်လည်စစ်ဆေးခဲ့သည်- repository Contributors API က <code>release/v3.8.53</code> မူလ branch အတွက် အစီရင်ခံထားသော GitHub က သတ်မှတ်သည့် commit များဖြစ်သည်။ API က identity 903 ခု (အသုံးပြုသူ 429 ဦး၊ bot 2 ခု၊ အမည်မသိ 472 ဦး) ကို ပြန်ပေးခဲ့သည်။ ဤဇယားတွင် ထိန်းသိမ်းသူ၊ bot များနှင့် အမည်မသိ identity များကို ဖယ်ထုတ်ထားပြီး အဆင့်တူသူများကို ဆက်လက်ထည့်သွင်းထားသည်။ ၎င်းသည် အထက်ပါ ပေါင်းစည်းပြီးသော PR အဆင့်သတ်မှတ်ချက်နှင့် အောက်ပါ Git metadata စာရင်းကောက်ယူမှု နှစ်ခုစလုံးမှ သီးခြားဖြစ်သည်။</sub>
 
 > 🙏 ဤပံ့ပိုးကူညီသူများ၏ လုပ်ဆောင်ချက်အသစ်များ၊ bug ပြင်ဆင်မှုများနှင့် အခြေခံအဆောက်အအုံ မြှင့်တင်မှုများသည် OmniRoute ကို ယုံကြည်စိတ်ချရပြီး လုပ်ဆောင်ချက်စုံလင်စေသည့်အရာများ၏ **အဓိကအစိတ်အပိုင်း** ဖြစ်သည်။ pull request တိုင်း၊ test case တိုင်းနှင့် i18n ဘာသာပြန်ဖိုင်တိုင်းသည် အရေးပါသည်။ Open source ကို သူတို့ကဲ့သို့သော လူများက တည်ဆောက်ကြသည်။
 

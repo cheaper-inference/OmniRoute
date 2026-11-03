@@ -1403,29 +1403,29 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
 
 <table>
   <tr><th align="center">தரவரிசை</th><th align="left">பங்களிப்பாளர்</th><th align="center">ஒன்றிணைக்கப்பட்ட PR-கள்</th><th align="right">~மாற்றப்பட்ட வரிகள்</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>நேரடி <code>release/v3.8.52</code> முனை <code>656f01cb43</code>-ஐக் கொண்டு 2026-10-18 15:09:09 UTC அன்று கணக்கெடுப்பு மேற்கொள்ளப்பட்டது. பக்கங்களாகப் பிரிக்கப்பட்ட GitHub GraphQL கணக்கெடுப்பில் ஒன்றிணைக்கப்பட்ட 9,191 PR-கள் உள்ளன: களஞ்சிய உரிமையாளரால் 3,834, Dependabot-ஆல் 229, பிற bot/app-களால் 6 மற்றும் <b>835 தனித்துவமான பங்களிப்பாளர்களிடமிருந்து 5,122 வெளிப்புற PR-கள்</b>. “மாற்றப்பட்ட வரிகள்” என்பது GitHub சேர்த்தல்கள் + நீக்குதல்கள் ஆகும்; இதில் உருவாக்கப்பட்ட கோப்புகள், lockfile-கள், பட்டியல்கள், மொழிபெயர்ப்புகள் மற்றும் ஆவணங்கள் அடங்கும்; இது மாற்றங்களின் அளவே தவிர, எழுதப்பட்ட LOC அல்ல. 49 PR-கள் 500,000 வரிகளுக்கு அதிகமான GitHub diff-களைப் பதிவுசெய்கின்றன (எடுத்துக்காட்டாக #13399, ஒற்றை provider சேர்ப்பு, மாற்றப்பட்ட 2,347 கோப்புகளைப் பட்டியலிடுகிறது); இது மேலே உள்ள பல மொத்த எண்ணிக்கைகளை உயர்த்துகிறது. சமநிலைகள் ஒன்றாகத் தரவரிசைப்படுத்தப்படுகின்றன.</sub>
+<sub>நேரடி <code>release/v3.8.53</code> முனை <code>05bc048d6c</code>-ஐக் கொண்டு 2026-11-03 03:01:19 UTC அன்று கணக்கெடுப்பு மேற்கொள்ளப்பட்டது. பக்கங்களாகப் பிரிக்கப்பட்ட GitHub GraphQL கணக்கெடுப்பில் ஒன்றிணைக்கப்பட்ட 9,947 PR-கள் உள்ளன: களஞ்சிய உரிமையாளரால் 4,130, Dependabot-ஆல் 240, பிற bot/app-களால் 6 மற்றும் <b>883 தனித்துவமான பங்களிப்பாளர்களிடமிருந்து 5,571 வெளிப்புற PR-கள்</b>. “மாற்றப்பட்ட வரிகள்” என்பது GitHub சேர்த்தல்கள் + நீக்குதல்கள் ஆகும்; இதில் உருவாக்கப்பட்ட கோப்புகள், lockfile-கள், பட்டியல்கள், மொழிபெயர்ப்புகள் மற்றும் ஆவணங்கள் அடங்கும்; இது மாற்றங்களின் அளவே தவிர, எழுதப்பட்ட LOC அல்ல. 53 PR-கள் 500,000 வரிகளுக்கு அதிகமான GitHub diff-களைப் பதிவுசெய்கின்றன (எடுத்துக்காட்டாக #13399, ஒற்றை provider சேர்ப்பு, மாற்றப்பட்ட 2,347 கோப்புகளைப் பட்டியலிடுகிறது); இது மேலே உள்ள பல மொத்த எண்ணிக்கைகளை உயர்த்துகிறது. சமநிலைகள் ஒன்றாகத் தரவரிசைப்படுத்தப்படுகின்றன.</sub>
 
 ### GitHub-ஆல் குறிப்பிடப்பட்ட commit-கள்
 
@@ -1436,14 +1436,14 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub-இல் குறிப்பிடப்பட்ட 367 கமிட்கள்</sub>
+      <sub>🥇 GitHub-இல் குறிப்பிடப்பட்ட 418 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub-இல் குறிப்பிடப்பட்ட 269 கமிட்கள்</sub>
+      <sub>🥈 GitHub-இல் குறிப்பிடப்பட்ட 294 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1453,6 +1453,13 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
       <sub>🥉 GitHub-இல் குறிப்பிடப்பட்ட 229 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 222 கமிட்கள்</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1460,12 +1467,14 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
       <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 202 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 174 கமிட்கள்</sub>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 134 கமிட்கள்</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1473,14 +1482,12 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
       </a><br/>
       <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 126 கமிட்கள்</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 114 கமிட்கள்</sub>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 115 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1490,18 +1497,18 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
       <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 108 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 87 கமிட்கள்</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 70 கமிட்கள்</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 68 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1513,7 +1520,7 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTC அன்று மீண்டும் சரிபார்க்கப்பட்டது: இயல்புநிலைக் கிளையான <code>release/v3.8.52</code> கிளைக்காகக் களஞ்சியத்தின் Contributors API தெரிவித்த GitHub-இல் குறிப்பிடப்பட்ட கமிட்கள். API 849 அடையாளங்களைத் திருப்பியளித்தது (429 பயனர்கள், 2 போட்கள், 418 பெயரிலிகள்); இந்த அட்டவணை பராமரிப்பாளர், போட்கள் மற்றும் பெயரிலி அடையாளங்களைத் தவிர்த்து, சமநிலையான போட்டி நிலைகளைத் தக்கவைக்கிறது. இது மேலே உள்ள ஒன்றிணைக்கப்பட்ட-PR தரவரிசை மற்றும் கீழே உள்ள Git-மெட்டாடேட்டா கணக்கெடுப்பு ஆகிய இரண்டிலிருந்தும் வேறுபட்டது.</sub>
+<sub>2026-11-03 02:09:16 UTC அன்று மீண்டும் சரிபார்க்கப்பட்டது: இயல்புநிலைக் கிளையான <code>release/v3.8.53</code> கிளைக்காகக் களஞ்சியத்தின் Contributors API தெரிவித்த GitHub-இல் குறிப்பிடப்பட்ட கமிட்கள். API 903 அடையாளங்களைத் திருப்பியளித்தது (429 பயனர்கள், 2 போட்கள், 472 பெயரிலிகள்); இந்த அட்டவணை பராமரிப்பாளர், போட்கள் மற்றும் பெயரிலி அடையாளங்களைத் தவிர்த்து, சமநிலையான போட்டி நிலைகளைத் தக்கவைக்கிறது. இது மேலே உள்ள ஒன்றிணைக்கப்பட்ட-PR தரவரிசை மற்றும் கீழே உள்ள Git-மெட்டாடேட்டா கணக்கெடுப்பு ஆகிய இரண்டிலிருந்தும் வேறுபட்டது.</sub>
 
 > 🙏 இந்தப் பங்களிப்பாளர்களின் அம்சங்கள், பிழைத் திருத்தங்கள் மற்றும் உள்கட்டமைப்பு மேம்பாடுகள் OmniRoute-ஐ நம்பகமானதாகவும் அம்சங்கள் நிறைந்ததாகவும் ஆக்குவதில் ஒரு **முக்கிய அங்கமாகும்**. ஒவ்வொரு pull request-உம், ஒவ்வொரு சோதனை நிகழ்வும், ஒவ்வொரு i18n மொழிபெயர்ப்புக் கோப்பும் முக்கியமானவை. திறந்த மூல மென்பொருள் இவர்களைப் போன்றவர்களால் உருவாக்கப்படுகிறது.
 

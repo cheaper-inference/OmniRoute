@@ -1392,29 +1392,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
 
 <table>
   <tr><th align="center">순위</th><th align="left">기여자</th><th align="center">병합된 PR 수</th><th align="right">변경된 줄 수(약)</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>2026-10-18 15:09:09 UTC에 라이브 <code>release/v3.8.52</code> 최신 커밋 <code>656f01cb43</code>을 기준으로 집계했습니다. 페이지네이션된 GitHub GraphQL 집계에는 병합된 PR 9,191개가 포함되어 있습니다. 이 중 3,834개는 저장소 소유자, 229개는 Dependabot, 6개는 기타 봇/앱이 생성했으며, <b>서로 다른 기여자 835명이 제출한 외부 PR은 5,122개입니다</b>. “변경된 줄 수”는 GitHub의 추가 줄 수와 삭제 줄 수의 합계이며 생성된 파일, 잠금 파일, 카탈로그, 번역 및 문서를 포함합니다. 이는 변경량이지 작성된 LOC가 아닙니다. 49개 PR의 GitHub diff가 500,000줄을 초과하는 것으로 보고되며(예: 단일 프로바이더 추가 PR인 #13399에는 변경된 파일 2,347개가 표시됨), 이로 인해 위의 여러 합계가 부풀려졌습니다. 동점자는 같은 순위로 표시됩니다.</sub>
+<sub>2026-11-03 03:01:19 UTC에 라이브 <code>release/v3.8.53</code> 최신 커밋 <code>05bc048d6c</code>을 기준으로 집계했습니다. 페이지네이션된 GitHub GraphQL 집계에는 병합된 PR 9,947개가 포함되어 있습니다. 이 중 4,130개는 저장소 소유자, 240개는 Dependabot, 6개는 기타 봇/앱이 생성했으며, <b>서로 다른 기여자 883명이 제출한 외부 PR은 5,571개입니다</b>. “변경된 줄 수”는 GitHub의 추가 줄 수와 삭제 줄 수의 합계이며 생성된 파일, 잠금 파일, 카탈로그, 번역 및 문서를 포함합니다. 이는 변경량이지 작성된 LOC가 아닙니다. 53개 PR의 GitHub diff가 500,000줄을 초과하는 것으로 보고되며(예: 단일 프로바이더 추가 PR인 #13399에는 변경된 파일 2,347개가 표시됨), 이로 인해 위의 여러 합계가 부풀려졌습니다. 동점자는 같은 순위로 표시됩니다.</sub>
 
 ### GitHub에서 집계된 커밋
 
@@ -1425,14 +1425,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub에서 기여한 것으로 집계된 커밋 367개</sub>
+      <sub>🥇 GitHub에서 기여한 것으로 집계된 커밋 418개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub에서 기여한 것으로 집계된 커밋 269개</sub>
+      <sub>🥈 GitHub에서 기여한 것으로 집계된 커밋 294개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1442,6 +1442,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
       <sub>🥉 GitHub에서 기여한 것으로 집계된 커밋 229개</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 GitHub에서 기여한 것으로 집계된 커밋 222개</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1449,12 +1456,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
       <sub>🏅 GitHub에서 기여한 것으로 집계된 커밋 202개</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub에서 기여한 것으로 집계된 커밋 174개</sub>
+      <sub>🏅 GitHub에서 기여한 것으로 집계된 커밋 134개</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1462,14 +1471,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
       </a><br/>
       <sub>🏅 GitHub에서 기여한 것으로 집계된 커밋 126개</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub에서 기여한 것으로 집계된 커밋 114개</sub>
+      <sub>🏅 GitHub에서 기여한 것으로 집계된 커밋 115개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1479,18 +1486,18 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
       <sub>🏅 GitHub에서 기여한 것으로 집계된 커밋 108개</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 GitHub에서 기여한 것으로 집계된 커밋 87개</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 GitHub에서 기여한 것으로 집계된 커밋 70개</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 GitHub에서 기여한 것으로 집계된 커밋 68개</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1502,7 +1509,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1도 이를 건너�
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTC에 재확인: 저장소 Contributors API가 기본 브랜치 <code>release/v3.8.52</code>에 대해 보고한 GitHub 귀속 커밋입니다. API는 849개의 ID(사용자 429명, 봇 2개, 익명 418명)를 반환했습니다. 이 표에서는 메인테이너, 봇 및 익명 ID를 제외하고 공동 순위는 유지합니다. 이 표는 위의 병합된 PR 순위 및 아래의 Git 메타데이터 조사와는 별개입니다.</sub>
+<sub>2026-11-03 02:09:16 UTC에 재확인: 저장소 Contributors API가 기본 브랜치 <code>release/v3.8.53</code>에 대해 보고한 GitHub 귀속 커밋입니다. API는 903개의 ID(사용자 429명, 봇 2개, 익명 472명)를 반환했습니다. 이 표에서는 메인테이너, 봇 및 익명 ID를 제외하고 공동 순위는 유지합니다. 이 표는 위의 병합된 PR 순위 및 아래의 Git 메타데이터 조사와는 별개입니다.</sub>
 
 > 🙏 이 기여자들이 제공한 기능, 버그 수정 및 인프라 개선은 OmniRoute를 안정적이고 풍부한 기능을 갖춘 프로젝트로 만드는 데 **핵심적인 부분**입니다. 모든 풀 리퀘스트, 모든 테스트 케이스, 모든 i18n 번역 파일이 중요합니다. 오픈 소스는 바로 이들과 같은 사람들이 만들어 갑니다.
 

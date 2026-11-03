@@ -1392,29 +1392,29 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
 
 <table>
   <tr><th align="center">Ọkwa</th><th align="left">Onye nyere aka</th><th align="center">PRs ejikọtara ọnụ</th><th align="right">~Ahịrị ndị gbanwere</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>E mere ọnụ ọgụgụ a na 2026-10-18 15:09:09 UTC site n'isi <code>release/v3.8.52</code> dị ugbu a, <code>656f01cb43</code>. Ọnụ ọgụgụ GitHub GraphQL e kewara n'ibe nwere PRs 9,191 ejikọtara ọnụ: 3,834 sitere n'aka onye nwe repository ahụ, 229 sitere na Dependabot, 6 sitere na bots/apps ndị ọzọ, yana <b>PRs mpụga 5,122 sitere n'aka ndị nyere aka 835 dị iche iche</b>. “Ahịrị ndị gbanwere” bụ mgbakwunye + nhichapụ GitHub ma gụnye faịlụ emepụtara, lockfiles, katalọgụ, ntụgharị na akwụkwọ; ọ bụ ọnụọgụ mgbanwe, ọ bụghị LOC onye dere. PRs 49 na-akọ GitHub diffs karịrị ahịrị 500,000 (dịka ọmụmaatụ #13399, mgbakwunye otu provider, depụtara faịlụ 2,347 gbanwere), nke na-ebuli ọtụtụ ngụkọta dị n'elu karịa. Ndị nwere otu akara nọ n'otu ọkwa.</sub>
+<sub>E mere ọnụ ọgụgụ a na 2026-11-03 03:01:19 UTC site n'isi <code>release/v3.8.53</code> dị ugbu a, <code>05bc048d6c</code>. Ọnụ ọgụgụ GitHub GraphQL e kewara n'ibe nwere PRs 9,947 ejikọtara ọnụ: 4,130 sitere n'aka onye nwe repository ahụ, 240 sitere na Dependabot, 6 sitere na bots/apps ndị ọzọ, yana <b>PRs mpụga 5,571 sitere n'aka ndị nyere aka 883 dị iche iche</b>. “Ahịrị ndị gbanwere” bụ mgbakwunye + nhichapụ GitHub ma gụnye faịlụ emepụtara, lockfiles, katalọgụ, ntụgharị na akwụkwọ; ọ bụ ọnụọgụ mgbanwe, ọ bụghị LOC onye dere. PRs 53 na-akọ GitHub diffs karịrị ahịrị 500,000 (dịka ọmụmaatụ #13399, mgbakwunye otu provider, depụtara faịlụ 2,347 gbanwere), nke na-ebuli ọtụtụ ngụkọta dị n'elu karịa. Ndị nwere otu akara nọ n'otu ọkwa.</sub>
 
 ### Commits GitHub kwuru na ha sitere n'aka ndị nyere aka
 
@@ -1425,14 +1425,14 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 commit 367 ndị GitHub kwadoro</sub>
+      <sub>🥇 commit 418 ndị GitHub kwadoro</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 commit 269 ndị GitHub kwadoro</sub>
+      <sub>🥈 commit 294 ndị GitHub kwadoro</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1442,6 +1442,13 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
       <sub>🥉 commit 229 ndị GitHub kwadoro</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 commit 222 ndị GitHub kwadoro</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1449,12 +1456,14 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
       <sub>🏅 commit 202 ndị GitHub kwadoro</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 commit 174 ndị GitHub kwadoro</sub>
+      <sub>🏅 commit 134 ndị GitHub kwadoro</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1462,14 +1471,12 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
       </a><br/>
       <sub>🏅 commit 126 ndị GitHub kwadoro</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 commit 114 ndị GitHub kwadoro</sub>
+      <sub>🏅 commit 115 ndị GitHub kwadoro</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1479,18 +1486,18 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
       <sub>🏅 commit 108 ndị GitHub kwadoro</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 commit 87 ndị GitHub kwadoro</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 commit 70 ndị GitHub kwadoro</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 commit 68 ndị GitHub kwadoro</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1502,7 +1509,7 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
   </tr>
 </table>
 
-<sub>Enyochakwara ọzọ na 2026-10-18 14:44:45 UTC: commit ndị GitHub kwadoro dịka Contributors API nke repository ahụ siri kọọ maka alaka ndabara <code>release/v3.8.52</code>. API ahụ weghachiri njirimara 849 (ndị ọrụ 429, bots 2, ndị amaghị aha 418); tebụl a anaghị agụnye onye na-ahụ maka mmezi, bots na ndị amaghị aha, ma na-edobe ndị nwere akara hà nhata n'asọmpi. Ọ dị iche ma na nhazi ọkwa PR ndị ejikọrọ dị n'elu ma na ngụkọ metadata Git dị n'okpuru.</sub>
+<sub>Enyochakwara ọzọ na 2026-11-03 02:09:16 UTC: commit ndị GitHub kwadoro dịka Contributors API nke repository ahụ siri kọọ maka alaka ndabara <code>release/v3.8.53</code>. API ahụ weghachiri njirimara 903 (ndị ọrụ 429, bots 2, ndị amaghị aha 472); tebụl a anaghị agụnye onye na-ahụ maka mmezi, bots na ndị amaghị aha, ma na-edobe ndị nwere akara hà nhata n'asọmpi. Ọ dị iche ma na nhazi ọkwa PR ndị ejikọrọ dị n'elu ma na ngụkọ metadata Git dị n'okpuru.</sub>
 
 > 🙏 Atụmatụ, mmezi ntụpọ, na nkwalite akụrụngwa nke ndị ntinye-aka a bụ **akụkụ bụ isi** nke ihe na-eme ka OmniRoute bụrụ nke a pụrụ ịdabere na ya ma nwee ọtụtụ atụmatụ. Pull request ọ bụla, test case ọ bụla, na faịlụ ntụgharị i18n ọ bụla dị mkpa. Ndị dị ka ha bụ ndị na-ewulite open source.
 

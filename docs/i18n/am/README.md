@@ -1395,29 +1395,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
 
 <table>
   <tr><th align="center">ደረጃ</th><th align="left">አስተዋጽዖ አድራጊ</th><th align="center">የተዋሃዱ PRዎች</th><th align="right">~የተቀየሩ መስመሮች</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>ቆጠራው በ2026-10-18 15:09:09 UTC፣ በቀጥታ ያለውን <code>release/v3.8.52</code> ጫፍ <code>656f01cb43</code> በመጠቀም ተካሂዷል። በገጾች የተከፋፈለው የGitHub GraphQL ቆጠራ 9,191 የተዋሃዱ PRዎችን ይዟል፦ 3,834 በማከማቻው ባለቤት፣ 229 በDependabot፣ 6 በሌሎች bots/apps፣ እና <b>ከ835 የተለያዩ አስተዋጽዖ አድራጊዎች የቀረቡ 5,122 ውጫዊ PRዎች</b>። “የተቀየሩ መስመሮች” ማለት የGitHub ጭማሪዎች + ስረዛዎች ሲሆን፣ የተፈጠሩ ፋይሎችን፣ lockfilesን፣ ካታሎጎችን፣ ትርጉሞችን እና ሰነዶችን ያካትታል፤ ይህ የለውጥ መጠን እንጂ በደራሲዎች የተጻፈ LOC አይደለም። 49 PRዎች ከ500,000 መስመሮች በላይ የሆኑ የGitHub diffዎችን ሪፖርት ያደርጋሉ (ለምሳሌ #13399፣ አንድ የprovider ጭማሪ፣ 2,347 የተቀየሩ ፋይሎችን ይዘረዝራል)፣ ይህም ከላይ ያሉትን በርካታ ድምሮች ያጋንናል። እኩል ውጤት ያላቸው በአንድ ላይ ደረጃ ተሰጥቷቸዋል።</sub>
+<sub>ቆጠራው በ2026-11-03 03:01:19 UTC፣ በቀጥታ ያለውን <code>release/v3.8.53</code> ጫፍ <code>05bc048d6c</code> በመጠቀም ተካሂዷል። በገጾች የተከፋፈለው የGitHub GraphQL ቆጠራ 9,947 የተዋሃዱ PRዎችን ይዟል፦ 4,130 በማከማቻው ባለቤት፣ 240 በDependabot፣ 6 በሌሎች bots/apps፣ እና <b>ከ883 የተለያዩ አስተዋጽዖ አድራጊዎች የቀረቡ 5,571 ውጫዊ PRዎች</b>። “የተቀየሩ መስመሮች” ማለት የGitHub ጭማሪዎች + ስረዛዎች ሲሆን፣ የተፈጠሩ ፋይሎችን፣ lockfilesን፣ ካታሎጎችን፣ ትርጉሞችን እና ሰነዶችን ያካትታል፤ ይህ የለውጥ መጠን እንጂ በደራሲዎች የተጻፈ LOC አይደለም። 53 PRዎች ከ500,000 መስመሮች በላይ የሆኑ የGitHub diffዎችን ሪፖርት ያደርጋሉ (ለምሳሌ #13399፣ አንድ የprovider ጭማሪ፣ 2,347 የተቀየሩ ፋይሎችን ይዘረዝራል)፣ ይህም ከላይ ያሉትን በርካታ ድምሮች ያጋንናል። እኩል ውጤት ያላቸው በአንድ ላይ ደረጃ ተሰጥቷቸዋል።</sub>
 
 ### በGitHub የተመደቡ commits
 
@@ -1428,14 +1428,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 በGitHub የተመዘገቡ commits</sub>
+      <sub>🥇 418 በGitHub የተመዘገቡ commits</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 በGitHub የተመዘገቡ commits</sub>
+      <sub>🥈 294 በGitHub የተመዘገቡ commits</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1445,6 +1445,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
       <sub>🥉 229 በGitHub የተመዘገቡ commits</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 222 በGitHub የተመዘገቡ commits</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1452,12 +1459,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
       <sub>🏅 202 በGitHub የተመዘገቡ commits</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 174 በGitHub የተመዘገቡ commits</sub>
+      <sub>🏅 134 በGitHub የተመዘገቡ commits</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1465,14 +1474,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
       </a><br/>
       <sub>🏅 126 በGitHub የተመዘገቡ commits</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 114 በGitHub የተመዘገቡ commits</sub>
+      <sub>🏅 115 በGitHub የተመዘገቡ commits</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1482,18 +1489,18 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
       <sub>🏅 108 በGitHub የተመዘገቡ commits</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 87 በGitHub የተመዘገቡ commits</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 70 በGitHub የተመዘገቡ commits</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 በGitHub የተመዘገቡ commits</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1505,7 +1512,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
   </tr>
 </table>
 
-<sub>በ2026-10-18 14:44:45 UTC እንደገና ተረጋግጧል፦ ለ<code>release/v3.8.52</code> ነባሪ ቅርንጫፍ በማከማቻው Contributors API የተገለጹ በGitHub የተመዘገቡ commits። APIው 849 ማንነቶችን (429 ተጠቃሚዎች፣ 2 bots፣ 418 ስም-አልባ) መልሷል፤ ይህ ሠንጠረዥ አስተዳዳሪውን፣ botsን እና ስም-አልባ ማንነቶችን አያካትትም፣ እኩል የውድድር ውጤቶችንም ያቆያል። ይህ ከላይ ካለው የተዋሃዱ PRዎች ደረጃ እና ከታች ካለው የGit metadata ቆጠራ ሁለቱም የተለየ ነው።</sub>
+<sub>በ2026-11-03 02:09:16 UTC እንደገና ተረጋግጧል፦ ለ<code>release/v3.8.53</code> ነባሪ ቅርንጫፍ በማከማቻው Contributors API የተገለጹ በGitHub የተመዘገቡ commits። APIው 903 ማንነቶችን (429 ተጠቃሚዎች፣ 2 bots፣ 472 ስም-አልባ) መልሷል፤ ይህ ሠንጠረዥ አስተዳዳሪውን፣ botsን እና ስም-አልባ ማንነቶችን አያካትትም፣ እኩል የውድድር ውጤቶችንም ያቆያል። ይህ ከላይ ካለው የተዋሃዱ PRዎች ደረጃ እና ከታች ካለው የGit metadata ቆጠራ ሁለቱም የተለየ ነው።</sub>
 
 > 🙏 የእነዚህ አስተዋጽዖ አበርካቾች ባህሪያት፣ የሳንካ ማስተካከያዎች እና የመሠረተ ልማት ማሻሻያዎች OmniRouteን አስተማማኝ እና በባህሪያት የበለጸገ ከሚያደርጉት ነገሮች **ዋና ክፍል** ናቸው። እያንዳንዱ pull request፣ እያንዳንዱ test case እና እያንዳንዱ የi18n ትርጉም ፋይል ጠቃሚ ነው። ክፍት ምንጭ የሚገነባው እንደ እነሱ ባሉ ሰዎች ነው።
 

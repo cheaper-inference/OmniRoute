@@ -1404,29 +1404,29 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
 
 <table>
   <tr><th align="center">Rang</th><th align="left">Rannchuiditheoir</th><th align="center">PRanna Cumaiscthe</th><th align="right">~Línte Athraithe</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Rinneadh an daonáireamh ar 2026-10-18 15:09:09 UTC le barr beo <code>release/v3.8.52</code>, <code>656f01cb43</code>. Tá 9,191 PR cumaiscthe sa daonáireamh uimhrithe GitHub GraphQL: 3,834 ag úinéir an stóir, 229 ag Dependabot, 6 ag róbónna/aipeanna eile, agus <b>5,122 PR sheachtracha ó 835 rannchuiditheoir ar leith</b>. Is ionann “Línte athraithe” agus suimiúcháin + scriosadh GitHub agus áirítear leis comhaid ghinte, comhaid ghlais, catalóga, aistriúcháin agus doiciméadacht; tomhas athraithe atá ann, ní LOC scríofa. Tuairiscíonn 49 PR difríochtaí GitHub os cionn 500,000 líne (mar shampla, liostaítear in #13399, cur leis aon soláthraí amháin, 2,347 comhad athraithe), rud a ardaíonn roinnt de na hiomláin thuas go saorga. Rangaítear comhscóir le chéile.</sub>
+<sub>Rinneadh an daonáireamh ar 2026-11-03 03:01:19 UTC le barr beo <code>release/v3.8.53</code>, <code>05bc048d6c</code>. Tá 9,947 PR cumaiscthe sa daonáireamh uimhrithe GitHub GraphQL: 4,130 ag úinéir an stóir, 240 ag Dependabot, 6 ag róbónna/aipeanna eile, agus <b>5,571 PR sheachtracha ó 883 rannchuiditheoir ar leith</b>. Is ionann “Línte athraithe” agus suimiúcháin + scriosadh GitHub agus áirítear leis comhaid ghinte, comhaid ghlais, catalóga, aistriúcháin agus doiciméadacht; tomhas athraithe atá ann, ní LOC scríofa. Tuairiscíonn 53 PR difríochtaí GitHub os cionn 500,000 líne (mar shampla, liostaítear in #13399, cur leis aon soláthraí amháin, 2,347 comhad athraithe), rud a ardaíonn roinnt de na hiomláin thuas go saorga. Rangaítear comhscóir le chéile.</sub>
 
 ### Tiomantais arna sannadh ag GitHub
 
@@ -1437,14 +1437,14 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 tiomantas arna chur i leith GitHub</sub>
+      <sub>🥇 418 tiomantas arna chur i leith GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 tiomantas arna chur i leith GitHub</sub>
+      <sub>🥈 294 tiomantas arna chur i leith GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1454,6 +1454,13 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
       <sub>🥉 229 tiomantas arna chur i leith GitHub</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 222 tiomantas arna chur i leith GitHub</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1461,12 +1468,14 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
       <sub>🏅 202 tiomantas arna chur i leith GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 174 tiomantas arna chur i leith GitHub</sub>
+      <sub>🏅 134 tiomantas arna chur i leith GitHub</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1474,14 +1483,12 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
       </a><br/>
       <sub>🏅 126 tiomantas arna chur i leith GitHub</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 114 tiomantas arna chur i leith GitHub</sub>
+      <sub>🏅 115 tiomantas arna chur i leith GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1491,18 +1498,18 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
       <sub>🏅 108 tiomantas arna chur i leith GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 87 tiomantas arna chur i leith GitHub</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 70 tiomantas arna chur i leith GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 tiomantas arna chur i leith GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1514,7 +1521,7 @@ Méadrachtaí canónacha ar 2026-10-18: **1.976 físeán uathúil** · **20.220.
   </tr>
 </table>
 
-<sub>Athsheiceáilte ag 2026-10-18 14:44:45 UTC: tiomantais arna gcur i leith GitHub a thuairiscigh API Rannpháirtithe na stórtha don bhrainse réamhshocraithe <code>release/v3.8.52</code>. D'fhill an API 849 aitheantas (429 úsáideoir, 2 róbat, 418 gan ainm); ní áirítear sa tábla seo an cothaitheoir, róbait ná aitheantais gan ainm, agus coinnítear comhscóir an chomórtais. Tá sé éagsúil ón rangú de PRanna cumaiscthe thuas agus ón daonáireamh meiteashonraí Git thíos araon.</sub>
+<sub>Athsheiceáilte ag 2026-11-03 02:09:16 UTC: tiomantais arna gcur i leith GitHub a thuairiscigh API Rannpháirtithe na stórtha don bhrainse réamhshocraithe <code>release/v3.8.53</code>. D'fhill an API 903 aitheantas (429 úsáideoir, 2 róbat, 472 gan ainm); ní áirítear sa tábla seo an cothaitheoir, róbait ná aitheantais gan ainm, agus coinnítear comhscóir an chomórtais. Tá sé éagsúil ón rangú de PRanna cumaiscthe thuas agus ón daonáireamh meiteashonraí Git thíos araon.</sub>
 
 > 🙏 Is **croíchuid** den mhéid a fhágann OmniRoute iontaofa agus lán gnéithe iad gnéithe, ceartúcháin fabhtanna agus feabhsuithe bonneagair na rannpháirtithe seo. Tá tábhacht le gach iarratas tarraingthe, gach cás tástála agus gach comhad aistriúcháin i18n. Is daoine cosúil leo a thógann bogearraí foinse oscailte.
 

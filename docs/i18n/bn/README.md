@@ -1392,29 +1392,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
 
 <table>
   <tr><th align="center">অবস্থান</th><th align="left">অবদানকারী</th><th align="center">মার্জ হওয়া PR</th><th align="right">~পরিবর্তিত লাইন</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>সরাসরি <code>release/v3.8.52</code> টিপ <code>656f01cb43</code> ব্যবহার করে 2026-10-18 15:09:09 UTC-তে এই পরিসংখ্যান নেওয়া হয়েছে। পৃষ্ঠাভিত্তিক GitHub GraphQL পরিসংখ্যানে 9,191টি মার্জ হওয়া PR রয়েছে: রিপোজিটরির মালিকের 3,834টি, Dependabot-এর 229টি, অন্যান্য বট/অ্যাপের 6টি এবং <b>835 জন স্বতন্ত্র অবদানকারীর 5,122টি বহিরাগত PR</b>। “পরিবর্তিত লাইন” হলো GitHub-এর সংযোজন + অপসারণ এবং এতে জেনারেট করা ফাইল, লকফাইল, ক্যাটালগ, অনুবাদ ও ডকুমেন্টেশন অন্তর্ভুক্ত রয়েছে; এটি পরিবর্তনের পরিমাণ, রচিত LOC নয়। 49টি PR-এ GitHub-এর হিসাবে 500,000 লাইনের বেশি পার্থক্য রয়েছে (উদাহরণস্বরূপ #13399, একটি মাত্র প্রোভাইডার সংযোজন, যেখানে 2,347টি পরিবর্তিত ফাইল তালিকাভুক্ত), যা ওপরের কয়েকটি মোট সংখ্যাকে স্ফীত করেছে। সমান ফলাফলগুলো একই অবস্থানে রাখা হয়েছে।</sub>
+<sub>সরাসরি <code>release/v3.8.53</code> টিপ <code>05bc048d6c</code> ব্যবহার করে 2026-11-03 03:01:19 UTC-তে এই পরিসংখ্যান নেওয়া হয়েছে। পৃষ্ঠাভিত্তিক GitHub GraphQL পরিসংখ্যানে 9,947টি মার্জ হওয়া PR রয়েছে: রিপোজিটরির মালিকের 4,130টি, Dependabot-এর 240টি, অন্যান্য বট/অ্যাপের 6টি এবং <b>883 জন স্বতন্ত্র অবদানকারীর 5,571টি বহিরাগত PR</b>। “পরিবর্তিত লাইন” হলো GitHub-এর সংযোজন + অপসারণ এবং এতে জেনারেট করা ফাইল, লকফাইল, ক্যাটালগ, অনুবাদ ও ডকুমেন্টেশন অন্তর্ভুক্ত রয়েছে; এটি পরিবর্তনের পরিমাণ, রচিত LOC নয়। 53টি PR-এ GitHub-এর হিসাবে 500,000 লাইনের বেশি পার্থক্য রয়েছে (উদাহরণস্বরূপ #13399, একটি মাত্র প্রোভাইডার সংযোজন, যেখানে 2,347টি পরিবর্তিত ফাইল তালিকাভুক্ত), যা ওপরের কয়েকটি মোট সংখ্যাকে স্ফীত করেছে। সমান ফলাফলগুলো একই অবস্থানে রাখা হয়েছে।</sub>
 
 ### GitHub-এ আরোপিত কমিটসমূহ
 
@@ -1425,14 +1425,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub-স্বীকৃত 367টি কমিট</sub>
+      <sub>🥇 GitHub-স্বীকৃত 418টি কমিট</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub-স্বীকৃত 269টি কমিট</sub>
+      <sub>🥈 GitHub-স্বীকৃত 294টি কমিট</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1442,6 +1442,13 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
       <sub>🥉 GitHub-স্বীকৃত 229টি কমিট</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 GitHub-স্বীকৃত 222টি কমিট</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1449,12 +1456,14 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
       <sub>🏅 GitHub-স্বীকৃত 202টি কমিট</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub-স্বীকৃত 174টি কমিট</sub>
+      <sub>🏅 GitHub-স্বীকৃত 134টি কমিট</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1462,14 +1471,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
       </a><br/>
       <sub>🏅 GitHub-স্বীকৃত 126টি কমিট</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub-স্বীকৃত 114টি কমিট</sub>
+      <sub>🏅 GitHub-স্বীকৃত 115টি কমিট</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1479,18 +1486,18 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
       <sub>🏅 GitHub-স্বীকৃত 108টি কমিট</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 GitHub-স্বীকৃত 87টি কমিট</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 GitHub-স্বীকৃত 70টি কমিট</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 GitHub-স্বীকৃত 68টি কমিট</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1502,7 +1509,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ও এটি এ
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTC-তে পুনরায় যাচাই করা হয়েছে: ডিফল্ট <code>release/v3.8.52</code> ব্রাঞ্চের জন্য রিপোজিটরির Contributors API দ্বারা প্রতিবেদন করা GitHub-স্বীকৃত কমিট। API 849টি পরিচয় ফেরত দিয়েছে (429 জন ব্যবহারকারী, 2টি বট, 418টি বেনামী); এই টেবিল থেকে রক্ষণাবেক্ষণকারী, বট ও বেনামী পরিচয় বাদ দেওয়া হয়েছে এবং সমান অবস্থান বজায় রাখা হয়েছে। এটি উপরের মার্জ করা PR-এর র্যাঙ্কিং এবং নিচের Git-মেটাডেটা শুমারি—উভয়টি থেকেই স্বতন্ত্র।</sub>
+<sub>2026-11-03 02:09:16 UTC-তে পুনরায় যাচাই করা হয়েছে: ডিফল্ট <code>release/v3.8.53</code> ব্রাঞ্চের জন্য রিপোজিটরির Contributors API দ্বারা প্রতিবেদন করা GitHub-স্বীকৃত কমিট। API 903টি পরিচয় ফেরত দিয়েছে (429 জন ব্যবহারকারী, 2টি বট, 472টি বেনামী); এই টেবিল থেকে রক্ষণাবেক্ষণকারী, বট ও বেনামী পরিচয় বাদ দেওয়া হয়েছে এবং সমান অবস্থান বজায় রাখা হয়েছে। এটি উপরের মার্জ করা PR-এর র্যাঙ্কিং এবং নিচের Git-মেটাডেটা শুমারি—উভয়টি থেকেই স্বতন্ত্র।</sub>
 
 > 🙏 এই অবদানকারীদের ফিচার, বাগ সংশোধন এবং অবকাঠামোগত উন্নতি OmniRoute-কে নির্ভরযোগ্য ও ফিচারসমৃদ্ধ করে তোলার একটি **মূল অংশ**। প্রতিটি পুল রিকোয়েস্ট, প্রতিটি টেস্ট কেস এবং প্রতিটি i18n অনুবাদ ফাইল গুরুত্বপূর্ণ। তাঁদের মতো মানুষদের হাতেই ওপেন সোর্স নির্মিত হয়।
 

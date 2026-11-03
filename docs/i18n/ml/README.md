@@ -1395,29 +1395,29 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
 
 <table>
   <tr><th align="center">റാങ്ക്</th><th align="left">സംഭാവകൻ</th><th align="center">ലയിപ്പിച്ച PR-കൾ</th><th align="right">~മാറ്റിയ വരികൾ</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>തത്സമയ <code>release/v3.8.52</code> ടിപ്പ് <code>656f01cb43</code> ഉപയോഗിച്ച് 2026-10-18 15:09:09 UTC-ന് കണക്കെടുപ്പ് നടത്തി. പേജുകളാക്കിയ GitHub GraphQL കണക്കെടുപ്പിൽ ലയിപ്പിച്ച 9,191 PR-കൾ ഉൾപ്പെടുന്നു: റിപ്പോസിറ്ററി ഉടമയുടേതായി 3,834, Dependabot-ന്റേതായി 229, മറ്റ് ബോട്ടുകൾ/ആപ്പുകൾ എന്നിവയുടേതായി 6, കൂടാതെ <b>835 വ്യത്യസ്ത സംഭാവകരിൽ നിന്നുള്ള 5,122 ബാഹ്യ PR-കൾ</b>. “മാറ്റിയ വരികൾ” എന്നത് GitHub-ലെ കൂട്ടിച്ചേർക്കലുകളുടെയും നീക്കംചെയ്യലുകളുടെയും ആകെത്തുകയാണ്; അതിൽ ജനറേറ്റ് ചെയ്ത ഫയലുകൾ, lockfiles, കാറ്റലോഗുകൾ, വിവർത്തനങ്ങൾ, ഡോക്യുമെന്റേഷൻ എന്നിവ ഉൾപ്പെടുന്നു. അത് മാറ്റങ്ങളുടെ അളവാണ്, രചിച്ച LOC അല്ല. 49 PR-കളിൽ 500,000 വരികൾക്കുമുകളിലുള്ള GitHub diffs റിപ്പോർട്ട് ചെയ്തിട്ടുണ്ട് (ഉദാഹരണത്തിന് #13399, ഒരൊറ്റ പ്രൊവൈഡർ കൂട്ടിച്ചേർക്കൽ, മാറ്റിയ 2,347 ഫയലുകൾ പട്ടികപ്പെടുത്തുന്നു); ഇത് മുകളിലുള്ള നിരവധി ആകെത്തുകകളെ പെരുപ്പിക്കുന്നു. തുല്യസ്ഥാനക്കാർക്ക് ഒരേ റാങ്കാണ് നൽകിയിരിക്കുന്നത്.</sub>
+<sub>തത്സമയ <code>release/v3.8.53</code> ടിപ്പ് <code>05bc048d6c</code> ഉപയോഗിച്ച് 2026-11-03 03:01:19 UTC-ന് കണക്കെടുപ്പ് നടത്തി. പേജുകളാക്കിയ GitHub GraphQL കണക്കെടുപ്പിൽ ലയിപ്പിച്ച 9,947 PR-കൾ ഉൾപ്പെടുന്നു: റിപ്പോസിറ്ററി ഉടമയുടേതായി 4,130, Dependabot-ന്റേതായി 240, മറ്റ് ബോട്ടുകൾ/ആപ്പുകൾ എന്നിവയുടേതായി 6, കൂടാതെ <b>883 വ്യത്യസ്ത സംഭാവകരിൽ നിന്നുള്ള 5,571 ബാഹ്യ PR-കൾ</b>. “മാറ്റിയ വരികൾ” എന്നത് GitHub-ലെ കൂട്ടിച്ചേർക്കലുകളുടെയും നീക്കംചെയ്യലുകളുടെയും ആകെത്തുകയാണ്; അതിൽ ജനറേറ്റ് ചെയ്ത ഫയലുകൾ, lockfiles, കാറ്റലോഗുകൾ, വിവർത്തനങ്ങൾ, ഡോക്യുമെന്റേഷൻ എന്നിവ ഉൾപ്പെടുന്നു. അത് മാറ്റങ്ങളുടെ അളവാണ്, രചിച്ച LOC അല്ല. 53 PR-കളിൽ 500,000 വരികൾക്കുമുകളിലുള്ള GitHub diffs റിപ്പോർട്ട് ചെയ്തിട്ടുണ്ട് (ഉദാഹരണത്തിന് #13399, ഒരൊറ്റ പ്രൊവൈഡർ കൂട്ടിച്ചേർക്കൽ, മാറ്റിയ 2,347 ഫയലുകൾ പട്ടികപ്പെടുത്തുന്നു); ഇത് മുകളിലുള്ള നിരവധി ആകെത്തുകകളെ പെരുപ്പിക്കുന്നു. തുല്യസ്ഥാനക്കാർക്ക് ഒരേ റാങ്കാണ് നൽകിയിരിക്കുന്നത്.</sub>
 
 ### GitHub ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ
 
@@ -1428,14 +1428,14 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 367 കമ്മിറ്റുകൾ</sub>
+      <sub>🥇 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 418 കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 269 കമ്മിറ്റുകൾ</sub>
+      <sub>🥈 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 294 കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1445,6 +1445,13 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
       <sub>🥉 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 229 കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 222 കമ്മിറ്റുകൾ</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1452,12 +1459,14 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
       <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 202 കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 174 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 134 കമ്മിറ്റുകൾ</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1465,14 +1474,12 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
       </a><br/>
       <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 126 കമ്മിറ്റുകൾ</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 114 കമ്മിറ്റുകൾ</sub>
+      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 115 കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1482,18 +1489,18 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
       <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 108 കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 87 കമ്മിറ്റുകൾ</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 70 കമ്മിറ്റുകൾ</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത 68 കമ്മിറ്റുകൾ</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1505,7 +1512,7 @@ port-ൽ ഒരേ process വഴിയാണ് ലഭ്യമാക്കു�
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTC-ന് വീണ്ടും പരിശോധിച്ചു: <code>release/v3.8.52</code> ഡിഫോൾട്ട് ബ്രാഞ്ചിനായി റിപ്പോസിറ്ററി Contributors API റിപ്പോർട്ട് ചെയ്ത GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ. API 849 ഐഡന്റിറ്റികൾ (429 ഉപയോക്താക്കൾ, 2 ബോട്ടുകൾ, 418 അജ്ഞാതർ) മടക്കിനൽകി; ഈ പട്ടികയിൽ മെയിന്റെയ്നർ, ബോട്ടുകൾ, അജ്ഞാത ഐഡന്റിറ്റികൾ എന്നിവ ഒഴിവാക്കുകയും മത്സരത്തിലെ സമനിലകൾ നിലനിർത്തുകയും ചെയ്തിട്ടുണ്ട്. മുകളിലുള്ള ലയിപ്പിച്ച-PR റാങ്കിങ്ങിൽ നിന്നും താഴെയുള്ള Git-മെറ്റാഡാറ്റ കണക്കെടുപ്പിൽ നിന്നും ഇത് വ്യത്യസ്തമാണ്.</sub>
+<sub>2026-11-03 02:09:16 UTC-ന് വീണ്ടും പരിശോധിച്ചു: <code>release/v3.8.53</code> ഡിഫോൾട്ട് ബ്രാഞ്ചിനായി റിപ്പോസിറ്ററി Contributors API റിപ്പോർട്ട് ചെയ്ത GitHub-ആട്രിബ്യൂട്ട് ചെയ്ത കമ്മിറ്റുകൾ. API 903 ഐഡന്റിറ്റികൾ (429 ഉപയോക്താക്കൾ, 2 ബോട്ടുകൾ, 472 അജ്ഞാതർ) മടക്കിനൽകി; ഈ പട്ടികയിൽ മെയിന്റെയ്നർ, ബോട്ടുകൾ, അജ്ഞാത ഐഡന്റിറ്റികൾ എന്നിവ ഒഴിവാക്കുകയും മത്സരത്തിലെ സമനിലകൾ നിലനിർത്തുകയും ചെയ്തിട്ടുണ്ട്. മുകളിലുള്ള ലയിപ്പിച്ച-PR റാങ്കിങ്ങിൽ നിന്നും താഴെയുള്ള Git-മെറ്റാഡാറ്റ കണക്കെടുപ്പിൽ നിന്നും ഇത് വ്യത്യസ്തമാണ്.</sub>
 
 > 🙏 ഈ സംഭാവകരുടെ ഫീച്ചറുകളും ബഗ് പരിഹാരങ്ങളും ഇൻഫ്രാസ്ട്രക്ചർ മെച്ചപ്പെടുത്തലുകളും OmniRoute-നെ വിശ്വസനീയവും ഫീച്ചർ സമ്പന്നവുമാക്കുന്നതിന്റെ **അവിഭാജ്യ ഘടകമാണ്**. ഓരോ പുൾ റിക്വസ്റ്റും ഓരോ ടെസ്റ്റ് കേസും ഓരോ i18n വിവർത്തന ഫയലും പ്രധാനമാണ്. അവരെപ്പോലുള്ള ആളുകളാണ് ഓപ്പൺ സോഴ്സ് നിർമ്മിക്കുന്നത്.
 

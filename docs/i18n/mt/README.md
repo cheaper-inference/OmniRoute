@@ -1395,29 +1395,29 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
 
 <table>
   <tr><th align="center">Pożizzjoni</th><th align="left">Kontributur</th><th align="center">PRs Magħquda</th><th align="right">~Linji mibdula</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Iċ-ċensiment sar 2026-10-18 15:09:09 UTC bil-punt l-aktar reċenti ta’ <code>release/v3.8.52</code>, <code>656f01cb43</code>. Iċ-ċensiment paġinat ta’ GitHub GraphQL fih 9,191 PR magħquda: 3,834 mis-sid tar-repożitorju, 229 minn Dependabot, 6 minn bots/apps oħra, u <b>5,122 PR esterna minn 835 kontributur distint</b>. “Linji mibdula” tfisser iż-żidiet + it-tħassir ta’ GitHub u tinkludi fajls iġġenerati, lockfiles, katalgi, traduzzjonijiet u dokumentazzjoni; din hija l-kwantità ta’ bidliet, mhux LOC miktuba. 49 PR jirrappurtaw diffs ta’ GitHub ta’ aktar minn 500,000 linja (pereżempju #13399, żieda ta’ fornitur wieħed, telenka 2,347 fajl mibdul), u dan jgħolli b’mod artifiċjali diversi totali hawn fuq. Dawk bl-istess riżultat jingħataw l-istess pożizzjoni.</sub>
+<sub>Iċ-ċensiment sar 2026-11-03 03:01:19 UTC bil-punt l-aktar reċenti ta’ <code>release/v3.8.53</code>, <code>05bc048d6c</code>. Iċ-ċensiment paġinat ta’ GitHub GraphQL fih 9,947 PR magħquda: 4,130 mis-sid tar-repożitorju, 240 minn Dependabot, 6 minn bots/apps oħra, u <b>5,571 PR esterna minn 883 kontributur distint</b>. “Linji mibdula” tfisser iż-żidiet + it-tħassir ta’ GitHub u tinkludi fajls iġġenerati, lockfiles, katalgi, traduzzjonijiet u dokumentazzjoni; din hija l-kwantità ta’ bidliet, mhux LOC miktuba. 53 PR jirrappurtaw diffs ta’ GitHub ta’ aktar minn 500,000 linja (pereżempju #13399, żieda ta’ fornitur wieħed, telenka 2,347 fajl mibdul), u dan jgħolli b’mod artifiċjali diversi totali hawn fuq. Dawk bl-istess riżultat jingħataw l-istess pożizzjoni.</sub>
 
 ### Commits attribwiti minn GitHub
 
@@ -1428,14 +1428,14 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 commit attribwit minn GitHub</sub>
+      <sub>🥇 418 commit attribwit minn GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 commit attribwit minn GitHub</sub>
+      <sub>🥈 294 commit attribwit minn GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1445,6 +1445,13 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
       <sub>🥉 229 commit attribwit minn GitHub</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 222 commit attribwit minn GitHub</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1452,12 +1459,14 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
       <sub>🏅 202 commit attribwit minn GitHub</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 174 commit attribwit minn GitHub</sub>
+      <sub>🏅 134 commit attribwit minn GitHub</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1465,28 +1474,19 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
       </a><br/>
       <sub>🏅 126 commit attribwit minn GitHub</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 114-il commit attribwit minn GitHub</sub>
+      <sub>🏅 115 commit attribwit minn GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 108 commits attribwiti minn GitHub</sub>
-    </td>
-    <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 87 commit attribwit minn GitHub</sub>
+      <sub>🏅 108 commit attribwit minn GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
@@ -1494,6 +1494,13 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
         <b>Chris</b>
       </a><br/>
       <sub>🏅 70 commit attribwit minn GitHub</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 commit attribwit minn GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1505,7 +1512,7 @@ Metriċi kanoniċi fl-2026-10-18: **1.976 vidjo uniku** · **20.220.289 darba ma
   </tr>
 </table>
 
-<sub>Iċċekkjat mill-ġdid fi 2026-10-18 14:44:45 UTC: commits attribwiti minn GitHub irrappurtati mill-API Contributors tar-repożitorju għall-fergħa predefinita <code>release/v3.8.52</code>. L-API rritornat 849 identità (429 utent, 2 bots, 418 anonimi); din it-tabella teskludi lill-manutenzjonist, lill-bots u lill-identitajiet anonimi, u żżomm ir-riżultati indaqs fil-kompetizzjoni. Hija distinta kemm mill-klassifikazzjoni tal-PRs magħquda hawn fuq kif ukoll miċ-ċensiment tal-metadejta ta’ Git hawn taħt.</sub>
+<sub>Iċċekkjat mill-ġdid fi 2026-11-03 02:09:16 UTC: commits attribwiti minn GitHub irrappurtati mill-API Contributors tar-repożitorju għall-fergħa predefinita <code>release/v3.8.53</code>. L-API rritornat 903 identità (429 utent, 2 bots, 472 anonimi); din it-tabella teskludi lill-manutenzjonist, lill-bots u lill-identitajiet anonimi, u żżomm ir-riżultati indaqs fil-kompetizzjoni. Hija distinta kemm mill-klassifikazzjoni tal-PRs magħquda hawn fuq kif ukoll miċ-ċensiment tal-metadejta ta’ Git hawn taħt.</sub>
 
 > 🙏 Il-karatteristiċi, it-tiswijiet tal-bugs u t-titjib fl-infrastruttura ta’ dawn il-kontributuri huma **parti ewlenija** minn dak li jagħmel lil OmniRoute affidabbli u rikk fil-karatteristiċi. Kull pull request, kull każ tat-test u kull fajl tat-traduzzjoni i18n huwa importanti. Is-sors miftuħ jinbena minn nies bħalhom.
 

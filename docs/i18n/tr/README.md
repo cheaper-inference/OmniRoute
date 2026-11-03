@@ -1394,29 +1394,29 @@ aynı süreç tarafından sunulur, bu nedenle bugün için ayrı bir yalnızca C
 
 <table>
   <tr><th align="center">Sıra</th><th align="left">Katkıda Bulunan</th><th align="center">Birleştirilen PR'ler</th><th align="right">~Değiştirilen satır</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Sayım, 2026-10-18 15:09:09 UTC tarihinde canlı <code>release/v3.8.52</code> dalının <code>656f01cb43</code> ucuyla gerçekleştirildi. Sayfalandırılmış GitHub GraphQL sayımı, birleştirilmiş 9.191 PR içeriyor: 3.834'ü depo sahibi, 229'u Dependabot, 6'sı diğer botlar/uygulamalar ve <b>835 farklı katkıda bulunandan gelen 5.122 harici PR</b>. “Değiştirilen satırlar”, GitHub'daki eklemeler ile silmelerin toplamıdır ve oluşturulan dosyaları, kilit dosyalarını, katalogları, çevirileri ve belgeleri içerir; bu değer, yazılan LOC değil, değişiklik hacmidir. 49 PR için GitHub farkları 500.000 satırın üzerindedir (örneğin tek bir sağlayıcı ekleyen #13399, değiştirilen 2.347 dosya listeler); bu da yukarıdaki bazı toplamları şişirmektedir. Eşit değerlere aynı sıra verilir.</sub>
+<sub>Sayım, 2026-11-03 03:01:19 UTC tarihinde canlı <code>release/v3.8.53</code> dalının <code>05bc048d6c</code> ucuyla gerçekleştirildi. Sayfalandırılmış GitHub GraphQL sayımı, birleştirilmiş 9.947 PR içeriyor: 4.130'ü depo sahibi, 240'u Dependabot, 6'sı diğer botlar/uygulamalar ve <b>883 farklı katkıda bulunandan gelen 5.571 harici PR</b>. “Değiştirilen satırlar”, GitHub'daki eklemeler ile silmelerin toplamıdır ve oluşturulan dosyaları, kilit dosyalarını, katalogları, çevirileri ve belgeleri içerir; bu değer, yazılan LOC değil, değişiklik hacmidir. 53 PR için GitHub farkları 500.000 satırın üzerindedir (örneğin tek bir sağlayıcı ekleyen #13399, değiştirilen 2.347 dosya listeler); bu da yukarıdaki bazı toplamları şişirmektedir. Eşit değerlere aynı sıra verilir.</sub>
 
 ### GitHub tarafından ilişkilendirilen commit'ler
 
@@ -1427,14 +1427,14 @@ aynı süreç tarafından sunulur, bu nedenle bugün için ayrı bir yalnızca C
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub tarafından ilişkilendirilen 367 commit</sub>
+      <sub>🥇 GitHub tarafından ilişkilendirilen 418 commit</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub tarafından ilişkilendirilen 269 commit</sub>
+      <sub>🥈 GitHub tarafından ilişkilendirilen 294 commit</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1444,6 +1444,13 @@ aynı süreç tarafından sunulur, bu nedenle bugün için ayrı bir yalnızca C
       <sub>🥉 GitHub tarafından ilişkilendirilen 229 commit</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 GitHub tarafından ilişkilendirilen 222 commit</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1451,12 +1458,14 @@ aynı süreç tarafından sunulur, bu nedenle bugün için ayrı bir yalnızca C
       <sub>🏅 GitHub tarafından ilişkilendirilen 202 commit</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub tarafından ilişkilendirilen 174 commit</sub>
+      <sub>🏅 GitHub tarafından ilişkilendirilen 134 commit</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1464,14 +1473,12 @@ aynı süreç tarafından sunulur, bu nedenle bugün için ayrı bir yalnızca C
       </a><br/>
       <sub>🏅 GitHub tarafından ilişkilendirilen 126 commit</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub tarafından ilişkilendirilen 114 commit</sub>
+      <sub>🏅 GitHub tarafından ilişkilendirilen 115 commit</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1481,18 +1488,18 @@ aynı süreç tarafından sunulur, bu nedenle bugün için ayrı bir yalnızca C
       <sub>🏅 GitHub tarafından ilişkilendirilen 108 commit</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 GitHub tarafından ilişkilendirilen 87 commit</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 GitHub tarafından ilişkilendirilen 70 commit</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 GitHub tarafından ilişkilendirilen 68 commit</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1504,7 +1511,7 @@ aynı süreç tarafından sunulur, bu nedenle bugün için ayrı bir yalnızca C
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTC tarihinde yeniden kontrol edildi: <code>release/v3.8.52</code> varsayılan dalı için depo Contributors API'si tarafından bildirilen GitHub ile ilişkilendirilmiş commit'ler. API, 849 kimlik (429 kullanıcı, 2 bot, 418 anonim) döndürdü; bu tablo bakım sorumlusunu, botları ve anonim kimlikleri hariç tutar ve sıralamadaki eşitlikleri korur. Hem yukarıdaki birleştirilmiş PR sıralamasından hem de aşağıdaki Git meta verisi sayımından farklıdır.</sub>
+<sub>2026-11-03 02:09:16 UTC tarihinde yeniden kontrol edildi: <code>release/v3.8.53</code> varsayılan dalı için depo Contributors API'si tarafından bildirilen GitHub ile ilişkilendirilmiş commit'ler. API, 903 kimlik (429 kullanıcı, 2 bot, 472 anonim) döndürdü; bu tablo bakım sorumlusunu, botları ve anonim kimlikleri hariç tutar ve sıralamadaki eşitlikleri korur. Hem yukarıdaki birleştirilmiş PR sıralamasından hem de aşağıdaki Git meta verisi sayımından farklıdır.</sub>
 
 > 🙏 Bu katkıda bulunanların özellikleri, hata düzeltmeleri ve altyapı iyileştirmeleri, OmniRoute'u güvenilir ve zengin özellikli kılan unsurların **temel bir parçasıdır**. Her pull request, her test senaryosu ve her i18n çeviri dosyası önemlidir. Açık kaynak, onlar gibi insanlar tarafından geliştirilir.
 

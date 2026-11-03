@@ -1403,29 +1403,29 @@ Kanonische Metriken vom 2026-10-18: **1.976 einzigartige Videos** · **20.220.28
 
 <table>
   <tr><th align="center">Rang</th><th align="left">Mitwirkende</th><th align="center">Zusammengeführte PRs</th><th align="right">~Geänderte Zeilen</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Erhebung vom 2026-10-18 15:09:09 UTC anhand des aktuellen Stands <code>656f01cb43</code> von <code>release/v3.8.52</code>. Die paginierte GitHub-GraphQL-Erhebung umfasst 9.191 zusammengeführte PRs: 3.834 vom Repository-Eigentümer, 229 von Dependabot, 6 von anderen Bots/Apps und <b>5.122 externe PRs von 835 verschiedenen Mitwirkenden</b>. „Geänderte Zeilen“ entspricht den Hinzufügungen + Löschungen von GitHub und umfasst generierte Dateien, Lockfiles, Kataloge, Übersetzungen und Dokumentation; die Angabe misst die Änderungsmenge, nicht die selbst verfassten Codezeilen. Für 49 PRs weist GitHub Diffs mit mehr als 500.000 Zeilen aus (beispielsweise listet #13399, das Hinzufügen eines einzelnen Providers, 2.347 geänderte Dateien auf), wodurch mehrere der oben aufgeführten Summen höher ausfallen. Bei Gleichstand wird derselbe Rang vergeben.</sub>
+<sub>Erhebung vom 2026-11-03 03:01:19 UTC anhand des aktuellen Stands <code>05bc048d6c</code> von <code>release/v3.8.53</code>. Die paginierte GitHub-GraphQL-Erhebung umfasst 9.947 zusammengeführte PRs: 4.130 vom Repository-Eigentümer, 240 von Dependabot, 6 von anderen Bots/Apps und <b>5.571 externe PRs von 883 verschiedenen Mitwirkenden</b>. „Geänderte Zeilen“ entspricht den Hinzufügungen + Löschungen von GitHub und umfasst generierte Dateien, Lockfiles, Kataloge, Übersetzungen und Dokumentation; die Angabe misst die Änderungsmenge, nicht die selbst verfassten Codezeilen. Für 53 PRs weist GitHub Diffs mit mehr als 500.000 Zeilen aus (beispielsweise listet #13399, das Hinzufügen eines einzelnen Providers, 2.347 geänderte Dateien auf), wodurch mehrere der oben aufgeführten Summen höher ausfallen. Bei Gleichstand wird derselbe Rang vergeben.</sub>
 
 ### Von GitHub zugeordnete Commits
 
@@ -1436,14 +1436,14 @@ Kanonische Metriken vom 2026-10-18: **1.976 einzigartige Videos** · **20.220.28
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 367 GitHub-zugeordnete Commits</sub>
+      <sub>🥇 418 GitHub-zugeordnete Commits</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 269 GitHub-zugeordnete Commits</sub>
+      <sub>🥈 294 GitHub-zugeordnete Commits</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1453,6 +1453,13 @@ Kanonische Metriken vom 2026-10-18: **1.976 einzigartige Videos** · **20.220.28
       <sub>🥉 229 GitHub-zugeordnete Commits</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 222 GitHub-zugeordnete Commits</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1460,12 +1467,14 @@ Kanonische Metriken vom 2026-10-18: **1.976 einzigartige Videos** · **20.220.28
       <sub>🏅 202 GitHub-zugeordnete Commits</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 174 GitHub-zugeordnete Commits</sub>
+      <sub>🏅 134 GitHub-zugeordnete Commits</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1473,14 +1482,12 @@ Kanonische Metriken vom 2026-10-18: **1.976 einzigartige Videos** · **20.220.28
       </a><br/>
       <sub>🏅 126 GitHub-zugeordnete Commits</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 114 GitHub-zugeordnete Commits</sub>
+      <sub>🏅 115 GitHub-zugeordnete Commits</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1490,18 +1497,18 @@ Kanonische Metriken vom 2026-10-18: **1.976 einzigartige Videos** · **20.220.28
       <sub>🏅 108 GitHub-zugeordnete Commits</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 87 GitHub-zugeordnete Commits</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 70 GitHub-zugeordnete Commits</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 68 GitHub-zugeordnete Commits</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1513,7 +1520,7 @@ Kanonische Metriken vom 2026-10-18: **1.976 einzigartige Videos** · **20.220.28
   </tr>
 </table>
 
-<sub>Erneut überprüft am 2026-10-18 um 14:44:45 UTC: GitHub-zugeordnete Commits, die von der Contributors API des Repositorys für den Standard-Branch <code>release/v3.8.52</code> gemeldet wurden. Die API gab 849 Identitäten zurück (429 Benutzer, 2 Bots, 418 anonyme Identitäten); diese Tabelle schließt den Maintainer, Bots und anonyme Identitäten aus und behält Gleichstände bei. Sie unterscheidet sich sowohl von der Rangliste der zusammengeführten PRs oben als auch von der Erhebung der Git-Metadaten unten.</sub>
+<sub>Erneut überprüft am 2026-10-18 um 14:44:45 UTC: GitHub-zugeordnete Commits, die von der Contributors API des Repositorys für den Standard-Branch <code>release/v3.8.53</code> gemeldet wurden. Die API gab 903 Identitäten zurück (429 Benutzer, 2 Bots, 472 anonyme Identitäten); diese Tabelle schließt den Maintainer, Bots und anonyme Identitäten aus und behält Gleichstände bei. Sie unterscheidet sich sowohl von der Rangliste der zusammengeführten PRs oben als auch von der Erhebung der Git-Metadaten unten.</sub>
 
 > 🙏 Die Funktionen, Fehlerbehebungen und Infrastrukturverbesserungen dieser Mitwirkenden sind ein **zentraler Bestandteil** dessen, was OmniRoute zuverlässig und funktionsreich macht. Jeder Pull Request, jeder Testfall und jede i18n-Übersetzungsdatei ist wichtig. Open Source wird von Menschen wie ihnen geschaffen.
 

@@ -1394,29 +1394,29 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
 
 <table>
   <tr><th align="center">ස්ථානය</th><th align="left">දායකයා</th><th align="center">ඒකාබද්ධ කළ PR</th><th align="right">~වෙනස් කළ පේළි</th></tr>
-  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
-  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
-  <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
-  <tr><td align="center">4</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
-  <tr><td align="center">5</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">174</td><td align="right">78,276</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">151</td><td align="right">3,562,936</td></tr>
-  <tr><td align="center">6</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
+  <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">418</td><td align="right">25,367,739</td></tr>
+  <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">295</td><td align="right">13,557,796</td></tr>
+  <tr><td align="center">3</td><td align="left"><a href="https://github.com/pacocartones"><b>pacocartones</b></a></td><td align="center">222</td><td align="right">81,551</td></tr>
+  <tr><td align="center">4</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
+  <tr><td align="center">5</td><td align="left"><a href="https://github.com/JxnLexn"><b>JxnLexn</b></a></td><td align="center">198</td><td align="right">3,570,623</td></tr>
+  <tr><td align="center">6</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">190</td><td align="right">411,243</td></tr>
+  <tr><td align="center">7</td><td align="left"><a href="https://github.com/KooshaPari"><b>KooshaPari</b></a></td><td align="center">151</td><td align="right">5,972,314</td></tr>
   <tr><td align="center">8</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
   <tr><td align="center">9</td><td align="left"><a href="https://github.com/RaviTharuma"><b>RaviTharuma</b></a></td><td align="center">123</td><td align="right">500,065</td></tr>
   <tr><td align="center">10</td><td align="left"><a href="https://github.com/herjarsa"><b>herjarsa</b></a></td><td align="center">88</td><td align="right">230,872</td></tr>
-  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">84</td><td align="right">2,849,554</td></tr>
-  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">67</td><td align="right">68,548</td></tr>
+  <tr><td align="center">11</td><td align="left"><a href="https://github.com/hartmark"><b>hartmark</b></a></td><td align="center">85</td><td align="right">2,849,623</td></tr>
+  <tr><td align="center">12</td><td align="left"><a href="https://github.com/jonlwheat2-gif"><b>jonlwheat2-gif</b></a></td><td align="center">68</td><td align="right">69,097</td></tr>
   <tr><td align="center">13</td><td align="left"><a href="https://github.com/artickc"><b>artickc</b></a></td><td align="center">62</td><td align="right">43,502</td></tr>
-  <tr><td align="center">14</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
-  <tr><td align="center">15</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
-  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">47</td><td align="right">33,626</td></tr>
-  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">46</td><td align="right">809,391</td></tr>
-  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">44</td><td align="right">147,896</td></tr>
+  <tr><td align="center">14</td><td align="left"><a href="https://github.com/xiaoyaner0201"><b>xiaoyaner0201</b></a></td><td align="center">59</td><td align="right">126,220</td></tr>
+  <tr><td align="center">15</td><td align="left"><a href="https://github.com/chirag127"><b>chirag127</b></a></td><td align="center">52</td><td align="right">6,661</td></tr>
+  <tr><td align="center">16</td><td align="left"><a href="https://github.com/xz-dev"><b>xz-dev</b></a></td><td align="center">50</td><td align="right">245,976</td></tr>
+  <tr><td align="center">17</td><td align="left"><a href="https://github.com/woodsonl"><b>woodsonl</b></a></td><td align="center">48</td><td align="right">811,771</td></tr>
+  <tr><td align="center">18</td><td align="left"><a href="https://github.com/rqzbeh"><b>rqzbeh</b></a></td><td align="center">46</td><td align="right">151,229</td></tr>
+  <tr><td align="center">19</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">43</td><td align="right">28,166</td></tr>
   <tr><td align="center">19</td><td align="left"><a href="https://github.com/QuangBlue"><b>QuangBlue</b></a></td><td align="center">43</td><td align="right">13,112</td></tr>
-  <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>සජීවී <code>release/v3.8.52</code> අග්රය <code>656f01cb43</code> භාවිතයෙන් 2026-10-18 15:09:09 UTC දින සංගණනය සිදු කරන ලදී. පිටුගත කළ GitHub GraphQL සංගණනයේ ඒකාබද්ධ කළ PR 9,191ක් අඩංගු වේ: ගබඩා හිමිකරුගෙන් 3,834ක්, Dependabot වෙතින් 229ක්, වෙනත් bots/apps වෙතින් 6ක් සහ <b>වෙන්වූ දායකයින් 835 දෙනෙකුගෙන් බාහිර PR 5,122ක්</b>. “වෙනස් කළ පේළි” යනු GitHub එකතු කිරීම් + මකා දැමීම් වන අතර ජනනය කළ ගොනු, lockfiles, නාමාවලි, පරිවර්තන සහ ලේඛන ඇතුළත් වේ; එය වෙනස්වීම් ප්රමාණය මිස කර්තෘ විසින් ලියූ LOC නොවේ. PR 49ක GitHub diff පේළි 500,000 ඉක්මවන බව වාර්තා වේ (උදාහරණයක් ලෙස, තනි provider එකක් එක් කරන #13399 හි වෙනස් කළ ගොනු 2,347ක් ලැයිස්තුගත වේ), එමඟින් ඉහත එකතුවලින් කිහිපයක් අතිශය වැඩි වේ. සම ලකුණු ලැබූවන් එකම ස්ථානයේ ශ්රේණිගත කර ඇත.</sub>
+<sub>සජීවී <code>release/v3.8.53</code> අග්රය <code>05bc048d6c</code> භාවිතයෙන් 2026-11-03 03:01:19 UTC දින සංගණනය සිදු කරන ලදී. පිටුගත කළ GitHub GraphQL සංගණනයේ ඒකාබද්ධ කළ PR 9,947ක් අඩංගු වේ: ගබඩා හිමිකරුගෙන් 4,130ක්, Dependabot වෙතින් 240ක්, වෙනත් bots/apps වෙතින් 6ක් සහ <b>වෙන්වූ දායකයින් 883 දෙනෙකුගෙන් බාහිර PR 5,571ක්</b>. “වෙනස් කළ පේළි” යනු GitHub එකතු කිරීම් + මකා දැමීම් වන අතර ජනනය කළ ගොනු, lockfiles, නාමාවලි, පරිවර්තන සහ ලේඛන ඇතුළත් වේ; එය වෙනස්වීම් ප්රමාණය මිස කර්තෘ විසින් ලියූ LOC නොවේ. PR 53ක GitHub diff පේළි 500,000 ඉක්මවන බව වාර්තා වේ (උදාහරණයක් ලෙස, තනි provider එකක් එක් කරන #13399 හි වෙනස් කළ ගොනු 2,347ක් ලැයිස්තුගත වේ), එමඟින් ඉහත එකතුවලින් කිහිපයක් අතිශය වැඩි වේ. සම ලකුණු ලැබූවන් එකම ස්ථානයේ ශ්රේණිගත කර ඇත.</sub>
 
 ### GitHub වෙත ආරෝපණය කළ commit
 
@@ -1427,14 +1427,14 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub වෙත ආරෝපිත commits 367ක්</sub>
+      <sub>🥇 GitHub වෙත ආරෝපිත commits 418ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub වෙත ආරෝපිත commits 269ක්</sub>
+      <sub>🥈 GitHub වෙත ආරෝපිත commits 294ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
@@ -1444,6 +1444,13 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
       <sub>🥉 GitHub වෙත ආරෝපිත commits 229ක්</sub>
     </td>
     <td align="center" width="160">
+      <a href="https://github.com/pacocartones">
+        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
+        <b>Paco Cartones</b>
+      </a><br/>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 222ක්</sub>
+    </td>
+    <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
@@ -1451,12 +1458,14 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
       <sub>🏅 GitHub වෙත ආරෝපිත commits 202ක්</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/pacocartones">
-        <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
-        <b>Paco Cartones</b>
+      <a href="https://github.com/JxnLexn">
+        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
+        <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub වෙත ආරෝපිත commits 174ක්</sub>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 134ක්</sub>
     </td>
+  </tr>
+  <tr>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
@@ -1464,14 +1473,12 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
       </a><br/>
       <sub>🏅 GitHub වෙත ආරෝපිත commits 126ක්</sub>
     </td>
-  </tr>
-  <tr>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub වෙත ආරෝපිත commits 114ක්</sub>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 115ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
@@ -1481,18 +1488,18 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
       <sub>🏅 GitHub වෙත ආරෝපිත commits 108ක්</sub>
     </td>
     <td align="center" width="160">
-      <a href="https://github.com/JxnLexn">
-        <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
-        <b>Jan Leon</b>
-      </a><br/>
-      <sub>🏅 GitHub වෙත ආරෝපිත commits 87ක්</sub>
-    </td>
-    <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
       <sub>🏅 GitHub වෙත ආරෝපිත commits 70ක්</sub>
+    </td>
+    <td align="center" width="160">
+      <a href="https://github.com/jonlwheat2-gif">
+        <img src="https://github.com/jonlwheat2-gif.png" width="40" style="border-radius:50%" alt="WebPerson"/><br/>
+        <b>WebPerson</b>
+      </a><br/>
+      <sub>🏅 GitHub වෙත ආරෝපිත commits 68ක්</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
@@ -1504,7 +1511,7 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTC දී නැවත පරීක්ෂා කරන ලදී: පෙරනිමි <code>release/v3.8.52</code> ශාඛාව සඳහා repository Contributors API මඟින් වාර්තා කළ GitHub වෙත ආරෝපිත commits. API එක අනන්යතා 849ක් (පරිශීලකයන් 429ක්, bots 2ක්, නිර්නාමික අනන්යතා 418ක්) ලබා දුන්නේය; මෙම වගුවෙන් නඩත්තුකරු, bots සහ නිර්නාමික අනන්යතා ඉවත් කර ඇති අතර සම තරග ස්ථාන රඳවා ඇත. මෙය ඉහත ඇති ඒකාබද්ධ කළ PR ශ්රේණිගත කිරීමෙන් සහ පහත ඇති Git-metadata සංගණනයෙන් යන දෙකෙන්ම වෙනස් වේ.</sub>
+<sub>2026-11-03 02:09:16 UTC දී නැවත පරීක්ෂා කරන ලදී: පෙරනිමි <code>release/v3.8.53</code> ශාඛාව සඳහා repository Contributors API මඟින් වාර්තා කළ GitHub වෙත ආරෝපිත commits. API එක අනන්යතා 903ක් (පරිශීලකයන් 429ක්, bots 2ක්, නිර්නාමික අනන්යතා 472ක්) ලබා දුන්නේය; මෙම වගුවෙන් නඩත්තුකරු, bots සහ නිර්නාමික අනන්යතා ඉවත් කර ඇති අතර සම තරග ස්ථාන රඳවා ඇත. මෙය ඉහත ඇති ඒකාබද්ධ කළ PR ශ්රේණිගත කිරීමෙන් සහ පහත ඇති Git-metadata සංගණනයෙන් යන දෙකෙන්ම වෙනස් වේ.</sub>
 
 > 🙏 මෙම දායකයන්ගේ විශේෂාංග, දෝෂ නිවැරදි කිරීම් සහ යටිතල පහසුකම් වැඩිදියුණු කිරීම් OmniRoute විශ්වාසදායක සහ විශේෂාංගවලින් පොහොසත් කරන දෙයෙහි **මූලික කොටසකි**. සෑම pull request එකක්ම, සෑම test case එකක්ම සහ සෑම i18n පරිවර්තන ගොනුවක්ම වැදගත් වේ. විවෘත මූලාශ්ර ගොඩනඟන්නේ ඔවුන් වැනි පුද්ගලයන් විසිනි.
 
