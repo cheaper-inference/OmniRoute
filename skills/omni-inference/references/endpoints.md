@@ -111,6 +111,8 @@
 - [`POST /api/v1/responses/{path}`](#post-apiv1responsespath)
 - [`GET /api/v1/search/analytics`](#get-apiv1searchanalytics)
 - [`POST /api/v1/segment`](#post-apiv1segment)
+- [`GET /api/v1/systemone`](#get-apiv1systemone)
+- [`POST /api/v1/systemone`](#post-apiv1systemone)
 - [`GET /api/v1/video-bridge/drilldown`](#get-apiv1video-bridgedrilldown)
 - [`DELETE /api/v1/video-bridge/drilldown`](#delete-apiv1video-bridgedrilldown)
 - [`GET /api/v1/videos/generations`](#get-apiv1videosgenerations)
@@ -1313,6 +1315,30 @@ POST segment
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/segment \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/v1/systemone
+
+List decisions-capable models
+
+Decisions entries from the unified model catalog.
+
+```bash
+curl http://localhost:20128/api/v1/systemone \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/v1/systemone
+
+System One typed decisions
+
+One `state` plus typed `questions` (`noul` / `choice` / `score`); the backend is selected by the model id — `typesafe/jev-*` or a bare `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/ <model>` routes to OpenRouter's alpha decisions endpoint. Answers, probabilities and usage (tokens, cost) pass through untouched.
+
+```bash
+curl -X POST http://localhost:20128/api/v1/systemone \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'

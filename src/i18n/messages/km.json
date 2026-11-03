@@ -4198,7 +4198,8 @@
     "duplicateAutoComboSnapshotMsg": "វានឹងថតស្ថានភាពបច្ចុប្បន្ននៃអ្នកផ្តល់សេវា/ម៉ូដែលដែលបានតភ្ជាប់ និងត្រូវគ្នានឹងគំរូនេះ ទៅជាបន្សំដែលអាចកែសម្រួលបាន។",
     "duplicateAutoComboFailedPrefix": "មិនអាចចម្លងបន្សំស្វ័យប្រវត្តិបានទេ៖",
     "duplicateAutoComboUnknownError": "កំហុសដែលមិនស្គាល់",
-    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}"
+    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}",
+    "fallbackSummary": "សំណើរ {rate}% បានប្រើជម្រើស រហូតដល់ ~{skips} គោលដៅ ដែលបានរំលង"
   },
   "costs": {
     "title": "ការចំណាយ",
@@ -15462,6 +15463,7 @@
     "upstreamStatus": "ស្ថានភាពអ៊ុបស្ត្រីម",
     "noResponse": "មិនមានការឆ្លើយតប",
     "egressIp": "អ៊ីភីចេញ",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "ក្បាលបន្ទាប់",
     "firstChunkAfter": "បំណែកដំបូងបន្ទាប់",
     "servedBy": "បានផ្តល់ដោយ",

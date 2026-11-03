@@ -444,9 +444,10 @@ server/
 
 ---
 
-## 4. `open-sse/` — Spațiu de lucru al motorului de streaming
+## 4. `open-sse/` — spațiul de lucru al motorului de streaming
 
-Spațiu de lucru separat npm publicat ca `@omniroute/open-sse`. Deține procesarea cererilor, executori, traducători, servicii, transformator și serverul MCP.
+Spațiu de lucru npm separat, publicat ca `@omniroute/open-sse`. Se ocupă de
+procesarea cererilor, executori, translatori, servicii, transformator și serverul MCP.
 
 ```
 open-sse/
@@ -456,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -466,61 +467,79 @@ open-sse/
 
 ### 4.1 `open-sse/handlers/`
 
-| Handler                 | Scop                                                                                      |
-| ----------------------- | ----------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Conducta principală de chat (cache, limită de rată, rutare combinată, expediere executor) |
-| `responsesHandler.ts`   | OpenAI Răspunsuri API punct de intrare                                                    |
-| `embeddings.ts`         | Înglobări                                                                                 |
-| `imageGeneration.ts`    | Generarea imaginii                                                                        |
-| `audioSpeech.ts`        | Transpunerea textului în vorbire                                                          |
-| `audioTranscription.ts` | Vorbire în text                                                                           |
-| `videoGeneration.ts`    | Generare video                                                                            |
-| `musicGeneration.ts`    | Generație muzicală                                                                        |
-| `rerank.ts`             | Reclasificare                                                                             |
-| `moderations.ts`        | Moderare                                                                                  |
-| `search.ts`             | Căutare pe web                                                                            |
-| `sseParser.ts`          | analizatorul de evenimente SSE                                                            |
-| `usageExtractor.ts`     | Extrageți numărul de jetonuri din fluxurile din amonte                                    |
-| `responseSanitizer.ts`  | Stripți zgomotul specific furnizorului                                                    |
-| `responseTranslator.ts` | Adeziv între răspunsul furnizorului și stratul traducător                                 |
+| Handler                 | Scop                                                                                            |
+| ----------------------- | ----------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Pipeline principal de chat (cache, limitare de rată, rutare combo, dispecerizarea executorului) |
+| `responsesHandler.ts`   | Punct de intrare pentru API-ul OpenAI Responses                                                 |
+| `embeddings.ts`         | Embeddings                                                                                      |
+| `imageGeneration.ts`    | Generarea imaginilor                                                                            |
+| `audioSpeech.ts`        | Conversie text-în-vorbire                                                                       |
+| `audioTranscription.ts` | Conversie vorbire-în-text                                                                       |
+| `videoGeneration.ts`    | Generarea videoclipurilor                                                                       |
+| `musicGeneration.ts`    | Generarea muzicii                                                                               |
+| `rerank.ts`             | Reordonare                                                                                      |
+| `moderations.ts`        | Moderare                                                                                        |
+| `search.ts`             | Căutare pe web                                                                                  |
+| `sseParser.ts`          | Analizor de evenimente SSE                                                                      |
+| `usageExtractor.ts`     | Extragerea numărului de tokenuri din fluxurile upstream                                         |
+| `responseSanitizer.ts`  | Eliminarea elementelor specifice furnizorului                                                   |
+| `responseTranslator.ts` | Legătura dintre răspunsul furnizorului și nivelul de translatare                                |
 
 ### 4.2 `open-sse/executors/`
 
-156 de module de executare de nivel superior (`*.ts` minus `base.ts`, `index.ts` și teste - măsoară numărul `npm run check:docs-counts` ). Fiecare clasă de executant extinde `BaseExecutor` (`base.ts`), direct sau prin `DefaultExecutor` sau alt executant; modulele rămase sunt ajutoare pentru fiecare furnizor (scheme de instrumente, adaptoare fetch/TTS, gestionare de ciudatenii). Executorii includ:
+158 de module executor de nivel superior (`*.ts`, cu excepția `base.ts`, `index.ts` și a testelor — numărul este măsurat de
+`npm run check:docs-counts`). Fiecare clasă executor extinde `BaseExecutor` (`base.ts`),
+direct sau prin `DefaultExecutor` ori un alt executor; modulele rămase sunt
+ajutoare specifice furnizorilor (scheme de instrumente, adaptoare fetch/TTS, gestionarea particularităților). Executorii includ:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` plus `claudeIdentity.ts` (asistent de identitate partajată) și `index.ts` (registru).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
+`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
+`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
+`pollinations`, `qoder`, `vertex`, `devin-desktop`, plus `claudeIdentity.ts`
+(ajutor comun pentru identitate) și `index.ts` (registru).
 
-> Notă: furnizorii care nu sunt enumerați aici sunt deserviți de `default.ts` folosind executatorul generic compatibil cu OpenAI. Catalogul complet de furnizori (377 de furnizori) locuiește în `src/shared/constants/providers.ts`.
+> Notă: furnizorii care nu sunt enumerați aici sunt deserviți de `default.ts`, utilizând executorul generic compatibil cu OpenAI. Catalogul complet al furnizorilor (380 de furnizori) se află în
+> `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Traducere hub-and-spoke (OpenAI este hub-ul).
+Translatare hub-and-spoke (OpenAI este hubul).
 
-- **9 solicită traducători** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 traducători de răspuns** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
-- **9 ajutoare** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, plus teste de ajutor.
-- **Ajutor de imagine** (`translator/image/sizeMapper.ts`).
-- Nivel superior: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- **9 translatori de cereri** (`translator/request/`):
+  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
+  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
+  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **9 translatori de răspunsuri** (`translator/response/`):
+  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+  `openai-to-claude`.
+- **9 ajutoare** (`translator/helpers/`):
+  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, plus
+  teste pentru ajutoare.
+- **Ajutoare pentru imagini** (`translator/image/sizeMapper.ts`).
+- La nivel superior: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Răspunsuri API ↔ Convertor de finalizări de chat (utilizat de ruta `responses/` catch-all).
+- `responsesTransformer.ts` — convertor bazat pe `TransformStream` pentru Responses API ↔ Chat
+  Completions (utilizat de ruta catch-all `responses/`).
 
 ### 4.5 `open-sse/services/`
 
-Repere (lista completă sub `open-sse/services/`):
+Aspecte principale (lista completă se află în `open-sse/services/`):
 
-| Îngrijorare           | Fișiere                                                                                                                                                                                                                                                  |
+| Preocupare            | Fișiere                                                                                                                                                                                                                                                  |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Rutare combinată      | `combo.ts` (20 de strategii), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                  |
-| Motor Combo Auto      | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Reziliență            | `accountFallback.ts` (închidere + de răcire), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                      |
+| Rutare combo          | `combo.ts` (20 strategii), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                     |
+| Motorul Auto Combo    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Reziliență            | `accountFallback.ts` (răcire + blocare), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                           |
 | Cote                  | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Memorarea în cache    | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Inteligența de rutare | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Manipularea modelelor | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Comprimare            | `compression/` — cablarea motorului cu compresie completă                                                                                                                                                                                                |
-| Sesiune token +       | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Memorare în cache     | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Inteligență de rutare | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Gestionarea modelelor | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Compresie             | `compression/` — integrarea completă a motorului de compresie                                                                                                                                                                                            |
+| Token + sesiune       | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Nivel / manifest      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / rețea            | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
 | Loturi                | `batchProcessor.ts`                                                                                                                                                                                                                                      |
@@ -528,20 +547,43 @@ Repere (lista completă sub `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unelte unice** cu fir în `server.ts` (45 canonice în memorie `schemas/tools.ts` +, abilități, abilități GitHub, pool, gamification, plugin, Notion, Obsidian, module local-corpus și de compresie — uniunea numărată de `countUniqueMcpTools`).
-- **3 transporturi** : stdio, HTTP Streamable, SSE.
-- **33 lunete** aplicat la runtime — lista de bază în `src/shared/constants/mcpScopes.ts`, setul complet este uniunea scopurilor declarate de fiecare modul de instrument.
-- Tabel de audit: `mcp_tool_audit` (populat cu `audit.ts`).
-- Fișiere: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus teste sub `__tests__/`.
-- Consultați [MCP-SERVER.md](../frameworks/MCP-SERVER.md) pentru catalogul complet de instrumente.
+- **110 instrumente unice** conectate în `server.ts` (45 canonice în `schemas/tools.ts` +
+  module pentru memorie, competențe, competențe GitHub, pool, gamificare, plugin, Notion, Obsidian,
+  corpus local și compresie — reuniunea este numărată de `countUniqueMcpTools`).
+- **3 transporturi**: stdio, HTTP Streamable, SSE.
+- **33 de domenii de aplicare** impuse în timpul rulării — lista de bază se află în `src/shared/constants/mcpScopes.ts`, iar setul complet este reuniunea domeniilor declarate de fiecare modul de instrumente.
+- Tabel de audit: `mcp_tool_audit` (populat de `audit.ts`).
+- Fișiere: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
+  `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
+  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
+  plus teste în `__tests__/`.
+- Consultați [MCP-SERVER.md](../frameworks/MCP-SERVER.md) pentru catalogul complet al instrumentelor.
 
 ### 4.7 `open-sse/config/`
 
-Registre de furnizori (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), registre de model pe format (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), ajutoare de identitate (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts` `cliFingerprints.ts`, `toolCloaking.ts`), ajutoare de acreditări (`credentialLoader.ts` `codexClient.ts` `defaultThinkingSignature.ts` și adaptoare cloud (`azureAi.ts`, `bedrock.ts`, zqx , `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, zqbb , `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts` `registryUtils.ts`).
+Registre pentru furnizori (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), registre de modele pentru fiecare format (`audioRegistry.ts`,
+`embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
+`musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
+ajutoare pentru identitate (`codexIdentity.ts`, `codexInstructions.ts`,
+`anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
+`cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
+ajutoare pentru acreditări (`credentialLoader.ts`, `codexClient.ts`) și adaptoare
+cloud (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+`maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
+`ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Primitive de streaming și asistență pentru furnizori: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, zqt , `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`, `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
+Primitive de streaming și utilitare pentru furnizori: `stream.ts`, `streamHandler.ts`,
+`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
+`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
+`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
+`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
+`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
+`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
+`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
+`ollamaTransform.ts`.
 
 ---
 
