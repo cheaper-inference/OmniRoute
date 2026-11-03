@@ -14,7 +14,7 @@ OmniRoute kofa ce ta AI da kuma dashboard da aka gina akan Next.js. Yana ba da m
 
 Babban damar iyawa:
 
-- BudeAI mai dacewa da API surface don CLI/tools (Masu samar da 380, 156 masu aiwatarwa)
+- BudeAI mai dacewa da API surface don CLI/tools (Masu samar da 380, 158 masu aiwatarwa)
 - fassarar Request/response a cikin tsarin mai bayarwa
 - Model combo fallback (jerin samfuri da yawa)
 - Matakan haɗe-haɗe (`provider + model + connection`) tare da oda lokacin aiki ta `compositeTiers`
