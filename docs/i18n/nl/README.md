@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — De Gratis AI Gateway
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Blijf altijd coderen. Elke AI-tool → 380 providers — 150+ gratis — via één endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity naar GRATIS Claude / GPT / Gemini met automatische fallback. RTK + Caveman gestapelde compressie bespaart 15–95% tokens (~89% gemiddeld) — nooit meer limieten bereiken. 380 AI-providers · 150+ gratis niveaus · ~1,62 miljard gratis tokens/maand · 20 routeringsstrategieën · €0 om te starten."/>
 
 </div>
@@ -1292,7 +1294,7 @@ Canonieke statistieken op 2026-10-18: **1.976 unieke video's** · **20.220.289 b
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Taal</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> in <code>src/</code> en <code>open-sse/</code> (nul <code>any</code> in de kern sinds v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journaling) + LowDB (JSON-legacy) — 147 domeinmodules, 220 migraties</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL-journaling) + LowDB (JSON-legacy) — 147 domeinmodules, 221 migraties</td></tr>
   <tr><td nowrap><b>Geheugen</b></td><td>SQLite FTS5 voor volledige tekst + int8-gekwantiseerde vectorinsluitingen, getypeerd verval</td></tr>
   <tr><td nowrap><b>Schema's</b></td><td>Zod 4 — validatie van MCP-tool-I/O + API-contracten</td></tr>
   <tr><td nowrap><b>Protocollen</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1805,7 +1807,7 @@ MIT-licentie - zie [LICENSE](LICENSE) voor details.
 
 **[⬆ Terug naar boven](#-omniroute)** · Gebouwd met ❤️ voor de open-source AI-community.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-licentie · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT-licentie · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions ingeschakeld voor community Q&A -->

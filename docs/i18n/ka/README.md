@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — უფასო AI გეითვეი
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — არასდროს შეწყვიტო კოდირება. ყველა AI ინსტრუმენტი → 380 პროვაიდერი — 150+ უფასო — ერთ ენდპოინტში. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity უფასო Claude / GPT / Gemini-ში ავტომატური გადართვით. RTK + Caveman-ის სტეკირებული კომპრესია ზოგავს 15–95% ტოკენს (~89% საშუალოდ) — არასდროს გადააჭარბებ ლიმიტებს. 380 AI პროვაიდერი · 150+ უფასო ტარი · ~1.62 მლრდ უფასო ტოკენი/თვე · 20 როუტინგის სტრატეგია · $0 დასაწყებად."/>
 
 </div>
@@ -1292,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-იც გამ�
   <tr><td nowrap><b>გაშვების გარემო</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ენა</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code>-სა და <code>open-sse/</code>-ში (<code>any</code>-ის ნულოვანი რაოდენობა ბირთვში v2.0-დან)</td></tr>
   <tr><td nowrap><b>ფრეიმვორკი</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>მონაცემთა ბაზა</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 დომენური მოდული, 220 მიგრაცია</td></tr>
+  <tr><td nowrap><b>მონაცემთა ბაზა</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 დომენური მოდული, 221 მიგრაცია</td></tr>
   <tr><td nowrap><b>მეხსიერება</b></td><td>SQLite FTS5 სრული ტექსტის ძიება + int8-quantized ვექტორული ემბედინგები, ტიპიზებული დეგრადაცია</td></tr>
   <tr><td nowrap><b>სქემები</b></td><td>Zod 4 — MCP ხელსაწყოების I/O ვალიდაცია + API კონტრაქტები</td></tr>
   <tr><td nowrap><b>პროტოკოლები</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1805,7 +1807,7 @@ MIT ლიცენზია — დეტალებისთვის იხ�
 
 **[⬆ ზემოთ დაბრუნება](#-omniroute)** · შექმნილია ❤️-ით ღია კოდის AI საზოგადოებისთვის.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ლიცენზია · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ლიცენზია · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions ჩართულია საზოგადოების კითხვებისა და პასუხებისთვის -->

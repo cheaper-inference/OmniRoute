@@ -59,11 +59,13 @@ import {
   isComboRequestScopedFailure as isScopedFailure,
   shouldRecordModelLockoutForComboFailure,
   isLocalKeyPolicyBreachErrorBody,
+  isAccountSemaphoreCapacityFailure,
   isLocalQueueCapacityErrorBody,
   toRecordedTarget,
   resolveDelayMs,
   resolvePersistedConnectionCooldownSkipReason,
   isModelScoped400,
+  isContextOverflowFailure,
   requestScopedReplayKey,
 } from "./comboPredicates.ts";
 import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
@@ -78,6 +80,7 @@ import {
   releaseRejectedQualityResponse,
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
+import { getEmptyTurnDiagnostics } from "../../utils/emptyTurnPolicy.ts";
 import {
   isTruncatedComboAttempt,
   recordTruncatedStreamAttempt,
@@ -93,6 +96,7 @@ import { readConnectionForCooldownGate } from "./executeTargetGates.ts";
 import { recordLkgpPin } from "./recordLkgpPin.ts";
 import {
   handlePreContentStreamRetry,
+  isProviderSafetyStreamFailure,
   qualityValidationFailure,
   remainderIsHomogeneous,
   shouldAbortOnInputBoundFailure,
@@ -401,7 +405,8 @@ export async function executeTargetAttempt(
         releaseRejectedQualityResponse(qualityClone, result);
         deps.log.warn(
           "COMBO",
-          `Model ${modelStr} returned 200 but failed quality check: ${quality.reason}`
+          `Model ${modelStr} returned 200 but failed quality check: ${quality.reason}; ` +
+            `detector=combo-quality native=${JSON.stringify(getEmptyTurnDiagnostics(result))}`
         );
         // #6692: a quality-rejected 200 never marks the connection row
         // unhealthy, so the sticky pin's lazy headroom recheck would never
@@ -476,6 +481,9 @@ export async function executeTargetAttempt(
           latencyMs: Date.now() - deps.startTime,
         });
         state.observeFailure(false, target.executionKey);
+        // #17049: an in-stream provider safety stop is terminal — no same-target retry,
+        // family sibling, or next target may replace it.
+        if (isProviderSafetyStreamFailure(quality)) return qualityValidationFailure(quality);
         if (handlePreContentStreamRetry(quality, retry, deps, modelStr)) {
           if (emptyStreamSiblingRecovery && quality.upstreamFailure?.emptyContent) {
             emptyTurnConnectionId = effectiveConnectionId || null;
@@ -1105,7 +1113,7 @@ export async function executeTargetAttempt(
     const isTransient =
       !isStreamReadinessFailure &&
       !isTokenLimitBreach &&
-      !scopedFailure &&
+      (!scopedFailure || isAccountSemaphoreCapacityFailure(structuredError)) &&
       [408, 429, 500, 502, 503, 504].includes(result.status);
     // failoverBeforeRetry means what it says: prefer the next sibling
     // target over hammering this one again. Without this check, a
@@ -1204,6 +1212,7 @@ export async function executeTargetAttempt(
     const protectedTargetTrust = state.targetFailureTrust.get(target.executionKey);
     if (
       protectedPriorityTarget &&
+      !isContextOverflowFailure(errorText, structuredError) &&
       (!protectedTargetTrust?.observedFailure || !protectedTargetTrust.allObservedFailuresQuota)
     ) {
       recordComboRequest(deps.combo.name, modelStr, {

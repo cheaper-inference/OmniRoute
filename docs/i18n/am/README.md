@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — ነፃ የAI መዳረሻ
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ከቶ ኮድ መጻፍ አትቁም። ሁሉም የAI መሳሪያዎች → 380 አቅራቢዎች — 150+ ነፃ — በአንድ መግቢያ ነጥብ። Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ወደ ነፃ Claude / GPT / Gemini በራስ-ሰር የመተካት ድጋፍ። RTK + Caveman የተያያዘ ጭነት ከ15–95% ቶክኖችን ያነሳል (~89% አማካይ) — ገደቦችን በቀላሉ አትድርስ። 380 የAI አቅራቢዎች · 150+ ነፃ ደረጃዎች · ~1.62B ነፃ ቶክኖች/ወር · 20 የመስመር ስታቴጂዎች · $0 ለመጀመር."/>
 
 </div>
@@ -1292,7 +1294,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1ም ይዘለዋ�
   <tr><td nowrap><b>የማስኬጃ አካባቢ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ቋንቋ</b></td><td>TypeScript 6.0 — በ<code>src/</code> እና <code>open-sse/</code> ውስጥ <b>100% TypeScript</b> (ከv2.0 ጀምሮ በዋናው ኮድ ውስጥ ዜሮ <code>any</code>)</td></tr>
   <tr><td nowrap><b>ፍሬምወርክ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ዳታቤዝ</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 የዶሜይን ሞጁሎች፣ 220 ማይግሬሽኖች</td></tr>
+  <tr><td nowrap><b>ዳታቤዝ</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 የዶሜይን ሞጁሎች፣ 221 ማይግሬሽኖች</td></tr>
   <tr><td nowrap><b>ማህደረ ትውስታ</b></td><td>SQLite FTS5 የሙሉ ጽሑፍ ፍለጋ + int8-quantized vector embeddings፣ በአይነት የተወሰነ መቀነስ</td></tr>
   <tr><td nowrap><b>ስኪማዎች</b></td><td>Zod 4 — የMCP መሣሪያ I/O ማረጋገጫ + የAPI ውሎች</td></tr>
   <tr><td nowrap><b>ፕሮቶኮሎች</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1805,7 +1807,7 @@ MIT ፈቃድ - ለዝርዝሮች [LICENSE](LICENSE) ይመልከቱ።
 
 **[⬆ ወደ ላይ ተመለስ](#-omniroute)** · ለክፍት ምንጭ AI ማህበረሰብ በ❤️ የተሰራ።
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ፈቃድ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT ፈቃድ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- ለማህበረሰብ ጥያቄ እና መልስ GitHub Discussions ነቅቷል -->

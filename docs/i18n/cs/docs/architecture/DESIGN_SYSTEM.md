@@ -120,16 +120,42 @@
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` zkopíruje upstream `src/` při tomto odevzdání (`latest` = nejnovější tag `v*` ) do `packages/ui-kit/src`, použije jedinou povolenou transformaci (vypustí příponu `.js` z relativních importů) a nastaví verzi pracovního prostoru v `packages/ui-kit/package.json` a `package-lock.json` na upstream. Poté: zkontrolujte `git diff packages/ui-kit`, proveďte vizuální předání poskytovatelů, nastavení, komba, použití a koncového bodu v obou tématech, spusťte `npm run check:ui-kit-snapshot` a `npm run test:vitest:ui` a otevřete PR pomocí upstream changelogu.
 
-## 6. README diagramy
+## 6. Diagramy v README
 
-Dvanáct diagramů, které kořen `README.md` vloží (`docs/diagrams/*.svg`), je sada aplikovaná na statický obrázek a jsou generovány, nikoli ručně: 13 souborů generátoru v `scripts/docs/gen-readme-*.mjs` (dvanáct diagramů plus ovladač `gen-readme-diagrams.mjs` ) a 12 testů zastaralosti v `tests/unit/docs/readme-*-svg.test.ts`, jeden na diagram, každý bajt porovnává potvrzený soubor s výstupem jeho generátoru zqf ( `test-unit`).
+Dvanáct diagramů, které kořenový soubor `README.md` vkládá (`docs/diagrams/*.svg`), tvoří sadu aplikovanou na statický
+obrázek a generují se, nekreslí ručně: 13 generátorových souborů v `scripts/docs/gen-readme-*.mjs`
+(dvanáct diagramů plus ovladač `gen-readme-diagrams.mjs`) a 12 testů zastaralosti v
+`tests/unit/docs/readme-*-svg.test.ts`, jeden pro každý diagram, přičemž každý porovnává bajt po bajtu potvrzený soubor s
+výstupem jeho generátoru (úloha `test-unit`).
 
-- **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` zkopíruje paletu z `packages/ui-kit/src/ci-tokens.css` (připnuto k tomuto souboru pomocí `tests/unit/docs/readme-diagram-theme.test.ts`) a definuje textové role na dřívějších plochách sady — Instrument Serif pro zobrazení, Inter pro text UI, IBM Plex Mono pro obrázky a kód — z balíčků `@fontsource` (samotná řídicí deska používá Switzer sady od sady 0.0.66). Světlé hodnoty sedí na `:root`, tmavé hodnoty za `prefers-color-scheme: dark`, uvnitř souboru, takže každý obrázek sleduje schéma diváka na GitHub.
-- **Písma.** `scripts/docs/readme-fonts.mjs` podmnoží tyto soubory woff2 do glyfů, které každý diagram nakreslí, a vloží je jako `@font-face` `data:` URIs – jediný způsob, jak typografie sady dosáhne obrazu README, protože GitHub Markdown nepřenáší žádné CSS a camo proxy blokuje každé externí načtení. Podmnožiny jsou pouze latinské; glyfy symbolů, které spadají zpět do systémového zásobníku, jsou povoleny jeden po druhém v `SYMBOL_FALLBACKS` a všechny ostatní nekryté glyfy hází.
-- **Regenerovat.** `npm run docs:readme-diagrams` přepíše všech dvanáct v pořadí README a vytiskne jeden řádek na soubor s jeho velikostí. Jediný generátor také běží sám o sobě (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` potřebuje `node --import tsx/esm` protože jeho čísla pocházejí ze zavaděče živého katalogu v `open-sse/config/freeModelCatalog.ts`; důsledek CI změny katalogu je v `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Spusťte generátor a SVG společně.
-- **Důkaz.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` vykreslí soubor tak, jak jej GitHub podává (značka `<img>`, camo's `Content-Security-Policy`, `image/svg+xml`), zachytí světlý a tmavý snímek a oznámí požadavky na externí písmo vytvořené na stránce (musí být 0).
-- **Rozpočet.** Méně než 200 KB za soubor (každý test zatuchlosti to potvrzuje); 500 KB je pevný limit pro jakýkoli obrázek README (pravidlo validátoru SVG studio).
-- **Kopie beze změny, počítá se od brány.** Změna značky změnila typ a paletu, nikoli slova: každý generátor nese kopii svého diagramu v konstantě `*_COPY` (nebo ji vytváří z živého katalogu), což je jak nakreslený text, tak vstup podmnožiny písem. Kanonické postavy zůstávají v uzlech `<text>`, čte je `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); testy zatuchlosti diagramů, které brána čte, také spouštějí své validátory na vygenerovaném souboru, takže číslo, které se odchyluje od kódu, v testu neprojde – opravte zdroj, který brána čte, nikdy ne číslo v generátoru.
+- **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` kopíruje paletu z `packages/ui-kit/src/ci-tokens.css`
+  (připnutou k tomuto souboru pomocí `tests/unit/docs/readme-diagram-theme.test.ts`) a definuje textové role na typografické škále sady:
+  Switzer s váhami sady (400/500/600, display s váhou 500) a prokladem pro
+  vše, s výjimkou rolí kódu (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), které
+  používají IBM Plex Mono a jsou určeny pouze pro příkazy, URL, identifikátory a terminálové obrazovky.
+  Světlé hodnoty jsou v `:root`, tmavé hodnoty za
+  `prefers-color-scheme: dark`, uvnitř souboru, takže každý
+  obrázek sleduje schéma prohlížeče na GitHubu.
+- **Písma.** Markdown na GitHubu nepřenáší žádné CSS a proxy camo blokuje každé externí načtení, takže typografie sady
+  musí cestovat uvnitř souboru. `scripts/docs/readme-outline.mjs`, poslední krok každého generátoru, tvaruje
+  role Switzeru pomocí HarfBuzz a vykresluje je jako vektorové obrysy (`<defs>` cesty a `<use>`),
+  přičemž šipky a geometrické symboly, které Switzer postrádá, kreslí pomocí vlastních metrik. Obrysy, nikdy vložené písmo:
+  licence Switzeru (`packages/ui-kit/src/fonts/FFL.txt`) zakazuje podmnožinování a převod formátu bez písemného
+  souhlasu a povoluje vektorové kresby, proto znovu nezavádějte `@font-face` Switzeru ani URI `data:`. Jediné
+  písmo ponechané v souboru je podmnožina IBM Plex Mono s licencí OFL pro to, co zůstává skutečným textem kódu
+  (`scripts/docs/readme-fonts.mjs`), sestavená z těchto znaků; každý glyf, který nelze vložit, vyvolá chybu.
+- **Regenerace.** `npm run docs:readme-diagrams` přepíše všech dvanáct diagramů v pořadí v README a pro každý
+  soubor vypíše jeden řádek s jeho velikostí. Jeden generátor lze spustit také samostatně (`node scripts/docs/gen-readme-<name>.mjs`;
+  `free-tier-budget` vyžaduje `node --import tsx/esm`, protože jeho údaje pocházejí z živého načítače katalogu v
+  `open-sse/config/freeModelCatalog.ts`; důsledek změny katalogu pro CI je v
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Generátor a SVG vždy potvrďte společně.
+- **Ověření.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` vykreslí soubor způsobem, jakým ho poskytuje GitHub
+  (značka `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), zachytí světlý a tmavý snímek
+  a oznámí požadavky stránky na externí písma (musí jich být 0).
+- **Limit.** Méně než 200 KB na soubor (každý test zastaralosti to ověřuje); 500 KB je pevný limit pro jakýkoli obrázek v README
+  (pravidlo validátoru SVG studia).
+- **Kopírujte beze změn, počty berte z kontroly.** Rebranding změnil typografii a paletu, nikoli slova: každý generátor obsahuje text svého diagramu v konstantě `*_COPY` (nebo ho sestavuje z živého katalogu), která je zároveň vykresleným textem a vstupem kroku tvorby obrysů. Kanonické údaje zůstávají v uzlech `<text>` (po vytvoření obrysů jsou neviditelné, `fill-opacity:0`), čte je `check:docs-counts`
+  (`scripts/check/check-docs-counts-sync.mjs`); testy zastaralosti diagramů, které kontrolu čtení zajišťují, také spouštějí jeho validátory nad vygenerovaným souborem, takže údaj, který se odchýlí od kódu, způsobí selhání testu — opravte zdroj, ze kterého kontrola čte, nikdy číslo v generátoru.
 
 ## 7. Referenční index
 
