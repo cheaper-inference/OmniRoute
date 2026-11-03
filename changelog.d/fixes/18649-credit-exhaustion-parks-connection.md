@@ -1,0 +1,1 @@
+- **fix(sse):** a connection whose account runs out of credit is now parked as `credits_exhausted` even when the failure happens inside combo fallback — previously the combo path dropped the terminal status and the dead account kept receiving traffic (#18633)

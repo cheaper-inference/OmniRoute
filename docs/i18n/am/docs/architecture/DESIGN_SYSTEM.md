@@ -59,7 +59,7 @@
 
 ## 5. ኪት ማዘመን
 
-`npm run check:ui-kit-upstream` በ `packages/ui-kit/UPSTREAM.md` ውስጥ የተሰካውን ስሪት ከአዲሱ `v*` መለያ ጋር ያወዳድራል እና ልቀቱ ሲወጣ የማመሳሰል ትዕዛዙን ያትማል። ሳምንታዊው `UI Kit upstream watch` የስራ ፍሰት (`.github/workflows/ui-kit-upstream-watch.yml`) ተመሳሳይ ፍተሻ ያካሂዳል እና ፒኑ ከኋላ እያለ አንድ የመከታተያ ጉዳይ ክፍት ያደርገዋል። ወደ ላይ ያለው ሪፖ ግላዊ ነው፣ ስለዚህ የስራ ፍሰቱ በ `UI_KIT_READ_TOKEN` ሚስጥር ውስጥ ተነባቢ-ብቻ ማስመሰያ ያስፈልገዋል እና ያለሱ ንቁ ሆኖ ይቆያል።
+`npm run check:ui-kit-upstream` በ `packages/ui-kit/UPSTREAM.md` ውስጥ የተሰካውን ስሪት ከአዲሱ `v*` መለያ ጋር ያወዳድራል እና ልቀቱ ሲወጣ የማመሳሰል ትዕዛዙን ያትማል። ሳምንታዊው `UI Kit upstream watch` የስራ ፍሰት (`.github/workflows/ui-kit-upstream-watch.yml`) ተመሳሳይ ፍተሻ ያካሂዳል እና ፒኑ ከኋላ እያለ አንድ የመከታተያ ጉዳይ ክፍት ያደርገዋል። ወደ ላይ ያለው ሪፖ የግል ነው፣ ስለዚህ የስራ ፍሰቱ በ `UI_KIT_READ_TOKEN` ሚስጥር ውስጥ ተነባቢ-ብቻ ማስመሰያ ያስፈልገዋል። ወደ ላይ ማንበብ በማይችልበት ጊዜ (ምንም ማስመሰያ፣ መስራት ያቆመ ቶከን፣ ወይም GitHub የማይደረስበት) ሩጫው አረንጓዴ ሆኖ ይቆያል ነገር ግን ማስጠንቀቂያ ይጽፋል እና አንድ የተለየ እትም ክፍት ያደርገዋል፣ ይህም አንዴ ይዘጋል፣ በኋላ ሩጫ እንደገና ወደላይ ማንበብ ይችላል።
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` የላይኛውን `src/` በዛ ቁርጠኝነት ይገለብጣል (`latest` = the new `v*` tag) ወደ `packages/ui-kit/src`, ነጠላ የተፈቀደውን ለውጥ ይተገበራል (ከአንፃራዊ ማስመጣት የ `.js` ቅጥያ ይጥላል) እና የስራ ቦታ ሥሪቱን በ `packages/ui-kit/package.json` እና `package-lock.json` ወደ ላይኛው ያዘጋጃል። በመቀጠል `git diff packages/ui-kit` ይገምግሙ፣ በአቅራቢዎች፣ መቼቶች፣ ጥንብሮች፣ አጠቃቀም እና የመጨረሻ ነጥብ በሁለቱም ጭብጦች ላይ ያድርጉ፣ `npm run check:ui-kit-snapshot` እና `npm run test:vitest:ui` ን ያሂዱ እና PR ከላይ ባለው የለውጥ ሎግ ይክፈቱ።
 
