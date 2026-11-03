@@ -15,6 +15,12 @@ test("shouldFetchLiveModels: zed-hosted (empty static catalog + modelsUrl) is fe
   assert.equal(shouldFetchLiveModels("zed-hosted"), true);
 });
 
+test("shouldFetchLiveModels: the other empty-catalog + modelsUrl providers are included too", () => {
+  for (const id of ["nube", "modelscope", "chatplayground"]) {
+    assert.equal(shouldFetchLiveModels(id), true, id);
+  }
+});
+
 test("shouldFetchLiveModels: providers with a static catalog are not fetched", () => {
   assert.equal(shouldFetchLiveModels("openai"), false);
   assert.equal(shouldFetchLiveModels("claude"), false);

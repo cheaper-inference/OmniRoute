@@ -27,13 +27,12 @@ webpack ବିଲ୍ଡ ଏବଂ ଗୋଟିଏ lint କାର୍ଯ୍ୟ ଏ
 | swap      | 16 GB                         | `omniroute-113-5` swap ବନ୍ଦ ରଖି (`MemorySwapMax=0`) ଚାଲେ, ଯାହାଦ୍ୱାରା କୌଣସି ଅନିୟନ୍ତ୍ରିତ ବିଲ୍ଡ ସମଗ୍ର ମେସିନ୍କୁ swapping କରାଇବା ପରିବର୍ତ୍ତେ ନିଜ cap ରେ ବନ୍ଦ ହୋଇଯାଏ                                                                                                                                                                                                                                                           |
 | `/tmp`    | **12 GB tmpfs = RAM**         | ସେଠାରେ ରଖାଯାଇଥିବା ସବୁକିଛି memory ବ୍ୟବହାର କରେ; ଅବଶିଷ୍ଟ ଫାଇଲ୍ଗୁଡ଼ିକ 3 ଘଣ୍ଟା ପରେ ସଫା କରାଯାଏ                                                                                                                                                                                                                                                                                                                                |
 | CPU       | 32 cores ରେ load 60 ଦେଖାଯାଇଛି | quotas ଲାଗୁ ହେବା ପୂର୍ବରୁ, ଗୋଟିଏ Turbopack ବିଲ୍ଡ (~1166 % CPU) ସହିତ ସେହି ମେସିନ୍ରେ ଚାଲୁଥିବା ଗୋଟିଏ coverage suite ଅନ୍ୟ listeners ଗୁଡ଼ିକର heartbeats ପାଇଁ ସମ୍ବଳ ଅଭାବ ସୃଷ୍ଟି କରିଥିଲା (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                   |
-| runners   | **6 listeners**               | 4ଟି OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` ନିଷ୍କ୍ରିୟ ଅଛନ୍ତି (`systemctl enable --now` ସେମାନଙ୍କ ମଧ୍ୟରୁ ଗୋଟିଏକୁ ପୁଣି ସକ୍ରିୟ କରେ)                                                                                                                                                                                                                                                                   |
+| runners   | **7 listeners** (2026-10-28)  | 5ଟି OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` ମଧ୍ୟ `omni-build` ବହନ କରେ; `omniroute-113-3/-4/-8` repoରୁ ଡିଲିଟ୍ କରାଯାଇଛି (2026-10-28)                                                                                                                                                                                                                                                                         |
 
 ସୀମାଗୁଡ଼ିକ ପ୍ରତ୍ୟେକ unit ର `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` ରେ ରହିଛି
 (ପୂର୍ବ ମୂଲ୍ୟଗୁଡ଼ିକ `override.conf.bak-20261018` ଭାବେ ରଖାଯାଇଛି) ଏବଂ
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` ମାଧ୍ୟମରେ live ଭାବେ ପ୍ରୟୋଗ କରାଯାଇଥିଲା — କୌଣସି restart ହୋଇନଥିଲା, ତେଣୁ
-ଚାଲୁଥିବା କୌଣସି କାର୍ଯ୍ୟ ପ୍ରଭାବିତ ହୋଇନଥିଲା। Labels ଗୁଡ଼ିକୁ runners API ମାଧ୍ୟମରେ ପରିବର୍ତ୍ତନ କରାଯାଏ
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+ଚାଲୁଥିବା କୌଣସି କାର୍ଯ୍ୟ ପ୍ରଭାବିତ ହୋଇନଥିଲା। Labels ଗୁଡ଼ିକୁ runners API ମାଧ୍ୟମରେ ପରିବର୍ତ୍ତନ କରାଯାଏ (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), ଏହା ମଧ୍ୟ live ଭାବେ କରାଯାଏ।
 
 ## ଜାନିଟର୍କୁ ଇନ୍ଷ୍ଟଲ୍ କରନ୍ତୁ (କେବଳ ଥରେ, ମେସିନ୍ରେ)
@@ -42,7 +41,7 @@ webpack ବିଲ୍ଡ ଏବଂ ଗୋଟିଏ lint କାର୍ଯ୍ୟ ଏ
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): ପ୍ରତି 30 ମିନିଟ୍ରେ, /var/log/runner-janitor.log ରେ ଲଗ୍ କରନ୍ତୁ
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` ଆବଶ୍ୟକ: ଜାନିଟର୍ କୌଣସି ପଥକୁ ଅପସାରଣ କରିବା ପୂର୍ବରୁ ଖୋଲା
@@ -128,9 +127,17 @@ CPU ବ୍ୟବହାର କରିଚାଲେ। ପ୍ରତ୍ୟେକ Omni
   ଆଗକୁ ବଢ଼ିଥିଲା; 8 GB throttlingକୁ ଦୂର କରେ।
 - **ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବେ କମ୍ listener।** 2026-08-29ରେ ଚାରିଟି OmniRoute unitକୁ disable
   କରାଯାଇଥିଲା — ପ୍ରତ୍ୟେକ ଅତିରିକ୍ତ listener ଉପରୋକ୍ତ memory budgetର ଆଉ ଜଣେ tenant।
-  janitorର ସର୍ବାଧିକ ସୀମା 6 (cronରେ `MAX_ACTIVE_RUNNERS=6`): ଏହା boxରେ ଥିବା ପ୍ରତ୍ୟେକ
-  `Runner.Listener`କୁ ଗଣେ, ଏବଂ OmniHeuris + OmniMind ଆମର ଚାରିଟି ସହିତ ଆଉ ଦୁଇଟି
+  janitorର ସର୍ବାଧିକ ସୀମା 8 (cronରେ `MAX_ACTIVE_RUNNERS=8`): ଏହା boxରେ ଥିବା ପ୍ରତ୍ୟେକ
+  `Runner.Listener`କୁ ଗଣେ, ଏବଂ OmniHeuris + OmniMind ଆମର ପାଞ୍ଚଟି ସହିତ ଆଉ ଦୁଇଟି
   ଯୋଗ କରେ।
+- **Unit ଓ Vitest ଜବ୍ ହୋଷ୍ଟେଡ୍ ରନର୍‌ରେ ହିଁ ରହେ।** repository variable `vars.USE_VPS_TEST_RUNNER`
+  `true` ଥିଲେ ହିଁ `ci.yml` ତାର unit shardଗୁଡ଼ିକ ଓ Vitest ଜବ୍‌କୁ `[self-hosted, omni-ci]`କୁ ପଠାଏ,
+  ଏବଂ ସେତେବେଳେ ମଧ୍ୟ କେବଳ ସମାନ repositoryର `pull_request` ରନ୍ ପାଇଁ; forks, `merge_group` ଓ pushଗୁଡ଼ିକ
+  `ubuntu-latest`ରେ ରହେ (`tests/unit/vps-runner-variable-scope.test.ts`)। variableଟି
+  `false`। 2026-10-28ରେ ତିନୋଟି 4-core `omni-ci` listener `npm ci` ପାଇଁ 250–270 s ନେଇଥିଲେ ଏବଂ ପ୍ରତ୍ୟେକ
+  unit shard 30 ମିନିଟ୍‌ର ଜବ୍ ସୀମାରେ ପହଞ୍ଚିଥିଲା, ଯେତେବେଳେ ଏକ ହୋଷ୍ଟେଡ୍ shard ~634 s ନିଏ; ସେତେବେଳେ boxର load
+  17–24 ଥିଲା। ସେହି listenerଗୁଡ଼ିକୁ ଡିଲିଟ୍ କରାଯାଇଥିଲା। ଏକ unit shard ପାଇଁ ଉପଯୁକ୍ତ ଆକାରର listener ବିନା
+  variableକୁ ପୁଣି ଅନ୍ କରନ୍ତୁ ନାହିଁ।
 - **କୌଣସି runner ବ୍ୟସ୍ତ ଥିବାବେଳେ `/tmp` କିମ୍ବା `_work`କୁ ହାତରେ କେବେ ମଧ୍ୟ
   ସଫା କରନ୍ତୁ ନାହିଁ।** ଯାଞ୍ଚ ଏବଂ delete ମଧ୍ୟରେ ବ୍ୟବଧାନ ଥିବା check-then-delete
   କାରଣରୁ 2026-08-27ରେ ଚାଲୁଥିବା ଗୋଟିଏ Build job ତାହାର `_work` ହରାଇଥିଲା। janitor
@@ -146,8 +153,9 @@ CPU ବ୍ୟବହାର କରିଚାଲେ। ପ୍ରତ୍ୟେକ Omni
 
 ## ହୋଷ୍ଟେଡ୍ ଲେନ୍ (GitHub-ହୋଷ୍ଟେଡ୍ ରନର୍ଗୁଡ଼ିକ)
 
-ଆକାଉଣ୍ଟଟି **Pro** ପ୍ଲାନ୍ରେ ଅଛି: **40ଟି ସମକାଳୀନ ହୋଷ୍ଟେଡ୍ ଜବ୍**, ଯାହା ପ୍ରତ୍ୟେକ PR ଯାଞ୍ଚ,
-ପ୍ରତ୍ୟେକ push-ଟ୍ରିଗର୍ ହୋଇଥିବା ୱର୍କଫ୍ଲୋ ଏବଂ CodeQLର ଡିଫଲ୍ଟ ସେଟଅପ୍ ଦ୍ୱାରା ସହଭାଗୀ ଭାବେ ବ୍ୟବହୃତ ହୁଏ। 2026-10-18ରେ
+repositoryଟି `cheaper-inference` organizationର, **Team** ପ୍ଲାନ୍‌ରେ ଅଛି: **60ଟି ସମକାଳୀନ ହୋଷ୍ଟେଡ୍ ଜବ୍**, ଯାହା organizationର ପ୍ରତ୍ୟେକ repository, ପ୍ରତ୍ୟେକ PR ଯାଞ୍ଚ,
+ପ୍ରତ୍ୟେକ push-ଟ୍ରିଗର୍ ହୋଇଥିବା ୱର୍କଫ୍ଲୋ ଏବଂ CodeQLର ଡିଫଲ୍ଟ ସେଟଅପ୍ ଦ୍ୱାରା ସହଭାଗୀ ଭାବେ ବ୍ୟବହୃତ ହୁଏ। ନିମ୍ନରେ ଥିବା ସଂଖ୍ୟାଗୁଡ଼ିକ
+**Pro** ପ୍ଲାନ୍‌ରେ (40ଟି ସମକାଳୀନ ହୋଷ୍ଟେଡ୍ ଜବ୍) ମାପ କରାଯାଇଥିଲା। 2026-10-18ରେ
 ଏକ merge ଅଭିଯାନ ସମୟରେ (~10 merges/hour, `release/v3.8.52`ରେ) ମାପ କରାଯାଇଥିଲା: **24 hରେ
 2,500ଟି ୱର୍କଫ୍ଲୋ ରନ୍ ସୃଷ୍ଟି ହୋଇଥିଲା**, 6 hରେ ବ୍ରାଞ୍ଚକୁ 44ଟି push, **106ଟି ହୋଷ୍ଟେଡ୍ ଜବ୍ କ୍ୟୁରେ ଥିଲା**, ଯେତେବେଳେ PR ଯାଞ୍ଚଗୁଡ଼ିକ
 ଘଣ୍ଟା ଘଣ୍ଟା ଧରି ଅପେକ୍ଷା କରିଥିଲା ଏବଂ ସେଗୁଡ଼ିକ ବିନା PRଗୁଡ଼ିକ merge କରାଯାଇଥିଲା। ବ୍ରାଞ୍ଚକୁ ପ୍ରତ୍ୟେକ pushରେ ନଅଟି ୱର୍କଫ୍ଲୋ ଚାଲୁ ହେଉଥିଲା:

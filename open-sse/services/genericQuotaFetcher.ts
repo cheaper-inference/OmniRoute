@@ -16,10 +16,11 @@
  * tests) can discover which windows that provider exposes.
  */
 
-import { toNumberOrNull } from "@/shared/utils/numeric";
+import { toNumberOrNull } from "../utils/numeric.ts";
 
 import { hasOllamaPurchasedCredits } from "./ollamaPurchasedCredits.ts";
-import { getUsageForProvider, USAGE_FETCHER_PROVIDERS } from "./usage.ts";
+import type { getUsageForProvider } from "./usage.ts";
+import { USAGE_FETCHER_PROVIDERS } from "./usage/fetcherProviders.ts";
 import {
   getQuotaCacheInvalidator,
   getQuotaFetcher,
@@ -457,7 +458,7 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
 
   let usage: unknown;
   try {
-    const fetchUsage = usageFetcherOverride ?? getUsageForProvider;
+    const fetchUsage = usageFetcherOverride ?? (await import("./usage.ts")).getUsageForProvider;
     usage = await fetchUsage(conn as Parameters<typeof getUsageForProvider>[0], {
       ...(forceRefresh ? { forceRefresh: true } : {}),
     });

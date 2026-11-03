@@ -25,26 +25,27 @@ omniroute launch --profile glm52  # Claude Code באמצעות glm/glm-5.2 דר�
 
 ---
 
-## כיצד Claude Code מתחבר לשער
+## איך Claude Code מתחבר לשער
 
-Claude Code מתקשר באמצעות **Anthropic Messages API** ומופנה אל נקודת קצה
-מותאמת אישית באמצעות משתני סביבה (אין לו דגל `--base-url`):
+קוד Claude מדבר על**Anthropic הודעות API** והוא מצביע על נקודת קצה מותאמת אישית עם משתני סביבה (אין לו דגל `--base-url` ):
 
-| משתנה                                        | מטרה                                                                                  |
-| -------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | כתובת ה־URL הבסיסית של השער (Claude Code מוסיף `/v1/messages`). **ללא הסיומת `/v1`.** |
-| `ANTHROPIC_AUTH_TOKEN`                       | נשלח בתור `Authorization: Bearer …` — השתמשו באסימון הגישה / מפתח ה־API של OmniRoute  |
-| `ANTHROPIC_API_KEY`                          | חלופה: נשלח בתור `x-api-key`. אם שניהם מוגדרים, `ANTHROPIC_AUTH_TOKEN` מקבל עדיפות    |
-| `ANTHROPIC_MODEL`                            | כפיית מודל מסוים (דורס את ברירת המחדל של בורר `/model`)                               |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` ← הבורר המובנה `/model` מציג מודלים מסוג `claude*`/`anthropic*` מתוך `/v1/models` |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | הגבלת מספר אסימוני הפלט לכל תגובה (למשל `65536`)                                      |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | סף אסימונים לדחיסה אוטומטית                                                           |
+| מִשְׁתַנֶה                                   | מַטָרָה                                                                         |
+| -------------------------------------------- | ------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | שורש השער URL (קוד Claude מוסיף `/v1/messages`).** אין סיומת `/v1`.**           |
+| `ANTHROPIC_AUTH_TOKEN`                       | נשלח כ- `Authorization: Bearer …` — השתמש ב- OmniRoute קוד הגישה / מפתח API     |
+| `ANTHROPIC_API_KEY`                          | חלופה: נשלח כ- `x-api-key`. אם שניהם מוגדרים, `ANTHROPIC_AUTH_TOKEN` מנצח       |
+| `ANTHROPIC_MODEL`                            | לכפות דגם ספציפי (עוקף את ברירת המחדל של בורר `/model` )                        |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → הבורר המקורי של `/model` מפרט דגמי `claude*`/`anthropic*` מ- `/v1/models` |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | קביעת אסימוני פלט לכל תגובה (למשל `65536`)                                      |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | סף אסימון לדחיסה אוטומטית                                                       |
 
-> משתני הסביבה נקראים **פעם אחת בעת ההפעלה** — הפעילו מחדש את Claude Code לאחר שינויים בהם.
+> Env vars נקראים** פעם אחת בהפעלה** — הפעל מחדש את קוד Claude לאחר שינוים.
 
-`omniroute launch` מגדיר את כולם עבורכם: הוא מאתר את כתובת ה־URL הבסיסית ואת האסימון
-מתוך ההקשר הפעיל (כך שלאחר `omniroute connect <vps>`, הפעלת `omniroute launch`
-פשוט עובדת), מבצע בדיקת תקינות לשרת ומריץ את `claude`.
+עבור אישור שמסתובב במקום מחרוזת קבועה, הגדר `apiKeyHelper` ב- `~/.claude/settings.json` לפקודה שמדפיסה את האישור הנוכחי ל-stdout. Claude Code מאחסן את הפלט שלו במשך חמש דקות כברירת מחדל (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` עוקף את זה) ושולח את הערך גם ב- `Authorization: Bearer` וגם `x-api-key`. הסקריפט חייב להדפיס את האישורים ושום דבר אחר לא — בבאנר לצדו ב-helper ב-v2.1.227 +.
+
+כך פועלת Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` מדפיסה אסימון גישה ל-Entra קצר מועד ש- OmniRoute מאמת במקום מפתח API. ראה [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` מגדיר את כל אלה עבורך: הוא פותר את אסימון URL + הבסיסי מההקשר הפעיל (אז `omniroute connect <vps>` ואז `omniroute launch` פשוט עובד), בודק בריאות את השרת ומנהל את `claude`.
 
 ---
 

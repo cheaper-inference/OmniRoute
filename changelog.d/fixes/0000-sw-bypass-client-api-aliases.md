@@ -1,0 +1,1 @@
+- **fix(pwa):** the service worker no longer intercepts or caches the client-API aliases (`/v1`, `/v1beta`, `/models`, `/chat`, `/responses`, `/codex`) or `/callback` and `/login`, and matches its bypass list case-insensitively like the server router (#0000)

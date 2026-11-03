@@ -1,0 +1,1 @@
+- **feat(providers):** add Token Harbor (`tokenharbor`) as an OpenAI-compatible API-key gateway with Bearer-key authentication, live model discovery from `/v1/models`, and a free-tier catalog entry for `claude-haiku-5.5:free` (#16315 - thanks @turbolego)

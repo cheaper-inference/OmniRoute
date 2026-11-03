@@ -62,7 +62,8 @@ test("Antigravity -> OpenAI maps generation config, system instructions, content
     false
   );
 
-  assert.equal(result.max_tokens, 32000);
+  // Explicit maxOutputTokens is honored even with tools (no tool-floor bump).
+  assert.equal(result.max_tokens, 128);
   assert.equal(result.temperature, 0.3);
   assert.equal(result.top_p, 0.8);
   assert.equal(result.top_k, 50);
