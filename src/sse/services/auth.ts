@@ -107,6 +107,7 @@ import {
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { copilotRejectionFlag, lockCopilotModelNotSupported } from "./copilotModelNotSupportedLock";
 import { isSharedWalletCredits402 } from "@omniroute/open-sse/services/accountFallback/sharedWalletCredits.ts";
+import { resolveAvalancheCooldownMs } from "@omniroute/open-sse/services/accountFallback/antiAvalanche.ts";
 import { isModelScopedAccessDenial } from "@omniroute/open-sse/services/accountFallback/modelScopedAccessDenial.ts";
 import { isModelUnsupported401 } from "@omniroute/open-sse/services/accountFallback/perModelFailureScope.ts";
 import { postOutputFailureReachesLockout } from "@omniroute/open-sse/services/accountFallback/postOutputFailureStreak.ts";
@@ -2342,6 +2343,16 @@ function isStreamContentStall(errorText: string): boolean {
   return /stream content stall/i.test(String(errorText || ""));
 }
 
+/** The reset an upstream announced for this failure, as opposed to a locally computed backoff. */
+function resolveUpstreamResetMs(fallback: {
+  usedUpstreamRetryHint?: boolean;
+  cooldownMs?: number;
+  quotaResetHintMs?: number | null;
+}): number | null {
+  if (fallback.usedUpstreamRetryHint === true) return fallback.cooldownMs ?? null;
+  return fallback.quotaResetHintMs ?? null;
+}
+
 export async function markAccountUnavailable(
   connectionId: string,
   status: number,
@@ -2356,6 +2367,9 @@ export async function markAccountUnavailable(
     headers?: Headers | Record<string, string> | null;
     correlationId?: string | null;
     streamOutputEmitted?: boolean;
+    isAvalancheRisk?: boolean;
+    avalancheCooldownMs?: number;
+    suppressFallback?: boolean;
     structuredError?: { code?: string | null; type?: string | null } | null;
   } = {}
 ) {
@@ -2811,6 +2825,12 @@ export async function markAccountUnavailable(
         status === 429
           ? ANTIGRAVITY_FAMILY_INFERRED_BASE_COOLDOWN_MS
           : null;
+      const upstreamCooldownMs = isModelScopedClaudeQuota
+        ? claudeQuotaScope.cooldownMs
+        : resolveUpstreamResetMs(fallbackResult);
+      const exactCooldownMs = options.isAvalancheRisk
+        ? resolveAvalancheCooldownMs(options.avalancheCooldownMs, upstreamCooldownMs)
+        : upstreamCooldownMs;
       const lockout = recordModelLockoutFailure(
         provider,
         connectionId,
@@ -2827,18 +2847,16 @@ export async function markAccountUnavailable(
         effectiveProviderProfile,
         {
           ...modelLockoutOptions,
-          exactCooldownMs: isModelScopedClaudeQuota
-            ? claudeQuotaScope.cooldownMs
-            : fallbackResult.usedUpstreamRetryHint === true
-              ? fallbackResult.cooldownMs
-              : (fallbackResult.quotaResetHintMs ?? null),
+          exactCooldownMs,
           maxCooldownMs: mlSettings.maxCooldownMs,
           scope: usesExactAntigravityLock ? "exact" : undefined,
           // Only a transport header, google.rpc.RetryInfo, or cached Claude reset can bypass
-          // maxCooldownMs. Prose and generic JSON hints remain exact but operator-capped.
+          // maxCooldownMs. Prose and generic JSON hints remain exact but operator-capped, and
+          // so does the avalanche burst cooldown when it outlasts the upstream reset.
           exactCooldownIsUpstreamReset:
-            retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
-            isModelScopedClaudeQuota,
+            exactCooldownMs === upstreamCooldownMs &&
+            (retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
+              isModelScopedClaudeQuota),
         }
       );
       // Update last error for observability (without changing terminal status)
@@ -2859,7 +2877,10 @@ export async function markAccountUnavailable(
         cooldownMs: lockout.cooldownMs,
         reason,
       });
-      return { shouldFallback: true, cooldownMs: lockout.cooldownMs };
+      return {
+        shouldFallback: options.suppressFallback ? false : true,
+        cooldownMs: lockout.cooldownMs,
+      };
     }
     const result = fallbackResult;
     if (isSharedWalletCredits402(provider, status, errorText)) {
@@ -2869,6 +2890,16 @@ export async function markAccountUnavailable(
     }
     const { shouldFallback, cooldownMs: rawCooldownMs, newBackoffLevel, reason } = result;
     if (!shouldFallback) return { shouldFallback: false, cooldownMs: 0 };
+    if (options.suppressFallback) {
+      const suppressedCooldownMs =
+        resolveAvalancheCooldownMs(options.avalancheCooldownMs, resolveUpstreamResetMs(result)) ??
+        rawCooldownMs;
+      // This path skips the connection cooldown below, so the lock is what keeps the key out.
+      if (provider && suppressedCooldownMs > 0 && !disableCooling) {
+        lockModel(provider, connectionId, model, reason || "unknown", suppressedCooldownMs);
+      }
+      return { shouldFallback: false, cooldownMs: suppressedCooldownMs };
+    }
     const providerErrorType = classifyProviderError(status, errorText, provider);
 
     if (
