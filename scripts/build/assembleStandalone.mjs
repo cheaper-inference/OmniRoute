@@ -1276,6 +1276,18 @@ export function assembleStandalone({
       seeds: [...SEED_PACKAGES, "@huggingface/transformers"],
       log: (message) => console.log(`[assembleStandalone] ${message.trim()}`),
     });
+
+    // #18699: the translated /docs pages sanitize through jsdom, an external Next's trace leaves
+    // out of the bundle. Without it every translated page falls back to English. Only bundles that
+    // carry the mirrors can reach that import, so Docker (which excludes them) stays lean.
+    if (fsSync.existsSync(path.join(resolvedOutDir, "docs", "i18n"))) {
+      colocateLlmlinguaOptionals({
+        rootDir: projectRoot,
+        targetNodeModulesDir: path.join(resolvedOutDir, "node_modules"),
+        seeds: ["jsdom"],
+        log: (message) => console.log(`[assembleStandalone] ${message.trim()}`),
+      });
+    }
   }
 
   // 7. Optionally dereference Turbopack hashed-module symlinks so the bundle is

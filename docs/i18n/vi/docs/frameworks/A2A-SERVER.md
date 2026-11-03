@@ -163,7 +163,7 @@ OmniRoute bộc lộ 6 kỹ năng A2A có trong `src/lib/a2a/taskExecution.ts::A
 | Báo cáo sức khỏe      | `health-report`      | Tổng hợp bộ ngắt mạch, thời gian hồi chiêu, trạng thái khóa cho mỗi nhà cung cấp                                                             | sức khỏe, khả năng phục hồi | "Hiển thị tình trạng sức khỏe của tất cả các nhà cung cấp" |
 | Liệt kê khả năng      | `list-capabilities`  | Trả về danh mục Kỹ năng đặc vụ gồm 45 mục đầy đủ (23 API + 21 CLI + 1 config) dưới dạng bảng đánh dấu với SKILL.md URLs thô để chèn ngữ cảnh | danh mục, khám phá, kỹ năng | "Liệt kê tất cả các khả năng OmniRoute "                   |
 
-> Thẻ Đại lý phải được giữ phù hợp với danh mục nhà cung cấp trực tiếp của 377; số lượng nhà cung cấp và siêu dữ liệu free/no-auth có nguồn gốc từ sổ đăng ký thời gian chạy.
+> Thẻ Đại lý phải được giữ phù hợp với danh mục nhà cung cấp 380 trực tiếp; số lượng nhà cung cấp và siêu dữ liệu free/no-auth có nguồn gốc từ sổ đăng ký thời gian chạy.
 
 ### Chi tiết kỹ năng `list-capabilities`
 
@@ -197,17 +197,17 @@ Mỗi hàng bao gồm cột `rawUrl` để các tổng đài viên có thể tì
 
 ---
 
-## Thêm kỹ năng mới
+## Thêm một kỹ năng mới
 
-1. **Tạo tệp kỹ năng:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Tạo tập tin kỹ năng:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Xuất một hàm bất đồng bộ `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Tuân theo cấu trúc của các kỹ năng hiện có như `smartRouting.ts`.
+   Xuất hàm không đồng bộ `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Thực hiện theo hình dạng của các kỹ năng hiện có như `smartRouting.ts`.
 
-2. **Đăng ký trình xử lý:** trong `src/lib/a2a/taskExecution.ts`, thêm một mục vào `A2A_SKILL_HANDLERS`:
+2. **Đăng ký xử lý:** trong `src/lib/a2a/taskExecution.ts`, thêm một mục vào `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...các kỹ năng hiện có
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ Mỗi hàng bao gồm cột `rawUrl` để các tổng đài viên có thể tì
    };
    ```
 
-3. **Công khai trong Thẻ tác nhân:** trong `src/lib/a2a/agentCardMetadata.ts` (được dùng chung bởi `/.well-known/agent.json` và `/.well-known/agent-card.json`), thêm vào mảng `skills`:
+3. **Hiển thị trong Thẻ đại lý:** trong `src/lib/a2a/agentCardMetadata.ts` (được chia sẻ bởi `/.well-known/agent.json` và `/.well-known/agent-card.json`), nối vào mảng `skills` :
 
    ```json
    {
@@ -227,9 +227,9 @@ Mỗi hàng bao gồm cột `rawUrl` để các tổng đài viên có thể tì
    }
    ```
 
-4. **Viết kiểm thử:** `tests/unit/a2a-<your-skill>.test.ts`. Bao quát trường hợp thành công và trường hợp lỗi.
+4. **Viết bài kiểm tra:** `tests/unit/a2a-<your-skill>.test.ts`. Che đường dẫn lỗi + đường dẫn hạnh phúc.
 
-5. **Ghi tài liệu** cho kỹ năng mới trong bảng `Available Skills` của tệp này.
+5. **Tài liệu** kỹ năng mới trong bảng `Available Skills` của tệp này.
 
 ---
 
