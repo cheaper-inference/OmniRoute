@@ -1,4 +1,5 @@
 import { BaseExecutor, type ProviderCredentials } from "./base.ts";
+import { sendCIPayload } from "../utils/ciPayloadTransport.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerModels.ts";
 
@@ -25,6 +26,17 @@ import { getModelTargetFormat, PROVIDER_ID_TO_ALIAS } from "../config/providerMo
 export class CheaperInferenceExecutor extends BaseExecutor {
   constructor(provider = "cheaperinference") {
     super(provider, PROVIDERS[provider]);
+  }
+
+  protected dispatchRequest(
+    url: string,
+    init: RequestInit,
+    credentials: ProviderCredentials
+  ): Promise<Response> {
+    return sendCIPayload(url, init, (target, options) => {
+      this.assertOutboundUrlAllowed(target);
+      return super.dispatchRequest(target, options, credentials);
+    });
   }
 
   /**

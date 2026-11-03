@@ -85,3 +85,36 @@ test("preserves the body the base executor already sanitized", () => {
   assert.equal(out.model, "gpt-5.5");
   assert.equal(out.temperature, 0.3);
 });
+
+test("execute compresses the final serialized CI body on both inference surfaces", async () => {
+  const { gunzipSync } = await import("node:zlib");
+  const originalFetch = globalThis.fetch;
+  const sent: { url: string; body: Record<string, unknown> }[] = [];
+  globalThis.fetch = (async (target, init) => {
+    const headers = new Headers(init?.headers);
+    assert.equal(headers.get("content-encoding"), "gzip");
+    const decoded = gunzipSync(Buffer.from(init?.body as Uint8Array)).toString();
+    sent.push({ url: String(target), body: JSON.parse(decoded) });
+    return Response.json({ id: "fixture", choices: [] });
+  }) as typeof fetch;
+  try {
+    for (const model of ["gpt-5.5", "deepseek-v4-flash"]) {
+      const result = await new CheaperInferenceExecutor().execute({
+        model,
+        credentials: CREDENTIALS,
+        body: { model, messages: [{ role: "user", content: "important context ".repeat(6000) }] },
+        stream: false,
+      });
+      assert.ok(result);
+    }
+    assert.equal(sent.length, 2);
+    assert.equal(sent[0].url, "https://api.cheaperinference.com/v1/responses");
+    assert.equal(sent[0].body.store, false);
+    assert.equal(sent[1].url, "https://api.cheaperinference.com/v1/chat/completions");
+    assert.deepEqual(sent[1].body.messages, [
+      { role: "user", content: "important context ".repeat(6000) },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
