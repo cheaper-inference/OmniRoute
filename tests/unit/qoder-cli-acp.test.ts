@@ -44,9 +44,15 @@ function handle(msg) {
   switch (msg.method) {
     case "initialize":
       return send({ id: msg.id, result: { protocolVersion: 1, agentCapabilities: {} } });
-    case "session/new":
+    case "session/new": {
       sessions += 1;
-      return send({ id: msg.id, result: { sessionId: "s" + sessions, models: { availableModels: [{ modelId: "auto", name: "Auto (default)" }, { modelId: "qmodel", name: "Qwen3.7-Plus" }], currentModelId: "auto" } } });
+      const reply = { id: msg.id, result: { sessionId: "s" + sessions, models: { availableModels: [{ modelId: "auto", name: "Auto (default)" }, { modelId: "qmodel", name: "Qwen3.7-Plus" }], currentModelId: "auto" } } };
+      if (!(process.env.QODER_PERSONAL_ACCESS_TOKEN || "").includes("hold-setup")) return send(reply);
+      // Hold the reply until the test has aborted the client and drops a "release" file.
+      log("held", "s" + sessions);
+      const release = () => (fs.existsSync("__DIR__/release") ? send(reply) : setTimeout(release, 5));
+      return release();
+    }
     case "session/set_model":
       log("models", p.modelId);
       return send({ id: msg.id, result: {} });
@@ -193,14 +199,17 @@ test(
     await withFakeAgent(async (dir) => {
       const controller = new AbortController();
       const pending = qoderCli.runQoderCli({
-        token: "pt-acp-early-abort",
+        token: "pt-acp-hold-setup",
         prompt: "hi",
         stream: false,
         model: "auto",
         signal: controller.signal,
       });
-      while (readLines(dir, "spawns").length === 0) await new Promise((r) => setTimeout(r, 5));
+      // The fake agent holds session/new, so the abort lands while setup is in flight. Waiting
+      // for the spawn alone raced the whole turn on a fast runner (run.error was null).
+      while (readLines(dir, "held").length === 0) await new Promise((r) => setTimeout(r, 5));
       controller.abort();
+      fs.writeFileSync(path.join(dir, "release"), "");
       const run = await pending;
       assert.equal(run.error, "Aborted");
       assert.deepEqual(readLines(dir, "deletes"), ["s1"]);
