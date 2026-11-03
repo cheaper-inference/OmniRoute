@@ -26,12 +26,15 @@ export function captureGlmResetRecovery(
   connection: JsonRecord,
   resetType: GlmResetWindow
 ): GlmResetRecoveryState | null {
-  const { provider, testStatus, lastErrorAt, rateLimitedUntil } = connection;
+  const { provider, testStatus, lastErrorAt, rateLimitedUntil, lastErrorSource } = connection;
+  // The generic chat 429 writer leaves provenance unset. Accept that legacy
+  // shape only with the exhausted-window/reset-time evidence below; an explicit
+  // non-upstream source must still never be cleared by a coding-plan card.
   if (
     !["glm", "glm-cn", "glmt", "zai"].includes(String(provider)) ||
     connection.isActive !== true ||
     testStatus !== "unavailable" ||
-    connection.lastErrorSource !== "upstream" ||
+    (lastErrorSource != null && lastErrorSource !== "" && lastErrorSource !== "upstream") ||
     !["rate_limited", "quota_exhausted"].includes(String(connection.lastErrorType)) ||
     Number(connection.errorCode) !== 429 ||
     typeof lastErrorAt !== "string" ||

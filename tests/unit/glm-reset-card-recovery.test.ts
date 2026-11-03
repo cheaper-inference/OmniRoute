@@ -12,6 +12,7 @@ const providers = await import("../../src/lib/db/providers.ts");
 const cache = await import("../../src/lib/db/providerLimits.ts");
 const cards = await import("../../src/lib/usage/glmResetCards.ts");
 const recovery = await import("../../src/lib/usage/glmResetCardRecovery.ts");
+const { markAccountUnavailable } = await import("../../src/sse/services/auth.ts");
 const originalFetch = globalThis.fetch;
 let fixtureSequence = 0;
 
@@ -130,6 +131,42 @@ async function fixture(window: "WEEK" | "FIVE_HOUR" = "WEEK", overrides = {}) {
 }
 
 for (const window of ["WEEK", "FIVE_HOUR"] as const) {
+  test(`${window} card recovers a cooldown created by the real chat 429 writer`, async () => {
+    const f = await fixture(window, {
+      testStatus: "active",
+      rateLimitedUntil: null,
+      lastError: null,
+      lastErrorAt: null,
+      lastErrorType: null,
+      lastErrorSource: null,
+      errorCode: null,
+      backoffLevel: 0,
+    });
+    const resetAt = new Date(Date.now() + (window === "WEEK" ? 86400000 : 7200000)).toISOString();
+    const error =
+      window === "WEEK"
+        ? `[1310][Weekly/Monthly Limit Exhausted. Your limit will reset at ${resetAt}]`
+        : `[1308][Usage limit reached for 5 hour. Your limit will reset at ${resetAt}]`;
+    await markAccountUnavailable(f.id, 429, error, "zai", "glm-5.3");
+    const cooling = await f.read();
+    assert.equal(cooling.testStatus, "unavailable");
+    assert.equal(cooling.lastErrorSource ?? null, null);
+    assert.equal(Number(cooling.errorCode), 429);
+    assert.ok(Math.abs(Date.parse(String(cooling.rateLimitedUntil)) - Date.parse(resetAt)) < 1000);
+    const entry = cache.getProviderLimitsCache(f.id)!;
+    entry.fetchedAt = new Date().toISOString();
+    entry.quotas![window === "WEEK" ? "weekly" : "session"] = { remainingPercentage: 0, resetAt };
+    cache.setProviderLimitsCache(f.id, entry);
+
+    assert.equal((await f.redeem()).outcome, "reset");
+    const after = await f.read();
+    assert.equal(after.testStatus, "active");
+    assert.equal(after.rateLimitedUntil ?? null, null);
+    assert.equal(after.lastError ?? null, null);
+    assert.equal(after.errorCode ?? null, null);
+    assert.equal(after.backoffLevel, 0);
+  });
+
   test(`${window} card releases its old upstream cooldown after fresh recovery`, async () => {
     const f = await fixture(window);
     const result = await f.redeem();
@@ -143,6 +180,15 @@ for (const window of ["WEEK", "FIVE_HOUR"] as const) {
     assert.equal(f.counts().uses, 1);
   });
 }
+
+test("a missing source does not relax the exhausted-window evidence requirement", async () => {
+  const f = await fixture("WEEK", { lastErrorSource: null });
+  const entry = cache.getProviderLimitsCache(f.id)!;
+  entry.quotas!.weekly = { remainingPercentage: 80, resetAt: f.until };
+  cache.setProviderLimitsCache(f.id, entry);
+  await f.redeem();
+  assert.equal((await f.read()).rateLimitedUntil, f.until);
+});
 
 for (const scenario of [
   "other-window-exhausted",
