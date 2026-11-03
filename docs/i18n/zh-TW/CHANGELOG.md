@@ -8,16 +8,16 @@
 
 ## [3.8.53] — TBD
 
-_Living section — reconciled 2026-11-03 from all cycle commits (`c754707d0e` → `fc78a69c47`, 931 non-merge commits). Bullets carry the merged PR and its author; direct pushes are listed with their commit hash. Regenerated at each `/generate-release` phase._
+_Living section — reconciled 2026-11-03 from all cycle commits (`c754707d0e` → `c34370bc69`, 934 non-merge commits). Bullets carry the merged PR and its author; direct pushes are listed with their commit hash. Regenerated at each `/generate-release` phase._
 
 ### 📊 Release by the numbers
 
 | | |
 | --- | ---: |
 | 👥 People who contributed | **175** |
-| 📝 Commits in the cycle | **931** |
-| 🔀 Pull requests referenced | **614** |
-| 📋 Changelog entries | **945** |
+| 📝 Commits in the cycle | **934** |
+| 🔀 Pull requests referenced | **616** |
+| 📋 Changelog entries | **948** |
 | 🙌 Contributors credited in entries | **174** |
 | 🤖 Automated dependency commits | 11 |
 
@@ -28,9 +28,9 @@ _Living section — reconciled 2026-11-03 from all cycle commits (`c754707d0e` �
 | 🐛 Fixes | 420 |
 | ♻️ Refactor | 201 |
 | ✨ Features | 130 |
-| 🧪 Tests | 81 |
+| 🧪 Tests | 82 |
+| 📚 Docs | 41 |
 | 🧹 Chore | 40 |
-| 📚 Docs | 39 |
 | ⚙️ CI | 17 |
 | ⚡ Performance | 8 |
 | 📦 Dependencies | 7 |
@@ -38,11 +38,11 @@ _Living section — reconciled 2026-11-03 from all cycle commits (`c754707d0e` �
 
 ### 🏆 Top 25 contributors this cycle
 
-_By commits in `c754707d0e..fc78a69c47`, author identities consolidated via `.mailmap` and the merged PR's GitHub login. Bots excluded._
+_By commits in `c754707d0e..c34370bc69`, author identities consolidated via `.mailmap` and the merged PR's GitHub login. Bots excluded._
 
 | # | Contributor | Commits |
 | ---: | --- | ---: |
-| 🥇 | diegosouzapw | 519 |
+| 🥇 | diegosouzapw | 522 |
 | 🥈 | Jan Leon (@JxnLexn) | 47 |
 | 🥉 | Dizzle (@maxmad64bis) | 40 |
 | 4 | Paco Cartones (@pacocartones) | 39 |
@@ -693,6 +693,7 @@ _By commits in `c754707d0e..fc78a69c47`, author identities consolidated via `.ma
 - **ci(dashboard):** the weekly UI Kit upstream watch now warns and keeps one tracking issue open when it can't read upstream, and closes it once it can; the message says the token is missing only when it really is unset ([#18759](https://github.com/cheaper-inference/OmniRoute/pull/18759))
 - **test(ui):** stop `api-key-redis-auth-cache` timing out on a loaded host by doing its imports and migrations while the file is collected, outside the hook and test deadlines ([#18762](https://github.com/cheaper-inference/OmniRoute/pull/18762))
 - **refactor(dashboard):** permanent notices use the kit `Alert` `dismissible={false}` prop instead of a CSS hack that hid the button, `/login` and `/status` build their notices from the kit `Alert`, and the combo builder's 1/2/3 stage icons come from one icon family ([#18764](https://github.com/cheaper-inference/OmniRoute/pull/18764))
+- **test(combo):** Port @skygunner's 28-case cooldown-expansion regression matrix from #17945 onto the #17880 landing, as promised in the #17945 review ([#18811](https://github.com/cheaper-inference/OmniRoute/pull/18811)) — thanks @skygunner
 - **test(ui):** repair the `test:vitest:ui` base-red: align the API-key access editor "Save sends the full PATCH body" test with the `preferredConnections: []` payload added by #13102, and register a no-op `ResizeObserver` stub in the shared vitest UI setup so tests rendering the kit `Table` (KEA-7886) stop crashing under jsdom (base-red) ([#18306](https://github.com/cheaper-inference/OmniRoute/pull/18306))
 - **style(dashboard):** paint the primary Button with the flat kit accent (grad-brand is no longer an image) (KEA-7886) (direct commit `10dc708d0d`)
 - **style(dashboard):** bridge the OmniRoute tokens to the CI UI Kit, load Keak fonts, drop the grid wallpaper (KEA-7886) (direct commit `0afbbcb5c6`)
@@ -906,6 +907,7 @@ _By commits in `c754707d0e..fc78a69c47`, author identities consolidated via `.ma
 - **test(e2e):** realign settings-toggles to the settings sub-routes and document testIgnore (direct commit `00ae4815b9`)
 - **test(e2e):** make npm run test:e2e -- <spec> filter and align @playwright/test with playwright (direct commit `91ad72a8cb`)
 - **test(e2e):** click the sidebar checkbox by its label row; keep memory-settings and skills-marketplace ignored with reasons (direct commit `3694006a57`)
+- **docs(release):** reconcile the v3.8.53 CHANGELOG with contributor credit (direct commit `93b0acdd40`)
 - **docs(readme):** refresh measured counts for v3.8.53 (direct commit `9b49e84556`)
 - **test(ci):** smoke-test packaged LLMLingua worker ([#15569](https://github.com/cheaper-inference/OmniRoute/pull/15569)) — thanks @insoln
 - **test(combo):** cover isRetryAfterEligibleStatus ([#17172](https://github.com/cheaper-inference/OmniRoute/pull/17172)) — thanks @pacocartones
@@ -1020,6 +1022,7 @@ _By commits in `c754707d0e..fc78a69c47`, author identities consolidated via `.ma
 - **chore(security):** accept the minimatch and glob CVEs in the npm bundled in the image ([#18766](https://github.com/cheaper-inference/OmniRoute/pull/18766))
 - **test(mutation):** register the credit-exhaustion test in the Stryker tap list ([#18771](https://github.com/cheaper-inference/OmniRoute/pull/18771))
 - **docs(i18n):** re-sync the 25 documents that drifted during the week of 2026-10-26 (66 locales; Kimi then Google fallback, references restored) ([#18789](https://github.com/cheaper-inference/OmniRoute/pull/18789))
+- **docs(i18n):** re-record target_hash for the 3 MCP-SERVER mirrors edited without a re-hash (release prep) ([#18807](https://github.com/cheaper-inference/OmniRoute/pull/18807))
 - **deps:** 11 Dependabot bumps — bump follow-redirects from 1.16.0 to 1.16.1 ([#17314](https://github.com/cheaper-inference/OmniRoute/pull/17314)); bump hono from 4.13.7 to 4.13.13 ([#17316](https://github.com/cheaper-inference/OmniRoute/pull/17316)); bump @modelcontextprotocol/server from 2.0.0 to 2.3.1 ([#17352](https://github.com/cheaper-inference/OmniRoute/pull/17352)); chore(deps): bump github/codeql-action/analyze from 4.38.3 to 4.39.1 ([#18029](https://github.com/cheaper-inference/OmniRoute/pull/18029)); chore(deps): bump github/codeql-action from 4.38.3 to 4.39.1 ([#18030](https://github.com/cheaper-inference/OmniRoute/pull/18030)); chore(deps): bump github/codeql-action/init from 4.38.3 to 4.39.1 ([#18031](https://github.com/cheaper-inference/OmniRoute/pull/18031)); bump undici to 8.12.3, 7.30.1 and 6.29.1 ([#18087](https://github.com/cheaper-inference/OmniRoute/pull/18087)); bump electron 44.9.1, fast-uri 3.1.9 and undici 7.30.1 in /electron ([#18088](https://github.com/cheaper-inference/OmniRoute/pull/18088)); bump body-parser from 2.3.0 to 2.4.0 ([#18091](https://github.com/cheaper-inference/OmniRoute/pull/18091)); bump zod from 4.6.5 to 4.6.7 ([#18093](https://github.com/cheaper-inference/OmniRoute/pull/18093)); bump follow-redirects from 1.16.1 to 1.16.2 ([#18654](https://github.com/cheaper-inference/OmniRoute/pull/18654))
 
 ### 🙌 Contributors
@@ -1161,7 +1164,7 @@ Thanks to everyone whose work landed in v3.8.53:
 | [@serenity-X](https://github.com/serenity-X) | #18611, #18617, #18639, #18649 |
 | [@shatinz](https://github.com/shatinz) | #18148 |
 | [@SIGTERM-015](https://github.com/SIGTERM-015) | #15521 |
-| [@skygunner](https://github.com/skygunner) | #17774, #17788, #17791, #17840, #17842, #17844, #17940 |
+| [@skygunner](https://github.com/skygunner) | #17774, #17788, #17791, #17840, #17842, #17844, #17940, #18811 |
 | [@skymanbj](https://github.com/skymanbj) | #14944 |
 | [@smserwan](https://github.com/smserwan) | #16748 |
 | [@snower](https://github.com/snower) | #16846 |
