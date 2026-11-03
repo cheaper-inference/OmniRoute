@@ -6,7 +6,7 @@ import { fetchCodexDiscoveryModels } from "../../src/app/api/providers/[id]/mode
 const REGISTRY_URL = "https://registry.npmjs.org/@openai%2Fcodex/latest";
 const originalVersion = process.env.CODEX_CLIENT_VERSION;
 const originalUserAgent = process.env.CODEX_USER_AGENT;
-const registryResponse = (version = "0.160.1") => Response.json({ name: "@openai/codex", version });
+const registryResponse = (version = "0.165.1") => Response.json({ name: "@openai/codex", version });
 
 test.beforeEach(() => {
   delete process.env.CODEX_CLIENT_VERSION;
@@ -36,15 +36,15 @@ test("refresh uses official metadata without credentials and aligns synchronous 
     assert.ok(init.signal instanceof AbortSignal);
     return registryResponse();
   };
-  assert.equal(await codexClient.refreshCodexClientVersion(fetchImpl), "0.160.1");
-  assert.equal(codexClient.getCodexClientVersion(), "0.160.1");
-  assert.equal(codexClient.getCodexDefaultHeaders().Version, "0.160.1");
-  assert.match(codexClient.getCodexUserAgent(), /^codex-cli\/0\.160\.1 /);
+  assert.equal(await codexClient.refreshCodexClientVersion(fetchImpl), "0.165.1");
+  assert.equal(codexClient.getCodexClientVersion(), "0.165.1");
+  assert.equal(codexClient.getCodexDefaultHeaders().Version, "0.165.1");
+  assert.match(codexClient.getCodexUserAgent(), /^codex-cli\/0\.165\.1 /);
   assert.equal(
     codexClient.getCodexCliRsHeaders()["User-Agent"],
-    `${codexClient.CODEX_CLI_RS_ORIGINATOR}/0.160.1`
+    `${codexClient.CODEX_CLI_RS_ORIGINATOR}/0.165.1`
   );
-  assert.equal(codexClient.getCodexBackendIdentityHeaders().Version, "0.160.1");
+  assert.equal(codexClient.getCodexBackendIdentityHeaders().Version, "0.165.1");
   assert.equal(calls, 1);
 });
 
@@ -82,9 +82,9 @@ test("fresh cache avoids lookup; expiry rechecks and concurrent callers share lo
   assert.equal(
     await codexClient.refreshCodexClientVersion(async () => {
       calls++;
-      return registryResponse("0.161.0");
+      return registryResponse("0.166.0");
     }),
-    "0.161.0"
+    "0.166.0"
   );
   assert.equal(calls, 2);
 });
@@ -106,11 +106,11 @@ test("offline refresh preserves last-known-good; failures are retried after a bo
   now += 5 * 60 * 1_000 + 1;
   assert.equal(
     await codexClient.refreshCodexClientVersion(async () => registryResponse()),
-    "0.160.1"
+    "0.165.1"
   );
   now += 6 * 60 * 60 * 1_000 + 1;
-  assert.equal(await codexClient.refreshCodexClientVersion(offline), "0.160.1");
-  assert.equal(codexClient.getCodexClientVersion(), "0.160.1");
+  assert.equal(await codexClient.refreshCodexClientVersion(offline), "0.165.1");
+  assert.equal(codexClient.getCodexClientVersion(), "0.165.1");
 });
 
 test("malformed metadata, prereleases, HTTP errors and downgrades cannot replace a known-good version", async () => {
@@ -129,7 +129,7 @@ test("malformed metadata, prereleases, HTTP errors and downgrades cannot replace
   ];
   for (const response of invalid) {
     now += 6 * 60 * 60 * 1_000 + 1;
-    assert.equal(await codexClient.refreshCodexClientVersion(async () => response), "0.160.1");
+    assert.equal(await codexClient.refreshCodexClientVersion(async () => response), "0.165.1");
   }
 });
 
@@ -144,9 +144,9 @@ test("discovery refreshes before authenticated model fetch and accepts remote-on
         assert.deepEqual(init.headers, { Accept: "application/json" });
         return registryResponse();
       }
-      assert.equal(new URL(url).searchParams.get("client_version"), "0.160.1");
-      assert.equal(init.headers.Version, "0.160.1");
-      assert.match(init.headers["User-Agent"], /^codex-cli\/0\.160\.1 /);
+      assert.equal(new URL(url).searchParams.get("client_version"), "0.165.1");
+      assert.equal(init.headers.Version, "0.165.1");
+      assert.match(init.headers["User-Agent"], /^codex-cli\/0\.165\.1 /);
       assert.equal(init.headers.Authorization, "Bearer test-token");
       assert.equal(init.headers["chatgpt-account-id"], "test-account");
       return Response.json({

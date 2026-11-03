@@ -110,6 +110,12 @@
       "justification": "SIL Open Font License 1.1 covers only the font files shipped by @fontsource/inter (self-hosted dashboard typography added by the Keak CI UI Kit migration, KEA-7886). OFL-1.1 permits bundling, embedding and redistribution of the fonts with software of any license as long as the fonts themselves are not sold on their own and keep their notices; it places no copyleft or attribution requirement on OmniRoute's code. The fonts are served as static assets, never modified.",
       "risk": "low",
       "reviewAt": "v4.0.0"
+    },
+    "@fontsource/vazirmatn": {
+      "license": "OFL-1.1",
+      "justification": "SIL Open Font License 1.1 covers only the font files shipped by @fontsource/vazirmatn (Copyright 2015 The Vazirmatn Project Authors; self-hosted Arabic-script typography for the RTL locales fa/ar/ur, named only under html[dir=rtl]). OFL-1.1 permits bundling, embedding and redistribution of the fonts with software of any license as long as the fonts themselves are not sold on their own and keep their notices; it places no copyleft or attribution requirement on OmniRoute's code. The fonts are served as static assets, never modified.",
+      "risk": "low",
+      "reviewAt": "v4.0.0"
     }
   }
 }
