@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, Check, LogOut, X } from "lucide-react";
 import { Button } from "./button";
 import { BrandLoader, type BrandLoaderVariant } from "./brand-loader";
 import { Card, CardContent } from "./card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 import { cn } from "./lib/utils";
+import { Alert } from "./alert";
 export interface WizardProps {
   steps: readonly { id: string; title: string; mobileTitle?: string; icon?: ReactNode }[];
   activeStep: number;
@@ -32,6 +33,8 @@ export interface WizardProps {
   /** Show save-and-exit when a handler is provided. Defaults to true. The app owns route guards. */
   allowExit?: boolean;
   nextLabel?: string;
+  /** Native same-tab navigation for a ready exit; avoids popup APIs in webviews. */
+  nextHref?: string;
   /** Hide Next while an external action is required; errors remain visible. Defaults to true. */
   showNext?: boolean;
   /** Compact progress keeps the current step/count without the full step list. */
@@ -45,6 +48,12 @@ export interface WizardProps {
   variant?: "default" | "onboarding";
   /** Fill a height-constrained parent; only the body scrolls. */
   fill?: boolean;
+  /** On narrow (up to 760px) or coarse-touch screens, use the host document scroll with an in-flow footer. The host must also permit document scrolling. Desktop and the default layout are unchanged. */
+  mobileLayout?: "default" | "document";
+  /** Reserve 6rem plus the device safe area below footer or inline body actions on small/touch screens for browser overlays. Desktop and the default safe-area spacing are unchanged. */
+  mobileBottomClearance?: "safe-area" | "browser";
+  /** Content-sized onboarding with a progress rail; compact progress on small screens. */
+  layout?: "stacked" | "sidebar";
   completedSteps?: readonly string[];
   /** Callers enabling all steps remain responsible for navigation guards. */
   stepNavigation?: "previous" | "all";
@@ -71,6 +80,7 @@ export function Wizard({
   onExit,
   allowExit = true,
   nextLabel,
+  nextHref,
   showNext = true,
   progressDisplay = "steps",
   nextBlocked,
@@ -78,25 +88,82 @@ export function Wizard({
   onStepSelect,
   variant = "default",
   fill = false,
+  mobileLayout = "default",
+  mobileBottomClearance = "safe-area",
+  layout = "stacked",
   completedSteps = [],
   stepNavigation = "previous",
   className,
 }: WizardProps) {
   const id = useId();
   const heading = useRef<HTMLHeadingElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
   const scrollArea = useRef<HTMLDivElement>(null);
   const loader = useRef<HTMLDivElement>(null);
+  const presentedStep = useRef(activeStep);
   const unavailable = busy || loading;
+  const [showBusy, setShowBusy] = useState(false);
   useEffect(() => {
+    if (!unavailable) { setShowBusy(false); return; }
+    const timer = setTimeout(() => setShowBusy(true), 150);
+    return () => clearTimeout(timer);
+  }, [unavailable]);
+  useEffect(() => {
+    if (mobileLayout !== "document" || mobileBottomClearance !== "browser") return;
+    const root = viewport.current?.closest<HTMLElement>(".ci-wizard");
+    const visual = window.visualViewport;
+    const update = () => {
+      if (!window.matchMedia("(max-width:760px), (hover:none) and (pointer:coarse)").matches) {
+        root?.style.removeProperty("--ci-wizard-viewport-occlusion");
+        return;
+      }
+      // Native browser controls and keyboards may reduce only the visual
+      // viewport. Pinch zoom is not browser occlusion and must not add runway.
+      const occlusion = visual && visual.scale === 1
+        ? Math.max(0, window.innerHeight - visual.height - visual.offsetTop) : 0;
+      root?.style.setProperty("--ci-wizard-viewport-occlusion", `${occlusion}px`);
+    };
+    update();
+    window.addEventListener("resize", update);
+    visual?.addEventListener("resize", update);
+    visual?.addEventListener("scroll", update);
+    return () => {
+      window.removeEventListener("resize", update);
+      visual?.removeEventListener("resize", update);
+      visual?.removeEventListener("scroll", update);
+      root?.style.removeProperty("--ci-wizard-viewport-occlusion");
+    };
+  }, [mobileLayout, mobileBottomClearance]);
+  useEffect(() => {
+    const documentLayout = mobileLayout === "document" && window.matchMedia("(max-width:760px), (hover:none) and (pointer:coarse)").matches;
     if (loading) {
       loader.current?.focus({ preventScroll: true });
+      if (documentLayout) loader.current?.scrollIntoView?.({ block: "start", inline: "nearest", behavior: "instant" });
+      return;
+    }
+    const stepChanged = presentedStep.current !== activeStep;
+    presentedStep.current = activeStep;
+    if (documentLayout) {
+      // Preserve the initial page position; reveal only a newly selected step.
+      // Focusing without scrolling avoids browser centering behind host chrome.
+      heading.current?.focus({ preventScroll: true });
+      if (stepChanged) heading.current?.scrollIntoView?.({ block: "start", inline: "nearest", behavior: "instant" });
       return;
     }
     scrollArea.current?.scrollTo?.({ top: 0 });
+    // Short mobile screens scroll the surrounding content, including progress.
+    const content = viewport.current?.parentElement;
+    content?.scrollTo?.({ top: 0 });
     heading.current?.focus({ preventScroll: fill });
-  }, [activeStep, fill, loading]);
+    if (fill && mobileBottomClearance === "browser" && content && heading.current && getComputedStyle(content).overflowY === "auto") {
+      // Present the new step immediately; its progress links remain above it
+      // in the same scroll region. CSS alone determines when this layout applies.
+      const inset = parseFloat(getComputedStyle(content).paddingTop) || 0;
+      content.scrollTo?.({ top: Math.max(0, content.scrollTop + heading.current.getBoundingClientRect().top - content.getBoundingClientRect().top - inset) });
+    }
+  }, [activeStep, fill, loading, mobileBottomClearance, mobileLayout]);
   return (
-    <Card className={cn("ci-wizard", className)} data-variant={variant} data-fill={fill || undefined}>
+    <Card className={cn("ci-wizard", className)} data-variant={variant} data-layout={layout} data-fill={fill || undefined} data-mobile-layout={mobileLayout === "document" ? "document" : undefined} data-mobile-bottom-clearance={mobileBottomClearance === "browser" ? "browser" : undefined}>
       <CardContent className="ci-wizard__content">
         <div className="ci-wizard__top">
           <span>
@@ -131,7 +198,7 @@ export function Wizard({
             </li>
           ))}
         </ol>}
-        <div className="ci-wizard__viewport" data-loading={loading || undefined}>
+        <div ref={viewport} className="ci-wizard__viewport" data-loading={loading || undefined}>
         <div ref={scrollArea} className="ci-wizard__scroll" inert={loading || undefined} aria-hidden={loading || undefined}>
         <h1 ref={heading} tabIndex={-1} id={id} className="ci-wizard__title">
           {title}
@@ -151,9 +218,7 @@ export function Wizard({
         </div>
         {(showNext || allowBack || (allowSkip && onSkip) || error) && <footer className="ci-wizard__footer">
           {error && (
-            <p className="ci-wizard__error" role="alert">
-              {error}
-            </p>
+            <Alert role="alert" dismissible={false} variant="warning" title="One more thing before continuing" description={error} />
           )}
           {(showNext || allowBack || (allowSkip && onSkip)) && <div className="ci-wizard__actions">
             {allowBack && <Button
@@ -168,15 +233,20 @@ export function Wizard({
               {allowSkip && onSkip && <Button variant="ghost" onClick={onSkip} disabled={unavailable}>
                 Skip for now
               </Button>}
-              {showNext && <Button
+              {showNext && (nextHref ? <Button asChild disabled={unavailable || nextBlocked} data-wizard-blocked={(nextBlocked && !unavailable) || undefined}>
+                <a href={nextHref} tabIndex={unavailable ? -1 : undefined} onClick={event => {
+                  if (unavailable || nextBlocked) { event.preventDefault(); if (!unavailable) onNextBlocked?.(); }
+                }}>{nextLabel || "Continue"}<ArrowRight aria-hidden /></a>
+              </Button> : <Button
+                loading={showBusy}
                 onClick={nextBlocked ? onNextBlocked : onNext}
                 disabled={unavailable}
                 aria-disabled={nextBlocked || undefined}
                 data-wizard-blocked={nextBlocked || undefined}
               >
-                {unavailable ? "Saving…" : nextLabel || "Continue"}
+                {showBusy ? "Saving…" : nextLabel || "Continue"}
                 <ArrowRight aria-hidden />
-              </Button>}
+              </Button>)}
             </div>
           </div>}
         </footer>}

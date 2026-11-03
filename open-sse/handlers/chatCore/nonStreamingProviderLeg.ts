@@ -312,6 +312,7 @@ function finishOk(
     // thinking block; the non-streaming converter used to never receive it.
     requestedThinking: hasActiveClaudeThinking(input.sourceBody ?? {}),
     phase: input.phase === "initial" ? "final" : "intermediate",
+    connectionId: params.connectionId,
   });
   const receipt = buildReceipt(input, {
     httpStatus: 200,
@@ -492,7 +493,8 @@ export async function runNonStreamingProviderLeg(
       !!error &&
       typeof error === "object" &&
       ((error as { code?: unknown }).code === "SEMAPHORE_TIMEOUT" ||
-        (error as { code?: unknown }).code === "SEMAPHORE_QUEUE_FULL")
+        (error as { code?: unknown }).code === "SEMAPHORE_QUEUE_FULL" ||
+        (error as { code?: unknown }).code === "MUSE_OWNERSHIP_REJECTED")
     ) {
       throw error;
     }

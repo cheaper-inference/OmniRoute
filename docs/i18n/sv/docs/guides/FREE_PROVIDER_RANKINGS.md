@@ -13,13 +13,13 @@
 
 ## Vad det är
 
-OmniRoute registrerar 377 leverantörer, inklusive 155 markerade katalogposter**free/no-auth** (no-auth, free-tier OAuth eller free-tier API nyckel — se [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) och hela [Free Tiers-katalogen](../reference/FREE_TIERS.md) ). Haken: gratisleverantörer varierar mycket i modellkvalitet. En leverantör utan auktorisering som betjänar en gränsmodell är mycket mer användbar än en som betjänar en liten äldre modell.
+OmniRoute registrerar 380 leverantörer, inklusive 155 katalogposter markerade**free/no-auth** (no-auth, free-tier OAuth eller free-tier API key — se [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) och hela [Free Tiers-katalogen](../reference/FREE_TIERS.md) ). Haken: gratisleverantörer varierar mycket i modellkvalitet. En leverantör utan auktorisering som betjänar en gränsmodell är mycket mer användbar än en som betjänar en liten äldre modell.
 
 **Gratis leverantörsranking** svarar"** vilken gratis leverantör ger mig den bästa modellen?** " genom att gå med i varje gratisleverantörs katalog med** kvalitetsresultat från publiken** från** Arena AI leaderboard** (mänsklig preferens ELO, samma idé bakom LMArena chatbot-arenan). Leverantörer rankas sedan efter deras styrka** bästa gratismodellen** .
 
 Rangordningen beräknas från tre verkliga källor:
 
-1. Listorna med gratisleverantörer — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` -poster flaggade `hasFree` (`src/shared/constants/providers.ts`).
+1. Gratis-leverantören listar — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` poster flaggade `hasFree` (`src/shared/constants/providers.ts`).
 2. Varje leverantörs modellkatalog från leverantörsregistret (`open-sse/config/providerRegistry.ts`).
 3. ELO-härledda uppgiftsanpassningspoäng lagrade i `model_intelligence` DB tabellen av Arena ELO sync-motorn (`src/lib/arenaEloSync.ts`).
 
