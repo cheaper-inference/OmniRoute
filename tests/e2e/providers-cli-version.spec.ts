@@ -125,8 +125,11 @@ test.describe("Advertised CLI client version card", () => {
     await expect(input).toBeVisible({ timeout: 20000 });
     await input.fill("2.1.260");
 
-    // Scope to the editor row: the provider page has other Save buttons.
-    const saveButton = input.locator("xpath=..").getByRole("button", { name: "Save" });
+    // Scope to this card; the kit Input adds a wrapper inside the editor row.
+    const versionCard = page
+      .getByRole("heading", { name: "Advertised CLI client version", exact: true })
+      .locator("..");
+    const saveButton = versionCard.getByRole("button", { name: "Save", exact: true });
     await expect(saveButton).toBeEnabled();
     await saveButton.click();
 
