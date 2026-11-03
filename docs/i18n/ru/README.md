@@ -11,11 +11,11 @@
 <br/>
 <br/>
 
-# 🚀 OmniRoute — Бесплатный AI-шлюз
+# 🚀 OmniRoute — Бесплатный шлюз для ИИ
 
-**Created by [Diego Souza](https://github.com/diegosouzapw)**
+**Создано [Diego Souza](https://github.com/diegosouzapw)**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Никогда не прекращайте кодить. Любой AI-инструмент → 380 провайдеров — 150+ бесплатных — через одну конечную точку. Claude Code, Codex, Cursor, Cline, Copilot и Antigravity в БЕСПЛАТНЫЙ Claude / GPT / Gemini с авто-переключением. RTK + Caveman-стековая компрессия экономит 15–95% токенов (~89% в среднем) — никогда не достигайте лимитов. 380 AI-провайдеров · 150+ бесплатных тарифов · ~1,62 млрд бесплатных токенов/мес · 20 стратегий маршрутизации · $0 для старта."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Никогда не прекращайте программировать. Каждый ИИ-инструмент → 380 провайдеров — 150+ бесплатных — через одну конечную точку. Claude Code, Codex, Cursor, Cline, Copilot и Antigravity подключаются к БЕСПЛАТНЫМ Claude / GPT / Gemini с автоматическим переключением. Стековое сжатие RTK + Caveman экономит 15–95% токенов (в среднем ~89%) — никогда не достигайте лимитов. 380 ИИ-провайдеров · 150+ бесплатных тарифов · ~1,62 млрд бесплатных токенов в месяц · 20 стратегий маршрутизации · $0 для начала."/>
 
 </div>
 
@@ -1295,17 +1295,17 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 также про
   <tr><td nowrap><b>Среда выполнения</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Язык</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> в <code>src/</code> и <code>open-sse/</code> (с версии v2.0 в ядре отсутствует <code>any</code>)</td></tr>
   <tr><td nowrap><b>Фреймворк</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База данных</b></td><td>better-sqlite3 (SQLite, журналирование WAL) + LowDB (устаревший JSON) — 147 доменных модулей, 221 миграций</td></tr>
+  <tr><td nowrap><b>База данных</b></td><td>better-sqlite3 (SQLite, журналирование WAL) + LowDB (устаревший JSON) — 147 доменных модулей, 221 миграция</td></tr>
   <tr><td nowrap><b>Память</b></td><td>Полнотекстовый поиск SQLite FTS5 + векторные эмбеддинги с квантованием int8, типизированное затухание</td></tr>
-  <tr><td nowrap><b>Схемы</b></td><td>Zod 4 — валидация ввода-вывода инструментов MCP + контракты API</td></tr>
+  <tr><td nowrap><b>Схемы</b></td><td>Zod 4 — проверка ввода-вывода инструментов MCP + контракты API</td></tr>
   <tr><td nowrap><b>Протоколы</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Потоковая передача</b></td><td>Server-Sent Events (SSE) + мост WebSocket (<code>/v1/ws</code>)</td></tr>
   <tr><td nowrap><b>Сжатие</b></td><td>Конвейер из 12 движков — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Аутентификация и безопасность</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + ограниченная областью действия аутентификация MCP · AES-256-GCM при хранении · DOMPurify</td></tr>
+  <tr><td nowrap><b>Аутентификация и безопасность</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + область действия аутентификации MCP · AES-256-GCM для данных в состоянии покоя · DOMPurify</td></tr>
   <tr><td nowrap><b>Скрытность</b></td><td>wreq-js — имитация TLS-отпечатков JA3 / JA4, прокси с 3 уровнями</td></tr>
   <tr><td nowrap><b>Отказоустойчивость</b></td><td>Автоматический выключатель, экспоненциальная задержка, защита от эффекта «стада», автоматическое комбинированное самовосстановление</td></tr>
   <tr><td nowrap><b>Журналирование</b></td><td>pino — структурированные журналы JSON с контекстом запроса</td></tr>
-  <tr><td nowrap><b>Тестирование</b></td><td>Встроенный тестовый модуль Node.js + Vitest — <b>более 60 000 статических объявлений тестов</b> в более чем 8 400 отслеживаемых тестовых файлах (модульные, интеграционные, E2E, тесты безопасности и экосистемы)</td></tr>
+  <tr><td nowrap><b>Тестирование</b></td><td>Средство запуска тестов Node.js + Vitest — <b>более 60 000 статических объявлений тестов</b> в более чем 8 400 отслеживаемых файлах тестов (модульные, интеграционные, E2E, безопасности, экосистемы)</td></tr>
   <tr><td nowrap><b>Платформы</b></td><td>Настольные компьютеры (Electron) · Android (Termux) · PWA (любой браузер)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автоматическая публикация в npm + Docker Hub при выпуске релиза</td></tr>
   <tr><td nowrap><b>Ссылки</b></td><td><a href="https://omniroute.online">Веб-сайт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
@@ -1800,15 +1800,15 @@ OmniRoute стоит на плечах гигантов. Он начинался
 
 ## 📄 Лицензия
 
-Лицензия MIT — подробности в [LICENSE](LICENSE).
+Лицензия MIT — подробности см. в файле [LICENSE](LICENSE).
 
 ---
 
 <div align="center">
 
-**[⬆ Наверх](#-omniroute)** · Сделано с ❤️ для сообщества open-source ИИ.
+**[⬆ В начало](#-omniroute)** · Создано ❤️ для сообщества разработчиков ИИ с открытым исходным кодом.
 
-<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Лицензия MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Создано <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Лицензия MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
-<!-- GitHub Discussions включены для вопросов и ответов сообщества -->
+<!-- Обсуждения GitHub включены для вопросов и ответов сообщества -->
