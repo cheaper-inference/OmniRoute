@@ -1252,6 +1252,30 @@ export function mergeStateUpdates(fresh, touched, fallback) {
   return base;
 }
 
+/**
+ * Move a source-level `source_hash` to the current source hash when EVERY docs locale already
+ * records that hash — the mirrors were brought up to date outside this runner (a hand re-sync
+ * that updated only the locale records, #18824). With no unit left to translate, nothing else
+ * would ever move the source-level hash and the drift check would report `source-changed`
+ * forever (refresh run 41636350056). A locale that lags, failed or has no record blocks the
+ * heal, so a source whose locales did not all translate is never marked as done.
+ * `currentHashes` maps rel → sha256 of the source; `locales` is the full docs locale list.
+ * Mutates `state`; returns the healed rels.
+ */
+export function healSourceHashes(state, currentHashes, locales) {
+  const healed = [];
+  if (!locales.length) return healed;
+  for (const [rel, hash] of currentHashes) {
+    const entry = state?.sources?.[rel];
+    if (!entry || entry.source_hash === hash) continue;
+    if (locales.every((locale) => entry.locales?.[locale]?.source_hash === hash)) {
+      entry.source_hash = hash;
+      healed.push(rel);
+    }
+  }
+  return healed;
+}
+
 async function main() {
   const opts = parseArgs(process.argv);
   const config = await loadConfig();
@@ -1267,7 +1291,8 @@ async function main() {
   }
 
   const docsExcluded = new Set(config.docsExcluded ?? ["en"]);
-  let targetLocales = config.locales.map((l) => l.code).filter((code) => !docsExcluded.has(code));
+  const docsLocales = config.locales.map((l) => l.code).filter((code) => !docsExcluded.has(code));
+  let targetLocales = docsLocales;
   if (opts.locales) {
     targetLocales = targetLocales.filter((code) => opts.locales.includes(code));
     const missing = opts.locales.filter((c) => !config.locales.some((l) => l.code === c));
@@ -1497,7 +1522,12 @@ async function main() {
   } catch (err) {
     logWarn(`${err.message} at save time — merging into this run's snapshot instead`);
   }
-  await saveState(mergeStateUpdates(fresh, touched, state));
+  const merged = mergeStateUpdates(fresh, touched, state);
+  const currentHashes = new Map([...sourceHashes].map(([rel, { hash }]) => [rel, hash]));
+  for (const rel of healSourceHashes(merged, currentHashes, docsLocales)) {
+    logInfo(`${rel}: every locale already records the current source — source hash updated`);
+  }
+  await saveState(merged);
 
   const elapsedSec = ((Date.now() - startMs) / 1000).toFixed(1);
   logInfo(
