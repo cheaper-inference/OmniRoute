@@ -22,6 +22,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@omniroute/ui-kit/breadcrumb";
+import { decodeRouteParam } from "@/shared/utils/decodeRouteParam";
 
 const PATH_LABELS = {
   dashboard: "dashboard",
@@ -123,18 +124,23 @@ const PATH_LABELS = {
  */
 function getLabel(segment, t) {
   const key = PATH_LABELS[segment];
-  const fallback = segment.charAt(0).toUpperCase() + segment.slice(1);
+  // usePathname() returns url.pathname verbatim — the URL's single encoding
+  // layer (auto%2Ffast) — so one decode yields the display label.
+  const decoded = decodeRouteParam(segment);
+  const fallback = decoded.charAt(0).toUpperCase() + decoded.slice(1);
   return key && typeof t.has === "function" && t.has(key) ? t(key) : fallback;
 }
 
 export default function Breadcrumbs() {
   const pathname = usePathname();
   const t = useTranslations("breadcrumbs");
+  const tTeams = useTranslations("teamCosts");
   if (!pathname || pathname === "/dashboard") return null;
 
   const segments = pathname.split("/").filter(Boolean);
   const crumbs = segments.map((seg, idx) => ({
-    label: getLabel(seg, t),
+    label:
+      seg === "teams" && segments[idx - 1] === "costs" ? tTeams("selectTeam") : getLabel(seg, t),
     href: "/" + segments.slice(0, idx + 1).join("/"),
     isLast: idx === segments.length - 1,
   }));

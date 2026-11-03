@@ -81,7 +81,11 @@ export function StatCard({
     <span
       className={`text-2xl font-bold ${color} truncate cursor-default`}
       data-tooltip={tooltip}
-      title={tooltip ? undefined : String(value)}
+      title={
+        tooltip || (typeof value !== "string" && typeof value !== "number")
+          ? undefined
+          : String(value)
+      }
     >
       {value}
     </span>
@@ -196,7 +200,7 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
 
 // ── ActivityHeatmap ────────────────────────────────────────────────────────
 
-export function ActivityHeatmap({ activityMap }) {
+export function ActivityHeatmap({ activityMap }: { activityMap?: Record<string, number> }) {
   const t = useTranslations("analytics");
   const locale = useLocale();
   const scrollRef = useRef<HTMLDivElement>(null);

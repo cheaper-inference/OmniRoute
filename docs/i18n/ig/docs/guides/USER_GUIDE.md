@@ -666,72 +666,77 @@ Maka ntụaka zuru ezu gbasara mgbanwe gburugburu, lee [README](../README.md).
 
 ---
 
-## 🧩 Atụmatụ Dị Elu
+## 🧩 Advanced Atụmatụ
 
-### Model Ahaziri Ahazi
+### Ụdị omenala
 
-Tinye ID model ọ bụla n’ebe onye na-eweta ọrụ ọ bụla nọ n’echeghị mmelite ngwa:
+Tinye ID ụdị ọ bụla na onye na-eweta ọ bụla na-echeghị mmelite ngwa:
 
 ```bash
-# Site na API
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# Depụta: curl http://localhost:20128/api/provider-models?provider=openai
-# Wepụ: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Ma ọ bụ jiri Dashboard: **Providers → [Provider] → Custom Models**.
+Ma ọ bụ jiri Dashboard:** Ndị na-enye → [Onye na-eweta] → Ụdị Omenala** .
 
-Ndetu:
+ndetu:
 
-- A na-ejikwa OpenRouter na ndị na-eweta ọrụ kwekọrọ na OpenAI/Anthropic naanị site na **Available Models**. Ntinye aka, mbubata, na mmekọrịta akpaaka niile na-abanye n’otu ndepụta model dịnụ, ya mere enweghị ngalaba Custom Models dị iche maka ndị na-eweta ọrụ ndị ahụ.
-- E mere ngalaba **Custom Models** maka ndị na-eweta ọrụ na-adịghị enye mbubata model dịnụ a na-achịkwa.
+- OpenRouter na ndị na-eweta OpenAI/Anthropic-compatible na-ejikwa site na** Ụdị dị** naanị. Tinye, bubata, na mekọrịta akpaaka ala niile n'otu ndepụta ụdị dị, yabụ enweghị ngalaba Model Model dị iche maka ndị na-eweta ya.
+- Nke** Ụdị omenala** Ezubere ngalaba maka ndị na-enye ndị na-anaghị ekpughe mbubata ụdị ejiziri.
 
-### Ndị Na-eweta Ọrụ Ahaziri Ahazi Kwekọrọ na OpenAI
+### Ndị na-eweta OpenAI dakọtara omenala
 
-Enwere ike ịgbakwunye gateway ọ bụla na-asụ API OpenAI (proxy a na-akwado n’onwe ya, vLLM, ma ọ bụ aggregator nke ndị ọzọ)
-dị ka node onye na-eweta ọrụ nke ya:
+Ọnụ ụzọ ámá ọ bụla na-ekwu OpenAI API (onye nnọchiteanya nke onwe ya, vLLM, onye nchịkọta nke atọ) nwere ike ịgbakwunye dị ka ọnụ ụzọ nke ya:
 
-1. **Providers → Add OpenAI Compatible**.
-2. **Name**: aha ngosi maka node ahụ.
-3. **Prefix**: aha ntụgharị ụzọ. Ndị ahịa na-akpọ model dịka `<prefix>/<model>`, ya mere node nwere
-   prefix `mygw` na-enye `mygw/gpt-4o-mini`. A chọrọ ya; enweghị mmachi mkpụrụedemede.
-4. **API Type**: ezinụlọ endpoint nke gateway ahụ na-enye (Chat Completions, Responses,
-   Embeddings, ọdịyo, onyonyo).
-5. **Base URL**: mgbọrọgwụ API, ruo ma gụnye `/v1` (dịka ọmụmaatụ
-   `https://gateway.example.com/v1`), ọ bụghị ụzọ `/chat/completions` zuru ezu. Gateway ndị nwere
-   ụzọ na-abụghị ọkọlọtọ na-edobe ha n’okpuru **Advanced Settings** (ụzọ nkata, ụzọ model).
-6. Oghere **API Key (for Check)** na-anwale naanị njikọ ahụ. Mgbe ịmepụtara node ahụ,
-   mepee ya ma jiri **Add Connection** chekwaa igodo arịrịọ ga-eji.
+1. **Ndị na-enye → Tinye OpenAI dakọtara** .
+2. **Aha** : akara ngosi maka ọnụ.
+3. **Prefix** : aha uzo. Ndị ahịa na-akpọ ụdị dị ka `<prefix>/<model>`, yabụ ọnụ nwere prefix `mygw` na-eje ozi `mygw/gpt-4o-mini`. Achọrọ; enweghị mmachi agwa.
+4. **API Ụdị** : ezinụlọ njedebe ọnụ ụzọ ámá na-eje ozi (Mmecha nkata, nzaghachi, ntinye, ọdịyo, onyonyo).
+5. **Base URL** : mgbọrọgwụ API, ruo na gụnyere `/v1` (dịka ọmụmaatụ `https://gateway.example.com/v1`), ọ bụghị ụzọ `/chat/completions` zuru ezu. Ọnụ ụzọ ámá ndị nwere ụzọ na-abụghị ọkọlọtọ edobere ha n'okpuru** Ntọala dị elu** (ụzọ nkata, ụzọ ụdị).
+6. Nke** igodo API (maka nlele)** ubi na-anwale njikọ ahụ naanị. Mgbe ịmepụtara ọnụ, mepee ya ma jiri ya** Tinye Njikọ** iji chekwaa igodo nke arịrịọ ga-eji.
 
-Node ahụ na-enweta id ime nke ụdị `openai-compatible-<apiType>-<uuid>`; ọ dịghị mgbe
-ị ga-achọ ịpị ya, prefix ahụ bụ aha ọha.
+Ọnụ ọnụ na-enweta id n'ime ụdị `openai-compatible-<apiType>-<uuid>`; ọ dịghị mkpa ka ị pịnye ya, prefix bụ aha ọha.
 
-#### Prefix ndị edobere iche
+#### prefixes echekwara
 
-Prefix enweghị ike ịbụ id ma ọ bụ alias nke onye na-eweta ọrụ arụnyere n’ime sistemụ (dịka ọmụmaatụ `openai`, `cf`), ma ọ bụ
-id nke onye na-eweta ọrụ e wepụrụla. Onye na-edozi model na-enyocha id na alias arụnyere n’ime sistemụ tupu
-node ahaziri ahazi, ya mere node na-eji otu n’ime prefix ndị ahụ agaghị enweta okporo ụzọ:
-`<prefix>/model` ga-aga na onye na-eweta ọrụ arụnyere n’ime sistemụ kama, ma ọ bụ jụ kpamkpam ma ọ bụrụ na onye na-eweta ọrụ ahụ
-ewepụla. A ga-ajụ imepụta ma ọ bụ idezi node nwere ụdị prefix ahụ site na ozi a:
+Nganiihu enweghị ike ịbụ id ma ọ bụ utu aha nke onye na-eweta arụrụ arụ (dịka ọmụmaatụ `openai`, `cf`), ma ọ bụ id nke onye na-eweta ezumike nka. Onye na-edozi ihe nlereanya na-enyocha ids arụnyere na aha aha n'ihu ọnụ ụzọ omenala, yabụ ọnụ na-eji otu n'ime prefixes ndị ahụ agaghị enweta okporo ụzọ: `<prefix>/model` ga-agakwuru onye na-eweta arụnyere, ma ọ bụ mechiri emechi ma ọ bụrụ na onye na-eweta ahụ lara ezumike nká. Ajụrụ imepụta ma ọ bụ dezie ọnụ ọnụ nwere ụdị prefix dị otú ahụ:
 
 ```text
-prefix: "<prefix>" bụ prefix onye na-eweta ọrụ edobere iche — họrọ prefix ọzọ (enweghị ike iji id/alias edobere iche maka node ahaziri ahazi n’ihi na arịrịọ dịka <prefix>/model na-aga na onye na-eweta ọrụ arụnyere n’ime sistemụ ma ọ bụ na-ajụ kpamkpam mgbe e wepụrụ ya)
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-Họrọ prefix pụrụ iche (`mygw`, `acme-proxy`). Ọ bụrụ na arịrịọ e zigara node ahaziri ahazi ada site na
-njehie na-akpọ aha onye na-eweta ọrụ arụnyere n’ime sistemụ ma ọ bụ nzere ya, lelee ma prefix node ahụ
-edobere iche: node ndị echekwara tupu iwu a adị ka echekwara, mana prefix ha na-aga na
-onye na-eweta ọrụ arụnyere n’ime sistemụ. Dezie node ahụ ma nye ya prefix ọhụrụ.
+Họrọ prefix dị iche (`mygw`, `acme-proxy`). Ọ bụrụ na arịrịọ maka ọnụ ọnụ omenala daa site na njehie nke na-akpọ onye na-eweta arụnyere arụnyere ma ọ bụ nzere ya, lelee ma edobere prefix node: nodes echekwara tupu iwu a adị, mana ụzọ prefix ha na-aga n'ime onye na-eweta ya. Dezie ọnụ ma nye ya prefix ọhụrụ.
 
-### Ijikọta Ndị Ọgbọ OmniRoute n’Agbụ
+#### Nhọrọ ọnụ ụzọ njikọ ọ bụla
 
-Enwere ike ịgbakwunye gateway OmniRoute ọzọ dịka onye na-eweta ọrụ **Custom OpenAI-compatible**. Jiri
-base URL `/v1` nke onye ọgbọ ahụ na igodo API pụrụ iche nwere ikike kacha nta nke onye ọgbọ ahụ nyere.
+Igodo ndị a na-aga na `providerSpecificData` njikọ (dịka ọmụmaatụ site na `PUT /api/providers/{id}`):
 
-Maka agbụ na-alaghachi azụ ma ọ bụ nke nwere ọtụtụ nzọụkwụ, gbanye ihe mgbochi loop a na-ahọrọ iji na gateway ọ bụla:
+- `toolNameMaxLength` (integer, 1–1024) - maka njikọ dakọtara na ụdị nkata OpenAI nke ọnụ ụzọ ajụọ ogologo aha ngwa ọrụ. A na-eziga aha ndị toro ogologo dị ka aha mkpirisi ma weghachite na nzaghachi.
+- `quotaEndpoint` — ebe ngwụcha quota/credits nke ọnụ ụzọ ámá, gụọ maka eriri dashboard quota strip na oke-amata ụzọ. Na-arụ ọrụ na njikọ OpenAI- na Anthropic dakọtara; A na-edepụta ọdịdị zuru oke na `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### Chaining OmniRoute Ndị ọgbọ
+
+Enwere ike ịgbakwunye ọnụ ụzọ OmniRoute ọzọ dị ka a** Omenala OpenAI dakọtara** onye na-eweta. Jiri `/v1` base URL nke ọgbọ yana igodo API raara onwe ya nye, obere ihe ùgwù nke ndị ọgbọ ahụ nyere.
+
+Maka ụdọ nkwụghachi azụ ma ọ bụ ọtụtụ hop, mee ka nche nhọrọ ntinye aka n'ọnụ ụzọ ọ bụla:
 
 ```bash
 # gateway-a
@@ -747,18 +752,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Naanị arịrịọ ezitere na URL onye ọgbọ e nyere ikike kpọmkwem na-enweta
-header `X-OmniRoute-Peer-Trace`. Gateway na-ajụ instance ID e kwughachiri ma ọ bụ oke nzọụkwụ
-gwụchara site na HTTP `508 Loop Detected`; ndị na-eweta ọrụ upstream nkịtị anaghị enweta metadata onye ọgbọ.
+Naanị arịrịọ ezigara na URL ndị ọgbọ anabatara nke ọma na-anata nkụnye eji isi `X-OmniRoute-Peer-Trace`. Ọnụ ụzọ ajụ ID ugboro ugboro ma ọ bụ mmefu ego hop ike gwụrụ na HTTP `508 Loop Detected`; ndị na-eweta elu elu nkịtị anaghị enweta metadata ndị ọgbọ.
 
-Ijikọta ndị ọgbọ abụghị mmegharị database ma ọ bụ failover host. Gateway ọ bụla na-edobe
-ọnọdụ SQLite, cache, ọnụego mgbakọ, na session nke ya. Jiri reverse proxy nwere nyocha ahụike ma ọ bụ failover
-onye ahịa maka nnweta active/passive ma ọ bụ active/active, e tinyekwala otu database SQLite
-n’ime ọtụtụ instance OmniRoute na-agba ọsọ.
+Ịnịkọ ndị ọgbọ abụghị mmegharị nchekwa data ma ọ bụ ọdịda nnabata. Ọnụ ụzọ ámá ọ bụla na-edobe steeti SQLite nọọrọ onwe ya, cache, ọnụ ahịa ọnụ ahịa, na nnọkọ. Jiri proxy reverse ma ọ bụ ọdịda onye ahịa nyochara ahụike maka nnweta active/passive ma ọ bụ active/active, na ebulikwala otu nchekwa data SQLite n'ime ọtụtụ OmniRoute na-agba ọsọ.
 
-### Ụzọ Ndị Na-eweta Ọrụ Pụrụ Iche
+### Ụzọ ndị na-enye ihe raara onwe ya nye
 
-Dugara arịrịọ ozugbo na otu onye na-eweta ọrụ kpọmkwem yana nkwado model:
+Arịrịọ ụzọ ozugbo gaa na ndị na-eweta ihe nwere nkwado ụdị:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -766,137 +766,137 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-A na-agbakwunye prefix onye na-eweta ọrụ na-akpaghị aka ma ọ bụrụ na ọ dịghị. Model na-adabaghị na-eweghachi `400`.
+A na-agbakwunye prefix nke ndị na-eweta ya ma ọ bụrụ na ọ na-efu. Ụdị adabaghị adaba na-alaghachi `400`.
 
-### Nhazi Proxy Netwọk
+### Nhazi proxy netwọk
 
 ```bash
-# Tọọ proxy zuru ụwa ọnụ
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Proxy maka onye na-eweta ọrụ ọ bụla
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Nwalee proxy
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Usoro ibu ụzọ:** Nke metụtara igodo → Nke metụtara Combo → Nke metụtara onye na-eweta ọrụ → Nke zuru ụwa ọnụ → Environment.
+**ụzọ:** Kpọmkwem → Ngwakọta-kpọmkwem → Onye na-eweta kpọmkwem → Gburugburu → gburugburu.
 
-### API Katalọgụ Model
+### Model katalọgụ API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Na-eweghachi model ndị e kewara dịka onye na-eweta ọrụ si dị yana ụdị ha (`chat`, `embedding`, `image`).
+Na-eweghachi ụdị nke ndị na-eweta chịkọbara nwere ụdị (`chat`, `embedding`, `image`).
 
-### Mmekọrịta Cloud
+### Mmekọrịta igwe ojii
 
-- Mekọrịta ndị na-eweta ọrụ, combo, na ntọala n’ofe ngwaọrụ
-- Mmekọrịta akpaaka n’azụ yana timeout + ọdịda-ngwa-ngwa
-- Họrọ `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` nke dị n’akụkụ server na production
+- Mekọrịta ndị na-eweta, combos na ntọala n'ofe ngwaọrụ
+- Mmekọrịta ndabere akpaaka na oge nkwụsị + dara ngwa ngwa
+- Masịrị nkesa-akụkụ `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` na mmepụta
 
-### Cloudflare Quick Tunnel
+### Cloudflare ngwa ngwa
 
-- Dị na **Dashboard → Endpoints** maka Docker na nrụnye ndị ọzọ ị na-akwado n'onwe gị
-- Na-emepụta URL `https://*.trycloudflare.com` nwa oge nke na-ebuga arịrịọ na endpoint `/v1` gị ugbu a nke dakọtara na OpenAI
-- Mgbe mbụ enyere ya aka, ọ na-etinye `cloudflared` naanị mgbe achọrọ ya; mmalitegharị ndị na-esote na-ejikwa otu binary ahụ a na-achịkwa
-- A naghị eweghachite Quick Tunnels na-akpaghị aka mgbe OmniRoute ma ọ bụ container malitegharịrị; mee ka ha rụọ ọrụ ọzọ site na dashboard mgbe achọrọ
-- URL nke tunnel bụ nke nwa oge ma na-agbanwe oge ọ bụla ị kwụsịrị/malite tunnel ahụ
-- Quick Tunnels ndị a na-achịkwa na-eji HTTP/2 transport na ndabara iji zere ịdọ aka ná ntị QUIC UDP buffer na-eme mkpọtụ n'ime container ndị nwere oke akụrụngwa
-- Tọọ `CLOUDFLARED_PROTOCOL=quic` ma ọ bụ `auto` ma ọ bụrụ na ịchọrọ ịgbanwe nhọrọ transport a na-achịkwa
-- Tọọ `CLOUDFLARED_BIN` ma ọ bụrụ na ịchọrọ iji binary `cloudflared` etinyegoro kama nbudata a na-achịkwa
-- Enwere ike igosi ma ọ bụ zoo panel Cloudflare Quick Tunnel, Tailscale Funnel, na ngrok Tunnel na **Settings → Appearance**. Izo panel anaghị akwụsị tunnel na-arụ ọrụ.
+- Dị na** Dashboard → Endpoints** maka Docker na ihe ndị ọzọ ejiri aka ha rụọ ọrụ
+- Na-emepụta `https://*.trycloudflare.com` URL nwa oge ga-aga na njedebe `/v1` OpenAI dakọtara ugbu a
+- Mbụ mee ka installs `cloudflared` naanị mgbe achọrọ; emechaa malitegharịa jiri otu ọnụọgụ abụọ jisiri ike
+- A naghị eweghachite ọwara ngwa ngwa mgbe OmniRoute ma ọ bụ akpa malitegharịa; nyegharịa ha site na dashboard mgbe achọrọ
+- Ọwara URLs bụ ihe na-agbanwe agbanwe mgbe ọ bụla ị stop/start ọwara ahụ
+- Ọwara ọwara ngwa ngwa jikwaa na mbugharị HTTP/2 iji zere ịdọ aka ná ntị QUIC UDP na-eme mkpọtụ n'ime akpa amachibidoro.
+- Tọọ `CLOUDFLARED_PROTOCOL=quic` ma ọ bụ `auto` ma ọ bụrụ na ịchọrọ ịkagbu nhọrọ njem ejisiri ike
+- Tọọ `CLOUDFLARED_BIN` ma ọ bụrụ na-amasị gị iji ọnụọgụ abụọ `cloudflared` etinyegoro kama nbudata ejirila
+- Cloudflare Ọwara ọsọ ọsọ, Tailscale Funnel, na oghere ọwara ngrok nwere ike igosi ma ọ bụ zoo n'ime ya** Ntọala → Ọdịdị** . Izochi otu panel anaghị akwụsị ọwara na-agba ọsọ.
 
-### Ọgụgụ Isi nke LLM Gateway (Phase 9)
+### LLM isi nke ọnụ ụzọ ámá (Nkeji 9)
 
-- **Semantic Cache** — Na-echekwa nzaghachi ndị na-abụghị streaming, temperature=0 na-akpaghị aka (gafee ya site na `X-OmniRoute-No-Cache: true`)
-- **Request Idempotency** — Na-ewepụ arịrịọ ndị megharịrị n'ime 5s site na header `Idempotency-Key` ma ọ bụ `X-Request-Id`
-- **Progress Tracking** — Ihe omume SSE `event: progress` nke a ga-ahọrọ isonye na ya site na header `X-OmniRoute-Progress: true`
-
----
-
-### Ebe Nnwale Translator
-
-Nweta ya site na **Dashboard → Translator**. Chọpụta ma gosipụta n'anya otú OmniRoute si atụgharị arịrịọ API n'etiti ndị na-eweta ọrụ.
-
-| Ọnọdụ            | Ebumnuche                                                                            |
-| ---------------- | ------------------------------------------------------------------------------------ |
-| **Playground**   | Họrọ usoro isi/mmepụta, mado arịrịọ, wee hụ nsonaazụ a tụgharịrị ozugbo              |
-| **Chat Tester**  | Zipụ ozi nkata dị ndụ site na proxy ma nyochaa usoro arịrịọ/nzaghachi ahụ dum        |
-| **Test Bench**   | Mee nnwale n'ìgwè n'ofe ngwakọta usoro dị iche iche iji nyochaa izi ezi nke ntụgharị |
-| **Live Monitor** | Lelee ntụgharị ozugbo ka arịrịọ na-agafe na proxy                                    |
-
-**Ebe eji ya:**
-
-- Chọpụta ihe kpatara otu ngwakọta client/provider ji ada
-- Nyochaa na a na-atụgharị thinking tags, tool calls, na system prompts nke ọma
-- Tụnyere ọdịiche usoro dị n'etiti usoro OpenAI, Claude, Gemini, na Responses API
+- **Cache Semantic** - Nchekwa akpaaka na-enweghị nkwanye, nzaghachi = 0 okpomọkụ (gafere na `X-OmniRoute-No-Cache: true`)
+- **Rịọ enweghị ike** - Na-ewepụ arịrịọ n'ime 5s site na isi `Idempotency-Key` ma ọ bụ `X-Request-Id`
+- **Ọganihu nsochi** - Wepụ mmemme zqa `event: progress` SSE na nkụnye eji isi mee `X-OmniRoute-Progress: true`
 
 ---
 
-### Atụmatụ Routing
+### Ebe egwuregwu ndị ntụgharị
 
-Hazie site na **Dashboard → Settings → Routing**. Dashboard na-egosi atụmatụ isii a na-ejikarị eme ihe; combos na auto-router na-akwado ọtụtụ ndị ọzọ n'ime sistemụ.
+Nweta site na** Dashboard → Ntụgharị** . Mebie ma chepụta ka OmniRoute si atụgharịa arịrịọ API n'etiti ndị na-eweta ya.
 
-**Atụmatụ ndị a na-ahụ na dashboard (routing n'ọkwa akaụntụ):**
+| Ụdị                   | Ebumnuche                                                                      |
+| --------------------- | ------------------------------------------------------------------------------ |
+| **Ebe egwuregwu**     | Họrọ usoro source/target, mado arịrịọ, wee hụ mmepụta atụgharịrị ozugbo        |
+| **Onye nyocha nkata** | Ziga ozi nkata ndụ site na proxy wee lelee okirikiri request/response zuru ezu |
+| **Nwalee oche**       | Gbaa ule n'ofe n'ọtụtụ nhazi usoro iji chọpụta izi ezi ntụgharị asụsụ          |
+| **Nyochaa Live**      | Lelee ntụgharị asụsụ ozugbo ka arịrịọ na-aga na proxy                          |
 
-| Atụmatụ                        | Nkọwa                                                                                                       |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| **Fill First**                 | Na-eji akaụntụ dịka usoro mkpa ha si dị — akaụntụ bụ isi na-ahụ maka arịrịọ niile ruo mgbe ọ na-adịkwaghị   |
-| **Round Robin**                | Na-atụgharị n'etiti akaụntụ niile site na sticky limit a pụrụ ịhazi (ndabara: oku 3 kwa akaụntụ)            |
-| **P2C (Power of Two Choices)** | Na-ahọrọ akaụntụ 2 na-enweghị usoro ma na-ebuga arịrịọ na nke ka mma — na-edozi ibu site n'ịma ọnọdụ ahụike |
-| **Random**                     | Na-ahọrọ akaụntụ na-enweghị usoro maka arịrịọ ọ bụla site na Fisher-Yates shuffle                           |
-| **Least Used**                 | Na-ebuga arịrịọ na akaụntụ nwere timestamp `lastUsedAt` kacha ochie, na-ekesa traffic n'ụzọ hà nhata        |
-| **Cost Optimized**             | Na-ebuga arịrịọ na akaụntụ nwere uru priority kacha ala, iji họrọ ndị na-eweta ọrụ dị ọnụ ala               |
+**Jiri ikpe:**
 
-**Combo dị elu na atụmatụ akpaaka** (a pụrụ ịhazi kwa combo ma ọ bụ site na prefix `auto/*` — lee [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+- Wepu ihe kpatara nchikota client/provider kpọmkwem ada ada
+- Nyochaa mkpado echiche, oku ngwaọrụ, na usoro mkpali na-atụgharị nke ọma
+- Tulee ọdịiche dị n'ụdị n'etiti OpenAI, Claude, Gemini, na nzaghachi API usoro
 
-- `priority` — usoro siri ike, anaghị eji round-robin eme ihe ma ọlị
-- `weighted` — nkesa traffic dabere na oke weight nke model ọ bụla
-- `fill-first` — jiri model mbụ ruo mgbe o ruru oke ya
+---
+
+### Atụmatụ ụzọ ụzọ
+
+Hazie site na** Dashboard → Settings → Routing** . Dashboard ahụ na-ekpughe atụmatụ isii kachasị eji; combos na akpaaka-router n'ime na-akwado usoro sara mbara.
+
+**Atụmatụ dashboard a na-ahụ anya (ntụgharị ọkwa ọkwa akaụntụ):**
+
+| Atụmatụ                      | Nkọwa                                                                                          |
+| ---------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Jupụta Mbụ**               | Na-eji akaụntụ n'usoro mkpa - akaụntụ mbụ na-ejikwa arịrịọ niile ruo mgbe adịghị               |
+| **Gburugburu Robin**         | Na-agafe na akaụntụ niile nwere oke nnyapade nwere ike ịhazi ya (ndabara: oku 3 n'otu akaụntụ) |
+| **P2C (Ike nke nhọrọ abụọ)** | Họrọ akaụntụ 2 enweghị usoro na ụzọ ga-akawanye mma - na-edozi ibu na mmata ahụike             |
+| **Random**                   | Na-ahọrọ akaụntụ maka arịrịọ ọ bụla na-akpaghị aka site na iji Fisher-Yates shuffle            |
+| **Eji Ochachaghi Eji**       | Ụzọ gaa na akaụntụ ahụ nwere stampụ oge `lastUsedAt` kacha ochie, na-ekesa okporo ụzọ nke ọma  |
+| **Ebuliri ọnụ ahịa**         | Ụzọ gaa na akaụntụ ahụ nwere uru kacha dị ala, na-eme ka ndị na-eweta ọnụ ahịa dị ọnụ ala      |
+
+**Ngwakọta dị elu na atụmatụ akpaaka** (nke a na-ahazi kwa ngwakọta ma ọ bụ site na prefixes `auto/*` - lee [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+
+- `priority` - usoro siri ike, ọ dịghị mgbe ọ bụla gburugburu-robins
+- `weighted` - okporo ụzọ nhata kewara site na nha ụdị ọ bụla
+- `fill-first` - igbapu ihe nlereanya mbụ ruo mgbe oke kụrụ
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
+- `p2c` (Ike nke nhọrọ abụọ)
 - `least-used` na `cost-optimized`
-- `auto` — dabere na akara n'etiti candidates niile
-- `lkgp` (Last Known Good Provider) — na-ejide provider ikpeazụ gara nke ọma, ma laghachi n'iwu ma ọ daa
-- `context-optimized` — na-ahọrọ model nwere context window efu kachasị ukwuu
-- `context-relay` — na-ejikọta model ndị nwere long-context maka turns ndị na-esote
+- `auto` - akara akara n'ofe ndị niile na-eme ntuli aka
+- `lkgp` (Onye na-enye nke ọma mara ikpeazụ) - atụdo nye onye na-eweta ihe ịga nke ọma ikpeazụ, wee daa azụ na iwu
+- `context-optimized` - na-ahọrọ ihe nlereanya nwere nnukwu windo ọnọdụ efu efu
+- `context-relay` - ụdọ ogologo-context ụdị maka nsochi ntụgharị
 
-#### Header Sticky Session Mpụga
+#### Isi Okwu Nnyapade Mpụga
 
-Maka external session affinity (dịka ọmụmaatụ, agents Claude Code/Codex nọ n'azụ reverse proxies), zipụ:
+Maka mmekọ nnọkọ mpụga (dịka ọmụmaatụ, Claude Code/Codex agents n'azụ proxies), zipu:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute na-anabatakwa `x_session_id` ma na-eweghachi session key a na-eji eme ihe na `X-OmniRoute-Session-Id`.
+OmniRoute na-anabatakwa `x_session_id` wee weghachi igodo nnọkọ dị irè na `X-OmniRoute-Session-Id`.
 
-Ọ bụrụ na ị na-eji Nginx ma na-ezipụ header ndị nwere underscore, mee ka nke a rụọ ọrụ:
+Ọ bụrụ na ị na-eji Nginx wee zipu nkụnye eji isi mee ihe, mee:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Wildcard Model Aliases
+#### Utu aha Kaadị Wild
 
-Mepụta wildcard patterns iji gbanwee aha model:
+Mepụta ụkpụrụ kaadị ọhịa iji chegharịa aha ụdị:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
 Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Wildcards na-akwado `*` (mkpụrụedemede ọ bụla) na `?` (otu mkpụrụedemede).
+Kaadị ọhịa na-akwado `*` (ederede ọ bụla) na `?` (otu agwa).
 
-#### Fallback Chains
+#### Chains Fallback
 
-Kọwaa global fallback chains ndị na-emetụta arịrịọ niile:
+Kọwaa ụdọ azụ azụ zuru ụwa ọnụ nke na-emetụta arịrịọ niile:
 
 ```
 Chain: production-fallback
@@ -907,22 +907,22 @@ Chain: production-fallback
 
 ---
 
-### Ngwakọta Provider na Usoro Routing Ndị A Na-ahụkarị
+### Ngwakọta ndị na-enye ndị na-enyekarị & ụkpụrụ ụzọ
 
-Ndị a bụ ihe atụ nke usoro eji agwakọta ọtụtụ providers ma na-eme routing n'etiti ha na OmniRoute:
+Nke a bụ usoro ihe atụ maka ijikọta ọtụtụ ndị na-eweta na ụzọ n'etiti ha na OmniRoute:
 
-#### 1. Coding Agent Combo: Reasoning Dị Elu nke Nwere Fallback Maka Ọnụ Ahịa/Ọsọ
+#### 1. Combo Agent Combo: Ntụgharị uche dị elu na Cost/Speed Fallback
 
-Ọ dabara nke ọma maka coding agents (OpenCode, Claude Code, Cursor, Cline). Ọ na-ebu ụzọ eziga arịrịọ na frontier reasoning models, wee laghachi na coding models ndị ngwa ngwa mgbe quota gwụsịrị ma ọ bụ njehie mee.
+Kwesịrị ekwesị maka ndị na-etinye koodu (OpenCode, koodu Claude, Cursor, Cline). Ụzọ mbụ gaa n'ụdị echiche echiche oke, na-adaghachi na ụdị ntinye ngwa ngwa na ike ọgwụgwụ oke ma ọ bụ mperi.
 
-- **Dashboard**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
-- **Models**:
-  1. `claude/claude-sonnet-4-6` (Coding agent bụ isi)
-  2. `openai/gpt-4o` (Fallback nke abụọ nwere ikike dị elu)
-  3. `deepseek/deepseek-v4-flash` (Fallback nwere arụmọrụ dị elu ma dị ọnụ ala)
+- **Dashboard** Combos → New Combo → Aha: `agent-coding` → Strategy: `Priority`
+- **Ụdị** :
+  1. `claude/claude-sonnet-4-6` (onye na-edepụta koodu mbụ)
+  2. `openai/gpt-4o` (ndaghachi azụ nke ikike dị elu nke abụọ)
+  3. `deepseek/deepseek-v4-flash` (Ike dị elu, ọdịda na-efu ọnụ)
 
 ```bash
-# Ọmụmaatụ site na API
+# Example via API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -937,183 +937,179 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Ngwakọta Mgbanwe-Akpaaka nke Ọkwa N'efu
+#### 2. Free-Tier Auto Failover Combo
 
-Na-ejikọta ọtụtụ ndị na-eweta ọrụ n'efu na ndị na-achọghị igodo iji mee ka oge ọrụ dị elu n'enweghị ụgwọ API.
+Na-ejikọta ọtụtụ ndị na-eweta ọkwa efu na enweghị igodo iji bulie oge na-enweghị ụgwọ API.
 
-- **Atụmatụ**: `Least Used` ma ọ bụ `Round Robin` (na-ekesa ibu n'etiti oke ojiji)
-- **Ụdị**:
+- **Atụmatụ** `Least Used` ma ọ bụ `Round Robin` (na-ekesa ibu n'ofe oke)
+- **Ụdị** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# Ọmụmaatụ site na CLI
+# Example via CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. Usoro Multimodal / Ọhụụ na Ederede
+#### 3. Multimodal / Vision & Pipeline ederede
 
-Ijikọ ụdị ndị pụrụ iche maka ọhụụ na mmepụta ederede dị oke ọsọ maka usoro ọrụ gụnyere nghọta onyonyo na mmepụta koodu.
+Ijikọta ụdị ọhụụ pụrụ iche nwere ọgbọ ederede dị elu maka usoro ọrụ metụtara nghọta onyonyo na ọgbọ koodu.
 
-- **Ụkpụrụ**: Ngwakọta `Priority` nke na-edepụta ụdị nwere ikike ọhụụ na mbụ, ma tinye ụdị ederede/koodu nwere nnukwu ọsọ nhazi n'ikpeazụ.
-- **Ụdị**:
-  1. `gemini/gemini-2.5-pro` (Nghọta onyonyo/multimodal siri ike)
-  2. `openai/gpt-4o` (Ojiji ọhụụ na ngwaọrụ ziri ezi n'ogo)
-  3. `deepseek/deepseek-v4-flash` (Mmepụta ederede/koodu)
-
----
-
-### Nkwụsi Ike na Ndị Na-akwụsị Sekit
-
-Hazie ya site na **Dashboard → Settings → Resilience**.
-
-OmniRoute na-eji ihe ise mejuputa nkwụsi ike n'ọkwa onye na-eweta ọrụ:
-
-1. **Ahịrị Arịrịọ na Nhazi Ọsọ** — Ịkpụzi arịrịọ n'ọkwa sistemụ:
-   - **Arịrịọ Kwa Nkeji (RPM)** — Ọnụọgụ arịrịọ kachasị kwa nkeji maka akaụntụ ọ bụla
-   - **Oge Kacha Nta N'etiti Arịrịọ** — Oghere kacha nta na milisekọnd n'etiti arịrịọ
-   - **Arịrịọ Ndị Na-aga N'otu Oge Kachasị** — Ọnụọgụ arịrịọ kacha ukwuu nwere ike ịga n'otu oge maka akaụntụ ọ bụla
-
-2. **Oge Ntụrụndụ Njikọ** — Nhazi dabere n'ụdị nyocha njirimara maka otu njikọ mgbe ọdịda ndị enwere ike ịnwale ọzọ mere:
-   - **Oge Ntụrụndụ Ndabere** — Oge ndabara maka ọdịda sitere n'aka onye na-eweta ọrụ nke enwere ike ịnwale ọzọ
-   - **Jiri Ndụmọdụ Nnwale Ọzọ nke Onye Na-eweta Ọrụ** — Na-agbaso `Retry-After` nwere ikike ma ọ bụ ndụmọdụ nrụgharị mgbe e nyere ha
-   - **Nzọụkwụ Nlaghachi Azụ Kachasị** — Ọkwa nlaghachi azụ exponential kachasị maka ọdịda ugboro ugboro
-
-3. **Onye Na-akwụsị Sekit nke Onye Na-eweta Ọrụ** — Na-enyocha ọdịda onye na-eweta ọrụ site na mmalite ruo na njedebe, na-akara onye na-eweta ọrụ dị ka nke arụmọrụ ya belatara mgbe o ruru oke ịdọ aka ná ntị ahaziri, ma mepee onye na-akwụsị sekit mgbe o ruru oke ọdịda ahaziri:
-   - **Oke Mbelata Arụmọrụ** — Ọdịda onye na-eweta ọrụ na-esochi ibe ha tupu ịbanye na `DEGRADED`
-   - **Oke Ọdịda** — Ọdịda onye na-eweta ọrụ na-esochi ibe ha tupu ịbanye na `OPEN`
-   - **Oge Nchere Tupu Nrụgharị** — Oge a ga-echere tupu anwale onye na-eweta ọrụ ọzọ
-   - **CLOSED** (Dị Mma) — Arịrịọ na-aga dịka o kwesịrị
-   - **DEGRADED** — Arịrịọ ka na-aga ka a na-enyocha mmụba ọdịda
-   - **OPEN** — A na-egbochi onye na-eweta ọrụ nwa oge mgbe ọdịda ugboro ugboro gasịrị
-   - **HALF_OPEN** — Na-anwale ma onye na-eweta ọrụ agbakeela
-
-   Oke ọsọ `429` metụtara njikọ na-anọgide na **Connection Cooldown**, a naghịkwa agụ ha n'ime onye na-akwụsị sekit nke onye na-eweta ọrụ.
-
-   A na-egosi ọnọdụ onye na-akwụsị sekit nke onye na-eweta ọrụ mgbe ọ na-arụ ọrụ naanị na **Dashboard → Health**.
-
-4. **Chere Ka Oge Ntụrụndụ Gafee** — Ọ bụrụ na njikọ niile enwere ike ịhọrọ abanyelarị n'oge ntụrụndụ, OmniRoute nwere ike ichere ruo mgbe nke mbụ gwụsịrị ma nwalee otu arịrịọ onye ahịa ahụ ọzọ na-akpaghị aka.
-
-5. **Nchọpụta Akpaaka nke Oke Ọsọ** — Mgbe ndị na-eweta ọrụ dị n'elu weghachiri oge nchere doro anya, ndụmọdụ ndị ahụ na-anọchi oge ntụrụndụ njikọ mpaghara mgbe agbanyere ntọala ahụ.
-
-**Ndụmọdụ Ọkachamara:** Jiri ibe **Health** nyochaa ma tọgharịa ndị na-akwụsị sekit nke ndị na-eweta ọrụ na-arụ ugbu a mgbe nkwụsị ọrụ gasịrị. Ibe Resilience na-agbanwe naanị nhazi.
+- **Ụkpụrụ** : Ngwakọta `Priority` nke na-edepụta ụdị ndị nwere ike ịhụ ụzọ na mbụ na ụdị text/code dị elu nke ikpeazụ.
+- **Ụdị** :
+  1. `gemini/gemini-2.5-pro` (nghọta image/multimodal siri ike)
+  2. `openai/gpt-4o` (ọhụụ ziri ezi na ojiji ngwaọrụ)
+  3. `deepseek/deepseek-v4-flash` (ọgbọ Text/code )
 
 ---
 
-### Mbupụ / Mbubata Ebe Nchekwa Data
+### Resilience & Ndị na-emebi sekit
 
-Jikwaa nkwado ndabere ebe nchekwa data na **Dashboard → Settings → System & Storage**.
+Hazie site na** Dashboard → Ntọala → Resilience** .
 
-| Omume                       | Nkọwa                                                                                                                                                                |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Bupụ Ebe Nchekwa Data**   | Na-ebudata ebe nchekwa data SQLite dị ugbu a dịka faịlụ `.sqlite`                                                                                                    |
-| **Bupụ Ha Niile (.tar.gz)** | Na-ebudata ngwugwu nkwado ndabere zuru ezu nke gụnyere: ebe nchekwa data, ntọala, ngwakọta, njikọ ndị na-eweta ọrụ (enweghị ozi nzere), metadata igodo API           |
-| **Bubata Ebe Nchekwa Data** | Bulite faịlụ `.sqlite` iji dochie ebe nchekwa data dị ugbu a. A na-emepụta nkwado ndabere tupu mbubata na-akpaghị aka ma ọ bụrụ na `DISABLE_SQLITE_AUTO_BACKUP=true` |
+OmniRoute na-eji akụkụ ise arụ ọrụ nkwụsi ike nke ọkwa-eweta:
+
+1. **Rịọ kwụ n'ahịrị & pacing** - Nhazi arịrịọ ọkwa sistemụ:
+   - **Arịrịọ kwa nkeji (RPM)** - Oke arịrịọ kwa nkeji kwa akaụntụ
+   - **Obere oge n'etiti arịrịọ** - Opekempe kacha nta na milliseconds n'etiti arịrịọ
+   - **Arịrịọ dị oke ọnụ** - Arịrịọ kacha n'otu oge kwa akaụntụ
+
+2. **Jikọọ Jikọọ** - Nhazi ụdị ọ bụla maka otu njikọ mgbe ọdịda enwere ike ịnwale:
+   - **Isi Cooldown** - Window cooldown ndabara maka ọdịda mgbago elu enwere ike ịnwale
+   - **Jiri Ngosipụta Nleba anya n'elu iyi** - Na-asọpụrụ `Retry-After` ikike ma ọ bụ tọgharịa ntụnye aka mgbe enyere ya
+   - **Nzọụkwụ dị oke azụ** - Ọkwa nkwụghachi ụgwọ kachasị elu maka ọdịda ugboro ugboro
+
+3. **Onye na-agbaji sekit** - Na-esochi ọdịda nke ndị na-eweta njedebe na njedebe, na-akanye onye na-eweta eweda ya ala n'ụzọ ịdọ aka ná ntị ahaziri, wee mepee onye na-agbaji mgbe eruru oke ọdịda ahaziri:
+   - **Oke mbibi** - Ọdịda ndị na-eweta ihe na-esochi tupu abanye `DEGRADED`
+   - **Oke ọdịda** - Ọdịda ndị na-eweta ihe na-esochi tupu abanye `OPEN`
+   - **Tọgharịa oge agwụla** - Window oge tupu anwale onye na-eweta ya ọzọ
+   - **CLOSED** (Healthy) - Arịrịọ na-agba ọsọ nke ọma
+   - **DEGRADED** - Arịrịọ ka na-aga ebe a na-enyocha ọdịda dị elu
+   - **OPEN** - A na-egbochi onye na-eweta ya nwa oge ka ọdịda ugboro ugboro
+   - **HALF_OPEN** - Nnwale ma ọ bụrụ na onye na-eweta ya agbakeela
+
+   Oke ọnụego `429` nwere njikọ na-anọ** Jikọọ Jikọọ** ma agụkwala ya na onye na-emebi ihe.
+
+   Egosiri steeti oge ojiri nke onye na-eweta ihe** Dashboard → Health** naanị.
+
+4. **Chere maka jụụ** - Ọ bụrụ na njikọ onye ọ bụla na-eme ntuli aka adịlarị jụụ, OmniRoute nwere ike ichere oyi mbụ wee nwaa otu arịrịọ onye ahịa na-akpaghị aka.
+
+5. **Nchọpụta akpaaka oke ọnụego** - Mgbe ndị na-eweta elu na-eweghachi windo echere doro anya, ndụmọdụ ndị ahụ na-emebi njikọ dị n'ime mpaghara mgbe agbanyere ntọala ahụ.
+
+**Ndụmọdụ Pro:** Jiri ihe** Ahụike** ibe iji nyochaa ma tọgharịa ndị na-eweta ndị na-eweta ndụ mgbe ọ kwụsịrị. Ibe Resilience na-agbanwe naanị nhazi.
+
+---
+
+### Mbupu / Bubata database
+
+Jikwaa ndabere nchekwa data n'ime** Dashboard → Ntọala → Sistemu & Nchekwa** .
+
+| Omume                        | Nkọwa                                                                                                                                                           |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Mbupụ ọdụ data**           | Na-ebudata nchekwa data SQLite dị ugbu a dịka faịlụ `.sqlite`                                                                                                   |
+| **Mbupu Ha niile (.tar.gz)** | Na-ebudata ebe nchekwa nchekwa zuru oke gụnyere: nchekwa data, ntọala, combos, njikọ ndị na-eweta (enweghị nzere), metadata igodo API                           |
+| **Bubata ọdụ data**          | Bulite faịlụ `.sqlite` iji dochie nchekwa data dị ugbu a. A na-emepụta nkwado ndabere nke mbubata na-akpaghị aka ma ọ bụrụ na `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: Bupụ ebe nchekwa data
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Bupụ ha niile (ngwugwu zuru ezu)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Bubata ebe nchekwa data
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Nnyocha Mbubata:** A na-enyocha faịlụ ebubatara maka izu oke (nnyocha pragma SQLite), tebụl ndị achọrọ (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), na nha (kachasị 100MB).
+**Nkwado mbubata:** A kwadoro faịlụ ahụ ebubatara maka iguzosi ike n'ezi ihe (SQLite pragma check), tebụl achọrọ (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), na nha (max 100MB).
 
-**Ọnọdụ Ojiji:**
+**Jiri Okwu:**
 
-- Bugharịa OmniRoute n'etiti kọmputa
-- Mepụta nkwado ndabere mpụga maka mgbake mgbe ọdachi mere
-- Kesaa nhazi n'etiti ndị otu (bupụ ha niile → kesaa ngwugwu)
-
----
-
-### Dashboard Ntọala
-
-A haziri ibe ntọala n'ime **taabụ 7** iji mee ka nchọgharị dị mfe:
-
-| Taabụ          | Ihe ndị dị n’ime                                                                                                                                                                |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Izugbe**     | Ngwaọrụ nchekwa sistemụ, omume ndabara, nhụta ọwara Endpoint                                                                                                                    |
-| **Ọdịdị**      | Njikwa isiokwu (ìhè/ọchịchịrị/sistemụ), nhụta sidebar, mgbanaka panel maka kaadị ọwara Cloudflare/Tailscale/ngrok                                                               |
-| **AI**         | Oke echiche (passthrough / iwepụ-na-akpaghị aka / ahaziri / adaptive — lee [THINKING_BUDGET.md](./THINKING_BUDGET.md)), system prompt zuru ụwa ọnụ, ọnụ ọgụgụ cache prompt      |
-| **Nchekwa**    | Ntọala Nbanye/Okwuntughe, Njikwa Nnweta IP, nkwenye API maka `/models`, Mgbochi Provider, nchedo megide prompt-injection                                                        |
-| **Routing**    | Atụmatụ routing zuru ụwa ọnụ (Buru Ụzọ Jupụta / Round Robin / P2C / Random / Nke Ejiri Obere / Nke Ahaziri Maka Ọnụahịa), wildcard model aliases, usoro fallback, ndabara combo |
-| **Resilience** | Ahịrị nchere arịrịọ, cooldown njikọ, nhazi provider breaker, na omume ichere ka cooldown gwụ                                                                                    |
-| **Nke dị elu** | Nhazi proxy zuru ụwa ọnụ (HTTP/SOCKS5), mgbanwe proxy pụrụ iche maka provider ọ bụla                                                                                            |
-
-Izugbe anaghịzi emepụtagharị ndetu logging na cache ndị bụ naanị maka ịgụ. A na-echekwa ntọala njigide na
-njikarịcha database site na `/api/settings/database`; ihichapụ cache n’onwe gị na-eji
-`DELETE /api/cache`. Ọ bụ `CALL_LOGS_TABLE_MAX_ROWS` na `PROXY_LOGS_TABLE_MAX_ROWS`
-na-achịkwa oke ahịrị ndekọ arịrịọ na proxy.
+- Bugharịa OmniRoute n'etiti igwe
+- Mepụta nkwado ndabere na mpaghara maka mgbake ọdachi
+- Kekọrịta nhazi n'etiti ndị otu otu (bupụ ebe nchekwa → niile)
 
 ---
 
-### Njikwa Ọnụahịa & Mmefu Ego
+### Dashboard ntọala
 
-Nweta ya site na **Dashboard → Ọnụahịa**.
+A haziri ibe ntọala n'ime** 7 tab** maka mfe igodo:
 
-| Taabụ         | Ebumnuche                                                                                      |
-| ------------- | ---------------------------------------------------------------------------------------------- |
-| **Mmefu Ego** | Tọọ oke mmefu maka API key ọ bụla site na mmefu kwa ụbọchị/izu/ọnwa na nlekota ozugbo          |
-| **Ọnụahịa**   | Lelee ma dezie ndenye ọnụahịa model — ọnụahịa kwa token ntinye/mmepụta 1K maka provider ọ bụla |
+| Tab            | ọdịnaya                                                                                                                                                                 |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Izugbe**     | Ngwa nchekwa sistemụ, omume ndabara, ọhụhụ ọwara Endpoint                                                                                                               |
+| **Ọdịdị**      | Njikwa isiokwu (light/dark/system), visibiliti sidebar, panel toggles maka kaadị ọwara Cloudflare/Tailscale/ngrok                                                       |
+| **AI**         | Atụmatụ mmefu ego (passthrough / auto-strip / custom / adaptive — lee [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), usoro zuru ụwa ọnụ ngwa ngwa, ngwa ngwa cache stats |
+| **Nchekwa**    | ntọala Login/Password, njikwa nnweta IP, API auth maka `/models`, igbochi onye na-enye ihe, onye nche ịgbanye ngwa ngwa.                                                |
+| **Ntugharị**   | Atụmatụ ntụgharị zuru ụwa ọnụ (Mejupụta Mbụ / Gburugburu Robin / P2C / Random / Kachasịghị Eji / Akwụsị Ego), utu aha ụdị kaadị ọhịa, ụdọ ọdịda, ndabara combo          |
+| **Nkwenye**    | Rịọ kwụ n'ahịrị, njikọ jụrụ oyi, nhazi onye na-eweta ihe na-eweta, yana omume echere maka oyi                                                                           |
+| **Nke dị elu** | Nhazi proxy zuru ụwa ọnụ (HTTP/SOCKS5), proxy onye na-eweta onye ọ bụla na-ewepụ                                                                                        |
+
+General anaghịzi emepụtagharị naanị ndekọ ndekọ na cache. A na-anọgide na-ejigide nchekwa data na ntọala kachasị site na `/api/settings/database`; mkpochapụ cache akwụkwọ ntuziaka na-eji `DELETE /api/cache`. `CALL_LOGS_TABLE_MAX_ROWS` na `PROXY_LOGS_TABLE_MAX_ROWS` na-achịkwa okpu ahịrị arịrịọ na proxy log.
+
+---
+
+### Ọnụ ego & njikwa mmefu ego
+
+Nweta site na** Dashboard → akwụ ụgwọ** .
+
+| Tab               | Ebumnuche                                                                                          |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
+| **mmefu ego**     | Tọọ oke mmefu ego kwa igodo API na mmefu ego daily/weekly/monthly yana nsochi oge                  |
+| **Ịnye ọnụ ahịa** | Lelee ma dezie ndenye ọnụahịa nlereanya - ọnụ ahịa kwa 1K input/output token maka onye na-eweta ya |
 
 ```bash
-# API: Tọọ mmefu ego
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Nweta ọnọdụ mmefu ego dị ugbu a
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Nlekota Ọnụahịa:** Arịrịọ ọ bụla na-edekọ ojiji token ma gbakọọ ọnụahịa site n’iji tebụl ọnụahịa. Lelee nkọwa ya na **Dashboard → Ojiji** dịka provider, model, na API key siri dị.
+**Ndepụta ọnụ ahịa:** Arịrịọ ọ bụla na-edekọ ojiji token wee gbakọọ ọnụ ahịa site na iji tebụl ọnụahịa. Lelee ndakpọ na** Dashboard → ojiji** site na onye na-eweta, ihe nlereanya, na igodo API.
 
 ---
 
-### Ntụgharị Ọdịyo Ka Ọ Bụrụ Ederede
+### Ederede ọdịyo
 
-OmniRoute na-akwado ntụgharị ọdịyo ka ọ bụrụ ederede site na endpoint dakọtara na OpenAI:
+OmniRoute na-akwado ndegharị ọdịyo site na njedebe njedebe dakọtara na OpenAI:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Ihe atụ na curl
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` bụ ụzọ Deepgram nke mbụ ma chọọ Deepgram API key.
-Ọ bụrụ na ọ bụ naanị OpenRouter ka ahaziri, jiri `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` bụ ụzọ Deepgram nke ala ma chọọ igodo Deepgram API. Ọ bụrụ naanị OpenRouter ka ahaziri, jiri `openrouter/deepgram/nova-3`.
 
-Ndị provider **Okwu-gaa-Ederede (ntụgharị)**:
+**Okwu-gaa-ederede (ndegharị)** ndị na-eweta:
 
-- `openai/` (dakọtara na whisper)
+- `openai/` (ntụgharị dakọtara)
 - `groq/` (Groq Whisper Turbo)
 - `deepgram/` (ezinụlọ Nova)
 - `assemblyai/`
 - `nvidia/` (Parakeet, Canary)
-- `huggingface/` (ụdị whisper dị iche iche)
+- `huggingface/` (dị iche iche ntanye)
 - `qwen/`
 
-Ndị provider **Ederede-gaa-Okwu (`POST /v1/audio/speech`)**:
+**Ederede-gaa-na-okwu (`POST /v1/audio/speech`)** ndị na-eweta:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
 - `deepgram/` (Aura)
-- `nvidia/` (Magpie TTS)
+- `nvidia/` ( Magpie TTS)
 - `elevenlabs/`
 - `huggingface/`
 - `inworld/`
@@ -1125,52 +1121,45 @@ Ndị provider **Ederede-gaa-Okwu (`POST /v1/audio/speech`)**:
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Ụdị ọdịyo akwadoro maka ntụgharị: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Ụdị mmepụta TTS dabere na provider (mp3, wav, opus, pcm, mulaw).
+Ụdị ọdịyo akwadoro maka ndegharị: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Ụdị mmepụta TTS dabere na onye na-eweta ya (mp3, wav, opus, PCm, mulaw).
 
 ---
 
-### Atụmatụ Idozi Combo Nha
+### Atụmatụ nhazi ngwakọta
 
-Hazie idozi nha maka combo ọ bụla na **Dashboard → Combo → Mepụta/Dezie → Atụmatụ**.
+Hazie nhazi n'otu n'otu n'ime** Dashboard → Combos → Create/Edit → Strategy** .
 
-| Atụmatụ                      | Nkọwa                                                                                   |
-| ---------------------------- | --------------------------------------------------------------------------------------- |
-| **Round-Robin**              | Na-agbanwegharị n’etiti model n’usoro                                                   |
-| **Mkpa**                     | Na-anwale model mbụ mgbe niile; ọ na-eji fallback naanị mgbe njehie mere                |
-| **Random**                   | Na-ahọrọ model na-enweghị usoro site na combo maka arịrịọ ọ bụla                        |
-| **Dabere na Ibu**            | Na-eme routing n’oke kwesịrị ekwesị dabere na ibu e kenyere model ọ bụla                |
-| **Nke Ejiri Obere**          | Na-eme routing gaa na model nwere arịrịọ ọhụrụ kachasị ole na ole (na-eji metrik combo) |
-| **Nke Ahaziri Maka Ọnụahịa** | Na-eme routing gaa na model dị ọnụ ala kachasị nke dị (na-eji tebụl ọnụahịa)            |
+| Atụmatụ                | Nkọwa                                                                       |
+| ---------------------- | --------------------------------------------------------------------------- |
+| **Gburugburu-Robin**   | Na-atụgharị site na ụdị n'usoro                                             |
+| **Ibu ụzọ**            | Na-agbalị mgbe niile mbụ nlereanya; daa azụ naanị na njehie                 |
+| **Random**             | Na-ahọrọ ụdị enweghị usoro site na ngwakọta maka arịrịọ ọ bụla              |
+| **Ibu arọ**            | Ụzọ n'otu n'otu dabere na ịdị arọ ekenyere otu ụdị                          |
+| **Eji Ochachaghi Eji** | Ụzọ na-aga ihe nlereanya nwere arịrịọ kacha nso nso a (na-eji metrik combo) |
+| **Ejikwa ọnụ ahịa**    | Ụzọ gaa ụdịdị kacha dị ọnụ ala (na-eji tebụl ọnụahịa)                       |
 
-Enwere ike ịtọ ndabara combo zuru ụwa ọnụ na **Dashboard → Ntọala → Routing → Ndabara Combo**.
-Timeout target combo na-eketa timeout arịrịọ dị ugbu a dịka ndabara. Jiri **Timeout target
-(sekọnd)** na ndabara combo ma ọ bụ otu combo naanị mgbe oke dị mkpụmkpụ maka target ọ bụla kwesịrị
-ịkpalite fallback ngwa ngwa.
+Enwere ike idobe ndabara combo zuru ụwa ọnụ** Dashboard → Settings → Routing → Combo Defaults** . Nkwụsịtụ ebumnuche Combo na-eketa oge nkwụsị nke arịrịọ dị ugbu a site na ndabara. Jiri** Oge ngwụcha nke ebumnuche (sekọnd)** na ndabara ndabara ma ọ bụ otu nchikota naanị mgbe mkpirisi n'otu n'otu kwesịrị ịkpalite ọdịda ngwa ngwa.
 
-Njikarịcha combo na-enweghị latency chọrọ ka ị họrọ ịgbanye ya. Hapụ **Njikarịcha na-enweghị latency** ka ọ bụrụ nke agbanyụrụ iji
-gbochie njirimara latency ndị a iso target fallback na-asọ mpi, ịwụfe target dabere na akụkọ
-TTFT, ma ọ bụ ịpịkọta arịrịọ fallback; ịgbanye ya na-enye ohere hedging ahaziri, ịwụfe TTFT
-n’amụma, na mkpakọ fallback nke na-arụ ọrụ tupu oge iji gbanwere izi ezi routing/arịrịọ maka
-latency ọdụ dị ala.
+Nkwalite mkpokọta efu abanyela. Hapụ** Nkwalite n'efu-latency** nwere nkwarụ iji gbochie njirimara latency ndị a site n'ịsọ ọsọ mgbagha, ịwụpụ ebumnobi dabere na akụkọ TTFT, ma ọ bụ mkpakọ arịrịọ ọdịda azụ; na-eme ka ọ na-enye ohere ahazi ahaziri, TTFT skips na-ebu amụma, na mkpakọ ọdịda azụ azụ iji routing/request ikwesị ntụkwasị obi maka nkwụsị ọdụ dị ala.
 
-Gbanyụọ **Reasoning token buffer** mgbe ndị na-eweta ọrụ upstream chọrọ ka e debe oke `max_tokens` / `maxOutputTokens` nke ọma. Mgbe enyere ya ikike, combo routing na-agbakwụnye naanị ohere mgbakwunye maka reasoning-model n'ụdị model ndị nwere oke mmepụta amaara, ma na-ahapụ oke token nke client ka ọ ghara ịgbanwe mgbe uru nchekwa e tinyere buffer ga-agafe oke ahụ. Ọ bụrụ na oke client adịlarị elu karịa oke amaara, OmniRoute na-ewedata ya ruo n'oke ahụ tupu o ziga arịrịọ upstream.
+Gbanyụọ** Reasoning token buffer** mgbe ndị na-eweta elu chọrọ oke `max_tokens` / `maxOutputTokens` siri ike. Mgbe enyere ya aka, ịnyagharị combo na-agbakwunye naanị ọnụ ụlọ echiche-ụkpụrụ maka ụdị nwere okpu mmepụta amaara wee hapụ oke akara ndị ahịa agbanweghị mgbe uru echekwara ga-akarị okpu ahụ. Ọ bụrụ na oke ndị ahịa adịlarị n'elu okpu amaara, OmniRoute jigide ya ruo okpu ahụ tupu izipu arịrịọ elu.
 
 ---
 
-### Dashboard Ahụike
+### Dashboard ahụike
 
-Nweta ya site na **Dashboard → Health**. Nchịkọta ahụike sistemụ ozugbo nwere kaadị 6:
+Nweta site na** Dashboard → Health** . Nyochaa ahụike sistemu oge nwere kaadị 6:
 
-| Kaadị                     | Ihe Ọ Na-egosi                                                |
-| ------------------------- | ------------------------------------------------------------- |
-| **Ọnọdụ Sistemụ**         | Oge ọ nọ n'ọrụ, ụdị mbipụta, ojiji ebe nchekwa, ndekọ data    |
-| **Ahụike Provider**       | Ọnọdụ ọrụ circuit breaker zuru ụwa ọnụ nke provider           |
-| **Oke Ọsọ**               | Oge nkwụsị njikọ ndị dị ugbu a n'akaụntụ ọ bụla na oge fọdụrụ |
-| **Mkpọchi Ndị Dị Ugbu A** | Mkpọchi ndị metụtara model na mwepụ nwa oge ndị dị ugbu a     |
-| **Cache Signature**       | Ọnụọgụ cache deduplication (igodo ndị na-arụ ọrụ, hit rate)   |
-| **Telemetry Latency**     | Nchịkọta latency p50/p95/p99 maka provider ọ bụla             |
+| Kaadị                   | Ihe Ọ Na-egosi                                       |
+| ----------------------- | ---------------------------------------------------- |
+| **Ọnọdụ Sistemu**       | Oge njedebe, ụdị, ojiji ebe nchekwa, ndekọ data      |
+| **Ahụike Onye na-enye** | Oge ọhụhụ nke onye na-eweta sekit nke ụwa            |
+| **Oke oke**             | Njikọ na-arụ ọrụ cooldowns kwa akaụntụ na oge fọdụrụ |
+| **Mkpọchi na-arụ ọrụ**  | Mkpọchi ihe nlereanya na-arụ ọrụ yana mwepu nwa oge  |
+| **Cache mbinye aka**    | stats cache mwepu (igodo na-arụ ọrụ, ọnụego kụrụ)    |
+| **Latency Telemetry**   | p50/p95/p99 latency kwa onye na-eweta ya             |
 
-**Ndụmọdụ Ọkachamara:** Ibe Health na-emegharị onwe ya kwa sekọnd 10. Jiri kaadị circuit breaker chọpụta provider ndị na-enwe nsogbu.
+**Ndụmọdụ Pro:** Ibe ahụike na-eme onwe ya na nkeji iri ọ bụla. Jiri kaadị mgbawa sekit ka ịmata ndị na-eweta nsogbu.
 
 ---
 
