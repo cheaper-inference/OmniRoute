@@ -108,6 +108,10 @@ export async function persistAntigravityPreflightFamilyLock(params: {
 }
 
 /** Read the saved deadline without installing any process-local model locks. */
+// Accept every family persistAntigravityFamilyCooldown() can write, not just the
+// gemini/claude pair this reader's sibling loop happens to rehydrate. argon is a
+// real bucket (gemini-4*), so narrowing the parameter here made the reader
+// disagree with both the writer and its callers.
 export function getAntigravityFamilyCooldownUntil(
   providerSpecificData: unknown,
   family: AntigravityQuotaFamily,

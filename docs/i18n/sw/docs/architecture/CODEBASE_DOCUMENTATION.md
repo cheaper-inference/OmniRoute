@@ -456,7 +456,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -486,7 +486,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 moduli za watekelezaji wa kiwango cha juu (`*.ts` minus `base.ts`, `index.ts` na hujaribu — kuhesabu vipimo `npm run check:docs-counts` ). Kila darasa la wasii huongeza `BaseExecutor` (`base.ts`), moja kwa moja au kupitia `DefaultExecutor` au mtekelezaji mwingine; moduli zilizobaki ni wasaidizi wa mtoaji (schemas za zana, adapta fetch/TTS, washughulikiaji wa quirk). Watekelezaji ni pamoja na:
+158 moduli za watekelezaji wa kiwango cha juu (`*.ts` minus `base.ts`, `index.ts` na hujaribu — kuhesabu vipimo `npm run check:docs-counts` ). Kila darasa la wasii huongeza `BaseExecutor` (`base.ts`), moja kwa moja au kupitia `DefaultExecutor` au mtekelezaji mwingine; moduli zilizobaki ni wasaidizi wa mtoaji (schemas za zana, adapta fetch/TTS, washughulikiaji wa quirk). Watekelezaji ni pamoja na:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `vertex`, plus `devin-desktop`(msaidizi `qoder` utambulisho ulioshirikiwa) na `claudeIdentity.ts` (usajili) `index.ts`
 
