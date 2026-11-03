@@ -4,7 +4,7 @@
 
 ---
 
-> **Статус:** панель приладів побудована на** Комплект Keak CI UI** (`@keak/cheaper-inference-ui-kit`), реалізований як робочий простір `packages/ui-kit` (`@omniroute/ui-kit`; попередній знімок закріплено в `packages/ui-kit/UPSTREAM.md` і охороняється `npm run check:ui-kit-snapshot`). Світло — канонічна тема; типовим параметром є `system`. Акцент — лайм Keak (`--ci-color-accent`). Switzer — це єдине сімейство для UI, відображення та кодового тексту (`--ci-font-ui`; `--ci-font-display` і `--ci-font-mono` прив’язуються до нього), розміщене в самому наборі (`packages/ui-kit/src/ci-fonts.css`, імпортовано `ci-tokens.css`). Кожен значок є гліфом Lucide.
+> **Статус:** панель приладів побудована на** Комплект Keak CI UI** (`@keak/cheaper-inference-ui-kit`), реалізований як робочий простір `packages/ui-kit` (`@omniroute/ui-kit`; попередній знімок закріплено в `packages/ui-kit/UPSTREAM.md` і охороняється `npm run check:ui-kit-snapshot`). Світло — канонічна тема; типовим параметром є `system`. Акцент — лайм Keak (`--ci-color-accent`). Switzer — це єдине сімейство для UI, відображення та кодового тексту (`--ci-font-ui`; `--ci-font-display` і `--ci-font-mono` прив’язуються до нього), розміщене в самому наборі (`packages/ui-kit/src/ci-fonts.css`, імпортовано `ci-tokens.css`). Написи Switzer не перераховують гліф за гліфом (`src/app/globals.css`): Inter для кирилиці, грецької та в’єтнамської мов і, лише під `html[dir="rtl"]`, Vazirmatn для арабського шрифту. Кожна іконка є гліфом Lucide.
 
 ## 1. Де що знаходиться
 

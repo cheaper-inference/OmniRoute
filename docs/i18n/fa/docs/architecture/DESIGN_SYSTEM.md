@@ -4,7 +4,7 @@
 
 ---
 
-> **وضعیت:** داشبورد بر روی ساخته شده است** کیک CI UI کیت** (`@keak/cheaper-inference-ui-kit`)، بهعنوان فضای کاری `packages/ui-kit` عرضه میشود (`@omniroute/ui-kit`؛ عکس فوری بالادست به `packages/ui-kit/UPSTREAM.md` پین شده و توسط `npm run check:ui-kit-snapshot` محافظت میشود). نور موضوع متعارف است. اولویت پیش فرض `system` است. لهجه آن Keak lime (`--ci-color-accent`) است. Switzer یک خانواده واحد برای UI، نمایش و متن کد (`--ci-font-ui`؛ `--ci-font-display` و `--ci-font-mono` به آن است)، که توسط خود کیت میزبانی میشود (`packages/ui-kit/src/ci-fonts.css`، وارد شده توسط `ci-tokens.css`). هر نماد یک گلیف Lucide است.
+> **وضعیت:** داشبورد بر روی ساخته شده است** کیک CI UI کیت** (`@keak/cheaper-inference-ui-kit`)، بهعنوان فضای کاری `packages/ui-kit` عرضه میشود (`@omniroute/ui-kit`؛ عکس فوری بالادست به `packages/ui-kit/UPSTREAM.md` پین شده و توسط `npm run check:ui-kit-snapshot` محافظت میشود). نور موضوع متعارف است. اولویت پیش فرض `system` است. لهجه آن Keak lime (`--ci-color-accent`) است. Switzer خانواده تکی برای UI، نمایش و متن کد (`--ci-font-ui`؛ `--ci-font-display` و `--ci-font-mono` به آن حل میشوند)، توسط خود کیت میزبانی میشود (`packages/ui-kit/src/ci-fonts.css`، وارد شده توسط `ci-tokens.css`). اسکریپتهای Switzer فاقد اسلوب به حروف (`src/app/globals.css`): Inter برای خط سیریلیک، یونانی و ویتنامی و فقط زیر `html[dir="rtl"]`، وزیرمتن برای خط عربی. هر نماد یک گلیف Lucide است.
 
 ## 1. محل قرارگیری اجزا
 
