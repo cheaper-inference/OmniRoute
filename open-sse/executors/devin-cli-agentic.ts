@@ -4,6 +4,7 @@ import os from "node:os";
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
+import { DEVIN_BRIDGE_NOT_CONFIGURED_CODE, UNSAFE_DEVIN_HOME_CODE } from "../config/constants.ts";
 import { DEVIN_MODEL_CATALOG } from "../config/providers/registry/devin/catalog.ts";
 import { buildErrorBody, errorResponse, sanitizeErrorMessage } from "../utils/error.ts";
 import { drainAwareFailureStatus } from "../utils/drainStatus.ts";
@@ -130,11 +131,22 @@ export function buildDevinChildEnv(
   source: NodeJS.ProcessEnv = process.env
 ): NodeJS.ProcessEnv {
   const home = source.DEVIN_AGENTIC_HOME?.trim() || "";
-  if (!home || !path.isAbsolute(home) || !isIsolatedDevinHome(home)) {
+  // Both failures are operator configuration, not a transient upstream fault (#18019):
+  // 503 with a stable code that the resilience layer treats as local (no cooldown, no
+  // breaker, no same-account retry). No default home is guessed, so the sandbox
+  // boundary stays an explicit operator choice.
+  if (!home) {
     throw new DevinAgenticBridgeError(
-      "DEVIN_AGENTIC_HOME must be an absolute path inside the bridge sandbox",
-      "unsafe_devin_home",
-      500
+      "Devin agentic bridge is not configured: set DEVIN_AGENTIC_HOME to an absolute path inside the bridge sandbox (a .sandbox directory segment) and restart OmniRoute",
+      DEVIN_BRIDGE_NOT_CONFIGURED_CODE,
+      503
+    );
+  }
+  if (!path.isAbsolute(home) || !isIsolatedDevinHome(home)) {
+    throw new DevinAgenticBridgeError(
+      "DEVIN_AGENTIC_HOME must be an absolute path inside the bridge sandbox (a .sandbox directory segment)",
+      UNSAFE_DEVIN_HOME_CODE,
+      503
     );
   }
 

@@ -1,1 +1,0 @@
-- **chore(quality):** the Release-Green package lane gets a 40 min ceiling. `next build` was killed at 20 min on an idle runner on every scheduled run, failing `build:cli`, the package artifact and the tarball boot-smoke; three dashboard and lease guards broken by recent merges are green again (#17219)

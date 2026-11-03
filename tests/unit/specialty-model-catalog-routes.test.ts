@@ -73,10 +73,10 @@ test(
     assert.deepEqual(
       ids.filter((id) => id.startsWith("codex/")),
       [
+        "codex/gpt-6.1-sol-image",
         "codex/gpt-5.6-sol-image",
         "codex/gpt-5.6-terra-image",
         "codex/gpt-5.6-luna-image",
-        "codex/gpt-6.1-sol-image",
         "codex/gpt-image-2.5-flare",
         "codex/gpt-image-2.5-sunburst",
         "codex/gpt-image-2",
