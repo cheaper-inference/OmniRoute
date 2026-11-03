@@ -699,7 +699,9 @@
       "tests/unit/sse-cut-tool-call-arguments.test.ts",
       "tests/unit/antigravity-argon-404.test.ts",
       "tests/unit/combo/combo-resilience-no-provider-state.test.ts",
-      "tests/unit/singbox-routes-local-only.test.ts"
+      "tests/unit/singbox-routes-local-only.test.ts",
+      "tests/unit/combo-precontent-transport-recovery-routing.test.ts",
+      "tests/unit/combo-precontent-transport-recovery.test.ts"
     ],
     "nodeArgs": [
       "--import",
