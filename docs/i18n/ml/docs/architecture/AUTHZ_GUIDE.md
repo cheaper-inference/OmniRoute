@@ -135,31 +135,31 @@ JWT സാധുതാ പരിശോധന വിജയിക്കുകയ�
 ## പൈപ്പ്ലൈൻ
 
 ```
-ഇൻകമിംഗ് അഭ്യർത്ഥന → src/proxy.ts
-  → src/server/authz/pipeline.ts-ലെ runAuthzPipeline()
-    1. വിശ്വസനീയമായ ആന്തരിക ഹെഡറുകൾ നീക്കംചെയ്യുക (x-omniroute-auth-*, x-omniroute-route-class)
-    2. അഭ്യർത്ഥന ഐഡി സൃഷ്ടിച്ച് classifyRoute() വഴി റൂട്ട് വർഗ്ഗീകരിക്കുക
-    3. pathname == "/" ആണെങ്കിൽ → /dashboard-ലേക്ക് റീഡയറക്ട് ചെയ്യുക
-    4. ഡ്രെയിനിംഗ് അവസ്ഥയിലാണെങ്കിൽ (ക്രമാനുസൃത ഷട്ട്ഡൗൺ), കൂടാതെ /api/* ആണെങ്കിൽ → 503
-    5. GET അല്ലാത്ത /api/* ആണെങ്കിൽ → checkBodySize() ഗാർഡ്
-    6. OPTIONS ആണെങ്കിൽ → CORS പ്രീഫ്ലൈറ്റ് 204
-    7. options.enforce == false ആണെങ്കിൽ → റൂട്ട്-ക്ലാസ് ഹെഡറുകളോടെ അതേപടി കടത്തിവിടുക
-    8. അല്ലെങ്കിൽ: POLICIES[routeClass].evaluate(ctx)
-       - അനുവദിക്കുക  → x-omniroute-auth-{kind,id,label,scopes} പതിപ്പിക്കുക → NextResponse.next()
-       - നിരസിക്കുക → correlation_id സഹിതമുള്ള JSON പിശക് (ഡാഷ്ബോർഡ് പേജുകൾ → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-വിശ്വസനീയമായ ആന്തരിക ഹെഡറുകൾ (`src/server/authz/headers.ts`-ൽ നിർവചിച്ചിരിക്കുന്നു) വർഗ്ഗീകരണത്തിനു മുമ്പ് **ഇൻകമിംഗ് അഭ്യർത്ഥനകളിൽനിന്ന് നീക്കംചെയ്യപ്പെടുന്നു** — ഒരു സബ്ജക്റ്റായി ആൾമാറാട്ടം നടത്താൻ ക്ലയന്റുകൾക്ക് `x-omniroute-auth-*` മുൻകൂട്ടി പൂരിപ്പിക്കാൻ കഴിയില്ല.
+വിശ്വസനീയമായ ആന്തരിക തലക്കെട്ടുകളാണ് ( `src/server/authz/headers.ts` യിൽ നിർവചിച്ചിരിക്കുന്നത്).** ഇൻകമിംഗ് അഭ്യർത്ഥനകളിൽ നിന്ന് നീക്കം ചെയ്തു** വർഗ്ഗീകരണത്തിന് മുമ്പ് — ക്ലയൻ്റുകൾക്ക് ഒരു വിഷയമായി ആൾമാറാട്ടം നടത്താൻ `x-omniroute-auth-*` മുൻകൂട്ടി പോപ്പുലേറ്റ് ചെയ്യാൻ കഴിയില്ല.
 
-### പോളിസി കരാറുകൾ
+### നയ കരാറുകൾ
 
-ഓരോ റൂട്ട് ക്ലാസിനും `src/server/authz/policies/`-ൽ ഒരു പോളിസിയുണ്ട്:
+ഓരോ റൂട്ട് ക്ലാസിനും `src/server/authz/policies/` യിൽ ഒരു നയമുണ്ട്:
 
-- **`publicPolicy`** (`policies/public.ts`) — എല്ലായ്പ്പോഴും `allow({ kind: "anonymous", id: "anonymous" })` മടക്കിനൽകുന്നു.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — ബെയറർ എക്സ്ട്രാക്റ്റ് ചെയ്ത് `validateApiKey()` വഴി സാധൂകരിക്കുന്നു. പ്രാബല്യത്തിലുള്ള `REQUIRE_API_KEY` ഫീച്ചർ ഫ്ലാഗ് പ്രവർത്തനരഹിതമായിരിക്കുമ്പോൾ മാത്രമേ അനോണിമസ് ആക്സസിലേക്ക് ഫാൾ ത്രൂ ചെയ്യൂ. ഡാഷ്ബോർഡ് ഫീച്ചർ ഫ്ലാഗുകളും എൻവയോൺമെന്റ് വേരിയബിളുകളും `/api/v1/*`, `/api/v1beta/*`, അവയുടെ അപരനാമങ്ങൾ എന്നിവയെ ഒരേ രീതിയിൽ നിയന്ത്രിക്കുന്നതിനായി, പ്രാബല്യത്തിലുള്ള ഫ്ലാഗ് `isRequireApiKeyEnabled()` (`DB ഫീച്ചർ ഫ്ലാഗ് ഓവർറൈഡ് > process.env.REQUIRE_API_KEY > ഡിഫോൾട്ട്`) വഴിയാണ് പരിഹരിക്കുന്നത്; റിസോൾവർ പരാജയങ്ങൾ ആക്സസ് നിഷേധിക്കും. ക്ലയന്റ് API റൂട്ടുകളിൽ ഡാഷ്ബോർഡ്-സെഷൻ അഭ്യർത്ഥനകൾ അനുവദിക്കുന്നു (ഡാഷ്ബോർഡ് മോഡൽ കാറ്റലോഗ് ഉപയോഗിക്കുന്ന `/api/v1/models` ഉൾപ്പെടെ).
-- **`managementPolicy`** (`policies/management.ts`) — ഡാഷ്ബോർഡ് സെഷൻ, ആന്തരിക മോഡൽ-സിങ്ക് അഭ്യർത്ഥനകൾ (`/api/providers/[name]/(sync-models|models)`-മായി പൊരുത്തപ്പെടുത്തുന്നവ) എന്നിവ സ്വീകരിക്കുന്നു; അല്ലെങ്കിൽ `isAuthRequired()` false മടക്കിനൽകുകയാണെങ്കിൽ പൂർണ്ണമായും ഒഴിവാക്കുന്നു. ബെയറർ ടോക്കൺ നൽകിയിട്ടുണ്ടെങ്കിലും അസാധുവാണെങ്കിൽ 403 (`AUTH_001`) മടക്കിനൽകുന്നു; അല്ലെങ്കിൽ 401. ഏതെങ്കിലും ഓത്ത് ബ്രാഞ്ചിനു മുമ്പായി റൂട്ട്-ഗാർഡ് ടയറുകളും (LOCAL_ONLY / ALWAYS_PROTECTED) നിർബന്ധമാക്കുന്നു — [റൂട്ട് ഗാർഡ് ടയറുകൾ](../security/ROUTE_GUARD_TIERS.md) കാണുക. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`-ലെ LOCAL_ONLY പാതകൾ (നിലവിൽ: `/api/mcp/`) ബെയറർ കീയിൽ `manage` സ്കോപ്പ് ഉണ്ടെങ്കിൽ നോൺ-ലൂപ്പ്ബാക്കിൽനിന്നും ആക്സസ് ചെയ്യാം; മറ്റ് എല്ലാ LOCAL_ONLY പാതകളും സ്കോപ്പ് പരിഗണിക്കാതെ സ്ട്രിക്റ്റ്-ലൂപ്പ്ബാക്കായി തുടരും.
+- **`publicPolicy`** (`policies/public.ts`) — എപ്പോഴും `allow({ kind: "anonymous", id: "anonymous" })` നൽകുന്നു.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — എക്സ്ട്രാക്ട് ബെയറർ, `validateApiKey()` വഴി സാധൂകരിക്കുന്നു. ഫലപ്രദമായ `REQUIRE_API_KEY` ഫീച്ചർ ഫ്ലാഗ് അപ്രാപ്തമാക്കുമ്പോൾ മാത്രമേ അജ്ഞാതനാകൂ. ഫലപ്രദമായ ഫ്ലാഗ് `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) വഴി പരിഹരിക്കപ്പെടുന്നു, അതിനാൽ ഡാഷ്ബോർഡ് ഫീച്ചർ ഫ്ലാഗുകളും പരിസ്ഥിതി വേരിയബിളുകളും `/api/v1/*`, `/api/v1beta/*`, അപരനാമങ്ങൾ എന്നിവ സ്ഥിരമായി നിയന്ത്രിക്കുന്നു; റിസോൾവർ പരാജയങ്ങൾ പരാജയപ്പെട്ടു. ക്ലയൻ്റ് API റൂട്ടുകളിൽ ഡാഷ്ബോർഡ്-സെഷൻ അഭ്യർത്ഥനകൾ അനുവദിക്കുന്നു (ഡാഷ്ബോർഡ് മോഡൽ കാറ്റലോഗ് ഉപയോഗിക്കുന്ന `/api/v1/models` ഉൾപ്പെടെ). Entra ID SSO പ്രവർത്തനക്ഷമമാക്കുമ്പോൾ, ഘടനാപരമായി ഒരു എൻട്രാ ടോക്കൺ (മൂന്ന് base64url സെഗ്മെൻ്റുകൾ, `RS*` alg, `kid`) ഒരു ബെയറർ കൈകാര്യം ചെയ്യുന്നത് SSO ബ്രാഞ്ചാണ്.** മുമ്പ്** `validateApiKey()`, അതിൻ്റെ വിധി അന്തിമ — ആണ്, ഇത് ഒരിക്കലും API-കീ പാഥിലേക്കോ ഡീഗ്രേഡ്-ടു-അജ്ഞാത ബ്രാഞ്ചിലേക്കോ വരുന്നില്ല, അതിനാൽ ഒരു ഐഡൻ്റിറ്റി പ്രൊവൈഡർ ഔട്ടേജ് ഓപ്പൺ ആക്സസ് ആകാൻ കഴിയില്ല. സ്റ്റാറ്റിക് API കീകളെ ബാധിക്കില്ല. [Entra ID SSO](../security/ENTRA_SSO.md) കാണുക.
+- **`managementPolicy`** (`policies/management.ts`) — ഡാഷ്ബോർഡ് സെഷൻ, ആന്തരിക മോഡൽ-സമന്വയ അഭ്യർത്ഥനകൾ ( `/api/providers/[name]/(sync-models|models)` മായി പൊരുത്തപ്പെടുന്നു) സ്വീകരിക്കുന്നു അല്ലെങ്കിൽ `isAuthRequired()` തെറ്റായി നൽകുകയാണെങ്കിൽ പൂർണ്ണമായും ഒഴിവാക്കുന്നു. ഒരു ബെയറർ ടോക്കൺ നിലവിലുണ്ടെങ്കിലും അസാധുവാണെങ്കിൽ 403 (`AUTH_001`) നൽകുന്നു, അല്ലാത്തപക്ഷം 401. ഏതെങ്കിലും auth ബ്രാഞ്ചിന് മുമ്പ് റൂട്ട് ഗാർഡ് ടയറുകൾ (LOCAL_ONLY / ALWAYS_PROTECTED) നടപ്പിലാക്കുന്നു — [റൂട്ട് ഗാർഡ് ടയറുകൾ](../security/ROUTE_GUARD_TIERS.md) കാണുക. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ലെ LOCAL_ONLY പാതകൾ (ഇന്ന്: `/api/mcp/`) ബെയറർ കീ `manage` സ്കോപ്പ് വഹിക്കുമ്പോൾ നോൺ-ലൂപ്പ്ബാക്കിൽ നിന്ന് ആക്സസ് ചെയ്യാവുന്നതാണ്; മറ്റെല്ലാ LOCAL_ONLY പാതകളും വ്യാപ്തി പരിഗണിക്കാതെ കർശനമായ-ലൂപ്പ്ബാക്ക് ആയി തുടരുന്നു.
 
-വിജയകരമായ ഒരു പോളിസി `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` ഉള്ള `AuthSubject` മടക്കിനൽകുന്നു. ഡൗൺസ്ട്രീം ഹാൻഡ്ലറുകൾക്ക് ഓത്ത് ലോജിക് വീണ്ടും പ്രവർത്തിപ്പിക്കുന്നതിനുപകരം `src/server/authz/assertAuth.ts`-ലെ `assertAuth(request, "CLIENT_API")` വഴി അത് വായിക്കാം.
+വിജയകരമായ ഒരു പോളിസി `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` നൊപ്പം `AuthSubject` നൽകുന്നു. ആധികാരിക ലോജിക് വീണ്ടും പ്രവർത്തിപ്പിക്കുന്നതിനുപകരം `src/server/authz/assertAuth.ts` ൽ `assertAuth(request, "CLIENT_API")` വഴി ഡൗൺസ്ട്രീം ഹാൻഡ്ലർമാർക്ക് ഇത് വായിക്കാനാകും.
 
 ## പൊതു റൂട്ടുകളുടെ പട്ടിക
 
@@ -296,23 +296,23 @@ API കീകൾ ഒരു `scopes` അറേ വഹിക്കുന്നു 
 
 ## ഡീബഗ്ഗിംഗ്
 
-പൈപ്പ്ലൈൻ എല്ലായ്പ്പോഴും പ്രതികരണങ്ങളിൽ ഇനിപ്പറയുന്നവ ചേർക്കുന്നു:
+പൈപ്പ്ലൈൻ എപ്പോഴും പ്രതികരണങ്ങൾ ഉപയോഗിച്ച് സ്റ്റാമ്പ് ചെയ്യുന്നു:
 
 ```
-x-request-id:               <കോറിലേഷൻ ഐഡി, പിശക് ബോഡികളിൽ പ്രതിധ്വനിക്കുന്നു>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-ഓതന്റിക്കേറ്റ് ചെയ്ത അഭ്യർത്ഥനകൾക്കായി, അപ്സ്ട്രീം (ഹാൻഡ്ലർ-സൈഡ്) അഭ്യർത്ഥനാ ഹെഡറുകളിൽ ഇനിപ്പറയുന്നവയും ഉൾപ്പെടുന്നു:
+ആധികാരികമായ അഭ്യർത്ഥനകൾക്കായി അപ്സ്ട്രീം (ഹാൻഡ്ലർ-സൈഡ്) അഭ്യർത്ഥന തലക്കെട്ടുകളും ഉൾപ്പെടുന്നു:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<അവസാന-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (ഐച്ഛികം)
-x-omniroute-auth-scopes:    കോമ ഉപയോഗിച്ച് വേർതിരിച്ച പട്ടിക
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-ഹാൻഡ്ലറുകൾക്കുള്ളിൽ `assertAuth(req, expectedClass)` ഉപയോഗിക്കുക — മിഡിൽവെയർ മറികടന്നിട്ടുണ്ടെങ്കിൽ, ഇത് `AUTHZ_NOT_INITIALIZED` കോഡോടുകൂടിയ `AuthzAssertionError` എറിയുന്നു (ടെസ്റ്റുകളിൽ കോൺഫിഗറേഷൻ റിഗ്രഷനുകൾ കണ്ടെത്താൻ സഹായകരമാണ്).
+ഹാൻഡ്ലറുകൾ — ഉള്ളിൽ `assertAuth(req, expectedClass)` ഉപയോഗിക്കുക, മിഡിൽവെയർ ബൈപാസ് ചെയ്താൽ അത് `AUTHZ_NOT_INITIALIZED` കോഡ് ഉപയോഗിച്ച് `AuthzAssertionError` എറിയുന്നു (ടെസ്റ്റുകളിൽ കോൺഫിഗറേഷൻ റിഗ്രഷനുകൾ പിടിക്കാൻ സഹായകമാണ്).
 
 ## ഇതും കാണുക
 

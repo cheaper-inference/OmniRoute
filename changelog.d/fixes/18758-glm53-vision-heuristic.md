@@ -1,0 +1,1 @@
+- **fix(capabilities):** Restrict the GLM-5.3 vision heuristic to Flash so text-only base/effort variants no longer inherit image support ([#18758](https://github.com/cheaper-inference/OmniRoute/pull/18758)) — thanks @insoln.
