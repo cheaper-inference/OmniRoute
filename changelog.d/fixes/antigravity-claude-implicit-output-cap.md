@@ -1,0 +1,1 @@
+- **fix(antigravity):** omit implicit output-token limits for Claude requests so the upstream native default applies when the client supplies no limit.
