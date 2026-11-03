@@ -27,7 +27,10 @@ describe("active named combo resolution (Phase 2)", () => {
     const plan = selectCompressionPlan(config, null, 0, undefined, undefined, combos);
     assert.equal(plan.mode, "stacked");
     assert.equal(plan.source, "active-profile");
-    assert.deepEqual(plan.stackedPipeline, [{ engine: "session-dedup" }, { engine: "lite" }]);
+    assert.deepEqual(plan.stackedPipeline, [
+      { engine: "session-dedup" },
+      { engine: "lite", config: { compressToolResults: false } },
+    ]);
     const optedIn = selectCompressionPlan(
       config,
       null,

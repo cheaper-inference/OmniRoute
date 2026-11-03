@@ -299,85 +299,73 @@ OmniRoute через ту саму модель підключення, що в�
 
 ---
 
-## Аутентифікація та обсяги доступу
+## Автентифікація та області дії
 
-Виклики інструментів MCP читають рядки обсягів від викликаючого. Ця перевірка належить одному з трьох незалежних просторів імен. Успішна перевірка одним перевіряючим не означає успіху в інших. Правила наведено в розділі [Три простори імен обсягів](#three-scope-namespaces). Каталог інструментів — у розділі [Обсяги інструментів MCP](#mcp-tool-scopes).
+Інструмент MCP викликає зчитування рядків області дії від викликаючого. Ця перевірка є одним із трьох незалежних просторів імен. Передача від однієї шашки не є передачею від інших. Правила [три області імен області](#three-scope-namespaces). Каталог інструментів — це [MCP tool scopes](#mcp-tool-scopes).
 
-### Три простори імен обсягів
+### Три області імен
 
-`manage` для API-ключа, `read:compression` для інструмента MCP та `read` для токена доступу `oma_live_…` — це три різні надання повноважень. Викликаючі, які надсилають токен доступу `read` до керуючого маршруту, що змінює стан, отримують HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Цей ранг визначає `scopeSatisfies`. Вона не звертається до таблиці MCP, і матчер MCP не звертається до неї.
+`manage` на ключі API, `read:compression` на інструменті MCP і `read` на маркері доступу `oma_live_…` — це три різні надання. Абоненти, які надсилають маркер доступу `read` до змінного маршруту керування, отримують HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Цей ранг – `scopeSatisfies`. Він не звертається до таблиці MCP, а засіб збігу MCP не звертається до неї.
 
-| Простір імен               | Облікові дані                                                                      | Перевіряючий           | Успішна перевірка дозволяє                                 |
-| :------------------------- | :--------------------------------------------------------------------------------- | :--------------------- | :--------------------------------------------------------- |
-| Керування API-ключем       | `api_keys.scopes`                                                                  | `hasManageScope`       | Керуючі REST-маршрути для цього Bearer-ключа               |
-| Аддитивні обсяги API-ключа | той самий масив, один точний рядок                                                 | функція, вказана нижче | Лише цю окрему можливість                                  |
-| Обсяги інструментів MCP    | той самий масив, інакше MCP `_meta` (лише HTTP/SSE), інакше `OMNIROUTE_MCP_SCOPES` | `scopeMatches`         | Цей інструмент, коли ввімкнено примусове застосування      |
-| Токен доступу              | `oma_live_…`                                                                       | `scopeSatisfies`       | Керуючий маршрут, метод і шлях якого вимагають цього рангу |
+| Простір імен               | облікові дані                                                                       | Шашка                    | Перепустка дозволяє                                          |
+| :------------------------- | :---------------------------------------------------------------------------------- | :----------------------- | :----------------------------------------------------------- |
+| Керування API-ключами      | `api_keys.scopes`                                                                   | `hasManageScope`         | Керування REST для цього ключа носія                         |
+| Добавка API-ключ           | той самий масив, один точний рядок                                                  | помічник, названий нижче | Лише одна можливість                                         |
+| діапазони інструментів MCP | той самий масив, інакше MCP `_meta` (лише HTTP/SSE ), інакше `OMNIROUTE_MCP_SCOPES` | `scopeMatches`           | Цей інструмент, коли ввімкнено примусове виконання           |
+| Маркер доступу             | `oma_live_…`                                                                        | `scopeSatisfies`         | Маршрут керування, метод і шлях якого вимагають такого рангу |
 
-Видача кожних облікових даних описана в [Аутентифікація керування](../guides/MANAGEMENT-AUTH.md).
+Оформлення кожного облікового запису описано в [Автентифікації керування](../guides/MANAGEMENT-AUTH.md).
 
-#### Обсяги API-ключів
+#### Області дії ключів API
 
-Один масив `api_keys.scopes` живить дві задачі. Вони використовують різні функції.
+Один масив `api_keys.scopes` забезпечує два завдання. Вони використовують різні функції.
 
-**Керуючий REST.** `manage` і `admin` — це члени `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). Саме `hasManageScope` авторизує керуючі маршрути для цього ключа. `admin` має керувальні права на цих маршрутах. Слово `admin` тут не є рангом токена доступу й не розширюється на обсяги інструментів MCP.
+**Управління REST.** `manage` і `admin` є членами `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`). `hasManageScope` – це те, що авторизує маршрути керування для цього ключа. `admin` здатний керувати на цих маршрутах. Слово `admin` тут не є рангом маркера доступу, і воно не розширюється на області інструментів MCP.
 
-**Аддитивні рядки.** Кожен з них — це точна перевірка належності, і кожен залишається поза `MANAGEMENT_API_KEY_SCOPES`.
+**Адитивні рядки.** Кожен з них є точним тестом на членство, і кожен залишається за межами `MANAGEMENT_API_KEY_SCOPES`.
 
-| Обсяг                          | Успішна перевірка дозволяє                                                                                                                                                 |
-| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Лише виняток LOCAL_ONLY для `/api/mcp/` поза loopback (`hasMcpConnectOrManageScope`). Ключ із `manage` або `admin` також проходить цей виняток.                            |
-| `self:usage`                   | `GET /api/v1/me/status` для цього ключа (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` додає цей обсяг під час створення (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Квоти облікового запису upstream усередині тієї самої відповіді статусу (`src/lib/usage/apiKeySelfService.ts`). Маршрут статусу все одно вимагає `self:usage`.             |
-| `policy:bypass-provider-quota` | Виклики інференсу цього ключа оминають політику квот провайдера (`hasProviderQuotaBypassScope` у `src/sse/handlers/chat.ts`).                                              |
+| Область застосування           | Перепустка дозволяє                                                                                                                                                         |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | Лише виділення `/api/mcp/` LOCAL_ONLY без петлі (`hasMcpConnectOrManageScope`). Ключ із `manage` або `admin` все ще пропускає це виділення.                                 |
+| `self:usage`                   | `GET /api/v1/me/status` для цього ключа (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` додає цю область під час створення (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Квоти облікового запису вгорі всередині цього корисного навантаження стану (`src/lib/usage/apiKeySelfService.ts`). Статус маршруту все ще потребує `self:usage`.            |
+| `policy:bypass-provider-quota` | Виклики цього ключа пропускають політику квот постачальника (`hasProviderQuotaBypassScope` в `src/sse/handlers/chat.ts`).                                                   |
 
 #### Зіставлення
 
-Каталог — це таблиця в розділі [Обсяги інструментів MCP](#mcp-tool-scopes). Не вважайте `MCP_SCOPE_LIST` у `src/shared/constants/mcpScopes.ts` цим каталогом: це початкова типізована підмножина. Пізніші інструменти оголошують поруч із нею додаткові обсяги (`read:notion`, `read:skills`, `read:local-corpus` та решту таблиці).
+Каталог — це таблиця в межах [інструментів MCP](#mcp-tool-scopes). Не розглядайте `MCP_SCOPE_LIST` у `src/shared/constants/mcpScopes.ts` як цей каталог: це оригінальна типізована підмножина. Пізніші інструменти оголошують додаткові області поряд з ним (`read:notion`, `read:skills`, `read:local-corpus` та решта таблиці).
 
-`evaluateToolScopes` у `open-sse/mcp-server/scopeEnforcement.ts` дозволяє виклик, коли кожен обов'язковий обсяг збігається з одним із наданих обсягів:
+`evaluateToolScopes` в `open-sse/mcp-server/scopeEnforcement.ts` дозволяє виклик, коли кожна необхідна область відповідає певній наданій області:
 
-- `*` збігається з кожним обов'язковим обсягом.
-- Наданий обсяг, що закінчується на `*`, збігається з обов'язковим обсягом, що починається з префікса перед зірочкою. `read:*` збігається з `read:compression`.
-- Будь-який інший наданий обсяг збігається лише з тотожним обов'язковим рядком.
+- `*` відповідає кожному необхідному діапазону.
+- Надана область, яка закінчується на `*` відповідає обов’язковій області, яка починається з префікса перед зірочкою. `read:*` відповідає `read:compression`.
+- Кожна інша надана область відповідає лише ідентичному необхідному рядку.
 
-Ключ, чиї обсяги — `["manage"]`, не проходить `scopeMatches` для `read:compression`. Той самий виклик не проходить для `admin`, `mcp:connect`, `read` і `write`, коли це єдині надані рядки. Серед обсягів інструментів MCP немає ієрархії, окрім кінцевого `*`.
+Ключ, область дії якого є `["manage"]` не виконує `scopeMatches` для `read:compression`. Той самий виклик не виконується для `admin`, `mcp:connect`, `read` і `write` якщо це єдині надані рядки. Немає ієрархії серед областей інструментів MCP за межами кінцевого `*`.
 
-Примусове застосування вимкнено, якщо не задано `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (типово `false`). Поки воно вимкнено, `evaluateToolScopes` дозволяє виклик і пропускає каталог. Коли воно увімкнено, HTTP використовує `api_keys.scopes` Bearer-ключа як `authInfo` (див. [Прив'язка обсягів HTTP до ключа](#per-key-http-scope-binding-7895)). Коли обсяги ключа не розв'язуються, набір наданих обсягів переходить до MCP `_meta` (враховується лише для викликаючих HTTP/SSE, усередині контексту HTTP-автентифікації; `_meta` викликаючого stdio ігнорується, бо ним керує клієнт і він не несе жодної ідентичності викликаючого), а потім до `OMNIROUTE_MCP_SCOPES`.
+Примусове виконання вимкнено, якщо не `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (за замовчуванням `false`). Коли його вимкнено, `evaluateToolScopes` дозволяє дзвінок і пропускає каталог. Поки він увімкнений, HTTP використовує `api_keys.scopes` ключа носія як `authInfo` (див. [Прив’язування області HTTP для кожного ключа](#per-key-http-scope-binding-7895) ). Якщо ключові області не розв’язані, наданий набір потрапляє до MCP `_meta` (вшановується лише для абонентів HTTP/SSE, у контексті автентифікації HTTP ; `_meta` абонента stdio ігнорується, оскільки ним керує клієнт і він не несе ідентифікаційних даних для кожного абонента), а потім `OMNIROUTE_MCP_SCOPES`.
 
-#### Обсяги токенів доступу
+#### Області маркерів доступу
 
-Токени `oma_live_…` (`src/lib/accessTokens/scopes.ts`) несуть `read`, `write` або `admin`. `scopeSatisfies` — це ранг: `admin` охоплює `write` і `read`, а `write` охоплює `read`. Невідомі обсяги не охоплюють нічого.
+Токени `oma_live_…` (`src/lib/accessTokens/scopes.ts`) містять `read`, `write` або `admin`. `scopeSatisfies` є рангом: `admin` охоплює `write` і `read`, а `write` охоплює `read`. Невідомі області нічого не покривають.
 
 `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) порівнює цей ранг із `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
-- `GET`, `HEAD` та `OPTIONS` вимагають `read`.
-- Усі інші методи вимагають `write`.
-- Шляхи в `ADMIN_SCOPE_PREFIXES` вимагають `admin` для кожного методу. `/api/mcp`
-  є в цьому списку, тому токен доступу `write` все одно не може викликати MCP
-  HTTP-поверхню.
+- `GET`, `HEAD` і `OPTIONS` вимагають `read`.
+- Кожен інший метод вимагає `write`.
+- Шляхи в `ADMIN_SCOPE_PREFIXES` вимагають `admin` для кожного методу. `/api/mcp` є в цьому списку, тому маркер доступу `write` все ще не може викликати поверхню MCP HTTP.
 - Шляхи в `ADMIN_MUTATION_PREFIXES` вимагають `admin` лише для мутацій.
-- Шляхи в `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) вимагають `admin` лише для мутацій і лише на
-  цьому точному шляху — інші підмаршрути `/api/settings/*` зберігають `write`.
+- Шляхи в `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`, `/api/settings/require-login`) вимагають `admin` лише для мутацій, і лише на цьому точному шляху — інші підмаршрути `/api/settings/*` зберігають `write`.
 
-`PATCH /api/keys/{id}` є мутацією і не входить до цих списків адміністрування,
-тому токен `read` отримує 403
-`Access token scope 'read' is insufficient; 'write' required.`
-Токен доступу `write` або `admin` задовольняє цій маршруту. JWT дашборду,
-loopback CLI machine-id токен та API-ключ із `manage` або `admin` йдуть іншими
-гілками і не звужуються цим рангом.
+`PATCH /api/keys/{id}` є мутацією, і її немає в списках адміністратора, тому маркер `read` отримує 403 `Access token scope 'read' is insufficient; 'write' required.` Маркер доступу `write` або `admin` задовольняє цей маршрут. JWT інформаційної панелі, токен ідентифікатора машини з петлею CLI і ключ API із `manage` або `admin` беруть інші гілки й не звужуються цим рангом.
 
-Токен доступу, який проходить `scopeSatisfies` для `/api/mcp`, пройшов лише
-ворота управління. Виклики інструментів все ще виконують `scopeMatches` проти
-скоупів API-ключів. Ранг токена доступу не є входом для `scopeMatches`.
+Маркер доступу, який передає `scopeSatisfies` для `/api/mcp`, очистив лише ворота керування. Виклики інструментів все ще запускають `scopeMatches` щодо областей ключа API. Ранг маркера доступу не є вхідними даними для `scopeMatches`.
 
-### Скоупи інструментів MCP
+### діапазони інструментів MCP
 
-Перевірка скоупів централізована в `open-sse/mcp-server/scopeEnforcement.ts`.
-Кожен інструмент вимагає певні скоупи:
+Застосування обсягу централізовано в `open-sse/mcp-server/scopeEnforcement.ts`. Кожен інструмент вимагає певних областей:
 
-| Область               | Інструменти                                                                                                                                                                            |
+| Область застосування  | Інструменти                                                                                                                                                                            |
 | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                      |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                              |
@@ -413,17 +401,19 @@ loopback CLI machine-id токен та API-ключ із `manage` або `admin
 | `write:obsidian`      | 9 інструментів запису — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                 |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                      |
 
-Підтримуються wildcard-scope: `read:*` надає всі scope читання, `*` — повний доступ.
+Підтримуються області підстановки: `read:*` надає всі області читання, `*` надає повний доступ.
 
-### `mcp:connect` — обмежена можливість маршруту (#7895)
+### можливість вузького маршруту `mcp:connect` — (#7895)
 
-Для доступу до HTTP/SSE MCP-транспорту (`/api/mcp/*`) з не-loopback адреса потрібен виняток LOCAL_ONLY для `/api/mcp/` (див. `docs/security/ROUTE_GUARD_TIERS.md`). Історично цей виняток приймав лише повний API-ключ зі scope `manage`/`admin` — надто широко для клієнта, якому потрібно лише говорити з MCP. `src/shared/constants/managementScopes.ts` тепер експортує `MCP_CONNECT_SCOPE = "mcp:connect"`: додатковий обмежений scope (за тим самим прецедентом, що й `SELF_USAGE_SCOPE`), який авторизує ЛИШЕ обхід `/api/mcp/` у `src/server/authz/policies/management.ts` — він не надає жодного іншого доступу до management-маршрутів і свідомо залишений ПОЗА `MANAGEMENT_API_KEY_SCOPES`. Ключ зі scope `manage`/`admin` і далі проходить цей виняток без змін; `mcp:connect` — це альтернатива з меншими привілеями для віддалених клієнтів, які працюють лише з MCP, і перевіряється через `hasMcpConnectOrManageScope()`.
+Досягнення транспорту HTTP/SSE MCP (`/api/mcp/*`) із без петлі вимагає виділення `/api/mcp/` LOCAL_ONLY (див. `docs/security/ROUTE_GUARD_TIERS.md`). Історично таке виділення приймало лише повний ключ `manage`/`admin` -scope API — надто широкий для абонента, якому потрібно лише говорити MCP. `src/shared/constants/managementScopes.ts` тепер експортує `MCP_CONNECT_SCOPE = "mcp:connect"`: додатковий, вузький обсяг (той самий прецедент, що й `SELF_USAGE_SCOPE`), який авторизує ONLY обхід `/api/mcp/` у `src/server/authz/policies/management.ts` — він не надає жодного іншого доступу до маршруту керування та навмисно зберігається OUT у `MANAGEMENT_API_KEY_SCOPES`. Ключ, який утримує `manage`/`admin` усе ще пропускає вирізання без змін; `mcp:connect` — альтернатива з нижчими привілеями для віддалених абонентів, що дзвонять лише через MCP, перевіряється через `hasMcpConnectOrManageScope()`.
 
-### Прив'язка scope до HTTP-ключа (#7895)
+### Прив’язка області HTTP для кожного ключа (#7895)
 
-У HTTP/SSE `open-sse/mcp-server/httpTransport.ts` тепер визначає реальні `api_keys.scopes` викликача через `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) і передає їх у MCP SDK через `transport.handleRequest(req, { authInfo })`, тож `extra.authInfo.scopes`, що доходить до кожного виклику інструмента, відображає власні scope ключа Bearer. `resolveCallerScopeContext()` у `scopeEnforcement.ts` уже надавав пріоритет `authInfo` над `_meta` та запасним варіантом через env `OMNIROUTE_MCP_SCOPES` — зміна лише заповнює це перше, найпріоритетніше джерело, яке раніше не отримувало даних через HTTP. Коли жоден API-ключ не визначається (немає заголовка, недійсний ключ), `authInfo` залишається `undefined`, і визначення переходить до наявного ланцюга `meta`/env без змін. У stdio немає ідентичності викликача (див. `mcpCallerIdentity.ts`), і він не зачіпається прив'язкою до ключа — він пропускає крок `_meta` (`_meta` враховується лише в контексті HTTP-авторизації, #15159) і визначається лише з env-ключа `OMNIROUTE_MCP_SCOPES`.
+Поверх HTTP/SSE `open-sse/mcp-server/httpTransport.ts` тепер вирішує реальний `api_keys.scopes` абонента через `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) і передає його MCP SDK `transport.handleRequest(req, { authInfo })`, тому `extra.authInfo.scopes` що досягає кожного виклику інструменту, відображає власні області дії ключа-носія. `scopeEnforcement.ts` `resolveCallerScopeContext()` вже встановив пріоритет `authInfo` над `_meta` і `OMNIROUTE_MCP_SCOPES` env резервний — це заповнює лише те перше, найпріоритетніше джерело, яке раніше не було подано через HTTP. Якщо ключ API не вирішується (немає заголовка, недійсний ключ), `authInfo` залишається `undefined`, а розв’язання переходить до існуючого ланцюжка `meta`/env без змін. stdio не має ідентифікаційних даних для кожного абонента (див. `mcpCallerIdentity.ts`), і на нього не впливає прив’язка кожного ключа — він пропускає крок `_meta` (`_meta` враховується лише в контексті автентифікації HTTP, #15159) і вирішує лише з ключа `OMNIROUTE_MCP_SCOPES` env.
 
-**Для HTTP/SSE-викликачів з обмеженими scope примусове ввімкнення перевірки діє незалежно від `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Значення `OMNIROUTE_MCP_ENFORCE_SCOPES` за замовчуванням `false` безпечне лише для локального/stdio-сценарію з одним оператором, де немає ідентичності викликача, до якої можна застосувати scope. `open-sse/mcp-server/server.ts::withScopeEnforcement()` безумовно вмикає перевірку scope для кожного інструмента (`shouldForceScopeEnforcement()` у `scopeEnforcement.ts`), щоразу коли `resolveCallerScopeContext()` визначив `source === "authInfo"` (тобто реальний HTTP-заголовок Authorization конкретного ключа, лише для HTTP/SSE) І цей ключ не має повного scope `manage`/`admin`. Це закриває прогалину, де ключ, що має ЛИШЕ обмежений bypass-scope `mcp:connect` — задокументований вище як такий, що авторизує нічого, крім винятку LOCAL_ONLY для `/api/mcp/` — інакше зміг би викликати будь-який MCP-інструмент, щойно оператор увімкнув віддалений/не-loopback доступ до MCP, просто тому що `OMNIROUTE_MCP_ENFORCE_SCOPES` за замовчуванням постачається як `false`. Повний ключ `manage`/`admin` через HTTP, а також кожен stdio/локальний викликач зберігають наявну поведінку, керовану `OMNIROUTE_MCP_ENFORCE_SCOPES`, без змін.
+**Застосування примусово ввімкнено для вузьких абонентів HTTP/SSE незалежно від `OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` що за замовчуванням має значення `false` є безпечним лише для потоку з одним оператором local/stdio, де немає ідентичності кожного абонента, проти якого можна було б перевірити. `open-sse/mcp-server/server.ts::withScopeEnforcement()` безумовно вмикає примусове застосування області інструментів (`shouldForceScopeEnforcement()` у `scopeEnforcement.ts`) кожного разу, коли `resolveCallerScopeContext()` вирішує `source === "authInfo"` (тобто реальний заголовок авторизації HTTP для кожного ключа, HTTP/SSE-only) AND цей ключ не містить повної області `manage`/`admin`. Це усуває прогалину, де ключ, що містить ONLY вузьку область обходу `mcp:connect` — задокументовану вище як авторизацію лише `/api/mcp/` LOCAL_ONLY, що виділяє — інакше міг би викликати кожен інструмент MCP коли оператор увімкнув remote/non-loopback MCP доступ, просто тому, що `OMNIROUTE_MCP_ENFORCE_SCOPES` надсилає `false` за замовчуванням. Повний ключ `manage`/`admin` над HTTP і кожен виклик stdio/local зберігає існуючу поведінку `OMNIROUTE_MCP_ENFORCE_SCOPES` -gated без змін.
+
+---
 
 ## Змінні середовища
 
