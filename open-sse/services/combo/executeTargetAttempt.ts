@@ -59,6 +59,7 @@ import {
   isComboRequestScopedFailure as isScopedFailure,
   shouldRecordModelLockoutForComboFailure,
   isLocalKeyPolicyBreachErrorBody,
+  isHedgeCancelledSentinel,
   isLocalQueueCapacityErrorBody,
   toRecordedTarget,
   resolveDelayMs,
@@ -828,6 +829,14 @@ export async function executeTargetAttempt(
       // executeTarget must return the {ok,response} contract — a raw Response
       // here makes the speculative loop's res.ok/res.response checks both miss,
       // so the combo would wrongly fall through to the next model after a 499.
+      return { ok: false, response: result };
+    }
+    // A hedge loser superseded by a sibling (status-599 `hedge_cancelled`
+    // sentinel) is not a failure: skip all failure bookkeeping (comboErrors,
+    // fallbackCount, LKGP clear, provider cooldown, failure logs) — the
+    // sibling that won already resolved this execution.
+    if (isHedgeCancelledSentinel(result.status, structuredError)) {
+      deps.log.info("COMBO", `Hedge sibling superseded ${modelStr} — ignoring its attempt result`);
       return { ok: false, response: result };
     }
     if (isLocalQueueCapacity) {
