@@ -216,55 +216,81 @@ export function buildGeminiSpeechStyle(instructions?: string, speed?: number): s
   return parts.length > 0 ? parts.join(". ") : undefined;
 }
 
+const C2PA_RIFF_TAGS = new Set(["C2PA", "jumb", "c2pa"]);
+
+function isRiffWave(buffer: Buffer): boolean {
+  return (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+    buffer.subarray(8, 12).toString("ascii") === "WAVE"
+  );
+}
+
+/** RIFF/WAVE: walk chunk headers and cut everything after the `data` chunk (C2PA/jumb trailers). */
+function stripRiffTrailer(buffer: Buffer): Buffer {
+  let pos = 12;
+  let dataEnd = -1;
+  while (pos + 8 <= buffer.length) {
+    const tag = buffer.subarray(pos, pos + 4).toString("ascii");
+    const chunkSize = buffer.readUInt32LE(pos + 4);
+    if (tag === "data") {
+      dataEnd = pos + 8 + chunkSize;
+      pos = dataEnd + (chunkSize & 1);
+      continue;
+    }
+    if (dataEnd !== -1 && C2PA_RIFF_TAGS.has(tag)) {
+      return buffer.subarray(0, pos);
+    }
+    pos += 8 + chunkSize + (chunkSize & 1);
+  }
+  if (dataEnd !== -1 && dataEnd < buffer.length) {
+    return buffer.subarray(0, dataEnd);
+  }
+  return buffer;
+}
+
+/** Non-RIFF fallback: verify trailer chunk header structure (tag + 4-byte LE length). */
+function stripRawC2paTrailer(buffer: Buffer): Buffer {
+  if (buffer.length <= 8) return buffer;
+  const markerIndex = buffer.lastIndexOf(Buffer.from("C2PA"));
+  if (
+    markerIndex === -1 ||
+    markerIndex < buffer.length - 65536 ||
+    markerIndex + 8 > buffer.length
+  ) {
+    return buffer;
+  }
+  const expectedEnd = markerIndex + 8 + buffer.readUInt32LE(markerIndex + 4);
+  if (expectedEnd === buffer.length || expectedEnd + 1 === buffer.length) {
+    return buffer.subarray(0, markerIndex);
+  }
+  return buffer;
+}
+
 /**
  * Strip metadata trailers (C2PA / SynthID / etc.) following the audio `data` chunk in RIFF/WAVE.
  * Inspects chunk headers rather than searching raw PCM bytes.
  */
 export function stripC2paMetadata(buffer: Buffer): Buffer {
-  if (
-    buffer.length >= 12 &&
-    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
-    buffer.subarray(8, 12).toString("ascii") === "WAVE"
-  ) {
-    let pos = 12;
-    let dataEnd = -1;
-    while (pos + 8 <= buffer.length) {
-      const tag = buffer.subarray(pos, pos + 4).toString("ascii");
-      const chunkSize = buffer.readUInt32LE(pos + 4);
-      if (tag === "data") {
-        dataEnd = pos + 8 + chunkSize;
-        pos = dataEnd + (chunkSize & 1);
-        continue;
-      }
-      if (dataEnd !== -1 && (tag === "C2PA" || tag === "jumb" || tag === "c2pa")) {
-        return buffer.subarray(0, pos);
-      }
-      pos += 8 + chunkSize + (chunkSize & 1);
-    }
-    if (dataEnd !== -1 && dataEnd < buffer.length) {
-      return buffer.subarray(0, dataEnd);
-    }
-    return buffer;
-  }
+  return isRiffWave(buffer) ? stripRiffTrailer(buffer) : stripRawC2paTrailer(buffer);
+}
 
-  // Non-RIFF fallback: verify trailer chunk header structure (tag + 4-byte LE length)
-  if (buffer.length > 8) {
-    const c2paMarker = Buffer.from("C2PA");
-    const markerIndex = buffer.lastIndexOf(c2paMarker);
-    if (
-      markerIndex !== -1 &&
-      markerIndex >= buffer.length - 65536 &&
-      markerIndex + 8 <= buffer.length
-    ) {
-      const trailerLen = buffer.readUInt32LE(markerIndex + 4);
-      const expectedEnd = markerIndex + 8 + trailerLen;
-      if (expectedEnd === buffer.length || expectedEnd + 1 === buffer.length) {
-        return buffer.subarray(0, markerIndex);
-      }
+/**
+ * Locate the payload of the RIFF/WAVE `data` chunk by walking chunk headers (never by a raw
+ * byte search: `fmt `/`LIST` chunk contents may contain the bytes "data").
+ * Offsets are clamped to the buffer; returns null when no `data` chunk header is present.
+ */
+function findRiffDataChunk(buffer: Buffer): { start: number; end: number } | null {
+  let pos = 12;
+  while (pos + 8 <= buffer.length) {
+    const tag = buffer.subarray(pos, pos + 4).toString("ascii");
+    const chunkSize = buffer.readUInt32LE(pos + 4);
+    if (tag === "data") {
+      return { start: pos + 8, end: Math.min(pos + 8 + chunkSize, buffer.length) };
     }
+    pos += 8 + chunkSize + (chunkSize & 1);
   }
-
-  return buffer;
+  return null;
 }
 
 /**
@@ -276,19 +302,17 @@ export function normalizeAudioOutput(
   responseFormat?: string
 ): { audio: Buffer; contentType: string } {
   const cleanBuffer = stripC2paMetadata(rawBuffer);
-  const isWav =
-    cleanBuffer.length >= 12 &&
-    cleanBuffer.subarray(0, 4).toString("ascii") === "RIFF" &&
-    cleanBuffer.subarray(8, 12).toString("ascii") === "WAVE";
+  const isWav = isRiffWave(cleanBuffer);
 
   const requestedFormat = (responseFormat || "wav").toLowerCase();
 
   if (requestedFormat === "pcm") {
-    if (isWav) {
-      const dataIdx = cleanBuffer.indexOf(Buffer.from("data"));
-      if (dataIdx !== -1 && dataIdx + 8 <= cleanBuffer.length) {
-        return { audio: cleanBuffer.subarray(dataIdx + 8), contentType: "audio/pcm" };
-      }
+    const dataChunk = isWav ? findRiffDataChunk(cleanBuffer) : null;
+    if (dataChunk) {
+      return {
+        audio: cleanBuffer.subarray(dataChunk.start, dataChunk.end),
+        contentType: "audio/pcm",
+      };
     }
     return { audio: cleanBuffer, contentType: "audio/pcm" };
   }

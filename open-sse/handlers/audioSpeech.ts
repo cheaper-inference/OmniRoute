@@ -873,6 +873,19 @@ async function handleGttsSpeech(body) {
   }
 }
 
+/** Style / pace / output-format options shared by the AI Studio and Vertex Gemini TTS paths. */
+function googleSpeechStyleOptions(body: Record<string, unknown>): {
+  instructions?: string;
+  speed?: number;
+  response_format?: string;
+} {
+  return {
+    instructions: extractSpeechInstruction(body),
+    speed: typeof body.speed === "number" ? body.speed : undefined,
+    response_format: typeof body.response_format === "string" ? body.response_format : undefined,
+  };
+}
+
 /**
  * Handle audio speech (TTS) request
  *
@@ -944,15 +957,11 @@ export async function handleAudioSpeech({
     }
 
     if (providerConfig.format === "vertex-gemini-tts") {
-      const instructions = extractSpeechInstruction(body);
       const { audio, contentType } = await vertexGenerateSpeech(credentials, {
         model: modelId,
         input: body.input,
         voice: body.voice,
-        instructions,
-        speed: typeof body.speed === "number" ? body.speed : undefined,
-        response_format:
-          typeof body.response_format === "string" ? body.response_format : undefined,
+        ...googleSpeechStyleOptions(body),
       });
       return new Response(audio, {
         status: 200,
@@ -960,15 +969,11 @@ export async function handleAudioSpeech({
       });
     }
     if (providerConfig.format === "gemini-tts") {
-      const instructions = extractSpeechInstruction(body);
       return handleGeminiTtsSpeech(credentials, {
         model: modelId,
         text: body.input,
         voice: body.voice,
-        instructions,
-        speed: typeof body.speed === "number" ? body.speed : undefined,
-        response_format:
-          typeof body.response_format === "string" ? body.response_format : undefined,
+        ...googleSpeechStyleOptions(body),
       });
     }
 
