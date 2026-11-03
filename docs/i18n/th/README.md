@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — เกตเวย์ AI ฟรี
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ไม่ต้องหยุดเขียนโค้ดอีกต่อไป ทุกเครื่องมือ AI → 380 ผู้ให้บริการ — 150+ ฟรี — ผ่าน endpoint เดียว Claude Code, Codex, Cursor, Cline, Copilot & Antigravity สู่ Claude / GPT / Gemini ฟรี พร้อมระบบ fallback อัตโนมัติ RTK + Caveman บีบอัดโทเคนลด 15–95% (เฉลี่ย ~89%) — ไม่ต้องกลัวชนขีดจำกัด 380 ผู้ให้บริการ AI · 150+ ฟรี · ~1.62B โทเคนฟรี/เดือน · 20 กลยุทธ์การจัดเส้นทาง · เริ่มต้นฟรี $0"/>
 
 </div>
@@ -1290,7 +1292,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 จะข้า�
   <tr><td nowrap><b>รันไทม์</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ภาษา</b></td><td>TypeScript 6.0 — <b>TypeScript 100%</b> ครอบคลุม <code>src/</code> และ <code>open-sse/</code> (ไม่มี <code>any</code> ในคอร์นับตั้งแต่ v2.0)</td></tr>
   <tr><td nowrap><b>เฟรมเวิร์ก</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ฐานข้อมูล</b></td><td>better-sqlite3 (SQLite, การทำบันทึก WAL) + LowDB (JSON รุ่นเก่า) — โมดูลโดเมน 147 รายการ, migration 220 รายการ</td></tr>
+  <tr><td nowrap><b>ฐานข้อมูล</b></td><td>better-sqlite3 (SQLite, การทำบันทึก WAL) + LowDB (JSON รุ่นเก่า) — โมดูลโดเมน 147 รายการ, migration 221 รายการ</td></tr>
   <tr><td nowrap><b>หน่วยความจำ</b></td><td>การค้นหาข้อความแบบเต็ม SQLite FTS5 + เวกเตอร์เอ็มเบดดิงที่ควอนไทซ์เป็น int8, การเสื่อมตามประเภท</td></tr>
   <tr><td nowrap><b>สคีมา</b></td><td>Zod 4 — การตรวจสอบ I/O ของเครื่องมือ MCP + สัญญา API</td></tr>
   <tr><td nowrap><b>โปรโตคอล</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1803,7 +1805,7 @@ OmniRoute ยืนอยู่บนไหล่ของยักษ์ให�
 
 **[⬆ กลับขึ้นด้านบน](#-omniroute)** · สร้างด้วย ❤️ เพื่อชุมชน AI โอเพนซอร์ส
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · สัญญาอนุญาต MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · สัญญาอนุญาต MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- เปิดใช้งาน GitHub Discussions สำหรับคำถามและคำตอบของชุมชน -->

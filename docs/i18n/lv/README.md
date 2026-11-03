@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Bezmaksas AI vārteja
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nekad nepārtrauc kodēt. Katrs AI rīks → 380 nodrošinātāji — 150+ bezmaksas — caur vienu galapunktu. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity uz BEZMAKSAS Claude / GPT / Gemini ar automātisku pārsūtīšanu. RTK + Caveman apvienotā kompresija ietaupa 15–95% tokenu (~89% vidēji) — nekad nesasniedz limitus. 380 AI nodrošinātāji · 150+ bezmaksas līmeņi · ~1,62B bezmaksas tokenu/mēn · 20 maršrutēšanas stratēģijas · $0, lai sāktu."/>
 
 </div>
@@ -1292,7 +1294,7 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
   <tr><td nowrap><b>Izpildvide</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Valoda</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> visā <code>src/</code> un <code>open-sse/</code> (kopš v2.0 kodolā nav neviena <code>any</code>)</td></tr>
   <tr><td nowrap><b>Ietvars</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Datubāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantots JSON) — 147 domēna moduļi, 220 migrācijas</td></tr>
+  <tr><td nowrap><b>Datubāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (mantots JSON) — 147 domēna moduļi, 221 migrācijas</td></tr>
   <tr><td nowrap><b>Atmiņa</b></td><td>SQLite FTS5 pilnteksta meklēšana + int8 kvantizēti vektoru iegulumi, tipizēta novecošana</td></tr>
   <tr><td nowrap><b>Shēmas</b></td><td>Zod 4 — MCP rīku I/O validācija + API līgumi</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1805,7 +1807,7 @@ MIT licence — sīkāku informāciju skatiet [LICENSE](LICENSE).
 
 **[⬆ Atpakaļ uz augšu](#-omniroute)** · Izveidots ar ❤️ atvērtā koda AI kopienai.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions iespējotas kopienas jautājumiem un atbildēm -->
