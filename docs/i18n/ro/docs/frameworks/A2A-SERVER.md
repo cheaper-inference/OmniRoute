@@ -163,7 +163,7 @@ OmniRoute expune 6 abilități A2A conectate în `src/lib/a2a/taskExecution.ts::
 | Raport de sănătate        | `health-report`      | Agregă întrerupător, răcire, stare de blocare per furnizor                                                                                                                  | sănătate, rezistență             | „Afișați starea de sănătate a tuturor furnizorilor” |
 | Lista de capabilități     | `list-capabilities`  | Returnează întregul catalog de abilități de agent cu 45 de intrări (23 API + 21 CLI + 1 config) ca un tabel de reducere cu SKILL.md URLs brut pentru injectarea contextului | catalog, descoperire, aptitudini | „Enumeră toate capabilitățile OmniRoute ”           |
 
-> Cardul de agent trebuie menținut aliniat cu catalogul live 377 de furnizori; Numărul furnizorilor și metadatele free/no-auth provin din registrul de rulare.
+> Cardul de agent ar trebui să fie menținut aliniat cu catalogul live 380 de furnizori; Numărul furnizorilor și metadatele free/no-auth provin din registrul de rulare.
 
 ### `list-capabilities` Detaliu abilitate
 
@@ -197,17 +197,17 @@ Punctul final JSON-RPC `/a2a` este punctul de intrare A2A canonic. Punctele fina
 
 ---
 
-## Adăugarea unei abilități noi
+## Adăugarea unei noi abilități
 
-1. **Creați fișierul abilității:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Creați fișierul de abilități:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportați o funcție asincronă `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Urmați structura abilităților existente, precum `smartRouting.ts`.
+   Exportați o funcție asincronă `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Urmăriți forma abilităților existente, cum ar fi `smartRouting.ts`.
 
-2. **Înregistrați handlerul:** în `src/lib/a2a/taskExecution.ts`, adăugați o intrare în `A2A_SKILL_HANDLERS`:
+2. **Înregistrare handler:** în `src/lib/a2a/taskExecution.ts`, adăugați o intrare la `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...abilități existente
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ Punctul final JSON-RPC `/a2a` este punctul de intrare A2A canonic. Punctele fina
    };
    ```
 
-3. **Expuneți abilitatea în fișa agentului:** în `src/lib/a2a/agentCardMetadata.ts` (partajat de `/.well-known/agent.json` și `/.well-known/agent-card.json`), adăugați următorul obiect în matricea `skills`:
+3. **Expuneți în cardul de agent:** în `src/lib/a2a/agentCardMetadata.ts` (partajat de `/.well-known/agent.json` și `/.well-known/agent-card.json`), adăugați la matricea `skills` :
 
    ```json
    {
      "id": "your-skill",
-     "name": "Abilitatea dvs.",
-     "description": "Descriere succintă, axată pe intenție",
-     "tags": ["rutare", "cotă"],
-     "examples": ["Exemplu de invocare în limbaj natural"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Scrieți teste:** `tests/unit/a2a-<your-skill>.test.ts`. Acoperiți scenariul reușit și scenariul de eroare.
+4. **Scrie teste:** `tests/unit/a2a-<your-skill>.test.ts`. Acoperiți calea de eroare + fericită.
 
-5. **Documentați** noua abilitate în tabelul `Available Skills` din acest fișier.
+5. **Document** noua abilitate din tabelul `Available Skills` al acestui fișier.
 
 ---
 

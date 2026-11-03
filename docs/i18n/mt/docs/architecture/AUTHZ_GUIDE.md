@@ -134,31 +134,31 @@ Xi azzjonijiet ta' `MANAGEMENT` huma **tal-operatur biss**: ċavetta `manage` ma
 ## Pipeline
 
 ```
-Talba deħlin → src/proxy.ts
-  → runAuthzPipeline() f’src/server/authz/pipeline.ts
-    1. Neħħi l-headers interni fdati (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Iġġenera l-id tat-talba, ikklassifika r-rotta permezz ta’ classifyRoute()
-    3. Jekk pathname == "/" → idderieġi mill-ġdid lejn /dashboard
-    4. Jekk qed isir draining (għeluq gradwali) u /api/* → 503
-    5. Jekk mhux GET /api/* → gwardja checkBodySize()
-    6. Jekk OPTIONS → preflight CORS 204
-    7. Jekk options.enforce == false → għaddi direttament bil-headers tal-klassi tar-rotta
-    8. Inkella: POLICIES[routeClass].evaluate(ctx)
-       - allow  → żid x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → żball JSON b’correlation_id (paġni tad-dashboard → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Il-headers interni fdati (iddefiniti f’`src/server/authz/headers.ts`) **jitneħħew mit-talbiet deħlin** qabel il-klassifikazzjoni — il-klijenti ma jistgħux jimlew minn qabel `x-omniroute-auth-*` biex jimpersonaw suġġett.
+Headers interni affidabbli (definiti `src/server/authz/headers.ts`) huma** imqaxxar minn talbiet deħlin** qabel il-klassifikazzjoni — klijenti ma jistgħux jimtlew minn qabel `x-omniroute-auth-*` biex jippersonaw suġġett.
 
-### Kuntratti tal-politiki
+### Kuntratti ta' politika
 
-Kull klassi ta’ rotta għandha politika f’`src/server/authz/policies/`:
+Kull klassi tar-rotta għandha politika fi `src/server/authz/policies/`:
 
-- **`publicPolicy`** (`policies/public.ts`) — dejjem tirritorna `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — testratta l-Bearer u tivvalidah permezz ta’ `validateApiKey()`. Tgħaddi għal aċċess anonimu biss meta l-feature flag effettiv `REQUIRE_API_KEY` ikun diżattivat. Il-flag effettiv jiġi riżolt permezz ta’ `isRequireApiKeyEnabled()` (`override tal-feature flag fid-DB > process.env.REQUIRE_API_KEY > valur predefinit`) sabiex il-Feature Flags tad-Dashboard u l-varjabbli tal-ambjent jirregolaw `/api/v1/*`, `/api/v1beta/*`, u l-aliases b’mod konsistenti; fallimenti tar-resolver iwasslu għal rifjut awtomatiku. Tippermetti talbiet b’sessjoni tad-dashboard fuq rotot tal-API tal-klijent (inkluża `/api/v1/models`, użata mill-katalgu tal-mudelli tad-dashboard).
-- **`managementPolicy`** (`policies/management.ts`) — taċċetta sessjoni tad-dashboard, talbiet interni għas-sinkronizzazzjoni tal-mudelli (imqabbla ma’ `/api/providers/[name]/(sync-models|models)`), jew taqbeż il-verifika kompletament jekk `isAuthRequired()` tirritorna false. Tirritorna 403 (`AUTH_001`) meta jkun preżenti token Bearer iżda jkun invalidu, u 401 f’każijiet oħra. Tinforza wkoll il-livelli tal-gwardja tar-rotot (LOCAL_ONLY / ALWAYS_PROTECTED) qabel kwalunkwe fergħa tal-awtentikazzjoni — ara [Livelli tal-Gwardja tar-Rotot](../security/ROUTE_GUARD_TIERS.md). Il-paths LOCAL_ONLY f’`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (illum: `/api/mcp/`) jistgħu jiġu aċċessati minn indirizzi li mhumiex loopback meta ċ-ċavetta Bearer ikollha l-ambitu `manage`; il-paths LOCAL_ONLY l-oħra kollha jibqgħu limitati strettament għal loopback irrispettivament mill-ambitu.
+- **`publicPolicy`** (`policies/public.ts`) — dejjem jirritorna `allow({ kind: "anonymous", id: "anonymous" })`.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — estratti Bearer, jivvalida permezz ta `validateApiKey()`. Jaqa' għal anonimu biss meta l-bandiera effettiva tal-karatteristika `REQUIRE_API_KEY` tkun diżattivata. Il-bandiera effettiva tiġi solvuta permezz ta' `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) għalhekk il-Bnadar tal-Karatteristiċi tad-Dashboard u l-varjabbli tal-ambjent jirregolaw `/api/v1/*`, `/api/v1beta/*`, u psewdonimi b'mod konsistenti; fallimenti tas-solvent ifallu magħluqa. Jippermetti talbiet għal sessjoni tad-dashboard fuq rotot API tal-klijenti (inkluż `/api/v1/models`, użat mill-katalgu tal-mudell tad-dashboard). Meta Entra ID SSO hija attivata, Bearer li strutturalment huwa token Entra (tliet segmenti base64url, `RS*` alg, `kid`) jiġi mmaniġġjat mill-fergħa SSO** qabel** `validateApiKey()` u l-verdett tiegħu huwa finali — qatt ma jaqa 'fil-mogħdija taċ-ċavetta API jew il-fergħa ta' degradazzjoni għal anonima, għalhekk qtugħ tal-fornitur tal-identità ma jistax isir aċċess miftuħ. Iċ-ċwievet API statiċi mhumiex affettwati. Ara [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — jaċċetta sessjoni tad-dashboard, talbiet interni ta' sinkronizzazzjoni tal-mudell (imqabbla ma' `/api/providers/[name]/(sync-models|models)`), jew jaqbeż kompletament jekk `isAuthRequired()` jirritorna falza. Jirritorna 403 (`AUTH_001`) meta token Bearer ikun preżenti iżda mhux validu, 401 mod ieħor. Jinforza wkoll il-livelli tal-gwardja tar-rotot (LOCAL_ONLY / ALWAYS_PROTECTED) qabel kwalunkwe fergħa ta' awtorizzazzjoni — ara [Livell tal-Gwardja tar-Rotot](../security/ROUTE_GUARD_TIERS.md). Il-mogħdijiet LOCAL_ONLY `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (illum: `/api/mcp/`) jistgħu jiġu aċċessati minn non-loopback meta ċ-ċavetta Bearer iġorr l-ambitu `manage` ; il-mogħdijiet LOCAL_ONLY l-oħra kollha jibqgħu stretta-loopback irrispettivament mill-ambitu.
 
-Politika li tirnexxi tirritorna `AuthSubject` b’`kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Il-handlers downstream jistgħu jaqrawh permezz ta’ `assertAuth(request, "CLIENT_API")` f’`src/server/authz/assertAuth.ts` minflok jerġgħu jeżegwixxu l-loġika tal-awtentikazzjoni.
+Poliza ta suċċess tirritorna `AuthSubject` ma `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Maniġers downstream jistgħu jaqrawha permezz ta' `assertAuth(request, "CLIENT_API")` `src/server/authz/assertAuth.ts` minflok ma jerġgħu jħaddmu l-loġika tal-awtentikazzjoni.
 
 ## Lista ta’ Rotot Pubbliċi
 
@@ -291,25 +291,25 @@ L-endpoints `/api/v1/agents/tasks/*` u `/api/resilience/model-cooldowns` **issa 
 - Lista ta’ permessi pubbliċi: `tests/unit/public-api-routes.test.ts`.
 - Ħaddem test speċifiku: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## Dijanjostika
+## Debugging
 
-Il-pipeline dejjem iżid dawn l-intestaturi mat-tweġibiet:
+Il-pipeline dejjem ittimbra t-tweġibiet bi:
 
 ```
 x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Għal talbiet awtentikati, l-intestaturi tat-talba upstream (min-naħa tal-handler) jinkludu wkoll:
+Għal talbiet awtentikati l-intestaturi tar-rikjesti upstream (min-naħa tal-handler) jinkludu wkoll:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Uża `assertAuth(req, expectedClass)` ġewwa l-handlers — din tarmi `AuthzAssertionError` bil-kodiċi `AUTHZ_NOT_INITIALIZED` jekk il-middleware jkun ġie evitat (utli biex jinqabdu regressjonijiet fil-konfigurazzjoni waqt it-testijiet).
+Uża `assertAuth(req, expectedClass)` ġewwa handlers — tarmi `AuthzAssertionError` bil-kodiċi `AUTHZ_NOT_INITIALIZED` jekk il-middleware ġie bypassed (tgħajjef biex taqbad ir-rigressjonijiet tal-konfigurazzjoni fit-testijiet).
 
 ## Ara wkoll
 

@@ -635,27 +635,35 @@ spec:
 
 外部Postgres / 多写入者HA是**不是**记录的库存路径。如果您需要HA，请保留单个副本或运行项目已单独测试和记录的拓扑。 Postgres/MySQL作品位于[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 。在那之前，唯一受支持的繁殖方式**大的**`/v1/responses`容量是 N 个独立进程（下一节），而不是一个卷上的`replicas > 1` 。
 
-## 横向扩展：N 个独立进程
+## 横向扩展：N个独立进程
 
-一个 Node 进程对应**一个 V8 堆**。两个重叠执行、大小约为 3 MiB / 约 75 万 token 的编码智能体 `POST /v1/responses` 请求（RTK + Caveman），会在堆达到约 12 Gi 时导致其中止（`FATAL ERROR: Reached heap limit`），并可能使 16 Gi cgroup 发生 OOM。参见 [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)。这一测量结果是**内存预算**警告，而不是产品将并发长时 `/v1/responses` 硬性限制为两个。重量级聊天准入由自动推导的接收字节预算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`、`src/shared/middleware/admissionBudget.ts`）控制，该预算根据相同的 V8/cgroup 上限确定——如果在已经完成容量规划的进程上将其调高（或者设置旧版的 `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 请求数上限），将再次引发进程中止。小型聊天、`/healthz`、`/v1/models` 和 MCP **不**受该上限约束。
+### Codex币轮换所有权
 
-### 单进程：超过两个长时 `/v1/responses`
+一个Codex帐户的副本不得独立消耗其一次性刷新令牌。在仅使用同步凭证的实例上，设置`OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` （别名`cx`）。在单个轮换所有者上保留其未设置状态。每个进程仍然需要自己的`DATA_DIR`；此选项既不共享SQLite ，也不提供令牌同步或分布式锁。
 
-当进程处于**健康**状态（堆低于 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`，默认值为 `0.75`），且进程级在途字节预算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110）仍有余量时，**可以**同时运行两个以上的长时 `POST /v1/responses`。请求体大小达到或超过 `OMNIROUTE_CHAT_LARGE_BODY_BYTES`（默认值为 256 KiB）的请求，会获取与结构复杂型请求相同的重量级租约，并使用相同的 [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` 逃生机制（`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`）。数十个并发的长时 SSE 客户端（运维人员通常需要 40–50 个）属于**内存预算**问题——需要确定堆大小、主槽位/余量槽位以及 `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`——而不是产品硬性规定“最多 2 个”。当堆承受压力时，系统仍会通过可重试的 `503` 拒绝请求，从而避免 #7849 再次出现。
+当需要刷新时，被动实例会重新读取连接，并仅采用不同的、未过期的访问令牌。否则，刷新将被禁用，而不会过期或停用连接或计算刷新中断器故障。真正的上游身份验证失败仍然使用正常的失败计数、指数冷却和正常的客户端错误；帐户停用仍然是永久性的。在访问令牌过期之前同步所有者的轮换令牌（默认主动刷新提前时间为五分钟），或重新导入Codex身份验证文件。被动导入存储提供的令牌，而不在令牌端点验证它们。手动dashboard/API刷新返回`409 refresh_disabled`；新的OAuth登录没有变化。请参阅[环境参考](../reference/ENVIRONMENT.md#passive-codex-token-refresh)。
 
-如需在**当前**实现中获得多个堆（相互独立的 V8 old-space）：
+一个节点进程是**一堆V8** 。两个重叠的~ 3 MiB / ~ 750k 令牌编码代理`POST /v1/responses` (RTK + Caveman) 在~ 12 Gi (`FATAL ERROR: Reached heap limit`) 处中止该堆，并且可以OOM一个 16 Gi cgroup。参见[#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) 。该测量是**内存预算**警告，不是两个并发长`/v1/responses`的乘积硬最大值。重量级聊天准入由自动生成的摄取字节预算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`、 `src/shared/middleware/admissionBudget.ts`）控制，该预算大小来自相同的V8/cgroup上限—在已经调整大小的进程上向上覆盖它（或设置旧的`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`请求计数上限），从而重新引入中止。小型聊天， `/healthz`、 `/v1/models`和MCP是**不是**在那顶帽子里。
 
-| 应该做                                                                                                 | 不应该做                                         |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| 运行 **N 个容器/pod**，每个都有其**自己的** `DATA_DIR` / 卷                                            | 对同一个 SQLite 文件设置 `replicas > 1`          |
-| 根据堆 / 在途字节预算确定重量级在途请求数与健康余量；1–2 是针对 #7849 的保守默认值，而不是产品硬性上限 | 为单个进程分配 8 倍 RAM 并设置无上限的请求数上限 |
-| 可选：使用 `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` 实现**共享配额计数器**                 | 将 Redis 当作共享 SQLite——它并不是               |
-| 将提供者密钥复制到每个实例中（或者接受仪表板相互隔离）                                                 | 期望跨实例使用同一个仪表板 / 同一份调用日志      |
-| 在前端使用任意负载均衡器；按 API 密钥或会话保持粘性即可                                                | 要求使用特定供应商、可感知请求大小的中间件       |
+### 1.单进程：两个以上的长`/v1/responses`
 
-硬件方面：每个实例可并发运行多少个长时 `/v1/responses`，属于**内存预算**问题（堆 + 在途字节 / #10110）。使用相互独立 `DATA_DIR` 的 `N` 个实例仍会产生多个堆：主机 RAM 必须能够容纳 `N × cgroup`，而不是“一个 16 Gi pod，N=8”。绝不要让 `replicas > 1` 的实例使用同一个 SQLite 文件。
+一个**健康**进程（堆低于`OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`，默认`0.75`）**可能**当进程范围的飞行字节预算 (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) 仍有空间时，运行两个以上的并发长`POST /v1/responses` 。 `OMNIROUTE_CHAT_LARGE_BODY_BYTES`或以上的主体（默认 256 KiB）采用与结构重请求相同的重量级租约，并使用相同的[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom`转义（`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`）。数十个并发长SSE客户端（运营商通常需要 40-50 个）**内存预算**问题—大小堆+ primary/headroom插槽+ `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` —不是严格的“最大 2”乘积限制。受压堆仍然会因可重试的`503`而脱落，因此 #7849 不会返回。
 
-Compose 示例（两个堆、两个卷——不要使用 `deploy.replicas: 2`）：
+到**乘法堆**（独立V8老空间）**今天**:
+
+| 做                                                                                           | 不要                                     |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| 跑步**containers/pods** ，每个都有其**自己的**`DATA_DIR` / 体积                              | 针对一个SQLite文件设置`replicas > 1`     |
+| 从堆/飞行字节预算中调整飞行中+健康净空的大小； 1–2 是保守的 #7849 默认值，而不是硬产品最大值 | 给一个进程8个× RAM和一个无限制的计数上限 |
+| 可选： `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL`用于**共享配额计数器**            | 将Redis视为共享SQLite —它不是            |
+| 将提供程序机密复制到每个实例中（或接受分区仪表板）                                           | 预计跨实例有一个仪表板/一个呼叫日志      |
+| 前端带有任何负载均衡器；通过API密钥或会话粘性就足够了                                        | 需要特定于供应商的尺寸感知中间件         |
+
+会话到帐户的关联性也可以通过Redis共享：在每个进程上设置`OMNIROUTE_SESSION_AFFINITY_STORE=redis`和`REDIS_URL` ，具有相同的`REDIS_KEY_PREFIX`和正的`sessionAffinityTtlMs`设置。引脚将散列使用帐户身份解析为每个进程的合格本地连接，因此具有匹配身份元数据的OAuth帐户不需要具有匹配的连接IDs。在 pin 解析和保护驱逐方面，已知账户身份优先于相互矛盾的本地IDs ；没有身份的记录（或没有身份的驱逐呼叫者）保留传统的ID守卫。没有稳定使用身份的账户仍然需要匹配IDs。 Redis错误或超过 100 毫秒的调用会回退到本地SQLite。每个Redis关联存储将未完成的操作限制为 8 个，在满时立即绕过Redis ，并且仅在底层工作解决时而不是在调用者截止日期时释放插槽。在Redis中断期间，不存在共享事实：每个实例都会回退到其自己的本地亲和性，每个实例的会话可能会重新固定一次，并且实例可能会出现分歧。当粘性恢复时，通过Redis重新收敛。超时限制等待，而不是发送EVAL，可能会在回退后落地。路由写入比较路由决策观察到的确切值，而不是新的突变时读取；观察到的未命中或SQLite回退观察将与缺失的Redis键进行比较。过时的引脚会在一个CAS中被替换，因此较晚的命令无法替换或删除较新的不同引脚。 Redis读取以原子方式返回值和剩余服务器TTL；正PTTL （或无过期）决定活性，而不是作者的JSON时间戳或读者的时钟。本地快照将剩余的TTL映射到本地截止日期；现有的JSON键仍然可读，并且为CAS保留其原始字节。 Redis是唯一的真相来源，同时它的答案。已确认的共享更新插入、触摸和删除会删除本地条目，而不会安装或刷新它。 Redis路径上的SQLite仅保存此实例自己的来自Redis错误、超时或准入饱和的后备决策，与以前一样受 TTL 限制。稍后中断时丢失的本地 pin 会导致一次新选择（一次提示缓存未命中），而不是错误或被逐出的帐户。被拒绝的更新插入以原子方式返回共享获胜者及其剩余的TTL ：普通选择重新检查映射的本地截止日期并使用仍然有效的合格获胜者，触摸该帐户的使用情况并记录，而无需其他共享写入。如果不可用，选择将保留本地候选，保持共享引脚不变并发出一条调试消息。拒绝CAS不写SQLite； Redis错误、超时或准入饱和将应用现有的本地操作。如果发送的突变的回复在超时后到达（接受、拒绝或错误），则同步精确序列化值比较和删除仅删除字节相同的超时后备行。比较和删除之间没有等待；保留较新的中断写入。即使Redis关闭，受保护的驱逐也会删除失败帐户自己的本地 pin，并在确认共享驱逐后再次清除它。待处理的早期共享回复无法恢复已逐出的本地 pin，因为共享成功永远不会写入SQLite。稍后的中断回退可以重新固定帐户；后来接受的共享写入仅存在于Redis中。 Redis未命中不咨询本地后备状态。当驱动器关闭时，新选择的引脚保留传统的四场SQLite JSON形状；只有Redis路由添加散列帐户身份。预取的引脚在其到期边界时重新检查。 Redis非租赁选择重新读取存储，但同步租赁规划仍然可以使用在预取和规划之间逐出的引脚（可接受的尽力而为窗口）。租约提交无法在持久声明后切换帐户：在拒绝更新插入时，它仅保留该请求的已声明候选者，而使共享获胜者保持不变，因此跨实例的协议受到该路径的限制。表的其余部分仍然适用：这不共享组合会话粘性、本机Codex转引脚、帐户信号量、锁定、支出限制、配置或呼叫日志。
+
+硬件：每个实例并发长`/v1/responses`是**内存预算**问题（堆+飞行字节/#10110）。 `N`独立的`DATA_DIR`仍然会乘以堆：主机RAM必须覆盖`N × cgroup`，而不是“一个 16 Gi pod 和 N = 8”。切勿在一个SQLite文件上`replicas > 1` 。
+
+撰写草图（两个堆，两个卷—不是`deploy.replicas: 2`）：
 
 ```yaml
 services:
@@ -682,7 +690,7 @@ volumes:
   omniroute-b-data:
 ```
 
-进程内密度（将压缩移出 HTTP isolate）参见 [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023)。基于共享持久状态构建单一逻辑集群参见 [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)。
+进程内密度（ HTTP隔离压缩）为[#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) 。共享持久状态上的一个逻辑集群是[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 。
 
 ## Docker 内的 Gemini 区域错误
 

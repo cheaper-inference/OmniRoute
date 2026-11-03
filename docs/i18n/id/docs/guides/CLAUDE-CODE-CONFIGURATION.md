@@ -25,26 +25,27 @@ omniroute launch --profile glm52  # Claude Code menggunakan glm/glm-5.2 melalui 
 
 ---
 
-## Cara Claude Code terhubung ke gateway
+## Bagaimana Kode Claude terhubung ke gateway
 
-Claude Code berkomunikasi dengan **Anthropic Messages API** dan diarahkan ke endpoint
-khusus melalui variabel lingkungan (tidak memiliki flag `--base-url`):
+Kode Claude berbicara tentang**Anthropic Pesan API** dan diarahkan ke titik akhir khusus dengan variabel lingkungan (tidak memiliki tanda `--base-url` ):
 
-| Variabel                                     | Tujuan                                                                                          |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | URL root gateway (Claude Code menambahkan `/v1/messages`). **Tanpa akhiran `/v1`.**             |
-| `ANTHROPIC_AUTH_TOKEN`                       | Dikirim sebagai `Authorization: Bearer …` — gunakan token akses / kunci API OmniRoute Anda      |
-| `ANTHROPIC_API_KEY`                          | Alternatif: dikirim sebagai `x-api-key`. Jika keduanya diatur, `ANTHROPIC_AUTH_TOKEN` digunakan |
-| `ANTHROPIC_MODEL`                            | Memaksa model tertentu (menggantikan pilihan default `/model`)                                  |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → pemilih bawaan `/model` mencantumkan model `claude*`/`anthropic*` dari `/v1/models`       |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Membatasi token keluaran per respons (misalnya `65536`)                                         |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Ambang batas token untuk pemadatan otomatis                                                     |
+| Variabel                                     | Tujuan                                                                                         |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Root gateway URL ( Kode Claude ditambahkan `/v1/messages`).** Tidak ada akhiran `/v1`.**       |
+| `ANTHROPIC_AUTH_TOKEN`                       | Dikirim sebagai `Authorization: Bearer …` — menggunakan token akses OmniRoute / kunci API Anda |
+| `ANTHROPIC_API_KEY`                          | Alternatif: dikirim sebagai `x-api-key`. Jika keduanya disetel, `ANTHROPIC_AUTH_TOKEN` menang  |
+| `ANTHROPIC_MODEL`                            | Paksa model tertentu (mengganti default pemilih `/model` )                                     |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → pemilih `/model` asli mencantumkan model `claude*`/`anthropic*` dari `/v1/models`        |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Batasi token keluaran per respons (misalnya `65536`)                                           |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Ambang batas token untuk pemadatan otomatis                                                    |
 
-> Variabel lingkungan dibaca **sekali saat dimulai** — mulai ulang Claude Code setelah mengubahnya.
+> Env vars dibaca** sekali saat startup** — restart Kode Claude setelah mengubahnya.
 
-`omniroute launch` mengatur semuanya untuk Anda: perintah ini menentukan URL dasar + token
-dari konteks aktif (sehingga `omniroute connect <vps>` lalu `omniroute launch`
-langsung berfungsi), memeriksa kesehatan server, dan menjalankan `claude` melalui exec.
+Untuk kredensial yang berputar dan bukan string tetap, setel `apiKeyHelper` di `~/.claude/settings.json` ke perintah yang mencetak kredensial saat ini ke stdout. Claude Code menyimpan outputnya dalam cache selama lima menit secara default (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` menimpanya) dan mengirimkan nilai dalam `Authorization: Bearer` dan `x-api-key`. Skrip harus mencetak kredensial dan tidak ada yang lain — spanduk di sampingnya gagal membantu di v2.1.227 +.
+
+Beginilah cara kerja Entra ID SSO : `scripts/cli/omniroute-sso.mjs token` mencetak token akses Entra berumur pendek yang diverifikasi OmniRoute alih-alih kunci API. Lihat [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` menyetel semua ini untuk Anda: ia menyelesaikan token URL + dasar dari konteks aktif (jadi `omniroute connect <vps>` lalu `omniroute launch` berfungsi), memeriksa kesehatan server, dan mengeksekusi `claude`.
 
 ---
 

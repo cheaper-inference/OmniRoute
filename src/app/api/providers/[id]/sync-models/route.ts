@@ -836,26 +836,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       prunedComboRefs,
     });
   } catch (error: any) {
-    // Log error
-    await saveTimedCallLog({
-      method: "POST",
-      path: `/api/providers/${id}/sync-models`,
-      status: 500,
-      model: "model-sync",
-      provider: logProvider,
-      sourceFormat: "-",
-      connectionId: id,
-      duration: Date.now() - start,
-      error: error.message || "Sync failed",
-      requestType: "model-sync",
-      ...(channelLabel
-        ? {
-            responseBody: {
-              channel: channelLabel,
-            },
-          }
-        : {}),
-    }).catch(() => {});
+    // Keep the audit sink explicit for the call-scoped error-helper gate.
+    await timings
+      .measure("call-log", () =>
+        saveCallLog({
+          method: "POST",
+          path: `/api/providers/${id}/sync-models`,
+          status: 500,
+          model: "model-sync",
+          provider: logProvider,
+          sourceFormat: "-",
+          connectionId: id,
+          duration: Date.now() - start,
+          error: error.message || "Sync failed",
+          requestType: "model-sync",
+          ...(channelLabel
+            ? {
+                responseBody: {
+                  channel: channelLabel,
+                },
+              }
+            : {}),
+        })
+      )
+      .catch(() => {});
 
     return NextResponse.json(
       { error: sanitizeErrorMessage(error) || "Failed to sync models" },
