@@ -156,14 +156,14 @@ OmniRoute afslører 6 A2A -færdigheder kablet i `src/lib/a2a/taskExecution.ts::
 
 | Dygtighed          | ID                   | Beskrivelse                                                                                                                                        | Tags                            | Eksempler                               |
 | :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :-------------------------------------- |
-| Smart Routing      | `smart-routing`      | Leder en prompt gennem den optimale provider/combo ved hjælp af OmniRoute's combo engine + scoring                                                 | routing, udbydere               | "Rut denne prompt via den bedste model" |
+| Smart Routing      | `smart-routing`      | Leder en prompt gennem den optimale provider/combo ved hjælp af OmniRoute combo engine + scoring                                                   | routing, udbydere               | "Rut denne prompt via den bedste model" |
 | Kvotestyring       | `quota-management`   | Rapporterer kvotetilstand pr. udbyder, hjælper opkaldere med at beslutte, hvornår de skal throttle/switch                                          | kvote, udbydere                 | "Tjek kvote for antropisk"              |
-| Udbyder opdagelse  | `provider-discovery` | Viser installerede udbydere med funktioner, fritliggende flag, OAuth status                                                                        | udbydere, opdagelse             | "Hvilke udbydere er tilgængelige?"      |
+| Udbyder opdagelse  | `provider-discovery` | Viser installerede udbydere med kapaciteter, free-tier flag, OAuth -status                                                                         | udbydere, opdagelse             | "Hvilke udbydere er tilgængelige?"      |
 | Omkostningsanalyse | `cost-analysis`      | Anslår prisen på en request/conversation givet kataloget + seneste brug                                                                            | omkostninger, brug              | "Estimer pris for denne samtale"        |
 | Sundhedsrapport    | `health-report`      | Aggregerer strømafbryder, nedkøling, lockout-tilstand pr. udbyder                                                                                  | sundhed, robusthed              | "Vis sundhedsstatus for alle udbydere"  |
 | Liste muligheder   | `list-capabilities`  | Returnerer hele 45-indgange Agent Skills-katalog (23 API + 21 CLI + 1 config) som en nedskrivningstabel med rå SKILL.md URLs til kontekstinjektion | katalog, opdagelse, færdigheder | "List alle OmniRoute funktioner"        |
 
-> Agentkortet skal holdes på linje med det levende 377-udbyderkatalog; udbydertal og free/no-auth metadata hentes fra runtime-registret.
+> Agentkortet skal holdes på linje med det levende 380-udbyderkatalog; udbydertal og free/no-auth metadata hentes fra runtime-registret.
 
 ### `list-capabilities` Færdighedsdetaljer
 
@@ -201,13 +201,13 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
 
 1. **Opret færdighedsfil:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksportér en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Følg strukturen for eksisterende færdigheder såsom `smartRouting.ts`.
+   Eksporter en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Følg formen af eksisterende færdigheder såsom `smartRouting.ts`.
 
-2. **Registrér handler:** Tilføj en post i `A2A_SKILL_HANDLERS` i `src/lib/a2a/taskExecution.ts`:
+2. **Registerbehandler:** i `src/lib/a2a/taskExecution.ts`, tilføj en post til `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...eksisterende færdigheder
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
    };
    ```
 
-3. **Eksponér i agentkortet:** Tilføj til arrayet `skills` i `src/lib/a2a/agentCardMetadata.ts` (som deles af `/.well-known/agent.json` og `/.well-known/agent-card.json`):
+3. **Eksponering i agentkort:** i `src/lib/a2a/agentCardMetadata.ts` (delt af `/.well-known/agent.json` og `/.well-known/agent-card.json`), føj til `skills` arrayet:
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
    }
    ```
 
-4. **Skriv tests:** `tests/unit/a2a-<your-skill>.test.ts`. Dæk både det forventede forløb og fejlforløbet.
+4. **Skriv test:** `tests/unit/a2a-<your-skill>.test.ts`. Cover happy path + fejlsti.
 
-5. **Dokumentér** den nye færdighed i tabellen `Available Skills` i denne fil.
+5. **Dokument** den nye færdighed i denne fils `Available Skills` tabel.
 
 ---
 

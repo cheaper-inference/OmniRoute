@@ -12,13 +12,13 @@
 
 ## Kas tas ir
 
-OmniRoute reģistrē 377 pakalpojumu sniedzējus, tostarp ir atzīmēti 155 kataloga ieraksti**free/no-auth** (bez autorizācijas, brīvā līmeņa OAuth vai brīvā līmeņa API atslēga — skatiet [bezmaksas līmeņu rokasgrāmatu](../getting-started/FREE-TIERS-GUIDE.md) un pilnu [bezmaksas līmeņu direktoriju](../reference/FREE_TIERS.md) ). Rezultāts: bezmaksas pakalpojumu sniedzēji ļoti atšķiras modeļu kvalitātes ziņā. Pakalpojumu sniedzējs bez autorizācijas, kas apkalpo robežmodeli, ir daudz noderīgāks nekā tāds, kas apkalpo nelielu mantoto modeli.
+OmniRoute reģistrē 380 pakalpojumu sniedzējus, tostarp ir atzīmēti 155 kataloga ieraksti**free/no-auth** (bez autorizācijas, brīvā līmeņa OAuth vai brīvā līmeņa API taustiņu — skatiet [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) un pilno [bezmaksas līmeņu direktoriju](../reference/FREE_TIERS.md) ). Rezultāts: bezmaksas pakalpojumu sniedzēji ļoti atšķiras modeļu kvalitātes ziņā. Pakalpojumu sniedzējs bez autorizācijas, kas apkalpo robežmodeli, ir daudz noderīgāks nekā tāds, kas apkalpo nelielu mantoto modeli.
 
 **Bezmaksas pakalpojumu sniedzēju klasifikācija** atbildes"** kurš bezmaksas pakalpojumu sniedzējs man piedāvā labāko modeli?** ", pievienojoties katra bezmaksas pakalpojumu sniedzēja katalogam ar** pūļa kvalitātes rādītāji** no** Arēnas AI līderu saraksts** (cilvēka izvēle ELO, tā pati ideja ir LMArena chatbot arēnā). Pēc tam pakalpojumu sniedzēji tiek sarindoti pēc to stipruma** labākais bezmaksas modelis** .
 
 Reitings tiek aprēķināts no trim reāliem avotiem:
 
-1. Bezmaksas pakalpojumu sniedzēju saraksti — `NOAUTH_PROVIDERS`, kā arī `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ieraksti ir atzīmēti kā `hasFree` (`src/shared/constants/providers.ts`).
+1. Bezmaksas pakalpojumu sniedzējs uzskaita — `NOAUTH_PROVIDERS`, kā arī `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ierakstus, kas atzīmēti ar karodziņu `hasFree` (`src/shared/constants/providers.ts`).
 2. Katra pakalpojumu sniedzēja modeļu katalogs no pakalpojumu sniedzēju reģistra (`open-sse/config/providerRegistry.ts`).
 3. No ELO atvasināti uzdevumu piemērotības rādītāji, ko `model_intelligence` DB tabulā saglabā Arena ELO sinhronizācijas dzinējs (`src/lib/arenaEloSync.ts`).
 

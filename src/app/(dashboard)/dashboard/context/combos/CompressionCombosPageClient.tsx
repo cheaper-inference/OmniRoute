@@ -269,7 +269,7 @@ function NamedCombosManager() {
           variant="warning"
           role="alert"
           data-testid="compression-master-switch-warning"
-          className="[&>.ci-alert__dismiss]:hidden"
+          dismissible={false}
         >
           {t("activeProfileMasterSwitchOffWarning")}{" "}
           <Link href="/dashboard/context/settings" className="font-medium underline">
