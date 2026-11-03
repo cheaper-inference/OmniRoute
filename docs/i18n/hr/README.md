@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Besplatni AI Gateway
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikad ne prestajte kodirati. Svaki AI alat → 380 pružatelja — 150+ besplatnih — kroz jedan endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity u BESPLATNI Claude / GPT / Gemini s automatskim prebacivanjem. RTK + Caveman složena kompresija štedi 15–95% tokena (~89% u prosjeku) — nikad ne dosegnite limite. 380 AI pružatelja · 150+ besplatnih paketa · ~1,62 milijardi besplatnih tokena/mj · 20 strategija usmjeravanja · 0 $ za početak."/>
 
 </div>
@@ -1816,7 +1818,7 @@ MIT licenca – pojedinosti potražite u [LICENSE](LICENSE).
 
 **[⬆ Natrag na vrh](#-omniroute)** · Izrađeno s ❤️ za open-source AI zajednicu.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licenca · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licenca · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions omogućen za pitanja i odgovore u zajednici -->

@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Il-Gateway AI B'xejn
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Qatt tieqafx tikteb il-kodiċi. Kull għodda AI → 380 fornitur — 150+ b’xejn — minn endpoint wieħed. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity f’Claude / GPT / Gemini B’XEJN b’fallback awtomatiku. RTK + Caveman stacked compression tiffranka 15–95% tokens (~89% medja) — qatt ma tilħaq il-limiti. 380 fornitur AI · 150+ livelli b’xejn · ~1.62B tokens b’xejn/kull xahar · 20 strateġija ta’ routing · $0 biex tibda."/>
 
 </div>
@@ -1806,7 +1808,7 @@ Liċenzja MIT - ara [LICENSE](LICENSE) għad-dettalji.
 
 **[⬆ Lura fil-quċċata](#-omniroute)** · Mibni b'❤️ għall-komunità open-source tal-IA.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Liċenzja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Liċenzja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions attivati għall-mistoqsijiet u tweġibiet tal-komunità -->

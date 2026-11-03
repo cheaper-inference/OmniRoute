@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Darmowa Brama AI
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nigdy nie przestawaj kodować. Każde narzędzie AI → 380 dostawców — 150+ darmowych — przez jeden endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity do DARMOWEGO Claude / GPT / Gemini z automatycznym przełączaniem awaryjnym. Kompresja warstwowa RTK + Caveman oszczędza 15–95% tokenów (~89% średnio) — nigdy nie przekraczaj limitów. 380 dostawców AI · 150+ darmowych planów · ~1,62 mld darmowych tokenów/mies. · 20 strategii routingu · $0 na start."/>
 
 </div>
@@ -1811,7 +1813,7 @@ Licencja MIT — szczegóły w pliku [LICENSE](LICENSE).
 
 **[⬆ Powrót na górę](#-omniroute)** · Stworzone z ❤️ dla społeczności open-source AI.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Licencja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licencja MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions włączone dla pytań i odpowiedzi społeczności -->

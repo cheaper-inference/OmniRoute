@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — സൗജന്യ AI ഗേറ്റ്വേ
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ഒരിക്കലും കോഡിംഗ് നിർത്തേണ്ടതില്ല. എല്ലാ AI ടൂളുകളും → 380 പ്രൊവൈഡർമാർ — 150+ സൗജന്യമായി — ഒരു എൻഡ്പോയിന്റ് വഴി. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity നെ സൗജന്യ Claude / GPT / Gemini യിലേക്ക് ഓട്ടോ-ഫോൾബാക്ക് ഉപയോഗിച്ച്. RTK + Caveman സ്റ്റാക്ക് ചെയ്ത കംപ്രഷൻ 15–95% ടോക്കൺസ് (~89% ശരാശരി) സംരക്ഷിക്കുന്നു — ഒരിക്കലും പരിധി തികയില്ല. 380 AI പ്രൊവൈഡർമാർ · 150+ സൗജന്യ ടിയറുകൾ · ~1.62B സൗജന്യ ടോക്കൺസ്/മാസം · 20 റൂട്ടിംഗ് സ്ട്രാറ്റജികൾ · ആരംഭിക്കാൻ ₹0."/>
 
 </div>
@@ -1805,7 +1807,7 @@ MIT ലൈസൻസ് - വിശദാംശങ്ങൾക്കായി [LI
 
 **[⬆ മുകളിലേക്ക് മടങ്ങുക](#-omniroute)** · ഓപ്പൺ സോഴ്സ് AI കമ്മ്യൂണിറ്റിക്കായി ❤️ ഉപയോഗിച്ച് നിർമ്മിച്ചത്.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT License · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- കമ്മ്യൂണിറ്റി ചോദ്യോത്തരങ്ങൾക്കായി GitHub Discussions പ്രവർത്തനക്ഷമമാക്കിയിരിക്കുന്നു -->

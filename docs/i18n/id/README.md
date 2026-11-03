@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Gerbang AI Gratis
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Jangan pernah berhenti ngoding. Setiap alat AI → 380 penyedia — 150+ gratis — melalui satu endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ke dalam Claude / GPT / Gemini GRATIS dengan auto-fallback. Kompresi bertumpuk RTK + Caveman menghemat 15–95% token (~89% rata-rata) — tidak pernah kena batas. 380 penyedia AI · 150+ paket gratis · ~1,62M token gratis/bln · 20 strategi routing · $0 untuk mulai."/>
 
 </div>
@@ -1806,7 +1808,7 @@ Lisensi MIT - lihat [LICENSE](LICENSE) untuk detailnya.
 
 **[⬆ Kembali ke atas](#-omniroute)** · Dibuat dengan ❤️ untuk komunitas AI open-source.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Lisensi MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Lisensi MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions diaktifkan untuk tanya jawab komunitas -->

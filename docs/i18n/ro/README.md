@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Gateway-ul AI Gratuit
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nu te opri niciodată din programare. Orice unealtă AI → 380 furnizori — 150+ gratuite — printr-un singur endpoint. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity în CLAUDE / GPT / Gemini GRATUIT cu fallback automat. Compresia stivuită RTK + Caveman economisește 15–95% tokeni (~89% medie) — nu atingi niciodată limitele. 380 furnizori AI · 150+ planuri gratuite · ~1,62 miliarde tokeni gratuiți/lună · 20 strategii de rutare · $0 la început."/>
 
 </div>
@@ -1814,7 +1816,7 @@ Licența MIT - consultați [LICENSE](LICENSE) pentru detalii.
 
 **[⬆ Înapoi sus](#-omniroute)** · Creat cu ❤️ pentru comunitatea AI open-source.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · Licență MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · Licență MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions activate pentru întrebări și răspunsuri din comunitate -->

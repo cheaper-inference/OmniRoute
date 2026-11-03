@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Az ingyenes AI átjáró
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Soha ne hagyd abba a kódolást. Minden AI eszköz → 380 szolgáltató — 150+ ingyenes — egyetlen végponton keresztül. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity INGYENES Claude / GPT / Gemini szolgáltatásba automatikus átváltással. RTK + Caveman rétegzett tömörítés 15–95% token megtakarítást eredményez (~89% átlag) — soha ne érj el korlátokat. 380 AI szolgáltató · 150+ ingyenes csomag · ~1,62 milliárd ingyenes token/hó · 20 útválasztási stratégia · $0 kezdőtőke."/>
 
 </div>
@@ -1806,7 +1808,7 @@ MIT licenc – részletekért lásd a [LICENSE](LICENSE) fájlt.
 
 **[⬆ Vissza a tetejére](#-omniroute)** · ❤️-vel készült a nyílt forráskódú AI-közösség számára.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licenc · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licenc · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions engedélyezve a közösségi kérdések és válaszok számára -->

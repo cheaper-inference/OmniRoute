@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — ច្រកទ្វារកម្មវិធី AI ដោយឥតគិតថ្លៃ
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — កុំឈប់កូដ។ គ្រប់ឧបករណ៍ AI ទាំងអស់ → ៣៨០ អ្នកផ្តល់សេវា — ១៥០+ ដោយឥតគិតថ្លៃ — តាមរយៈចំណុចចូលតែមួយ។ Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ទៅកាន់ Claude / GPT / Gemini ដោយឥតគិតថ្លៃជាមួយការធ្វើ fallback ស្វ័យប្រវត្តិ។ RTK + Caveman បង្ហាប់សញ្ញាសម្ងាត់ជាន់គ្នា សន្សំបាន ១៥–៩៥% token (~៨៩% មធ្យម) — មិនដែលឆ្លងកំណត់។ ៣៨០ អ្នកផ្តល់សេវា AI · ១៥០+ ជាន់ឥតគិតថ្លៃ · ~១.៦២B token ឥតគិតថ្លៃ/ខែ · ២០យុទ្ធសាស្ត្រចែកចាយ · $០ ដើម្បីចាប់ផ្តើម."/>
 
 </div>
@@ -1804,7 +1806,7 @@ OmniRoute ឈរលើស្នាដៃរបស់អ្នកជំនាន�
 
 **[⬆ ត្រឡប់ទៅខាងលើ](#-omniroute)** · សាងសង់ដោយ ❤️ សម្រាប់សហគមន៍ AI ប្រភពបើកចំហ។
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · អាជ្ញាប័ណ្ណ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · អាជ្ញាប័ណ្ណ MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- បានបើក GitHub Discussions សម្រាប់សំណួរ និងចម្លើយរបស់សហគមន៍ -->

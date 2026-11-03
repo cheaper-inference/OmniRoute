@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Ücretsiz Yapay Zeka Geçidi
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yazmaya asla ara verme. Her yapay zeka aracı → 380 sağlayıcı — 150+ ücretsiz — tek bir uç noktadan. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity'i OTOMATİK yedeklemeli ÜCRETSİZ Claude / GPT / Gemini'ye yönlendir. RTK + Caveman yığınlı sıkıştırma ile %15–95 arası token tasarrufu (~%89 ortalama) — asla sınırları aşma. 380 yapay zeka sağlayıcı · 150+ ücretsiz katman · ~1,62Milyar ücretsiz token/ay · 20 yönlendirme stratejisi · Başlangıç maliyeti $0."/>
 
 </div>
@@ -1805,7 +1807,7 @@ MIT Lisansı - ayrıntılar için [LICENSE](LICENSE) dosyasına bakın.
 
 **[⬆ Başa dön](#-omniroute)** · Açık kaynaklı yapay zeka topluluğu için ❤️ ile geliştirildi.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Lisansı · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT Lisansı · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- Topluluk soru-cevabı için GitHub Discussions etkinleştirildi -->

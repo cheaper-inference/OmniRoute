@@ -163,3 +163,131 @@ test("a named combo chosen by the compression header is not replaced by the defa
   assert.ok(!debugLines.includes(DEFAULT_COMBO_APPLIED), "the header's combo should run");
   assert.match(toolContent, RTK_MARKER);
 });
+
+// A past tool result (before the last assistant turn) longer than lite's 2,000-char cap,
+// with unique lines so neither session-dedup nor rtk has anything to remove.
+const LONG_TOOL_RESULT = Array.from({ length: 160 }, (_, i) => `row ${i}: value-${i * 7919}`).join(
+  "\n"
+);
+
+async function sendPastToolResult(compressionHeader?: string, toolResult = LONG_TOOL_RESULT) {
+  const connection = await providersDb.createProviderConnection({
+    provider: "openai",
+    apiKey: "sk-test-not-real",
+    isActive: true,
+  });
+  let capturedBody: { messages?: Array<{ role?: string; content?: string }> } | null = null;
+  globalThis.fetch = async (_url: string | URL | Request, init?: RequestInit) => {
+    if (init?.body) capturedBody = JSON.parse(init.body as string) as typeof capturedBody;
+    return new Response(
+      JSON.stringify({
+        choices: [{ message: { role: "assistant", content: "ok" } }],
+        usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  };
+  const result = await handleChatCore({
+    body: {
+      model: "gpt-4",
+      stream: false,
+      messages: [
+        { role: "user", content: "read the table" },
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            { id: "call_1", type: "function", function: { name: "read", arguments: "{}" } },
+          ],
+        },
+        { role: "tool", tool_call_id: "call_1", content: toolResult },
+        { role: "assistant", content: "read it" },
+        { role: "user", content: "what is in row 150?" },
+      ],
+    },
+    modelInfo: { provider: "openai", model: "gpt-4" },
+    credentials: { apiKey: "sk-test-not-real" },
+    log: { debug: () => {}, info: () => {}, warn: () => {}, error: () => {} },
+    clientRawRequest: {
+      endpoint: "/v1/chat/completions",
+      headers: compressionHeader ? { "x-omniroute-compression": compressionHeader } : {},
+    },
+    connectionId: connection.id,
+    onCredentialsRefreshed: () => {},
+    onRequestSuccess: () => {},
+    onStreamFailure: () => {},
+    onDisconnect: () => {},
+    userAgent: "test-agent",
+    comboName: null,
+  });
+  assert.ok(result.success, "request should succeed");
+  assert.ok(capturedBody, "the upstream fetch should receive the request body");
+  return capturedBody.messages?.find((m) => m.role === "tool")?.content ?? "";
+}
+
+test("without an opt-in the default pipeline forwards past tool results untruncated", async () => {
+  await storeLegacyStackedSettings();
+  const toolContent = await sendPastToolResult();
+  assert.equal(toolContent, LONG_TOOL_RESULT);
+});
+
+test("allow-lossy still lets lite truncate past tool results", async () => {
+  await storeLegacyStackedSettings();
+  const toolContent = await sendPastToolResult("allow-lossy");
+  assert.match(toolContent, /\.\.\.\[truncated\]$/);
+  assert.ok(toolContent.length < LONG_TOOL_RESULT.length);
+});
+
+// openai/gpt-4 resolves to a 128,000-token window: the reserve-output target is 122,880.
+// ~640k unique characters (~160k estimated tokens) is over it; LONG_TOOL_RESULT is far under.
+const OVER_WINDOW_TOOL_RESULT = Array.from(
+  { length: 24_000 },
+  (_, i) => `row ${i}: value-${(i * 7919) % 104729}`
+).join("\n");
+const PRODUCTION_CONTEXT_BUDGET = {
+  mode: "replace-autotrigger",
+  policy: "reserve-output",
+  outputReserve: 4096,
+  safetyMargin: 1024,
+  pct: 0.85,
+  absoluteBudget: 0,
+} as const;
+
+async function storeEnginesMapSettings() {
+  await compressionDb.updateCompressionSettings({
+    enabled: true,
+    defaultMode: "stacked",
+    autoTriggerTokens: 0,
+    enginesExplicit: true,
+    engines: {
+      "session-dedup": { enabled: true },
+      lite: { enabled: true },
+      rtk: { enabled: true, level: "aggressive" },
+    },
+    lite: { compressToolResults: true },
+    contextBudget: PRODUCTION_CONTEXT_BUDGET,
+  });
+}
+
+for (const [label, store] of [
+  [
+    "legacy default combo",
+    async () => {
+      await storeLegacyStackedSettings();
+      await compressionDb.updateCompressionSettings({ contextBudget: PRODUCTION_CONTEXT_BUDGET });
+    },
+  ],
+  ["panel engines map", storeEnginesMapSettings],
+] as const) {
+  test(`${label}: a request that fits the window keeps its past tool results intact`, async () => {
+    await store();
+    assert.equal(await sendPastToolResult(), LONG_TOOL_RESULT);
+  });
+
+  test(`${label}: a request over the window still gets its past tool results truncated to fit`, async () => {
+    await store();
+    const toolContent = await sendPastToolResult(undefined, OVER_WINDOW_TOOL_RESULT);
+    assert.match(toolContent, /\.\.\.\[truncated\]$/);
+    assert.ok(toolContent.length < OVER_WINDOW_TOOL_RESULT.length / 10);
+  });
+}

@@ -13,6 +13,8 @@
 
 # 🚀 OmniRoute — Bezmaksas AI vārteja
 
+**Created by [Diego Souza](https://github.com/diegosouzapw)**
+
 <img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nekad nepārtrauc kodēt. Katrs AI rīks → 380 nodrošinātāji — 150+ bezmaksas — caur vienu galapunktu. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity uz BEZMAKSAS Claude / GPT / Gemini ar automātisku pārsūtīšanu. RTK + Caveman apvienotā kompresija ietaupa 15–95% tokenu (~89% vidēji) — nekad nesasniedz limitus. 380 AI nodrošinātāji · 150+ bezmaksas līmeņi · ~1,62B bezmaksas tokenu/mēn · 20 maršrutēšanas stratēģijas · $0, lai sāktu."/>
 
 </div>
@@ -1805,7 +1807,7 @@ MIT licence — sīkāku informāciju skatiet [LICENSE](LICENSE).
 
 **[⬆ Atpakaļ uz augšu](#-omniroute)** · Izveidots ar ❤️ atvērtā koda AI kopienai.
 
-<sub>OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Created by <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.53 · Node ≥22.22.2 · MIT licence · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions iespējotas kopienas jautājumiem un atbildēm -->
