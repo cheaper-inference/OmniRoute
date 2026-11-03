@@ -178,23 +178,15 @@ export class SseOutputScanner {
     this.replayEventType = "";
   }
 
-  private observeReplayLine(line: string): void {
-    if (!this.observeReplay) return;
-    this.replayBufferedChars += line.length + 1;
-    this.replayBufferedLines++;
-    if (
+  private replayInspectionExceeded(): boolean {
+    return (
       this.replayOverflowed ||
       this.replayBufferedChars > MAX_BUFFERED_CHARS ||
       this.replayBufferedLines > MAX_PENDING_REPLAY_LINES
-    ) {
-      // Incomplete inspection cannot authorize a new transport retry.
-      this.observeReplay();
-      this.resetReplayFrame();
-      this.replayOverflowed = line.trim().length > 0;
-      return;
-    }
-    // Use quality framing, including implicit field/comment flushes and invalid-JSON fallback.
-    const completed = this.replayNormalizer.normalize([line]);
+    );
+  }
+
+  private observeCompletedReplayLines(completed: string[]): void {
     for (const normalized of completed) {
       const trimmed = normalized.trim();
       if (trimmed.startsWith("event:")) {
@@ -208,6 +200,22 @@ export class SseOutputScanner {
         this.replayEventType = "";
       }
     }
+  }
+
+  private observeReplayLine(line: string): void {
+    if (!this.observeReplay) return;
+    this.replayBufferedChars += line.length + 1;
+    this.replayBufferedLines++;
+    if (this.replayInspectionExceeded()) {
+      // Incomplete inspection cannot authorize a new transport retry.
+      this.observeReplay();
+      this.resetReplayFrame();
+      this.replayOverflowed = line.trim().length > 0;
+      return;
+    }
+    // Use quality framing, including implicit field/comment flushes and invalid-JSON fallback.
+    const completed = this.replayNormalizer.normalize([line]);
+    this.observeCompletedReplayLines(completed);
     if (completed.length > 0) {
       const pending = this.replayNormalizer.hasPending();
       this.replayBufferedChars = pending ? line.length + 1 : 0;

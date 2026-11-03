@@ -9,6 +9,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
+type ReadFailureHop = "abort" | "invalid" | { transportCode: string | null; cause: unknown };
+
+/** One link of the cause chain. Reads happen in the same order as the original single loop. */
+function inspectReadFailureHop(current: unknown, seen: Set<object>): ReadFailureHop {
+  if (!isRecord(current) || seen.has(current)) return "invalid";
+  seen.add(current);
+  const name = current.name;
+  if (name === "AbortError") return "abort";
+  const code = current.code;
+  if (ABORT_CODES.has(code as string)) return "abort";
+  const causeCode = current.causeCode;
+  if (ABORT_CODES.has(causeCode as string)) return "abort";
+  if ([name, code, causeCode].some((value) => value != null && typeof value !== "string"))
+    return "invalid";
+  const transportCode = [code, causeCode].find((value) => TRANSPORT_CODES.has(value as string));
+  return { transportCode: (transportCode as string | undefined) ?? null, cause: current.cause };
+}
+
 /** Inspect the whole bounded chain before accepting a transport code. */
 export function classifyPreContentReadFailure(error: unknown): ReadFailureDisposition {
   const seen = new Set<object>();
@@ -16,21 +34,13 @@ export function classifyPreContentReadFailure(error: unknown): ReadFailureDispos
   let transportCode: string | null = null;
   for (let depth = 0; depth < 8; depth++) {
     try {
-      if (!isRecord(current) || seen.has(current)) return null;
-      seen.add(current);
-      const name = current.name;
-      if (name === "AbortError") return { kind: "abort" };
-      const code = current.code;
-      if (ABORT_CODES.has(code as string)) return { kind: "abort" };
-      const causeCode = current.causeCode;
-      if (ABORT_CODES.has(causeCode as string)) return { kind: "abort" };
-      if ([name, code, causeCode].some((value) => value != null && typeof value !== "string"))
-        return null;
-      if (TRANSPORT_CODES.has(code as string)) transportCode ??= code as string;
-      if (TRANSPORT_CODES.has(causeCode as string)) transportCode ??= causeCode as string;
-      const cause = current.cause;
-      if (cause == null) return transportCode ? { kind: "transport", code: transportCode } : null;
-      current = cause;
+      const hop = inspectReadFailureHop(current, seen);
+      if (hop === "abort") return { kind: "abort" };
+      if (hop === "invalid") return null;
+      transportCode ??= hop.transportCode;
+      if (hop.cause == null)
+        return transportCode ? { kind: "transport", code: transportCode } : null;
+      current = hop.cause;
     } catch {
       return null;
     }

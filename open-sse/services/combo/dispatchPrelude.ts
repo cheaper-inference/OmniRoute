@@ -217,6 +217,11 @@ export function buildDefaultNesting(
   );
 }
 
+/** True once the client went away while pre-content transport recovery is in charge. */
+function recoveryAborted(recovery: boolean | undefined, signal?: AbortSignal | null): boolean {
+  return recovery === true && signal?.aborted === true;
+}
+
 /**
  * Decide whether the honored pin's response is good enough to return as-is.
  * Returns the response to serve it, or null to fall through to the combo
@@ -256,7 +261,7 @@ async function evaluatePinnedResponse(args: {
       preContentTransportRecovery
     );
     releaseQualityClone(pinnedClone, pinnedResult, pinnedQuality);
-    if (preContentTransportRecovery && signal?.aborted) {
+    if (recoveryAborted(preContentTransportRecovery, signal)) {
       void pinnedQuality.clonedResponse?.body?.cancel().catch(() => {});
       releaseRejectedQualityResponse(pinnedClone, pinnedResult);
       return errorResponse(499, "Client disconnected");
@@ -287,6 +292,84 @@ async function evaluatePinnedResponse(args: {
     "COMBO",
     `Pinned model ${pinnedModel} failed (${pinnedStatus}), falling through to combo retry/fallback`
   );
+  return null;
+}
+
+/**
+ * Dispatch to the honored pin and decide whether its response is served. Returns the response to
+ * serve (including a 499 when the client went away), or null to fall through to the combo strategy.
+ */
+async function dispatchHonoredPin(args: {
+  body: Record<string, unknown>;
+  combo: ComboLike;
+  pinnedModel: string;
+  comboTargets: ReturnType<typeof resolveComboTargets>;
+  config: ComboSetupConfig;
+  clientRequestedStream: boolean;
+  handleSingleModelWithTimeout: HandleSingleModel;
+  log: ComboLogger;
+  preContentTransportRecovery: boolean;
+  signal?: AbortSignal | null;
+}): Promise<Response | null> {
+  const {
+    body,
+    combo,
+    pinnedModel,
+    comboTargets,
+    config,
+    clientRequestedStream,
+    handleSingleModelWithTimeout,
+    log,
+    preContentTransportRecovery,
+    signal,
+  } = args;
+  let pinnedResult: Response | null = null;
+  try {
+    // #5501: the combo system_message also expands on the pinned context path —
+    // a session pin bypasses the main loop, so without this the template would
+    // go literal from the second in-session request on. Target context comes
+    // from the pinned model's resolved combo target when available.
+    const pinnedTarget = comboTargets.find((t) => t.modelStr === pinnedModel);
+    const pinnedBody = expandComboSystemPromptIfPresent(body, combo, {
+      modelId: pinnedModel,
+      providerId: pinnedTarget && pinnedTarget.provider !== "unknown" ? pinnedTarget.provider : "",
+      account:
+        typeof pinnedTarget?.label === "string" && pinnedTarget.label.trim().length > 0
+          ? pinnedTarget.label.trim()
+          : "",
+      fingerprint: pinnedTarget ? (resolveTargetFingerprint(pinnedTarget) ?? "") : "",
+    });
+    if (recoveryAborted(preContentTransportRecovery, signal))
+      return errorResponse(499, "Client disconnected");
+    pinnedResult = await handleSingleModelWithTimeout(pinnedBody, pinnedModel, {
+      modelPinned: true,
+    } as SingleModelTarget);
+  } catch (pinErr) {
+    if (recoveryAborted(preContentTransportRecovery, signal))
+      return errorResponse(499, "Client disconnected");
+    log.warn(
+      "COMBO",
+      `Pinned model ${pinnedModel} threw error: ${pinErr instanceof Error ? pinErr.message : String(pinErr)}, falling through to combo retry/fallback`
+    );
+  }
+  if (recoveryAborted(preContentTransportRecovery, signal)) {
+    if (pinnedResult) releaseRejectedQualityResponse(pinnedResult, pinnedResult);
+    return errorResponse(499, "Client disconnected");
+  }
+  if (pinnedResult) {
+    const accepted = await evaluatePinnedResponse({
+      body,
+      pinnedResult,
+      pinnedModel,
+      hasOtherTargets: comboTargets.length > 1,
+      clientRequestedStream,
+      config,
+      log,
+      preContentTransportRecovery,
+      signal,
+    });
+    return accepted;
+  }
   return null;
 }
 
@@ -332,7 +415,7 @@ export async function tryPinnedModelDispatch(args: {
   const preContentTransportRecovery =
     clientRequestedStream && args.preContentTransportRecovery === true;
   const signal = args.signal;
-  if (preContentTransportRecovery && signal?.aborted)
+  if (recoveryAborted(preContentTransportRecovery, signal))
     return errorResponse(499, "Client disconnected");
   const haveFullCombos = Array.isArray(allCombos) ? allCombos.length > 0 : !!allCombos;
   // Eagerly resolve the combo's targets once (used for the pin-validity check AND
@@ -361,54 +444,19 @@ export async function tryPinnedModelDispatch(args: {
       "COMBO",
       `Bypassing strategy — routing directly to pinned context model: ${pinnedModel}`
     );
-    let pinnedResult: Response | null = null;
-    try {
-      // #5501: the combo system_message also expands on the pinned context path —
-      // a session pin bypasses the main loop, so without this the template would
-      // go literal from the second in-session request on. Target context comes
-      // from the pinned model's resolved combo target when available.
-      const pinnedTarget = comboTargets.find((t) => t.modelStr === pinnedModel);
-      const pinnedBody = expandComboSystemPromptIfPresent(body, combo, {
-        modelId: pinnedModel,
-        providerId:
-          pinnedTarget && pinnedTarget.provider !== "unknown" ? pinnedTarget.provider : "",
-        account:
-          typeof pinnedTarget?.label === "string" && pinnedTarget.label.trim().length > 0
-            ? pinnedTarget.label.trim()
-            : "",
-        fingerprint: pinnedTarget ? (resolveTargetFingerprint(pinnedTarget) ?? "") : "",
-      });
-      if (preContentTransportRecovery && signal?.aborted)
-        return errorResponse(499, "Client disconnected");
-      pinnedResult = await handleSingleModelWithTimeout(pinnedBody, pinnedModel, {
-        modelPinned: true,
-      } as SingleModelTarget);
-    } catch (pinErr) {
-      if (preContentTransportRecovery && signal?.aborted)
-        return errorResponse(499, "Client disconnected");
-      log.warn(
-        "COMBO",
-        `Pinned model ${pinnedModel} threw error: ${pinErr instanceof Error ? pinErr.message : String(pinErr)}, falling through to combo retry/fallback`
-      );
-    }
-    if (preContentTransportRecovery && signal?.aborted) {
-      if (pinnedResult) releaseRejectedQualityResponse(pinnedResult, pinnedResult);
-      return errorResponse(499, "Client disconnected");
-    }
-    if (pinnedResult) {
-      const accepted = await evaluatePinnedResponse({
-        body,
-        pinnedResult,
-        pinnedModel,
-        hasOtherTargets: comboTargets.length > 1,
-        clientRequestedStream,
-        config,
-        log,
-        preContentTransportRecovery,
-        signal,
-      });
-      if (accepted) return accepted;
-    }
+    const honored = await dispatchHonoredPin({
+      body,
+      combo,
+      pinnedModel,
+      comboTargets,
+      config,
+      clientRequestedStream,
+      handleSingleModelWithTimeout,
+      log,
+      preContentTransportRecovery,
+      signal,
+    });
+    if (honored) return honored;
     // Fall through to the target iteration loop below — retries and sibling
     // models will be tried via the normal combo machinery.
   }
