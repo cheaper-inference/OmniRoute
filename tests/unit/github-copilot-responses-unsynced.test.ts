@@ -24,6 +24,8 @@ const { resolveChatCoreTargetFormat } =
 const { resolveExecutionCredentials } =
   await import("../../open-sse/handlers/chatCore/executionCredentials.ts");
 const { GithubExecutor } = await import("../../open-sse/executors/github.ts");
+const { inferGithubUnsyncedTargetFormat } =
+  await import("../../src/sse/services/githubResponsesFallback.ts");
 
 const RESPONSES_URL = "https://api.githubcopilot.com/responses";
 const CHAT_URL = "https://api.githubcopilot.com/chat/completions";
@@ -171,4 +173,23 @@ test("GithubExecutor.buildUrl sends gpt-6-luna to /responses once the format is 
     ccSessionId: null,
   });
   assert.equal(executor.buildUrl("gpt-6-luna", false, 0, credentials), RESPONSES_URL);
+});
+
+test("inferGithubUnsyncedTargetFormat covers gh / ghe-copilot ids, prefixes and codex ids", () => {
+  for (const providerId of ["github", "gh", "ghe-copilot"]) {
+    assert.equal(inferGithubUnsyncedTargetFormat(providerId, "gpt-6.1-terra"), "openai-responses");
+    assert.equal(inferGithubUnsyncedTargetFormat(providerId, "gpt-5.5"), "openai-responses");
+    assert.equal(inferGithubUnsyncedTargetFormat(providerId, "gpt-5.1-codex"), "openai-responses");
+    assert.equal(inferGithubUnsyncedTargetFormat(providerId, "codex-mini"), "openai-responses");
+    assert.equal(
+      inferGithubUnsyncedTargetFormat(providerId, `${providerId}/gpt-6-sol`),
+      "openai-responses"
+    );
+    assert.equal(inferGithubUnsyncedTargetFormat(providerId, "gpt-5.4"), undefined);
+    assert.equal(inferGithubUnsyncedTargetFormat(providerId, "claude-codex"), undefined);
+    assert.equal(inferGithubUnsyncedTargetFormat(providerId, "gemini-gpt-6"), undefined);
+  }
+  for (const providerId of ["openrouter", "openai", "codex"]) {
+    assert.equal(inferGithubUnsyncedTargetFormat(providerId, "gpt-6.1-terra"), undefined);
+  }
 });
