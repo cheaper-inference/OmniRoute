@@ -13,7 +13,7 @@ import { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
 export { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
 import { dashboardDetailIo, resolveCallLogDetail } from "./callLogDetailResolver";
 import { shouldPersistToDisk } from "./migrations";
-import { updateRequestTokensById } from "./usageHistory";
+import { markRequestPersistedById, updateRequestTokensById } from "./usageHistory";
 import { getCallLogApiKeyContext } from "./callLogApiKeyContext";
 import { serializeResilienceActions, resetResilienceActions } from "./resilienceActionsContext";
 import { parseResilienceActions } from "./resilienceActionsParse";
@@ -463,6 +463,11 @@ async function saveCallLogOperation(entry: any): Promise<void> {
     }
   }
   if (!inserted) return;
+  markRequestPersistedById(
+    entry.pendingRequestId,
+    entry.pendingRequestGeneration,
+    String(prepared.logEntry.id)
+  );
   try {
     await publishCallLogDetail(prepared);
   } catch (error) {

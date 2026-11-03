@@ -457,7 +457,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provider registries, header profiles, identity, …
 ├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── executors/              158 provider executor modules (executor classes + per-provider helpers)
 ├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions stream transformer
 ├── services/               80+ service modules (combos, fallback, quotas, identity, …)
@@ -487,7 +487,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-156 টপ-লেভেল এক্সিকিউটর মডিউল (`*.ts` বিয়োগ `base.ts`, `index.ts` এবং পরীক্ষা — গণনা `npm run check:docs-counts` পরিমাপ)। প্রতিটি নির্বাহক শ্রেণী সরাসরি বা `DefaultExecutor` বা অন্য নির্বাহকের মাধ্যমে `BaseExecutor` (`base.ts`) প্রসারিত করে; অবশিষ্ট মডিউলগুলি প্রতি-প্রদানকারী সাহায্যকারী (টুল স্কিমা, fetch/TTS অ্যাডাপ্টার, কুইর্ক হ্যান্ডলার)। নির্বাহকদের অন্তর্ভুক্ত:
+158 টপ-লেভেল এক্সিকিউটর মডিউল (`*.ts` বিয়োগ `base.ts`, `index.ts` এবং পরীক্ষা — গণনা `npm run check:docs-counts` পরিমাপ)। প্রতিটি নির্বাহক শ্রেণী সরাসরি বা `DefaultExecutor` বা অন্য নির্বাহকের মাধ্যমে `BaseExecutor` (`base.ts`) প্রসারিত করে; অবশিষ্ট মডিউলগুলি প্রতি-প্রদানকারী সাহায্যকারী (টুল স্কিমা, fetch/TTS অ্যাডাপ্টার, কুইর্ক হ্যান্ডলার)। নির্বাহকদের অন্তর্ভুক্ত:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex` `devin-desktop` প্লাস `claudeIdentity.ts` (শেয়ারড আইডেন্টিটি হেল্পার) এবং `index.ts` (রেজিস্ট্রি)।
 

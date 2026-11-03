@@ -4121,7 +4121,8 @@
     "duplicateAutoComboSnapshotMsg": "Bu shablonga mos keladigan, hozir ulangan provayderlar/modellarning joriy holatini tahrirlanadigan kombinatsiya sifatida saqlaydi.",
     "duplicateAutoComboFailedPrefix": "Avtomatik kombinatsiyani nusxalab bo‘lmadi:",
     "duplicateAutoComboUnknownError": "Noma’lum xato",
-    "duplicateAutoComboTitle": "{name} asosida statik kombinatsiya yaratish"
+    "duplicateAutoComboTitle": "{name} asosida statik kombinatsiya yaratish",
+    "fallbackSummary": "So'rovlar uchun %{rate} o'rin aldi, har birida ~{skips} maqsadlar o'tkazib yuborildi"
   },
   "costs": {
     "title": "Xarajatlar",
@@ -15385,6 +15386,7 @@
     "upstreamStatus": "Oqim holati",
     "noResponse": "Javob yo'q",
     "egressIp": "Chiqish IP",
+    "egressIpFamily": "IPv{version}",
     "headersAfter": "Sarlavhalar keyin",
     "firstChunkAfter": "Birinchi bo'lak keyin",
     "servedBy": "Ta'minlovchi",
