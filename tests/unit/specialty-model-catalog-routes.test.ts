@@ -70,6 +70,7 @@ test("image catalog GET uses the unified active-credential model list", async ()
   assert.deepEqual(
     ids.filter((id) => id.startsWith("codex/")),
     [
+      "codex/gpt-6.1-sol-image",
       "codex/gpt-5.6-sol-image",
       "codex/gpt-5.6-terra-image",
       "codex/gpt-5.6-luna-image",
