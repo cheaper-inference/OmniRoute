@@ -48,6 +48,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "info",
   },
   {
+    key: "API_KEY_AUDIT_CLIENT_DETAILS_ENABLED",
+    label: "API Key Audit: Record Client IP and User-Agent",
+    description:
+      "Record the caller's IP address and user-agent on the audit-log rows written for successful API-key metadata and discovery reads (action api_key.auth.touch). Off by default: those rows still record which key was used, when, and on which path, without IP or user-agent.",
+    descriptionI18nKey: "featureFlagApiKeyAuditClientDetailsEnabledDescription",
+    category: "security",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "PII_REDACTION_ENABLED",
     label: "PII Redaction",
     description: "Redact personally identifiable information from requests",
@@ -479,7 +491,20 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "info",
   },
 
-  // ──────────────── Policies (7) ────────────────
+  // ──────────────── Policies (8) ────────────────
+  {
+    key: "UNPRICED_USAGE_BUDGET_POLICY",
+    label: "Unpriced Usage Budget Policy",
+    description:
+      "How per-key daily/weekly USD limits treat successful usage whose provider/model has no pricing row. 'fail_closed' (default) marks the window as exceeded so an unknown cost can never slip past a hard cap (#12341). 'count_as_zero' counts that usage as $0 and keeps enforcing the priced spend. Unpriced models are listed on the dashboard home page either way.",
+    descriptionI18nKey: "featureFlags.definitions.UNPRICED_USAGE_BUDGET_POLICY.description",
+    category: "policies",
+    defaultValue: "fail_closed",
+    type: "enum",
+    enumValues: ["fail_closed", "count_as_zero"],
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
   {
     key: "TOOL_POLICY_MODE",
     label: "Tool Policy Mode",
@@ -1353,5 +1378,17 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     type: "boolean",
     requiresRestart: false,
     warningLevel: "caution",
+  },
+  {
+    key: "COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE",
+    label: "Compression Cache Stats: Automatic-Prefix Eligibility",
+    description:
+      "In the compression cache stats, count a compressed request to an automatic-prefix-caching provider (OpenAI, Codex, Azure, or a custom connection that declares prompt caching with marker stripping) as an estimated cache hit even without cache_control markers. The estimate is a cache-eligibility signal, not an observed hit, so the reported hit rate for those providers trends toward 100%. Off by default: only a request carrying cache_control markers to a caching provider counts as an estimated hit, so automatic-prefix providers keep reporting 0.",
+    descriptionI18nKey: "featureFlagCompressionCacheAutomaticPrefixEstimateDescription",
+    category: "runtime",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
   },
 ];

@@ -163,7 +163,7 @@ OmniRoute ავლენს 6 A2A უნარს `src/lib/a2a/taskExecution.ts
 | ჯანმრთელობის ანგარიში     | `health-report`      | აგრეგატები ამომრთველი, გაგრილება, დაბლოკვის მდგომარეობა თითო პროვაიდერზე                                                                                      | ჯანმრთელობა, გამძლეობა      | "ყველა პროვაიდერის ჯანმრთელობის მდგომარეობის ჩვენება" |
 | ჩამოთვალეთ შესაძლებლობები | `list-capabilities`  | აბრუნებს აგენტის უნარების სრულ 45 ჩანაწერის კატალოგს (23 API + 21 CLI + 1 კონფიგურაცია), როგორც მარკირების ცხრილი ნედლი SKILL.md URLs კონტექსტის ინექციისთვის | კატალოგი, აღმოჩენა, უნარები | "ჩამოთვალეთ OmniRoute ყველა შესაძლებლობა"             |
 
-> აგენტის ბარათი უნდა ინახებოდეს პირდაპირ 377 პროვაიდერის კატალოგთან; პროვაიდერის რაოდენობა და free/no-auth მეტამონაცემები მიიღება გაშვების რეესტრიდან.
+> აგენტის ბარათი უნდა ინახებოდეს პირდაპირ 380 პროვაიდერის კატალოგთან; პროვაიდერის რაოდენობა და free/no-auth მეტამონაცემები მიიღება გაშვების რეესტრიდან.
 
 ### `list-capabilities` უნარი დეტალი
 
@@ -199,15 +199,15 @@ JSON-RPC საბოლოო წერტილი `/a2a` არის A2A-ი
 
 ## ახალი უნარის დამატება
 
-1. **შექმენით უნარის ფაილი:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **შექმენით უნარების ფაილი:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   გაიტანეთ async ფუნქცია `(task: A2ATask) => Promise<{ artifacts, metadata }>`. დაიცავით არსებული უნარების, მაგალითად `smartRouting.ts`-ის, სტრუქტურა.
+   ასინქრონული `(task: A2ATask) => Promise<{ artifacts, metadata }>` ფუნქციის ექსპორტი. დაიცავით არსებული უნარების ფორმა, როგორიცაა `smartRouting.ts`.
 
-2. **დაარეგისტრირეთ დამმუშავებელი:** `src/lib/a2a/taskExecution.ts`-ში დაამატეთ ჩანაწერი `A2A_SKILL_HANDLERS`-ში:
+2. **რეგისტრაციის დამმუშავებელი:** `src/lib/a2a/taskExecution.ts` ში დაამატეთ ჩანაწერი `A2A_SKILL_HANDLERS` ში:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...არსებული უნარები
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ JSON-RPC საბოლოო წერტილი `/a2a` არის A2A-ი
    };
    ```
 
-3. **გამოაჩინეთ აგენტის ბარათში:** `src/lib/a2a/agentCardMetadata.ts`-ში (რომელსაც ერთობლივად იყენებს `/.well-known/agent.json` და `/.well-known/agent-card.json`) დაამატეთ `skills` მასივში:
+3. **აგენტის ბარათში გამოვლენა:** `src/lib/a2a/agentCardMetadata.ts` ში (გაზიარებული `/.well-known/agent.json` და `/.well-known/agent-card.json`), დაამატეთ `skills` მასივს:
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC საბოლოო წერტილი `/a2a` არის A2A-ი
    }
    ```
 
-4. **დაწერეთ ტესტები:** `tests/unit/a2a-<your-skill>.test.ts`. დაფარეთ წარმატებული შესრულებისა და შეცდომის სცენარები.
+4. **დაწერეთ ტესტები:** `tests/unit/a2a-<your-skill>.test.ts`. დაფარეთ ბედნიერი გზა + შეცდომის გზა.
 
-5. **აღწერეთ დოკუმენტაციაში** ახალი უნარი ამ ფაილის `Available Skills` ცხრილში.
+5. **დოკუმენტი** ახალი უნარი ამ ფაილის `Available Skills` ცხრილში.
 
 ---
 

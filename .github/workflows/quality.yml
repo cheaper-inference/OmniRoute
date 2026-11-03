@@ -295,6 +295,9 @@ jobs:
           echo "::group::check:dashboard-typecheck"
           npm run check:dashboard-typecheck || failed+=("check:dashboard-typecheck")
           echo "::endgroup::"
+          echo "::group::check:build-typecheck"
+          npm run check:build-typecheck || failed+=("check:build-typecheck")
+          echo "::endgroup::"
           # #10134: TS7 zero-new-diagnostics ratchet — folded into this non-fail-fast
           # loop (never a separate blocking step) so an earlier red gate cannot abort
           # the job and mask it (#8542 mechanism). PR-only: the base-relative
