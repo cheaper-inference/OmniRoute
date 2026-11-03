@@ -1,0 +1,1 @@
+- **fix(db):** utilization chart bucket timestamps are now emitted as ISO-8601 UTC (`YYYY-MM-DDTHH:MM:SSZ`), so the dashboard no longer shifts them by the browser's UTC offset ([#18083](https://github.com/cheaper-inference/OmniRoute/pull/18083)) — thanks @levinkin

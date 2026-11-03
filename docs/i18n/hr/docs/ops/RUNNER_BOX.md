@@ -28,7 +28,7 @@ Izmjereno 2026-10-18:
 | swap      | 16 GB                                   | `omniroute-113-5` radi s isključenim swapom (`MemorySwapMax=0`) kako bi se nekontrolirana izgradnja prekinula kada dosegne ograničenje, umjesto da cijeli poslužitelj počne koristiti swap                                                                                                                                                                                                                         |
 | `/tmp`    | **12 GB tmpfs = RAM**                   | sve što se ondje pohrani zauzima memoriju; preostale datoteke brišu se nakon 3 h                                                                                                                                                                                                                                                                                                                                   |
 | CPU       | zabilježeno opterećenje 60 na 32 jezgre | prije uvođenja kvota, jedna Turbopack izgradnja (~1166 % CPU-a) uz paket testova pokrivenosti na istom poslužitelju onemogućila je signale prisutnosti ostalih osluškivača (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                   |
-| runneri   | **6 osluškivača**                       | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` su onemogućeni (`systemctl enable --now` ponovno pokreće jedan)                                                                                                                                                                                                                                                                                    |
+| runneri   | **7 osluškivača** (2026-10-28)          | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` nosi i `omni-build`; `omniroute-113-3/-4/-8` izbrisani su iz repozitorija (2026-10-28)                                                                                                                                                                                                                                                                      |
 
 Ograničenja se nalaze u datoteci `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 svake jedinice (prethodne su vrijednosti sačuvane kao `override.conf.bak-20261018`) i primijenjena su
@@ -43,7 +43,7 @@ runnere (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): svakih 30 min, zapisuj u /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` je obavezan: čistač potvrđuje da se putanja ne koristi na temelju jedne snimke otvorenih
@@ -118,8 +118,9 @@ odjednom, samo kada je neaktivan**, pri čemu provjera neaktivnosti i ponovno po
   imao je `MemoryHigh=4G` do 2026-10-18 — promptfoo izgradnja probijala se kroz oslobađanje memorije 54 minute
   na tom sustavu; 8 GB uklanja ograničavanje.
 - **Namjerno manje procesa za osluškivanje.** Četiri OmniRoute jedinice onemogućene su 2026-08-29 — svaki dodatni
-  proces za osluškivanje još je jedan korisnik gore navedenog memorijskog proračuna. Gornja granica čistača iznosi 6 (`MAX_ACTIVE_RUNNERS=6` u cronu): broji
-  svaki `Runner.Listener` na sustavu, a OmniHeuris + OmniMind dodaju još dva našima četirima.
+  proces za osluškivanje još je jedan korisnik gore navedenog memorijskog proračuna. Gornja granica čistača iznosi 8 (`MAX_ACTIVE_RUNNERS=8` u cronu): broji
+  svaki `Runner.Listener` na sustavu, a OmniHeuris + OmniMind dodaju još dva uz naših pet.
+- **Unit i Vitest poslovi ostaju hostani.** `ci.yml` šalje svoje unit shardove i Vitest posao na `[self-hosted, omni-ci]` samo kada je varijabla repozitorija `vars.USE_VPS_TEST_RUNNER` postavljena na `true`, i tada samo za `pull_request` pokretanja iz istog repozitorija; forkovi, `merge_group` i slanja promjena ostaju na `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Varijabla je `false`. Dana 2026-10-28 tri `omni-ci` osluškivača s po 4 jezgre trebala su 250–270 s za `npm ci`, a svaki unit shard dosegnuo je ograničenje posla od 30 minuta, naspram ~634 s za hostani shard, uz opterećenje sustava od 17–24. Osluškivači su izbrisani. Ne uključujte varijablu ponovno bez osluškivača dimenzioniranih za unit shard.
 - **Nikada ručno ne čistite `/tmp` ili `_work` dok je bilo koji runner zauzet.** Provjera
   pa brisanje, s razmakom između tih radnji, razlog je zbog kojeg je aktivni Build posao izgubio svoj
   `_work` 2026-08-27. Čistač obavlja provjeru i uklanjanje u jednom koraku;
@@ -133,8 +134,7 @@ odjednom, samo kada je neaktivan**, pri čemu provjera neaktivnosti i ponovno po
 
 ## Hostana traka (izvršitelji koje hosta GitHub)
 
-Račun je na tarifi **Pro**: **40 istodobnih hostanih poslova**, koje dijele sve provjere PR-ova,
-svi radni tijekovi pokrenuti slanjem promjena i zadana konfiguracija CodeQL-a. Izmjereno 2026-10-18 tijekom
+Repozitorij pripada organizaciji `cheaper-inference`, na tarifi **Team**: **60 istodobnih hostanih poslova**, koje dijele svi repozitoriji u organizaciji, sve provjere PR-ova, svi radni tijekovi pokrenuti slanjem promjena i zadana konfiguracija CodeQL-a. Brojke u nastavku izmjerene su na tarifi **Pro** (40 istodobnih hostanih poslova). Izmjereno 2026-10-18 tijekom
 kampanje spajanja (~10 spajanja/sat na `release/v3.8.52`): **2.500 pokretanja radnih tijekova stvoreno je u
 24 h**, 44 slanja promjena na granu u 6 h, a **106 hostanih poslova čekalo je u redu** dok su provjere PR-ova
 čekale satima te su PR-ovi spojeni bez njih. Devet radnih tijekova pokrenulo se pri svakom slanju promjena na granu:

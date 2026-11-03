@@ -450,7 +450,7 @@ export default function QuotaSharePageClient() {
       <Alert
         variant="warning"
         icon={<Icon name="science" size={16} />}
-        className="[&>.ci-alert__dismiss]:hidden"
+        dismissible={false}
         description={
           <span>
             <span className="font-semibold">{t("betaTitle")}</span> — {t("betaText")}

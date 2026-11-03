@@ -53,6 +53,7 @@ import {
   validateResponseQuality,
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
+import { AGENTIC_STALL_COMBO_REASON, isAgenticStallComboAttempt } from "./agenticStallFailover.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
 import type {
   ComboCollectionLike,
@@ -221,13 +222,16 @@ export function buildDefaultNesting(
  * strategy (200-but-empty, or a transient upstream status worth failing over).
  */
 async function evaluatePinnedResponse(args: {
+  body: Record<string, unknown>;
   pinnedResult: Response;
   pinnedModel: string;
+  hasOtherTargets: boolean;
   clientRequestedStream: boolean;
   config: ComboSetupConfig;
   log: ComboLogger;
 }): Promise<Response | null> {
-  const { pinnedResult, pinnedModel, clientRequestedStream, config, log } = args;
+  const { body, pinnedResult, pinnedModel, hasOtherTargets, clientRequestedStream, config, log } =
+    args;
   if (pinnedResult.ok) {
     let pinnedClone: Response;
     try {
@@ -244,11 +248,21 @@ async function evaluatePinnedResponse(args: {
       await isTrustedEmptyTurn(parseModel(pinnedModel).provider, pinnedResult)
     );
     releaseQualityClone(pinnedClone, pinnedResult, pinnedQuality);
-    if (pinnedQuality.valid) return pinnedResult;
+    // #13954 (opt-in): a stalled pin gives the turn back to the combo strategy.
+    const pinnedStalled =
+      pinnedQuality.valid &&
+      (await isAgenticStallComboAttempt({
+        body,
+        result: pinnedResult,
+        modelStr: pinnedModel,
+        hasNextTarget: hasOtherTargets,
+        log,
+      }));
+    if (pinnedQuality.valid && !pinnedStalled) return pinnedResult;
     releaseRejectedQualityResponse(pinnedClone, pinnedResult);
     log.warn(
       "COMBO",
-      `Pinned model ${pinnedModel} returned 200 but failed quality check: ${pinnedQuality.reason}, falling through to combo retry/fallback`
+      `Pinned model ${pinnedModel} returned 200 but ${pinnedStalled ? AGENTIC_STALL_COMBO_REASON : `failed quality check: ${pinnedQuality.reason}`}, falling through to combo retry/fallback`
     );
     return null;
   }
@@ -355,8 +369,10 @@ export async function tryPinnedModelDispatch(args: {
     }
     if (pinnedResult) {
       const accepted = await evaluatePinnedResponse({
+        body,
         pinnedResult,
         pinnedModel,
+        hasOtherTargets: comboTargets.length > 1,
         clientRequestedStream,
         config,
         log,
@@ -474,14 +490,15 @@ export async function tryFusionDispatch(args: {
   }
   // #3378 (ported from upstream decolua/9router): every non-fusion combo
   // strategy runs candidates through filterTargetsByRequestCompatibility before
-  // dispatch, which excludes a target whose vision support cannot be *confirmed*
-  // `=== true` for an image-bearing request (#8332 — unknown is treated the same
-  // as unsupported, never silently forwarded). Fusion resolved its panel via the
+  // dispatch, which excludes a target whose vision support is explicitly false
+  // for an image-bearing request (#17289 relaxed #8332: unknown metadata is now
+  // tried after confirmed targets). Fusion resolved its panel via the
   // raw target list and skipped that filter entirely, so a panel member with an
   // unrecognized model id (capability lookup misses -> supportsVision !== true)
   // still received the unmodified image body while the panel silently lost a
-  // "confirmed vision" voice. Apply the same exclusion here so the fusion panel
-  // only fans an image request out to targets with confirmed vision support.
+  // "confirmed vision" voice. Fusion deliberately keeps the stricter #8332 rule
+  // (isVisionIncompatibleTarget: unknown is excluded too): a panel fan-out has no
+  // "last resort" tier, so the panel only receives targets with confirmed vision.
   const fusionRequirements = judgeFusionRequirements;
   const resolvedFusionTargets = fusionRequirements.requiresVision
     ? allResolvedFusionTargets.filter(
