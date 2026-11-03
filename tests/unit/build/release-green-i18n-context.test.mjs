@@ -19,7 +19,10 @@ const comparisonFor = (fixture) => ({
 test("both UI aliases receive the same pinned observer pair, not a package-derived branch", (t) => {
   const fixture = createReleaseGreenProfileFixture(t, root);
   const comparison = comparisonFor(fixture);
-  const gates = profile.loadFullCiProfile(fixture.root, { comparison });
+  const gates = profile.loadFullCiProfile(fixture.root, {
+    comparison,
+    testMaskingBaseSha: fixture.baseSha,
+  });
   const ui = gates.filter((gate) =>
     ["i18n:check-value-drift", "i18n:check-new-keys"].includes(gate.id)
   );

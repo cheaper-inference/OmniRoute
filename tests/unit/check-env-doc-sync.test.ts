@@ -220,6 +220,46 @@ test("desktop release context is not app configuration, while undocumented app v
   assert.deepEqual(result.problems.codeMissingEnv, ["OMNIROUTE_UNDOCUMENTED_APP_OPTION"]);
 });
 
+test("#18345: Actions workflow SHA is runner-owned build provenance", () => {
+  const result = runEnvDocSync({
+    envExampleText: "",
+    envDocText: "",
+    codeVars: new Set(["GITHUB_WORKFLOW_SHA"]),
+    docOnlyAllowlist: new Set(),
+    envOnlyAllowlist: new Set(),
+  });
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.problems, {
+    codeMissingEnv: [],
+    envMissingDoc: [],
+    docMissingEnv: [],
+  });
+});
+
+test("#18345: unknown product and GitHub-prefixed variables still fail", () => {
+  const result = runEnvDocSync({
+    envExampleText: "",
+    envDocText: "",
+    codeVars: new Set([
+      "GITHUB_UNDOCUMENTED_APP_OPTION",
+      "GITHUB_WORKFLOW_SHA_OVERRIDE",
+      "OMNIROUTE_UNDOCUMENTED_APP_OPTION",
+    ]),
+    docOnlyAllowlist: new Set(),
+    envOnlyAllowlist: new Set(),
+  });
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.problems, {
+    codeMissingEnv: [
+      "GITHUB_UNDOCUMENTED_APP_OPTION",
+      "GITHUB_WORKFLOW_SHA_OVERRIDE",
+      "OMNIROUTE_UNDOCUMENTED_APP_OPTION",
+    ],
+    envMissingDoc: [],
+    docMissingEnv: [],
+  });
+});
+
 test("repository contract is in sync (live data)", () => {
   // Uses the real .env.example, docs/ENVIRONMENT.md, and the bundled
   // allowlists. This is the same check that runs in pre-commit / CI.

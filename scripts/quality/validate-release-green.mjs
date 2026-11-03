@@ -31,6 +31,8 @@
 //     --i18n-base-sha <sha> --i18n-candidate-sha <sha>  explicit comparison pair
 //                   for --full-ci; otherwise resolve the event or explicit local BASE_REF.
 //     --i18n-scope <candidate|push-range|last-commit>  scope of an explicit pair
+//     --test-masking-base-sha <sha>  immutable test comparison base; otherwise pin
+//                   local origin/main once. No fetch runs during the observation.
 //     --suites-from <dir>  consume hosted receipts instead of local suite execution;
 //                   requires --suites-workflow-sha <sha> from the producing workflow.
 //
@@ -50,7 +52,9 @@ import { eslintMeasurementCounts } from "./eslint-measurement.mjs";
 import {
   loadFullCiProfile,
   resolveFullCiComparison,
+  resolveTestMaskingBase,
   staticGateOutcome,
+  testMaskingGateEnv,
 } from "./release-green-static-profile.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -989,6 +993,16 @@ async function main() {
   const SUITES_WORKFLOW_SHA =
     suitesWorkflowIndex >= 0 ? process.argv[suitesWorkflowIndex + 1] : null;
 
+  let testMaskingBaseSha = null;
+  let testMaskingBaseError = null;
+  if (!QUICK || FULL_CI || process.argv.some((arg) => arg.startsWith("--test-masking"))) {
+    try {
+      testMaskingBaseSha = resolveTestMaskingBase(ROOT, process.argv.slice(2));
+    } catch (error) {
+      testMaskingBaseError = error;
+    }
+  }
+
   let i18nComparison = null;
   let i18nComparisonError = null;
   if (FULL_CI) {
@@ -1005,6 +1019,16 @@ async function main() {
     const icon = r.ok ? "✅" : r.kind === "drift" ? "🟡" : "❌";
     process.stderr.write(`${icon} [${r.kind}] ${r.label}${r.detail ? ` — ${r.detail}` : ""}\n`);
   };
+  if (QUICK && !FULL_CI && testMaskingBaseError) {
+    record({
+      id: "test-masking-base",
+      label: "Test-masking comparison input",
+      kind: "hard",
+      ok: false,
+      evidenceState: "INCOMPLETE",
+      detail: testMaskingBaseError.message,
+    });
+  }
 
   // Announce before running; supervisor heartbeats then distinguish a quiet process
   // from a missing observation without treating silence as a successful result.
@@ -1137,21 +1161,31 @@ async function main() {
   // config/quality/test-masking-allowlist.json; tautology/skip/deletion signals are never allowlistable.
   if (!QUICK) {
     announce("Test-masking (weakened-assert guard vs main)");
-    // best-effort fetch so the merge-base diff is accurate; ignore fetch failure (offline pre-flight)
-    await run("git", ["fetch", "--no-tags", "origin", "main", "--depth=200"], {
-      timeout: 60 * 1000,
-    });
-    const { code, out } = await run(npmCmd, ["run", "check:test-masking"], {
-      env: { GITHUB_BASE_REF: "main" },
-    });
-    saveGateLog("test-masking", out);
-    record({
-      id: "test-masking",
-      label: "Test-masking (weakened-assert guard)",
-      kind: "hard",
-      ok: code === 0,
-      detail: code === 0 ? "no weakening" : firstFailureLine(out),
-    });
+    let env;
+    try {
+      if (testMaskingBaseError) throw testMaskingBaseError;
+      env = testMaskingGateEnv(ROOT, testMaskingBaseSha);
+    } catch (error) {
+      record({
+        id: "test-masking",
+        label: "Test-masking (weakened-assert guard)",
+        kind: "hard",
+        ok: false,
+        evidenceState: "INCOMPLETE",
+        detail: error.message,
+      });
+    }
+    if (env) {
+      const { code, out } = await run(npmCmd, ["run", "check:test-masking"], { env });
+      saveGateLog("test-masking", out);
+      record({
+        id: "test-masking",
+        label: "Test-masking (weakened-assert guard)",
+        kind: "hard",
+        ok: code === 0,
+        detail: code === 0 ? "no weakening" : firstFailureLine(out),
+      });
+    }
   }
 
   // Remaining quality-gate / quality-extended ratchets that the PR→release
@@ -1428,7 +1462,8 @@ async function main() {
     let gates = [];
     try {
       if (i18nComparisonError) throw i18nComparisonError;
-      gates = loadFullCiProfile(ROOT, { comparison: i18nComparison });
+      if (testMaskingBaseError) throw testMaskingBaseError;
+      gates = loadFullCiProfile(ROOT, { comparison: i18nComparison, testMaskingBaseSha });
     } catch (err) {
       record({
         id: "full-ci-extract",
@@ -1536,6 +1571,7 @@ async function main() {
         profile: QUICK ? "quick" : WITH_BUILD && FULL_CI ? "full" : "standard",
         completedAt: new Date().toISOString(),
         i18nComparison,
+        testMaskingBaseSha,
         releaseGreen,
         hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
         drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),

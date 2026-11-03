@@ -27,6 +27,7 @@ function fixture(run) {
       "config/quality",
       "scripts/quality",
       "scripts/dev",
+      "scripts/ci",
       "scripts/i18n",
       "scripts/check",
       "bin",
@@ -49,6 +50,7 @@ function fixture(run) {
       "scripts/i18n/resolve-ui-diff-base.mjs",
       "scripts/check/openapiBaseline.mjs",
       "scripts/dev/resource-budget-process.mjs",
+      "scripts/ci/unit-diagnostics.mjs",
     ]) {
       copyFileSync(join(root, path), join(dir, path));
     }

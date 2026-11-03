@@ -18,6 +18,7 @@ const root = fileURLToPath(new URL("../../../", import.meta.url));
 test("full static requirements include audit, mutation and translation drift", (t) => {
   const fixture = createReleaseGreenProfileFixture(t, root);
   const gates = loadFullCiProfile(fixture.root, {
+    testMaskingBaseSha: fixture.baseSha,
     comparison: {
       baseSha: fixture.baseSha,
       baseTipSha: fixture.baseSha,
@@ -145,6 +146,7 @@ test("an interrupted static process never has complete measurement evidence", ()
 test("the real profile has executable absolute boundary arguments", (t) => {
   const fixture = createReleaseGreenProfileFixture(t, root);
   const gate = loadFullCiProfile(fixture.root, {
+    testMaskingBaseSha: fixture.baseSha,
     comparison: {
       baseSha: fixture.baseSha,
       baseTipSha: fixture.baseSha,
@@ -167,6 +169,7 @@ test("declared required policy cannot be weakened by an old curated drift bucket
 test("test-masking receives a fixed base SHA in the full profile", (t) => {
   const fixture = createReleaseGreenProfileFixture(t, root);
   const gate = loadFullCiProfile(fixture.root, {
+    testMaskingBaseSha: fixture.baseSha,
     comparison: {
       baseSha: fixture.baseSha,
       baseTipSha: fixture.baseSha,
@@ -178,11 +181,11 @@ test("test-masking receives a fixed base SHA in the full profile", (t) => {
   assert.match(gate.env.GITHUB_BASE_SHA, /^[0-9a-f]{40}$/);
   assert.equal(gate.env.GITHUB_BASE_SHA, fixture.baseSha);
   assert.notEqual(gate.env.GITHUB_BASE_SHA, fixture.headSha);
-  assert.equal(gate.env.GITHUB_BASE_REF, undefined);
+  assert.equal(gate.env.GITHUB_BASE_REF, "");
 });
 
-test("the full profile rejects a checkout without the required base ref", (t) => {
-  const fixture = createReleaseGreenProfileFixture(t, root, { withBase: false });
+test("the full profile rejects a missing immutable test-masking base", (t) => {
+  const fixture = createReleaseGreenProfileFixture(t, root);
   assert.throws(
     () =>
       loadFullCiProfile(fixture.root, {
@@ -194,9 +197,6 @@ test("the full profile rejects a checkout without the required base ref", (t) =>
           scope: "candidate",
         },
       }),
-    {
-      status: 128,
-      message: /origin\/main/,
-    }
+    /Test-masking comparison requires an immutable base SHA/
   );
 });

@@ -217,7 +217,7 @@ test("classifyRunError: a kill WITHOUT a configured timeout is not misreported a
   assert.doesNotMatch(r.out, /ceiling/);
 });
 
-test("pre-flight wires the test-masking PR-context gate against origin/main (v3.8.43 gap fix)", async () => {
+test("pre-flight pins one local test-masking base before gate execution", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(
     new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
@@ -226,17 +226,19 @@ test("pre-flight wires the test-masking PR-context gate against origin/main (v3.
   // The gate must run check:test-masking, pin the base to main, and be classified HARD —
   // it caught a real net-assert reduction that only surfaced on the release PR before.
   assert.match(src, /check:test-masking/, "test-masking gate must be wired into the pre-flight");
-  assert.match(src, /GITHUB_BASE_REF:\s*"main"/, "test-masking must diff against origin/main");
+  assert.match(src, /resolveTestMaskingBase\(ROOT, process\.argv\.slice\(2\)\)/);
+  assert.match(src, /testMaskingGateEnv\(ROOT, testMaskingBaseSha\)/);
+  assert.doesNotMatch(src, /\["fetch",/);
   assert.match(
     src,
     /id:\s*"test-masking"[\s\S]*?kind:\s*"hard"/,
     "test-masking must be a HARD gate (non-allowlisted weakening blocks the release)"
   );
-  // run() must honor a per-gate env override so GITHUB_BASE_REF actually reaches the child
+  // run() must honor a per-gate env override so the pinned GITHUB_BASE_SHA reaches the child
   // (routed through buildGateEnv since the --hermetic scrub was added).
   assert.match(
     src,
-    /env:\s*buildGateEnv\(opts\.env\)/,
+    /env:\s*buildGateEnv\(\{\s*\.\.\.opts\.env,/,
     "run() must merge opts.env into the child env"
   );
   assert.match(
@@ -696,6 +698,7 @@ test("the real full profile requires workflow audits even when the curated obser
     fileURLToPath(new URL("../../", import.meta.url))
   );
   const gates = loadFullCiProfile(fixture.root, {
+    testMaskingBaseSha: fixture.baseSha,
     comparison: {
       baseSha: fixture.baseSha,
       baseTipSha: fixture.baseSha,

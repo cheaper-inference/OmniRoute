@@ -531,12 +531,23 @@ function main() {
     process.exit(1);
   }
 
-  const base = resolveBase();
-  if (!base) {
+  const baseRef = resolveBase();
+  if (!baseRef) {
     console.log(
       "[test-masking] sem base ref (não é PR) — pulando checks de diff (scan absoluto de tautologias OK)."
     );
     return;
+  }
+
+  // Three-dot diffs describe changes since the common ancestor, not the base tip.
+  // Resolve that ancestor once so file selection and prior contents use the same tree.
+  const mergeBases = git(["merge-base", "--all", "--", baseRef, "HEAD"]).trim().split(/\r?\n/);
+  const [base] = mergeBases;
+  if (mergeBases.length !== 1 || !/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(base)) {
+    console.error(
+      "[test-masking] comparison base unavailable or ambiguous — diff checks cannot run."
+    );
+    process.exit(1);
   }
 
   // (6A.10 subcheck 1) Arquivos de teste deletados/renomeados via MDR filter.
