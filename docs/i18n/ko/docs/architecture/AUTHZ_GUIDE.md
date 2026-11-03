@@ -134,34 +134,34 @@ Cookie: auth_token=<JWT signed with JWT_SECRET>
 
 일부 `MANAGEMENT` 작업은 **운영자 전용**입니다. `manage` 키만으로는 충분하지 않습니다. 저장된 자격 증명 내보내기(`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), 라이브 데이터 위에 백업 복원(`dryRun=true`를 포함한 `POST /api/db-backups/import`, ID 기준 `POST /api/db-backups` 복원, `POST /api/settings/import-json`), 복원 지점 삭제(`DELETE /api/db-backups` 정리, 그리고 `PATCH /api/db-backups` — 여기서 저장되는 보존 설정이 백업 후 자동 정리를 결정하기 때문입니다)에는 대시보드 세션, 로컬 CLI 주체, 또는 로그인 비활성화 상태가 필요합니다. 동기화 토큰 발급(`POST /api/sync/tokens`)과 `admin` CLI 액세스 토큰 발급(`POST /api/cli/tokens`)은 모든 로그인 모드에서 대시보드 세션 또는 로컬 CLI 주체가 필요합니다. 어떤 스코프의 API 키와 `oma_` 액세스 토큰도 운영자 자격 증명이 아니므로, 이런 자격 증명이 요구되는 곳에서는 항상 `403`을 받습니다. 이 검사는 `src/lib/api/operatorCredential.ts`(`resolveOperatorCredential()` / `requireOperatorCredential()`)에 있습니다. 로그인 설정 변경도 운영자 전용입니다. `POST /api/settings/require-login`(관리 비밀번호 설정, `requireLogin` 토글)은 비밀번호가 한 번 만들어진 뒤에는 이 자격 증명만 받아들입니다. 최초 실행 부트스트랩 기간(아직 비밀번호가 없는 상태)은 그대로 유지됩니다. 대시보드 세션으로 비밀번호를 교체하려면 `currentPassword`를 보내야 하며(누락되거나 틀리면 `403`, `settings.update_failed`로 감사 기록), 로컬 CLI와 로그인이 비활성화된 인스턴스는 복구 경로를 유지하여 이것 없이도 비밀번호를 설정할 수 있습니다. 둘 다 데이터 디렉터리를 소유한 호스트에 묶여 있기 때문입니다.
 
-## 파이프라인
+## 관로
 
 ```
-수신 요청 → src/proxy.ts
-  → src/server/authz/pipeline.ts의 runAuthzPipeline()
-    1. 신뢰할 수 있는 내부 헤더 제거(x-omniroute-auth-*, x-omniroute-route-class)
-    2. 요청 ID 생성, classifyRoute()를 통해 라우트 분류
-    3. pathname == "/"인 경우 → /dashboard로 리디렉션
-    4. 드레이닝(정상 종료) 중이고 /api/*인 경우 → 503
-    5. GET이 아닌 /api/*인 경우 → checkBodySize() 보호 로직
-    6. OPTIONS인 경우 → CORS 프리플라이트 204
-    7. options.enforce == false인 경우 → route-class 헤더와 함께 그대로 전달
-    8. 그 외의 경우: POLICIES[routeClass].evaluate(ctx)
-       - 허용  → x-omniroute-auth-{kind,id,label,scopes} 설정 → NextResponse.next()
-       - 거부 → correlation_id가 포함된 JSON 오류(대시보드 페이지 → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-신뢰할 수 있는 내부 헤더(`src/server/authz/headers.ts`에 정의됨)는 분류 전에 **수신 요청에서 제거됩니다**. 따라서 클라이언트는 주체를 사칭하기 위해 `x-omniroute-auth-*`를 미리 설정할 수 없습니다.
+신뢰할 수 있는 내부 헤더( `src/server/authz/headers.ts` 에 정의됨)는 다음과 같습니다.** 들어오는 요청에서 제거됨** 분류 전에 — 클라이언트는 주제를 가장하기 위해 `x-omniroute-auth-*` 미리 채울 수 없습니다.
 
 ### 정책 계약
 
-각 라우트 클래스에는 `src/server/authz/policies/`의 정책이 적용됩니다.
+각 경로 클래스에는 `src/server/authz/policies/` 정책이 있습니다.
 
-- **`publicPolicy`** (`policies/public.ts`) — 항상 `allow({ kind: "anonymous", id: "anonymous" })`를 반환합니다.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer를 추출하고 `validateApiKey()`를 통해 검증합니다. 유효한 `REQUIRE_API_KEY` 기능 플래그가 비활성화된 경우에만 익명으로 폴스루합니다. 유효한 플래그는 `isRequireApiKeyEnabled()`(`DB 기능 플래그 재정의 > process.env.REQUIRE_API_KEY > 기본값`)를 통해 결정되므로 대시보드 기능 플래그와 환경 변수가 `/api/v1/*`, `/api/v1beta/*` 및 별칭에 일관되게 적용됩니다. 리졸버 오류가 발생하면 폐쇄형으로 실패합니다. 클라이언트 API 라우트에서 대시보드 세션 요청을 허용합니다(대시보드 모델 카탈로그에서 사용하는 `/api/v1/models` 포함).
-- **`managementPolicy`** (`policies/management.ts`) — 대시보드 세션, 내부 모델 동기화 요청(`/api/providers/[name]/(sync-models|models)`와 일치) 또는 `isAuthRequired()`가 false를 반환하는 경우의 완전한 건너뛰기를 허용합니다. Bearer 토큰이 있지만 유효하지 않은 경우 403(`AUTH_001`)을 반환하고, 그 외에는 401을 반환합니다. 또한 모든 인증 분기 전에 라우트 가드 티어(LOCAL_ONLY / ALWAYS_PROTECTED)를 적용합니다. 자세한 내용은 [라우트 가드 티어](../security/ROUTE_GUARD_TIERS.md)를 참조하세요. `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`에 속하는 LOCAL_ONLY 경로(현재: `/api/mcp/`)는 Bearer 키에 `manage` 범위가 있는 경우 루프백이 아닌 위치에서도 접근할 수 있습니다. 그 외의 모든 LOCAL_ONLY 경로는 범위와 관계없이 엄격하게 루프백으로 제한됩니다.
+- **`publicPolicy`** (`policies/public.ts`) — 항상 `allow({ kind: "anonymous", id: "anonymous" })` 반환합니다.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer를 추출하고 `validateApiKey()` 통해 유효성을 검사합니다. 유효한 `REQUIRE_API_KEY` 기능 플래그가 비활성화된 경우에만 익명으로 전환됩니다. 유효 플래그는 `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`)를 통해 확인되므로 대시보드 기능 플래그와 환경 변수는 `/api/v1/*`, `/api/v1beta/*` 및 별칭을 일관되게 관리합니다. 해결 프로그램 오류가 실패로 종료되었습니다. 클라이언트 API 경로(대시보드 모델 카탈로그에서 사용되는 `/api/v1/models` 포함)에 대한 대시보드 세션 요청을 허용합니다. Entra ID SSO 활성화되면 구조적으로 Entra 토큰(3개의 base64url 세그먼트, `RS*` alg, `kid`)인 Bearer가 SSO 분기에 의해 처리됩니다.** ~ 전에** `validateApiKey()` 및 해당 평결은 최종 — 입니다. 이는 API 키 경로 또는 익명으로 저하 분기를 통과하지 않으므로 ID 제공자 중단은 공개 액세스가 될 수 없습니다. 정적 API 키는 영향을 받지 않습니다. [Entra ID SSO](../security/ENTRA_SSO.md) 참조하세요.
+- **`managementPolicy`** (`policies/management.ts`) — 대시보드 세션, 내부 모델 동기화 요청( `/api/providers/[name]/(sync-models|models)` 와 일치)을 수락하거나 `isAuthRequired()` false를 반환하는 경우 완전히 건너뜁니다. Bearer 토큰이 있지만 유효하지 않은 경우 403(`AUTH_001`)을 반환하고, 그렇지 않으면 401을 반환합니다. 또한 인증 분기 — 이전에 경로 보호 계층(LOCAL_ONLY / ALWAYS_PROTECTED)을 적용합니다. [경로 보호 계층을](../security/ROUTE_GUARD_TIERS.md) 참조하세요. Bearer 키가 `manage` 범위를 전달하는 경우 `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (현재: `/api/mcp/`)의 LOCAL_ONLY 경로는 비루프백에서 액세스할 수 있습니다. 다른 모든 LOCAL_ONLY 경로는 범위에 관계없이 엄격한 루프백을 유지합니다.
 
-정책이 성공하면 `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`인 `AuthSubject`를 반환합니다. 다운스트림 핸들러는 인증 로직을 다시 실행하는 대신 `src/server/authz/assertAuth.ts`의 `assertAuth(request, "CLIENT_API")`를 통해 이를 읽을 수 있습니다.
+성공적인 정책은 `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` 와 함께 `AuthSubject` 반환합니다. 다운스트림 핸들러는 인증 로직을 다시 실행하는 대신 `src/server/authz/assertAuth.ts` 의 `assertAuth(request, "CLIENT_API")` 통해 이를 읽을 수 있습니다.
 
 ## 공개 라우트 목록
 
@@ -296,23 +296,23 @@ API 키는 `scopes` 배열을 가집니다 (`api_keys.scopes`에 JSON으로 저�
 
 ## 디버깅
 
-파이프라인은 항상 응답에 다음 헤더를 추가합니다.
+파이프라인은 항상 다음을 사용하여 응답에 스탬프를 찍습니다.
 
 ```
-x-request-id:               <상관관계 ID, 오류 본문에도 동일하게 포함>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-인증된 요청의 경우 업스트림(핸들러 측) 요청 헤더에 다음 항목도 포함됩니다.
+인증된 요청의 경우 업스트림(처리기 측) 요청 헤더에는 다음도 포함됩니다.
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<마지막 4자리> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (선택 사항)
-x-omniroute-auth-scopes:    쉼표로 구분된 목록
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-핸들러 내부에서 `assertAuth(req, expectedClass)`를 사용하세요. 미들웨어를 우회한 경우 코드가 `AUTHZ_NOT_INITIALIZED`인 `AuthzAssertionError`를 발생시킵니다(테스트에서 구성 회귀를 발견하는 데 유용합니다).
+핸들러 `assertAuth(req, expectedClass)` 내에서 — 를 사용하면 미들웨어가 우회된 경우 코드 `AUTHZ_NOT_INITIALIZED` 와 함께 `AuthzAssertionError` 발생합니다(테스트에서 구성 회귀를 포착하는 데 도움이 됨).
 
 ## 관련 항목
 

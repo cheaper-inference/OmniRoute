@@ -4,7 +4,7 @@
 
 ---
 
-> **Matsayi:** an gina dashboard akan** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), wanda aka siyar dashi azaman filin aiki `packages/ui-kit` (`@omniroute/ui-kit`; hoton sama yana liƙa a cikin `packages/ui-kit/UPSTREAM.md` kuma `npm run check:ui-kit-snapshot` yana kiyaye shi). Haske shine taken canonical; fifikon tsoho shine `system`. Lafazin shine Keak lemun tsami (`--ci-color-accent`). Switzer shine iyali guda don UI, nuni da rubutu na lamba (`--ci-font-ui`; `--ci-font-display` da `--ci-font-mono` sun yanke shawara zuwa gare shi), kayan aikin da kanta suka shirya (`packages/ui-kit/src/ci-fonts.css`, shigo da `ci-tokens.css`). Kowane gunki shine Lucide glyph.
+> **Matsayi:** an gina dashboard akan** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), wanda aka siyar dashi azaman filin aiki `packages/ui-kit` (`@omniroute/ui-kit`; hoton sama yana liƙa a cikin `packages/ui-kit/UPSTREAM.md` kuma `npm run check:ui-kit-snapshot` yana kiyaye shi). Haske shine taken canonical; fifikon tsoho shine `system`. Lafazin shine Keak lemun tsami (`--ci-color-accent`). Switzer shine iyali guda don UI, nuni da rubutu na lamba (`--ci-font-ui`; `--ci-font-display` da `--ci-font-mono` sun warware shi), kayan da kanta ke ɗaukar nauyinsa (`packages/ui-kit/src/ci-fonts.css`, shigo da `ci-tokens.css`). Rubutun Switzer ya rasa faɗuwa ta hanyar glyph ta glyph (`src/app/globals.css`): Inter don Cyrillic, Girkanci da Vietnamese kuma, a ƙarƙashin `html[dir="rtl"]` kawai, Vazirmatn don rubutun Larabci. Kowane gunki shine Lucide glyph.
 
 ## 1. Inda abubuwa ke zaune
 

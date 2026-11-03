@@ -4,7 +4,7 @@
 
 ---
 
-> **Hali:** dashibodi imejengwa juu ya** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), inauzwa kama nafasi ya kazi `packages/ui-kit` (`@omniroute/ui-kit`; picha ya juu ya mkondo imebandikwa `packages/ui-kit/UPSTREAM.md` na inalindwa na `npm run check:ui-kit-snapshot`). Nuru ni mada ya kisheria; upendeleo chaguo-msingi ni `system`. Lafudhi ni Keak chokaa (`--ci-color-accent`). Switzer ni familia moja ya UI, onyesho na maandishi ya msimbo (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` suluhisha kwake), inayojiendesha yenyewe na kit yenyewe (`packages/ui-kit/src/ci-fonts.css`, iliyoagizwa na `ci-tokens.css`). Kila ikoni ni glyph ya Lucide.
+> **Hali:** dashibodi imejengwa juu ya** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), inauzwa kama nafasi ya kazi `packages/ui-kit` (`@omniroute/ui-kit`; picha ya juu ya mkondo imebandikwa `packages/ui-kit/UPSTREAM.md` na inalindwa na `npm run check:ui-kit-snapshot`). Nuru ni mada ya kisheria; upendeleo chaguo-msingi ni `system`. Lafudhi ni Keak chokaa (`--ci-color-accent`). Switzer ni familia moja ya UI, onyesho na maandishi ya msimbo (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` suluhisha kwake), inayojiendesha yenyewe na kit yenyewe (`packages/ui-kit/src/ci-fonts.css`, iliyoingizwa na `ci-tokens.css`). Scripts Switzer inakosa kuangukia glyph by glyph (`src/app/globals.css`): Inter kwa Kisirili, Kigiriki na Kivietinamu na, chini ya `html[dir="rtl"]`, Vazirmatn kwa hati ya Kiarabu pekee. Kila ikoni ni glyph ya Lucide.
 
 ## 1. Mahali vitu vilipo
 

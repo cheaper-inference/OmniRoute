@@ -4,7 +4,7 @@
 
 ---
 
-> **ሁኔታ፡** ዳሽቦርዱ የተገነባው በ** Keak CI UI ኪት** (`@keak/cheaper-inference-ui-kit`)፣ እንደ የሥራ ቦታ `packages/ui-kit` (`@omniroute/ui-kit`) የሚሸጥ (zqe፣ የላይኛው ዥረት ቅጽበታዊ ገጽ እይታ በ `packages/ui-kit/UPSTREAM.md` የተሰካ እና በ `npm run check:ui-kit-snapshot` የተጠበቀ ነው)። ብርሃን ቀኖናዊ ጭብጥ ነው; ነባሪው ምርጫ `system` ነው። ዘዬው Keak lime (`--ci-color-accent`) ነው። ስዊዘርዘር ለ UI፣ የማሳያ እና ኮድ ጽሑፍ (`--ci-font-ui`፣ `--ci-font-display` እና `--ci-font-mono` መፍታት ያለበት) ነጠላ ቤተሰብ ነው፣ በራሱ በራሱ የሚስተናገደው (`packages/ui-kit/src/ci-fonts.css`፣ በ `ci-tokens.css` የመጣ)። እያንዳንዱ አዶ የሉሲድ ግሊፍ ነው።
+> **ሁኔታ፡** ዳሽቦርዱ የተገነባው በ** Keak CI UI ኪት** (`@keak/cheaper-inference-ui-kit`)፣ እንደ የሥራ ቦታ `packages/ui-kit` (`@omniroute/ui-kit`፣ የላይኛው ዥረት ቅጽበታዊ ገጽ እይታ በ `packages/ui-kit/UPSTREAM.md` ላይ ተሰክቷል እና በ `npm run check:ui-kit-snapshot` ይጠበቃል)። ብርሃን ቀኖናዊ ጭብጥ ነው; ነባሪው ምርጫ `system` ነው። ዘዬው Keak lime (`--ci-color-accent`) ነው። ስዊዘርዘር ለ UI፣ የማሳያ እና ኮድ ጽሑፍ (`--ci-font-ui`፣ `--ci-font-display` እና `--ci-font-mono` መፍታት ያለበት) ነጠላ ቤተሰብ ነው፣ በራሱ በራሱ የሚስተናገደው (`packages/ui-kit/src/ci-fonts.css`፣ በ `ci-tokens.css` የመጣ)። ስክሪፕቶች ስዊዘርላንድ ይጎድላቸዋል glyph በ glyph (`src/app/globals.css`): ኢንተር ለሲሪሊክ፣ ግሪክ እና ቬትናምኛ እና፣ `html[dir="rtl"]` ስር ብቻ፣ ቫዚርማትን ለአረብኛ ፊደል። እያንዳንዱ አዶ የሉሲድ ግሊፍ ነው።
 
 ## 1. ነገሮች የሚገኙበት ቦታ
 

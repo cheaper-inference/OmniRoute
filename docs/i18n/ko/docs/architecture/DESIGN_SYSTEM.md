@@ -4,7 +4,7 @@
 
 ---
 
-> **상태:** 대시보드는** Keak CI UI 키트** (`@keak/cheaper-inference-ui-kit`), 작업 공간 `packages/ui-kit` (`@omniroute/ui-kit`; 업스트림 스냅샷은 `packages/ui-kit/UPSTREAM.md` 에 고정되고 `npm run check:ui-kit-snapshot` 에 의해 보호됨)로 판매됩니다. 빛은 표준적인 주제입니다. 기본 설정은 `system` 입니다. 악센트는 Keak 라임(`--ci-color-accent`)입니다. Switzer는 UI, 디스플레이 및 코드 텍스트(`--ci-font-ui`, `--ci-font-display` 및 `--ci-font-mono` 이를 해결함)에 대한 단일 제품군이며 키트 자체(`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` 에서 가져옴)에 의해 자체 호스팅됩니다. 모든 아이콘은 Lucide 문자 모양입니다.
+> **상태:** 대시보드는** Keak CI UI 키트** (`@keak/cheaper-inference-ui-kit`), 작업 공간 `packages/ui-kit` (`@omniroute/ui-kit`; 업스트림 스냅샷은 `packages/ui-kit/UPSTREAM.md` 에 고정되고 `npm run check:ui-kit-snapshot` 에 의해 보호됨)로 판매됩니다. 빛은 표준적인 주제입니다. 기본 설정은 `system` 입니다. 악센트는 Keak 라임(`--ci-color-accent`)입니다. Switzer는 UI, 디스플레이 및 코드 텍스트(`--ci-font-ui`, `--ci-font-display` 및 `--ci-font-mono` 이를 해결함)에 대한 단일 제품군이며 키트 자체(`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` 에서 가져옴)에 의해 자체 호스팅됩니다. 스크립트 Switzer에는 fall through glyph by glyph(`src/app/globals.css`)가 없습니다. 키릴 문자, 그리스어 및 베트남어의 경우 Inter, 아랍어 스크립트의 경우 `html[dir="rtl"]`, Vazirmatn에서만 가능합니다. 모든 아이콘은 Lucide 문자 모양입니다.
 
 ## 1. 각 요소의 위치
 

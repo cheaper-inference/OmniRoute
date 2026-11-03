@@ -4,7 +4,7 @@
 
 ---
 
-> **အခြေအနေ-** ဒက်ရှ်ဘုတ်ပေါ်တွင် တည်ဆောက်ထားသည်။** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ၊ အလုပ်နေရာ `packages/ui-kit` (`@omniroute/ui-kit`၊ အထက်ပိုင်းလျှပ်တစ်ပြက်ကို `packages/ui-kit/UPSTREAM.md` တွင် ချိတ်ပြီး `npm run check:ui-kit-snapshot` ဖြင့် စောင့်ထားသည် )။ အလင်းသည် စံနမူနာပြ ဆောင်ပုဒ်ဖြစ်သည်။ မူရင်းဦးစားပေးသည် `system` ဖြစ်သည်။ လေယူလေသိမ်းသည် Keak lime (`--ci-color-accent`) ဖြစ်သည်။ Switzer သည် UI၊ display နှင့် code စာသား (`--ci-font-ui`; `--ci-font-display` နှင့် `--ci-font-mono` တို့ကိုဖြေရှင်းရန်) အတွက် တစ်ခုတည်းသော မိသားစုဖြစ်ပြီး kit ကိုယ်တိုင် (`packages/ui-kit/src/ci-fonts.css`၊ `ci-tokens.css` မှ တင်သွင်းသည် ) ။ အိုင်ကွန်တိုင်းသည် Lucide ဂရပ်ဖစ်ဖြစ်သည်။
+> **အခြေအနေ-** ဒက်ရှ်ဘုတ်ပေါ်တွင် တည်ဆောက်ထားသည်။** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ၊ အလုပ်နေရာ `packages/ui-kit` (`@omniroute/ui-kit`၊ အထက်ပိုင်းလျှပ်တစ်ပြက်ကို `packages/ui-kit/UPSTREAM.md` တွင် ချိတ်ပြီး `npm run check:ui-kit-snapshot` ဖြင့် စောင့်ထားသည် )။ အလင်းသည် စံနမူနာပြ ဆောင်ပုဒ်ဖြစ်သည်။ မူရင်းဦးစားပေးသည် `system` ဖြစ်သည်။ လေယူလေသိမ်းသည် Keak lime (`--ci-color-accent`) ဖြစ်သည်။ Switzer သည် UI၊ display နှင့် code စာသား (`--ci-font-ui`; `--ci-font-display` နှင့် `--ci-font-mono` တို့ကိုဖြေရှင်းရန်) အတွက် တစ်ခုတည်းသော မိသားစုဖြစ်ပြီး kit ကိုယ်တိုင် (`packages/ui-kit/src/ci-fonts.css`၊ `ci-tokens.css` မှ တင်သွင်းသည် ) ။ Switzer Script များသည် glyph အားဖြင့် glyph (`src/app/globals.css`) : Inter for Cyrillic ၊ Greek နှင့် Vietnamese နှင့် `html[dir="rtl"]` အောက်တွင်သာ ၊ Vazirmatn for Arabic script များဖြစ်သည်။ အိုင်ကွန်တိုင်းသည် Lucide ဂရပ်ဖစ်ဖြစ်သည်။
 
 ## ၁. အရာများ တည်ရှိရာနေရာ
 

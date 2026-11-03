@@ -4,7 +4,7 @@
 
 ---
 
-> **ស្ថានភាព៖** ផ្ទាំងគ្រប់គ្រងត្រូវបានបង្កើតឡើងនៅលើ** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ដែលបានលក់ជាកន្លែងធ្វើការ `packages/ui-kit` (`@omniroute/ui-kit`; រូបថតខាងលើត្រូវបានខ្ទាស់ជា `packages/ui-kit/UPSTREAM.md` និងការពារដោយ `npm run check:ui-kit-snapshot`) ។ ពន្លឺគឺជាប្រធានបទ Canonical; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ការសង្កត់សំឡេងគឺ Keak lime (`--ci-color-accent`) ។ ស្វ៊ីសគឺជាគ្រួសារតែមួយសម្រាប់ UI ការបង្ហាញ និងអត្ថបទកូដ (`--ci-font-ui`; `--ci-font-display` និង `--ci-font-mono` ដោះស្រាយវា) រៀបចំដោយខ្លួនឯងដោយឧបករណ៍ខ្លួនវា (`packages/ui-kit/src/ci-fonts.css` នាំចូលដោយ `ci-tokens.css`) ។ រូបតំណាងនីមួយៗគឺ Lucide glyph ។
+> **ស្ថានភាព៖** ផ្ទាំងគ្រប់គ្រងត្រូវបានបង្កើតឡើងនៅលើ** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ដែលបានលក់ជាកន្លែងធ្វើការ `packages/ui-kit` (`@omniroute/ui-kit`; រូបថតខាងលើត្រូវបានខ្ទាស់ជា `packages/ui-kit/UPSTREAM.md` និងការពារដោយ `npm run check:ui-kit-snapshot`) ។ ពន្លឺគឺជាប្រធានបទ Canonical; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ការសង្កត់សំឡេងគឺ Keak lime (`--ci-color-accent`) ។ ស្វ៊ីសគឺជាគ្រួសារតែមួយសម្រាប់ UI ការបង្ហាញ និងអត្ថបទកូដ (`--ci-font-ui`; `--ci-font-display` និង `--ci-font-mono` ដោះស្រាយវា) រៀបចំដោយខ្លួនឯងដោយឧបករណ៍ខ្លួនវា (`packages/ui-kit/src/ci-fonts.css` នាំចូលដោយ `ci-tokens.css`) ។ ស្គ្រីប Switzer ខ្វះការធ្លាក់តាមរយៈ glyph ដោយ glyph (`src/app/globals.css`): Inter សម្រាប់ Cyrillic ក្រិក និងវៀតណាម ហើយមានតែក្រោម `html[dir="rtl"]`, Vazirmatn សម្រាប់អក្សរអារ៉ាប់។ រូបតំណាងនីមួយៗគឺ Lucide glyph ។
 
 ## 1. កន្លែងដែលអ្វីៗស្ថិតនៅ
 

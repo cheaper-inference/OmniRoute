@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** id-daxxbord huwa mibni fuq il-** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), mibjugħa bħala l-ispazju tax-xogħol `packages/ui-kit` (`@omniroute/ui-kit`; l-istampa upstream hija ippinjata `packages/ui-kit/UPSTREAM.md` u mħarsa minn `npm run check:ui-kit-snapshot`). Id-dawl huwa t-tema kanonika; il-preferenza default hija `system`. L-aċċent huwa Keak lime (`--ci-color-accent`). Switzer hija l-familja waħda għal UI, wiri u test tal-kodiċi (`--ci-font-ui`; `--ci-font-display` u `--ci-font-mono` jirrisolvu għaliha), ospitat waħdu mill-kit innifsu (`packages/ui-kit/src/ci-fonts.css`, importat minn `ci-tokens.css`). Kull ikona hija glifa Lucide.
+> **Status:** id-daxxbord huwa mibni fuq il-** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), mibjugħa bħala l-ispazju tax-xogħol `packages/ui-kit` (`@omniroute/ui-kit`; l-istampa upstream hija ippinjata `packages/ui-kit/UPSTREAM.md` u mħarsa minn `npm run check:ui-kit-snapshot`). Id-dawl huwa t-tema kanonika; il-preferenza default hija `system`. L-aċċent huwa Keak lime (`--ci-color-accent`). Switzer hija l-familja waħda għal UI, wiri u test tal-kodiċi (`--ci-font-ui`; `--ci-font-display` u `--ci-font-mono` jirrisolvu għaliha), ospitat waħdu mill-kit innifsu (`packages/ui-kit/src/ci-fonts.css`, importat minn `ci-tokens.css`). Skripts Switzer lacks jaqgħu permezz ta' glyph b'glyph (`src/app/globals.css`): Inter għal Ċirilliku, Grieg u Vjetnamiż u, biss taħt `html[dir="rtl"]`, Vazirmatn għall-kitba Għarbija. Kull ikona hija glifa Lucide.
 
 ## 1. Fejn jinsabu l-affarijiet
 

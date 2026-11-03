@@ -4,7 +4,7 @@
 
 ---
 
-> **Statuss:** informācijas panelis ir veidots uz** Keak CI UI komplekts** (`@keak/cheaper-inference-ui-kit`), tiek piegādāts kā darbvieta `packages/ui-kit` (`@omniroute/ui-kit`; augšējais momentuzņēmums ir piesprausts `packages/ui-kit/UPSTREAM.md` un to aizsargā `npm run check:ui-kit-snapshot`). Gaisma ir kanoniskā tēma; noklusējuma preference ir `system`. Akcents ir Keak laima (`--ci-color-accent`). Switzer ir viena saime UI, displeja un koda tekstam (`--ci-font-ui`; `--ci-font-display` un `--ci-font-mono` to atrisina), ko pats mitina pats komplekts (`packages/ui-kit/src/ci-fonts.css`, importēts `ci-tokens.css`). Katra ikona ir Lucide glifs.
+> **Statuss:** informācijas panelis ir veidots uz** Keak CI UI komplekts** (`@keak/cheaper-inference-ui-kit`), tiek piegādāts kā darbvieta `packages/ui-kit` (`@omniroute/ui-kit`; augšējais momentuzņēmums ir piesprausts `packages/ui-kit/UPSTREAM.md` un to aizsargā `npm run check:ui-kit-snapshot`). Gaisma ir kanoniskā tēma; noklusējuma preference ir `system`. Akcents ir Keak laima (`--ci-color-accent`). Switzer ir viena saime UI, displeja un koda tekstam (`--ci-font-ui`; `--ci-font-display` un `--ci-font-mono` to atrisina), ko pats mitina pats komplekts (`packages/ui-kit/src/ci-fonts.css`, importēts `ci-tokens.css`). Skripti Switzer trūkst izšķirtspējas pēc glifa (`src/app/globals.css`): Inter kirilicai, grieķu un vjetnamiešu valodai un, tikai zem `html[dir="rtl"]`, Vazirmatn arābu rakstībai. Katra ikona ir Lucide glifs.
 
 ## 1. Kur kas atrodas
 

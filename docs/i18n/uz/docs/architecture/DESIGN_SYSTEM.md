@@ -4,7 +4,7 @@
 
 ---
 
-> **Holati:** asboblar paneli ustiga qurilgan** Keak CI UI to'plami** (`@keak/cheaper-inference-ui-kit`), ish maydoni `packages/ui-kit` (`@omniroute/ui-kit`; yuqori oqim snapshot `packages/ui-kit/UPSTREAM.md` ga mahkamlanadi va `npm run check:ui-kit-snapshot` tomonidan himoyalanadi ) sifatida taqdim etiladi. Nur - kanonik mavzu; standart afzallik `system`. Urg'u - Keak ohak (`--ci-color-accent`). Switzer UI, displey va kod matni (`--ci-font-ui`; `--ci-font-display` va `--ci-font-mono` to'g'ridan-to'g'ri) uchun yagona oila bo'lib, to'plamning o'zi (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tomonidan import qilingan) tomonidan o'z-o'zidan joylashtirilgan. Har bir belgi Lucid glifidir.
+> **Holati:** asboblar paneli ustiga qurilgan** Keak CI UI to'plami** (`@keak/cheaper-inference-ui-kit`), ish maydoni `packages/ui-kit` (`@omniroute/ui-kit`; yuqori oqim snapshoti `packages/ui-kit/UPSTREAM.md` ga mahkamlanadi va `npm run check:ui-kit-snapshot` tomonidan himoyalanadi) sifatida sotiladi. Nur - kanonik mavzu; standart afzallik `system`. Urg'u - Keak ohak (`--ci-color-accent`). Switzer UI, displey va kod matni (`--ci-font-ui`; `--ci-font-display` va `--ci-font-mono` to'g'ridan-to'g'ri) uchun yagona oila bo'lib, to'plamning o'zi (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tomonidan import qilingan) tomonidan o'z-o'zidan joylashtirilgan. Shveytsariya skriptlarida glif bo'yicha glif (`src/app/globals.css`) yo'q: kirill, yunon va vetnam uchun Inter va arab yozuvi uchun faqat `html[dir="rtl"]` ostida Vazirmatn. Har bir belgi Lucid glifidir.
 
 ## 1. Narsalar qayerda joylashgani
 

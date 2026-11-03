@@ -4,7 +4,7 @@
 
 ---
 
-> **Estado:** El tablero está construido sobre el** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), suministrado como el espacio de trabajo `packages/ui-kit` (`@omniroute/ui-kit`; la instantánea ascendente está fijada en `packages/ui-kit/UPSTREAM.md` y protegida por `npm run check:ui-kit-snapshot`). La luz es el tema canónico; la preferencia predeterminada es `system`. El acento es lima Keak (`--ci-color-accent`). Switzer es la única familia para UI, texto de visualización y código (`--ci-font-ui`; `--ci-font-display` y `--ci-font-mono` lo resuelven), autohospedado por el propio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Cada ícono es un glifo Lucide.
+> **Estado:** El tablero está construido sobre el** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), suministrado como el espacio de trabajo `packages/ui-kit` (`@omniroute/ui-kit`; la instantánea ascendente está fijada en `packages/ui-kit/UPSTREAM.md` y protegida por `npm run check:ui-kit-snapshot`). La luz es el tema canónico; la preferencia predeterminada es `system`. El acento es lima Keak (`--ci-color-accent`). Switzer es la única familia para UI, texto de visualización y código (`--ci-font-ui`; `--ci-font-display` y `--ci-font-mono` lo resuelven), autohospedado por el propio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Las escrituras suizas carecen de clasificación glifo por glifo (`src/app/globals.css`): Inter para cirílico, griego y vietnamita y, sólo bajo `html[dir="rtl"]`, Vazirmatn para escritura árabe. Cada ícono es un glifo Lucide.
 
 ## 1. Dónde se encuentran las cosas
 

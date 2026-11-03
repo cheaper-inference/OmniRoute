@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** het dashboard is gebouwd op de** Keak CI UI -kit** (`@keak/cheaper-inference-ui-kit`), verkocht als de werkruimte `packages/ui-kit` (`@omniroute/ui-kit`; de upstream-snapshot is vastgezet in `packages/ui-kit/UPSTREAM.md` en bewaakt door `npm run check:ui-kit-snapshot`). Licht is het canonieke thema; de standaardvoorkeur is `system`. Het accent is Keak-limoen (`--ci-color-accent`). Switzer is de enige familie voor UI, display- en codetekst (`--ci-font-ui`; `--ci-font-display` en `--ci-font-mono` lossen dit op), zelf gehost door de kit zelf (`packages/ui-kit/src/ci-fonts.css`, geïmporteerd door `ci-tokens.css`). Elk pictogram is een Lucide-glyph.
+> **Status:** het dashboard is gebouwd op de** Keak CI UI -kit** (`@keak/cheaper-inference-ui-kit`), verkocht als de werkruimte `packages/ui-kit` (`@omniroute/ui-kit`; de upstream-snapshot is vastgezet in `packages/ui-kit/UPSTREAM.md` en bewaakt door `npm run check:ui-kit-snapshot`). Licht is het canonieke thema; de standaardvoorkeur is `system`. Het accent is Keak-limoen (`--ci-color-accent`). Switzer is de enige familie voor UI, display- en codetekst (`--ci-font-ui`; `--ci-font-display` en `--ci-font-mono` lossen dit op), zelf gehost door de kit zelf (`packages/ui-kit/src/ci-fonts.css`, geïmporteerd door `ci-tokens.css`). Scripts die Switzer mist vallen per glyph (`src/app/globals.css`): Inter voor Cyrillisch, Grieks en Vietnamees en, alleen onder `html[dir="rtl"]`, Vazirmatn voor Arabisch schrift. Elk pictogram is een Lucide-glyph.
 
 ## 1. Waar alles staat
 

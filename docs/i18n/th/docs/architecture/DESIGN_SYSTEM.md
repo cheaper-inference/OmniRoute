@@ -4,7 +4,7 @@
 
 ---
 
-> **สถานะ:** แดชบอร์ดถูกสร้างขึ้นบน** เกี๊ยก CI UI Kit** (`@keak/cheaper-inference-ui-kit`) จำหน่ายเป็นพื้นที่ทำงาน `packages/ui-kit` (`@omniroute/ui-kit`; สแน็ปช็อตอัปสตรีมถูกปักหมุดใน `packages/ui-kit/UPSTREAM.md` และป้องกันโดย `npm run check:ui-kit-snapshot`) แสงเป็นธีมที่เป็นที่ยอมรับ การตั้งค่าเริ่มต้นคือ `system` สำเนียงคือ มะนาวเปรี้ยว (`--ci-color-accent`) Switzer เป็นตระกูลเดี่ยวสำหรับ UI ที่แสดงและข้อความโค้ด (`--ci-font-ui`; `--ci-font-display` และ `--ci-font-mono` แก้ไขได้) ซึ่งโฮสต์เองโดยชุดอุปกรณ์เอง (`packages/ui-kit/src/ci-fonts.css` นำเข้าโดย `ci-tokens.css`) ทุกไอคอนเป็นสัญลักษณ์ลูซิด
+> **สถานะ:** แดชบอร์ดถูกสร้างขึ้นบน** เกี๊ยก CI UI Kit** (`@keak/cheaper-inference-ui-kit`) จำหน่ายเป็นพื้นที่ทำงาน `packages/ui-kit` (`@omniroute/ui-kit`; สแน็ปช็อตอัปสตรีมถูกปักหมุดใน `packages/ui-kit/UPSTREAM.md` และป้องกันโดย `npm run check:ui-kit-snapshot`) แสงเป็นธีมที่เป็นที่ยอมรับ การตั้งค่าเริ่มต้นคือ `system` สำเนียงคือ มะนาวเปรี้ยว (`--ci-color-accent`) Switzer เป็นตระกูลเดี่ยวสำหรับ UI ที่แสดงและข้อความโค้ด (`--ci-font-ui`; `--ci-font-display` และ `--ci-font-mono` แก้ไขได้) ซึ่งโฮสต์เองโดยชุดอุปกรณ์เอง (`packages/ui-kit/src/ci-fonts.css` นำเข้าโดย `ci-tokens.css`) สคริปต์ Switzer ขาดสัญลักษณ์ทีละสัญลักษณ์ (`src/app/globals.css`): Inter สำหรับซีริลลิก กรีก และเวียดนาม และภายใต้ `html[dir="rtl"]` เท่านั้น Vazirmatn สำหรับสคริปต์ภาษาอาหรับ ทุกไอคอนเป็นสัญลักษณ์ลูซิด
 
 ## 1. ตำแหน่งที่อยู่ของสิ่งต่างๆ
 

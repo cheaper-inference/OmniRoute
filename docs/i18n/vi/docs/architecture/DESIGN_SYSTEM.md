@@ -4,7 +4,7 @@
 
 ---
 
-> **Trạng thái:** bảng điều khiển được xây dựng trên** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), được bán dưới dạng không gian làm việc `packages/ui-kit` (`@omniroute/ui-kit`; ảnh chụp nhanh ngược dòng được ghim trong `packages/ui-kit/UPSTREAM.md` và được bảo vệ bởi `npm run check:ui-kit-snapshot`). Ánh sáng là chủ đề kinh điển; tùy chọn mặc định là `system`. Giọng là Keak vôi (`--ci-color-accent`). Switzer là họ duy nhất cho UI, văn bản hiển thị và mã (`--ci-font-ui`; `--ci-font-display` và `--ci-font-mono` giải quyết nó), được chính bộ công cụ tự lưu trữ (`packages/ui-kit/src/ci-fonts.css`, được nhập bởi `ci-tokens.css`). Mỗi biểu tượng là một hình tượng Lucide.
+> **Trạng thái:** bảng điều khiển được xây dựng trên** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), được bán dưới dạng không gian làm việc `packages/ui-kit` (`@omniroute/ui-kit`; ảnh chụp nhanh ngược dòng được ghim trong `packages/ui-kit/UPSTREAM.md` và được bảo vệ bởi `npm run check:ui-kit-snapshot`). Ánh sáng là chủ đề kinh điển; tùy chọn mặc định là `system`. Giọng là Keak vôi (`--ci-color-accent`). Switzer là họ duy nhất cho UI, văn bản hiển thị và mã (`--ci-font-ui`; `--ci-font-display` và `--ci-font-mono` giải quyết nó), được tự lưu trữ bởi chính bộ công cụ (`packages/ui-kit/src/ci-fonts.css`, được nhập bởi `ci-tokens.css`). Chữ viết Switzer thiếu glyph theo glyph (`src/app/globals.css`): Inter cho chữ Cyrillic, tiếng Hy Lạp và tiếng Việt và, chỉ dưới `html[dir="rtl"]`, Vazirmatn cho chữ viết Ả Rập. Mỗi biểu tượng là một hình tượng Lucide.
 
 ## 1. Mọi thứ nằm ở đâu
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** kojelauta on rakennettu** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), toimitetaan työtilana `packages/ui-kit` (`@omniroute/ui-kit`; alkuvirran tilannekuva on kiinnitetty `packages/ui-kit/UPSTREAM.md` ään ja sitä suojaa `npm run check:ui-kit-snapshot`). Valo on kanoninen teema; oletusasetus on `system`. Aksentti on Keak lime (`--ci-color-accent`). Switzer on yksi UI, näyttö- ja kooditekstiperhe (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` ratkaisevat sen), itse isännöi itse sarja (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css`:n tuoma). Jokainen kuvake on Luciden merkki.
+> **Status:** kojelauta on rakennettu** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), toimitetaan työtilana `packages/ui-kit` (`@omniroute/ui-kit`; alkuvirran tilannekuva on kiinnitetty `packages/ui-kit/UPSTREAM.md` ään ja sitä suojaa `npm run check:ui-kit-snapshot`). Valo on kanoninen teema; oletusasetus on `system`. Aksentti on Keak lime (`--ci-color-accent`). Switzer on yksi UI, näyttö- ja kooditekstiperhe (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` ratkaisevat sen), itse isännöi itse sarja (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css`:n tuoma). Scripts Switzeristä puuttuu kaatuminen kuvio kerrallaan (`src/app/globals.css`): Inter kyrilliselle, kreikalle ja vietnam ja vain `html[dir="rtl"]`:n alla Vazirmatn arabialle. Jokainen kuvake on Luciden merkki.
 
 ## 1. Missä asiat sijaitsevat
 

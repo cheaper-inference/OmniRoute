@@ -4,7 +4,7 @@
 
 ---
 
-> **Vəziyyət:** panel üzərində qurulmuşdur** Keak CI UI dəsti** (`@keak/cheaper-inference-ui-kit`), iş sahəsi `packages/ui-kit` (`@omniroute/ui-kit`; yuxarı snapshot `packages/ui-kit/UPSTREAM.md` -də bərkidilir və `npm run check:ui-kit-snapshot` tərəfindən qorunur). İşıq kanonik mövzudur; standart üstünlük `system`. Vurğu Keak əhəngdir (`--ci-color-accent`). Switzer UI, displey və kod mətni (`--ci-font-ui`; `--ci-font-display` və `--ci-font-mono` həll etmək üçün ) üçün vahid ailədir , dəstin özü tərəfindən (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tərəfindən idxal olunur ). Hər ikona Lucide qlifidir.
+> **Vəziyyət:** panel üzərində qurulmuşdur** Keak CI UI dəsti** (`@keak/cheaper-inference-ui-kit`), iş sahəsi `packages/ui-kit` (`@omniroute/ui-kit`; yuxarı snapshot `packages/ui-kit/UPSTREAM.md` -də bərkidilir və `npm run check:ui-kit-snapshot` tərəfindən qorunur). İşıq kanonik mövzudur; standart üstünlük `system`. Vurğu Keak əhəngdir (`--ci-color-accent`). Switzer UI, displey və kod mətni (`--ci-font-ui`; `--ci-font-display` və `--ci-font-mono` həll etmək üçün ) üçün vahid ailədir , dəstin özü tərəfindən (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tərəfindən idxal olunur ). Switzer-də qlif (`src/app/globals.css`) ilə qlifdən aşağı düşmə skriptləri yoxdur: Kiril, Yunan və Vyetnam üçün Inter və ərəb qrafikası üçün yalnız `html[dir="rtl"]` altında Vəzirmatn. Hər ikona Lucide qlifidir.
 
 ## 1. Hər şey harada yerləşir
 

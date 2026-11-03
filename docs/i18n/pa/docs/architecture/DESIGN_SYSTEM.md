@@ -4,7 +4,7 @@
 
 ---
 
-> **ਸਥਿਤੀ:** 'ਤੇ ਡੈਸ਼ਬੋਰਡ ਬਣਾਇਆ ਗਿਆ ਹੈ** ਕੇਕ CI UI ਕਿੱਟ** (`@keak/cheaper-inference-ui-kit`), ਵਰਕਸਪੇਸ `packages/ui-kit` (`@omniroute/ui-kit`; ਅੱਪਸਟ੍ਰੀਮ ਸਨੈਪਸ਼ਾਟ `packages/ui-kit/UPSTREAM.md` ਵਿੱਚ ਪਿੰਨ ਕੀਤਾ ਗਿਆ ਹੈ ਅਤੇ `npm run check:ui-kit-snapshot` ਦੁਆਰਾ ਸੁਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ ਹੈ) ਵਜੋਂ ਵਿਕਰੇਤਾ। ਰੋਸ਼ਨੀ ਕੈਨੋਨੀਕਲ ਥੀਮ ਹੈ; ਮੂਲ ਤਰਜੀਹ `system` ਹੈ। ਲਹਿਜ਼ਾ Keak lime (`--ci-color-accent`) ਹੈ। ਸਵਿਟਜ਼ਰ UI, ਡਿਸਪਲੇਅ ਅਤੇ ਕੋਡ ਟੈਕਸਟ (`--ci-font-ui`; `--ci-font-display` ਅਤੇ `--ci-font-mono` ਇਸ ਨੂੰ ਹੱਲ ਕਰਦਾ ਹੈ), ਕਿੱਟ ਦੁਆਰਾ ਸਵੈ-ਮੇਜ਼ਬਾਨੀ (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ਦੁਆਰਾ ਆਯਾਤ ਕੀਤਾ ਗਿਆ) ਲਈ ਇੱਕਲਾ ਪਰਿਵਾਰ ਹੈ। ਹਰ ਆਈਕਨ ਇੱਕ ਲੂਸਾਈਡ ਗਲਾਈਫ ਹੈ।
+> **ਸਥਿਤੀ:** 'ਤੇ ਡੈਸ਼ਬੋਰਡ ਬਣਾਇਆ ਗਿਆ ਹੈ** ਕੇਕ CI UI ਕਿੱਟ** (`@keak/cheaper-inference-ui-kit`), ਵਰਕਸਪੇਸ `packages/ui-kit` (`@omniroute/ui-kit`; ਅੱਪਸਟ੍ਰੀਮ ਸਨੈਪਸ਼ਾਟ `packages/ui-kit/UPSTREAM.md` ਵਿੱਚ ਪਿੰਨ ਕੀਤਾ ਗਿਆ ਹੈ ਅਤੇ `npm run check:ui-kit-snapshot` ਦੁਆਰਾ ਸੁਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ ਹੈ) ਵਜੋਂ ਵਿਕਰੇਤਾ। ਰੋਸ਼ਨੀ ਕੈਨੋਨੀਕਲ ਥੀਮ ਹੈ; ਮੂਲ ਤਰਜੀਹ `system` ਹੈ। ਲਹਿਜ਼ਾ Keak lime (`--ci-color-accent`) ਹੈ। ਸਵਿਟਜ਼ਰ UI, ਡਿਸਪਲੇਅ ਅਤੇ ਕੋਡ ਟੈਕਸਟ (`--ci-font-ui`; `--ci-font-display` ਅਤੇ `--ci-font-mono` ਇਸ ਨੂੰ ਹੱਲ ਕਰਦਾ ਹੈ), ਕਿੱਟ ਦੁਆਰਾ ਸਵੈ-ਮੇਜ਼ਬਾਨੀ (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ਦੁਆਰਾ ਆਯਾਤ ਕੀਤਾ ਗਿਆ) ਲਈ ਇੱਕਲਾ ਪਰਿਵਾਰ ਹੈ। ਸਕ੍ਰਿਪਟਾਂ ਸਵਿਟਜ਼ਰ ਵਿੱਚ ਗਲਾਈਫ ਦੁਆਰਾ ਗਲਾਈਫ ਦੁਆਰਾ ਡਿੱਗਣ ਦੀ ਘਾਟ ਹੈ (`src/app/globals.css`): ਸਿਰਿਲਿਕ, ਯੂਨਾਨੀ ਅਤੇ ਵੀਅਤਨਾਮੀ ਲਈ ਇੰਟਰ ਅਤੇ ਅਰਬੀ ਲਿਪੀ ਲਈ ਸਿਰਫ `html[dir="rtl"]`, ਵਜ਼ੀਰਮਟਨ ਦੇ ਅਧੀਨ। ਹਰ ਆਈਕਨ ਇੱਕ ਲੂਸਾਈਡ ਗਲਾਈਫ ਹੈ।
 
 ## 1. ਚੀਜ਼ਾਂ ਕਿੱਥੇ ਹਨ
 

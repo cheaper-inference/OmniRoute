@@ -4,7 +4,7 @@
 
 ---
 
-> **status:** armaturna plošča je zgrajena na** Keak CI UI komplet** (`@keak/cheaper-inference-ui-kit`), prodajalec kot delovni prostor `packages/ui-kit` (`@omniroute/ui-kit`; zgornji posnetek je pripet v `packages/ui-kit/UPSTREAM.md` in ga varuje `npm run check:ui-kit-snapshot`). Svetloba je kanonična tema; privzeta nastavitev je `system`. Naglas je Keak limeta (`--ci-color-accent`). Switzer je ena sama družina za UI, zaslonsko in kodno besedilo (`--ci-font-ui`; `--ci-font-display` in `--ci-font-mono` ga razrešita), ki ga samostojno gosti sam komplet (`packages/ui-kit/src/ci-fonts.css`, uvozil `ci-tokens.css`). Vsaka ikona je glif Lucide.
+> **status:** armaturna plošča je zgrajena na** Keak CI UI komplet** (`@keak/cheaper-inference-ui-kit`), prodajalec kot delovni prostor `packages/ui-kit` (`@omniroute/ui-kit`; zgornji posnetek je pripet v `packages/ui-kit/UPSTREAM.md` in ga varuje `npm run check:ui-kit-snapshot`). Svetloba je kanonična tema; privzeta nastavitev je `system`. Naglas je Keak limeta (`--ci-color-accent`). Switzer je ena sama družina za UI, prikaz in kodno besedilo (`--ci-font-ui`; `--ci-font-display` in `--ci-font-mono` ga razrešita), ki ga samostojno gosti sam komplet (`packages/ui-kit/src/ci-fonts.css`, uvozil `ci-tokens.css`). Pisave, ki jih Switzer nima, se razvrščajo skozi glif za glifom (`src/app/globals.css`): Inter za cirilico, grščino in vietnamščino in samo pod `html[dir="rtl"]` Vazirmatn za arabsko pisavo. Vsaka ikona je glif Lucide.
 
 ## 1. Kje se stvari nahajajo
 

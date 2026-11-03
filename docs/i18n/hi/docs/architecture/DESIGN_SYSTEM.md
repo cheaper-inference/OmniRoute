@@ -4,7 +4,7 @@
 
 ---
 
-> **स्थिति:** डैशबोर्ड पर बनाया गया है** Keak CI UI किट** (`@keak/cheaper-inference-ui-kit`), कार्यक्षेत्र `packages/ui-kit` (`@omniroute/ui-kit`) के रूप में बेचा जाता है; अपस्ट्रीम स्नैपशॉट को `packages/ui-kit/UPSTREAM.md` में पिन किया जाता है और `npm run check:ui-kit-snapshot` द्वारा संरक्षित किया जाता है। प्रकाश विहित विषय है; डिफ़ॉल्ट प्राथमिकता `system` है। उच्चारण कीक लाइम (`--ci-color-accent`) है। स्विट्ज़र UI, डिस्प्ले और कोड टेक्स्ट (`--ci-font-ui`; `--ci-font-display` और `--ci-font-mono` इसे हल करता है) के लिए एकल परिवार है, किट द्वारा स्वयं-होस्टेड (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` द्वारा आयातित)। प्रत्येक आइकन एक ल्यूसिड ग्लिफ़ है।
+> **स्थिति:** डैशबोर्ड पर बनाया गया है** Keak CI UI किट** (`@keak/cheaper-inference-ui-kit`), कार्यक्षेत्र `packages/ui-kit` (`@omniroute/ui-kit`) के रूप में बेचा जाता है; अपस्ट्रीम स्नैपशॉट को `packages/ui-kit/UPSTREAM.md` में पिन किया जाता है और `npm run check:ui-kit-snapshot` द्वारा संरक्षित किया जाता है। प्रकाश विहित विषय है; डिफ़ॉल्ट प्राथमिकता `system` है। उच्चारण कीक लाइम (`--ci-color-accent`) है। स्विट्ज़र UI, डिस्प्ले और कोड टेक्स्ट (`--ci-font-ui`; `--ci-font-display` और `--ci-font-mono` इसे हल करता है) के लिए एकल परिवार है, किट द्वारा स्वयं-होस्टेड (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` द्वारा आयातित)। स्वित्ज़र लिपियों में ग्लिफ़ दर ग्लिफ़ (`src/app/globals.css`) का अभाव है: सिरिलिक, ग्रीक और वियतनामी के लिए इंटर और, केवल `html[dir="rtl"]` के अंतर्गत, अरबी लिपि के लिए वज़ीरमैटन। प्रत्येक आइकन एक ल्यूसिड ग्लिफ़ है।
 
 ## 1. चीज़ें कहाँ रहती हैं
 

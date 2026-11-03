@@ -4,7 +4,7 @@
 
 ---
 
-> **Állapot:** a műszerfal a** Keak CI UI készlet** (`@keak/cheaper-inference-ui-kit`), a `packages/ui-kit` munkaterület (`@omniroute/ui-kit`; az upstream pillanatkép rögzítve van `packages/ui-kit/UPSTREAM.md` -ben, és `npm run check:ui-kit-snapshot` védi). A fény a kanonikus téma; az alapértelmezett beállítás a `system`. Az akcentus a Keak lime (`--ci-color-accent`). A Switzer az egyetlen család UI hoz, a kijelzőhöz és a kódszöveghez (`--ci-font-ui`; `--ci-font-display` és `--ci-font-mono` ezt oldja meg), amelyet maga a készlet tárol (`packages/ui-kit/src/ci-fonts.css`, importálta `ci-tokens.css`). Minden ikon egy Lucide jelkép.
+> **Állapot:** a műszerfal a** Keak CI UI készlet** (`@keak/cheaper-inference-ui-kit`), a `packages/ui-kit` munkaterület (`@omniroute/ui-kit`; az upstream pillanatkép rögzítve van `packages/ui-kit/UPSTREAM.md` -ben, és `npm run check:ui-kit-snapshot` védi). A fény a kanonikus téma; az alapértelmezett beállítás a `system`. Az akcentus a Keak lime (`--ci-color-accent`). A Switzer az egyetlen család UI hoz, a kijelzőhöz és a kódszöveghez (`--ci-font-ui`; `--ci-font-display` és `--ci-font-mono` ennek megoldása), amelyet maga a készlet tárol (`packages/ui-kit/src/ci-fonts.css`, importálta `ci-tokens.css`). Scripts Switzer hiányzik a karakterjelről karakterjelre (`src/app/globals.css`): Inter a cirill, görög és vietnami, és csak `html[dir="rtl"]` alatt a Vazirmatn az arab írásra. Minden ikon egy Lucide jelkép.
 
 ## 1. Hol mi található
 

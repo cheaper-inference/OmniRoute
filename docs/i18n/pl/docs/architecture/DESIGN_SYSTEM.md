@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** deska rozdzielcza jest zbudowana na** Zestaw Keak CI UI** (`@keak/cheaper-inference-ui-kit`), sprzedawany jako obszar roboczy `packages/ui-kit` (`@omniroute/ui-kit`; migawka nadrzędna jest przypinana w `packages/ui-kit/UPSTREAM.md` i chroniona przez `npm run check:ui-kit-snapshot`). Światło jest tematem kanonicznym; domyślna preferencja to `system`. Akcentem jest limonka Keak (`--ci-color-accent`). Switzer to pojedyncza rodzina dla UI, wyświetlacza i tekstu kodu (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` na to odpowiadają), hostowana przez sam zestaw (`packages/ui-kit/src/ci-fonts.css`, importowany przez `ci-tokens.css`). Każda ikona jest glifem Lucide.
+> **Status:** deska rozdzielcza jest zbudowana na** Zestaw Keak CI UI** (`@keak/cheaper-inference-ui-kit`), sprzedawany jako obszar roboczy `packages/ui-kit` (`@omniroute/ui-kit`; migawka nadrzędna jest przypinana w `packages/ui-kit/UPSTREAM.md` i chroniona przez `npm run check:ui-kit-snapshot`). Światło jest tematem kanonicznym; domyślna preferencja to `system`. Akcentem jest limonka Keak (`--ci-color-accent`). Switzer to pojedyncza rodzina dla UI, wyświetlacza i tekstu kodu (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` na to odpowiadają), hostowana samodzielnie przez sam zestaw (`packages/ui-kit/src/ci-fonts.css`, importowany przez `ci-tokens.css`). Skrypty, których brakuje Switzerowi, przechodzą przez glif po glifie (`src/app/globals.css`): Inter dla cyrylicy, greckiego i wietnamskiego oraz, tylko pod `html[dir="rtl"]`, Vazirmatn dla pisma arabskiego. Każda ikona jest glifem Lucide.
 
 ## 1. Gdzie co się znajduje
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** dasbor dibangun di atas** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), dijual sebagai ruang kerja `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream disematkan di `packages/ui-kit/UPSTREAM.md` dan dijaga oleh `npm run check:ui-kit-snapshot`). Terang adalah tema kanonik; preferensi defaultnya adalah `system`. Aksennya adalah kapur keak (`--ci-color-accent`). Switzer adalah keluarga tunggal untuk UI, tampilan dan teks kode (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` memutuskan untuk itu), dihosting sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimpor oleh `ci-tokens.css`). Setiap ikon adalah mesin terbang Lucide.
+> **Status:** dasbor dibangun di atas** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), dijual sebagai ruang kerja `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream disematkan di `packages/ui-kit/UPSTREAM.md` dan dijaga oleh `npm run check:ui-kit-snapshot`). Terang adalah tema kanonik; preferensi defaultnya adalah `system`. Aksennya adalah kapur keak (`--ci-color-accent`). Switzer adalah keluarga tunggal untuk UI, tampilan dan teks kode (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` memutuskan untuk itu), dihosting sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimpor oleh `ci-tokens.css`). Skrip Switzer tidak memiliki mesin terbang demi mesin terbang (`src/app/globals.css`): Inter untuk Sirilik, Yunani, dan Vietnam dan, hanya di bawah `html[dir="rtl"]`, Vazirmatn untuk aksara Arab. Setiap ikon adalah mesin terbang Lucide.
 
 ## 1. Di mana semuanya berada
 

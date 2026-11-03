@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** papan pemuka dibina di atas** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), dijual sebagai ruang kerja `packages/ui-kit` (`@omniroute/ui-kit`; syot kilat hulu disematkan dalam `packages/ui-kit/UPSTREAM.md` dan dikawal oleh `npm run check:ui-kit-snapshot`). Cahaya ialah tema kanonik; keutamaan lalai ialah `system`. Loghatnya ialah limau keak (`--ci-color-accent`). Switzer ialah keluarga tunggal untuk UI, paparan dan teks kod (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` menyelesaikannya), dihoskan sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimport oleh `ci-tokens.css`). Setiap ikon ialah glif Lucide.
+> **Status:** papan pemuka dibina di atas** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), dijual sebagai ruang kerja `packages/ui-kit` (`@omniroute/ui-kit`; syot kilat hulu disematkan dalam `packages/ui-kit/UPSTREAM.md` dan dikawal oleh `npm run check:ui-kit-snapshot`). Cahaya ialah tema kanonik; keutamaan lalai ialah `system`. Loghatnya ialah limau keak (`--ci-color-accent`). Switzer ialah keluarga tunggal untuk UI, paparan dan teks kod (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` menyelesaikannya), dihoskan sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimport oleh `ci-tokens.css`). Skrip Switzer kekurangan jatuh melalui glif demi glif (`src/app/globals.css`): Inter untuk Cyrillic, Greek dan Vietnam dan, hanya di bawah `html[dir="rtl"]`, Vazirmatn untuk skrip Arab. Setiap ikon ialah glif Lucide.
 
 ## 1. Di mana semuanya berada
 

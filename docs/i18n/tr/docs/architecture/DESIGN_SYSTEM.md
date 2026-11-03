@@ -4,7 +4,7 @@
 
 ---
 
-> **Durum:** gösterge paneli bunun üzerine inşa edilmiştir** Keak CI UI Kiti** (`@keak/cheaper-inference-ui-kit`), `packages/ui-kit` çalışma alanı olarak satılır (`@omniroute/ui-kit`; yukarı akış anlık görüntüsü `packages/ui-kit/UPSTREAM.md` sabitlenir ve `npm run check:ui-kit-snapshot` tarafından korunur). Işık kanonik temadır; varsayılan tercih `system`. Aksan Keak limonudur (`--ci-color-accent`). Switzer, kitin kendisi tarafından barındırılan (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tarafından içe aktarılan) UI, görüntüleme ve kod metni (`--ci-font-ui`; `--ci-font-display` ve `--ci-font-mono` buna çözümlenir) için tek bir ailedir. Her simge bir Lucide glifidir.
+> **Durum:** gösterge paneli bunun üzerine inşa edilmiştir** Keak CI UI Kiti** (`@keak/cheaper-inference-ui-kit`), `packages/ui-kit` çalışma alanı olarak satılır (`@omniroute/ui-kit`; yukarı akış anlık görüntüsü `packages/ui-kit/UPSTREAM.md` sabitlenir ve `npm run check:ui-kit-snapshot` tarafından korunur). Işık kanonik temadır; varsayılan tercih `system`. Aksan Keak limonudur (`--ci-color-accent`). Switzer, kitin kendisi tarafından barındırılan (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tarafından içe aktarılan) UI, görüntüleme ve kod metni (`--ci-font-ui`; `--ci-font-display` ve `--ci-font-mono` buna çözümlenir) için tek bir ailedir. Komut Dosyaları Switzer'de glif yoluyla glif (`src/app/globals.css`) yoktur: Kiril, Yunanca ve Vietnamca için Inter ve yalnızca `html[dir="rtl"]` altında, Arap alfabesi için Vazirmatn. Her simge bir Lucide glifidir.
 
 ## 1. Nerede ne bulunur
 

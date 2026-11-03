@@ -4,7 +4,7 @@
 
 ---
 
-> **Статус:** таблото е изградено върху** Комплект Keak CI UI** (`@keak/cheaper-inference-ui-kit`), предлаган като работно пространство `packages/ui-kit` (`@omniroute/ui-kit`; моментната снимка нагоре по веригата е фиксирана в `packages/ui-kit/UPSTREAM.md` и се пази от `npm run check:ui-kit-snapshot`). Светлината е каноничната тема; предпочитанието по подразбиране е `system`. Акцентът е Keak lime (`--ci-color-accent`). Switzer е единствената фамилия за UI, дисплей и кодов текст (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` разрешават това), самостоятелно хостван от самия комплект (`packages/ui-kit/src/ci-fonts.css`, импортиран от `ci-tokens.css`). Всяка икона е Lucide глиф.
+> **Статус:** таблото е изградено върху** Комплект Keak CI UI** (`@keak/cheaper-inference-ui-kit`), предлаган като работно пространство `packages/ui-kit` (`@omniroute/ui-kit`; моментната снимка нагоре по веригата е фиксирана в `packages/ui-kit/UPSTREAM.md` и се пази от `npm run check:ui-kit-snapshot`). Светлината е каноничната тема; предпочитанието по подразбиране е `system`. Акцентът е Keak lime (`--ci-color-accent`). Switzer е единствената фамилия за UI, дисплей и кодов текст (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` разрешават това), самостоятелно хостван от самия комплект (`packages/ui-kit/src/ci-fonts.css`, импортиран от `ci-tokens.css`). Писмена, липсващи на Switzer, преминават през глиф по глиф (`src/app/globals.css`): Inter за кирилица, гръцки и виетнамски и, само под `html[dir="rtl"]`, Vazirmatn за арабски шрифт. Всяка икона е Lucide глиф.
 
 ## 1. Къде се намират нещата
 

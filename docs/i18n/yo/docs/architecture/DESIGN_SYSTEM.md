@@ -4,7 +4,7 @@
 
 ---
 
-> **Ipo:** Dasibodu ti wa ni itumọ ti lori awọn** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ti a ṣe tita bi aaye iṣẹ-iṣẹ `packages/ui-kit` (`@omniroute/ui-kit`; fọtoyiya ti oke ti wa ni ṣoki ni `packages/ui-kit/UPSTREAM.md` ati aabo nipasẹ `npm run check:ui-kit-snapshot`). Imọlẹ jẹ koko ọrọ-ọrọ; ààyò aiyipada jẹ `system`. Asẹnti naa ni Keak orombo wewe (`--ci-color-accent`). Switzer jẹ ẹbi ẹyọkan fun UI, ifihan ati ọrọ koodu (`--ci-font-ui`; `--ci-font-display` ati `--ci-font-mono` pinnu si rẹ), ti gbalejo nipasẹ ohun elo funrararẹ (`packages/ui-kit/src/ci-fonts.css`, gbe wọle nipasẹ `ci-tokens.css`). Gbogbo aami jẹ glyph Lucide kan.
+> **Ipo:** Dasibodu ti wa ni itumọ ti lori awọn** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ti a ṣe tita bi aaye iṣẹ-iṣẹ `packages/ui-kit` (`@omniroute/ui-kit`; fọtoyiya ti oke ti wa ni ṣoki ni `packages/ui-kit/UPSTREAM.md` ati aabo nipasẹ `npm run check:ui-kit-snapshot`). Imọlẹ jẹ koko ọrọ-ọrọ; ààyò aiyipada jẹ `system`. Asẹnti naa ni Keak orombo wewe (`--ci-color-accent`). Switzer jẹ ẹbi ẹyọkan fun UI, ifihan ati ọrọ koodu (`--ci-font-ui`; `--ci-font-display` ati `--ci-font-mono` pinnu si rẹ), ti gbalejo nipasẹ ohun elo funrararẹ (`packages/ui-kit/src/ci-fonts.css`, gbe wọle nipasẹ `ci-tokens.css`). Awọn iwe afọwọkọ Switzer ko ṣubu nipasẹ glyph nipasẹ glyph (`src/app/globals.css`): Inter fun Cyrillic, Greek ati Vietnamese ati, labẹ `html[dir="rtl"]` nikan, Vazirmatn fun iwe afọwọkọ Larubawa. Gbogbo aami jẹ glyph Lucide kan.
 
 ## 1. Ibi tí àwọn ohun wà
 
