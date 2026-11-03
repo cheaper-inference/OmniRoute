@@ -612,17 +612,17 @@ post_install() {
 <details>
 <summary><b>사용 가능한 모든 모델 보기</b></summary>
 
-> 아래 목록은 v3.8.0의 `open-sse/config/providerRegistry.ts`를 기반으로 선별되었습니다. 클라우드 카탈로그(Gemini, OpenRouter 등)는 동적으로 동기화됩니다. 전체 실시간 카탈로그를 보려면 **Dashboard → Providers → [provider] → Available Models**를 열거나 `GET /api/models/catalog`을 호출하세요.
+> 아래 목록은 v3.8.0 기준 `open-sse/config/providerRegistry.ts`에서 선별한 것입니다. 클라우드 카탈로그(Gemini, OpenRouter 등)는 동적으로 동기화됩니다 — 전체 실시간 카탈로그는 **대시보드 → 프로바이더 → [provider] → 사용 가능한 모델**에서 확인하거나 `GET /api/models/catalog`를 호출하세요.
 >
-> 제공자의 기본 제공 목록이 최신 상태와 달라진 경우, 해당 페이지에서 **Import from /models**를 사용하거나 **Auto-Sync**를 활성화하여 업스트림의 실시간 카탈로그를 가져오세요. 이는 LLM7.io(`gemini-3.1-flash-lite`) 및 UncloseAI(`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)에 대해 v3.8.50에서 검증되었습니다. 같은 테스트 과정에서 Pollinations의 익명 액세스는 여전히 업스트림 제한을 받았습니다.
+> 프로바이더의 기본 내장 목록이 최신과 달라진 경우, 해당 페이지에서 **/models에서 가져오기**를 사용하거나 **자동 동기화**를 활성화하여 실시간 업스트림 카탈로그를 가져오세요. 이는 v3.8.50에서 LLM7.io(`gemini-3.1-flash-lite`)와 UncloseAI(`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)에 대해 검증되었으며, Pollinations 익명 액세스는 동일한 테스트 과정에서 업스트림 제한 상태를 유지했습니다.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ 추론 노력 수준: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort 단계: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — 무료 OAuth: **Dashboard → Providers → Kiro → Available Models** 아래에 표시되는 실시간 카탈로그를 사용하세요. 이용 가능 여부는 계정 및 요금제에 따라 달라집니다.
+**Kiro (`kr/`)** — 무료 OAuth: **대시보드 → 프로바이더 → Kiro → 사용 가능한 모델**에 표시되는 실시간 카탈로그를 사용하세요. 사용 가능 여부는 계정 및 요금제에 따라 달라집니다.
 
 **Qoder (`if/`)** — 무료 OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -640,27 +640,27 @@ post_install() {
 
 **Mistral (`mistral/`)** — EU 호스팅: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — 검색 보강형: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — 검색 증강: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — 오픈 소스: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (무료), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — 빠른 추론: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — 고속 추론: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — 웨이퍼 스케일: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG 중심: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — RAG 특화: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — 엔터프라이즈: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — 엔터프라이즈: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google에서 API 키별로 실시간 동기화되므로 정적 목록은 없습니다. **Dashboard → Providers**에서 키를 연결한 다음 **Available Models**를 사용하여 현재 카탈로그를 가져오세요(예: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: API 키별로 Google에서 실시간으로 동기화됩니다 — 정적 목록이 없습니다. **대시보드 → 프로바이더**에서 키를 연결한 후 **사용 가능한 모델**을 사용하여 현재 카탈로그를 가져오세요 (예: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**기타 호환 제공자**(일부): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock`(`aws-bedrock`을 통해), `azure-ai`, `openrouter`(패스스루 카탈로그), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. 각 제공자는 `providerRegistry.ts`에서 자체 모델 목록을 관리하며, 제공자가 `/models` 엔드포인트를 노출하는 경우 자동으로 동기화할 수 있습니다.
+**기타 호환 프로바이더** (일부 선별): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` 경유), `azure-ai`, `openrouter` (패스스루 카탈로그), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. 각 프로바이더는 `providerRegistry.ts`에 자체 모델 목록을 유지하며, 프로바이더가 `/models` 엔드포인트를 제공하는 경우 자동 동기화할 수 있습니다.
 
-**모델 ID 참고:** OmniRoute는 제공자 네이티브 ID(`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)를 사용합니다. 일부 ID에 점으로 구분된 버전이 포함되는 이유는 업스트림 API가 해당 형식을 요구하기 때문입니다. 모델이 위에 나열되어 있지 않은 경우 `omniroute models --search <term>`을 실행하거나 `GET /api/models/catalog`을 호출하여 이용 가능 여부를 확인하세요.
+**모델 ID 참고 사항:** OmniRoute는 프로바이더 고유 ID(`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)를 사용합니다. 일부 ID에 점이 포함된 버전이 있는 것은 업스트림 API가 그 형식을 요구하기 때문입니다. 위에 나열되지 않은 모델은 `omniroute models --search <term>`을 실행하거나 `GET /api/models/catalog`를 호출하여 사용 가능 여부를 확인하세요.
 
 </details>
 
@@ -668,70 +668,75 @@ post_install() {
 
 ## 🧩 고급 기능
 
-### 사용자 지정 모델
+### 맞춤형 모델
 
-앱 업데이트를 기다리지 않고 어떤 공급자에든 원하는 모델 ID를 추가할 수 있습니다.
+앱 업데이트를 기다리지 않고 모든 공급자에 모델 ID 추가하세요.
 
 ```bash
-# API를 통해
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# 목록: curl http://localhost:20128/api/provider-models?provider=openai
-# 제거: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-또는 대시보드에서 **공급자 → [공급자] → 사용자 지정 모델**을 사용하세요.
+또는 대시보드를 사용하세요.** 공급자 → [공급자] → 사용자 정의 모델** .
 
 참고:
 
-- OpenRouter 및 OpenAI/Anthropic 호환 공급자는 **사용 가능한 모델**에서만 관리됩니다. 수동 추가, 가져오기, 자동 동기화 결과가 모두 동일한 사용 가능한 모델 목록에 반영되므로, 이러한 공급자에는 별도의 사용자 지정 모델 섹션이 없습니다.
-- **사용자 지정 모델** 섹션은 관리형 사용 가능 모델 가져오기를 제공하지 않는 공급자를 위한 것입니다.
+- OpenRouter 및 OpenAI/Anthropic-compatible 공급자는 다음에서 관리됩니다.** 사용 가능한 모델** 오직. 수동 추가, 가져오기 및 자동 동기화는 모두 동일한 사용 가능한 모델 목록에 있으므로 해당 공급자에 대한 별도의 사용자 정의 모델 섹션이 없습니다.
+- 그만큼** 맞춤형 모델** 섹션은 관리형 사용 가능 모델 가져오기를 노출하지 않는 공급자를 위한 것입니다.
 
-### 사용자 지정 OpenAI 호환 공급자
+### 맞춤형 OpenAI 호환 공급자
 
-OpenAI API를 사용하는 모든 게이트웨이(자체 호스팅 프록시, vLLM, 서드파티 애그리게이터)를
-독립된 공급자 노드로 추가할 수 있습니다.
+OpenAI API (자체 호스팅 프록시, vLLM, 타사 수집기)를 사용하는 모든 게이트웨이를 자체 공급자 노드로 추가할 수 있습니다.
 
-1. **공급자 → OpenAI 호환 공급자 추가**.
-2. **이름**: 노드에 표시할 레이블입니다.
-3. **접두사**: 라우팅 이름입니다. 클라이언트는 `<prefix>/<model>` 형식으로 모델을 호출하므로,
-   접두사가 `mygw`인 노드는 `mygw/gpt-4o-mini`를 제공합니다. 필수 항목이며 문자 제한은 없습니다.
-4. **API 유형**: 게이트웨이가 제공하는 엔드포인트 계열입니다(Chat Completions, Responses,
-   Embeddings, 오디오, 이미지).
-5. **기본 URL**: `/v1`까지 포함하는 API 루트입니다(예:
-   `https://gateway.example.com/v1`). 전체 `/chat/completions` 경로를 입력하지 마세요. 비표준
-   경로를 사용하는 게이트웨이는 **고급 설정**에서 해당 경로를 설정합니다(채팅 경로, 모델 경로).
-6. **API 키(확인용)** 필드는 연결 테스트에만 사용됩니다. 노드를 생성한 후,
-   해당 노드를 열고 **연결 추가**를 사용하여 요청에 사용할 키를 저장하세요.
+1. **공급자 → OpenAI 호환 추가** .
+2. **이름** : 노드의 표시 레이블입니다.
+3. **접두사** : 라우팅 이름입니다. 클라이언트는 모델을 `<prefix>/<model>` 로 호출하므로 접두사가 `mygw` 인 노드는 `mygw/gpt-4o-mini` 제공합니다. 필수의; 문자 제한은 없습니다.
+4. **API 유형** : 게이트웨이가 제공하는 엔드포인트 제품군(채팅 완료, 응답, 임베딩, 오디오, 이미지)입니다.
+5. **베이스 URL** : 전체 `/chat/completions` 경로가 아닌 `/v1` 까지의 API 루트(예: `https://gateway.example.com/v1`). 비표준 경로가 있는 게이트웨이는 다음과 같이 설정됩니다.** 고급 설정** (채팅 경로, 모델 경로).
+6. 그만큼**API 키(확인용)** 필드는 연결만 테스트합니다. 노드를 생성한 후 열어서 사용하세요.** 연결 추가** 요청에 사용할 키를 저장합니다.
 
-노드에는 `openai-compatible-<apiType>-<uuid>` 형식의 내부 ID가 부여됩니다. 이 ID를 직접
-입력할 필요는 없으며, 접두사가 공개 이름으로 사용됩니다.
+노드는 `openai-compatible-<apiType>-<uuid>` 형식의 내부 ID를 얻습니다. 입력할 필요가 없습니다. 접두사는 공개 이름입니다.
 
 #### 예약된 접두사
 
-접두사는 기본 제공 공급자의 ID 또는 별칭(예: `openai`, `cf`)이나 사용 중단된 공급자의
-ID와 같을 수 없습니다. 모델 리졸버는 사용자 지정 노드보다 먼저 기본 제공 ID와 별칭을
-확인하므로, 이러한 접두사를 사용하는 노드는 트래픽을 받을 수 없습니다.
-`<prefix>/model`은 대신 기본 제공 공급자로 전달되거나, 해당 공급자가 사용 중단된 경우
-안전하게 실패합니다. 이러한 접두사로 노드를 생성하거나 편집하면 다음 오류와 함께 거부됩니다.
+접두사는 내장 공급자의 ID 또는 별칭(예: `openai`, `cf`)이거나 폐기된 공급자의 ID일 수 없습니다. 모델 확인자는 사용자 정의 노드 전에 내장 ID와 별칭을 확인하므로 해당 접두사 중 하나를 사용하는 노드는 트래픽을 수신하지 않습니다. `<prefix>/model` 대신 내장 공급자로 이동하거나 해당 공급자가 폐기된 경우 페일클로즈됩니다. 이러한 접두사가 있는 노드를 생성하거나 편집하는 것은 다음과 같이 거부됩니다.
 
 ```text
-prefix: "<prefix>"는 예약된 공급자 접두사입니다. 다른 접두사를 선택하세요(예약된 ID/별칭은 사용자 지정 노드에 사용할 수 없습니다. <prefix>/model과 같은 요청이 기본 제공 공급자로 라우팅되거나 공급자가 사용 중단된 경우 안전하게 실패하기 때문입니다).
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-고유한 접두사(`mygw`, `acme-proxy`)를 선택하세요. 사용자 지정 노드에 대한 요청이 기본 제공
-공급자나 해당 자격 증명을 언급하는 오류와 함께 실패하는 경우, 노드의 접두사가 예약되어
-있는지 확인하세요. 이 규칙이 도입되기 전에 저장된 노드는 그대로 유지되지만 해당 접두사는
-기본 제공 공급자로 라우팅됩니다. 노드를 편집하고 새 접두사를 지정하세요.
+고유한 접두사(`mygw`, `acme-proxy`)를 선택하세요. 기본 제공 공급자 또는 해당 자격 증명의 이름을 지정하는 오류로 인해 사용자 지정 노드에 대한 요청이 실패하는 경우 노드의 접두사가 예약되어 있는지 확인하세요. 이 규칙이 존재하기 전에 저장된 노드는 계속 저장되지만 해당 접두사는 기본 제공 공급자로 라우팅됩니다. 노드를 편집하고 새 접두사를 지정합니다.
 
-### OmniRoute 피어 체이닝
+#### 연결별 게이트웨이 옵션
 
-다른 OmniRoute 게이트웨이를 **사용자 지정 OpenAI 호환** 공급자로 추가할 수 있습니다.
-피어의 `/v1` 기본 URL과 해당 피어에서 발급한 전용 최소 권한 API 키를 사용하세요.
+이러한 키는 연결의 `providerSpecificData` 에 들어갑니다(예: `PUT /api/providers/{id}` 통해).
 
-상호 또는 다중 홉 체인의 경우 모든 게이트웨이에서 선택적 루프 방지 기능을 활성화하세요.
+- `toolNameMaxLength` (정수, 1–1024) — 게이트웨이가 긴 도구 이름을 거부하는 OpenAI 채팅 형식 호환 연결용입니다. 더 긴 이름은 짧은 별칭으로 전송되고 응답으로 복원됩니다.
+- `quotaEndpoint` — 게이트웨이의 quota/credits 엔드포인트, 대시보드 할당량 스트립 및 할당량 인식 라우팅을 읽습니다. OpenAI 및 Anthropic 호환 연결 모두에서 작동합니다. 전체 모양은 `open-sse/services/usage/openaiCompatible.ts` 에 문서화되어 있습니다.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### OmniRoute 피어 연결
+
+다른 OmniRoute 게이트웨이를 추가할 수 있습니다.** 맞춤형 OpenAI 호환** 공급자. 피어의 `/v1` 기본 URL 와 해당 피어에서 발급한 전용 최소 권한 API 키를 사용하세요.
+
+상호 또는 다중 홉 체인의 경우 모든 게이트웨이에서 옵트인 루프 가드를 활성화합니다.
 
 ```bash
 # gateway-a
@@ -747,19 +752,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-명시적으로 허용 목록에 추가된 피어 URL로 전송되는 요청에만
-`X-OmniRoute-Peer-Trace` 헤더가 포함됩니다. 게이트웨이는 반복된 인스턴스 ID 또는 소진된
-홉 예산을 HTTP `508 Loop Detected`로 거부하며, 일반 업스트림 공급자에는 피어 메타데이터가
-전송되지 않습니다.
+명시적으로 허용 목록에 있는 피어 URL 로 전송된 요청만 `X-OmniRoute-Peer-Trace` 헤더를 수신합니다. 게이트웨이는 HTTP `508 Loop Detected` 사용하여 반복되는 인스턴스 ID 또는 소진된 홉 예산을 거부합니다. 일반 업스트림 공급자는 피어 메타데이터를 수신하지 않습니다.
 
-피어 체이닝은 데이터베이스 복제나 호스트 장애 조치가 아닙니다. 각 게이트웨이는 독립적인
-SQLite 상태, 캐시, 속도 카운터 및 세션을 유지합니다. 액티브/패시브 또는 액티브/액티브
-가용성을 위해 상태 확인 기능이 있는 리버스 프록시나 클라이언트 장애 조치를 사용하고,
-하나의 SQLite 데이터베이스를 실행 중인 여러 OmniRoute 인스턴스에 마운트하지 마세요.
+피어 체인은 데이터베이스 복제나 호스트 장애 조치가 아닙니다. 각 게이트웨이는 독립적인 SQLite 상태, 캐시, 속도 카운터 및 세션을 유지합니다. active/passive 또는 active/active 가용성을 위해 상태 확인 역방향 프록시 또는 클라이언트 장애 조치를 사용하고 하나의 SQLite 데이터베이스를 실행 중인 여러 OmniRoute 인스턴스에 마운트하지 마십시오.
 
 ### 전용 공급자 경로
 
-모델 검증과 함께 특정 공급자로 직접 요청을 라우팅합니다.
+모델 검증을 통해 요청을 특정 공급자에게 직접 라우팅합니다.
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -767,25 +766,25 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-공급자 접두사가 없으면 자동으로 추가됩니다. 일치하지 않는 모델은 `400`을 반환합니다.
+공급자 접두사가 누락된 경우 자동으로 추가됩니다. 일치하지 않는 모델은 `400` 반환합니다.
 
 ### 네트워크 프록시 구성
 
 ```bash
-# 전역 프록시 설정
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# 공급자별 프록시
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# 프록시 테스트
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**우선순위:** 키별 → 콤보별 → 공급자별 → 전역 → 환경.
+**상위:** 키별 → 콤보별 → 공급자별 → 전역 → 환경.
 
 ### 모델 카탈로그 API
 
@@ -793,92 +792,92 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
 curl http://localhost:20128/api/models/catalog
 ```
 
-유형(`chat`, `embedding`, `image`)과 함께 공급자별로 그룹화된 모델을 반환합니다.
+유형(`chat`, `embedding`, `image`)을 사용하여 공급자별로 그룹화된 모델을 반환합니다.
 
 ### 클라우드 동기화
 
-- 여러 기기에서 공급자, 콤보 및 설정 동기화
-- 시간 초과 및 빠른 실패가 적용된 자동 백그라운드 동기화
-- 프로덕션에서는 서버 측 `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` 사용 권장
+- 여러 장치에서 공급자, 콤보 및 설정을 동기화합니다.
+- 시간 제한이 있는 자동 백그라운드 동기화 + Fail-Fast
+- 프로덕션에서는 서버측 `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` 를 선호합니다.
 
 ### Cloudflare 빠른 터널
 
-- Docker 및 기타 셀프 호스팅 배포의 **Dashboard → Endpoints**에서 사용할 수 있습니다
-- 현재 OpenAI 호환 `/v1` 엔드포인트로 전달되는 임시 `https://*.trycloudflare.com` URL을 생성합니다
-- 처음 활성화할 때만 필요한 경우 `cloudflared`를 설치하며, 이후 재시작 시에는 동일한 관리형 바이너리를 재사용합니다
-- Quick Tunnel은 OmniRoute 또는 컨테이너 재시작 후 자동으로 복원되지 않습니다. 필요할 때 대시보드에서 다시 활성화하세요
-- 터널 URL은 일시적이며 터널을 중지하거나 시작할 때마다 변경됩니다
-- 관리형 Quick Tunnel은 리소스가 제한된 컨테이너에서 불필요한 QUIC UDP 버퍼 경고를 방지하기 위해 기본적으로 HTTP/2 전송 방식을 사용합니다
-- 관리형 전송 방식 선택을 재정의하려면 `CLOUDFLARED_PROTOCOL=quic` 또는 `auto`로 설정하세요
-- 관리형 다운로드 대신 미리 설치된 `cloudflared` 바이너리를 사용하려면 `CLOUDFLARED_BIN`을 설정하세요
-- Cloudflare Quick Tunnel, Tailscale Funnel 및 ngrok Tunnel 패널은 **Settings → Appearance**에서 표시하거나 숨길 수 있습니다. 패널을 숨겨도 실행 중인 터널은 중지되지 않습니다.
+- 사용 가능** 대시보드 → 엔드포인트** Docker 및 기타 자체 호스팅 배포용
+- 현재 OpenAI 호환 `/v1` 엔드포인트로 전달되는 임시 `https://*.trycloudflare.com` URL 생성합니다.
+- 먼저 활성화하면 필요할 때만 `cloudflared` 설치합니다. 나중에 다시 시작하면 동일한 관리 바이너리를 재사용합니다.
+- 빠른 터널은 OmniRoute 또는 컨테이너를 다시 시작한 후에 자동으로 복원되지 않습니다. 필요할 때 대시보드에서 다시 활성화하세요.
+- 터널 URLs 는 일시적이며 터널을 stop/start 할 때마다 변경됩니다.
+- 제한된 컨테이너에서 시끄러운 QUIC UDP 버퍼 경고를 방지하기 위해 관리형 빠른 터널은 기본적으로 HTTP/2 전송으로 설정됩니다.
+- 관리 전송 선택을 재정의하려면 `CLOUDFLARED_PROTOCOL=quic` 또는 `auto` 설정하십시오.
+- 관리되는 다운로드 대신 사전 설치된 `cloudflared` 바이너리를 사용하려는 경우 `CLOUDFLARED_BIN` 설정하십시오.
+- Cloudflare Quick Tunnel, Tailscale Funnel 및 ngrok Tunnel 패널은 다음에서 표시하거나 숨길 수 있습니다.** 설정 → 모양** . 패널을 숨겨도 실행 중인 터널은 중지되지 않습니다.
 
-### LLM 게이트웨이 인텔리전스(Phase 9)
+### LLM 게이트웨이 인텔리전스(9단계)
 
-- **시맨틱 캐시** — 스트리밍이 아니고 temperature=0인 응답을 자동으로 캐시합니다(`X-OmniRoute-No-Cache: true`로 우회)
-- **요청 멱등성** — `Idempotency-Key` 또는 `X-Request-Id` 헤더를 통해 5초 이내의 중복 요청을 제거합니다
-- **진행 상황 추적** — `X-OmniRoute-Progress: true` 헤더를 통해 선택적으로 SSE `event: progress` 이벤트를 제공합니다
+- **의미론적 캐시** — 비스트리밍, 온도 = 0 응답 자동 캐시( `X-OmniRoute-No-Cache: true` 로 우회)
+- **멱등성 요청** — `Idempotency-Key` 또는 `X-Request-Id` 헤더를 통해 5초 이내에 요청 중복 제거
+- **진행 상황 추적** — `X-OmniRoute-Progress: true` 헤더를 통해 SSE `event: progress` 이벤트 선택
 
 ---
 
-### 번역기 플레이그라운드
+### 번역가 놀이터
 
-**Dashboard → Translator**를 통해 접근할 수 있습니다. OmniRoute가 공급자 간 API 요청을 어떻게 변환하는지 디버깅하고 시각화합니다.
+다음을 통해 액세스** 대시보드 → 번역기** . OmniRoute 공급자 간에 API 요청을 변환하는 방법을 디버그하고 시각화합니다.
 
-| 모드             | 용도                                                                       |
-| ---------------- | -------------------------------------------------------------------------- |
-| **Playground**   | 소스/대상 형식을 선택하고 요청을 붙여 넣어 변환된 출력을 즉시 확인합니다   |
-| **Chat Tester**  | 프록시를 통해 실시간 채팅 메시지를 보내고 전체 요청/응답 주기를 검사합니다 |
-| **Test Bench**   | 여러 형식 조합에 대해 일괄 테스트를 실행하여 변환의 정확성을 검증합니다    |
-| **Live Monitor** | 프록시를 통과하는 요청의 실시간 변환을 확인합니다                          |
+| 방법              | 목적                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------- |
+| **운동장**        | source/target 형식을 선택하고, 요청을 붙여넣고, 번역된 출력을 즉시 확인하세요.     |
+| **채팅 테스터**   | 프록시를 통해 실시간 채팅 메시지를 보내고 전체 request/response 주기를 검사하세요. |
+| **테스트 벤치**   | 여러 형식 조합에 걸쳐 일괄 테스트를 실행하여 번역 정확성 확인                      |
+| **라이브 모니터** | 요청이 프록시를 통해 흐르면서 실시간 번역을 시청하세요.                            |
 
 **사용 사례:**
 
-- 특정 클라이언트/공급자 조합이 실패하는 이유 디버깅
-- 사고 태그, 도구 호출 및 시스템 프롬프트가 올바르게 변환되는지 검증
-- OpenAI, Claude, Gemini 및 Responses API 형식 간의 차이 비교
+- 특정 client/provider 조합이 실패하는 이유 디버그
+- 사고 태그, 도구 호출, 시스템 프롬프트가 올바르게 번역되는지 확인하세요.
+- OpenAI, Claude, Gemini 및 응답 API 형식 간의 형식 차이점 비교
 
 ---
 
 ### 라우팅 전략
 
-**Dashboard → Settings → Routing**에서 구성합니다. 대시보드에는 가장 많이 사용되는 6가지 전략이 표시되며, 콤보와 자동 라우터는 내부적으로 더 다양한 전략을 지원합니다.
+다음을 통해 구성** 대시보드 → 설정 → 라우팅** . 대시보드에는 가장 많이 사용되는 6가지 전략이 표시됩니다. 콤보와 자동 라우터는 내부적으로 더 넓은 세트를 지원합니다.
 
-**대시보드에 표시되는 전략(계정 수준 라우팅):**
+**대시보드 표시 전략(계정 수준 라우팅):**
 
-| 전략                          | 설명                                                                                            |
-| ----------------------------- | ----------------------------------------------------------------------------------------------- |
-| **우선 채우기**               | 우선순위에 따라 계정을 사용합니다. 기본 계정이 사용할 수 없게 될 때까지 모든 요청을 처리합니다  |
-| **라운드 로빈**               | 구성 가능한 고정 한도로 모든 계정을 순환합니다(기본값: 계정당 3회 호출)                         |
-| **P2C(Power of Two Choices)** | 임의의 계정 2개를 선택해 더 정상적인 계정으로 라우팅합니다. 상태를 고려하면서 부하를 분산합니다 |
-| **무작위**                    | Fisher-Yates 셔플을 사용해 각 요청에 대한 계정을 무작위로 선택합니다                            |
-| **최소 사용**                 | 가장 오래된 `lastUsedAt` 타임스탬프를 가진 계정으로 라우팅하여 트래픽을 균등하게 분산합니다     |
-| **비용 최적화**               | 우선순위 값이 가장 낮은 계정으로 라우팅하여 비용이 가장 낮은 공급자에 맞게 최적화합니다         |
+| 전략                        | 설명                                                                                                       |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **먼저 채우기**             | 우선순위에 따라 계정을 사용합니다. 기본 계정은 사용할 수 없을 때까지 모든 요청을 처리합니다.               |
+| **라운드 로빈**             | 구성 가능한 고정 제한이 있는 모든 계정을 순환합니다(기본값: 계정당 3회 호출).                              |
+| **P2C (두 가지 선택의 힘)** | 2개의 무작위 계정을 선택하고 더 건강한 계정으로 라우팅합니다. 건강에 대한 인식과 부하의 균형을 유지합니다. |
+| **무작위의**                | Fisher-Yates shuffle을 사용하여 각 요청에 대해 무작위로 계정을 선택합니다.                                 |
+| **최소 사용**               | 가장 오래된 `lastUsedAt` 타임스탬프가 있는 계정으로 라우팅하여 트래픽을 균등하게 분배합니다.               |
+| **비용 최적화**             | 가장 낮은 비용의 공급자를 위해 최적화하여 우선순위 값이 가장 낮은 계정으로 라우팅합니다.                   |
 
-**고급 콤보 및 자동 전략**(콤보별로 또는 `auto/*` 접두사를 통해 구성 가능 — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) 참조):
+**고급 콤보 및 자동 전략** (콤보별로 또는 `auto/*` 접두사를 통해 구성 가능 — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) 참조):
 
-- `priority` — 엄격한 순서를 따르며 라운드 로빈을 사용하지 않음
-- `weighted` — 모델별 가중치에 따른 비례적 트래픽 분배
-- `fill-first` — 한도에 도달할 때까지 첫 번째 모델을 우선 사용
+- `priority` — 엄격한 순서, 절대 라운드 로빈이 아님
+- `weighted` — 모델별 가중치로 분할된 비례 트래픽
+- `fill-first` — 한계에 도달할 때까지 첫 번째 모델을 배출합니다.
 - `round-robin` / `strict-random` / `random`
-- `p2c`(Power of Two Choices)
-- `least-used` 및 `cost-optimized`
-- `auto` — 모든 후보를 점수에 따라 선택
-- `lkgp`(Last Known Good Provider) — 마지막으로 성공한 공급자에 고정한 후 규칙에 따라 대체
-- `context-optimized` — 사용 가능한 컨텍스트 창이 가장 큰 모델 선택
-- `context-relay` — 후속 턴을 위해 긴 컨텍스트 모델을 연쇄적으로 연결
+- `p2c` (두 가지 선택의 힘)
+- `least-used` 와 `cost-optimized`
+- `auto` — 모든 후보자의 점수 기반
+- `lkgp` (마지막으로 알려진 양호한 공급자) — 마지막으로 성공한 공급자를 고정한 다음 규칙으로 돌아갑니다.
+- `context-optimized` — 자유 컨텍스트 창이 가장 큰 모델을 선택합니다.
+- `context-relay` — 후속 턴을 위해 긴 컨텍스트 모델을 연결합니다.
 
 #### 외부 고정 세션 헤더
 
-외부 세션 어피니티를 사용하려면(예: 리버스 프록시 뒤의 Claude Code/Codex 에이전트) 다음을 전송하세요.
+외부 세션 선호도(예: 역방향 프록시 뒤의 Claude Code/Codex 에이전트)의 경우 다음을 보냅니다.
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute는 `x_session_id`도 허용하며 실제 적용된 세션 키를 `X-OmniRoute-Session-Id`로 반환합니다.
+OmniRoute 또한 `x_session_id` 허용하고 `X-OmniRoute-Session-Id` 에 유효한 세션 키를 반환합니다.
 
-Nginx를 사용하며 밑줄 형식의 헤더를 전송하는 경우 다음을 활성화하세요.
+Nginx를 사용하고 밑줄 형식 헤더를 보내는 경우 다음을 활성화합니다.
 
 ```nginx
 underscores_in_headers on;
@@ -886,21 +885,21 @@ underscores_in_headers on;
 
 #### 와일드카드 모델 별칭
 
-모델 이름을 다시 매핑할 와일드카드 패턴을 생성합니다.
+모델 이름을 다시 매핑하는 와일드카드 패턴을 만듭니다.
 
 ```
-패턴: claude-sonnet-*     →  대상: cc/claude-sonnet-4-6
-패턴: gpt-*               →  대상: gh/gpt-5.3-codex
+Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
+Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-와일드카드는 `*`(임의의 문자)와 `?`(단일 문자)를 지원합니다.
+와일드카드는 `*` (모든 문자) 및 `?` (단일 문자)를 지원합니다.
 
-#### 대체 체인
+#### 폴백 체인
 
 모든 요청에 적용되는 전역 대체 체인을 정의합니다.
 
 ```
-체인: production-fallback
+Chain: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -910,20 +909,20 @@ underscores_in_headers on;
 
 ### 일반적인 공급자 조합 및 라우팅 패턴
 
-OmniRoute에서 여러 공급자를 조합하고 공급자 간에 라우팅하는 예시 패턴은 다음과 같습니다.
+다음은 OmniRoute 에서 여러 공급자를 결합하고 이들 사이를 라우팅하는 패턴의 예입니다.
 
-#### 1. 코딩 에이전트 콤보: 비용/속도 대체 기능을 갖춘 고급 추론
+#### 1. 코딩 에이전트 콤보: Cost/Speed Fallback을 사용한 고급 추론
 
-코딩 에이전트(OpenCode, Claude Code, Cursor, Cline)에 적합합니다. 처음에는 최첨단 추론 모델로 라우팅하고 할당량이 소진되거나 오류가 발생하면 빠른 코딩 모델로 대체합니다.
+코딩 에이전트(OpenCode, Claude Code, Cursor, Cline)에 이상적입니다. 처음에는 프론티어 추론 모델로 라우팅하고 할당량 소진 또는 오류에 대한 빠른 코딩 모델로 돌아갑니다.
 
-- **대시보드**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
-- **모델**:
-  1. `claude/claude-sonnet-4-6`(기본 코딩 에이전트)
-  2. `openai/gpt-4o`(높은 용량의 보조 대체 모델)
-  3. `deepseek/deepseek-v4-flash`(고효율의 비용 효과적인 대체 모델)
+- **계기반** : 콤보 → 새 콤보 → 이름: `agent-coding` → 전략: `Priority`
+- **모델** :
+  1. `claude/claude-sonnet-4-6` (1차 코딩 에이전트)
+  2. `openai/gpt-4o` (보조 대용량 폴백)
+  3. `deepseek/deepseek-v4-flash` (고효율, 비용 효율적인 폴백)
 
 ```bash
-# API를 통한 예시
+# Example via API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -938,183 +937,179 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. 무료 티어 자동 장애 조치 콤보
+#### 2. 프리 티어 자동 장애 조치 콤보
 
-여러 무료 티어 및 키가 필요 없는 제공자를 연결하여 API 비용 없이 가동 시간을 극대화합니다.
+여러 무료 계층 및 키 없는 공급자를 연결하여 API 비용 없이 가동 시간을 극대화합니다.
 
-- **전략**: `Least Used` 또는 `Round Robin`(할당량 전체에 부하 분산)
-- **모델**:
+- **전략** : `Least Used` 또는 `Round Robin` (할당량에 따라 로드 분산)
+- **모델** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# CLI를 통한 예시
+# Example via CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. 멀티모달 / 비전 및 텍스트 파이프라인
+#### 3. 멀티모달/비전 및 텍스트 파이프라인
 
-이미지 이해 및 코드 생성이 포함된 워크플로를 위해 특화된 비전 모델과 고속 텍스트 생성 모델을 조합합니다.
+이미지 이해 및 코드 생성과 관련된 워크플로우를 위해 특수 비전 모델을 고속 텍스트 생성과 결합합니다.
 
-- **패턴**: 비전 지원 모델을 먼저 나열하고 처리량이 높은 텍스트/코드 모델을 마지막에 배치하는 `Priority` 콤보입니다.
-- **모델**:
-  1. `gemini/gemini-2.5-pro` (강력한 이미지/멀티모달 이해 능력)
-  2. `openai/gpt-4o` (균형 잡힌 비전 및 도구 사용 능력)
-  3. `deepseek/deepseek-v4-flash` (텍스트/코드 생성)
+- **무늬** : 비전 지원 모델을 먼저 나열하고 처리량이 높은 text/code 모델을 마지막에 나열하는 `Priority` 콤보입니다.
+- **모델** :
+  1. `gemini/gemini-2.5-pro` (강력한 image/multimodal 이해력)
+  2. `openai/gpt-4o` (균형잡힌 시각과 도구 사용)
+  3. `deepseek/deepseek-v4-flash` (Text/code 세대)
 
 ---
 
-### 복원력 및 서킷 브레이커
+### 탄력성 및 회로 차단기
 
-**대시보드 → 설정 → 복원력**에서 구성합니다.
+다음을 통해 구성** 대시보드 → 설정 → 탄력성** .
 
-OmniRoute는 다음 5가지 구성 요소를 통해 제공자 수준의 복원력을 구현합니다.
+OmniRoute 다섯 가지 구성 요소로 공급자 수준 복원력을 구현합니다.
 
-1. **요청 큐 및 페이싱** — 시스템 수준의 요청 조정:
+1. **요청 대기열 및 간격** — 시스템 수준 요청 형성:
    - **분당 요청 수(RPM)** — 계정당 분당 최대 요청 수
-   - **요청 간 최소 시간** — 요청 사이의 최소 간격(밀리초)
-   - **최대 동시 요청 수** — 계정당 최대 동시 요청 수
+   - **요청 간 최소 시간** — 요청 간 최소 간격(밀리초)
+   - **최대 동시 요청** — 계정당 최대 동시 요청 수
 
-2. **연결 쿨다운** — 재시도 가능한 실패 발생 후 개별 연결에 적용되는 인증 유형별 구성:
-   - **기본 쿨다운** — 재시도 가능한 업스트림 실패에 대한 기본 쿨다운 시간
-   - **업스트림 재시도 힌트 사용** — 제공되는 경우 신뢰할 수 있는 `Retry-After` 또는 재설정 힌트를 따름
-   - **최대 백오프 단계** — 반복된 실패에 대한 최대 지수 백오프 수준
+2. **연결 쿨다운** — 재시도 가능한 실패 후 단일 연결에 대한 인증 유형별 구성:
+   - **기본 쿨다운** — 재시도 가능한 업스트림 오류에 대한 기본 휴지 기간
+   - **업스트림 재시도 힌트 사용** — 제공된 경우 권위 있는 `Retry-After` 또는 재설정 힌트를 존중합니다.
+   - **최대 백오프 단계** — 반복되는 실패에 대한 최대 지수 백오프 수준
 
-3. **제공자 서킷 브레이커** — 엔드투엔드 제공자 실패를 추적하고, 구성된 경고 임계값에서 제공자를 성능 저하 상태로 표시하며, 구성된 실패 임계값에 도달하면 브레이커를 엽니다:
-   - **성능 저하 임계값** — `DEGRADED` 상태로 전환되기 전까지 허용되는 연속 제공자 실패 횟수
-   - **실패 임계값** — `OPEN` 상태로 전환되기 전까지 허용되는 연속 제공자 실패 횟수
-   - **재설정 제한 시간** — 제공자를 다시 테스트하기 전까지의 시간
-   - **CLOSED** (정상) — 요청이 정상적으로 처리됨
-   - **DEGRADED** — 증가한 실패를 추적하면서 요청은 계속 처리됨
-   - **OPEN** — 반복된 실패 후 제공자가 일시적으로 차단됨
-   - **HALF_OPEN** — 제공자가 복구되었는지 테스트 중
+3. **공급자 회로 차단기** — 엔드 투 엔드 공급자 오류를 추적하고, 구성된 경고 임계값에서 공급자의 성능이 저하된 것으로 표시하고, 구성된 오류 임계값에 도달하면 차단기를 엽니다.
+   - **저하 임계값** — `DEGRADED` 에 들어가기 전 연속 공급자 실패
+   - **실패 임계값** — `OPEN` 에 들어가기 전 연속 공급자 실패
+   - **시간 초과 재설정** — 공급자가 다시 테스트되기까지의 시간
+   - **CLOSED** (정상) — 요청 흐름이 정상적으로 이루어집니다.
+   - **DEGRADED** — 증가된 실패를 추적하는 동안에도 요청은 계속 흐릅니다.
+   - **OPEN** — 반복적인 실패 후 공급자가 일시적으로 차단됩니다.
+   - **HALF_OPEN** — 공급자가 복구되었는지 테스트
 
-   연결 범위의 `429` 속도 제한은 **연결 쿨다운**에 유지되며 제공자 브레이커의 실패 횟수에 포함되지 않습니다.
+   연결 범위의 `429` 속도 제한은 그대로 유지됩니다.** 연결 쿨다운** 공급자 차단기에 포함되지 않습니다.
 
-   제공자 브레이커의 런타임 상태는 **대시보드 → 상태**에서만 표시됩니다.
+   공급자 차단기 런타임 상태는 다음에 표시됩니다.** 대시보드 → 건강** 오직.
 
-4. **쿨다운 대기** — 모든 후보 연결이 이미 쿨다운 상태인 경우 OmniRoute는 가장 먼저 종료되는 쿨다운을 기다린 후 동일한 클라이언트 요청을 자동으로 재시도할 수 있습니다.
+4. **쿨다운을 기다리세요** — 모든 후보 연결이 이미 냉각 중인 경우 OmniRoute 가장 빠른 냉각을 기다리고 동일한 클라이언트 요청을 자동으로 재시도할 수 있습니다.
 
-5. **속도 제한 자동 감지** — 업스트림 제공자가 명시적인 대기 시간을 반환하면, 이 설정이 활성화된 경우 해당 힌트가 로컬 연결 쿨다운보다 우선합니다.
+5. **속도 제한 자동 감지** — 업스트림 공급자가 명시적인 대기 창을 반환하면 설정이 활성화되면 해당 힌트가 로컬 연결 휴지 기간을 재정의합니다.
 
-**전문가 팁:** 장애 발생 후 **상태** 페이지에서 실시간 제공자 브레이커를 검사하고 재설정하세요. 복원력 페이지에서는 구성만 변경할 수 있습니다.
+**전문가 팁:** 사용** 건강** 중단 후 라이브 공급자 차단기를 검사하고 재설정하는 페이지입니다. 복원력 페이지는 구성만 변경합니다.
 
 ---
 
-### 데이터베이스 내보내기 / 가져오기
+### 데이터베이스 내보내기/가져오기
 
-**대시보드 → 설정 → 시스템 및 스토리지**에서 데이터베이스 백업을 관리합니다.
+데이터베이스 백업 관리** 대시보드 → 설정 → 시스템 및 스토리지** .
 
-| 작업                       | 설명                                                                                                                                          |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **데이터베이스 내보내기**  | 현재 SQLite 데이터베이스를 `.sqlite` 파일로 다운로드합니다                                                                                    |
-| **모두 내보내기(.tar.gz)** | 데이터베이스, 설정, 콤보, 제공자 연결(자격 증명 제외), API 키 메타데이터가 포함된 전체 백업 아카이브를 다운로드합니다                         |
-| **데이터베이스 가져오기**  | `.sqlite` 파일을 업로드하여 현재 데이터베이스를 교체합니다. `DISABLE_SQLITE_AUTO_BACKUP=true`가 아니면 가져오기 전 백업이 자동으로 생성됩니다 |
+| 행동                       | 설명                                                                                                                                           |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **데이터베이스 내보내기**  | 현재 SQLite 데이터베이스를 `.sqlite` 파일로 다운로드합니다.                                                                                    |
+| **모두 내보내기(.tar.gz)** | 데이터베이스, 설정, 콤보, 공급자 연결(자격 증명 없음), API 키 메타데이터를 포함한 전체 백업 아카이브를 다운로드합니다.                         |
+| **데이터베이스 가져오기**  | 현재 데이터베이스를 대체하려면 `.sqlite` 파일을 업로드하세요. `DISABLE_SQLITE_AUTO_BACKUP=true` 아니면 가져오기 전 백업이 자동으로 생성됩니다. |
 
 ```bash
-# API: 데이터베이스 내보내기
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: 모두 내보내기(전체 아카이브)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: 데이터베이스 가져오기
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**가져오기 유효성 검사:** 가져온 파일은 무결성(SQLite pragma 검사), 필수 테이블(`provider_connections`, `provider_nodes`, `combos`, `api_keys`) 및 크기(최대 100MB)에 대해 검증됩니다.
+**수입 검증:** 가져온 파일은 무결성(SQLite pragma check), 필수 테이블(`provider_connections`, `provider_nodes`, `combos`, `api_keys`) 및 크기(최대 100MB)에 대해 검증됩니다.
 
 **사용 사례:**
 
 - 머신 간 OmniRoute 마이그레이션
 - 재해 복구를 위한 외부 백업 생성
-- 팀원 간 구성 공유(모두 내보내기 → 아카이브 공유)
+- 팀 구성원 간 구성 공유(모든 → 공유 아카이브 내보내기)
 
 ---
 
 ### 설정 대시보드
 
-설정 페이지는 간편한 탐색을 위해 **7개의 탭**으로 구성되어 있습니다:
+설정 페이지는 다음과 같이 구성됩니다.** 탭 7개** 쉬운 탐색을 위해:
 
-| 탭         | 내용                                                                                                                                                |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **일반**   | 시스템 스토리지 도구, 기본 동작, Endpoint 터널 표시 여부                                                                                            |
-| **외관**   | 테마 제어(라이트/다크/시스템), 사이드바 표시 여부, Cloudflare/Tailscale/ngrok 터널 카드의 패널 토글                                                 |
-| **AI**     | 사고 예산(passthrough / auto-strip / custom / adaptive — [THINKING_BUDGET.md](./THINKING_BUDGET.md) 참조), 전역 시스템 프롬프트, 프롬프트 캐시 통계 |
-| **보안**   | 로그인/비밀번호 설정, IP 액세스 제어, `/models`의 API 인증, 공급자 차단, 프롬프트 인젝션 방어                                                       |
-| **라우팅** | 전역 라우팅 전략(Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), 와일드카드 모델 별칭, 폴백 체인, 콤보 기본값               |
-| **복원력** | 요청 큐, 연결 쿨다운, 공급자 차단기 구성 및 쿨다운 대기 동작                                                                                        |
-| **고급**   | 전역 프록시 구성(HTTP/SOCKS5), 공급자별 프록시 재정의                                                                                               |
+| 꼬리표       | 내용물                                                                                                                                     |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **일반적인** | 시스템 스토리지 도구, 기본 동작, 엔드포인트 터널 가시성                                                                                    |
+| **모습**     | 테마 컨트롤(light/dark/system), 사이드바 가시성, Cloudflare/Tailscale/ngrok 터널 카드용 패널 토글                                          |
+| **AI**       | 생각하는 예산(통과/자동 제거/사용자 정의/적응 — [THINKING_BUDGET.md](./THINKING_BUDGET.md) 참조), 전역 시스템 프롬프트, 프롬프트 캐시 통계 |
+| **보안**     | Login/Password 설정, IP 액세스 제어, `/models` 에 대한 API 인증, 공급자 차단, 프롬프트 주입 가드                                           |
+| **라우팅**   | 글로벌 라우팅 전략(Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), 와일드카드 모델 별칭, 폴백 체인, 콤보 기본값    |
+| **회복력**   | 요청 대기열, 연결 휴지, 공급자 차단기 구성 및 휴지 대기 동작                                                                               |
+| **고급의**   | 전역 프록시 구성(HTTP/SOCKS5), 공급자별 프록시 재정의                                                                                      |
 
-일반 탭에서는 더 이상 읽기 전용 로깅 및 캐시 참고 사항을 중복해서 표시하지 않습니다. 데이터베이스 보존 및
-최적화 설정은 `/api/settings/database`를 통해 저장되며, 수동 캐시 삭제에는
-`DELETE /api/cache`를 사용합니다. 요청 및 프록시 로그의 최대 행 수는
-`CALL_LOGS_TABLE_MAX_ROWS`와 `PROXY_LOGS_TABLE_MAX_ROWS`로 제어됩니다.
+일반은 더 이상 읽기 전용 로깅 및 캐시 메모를 복제하지 않습니다. 데이터베이스 보존 및 최적화 설정은 `/api/settings/database` 통해 유지됩니다. 수동 캐시 지우기는 `DELETE /api/cache` 사용합니다. 요청 및 프록시 로그 행 캡은 `CALL_LOGS_TABLE_MAX_ROWS` 및 `PROXY_LOGS_TABLE_MAX_ROWS` 에 의해 제어됩니다.
 
 ---
 
 ### 비용 및 예산 관리
 
-**대시보드 → 비용**을 통해 액세스합니다.
+다음을 통해 액세스** 대시보드 → 비용** .
 
-| 탭       | 용도                                                                          |
-| -------- | ----------------------------------------------------------------------------- |
-| **예산** | 일별/주별/월별 예산으로 API 키별 지출 한도를 설정하고 실시간으로 추적합니다   |
-| **가격** | 모델 가격 항목을 확인하고 편집합니다 — 공급자별 입력/출력 토큰 1,000개당 비용 |
+| 꼬리표   | 목적                                                                    |
+| -------- | ----------------------------------------------------------------------- |
+| **예산** | daily/weekly/monthly 예산 및 실시간 추적을 통해 API 키당 지출 한도 설정 |
+| **가격** | 모델 가격 항목 보기 및 편집 - 공급자당 1,000개 input/output 토큰당 비용 |
 
 ```bash
-# API: 예산 설정
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: 현재 예산 상태 가져오기
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**비용 추적:** 모든 요청은 토큰 사용량을 기록하고 가격표를 사용하여 비용을 계산합니다. **대시보드 → 사용량**에서 공급자, 모델 및 API 키별 세부 내역을 확인할 수 있습니다.
+**비용 추적:** 모든 요청은 토큰 사용량을 기록하고 가격표를 사용하여 비용을 계산합니다. 다음의 분류 보기** 대시보드 → 사용법** 공급자, 모델 및 API 키별.
 
 ---
 
-### 오디오 트랜스크립션
+### 오디오 전사
 
-OmniRoute는 OpenAI 호환 엔드포인트를 통해 오디오 트랜스크립션을 지원합니다.
+OmniRoute OpenAI 호환 엔드포인트를 통해 오디오 전사를 지원합니다.
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# curl 사용 예시
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3`은 네이티브 Deepgram 경로이며 Deepgram API 키가 필요합니다.
-OpenRouter만 구성된 경우 `openrouter/deepgram/nova-3`을 사용하세요.
+`deepgram/nova-3` 는 기본 Deepgram 경로이며 Deepgram API 키가 필요합니다. OpenRouter 만 구성된 경우 `openrouter/deepgram/nova-3` 사용하세요.
 
-**음성-텍스트 변환(트랜스크립션)** 공급자:
+**음성-텍스트(녹화)** 공급자:
 
-- `openai/` (whisper 호환)
-- `groq/` (Groq Whisper Turbo)
-- `deepgram/` (Nova 제품군)
+- `openai/` (속삭임 호환)
+- `groq/` (Groq 속삭임 터보)
+- `deepgram/` (노바 패밀리)
 - `assemblyai/`
-- `nvidia/` (Parakeet, Canary)
-- `huggingface/` (whisper 변형)
+- `nvidia/` (앵무새, 카나리아)
+- `huggingface/` (속삭임 변형)
 - `qwen/`
 
-**텍스트-음성 변환(`POST /v1/audio/speech`)** 공급자:
+**텍스트 음성 변환(`POST /v1/audio/speech`)** 공급자:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
-- `deepgram/` (Aura)
-- `nvidia/` (Magpie TTS)
+- `deepgram/` (아우라)
+- `nvidia/` (까치 TTS)
 - `elevenlabs/`
 - `huggingface/`
 - `inworld/`
@@ -1126,52 +1121,45 @@ OpenRouter만 구성된 경우 `openrouter/deepgram/nova-3`을 사용하세요.
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-트랜스크립션에 지원되는 오디오 형식: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS 출력 형식은 공급자에 따라 다릅니다(mp3, wav, opus, pcm, mulaw).
+전사에 지원되는 오디오 형식: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. TTS 출력 형식은 공급자(mp3, wav, opus, pcm, mulaw)에 따라 다릅니다.
 
 ---
 
 ### 콤보 밸런싱 전략
 
-**대시보드 → 콤보 → 생성/편집 → 전략**에서 콤보별 밸런싱을 구성합니다.
+콤보별 밸런싱을 구성하세요.** 대시보드 → 콤보 → Create/Edit →** .
 
-| 전략            | 설명                                                           |
-| --------------- | -------------------------------------------------------------- |
-| **라운드 로빈** | 모델을 순차적으로 순환합니다                                   |
-| **우선순위**    | 항상 첫 번째 모델을 시도하며, 오류가 발생할 때만 폴백합니다    |
-| **무작위**      | 각 요청에 대해 콤보에서 무작위 모델을 선택합니다               |
-| **가중치 기반** | 모델별로 할당된 가중치에 비례하여 라우팅합니다                 |
-| **최소 사용**   | 최근 요청 수가 가장 적은 모델로 라우팅합니다(콤보 메트릭 사용) |
-| **비용 최적화** | 사용 가능한 가장 저렴한 모델로 라우팅합니다(가격표 사용)       |
+| 전략                 | 설명                                                        |
+| -------------------- | ----------------------------------------------------------- |
+| **라운드 로빈**      | 모델을 순차적으로 순환합니다.                               |
+| **우선 사항**        | 항상 첫 번째 모델을 시도합니다. 오류가 발생한 경우에만 폴백 |
+| **무작위의**         | 각 요청에 대한 콤보에서 무작위 모델을 선택합니다.           |
+| **가중**             | 모델당 할당된 가중치에 따라 비례적으로 라우팅               |
+| **가장 적게 사용됨** | 최근 요청이 가장 적은 모델로 라우팅(콤보 측정항목 사용)     |
+| **비용 최적화**      | 사용 가능한 가장 저렴한 모델로 라우팅(가격표 사용)          |
 
-전역 콤보 기본값은 **대시보드 → 설정 → 라우팅 → 콤보 기본값**에서 설정할 수 있습니다.
-콤보 대상 타임아웃은 기본적으로 현재 요청 타임아웃을 상속합니다. 더 짧은 대상별 제한으로
-더 빠른 폴백을 트리거해야 하는 경우에만 콤보 기본값 또는 개별 콤보에서 **대상 타임아웃
-(초)**을 사용하세요.
+글로벌 콤보 기본값은 다음에서 설정할 수 있습니다.** 대시보드 → 설정 → 라우팅 → 콤보 기본값** . 콤보 대상 시간 초과는 기본적으로 현재 요청 시간 초과를 상속합니다. 사용** 대상 시간 초과(초)** 콤보 기본값 또는 개별 콤보는 대상당 제한이 짧을수록 더 빠른 폴백을 트리거해야 하는 경우에만 가능합니다.
 
-지연 시간 없는 콤보 최적화는 선택적으로 활성화해야 합니다. 이러한 지연 시간 기능이 폴백 대상을 동시에 요청하거나, TTFT
-기록을 기반으로 대상을 건너뛰거나, 폴백 요청을 압축하는 것을 방지하려면 **지연 시간 없는 최적화**를 비활성화된 상태로
-유지하세요. 활성화하면 구성된 헤징, 예측형 TTFT
-건너뛰기 및 선제적 폴백 압축을 통해 라우팅/요청 충실도를 낮추는 대신 긴 꼬리
-지연 시간을 줄일 수 있습니다.
+제로 레이턴시 콤보 최적화가 선택되어 있습니다. 떠나다** 지연 시간 없는 최적화** 대기 시간 기능이 폴백 대상을 경주하거나, TTFT 기록을 기반으로 대상을 건너뛰거나, 폴백 요청을 압축하는 것을 방지하기 위해 비활성화됩니다. 이를 활성화하면 구성된 헤징, 예측적 TTFT 건너뛰기 및 사전 폴백 압축을 통해 routing/request 충실도를 교환하여 더 낮은 꼬리 대기 시간을 얻을 수 있습니다.
 
-업스트림 제공자가 엄격한 `max_tokens` / `maxOutputTokens` 제한을 요구하는 경우 **Reasoning token buffer**를 비활성화하세요. 활성화하면 콤보 라우팅은 출력 한도가 알려진 모델에만 추론 모델용 여유 토큰을 추가하며, 안전하게 버퍼링된 값이 해당 한도를 초과할 경우 클라이언트 토큰 제한을 변경하지 않습니다. 클라이언트 제한이 이미 알려진 한도를 초과한 경우 OmniRoute는 업스트림 요청을 보내기 전에 해당 한도까지 제한합니다.
+장애를 입히다** 추론 토큰 버퍼** 업스트림 공급자가 엄격한 `max_tokens` / `maxOutputTokens` 제한을 요구하는 경우. 활성화되면 콤보 라우팅은 알려진 출력 한도가 있는 모델에 대한 추론 모델 헤드룸만 추가하고 안전한 버퍼링 값이 해당 한도를 초과하는 경우 클라이언트 토큰 제한을 변경하지 않고 그대로 둡니다. 클라이언트 제한이 이미 알려진 한도보다 높은 경우, OmniRoute 업스트림 요청을 보내기 전에 이를 해당 한도로 제한합니다.
 
 ---
 
-### 상태 대시보드
+### 건강 대시보드
 
-**Dashboard → Health**를 통해 액세스할 수 있습니다. 6개의 카드로 구성된 실시간 시스템 상태 개요입니다.
+다음을 통해 액세스** 대시보드 → 건강** . 6개의 카드를 사용한 실시간 시스템 상태 개요:
 
-| 카드                     | 표시 내용                                       |
-| ------------------------ | ----------------------------------------------- |
-| **시스템 상태**          | 가동 시간, 버전, 메모리 사용량, 데이터 디렉터리 |
-| **제공자 상태**          | 전역 제공자 회로 차단기의 런타임 상태           |
-| **속도 제한**            | 계정별 활성 연결 쿨다운 및 남은 시간            |
-| **활성 잠금**            | 활성 모델 범위 잠금 및 임시 제외                |
-| **서명 캐시**            | 중복 제거 캐시 통계(활성 키, 적중률)            |
-| **지연 시간 텔레메트리** | 제공자별 p50/p95/p99 지연 시간 집계             |
+| 카드                    | 그것이 보여주는 것                              |
+| ----------------------- | ----------------------------------------------- |
+| **시스템 상태**         | 가동 시간, 버전, 메모리 사용량, 데이터 디렉터리 |
+| **제공자 상태**         | 글로벌 공급자 회로 차단기 런타임 상태           |
+| **비율 제한**           | 남은 시간이 있는 계정당 활성 연결 대기 시간     |
+| **활성 잠금**           | 활성 모델 범위 잠금 및 임시 제외                |
+| **서명 캐시**           | 중복 제거 캐시 통계(활성 키, 적중률)            |
+| **대기 시간 원격 측정** | 공급자별 p50/p95/p99 대기 시간 집계             |
 
-**전문가 팁:** Health 페이지는 10초마다 자동으로 새로 고침됩니다. 회로 차단기 카드를 사용하여 문제가 발생한 제공자를 파악하세요.
+**전문가 팁:** 상태 페이지는 10초마다 자동으로 새로 고쳐집니다. 회로 차단기 카드를 사용하여 어떤 공급자가 문제를 겪고 있는지 식별하십시오.
 
 ---
 
@@ -1293,34 +1281,34 @@ OmniRoute는 클라우드 코딩 에이전트(**OpenAI Codex Cloud**, **Devin**,
 
 ## 🛠️ 프로그래밍 방식 관리
 
-**`manage` 범위가 지정된 Bearer 키**를 사용하여 HTTP를 통해 모든 OmniRoute 리소스(프로바이더, 콤보, 키, 설정)를 관리할 수 있습니다.
+다음을 사용하여 HTTP 통해 모든 OmniRoute 리소스(공급자, 콤보, 키, 설정)를 관리할 수 있습니다.** `manage` 범위가 있는 베어러 키** .
 
-**Dashboard → API Keys → New Key → Scope: manage**에서 키를 생성한 후 다음과 같이 사용하세요.
+키 생성** 대시보드 → API 키 → 새 키 → 범위: 관리** , 그 다음에:
 
 ```bash
-# 프로바이더 목록 조회
+# List providers
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
-# 프로바이더 연결 추가
+# Add a provider connection
 curl -X POST http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
 
-# 콤보 생성
+# Create a combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
 
-# API 키 목록 조회/생성
+# List/create API keys
 curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-전체 엔드포인트 목록과 요청/응답 스키마는 [API_REFERENCE.md](../reference/API_REFERENCE.md)를 참조하세요.
+전체 엔드포인트 카탈로그 및 request/response 스키마는 [API_REFERENCE.md를](../reference/API_REFERENCE.md) 참조하세요.
 
 ---
 

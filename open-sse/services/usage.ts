@@ -97,6 +97,7 @@ import { getKilocodeUsage } from "./usage/kilocode.ts";
 import { getChatPlaygroundUsage } from "./usage/chatplayground.ts";
 import { getTokenRouterUsage } from "./usage/tokenrouter.ts";
 import { getCloudflareAiUsage } from "./usage/cloudflareAi.ts";
+import { getMuseUsage } from "./usage/museCode.ts";
 
 type JsonRecord = Record<string, unknown>;
 type UsageProviderConnection = JsonRecord & {
@@ -129,24 +130,27 @@ export type { UsageFetcherProvider } from "./usage/fetcherProviders.ts";
  */
 export async function getUsageForProvider(
   connection: UsageProviderConnection,
-  options: { forceRefresh?: boolean } = {}
+  options: { forceRefresh?: boolean; includePlan?: boolean } = {}
 ) {
   const { id, provider, accessToken, apiKey, providerSpecificData, projectId, email } = connection;
 
   if (isKimiCodingConnection(connection)) {
-    return await getKimiUsage(accessToken, apiKey, providerSpecificData);
+    return await getKimiUsage(accessToken, apiKey, providerSpecificData, options);
   }
 
   if (isMoonshotOpenPlatformConnection(connection)) {
     return await getMoonshotOpenPlatformUsage(connection);
   }
 
-  // openai-compatible-* ids are generated per connection, so they can never
+  // openai-/anthropic-compatible-* ids are generated per connection, so they can never
   // appear in the switch below or in USAGE_FETCHER_PROVIDERS. The connection
   // itself declares where its quota lives (#13616); without that declaration
   // this returns a message and the sync treats it as "nothing to show", exactly
   // as it did before.
-  if (typeof provider === "string" && provider.startsWith("openai-compatible-")) {
+  if (
+    typeof provider === "string" &&
+    (provider.startsWith("openai-compatible-") || provider.startsWith("anthropic-compatible-"))
+  ) {
     return await getOpenAiCompatibleUsage(apiKey, providerSpecificData);
   }
 
@@ -184,7 +188,7 @@ export async function getUsageForProvider(
       return await getVertexUsage(id || "", provider);
     case "kimi-coding":
     case "kimi-coding-apikey":
-      return await getKimiUsage(accessToken, apiKey, providerSpecificData);
+      return await getKimiUsage(accessToken, apiKey, providerSpecificData, options);
     case "qoder":
       // Qoder PATs live in `apiKey` (decrypted) or `providerSpecificData.qoderPat`,
       // never in `accessToken`.
@@ -304,6 +308,9 @@ export async function getUsageForProvider(
     case "cloudflare-ai":
       // Daily neurons from GraphQL Analytics (needs Account Analytics: Read on the token).
       return await getCloudflareAiUsage(apiKey || "", providerSpecificData);
+    case "muse-code":
+      // Muse Code has no usage/balance API. Return persisted subscription metadata.
+      return await getMuseUsage(accessToken, providerSpecificData, id || "");
     default:
       return { message: `Usage API not implemented for ${provider}` };
   }

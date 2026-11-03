@@ -170,7 +170,7 @@ for (const profile of ["ci", "quality"]) {
   for (const status of ["failure", "cancelled", "skipped", "pending", "unknown"]) {
     test(`${profile}: an applicable required job cannot pass as ${status}`, () => {
       const needs = needsFor(profile);
-      const id = profile === "ci" ? "test-vitest" : "fast-vitest";
+      const id = profile === "ci" ? "test-vitest" : "fast-gates";
       needs[id].result = status;
       assert.notEqual(run(needs, context, profile).verdict, "PASS");
     });
@@ -350,3 +350,57 @@ for (const profile of ["ci", "quality"]) {
     assert.equal(verdict.steps.at(-1).with["if-no-files-found"], "error");
   });
 }
+
+// Full-matrix lane (2026-10-27): E2E, Electron, package, integration, ecosystem, protocol
+// clients and Bun run on push / dispatch / merge_group and on the Mergify queue candidate,
+// not on every push to an ordinary PR (the org's Free plan caps hosted runners at 20 jobs).
+const FULL_LANE = Object.entries(policy.profiles.ci.jobs)
+  .filter(([, job]) => job.when.startsWith("full-"))
+  .map(([id]) => id);
+
+test("full-matrix lanes cover the heavy jobs and nothing the fast lane needs", () => {
+  for (const id of ["test-e2e", "electron-package-smoke", "package-artifact", "test-integration"])
+    assert.ok(FULL_LANE.includes(id), `${id} belongs to the full-matrix lane`);
+  for (const id of ["lint", "build", "test-unit", "test-vitest", "test-coverage", "test-security"])
+    assert.ok(!FULL_LANE.includes(id), `${id} must keep running on every code PR`);
+});
+
+test("an ordinary code PR may skip the full-matrix lanes; the queue candidate and push may not", () => {
+  const needs = needsFor("ci");
+  for (const id of FULL_LANE) needs[id].result = "skipped";
+  assert.equal(run(needs).verdict, "PASS");
+  assert.notEqual(run(needs, queueContext).verdict, "PASS");
+  assert.notEqual(run(needs, { ...context, event: "push" }).verdict, "PASS");
+  assert.notEqual(run(needs, { ...context, event: "workflow_dispatch" }).verdict, "PASS");
+});
+
+test("a full-matrix lane that ran and failed still fails an ordinary PR", () => {
+  const needs = needsFor("ci");
+  for (const id of FULL_LANE) needs[id].result = "skipped";
+  needs["test-integration"].result = "failure";
+  assert.notEqual(run(needs).verdict, "PASS");
+});
+
+test("tests-only queue candidates still skip browser E2E", () => {
+  const needs = needsFor("ci");
+  needs.changes.outputs.testsOnly = "true";
+  needs["test-e2e"].result = "skipped";
+  assert.equal(run(needs, queueContext).verdict, "PASS");
+});
+
+test("ci.yml gates every full-matrix job on the queue candidate, not on PR readiness", () => {
+  const workflow = loadYaml(
+    readFileSync(new URL("../../.github/workflows/ci.yml", import.meta.url), "utf8")
+  );
+  for (const id of FULL_LANE) {
+    const cond = String(workflow.jobs[id].if ?? "");
+    assert.ok(
+      cond.includes("github.event_name != 'pull_request'") &&
+        cond.includes("needs.changes.outputs.queueCandidate == 'true'"),
+      `${id}: if must admit non-PR events and the queue candidate only`
+    );
+    assert.ok(!cond.includes("draft == false"), `${id}: a ready PR alone must not start it`);
+    const needs = [workflow.jobs[id].needs].flat();
+    assert.ok(needs.includes("changes"), `${id} must depend on changes to read queueCandidate`);
+  }
+});

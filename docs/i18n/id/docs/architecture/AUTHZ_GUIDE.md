@@ -143,34 +143,34 @@ dilengkapi:
 
 Beberapa aksi `MANAGEMENT` bersifat **khusus operator**: kunci `manage` tidak cukup. Mengekspor kredensial tersimpan (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), memulihkan cadangan di atas data aktif (`POST /api/db-backups/import` termasuk `dryRun=true`, `POST /api/db-backups` pemulihan berdasarkan id, `POST /api/settings/import-json`), dan menghancurkan titik pemulihan (`DELETE /api/db-backups` untuk pembersihan, dan `PATCH /api/db-backups` karena retensi yang disimpannya menggerakkan pemangkasan otomatis setelah setiap cadangan) memerlukan sesi dashboard, subjek CLI lokal, atau login yang dinonaktifkan. Menerbitkan token sinkronisasi (`POST /api/sync/tokens`) dan mencetak token akses CLI `admin` (`POST /api/cli/tokens`) memerlukan sesi dashboard atau subjek CLI lokal di setiap mode login. Kunci API dengan cakupan apa pun dan token akses `oma_` bukan kredensial operator: mereka mendapat `403` setiap kali salah satunya diperlukan. Pemeriksaannya ada di `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Mengubah pengaturan login juga khusus operator: `POST /api/settings/require-login` (mengatur kata sandi manajemen / mengaktifkan-menonaktifkan `requireLogin`) hanya menerima kredensial tersebut setelah kata sandi ada — jendela bootstrap pertama kali (belum ada kata sandi) tidak berubah — dan sesi dashboard harus mengirim `currentPassword` untuk mengganti kata sandi (`403` jika tidak ada atau salah, dicatat sebagai `settings.update_failed`). CLI lokal dan instans dengan login dinonaktifkan mempertahankan jalur pemulihan dan dapat mengatur kata sandi tanpanya, karena keduanya terikat pada host yang memiliki direktori data.
 
-## Pipeline
+## Saluran pipa
 
 ```
-Permintaan masuk → src/proxy.ts
-  → runAuthzPipeline() di src/server/authz/pipeline.ts
-    1. Hapus header internal tepercaya (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Buat ID permintaan, klasifikasikan rute melalui classifyRoute()
-    3. Jika pathname == "/" → alihkan ke /dashboard
-    4. Jika sedang menguras koneksi (penghentian secara bertahap) dan /api/* → 503
-    5. Jika non-GET /api/* → pemeriksaan checkBodySize()
-    6. Jika OPTIONS → preflight CORS 204
-    7. Jika options.enforce == false → teruskan dengan header kelas rute
-    8. Jika tidak: POLICIES[routeClass].evaluate(ctx)
-       - izinkan → tambahkan x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - tolak   → kesalahan JSON dengan correlation_id (halaman dashboard → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Header internal tepercaya (didefinisikan di `src/server/authz/headers.ts`) **dihapus dari permintaan masuk** sebelum klasifikasi — klien tidak dapat mengisi `x-omniroute-auth-*` terlebih dahulu untuk menyamar sebagai suatu subjek.
+Header internal tepercaya (didefinisikan dalam `src/server/authz/headers.ts`) adalah** dihapus dari permintaan masuk** sebelum klasifikasi — klien tidak dapat mengisi `x-omniroute-auth-*` terlebih dahulu untuk meniru subjek.
 
 ### Kontrak kebijakan
 
 Setiap kelas rute memiliki kebijakan di `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — selalu mengembalikan `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — mengekstrak Bearer, memvalidasinya melalui `validateApiKey()`. Hanya beralih ke anonim ketika feature flag efektif `REQUIRE_API_KEY` dinonaktifkan. Flag efektif ditentukan melalui `isRequireApiKeyEnabled()` (`penggantian feature flag DB > process.env.REQUIRE_API_KEY > default`) sehingga Feature Flags Dashboard dan variabel lingkungan mengatur `/api/v1/*`, `/api/v1beta/*`, serta aliasnya secara konsisten; kegagalan resolver akan menolak akses secara default. Mengizinkan permintaan sesi dashboard pada rute API klien (termasuk `/api/v1/models`, yang digunakan oleh katalog model dashboard).
-- **`managementPolicy`** (`policies/management.ts`) — menerima sesi dashboard, permintaan sinkronisasi model internal (dicocokkan dengan `/api/providers/[name]/(sync-models|models)`), atau melewatkan pemeriksaan sepenuhnya jika `isAuthRequired()` mengembalikan false. Mengembalikan 403 (`AUTH_001`) ketika token Bearer tersedia tetapi tidak valid, dan 401 jika tidak. Kebijakan ini juga memberlakukan tingkatan penjaga rute (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum cabang autentikasi apa pun — lihat [Tingkatan Penjaga Rute](../security/ROUTE_GUARD_TIERS.md). Path LOCAL_ONLY di `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (saat ini: `/api/mcp/`) dapat diakses dari non-loopback ketika kunci Bearer memiliki scope `manage`; semua path LOCAL_ONLY lainnya tetap dibatasi secara ketat ke loopback terlepas dari scope.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — mengekstrak Pembawa, memvalidasi melalui `validateApiKey()`. Masuk ke anonim hanya ketika tanda fitur `REQUIRE_API_KEY` yang efektif dinonaktifkan. Bendera yang efektif diselesaikan melalui `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) sehingga Bendera Fitur Dasbor dan variabel lingkungan mengatur `/api/v1/*`, `/api/v1beta/*`, dan alias secara konsisten; kegagalan penyelesai gagal ditutup. Mengizinkan permintaan sesi dasbor pada rute API klien (termasuk `/api/v1/models`, yang digunakan oleh katalog model dasbor). Ketika Entra ID SSO diaktifkan, Pembawa yang secara struktural merupakan token Entra (tiga segmen base64url, `RS*` alg, `kid`) ditangani oleh cabang SSO** sebelum** `validateApiKey()` dan putusannya bersifat final — tidak pernah masuk ke jalur kunci API atau cabang degradasi ke anonim, sehingga penghentian penyedia identitas tidak dapat menjadi akses terbuka. Kunci API statis tidak terpengaruh. Lihat [Masuk ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — menerima sesi dasbor, permintaan sinkronisasi model internal (cocok dengan `/api/providers/[name]/(sync-models|models)`), atau melompati seluruhnya jika `isAuthRequired()` mengembalikan false. Mengembalikan 403 (`AUTH_001`) ketika token Pembawa ada tetapi tidak valid, 401 sebaliknya. Juga menerapkan tingkatan penjaga rute (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum cabang autentikasi mana pun — lihat [Tingkatan Penjaga Rute](../security/ROUTE_GUARD_TIERS.md). jalur LOCAL_ONLY di `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hari ini: `/api/mcp/`) dapat diakses dari non-loopback ketika kunci Pembawa membawa cakupan `manage` ; semua jalur LOCAL_ONLY lainnya tetap loopback ketat terlepas dari cakupannya.
 
-Kebijakan yang berhasil mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Handler downstream dapat membacanya melalui `assertAuth(request, "CLIENT_API")` di `src/server/authz/assertAuth.ts` tanpa menjalankan ulang logika autentikasi.
+Kebijakan yang berhasil mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Penangan hilir dapat membacanya melalui `assertAuth(request, "CLIENT_API")` di `src/server/authz/assertAuth.ts` alih-alih menjalankan kembali logika autentikasi.
 
 ## Daftar Rute Publik
 
@@ -309,25 +309,25 @@ Endpoint `/api/v1/agents/tasks/*` dan `/api/resilience/model-cooldowns` **kini m
 - Daftar izin publik: `tests/unit/public-api-routes.test.ts`.
 - Jalankan pengujian terfokus: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`.
 
-## Debugging
+## Men-debug
 
 Pipeline selalu menandai respons dengan:
 
 ```
-x-request-id:               <ID korelasi, ditampilkan kembali dalam isi error>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Untuk permintaan yang diautentikasi, header permintaan upstream (di sisi handler) juga mencakup:
+Untuk permintaan yang diautentikasi, header permintaan upstream (sisi pengendali) juga mencakup:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<4 karakter terakhir> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (opsional)
-x-omniroute-auth-scopes:    daftar yang dipisahkan koma
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Gunakan `assertAuth(req, expectedClass)` di dalam handler — fungsi ini melempar `AuthzAssertionError` dengan kode `AUTHZ_NOT_INITIALIZED` jika middleware dilewati (berguna untuk mendeteksi regresi konfigurasi dalam pengujian).
+Gunakan `assertAuth(req, expectedClass)` di dalam penangan — ia melempar `AuthzAssertionError` dengan kode `AUTHZ_NOT_INITIALIZED` jika middleware dilewati (berguna untuk menangkap regresi konfigurasi dalam pengujian).
 
 ## Lihat Juga
 

@@ -113,6 +113,8 @@ export interface DataTableFilterFieldProps
   width?: "standard" | "wide";
   /** Optional two-column layout for compact dashboard toolbars on phones. */
   mobileWidth?: "full" | "half";
+  /** Fill an application-sized grid/flex column instead of shrinking the control to its label. */
+  fill?: boolean;
   children: ReactNode;
 }
 
@@ -121,6 +123,7 @@ export function DataTableFilterField({
   label,
   width = "standard",
   mobileWidth = "full",
+  fill = false,
   children,
   className,
   ...props
@@ -137,6 +140,7 @@ export function DataTableFilterField({
       data-slot="data-table-filter"
       data-width={width}
       data-mobile-width={mobileWidth}
+      data-fill={fill || undefined}
       className={cn("ci-data-table-filter", className)}
       {...props}
     >

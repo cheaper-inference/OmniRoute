@@ -1,4 +1,9 @@
+# Cost & Spend Tracking (Polski)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/COST_TRACKING.md) · 🇪🇹 [am](../../../am/docs/guides/COST_TRACKING.md) · 🇸🇦 [ar](../../../ar/docs/guides/COST_TRACKING.md) · 🇦🇿 [az](../../../az/docs/guides/COST_TRACKING.md) · 🇧🇬 [bg](../../../bg/docs/guides/COST_TRACKING.md) · 🇧🇩 [bn](../../../bn/docs/guides/COST_TRACKING.md) · 🇧🇦 [bs](../../../bs/docs/guides/COST_TRACKING.md) · 🇨🇿 [cs](../../../cs/docs/guides/COST_TRACKING.md) · 🇩🇰 [da](../../../da/docs/guides/COST_TRACKING.md) · 🇩🇪 [de](../../../de/docs/guides/COST_TRACKING.md) · 🇬🇷 [el](../../../el/docs/guides/COST_TRACKING.md) · 🇪🇸 [es](../../../es/docs/guides/COST_TRACKING.md) · 🇪🇪 [et](../../../et/docs/guides/COST_TRACKING.md) · 🇮🇷 [fa](../../../fa/docs/guides/COST_TRACKING.md) · 🇫🇮 [fi](../../../fi/docs/guides/COST_TRACKING.md) · 🇫🇷 [fr](../../../fr/docs/guides/COST_TRACKING.md) · 🇮🇪 [ga](../../../ga/docs/guides/COST_TRACKING.md) · 🇮🇳 [gu](../../../gu/docs/guides/COST_TRACKING.md) · 🇳🇬 [ha](../../../ha/docs/guides/COST_TRACKING.md) · 🇮🇱 [he](../../../he/docs/guides/COST_TRACKING.md) · 🇮🇳 [hi](../../../hi/docs/guides/COST_TRACKING.md) · 🇭🇷 [hr](../../../hr/docs/guides/COST_TRACKING.md) · 🇭🇺 [hu](../../../hu/docs/guides/COST_TRACKING.md) · 🇦🇲 [hy](../../../hy/docs/guides/COST_TRACKING.md) · 🇮🇩 [id](../../../id/docs/guides/COST_TRACKING.md) · 🇳🇬 [ig](../../../ig/docs/guides/COST_TRACKING.md) · 🇮🇹 [it](../../../it/docs/guides/COST_TRACKING.md) · 🇯🇵 [ja](../../../ja/docs/guides/COST_TRACKING.md) · 🇬🇪 [ka](../../../ka/docs/guides/COST_TRACKING.md) · 🇰🇭 [km](../../../km/docs/guides/COST_TRACKING.md) · 🇮🇳 [kn](../../../kn/docs/guides/COST_TRACKING.md) · 🇰🇷 [ko](../../../ko/docs/guides/COST_TRACKING.md) · 🇱🇹 [lt](../../../lt/docs/guides/COST_TRACKING.md) · 🇱🇻 [lv](../../../lv/docs/guides/COST_TRACKING.md) · 🇮🇳 [ml](../../../ml/docs/guides/COST_TRACKING.md) · 🇮🇳 [mr](../../../mr/docs/guides/COST_TRACKING.md) · 🇲🇾 [ms](../../../ms/docs/guides/COST_TRACKING.md) · 🇲🇹 [mt](../../../mt/docs/guides/COST_TRACKING.md) · 🇲🇲 [my](../../../my/docs/guides/COST_TRACKING.md) · 🇳🇵 [ne](../../../ne/docs/guides/COST_TRACKING.md) · 🇳🇱 [nl](../../../nl/docs/guides/COST_TRACKING.md) · 🇳🇴 [no](../../../no/docs/guides/COST_TRACKING.md) · 🇮🇳 [or](../../../or/docs/guides/COST_TRACKING.md) · 🇮🇳 [pa](../../../pa/docs/guides/COST_TRACKING.md) · 🇵🇭 [phi](../../../phi/docs/guides/COST_TRACKING.md) · 🇵🇹 [pt](../../../pt/docs/guides/COST_TRACKING.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/COST_TRACKING.md) · 🇷🇴 [ro](../../../ro/docs/guides/COST_TRACKING.md) · 🇷🇺 [ru](../../../ru/docs/guides/COST_TRACKING.md) · 🇱🇰 [si](../../../si/docs/guides/COST_TRACKING.md) · 🇸🇰 [sk](../../../sk/docs/guides/COST_TRACKING.md) · 🇸🇮 [sl](../../../sl/docs/guides/COST_TRACKING.md) · 🇷🇸 [sr](../../../sr/docs/guides/COST_TRACKING.md) · 🇸🇪 [sv](../../../sv/docs/guides/COST_TRACKING.md) · 🇰🇪 [sw](../../../sw/docs/guides/COST_TRACKING.md) · 🇮🇳 [ta](../../../ta/docs/guides/COST_TRACKING.md) · 🇮🇳 [te](../../../te/docs/guides/COST_TRACKING.md) · 🇹🇭 [th](../../../th/docs/guides/COST_TRACKING.md) · 🇹🇷 [tr](../../../tr/docs/guides/COST_TRACKING.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/COST_TRACKING.md) · 🇵🇰 [ur](../../../ur/docs/guides/COST_TRACKING.md) · 🇺🇿 [uz](../../../uz/docs/guides/COST_TRACKING.md) · 🇻🇳 [vi](../../../vi/docs/guides/COST_TRACKING.md) · 🇳🇬 [yo](../../../yo/docs/guides/COST_TRACKING.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/COST_TRACKING.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/COST_TRACKING.md)
+
 ---
+
 title: "Śledzenie kosztów i wydatków"
 version: 3.8.40
 lastUpdated: 2026-06-28
@@ -43,63 +48,57 @@ Ponieważ liczba jest szacunkiem:
 
 ### Źródło cen
 
-Koszty pochodzą z tabeli cen rozwiązywanej w tej kolejności pierwszeństwa
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Koszty pochodzą z połączonej tabeli cen w [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), w tej kolejności pierwszeństwa (** najpierw najwyższy** ):
 
-1. **Nadpisania użytkownika** — ceny ustawione w dashboardzie / przez `PATCH /api/pricing`.
-2. **Zsynchronizowane ceny zewnętrzne** — pobierane z publicznego pliku LiteLLM
-   `model_prices_and_context_window.json`, gdy sync jest włączony (przechowywane w osobnej
-   przestrzeni nazw `pricing_synced`, więc nigdy nie nadpisują Twoich override’ów).
-3. **Zakodowane na stałe domyślne** — dostarczane z OmniRoute.
+1. **Zastąpienia użytkownika** ceny — ustawione w panelu kontrolnym lub poprzez `PATCH /api/pricing` (przestrzeń nazw `pricing` ).
+2. **synchronizacja modeli.dev** Ceny — pobrane z `https://models.dev/api.json` (przestrzeni nazw `models_dev_pricing` ).
+3. **LiteLLM sync** — prices fetched from LiteLLM's public `model_prices_and_context_window.json` (the `pricing_synced` namespace).
+4. **Zakodowane na stałe ustawienia domyślne** Stawki — wysyłane w [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Zewnętrzny sync cen jest **opt-in**, domyślnie wyłączony. Istotne zmienne środowiskowe
-(zob. [`.env.example`](../../.env.example)):
+Dla tego samego provider/model wartości z warstw o wyższym priorytecie zastępują pasujące pola w niższych warstwach; pola nieobecne w górnej warstwie mogą nadal pochodzić z dolnej warstwy. Kolejność jest stała, nawet jeśli oba niezależne zadania synchronizacji są uruchamiane w tym samym czasie. `GET /api/pricing?includeSources=1` zwraca `pricing` i `sourceMap`, których etykiety poszczególnych modeli (`user`, `modelsDev`, `litellm`, `default`) identyfikują warstwę o najwyższym priorytecie zawierającą ten model.
 
-| Env var                 | Default   | Cel                                                          |
-| ----------------------- | --------- | ------------------------------------------------------------ |
-| `PRICING_SYNC_ENABLED`  | `false`   | Włącza w tle sync cen LiteLLM przy starcie.                  |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Interwał sync w **sekundach** (domyślnie codziennie).        |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Lista źródeł rozdzielona przecinkami (dziś tylko `litellm`). |
+**synchronizacja LiteLLM** jest opcjonalna, domyślnie wyłączona. Jego zmienne środowiskowe (patrz [`.env.example`](../../.env.example) ) to:
 
-### Formuła kosztu
+| Kop. zm                 | Domyślny  | Zamiar                                                                               |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------ |
+| `PRICING_SYNC_ENABLED`  | `false`   | Włącz synchronizację cen LiteLLM w tle.                                              |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Interwał synchronizacji w sekundach (codziennie).                                    |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Wybór źródła tylko dla tej synchronizacji; obecnie obsługiwany jest tylko `litellm`. |
 
-Koszt jest liczony per request z liczby tokenów i stawek za milion tokenów w
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+**synchronizacja modeli.dev** jest oddzielny od synchronizacji LiteLLM i jest również domyślnie wyłączony. Włącz tę opcję w Ustawieniach (synchronizacja modeli.dev) lub użyj tych zmiennych:
 
-- **Tokeny wejściowe** (minus odczyty cache i tokeny tworzenia cache) × stawka `input`.
-- **Tokeny odczytu cache** × stawka `cached` (fallback do stawki input).
-- **Tokeny tworzenia cache** × stawka `cache_creation` (fallback do stawki input).
-- **Tokeny wyjściowe** × stawka `output`.
-- **Tokeny reasoning** × stawka `reasoning` (fallback do stawki output).
+| Kop. zm                    | Domyślny       | Zamiar                                                                                                                                                            |
+| -------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(nieoprawny)_ | Nieustawione następuje po przełączeniu Ustawień; `1/true/on/yes` wymusza włączenie i `0/false/off/no` wymusza wyłączenie (nawet jeśli Ustawienia to umożliwiają). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`        | Domyślny interwał synchronizacji models.dev w sekundach (dziennie).                                                                                               |
 
-Wszystkie stawki są interpretowane jako USD za 1 000 000 tokenów. Tier usługowy Codex
-„fast”/„priority” lub „flex” stosuje mnożnik kosztu (`getCodexFastCostMultiplier`) —
-np. flex jest rozliczany z 50% zniżką na tokeny, pokazywaną na dashboardzie jako
-**flex savings**.
+`PRICING_SYNC_SOURCES` tak** nie** włącz models.dev; kontroluje tylko synchronizację LiteLLM. Usunięcie zastąpienia użytkownika nie powoduje wyczyszczenia żadnej zsynchronizowanej przestrzeni nazw; wchodzi w życie kolejna dostępna warstwa cenowa. W przypadku modelu niedrogiego sprawdź zarówno ustawienia synchronizacji, jak i `sourceMap` przed dodaniem ręcznego zastąpienia.
 
-Nazwy modeli są najpierw normalizowane (prefiksy ścieżek providera, takie jak `openai/`
-lub `accounts/fireworks/models/`, są usuwane), dzięki czemu historyczne wiersze nadal
-pasują do ceny.
+### Formuła kosztowa
 
-### Jak rejestrowane są wydatki
+Koszt jest obliczany na żądanie na podstawie liczby tokenów i stawek za milion tokenów w [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- Koszt per request jest liczony po odpowiedzi i zapisywany fire-and-forget, więc nie
-  dodaje opóźnienia po stronie klienta. Zużycie shared-quota jest planowane na następnym
-  ticku event-loop przez [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Wydatki kluczy API są buforowane i flushowane partiami przez
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (domyślny interwał flush 60 s,
-  bufor 1000 wpisów). Konfigurowalne przez:
+- **Tokeny wejściowe** (minus odczyty pamięci podręcznej i tokeny tworzenia pamięci podręcznej) szybkość × `input`.
+- **Tokeny odczytu pamięci podręcznej** × `cached` stawka (powraca do stawki wejściowej).
+- **Tokeny tworzenia pamięci podręcznej** × `cache_creation` stawka (powraca do stawki wejściowej).
+- **Tokeny wyjściowe** stawka × `output`.
+- **Żetony rozumowania** × `reasoning` (powraca do stopy wyjściowej).
 
-  | Env var                             | Default | Cel                                             |
-  | ----------------------------------- | ------- | ----------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Interwał flush w milisekundach.                 |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Maks. liczba buforowanych wpisów przed flushem. |
+Wszystkie stawki są interpretowane jako USD na 1 000 000 tokenów. Warstwa usług Codex „szybka”/„priorytetowa” lub „elastyczna” stosuje mnożnik kosztów (`getCodexFastCostMultiplier`) — np. flex jest rozliczany z 50% zniżką na tokeny, prezentowaną jako** oszczędności elastyczne** w desce rozdzielczej.
 
-Liczby kosztów na dashboardzie **nie** pochodzą z zapisanej kwoty dolarowej per wiersz —
-są przeliczane w locie z liczby tokenów i bieżącej tabeli cen przy każdym wywołaniu
-endpointu analytics. Dzięki temu poprawa błędnej ceny (i ponowny sync) aktualizuje
-historyczne szacunki kosztów z mocą wsteczną.
+Nazwy modeli są najpierw normalizowane (przedrostki ścieżek dostawców, takie jak `openai/` lub `accounts/fireworks/models/` są usuwane), więc wiersze historyczne nadal odpowiadają cenie.
+
+### Sposób rejestrowania wydatków
+
+- Koszt żądania jest obliczany po udzieleniu odpowiedzi i rejestrowany w trybie „uruchom i zapomnij”, dzięki czemu nigdy nie zwiększa się opóźnienia dla klienta. Zużycie współdzielonego limitu jest planowane w następnym takcie pętli zdarzeń za pośrednictwem [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Wydatki na klucze API są buforowane i opróżniane partiami przez [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (domyślny interwał opróżniania 60 s, bufor na 1000 wpisów). Możliwość strojenia poprzez:
+
+  | Kop. zm                             | Domyślny | Zamiar                                           |
+  | ----------------------------------- | -------- | ------------------------------------------------ |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Interwał spłukiwania w milisekundach.            |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Maksymalnie buforowane wpisy przed opróżnieniem. |
+
+Dane dotyczące kosztów panelu kontrolnego są następujące** nie** odczytane z zapisanej kwoty w dolarach w wierszu — są ponownie obliczane na bieżąco na podstawie liczby tokenów i bieżącej tabeli cen za każdym razem, gdy uruchamiany jest punkt końcowy analizy. Oznacza to, że skorygowanie błędnej ceny (i ponowna synchronizacja) aktualizuje historyczne szacunki kosztów z mocą wsteczną.
 
 ---
 
@@ -147,64 +146,60 @@ Obszar Costs hostuje też (wszystko pod `/dashboard/costs/`):
 
 ---
 
-## Endpointy API
+## punkty końcowe API
 
-Wszystkie wymagają management auth (loopback/JWT, przez `requireManagementAuth`), o ile
-nie zaznaczono inaczej.
+Wszystkie wymagają autoryzacji zarządzania (loopback/JWT, via `requireManagementAuth`), chyba że zaznaczono inaczej.
 
-### Analityka użycia i kosztów
+### Analiza wykorzystania i kosztów
 
-| Method | Endpoint                 | Cel                                                                                                                                                             |
-| ------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Pełna analityka kosztów/użycia: summary, dzienny trend, wg provider/model/API key/account/tier. Query: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Wykorzystanie quota per provider w czasie. Query: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                  |
-| `GET`  | `/api/usage/history`     | Surowe wiersze historii użycia.                                                                                                                                 |
-| `GET`  | `/api/usage/call-logs`   | Logi wywołań per request (model, tokeny, koszt, latency, status).                                                                                               |
-| `GET`  | `/api/usage/quota`       | Status quota providera.                                                                                                                                         |
-| `GET`  | `/api/usage/proxy-logs`  | Logi żądań proxy.                                                                                                                                               |
+| Metoda | Punkt końcowy            | Zamiar                                                                                                                                                                    |
+| ------ | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Pełna analityka cost/usage : podsumowanie, trend dzienny, autor: provider/model/API key/account/tier. Zapytanie: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | Wykorzystanie limitu na dostawcę w czasie. Zapytanie: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                        |
+| `GET`  | `/api/usage/history`     | Surowe wiersze historii użytkowania.                                                                                                                                      |
+| `GET`  | `/api/usage/call-logs`   | Dzienniki połączeń na żądanie (model, tokeny, koszt, opóźnienie, status).                                                                                                 |
+| `GET`  | `/api/usage/quota`       | Stan limitu dostawcy.                                                                                                                                                     |
+| `GET`  | `/api/usage/proxy-logs`  | Dzienniki żądań serwera proxy.                                                                                                                                            |
 
 ### Budżety
 
-| Method | Endpoint                 | Cel                                                                                                  |
-| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Podsumowanie kosztów + sprawdzenie budżetu dla jednego klucza API (wymagany query param `apiKeyId`). |
-| `POST` | `/api/usage/budget`      | Ustawia limity USD dzienny/tygodniowy/miesięczny + próg ostrzeżenia dla klucza API.                  |
-| `GET`  | `/api/usage/budget/bulk` | Zbiorcze podsumowania budżetów dla kluczy API.                                                       |
+| Metoda | Punkt końcowy            | Zamiar                                                                                                    |
+| ------ | ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Podsumowanie kosztów Kontrola budżetu + dla jednego klucza API (wymagany parametr zapytania `apiKeyId` ). |
+| `POST` | `/api/usage/budget`      | Ustawia próg ostrzegawczy daily/weekly/monthly USD limitów + dla klucza API.                              |
+| `GET`  | `/api/usage/budget/bulk` | Zbiorcze podsumowania budżetu dla kluczy API.                                                             |
 
-> API budżetu jest scoped per **API key** (`apiKeyId`). Limity zwracane przez
-> `GET /api/usage/budget` obejmują `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> `warningThreshold` oraz bieżące sumy (`totalCostToday`, `totalCostMonth`, …).
+> Budżet API jest ograniczony do** klucz API** (`apiKeyId`). Limity zwracane przez `GET /api/usage/budget` obejmują `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` i sumy bieżące (`totalCostToday`, `totalCostMonth`,…).
 
-### Pricing
+### Wycena
 
-| Method   | Endpoint                | Cel                                                                                                |
-| -------- | ----------------------- | -------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Bieżące scalone ceny (user + synced + defaults). `?includeSources=1`, by zobaczyć źródło per wpis. |
-| `PATCH`  | `/api/pricing`          | Nadpisanie cen dla `{ provider: { model: { input, output, cached, … } } }`.                        |
-| `DELETE` | `/api/pricing`          | Reset cen do domyślnych (opcjonalnie scoped przez `?provider=&model=`).                            |
-| `GET`    | `/api/pricing/defaults` | Pokazuje domyślne stawki fallback per-1M.                                                          |
-| `GET`    | `/api/pricing/models`   | Ceny kluczowane po modelu.                                                                         |
-| `POST`   | `/api/pricing/sync`     | Ręczny sync ze źródeł zewnętrznych (LiteLLM).                                                      |
-| `GET`    | `/api/pricing/sync`     | Bieżący status sync.                                                                               |
-| `DELETE` | `/api/pricing/sync`     | Czyści wszystkie zsynchronizowane dane cenowe.                                                     |
+| Metoda   | Punkt końcowy           | Zamiar                                                                                                                                                        |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Połączone ceny czterowarstwowe (user, models.dev, LiteLLM, defaults). `?includeSources=1` zwraca `pricing` + `sourceMap`.                                     |
+| `PATCH`  | `/api/pricing`          | Zastąp cenę dla `{ provider: { model: { input, output, cached, … } } }`.                                                                                      |
+| `DELETE` | `/api/pricing`          | Usuń zastąpienia cen użytkownika (opcjonalnie w zakresie `?provider=&model=`); zsynchronizowane stawki lub wbudowane ustawienia domyślne pozostają rezerwowe. |
+| `GET`    | `/api/pricing/defaults` | Pokaż domyślne stawki rezerwowe per-1M.                                                                                                                       |
+| `GET`    | `/api/pricing/models`   | Ceny zależne od modelu.                                                                                                                                       |
+| `POST`   | `/api/pricing/sync`     | Uruchom ręczną synchronizację ze źródeł zewnętrznych (LiteLLM).                                                                                               |
+| `GET`    | `/api/pricing/sync`     | Bieżący stan synchronizacji.                                                                                                                                  |
+| `DELETE` | `/api/pricing/sync`     | Wyczyść tylko ceny zsynchronizowane z LiteLLM (`pricing_synced`); Dane models.dev są oddzielne.                                                               |
 
-### Inne endpointy związane z kosztami
+### Inne istotne pod względem kosztów punkty końcowe
 
-| Method | Endpoint                      | Cel                                                                          |
-| ------ | ----------------------------- | ---------------------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | Sumy tokenów darmowych modeli, used-this-month oraz pozostały darmowy limit. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Użycie dla puli shared-quota.                                                |
+| Metoda | Punkt końcowy                 | Zamiar                                                                                             |
+| ------ | ----------------------------- | -------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/free-tier/summary`      | Łączna liczba tokenów modelu bezpłatnego, wykorzystana w tym miesiącu i pozostały bezpłatny limit. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Użycie puli współdzielonych przydziałów.                                                           |
 
 ---
 
 ## CLI
 
-CLI OmniRoute udostępnia komendy cost, usage i pricing (zarejestrowane w
-[`bin/cli/commands/registry.mjs`](../../bin/cli/commands/registry.mjs)).
+OmniRouteCLI udostępnia polecenia dotyczące kosztów, użycia i cen (zarejestrowane w [`bin/cli/commands/registry.mjs`](../../bin/cli/commands/registry.mjs) ).
 
 ### `omniroute cost`
 
-Raport kosztów agregowany z `/api/usage/analytics`.
+Raport kosztów zagregowany z `/api/usage/analytics`.
 
 ```bash
 omniroute cost                          # last 30d, grouped by provider
@@ -214,8 +209,7 @@ omniroute cost --since 2026-06-01 --until 2026-06-13
 omniroute cost --api-key <key> --limit 50
 ```
 
-Kolumny: group, requests, tokens in/out, cost (USD) oraz % of total. Na końcu drukowana
-jest linia grand total (tłumiona przez `--quiet` lub `--output json`).
+Kolumny: grupa, żądania, tokeny in/out, koszt (USD) i % sumy. Na końcu drukowana jest całkowita linia sumy (pomijana przez `--quiet` lub `--output json`).
 
 ### `omniroute usage`
 
@@ -245,8 +239,7 @@ omniroute pricing defaults show
 omniroute pricing defaults set [--input <p>] [--output <p>] [--cache-read <p>] [--cache-write <p>]
 ```
 
-> `pricing defaults show` czyta `GET /api/pricing/defaults`. Aby edytować ceny
-> poszczególnych modeli, użyj strony **Pricing** w dashboardzie lub `PATCH /api/pricing`.
+> `pricing defaults show` czyta `GET /api/pricing/defaults`. Aby zamiast tego edytować ceny poszczególnych modeli, użyj opcji** Wycena** strona panelu kontrolnego lub `PATCH /api/pricing`.
 
 ---
 
