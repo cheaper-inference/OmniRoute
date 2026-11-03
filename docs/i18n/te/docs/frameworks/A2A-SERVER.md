@@ -163,7 +163,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` లో వైర్
 | ఆరోగ్య నివేదిక     | `health-report`      | ప్రతి ప్రొవైడర్కు సర్క్యూట్ బ్రేకర్, కూల్డౌన్, లాక్అవుట్ స్థితిని సమీకరించండి                                                                          | ఆరోగ్యం, స్థితిస్థాపకత        | "అందరు ప్రొవైడర్ల ఆరోగ్య స్థితిని చూపు"        |
 | జాబితా సామర్థ్యాలు | `list-capabilities`  | కాంటెక్స్ట్ ఇంజెక్షన్ కోసం రా SKILL.md URLs తో మార్క్డౌన్ టేబుల్గా పూర్తి 45-ఎంట్రీ ఏజెంట్ స్కిల్స్ కేటలాగ్ (23 API + 21 CLI + 1 config)ని అందిస్తుంది | కేటలాగ్, ఆవిష్కరణ, నైపుణ్యాలు | "అన్ని OmniRoute సామర్థ్యాలను జాబితా చేయండి"   |
 
-> ఏజెంట్ కార్డ్ ప్రత్యక్ష 377-ప్రొవైడర్ కేటలాగ్తో సమలేఖనం చేయబడాలి; ప్రొవైడర్ గణనలు మరియు free/no-auth మెటాడేటా రన్టైమ్ రిజిస్ట్రీ నుండి తీసుకోబడ్డాయి.
+> ఏజెంట్ కార్డ్ ప్రత్యక్ష 380-ప్రొవైడర్ కేటలాగ్తో సమలేఖనం చేయబడాలి; ప్రొవైడర్ గణనలు మరియు free/no-auth మెటాడేటా రన్టైమ్ రిజిస్ట్రీ నుండి తీసుకోబడ్డాయి.
 
 ### `list-capabilities` నైపుణ్యం వివరాలు
 
@@ -197,17 +197,17 @@ JSON-RPC ఎండ్పాయింట్ `/a2a` ప్రామాణిక A2
 
 ---
 
-## కొత్త స్కిల్ను జోడించడం
+## కొత్త నైపుణ్యాన్ని జోడిస్తోంది
 
-1. **స్కిల్ ఫైల్ను సృష్టించండి:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **నైపుణ్యం ఫైల్ని సృష్టించండి:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` అనే async ఫంక్షన్ను export చేయండి. `smartRouting.ts` వంటి ఇప్పటికే ఉన్న స్కిల్స్ నిర్మాణాన్ని అనుసరించండి.
+   async ఫంక్షన్ `(task: A2ATask) => Promise<{ artifacts, metadata }>` ఎగుమతి చేయండి. `smartRouting.ts` వంటి ఇప్పటికే ఉన్న నైపుణ్యాల ఆకృతిని అనుసరించండి.
 
-2. **హ్యాండ్లర్ను నమోదు చేయండి:** `src/lib/a2a/taskExecution.ts`లో, `A2A_SKILL_HANDLERS`కు ఒక ఎంట్రీని జోడించండి:
+2. **రిజిస్టర్ హ్యాండ్లర్:** `src/lib/a2a/taskExecution.ts` లో, `A2A_SKILL_HANDLERS` కి ఎంట్రీని జోడించండి:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ఇప్పటికే ఉన్న స్కిల్స్
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ JSON-RPC ఎండ్పాయింట్ `/a2a` ప్రామాణిక A2
    };
    ```
 
-3. **Agent Cardలో అందుబాటులో ఉంచండి:** `src/lib/a2a/agentCardMetadata.ts`లో (`/.well-known/agent.json` మరియు `/.well-known/agent-card.json` రెండూ దీనిని పంచుకుంటాయి), `skills` arrayకు జోడించండి:
+3. **ఏజెంట్ కార్డ్లో బహిర్గతం చేయండి:** `src/lib/a2a/agentCardMetadata.ts` లో ( `/.well-known/agent.json` మరియు `/.well-known/agent-card.json` ద్వారా భాగస్వామ్యం చేయబడింది), `skills` శ్రేణికి జోడించు:
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC ఎండ్పాయింట్ `/a2a` ప్రామాణిక A2
    }
    ```
 
-4. **పరీక్షలను వ్రాయండి:** `tests/unit/a2a-<your-skill>.test.ts`. విజయవంతమైన మార్గం + లోప మార్గాన్ని కవర్ చేయండి.
+4. **పరీక్షలు రాయండి:** `tests/unit/a2a-<your-skill>.test.ts` హ్యాపీ పాత్ + ఎర్రర్ పాత్ను కవర్ చేయండి.
 
-5. ఈ ఫైల్లోని `Available Skills` పట్టికలో కొత్త స్కిల్ను **డాక్యుమెంట్ చేయండి**.
+5. **పత్రం** ఈ ఫైల్ యొక్క `Available Skills` పట్టికలో కొత్త నైపుణ్యం.
 
 ---
 

@@ -141,34 +141,34 @@ papildomas:
 
 Kai kurie `MANAGEMENT` veiksmai yra **tik operatoriui**: vien `manage` raktas nepakanka. Saugomų prisijungimo duomenų eksportas (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), atsarginės kopijos atkūrimas virš dabartinių duomenų (`POST /api/db-backups/import`, įskaitant `dryRun=true`, `POST /api/db-backups` atkūrimas pagal id, `POST /api/settings/import-json`) ir atkūrimo taškų naikinimas (`DELETE /api/db-backups` valymas ir `PATCH /api/db-backups`, nes išsaugota saugojimo trukmė valdo automatinį išvalymą po kiekvienos atsarginės kopijos) reikalauja valdymo skydelio sesijos, vietinio CLI tapatybės arba kad prisijungimas būtų išjungtas. Sinchronizavimo žetono išdavimas (`POST /api/sync/tokens`) ir `admin` taikymo srities CLI prieigos žetono kūrimas (`POST /api/cli/tokens`) reikalauja valdymo skydelio sesijos arba vietinio CLI tapatybės visuose prisijungimo režimuose. API raktai bet kurios taikymo srities ir `oma_` prieigos žetonai nėra operatoriaus prisijungimo duomenys: kai jų reikia, jie gauna `403`. Patikra yra faile `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Prisijungimo nustatymų keitimas taip pat tik operatoriui: `POST /api/settings/require-login` (nustatyti administravimo slaptažodį / perjungti `requireLogin`) priima tik šiuos prisijungimo duomenis, kai slaptažodis jau yra. Pirminio paleidimo bootstrap langas (slaptažodžio dar nėra) lieka nepakitęs, o valdymo skydelio sesija, norėdama pakeisti slaptažodį, turi pateikti `currentPassword` (`403`, kai jo nėra arba jis neteisingas, įrašoma kaip `settings.update_failed`). Vietinis CLI ir egzempliorius su išjungtu prisijungimu išlaiko atkūrimo kelią ir gali nustatyti slaptažodį be jo, nes abu susieti su duomenų katalogą valdančiu serveriu.
 
-## Vykdymo seka
+## Dujotiekis
 
 ```
-Gaunama užklausa → src/proxy.ts
-  → runAuthzPipeline(), esanti src/server/authz/pipeline.ts
-    1. Pašalinti patikimas vidines antraštes (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Sugeneruoti užklausos ID, klasifikuoti maršrutą naudojant classifyRoute()
-    3. Jei pathname == "/" → peradresuoti į /dashboard
-    4. Jei vykdomas užbaigimas (tvarkingas išjungimas) ir /api/* → 503
-    5. Jei ne GET /api/* → taikyti checkBodySize() apsaugą
-    6. Jei OPTIONS → CORS pirminė užklausa 204
-    7. Jei options.enforce == false → praleisti toliau su maršruto klasės antraštėmis
-    8. Kitu atveju: POLICIES[routeClass].evaluate(ctx)
-       - allow  → pridėti x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - reject → JSON klaida su correlation_id (valdymo skydelio puslapiams → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Patikimos vidinės antraštės (apibrėžtos `src/server/authz/headers.ts`) yra **pašalinamos iš gaunamų užklausų** prieš klasifikuojant — klientai negali iš anksto nustatyti `x-omniroute-auth-*`, kad apsimestų kitu subjektu.
+Patikimos vidinės antraštės (apibrėžtos `src/server/authz/headers.ts`) yra** atimta nuo gaunamų užklausų** prieš klasifikuodami — klientai negali iš anksto užpildyti `x-omniroute-auth-*` kad galėtų apsimesti subjektu.
 
-### Politikų sutartys
+### Politikos sutartys
 
-Kiekviena maršrutų klasė turi politiką kataloge `src/server/authz/policies/`:
+Kiekviena maršruto klasė turi `src/server/authz/policies/` politiką:
 
 - **`publicPolicy`** (`policies/public.ts`) — visada grąžina `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — išskiria Bearer, patikrina naudodama `validateApiKey()`. Anoniminė prieiga leidžiama tik tada, kai galiojanti `REQUIRE_API_KEY` funkcijos žyma yra išjungta. Galiojanti žyma nustatoma naudojant `isRequireApiKeyEnabled()` (`DB funkcijos žymos perrašymas > process.env.REQUIRE_API_KEY > numatytoji reikšmė`), todėl valdymo skydelio funkcijų žymos ir aplinkos kintamieji nuosekliai valdo `/api/v1/*`, `/api/v1beta/*` ir alternatyvius maršrutus; sprendiklio klaidos užblokuoja prieigą. Kliento API maršrutuose leidžia valdymo skydelio sesijos užklausas (įskaitant `/api/v1/models`, kurį naudoja valdymo skydelio modelių katalogas).
-- **`managementPolicy`** (`policies/management.ts`) — priima valdymo skydelio sesiją, vidines modelių sinchronizavimo užklausas (atitinkančias `/api/providers/[name]/(sync-models|models)`) arba visiškai praleidžia patikrą, jei `isAuthRequired()` grąžina false. Kai pateiktas Bearer prieigos raktas yra netinkamas, grąžina 403 (`AUTH_001`), kitu atveju — 401. Be to, prieš bet kurią autentifikavimo šaką taiko maršrutų apsaugos lygius (LOCAL_ONLY / ALWAYS_PROTECTED) — žr. [Maršrutų apsaugos lygiai](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY` keliai, esantys `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (šiuo metu: `/api/mcp/`), gali būti pasiekiami ne iš vietinio grįžtamojo ryšio adreso, kai Bearer raktas turi `manage` aprėptį; visi kiti `LOCAL_ONLY` keliai išlieka griežtai pasiekiami tik per vietinį grįžtamojo ryšio adresą, nepriklausomai nuo aprėpties.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ekstraktai Nenešėjas, patvirtina per `validateApiKey()`. Patenka į anoniminį tik tada, kai išjungta efektyvi `REQUIRE_API_KEY` funkcijos vėliavėlė. Veiksminga vėliavėlė išsprendžiama naudojant `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), todėl prietaisų skydelio funkcijų vėliavėlės ir aplinkos kintamieji nuosekliai valdo `/api/v1/*`, `/api/v1beta/*` ir slapyvardžius; sprendiklio gedimai nepavyksta uždaryti. Leidžia pateikti informacijos suvestinės seanso užklausas kliento API maršrutuose (įskaitant `/api/v1/models`, naudojamą prietaisų skydelio modelių kataloge). Kai Entra ID SSO yra įjungtas, nešėją, kuri struktūriškai yra Entra prieigos raktas (trys base64url segmentai, `RS*` alg, `kid`), tvarko SSO šaka.** prieš** `validateApiKey()` ir jo sprendimas yra galutinis. — jis niekada nepatenka į API rakto kelią arba į anoniminį atšaką, todėl tapatybės teikėjo gedimas negali tapti atvira prieiga. Statiniai API klavišai neturi įtakos. Žr. [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — priima prietaisų skydelio seansą, vidinio modelio sinchronizavimo užklausas (atitinka `/api/providers/[name]/(sync-models|models)`) arba visiškai praleidžia, jei `isAuthRequired()` grąžina false. Grąžina 403 (`AUTH_001`), kai yra nešiklio ženklas, bet jis negalioja, 401 kitu atveju. Taip pat įgyvendina maršruto apsaugos pakopas (LOCAL_ONLY / ALWAYS_PROTECTED) prieš bet kurią autentifikavimo šaką — see [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY keliai `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (šiandien: `/api/mcp/`) gali būti pasiekiami be kilpos, kai nešiklio raktas turi `manage` sritį; visi kiti LOCAL_ONLY keliai išlieka griežti atgal, nepaisant taikymo srities.
 
-Sėkminga politika grąžina `AuthSubject`, kurio `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Tolesnės apdorojimo funkcijos gali jį nuskaityti naudodamos `assertAuth(request, "CLIENT_API")`, esančią `src/server/authz/assertAuth.ts`, užuot iš naujo vykdžiusios autentifikavimo logiką.
+Sėkminga politika grąžina `AuthSubject` su `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Tolesni tvarkytojai gali jį nuskaityti naudodami `assertAuth(request, "CLIENT_API")` `src/server/authz/assertAuth.ts` o ne pakartotinai paleisti autentifikavimo logiką.
 
 ## Viešųjų maršrutų sąrašas
 
@@ -316,23 +316,23 @@ Galiniams taškams `/api/v1/agents/tasks/*` ir `/api/resilience/model-cooldowns`
 
 ## Derinimas
 
-Apdorojimo grandinė atsakymuose visada prideda šias antraštes:
+Dujotiekis visada antspauduoja atsakymus su:
 
 ```
-x-request-id:               <koreliacijos ID, pakartojamas klaidų atsakymų turinyje>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Autentifikuotų užklausų atveju aukštesnio lygio sistemos (apdorojimo funkcijos pusėje) užklausų antraštėse taip pat yra:
+Autentifikuotų užklausų užklausų antraštės taip pat apima:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<paskutiniai 4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (neprivaloma)
-x-omniroute-auth-scopes:    kableliais atskirtas sąrašas
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Apdorojimo funkcijose naudokite `assertAuth(req, expectedClass)` — ši funkcija išmeta `AuthzAssertionError` su kodu `AUTHZ_NOT_INITIALIZED`, jei tarpinė programinė įranga buvo apeita (tai naudinga bandymuose aptinkant konfigūracijos regresijas).
+Jei tarpinė programinė įranga buvo apeinama, naudokite `assertAuth(req, expectedClass)` viduje tvarkyklės — ji išmeta `AuthzAssertionError` su kodu `AUTHZ_NOT_INITIALIZED` (padeda užfiksuoti konfigūracijos regresijas testuose).
 
 ## Taip pat žr.
 

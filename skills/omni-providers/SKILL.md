@@ -38,6 +38,7 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`DELETE /api/provider-nodes/{id}`](references/endpoints.md#delete-apiprovider-nodesid)
 - [`POST /api/provider-nodes/validate`](references/endpoints.md#post-apiprovider-nodesvalidate)
 - [`GET /api/provider-models`](references/endpoints.md#get-apiprovider-models)
+- [`POST /api/provider-models`](references/endpoints.md#post-apiprovider-models)
 - [`PUT /api/provider-models`](references/endpoints.md#put-apiprovider-models)
 - [`POST /api/provider-models/validate-and-add`](references/endpoints.md#post-apiprovider-modelsvalidate-and-add)
 - [`GET /api/providers/{id}/cc-alias`](references/endpoints.md#get-apiprovidersidcc-alias)
