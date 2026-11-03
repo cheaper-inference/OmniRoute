@@ -125,58 +125,97 @@ function observeStreamedOutput(state: EmptyTurnExecution, payload: Record<string
   }
 }
 
-function observeResponsesTerminal(state: EmptyTurnExecution, payload: Record<string, unknown>) {
-  const response = payload.response as Record<string, unknown> | undefined;
-  const eventType =
-    typeof payload.type === "string" &&
-    ["response.completed", "response.done", "response.failed", "response.incomplete"].includes(
-      payload.type
-    )
-      ? payload.type
-      : null;
-  if (!eventType && payload.object !== "response") return;
-  state.terminalType = eventType ?? "response";
-  const terminal = response ?? payload;
-  state.terminalStatus =
-    typeof terminal.status === "string" &&
-    ["completed", "failed", "cancelled", "incomplete", "in_progress"].includes(terminal.status)
-      ? terminal.status
-      : null;
-  const incomplete = terminal.incomplete_details as Record<string, unknown> | undefined;
-  state.incompleteReason =
-    incomplete?.reason === "max_output_tokens" || incomplete?.reason === "content_filter"
-      ? incomplete.reason
-      : null;
-  state.outputItems = { messages: 0, reasoning: 0, tools: 0, other: 0 };
-  if (Array.isArray(terminal.output)) {
-    for (const item of terminal.output) countOutputItem(state.outputItems, item);
+const RESPONSES_TERMINAL_EVENTS = [
+  "response.completed",
+  "response.done",
+  "response.failed",
+  "response.incomplete",
+] as const;
+const RESPONSES_TERMINAL_STATUSES = [
+  "completed",
+  "failed",
+  "cancelled",
+  "incomplete",
+  "in_progress",
+] as const;
+const INCOMPLETE_REASONS = ["max_output_tokens", "content_filter"] as const;
+const SAFE_STOP_REASONS = [
+  "stop",
+  "end_turn",
+  "stop_sequence",
+  "length",
+  "max_tokens",
+  "tool_calls",
+  "tool_use",
+  "content_filter",
+  "refusal",
+  "pause_turn",
+] as const;
+
+function allowedString(value: unknown, allowed: readonly string[]): string | null {
+  return typeof value === "string" && allowed.includes(value) ? value : null;
+}
+
+function countOutputItems(output: unknown): OutputItemCounts {
+  const counts: OutputItemCounts = { messages: 0, reasoning: 0, tools: 0, other: 0 };
+  if (Array.isArray(output)) {
+    for (const item of output) countOutputItem(counts, item);
   }
-  const usage = terminal.usage as Record<string, unknown> | undefined;
+  return counts;
+}
+
+function observeTerminalUsage(state: EmptyTurnExecution, usageValue: unknown) {
+  const usage = usageValue as Record<string, unknown> | undefined;
   const details = usage?.output_tokens_details as Record<string, unknown> | undefined;
   state.outputTokens = finiteTokenCount(usage?.output_tokens);
   state.reasoningTokens = finiteTokenCount(details?.reasoning_tokens);
 }
 
+function observeResponsesTerminal(state: EmptyTurnExecution, payload: Record<string, unknown>) {
+  const eventType = allowedString(payload.type, RESPONSES_TERMINAL_EVENTS);
+  if (!eventType && payload.object !== "response") return;
+  state.terminalType = eventType ?? "response";
+  const terminal = (payload.response as Record<string, unknown> | undefined) ?? payload;
+  state.terminalStatus = allowedString(terminal.status, RESPONSES_TERMINAL_STATUSES);
+  const incomplete = terminal.incomplete_details as Record<string, unknown> | undefined;
+  state.incompleteReason = allowedString(incomplete?.reason, INCOMPLETE_REASONS);
+  state.outputItems = countOutputItems(terminal.output);
+  observeTerminalUsage(state, terminal.usage);
+}
+
 function safeStopReason(reason: unknown): string | null {
-  return typeof reason === "string" &&
-    [
-      "stop",
-      "end_turn",
-      "stop_sequence",
-      "length",
-      "max_tokens",
-      "tool_calls",
-      "tool_use",
-      "content_filter",
-      "refusal",
-      "pause_turn",
-    ].includes(reason)
-    ? reason
-    : null;
+  return allowedString(reason, SAFE_STOP_REASONS);
 }
 
 function finiteTokenCount(tokens: unknown): number | null {
   return typeof tokens === "number" && Number.isSafeInteger(tokens) && tokens >= 0 ? tokens : null;
+}
+
+function isFailedPayload(
+  protocol: NativeProtocol,
+  data: Record<string, unknown>,
+  response: Record<string, unknown> | undefined
+): boolean {
+  if (data.error || response?.error) return true;
+  if (data.type === "error" || data.type === "response.failed") return true;
+  if (data.type === "response.incomplete" || data.status === "failed") return true;
+  return (
+    protocol === "openai-responses" &&
+    allowedString(response?.status, ["failed", "cancelled", "incomplete"]) !== null
+  );
+}
+
+function observeOpenAiPayload(state: EmptyTurnExecution, data: Record<string, unknown>) {
+  const choices = data.choices as { finish_reason?: unknown }[] | undefined;
+  if (!Array.isArray(choices)) return;
+  if (choices.length > 0 && choices.every((choice) => choice.finish_reason === "stop")) {
+    state.normalStop = true;
+  }
+  const terminalChoice = choices.find((choice) => choice.finish_reason != null);
+  if (terminalChoice) {
+    state.terminalType = "chat.completion";
+    state.terminalStatus = safeStopReason(terminalChoice.finish_reason);
+  }
 }
 
 function observePayload(state: EmptyTurnExecution, value: unknown) {
@@ -188,36 +227,12 @@ function observePayload(state: EmptyTurnExecution, value: unknown) {
     observeStreamedOutput(state, data);
     observeResponsesTerminal(state, data);
   }
-  if (
-    data.error ||
-    response?.error ||
-    data.type === "error" ||
-    data.type === "response.failed" ||
-    data.type === "response.incomplete" ||
-    data.status === "failed" ||
-    (state.protocol === "openai-responses" &&
-      (response?.status === "failed" ||
-        response?.status === "cancelled" ||
-        response?.status === "incomplete"))
-  ) {
+  if (isFailedPayload(state.protocol, data, response)) {
     state.failed = true;
     return;
   }
   if (state.protocol === "openai") {
-    const choices = data.choices as { finish_reason?: unknown }[] | undefined;
-    if (
-      Array.isArray(choices) &&
-      choices.length > 0 &&
-      choices.every((choice) => choice.finish_reason === "stop")
-    )
-      state.normalStop = true;
-    const terminalChoice = Array.isArray(choices)
-      ? choices.find((choice) => choice.finish_reason != null)
-      : undefined;
-    if (terminalChoice) {
-      state.terminalType = "chat.completion";
-      state.terminalStatus = safeStopReason(terminalChoice.finish_reason);
-    }
+    observeOpenAiPayload(state, data);
   } else if (state.protocol === "claude") {
     observeClaudePayload(state, data);
   } else if (isCompletedResponsesPayload(data, response)) {
