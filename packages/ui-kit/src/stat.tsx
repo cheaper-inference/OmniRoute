@@ -3,20 +3,18 @@ import { cn } from "./lib/utils";
 import { NumberTicker } from "./number-ticker";
 
 export type StatTone = "default" | "positive" | "critical";
-export type StatFormat = "number" | "compact" | "currency" | "percent";
+export type StatFormat = "number" | "compact" | "currency" | "percent" | "text";
 export type StatLabelVariant = "default" | "eyebrow";
 
-export interface StatProps extends ComponentProps<"div"> {
+interface StatBaseProps extends ComponentProps<"div"> {
   label: ReactNode;
   /** Decorative mark displayed before the label. */
   icon?: ReactNode;
   /** Opt-in compact uppercase treatment for dashboard summary labels. */
   labelVariant?: StatLabelVariant;
-  value: number | null;
   hint?: ReactNode;
   suffix?: ReactNode;
   tone?: StatTone;
-  format?: StatFormat;
   currency?: string;
   /** Locale used by both static and animated number formatting. */
   locale?: string;
@@ -28,6 +26,14 @@ export interface StatProps extends ComponentProps<"div"> {
   /** Optional NumberTicker viewport behavior override. */
   animateOnView?: boolean;
 }
+
+/** Text summaries use the same card structure with wrapping, compact typography.
+ * Numeric options and animation only apply to numeric values. Null stays unknown.
+ */
+export type StatProps = StatBaseProps & (
+  | { format?: Exclude<StatFormat, "text">; value: number | null }
+  | { format: "text"; value: string | null }
+);
 
 function formatOptions(format: StatFormat, currency: string): Intl.NumberFormatOptions {
   if (format === "compact") return { notation: "compact", maximumFractionDigits: 1 };
@@ -55,10 +61,11 @@ export function Stat({
   ...props
 }: StatProps) {
   const options = { ...formatOptions(format, currency), ...numberFormatOptions };
-  const rendered = value === null ? "—" : new Intl.NumberFormat(locale, options).format(value);
+  const rendered = value === null ? "—" : typeof value === "string" ? value : new Intl.NumberFormat(locale, options).format(value);
   return (
     <div
       data-label-variant={labelVariant}
+      data-value-format={format}
       className={cn("ci-stat", `ci-stat--${tone}`, className)}
       {...props}
     >
@@ -73,7 +80,7 @@ export function Stat({
       <div className="ci-stat__value">
         {value === null ? (
           "—"
-        ) : animate ? (
+        ) : animate && typeof value === "number" ? (
           <NumberTicker
             value={value}
             formatOptions={options}

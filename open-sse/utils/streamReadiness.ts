@@ -1,7 +1,12 @@
-import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "./emptyTurnPolicy.ts";
+import {
+  getEmptyTurnDiagnostics,
+  hasTrustedEmptyTurn,
+  inheritEmptyTurnPolicy,
+} from "./emptyTurnPolicy.ts";
 import { normalizeStreamFailurePayload, type StreamFailurePayload } from "./streamErrorFormat.ts";
 import { HTTP_STATUS } from "../config/constants.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "./error.ts";
+import { classifyProviderSafetyError, type ProviderSafetyInput } from "./providerSafety.ts";
 import {
   CODEX_REASONING_REPLAY_ERROR_CODE,
   matchesReasoningReplayRejectionMessage,
@@ -211,7 +216,9 @@ export function hasUsefulStreamContent(text: string, options: UsefulContentOptio
     try {
       if (hasUsefulJsonPayload(JSON.parse(data), options.contentProbe === true)) return true;
     } catch {
-      if (data.length > 0) return true;
+      // A non-JSON `data:` line is not useful stream content: skip it and
+      // inspect the next line instead of failing the whole text.
+      continue;
     }
   }
 
@@ -560,11 +567,40 @@ type StreamReadinessSignalState = {
   pendingLine: string;
   upstreamDiagnostic: string | null;
   cursorFailure?: StreamFailurePayload | null;
+  /** #17049: protocol fields of the first error-only frame, classified once at EOF. */
+  upstreamErrorFields: ProviderSafetyInput | null;
 };
 
 function resetCurrentEvent(state: StreamReadinessSignalState): void {
   state.currentEvent = "";
   state.dataLines = [];
+}
+
+/**
+ * Record the first error-only frame: its sanitized message as the diagnostic and, for
+ * #17049, its protocol fields. Classification is deferred to EOF so the feature-flag
+ * lookup never runs inside the timed read loop.
+ */
+function recordErrorOnlyFrame(
+  state: StreamReadinessSignalState,
+  payload: Record<string, unknown>
+): void {
+  const error = payload.error;
+  const rawMessage =
+    typeof error === "string"
+      ? error
+      : isRecord(error) && typeof error.message === "string"
+        ? error.message
+        : "";
+  const diagnostic = sanitizeErrorMessage(rawMessage).trim();
+  if (diagnostic) state.upstreamDiagnostic = diagnostic;
+  if (!isRecord(error)) return;
+  state.upstreamErrorFields = {
+    status: error.status_code ?? error.status ?? payload.status_code ?? payload.status,
+    code: error.code,
+    type: error.type,
+    message: rawMessage,
+  };
 }
 
 function processStreamReadinessEvent(state: StreamReadinessSignalState): boolean {
@@ -584,15 +620,7 @@ function processStreamReadinessEvent(state: StreamReadinessSignalState): boolean
       return true;
     }
     if (!state.upstreamDiagnostic && isRecord(payload) && isErrorOnlyStructuredPayload(payload)) {
-      const error = payload.error;
-      const rawMessage =
-        typeof error === "string"
-          ? error
-          : isRecord(error) && typeof error.message === "string"
-            ? error.message
-            : "";
-      const diagnostic = sanitizeErrorMessage(rawMessage).trim();
-      if (diagnostic) state.upstreamDiagnostic = diagnostic;
+      recordErrorOnlyFrame(state, payload);
     }
     return hasNonPingStructuredPayload(payload, eventType);
   } catch {
@@ -665,6 +693,7 @@ export function hasStreamReadinessSignal(text: string): boolean {
     dataLines: [],
     pendingLine: "",
     upstreamDiagnostic: null,
+    upstreamErrorFields: null,
   };
   if (appendStreamReadinessSignal(state, text)) return true;
   return finishStreamReadinessSignal(state);
@@ -688,6 +717,38 @@ function createErrorResponse(
     ),
     { status, headers: { "Content-Type": "application/json" } }
   );
+}
+
+/**
+ * #17049: terminal readiness failure for an explicit provider safety stop that arrived as
+ * an error-only frame on a 200 stream. Same envelope as an HTTP-level stop (403/400,
+ * `invalid_request_error`, safety code), so neither the early-EOF retry, the readiness
+ * stall retry nor combo failover re-sends the stopped conversation.
+ */
+function buildSafetyStopReadiness(
+  safety: { status: number; code: string },
+  failure: { reason: string; classificationReason: string; upstreamDiagnostic?: string },
+  options: { provider?: string | null; model?: string | null; log?: StreamReadinessLogger | null }
+): Extract<StreamReadinessResult, { ok: false }> {
+  const { reason, classificationReason, upstreamDiagnostic } = failure;
+  options.log?.warn?.(
+    "STREAM",
+    `${classificationReason}: provider safety stop ${safety.code} (${options.provider || "provider"}/${options.model || "unknown"})`
+  );
+  return {
+    ok: false,
+    reason,
+    classificationReason,
+    ...(upstreamDiagnostic ? { upstreamDiagnostic } : {}),
+    code: safety.code,
+    type: "invalid_request_error",
+    response: createErrorResponse(
+      safety.status,
+      upstreamDiagnostic || "Upstream request refused",
+      safety.code,
+      "invalid_request_error"
+    ),
+  };
 }
 
 export function prependBufferedChunks(
@@ -812,6 +873,7 @@ export async function ensureStreamReadiness(
     pendingLine: "",
     upstreamDiagnostic: null,
     ...(options.provider === "cursor" ? { cursorFailure: null } : {}),
+    upstreamErrorFields: null,
   };
   const startedAt = Date.now();
   const effectiveTimeoutMs = Math.max(0, Math.floor(options.timeoutMs));
@@ -970,6 +1032,10 @@ export async function ensureStreamReadiness(
           !hasTrustedEmptyTurn(response)
         ) {
           const reason = "Provider returned empty content";
+          options.log?.warn?.(
+            "STREAM",
+            `detector=readiness native=${JSON.stringify(getEmptyTurnDiagnostics(response))}`
+          );
           return {
             ok: false,
             reason,
@@ -1031,6 +1097,18 @@ export async function ensureStreamReadiness(
         const reason = upstreamDiagnostic
           ? `${classificationReason}: ${upstreamDiagnostic}`
           : classificationReason;
+        // #17049: an explicit provider safety stop is deterministic and terminal, not a
+        // transient hang-up; see buildSafetyStopReadiness.
+        const safety = readinessState.upstreamErrorFields
+          ? classifyProviderSafetyError(readinessState.upstreamErrorFields)
+          : null;
+        if (safety) {
+          return buildSafetyStopReadiness(
+            safety,
+            { reason, classificationReason, upstreamDiagnostic },
+            options
+          );
+        }
         options.log?.warn?.(
           "STREAM",
           `${reason} (${options.provider || "provider"}/${options.model || "unknown"})`

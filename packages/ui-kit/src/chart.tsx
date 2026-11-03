@@ -248,6 +248,7 @@ export function Chart({
             <text
               key={point.label}
               className="ci-chart__x-label"
+              data-numeric={/^[+\-−]?\p{N}[\p{N}\p{P}\p{Z}]*$/u.test(point.label.trim()) || undefined}
               x={variant === "bar" ? PADDING.left + index * barSlot + barSlot / 2 : point.x}
               y={PADDING.top + geometry.plotHeight + 26}
             >
