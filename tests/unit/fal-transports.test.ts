@@ -176,7 +176,7 @@ test("documented realtime WebSockets use MessagePack, retain outputs and close o
   connection.send(input);
   assert.deepEqual(decode(socket.messages[0]), input);
   connection.send(compileFalInput(definition, "realtime")({ ...input, prompt: "later image" }));
-  assert.equal(decode(socket.messages[1]).prompt, "later image");
+  assert.deepEqual(decode(socket.messages[1]), { ...input, prompt: "later image" });
   const reader = connection.output.getReader();
   const output = {
     images: [{ url: "https://example.com/image.png", content_type: "image/png" }],

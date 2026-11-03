@@ -130,7 +130,7 @@ function validateCodexReferencesForModel(
   return validateCodexImageEditReferences(images, maxReferences);
 }
 
-async function readMultipartImage(formData: FormData): Promise<EditInput> {
+async function readMultipartOptions(formData: FormData): Promise<Record<string, unknown>> {
   const options: Record<string, unknown> = {};
   for (const [key, value] of formData.entries()) {
     if (key === "image" || key === "image[]") continue;
@@ -157,6 +157,11 @@ async function readMultipartImage(formData: FormData): Promise<EditInput> {
       options.mask = `data:${value.type || "image/png"};base64,${Buffer.from(await value.arrayBuffer()).toString("base64")}`;
     }
   }
+  return options;
+}
+
+async function readMultipartImage(formData: FormData): Promise<EditInput> {
+  const options = await readMultipartOptions(formData);
   const promptRaw = formData.get("prompt");
   const prompt = typeof promptRaw === "string" ? promptRaw.trim() : "";
   const modelRaw = formData.get("model");
@@ -193,6 +198,23 @@ async function readMultipartImage(formData: FormData): Promise<EditInput> {
   };
 }
 
+function readJsonEdit(rawBody: Parameters<TextDecoder["decode"]>[0]): EditInput | null {
+  try {
+    const parsed = ImageEditJsonSchema.safeParse(
+      JSON.parse(new TextDecoder().decode(rawBody)) as unknown
+    );
+    if (!parsed.success) {
+      log.warn("IMAGE", `Invalid JSON edit body shape: ${parsed.error.message}`);
+      return null;
+    }
+    const extracted = extractImageEditInputFromJson(parsed.data);
+    return extracted ? { ...extracted, options: parsed.data } : null;
+  } catch (err) {
+    log.warn("IMAGE", `Invalid JSON edit body: ${err instanceof Error ? err.message : err}`);
+    return null;
+  }
+}
+
 /** Read the edit input from either multipart/form-data or a JSON/data-URL body. */
 async function readEditInput(request: Request): Promise<EditInput | null> {
   const contentType = request.headers.get("content-type") || "";
@@ -216,20 +238,7 @@ async function readEditInput(request: Request): Promise<EditInput | null> {
     }
   }
   if (contentType.includes("application/json")) {
-    try {
-      const parsed = ImageEditJsonSchema.safeParse(
-        JSON.parse(new TextDecoder().decode(rawBody)) as unknown
-      );
-      if (!parsed.success) {
-        log.warn("IMAGE", `Invalid JSON edit body shape: ${parsed.error.message}`);
-        return null;
-      }
-      const extracted = extractImageEditInputFromJson(parsed.data);
-      return extracted ? { ...extracted, options: parsed.data } : null;
-    } catch (err) {
-      log.warn("IMAGE", `Invalid JSON edit body: ${err instanceof Error ? err.message : err}`);
-      return null;
-    }
+    return readJsonEdit(rawBody);
   }
   return null;
 }

@@ -1046,6 +1046,26 @@ async function validateSelfLoopScopedAccess(
   return (await validateQuotaAccess(context)) ?? (await validateModelAccess(context));
 }
 
+function isFalReceiptRead(request: Request, options?: EnforceApiKeyPolicyOptions): boolean {
+  const canonicalPath = resolveCanonicalEndpointPath(new URL(request.url).pathname);
+  return (
+    options?.existingFalJob === true &&
+    ((["GET", "DELETE"].includes(request.method) &&
+      /^\/v1\/fal\/jobs\/[a-zA-Z0-9-]+$/.test(canonicalPath)) ||
+      (request.method === "POST" &&
+        canonicalPath === "/v1/fal/run" &&
+        request.headers.has("idempotency-key")))
+  );
+}
+async function validateFalReceiptPolicy(context: PolicyContext) {
+  return (
+    validateKeyAccessSchedule(context) ??
+    validateEndpointAccess(context) ??
+    (await validateQuotaAccess(context)) ??
+    (await validateModelAccess(context))
+  );
+}
+
 export async function enforceApiKeyPolicy(
   request: Request,
   modelStr: string | null,
@@ -1083,23 +1103,9 @@ export async function enforceApiKeyPolicy(
   const context = { request, apiKey, apiKeyInfo, modelStr };
   const statusRejection = validateKeyStatus(context);
   if (statusRejection) return { apiKey, apiKeyInfo, rejection: statusRejection };
-  const canonicalPath = resolveCanonicalEndpointPath(new URL(request.url).pathname);
-  if (
-    options?.existingFalJob === true &&
-    ((["GET", "DELETE"].includes(request.method) &&
-      /^\/v1\/fal\/jobs\/[a-zA-Z0-9-]+$/.test(canonicalPath)) ||
-      (request.method === "POST" &&
-        canonicalPath === "/v1/fal/run" &&
-        request.headers.has("idempotency-key")))
-  ) {
-    // Existing receipts and results remain accessible after spend limits. The run route
-    // uses this only for receipt lookup, then reapplies full policy before any new dispatch.
-    const rejection =
-      validateKeyAccessSchedule(context) ??
-      validateEndpointAccess(context) ??
-      (await validateQuotaAccess(context)) ??
-      (await validateModelAccess(context));
-    return { apiKey, apiKeyInfo, rejection };
+  if (isFalReceiptRead(request, options)) {
+    // Receipt lookup cannot dispatch; the run route reapplies full policy for new inference.
+    return { apiKey, apiKeyInfo, rejection: await validateFalReceiptPolicy(context) };
   }
   if (selfLoopScope.key) {
     return { apiKey, apiKeyInfo, rejection: await validateSelfLoopScopedAccess(context) };
