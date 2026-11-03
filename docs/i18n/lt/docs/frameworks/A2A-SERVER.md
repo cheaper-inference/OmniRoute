@@ -163,7 +163,7 @@ OmniRoute atskleidžia 6 A2A įgūdžius, prijungtus prie `src/lib/a2a/taskExecu
 | Sveikatos ataskaita           | `health-report`      | Agregatai grandinės pertraukiklis, aušinimas, blokavimo būsena kiekvienam teikėjui                                                                    | sveikata, atsparumas           | „Rodyti visų paslaugų teikėjų sveikatos būklę“ |
 | Galimybių sąrašas             | `list-capabilities`  | Pateikiamas visas 45 įrašų Agent Skills katalogas (23 API + 21 CLI + 1 config) kaip sumažinimo lentelė su neapdorotu SKILL.md URLs kontekstui įterpti | katalogas, atradimas, įgūdžiai | "Išvardykite visas OmniRoute galimybes"        |
 
-> Agento kortelė turi būti suderinta su tiesioginiu 377 teikėjų katalogu; teikėjų skaičius ir free/no-auth metaduomenys gaunami iš vykdymo laiko registro.
+> Agento kortelė turi būti suderinta su tiesioginiu 380 teikėjų katalogu; teikėjų skaičius ir free/no-auth metaduomenys gaunami iš vykdymo laiko registro.
 
 ### `list-capabilities` įgūdžių detalė
 
@@ -199,15 +199,15 @@ JSON-RPC galinis taškas `/a2a` yra pagrindinis A2A įvesties taškas. Toliau pa
 
 ## Naujo įgūdžio pridėjimas
 
-1. **Sukurkite įgūdžio failą:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Sukurkite įgūdžių failą:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksportuokite asinchroninę funkciją `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Vadovaukitės esamų įgūdžių, pvz., `smartRouting.ts`, struktūra.
+   Eksportuokite asinchroninę funkciją `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Sekite esamų įgūdžių, tokių kaip `smartRouting.ts` formą.
 
-2. **Užregistruokite apdorojimo funkciją:** faile `src/lib/a2a/taskExecution.ts` pridėkite įrašą į `A2A_SKILL_HANDLERS`:
+2. **Registrų tvarkytojas:** `src/lib/a2a/taskExecution.ts`, pridėkite įrašą prie `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...esami įgūdžiai
+     // ...existing skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ JSON-RPC galinis taškas `/a2a` yra pagrindinis A2A įvesties taškas. Toliau pa
    };
    ```
 
-3. **Paskelbkite Agento kortelėje:** faile `src/app/.well-known/agent.json/route.ts` papildykite `skills` masyvą:
+3. **Atskleisti agento kortelėje:** `src/lib/a2a/agentCardMetadata.ts` (bendrinamas `/.well-known/agent.json` ir `/.well-known/agent-card.json`), pridėkite prie `skills` masyvo:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Jūsų įgūdis",
-     "description": "Trumpas, į tikslą orientuotas aprašymas",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Natūraliosios kalbos iškvietimo pavyzdys"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Parašykite testus:** `tests/unit/a2a-<your-skill>.test.ts`. Apimkite sėkmingą scenarijų ir klaidos scenarijų.
+4. **Rašyti testus:** `tests/unit/a2a-<your-skill>.test.ts`. Viršelis laimingas kelias + klaidos kelias.
 
-5. **Dokumentuokite** naują įgūdį šio failo lentelėje `Available Skills`.
+5. **dokumentas** naujas įgūdis šio failo `Available Skills` lentelėje.
 
 ---
 

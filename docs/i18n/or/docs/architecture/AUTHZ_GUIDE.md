@@ -131,34 +131,34 @@ JWTର ବୈଧତା ଯାଞ୍ଚ **ଏବଂ** ଏଥିରେ `authentica
 
 କିଛି `MANAGEMENT` କାର୍ଯ୍ୟ **କେବଳ ଅପରେଟର୍** ଅଟେ: `manage` କୀ ଯଥେଷ୍ଟ ନୁହେଁ। ସଂରକ୍ଷିତ କ୍ରେଡେନସିଆଲ୍ ରପ୍ତାନି (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ଜୀବନ୍ତ ଡାଟା ଉପରେ ବ୍ୟାକଅପ୍ ପୁନଃସ୍ଥାପନ (`dryRun=true` ସମେତ `POST /api/db-backups/import`, id ଦ୍ୱାରା `POST /api/db-backups` ପୁନଃସ୍ଥାପନ, `POST /api/settings/import-json`), ପୁନଃସ୍ଥାପନ ବିନ୍ଦୁ ନଷ୍ଟ କରିବା (`DELETE /api/db-backups` ସଫାସୁତରା, ଏବଂ `PATCH /api/db-backups` କାରଣ ଏହା ସଞ୍ଚୟ କରୁଥିବା ରିଟେନସନ୍ ପ୍ରତି ବ୍ୟାକଅପ୍ ପରେ ସ୍ୱୟଂଚାଳିତ ପ୍ରୁନିଂ ଚଳାଏ) ଡ୍ୟାସବୋର୍ଡ ସେସନ୍, ସ୍ଥାନୀୟ CLI ବିଷୟ, କିମ୍ବା ଲଗଇନ୍ ଅକ୍ଷମ ଥିବା ଆବଶ୍ୟକ କରେ। ସିଙ୍କ୍ ଟୋକେନ୍ ଜାରି କରିବା (`POST /api/sync/tokens`) ଏବଂ `admin` CLI ଆକ୍ସେସ୍ ଟୋକେନ୍ ଜାରି କରିବା (`POST /api/cli/tokens`) ପ୍ରତ୍ୟେକ ଲଗଇନ୍ ମୋଡ୍‌ରେ ଡ୍ୟାସବୋର୍ଡ ସେସନ୍ କିମ୍ବା ସ୍ଥାନୀୟ CLI ବିଷୟ ଆବଶ୍ୟକ କରେ। ଯେକୌଣସି ସ୍କୋପ୍‌ର API କୀ ଏବଂ `oma_` ଆକ୍ସେସ୍ ଟୋକେନ୍ ଅପରେଟର୍ କ୍ରେଡେନସିଆଲ୍ ନୁହଁନ୍ତି: ଯେତେବେଳେ ଏକ ଅପରେଟର୍ ଆବଶ୍ୟକ ହୁଏ, ସେମାନେ `403` ପାଆନ୍ତି। ଯାଞ୍ଚଟି `src/lib/api/operatorCredential.ts` ରେ ଅଛି (`resolveOperatorCredential()` / `requireOperatorCredential()`)। ଲଗଇନ୍ ସେଟିଂସ୍ ବଦଳାଇବା ମଧ୍ୟ କେବଳ ଅପରେଟର୍: `POST /api/settings/require-login` (ପରିଚାଳନା ପାସୱାର୍ଡ ସେଟ୍ / `requireLogin` ଟଗଲ୍) ଏକ ପାସୱାର୍ଡ ଥିଲେ କେବଳ ସେହି କ୍ରେଡେନସିଆଲ୍ ଗ୍ରହଣ କରେ — ପ୍ରଥମ-ଚାଲନା ବୁଟଷ୍ଟ୍ରାପ୍ ୱିଣ୍ଡୋ (ଏପର୍ଯ୍ୟନ୍ତ ପାସୱାର୍ଡ ନାହିଁ) ଅପରିବର୍ତ୍ତିତ ରହେ — ଏବଂ ପାସୱାର୍ଡ ବଦଳାଇବାକୁ ଡ୍ୟାସବୋର୍ଡ ସେସନ୍‌କୁ `currentPassword` ପଠାଇବାକୁ ପଡ଼େ (ଏହା ନଥିଲେ କିମ୍ବା ଭୁଲ ହେଲେ `403`, `settings.update_failed` ଭାବରେ ଅଡିଟ୍ ହୁଏ)। ସ୍ଥାନୀୟ CLI ଏବଂ ଲଗଇନ୍ ଅକ୍ଷମ ଥିବା ଇନଷ୍ଟାନ୍ସ ପୁନରୁଦ୍ଧାର ପଥ ରଖନ୍ତି ଏବଂ ତାହା ବିନା ପାସୱାର୍ଡ ସେଟ୍ କରିପାରନ୍ତି, କାରଣ ଉଭୟ ଡାଟା ଡାଇରେକ୍ଟ୍ରୀର ମାଲିକ ହୋଷ୍ଟ ସହ ବନ୍ଧା।
 
-## ପାଇପ୍ଲାଇନ୍
+## ପାଇପଲାଇନ
 
 ```
-ଆସୁଥିବା ଅନୁରୋଧ → src/proxy.ts
-  → src/server/authz/pipeline.tsରେ runAuthzPipeline()
-    1. ବିଶ୍ୱସ୍ତ ଆଭ୍ୟନ୍ତରୀଣ ହେଡର୍ଗୁଡ଼ିକୁ ବାଦ ଦିଅନ୍ତୁ (x-omniroute-auth-*, x-omniroute-route-class)
-    2. ଅନୁରୋଧ id ସୃଷ୍ଟି କରନ୍ତୁ, classifyRoute() ମାଧ୍ୟମରେ ରୁଟ୍ ବର୍ଗୀକରଣ କରନ୍ତୁ
-    3. ଯଦି pathname == "/" → /dashboardକୁ ପୁନଃନିର୍ଦ୍ଦେଶ କରନ୍ତୁ
-    4. ଯଦି ଡ୍ରେନିଂ ଚାଲିଛି (ସୁବ୍ୟବସ୍ଥିତ ଶଟ୍ଡାଉନ୍) ଏବଂ /api/* → 503
-    5. ଯଦି non-GET /api/* → checkBodySize() ଗାର୍ଡ
-    6. ଯଦି OPTIONS → CORS ପ୍ରିଫ୍ଲାଇଟ୍ 204
-    7. ଯଦି options.enforce == false → ରୁଟ୍-କ୍ଲାସ୍ ହେଡର୍ଗୁଡ଼ିକ ସହିତ ପାସ୍-ଥ୍ରୁ
-    8. ଅନ୍ୟଥା: POLICIES[routeClass].evaluate(ctx)
-       - ଅନୁମତି  → x-omniroute-auth-{kind,id,label,scopes} ଯୋଡ଼ନ୍ତୁ → NextResponse.next()
-       - ପ୍ରତ୍ୟାଖ୍ୟାନ → correlation_id ସହିତ JSON ତ୍ରୁଟି (ଡ୍ୟାସ୍ବୋର୍ଡ ପୃଷ୍ଠାଗୁଡ଼ିକ → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-ବିଶ୍ୱସ୍ତ ଆଭ୍ୟନ୍ତରୀଣ ହେଡର୍ଗୁଡ଼ିକ (`src/server/authz/headers.ts`ରେ ପରିଭାଷିତ) ବର୍ଗୀକରଣ ପୂର୍ବରୁ **ଆସୁଥିବା ଅନୁରୋଧଗୁଡ଼ିକରୁ ବାଦ ଦିଆଯାଏ** — କ୍ଲାଏଣ୍ଟମାନେ କୌଣସି ବିଷୟର ଛଦ୍ମବେଶ ଧାରଣ କରିବା ପାଇଁ `x-omniroute-auth-*`କୁ ଆଗୁଆ ପୂରଣ କରିପାରିବେ ନାହିଁ।
+ବିଶ୍ୱସ୍ତ ଆଭ୍ୟନ୍ତରୀଣ ଶୀର୍ଷଲେଖଗୁଡ଼ିକ ( `src/server/authz/headers.ts` ରେ ବ୍ୟାଖ୍ୟା କରାଯାଇଛି) \|** ଆସୁଥିବା ଅନୁରୋଧରୁ ଛଡ଼ାଯାଇଛି \|** ବର୍ଗୀକରଣ ପୂର୍ବରୁ — ଗ୍ରାହକମାନେ ଏକ ବିଷୟର ଛଦ୍ମନାମ କରିବାକୁ `x-omniroute-auth-*` ପୂର୍ବ-ଜନସଂଖ୍ୟା କରିପାରିବେ ନାହିଁ \|
 
-### ପଲିସି ଚୁକ୍ତିଗୁଡ଼ିକ
+### ନୀତି ଚୁକ୍ତି
 
-ପ୍ରତ୍ୟେକ ରୁଟ୍ କ୍ଲାସ୍ର `src/server/authz/policies/`ରେ ଏକ ପଲିସି ଅଛି:
+ପ୍ରତ୍ୟେକ ରୁଟ୍ ଶ୍ରେଣୀର `src/server/authz/policies/` ରେ ଏକ ନୀତି ଅଛି:
 
-- **`publicPolicy`** (`policies/public.ts`) — ସର୍ବଦା `allow({ kind: "anonymous", id: "anonymous" })` ଫେରାଏ।
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer ବାହାର କରେ, `validateApiKey()` ମାଧ୍ୟମରେ ବୈଧତା ଯାଞ୍ଚ କରେ। ପ୍ରଭାବୀ `REQUIRE_API_KEY` ଫିଚର୍ ଫ୍ଲାଗ୍ ଅକ୍ଷମ ଥିଲେ ମାତ୍ର ଅଜ୍ଞାତ ଉପଯୋଗକର୍ତ୍ତାକୁ ଫଲ୍-ଥ୍ରୁ କରେ। ପ୍ରଭାବୀ ଫ୍ଲାଗ୍ଟି `isRequireApiKeyEnabled()` (`DB ଫିଚର୍ ଫ୍ଲାଗ୍ ଓଭର୍ରାଇଡ୍ > process.env.REQUIRE_API_KEY > ଡିଫଲ୍ଟ`) ମାଧ୍ୟମରେ ସମାଧାନ କରାଯାଏ, ଯାହାଦ୍ୱାରା ଡ୍ୟାସ୍ବୋର୍ଡ ଫିଚର୍ ଫ୍ଲାଗ୍ ଏବଂ ପରିବେଶ ଭେରିଏବଲ୍ଗୁଡ଼ିକ `/api/v1/*`, `/api/v1beta/*` ଓ ଉପନାମଗୁଡ଼ିକୁ ସୁସଙ୍ଗତ ଭାବେ ନିୟନ୍ତ୍ରଣ କରନ୍ତି; ରିଜଲ୍ଭର୍ ବିଫଳତାଗୁଡ଼ିକ ଆକ୍ସେସ୍ ବନ୍ଦ ରଖେ। କ୍ଲାଏଣ୍ଟ API ରୁଟ୍ଗୁଡ଼ିକରେ ଡ୍ୟାସ୍ବୋର୍ଡ-ସେସନ୍ ଅନୁରୋଧଗୁଡ଼ିକୁ ଅନୁମତି ଦିଏ (`/api/v1/models` ସମେତ, ଯାହା ଡ୍ୟାସ୍ବୋର୍ଡ ମଡେଲ୍ କ୍ୟାଟାଲଗ୍ ଦ୍ୱାରା ବ୍ୟବହୃତ)।
-- **`managementPolicy`** (`policies/management.ts`) — ଡ୍ୟାସ୍ବୋର୍ଡ ସେସନ୍, ଆଭ୍ୟନ୍ତରୀଣ ମଡେଲ୍-ସିଙ୍କ୍ ଅନୁରୋଧଗୁଡ଼ିକ (`/api/providers/[name]/(sync-models|models)` ସହିତ ମେଳ କରାଯାଇଥିବା) ଗ୍ରହଣ କରେ, କିମ୍ବା `isAuthRequired()` false ଫେରାଇଲେ ସମ୍ପୂର୍ଣ୍ଣ ଭାବେ ଏଡ଼ାଇଯାଏ। ଏକ Bearer ଟୋକେନ୍ ଉପସ୍ଥିତ କିନ୍ତୁ ଅବୈଧ ହେଲେ 403 (`AUTH_001`), ଅନ୍ୟଥା 401 ଫେରାଏ। କୌଣସି ପ୍ରମାଣୀକରଣ ଶାଖା ପୂର୍ବରୁ ରୁଟ୍-ଗାର୍ଡ ସ୍ତରଗୁଡ଼ିକ (LOCAL_ONLY / ALWAYS_PROTECTED) ମଧ୍ୟ ପ୍ରୟୋଗ କରେ — [ରୁଟ୍ ଗାର୍ଡ ସ୍ତରଗୁଡ଼ିକ](../security/ROUTE_GUARD_TIERS.md) ଦେଖନ୍ତୁ। `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`ରେ ଥିବା LOCAL_ONLY ପଥଗୁଡ଼ିକ (ବର୍ତ୍ତମାନ: `/api/mcp/`)ରେ Bearer କୀ `manage` ସ୍କୋପ୍ ବହନ କଲେ non-loopbackରୁ ପ୍ରବେଶ କରାଯାଇପାରେ; ଅନ୍ୟ ସମସ୍ତ LOCAL_ONLY ପଥ ସ୍କୋପ୍କୁ ଖାତିର ନକରି strict-loopback ହୋଇ ରହେ।
+- **`publicPolicy`** (`policies/public.ts`) — ସର୍ବଦା `allow({ kind: "anonymous", id: "anonymous" })` ଫେରସ୍ତ କରେ \|
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — ନିର୍ବାହକାରୀ, `validateApiKey()` ମାଧ୍ୟମରେ ବ valid ଧ କରେ \| ପ୍ରଭାବଶାଳୀ `REQUIRE_API_KEY` feature ଶିଷ୍ଟ୍ୟ ପତାକା ଅକ୍ଷମ ହେଲେ ହିଁ ଅଜ୍ଞାତ ହୋଇଯାଏ \| ପ୍ରଭାବଶାଳୀ ପତାକା `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) ମାଧ୍ୟମରେ ସମାଧାନ ହୋଇଛି ତେଣୁ ଡ୍ୟାସବୋର୍ଡ ବ ature ଶିଷ୍ଟ୍ୟ ଫ୍ଲାଗ ଏବଂ ପରିବେଶ ଭେରିଏବଲ୍ `/api/v1/*`, `/api/v1beta/*`, ଏବଂ ଛଦ୍ମନାମକୁ କ୍ରମାଗତ ଭାବରେ ପରିଚାଳନା କରେ \| ସମାଧାନକାରୀ ବିଫଳତା ବନ୍ଦ ହୋଇଯାଏ \| କ୍ଲାଏଣ୍ଟ API ରୁଟରେ ଡ୍ୟାସବୋର୍ଡ-ଅଧିବେଶନ ଅନୁରୋଧକୁ ଅନୁମତି ଦେଇଥାଏ ( `/api/v1/models` ଅନ୍ତର୍ଭୂକ୍ତ କରି, ଡ୍ୟାସବୋର୍ଡ ମଡେଲ କାଟାଲଗ୍ ଦ୍ୱାରା ବ୍ୟବହୃତ) \| ଯେତେବେଳେ ଏଣ୍ଟ୍ରା ID SSO ସକ୍ଷମ ହୁଏ, ଏକ ବିୟର ଯାହାକି ଗଠନମୂଳକ ଭାବରେ ଏକ ଏଣ୍ଟ୍ରା ଟୋକେନ୍ (ତିନୋଟି ଆଧାର 64url ସେଗମେଣ୍ଟ, `RS*` alg, `kid`) SSO ଶାଖା ଦ୍ୱାରା ପରିଚାଳିତ ହୋଇଥାଏ \|** ପୂର୍ବରୁ** `validateApiKey()` — ଷ୍ଟାଟିକ୍ API କିଗୁଡ଼ିକ ପ୍ରଭାବିତ ନୁହେଁ \| [Entra ID SSO](../security/ENTRA_SSO.md) ଦେଖନ୍ତୁ \|
+- **`managementPolicy`** (`policies/management.ts`) — ଡ୍ୟାସବୋର୍ଡ ଅଧିବେଶନ, ଆଭ୍ୟନ୍ତରୀଣ ମଡେଲ-ସିଙ୍କ ଅନୁରୋଧ ( `/api/providers/[name]/(sync-models|models)` ସହିତ ମେଳ) ଗ୍ରହଣ କରେ, କିମ୍ବା ଯଦି `isAuthRequired()` ମିଥ୍ୟା ଫେରସ୍ତ କରେ ତେବେ ସଂପୂର୍ଣ୍ଣ ଛାଡିଦିଏ \| 403 (`AUTH_001`) ଫେରସ୍ତ କରେ ଯେତେବେଳେ ଏକ ବିୟର ଟୋକନ୍ ଉପସ୍ଥିତ କିନ୍ତୁ ଅବ alid ଧ, 401 ଅନ୍ୟଥା \| ଯେକ any ଣସି auth ଶାଖା — [ରୁଟ୍ ଗାର୍ଡ ଟାୟର୍](../security/ROUTE_GUARD_TIERS.md) ଦେଖିବା ପୂର୍ବରୁ ରୁଟ୍-ଗାର୍ଡ ସ୍ତରଗୁଡିକ (LOCAL_ONLY / ALWAYS_PROTECTED) କୁ ମଧ୍ୟ କାର୍ଯ୍ୟକାରୀ କରିଥାଏ \| `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ରେ LOCAL_ONLY ପଥ (ଆଜି: `/api/mcp/`) ଅଣ-ଲୁପବ୍ୟାକ୍ ରୁ ପ୍ରବେଶ କରାଯାଇପାରେ ଯେତେବେଳେ ବିୟର ଚାବି `manage` ପରିସର ବହନ କରେ; ଅନ୍ୟ ସମସ୍ତ LOCAL_ONLY ପଥଗୁଡିକ ପରିସରକୁ ଖାତିର ନକରି କଠୋର-ଲୁପବ୍ୟାକ୍ ରହିଥାଏ \|
 
-ଏକ ସଫଳ ପଲିସି `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` ସହିତ `AuthSubject` ଫେରାଏ। ଡାଉନ୍ଷ୍ଟ୍ରିମ୍ ହ୍ୟାଣ୍ଡଲର୍ଗୁଡ଼ିକ ପ୍ରମାଣୀକରଣ ତର୍କକୁ ପୁନଃ ଚଳାଇବା ପରିବର୍ତ୍ତେ `src/server/authz/assertAuth.ts`ରେ ଥିବା `assertAuth(request, "CLIENT_API")` ମାଧ୍ୟମରେ ଏହାକୁ ପଢ଼ିପାରିବେ।
+ଏକ ସଫଳ ନୀତି `AuthSubject` ସହିତ `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ଫେରସ୍ତ କରେ \| ଡାଉନ୍ଷ୍ଟ୍ରିମ୍ ହ୍ୟାଣ୍ଡେଲର୍ମାନେ auth ତର୍କକୁ ପୁନ running ଚଲାଇବା ପରିବର୍ତ୍ତେ `src/server/authz/assertAuth.ts` ରେ `assertAuth(request, "CLIENT_API")` ମାଧ୍ୟମରେ ପ read ିପାରିବେ \|
 
 ## ସାର୍ବଜନୀନ ରୁଟ୍ଗୁଡ଼ିକର ତାଲିକା
 
@@ -304,25 +304,25 @@ Client API କୀ ବାଧ୍ୟତା `src/shared/utils/featureFlags.ts` ର�
 - ସାର୍ବଜନୀନ ଅନୁମୋଦିତ ତାଲିକା: `tests/unit/public-api-routes.test.ts`।
 - କେନ୍ଦ୍ରିତ ଭାବେ ଚଲାନ୍ତୁ: `node --import tsx/esm --test tests/unit/authz/classify.test.ts`।
 
-## ଡିବଗିଂ
+## ତ୍ରୁଟି ନିବାରଣ
 
-ପାଇପଲାଇନ୍ ସର୍ବଦା ପ୍ରତିକ୍ରିୟାଗୁଡ଼ିକରେ ନିମ୍ନଲିଖିତ ହେଡର୍ ଯୋଡ଼େ:
+ପାଇପଲାଇନ ସର୍ବଦା ପ୍ରତିକ୍ରିୟାଗୁଡ଼ିକୁ ଷ୍ଟାମ୍ପ କରିଥାଏ:
 
 ```
 x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-ପ୍ରମାଣିତ ଅନୁରୋଧଗୁଡ଼ିକ ପାଇଁ ଅପ୍ଷ୍ଟ୍ରିମ୍ (ହ୍ୟାଣ୍ଡଲର୍-ପାର୍ଶ୍ୱ) ଅନୁରୋଧ ହେଡର୍ଗୁଡ଼ିକରେ ଏଗୁଡ଼ିକ ମଧ୍ୟ ଅନ୍ତର୍ଭୁକ୍ତ ଥାଏ:
+ପ୍ରାମାଣିକ ଅନୁରୋଧ ପାଇଁ ଅପଷ୍ଟ୍ରିମ୍ (ହ୍ୟାଣ୍ଡେଲର୍-ସାଇଡ୍) ଅନୁରୋଧ ହେଡର୍ ଗୁଡିକ ମଧ୍ୟ ଅନ୍ତର୍ଭୁକ୍ତ କରେ:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous"
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
 x-omniroute-auth-label:     (optional)
 x-omniroute-auth-scopes:    comma-separated list
 ```
 
-ହ୍ୟାଣ୍ଡଲର୍ଗୁଡ଼ିକ ଭିତରେ `assertAuth(req, expectedClass)` ବ୍ୟବହାର କରନ୍ତୁ — ଯଦି ମିଡଲୱେର୍କୁ ବାଇପାସ୍ କରାଯାଇଥାଏ, ଏହା `AUTHZ_NOT_INITIALIZED` କୋଡ୍ ସହିତ `AuthzAssertionError` ଥ୍ରୋ କରେ (ପରୀକ୍ଷଣଗୁଡ଼ିକରେ ବିନ୍ୟାସ ରିଗ୍ରେସନ୍ ଚିହ୍ନଟ କରିବା ପାଇଁ ଉପଯୋଗୀ)।
+ହ୍ୟାଣ୍ଡଲର୍ ଭିତରେ `assertAuth(req, expectedClass)` ବ୍ୟବହାର କରନ୍ତୁ — ଏହା `AuthzAssertionError` `AUTHZ_NOT_INITIALIZED` ସହିତ ଫୋପାଡିଥାଏ ଯଦି ମଧ୍ୟମ ସଫ୍ଟୱେର୍ ବାଇପାସ୍ ହୋଇଥଲା (ପରୀକ୍ଷଣରେ ବିନ୍ୟାସକରଣ ରିଗ୍ରେସନ୍ ଧରିବାରେ ସାହାଯ୍ୟକାରୀ) \|
 
 ## ଏହା ମଧ୍ୟ ଦେଖନ୍ତୁ
 
