@@ -178,77 +178,79 @@ Scopes (v3.8)፦ `db`፣ `sse`፣ `oauth`፣ `dashboard`፣ `api`፣ `cli`፣ `d
 # ሁሉም ሙከራዎች (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# አንድ የሙከራ ፋይል (የNode.js ቤተኛ test runner — አብዛኞቹ ሙከራዎች ይህን ይጠቀማሉ)
+# ነጠላ የሙከራ ፋይል (የNode.js ቤተኛ የሙከራ አስኬጅ — አብዛኞቹ ሙከራዎች ይህን ይጠቀማሉ)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# በለውጥዎ የተነኩት unit tests ብቻ (ከCI gate ጋር ተመሳሳይ TIA selector፣ #8084)
-npm run test:scoped            # በመጨረሻው commit (ወይም በworking tree) ውስጥ ያሉ ለውጦች
-npm run test:scoped:staged     # staged ለውጦች ብቻ — ከpre-commit ማስኬድ ጋር በሚገባ ይጣመራል
-npm run test:scoped:full       # በመጀመሪያ import-graph mapን እንደገና ይገነባል (ፋይሎችን ካከሉ/ካንቀሳቀሱ በኋላ)
-# Exit 1 + "run the full suite" ማለት hub file (tsconfig፣ package.json፣ …) ወይም
-# unmapped source ተለውጧል ማለት ነው — selector በደህንነት ሁኔታ ይወድቃል፤ በጭራሽ ያለማሳወቅ አይዘልም።
+# በለውጥዎ የተጎዱት የunit ሙከራዎች ብቻ (ከCI መቆጣጠሪያው ጋር ተመሳሳይ የTIA መራጭ፣ #8084)
+npm run test:scoped            # ባለፈው commit ውስጥ (ወይም በworking tree ውስጥ) ያሉ ለውጦች
+npm run test:scoped:staged     # staged የተደረጉ ለውጦች ብቻ — ከpre-commit ማስኬጃ ጋር በደንብ ይሠራል
+npm run test:scoped:full       # በመጀመሪያ የimport-graph ካርታውን እንደገና ይገንቡ (ፋይሎችን ካከሉ/ካንቀሳቀሱ በኋላ)
+# Exit 1 + "ሙሉውን suite ያስኪዱ" ማለት hub ፋይል (tsconfig, package.json, …) ወይም
+# ካርታ ያልተዘጋጀለት source ተለውጧል ማለት ነው — መራጩ በአስተማማኝ ሁኔታ ይወድቃል፣ ምንም ጊዜ ያለማሳወቅ አይዘልም።
 
-# Vitest (MCP server፣ autoCombo፣ cache)
+# Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
-# E2E ሙከራዎች (Playwrightን ይፈልጋል)
+# E2E ሙከራዎች (Playwright ያስፈልጋል)
 npm run test:e2e
 
-# የProtocol clients E2E (MCP transports፣ A2A)
+# የProtocol clients E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# የEcosystem ተኳኋኝነት ሙከራዎች
+# የEcosystem ተኳሃኝነት ሙከራዎች
 npm run test:ecosystem
 
-# የCoverage gate፦ 60% statements/lines/functions/branches
+# የCoverage መቆጣጠሪያ፦ 60% statements/lines/functions/branches
 npm run test:coverage
 npm run coverage:report
 
-# Lint + የቅርጸት ማረጋገጫ
+# የLint + format ማረጋገጫ
 npm run lint
 npm run check
 
-# Gated real-upstream combo smoke (የVPS መዳረሻ + የእውነተኛ provider credits ይፈልጋል)
-# እውነተኛ providersን ይጠቀማል — ትንሽ ወጪ አለው። በCI ውስጥ በፍጹም አይሰራም። gate ከሌለ በአግባቡ ይዘላል።
-# የሚያስፈልገው፦ ssh root@192.168.0.15 መዳረሻ (ከVPS የread-only DB snapshot ይጭናል)።
+# በመቆጣጠሪያ የተገደበ የእውነተኛ-upstream combo smoke (የVPS መዳረሻ + የእውነተኛ provider ክሬዲቶች ያስፈልጋሉ)
+# እውነተኛ providersን ያገኛል — ትንሽ ወጪ አለው። በCI ውስጥ በፍጹም አይሄድም። መቆጣጠሪያው ከሌለ ያለችግር ይዘላል።
+# የሚያስፈልገው፦ ssh root@192.168.0.15 መዳረሻ (ከVPS ላይ ተነባቢ-ብቻ የDB snapshot ይጫናል)።
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — ተራ Node ESM scripts፤ live .15 serverን በቀጥታ ይጠቀማሉ።
-# የሚያስፈልገው፦ ssh root@192.168.0.15 መዳረሻ (combos በSSH sqlite በኩል ይፈጠራሉ/ይወገዳሉ)።
-# እውነተኛ providersን ይጠቀማል (አነስተኛ ወጪ)። __live_test__* combosን ብቻ ይፈጥራል/ይሰርዛል። በCI ውስጥ በፍጹም አይሰራም።
-# REQUIRE_API_KEY=false በ.15 ላይ ስለሆነ API key አያስፈልግም፤ ነገር ግን COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ከተዋቀሩ ያከብራቸዋል።
-npm run test:combo:live:vps              # 7 HTTP scenarios (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # እውነተኛ cross-provider failover scenario ይጨምራል (በድምሩ 8)
+# Phase-3 VPS live smoke — ቀላል የNode ESM scripts፣ የቀጥታውን .15 server በቀጥታ ያገኛሉ።
+# የሚያስፈልገው፦ ssh root@192.168.0.15 መዳረሻ (combos በSSH sqlite በኩል ይፈጠራሉ/ይፈርሳሉ)።
+# እውነተኛ providersን ያገኛል (አነስተኛ ወጪ)። __live_test__* combosን ብቻ ይፈጥራል/ይሰርዛል። በCI ውስጥ በፍጹም አይሄድም።
+# REQUIRE_API_KEY=false በ.15 ላይ ስለሆነ API key አያስፈልግም፣ ነገር ግን COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ከተዋቀሩ ያከብራቸዋል።
+npm run test:combo:live:vps              # 7 የHTTP ሁኔታዎች (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # እውነተኛ የcross-provider failover ሁኔታን ይጨምራል (በአጠቃላይ 8)
 ```
 
 የCoverage ማስታወሻዎች፦
 
-- `npm run test:coverage` ለዋናው unit test suite የsource coverageን ይለካል፣ `tests/**`ን ያስወግዳል፣ እና `open-sse/**`ን ያካትታል
-- Pull requests የcoverage gateን በ**60%+** statements/lines/functions/branches ማቆየት አለባቸው
-- PR በ`src/`፣ `open-sse/`፣ `electron/`፣ ወይም `bin/` ውስጥ ያለ production codeን ከለወጠ፣ በዚያው PR ውስጥ automated testsን ማከል ወይም ማዘመን አለበት
-- `npm run coverage:report` ከቅርብ ጊዜው coverage run የተገኘውን ዝርዝር የፋይል-በ-ፋይል ሪፖርት ያትማል
-- `npm run test:coverage:legacy` ለታሪካዊ ንጽጽር የቀድሞውን metric ይጠብቃል
-- ደረጃ በደረጃ የcoverage ማሻሻያ roadmapን ለማየት `docs/ops/COVERAGE_PLAN.md`ን ይመልከቱ
+- `npm run test:coverage` ለዋናው የunit test suite የsource coverageን ይለካል፣ `tests/**`ን ያስወግዳል፣ እና `open-sse/**`ን ያካትታል
+- Pull requests የcoverage መቆጣጠሪያውን በ**60%+** statements/lines/functions/branches ማቆየት አለባቸው
+- PR በ`src/`፣ `open-sse/`፣ `electron/`፣ ወይም `bin/` ውስጥ ያለ production code ከቀየረ፣ በዚያው PR ውስጥ ራስ-ሰር ሙከራዎችን ማከል ወይም ማዘመን አለበት
+- `npm run coverage:report` ከቅርብ ጊዜው የcoverage ማስኬጃ የተገኘውን ዝርዝር የፋይል-በ-ፋይል ሪፖርት ያትማል
+- `npm run test:coverage:legacy` ለታሪካዊ ንጽጽር አሮጌውን መለኪያ ይጠብቃል
+- ደረጃ በደረጃ የcoverage ማሻሻያ ዕቅዱን ለማየት `docs/ops/COVERAGE_PLAN.md`ን ይመልከቱ
 
 ### የPull Request መስፈርቶች
 
-PR ከመክፈትዎ በፊት፣ ለለወጡት ነገር ያተኮረውን loop ለማስኬድ
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)ን ይጠቀሙ። ሙሉው unit suite (4 CI shards)፣ Vitest፣ **60%+** coverage gate፣ እና
-production build የCI ኃላፊነት ናቸው — እነዚህን በአካባቢዎ ማስኬድ PR checks አስቀድመው ከሚሰጡት ውጭ ተጨማሪ መረጃ አይሰጥም፣ እና አነስተኛ ማሽኖች ላይ hostን ሊያጨናንቅ ይችላል (#8084)፦
+PR ከመክፈትዎ በፊት፣ ለቀየሩት ነገር ያተኮረውን loop ለማስኬድ
+[የአስተዋጽኦ Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)ን ይጠቀሙ። ሙሉው unit suite (4 CI shards)፣ Vitest፣ **60%+** የcoverage መቆጣጠሪያ፣ እና
+production build የCI ኃላፊነት ናቸው — እነዚህን በአካባቢዎ ማስኬድ PR
+ማረጋገጫዎቹ አስቀድመው ከሚሰጡት በላይ መረጃ አይጨምርም፣ እና በአነስተኛ ማሽኖች ላይ hostን ሙሉ በሙሉ ሊጭን ይችላል (#8084)፦
 
 - ለውጥዎን የሚሸፍኑ የሙከራ ፋይሎችን ያስኪዱ፦ `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint`ን ያስኪዱ
-- production code በተለወጠ ቁጥር automated testsን በዚያው PR ውስጥ ያካትቱ ወይም ያዘምኑ
-- production code ሲለወጥ የተለወጡትን ወይም የታከሉትን የሙከራ ፋይሎች በPR መግለጫ ውስጥ ያካትቱ
-- የproject secrets በCI ውስጥ ሲዋቀሩ በPR ላይ ያለውን የSonarQube ውጤት ያረጋግጡ
+- production code በተቀየረ ቁጥር በዚያው PR ውስጥ ራስ-ሰር ሙከራዎችን ያካትቱ ወይም ያዘምኑ
+- በ`node:test` ፋይሎች ውስጥ፣ እያንዳንዱን ከፍተኛ-ደረጃ `await` (እንደ `await import(...)`) ከመጀመሪያው `test()` / `describe()` በፊት ያስቀምጡ፦ በ`--test-force-exit` ስር፣ ከእሱ በኋላ የተመዘገቡ ሙከራዎች ያለማሳወቅ ፈጽሞ ላይሄዱ ይችላሉ (#18045፤ በ`npm run check:test-tla-order` የሚተገበር)
+- production code በተቀየረ ጊዜ የተቀየሩትን ወይም የታከሉትን የሙከራ ፋይሎች በPR መግለጫው ውስጥ ያካትቱ
+- የproject secrets በCI ውስጥ በተዋቀሩ ጊዜ በPR ላይ ያለውን የSonarQube ውጤት ያረጋግጡ
 
-የአሁኑ የሙከራ ሁኔታ፦ **122 unit test files** የሚከተሉትን ይሸፍናሉ፦
+የአሁኑ የሙከራ ሁኔታ፦ **122 የunit test ፋይሎች** የሚከተሉትን ይሸፍናሉ፦
 
-- የProvider translators እና የቅርጸት ልወጣ
+- የProvider translators እና format conversion
 - Rate limiting፣ circuit breaker፣ እና resilience
-- Semantic cache፣ idempotency፣ እና progress tracking
+- Semantic cache፣ idempotency፣ progress tracking
 - የDatabase operations እና schema (21 DB modules)
-- OAuth flows እና authentication
+- የOAuth flows እና authentication
 - የAPI endpoint validation (Zod v4)
 - የMCP server tools እና scope enforcement
 - የMemory እና Skills systems

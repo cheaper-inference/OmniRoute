@@ -906,8 +906,16 @@ function flushEvents(state) {
 // the terminal `response.output_item.done` snapshot for that item is NOT re-emitted
 // (which would duplicate the reasoning channel). Keyed by item_id when present, with a
 // global fallback for streams whose deltas carry no item_id.
-function markResponsesReasoningDeltaEmitted(state, itemId) {
+function markResponsesReasoningDeltaEmitted(state, itemId, outputIndex?) {
   state.reasoningDeltaEmitted = true;
+  // GitHub Copilot rotates the encrypted reasoning item id between events, so the
+  // id alone cannot pair a delta with its output_item.done. Record output_index too.
+  if (typeof outputIndex === "number") {
+    if (!(state.reasoningOutputIndexesWithDelta instanceof Set)) {
+      state.reasoningOutputIndexesWithDelta = new Set();
+    }
+    state.reasoningOutputIndexesWithDelta.add(outputIndex);
+  }
   const id = itemId != null ? String(itemId) : "";
   if (!id) return;
   if (!(state.reasoningItemsWithDelta instanceof Set)) {
@@ -1512,7 +1520,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
   ) {
     const reasoningDelta = data.delta || "";
     if (!reasoningDelta) return null;
-    markResponsesReasoningDeltaEmitted(state, data.item_id);
+    markResponsesReasoningDeltaEmitted(state, data.item_id, data.output_index);
     return {
       id: state.chatId,
       object: "chat.completion.chunk",
@@ -1535,7 +1543,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
   if (eventType === "response.reasoning_summary_text.delta") {
     const reasoningDelta = data.delta || "";
     if (!reasoningDelta) return null;
-    markResponsesReasoningDeltaEmitted(state, data.item_id);
+    markResponsesReasoningDeltaEmitted(state, data.item_id, data.output_index);
     const deltaText = buildResponsesReasoningSummaryDelta(state, data, reasoningDelta);
     return buildResponsesReasoningDeltaChunk(state, deltaText);
   }
@@ -1554,7 +1562,12 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
     const emittedWithoutItemId =
       state.reasoningDeltaEmitted &&
       !(state.reasoningItemsWithDelta instanceof Set && state.reasoningItemsWithDelta.size > 0);
-    if (emittedForItem || emittedWithoutItemId) return null;
+    // Same reasoning item under a rotated id (GitHub Copilot): match by output_index.
+    const emittedForOutputIndex =
+      typeof data.output_index === "number" &&
+      state.reasoningOutputIndexesWithDelta instanceof Set &&
+      state.reasoningOutputIndexesWithDelta.has(data.output_index);
+    if (emittedForItem || emittedWithoutItemId || emittedForOutputIndex) return null;
 
     const replayableReasoning = extractReplayableResponsesReasoningText(item);
     if (replayableReasoning) {

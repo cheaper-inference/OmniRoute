@@ -179,15 +179,15 @@ Kapsamlar (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci
 # Tüm testler (birim + vitest + ekosistem + e2e)
 npm run test:all
 
-# Tek test dosyası (Node.js yerel test çalıştırıcısı — testlerin çoğu bunu kullanır)
+# Tek test dosyası (Node.js yerel test çalıştırıcısı — çoğu test bunu kullanır)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Yalnızca değişikliğinizden etkilenen birim testleri (CI geçidiyle aynı TIA seçicisi, #8084)
 npm run test:scoped            # son commit'teki (veya çalışma ağacındaki) değişiklikler
-npm run test:scoped:staged     # yalnızca hazırlama alanındaki değişiklikler — commit öncesi çalıştırmayla iyi eşleşir
+npm run test:scoped:staged     # yalnızca hazırlama alanındaki değişiklikler — commit öncesi çalıştırmayla iyi uyum sağlar
 npm run test:scoped:full       # önce içe aktarma grafiği eşlemesini yeniden oluşturur (dosya ekledikten/taşıdıktan sonra)
-# Çıkış 1 + "run the full suite", bir merkez dosyanın (tsconfig, package.json, …) veya
-# eşlenmemiş bir kaynağın değiştiği anlamına gelir — seçici güvenli biçimde başarısız olur, hiçbir zaman sessizce atlamaz.
+# Çıkış kodu 1 + "run the full suite", bir merkez dosyanın (tsconfig, package.json, …) veya
+# eşlenmemiş bir kaynak dosyanın değiştiği anlamına gelir — seçici güvenli biçimde başarısız olur, hiçbir şeyi sessizce atlamaz.
 
 # Vitest (MCP sunucusu, autoCombo, önbellek)
 npm run test:vitest
@@ -209,52 +209,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Geçitli gerçek üst sağlayıcı kombinasyon smoke testi (VPS erişimi + gerçek sağlayıcı kredileri gerektirir)
-# GERÇEK sağlayıcılara istek gönderir — düşük miktarda maliyet oluşturur. CI'da ASLA çalışmaz. Geçit olmadan sorunsuzca atlanır.
-# Gereken: ssh root@192.168.0.15 erişimi (VPS'ten salt okunur bir DB anlık görüntüsü alır).
+# Geçitli gerçek üst kaynak combo duman testi (VPS erişimi + gerçek sağlayıcı kredileri gerektirir)
+# GERÇEK sağlayıcılara istek gönderir — küçük bir maliyeti vardır. CI'da ASLA çalışmaz. Geçit olmadan sorunsuzca atlanır.
+# Gereksinim: ssh root@192.168.0.15 erişimi (VPS'ten salt okunur bir DB anlık görüntüsü alır).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Aşama-3 VPS canlı smoke testi — düz Node ESM betikleri, doğrudan canlı .15 sunucusuna istek gönderir.
-# Gereken: ssh root@192.168.0.15 erişimi (kombinasyonlar SSH sqlite aracılığıyla oluşturulur/kaldırılır).
-# GERÇEK sağlayıcılara istek gönderir (düşük maliyet). Yalnızca __live_test__* kombinasyonlarını oluşturur/siler. CI'da ASLA çalışmaz.
-# .15 üzerinde REQUIRE_API_KEY=false olduğundan API anahtarı gerekmez, ancak ayarlanmışsa COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY değerlerini kullanır.
-npm run test:combo:live:vps              # 7 HTTP senaryosu (öncelik/round-robin/ağırlıklı/maliyet/birleştirme/otomatik + sağlık)
+# Aşama 3 VPS canlı duman testi — düz Node ESM betikleri, canlı .15 sunucusuna doğrudan istek gönderir.
+# Gereksinim: ssh root@192.168.0.15 erişimi (combo'lar SSH sqlite üzerinden oluşturulur/kaldırılır).
+# GERÇEK sağlayıcılara istek gönderir (küçük maliyet). Yalnızca __live_test__* combo'larını oluşturur/siler. CI'da ASLA çalışmaz.
+# .15 üzerinde REQUIRE_API_KEY=false olduğundan API anahtarı gerekmez, ancak ayarlanmışsa COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY değerlerine uyar.
+npm run test:combo:live:vps              # 7 HTTP senaryosu (öncelik/döngüsel/ağırlıklı/maliyet/birleştirme/otomatik + sağlık)
 npm run test:combo:live:vps:failover     # gerçek bir sağlayıcılar arası yük devretme senaryosu ekler (toplam 8)
 ```
 
 Kapsam notları:
 
-- `npm run test:coverage`, ana birim testi paketi için kaynak kapsamını ölçer, `tests/**` öğesini hariç tutar ve `open-sse/**` öğesini dahil eder
-- Pull request'ler; ifadeler/satırlar/fonksiyonlar/dallar için kapsam geçidini **%60+** seviyesinde tutmalıdır
-- Bir PR, `src/`, `open-sse/`, `electron/` veya `bin/` içindeki üretim kodunu değiştiriyorsa aynı PR'da otomatik testler eklemeli veya mevcut testleri güncellemelidir
-- `npm run coverage:report`, en son kapsam çalıştırmasından dosya bazında ayrıntılı raporu yazdırır
+- `npm run test:coverage`, ana birim test paketi için kaynak kapsamını ölçer, `tests/**` kapsam dışı bırakılır ve `open-sse/**` dahil edilir
+- Pull request'ler ifadeler/satırlar/fonksiyonlar/dallar için kapsam geçidini **%60+** düzeyinde tutmalıdır
+- Bir PR, `src/`, `open-sse/`, `electron/` veya `bin/` içindeki üretim kodunu değiştiriyorsa aynı PR içinde otomatik testler eklemeli veya mevcut testleri güncellemelidir
+- `npm run coverage:report`, en son kapsam çalıştırmasından ayrıntılı dosya bazında raporu yazdırır
 - `npm run test:coverage:legacy`, geçmiş karşılaştırmalar için eski metriği korur
-- Aşamalı kapsam iyileştirme yol haritası için `docs/ops/COVERAGE_PLAN.md` belgesine bakın
+- Aşamalı kapsam iyileştirme yol haritası için `docs/ops/COVERAGE_PLAN.md` dosyasına bakın
 
 ### Pull Request Gereksinimleri
 
-Bir PR açmadan önce, değiştirdiğiniz öğelere yönelik odaklı döngüyü çalıştırmak için
-[Katkı İçin Altın Yol](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) belgesini kullanın. Tam birim testi paketi
-(4 CI parçası), Vitest, **%60+** kapsam geçidi ve üretim derlemesi CI'ın sorumluluğundadır —
-bunları yerel olarak çalıştırmak, PR kontrollerinin zaten sağlayacağı bilgilere katkıda bulunmaz ve
-daha düşük kapasiteli makinelerde sistemi tamamen meşgul edebilir (#8084):
+Bir PR açmadan önce, değiştirdiğiniz öğeler için odaklanmış döngüyü çalıştırmak üzere
+[Katkı Altın Yolunu](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) kullanın. Tam birim test paketi (4 CI parçası), Vitest, **%60+** kapsam geçidi ve
+üretim derlemesi CI'ın sorumluluğundadır — bunları yerel olarak çalıştırmak, PR
+denetimlerinin zaten sağlamayacağı ek bir sinyal sağlamaz ve daha küçük makinelerde sistemi tamamen meşgul edebilir (#8084):
 
 - Değişikliğinizi kapsayan test dosyalarını çalıştırın: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` komutunu çalıştırın
-- Üretim kodu değiştiğinde aynı PR'a otomatik testler ekleyin veya mevcut testleri güncelleyin
-- Üretim kodu değiştiğinde değiştirilen veya eklenen test dosyalarını PR açıklamasına dahil edin
-- Proje gizli değerleri CI'da yapılandırılmışsa PR üzerindeki SonarQube sonucunu kontrol edin
+- Üretim kodu değiştiğinde aynı PR içinde otomatik testler ekleyin veya mevcut testleri güncelleyin
+- `node:test` dosyalarında, her üst düzey `await` ifadesini (`await import(...)` gibi) ilk `test()` / `describe()` çağrısından önce yerleştirin: `--test-force-exit` altında bundan sonra kaydedilen testler sessizce hiç çalışmayabilir (#18045; `npm run check:test-tla-order` tarafından zorunlu kılınır)
+- Üretim kodu değiştiğinde değiştirilen veya eklenen test dosyalarını PR açıklamasına ekleyin
+- Proje gizli anahtarları CI'da yapılandırılmışsa PR üzerindeki SonarQube sonucunu kontrol edin
 
-Mevcut test durumu: Aşağıdakileri kapsayan **122 birim testi dosyası**:
+Mevcut test durumu: Şunları kapsayan **122 birim test dosyası**:
 
 - Sağlayıcı çeviricileri ve biçim dönüştürme
 - Hız sınırlama, devre kesici ve dayanıklılık
-- Semantik önbellek, idempotency ve ilerleme takibi
-- Veritabanı işlemleri ve şema (21 DB modülü)
+- Anlamsal önbellek, eş etkili işlemler ve ilerleme takibi
+- Veritabanı işlemleri ve şeması (21 DB modülü)
 - OAuth akışları ve kimlik doğrulama
 - API uç noktası doğrulaması (Zod v4)
-- MCP sunucusu araçları ve kapsam zorlaması
-- Memory ve Skills sistemleri
+- MCP sunucu araçları ve kapsam uygulaması
+- Bellek ve Skills sistemleri
 
 ---
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import Icon from "@/shared/components/Icon";
 
 export default function FlowAnimation() {
   const t = useTranslations("landing");
@@ -54,9 +55,7 @@ export default function FlowAnimation() {
       <div className="relative h-[360px] hidden md:flex items-center justify-center animate-[float_6s_ease-in-out_infinite] overflow-hidden">
         {/* OmniRoute Hub - Center */}
         <div className="relative z-20 w-32 h-32 rounded-full bg-[#111520] border-2 border-[#E54D5E] shadow-[0_0_40px_rgba(229,77,94,0.3)] flex flex-col items-center justify-center gap-1 group cursor-pointer hover:scale-105 transition-transform duration-500">
-          <span className="material-symbols-outlined text-4xl text-[#E54D5E]" aria-hidden="true">
-            hub
-          </span>
+          <Icon name="hub" size={36} className="text-[#E54D5E]" />
           <span className="text-xs font-bold text-white tracking-widest uppercase">
             {t("brandName")}
           </span>

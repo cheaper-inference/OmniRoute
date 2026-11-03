@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import ReactMarkdown, { type Components } from "react-markdown";
-import { Button } from "@/shared/components";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import { Button, Card } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
+import { ViewerStatus } from "./ChangelogStates";
 import {
   CHANGELOG_GITHUB_URL,
   CHANGELOG_RAW_URL,
@@ -22,22 +25,45 @@ function resolveChangelogHref(href: string | undefined): string | null {
   }
 }
 
+/** "[3.8.52] — 2026-10-19" → { version: "3.8.52", date: "2026-10-19" } (date is optional). */
+export function splitReleaseHeading(text: string): { version: string; date: string | null } {
+  const match = /^\[?([^\]]+?)\]?(?:\s+[—–-]\s+(.+))?$/.exec(text.trim());
+  if (!match) return { version: text, date: null };
+  return { version: match[1].trim(), date: match[2]?.trim() || null };
+}
+
+function textOf(node: React.ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(textOf).join("");
+  return "";
+}
+
+/** One release per kit Card: split the markdown before every `## ` heading. */
+function splitReleases(markdown: string): string[] {
+  return markdown
+    .split(/^(?=## )/m)
+    .map((part) => part.trim())
+    .filter((part) => part && !/^#\s/.test(part));
+}
+
 const markdownComponents: Components = {
   h1({ children }) {
-    return <h1 className="mb-6 text-2xl font-bold text-text-main">{children}</h1>;
+    return <h1 className="ci-heading mb-6 text-2xl">{children}</h1>;
   },
   h2({ children }) {
+    const { version, date } = splitReleaseHeading(textOf(children));
     return (
-      <h2 className="mt-8 mb-4 flex items-center gap-2 text-lg font-bold text-text-main first:mt-0">
-        <span className="material-symbols-outlined text-[20px] text-primary">sell</span>
-        {children}
-      </h2>
+      <header className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 className="ci-dashboard-display flex items-center gap-2 text-2xl">
+          <Icon name="sell" size={20} className="text-text-muted" />
+          {version}
+        </h2>
+        {date && <span className="ci-eyebrow">{date}</span>}
+      </header>
     );
   },
   h3({ children }) {
-    return (
-      <h3 className="mt-5 mb-2 text-sm font-semibold uppercase text-text-main/80">{children}</h3>
-    );
+    return <h3 className="ci-eyebrow mt-5 mb-2 text-text-main">{children}</h3>;
   },
   p({ children }) {
     return <p className="mb-2 text-sm leading-relaxed text-text-muted">{children}</p>;
@@ -58,7 +84,7 @@ const markdownComponents: Components = {
   },
   code({ children }) {
     return (
-      <code className="rounded border border-black/5 bg-bg-subtle px-1.5 py-0.5 font-mono text-[13px] text-text-main dark:border-white/5">
+      <code className="rounded border border-border bg-bg-subtle px-1.5 py-0.5 font-mono text-[13px] text-text-main">
         {children}
       </code>
     );
@@ -106,41 +132,35 @@ export default function ChangelogViewer() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center space-y-4 py-32">
-        <span className="material-symbols-outlined animate-spin text-[32px] text-text-muted/50">
-          sync
-        </span>
-        <p className="text-sm text-text-muted">{t("loading")}</p>
-      </div>
-    );
+    return <ViewerStatus busy icon="sync" message={t("loading")} />;
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-text-muted">
-        <span className="material-symbols-outlined mb-4 text-[48px] text-red-500/50">
-          error_outline
-        </span>
-        <p>{t("changelogLoadFailed")}</p>
-        <Button variant="secondary" className="mt-4" onClick={() => globalThis.location.reload()}>
+      <ViewerStatus tone="error" icon="error_outline" message={t("changelogLoadFailed")}>
+        <Button variant="secondary" onClick={() => globalThis.location.reload()}>
           {t("retry")}
         </Button>
-      </div>
+      </ViewerStatus>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="max-w-none">
-        <ReactMarkdown components={markdownComponents}>{markdown}</ReactMarkdown>
-      </div>
-      <div className="mt-12 flex justify-center border-t border-border pt-6">
-        <a href={CHANGELOG_GITHUB_URL} target="_blank" rel="noopener noreferrer">
-          <Button variant="secondary" className="gap-2 text-xs">
-            <span className="material-symbols-outlined text-[16px]">open_in_new</span>
-            {t("viewFullHistory")}
-          </Button>
+    <div className="flex flex-col gap-4">
+      {splitReleases(markdown).map((release, index) => (
+        <Card key={index} padding="md">
+          <ReactMarkdown components={markdownComponents}>{release}</ReactMarkdown>
+        </Card>
+      ))}
+      <div className="flex justify-center pt-2">
+        <a
+          href={CHANGELOG_GITHUB_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={buttonVariants({ variant: "secondary", size: "sm" })}
+        >
+          <Icon name="open_in_new" size={16} />
+          {t("viewFullHistory")}
         </a>
       </div>
     </div>

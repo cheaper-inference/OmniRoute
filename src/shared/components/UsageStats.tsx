@@ -6,21 +6,12 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Card from "./Card";
 import Badge from "./Badge";
+import SegmentedControl from "./SegmentedControl";
+import Toggle from "./Toggle";
 import { CardSkeleton } from "./Loading";
 import { fmtFull, fmtCost } from "@/shared/utils/formatting";
-
-function SortIcon({
-  field,
-  currentSort,
-  currentOrder,
-}: {
-  field: string;
-  currentSort: string;
-  currentOrder: string;
-}) {
-  if (currentSort !== field) return <span className="ml-1 opacity-20">↕</span>;
-  return <span className="ml-1">{currentOrder === "asc" ? "↑" : "↓"}</span>;
-}
+import { SortableTableHead, type DataTableSortDirection } from "@omniroute/ui-kit/data-table-shell";
+import { Table, TableBody, TableCell, TableHeader, TableRow } from "@omniroute/ui-kit/table";
 
 function MiniBarGraph({
   data,
@@ -59,14 +50,12 @@ export default function UsageStats() {
   const [refreshInterval, setRefreshInterval] = useState(5000); // Start with 5s
   const prevTotalRequestsRef = useRef(0);
 
-  const toggleSort = (field: string) => {
+  // SortableTableHead (kit) computes the next direction: flip on the active column, "asc" on a
+  // new one (defaultDirection) — the rule the legacy header click applied.
+  const toggleSort = (field: string, direction: DataTableSortDirection) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (sortBy === field) {
-      params.set("sortOrder", sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      params.set("sortBy", field);
-      params.set("sortOrder", "asc");
-    }
+    params.set("sortBy", field);
+    params.set("sortOrder", direction);
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
@@ -227,48 +216,25 @@ export default function UsageStats() {
         <h2 className="text-xl font-semibold">{t("usageOverview")}</h2>
         <div className="flex items-center gap-2">
           {/* View Toggle */}
-          <div className="flex items-center gap-1 bg-bg-subtle rounded-lg p-1 border border-border">
-            <button
-              onClick={() => setViewMode("tokens")}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                viewMode === "tokens"
-                  ? "bg-primary text-white shadow-sm"
-                  : "text-text-muted hover:text-text hover:bg-bg-hover"
-              }`}
-            >
-              {t("tokens")}
-            </button>
-            <button
-              onClick={() => setViewMode("costs")}
-              className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                viewMode === "costs"
-                  ? "bg-primary text-white shadow-sm"
-                  : "text-text-muted hover:text-text hover:bg-bg-hover"
-              }`}
-            >
-              {t("costs")}
-            </button>
-          </div>
+          <SegmentedControl
+            size="sm"
+            value={viewMode}
+            onChange={(next) => setViewMode(next as typeof viewMode)}
+            options={[
+              { value: "tokens", label: t("tokens") },
+              { value: "costs", label: t("costs") },
+            ]}
+          />
 
           {/* Auto Refresh Toggle */}
           <div className="text-sm font-medium text-text-muted flex items-center gap-2">
             <span>{t("autoRefresh", { seconds: refreshInterval / 1000 })}</span>
-            <button
-              type="button"
-              onClick={() => setAutoRefresh(!autoRefresh)}
-              role="switch"
-              aria-checked={autoRefresh}
-              aria-label={t("toggleAutoRefresh")}
-              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 ${
-                autoRefresh ? "bg-primary" : "bg-bg-subtle border border-border"
-              }`}
-            >
-              <span
-                className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                  autoRefresh ? "translate-x-5" : "translate-x-1"
-                }`}
-              />
-            </button>
+            <Toggle
+              size="sm"
+              checked={autoRefresh}
+              onChange={setAutoRefresh}
+              ariaLabel={t("toggleAutoRefresh")}
+            />
           </div>
         </div>
       </div>
@@ -292,11 +258,11 @@ export default function UsageStats() {
                 >
                   <span className="text-primary font-bold">{req.model}</span>
                   <span className="mx-1 text-text-muted">|</span>
-                  <span className="text-text">{req.provider}</span>
+                  <span className="text-text-main">{req.provider}</span>
                   <span className="mx-1 text-text-muted">|</span>
-                  <span className="text-text font-medium">{req.account}</span>
+                  <span className="text-text-main font-medium">{req.account}</span>
                   {req.count > 1 && (
-                    <span className="ml-2 px-1.5 py-0.5 rounded bg-primary text-white font-bold">
+                    <span className="ml-2 px-1.5 py-0.5 rounded bg-primary text-accent-foreground font-bold">
                       x{req.count}
                     </span>
                   )}
@@ -365,159 +331,185 @@ export default function UsageStats() {
         <div className="p-4 border-b border-border bg-bg-subtle/50">
           <h3 className="font-semibold">{t("usageByModel")}</h3>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-bg-subtle/30 text-text-muted uppercase text-xs">
-              <tr>
-                <th
-                  className="px-6 py-3 cursor-pointer hover:bg-bg-subtle/50"
-                  onClick={() => toggleSort("rawModel")}
+        <Table containerClassName="rounded-none border-0" className="text-sm text-left">
+          <TableHeader>
+            <TableRow>
+              <SortableTableHead
+                className="px-6 py-3"
+                defaultDirection="asc"
+                direction={
+                  sortBy === "rawModel" ? (sortOrder as DataTableSortDirection) : undefined
+                }
+                onDirectionChange={(direction) => toggleSort("rawModel", direction)}
+              >
+                {t("model")}
+              </SortableTableHead>
+              <SortableTableHead
+                className="px-6 py-3"
+                defaultDirection="asc"
+                direction={
+                  sortBy === "provider" ? (sortOrder as DataTableSortDirection) : undefined
+                }
+                onDirectionChange={(direction) => toggleSort("provider", direction)}
+              >
+                {t("provider")}
+              </SortableTableHead>
+              <SortableTableHead
+                align="right"
+                className="px-6 py-3"
+                defaultDirection="asc"
+                direction={
+                  sortBy === "requests" ? (sortOrder as DataTableSortDirection) : undefined
+                }
+                onDirectionChange={(direction) => toggleSort("requests", direction)}
+              >
+                {t("requests")}
+              </SortableTableHead>
+              <SortableTableHead
+                align="right"
+                className="px-6 py-3"
+                defaultDirection="asc"
+                direction={
+                  sortBy === "lastUsed" ? (sortOrder as DataTableSortDirection) : undefined
+                }
+                onDirectionChange={(direction) => toggleSort("lastUsed", direction)}
+              >
+                {t("lastUsed")}
+              </SortableTableHead>
+              {viewMode === "tokens" ? (
+                <>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "promptTokens" ? (sortOrder as DataTableSortDirection) : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("promptTokens", direction)}
+                  >
+                    {t("inputTokens")}
+                  </SortableTableHead>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "completionTokens"
+                        ? (sortOrder as DataTableSortDirection)
+                        : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("completionTokens", direction)}
+                  >
+                    {t("outputTokens")}
+                  </SortableTableHead>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "totalTokens" ? (sortOrder as DataTableSortDirection) : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("totalTokens", direction)}
+                  >
+                    {t("totalTokens")}
+                  </SortableTableHead>
+                </>
+              ) : (
+                <>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "promptTokens" ? (sortOrder as DataTableSortDirection) : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("promptTokens", direction)}
+                  >
+                    {t("inputCost")}
+                  </SortableTableHead>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "completionTokens"
+                        ? (sortOrder as DataTableSortDirection)
+                        : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("completionTokens", direction)}
+                  >
+                    {t("outputCost")}
+                  </SortableTableHead>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "cost" ? (sortOrder as DataTableSortDirection) : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("cost", direction)}
+                  >
+                    {t("totalCost")}
+                  </SortableTableHead>
+                </>
+              )}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedModels.map((data) => (
+              <TableRow key={data.key}>
+                <TableCell
+                  className={`px-6 py-3 font-medium transition-colors ${
+                    data.pending > 0 ? "text-primary" : ""
+                  }`}
                 >
-                  {t("model")}{" "}
-                  <SortIcon field="rawModel" currentSort={sortBy} currentOrder={sortOrder} />
-                </th>
-                <th
-                  className="px-6 py-3 cursor-pointer hover:bg-bg-subtle/50"
-                  onClick={() => toggleSort("provider")}
-                >
-                  {t("provider")}{" "}
-                  <SortIcon field="provider" currentSort={sortBy} currentOrder={sortOrder} />
-                </th>
-                <th
-                  className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                  onClick={() => toggleSort("requests")}
-                >
-                  {t("requests")}{" "}
-                  <SortIcon field="requests" currentSort={sortBy} currentOrder={sortOrder} />
-                </th>
-                <th
-                  className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                  onClick={() => toggleSort("lastUsed")}
-                >
-                  {t("lastUsed")}{" "}
-                  <SortIcon field="lastUsed" currentSort={sortBy} currentOrder={sortOrder} />
-                </th>
+                  {data.rawModel}
+                </TableCell>
+                <TableCell className="px-6 py-3">
+                  <Badge variant={data.pending > 0 ? "primary" : "default"} size="sm">
+                    {data.provider}
+                  </Badge>
+                </TableCell>
+                <TableCell className="px-6 py-3 text-right">{fmt(data.requests)}</TableCell>
+                <TableCell className="px-6 py-3 text-right text-text-muted whitespace-nowrap">
+                  {fmtTime(data.lastUsed)}
+                </TableCell>
                 {viewMode === "tokens" ? (
                   <>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("promptTokens")}
-                    >
-                      {t("inputTokens")}{" "}
-                      <SortIcon
-                        field="promptTokens"
-                        currentSort={sortBy}
-                        currentOrder={sortOrder}
-                      />
-                    </th>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("completionTokens")}
-                    >
-                      {t("outputTokens")}{" "}
-                      <SortIcon
-                        field="completionTokens"
-                        currentSort={sortBy}
-                        currentOrder={sortOrder}
-                      />
-                    </th>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("totalTokens")}
-                    >
-                      {t("totalTokens")}{" "}
-                      <SortIcon field="totalTokens" currentSort={sortBy} currentOrder={sortOrder} />
-                    </th>
+                    <TableCell className="px-6 py-3 text-right text-text-muted">
+                      {fmt(data.promptTokens)}
+                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right text-text-muted">
+                      {fmt(data.completionTokens)}
+                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right font-medium">
+                      {fmt(data.totalTokens)}
+                    </TableCell>
                   </>
                 ) : (
                   <>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("promptTokens")}
-                    >
-                      {t("inputCost")}{" "}
-                      <SortIcon
-                        field="promptTokens"
-                        currentSort={sortBy}
-                        currentOrder={sortOrder}
-                      />
-                    </th>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("completionTokens")}
-                    >
-                      {t("outputCost")}{" "}
-                      <SortIcon
-                        field="completionTokens"
-                        currentSort={sortBy}
-                        currentOrder={sortOrder}
-                      />
-                    </th>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("cost")}
-                    >
-                      {t("totalCost")}{" "}
-                      <SortIcon field="cost" currentSort={sortBy} currentOrder={sortOrder} />
-                    </th>
+                    <TableCell className="px-6 py-3 text-right text-text-muted">
+                      {fmtCost(data.inputCost)}
+                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right text-text-muted">
+                      {fmtCost(data.outputCost)}
+                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right font-medium text-warning">
+                      {fmtCost(data.totalCost)}
+                    </TableCell>
                   </>
                 )}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {sortedModels.map((data) => (
-                <tr key={data.key} className="hover:bg-bg-subtle/20">
-                  <td
-                    className={`px-6 py-3 font-medium transition-colors ${
-                      data.pending > 0 ? "text-primary" : ""
-                    }`}
-                  >
-                    {data.rawModel}
-                  </td>
-                  <td className="px-6 py-3">
-                    <Badge variant={data.pending > 0 ? "primary" : "default"} size="sm">
-                      {data.provider}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-3 text-right">{fmt(data.requests)}</td>
-                  <td className="px-6 py-3 text-right text-text-muted whitespace-nowrap">
-                    {fmtTime(data.lastUsed)}
-                  </td>
-                  {viewMode === "tokens" ? (
-                    <>
-                      <td className="px-6 py-3 text-right text-text-muted">
-                        {fmt(data.promptTokens)}
-                      </td>
-                      <td className="px-6 py-3 text-right text-text-muted">
-                        {fmt(data.completionTokens)}
-                      </td>
-                      <td className="px-6 py-3 text-right font-medium">{fmt(data.totalTokens)}</td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-6 py-3 text-right text-text-muted">
-                        {fmtCost(data.inputCost)}
-                      </td>
-                      <td className="px-6 py-3 text-right text-text-muted">
-                        {fmtCost(data.outputCost)}
-                      </td>
-                      <td className="px-6 py-3 text-right font-medium text-warning">
-                        {fmtCost(data.totalCost)}
-                      </td>
-                    </>
-                  )}
-                </tr>
-              ))}
-              {sortedModels.length === 0 && (
-                <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center text-text-muted">
-                    {t("noUsageData")}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </TableRow>
+            ))}
+            {sortedModels.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={8} className="px-6 py-8 text-center text-text-muted">
+                  {t("noUsageData")}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </Card>
 
       {/* {t("usageByAccount")} Table */}
@@ -525,176 +517,205 @@ export default function UsageStats() {
         <div className="p-4 border-b border-border bg-bg-subtle/50">
           <h3 className="font-semibold">{t("usageByAccount")}</h3>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-bg-subtle/30 text-text-muted uppercase text-xs">
-              <tr>
-                <th
-                  className="px-6 py-3 cursor-pointer hover:bg-bg-subtle/50"
-                  onClick={() => toggleSort("rawModel")}
+        <Table containerClassName="rounded-none border-0" className="text-sm text-left">
+          <TableHeader>
+            <TableRow>
+              <SortableTableHead
+                className="px-6 py-3"
+                defaultDirection="asc"
+                direction={
+                  sortBy === "rawModel" ? (sortOrder as DataTableSortDirection) : undefined
+                }
+                onDirectionChange={(direction) => toggleSort("rawModel", direction)}
+              >
+                {t("model")}
+              </SortableTableHead>
+              <SortableTableHead
+                className="px-6 py-3"
+                defaultDirection="asc"
+                direction={
+                  sortBy === "provider" ? (sortOrder as DataTableSortDirection) : undefined
+                }
+                onDirectionChange={(direction) => toggleSort("provider", direction)}
+              >
+                {t("provider")}
+              </SortableTableHead>
+              <SortableTableHead
+                className="px-6 py-3"
+                defaultDirection="asc"
+                direction={
+                  sortBy === "accountName" ? (sortOrder as DataTableSortDirection) : undefined
+                }
+                onDirectionChange={(direction) => toggleSort("accountName", direction)}
+              >
+                {t("account")}
+              </SortableTableHead>
+              <SortableTableHead
+                align="right"
+                className="px-6 py-3"
+                defaultDirection="asc"
+                direction={
+                  sortBy === "requests" ? (sortOrder as DataTableSortDirection) : undefined
+                }
+                onDirectionChange={(direction) => toggleSort("requests", direction)}
+              >
+                {t("requests")}
+              </SortableTableHead>
+              <SortableTableHead
+                align="right"
+                className="px-6 py-3"
+                defaultDirection="asc"
+                direction={
+                  sortBy === "lastUsed" ? (sortOrder as DataTableSortDirection) : undefined
+                }
+                onDirectionChange={(direction) => toggleSort("lastUsed", direction)}
+              >
+                {t("lastUsed")}
+              </SortableTableHead>
+              {viewMode === "tokens" ? (
+                <>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "promptTokens" ? (sortOrder as DataTableSortDirection) : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("promptTokens", direction)}
+                  >
+                    {t("inputTokens")}
+                  </SortableTableHead>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "completionTokens"
+                        ? (sortOrder as DataTableSortDirection)
+                        : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("completionTokens", direction)}
+                  >
+                    {t("outputTokens")}
+                  </SortableTableHead>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "totalTokens" ? (sortOrder as DataTableSortDirection) : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("totalTokens", direction)}
+                  >
+                    {t("totalTokens")}
+                  </SortableTableHead>
+                </>
+              ) : (
+                <>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "promptTokens" ? (sortOrder as DataTableSortDirection) : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("promptTokens", direction)}
+                  >
+                    {t("inputCost")}
+                  </SortableTableHead>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "completionTokens"
+                        ? (sortOrder as DataTableSortDirection)
+                        : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("completionTokens", direction)}
+                  >
+                    {t("outputCost")}
+                  </SortableTableHead>
+                  <SortableTableHead
+                    align="right"
+                    className="px-6 py-3"
+                    defaultDirection="asc"
+                    direction={
+                      sortBy === "cost" ? (sortOrder as DataTableSortDirection) : undefined
+                    }
+                    onDirectionChange={(direction) => toggleSort("cost", direction)}
+                  >
+                    {t("totalCost")}
+                  </SortableTableHead>
+                </>
+              )}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedAccounts.map((data) => (
+              <TableRow key={data.key}>
+                <TableCell
+                  className={`px-6 py-3 font-medium transition-colors ${
+                    data.pending > 0 ? "text-primary" : ""
+                  }`}
                 >
-                  {t("model")}{" "}
-                  <SortIcon field="rawModel" currentSort={sortBy} currentOrder={sortOrder} />
-                </th>
-                <th
-                  className="px-6 py-3 cursor-pointer hover:bg-bg-subtle/50"
-                  onClick={() => toggleSort("provider")}
-                >
-                  {t("provider")}{" "}
-                  <SortIcon field="provider" currentSort={sortBy} currentOrder={sortOrder} />
-                </th>
-                <th
-                  className="px-6 py-3 cursor-pointer hover:bg-bg-subtle/50"
-                  onClick={() => toggleSort("accountName")}
-                >
-                  {t("account")}{" "}
-                  <SortIcon field="accountName" currentSort={sortBy} currentOrder={sortOrder} />
-                </th>
-                <th
-                  className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                  onClick={() => toggleSort("requests")}
-                >
-                  {t("requests")}{" "}
-                  <SortIcon field="requests" currentSort={sortBy} currentOrder={sortOrder} />
-                </th>
-                <th
-                  className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                  onClick={() => toggleSort("lastUsed")}
-                >
-                  {t("lastUsed")}{" "}
-                  <SortIcon field="lastUsed" currentSort={sortBy} currentOrder={sortOrder} />
-                </th>
-                {viewMode === "tokens" ? (
-                  <>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("promptTokens")}
-                    >
-                      {t("inputTokens")}{" "}
-                      <SortIcon
-                        field="promptTokens"
-                        currentSort={sortBy}
-                        currentOrder={sortOrder}
-                      />
-                    </th>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("completionTokens")}
-                    >
-                      {t("outputTokens")}{" "}
-                      <SortIcon
-                        field="completionTokens"
-                        currentSort={sortBy}
-                        currentOrder={sortOrder}
-                      />
-                    </th>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("totalTokens")}
-                    >
-                      {t("totalTokens")}{" "}
-                      <SortIcon field="totalTokens" currentSort={sortBy} currentOrder={sortOrder} />
-                    </th>
-                  </>
-                ) : (
-                  <>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("promptTokens")}
-                    >
-                      {t("inputCost")}{" "}
-                      <SortIcon
-                        field="promptTokens"
-                        currentSort={sortBy}
-                        currentOrder={sortOrder}
-                      />
-                    </th>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("completionTokens")}
-                    >
-                      {t("outputCost")}{" "}
-                      <SortIcon
-                        field="completionTokens"
-                        currentSort={sortBy}
-                        currentOrder={sortOrder}
-                      />
-                    </th>
-                    <th
-                      className="px-6 py-3 text-right cursor-pointer hover:bg-bg-subtle/50"
-                      onClick={() => toggleSort("cost")}
-                    >
-                      {t("totalCost")}{" "}
-                      <SortIcon field="cost" currentSort={sortBy} currentOrder={sortOrder} />
-                    </th>
-                  </>
-                )}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {sortedAccounts.map((data) => (
-                <tr key={data.key} className="hover:bg-bg-subtle/20">
-                  <td
-                    className={`px-6 py-3 font-medium transition-colors ${
+                  {data.rawModel}
+                </TableCell>
+                <TableCell className="px-6 py-3">
+                  <Badge variant={data.pending > 0 ? "primary" : "default"} size="sm">
+                    {data.provider}
+                  </Badge>
+                </TableCell>
+                <TableCell className="px-6 py-3">
+                  <span
+                    className={`font-medium transition-colors ${
                       data.pending > 0 ? "text-primary" : ""
                     }`}
                   >
-                    {data.rawModel}
-                  </td>
-                  <td className="px-6 py-3">
-                    <Badge variant={data.pending > 0 ? "primary" : "default"} size="sm">
-                      {data.provider}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-3">
-                    <span
-                      className={`font-medium transition-colors ${
-                        data.pending > 0 ? "text-primary" : ""
-                      }`}
-                    >
-                      {data.accountName ||
-                        t("accountLabel", { id: `${data.connectionId?.slice(0, 8)}...` })}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 text-right">{fmt(data.requests)}</td>
-                  <td className="px-6 py-3 text-right text-text-muted whitespace-nowrap">
-                    {fmtTime(data.lastUsed)}
-                  </td>
-                  {viewMode === "tokens" ? (
-                    <>
-                      <td className="px-6 py-3 text-right text-text-muted">
-                        {fmt(data.promptTokens)}
-                      </td>
-                      <td className="px-6 py-3 text-right text-text-muted">
-                        {fmt(data.completionTokens)}
-                      </td>
-                      <td className="px-6 py-3 text-right font-medium">{fmt(data.totalTokens)}</td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-6 py-3 text-right text-text-muted">
-                        {fmtCost(data.inputCost)}
-                      </td>
-                      <td className="px-6 py-3 text-right text-text-muted">
-                        {fmtCost(data.outputCost)}
-                      </td>
-                      <td className="px-6 py-3 text-right font-medium text-warning">
-                        {fmtCost(data.totalCost)}
-                      </td>
-                    </>
-                  )}
-                </tr>
-              ))}
-              {sortedAccounts.length === 0 && (
-                <tr>
-                  <td colSpan={9} className="px-6 py-8 text-center text-text-muted">
-                    {t("noAccountUsage")}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                    {data.accountName ||
+                      t("accountLabel", { id: `${data.connectionId?.slice(0, 8)}...` })}
+                  </span>
+                </TableCell>
+                <TableCell className="px-6 py-3 text-right">{fmt(data.requests)}</TableCell>
+                <TableCell className="px-6 py-3 text-right text-text-muted whitespace-nowrap">
+                  {fmtTime(data.lastUsed)}
+                </TableCell>
+                {viewMode === "tokens" ? (
+                  <>
+                    <TableCell className="px-6 py-3 text-right text-text-muted">
+                      {fmt(data.promptTokens)}
+                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right text-text-muted">
+                      {fmt(data.completionTokens)}
+                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right font-medium">
+                      {fmt(data.totalTokens)}
+                    </TableCell>
+                  </>
+                ) : (
+                  <>
+                    <TableCell className="px-6 py-3 text-right text-text-muted">
+                      {fmtCost(data.inputCost)}
+                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right text-text-muted">
+                      {fmtCost(data.outputCost)}
+                    </TableCell>
+                    <TableCell className="px-6 py-3 text-right font-medium text-warning">
+                      {fmtCost(data.totalCost)}
+                    </TableCell>
+                  </>
+                )}
+              </TableRow>
+            ))}
+            {sortedAccounts.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={9} className="px-6 py-8 text-center text-text-muted">
+                  {t("noAccountUsage")}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
       </Card>
     </div>
   );

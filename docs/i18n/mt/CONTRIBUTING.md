@@ -172,88 +172,91 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 
 ---
 
-## Qed Tista' Tqies Testijiet
+## Tħaddim tat-Testijiet
 
 ```bash
-# Kollha t-testijiet (unit + vitest + ecosystem + e2e)
+# It-testijiet kollha (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Singlu file ta' test (Node.js native test runner — l-aqwa testijiet jutu l-waħda)
+# Fajl wieħed tat-testijiet (runner nattiv tat-testijiet ta’ Node.js — il-biċċa l-kbira tat-testijiet jużaw dan)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Biex testijiet unit impattati biss mill-bidla tiegħek (istess TIA selector bħala l-CI gate, #8084)
-npm run test:scoped            # bidliet fil-commit l-aħħar (jew working tree)
-npm run test:scoped:staged     # bidliet staged biss — jaqbad sew b'pre-commit run
-npm run test:scoped:full       # rebildja l-import-graph map l-ewwel (wara li tżid/temmuv file)
-# Exit 1 + "run the full suite" jibni file hub (tsconfig, package.json, …) jew
-# sorgenti unmapped bedlet — is-selektor jiffaġġa safe, ma jmissx silently.
+# It-testijiet unit biss affettwati mill-bidla tiegħek (l-istess selettur TIA bħall-kontroll tas-CI, #8084)
+npm run test:scoped            # bidliet fl-aħħar commit (jew fis-siġra tax-xogħol)
+npm run test:scoped:staged     # bidliet staged biss — jaħdem tajjeb ma’ tħaddim pre-commit
+npm run test:scoped:full       # l-ewwel ibni mill-ġdid il-mappa tal-graff tal-importazzjonijiet (wara li żżid/iċċaqlaq fajls)
+# Exit 1 + "run the full suite" tfisser li nbidel fajl ċentrali (tsconfig, package.json, …) jew
+# sors mhux immappjat — is-selettur ifalli b’mod sikur u qatt ma jaqbeż testijiet fis-skiet.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (server MCP, autoCombo, cache)
 npm run test:vitest
 
-# Testijiet E2E (meħtieġ Playwright)
+# Testijiet E2E (jeħtieġu Playwright)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# E2E tal-klijenti tal-protokoll (trasporti MCP, A2A)
 npm run test:protocols:e2e
 
-# Testijiet ta' kompatibilità tal-ecosystem
+# Testijiet tal-kompatibbiltà tal-ekosistema
 npm run test:ecosystem
 
-# Coverage gate: 60% statements/lines/functions/branches
+# Limitu tal-kopertura: 60% dikjarazzjonijiet/linji/funzjonijiet/fergħat
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format check
+# Kontroll tal-lint + format
 npm run lint
 npm run check
 
-# Gated real-upstream combo smoke (meħtieġ VPS access + real provider credits)
-# Jipprovokaw PROVIDERS REALE — jiswa ftit. QATT ma jirri fil-CI. Jiskipa clean mingħajr il-gate.
-# Meħtieġ: ssh root@192.168.0.15 access (sources a read-only DB snapshot mill-VPS).
+# Smoke test combo reali kkontrollat fuq upstream (jeħtieġ aċċess għall-VPS + krediti reali tal-fornitur)
+# Jaċċessa fornituri REALI — jiswa ftit. QATT ma jitħaddem fis-CI. Jinqabeż b’mod nadif mingħajr il-kontroll.
+# Jeħtieġ: aċċess ssh root@192.168.0.15 (juża snapshot read-only tad-DB mill-VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — plain Node ESM scripts, jipprovokaw live .15 server direttament.
-# Meħtieġ: ssh root@192.168.0.15 access (combos created/torn down via SSH sqlite).
-# Jipprovokaw PROVIDERS REALE (kost żgħira). Jikkreaw/jiddilettu biss __live_test__* combos. QATT ma jirri fil-CI.
-# REQUIRE_API_KEY=false fuq .15 għax ebda API key meħtieġa, imma jirispetta COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY jekk msetjup.
-npm run test:combo:live:vps              # 7 HTTP scenarios (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # żieda real cross-provider failover scenario (8 total)
+# Smoke test live tal-VPS tal-Fażi 3 — skripts Node ESM sempliċi, jaċċessaw direttament is-server live .15.
+# Jeħtieġ: aċċess ssh root@192.168.0.15 (il-combos jinħolqu/jitneħħew permezz ta’ SSH sqlite).
+# Jaċċessa fornituri REALI (spiża żgħira). Joħloq/iħassar biss combos __live_test__*. QATT ma jitħaddem fis-CI.
+# REQUIRE_API_KEY=false fuq .15 għalhekk mhi meħtieġa l-ebda API key, iżda jirrispetta COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY jekk issettjati.
+npm run test:combo:live:vps              # 7 xenarji HTTP (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # iżid xenarju reali ta’ failover bejn fornituri (8 b’kollox)
 ```
 
-Noti dwar Coverage:
+Noti dwar il-kopertura:
 
-- `npm run test:coverage` jikkalcola source coverage għall-main unit test suite, jieħu barra `tests/**`, u jinkludi `open-sse/**`
-- Pull requests għandhom jibqgħu l-coverage gate b'**60%+**' statements/lines/functions/branches
-- Jekk PR tibdel production code f'`src/`', `open-sse/`', `electron/`', jew `bin/`', għandha tżid jew tagħmel update għat-testijiet awtomatiċi fil-istess PR
-- `npm run coverage:report` tipprinta d-dettaljat file-by-file report mill-aħħar coverage run
-- `npm run test:coverage:legacy` tħalli l-metric l-qadima għal komparazzjoni storika
-- Ara `docs/ops/COVERAGE_PLAN.md` għall-roadmap ta' phased coverage improvement
+- `npm run test:coverage` ikejjel il-kopertura tas-sors għas-suite ewlenija tat-testijiet unit, jeskludi `tests/**`, u jinkludi `open-sse/**`
+- Il-pull requests iridu jżommu l-limitu tal-kopertura ta’ **60%+** għad-dikjarazzjonijiet/linji/funzjonijiet/fergħat
+- Jekk PR jibdel il-kodiċi tal-produzzjoni f’`src/`, `open-sse/`, `electron/`, jew `bin/`, irid iżid jew jaġġorna testijiet awtomatizzati fl-istess PR
+- `npm run coverage:report` jistampa r-rapport dettaljat fajl b’fajl mill-aktar tħaddim reċenti tal-kopertura
+- `npm run test:coverage:legacy` iżomm il-metrika l-antika għal tqabbil storiku
+- Ara `docs/ops/COVERAGE_PLAN.md` għall-pjan direzzjonali gradwali għat-titjib tal-kopertura
 
-### Rekwiziti tal-Pull Request
+### Rekwiżiti tal-Pull Request
 
-Qabel ma tiftaħ PR, uża l-
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) biex tirri l-focused loop għal
-x'bedlet. L-unit suite sħiħa (4 CI shards), Vitest, il-**60%+** coverage gate, u
-il-production build huma responsabbiltà tal-CI — jirruhom lokalment ma jżidu xejn signal li
-l-PR checks ma jkollokx, u fuq makkini żgħar jistgħu jissaturaw l-host (#8084):
+Qabel tiftaħ PR, uża l-
+[Proċess Rakkomandat għall-Kontribuzzjonijiet](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) biex tħaddem iċ-ċiklu ffukat għal
+dak li biddilt. Is-suite sħiħa tat-testijiet unit (4 shards tas-CI), Vitest, il-limitu tal-kopertura ta’ **60%+**, u
+l-build tal-produzzjoni huma r-responsabbiltà tas-CI — it-tħaddim tagħhom lokalment ma jipprovdi ebda indikazzjoni li l-kontrolli
+tal-PR ma jkunux diġà se jagħtuk, u fuq magni iżgħar jista’ jgħabbi żżejjed lill-host (#8084):
 
-- Irri l-test files li jkopru l-bidla tiegħek: `node --import tsx/esm --test tests/unit/<file>.test.ts`
-- Irri `npm run lint`
-- Inkludi jew agġorna testijiet awtomatiċi fil-istess PR meta production code jibbedel
-- Inkludi l-test files bedlet jew mżidda fid-deskrizzjoni tal-PR meta production code bedlet
-- Chekka r-riżultat ta' SonarQube fuq il-PR meta l-proġett secrets huma konfigurati fil-CI
+- Ħaddem il-fajls tat-testijiet li jkopru l-bidla tiegħek: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Ħaddem `npm run lint`
+- Inkludi jew aġġorna testijiet awtomatizzati fl-istess PR kull meta jinbidel il-kodiċi tal-produzzjoni
+- Fil-fajls `node:test`, poġġi kull `await` tal-ogħla livell (bħal `await import(...)`) qabel l-ewwel `test()` / `describe()`: taħt `--test-force-exit`, testijiet irreġistrati warajh jistgħu fis-skiet qatt ma jitħaddmu (#18045; infurzat minn `npm run check:test-tla-order`)
+- Inkludi l-fajls tat-testijiet mibdula jew miżjuda fid-deskrizzjoni tal-PR meta jkun inbidel il-kodiċi tal-produzzjoni
+- Iċċekkja r-riżultat ta’ SonarQube fuq il-PR meta s-segreti tal-proġett ikunu kkonfigurati fis-CI
 
-Status attwali tat-testijiet: **122 unit test files** li jkopru:
+L-istatus attwali tat-testijiet: **122 fajl tat-testijiet unit** li jkopru:
 
-- Provider translators u format conversion
-- Rate limiting, circuit breaker, u resilience
-- Semantic cache, idempotency, progress tracking
-- Database operations u schema (21 DB modules)
-- OAuth flows u authentication
-- API endpoint validation (Zod v4)
-- MCP server tools u scope enforcement
-- Memory u Skills systems
+- Tradutturi tal-fornituri u konverżjoni tal-format
+- Limitazzjoni tar-rata, circuit breaker, u reżiljenza
+- Cache semantiku, idempotenza, u traċċar tal-progress
+- Operazzjonijiet tad-database u schema (21 modulu tad-DB)
+- Flussi OAuth u awtentikazzjoni
+- Validazzjoni tal-endpoints tal-API (Zod v4)
+- Għodod tas-server MCP u infurzar tal-ambitu
+- Sistemi tal-Memorja u tal-Ħiliet
+
+---
 
 ## Stil tal-Kodiċi
 

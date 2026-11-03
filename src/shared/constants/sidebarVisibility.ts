@@ -14,132 +14,6 @@ import type {
   SidebarPresetDefinition,
 } from "./sidebarVisibility/types";
 
-export const SIDEBAR_ICON_ACCENTS: Partial<Record<SidebarItemId, string>> = {
-  home: "#60A5FA",
-  "api-manager": "#F59E0B",
-  endpoints: "#38BDF8",
-  providers: "#818CF8",
-  combos: "#A855F7",
-  quota: "#F472B6",
-  "context-caveman": "#F97316",
-  "context-rtk": "#2DD4BF",
-  "context-combos": "#C084FC",
-  "cli-code": "#FACC15",
-  "cli-agents": "#93C5FD",
-  "cloud-agents": "#7DD3FC",
-  "api-endpoints": "#14B8A6",
-  webhooks: "#EC4899",
-  proxy: "#A3E635",
-  "mitm-proxy": "#FB7185",
-  "1proxy": "#22D3EE",
-  analytics: "#06B6D4",
-  "analytics-combo-health": "#34D399",
-  "analytics-utilization": "#FBBF24",
-  costs: "#FB923C",
-  cache: "#84CC16",
-  "analytics-compression": "#F97316",
-  "analytics-search": "#38BDF8",
-  "analytics-evals": "#A78BFA",
-  logs: "#CBD5E1",
-  "logs-proxy": "#A3E635",
-  "logs-console": "#FACC15",
-  "logs-timeline": "#F472B6",
-  "logs-activity": "#60A5FA",
-  health: "#EF4444",
-  runtime: "#F59E0B",
-  "resilience-connections": "#22C55E",
-  "costs-pricing": "#FB923C",
-  "costs-budget": "#22C55E",
-  "costs-quota-share": "#06B6D4",
-  "radar-admin": "#F59E0B",
-  audit: "#F43F5E",
-  "audit-mcp": "#818CF8",
-  "audit-a2a": "#A855F7",
-  translator: "#3B82F6",
-  playground: "#EAB308",
-  "search-tools": "#0891B2",
-  memory: "#10B981",
-  skills: "#F43F5E",
-  "agent-skills": "#D946EF",
-  mcp: "#8B5CF6",
-  a2a: "#06B6D4",
-  leaderboard: "#FACC15",
-  profile: "#60A5FA",
-  tokens: "#A3E635",
-  "gamification-admin": "#F87171",
-  media: "#D946EF",
-  batch: "#14B8A6",
-  "batch-files": "#38BDF8",
-  "settings-general": "#64748B",
-  "settings-appearance": "#D946EF",
-  "settings-ai": "#A78BFA",
-  "settings-modality-bridge": "#8B5CF6",
-  "settings-routing": "#06B6D4",
-  "settings-resilience": "#22C55E",
-  "settings-advanced": "#F97316",
-  "settings-security": "#EF4444",
-  "settings-feature-flags": "#FACC15",
-  "settings-cache": "#84CC16",
-  "settings-sidebar": "#38BDF8",
-  docs: "#2563EB",
-  issues: "#DC2626",
-  changelog: "#F59E0B",
-};
-
-export const SIDEBAR_SUBITEM_ICON_ACCENTS: Record<string, string> = {};
-
-function getDeterministicIconAccent(id: string): string {
-  let hash = 0;
-  for (let index = 0; index < id.length; index += 1) {
-    hash = (hash * 31 + id.charCodeAt(index)) >>> 0;
-  }
-  const hue = hash % 360;
-  const saturation = 72;
-  const lightness = 56;
-  const chroma = (1 - Math.abs((2 * lightness) / 100 - 1)) * (saturation / 100);
-  const huePrime = hue / 60;
-  const x = chroma * (1 - Math.abs((huePrime % 2) - 1));
-  const match = lightness / 100 - chroma / 2;
-  const [red, green, blue] =
-    huePrime < 1
-      ? [chroma, x, 0]
-      : huePrime < 2
-        ? [x, chroma, 0]
-        : huePrime < 3
-          ? [0, chroma, x]
-          : huePrime < 4
-            ? [0, x, chroma]
-            : huePrime < 5
-              ? [x, 0, chroma]
-              : [chroma, 0, x];
-
-  return [red, green, blue]
-    .map((channel) =>
-      Math.round((channel + match) * 255)
-        .toString(16)
-        .padStart(2, "0")
-        .toUpperCase()
-    )
-    .join("")
-    .replace(/^/, "#");
-}
-
-/**
- * Stable accent colour for a sidebar item id.
- *
- * Kept as a public pure utility (#3812) although `Sidebar.tsx` no longer colours its icons per
- * item since the navigation-hierarchy redesign (#12869). Its contract is pinned by
- * tests/unit/sidebar-icon-accents-3812.test.ts and tests/unit/sidebar-hierarchy-a11y-12869.test.tsx,
- * which also asserts the Sidebar renders no accent colours.
- */
-export function getSidebarIconAccent(id: string): string {
-  return (
-    SIDEBAR_ICON_ACCENTS[id as SidebarItemId] ||
-    SIDEBAR_SUBITEM_ICON_ACCENTS[id] ||
-    getDeterministicIconAccent(id)
-  );
-}
-
 /**
  * Decide whether a sidebar item should be shown given a resolved feature-flag
  * map. Items without `featureFlagKey` are always visible. Fails OPEN when the
@@ -379,6 +253,7 @@ const ADMIN_SHOWN: ReadonlySet<HideableSidebarItemId> = new Set([
   "costs-pricing",
   "costs-budget",
   "costs-quota-share",
+  "costs-teams",
   "radar-admin",
   "cache",
   "logs",

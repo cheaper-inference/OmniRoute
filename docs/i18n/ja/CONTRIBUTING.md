@@ -170,18 +170,18 @@ refactor(db): consolidate rate limit tables
 ## テストの実行
 
 ```bash
-# すべてのテスト（unit + vitest + ecosystem + e2e）
+# すべてのテスト（ユニット + vitest + エコシステム + e2e）
 npm run test:all
 
-# 単一のテストファイル（Node.js ネイティブテストランナー — ほとんどのテストでこれを使用）
+# 単一のテストファイル（Node.js ネイティブテストランナー — ほとんどのテストで使用）
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # 変更の影響を受けるユニットテストのみ（CI ゲートと同じ TIA セレクター、#8084）
-npm run test:scoped            # 直前のコミット（またはワーキングツリー）の変更
-npm run test:scoped:staged     # ステージ済みの変更のみ — pre-commit 実行との組み合わせに最適
-npm run test:scoped:full       # 最初にインポートグラフマップを再構築（ファイルの追加・移動後）
-# 終了コード 1 +「run the full suite」は、ハブファイル（tsconfig、package.json、…）または
-# マッピングされていないソースが変更されたことを意味します — セレクターは安全側に倒れ、暗黙にスキップすることはありません。
+npm run test:scoped            # 直近のコミット（または作業ツリー）の変更
+npm run test:scoped:staged     # ステージ済みの変更のみ — pre-commit 実行との併用に最適
+npm run test:scoped:full       # 最初にインポートグラフのマップを再構築（ファイルの追加／移動後）
+# 終了コード 1 + 「フルスイートを実行」は、ハブファイル（tsconfig、package.json、…）または
+# マッピングされていないソースが変更されたことを意味します — セレクターはフェイルセーフで動作し、暗黙にスキップすることはありません。
 
 # Vitest（MCP サーバー、autoCombo、キャッシュ）
 npm run test:vitest
@@ -199,55 +199,56 @@ npm run test:ecosystem
 npm run test:coverage
 npm run coverage:report
 
-# lint + フォーマットチェック
+# Lint + フォーマットチェック
 npm run lint
 npm run check
 
-# ゲート付きの実アップストリーム combo スモークテスト（VPS へのアクセス権 + 実プロバイダーのクレジットが必要）
-# 実際のプロバイダーにアクセスします — 少額の費用がかかります。CI では決して実行されません。ゲートがなければ正常にスキップします。
-# 必要条件：ssh root@192.168.0.15 へのアクセス権（VPS から読み取り専用 DB スナップショットを読み込みます）。
+# ゲート付きの実アップストリームコンボのスモークテスト（VPS アクセス + 実プロバイダーのクレジットが必要）
+# 実際のプロバイダーにアクセスします — 少額の費用がかかります。CI では絶対に実行されません。ゲートがなければ正常にスキップします。
+# 必要条件：ssh root@192.168.0.15 アクセス（VPS から読み取り専用 DB スナップショットを読み込みます）。
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
 # フェーズ 3 の VPS ライブスモークテスト — 純粋な Node ESM スクリプトで、稼働中の .15 サーバーに直接アクセスします。
-# 必要条件：ssh root@192.168.0.15 へのアクセス権（combo は SSH sqlite 経由で作成／破棄されます）。
-# 実際のプロバイダーにアクセスします（少額の費用がかかります）。__live_test__* combo のみ作成／削除します。CI では決して実行されません。
+# 必要条件：ssh root@192.168.0.15 アクセス（SSH sqlite 経由でコンボを作成／破棄します）。
+# 実際のプロバイダーにアクセスします（少額の費用）。__live_test__* コンボのみを作成／削除します。CI では絶対に実行されません。
 # .15 では REQUIRE_API_KEY=false のため API キーは不要ですが、設定されている場合は COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY を使用します。
-npm run test:combo:live:vps              # 7 つの HTTP シナリオ（priority/round-robin/weighted/cost/fusion/auto + health）
-npm run test:combo:live:vps:failover     # 実際のプロバイダー間フェイルオーバーシナリオを追加（合計 8）
+npm run test:combo:live:vps              # 7 つの HTTP シナリオ（優先度／ラウンドロビン／重み付き／コスト／フュージョン／自動 + ヘルス）
+npm run test:combo:live:vps:failover     # 実際のプロバイダー間フェイルオーバーシナリオを追加（合計 8 つ）
 ```
 
-カバレッジに関する注記：
+カバレッジに関する注意事項：
 
 - `npm run test:coverage` はメインのユニットテストスイートのソースカバレッジを測定し、`tests/**` を除外して、`open-sse/**` を含めます
-- プルリクエストでは、ステートメント／行／関数／分岐のカバレッジゲートを **60%以上** に維持する必要があります
+- プルリクエストでは、ステートメント／行／関数／分岐のカバレッジゲートを **60% 以上** に維持する必要があります
 - PR で `src/`、`open-sse/`、`electron/`、または `bin/` の本番コードを変更する場合、同じ PR で自動テストを追加または更新する必要があります
-- `npm run coverage:report` は、直近のカバレッジ実行によるファイルごとの詳細レポートを出力します
+- `npm run coverage:report` は、最新のカバレッジ実行からファイルごとの詳細レポートを出力します
 - `npm run test:coverage:legacy` は、過去との比較用に以前の指標を維持します
 - 段階的なカバレッジ改善ロードマップについては、`docs/ops/COVERAGE_PLAN.md` を参照してください
 
 ### プルリクエストの要件
 
 PR を作成する前に、
-[コントリビューションのゴールデンパス](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)に従って、変更内容に対応する
-重点的なループを実行してください。完全なユニットテストスイート（4 つの CI シャード）、Vitest、**60%以上**のカバレッジゲート、
-および本番ビルドは CI が担当します — これらをローカルで実行しても、PR チェックですでに得られる以上の情報は得られず、
-小規模なマシンではホストのリソースを使い果たす可能性があります（#8084）：
+[コントリビューションのゴールデンパス](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)を使用して、変更内容に応じた
+対象限定のループを実行してください。完全なユニットスイート（CI の 4 シャード）、Vitest、**60% 以上**のカバレッジゲート、および
+本番ビルドは CI が担当します。これらをローカルで実行しても、PR
+チェックから得られる以上の情報は増えず、性能の低いマシンではホストのリソースを使い果たす可能性があります（#8084）：
 
-- 変更をカバーするテストファイルを実行します：`node --import tsx/esm --test tests/unit/<file>.test.ts`
-- `npm run lint` を実行します
-- 本番コードを変更する場合は、必ず同じ PR で自動テストを追加または更新します
-- 本番コードを変更した場合は、変更または追加したテストファイルを PR の説明に記載します
-- CI にプロジェクトのシークレットが設定されている場合は、PR の SonarQube 結果を確認します
+- 変更をカバーするテストファイルを実行する：`node --import tsx/esm --test tests/unit/<file>.test.ts`
+- `npm run lint` を実行する
+- 本番コードを変更する場合は、必ず同じ PR に自動テストを追加または更新する
+- `node:test` ファイルでは、すべてのトップレベル `await`（`await import(...)` など）を最初の `test()` / `describe()` より前に配置する：`--test-force-exit` では、それより後に登録されたテストが暗黙に実行されないことがあります（#18045。`npm run check:test-tla-order` により強制）
+- 本番コードを変更した場合は、変更または追加したテストファイルを PR の説明に記載する
+- CI にプロジェクトシークレットが設定されている場合は、PR の SonarQube 結果を確認する
 
 現在のテスト状況：以下をカバーする **122 個のユニットテストファイル**：
 
-- プロバイダーのトランスレーターとフォーマット変換
+- プロバイダートランスレーターと形式変換
 - レート制限、サーキットブレーカー、レジリエンス
 - セマンティックキャッシュ、冪等性、進捗追跡
 - データベース操作とスキーマ（21 個の DB モジュール）
 - OAuth フローと認証
 - API エンドポイントの検証（Zod v4）
-- MCP サーバーツールとスコープの強制
+- MCP サーバーツールとスコープ適用
 - Memory および Skills システム
 
 ---

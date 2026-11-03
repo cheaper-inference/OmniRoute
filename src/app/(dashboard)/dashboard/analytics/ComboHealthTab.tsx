@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import SegmentedControl from "@/shared/components/SegmentedControl";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import { useProviderNodeMap, resolveProviderName } from "@/lib/display/useProviderNodeMap";
 import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
@@ -22,7 +25,6 @@ import type {
   ComboScoringInspectorResponse,
   UtilizationTimeRange,
 } from "@/shared/types/utilization";
-import { cn } from "@/shared/utils/cn";
 
 function formatPercent(value: number, digits = 0) {
   return `${value.toFixed(digits)}%`;
@@ -103,9 +105,9 @@ function MetricBlock({
   subValue?: string;
 }) {
   return (
-    <div className="rounded-lg border border-black/5 bg-black/2 p-4 dark:border-white/5 dark:bg-white/2">
+    <div className="rounded-lg border border-border bg-surface-2 p-4">
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-text-muted">
-        <span className="material-symbols-outlined text-[16px]">{icon}</span>
+        <Icon name={icon} size={16} />
         {label}
       </div>
       <div className="mt-2 text-2xl font-semibold text-text-main">{value}</div>
@@ -118,12 +120,12 @@ function DistributionBar({ label, value, meta }: { label: string; value: number;
   const width = `${Math.max(value * 100, value > 0 ? 6 : 0)}%`;
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-black/5 bg-black/2 p-3 dark:border-white/5 dark:bg-white/2">
+    <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface-2 p-3">
       <div className="flex items-center justify-between gap-3 text-sm">
         <span className="truncate font-medium text-text-main">{label}</span>
         <span className="shrink-0 text-xs text-text-muted">{meta}</span>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-black/5 dark:bg-white/5">
+      <div className="h-2 overflow-hidden rounded-full bg-border/60">
         <div className="h-full rounded-full bg-primary transition-all" style={{ width }} />
       </div>
     </div>
@@ -142,7 +144,7 @@ function ComboForecastPanel({ forecast }: { forecast: ComboForecastMetrics }) {
   );
 
   return (
-    <div className="border-t border-black/5 px-6 py-5 dark:border-white/5">
+    <div className="border-t border-border px-6 py-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="text-sm font-semibold text-text-main">
@@ -203,7 +205,7 @@ function ComboForecastPanel({ forecast }: { forecast: ComboForecastMetrics }) {
           {topTargets.map((target) => (
             <div
               key={target.executionKey}
-              className="rounded-lg border border-black/5 bg-black/2 p-4 dark:border-white/5 dark:bg-white/2"
+              className="rounded-lg border border-border bg-surface-2 p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -247,7 +249,7 @@ function ComboForecastPanel({ forecast }: { forecast: ComboForecastMetrics }) {
       ) : null}
 
       {forecast.dataQuality.notes.length > 0 ? (
-        <div className="mt-4 rounded-lg border border-black/5 bg-black/2 p-3 text-xs text-text-muted dark:border-white/5 dark:bg-white/2">
+        <div className="mt-4 rounded-lg border border-border bg-surface-2 p-3 text-xs text-text-muted">
           {forecast.dataQuality.notes.slice(0, 2).join(" · ")}
         </div>
       ) : null}
@@ -265,7 +267,7 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
 
   return (
     <Card className="overflow-hidden p-0">
-      <div className="flex flex-col gap-4 border-b border-black/5 px-6 py-5 dark:border-white/5 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-4 border-b border-border px-6 py-5 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-base font-semibold text-text-main">
@@ -317,10 +319,7 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
         {topIssues.length > 0 ? (
           <div className="grid gap-3 lg:grid-cols-2">
             {topIssues.map(({ combo, issue }) => (
-              <div
-                key={issue.id}
-                className="rounded-lg border border-black/5 bg-black/2 p-4 dark:border-white/5 dark:bg-white/2"
-              >
+              <div key={issue.id} className="rounded-lg border border-border bg-surface-2 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-semibold text-text-main">
@@ -342,11 +341,9 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
                         <Link
                           key={`${issue.id}-${action.type}`}
                           href={action.href}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-black/5 px-3 py-1.5 text-xs font-medium text-text-main transition-colors hover:bg-black/5 dark:border-white/5 dark:hover:bg-white/5"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-main transition-colors hover:bg-surface-2"
                         >
-                          <span className="material-symbols-outlined text-[14px]">
-                            arrow_forward
-                          </span>
+                          <Icon name="arrow_forward" size={14} />
                           {action.label}
                         </Link>
                       ) : null
@@ -357,7 +354,7 @@ function ComboAutopilotPanel({ report }: { report: ComboAutopilotReport }) {
             ))}
           </div>
         ) : (
-          <div className="rounded-lg border border-green-500/20 bg-green-500/5 p-4 text-sm text-green-700 dark:text-green-300">
+          <div className="rounded-lg border border-success/20 bg-success/5 p-4 text-sm text-success">
             {t("comboHealthNoActiveIssues")}
           </div>
         )}
@@ -372,7 +369,7 @@ function ComboScoringInspectorPanel({ inspector }: { inspector: ComboScoringInsp
   const topTargets = inspector.targets.slice(0, 3);
 
   return (
-    <div className="border-t border-black/5 px-6 py-5 dark:border-white/5">
+    <div className="border-t border-border px-6 py-5">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
@@ -398,7 +395,7 @@ function ComboScoringInspectorPanel({ inspector }: { inspector: ComboScoringInsp
       </div>
 
       {inspector.warnings.length > 0 ? (
-        <div className="mt-4 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-3 text-xs text-yellow-700 dark:text-yellow-300">
+        <div className="mt-4 rounded-lg border border-warning/20 bg-warning/5 p-3 text-xs text-warning">
           {inspector.warnings.slice(0, 2).join(" · ")}
         </div>
       ) : null}
@@ -410,7 +407,7 @@ function ComboScoringInspectorPanel({ inspector }: { inspector: ComboScoringInsp
             return (
               <div
                 key={target.executionKey}
-                className="rounded-lg border border-black/5 bg-black/2 p-4 dark:border-white/5 dark:bg-white/2"
+                className="rounded-lg border border-border bg-surface-2 p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -436,7 +433,7 @@ function ComboScoringInspectorPanel({ inspector }: { inspector: ComboScoringInsp
                           +{factor.contribution.toFixed(3)}
                         </span>
                       </div>
-                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-black/5 dark:bg-white/5">
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-border/60">
                         <div
                           className="h-full rounded-full bg-primary"
                           style={{ width: `${Math.max(0, Math.min(100, factor.value * 100))}%` }}
@@ -468,7 +465,7 @@ function ComboScoringInspectorPanel({ inspector }: { inspector: ComboScoringInsp
           })}
         </div>
       ) : (
-        <div className="mt-4 rounded-lg border border-black/5 bg-black/2 p-4 text-sm text-text-muted dark:border-white/5 dark:bg-white/2">
+        <div className="mt-4 rounded-lg border border-border bg-surface-2 p-4 text-sm text-text-muted">
           {t("comboHealthNoInspectableTargets")}
         </div>
       )}
@@ -501,7 +498,7 @@ function ComboHealthCard({
 
   return (
     <Card className="overflow-hidden p-0">
-      <div className="border-b border-black/5 px-6 py-5 dark:border-white/5">
+      <div className="border-b border-border px-6 py-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -566,7 +563,7 @@ function ComboHealthCard({
               return (
                 <div
                   key={provider.provider}
-                  className="rounded-lg border border-black/5 bg-black/2 p-4 dark:border-white/5 dark:bg-white/2"
+                  className="rounded-lg border border-border bg-surface-2 p-4"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
@@ -590,7 +587,7 @@ function ComboHealthCard({
                       ) : null}
                     </div>
                   </div>
-                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-black/5 dark:bg-white/5">
+                  <div className="mt-3 h-2 overflow-hidden rounded-full bg-border/60">
                     <div
                       className="h-full rounded-full bg-primary transition-all"
                       style={{ width }}
@@ -612,10 +609,7 @@ function ComboHealthCard({
 
           <div className="flex flex-col gap-3">
             {sortedDistribution.map((entry) => (
-              <div
-                key={entry.model}
-                className="rounded-lg border border-black/5 bg-black/2 p-4 dark:border-white/5 dark:bg-white/2"
-              >
+              <div key={entry.model} className="rounded-lg border border-border bg-surface-2 p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium text-text-main">{entry.model}</div>
@@ -677,7 +671,7 @@ function ComboHealthCard({
       </div>
 
       {targetHealth.length > 0 ? (
-        <div className="border-t border-black/5 px-6 py-5 dark:border-white/5">
+        <div className="border-t border-border px-6 py-5">
           <div>
             <div className="text-sm font-semibold text-text-main">
               {t("comboHealthExecutionTargets")}
@@ -691,7 +685,7 @@ function ComboHealthCard({
             {targetHealth.map((target) => (
               <div
                 key={target.executionKey}
-                className="rounded-lg border border-black/5 bg-black/2 p-4 dark:border-white/5 dark:bg-white/2"
+                className="rounded-lg border border-border bg-surface-2 p-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -880,55 +874,49 @@ export default function ComboHealthTab() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 rounded-xl border border-black/5 bg-surface p-5 shadow-sm dark:border-white/5 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 shadow-sm md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-text-main">{t("comboHealthTitle")}</h2>
           <p className="mt-1 text-sm text-text-muted">{t("comboHealthIntro")}</p>
         </div>
         <div className="flex flex-col gap-3 sm:items-end">
           <TimeRangeSelector value={range} onChange={setRange} />
-          <div className="flex items-center gap-1 rounded-lg border border-black/5 bg-black/2 p-1 dark:border-white/5 dark:bg-white/2">
-            {(["24h", "7d", "30d"] as ComboForecastHorizon[]).map((value) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setHorizon(value)}
-                className={cn(
-                  "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-                  horizon === value
-                    ? "bg-primary text-white"
-                    : "text-text-muted hover:bg-black/5 hover:text-text-main dark:hover:bg-white/5"
-                )}
-              >
-                {t("comboHealthForecastHorizon", { value })}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            size="sm"
+            aria-label={t("comboHealthForecastHorizon", { value: horizon })}
+            value={horizon}
+            onChange={(next) => setHorizon(next as ComboForecastHorizon)}
+            options={(["24h", "7d", "30d"] as ComboForecastHorizon[]).map((value) => ({
+              value,
+              label: t("comboHealthForecastHorizon", { value }),
+            }))}
+            className="w-auto"
+          />
         </div>
       </div>
 
       {!loading && forecastError ? (
-        <Card className="border-yellow-500/20 bg-yellow-500/5 p-4">
-          <div className="flex items-center gap-2 text-sm text-yellow-700 dark:text-yellow-300">
-            <span className="material-symbols-outlined text-[18px]">warning</span>
+        <Card className="border-warning/20 bg-warning/5 p-4">
+          <div className="flex items-center gap-2 text-sm text-warning">
+            <Icon name="warning" size={18} />
             {forecastError}
           </div>
         </Card>
       ) : null}
 
       {!loading && autopilotError ? (
-        <Card className="border-yellow-500/20 bg-yellow-500/5 p-4">
-          <div className="flex items-center gap-2 text-sm text-yellow-700 dark:text-yellow-300">
-            <span className="material-symbols-outlined text-[18px]">warning</span>
+        <Card className="border-warning/20 bg-warning/5 p-4">
+          <div className="flex items-center gap-2 text-sm text-warning">
+            <Icon name="warning" size={18} />
             {autopilotError}
           </div>
         </Card>
       ) : null}
 
       {!loading && scoringError ? (
-        <Card className="border-yellow-500/20 bg-yellow-500/5 p-4">
-          <div className="flex items-center gap-2 text-sm text-yellow-700 dark:text-yellow-300">
-            <span className="material-symbols-outlined text-[18px]">warning</span>
+        <Card className="border-warning/20 bg-warning/5 p-4">
+          <div className="flex items-center gap-2 text-sm text-warning">
+            <Icon name="warning" size={18} />
             {scoringError}
           </div>
         </Card>
@@ -939,31 +927,14 @@ export default function ComboHealthTab() {
       {!loading && error ? (
         <Card className="p-8">
           <div className="flex flex-col items-center justify-center gap-4 text-center">
-            <span className="material-symbols-outlined text-[40px] text-error">sync_problem</span>
+            <Icon name="sync_problem" size={40} className="text-error" />
             <div className="flex flex-col gap-1">
               <div className="font-medium text-text-main">{t("comboHealthUnableToLoad")}</div>
               <div className="text-sm text-text-muted">{error}</div>
             </div>
-            <button
-              type="button"
-              onClick={handleRetry}
-              disabled={retrying}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {retrying ? (
-                <>
-                  <span className="material-symbols-outlined animate-spin text-[18px]">
-                    progress_activity
-                  </span>
-                  {t("retrying")}
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-[18px]">refresh</span>
-                  {t("retry")}
-                </>
-              )}
-            </button>
+            <Button onClick={handleRetry} loading={retrying} icon="refresh">
+              {retrying ? t("retrying") : t("retry")}
+            </Button>
           </div>
         </Card>
       ) : null}
@@ -971,20 +942,16 @@ export default function ComboHealthTab() {
       {!loading && !error && combos.length === 0 ? (
         <Card className="p-10">
           <div className="flex flex-col items-center justify-center gap-4 text-center">
-            <span className="material-symbols-outlined text-[40px] text-text-muted/70">
-              monitor_heart
-            </span>
+            <Icon name="monitor_heart" size={40} className="text-text-muted/70" />
             <div className="text-base font-medium text-text-main">{t("comboHealthNoData")}</div>
             <div className="max-w-md text-sm text-text-muted">
               {t("comboHealthNoDataDescription")}
             </div>
-            <div className="rounded-lg border border-black/5 bg-black/[0.02] p-4 dark:border-white/5 dark:bg-white/[0.02]">
+            <div className="rounded-lg border border-border bg-surface-2 p-4">
               <p className="text-xs font-medium text-text-main">{t("comboHealthGettingStarted")}</p>
               <ul className="mt-2 text-left text-xs text-text-muted">
                 <li className="flex items-start gap-2">
-                  <span className="material-symbols-outlined text-[14px] text-primary">
-                    check_circle
-                  </span>
+                  <Icon name="check_circle" size={14} className="text-primary" />
                   <span>
                     {t.rich("comboHealthStepCreate", {
                       strong: (chunks) => <strong>{chunks}</strong>,
@@ -992,15 +959,11 @@ export default function ComboHealthTab() {
                   </span>
                 </li>
                 <li className="mt-1 flex items-start gap-2">
-                  <span className="material-symbols-outlined text-[14px] text-primary">
-                    check_circle
-                  </span>
+                  <Icon name="check_circle" size={14} className="text-primary" />
                   <span>{t("comboHealthStepSend")}</span>
                 </li>
                 <li className="mt-1 flex items-start gap-2">
-                  <span className="material-symbols-outlined text-[14px] text-primary">
-                    check_circle
-                  </span>
+                  <Icon name="check_circle" size={14} className="text-primary" />
                   <span>{t("comboHealthStepAutomatic")}</span>
                 </li>
               </ul>
@@ -1013,10 +976,7 @@ export default function ComboHealthTab() {
         <div className="flex flex-col gap-4">
           {autopilotData ? <ComboAutopilotPanel report={autopilotData} /> : null}
           <div className="flex items-center gap-2 text-sm text-text-muted">
-            <Spinner
-              size="sm"
-              className={cn("text-primary", "[&_.material-symbols-outlined]:text-[16px]")}
-            />
+            <Spinner size="sm" className="text-primary [&_.oi-icon]:size-4" />
             {t("comboHealthTracking", { count: combos.length, range })}
           </div>
           {combos.map((combo) => (

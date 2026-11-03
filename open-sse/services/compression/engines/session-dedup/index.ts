@@ -210,7 +210,10 @@ function dedupMessageTexts(
 
   // Single-message case: apply intra-message dedup.
   if (msgTexts.length === 1) {
-    const { text, msgIdx } = msgTexts[0];
+    const { text, msgIdx, messageIndex } = msgTexts[0];
+    if (messageIndex >= currentTurnStart) {
+      return { deduped, dedupCount };
+    }
     const { deduped: dedupedText, changed } = dedupeWithinMessage(text, minBlockChars);
     if (changed) {
       deduped.set(msgIdx, dedupedText);
@@ -382,11 +385,25 @@ function applyTextSlots(
 }
 
 /**
+ * Calculates the start index of the current turn (messages after the last assistant message).
+ * If no assistant message is present, returns 0 (the entire conversation is the current turn).
+ */
+function calculateCurrentTurnStart(messages: MessageLike[]): number {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i]?.role === "assistant") {
+      return i + 1;
+    }
+  }
+  return 0;
+}
+
+/**
  * Process messages: collect text content, run two-pass dedup, apply results.
  */
 function processMessages(
   messages: MessageLike[],
-  minBlockChars: number
+  minBlockChars: number,
+  currentTurnStart: number
 ): { messages: MessageLike[]; dedupCount: number } {
   // Collect (msgIdx, text) for non-system messages, including Anthropic tool_result text.
   // For multipart, index each text-bearing slot separately.
@@ -406,14 +423,6 @@ function processMessages(
     return { messages, dedupCount: 0 };
   }
 
-  // Messages after the last assistant message form the current turn.
-  let currentTurnStart = 0;
-  for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].role === "assistant") {
-      currentTurnStart = i + 1;
-      break;
-    }
-  }
   const { deduped, dedupCount } = dedupMessageTexts(msgTexts, minBlockChars, currentTurnStart);
 
   if (dedupCount === 0) {
@@ -523,10 +532,13 @@ export const sessionDedupEngine: CompressionEngine = {
       return { body, compressed: false, stats: null };
     }
 
+    const currentTurnStart = calculateCurrentTurnStart(messages as MessageLike[]);
+
     const start = performance.now();
     const { messages: exactMessages, dedupCount } = processMessages(
       messages as MessageLike[],
-      minBlockChars
+      minBlockChars,
+      currentTurnStart
     );
 
     const { messages: finalMessages, fuzzyCount } = runFuzzyPass(
@@ -534,7 +546,8 @@ export const sessionDedupEngine: CompressionEngine = {
       stepConfig,
       minBlockChars,
       options?.principalId,
-      callerSupportsCcrRetrieve(body)
+      callerSupportsCcrRetrieve(body),
+      currentTurnStart
     );
 
     if (dedupCount + fuzzyCount === 0) {

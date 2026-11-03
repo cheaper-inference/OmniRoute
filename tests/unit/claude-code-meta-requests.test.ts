@@ -25,7 +25,10 @@ test("extractCommandPrefix detects command injection", () => {
 });
 
 test("extractFilepathsFromCommand returns read files for read commands", () => {
-  assert.deepEqual(extractFilepathsFromCommand("cat src/a.ts src/b.ts", ""), ["src/a.ts", "src/b.ts"]);
+  assert.deepEqual(extractFilepathsFromCommand("cat src/a.ts src/b.ts", ""), [
+    "src/a.ts",
+    "src/b.ts",
+  ]);
   assert.deepEqual(extractFilepathsFromCommand("head -n5 README.md", ""), ["README.md"]);
 });
 
@@ -50,4 +53,20 @@ test("extractFilepathsFromCommand handles grep -e pattern then file", () => {
 
 test("extractFilepathsFromCommand handles grep -f patternfile then file", () => {
   assert.deepEqual(extractFilepathsFromCommand("grep -f pats.txt a.ts", ""), ["a.ts"]);
+});
+
+test("grep context/count options do not consume the positional search pattern", () => {
+  assert.deepEqual(extractFilepathsFromCommand('grep -n -A 2 -m 5 "two words" "a b.ts" c.ts'), [
+    "a b.ts",
+    "c.ts",
+  ]);
+});
+
+test("grep explicit patterns can be interspersed with files and consuming options", () => {
+  assert.deepEqual(extractFilepathsFromCommand('grep -e first a.ts -f "patterns file" -C 3 b.ts'), [
+    "a.ts",
+    "b.ts",
+  ]);
+  assert.deepEqual(extractFilepathsFromCommand("grep -e"), []);
+  assert.deepEqual(extractFilepathsFromCommand("grep pattern -A"), []);
 });

@@ -282,8 +282,9 @@ test.describe("API keys flow", () => {
     const createKeyButton = createDialog.getByRole("button", { name: /create api key/i });
     await createKeyButton.click({ force: true });
 
-    // The validation error must appear as an inline <p role="alert"> INSIDE the modal
-    const inlineError = createDialog.locator("p[role='alert']");
+    // The validation error must appear as an inline role="alert" message INSIDE the modal
+    // (KEA-7886: the Input adapter renders it in the kit Field message slot).
+    const inlineError = createDialog.locator("[data-slot='field'] [role='alert']");
     await expect(inlineError).toBeVisible({ timeout: UI_STABILITY_TIMEOUT_MS });
 
     // The error must be visible — i.e. not obscured by the backdrop.
@@ -292,7 +293,8 @@ test.describe("API keys flow", () => {
     await expect(inlineError).toBeInViewport();
 
     // No page-level error banner should appear behind the modal
-    const pageErrorBanner = page.locator('.flex.flex-col.gap-8 > [class~="bg-red-500/10"]');
+    // KEA-7886: the page-level banner is the kit Alert (critical variant).
+    const pageErrorBanner = page.locator('.flex.flex-col.gap-8 > [data-slot="alert"]');
     await expect(pageErrorBanner).not.toBeVisible();
 
     // Typing should clear the error

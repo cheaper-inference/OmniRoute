@@ -9,20 +9,27 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { Card, Button, Input, EmptyState } from "@/shared/components";
-import { useNotificationStore } from "@/store/notificationStore";
 import { useTranslations } from "next-intl";
+import { Card, Button, Input, EmptyState, Skeleton } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
+import { useNotificationStore } from "@/store/notificationStore";
 
-const CHAIN_COLORS = [
-  "#6366f1",
-  "#22c55e",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#06b6d4",
-  "#ec4899",
-  "#14b8a6",
-];
+// Chain position colours are data series (1st, 2nd, … provider), so they come from the
+// kit chart palette and cycle through its five steps. The palette is tuned for fills, not
+// text (chart-1 is ≈2.3:1 on a light tint), so the label stays on the text token and the
+// series colour sits on the border and a leading dot.
+const CHAIN_COLOR_COUNT = 5;
+function chainColor(index: number): string {
+  return `var(--color-chart-${(index % CHAIN_COLOR_COUNT) + 1})`;
+}
+function chainChipStyle(index: number): React.CSSProperties {
+  const color = chainColor(index);
+  return {
+    color: "var(--color-text-main)",
+    backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)`,
+    border: `1px solid color-mix(in srgb, ${color} 60%, transparent)`,
+  };
+}
 
 async function fetchChainsData() {
   try {
@@ -129,11 +136,11 @@ export default function FallbackChainsEditor() {
 
   if (loading) {
     return (
-      <Card>
-        <div className="flex items-center gap-2 text-text-muted animate-pulse">
-          <span className="material-symbols-outlined text-[20px]">timeline</span>
+      <Card icon="timeline" title={t("fallbackChainsTitle")}>
+        <p className="sr-only" role="status">
           {t("loadingFallbackChains")}
-        </div>
+        </p>
+        <Skeleton className="h-16 w-full" />
       </Card>
     );
   }
@@ -141,23 +148,24 @@ export default function FallbackChainsEditor() {
   const chainEntries = Object.entries(chains);
 
   return (
-    <Card>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="p-2 rounded-lg bg-cyan-500/10 text-cyan-500">
-          <span className="material-symbols-outlined text-[20px]">timeline</span>
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold">{t("fallbackChainsTitle")}</h3>
-          <p className="text-sm text-text-muted">{t("fallbackChainsDesc")}</p>
-        </div>
-        <Button size="sm" variant="primary" onClick={() => setShowCreate(!showCreate)}>
+    <Card
+      icon="timeline"
+      title={t("fallbackChainsTitle")}
+      subtitle={t("fallbackChainsDesc")}
+      action={
+        <Button
+          size="sm"
+          variant={showCreate ? "outline" : "primary"}
+          aria-expanded={showCreate}
+          onClick={() => setShowCreate(!showCreate)}
+        >
           {showCreate ? tc("cancel") : t("addChain")}
         </Button>
-      </div>
-
+      }
+    >
       {/* Create Form */}
       {showCreate && (
-        <div className="p-4 rounded-lg border border-border/30 bg-surface/20 mb-4">
+        <div className="p-4 rounded-lg border border-border bg-bg-subtle mb-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
             <Input
               label={t("modelName")}
@@ -191,38 +199,39 @@ export default function FallbackChainsEditor() {
             {chainEntries.map(([model, chain]) => (
               <div
                 key={model}
-                className="flex items-center justify-between px-4 py-3 rounded-lg border border-border/20 bg-surface/20 hover:bg-surface/40 transition-colors"
+                className="flex items-center justify-between gap-2 px-4 py-3 rounded-lg border border-border bg-bg-subtle"
               >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
                   <span className="font-mono text-sm text-text-main truncate max-w-[200px]">
                     {model}
                   </span>
-                  <span className="material-symbols-outlined text-[14px] text-text-muted">
-                    arrow_forward
-                  </span>
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
                   <div className="flex gap-1.5 flex-wrap">
                     {(Array.isArray(chain) ? chain : []).map((entry, i) => (
                       <span
                         key={`${entry.provider}-${i}`}
-                        className="text-xs px-2 py-0.5 rounded-full font-medium"
-                        style={{
-                          backgroundColor: `${CHAIN_COLORS[i % CHAIN_COLORS.length]}20`,
-                          color: CHAIN_COLORS[i % CHAIN_COLORS.length],
-                          border: `1px solid ${CHAIN_COLORS[i % CHAIN_COLORS.length]}40`,
-                        }}
+                        className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full font-medium"
+                        style={chainChipStyle(i)}
                       >
+                        <span
+                          aria-hidden="true"
+                          className="size-1.5 shrink-0 rounded-full"
+                          style={{ backgroundColor: chainColor(i) }}
+                        />
                         {i + 1}. {entry.provider}
                       </span>
                     ))}
                   </div>
                 </div>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
                   onClick={() => handleDelete(model)}
-                  className="text-text-muted hover:text-red-400 transition-colors ml-2"
                   title={t("deleteChain")}
+                  aria-label={`${t("deleteChain")} ${model}`}
                 >
-                  <span className="material-symbols-outlined text-[16px]">close</span>
-                </button>
+                  <Icon name="close" size={16} />
+                </Button>
               </div>
             ))}
           </div>

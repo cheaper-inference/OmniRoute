@@ -2,6 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import Button from "@/shared/components/Button";
+import Checkbox from "@/shared/components/Checkbox";
+import Icon from "@/shared/components/Icon";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import type { QuotaSchedule, ReserveRule } from "@/lib/quota/schedules";
 
 export interface PoolSchedulesCardProps {
@@ -191,26 +196,29 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
     }
   }, [rows, poolId, t]);
 
-  const inputCls =
-    "bg-bg-subtle border border-border/50 rounded px-1.5 py-0.5 text-[11px] text-text-main";
+  // Dense inline editor rows: kit controls at a compact height.
+  const inputCls = "h-7 min-h-7 px-1.5 text-[11px]";
+  const selectCls = "ci-select-native--sm h-7 min-h-7 text-[11px]";
 
   return (
-    <div className="mt-2 pt-2 border-t border-border/30">
-      <button
-        type="button"
+    <div className="mt-2 pt-2 border-t border-border">
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold text-text-muted hover:text-text-main w-full text-left cursor-pointer"
+        aria-expanded={open}
+        className="h-7 min-h-7 w-full justify-start gap-1 px-1 text-[10px] font-bold uppercase tracking-wide text-text-muted"
       >
-        <span
-          className={`material-symbols-outlined text-[13px] transition-transform ${open ? "rotate-90" : ""}`}
-        >
-          chevron_right
-        </span>
+        <Icon
+          name="chevron_right"
+          size={13}
+          className={`transition-transform ${open ? "rotate-90" : ""}`}
+        />
         {t("schedulesTitle")}
         {rows.length > 0 && (
           <span className="ml-1 text-text-muted/60 normal-case font-normal">({rows.length})</span>
         )}
-      </button>
+      </Button>
 
       {open && (
         <div className="mt-1.5 flex flex-col gap-2">
@@ -225,53 +233,51 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
               {rows.map((row, index) => (
                 <div
                   key={row.id}
-                  className={`rounded-md border border-border/40 p-2 flex flex-col gap-1.5 ${
+                  className={`rounded-md border border-border p-2 flex flex-col gap-1.5 ${
                     row.enabled ? "" : "opacity-50"
                   }`}
                 >
                   {/* Row 1 — when */}
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <input
-                      type="checkbox"
+                    <Checkbox
                       checked={row.enabled}
                       onChange={(e) => patchRow(index, { enabled: e.target.checked })}
                       aria-label={t("schedulesEnabled")}
-                      className="cursor-pointer"
                     />
 
-                    <select
+                    <Select
                       value={row.mode}
                       onChange={(e) =>
                         patchRow(index, { mode: e.target.value as DraftSchedule["mode"] })
                       }
                       aria-label={t("schedulesMode")}
-                      className={`${inputCls} cursor-pointer`}
+                      selectClassName={selectCls}
                     >
                       <option value="allow">{t("schedulesModeAllow")}</option>
                       <option value="block">{t("schedulesModeBlock")}</option>
-                    </select>
+                    </Select>
 
                     <div className="flex items-center gap-0.5">
                       {initials.map((initial, day) => (
-                        <button
+                        <Button
                           key={day}
-                          type="button"
+                          variant={row.days.includes(day) ? "secondary" : "ghost"}
+                          size="icon-sm"
                           onClick={() => toggleDay(index, day)}
                           aria-pressed={row.days.includes(day)}
                           title={initial}
-                          className={`w-5 h-5 rounded text-[10px] font-bold cursor-pointer ${
-                            row.days.includes(day)
-                              ? "bg-accent/20 text-accent"
-                              : "bg-bg-subtle text-text-muted"
+                          className={`size-6 min-h-6 text-[10px] font-bold ${
+                            row.days.includes(day) ? "text-primary" : "text-text-muted"
                           }`}
                         >
                           {initial}
-                        </button>
+                        </Button>
                       ))}
                     </div>
 
-                    <input
+                    <Input
                       type="time"
+                      inputClassName={inputCls}
                       value={minutesToTime(row.startMinute)}
                       onChange={(e) =>
                         patchRow(index, {
@@ -279,54 +285,57 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                         })
                       }
                       aria-label={t("schedulesFrom")}
-                      className={inputCls}
                     />
                     <span className="text-[11px] text-text-muted">→</span>
-                    <input
+                    <Input
                       type="time"
+                      inputClassName={inputCls}
                       value={minutesToTime(row.endMinute)}
                       onChange={(e) =>
                         patchRow(index, { endMinute: timeToMinutes(e.target.value, row.endMinute) })
                       }
                       aria-label={t("schedulesTo")}
-                      className={inputCls}
                     />
 
-                    <button
-                      type="button"
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => {
                         setRows((prev) => prev.filter((_, i) => i !== index));
                         setMessage(null);
                       }}
                       title={t("schedulesRemove")}
-                      className="ml-auto p-1 rounded hover:bg-red-500/10 text-text-muted hover:text-red-400 cursor-pointer"
+                      aria-label={t("schedulesRemove")}
+                      className="ml-auto text-text-muted hover:bg-error/10 hover:text-error"
                     >
-                      <span className="material-symbols-outlined text-[14px]">delete</span>
-                    </button>
+                      <Icon name="delete" size={14} />
+                    </Button>
                   </div>
 
                   {/* Row 2a — how much must be left, one floor per metered window */}
                   {row.mode === "allow" && (
                     <div className="flex flex-col gap-1">
                       <div className="flex flex-wrap items-center gap-1.5">
-                        <label
+                        <span
                           className="text-[11px] text-text-muted"
                           title={t("schedulesReserveHint")}
                         >
                           {t("schedulesReserve")}
-                        </label>
+                        </span>
                         {row.reserves.length === 0 && (
                           <span className="text-[11px] text-text-muted/60 italic">
                             {t("schedulesReserveNone")}
                           </span>
                         )}
-                        <button
-                          type="button"
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          icon="add"
                           onClick={() => addReserve(index)}
-                          className="text-[11px] px-1.5 py-0.5 rounded bg-bg-subtle hover:bg-bg-subtle/70 text-text-main cursor-pointer"
+                          className="h-7 min-h-7 px-2 text-[11px]"
                         >
-                          + {t("schedulesReserveAdd")}
-                        </button>
+                          {t("schedulesReserveAdd")}
+                        </Button>
                       </div>
 
                       {row.reserves.map((rule, ruleIndex) => (
@@ -334,7 +343,8 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                           key={`${rule.window}-${ruleIndex}`}
                           className="flex flex-wrap items-center gap-1.5 pl-3"
                         >
-                          <select
+                          <Select
+                            selectClassName={selectCls}
                             value={rule.window}
                             onChange={(e) =>
                               patchReserve(index, ruleIndex, {
@@ -343,15 +353,14 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                               })
                             }
                             aria-label={t("schedulesReserveWindow")}
-                            className={`${inputCls} cursor-pointer`}
                           >
                             {RESERVE_WINDOWS.map((w) => (
                               <option key={w} value={w}>
                                 {w === "any" ? t("schedulesReserveWindowAny") : w}
                               </option>
                             ))}
-                          </select>
-                          <input
+                          </Select>
+                          <Input
                             type="number"
                             min={0}
                             max={100}
@@ -364,17 +373,19 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                               })
                             }
                             aria-label={t("schedulesReserve")}
-                            className={`${inputCls} w-16`}
+                            inputClassName={`${inputCls} w-16`}
                           />
                           <span className="text-[11px] text-text-muted">%</span>
-                          <button
-                            type="button"
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
                             onClick={() => patchReserve(index, ruleIndex, null)}
                             title={t("schedulesReserveRemove")}
-                            className="p-0.5 rounded hover:bg-red-500/10 text-text-muted hover:text-red-400 cursor-pointer"
+                            aria-label={t("schedulesReserveRemove")}
+                            className="size-6 min-h-6 text-text-muted hover:bg-error/10 hover:text-error"
                           >
-                            <span className="material-symbols-outlined text-[13px]">close</span>
-                          </button>
+                            <Icon name="close" size={13} />
+                          </Button>
                         </div>
                       ))}
                     </div>
@@ -383,14 +394,15 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                   {/* Row 2b — how much OmniRoute itself may spend */}
                   {row.mode === "allow" && (
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <label
+                      <span
                         className="text-[11px] text-text-muted"
                         title={t("schedulesBudgetHint")}
                       >
                         {t("schedulesBudget")}
-                      </label>
-                      <input
+                      </span>
+                      <Input
                         type="number"
+                        aria-label={t("schedulesBudget")}
                         min={0}
                         value={row.budgetValue ?? ""}
                         placeholder="—"
@@ -403,9 +415,10 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                               e.target.value === "" ? undefined : (row.budgetUnit ?? "tokens"),
                           })
                         }
-                        className={`${inputCls} w-24`}
+                        inputClassName={`${inputCls} w-24`}
                       />
-                      <select
+                      <Select
+                        selectClassName={selectCls}
                         value={row.budgetUnit ?? ""}
                         disabled={row.budgetValue === undefined}
                         onChange={(e) =>
@@ -415,7 +428,6 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                           })
                         }
                         aria-label={t("schedulesBudgetUnit")}
-                        className={`${inputCls} cursor-pointer disabled:opacity-40`}
                       >
                         <option value="">—</option>
                         {BUDGET_UNITS.map((unit) => (
@@ -423,8 +435,9 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                             {unit}
                           </option>
                         ))}
-                      </select>
-                      <select
+                      </Select>
+                      <Select
+                        selectClassName={selectCls}
                         value={row.budgetWindow}
                         disabled={row.budgetValue === undefined}
                         onChange={(e) =>
@@ -433,37 +446,38 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
                           })
                         }
                         aria-label={t("schedulesBudgetWindow")}
-                        className={`${inputCls} cursor-pointer disabled:opacity-40`}
                       >
                         {BUDGET_WINDOWS.map((w) => (
                           <option key={w} value={w}>
                             {w}
                           </option>
                         ))}
-                      </select>
+                      </Select>
                     </div>
                   )}
 
                   {/* Row 3 — zone and precedence */}
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <label className="text-[11px] text-text-muted">{t("schedulesTimezone")}</label>
-                    <input
+                    <span className="text-[11px] text-text-muted">{t("schedulesTimezone")}</span>
+                    <Input
                       type="text"
+                      aria-label={t("schedulesTimezone")}
                       value={row.timezone ?? ""}
                       placeholder="Europe/Rome"
                       onChange={(e) => patchRow(index, { timezone: e.target.value.trim() || null })}
-                      className={`${inputCls} w-40`}
+                      inputClassName={`${inputCls} w-40`}
                     />
-                    <label className="text-[11px] text-text-muted ml-1">
+                    <span className="ml-1 text-[11px] text-text-muted">
                       {t("schedulesPriority")}
-                    </label>
-                    <input
+                    </span>
+                    <Input
                       type="number"
+                      aria-label={t("schedulesPriority")}
                       min={0}
                       max={1000}
                       value={row.priority}
                       onChange={(e) => patchRow(index, { priority: Number(e.target.value) || 0 })}
-                      className={`${inputCls} w-14`}
+                      inputClassName={`${inputCls} w-14`}
                     />
                   </div>
                 </div>
@@ -472,27 +486,24 @@ export default function PoolSchedulesCard({ poolId }: PoolSchedulesCardProps) {
           )}
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
+              icon="add"
               onClick={() => {
                 setRows((prev) => [...prev, newDraft()]);
                 setMessage(null);
               }}
-              className="text-[11px] px-2 py-1 rounded bg-bg-subtle hover:bg-bg-subtle/70 text-text-main cursor-pointer"
             >
-              + {t("schedulesAdd")}
-            </button>
-            <button
-              type="button"
-              onClick={save}
-              disabled={saving || !loaded}
-              className="text-[11px] px-2 py-1 rounded bg-accent/20 text-accent hover:bg-accent/30 disabled:opacity-40 cursor-pointer"
-            >
+              {t("schedulesAdd")}
+            </Button>
+            <Button size="sm" onClick={save} loading={saving} disabled={saving || !loaded}>
               {saving ? t("loading") : t("save")}
-            </button>
+            </Button>
             {message && (
               <span
-                className={`text-[11px] ${message.kind === "ok" ? "text-emerald-400" : "text-red-400"}`}
+                role="status"
+                className={`text-[11px] ${message.kind === "ok" ? "text-success" : "text-error"}`}
               >
                 {message.text}
               </span>

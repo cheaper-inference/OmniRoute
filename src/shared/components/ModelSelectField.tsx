@@ -215,21 +215,16 @@ export default function ModelSelectField({
           disabled={disabled}
           aria-label={ariaLabel}
         />
-        <div className="flex flex-col gap-1">
-          <label htmlFor={customInputId} className="text-xs font-medium text-text-muted">
-            {t("custom")}
-          </label>
-          <input
-            id={customInputId}
-            data-testid={testId ? `${testId}-custom-input` : undefined}
-            value={value}
-            disabled={disabled}
-            placeholder={placeholder || t("selectAModel")}
-            aria-label={ariaLabel}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full py-2 px-3 text-sm text-text-main bg-surface border border-black/10 dark:border-white/10 rounded-control focus:ring-1 focus:ring-accent/30 focus:border-accent/50 focus:outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed text-[16px] sm:text-sm"
-          />
-        </div>
+        <Input
+          id={customInputId}
+          label={t("custom")}
+          data-testid={testId ? `${testId}-custom-input` : undefined}
+          value={value}
+          disabled={disabled}
+          placeholder={placeholder || t("selectAModel")}
+          aria-label={ariaLabel}
+          onChange={(e) => onChange(e.target.value)}
+        />
       </div>
     );
   }

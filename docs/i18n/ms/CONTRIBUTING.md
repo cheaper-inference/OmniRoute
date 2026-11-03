@@ -173,15 +173,15 @@ Skop (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `m
 # Semua ujian (unit + vitest + ekosistem + e2e)
 npm run test:all
 
-# Satu fail ujian (pelaksana ujian asli Node.js — kebanyakan ujian menggunakan ini)
+# Fail ujian tunggal (pelaksana ujian asli Node.js — kebanyakan ujian menggunakan ini)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Hanya ujian unit yang terjejas oleh perubahan anda (pemilih TIA yang sama seperti get CI, #8084)
 npm run test:scoped            # perubahan dalam komit terakhir (atau pepohon kerja)
-npm run test:scoped:staged     # perubahan berperingkat sahaja — sesuai digandingkan dengan pelaksanaan pra-komit
+npm run test:scoped:staged     # perubahan yang dipentaskan sahaja — sesuai digandingkan dengan pelaksanaan prakomit
 npm run test:scoped:full       # bina semula peta graf import terlebih dahulu (selepas menambah/mengalihkan fail)
-# Keluar 1 + "run the full suite" bermaksud fail hab (tsconfig, package.json, …) atau sumber
-# yang tidak dipetakan telah berubah — pemilih gagal secara selamat, ia tidak pernah melangkau secara senyap.
+# Keluar dengan 1 + "jalankan seluruh suit" bermaksud fail hab (tsconfig, package.json, …) atau sumber
+# yang tidak dipetakan telah berubah — pemilih gagal secara selamat dan tidak pernah melangkau secara senyap.
 
 # Vitest (pelayan MCP, autoCombo, cache)
 npm run test:vitest
@@ -204,42 +204,43 @@ npm run lint
 npm run check
 
 # Ujian ringkas kombo huluan sebenar berpagar (memerlukan akses VPS + kredit penyedia sebenar)
-# Mengakses penyedia SEBENAR — melibatkan sedikit kos. TIDAK PERNAH dijalankan dalam CI. Dilangkau dengan sempurna tanpa get.
+# Mengakses penyedia SEBENAR — melibatkan sedikit kos. TIDAK PERNAH dijalankan dalam CI. Dilangkau dengan lancar tanpa get.
 # Memerlukan: akses ssh root@192.168.0.15 (mendapatkan petikan DB baca sahaja daripada VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Ujian ringkas langsung VPS fasa 3 — skrip Node ESM biasa, mengakses terus pelayan .15 yang aktif.
+# Ujian ringkas langsung VPS fasa 3 — skrip ESM Node biasa, mengakses pelayan .15 langsung.
 # Memerlukan: akses ssh root@192.168.0.15 (kombo dicipta/dihapuskan melalui SSH sqlite).
-# Mengakses penyedia SEBENAR (kos kecil). Mencipta/memadam hanya kombo __live_test__*. TIDAK PERNAH dijalankan dalam CI.
-# REQUIRE_API_KEY=false pada .15, jadi kunci API tidak diperlukan, tetapi mematuhi COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY jika ditetapkan.
+# Mengakses penyedia SEBENAR (kos kecil). Mencipta/memadamkan kombo __live_test__* sahaja. TIDAK PERNAH dijalankan dalam CI.
+# REQUIRE_API_KEY=false pada .15, jadi kunci API tidak diperlukan, tetapi menghormati COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY jika ditetapkan.
 npm run test:combo:live:vps              # 7 senario HTTP (keutamaan/round-robin/berwajaran/kos/gabungan/auto + kesihatan)
-npm run test:combo:live:vps:failover     # menambahkan senario failover merentas penyedia sebenar (jumlah 8)
+npm run test:combo:live:vps:failover     # menambah senario failover rentas penyedia sebenar (jumlah 8)
 ```
 
-Catatan liputan:
+Nota liputan:
 
-- `npm run test:coverage` mengukur liputan sumber untuk suite ujian unit utama, mengecualikan `tests/**`, dan menyertakan `open-sse/**`
-- Permintaan tarik mesti mengekalkan get liputan pada **60%+** pernyataan/baris/fungsi/cabang
-- Jika PR mengubah kod pengeluaran dalam `src/`, `open-sse/`, `electron/`, atau `bin/`, ia mesti menambah atau mengemas kini ujian automatik dalam PR yang sama
+- `npm run test:coverage` mengukur liputan sumber bagi suit ujian unit utama, mengecualikan `tests/**`, dan menyertakan `open-sse/**`
+- Pull request mesti mengekalkan get liputan pada **60%+** bagi pernyataan/baris/fungsi/cabang
+- Jika PR mengubah kod produksi dalam `src/`, `open-sse/`, `electron/`, atau `bin/`, PR yang sama mesti menambah atau mengemas kini ujian automatik
 - `npm run coverage:report` mencetak laporan terperinci fail demi fail daripada pelaksanaan liputan terkini
 - `npm run test:coverage:legacy` mengekalkan metrik lama untuk perbandingan sejarah
 - Lihat `docs/ops/COVERAGE_PLAN.md` untuk pelan hala tuju peningkatan liputan berfasa
 
-### Keperluan Permintaan Tarik
+### Keperluan Pull Request
 
 Sebelum membuka PR, gunakan
-[Laluan Emas Sumbangan](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) untuk menjalankan gelung terfokus bagi
-perkara yang anda ubah. Suite unit penuh (4 serpihan CI), Vitest, get liputan **60%+**, dan
-binaan pengeluaran ialah tanggungjawab CI — menjalankannya secara setempat tidak memberikan sebarang isyarat yang belum
-akan diberikan oleh semakan PR, dan pada mesin yang lebih kecil, ia boleh menepukan hos (#8084):
+[Laluan Emas Sumbangan](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) untuk menjalankan gelung berfokus bagi
+perkara yang anda ubah. Suit unit penuh (4 serpihan CI), Vitest, get liputan **60%+**, dan
+binaan produksi merupakan tanggungjawab CI — menjalankannya secara setempat tidak memberikan sebarang maklumat tambahan yang belum
+diberikan oleh semakan PR, dan pada mesin yang lebih kecil, tindakan ini boleh menepukan hos (#8084):
 
 - Jalankan fail ujian yang meliputi perubahan anda: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Jalankan `npm run lint`
-- Sertakan atau kemas kini ujian automatik dalam PR yang sama apabila kod pengeluaran berubah
-- Sertakan fail ujian yang diubah atau ditambah dalam perihalan PR apabila kod pengeluaran berubah
+- Sertakan atau kemas kini ujian automatik dalam PR yang sama apabila kod produksi berubah
+- Dalam fail `node:test`, letakkan setiap `await` peringkat teratas (seperti `await import(...)`) sebelum `test()` / `describe()` yang pertama: di bawah `--test-force-exit`, ujian yang didaftarkan selepasnya mungkin tidak akan dijalankan secara senyap (#18045; dikuatkuasakan oleh `npm run check:test-tla-order`)
+- Sertakan fail ujian yang diubah atau ditambah dalam perihalan PR apabila kod produksi berubah
 - Semak hasil SonarQube pada PR apabila rahsia projek dikonfigurasikan dalam CI
 
-Status ujian semasa: **122 fail ujian unit** yang merangkumi:
+Status ujian semasa: **122 fail ujian unit** yang meliputi:
 
 - Penterjemah penyedia dan penukaran format
 - Pengehadan kadar, pemutus litar, dan daya tahan
