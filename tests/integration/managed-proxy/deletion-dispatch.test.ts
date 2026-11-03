@@ -45,7 +45,11 @@ const adapters: Record<string, string> = {
     export function isTrustedLoopbackInternalServiceRequest(){return false;}`,
   "src/lib/middleware/cliTokenAuth": "export async function isCliTokenAuthValid(){return false;}",
   "open-sse/services/ipFilter": "export function checkRequestIP(){return {allowed:true};}",
-  "src/shared/utils/featureFlags": "export function isRequireApiKeyEnabled(){return true;}",
+  // Auth-touch persistence is outside the deletion contract; keep its DB out of the bundle.
+  "src/lib/compliance/index": "export function recordApiKeyAuthTouch(){}",
+  "src/shared/utils/featureFlags": `
+    export function isRequireApiKeyEnabled(){return true;}
+    export function isFeatureFlagEnabled(){return false;}`,
   "open-sse/utils/proxyDispatcher": "export function clearDispatcherCache(){}",
   "src/lib/db/proxies": `
     export async function getProxyById(id){return id==="missing"?null:{id,notes:
